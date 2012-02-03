@@ -1,3 +1,13 @@
+2012-02-03  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relocate_functions::abs8,
+	Arm_relocate_functions::abs16): Use
+	Bits::has_signed_unsigned_overflow32.
+	(Arm_relocate_functions::thm_abs8): Correct range of
+	overflow check.
+	* reloc.h (Bits class): Change minimum number of bits from 0 to 1
+	in assertions.
+
 2012-02-02  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Reloc_stub::stub_type_for_reloc): Use PIC stubs in all

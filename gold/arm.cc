@@ -3183,8 +3183,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     elfcpp::Swap<8, big_endian>::writeval(wv, val);
 
     // R_ARM_ABS8 permits signed or unsigned results.
-    int signed_x = static_cast<int32_t>(x);
-    return ((signed_x < -128 || signed_x > 255)
+    return (Bits<8>::has_signed_unsigned_overflow32(x)
 	    ? This::STATUS_OVERFLOW
 	    : This::STATUS_OKAY);
   }
@@ -3203,10 +3202,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     Reltype x = psymval->value(object, addend);
     val = Bits<32>::bit_select32(val, x << 6, 0x7e0U);
     elfcpp::Swap<16, big_endian>::writeval(wv, val);
-
-    // R_ARM_ABS16 permits signed or unsigned results.
-    int signed_x = static_cast<int32_t>(x);
-    return ((signed_x < -32768 || signed_x > 65535)
+    return (Bits<5>::has_overflow32(x)
 	    ? This::STATUS_OVERFLOW
 	    : This::STATUS_OKAY);
   }
@@ -3245,8 +3241,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     elfcpp::Swap_unaligned<16, big_endian>::writeval(view, val);
 
     // R_ARM_ABS16 permits signed or unsigned results.
-    int signed_x = static_cast<int32_t>(x);
-    return ((signed_x < -32768 || signed_x > 65536)
+    return (Bits<16>::has_signed_unsigned_overflow32(x)
 	    ? This::STATUS_OVERFLOW
 	    : This::STATUS_OKAY);
   }

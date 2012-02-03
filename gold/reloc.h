@@ -724,11 +724,11 @@ class Bits
 {
  public:
   // Sign extend an n-bit unsigned integer stored in a uint32_t into
-  // an int32_t.  BITS must be between 0 and 32.
+  // an int32_t.  BITS must be between 1 and 32.
   static inline int32_t
   sign_extend32(uint32_t val)
   {
-    gold_assert(bits >= 0 && bits <= 32);
+    gold_assert(bits > 0 && bits <= 32);
     if (bits == 32)
       return static_cast<int32_t>(val);
     uint32_t mask = (~static_cast<uint32_t>(0)) >> (32 - bits);
@@ -745,7 +745,7 @@ class Bits
   static inline bool
   has_overflow32(uint32_t val)
   {
-    gold_assert(bits >= 0 && bits <= 32);
+    gold_assert(bits > 0 && bits <= 32);
     if (bits == 32)
       return false;
     int32_t max = (1 << (bits - 1)) - 1;
@@ -761,7 +761,7 @@ class Bits
   static inline bool
   has_signed_unsigned_overflow32(uint32_t val)
   {
-    gold_assert(bits >= 0 && bits <= 32);
+    gold_assert(bits > 0 && bits <= 32);
     if (bits == 32)
       return false;
     int32_t max = static_cast<int32_t>((1U << bits) - 1);
@@ -778,11 +778,11 @@ class Bits
   { return (a & ~mask) | (b & mask); }
 
   // Sign extend an n-bit unsigned integer stored in a uint64_t into
-  // an int64_t.  BITS must be between 0 and 64.
+  // an int64_t.  BITS must be between 1 and 64.
   static inline int64_t
   sign_extend(uint64_t val)
   {
-    gold_assert(bits >= 0 && bits <= 64);
+    gold_assert(bits > 0 && bits <= 64);
     if (bits == 64)
       return static_cast<int64_t>(val);
     uint64_t mask = (~static_cast<uint64_t>(0)) >> (64 - bits);
@@ -799,7 +799,7 @@ class Bits
   static inline bool
   has_overflow(uint64_t val)
   {
-    gold_assert(bits >= 0 && bits <= 64);
+    gold_assert(bits > 0 && bits <= 64);
     if (bits == 64)
       return false;
     int64_t max = (static_cast<int64_t>(1) << (bits - 1)) - 1;
@@ -815,7 +815,7 @@ class Bits
   static inline bool
   has_signed_unsigned_overflow64(uint64_t val)
   {
-    gold_assert(bits >= 0 && bits <= 64);
+    gold_assert(bits > 0 && bits <= 64);
     if (bits == 64)
       return false;
     int64_t max = static_cast<int64_t>((static_cast<uint64_t>(1) << bits) - 1);
