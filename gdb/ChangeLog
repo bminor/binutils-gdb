@@ -1,3 +1,11 @@
+2012-02-03  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/13596:
+	* solib.h (gdb_bfd_lookup_symbol_from_symtab): Rename from
+	bfd_lookup_symbol_from_symtab.
+	* solib-pa64.c (pa64_solib_create_inferior_hook): Use
+	gdb_bfd_lookup_symbol_from_symtab.
+
 2012-02-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* mi/mi-cmd-stack.c (list_args_or_locals): For argument symbols,

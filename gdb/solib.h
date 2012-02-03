@@ -86,9 +86,9 @@ extern CORE_ADDR gdb_bfd_lookup_symbol (bfd *abfd,
 
 /* Look up symbol from symbol table.  */
 
-extern CORE_ADDR bfd_lookup_symbol_from_symtab (bfd *abfd,
-						int (*match_sym) (asymbol *,
-								  void *),
-						void *data);
+extern CORE_ADDR gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
+						    int (*match_sym) (asymbol *,
+								      void *),
+						    void *data);
 
 #endif /* SOLIB_H */

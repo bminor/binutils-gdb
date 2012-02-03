@@ -383,8 +383,8 @@ manpage for methods to privately map shared library text."));
 	 routine.  */
       load_addr = regcache_read_pc (get_current_regcache ())
 		  - tmp_bfd->start_address;
-      sym_addr = bfd_lookup_symbol_from_symtab (tmp_bfd, cmp_name,
-						"__dld_break");
+      sym_addr = gdb_bfd_lookup_symbol_from_symtab (tmp_bfd, cmp_name,
+						    "__dld_break");
       sym_addr = load_addr + sym_addr + 4;
       
       /* Create the shared library breakpoint.  */
