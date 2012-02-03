@@ -8590,8 +8590,17 @@ remote_rcmd (char *command,
       char *buf;
 
       /* XXX - see also remote_get_noisy_reply().  */
+      QUIT;			/* Allow user to bail out with ^C.  */
       rs->buf[0] = '\0';
-      getpkt (&rs->buf, &rs->buf_size, 0);
+      if (getpkt_sane (&rs->buf, &rs->buf_size, 0) == -1)
+        { 
+          /* Timeout.  Continue to (try to) read responses.
+             This is better than stopping with an error, assuming the stub
+             is still executing the (long) monitor command.
+             If needed, the user can interrupt gdb using C-c, obtaining
+             an effect similar to stop on timeout.  */
+          continue;
+        }
       buf = rs->buf;
       if (buf[0] == '\0')
 	error (_("Target does not support this command."));

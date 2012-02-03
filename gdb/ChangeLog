@@ -1,3 +1,8 @@
+2012-02-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* remote.c (remote_rcmd): Use getpkt_sane to detect timeout
+	and continue the loop.  Add QUIT statement.
+
 2012-02-03  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/13596:
