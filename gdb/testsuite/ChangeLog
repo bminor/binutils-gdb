@@ -1,3 +1,7 @@
+2012-02-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_task_arg: New testcase.
+
 2012-02-02  Pedro Alves  <palves@redhat.com>
 
 	* gdb.reverse/until-precsave.exp: Also put "record save" under the

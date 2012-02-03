@@ -1,3 +1,9 @@
+2012-02-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-cmd-stack.c (list_args_or_locals): For argument symbols,
+	use SYMBOL_LINKAGE_NAME to find the corresponding non-argument
+	symbol.  Add assertion that sym2 is never NULL.
+
 2012-02-02  Doug Evans  <dje@google.com>
 
 	* blockframe.c (find_pc_partial_function_gnu_ifunc): Change type of

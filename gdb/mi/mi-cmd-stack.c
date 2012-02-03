@@ -389,11 +389,12 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 	      struct frame_arg arg, entryarg;
 
 	      if (SYMBOL_IS_ARGUMENT (sym))
-		sym2 = lookup_symbol (SYMBOL_NATURAL_NAME (sym),
+		sym2 = lookup_symbol (SYMBOL_LINKAGE_NAME (sym),
 				      block, VAR_DOMAIN,
 				      (int *) NULL);
 	      else
 		sym2 = sym;
+	      gdb_assert (sym2 != NULL);
 
 	      memset (&arg, 0, sizeof (arg));
 	      arg.sym = sym2;
