@@ -1,3 +1,8 @@
+2012-02-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* configure.tgt (rl78-*-elf): New target.
+	* rl78-tdep.c: New file.
+
 2012-02-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* remote.c (remote_rcmd): Use getpkt_sane to detect timeout

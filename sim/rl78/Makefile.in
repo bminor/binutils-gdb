@@ -32,6 +32,7 @@ SIM_OBJS = \
 	mem.o \
 	cpu.o \
 	rl78.o \
+	gdb-if.o \
 	trace.o
 
 ## COMMON_POST_CONFIG_FRAG

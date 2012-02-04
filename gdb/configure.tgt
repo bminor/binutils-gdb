@@ -418,6 +418,12 @@ s390*-*-*)
 	build_gdbserver=yes
 	;;
 
+rl78-*-elf)
+	# Target: Renesas rl78
+	gdb_target_obs="rl78-tdep.o"
+	gdb_sim=../sim/rl78/libsim.a
+	;;
+
 rx-*-elf)
 	# Target: Renesas RX
 	gdb_target_obs="rx-tdep.o"
