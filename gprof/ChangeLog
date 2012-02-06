@@ -1,3 +1,8 @@
+2012-02-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: New Serbian translation.
+	* configure.in (ALL_LINGUAS): Add sr.
+	* configure: Regenerate.
 
 For older changes see ChangeLog-2011
 
