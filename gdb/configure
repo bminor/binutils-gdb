@@ -15321,7 +15321,7 @@ OLD_CFLAGS=$CFLAGS
 OLD_LDFLAGS=$LDFLAGS
 OLD_LIBS=$LIBS
 CFLAGS="$CFLAGS -I${srcdir}/../include -I../bfd -I${srcdir}/../bfd"
-LDFLAGS="$LDFLAGS -L../bfd -L../libiberty"
+LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
 intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
 # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
 if test "$plugins" = "yes"; then

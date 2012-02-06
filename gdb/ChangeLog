@@ -1,3 +1,9 @@
+2012-02-06  Luca Pizzamiglio  <luca.pizzamiglio@gmail.com>
+
+	* configure: Rebuild.
+	* configure.ac: Put -L../bfd and -L../libiberty at the front of
+	LDFLAGS.
+
 2012-02-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* configure.tgt (rl78-*-elf): New target.
