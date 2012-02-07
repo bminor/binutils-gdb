@@ -39,7 +39,7 @@ static void java_type_print_base (struct type * type,
 static void
 java_type_print_derivation_info (struct ui_file *stream, struct type *type)
 {
-  char *name;
+  const char *name;
   int i;
   int n_bases;
   int prev;
@@ -208,8 +208,8 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    {
 	      struct fn_field *f;
 	      int j;
-	      char *method_name;
-	      char *name;
+	      const char *method_name;
+	      const char *name;
 	      int is_constructor;
 	      int n_overloads;
 

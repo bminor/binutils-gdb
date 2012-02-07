@@ -3086,7 +3086,7 @@ c_describe_child (struct varobj *parent, int index,
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       {
-	char *field_name;
+	const char *field_name;
 
 	/* If the type is anonymous and the field has no name,
 	   set an appropriate name.  */
@@ -3515,7 +3515,7 @@ cplus_describe_child (struct varobj *parent, int index,
 	  enum accessibility acc = public_field;
 	  int vptr_fieldno;
 	  struct type *basetype = NULL;
-	  char *field_name;
+	  const char *field_name;
 
 	  vptr_fieldno = get_vptr_fieldno (type, &basetype);
 	  if (strcmp (parent->name, "private") == 0)

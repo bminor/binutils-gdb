@@ -79,8 +79,8 @@ i386_sol2_mcontext_addr (struct frame_info *this_frame)
 /* SunPRO encodes the static variables.  This is not related to C++
    mangling, it is done for C too.  */
 
-static char *
-i386_sol2_static_transform_name (char *name)
+static const char *
+i386_sol2_static_transform_name (const char *name)
 {
   char *p;
   if (name[0] == '.')

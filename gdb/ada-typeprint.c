@@ -76,7 +76,7 @@ decoded_type_name (struct type *type)
     return NULL;
   else
     {
-      char *raw_name = ada_type_name (type);
+      const char *raw_name = ada_type_name (type);
       char *s, *q;
 
       if (name_buffer == NULL || name_buffer_len <= strlen (raw_name))
@@ -223,9 +223,9 @@ print_dynamic_range_bound (struct type *type, const char *name, int name_len,
 static void
 print_range_type (struct type *raw_type, struct ui_file *stream)
 {
-  char *name;
+  const char *name;
   struct type *base_type;
-  char *subtype_info;
+  const char *subtype_info;
 
   gdb_assert (raw_type != NULL);
   name = TYPE_NAME (raw_type);
@@ -810,7 +810,7 @@ ada_print_type (struct type *type0, const char *varstring,
 	  print_fixed_point_type (type, stream);
 	else
 	  {
-	    char *name = ada_type_name (type);
+	    const char *name = ada_type_name (type);
 
 	    if (!ada_is_range_type_name (name))
 	      fprintf_filtered (stream, _("<%d-byte integer>"),

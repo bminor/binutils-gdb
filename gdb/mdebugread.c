@@ -2359,7 +2359,7 @@ parse_partial_symbols (struct objfile *objfile)
   int past_first_source_file = 0;
 
   /* List of current psymtab's include files.  */
-  char **psymtab_include_list;
+  const char **psymtab_include_list;
   int includes_allocated;
   int includes_used;
   EXTR *extern_tab;
@@ -2389,8 +2389,8 @@ parse_partial_symbols (struct objfile *objfile)
 
   includes_allocated = 30;
   includes_used = 0;
-  psymtab_include_list = (char **) alloca (includes_allocated *
-					   sizeof (char *));
+  psymtab_include_list = (const char **) alloca (includes_allocated *
+						 sizeof (const char *));
   next_symbol_text_func = mdebug_next_symbol_text;
 
   dependencies_allocated = 30;
@@ -2754,7 +2754,7 @@ parse_partial_symbols (struct objfile *objfile)
 	  for (cur_sdx = 2; cur_sdx < fh->csym; cur_sdx++)
 	    {
 	      int type_code;
-	      char *namestring;
+	      const char *namestring;
 
 	      (*swap_sym_in) (cur_bfd,
 			      (((char *) debug_info->external_sym)
@@ -3090,13 +3090,13 @@ parse_partial_symbols (struct objfile *objfile)
 		      psymtab_include_list[includes_used++] = namestring;
 		      if (includes_used >= includes_allocated)
 			{
-			  char **orig = psymtab_include_list;
+			  const char **orig = psymtab_include_list;
 
-			  psymtab_include_list = (char **)
+			  psymtab_include_list = (const char **)
 			    alloca ((includes_allocated *= 2) *
-				    sizeof (char *));
+				    sizeof (const char *));
 			  memcpy (psymtab_include_list, orig,
-				  includes_used * sizeof (char *));
+				  includes_used * sizeof (const char *));
 			}
 		      continue;
 		    }

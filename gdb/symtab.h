@@ -81,7 +81,7 @@ struct language_defn;
 
 struct cplus_specific
 {
-  char *demangled_name;
+  const char *demangled_name;
 };
 
 /* Define a structure for the information that is common to all symbol types,
@@ -99,7 +99,7 @@ struct general_symbol_info
      the mangled name and demangled name, this is the mangled
      name.  */
 
-  char *name;
+  const char *name;
 
   /* Value of the symbol.  Which member of this union to use, and what
      it means, depends on what kind of symbol this is and its
@@ -135,7 +135,7 @@ struct general_symbol_info
        currently used by Ada, Java, and Objective C.  */
     struct mangled_lang
     {
-      char *demangled_name;
+      const char *demangled_name;
     }
     mangled_lang;
 
@@ -166,7 +166,8 @@ struct general_symbol_info
 extern void symbol_set_demangled_name (struct general_symbol_info *, char *,
                                        struct objfile *);
 
-extern char *symbol_get_demangled_name (const struct general_symbol_info *);
+extern const char *symbol_get_demangled_name
+  (const struct general_symbol_info *);
 
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
@@ -225,7 +226,8 @@ extern void symbol_set_names (struct general_symbol_info *symbol,
 
 #define SYMBOL_NATURAL_NAME(symbol) \
   (symbol_natural_name (&(symbol)->ginfo))
-extern char *symbol_natural_name (const struct general_symbol_info *symbol);
+extern const char *symbol_natural_name
+  (const struct general_symbol_info *symbol);
 
 /* Return SYMBOL's name from the point of view of the linker.  In
    languages like C++ where symbols may be mangled for ease of
@@ -238,7 +240,8 @@ extern char *symbol_natural_name (const struct general_symbol_info *symbol);
    that symbol.  If no demangled name exists, return NULL.  */
 #define SYMBOL_DEMANGLED_NAME(symbol) \
   (symbol_demangled_name (&(symbol)->ginfo))
-extern char *symbol_demangled_name (const struct general_symbol_info *symbol);
+extern const char *symbol_demangled_name
+  (const struct general_symbol_info *symbol);
 
 /* Macro that returns a version of the name of a symbol that is
    suitable for output.  In C++ this is the "demangled" form of the
@@ -261,7 +264,7 @@ extern int demangle;
    returns the same value (same pointer) as SYMBOL_LINKAGE_NAME.  */
 #define SYMBOL_SEARCH_NAME(symbol)					 \
    (symbol_search_name (&(symbol)->ginfo))
-extern char *symbol_search_name (const struct general_symbol_info *);
+extern const char *symbol_search_name (const struct general_symbol_info *);
 
 /* Return non-zero if NAME matches the "search" name of SYMBOL.
    Whitespace and trailing parentheses are ignored.

@@ -335,7 +335,8 @@ evaluate_struct_tuple (struct value *struct_val,
 	      for (fieldno = 0; fieldno < TYPE_NFIELDS (struct_type);
 		   fieldno++)
 		{
-		  char *field_name = TYPE_FIELD_NAME (struct_type, fieldno);
+		  const char *field_name =
+		    TYPE_FIELD_NAME (struct_type, fieldno);
 
 		  if (field_name != NULL && strcmp (field_name, label) == 0)
 		    {
@@ -348,7 +349,8 @@ evaluate_struct_tuple (struct value *struct_val,
 	      for (fieldno = 0; fieldno < TYPE_NFIELDS (struct_type);
 		   fieldno++)
 		{
-		  char *field_name = TYPE_FIELD_NAME (struct_type, fieldno);
+		  const char *field_name =
+		    TYPE_FIELD_NAME (struct_type, fieldno);
 
 		  field_type = TYPE_FIELD_TYPE (struct_type, fieldno);
 		  if ((field_name == 0 || *field_name == '\0')

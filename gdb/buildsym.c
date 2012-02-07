@@ -151,7 +151,7 @@ struct symbol *
 find_symbol_in_list (struct pending *list, char *name, int length)
 {
   int j;
-  char *pp;
+  const char *pp;
 
   while (list != NULL)
     {
@@ -1251,7 +1251,7 @@ pop_context (void)
 /* Compute a small integer hash code for the given name.  */
 
 int
-hashname (char *name)
+hashname (const char *name)
 {
     return (hash(name,strlen(name)) % HASHSIZE);
 }

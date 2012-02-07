@@ -735,7 +735,7 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct minimal_symbol *thunk_sym, *fn_sym;
   struct obj_section *section;
-  char *thunk_name, *fn_name;
+  const char *thunk_name, *fn_name;
   
   real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
   if (real_stop_pc == 0)
@@ -804,7 +804,7 @@ gnuv3_pass_by_reference (struct type *type)
 	 fieldelem++)
       {
 	struct fn_field *fn = TYPE_FN_FIELDLIST1 (type, fieldnum);
-	char *name = TYPE_FN_FIELDLIST_NAME (type, fieldnum);
+	const char *name = TYPE_FN_FIELDLIST_NAME (type, fieldnum);
 	struct type *fieldtype = TYPE_FN_FIELD_TYPE (fn, fieldelem);
 
 	/* If this function is marked as artificial, it is compiler-generated,

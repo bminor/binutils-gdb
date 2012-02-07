@@ -124,7 +124,7 @@ static PyObject *
 frapy_name (PyObject *self, PyObject *args)
 {
   struct frame_info *frame;
-  char *name;
+  const char *name;
   enum language lang;
   PyObject *result;
   volatile struct gdb_exception except;

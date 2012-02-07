@@ -50,7 +50,7 @@ extern void pascal_type_print_method_args (const char *, const char *,
 
 extern int
   is_pascal_string_type (struct type *, int *, int *, int *,
-			 struct type **, char **);
+			 struct type **, const char **);
 
 extern void pascal_printchar (int, struct type *, struct ui_file *);
 

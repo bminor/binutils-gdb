@@ -44,7 +44,7 @@ arm_pe_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST indirect;
   struct minimal_symbol *indsym;
-  char *symname;
+  const char *symname;
   CORE_ADDR next_pc;
 
   /* The format of an ARM DLL trampoline is:

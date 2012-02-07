@@ -999,7 +999,7 @@ get_last_displayed_sal (struct symtab_and_line *sal)
    corresponding to FRAME.  */
 
 void
-find_frame_funname (struct frame_info *frame, char **funname,
+find_frame_funname (struct frame_info *frame, const char **funname,
 		    enum language *funlang, struct symbol **funcp)
 {
   struct symbol *func;
@@ -1095,7 +1095,7 @@ print_frame (struct frame_info *frame, int print_level,
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct ui_out *uiout = current_uiout;
-  char *funname = NULL;
+  const char *funname = NULL;
   enum language funlang = language_unknown;
   struct ui_stream *stb;
   struct cleanup *old_chain, *list_chain;
@@ -1363,7 +1363,7 @@ frame_info (char *addr_exp, int from_tty)
   struct symtab *s;
   struct frame_info *calling_frame_info;
   int numregs;
-  char *funname = 0;
+  const char *funname = 0;
   enum language funlang = language_unknown;
   const char *pc_regname;
   int selected_frame_p;

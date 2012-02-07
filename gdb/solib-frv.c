@@ -961,7 +961,7 @@ frv_fdpic_find_global_pointer (CORE_ADDR addr)
 
 /* Forward declarations for frv_fdpic_find_canonical_descriptor().  */
 static CORE_ADDR find_canonical_descriptor_in_load_object
-  (CORE_ADDR, CORE_ADDR, char *, bfd *, struct lm_info *);
+  (CORE_ADDR, CORE_ADDR, const char *, bfd *, struct lm_info *);
 
 /* Given a function entry point, attempt to find the canonical descriptor
    associated with that entry point.  Return 0 if no canonical descriptor
@@ -970,7 +970,7 @@ static CORE_ADDR find_canonical_descriptor_in_load_object
 CORE_ADDR
 frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
 {
-  char *name;
+  const char *name;
   CORE_ADDR addr;
   CORE_ADDR got_value;
   struct int_elf32_fdpic_loadmap *ldm = 0;
@@ -1019,7 +1019,7 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
 
 static CORE_ADDR
 find_canonical_descriptor_in_load_object
-  (CORE_ADDR entry_point, CORE_ADDR got_value, char *name, bfd *abfd,
+  (CORE_ADDR entry_point, CORE_ADDR got_value, const char *name, bfd *abfd,
    struct lm_info *lm)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);

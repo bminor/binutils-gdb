@@ -162,7 +162,7 @@ struct stab_section_list
    they are only used by some stabs readers.  */
 
 extern struct partial_symtab *end_psymtab (struct partial_symtab *pst,
-					   char **include_list,
+					   const char **include_list,
 					   int num_includes,
 					   int capping_symbol_offset,
 					   CORE_ADDR capping_text,

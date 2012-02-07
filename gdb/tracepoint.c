@@ -2577,7 +2577,8 @@ scope_info (char *args, int from_tty)
   struct symbol *sym;
   struct minimal_symbol *msym;
   struct block *block;
-  char *symname, *save_args = args;
+  const char *symname;
+  char *save_args = args;
   struct dict_iterator iter;
   int j, count = 0;
   struct gdbarch *gdbarch;

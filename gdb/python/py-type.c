@@ -1271,7 +1271,7 @@ typy_getitem (PyObject *self, PyObject *key)
   
   for (i = 0; i < TYPE_NFIELDS (type); i++)
     {
-      char *t_field_name = TYPE_FIELD_NAME (type, i);
+      const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
       if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
 	{
@@ -1332,7 +1332,7 @@ typy_has_key (PyObject *self, PyObject *args)
 
   for (i = 0; i < TYPE_NFIELDS (type); i++)
     {
-      char *t_field_name = TYPE_FIELD_NAME (type, i);
+      const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
       if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
 	Py_RETURN_TRUE;

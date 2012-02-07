@@ -45,8 +45,8 @@
 
 extern void _initialize_java_language (void);
 
-static int java_demangled_signature_length (char *);
-static void java_demangled_signature_copy (char *, char *);
+static int java_demangled_signature_length (const char *);
+static void java_demangled_signature_copy (char *, const char *);
 
 static struct symtab *get_java_class_symtab (struct gdbarch *gdbarch);
 static char *get_java_utf8_name (struct obstack *obstack, struct value *name);
@@ -341,8 +341,8 @@ java_link_class_type (struct gdbarch *gdbarch,
 		      struct type *type, struct value *clas)
 {
   struct value *temp;
-  char *unqualified_name;
-  char *name = TYPE_TAG_NAME (type);
+  const char *unqualified_name;
+  const char *name = TYPE_TAG_NAME (type);
   int ninterfaces, nfields, nmethods;
   int type_is_object = 0;
   struct fn_field *fn_fields;
@@ -511,7 +511,7 @@ java_link_class_type (struct gdbarch *gdbarch,
   methods = NULL;
   for (i = 0; i < nmethods; i++)
     {
-      char *mname;
+      const char *mname;
       int k;
 
       if (methods == NULL)
@@ -617,7 +617,7 @@ is_object_type (struct type *type)
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
     {
       struct type *ttype = check_typedef (TYPE_TARGET_TYPE (type));
-      char *name;
+      const char *name;
       if (TYPE_CODE (ttype) != TYPE_CODE_STRUCT)
 	return 0;
       while (TYPE_N_BASECLASSES (ttype) > 0)
@@ -667,7 +667,7 @@ java_primitive_type (struct gdbarch *gdbarch, int signature)
 
 struct type *
 java_primitive_type_from_name (struct gdbarch *gdbarch,
-			       char *name, int namelen)
+			       const char *name, int namelen)
 {
   const struct builtin_java_type *builtin = builtin_java_type (gdbarch);
 
@@ -742,7 +742,7 @@ java_primitive_type_name (int signature)
    signature string SIGNATURE.  */
 
 static int
-java_demangled_signature_length (char *signature)
+java_demangled_signature_length (const char *signature)
 {
   int array = 0;
 
@@ -762,7 +762,7 @@ java_demangled_signature_length (char *signature)
    RESULT.  */
 
 static void
-java_demangled_signature_copy (char *result, char *signature)
+java_demangled_signature_copy (char *result, const char *signature)
 {
   int array = 0;
   char *ptr;
@@ -805,7 +805,7 @@ java_demangled_signature_copy (char *result, char *signature)
    as a freshly allocated copy.  */
 
 char *
-java_demangle_type_signature (char *signature)
+java_demangle_type_signature (const char *signature)
 {
   int length = java_demangled_signature_length (signature);
   char *result = xmalloc (length + 1);
@@ -905,7 +905,7 @@ evaluate_subexp_java (struct type *expect_type, struct expression *exp,
 {
   int pc = *pos;
   int i;
-  char *name;
+  const char *name;
   enum exp_opcode op = exp->elts[*pos].opcode;
   struct value *arg1;
   struct value *arg2;

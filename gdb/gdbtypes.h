@@ -436,9 +436,11 @@ struct main_type
   /* Name of this type, or NULL if none.
 
      This is used for printing only, except by poorly designed C++ code.
-     For looking up a name, look for a symbol in the VAR_DOMAIN.  */
+     For looking up a name, look for a symbol in the VAR_DOMAIN.
+     This is generally allocated in the objfile's obstack.
+     However coffread.c uses malloc.  */
 
-  char *name;
+  const char *name;
 
   /* Tag name for this type, or NULL if none.  This means that the
      name of the type consists of a keyword followed by the tag name.
@@ -451,7 +453,7 @@ struct main_type
      One more legitimate use is that if TYPE_FLAG_STUB is set, this is
      the name to use to look for definitions in other files.  */
 
-  char *tag_name;
+  const char *tag_name;
 
   /* Every type is now associated with a particular objfile, and the
      type is allocated on the objfile_obstack for that objfile.  One problem
@@ -556,7 +558,7 @@ struct main_type
 	 NULL for range bounds, array domains, and member function
 	 arguments.  */
 
-      char *name;
+      const char *name;
     } *fields;
 
     /* Union member used for range types.  */
@@ -761,9 +763,11 @@ struct cplus_struct_type
     struct fn_fieldlist
       {
 
-	/* The overloaded name.  */
+	/* The overloaded name.
+	   This is generally allocated in the objfile's obstack.
+	   However stabsread.c sometimes uses malloc.  */
 
-	char *name;
+	const char *name;
 
 	/* The number of methods with this name.  */
 
@@ -1461,7 +1465,7 @@ extern void smash_to_methodptr_type (struct type *, struct type *);
 
 extern struct type *allocate_stub_method (struct type *);
 
-extern char *type_name_no_tag (const struct type *);
+extern const char *type_name_no_tag (const struct type *);
 
 extern const char *type_name_no_tag_or_error (struct type *type);
 
@@ -1489,10 +1493,10 @@ extern struct type *lookup_string_range_type (struct type *, int, int);
 extern struct type *create_set_type (struct type *, struct type *);
 
 extern struct type *lookup_unsigned_typename (const struct language_defn *,
-					      struct gdbarch *,char *);
+					      struct gdbarch *, const char *);
 
 extern struct type *lookup_signed_typename (const struct language_defn *,
-					    struct gdbarch *,char *);
+					    struct gdbarch *, const char *);
 
 extern struct type *check_typedef (struct type *);
 

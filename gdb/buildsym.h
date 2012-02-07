@@ -279,7 +279,7 @@ extern void record_line (struct subfile *subfile, int line, CORE_ADDR pc);
 
 extern void start_symtab (char *name, char *dirname, CORE_ADDR start_addr);
 
-extern int hashname (char *name);
+extern int hashname (const char *name);
 
 extern void free_pending_blocks (void);
 

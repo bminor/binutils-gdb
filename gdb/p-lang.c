@@ -99,7 +99,7 @@ int
 is_pascal_string_type (struct type *type,int *length_pos,
                        int *length_size, int *string_pos,
 		       struct type **char_type,
-		       char **arrayname)
+		       const char **arrayname)
 {
   if (type != NULL && TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {

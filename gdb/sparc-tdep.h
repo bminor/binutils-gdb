@@ -217,7 +217,7 @@ extern const struct sparc_gregset sparc32_sol2_gregset;
 
 extern int sparc_sol2_pc_in_sigtramp (CORE_ADDR pc, const char *name);
 
-extern char *sparc_sol2_static_transform_name (char *name);
+extern const char *sparc_sol2_static_transform_name (const char *name);
 
 extern void sparc32_sol2_init_abi (struct gdbarch_info info,
 				   struct gdbarch *gdbarch);

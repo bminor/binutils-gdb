@@ -386,7 +386,7 @@ add_struct_fields (struct type *type, int *nextp, char **output,
 {
   int i;
   int computed_type_name = 0;
-  char *type_name = NULL;
+  const char *type_name = NULL;
 
   CHECK_TYPEDEF (type);
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
@@ -416,7 +416,7 @@ add_struct_fields (struct type *type, int *nextp, char **output,
 
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
     {
-      char *name = TYPE_FN_FIELDLIST_NAME (type, i);
+      const char *name = TYPE_FN_FIELDLIST_NAME (type, i);
 
       if (name && ! strncmp (name, fieldname, namelen))
 	{

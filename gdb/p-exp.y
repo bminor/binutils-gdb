@@ -338,7 +338,7 @@ exp	:	field_exp COMPLETE
 
 exp	:	exp '['
 			/* We need to save the current_type value.  */
-			{ char *arrayname;
+			{ const char *arrayname;
 			  int arrayfieldindex;
 			  arrayfieldindex = is_pascal_string_type (
 				current_type, NULL, NULL,

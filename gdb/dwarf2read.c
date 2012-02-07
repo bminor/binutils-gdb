@@ -1029,7 +1029,7 @@ static struct type *read_type_die (struct die_info *, struct dwarf2_cu *);
 
 static struct type *read_type_die_1 (struct die_info *, struct dwarf2_cu *);
 
-static char *determine_prefix (struct die_info *die, struct dwarf2_cu *);
+static const char *determine_prefix (struct die_info *die, struct dwarf2_cu *);
 
 static char *typename_concat (struct obstack *obs, const char *prefix,
 			      const char *suffix, int physname,
@@ -5013,7 +5013,7 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
       if (die_needs_namespace (die, cu))
 	{
 	  long length;
-	  char *prefix;
+	  const char *prefix;
 	  struct ui_file *buf;
 
 	  prefix = determine_prefix (die, cu);
@@ -7729,7 +7729,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		       i >= TYPE_N_BASECLASSES (t);
 		       --i)
 		    {
-		      char *fieldname = TYPE_FIELD_NAME (t, i);
+		      const char *fieldname = TYPE_FIELD_NAME (t, i);
 
                       if (is_vtable_name (fieldname, cu))
 			{
@@ -12479,7 +12479,7 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
 
    then determine_prefix on foo's die will return "N::C".  */
 
-static char *
+static const char *
 determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct die_info *parent, *spec_die;

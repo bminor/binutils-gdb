@@ -57,7 +57,7 @@ extern struct type *type_from_class (struct gdbarch *, struct value *);
 extern struct type *java_primitive_type (struct gdbarch *, int signature);
 
 extern struct type *java_primitive_type_from_name (struct gdbarch *,
-						   char *, int);
+						   const char *, int);
 
 extern struct type *java_array_type (struct type *, int);
 
@@ -72,6 +72,6 @@ extern int is_object_type (struct type *);
 extern void java_print_type (struct type *, const char *,
 			     struct ui_file *, int, int);
 
-extern char *java_demangle_type_signature (char *);
+extern char *java_demangle_type_signature (const char *);
 
 #endif

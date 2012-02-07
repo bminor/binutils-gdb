@@ -1205,7 +1205,7 @@ make_symbol_overload_list_adl_namespace (struct type *type,
                                          const char *func_name)
 {
   char *namespace;
-  char *type_name;
+  const char *type_name;
   int i, prefix_len;
 
   while (TYPE_CODE (type) == TYPE_CODE_PTR

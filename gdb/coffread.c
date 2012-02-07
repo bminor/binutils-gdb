@@ -1455,10 +1455,11 @@ patch_type (struct type *type, struct type *real_type)
 
   if (TYPE_NAME (real_target))
     {
+      /* The previous copy of TYPE_NAME is allocated by
+	 process_coff_symbol.  */
       if (TYPE_NAME (target))
-	xfree (TYPE_NAME (target));
-      TYPE_NAME (target) = concat (TYPE_NAME (real_target), 
-				   (char *) NULL);
+	xfree ((char*) TYPE_NAME (target));
+      TYPE_NAME (target) = xstrdup (TYPE_NAME (real_target));
     }
 }
 
@@ -1486,7 +1487,7 @@ patch_opaque_types (struct symtab *s)
 	  && TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR
 	  && TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
 	{
-	  char *name = SYMBOL_LINKAGE_NAME (real_sym);
+	  const char *name = SYMBOL_LINKAGE_NAME (real_sym);
 	  int hash = hashname (name);
 	  struct symbol *sym, *prev;
 
@@ -1675,7 +1676,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		}
 	      else
 		TYPE_NAME (SYMBOL_TYPE (sym)) =
-		  concat (SYMBOL_LINKAGE_NAME (sym), (char *) NULL);
+		  xstrdup (SYMBOL_LINKAGE_NAME (sym));
 	    }
 
 	  /* Keep track of any type which points to empty structured

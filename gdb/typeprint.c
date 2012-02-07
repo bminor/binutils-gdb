@@ -73,7 +73,7 @@ default_print_typedef (struct type *type, struct symbol *new_symbol,
    If SHOW is negative, we never show the details of elements' types.  */
 
 void
-type_print (struct type *type, char *varstring, struct ui_file *stream,
+type_print (struct type *type, const char *varstring, struct ui_file *stream,
 	    int show)
 {
   LA_PRINT_TYPE (type, varstring, stream, show, 0);

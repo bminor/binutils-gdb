@@ -909,8 +909,8 @@ extern void set_gdbarch_core_read_description (struct gdbarch *gdbarch, gdbarch_
 
 extern int gdbarch_static_transform_name_p (struct gdbarch *gdbarch);
 
-typedef char * (gdbarch_static_transform_name_ftype) (char *name);
-extern char * gdbarch_static_transform_name (struct gdbarch *gdbarch, char *name);
+typedef const char * (gdbarch_static_transform_name_ftype) (const char *name);
+extern const char * gdbarch_static_transform_name (struct gdbarch *gdbarch, const char *name);
 extern void set_gdbarch_static_transform_name (struct gdbarch *gdbarch, gdbarch_static_transform_name_ftype *static_transform_name);
 
 /* Set if the address in N_SO or N_FUN stabs may be zero. */

@@ -65,8 +65,6 @@
 
 /* Prototypes for local functions */
 
-static void completion_list_add_name (char *, char *, int, char *, char *);
-
 static void rbreak_command (char *, int);
 
 static void types_info (char *, int);
@@ -366,9 +364,9 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   char *mangled_name;
   struct fn_field *f = TYPE_FN_FIELDLIST1 (type, method_id);
   struct fn_field *method = &f[signature_id];
-  char *field_name = TYPE_FN_FIELDLIST_NAME (type, method_id);
+  const char *field_name = TYPE_FN_FIELDLIST_NAME (type, method_id);
   const char *physname = TYPE_FN_FIELD_PHYSNAME (f, signature_id);
-  char *newname = type_name_no_tag (type);
+  const char *newname = type_name_no_tag (type);
 
   /* Does the form of physname indicate that it is the full mangled name
      of a constructor (not just the args)?  */
@@ -478,7 +476,7 @@ symbol_set_demangled_name (struct general_symbol_info *gsymbol,
 
 /* Return the demangled name of GSYMBOL.  */
 
-char *
+const char *
 symbol_get_demangled_name (const struct general_symbol_info *gsymbol)
 {
   if (gsymbol->language == language_cplus)
@@ -686,12 +684,14 @@ symbol_set_names (struct general_symbol_info *gsymbol,
          name with the symbol, we don't need to use the same trick
          as Java.  */
       if (!copy_name)
-	gsymbol->name = (char *) linkage_name;
+	gsymbol->name = linkage_name;
       else
 	{
-	  gsymbol->name = obstack_alloc (&objfile->objfile_obstack, len + 1);
-	  memcpy (gsymbol->name, linkage_name, len);
-	  gsymbol->name[len] = '\0';
+	  char *name = obstack_alloc (&objfile->objfile_obstack, len + 1);
+
+	  memcpy (name, linkage_name, len);
+	  name[len] = '\0';
+	  gsymbol->name = name;
 	}
       symbol_set_demangled_name (gsymbol, NULL, NULL);
 
@@ -797,7 +797,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 /* Return the source code name of a symbol.  In languages where
    demangling is necessary, this is the demangled name.  */
 
-char *
+const char *
 symbol_natural_name (const struct general_symbol_info *gsymbol)
 {
   switch (gsymbol->language)
@@ -825,7 +825,7 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL.  */
 
-char *
+const char *
 symbol_demangled_name (const struct general_symbol_info *gsymbol)
 {
   switch (gsymbol->language)
@@ -855,7 +855,7 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
    If there is no distinct demangled name, then returns the same value
    (same pointer) as SYMBOL_LINKAGE_NAME.  */
 
-char *
+const char *
 symbol_search_name (const struct general_symbol_info *gsymbol)
 {
   if (gsymbol->language == language_ada)
@@ -3833,8 +3833,9 @@ static char **return_val;
    characters.  If so, add it to the current completion list.  */
 
 static void
-completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
-			  char *text, char *word)
+completion_list_add_name (const char *symname,
+			  const char *sym_text, int sym_text_len,
+			  const char *text, const char *word)
 {
   int newsize;
 
@@ -3882,13 +3883,14 @@ completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
    again and feed all the selectors into the mill.  */
 
 static void
-completion_list_objc_symbol (struct minimal_symbol *msymbol, char *sym_text,
-			     int sym_text_len, char *text, char *word)
+completion_list_objc_symbol (struct minimal_symbol *msymbol,
+			     const char *sym_text, int sym_text_len,
+			     const char *text, const char *word)
 {
   static char *tmp = NULL;
   static unsigned int tmplen = 0;
 
-  char *method, *category, *selector;
+  const char *method, *category, *selector;
   char *tmp2 = NULL;
 
   method = SYMBOL_NATURAL_NAME (msymbol);

@@ -2452,7 +2452,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
 
   if (target_code == TYPE_CODE_FUNC || target_code == TYPE_CODE_METHOD)
     {
-      char *func_name;
+      const char *func_name;
       char *tramp_name;
       struct minimal_symbol *tramp_msym;
 
@@ -2539,7 +2539,7 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
 
       if (ptr_msym)
         {
-          char *ptr_msym_name = SYMBOL_LINKAGE_NAME (ptr_msym);
+          const char *ptr_msym_name = SYMBOL_LINKAGE_NAME (ptr_msym);
           int len = strlen (ptr_msym_name);
 
           if (len > 4

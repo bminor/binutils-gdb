@@ -3646,8 +3646,8 @@ gdbarch_static_transform_name_p (struct gdbarch *gdbarch)
   return gdbarch->static_transform_name != NULL;
 }
 
-char *
-gdbarch_static_transform_name (struct gdbarch *gdbarch, char *name)
+const char *
+gdbarch_static_transform_name (struct gdbarch *gdbarch, const char *name)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->static_transform_name != NULL);

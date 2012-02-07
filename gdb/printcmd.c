@@ -638,7 +638,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
   struct symbol *symbol;
   CORE_ADDR name_location = 0;
   struct obj_section *section = NULL;
-  char *name_temp = "";
+  const char *name_temp = "";
   
   /* Let's say it is mapped (not unmapped).  */
   *unmapped = 0;

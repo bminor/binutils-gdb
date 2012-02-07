@@ -173,8 +173,8 @@ static const struct frame_unwind sparc32_sol2_sigtramp_frame_unwind =
 
 /* Unglobalize NAME.  */
 
-char *
-sparc_sol2_static_transform_name (char *name)
+const const char *
+sparc_sol2_static_transform_name (const char *name)
 {
   /* The Sun compilers (Sun ONE Studio, Forte Developer, Sun WorkShop,
      SunPRO) convert file static variables into global values, a

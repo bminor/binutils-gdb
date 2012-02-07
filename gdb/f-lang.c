@@ -572,7 +572,7 @@ find_first_common_named (char *name)
    that belongs to function funcname.  */
 
 SAVED_F77_COMMON_PTR
-find_common_for_function (char *name, char *funcname)
+find_common_for_function (const char *name, const char *funcname)
 {
 
   SAVED_F77_COMMON_PTR tmp;

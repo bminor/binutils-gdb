@@ -22,7 +22,7 @@
 
 void select_frame_command (char *level_exp, int from_tty);
 
-void find_frame_funname (struct frame_info *frame, char **funname,
+void find_frame_funname (struct frame_info *frame, const char **funname,
 			 enum language *funlang, struct symbol **funcp);
 
 typedef void (*iterate_over_block_arg_local_vars_cb) (const char *print_name,

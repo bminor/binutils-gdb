@@ -75,7 +75,8 @@ extern SAVED_F77_COMMON_PTR head_common_list;	/* Ptr to 1st saved COMMON  */
 extern SAVED_F77_COMMON_PTR tail_common_list;	/* Ptr to last saved COMMON  */
 extern SAVED_F77_COMMON_PTR current_common;	/* Ptr to current COMMON */
 
-extern SAVED_F77_COMMON_PTR find_common_for_function (char *, char *);
+extern SAVED_F77_COMMON_PTR find_common_for_function (const char *,
+						      const char *);
 
 #define UNINITIALIZED_SECNUM -1
 #define COMMON_NEEDS_PATCHING(blk) ((blk)->secnum == UNINITIALIZED_SECNUM)

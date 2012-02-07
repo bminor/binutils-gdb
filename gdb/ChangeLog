@@ -1,3 +1,93 @@
+2012-02-06  Doug Evans  <dje@google.com>
+
+	* gdbtypes.h (struct main_type): Change type of name,tag_name,
+	and fields.name members from char * to const char *.  All uses updated.
+	(struct cplus_struct_type): Change type of fn_fieldlists.name member
+	from char * to const char *.  All uses updated.
+	(type_name_no_tag): Update.
+	(lookup_unsigned_typename, lookup_signed_typename): Update.
+	* gdbtypes.c (type_name_no_tag): Change result type
+	from char * to const char *.  All callers updated.
+	(lookup_unsigned_typename, lookup_signed_typename): Change type of
+	name parameter from char * to const char *.
+	* symtab.h (struct cplus_specific): Change type of demangled_name
+	member from char * to const char *.  All uses updated.
+	(struct general_symbol_info): Change type of name and
+	mangled_lang.demangled_name members from char * to const char *.
+	All uses updated.
+	(symbol_get_demangled_name, symbol_natural_name): Update.
+	(symbol_demangled_name, symbol_search_name): Update.
+	* symtab.c (symbol_get_demangled_name): Change result type
+	from char * to const char *.  All callers updated.
+	(symbol_natural_name, symbol_demangled_name): Ditto.
+	(symbol_search_name): Ditto.
+	(completion_list_add_name): Change type of symname,sym_text,
+	text,word parameters from char * to const char *.
+	(completion_list_objc_symbol): Change type of sym_text,
+	text,word parameters from char * to const char *.
+	* ada-lang.c (find_struct_field): Change type of name parameter
+	from char * to const char *.
+	(encoded_ordered_before): Similarly for N0,N1 parameters.
+	(old_renaming_is_invisible): Similarly for function_name parameter.
+	(ada_type_name): Change result type from char * to const char *.
+	All callers updated.
+	* ada-lang.h (ada_type_name): Update.
+	* buildsym.c (hashname): Change type of name parameter
+	from char * to const char *.
+	* buildsym.h (hashname): Update.
+	* dbxread.c (end_psymtab): Change type of include_list parameter
+	from char ** to const char **.
+	* dwarf2read.c (determine_prefix): Change result type
+	from char * to const char *.  All callers updated.
+	* f-lang.c (find_common_for_function): Change type of name, funcname
+	parameters from char * to const char *.
+	* f-lang.c (find_common_for_function): Update.
+	* f-valprint.c (list_all_visible_commons): Change type of funcname
+	parameters from char * to const char *.
+	* gdbarch.sh (static_transform_name): Change type of name parameter
+	and result from char * to const char *.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* i386-sol2-tdep.c (i386_sol2_static_transform_name): Change type
+	of name parameter from char * to const char *.
+	* jv-lang.c (java_primitive_type_from_name): Ditto.
+	(java_demangled_signature_length): Similarly for signature parameter.
+	(java_demangled_signature_copy): Ditto.
+	(java_demangle_type_signature): Ditto.
+	* jv-lang.h (java_primitive_type_from_name): Update.
+	(java_demangle_type_signature): Update.
+	* objc-lang.c (specialcmp): Change type of a,b parameters
+	from char * to const char *.
+	* p-lang.c (is_pascal_string_type): Change type of arrayname parameter
+	from char * to const char *.  All callers updated.
+	* p-lang.h (is_pascal_string_type): Update.
+	* solib-frv.c (find_canonical_descriptor_in_load_object): Change type
+	of name parameter from char * to const char *.
+	* sparc-sol2-tdep.c (sparc_sol2_static_transform_name): Ditto.
+	* utils.c (fprintf_symbol_filtered): Ditto.
+	* defs.h (fprintf_symbol_filtered): Update.
+	* sparc-tdep.h (sparc_sol2_static_transform_name): Update.
+	* stabsread.h (end_psymtab): Update.
+	* stack.c (find_frame_funname): Change type of funname parameter
+	from char ** to const char **.
+	* stack.h (find_frame_funname): Update.
+	* typeprint.c (type_print): Change type of varstring parameter
+	from char * to const char *.
+	* value.h (type_print): Update.
+	* xcoffread.c (xcoff_start_psymtab): Change type of filename parameter
+	from char * to const char *.  All callers updated.
+	(xcoff_end_psymtab): Change type of include_list parameter
+	from char ** to const char **.  All callers updated.
+	(swap_sym): Similarly for name parameter.  All callers updated.
+	* coffread.c (patch_type): Add (char*) cast to xfree parameter.
+	Use xstrdup.
+	(process_coff_symbol): Use xstrdup.
+	* stabsread.c (stabs_method_name_from_physname): Renamed from
+	update_method_name_from_physname.  Change result type from void
+	to char *.  All callers updated.
+	(read_member_functions): In has_destructor case, store name in objfile
+	obstack instead of malloc space.  In !has_stub case, fix mem leak.
+
 2012-02-06  Luca Pizzamiglio  <luca.pizzamiglio@gmail.com>
 
 	* configure: Rebuild.

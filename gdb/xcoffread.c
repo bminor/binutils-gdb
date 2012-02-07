@@ -882,7 +882,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
 
 #define	RECORD_MINIMAL_SYMBOL(NAME, ADDR, TYPE, SECTION, OBJFILE) \
 {						\
-  char *namestr;				\
+  const char *namestr;				\
 						\
   namestr = (NAME);				\
   if (namestr[0] == '.') ++namestr;		\
@@ -986,7 +986,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 
   char *filestring = " _start_ ";	/* Name of the current file.  */
 
-  char *last_csect_name;	/* Last seen csect's name and value.  */
+  const char *last_csect_name;	/* Last seen csect's name and value.  */
   CORE_ADDR last_csect_val;
   int last_csect_sec;
 
@@ -1989,10 +1989,6 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
    for the psymtab.  */
 static unsigned int first_fun_line_offset;
 
-static struct partial_symtab *xcoff_start_psymtab
-  (struct objfile *, char *, int,
-   struct partial_symbol **, struct partial_symbol **);
-
 /* Allocate and partially fill a partial symtab.  It will be
    completely filled at the end of the symbol list.
 
@@ -2001,7 +1997,8 @@ static struct partial_symtab *xcoff_start_psymtab
    (normal).  */
 
 static struct partial_symtab *
-xcoff_start_psymtab (struct objfile *objfile, char *filename, int first_symnum,
+xcoff_start_psymtab (struct objfile *objfile,
+		     const char *filename, int first_symnum,
 		     struct partial_symbol **global_syms,
 		     struct partial_symbol **static_syms)
 {
@@ -2023,10 +2020,6 @@ xcoff_start_psymtab (struct objfile *objfile, char *filename, int first_symnum,
   return result;
 }
 
-static struct partial_symtab *xcoff_end_psymtab
-  (struct partial_symtab *, char **, int, int,
-   struct partial_symtab **, int, int);
-
 /* Close off the current usage of PST.
    Returns PST, or NULL if the partial symtab was empty and thrown away.
 
@@ -2036,7 +2029,7 @@ static struct partial_symtab *xcoff_end_psymtab
    are the information for includes and dependencies.  */
 
 static struct partial_symtab *
-xcoff_end_psymtab (struct partial_symtab *pst, char **include_list,
+xcoff_end_psymtab (struct partial_symtab *pst, const char **include_list,
 		   int num_includes, int capping_symbol_number,
 		   struct partial_symtab **dependency_list,
 		   int number_dependencies, int textlow_not_set)
@@ -2119,17 +2112,13 @@ xcoff_end_psymtab (struct partial_symtab *pst, char **include_list,
   return pst;
 }
 
-static void swap_sym (struct internal_syment *,
-		      union internal_auxent *, char **, char **,
-		      unsigned int *, struct objfile *);
-
 /* Swap raw symbol at *RAW and put the name in *NAME, the symbol in
    *SYMBOL, the first auxent in *AUX.  Advance *RAW and *SYMNUMP over
    the symbol and its auxents.  */
 
 static void
 swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
-	  char **name, char **raw, unsigned int *symnump,
+	  const char **name, char **raw, unsigned int *symnump,
 	  struct objfile *objfile)
 {
   bfd_coff_swap_sym_in (objfile->obfd, *raw, symbol);
@@ -2189,9 +2178,9 @@ scan_xcoff_symtab (struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   CORE_ADDR toc_offset = 0;	/* toc offset value in data section.  */
-  char *filestring = NULL;
+  const char *filestring = NULL;
 
-  char *namestring;
+  const char *namestring;
   int past_first_source_file = 0;
   bfd *abfd;
   asection *bfd_sect;
@@ -2201,7 +2190,7 @@ scan_xcoff_symtab (struct objfile *objfile)
   struct partial_symtab *pst;
 
   /* List of current psymtab's include files.  */
-  char **psymtab_include_list;
+  const char **psymtab_include_list;
   int includes_allocated;
   int includes_used;
 
@@ -2214,7 +2203,7 @@ scan_xcoff_symtab (struct objfile *objfile)
   union internal_auxent main_aux[5];
   unsigned int ssymnum;
 
-  char *last_csect_name = NULL;	/* Last seen csect's name and value.  */
+  const char *last_csect_name = NULL; /* Last seen csect's name and value.  */
   CORE_ADDR last_csect_val = 0;
   int last_csect_sec = 0;
   int misc_func_recorded = 0;	/* true if any misc. function.  */
@@ -2224,8 +2213,8 @@ scan_xcoff_symtab (struct objfile *objfile)
 
   includes_allocated = 30;
   includes_used = 0;
-  psymtab_include_list = (char **) alloca (includes_allocated *
-					   sizeof (char *));
+  psymtab_include_list = (const char **) alloca (includes_allocated *
+						 sizeof (const char *));
 
   dependencies_allocated = 30;
   dependencies_used = 0;
@@ -2619,13 +2608,13 @@ scan_xcoff_symtab (struct objfile *objfile)
 	    psymtab_include_list[includes_used++] = namestring;
 	    if (includes_used >= includes_allocated)
 	      {
-		char **orig = psymtab_include_list;
+		const char **orig = psymtab_include_list;
 
-		psymtab_include_list = (char **)
+		psymtab_include_list = (const char **)
 		  alloca ((includes_allocated *= 2) *
-			  sizeof (char *));
+			  sizeof (const char *));
 		memcpy (psymtab_include_list, orig,
-			includes_used * sizeof (char *));
+			includes_used * sizeof (const char *));
 	      }
 	    continue;
 	  }

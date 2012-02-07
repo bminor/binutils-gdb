@@ -435,8 +435,7 @@ find_methods (struct type *t, const char *name,
 {
   int i1 = 0;
   int ibase;
-  char *class_name = type_name_no_tag (t);
-  char *canon;
+  const char *class_name = type_name_no_tag (t);
 
   /* Ignore this class if it doesn't have a name.  This is ugly, but
      unless we figure out how to get the physname without the name of
@@ -456,7 +455,7 @@ find_methods (struct type *t, const char *name,
 	   method_counter >= 0;
 	   --method_counter)
 	{
-	  char *method_name = TYPE_FN_FIELDLIST_NAME (t, method_counter);
+	  const char *method_name = TYPE_FN_FIELDLIST_NAME (t, method_counter);
 	  char dem_opname[64];
 
 	  if (strncmp (method_name, "__", 2) == 0 ||

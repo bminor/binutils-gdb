@@ -42,7 +42,7 @@ java_value_print (struct value *val, struct ui_file *stream,
   struct type *type;
   CORE_ADDR address;
   int i;
-  char *name;
+  const char *name;
   struct value_print_options opts;
 
   type = value_type (val);
@@ -283,7 +283,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	{
 	  int boffset;
 	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-	  char *basename = TYPE_NAME (baseclass);
+	  const char *basename = TYPE_NAME (baseclass);
 	  const gdb_byte *base_valaddr;
 
 	  if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -325,7 +325,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	  /* If requested, skip printing of static fields.  */
 	  if (field_is_static (&TYPE_FIELD (type, i)))
 	    {
-	      char *name = TYPE_FIELD_NAME (type, i);
+	      const char *name = TYPE_FIELD_NAME (type, i);
 
 	      if (!options->static_field_print)
 		continue;
