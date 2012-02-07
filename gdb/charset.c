@@ -839,7 +839,7 @@ find_charset_names (void)
 	 parse the glibc and libiconv formats; feel free to add others
 	 as needed.  */
 
-      while (!feof (in))
+      while (in != NULL && !feof (in))
 	{
 	  /* The size of buf is chosen arbitrarily.  */
 	  char buf[1024];
