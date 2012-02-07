@@ -15,6 +15,11 @@
   ** gdb.Symbol now has a 'line' attribute, holding the line number in
      the source at which the symbol was defined.
 
+  ** gdb.Symbol now has the new attribute 'needs_frame' and the new
+     method 'value'.  The former indicates whether the symbol needs a
+     frame in order to compute its value, and the latter computes the
+     symbol's value.
+
 * GDBserver now supports stdio connections.
   E.g. (gdb) target remote | ssh myhost gdbserver - hello
 

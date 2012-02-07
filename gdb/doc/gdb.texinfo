@@ -23993,6 +23993,11 @@ of a symbol.  Each address class is a constant defined in the
 @code{gdb} module and described later in this chapter.
 @end defvar
 
+@defvar Symbol.needs_frame
+This is @code{True} if evaluating this symbol's value requires a frame
+(@pxref{Frames In Python}) and @code{False} otherwise.  Typically,
+local variables will require a frame, but other symbols will not.
+
 @defvar Symbol.is_argument
 @code{True} if the symbol is an argument of a function.
 @end defvar
@@ -24019,6 +24024,15 @@ Returns @code{True} if the @code{gdb.Symbol} object is valid,
 the symbol it refers to does not exist in @value{GDBN} any longer.
 All other @code{gdb.Symbol} methods will throw an exception if it is
 invalid at the time the method is called.
+@end defun
+
+@defun Symbol.value (@r{[}frame@r{]})
+Compute the value of the symbol, as a @code{gdb.Value}.  For
+functions, this computes the address of the function, cast to the
+appropriate type.  If the symbol requires a frame in order to compute
+its value, then @var{frame} must be given.  If @var{frame} is not
+given, or if @var{frame} is invalid, then this method will throw an
+exception.
 @end defun
 @end table
 

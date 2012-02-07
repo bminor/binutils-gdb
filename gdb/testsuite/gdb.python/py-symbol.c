@@ -35,7 +35,7 @@ class SimpleClass
 };
 #endif
 
-int qq;				/* line of qq */
+int qq = 72;			/* line of qq */
 
 int func (int arg)
 {

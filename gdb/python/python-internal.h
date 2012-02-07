@@ -121,6 +121,7 @@ extern PyTypeObject event_object_type;
 extern PyTypeObject events_object_type;
 extern PyTypeObject stop_event_object_type;
 extern PyTypeObject breakpoint_object_type;
+extern PyTypeObject frame_object_type;
 
 typedef struct breakpoint_object
 {

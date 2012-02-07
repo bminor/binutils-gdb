@@ -1,5 +1,10 @@
 2012-02-07  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Symbols In Python): Document Symbol.needs_frame and
+	Symbol.value.
+
+2012-02-07  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (Symbols In Python): Document Symbol.line.
 
 2012-01-27  Thomas Schwinge  <thomas@codesourcery.com>

@@ -1,5 +1,15 @@
 2012-02-07  Tom Tromey  <tromey@redhat.com>
 
+	PR python/12027:
+	* python/python-internal.h (frame_object_type): Declare.
+	* python/py-symbol.c (sympy_needs_frame): New function.
+	(sympy_value): New function.
+	(symbol_object_getset): Add "needs_frame".
+	(symbol_object_methods): Add "value".
+	* python/py-frame.c (frame_object_type): No longer static.
+
+2012-02-07  Tom Tromey  <tromey@redhat.com>
+
 	PR python/13599:
 	* python/py-symbol.c (sympy_line): New function.
 	(symbol_object_getset): Add "line".

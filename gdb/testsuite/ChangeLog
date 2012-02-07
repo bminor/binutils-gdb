@@ -1,4 +1,10 @@
-2012-01-31  Tom Tromey  <tromey@redhat.com>
+2012-02-07  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-symbol.exp: Test Symbol.needs_frame and
+	Symbol.value.
+	* gdb.python/py-symbol.c (qq): Set default value.
+
+2012-02-07  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-symbol.c (qq): New global.
 	* gdb.python/py-symbol.exp: Add test for frame-less

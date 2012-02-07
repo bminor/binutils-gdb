@@ -183,6 +183,29 @@ sympy_is_variable (PyObject *self, void *closure)
 			      || class == LOC_OPTIMIZED_OUT));
 }
 
+/* Implementation of gdb.Symbol.needs_frame -> Boolean.
+   Returns true iff the symbol needs a frame for evaluation.  */
+
+static PyObject *
+sympy_needs_frame (PyObject *self, void *closure)
+{
+  struct symbol *symbol = NULL;
+  volatile struct gdb_exception except;
+  int result = 0;
+
+  SYMPY_REQUIRE_VALID (self, symbol);
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      result = symbol_read_needs_frame (symbol);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (result)
+    Py_RETURN_TRUE;
+  Py_RETURN_FALSE;
+}
+
 /* Implementation of gdb.Symbol.line -> int.
    Returns the line number at which the symbol was defined.  */
 
@@ -209,6 +232,53 @@ sympy_is_valid (PyObject *self, PyObject *args)
     Py_RETURN_FALSE;
 
   Py_RETURN_TRUE;
+}
+
+/* Implementation of gdb.Symbol.value (self[, frame]) -> gdb.Value.  Returns
+   the value of the symbol, or an error in various circumstances.  */
+
+static PyObject *
+sympy_value (PyObject *self, PyObject *args)
+{
+  struct symbol *symbol = NULL;
+  struct frame_info *frame_info = NULL;
+  PyObject *frame_obj = NULL;
+  struct value *value = NULL;
+  volatile struct gdb_exception except;
+
+  if (!PyArg_ParseTuple (args, "|O", &frame_obj))
+    return NULL;
+
+  if (frame_obj != NULL && !PyObject_TypeCheck (frame_obj, &frame_object_type))
+    {
+      PyErr_SetString (PyExc_TypeError, "argument is not a frame");
+      return NULL;
+    }
+
+  SYMPY_REQUIRE_VALID (self, symbol);
+  if (SYMBOL_CLASS (symbol) == LOC_TYPEDEF)
+    {
+      PyErr_SetString (PyExc_TypeError, "cannot get the value of a typedef");
+      return NULL;
+    }
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      if (frame_obj != NULL)
+	{
+	  frame_info = frame_object_to_frame_info (frame_obj);
+	  if (frame_info == NULL)
+	    error ("invalid frame");
+	}
+      
+      if (symbol_read_needs_frame (symbol) && frame_info == NULL)
+	error ("symbol requires a frame to compute its value");
+
+      value = read_var_value (symbol, frame_info);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  return value_to_value_object (value);
 }
 
 /* Given a symbol, and a symbol_object that has previously been
@@ -473,6 +543,8 @@ to display demangled or mangled names.", NULL },
     "True if the symbol is a function or method." },
   { "is_variable", sympy_is_variable, NULL,
     "True if the symbol is a variable." },
+  { "needs_frame", sympy_needs_frame, NULL,
+    "True if the symbol requires a frame for evaluation." },
   { "line", sympy_line, NULL,
     "The source line number at which the symbol was defined." },
   { NULL }  /* Sentinel */
@@ -482,6 +554,9 @@ static PyMethodDef symbol_object_methods[] = {
   { "is_valid", sympy_is_valid, METH_NOARGS,
     "is_valid () -> Boolean.\n\
 Return true if this symbol is valid, false if not." },
+  { "value", sympy_value, METH_VARARGS,
+    "value ([frame]) -> gdb.Value\n\
+Return the value of the symbol." },
   {NULL}  /* Sentinel */
 };
 
