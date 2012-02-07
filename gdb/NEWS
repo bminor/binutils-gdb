@@ -10,6 +10,11 @@
   ** A new class, gdb.printing.FlagEnumerationPrinter, can be used to
      apply "flag enum"-style pretty-printing to any enum.
 
+  ** gdb.lookup_symbol can now work when there is no current frame.
+
+  ** gdb.Symbol now has a 'line' attribute, holding the line number in
+     the source at which the symbol was defined.
+
 * GDBserver now supports stdio connections.
   E.g. (gdb) target remote | ssh myhost gdbserver - hello
 

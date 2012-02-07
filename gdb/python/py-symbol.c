@@ -183,6 +183,19 @@ sympy_is_variable (PyObject *self, void *closure)
 			      || class == LOC_OPTIMIZED_OUT));
 }
 
+/* Implementation of gdb.Symbol.line -> int.
+   Returns the line number at which the symbol was defined.  */
+
+static PyObject *
+sympy_line (PyObject *self, void *closure)
+{
+  struct symbol *symbol = NULL;
+
+  SYMPY_REQUIRE_VALID (self, symbol);
+
+  return PyInt_FromLong (SYMBOL_LINE (symbol));
+}
+
 /* Implementation of gdb.Symbol.is_valid (self) -> Boolean.
    Returns True if this Symbol still exists in GDB.  */
 
@@ -460,6 +473,8 @@ to display demangled or mangled names.", NULL },
     "True if the symbol is a function or method." },
   { "is_variable", sympy_is_variable, NULL,
     "True if the symbol is a variable." },
+  { "line", sympy_line, NULL,
+    "The source line number at which the symbol was defined." },
   { NULL }  /* Sentinel */
 };
 

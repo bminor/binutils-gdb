@@ -23967,6 +23967,11 @@ represented as a @code{gdb.Symtab} object.  @xref{Symbol Tables In
 Python}.  This attribute is not writable.
 @end defvar
 
+@defvar Symbol.line
+The line number in the source code at which the symbol was defined.
+This is an integer.
+@end defvar
+
 @defvar Symbol.name
 The name of the symbol as a string.  This attribute is not writable.
 @end defvar

@@ -1,5 +1,11 @@
 2012-02-07  Tom Tromey  <tromey@redhat.com>
 
+	PR python/13599:
+	* python/py-symbol.c (sympy_line): New function.
+	(symbol_object_getset): Add "line".
+
+2012-02-07  Tom Tromey  <tromey@redhat.com>
+
 	* charset.c (find_charset_names): Check 'in' against NULL.
 
 2012-02-06  Doug Evans  <dje@google.com>

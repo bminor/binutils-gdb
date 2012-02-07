@@ -1,3 +1,10 @@
+2012-01-31  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-symbol.c (qq): New global.
+	* gdb.python/py-symbol.exp: Add test for frame-less
+	lookup_symbol.
+	* gdb.python/py-symtab.exp: Fix line number.
+
 2012-02-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_task_arg: New testcase.
