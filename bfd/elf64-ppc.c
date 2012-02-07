@@ -5637,14 +5637,13 @@ opd_entry_value (asection *opd_sec,
    and *CODE_OFF to the function's entry point.  */
 
 static bfd_boolean
-ppc64_elf_maybe_function_sym (const elf_symbol_type *sym,
+ppc64_elf_maybe_function_sym (const asymbol *sym,
 			      asection **code_sec, bfd_vma *code_off)
 {
   if (_bfd_elf_maybe_function_sym (sym, code_sec, code_off))
     {
-      if (strcmp (sym->symbol.section->name, ".opd") == 0)
-	opd_entry_value (sym->symbol.section, sym->symbol.value,
-			 code_sec, code_off);
+      if (strcmp (sym->section->name, ".opd") == 0)
+	opd_entry_value (sym->section, sym->value, code_sec, code_off);
       return TRUE;
     }
   return FALSE;

@@ -1223,7 +1223,7 @@ struct elf_backend_data
 
   /* Return TRUE if symbol may be a function.  Set *CODE_SEC and *CODE_VAL
      to the function's entry point.  */
-  bfd_boolean (*maybe_function_sym) (const elf_symbol_type *sym,
+  bfd_boolean (*maybe_function_sym) (const asymbol *sym,
 				     asection **code_sec, bfd_vma *code_off);
 
   /* Used to handle bad SHF_LINK_ORDER input.  */
@@ -2202,7 +2202,7 @@ extern bfd_boolean _bfd_elf_map_sections_to_segments
 
 extern bfd_boolean _bfd_elf_is_function_type (unsigned int);
 
-extern bfd_boolean _bfd_elf_maybe_function_sym (const elf_symbol_type *,
+extern bfd_boolean _bfd_elf_maybe_function_sym (const asymbol *,
 						asection **, bfd_vma *);
 
 extern int bfd_elf_get_default_section_type (flagword);

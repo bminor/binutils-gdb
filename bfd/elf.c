@@ -7404,36 +7404,30 @@ elf_find_function (bfd *abfd,
 
   for (p = symbols; *p != NULL; p++)
     {
-      elf_symbol_type *q;
-      unsigned int type;
+      asymbol *sym = *p;
       asection *code_sec;
       bfd_vma code_off;
 
-      q = (elf_symbol_type *) *p;
-
-      type = ELF_ST_TYPE (q->internal_elf_sym.st_info);
-      switch (type)
+      if ((sym->flags & BSF_FILE) != 0)
 	{
-	case STT_FILE:
-	  file = &q->symbol;
+	  file = sym;
 	  if (state == symbol_seen)
 	    state = file_after_symbol_seen;
 	  continue;
-	default:
-	  if (bed->maybe_function_sym (q, &code_sec, &code_off)
-	      && code_sec == section
-	      && code_off >= low_func
-	      && code_off <= offset)
-	    {
-	      func = (asymbol *) q;
-	      low_func = code_off;
-	      filename = NULL;
-	      if (file != NULL
-		  && (ELF_ST_BIND (q->internal_elf_sym.st_info) == STB_LOCAL
-		      || state != file_after_symbol_seen))
-		filename = bfd_asymbol_name (file);
-	    }
-	  break;
+	}
+
+      if (bed->maybe_function_sym (sym, &code_sec, &code_off)
+	  && code_sec == section
+	  && code_off >= low_func
+	  && code_off <= offset)
+	{
+	  func = sym;
+	  low_func = code_off;
+	  filename = NULL;
+	  if (file != NULL
+	      && ((sym->flags & BSF_LOCAL) != 0
+		  || state != file_after_symbol_seen))
+	    filename = bfd_asymbol_name (file);
 	}
       if (state == nothing_seen)
 	state = symbol_seen;
@@ -9695,17 +9689,14 @@ _bfd_elf_is_function_type (unsigned int type)
    and *CODE_OFF to the function's entry point.  */
 
 bfd_boolean
-_bfd_elf_maybe_function_sym (const elf_symbol_type *sym,
+_bfd_elf_maybe_function_sym (const asymbol *sym,
 			     asection **code_sec, bfd_vma *code_off)
 {
-  unsigned int type = ELF_ST_TYPE (sym->internal_elf_sym.st_info);
-  if (type == STT_NOTYPE
-      || type == STT_FUNC
-      || type == STT_GNU_IFUNC)
-    {
-      *code_sec = sym->symbol.section;
-      *code_off = sym->symbol.value;
-      return TRUE;
-    }
-  return FALSE;
+  if ((sym->flags & (BSF_SECTION_SYM | BSF_FILE | BSF_OBJECT
+		     | BSF_THREAD_LOCAL | BSF_RELC | BSF_SRELC)) != 0)
+    return FALSE;
+
+  *code_sec = sym->section;
+  *code_off = sym->value;
+  return TRUE;
 }

@@ -1,7 +1,16 @@
+2012-02-07  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (elf_find_function): Don't use internal_elf_sym.
+	(_bfd_elf_maybe_function_sym): Likewise.  Replace elf_symbol_type
+	parameter with asymbol.
+	* elf64-ppc.c (ppc64_elf_maybe_function_sym): Likewise.
+	* elf-bfd.h (_bfd_elf_maybe_function_sym): Update prototype.
+	(struct elf_backend_data <maybe_function_sym>): Likewise.
+
 2012-02-02  Vidya Praveen (vidya.praveen@atmel.com)
 
 	PR bfd/13410
-	* bfd/elf32-avr.c (elf32_avr_relax_section): Correct the 
+	* bfd/elf32-avr.c (elf32_avr_relax_section): Correct the
 	condition that qualifies the candidates for relaxation.
 
 2012-02-02  Tristan Gingold  <gingold@adacore.com>
@@ -102,13 +111,13 @@
 	* cpu-z8k.c: Likewise.
 
 	* cpu-i386.c: Include "libiberty.h".
-	(bfd_arch_i386_fill): New. 
+	(bfd_arch_i386_fill): New.
 	Add bfd_arch_i386_fill to  bfd_arch_info initializer.
 
 	* cpu-k1om.c: Add bfd_arch_i386_fill to  bfd_arch_info initializer.
 	* cpu-l1om.c: Likewise.
 
-	* linker.c (default_data_link_order): Call abfd->arch_info->fill 
+	* linker.c (default_data_link_order): Call abfd->arch_info->fill
 	if fill size is 0.
 
 	* bfd-in2.h: Regenerated.
