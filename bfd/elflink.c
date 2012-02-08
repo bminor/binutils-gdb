@@ -2510,23 +2510,21 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
      over to the real definition.  */
   if (h->u.weakdef != NULL)
     {
-      struct elf_link_hash_entry *weakdef;
-
-      weakdef = h->u.weakdef;
-      while (h->root.type == bfd_link_hash_indirect)
-	h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-      BFD_ASSERT (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak);
-      BFD_ASSERT (weakdef->def_dynamic);
-
       /* If the real definition is defined by a regular object file,
 	 don't do anything special.  See the longer description in
 	 _bfd_elf_adjust_dynamic_symbol, below.  */
-      if (weakdef->def_regular)
+      if (h->u.weakdef->def_regular)
 	h->u.weakdef = NULL;
       else
 	{
+	  struct elf_link_hash_entry *weakdef = h->u.weakdef;
+
+	  while (h->root.type == bfd_link_hash_indirect)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  BFD_ASSERT (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak);
+	  BFD_ASSERT (weakdef->def_dynamic);
 	  BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined
 		      || weakdef->root.type == bfd_link_hash_defweak);
 	  (*bed->elf_backend_copy_indirect_symbol) (eif->info, weakdef, h);
@@ -11575,6 +11573,12 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
       h->mark = 1;
+      /* If this symbol is weak and there is a non-weak definition, we
+	 keep the non-weak definition because many backends put
+	 dynamic reloc info on the non-weak definition for code
+	 handling copy relocs.  */
+      if (h->u.weakdef != NULL)
+	h->u.weakdef->mark = 1;
       return (*gc_mark_hook) (sec, info, cookie->rel, h, NULL);
     }
 

@@ -1,3 +1,9 @@
+2012-02-08  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_gc_mark_rsec): Mark weakdef syms too.
+	(_bfd_elf_fix_symbol_flags): When a weakdef is def_regular, clear
+	the correct h->u.weakdef.
+
 2012-02-07  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (elf_find_function): Don't use internal_elf_sym.
