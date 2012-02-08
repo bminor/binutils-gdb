@@ -1,3 +1,8 @@
+2012-02-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-darwin.c (darwin_bfd_open): Make sure that the filename
+	of the returned BFD is allocated by GDB.
+
 2012-02-07  Tom Tromey  <tromey@redhat.com>
 
 	PR python/12027:
