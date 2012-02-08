@@ -1,3 +1,20 @@
+2012-02-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* language.h (symbol_name_cmp_ftype): Renames
+	symbol_name_match_p_ftype.
+	(struct language_defn)[la_get_symbol_name_cmp]: Renames
+	la_get_symbol_name_match_p.
+	* ada-lang.c (ada_get_symbol_name_cmp): Renames
+	ada_get_symbol_name_match_p.  Update comment.
+	(ada_language_defn)[la_get_symbol_name_cmp]: Update value.
+	* linespec.c (struct symbol_matcher_data)[symbol_name_cmp]:
+	Renames symbol_name_match_p.  Update field type.
+	(iterate_name_matcher, iterate_over_all_matching_symtabs): Adjust.
+	* c-lang.c, d-lang.c, f-lang.c, jv-lang.c, m2-lang.c, objc-lang.c,
+	opencl-lang.c, p-lang.c: Replace "la_get_symbol_name_match_p" by
+	"la_get_symbol_name_cmp" in comments.
+	* language.c: Likewise.
+
 2012-02-08  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* amd64-sol2-tdep.c (amd64_sol2_gregset_reg_offset): Correct

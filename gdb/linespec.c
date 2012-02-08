@@ -329,7 +329,7 @@ struct symbol_matcher_data
   const char *lookup_name;
 
   /* The routine to be used for comparison.  */
-  symbol_name_match_p_ftype symbol_name_match_p;
+  symbol_name_cmp_ftype symbol_name_cmp;
 };
 
 /* A helper for iterate_over_all_matching_symtabs that is passed as a
@@ -340,7 +340,7 @@ iterate_name_matcher (const char *name, void *d)
 {
   const struct symbol_matcher_data *data = d;
 
-  if (data->symbol_name_match_p (name, data->lookup_name) == 0)
+  if (data->symbol_name_cmp (name, data->lookup_name) == 0)
     return 1; /* Expand this symbol's symbol table.  */
   return 0; /* Skip this symbol.  */
 }
@@ -362,9 +362,9 @@ iterate_over_all_matching_symtabs (const char *name,
   struct symbol_matcher_data matcher_data;
 
   matcher_data.lookup_name = name;
-  matcher_data.symbol_name_match_p =
-    current_language->la_get_symbol_name_match_p != NULL
-    ? current_language->la_get_symbol_name_match_p (name)
+  matcher_data.symbol_name_cmp =
+    current_language->la_get_symbol_name_cmp != NULL
+    ? current_language->la_get_symbol_name_cmp (name)
     : strcmp_iw;
 
   ALL_PSPACES (pspace)

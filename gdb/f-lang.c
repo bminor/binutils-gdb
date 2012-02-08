@@ -309,7 +309,7 @@ const struct language_defn f_language_defn =
   default_print_array_index,
   default_pass_by_reference,
   default_get_string,
-  NULL,				/* la_get_symbol_name_match_p */
+  NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
   LANG_MAGIC
 };
