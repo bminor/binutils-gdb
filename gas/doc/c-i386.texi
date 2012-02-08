@@ -159,6 +159,8 @@ accept various extension mnemonics.  For example,
 @code{movbe},
 @code{ept},
 @code{lzcnt},
+@code{hle},
+@code{rtm},
 @code{invpcid},
 @code{clflush},
 @code{lwp},
@@ -1015,7 +1017,8 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.clflush} @tab @samp{.movbe} @tab @samp{.xsave} @tab @samp{.xsaveopt}
 @item @samp{.aes} @tab @samp{.pclmul} @tab @samp{.fma} @tab @samp{.fsgsbase}
 @item @samp{.rdrnd} @tab @samp{.f16c} @tab @samp{.avx2} @tab @samp{.bmi2}
-@item @samp{.lzcnt} @tab @samp{.invpcid} @tab @samp{.vmfunc}
+@item @samp{.lzcnt} @tab @samp{.invpcid} @tab @samp{.vmfunc} @tab @samp{.hle}
+@item @samp{.rtm}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop}

@@ -1,3 +1,15 @@
+2012-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (HLE_PREFIX): New.
+	(check_hle): Likewise.
+	(_i386_insn): Add have_hle.
+	(cpu_arch): Add .hle and .rtm.
+	(md_assemble): Call check_hle if i.have_hle isn't zero.
+	(parse_insn): Set i.have_hle to 1 for HLE prefix.
+	(output_jump): Support up to 2 byte opcode.
+
+	* doc/c-i386.texi: Document hle/.hle and rtm/.rtm.
+
 2012-02-02  Tristan Gingold  <gingold@adacore.com>
 
 	* config/obj-macho.c (obj_mach_o_zerofill): Silent

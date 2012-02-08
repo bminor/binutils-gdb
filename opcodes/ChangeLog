@@ -1,3 +1,51 @@
+2012-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (HLE_Fixup1): New.
+	(HLE_Fixup2): Likewise.
+	(HLE_Fixup3): Likewise.
+	(Ebh1): Likewise.
+	(Evh1): Likewise.
+	(Ebh2): Likewise.
+	(Evh2): Likewise.
+	(Ebh3): Likewise.
+	(Evh3): Likewise.
+	(MOD_C6_REG_7): Likewise.
+	(MOD_C7_REG_7): Likewise.
+	(RM_C6_REG_7): Likewise.
+	(RM_C7_REG_7): Likewise.
+	(XACQUIRE_PREFIX): Likewise.
+	(XRELEASE_PREFIX): Likewise.
+	(dis386): Use Ebh1/Evh1 on add, adc, and, btc, btr, bts,
+	cmpxchg, dec, inc, neg, not, or, sbb, sub, xor and xadd. Use
+	Ebh2/Evh2 on xchg.  Use Ebh3/Evh3 on mov.
+	(reg_table): Use Ebh1/Evh1 on add, adc, and, dec, inc, neg,
+	not, or, sbb, sub and xor.  Use Ebh3/Evh3 on mov.  Use
+	MOD_C6_REG_7 and MOD_C7_REG_7.
+	(mod_table): Add MOD_C6_REG_7 and MOD_C7_REG_7.
+	(rm_table): Add RM_C6_REG_7 and RM_C7_REG_7.  Add xend and
+	xtest.
+	(prefix_name): Handle XACQUIRE_PREFIX and XRELEASE_PREFIX.
+	(CMPXCHG8B_Fixup): Handle HLE prefix on cmpxchg8b.
+
+	* i386-gen.c (cpu_flag_init): Add CPU_HLE_FLAGS and
+	CPU_RTM_FLAGS.
+	(cpu_flags): Add CpuHLE and CpuRTM.
+	(opcode_modifiers): Add HLEPrefixOk.
+
+	* i386-opc.h (CpuHLE): New.
+	(CpuRTM): Likewise.
+	(HLEPrefixOk): Likewise.
+	(i386_cpu_flags): Add cpuhle and cpurtm.
+	(i386_opcode_modifier): Add hleprefixok.
+
+	* i386-opc.tbl: Add HLEPrefixOk=3 to mov.  Add HLEPrefixOk to
+	add, adc, and, btc, btr, bts, cmpxchg, dec, inc, neg, not, or,
+	sbb, sub, xor and xadd.  Add HLEPrefixOk=2 to xchg with memory
+	operand.  Add xacquire, xrelease, xabort, xbegin, xend and
+	xtest.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2012-01-24  DJ Delorie  <dj@redhat.com>
 
 	* rl78-decode.opc (rl78_decode_opcode): Add NOT1.

@@ -60,12 +60,13 @@
    WAIT_PREFIX must be the first prefix since FWAIT is really is an
    instruction, and so must come before any prefixes.
    The preferred prefix order is SEG_PREFIX, ADDR_PREFIX, DATA_PREFIX,
-   REP_PREFIX, LOCK_PREFIX.  */
+   REP_PREFIX/HLE_PREFIX, LOCK_PREFIX.  */
 #define WAIT_PREFIX	0
 #define SEG_PREFIX	1
 #define ADDR_PREFIX	2
 #define DATA_PREFIX	3
 #define REP_PREFIX	4
+#define HLE_PREFIX	REP_PREFIX
 #define LOCK_PREFIX	5
 #define REX_PREFIX	6       /* must come last.  */
 #define MAX_PREFIXES	7	/* max prefixes per opcode */
@@ -287,6 +288,9 @@ struct _i386_insn
 	disp_encoding_8bit,
 	disp_encoding_32bit
       } disp_encoding;
+
+    /* Have HLE prefix.  */
+    unsigned int have_hle;
 
     /* Error message.  */
     enum i386_error error;
@@ -731,6 +735,10 @@ static const arch_entry cpu_arch[] =
     CPU_EPT_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".lzcnt"), PROCESSOR_UNKNOWN,
     CPU_LZCNT_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".hle"), PROCESSOR_UNKNOWN,
+    CPU_HLE_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".rtm"), PROCESSOR_UNKNOWN,
+    CPU_RTM_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".invpcid"), PROCESSOR_UNKNOWN,
     CPU_INVPCID_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".clflush"), PROCESSOR_UNKNOWN,
@@ -2999,6 +3007,50 @@ process_immext (void)
   i.tm.extension_opcode = None;
 }
 
+
+static int
+check_hle (void)
+{
+  switch (i.tm.opcode_modifier.hleprefixok)
+    {
+    default:
+      abort ();
+    case 0:
+      if (i.prefix[HLE_PREFIX] == XACQUIRE_PREFIX_OPCODE)
+	as_bad (_("invalid instruction `%s' after `xacquire'"),
+		i.tm.name);
+      else
+	as_bad (_("invalid instruction `%s' after `xrelease'"),
+		i.tm.name);
+      return 0;
+    case 1:
+      if (i.prefix[LOCK_PREFIX])
+	return 1;
+      if (i.prefix[HLE_PREFIX] == XACQUIRE_PREFIX_OPCODE)
+	as_bad (_("missing `lock' with `xacquire'"));
+      else
+	as_bad (_("missing `lock' with `xrelease'"));
+      return 0;
+    case 2:
+      return 1;
+    case 3:
+      if (i.prefix[HLE_PREFIX] != XRELEASE_PREFIX_OPCODE)
+	{
+	  as_bad (_("instruction `%s' after `xacquire' not allowed"),
+		  i.tm.name);
+	  return 0;
+	}
+      if (i.mem_operands == 0
+	  || !operand_type_check (i.types[i.operands - 1], anymem))
+	{
+	  as_bad (_("memory destination needed for instruction `%s'"
+		    " after `xrelease'"), i.tm.name);
+	  return 0;
+	}
+      return 1;
+    }
+}
+
 /* This is the guts of the machine-dependent assembler.  LINE points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
@@ -3116,6 +3168,10 @@ md_assemble (char *line)
       as_bad (_("expecting lockable instruction after `lock'"));
       return;
     }
+
+  /* Check if HLE prefix is OK.  */
+  if (i.have_hle && !check_hle ())
+    return;
 
   /* Check string instruction segment overrides.  */
   if (i.tm.opcode_modifier.isstring && i.mem_operands != 0)
@@ -3320,7 +3376,10 @@ parse_insn (char *line, char *mnemonic)
 	    case PREFIX_EXIST:
 	      return NULL;
 	    case PREFIX_REP:
-	      expecting_string_instruction = current_templates->start->name;
+	      if (current_templates->start->cpu_flags.bitfield.cpuhle)
+		i.have_hle = 1;
+	      else
+		expecting_string_instruction = current_templates->start->name;
 	      break;
 	    default:
 	      break;
@@ -6041,8 +6100,17 @@ output_jump (void)
   if (i.prefixes != 0 && !intel_syntax)
     as_warn (_("skipping prefixes on this instruction"));
 
-  p = frag_more (1 + size);
-  *p++ = i.tm.base_opcode;
+  p = frag_more (i.tm.opcode_length + size);
+  switch (i.tm.opcode_length)
+    {
+    case 2:
+      *p++ = i.tm.base_opcode >> 8;
+    case 1:
+      *p++ = i.tm.base_opcode;
+      break;
+    default:
+      abort ();
+    }
 
   fixP = fix_new_exp (frag_now, p - frag_now->fr_literal, size,
 		      i.op[0].disps, 1, reloc (size, 1, 1, i.reloc[0]));

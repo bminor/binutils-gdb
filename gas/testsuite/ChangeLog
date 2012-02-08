@@ -1,3 +1,26 @@
+2012-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/hle-intel.d: New.
+	* gas/i386/hle.d: Likewise.
+	* gas/i386/hle.s: Likewise.
+	* gas/i386/hlebad.l: Likewise.
+	* gas/i386/hlebad.s: Likewise.
+	* gas/i386/rtm-intel.d: Likewise.
+	* gas/i386/rtm.d: Likewise.
+	* gas/i386/rtm.s: Likewise.
+	* gas/i386/x86-64-hle-intel.d: Likewise.
+	* gas/i386/x86-64-hle.d: Likewise.
+	* gas/i386/x86-64-hle.s: Likewise.
+	* gas/i386/x86-64-hlebad.l: Likewise.
+	* gas/i386/x86-64-hlebad.s: Likewise.
+	* gas/i386/x86-64-rtm-intel.d: Likewise.
+	* gas/i386/x86-64-rtm.d: Likewise.
+	* gas/i386/x86-64-rtm.s: Likewise.
+
+	* gas/i386/i386.exp: Run hle, hle-intel, hlebad x86-64-hle, rtm,
+	rtm-intel, x86-64-hle-intel, x86-64-hlebad, x86-64-rtm and
+	x86-64-rtm-intel.
+
 2012-01-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/disp32.s: Add tests for .d8 suffix.
