@@ -42,17 +42,18 @@ gdb_py_test_silent_cmd "python main_func = gdb.lookup_global_symbol(\"main\")" "
 gdb_test "python print main_func.is_function" "True" "Test main_func.is_function"
 gdb_test "python print gdb.lookup_global_symbol(\"junk\")" "None" "Test lookup_global_symbol(\"junk\")"
 
-gdb_test "python print gdb.lookup_symbol('main')\[0\].value()" "$hex .main." \
+gdb_test "python print gdb.lookup_global_symbol('main').value()" "$hex .main." \
     "print value of main"
 
 set qq_line [gdb_get_line_number "line of qq"]
-gdb_test "python print gdb.lookup_symbol('qq')\[0\].line" "$qq_line" \
+gdb_test "python print gdb.lookup_global_symbol('qq').line" "$qq_line" \
     "print line number of qq"
 
-gdb_test "python print gdb.lookup_symbol('qq')\[0\].value()" "72" \
+gdb_test "python print gdb.lookup_global_symbol('qq').value()" "72" \
     "print value of qq"
 
-gdb_test "python print gdb.lookup_symbol('qq')\[0\].needs_frame" "False" \
+gdb_test "python print gdb.lookup_global_symbol('qq').needs_frame" \
+    "False" \
     "print whether qq needs a frame"
 
 
