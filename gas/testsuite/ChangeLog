@@ -1,3 +1,7 @@
+2012-02-08  Kai Tietz  <ktietz@redhat.com>
+
+	* gas/i386/x86-64-disp32.d: Fix lable-pattern.
+
 2012-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/hle-intel.d: New.

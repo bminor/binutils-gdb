@@ -7,7 +7,7 @@
 
 Disassembly of section .text:
 
-0+ <foo-0x26>:
+0+ <.*>:
 [ 	]*[a-f0-9]+:	8b 18                	mov    \(%rax\),%ebx
 [ 	]*[a-f0-9]+:	8b 58 03             	mov    0x3\(%rax\),%ebx
 [ 	]*[a-f0-9]+:	8b 58 00             	mov    0x0\(%rax\),%ebx
