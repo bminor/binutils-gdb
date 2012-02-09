@@ -1,3 +1,7 @@
+2012-02-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (bp_location_compare): Fix comment.  Reindent the code.
+
 2012-02-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* language.h (symbol_name_cmp_ftype): Renames

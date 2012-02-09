@@ -10589,12 +10589,13 @@ bp_location_compare (const void *ap, const void *bp)
   if (a_perm != b_perm)
     return (a_perm < b_perm) - (a_perm > b_perm);
 
-  /* Make the user-visible order stable across GDB runs.  Locations of
-     the same breakpoint can be sorted in arbitrary order.  */
+  /* Make the internal GDB representation stable across GDB runs
+     where A and B memory inside GDB can differ.  Breakpoint locations of
+     the same type at the same address can be sorted in arbitrary order.  */
 
   if (a->owner->number != b->owner->number)
-    return (a->owner->number > b->owner->number)
-           - (a->owner->number < b->owner->number);
+    return ((a->owner->number > b->owner->number)
+	    - (a->owner->number < b->owner->number));
 
   return (a > b) - (a < b);
 }
