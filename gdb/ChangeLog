@@ -1,5 +1,11 @@
 2012-02-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb-gdb.py (StructMainTypePrettyPrinter) <struct_field_img>: Print
+	flds_bnds.fields.
+	(StructMainTypePrettyPrinter) <bounds_img>: Print flds_bnds.bounds.
+
+2012-02-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* breakpoint.c (bp_location_compare): Fix comment.  Reindent the code.
 
 2012-02-08  Joel Brobecker  <brobecker@adacore.com>
