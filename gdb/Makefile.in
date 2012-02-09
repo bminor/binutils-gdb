@@ -761,7 +761,7 @@ common/gdb_signals.h common/gdb_thread_db.h common/i386-xstate.h \
 common/linux-ptrace.h \
 proc-utils.h arm-tdep.h ax-gdb.h ppcnbsd-tdep.h	\
 cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
-exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h \
+exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h amd64bsd-nat.h \
 i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
 ia64-tdep.h ada-lang.h varobj.h frv-tdep.h nto-tdep.h serial.h \
 c-lang.h d-lang.h frame.h event-loop.h block.h cli/cli-setshow.h	\

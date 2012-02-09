@@ -1,3 +1,19 @@
+2012-02-09  Valery Khromov  <valery.khromov@gmail.com>
+
+	PR gdb/12953
+	* Makefile.in (HFILES_NO_SRCDIR): Add amd64bsd-nat.h.
+	* amd64bsd-nat.c: Add support for debug registers (adapted from
+	i386bsd-nat.c).
+	[HAVE_PT_GETDBREGS] (amd64bsd_dr_get, amd64bsd_dr_set)
+	(amd64bsd_dr_set_control, amd64bsd_dr_set_addr)
+	(amd64bsd_dr_get_addr, amd64bsd_dr_get_status)
+	(amd64bsd_dr_get_control): New functions.
+	* amd64bsd-nat.h: New file (adapted from i386bsd-nat.h).
+	* amd64fbsd-nat.c: Include "amd64bsd-nat.h", "i386-nat.h".
+	[HAVE_PT_GETDBREGS] (_initialize_amd64fbsd_nat): Add hardware
+	watchpoints initialization.
+	* config/i386/fbsd64.mh (NATDEPFILES): Add i386-nat.o.
+
 2012-02-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb-gdb.py (StructMainTypePrettyPrinter) <struct_field_img>: Print
