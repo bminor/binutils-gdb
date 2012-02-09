@@ -19,9 +19,9 @@
    Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include "sysdep.h"
 #include <stddef.h>
 #include <time.h>
-#include "sysdep.h"
 #include "safe-ctype.h"
 #include "bfd.h"
 #include "objdump.h"

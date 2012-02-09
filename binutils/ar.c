@@ -37,7 +37,6 @@
 #include "filenames.h"
 #include "binemul.h"
 #include "plugin.h"
-#include <sys/stat.h>
 
 #ifdef __GO32___
 #define EXT_NAME_LEN 3		/* Bufflen of addition to name if it's MS-DOS.  */

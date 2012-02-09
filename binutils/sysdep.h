@@ -1,6 +1,6 @@
 /* sysdep.h -- handle host dependencies for binutils
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009
+   2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2012
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -67,6 +67,10 @@ extern char *strrchr ();
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
+#endif
+
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
 #endif
 
 #include "binary-io.h"

@@ -1,6 +1,6 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009, 2011  Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008, 2009, 2011, 2012 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -232,15 +232,6 @@
 
    .idata$7 = dll name (eg: "kernel32.dll"). (.idata$6 for ppc).  */
 
-/* AIX requires this to be the first thing in the file.  */
-#ifndef __GNUC__
-# ifdef _AIX
- #pragma alloca
-#endif
-#endif
-
-#define show_allnames 0
-
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
@@ -252,8 +243,6 @@
 #include "safe-ctype.h"
 
 #include <time.h>
-#include <sys/stat.h>
-#include <stdarg.h>
 #include <assert.h>
 
 #ifdef DLLTOOL_ARM
@@ -318,6 +307,8 @@ static void mcore_elf_gen_out_file (void);
 #endif
 #endif /* defined (_WIN32) && ! defined (__CYGWIN32__) */
 #endif /* ! HAVE_SYS_WAIT_H */
+
+#define show_allnames 0
 
 /* ifunc and ihead data structures: ttk@cygnus.com 1997
 

@@ -1,3 +1,26 @@
+2012-02-09  Alan Modra  <amodra@gmail.com>
+
+	* sysdep.h: Include sys/stat.h here.
+	* ar.c: Don't include headers already included by sysdep.h.
+	* bucomm.c: Likewise.
+	* budbg.h: Likewise.
+	* dlltool.h: Likewise.
+	* elfedit.c: Likewise.
+	* nlmconv.c: Likewise.
+	* objcopy.c: Likewise.
+	* objdump.c: Likewise.
+	* objdump.h: Likewise.
+	* readelf.c: Likewise.
+	* rename.c: Likewise.
+	* resrc.c: Likewise.
+	* strings.c: Likewise.
+	* windres.c: Likewise.
+	* od-macho.c: Ensure #include sysdep.h is first.
+	* od-xcoff.c: Likewise.
+	* dllwrap.c: Remove alloca pragma handled by sysdep.h, and
+	remove duplicate headers.
+	* dlltool.c: Likewise and ensure #include sysdep.h is first.
+
 2012-02-01  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/13493

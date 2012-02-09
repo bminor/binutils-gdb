@@ -1,6 +1,6 @@
 /* windres.c -- a program to manipulate Windows resources
    Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008,
-   2009, 2011 Free Software Foundation, Inc.
+   2009, 2011, 2012 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
 
@@ -45,7 +45,6 @@
 #include "safe-ctype.h"
 #include "obstack.h"
 #include "windres.h"
-#include <sys/stat.h>
 
 /* Used by resrc.c at least.  */
 

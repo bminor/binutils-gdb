@@ -1,5 +1,5 @@
 /* objdump.h
-   Copyright 2011 Free Software Foundation, Inc.
+   Copyright 2011, 2012 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -17,8 +17,6 @@
    along with this program; if not, write to the Free Software
    Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
-
-#include <stdio.h>
 
 struct objdump_private_option
 {
