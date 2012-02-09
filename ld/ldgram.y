@@ -629,7 +629,7 @@ input_section_spec_no_keep:
 			  tmp.exclude_name_list = NULL;
 			  tmp.sorted = none;
 			  tmp.section_flag_list = $1;
-			  lang_add_wild (NULL, $3, ldgram_had_keep);
+			  lang_add_wild (&tmp, $3, ldgram_had_keep);
 			}
 	|	wildcard_spec '(' file_NAME_list ')'
 			{

@@ -1,3 +1,7 @@
+2012-02-09  Alan Modra  <amodra@gmail.com>
+
+	* ldgram.y (input_section_spec_no_keep): Don't ignore sect_flags.
+
 2012-01-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13616
