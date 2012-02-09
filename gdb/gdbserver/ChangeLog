@@ -1,3 +1,10 @@
+2012-02-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Add readlink to AC_CHECK_FUNCS list.
+	* configure, config.in: Regenerate.
+	* hostio.c: Provide an alternate implementation if HAVE_READLINK
+	is not defined.
+
 2012-02-02  Pedro Alves  <palves@redhat.com>
 
 	Try SIGKILL first, then PTRACE_KILL.

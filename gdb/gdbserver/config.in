@@ -128,6 +128,9 @@
 /* Define to 1 if you have the `pwrite' function. */
 #undef HAVE_PWRITE
 
+/* Define to 1 if you have the `readlink' function. */
+#undef HAVE_READLINK
+
 /* Define to 1 if you have the <sgtty.h> header file. */
 #undef HAVE_SGTTY_H
 
