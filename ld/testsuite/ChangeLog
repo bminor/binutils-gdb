@@ -1,3 +1,9 @@
+2012-02-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13675
+	* ld-i386/tlsnopic.dd: Update no-op padding.
+	* ld-i386/tlspic.dd: Likewise. 
+
 2012-01-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13616

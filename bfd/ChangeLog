@@ -1,3 +1,19 @@
+2012-02-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13675
+	* cpu-i386.c (bfd_arch_i386_fill): Updated to support multi byte
+	nop instructions.
+	(bfd_arch_i386_short_nop_fill): New.
+	(bfd_arch_i386_long_nop_fill): Likewise.
+	Use bfd_arch_i386_short_nop_fill in 32bit bfd_arch_info
+	initializers.  Use bfd_arch_i386_long_nop_fill on 64bit
+	bfd_arch_info initializers.
+
+	* cpu-k1om.c (bfd_arch_i386_fill): Renamed to ...
+	(bfd_arch_i386_short_nop_fill): This.
+	Update bfd_arch_info initializers.
+	* cpu-l1om.c: Likewise.
+
 2012-02-08  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_gc_mark_rsec): Mark weakdef syms too.
