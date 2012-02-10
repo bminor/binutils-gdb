@@ -326,13 +326,30 @@ bfd_mach_o_section_type_valid_for_x86_64 (unsigned long val)
   return TRUE;
 }
 
+/* We want to bump the alignment of some sections.  */
+static const mach_o_section_name_xlat text_section_names_xlat[] =
+  {
+    {	".eh_frame",				"__eh_frame",
+	SEC_READONLY | SEC_DATA | SEC_LOAD,	BFD_MACH_O_S_COALESCED,
+	BFD_MACH_O_S_ATTR_LIVE_SUPPORT
+	| BFD_MACH_O_S_ATTR_STRIP_STATIC_SYMS
+	| BFD_MACH_O_S_ATTR_NO_TOC,		3},
+    { NULL, NULL, 0, 0, 0, 0}
+  };
+
+const mach_o_segment_name_xlat mach_o_x86_64_segsec_names_xlat[] =
+  {
+    { "__TEXT", text_section_names_xlat },
+    { NULL, NULL }
+  };
+
 #define bfd_mach_o_swap_reloc_in bfd_mach_o_x86_64_swap_reloc_in
 #define bfd_mach_o_swap_reloc_out bfd_mach_o_x86_64_swap_reloc_out
 
 #define bfd_mach_o_bfd_reloc_type_lookup bfd_mach_o_x86_64_bfd_reloc_type_lookup
 #define bfd_mach_o_bfd_reloc_name_lookup bfd_mach_o_x86_64_bfd_reloc_name_lookup
 #define bfd_mach_o_print_thread NULL
-#define bfd_mach_o_tgt_seg_table NULL
+#define bfd_mach_o_tgt_seg_table mach_o_x86_64_segsec_names_xlat
 #define bfd_mach_o_section_type_valid_for_tgt bfd_mach_o_section_type_valid_for_x86_64
 
 #define TARGET_NAME 		mach_o_x86_64_vec

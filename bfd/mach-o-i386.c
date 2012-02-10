@@ -283,11 +283,11 @@ bfd_mach_o_i386_print_thread (bfd *abfd, bfd_mach_o_thread_flavour *thread,
 static const mach_o_section_name_xlat text_section_names_xlat[] =
   {
     {	".symbol_stub",			"__symbol_stub",
-	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_SYMBOL_STUBS,
+	SEC_CODE | SEC_LOAD,		BFD_MACH_O_S_SYMBOL_STUBS,
 	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS,
 					0},
     {	".picsymbol_stub",		"__picsymbol_stub",
-	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_SYMBOL_STUBS,
+	SEC_CODE | SEC_LOAD,		BFD_MACH_O_S_SYMBOL_STUBS,
 	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS,
 					0},
     { NULL, NULL, 0, 0, 0, 0}
@@ -315,7 +315,7 @@ static const mach_o_section_name_xlat data_section_names_xlat[] =
 static const mach_o_section_name_xlat import_section_names_xlat[] =
   {
     {	".picsymbol_stub3",		"__jump_table",
-	SEC_DATA | SEC_LOAD,		BFD_MACH_O_S_SYMBOL_STUBS,
+	SEC_CODE | SEC_LOAD,		BFD_MACH_O_S_SYMBOL_STUBS,
 	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS 
 	| BFD_MACH_O_S_SELF_MODIFYING_CODE,
 					6},

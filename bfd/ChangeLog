@@ -1,3 +1,12 @@
+2012-02-10  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* mach-o.c (mach_o_section_name_xlat): Correct eh-frame section
+	parameters.
+	* mach-o-x86-64.c (text_section_names_xlat): New.
+	(mach_o_x86_64_segsec_names_xlat): New.
+	(bfd_mach_o_tgt_seg_table): Define to mach_o_x86_64_segsec_names_xlat.
+	* mach-o-i386.c (text_section_names_xlat): Correct section parameters.
+
 2012-02-10  Tristan Gingold  <gingold@adacore.com>
 
 	* elfnn-ia64.c (elfNN_vms_object_p): Change comparison operator

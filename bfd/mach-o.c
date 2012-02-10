@@ -121,10 +121,10 @@ static const mach_o_section_name_xlat text_section_names_xlat[] =
 	SEC_CODE | SEC_LOAD,			BFD_MACH_O_S_REGULAR,
 	BFD_MACH_O_S_ATTR_NONE,			0},
     {	".eh_frame",				"__eh_frame",
-	SEC_READONLY | SEC_LOAD,		BFD_MACH_O_S_COALESCED,
+	SEC_READONLY | SEC_DATA | SEC_LOAD,	BFD_MACH_O_S_COALESCED,
 	BFD_MACH_O_S_ATTR_LIVE_SUPPORT
 	| BFD_MACH_O_S_ATTR_STRIP_STATIC_SYMS
-	| BFD_MACH_O_S_ATTR_NO_TOC,		3},
+	| BFD_MACH_O_S_ATTR_NO_TOC,		2},
     { NULL, NULL, 0, 0, 0, 0}
   };
 
