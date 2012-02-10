@@ -262,9 +262,7 @@ proc test_attach_gdb {file pid displacement prefix} {
     # Print the "PIE (Position Independent Executable) displacement" message.
     gdb_test_no_output "set verbose on"
 
-    if {$file != ""} {
-	gdb_test "file $file" "Reading symbols from .*done\\." "file"
-    }
+    gdb_test "file $file" "Reading symbols from .*done\\." "file"
 
     set test "attach"
     gdb_test_multiple "attach $pid" $test {
@@ -308,6 +306,7 @@ proc test_attach_gdb {file pid displacement prefix} {
 
 proc test_attach {file displacement {relink_args ""}} {
     global board_info
+    global exec
 
     gdb_exit
 
@@ -336,10 +335,10 @@ proc test_attach {file displacement {relink_args ""}} {
     }
 
     if {$relink_args == ""} {
-	test_attach_gdb "" $pid $displacement "attach"
+	test_attach_gdb $exec $pid $displacement "attach"
     } else {
 	# These could be rather passed as arguments.
-	global exec interp_saved interp
+	global interp_saved interp
 
 	foreach relink {YES NO} {
 	    # Formerly this test was testing only prelinking of $EXEC.  As the
