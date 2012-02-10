@@ -912,9 +912,11 @@ decode_line_internal (struct linespec_state *self, char **argptr)
   /* First things first: if ARGPTR starts with a filename, get its
      symtab and strip the filename from ARGPTR.
      Avoid calling symtab_from_filename if we know can,
-     it can be expensive.  */
+     it can be expensive.  We know we can avoid the call if we see a
+     single word (e.g., "break NAME") or if we see a qualified C++
+     name ("break QUAL::NAME").  */
 
-  if (*p != '\0')
+  if (*p != '\0' && !(p[0] == ':' && p[1] == ':'))
     {
       TRY_CATCH (file_exception, RETURN_MASK_ERROR)
 	{

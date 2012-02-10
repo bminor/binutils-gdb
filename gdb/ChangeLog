@@ -1,3 +1,8 @@
+2012-02-10  Tom Tromey  <tromey@redhat.com>
+
+	* linespec.c (decode_line_internal): Skip symtabs_from_filename
+	when we have a C++ qualified name.
+
 2012-02-10  Pedro Alves  <palves@redhat.com>
 
 	* inferior.c (inferior_pid_to_str): New.
