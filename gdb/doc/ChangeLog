@@ -1,3 +1,7 @@
+2012-02-09  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Symbols In Python): Add missing `@end defvar'.
+
 2012-02-07  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Symbols In Python): Document Symbol.needs_frame and

@@ -23997,6 +23997,7 @@ of a symbol.  Each address class is a constant defined in the
 This is @code{True} if evaluating this symbol's value requires a frame
 (@pxref{Frames In Python}) and @code{False} otherwise.  Typically,
 local variables will require a frame, but other symbols will not.
+@end defvar
 
 @defvar Symbol.is_argument
 @code{True} if the symbol is an argument of a function.
