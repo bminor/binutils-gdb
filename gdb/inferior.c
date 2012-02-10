@@ -526,6 +526,18 @@ number_of_inferiors (void)
   return count;
 }
 
+/* Converts an inferior process id to a string.  Like
+   target_pid_to_str, but special cases the null process.  */
+
+static char *
+inferior_pid_to_str (int pid)
+{
+  if (pid != 0)
+    return target_pid_to_str (pid_to_ptid (pid));
+  else
+    return _("<null>");
+}
+
 /* Prints the list of inferiors and their details on UIOUT.  This is a
    version of 'info_inferior_command' suitable for use from MI.
 
@@ -579,11 +591,8 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
 
       ui_out_field_int (uiout, "number", inf->num);
 
-      if (inf->pid)
-	ui_out_field_string (uiout, "target-id",
-			     target_pid_to_str (pid_to_ptid (inf->pid)));
-      else
-	ui_out_field_string (uiout, "target-id", "<null>");
+      ui_out_field_string (uiout, "target-id",
+			   inferior_pid_to_str (inf->pid));
 
       if (inf->pspace->ebfd)
 	ui_out_field_string (uiout, "exec",
@@ -700,7 +709,7 @@ inferior_command (char *args, int from_tty)
 
   printf_filtered (_("[Switching to inferior %d [%s] (%s)]\n"),
 		   inf->num,
-		   target_pid_to_str (pid_to_ptid (inf->pid)),
+		   inferior_pid_to_str (inf->pid),
 		   (inf->pspace->ebfd
 		    ? bfd_get_filename (inf->pspace->ebfd)
 		    : _("<noexec>")));

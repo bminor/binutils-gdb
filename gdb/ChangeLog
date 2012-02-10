@@ -1,5 +1,10 @@
 2012-02-10  Pedro Alves  <palves@redhat.com>
 
+	* inferior.c (inferior_pid_to_str): New.
+	(print_inferior, inferior_command): Use it.
+
+2012-02-10  Pedro Alves  <palves@redhat.com>
+
 	* configure.ac (HAVE_ELF test): Put the old CFLAGS at the end of
 	the test CFLAGS.
 	* configure: Regenerate.
