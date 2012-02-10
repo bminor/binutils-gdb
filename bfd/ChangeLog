@@ -1,3 +1,8 @@
+2012-02-10  Tristan Gingold  <gingold@adacore.com>
+
+	* elfnn-ia64.c (elfNN_vms_object_p): Change comparison operator
+	to avoid infinite loop.  Add comments.
+
 2012-02-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13675

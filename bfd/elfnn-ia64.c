@@ -5036,18 +5036,27 @@ elfNN_vms_object_p (bfd *abfd)
 	  flagword flags;
 	  char *nname = NULL;
 
-	  /* Find a section covering base_vma.  */
+	  /* Find a section covering [base_vma;limit_vma)  */
 	  for (sec = abfd->sections; sec != NULL; sec = sec->next)
 	    {
-	      if ((sec->flags & (SEC_ALLOC | SEC_LOAD)) == 0)
+	      /* Skip uninteresting sections (either not in memory or
+		 below base_vma.  */
+	      if ((sec->flags & (SEC_ALLOC | SEC_LOAD)) == 0
+		  || sec->vma + sec->size <= base_vma)
 		continue;
-	      if (sec->vma <= base_vma && sec->vma + sec->size > base_vma)
+	      if (sec->vma <= base_vma)
 		{
+		  /* This section covers (maybe partially) the beginning
+		     of the range.  */
 		  base_vma = sec->vma + sec->size;
 		  goto again;
 		}
-	      if (sec->vma < next_vma && sec->vma + sec->size >= base_vma)
-		next_vma = sec->vma;
+	      if (sec->vma < next_vma)
+		{
+		  /* This section partially covers the end of the range.
+		     Used to compute the size of the hole.  */
+		  next_vma = sec->vma;
+		}
 	    }
 
 	  /* No section covering [base_vma; next_vma).  Create a fake one.  */
