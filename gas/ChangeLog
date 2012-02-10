@@ -1,3 +1,9 @@
+2012-02-10  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* config/obj-macho.c (obj_mach_o_make_or_get_sect): Always fill in
+	stub size when provided.  (obj_mach_o_section): Flag that stub-size
+	has been provided.
+
 2012-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (HLE_PREFIX): New.

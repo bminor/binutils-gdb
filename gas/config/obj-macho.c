@@ -161,6 +161,7 @@ obj_mach_o_get_section_names (char *seg, char *sec,
 #define SECT_TYPE_SPECIFIED 0x0001
 #define SECT_ATTR_SPECIFIED 0x0002
 #define SECT_ALGN_SPECIFIED 0x0004
+#define SECT_STUB_SPECIFIED 0x0008
 
 static segT
 obj_mach_o_make_or_get_sect (char * segname, char * sectname,
@@ -250,7 +251,6 @@ obj_mach_o_make_or_get_sect (char * segname, char * sectname,
 
       msect->align = secalign;
       msect->flags = sectype | secattr;
-      msect->reserved2 = stub_size;
       
       if (sectype == BFD_MACH_O_S_ZEROFILL
 	  || sectype == BFD_MACH_O_S_GB_ZEROFILL)
@@ -262,6 +262,10 @@ obj_mach_o_make_or_get_sect (char * segname, char * sectname,
 	  || msect->flags != (secattr | sectype))
 	as_warn (_("Ignoring changed section attributes for %s"), name);
     }
+
+  if (specified_mask & SECT_STUB_SPECIFIED)
+    /* At present, the stub size is not supplied from the BFD tables.  */
+    msect->reserved2 = stub_size;
 
   return sec;
 }
@@ -396,6 +400,7 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
 
 	      input_line_pointer++;
               sizeof_stub = get_absolute_expression ();
+              specified_mask |= SECT_STUB_SPECIFIED;
             }
           else if ((specified_mask & SECT_ATTR_SPECIFIED) 
 		   && sectype == BFD_MACH_O_S_SYMBOL_STUBS)
