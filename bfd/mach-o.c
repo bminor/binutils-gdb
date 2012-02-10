@@ -2026,7 +2026,12 @@ bfd_mach_o_build_seg_command (const char *segment,
   seg->sect_head = NULL;
   seg->sect_tail = NULL;
 
-  /*  Append sections to the segment.  */
+  /*  Append sections to the segment.  
+
+      This is a little tedious, we have to honor the need to account zerofill
+      sections after all the rest.  This forces us to do the calculation of
+      total vmsize in three passes so that any alignment increments are 
+      properly accounted.  */
 
   for (i = 0; i < mdata->nsects; ++i)
     {
@@ -2039,14 +2044,10 @@ bfd_mach_o_build_seg_command (const char *segment,
 	  && strncmp (segment, s->segname, BFD_MACH_O_SEGNAME_SIZE) != 0)
 	continue;
 
+      /* Although we account for zerofill section sizes in vm order, they are
+	 placed in the file in source sequence.  */
       bfd_mach_o_append_section_to_segment (seg, sec);
-
       s->offset = 0;
-      if (s->size > 0)
-       {
-          seg->vmsize = FILE_ALIGN (seg->vmsize, s->align);
-	  seg->vmsize += s->size;
-        }
       
       /* Zerofill sections have zero file size & offset, 
 	 and are not written.  */
@@ -2057,19 +2058,59 @@ bfd_mach_o_build_seg_command (const char *segment,
 
       if (s->size > 0)
        {
+	  seg->vmsize = FILE_ALIGN (seg->vmsize, s->align);
+	  seg->vmsize += s->size;
+
+	  seg->filesize = FILE_ALIGN (seg->filesize, s->align);
+	  seg->filesize += s->size;
+
           mdata->filelen = FILE_ALIGN (mdata->filelen, s->align);
           s->offset = mdata->filelen;
         }
 
       sec->filepos = s->offset;
-
       mdata->filelen += s->size;
     }
 
-  seg->filesize = mdata->filelen - seg->fileoff;
-  seg->filesize = FILE_ALIGN(seg->filesize, 2);
+  /* Now pass through again, for zerofill, only now we just update the vmsize.  */
+  for (i = 0; i < mdata->nsects; ++i)
+    {
+      bfd_mach_o_section *s = mdata->sections[i];
 
-  /* Allocate relocation room.  */
+      if ((s->flags & BFD_MACH_O_SECTION_TYPE_MASK) != BFD_MACH_O_S_ZEROFILL)
+        continue;
+
+      if (! is_mho 
+	  && strncmp (segment, s->segname, BFD_MACH_O_SEGNAME_SIZE) != 0)
+	continue;
+
+      if (s->size > 0)
+	{
+	  seg->vmsize = FILE_ALIGN (seg->vmsize, s->align);
+	  seg->vmsize += s->size;
+	}
+    }
+
+  /* Now pass through again, for zerofill_GB.  */
+  for (i = 0; i < mdata->nsects; ++i)
+    {
+      bfd_mach_o_section *s = mdata->sections[i];
+ 
+      if ((s->flags & BFD_MACH_O_SECTION_TYPE_MASK) != BFD_MACH_O_S_GB_ZEROFILL)
+        continue;
+
+      if (! is_mho 
+	  && strncmp (segment, s->segname, BFD_MACH_O_SEGNAME_SIZE) != 0)
+	continue;
+
+      if (s->size > 0)
+	{
+	  seg->vmsize = FILE_ALIGN (seg->vmsize, s->align);
+	  seg->vmsize += s->size;
+	}
+    }
+
+  /* Allocate space for the relocations.  */
   mdata->filelen = FILE_ALIGN(mdata->filelen, 2);
 
   for (i = 0; i < mdata->nsects; ++i)

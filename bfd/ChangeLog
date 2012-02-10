@@ -1,5 +1,10 @@
 2012-02-10  Iain Sandoe  <idsandoe@googlemail.com>
 
+	* mach-o.c (bfd_mach_o_build_seg_command): Count zerofill section
+	vma additions in their logical, rather than physical order.
+
+2012-02-10  Iain Sandoe  <idsandoe@googlemail.com>
+
 	* mach-o.c (mach_o_section_name_xlat): Correct eh-frame section
 	parameters.
 	* mach-o-x86-64.c (text_section_names_xlat): New.
