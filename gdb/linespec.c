@@ -903,7 +903,7 @@ decode_line_internal (struct linespec_state *self, char **argptr)
 
   /* Locate the end of the first half of the linespec.
      After the call, for instance, if the argptr string is "foo.c:123"
-     p will point at "123".  If there is only one part, like "foo", p
+     p will point at ":123".  If there is only one part, like "foo", p
      will point to "".  If this is a C++ name, like "A::B::foo", p will
      point to "::B::foo".  Argptr is not changed by this call.  */
 

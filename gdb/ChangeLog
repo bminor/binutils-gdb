@@ -1,3 +1,7 @@
+2012-02-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linespec.c (decode_line_internal): Fix comment correctness.
+
 2012-02-09  Valery Khromov  <valery.khromov@gmail.com>
 
 	PR gdb/12953
