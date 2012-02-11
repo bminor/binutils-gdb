@@ -906,9 +906,11 @@ oasys_write_header (bfd *abfd)
 
   if (length > (size_t) sizeof (r.module_name))
     length = sizeof (r.module_name);
+  else if (length < (size_t) sizeof (r.module_name))
+    (void) memset (r.module_name + length, ' ',
+		   sizeof (r.module_name) - length);
 
   (void) memcpy (r.module_name, abfd->filename, length);
-  (void) memset (r.module_name + length, ' ', sizeof (r.module_name) - length);
 
   r.version_number = OASYS_VERSION_NUMBER;
   r.rev_number = OASYS_REV_NUMBER;

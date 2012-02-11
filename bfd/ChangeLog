@@ -1,3 +1,9 @@
+2012-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* oasys.c (oasys_write_header): Fix compilation warning on zero-sized
+	memset.
+
 2012-02-10  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* mach-o.c (bfd_mach_o_build_seg_command): Count zerofill section
