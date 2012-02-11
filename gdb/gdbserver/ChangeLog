@@ -1,3 +1,9 @@
+2012-02-11  Yao Qi  <yao@codesourcery.com>
+
+	* server.c: (handle_monitor_command): Add a new parameter
+	`own_buf'.
+	(handle_query): Update caller.
+
 2012-02-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Add readlink to AC_CHECK_FUNCS list.

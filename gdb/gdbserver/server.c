@@ -811,7 +811,7 @@ handle_search_memory (char *own_buf, int packet_len)
 /* Handle monitor commands not handled by target-specific handlers.  */
 
 static void
-handle_monitor_command (char *mon)
+handle_monitor_command (char *mon, char *own_buf)
 {
   if (strcmp (mon, "set debug 1") == 0)
     {
@@ -1737,7 +1737,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (the_target->handle_monitor_command == NULL
 	  || (*the_target->handle_monitor_command) (mon) == 0)
 	/* Default processing.  */
-	handle_monitor_command (mon);
+	handle_monitor_command (mon, own_buf);
 
       free (mon);
       return;
