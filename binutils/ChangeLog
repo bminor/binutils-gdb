@@ -1,3 +1,9 @@
+2012-02-11  Kai Tietz  <ktietz@redhat.com>
+
+	PR binutils/13297
+	* resrc.c (write_rc_dialog_control): Omit text dump for
+	EDITTEXT, COMBOBOX, LISTBOX, and SCROLLBAR.
+
 2012-02-09  Alan Modra  <amodra@gmail.com>
 
 	* sysdep.h: Include sys/stat.h here.
