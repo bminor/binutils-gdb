@@ -1,3 +1,10 @@
+2012-02-11  Pascal Obry  <pascal@obry.net>
+
+	* pe-dll.c (auto_export): Use bsearch to speed up scan of exports
+	table.
+	(process_def_file_and_drectve): Maintain sorting of exports table
+	after stripping leading @ signs.
+
 2012-02-09  Alan Modra  <amodra@gmail.com>
 
 	* ldgram.y (input_section_spec_no_keep): Don't ignore sect_flags.

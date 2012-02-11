@@ -1,6 +1,6 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+   2008, 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -529,16 +529,20 @@ is_import (const char* n)
 static int
 auto_export (bfd *abfd, def_file *d, const char *n)
 {
-  int i;
+  def_file_export key;
   struct exclude_list_struct *ex;
   const autofilter_entry_type *afptr;
-  const char * libname = 0;
+  const char * libname = NULL;
+
   if (abfd && abfd->my_archive)
     libname = lbasename (abfd->my_archive->filename);
 
-  for (i = 0; i < d->num_exports; i++)
-    if (strcmp (d->exports[i].name, n) == 0)
-      return 0;
+  key.name = key.its_name = (char *) n;
+
+  /* Return false if n is in the d->exports table.  */
+  if (bsearch (&key, d->exports, d->num_exports,
+               sizeof (pe_def_file->exports[0]), pe_export_sort))
+    return 0;
 
   if (pe_dll_do_default_excludes)
     {
@@ -644,6 +648,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
   bfd *b;
   struct bfd_section *s;
   def_file_export *e = 0;
+  bfd_boolean resort_needed;
 
   if (!pe_def_file)
     pe_def_file = def_file_empty ();
@@ -750,6 +755,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 		    {
 		      int is_dup = 0;
 		      def_file_export *p;
+
 		      p = def_file_add_export (pe_def_file, sn, 0, -1,
 					       NULL, &is_dup);
 		      /* Fill data flag properly, from dlltool.c.  */
@@ -767,6 +773,8 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
   /* Don't create an empty export table.  */
   if (NE == 0)
     return;
+
+  resort_needed = FALSE;
 
   /* Canonicalize the export list.  */
   if (pe_dll_kill_ats)
@@ -788,9 +796,16 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	        einfo (_("%XCannot export %s: invalid export name\n"),
 		       pe_def_file->exports[i].name);
 	      pe_def_file->exports[i].name = tmp;
+              resort_needed = TRUE;
 	    }
 	}
     }
+
+  /* Re-sort the exports table as we have possibly changed the order
+     by removing leading @.  */
+  if (resort_needed)
+    qsort (pe_def_file->exports, NE, sizeof (pe_def_file->exports[0]),
+           pe_export_sort);
 
   if (pe_dll_stdcall_aliases)
     {
@@ -829,8 +844,6 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
   count_exported_byname = 0;
   count_with_ordinals = 0;
 
-  qsort (pe_def_file->exports, NE, sizeof (pe_def_file->exports[0]),
-	 pe_export_sort);
   for (i = 0, j = 0; i < NE; i++)
     {
       if (i > 0 && strcmp (e[i].name, e[i - 1].name) == 0)
