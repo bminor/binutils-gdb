@@ -1,3 +1,7 @@
+2012-02-11  Kai Tietz  <ktietz@redhat.com>
+
+	* gas/i386/disp32.d: Adjust lable-pattern.
+
 2012-02-08  Kai Tietz  <ktietz@redhat.com>
 
 	* gas/i386/x86-64-disp32.d: Fix lable-pattern.
