@@ -1,3 +1,8 @@
+2012-02-11  Kai Tietz  <ktietz@redhat.com>
+
+	* binutils-all/version.def: New file.
+	* binutils-all/dlltool.exp: Add version-dll test.
+
 2012-02-02  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/readelf.n: Add #pass to cope with targets that add

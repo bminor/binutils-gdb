@@ -1,3 +1,12 @@
+2012-02-11  Kai Tietz  <ktietz@redhat.com>
+
+	* deffilep.y (%union): New type id_const.
+	(opt_name2): New rule.
+	(keyword_as_name): New rule.
+	(dot_name): Replaced by opt_name2 rule.
+	(opt_name): Adjust rule.
+	(opt_equal_name): Likewise.
+
 2012-02-11  Pascal Obry  <pascal@obry.net>
 
 	* pe-dll.c (auto_export): Use bsearch to speed up scan of exports

@@ -113,6 +113,7 @@ static const char *lex_parse_string_end = 0;
 
 %union {
   char *id;
+  const char *id_const;
   int number;
   char *digits;
 };
@@ -127,8 +128,9 @@ static const char *lex_parse_string_end = 0;
 %type  <digits> opt_digits
 %type  <number> opt_base opt_ordinal
 %type  <number> attr attr_list opt_number exp_opt_list exp_opt
-%type  <id> opt_name opt_equal_name dot_name anylang_id opt_id
+%type  <id> opt_name opt_name2 opt_equal_name anylang_id opt_id
 %type  <id> opt_equalequal_name
+%type  <id_const> keyword_as_name
 
 %%
 
@@ -164,7 +166,7 @@ expline:
 		/* The opt_comma is necessary to support both the usual
 		  DEF file syntax as well as .drectve syntax which
 		  mandates <expsym>,<expoptlist>.  */
-		dot_name opt_equal_name opt_ordinal opt_comma exp_opt_list opt_comma opt_equalequal_name
+		opt_name2 opt_equal_name opt_ordinal opt_comma exp_opt_list opt_comma opt_equalequal_name
 			{ def_exports ($1, $2, $3, $5, $7); }
 	;
 exp_opt_list:
@@ -234,19 +236,60 @@ attr:
 	|	SHARED	{ $$=8;}
 	;
 
-opt_name: ID		{ $$ = $1; }
-	| '.' ID
+
+keyword_as_name: BASE { $$ = "BASE"; }
+	 | CODE { $$ = "CODE"; }
+	 | CONSTANTU { $$ = "CONSTANT"; }
+	 | CONSTANTL { $$ = "constant"; }
+	 | DATAU { $$ = "DATA"; }
+	 | DATAL { $$ = "data"; }
+	 | DESCRIPTION { $$ = "DESCRIPTION"; }
+	 | DIRECTIVE { $$ = "DIRECTIVE"; }
+	 | EXECUTE { $$ = "EXECUTE"; }
+	 | EXPORTS { $$ = "EXPORTS"; }
+	 | HEAPSIZE { $$ = "HEAPSIZE"; }
+	 | IMPORTS { $$ = "IMPORTS"; }
+	 | LIBRARY { $$ = "LIBRARY"; }
+	 | NAME { $$ = "NAME"; }
+	 | NONAMEU { $$ = "NONAME"; }
+	 | NONAMEL { $$ = "noname"; }
+	 | PRIVATEU { $$ = "PRIVATE"; }
+	 | PRIVATEL { $$ = "private"; }
+	 | READ { $$ = "READ"; }
+	 | SHARED  { $$ = "SHARED"; }
+	 | STACKSIZE_K { $$ = "STACKSIZE"; }
+	 | VERSIONK { $$ = "VERSION"; }
+	 | WRITE { $$ = "WRITE"; }
+	 ;
+
+opt_name2: ID { $$ = $1; }
+	| '.' keyword_as_name
 	  {
+	    char *name = xmalloc (strlen ($2) + 2);
+	    sprintf (name, ".%s", $2);
+	    $$ = name;
+	  }
+	| '.' opt_name2
+	  { 
 	    char *name = def_pool_alloc (strlen ($2) + 2);
 	    sprintf (name, ".%s", $2);
 	    $$ = name;
 	  }
-	| ID '.' ID	
+	| keyword_as_name '.' opt_name2
 	  { 
 	    char *name = def_pool_alloc (strlen ($1) + 1 + strlen ($3) + 1);
 	    sprintf (name, "%s.%s", $1, $3);
 	    $$ = name;
 	  }
+	| ID '.' opt_name2
+	  { 
+	    char *name = def_pool_alloc (strlen ($1) + 1 + strlen ($3) + 1);
+	    sprintf (name, "%s.%s", $1, $3);
+	    $$ = name;
+	  }
+	;
+
+opt_name: opt_name2 { $$ = $1; }
 	|		{ $$ = ""; }
 	;
 
@@ -260,27 +303,12 @@ opt_ordinal:
 	;
 
 opt_equal_name:
-          '=' dot_name	{ $$ = $2; }
+          '=' opt_name2	{ $$ = $2; }
         | 		{ $$ =  0; }			 
 	;
 
 opt_base: BASE	'=' NUMBER	{ $$ = $3;}
 	|	{ $$ = -1;}
-	;
-
-dot_name: ID		{ $$ = $1; }
-	| '.' ID
-	  {
-	    char *name = def_pool_alloc (strlen ($2) + 2);
-	    sprintf (name, ".%s", $2);
-	    $$ = name;
-	  }
-	| dot_name '.' ID	
-	  { 
-	    char *name = def_pool_alloc (strlen ($1) + 1 + strlen ($3) + 1);
-	    sprintf (name, "%s.%s", $1, $3);
-	    $$ = name;
-	  }
 	;
 
 anylang_id: ID		{ $$ = $1; }

@@ -1,5 +1,15 @@
 2012-02-11  Kai Tietz  <ktietz@redhat.com>
 
+	PR binutils/13657
+	* defparse.y (%union): New type id_const.
+	(opt_name2): New rule.
+	(keyword_as_name): New rule.
+	(opt_name): Adjust rule.
+	(opt_import_name): Likewise.
+	(opt_equal_name): Likewise.
+
+2012-02-11  Kai Tietz  <ktietz@redhat.com>
+
 	PR binutils/13297
 	* resrc.c (write_rc_dialog_control): Omit text dump for
 	EDITTEXT, COMBOBOX, LISTBOX, and SCROLLBAR.
