@@ -593,9 +593,10 @@ fetch_register (struct regcache *regcache, int tid, int regno)
        bytes_transferred < register_size (gdbarch, regno);
        bytes_transferred += sizeof (long))
     {
+      long l;
+
       errno = 0;
-      *(long *) &buf[bytes_transferred]
-        = ptrace (PTRACE_PEEKUSER, tid, (PTRACE_TYPE_ARG3) regaddr, 0);
+      l = ptrace (PTRACE_PEEKUSER, tid, (PTRACE_TYPE_ARG3) regaddr, 0);
       regaddr += sizeof (long);
       if (errno != 0)
 	{
@@ -604,6 +605,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
 		   gdbarch_register_name (gdbarch, regno), regno);
 	  perror_with_name (message);
 	}
+      memcpy (&buf[bytes_transferred], &l, sizeof (l));
     }
 
   /* Now supply the register.  Keep in mind that the regcache's idea
@@ -1073,9 +1075,11 @@ store_register (const struct regcache *regcache, int tid, int regno)
 
   for (i = 0; i < bytes_to_transfer; i += sizeof (long))
     {
+      long l;
+
+      memcpy (&l, &buf[i], sizeof (l));
       errno = 0;
-      ptrace (PTRACE_POKEUSER, tid, (PTRACE_TYPE_ARG3) regaddr,
-	      *(long *) &buf[i]);
+      ptrace (PTRACE_POKEUSER, tid, (PTRACE_TYPE_ARG3) regaddr, l);
       regaddr += sizeof (long);
 
       if (errno == EIO 
