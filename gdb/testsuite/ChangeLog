@@ -1,3 +1,7 @@
+2012-02-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.server/server-exec-info.exp: New file.
+
 2012-02-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/break-interp.exp (test_attach_gdb): Assume $file is

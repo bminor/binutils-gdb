@@ -1,3 +1,9 @@
+2012-02-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix crash on loaded shlibs without loaded exec_bfd.
+	* exec.c (exec_files_info): Do not crash on NULL EXEC_BFD.
+	(set_section_command): Replace exec_bfd by p->bfd.
+
 2012-02-10  Tom Tromey  <tromey@redhat.com>
 
 	* linespec.c (decode_line_internal): Skip symtabs_from_filename

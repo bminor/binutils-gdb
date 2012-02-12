@@ -761,7 +761,10 @@ print_section_info (struct target_section_table *t, bfd *abfd)
 static void
 exec_files_info (struct target_ops *t)
 {
-  print_section_info (current_target_sections, exec_bfd);
+  if (exec_bfd)
+    print_section_info (current_target_sections, exec_bfd);
+  else
+    puts_filtered (_("\t<no file loaded>\n"));
 
   if (vmap)
     {
@@ -813,9 +816,9 @@ set_section_command (char *args, int from_tty)
   table = current_target_sections;
   for (p = table->sections; p < table->sections_end; p++)
     {
-      if (!strncmp (secname, bfd_section_name (exec_bfd,
+      if (!strncmp (secname, bfd_section_name (p->bfd,
 					       p->the_bfd_section), seclen)
-	  && bfd_section_name (exec_bfd, p->the_bfd_section)[seclen] == '\0')
+	  && bfd_section_name (p->bfd, p->the_bfd_section)[seclen] == '\0')
 	{
 	  offset = secaddr - p->addr;
 	  p->addr += offset;
