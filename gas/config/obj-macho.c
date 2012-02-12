@@ -1187,6 +1187,11 @@ obj_mach_o_indirect_symbol (int arg ATTRIBUTE_UNUSED)
 	  }
 	  *input_line_pointer = c;
 
+	  /* The indirect symbols are validated after the symbol table is 
+	     frozen, we must make sure that if a local symbol is used as an 
+	     indirect, it is promoted to a 'real' one.  Fetching the bfd sym
+	     achieves this.  */
+	  symbol_get_bfdsym (sym);
 	  isym = (obj_mach_o_indirect_sym *)
 			xmalloc (sizeof (obj_mach_o_indirect_sym));
 

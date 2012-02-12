@@ -1,3 +1,8 @@
+2012-02-12  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* config/obj-macho.c (obj_mach_o_indirect_symbol): Force promotion of
+	any local symbol used as an indirect.
+
 2012-02-10  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* config/obj-macho.c (obj_mach_o_make_or_get_sect): Always fill in
