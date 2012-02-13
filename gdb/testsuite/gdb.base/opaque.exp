@@ -134,11 +134,6 @@ gdb_test "ptype struct foo" \
 # have learned during the static tests.
 #
 
-if [istarget "mips-idt-*"] then {
-    # Restart because IDT/SIM runs out of file descriptors.
-    gdb_exit
-    gdb_start
-}
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
@@ -189,11 +184,6 @@ gdb_test "ptype struct foo" \
 # Now reload the symbols again so we forget about anything we might
 # have learned reading the symbols during the previous tests.
 
-if [istarget "mips-idt-*"] then {
-    # Restart because IDT/SIM runs out of file descriptors.
-    gdb_exit
-    gdb_start
-}
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 

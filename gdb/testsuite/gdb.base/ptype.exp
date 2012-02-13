@@ -169,7 +169,7 @@ gdb_test "ptype red" "type = enum \{red, green, blue\}.*" "ptype unnamed enumera
 # acts like whatis for basic types.  If it is thought to be necessary to
 # test both whatis and ptype for all the types, the tests should be
 # merged into whatis.exp, or else maintenance will be a royal pain -kingdon
-#setup_xfail "mips-idt-*" "mips-sgi-*"
+#setup_xfail "mips-sgi-*"
 #send "ptype v_char\n"
 #gdb_expect {
 #    -re "type = char.*$gdb_prompt $"	{ pass "ptype char" }
@@ -273,7 +273,7 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 #
 # test ptype command with arrays
 #
-#setup_xfail "mips-idt-*" "mips-sgi-*"
+#setup_xfail "mips-sgi-*"
 #send "ptype v_char_array\n"
 #gdb_expect {
 #    -re "type = char .2..*$gdb_prompt $"	{ pass "ptype char array" }
@@ -374,7 +374,7 @@ gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 ##
 ## test ptype command with pointers
 ##
-#setup_xfail "mips-idt-*" "mips-sgi-*"
+#setup_xfail "mips-sgi-*"
 #send "ptype v_char_pointer\n"
 #gdb_expect {
 #    -re "type = char \*.*$gdb_prompt $"	{ pass "ptype char pointer" }

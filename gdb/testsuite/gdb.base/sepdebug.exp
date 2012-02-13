@@ -175,9 +175,6 @@ gdb_test "info break" \
 # handle arguments.
 # Huh? There doesn't *appear* to be anything that passes arguments
 # below.
-if [istarget "mips-idt-*"] then {
-    return
-}
 
 #
 # run until the breakpoint at main is hit. For non-stubs-using targets.

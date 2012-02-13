@@ -965,21 +965,6 @@ proc recursive_structs_by_value {} {
     gdb_stop_suppressing_tests;
 }
 
-proc funcargs_reload { } {
-    global objdir
-    global subdir
-    global binfile
-    global srcdir
-
-    if [istarget "mips-idt-*"] {
-	# Restart because IDT/SIM runs out of file descriptors.
-	gdb_exit
-	gdb_start
-	gdb_reinitialize_dir $srcdir/$subdir
-	gdb_load ${binfile}
-    }
-}
-
 #
 # Test for accessing local stack variables in functions which call alloca
 #
@@ -1234,46 +1219,31 @@ gdb_test_multiple "show endian" "getting target endian" {
 gdb_test_no_output "set print frame-arguments all"
 
 integral_args
-funcargs_reload
 unsigned_integral_args
-funcargs_reload
 if {![target_info exists gdb,skip_float_tests]} {
   float_and_integral_args
 }
 
 # Test _Complex type here if supported.
 if [support_complex_tests] {
-    funcargs_reload
     complex_args
 
-    funcargs_reload
     complex_integral_args
 
     if {![target_info exists gdb,skip_float_tests]} {
-	funcargs_reload
 	complex_float_integral_args
     }
 }
 
-funcargs_reload
 pointer_args
-funcargs_reload
 structs_by_reference
-funcargs_reload
 structs_by_value
-funcargs_reload
 discard_and_shuffle
-funcargs_reload
 shuffle_round_robin
-funcargs_reload
 recursive_structs_by_value
-funcargs_reload
 localvars_after_alloca
-funcargs_reload
 call_after_alloca
-funcargs_reload
 localvars_in_indirect_call
-funcargs_reload
 test_stepping_over_trampolines
 
 set timeout $prev_timeout

@@ -107,7 +107,7 @@ if [istarget "*-*-vxworks*"] then {
     verbose "Timeout is now $timeout seconds" 2
     gdb_expect -re "$gdb_prompt $" {}
 } else {
-	setup_xfail "mips-idt-*" "arm-*-coff"
+	setup_xfail "arm-*-coff"
 	gdb_run_cmd 5
 	gdb_expect {
 	    -re ".*120.*$gdb_prompt $"\
@@ -118,7 +118,6 @@ if [istarget "*-*-vxworks*"] then {
 }
 
 # Run again with same arguments.
-setup_xfail "mips-idt-*"
 gdb_run_cmd
 
 if [istarget "*-*-vxworks*"] then {
@@ -185,7 +184,6 @@ if [istarget "*-*-vxworks*"] then {
 }
 
 # Use "set args" command to specify an argument and run again.
-setup_xfail "mips-idt-*"
 if [istarget "*-*-vxworks*"] then {
     gdb_test_no_output "set args vxmain \"6\""
 } else {

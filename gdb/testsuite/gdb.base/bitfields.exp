@@ -253,29 +253,7 @@ gdb_load ${binfile}
 gdb_test_no_output "set print sevenbit-strings"
 
 bitfield_uniqueness
-if [istarget "mips-idt-*"] then {
-    # Restart because IDT/SIM runs out of file descriptors.
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${binfile}
-}
 bitfield_containment
-if [istarget "mips-idt-*"] then {
-    # Restart because IDT/SIM runs out of file descriptors.
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${binfile}
-}
 bitfield_unsignedness
-if [istarget "mips-idt-*"] then {
-    # Restart because IDT/SIM runs out of file descriptors.
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${binfile}
-}
 bitfield_signedness
-
 bitfield_at_offset

@@ -39,7 +39,6 @@ gdb_test "append binary memory" "Missing filename\."
 gdb_test "append binary value"  "Missing filename\." 
 
 if !$use_gdb_stub {
-    setup_xfail "mips-idt-*"
     gdb_test_multiple "attach" "attach" {
 	-re "Argument required .(process-id|program) to attach.*$gdb_prompt $"\
 	    { pass "attach" }
@@ -61,7 +60,6 @@ if !$use_gdb_stub {
     }
 
     
-    setup_xfail "mips-idt-*"
     gdb_test "backtrace" "No stack."
 
     # ba and bac are no longer unique command prefixes. So these tests
@@ -69,18 +67,14 @@ if !$use_gdb_stub {
     # GDB needs to be fixed to map unique alias here for ba bac.
     #
     foreach i "bt ba bac" {
-	setup_xfail "mips-idt-*"
 	gdb_test $i "No stack." "backtrace \"$i\" abbreviation"
     }
 } else {
     warning "Skipping backtrace and break tests because of GDB stub."
 }
 
-# This works on the MIPS IDT board, but confuses future tests.
-if ![istarget "mips-idt-*"] then {
-    gdb_test "continue" "The program is not being run." "continue"
-    gdb_test "c" "The program is not being run." "continue \"c\" abbreviation"
-}
+gdb_test "continue" "The program is not being run." "continue"
+gdb_test "c" "The program is not being run." "continue \"c\" abbreviation"
 
 #test call
 gdb_test "call" "The history is empty..*" "call"

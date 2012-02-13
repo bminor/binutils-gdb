@@ -18,13 +18,6 @@
 # Test that GDB cleans up properly after errors that result when a 
 # breakpoint is reset. 
 
-
-# IDT/SIM apparently doesn't have enough file descriptors to allow the
-# problem checked by this test to occur.
-if [istarget "mips-idt-*"] {
-    return 0;
-}
-
 set testfile "chng-syms"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}

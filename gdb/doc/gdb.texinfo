@@ -19190,7 +19190,7 @@ Show MicroBlaze-specific debugging level.
 @cindex MIPS boards
 @value{GDBN} can use the MIPS remote debugging protocol to talk to a
 MIPS board attached to a serial line.  This is available when
-you configure @value{GDBN} with @samp{--target=mips-idt-ecoff}.
+you configure @value{GDBN} with @samp{--target=mips-elf}.
 
 @need 1000
 Use these @value{GDBN} commands to specify the connection to your target board:
@@ -19295,7 +19295,7 @@ waiting for an acknowledgment of a packet with the @code{set
 retransmit-timeout @var{seconds}} command.  The default is 3 seconds.
 You can inspect both values with @code{show timeout} and @code{show
 retransmit-timeout}.  (These commands are @emph{only} available when
-@value{GDBN} is configured for @samp{--target=mips-idt-ecoff}.)
+@value{GDBN} is configured for @samp{--target=mips-elf}.)
 
 The timeout set by @code{set timeout} does not apply when @value{GDBN}
 is waiting for your program to stop.  In that case, @value{GDBN} waits

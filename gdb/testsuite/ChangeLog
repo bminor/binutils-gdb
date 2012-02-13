@@ -1,3 +1,24 @@
+2012-02-13  Pedro Alves  <palves@redhat.com>
+
+	* config/mips-idt.exp: Delete.
+	* gdb.base/a2-run.exp: Remove mips-idt xfails.
+	* gdb.base/bitfields.exp: Remove mips-idt restarts.
+	* gdb.base/break.exp: Remove mips-idt references.
+	* gdb.base/chng-syms.exp: Ditto.
+	* gdb.base/default.exp: Ditto.
+	* gdb.base/funcargs.exp (funcargs_reload): Delete.
+	(top level): Don't call it.
+	* gdb.base/opaque.exp: Remove mips-idt restarts.
+	* gdb.base/ptype.exp: Remove mips-idt xfails.
+	* gdb.base/scope.exp: Remove mips-idt restarts.
+	* gdb.base/sepdebug.exp: Remove mips-idt references.
+	* gdb.base/watchpoint.exp (maybe_clean_restart)
+	(maybe_reinitialize): Delete.
+	(test_disabling_watchpoints, test_disabling_watchpoints)
+	(test_watchpoint_triggered_in_syscall)
+	(test_watchpoint_and_breakpoint, test_inaccessible_watchpoint):
+	Don't call them.
+
 2012-02-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.server/server-exec-info.exp: New file.
