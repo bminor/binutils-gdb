@@ -1,14 +1,10 @@
 #
 # Some generic m68HC11 tests
 #
-if ![istarget "m68hc11-*-*"] then {
-    if ![istarget "m6811-*-*"] then {
-	if ![istarget "m68hc12-*-*"] then {
-	    if ![istarget "m6812-*-*"] then {
-		return
-	    }
-	}
-    }
+if { ![istarget "m68hc1*-*-*"]
+     && ![istarget "m6811-*-*"]
+     && ![istarget "m6812-*-*"] } then {
+    return
 }
 
 # Simple test for --print-opcodes (list of supported opcodes)
@@ -80,21 +76,21 @@ proc gas_m68hc11_warning { options line expect } {
 
 # ------------------
 # 68HC11 error tests
-gas_m68hc11_error "" "puld\n" "Opcode .puld. is not recognized"
+gas_m68hc11_error "-m68hc11" "puld\n" "Opcode .puld. is not recognized"
 gas_m68hc11_error "" "ldab\n" "Invalid operand for .ldab."
-gas_m68hc11_error "" "ldab 256,x\n" "Operand out of 8-bit range:.*256"
-gas_m68hc11_error "" "ldab 257,y\n" "Operand out of 8-bit range:.*257"
-gas_m68hc11_error "" "ldab -1,y\n" "Operand out of 8-bit range:.*-1"
-gas_m68hc11_error "" "ldab bar,y\nbar=300" "value of 300 too large for field of 1 byte"
+gas_m68hc11_error "-m68hc11" "ldab 256,x\n" "Operand out of 8-bit range:.*256"
+gas_m68hc11_error "-m68hc11" "ldab 257,y\n" "Operand out of 8-bit range:.*257"
+gas_m68hc11_error "-m68hc11" "ldab -1,y\n" "Operand out of 8-bit range:.*-1"
+gas_m68hc11_error "-m68hc11" "ldab bar,y\nbar=300" "value of 300 too large for field of 1 byte"
 gas_m68hc11_error "" "jmp \#23\n" "Immediate operand is not allowed"
-gas_m68hc11_error "" "ldab \[d,pc\]\n" "Indirect indexed addressing is not valid for 68HC11"
+gas_m68hc11_error "-m68hc11" "ldab \[d,pc\]\n" "Indirect indexed addressing is not valid for 68HC11"
 gas_m68hc11_error "" "ldab ,t\n" "Spurious .,. or bad indirect register"
 gas_m68hc11_error "" "ldab 1,t\n" "Garbage at end of instruction:.*,t"
 gas_m68hc11_error "" "ldab 1,,x\n" "Garbage at end of instruction:.*,x"
-gas_m68hc11_error "" "ldab 1,+x\n" "Pre-increment mode is not valid"
-gas_m68hc11_error "" "ldab 1,-x\n" "Pre-increment mode is not valid"
-gas_m68hc11_error "" "ldab 1,x+\n" "Post-increment mode is not valid"
-gas_m68hc11_error "" "ldab 1,x-\n" "Post-decrement mode is not valid"
+gas_m68hc11_error "-m68hc11" "ldab 1,+x\n" "Pre-increment mode is not valid"
+gas_m68hc11_error "-m68hc11" "ldab 1,-x\n" "Pre-increment mode is not valid"
+gas_m68hc11_error "-m68hc11" "ldab 1,x+\n" "Post-increment mode is not valid"
+gas_m68hc11_error "-m68hc11" "ldab 1,x-\n" "Post-decrement mode is not valid"
 gas_m68hc11_error "" "ldd \#65536\n" "Operand out of 16-bit range"
 gas_m68hc11_error "--short-branchs" "bne 200\n" \
     "Operand out of range for a relative branch"

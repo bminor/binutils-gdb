@@ -1,6 +1,14 @@
+2012-02-13  Alan Modra  <amodra@gmail.com>
+
+	* gas/all/gas.exp (redef2): xfail m6811 and m6812.
+	* gas/elf/elf.exp: Use is_elf_format.
+	* gas/symver/symver.exp: Likewise.
+	* gas/m68hc11/m68hc11.exp: Simplify target test.
+	Add -m68hc11 to error tests that pass for hc12.
+
 2012-02-11  Kai Tietz  <ktietz@redhat.com>
 
-	* gas/i386/disp32.d: Adjust lable-pattern.
+	* gas/i386/disp32.d: Adjust label pattern.
 
 2012-02-08  Kai Tietz  <ktietz@redhat.com>
 

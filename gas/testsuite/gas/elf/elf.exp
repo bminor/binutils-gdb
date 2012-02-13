@@ -37,19 +37,7 @@ proc run_elf_list_test { name suffix opts readelf_opts readelf_pipe } {
 }
 
 # We're testing bits in obj-elf -- don't run on anything else.
-if { ([istarget "*-*-*elf*"]
-      || [istarget "*-*-linux*"]
-      || [istarget "*-*-gnu*"]
-      || [istarget "m6811-*"]
-      || [istarget "m6812-*"]
-      || [istarget "sparc*-*-solaris*"]
-      || [istarget "mips*-*-irix6*"]
-      || [istarget "arm*-*-eabi"])
-     && ![istarget *-*-linux*aout*]
-     && ![istarget *-*-linux*coff*]
-     && ![istarget *-*-linux*oldld*]
-     && ![istarget sh64*-*-linux*]
-} then {
+if { [is_elf_format] } then {
     set target_machine ""
     if {[istarget "mips*-*-*"]} then {
 	set target_machine -mips
@@ -107,8 +95,13 @@ if { ([istarget "*-*-*elf*"]
     run_dump_test "group0c"
     run_dump_test "group1a"
     run_dump_test "group1b"
-    run_dump_test "groupautoa"
     case $target_triplet in {
+	{ hppa64*-*-hpux* } { }
+	default {
+	    run_dump_test "groupautoa"
+	}
+    case $target_triplet in {
+	{ hppa64*-*-hpux* } { }
 	{ xtensa*-*-* } { }
 	default {
 	    run_dump_test "groupautob"
@@ -159,16 +152,20 @@ if { ([istarget "*-*-*elf*"]
     }
     run_dump_test "symver"
 
-    # The MSP port sets the ELF header's OSABI field to ELFOSABI_STANDALONE.
-    # The non-eabi ARM ports sets it to ELFOSABI_ARM.
-    # So for these targets we cannot include an IFUNC symbol type
-    # in the symbol type test.
-    if {   [istarget "msp*-*-*"]
-	|| [istarget "arm*-*-*"]} then {
-	    run_elf_list_test "type-noifunc" "" "" "-s" "| grep \"1 *\\\[FONTC\\\]\""
+    if { [istarget "hppa*-*-hpux*"] } then {
+	# No indirect functions on non-GNU targets.
     } else {
+	# The MSP port sets the ELF header's OSABI field to ELFOSABI_STANDALONE.
+	# The non-eabi ARM ports sets it to ELFOSABI_ARM.
+	# So for these targets we cannot include an IFUNC symbol type
+	# in the symbol type test.
+	if { [istarget "msp*-*-*"]
+	     || [istarget "arm*-*-*"]} then {
+	    run_elf_list_test "type-noifunc" "" "" "-s" "| grep \"1 *\\\[FONTC\\\]\""
+	} else {
     	    run_dump_test ifunc-1
 	    run_elf_list_test "type" "" "" "-s" "| grep \"1 *\\\[FIONTCU\\\]\""
+	}
     }
 
     run_dump_test "section6"
