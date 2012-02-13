@@ -622,13 +622,21 @@ find_export_in_list (def_file_export *b, int max,
   if (!max)
     return 0;
   if ((e = cmp_export_elem (b, ex_name, in_name, its_name, ord)) <= 0)
-    return 0;
+    {
+      if (!e)
+        *is_ident = 1;
+      return 0;
+    }
   if (max == 1)
     return 1;
   if ((e = cmp_export_elem (b + (max - 1), ex_name, in_name, its_name, ord)) > 0)
     return max;
   else if (!e || max == 2)
-    return max - 1;
+    {
+      if (!e)
+	*is_ident = 1;
+      return max - 1;
+    }
   l = 0; r = max - 1;
   while (l < r)
     {
@@ -757,13 +765,21 @@ find_import_in_list (def_file_import *b, int max,
   if (!max)
     return 0;
   if ((e = cmp_import_elem (b, ex_name, in_name, module, ord)) <= 0)
-    return 0;
+    {
+      if (!e)
+        *is_ident = 1;
+      return 0;
+    }
   if (max == 1)
     return 1;
   if ((e = cmp_import_elem (b + (max - 1), ex_name, in_name, module, ord)) > 0)
     return max;
   else if (!e || max == 2)
-    return max - 1;
+    {
+      if (!e)
+        *is_ident = 1;
+      return max - 1;
+    }
   l = 0; r = max - 1;
   while (l < r)
     {
