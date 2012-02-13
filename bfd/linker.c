@@ -3208,6 +3208,12 @@ fix_syms (struct bfd_link_hash_entry *h, void *data)
 		op = op1;
 	    }
 
+	  /* Refuse to choose a section for which we are out of bounds.  */
+	  /* ??? This may make most of the above moot.  */
+	  if (h->u.def.value < op->vma
+	      || h->u.def.value > op->vma + op->size)
+	    op = bfd_abs_section_ptr;
+
 	  h->u.def.value -= op->vma;
 	  h->u.def.section = op;
 	}

@@ -1,3 +1,9 @@
+2012-02-13  Richard Henderson  <rth@redhat.com>
+
+	PR ld/13621
+	* linker.c (fix_syms): Force symbols outside any section into
+	bfd_abs_section_ptr.
+
 2012-02-13  Alan Modra  <amodra@gmail.com>
 
 	* elf32-m68hc1x.c (elf32_m68hc11_merge_symbol_attribute): New function.

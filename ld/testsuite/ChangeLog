@@ -1,3 +1,9 @@
+2012-02-13  Richard Henderson  <rth@redhat.com>
+
+	PR ld/13621
+	* ld-elf/warn2.d: Expect ABS section for Foo.
+	* ld-elf/zerosize1.d, zerosize1.s: New test.
+
 2012-02-13  Alan Modra  <amodra@gmail.com>
 
 	* ld-m68hc11/m68hc11.exp: Run for m68hc11-*-* and m68hc12-*-*.
