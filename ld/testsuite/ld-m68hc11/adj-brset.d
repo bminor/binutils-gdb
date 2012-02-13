@@ -1,8 +1,7 @@
 #source: adj-brset.s
 #as: -m68hc11
-#ld: --relax
+#ld: -m m68hc11elf --relax
 #objdump: -d --prefix-addresses -r
-#target: m6811-*-* m6812-*-*
 
 .*: +file format elf32\-m68hc11
 

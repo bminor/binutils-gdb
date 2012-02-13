@@ -2,7 +2,6 @@
 #as: -m68hc12
 #ld: -m m68hc12elf --script $srcdir/$subdir/far-hc12.ld
 #objdump: -d --prefix-addresses -r
-#target: m6811-*-* m6812-*-*
 
 .*:     file format elf32\-m68hc12
 
