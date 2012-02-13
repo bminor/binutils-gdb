@@ -1,3 +1,10 @@
+2012-02-13  Alan Modra  <amodra@gmail.com>
+
+	* elf32-m68hc1x.c (elf32_m68hc11_merge_symbol_attribute): New function.
+	* elf32-m68hc1x.h (elf32_m68hc11_merge_symbol_attribute): Declare.
+	* elf32-m68hc11.c (elf_backend_merge_symbol_attribute): Define.
+	* elf32-m68hc12.c (elf_backend_merge_symbol_attribute): Define.
+
 2012-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
 

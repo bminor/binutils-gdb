@@ -1,6 +1,6 @@
 /* Motorola 68HC11/HC12-specific support for 32-bit ELF
    Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-   2009, 2010, 2011  Free Software Foundation, Inc.
+   2009, 2010, 2011, 2012 Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -212,6 +212,20 @@ elf32_m68hc11_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 
     }
   return TRUE;
+}
+
+/* Merge non-visibility st_other attributes, STO_M68HC12_FAR and
+   STO_M68HC12_INTERRUPT.  */
+
+void
+elf32_m68hc11_merge_symbol_attribute (struct elf_link_hash_entry *h,
+				      const Elf_Internal_Sym *isym,
+				      bfd_boolean definition,
+				      bfd_boolean dynamic ATTRIBUTE_UNUSED)
+{
+  if (definition)
+    h->other = ((isym->st_other & ~ELF_ST_VISIBILITY (-1))
+		| ELF_ST_VISIBILITY (h->other));
 }
 
 /* External entry points for sizing and building linker stubs.  */

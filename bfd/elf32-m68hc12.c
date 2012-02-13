@@ -1,5 +1,5 @@
 /* Motorola 68HC12-specific support for 32-bit ELF
-   Copyright 1999, 2000, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 1999, 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2010, 2012
    Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
    (Heavily copied from the D10V port by Martin Hunt (hunt@cygnus.com))
@@ -581,6 +581,7 @@ static const struct bfd_elf_special_section elf32_m68hc12_special_sections[] =
 #define elf_backend_special_sections elf32_m68hc12_special_sections
 #define elf_backend_post_process_headers     elf32_m68hc11_post_process_headers
 #define elf_backend_add_symbol_hook  elf32_m68hc11_add_symbol_hook
+#define elf_backend_merge_symbol_attribute elf32_m68hc11_merge_symbol_attribute
 
 #define bfd_elf32_bfd_link_hash_table_create \
                                 m68hc12_elf_bfd_link_hash_table_create
