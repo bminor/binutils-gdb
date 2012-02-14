@@ -124,6 +124,8 @@ config/tc-pj.c
 config/tc-pj.h
 config/tc-ppc.c
 config/tc-ppc.h
+config/tc-rl78.c
+config/tc-rl78.h
 config/tc-rx.c
 config/tc-rx.h
 config/tc-s390.c
