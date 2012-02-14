@@ -10,7 +10,7 @@
 
 	PR ld/13621
 	* ld-elf/warn2.d: Expect ABS section for Foo.
-	* ld-elf/zerosize1.d, zerosize1.s: New test.
+	* ld-elf/zerosize1.d, ld-elf/zerosize1.s: New test.
 
 2012-02-13  Alan Modra  <amodra@gmail.com>
 
