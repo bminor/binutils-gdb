@@ -33,6 +33,7 @@
 #include "value.h"
 #include "gdbcore.h"
 #include "dwarf2-frame.h"
+#include "reggroups.h"
 
 #include "elf/rl78.h"
 #include "elf-bfd.h"
@@ -54,7 +55,73 @@ enum
 enum
 {
   /* All general purpose registers are 8 bits wide.  */
-  RL78_BANK0_R0_REGNUM = 0,
+  RL78_RAW_BANK0_R0_REGNUM = 0,
+  RL78_RAW_BANK0_R1_REGNUM,
+  RL78_RAW_BANK0_R2_REGNUM,
+  RL78_RAW_BANK0_R3_REGNUM,
+  RL78_RAW_BANK0_R4_REGNUM,
+  RL78_RAW_BANK0_R5_REGNUM,
+  RL78_RAW_BANK0_R6_REGNUM,
+  RL78_RAW_BANK0_R7_REGNUM,
+
+  RL78_RAW_BANK1_R0_REGNUM,
+  RL78_RAW_BANK1_R1_REGNUM,
+  RL78_RAW_BANK1_R2_REGNUM,
+  RL78_RAW_BANK1_R3_REGNUM,
+  RL78_RAW_BANK1_R4_REGNUM,
+  RL78_RAW_BANK1_R5_REGNUM,
+  RL78_RAW_BANK1_R6_REGNUM,
+  RL78_RAW_BANK1_R7_REGNUM,
+
+  RL78_RAW_BANK2_R0_REGNUM,
+  RL78_RAW_BANK2_R1_REGNUM,
+  RL78_RAW_BANK2_R2_REGNUM,
+  RL78_RAW_BANK2_R3_REGNUM,
+  RL78_RAW_BANK2_R4_REGNUM,
+  RL78_RAW_BANK2_R5_REGNUM,
+  RL78_RAW_BANK2_R6_REGNUM,
+  RL78_RAW_BANK2_R7_REGNUM,
+
+  RL78_RAW_BANK3_R0_REGNUM,
+  RL78_RAW_BANK3_R1_REGNUM,
+  RL78_RAW_BANK3_R2_REGNUM,
+  RL78_RAW_BANK3_R3_REGNUM,
+  RL78_RAW_BANK3_R4_REGNUM,
+  RL78_RAW_BANK3_R5_REGNUM,
+  RL78_RAW_BANK3_R6_REGNUM,
+  RL78_RAW_BANK3_R7_REGNUM,
+
+  RL78_PSW_REGNUM,	/* 8 bits */
+  RL78_ES_REGNUM,	/* 8 bits */
+  RL78_CS_REGNUM,	/* 8 bits */
+  RL78_PC_REGNUM,	/* 20 bits; we'll use 32 bits for it.  */
+
+  /* Fixed address SFRs (some of those above are SFRs too.) */
+  RL78_SPL_REGNUM,	/* 8 bits; lower half of SP */
+  RL78_SPH_REGNUM,	/* 8 bits; upper half of SP */
+  RL78_PMC_REGNUM,	/* 8 bits */
+  RL78_MEM_REGNUM,	/* 8 bits ?? */
+
+  RL78_NUM_REGS,
+
+  /* Pseudo registers.  */
+  RL78_SP_REGNUM = RL78_NUM_REGS,
+
+  RL78_X_REGNUM,
+  RL78_A_REGNUM,
+  RL78_C_REGNUM,
+  RL78_B_REGNUM,
+  RL78_E_REGNUM,
+  RL78_D_REGNUM,
+  RL78_L_REGNUM,
+  RL78_H_REGNUM,
+
+  RL78_AX_REGNUM,
+  RL78_BC_REGNUM,
+  RL78_DE_REGNUM,
+  RL78_HL_REGNUM,
+
+  RL78_BANK0_R0_REGNUM,
   RL78_BANK0_R1_REGNUM,
   RL78_BANK0_R2_REGNUM,
   RL78_BANK0_R3_REGNUM,
@@ -90,21 +157,7 @@ enum
   RL78_BANK3_R6_REGNUM,
   RL78_BANK3_R7_REGNUM,
 
-  RL78_PSW_REGNUM,	/* 8 bits */
-  RL78_ES_REGNUM,	/* 8 bits */
-  RL78_CS_REGNUM,	/* 8 bits */
-  RL78_PC_REGNUM,	/* 20 bits; we'll use 32 bits for it.  */
-
-  /* Fixed address SFRs (some of those above are SFRs too.) */
-  RL78_SPL_REGNUM,	/* 8 bits; lower half of SP */
-  RL78_SPH_REGNUM,	/* 8 bits; upper half of SP */
-  RL78_PMC_REGNUM,	/* 8 bits */
-  RL78_MEM_REGNUM,	/* 8 bits ?? */
-
-  RL78_NUM_REGS,
-
-  /* Pseudo registers.  */
-  RL78_BANK0_RP0_REGNUM = RL78_NUM_REGS,
+  RL78_BANK0_RP0_REGNUM,
   RL78_BANK0_RP1_REGNUM,
   RL78_BANK0_RP2_REGNUM,
   RL78_BANK0_RP3_REGNUM,
@@ -124,21 +177,6 @@ enum
   RL78_BANK3_RP2_REGNUM,
   RL78_BANK3_RP3_REGNUM,
 
-  RL78_SP_REGNUM,
-
-  RL78_X_REGNUM,
-  RL78_A_REGNUM,
-  RL78_C_REGNUM,
-  RL78_B_REGNUM,
-  RL78_E_REGNUM,
-  RL78_D_REGNUM,
-  RL78_L_REGNUM,
-  RL78_H_REGNUM,
-
-  RL78_AX_REGNUM,
-  RL78_BC_REGNUM,
-  RL78_DE_REGNUM,
-  RL78_HL_REGNUM,
   RL78_NUM_TOTAL_REGS,
   RL78_NUM_PSEUDO_REGS = RL78_NUM_TOTAL_REGS - RL78_NUM_REGS
 };
@@ -206,7 +244,9 @@ rl78_register_type (struct gdbarch *gdbarch, int reg_nr)
   if (reg_nr == RL78_PC_REGNUM)
     return tdep->rl78_code_pointer;
   else if (reg_nr <= RL78_MEM_REGNUM
-           || (RL78_X_REGNUM <= reg_nr && reg_nr <= RL78_H_REGNUM))
+           || (RL78_X_REGNUM <= reg_nr && reg_nr <= RL78_H_REGNUM)
+	   || (RL78_BANK0_R0_REGNUM <= reg_nr
+	       && reg_nr <= RL78_BANK3_R7_REGNUM))
     return tdep->rl78_int8;
   else
     return tdep->rl78_data_pointer;
@@ -219,6 +259,68 @@ rl78_register_name (struct gdbarch *gdbarch, int regnr)
 {
   static const char *const reg_names[] =
   {
+    "",		/* bank0_r0 */
+    "",		/* bank0_r1 */
+    "",		/* bank0_r2 */
+    "",		/* bank0_r3 */
+    "",		/* bank0_r4 */
+    "",		/* bank0_r5 */
+    "",		/* bank0_r6 */
+    "",		/* bank0_r7 */
+
+    "",		/* bank1_r0 */
+    "",		/* bank1_r1 */
+    "",		/* bank1_r2 */
+    "",		/* bank1_r3 */
+    "",		/* bank1_r4 */
+    "",		/* bank1_r5 */
+    "",		/* bank1_r6 */
+    "",		/* bank1_r7 */
+
+    "",		/* bank2_r0 */
+    "",		/* bank2_r1 */
+    "",		/* bank2_r2 */
+    "",		/* bank2_r3 */
+    "",		/* bank2_r4 */
+    "",		/* bank2_r5 */
+    "",		/* bank2_r6 */
+    "",		/* bank2_r7 */
+
+    "",		/* bank3_r0 */
+    "",		/* bank3_r1 */
+    "",		/* bank3_r2 */
+    "",		/* bank3_r3 */
+    "",		/* bank3_r4 */
+    "",		/* bank3_r5 */
+    "",		/* bank3_r6 */
+    "",		/* bank3_r7 */
+
+    "psw",
+    "es",
+    "cs",
+    "pc",
+
+    "",		/* spl */
+    "",		/* sph */
+    "pmc",
+    "mem",
+
+    "sp",
+
+    "x",
+    "a",
+    "c",
+    "b",
+    "e",
+    "d",
+    "l",
+    "h",
+
+    "ax",
+    "bc",
+    "de",
+    "hl",
+
     "bank0_r0",
     "bank0_r1",
     "bank0_r2",
@@ -255,16 +357,6 @@ rl78_register_name (struct gdbarch *gdbarch, int regnr)
     "bank3_r6",
     "bank3_r7",
 
-    "psw",
-    "es",
-    "cs",
-    "pc",
-
-    "spl",
-    "sph",
-    "pmc",
-    "mem",
-
     "bank0_rp0",
     "bank0_rp1",
     "bank0_rp2",
@@ -283,26 +375,41 @@ rl78_register_name (struct gdbarch *gdbarch, int regnr)
     "bank3_rp0",
     "bank3_rp1",
     "bank3_rp2",
-    "bank3_rp3",
-
-    "sp",
-
-    "x",
-    "a",
-    "c",
-    "b",
-    "e",
-    "d",
-    "l",
-    "h",
-
-    "ax",
-    "bc",
-    "de",
-    "hl"
+    "bank3_rp3"
   };
 
   return reg_names[regnr];
+}
+
+/* Implement the "register_reggroup_p" gdbarch method.  */
+
+static int
+rl78_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+			  struct reggroup *group)
+{
+  if (group == all_reggroup)
+    return 1;
+
+  /* All other registers are saved and restored.  */
+  if (group == save_reggroup || group == restore_reggroup)
+    {
+      if (regnum < RL78_NUM_REGS)
+	return 1;
+      else
+	return 0;
+    }
+
+  if ((RL78_BANK0_R0_REGNUM <= regnum && regnum <= RL78_BANK3_R7_REGNUM)
+      || regnum == RL78_ES_REGNUM
+      || regnum == RL78_CS_REGNUM
+      || regnum == RL78_SPL_REGNUM
+      || regnum == RL78_SPH_REGNUM
+      || regnum == RL78_PMC_REGNUM
+      || regnum == RL78_MEM_REGNUM
+      || (RL78_BANK0_RP0_REGNUM <= regnum && regnum <= RL78_BANK3_RP3_REGNUM))
+    return group == system_reggroup;
+
+  return group == general_reggroup;
 }
 
 /* Strip bits to form an instruction address.  (When fetching a
@@ -332,10 +439,17 @@ rl78_pseudo_register_read (struct gdbarch *gdbarch,
 {
   enum register_status status;
 
-  if (RL78_BANK0_RP0_REGNUM <= reg && reg <= RL78_BANK3_RP3_REGNUM)
+  if (RL78_BANK0_R0_REGNUM <= reg && reg <= RL78_BANK3_R7_REGNUM)
+    {
+      int raw_regnum = RL78_RAW_BANK0_R0_REGNUM
+                       + (reg - RL78_BANK0_R0_REGNUM);
+
+      status = regcache_raw_read (regcache, raw_regnum, buffer);
+    }
+  else if (RL78_BANK0_RP0_REGNUM <= reg && reg <= RL78_BANK3_RP3_REGNUM)
     {
       int raw_regnum = 2 * (reg - RL78_BANK0_RP0_REGNUM)
-                       + RL78_BANK0_R0_REGNUM;
+                       + RL78_RAW_BANK0_R0_REGNUM;
 
       status = regcache_raw_read (regcache, raw_regnum, buffer);
       if (status == REG_VALID)
@@ -356,7 +470,7 @@ rl78_pseudo_register_read (struct gdbarch *gdbarch,
 	{
 	  /* RSB0 is at bit 3; RSBS1 is at bit 5.  */
 	  int bank = ((psw >> 3) & 1) | ((psw >> 4) & 1);
-	  int raw_regnum = RL78_BANK0_R0_REGNUM + bank * RL78_REGS_PER_BANK
+	  int raw_regnum = RL78_RAW_BANK0_R0_REGNUM + bank * RL78_REGS_PER_BANK
 	                   + (reg - RL78_X_REGNUM);
 	  status = regcache_raw_read (regcache, raw_regnum, buffer);
 	}
@@ -370,7 +484,7 @@ rl78_pseudo_register_read (struct gdbarch *gdbarch,
 	{
 	  /* RSB0 is at bit 3; RSBS1 is at bit 5.  */
 	  int bank = ((psw >> 3) & 1) | ((psw >> 4) & 1);
-	  int raw_regnum = RL78_BANK0_R0_REGNUM + bank * RL78_REGS_PER_BANK
+	  int raw_regnum = RL78_RAW_BANK0_R0_REGNUM + bank * RL78_REGS_PER_BANK
 	                   + 2 * (reg - RL78_AX_REGNUM);
 	  status = regcache_raw_read (regcache, raw_regnum, buffer);
 	  if (status == REG_VALID)
@@ -390,10 +504,17 @@ rl78_pseudo_register_write (struct gdbarch *gdbarch,
                             struct regcache *regcache,
                             int reg, const gdb_byte *buffer)
 {
-  if (RL78_BANK0_RP0_REGNUM <= reg && reg <= RL78_BANK3_RP3_REGNUM)
+  if (RL78_BANK0_R0_REGNUM <= reg && reg <= RL78_BANK3_R7_REGNUM)
+    {
+      int raw_regnum = RL78_RAW_BANK0_R0_REGNUM
+                       + (reg - RL78_BANK0_R0_REGNUM);
+
+      regcache_raw_write (regcache, raw_regnum, buffer);
+    }
+  else if (RL78_BANK0_RP0_REGNUM <= reg && reg <= RL78_BANK3_RP3_REGNUM)
     {
       int raw_regnum = 2 * (reg - RL78_BANK0_RP0_REGNUM)
-                       + RL78_BANK0_R0_REGNUM;
+                       + RL78_RAW_BANK0_R0_REGNUM;
 
       regcache_raw_write (regcache, raw_regnum, buffer);
       regcache_raw_write (regcache, raw_regnum + 1, buffer + 1);
@@ -412,7 +533,7 @@ rl78_pseudo_register_write (struct gdbarch *gdbarch,
       regcache_raw_read_unsigned (regcache, RL78_PSW_REGNUM, &psw);
       bank = ((psw >> 3) & 1) | ((psw >> 4) & 1);
       /* RSB0 is at bit 3; RSBS1 is at bit 5.  */
-      raw_regnum = RL78_BANK0_R0_REGNUM + bank * RL78_REGS_PER_BANK
+      raw_regnum = RL78_RAW_BANK0_R0_REGNUM + bank * RL78_REGS_PER_BANK
 	           + (reg - RL78_X_REGNUM);
       regcache_raw_write (regcache, raw_regnum, buffer);
     }
@@ -424,7 +545,7 @@ rl78_pseudo_register_write (struct gdbarch *gdbarch,
       regcache_raw_read_unsigned (regcache, RL78_PSW_REGNUM, &psw);
       bank = ((psw >> 3) & 1) | ((psw >> 4) & 1);
       /* RSB0 is at bit 3; RSBS1 is at bit 5.  */
-      raw_regnum = RL78_BANK0_R0_REGNUM + bank * RL78_REGS_PER_BANK
+      raw_regnum = RL78_RAW_BANK0_R0_REGNUM + bank * RL78_REGS_PER_BANK
 		   + 2 * (reg - RL78_AX_REGNUM);
       regcache_raw_write (regcache, raw_regnum, buffer);
       regcache_raw_write (regcache, raw_regnum + 1, buffer + 1);
@@ -796,6 +917,19 @@ rl78_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 		    reg);
 }
 
+/* Implement the `register_sim_regno' gdbarch method.  */
+
+static int
+rl78_register_sim_regno (struct gdbarch *gdbarch, int regnum)
+{
+  gdb_assert (regnum < RL78_NUM_REGS);
+
+  /* So long as regnum is in [0, RL78_NUM_REGS), it's valid.  We
+     just want to override the default here which disallows register
+     numbers which have no names.  */
+  return regnum;
+}
+
 /* Implement the "return_value" gdbarch method.  */
 
 static enum return_value_convention
@@ -814,7 +948,7 @@ rl78_return_value (struct gdbarch *gdbarch,
   if (readbuf)
     {
       ULONGEST u;
-      int argreg = RL78_BANK1_R0_REGNUM;
+      int argreg = RL78_RAW_BANK1_R0_REGNUM;
       int offset = 0;
 
       while (valtype_len > 0)
@@ -830,7 +964,7 @@ rl78_return_value (struct gdbarch *gdbarch,
   if (writebuf)
     {
       ULONGEST u;
-      int argreg = RL78_BANK1_R0_REGNUM;
+      int argreg = RL78_RAW_BANK1_R0_REGNUM;
       int offset = 0;
 
       while (valtype_len > 0)
@@ -981,6 +1115,8 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pseudo_register_read (gdbarch, rl78_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, rl78_pseudo_register_write);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rl78_dwarf_reg_to_regnum);
+  set_gdbarch_register_reggroup_p (gdbarch, rl78_register_reggroup_p);
+  set_gdbarch_register_sim_regno (gdbarch, rl78_register_sim_regno);
 
   /* Data types.  */
   set_gdbarch_char_signed (gdbarch, 0);

@@ -1,5 +1,52 @@
 2012-02-14  Kevin Buettner  <kevinb@redhat.com>
 
+	* rl78-tdep.c (reggroups.h): Include.
+	(RL78_RAW_BANK0_R0_REGNUM, RL78_RAW_BANK0_R1_REGNUM)
+	(RL78_RAW_BANK0_R2_REGNUM, RL78_RAW_BANK0_R3_REGNUM)
+	(RL78_RAW_BANK0_R4_REGNUM, RL78_RAW_BANK0_R5_REGNUM)
+	(RL78_RAW_BANK0_R6_REGNUM, RL78_RAW_BANK0_R7_REGNUM)
+	(RL78_RAW_BANK1_R0_REGNUM, RL78_RAW_BANK1_R1_REGNUM)
+	(RL78_RAW_BANK1_R2_REGNUM, RL78_RAW_BANK1_R3_REGNUM)
+	(RL78_RAW_BANK1_R4_REGNUM, RL78_RAW_BANK1_R5_REGNUM)
+	(RL78_RAW_BANK1_R6_REGNUM, RL78_RAW_BANK1_R7_REGNUM)
+	(RL78_RAW_BANK2_R0_REGNUM, RL78_RAW_BANK2_R1_REGNUM)
+	(RL78_RAW_BANK2_R2_REGNUM, RL78_RAW_BANK2_R3_REGNUM)
+	(RL78_RAW_BANK2_R4_REGNUM, RL78_RAW_BANK2_R5_REGNUM)
+	(RL78_RAW_BANK2_R6_REGNUM, RL78_RAW_BANK2_R7_REGNUM)
+	(RL78_RAW_BANK3_R0_REGNUM, RL78_RAW_BANK3_R1_REGNUM)
+	(RL78_RAW_BANK3_R2_REGNUM, RL78_RAW_BANK3_R3_REGNUM)
+	(RL78_RAW_BANK3_R4_REGNUM, RL78_RAW_BANK3_R5_REGNUM)
+	(RL78_RAW_BANK3_R6_REGNUM, RL78_RAW_BANK3_R7_REGNUM): Add to
+	beginning of register list.
+	(RL78_BANK0_R0_REGNUM, RL78_BANK0_R1_REGNUM, RL78_BANK0_R2_REGNUM)
+	(RL78_BANK0_R3_REGNUM, RL78_BANK0_R4_REGNUM, RL78_BANK0_R5_REGNUM)
+	(RL78_BANK0_R6_REGNUM, RL78_BANK0_R7_REGNUM, RL78_BANK1_R0_REGNUM)
+	(RL78_BANK1_R1_REGNUM, RL78_BANK1_R2_REGNUM, RL78_BANK1_R3_REGNUM)
+	(RL78_BANK1_R4_REGNUM, RL78_BANK1_R5_REGNUM, RL78_BANK1_R6_REGNUM)
+	(RL78_BANK1_R7_REGNUM, RL78_BANK2_R0_REGNUM, RL78_BANK2_R1_REGNUM)
+	(RL78_BANK2_R2_REGNUM, RL78_BANK2_R3_REGNUM, RL78_BANK2_R4_REGNUM)
+	(RL78_BANK2_R5_REGNUM, RL78_BANK2_R6_REGNUM, RL78_BANK2_R7_REGNUM)
+	(RL78_BANK3_R0_REGNUM, RL78_BANK3_R1_REGNUM, RL78_BANK3_R2_REGNUM)
+	(RL78_BANK3_R3_REGNUM, RL78_BANK3_R4_REGNUM, RL78_BANK3_R5_REGNUM)
+	(RL78_BANK3_R6_REGNUM, RL78_BANK3_R7_REGNUM): Move these into
+	the pseudo registers.  Rearrange other pseudo registers too so
+	that the bank registers appear at the end.
+	(rl78_register_type): Account for the fact that the byte sized
+	bank registers are now pseudo-registers.
+	(rl78_register_name): Rearrange the register name array.  Make
+	initial set of raw banked registers inaccessible.
+	(rl78_register_reggroup_p, rl78_register_sim_regno): New functions.
+	(rl78_pseudo_register_read, rl78_pseudo_register_write): Add
+	case for copying bytes back and forth between raw and pseudo
+	versions of the banked registers.  Update other cases to reflect
+	the changed names.
+	(rl78_return_value): Update to account for changed names of
+	raw registers.
+	(rl78_gdbarch_init): Register rl78_register_reggroup_p() and
+	rl78_register_sim_regno().
+
+2012-02-14  Kevin Buettner  <kevinb@redhat.com>
+
 	* rl78-tdep.c (rl78_skip_prologue): Make `const' the type of
 	the name parameter being passed to find_pc_partial_function().
 
