@@ -268,7 +268,6 @@ the native maintainer when resolving ABI issues.
 
 	ia64		--target=ia64-linux-gnu ,-Werror
 			(--target=ia64-elf broken)
-			Jan Kratochvil		jan.kratochvil@redhat.com
 
 	lm32		--target=lm32-elf ,-Werror
 

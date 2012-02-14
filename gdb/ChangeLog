@@ -1,3 +1,7 @@
+2012-02-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* MAINTAINERS: Step down from being ia64 target maintainer.
+
 2012-02-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* ppc-linux-nat.c (fetch_register, store_register): Fix GCC aliasing
