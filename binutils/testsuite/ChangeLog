@@ -1,5 +1,7 @@
 2012-02-14  Alan Modra  <amodra@gmail.com>
 
+	* binutils-all/dlltool.exp: Add setup_xfail.
+
 	* binutils-all/dw2-decodedline.S: Always have whitespace before
 	directives.
 	* binutils-all/version.s: Likewise.
