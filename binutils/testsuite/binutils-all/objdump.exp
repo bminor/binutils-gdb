@@ -207,6 +207,9 @@ if { ![is_elf_format] } then {
 # of DWARF2 line debug information.
 
 if { ![is_elf_format]
+     || [istarget "hppa64*-*-hpux*"]
+     || [istarget "i370-*-*"]
+     || [istarget "i960-*-*"]
      || [istarget "ia64*-*-*"]
      || [istarget "mcore-*-*"]
      || [istarget "moxie-*-*"]

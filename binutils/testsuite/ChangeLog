@@ -1,3 +1,11 @@
+2012-02-14  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/dw2-decodedline.S: Always have whitespace before
+	directives.
+	* binutils-all/version.s: Likewise.
+	* binutils-all/objdump.exp (dw2-decodedline): Don't run for
+	hppa64*-*-hpux*, i370-*-*, i960-*-*.
+
 2012-02-11  Kai Tietz  <ktietz@redhat.com>
 
 	* binutils-all/version.def: New file.
