@@ -112,6 +112,7 @@ cpu-pdp11.c
 cpu-pj.c
 cpu-plugin.c
 cpu-powerpc.c
+cpu-rl78.c
 cpu-rs6000.c
 cpu-rx.c
 cpu-s390.c
@@ -195,6 +196,7 @@ elf32-openrisc.c
 elf32-or32.c
 elf32-pj.c
 elf32-ppc.c
+elf32-rl78.c
 elf32-rx.c
 elf32-s390.c
 elf32-score.c
