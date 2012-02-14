@@ -3,7 +3,7 @@
 main:
 	.type	main, @function
 .LFB0:
-	.section	.text.unlikely
+	.section	.text.unlikely,"ax",%progbits
 .L5:
 	.globl __gxx_personality_v0
 	.section	.gcc_except_table,"a",%progbits

@@ -95,8 +95,14 @@ if { [is_elf_format] } then {
     run_dump_test "group0c"
     run_dump_test "group1a"
     run_dump_test "group1b"
-    run_dump_test "groupautoa"
     case $target_triplet in {
+	{ hppa64*-*-hpux* } { }
+	default {
+	    run_dump_test "groupautoa"
+	}
+    }
+    case $target_triplet in {
+	{ hppa64*-*-hpux* } { }
 	{ xtensa*-*-* } { }
 	default {
 	    run_dump_test "groupautob"
@@ -147,16 +153,21 @@ if { [is_elf_format] } then {
     }
     run_dump_test "symver"
 
+    # No indirect functions on non-GNU targets.
     # The MSP port sets the ELF header's OSABI field to ELFOSABI_STANDALONE.
     # The non-eabi ARM ports sets it to ELFOSABI_ARM.
     # So for these targets we cannot include an IFUNC symbol type
     # in the symbol type test.
-    if {   [istarget "msp*-*-*"]
-	|| [istarget "arm*-*-*"]} then {
+    if { [istarget "*-*-hpux*"]
+	 || [istarget "msp*-*-*"]
+	 || [istarget "arm*-*-*"]} then {
+	# hppa64 has a non-standard common directive
+	if { ![istarget "hppa64*-*-hpux*"] } then {
 	    run_elf_list_test "type-noifunc" "" "" "-s" "| grep \"1 *\\\[FONTC\\\]\""
+	}
     } else {
-    	    run_dump_test ifunc-1
-	    run_elf_list_test "type" "" "" "-s" "| grep \"1 *\\\[FIONTCU\\\]\""
+	run_dump_test ifunc-1
+	run_elf_list_test "type" "" "" "-s" "| grep \"1 *\\\[FIONTCU\\\]\""
     }
 
     run_dump_test "section6"

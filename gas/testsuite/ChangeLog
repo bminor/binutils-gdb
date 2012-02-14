@@ -1,3 +1,13 @@
+2012-02-14  Alan Modra  <amodra@gmail.com>
+
+	* gas/elf/bad-group.s: Add section attributes.
+	* gas/elf/elf.exp (groupautoa, groupautob): Don't run for hppa64-hpux.
+	(ifunc-1, type): Don't run for hpux.
+	* gas/elf/type-noifunc.e: Accept ANSI_COM.
+	* gas/elf/section7.s: Always have whitespace before directives.
+	* gas/elf/warn-2.s: Likewise.
+	* gas/i386/ifunc-3.s: Move .size directive.
+
 2012-02-13  Alan Modra  <amodra@gmail.com>
 
 	* gas/all/gas.exp (redef2): xfail m6811 and m6812.
