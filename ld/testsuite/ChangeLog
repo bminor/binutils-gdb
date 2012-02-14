@@ -1,3 +1,11 @@
+2012-02-14  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/linkoncerdiff.d: Don't run for hppa64-hpux.
+	* ld-elf/pr11304a.s: Always have whitespace before directives.
+	* ld-elf/pr11304b.s: Likewise.
+	* ld-selective/selective.exp: Test m68hc1* variant of m6811, m6812.
+	* lib/ld-lib.exp: Likewise, and vice versa.
+
 2012-02-13  Richard Henderson  <rth@redhat.com>
 
 	PR ld/13621

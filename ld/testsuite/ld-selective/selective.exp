@@ -141,7 +141,7 @@ foreach testitem $seltests {
     }
 
     # m6811/m6812 code has references to soft registers.
-    if {[istarget m6811-*-*] || [istarget m6812-*-*]} {
+    if {[istarget m6811-*-*] || [istarget m6812-*-*] || [istarget m68hc1*-*-*]} {
 	set objfile "$objfile --defsym _.frame=0 --defsym _.d1=0"
 	set objfile "$objfile --defsym _.d2=0"
     }

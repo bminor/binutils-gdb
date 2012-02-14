@@ -415,7 +415,7 @@ proc ld_simple_link_defsyms {} {
     }
 
     # m6811/m6812 code has references to soft registers.
-    if {[istarget m6811-*-*] || [istarget m6812-*-*]} {
+    if {[istarget m6811-*-*] || [istarget m6812-*-*] || [istarget m68hc1*-*-*]} {
 	append flags " --defsym _.frame=0 --defsym _.d1=0 --defsym _.d2=0"
 	append flags " --defsym _.d3=0 --defsym _.d4=0"
 	append flags " --defsym _.tmp=0 --defsym _.xy=0 --defsym _.z=0"
@@ -1502,6 +1502,8 @@ proc check_shared_lib_support { } {
 	 && ![istarget lm32-*-*]
 	 && ![istarget m32c-*-*]
 	 && ![istarget m32r-*-*]
+	 && ![istarget m6811-*-*]
+	 && ![istarget m6812-*-*]
 	 && ![istarget m68hc1*-*-*]
 	 && ![istarget mcore*-*-*]
 	 && ![istarget mep-*-*]
