@@ -636,7 +636,7 @@ rl78_pointer_to_address (struct gdbarch *gdbarch,
 static CORE_ADDR
 rl78_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  char *name;
+  const char *name;
   CORE_ADDR func_addr, func_end;
   struct rl78_prologue p;
 

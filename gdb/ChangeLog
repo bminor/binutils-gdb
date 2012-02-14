@@ -1,3 +1,8 @@
+2012-02-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (rl78_skip_prologue): Make `const' the type of
+	the name parameter being passed to find_pc_partial_function().
+
 2012-02-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* MAINTAINERS: Step down from being ia64 target maintainer.
