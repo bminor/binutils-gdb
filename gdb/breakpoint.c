@@ -83,6 +83,8 @@ static void enable_delete_command (char *, int);
 
 static void enable_once_command (char *, int);
 
+static void enable_count_command (char *, int);
+
 static void disable_command (char *, int);
 
 static void enable_command (char *, int);
@@ -207,7 +209,8 @@ static void hbreak_command (char *, int);
 
 static void thbreak_command (char *, int);
 
-static void enable_breakpoint_disp (struct breakpoint *, enum bpdisp);
+static void enable_breakpoint_disp (struct breakpoint *, enum bpdisp,
+				    int count);
 
 static void stop_command (char *arg, int from_tty);
 
@@ -4335,7 +4338,9 @@ bpstat_stop_status (struct address_space *aspace,
 	      /* We will stop here.  */
 	      if (b->disposition == disp_disable)
 		{
-		  if (b->enable_state != bp_permanent)
+		  --(b->enable_count);
+		  if (b->enable_count <= 0
+		      && b->enable_state != bp_permanent)
 		    b->enable_state = bp_disabled;
 		  removed_any = 1;
 		}
@@ -5036,6 +5041,23 @@ print_one_breakpoint_location (struct breakpoint *b,
       annotate_field (8);
       ui_out_text (uiout, "\tignore next ");
       ui_out_field_int (uiout, "ignore", b->ignore_count);
+      ui_out_text (uiout, " hits\n");
+    }
+
+  /* Note that an enable count of 1 corresponds to "enable once"
+     behavior, which is reported by the combination of enablement and
+     disposition, so we don't need to mention it here.  */
+  if (!part_of_multiple && b->enable_count > 1)
+    {
+      annotate_field (8);
+      ui_out_text (uiout, "\tdisable after ");
+      /* Tweak the wording to clarify that ignore and enable counts
+	 are distinct, and have additive effect.  */
+      if (b->ignore_count)
+	ui_out_text (uiout, "additional ");
+      else
+	ui_out_text (uiout, "next ");
+      ui_out_field_int (uiout, "enable", b->enable_count);
       ui_out_text (uiout, " hits\n");
     }
 
@@ -12884,7 +12906,8 @@ disable_command (char *args, int from_tty)
 }
 
 static void
-enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition)
+enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
+			int count)
 {
   int target_resources_ok;
 
@@ -12937,6 +12960,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition)
     }
 
   bpt->disposition = disposition;
+  bpt->enable_count = count;
   update_global_location_list (1);
   breakpoints_changed ();
   
@@ -12947,7 +12971,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition)
 void
 enable_breakpoint (struct breakpoint *bpt)
 {
-  enable_breakpoint_disp (bpt, bpt->disposition);
+  enable_breakpoint_disp (bpt, bpt->disposition, 0);
 }
 
 static void
@@ -12997,18 +13021,27 @@ enable_command (char *args, int from_tty)
     map_breakpoint_numbers (args, do_map_enable_breakpoint, NULL);
 }
 
+/* This struct packages up disposition data for application to multiple
+   breakpoints.  */
+
+struct disp_data
+{
+  enum bpdisp disp;
+  int count;
+};
+
 static void
 do_enable_breakpoint_disp (struct breakpoint *bpt, void *arg)
 {
-  enum bpdisp disp = *(enum bpdisp *) arg;
+  struct disp_data disp_data = *(struct disp_data *) arg;
 
-  enable_breakpoint_disp (bpt, disp);
+  enable_breakpoint_disp (bpt, disp_data.disp, disp_data.count);
 }
 
 static void
 do_map_enable_once_breakpoint (struct breakpoint *bpt, void *ignore)
 {
-  enum bpdisp disp = disp_disable;
+  struct disp_data disp = { disp_disable, 1 };
 
   iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
 }
@@ -13020,9 +13053,25 @@ enable_once_command (char *args, int from_tty)
 }
 
 static void
+do_map_enable_count_breakpoint (struct breakpoint *bpt, void *countptr)
+{
+  struct disp_data disp = { disp_disable, *(int *) countptr };
+
+  iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
+}
+
+static void
+enable_count_command (char *args, int from_tty)
+{
+  int count = get_number (&args);
+
+  map_breakpoint_numbers (args, do_map_enable_count_breakpoint, &count);
+}
+
+static void
 do_map_enable_delete_breakpoint (struct breakpoint *bpt, void *ignore)
 {
-  enum bpdisp disp = disp_del;
+  struct disp_data disp = { disp_del, 1 };
 
   iterate_over_related_breakpoints (bpt, do_enable_breakpoint_disp, &disp);
 }
@@ -14291,6 +14340,12 @@ Enable breakpoints and delete when hit.  Give breakpoint numbers.\n\
 If a breakpoint is hit while enabled in this fashion, it is deleted."),
 	   &enablebreaklist);
 
+  add_cmd ("count", no_class, enable_count_command, _("\
+Enable breakpoints for COUNT hits.  Give count and then breakpoint numbers.\n\
+If a breakpoint is hit while enabled in this fashion,\n\
+the count is decremented; when it reaches zero, the breakpoint is disabled."),
+	   &enablebreaklist);
+
   add_cmd ("delete", no_class, enable_delete_command, _("\
 Enable breakpoints and delete when hit.  Give breakpoint numbers.\n\
 If a breakpoint is hit while enabled in this fashion, it is deleted."),
@@ -14299,6 +14354,12 @@ If a breakpoint is hit while enabled in this fashion, it is deleted."),
   add_cmd ("once", no_class, enable_once_command, _("\
 Enable breakpoints for one hit.  Give breakpoint numbers.\n\
 If a breakpoint is hit while enabled in this fashion, it becomes disabled."),
+	   &enablelist);
+
+  add_cmd ("count", no_class, enable_count_command, _("\
+Enable breakpoints for COUNT hits.  Give count and then breakpoint numbers.\n\
+If a breakpoint is hit while enabled in this fashion,\n\
+the count is decremented; when it reaches zero, the breakpoint is disabled."),
 	   &enablelist);
 
   add_prefix_cmd ("disable", class_breakpoint, disable_command, _("\

@@ -3505,6 +3505,11 @@ has been hit.  This is especially useful in conjunction with the
 hits, look at the breakpoint info to see how many times the breakpoint
 was hit, and then run again, ignoring one less than that number.  This
 will get you quickly to the last hit of that breakpoint.
+
+@noindent
+For a breakpoints with an enable count (xref) greater than 1,
+@code{info break} also displays that count.
+
 @end table
 
 @value{GDBN} allows you to set any number of breakpoints at the same place in
@@ -4252,8 +4257,8 @@ do not know which numbers to use.
 Disabling and enabling a breakpoint that has multiple locations
 affects all of its locations.
 
-A breakpoint, watchpoint, or catchpoint can have any of four different
-states of enablement:
+A breakpoint, watchpoint, or catchpoint can have any of several
+different states of enablement:
 
 @itemize @bullet
 @item
@@ -4264,6 +4269,9 @@ Disabled.  The breakpoint has no effect on your program.
 @item
 Enabled once.  The breakpoint stops your program, but then becomes
 disabled.
+@item
+Enabled for a count.  The breakpoint stops your program for the next
+N times, then becomes disabled.
 @item
 Enabled for deletion.  The breakpoint stops your program, but
 immediately after it does so it is deleted permanently.  A breakpoint
@@ -4291,6 +4299,14 @@ become effective once again in stopping your program.
 @item enable @r{[}breakpoints@r{]} once @var{range}@dots{}
 Enable the specified breakpoints temporarily.  @value{GDBN} disables any
 of these breakpoints immediately after stopping your program.
+
+@item enable @r{[}breakpoints@r{]} count @var{count} @var{range}@dots{}
+Enable the specified breakpoints temporarily.  @value{GDBN} records
+@var{count} with each of the specified breakpoints, and decrements a
+breakpoint's count when it is hit.  When any count reaches 0,
+@value{GDBN} disables that breakpoint.  If a breakpoint has an ignore
+count (@pxref{Conditions, ,Break Conditions}), that will be
+decremented to 0 before @var{count} is affected.
 
 @item enable @r{[}breakpoints@r{]} delete @var{range}@dots{}
 Enable the specified breakpoints to work once, then die.  @value{GDBN}

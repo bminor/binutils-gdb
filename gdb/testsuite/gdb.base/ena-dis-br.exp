@@ -46,6 +46,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
+set bp_location7 [gdb_get_line_number "set breakpoint 7 here"]
 set bp_location8 [gdb_get_line_number "set breakpoint 8 here" $srcfile1]
 set bp_location9 [gdb_get_line_number "set breakpoint 9 here" $srcfile1]
 set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
@@ -161,6 +162,31 @@ gdb_test_no_output "disable $bp" "disable break marker4"
 gdb_test "info break $bp" \
     "\[0-9\]*\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+n.*" \
     "info break marker4"
+
+if ![runto_main] then {
+    fail "enable/disable break tests suppressed"
+}
+
+# Test enable count by stopping at a location until it is disabled
+# and passes through.
+
+set bp [break_at $bp_location7 "line $bp_location7"]
+
+set bp2 [break_at marker1 " line ($bp_location15|$bp_location16)"]
+
+gdb_test_no_output "enable count 2 $bp" "disable break with count"
+
+gdb_test "continue" \
+    ".*factorial .*:$bp_location7.*" \
+    "continue from enable count, first time"
+
+gdb_test "continue" \
+    ".*factorial .*:$bp_location7.*" \
+    "continue from enable count, second time"
+
+gdb_test "continue" \
+    ".*marker1 .*:($bp_location15|$bp_location16).*" \
+    "continue through enable count, now disabled"
 
 # Verify that we can set a breakpoint with an ignore count N, which
 # should cause the next N triggers of the bp to be ignored.  (This is

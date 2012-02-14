@@ -596,6 +596,11 @@ struct breakpoint
     /* Number of stops at this breakpoint that should
        be continued automatically before really stopping.  */
     int ignore_count;
+
+    /* Number of stops at this breakpoint before it will be
+       disabled.  */
+    int enable_count;
+
     /* Chain of command lines to execute when this breakpoint is
        hit.  */
     struct counted_command_line *commands;

@@ -49,6 +49,9 @@
   ** "catch load" and "catch unload" can be used to stop when a shared
      library is loaded or unloaded, respectively.
 
+  ** "enable count" can be used to auto-disable a breakpoint after
+     several hits.
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing

@@ -1,3 +1,19 @@
+2012-02-14  Stan Shebs  <stan@codesourcery.com>
+
+	* NEWS: Mention enable count command.
+	* breakpoint.h (struct breakpoint): New field enable_count.
+	* breakpoint.c (enable_breakpoint_disp): Add count argument.
+	(enable_breakpoint): Add arg to call.
+	(struct disp_data): New struct.
+	(do_enable_breakpoint_disp): Interp arg as disp_data and unpack.
+	(do_map_enable_once_breakpoint): Create a struct and pass it.
+	(do_map_enable_delete_breakpoint): Ditto.
+	(do_map_enable_count_breakpoint): New function.
+	(enable_count_command): New function.
+	(bpstat_stop_status): Decrement enable_count.
+	(print_one_breakpoint_location): Report enable count.
+	(_initialize_breakpoint): Add enable count command.
+
 2012-02-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* rl78-tdep.c (reggroups.h): Include.
