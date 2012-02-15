@@ -1,5 +1,16 @@
 2012-02-15  Pedro Alves  <palves@redhat.com>
 
+	* gdb.server/ext-attach.exp: Make sure gdb is disconnected.
+	* gdb.server/ext-run.exp: Make sure gdb is disconnected.
+	* gdb.server/file-transfer.exp: Make sure gdb is disconnected.
+	* gdb.server/server-mon.exp: Make sure gdb is disconnected.
+	* gdb.server/server-run.exp: Make sure gdb is disconnected.
+	* lib/gdbserver-support.exp (gdbserver_start_extended): Only
+	prepend "extended-" to $gdbserver_protocol if $gdbserver_protocol
+	doesn't start with "extended-" already.
+
+2012-02-15  Pedro Alves  <palves@redhat.com>
+
 	Support extended-remote.  Avoid cascading timeouts.
 
 	* gdb.base/attach.exp (do_attach_tests): Add expected output for

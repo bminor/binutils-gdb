@@ -364,7 +364,10 @@ proc gdbserver_start_extended { } {
     global use_gdb_stub
 
     set res [gdbserver_start "--multi" ""]
-    set gdbserver_protocol "extended-[lindex $res 0]"
+    set gdbserver_protocol [lindex $res 0]
+    if { [string first "extended-" $gdbserver_protocol] != 0} {
+	set gdbserver_protocol "extended-$gdbserver_protocol"
+    }
     set gdbserver_gdbport [lindex $res 1]
 
     # Even if the board file is testing with target remote, our caller

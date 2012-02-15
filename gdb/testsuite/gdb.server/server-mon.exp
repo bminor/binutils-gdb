@@ -36,6 +36,10 @@ gdb_start
 gdb_load $binfile
 gdb_reinitialize_dir $srcdir/$subdir
 
+# Make sure we're disconnected, in case we're testing with an
+# extended-remote board, therefore already connected.
+gdb_test "disconnect" ".*"
+
 gdbserver_run ""
 
 gdb_test_multiple "monitor help" "monitor help" {
