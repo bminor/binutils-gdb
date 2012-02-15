@@ -1,3 +1,12 @@
+2012-02-15  Pedro Alves  <palves@redhat.com>
+
+	Support extended-remote.  Avoid cascading timeouts.
+
+	* gdb.base/attach.exp (do_attach_tests): Add expected output for
+	the extended-remote target.  If attaching with no file fails, load
+	the file manually.
+	* gdb.server/ext-attach.exp: Adjust expected attach/detach output.
+
 2012-02-14  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.base/ena-dis-br.exp: Add enable count test.

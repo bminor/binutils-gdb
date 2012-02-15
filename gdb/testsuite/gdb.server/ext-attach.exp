@@ -57,14 +57,16 @@ if { [istarget "*-*-cygwin*"] } {
     set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
 }
 
-gdb_test "attach $testpid" "Attached to.*" \
+gdb_test "attach $testpid" \
+    "Attaching to program: .*, process $testpid.*(in|at).*" \
     "attach to remote program 1"
 gdb_test "backtrace" ".*main.*" "backtrace 1"
 
-gdb_test "detach" "Detached from remote process.*\\."
+gdb_test "detach" "Detaching from program.*process.*"
 gdb_test "backtrace" "No stack\\." "backtrace with no program"
 
-gdb_test "attach $testpid" "Attached to.*" \
+gdb_test "attach $testpid" \
+    "Attaching to program: .*, process $testpid.*(in|at).*" \
     "attach to remote program 2"
 gdb_test "backtrace" ".*main.*" "backtrace 2"
 

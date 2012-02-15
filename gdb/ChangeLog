@@ -1,3 +1,9 @@
+2012-02-15  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_detach_1, extended_remote_attach_1): Tweak
+	output to be like native targets'.
+	(remote_pid_to_str): Special case the null ptid.
+
 2012-02-14  Stan Shebs  <stan@codesourcery.com>
 
 	* NEWS: Mention enable count command.

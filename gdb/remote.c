@@ -4205,6 +4205,16 @@ remote_detach_1 (char *args, int from_tty, int extended)
   if (!target_has_execution)
     error (_("No process to detach from."));
 
+  if (from_tty)
+    {
+      char *exec_file = get_exec_file (0);
+      if (exec_file == NULL)
+	exec_file = "";
+      printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
+			 target_pid_to_str (pid_to_ptid (pid)));
+      gdb_flush (gdb_stdout);
+    }
+
   /* Tell the remote target to detach.  */
   if (remote_multi_process_p (rs))
     sprintf (rs->buf, "D;%x", pid);
@@ -4221,19 +4231,8 @@ remote_detach_1 (char *args, int from_tty, int extended)
   else
     error (_("Can't detach process."));
 
-  if (from_tty)
-    {
-      if (remote_multi_process_p (rs))
-	printf_filtered (_("Detached from remote %s.\n"),
-			 target_pid_to_str (pid_to_ptid (pid)));
-      else
-	{
-	  if (extended)
-	    puts_filtered (_("Detached from remote process.\n"));
-	  else
-	    puts_filtered (_("Ending remote debugging.\n"));
-	}
-    }
+  if (from_tty && !extended)
+    puts_filtered (_("Ending remote debugging.\n"));
 
   discard_pending_stop_replies (pid);
   target_mourn_inferior ();
@@ -4286,6 +4285,20 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
   if (remote_protocol_packets[PACKET_vAttach].support == PACKET_DISABLE)
     error (_("This target does not support attaching to a process"));
 
+  if (from_tty)
+    {
+      char *exec_file = get_exec_file (0);
+
+      if (exec_file)
+	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
+			   target_pid_to_str (pid_to_ptid (pid)));
+      else
+	printf_unfiltered (_("Attaching to %s\n"),
+			   target_pid_to_str (pid_to_ptid (pid)));
+
+      gdb_flush (gdb_stdout);
+    }
+
   sprintf (rs->buf, "vAttach;%x", pid);
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
@@ -4293,10 +4306,6 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
   if (packet_ok (rs->buf,
 		 &remote_protocol_packets[PACKET_vAttach]) == PACKET_OK)
     {
-      if (from_tty)
-	printf_unfiltered (_("Attached to %s\n"),
-			   target_pid_to_str (pid_to_ptid (pid)));
-
       if (!non_stop)
 	{
 	  /* Save the reply for later.  */
@@ -8823,7 +8832,9 @@ remote_pid_to_str (struct target_ops *ops, ptid_t ptid)
   static char buf[64];
   struct remote_state *rs = get_remote_state ();
 
-  if (ptid_is_pid (ptid))
+  if (ptid_equal (ptid, null_ptid))
+    return normal_pid_to_str (ptid);
+  else if (ptid_is_pid (ptid))
     {
       /* Printing an inferior target id.  */
 
