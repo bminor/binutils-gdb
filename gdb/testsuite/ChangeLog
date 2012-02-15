@@ -1,5 +1,20 @@
 2012-02-15  Pedro Alves  <palves@redhat.com>
 
+	* gdb.trace/backtrace.exp: Issue UNSUPPORTED instead of PASS when
+	the target doesn't support tracepoints.
+	* gdb.trace/circ.exp: Ditto.
+	* gdb.trace/collection.exp: Ditto.
+	* gdb.trace/packetlen.exp: Ditto.
+	* gdb.trace/passc-dyn.exp: Ditto.
+	* gdb.trace/report.exp: Ditto.
+	* gdb.trace/tfind.exp: Ditto.
+	* gdb.trace/tspeed.exp: Ditto.
+	* gdb.trace/tsv.exp: Ditto.
+	* gdb.trace/unavailable.exp: Ditto.
+	* gdb.trace/while-dyn.exp: Ditto.
+
+2012-02-15  Pedro Alves  <palves@redhat.com>
+
 	* gdb.trace/circ.exp (trace_buffer_normal): Rewrite using
 	gdb_test_multiple, and call unsupported instead of fail, if the
 	remote side does not support the request.

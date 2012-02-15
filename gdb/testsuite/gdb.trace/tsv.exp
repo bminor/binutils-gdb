@@ -92,7 +92,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 # The rest of the testing needs actual tracing to work.
 if { ![gdb_target_supports_trace] } then {
-    pass "Current target does not support trace"
+    unsupported "Current target does not support trace"
     return 1;
 }
 

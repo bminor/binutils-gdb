@@ -779,10 +779,8 @@ proc gdb_trace_collection_test {} {
 clean_restart $executable
 runto_main
 
-# We generously give ourselves one "pass" if we successfully
-# detect that this test cannot be run on this target!
 if { ![gdb_target_supports_trace] } then {
-    pass "Current target does not support trace"
+    unsupported "Current target does not support trace"
     return 1;
 }
 
