@@ -309,6 +309,8 @@ the native maintainer when resolving ABI issues.
 
 	powerpc		--target=powerpc-eabi ,-Werror
 
+	rl78		--target=rl78-elf ,-Werror
+
 	s390		--target=s390-linux-gnu ,-Werror
 
 	score	--target=score-elf

@@ -555,6 +555,7 @@ ALL_TARGET_OBS = \
 	mt-tdep.o \
 	nto-tdep.o \
 	ppc-linux-tdep.o ppcnbsd-tdep.o ppcobsd-tdep.o ppc-sysv-tdep.o \
+	rl78-tdep.o \
 	rs6000-aix-tdep.o rs6000-tdep.o \
 	s390-tdep.o \
 	score-tdep.o \
@@ -1489,6 +1490,7 @@ ALLDEPFILES = \
 	remote-m32r-sdi.c remote-mips.c \
 	remote-sim.c \
 	dcache.c \
+	rl78-tdep.c \
 	rs6000-nat.c rs6000-tdep.c \
 	s390-tdep.c s390-nat.c \
 	score-tdep.c \
