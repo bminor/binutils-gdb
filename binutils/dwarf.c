@@ -169,6 +169,27 @@ dwarf_vmatoa (const char *fmtch, dwarf_vma value)
   return ret;
 }
 
+/* Format a 64-bit value, given as two 32-bit values, in hex.
+   For reentrancy, this uses a buffer provided by the caller.  */
+
+static const char *
+dwarf_vmatoa64 (dwarf_vma hvalue, dwarf_vma lvalue, char *buf,
+		unsigned int buf_len)
+{
+  int len = 0;
+
+  if (hvalue == 0)
+    snprintf (buf, buf_len, "%" DWARF_VMA_FMT "x", lvalue);
+  else
+    {
+      len = snprintf (buf, buf_len, "%" DWARF_VMA_FMT "x", hvalue);
+      snprintf (buf + len, buf_len - len,
+		"%08" DWARF_VMA_FMT "x", lvalue);
+    }
+
+  return buf;
+}
+
 dwarf_vma
 read_leb128 (unsigned char *data, unsigned int *length_return, int sign)
 {
@@ -1381,9 +1402,12 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_FORM_data8:
       if (!do_loc)
 	{
-	  uvalue = byte_get (data, 4);
-	  printf (" 0x%s", dwarf_vmatoa ("x", uvalue));
-	  printf (" 0x%lx", (unsigned long) byte_get (data + 4, 4));
+	  dwarf_vma high_bits;
+	  char buf[64];
+
+	  byte_get_64 (data, &high_bits, &uvalue);
+	  printf (" 0x%s",
+		  dwarf_vmatoa64 (high_bits, uvalue, buf, sizeof (buf)));
 	}
       if ((do_loc || do_debug_loc || do_debug_ranges)
 	  && num_debug_info_entries == 0)
@@ -1453,16 +1477,14 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_FORM_ref_sig8:
       if (!do_loc)
 	{
-	  int i;
-	  printf (" signature: ");
-	  for (i = 0; i < 8; i++)
-	    {
-	      printf ("%02x", (unsigned) byte_get (data, 1));
-	      data += 1;
-	    }
+	  dwarf_vma high_bits;
+	  char buf[64];
+
+	  byte_get_64 (data, &high_bits, &uvalue);
+	  printf (" signature: 0x%s",
+		  dwarf_vmatoa64 (high_bits, uvalue, buf, sizeof (buf)));
 	}
-      else
-        data += 8;
+      data += 8;
       break;
 
     default:
@@ -2113,7 +2135,8 @@ process_debug_info (struct dwarf_section *section,
       dwarf_vma cu_offset;
       int offset_size;
       int initial_length_size;
-      unsigned char signature[8] = { 0 };
+      dwarf_vma signature_high = 0;
+      dwarf_vma signature_low = 0;
       dwarf_vma type_offset = 0;
 
       hdrptr = start;
@@ -2147,14 +2170,8 @@ process_debug_info (struct dwarf_section *section,
 
       if (do_types)
         {
-          int i;
-
-          for (i = 0; i < 8; i++)
-            {
-              signature[i] = byte_get (hdrptr, 1);
-              hdrptr += 1;
-            }
-
+          byte_get_64 (hdrptr, &signature_high, &signature_low);
+          hdrptr += 8;
           type_offset = byte_get (hdrptr, offset_size);
           hdrptr += offset_size;
         }
@@ -2191,13 +2208,13 @@ process_debug_info (struct dwarf_section *section,
 	  printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
 	  if (do_types)
 	    {
-	      int i;
-	      printf (_("   Signature:     "));
-	      for (i = 0; i < 8; i++)
-	        printf ("%02x", signature[i]);
-	      printf ("\n");
-             printf (_("   Type Offset:   0x%s\n"),
-                     dwarf_vmatoa ("x", type_offset));
+	      char buf[64];
+
+	      printf (_("   Signature:     0x%s\n"),
+		      dwarf_vmatoa64 (signature_high, signature_low,
+				      buf, sizeof (buf)));
+	      printf (_("   Type Offset:   0x%s\n"),
+		      dwarf_vmatoa ("x", type_offset));
 	    }
 	}
 

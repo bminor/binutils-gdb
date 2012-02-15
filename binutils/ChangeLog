@@ -1,3 +1,12 @@
+2012-02-14  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.c (dwarf_vmatoa64): New function.
+	(read_and_display_attr_value): Print 8-byte forms as single hex
+	numbers.
+	(process_debug_info): Print type signatures as single hex numbers.
+	* elfcomm.c (byte_get_64): New function.
+	* elfcomm.h (byte_get_64): New function.
+
 2012-02-11  Kai Tietz  <ktietz@redhat.com>
 
 	PR binutils/13657

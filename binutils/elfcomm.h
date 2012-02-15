@@ -47,6 +47,7 @@ extern elf_vma (*byte_get) (unsigned char *, int);
 extern elf_vma byte_get_signed (unsigned char *, int);
 extern elf_vma byte_get_little_endian (unsigned char *, int);
 extern elf_vma byte_get_big_endian (unsigned char *, int);
+extern void byte_get_64 (unsigned char *, elf_vma *, elf_vma *);
 
 #define BYTE_PUT(field, val)	byte_put (field, val, sizeof (field))
 #define BYTE_GET(field)		byte_get (field, sizeof (field))

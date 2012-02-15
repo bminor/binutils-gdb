@@ -238,6 +238,25 @@ byte_get_signed (unsigned char *field, int size)
     }
 }
 
+/* Return the high-order 32-bits and the low-order 32-bits
+   of an 8-byte value separately.  */
+
+void
+byte_get_64 (unsigned char *field, elf_vma *high, elf_vma *low)
+{
+  if (byte_get == byte_get_big_endian)
+    {
+      *high = byte_get_big_endian (field, 4);
+      *low = byte_get_big_endian (field + 4, 4);
+    }
+  else
+    {
+      *high = byte_get_little_endian (field + 4, 4);
+      *low = byte_get_little_endian (field, 4);
+    }
+  return;
+}
+
 /* Return the path name for a proxy entry in a thin archive, adjusted
    relative to the path name of the thin archive itself if necessary.
    Always returns a pointer to malloc'ed memory.  */
