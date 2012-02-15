@@ -1,3 +1,7 @@
+2012-02-14  Cary Coutant  <ccoutant@google.com>
+
+	* options.cc (General_options::finalize): Disallow -pie and -static.
+
 2012-02-03  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relocate_functions::abs8,
