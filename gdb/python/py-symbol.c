@@ -268,11 +268,11 @@ sympy_value (PyObject *self, PyObject *args)
 	{
 	  frame_info = frame_object_to_frame_info (frame_obj);
 	  if (frame_info == NULL)
-	    error ("invalid frame");
+	    error (_("invalid frame"));
 	}
       
       if (symbol_read_needs_frame (symbol) && frame_info == NULL)
-	error ("symbol requires a frame to compute its value");
+	error (_("symbol requires a frame to compute its value"));
 
       value = read_var_value (symbol, frame_info);
     }

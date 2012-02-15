@@ -1,3 +1,7 @@
+2012-02-15  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-symbol.c (sympy_value): Use _().
+
 2012-02-15  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_detach_1, extended_remote_attach_1): Tweak
