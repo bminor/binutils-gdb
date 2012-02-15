@@ -1,5 +1,11 @@
 2012-02-15  Pedro Alves  <palves@redhat.com>
 
+	* gdb.trace/circ.exp (trace_buffer_normal): Rewrite using
+	gdb_test_multiple, and call unsupported instead of fail, if the
+	remote side does not support the request.
+
+2012-02-15  Pedro Alves  <palves@redhat.com>
+
 	* gdb.server/ext-attach.exp: Make sure gdb is disconnected.
 	* gdb.server/ext-run.exp: Make sure gdb is disconnected.
 	* gdb.server/file-transfer.exp: Make sure gdb is disconnected.

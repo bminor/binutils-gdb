@@ -88,16 +88,38 @@ proc setup_tracepoints { } {
 
 # return 0 for success, 1 for failure
 proc trace_buffer_normal { } {
-    if [gdb_test "maint packet QTBuffer:size:ffffffff" \
-	    "received: .OK." ""] then { 
-	pass "This test cannot be run on this target"
+    global gdb_prompt
+
+    set ok 0
+    set test "maint packet QTBuffer:size:ffffffff"
+    gdb_test_multiple $test $test {
+	-re "received: .OK.\r\n$gdb_prompt $" {
+	    set ok 1
+	    pass $test
+	}
+	-re "\r\n$gdb_prompt $" {
+	}
+    }
+    if { !$ok } {
+	unsupported $test
 	return 1;
     }
-    if [gdb_test "maint packet QTBuffer:circular:0" \
-	    "received: .OK." ""] then { 
-	pass "This test cannot be run on this target"
+
+    set ok 0
+    set test "maint packet QTBuffer:circular:0"
+    gdb_test_multiple $test $test {
+	-re "received: .OK.\r\n$gdb_prompt $" {
+	    set ok 1
+	    pass $test
+	}
+	-re "\r\n$gdb_prompt $" {
+	}
+    }
+    if { !$ok } {
+	unsupported $test
 	return 1;
     }
+
     return 0;
 }
 
