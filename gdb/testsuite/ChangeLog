@@ -1,5 +1,9 @@
 2012-02-15  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/pc-fp.exp: Add "info register" tests.
+
+2012-02-15  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/regs.exp: Remove.
 
 2012-02-15  Pedro Alves  <palves@redhat.com>

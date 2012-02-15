@@ -1,5 +1,11 @@
 2012-02-15  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/12659:
+	* infcmd.c (registers_info): Print just the current register's
+	name.
+
+2012-02-15  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-symbol.c (sympy_value): Use _().
 
 2012-02-15  Pedro Alves  <palves@redhat.com>

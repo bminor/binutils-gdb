@@ -2170,7 +2170,7 @@ registers_info (char *addr_exp, int fpregs)
 		struct value_print_options opts;
 		struct value *val = value_of_user_reg (regnum, frame);
 
-		printf_filtered ("%s: ", start);
+		printf_filtered ("%.*s: ", (int) (end - start), start);
 		get_formatted_print_options (&opts, 'x');
 		val_print_scalar_formatted (check_typedef (value_type (val)),
 					    value_contents_for_printing (val),
