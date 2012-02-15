@@ -1,3 +1,9 @@
+2012-02-15  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* frame.c (find_frame_sal): Initialize sal->pspace field from frame
+	data.
+	* stack.c (set_last_displayed_sal): Validate that PSPACE is not NULL.
+
 2012-02-15  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/12659:
