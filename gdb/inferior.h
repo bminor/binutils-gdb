@@ -516,6 +516,11 @@ struct inferior
      if any catching is necessary.  */
   int total_syscalls_count;
 
+  /* Default flags to pass to the symbol reading functions.  These are
+     used whenever a new objfile is created.  The valid values come
+     from enum symfile_add_flags.  */
+  int symfile_flags;
+
   /* Per inferior data-pointers required by other GDB modules.  */
   void **data;
   unsigned num_data;

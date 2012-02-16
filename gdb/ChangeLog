@@ -1,3 +1,15 @@
+2012-02-16  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (symbol_file_add_main_1): Use inferior's
+	symfile_flags.
+	* solib.c (solib_read_symbols): Use inferior's symfile_flags.
+	* linux-nat.c (linux_child_follow_fork): Set symfile_flags on
+	inferior.
+	* infrun.c (handle_vfork_child_exec_or_exit): Set symfile_flags on
+	inferior.
+	(follow_exec): Use inferior's symfile_flags.
+	* inferior.h (struct inferior) <symfile_flags>: New field.
+
 2012-02-16  Mike Frysinger  <vapier@gentoo.org>
 
 	PR gdb/9734:

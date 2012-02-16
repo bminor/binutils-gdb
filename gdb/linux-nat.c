@@ -59,6 +59,7 @@
 #include "solib.h"
 #include "linux-osdata.h"
 #include "linux-tdep.h"
+#include "symfile.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -723,6 +724,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_lp = add_lwp (inferior_ptid);
 	  child_lp->stopped = 1;
 	  child_lp->last_resume_kind = resume_stop;
+	  child_inf->symfile_flags = SYMFILE_NO_READ;
 
 	  /* If this is a vfork child, then the address-space is
 	     shared with the parent.  */
@@ -928,6 +930,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_inf->aspace = new_address_space ();
 	  child_inf->pspace = add_program_space (child_inf->aspace);
 	  child_inf->removable = 1;
+	  child_inf->symfile_flags = SYMFILE_NO_READ;
 	  set_current_program_space (child_inf->pspace);
 	  clone_program_space (child_inf->pspace, parent_pspace);
 

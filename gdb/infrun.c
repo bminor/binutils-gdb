@@ -739,6 +739,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	  pspace = add_program_space (maybe_new_address_space ());
 	  set_current_program_space (pspace);
 	  inf->removable = 1;
+	  inf->symfile_flags = SYMFILE_NO_READ;
 	  clone_program_space (pspace, inf->vfork_parent->pspace);
 	  inf->pspace = pspace;
 	  inf->aspace = pspace->aspace;
@@ -900,10 +901,13 @@ follow_exec (ptid_t pid, char *execd_pathname)
      solib_create_inferior_hook below.  breakpoint_re_set would fail to insert
      the breakpoints with the zero displacement.  */
 
-  symbol_file_add (execd_pathname, SYMFILE_MAINLINE | SYMFILE_DEFER_BP_RESET,
+  symbol_file_add (execd_pathname,
+		   (inf->symfile_flags
+		    | SYMFILE_MAINLINE | SYMFILE_DEFER_BP_RESET),
 		   NULL, 0);
 
-  set_initial_language ();
+  if ((inf->symfile_flags & SYMFILE_NO_READ) == 0)
+    set_initial_language ();
 
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
   SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));

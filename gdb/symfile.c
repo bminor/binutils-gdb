@@ -1246,14 +1246,17 @@ symbol_file_add_main (char *args, int from_tty)
 static void
 symbol_file_add_main_1 (char *args, int from_tty, int flags)
 {
-  const int add_flags = SYMFILE_MAINLINE | (from_tty ? SYMFILE_VERBOSE : 0);
+  const int add_flags = (current_inferior ()->symfile_flags
+			 | SYMFILE_MAINLINE | (from_tty ? SYMFILE_VERBOSE : 0));
+
   symbol_file_add (args, add_flags, NULL, flags);
 
   /* Getting new symbols may change our opinion about
      what is frameless.  */
   reinit_frame_cache ();
 
-  set_initial_language ();
+  if ((flags & SYMFILE_NO_READ) == 0)
+    set_initial_language ();
 }
 
 void

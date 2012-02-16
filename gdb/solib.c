@@ -592,6 +592,8 @@ solib_read_symbols (struct so_list *so, int flags)
     {
       volatile struct gdb_exception e;
 
+      flags |= current_inferior ()->symfile_flags;
+
       TRY_CATCH (e, RETURN_MASK_ERROR)
 	{
 	  struct section_addr_info *sap;
