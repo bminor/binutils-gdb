@@ -864,7 +864,7 @@ initpri1_LDADD =
 check_PROGRAMS += initpri2
 initpri2_SOURCES = initpri2.c
 initpri2_DEPENDENCIES = gcctestdir/ld
-initpri2_LDFLAGS = -Bgcctestdir/
+initpri2_LDFLAGS = -Bgcctestdir/ -Wl,--ctors-in-init-array
 initpri2_LDADD =
 
 check_PROGRAMS += initpri3a

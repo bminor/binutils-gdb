@@ -1,3 +1,8 @@
+2012-02-16  Cary Coutant  <ccoutant@google.com>
+
+	* testsuite/Makefile.am (initpri2): Add --ctors-in-init-array option.
+	* testsuite/Makefile.in: Regenerate.
+
 2012-02-14  Cary Coutant  <ccoutant@google.com>
 
 	* options.cc (General_options::finalize): Disallow -pie and -static.
