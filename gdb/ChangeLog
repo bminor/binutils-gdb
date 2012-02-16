@@ -1,3 +1,9 @@
+2012-02-16  Mike Frysinger  <vapier@gentoo.org>
+
+	PR gdb/9734:
+	* remote-sim.c (gdbsim_create_inferior): Call error() when
+	sim_create_inferior() fails.
+
 2012-02-16  Josh Matthews  <josh@joshmatthews.net>
 
 	* machoread.c: Initialize nbr_syms to avoid warnings-as-errors failure.
