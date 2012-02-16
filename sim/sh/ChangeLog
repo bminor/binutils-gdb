@@ -1,3 +1,10 @@
+2012-02-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* interp.c (MA): Adjust cast to avoid warning on 64-bit hosts.
+
+	* interp.c (sim_store_register, sim_fetch_register): Return
+	length, not -1.
+
 2011-12-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4: New file.

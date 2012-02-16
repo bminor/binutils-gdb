@@ -383,7 +383,7 @@ sim_fetch_register (SIM_DESC sd,
 		    int length)
 {
   put_word (memory, State.regs[rn]);
-  return -1;
+  return length;
 }
  
 int

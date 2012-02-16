@@ -1,3 +1,7 @@
+2012-02-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* interp.c (sim_fetch_register): Return length, not -1.
+
 2012-01-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* sim-main.h: Reformat copyright header.
