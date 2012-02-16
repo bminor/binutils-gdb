@@ -1072,6 +1072,7 @@ struct current_thread_cleanup
   int selected_frame_level;
   int was_stopped;
   int inf_id;
+  int was_removable;
 };
 
 static void
@@ -1112,10 +1113,14 @@ restore_current_thread_cleanup_dtor (void *arg)
 {
   struct current_thread_cleanup *old = arg;
   struct thread_info *tp;
+  struct inferior *inf;
 
   tp = find_thread_ptid (old->inferior_ptid);
   if (tp)
     tp->refcount--;
+  inf = find_inferior_id (old->inf_id);
+  if (inf != NULL)
+    inf->removable = old->was_removable;
   xfree (old);
 }
 
@@ -1129,6 +1134,7 @@ make_cleanup_restore_current_thread (void)
   old = xmalloc (sizeof (struct current_thread_cleanup));
   old->inferior_ptid = inferior_ptid;
   old->inf_id = current_inferior ()->num;
+  old->was_removable = current_inferior ()->removable;
 
   if (!ptid_equal (inferior_ptid, null_ptid))
     {
@@ -1155,6 +1161,8 @@ make_cleanup_restore_current_thread (void)
       if (tp)
 	tp->refcount++;
     }
+
+  current_inferior ()->removable = 0;
 
   return make_cleanup_dtor (do_restore_current_thread_cleanup, old,
 			    restore_current_thread_cleanup_dtor);

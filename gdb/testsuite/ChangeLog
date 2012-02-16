@@ -1,3 +1,8 @@
+2012-02-16  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/inferior-died.c: New file.
+	* gdb.base/inferior-died.exp: New file.
+
 2012-02-15  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* gdb.base/break-inline.exp: New file.

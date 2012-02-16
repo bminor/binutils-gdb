@@ -1,3 +1,11 @@
+2012-02-16  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/13653:
+	* thread.c (struct current_thread_cleanup) <was_removable>: New
+	field.
+	(restore_current_thread_cleanup_dtor): Restore 'removable' field.
+	(make_cleanup_restore_current_thread): Initialize new field.
+
 2012-02-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* MAINTAINERS: Add rl78 to target ISA section.
