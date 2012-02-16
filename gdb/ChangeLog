@@ -1,3 +1,9 @@
+2012-02-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* MAINTAINERS: Add rx to target ISA section.
+	* Makefile.in (ALL_TARGET_OBS): Add rx-tdep.o.
+	(ALLDEPFILES): Add rx-tdep.c.
+
 2012-02-16  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.c (symbol_file_add_main_1): Use inferior's

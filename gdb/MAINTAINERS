@@ -311,6 +311,8 @@ the native maintainer when resolving ABI issues.
 
 	rl78		--target=rl78-elf ,-Werror
 
+	rx		--target=rx-elf ,-Werror
+
 	s390		--target=s390-linux-gnu ,-Werror
 
 	score	--target=score-elf
