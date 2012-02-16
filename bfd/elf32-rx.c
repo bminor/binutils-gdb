@@ -2115,7 +2115,7 @@ elf32_rx_relax_section (bfd *                  abfd,
 		   /* Decodable bits.  */
 		   && (insn[0] & 0xcc) == 0xcc
 		   /* Width.  */
-		   && (insn[0] & 0x30) != 3
+		   && (insn[0] & 0x30) != 0x30
 		   /* Register MSBs.  */
 		   && (insn[1] & 0x88)  == 0x00)
 	    {
@@ -2219,7 +2219,7 @@ elf32_rx_relax_section (bfd *                  abfd,
 		   /* Decodable bits.  */
 		   && (insn[0] & 0xc3) == 0xc3
 		   /* Width.  */
-		   && (insn[0] & 0x30) != 3
+		   && (insn[0] & 0x30) != 0x30
 		   /* Register MSBs.  */
 		   && (insn[1] & 0x88)  == 0x00)
 	    {

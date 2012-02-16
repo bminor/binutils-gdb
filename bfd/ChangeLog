@@ -1,3 +1,8 @@
+2012-02-16  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/13355
+	* elf32-rx.c (elf32_rx_relax_section): Correct width check.
+
 2012-02-13  Richard Henderson  <rth@redhat.com>
 
 	PR ld/13621
