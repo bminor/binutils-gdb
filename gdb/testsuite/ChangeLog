@@ -1,5 +1,9 @@
 2012-02-16  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/inferior-died.c: Don't include stdio.h.
+
+2012-02-16  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/inferior-died.c: New file.
 	* gdb.base/inferior-died.exp: New file.
 
