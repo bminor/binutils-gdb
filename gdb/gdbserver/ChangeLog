@@ -1,3 +1,12 @@
+2012-02-16  Yao Qi  <yao@codesourcery.com>
+
+	* inferiors.c: Move code to ...
+	* dll.c: .... here.  New.
+	* server.h: Declare clear_dlls.
+	* Makefile.in (SFILES): Add dll.c.
+	(OBS): Add dll.o
+	(dll.o): New rule.
+
 2012-02-11  Yao Qi  <yao@codesourcery.com>
 
 	* server.c: (handle_monitor_command): Add a new parameter

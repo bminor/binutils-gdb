@@ -236,6 +236,7 @@ extern struct inferior_list all_processes;
 extern struct inferior_list all_threads;
 extern struct inferior_list all_dlls;
 extern int dlls_changed;
+extern void clear_dlls (void);
 
 void add_inferior_to_list (struct inferior_list *list,
 			   struct inferior_list_entry *new_inferior);

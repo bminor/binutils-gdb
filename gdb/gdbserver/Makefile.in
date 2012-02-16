@@ -104,7 +104,7 @@ INTERNAL_LDFLAGS = $(LDFLAGS) @RDYNAMIC@
 
 # All source files that go into linking GDB remote server.
 
-SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
+SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/mem-break.c $(srcdir)/proc-service.c \
 	$(srcdir)/proc-service.list $(srcdir)/regcache.c \
 	$(srcdir)/remote-utils.c $(srcdir)/server.c $(srcdir)/target.c \
@@ -138,6 +138,7 @@ OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
 	xml-utils.o common-utils.o ptid.o buffer.o \
+	dll.o \
 	$(XML_BUILTIN) \
 	$(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
@@ -401,6 +402,7 @@ thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h) \
 tracepoint.o: tracepoint.c $(server_h) $(srcdir)/../common/ax.def
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
+dll.o: dll.c $(server_h)
 
 signals.o: ../common/signals.c $(server_h) $(signals_def)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
