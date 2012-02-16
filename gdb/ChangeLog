@@ -1,3 +1,7 @@
+2012-02-16  Josh Matthews  <josh@joshmatthews.net>
+
+	* machoread.c: Initialize nbr_syms to avoid warnings-as-errors failure.
+
 2012-02-16  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/13653:

@@ -180,7 +180,7 @@ macho_symtab_read (struct objfile *objfile,
   const asymbol *dir_so = NULL;
   const asymbol *file_so = NULL;
   asymbol **oso_file = NULL;
-  unsigned int nbr_syms;
+  unsigned int nbr_syms = 0;
 
   /* Current state while reading stabs.  */
   enum
