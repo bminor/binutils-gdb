@@ -89,9 +89,24 @@ struct sh_frame_cache
 static int
 sh_is_renesas_calling_convention (struct type *func_type)
 {
-  return ((func_type
-	   && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GNU_renesas_sh)
-	  || sh_active_calling_convention == sh_cc_renesas);
+  int val = 0;
+
+  if (func_type)
+    {
+      func_type = check_typedef (func_type);
+
+      if (TYPE_CODE (func_type) == TYPE_CODE_PTR)
+        func_type = check_typedef (TYPE_TARGET_TYPE (func_type));
+
+      if (TYPE_CODE (func_type) == TYPE_CODE_FUNC
+          && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GNU_renesas_sh)
+        val = 1;
+    }
+
+  if (sh_active_calling_convention == sh_cc_renesas)
+    val = 1;
+
+  return val;
 }
 
 static const char *
