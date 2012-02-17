@@ -1,3 +1,7 @@
+2012-02-17  Tristan Gingold  <gingold@adacore.com>
+ 
+	* solib-darwin.c (darwin_current_sos): Check magic and filetype
+ 
 2012-02-17  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* sh-tdep.c (sh_is_renesas_calling_convention): Fix handling of

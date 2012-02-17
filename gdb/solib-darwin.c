@@ -41,6 +41,7 @@
 #include "auxv.h"
 #include "exceptions.h"
 #include "mach-o.h"
+#include "mach-o/external.h"
 
 struct gdb_dyld_image_info
 {
@@ -210,6 +211,7 @@ static struct so_list *
 darwin_current_sos (void)
 {
   struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int ptr_len = TYPE_LENGTH (ptr_type);
   unsigned int image_info_size;
   CORE_ADDR lm;
@@ -226,13 +228,17 @@ darwin_current_sos (void)
   image_info_size = ptr_len * 3;
 
   /* Read infos for each solib.
-     This first entry is ignored as this is the executable itself.  */
-  for (i = 1; i < dyld_all_image.count; i++)
+     The first entry was rumored to be the executable itself, but this is not
+     true when a large number of shared libraries are used (table expanded ?).
+     We now check all entries, but discard executable images.  */
+  for (i = 0; i < dyld_all_image.count; i++)
     {
       CORE_ADDR info = dyld_all_image.info + i * image_info_size;
       char buf[image_info_size];
       CORE_ADDR load_addr;
       CORE_ADDR path_addr;
+      struct mach_o_header_external hdr;
+      unsigned long hdr_val;
       char *file_path;
       int errcode;
       struct darwin_so_list *dnew;
@@ -245,6 +251,20 @@ darwin_current_sos (void)
 
       load_addr = extract_typed_address (buf, ptr_type);
       path_addr = extract_typed_address (buf + ptr_len, ptr_type);
+
+      /* Read Mach-O header from memory.  */
+      if (target_read_memory (load_addr, (char *) &hdr, sizeof (hdr) - 4))
+	break;
+      /* Discard wrong magic numbers.  Shouldn't happen.  */
+      hdr_val = extract_unsigned_integer
+        (hdr.magic, sizeof (hdr.magic), byte_order);
+      if (hdr_val != BFD_MACH_O_MH_MAGIC && hdr_val != BFD_MACH_O_MH_MAGIC_64)
+        continue;
+      /* Discard executable.  Should happen only once.  */
+      hdr_val = extract_unsigned_integer
+        (hdr.filetype, sizeof (hdr.filetype), byte_order);
+      if (hdr_val == BFD_MACH_O_MH_EXECUTE)
+        continue;
 
       target_read_string (path_addr, &file_path,
 			  SO_NAME_MAX_PATH_SIZE - 1, &errcode);
