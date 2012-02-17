@@ -2919,11 +2919,18 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	      if ((insn & 0xff000fff) != 0x4d000000 &&
-		  (insn & 0xffff0000) != 0xc0e50000)
+		  (insn & 0xffff0000) != 0xc0e50000 &&
+		  (insn & 0xff000000) != 0x0d000000)
 		invalid_tls_insn (input_bfd, input_section, rel);
 	      if (!info->shared && (h == NULL || h->dynindx == -1))
 		{
-		  if ((insn & 0xff000000) == 0x4d000000)
+		  if ((insn & 0xff000000) == 0x0d000000)
+		    {
+		      /* GD->LE transition.
+			 basr rx, ry -> nopr r7 */
+		      insn = 0x07070000 | (insn & 0xffff);
+		    }
+		  else if ((insn & 0xff000000) == 0x4d000000)
 		    {
 		      /* GD->LE transition.
 			 bas %r14,0(%rx,%r13) -> bc 0,0  */
@@ -2932,7 +2939,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		  else
 		    {
 		      /* GD->LE transition.
-			 brasl %r14,_tls_get_addr@plt -> brcl 0,.  */
+			 brasl %r14,_tls_get_offset@plt -> brcl 0,.  */
 		      insn = 0xc0040000;
 		      bfd_put_16 (output_bfd, 0x0000,
 				  contents + rel->r_offset + 4);
@@ -2940,6 +2947,11 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 	      else
 		{
+		  /* If basr is used in the pic case to invoke
+		     _tls_get_offset, something went wrong before.  */
+		  if ((insn & 0xff000000) == 0x0d000000)
+		    invalid_tls_insn (input_bfd, input_section, rel);
+
 		  if ((insn & 0xff000000) == 0x4d000000)
 		    {
 		      /* GD->IE transition.
@@ -2966,9 +2978,17 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		  insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 		  if ((insn & 0xff000fff) != 0x4d000000 &&
-		      (insn & 0xffff0000) != 0xc0e50000)
+		      (insn & 0xffff0000) != 0xc0e50000 &&
+		      (insn & 0xff000000) != 0x0d000000)
 		    invalid_tls_insn (input_bfd, input_section, rel);
-		  if ((insn & 0xff000000) == 0x4d000000)
+
+		  if ((insn & 0xff000000) == 0x0d000000)
+		    {
+		      /* LD->LE transition.
+			 basr rx, ry -> nopr r7 */
+		      insn = 0x07070000 | (insn & 0xffff);
+		    }
+		  else if ((insn & 0xff000000) == 0x4d000000)
 		    {
 		      /* LD->LE transition.
 			 bas %r14,0(%rx,%r13) -> bc 0,0  */
@@ -2977,7 +2997,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		  else
 		    {
 		      /* LD->LE transition.
-			 brasl %r14,__tls_get_addr@plt -> brcl 0,. */
+			 brasl %r14,__tls_get_offset@plt -> brcl 0,. */
 		      insn = 0xc0040000;
 		      bfd_put_16 (output_bfd, 0x0000,
 				  contents + rel->r_offset + 4);

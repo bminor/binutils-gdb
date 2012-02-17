@@ -1,3 +1,8 @@
+2012-02-17  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* elf32-s390.c (elf_s390_relocate_section): Support basr in the
+	GD->LE and LD->LE optimizations.
+
 2012-02-16  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/13355
