@@ -1,3 +1,12 @@
+2012-02-17  Tristan Gingold  <gingold@adacore.com>
+
+	* reloc.c (BFD_RELOC_MACH_O_LOCAL_SECTDIFF):
+	* libbfd.h: Regenerated.
+	* bfd-in2.h: Likewise.
+	* mach-o-i386.c (i386_howto_table): Include local sectdiff.
+	(bfd_mach_o_i386_swap_reloc_in): Update for local sectdiff.
+	(bfd_mach_o_i386_swap_reloc_out): Likewise.
+
 2012-02-17  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* elf32-s390.c (elf_s390_relocate_section): Support basr in the

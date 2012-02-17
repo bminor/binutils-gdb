@@ -2161,6 +2161,7 @@ enum bfd_architecture
 #define bfd_mach_tilegx    1
   bfd_arch_last
   };
+
 typedef struct bfd_arch_info
 {
   int bits_per_word;
@@ -4823,6 +4824,9 @@ BFD_RELOC_XTENSA_ASM_EXPAND.  */
 /* Difference between two section addreses.  Must be followed by a
 BFD_RELOC_MACH_O_PAIR.  */
   BFD_RELOC_MACH_O_SECTDIFF,
+
+/* Like BFD_RELOC_MACH_O_SECTDIFF but with a local symbol.  */
+  BFD_RELOC_MACH_O_LOCAL_SECTDIFF,
 
 /* Pair of relocation.  Contains the first symbol.  */
   BFD_RELOC_MACH_O_PAIR,

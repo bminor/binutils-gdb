@@ -63,6 +63,7 @@ bfd_mach_o_i386_mkobject (bfd *abfd)
 
 static reloc_howto_type i386_howto_table[]=
 {
+  /* 0 */
   HOWTO(BFD_RELOC_32, 0, 2, 32, FALSE, 0,
 	complain_overflow_bitfield,
 	NULL, "32",
@@ -79,6 +80,7 @@ static reloc_howto_type i386_howto_table[]=
 	complain_overflow_bitfield,
 	NULL, "DISP32",
 	FALSE, 0xffffffff, 0xffffffff, TRUE),
+  /* 4 */
   HOWTO(BFD_RELOC_16_PCREL, 0, 1, 16, TRUE, 0,
 	complain_overflow_bitfield,
 	NULL, "DISP16",
@@ -86,6 +88,10 @@ static reloc_howto_type i386_howto_table[]=
   HOWTO(BFD_RELOC_MACH_O_SECTDIFF, 0, 2, 32, FALSE, 0,
 	complain_overflow_bitfield,
 	NULL, "SECTDIFF_32",
+	FALSE, 0xffffffff, 0xffffffff, FALSE),
+  HOWTO(BFD_RELOC_MACH_O_LOCAL_SECTDIFF, 0, 2, 32, FALSE, 0,
+	complain_overflow_bitfield,
+	NULL, "LSECTDIFF_32",
 	FALSE, 0xffffffff, 0xffffffff, FALSE),
   HOWTO(BFD_RELOC_MACH_O_PAIR, 0, 2, 32, FALSE, 0,
 	complain_overflow_bitfield,
@@ -103,14 +109,18 @@ bfd_mach_o_i386_swap_reloc_in (arelent *res, bfd_mach_o_reloc_info *reloc)
         case BFD_MACH_O_GENERIC_RELOC_PAIR:
           if (reloc->r_length != 2)
             return FALSE;
-          res->howto = &i386_howto_table[6];
+          res->howto = &i386_howto_table[7];
           res->address = res[-1].address;
           return TRUE;
         case BFD_MACH_O_GENERIC_RELOC_SECTDIFF:
-        case BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF:
           if (reloc->r_length != 2)
             return FALSE;
           res->howto = &i386_howto_table[5];
+          return TRUE;
+        case BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF:
+          if (reloc->r_length != 2)
+            return FALSE;
+          res->howto = &i386_howto_table[6];
           return TRUE;
         default:
           return FALSE;
@@ -181,6 +191,15 @@ bfd_mach_o_i386_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_length = 2;
       rinfo->r_extern = 0;
       rinfo->r_value = (*rel->sym_ptr_ptr)->value 
+        + (*rel->sym_ptr_ptr)->section->vma;
+      break;
+    case BFD_RELOC_MACH_O_LOCAL_SECTDIFF:
+      rinfo->r_scattered = 1;
+      rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF;
+      rinfo->r_pcrel = 0;
+      rinfo->r_length = 2;
+      rinfo->r_extern = 0;
+      rinfo->r_value = (*rel->sym_ptr_ptr)->value
         + (*rel->sym_ptr_ptr)->section->vma;
       break;
     case BFD_RELOC_MACH_O_PAIR:

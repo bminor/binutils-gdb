@@ -5594,6 +5594,10 @@ ENUMDOC
   Difference between two section addreses.  Must be followed by a
   BFD_RELOC_MACH_O_PAIR.
 ENUM
+  BFD_RELOC_MACH_O_LOCAL_SECTDIFF
+ENUMDOC
+  Like BFD_RELOC_MACH_O_SECTDIFF but with a local symbol.
+ENUM
   BFD_RELOC_MACH_O_PAIR
 ENUMDOC
   Pair of relocation.  Contains the first symbol.
