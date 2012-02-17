@@ -1,3 +1,7 @@
+2012-02-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/strace.exp (strace_info_marker): Test `info threads'.
+
 2012-02-16  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/inferior-died.c: Don't include stdio.h.

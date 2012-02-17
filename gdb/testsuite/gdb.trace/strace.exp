@@ -55,6 +55,7 @@ gdb_load_shlibs $libipa
 proc strace_info_marker { } {
     global executable
     global pf_prefix
+    global gdb_prompt
 
     set old_pf_prefix $pf_prefix
     lappend pf_prefix "info_marker"
@@ -71,6 +72,13 @@ proc strace_info_marker { } {
     gdb_test "info static-tracepoint-markers" \
 	".*ust/bar\[\t \]+n\[\t \]+.*ust/bar2\[\t \]+n\[\t \]+.*"
 
+    # List all the thread.  It is expected to get three threads without
+    # any errors.
+    gdb_test_multiple "info threads 3 2 1" "info threads" {
+	-re "3\[ \t\]+Thread .*2\[ \t\]+Thread .*1\[ \t\]+Thread .*${gdb_prompt} $" {
+	    pass "info threads"
+	}
+    }
     set pf_prefix $old_pf_prefix
 }
 
