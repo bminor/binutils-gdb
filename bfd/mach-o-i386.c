@@ -97,6 +97,19 @@ static reloc_howto_type i386_howto_table[]=
 	complain_overflow_bitfield,
 	NULL, "PAIR_32",
 	FALSE, 0xffffffff, 0xffffffff, FALSE),
+  /* 8 */
+  HOWTO(BFD_RELOC_MACH_O_SECTDIFF, 0, 1, 16, FALSE, 0,
+	complain_overflow_bitfield,
+	NULL, "SECTDIFF_16",
+	FALSE, 0xffff, 0xffff, FALSE),
+  HOWTO(BFD_RELOC_MACH_O_LOCAL_SECTDIFF, 0, 1, 16, FALSE, 0,
+	complain_overflow_bitfield,
+	NULL, "LSECTDIFF_16",
+	FALSE, 0xffff, 0xffff, FALSE),
+  HOWTO(BFD_RELOC_MACH_O_PAIR, 0, 1, 16, FALSE, 0,
+	complain_overflow_bitfield,
+	NULL, "PAIR_16",
+	FALSE, 0xffff, 0xffff, FALSE),
 };
 
 static bfd_boolean
@@ -107,21 +120,43 @@ bfd_mach_o_i386_swap_reloc_in (arelent *res, bfd_mach_o_reloc_info *reloc)
       switch (reloc->r_type)
         {
         case BFD_MACH_O_GENERIC_RELOC_PAIR:
-          if (reloc->r_length != 2)
-            return FALSE;
-          res->howto = &i386_howto_table[7];
-          res->address = res[-1].address;
-          return TRUE;
+          if (reloc->r_length == 2)
+            {
+	      res->howto = &i386_howto_table[7];
+	      res->address = res[-1].address;
+	      return TRUE;
+            }
+          else if (reloc->r_length == 1)
+	    {
+	      res->howto = &i386_howto_table[10];
+	      res->address = res[-1].address;
+	      return TRUE;
+	    }
+          return FALSE;
         case BFD_MACH_O_GENERIC_RELOC_SECTDIFF:
-          if (reloc->r_length != 2)
-            return FALSE;
-          res->howto = &i386_howto_table[5];
-          return TRUE;
+          if (reloc->r_length == 2)
+            {
+	      res->howto = &i386_howto_table[5];
+	      return TRUE;
+            }
+          else if (reloc->r_length == 1)
+            {
+	      res->howto = &i386_howto_table[8];
+	      return TRUE;
+            }
+          return FALSE;
         case BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF:
-          if (reloc->r_length != 2)
-            return FALSE;
-          res->howto = &i386_howto_table[6];
-          return TRUE;
+          if (reloc->r_length == 2)
+            {
+	      res->howto = &i386_howto_table[6];
+	      return TRUE;
+            }
+          else if (reloc->r_length == 1)
+            {
+	      res->howto = &i386_howto_table[9];
+	      return TRUE;
+            }
+          return FALSE;
         default:
           return FALSE;
         }
@@ -188,29 +223,26 @@ bfd_mach_o_i386_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_scattered = 1;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_SECTDIFF;
       rinfo->r_pcrel = 0;
-      rinfo->r_length = 2;
+      rinfo->r_length = rel->howto->size;
       rinfo->r_extern = 0;
-      rinfo->r_value = (*rel->sym_ptr_ptr)->value 
-        + (*rel->sym_ptr_ptr)->section->vma;
+      rinfo->r_value = rel->addend;
       break;
     case BFD_RELOC_MACH_O_LOCAL_SECTDIFF:
       rinfo->r_scattered = 1;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF;
       rinfo->r_pcrel = 0;
-      rinfo->r_length = 2;
+      rinfo->r_length = rel->howto->size;
       rinfo->r_extern = 0;
-      rinfo->r_value = (*rel->sym_ptr_ptr)->value
-        + (*rel->sym_ptr_ptr)->section->vma;
+      rinfo->r_value = rel->addend;
       break;
     case BFD_RELOC_MACH_O_PAIR:
       rinfo->r_address = 0;
       rinfo->r_scattered = 1;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_PAIR;
       rinfo->r_pcrel = 0;
-      rinfo->r_length = 2;
+      rinfo->r_length = rel->howto->size;
       rinfo->r_extern = 0;
-      rinfo->r_value = (*rel->sym_ptr_ptr)->value 
-        + (*rel->sym_ptr_ptr)->section->vma;
+      rinfo->r_value = rel->addend;
       break;
     default:
       return FALSE;
