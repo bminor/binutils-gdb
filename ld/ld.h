@@ -1,6 +1,6 @@
 /* ld.h -- general linker header file
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -325,9 +325,6 @@ extern ld_config_type config;
 
 extern FILE * saved_script_handle;
 extern bfd_boolean force_make_executable;
-
-/* Non-zero if we are processing a --defsym from the command line.  */
-extern int parsing_defsym;
 
 extern int yyparse (void);
 extern void add_cref (const char *, bfd *, asection *, bfd_vma);

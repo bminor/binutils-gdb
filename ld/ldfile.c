@@ -1,6 +1,6 @@
 /* Linker file opening and searching.
    Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2007, 2008, 2009, 2010, 2011
+   2003, 2004, 2005, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -40,7 +40,6 @@
 #include "plugin.h"
 #endif /* ENABLE_PLUGINS */
 
-const char * ldfile_input_filename;
 bfd_boolean  ldfile_assumed_script = FALSE;
 const char * ldfile_output_machine_name = "";
 unsigned long ldfile_output_machine;
@@ -638,7 +637,6 @@ ldfile_open_command_file_1 (const char *name, bfd_boolean default_only)
 
   lex_push_file (ldlex_input_stack, name);
 
-  ldfile_input_filename = name;
   lineno = 1;
 
   saved_script_handle = ldlex_input_stack;

@@ -1,3 +1,36 @@
+2012-02-18  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13343
+	* ld.h (parsing_defsym): Delete.
+	* ldexp.c (exp_intop, exp_bigintop, exp_relop): Set type.filename.
+	(fold_binary, fold_name, exp_fold_tree_1, exp_get_vma, exp_get_fill,
+	exp_get_abs_int): Add tree arg for %S in error messages.  Don't
+	fudge lineno.
+	(exp_binop, exp_unop, exp_nameop, exp_assop, exp_assert): Copy
+	type.filename from sub-tree.
+	(exp_trinop): Likewise, and use "cond" rather than "lhs".
+	* ldexp.h (node_type): Add filename field to struct.
+	* ldfile.c (ldfile_input_filename): Delete.  Remove all refs.
+	* ldfile.h (ldfile_input_filename): Delete.
+	* ldgram.y (phdr_type, phdr_qualifiers, yyerror): Add NULL arg for
+	%S in error messages.
+	* ldemul.c (syslib_default, hll_default): Likewise.
+	* ldlang.c (lang_memory_region_lookup, lang_memory_region_alias,
+	lang_get_regions, lang_new_phdr): Likewise.
+	(lang_size_sections_1): Pass addr_tree for %S.
+	* ldlex.h (lex_redirect): Update prototype.
+	(ldlex_filename): Declare.
+	* ldlex.l (<EOF>): Don't set ldfile_input_filename.
+	(lex_redirect): Add fake_filename and count params.  Push
+	fake_filename to file_name_stack and init lineno from count.
+	(ldlex_filename): New function.
+	(lex_warn_invalid): Use above.
+	* ldmain.c (main): Update lex_redirect call.
+	* ldmisc.c (vfinfo <%S>): Take file name and line number from
+	etree_type arg, or use current if arg is NULL.
+	* lexsup.c (parsing_defsym): Delete.
+	(parse_args <OPTION_DEFSYM>): Update lex_redirect call.
+
 2012-02-13  Kai Tietz  <ktietz@redhat.com>
 
 	* deffilep.y (find_export_in_list): Set is_indent for

@@ -1,6 +1,6 @@
 /* A YACC grammar to parse a superset of the AT&T linker scripting language.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
@@ -1219,7 +1219,7 @@ phdr_type:
 			    {
 			      einfo (_("\
 %X%P:%S: unknown phdr type `%s' (try integer literal)\n"),
-				     s);
+				     NULL, s);
 			      $$ = exp_intop (0);
 			    }
 			}
@@ -1242,7 +1242,8 @@ phdr_qualifiers:
 		  else if (strcmp ($1, "FLAGS") == 0 && $2 != NULL)
 		    $$.flags = $2;
 		  else
-		    einfo (_("%X%P:%S: PHDRS syntax error at `%s'\n"), $1);
+		    einfo (_("%X%P:%S: PHDRS syntax error at `%s'\n"),
+			   NULL, $1);
 		}
 	|	AT '(' exp ')' phdr_qualifiers
 		{
@@ -1448,9 +1449,9 @@ yyerror(arg)
 {
   if (ldfile_assumed_script)
     einfo (_("%P:%s: file format not recognized; treating as linker script\n"),
-	   ldfile_input_filename);
+	   ldlex_filename ());
   if (error_index > 0 && error_index < ERROR_NAME_MAX)
-     einfo ("%P%F:%S: %s in %s\n", arg, error_names[error_index-1]);
+    einfo ("%P%F:%S: %s in %s\n", NULL, arg, error_names[error_index - 1]);
   else
-     einfo ("%P%F:%S: %s\n", arg);
+    einfo ("%P%F:%S: %s\n", NULL, arg);
 }

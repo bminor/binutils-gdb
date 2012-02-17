@@ -1312,12 +1312,13 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
         {
           if (create)
             einfo (_("%P:%S: warning: redeclaration of memory region `%s'\n"),
-                   name);
+                   NULL, name);
           return r;
         }
 
   if (!create && strcmp (name, DEFAULT_MEMORY_REGION))
-    einfo (_("%P:%S: warning: memory region `%s' not declared\n"), name);
+    einfo (_("%P:%S: warning: memory region `%s' not declared\n"),
+	   NULL, name);
 
   new_region = (lang_memory_region_type *)
       stat_alloc (sizeof (lang_memory_region_type));
@@ -1351,7 +1352,7 @@ lang_memory_region_alias (const char * alias, const char * region_name)
      the default memory region.  */
   if (strcmp (region_name, DEFAULT_MEMORY_REGION) == 0
       || strcmp (alias, DEFAULT_MEMORY_REGION) == 0)
-    einfo (_("%F%P:%S: error: alias for default memory region\n"));
+    einfo (_("%F%P:%S: error: alias for default memory region\n"), NULL);
 
   /* Look for the target region and check if the alias is not already
      in use.  */
@@ -1364,15 +1365,14 @@ lang_memory_region_alias (const char * alias, const char * region_name)
         if (strcmp (n->name, alias) == 0)
           einfo (_("%F%P:%S: error: redefinition of memory region "
                    "alias `%s'\n"),
-                 alias);
+                 NULL, alias);
       }
 
   /* Check if the target region exists.  */
   if (region == NULL)
     einfo (_("%F%P:%S: error: memory region `%s' "
              "for alias `%s' does not exist\n"),
-           region_name,
-           alias);
+           NULL, region_name, alias);
 
   /* Add alias to region name list.  */
   n = (lang_memory_region_name *) stat_alloc (sizeof (lang_memory_region_name));
@@ -4891,7 +4891,7 @@ lang_size_sections_1
 		else if (expld.phase != lang_mark_phase_enum)
 		  einfo (_("%F%S: non constant or forward reference"
 			   " address expression for section %s\n"),
-			 os->name);
+			 os->addr_tree, os->name);
 	      }
 
 	    if (os->bfd_section == NULL)
@@ -6948,7 +6948,8 @@ lang_get_regions (lang_memory_region_type **region,
     *region = lang_memory_region_lookup (memspec, FALSE);
 
   if (have_lma && lma_memspec != 0)
-    einfo (_("%X%P:%S: section has both a load address and a load region\n"));
+    einfo (_("%X%P:%S: section has both a load address and a load region\n"),
+	   NULL);
 }
 
 void
@@ -7135,7 +7136,8 @@ lang_new_phdr (const char *name,
 	&& (*pp)->type == 1
 	&& !((*pp)->filehdr || (*pp)->phdrs))
       {
-	einfo (_("%X%P:%S: PHDRS and FILEHDR are not supported when prior PT_LOAD headers lack them\n"));
+	einfo (_("%X%P:%S: PHDRS and FILEHDR are not supported"
+		 " when prior PT_LOAD headers lack them\n"), NULL);
 	hdrs = FALSE;
       }
 

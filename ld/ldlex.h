@@ -1,6 +1,6 @@
 /* ldlex.h -
-   Copyright 1991, 1992, 1993, 1994, 1995, 1997, 2000, 2003, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995, 1997, 2000, 2003, 2005, 2006,
+   2007, 2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -42,7 +42,7 @@ extern const char *lex_string;
 /* In ldlex.l.  */
 extern int yylex (void);
 extern void lex_push_file (FILE *, const char *);
-extern void lex_redirect (const char *);
+extern void lex_redirect (const char *, const char *, unsigned int);
 extern void ldlex_script (void);
 extern void ldlex_mri_script (void);
 extern void ldlex_version_script (void);
@@ -52,6 +52,7 @@ extern void ldlex_expression (void);
 extern void ldlex_both (void);
 extern void ldlex_command (void);
 extern void ldlex_popstate (void);
+extern const char* ldlex_filename (void);
 
 /* In lexsup.c.  */
 extern int lex_input (void);

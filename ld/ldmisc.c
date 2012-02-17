@@ -1,6 +1,6 @@
 /* ldmisc.c
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2010, 2011
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2010, 2011, 2012
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -51,7 +51,7 @@
  %I filename from a lang_input_statement_type
  %P print program name
  %R info about a relent
- %S print script file and linenumber
+ %S print script file and linenumber from etree_type.
  %T symbol name
  %V hex bfd_vma
  %W hex bfd_vma with 0x with no leading zeros taking up 8 spaces
@@ -240,12 +240,19 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 
 	    case 'S':
 	      /* Print script file and linenumber.  */
-	      if (parsing_defsym)
-		fprintf (fp, "--defsym %s", lex_string);
-	      else if (ldfile_input_filename != NULL)
-		fprintf (fp, "%s:%u", ldfile_input_filename, lineno);
-	      else
-		fprintf (fp, _("built in linker script:%u"), lineno);
+	      {
+		node_type node;
+		etree_type *tp = va_arg (arg, etree_type *);
+
+		if (tp == NULL)
+		  {
+		    tp = (etree_type *) &node;
+		    tp->type.filename = ldlex_filename ();
+		    tp->type.lineno = lineno;
+		  }
+		if (tp->type.filename != NULL)
+		  fprintf (fp, "%s:%u", tp->type.filename, tp->type.lineno);
+	      }
 	      break;
 
 	    case 'R':

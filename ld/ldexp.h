@@ -1,6 +1,6 @@
 /* ldexp.h -
    Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2007, 2011 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007, 2011, 2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -46,6 +46,7 @@ enum node_tree_enum {
 typedef struct {
   int node_code;
   unsigned int lineno;
+  const char *filename;
   enum node_tree_enum node_class;
 } node_type;
 

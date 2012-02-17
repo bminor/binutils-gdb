@@ -3,7 +3,7 @@
 %{
 
 /* Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -448,17 +448,11 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 
 <<EOF>> {
   include_stack_ptr--;
-
   if (include_stack_ptr == 0)
-  {
     yyterminate ();
-  }
   else
-  {
     yy_switch_to_buffer (include_stack[include_stack_ptr]);
-  }
 
-  ldfile_input_filename = file_name_stack[include_stack_ptr - 1];
   lineno = lineno_stack[include_stack_ptr];
 
   return END;
@@ -534,7 +528,7 @@ yy_create_string_buffer (const char *string, size_t size)
    on the include stack.  */
 
 void
-lex_redirect (const char *string)
+lex_redirect (const char *string, const char *fake_filename, unsigned int count)
 {
   YY_BUFFER_STATE tmp;
 
@@ -543,11 +537,11 @@ lex_redirect (const char *string)
     {
       einfo("%F: macros nested too deeply\n");
     }
-  file_name_stack[include_stack_ptr] = "redirect";
+  file_name_stack[include_stack_ptr] = fake_filename;
   lineno_stack[include_stack_ptr] = lineno;
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
   include_stack_ptr++;
-  lineno = 1;
+  lineno = count;
   tmp = yy_create_string_buffer (string, strlen (string));
   yy_switch_to_buffer (tmp);
 }
@@ -611,6 +605,15 @@ void
 ldlex_popstate (void)
 {
   yy_start = *(--state_stack_p);
+}
+
+/* Return the current file name, or the previous file if no file is
+   current.  */
+
+const char*
+ldlex_filename (void)
+{
+  return file_name_stack[include_stack_ptr - (include_stack_ptr != 0)];
 }
 
 
@@ -685,7 +688,7 @@ lex_warn_invalid (char *where, char *what)
   if (ldfile_assumed_script)
     {
       bfd_set_error (bfd_error_file_not_recognized);
-      einfo ("%F%s: file not recognized: %E\n", ldfile_input_filename);
+      einfo ("%F%s: file not recognized: %E\n", ldlex_filename ());
     }
 
   if (! ISPRINT (*what))
@@ -694,5 +697,5 @@ lex_warn_invalid (char *where, char *what)
       what = buf;
     }
 
-  einfo ("%P:%S: ignoring invalid character `%s'%s\n", what, where);
+  einfo ("%P:%S: ignoring invalid character `%s'%s\n", NULL, what, where);
 }
