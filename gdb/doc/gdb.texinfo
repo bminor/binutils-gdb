@@ -24629,7 +24629,7 @@ then @value{GDBN} will look for @var{real-name} in all of the
 directories mentioned in the value of @code{debug-file-directory}.
 
 Finally, if this file does not exist, then @value{GDBN} will look for
-a file named @file{@var{data-directory}/python/auto-load/@var{real-name}}, where
+a file named @file{@var{data-directory}/auto-load/@var{real-name}}, where
 @var{data-directory} is @value{GDBN}'s data directory (available via
 @code{show data-directory}, @pxref{Data Files}), and @var{real-name}
 is the object file's real name, as described above.
