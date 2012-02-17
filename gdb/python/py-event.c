@@ -132,6 +132,13 @@ evpy_emit_event (PyObject *event,
   return -1;
 }
 
+static PyGetSetDef event_object_getset[] =
+{
+  { "__dict__", gdb_py_generic_dict, NULL,
+    "The __dict__ for this event.", &event_object_type },
+  { NULL }
+};
+
 PyTypeObject event_object_type =
 {
   PyObject_HEAD_INIT (NULL)
@@ -164,7 +171,7 @@ PyTypeObject event_object_type =
   0,                                          /* tp_iternext */
   0,                                          /* tp_methods */
   0,                                          /* tp_members */
-  0,                                          /* tp_getset */
+  event_object_getset,			      /* tp_getset */
   0,                                          /* tp_base */
   0,                                          /* tp_dict */
   0,                                          /* tp_descr_get */

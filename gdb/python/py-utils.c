@@ -373,3 +373,23 @@ gdb_py_int_as_long (PyObject *obj, long *result)
   *result = PyInt_AsLong (obj);
   return ! (*result == -1 && PyErr_Occurred ());
 }
+
+
+
+/* Generic implementation of the __dict__ attribute for objects that
+   have a dictionary.  The CLOSURE argument should be the type object.
+   This only handles positive values for tp_dictoffset.  */
+
+PyObject *
+gdb_py_generic_dict (PyObject *self, void *closure)
+{
+  PyObject *result;
+  PyTypeObject *type_obj = closure;
+  char *raw_ptr;
+
+  raw_ptr = (char *) self + type_obj->tp_dictoffset;
+  result = * (PyObject **) raw_ptr;
+
+  Py_INCREF (result);
+  return result;
+}

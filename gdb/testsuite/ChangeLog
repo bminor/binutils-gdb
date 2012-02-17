@@ -1,3 +1,9 @@
+2012-02-17  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-events.py (exit_handler): Add test for 'dir'.
+	* gdb.python/py-events.exp: Check 'dir' output.
+	* gdb.python/py-type.exp (test_fields): Add test for 'dir'.
+
 2012-02-17  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/strace.exp (strace_info_marker): Test `info threads'.

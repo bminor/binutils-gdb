@@ -1,3 +1,13 @@
+2012-02-17  Tom Tromey  <tromey@redhat.com>
+
+	PR python/12070:
+	* python/py-event.c (event_object_getset): New global.
+	(event_object_type): Reference it.
+	* python/py-type.c (field_object_getset): New global.
+	(field_object_type): Reference it.
+	* python/python-internal.h (gdb_py_generic_dict): Declare.
+	* python/py-utils.c (gdb_py_generic_dict): New function.
+
 2012-02-17  Tristan Gingold  <gingold@adacore.com>
  
 	* solib-darwin.c (darwin_current_sos): Check magic and filetype

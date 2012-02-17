@@ -342,4 +342,6 @@ PyObject *gdb_py_object_from_longest (LONGEST l);
 PyObject *gdb_py_object_from_ulongest (ULONGEST l);
 int gdb_py_int_as_long (PyObject *, long *);
 
+PyObject *gdb_py_generic_dict (PyObject *self, void *closure);
+
 #endif /* GDB_PYTHON_INTERNAL_H */

@@ -86,6 +86,11 @@ proc test_fields {lang} {
   gdb_test "python print fields\[0\].name" "a" "Check structure field a name"
   gdb_test "python print fields\[1\].name" "b" "Check structure field b name"
 
+  # Regression test for
+  # http://sourceware.org/bugzilla/show_bug.cgi?id=12070.
+  gdb_test "python print 'type' in dir(fields\[0\])" "True" \
+    "Check that dir includes name"
+
   # Test Python mapping behavior of gdb.Type for structs/classes
   gdb_test "python print len(st.type)" "2" "Check number of fields"
   gdb_test "python print st.type\['a'\].name" "a" "Check fields lookup by name"

@@ -85,10 +85,12 @@ delete_breakpoints
 gdb_test "continue" ".*event type: continue.*
 .*event type: exit.*
 .*exit code: 12.*
-.*exit inf: 1.*" "Inferior 1 terminated."
+.*exit inf: 1.*
+dir ok: True.*" "Inferior 1 terminated."
 
 gdb_test "inferior 2" ".*Switching to inferior 2.*"
 gdb_test "continue" ".*event type: continue.*
 .*event type: exit.*
 .*exit code: 12.*
-.*exit inf: 2.*" "Inferior 2 terminated."
+.*exit inf: 2.*
+dir ok: True.*" "Inferior 2 terminated."
