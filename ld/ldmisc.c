@@ -241,12 +241,12 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 	    case 'S':
 	      /* Print script file and linenumber.  */
 	      {
-		node_type node;
+		etree_type node;
 		etree_type *tp = va_arg (arg, etree_type *);
 
 		if (tp == NULL)
 		  {
-		    tp = (etree_type *) &node;
+		    tp = &node;
 		    tp->type.filename = ldlex_filename ();
 		    tp->type.lineno = lineno;
 		  }

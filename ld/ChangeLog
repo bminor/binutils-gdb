@@ -1,3 +1,8 @@
+2012-02-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ldmisc.c (vfinfo <%S>): Use same type and avoid cast for
+	temporary variable node used for NULL argument.
+
 2012-02-18  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13343
