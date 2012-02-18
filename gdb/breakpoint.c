@@ -8766,6 +8766,7 @@ break_range_command (char *arg, int from_tty)
     means EXP is variable.  Also the constant detection may fail for
     some constant expressions and in such case still falsely return
     zero.  */
+
 static int
 watchpoint_exp_is_const (const struct expression *exp)
 {

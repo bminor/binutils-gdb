@@ -1,3 +1,8 @@
+2012-20-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (watchpoint_exp_is_const): Add missing empty line
+	between function description and implementation.
+
 2012-02-17  Tom Tromey  <tromey@redhat.com>
 
 	PR python/12070:
