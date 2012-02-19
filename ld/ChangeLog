@@ -1,3 +1,13 @@
+2012-02-19  Kai Tietz  <ktietz@redhat.com>
+
+	* deffilep.y (cmp_import_elem): Sort first by module name.
+	* pe-dll.c (process_def_file_and_drectve): Free strings
+	from removed export-element.
+	(add_bfd_to_link): Optimize loop on import-elements and lower
+	allocated memory.
+	(pe_implied_import_dll): Pass NULL instead of 0 for pointer
+	argument.
+
 2012-02-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ldmisc.c (vfinfo <%S>): Use same type and avoid cast for

@@ -834,16 +834,6 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
   /* Convenience, but watch out for it changing.  */
   e = pe_def_file->exports;
 
-  exported_symbol_offsets = xmalloc (NE * sizeof (bfd_vma));
-  exported_symbol_sections = xmalloc (NE * sizeof (struct bfd_section *));
-
-  memset (exported_symbol_sections, 0, NE * sizeof (struct bfd_section *));
-  max_ordinal = 0;
-  min_ordinal = 65536;
-  count_exported = 0;
-  count_exported_byname = 0;
-  count_with_ordinals = 0;
-
   for (i = 0, j = 0; i < NE; i++)
     {
       if (i > 0 && strcmp (e[i].name, e[i - 1].name) == 0)
@@ -872,6 +862,12 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	  e[j - 1].flag_constant |= e[i].flag_constant;
 	  e[j - 1].flag_noname |= e[i].flag_noname;
 	  e[j - 1].flag_data |= e[i].flag_data;
+	  if (e[i].name)
+	    free (e[i].name);
+	  if (e[i].internal_name)
+	    free (e[i].internal_name);
+	  if (e[i].its_name)
+	    free (e[i].its_name);
 	}
       else
 	{
@@ -881,6 +877,16 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	}
     }
   pe_def_file->num_exports = j;	/* == NE */
+
+  exported_symbol_offsets = xmalloc (NE * sizeof (bfd_vma));
+  exported_symbol_sections = xmalloc (NE * sizeof (struct bfd_section *));
+
+  memset (exported_symbol_sections, 0, NE * sizeof (struct bfd_section *));
+  max_ordinal = 0;
+  min_ordinal = 65536;
+  count_exported = 0;
+  count_exported_byname = 0;
+  count_with_ordinals = 0;
 
   for (i = 0; i < NE; i++)
     {
@@ -2861,99 +2867,101 @@ add_bfd_to_link (bfd *abfd, const char *name, struct bfd_link_info *linfo)
 void
 pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *linfo)
 {
+  int i, j;
   def_file_module *module;
+  def_file_import *imp;
 
   pe_dll_id_target (bfd_get_target (output_bfd));
 
   if (!pe_def_file)
     return;
 
+  imp = pe_def_file->imports;
+
   for (module = pe_def_file->modules; module; module = module->next)
     {
-      int i, do_this_dll;
+      int do_this_dll = 0;
+
+      for (i = 0; i < pe_def_file->num_imports && imp[i].module != module; i++)
+	;
+      if (i >= pe_def_file->num_imports)
+        continue;
 
       dll_filename = module->name;
       dll_symname = xstrdup (module->name);
-      for (i = 0; dll_symname[i]; i++)
-	if (!ISALNUM (dll_symname[i]))
-	  dll_symname[i] = '_';
+      for (j = 0; dll_symname[j]; j++)
+	if (!ISALNUM (dll_symname[j]))
+	  dll_symname[j] = '_';
 
-      do_this_dll = 0;
+      for (; i < pe_def_file->num_imports && imp[i].module == module; i++)
+	{
+	  def_file_export exp;
+	  struct bfd_link_hash_entry *blhe;
+	  int lead_at = (*imp[i].internal_name == '@');
+	  /* See if we need this import.  */
+	  size_t len = strlen (imp[i].internal_name);
+	  char *name = xmalloc (len + 2 + 6);
+	  bfd_boolean include_jmp_stub = FALSE;
+	  bfd_boolean is_cdecl = FALSE;
+	  if (!lead_at && strchr (imp[i].internal_name, '@') == NULL)
+	      is_cdecl = TRUE;
 
-      for (i = 0; i < pe_def_file->num_imports; i++)
-	if (pe_def_file->imports[i].module == module)
-	  {
-	    def_file_export exp;
-	    struct bfd_link_hash_entry *blhe;
-	    int lead_at = (*pe_def_file->imports[i].internal_name == '@');
-	    /* See if we need this import.  */
-	    size_t len = strlen (pe_def_file->imports[i].internal_name);
-	    char *name = xmalloc (len + 2 + 6);
-	    bfd_boolean include_jmp_stub = FALSE;
-	    bfd_boolean is_cdecl = FALSE;
-	    if (!lead_at && strchr (pe_def_file->imports[i].internal_name, '@') == NULL)
-	        is_cdecl = TRUE;
+	  if (lead_at)
+	    sprintf (name, "%s", imp[i].internal_name);
+	  else
+	    sprintf (name, "%s%s",U (""), imp[i].internal_name);
 
- 	    if (lead_at)
-	      sprintf (name, "%s",
-		       pe_def_file->imports[i].internal_name);
-	    else
-	      sprintf (name, "%s%s",U (""),
-		       pe_def_file->imports[i].internal_name);
+	  blhe = bfd_link_hash_lookup (linfo->hash, name,
+				       FALSE, FALSE, FALSE);
 
-	    blhe = bfd_link_hash_lookup (linfo->hash, name,
-					 FALSE, FALSE, FALSE);
+	  /* Include the jump stub for <sym> only if the <sym>
+	     is undefined.  */
+	  if (!blhe || (blhe && blhe->type != bfd_link_hash_undefined))
+	    {
+	      if (lead_at)
+		sprintf (name, "%s%s", "__imp_", imp[i].internal_name);
+	      else
+		sprintf (name, "%s%s%s", "__imp_", U (""),
+			 imp[i].internal_name);
 
-	    /* Include the jump stub for <sym> only if the <sym>
-	       is undefined.  */
-	    if (!blhe || (blhe && blhe->type != bfd_link_hash_undefined))
-	      {
-		if (lead_at)
-		  sprintf (name, "%s%s", "__imp_",
-			   pe_def_file->imports[i].internal_name);
-		else
-		  sprintf (name, "%s%s%s", "__imp_", U (""),
-			   pe_def_file->imports[i].internal_name);
+	      blhe = bfd_link_hash_lookup (linfo->hash, name,
+					   FALSE, FALSE, FALSE);
+	    }
+	  else
+	    include_jmp_stub = TRUE;
 
-		blhe = bfd_link_hash_lookup (linfo->hash, name,
-					     FALSE, FALSE, FALSE);
-	      }
-	    else
+	  if (is_cdecl && !blhe)
+	    {
+	      sprintf (name, "%s%s",U (""), imp[i].internal_name);
+	      blhe = pe_find_cdecl_alias_match (name);
 	      include_jmp_stub = TRUE;
+	    }
 
-	    if (is_cdecl && !blhe)
-	      {
-		sprintf (name, "%s%s",U (""),
-		         pe_def_file->imports[i].internal_name);
-		blhe = pe_find_cdecl_alias_match (name);
-		include_jmp_stub = TRUE;
-	      }
+	  free (name);
 
-	    free (name);
-
-	    if (blhe && blhe->type == bfd_link_hash_undefined)
-	      {
-		bfd *one;
-		/* We do.  */
-		if (!do_this_dll)
-		  {
-		    bfd *ar_head = make_head (output_bfd);
-		    add_bfd_to_link (ar_head, ar_head->filename, linfo);
-		    do_this_dll = 1;
-		  }
-		exp.internal_name = pe_def_file->imports[i].internal_name;
-		exp.name = pe_def_file->imports[i].name;
-		exp.its_name = pe_def_file->imports[i].its_name;
-		exp.ordinal = pe_def_file->imports[i].ordinal;
-		exp.hint = exp.ordinal >= 0 ? exp.ordinal : 0;
-		exp.flag_private = 0;
-		exp.flag_constant = 0;
-		exp.flag_data = pe_def_file->imports[i].data;
-		exp.flag_noname = exp.name ? 0 : 1;
-		one = make_one (&exp, output_bfd, (! exp.flag_data) && include_jmp_stub);
-		add_bfd_to_link (one, one->filename, linfo);
-	      }
-	  }
+	  if (blhe && blhe->type == bfd_link_hash_undefined)
+	    {
+	      bfd *one;
+	      /* We do.  */
+	      if (!do_this_dll)
+		{
+		  bfd *ar_head = make_head (output_bfd);
+		  add_bfd_to_link (ar_head, ar_head->filename, linfo);
+		  do_this_dll = 1;
+		}
+	      exp.internal_name = imp[i].internal_name;
+	      exp.name = imp[i].name;
+	      exp.its_name = imp[i].its_name;
+	      exp.ordinal = imp[i].ordinal;
+	      exp.hint = exp.ordinal >= 0 ? exp.ordinal : 0;
+	      exp.flag_private = 0;
+	      exp.flag_constant = 0;
+	      exp.flag_data = imp[i].data;
+	      exp.flag_noname = exp.name ? 0 : 1;
+	      one = make_one (&exp, output_bfd, (! exp.flag_data) && include_jmp_stub);
+	      add_bfd_to_link (one, one->filename, linfo);
+	    }
+	}
       if (do_this_dll)
 	{
 	  bfd *ar_tail = make_tail (output_bfd);
@@ -3178,7 +3186,7 @@ pe_implied_import_dll (const char *filename)
 	    || (func_rva >= bss_start && func_rva < bss_end);
 
 	  imp = def_file_add_import (pe_def_file, erva + name_rva,
-				     dllname, i, 0, NULL, &is_dup);
+				     dllname, i, NULL, NULL, &is_dup);
  	  /* Mark symbol type.  */
  	  if (!is_dup)
  	    imp->data = is_data;

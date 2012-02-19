@@ -741,13 +741,15 @@ cmp_import_elem (const def_file_import *e, const char *ex_name,
 {
   int r;
 
+  if ((r = are_names_equal (module, (e->module ? e->module->name : NULL))))
+    return r;
   if ((r = are_names_equal (ex_name, e->name)) != 0)
     return r;
   if ((r = are_names_equal (in_name, e->internal_name)) != 0)
     return r;
   if (ord != e->ordinal)
     return (ord < e->ordinal ? -1 : 1);
-  return are_names_equal (module, (e->module ? e->module->name : NULL));
+  return 0;
 }
 
 /* Search the position of the identical element, or returns the position
