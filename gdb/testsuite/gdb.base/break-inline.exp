@@ -18,7 +18,9 @@ if { [prepare_for_testing break-inline.exp "break-inline" {} {debug nowarnings o
     return -1
 }
 
-gdb_test "start" "Temporary breakpoint.*foo().*"
+gdb_breakpoint "main" "temporary"
+gdb_run_cmd
+gdb_test "" "Temporary breakpoint.*foo\\(\\).*"
 
 # Now test 'break' with no arguments.
 gdb_test "break" "Breakpoint.*"

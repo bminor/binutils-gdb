@@ -1,3 +1,9 @@
+2012-02-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix for gdbserver non-extended mode.
+	* gdb.base/break-inline.exp (start): Replace "start" by gdb_breakpoint
+	and gdb_run_cmd.
+
 2012-02-17  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-events.py (exit_handler): Add test for 'dir'.
