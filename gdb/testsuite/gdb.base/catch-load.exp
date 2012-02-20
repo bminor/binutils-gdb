@@ -68,7 +68,6 @@ proc one_catch_load_test {scenario kind match sostop} {
     gdb_test_no_output "set stop-on-solib-events $sostop"
     gdb_test "catch $kind" "Catchpoint $decimal \\(.*\\)"
 
-    send_gdb "continue\n"
     gdb_test_multiple "continue" "continue" {
 	-re "Catchpoint $decimal\r\n.*loaded .*/$testfile2.*\r\n.*$gdb_prompt $" {
 	    if {$match} {

@@ -1,3 +1,9 @@
+2012-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix racy FAILs.
+	* gdb.base/catch-load.exp (one_catch_load_test): Remove duplicate
+	"continue" command.
+
 2012-02-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix for gdbserver non-extended mode.
