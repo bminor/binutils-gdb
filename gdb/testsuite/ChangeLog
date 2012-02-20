@@ -1,5 +1,13 @@
 2012-02-20  Pedro Alves  <palves@redhat.com>
 
+	* gdb.threads/attach-into-signal.exp (corefunc): Don't enable
+	lin-lwp output.  Set SIGALRM to stop.  Adjust tests to not rely on
+	gdb's internal debug output.  For the non-threaded case, look for
+	"Program received signal SIGLARM", for the threaded case, peek at
+	the thread's siginfo.
+
+2012-02-20  Pedro Alves  <palves@redhat.com>
+
 	General cleanup, make output test messages unique, and build
 	different executable files for the non-threaded and threaded
 	cases.
