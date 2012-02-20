@@ -2437,13 +2437,6 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 		return 1;
 	    }
 
-	    {
-	      if (dw2_map_expand_apply (objfile, per_cu,
-					name, full_path, real_path,
-					callback, data))
-		return 1;
-	    }
-
 	  /* Before we invoke realpath, which can get expensive when many
 	     files are involved, do a quick comparison of the basenames.  */
 	  if (! basenames_may_differ
