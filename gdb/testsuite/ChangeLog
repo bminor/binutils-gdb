@@ -1,3 +1,20 @@
+2012-02-20  Pedro Alves  <palves@redhat.com>
+
+	General cleanup, make output test messages unique, and build
+	different executable files for the non-threaded and threaded
+	cases.
+
+	* gdb.threads/attach-into-signal.exp (binfile, escapedbinfile):
+	Delete.
+	(executable_nothr, executable_thr): New globals.
+	(top level): Adjust to delete both executables.
+	(corefunc): New parameter $executable.  Set $pf_prefix instead of
+	hand writing a prefix in tests.  Issue a clean_restart and enable
+	lin-lwp debug output here.
+	(top level): Adjust.  Use build_executable.  Don't start gdb here,
+	and don't enable lin-lwp debug output here.
+	* gdb.threads/Makefile.in (EXECUTABLES): Adjust.
+
 2012-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix racy FAILs.

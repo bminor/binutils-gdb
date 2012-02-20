@@ -24,23 +24,34 @@ if { ![isnative] || [is_remote host] || [target_info exists use_gdb_stub]
 
 set testfile "attach-into-signal"
 set srcfile  ${testfile}.c
-set binfile  ${objdir}/${subdir}/${testfile}
-set escapedbinfile  [string_to_regexp ${objdir}/${subdir}/${testfile}]
+set executable_nothr ${testfile}-nothr
+set executable_thr ${testfile}-thr
 
-remote_exec build "rm -f ${binfile}"
+remote_exec build "rm -f ${objdir}/${subdir}/${executable_nothr}"
+remote_exec build "rm -f ${objdir}/${subdir}/${executable_thr}"
 # For debugging this test
 #
 #log_user 1
 
-proc corefunc { threadtype } {
+proc corefunc { threadtype executable } {
     global srcfile
-    global binfile
-    global escapedbinfile
     global srcdir
+    global objdir
     global subdir
     global gdb_prompt
+    global pf_prefix
+
+    set save_pf_prefix $pf_prefix
+    lappend pf_prefix "$threadtype:"
+
+    clean_restart ${executable}
+    gdb_test_no_output "set debug lin-lwp 1" ""
+
+    set binfile ${objdir}/${subdir}/${executable}
+    set escapedbinfile [string_to_regexp ${objdir}/${subdir}/${executable}]
 
     if [get_compiler_info ${binfile}] {
+	set pf_prefix $save_pf_prefix
 	return -1
     }
 
@@ -79,12 +90,12 @@ proc corefunc { threadtype } {
 	}
 	if { $stoppedtry >= 10 } {
 	    verbose -log $line2
-	    set test "$threadtype: process is still running on the attempt # $attempt of $attempts"
+	    set test "process is still running on the attempt # $attempt of $attempts"
 	    break
 	}
 
 	# Main test:
-	set test "$threadtype: attach (pass $passes), pending signal catch"
+	set test "attach (pass $passes), pending signal catch"
 	if {[gdb_test_multiple "attach $testpid" $test {
 	    -re "Attaching to program.*`?$escapedbinfile'?, process $testpid.*Received Alarm clock.*$gdb_prompt $" {
 		# nonthreaded:
@@ -136,35 +147,24 @@ proc corefunc { threadtype } {
     remote_exec build "kill -s CONT ${testpid}"
        
     remote_exec build "kill -9 ${testpid}"
-}
 
-# Start with clean gdb
-gdb_exit
+    set pf_prefix $save_pf_prefix
+}
 
 # build the test case first without threads
 #
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "attach-into-signal.exp (unthreaded)"
+if {[build_executable $testfile $executable_nothr $srcfile] == -1} {
+    untested "attach-into-signal.exp (nonthreaded)"
     return -1
 }
 
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-gdb_test_no_output "set debug lin-lwp 1" ""
-
-corefunc nonthreaded
+corefunc nonthreaded ${executable_nothr}
 
 # build the test case also with threads
 #
-if  { [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DUSE_THREADS}] != "" } {
+if  { [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${objdir}/${subdir}/${executable_thr}" executable {debug additional_flags=-DUSE_THREADS}] != "" } {
     untested "attach-into-signal.exp (threaded)"
     return -1
 }
 
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-gdb_test_no_output "set debug lin-lwp 1" ""
-
-corefunc threaded
+corefunc threaded ${executable_thr}
