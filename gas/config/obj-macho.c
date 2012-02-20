@@ -240,6 +240,18 @@ obj_mach_o_make_or_get_sect (char * segname, char * sectname,
 
   if (oldflags == SEC_NO_FLAGS)
     {
+      /* In the absence of canonical information, try to determine CODE and
+	 DEBUG section flags from the mach-o section data.  */
+      if (flags == SEC_NO_FLAGS
+	  && (specified_mask & SECT_ATTR_SPECIFIED)
+	  && (secattr & BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS))
+	flags |= SEC_CODE;
+      
+      if (flags == SEC_NO_FLAGS
+	  && (specified_mask & SECT_ATTR_SPECIFIED)
+	  && (secattr & BFD_MACH_O_S_ATTR_DEBUG))
+	flags |= SEC_DEBUGGING;
+
       /* New, so just use the defaults or what's specified.  */
       if (! bfd_set_section_flags (stdoutput, sec, flags))
 	as_warn (_("failed to set flags for \"%s\": %s"),
