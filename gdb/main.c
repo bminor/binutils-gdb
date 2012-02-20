@@ -84,18 +84,11 @@ int batch_silent = 0;
 int return_child_result = 0;
 int return_child_result_value = -1;
 
-/* Whether to enable writing into executable and core files.  */
-extern int write_files;
 
 /* GDB as it has been invoked from the command line (i.e. argv[0]).  */
 static char *gdb_program_name;
 
 static void print_gdb_help (struct ui_file *);
-
-/* These two are used to set the external editor commands when gdb is
-   farming out files to be edited by another program.  */
-
-extern char *external_editor_command;
 
 /* Relocate a file or directory.  PROGNAME is the name by which gdb
    was invoked (i.e., argv[0]).  INITIAL is the default value for the
@@ -588,6 +581,10 @@ captured_main (void *data)
 	    break;
 	  case 'w':
 	    {
+	      /* Set the external editor commands when gdb is farming out files
+		 to be edited by another program.  */
+	      extern char *external_editor_command;
+
 	      external_editor_command = xstrdup (optarg);
 	      break;
 	    }

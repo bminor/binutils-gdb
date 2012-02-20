@@ -1,3 +1,10 @@
+2012-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* main.c (write_files): Remove the declaration.
+	(external_editor_command): Move the declaration ...
+	[GDBTK] (external_editor_command): ... here.  Fix the comment.
+
 2012-02-20  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dw2_map_symtabs_matching_filename): Remove
