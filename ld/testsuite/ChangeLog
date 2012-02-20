@@ -1,3 +1,7 @@
+2012-02-20  Thomas Schwinge <thomas@schwinge.name>
+
+	* ld-elf/comm-data.exp: Run for *-*-gnu*.
+
 2012-02-14  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/linkoncerdiff.d: Don't run for hppa64-hpux.

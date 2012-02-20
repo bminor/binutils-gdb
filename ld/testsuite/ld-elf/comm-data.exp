@@ -1,6 +1,6 @@
 # Expect script for common symbol override.
 #
-#   Copyright 2011  Free Software Foundation, Inc.
+# Copyright 2011, 2012 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -29,9 +29,10 @@ if ![is_elf_format] {
     return
 }
 
-# Exclude non-Linux targets; feel free to include your favorite one
+# Exclude some more targets; feel free to include your favorite one
 # if you like.
-if ![istarget *-*-linux*] {
+if { ![istarget *-*-linux*]
+     && ![istarget *-*-gnu*] } {
     return
 }
 
