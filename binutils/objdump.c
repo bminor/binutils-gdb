@@ -1123,25 +1123,28 @@ slurp_file (const char *fn, size_t *size)
   if (fd < 0)
     return NULL;
   if (fstat (fd, &st) < 0)
-    return NULL;
+    {
+      close (fd);
+      return NULL;
+    }
   *size = st.st_size;
 #ifdef HAVE_MMAP
   msize = (*size + ps - 1) & ~(ps - 1);
   map = mmap (NULL, msize, PROT_READ, MAP_SHARED, fd, 0);
-  if (map != (char *)-1L)
+  if (map != (char *) -1L)
     {
-      close(fd);
-      return map; 
+      close (fd);
+      return map;
     }
 #endif
   map = (const char *) malloc (*size);
-  if (!map || (size_t) read (fd, (char *)map, *size) != *size) 
-    { 
-      free ((void *)map);
+  if (!map || (size_t) read (fd, (char *) map, *size) != *size)
+    {
+      free ((void *) map);
       map = NULL;
     }
   close (fd);
-  return map; 
+  return map;
 }
 
 #define line_map_decrease 5
