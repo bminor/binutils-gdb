@@ -1,3 +1,8 @@
+2012-02-20  Nick Clifton  <nickc@redhat.com>
+
+	* cgen.c (gas_cgen_parse_operand): Do not set BSF_RELC flag on
+	local symbols.
+
 2012-02-12  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* config/obj-macho.c (obj_mach_o_indirect_symbol): Force promotion of

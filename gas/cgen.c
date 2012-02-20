@@ -483,7 +483,8 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
 	  if (operand && (operand->hw_type == HW_H_SINT))
 	    signed_p = 1;
 
-	  if (stmp->bsym && (stmp->bsym->section == expr_section))
+	  if (stmp->bsym && (stmp->bsym->section == expr_section)
+	      && ! S_IS_LOCAL (stmp))
 	    {
 	      if (signed_p)
 		stmp->bsym->flags |= BSF_SRELC;
