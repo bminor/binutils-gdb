@@ -2700,32 +2700,63 @@ dw2_expand_symtabs_matching
   index = dwarf2_per_objfile->index_table;
 
   if (file_matcher != NULL)
-    for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		     + dwarf2_per_objfile->n_type_units); ++i)
-      {
-	int j;
-	struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
-	struct quick_file_names *file_data;
+    {
+      struct cleanup *cleanup;
+      htab_t visited_found, visited_not_found;
 
-	per_cu->v.quick->mark = 0;
+      visited_found = htab_create_alloc (10,
+					 htab_hash_pointer, htab_eq_pointer,
+					 NULL, xcalloc, xfree);
+      cleanup = make_cleanup_htab_delete (visited_found);
+      visited_not_found = htab_create_alloc (10,
+					     htab_hash_pointer, htab_eq_pointer,
+					     NULL, xcalloc, xfree);
+      make_cleanup_htab_delete (visited_not_found);
 
-	/* We only need to look at symtabs not already expanded.  */
-	if (per_cu->v.quick->symtab)
-	  continue;
+      for (i = 0; i < (dwarf2_per_objfile->n_comp_units
+		       + dwarf2_per_objfile->n_type_units); ++i)
+	{
+	  int j;
+	  struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+	  struct quick_file_names *file_data;
+	  void **slot;
 
-	file_data = dw2_get_file_names (objfile, per_cu);
-	if (file_data == NULL)
-	  continue;
+	  per_cu->v.quick->mark = 0;
 
-	for (j = 0; j < file_data->num_file_names; ++j)
-	  {
-	    if (file_matcher (file_data->file_names[j], data))
-	      {
-		per_cu->v.quick->mark = 1;
-		break;
-	      }
-	  }
-      }
+	  /* We only need to look at symtabs not already expanded.  */
+	  if (per_cu->v.quick->symtab)
+	    continue;
+
+	  file_data = dw2_get_file_names (objfile, per_cu);
+	  if (file_data == NULL)
+	    continue;
+
+	  if (htab_find (visited_not_found, file_data) != NULL)
+	    continue;
+	  else if (htab_find (visited_found, file_data) != NULL)
+	    {
+	      per_cu->v.quick->mark = 1;
+	      continue;
+	    }
+
+	  for (j = 0; j < file_data->num_file_names; ++j)
+	    {
+	      if (file_matcher (file_data->file_names[j], data))
+		{
+		  per_cu->v.quick->mark = 1;
+		  break;
+		}
+	    }
+
+	  slot = htab_find_slot (per_cu->v.quick->mark
+				 ? visited_found
+				 : visited_not_found,
+				 file_data, INSERT);
+	  *slot = file_data;
+	}
+
+      do_cleanups (cleanup);
+    }
 
   for (iter = 0; iter < index->symbol_table_slots; ++iter)
     {
@@ -2787,8 +2818,27 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 			  void *data, int need_fullname)
 {
   int i;
+  struct cleanup *cleanup;
+  htab_t visited = htab_create_alloc (10, htab_hash_pointer, htab_eq_pointer,
+				      NULL, xcalloc, xfree);
 
+  cleanup = make_cleanup_htab_delete (visited);
   dw2_setup (objfile);
+
+  /* We can ignore file names coming from already-expanded CUs.  */
+  for (i = 0; i < (dwarf2_per_objfile->n_comp_units
+		   + dwarf2_per_objfile->n_type_units); ++i)
+    {
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+
+      if (per_cu->v.quick->symtab)
+	{
+	  void **slot = htab_find_slot (visited, per_cu->v.quick->file_names,
+					INSERT);
+
+	  *slot = per_cu->v.quick->file_names;
+	}
+    }
 
   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
 		   + dwarf2_per_objfile->n_type_units); ++i)
@@ -2796,6 +2846,7 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
       int j;
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
       struct quick_file_names *file_data;
+      void **slot;
 
       /* We only need to look at symtabs not already expanded.  */
       if (per_cu->v.quick->symtab)
@@ -2804,6 +2855,14 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
       file_data = dw2_get_file_names (objfile, per_cu);
       if (file_data == NULL)
 	continue;
+
+      slot = htab_find_slot (visited, file_data, INSERT);
+      if (*slot)
+	{
+	  /* Already visited.  */
+	  continue;
+	}
+      *slot = file_data;
 
       for (j = 0; j < file_data->num_file_names; ++j)
 	{
@@ -2816,6 +2875,8 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 	  (*fun) (file_data->file_names[j], this_real_name, data);
 	}
     }
+
+  do_cleanups (cleanup);
 }
 
 static int
