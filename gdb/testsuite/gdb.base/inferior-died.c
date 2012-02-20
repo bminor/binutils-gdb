@@ -33,4 +33,5 @@ int main()
     function ();
   else
     waitpid (child, NULL, 0);
+  return 0;
 }

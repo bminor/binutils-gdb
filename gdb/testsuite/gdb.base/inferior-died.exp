@@ -53,4 +53,19 @@ gdb_breakpoint $srcfile:$line
 gdb_continue_to_breakpoint "breakpoint"
 
 gdb_test "inferior 2" "Switching to inferior 2.*"
-gdb_test "continue" "exited normally.*"
+
+# The inferior 1 exit may come unexpectedly in any moment.
+set test "continue"
+set seen 0
+gdb_test_multiple $test $test {
+    -re "($gdb_prompt |\\\[Inferior \[^\r\n\]* exited normally\\\])" {
+	incr seen
+	if {$seen < 3} {
+	    exp_continue
+	}
+	pass $test
+    }
+}
+
+# Internal error may show up after all the messages above.
+gdb_test "p 1" " = 1"

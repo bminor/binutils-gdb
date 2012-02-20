@@ -1,3 +1,11 @@
+2012-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix racy FAILs.
+	* gdb.base/inferior-died.c (main): Add return of 0.
+	* gdb.base/inferior-died.exp (continue): Fix expectation of
+	asynchronous events.
+	(p 1): New test.
+
 2012-02-20  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/attach-into-signal.exp (corefunc): Don't enable
