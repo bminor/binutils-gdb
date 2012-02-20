@@ -73,6 +73,12 @@ void obj_mach_o_reorder_section_relocs (asection *, arelent **, unsigned int);
 #define SET_SECTION_RELOCS(sec, relocs, n) \
   obj_mach_o_reorder_section_relocs (sec, relocs, n)
 
+/* Emit relocs for local subtracts, to cater for subsections-via-symbols.  */
+#define md_allow_local_subtract(LEFT, RIGHT, SECTION) \
+ obj_mach_o_allow_local_subtract (LEFT, RIGHT, SECTION)
+extern int obj_mach_o_allow_local_subtract (expressionS *, expressionS *,
+					    segT);
+
 #define EMIT_SECTION_SYMBOLS		0
 
 #define OBJ_PROCESS_STAB(SEG,W,S,T,O,D)	obj_mach_o_process_stab(W,S,T,O,D)

@@ -1,5 +1,12 @@
 2012-02-20  Iain Sandoe  <idsandoe@googlemail.com>
 
+	* config/obj-macho.c (obj_mach_o_is_frame_section): New.
+	(obj_mach_o_allow_local_subtract): New.
+	* config/obj-macho.h (md_allow_local_subtract): Define.
+	(obj_mach_o_allow_local_subtract): Declare.
+
+2012-02-20  Iain Sandoe  <idsandoe@googlemail.com>
+
 	* config/obj-macho.c (obj_mach_o_make_or_get_sect): In the absence of
 	canonical information, try to determine CODE and DEBUG section flags
 	from the mach-o section data.

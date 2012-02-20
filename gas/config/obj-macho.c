@@ -1495,6 +1495,19 @@ obj_macho_frob_symbol (struct symbol *sp)
   return 0;
 }
 
+/* Relocation rules are different in frame sections.  */
+
+static int
+obj_mach_o_is_frame_section (segT sec)
+{
+  int l;
+  l = strlen (segment_name (sec));
+  if ((l == 9 && strncmp (".eh_frame", segment_name (sec), 9) == 0)
+       || (l == 12 && strncmp (".debug_frame", segment_name (sec), 12) == 0))
+    return 1;
+  return 0;
+}
+
 /* Zerofill and GB Zerofill sections must be sorted to follow all other
    sections in their segments.
 
@@ -1756,4 +1769,22 @@ obj_mach_o_process_stab (int what, const char *string,
 
   /* It's a debug symbol.  */
   s->symbol.flags |= BSF_DEBUGGING;
+}
+
+/* Unless we're in a frame section, we need to force relocs to be generated for
+   local subtractions.  We might eliminate them later (if they are within the
+   same sub-section) but we don't know that at the point that this decision is
+   being made.  */
+
+int
+obj_mach_o_allow_local_subtract (expressionS * left ATTRIBUTE_UNUSED, 
+				 expressionS * right ATTRIBUTE_UNUSED,
+				 segT seg)
+{
+  /* Don't interfere if it's one of the GAS internal sections.  */
+  if (! SEG_NORMAL (seg))
+    return 1;
+
+  /* Allow in frame sections, otherwise emit a reloc.  */
+  return obj_mach_o_is_frame_section (seg);
 }
