@@ -1,5 +1,9 @@
 2012-02-20  Tristan Gingold  <gingold@adacore.com>
 
+	* darwin-nat.h (enum darwin_msg_state): Add comments.
+
+2012-02-20  Tristan Gingold  <gingold@adacore.com>
+
 	* amd64-darwin-tdep.c (x86_darwin_init_abi_64): Fix jb_pc_offset
 	value.
 

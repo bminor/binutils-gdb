@@ -61,7 +61,17 @@ struct darwin_exception_msg
   integer_t ex_data[2];
 };
 
-enum darwin_msg_state { DARWIN_RUNNING, DARWIN_STOPPED, DARWIN_MESSAGE };
+enum darwin_msg_state
+{
+  /* The thread is running.  */
+  DARWIN_RUNNING,
+
+  /* The thread is stopped.  */
+  DARWIN_STOPPED,
+
+  /* The thread has sent a message and waits for a reply.  */
+  DARWIN_MESSAGE
+};
 
 struct private_thread_info
 {
