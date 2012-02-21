@@ -1767,6 +1767,10 @@ write_object_file (void)
   fragS *fragP;			/* Track along all frags.  */
 #endif
 
+#ifdef md_pre_output_hook
+  md_pre_output_hook;
+#endif
+
   /* Do we really want to write it?  */
   {
     int n_warns, n_errs;

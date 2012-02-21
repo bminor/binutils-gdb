@@ -87,6 +87,9 @@ struct obj_mach_o_frag_data
   
 #define OBJ_FRAG_TYPE struct obj_mach_o_frag_data
 
+#define md_pre_output_hook obj_mach_o_pre_output_hook()
+extern void obj_mach_o_pre_output_hook(void);
+
 #define md_pre_relax_hook obj_mach_o_pre_relax_hook()
 extern void obj_mach_o_pre_relax_hook (void);
 

@@ -1,3 +1,11 @@
+2012-02-21  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* write.c (write_object_file): Add md_pre_output_hook.
+	* config/obj-macho.c (obj_mach_o_check_before_writing): New.
+	(obj_mach_o_pre_output_hook): New.
+	* config/obj-macho.h (md_pre_output_hook): Define.
+	(obj_mach_o_pre_output_hook): Declare.
+
 2012-02-21  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-i386.h (OBJ_MACH_O): New section.

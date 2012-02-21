@@ -1554,6 +1554,72 @@ obj_mach_o_process_stab (int what, const char *string,
 
   /* It's a debug symbol.  */
   s->symbol.flags |= BSF_DEBUGGING;
+  
+  /* We've set it - so check it, if you can, but don't try to create the
+     flags.  */
+  s->symbol.udata.i = SYM_MACHO_FIELDS_NOT_VALIDATED;
+}
+
+/* This is a place to check for any errors that we can't detect until we know
+   what remains undefined at the end of assembly.  */
+
+static void
+obj_mach_o_check_before_writing (bfd *abfd ATTRIBUTE_UNUSED,
+				 asection *sec,
+				 void *unused ATTRIBUTE_UNUSED)
+{
+  fixS *fixP;
+  struct frchain *frchp;
+  segment_info_type *seginfo = seg_info (sec);
+
+  if (seginfo == NULL)
+    return;
+
+  /* We are not allowed subtractions where either of the operands is
+     undefined.  So look through the frags for any fixes to check.  */
+  for (frchp = seginfo->frchainP; frchp != NULL; frchp = frchp->frch_next)
+   for (fixP = frchp->fix_root; fixP != NULL; fixP = fixP->fx_next)
+    {
+      if (fixP->fx_addsy != NULL
+	  && fixP->fx_subsy != NULL
+	  && (! S_IS_DEFINED (fixP->fx_addsy)
+	      || ! S_IS_DEFINED (fixP->fx_subsy)))
+	{
+	  segT add_symbol_segment = S_GET_SEGMENT (fixP->fx_addsy);
+	  segT sub_symbol_segment = S_GET_SEGMENT (fixP->fx_subsy);
+
+	  if (! S_IS_DEFINED (fixP->fx_addsy)
+	      && S_IS_DEFINED (fixP->fx_subsy))
+	    {
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+		_("`%s' can't be undefined in `%s' - `%s' {%s section}"),
+		S_GET_NAME (fixP->fx_addsy), S_GET_NAME (fixP->fx_addsy),
+		S_GET_NAME (fixP->fx_subsy), segment_name (sub_symbol_segment));
+	    }
+	  else if (! S_IS_DEFINED (fixP->fx_subsy)
+		   && S_IS_DEFINED (fixP->fx_addsy))
+	    {
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+		_("`%s' can't be undefined in `%s' {%s section} - `%s'"),
+		S_GET_NAME (fixP->fx_subsy), S_GET_NAME (fixP->fx_addsy),
+		segment_name (add_symbol_segment), S_GET_NAME (fixP->fx_subsy));
+	    }
+	  else
+	    {
+	      as_bad_where (fixP->fx_file, fixP->fx_line,
+		_("`%s' and `%s' can't be undefined in `%s' - `%s'"),
+		S_GET_NAME (fixP->fx_addsy), S_GET_NAME (fixP->fx_subsy),
+		S_GET_NAME (fixP->fx_addsy), S_GET_NAME (fixP->fx_subsy));
+	    }
+	}
+    }
+}
+
+/* Do any checks that we can't complete without knowing what's undefined.  */
+void
+obj_mach_o_pre_output_hook (void)
+{
+  bfd_map_over_sections (stdoutput, obj_mach_o_check_before_writing, (char *) 0);
 }
 
 /* Here we count up frags in each subsection (where a sub-section is defined
