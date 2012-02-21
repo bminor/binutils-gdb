@@ -30,7 +30,7 @@ if { [istarget "i\[34567\]86-*-linux*"] || [istarget "x86_64-*-linux*"] } {
     return -1
 }
 
-proc disp_step_cross_syscall { syscall } { with_test_prefix " $syscall:" {
+proc disp_step_cross_syscall { syscall } { with_test_prefix "$syscall" {
     global syscall_insn
     global gdb_prompt
 

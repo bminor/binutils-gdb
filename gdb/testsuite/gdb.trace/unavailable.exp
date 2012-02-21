@@ -136,7 +136,7 @@ proc test_maybe_regvar_display { var } {
 # Test procs
 #
 
-proc gdb_collect_args_test {} { with_test_prefix " unavailable arguments:" {
+proc gdb_collect_args_test {} { with_test_prefix "unavailable arguments" {
     global cr
     global gdb_prompt
 
@@ -203,7 +203,7 @@ proc gdb_collect_args_test {} { with_test_prefix " unavailable arguments:" {
 	"cease trace debugging"
 }}
 
-proc gdb_collect_locals_test { func msg } { with_test_prefix " unavailable locals: $msg:" {
+proc gdb_collect_locals_test { func msg } { with_test_prefix "unavailable locals: $msg" {
     global cr
     global gdb_prompt
 
@@ -254,7 +254,7 @@ proc gdb_collect_locals_test { func msg } { with_test_prefix " unavailable local
 	"cease trace debugging"
 }}
 
-proc gdb_unavailable_registers_test { } { with_test_prefix " unavailable registers:" {
+proc gdb_unavailable_registers_test { } { with_test_prefix "unavailable registers" {
     global gdb_prompt
     global spreg
     global pcreg
@@ -305,7 +305,7 @@ proc gdb_unavailable_registers_test { } { with_test_prefix " unavailable registe
     gdb_test "tfind none" "#0  end .*" "cease trace debugging"
 }}
 
-proc gdb_collect_globals_test { } { with_test_prefix " collect globals:" {
+proc gdb_collect_globals_test { } { with_test_prefix "collect globals" {
     global ws
     global cr
     global gdb_prompt

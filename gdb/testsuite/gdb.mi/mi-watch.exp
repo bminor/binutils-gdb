@@ -147,7 +147,7 @@ proc test_watchpoint_triggering {type} {
     clear_xfail *-*-*
 }
 
-proc test_watchpoint_all {type} { with_test_prefix " $type:" {
+proc test_watchpoint_all {type} { with_test_prefix "$type" {
     upvar srcdir srcdir
     upvar subdir subdir
     upvar binfile binfile

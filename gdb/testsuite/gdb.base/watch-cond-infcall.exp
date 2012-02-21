@@ -49,7 +49,7 @@ proc test_watchpoint { hw } {
 }
 
 if { ![target_info exists gdb,no_hardware_watchpoints] } {
-    with_test_prefix " hw:" { test_watchpoint 1 }
+    with_test_prefix "hw" { test_watchpoint 1 }
 }
 
-with_test_prefix " sw:" { test_watchpoint 0 }
+with_test_prefix "sw" { test_watchpoint 0 }

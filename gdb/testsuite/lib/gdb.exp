@@ -1507,21 +1507,21 @@ proc skip_shlib_tests {} {
 #   gdb_test ... ... "test foo"
 #   gdb_test ... ... "test bar"
 #
-#   with_test_prefix " subvariation a:" {
+#   with_test_prefix "subvariation a" {
 #     gdb_test ... ... "test x"
 #   }
 #
-#   with_test_prefix " subvariation b:" {
+#   with_test_prefix "subvariation b" {
 #     gdb_test ... ... "test x"
 #   }
 # }
 #
-# with_test_prefix " variation1:" {
+# with_test_prefix "variation1" {
 #   ...do setup for variation 1...
 #   do_tests
 # }
 #
-# with_test_prefix " variation2:" {
+# with_test_prefix "variation2" {
 #   ...do setup for variation 2...
 #   do_tests
 # }
@@ -1543,19 +1543,20 @@ proc skip_shlib_tests {} {
 #
 #   global pf_prefix
 #   set saved_pf_prefix
-#   append pf_prefix "${foo} bar"
+#   append pf_prefix "${foo}: bar"
 #   ... actual tests ...
 #   set pf_prefix $saved_pf_prefix
 #
 
 # Run BODY in the context of the caller, with the current test prefix
-# (pf_prefix) appended with PREFIX.  Returns the result of BODY.
+# (pf_prefix) appended with one space, then PREFIX, and then a colon.
+# Returns the result of BODY.
 #
 proc with_test_prefix { prefix body } {
   global pf_prefix
 
   set saved $pf_prefix
-  append pf_prefix $prefix
+  append pf_prefix " " $prefix ":"
   set code [catch {uplevel 1 $body} result]
   set pf_prefix $saved
 

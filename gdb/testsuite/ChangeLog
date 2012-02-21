@@ -1,4 +1,40 @@
 2012-02-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/altivec-abi.exp (altivec_abi_tests): Don't do
+	with_test_prefix here.
+	(top level): Do it here instead.  Remove `:' from the
+	with_test_prefix string.
+	* gdb.base/attach-pie-misread.exp: Remove the leading space the
+	the suffix `:' from the with_test_prefix prefix string.
+	* gdb.base/break-interp.exp: Ditto.
+	* gdb.base/catch-load.exp: Ditto.
+	* gdb.base/disp-step-syscall.exp: Ditto.
+	* gdb.base/jit-so.exp: Ditto.
+	* gdb.base/jit.exp: Ditto.
+	* gdb.base/sepdebug.exp: Ditto.
+	* gdb.base/solib-display.exp: Ditto.
+	* gdb.base/solib-overlap.exp: Ditto.
+	* gdb.base/watch-cond-infcall.exp: Ditto.
+	* gdb.base/watchpoint.exp: Ditto.
+	* gdb.dwarf2/dw2-noloc.exp: Ditto.
+	* gdb.mi/mi-watch.exp: Ditto.
+	* gdb.mi/mi2-watch.exp: Ditto.
+	* gdb.threads/non-ldr-exc-1.exp: Ditto.
+	* gdb.threads/non-ldr-exc-2.exp: Ditto.
+	* gdb.threads/non-ldr-exc-3.exp: Ditto.
+	* gdb.threads/non-ldr-exc-4.exp: Ditto.
+	* gdb.threads/watchpoint-fork.exp: Ditto.
+	* gdb.threads/watchthreads-reorder.exp: Ditto.
+	* gdb.trace/change-loc.exp: Ditto.
+	* gdb.trace/pending.exp: Ditto.
+	* gdb.trace/status-stop.exp: Ditto.
+	* gdb.trace/strace.exp: Ditto.
+	* gdb.trace/trace-break.exp: Ditto.
+	* gdb.trace/unavailable.exp: Ditto.
+	* lib/gdb.exp (with_test_prefix): Always prefix with space and
+	suffix with colon.  Adjust leading comments.
+
+2012-02-21  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 
 	* lib/gdb.exp: Add description of test prefixes.

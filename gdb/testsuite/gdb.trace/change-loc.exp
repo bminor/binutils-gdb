@@ -71,7 +71,7 @@ if [is_amd64_regs_target] {
 
 # Set tracepoint during tracing experiment.
 
-proc tracepoint_change_loc_1 { trace_type } { with_test_prefix " 1 $trace_type:" {
+proc tracepoint_change_loc_1 { trace_type } { with_test_prefix "1 $trace_type" {
     global testfile
     global srcfile
     global pcreg
@@ -141,7 +141,7 @@ proc tracepoint_change_loc_1 { trace_type } { with_test_prefix " 1 $trace_type:"
 
 # Set pending tracepoint.
 
-proc tracepoint_change_loc_2 { trace_type } { with_test_prefix " 2 $trace_type:" {
+proc tracepoint_change_loc_2 { trace_type } { with_test_prefix "2 $trace_type" {
     global srcdir
     global srcfile
     global subdir

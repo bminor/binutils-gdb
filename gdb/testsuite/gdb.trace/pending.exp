@@ -60,7 +60,7 @@ if ![gdb_target_supports_trace] {
 
 # Verify pending tracepoint is resolved to running to main.
 
-proc pending_tracepoint_resolved { trace_type } { with_test_prefix " $trace_type resolved:" {
+proc pending_tracepoint_resolved { trace_type } { with_test_prefix "$trace_type resolved" {
     global srcdir
     global subdir
     global binfile
@@ -101,7 +101,7 @@ proc pending_tracepoint_resolved { trace_type } { with_test_prefix " $trace_type
 
 # Verify pending tracepoint is resolved and works as expected.
 
-proc pending_tracepoint_works { trace_type } { with_test_prefix " $trace_type works:" {
+proc pending_tracepoint_works { trace_type } { with_test_prefix "$trace_type works" {
     global executable
     global srcfile
     global lib_sl1
@@ -155,7 +155,7 @@ proc pending_tracepoint_works { trace_type } { with_test_prefix " $trace_type wo
 # Verify pending tracepoint is resolved during trace.
 
 proc pending_tracepoint_resolved_during_trace { trace_type } \
-{ with_test_prefix " $trace_type resolved_in_trace:" \
+{ with_test_prefix "$trace_type resolved_in_trace" \
 {
     global executable
     global srcfile
@@ -214,7 +214,7 @@ proc pending_tracepoint_resolved_during_trace { trace_type } \
 # Verify pending tracepoint is resolved and installed during trace.
 
 proc pending_tracepoint_installed_during_trace { trace_type } \
-{ with_test_prefix " $trace_type installed_in_trace:" \
+{ with_test_prefix "$trace_type installed_in_trace" \
 {
     global executable
     global srcfile
@@ -279,7 +279,7 @@ proc pending_tracepoint_installed_during_trace { trace_type } \
 # Verify pending tracepoint will no longer work if we disconnect during tracing.
 
 proc pending_tracepoint_disconnect_during_trace { trace_type } \
-{ with_test_prefix " $trace_type disconn:" \
+{ with_test_prefix "$trace_type disconn" \
 {
     global executable
     global srcfile
@@ -327,7 +327,7 @@ proc pending_tracepoint_disconnect_during_trace { trace_type } \
 # Verify disconnect after pending tracepoint has been resolved.
 
 proc pending_tracepoint_disconnect_after_resolved { trace_type } \
-{ with_test_prefix " $trace_type disconn_resolved:" \
+{ with_test_prefix "$trace_type disconn_resolved" \
 {
     global executable
     global srcfile
@@ -379,7 +379,7 @@ proc pending_tracepoint_disconnect_after_resolved { trace_type } \
 # Verify action works properly in resolved tracepoint.
 
 proc pending_tracepoint_with_action_resolved { trace_type } \
-{ with_test_prefix " $trace_type action_resolved:" \
+{ with_test_prefix "$trace_type action_resolved" \
 {
     global executable
     global srcfile

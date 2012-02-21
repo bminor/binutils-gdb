@@ -33,7 +33,7 @@ if { [prepare_for_testing dw2-noloc.exp "dw2-noloc" {dw2-noloc-main.c dw2-noloc.
 # unresolvable: .symtab entry does not exist for this symbol name.
 # DW_AT_declaration is not present in any of these DIEs.
 
-proc file_symbols {type} { with_test_prefix " $type:" {
+proc file_symbols {type} { with_test_prefix "$type" {
 
     global gdb_prompt
 

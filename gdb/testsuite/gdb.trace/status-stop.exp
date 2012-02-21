@@ -39,7 +39,7 @@ if ![gdb_target_supports_trace] {
 
 # Verify that the sequence of commands "tstart tstop tstart" works well.
 
-proc test_tstart_tstop_tstart { } { with_test_prefix " tstart_tstop_tstart:" {
+proc test_tstart_tstop_tstart { } { with_test_prefix "tstart_tstop_tstart" {
     global executable
     global hex
 
@@ -63,7 +63,7 @@ proc test_tstart_tstop_tstart { } { with_test_prefix " tstart_tstop_tstart:" {
 
 # Verify the sequence of commands "tstart tstart" works well.
 
-proc test_tstart_tstart { } { with_test_prefix " tstart_tstart:" {
+proc test_tstart_tstart { } { with_test_prefix "tstart_tstart" {
     global executable
     global hex
 
@@ -82,7 +82,7 @@ proc test_tstart_tstart { } { with_test_prefix " tstart_tstart:" {
 
 # Verify that trace stops clearly when trace buffer is full.
 
-proc test_buffer_full_tstart { } { with_test_prefix " buffer_full_tstart:" {
+proc test_buffer_full_tstart { } { with_test_prefix "buffer_full_tstart" {
     global executable
     global hex
 

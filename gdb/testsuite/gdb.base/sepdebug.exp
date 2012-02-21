@@ -650,7 +650,7 @@ test_next_with_recursion
 
 #********
 
-proc test_different_dir {type test_different_dir xfail} { with_test_prefix " $type:" {
+proc test_different_dir {type test_different_dir xfail} { with_test_prefix "$type" {
     global srcdir subdir objdir binfile srcfile timeout gdb_prompt
     global bp_location6 decimal hex
 

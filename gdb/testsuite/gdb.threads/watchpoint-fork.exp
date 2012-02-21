@@ -22,7 +22,7 @@ if [is_remote target] {
     return
 }
 
-proc test {type symbol} { with_test_prefix " $type:" {
+proc test {type symbol} { with_test_prefix "$type" {
     global testfile objdir subdir srcdir gdb_prompt pf_prefix
 
     set srcfile_type ${srcdir}/${subdir}/${testfile}-${type}.c

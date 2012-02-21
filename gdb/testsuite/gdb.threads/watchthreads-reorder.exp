@@ -38,7 +38,7 @@ if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" ${binfile} executable
     return -1
 }
 
-foreach reorder {0 1} { with_test_prefix " reorder$reorder:" {
+foreach reorder {0 1} { with_test_prefix "reorder$reorder" {
 
     clean_restart $testfile
 

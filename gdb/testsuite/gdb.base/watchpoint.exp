@@ -894,7 +894,7 @@ proc do_tests {} {
 
 do_tests
 if ![target_info exists gdb,no_hardware_watchpoints] {
-    with_test_prefix " no-hw:" {
+    with_test_prefix "no-hw" {
 	set no_hw 1
 	do_tests
     }

@@ -56,7 +56,7 @@ if [is_amd64_regs_target] {
 # Set breakpoint and tracepoint at the same address.
 
 proc break_trace_same_addr_1 { trace_type option } \
-{ with_test_prefix " 1 $trace_type $option:" \
+{ with_test_prefix "1 $trace_type $option" \
 {
     global executable
     global hex
@@ -89,7 +89,7 @@ proc break_trace_same_addr_1 { trace_type option } \
 # Set multiple tracepoints at the same address.
 
 proc break_trace_same_addr_2 { trace_type1 trace_type2 option } \
-{ with_test_prefix " 2 $trace_type1 $trace_type2 $option:" \
+{ with_test_prefix "2 $trace_type1 $trace_type2 $option" \
 {
     global executable
     global hex
@@ -127,7 +127,7 @@ proc break_trace_same_addr_2 { trace_type1 trace_type2 option } \
 # that tracepoint still works.
 
 proc break_trace_same_addr_3 { trace_type option } \
-{ with_test_prefix " 3 $trace_type $option:" \
+{ with_test_prefix "3 $trace_type $option" \
 {
     global executable
     global hex
@@ -162,7 +162,7 @@ proc break_trace_same_addr_3 { trace_type option } \
 # that breakpoint still works.
 
 proc break_trace_same_addr_4 { trace_type option } \
-{ with_test_prefix " 4 $trace_type $option:" \
+{ with_test_prefix "4 $trace_type $option" \
 {
     global executable
     global hex
@@ -201,7 +201,7 @@ proc break_trace_same_addr_4 { trace_type option } \
 # of two locations.  Verify  these tracepoints work as expected.
 
 proc break_trace_same_addr_5 { trace1 trace2 trace3 trace3_at_first_loc } \
-{ with_test_prefix " 5 $trace1 $trace2 ${trace3}@${trace3_at_first_loc}:" \
+{ with_test_prefix "5 $trace1 $trace2 ${trace3}@${trace3_at_first_loc}" \
 {
     global executable
     global hex
@@ -273,7 +273,7 @@ proc break_trace_same_addr_5 { trace1 trace2 trace3 trace3_at_first_loc } \
 # tracepoints work as expect.
 
 proc break_trace_same_addr_6 { trace1 enable1 trace2 enable2 } \
-{ with_test_prefix " 6 $trace1 $enable1 $trace2 $enable2:" \
+{ with_test_prefix "6 $trace1 $enable1 $trace2 $enable2" \
 {
     global executable
     global hex

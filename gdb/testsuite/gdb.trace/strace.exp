@@ -52,7 +52,7 @@ if { ![gdb_target_supports_trace] } then {
 
 gdb_load_shlibs $libipa
 
-proc strace_info_marker { } { with_test_prefix " info_marker" {
+proc strace_info_marker { } { with_test_prefix "info_marker" {
     global executable
     global gdb_prompt
 
@@ -76,7 +76,7 @@ proc strace_info_marker { } { with_test_prefix " info_marker" {
     }
 }}
 
-proc strace_probe_marker { } { with_test_prefix " probe_marker" {
+proc strace_probe_marker { } { with_test_prefix "probe_marker" {
     global executable
     global expect_out
     global gdb_prompt
@@ -105,7 +105,7 @@ proc strace_probe_marker { } { with_test_prefix " probe_marker" {
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
 }}
 
-proc strace_trace_on_same_addr { type } { with_test_prefix " trace_same_addr $type" {
+proc strace_trace_on_same_addr { type } { with_test_prefix "trace_same_addr $type" {
     global executable
     global expect_out
     global gdb_prompt
@@ -195,7 +195,7 @@ proc strace_trace_on_same_addr { type } { with_test_prefix " trace_same_addr $ty
     }
 }}
 
-proc strace_trace_on_diff_addr { } { with_test_prefix " trace_diff_addr" {
+proc strace_trace_on_diff_addr { } { with_test_prefix "trace_diff_addr" {
 
     global executable
     global expect_out

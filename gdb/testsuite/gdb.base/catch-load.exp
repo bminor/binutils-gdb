@@ -46,7 +46,7 @@ if { [gdb_compile_shlib "${srcdir}/${subdir}/${srcfile2}" ${binfile2} {debug}] !
 # names.
 # KIND is passed to the "catch" command.
 # MATCH is a boolean saying whether we expect the catchpoint to be hit.
-proc one_catch_load_test {scenario kind match sostop} { with_test_prefix "${scenario}:" {
+proc one_catch_load_test {scenario kind match sostop} { with_test_prefix "${scenario}" {
     global verbose testfile testfile2 binfile2_dlopen
     global srcfile
     global decimal gdb_prompt
