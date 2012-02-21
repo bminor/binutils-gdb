@@ -650,13 +650,9 @@ test_next_with_recursion
 
 #********
 
-proc test_different_dir {type test_different_dir xfail} {
+proc test_different_dir {type test_different_dir xfail} { with_test_prefix " $type:" {
     global srcdir subdir objdir binfile srcfile timeout gdb_prompt
-    global pf_prefix
     global bp_location6 decimal hex
-
-    set old_pf_prefix $pf_prefix
-    append pf_prefix " $type:"
 
     gdb_exit
     gdb_start
@@ -747,9 +743,8 @@ proc test_different_dir {type test_different_dir xfail} {
 	gdb_test_no_output "set args main"
     }
 
-    set pf_prefix $old_pf_prefix
 # proc test_different_dir
-}
+}}
 
 
 # now move the .debug file to a different location so that we can test

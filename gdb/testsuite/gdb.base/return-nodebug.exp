@@ -18,7 +18,7 @@ proc do_test {type} {
 
     global pf_prefix
     set old_prefix $pf_prefix
-    lappend pf_prefix "$typenospace:"
+    append pf_prefix " $typenospace:"
 
     if {[runto "func"]} {
 	# Verify that we do not crash when using "return" from a function with

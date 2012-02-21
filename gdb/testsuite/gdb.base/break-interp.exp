@@ -185,26 +185,18 @@ proc reach_1 {func command displacement} {
 # displacement of 0 bytes to be present, "NONZERO" for displacement of non-0
 # bytes to be present and "PRESENT" if both "ZERO" and "NONZERO" are valid.
 proc reach {func command displacement} {
-    global pf_prefix
-    set old_ldprefix $pf_prefix
-    lappend pf_prefix "reach-$func:"
-
-    reach_1 $func $command $displacement
-
-    set pf_prefix $old_ldprefix
+    with_test_prefix " reach-$func:" {
+	reach_1 $func $command $displacement
+    }
 }
 
-proc test_core {file displacement} {
+proc test_core {file displacement} { with_test_prefix " core:" {
     global srcdir subdir gdb_prompt expect_out
 
     set corefile [core_find $file {} "segv"]
     if {$corefile == ""} {
 	return
     }
-
-    global pf_prefix
-    set old_ldprefix $pf_prefix
-    lappend pf_prefix "core:"
 
     gdb_exit
     gdb_start
@@ -245,16 +237,10 @@ proc test_core {file displacement} {
     }
 
     gdb_test "bt" "#\[0-9\]+ +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#\[0-9\]+ +\[^\r\n\]*\\mmain\\M.*" "core main bt"
+}}
 
-    set pf_prefix $old_ldprefix
-}
-
-proc test_attach_gdb {file pid displacement prefix} {
+proc test_attach_gdb {file pid displacement prefix} { with_test_prefix " $prefix:" {
     global gdb_prompt expect_out
-
-    global pf_prefix
-    set old_ldprefix $pf_prefix
-    lappend pf_prefix "$prefix:"
 
     gdb_exit
     gdb_start
@@ -300,9 +286,7 @@ proc test_attach_gdb {file pid displacement prefix} {
 
     gdb_test "bt" "#\[0-9\]+ +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#\[0-9\]+ +\[^\r\n\]*\\mmain\\M.*" "attach main bt"
     gdb_exit
-
-    set pf_prefix $old_ldprefix
-}
+}}
 
 proc test_attach {file displacement {relink_args ""}} {
     global board_info
@@ -429,7 +413,7 @@ proc test_ld {file ifmain trynosym displacement} {
 
     global pf_prefix
     set old_ldprefix $pf_prefix
-    lappend pf_prefix "symbol-less:"
+    append pf_prefix " symbol-less:"
 
     # Test also `exec-file'-command loaded $FILE - therefore without symbols.
     # SYMBOL_OBJFILE is not available and only EXEC_BFD must be used.
@@ -544,7 +528,7 @@ foreach ldprelink {NO YES} {
 	set interp_saved ${interp}-saved
 
 	set pf_prefix $old_ldprefix
-	lappend pf_prefix "$ldname:"
+	append pf_prefix " $ldname:"
 
 	if {$ldsepdebug == "NO"} {
 	    file_copy $interp_system $interp
@@ -626,7 +610,7 @@ foreach ldprelink {NO YES} {
 		    set exec $binprefix-$binname
 
 		    set pf_prefix $old_binprefix
-		    lappend pf_prefix "$binname:"
+		    append pf_prefix " $binname:"
 
 		    set opts "ldflags=-Wl,$binfile_lib,-rpath,[file dirname $binfile_lib]"
 		    if {$binsepdebug != "NO"} {

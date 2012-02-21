@@ -46,20 +46,16 @@ if { [gdb_compile_shlib "${srcdir}/${subdir}/${srcfile2}" ${binfile2} {debug}] !
 # names.
 # KIND is passed to the "catch" command.
 # MATCH is a boolean saying whether we expect the catchpoint to be hit.
-proc one_catch_load_test {scenario kind match sostop} {
+proc one_catch_load_test {scenario kind match sostop} { with_test_prefix "${scenario}:" {
     global verbose testfile testfile2 binfile2_dlopen
-    global pf_prefix srcfile
+    global srcfile
     global decimal gdb_prompt
-
-    set saved_prefix $pf_prefix
-    append pf_prefix "${scenario}:"
 
     clean_restart $testfile
     gdb_load_shlibs $binfile2_dlopen
 
     if {![runto_main]} {
 	fail "can't run to main"
-	set pf_prefix $saved_prefix
 	return
     }
 
@@ -97,9 +93,7 @@ proc one_catch_load_test {scenario kind match sostop} {
 	    fail "continue"
 	}
     }
-
-    set pf_prefix $saved_prefix
-}
+}}
 
 one_catch_load_test "plain load" "load" 1 0
 one_catch_load_test "plain load with stop-on-solib-events" "load" 1 1

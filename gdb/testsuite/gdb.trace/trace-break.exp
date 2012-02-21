@@ -55,19 +55,16 @@ if [is_amd64_regs_target] {
 
 # Set breakpoint and tracepoint at the same address.
 
-proc break_trace_same_addr_1 { trace_type option } {
+proc break_trace_same_addr_1 { trace_type option } \
+{ with_test_prefix " 1 $trace_type $option:" \
+{
     global executable
-    global pf_prefix
     global hex
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix 1 $trace_type $option:"
 
     # Start with a fresh gdb.
     clean_restart ${executable}
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -87,25 +84,20 @@ proc break_trace_same_addr_1 { trace_type option } {
 
     gdb_test "tfind" "Found trace frame 0, tracepoint .*" "tfind frame 0"
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 # Set multiple tracepoints at the same address.
 
-proc break_trace_same_addr_2 { trace_type1 trace_type2 option } {
+proc break_trace_same_addr_2 { trace_type1 trace_type2 option } \
+{ with_test_prefix " 2 $trace_type1 $trace_type2 $option:" \
+{
     global executable
-    global pf_prefix
     global hex
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix 2 $trace_type1 $trace_type2 $option:"
 
     # Start with a fresh gdb.
     clean_restart ${executable}
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -129,26 +121,21 @@ proc break_trace_same_addr_2 { trace_type1 trace_type2 option } {
     gdb_test "tfind" "Found trace frame 0, tracepoint .*" "tfind frame 0"
     gdb_test "tfind" "Found trace frame 1, tracepoint .*" "tfind frame 1"
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 # Set breakpoint and tracepoint at the same address.  Delete breakpoint, and verify
 # that tracepoint still works.
 
-proc break_trace_same_addr_3 { trace_type option } {
+proc break_trace_same_addr_3 { trace_type option } \
+{ with_test_prefix " 3 $trace_type $option:" \
+{
     global executable
-    global pf_prefix
     global hex
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix 3 $trace_type $option:"
 
     # Start with a fresh gdb.
     clean_restart ${executable}
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -169,26 +156,22 @@ proc break_trace_same_addr_3 { trace_type option } {
 
     gdb_test "tfind" "Found trace frame 0, tracepoint .*" "tfind frame 0"
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 # Set breakpoint and tracepoint at the same address.  Delete tracepoint, and verify
 # that breakpoint still works.
 
-proc break_trace_same_addr_4 { trace_type option } {
+proc break_trace_same_addr_4 { trace_type option } \
+{ with_test_prefix " 4 $trace_type $option:" \
+{
     global executable
-    global pf_prefix
     global hex
 
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix 4 $trace_type $option:"
 
     # Start with a fresh gdb.
     clean_restart ${executable}
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -210,31 +193,26 @@ proc break_trace_same_addr_4 { trace_type option } {
     gdb_test "tstop" "Trace is not running.*"
 
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 # Set two tracepoints TRACE1 and TRACE2 at two locations, and start tracing.
 # Then, set tracepoint TRACE3 at either of these two locations.
 # TRACE3_AT_FIRST_LOC is a boolean variable to decide insert TRACE3 at which
 # of two locations.  Verify  these tracepoints work as expected.
 
-proc break_trace_same_addr_5 { trace1 trace2 trace3 trace3_at_first_loc } {
+proc break_trace_same_addr_5 { trace1 trace2 trace3 trace3_at_first_loc } \
+{ with_test_prefix " 5 $trace1 $trace2 ${trace3}@${trace3_at_first_loc}:" \
+{
     global executable
-    global pf_prefix
     global hex
     global fpreg
     global spreg
     global pcreg
 
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix 5 $trace1 $trace2 ${trace3}@${trace3_at_first_loc}:"
-
     # Start with a fresh gdb.
     clean_restart ${executable}
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -289,29 +267,24 @@ proc break_trace_same_addr_5 { trace1 trace2 trace3 trace3_at_first_loc } {
     gdb_test "tdump" \
 	"Data collected at tracepoint .*, trace frame \[0-9\]:.*\\$${fpreg} = .*" \
 	"tdump 3"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 # Set two tracepoints at the same address, and enable/disable them.  Verify
 # tracepoints work as expect.
 
-proc break_trace_same_addr_6 { trace1 enable1 trace2 enable2 } {
+proc break_trace_same_addr_6 { trace1 enable1 trace2 enable2 } \
+{ with_test_prefix " 6 $trace1 $enable1 $trace2 $enable2:" \
+{
     global executable
-    global pf_prefix
     global hex
     global gdb_prompt
     global spreg
     global pcreg
 
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix 6 $trace1 $enable1 $trace2 $enable2:"
-
     # Start with a fresh gdb.
     clean_restart ${executable}
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -362,9 +335,7 @@ proc break_trace_same_addr_6 { trace1 enable1 trace2 enable2 } {
 	gdb_test "tfind tracepoint 5" "Target failed to find requested trace frame.*" \
 	    "tfind test frame of tracepoint 5"
     }
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 
 foreach break_always_inserted { "on" "off" } {

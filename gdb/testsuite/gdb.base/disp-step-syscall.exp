@@ -30,10 +30,9 @@ if { [istarget "i\[34567\]86-*-linux*"] || [istarget "x86_64-*-linux*"] } {
     return -1
 }
 
-proc disp_step_cross_syscall { syscall } {
+proc disp_step_cross_syscall { syscall } { with_test_prefix " $syscall:" {
     global syscall_insn
     global gdb_prompt
-    global pf_prefix
 
     set testfile "disp-step-$syscall"
 
@@ -46,9 +45,6 @@ proc disp_step_cross_syscall { syscall } {
 	fail "run to main ($syscall)"
 	return
     }
-
-    set old_pf_prefix $pf_prefix
-    lappend pf_prefix "$syscall:"
 
     # Delete the breakpoint on main.
     gdb_test_no_output "delete break 1"
@@ -94,7 +90,6 @@ proc disp_step_cross_syscall { syscall } {
 
     if {$see_syscall_insn == 0} then {
 	fail "find syscall insn in $syscall"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -130,9 +125,7 @@ proc disp_step_cross_syscall { syscall } {
 
     gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
 	"continue to marker ($syscall)"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 disp_step_cross_syscall "fork"
 disp_step_cross_syscall "vfork"

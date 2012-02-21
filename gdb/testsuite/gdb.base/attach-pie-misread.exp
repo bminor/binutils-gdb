@@ -152,9 +152,7 @@ gdb_expect {
 }
 
 # Due to alignments it was reproducible with 1 on x86_64 but 2 on i686.
-foreach align_mult {1 2} {
-    set old_ldprefix $pf_prefix
-    lappend pf_prefix "shift-by-$align_mult:"
+foreach align_mult {1 2} { with_test_prefix " shift-by-$align_mult:" {
 
     # FIXME: We believe there is enough room under FIRST_OFFSET.
     set shifted_offset [format 0x%x [expr "$first_offset - $align_mult * $align_max"]]
@@ -198,8 +196,6 @@ foreach align_mult {1 2} {
     }
 
     gdb_test "detach" "Detaching from program: .*"
-
-    set pf_prefix $old_ldprefix
-}
+}}
 
 remote_exec host "kill -9 $pid"

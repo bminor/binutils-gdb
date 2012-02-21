@@ -36,7 +36,7 @@ if [get_compiler_info $binfile] {
     return -1
 }
 
-proc altivec_abi_tests { extra_flags force_abi } {
+proc altivec_abi_tests { prefix extra_flags force_abi } { with_test_prefix $prefix {
     global testfile binfile srcfile srcdir subdir
     global gdb_prompt
 
@@ -144,13 +144,10 @@ proc altivec_abi_tests { extra_flags force_abi } {
     gdb_test "p matrix\[1\]" ".*= .11, 12, 13, 14, 15, 16, 17, 18." "print second vector"
     gdb_test "p matrix\[2\]" ".*= .21, 22, 23, 24, 25, 26, 27, 28." "print third vector"
     gdb_test "p matrix\[3\]" ".*= .31, 32, 33, 34, 35, 36, 37, 38." "print fourth vector"
-}
+}}
 
 if [test_compiler_info gcc*] {
-    set saved_prefix $pf_prefix
-
-    set pf_prefix "${saved_prefix} default ABI, auto:"
-    altivec_abi_tests "additional_flags=-maltivec" "auto"
+    altivec_abi_tests " default ABI, auto:" "additional_flags=-maltivec" "auto"
 
     # On GNU/Linux, we can mix -mabi=no-altivec and -mabi=altivec.
     # So test some combinations.
@@ -159,24 +156,24 @@ if [test_compiler_info gcc*] {
 	# was broken, so skip those tests there.
 	if { ![is_lp64_target] || ![test_compiler_info "gcc-4-\[12\]-*"] } {
 	    set binfile ${objdir}/${subdir}/${testfile}-ge-ge
-	    set pf_prefix "${saved_prefix} generic ABI, forced:"
-	    altivec_abi_tests "additional_flags=-maltivec additional_flags=-mabi=no-altivec" "generic"
+	    altivec_abi_tests " generic ABI, forced:" \
+		"additional_flags=-maltivec additional_flags=-mabi=no-altivec" "generic"
 
 	    set binfile ${objdir}/${subdir}/${testfile}-ge-auto
-	    set pf_prefix "${saved_prefix} generic ABI, auto:"
-	    altivec_abi_tests "additional_flags=-maltivec additional_flags=-mabi=no-altivec" "auto"
+	    altivec_abi_tests " generic ABI, auto:" \
+		"additional_flags=-maltivec additional_flags=-mabi=no-altivec" "auto"
 	}
 
 	set binfile ${objdir}/${subdir}/${testfile}-av-av
-	set pf_prefix "${saved_prefix} AltiVec ABI, forced:"
-	altivec_abi_tests "additional_flags=-maltivec additional_flags=-mabi=altivec" "altivec"
+	altivec_abi_tests " AltiVec ABI, forced:" \
+	    "additional_flags=-maltivec additional_flags=-mabi=altivec" "altivec"
 
 	set binfile ${objdir}/${subdir}/${testfile}-av-auto
-	set pf_prefix "${saved_prefix} AltiVec ABI, auto:"
-	altivec_abi_tests "additional_flags=-maltivec additional_flags=-mabi=altivec" "auto"
+	altivec_abi_tests " AltiVec ABI, auto:" \
+	    "additional_flags=-maltivec additional_flags=-mabi=altivec" "auto"
     }
 } elseif [test_compiler_info xlc*] {
-    altivec_abi_tests "additional_flags=-qaltivec" "auto"
+    altivec_abi_tests "" "additional_flags=-qaltivec" "auto"
 } else {
     warning "unknown compiler"
     return -1

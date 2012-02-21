@@ -71,20 +71,15 @@ if [is_amd64_regs_target] {
 
 # Set tracepoint during tracing experiment.
 
-proc tracepoint_change_loc_1 { trace_type } {
+proc tracepoint_change_loc_1 { trace_type } { with_test_prefix " 1 $trace_type:" {
     global testfile
     global srcfile
     global pcreg
     global gdb_prompt
-    global pf_prefix
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix 1 $trace_type:"
 
     clean_restart ${testfile}
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
     gdb_test_no_output "delete break 1"
@@ -120,7 +115,6 @@ proc tracepoint_change_loc_1 { trace_type } {
 	}
 	-re ".*$gdb_prompt $" {
 	    kfail "gdb/13392" "continue to marker 2"
-	    set pf_prefix $old_pf_prefix
 	    return
 	}
     }
@@ -143,23 +137,17 @@ proc tracepoint_change_loc_1 { trace_type } {
 
     gdb_test "tfind" "Found trace frame 0, tracepoint 4.*" "tfind frame 0"
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 # Set pending tracepoint.
 
-proc tracepoint_change_loc_2 { trace_type } {
+proc tracepoint_change_loc_2 { trace_type } { with_test_prefix " 2 $trace_type:" {
     global srcdir
     global srcfile
     global subdir
     global pcreg
     global binfile
     global gdb_prompt
-    global pf_prefix
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix 2 $trace_type:"
 
     gdb_exit
     gdb_start
@@ -218,7 +206,6 @@ proc tracepoint_change_loc_2 { trace_type } {
 	}
 	-re ".*$gdb_prompt $" {
 	    kfail "gdb/13392" "continue to marker 1"
-	    set pf_prefix $old_pf_prefix
 	    return
 	}
     }
@@ -247,9 +234,7 @@ proc tracepoint_change_loc_2 { trace_type } {
     gdb_test "tfind" "Found trace frame 1, tracepoint 1.*" "tfind frame 1"
     gdb_test "tfind" "Found trace frame 2, tracepoint 1.*" "tfind frame 2"
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 tracepoint_change_loc_1 "trace"
 tracepoint_change_loc_2 "trace"

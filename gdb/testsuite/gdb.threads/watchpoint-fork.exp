@@ -22,21 +22,15 @@ if [is_remote target] {
     return
 }
 
-proc test {type symbol} {
-    global testfile objdir subdir srcdir gdb_prompt
-
-    global pf_prefix
-    set prefix_test $pf_prefix
-    lappend pf_prefix "$type:"
-    set prefix_mt $pf_prefix
+proc test {type symbol} { with_test_prefix " $type:" {
+    global testfile objdir subdir srcdir gdb_prompt pf_prefix
 
     set srcfile_type ${srcdir}/${subdir}/${testfile}-${type}.c
 
-
     # no threads
 
-    set pf_prefix $prefix_mt
-    lappend pf_prefix "singlethreaded:"
+    set prefix_test $pf_prefix
+    append pf_prefix " singlethreaded:"
 
     set executable ${testfile}-${type}-st
     set srcfile_main ${srcdir}/${subdir}/${testfile}-st.c
@@ -98,8 +92,8 @@ proc test {type symbol} {
 	return
     }
 
-    set pf_prefix $prefix_mt
-    lappend pf_prefix "multithreaded:"
+    set pf_prefix $prefix_test
+    append pf_prefix " multithreaded:"
 
     set executable ${testfile}-${type}-mt
     set srcfile_main ${srcdir}/${subdir}/${testfile}-mt.c
@@ -151,7 +145,7 @@ proc test {type symbol} {
 
     # cleanup
     set pf_prefix $prefix_test
-}
+}}
 
 test parent FOLLOW_PARENT
 

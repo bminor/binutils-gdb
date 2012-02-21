@@ -52,19 +52,14 @@ if { ![gdb_target_supports_trace] } then {
 
 gdb_load_shlibs $libipa
 
-proc strace_info_marker { } {
+proc strace_info_marker { } { with_test_prefix " info_marker" {
     global executable
-    global pf_prefix
     global gdb_prompt
-
-    set old_pf_prefix $pf_prefix
-    lappend pf_prefix "info_marker"
 
     # Restart with a fresh gdb.
     clean_restart $executable
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -79,24 +74,18 @@ proc strace_info_marker { } {
 	    pass "info threads"
 	}
     }
-    set pf_prefix $old_pf_prefix
-}
+}}
 
-proc strace_probe_marker { } {
+proc strace_probe_marker { } { with_test_prefix " probe_marker" {
     global executable
-    global pf_prefix
     global expect_out
     global gdb_prompt
     global hex
-
-    set old_pf_prefix $pf_prefix
-    lappend pf_prefix "probe_marker"
 
     # Restart with a fresh gdb.
     clean_restart $executable
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -114,25 +103,18 @@ proc strace_probe_marker { } {
     gdb_test "tfind" "Found trace frame 0, tracepoint .*" "tfind frame 0"
     gdb_test "tfind" "Found trace frame 1, tracepoint .*" "tfind frame 1"
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
+}}
 
-    set pf_prefix $old_pf_prefix
-}
-
-proc strace_trace_on_same_addr { type } {
+proc strace_trace_on_same_addr { type } { with_test_prefix " trace_same_addr $type" {
     global executable
-    global pf_prefix
     global expect_out
     global gdb_prompt
     global hex
-
-    set old_pf_prefix $pf_prefix
-    lappend pf_prefix "trace_same_addr" "$type"
 
     # Restart with a fresh gdb.
     clean_restart $executable
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -211,24 +193,19 @@ proc strace_trace_on_same_addr { type } {
 	gdb_test "tfind" "Found trace frame 3, tracepoint .*" "tfind frame 3"
 	gdb_test "tfind" "Target failed to find requested trace frame\\..*"
     }
-    set pf_prefix $old_pf_prefix
-}
+}}
 
-proc strace_trace_on_diff_addr { } {
+proc strace_trace_on_diff_addr { } { with_test_prefix " trace_diff_addr" {
+
     global executable
-    global pf_prefix
     global expect_out
     global gdb_prompt
     global hex
-
-    set old_pf_prefix $pf_prefix
-    lappend pf_prefix "trace_diff_addr"
 
     # Restart with a fresh gdb.
     clean_restart $executable
     if ![runto_main] {
 	fail "Can't run to main"
-	set pf_prefix $old_pf_prefix
 	return -1
     }
 
@@ -269,9 +246,7 @@ proc strace_trace_on_diff_addr { } {
     gdb_test "tfind" "Found trace frame 0, tracepoint .*" "tfind frame 0"
     gdb_test "tfind" "Found trace frame 1, tracepoint .*" "tfind frame 1"
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 strace_info_marker
 strace_probe_marker

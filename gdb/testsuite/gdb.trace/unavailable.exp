@@ -136,13 +136,9 @@ proc test_maybe_regvar_display { var } {
 # Test procs
 #
 
-proc gdb_collect_args_test {} {
+proc gdb_collect_args_test {} { with_test_prefix " unavailable arguments:" {
     global cr
     global gdb_prompt
-    global pf_prefix
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix unavailable arguments:"
 
     prepare_for_trace_test
 
@@ -205,17 +201,11 @@ proc gdb_collect_args_test {} {
     gdb_test "tfind none" \
 	"#0  end .*" \
 	"cease trace debugging"
+}}
 
-    set pf_prefix $old_pf_prefix
-}
-
-proc gdb_collect_locals_test { func msg } {
+proc gdb_collect_locals_test { func msg } { with_test_prefix " unavailable locals: $msg:" {
     global cr
     global gdb_prompt
-    global pf_prefix
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix unavailable locals: $msg:"
 
     prepare_for_trace_test
 
@@ -262,18 +252,12 @@ proc gdb_collect_locals_test { func msg } {
     gdb_test "tfind none" \
 	"#0  end .*" \
 	"cease trace debugging"
+}}
 
-    set pf_prefix $old_pf_prefix
-}
-
-proc gdb_unavailable_registers_test { } {
+proc gdb_unavailable_registers_test { } { with_test_prefix " unavailable registers:" {
     global gdb_prompt
     global spreg
     global pcreg
-    global pf_prefix
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix unavailable registers:"
 
     prepare_for_trace_test
 
@@ -319,19 +303,13 @@ proc gdb_unavailable_registers_test { } {
 	"info registers \$$spreg reports not available"
 
     gdb_test "tfind none" "#0  end .*" "cease trace debugging"
+}}
 
-    set pf_prefix $old_pf_prefix
-}
-
-proc gdb_collect_globals_test { } {
+proc gdb_collect_globals_test { } { with_test_prefix " collect globals:" {
     global ws
     global cr
     global gdb_prompt
     global hex
-    global pf_prefix
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix collect globals:"
 
     prepare_for_trace_test
 
@@ -518,8 +496,9 @@ proc gdb_collect_globals_test { } {
 
     gdb_test_no_output "set print object on"
 
-    set old_pf_prefix_2 $pf_prefix
-    set pf_prefix "$pf_prefix print object on:"
+    global pf_prefix
+    set old_pf_prefix $pf_prefix
+    append pf_prefix " print object on:"
 
     # With print object on, printing a pointer may need to fetch the
     # pointed-to object, to check its run-time type.  Make sure that
@@ -539,11 +518,11 @@ proc gdb_collect_globals_test { } {
     gdb_test "print derived_whole" \
 	" = \\(Derived\\) {<Middle> = {<Base> = {x = 2}, _vptr.Middle = $hex, y = 3}, _vptr.Derived = $hex, z = 4}"
 
-    set pf_prefix $old_pf_prefix_2
+    set pf_prefix $old_pf_prefix
 
     gdb_test_no_output "set print object off"
 
-    set pf_prefix "$pf_prefix print object off:"
+    append pf_prefix " print object off:"
 
     gdb_test "print virtualp" " = \\(Virtual \\*\\) <unavailable>"
 
@@ -559,7 +538,7 @@ proc gdb_collect_globals_test { } {
     gdb_test "print derived_whole" \
 	" = {<Middle> = {<Base> = {x = 2}, _vptr.Middle = $hex, y = 3}, _vptr.Derived = $hex, z = 4}"
 
-    set pf_prefix $old_pf_prefix_2
+    set pf_prefix $old_pf_prefix
 
     # An instance of a virtual class where we collected everything but
     # the vptr.
@@ -569,9 +548,7 @@ proc gdb_collect_globals_test { } {
     gdb_test "tfind none" \
 	"#0  end .*" \
 	"cease trace debugging"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 proc gdb_trace_collection_test {} {
     gdb_collect_globals_test

@@ -51,11 +51,8 @@ if { [gdb_compile_shlib ${solib_srcfile} ${solib_binfile} {-fPIC}] != "" } {
 
 set solib_binfile_target [gdb_download ${solib_binfile}]
 
-proc one_jit_test {count match_str} {
-    global verbose testfile solib_binfile_target solib_binfile_test_msg pf_prefix
-
-    set old_pf_prefix $pf_prefix
-    lappend pf_prefix "one_jit_test-$count:"
+proc one_jit_test {count match_str} { with_test_prefix " one_jit_test-$count:" {
+    global verbose testfile solib_binfile_target solib_binfile_test_msg
 
     clean_restart $testfile
 
@@ -93,9 +90,8 @@ proc one_jit_test {count match_str} {
     gdb_continue_to_breakpoint "break here 2"
     # All jit librares must have been unregistered
     gdb_test "info function jit_function" \
-	"All functions matching regular expression \"jit_function\":" 
-    set pf_prefix $old_pf_prefix
-}
+	"All functions matching regular expression \"jit_function\":"
+}}
 
 one_jit_test 1 "${hex}  jit_function_0000"
 one_jit_test 2 "${hex}  jit_function_0000\[\r\n\]+${hex}  jit_function_0001"

@@ -39,19 +39,14 @@ if ![gdb_target_supports_trace] {
 
 # Verify that the sequence of commands "tstart tstop tstart" works well.
 
-proc test_tstart_tstop_tstart { } {
+proc test_tstart_tstop_tstart { } { with_test_prefix " tstart_tstop_tstart:" {
     global executable
-    global pf_prefix
     global hex
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix tstart_tstop_tstart:"
 
     # Start with a fresh gdb.
     clean_restart ${executable}
     if ![runto_main] {
         fail "Can't run to main"
-        set pf_prefix $old_pf_prefix
         return -1
     }
 
@@ -64,25 +59,18 @@ proc test_tstart_tstop_tstart { } {
     gdb_test_no_output "tstop"
 
     gdb_test_no_output "tstart"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 # Verify the sequence of commands "tstart tstart" works well.
 
-proc test_tstart_tstart { } {
+proc test_tstart_tstart { } { with_test_prefix " tstart_tstart:" {
     global executable
-    global pf_prefix
     global hex
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix tstart_tstart:"
 
     # Start with a fresh gdb.
     clean_restart ${executable}
     if ![runto_main] {
         fail "Can't run to main"
-        set pf_prefix $old_pf_prefix
         return -1
     }
 
@@ -90,25 +78,18 @@ proc test_tstart_tstart { } {
     gdb_test_no_output "tstart"
 
     gdb_test "tstart" "" "tstart again" "A trace is running already.  Start a new run\\? \\(y or n\\) " "y"
-
-    set pf_prefix $old_pf_prefix
-}
+}}
 
 # Verify that trace stops clearly when trace buffer is full.
 
-proc test_buffer_full_tstart { } {
+proc test_buffer_full_tstart { } { with_test_prefix " buffer_full_tstart:" {
     global executable
-    global pf_prefix
     global hex
-
-    set old_pf_prefix $pf_prefix
-    set pf_prefix "$pf_prefix buffer_full_tstart:"
 
     # Start with a fresh gdb.
     clean_restart ${executable}
     if ![runto_main] {
         fail "Can't run to main"
-        set pf_prefix $old_pf_prefix
         return -1
     }
 
@@ -123,9 +104,7 @@ proc test_buffer_full_tstart { } {
 
     gdb_test "tstatus" ".*buffer was full.*"
     gdb_test_no_output "tstart"
-
-    set old_pf_prefix $pf_prefix
-}
+}}
 
 test_tstart_tstop_tstart
 

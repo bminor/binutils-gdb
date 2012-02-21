@@ -894,12 +894,10 @@ proc do_tests {} {
 
 do_tests
 if ![target_info exists gdb,no_hardware_watchpoints] {
-    set save_pf_prefix $pf_prefix
-    lappend pf_prefix "no-hw:"
-
-    set no_hw 1
-    do_tests
-    set pf_prefix $save_pf_prefix
+    with_test_prefix " no-hw:" {
+	set no_hw 1
+	do_tests
+    }
 }
 
 # Restore old timeout
