@@ -1,5 +1,12 @@
 2012-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR build/13638
+	* configure.ac (MAKEINFO): Replace AC_CHECK_PROG by AC_ARG_VAR.
+	(MAKEINFOFLAGS): Replace static string by AC_ARG_VAR.
+	* configure: Regenerate.
+
+2012-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* configure: Regenerate.
 	* config.in: Regenerate.
 
