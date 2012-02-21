@@ -1,5 +1,24 @@
 2012-02-21  Anton Gorenkov  <xgsa@yandex.ru>
 
+	* c-valprint.c (c_value_print): Use value_rtti_indirect_type
+	instead of value_rtti_target_type.
+	* eval.c (evaluate_subexp_standard): Use value_rtti_indirect_type
+	instead of value_rtti_target_type.
+	* typeprint.c (whatis_exp): Use value_rtti_indirect_type instead of
+	value_rtti_target_type.
+	* valops.c (value_ind): Extract function readjust_indirect_value_type.
+	(value_rtti_target_type): Rename to ...
+	(value_rtti_indirect_type): ... here and make it indirect.  Update
+	function comment.
+	* value.c (readjust_indirect_value_type): New function.
+	(coerce_ref): Support for enclosing type setting for references
+	with readjust_indirect_value_type.
+	* value.h (readjust_value_type): New declaration.
+	(value_rtti_target_type): Rename to ...
+	(value_rtti_indirect_type): ... here.
+
+2012-02-21  Anton Gorenkov  <xgsa@yandex.ru>
+
 	* MAINTAINERS (Write After Approval): Add myself to the list.
 
 2012-02-20  Doug Evans  <dje@google.com>

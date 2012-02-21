@@ -351,6 +351,19 @@ extern short *deprecated_value_regnum_hack (struct value *);
 
 extern struct value *coerce_ref_if_computed (const struct value *arg);
 
+/* Setup a new value type and enclosing value type for dereferenced value VALUE.
+   ENC_TYPE is the new enclosing type that should be set.  ORIGINAL_TYPE and
+   ORIGINAL_VAL are the type and value of the original reference or pointer.
+
+   Note, that VALUE is modified by this function.
+
+   It is a common implementation for coerce_ref and value_ind.  */
+
+extern struct value * readjust_indirect_value_type (struct value *value,
+						    struct type *enc_type,
+						    struct type *original_type,
+						    struct value *original_val);
+
 /* Convert a REF to the object referenced.  */
 
 extern struct value *coerce_ref (struct value *value);
@@ -615,8 +628,8 @@ extern struct value *value_primitive_field (struct value *arg1, int offset,
 					    struct type *arg_type);
 
 
-extern struct type *value_rtti_target_type (struct value *, int *, int *,
-					    int *);
+extern struct type *value_rtti_indirect_type (struct value *, int *, int *,
+					      int *);
 
 extern struct value *value_full_object (struct value *, struct type *, int,
 					int, int);

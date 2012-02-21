@@ -728,22 +728,13 @@ c_value_print (struct value *val, struct ui_file *stream,
 
 	  if (value_entirely_available (val))
  	    {
-	      real_type = value_rtti_target_type (val, &full, &top, &using_enc);
+	      real_type = value_rtti_indirect_type (val, &full, &top,
+						    &using_enc);
 	      if (real_type)
 		{
 		  /* RTTI entry found.  */
-		  if (TYPE_CODE (type) == TYPE_CODE_PTR)
-		    {
-		      /* Create a pointer type pointing to the real
-			 type.  */
-		      type = lookup_pointer_type (real_type);
-		    }
-		  else
-		    {
-		      /* Create a reference type referencing the real
-			 type.  */
-		      type = lookup_reference_type (real_type);
-		    }
+		  type = real_type;
+
 		  /* Need to adjust pointer value.  */
 		  val = value_from_pointer (type, value_as_address (val) - top);
 

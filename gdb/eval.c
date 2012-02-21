@@ -2001,16 +2001,10 @@ evaluate_subexp_standard (struct type *expect_type,
         if (opts.objectprint && TYPE_TARGET_TYPE(type)
             && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
           {
-            real_type = value_rtti_target_type (arg1, &full, &top, &using_enc);
+            real_type = value_rtti_indirect_type (arg1, &full, &top,
+						  &using_enc);
             if (real_type)
-              {
-                if (TYPE_CODE (type) == TYPE_CODE_PTR)
-                  real_type = lookup_pointer_type (real_type);
-                else
-                  real_type = lookup_reference_type (real_type);
-
                 arg1 = value_cast (real_type, arg1);
-              }
           }
       }
 

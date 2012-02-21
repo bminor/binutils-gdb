@@ -139,16 +139,7 @@ whatis_exp (char *exp, int show)
       if (((TYPE_CODE (type) == TYPE_CODE_PTR)
 	   || (TYPE_CODE (type) == TYPE_CODE_REF))
 	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
-        {
-          real_type = value_rtti_target_type (val, &full, &top, &using_enc);
-          if (real_type)
-            {
-              if (TYPE_CODE (type) == TYPE_CODE_PTR)
-                real_type = lookup_pointer_type (real_type);
-              else
-                real_type = lookup_reference_type (real_type);
-            }
-        }
+        real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
       else if (TYPE_CODE (type) == TYPE_CODE_CLASS)
 	real_type = value_rtti_type (val, &full, &top, &using_enc);
     }

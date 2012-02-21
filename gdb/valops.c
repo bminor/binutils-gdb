@@ -1772,15 +1772,7 @@ value_ind (struct value *arg1)
 			      (value_as_address (arg1)
 			       - value_pointed_to_offset (arg1)));
 
-      /* Re-adjust type.  */
-      deprecated_set_value_type (arg2, TYPE_TARGET_TYPE (base_type));
-      /* Add embedding info.  */
-      set_value_enclosing_type (arg2, enc_type);
-      set_value_embedded_offset (arg2, value_pointed_to_offset (arg1));
-
-      /* We may be pointing to an object of some derived type.  */
-      arg2 = value_full_object (arg2, NULL, 0, 0, 0);
-      return arg2;
+      return readjust_indirect_value_type (arg2, enc_type, base_type, arg1);
     }
 
   error (_("Attempt to take contents of a non-pointer value."));
@@ -3526,21 +3518,48 @@ value_maybe_namespace_elt (const struct type *curtype,
   return result;
 }
 
-/* Given a pointer value V, find the real (RTTI) type of the object it
-   points to.
+/* Given a pointer or a reference value V, find its real (RTTI) type.
 
    Other parameters FULL, TOP, USING_ENC as with value_rtti_type()
    and refer to the values computed for the object pointed to.  */
 
 struct type *
-value_rtti_target_type (struct value *v, int *full, 
-			int *top, int *using_enc)
+value_rtti_indirect_type (struct value *v, int *full, 
+			  int *top, int *using_enc)
 {
   struct value *target;
+  struct type *type, *real_type, *target_type;
 
-  target = value_ind (v);
+  type = value_type (v);
+  type = check_typedef (type);
+  if (TYPE_CODE (type) == TYPE_CODE_REF)
+    target = coerce_ref (v);
+  else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    target = value_ind (v);
+  else
+    return NULL;
 
-  return value_rtti_type (target, full, top, using_enc);
+  real_type = value_rtti_type (target, full, top, using_enc);
+
+  if (real_type)
+    {
+      /* Copy qualifiers to the referenced object.  */
+      target_type = value_type (target);
+      real_type = make_cv_type (TYPE_CONST (target_type),
+				TYPE_VOLATILE (target_type), real_type, NULL);
+      if (TYPE_CODE (type) == TYPE_CODE_REF)
+        real_type = lookup_reference_type (real_type);
+      else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+        real_type = lookup_pointer_type (real_type);
+      else
+        internal_error (__FILE__, __LINE__, _("Unexpected value type."));
+
+      /* Copy qualifiers to the pointer/reference.  */
+      real_type = make_cv_type (TYPE_CONST (type), TYPE_VOLATILE (type),
+				real_type, NULL);
+    }
+
+  return real_type;
 }
 
 /* Given a value pointed to by ARGP, check its real run-time type, and

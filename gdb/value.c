@@ -3134,11 +3134,30 @@ coerce_ref_if_computed (const struct value *arg)
   return funcs->coerce_ref (arg);
 }
 
+/* Look at value.h for description.  */
+
+struct value *
+readjust_indirect_value_type (struct value *value, struct type *enc_type,
+			      struct type *original_type,
+			      struct value *original_value)
+{
+  /* Re-adjust type.  */
+  deprecated_set_value_type (value, TYPE_TARGET_TYPE (original_type));
+
+  /* Add embedding info.  */
+  set_value_enclosing_type (value, enc_type);
+  set_value_embedded_offset (value, value_pointed_to_offset (original_value));
+
+  /* We may be pointing to an object of some derived type.  */
+  return value_full_object (value, NULL, 0, 0, 0);
+}
+
 struct value *
 coerce_ref (struct value *arg)
 {
   struct type *value_type_arg_tmp = check_typedef (value_type (arg));
   struct value *retval;
+  struct type *enc_type;
 
   retval = coerce_ref_if_computed (arg);
   if (retval)
@@ -3147,9 +3166,14 @@ coerce_ref (struct value *arg)
   if (TYPE_CODE (value_type_arg_tmp) != TYPE_CODE_REF)
     return arg;
 
-  return value_at_lazy (TYPE_TARGET_TYPE (value_type_arg_tmp),
-			unpack_pointer (value_type (arg),
-					value_contents (arg)));
+  enc_type = check_typedef (value_enclosing_type (arg));
+  enc_type = TYPE_TARGET_TYPE (enc_type);
+
+  retval = value_at_lazy (enc_type,
+                          unpack_pointer (value_type (arg),
+                                          value_contents (arg)));
+  return readjust_indirect_value_type (retval, enc_type,
+                                       value_type_arg_tmp, arg);
 }
 
 struct value *
