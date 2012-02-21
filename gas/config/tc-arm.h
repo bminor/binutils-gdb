@@ -1,6 +1,6 @@
 /* This file is tc-arm.h
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009, 2012  Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
 
@@ -78,6 +78,9 @@ struct fix;
 # define ARM_BI_ENDIAN
 # define TARGET_FORMAT	elf32_arm_target_format ()
 #endif
+
+/* We support double slash line-comments for compatibility with the ARM AArch64 Assembler.  */
+#define DOUBLESLASH_LINE_COMMENTS
 
 #define TC_FORCE_RELOCATION(FIX) arm_force_relocation (FIX)
 

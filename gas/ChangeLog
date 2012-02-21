@@ -1,3 +1,7 @@
+2012-02-21  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/config/tc-arm.h (DOUBLESLASH_LINE_COMMENTS): Define.
+
 2012-02-21  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* write.c (write_object_file): Add md_pre_output_hook.
