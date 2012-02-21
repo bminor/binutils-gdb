@@ -1,3 +1,7 @@
+2012-02-21  Anton Gorenkov  <xgsa@yandex.ru>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2012-02-20  Doug Evans  <dje@google.com>
 
 	* objfiles.c (add_to_objfile_sections): Remove outdated comments.
