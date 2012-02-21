@@ -85,24 +85,12 @@ PACKAGE=gdb
 AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE", [Name of this package. ])
 AC_SUBST(PACKAGE)
 
-# Do we have a single-tree copy of texinfo?  Even if we do, we can't
-# rely on it - libiberty is built before texinfo.
-AC_CHECK_PROG(MAKEINFO, makeinfo, makeinfo, )
-if test "x$MAKEINFO" = "x"; then
-  AC_ERROR([makeinfo is required for compilation])
-else
-  case "$MAKEINFO" in
-    */missing\ makeinfo*)
-      AC_ERROR([makeinfo is required for compilation])
-      ;;
-  esac
-fi
-AC_SUBST(MAKEINFO)
-
-# --split-size=5000000 may be already in $MAKEINFO from parent configure.
-# Re-running configure in gdb/ would lose it so ensure it stays present.
-MAKEINFOFLAGS=${MAKEINFOFLAGS---split-size=5000000}
-AC_SUBST(MAKEINFOFLAGS)
+# We never need to detect it in this sub-configure.
+# But preserve it for config.status --recheck.
+AC_ARG_VAR(MAKEINFO,
+  [Parent configure detects if it is of sufficient version.])
+AC_ARG_VAR(MAKEINFOFLAGS,
+  [Parameters for MAKEINFO.])
 
 MAKEINFO_EXTRA_FLAGS=""
 AC_CACHE_CHECK([whether $MAKEINFO supports @click], gdb_cv_have_makeinfo_click,
