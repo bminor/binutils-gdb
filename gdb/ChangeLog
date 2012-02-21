@@ -1,3 +1,13 @@
+2012-02-21  Tristan Gingold  <gingold@adacore.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* ia64-tdep.c: Do not include libunwind-ia64.h.
+	* libunwind-frame.h: Remove #ifdef HAVE_LIBUNWIND_H guard.
+	Include libunwind-ia64.h instead of libunwind.h.
+	* configure.ac (--with-libunwind, $enable_libunwind): Don't check
+	for libunwind.h existence.
+	* configure, config.in: Regenerate.
+
 2012-02-21  Anton Gorenkov  <xgsa@yandex.ru>
 
 	* c-valprint.c (c_value_print): Use value_rtti_indirect_type

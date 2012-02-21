@@ -8252,21 +8252,19 @@ if test "${with_libunwind+set}" = set; then :
 esac
 else
 
-  for ac_header in libunwind.h libunwind-ia64.h
+  for ac_header in libunwind-ia64.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "libunwind-ia64.h" "ac_cv_header_libunwind_ia64_h" "$ac_includes_default"
+if test "x$ac_cv_header_libunwind_ia64_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_LIBUNWIND_IA64_H 1
 _ACEOF
 
 fi
 
 done
 
-  if test x"$ac_cv_header_libunwind_h" = xyes -a x"$ac_cv_header_libunwind_ia64_h" = xyes; then
+  if test x"$ac_cv_header_libunwind_ia64_h" = xyes; then
     enable_libunwind=yes;
   fi
 
@@ -8274,14 +8272,12 @@ fi
 
 
 if test x"$enable_libunwind" = xyes; then
-  for ac_header in libunwind.h libunwind-ia64.h
+  for ac_header in libunwind-ia64.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "libunwind-ia64.h" "ac_cv_header_libunwind_ia64_h" "$ac_includes_default"
+if test "x$ac_cv_header_libunwind_ia64_h" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_LIBUNWIND_IA64_H 1
 _ACEOF
 
 fi

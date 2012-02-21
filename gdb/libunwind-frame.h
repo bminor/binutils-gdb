@@ -19,8 +19,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifdef HAVE_LIBUNWIND_H
-
 struct frame_info;
 struct frame_id;
 struct regcache;
@@ -29,7 +27,13 @@ struct gdbarch;
 #ifndef LIBUNWIND_FRAME_H
 #define LIBUNWIND_FRAME_H 1
 
-#include "libunwind.h"
+/* IA-64 is the only target that currently uses libunwind.  If some
+   other target wants to use it, we will need to do some abstracting
+   in order to make it possible to have more than one libunwind-frame
+   instance.  Including "libunwind.h" is wrong as that ends up
+   including the libunwind-$(arch).h for the host gdb is running
+   on.  */
+#include "libunwind-ia64.h"
 
 struct libunwind_descr
 {
@@ -72,5 +76,3 @@ int libunwind_get_reg_special (struct gdbarch *gdbarch,
 			       int regnum, void *buf);
 
 #endif /* libunwind-frame.h */
-
-#endif /* HAVE_LIBUNWIND_H  */

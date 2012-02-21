@@ -40,6 +40,14 @@
 
 #include "complaints.h"
 
+/* IA-64 is the only target that currently uses libunwind-frame.  Note
+   how UNW_TARGET, UNW_OBJ, etc. are compile time constants below.
+   Those come from libunwind's headers, and are target dependent.
+   Also, some of libunwind's typedefs are target dependent, as e.g.,
+   unw_word_t.  If some other target wants to use this, we will need
+   to do some abstracting in order to make it possible to select which
+   libunwind we're talking to at runtime (and have one per arch).  */
+
 /* The following two macros are normally defined in <endian.h>.
    But systems such as ia64-hpux do not provide such header, so
    we just define them here if not already defined.  */

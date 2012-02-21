@@ -348,14 +348,14 @@ AS_HELP_STRING([--with-libunwind], [use libunwind frame unwinding support]),
   no)   enable_libunwind=no ;;
   *)    AC_MSG_ERROR(bad value ${withval} for GDB with-libunwind option) ;;
 esac],[
-  AC_CHECK_HEADERS(libunwind.h libunwind-ia64.h)
-  if test x"$ac_cv_header_libunwind_h" = xyes -a x"$ac_cv_header_libunwind_ia64_h" = xyes; then
+  AC_CHECK_HEADERS(libunwind-ia64.h)
+  if test x"$ac_cv_header_libunwind_ia64_h" = xyes; then
     enable_libunwind=yes;
   fi
 ])
    
 if test x"$enable_libunwind" = xyes; then
-  AC_CHECK_HEADERS(libunwind.h libunwind-ia64.h)
+  AC_CHECK_HEADERS(libunwind-ia64.h)
   AC_DEFINE(HAVE_LIBUNWIND, 1, [Define if libunwind library is being used.])
   CONFIG_OBS="$CONFIG_OBS libunwind-frame.o"
   CONFIG_DEPS="$CONFIG_DEPS libunwind-frame.o"
