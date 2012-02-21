@@ -1,5 +1,12 @@
 2012-02-20  Doug Evans  <dje@google.com>
 
+	* objfiles.c (add_to_objfile_sections): Remove outdated comments.
+	Rename objfile_p_char parameter to objfilep.
+	(build_objfile_section_table): Result is now void.  All callers
+	updated.
+	* objfiles.h (struct objfile): Tweak comments, whitespace.
+	(build_objfile_section_table): Update.
+
 	* elfread.c (elf_symfile_segments): Fix warning text.
 
 2012-02-20  Tom Tromey  <tromey@redhat.com>

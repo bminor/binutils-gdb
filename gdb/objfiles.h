@@ -327,13 +327,13 @@ struct objfile
     unsigned num_data;
 
     /* Set of relocation offsets to apply to each section.
-       Currently on the objfile_obstack (which makes no sense, but I'm
-       not sure it's harming anything).
+       The table is indexed by the_bfd_section->index, thus it is generally
+       as large as the number of sections in the binary.
+       The table is stored on the objfile_obstack.
 
        These offsets indicate that all symbols (including partial and
        minimal symbols) which have been read have been relocated by this
-       much.  Symbols which are yet to be read need to be relocated by
-       it.  */
+       much.  Symbols which are yet to be read need to be relocated by it.  */
 
     struct section_offsets *section_offsets;
     int num_sections;
@@ -354,12 +354,11 @@ struct objfile
        among other things, is used to map pc addresses into sections.
        SECTIONS points to the first entry in the table, and
        SECTIONS_END points to the first location past the last entry
-       in the table.  Currently the table is stored on the
-       objfile_obstack (which makes no sense, but I'm not sure it's
-       harming anything).  */
+       in the table.  The table is stored on the objfile_obstack.
+       There is no particular order to the sections in this table, and it
+       only contains sections we care about (e.g. non-empty, SEC_ALLOC).  */
 
-    struct obj_section
-     *sections, *sections_end;
+    struct obj_section *sections, *sections_end;
 
     /* GDB allows to have debug symbols in separate object files.  This is
        used by .gnu_debuglink, ELF build id note and Mach-O OSO.
@@ -381,7 +380,7 @@ struct objfile
     struct objfile *separate_debug_objfile_link;
 
     /* Place to stash various statistics about this objfile.  */
-      OBJSTATS;
+    OBJSTATS;
 
     /* A linked list of symbols created when reading template types or
        function templates.  These symbols are not stored in any symbol
@@ -450,7 +449,7 @@ extern int entry_point_address_query (CORE_ADDR *entry_p);
 
 extern CORE_ADDR entry_point_address (void);
 
-extern int build_objfile_section_table (struct objfile *);
+extern void build_objfile_section_table (struct objfile *);
 
 extern void terminate_minimal_symbol_table (struct objfile *objfile);
 
