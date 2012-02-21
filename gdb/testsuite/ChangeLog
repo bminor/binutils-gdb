@@ -1,5 +1,10 @@
 2012-02-21  Pedro Alves  <palves@redhat.com>
 
+	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Use
+	with_test_prefix.
+
+2012-02-21  Pedro Alves  <palves@redhat.com>
+
 	* gdb.arch/altivec-abi.exp (altivec_abi_tests): Don't do
 	with_test_prefix here.
 	(top level): Do it here instead.  Remove `:' from the
