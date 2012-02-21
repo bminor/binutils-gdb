@@ -1,3 +1,15 @@
+2012-02-21  Kai Tietz<ktietz@redhat.com>
+
+	PR binutils/13682
+	* NEWS: Mention new feature.
+	* dlltool.c (i386_x64_dljtab): New stub-code for x64
+	delayed-load feature.
+	(i386_x64_trampoline): New trampoline-code for x64
+	delayed-load feature.
+	(make_one_lib_file): Add support for x64 delayed-load
+	feature.
+	(make_delay_head): Likewis
+
 2012-02-20  Namhyung Kim  <namhyung.kim@lge.com>
 
 	* objdump.c (slurp_file): Close file if fstat fails.

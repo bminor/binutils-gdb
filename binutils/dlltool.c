@@ -515,6 +515,14 @@ static const unsigned char i386_dljtab[] =
   0xE9, 0x00, 0x00, 0x00, 0x00        /* jmp __tailMerge__dllname        */
 };
 
+static const unsigned char i386_x64_dljtab[] =
+{
+  0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, /* jmp __imp__function             */
+  0x48, 0x8d, 0x05,		      /* leaq rax, (__imp__function) */
+        0x00, 0x00, 0x00, 0x00,
+  0xE9, 0x00, 0x00, 0x00, 0x00        /* jmp __tailMerge__dllname        */
+};
+
 static const unsigned char arm_jtab[] =
 {
   0x00, 0xc0, 0x9f, 0xe5,	/* ldr  ip, [pc] */
@@ -590,6 +598,22 @@ static const char i386_trampoline[] =
   "\tpopl %%edx\n"
   "\tpopl %%ecx\n"
   "\tjmp *%%eax\n";
+
+static const char i386_x64_trampoline[] =  
+  "\tpushq %%rcx\n"
+  "\tpushq %%rdx\n"
+  "\tpushq %%r8\n"
+  "\tpushq %%r9\n"
+  "\tsubq  $40, %%rsp\n"
+  "\tmovq  %%rax, %%rdx\n"
+  "\tleaq  __DELAY_IMPORT_DESCRIPTOR_%s(%%rip), %%rcx\n"
+  "\tcall __delayLoadHelper2\n"
+  "\taddq  $40, %%rsp\n"
+  "\tpopq %%r9\n"
+  "\tpopq %%r8\n"
+  "\tpopq %%rdx\n"
+  "\tpopq %%rcx\n"
+  "\tjmp *%%rax\n";
 
 struct mac
 {
@@ -735,7 +759,7 @@ mtable[] =
     "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
     "pe-x86-64",bfd_arch_i386,
     i386_jtab, sizeof (i386_jtab), 2,
-    i386_dljtab, sizeof (i386_dljtab), 2, 7, 12, i386_trampoline
+    i386_x64_dljtab, sizeof (i386_x64_dljtab), 2, 9, 14, i386_x64_trampoline
   }
   ,
   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
@@ -2609,9 +2633,14 @@ make_one_lib_file (export_type *exp, int i, int delay)
 
 	      if (delay)
 	        {
-	          rel2->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32);
+		  if (machine == MX86)
+		   rel2->howto = bfd_reloc_type_lookup (abfd,
+							BFD_RELOC_32_PCREL);
+	          else
+	            rel2->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32);
 	          rel2->sym_ptr_ptr = rel->sym_ptr_ptr;
-	          rel3->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32_PCREL);
+	          rel3->howto = bfd_reloc_type_lookup (abfd,
+						       BFD_RELOC_32_PCREL);
 	          rel3->sym_ptr_ptr = iname_lab_pp;
 	        }
 
@@ -2623,10 +2652,11 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	case IDATA5:
 	  if (delay)
 	    {
-	      si->data = xmalloc (4);
-	      si->size = 4;
+	      si->size = create_for_pep ? 8 : 4;
+	      si->data = xmalloc (si->size);
 	      sec->reloc_count = 1;
 	      memset (si->data, 0, si->size);
+	      /* Point after jmp [__imp_...] instruction.  */
 	      si->data[0] = 6;
 	      rel = xmalloc (sizeof (arelent));
 	      rpp = xmalloc (sizeof (arelent *) * 2);
@@ -2634,7 +2664,10 @@ make_one_lib_file (export_type *exp, int i, int delay)
 	      rpp[1] = 0;
 	      rel->address = 0;
 	      rel->addend = 0;
-	      rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32);
+	      if (create_for_pep)
+	        rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_64);
+	      else
+	        rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32);
 	      rel->sym_ptr_ptr = secdata[TEXT].sympp;
 	      sec->orelocation = rpp;
 	      break;
@@ -3005,6 +3038,8 @@ make_delay_head (void)
   fprintf (f, "\n.section .data\n");
   fprintf (f, "__DLL_HANDLE_%s:\n", imp_name_lab);
   fprintf (f, "\t%s\t0\t%s Handle\n", ASM_LONG, ASM_C);
+  if (create_for_pep)
+    fprintf (f, "\t%s\t0\n", ASM_LONG);
   fprintf (f, "\n");
 
   fprintf (f, "%sStuff for compatibility\n", ASM_C);
@@ -3013,11 +3048,10 @@ make_delay_head (void)
     {
       fprintf (f, "\t.section\t.idata$5\n");
       /* NULL terminating list.  */
-#ifdef DLLTOOL_MX86_64
-      fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
-#else
-      fprintf (f,"\t%s\t0\n", ASM_LONG);
-#endif
+      if (create_for_pep)
+        fprintf (f,"\t%s\t0\n\t%s\t0\n", ASM_LONG, ASM_LONG);
+      else
+        fprintf (f,"\t%s\t0\n", ASM_LONG);
       fprintf (f, "__IAT_%s:\n", imp_name_lab);
     }
 
@@ -3025,6 +3059,8 @@ make_delay_head (void)
     {
       fprintf (f, "\t.section\t.idata$4\n");
       fprintf (f, "\t%s\t0\n", ASM_LONG);
+      if (create_for_pep)
+        fprintf (f, "\t%s\t0\n", ASM_LONG);
       fprintf (f, "\t.section\t.idata$4\n");
       fprintf (f, "__INT_%s:\n", imp_name_lab);
     }
