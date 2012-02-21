@@ -1790,6 +1790,10 @@ write_object_file (void)
       }
   }
 
+#ifdef md_pre_relax_hook
+  md_pre_relax_hook;
+#endif
+
   /* From now on, we don't care about sub-segments.  Build one frag chain
      for each segment. Linked thru fr_next.  */
 

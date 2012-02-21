@@ -100,6 +100,9 @@ struct frag {
 #ifdef TC_FRAG_TYPE
   TC_FRAG_TYPE tc_frag_data;
 #endif
+#ifdef OBJ_FRAG_TYPE
+  OBJ_FRAG_TYPE obj_frag_data;
+#endif
 
   /* Data begins here.  */
   char fr_literal[1];

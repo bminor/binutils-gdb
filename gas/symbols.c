@@ -317,6 +317,10 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
     }
 #endif /* WORKING_DOT_WORD */
 
+#ifdef obj_frob_colon
+  obj_frob_colon (sym_name);
+#endif
+
   if ((symbolP = symbol_find (sym_name)) != 0)
     {
       S_CLEAR_WEAKREFR (symbolP);

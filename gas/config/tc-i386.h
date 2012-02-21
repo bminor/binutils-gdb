@@ -316,4 +316,18 @@ void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
 /* X_add_symbol:X_op_symbol (Intel mode only) */
 #define O_full_ptr O_md2
 
+#ifdef OBJ_MACH_O
+
+#define TC_FORCE_RELOCATION(FIX) (obj_mach_o_force_reloc (FIX))
+
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX,SEG) \
+	  (obj_mach_o_force_reloc_sub_same (FIX, SEG))
+
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX,SEG) \
+	(obj_mach_o_force_reloc_sub_local (FIX, SEG))
+
+#define TC_VALIDATE_FIX_SUB(FIX, SEG) 1
+
+#endif /* OBJ_MACH_O */
+
 #endif /* TC_I386 */

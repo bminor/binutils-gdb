@@ -1,3 +1,32 @@
+2012-02-21  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-i386.h (OBJ_MACH_O): New section.
+	(TC_FORCE_RELOCATION): Use obj_mach_o_force_reloc.
+	(TC_FORCE_RELOCATION_SUB_SAME): New
+	(TC_FORCE_RELOCATION_SUB_LOCAL): New.
+	(TC_VALIDATE_FIX_SUB): New.
+	* frags.h (struct frag): OBJ_FRAG_TYPE, new field.
+	* symbols.c (colon): obj_frob_colon: New hook.
+	* write.c (write_object_file): md_pre_relax_hook, new
+	hook.
+	* config/obj-macho.c (obj_mach_o_frob_colon): New.
+	(obj_mach_o_frob_label): Record sub-section labels.
+	(obj_mach_o_frob_symbol): Rename from obj_macho_frob_symbol.
+	(obj_mach_o_set_subsections): New.
+	(obj_mach_o_pre_relax_hook): New.
+	(obj_mach_o_in_different_subsection): New.
+	(obj_mach_o_force_reloc_sub_same): New.
+	(obj_mach_o_force_reloc_sub_local): New.
+	(obj_mach_o_force_reloc): New.
+	* config/obj-macho.h (OBJ_SYMFIELD_TYPE): New.
+	(obj_frob_colon): New Define.
+	(obj_mach_o_frob_label): Renamed.
+	(obj_mach_o_frob_symbol): Renamed.
+	(OBJ_FRAG_TYPE): New.
+	(obj_mach_o_in_different_subsection, obj_mach_o_force_reloc,
+	 obj_mach_o_force_reloc_sub_same,
+	 obj_mach_o_force_reloc_sub_local): New declarations.
+
 2012-02-20  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* config/obj-macho.c (obj_mach_o_is_frame_section): New.

@@ -56,6 +56,7 @@ static int obj_mach_o_is_static;
 
 /* TODO: Implement the "-n" command line option to suppress the initial
    switch to the text segment.  */
+
 static int obj_mach_o_start_with_text_section = 1;
 
 /* Allow for special re-ordering on output.  */
@@ -1343,6 +1344,18 @@ obj_mach_o_type_for_symbol (bfd_mach_o_asymbol *s)
     return BFD_MACH_O_N_SECT;
 }
 
+void
+obj_mach_o_frob_colon (const char *name)
+{
+  if (!bfd_is_local_label_name (stdoutput, name))
+    {
+      /* A non-local label will create a new subsection, so start a new
+         frag.  */
+      frag_wane (frag_now);
+      frag_new (0);
+    }
+}
+
 /* We need to check the correspondence between some kinds of symbols and their
    sections.  Common and BSS vars will seen via the obj_macho_comm() function.
    
@@ -1357,12 +1370,20 @@ obj_mach_o_type_for_symbol (bfd_mach_o_asymbol *s)
    are possibly incompatible with the section etc. that the symbol is defined
    in.  */
 
-void obj_macho_frob_label (struct symbol *sp)
+void obj_mach_o_frob_label (struct symbol *sp)
 {
   bfd_mach_o_asymbol *s;
   unsigned base_type;
   bfd_mach_o_section *sec;
   int sectype = -1;
+
+  if (!bfd_is_local_label_name (stdoutput, S_GET_NAME (sp)))
+    {
+      /* If this is a non-local label, it should have started a new sub-
+	 section.  */
+      gas_assert (frag_now->obj_frag_data.subsection == NULL);
+      frag_now->obj_frag_data.subsection = sp;
+    }
 
   /* Leave local symbols alone.  */
 
@@ -1404,7 +1425,7 @@ void obj_macho_frob_label (struct symbol *sp)
    (e.g. global + weak_def).  */
 
 int
-obj_macho_frob_symbol (struct symbol *sp)
+obj_mach_o_frob_symbol (struct symbol *sp)
 {
   bfd_mach_o_asymbol *s;
   unsigned base_type;
@@ -1495,17 +1516,93 @@ obj_macho_frob_symbol (struct symbol *sp)
   return 0;
 }
 
-/* Relocation rules are different in frame sections.  */
+/* Support stabs for mach-o.  */
 
-static int
-obj_mach_o_is_frame_section (segT sec)
+void
+obj_mach_o_process_stab (int what, const char *string,
+			 int type, int other, int desc)
 {
-  int l;
-  l = strlen (segment_name (sec));
-  if ((l == 9 && strncmp (".eh_frame", segment_name (sec), 9) == 0)
-       || (l == 12 && strncmp (".debug_frame", segment_name (sec), 12) == 0))
-    return 1;
-  return 0;
+  symbolS *symbolP;
+  bfd_mach_o_asymbol *s;
+
+  switch (what)
+    {
+      case 'd':
+	symbolP = symbol_new ("", now_seg, frag_now_fix (), frag_now);
+	/* Special stabd NULL name indicator.  */
+	S_SET_NAME (symbolP, NULL);
+	break;
+
+      case 'n':
+      case 's':
+	symbolP = symbol_new (string, undefined_section, (valueT) 0,
+			      &zero_address_frag);
+	pseudo_set (symbolP);
+	break;
+
+      default:
+	as_bad(_("unrecognized stab type '%c'"), (char)what);
+	abort ();
+	break;
+    }
+
+  s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (symbolP);
+  s->n_type = type;
+  s->n_desc = desc;
+  /* For stabd, this will eventually get overwritten by the section number.  */
+  s->n_sect = other;
+
+  /* It's a debug symbol.  */
+  s->symbol.flags |= BSF_DEBUGGING;
+}
+
+/* Here we count up frags in each subsection (where a sub-section is defined
+   as starting with a non-local symbol).
+   Note that, if there are no non-local symbols in a section, all the frags will
+   be attached as one anonymous subsection.  */
+
+static void
+obj_mach_o_set_subsections (bfd *abfd ATTRIBUTE_UNUSED,
+                            asection *sec,
+                            void *unused ATTRIBUTE_UNUSED)
+{
+  segment_info_type *seginfo = seg_info (sec);
+  symbolS *cur_subsection = NULL;
+  struct obj_mach_o_symbol_data *cur_subsection_data = NULL;
+  fragS *frag;
+  frchainS *chain;
+
+  /* Protect against sections not created by gas.  */
+  if (seginfo == NULL)
+    return;
+
+  /* Attach every frag to a subsection.  */
+  for (chain = seginfo->frchainP; chain != NULL; chain = chain->frch_next)
+    for (frag = chain->frch_root; frag != NULL; frag = frag->fr_next)
+      {
+        if (frag->obj_frag_data.subsection == NULL)
+          frag->obj_frag_data.subsection = cur_subsection;
+        else
+          {
+            cur_subsection = frag->obj_frag_data.subsection;
+            cur_subsection_data = symbol_get_obj (cur_subsection);
+            cur_subsection_data->subsection_size = 0;
+          }
+        if (cur_subsection_data != NULL)
+          {
+            /* Update subsection size.  */
+            cur_subsection_data->subsection_size += frag->fr_fix;
+          }
+      }
+}
+
+/* Handle mach-o subsections-via-symbols counting up frags belonging to each 
+   sub-section.  */
+
+void
+obj_mach_o_pre_relax_hook (void)
+{
+  bfd_map_over_sections (stdoutput, obj_mach_o_set_subsections, (char *) 0);
 }
 
 /* Zerofill and GB Zerofill sections must be sorted to follow all other
@@ -1731,44 +1828,17 @@ obj_mach_o_reorder_section_relocs (asection *sec, arelent **rels, unsigned int n
   bfd_set_reloc (stdoutput, sec, rels, n);
 }
 
-/* Support stabs for mach-o.  */
+/* Relocation rules are different in frame sections.  */
 
-void
-obj_mach_o_process_stab (int what, const char *string,
-			 int type, int other, int desc)
+static int
+obj_mach_o_is_frame_section (segT sec)
 {
-  symbolS *symbolP;
-  bfd_mach_o_asymbol *s;
-
-  switch (what)
-    {
-      case 'd':
-	symbolP = symbol_new ("", now_seg, frag_now_fix (), frag_now);
-	/* Special stabd NULL name indicator.  */
-	S_SET_NAME (symbolP, NULL);
-	break;
-
-      case 'n':
-      case 's':
-	symbolP = symbol_new (string, undefined_section, (valueT) 0,
-			      &zero_address_frag);
-	pseudo_set (symbolP);
-	break;
-
-      default:
-	as_bad(_("unrecognized stab type '%c'"), (char)what);
-	abort ();
-	break;
-    }
-
-  s = (bfd_mach_o_asymbol *) symbol_get_bfdsym (symbolP);
-  s->n_type = type;
-  s->n_desc = desc;
-  /* For stabd, this will eventually get overwritten by the section number.  */
-  s->n_sect = other;
-
-  /* It's a debug symbol.  */
-  s->symbol.flags |= BSF_DEBUGGING;
+  int l;
+  l = strlen (segment_name (sec));
+  if ((l == 9 && strncmp (".eh_frame", segment_name (sec), 9) == 0)
+       || (l == 12 && strncmp (".debug_frame", segment_name (sec), 12) == 0))
+    return 1;
+  return 0;
 }
 
 /* Unless we're in a frame section, we need to force relocs to be generated for
@@ -1787,4 +1857,68 @@ obj_mach_o_allow_local_subtract (expressionS * left ATTRIBUTE_UNUSED,
 
   /* Allow in frame sections, otherwise emit a reloc.  */
   return obj_mach_o_is_frame_section (seg);
+}
+
+int
+obj_mach_o_in_different_subsection (symbolS *a, symbolS *b)
+{
+  fragS *fa;
+  fragS *fb;
+
+  if (S_GET_SEGMENT (a) != S_GET_SEGMENT (b)
+      || !S_IS_DEFINED (a)
+      || !S_IS_DEFINED (b))
+    {
+      /* Not in the same segment, or undefined symbol.  */
+      return 1;
+    }
+
+  fa = symbol_get_frag (a);
+  fb = symbol_get_frag (b);
+  if (fa == NULL || fb == NULL)
+    {
+      /* One of the symbols is not in a subsection.  */
+      return 1;
+    }
+
+  return fa->obj_frag_data.subsection != fb->obj_frag_data.subsection;
+}
+
+int
+obj_mach_o_force_reloc_sub_same (fixS *fix, segT seg)
+{
+  if (! SEG_NORMAL (seg))
+    return 1;
+  return obj_mach_o_in_different_subsection (fix->fx_addsy, fix->fx_subsy);
+}
+
+int
+obj_mach_o_force_reloc_sub_local (fixS *fix, segT seg ATTRIBUTE_UNUSED)
+{
+  return obj_mach_o_in_different_subsection (fix->fx_addsy, fix->fx_subsy);
+}
+
+int
+obj_mach_o_force_reloc (fixS *fix)
+{
+  if (generic_force_reloc (fix))
+    return 1;
+
+  /* Force a reloc if the target is not in the same subsection.
+     FIXME: handle (a - b) where a and b belongs to the same subsection ?  */
+  if (fix->fx_addsy != NULL)
+    {
+      symbolS *subsec = fix->fx_frag->obj_frag_data.subsection;
+      symbolS *targ = fix->fx_addsy;
+
+      /* There might be no subsections at all.  */
+      if (subsec == NULL)
+        return 0;
+
+      if (S_GET_SEGMENT (targ) == absolute_section)
+        return 0;
+
+      return obj_mach_o_in_different_subsection (targ, subsec);
+    }
+  return 0;
 }
