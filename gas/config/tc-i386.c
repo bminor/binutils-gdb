@@ -3015,7 +3015,7 @@ check_hle (void)
     {
     default:
       abort ();
-    case 0:
+    case HLEPrefixNone:
       if (i.prefix[HLE_PREFIX] == XACQUIRE_PREFIX_OPCODE)
 	as_bad (_("invalid instruction `%s' after `xacquire'"),
 		i.tm.name);
@@ -3023,7 +3023,7 @@ check_hle (void)
 	as_bad (_("invalid instruction `%s' after `xrelease'"),
 		i.tm.name);
       return 0;
-    case 1:
+    case HLEPrefixLock:
       if (i.prefix[LOCK_PREFIX])
 	return 1;
       if (i.prefix[HLE_PREFIX] == XACQUIRE_PREFIX_OPCODE)
@@ -3031,9 +3031,9 @@ check_hle (void)
       else
 	as_bad (_("missing `lock' with `xrelease'"));
       return 0;
-    case 2:
+    case HLEPrefixAny:
       return 1;
-    case 3:
+    case HLEPrefixRelease:
       if (i.prefix[HLE_PREFIX] != XRELEASE_PREFIX_OPCODE)
 	{
 	  as_bad (_("instruction `%s' after `xacquire' not allowed"),

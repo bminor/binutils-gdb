@@ -304,6 +304,10 @@ enum
      2. With or without a LOCK prefix.
      3. With a RELEASE (0xf3) prefix.
    */
+#define HLEPrefixNone		0
+#define HLEPrefixLock		1
+#define HLEPrefixAny		2
+#define HLEPrefixRelease	3
   HLEPrefixOk,
   /* Convert to DWORD */
   ToDword,
