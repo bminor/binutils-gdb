@@ -142,7 +142,7 @@ elf_symfile_segments (bfd *abfd)
 	 binaries are not relocatable.  */
       if (bfd_get_section_size (sect) > 0 && j == num_segments
 	  && (bfd_get_section_flags (abfd, sect) & SEC_LOAD) != 0)
-	warning (_("Loadable segment \"%s\" outside of ELF segments"),
+	warning (_("Loadable section \"%s\" outside of ELF segments"),
 		 bfd_section_name (abfd, sect));
     }
 
