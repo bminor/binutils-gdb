@@ -5,6 +5,9 @@
 	starting garbage collection.
 	* ldexp.c (fold_name): Generate a reloc for defined symbols
 	found without an associated output section during the mark phase.
+	(exp_fold_tree_1): Continue processing an expression, even if we
+	are unable to fold it, if we are in the first two evaluation
+	phases.
 	* ldexp.h (enum lang_phase_type): Add descriptions of the phases.
 
 2012-02-19  Kai Tietz  <ktietz@redhat.com>
