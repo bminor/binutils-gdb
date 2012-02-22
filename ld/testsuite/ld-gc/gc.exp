@@ -120,3 +120,8 @@ if { [is_remote host] || [which $CC] != 0 } {
 	run_dump_test "pr11218"
     }
 }
+
+if { [is_remote host] || [which $CC] != 0 } {
+	ld_compile "$CC $CFLAGS $cflags" $srcdir/$subdir/pr13683.c tmpdir/pr13683.o
+	run_dump_test "pr13683"
+}

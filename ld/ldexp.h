@@ -94,11 +94,19 @@ typedef union etree_union {
   } assert_s;
 } etree_type;
 
-typedef enum {
+/* Expression evaluation control.  */
+typedef enum
+{
+  /* Parsing linker script.  Will only return "valid" for expressions
+     that evaluate to a constant.  */
   lang_first_phase_enum,
+  /* Prior to section sizing.  */
   lang_mark_phase_enum,
+  /* During section sizing.  */
   lang_allocating_phase_enum,
+  /* During assignment of symbol values when relaxation in progress.  */
   lang_assigning_phase_enum,
+  /* Final assignment of symbol values.  */
   lang_final_phase_enum
 } lang_phase_type;
 

@@ -1,3 +1,18 @@
+2012-02-22  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/13683
+	* ld-gc/pr13683.c: New test source file.
+	* ld-gc/pr13683.d: New test control and output file.
+	* ld-gc/gc.exp: Run the pr13683 test.
+
+	* ld-cris/tls-gc-68: Update expected symbol table dump.
+	* ld-cris/tls-gc-69: Likewise.
+	* ld-cris/tls-gc-70: Likewise.
+	* ld-cris/tls-gc-71: Likewise.
+	* ld-cris/tls-gc-75: Likewise.
+	* ld-cris/tls-gc-76.d: Likewise.
+	* ld-cris/tls-gc-79.d: Likewise.
+
 2012-02-20  Thomas Schwinge <thomas@schwinge.name>
 
 	* ld-elf/comm-data.exp: Run for *-*-gnu*.

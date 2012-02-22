@@ -6650,6 +6650,11 @@ lang_process (void)
      files.  */
   ldctor_build_sets ();
 
+  /* PR 13683: We must rerun the assignments prior to running garbage
+     collection in order to make sure that all symbol aliases are resolved.  */
+  lang_do_assignments (lang_mark_phase_enum);
+  expld.phase = lang_first_phase_enum;
+
   /* Remove unreferenced sections if asked to.  */
   lang_gc_sections ();
 

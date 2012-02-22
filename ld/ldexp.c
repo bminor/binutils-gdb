@@ -590,7 +590,9 @@ fold_name (etree_type *tree)
 	      output_section = h->u.def.section->output_section;
 	      if (output_section == NULL)
 		{
-		  if (expld.phase != lang_mark_phase_enum)
+		  if (expld.phase == lang_mark_phase_enum)
+		    new_rel (h->u.def.value, h->u.def.section);
+		  else
 		    einfo (_("%X%S: unresolvable symbol `%s'"
 			     " referenced in expression\n"),
 			   tree, tree->name.name);
@@ -882,7 +884,7 @@ exp_fold_tree_1 (etree_type *tree)
 
 	  exp_fold_tree_1 (tree->assign.src);
 	  if (expld.result.valid_p
-	      || (expld.phase == lang_first_phase_enum
+	      || (expld.phase <= lang_mark_phase_enum
 		  && tree->type.node_class == etree_assign
 		  && tree->assign.hidden))
 	    {

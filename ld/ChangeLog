@@ -1,3 +1,12 @@
+2012-02-22  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13683
+	* ldlang.c (lang_process): Rerun lang_do_assignments before
+	starting garbage collection.
+	* ldexp.c (fold_name): Generate a reloc for defined symbols
+	found without an associated output section during the mark phase.
+	* ldexp.h (enum lang_phase_type): Add descriptions of the phases.
+
 2012-02-19  Kai Tietz  <ktietz@redhat.com>
 
 	* deffilep.y (cmp_import_elem): Sort first by module name.

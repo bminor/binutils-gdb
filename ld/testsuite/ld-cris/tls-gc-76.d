@@ -23,11 +23,11 @@ SYMBOL TABLE:
 0+82080 l    d  .got	0+ .got
 0+82090 l    d  .data	0+ .data
 0+82090 l     O .data	0+4 gc76var
+0+82094 l       \*ABS\*	0+ __bss_start
+0+82094 l       \*ABS\*	0+ _edata
 0+82080 l     O .got	0+ _GLOBAL_OFFSET_TABLE_
+0+820a0 l       \*ABS\*	0+ _end
 0+80074 g       .text	0+ _start
-0+82094 g       \*ABS\*	0+ __bss_start
-0+82094 g       \*ABS\*	0+ _edata
-0+820a0 g       \*ABS\*	0+ _end
 0+80078 g     F .text	0+6 gc76fn
 
 Contents of section .text:
