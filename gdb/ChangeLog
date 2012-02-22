@@ -1,3 +1,8 @@
+2012-02-22  Gary Benson  <gbenson@redhat.com>
+
+	* dwarf2read.c (dwarf2_read_index): Correct misspelling.
+	(find_slot_in_mapped_hash): Likewise.
+
 2012-02-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR build/13638

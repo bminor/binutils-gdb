@@ -2054,7 +2054,7 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
     }
 
   /* Index version 4 did not support case insensitive searches.  But the
-     indexes for case insensitive languages are built in lowercase, therefore
+     indices for case insensitive languages are built in lowercase, therefore
      simulate our NAME being searched is also lowercased.  */
   hash = mapped_index_string_hash ((index->version == 4
                                     && case_sensitivity == case_sensitive_off
@@ -2125,7 +2125,7 @@ dwarf2_read_index (struct objfile *objfile)
      version 5 and later.  */
   if (version < 4)
     return 0;
-  /* Indexes with higher version than the one supported by GDB may be no
+  /* Indices with higher version than the one supported by GDB may be no
      longer backward compatible.  */
   if (version > 5)
     return 0;
