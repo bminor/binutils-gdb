@@ -1,3 +1,8 @@
+2012-02-22  Sterling Augustine  <saugustine@google.com>
+
+	* gdb.base/watchpoint.exp (test_constant_watchpoint): Add test for
+	constant with cast.
+
 2012-02-21  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/watchpoint-fork.exp (test): Use with_test_prefix.

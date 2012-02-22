@@ -8831,6 +8831,7 @@ watchpoint_exp_is_const (const struct expression *exp)
 	case UNOP_COMPLEMENT:
 	case UNOP_ADDR:
 	case UNOP_HIGH:
+	case UNOP_CAST:
 	  /* Unary, binary and ternary operators: We have to check
 	     their operands.  If they are constant, then so is the
 	     result of that operation.  For instance, if A and B are

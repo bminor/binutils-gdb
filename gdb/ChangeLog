@@ -1,3 +1,8 @@
+2012-02-22  Sterling Augustine  <saugustine@google.com>
+
+	PR 13689:
+	* breakpoint.c (watchpoint_exp_is_constant): Add UNOP_CAST to switch.
+
 2012-02-22  Gary Benson  <gbenson@redhat.com>
 
 	* dwarf2read.c (dwarf2_read_index): Correct misspelling.

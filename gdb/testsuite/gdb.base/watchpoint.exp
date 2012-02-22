@@ -559,6 +559,8 @@ proc test_watchpoint_and_breakpoint {} {
 
 proc test_constant_watchpoint {} {
     gdb_test "watch 5" "Cannot watch constant value `5'." "number is constant"
+    gdb_test "watch (int *)5" "Cannot watch constant value `\\(int \\*\\)5'." \
+    "number with cast is constant"
     gdb_test "watch marker1" "Cannot watch constant value `marker1'." \
     "marker1 is constant"
     gdb_test "watch count + 6" ".*atchpoint \[0-9\]+: count \\+ 6"
