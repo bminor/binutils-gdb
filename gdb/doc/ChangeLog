@@ -1,3 +1,7 @@
+2012-02-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Blocks In Python): Clarify block iteration.
+
 2012-02-17  Tom Tromey  <tromey@redhat.com>
 
 	PR python/10753:

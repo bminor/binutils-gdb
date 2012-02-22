@@ -23848,6 +23848,9 @@ frames.  Furthermore, see @ref{Stack, ,Examining the Stack}, for more
 detailed technical information on @value{GDBN}'s book-keeping of the
 stack.
 
+A @code{gdb.Block} is iterable.  The iterator returns the symbols
+(@pxref{Symbols In Python}) local to the block.
+
 The following block-related functions are available in the @code{gdb}
 module:
 
@@ -23866,9 +23869,8 @@ Returns @code{True} if the @code{gdb.Block} object is valid,
 @code{False} if not.  A block object can become invalid if the block it
 refers to doesn't exist anymore in the inferior.  All other
 @code{gdb.Block} methods will throw an exception if it is invalid at
-the time the method is called.  This method is also made available to
-the Python iterator object that @code{gdb.Block} provides in an iteration
-context and via the Python @code{iter} built-in function.
+the time the method is called.  The block's validity is also checked
+during iteration over symbols of the block.
 @end defun
 @end table
 
