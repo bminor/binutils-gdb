@@ -1,5 +1,9 @@
 2012-02-21  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/return-nodebug.exp (do_test): Use with_test_prefix.
+
+2012-02-21  Pedro Alves  <palves@redhat.com>
+
 	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Use
 	with_test_prefix.
 
