@@ -500,21 +500,6 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 				      val, options, 0, stream);
 	  break;
 	}
-#if 0
-      if (options->vtblprint && cp_is_vtbl_ptr_type (type))
-	{
-	  /* Print the unmangled name if desired.  */
-	  /* Print vtable entry - we only get here if we ARE using
-	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.)  */
-	  /* Extract an address, assume that it is unsigned.  */
-	  print_address_demangle
-	    (gdbarch,
-	     extract_unsigned_integer (valaddr + embedded_offset,
-				       TYPE_LENGTH (type)),
-	     stream, demangle);
-	  break;
-	}
-#endif
       addr = unpack_pointer (type, valaddr + embedded_offset);
       if (addr == 0)
 	{

@@ -1,3 +1,7 @@
+2012-02-23  Tom Tromey  <tromey@redhat.com>
+
+	* jv-valprint.c (java_val_print): Remove dead code.
+
 2012-02-23  Tristan Gingold  <gingold@adacore.com>
 
        * ada-tasks.c (struct ada_tasks_inferior_data): Add
