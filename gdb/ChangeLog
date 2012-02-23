@@ -1,3 +1,15 @@
+2012-02-23  Tristan Gingold  <gingold@adacore.com>
+
+       * ada-tasks.c (struct ada_tasks_inferior_data): Add
+        known_tasks_element and known_tasks_length fields.
+        (read_known_tasks_array): Change argument type.  Use pointer type
+        and number of elements from DATA.  Adjust.
+        (read_known_tasks_list): Likewise.
+        (get_known_tasks_addr): Remove.
+        (ada_set_current_inferior_known_tasks_addr): Renamed to ...
+        (ada_tasks_inferior_data_sniffer): ... this.  Use symtab for element
+        type and array length.  Merge former get_known_tasks_addr code.
+
 2012-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR backtrace/13716
