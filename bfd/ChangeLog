@@ -1,3 +1,13 @@
+2012-02-23  Iain Sandoe  <idsandoe@googlemail.com>
+
+	* mach-o.c (bfd_mach_o_swap_in_non_scattered_reloc): New.
+	(bfd_mach_o_canonicalize_one_reloc):  Swap non-scattered reloc
+	bit-fields when target and host differ in endian-ness.  When
+	PAIRs are non-scattered	find the 'symbol' from the preceding
+	reloc.  Add FIXME re. reloc symbols on section boundaries.
+	(bfd_mach_o_swap_out_non_scattered_reloc): New.
+	(bfd_mach_o_write_relocs): Use bfd_mach_o_encode_non_scattered_reloc.
+
 2012-02-17  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* mach-o-i386.c (i386_howto_table): Add support for 16 bit
