@@ -1636,6 +1636,7 @@ finish_backward (struct symbol *function)
 static void
 finish_forward (struct symbol *function, struct frame_info *frame)
 {
+  struct frame_id frame_id = get_frame_id (frame);
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct symtab_and_line sal;
   struct thread_info *tp = inferior_thread ();
@@ -1653,7 +1654,7 @@ finish_forward (struct symbol *function, struct frame_info *frame)
 
   old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
-  set_longjmp_breakpoint (tp, get_frame_id (frame));
+  set_longjmp_breakpoint (tp, frame_id);
   make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
 
   /* We want stop_registers, please...  */

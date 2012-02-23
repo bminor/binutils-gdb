@@ -1,3 +1,9 @@
+2012-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR backtrace/13716
+	* infcmd.c (finish_forward): New variable frame_id, initialize it, use
+	it after set_momentary_breakpoint.
+
 2012-02-22  Sterling Augustine  <saugustine@google.com>
 
 	PR 13689:
