@@ -1,3 +1,8 @@
+2012-02-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* breakpoint.c (bp_location_compare): Sort by pspace before sorting by
+	number.
+
 2012-02-24  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* sh-tdep.c (sh_skip_prologue): Use skip_prologue_using_sal.

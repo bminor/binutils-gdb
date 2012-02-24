@@ -10609,6 +10609,14 @@ bp_location_compare (const void *ap, const void *bp)
   if (a->address != b->address)
     return (a->address > b->address) - (a->address < b->address);
 
+  /* Sort locations at the same address by their pspace number, keeping
+     locations of the same inferior (in a multi-inferior environment)
+     grouped.  */
+
+  if (a->pspace->num != b->pspace->num)
+    return ((a->pspace->num > b->pspace->num)
+	    - (a->pspace->num < b->pspace->num));
+
   /* Sort permanent breakpoints first.  */
   if (a_perm != b_perm)
     return (a_perm < b_perm) - (a_perm > b_perm);
