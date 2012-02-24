@@ -1,3 +1,9 @@
+2012-02-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix false FAILs with glibc debug infos installed.
+	* gdb.reverse/solib-precsave.exp (set debug-file-directory): New test.
+	* gdb.reverse/solib-reverse.exp (set debug-file-directory): New test.
+
 2012-02-22  Sterling Augustine  <saugustine@google.com>
 
 	* gdb.base/watchpoint.exp (test_constant_watchpoint): Add test for

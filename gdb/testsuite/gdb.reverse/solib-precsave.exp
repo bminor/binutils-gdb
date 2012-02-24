@@ -48,6 +48,10 @@ if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opt
 
 gdb_exit
 gdb_start
+
+# Clear it to never find any separate system debug infos.
+gdb_test_no_output "set debug-file-directory"
+
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
