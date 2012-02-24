@@ -1,3 +1,7 @@
+2012-02-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/cond-eval-mode.exp: New file.
+
 2012-02-24  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/break-interp.exp (test_ld): Use with_test_prefix.
