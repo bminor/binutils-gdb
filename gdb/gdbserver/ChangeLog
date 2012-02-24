@@ -1,3 +1,7 @@
+2012-02-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* linux-mips-low.c (mips_regmap): Correct the index of $f9.
+
 2012-02-24  Luis Machado  <lgustavo@codesourcery>
 
 	* server.c (handle_query): Advertise support for target-side
