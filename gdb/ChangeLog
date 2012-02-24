@@ -1,3 +1,8 @@
+2012-02-24  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* sh-tdep.c (sh_skip_prologue): Use skip_prologue_using_sal.
+	(after_prologue): Remove.
+
 2012-02-23  Tom Tromey  <tromey@redhat.com>
 
 	* jv-valprint.c (java_val_print): Remove dead code.

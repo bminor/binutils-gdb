@@ -712,55 +712,29 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
 }
 
 /* Skip any prologue before the guts of a function.  */
-
-/* Skip the prologue using the debug information.  If this fails we'll
-   fall back on the 'guess' method below.  */
 static CORE_ADDR
-after_prologue (CORE_ADDR pc)
+sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  struct symtab_and_line sal;
-  CORE_ADDR func_addr, func_end;
-
-  /* If we can not find the symbol in the partial symbol table, then
-     there is no hope we can determine the function's start address
-     with this code.  */
-  if (!find_pc_partial_function (pc, NULL, &func_addr, &func_end))
-    return 0;
-
-  /* Get the line associated with FUNC_ADDR.  */
-  sal = find_pc_line (func_addr, 0);
-
-  /* There are only two cases to consider.  First, the end of the source line
-     is within the function bounds.  In that case we return the end of the
-     source line.  Second is the end of the source line extends beyond the
-     bounds of the current function.  We need to use the slow code to
-     examine instructions in that case.  */
-  if (sal.end < func_end)
-    return sal.end;
-  else
-    return 0;
-}
-
-static CORE_ADDR
-sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
-{
-  CORE_ADDR pc;
+  CORE_ADDR post_prologue_pc, func_addr;
   struct sh_frame_cache cache;
 
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
      is greater.  */
-  pc = after_prologue (start_pc);
+  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
+    {
+      post_prologue_pc = skip_prologue_using_sal (gdbarch, func_addr);
+      if (post_prologue_pc != 0)
+        return max (pc, post_prologue_pc);
+    }
 
-  /* If after_prologue returned a useful address, then use it.  Else
-     fall back on the instruction skipping code.  */
-  if (pc)
-    return max (pc, start_pc);
+  /* Can't determine prologue from the symbol table, need to examine
+     instructions.  */
 
   cache.sp_offset = -4;
-  pc = sh_analyze_prologue (gdbarch, start_pc, (CORE_ADDR) -1, &cache, 0);
-  if (!cache.uses_fp)
-    return start_pc;
+  post_prologue_pc = sh_analyze_prologue (gdbarch, pc, (CORE_ADDR) -1, &cache, 0);
+  if (cache.uses_fp)
+    pc = post_prologue_pc;
 
   return pc;
 }
