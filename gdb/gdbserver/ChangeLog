@@ -1,5 +1,35 @@
 2012-02-24  Luis Machado  <lgustavo@codesourcery>
 
+	* server.c (handle_query): Advertise support for target-side
+	breakpoint condition evaluation.
+	(process_point_options): New function.
+	(process_serial_event): When inserting a breakpoint, check for
+	a target-side condition that should be evaluated.
+
+	* mem-break.c: Include regcache.h and ax.h.
+	(point_cond_list_t): New data structure.
+	(breakpoint) <cond_list>: New field.
+	(find_gdb_breakpoint_at): Make non-static.
+	(delete_gdb_breakpoint_at): Clear any target-side
+	conditions.
+	(clear_gdb_breakpoint_conditions): New function.
+	(add_condition_to_breakpoint): Likewise.
+	(add_breakpoint_condition): Likewise.
+	(gdb_condition_true_at_breakpoint): Likewise.
+	(gdb_breakpoint_here): Return result directly instead
+	of going through a local variable.
+
+	* mem-break.h (find_gdb_breakpoint_at): New prototype.
+	(clear_gdb_breakpoint_conditions): Likewise.
+	(add_breakpoint_condition): Likewise.
+	(gdb_condition_true_at_breakpoint): Likewise.
+
+	* linux-low.c (linux_wait_1): Evaluate target-side breakpoint condition.
+	(need_step_over_p): Take target-side breakpoint condition into
+	consideration.
+
+2012-02-24  Luis Machado  <lgustavo@codesourcery>
+
 	* server.h: Include tracepoint.h.
 	(agent_mem_read, agent_get_trace_state_variable_value,
 	agent_set_trace_state_variable_value,

@@ -1621,6 +1621,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  strcat (own_buf, ";tracenz+");
 	}
 
+      /* Support target-side breakpoint conditions.  */
+      strcat (own_buf, ";ConditionalBreakpoints+");
+
       return;
     }
 
@@ -2825,6 +2828,43 @@ main (int argc, char *argv[])
     }
 }
 
+/* Process options coming from Z packets for *point at address
+   POINT_ADDR.  PACKET is the packet buffer.  *PACKET is updated
+   to point to the first char after the last processed option.  */
+
+static void
+process_point_options (CORE_ADDR point_addr, char **packet)
+{
+  char *dataptr = *packet;
+
+  /* Check if data has the correct format.  */
+  if (*dataptr != ';')
+    return;
+
+  dataptr++;
+
+  while (*dataptr)
+    {
+      switch (*dataptr)
+	{
+	  case 'X':
+	    /* Conditional expression.  */
+	    fprintf (stderr, "Found breakpoint condition.\n");
+	    add_breakpoint_condition (point_addr, &dataptr);
+	    break;
+	  default:
+	    /* Unrecognized token, just skip it.  */
+	    fprintf (stderr, "Unknown token %c, ignoring.\n",
+		     *dataptr);
+	}
+
+      /* Skip tokens until we find one that we recognize.  */
+      while (*dataptr && *dataptr != 'X' && *dataptr != ';')
+	dataptr++;
+    }
+  *packet = dataptr;
+}
+
 /* Event loop callback that handles a serial event.  The first byte in
    the serial buffer gets us here.  We expect characters to arrive at
    a brisk pace, so we read the rest of the packet with a blocking
@@ -3147,7 +3187,22 @@ process_serial_event (void)
 	  case '4': /* access watchpoint */
 	    require_running (own_buf);
 	    if (insert && the_target->insert_point != NULL)
-	      res = (*the_target->insert_point) (type, addr, len);
+	      {
+		/* Insert the breakpoint.  If it is already inserted, nothing
+		   will take place.  */
+		res = (*the_target->insert_point) (type, addr, len);
+
+		/* GDB may have sent us a list of *point parameters to be
+		   evaluated on the target's side.  Read such list here.  If we
+		   already have a list of parameters, GDB is telling us to drop
+		   that list and use this one instead.  */
+		if (!res && (type == '0' || type == '1'))
+		  {
+		    /* Remove previous conditions.  */
+		    clear_gdb_breakpoint_conditions (addr);
+		    process_point_options (addr, &dataptr);
+		  }
+	      }
 	    else if (!insert && the_target->remove_point != NULL)
 	      res = (*the_target->remove_point) (type, addr, len);
 	    break;

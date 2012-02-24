@@ -2398,7 +2398,8 @@ Check if we're already there.\n",
 		   || event_child->stopped_by_watchpoint
 		   || (!step_over_finished
 		       && !bp_explains_trap && !trace_event)
-		   || gdb_breakpoint_here (event_child->stop_pc));
+		   || (gdb_breakpoint_here (event_child->stop_pc)
+		   && gdb_condition_true_at_breakpoint (event_child->stop_pc)));
 
   /* We found no reason GDB would want us to stop.  We either hit one
      of our own breakpoints, or finished an internal step GDB
@@ -3261,8 +3262,10 @@ need_step_over_p (struct inferior_list_entry *entry, void *dummy)
   if (breakpoint_here (pc) || fast_tracepoint_jump_here (pc))
     {
       /* Don't step over a breakpoint that GDB expects to hit
-	 though.  */
-      if (gdb_breakpoint_here (pc))
+	 though.  If the condition is being evaluated on the target's side
+	 and it evaluate to false, step over this breakpoint as well.  */
+      if (gdb_breakpoint_here (pc)
+	  && gdb_condition_true_at_breakpoint (pc))
 	{
 	  if (debug_threads)
 	    fprintf (stderr,
