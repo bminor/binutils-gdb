@@ -134,7 +134,7 @@ LIBOBJS = @LIBOBJS@
 SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
-OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
+OBS = ax.o inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
 	xml-utils.o common-utils.o ptid.o buffer.o \
@@ -237,7 +237,7 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS)
 
-IPA_OBJS=tracepoint-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o ${IPA_DEPFILES}
+IPA_OBJS=ax-ipa.o tracepoint-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o ${IPA_DEPFILES}
 
 IPA_LIB=libinproctrace.so
 
@@ -336,6 +336,7 @@ regcache_h = $(srcdir)/regcache.h
 signals_def = $(srcdir)/../../include/gdb/signals.def
 signals_h = $(srcdir)/../../include/gdb/signals.h $(signals_def)
 ptid_h = $(srcdir)/../common/ptid.h
+ax_h = $(srcdir)/ax.h
 linux_osdata_h = $(srcdir)/../common/linux-osdata.h
 server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 		$(srcdir)/mem-break.h $(srcdir)/../common/gdb_signals.h \
@@ -368,7 +369,9 @@ IPAGENT_CFLAGS = $(CPPFLAGS) $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
 	-fvisibility=hidden
 
 # In-process agent object rules
-tracepoint-ipa.o: tracepoint.c $(server_h) $(srcdir)/../common/ax.def
+ax-ipa.o: ax.c $(server_h) $(ax_h) $(srcdir)/../common/ax.def
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o ax-ipa.o
+tracepoint-ipa.o: tracepoint.c $(server_h) ${ax_h}
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o tracepoint-ipa.o
 utils-ipa.o: utils.c $(server_h)
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o utils-ipa.o
@@ -387,11 +390,12 @@ linux-amd64-ipa.o: linux-amd64-ipa.c $(server_h)
 amd64-linux-ipa.o : amd64-linux.c $(regdef_h)
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o amd64-linux-ipa.o
 
+ax.o: ax.c $(server_h) $(ax_h) $(srcdir)/../common/ax.def
 event-loop.o: event-loop.c $(server_h)
 hostio.o: hostio.c $(server_h)
 hostio-errno.o: hostio-errno.c $(server_h)
 inferiors.o: inferiors.c $(server_h)
-mem-break.o: mem-break.c $(server_h)
+mem-break.o: mem-break.c $(server_h) $(ax_h)
 proc-service.o: proc-service.c $(server_h) $(gdb_proc_service_h)
 regcache.o: regcache.c $(server_h) $(regdef_h)
 remote-utils.o: remote-utils.c terminal.h $(server_h)
@@ -399,7 +403,7 @@ server.o: server.c $(server_h)
 target.o: target.c $(server_h)
 thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h) \
 	$(gdb_thread_db_h)
-tracepoint.o: tracepoint.c $(server_h) $(srcdir)/../common/ax.def
+tracepoint.o: tracepoint.c $(server_h) $(ax_h)
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
 dll.o: dll.c $(server_h)

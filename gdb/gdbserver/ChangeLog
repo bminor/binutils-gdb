@@ -1,3 +1,64 @@
+2012-02-24  Luis Machado  <lgustavo@codesourcery>
+
+	* server.h: Include tracepoint.h.
+	(agent_mem_read, agent_get_trace_state_variable_value,
+	agent_set_trace_state_variable_value,
+	agent_tsv_read, agent_mem_read_string, get_get_tsv_func_addr,
+	get_set_tsv_func_addr): New prototypes.
+
+	* ax.h: New include file.
+	* ax.c: New source file.
+
+	* tracepoint.c: Include ax.h.
+	(gdb_agent_op, gdb_agent_op_names, gdb_agent_op_sizes,
+	agent_expr, eval_result_type): Move to ax.h.
+	(parse_agent_expr): Rename to ...
+	(gdb_parse_agent_expr): ... this, make it non-static and move
+	to ax.h.
+	(unparse_agent_expr) Rename to ...
+	(gdb_unparse_agent_expr): ... this, make it non-static and move
+	to ax.h.
+	(eval_agent_expr): Rename to ...
+	(eval_tracepoint_agent_expr): ... this.
+	(agent_mem_read, agent_mem_read_string, agent_tsv_read): Remove
+	forward declarations.
+	(add_tracepoint_action): Call gdb_parse_agent_expr (...).
+	(agent_get_trace_state_variable_value): New function.
+	(agent_set_trace_state_variable_value): New function.
+	(cmd_qtdp): Call gdb_parse_agent_expr (...).
+	(response_tracepoint): Call gdb_unparse_agent_expr (...).
+	(do_action_at_tracepoint): Call eval_tracepoint_agent_expr (...).
+	(condition_true_at_tracepoint): Likewise.
+	(parse_agent_expr): Rename to ...
+	(gdb_parse_agent_expr): ... this and move to ax.c.
+	(unparse_agent_expr): Rename to ...
+	(gdb_unparse_agent_expr): ... this and move to ax.c.
+	(gdb_agent_op_name): Move to ax.c.
+	(eval_agent_expr): Rename to ...
+	(gdb_eval_agent_expr): ... this, use regcache passed as parameter
+	and move to ax.c.
+	(eval_tracepoint_agent_expr): New function.
+	(agent_mem_read, agent_mem_read_string, agent_tsv_read): Make
+	non-static. 
+	(current_insn_ptr, emit_error, struct bytecode_address): Move to
+	ax.c.
+	(emit_prologue, emit_epilogue, emit_add, emit_sub, emit_mul, emit_lsh,
+	emit_rsh_signed, emit_rsh_unsigned, emit_ext, emit_log_not,
+	emit_bit_and, emit_bit_or, emit_bit_xor, emit_bit_not, emit_equal,
+	emit_less_signed, emit_less_unsigned, emit_ref, emit_if_goto,
+	emit_goto, write_goto_address, emit_const, emit_reg, emit_pop,
+	emit_stack, emit_zero_ext, emit_swap, emit_stack_adjust,
+	emit_int_call_1, emit_void_call_2, emit_eq_goto, emit_ne_goto,
+	emit_lt_goto, emit_ge_goto, emit_gt_goto, emit_le_goto): Move to ax.c.
+	(get_get_tsv_func_addr, get_set_tsv_func_addr): New functions.
+	(compile_bytecodes): Remove forward declaration.
+	(is_goto_target): Move to ax.c.
+	(compile_bytecodes): Move to ax.c and call
+	agent_get_trace_state_variable_value (...) and
+	agent_set_trace_state_variable_value (...).
+
+	* Makefile.in: Update ax.c and IPA dependencies.
+
 2012-02-24  Pedro Alves  <palves@redhat.com>
 
 	* tracepoint.c (cmd_bigqtbuffer): Rename as ...
