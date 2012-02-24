@@ -1493,6 +1493,8 @@ extern int target_ranged_break_num_registers (void);
 #define target_stopped_data_address(target, addr_p) \
     (*target.to_stopped_data_address) (target, addr_p)
 
+/* Return non-zero if ADDR is within the range of a watchpoint spanning
+   LENGTH bytes beginning at START.  */
 #define target_watchpoint_addr_within_range(target, addr, start, length) \
   (*target.to_watchpoint_addr_within_range) (target, addr, start, length)
 
