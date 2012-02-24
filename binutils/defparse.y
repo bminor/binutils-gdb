@@ -153,7 +153,10 @@ opt_PRIVATE:
 	;
 
 keyword_as_name: NAME { $$ = "NAME"; }
-	| LIBRARY { $$ = "LIBRARY"; }
+/*  Disabled LIBRARY keyword for a quirk in libtool. It places LIBRARY
+    command after EXPORTS list, which is illegal by specification.
+    See PR binutils/13710
+	| LIBRARY { $$ = "LIBRARY"; } */
 	| DESCRIPTION { $$ = "DESCRIPTION"; }
 	| STACKSIZE { $$ = "STACKSIZE"; }
 	| HEAPSIZE { $$ = "HEAPSIZE"; }

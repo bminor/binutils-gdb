@@ -1,3 +1,9 @@
+2012-02-24  Kai Tietz  <ktietz@redhat.com>
+
+	PR binutils/13710
+	* deffilep.y (keyword_as_name): Disable LIBRARY
+	keyword.
+
 2012-02-22  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13683

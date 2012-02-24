@@ -249,7 +249,12 @@ keyword_as_name: BASE { $$ = "BASE"; }
 	 | EXPORTS { $$ = "EXPORTS"; }
 	 | HEAPSIZE { $$ = "HEAPSIZE"; }
 	 | IMPORTS { $$ = "IMPORTS"; }
-	 | LIBRARY { $$ = "LIBRARY"; }
+/* Disable LIBRARY keyword as valid symbol-name.  This is necessary
+   for libtool, which places this command after EXPORTS command.
+   This behavior is illegal by specification, but sadly required by
+   by compatibility reasons.
+   See PR binutils/13710
+	 | LIBRARY { $$ = "LIBRARY"; } */
 	 | NAME { $$ = "NAME"; }
 	 | NONAMEU { $$ = "NONAME"; }
 	 | NONAMEL { $$ = "noname"; }
