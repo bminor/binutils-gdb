@@ -67,9 +67,16 @@ gdb_test "break $end_sse_test" \
     "Breakpoint $decimal at .* line $end_sse_test\." \
     "set breakpoint at end of sse_test"
 
-gdb_test "continue" \
-    " end sse_test .*" \
-    "continue to end of sse_test"
+set test "continue to end of sse_test"
+gdb_test_multiple "continue" $test {
+    -re " end sse_test .*\r\n$gdb_prompt $" {
+	pass $test
+    }
+    -re " Illegal instruction.*\r\n$gdb_prompt $" {
+	untested i386-sse-reverse
+	return -1
+    }
+}
 
 gdb_test "reverse-step" "xorps.*" "reverse-step to xorps"
 

@@ -1,5 +1,11 @@
 2012-02-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix false FAILs on old CPUs without SSE.
+	* gdb.reverse/i386-sse-reverse.exp (continue to end of sse_test):
+	Return untested for Illegal instruction.
+
+2012-02-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix false FAILs with glibc debug infos installed.
 	* gdb.reverse/solib-precsave.exp (set debug-file-directory): New test.
 	* gdb.reverse/solib-reverse.exp (set debug-file-directory): New test.
