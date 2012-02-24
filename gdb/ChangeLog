@@ -1,3 +1,9 @@
+2012-02-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (until_break_command): Install breakpoints after
+	all frame manipulations.
+
 2012-02-24  Luis Machado  <lgustavo@codesourcery.com>
 
 	* remote.c (remote_supports_cond_breakpoints): New forward

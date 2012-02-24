@@ -10418,6 +10418,9 @@ until_break_command (char *arg, int from_tty, int anywhere)
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
   struct frame_info *frame = get_selected_frame (NULL);
+  struct gdbarch *frame_gdbarch = get_frame_arch (frame);
+  struct frame_id stack_frame_id = get_stack_frame_id (frame);
+  struct frame_id caller_frame_id = frame_unwind_caller_id (frame);
   struct breakpoint *breakpoint;
   struct breakpoint *breakpoint2 = NULL;
   struct cleanup *old_chain;
@@ -10448,39 +10451,44 @@ until_break_command (char *arg, int from_tty, int anywhere)
 
   resolve_sal_pc (&sal);
 
-  if (anywhere)
-    /* If the user told us to continue until a specified location,
-       we don't specify a frame at which we need to stop.  */
-    breakpoint = set_momentary_breakpoint (get_frame_arch (frame), sal,
-					   null_frame_id, bp_until);
-  else
-    /* Otherwise, specify the selected frame, because we want to stop
-       only at the very same frame.  */
-    breakpoint = set_momentary_breakpoint (get_frame_arch (frame), sal,
-					   get_stack_frame_id (frame),
-					   bp_until);
-
-  old_chain = make_cleanup_delete_breakpoint (breakpoint);
-
   tp = inferior_thread ();
   thread = tp->num;
+
+  old_chain = make_cleanup (null_cleanup, NULL);
+
+  /* Installing a breakpoint invalidates the frame chain (as it may
+     need to switch threads), so do any frame handling first.  */
 
   /* Keep within the current frame, or in frames called by the current
      one.  */
 
-  if (frame_id_p (frame_unwind_caller_id (frame)))
+  if (frame_id_p (caller_frame_id))
     {
-      sal = find_pc_line (frame_unwind_caller_pc (frame), 0);
-      sal.pc = frame_unwind_caller_pc (frame);
+      struct symtab_and_line sal2;
+
+      sal2 = find_pc_line (frame_unwind_caller_pc (frame), 0);
+      sal2.pc = frame_unwind_caller_pc (frame);
       breakpoint2 = set_momentary_breakpoint (frame_unwind_caller_arch (frame),
-					      sal,
-					      frame_unwind_caller_id (frame),
+					      sal2,
+					      caller_frame_id,
 					      bp_until);
       make_cleanup_delete_breakpoint (breakpoint2);
 
-      set_longjmp_breakpoint (tp, frame_unwind_caller_id (frame));
+      set_longjmp_breakpoint (tp, caller_frame_id);
       make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
     }
+
+  if (anywhere)
+    /* If the user told us to continue until a specified location,
+       we don't specify a frame at which we need to stop.  */
+    breakpoint = set_momentary_breakpoint (frame_gdbarch, sal,
+					   null_frame_id, bp_until);
+  else
+    /* Otherwise, specify the selected frame, because we want to stop
+       only at the very same frame.  */
+    breakpoint = set_momentary_breakpoint (frame_gdbarch, sal,
+					   stack_frame_id, bp_until);
+  make_cleanup_delete_breakpoint (breakpoint);
 
   proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
 
