@@ -699,6 +699,7 @@ update_current_target (void)
       INHERIT (to_static_tracepoint_markers_by_strid, t);
       INHERIT (to_traceframe_info, t);
       INHERIT (to_magic, t);
+      INHERIT (to_supports_evaluation_of_breakpoint_conditions, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
       /* Do not inherit to_flash_done.  */
@@ -925,6 +926,9 @@ update_current_target (void)
   de_fault (to_traceframe_info,
 	    (struct traceframe_info * (*) (void))
 	    tcomplain);
+  de_fault (to_supports_evaluation_of_breakpoint_conditions,
+	    (int (*) (void))
+	    return_zero);
   de_fault (to_execution_direction, default_execution_direction);
 
 #undef de_fault

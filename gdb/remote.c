@@ -242,6 +242,8 @@ static int remote_read_description_p (struct target_ops *target);
 
 static void remote_console_output (char *msg);
 
+static int remote_supports_cond_breakpoints (void);
+
 /* The non-stop remote protocol provisions for one pending stop reply.
    This is where we keep it until it is acknowledged.  */
 
@@ -7729,6 +7731,43 @@ extended_remote_create_inferior (struct target_ops *ops,
 }
 
 
+/* Given a location's target info BP_TGT and the packet buffer BUF,  output
+   the list of conditions (in agent expression bytecode format), if any, the
+   target needs to evaluate.  The output is placed into the packet buffer
+   BUF.  */
+
+static int
+remote_add_target_side_condition (struct gdbarch *gdbarch,
+				  struct bp_target_info *bp_tgt, char *buf)
+{
+  struct agent_expr *aexpr = NULL;
+  int i, ix;
+  char *pkt;
+  char *buf_start = buf;
+
+  if (VEC_empty (agent_expr_p, bp_tgt->conditions))
+    return 0;
+
+  buf += strlen (buf);
+  sprintf (buf, "%s", ";");
+  buf++;
+
+  /* Send conditions to the target and free the vector.  */
+  for (ix = 0;
+       VEC_iterate (agent_expr_p, bp_tgt->conditions, ix, aexpr);
+       ix++)
+    {
+      sprintf (buf, "X%x,", aexpr->len);
+      buf += strlen (buf);
+      for (i = 0; i < aexpr->len; ++i)
+	buf = pack_hex_byte (buf, aexpr->buf[i]);
+      *buf = '\0';
+    }
+
+  VEC_free (agent_expr_p, bp_tgt->conditions);
+  return 0;
+}
+
 /* Insert a breakpoint.  On targets that have software breakpoint
    support, we ask the remote target to do the work; on targets
    which don't, we insert a traditional memory breakpoint.  */
@@ -7748,6 +7787,7 @@ remote_insert_breakpoint (struct gdbarch *gdbarch,
       struct remote_state *rs;
       char *p;
       int bpsize;
+      struct condition_list *cond = NULL;
 
       gdbarch_remote_breakpoint_from_pc (gdbarch, &addr, &bpsize);
 
@@ -7760,6 +7800,9 @@ remote_insert_breakpoint (struct gdbarch *gdbarch,
       addr = (ULONGEST) remote_address_masked (addr);
       p += hexnumstr (p, addr);
       sprintf (p, ",%d", bpsize);
+
+      if (remote_supports_cond_breakpoints ())
+	remote_add_target_side_condition (gdbarch, bp_tgt, p);
 
       putpkt (rs->buf);
       getpkt (&rs->buf, &rs->buf_size, 0);
@@ -7985,6 +8028,9 @@ remote_insert_hw_breakpoint (struct gdbarch *gdbarch,
   addr = remote_address_masked (bp_tgt->placed_address);
   p += hexnumstr (p, (ULONGEST) addr);
   sprintf (p, ",%x", bp_tgt->placed_size);
+
+  if (remote_supports_cond_breakpoints ())
+    remote_add_target_side_condition (gdbarch, bp_tgt, p);
 
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
@@ -10781,6 +10827,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_fileio_readlink = remote_hostio_readlink;
   remote_ops.to_supports_enable_disable_tracepoint = remote_supports_enable_disable_tracepoint;
   remote_ops.to_supports_string_tracing = remote_supports_string_tracing;
+  remote_ops.to_supports_evaluation_of_breakpoint_conditions = remote_supports_cond_breakpoints;
   remote_ops.to_trace_init = remote_trace_init;
   remote_ops.to_download_tracepoint = remote_download_tracepoint;
   remote_ops.to_can_download_tracepoint = remote_can_download_tracepoint;

@@ -22,6 +22,7 @@
 #include "frame.h"
 #include "value.h"
 #include "vec.h"
+#include "ax.h"
 
 struct value;
 struct block;
@@ -215,6 +216,16 @@ enum target_hw_bp_type
   };
 
 
+/* Status of breakpoint conditions used when synchronizing
+   conditions with the target.  */
+
+enum condition_status
+  {
+    condition_unchanged = 0,
+    condition_modified,
+    condition_updated
+  };
+
 /* Information used by targets to insert and remove breakpoints.  */
 
 struct bp_target_info
@@ -249,6 +260,10 @@ struct bp_target_info
      (e.g. if a remote stub handled the details).  We may still need
      the size to remove the breakpoint safely.  */
   int placed_size;
+
+  /* Vector of conditions the target should evaluate if it supports target-side
+     breakpoint conditions.  */
+  VEC(agent_expr_p) *conditions;
 };
 
 /* GDB maintains two types of information about each breakpoint (or
@@ -314,6 +329,30 @@ struct bp_location
      breakpoints; a watchpoint's conditional expression is stored in
      the owner breakpoint object.  */
   struct expression *cond;
+
+  /* Conditional expression in agent expression
+     bytecode form.  This is used for stub-side breakpoint
+     condition evaluation.  */
+  struct agent_expr *cond_bytecode;
+
+  /* Signals that the condition has changed since the last time
+     we updated the global location list.  This means the condition
+     needs to be sent to the target again.  This is used together
+     with target-side breakpoint conditions.
+
+     condition_unchanged: It means there has been no condition changes.
+
+     condition_modified: It means this location had its condition modified.
+
+     condition_updated: It means we already marked all the locations that are
+     duplicates of this location and thus we don't need to call
+     force_breakpoint_reinsertion (...) for this location.  */
+
+  enum condition_status condition_changed;
+
+  /* Signals that breakpoint conditions need to be re-synched with the
+     target.  This has no use other than target-side breakpoints.  */
+  char needs_update;
 
   /* This location's address is in an unloaded solib, and so this
      location should not be inserted.  It will be automatically
@@ -725,6 +764,11 @@ struct watchpoint
   /* The mask address for a masked hardware watchpoint.  */
   CORE_ADDR hw_wp_mask;
 };
+
+/* Return true if BPT is either a software breakpoint or a hardware
+   breakpoint.  */
+
+extern int is_breakpoint (const struct breakpoint *bpt);
 
 /* Returns true if BPT is really a watchpoint.  */
 

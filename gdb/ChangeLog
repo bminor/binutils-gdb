@@ -1,5 +1,82 @@
 2012-02-24  Luis Machado  <lgustavo@codesourcery.com>
 
+	* remote.c (remote_supports_cond_breakpoints): New forward
+	declaration.
+	(remote_add_target_side_condition): New function.
+	(remote_insert_breakpoint): Add target-side breakpoint
+	conditional if supported.
+	(remote_insert_hw_breakpoint): Likewise.
+	(init_remote_ops): Set to_supports_evaluation_of_breakpoint_conditions
+	hook.
+
+	* target.c (update_current_target): Inherit
+	to_supports_evaluation_of_breakpoint_conditions.
+	Default to_supports_evaluation_of_breakpoint_conditions to return_zero.
+
+	* target.h (struct target_ops)
+	<to_supports_evaluation_of_breakpoint_conditions>: New field.
+	(target_supports_evaluation_of_breakpoint_conditions): New #define.
+
+	* breakpoint.c (get_first_locp_gte_addr): New forward declaration.
+	(condition_evaluation_both, condition_evaluation_auto,
+	condition_evaluation_host, condition_evaluation_target,
+	condition_evaluation_enums, condition_evaluation_mode_1,
+	condition_evaluation_mode): New	static globals.
+	(translate_condition_evaluation_mode): New function.
+	(breakpoint_condition_evaluation_mode): New function.
+	(gdb_evaluates_breakpoint_condition_p): New function.
+	(ALL_BP_LOCATIONS_AT_ADDR): New helper macro.
+	(mark_breakpoint_modified): New function.
+	(mark_breakpoint_location_modified): New function.
+	(set_condition_evaluation_mode): New function.
+	(show_condition_evaluation_mode): New function.
+	(bp_location_compare_addrs): New function.
+	(get_first_location_gte_addr): New helper function.
+	(set_breakpoint_condition): Free condition bytecode if locations
+	has become unconditional.  Call mark_breakpoint_modified (...).
+	(condition_command): Call update_global_location_list (1) for
+	breakpoints.
+	(breakpoint_xfer_memory): Use is_breakpoint (...).
+	(is_breakpoint): New function.
+	(parse_cond_to_aexpr): New function.
+	(build_target_condition_list): New function.
+	(insert_bp_location): Handle target-side conditional
+	breakpoints and call build_target_condition_list (...).
+	(update_inserted_breakpoint_locations): New function.
+	(insert_breakpoint_locations): Handle target-side conditional
+	breakpoints.
+	(bpstat_check_breakpoint_conditions): Add comment.
+	(bp_condition_evaluator): New function.
+	(bp_location_condition_evaluator): New function.
+	(print_breakpoint_location): Print information on where the condition
+	will be evaluated.
+	(print_one_breakpoint_location): Likewise.
+	(init_bp_location): Call mark_breakpoint_location_modified (...) for
+	breakpoint location.
+	(force_breakpoint_reinsertion): New functions.
+	(update_global_location_list): Handle target-side breakpoint
+	conditions.
+	Reinsert locations that are already inserted if conditions have
+	changed.
+	(bp_location_dtor): Free agent expression bytecode.
+	(disable_breakpoint): Call mark_breakpoint_modified (...).
+	Call update_global_location_list (...) with parameter 1 for breakpoints.
+	(disable_command): Call mark_breakpoint_location_modified (...).
+	Call update_global_location_list (...) with parameter 1 for breakpoints.
+	(enable_breakpoint_disp): Call mark_breakpoint_modified (...).
+	(enable_command): mark_breakpoint_location_modified (...).
+	(_initialize_breakpoint): Update documentation and add
+	condition-evaluation breakpoint subcommand.
+
+	* breakpoint.h: Include ax.h.
+	(condition_list): New data structure.
+	(condition_status): New enum.
+	(bp_target_info) <cond_list>: New field.
+	(bp_location) <condition_changed, cond_bytecode>: New fields.
+	(is_breakpoint): New prototype.
+
+2012-02-24  Luis Machado  <lgustavo@codesourcery.com>
+
 	* remote.c (remote_state) <cond_breakpoints>: New field.
 	(PACKET_ConditionalBreakpoints): New enum.
 	(remote_cond_breakpoint_feature): New function.

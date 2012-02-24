@@ -66,6 +66,7 @@
 #include "skip.h"
 #include "record.h"
 #include "gdb_regex.h"
+#include "ax-gdb.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -258,6 +259,8 @@ static void trace_pass_command (char *, int);
 
 static int is_masked_watchpoint (const struct breakpoint *b);
 
+static struct bp_location **get_first_locp_gte_addr (CORE_ADDR address);
+
 /* Return 1 if B refers to a static tracepoint set by marker ("-m"), zero
    otherwise.  */
 
@@ -406,6 +409,64 @@ breakpoints_always_inserted_mode (void)
 	  && !RECORD_IS_USED);
 }
 
+static const char condition_evaluation_both[] = "host or target";
+
+/* Modes for breakpoint condition evaluation.  */
+static const char condition_evaluation_auto[] = "auto";
+static const char condition_evaluation_host[] = "host";
+static const char condition_evaluation_target[] = "target";
+static const char *const condition_evaluation_enums[] = {
+  condition_evaluation_auto,
+  condition_evaluation_host,
+  condition_evaluation_target,
+  NULL
+};
+
+/* Global that holds the current mode for breakpoint condition evaluation.  */
+static const char *condition_evaluation_mode_1 = condition_evaluation_auto;
+
+/* Global that we use to display information to the user (gets its value from
+   condition_evaluation_mode_1.  */
+static const char *condition_evaluation_mode = condition_evaluation_auto;
+
+/* Translate a condition evaluation mode MODE into either "host"
+   or "target".  This is used mostly to translate from "auto" to the
+   real setting that is being used.  It returns the translated
+   evaluation mode.  */
+
+static const char *
+translate_condition_evaluation_mode (const char *mode)
+{
+  if (mode == condition_evaluation_auto)
+    {
+      if (target_supports_evaluation_of_breakpoint_conditions ())
+	return condition_evaluation_target;
+      else
+	return condition_evaluation_host;
+    }
+  else
+    return mode;
+}
+
+/* Discovers what condition_evaluation_auto translates to.  */
+
+static const char *
+breakpoint_condition_evaluation_mode (void)
+{
+  return translate_condition_evaluation_mode (condition_evaluation_mode);
+}
+
+/* Return true if GDB should evaluate breakpoint conditions or false
+   otherwise.  */
+
+static int
+gdb_evaluates_breakpoint_condition_p (void)
+{
+  const char *mode = breakpoint_condition_evaluation_mode ();
+
+  return (mode == condition_evaluation_host);
+}
+
 void _initialize_breakpoint (void);
 
 /* Are we executing breakpoint commands?  */
@@ -436,6 +497,20 @@ int target_exact_watchpoints = 0;
 	for (BP_TMP = bp_location;					\
 	     BP_TMP < bp_location + bp_location_count && (B = *BP_TMP);	\
 	     BP_TMP++)
+
+/* Iterates through locations with address ADDRESS for the currently selected
+   program space.  BP_LOCP_TMP points to each object.  BP_LOCP_START points
+   to where the loop should start from.
+   If BP_LOCP_START is a NULL pointer, the macro automatically seeks the
+   appropriate location to start with.  */
+
+#define ALL_BP_LOCATIONS_AT_ADDR(BP_LOCP_TMP, BP_LOCP_START, ADDRESS)	\
+	for (BP_LOCP_START = BP_LOCP_START == NULL ? get_first_locp_gte_addr (ADDRESS) : BP_LOCP_START, \
+	     BP_LOCP_TMP = BP_LOCP_START;				\
+	     BP_LOCP_START						\
+	     && (BP_LOCP_TMP < bp_location + bp_location_count		\
+	     && (*BP_LOCP_TMP)->address == ADDRESS);			\
+	     BP_LOCP_TMP++)
 
 /* Iterator for tracepoints only.  */
 
@@ -620,6 +695,178 @@ get_breakpoint (int num)
 
 
 
+/* Mark locations as "conditions have changed" in case the target supports
+   evaluating conditions on its side.  */
+
+static void
+mark_breakpoint_modified (struct breakpoint *b)
+{
+  struct bp_location *loc;
+
+  /* This is only meaningful if the target is
+     evaluating conditions and if the user has
+     opted for condition evaluation on the target's
+     side.  */
+  if (gdb_evaluates_breakpoint_condition_p ()
+      || !target_supports_evaluation_of_breakpoint_conditions ())
+    return;
+
+  if (!is_breakpoint (b))
+    return;
+
+  for (loc = b->loc; loc; loc = loc->next)
+    loc->condition_changed = condition_modified;
+}
+
+/* Mark location as "conditions have changed" in case the target supports
+   evaluating conditions on its side.  */
+
+static void
+mark_breakpoint_location_modified (struct bp_location *loc)
+{
+  /* This is only meaningful if the target is
+     evaluating conditions and if the user has
+     opted for condition evaluation on the target's
+     side.  */
+  if (gdb_evaluates_breakpoint_condition_p ()
+      || !target_supports_evaluation_of_breakpoint_conditions ())
+
+    return;
+
+  if (!is_breakpoint (loc->owner))
+    return;
+
+  loc->condition_changed = condition_modified;
+}
+
+/* Sets the condition-evaluation mode using the static global
+   condition_evaluation_mode.  */
+
+static void
+set_condition_evaluation_mode (char *args, int from_tty,
+			       struct cmd_list_element *c)
+{
+  struct breakpoint *b;
+  const char *old_mode, *new_mode;
+
+  if ((condition_evaluation_mode_1 == condition_evaluation_target)
+      && !target_supports_evaluation_of_breakpoint_conditions ())
+    {
+      condition_evaluation_mode_1 = condition_evaluation_mode;
+      warning (_("Target does not support breakpoint condition evaluation.\n"
+		 "Using host evaluation mode instead."));
+      return;
+    }
+
+  new_mode = translate_condition_evaluation_mode (condition_evaluation_mode_1);
+  old_mode = translate_condition_evaluation_mode (condition_evaluation_mode);
+
+  /* Only update the mode if the user picked a different one.  */
+  if (new_mode != old_mode)
+    {
+      struct bp_location *loc, **loc_tmp;
+      /* If the user switched to a different evaluation mode, we
+	 need to synch the changes with the target as follows:
+
+	 "host" -> "target": Send all (valid) conditions to the target.
+	 "target" -> "host": Remove all the conditions from the target.
+      */
+
+      /* Flip the switch.  */
+      condition_evaluation_mode = condition_evaluation_mode_1;
+
+      if (new_mode == condition_evaluation_target)
+	{
+	  /* Mark everything modified and synch conditions with the
+	     target.  */
+	  ALL_BP_LOCATIONS (loc, loc_tmp)
+	    mark_breakpoint_location_modified (loc);
+  	}
+      else
+	{
+	  /* Manually mark non-duplicate locations to synch conditions
+	     with the target.  We do this to remove all the conditions the
+	     target knows about.  */
+	  ALL_BP_LOCATIONS (loc, loc_tmp)
+	    if (is_breakpoint (loc->owner) && loc->inserted)
+	      loc->needs_update = 1;
+	}
+
+      /* Do the update.  */
+      update_global_location_list (1);
+    }
+
+  return;
+}
+
+/* Shows the current mode of breakpoint condition evaluation.  Explicitly shows
+   what "auto" is translating to.  */
+
+static void
+show_condition_evaluation_mode (struct ui_file *file, int from_tty,
+				struct cmd_list_element *c, const char *value)
+{
+  if (condition_evaluation_mode == condition_evaluation_auto)
+    fprintf_filtered (file,
+		      _("Breakpoint condition evaluation "
+			"mode is %s (currently %s).\n"),
+		      value,
+		      breakpoint_condition_evaluation_mode ());
+  else
+    fprintf_filtered (file, _("Breakpoint condition evaluation mode is %s.\n"),
+		      value);
+}
+
+/* A comparison function for bp_location AP and BP that is used by
+   bsearch.  This comparison function only cares about addresses, unlike
+   the more general bp_location_compare function.  */
+
+static int
+bp_location_compare_addrs (const void *ap, const void *bp)
+{
+  struct bp_location *a = *(void **) ap;
+  struct bp_location *b = *(void **) bp;
+
+  if (a->address == b->address)
+    return 0;
+  else
+    return ((a->address > b->address) - (a->address < b->address));
+}
+
+/* Helper function to skip all bp_locations with addresses
+   less than ADDRESS.  It returns the first bp_location that
+   is greater than or equal to ADDRESS.  If none is found, just
+   return NULL.  */
+
+static struct bp_location **
+get_first_locp_gte_addr (CORE_ADDR address)
+{
+  struct bp_location dummy_loc;
+  struct bp_location *dummy_locp = &dummy_loc;
+  struct bp_location **locp_found = NULL;
+
+  /* Initialize the dummy location's address field.  */
+  memset (&dummy_loc, 0, sizeof (struct bp_location));
+  dummy_loc.address = address;
+
+  /* Find a close match to the first location at ADDRESS.  */
+  locp_found = bsearch (&dummy_locp, bp_location, bp_location_count,
+			sizeof (struct bp_location **),
+			bp_location_compare_addrs);
+
+  /* Nothing was found, nothing left to do.  */
+  if (locp_found == NULL)
+    return NULL;
+
+  /* We may have found a location that is at ADDRESS but is not the first in the
+     location's list.  Go backwards (if possible) and locate the first one.  */
+  while ((locp_found - 1) >= bp_location
+	 && (*(locp_found - 1))->address == address)
+    locp_found--;
+
+  return locp_found;
+}
+
 void
 set_breakpoint_condition (struct breakpoint *b, char *exp,
 			  int from_tty)
@@ -642,6 +889,10 @@ set_breakpoint_condition (struct breakpoint *b, char *exp,
 	{
 	  xfree (loc->cond);
 	  loc->cond = NULL;
+
+	  /* No need to free the condition agent expression
+	     bytecode (if we have one).  We will handle this
+	     when we go through update_global_location_list.  */
 	}
     }
 
@@ -684,6 +935,8 @@ set_breakpoint_condition (struct breakpoint *b, char *exp,
 	    }
 	}
     }
+  mark_breakpoint_modified (b);
+
   breakpoints_changed ();
   observer_notify_breakpoint_modified (b);
 }
@@ -717,6 +970,10 @@ condition_command (char *arg, int from_tty)
 	  error (_("Cannot set a condition where a Python 'stop' "
 		   "method has been defined in the breakpoint."));
 	set_breakpoint_condition (b, p, from_tty);
+
+	if (is_breakpoint (b))
+	  update_global_location_list (1);
+
 	return;
       }
 
@@ -1216,6 +1473,16 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
 }
 
 
+/* Return true if BPT is either a software breakpoint or a hardware
+   breakpoint.  */
+
+int
+is_breakpoint (const struct breakpoint *bpt)
+{
+  return (bpt->type == bp_breakpoint
+	  || bpt->type == bp_hardware_breakpoint);
+}
+
 /* Return true if BPT is of any hardware watchpoint kind.  */
 
 static int
@@ -1658,6 +1925,143 @@ unduplicated_should_be_inserted (struct bp_location *bl)
   return result;
 }
 
+/* Parses a conditional described by an expression COND into an
+   agent expression bytecode suitable for evaluation
+   by the bytecode interpreter.  Return NULL if there was
+   any error during parsing.  */
+
+static struct agent_expr *
+parse_cond_to_aexpr (CORE_ADDR scope, struct expression *cond)
+{
+  struct agent_expr *aexpr = NULL;
+  struct cleanup *old_chain = NULL;
+  volatile struct gdb_exception ex;
+
+  if (!cond)
+    return NULL;
+
+  /* We don't want to stop processing, so catch any errors
+     that may show up.  */
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      aexpr = gen_eval_for_expr (scope, cond);
+    }
+
+  if (ex.reason < 0)
+    {
+      /* If we got here, it means the condition could not be parsed to a valid
+	 bytecode expression and thus can't be evaluated on the target's side.
+	 It's no use iterating through the conditions.  */
+      return NULL;
+    }
+
+  /* We have a valid agent expression.  */
+  return aexpr;
+}
+
+/* Based on location BL, create a list of breakpoint conditions to be
+   passed on to the target.  If we have duplicated locations with different
+   conditions, we will add such conditions to the list.  The idea is that the
+   target will evaluate the list of conditions and will only notify GDB when
+   one of them is true.  */
+
+static void
+build_target_condition_list (struct bp_location *bl)
+{
+  struct bp_location **locp = NULL, **loc2p;
+  int null_condition_or_parse_error = 0;
+  int modified = bl->needs_update;
+  struct bp_location *loc;
+
+  /* This is only meaningful if the target is
+     evaluating conditions and if the user has
+     opted for condition evaluation on the target's
+     side.  */
+  if (gdb_evaluates_breakpoint_condition_p ()
+      || !target_supports_evaluation_of_breakpoint_conditions ())
+    return;
+
+  /* Do a first pass to check for locations with no assigned
+     conditions or conditions that fail to parse to a valid agent expression
+     bytecode.  If any of these happen, then it's no use to send conditions
+     to the target since this location will always trigger and generate a
+     response back to GDB.  */
+  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
+    {
+      loc = (*loc2p);
+      if (is_breakpoint (loc->owner) && loc->pspace->num == bl->pspace->num)
+	{
+	  if (modified)
+	    {
+	      struct agent_expr *aexpr;
+
+	      /* Re-parse the conditions since something changed.  In that
+		 case we already freed the condition bytecodes (see
+		 force_breakpoint_reinsertion).  We just
+		 need to parse the condition to bytecodes again.  */
+	      aexpr = parse_cond_to_aexpr (bl->address, loc->cond);
+	      loc->cond_bytecode = aexpr;
+
+	      /* Check if we managed to parse the conditional expression
+		 correctly.  If not, we will not send this condition
+		 to the target.  */
+	      if (aexpr)
+		continue;
+	    }
+
+	  /* If we have a NULL bytecode expression, it means something
+	     went wrong or we have a null condition expression.  */
+	  if (!loc->cond_bytecode)
+	    {
+	      null_condition_or_parse_error = 1;
+	      break;
+	    }
+	}
+    }
+
+  /* If any of these happened, it means we will have to evaluate the conditions
+     for the location's address on gdb's side.  It is no use keeping bytecodes
+     for all the other duplicate locations, thus we free all of them here.
+
+     This is so we have a finer control over which locations' conditions are
+     being evaluated by GDB or the remote stub.  */
+  if (null_condition_or_parse_error)
+    {
+      ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
+	{
+	  loc = (*loc2p);
+	  if (is_breakpoint (loc->owner) && loc->pspace->num == bl->pspace->num)
+	    {
+	      /* Only go as far as the first NULL bytecode is
+		 located.  */
+	      if (!loc->cond_bytecode)
+		return;
+
+	      free_agent_expr (loc->cond_bytecode);
+	      loc->cond_bytecode = NULL;
+	    }
+	}
+    }
+
+  /* No NULL conditions or failed bytecode generation.  Build a condition list
+     for this location's address.  */
+  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
+    {
+      loc = (*loc2p);
+      if (loc->cond
+	  && is_breakpoint (loc->owner)
+	  && loc->pspace->num == bl->pspace->num
+	  && loc->owner->enable_state == bp_enabled
+	  && loc->enabled)
+	/* Add the condition to the vector.  This will be used later to send the
+	   conditions to the target.  */
+	VEC_safe_push (agent_expr_p, bl->target_info.conditions,
+		       loc->cond_bytecode);
+    }
+
+  return;
+}
+
 /* Insert a low-level "breakpoint" of some type.  BL is the breakpoint
    location.  Any error messages are printed to TMP_ERROR_STREAM; and
    DISABLED_BREAKS, and HW_BREAKPOINT_ERROR are used to report problems.
@@ -1674,7 +2078,7 @@ insert_bp_location (struct bp_location *bl,
 {
   int val = 0;
 
-  if (!should_be_inserted (bl) || bl->inserted)
+  if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
     return 0;
 
   /* Initialize the target-specific information.  */
@@ -1682,6 +2086,18 @@ insert_bp_location (struct bp_location *bl,
   bl->target_info.placed_address = bl->address;
   bl->target_info.placed_address_space = bl->pspace->aspace;
   bl->target_info.length = bl->length;
+
+  /* When working with target-side conditions, we must pass all the conditions
+     for the same breakpoint address down to the target since GDB will not
+     insert those locations.  With a list of breakpoint conditions, the target
+     can decide when to stop and notify GDB.  */
+
+  if (is_breakpoint (bl->owner))
+    {
+      build_target_condition_list (bl);
+      /* Reset the condition modification marker.  */
+      bl->needs_update = 0;
+    }
 
   if (bl->loc_type == bp_loc_software_breakpoint
       || bl->loc_type == bp_loc_hardware_breakpoint)
@@ -1991,6 +2407,66 @@ insert_breakpoints (void)
     insert_breakpoint_locations ();
 }
 
+/* This is used when we need to synch breakpoint conditions between GDB and the
+   target.  It is the case with deleting and disabling of breakpoints when using
+   always-inserted mode.  */
+
+static void
+update_inserted_breakpoint_locations (void)
+{
+  struct bp_location *bl, **blp_tmp;
+  int error_flag = 0;
+  int val = 0;
+  int disabled_breaks = 0;
+  int hw_breakpoint_error = 0;
+
+  struct ui_file *tmp_error_stream = mem_fileopen ();
+  struct cleanup *cleanups = make_cleanup_ui_file_delete (tmp_error_stream);
+
+  /* Explicitly mark the warning -- this will only be printed if
+     there was an error.  */
+  fprintf_unfiltered (tmp_error_stream, "Warning:\n");
+
+  save_current_space_and_thread ();
+
+  ALL_BP_LOCATIONS (bl, blp_tmp)
+    {
+      /* We only want to update software breakpoints and hardware
+	 breakpoints.  */
+      if (!is_breakpoint (bl->owner))
+	continue;
+
+      /* We only want to update locations that are already inserted
+	 and need updating.  This is to avoid unwanted insertion during
+	 deletion of breakpoints.  */
+      if (!bl->inserted || (bl->inserted && !bl->needs_update))
+	continue;
+
+      switch_to_program_space_and_thread (bl->pspace);
+
+      /* For targets that support global breakpoints, there's no need
+	 to select an inferior to insert breakpoint to.  In fact, even
+	 if we aren't attached to any process yet, we should still
+	 insert breakpoints.  */
+      if (!gdbarch_has_global_breakpoints (target_gdbarch)
+	  && ptid_equal (inferior_ptid, null_ptid))
+	continue;
+
+      val = insert_bp_location (bl, tmp_error_stream, &disabled_breaks,
+				    &hw_breakpoint_error);
+      if (val)
+	error_flag = val;
+    }
+
+  if (error_flag)
+    {
+      target_terminal_ours_for_output ();
+      error_stream (tmp_error_stream);
+    }
+
+  do_cleanups (cleanups);
+}
+
 /* Used when starting or continuing the program.  */
 
 static void
@@ -2014,7 +2490,7 @@ insert_breakpoint_locations (void)
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
     {
-      if (!should_be_inserted (bl) || bl->inserted)
+      if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
 	continue;
 
       /* There is no point inserting thread-specific breakpoints if
@@ -4092,6 +4568,10 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
   b = bs->breakpoint_at;
   gdb_assert (b != NULL);
 
+  /* Even if the target evaluated the condition on its end and notified GDB, we
+     need to do so again since GDB does not know if we stopped due to a
+     breakpoint or a single step breakpoint.  */
+
   if (frame_id_p (b->frame_id)
       && !frame_id_eq (b->frame_id, get_stack_frame_id (get_current_frame ())))
     bs->stop = 0;
@@ -4669,6 +5149,66 @@ wrap_indent_at_field (struct ui_out *uiout, const char *col_name)
   return NULL;
 }
 
+/* Determine if the locations of this breakpoint will have their conditions
+   evaluated by the target, host or a mix of both.  Returns the following:
+
+    "host": Host evals condition.
+    "host or target": Host or Target evals condition.
+    "target": Target evals condition.
+*/
+
+static const char *
+bp_condition_evaluator (struct breakpoint *b)
+{
+  struct bp_location *bl;
+  char host_evals = 0;
+  char target_evals = 0;
+
+  if (!b)
+    return NULL;
+
+  if (!is_breakpoint (b))
+    return NULL;
+
+  if (gdb_evaluates_breakpoint_condition_p ()
+      || !target_supports_evaluation_of_breakpoint_conditions ())
+    return condition_evaluation_host;
+
+  for (bl = b->loc; bl; bl = bl->next)
+    {
+      if (bl->cond_bytecode)
+	target_evals++;
+      else
+	host_evals++;
+    }
+
+  if (host_evals && target_evals)
+    return condition_evaluation_both;
+  else if (target_evals)
+    return condition_evaluation_target;
+  else
+    return condition_evaluation_host;
+}
+
+/* Determine the breakpoint location's condition evaluator.  This is
+   similar to bp_condition_evaluator, but for locations.  */
+
+static const char *
+bp_location_condition_evaluator (struct bp_location *bl)
+{
+  if (bl && !is_breakpoint (bl->owner))
+    return NULL;
+
+  if (gdb_evaluates_breakpoint_condition_p ()
+      || !target_supports_evaluation_of_breakpoint_conditions ())
+    return condition_evaluation_host;
+
+  if (bl && bl->cond_bytecode)
+    return condition_evaluation_target;
+  else
+    return condition_evaluation_host;
+}
+
 /* Print the LOC location out of the list of B->LOC locations.  */
 
 static void
@@ -4726,6 +5266,16 @@ print_breakpoint_location (struct breakpoint *b,
     }
   else
     ui_out_field_string (uiout, "pending", b->addr_string);
+
+  if (loc && is_breakpoint (b)
+      && breakpoint_condition_evaluation_mode () == condition_evaluation_target
+      && bp_condition_evaluator (b) == condition_evaluation_both)
+    {
+      ui_out_text (uiout, " (");
+      ui_out_field_string (uiout, "evaluated-by",
+			   bp_location_condition_evaluator (loc));
+      ui_out_text (uiout, ")");
+    }
 
   do_cleanups (old_chain);
 }
@@ -5002,6 +5552,18 @@ print_one_breakpoint_location (struct breakpoint *b,
       else
 	ui_out_text (uiout, "\tstop only if ");
       ui_out_field_string (uiout, "cond", b->cond_string);
+
+      /* Print whether the target is doing the breakpoint's condition
+	 evaluation.  If GDB is doing the evaluation, don't print anything.  */
+      if (is_breakpoint (b)
+	  && breakpoint_condition_evaluation_mode ()
+	  == condition_evaluation_target)
+	{
+	  ui_out_text (uiout, " (");
+	  ui_out_field_string (uiout, "evaluated-by",
+			       bp_condition_evaluator (b));
+	  ui_out_text (uiout, " evals)");
+	}
       ui_out_text (uiout, "\n");
     }
 
@@ -5731,6 +6293,7 @@ init_bp_location (struct bp_location *loc, const struct bp_location_ops *ops,
   loc->ops = ops;
   loc->owner = owner;
   loc->cond = NULL;
+  loc->cond_bytecode = NULL;
   loc->shlib_disabled = 0;
   loc->enabled = 1;
 
@@ -5758,9 +6321,11 @@ init_bp_location (struct bp_location *loc, const struct bp_location_ops *ops,
     case bp_gnu_ifunc_resolver:
     case bp_gnu_ifunc_resolver_return:
       loc->loc_type = bp_loc_software_breakpoint;
+      mark_breakpoint_location_modified (loc);
       break;
     case bp_hardware_breakpoint:
       loc->loc_type = bp_loc_hardware_breakpoint;
+      mark_breakpoint_location_modified (loc);
       break;
     case bp_hardware_watchpoint:
     case bp_read_watchpoint:
@@ -10718,6 +11283,7 @@ swap_insertion (struct bp_location *left, struct bp_location *right)
 {
   const int left_inserted = left->inserted;
   const int left_duplicate = left->duplicate;
+  const int left_needs_update = left->needs_update;
   const struct bp_target_info left_target_info = left->target_info;
 
   /* Locations of tracepoints can never be duplicated.  */
@@ -10728,10 +11294,65 @@ swap_insertion (struct bp_location *left, struct bp_location *right)
 
   left->inserted = right->inserted;
   left->duplicate = right->duplicate;
+  left->needs_update = right->needs_update;
   left->target_info = right->target_info;
   right->inserted = left_inserted;
   right->duplicate = left_duplicate;
+  right->needs_update = left_needs_update;
   right->target_info = left_target_info;
+}
+
+/* Force the re-insertion of the locations at ADDRESS.  This is called
+   once a new/deleted/modified duplicate location is found and we are evaluating
+   conditions on the target's side.  Such conditions need to be updated on
+   the target.  */
+
+static void
+force_breakpoint_reinsertion (struct bp_location *bl)
+{
+  struct bp_location **locp = NULL, **loc2p;
+  struct bp_location *loc;
+  CORE_ADDR address = 0;
+  int pspace_num;
+
+  address = bl->address;
+  pspace_num = bl->pspace->num;
+
+  /* This is only meaningful if the target is
+     evaluating conditions and if the user has
+     opted for condition evaluation on the target's
+     side.  */
+  if (gdb_evaluates_breakpoint_condition_p ()
+      || !target_supports_evaluation_of_breakpoint_conditions ())
+    return;
+
+  /* Flag all breakpoint locations with this address and
+     the same program space as the location
+     as "its condition has changed".  We need to
+     update the conditions on the target's side.  */
+  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, address)
+    {
+      loc = *loc2p;
+
+      if (!is_breakpoint (loc->owner)
+	  || pspace_num != loc->pspace->num)
+	continue;
+
+      /* Flag the location appropriately.  We use a different state to
+	 let everyone know that we already updated the set of locations
+	 with addr bl->address and program space bl->pspace.  This is so
+	 we don't have to keep calling these functions just to mark locations
+	 that have already been marked.  */
+      loc->condition_changed = condition_updated;
+
+      /* Free the agent expression bytecode as well.  We will compute
+	 it later on.  */
+      if (loc->cond_bytecode)
+	{
+	  free_agent_expr (loc->cond_bytecode);
+	  loc->cond_bytecode = NULL;
+	}
+    }
 }
 
 /* If SHOULD_INSERT is false, do not insert any breakpoint locations
@@ -10755,6 +11376,10 @@ update_global_location_list (int should_insert)
   struct breakpoint *b;
   struct bp_location **locp, *loc;
   struct cleanup *cleanups;
+  /* Last breakpoint location address that was marked for update.  */
+  CORE_ADDR last_addr = 0;
+  /* Last breakpoint location program space that was marked for update.  */
+  int last_pspace_num = -1;
 
   /* Used in the duplicates detection below.  When iterating over all
      bp_locations, points to the first bp_location of a given address.
@@ -10827,12 +11452,29 @@ update_global_location_list (int should_insert)
 	    && (*loc2p)->address == old_loc->address);
 	   loc2p++)
 	{
-	  if (*loc2p == old_loc)
+	  /* Check if this is a new/duplicated location or a duplicated
+	     location that had its condition modified.  If so, we want to send
+	     its condition to the target if evaluation of conditions is taking
+	     place there.  */
+	  if ((*loc2p)->condition_changed == condition_modified
+	      && (last_addr != old_loc->address
+		  || last_pspace_num != old_loc->pspace->num))
 	    {
-	      found_object = 1;
-	      break;
+	      force_breakpoint_reinsertion (*loc2p);
+	      last_pspace_num = old_loc->pspace->num;
 	    }
+
+	  if (*loc2p == old_loc)
+	    found_object = 1;
 	}
+
+      /* We have already handled this address, update it so that we don't
+	 have to go through updates again.  */
+      last_addr = old_loc->address;
+
+      /* Target-side condition evaluation: Handle deleted locations.  */
+      if (!found_object)
+	force_breakpoint_reinsertion (old_loc);
 
       /* If this location is no longer present, and inserted, look if
 	 there's maybe a new location at the same address.  If so,
@@ -10853,6 +11495,10 @@ update_global_location_list (int should_insert)
 	    }
 	  else
 	    {
+	      /* This location still exists, but it won't be kept in the
+		 target since it may have been disabled.  We proceed to
+		 remove its target-side condition.  */
+
 	      /* The location is either no longer present, or got
 		 disabled.  See if there's another location at the
 		 same address, in which case we don't need to remove
@@ -11005,7 +11651,11 @@ update_global_location_list (int should_insert)
 	   never duplicated.  See the comments in field `duplicate' of
 	   `struct bp_location'.  */
 	  || is_tracepoint (b))
-	continue;
+	{
+	  /* Clear the condition modification flag.  */
+	  loc->condition_changed = condition_unchanged;
+	  continue;
+	}
 
       /* Permanent breakpoint should always be inserted.  */
       if (b->enable_state == bp_permanent && ! loc->inserted)
@@ -11028,6 +11678,13 @@ update_global_location_list (int should_insert)
 	{
 	  *loc_first_p = loc;
 	  loc->duplicate = 0;
+
+	  if (is_breakpoint (loc->owner) && loc->condition_changed)
+	    {
+	      loc->needs_update = 1;
+	      /* Clear the condition modification flag.  */
+	      loc->condition_changed = condition_unchanged;
+	    }
 	  continue;
 	}
 
@@ -11039,6 +11696,9 @@ update_global_location_list (int should_insert)
 	swap_insertion (loc, *loc_first_p);
       loc->duplicate = 1;
 
+      /* Clear the condition modification flag.  */
+      loc->condition_changed = condition_unchanged;
+
       if ((*loc_first_p)->owner->enable_state == bp_permanent && loc->inserted
 	  && b->enable_state != bp_permanent)
 	internal_error (__FILE__, __LINE__,
@@ -11046,10 +11706,21 @@ update_global_location_list (int should_insert)
 			"a permanent breakpoint"));
     }
 
-  if (breakpoints_always_inserted_mode () && should_insert
+  if (breakpoints_always_inserted_mode ()
       && (have_live_inferiors ()
 	  || (gdbarch_has_global_breakpoints (target_gdbarch))))
-    insert_breakpoint_locations ();
+    {
+      if (should_insert)
+	insert_breakpoint_locations ();
+      else
+	{
+	  /* Though should_insert is false, we may need to update conditions
+	     on the target's side if it is evaluating such conditions.  We
+	     only update conditions for locations that are marked
+	     "needs_update".  */
+	  update_inserted_breakpoint_locations ();
+	}
+    }
 
   if (should_insert)
     download_tracepoint_locations ();
@@ -11163,6 +11834,8 @@ static void
 bp_location_dtor (struct bp_location *self)
 {
   xfree (self->cond);
+  if (self->cond_bytecode)
+    free_agent_expr (self->cond_bytecode);
   xfree (self->function_name);
   xfree (self->source_file);
 }
@@ -12856,6 +13529,9 @@ disable_breakpoint (struct breakpoint *bpt)
 
   bpt->enable_state = bp_disabled;
 
+  /* Mark breakpoint locations modified.  */
+  mark_breakpoint_modified (bpt);
+
   if (target_supports_enable_disable_tracepoint ()
       && current_trace_status ()->running && is_tracepoint (bpt))
     {
@@ -12903,7 +13579,11 @@ disable_command (char *args, int from_tty)
       struct bp_location *loc = find_location_by_number (args);
       if (loc)
 	{
-	  loc->enabled = 0;
+	  if (loc->enabled)
+	    {
+	      loc->enabled = 0;
+	      mark_breakpoint_location_modified (loc);
+	    }
 	  if (target_supports_enable_disable_tracepoint ()
 	      && current_trace_status ()->running && loc->owner
 	      && is_tracepoint (loc->owner))
@@ -12959,6 +13639,11 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
 
   if (bpt->enable_state != bp_permanent)
     bpt->enable_state = bp_enabled;
+
+  bpt->enable_state = bp_enabled;
+
+  /* Mark breakpoint locations modified.  */
+  mark_breakpoint_modified (bpt);
 
   if (target_supports_enable_disable_tracepoint ()
       && current_trace_status ()->running && is_tracepoint (bpt))
@@ -13019,7 +13704,11 @@ enable_command (char *args, int from_tty)
       struct bp_location *loc = find_location_by_number (args);
       if (loc)
 	{
-	  loc->enabled = 1;
+	  if (!loc->enabled)
+	    {
+	      loc->enabled = 1;
+	      mark_breakpoint_location_modified (loc);
+	    }
 	  if (target_supports_enable_disable_tracepoint ()
 	      && current_trace_status ()->running && loc->owner
 	      && is_tracepoint (loc->owner))
@@ -14791,6 +15480,23 @@ behaves as if always-inserted mode is on; if gdb is controlling the\n\
 inferior in all-stop mode, gdb behaves as if always-inserted mode is off."),
 			   NULL,
 			   &show_always_inserted_mode,
+			   &breakpoint_set_cmdlist,
+			   &breakpoint_show_cmdlist);
+
+  add_setshow_enum_cmd ("condition-evaluation", class_breakpoint,
+			condition_evaluation_enums,
+			&condition_evaluation_mode_1, _("\
+Set mode of breakpoint condition evaluation."), _("\
+Show mode of breakpoint condition evaluation."), _("\
+When this is set to \"gdb\", breakpoint conditions will be\n\
+evaluated on the host's side by GDB.  When it is set to \"target\",\n\
+breakpoint conditions will be downloaded to the target (if the target\n\
+supports such feature) and conditions will be evaluated on the target's side.\n\
+If this is set to \"auto\" (default), this will be automatically set to\n\
+\"target\" if it supports condition evaluation, otherwise it will\n\
+be set to \"gdb\""),
+			   &set_condition_evaluation_mode,
+			   &show_condition_evaluation_mode,
 			   &breakpoint_set_cmdlist,
 			   &breakpoint_show_cmdlist);
 

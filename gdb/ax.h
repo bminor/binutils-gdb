@@ -20,6 +20,7 @@
 #define AGENTEXPR_H
 
 #include "doublest.h"		/* For DOUBLEST.  */
+#include "vec.h"
 
 /* It's sometimes useful to be able to debug programs that you can't
    really stop for more than a fraction of a second.  To this end, the
@@ -143,6 +144,12 @@ struct agent_expr
     int reg_mask_len;
     unsigned char *reg_mask;
   };
+
+/* Pointer to an agent_expr structure.  */
+typedef struct agent_expr *agent_expr_p;
+
+/* Vector of pointers to agent expressions.  */
+DEF_VEC_P (agent_expr_p);
 
 /* The actual values of the various bytecode operations.  */
 

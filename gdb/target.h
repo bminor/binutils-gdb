@@ -662,6 +662,10 @@ struct target_ops
     /* Does this target support the tracenz bytecode for string collection?  */
     int (*to_supports_string_tracing) (void);
 
+    /* Does this target support evaluation of breakpoint conditions on its
+       end?  */
+    int (*to_supports_evaluation_of_breakpoint_conditions) (void);
+
     /* Determine current architecture of thread PTID.
 
        The target is supposed to determine the architecture of the code where
@@ -967,6 +971,12 @@ int target_supports_disable_randomization (void);
 
 #define target_supports_string_tracing() \
   (*current_target.to_supports_string_tracing) ()
+
+/* Returns true if this target can handle breakpoint conditions
+   on its end.  */
+
+#define target_supports_evaluation_of_breakpoint_conditions() \
+  (*current_target.to_supports_evaluation_of_breakpoint_conditions) ()
 
 /* Invalidate all target dcaches.  */
 extern void target_dcache_invalidate (void);
