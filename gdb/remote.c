@@ -315,6 +315,10 @@ struct remote_state
   /* True if the stub reports support for conditional tracepoints.  */
   int cond_tracepoints;
 
+  /* True if the stub reports support for target-side breakpoint
+     conditions.  */
+  int cond_breakpoints;
+
   /* True if the stub reports support for fast tracepoints.  */
   int fast_tracepoints;
 
@@ -1263,6 +1267,7 @@ enum {
   PACKET_qXfer_siginfo_write,
   PACKET_qAttached,
   PACKET_ConditionalTracepoints,
+  PACKET_ConditionalBreakpoints,
   PACKET_FastTracepoints,
   PACKET_StaticTracepoints,
   PACKET_InstallInTrace,
@@ -3717,6 +3722,16 @@ remote_cond_tracepoint_feature (const struct protocol_feature *feature,
 }
 
 static void
+remote_cond_breakpoint_feature (const struct protocol_feature *feature,
+				enum packet_support support,
+				const char *value)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  rs->cond_breakpoints = (support == PACKET_ENABLE);
+}
+
+static void
 remote_fast_tracepoint_feature (const struct protocol_feature *feature,
 				enum packet_support support,
 				const char *value)
@@ -3810,6 +3825,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_siginfo_write },
   { "ConditionalTracepoints", PACKET_DISABLE, remote_cond_tracepoint_feature,
     PACKET_ConditionalTracepoints },
+  { "ConditionalBreakpoints", PACKET_DISABLE, remote_cond_breakpoint_feature,
+    PACKET_ConditionalBreakpoints },
   { "FastTracepoints", PACKET_DISABLE, remote_fast_tracepoint_feature,
     PACKET_FastTracepoints },
   { "StaticTracepoints", PACKET_DISABLE, remote_static_tracepoint_feature,
@@ -9853,6 +9870,14 @@ remote_supports_cond_tracepoints (void)
   return rs->cond_tracepoints;
 }
 
+static int
+remote_supports_cond_breakpoints (void)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  return rs->cond_breakpoints;
+}
+
 int
 remote_supports_fast_tracepoints (void)
 {
@@ -11273,6 +11298,11 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_ConditionalTracepoints],
 			 "ConditionalTracepoints",
 			 "conditional-tracepoints", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_ConditionalBreakpoints],
+			 "ConditionalBreakpoints",
+			 "conditional-breakpoints", 0);
+
   add_packet_config_cmd (&remote_protocol_packets[PACKET_FastTracepoints],
 			 "FastTracepoints", "fast-tracepoints", 0);
 

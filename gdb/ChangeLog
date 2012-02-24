@@ -1,5 +1,15 @@
 2012-02-24  Luis Machado  <lgustavo@codesourcery.com>
 
+	* remote.c (remote_state) <cond_breakpoints>: New field.
+	(PACKET_ConditionalBreakpoints): New enum.
+	(remote_cond_breakpoint_feature): New function.
+	(remote_protocol_features): Add new ConditionalBreakpoints entry.
+	(remote_supports_cond_breakpoints): New function.
+	(_initialize_remote): Add new packet configuration for
+	target-side conditional breakpoints.
+
+2012-02-24  Luis Machado  <lgustavo@codesourcery.com>
+
 	* NEWS: Mention target-side conditional breakpoint support,
 	new condition-evaluation breakpoint subcommand and remote
 	packet extensions.
