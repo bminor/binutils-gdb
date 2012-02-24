@@ -1,5 +1,11 @@
 2012-02-24  Luis Machado  <lgustavo@codesourcery.com>
 
+	* NEWS: Mention target-side conditional breakpoint support,
+	new condition-evaluation breakpoint subcommand and remote
+	packet extensions.
+
+2012-02-24  Luis Machado  <lgustavo@codesourcery.com>
+
 	* breakpoint.c (bp_location_compare): Sort by pspace before sorting by
 	number.
 

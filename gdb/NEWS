@@ -56,6 +56,28 @@
 
 Renesas RL78			rl78-*-elf
 
+* GDBserver supports evaluation of breakpoint conditions.  When
+  support is advertised by GDBserver, GDB may be told to send the
+  breakpoint conditions in bytecode form to GDBserver.  GDBserver
+  will only report the breakpoint trigger to GDB when its condition
+  evaluates to true.
+
+* New options
+
+set breakpoint condition-evaluation
+show breakpoint condition-evaluation
+  Controls whether breakpoint conditions are evaluated by GDB ("gdb") or by
+  GDBserver ("target").
+  This option can improve debugger efficiency depending on the speed of the
+  target.
+
+* New remote packets
+
+  The z0/z1 breakpoint insertion packets have been extended to carry
+  a list of conditional expressions over to the remote stub depending on the
+  condition evaluation mode.  The use of this extension can be controlled
+  via the "set remote conditional-breakpoints-packet" command.
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing
