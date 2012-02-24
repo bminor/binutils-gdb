@@ -911,8 +911,9 @@ set_last_displayed_sal (int valid, struct program_space *pspace,
   last_displayed_line = line;
   if (valid && pspace == NULL)
     {
-      warning (_("Trying to set NULL pspace."));
       clear_last_displayed_sal ();
+      internal_error (__FILE__, __LINE__,
+		      _("Trying to set NULL pspace."));
     }
 }
 

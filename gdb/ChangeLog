@@ -1,3 +1,8 @@
+2012-02-24  Pedro Alves  <palves@redhat.com>
+
+	* stack.c (set_last_displayed_sal): Issue internal_error instead
+	of warning, and issue it after clearing the last displayed sal.
+
 2012-02-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
