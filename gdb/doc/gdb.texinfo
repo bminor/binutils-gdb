@@ -3484,12 +3484,17 @@ the appropriate shared library is loaded in the future.
 @end table
 
 @noindent
-If a breakpoint is conditional, @code{info break} shows the condition on
-the line following the affected breakpoint; breakpoint commands, if any,
-are listed after that.  A pending breakpoint is allowed to have a condition
-specified for it.  The condition is not parsed for validity until a shared
-library is loaded that allows the pending breakpoint to resolve to a
-valid location.
+If a breakpoint is conditional, there are two evaluation modes: ``host'' and
+``target''.  If mode is ``host'', breakpoint condition evaluation is done by
+@value{GDBN} on the host's side.  If it is ``target'', then the condition
+is evaluated by the target.  The @code{info break} command shows
+the condition on the line following the affected breakpoint, together with
+its condition evaluation mode in between parentheses.
+
+Breakpoint commands, if any, are listed after that.  A pending breakpoint is
+allowed to have a condition specified for it.  The condition is not parsed for
+validity until a shared library is loaded that allows the pending
+breakpoint to resolve to a valid location.
 
 @noindent
 @code{info break} with a breakpoint
@@ -3685,6 +3690,47 @@ in non-stop mode (@pxref{Non-Stop Mode}), gdb behaves as if
 controlling the inferior in all-stop mode, @value{GDBN} behaves as if
 @code{breakpoint always-inserted} mode is off.
 @end table
+
+@value{GDBN} handles conditional breakpoints by evaluating these conditions
+when a breakpoint breaks.  If the condition is true, then the process being
+debugged stops, otherwise the process is resumed.
+
+If the target supports evaluating conditions on its end, @value{GDBN} may
+download the breakpoint, together with its conditions, to it.
+
+This feature can be controlled via the following commands:
+
+@kindex set breakpoint condition-evaluation
+@kindex show breakpoint condition-evaluation
+@table @code
+@item set breakpoint condition-evaluation host
+This option commands @value{GDBN} to evaluate the breakpoint
+conditions on the host's side.  Unconditional breakpoints are sent to
+the target which in turn receives the triggers and reports them back to GDB
+for condition evaluation.  This is the standard evaluation mode.
+
+@item set breakpoint condition-evaluation target
+This option commands @value{GDBN} to download breakpoint conditions
+to the target at the moment of their insertion.  The target
+is responsible for evaluating the conditional expression and reporting
+breakpoint stop events back to @value{GDBN} whenever the condition
+is true.  Due to limitations of target-side evaluation, some conditions
+cannot be evaluated there, e.g., conditions that depend on local data
+that is only known to the host.  Examples include
+conditional expressions involving convenience variables, complex types
+that cannot be handled by the agent expression parser and expressions
+that are too long to be sent over to the target, specially when the
+target is a remote system.  In these cases, the conditions will be
+evaluated by @value{GDBN}.
+
+@item set breakpoint condition-evaluation auto
+This is the default mode.  If the target supports evaluating breakpoint
+conditions on its end, @value{GDBN} will download breakpoint conditions to
+the target (limitations mentioned previously apply).  If the target does
+not support breakpoint condition evaluation, then @value{GDBN} will fallback
+to evaluating all these conditions on the host's side.
+@end table
+
 
 @cindex negative breakpoint numbers
 @cindex internal @value{GDBN} breakpoints
@@ -4361,6 +4407,19 @@ breakpoint commands are usually more convenient and flexible than break
 conditions for the
 purpose of performing side effects when a breakpoint is reached
 (@pxref{Break Commands, ,Breakpoint Command Lists}).
+
+Breakpoint conditions can also be evaluated on the target's side if
+the target supports it.  Instead of evaluating the conditions locally,
+@value{GDBN} encodes the expression into an agent expression
+(@pxref{Agent Expressions}) suitable for execution on the target,
+independently of @value{GDBN}.  Global variables become raw memory
+locations, locals become stack accesses, and so forth.
+
+In this case, @value{GDBN} will only be notified of a breakpoint trigger
+when its condition evaluates to true.  This mechanism may provide faster
+response times depending on the performance characteristics of the target
+since it does not need to keep @value{GDBN} informed about
+every breakpoint trigger, even those with false conditions.
 
 Break conditions can be specified when a breakpoint is set, by using
 @samp{if} in the arguments to the @code{break} command.  @xref{Set
@@ -17500,6 +17559,10 @@ are:
 @item @code{disable-randomization}
 @tab @code{QDisableRandomization}
 @tab @code{set disable-randomization}
+
+@item @code{conditional-breakpoints-packet}
+@tab @code{Z0 and Z1}
+@tab @code{Support for target-side breakpoint condition evaluation}
 @end multitable
 
 @node Remote Stub
@@ -34247,7 +34310,7 @@ avoid potential problems with duplicate packets, the operations should
 be implemented in an idempotent way.}
 
 @item z0,@var{addr},@var{kind}
-@itemx Z0,@var{addr},@var{kind}
+@itemx Z0,@var{addr},@var{kind}@r{[};@var{cond_list}@dots{}@r{]}
 @cindex @samp{z0} packet
 @cindex @samp{Z0} packet
 Insert (@samp{Z0}) or remove (@samp{z0}) a memory breakpoint at address
@@ -34259,6 +34322,22 @@ A memory breakpoint is implemented by replacing the instruction at
 the breakpoint in bytes that should be inserted.  E.g., the @sc{arm}
 and @sc{mips} can insert either a 2 or 4 byte breakpoint.  Some
 architectures have additional meanings for @var{kind};
+@var{cond_list} is an optional list of conditional expressions in bytecode
+form that should be evaluated on the target's side.  These are the
+conditions that should be taken into consideration when deciding if
+the breakpoint trigger should be reported back to @var{GDBN}.
+
+The @var{cond_list} parameter is comprised of a series of expressions,
+concatenated without separators. Each expression has the following form:
+
+@table @samp
+
+@item X @var{len},@var{expr}
+@var{len} is the length of the bytecode expression and @var{expr} is the
+actual conditional expression in bytecode form.
+
+@end table
+
 see @ref{Architecture-Specific Protocol Details}.
 
 @emph{Implementation note: It is possible for a target to copy or move
@@ -34277,7 +34356,7 @@ for an error
 @end table
 
 @item z1,@var{addr},@var{kind}
-@itemx Z1,@var{addr},@var{kind}
+@itemx Z1,@var{addr},@var{kind}@r{[};@var{cond_list}@dots{}@r{]}
 @cindex @samp{z1} packet
 @cindex @samp{Z1} packet
 Insert (@samp{Z1}) or remove (@samp{z1}) a hardware breakpoint at
@@ -34285,7 +34364,7 @@ address @var{addr}.
 
 A hardware breakpoint is implemented using a mechanism that is not
 dependant on being able to modify the target's memory.  @var{kind}
-has the same meaning as in @samp{Z0} packets.
+and @var{cond_list} have the same meaning as in @samp{Z0} packets.
 
 @emph{Implementation note: A hardware breakpoint is not affected by code
 movement.}
@@ -35090,6 +35169,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{ConditionalBreakpoints}
+@tab No
+@tab @samp{-}
+@tab No
+
 @item @samp{ConditionalTracepoints}
 @tab No
 @tab @samp{-}
@@ -35226,6 +35310,11 @@ indicated it supports them in its @samp{qSupported} request.
 @item qXfer:osdata:read
 The remote stub understands the @samp{qXfer:osdata:read} packet
 ((@pxref{qXfer osdata read}).
+
+@item ConditionalBreakpoints
+The target accepts and implements evaluation of conditional expressions
+defined for breakpoints.  The target will only report breakpoint triggers
+when such conditions are true (@pxref{Conditions, ,Break Conditions}).
 
 @item ConditionalTracepoints
 The remote stub accepts and implements conditional expressions defined

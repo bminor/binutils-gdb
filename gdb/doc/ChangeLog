@@ -1,3 +1,15 @@
+2012-02-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.texinfo (Setting Breakpoints): Mention and explain the
+	condition-evaluation breakpoint parameter.
+	Mention condition-evaluation mode being shown in "info break".
+	(Break Conditions): Add description for target-side
+	conditional breakpoints.
+	(Remote Configuration): Mention conditional-breakpoints-packet. 
+	(Packets): Add cond-expr parameter to Z0/Z1 packets and explain
+	cond-expr.
+	(General Query Packets): Mention new ConditionalBreakpoint feature.
+
 2012-02-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Blocks In Python): Clarify block iteration.
