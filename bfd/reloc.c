@@ -6394,6 +6394,15 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		    goto error_return;
 		  break;
 		case bfd_reloc_outofrange:
+		  /* PR ld/13730:
+		     This error can result when processing some partially
+		     complete binaries.  Do not abort, but issue an error
+		     message instead.  */
+		  link_info->callbacks->einfo
+		    (_("%X%P: %B(%A): relocation \"%R\" goes out of range\n"),
+		     abfd, input_section, * parent);
+		  goto error_return;
+
 		default:
 		  abort ();
 		  break;

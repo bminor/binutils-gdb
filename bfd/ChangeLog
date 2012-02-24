@@ -1,3 +1,10 @@
+2012-02-24  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/13730
+	* reloc.c (bfd_generic_get_relocated_section_contents): Issue an
+	error message instead of aborting, when an outofrange reloc is
+	encountered.
+
 2012-02-23  Iain Sandoe  <idsandoe@googlemail.com>
 
 	* mach-o.c (bfd_mach_o_swap_in_non_scattered_reloc): New.
