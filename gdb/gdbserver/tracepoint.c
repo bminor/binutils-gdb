@@ -3794,24 +3794,18 @@ cmd_qtbuffer (char *own_buf)
 }
 
 static void
-cmd_bigqtbuffer (char *own_buf)
+cmd_bigqtbuffer_circular (char *own_buf)
 {
   ULONGEST val;
   char *packet = own_buf;
 
-  packet += strlen ("QTBuffer:");
+  packet += strlen ("QTBuffer:circular:");
 
-  if (strncmp ("circular:", packet, strlen ("circular:")) == 0)
-    {
-      packet += strlen ("circular:");
-      unpack_varlen_hex (packet, &val);
-      circular_trace_buffer = val;
-      trace_debug ("Trace buffer is now %s",
-		   circular_trace_buffer ? "circular" : "linear");
-      write_ok (own_buf);
-    }
-  else
-    write_enn (own_buf);
+  unpack_varlen_hex (packet, &val);
+  circular_trace_buffer = val;
+  trace_debug ("Trace buffer is now %s",
+	       circular_trace_buffer ? "circular" : "linear");
+  write_ok (own_buf);
 }
 
 static void
@@ -3930,9 +3924,9 @@ handle_tracepoint_general_set (char *packet)
       cmd_qtframe (packet);
       return 1;
     }
-  else if (strncmp ("QTBuffer:", packet, strlen ("QTBuffer:")) == 0)
+  else if (strncmp ("QTBuffer:circular:", packet, strlen ("QTBuffer:circular:")) == 0)
     {
-      cmd_bigqtbuffer (packet);
+      cmd_bigqtbuffer_circular (packet);
       return 1;
     }
   else if (strncmp ("QTNotes:", packet, strlen ("QTNotes:")) == 0)

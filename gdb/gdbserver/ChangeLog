@@ -1,3 +1,10 @@
+2012-02-24  Pedro Alves  <palves@redhat.com>
+
+	* tracepoint.c (cmd_bigqtbuffer): Rename as ...
+	(cmd_bigqtbuffer_circular): ... this.  Only handle
+	'QTBuffer:circular:'.
+	(handle_tracepoint_general_set): Adjust.
+
 2012-02-16  Yao Qi  <yao@codesourcery.com>
 
 	* inferiors.c: Move code to ...
