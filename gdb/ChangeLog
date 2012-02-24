@@ -1,5 +1,10 @@
 2012-02-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* remote.c (remote_watchpoint_addr_within_range): New function.
+	(init_remote_ops): Use it.
+
+2012-02-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* target.h (target_watchpoint_addr_within_range): Document macro.
 
 2012-02-24  Pedro Alves  <palves@redhat.com>

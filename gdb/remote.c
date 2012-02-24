@@ -7904,6 +7904,15 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type,
 		  _("remote_insert_watchpoint: reached end of function"));
 }
 
+static int
+remote_watchpoint_addr_within_range (struct target_ops *target, CORE_ADDR addr,
+				     CORE_ADDR start, int length)
+{
+  CORE_ADDR diff = remote_address_masked (addr - start);
+
+  return diff < length;
+}
+
 
 static int
 remote_remove_watchpoint (CORE_ADDR addr, int len, int type,
@@ -10775,6 +10784,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_remove_breakpoint = remote_remove_breakpoint;
   remote_ops.to_stopped_by_watchpoint = remote_stopped_by_watchpoint;
   remote_ops.to_stopped_data_address = remote_stopped_data_address;
+  remote_ops.to_watchpoint_addr_within_range =
+    remote_watchpoint_addr_within_range;
   remote_ops.to_can_use_hw_breakpoint = remote_check_watch_resources;
   remote_ops.to_insert_hw_breakpoint = remote_insert_hw_breakpoint;
   remote_ops.to_remove_hw_breakpoint = remote_remove_hw_breakpoint;
