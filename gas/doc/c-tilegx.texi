@@ -218,21 +218,6 @@ shl16insli r0, r0, hw0(sym)
 This modifier is used to load bits 0-15 of the symbol's offset in the
 GOT entry corresponding to the symbol.
 
-@item hw1_got
-
-This modifier is used to load bits 16-31 of the symbol's offset in the
-GOT entry corresponding to the symbol.
-
-@item hw2_got
-
-This modifier is used to load bits 32-47 of the symbol's offset in the
-GOT entry corresponding to the symbol.
-
-@item hw3_got
-
-This modifier is used to load bits 48-63 of the symbol's offset in the
-GOT entry corresponding to the symbol.
-
 @item hw0_last_got
 
 This modifier yields the same value as @code{hw0_got}, but it also
@@ -240,13 +225,9 @@ checks that the value does not overflow.
 
 @item hw1_last_got
 
-This modifier yields the same value as @code{hw1_got}, but it also
-checks that the value does not overflow.
-
-@item hw2_last_got
-
-This modifier yields the same value as @code{hw2_got}, but it also
-checks that the value does not overflow.
+This modifier is used to load bits 16-31 of the symbol's offset in the
+GOT entry corresponding to the symbol, and it also checks that the
+value does not overflow.
 
 @item plt
 
@@ -267,24 +248,6 @@ This modifier is used to load bits 0-15 of the offset of the GOT entry
 of the symbol's TLS descriptor, to be used for general-dynamic TLS
 accesses.
 
-@item hw1_tls_gd
-
-This modifier is used to load bits 16-31 of the offset of the GOT
-entry of the symbol's TLS descriptor, to be used for general-dynamic
-TLS accesses.
-
-@item hw2_tls_gd
-
-This modifier is used to load bits 32-47 of the offset of the GOT
-entry of the symbol's TLS descriptor, to be used for general-dynamic
-TLS accesses.
-
-@item hw3_tls_gd
-
-This modifier is used to load bits 48-63 of the offset of the GOT
-entry of the symbol's TLS descriptor, to be used for general-dynamic
-TLS accesses.
-
 @item hw0_last_tls_gd
 
 This modifier yields the same value as @code{hw0_tls_gd}, but it also
@@ -292,37 +255,15 @@ checks that the value does not overflow.
 
 @item hw1_last_tls_gd
 
-This modifier yields the same value as @code{hw1_tls_gd}, but it also
-checks that the value does not overflow.
-
-@item hw2_last_tls_gd
-
-This modifier yields the same value as @code{hw2_tls_gd}, but it also
-checks that the value does not overflow.
+This modifier is used to load bits 16-31 of the offset of the GOT
+entry of the symbol's TLS descriptor, to be used for general-dynamic
+TLS accesses.  It also checks that the value does not overflow.
 
 @item hw0_tls_ie
 
 This modifier is used to load bits 0-15 of the offset of the GOT entry
 containing the offset of the symbol's address from the TCB, to be used
 for initial-exec TLS accesses.
-
-@item hw1_tls_ie
-
-This modifier is used to load bits 16-31 of the offset of the GOT
-entry containing the offset of the symbol's address from the TCB, to
-be used for initial-exec TLS accesses.
-
-@item hw2_tls_ie
-
-This modifier is used to load bits 32-47 of the offset of the GOT entry
-containing the offset of the symbol's address from the TCB, to be used
-for initial-exec TLS accesses.
-
-@item hw3_tls_ie
-
-This modifier is used to load bits 48-63 of the offset of the GOT
-entry containing the offset of the symbol's address from the TCB, to
-be used for initial-exec TLS accesses.
 
 @item hw0_last_tls_ie
 
@@ -331,13 +272,41 @@ checks that the value does not overflow.
 
 @item hw1_last_tls_ie
 
-This modifier yields the same value as @code{hw1_tls_ie}, but it also
+This modifier is used to load bits 16-31 of the offset of the GOT
+entry containing the offset of the symbol's address from the TCB, to
+be used for initial-exec TLS accesses.  It also checks that the value
+does not overflow.
+
+@item hw0_tls_le
+
+This modifier is used to load bits 0-15 of the offset of the symbol's
+address from the TCB, to be used for local-exec TLS accesses.
+
+@item hw0_last_tls_le
+
+This modifier yields the same value as @code{hw0_tls_le}, but it also
 checks that the value does not overflow.
 
-@item hw2_last_tls_ie
+@item hw1_last_tls_le
 
-This modifier yields the same value as @code{hw2_tls_ie}, but it also
-checks that the value does not overflow.
+This modifier is used to load bits 16-31 of the offset of the symbol's
+address from the TCB, to be used for local-exec TLS accesses.  It
+also checks that the value does not overflow.
+
+@item tls_gd_call
+
+This modifier is used to tag an instrution as the ``call'' part of a
+calling sequence for a TLS GD reference of its operand.
+
+@item tls_gd_add
+
+This modifier is used to tag an instruction as the ``add'' part of a
+calling sequence for a TLS GD reference of its operand.
+
+@item tls_ie_load
+
+This modifier is used to tag an instruction as the ``load'' part of a
+calling sequence for a TLS IE reference of its operand.
 
 @end table
 

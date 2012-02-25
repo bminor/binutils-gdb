@@ -41,7 +41,7 @@
 #include <stddef.h>
 #endif
 
-const struct tilegx_opcode tilegx_opcodes[334] =
+const struct tilegx_opcode tilegx_opcodes[336] =
 {
  { "bpt", TILEGX_OPC_BPT, 0x2, 0, TREG_ZERO, 0,
     { { 0, }, {  }, { 0, }, { 0, }, { 0, } },
@@ -100,8 +100,46 @@ const struct tilegx_opcode tilegx_opcodes[334] =
     }
 #endif
   },
+  { "ld4s_tls", TILEGX_OPC_LD4S_TLS, 0x2, 3, TREG_ZERO, 1,
+    { { 0, }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
+#ifndef DISASM_ONLY
+    {
+      0ULL,
+      0xfffff80000000000ULL,
+      0ULL,
+      0ULL,
+      0ULL
+    },
+    {
+      -1ULL,
+      0x1858000000000000ULL,
+      -1ULL,
+      -1ULL,
+      -1ULL
+    }
+#endif
+  },
+  { "ld_tls", TILEGX_OPC_LD_TLS, 0x2, 3, TREG_ZERO, 1,
+    { { 0, }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
+#ifndef DISASM_ONLY
+    {
+      0ULL,
+      0xfffff80000000000ULL,
+      0ULL,
+      0ULL,
+      0ULL
+    },
+    {
+      -1ULL,
+      0x18a0000000000000ULL,
+      -1ULL,
+      -1ULL,
+      -1ULL
+    }
+#endif
+  },
   { "move", TILEGX_OPC_MOVE, 0xf, 2, TREG_ZERO, 1,
-    { { 6, 7 }, { 8, 9 }, { 10, 11 }, { 12, 13 }, { 0, } },
+    { { 8, 9 }, { 6, 7 }, { 10, 11 }, { 12, 13 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -120,7 +158,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "movei", TILEGX_OPC_MOVEI, 0xf, 2, TREG_ZERO, 1,
-    { { 6, 0 }, { 8, 1 }, { 10, 2 }, { 12, 3 }, { 0, } },
+    { { 8, 0 }, { 6, 1 }, { 10, 2 }, { 12, 3 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00fc0ULL,
@@ -139,7 +177,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "moveli", TILEGX_OPC_MOVELI, 0x3, 2, TREG_ZERO, 1,
-    { { 6, 4 }, { 8, 5 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 4 }, { 6, 5 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc000000070000fc0ULL,
@@ -158,7 +196,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "prefetch", TILEGX_OPC_PREFETCH, 0x12, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 14 } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -291,7 +329,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "prefetch_l1", TILEGX_OPC_PREFETCH_L1, 0x12, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 14 } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -310,7 +348,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "prefetch_l1_fault", TILEGX_OPC_PREFETCH_L1_FAULT, 0x12, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 14 } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -329,7 +367,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "prefetch_l2", TILEGX_OPC_PREFETCH_L2, 0x12, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 14 } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -348,7 +386,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "prefetch_l2_fault", TILEGX_OPC_PREFETCH_L2_FAULT, 0x12, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 14 } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -367,7 +405,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "prefetch_l3", TILEGX_OPC_PREFETCH_L3, 0x12, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 14 } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -386,7 +424,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "prefetch_l3_fault", TILEGX_OPC_PREFETCH_L3_FAULT, 0x12, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 14 } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -424,7 +462,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "add", TILEGX_OPC_ADD, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -443,7 +481,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "addi", TILEGX_OPC_ADDI, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 10, 11, 2 }, { 12, 13, 3 }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 10, 11, 2 }, { 12, 13, 3 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -462,7 +500,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "addli", TILEGX_OPC_ADDLI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 4 }, { 8, 9, 5 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 4 }, { 6, 7, 5 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc000000070000000ULL,
@@ -481,7 +519,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "addx", TILEGX_OPC_ADDX, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -500,7 +538,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "addxi", TILEGX_OPC_ADDXI, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 10, 11, 2 }, { 12, 13, 3 }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 10, 11, 2 }, { 12, 13, 3 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -519,7 +557,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "addxli", TILEGX_OPC_ADDXLI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 4 }, { 8, 9, 5 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 4 }, { 6, 7, 5 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc000000070000000ULL,
@@ -538,7 +576,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "addxsc", TILEGX_OPC_ADDXSC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -557,7 +595,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "and", TILEGX_OPC_AND, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -576,7 +614,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "andi", TILEGX_OPC_ANDI, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 10, 11, 2 }, { 12, 13, 3 }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 10, 11, 2 }, { 12, 13, 3 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -595,7 +633,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "beqz", TILEGX_OPC_BEQZ, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -614,7 +652,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "beqzt", TILEGX_OPC_BEQZT, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -633,7 +671,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bfexts", TILEGX_OPC_BFEXTS, 0x1, 4, TREG_ZERO, 1,
-    { { 6, 7, 21, 22 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 21, 22 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007f000000ULL,
@@ -652,7 +690,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bfextu", TILEGX_OPC_BFEXTU, 0x1, 4, TREG_ZERO, 1,
-    { { 6, 7, 21, 22 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 21, 22 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007f000000ULL,
@@ -671,7 +709,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bfins", TILEGX_OPC_BFINS, 0x1, 4, TREG_ZERO, 1,
-    { { 23, 7, 21, 22 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 21, 22 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007f000000ULL,
@@ -690,7 +728,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bgez", TILEGX_OPC_BGEZ, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -709,7 +747,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bgezt", TILEGX_OPC_BGEZT, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -728,7 +766,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bgtz", TILEGX_OPC_BGTZ, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -747,7 +785,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bgtzt", TILEGX_OPC_BGTZT, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -766,7 +804,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "blbc", TILEGX_OPC_BLBC, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -785,7 +823,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "blbct", TILEGX_OPC_BLBCT, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -804,7 +842,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "blbs", TILEGX_OPC_BLBS, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -823,7 +861,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "blbst", TILEGX_OPC_BLBST, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -842,7 +880,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "blez", TILEGX_OPC_BLEZ, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -861,7 +899,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "blezt", TILEGX_OPC_BLEZT, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -880,7 +918,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bltz", TILEGX_OPC_BLTZ, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -899,7 +937,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bltzt", TILEGX_OPC_BLTZT, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -918,7 +956,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bnez", TILEGX_OPC_BNEZ, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -937,7 +975,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "bnezt", TILEGX_OPC_BNEZT, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 20 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 20 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -956,7 +994,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "clz", TILEGX_OPC_CLZ, 0x5, 2, TREG_ZERO, 1,
-    { { 6, 7 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
+    { { 8, 9 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -975,7 +1013,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmoveqz", TILEGX_OPC_CMOVEQZ, 0x5, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -994,7 +1032,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmovnez", TILEGX_OPC_CMOVNEZ, 0x5, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1013,7 +1051,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmpeq", TILEGX_OPC_CMPEQ, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1032,7 +1070,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmpeqi", TILEGX_OPC_CMPEQI, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 10, 11, 2 }, { 12, 13, 3 }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 10, 11, 2 }, { 12, 13, 3 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -1051,7 +1089,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmpexch", TILEGX_OPC_CMPEXCH, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1070,7 +1108,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmpexch4", TILEGX_OPC_CMPEXCH4, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1089,7 +1127,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmples", TILEGX_OPC_CMPLES, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1108,7 +1146,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmpleu", TILEGX_OPC_CMPLEU, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1127,7 +1165,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmplts", TILEGX_OPC_CMPLTS, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1146,7 +1184,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmpltsi", TILEGX_OPC_CMPLTSI, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 10, 11, 2 }, { 12, 13, 3 }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 10, 11, 2 }, { 12, 13, 3 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -1165,7 +1203,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmpltu", TILEGX_OPC_CMPLTU, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1184,7 +1222,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmpltui", TILEGX_OPC_CMPLTUI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -1203,7 +1241,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmpne", TILEGX_OPC_CMPNE, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1222,7 +1260,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmul", TILEGX_OPC_CMUL, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1241,7 +1279,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmula", TILEGX_OPC_CMULA, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1260,7 +1298,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmulaf", TILEGX_OPC_CMULAF, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1279,7 +1317,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmulf", TILEGX_OPC_CMULF, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1298,7 +1336,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmulfr", TILEGX_OPC_CMULFR, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1317,7 +1355,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmulh", TILEGX_OPC_CMULH, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1336,7 +1374,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "cmulhr", TILEGX_OPC_CMULHR, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1355,7 +1393,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "crc32_32", TILEGX_OPC_CRC32_32, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1374,7 +1412,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "crc32_8", TILEGX_OPC_CRC32_8, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1393,7 +1431,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ctz", TILEGX_OPC_CTZ, 0x5, 2, TREG_ZERO, 1,
-    { { 6, 7 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
+    { { 8, 9 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -1412,7 +1450,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "dblalign", TILEGX_OPC_DBLALIGN, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1431,7 +1469,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "dblalign2", TILEGX_OPC_DBLALIGN2, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1450,7 +1488,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "dblalign4", TILEGX_OPC_DBLALIGN4, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1469,7 +1507,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "dblalign6", TILEGX_OPC_DBLALIGN6, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1507,7 +1545,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "dtlbpr", TILEGX_OPC_DTLBPR, 0x2, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1526,7 +1564,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "exch", TILEGX_OPC_EXCH, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1545,7 +1583,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "exch4", TILEGX_OPC_EXCH4, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1564,7 +1602,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fdouble_add_flags", TILEGX_OPC_FDOUBLE_ADD_FLAGS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1583,7 +1621,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fdouble_addsub", TILEGX_OPC_FDOUBLE_ADDSUB, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1602,7 +1640,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fdouble_mul_flags", TILEGX_OPC_FDOUBLE_MUL_FLAGS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1621,7 +1659,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fdouble_pack1", TILEGX_OPC_FDOUBLE_PACK1, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1640,7 +1678,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fdouble_pack2", TILEGX_OPC_FDOUBLE_PACK2, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1659,7 +1697,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fdouble_sub_flags", TILEGX_OPC_FDOUBLE_SUB_FLAGS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1678,7 +1716,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fdouble_unpack_max", TILEGX_OPC_FDOUBLE_UNPACK_MAX, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1697,7 +1735,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fdouble_unpack_min", TILEGX_OPC_FDOUBLE_UNPACK_MIN, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1716,7 +1754,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fetchadd", TILEGX_OPC_FETCHADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1735,7 +1773,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fetchadd4", TILEGX_OPC_FETCHADD4, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1754,7 +1792,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fetchaddgez", TILEGX_OPC_FETCHADDGEZ, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1773,7 +1811,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fetchaddgez4", TILEGX_OPC_FETCHADDGEZ4, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1792,7 +1830,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fetchand", TILEGX_OPC_FETCHAND, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1811,7 +1849,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fetchand4", TILEGX_OPC_FETCHAND4, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1830,7 +1868,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fetchor", TILEGX_OPC_FETCHOR, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1849,7 +1887,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fetchor4", TILEGX_OPC_FETCHOR4, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1868,7 +1906,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "finv", TILEGX_OPC_FINV, 0x2, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1887,7 +1925,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "flush", TILEGX_OPC_FLUSH, 0x2, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -1944,7 +1982,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fsingle_add1", TILEGX_OPC_FSINGLE_ADD1, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1963,7 +2001,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fsingle_addsub2", TILEGX_OPC_FSINGLE_ADDSUB2, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -1982,7 +2020,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fsingle_mul1", TILEGX_OPC_FSINGLE_MUL1, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -2001,7 +2039,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fsingle_mul2", TILEGX_OPC_FSINGLE_MUL2, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -2020,7 +2058,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fsingle_pack1", TILEGX_OPC_FSINGLE_PACK1, 0x5, 2, TREG_ZERO, 1,
-    { { 6, 7 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
+    { { 8, 9 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -2039,7 +2077,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fsingle_pack2", TILEGX_OPC_FSINGLE_PACK2, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -2058,7 +2096,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "fsingle_sub1", TILEGX_OPC_FSINGLE_SUB1, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -2077,7 +2115,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "icoh", TILEGX_OPC_ICOH, 0x2, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2115,7 +2153,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "inv", TILEGX_OPC_INV, 0x2, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2191,7 +2229,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "jalr", TILEGX_OPC_JALR, 0xa, 1, TREG_LR, 1,
-    { { 0, }, { 9 }, { 0, }, { 13 }, { 0, } },
+    { { 0, }, { 7 }, { 0, }, { 13 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2210,7 +2248,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "jalrp", TILEGX_OPC_JALRP, 0xa, 1, TREG_LR, 1,
-    { { 0, }, { 9 }, { 0, }, { 13 }, { 0, } },
+    { { 0, }, { 7 }, { 0, }, { 13 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2229,7 +2267,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "jr", TILEGX_OPC_JR, 0xa, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 13 }, { 0, } },
+    { { 0, }, { 7 }, { 0, }, { 13 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2248,7 +2286,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "jrp", TILEGX_OPC_JRP, 0xa, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 13 }, { 0, } },
+    { { 0, }, { 7 }, { 0, }, { 13 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2267,7 +2305,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld", TILEGX_OPC_LD, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 26, 14 } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 26, 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2286,7 +2324,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld1s", TILEGX_OPC_LD1S, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 26, 14 } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 26, 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2305,7 +2343,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld1s_add", TILEGX_OPC_LD1S_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2324,7 +2362,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld1u", TILEGX_OPC_LD1U, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 26, 14 } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 26, 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2343,7 +2381,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld1u_add", TILEGX_OPC_LD1U_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2362,7 +2400,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld2s", TILEGX_OPC_LD2S, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 26, 14 } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 26, 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2381,7 +2419,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld2s_add", TILEGX_OPC_LD2S_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2400,7 +2438,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld2u", TILEGX_OPC_LD2U, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 26, 14 } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 26, 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2419,7 +2457,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld2u_add", TILEGX_OPC_LD2U_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2438,7 +2476,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld4s", TILEGX_OPC_LD4S, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 26, 14 } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 26, 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2457,7 +2495,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld4s_add", TILEGX_OPC_LD4S_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2476,7 +2514,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld4u", TILEGX_OPC_LD4U, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 26, 14 } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 26, 14 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2495,7 +2533,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld4u_add", TILEGX_OPC_LD4U_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2514,7 +2552,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ld_add", TILEGX_OPC_LD_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2533,7 +2571,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldna", TILEGX_OPC_LDNA, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2552,7 +2590,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldna_add", TILEGX_OPC_LDNA_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2571,7 +2609,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt", TILEGX_OPC_LDNT, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2590,7 +2628,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt1s", TILEGX_OPC_LDNT1S, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2609,7 +2647,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt1s_add", TILEGX_OPC_LDNT1S_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2628,7 +2666,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt1u", TILEGX_OPC_LDNT1U, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2647,7 +2685,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt1u_add", TILEGX_OPC_LDNT1U_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2666,7 +2704,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt2s", TILEGX_OPC_LDNT2S, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2685,7 +2723,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt2s_add", TILEGX_OPC_LDNT2S_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2704,7 +2742,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt2u", TILEGX_OPC_LDNT2U, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2723,7 +2761,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt2u_add", TILEGX_OPC_LDNT2U_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2742,7 +2780,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt4s", TILEGX_OPC_LDNT4S, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2761,7 +2799,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt4s_add", TILEGX_OPC_LDNT4S_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2780,7 +2818,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt4u", TILEGX_OPC_LDNT4U, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2799,7 +2837,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt4u_add", TILEGX_OPC_LDNT4U_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2818,7 +2856,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ldnt_add", TILEGX_OPC_LDNT_ADD, 0x2, 3, TREG_ZERO, 1,
-    { { 0, }, { 8, 15, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 15, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2837,7 +2875,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "lnk", TILEGX_OPC_LNK, 0xa, 1, TREG_ZERO, 1,
-    { { 0, }, { 8 }, { 0, }, { 12 }, { 0, } },
+    { { 0, }, { 6 }, { 0, }, { 12 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2875,7 +2913,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mfspr", TILEGX_OPC_MFSPR, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 8, 27 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 6, 27 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2894,7 +2932,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mm", TILEGX_OPC_MM, 0x1, 4, TREG_ZERO, 1,
-    { { 23, 7, 21, 22 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 21, 22 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007f000000ULL,
@@ -2913,7 +2951,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mnz", TILEGX_OPC_MNZ, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -2932,7 +2970,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mtspr", TILEGX_OPC_MTSPR, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 28, 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 28, 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -2951,7 +2989,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mul_hs_hs", TILEGX_OPC_MUL_HS_HS, 0x5, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 10, 11, 18 }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 10, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -2970,7 +3008,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mul_hs_hu", TILEGX_OPC_MUL_HS_HU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -2989,7 +3027,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mul_hs_ls", TILEGX_OPC_MUL_HS_LS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3008,7 +3046,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mul_hs_lu", TILEGX_OPC_MUL_HS_LU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3027,7 +3065,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mul_hu_hu", TILEGX_OPC_MUL_HU_HU, 0x5, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 10, 11, 18 }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 10, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3046,7 +3084,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mul_hu_ls", TILEGX_OPC_MUL_HU_LS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3065,7 +3103,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mul_hu_lu", TILEGX_OPC_MUL_HU_LU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3084,7 +3122,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mul_ls_ls", TILEGX_OPC_MUL_LS_LS, 0x5, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 10, 11, 18 }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 10, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3103,7 +3141,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mul_ls_lu", TILEGX_OPC_MUL_LS_LU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3122,7 +3160,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mul_lu_lu", TILEGX_OPC_MUL_LU_LU, 0x5, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 10, 11, 18 }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 10, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3141,7 +3179,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mula_hs_hs", TILEGX_OPC_MULA_HS_HS, 0x5, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3160,7 +3198,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mula_hs_hu", TILEGX_OPC_MULA_HS_HU, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3179,7 +3217,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mula_hs_ls", TILEGX_OPC_MULA_HS_LS, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3198,7 +3236,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mula_hs_lu", TILEGX_OPC_MULA_HS_LU, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3217,7 +3255,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mula_hu_hu", TILEGX_OPC_MULA_HU_HU, 0x5, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3236,7 +3274,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mula_hu_ls", TILEGX_OPC_MULA_HU_LS, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3255,7 +3293,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mula_hu_lu", TILEGX_OPC_MULA_HU_LU, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3274,7 +3312,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mula_ls_ls", TILEGX_OPC_MULA_LS_LS, 0x5, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3293,7 +3331,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mula_ls_lu", TILEGX_OPC_MULA_LS_LU, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3312,7 +3350,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mula_lu_lu", TILEGX_OPC_MULA_LU_LU, 0x5, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3331,7 +3369,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mulax", TILEGX_OPC_MULAX, 0x5, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 24, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3350,7 +3388,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mulx", TILEGX_OPC_MULX, 0x5, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 10, 11, 18 }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 10, 11, 18 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3369,7 +3407,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "mz", TILEGX_OPC_MZ, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3426,7 +3464,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "nor", TILEGX_OPC_NOR, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3445,7 +3483,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "or", TILEGX_OPC_OR, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3464,7 +3502,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "ori", TILEGX_OPC_ORI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -3483,7 +3521,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "pcnt", TILEGX_OPC_PCNT, 0x5, 2, TREG_ZERO, 1,
-    { { 6, 7 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
+    { { 8, 9 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -3502,7 +3540,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "revbits", TILEGX_OPC_REVBITS, 0x5, 2, TREG_ZERO, 1,
-    { { 6, 7 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
+    { { 8, 9 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -3521,7 +3559,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "revbytes", TILEGX_OPC_REVBYTES, 0x5, 2, TREG_ZERO, 1,
-    { { 6, 7 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
+    { { 8, 9 }, { 0, }, { 10, 11 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -3540,7 +3578,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "rotl", TILEGX_OPC_ROTL, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3559,7 +3597,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "rotli", TILEGX_OPC_ROTLI, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 10, 11, 31 }, { 12, 13, 32 }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 10, 11, 31 }, { 12, 13, 32 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3578,7 +3616,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shl", TILEGX_OPC_SHL, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3597,7 +3635,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shl16insli", TILEGX_OPC_SHL16INSLI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 4 }, { 8, 9, 5 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 4 }, { 6, 7, 5 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc000000070000000ULL,
@@ -3616,7 +3654,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shl1add", TILEGX_OPC_SHL1ADD, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3635,7 +3673,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shl1addx", TILEGX_OPC_SHL1ADDX, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3654,7 +3692,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shl2add", TILEGX_OPC_SHL2ADD, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3673,7 +3711,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shl2addx", TILEGX_OPC_SHL2ADDX, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3692,7 +3730,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shl3add", TILEGX_OPC_SHL3ADD, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3711,7 +3749,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shl3addx", TILEGX_OPC_SHL3ADDX, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3730,7 +3768,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shli", TILEGX_OPC_SHLI, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 10, 11, 31 }, { 12, 13, 32 }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 10, 11, 31 }, { 12, 13, 32 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3749,7 +3787,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shlx", TILEGX_OPC_SHLX, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3768,7 +3806,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shlxi", TILEGX_OPC_SHLXI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3787,7 +3825,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shrs", TILEGX_OPC_SHRS, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3806,7 +3844,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shrsi", TILEGX_OPC_SHRSI, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 10, 11, 31 }, { 12, 13, 32 }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 10, 11, 31 }, { 12, 13, 32 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3825,7 +3863,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shru", TILEGX_OPC_SHRU, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3844,7 +3882,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shrui", TILEGX_OPC_SHRUI, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 10, 11, 31 }, { 12, 13, 32 }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 10, 11, 31 }, { 12, 13, 32 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3863,7 +3901,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shrux", TILEGX_OPC_SHRUX, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3882,7 +3920,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shruxi", TILEGX_OPC_SHRUXI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3901,7 +3939,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "shufflebytes", TILEGX_OPC_SHUFFLEBYTES, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -3920,7 +3958,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "st", TILEGX_OPC_ST, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 17 }, { 0, }, { 0, }, { 14, 33 } },
+    { { 0, }, { 7, 17 }, { 0, }, { 0, }, { 14, 33 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -3939,7 +3977,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "st1", TILEGX_OPC_ST1, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 17 }, { 0, }, { 0, }, { 14, 33 } },
+    { { 0, }, { 7, 17 }, { 0, }, { 0, }, { 14, 33 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -3977,7 +4015,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "st2", TILEGX_OPC_ST2, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 17 }, { 0, }, { 0, }, { 14, 33 } },
+    { { 0, }, { 7, 17 }, { 0, }, { 0, }, { 14, 33 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -4015,7 +4053,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "st4", TILEGX_OPC_ST4, 0x12, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 17 }, { 0, }, { 0, }, { 14, 33 } },
+    { { 0, }, { 7, 17 }, { 0, }, { 0, }, { 14, 33 } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -4072,7 +4110,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "stnt", TILEGX_OPC_STNT, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -4091,7 +4129,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "stnt1", TILEGX_OPC_STNT1, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -4129,7 +4167,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "stnt2", TILEGX_OPC_STNT2, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -4167,7 +4205,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "stnt4", TILEGX_OPC_STNT4, 0x2, 2, TREG_ZERO, 1,
-    { { 0, }, { 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -4224,7 +4262,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "sub", TILEGX_OPC_SUB, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4243,7 +4281,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "subx", TILEGX_OPC_SUBX, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4262,7 +4300,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "subxsc", TILEGX_OPC_SUBXSC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4357,7 +4395,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "tblidxb0", TILEGX_OPC_TBLIDXB0, 0x5, 2, TREG_ZERO, 1,
-    { { 23, 7 }, { 0, }, { 24, 11 }, { 0, }, { 0, } },
+    { { 23, 9 }, { 0, }, { 24, 11 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -4376,7 +4414,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "tblidxb1", TILEGX_OPC_TBLIDXB1, 0x5, 2, TREG_ZERO, 1,
-    { { 23, 7 }, { 0, }, { 24, 11 }, { 0, }, { 0, } },
+    { { 23, 9 }, { 0, }, { 24, 11 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -4395,7 +4433,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "tblidxb2", TILEGX_OPC_TBLIDXB2, 0x5, 2, TREG_ZERO, 1,
-    { { 23, 7 }, { 0, }, { 24, 11 }, { 0, }, { 0, } },
+    { { 23, 9 }, { 0, }, { 24, 11 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -4414,7 +4452,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "tblidxb3", TILEGX_OPC_TBLIDXB3, 0x5, 2, TREG_ZERO, 1,
-    { { 23, 7 }, { 0, }, { 24, 11 }, { 0, }, { 0, } },
+    { { 23, 9 }, { 0, }, { 24, 11 }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffff000ULL,
@@ -4433,7 +4471,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1add", TILEGX_OPC_V1ADD, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4452,7 +4490,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1addi", TILEGX_OPC_V1ADDI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -4471,7 +4509,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1adduc", TILEGX_OPC_V1ADDUC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4490,7 +4528,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1adiffu", TILEGX_OPC_V1ADIFFU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4509,7 +4547,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1avgu", TILEGX_OPC_V1AVGU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4528,7 +4566,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1cmpeq", TILEGX_OPC_V1CMPEQ, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4547,7 +4585,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1cmpeqi", TILEGX_OPC_V1CMPEQI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -4566,7 +4604,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1cmples", TILEGX_OPC_V1CMPLES, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4585,7 +4623,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1cmpleu", TILEGX_OPC_V1CMPLEU, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4604,7 +4642,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1cmplts", TILEGX_OPC_V1CMPLTS, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4623,7 +4661,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1cmpltsi", TILEGX_OPC_V1CMPLTSI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -4642,7 +4680,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1cmpltu", TILEGX_OPC_V1CMPLTU, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4661,7 +4699,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1cmpltui", TILEGX_OPC_V1CMPLTUI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -4680,7 +4718,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1cmpne", TILEGX_OPC_V1CMPNE, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4699,7 +4737,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1ddotpu", TILEGX_OPC_V1DDOTPU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4718,7 +4756,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1ddotpua", TILEGX_OPC_V1DDOTPUA, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4737,7 +4775,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1ddotpus", TILEGX_OPC_V1DDOTPUS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4756,7 +4794,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1ddotpusa", TILEGX_OPC_V1DDOTPUSA, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4775,7 +4813,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1dotp", TILEGX_OPC_V1DOTP, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4794,7 +4832,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1dotpa", TILEGX_OPC_V1DOTPA, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4813,7 +4851,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1dotpu", TILEGX_OPC_V1DOTPU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4832,7 +4870,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1dotpua", TILEGX_OPC_V1DOTPUA, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4851,7 +4889,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1dotpus", TILEGX_OPC_V1DOTPUS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4870,7 +4908,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1dotpusa", TILEGX_OPC_V1DOTPUSA, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4889,7 +4927,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1int_h", TILEGX_OPC_V1INT_H, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4908,7 +4946,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1int_l", TILEGX_OPC_V1INT_L, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4927,7 +4965,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1maxu", TILEGX_OPC_V1MAXU, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4946,7 +4984,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1maxui", TILEGX_OPC_V1MAXUI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -4965,7 +5003,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1minu", TILEGX_OPC_V1MINU, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -4984,7 +5022,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1minui", TILEGX_OPC_V1MINUI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -5003,7 +5041,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1mnz", TILEGX_OPC_V1MNZ, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5022,7 +5060,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1multu", TILEGX_OPC_V1MULTU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5041,7 +5079,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1mulu", TILEGX_OPC_V1MULU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5060,7 +5098,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1mulus", TILEGX_OPC_V1MULUS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5079,7 +5117,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1mz", TILEGX_OPC_V1MZ, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5098,7 +5136,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1sadau", TILEGX_OPC_V1SADAU, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5117,7 +5155,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1sadu", TILEGX_OPC_V1SADU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5136,7 +5174,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1shl", TILEGX_OPC_V1SHL, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5155,7 +5193,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1shli", TILEGX_OPC_V1SHLI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5174,7 +5212,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1shrs", TILEGX_OPC_V1SHRS, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5193,7 +5231,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1shrsi", TILEGX_OPC_V1SHRSI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5212,7 +5250,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1shru", TILEGX_OPC_V1SHRU, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5231,7 +5269,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1shrui", TILEGX_OPC_V1SHRUI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5250,7 +5288,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1sub", TILEGX_OPC_V1SUB, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5269,7 +5307,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v1subuc", TILEGX_OPC_V1SUBUC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5288,7 +5326,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2add", TILEGX_OPC_V2ADD, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5307,7 +5345,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2addi", TILEGX_OPC_V2ADDI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -5326,7 +5364,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2addsc", TILEGX_OPC_V2ADDSC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5345,7 +5383,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2adiffs", TILEGX_OPC_V2ADIFFS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5364,7 +5402,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2avgs", TILEGX_OPC_V2AVGS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5383,7 +5421,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2cmpeq", TILEGX_OPC_V2CMPEQ, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5402,7 +5440,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2cmpeqi", TILEGX_OPC_V2CMPEQI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -5421,7 +5459,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2cmples", TILEGX_OPC_V2CMPLES, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5440,7 +5478,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2cmpleu", TILEGX_OPC_V2CMPLEU, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5459,7 +5497,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2cmplts", TILEGX_OPC_V2CMPLTS, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5478,7 +5516,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2cmpltsi", TILEGX_OPC_V2CMPLTSI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -5497,7 +5535,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2cmpltu", TILEGX_OPC_V2CMPLTU, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5516,7 +5554,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2cmpltui", TILEGX_OPC_V2CMPLTUI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -5535,7 +5573,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2cmpne", TILEGX_OPC_V2CMPNE, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5554,7 +5592,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2dotp", TILEGX_OPC_V2DOTP, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5573,7 +5611,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2dotpa", TILEGX_OPC_V2DOTPA, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5592,7 +5630,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2int_h", TILEGX_OPC_V2INT_H, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5611,7 +5649,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2int_l", TILEGX_OPC_V2INT_L, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5630,7 +5668,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2maxs", TILEGX_OPC_V2MAXS, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5649,7 +5687,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2maxsi", TILEGX_OPC_V2MAXSI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -5668,7 +5706,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2mins", TILEGX_OPC_V2MINS, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5687,7 +5725,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2minsi", TILEGX_OPC_V2MINSI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -5706,7 +5744,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2mnz", TILEGX_OPC_V2MNZ, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5725,7 +5763,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2mulfsc", TILEGX_OPC_V2MULFSC, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5744,7 +5782,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2muls", TILEGX_OPC_V2MULS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5763,7 +5801,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2mults", TILEGX_OPC_V2MULTS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5782,7 +5820,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2mz", TILEGX_OPC_V2MZ, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5801,7 +5839,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2packh", TILEGX_OPC_V2PACKH, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5820,7 +5858,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2packl", TILEGX_OPC_V2PACKL, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5839,7 +5877,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2packuc", TILEGX_OPC_V2PACKUC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5858,7 +5896,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2sadas", TILEGX_OPC_V2SADAS, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5877,7 +5915,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2sadau", TILEGX_OPC_V2SADAU, 0x1, 3, TREG_ZERO, 1,
-    { { 23, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 23, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5896,7 +5934,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2sads", TILEGX_OPC_V2SADS, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5915,7 +5953,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2sadu", TILEGX_OPC_V2SADU, 0x1, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 0, }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5934,7 +5972,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2shl", TILEGX_OPC_V2SHL, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5953,7 +5991,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2shli", TILEGX_OPC_V2SHLI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5972,7 +6010,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2shlsc", TILEGX_OPC_V2SHLSC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -5991,7 +6029,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2shrs", TILEGX_OPC_V2SHRS, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6010,7 +6048,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2shrsi", TILEGX_OPC_V2SHRSI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6029,7 +6067,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2shru", TILEGX_OPC_V2SHRU, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6048,7 +6086,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2shrui", TILEGX_OPC_V2SHRUI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 29 }, { 8, 9, 30 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 29 }, { 6, 7, 30 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6067,7 +6105,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2sub", TILEGX_OPC_V2SUB, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6086,7 +6124,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v2subsc", TILEGX_OPC_V2SUBSC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6105,7 +6143,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4add", TILEGX_OPC_V4ADD, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6124,7 +6162,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4addsc", TILEGX_OPC_V4ADDSC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6143,7 +6181,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4int_h", TILEGX_OPC_V4INT_H, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6162,7 +6200,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4int_l", TILEGX_OPC_V4INT_L, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6181,7 +6219,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4packsc", TILEGX_OPC_V4PACKSC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6200,7 +6238,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4shl", TILEGX_OPC_V4SHL, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6219,7 +6257,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4shlsc", TILEGX_OPC_V4SHLSC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6238,7 +6276,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4shrs", TILEGX_OPC_V4SHRS, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6257,7 +6295,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4shru", TILEGX_OPC_V4SHRU, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6276,7 +6314,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4sub", TILEGX_OPC_V4SUB, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6295,7 +6333,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "v4subsc", TILEGX_OPC_V4SUBSC, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6314,7 +6352,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "wh64", TILEGX_OPC_WH64, 0x2, 1, TREG_ZERO, 1,
-    { { 0, }, { 9 }, { 0, }, { 0, }, { 0, } },
+    { { 0, }, { 7 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0ULL,
@@ -6333,7 +6371,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "xor", TILEGX_OPC_XOR, 0xf, 3, TREG_ZERO, 1,
-    { { 6, 7, 16 }, { 8, 9, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
+    { { 8, 9, 16 }, { 6, 7, 17 }, { 10, 11, 18 }, { 12, 13, 19 }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ffc0000ULL,
@@ -6352,7 +6390,7 @@ const struct tilegx_opcode tilegx_opcodes[334] =
 #endif
   },
   { "xori", TILEGX_OPC_XORI, 0x3, 3, TREG_ZERO, 1,
-    { { 6, 7, 0 }, { 8, 9, 1 }, { 0, }, { 0, }, { 0, } },
+    { { 8, 9, 0 }, { 6, 7, 1 }, { 0, }, { 0, }, { 0, } },
 #ifndef DISASM_ONLY
     {
       0xc00000007ff00000ULL,
@@ -6672,7 +6710,7 @@ static const unsigned short decode_X0_fsm[936] =
   TILEGX_OPC_INFOL,
 };
 
-static const unsigned short decode_X1_fsm[1206] =
+static const unsigned short decode_X1_fsm[1266] =
 {
   BITFIELD(53, 9) /* index 0 */,
   CHILD(513), CHILD(513), CHILD(513), CHILD(513), CHILD(513), CHILD(513),
@@ -6718,8 +6756,8 @@ static const unsigned short decode_X1_fsm[1206] =
   TILEGX_OPC_BLEZT, TILEGX_OPC_BLEZ, TILEGX_OPC_BLEZ, TILEGX_OPC_BLTZT,
   TILEGX_OPC_BLTZT, TILEGX_OPC_BLTZ, TILEGX_OPC_BLTZ, TILEGX_OPC_BNEZT,
   TILEGX_OPC_BNEZT, TILEGX_OPC_BNEZ, TILEGX_OPC_BNEZ, CHILD(528), CHILD(578),
-  CHILD(598), CHILD(663), CHILD(683), CHILD(688), CHILD(693), CHILD(698),
-  CHILD(703), CHILD(708), CHILD(713), CHILD(718), TILEGX_OPC_NONE,
+  CHILD(598), CHILD(703), CHILD(723), CHILD(728), CHILD(753), CHILD(758),
+  CHILD(763), CHILD(768), CHILD(773), CHILD(778), TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
@@ -6747,8 +6785,8 @@ static const unsigned short decode_X1_fsm[1206] =
   TILEGX_OPC_J, TILEGX_OPC_J, TILEGX_OPC_J, TILEGX_OPC_J, TILEGX_OPC_J,
   TILEGX_OPC_J, TILEGX_OPC_J, TILEGX_OPC_J, TILEGX_OPC_J, TILEGX_OPC_J,
   TILEGX_OPC_J, TILEGX_OPC_J, TILEGX_OPC_J, TILEGX_OPC_J, TILEGX_OPC_J,
-  CHILD(723), CHILD(740), CHILD(772), CHILD(789), CHILD(1108), CHILD(1125),
-  CHILD(1142), TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
+  CHILD(783), CHILD(800), CHILD(832), CHILD(849), CHILD(1168), CHILD(1185),
+  CHILD(1202), TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
@@ -6762,7 +6800,7 @@ static const unsigned short decode_X1_fsm[1206] =
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
-  TILEGX_OPC_NONE, TILEGX_OPC_NONE, CHILD(1159), TILEGX_OPC_NONE,
+  TILEGX_OPC_NONE, TILEGX_OPC_NONE, CHILD(1219), TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
@@ -6778,20 +6816,20 @@ static const unsigned short decode_X1_fsm[1206] =
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
-  TILEGX_OPC_NONE, TILEGX_OPC_NONE, CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176), CHILD(1176),
-  CHILD(1176),
+  TILEGX_OPC_NONE, TILEGX_OPC_NONE, CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236), CHILD(1236),
+  CHILD(1236),
   BITFIELD(37, 2) /* index 513 */,
   TILEGX_OPC_ADDLI, TILEGX_OPC_ADDLI, TILEGX_OPC_ADDLI, CHILD(518),
   BITFIELD(39, 2) /* index 518 */,
@@ -6851,68 +6889,96 @@ static const unsigned short decode_X1_fsm[1206] =
   TILEGX_OPC_LD2U_ADD, TILEGX_OPC_LD2U_ADD, TILEGX_OPC_LD2U_ADD,
   TILEGX_OPC_PREFETCH_ADD_L2,
   BITFIELD(31, 2) /* index 648 */,
-  TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD, CHILD(653),
-  BITFIELD(33, 2) /* index 653 */,
-  TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD, CHILD(658),
-  BITFIELD(35, 2) /* index 658 */,
-  TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD,
-  TILEGX_OPC_PREFETCH_ADD_L3_FAULT,
-  BITFIELD(51, 2) /* index 663 */,
-  CHILD(668), TILEGX_OPC_LDNT1S_ADD, TILEGX_OPC_LDNT1U_ADD,
-  TILEGX_OPC_LDNT2S_ADD,
-  BITFIELD(31, 2) /* index 668 */,
-  TILEGX_OPC_LD4U_ADD, TILEGX_OPC_LD4U_ADD, TILEGX_OPC_LD4U_ADD, CHILD(673),
+  CHILD(653), CHILD(653), CHILD(653), CHILD(673),
+  BITFIELD(43, 2) /* index 653 */,
+  CHILD(658), TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD,
+  BITFIELD(45, 2) /* index 658 */,
+  CHILD(663), TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD,
+  BITFIELD(47, 2) /* index 663 */,
+  CHILD(668), TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD,
+  BITFIELD(49, 2) /* index 668 */,
+  TILEGX_OPC_LD4S_TLS, TILEGX_OPC_LD4S_ADD, TILEGX_OPC_LD4S_ADD,
+  TILEGX_OPC_LD4S_ADD,
   BITFIELD(33, 2) /* index 673 */,
-  TILEGX_OPC_LD4U_ADD, TILEGX_OPC_LD4U_ADD, TILEGX_OPC_LD4U_ADD, CHILD(678),
+  CHILD(653), CHILD(653), CHILD(653), CHILD(678),
   BITFIELD(35, 2) /* index 678 */,
+  CHILD(653), CHILD(653), CHILD(653), CHILD(683),
+  BITFIELD(43, 2) /* index 683 */,
+  CHILD(688), TILEGX_OPC_PREFETCH_ADD_L3_FAULT,
+  TILEGX_OPC_PREFETCH_ADD_L3_FAULT, TILEGX_OPC_PREFETCH_ADD_L3_FAULT,
+  BITFIELD(45, 2) /* index 688 */,
+  CHILD(693), TILEGX_OPC_PREFETCH_ADD_L3_FAULT,
+  TILEGX_OPC_PREFETCH_ADD_L3_FAULT, TILEGX_OPC_PREFETCH_ADD_L3_FAULT,
+  BITFIELD(47, 2) /* index 693 */,
+  CHILD(698), TILEGX_OPC_PREFETCH_ADD_L3_FAULT,
+  TILEGX_OPC_PREFETCH_ADD_L3_FAULT, TILEGX_OPC_PREFETCH_ADD_L3_FAULT,
+  BITFIELD(49, 2) /* index 698 */,
+  TILEGX_OPC_LD4S_TLS, TILEGX_OPC_PREFETCH_ADD_L3_FAULT,
+  TILEGX_OPC_PREFETCH_ADD_L3_FAULT, TILEGX_OPC_PREFETCH_ADD_L3_FAULT,
+  BITFIELD(51, 2) /* index 703 */,
+  CHILD(708), TILEGX_OPC_LDNT1S_ADD, TILEGX_OPC_LDNT1U_ADD,
+  TILEGX_OPC_LDNT2S_ADD,
+  BITFIELD(31, 2) /* index 708 */,
+  TILEGX_OPC_LD4U_ADD, TILEGX_OPC_LD4U_ADD, TILEGX_OPC_LD4U_ADD, CHILD(713),
+  BITFIELD(33, 2) /* index 713 */,
+  TILEGX_OPC_LD4U_ADD, TILEGX_OPC_LD4U_ADD, TILEGX_OPC_LD4U_ADD, CHILD(718),
+  BITFIELD(35, 2) /* index 718 */,
   TILEGX_OPC_LD4U_ADD, TILEGX_OPC_LD4U_ADD, TILEGX_OPC_LD4U_ADD,
   TILEGX_OPC_PREFETCH_ADD_L3,
-  BITFIELD(51, 2) /* index 683 */,
+  BITFIELD(51, 2) /* index 723 */,
   TILEGX_OPC_LDNT2U_ADD, TILEGX_OPC_LDNT4S_ADD, TILEGX_OPC_LDNT4U_ADD,
   TILEGX_OPC_LDNT_ADD,
-  BITFIELD(51, 2) /* index 688 */,
-  TILEGX_OPC_LD_ADD, TILEGX_OPC_LDNA_ADD, TILEGX_OPC_MFSPR, TILEGX_OPC_MTSPR,
-  BITFIELD(51, 2) /* index 693 */,
+  BITFIELD(51, 2) /* index 728 */,
+  CHILD(733), TILEGX_OPC_LDNA_ADD, TILEGX_OPC_MFSPR, TILEGX_OPC_MTSPR,
+  BITFIELD(43, 2) /* index 733 */,
+  CHILD(738), TILEGX_OPC_LD_ADD, TILEGX_OPC_LD_ADD, TILEGX_OPC_LD_ADD,
+  BITFIELD(45, 2) /* index 738 */,
+  CHILD(743), TILEGX_OPC_LD_ADD, TILEGX_OPC_LD_ADD, TILEGX_OPC_LD_ADD,
+  BITFIELD(47, 2) /* index 743 */,
+  CHILD(748), TILEGX_OPC_LD_ADD, TILEGX_OPC_LD_ADD, TILEGX_OPC_LD_ADD,
+  BITFIELD(49, 2) /* index 748 */,
+  TILEGX_OPC_LD_TLS, TILEGX_OPC_LD_ADD, TILEGX_OPC_LD_ADD, TILEGX_OPC_LD_ADD,
+  BITFIELD(51, 2) /* index 753 */,
   TILEGX_OPC_ORI, TILEGX_OPC_ST1_ADD, TILEGX_OPC_ST2_ADD, TILEGX_OPC_ST4_ADD,
-  BITFIELD(51, 2) /* index 698 */,
+  BITFIELD(51, 2) /* index 758 */,
   TILEGX_OPC_STNT1_ADD, TILEGX_OPC_STNT2_ADD, TILEGX_OPC_STNT4_ADD,
   TILEGX_OPC_STNT_ADD,
-  BITFIELD(51, 2) /* index 703 */,
+  BITFIELD(51, 2) /* index 763 */,
   TILEGX_OPC_ST_ADD, TILEGX_OPC_V1ADDI, TILEGX_OPC_V1CMPEQI,
   TILEGX_OPC_V1CMPLTSI,
-  BITFIELD(51, 2) /* index 708 */,
+  BITFIELD(51, 2) /* index 768 */,
   TILEGX_OPC_V1CMPLTUI, TILEGX_OPC_V1MAXUI, TILEGX_OPC_V1MINUI,
   TILEGX_OPC_V2ADDI,
-  BITFIELD(51, 2) /* index 713 */,
+  BITFIELD(51, 2) /* index 773 */,
   TILEGX_OPC_V2CMPEQI, TILEGX_OPC_V2CMPLTSI, TILEGX_OPC_V2CMPLTUI,
   TILEGX_OPC_V2MAXSI,
-  BITFIELD(51, 2) /* index 718 */,
+  BITFIELD(51, 2) /* index 778 */,
   TILEGX_OPC_V2MINSI, TILEGX_OPC_XORI, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
-  BITFIELD(49, 4) /* index 723 */,
+  BITFIELD(49, 4) /* index 783 */,
   TILEGX_OPC_NONE, TILEGX_OPC_ADDXSC, TILEGX_OPC_ADDX, TILEGX_OPC_ADD,
   TILEGX_OPC_AND, TILEGX_OPC_CMPEQ, TILEGX_OPC_CMPEXCH4, TILEGX_OPC_CMPEXCH,
   TILEGX_OPC_CMPLES, TILEGX_OPC_CMPLEU, TILEGX_OPC_CMPLTS, TILEGX_OPC_CMPLTU,
   TILEGX_OPC_CMPNE, TILEGX_OPC_DBLALIGN2, TILEGX_OPC_DBLALIGN4,
   TILEGX_OPC_DBLALIGN6,
-  BITFIELD(49, 4) /* index 740 */,
+  BITFIELD(49, 4) /* index 800 */,
   TILEGX_OPC_EXCH4, TILEGX_OPC_EXCH, TILEGX_OPC_FETCHADD4,
   TILEGX_OPC_FETCHADDGEZ4, TILEGX_OPC_FETCHADDGEZ, TILEGX_OPC_FETCHADD,
   TILEGX_OPC_FETCHAND4, TILEGX_OPC_FETCHAND, TILEGX_OPC_FETCHOR4,
   TILEGX_OPC_FETCHOR, TILEGX_OPC_MNZ, TILEGX_OPC_MZ, TILEGX_OPC_NOR,
-  CHILD(757), TILEGX_OPC_ROTL, TILEGX_OPC_SHL1ADDX,
-  BITFIELD(43, 2) /* index 757 */,
-  TILEGX_OPC_OR, TILEGX_OPC_OR, TILEGX_OPC_OR, CHILD(762),
-  BITFIELD(45, 2) /* index 762 */,
-  TILEGX_OPC_OR, TILEGX_OPC_OR, TILEGX_OPC_OR, CHILD(767),
-  BITFIELD(47, 2) /* index 767 */,
+  CHILD(817), TILEGX_OPC_ROTL, TILEGX_OPC_SHL1ADDX,
+  BITFIELD(43, 2) /* index 817 */,
+  TILEGX_OPC_OR, TILEGX_OPC_OR, TILEGX_OPC_OR, CHILD(822),
+  BITFIELD(45, 2) /* index 822 */,
+  TILEGX_OPC_OR, TILEGX_OPC_OR, TILEGX_OPC_OR, CHILD(827),
+  BITFIELD(47, 2) /* index 827 */,
   TILEGX_OPC_OR, TILEGX_OPC_OR, TILEGX_OPC_OR, TILEGX_OPC_MOVE,
-  BITFIELD(49, 4) /* index 772 */,
+  BITFIELD(49, 4) /* index 832 */,
   TILEGX_OPC_SHL1ADD, TILEGX_OPC_SHL2ADDX, TILEGX_OPC_SHL2ADD,
   TILEGX_OPC_SHL3ADDX, TILEGX_OPC_SHL3ADD, TILEGX_OPC_SHLX, TILEGX_OPC_SHL,
   TILEGX_OPC_SHRS, TILEGX_OPC_SHRUX, TILEGX_OPC_SHRU, TILEGX_OPC_ST1,
   TILEGX_OPC_ST2, TILEGX_OPC_ST4, TILEGX_OPC_STNT1, TILEGX_OPC_STNT2,
   TILEGX_OPC_STNT4,
-  BITFIELD(46, 7) /* index 789 */,
+  BITFIELD(46, 7) /* index 849 */,
   TILEGX_OPC_STNT, TILEGX_OPC_STNT, TILEGX_OPC_STNT, TILEGX_OPC_STNT,
   TILEGX_OPC_STNT, TILEGX_OPC_STNT, TILEGX_OPC_STNT, TILEGX_OPC_STNT,
   TILEGX_OPC_ST, TILEGX_OPC_ST, TILEGX_OPC_ST, TILEGX_OPC_ST, TILEGX_OPC_ST,
@@ -6922,8 +6988,8 @@ static const unsigned short decode_X1_fsm[1206] =
   TILEGX_OPC_SUBX, TILEGX_OPC_SUBX, TILEGX_OPC_SUBX, TILEGX_OPC_SUBX,
   TILEGX_OPC_SUBX, TILEGX_OPC_SUBX, TILEGX_OPC_SUBX, TILEGX_OPC_SUB,
   TILEGX_OPC_SUB, TILEGX_OPC_SUB, TILEGX_OPC_SUB, TILEGX_OPC_SUB,
-  TILEGX_OPC_SUB, TILEGX_OPC_SUB, TILEGX_OPC_SUB, CHILD(918), CHILD(927),
-  CHILD(1006), CHILD(1090), CHILD(1099), TILEGX_OPC_NONE, TILEGX_OPC_NONE,
+  TILEGX_OPC_SUB, TILEGX_OPC_SUB, TILEGX_OPC_SUB, CHILD(978), CHILD(987),
+  CHILD(1066), CHILD(1150), CHILD(1159), TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_V1ADDUC, TILEGX_OPC_V1ADDUC, TILEGX_OPC_V1ADDUC,
   TILEGX_OPC_V1ADDUC, TILEGX_OPC_V1ADDUC, TILEGX_OPC_V1ADDUC,
   TILEGX_OPC_V1ADDUC, TILEGX_OPC_V1ADDUC, TILEGX_OPC_V1ADD, TILEGX_OPC_V1ADD,
@@ -6950,122 +7016,122 @@ static const unsigned short decode_X1_fsm[1206] =
   TILEGX_OPC_V1INT_L, TILEGX_OPC_V1INT_L, TILEGX_OPC_V1INT_L,
   TILEGX_OPC_V1INT_L, TILEGX_OPC_V1INT_L, TILEGX_OPC_V1INT_L,
   TILEGX_OPC_V1INT_L, TILEGX_OPC_V1INT_L,
-  BITFIELD(43, 3) /* index 918 */,
+  BITFIELD(43, 3) /* index 978 */,
   TILEGX_OPC_NONE, TILEGX_OPC_DRAIN, TILEGX_OPC_DTLBPR, TILEGX_OPC_FINV,
   TILEGX_OPC_FLUSHWB, TILEGX_OPC_FLUSH, TILEGX_OPC_FNOP, TILEGX_OPC_ICOH,
-  BITFIELD(43, 3) /* index 927 */,
-  CHILD(936), TILEGX_OPC_INV, TILEGX_OPC_IRET, TILEGX_OPC_JALRP,
-  TILEGX_OPC_JALR, TILEGX_OPC_JRP, TILEGX_OPC_JR, CHILD(991),
-  BITFIELD(31, 2) /* index 936 */,
-  CHILD(941), CHILD(966), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
-  BITFIELD(33, 2) /* index 941 */,
-  TILEGX_OPC_ILL, TILEGX_OPC_ILL, TILEGX_OPC_ILL, CHILD(946),
-  BITFIELD(35, 2) /* index 946 */,
-  TILEGX_OPC_ILL, CHILD(951), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
-  BITFIELD(37, 2) /* index 951 */,
-  TILEGX_OPC_ILL, CHILD(956), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
-  BITFIELD(39, 2) /* index 956 */,
-  TILEGX_OPC_ILL, CHILD(961), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
-  BITFIELD(41, 2) /* index 961 */,
+  BITFIELD(43, 3) /* index 987 */,
+  CHILD(996), TILEGX_OPC_INV, TILEGX_OPC_IRET, TILEGX_OPC_JALRP,
+  TILEGX_OPC_JALR, TILEGX_OPC_JRP, TILEGX_OPC_JR, CHILD(1051),
+  BITFIELD(31, 2) /* index 996 */,
+  CHILD(1001), CHILD(1026), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
+  BITFIELD(33, 2) /* index 1001 */,
+  TILEGX_OPC_ILL, TILEGX_OPC_ILL, TILEGX_OPC_ILL, CHILD(1006),
+  BITFIELD(35, 2) /* index 1006 */,
+  TILEGX_OPC_ILL, CHILD(1011), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
+  BITFIELD(37, 2) /* index 1011 */,
+  TILEGX_OPC_ILL, CHILD(1016), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
+  BITFIELD(39, 2) /* index 1016 */,
+  TILEGX_OPC_ILL, CHILD(1021), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
+  BITFIELD(41, 2) /* index 1021 */,
   TILEGX_OPC_ILL, TILEGX_OPC_ILL, TILEGX_OPC_BPT, TILEGX_OPC_ILL,
-  BITFIELD(33, 2) /* index 966 */,
-  TILEGX_OPC_ILL, TILEGX_OPC_ILL, TILEGX_OPC_ILL, CHILD(971),
-  BITFIELD(35, 2) /* index 971 */,
-  TILEGX_OPC_ILL, CHILD(976), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
-  BITFIELD(37, 2) /* index 976 */,
-  TILEGX_OPC_ILL, CHILD(981), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
-  BITFIELD(39, 2) /* index 981 */,
-  TILEGX_OPC_ILL, CHILD(986), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
-  BITFIELD(41, 2) /* index 986 */,
+  BITFIELD(33, 2) /* index 1026 */,
+  TILEGX_OPC_ILL, TILEGX_OPC_ILL, TILEGX_OPC_ILL, CHILD(1031),
+  BITFIELD(35, 2) /* index 1031 */,
+  TILEGX_OPC_ILL, CHILD(1036), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
+  BITFIELD(37, 2) /* index 1036 */,
+  TILEGX_OPC_ILL, CHILD(1041), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
+  BITFIELD(39, 2) /* index 1041 */,
+  TILEGX_OPC_ILL, CHILD(1046), TILEGX_OPC_ILL, TILEGX_OPC_ILL,
+  BITFIELD(41, 2) /* index 1046 */,
   TILEGX_OPC_ILL, TILEGX_OPC_ILL, TILEGX_OPC_RAISE, TILEGX_OPC_ILL,
-  BITFIELD(31, 2) /* index 991 */,
-  TILEGX_OPC_LD1S, TILEGX_OPC_LD1S, TILEGX_OPC_LD1S, CHILD(996),
-  BITFIELD(33, 2) /* index 996 */,
-  TILEGX_OPC_LD1S, TILEGX_OPC_LD1S, TILEGX_OPC_LD1S, CHILD(1001),
-  BITFIELD(35, 2) /* index 1001 */,
+  BITFIELD(31, 2) /* index 1051 */,
+  TILEGX_OPC_LD1S, TILEGX_OPC_LD1S, TILEGX_OPC_LD1S, CHILD(1056),
+  BITFIELD(33, 2) /* index 1056 */,
+  TILEGX_OPC_LD1S, TILEGX_OPC_LD1S, TILEGX_OPC_LD1S, CHILD(1061),
+  BITFIELD(35, 2) /* index 1061 */,
   TILEGX_OPC_LD1S, TILEGX_OPC_LD1S, TILEGX_OPC_LD1S,
   TILEGX_OPC_PREFETCH_L1_FAULT,
-  BITFIELD(43, 3) /* index 1006 */,
-  CHILD(1015), CHILD(1030), CHILD(1045), CHILD(1060), CHILD(1075),
+  BITFIELD(43, 3) /* index 1066 */,
+  CHILD(1075), CHILD(1090), CHILD(1105), CHILD(1120), CHILD(1135),
   TILEGX_OPC_LDNA, TILEGX_OPC_LDNT1S, TILEGX_OPC_LDNT1U,
-  BITFIELD(31, 2) /* index 1015 */,
-  TILEGX_OPC_LD1U, TILEGX_OPC_LD1U, TILEGX_OPC_LD1U, CHILD(1020),
-  BITFIELD(33, 2) /* index 1020 */,
-  TILEGX_OPC_LD1U, TILEGX_OPC_LD1U, TILEGX_OPC_LD1U, CHILD(1025),
-  BITFIELD(35, 2) /* index 1025 */,
+  BITFIELD(31, 2) /* index 1075 */,
+  TILEGX_OPC_LD1U, TILEGX_OPC_LD1U, TILEGX_OPC_LD1U, CHILD(1080),
+  BITFIELD(33, 2) /* index 1080 */,
+  TILEGX_OPC_LD1U, TILEGX_OPC_LD1U, TILEGX_OPC_LD1U, CHILD(1085),
+  BITFIELD(35, 2) /* index 1085 */,
   TILEGX_OPC_LD1U, TILEGX_OPC_LD1U, TILEGX_OPC_LD1U, TILEGX_OPC_PREFETCH,
-  BITFIELD(31, 2) /* index 1030 */,
-  TILEGX_OPC_LD2S, TILEGX_OPC_LD2S, TILEGX_OPC_LD2S, CHILD(1035),
-  BITFIELD(33, 2) /* index 1035 */,
-  TILEGX_OPC_LD2S, TILEGX_OPC_LD2S, TILEGX_OPC_LD2S, CHILD(1040),
-  BITFIELD(35, 2) /* index 1040 */,
+  BITFIELD(31, 2) /* index 1090 */,
+  TILEGX_OPC_LD2S, TILEGX_OPC_LD2S, TILEGX_OPC_LD2S, CHILD(1095),
+  BITFIELD(33, 2) /* index 1095 */,
+  TILEGX_OPC_LD2S, TILEGX_OPC_LD2S, TILEGX_OPC_LD2S, CHILD(1100),
+  BITFIELD(35, 2) /* index 1100 */,
   TILEGX_OPC_LD2S, TILEGX_OPC_LD2S, TILEGX_OPC_LD2S,
   TILEGX_OPC_PREFETCH_L2_FAULT,
-  BITFIELD(31, 2) /* index 1045 */,
-  TILEGX_OPC_LD2U, TILEGX_OPC_LD2U, TILEGX_OPC_LD2U, CHILD(1050),
-  BITFIELD(33, 2) /* index 1050 */,
-  TILEGX_OPC_LD2U, TILEGX_OPC_LD2U, TILEGX_OPC_LD2U, CHILD(1055),
-  BITFIELD(35, 2) /* index 1055 */,
+  BITFIELD(31, 2) /* index 1105 */,
+  TILEGX_OPC_LD2U, TILEGX_OPC_LD2U, TILEGX_OPC_LD2U, CHILD(1110),
+  BITFIELD(33, 2) /* index 1110 */,
+  TILEGX_OPC_LD2U, TILEGX_OPC_LD2U, TILEGX_OPC_LD2U, CHILD(1115),
+  BITFIELD(35, 2) /* index 1115 */,
   TILEGX_OPC_LD2U, TILEGX_OPC_LD2U, TILEGX_OPC_LD2U, TILEGX_OPC_PREFETCH_L2,
-  BITFIELD(31, 2) /* index 1060 */,
-  TILEGX_OPC_LD4S, TILEGX_OPC_LD4S, TILEGX_OPC_LD4S, CHILD(1065),
-  BITFIELD(33, 2) /* index 1065 */,
-  TILEGX_OPC_LD4S, TILEGX_OPC_LD4S, TILEGX_OPC_LD4S, CHILD(1070),
-  BITFIELD(35, 2) /* index 1070 */,
+  BITFIELD(31, 2) /* index 1120 */,
+  TILEGX_OPC_LD4S, TILEGX_OPC_LD4S, TILEGX_OPC_LD4S, CHILD(1125),
+  BITFIELD(33, 2) /* index 1125 */,
+  TILEGX_OPC_LD4S, TILEGX_OPC_LD4S, TILEGX_OPC_LD4S, CHILD(1130),
+  BITFIELD(35, 2) /* index 1130 */,
   TILEGX_OPC_LD4S, TILEGX_OPC_LD4S, TILEGX_OPC_LD4S,
   TILEGX_OPC_PREFETCH_L3_FAULT,
-  BITFIELD(31, 2) /* index 1075 */,
-  TILEGX_OPC_LD4U, TILEGX_OPC_LD4U, TILEGX_OPC_LD4U, CHILD(1080),
-  BITFIELD(33, 2) /* index 1080 */,
-  TILEGX_OPC_LD4U, TILEGX_OPC_LD4U, TILEGX_OPC_LD4U, CHILD(1085),
-  BITFIELD(35, 2) /* index 1085 */,
+  BITFIELD(31, 2) /* index 1135 */,
+  TILEGX_OPC_LD4U, TILEGX_OPC_LD4U, TILEGX_OPC_LD4U, CHILD(1140),
+  BITFIELD(33, 2) /* index 1140 */,
+  TILEGX_OPC_LD4U, TILEGX_OPC_LD4U, TILEGX_OPC_LD4U, CHILD(1145),
+  BITFIELD(35, 2) /* index 1145 */,
   TILEGX_OPC_LD4U, TILEGX_OPC_LD4U, TILEGX_OPC_LD4U, TILEGX_OPC_PREFETCH_L3,
-  BITFIELD(43, 3) /* index 1090 */,
+  BITFIELD(43, 3) /* index 1150 */,
   TILEGX_OPC_LDNT2S, TILEGX_OPC_LDNT2U, TILEGX_OPC_LDNT4S, TILEGX_OPC_LDNT4U,
   TILEGX_OPC_LDNT, TILEGX_OPC_LD, TILEGX_OPC_LNK, TILEGX_OPC_MF,
-  BITFIELD(43, 3) /* index 1099 */,
+  BITFIELD(43, 3) /* index 1159 */,
   TILEGX_OPC_NAP, TILEGX_OPC_NOP, TILEGX_OPC_SWINT0, TILEGX_OPC_SWINT1,
   TILEGX_OPC_SWINT2, TILEGX_OPC_SWINT3, TILEGX_OPC_WH64, TILEGX_OPC_NONE,
-  BITFIELD(49, 4) /* index 1108 */,
+  BITFIELD(49, 4) /* index 1168 */,
   TILEGX_OPC_V1MAXU, TILEGX_OPC_V1MINU, TILEGX_OPC_V1MNZ, TILEGX_OPC_V1MZ,
   TILEGX_OPC_V1SHL, TILEGX_OPC_V1SHRS, TILEGX_OPC_V1SHRU, TILEGX_OPC_V1SUBUC,
   TILEGX_OPC_V1SUB, TILEGX_OPC_V2ADDSC, TILEGX_OPC_V2ADD, TILEGX_OPC_V2CMPEQ,
   TILEGX_OPC_V2CMPLES, TILEGX_OPC_V2CMPLEU, TILEGX_OPC_V2CMPLTS,
   TILEGX_OPC_V2CMPLTU,
-  BITFIELD(49, 4) /* index 1125 */,
+  BITFIELD(49, 4) /* index 1185 */,
   TILEGX_OPC_V2CMPNE, TILEGX_OPC_V2INT_H, TILEGX_OPC_V2INT_L,
   TILEGX_OPC_V2MAXS, TILEGX_OPC_V2MINS, TILEGX_OPC_V2MNZ, TILEGX_OPC_V2MZ,
   TILEGX_OPC_V2PACKH, TILEGX_OPC_V2PACKL, TILEGX_OPC_V2PACKUC,
   TILEGX_OPC_V2SHLSC, TILEGX_OPC_V2SHL, TILEGX_OPC_V2SHRS, TILEGX_OPC_V2SHRU,
   TILEGX_OPC_V2SUBSC, TILEGX_OPC_V2SUB,
-  BITFIELD(49, 4) /* index 1142 */,
+  BITFIELD(49, 4) /* index 1202 */,
   TILEGX_OPC_V4ADDSC, TILEGX_OPC_V4ADD, TILEGX_OPC_V4INT_H,
   TILEGX_OPC_V4INT_L, TILEGX_OPC_V4PACKSC, TILEGX_OPC_V4SHLSC,
   TILEGX_OPC_V4SHL, TILEGX_OPC_V4SHRS, TILEGX_OPC_V4SHRU, TILEGX_OPC_V4SUBSC,
   TILEGX_OPC_V4SUB, TILEGX_OPC_XOR, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE, TILEGX_OPC_NONE,
-  BITFIELD(49, 4) /* index 1159 */,
+  BITFIELD(49, 4) /* index 1219 */,
   TILEGX_OPC_NONE, TILEGX_OPC_ROTLI, TILEGX_OPC_SHLI, TILEGX_OPC_SHLXI,
   TILEGX_OPC_SHRSI, TILEGX_OPC_SHRUI, TILEGX_OPC_SHRUXI, TILEGX_OPC_V1SHLI,
   TILEGX_OPC_V1SHRSI, TILEGX_OPC_V1SHRUI, TILEGX_OPC_V2SHLI,
   TILEGX_OPC_V2SHRSI, TILEGX_OPC_V2SHRUI, TILEGX_OPC_NONE, TILEGX_OPC_NONE,
   TILEGX_OPC_NONE,
-  BITFIELD(31, 2) /* index 1176 */,
+  BITFIELD(31, 2) /* index 1236 */,
   TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI,
-  CHILD(1181),
-  BITFIELD(33, 2) /* index 1181 */,
+  CHILD(1241),
+  BITFIELD(33, 2) /* index 1241 */,
   TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI,
-  CHILD(1186),
-  BITFIELD(35, 2) /* index 1186 */,
+  CHILD(1246),
+  BITFIELD(35, 2) /* index 1246 */,
   TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI,
-  CHILD(1191),
-  BITFIELD(37, 2) /* index 1191 */,
+  CHILD(1251),
+  BITFIELD(37, 2) /* index 1251 */,
   TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI,
-  CHILD(1196),
-  BITFIELD(39, 2) /* index 1196 */,
+  CHILD(1256),
+  BITFIELD(39, 2) /* index 1256 */,
   TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI,
-  CHILD(1201),
-  BITFIELD(41, 2) /* index 1201 */,
+  CHILD(1261),
+  BITFIELD(41, 2) /* index 1261 */,
   TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI, TILEGX_OPC_SHL16INSLI,
   TILEGX_OPC_INFOL,
 };
@@ -7328,22 +7394,22 @@ const struct tilegx_operand tilegx_operands[35] =
   {
     TILEGX_OP_TYPE_REGISTER, BFD_RELOC(NONE),
     6, 0, 0, 1, 0, 0,
-    create_Dest_X0, get_Dest_X0
-  },
-  {
-    TILEGX_OP_TYPE_REGISTER, BFD_RELOC(NONE),
-    6, 0, 1, 0, 0, 0,
-    create_SrcA_X0, get_SrcA_X0
-  },
-  {
-    TILEGX_OP_TYPE_REGISTER, BFD_RELOC(NONE),
-    6, 0, 0, 1, 0, 0,
     create_Dest_X1, get_Dest_X1
   },
   {
     TILEGX_OP_TYPE_REGISTER, BFD_RELOC(NONE),
     6, 0, 1, 0, 0, 0,
     create_SrcA_X1, get_SrcA_X1
+  },
+  {
+    TILEGX_OP_TYPE_REGISTER, BFD_RELOC(NONE),
+    6, 0, 0, 1, 0, 0,
+    create_Dest_X0, get_Dest_X0
+  },
+  {
+    TILEGX_OP_TYPE_REGISTER, BFD_RELOC(NONE),
+    6, 0, 1, 0, 0, 0,
+    create_SrcA_X0, get_SrcA_X0
   },
   {
     TILEGX_OP_TYPE_REGISTER, BFD_RELOC(NONE),

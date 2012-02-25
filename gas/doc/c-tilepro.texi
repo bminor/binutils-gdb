@@ -261,6 +261,41 @@ to be used for initial-exec TLS accesses.
 This modifier is like @code{tls_ie_hi16}, but it adds one to the value
 if @code{tls_ie_lo16} of the input value is negative.
 
+@item tls_le
+
+This modifier is used to load the offset of the symbol's address from
+the TCB, to be used for local-exec TLS accesses.
+
+@item tls_le_lo16
+
+This modifier is used to load the low 16 bits of the offset of the
+symbol's address from the TCB, to be used for local-exec TLS accesses.
+
+@item tls_le_hi16
+
+This modifier is used to load the high 16 bits of the offset of the
+symbol's address from the TCB, to be used for local-exec TLS accesses.
+
+@item tls_le_ha16
+
+This modifier is like @code{tls_le_hi16}, but it adds one to the value
+if @code{tls_le_lo16} of the input value is negative.
+
+@item tls_gd_call
+
+This modifier is used to tag an instrution as the ``call'' part of a
+calling sequence for a TLS GD reference of its operand.
+
+@item tls_gd_add
+
+This modifier is used to tag an instruction as the ``add'' part of a
+calling sequence for a TLS GD reference of its operand.
+
+@item tls_ie_load
+
+This modifier is used to tag an instruction as the ``load'' part of a
+calling sequence for a TLS IE reference of its operand.
+
 @end table
 
 @node TILEPro Directives

@@ -490,35 +490,38 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X0_HW0_GOT, 0),
   TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X1_HW0_GOT, 0),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X0_HW1_GOT, 16),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X1_HW1_GOT, 16),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X0_HW2_GOT, 32),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X1_HW2_GOT, 32),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X0_HW3_GOT, 48),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X1_HW3_GOT, 48),
+  /* These relocs are currently not defined.  */
+  EMPTY_HOWTO (66),
+  EMPTY_HOWTO (67),
+  EMPTY_HOWTO (68),
+  EMPTY_HOWTO (69),
+  EMPTY_HOWTO (70),
+  EMPTY_HOWTO (71),
 
   TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X0_HW0_LAST_GOT, 0),
   TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X1_HW0_LAST_GOT, 0),
   TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X0_HW1_LAST_GOT, 16),
   TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X1_HW1_LAST_GOT, 16),
-  TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X0_HW2_LAST_GOT, 32),
-  TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X1_HW2_LAST_GOT, 32),
+  /* These relocs are currently not defined.  */
+  EMPTY_HOWTO (76),
+  EMPTY_HOWTO (77),
 
   TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X0_HW0_TLS_GD, 0),
   TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X1_HW0_TLS_GD, 0),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X0_HW1_TLS_GD, 16),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X1_HW1_TLS_GD, 16),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X0_HW2_TLS_GD, 32),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X1_HW2_TLS_GD, 32),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X0_HW3_TLS_GD, 48),
-  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X1_HW3_TLS_GD, 48),
+
+  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X0_HW0_TLS_LE, 0),
+  TILEGX_IMM16_HOWTO (R_TILEGX_IMM16_X1_HW0_TLS_LE, 0),
+  TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X0_HW0_LAST_TLS_LE, 0),
+  TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X1_HW0_LAST_TLS_LE, 0),
+  TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X0_HW1_LAST_TLS_LE, 16),
+  TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X1_HW1_LAST_TLS_LE, 16),
 
   TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X0_HW0_LAST_TLS_GD, 0),
   TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X1_HW0_LAST_TLS_GD, 0),
   TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X0_HW1_LAST_TLS_GD, 16),
   TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X1_HW1_LAST_TLS_GD, 16),
-  TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X0_HW2_LAST_TLS_GD, 32),
-  TILEGX_IMM16_HOWTO_LAST (R_TILEGX_IMM16_X1_HW2_LAST_TLS_GD, 32),
+  EMPTY_HOWTO (90),
+  EMPTY_HOWTO (91),
 
 #define TILEGX_IMM16_HOWTO_TLS_IE(name, rshift) \
   HOWTO (name, rshift, 1, 16, FALSE, 0, \
@@ -527,12 +530,12 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   TILEGX_IMM16_HOWTO_TLS_IE (R_TILEGX_IMM16_X0_HW0_TLS_IE, 0),
   TILEGX_IMM16_HOWTO_TLS_IE (R_TILEGX_IMM16_X1_HW0_TLS_IE, 0),
-  TILEGX_IMM16_HOWTO_TLS_IE (R_TILEGX_IMM16_X0_HW1_TLS_IE, 16),
-  TILEGX_IMM16_HOWTO_TLS_IE (R_TILEGX_IMM16_X1_HW1_TLS_IE, 16),
-  TILEGX_IMM16_HOWTO_TLS_IE (R_TILEGX_IMM16_X0_HW2_TLS_IE, 32),
-  TILEGX_IMM16_HOWTO_TLS_IE (R_TILEGX_IMM16_X1_HW2_TLS_IE, 32),
-  TILEGX_IMM16_HOWTO_TLS_IE (R_TILEGX_IMM16_X0_HW3_TLS_IE, 48),
-  TILEGX_IMM16_HOWTO_TLS_IE (R_TILEGX_IMM16_X1_HW3_TLS_IE, 48),
+  EMPTY_HOWTO (94),
+  EMPTY_HOWTO (95),
+  EMPTY_HOWTO (96),
+  EMPTY_HOWTO (97),
+  EMPTY_HOWTO (98),
+  EMPTY_HOWTO (99),
 
 #define TILEGX_IMM16_HOWTO_LAST_TLS_IE(name, rshift) \
   HOWTO (name, rshift, 1, 16, FALSE, 0, \
@@ -543,8 +546,8 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   TILEGX_IMM16_HOWTO_LAST_TLS_IE (R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE, 0),
   TILEGX_IMM16_HOWTO_LAST_TLS_IE (R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE, 16),
   TILEGX_IMM16_HOWTO_LAST_TLS_IE (R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE, 16),
-  TILEGX_IMM16_HOWTO_LAST_TLS_IE (R_TILEGX_IMM16_X0_HW2_LAST_TLS_IE, 32),
-  TILEGX_IMM16_HOWTO_LAST_TLS_IE (R_TILEGX_IMM16_X1_HW2_LAST_TLS_IE, 32),
+  EMPTY_HOWTO (104),
+  EMPTY_HOWTO (105),
 
   HOWTO(R_TILEGX_TLS_DTPMOD64, 0, 0, 0, FALSE, 0, complain_overflow_dont,
         bfd_elf_generic_reloc, "R_TILEGX_TLS_DTPMOD64",
@@ -564,7 +567,31 @@ static reloc_howto_type tilegx_elf_howto_table [] =
         FALSE, 0, -1, TRUE),
   HOWTO(R_TILEGX_TLS_TPOFF32, 0, 0, 0, FALSE, 0, complain_overflow_dont,
         bfd_elf_generic_reloc, "R_TILEGX_TLS_TPOFF32",
-        FALSE, 0, 0, TRUE)
+        FALSE, 0, 0, TRUE),
+
+  HOWTO (R_TILEGX_TLS_GD_CALL, /* type */
+	 TILEGX_LOG2_BUNDLE_ALIGNMENT_IN_BYTES, /* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 27,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,/* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_TILEGX_TLS_GD_CALL", /* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 -1,			/* dst_mask */
+	 TRUE), 		/* pcrel_offset */
+
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X0_TLS_GD_ADD,  0,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X1_TLS_GD_ADD,  0,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y0_TLS_GD_ADD,  0,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y1_TLS_GD_ADD,  0,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_TLS_IE_LOAD, 0,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X0_TLS_ADD,  0,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_X1_TLS_ADD,  0,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y0_TLS_ADD,  0,  8),
+  TILEGX_IMM_HOWTO(R_TILEGX_IMM8_Y1_TLS_ADD,  0,  8),
 };
 
 static reloc_howto_type tilegx_elf_howto_table2 [] =
@@ -686,46 +713,28 @@ static const reloc_map tilegx_reloc_map [] =
   SIMPLE_REMAP (TILEGX_IMM16_X1_HW2_LAST_PCREL)
   SIMPLE_REMAP (TILEGX_IMM16_X0_HW0_GOT)
   SIMPLE_REMAP (TILEGX_IMM16_X1_HW0_GOT)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW1_GOT)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW1_GOT)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW2_GOT)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW2_GOT)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW3_GOT)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW3_GOT)
   SIMPLE_REMAP (TILEGX_IMM16_X0_HW0_LAST_GOT)
   SIMPLE_REMAP (TILEGX_IMM16_X1_HW0_LAST_GOT)
   SIMPLE_REMAP (TILEGX_IMM16_X0_HW1_LAST_GOT)
   SIMPLE_REMAP (TILEGX_IMM16_X1_HW1_LAST_GOT)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW2_LAST_GOT)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW2_LAST_GOT)
   SIMPLE_REMAP (TILEGX_IMM16_X0_HW0_TLS_GD)
   SIMPLE_REMAP (TILEGX_IMM16_X1_HW0_TLS_GD)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW1_TLS_GD)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW1_TLS_GD)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW2_TLS_GD)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW2_TLS_GD)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW3_TLS_GD)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW3_TLS_GD)
+  SIMPLE_REMAP (TILEGX_IMM16_X0_HW0_TLS_LE)
+  SIMPLE_REMAP (TILEGX_IMM16_X1_HW0_TLS_LE)
+  SIMPLE_REMAP (TILEGX_IMM16_X0_HW0_LAST_TLS_LE)
+  SIMPLE_REMAP (TILEGX_IMM16_X1_HW0_LAST_TLS_LE)
+  SIMPLE_REMAP (TILEGX_IMM16_X0_HW1_LAST_TLS_LE)
+  SIMPLE_REMAP (TILEGX_IMM16_X1_HW1_LAST_TLS_LE)
   SIMPLE_REMAP (TILEGX_IMM16_X0_HW0_LAST_TLS_GD)
   SIMPLE_REMAP (TILEGX_IMM16_X1_HW0_LAST_TLS_GD)
   SIMPLE_REMAP (TILEGX_IMM16_X0_HW1_LAST_TLS_GD)
   SIMPLE_REMAP (TILEGX_IMM16_X1_HW1_LAST_TLS_GD)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW2_LAST_TLS_GD)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW2_LAST_TLS_GD)
   SIMPLE_REMAP (TILEGX_IMM16_X0_HW0_TLS_IE)
   SIMPLE_REMAP (TILEGX_IMM16_X1_HW0_TLS_IE)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW1_TLS_IE)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW1_TLS_IE)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW2_TLS_IE)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW2_TLS_IE)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW3_TLS_IE)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW3_TLS_IE)
   SIMPLE_REMAP (TILEGX_IMM16_X0_HW0_LAST_TLS_IE)
   SIMPLE_REMAP (TILEGX_IMM16_X1_HW0_LAST_TLS_IE)
   SIMPLE_REMAP (TILEGX_IMM16_X0_HW1_LAST_TLS_IE)
   SIMPLE_REMAP (TILEGX_IMM16_X1_HW1_LAST_TLS_IE)
-  SIMPLE_REMAP (TILEGX_IMM16_X0_HW2_LAST_TLS_IE)
-  SIMPLE_REMAP (TILEGX_IMM16_X1_HW2_LAST_TLS_IE)
 
   SIMPLE_REMAP (TILEGX_TLS_DTPMOD64)
   SIMPLE_REMAP (TILEGX_TLS_DTPOFF64)
@@ -734,6 +743,17 @@ static const reloc_map tilegx_reloc_map [] =
   SIMPLE_REMAP (TILEGX_TLS_DTPMOD32)
   SIMPLE_REMAP (TILEGX_TLS_DTPOFF32)
   SIMPLE_REMAP (TILEGX_TLS_TPOFF32)
+
+  SIMPLE_REMAP (TILEGX_TLS_GD_CALL)
+  SIMPLE_REMAP (TILEGX_IMM8_X0_TLS_GD_ADD)
+  SIMPLE_REMAP (TILEGX_IMM8_X1_TLS_GD_ADD)
+  SIMPLE_REMAP (TILEGX_IMM8_Y0_TLS_GD_ADD)
+  SIMPLE_REMAP (TILEGX_IMM8_Y1_TLS_GD_ADD)
+  SIMPLE_REMAP (TILEGX_TLS_IE_LOAD)
+  SIMPLE_REMAP (TILEGX_IMM8_X0_TLS_ADD)
+  SIMPLE_REMAP (TILEGX_IMM8_X1_TLS_ADD)
+  SIMPLE_REMAP (TILEGX_IMM8_Y0_TLS_ADD)
+  SIMPLE_REMAP (TILEGX_IMM8_Y1_TLS_ADD)
 
 #undef SIMPLE_REMAP
 #undef TH_REMAP
@@ -823,6 +843,10 @@ struct tilegx_elf_link_hash_table
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sdynbss;
   asection *srelbss;
+
+  /* Whether LE transition has been disabled for some of the
+     sections.  */
+  bfd_boolean disable_le_transition;
 
   /* Small local sym to section mapping cache.  */
   struct sym_cache sym_cache;
@@ -920,7 +944,7 @@ tilegx_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
 {
   unsigned int r_type = TILEGX_ELF_R_TYPE (dst->r_info);
 
-  if (r_type <= (unsigned int) R_TILEGX_TLS_TPOFF32)
+  if (r_type <= (unsigned int) R_TILEGX_IMM8_Y1_TLS_ADD)
     cache_ptr->howto = &tilegx_elf_howto_table [r_type];
   else if (r_type - R_TILEGX_GNU_VTINHERIT
 	   <= (unsigned int) R_TILEGX_GNU_VTENTRY)
@@ -1003,6 +1027,18 @@ static const tilegx_create_func reloc_to_create_func[] =
   create_Imm16_X1,
   create_Imm16_X0,
   create_Imm16_X1,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  create_Imm16_X0,
+  create_Imm16_X1,
+  create_Imm16_X0,
+  create_Imm16_X1,
+  NULL,
+  NULL,
   create_Imm16_X0,
   create_Imm16_X1,
   create_Imm16_X0,
@@ -1015,34 +1051,20 @@ static const tilegx_create_func reloc_to_create_func[] =
   create_Imm16_X1,
   create_Imm16_X0,
   create_Imm16_X1,
+  NULL,
+  NULL,
+  create_Imm16_X0,
+  create_Imm16_X1,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
   create_Imm16_X0,
   create_Imm16_X1,
   create_Imm16_X0,
   create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1,
-  create_Imm16_X0,
-  create_Imm16_X1
 };
 
 static void
@@ -1538,6 +1560,83 @@ tilegx_elf_copy_indirect_symbol (struct bfd_link_info *info,
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
+static int
+tilegx_tls_translate_to_le (int r_type)
+{
+  switch (r_type)
+    {
+    case R_TILEGX_IMM16_X0_HW0_TLS_GD:
+    case R_TILEGX_IMM16_X0_HW0_TLS_IE:
+      return R_TILEGX_IMM16_X0_HW0_TLS_LE;
+
+    case R_TILEGX_IMM16_X1_HW0_TLS_GD:
+    case R_TILEGX_IMM16_X1_HW0_TLS_IE:
+      return R_TILEGX_IMM16_X1_HW0_TLS_LE;
+
+    case R_TILEGX_IMM16_X0_HW0_LAST_TLS_GD:
+    case R_TILEGX_IMM16_X0_HW0_LAST_TLS_IE:
+      return R_TILEGX_IMM16_X0_HW0_LAST_TLS_LE;
+
+    case R_TILEGX_IMM16_X1_HW0_LAST_TLS_GD:
+    case R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE:
+      return R_TILEGX_IMM16_X1_HW0_LAST_TLS_LE;
+
+    case R_TILEGX_IMM16_X0_HW1_LAST_TLS_GD:
+    case R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE:
+      return R_TILEGX_IMM16_X0_HW1_LAST_TLS_LE;
+
+    case R_TILEGX_IMM16_X1_HW1_LAST_TLS_GD:
+    case R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE:
+      return R_TILEGX_IMM16_X1_HW1_LAST_TLS_LE;
+    }
+  return r_type;
+}
+
+static int
+tilegx_tls_translate_to_ie (int r_type)
+{
+  switch (r_type)
+    {
+    case R_TILEGX_IMM16_X0_HW0_TLS_GD:
+    case R_TILEGX_IMM16_X0_HW0_TLS_IE:
+      return R_TILEGX_IMM16_X0_HW0_TLS_IE;
+
+    case R_TILEGX_IMM16_X1_HW0_TLS_GD:
+    case R_TILEGX_IMM16_X1_HW0_TLS_IE:
+      return R_TILEGX_IMM16_X1_HW0_TLS_IE;
+
+    case R_TILEGX_IMM16_X0_HW0_LAST_TLS_GD:
+    case R_TILEGX_IMM16_X0_HW0_LAST_TLS_IE:
+      return R_TILEGX_IMM16_X0_HW0_LAST_TLS_IE;
+
+    case R_TILEGX_IMM16_X1_HW0_LAST_TLS_GD:
+    case R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE:
+      return R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE;
+
+    case R_TILEGX_IMM16_X0_HW1_LAST_TLS_GD:
+    case R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE:
+      return R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE;
+
+    case R_TILEGX_IMM16_X1_HW1_LAST_TLS_GD:
+    case R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE:
+      return R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE;
+    }
+  return r_type;
+}
+
+static int
+tilegx_elf_tls_transition (struct bfd_link_info *info, int r_type,
+			   int is_local, bfd_boolean disable_le_transition)
+{
+  if (info->shared)
+    return r_type;
+
+  if (is_local && !disable_le_transition)
+    return tilegx_tls_translate_to_le (r_type);
+  else
+    return tilegx_tls_translate_to_ie (r_type);
+}
+
 /* Look through the relocs for a section during the first phase, and
    allocate space in the global offset table or procedure linkage
    table.  */
@@ -1553,6 +1652,7 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
   int num_relocs;
+  bfd_boolean has_tls_gd_or_ie = FALSE, has_tls_add = FALSE;
 
   if (info->relocatable)
     return TRUE;
@@ -1571,6 +1671,33 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
     htab->elf.dynobj = abfd;
 
   rel_end = relocs + num_relocs;
+
+  /* Check whether to do optimization to transform TLS GD/IE
+     referehces to TLS LE.  We disable it if we're linking with old
+     TLS code sequences that do not support such optimization.  Old
+     TLS code sequences have tls_gd_call/tls_ie_load relocations but
+     no tls_add relocations.  */
+  for (rel = relocs; rel < rel_end && !has_tls_add; rel++)
+    {
+      int r_type = TILEGX_ELF_R_TYPE (rel->r_info);
+      switch (r_type)
+	{
+	case R_TILEGX_TLS_GD_CALL:
+	case R_TILEGX_TLS_IE_LOAD:
+	  has_tls_gd_or_ie = TRUE;
+	  break;
+	case R_TILEGX_IMM8_X0_TLS_ADD:
+	case R_TILEGX_IMM8_Y0_TLS_ADD:
+	case R_TILEGX_IMM8_X1_TLS_ADD:
+	case R_TILEGX_IMM8_Y1_TLS_ADD:
+	  has_tls_add = TRUE;
+	  break;
+	}
+    }
+
+  sec->sec_flg0 = (has_tls_gd_or_ie && !has_tls_add);
+  htab->disable_le_transition |= sec->sec_flg0;
+
   for (rel = relocs; rel < rel_end; rel++)
     {
       unsigned int r_type;
@@ -1598,39 +1725,36 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
+      r_type = tilegx_elf_tls_transition (info, r_type, h == NULL,
+					  sec->sec_flg0);
       switch (r_type)
 	{
+	case R_TILEGX_IMM16_X0_HW0_TLS_LE:
+	case R_TILEGX_IMM16_X1_HW0_TLS_LE:
+	case R_TILEGX_IMM16_X0_HW0_LAST_TLS_LE:
+	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_LE:
+	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_LE:
+	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_LE:
+	  if (info->shared)
+	    goto r_tilegx_plt32;
+	  break;
+
 	case R_TILEGX_IMM16_X0_HW0_TLS_GD:
 	case R_TILEGX_IMM16_X1_HW0_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW1_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW1_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW2_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW2_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW3_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW3_TLS_GD:
 	case R_TILEGX_IMM16_X0_HW0_LAST_TLS_GD:
 	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_GD:
 	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_GD:
 	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW2_LAST_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW2_LAST_TLS_GD:
-          tls_type = GOT_TLS_GD;
+	  BFD_ASSERT (info->shared);
+	  tls_type = GOT_TLS_GD;
           goto have_got_reference;
 
 	case R_TILEGX_IMM16_X0_HW0_TLS_IE:
 	case R_TILEGX_IMM16_X1_HW0_TLS_IE:
-	case R_TILEGX_IMM16_X0_HW1_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW1_TLS_IE:
-	case R_TILEGX_IMM16_X0_HW2_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW2_TLS_IE:
-	case R_TILEGX_IMM16_X0_HW3_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW3_TLS_IE:
 	case R_TILEGX_IMM16_X0_HW0_LAST_TLS_IE:
 	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE:
 	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE:
 	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE:
-	case R_TILEGX_IMM16_X0_HW2_LAST_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW2_LAST_TLS_IE:
           tls_type = GOT_TLS_IE;
           if (info->shared)
             info->flags |= DF_STATIC_TLS;
@@ -1638,18 +1762,10 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_TILEGX_IMM16_X0_HW0_GOT:
 	case R_TILEGX_IMM16_X1_HW0_GOT:
-	case R_TILEGX_IMM16_X0_HW1_GOT:
-	case R_TILEGX_IMM16_X1_HW1_GOT:
-	case R_TILEGX_IMM16_X0_HW2_GOT:
-	case R_TILEGX_IMM16_X1_HW2_GOT:
-	case R_TILEGX_IMM16_X0_HW3_GOT:
-	case R_TILEGX_IMM16_X1_HW3_GOT:
 	case R_TILEGX_IMM16_X0_HW0_LAST_GOT:
 	case R_TILEGX_IMM16_X1_HW0_LAST_GOT:
 	case R_TILEGX_IMM16_X0_HW1_LAST_GOT:
 	case R_TILEGX_IMM16_X1_HW1_LAST_GOT:
-	case R_TILEGX_IMM16_X0_HW2_LAST_GOT:
-	case R_TILEGX_IMM16_X1_HW2_LAST_GOT:
           tls_type = GOT_NORMAL;
           /* Fall Through */
 
@@ -1719,6 +1835,24 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		return FALSE;
 	    }
 	  break;
+
+	case R_TILEGX_TLS_GD_CALL:
+	  if (info->shared)
+	    {
+	      /* These are basically R_TILEGX_JUMPOFF_X1_PLT relocs
+		 against __tls_get_addr.  */
+	      struct bfd_link_hash_entry *bh = NULL;
+	      if (! _bfd_generic_link_add_one_symbol (info, abfd,
+						      "__tls_get_addr", 0,
+						      bfd_und_section_ptr, 0,
+						      NULL, FALSE, FALSE,
+						      &bh))
+		return FALSE;
+	      h = (struct elf_link_hash_entry *) bh;
+	    }
+	  else
+	    break;
+	  /* Fall through */
 
         case R_TILEGX_JUMPOFF_X1_PLT:
 	  /* This symbol requires a procedure linkage table entry.  We
@@ -1805,16 +1939,15 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_TILEGX_IMM16_X0_HW2_LAST:
 	case R_TILEGX_IMM16_X1_HW2_LAST:
 	  if (h != NULL)
-            {
-              h->non_got_ref = 1;
+	    h->non_got_ref = 1;
 
-              if (!info->shared)
-                {
-                  /* We may need a .plt entry if the function this reloc
-                     refers to is in a shared lib.  */
-                  h->plt.refcount += 1;
-                }
-            }
+	r_tilegx_plt32:
+	  if (h != NULL && !info->shared)
+	    {
+	      /* We may need a .plt entry if the function this reloc
+		 refers to is in a shared lib.  */
+	      h->plt.refcount += 1;
+	    }
 
 	  /* If we are creating a shared library, and this is a reloc
 	     against a global symbol, or a non PC relative reloc
@@ -2008,51 +2141,28 @@ tilegx_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	}
 
       r_type = TILEGX_ELF_R_TYPE (rel->r_info);
-
+      r_type = tilegx_elf_tls_transition (info, r_type, h != NULL,
+					  sec->sec_flg0);
       switch (r_type)
 	{
 	case R_TILEGX_IMM16_X0_HW0_GOT:
 	case R_TILEGX_IMM16_X1_HW0_GOT:
-	case R_TILEGX_IMM16_X0_HW1_GOT:
-	case R_TILEGX_IMM16_X1_HW1_GOT:
-	case R_TILEGX_IMM16_X0_HW2_GOT:
-	case R_TILEGX_IMM16_X1_HW2_GOT:
-	case R_TILEGX_IMM16_X0_HW3_GOT:
-	case R_TILEGX_IMM16_X1_HW3_GOT:
 	case R_TILEGX_IMM16_X0_HW0_LAST_GOT:
 	case R_TILEGX_IMM16_X1_HW0_LAST_GOT:
 	case R_TILEGX_IMM16_X0_HW1_LAST_GOT:
 	case R_TILEGX_IMM16_X1_HW1_LAST_GOT:
-	case R_TILEGX_IMM16_X0_HW2_LAST_GOT:
-	case R_TILEGX_IMM16_X1_HW2_LAST_GOT:
 	case R_TILEGX_IMM16_X0_HW0_TLS_GD:
 	case R_TILEGX_IMM16_X1_HW0_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW1_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW1_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW2_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW2_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW3_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW3_TLS_GD:
 	case R_TILEGX_IMM16_X0_HW0_LAST_TLS_GD:
 	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_GD:
 	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_GD:
 	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_GD:
-	case R_TILEGX_IMM16_X0_HW2_LAST_TLS_GD:
-	case R_TILEGX_IMM16_X1_HW2_LAST_TLS_GD:
 	case R_TILEGX_IMM16_X0_HW0_TLS_IE:
 	case R_TILEGX_IMM16_X1_HW0_TLS_IE:
-	case R_TILEGX_IMM16_X0_HW1_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW1_TLS_IE:
-	case R_TILEGX_IMM16_X0_HW2_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW2_TLS_IE:
-	case R_TILEGX_IMM16_X0_HW3_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW3_TLS_IE:
 	case R_TILEGX_IMM16_X0_HW0_LAST_TLS_IE:
 	case R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE:
 	case R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE:
 	case R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE:
-	case R_TILEGX_IMM16_X0_HW2_LAST_TLS_IE:
-	case R_TILEGX_IMM16_X1_HW2_LAST_TLS_IE:
 	  if (h != NULL)
 	    {
 	      if (h->got.refcount > 0)
@@ -2060,7 +2170,8 @@ tilegx_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	    }
 	  else
 	    {
-	      if (local_got_refcounts[r_symndx] > 0)
+	      if (local_got_refcounts &&
+		  local_got_refcounts[r_symndx] > 0)
 		local_got_refcounts[r_symndx]--;
 	    }
 	  break;
@@ -2361,7 +2472,15 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       h->needs_plt = 0;
     }
 
-  if (h->got.refcount > 0)
+  /* If a TLS_IE symbol is now local to the binary, make it a TLS_LE
+     requiring no TLS entry.  */
+  if (h->got.refcount > 0
+      && !htab->disable_le_transition
+      && !info->shared
+      && h->dynindx == -1
+      && tilegx_elf_hash_entry(h)->tls_type == GOT_TLS_IE)
+    h->got.offset = (bfd_vma) -1;
+  else if (h->got.refcount > 0)
     {
       asection *s;
       bfd_boolean dyn;
@@ -2781,6 +2900,125 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
   return (address - htab->tls_sec->vma);
 }
 
+/* Copy SIZE bits from FROM to TO at address ADDR.  */
+
+static void
+tilegx_copy_bits (bfd_byte *addr, int from, int to, int size)
+{
+  int i;
+  for (i = 0; i < size; i++)
+    {
+      int from_byte = (from + i) / 8;
+      int from_bit = (from + i) % 8;
+      int to_byte = (to + i) / 8;
+      int to_bit = (to + i) % 8;
+      bfd_byte to_mask = 1 << to_bit;
+      addr[to_byte] = (addr[to_byte] & ~to_mask)
+	| ((addr[from_byte] >> from_bit << to_bit) & to_mask);
+    }
+}
+
+/* Replace the MASK bits in ADDR with those in INSN, for the next
+   TILEGX_BUNDLE_SIZE_IN_BYTES bytes.  */
+
+static void
+tilegx_replace_insn (bfd_byte *addr, const bfd_byte *mask,
+		     const bfd_byte *insn)
+{
+  int i;
+  for (i = 0; i < TILEGX_BUNDLE_SIZE_IN_BYTES; i++)
+    {
+      addr[i] = (addr[i] & ~mask[i]) | (insn[i] & mask[i]);
+    }
+}
+
+/* Mask to extract the bits corresponding to an instruction in a
+   specific pipe of a bundle.  */
+static const bfd_byte insn_mask_X1[] = {
+  0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0x3f
+};
+
+/* Mask to extract the bits corresponding to an instruction in a
+   specific pipe of a bundle, minus the destination operand and the
+   first source operand.  */
+static const bfd_byte insn_mask_X0_no_dest_no_srca[] = { 
+  0x00, 0xf0, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00
+};
+
+static const bfd_byte insn_mask_X1_no_dest_no_srca[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0xff, 0x3f
+};
+
+static const bfd_byte insn_mask_Y0_no_dest_no_srca[] = {
+  0x00, 0xf0, 0x0f, 0x78, 0x00, 0x00, 0x00, 0x00
+};
+static const bfd_byte insn_mask_Y1_no_dest_no_srca[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x07, 0x3c
+};
+
+/* Mask to extract the bits corresponding to an instruction in a
+   specific pipe of a bundle, minus the register operands.  */
+static const bfd_byte insn_mask_X0_no_operand[] = {
+  0x00, 0x00, 0xfc, 0x7f, 0x00, 0x00, 0x00, 0x00
+};
+
+static const bfd_byte insn_mask_X1_no_operand[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xfe, 0x3f
+};
+
+static const bfd_byte insn_mask_Y0_no_operand[] = {
+  0x00, 0x00, 0x0c, 0x78, 0x00, 0x00, 0x00, 0x00
+};
+
+static const bfd_byte insn_mask_Y1_no_operand[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x3c
+};
+
+/* Various instructions synthesized to support tls references.  */
+
+/* ld r0, r0 in the X1 pipe, used for tls ie.  */
+static const bfd_byte insn_tls_ie_ld_X1[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0xe8, 0x6a, 0x28
+};
+
+/* ld4s r0, r0 in the X1 pipe, used for tls ie.  */
+static const bfd_byte insn_tls_ie_ld4s_X1[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x98, 0x6a, 0x28
+};
+
+/* add r0, r0, tp in various pipes, used for tls ie.  */
+static const bfd_byte insn_tls_ie_add_X0X1[] = {
+  0x00, 0x50, 0x0f, 0x50, 0x00, 0xa8, 0x07, 0x28
+};
+static const bfd_byte insn_tls_ie_add_Y0Y1[] = {
+  0x00, 0x50, 0x27, 0x2c, 0x00, 0xa8, 0x13, 0x9a
+};
+
+/* addx r0, r0, tp in various pipes, used for tls ie.  */
+static const bfd_byte insn_tls_ie_addx_X0X1[] = {
+  0x00, 0x50, 0x0b, 0x50, 0x00, 0xa8, 0x05, 0x28
+};
+static const bfd_byte insn_tls_ie_addx_Y0Y1[] = {
+  0x00, 0x50, 0x03, 0x2c, 0x00, 0xa8, 0x01, 0x9a
+};
+
+/* move r0, r0 in various pipes, used for tls gd.  */
+static const bfd_byte insn_tls_gd_add_X0X1[] = {
+  0x00, 0xf0, 0x07, 0x51, 0x00, 0xf8, 0x3b, 0x28
+};
+static const bfd_byte insn_tls_gd_add_Y0Y1[] = {
+  0x00, 0xf0, 0x0b, 0x54, 0x00, 0xf8, 0x05, 0xae
+};
+
+static const bfd_byte *insn_move_X0X1 = insn_tls_gd_add_X0X1;
+static const bfd_byte *insn_move_Y0Y1 = insn_tls_gd_add_Y0Y1;
+
+static const bfd_byte *insn_add_X0X1 = insn_tls_ie_add_X0X1;
+static const bfd_byte *insn_add_Y0Y1 = insn_tls_ie_add_Y0Y1;
+
+static const bfd_byte *insn_addx_X0X1 = insn_tls_ie_addx_X0X1;
+static const bfd_byte *insn_addx_Y0Y1 = insn_tls_ie_addx_Y0Y1;
+
 /* Relocate an TILEGX ELF section.
 
    The RELOCATE_SECTION function is called by the new ELF backend linker
@@ -2845,6 +3083,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   for (; rel < relend; rel++)
     {
       int r_type, tls_type;
+      bfd_boolean is_tls_iele, is_tls_le;
       reloc_howto_type *howto;
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
@@ -2927,20 +3166,203 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
       switch (r_type)
 	{
+	case R_TILEGX_TLS_GD_CALL:
+	case R_TILEGX_IMM8_X0_TLS_GD_ADD:
+	case R_TILEGX_IMM8_Y0_TLS_GD_ADD:
+	case R_TILEGX_IMM8_X1_TLS_GD_ADD:
+	case R_TILEGX_IMM8_Y1_TLS_GD_ADD:
+	case R_TILEGX_IMM8_X0_TLS_ADD:
+	case R_TILEGX_IMM8_Y0_TLS_ADD:
+	case R_TILEGX_IMM8_X1_TLS_ADD:
+	case R_TILEGX_IMM8_Y1_TLS_ADD:
+	  tls_type = GOT_UNKNOWN;
+	  if (h == NULL && local_got_offsets)
+	    tls_type =
+	      _bfd_tilegx_elf_local_got_tls_type (input_bfd) [r_symndx];
+	  else if (h != NULL)
+	    tls_type = tilegx_elf_hash_entry(h)->tls_type;
+
+	  is_tls_iele = (! info->shared || tls_type == GOT_TLS_IE);
+	  is_tls_le = is_tls_iele && (!input_section->sec_flg0
+				      && !info->shared
+				      && (h == NULL || h->dynindx == -1));
+
+	  if (r_type == R_TILEGX_TLS_GD_CALL)
+	    {
+	      if (is_tls_le)
+		{
+		  /* GD -> LE */
+		  tilegx_replace_insn (contents + rel->r_offset,
+				       insn_mask_X1, insn_move_X0X1);
+		  continue;
+		}
+	      else if (is_tls_iele)
+		{
+		  /* GD -> IE */
+		  if (ABI_64_P (output_bfd))
+		    tilegx_replace_insn (contents + rel->r_offset,
+					 insn_mask_X1, insn_tls_ie_ld_X1);
+		  else
+		    tilegx_replace_insn (contents + rel->r_offset,
+					 insn_mask_X1, insn_tls_ie_ld4s_X1);
+		  continue;
+		}
+
+	      /* GD -> GD */
+	      h = (struct elf_link_hash_entry *)
+		bfd_link_hash_lookup (info->hash, "__tls_get_addr", FALSE,
+				      FALSE, TRUE);
+	      BFD_ASSERT (h != NULL);
+	      r_type = R_TILEGX_JUMPOFF_X1_PLT;
+	      howto = tilegx_elf_howto_table + r_type;
+	    }
+	  else if (r_type == R_TILEGX_IMM8_X0_TLS_ADD
+		   || r_type ==  R_TILEGX_IMM8_X1_TLS_ADD
+		   || r_type ==  R_TILEGX_IMM8_Y0_TLS_ADD
+		   || r_type ==  R_TILEGX_IMM8_Y1_TLS_ADD)
+	    {
+	      bfd_boolean is_pipe0 =
+		(r_type == R_TILEGX_IMM8_X0_TLS_ADD
+		 || r_type ==  R_TILEGX_IMM8_Y0_TLS_ADD);
+	      bfd_boolean is_X0X1 =
+		(r_type == R_TILEGX_IMM8_X0_TLS_ADD
+		 || r_type ==  R_TILEGX_IMM8_X1_TLS_ADD);
+	      int dest_begin = is_pipe0 ? 0 : 31;
+	      int src_begin;
+	      const bfd_byte *insn;
+	      const bfd_byte *mask;
+
+	      if (is_tls_le)
+		{
+		  /* 1. copy dest operand into the first source operand.
+		     2. change the opcode to "move".  */
+		  src_begin = is_pipe0 ? 6 : 37;
+		  insn = is_X0X1 ? insn_move_X0X1 : insn_move_Y0Y1;
+
+		  switch (r_type)
+		    {
+		    case R_TILEGX_IMM8_X0_TLS_ADD:
+		      mask = insn_mask_X0_no_dest_no_srca;
+		      break;
+		    case R_TILEGX_IMM8_X1_TLS_ADD:
+		      mask = insn_mask_X1_no_dest_no_srca;
+		      break;
+		    case R_TILEGX_IMM8_Y0_TLS_ADD:
+		      mask = insn_mask_Y0_no_dest_no_srca;
+		      break;
+		    case R_TILEGX_IMM8_Y1_TLS_ADD:
+		      mask = insn_mask_Y1_no_dest_no_srca;
+		      break;
+		    }
+		}
+	      else
+		{
+		  /* 1. copy dest operand into the second source operand.
+		     2. change the opcode to "add".  */
+		  src_begin = is_pipe0 ? 12 : 43;
+		  if (ABI_64_P (output_bfd))
+		    insn = is_X0X1 ? insn_add_X0X1 : insn_add_Y0Y1;
+		  else
+		    insn = is_X0X1 ? insn_addx_X0X1 : insn_addx_Y0Y1;
+
+		  switch (r_type)
+		    {
+		    case R_TILEGX_IMM8_X0_TLS_ADD:
+		      mask = insn_mask_X0_no_operand;
+		      break;
+		    case R_TILEGX_IMM8_X1_TLS_ADD:
+		      mask = insn_mask_X1_no_operand;
+		      break;
+		    case R_TILEGX_IMM8_Y0_TLS_ADD:
+		      mask = insn_mask_Y0_no_operand;
+		      break;
+		    case R_TILEGX_IMM8_Y1_TLS_ADD:
+		      mask = insn_mask_Y1_no_operand;
+		      break;
+		    }
+		}
+
+	      tilegx_copy_bits (contents + rel->r_offset, dest_begin,
+				src_begin, 6);
+	      tilegx_replace_insn (contents  + rel->r_offset, mask, insn);
+
+	      continue;
+	    }
+	  else
+	    {
+	      const bfd_byte *mask = NULL;
+	      const bfd_byte *add_insn = NULL;
+	      bfd_boolean is_64bit = ABI_64_P (output_bfd);
+
+	      switch (r_type)
+		{
+		case R_TILEGX_IMM8_X0_TLS_GD_ADD:
+		  add_insn = is_tls_iele
+		    ? (is_64bit ? insn_tls_ie_add_X0X1 : insn_tls_ie_addx_X0X1)
+		    : insn_tls_gd_add_X0X1;
+		  mask = insn_mask_X0_no_dest_no_srca;
+		  break;
+		case R_TILEGX_IMM8_X1_TLS_GD_ADD:
+		  add_insn = is_tls_iele
+		    ? (is_64bit ? insn_tls_ie_add_X0X1 : insn_tls_ie_addx_X0X1)
+		    : insn_tls_gd_add_X0X1;
+		  mask = insn_mask_X1_no_dest_no_srca;
+		  break;
+		case R_TILEGX_IMM8_Y0_TLS_GD_ADD:
+		  add_insn = is_tls_iele
+		    ? (is_64bit ? insn_tls_ie_add_Y0Y1 : insn_tls_ie_addx_Y0Y1)
+		    : insn_tls_gd_add_Y0Y1;
+		  mask = insn_mask_Y0_no_dest_no_srca;
+		  break;
+		case R_TILEGX_IMM8_Y1_TLS_GD_ADD:
+		  add_insn = is_tls_iele
+		    ? (is_64bit ? insn_tls_ie_add_Y0Y1 : insn_tls_ie_addx_Y0Y1)
+		    : insn_tls_gd_add_Y0Y1;
+		  mask = insn_mask_Y1_no_dest_no_srca;
+		  break;
+		}
+
+	      tilegx_replace_insn (contents + rel->r_offset, mask, add_insn);
+
+	      continue;
+	    }
+	  break;
+	case R_TILEGX_TLS_IE_LOAD:
+	  if (!input_section->sec_flg0
+	      && !info->shared
+	      && (h == NULL || h->dynindx == -1))
+	    {
+	      /* IE -> LE */
+	      tilegx_replace_insn (contents + rel->r_offset,
+				   insn_mask_X1_no_dest_no_srca,
+				   insn_move_X0X1);
+	    }
+	  else
+	    {
+	      /* IE -> IE */
+	      if (ABI_64_P (output_bfd))
+		tilegx_replace_insn (contents + rel->r_offset,
+				     insn_mask_X1_no_dest_no_srca,
+				     insn_tls_ie_ld_X1);
+	      else
+		tilegx_replace_insn (contents + rel->r_offset,
+				     insn_mask_X1_no_dest_no_srca,
+				     insn_tls_ie_ld4s_X1);
+	    }
+	  continue;
+	  break;
+	default:
+	  break;
+	}
+
+      switch (r_type)
+	{
 	case R_TILEGX_IMM16_X0_HW0_GOT:
 	case R_TILEGX_IMM16_X1_HW0_GOT:
-	case R_TILEGX_IMM16_X0_HW1_GOT:
-	case R_TILEGX_IMM16_X1_HW1_GOT:
-	case R_TILEGX_IMM16_X0_HW2_GOT:
-	case R_TILEGX_IMM16_X1_HW2_GOT:
-	case R_TILEGX_IMM16_X0_HW3_GOT:
-	case R_TILEGX_IMM16_X1_HW3_GOT:
 	case R_TILEGX_IMM16_X0_HW0_LAST_GOT:
 	case R_TILEGX_IMM16_X1_HW0_LAST_GOT:
 	case R_TILEGX_IMM16_X0_HW1_LAST_GOT:
 	case R_TILEGX_IMM16_X1_HW1_LAST_GOT:
-	case R_TILEGX_IMM16_X0_HW2_LAST_GOT:
-	case R_TILEGX_IMM16_X1_HW2_LAST_GOT:
 	  /* Relocation is to the entry for this symbol in the global
 	     offset table.  */
 	  if (htab->elf.sgot == NULL)
@@ -3248,92 +3670,83 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    }
 	  break;
 
+        case R_TILEGX_IMM16_X0_HW0_TLS_LE:
+        case R_TILEGX_IMM16_X1_HW0_TLS_LE:
+        case R_TILEGX_IMM16_X0_HW0_LAST_TLS_LE:
+        case R_TILEGX_IMM16_X1_HW0_LAST_TLS_LE:
+        case R_TILEGX_IMM16_X0_HW1_LAST_TLS_LE:
+        case R_TILEGX_IMM16_X1_HW1_LAST_TLS_LE:
+	  if (info->shared)
+	    {
+	      Elf_Internal_Rela outrel;
+	      bfd_boolean skip;
+
+	      BFD_ASSERT (sreloc != NULL);
+	      skip = FALSE;
+	      outrel.r_offset =
+		_bfd_elf_section_offset (output_bfd, info, input_section,
+					 rel->r_offset);
+	      if (outrel.r_offset == (bfd_vma) -1)
+		skip = TRUE;
+	      else if (outrel.r_offset == (bfd_vma) -2)
+		skip = TRUE;
+	      outrel.r_offset += (input_section->output_section->vma
+				  + input_section->output_offset);
+	      if (skip)
+		memset (&outrel, 0, sizeof outrel);
+	      else
+		{
+		  outrel.r_info = TILEGX_ELF_R_INFO (htab, NULL, 0, r_type);
+		  outrel.r_addend = relocation - dtpoff_base (info)
+				    + rel->r_addend;
+		}
+
+	      tilegx_elf_append_rela (output_bfd, sreloc, &outrel);
+	      continue;
+	    }
+	  relocation = tpoff (info, relocation);
+	  break;
+
         case R_TILEGX_IMM16_X0_HW0_TLS_GD:
         case R_TILEGX_IMM16_X1_HW0_TLS_GD:
-        case R_TILEGX_IMM16_X0_HW1_TLS_GD:
-        case R_TILEGX_IMM16_X1_HW1_TLS_GD:
-        case R_TILEGX_IMM16_X0_HW2_TLS_GD:
-        case R_TILEGX_IMM16_X1_HW2_TLS_GD:
-        case R_TILEGX_IMM16_X0_HW3_TLS_GD:
-        case R_TILEGX_IMM16_X1_HW3_TLS_GD:
         case R_TILEGX_IMM16_X0_HW0_LAST_TLS_GD:
         case R_TILEGX_IMM16_X1_HW0_LAST_TLS_GD:
         case R_TILEGX_IMM16_X0_HW1_LAST_TLS_GD:
         case R_TILEGX_IMM16_X1_HW1_LAST_TLS_GD:
-        case R_TILEGX_IMM16_X0_HW2_LAST_TLS_GD:
-        case R_TILEGX_IMM16_X1_HW2_LAST_TLS_GD:
-          tls_type = GOT_TLS_GD;
-          goto have_tls_reference;
-
         case R_TILEGX_IMM16_X0_HW0_TLS_IE:
         case R_TILEGX_IMM16_X1_HW0_TLS_IE:
-        case R_TILEGX_IMM16_X0_HW1_TLS_IE:
-        case R_TILEGX_IMM16_X1_HW1_TLS_IE:
-        case R_TILEGX_IMM16_X0_HW2_TLS_IE:
-        case R_TILEGX_IMM16_X1_HW2_TLS_IE:
-        case R_TILEGX_IMM16_X0_HW3_TLS_IE:
-        case R_TILEGX_IMM16_X1_HW3_TLS_IE:
         case R_TILEGX_IMM16_X0_HW0_LAST_TLS_IE:
         case R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE:
         case R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE:
         case R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE:
-        case R_TILEGX_IMM16_X0_HW2_LAST_TLS_IE:
-        case R_TILEGX_IMM16_X1_HW2_LAST_TLS_IE:
-          tls_type = GOT_TLS_IE;
-          /* Fall through. */
-
-        have_tls_reference:
+	  r_type = tilegx_elf_tls_transition (info, r_type, h == NULL,
+					      input_section->sec_flg0);
+          tls_type = GOT_UNKNOWN;
 	  if (h == NULL && local_got_offsets)
-	    tls_type = _bfd_tilegx_elf_local_got_tls_type (input_bfd) [r_symndx];
+	    tls_type =
+	      _bfd_tilegx_elf_local_got_tls_type (input_bfd) [r_symndx];
 	  else if (h != NULL)
-	    tls_type = tilegx_elf_hash_entry(h)->tls_type;
+	    {
+	      tls_type = tilegx_elf_hash_entry(h)->tls_type;
+	      if (!info->shared && h->dynindx == -1 && tls_type == GOT_TLS_IE)
+		r_type = (!input_section->sec_flg0
+			  ? tilegx_tls_translate_to_le (r_type)
+			  : tilegx_tls_translate_to_ie (r_type));
+	    }
 
 	  if (tls_type == GOT_TLS_IE)
-	    switch (r_type)
-	      {
-              case R_TILEGX_IMM16_X0_HW0_TLS_GD:
-                r_type = R_TILEGX_IMM16_X0_HW0_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X1_HW0_TLS_GD:
-                r_type = R_TILEGX_IMM16_X1_HW0_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X0_HW1_TLS_GD:
-                r_type = R_TILEGX_IMM16_X0_HW1_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X1_HW1_TLS_GD:
-                r_type = R_TILEGX_IMM16_X1_HW1_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X0_HW2_TLS_GD:
-                r_type = R_TILEGX_IMM16_X0_HW2_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X1_HW2_TLS_GD:
-                r_type = R_TILEGX_IMM16_X1_HW2_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X0_HW3_TLS_GD:
-                r_type = R_TILEGX_IMM16_X0_HW3_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X1_HW3_TLS_GD:
-                r_type = R_TILEGX_IMM16_X1_HW3_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X0_HW0_LAST_TLS_GD:
-                r_type = R_TILEGX_IMM16_X0_HW0_LAST_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X1_HW0_LAST_TLS_GD:
-                r_type = R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X0_HW1_LAST_TLS_GD:
-                r_type = R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X1_HW1_LAST_TLS_GD:
-                r_type = R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X0_HW2_LAST_TLS_GD:
-                r_type = R_TILEGX_IMM16_X0_HW2_LAST_TLS_IE;
-                break;
-              case R_TILEGX_IMM16_X1_HW2_LAST_TLS_GD:
-                r_type = R_TILEGX_IMM16_X1_HW2_LAST_TLS_IE;
-                break;
-	      }
+	    r_type = tilegx_tls_translate_to_ie (r_type);
+
+	  if (r_type == R_TILEGX_IMM16_X0_HW0_TLS_LE
+	      || r_type == R_TILEGX_IMM16_X1_HW0_TLS_LE
+	      || r_type == R_TILEGX_IMM16_X0_HW0_LAST_TLS_LE
+	      || r_type == R_TILEGX_IMM16_X1_HW0_LAST_TLS_LE
+	      || r_type == R_TILEGX_IMM16_X0_HW1_LAST_TLS_LE
+	      || r_type == R_TILEGX_IMM16_X1_HW1_LAST_TLS_LE)
+	    {
+	      relocation = tpoff (info, relocation);
+	      break;
+	    }
 
 	  if (h != NULL)
 	    {
@@ -3386,18 +3799,10 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
                 {
 		  case R_TILEGX_IMM16_X0_HW0_TLS_IE:
 		  case R_TILEGX_IMM16_X1_HW0_TLS_IE:
-		  case R_TILEGX_IMM16_X0_HW1_TLS_IE:
-		  case R_TILEGX_IMM16_X1_HW1_TLS_IE:
-		  case R_TILEGX_IMM16_X0_HW2_TLS_IE:
-		  case R_TILEGX_IMM16_X1_HW2_TLS_IE:
-		  case R_TILEGX_IMM16_X0_HW3_TLS_IE:
-		  case R_TILEGX_IMM16_X1_HW3_TLS_IE:
 		  case R_TILEGX_IMM16_X0_HW0_LAST_TLS_IE:
 		  case R_TILEGX_IMM16_X1_HW0_LAST_TLS_IE:
 		  case R_TILEGX_IMM16_X0_HW1_LAST_TLS_IE:
 		  case R_TILEGX_IMM16_X1_HW1_LAST_TLS_IE:
-		  case R_TILEGX_IMM16_X0_HW2_LAST_TLS_IE:
-		  case R_TILEGX_IMM16_X1_HW2_LAST_TLS_IE:
 		    if (need_relocs) {
 		      TILEGX_ELF_PUT_WORD (htab, output_bfd, 0,
 					   htab->elf.sgot->contents + off);
@@ -3418,18 +3823,10 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 		  case R_TILEGX_IMM16_X0_HW0_TLS_GD:
 		  case R_TILEGX_IMM16_X1_HW0_TLS_GD:
-		  case R_TILEGX_IMM16_X0_HW1_TLS_GD:
-		  case R_TILEGX_IMM16_X1_HW1_TLS_GD:
-		  case R_TILEGX_IMM16_X0_HW2_TLS_GD:
-		  case R_TILEGX_IMM16_X1_HW2_TLS_GD:
-		  case R_TILEGX_IMM16_X0_HW3_TLS_GD:
-		  case R_TILEGX_IMM16_X1_HW3_TLS_GD:
 		  case R_TILEGX_IMM16_X0_HW0_LAST_TLS_GD:
 		  case R_TILEGX_IMM16_X1_HW0_LAST_TLS_GD:
 		  case R_TILEGX_IMM16_X0_HW1_LAST_TLS_GD:
 		  case R_TILEGX_IMM16_X1_HW1_LAST_TLS_GD:
-		  case R_TILEGX_IMM16_X0_HW2_LAST_TLS_GD:
-		  case R_TILEGX_IMM16_X1_HW2_LAST_TLS_GD:
 		    if (need_relocs) {
  	              outrel.r_offset = (htab->elf.sgot->output_section->vma
 				       + htab->elf.sgot->output_offset + off);

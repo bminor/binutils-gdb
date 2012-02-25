@@ -1,5 +1,42 @@
 2012-02-25  Walter Lee  <walt@tilera.com>
 
+	* tc-tilepro.c (O_tls_le): Define operator.
+	(O_tls_le_lo16): Ditto.
+	(O_tls_le_hi16): Ditto.
+	(O_tls_le_ha16): Ditto.
+	(O_tls_gd_call): Ditto.
+	(O_tls_gd_add): Ditto.
+	(O_tls_ie_load): Ditto.
+	(md_begin): Delete old operators; handle new operators.
+	(emit_tilepro_instruction): Ditto.
+	(md_apply_fix): Ditto.
+	* tc-tilegx.c (O_hw1_got): Delete operator.
+	(O_hw2_got): Ditto.
+	(O_hw3_got): Ditto.
+	(O_hw2_last_got): Ditto.
+	(O_hw1_tls_gd): Ditto.
+	(O_hw2_tls_gd): Ditto.
+	(O_hw3_tls_gd): Ditto.
+	(O_hw2_last_tls_gd): Ditto.
+	(O_hw1_tls_ie): Ditto.
+	(O_hw2_tls_ie): Ditto.
+	(O_hw3_tls_ie): Ditto.
+	(O_hw2_last_tls_ie): Ditto.
+	(O_hw0_tls_le): Define operator.
+	(O_hw0_last_tls_le): Ditto.
+	(O_hw1_last_tls_le): Ditto.
+	(O_tls_gd_call): Ditto.
+	(O_tls_gd_add): Ditto.
+	(O_tls_ie_load): Ditto.
+	(O_tls_add): Ditto.
+	(md_begin): Delete old operators; handle new operators.
+	(emit_tilegx_instruction): Ditto.
+	(md_apply_fix): Ditto.
+	* doc/c-tilegx.texi: Delete old operators; document new operators.
+	* doc/c-tilepro.texi: Ditto.
+
+2012-02-25  Walter Lee  <walt@tilera.com>
+
 	* tc-tilepro.c (apply_special_operator): delete cases for
 	got and tls operators.
 	(md_apply_fix): Ditto.
