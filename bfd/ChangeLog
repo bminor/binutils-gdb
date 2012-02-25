@@ -1,3 +1,10 @@
+2012-02-25  Walter Lee  <walt@tilera.com>
+
+	* arctures.c (bfd_architecture): Define bfd_mach_tilegx32.
+	* bfd-in2.h: Regenerate.
+	* cpu-tilegx.c (bfd_tilegx32_arch): define.
+	  (bfd_tilegx_arch): link to bfd_tilegx32_arch.
+
 2012-02-24  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/13730

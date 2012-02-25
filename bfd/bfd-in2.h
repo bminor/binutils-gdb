@@ -2159,6 +2159,7 @@ enum bfd_architecture
   bfd_arch_tilegx, /* Tilera TILE-Gx */
 #define bfd_mach_tilepro   1
 #define bfd_mach_tilegx    1
+#define bfd_mach_tilegx32  2
   bfd_arch_last
   };
 

@@ -241,6 +241,10 @@ md_begin (void)
 {
   const struct tilegx_opcode *op;
   int i;
+  int mach = (tilegx_arch_size == 64) ? bfd_mach_tilegx : bfd_mach_tilegx32;
+
+  if (! bfd_set_arch_mach (stdoutput, bfd_arch_tilegx, mach))
+    as_warn (_("Could not set architecture and machine"));
 
   /* Guarantee text section is aligned.  */
   bfd_set_section_alignment (stdoutput, text_section,
