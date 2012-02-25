@@ -726,20 +726,22 @@ void
 clear_gdb_breakpoint_conditions (CORE_ADDR addr)
 {
   struct breakpoint *bp = find_gdb_breakpoint_at (addr);
-  struct point_cond_list *cond, **cond_p;
+  struct point_cond_list *cond;
 
   if (bp == NULL || bp->cond_list == NULL)
     return;
 
   cond = bp->cond_list;
-  cond_p = &bp->cond_list->next;
 
   while (cond != NULL)
     {
+      struct point_cond_list *cond_next;
+
+      cond_next = cond->next;
+      free (cond->cond->bytes);
       free (cond->cond);
       free (cond);
-      cond = *cond_p;
-      cond_p = &cond->next;
+      cond = cond_next;
     }
 
   bp->cond_list = NULL;
