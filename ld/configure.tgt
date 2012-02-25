@@ -654,7 +654,10 @@ tic6x-*-uclinux)	targ_emul=elf32_tic6x_linux_le
 tic80-*-*)		targ_emul=tic80coff
 			;;
 tilegx-*-*)		targ_emul=elf64tilegx
-			targ_extra_emuls="elf32tilegx"
+			targ_extra_emuls="elf64tilegx_be elf32tilegx elf32tilegx_be"
+			targ_extra_libpath=$targ_extra_emuls ;;
+tilegxbe-*-*)		targ_emul=elf64tilegx_be
+			targ_extra_emuls="elf64tilegx elf32tilegx elf32tilegx_be"
 			targ_extra_libpath=$targ_extra_emuls ;;
 tilepro-*-*)		targ_emul=elf32tilepro ;;
 v850*-*-*)		targ_emul=v850

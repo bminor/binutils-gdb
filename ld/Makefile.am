@@ -250,6 +250,7 @@ ALL_EMULATION_SOURCES = \
 	eelf32rl78.c \
 	eelf32rx.c \
 	eelf32tilegx.c \
+	eelf32tilegx_be.c \
 	eelf32tilepro.c \
 	eelf32vax.c \
 	eelf32xc16x.c \
@@ -482,6 +483,7 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64ppc.c \
 	eelf64ppc_fbsd.c \
 	eelf64tilegx.c \
+ 	eelf64tilegx_be.c \
 	eelf_l1om.c \
 	eelf_l1om_fbsd.c \
 	eelf_k1om.c \
@@ -1152,6 +1154,10 @@ eelf32tilegx.c: $(srcdir)/emulparams/elf32tilegx.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32tilegx "$(tdir_tilegx)"
+eelf32tilegx_be.c: $(srcdir)/emulparams/elf32tilegx_be.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32tilegx_be "$(tdir_tilegx_be)"
 eelf32tilepro.c: $(srcdir)/emulparams/elf32tilepro.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -1989,6 +1995,10 @@ eelf64tilegx.c: $(srcdir)/emulparams/elf64tilegx.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64tilegx "$(tdir_tilegx)"
+eelf64tilegx_be.c: $(srcdir)/emulparams/elf64tilegx_be.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64tilegx_be "$(tdir_tilegx_be)"
 eelf_l1om.c: $(srcdir)/emulparams/elf_l1om.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_l1om "$(tdir_elf_l1om)"

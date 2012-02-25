@@ -87,8 +87,11 @@ tilegx_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define ELF_MAXPAGESIZE		0x10000
 #define ELF_COMMONPAGESIZE	0x10000
 
-#define TARGET_LITTLE_SYM       bfd_elf64_tilegx_vec
-#define TARGET_LITTLE_NAME	"elf64-tilegx"
+
+#define TARGET_BIG_SYM          bfd_elf64_tilegx_be_vec
+#define TARGET_BIG_NAME         "elf64-tilegx-be"
+#define TARGET_LITTLE_SYM       bfd_elf64_tilegx_le_vec
+#define TARGET_LITTLE_NAME      "elf64-tilegx-le"
 
 #define elf_backend_reloc_type_class	     tilegx_reloc_type_class
 

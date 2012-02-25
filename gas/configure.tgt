@@ -82,6 +82,8 @@ case ${cpu} in
   sparclet*)		cpu_type=sparc arch=sparclet ;;
   sparclite*)		cpu_type=sparc arch=sparclite ;;
   sparc*)		cpu_type=sparc arch=sparclite ;; # ??? See tc-sparc.c.
+  tilegx*be)		cpu_type=tilegx endian=big ;;
+  tilegx*)		cpu_type=tilegx endian=little ;;
   v850*)		cpu_type=v850 ;;
   x86_64*)		cpu_type=i386 arch=x86_64;;
   xtensa*)		cpu_type=xtensa arch=xtensa ;;
@@ -404,7 +406,7 @@ case ${generic_target} in
   tic54x-*-* | c54x*-*-*)		fmt=coff bfd_gas=yes need_libm=yes;;
   tic6x-*-*)				fmt=elf ;;
 
-  tilepro-*-* | tilegx-*-*)		fmt=elf ;;
+  tilepro-*-* | tilegx*-*-*)		fmt=elf ;;
 
   v850*-*-*)				fmt=elf ;;
 

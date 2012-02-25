@@ -1507,8 +1507,12 @@ case "${targ}" in
 
 #ifdef BFD64
   tilegx-*-*)
-    targ_defvec=bfd_elf64_tilegx_vec
-    targ_selvecs=bfd_elf32_tilegx_vec
+    targ_defvec=bfd_elf64_tilegx_le_vec
+    targ_selvecs="bfd_elf64_tilegx_be_vec bfd_elf32_tilegx_be_vec bfd_elf32_tilegx_le_vec"
+    ;;
+  tilegxbe-*-*)
+    targ_defvec=bfd_elf64_tilegx_be_vec
+    targ_selvecs="bfd_elf64_tilegx_le_vec bfd_elf32_tilegx_be_vec bfd_elf32_tilegx_le_vec"
     ;;
 #endif
 

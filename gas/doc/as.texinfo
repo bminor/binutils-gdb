@@ -497,7 +497,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset TILEGX
 
 @emph{Target TILE-Gx options:}
-   [@b{-m32}|@b{-m64}]
+   [@b{-m32}|@b{-m64}][@b{-EB}][@b{-EL}]
 @end ifset
 @ifset TILEPRO
 @c TILEPro has no machine-dependent assembler options

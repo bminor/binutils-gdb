@@ -1,3 +1,7 @@
+2012-02-25  Walter Lee  <walt@tilera.com>
+
+	* binutils-all/objdump.exp (cpus_expected): Add tilegx.
+
 2012-02-14  Alan Modra  <amodra@gmail.com>
 
 	* binutils-all/dlltool.exp: Add setup_xfail.

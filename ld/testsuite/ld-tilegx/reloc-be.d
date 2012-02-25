@@ -1,5 +1,5 @@
 
-.*:     file format elf64-tilegx.*
+.*:     file format .*tilegx.*
 
 Contents of section .text:
  100b0 .*
@@ -21,9 +21,9 @@ Contents of section .text:
  101b0 .*
  101c0 .*
 Contents of section .data:
- 201e0 b8010100 c0010100 7a82644b 11773200  .*
- 201f0 00002e00 2c7a8234 12785634 127856bc  .*
- 20200 9a341278 56bc9af0 de000000 00000000  .*
+ 201e0 000101b8 000101c0 827a4b64 11770000  .*
+ 201f0 0032002e 2c827a12 34567812 3456789a  .*
+ 20200 bc123456 789abcde f0000000 00000000  .*
  20210 00000000 00000000 00000000 00000000  .*
 
 Disassembly of section .text:

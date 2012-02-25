@@ -1,3 +1,21 @@
+2012-02-25  Walter Lee  <walt@tilera.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf32tilegx_be.c.
+	(ALL_64_EMULATION_SOURCES): Add eelf64tilegx_be.c.
+	(eelf32tilegx_be.c): Add rule to build this file.
+	(eelf64tilegx_be.c): Ditto.
+	* Makefile.in: Regenerate.
+	* configure.tgt (tilegx-*-*): Support big endian.
+	(tilegxbe-*-*): New.
+	* emulparams/elf32tilegx.sh (OUTPUT_FORMAT): Rename.
+	(BIG_OUTPUT_FORMAT): Define.
+	(LITTLE_OUTPUT_FORMAT): Define.
+	* emulparams/elf32tilegx_be.sh: New.
+	* emulparams/elf64tilegx.sh (OUTPUT_FORMAT): Rename.
+	(BIG_OUTPUT_FORMAT): Define.
+	(LITTLE_OUTPUT_FORMAT): Define.
+	* emulparams/elf64tilegx_be.sh: New.
+
 2012-02-24  Kai Tietz  <ktietz@redhat.com>
 
 	PR binutils/13710

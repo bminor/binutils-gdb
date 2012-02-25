@@ -72,12 +72,18 @@ static int tilegx_arch_size = 64;
 const char *
 tilegx_target_format (void)
 {
-  return tilegx_arch_size == 64 ? "elf64-tilegx" : "elf32-tilegx";
+    if (target_big_endian) {
+        return tilegx_arch_size == 64 ? "elf64-tilegx-be" : "elf32-tilegx-be";
+    } else {
+        return tilegx_arch_size == 64 ? "elf64-tilegx-le" : "elf32-tilegx-le";
+    }
 }
 
 
 #define OPTION_32 (OPTION_MD_BASE + 0)
 #define OPTION_64 (OPTION_MD_BASE + 1)
+#define OPTION_EB (OPTION_MD_BASE + 2)
+#define OPTION_EL (OPTION_MD_BASE + 3)
 
 const char *md_shortopts = "VQ:";
 
@@ -85,6 +91,8 @@ struct option md_longopts[] =
 {
   {"32", no_argument, NULL, OPTION_32},
   {"64", no_argument, NULL, OPTION_64},
+  {"EB", no_argument, NULL, OPTION_EB },
+  {"EL", no_argument, NULL, OPTION_EL },
   {NULL, no_argument, NULL, 0}
 };
 
@@ -113,6 +121,14 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       tilegx_arch_size = 64;
       break;
 
+    case OPTION_EB:
+      target_big_endian = 1;
+      break;
+
+    case OPTION_EL:
+      target_big_endian = 0;
+      break;
+
     default:
       return 0;
     }
@@ -126,6 +142,7 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -Q                      ignored\n\
   -V                      print assembler version number\n\
+  -EB/-EL                 generate big-endian/little-endian code\n\
   --32/--64               generate 32bit/64bit code\n"));
 }
 
@@ -1268,6 +1285,15 @@ const pseudo_typeS md_pseudo_table[] =
 
 /* Equal to MAX_PRECISION in atof-ieee.c  */
 #define MAX_LITTLENUMS 6
+
+void
+md_number_to_chars (char * buf, valueT val, int n)
+{
+  if (target_big_endian)
+    number_to_chars_bigendian (buf, val, n);
+  else
+    number_to_chars_littleendian (buf, val, n);
+}
 
 /* Turn the string pointed to by litP into a floating point constant
    of type TYPE, and emit the appropriate bytes.  The number of

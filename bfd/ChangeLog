@@ -1,9 +1,34 @@
 2012-02-25  Walter Lee  <walt@tilera.com>
 
+	* config.bfd (tilegx-*-*): rename little endian vector; add big
+	endian vector.
+	(tilegxbe-*-*): New case.
+	* configure.in (bfd_elf32_tilegx_vec): Rename...
+	(bfd_elf32_tilegx_le_vec): ... to this.
+	(bfd_elf32_tilegx_be_vec): New vector.
+	(bfd_elf64_tilegx_vec): Rename...
+	(bfd_elf64_tilegx_le_vec): ... to this.
+	(bfd_elf64_tilegx_be_vec): New vector.
+	* configure: Regenerate.
+	* elf32-tilegx.c (TARGET_LITTLE_SYM): Rename.
+	(TARGET_LITTLE_NAME): Ditto.
+	(TARGET_BIG_SYM): Define.
+	(TARGET_BIG_NAME): Define.
+	* elf64-tilegx.c (TARGET_LITTLE_SYM): Rename.
+	(TARGET_LITTLE_NAME): Ditto.
+	(TARGET_BIG_SYM): Define.
+	(TARGET_BIG_NAME): Define.
+	* targets.c (bfd_elf32_tilegx_vec): Rename...
+	(bfd_elf32_tilegx_le_vec): ... to this.
+	(bfd_elf32_tilegx_be_vec): Declare.
+	(bfd_elf64_tilegx_vec): Rename...
+	(bfd_elf64_tilegx_le_vec): ... to this.
+	(bfd_elf64_tilegx_be_vec): Declare.
+	(_bfd_target_vector): Add / rename above vectors.
 	* arctures.c (bfd_architecture): Define bfd_mach_tilegx32.
 	* bfd-in2.h: Regenerate.
 	* cpu-tilegx.c (bfd_tilegx32_arch): define.
-	  (bfd_tilegx_arch): link to bfd_tilegx32_arch.
+	(bfd_tilegx_arch): link to bfd_tilegx32_arch.
 
 2012-02-24  Nick Clifton  <nickc@redhat.com>
 

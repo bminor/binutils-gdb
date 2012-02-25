@@ -801,7 +801,8 @@ do
     bfd_elf32_tic6x_linux_le_vec) tb="$tb elf32-tic6x.lo elf32.lo $elf" ;;
     bfd_elf32_tic6x_elf_be_vec) tb="$tb elf32-tic6x.lo elf32.lo $elf" ;;
     bfd_elf32_tic6x_elf_le_vec) tb="$tb elf32-tic6x.lo elf32.lo $elf" ;;
-    bfd_elf32_tilegx_vec)	tb="$tb elf32-tilegx.lo elfxx-tilegx.lo elf32.lo $elf" ; target_size=32 ;;
+    bfd_elf32_tilegx_be_vec)	tb="$tb elf32-tilegx.lo elfxx-tilegx.lo elf32.lo $elf" ; target_size=32 ;;
+    bfd_elf32_tilegx_le_vec)	tb="$tb elf32-tilegx.lo elfxx-tilegx.lo elf32.lo $elf" ; target_size=32 ;;
     bfd_elf32_tilepro_vec)	tb="$tb elf32-tilepro.lo elf32.lo $elf" ;;
     bfd_elf32_tradbigmips_vec | bfd_elf32_tradbigmips_freebsd_vec)
 				tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
@@ -840,7 +841,8 @@ do
     bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_sparc_freebsd_vec) tb="$tb elf64-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_sparc_sol2_vec) tb="$tb elf64-sparc.lo elfxx-sparc.lo elf-vxworks.lo elf64.lo $elf"; target_size=64 ;;
-    bfd_elf64_tilegx_vec)	tb="$tb elf64-tilegx.lo elfxx-tilegx.lo elf64.lo $elf" ; target_size=64 ;;
+    bfd_elf64_tilegx_be_vec)	tb="$tb elf64-tilegx.lo elfxx-tilegx.lo elf64.lo $elf" ; target_size=64 ;;
+    bfd_elf64_tilegx_le_vec)	tb="$tb elf64-tilegx.lo elfxx-tilegx.lo elf64.lo $elf" ; target_size=64 ;;
     bfd_elf64_tradbigmips_vec | bfd_elf64_tradbigmips_freebsd_vec)
 				tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_tradlittlemips_vec | bfd_elf64_tradlittlemips_freebsd_vec)

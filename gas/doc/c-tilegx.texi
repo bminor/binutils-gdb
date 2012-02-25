@@ -33,6 +33,11 @@ The following table lists all available TILE-Gx specific options:
 @item -m32 | -m64
 Select the word size, either 32 bits or 64 bits.
 
+@cindex @samp{-EB} option, TILE-Gx
+@cindex @samp{-EL} option, TILE-Gx
+@item -EB | -EL
+Select the endianness, either big-endian (-EB) or little-endian (-EL).
+
 @end table
 @c man end
 

@@ -1,6 +1,19 @@
 2012-02-25  Walter Lee  <walt@tilera.com>
 
-	* tc-tilegx.c (md_begin): set architecture and machine.
+	* tc-tilegx.c (md_begin): Set architecture and machine.
+	(tilegx_target_format): Handle big endian.
+	(OPTION_EB): Define.
+	(OPTION_EL): Define.
+	(md_longopts): Add entries for "EB" and "EL".
+	(md_parse_option): Handle OPTION_EB and OPTION_EL.
+	(md_show_usage): Add -EB and -EL.
+	(md_number_to_chars): New.
+	* tc-tilegx.h (TARGET_BYTES_BIG_ENDIAN): Guard definition with
+	ifndef.
+	(md_number_to_chars): Delete.
+	* configure.tgt (tilegx*be): Handle.
+	* doc/as.texinfo [TILE-Gx]: Document -EB and -EL.
+	* doc/c-tilegx.texi: Ditto.
 
 2012-02-21  H.J. Lu  <hongjiu.lu@intel.com>
 

@@ -24,7 +24,9 @@
 
 #define TC_TILEGX
 
+#ifndef TARGET_BYTES_BIG_ENDIAN
 #define TARGET_BYTES_BIG_ENDIAN 0
+#endif
 
 #define WORKING_DOT_WORD
 
@@ -34,8 +36,6 @@ extern const char * tilegx_target_format (void);
 #define TARGET_FORMAT tilegx_target_format ()
 
 #define DWARF2_LINE_MIN_INSN_LENGTH	8
-
-#define md_number_to_chars		number_to_chars_littleendian
 
 #define DIFF_EXPR_OK   /* foo-. gets turned into PC relative relocs */
 
