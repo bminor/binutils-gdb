@@ -1,5 +1,11 @@
 2012-02-25  Walter Lee  <walt@tilera.com>
 
+	* tc-tilepro.c (emit_tilepro_instruction): Check if symbol is
+	non-local before checking sy_value.
+	* tc-tilegx.c (emit_tilegx_instruction): Ditto.
+
+2012-02-25  Walter Lee  <walt@tilera.com>
+
 	* tc-tilepro.c (O_tls_le): Define operator.
 	(O_tls_le_lo16): Ditto.
 	(O_tls_le_hi16): Ditto.

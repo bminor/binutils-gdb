@@ -715,7 +715,8 @@ emit_tilegx_instruction (tilegx_bundle_bits bits,
 	      /* Now that we've changed the reloc, change ha16(x) into x,
 		 etc.  */
 
-	      if (operand_exp->X_add_symbol->sy_value.X_md)
+	      if (!operand_exp->X_add_symbol->sy_flags.sy_local_symbol
+                  && operand_exp->X_add_symbol->sy_value.X_md)
 		{
 		  /* HACK: We used X_md to mark this symbol as a fake wrapper
 		     around a real expression. To unwrap it, we just grab its
