@@ -1277,8 +1277,9 @@ $ gdb -ex "set auto-load-scripts off" myprogram
 @end smallexample
 
 @item
-Reads command files specified by the @samp{-x} option.  @xref{Command
-Files}, for more details about @value{GDBN} command files.
+Executes commands and command files specified by the @samp{-ex} and
+@samp{-x} options in their specified order.  @xref{Command Files}, for
+more details about @value{GDBN} command files.
 
 @item
 Reads the command history recorded in the @dfn{history file}.
