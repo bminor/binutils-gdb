@@ -381,24 +381,12 @@ apply_special_operator (operatorT op, int num)
   switch (op)
     {
     case O_lo16:
-    case O_got:
-    case O_got_lo16:
-    case O_tls_gd:
-    case O_tls_gd_lo16:
-    case O_tls_ie:
-    case O_tls_ie_lo16:
       return (signed short)num;
 
     case O_hi16:
-    case O_got_hi16:
-    case O_tls_gd_hi16:
-    case O_tls_ie_hi16:
       return (signed short)(num >> 16);
 
     case O_ha16:
-    case O_got_ha16:
-    case O_tls_gd_ha16:
-    case O_tls_ie_ha16:
       return (signed short)((num + 0x8000) >> 16);
 
     default:
@@ -1343,52 +1331,12 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
   /* Apply lo16, hi16, ha16, etc. munging. */
   switch (fixP->fx_r_type)
     {
-    case BFD_RELOC_TILEPRO_IMM16_X0_GOT:
-    case BFD_RELOC_TILEPRO_IMM16_X1_GOT:
-      *valP = value = apply_special_operator (O_got, value);
-      break;
-
-    case BFD_RELOC_TILEPRO_IMM16_X0_GOT_LO:
-    case BFD_RELOC_TILEPRO_IMM16_X1_GOT_LO:
-      *valP = value = apply_special_operator (O_got_lo16, value);
-      break;
-
-    case BFD_RELOC_TILEPRO_IMM16_X0_GOT_HI:
-    case BFD_RELOC_TILEPRO_IMM16_X1_GOT_HI:
-      *valP = value = apply_special_operator (O_got_hi16, value);
-      break;
-
-    case BFD_RELOC_TILEPRO_IMM16_X0_GOT_HA:
-    case BFD_RELOC_TILEPRO_IMM16_X1_GOT_HA:
-      *valP = value = apply_special_operator (O_got_ha16, value);
-      break;
-
-    case BFD_RELOC_TILEPRO_IMM16_X0_TLS_GD:
-    case BFD_RELOC_TILEPRO_IMM16_X1_TLS_GD:
-      *valP = value = apply_special_operator (O_tls_gd, value);
-      break;
-
-    case BFD_RELOC_TILEPRO_IMM16_X0_TLS_IE:
-    case BFD_RELOC_TILEPRO_IMM16_X1_TLS_IE:
-      *valP = value = apply_special_operator (O_tls_ie, value);
-      break;
-
     case BFD_RELOC_LO16:
     case BFD_RELOC_TILEPRO_IMM16_X0_LO:
     case BFD_RELOC_TILEPRO_IMM16_X1_LO:
     case BFD_RELOC_TILEPRO_IMM16_X0_LO_PCREL:
     case BFD_RELOC_TILEPRO_IMM16_X1_LO_PCREL:
       *valP = value = apply_special_operator (O_lo16, value);
-      break;
-
-    case BFD_RELOC_TILEPRO_IMM16_X0_TLS_GD_LO:
-    case BFD_RELOC_TILEPRO_IMM16_X1_TLS_GD_LO:
-      *valP = value = apply_special_operator (O_tls_gd_lo16, value);
-      break;
-
-    case BFD_RELOC_TILEPRO_IMM16_X0_TLS_IE_LO:
-    case BFD_RELOC_TILEPRO_IMM16_X1_TLS_IE_LO:
-      *valP = value = apply_special_operator (O_tls_ie_lo16, value);
       break;
 
     case BFD_RELOC_HI16:
@@ -1399,32 +1347,12 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
       *valP = value = apply_special_operator (O_hi16, value);
       break;
 
-    case BFD_RELOC_TILEPRO_IMM16_X0_TLS_GD_HI:
-    case BFD_RELOC_TILEPRO_IMM16_X1_TLS_GD_HI:
-      *valP = value = apply_special_operator (O_tls_gd_hi16, value);
-      break;
-
-    case BFD_RELOC_TILEPRO_IMM16_X0_TLS_IE_HI:
-    case BFD_RELOC_TILEPRO_IMM16_X1_TLS_IE_HI:
-      *valP = value = apply_special_operator (O_tls_ie_hi16, value);
-      break;
-
     case BFD_RELOC_HI16_S:
     case BFD_RELOC_TILEPRO_IMM16_X0_HA:
     case BFD_RELOC_TILEPRO_IMM16_X1_HA:
     case BFD_RELOC_TILEPRO_IMM16_X0_HA_PCREL:
     case BFD_RELOC_TILEPRO_IMM16_X1_HA_PCREL:
       *valP = value = apply_special_operator (O_ha16, value);
-      break;
-
-    case BFD_RELOC_TILEPRO_IMM16_X0_TLS_GD_HA:
-    case BFD_RELOC_TILEPRO_IMM16_X1_TLS_GD_HA:
-      *valP = value = apply_special_operator (O_tls_gd_ha16, value);
-      break;
-
-    case BFD_RELOC_TILEPRO_IMM16_X0_TLS_IE_HA:
-    case BFD_RELOC_TILEPRO_IMM16_X1_TLS_IE_HA:
-      *valP = value = apply_special_operator (O_tls_ie_ha16, value);
       break;
 
     default:

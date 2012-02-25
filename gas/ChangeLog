@@ -1,5 +1,8 @@
 2012-02-25  Walter Lee  <walt@tilera.com>
 
+	* tc-tilepro.c (apply_special_operator): delete cases for
+	got and tls operators.
+	(md_apply_fix): Ditto.
 	* tc-tilegx.c (md_begin): Set architecture and machine.
 	(tilegx_target_format): Handle big endian.
 	(OPTION_EB): Define.
@@ -8,6 +11,9 @@
 	(md_parse_option): Handle OPTION_EB and OPTION_EL.
 	(md_show_usage): Add -EB and -EL.
 	(md_number_to_chars): New.
+	(apply_special_operator): delete cases for got and tls
+	operators.
+	(md_apply_fix): Ditto.
 	* tc-tilegx.h (TARGET_BYTES_BIG_ENDIAN): Guard definition with
 	ifndef.
 	(md_number_to_chars): Delete.
