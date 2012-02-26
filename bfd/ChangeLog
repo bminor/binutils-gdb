@@ -1,3 +1,7 @@
+2012-02-27  Alan Modra  <amodra@gmail.com>
+
+	* elf32-spu.c (build_stub): Fix malloc under-allocation.
+
 2012-02-25  Walter Lee  <walt@tilera.com>
 	* reloc.c: Add BFD_RELOC_TILEPRO_TLS_GD_CALL,
 	BFD_RELOC_TILEPRO_IMM8_X0_TLS_GD_ADD,

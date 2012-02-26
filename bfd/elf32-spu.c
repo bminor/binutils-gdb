@@ -1,6 +1,7 @@
 /* SPU specific support for 32-bit ELF
 
-   Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1425,7 +1426,7 @@ build_stub (struct bfd_link_info *info,
 	add = (int) irela->r_addend & 0xffffffff;
       if (add != 0)
 	len += 1 + 8;
-      name = bfd_malloc (len);
+      name = bfd_malloc (len + 1);
       if (name == NULL)
 	return FALSE;
 
