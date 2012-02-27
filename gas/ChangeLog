@@ -1,5 +1,11 @@
 2012-02-27  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-tic4x.c (tic4x_do_align): Remove ATTRIBUTE_UNUSED on
+	params.  Properly generate NOP pattern.  Comment reason for
+	subseg_text_p failure.
+
+2012-02-27  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-h8300.c (constant_fits_width_p): Trim constant to 32 bits
 	and sign extend before range tests.
 	(constant_fits_size_p): Similarly.
