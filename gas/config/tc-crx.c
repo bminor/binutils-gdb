@@ -1331,9 +1331,6 @@ check_range (long *num, int bits, int unsigned flags, int update)
   uint32_t upper_64kb = 0xffff0000;
   uint32_t value = *num;
 
-  /* Trim all values to 32 bits.  uint32_t can be more than 32 bits.  */
-  value &= 0xffffffff;
-
   /* Verify operand value is even.  */
   if (flags & OP_EVEN)
     {
@@ -1361,7 +1358,7 @@ check_range (long *num, int bits, int unsigned flags, int update)
 	 value is implementation defined.  See ISO C 6.5.7.  So we use
 	 an unsigned type and sign extend afterwards.  */
       value >>= 1;
-      value = ((value ^ 0x40000000) - 0x40000000) & 0xffffffff;
+      value = (value ^ 0x40000000) - 0x40000000;
       if (update)
 	*num = value;
     }
@@ -1407,7 +1404,7 @@ check_range (long *num, int bits, int unsigned flags, int update)
 
       for (bin = 0; bin < cst4_maps; bin++)
 	{
-	  if (value == ((uint32_t) cst4_map[bin] & 0xffffffff))
+	  if (value == (uint32_t) cst4_map[bin])
 	    {
 	      is_cst4 = 1;
 	      if (update)

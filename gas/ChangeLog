@@ -1,5 +1,9 @@
 2012-02-27  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-crx.c (check_range): Correct uint32_t misconceptions.
+
+2012-02-27  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-tic4x.c (tic4x_do_align): Remove ATTRIBUTE_UNUSED on
 	params.  Properly generate NOP pattern.  Comment reason for
 	subseg_text_p failure.
