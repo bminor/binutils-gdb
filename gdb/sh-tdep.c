@@ -41,6 +41,7 @@
 #include "osabi.h"
 #include "reggroups.h"
 #include "regset.h"
+#include "objfiles.h"
 
 #include "sh-tdep.h"
 
@@ -2666,6 +2667,57 @@ static const struct frame_base sh_frame_base = {
   sh_frame_base_address
 };
 
+static struct sh_frame_cache *
+sh_make_stub_cache (struct frame_info *this_frame)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct sh_frame_cache *cache;
+
+  cache = sh_alloc_frame_cache ();
+
+  cache->saved_sp
+    = get_frame_register_unsigned (this_frame, gdbarch_sp_regnum (gdbarch));
+
+  return cache;
+}
+
+static void
+sh_stub_this_id (struct frame_info *this_frame, void **this_cache,
+                 struct frame_id *this_id)
+{
+  struct sh_frame_cache *cache;
+
+  if (*this_cache == NULL)
+    *this_cache = sh_make_stub_cache (this_frame);
+  cache = *this_cache;
+
+  *this_id = frame_id_build (cache->saved_sp, get_frame_pc (this_frame));
+}
+
+static int
+sh_stub_unwind_sniffer (const struct frame_unwind *self,
+                        struct frame_info *this_frame,
+                        void **this_prologue_cache)
+{
+  CORE_ADDR addr_in_block;
+
+  addr_in_block = get_frame_address_in_block (this_frame);
+  if (in_plt_section (addr_in_block, NULL))
+    return 1;
+
+  return 0;
+}
+
+static const struct frame_unwind sh_stub_unwind =
+{
+  NORMAL_FRAME,
+  default_frame_unwind_stop_reason,
+  sh_stub_this_id,
+  sh_frame_prev_register,
+  NULL,
+  sh_stub_unwind_sniffer
+};
+
 /* The epilogue is defined here as the area at the end of a function,
    either on the `ret' instruction itself or after an instruction which
    destroys the function's stack frame.  */
@@ -3055,6 +3107,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_init_osabi (info, gdbarch);
 
   dwarf2_append_unwinders (gdbarch);
+  frame_unwind_append_unwinder (gdbarch, &sh_stub_unwind);
   frame_unwind_append_unwinder (gdbarch, &sh_frame_unwind);
 
   return gdbarch;

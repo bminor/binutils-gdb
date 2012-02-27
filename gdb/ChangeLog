@@ -1,3 +1,10 @@
+2012-02-27  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* sh-tdep.c (sh_make_stub_cache, sh_stub_this_id)
+	(sh_stub_unwind_sniffer): New functions.
+	(sh_stub_unwind): New variable.
+	(sh_gdbarch_init): Wire everything.
+
 2012-02-27  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (pid_is_stopped): Delete, moved to common/.
