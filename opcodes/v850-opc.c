@@ -1,6 +1,6 @@
 /* Assemble V850 instructions.
-   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2005, 2007, 2010
-   Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2005, 2007, 2010,
+   2012 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -259,7 +259,7 @@ insert_v8 (unsigned long insn, long value, const char ** errmsg)
 static unsigned long
 extract_v8 (unsigned long insn, int * invalid)
 {
-  unsigned long ret = (insn & 0x1f) | ((insn & 0x38000000) >> (27-5));
+  unsigned long ret = (insn & 0x1f) | ((insn >> (27-5)) & 0xe0);
 
   if (invalid != 0)
     *invalid = 0;
@@ -285,10 +285,9 @@ insert_d9 (unsigned long insn, long value, const char ** errmsg)
 static unsigned long
 extract_d9 (unsigned long insn, int * invalid)
 {
-  unsigned long ret = ((insn & 0xf800) >> 7) | ((insn & 0x0070) >> 3);
+  signed long ret = ((insn >> 7) & 0x1f0) | ((insn >> 3) & 0x0e);
 
-  if ((insn & 0x8000) != 0)
-    ret -= 0x0200;
+  ret = (ret ^ 0x100) - 0x100;
 
   if (invalid != 0)
     *invalid = 0;
@@ -341,8 +340,9 @@ insert_d16_15 (unsigned long insn, long value, const char ** errmsg)
 static unsigned long
 extract_d16_15 (unsigned long insn, int * invalid)
 {
-  signed long ret = (insn & 0xfffe0000);
-  ret >>= 16;
+  signed long ret = (insn >> 16) & 0xfffe;
+
+  ret = (ret ^ 0x8000) - 0x8000;
 
   if (invalid != 0)
     *invalid = 0;
@@ -361,9 +361,9 @@ insert_d16_16 (unsigned long insn, signed long value, const char ** errmsg)
 static unsigned long
 extract_d16_16 (unsigned long insn, int * invalid)
 {
-  signed long ret = insn & 0xfffe0000;
-  ret >>= 16;
-  ret |= ((insn & 0x20) >> 5);
+  signed long ret = ((insn >> 16) & 0xfffe) | ((insn >> 5) & 1);
+
+  ret = (ret ^ 0x8000) - 0x8000;
 
   if (invalid != 0)
     *invalid = 0;
@@ -382,9 +382,9 @@ insert_d17_16 (unsigned long insn, long value, const char ** errmsg)
 static unsigned long
 extract_d17_16 (unsigned long insn, int * invalid)
 {
-  signed long ret = (insn >> 16) & 0xfffe;
-  ret |= (insn << (16 - 4)) & 0x10000;
-  ret = (ret << ((sizeof ret)*8 - 17)) >> ((sizeof ret)*8 - 17);
+  signed long ret = ((insn >> 16) & 0xfffe) | ((insn << (16 - 4)) & 0x10000);
+
+  ret = (ret ^ 0x10000) - 0x10000;
 
   if (invalid != 0)
     *invalid = 0;
@@ -410,9 +410,9 @@ insert_d22 (unsigned long insn, long value, const char ** errmsg)
 static unsigned long
 extract_d22 (unsigned long insn, int * invalid)
 {
-  signed long ret = ((insn & 0xfffe0000) >> 16) | ((insn & 0x3f) << 16);
+  signed long ret = ((insn >> 16) & 0xfffe) | ((insn << 16) & 0x3f0000);
 
-  ret = (ret << ((sizeof ret)*8 - 22)) >> ((sizeof ret)*8 - 22);
+  ret = (ret ^ 0x200000) - 0x200000;
 
   if (invalid != 0)
     *invalid = 0;
@@ -423,7 +423,7 @@ static unsigned long
 insert_d23 (unsigned long insn, long value, const char ** errmsg)
 {
   if (value > 0x3fffff || value < -0x400000)
-	* errmsg = out_of_range;
+    * errmsg = out_of_range;
 
   return insn | ((value & 0x7f) << 4) | ((value & 0x7fff80) << (16-7));
 }
@@ -431,9 +431,9 @@ insert_d23 (unsigned long insn, long value, const char ** errmsg)
 static unsigned long
 extract_d23 (unsigned long insn, int * invalid)
 {
-  signed long ret = ((insn >> 4) & 0x7f) | ((insn >> (16-7)) & 0x7fffff80);
+  signed long ret = ((insn >> 4) & 0x7f) | ((insn >> (16-7)) & 0x7fff80);
 
-  ret = ((ret << ((sizeof ret)*8 - 23)) >> ((sizeof ret)*8 - 23));
+  ret = (ret ^ 0x400000) - 0x400000;
 
   if (invalid != 0)
     *invalid = 0;
@@ -452,11 +452,9 @@ insert_i9 (unsigned long insn, signed long value, const char ** errmsg)
 static unsigned long
 extract_i9 (unsigned long insn, int * invalid)
 {
-  signed long ret = insn & 0x003c0000;
+  signed long ret = ((insn >> 13) & 0x1e0) | (insn & 0x1f);
 
-  ret <<= 10;
-  ret >>= 23;
-  ret |= (insn & 0x1f);
+  ret = (ret ^ 0x100) - 0x100;
 
   if (invalid != 0)
     *invalid = 0;
@@ -477,11 +475,7 @@ insert_u9 (unsigned long insn, long v, const char ** errmsg)
 static unsigned long
 extract_u9 (unsigned long insn, int * invalid)
 {
-  unsigned long ret = insn & 0x003c0000;
-
-  ret >>= 13;
-
-  ret |= (insn & 0x1f);
+  unsigned long ret = ((insn >> 13) & 0x1e0) | (insn & 0x1f);
 
   if (invalid != 0)
     *invalid = 0;
@@ -496,7 +490,7 @@ insert_spe (unsigned long insn, long v, const char ** errmsg)
   if (value != 3)
     * errmsg = _("invalid register for stack adjustment");
 
-  return insn & (~ 0x180000);
+  return insn & ~0x180000;
 }
 
 static unsigned long
@@ -524,9 +518,7 @@ insert_r4 (unsigned long insn, long v, const char ** errmsg)
 static unsigned long
 extract_r4 (unsigned long insn, int * invalid)
 {
-  unsigned long ret;
-  ret = (insn >> 17) & 0xf;
-  ret |= (insn >> (23-4)) & 0x10;
+  unsigned long ret = ((insn >> (23-4)) & 0x10) | ((insn >> 17) & 0x0f);
 
   if (invalid != 0)
     *invalid = 0;

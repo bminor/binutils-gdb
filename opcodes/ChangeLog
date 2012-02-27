@@ -1,5 +1,17 @@
 2012-02-27  Alan Modra  <amodra@gmail.com>
 
+	* v850-opc.c (extract_v8): Rearrange to make it obvious this
+	is the inverse of corresponding insert function.
+	(extract_d22, extract_u9, extract_r4): Likewise.
+	(extract_d9): Correct sign extension.
+	(extract_d16_15): Don't assume "long" is 32 bits, and don't
+	rely on implementation defined behaviour for shift right of
+	signed types.
+	(extract_d16_16, extract_d17_16, extract_i9): Likewise.
+	(extract_d23): Likewise, and correct mask.
+
+2012-02-27  Alan Modra  <amodra@gmail.com>
+
 	* crx-dis.c (print_arg): Mask constant to 32 bits.
 	* crx-opc.c (cst4_map): Use int array.
 
