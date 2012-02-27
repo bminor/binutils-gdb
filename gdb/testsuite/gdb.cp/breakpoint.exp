@@ -46,7 +46,7 @@ proc test_breakpoint {name} {
     # lead to a cascade.
     if ![runto_main] then {
 	perror "couldn't run to main when testing ${name}"
-	continue
+	return -code continue
     } else {
 	gdb_breakpoint "${name}"
 	gdb_test "continue" "Continuing.\r\n\r\nBreakpoint \[0-9\]*, ${name}.*" "continue to ${name}"

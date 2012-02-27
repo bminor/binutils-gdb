@@ -1,3 +1,8 @@
+2012-02-27  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.cp/breakpoint.exp (test_breakpoint): Fix the runto_main
+	failure return path.
+
 2012-02-27  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.base/save-bp.exp: Account for new condition evaluator output.
