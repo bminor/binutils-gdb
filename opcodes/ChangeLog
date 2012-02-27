@@ -1,5 +1,10 @@
 2012-02-27  Alan Modra  <amodra@gmail.com>
 
+	* crx-dis.c (print_arg): Mask constant to 32 bits.
+	* crx-opc.c (cst4_map): Use int array.
+
+2012-02-27  Alan Modra  <amodra@gmail.com>
+
 	* arc-dis.c (BITS): Don't use shifts to mask off bits.
 	(FIELDD): Sign extend with xor,sub.
 

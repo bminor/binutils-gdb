@@ -1,3 +1,10 @@
+2012-02-27  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-crx.c: Include bfd_stdint.h.
+	(getconstant): Remove irrelevant comment.  Don't fail due to
+	sign-extension of int mask.
+	(check_range): Rewrite using unsigned arithmetic throughout.
+
 2012-02-25  Walter Lee  <walt@tilera.com>
 
 	* tc-tilepro.c (emit_tilepro_instruction): Check if symbol is
