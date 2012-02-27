@@ -1,3 +1,10 @@
+2012-02-27  Maciej W. Rozycki  <macro@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Don't proceed through
+	shared library trampolines if stepping at the machine
+	instruction level.
+
 2012-02-27  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-linux-tdep.c (mips_linux_init_abi): Set num_pseudo_regs
