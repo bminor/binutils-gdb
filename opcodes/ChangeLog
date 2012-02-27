@@ -1,5 +1,9 @@
 2012-02-27  Alan Modra  <amodra@gmail.com>
 
+	* mt-dis.c: Regenerate.
+
+2012-02-27  Alan Modra  <amodra@gmail.com>
+
 	* v850-opc.c (extract_v8): Rearrange to make it obvious this
 	is the inverse of corresponding insert function.
 	(extract_d22, extract_u9, extract_r4): Likewise.

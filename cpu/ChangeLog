@@ -1,3 +1,7 @@
+2012-02-27  Alan Modra  <amodra@gmail.com>
+
+	* mt.opc (print_dollarhex): Trim values to 32 bits.
+
 2011-12-15  Nick Clifton  <nickc@redhat.com>
 
 	* frv.opc (parse_uhi16): Fix handling of %hi operator on 64-bit
