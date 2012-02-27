@@ -5293,6 +5293,236 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch,
     }
 }
 
+/* Return non-zero if the ADDR instruction has a branch delay slot
+   (i.e. it is a jump or branch instruction).  This function is based
+   on mips32_next_pc.  */
+
+static int
+mips32_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb_byte buf[MIPS_INSN32_SIZE];
+  unsigned long inst;
+  int status;
+  int op;
+
+  status = target_read_memory (addr, buf, MIPS_INSN32_SIZE);
+  if (status)
+    return 0;
+
+  inst = mips_fetch_instruction (gdbarch, addr);
+  op = itype_op (inst);
+  if ((inst & 0xe0000000) != 0)
+    return (op >> 2 == 5	/* BEQL, BNEL, BLEZL, BGTZL: bits 0101xx  */
+	    || op == 29		/* JALX: bits 011101  */
+	    || (op == 17 && itype_rs (inst) == 8));
+				/* BC1F, BC1FL, BC1T, BC1TL: 010001 01000  */
+  else
+    switch (op & 0x07)		/* extract bits 28,27,26  */
+      {
+      case 0:			/* SPECIAL  */
+	op = rtype_funct (inst);
+	return (op == 8		/* JR  */
+		|| op == 9);	/* JALR  */
+	break;			/* end SPECIAL  */
+      case 1:			/* REGIMM  */
+	op = itype_rt (inst);	/* branch condition  */
+	return (op & 0xc) == 0;
+				/* BLTZ, BLTZL, BGEZ, BGEZL: bits 000xx  */
+				/* BLTZAL, BLTZALL, BGEZAL, BGEZALL: 100xx  */
+	break;			/* end REGIMM  */
+      default:			/* J, JAL, BEQ, BNE, BLEZ, BGTZ  */
+	return 1;
+	break;
+      }
+}
+
+/* Return non-zero if the ADDR instruction, which must be a 32-bit
+   instruction if MUSTBE32 is set or can be any instruction otherwise,
+   has a branch delay slot (i.e. it is a non-compact jump instruction).  */
+
+static int
+mips16_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr,
+				   int mustbe32)
+{
+  gdb_byte buf[MIPS_INSN16_SIZE];
+  unsigned short inst;
+  int status;
+
+  status = target_read_memory (addr, buf, MIPS_INSN16_SIZE);
+  if (status)
+    return 0;
+
+  inst = mips_fetch_instruction (gdbarch, addr);
+  if (!mustbe32)
+    return (inst & 0xf89f) == 0xe800;	/* JR/JALR (16-bit instruction)  */
+  return (inst & 0xf800) == 0x1800;	/* JAL/JALX (32-bit instruction)  */
+}
+
+/* Calculate the starting address of the MIPS memory segment BPADDR is in.
+   This assumes KSSEG exists.  */
+
+static CORE_ADDR
+mips_segment_boundary (CORE_ADDR bpaddr)
+{
+  CORE_ADDR mask = CORE_ADDR_MAX;
+  int segsize;
+
+  if (sizeof (CORE_ADDR) == 8)
+    /* Get the topmost two bits of bpaddr in a 32-bit safe manner (avoid
+       a compiler warning produced where CORE_ADDR is a 32-bit type even
+       though in that case this is dead code).  */
+    switch (bpaddr >> ((sizeof (CORE_ADDR) << 3) - 2) & 3)
+      {
+      case 3:
+	if (bpaddr == (bfd_signed_vma) (int32_t) bpaddr)
+	  segsize = 29;			/* 32-bit compatibility segment  */
+	else
+	  segsize = 62;			/* xkseg  */
+	break;
+      case 2:				/* xkphys  */
+	segsize = 59;
+	break;
+      default:				/* xksseg (1), xkuseg/kuseg (0)  */
+	segsize = 62;
+	break;
+      }
+  else if (bpaddr & 0x80000000)		/* kernel segment  */
+    segsize = 29;
+  else
+    segsize = 31;			/* user segment  */
+  mask <<= segsize;
+  return bpaddr & mask;
+}
+
+/* Move the breakpoint at BPADDR out of any branch delay slot by shifting
+   it backwards if necessary.  Return the address of the new location.  */
+
+static CORE_ADDR
+mips_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
+{
+  CORE_ADDR prev_addr, next_addr;
+  CORE_ADDR boundary;
+  CORE_ADDR func_addr;
+
+  /* If a breakpoint is set on the instruction in a branch delay slot,
+     GDB gets confused.  When the breakpoint is hit, the PC isn't on
+     the instruction in the branch delay slot, the PC will point to
+     the branch instruction.  Since the PC doesn't match any known
+     breakpoints, GDB reports a trap exception.
+
+     There are two possible fixes for this problem.
+
+     1) When the breakpoint gets hit, see if the BD bit is set in the
+     Cause register (which indicates the last exception occurred in a
+     branch delay slot).  If the BD bit is set, fix the PC to point to
+     the instruction in the branch delay slot.
+
+     2) When the user sets the breakpoint, don't allow him to set the
+     breakpoint on the instruction in the branch delay slot.  Instead
+     move the breakpoint to the branch instruction (which will have
+     the same result).
+
+     The problem with the first solution is that if the user then
+     single-steps the processor, the branch instruction will get
+     skipped (since GDB thinks the PC is on the instruction in the
+     branch delay slot).
+
+     So, we'll use the second solution.  To do this we need to know if
+     the instruction we're trying to set the breakpoint on is in the
+     branch delay slot.  */
+
+  boundary = mips_segment_boundary (bpaddr);
+
+  /* Make sure we don't scan back before the beginning of the current
+     function, since we may fetch constant data or insns that look like
+     a jump.  Of course we might do that anyway if the compiler has
+     moved constants inline. :-(  */
+  if (find_pc_partial_function (bpaddr, NULL, &func_addr, NULL)
+      && func_addr > boundary && func_addr <= bpaddr)
+    boundary = func_addr;
+
+  if (!mips_pc_is_mips16 (bpaddr))
+    {
+      if (bpaddr == boundary)
+	return bpaddr;
+
+      /* If the previous instruction has a branch delay slot, we have
+         to move the breakpoint to the branch instruction. */
+      prev_addr = bpaddr - 4;
+      if (mips32_instruction_has_delay_slot (gdbarch, prev_addr))
+	bpaddr = prev_addr;
+    }
+  else
+    {
+      struct minimal_symbol *sym;
+      CORE_ADDR addr, jmpaddr;
+      int i;
+
+      boundary = unmake_mips16_addr (boundary);
+
+      /* The only MIPS16 instructions with delay slots are JAL, JALX,
+         JALR and JR.  An absolute JAL/JALX is always 4 bytes long,
+         so try for that first, then try the 2 byte JALR/JR.
+         FIXME: We have to assume that bpaddr is not the second half
+         of an extended instruction.  */
+
+      jmpaddr = 0;
+      addr = bpaddr;
+      for (i = 1; i < 4; i++)
+	{
+	  if (unmake_mips16_addr (addr) == boundary)
+	    break;
+	  addr -= 2;
+	  if (i == 1 && mips16_instruction_has_delay_slot (gdbarch, addr, 0))
+	    /* Looks like a JR/JALR at [target-1], but it could be
+	       the second word of a previous JAL/JALX, so record it
+	       and check back one more.  */
+	    jmpaddr = addr;
+	  else if (i > 1
+		   && mips16_instruction_has_delay_slot (gdbarch, addr, 1))
+	    {
+	      if (i == 2)
+		/* Looks like a JAL/JALX at [target-2], but it could also
+		   be the second word of a previous JAL/JALX, record it,
+		   and check back one more.  */
+		jmpaddr = addr;
+	      else
+		/* Looks like a JAL/JALX at [target-3], so any previously
+		   recorded JAL/JALX or JR/JALR must be wrong, because:
+
+		   >-3: JAL
+		    -2: JAL-ext (can't be JAL/JALX)
+		    -1: bdslot (can't be JR/JALR)
+		     0: target insn
+
+		   Of course it could be another JAL-ext which looks
+		   like a JAL, but in that case we'd have broken out
+		   of this loop at [target-2]:
+
+		    -4: JAL
+		   >-3: JAL-ext
+		    -2: bdslot (can't be jmp)
+		    -1: JR/JALR
+		     0: target insn  */
+		jmpaddr = 0;
+	    }
+	  else
+	    {
+	      /* Not a jump instruction: if we're at [target-1] this
+	         could be the second word of a JAL/JALX, so continue;
+	         otherwise we're done.  */
+	      if (i > 1)
+		break;
+	    }
+	}
+
+      if (jmpaddr)
+	bpaddr = jmpaddr;
+    }
+
+  return bpaddr;
+}
+
 /* If PC is in a mips16 call or return stub, return the address of the target
    PC, which is either the callee or the caller.  There are several
    cases which must be handled:
@@ -6230,6 +6460,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, mips_breakpoint_from_pc);
+  set_gdbarch_adjust_breakpoint_address (gdbarch,
+					 mips_adjust_breakpoint_address);
 
   set_gdbarch_skip_prologue (gdbarch, mips_skip_prologue);
 

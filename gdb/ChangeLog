@@ -1,3 +1,13 @@
+2012-02-27  Chris Dearman  <chris@mips.com>
+            Nathan Froyd  <froydnj@codesourcery.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips32_instruction_has_delay_slot): New function.
+	(mips16_instruction_has_delay_slot): Likewise.
+	(mips_segment_boundary): Likewise.
+	(mips_adjust_breakpoint_address): Likewise.
+	(mips_gdbarch_init): Use mips_adjust_breakpoint_address.
+
 2012-02-27  Maciej W. Rozycki  <macro@mips.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 
