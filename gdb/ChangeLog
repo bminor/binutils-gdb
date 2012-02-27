@@ -1,3 +1,13 @@
+2012-02-27  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (pid_is_stopped): Delete, moved to common/.
+	(linux_nat_post_attach_wait): Adjust to use
+	linux_proc_pid_is_stopped.
+	* common/linux-procfs.h (linux_proc_pid_is_stopped): Declare.
+	* common/linux-procfs.c (linux_proc_pid_is_stopped): New function,
+	based on pid_is_stopped from both linux-nat.c and
+	gdbserver/linux-low.c, and renamed.
+
 2012-02-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* remote.c (remote_watchpoint_addr_within_range): New function.

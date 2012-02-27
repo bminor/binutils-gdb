@@ -1,5 +1,10 @@
 2012-02-27  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (pid_is_stopped): Delete, moved to common/.
+	(linux_attach_lwp_1): Adjust to use linux_proc_pid_is_stopped.
+
+2012-02-27  Pedro Alves  <palves@redhat.com>
+
 	PR server/9684
 	* linux-low.c (pid_is_stopped): New.
 	(linux_attach_lwp_1): Handle attaching to 'T (stopped)' processes.

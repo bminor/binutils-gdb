@@ -26,4 +26,9 @@
 
 extern int linux_proc_get_tgid (int lwpid);
 
+/* Detect `T (stopped)' in `/proc/PID/status'.
+   Other states including `T (tracing stop)' are reported as false.  */
+
+extern int linux_proc_pid_is_stopped (pid_t pid);
+
 #endif /* COMMON_LINUX_PROCFS_H */

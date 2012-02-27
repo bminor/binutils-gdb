@@ -1356,37 +1356,6 @@ exit_lwp (struct lwp_info *lp)
   delete_lwp (lp->ptid);
 }
 
-/* Detect `T (stopped)' in `/proc/PID/status'.
-   Other states including `T (tracing stop)' are reported as false.  */
-
-static int
-pid_is_stopped (pid_t pid)
-{
-  FILE *status_file;
-  char buf[100];
-  int retval = 0;
-
-  snprintf (buf, sizeof (buf), "/proc/%d/status", (int) pid);
-  status_file = fopen (buf, "r");
-  if (status_file != NULL)
-    {
-      int have_state = 0;
-
-      while (fgets (buf, sizeof (buf), status_file))
-	{
-	  if (strncmp (buf, "State:", 6) == 0)
-	    {
-	      have_state = 1;
-	      break;
-	    }
-	}
-      if (have_state && strstr (buf, "T (stopped)") != NULL)
-	retval = 1;
-      fclose (status_file);
-    }
-  return retval;
-}
-
 /* Wait for the LWP specified by LP, which we have just attached to.
    Returns a wait status for that LWP, to cache.  */
 
@@ -1397,7 +1366,7 @@ linux_nat_post_attach_wait (ptid_t ptid, int first, int *cloned,
   pid_t new_pid, pid = GET_LWP (ptid);
   int status;
 
-  if (pid_is_stopped (pid))
+  if (linux_proc_pid_is_stopped (pid))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,

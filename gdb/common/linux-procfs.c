@@ -53,3 +53,34 @@ linux_proc_get_tgid (int lwpid)
 
   return tgid;
 }
+
+/* Detect `T (stopped)' in `/proc/PID/status'.
+   Other states including `T (tracing stop)' are reported as false.  */
+
+int
+linux_proc_pid_is_stopped (pid_t pid)
+{
+  FILE *status_file;
+  char buf[100];
+  int retval = 0;
+
+  snprintf (buf, sizeof (buf), "/proc/%d/status", (int) pid);
+  status_file = fopen (buf, "r");
+  if (status_file != NULL)
+    {
+      int have_state = 0;
+
+      while (fgets (buf, sizeof (buf), status_file))
+	{
+	  if (strncmp (buf, "State:", 6) == 0)
+	    {
+	      have_state = 1;
+	      break;
+	    }
+	}
+      if (have_state && strstr (buf, "T (stopped)") != NULL)
+	retval = 1;
+      fclose (status_file);
+    }
+  return retval;
+}
