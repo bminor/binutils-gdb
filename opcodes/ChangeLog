@@ -1,3 +1,8 @@
+2012-02-27  Alan Modra  <amodra@gmail.com>
+
+	* arc-dis.c (BITS): Don't use shifts to mask off bits.
+	(FIELDD): Sign extend with xor,sub.
+
 2012-02-25  Walter Lee  <walt@tilera.com>
 
 	* tilegx-opc.c: Handle TILEGX_OPC_LD4S_TLS and TILEGX_OPC_LD_TLS.
