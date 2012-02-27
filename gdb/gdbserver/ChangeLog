@@ -1,3 +1,9 @@
+2012-02-27  Pedro Alves  <palves@redhat.com>
+
+	PR server/9684
+	* linux-low.c (pid_is_stopped): New.
+	(linux_attach_lwp_1): Handle attaching to 'T (stopped)' processes.
+
 2012-02-25  Luis Machado  <lgustavo@codesourcery.com>
 
 	* mem-break.c (clear_gdb_breakpoint_conditions): Fix de-allocation
