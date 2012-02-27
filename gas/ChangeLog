@@ -1,5 +1,14 @@
 2012-02-27  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-h8300.c (constant_fits_width_p): Trim constant to 32 bits
+	and sign extend before range tests.
+	(constant_fits_size_p): Similarly.
+	(get_specific): Trim X_add_number to 32 bits.
+	(fix_operand_size): Likewise, and use unsigned test for signed
+	ranges.
+
+2012-02-27  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-crx.c: Include bfd_stdint.h.
 	(getconstant): Remove irrelevant comment.  Don't fail due to
 	sign-extension of int mask.
