@@ -1334,6 +1334,7 @@ mips_linux_init_abi (struct gdbarch_info info,
 	 described or not).  */
       gdb_assert (gdbarch_num_regs (gdbarch) <= MIPS_RESTART_REGNUM);
       set_gdbarch_num_regs (gdbarch, MIPS_RESTART_REGNUM + 1);
+      set_gdbarch_num_pseudo_regs (gdbarch, MIPS_RESTART_REGNUM + 1);
 
       /* If it's present, then assign it to the reserved number.  */
       feature = tdesc_find_feature (info.target_desc,
