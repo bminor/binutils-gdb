@@ -1,3 +1,9 @@
+2012-02-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix static analysis issue found by cppcheck.
+	* microblaze-tdep.c (microblaze_extract_return_value): Fix
+	uninitialized BUF for size 2.
+
 2012-02-27  Chris Dearman  <chris@mips.com>
             Nathan Froyd  <froydnj@codesourcery.com>
             Maciej W. Rozycki  <macro@codesourcery.com>

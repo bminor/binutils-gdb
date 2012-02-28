@@ -562,6 +562,7 @@ microblaze_extract_return_value (struct type *type, struct regcache *regcache,
 	memcpy(valbuf, buf + MICROBLAZE_REGISTER_SIZE - 1, 1);
 	return;
       case 2:	/* return last 2 bytes in register.  */
+	regcache_cooked_read (regcache, MICROBLAZE_RETVAL_REGNUM, buf);
 	memcpy(valbuf, buf + MICROBLAZE_REGISTER_SIZE - 2, 2);
 	return;
       case 4:	/* for sizes 4 or 8, copy the required length.  */
