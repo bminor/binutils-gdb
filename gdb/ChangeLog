@@ -1,3 +1,9 @@
+2012-02-28  Joel Brobecker  <brobecker@adacore.com>
+
+	From Tristan Gingold  <gingold@adacore.com>.
+	* ada-tasks.c (ada_tasks_inferior_data_sniffer): Rework code to
+	avoid variable assignments inside condition.
+
 2012-02-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix static analysis issue found by cppcheck.

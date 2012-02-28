@@ -870,13 +870,15 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 	{
 	  /* Validate.  */
 	  struct type *type = check_typedef (SYMBOL_TYPE (sym));
-	  struct type *eltype;
-	  struct type *idxtype;
+	  struct type *eltype = NULL;
+	  struct type *idxtype = NULL;
 
-	  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
-	      && (eltype = check_typedef (TYPE_TARGET_TYPE (type)))
-	      && TYPE_CODE (eltype) == TYPE_CODE_PTR
-	      && (idxtype = check_typedef (TYPE_INDEX_TYPE (type)))
+	  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	    eltype = check_typedef (TYPE_TARGET_TYPE (type));
+	  if (eltype != NULL
+	      && TYPE_CODE (eltype) == TYPE_CODE_PTR)
+	    idxtype = check_typedef (TYPE_INDEX_TYPE (type));
+	  if (idxtype != NULL
 	      && !TYPE_LOW_BOUND_UNDEFINED (idxtype)
 	      && !TYPE_HIGH_BOUND_UNDEFINED (idxtype))
 	    {
