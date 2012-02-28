@@ -45,11 +45,6 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-#
-# the line at which break main will put the breakpoint
-#
-set main_line 32
-
 # The commands we test here produce many lines of output; disable "press 
 # <return> to continue" prompts.
 gdb_test_no_output "set height 0"
@@ -57,8 +52,11 @@ gdb_test_no_output "set height 0"
 #
 # break at main
 #
+
+set main_line [gdb_get_line_number "break main"]
+
 gdb_test "break main" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
+    "Breakpoint.*at.* file .*$srcfile, line $main_line\\." \
     "breakpoint main"
 
 
@@ -302,13 +300,13 @@ gdb_test_multiple "delete 3" "delete bp 3" {
 # break at main, after value is initialized. This is in preparation
 # to test the annotate output for the display command.
 #
-gdb_test_multiple "break main" "break at 28" {
+gdb_test_multiple "break main" "break at main" {
     -re "post-prompt.*\032\032breakpoints-invalid.*Breakpoint 4 at $hex: file ${escapedsrcfile}, line $main_line.*$gdb_prompt$" {
-	pass "break at 28"
+	pass "break at main"
     }
     -re "post-prompt.*\032\032breakpoints-invalid.*Breakpoint 4 at $hex: file .*${srcfile}, line $main_line.*$gdb_prompt$" {
 	setup_xfail "*-*-*" 1270
-	fail "break at 28"
+	fail "break at main"
     }
 }
 
@@ -351,9 +349,12 @@ gdb_expect {
 # Test that breakpoints-invalid is issued once and only once for
 # breakpoint ignore count changes, after annotation stopped.
 #
-gdb_test_multiple "break 46" "break at 46" {
-    -re "Breakpoint 5 at $hex: file .*$srcfile, line 46.*$gdb_prompt$" {
-	pass "break at 46"
+
+set value_inc_line [gdb_get_line_number "increment value"]
+
+gdb_test_multiple "break $value_inc_line" "break at value++" {
+    -re "Breakpoint 5 at $hex: file .*$srcfile, line $value_inc_line.*$gdb_prompt$" {
+	pass "break at value++"
     }
 }
 
@@ -364,7 +365,7 @@ gdb_test_multiple "ignore 5 4" "ignore 5 4" {
 }
 
 gdb_test_multiple "continue" "annotate ignore count change" {
-    -re ".*$srcfile:46:.*\032\032stopped\r\n\r\n\032\032breakpoints-invalid\r\n$gdb_prompt$" {
+    -re ".*$srcfile:$value_inc_line:.*\032\032stopped\r\n\r\n\032\032breakpoints-invalid\r\n$gdb_prompt$" {
 	pass "annotate ignore count change"
     }
 }
@@ -377,8 +378,10 @@ gdb_test_multiple "next" "next to exit loop" {
     }
 }
 
+set after_loop_line [gdb_get_line_number "after loop"]
+
 gdb_test_multiple "next" "breakpoint ignore count" {
-    -re ".*$srcfile:49:.*$gdb_prompt$" {
+    -re ".*$srcfile:$after_loop_line:.*$gdb_prompt$" {
 	pass "breakpoint ignore count"
     }
 }

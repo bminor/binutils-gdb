@@ -25,7 +25,7 @@ int
 main ()
 #endif
 {
-  int my_array[3] = { 1, 2, 3 };
+  int my_array[3] = { 1, 2, 3 };  /* break main */
   
   value = 7;
   
@@ -39,9 +39,9 @@ main ()
   {
     int i;
     for (i = 0; i < 5; i++)
-      value++;
+      value++;  /* increment value */
   }
 
-  return 0;
+  return 0;  /* after loop */
 }
 

@@ -1,10 +1,17 @@
 2012-02-28  Thomas Schwinge  <thomas@codesourcery.com>
 
-        * gdb.base/annota1.c [__sh__]: Remove any special-casing.
-        * gdb.base/annota3.c: Likewise.
-        * gdb.base/sigall.c: Likewise.
-        * gdb.base/signals.c: Likewise.
-        * gdb.reverse/sigall-reverse.c: Likewise.
+	* gdb.base/annota1.exp: Use gdb_get_line_number for retrieving line
+	numbers instead of hardcoding them.
+	* gdb.base/annota1.c: Provide suitable markers.
+	* gdb.base/annota3.exp: Use gdb_get_line_number for retrieving line
+	numbers instead of hardcoding them.
+	* gdb.base/annota3.c: Provide suitable markers.
+
+	* gdb.base/annota1.c [__sh__]: Remove any special-casing.
+	* gdb.base/annota3.c: Likewise.
+	* gdb.base/sigall.c: Likewise.
+	* gdb.base/signals.c: Likewise.
+	* gdb.reverse/sigall-reverse.c: Likewise.
 
 2012-02-27  Maciej W. Rozycki  <macro@codesourcery.com>
 
