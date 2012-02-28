@@ -3,10 +3,6 @@
 #include <signal.h>
 #include <unistd.h>
 
-#ifdef __sh__
-#define signal(a,b)	/* Signals not supported on this target - make them go away */
-#define alarm(a)	/* Ditto for alarm() */
-#endif
 
 static int count = 0;
 
