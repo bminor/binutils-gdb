@@ -1,5 +1,10 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lex.p (processId): Do not modify already encoded IDs.
+	Update function documentation.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (ada_find_renaming_symbol): Replace parameter
 	"name" with "struct symbol *name_sym".
 	* ada-exp.y (write_var_or_type): Update call to
