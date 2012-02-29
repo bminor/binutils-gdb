@@ -1,3 +1,9 @@
+2012-02-29  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c: (linux_wait_1): Call unsuspend_all_lwps when
+	`step_over_finished' is true.
+
 2012-02-27  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (pid_is_stopped): Delete, moved to common/.

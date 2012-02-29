@@ -2509,6 +2509,15 @@ Check if we're already there.\n",
 	 why.  */
       find_inferior (&all_lwps, cancel_breakpoints_callback, event_child);
 
+      /* If we were going a step-over, all other threads but the stepping one
+	 had been paused in start_step_over, with their suspend counts
+	 incremented.  We don't want to do a full unstop/unpause, because we're
+	 in all-stop mode (so we want threads stopped), but we still need to
+	 unsuspend the other threads, to decrement their `suspended' count
+	 back.  */
+      if (step_over_finished)
+	unsuspend_all_lwps (event_child);
+
       /* Stabilize threads (move out of jump pads).  */
       stabilize_threads ();
     }
