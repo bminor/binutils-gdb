@@ -1,5 +1,10 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (constrained_packed_array_type): If there is a
+	parallel XA type, use it to determine the array index type.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_val_print_1): If our value is a reference
 	to an array descriptor, dereference it before converting it
 	to a simple array.

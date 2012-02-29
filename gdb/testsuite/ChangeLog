@@ -1,5 +1,10 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/arrayidx.exp: Adjust expected output for p_one_two_three.
+	* gdb.ada/enum_idx_packed: New testcase.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/aliased_array: New testcase.
 
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>

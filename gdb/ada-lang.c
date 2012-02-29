@@ -2006,22 +2006,30 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
 {
   struct type *new_elt_type;
   struct type *new_type;
+  struct type *index_type_desc;
+  struct type *index_type;
   LONGEST low_bound, high_bound;
 
   type = ada_check_typedef (type);
   if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
     return type;
 
+  index_type_desc = ada_find_parallel_type (type, "___XA");
+  if (index_type_desc)
+    index_type = to_fixed_range_type (TYPE_FIELD_TYPE (index_type_desc, 0),
+				      NULL);
+  else
+    index_type = TYPE_INDEX_TYPE (type);
+
   new_type = alloc_type_copy (type);
   new_elt_type =
     constrained_packed_array_type (ada_check_typedef (TYPE_TARGET_TYPE (type)),
 				   elt_bits);
-  create_array_type (new_type, new_elt_type, TYPE_INDEX_TYPE (type));
+  create_array_type (new_type, new_elt_type, index_type);
   TYPE_FIELD_BITSIZE (new_type, 0) = *elt_bits;
   TYPE_NAME (new_type) = ada_type_name (type);
 
-  if (get_discrete_bounds (TYPE_INDEX_TYPE (type),
-                           &low_bound, &high_bound) < 0)
+  if (get_discrete_bounds (index_type, &low_bound, &high_bound) < 0)
     low_bound = high_bound = 0;
   if (high_bound < low_bound)
     *elt_bits = TYPE_LENGTH (new_type) = 0;

@@ -53,7 +53,7 @@ gdb_test "print u_one_two_three" \
          "print u_one_two_three, indexes off"
 
 gdb_test "print p_one_two_three" \
-         "= \\(0 => false, true, true\\)" \
+         "= \\(false, true, true\\)" \
          "print p_one_two_three, indexes off"
 
 gdb_test "print few_reps" \
@@ -89,7 +89,7 @@ gdb_test "print u_one_two_three" \
          "print u_one_two_three"
 
 gdb_test "print p_one_two_three" \
-         "= \\(0 => false, 1 => true, 2 => true\\)" \
+         "= \\(one => false, two => true, three => true\\)" \
          "print p_one_two_three"
 
 gdb_test "print few_reps" \
