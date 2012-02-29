@@ -1,5 +1,10 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_lookup_symbol_list): Only cache the result of
+	full searches.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (constrained_packed_array_type): If there is a
 	parallel XA type, use it to determine the array index type.
 

@@ -5069,10 +5069,10 @@ done:
 
   ndefns = remove_extra_symbols (*results, ndefns);
 
-  if (ndefns == 0)
+  if (ndefns == 0 && full_search)
     cache_symbol (name0, namespace, NULL, NULL);
 
-  if (ndefns == 1 && cacheIfUnique)
+  if (ndefns == 1 && full_search && cacheIfUnique)
     cache_symbol (name0, namespace, (*results)[0].sym, (*results)[0].block);
 
   ndefns = remove_irrelevant_renamings (*results, ndefns, block0);
