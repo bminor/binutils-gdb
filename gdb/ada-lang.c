@@ -271,6 +271,8 @@ static struct value *ada_evaluate_subexp (struct type *, struct expression *,
 
 static void ada_forward_operator_length (struct expression *, int, int *,
 					 int *);
+
+static struct type *ada_find_any_type (const char *name);
 
 
 
@@ -7022,10 +7024,10 @@ field_alignment (struct type *type, int f)
   return atoi (name + align_offset) * TARGET_CHAR_BIT;
 }
 
-/* Find a symbol named NAME.  Ignores ambiguity.  */
+/* Find a typedef or tag symbol named NAME.  Ignores ambiguity.  */
 
-struct symbol *
-ada_find_any_symbol (const char *name)
+static struct symbol *
+ada_find_any_type_symbol (const char *name)
 {
   struct symbol *sym;
 
@@ -7041,10 +7043,10 @@ ada_find_any_symbol (const char *name)
    solely for types defined by debug info, it will not search the GDB
    primitive types.  */
 
-struct type *
+static struct type *
 ada_find_any_type (const char *name)
 {
-  struct symbol *sym = ada_find_any_symbol (name);
+  struct symbol *sym = ada_find_any_type_symbol (name);
 
   if (sym != NULL)
     return SYMBOL_TYPE (sym);
@@ -7068,7 +7070,7 @@ ada_find_renaming_symbol (const char *name, struct block *block)
     return sym;
 
   /* Not right yet.  FIXME pnh 7/20/2007.  */
-  sym = ada_find_any_symbol (name);
+  sym = ada_find_any_type_symbol (name);
   if (sym != NULL && strstr (SYMBOL_LINKAGE_NAME (sym), "___XR") != NULL)
     return sym;
   else
@@ -7126,7 +7128,7 @@ find_old_style_renaming_symbol (const char *name, struct block *block)
       xsnprintf (rename, rename_len * sizeof (char), "%s___XR", name);
     }
 
-  return ada_find_any_symbol (rename);
+  return ada_find_any_type_symbol (rename);
 }
 
 /* Because of GNAT encoding conventions, several GDB symbols may match a

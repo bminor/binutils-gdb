@@ -333,10 +333,6 @@ extern struct type *ada_find_parallel_type (struct type *,
 
 extern LONGEST get_int_var_value (char *, int *);
 
-extern struct symbol *ada_find_any_symbol (const char *name);
-
-extern struct type *ada_find_any_type (const char *name);
-
 extern struct symbol *ada_find_renaming_symbol (const char *name,
                                                 struct block *block);
 

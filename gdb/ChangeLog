@@ -1,5 +1,16 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.h (ada_find_any_symbol, ada_find_any_type): Delete.
+	* ada-lang.c (ada_find_any_type): Add advance declaration.
+	Make static.  Replace ada_find_any_symbol by
+	ada_find_any_type_symbol.
+	(ada_find_any_type_symbol): Renames ada_find_any_symbol.
+	Improve function description.  Make static.
+	(ada_find_renaming_symbol, find_old_style_renaming_symbol):
+	Replace ada_find_any_symbol by ada_find_any_type_symbol.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (struct tag_args): Delete.
 	(ada_get_tsd_type): Function body moved up in source file.
 	(ada_tag_name_1, ada_tag_name_2): Delete.
