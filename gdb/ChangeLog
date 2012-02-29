@@ -1,3 +1,19 @@
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (catch_ada_exception_command_split): Add new
+	argument cond_string.  Add support for condition at end of
+	"catch exception" commands.
+	(ada_decode_exception_location): Add new argument cond_string.
+	Update call to catch_ada_exception_command_split.
+	(create_ada_exception_catchpoint): Add new argument cond_string.
+	Set the breakpoint condition if needed.
+	(catch_ada_exception_command): Update call to
+	ada_decode_exception_location.
+	(ada_decode_assert_location): Add function documentation.
+	Add support for condition at end of "catch assert" command.
+	(catch_assert_command): Update calls to ada_decode_assert_location
+	and create_ada_exception_catchpoint.
+
 2012-02-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix disp-step-syscall.exp: fork: single step over fork.
