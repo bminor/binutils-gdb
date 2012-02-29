@@ -210,6 +210,10 @@ extern LONGEST ada_discrete_type_low_bound (struct type *);
 
 extern LONGEST ada_discrete_type_high_bound (struct type *);
 
+extern struct value *ada_get_decoded_value (struct value *value);
+
+extern struct type *ada_get_decoded_type (struct type *type);
+
 extern char *ada_decode_symbol (const struct general_symbol_info*);
 
 extern const char *ada_decode (const char*);

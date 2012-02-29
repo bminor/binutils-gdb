@@ -1,5 +1,12 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.h (ada_get_decoded_value, ada_get_decoded_type): Add
+	declaration.
+	* ada-lang.c (ada_get_decoded_value, ada_get_decoded_type): New
+	function.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_is_ignored_field): Rewrite wrong comment.
 
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>

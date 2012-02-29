@@ -733,6 +733,46 @@ get_base_type (struct type *type)
     }
   return type;
 }
+
+/* Return a decoded version of the given VALUE.  This means returning
+   a value whose type is obtained by applying all the GNAT-specific
+   encondings, making the resulting type a static but standard description
+   of the initial type.  */
+
+struct value *
+ada_get_decoded_value (struct value *value)
+{
+  struct type *type = ada_check_typedef (value_type (value));
+
+  if (ada_is_array_descriptor_type (type)
+      || (ada_is_constrained_packed_array_type (type)
+          && TYPE_CODE (type) != TYPE_CODE_PTR))
+    {
+      if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)  /* array access type.  */
+        value = ada_coerce_to_simple_array_ptr (value);
+      else
+        value = ada_coerce_to_simple_array (value);
+    }
+  else
+    value = ada_to_fixed_value (value);
+
+  return value;
+}
+
+/* Same as ada_get_decoded_value, but with the given TYPE.
+   Because there is no associated actual value for this type,
+   the resulting type might be a best-effort approximation in
+   the case of dynamic types.  */
+
+struct type *
+ada_get_decoded_type (struct type *type)
+{
+  type = to_static_fixed_type (type);
+  if (ada_is_constrained_packed_array_type (type))
+    type = ada_coerce_to_simple_array_type (type);
+  return type;
+}
+
 
 
                                 /* Language Selection */
