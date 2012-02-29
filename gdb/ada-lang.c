@@ -6029,44 +6029,6 @@ type_from_tag (struct value *tag)
   return NULL;
 }
 
-struct tag_args
-{
-  struct value *tag;
-  char *name;
-};
-
-
-static int ada_tag_name_1 (void *);
-static int ada_tag_name_2 (struct tag_args *);
-
-/* Wrapper function used by ada_tag_name.  Given a struct tag_args*
-   value ARGS, sets ARGS->name to the tag name of ARGS->tag.
-   The value stored in ARGS->name is valid until the next call to 
-   ada_tag_name_1.  */
-
-static int
-ada_tag_name_1 (void *args0)
-{
-  struct tag_args *args = (struct tag_args *) args0;
-  static char name[1024];
-  char *p;
-  struct value *val;
-
-  args->name = NULL;
-  val = ada_value_struct_elt (args->tag, "tsd", 1);
-  if (val == NULL)
-    return ada_tag_name_2 (args);
-  val = ada_value_struct_elt (val, "expanded_name", 1);
-  if (val == NULL)
-    return 0;
-  read_memory_string (value_as_address (val), name, sizeof (name) - 1);
-  for (p = name; *p != '\0'; p += 1)
-    if (isalpha (*p))
-      *p = tolower (*p);
-  args->name = name;
-  return 0;
-}
-
 /* Return the "ada__tags__type_specific_data" type.  */
 
 static struct type *
@@ -6079,55 +6041,98 @@ ada_get_tsd_type (struct inferior *inf)
   return data->tsd_type;
 }
 
-/* Utility function for ada_tag_name_1 that tries the second
-   representation for the dispatch table (in which there is no
-   explicit 'tsd' field in the referent of the tag pointer, and instead
-   the tsd pointer is stored just before the dispatch table.  */
-   
-static int
-ada_tag_name_2 (struct tag_args *args)
+/* Return the TSD (type-specific data) associated to the given TAG.
+   TAG is assumed to be the tag of a tagged-type entity.
+
+   May return NULL if we are unable to get the TSD.  */
+
+static struct value *
+ada_get_tsd_from_tag (struct value *tag)
 {
-  struct type *info_type;
+  struct value *val;
+  struct type *type;
+
+  /* First option: The TSD is simply stored as a field of our TAG.
+     Only older versions of GNAT would use this format, but we have
+     to test it first, because there are no visible markers for
+     the current approach except the absence of that field.  */
+
+  val = ada_value_struct_elt (tag, "tsd", 1);
+  if (val)
+    return val;
+
+  /* Try the second representation for the dispatch table (in which
+     there is no explicit 'tsd' field in the referent of the tag pointer,
+     and instead the tsd pointer is stored just before the dispatch
+     table.  */
+
+  type = ada_get_tsd_type (current_inferior());
+  if (type == NULL)
+    return NULL;
+  type = lookup_pointer_type (lookup_pointer_type (type));
+  val = value_cast (type, tag);
+  if (val == NULL)
+    return NULL;
+  return value_ind (value_ptradd (val, -1));
+}
+
+/* Given the TSD of a tag (type-specific data), return a string
+   containing the name of the associated type.
+
+   The returned value is good until the next call.  May return NULL
+   if we are unable to determine the tag name.  */
+
+static char *
+ada_tag_name_from_tsd (struct value *tsd)
+{
   static char name[1024];
   char *p;
-  struct value *val, *valp;
+  struct value *val;
 
-  args->name = NULL;
-  info_type = ada_get_tsd_type (current_inferior());
-  if (info_type == NULL)
-    return 0;
-  info_type = lookup_pointer_type (lookup_pointer_type (info_type));
-  valp = value_cast (info_type, args->tag);
-  if (valp == NULL)
-    return 0;
-  val = value_ind (value_ptradd (valp, -1));
+  val = ada_value_struct_elt (tsd, "expanded_name", 1);
   if (val == NULL)
-    return 0;
-  val = ada_value_struct_elt (val, "expanded_name", 1);
-  if (val == NULL)
-    return 0;
+    return NULL;
   read_memory_string (value_as_address (val), name, sizeof (name) - 1);
   for (p = name; *p != '\0'; p += 1)
     if (isalpha (*p))
       *p = tolower (*p);
-  args->name = name;
-  return 0;
+  return name;
 }
 
 /* The type name of the dynamic type denoted by the 'tag value TAG, as
-   a C string.  */
+   a C string.
+
+   Return NULL if the TAG is not an Ada tag, or if we were unable to
+   determine the name of that tag.  The result is good until the next
+   call.  */
 
 const char *
 ada_tag_name (struct value *tag)
 {
-  struct tag_args args;
+  volatile struct gdb_exception e;
+  char *name = NULL;
 
   if (!ada_is_tag_type (value_type (tag)))
     return NULL;
-  args.tag = tag;
-  args.name = NULL;
-  catch_errors (ada_tag_name_1, &args, NULL, RETURN_MASK_ALL);
-  return args.name;
+
+  /* It is perfectly possible that an exception be raised while trying
+     to determine the TAG's name, even under normal circumstances:
+     The associated variable may be uninitialized or corrupted, for
+     instance. We do not let any exception propagate past this point.
+     instead we return NULL.
+
+     We also do not print the error message either (which often is very
+     low-level (Eg: "Cannot read memory at 0x[...]"), but instead let
+     the caller print a more meaningful message if necessary.  */
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      struct value *tsd = ada_get_tsd_from_tag (tag);
+
+      if (tsd != NULL)
+	name = ada_tag_name_from_tsd (tsd);
+    }
+
+  return name;
 }
 
 /* The parent type of TYPE, or NULL if none.  */

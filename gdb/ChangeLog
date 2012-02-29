@@ -1,5 +1,15 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (struct tag_args): Delete.
+	(ada_get_tsd_type): Function body moved up in source file.
+	(ada_tag_name_1, ada_tag_name_2): Delete.
+	(ada_get_tsd_from_tag): New function.
+	(ada_tag_name_from_tsd): New function.
+	(ada_tag_name): Use a TRY_CATCH block instead of catch_errors
+	to determine the tag name.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (ada_get_decoded_value, ada_get_decoded_type): Add
 	declaration.
 	* ada-lang.c (ada_get_decoded_value, ada_get_decoded_type): New
