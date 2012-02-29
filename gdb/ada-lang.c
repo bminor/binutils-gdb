@@ -7826,6 +7826,11 @@ to_fixed_array_type (struct type *type0, struct value *dval,
         error (_("array type with dynamic size is larger than varsize-limit"));
     }
 
+  /* We want to preserve the type name.  This can be useful when
+     trying to get the type name of a value that has already been
+     printed (for instance, if the user did "print VAR; whatis $".  */
+  TYPE_NAME (result) = TYPE_NAME (type0);
+
   if (constrained_packed_array_p)
     {
       /* So far, the resulting type has been created as if the original

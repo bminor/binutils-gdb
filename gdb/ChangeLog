@@ -1,5 +1,9 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (to_fixed_array_type): Set result's type name.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (catch_ada_exception_command_split): Add new
 	argument cond_string.  Add support for condition at end of
 	"catch exception" commands.
