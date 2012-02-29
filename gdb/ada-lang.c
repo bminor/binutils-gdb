@@ -6902,7 +6902,7 @@ ada_which_variant_applies (struct type *var_type, struct type *outer_type,
 struct value *
 ada_value_ind (struct value *val0)
 {
-  struct value *val = unwrap_value (value_ind (val0));
+  struct value *val = value_ind (val0);
 
   return ada_to_fixed_value (val);
 }
@@ -6918,7 +6918,6 @@ ada_coerce_ref (struct value *val0)
       struct value *val = val0;
 
       val = coerce_ref (val);
-      val = unwrap_value (val);
       return ada_to_fixed_value (val);
     }
   else
@@ -8138,9 +8137,11 @@ ada_to_fixed_value_create (struct type *type0, CORE_ADDR address,
 struct value *
 ada_to_fixed_value (struct value *val)
 {
-  return ada_to_fixed_value_create (value_type (val),
-                                    value_address (val),
-                                    val);
+  val = unwrap_value (val);
+  val = ada_to_fixed_value_create (value_type (val),
+				      value_address (val),
+				      val);
+  return val;
 }
 
 
@@ -8702,7 +8703,7 @@ assign_component (struct value *container, struct value *lhs, LONGEST index,
   else
     {
       elt = ada_index_struct_field (index, lhs, 0, value_type (lhs));
-      elt = ada_to_fixed_value (unwrap_value (elt));
+      elt = ada_to_fixed_value (elt);
     }
 
   if (exp->elts[*pos].opcode == OP_AGGREGATE)
@@ -9539,7 +9540,6 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       else
         {
           arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
-          arg1 = unwrap_value (arg1);
           return ada_to_fixed_value (arg1);
         }
 

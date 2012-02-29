@@ -1,5 +1,13 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_to_fixed_value): Call unwrap_value before
+	creating fixed value.
+	(ada_value_ind, ada_coerce_ref, assign_component)
+	(ada_evaluate_subexp): Remove call to unwrap_value before
+	call to ada_to_fixed_value.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (to_fixed_array_type): Set result's type name.
 
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
