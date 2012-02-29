@@ -1,3 +1,24 @@
+2012-02-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Support processors without SSSE3.
+	* gdb.reverse/i386-sse-reverse.c (sse_test): Move pabsb, pabsw and
+	pabsd into ...
+	(ssse3_test): ... a new function.
+	(main): Call ssse3_test.
+	* gdb.reverse/i386-sse-reverse.exp: New variable end_ssse3_test.
+	Update expected values everywhere.
+	(reverse-step to pabsd, verify xmm0 after reverse pabsd)
+	(verify xmm1 after reverse pabsd, verify xmm2 after reverse pabsd)
+	(reverse-step to pabsw, verify xmm0 after reverse pabsw)
+	(verify xmm1 after reverse pabsw, verify xmm2 after reverse pabsw)
+	(reverse-step to pabsb, verify xmm0 after reverse pabsb)
+	(verify xmm1 after reverse pabsb, verify xmm2 after reverse pabsb):
+	Move these tests lower.
+	(set breakpoint at end of ssse3_test, continue to end of ssse3_test)
+	(verify xmm0 at end of ssse3_test, verify xmm1 at end of ssse3_test)
+	(verify xmm2 at end of ssse3_test, continue to end of ssse3_test #2):
+	New tests.
+
 2012-02-29  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
