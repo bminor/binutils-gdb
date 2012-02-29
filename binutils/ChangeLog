@@ -1,3 +1,7 @@
+2012-02-29  Jeff Law  <law@redhat.com>
+
+	* doc/binutils.texi (c++filt): Fix typos.
+
 2012-02-24  Kai Tietz  <ktietz@redhat.com>
 
 	PR binutils/13710

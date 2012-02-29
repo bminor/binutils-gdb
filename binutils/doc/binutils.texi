@@ -2866,8 +2866,8 @@ the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS cxxfilt
-c++filt [@option{-_}|@option{--strip-underscores}]
-        [@option{-n}|@option{--no-strip-underscores}]
+c++filt [@option{-_}|@option{--strip-underscore}]
+        [@option{-n}|@option{--no-strip-underscore}]
         [@option{-p}|@option{--no-params}]
         [@option{-t}|@option{--types}]
         [@option{-i}|@option{--no-verbose}]
@@ -2947,14 +2947,14 @@ characters trailing after a mangled name.  For example:
 
 @table @env
 @item -_
-@itemx --strip-underscores
+@itemx --strip-underscore
 On some systems, both the C and C++ compilers put an underscore in front
 of every name.  For example, the C name @code{foo} gets the low-level
 name @code{_foo}.  This option removes the initial underscore.  Whether
 @command{c++filt} removes the underscore by default is target dependent.
 
 @item -n
-@itemx --no-strip-underscores
+@itemx --no-strip-underscore
 Do not remove the initial underscore.
 
 @item -p
