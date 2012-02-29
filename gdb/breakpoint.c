@@ -10478,6 +10478,9 @@ until_break_command (char *arg, int from_tty, int anywhere)
       make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
     }
 
+  /* set_momentary_breakpoint could invalidate FRAME.  */
+  frame = NULL;
+
   if (anywhere)
     /* If the user told us to continue until a specified location,
        we don't specify a frame at which we need to stop.  */

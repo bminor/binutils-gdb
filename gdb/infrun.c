@@ -5520,6 +5520,10 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 
 	  bp = set_momentary_breakpoint_at_pc (get_frame_arch (frame),
 					       handler, bp_exception_resume);
+
+	  /* set_momentary_breakpoint_at_pc invalidates FRAME.  */
+	  frame = NULL;
+
 	  bp->thread = tp->num;
 	  inferior_thread ()->control.exception_resume_breakpoint = bp;
 	}

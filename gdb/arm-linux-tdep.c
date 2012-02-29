@@ -937,6 +937,9 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
         	= set_momentary_breakpoint (gdbarch, sal, get_frame_id (frame),
 					    bp_step_resume);
 
+	      /* set_momentary_breakpoint invalidates FRAME.  */
+	      frame = NULL;
+
 	      /* We need to make sure we actually insert the momentary
 	         breakpoint set above.  */
 	      insert_breakpoints ();

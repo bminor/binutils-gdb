@@ -783,6 +783,10 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
        PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
        dummy_id to form the frame ID's stack address.  */
     bpt = set_momentary_breakpoint (gdbarch, sal, dummy_id, bp_call_dummy);
+
+    /* set_momentary_breakpoint invalidates FRAME.  */
+    frame = NULL;
+
     bpt->disposition = disp_del;
   }
 

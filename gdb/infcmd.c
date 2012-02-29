@@ -1652,6 +1652,9 @@ finish_forward (struct symbol *function, struct frame_info *frame)
 					 get_stack_frame_id (frame),
                                          bp_finish);
 
+  /* set_momentary_breakpoint invalidates FRAME.  */
+  frame = NULL;
+
   old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
   set_longjmp_breakpoint (tp, frame_id);

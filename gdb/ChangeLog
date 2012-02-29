@@ -1,3 +1,12 @@
+2012-02-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* arm-linux-tdep.c (arm_linux_copy_svc): Reset stale FRAME.
+	* breakpoint.c (until_break_command): Likewise.
+	* elfread.c (elf_gnu_ifunc_resolver_stop): Likewise.
+	* infcall.c (call_function_by_hand): Likewise.
+	* infcmd.c (finish_forward): Likewise.
+	* infrun.c (insert_exception_resume_breakpoint): Likewise.
+
 2012-02-28  Joel Brobecker  <brobecker@adacore.com>
 
 	From Tristan Gingold  <gingold@adacore.com>.
