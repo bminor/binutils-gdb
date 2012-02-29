@@ -1288,8 +1288,7 @@ write_var_or_type (struct block *block, struct stoken name0)
 	  if (nsyms == 1)
 	    {
 	      struct symbol *ren_sym =
-		ada_find_renaming_symbol (SYMBOL_LINKAGE_NAME (syms[0].sym), 
-					  syms[0].block);
+		ada_find_renaming_symbol (syms[0].sym, syms[0].block);
 
 	      if (ren_sym != NULL)
 		syms[0].sym = ren_sym;

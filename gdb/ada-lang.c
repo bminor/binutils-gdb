@@ -7054,15 +7054,20 @@ ada_find_any_type (const char *name)
   return NULL;
 }
 
-/* Given NAME and an associated BLOCK, search all symbols for
-   NAME suffixed with  "___XR", which is the ``renaming'' symbol
-   associated to NAME.  Return this symbol if found, return
-   NULL otherwise.  */
+/* Given NAME_SYM and an associated BLOCK, find a "renaming" symbol
+   associated with NAME_SYM's name.  NAME_SYM may itself be a renaming
+   symbol, in which case it is returned.  Otherwise, this looks for
+   symbols whose name is that of NAME_SYM suffixed with  "___XR".
+   Return symbol if found, and NULL otherwise.  */
 
 struct symbol *
-ada_find_renaming_symbol (const char *name, struct block *block)
+ada_find_renaming_symbol (struct symbol *name_sym, struct block *block)
 {
+  const char *name = SYMBOL_LINKAGE_NAME (name_sym);
   struct symbol *sym;
+
+  if (strstr (name, "___XR") != NULL)
+     return name_sym;
 
   sym = find_old_style_renaming_symbol (name, block);
 
