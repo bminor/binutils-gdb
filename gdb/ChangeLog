@@ -1,5 +1,13 @@
 2012-02-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix reverse mode for syscall on AMD CPUs in 32-bit mode.
+	* i386-linux-tdep.c (i386_linux_intx80_sysenter_record): Rename to ...
+	(i386_linux_intx80_sysenter_syscall_record): ... here.
+	(i386_linux_init_abi): Initialize also I386_SYSCALL_RECORD.
+	Use the renamed function name.
+
+2012-02-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* arm-linux-tdep.c (arm_linux_copy_svc): Reset stale FRAME.
 	* breakpoint.c (until_break_command): Likewise.
 	* elfread.c (elf_gnu_ifunc_resolver_stop): Likewise.

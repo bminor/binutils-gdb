@@ -418,7 +418,7 @@ i386_canonicalize_syscall (int syscall)
 static struct linux_record_tdep i386_linux_record_tdep;
 
 static int
-i386_linux_intx80_sysenter_record (struct regcache *regcache)
+i386_linux_intx80_sysenter_syscall_record (struct regcache *regcache)
 {
   int ret;
   LONGEST syscall_native;
@@ -856,8 +856,9 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.arg5 = I386_EDI_REGNUM;
   i386_linux_record_tdep.arg6 = I386_EBP_REGNUM;
 
-  tdep->i386_intx80_record = i386_linux_intx80_sysenter_record;
-  tdep->i386_sysenter_record = i386_linux_intx80_sysenter_record;
+  tdep->i386_intx80_record = i386_linux_intx80_sysenter_syscall_record;
+  tdep->i386_sysenter_record = i386_linux_intx80_sysenter_syscall_record;
+  tdep->i386_syscall_record = i386_linux_intx80_sysenter_syscall_record;
 
   /* N_FUN symbols in shared libaries have 0 for their values and need
      to be relocated.  */
