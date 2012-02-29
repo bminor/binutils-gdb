@@ -1,5 +1,11 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_val_print_1): If our value is a reference
+	to an array descriptor, dereference it before converting it
+	to a simple array.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_to_fixed_value): Call unwrap_value before
 	creating fixed value.
 	(ada_value_ind, ada_coerce_ref, assign_component)

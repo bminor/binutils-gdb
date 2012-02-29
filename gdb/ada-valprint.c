@@ -689,6 +689,10 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
       struct value *val;
 
       val = value_from_contents_and_address (type, valaddr + offset, address);
+      /* If this is a reference, coerce it now.  This helps taking care
+	 of the case where ADDRESS is meaningless because original_value
+	 was not an lval.  */
+      val = coerce_ref (val);
       if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)  /* array access type.  */
 	val = ada_coerce_to_simple_array_ptr (val);
       else

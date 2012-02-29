@@ -1,5 +1,9 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/aliased_array: New testcase.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/whatis_array_val: New testcase.
 
 2012-02-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
