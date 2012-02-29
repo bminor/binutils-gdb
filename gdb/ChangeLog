@@ -1,5 +1,9 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_is_ignored_field): Rewrite wrong comment.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_lookup_symbol_list): Only cache the result of
 	full searches.
 
