@@ -62,12 +62,14 @@ ResetLineStateMachine(struct LineStateMachine* lsm, bool default_is_stmt)
 }
 
 template<int size, bool big_endian>
-Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object,
-                                                               unsigned int read_shndx)
-  : data_valid_(false), buffer_(NULL), symtab_buffer_(NULL),
-    directories_(), files_(), current_header_index_(-1)
+Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(
+    Object* object,
+    unsigned int read_shndx)
+  : data_valid_(false), buffer_(NULL), buffer_start_(NULL),
+    symtab_buffer_(NULL), directories_(), files_(), current_header_index_(-1)
 {
   unsigned int debug_shndx;
+
   for (debug_shndx = 1; debug_shndx < object->shnum(); ++debug_shndx)
     {
       // FIXME: do this more efficiently: section_name() isn't super-fast
@@ -75,29 +77,18 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object,
       if (name == ".debug_line" || name == ".zdebug_line")
 	{
 	  section_size_type buffer_size;
-	  this->buffer_ = object->section_contents(debug_shndx, &buffer_size,
-						   false);
+	  bool is_new = false;
+	  this->buffer_ = object->decompressed_section_contents(debug_shndx,
+								&buffer_size,
+								&is_new);
+	  if (is_new)
+	    this->buffer_start_ = this->buffer_;
 	  this->buffer_end_ = this->buffer_ + buffer_size;
 	  break;
 	}
     }
   if (this->buffer_ == NULL)
     return;
-
-  section_size_type uncompressed_size = 0;
-  unsigned char* uncompressed_data = NULL;
-  if (object->section_is_compressed(debug_shndx, &uncompressed_size))
-    {
-      uncompressed_data = new unsigned char[uncompressed_size];
-      if (!decompress_input_section(this->buffer_,
-				    this->buffer_end_ - this->buffer_,
-				    uncompressed_data,
-				    uncompressed_size))
-	object->error(_("could not decompress section %s"),
-		      object->section_name(debug_shndx).c_str());
-      this->buffer_ = uncompressed_data;
-      this->buffer_end_ = this->buffer_ + uncompressed_size;
-    }
 
   // Find the relocation section for ".debug_line".
   // We expect these for relobjs (.o's) but not dynobjs (.so's).

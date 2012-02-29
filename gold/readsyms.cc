@@ -602,6 +602,7 @@ Add_symbols::run(Workqueue*)
 
   if (!this->input_objects_->add_object(this->object_))
     {
+      this->object_->discard_decompressed_sections();
       gold_assert(this->sd_ != NULL);
       delete this->sd_;
       this->sd_ = NULL;
@@ -632,6 +633,7 @@ Add_symbols::run(Workqueue*)
 	}
       this->object_->layout(this->symtab_, this->layout_, this->sd_);
       this->object_->add_symbols(this->symtab_, this->sd_, this->layout_);
+      this->object_->discard_decompressed_sections();
       delete this->sd_;
       this->sd_ = NULL;
       this->object_->release();

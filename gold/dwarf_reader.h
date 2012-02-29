@@ -120,6 +120,13 @@ class Sized_dwarf_line_info : public Dwarf_line_info
   // information that pertains to the specified section.
   Sized_dwarf_line_info(Object* object, unsigned int read_shndx = -1U);
 
+  virtual
+  ~Sized_dwarf_line_info()
+  {
+    if (this->buffer_start_ != NULL)
+      delete[] this->buffer_start_;
+  }
+
  private:
   std::string
   do_addr2line(unsigned int shndx, off_t offset,
@@ -199,6 +206,10 @@ class Sized_dwarf_line_info : public Dwarf_line_info
   // the line info to read is.
   const unsigned char* buffer_;
   const unsigned char* buffer_end_;
+  // If the buffer was allocated temporarily, and therefore must be
+  // deallocated in the dtor, this contains a pointer to the start
+  // of the buffer.
+  const unsigned char* buffer_start_;
 
   // This has relocations that point into buffer.
   Track_relocs<size, big_endian> track_relocs_;

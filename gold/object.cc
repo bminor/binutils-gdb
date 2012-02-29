@@ -550,8 +550,22 @@ Sized_relobj_file<size, big_endian>::find_eh_frame(
   return false;
 }
 
+// Return TRUE if this is a section whose contents will be needed in the
+// Add_symbols task.
+
+static bool
+need_decompressed_section(const char* name)
+{
+  // We will need .zdebug_str if this is not an incremental link
+  // (i.e., we are processing string merge sections).
+  if (!parameters->incremental() && strcmp(name, ".zdebug_str") == 0)
+    return true;
+
+  return false;
+}
+
 // Build a table for any compressed debug sections, mapping each section index
-// to the uncompressed size.
+// to the uncompressed size and (if needed) the decompressed contents.
 
 template<int size, bool big_endian>
 Compressed_section_map*
@@ -562,9 +576,10 @@ build_compressed_section_map(
     section_size_type names_size,
     Sized_relobj_file<size, big_endian>* obj)
 {
-  Compressed_section_map* uncompressed_sizes = new Compressed_section_map();
+  Compressed_section_map* uncompressed_map = new Compressed_section_map();
   const unsigned int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   const unsigned char* p = pshdrs + shdr_size;
+
   for (unsigned int i = 1; i < shnum; ++i, p += shdr_size)
     {
       typename elfcpp::Shdr<size, big_endian> shdr(p);
@@ -586,12 +601,38 @@ build_compressed_section_map(
 		  obj->section_contents(i, &len, false);
 	      uint64_t uncompressed_size = get_uncompressed_size(contents, len);
 	      if (uncompressed_size != -1ULL)
-		(*uncompressed_sizes)[i] =
-		    convert_to_section_size_type(uncompressed_size);
+		{
+		  Compressed_section_info info;
+		  info.size = convert_to_section_size_type(uncompressed_size);
+		  info.contents = NULL;
+
+#ifdef ENABLE_THREADS
+		  // If we're multi-threaded, it will help to decompress
+		  // any sections that will be needed during the Add_symbols
+		  // task, so that several decompressions can run in
+		  // parallel.
+		  if (parameters->options().threads())
+		    {
+		      unsigned char* uncompressed_data = NULL;
+		      if (need_decompressed_section(name))
+			{
+			  uncompressed_data = new unsigned char[uncompressed_size];
+			  if (decompress_input_section(contents, len,
+						       uncompressed_data,
+						       uncompressed_size))
+			    info.contents = uncompressed_data;
+			  else
+			    delete[] uncompressed_data;
+			}
+		    }
+#endif
+
+		  (*uncompressed_map)[i] = info;
+		}
 	    }
 	}
     }
-  return uncompressed_sizes;
+  return uncompressed_map;
 }
 
 // Read the sections and symbols from an object file.
@@ -2555,6 +2596,85 @@ Sized_relobj_file<size, big_endian>::do_get_global_symbol_counts(
 	&& (*p)->is_defined())
       ++count;
   *used = count;
+}
+
+// Return a view of the decompressed contents of a section.  Set *PLEN
+// to the size.  Set *IS_NEW to true if the contents need to be freed
+// by the caller.
+
+template<int size, bool big_endian>
+const unsigned char*
+Sized_relobj_file<size, big_endian>::do_decompressed_section_contents(
+    unsigned int shndx,
+    section_size_type* plen,
+    bool* is_new)
+{
+  section_size_type buffer_size;
+  const unsigned char* buffer = this->section_contents(shndx, &buffer_size,
+						       false);
+
+  if (this->compressed_sections_ == NULL)
+    {
+      *plen = buffer_size;
+      *is_new = false;
+      return buffer;
+    }
+
+  Compressed_section_map::const_iterator p =
+      this->compressed_sections_->find(shndx);
+  if (p == this->compressed_sections_->end())
+    {
+      *plen = buffer_size;
+      *is_new = false;
+      return buffer;
+    }
+
+  section_size_type uncompressed_size = p->second.size;
+  if (p->second.contents != NULL)
+    {
+      *plen = uncompressed_size;
+      *is_new = false;
+      return p->second.contents;
+    }
+
+  unsigned char* uncompressed_data = new unsigned char[uncompressed_size];
+  if (!decompress_input_section(buffer,
+				buffer_size,
+				uncompressed_data,
+				uncompressed_size))
+    this->error(_("could not decompress section %s"),
+		this->do_section_name(shndx).c_str());
+
+  // We could cache the results in p->second.contents and store
+  // false in *IS_NEW, but build_compressed_section_map() would
+  // have done so if it had expected it to be profitable.  If
+  // we reach this point, we expect to need the contents only
+  // once in this pass.
+  *plen = uncompressed_size;
+  *is_new = true;
+  return uncompressed_data;
+}
+
+// Discard any buffers of uncompressed sections.  This is done
+// at the end of the Add_symbols task.
+
+template<int size, bool big_endian>
+void
+Sized_relobj_file<size, big_endian>::do_discard_decompressed_sections()
+{
+  if (this->compressed_sections_ == NULL)
+    return;
+
+  for (Compressed_section_map::iterator p = this->compressed_sections_->begin();
+       p != this->compressed_sections_->end();
+       ++p)
+    {
+      if (p->second.contents != NULL)
+        {
+          delete[] p->second.contents;
+          p->second.contents = NULL;
+        }
+    }
 }
 
 // Input_objects methods.

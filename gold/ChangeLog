@@ -1,3 +1,26 @@
+2012-02-29  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf_reader.cc (Sized_dwarf_line_info::Sized_dwarf_line_info):
+	Call Object::decompressed_section_contents.
+	* dwarf_reader.h (Sized_dwarf_line_info::~Sized_dwarf_line_info):
+	New dtor.
+	(Sized_dwarf_line_info::buffer_start_): New data member.
+	* merge.cc (Output_merge_data::do_add_input_section): Call
+	Object::decompressed_section_contents.
+	(Output_merge_string::do_add_input_section): Likewise.
+	* object.cc (need_decompressed_section): New function.
+	(build_compressed_section_map): Decompress sections needed later.
+	(Sized_relobj_file::do_decompressed_section_contents): New function.
+	(Sized_relobj_file::do_discard_decompressed_sections): New function.
+	* object.h (Object::decompressed_section_contents): New function.
+	(Object::discard_decompressed_sections): New function.
+	(Object::do_decompressed_section_contents): New function.
+	(Object::do_discard_decompressed_sections): New function.
+	(Compressed_section_info): New type.
+	(Compressed_section_map): Include decompressed section contents.
+	(Sized_relobj_file::do_decompressed_section_contents): New function.
+	(Sized_relobj_file::do_discard_decompressed_sections): New function.
+
 2012-02-16  Cary Coutant  <ccoutant@google.com>
 
 	* testsuite/Makefile.am (initpri2): Add --ctors-in-init-array option.
