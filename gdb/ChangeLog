@@ -1,5 +1,19 @@
 2012-02-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix disp-step-syscall.exp: fork: single step over fork.
+	* i386-linux-tdep.c (-i386_linux_get_syscall_number): Rename to ...
+	(i386_linux_get_syscall_number_from_regcache): ... here, new function
+	comment, change parameters gdbarch and ptid to regcache.  Remove
+	parameter regcache, initialize gdbarch from regcache here.
+	(i386_linux_get_syscall_number, i386_linux_displaced_step_copy_insn):
+	New functions.
+	(i386_linux_init_abi): Install i386_linux_displaced_step_copy_insn
+	instead.
+	* i386-tdep.c (i386_syscall_p): Check also for 'sysenter' and
+	'syscall'.  Make the 'int' check more strict.
+
+2012-02-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix reverse mode for syscall on AMD CPUs in 32-bit mode.
 	* i386-linux-tdep.c (i386_linux_intx80_sysenter_record): Rename to ...
 	(i386_linux_intx80_sysenter_syscall_record): ... here.

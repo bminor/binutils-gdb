@@ -1,5 +1,13 @@
 2012-02-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix disp-step-syscall.exp: fork: single step over fork.
+	* gdb.base/disp-step-syscall.exp (syscall_insn): Anchor it by
+	whitespaces.
+	(single step over $syscall): Remove its check.
+	(single step over $syscall final pc): New check.
+
+2012-02-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support processors without SSSE3.
 	* gdb.reverse/i386-sse-reverse.c (sse_test): Move pabsb, pabsw and
 	pabsd into ...

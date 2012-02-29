@@ -491,11 +491,17 @@ i386_linux_record_signal (struct gdbarch *gdbarch,
 }
 
 
+/* Core of the implementation for gdbarch get_syscall_number.  Get pending
+   syscall number from REGCACHE.  If there is no pending syscall -1 will be
+   returned.  Pending syscall means ptrace has stepped into the syscall but
+   another ptrace call will step out.  PC is right after the int $0x80
+   / syscall / sysenter instruction in both cases, PC does not change during
+   the second ptrace step.  */
+
 static LONGEST
-i386_linux_get_syscall_number (struct gdbarch *gdbarch,
-                               ptid_t ptid)
+i386_linux_get_syscall_number_from_regcache (struct regcache *regcache)
 {
-  struct regcache *regcache = get_thread_regcache (ptid);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* The content of a register.  */
   gdb_byte buf[4];
@@ -510,6 +516,18 @@ i386_linux_get_syscall_number (struct gdbarch *gdbarch,
   ret = extract_signed_integer (buf, 4, byte_order);
 
   return ret;
+}
+
+/* Wrapper for i386_linux_get_syscall_number_from_regcache to make it
+   compatible with gdbarch get_syscall_number method prototype.  */
+
+static LONGEST
+i386_linux_get_syscall_number (struct gdbarch *gdbarch,
+                               ptid_t ptid)
+{
+  struct regcache *regcache = get_thread_regcache (ptid);
+
+  return i386_linux_get_syscall_number_from_regcache (regcache);
 }
 
 /* The register sets used in GNU/Linux ELF core-dumps are identical to
@@ -641,6 +659,49 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
     return tdesc_i386_linux;
   else
     return tdesc_i386_mmx_linux;
+}
+
+/* Linux kernel shows PC value after the 'int $0x80' instruction even if
+   inferior is still inside the syscall.  On next PTRACE_SINGLESTEP it will
+   finish the syscall but PC will not change.
+   
+   Some vDSOs contain 'int $0x80; ret' and during stepping out of the syscall
+   i386_displaced_step_fixup would keep PC at the displaced pad location.
+   As PC is pointing to the 'ret' instruction before the step
+   i386_displaced_step_fixup would expect inferior has just executed that 'ret'
+   and PC should not be adjusted.  In reality it finished syscall instead and
+   PC should get relocated back to its vDSO address.  Hide the 'ret'
+   instruction by 'nop' so that i386_displaced_step_fixup is not confused.
+   
+   It is not fully correct as the bytes in struct displaced_step_closure will
+   not match the inferior code.  But we would need some new flag in
+   displaced_step_closure otherwise to keep the state that syscall is finishing
+   for the later i386_displaced_step_fixup execution as the syscall execution
+   is already no longer detectable there.  The new flag field would mean
+   i386-linux-tdep.c needs to wrap all the displacement methods of i386-tdep.c
+   which does not seem worth it.  The same effect is achieved by patching that
+   'nop' instruction there instead.  */
+
+struct displaced_step_closure *
+i386_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
+				     CORE_ADDR from, CORE_ADDR to,
+				     struct regcache *regs)
+{
+  struct displaced_step_closure *closure;
+  
+  closure = i386_displaced_step_copy_insn (gdbarch, from, to, regs);
+
+  if (i386_linux_get_syscall_number_from_regcache (regs) != -1)
+    {
+      /* Since we use simple_displaced_step_copy_insn, our closure is a
+	 copy of the instruction.  */
+      gdb_byte *insn = (gdb_byte *) closure;
+
+      /* Fake nop.  */
+      insn[0] = 0x90;
+    }
+
+  return closure;
 }
 
 static void
@@ -891,7 +952,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Displaced stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch,
-                                        i386_displaced_step_copy_insn);
+                                        i386_linux_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, i386_displaced_step_fixup);
   set_gdbarch_displaced_step_free_closure (gdbarch,
                                            simple_displaced_step_free_closure);

@@ -521,7 +521,12 @@ i386_call_p (const gdb_byte *insn)
 static int
 i386_syscall_p (const gdb_byte *insn, int *lengthp)
 {
-  if (insn[0] == 0xcd)
+  /* Is it 'int $0x80'?  */
+  if ((insn[0] == 0xcd && insn[1] == 0x80)
+      /* Or is it 'sysenter'?  */
+      || (insn[0] == 0x0f && insn[1] == 0x34)
+      /* Or is it 'syscall'?  */
+      || (insn[0] == 0x0f && insn[1] == 0x05))
     {
       *lengthp = 2;
       return 1;
