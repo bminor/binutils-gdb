@@ -644,7 +644,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
   return (0);
 }
 
-int
+void
 c_value_print (struct value *val, struct ui_file *stream, 
 	       const struct value_print_options *options)
 {
@@ -748,10 +748,11 @@ c_value_print (struct value *val, struct ui_file *stream,
 			    full ? "" : _(" [incomplete object]"));
 	  /* Print out object: enclosing type is same as real_type if
 	     full.  */
-	  return val_print (value_enclosing_type (val),
-			    value_contents_for_printing (val), 0,
-			    value_address (val), stream, 0,
-			    val, &opts, current_language);
+	  val_print (value_enclosing_type (val),
+		     value_contents_for_printing (val), 0,
+		     value_address (val), stream, 0,
+		     val, &opts, current_language);
+	  return;
           /* Note: When we look up RTTI entries, we don't get any
              information on const or volatile attributes.  */
 	}
@@ -760,17 +761,18 @@ c_value_print (struct value *val, struct ui_file *stream,
 	  /* No RTTI information, so let's do our best.  */
 	  fprintf_filtered (stream, "(%s ?) ",
 			    TYPE_NAME (value_enclosing_type (val)));
-	  return val_print (value_enclosing_type (val),
-			    value_contents_for_printing (val), 0,
-			    value_address (val), stream, 0,
-			    val, &opts, current_language);
+	  val_print (value_enclosing_type (val),
+		     value_contents_for_printing (val), 0,
+		     value_address (val), stream, 0,
+		     val, &opts, current_language);
+	  return;
 	}
       /* Otherwise, we end up at the return outside this "if".  */
     }
 
-  return val_print (val_type, value_contents_for_printing (val),
-		    value_embedded_offset (val),
-		    value_address (val),
-		    stream, 0,
-		    val, &opts, current_language);
+  val_print (val_type, value_contents_for_printing (val),
+	     value_embedded_offset (val),
+	     value_address (val),
+	     stream, 0,
+	     val, &opts, current_language);
 }

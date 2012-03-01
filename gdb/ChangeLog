@@ -1,5 +1,23 @@
 2012-03-01  Tom Tromey  <tromey@redhat.com>
 
+	* value.h (value_print): Return void.
+	* valprint.c (value_print): Return void.
+	* p-valprint.c (pascal_value_print): Return void.
+	* p-lang.h (pascal_value_print): Return void.
+	* language.h (struct language_defn) <la_value_print>: Return
+	void.
+	* language.c (unk_lang_value_print): Return void.
+	* jv-valprint.c (java_value_print): Return void.
+	* jv-lang.h (java_value_print): Return void.
+	* f-valprint.c (c_value_print): Don't declare.
+	Include c-lang.h.
+	* c-valprint.c (c_value_print): Return void.
+	* c-lang.h (c_value_print): Return void.
+	* ada-valprint.c (ada_value_print): Return void.
+	* ada-lang.h (ada_value_print): Return void.
+
+2012-03-01  Tom Tromey  <tromey@redhat.com>
+
 	* value.c (value_primitive_field): Handle virtual base classes.
 
 2012-03-01  Tom Tromey  <tromey@redhat.com>

@@ -963,7 +963,7 @@ print_variant_part (struct type *type, int field_num,
        comma_needed, outer_type, outer_offset);
 }
 
-int
+void
 ada_value_print (struct value *val0, struct ui_file *stream,
 		 const struct value_print_options *options)
 {
@@ -1003,14 +1003,14 @@ ada_value_print (struct value *val0, struct ui_file *stream,
       fprintf_filtered (stream, "(");
       type_print (type, "", stream, -1);
       fprintf_filtered (stream, ") (...?)");
-      return 0;
+      return;
     }
 
   opts = *options;
   opts.deref_ref = 1;
-  return (val_print (type, value_contents_for_printing (val),
-		     value_embedded_offset (val), address,
-		     stream, 0, val, &opts, current_language));
+  val_print (type, value_contents_for_printing (val),
+	     value_embedded_offset (val), address,
+	     stream, 0, val, &opts, current_language);
 }
 
 static void

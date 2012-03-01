@@ -77,8 +77,8 @@ extern int c_val_print (struct type *, const gdb_byte *,
 			const struct value *,
 			const struct value_print_options *);
 
-extern int c_value_print (struct value *, struct ui_file *,
-			  const struct value_print_options *);
+extern void c_value_print (struct value *, struct ui_file *,
+			   const struct value_print_options *);
 
 /* These are in c-lang.c: */
 

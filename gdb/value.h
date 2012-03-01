@@ -808,8 +808,8 @@ extern void print_floating (const gdb_byte *valaddr, struct type *type,
 extern void print_decimal_floating (const gdb_byte *valaddr, struct type *type,
 				    struct ui_file *stream);
 
-extern int value_print (struct value *val, struct ui_file *stream,
-			const struct value_print_options *options);
+extern void value_print (struct value *val, struct ui_file *stream,
+			 const struct value_print_options *options);
 
 extern void value_print_array_elements (struct value *val,
 					struct ui_file *stream, int format,

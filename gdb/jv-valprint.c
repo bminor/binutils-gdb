@@ -33,7 +33,7 @@
 
 /* Local functions */
 
-int
+void
 java_value_print (struct value *val, struct ui_file *stream, 
 		  const struct value_print_options *options)
 {
@@ -205,7 +205,7 @@ java_value_print (struct value *val, struct ui_file *stream,
 
       fprintf_filtered (stream, "}");
 
-      return 0;
+      return;
     }
 
   /* If it's type String, print it.  */
@@ -245,12 +245,12 @@ java_value_print (struct value *val, struct ui_file *stream,
       val_print_string (char_type, NULL, data + boffset, count, stream,
 			options);
 
-      return 0;
+      return;
     }
 
   opts = *options;
   opts.deref_ref = 1;
-  return common_val_print (val, stream, 0, &opts, current_language);
+  common_val_print (val, stream, 0, &opts, current_language);
 }
 
 /* TYPE, VALADDR, ADDRESS, STREAM, RECURSE, and OPTIONS have the

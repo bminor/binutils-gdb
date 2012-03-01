@@ -33,6 +33,7 @@
 #include "value.h"
 #include "cp-support.h"
 #include "charset.h"
+#include "c-lang.h"
 
 
 /* Following is dubious stuff that had been in the xcoff reader.  */
@@ -267,11 +268,6 @@ f_make_symbol_completion_list (char *text, char *word)
 {
   return default_make_symbol_completion_list_break_on (text, word, ":");
 }
-
-/* This is declared in c-lang.h but it is silly to import that file for what
-   is already just a hack.  */
-extern int c_value_print (struct value *, struct ui_file *,
-			  const struct value_print_options *);
 
 const struct language_defn f_language_defn =
 {

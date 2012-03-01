@@ -579,7 +579,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
   return (0);
 }
 
-int
+void
 pascal_value_print (struct value *val, struct ui_file *stream,
 		    const struct value_print_options *options)
 {
@@ -613,7 +613,7 @@ pascal_value_print (struct value *val, struct ui_file *stream,
 	  fprintf_filtered (stream, ") ");
 	}
     }
-  return common_val_print (val, stream, 0, &opts, current_language);
+  common_val_print (val, stream, 0, &opts, current_language);
 }
 
 

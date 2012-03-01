@@ -460,17 +460,14 @@ common_val_print (struct value *val, struct ui_file *stream, int recurse,
 }
 
 /* Print on stream STREAM the value VAL according to OPTIONS.  The value
-   is printed using the current_language syntax.
+   is printed using the current_language syntax.  */
 
-   If the object printed is a string pointer, return the number of string
-   bytes printed.  */
-
-int
+void
 value_print (struct value *val, struct ui_file *stream,
 	     const struct value_print_options *options)
 {
   if (!value_check_printable (val, stream, options))
-    return 0;
+    return;
 
   if (!options->raw)
     {
@@ -482,10 +479,10 @@ value_print (struct value *val, struct ui_file *stream,
 					val, options, current_language);
 
       if (r)
-	return r;
+	return;
     }
 
-  return LA_VALUE_PRINT (val, stream, options);
+  LA_VALUE_PRINT (val, stream, options);
 }
 
 /* Called by various <lang>_val_print routines to print

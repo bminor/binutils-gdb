@@ -40,8 +40,8 @@ extern int pascal_val_print (struct type *, const gdb_byte *, int,
 			     const struct value *,
 			     const struct value_print_options *);
 
-extern int pascal_value_print (struct value *, struct ui_file *,
-			       const struct value_print_options *);
+extern void pascal_value_print (struct value *, struct ui_file *,
+				const struct value_print_options *);
 
 extern void pascal_type_print_method_args (const char *, const char *,
 					   struct ui_file *);

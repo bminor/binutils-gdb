@@ -249,8 +249,8 @@ struct language_defn
 
     /* Print a top-level value using syntax appropriate for this language.  */
 
-    int (*la_value_print) (struct value *, struct ui_file *,
-			   const struct value_print_options *);
+    void (*la_value_print) (struct value *, struct ui_file *,
+			    const struct value_print_options *);
 
     /* PC is possibly an unknown languages trampoline.
        If that PC falls in a trampoline belonging to this language,

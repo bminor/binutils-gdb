@@ -66,8 +66,8 @@ static void unk_lang_printchar (int c, struct type *type,
 static void unk_lang_print_type (struct type *, const char *, struct ui_file *,
 				 int, int);
 
-static int unk_lang_value_print (struct value *, struct ui_file *,
-				 const struct value_print_options *);
+static void unk_lang_value_print (struct value *, struct ui_file *,
+				  const struct value_print_options *);
 
 static CORE_ADDR unk_lang_trampoline (struct frame_info *, CORE_ADDR pc);
 
@@ -858,7 +858,7 @@ unk_lang_val_print (struct type *type, const gdb_byte *valaddr,
 	   "function unk_lang_val_print called."));
 }
 
-static int
+static void
 unk_lang_value_print (struct value *val, struct ui_file *stream,
 		      const struct value_print_options *options)
 {

@@ -169,8 +169,8 @@ extern int ada_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 			  const struct value *,
 			  const struct value_print_options *);
 
-extern int ada_value_print (struct value *, struct ui_file *,
-			    const struct value_print_options *);
+extern void ada_value_print (struct value *, struct ui_file *,
+			     const struct value_print_options *);
 
                                 /* Defined in ada-lang.c */
 

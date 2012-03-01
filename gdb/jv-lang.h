@@ -47,8 +47,8 @@ extern int java_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 			   const struct value *,
 			   const struct value_print_options *);
 
-extern int java_value_print (struct value *, struct ui_file *,
-			     const struct value_print_options *);
+extern void java_value_print (struct value *, struct ui_file *,
+			      const struct value_print_options *);
 
 extern struct value *java_class_from_object (struct value *);
 
