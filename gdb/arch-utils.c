@@ -793,6 +793,18 @@ default_gen_return_address (struct gdbarch *gdbarch,
   error (_("This architecture has no method to collect a return address."));
 }
 
+int
+default_target_signal_to_host (struct gdbarch *gdbarch, enum target_signal ts)
+{
+  return target_signal_to_host (ts);
+}
+
+enum target_signal
+default_target_signal_from_host (struct gdbarch *gdbarch, int signo)
+{
+  return target_signal_from_host (signo);
+}
+
 /* */
 
 /* -Wmissing-prototypes */

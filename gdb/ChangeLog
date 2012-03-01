@@ -1,5 +1,22 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* common/signals.c (default_target_signal_to_host)
+	(default_target_signal_from_host): Move ...
+	* arch-utils.c: ... here.
+	* arch-utils.h (default_target_signal_to_host)
+	(default_target_signal_from_host): Declare.
+
+	* common/signals.c (target_signal_from_command): Move ...
+	* infrun.c: ... here.
+	* inferior.h (target_signal_from_command): Declare.
+	* target.h (target_signal_from_command)
+	(default_target_signal_from_host, default_target_signal_to_host):
+	Delete declarations.
+
+	* common/signals.c (_initialize_signals): Delete.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	* jit-reader.in (plugin_is_GPL_compatible): Add declarations for
 	both __cplusplus and !__cplusplus.
 

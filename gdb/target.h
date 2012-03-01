@@ -1827,16 +1827,6 @@ extern int remote_timeout;
 /* This is for native targets which use a unix/POSIX-style waitstatus.  */
 extern void store_waitstatus (struct target_waitstatus *, int);
 
-/* These are in common/signals.c, but they're only used by gdb.  */
-extern enum target_signal default_target_signal_from_host (struct gdbarch *,
-							   int);
-extern int default_target_signal_to_host (struct gdbarch *, 
-					  enum target_signal);
-
-/* Convert from a number used in a GDB command to an enum target_signal.  */
-extern enum target_signal target_signal_from_command (int);
-/* End of files in common/signals.c.  */
-
 /* Set the show memory breakpoints mode to show, and installs a cleanup
    to restore it back to the current value.  */
 extern struct cleanup *make_show_memory_breakpoints_cleanup (int show);

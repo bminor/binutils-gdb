@@ -6445,6 +6445,15 @@ xdb_handle_command (char *args, int from_tty)
   do_cleanups (old_chain);
 }
 
+enum target_signal
+target_signal_from_command (int num)
+{
+  if (num >= 1 && num <= 15)
+    return (enum target_signal) num;
+  error (_("Only signals 1-15 are valid as numeric signals.\n\
+Use \"info signals\" for a list of symbolic signals."));
+}
+
 /* Print current contents of the tables set by the handle command.
    It is possible we should just be printing signals actually used
    by the current target (but for things to work right when switching
