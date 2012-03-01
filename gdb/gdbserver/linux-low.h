@@ -70,6 +70,12 @@ struct linux_target_ops
 
   int num_regs;
   int *regmap;
+
+  /* Regset support bitmap: 1 for registers that are transferred as a part
+     of a regset, 0 for ones that need to be handled individually.  This
+     can be NULL if all registers are transferred with regsets or regsets
+     are not supported.  */
+  unsigned char *regset_bitmap;
   int (*cannot_fetch_register) (int);
 
   /* Returns 0 if we can store the register, 1 if we can not

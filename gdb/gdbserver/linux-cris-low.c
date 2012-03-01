@@ -112,6 +112,7 @@ struct linux_target_ops the_low_target = {
   init_registers_cris,
   cris_num_regs,
   cris_regmap,
+  NULL,
   cris_cannot_fetch_register,
   cris_cannot_store_register,
   cris_get_pc,

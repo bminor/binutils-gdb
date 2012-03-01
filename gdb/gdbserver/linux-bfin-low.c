@@ -94,6 +94,7 @@ struct linux_target_ops the_low_target = {
   init_registers_bfin,
   bfin_num_regs,
   bfin_regmap,
+  NULL,
   bfin_cannot_fetch_register,
   bfin_cannot_store_register,
   bfin_get_pc,

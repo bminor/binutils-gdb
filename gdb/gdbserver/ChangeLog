@@ -1,3 +1,56 @@
+2012-03-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* linux-low.h (linux_target_ops): Add regset_bitmap member.
+	* linux-low.c (use_linux_regsets): New macro.
+	[!HAVE_LINUX_REGSETS] (regsets_fetch_inferior_registers): Likewise.
+	[!HAVE_LINUX_REGSETS] (regsets_store_inferior_registers): Likewise.
+	(linux_register_in_regsets): New function.
+	(usr_fetch_inferior_registers): Skip registers covered by
+	regsets.
+	(usr_store_inferior_registers): Likewise.
+	(usr_fetch_inferior_registers): New macro.
+	(usr_store_inferior_registers): Likewise.
+	(linux_fetch_registers): Handle mixed regset/non-regset targets.
+	(linux_store_registers): Likewise.
+	* linux-mips-low.c (init_registers_mips_dsp_linux): New
+	prototype.
+	(init_registers_mips64_dsp_linux): Likewise.
+	(init_registers_mips_linux): New macro.
+	(init_registers_mips_dsp_linux): Likewise.
+	(mips_dsp_num_regs): Likewise.
+	(DSP_BASE, DSP_CONTROL): New fallback macros.
+	(mips_base_regs): New macro.
+	(mips_regmap): Use it.  Fix the size.
+	(mips_dsp_regmap): New variable.
+	(mips_dsp_regset_bitmap): Likewise.
+	(mips_arch_setup): New function.
+	(mips_cannot_fetch_register): Use the_low_target.regmap rather
+	than mips_regmap.
+	(mips_cannot_store_register): Likewise.
+	(the_low_target): Update .arch_setup, .num_regs and .regmap
+	initializers.  Add .regset_bitmap initializer.
+	* linux-arm-low.c (the_low_target): Add .regset_bitmap
+	initializer.
+	* linux-bfin-low.c (the_low_target): Likewise.
+	* linux-cris-low.c (the_low_target): Likewise.
+	* linux-crisv32-low.c (the_low_target): Likewise.
+	* linux-ia64-low.c (the_low_target): Likewise.
+	* linux-m32r-low.c (the_low_target): Likewise.
+	* linux-m68k-low.c (the_low_target): Likewise.
+	* linux-ppc-low.c (the_low_target): Likewise.
+	* linux-s390-low.c (the_low_target): Likewise.
+	* linux-sh-low.c (the_low_target): Likewise.
+	* linux-sparc-low.c (the_low_target): Likewise.
+	* linux-tic6x-low.c (the_low_target): Likewise.
+	* linux-x86-low.c (the_low_target): Likewise.
+	* linux-xtensa-low.c (the_low_target): Likewise.
+	* configure.srv <mips*-*-linux*>: Add mips-dsp-linux.o and
+	mips64-dsp-linux.o to srv_regobj.  Add mips-dsp-linux.xml,
+	mips64-dsp-linux.xml, mips-dsp.xml and mips64-dsp.xml to
+	srv_xmlfiles.
+	* Makefile.in (mips-dsp-linux.o, mips-dsp-linux.c): New targets.
+	(mips64-dsp-linux.o, mips64-dsp-linux.c): Likewise.
+
 2012-02-29  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 

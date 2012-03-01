@@ -834,6 +834,7 @@ struct linux_target_ops the_low_target = {
   arm_arch_setup,
   arm_num_regs,
   arm_regmap,
+  NULL,
   arm_cannot_fetch_register,
   arm_cannot_store_register,
   arm_get_pc,

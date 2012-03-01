@@ -610,6 +610,7 @@ struct linux_target_ops the_low_target = {
   ppc_arch_setup,
   ppc_num_regs,
   ppc_regmap,
+  NULL,
   ppc_cannot_fetch_register,
   ppc_cannot_store_register,
   ppc_get_pc,

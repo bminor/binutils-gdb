@@ -321,6 +321,7 @@ struct linux_target_ops the_low_target = {
   tic6x_arch_setup,
   TIC6X_NUM_REGS,
   0,
+  NULL,
   tic6x_cannot_fetch_register,
   tic6x_cannot_store_register,
   tic6x_get_pc,

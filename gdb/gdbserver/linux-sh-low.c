@@ -112,6 +112,7 @@ struct linux_target_ops the_low_target = {
   init_registers_sh,
   sh_num_regs,
   sh_regmap,
+  NULL,
   sh_cannot_fetch_register,
   sh_cannot_store_register,
   sh_get_pc,

@@ -1,3 +1,54 @@
+2012-03-01  Maciej W. Rozycki  <macro@mips.com>
+            Chris Dearman  <chris@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* features/mips-dsp.xml: New file.
+	* features/mips64-dsp.xml: New file.
+	* features/mips-dsp-linux.xml: New file.
+	* features/mips64-dsp-linux.xml: New file.
+	* features/Makefile (WHICH): Add mips-dsp-linux and
+	mips64-dsp-linux.
+	(mips-dsp-expedite, mips64-dsp-expedite): New variables.
+	* features/mips-dsp-linux.c: New file.
+	* features/mips64-dsp-linux.c: New file.
+	* regformats/mips-dsp-linux.dat: New file.
+	* regformats/mips64-dsp-linux.dat: New file.
+	* mips-linux-nat.c (mips_linux_register_addr): Handle DSP
+	registers.
+	(mips64_linux_register_addr): Likewise.
+	(mips64_linux_regsets_fetch_registers): Likewise.
+	(mips64_linux_regsets_store_registers): Likewise.
+	(mips64_linux_fetch_registers): Update call to
+	mips64_linux_regsets_fetch_registers.
+	(mips64_linux_store_registers): Update call to
+	mips64_linux_regsets_store_registers.
+	(mips_linux_read_description): Probe for DSP registers.
+	(_initialize_mips_linux_nat): Call initialize_tdesc_mips_dsp_linux
+	and initialize_tdesc_mips64_dsp_linux.
+	* mips-linux-tdep.c (supply_gregset, mips64_supply_gregset):
+	Remove padding of no longer used embedded register slots.
+	* mips-linux-tdep.h (DSP_BASE, DSP_CONTROL): New macros.
+	(MIPS_RESTART_REGNUM): Redefine enum value.
+	* mips-tdep.c (mips_generic_reg_names): Remove trailing null
+	strings.
+	(mips_tx39_reg_names): Likewise.
+	(mips_linux_reg_names): New array of register names for Linux
+	targets.
+	(mips_register_name): Check for a null pointer in
+	mips_processor_reg_names and return an empty string.
+	(mips_register_type): Exclude embedded registers for the IRIX
+	and Linux ABIs.
+	(mips_pseudo_register_type): Likewise.  Use dynamic numbers to
+	refer to FP registers, LO, HI, BadVAddr, Cause and PC.  Handle
+	DSP registers.
+	(mips_stab_reg_to_regnum): Handle DSP accumulators.
+	(mips_dwarf_dwarf2_ecoff_reg_to_regnum): Likewise.
+	(mips_gdbarch_init): Likewise.  Initialize internal register
+	indices for the Linux ABI.  Use dynamic numbers to refer to
+	registers, as applicable, while parsing the target description.
+	* mips-tdep.h (struct mips_regnum): Add dspacc/dspctl offsets.
+
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
 	* jit-reader.in [!__cplusplus]

@@ -53,6 +53,8 @@ struct mips_regnum
   int cause;		/* Describes last exception.  */
   int hi;		/* Multiply/divide temp.  */
   int lo;		/* ...  */
+  int dspacc;		/* SmartMIPS/DSP accumulators.  */
+  int dspctl;		/* DSP control.  */
 };
 extern const struct mips_regnum *mips_regnum (struct gdbarch *gdbarch);
 

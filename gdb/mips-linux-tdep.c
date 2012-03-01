@@ -119,13 +119,8 @@ mips_supply_gregset (struct regcache *regcache,
   supply_32bit_reg (regcache, mips_regnum (gdbarch)->cause,
 		    regp + EF_CP0_CAUSE);
 
-  /* Fill inaccessible registers with zero.  */
+  /* Fill the inaccessible zero register with zero.  */
   regcache_raw_supply (regcache, MIPS_ZERO_REGNUM, zerobuf);
-  regcache_raw_supply (regcache, MIPS_UNUSED_REGNUM, zerobuf);
-  for (regi = MIPS_FIRST_EMBED_REGNUM;
-       regi <= MIPS_LAST_EMBED_REGNUM;
-       regi++)
-    regcache_raw_supply (regcache, regi, zerobuf);
 }
 
 static void
@@ -374,13 +369,8 @@ mips64_supply_gregset (struct regcache *regcache,
   supply_64bit_reg (regcache, mips_regnum (gdbarch)->cause,
 		    (const gdb_byte *) (regp + MIPS64_EF_CP0_CAUSE));
 
-  /* Fill inaccessible registers with zero.  */
+  /* Fill the inaccessible zero register with zero.  */
   regcache_raw_supply (regcache, MIPS_ZERO_REGNUM, zerobuf);
-  regcache_raw_supply (regcache, MIPS_UNUSED_REGNUM, zerobuf);
-  for (regi = MIPS_FIRST_EMBED_REGNUM;
-       regi <= MIPS_LAST_EMBED_REGNUM;
-       regi++)
-    regcache_raw_supply (regcache, regi, zerobuf);
 }
 
 static void

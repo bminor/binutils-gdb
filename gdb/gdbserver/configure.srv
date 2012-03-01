@@ -151,16 +151,23 @@ case "${target}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
-  mips*-*-linux*)	srv_regobj="mips-linux.o mips64-linux.o"
+  mips*-*-linux*)	srv_regobj="mips-linux.o"
+			srv_regobj="${srv_regobj} mips-dsp-linux.o"
+			srv_regobj="${srv_regobj} mips64-linux.o"
+			srv_regobj="${srv_regobj} mips64-dsp-linux.o"
 			srv_tgtobj="linux-low.o linux-osdata.o linux-mips-low.o linux-procfs.o"
 			srv_xmlfiles="mips-linux.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips-dsp-linux.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips-cpu.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips-cp0.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips-fpu.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips-dsp.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips64-linux.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips64-dsp-linux.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips64-cpu.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips64-cp0.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips64-fpu.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips64-dsp.xml"
 			srv_linux_regsets=yes
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes

@@ -1,4 +1,9 @@
 2012-03-01  Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb.xml/tdesc-regs.exp: Add "mips-dsp.xml" to the list of MIPS
+	core registers.
+
+2012-03-01  Maciej W. Rozycki  <macro@mips.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
             Daniel Jacobowitz  <dan@codesourcery.com>
 

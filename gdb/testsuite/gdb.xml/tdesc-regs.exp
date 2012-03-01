@@ -34,7 +34,7 @@ switch -glob -- [istarget] {
         set core-regs {m68k-core.xml}
     }
     "mips*-*-*" {
-	set core-regs {mips-cpu.xml mips-cp0.xml mips-fpu.xml}
+	set core-regs {mips-cpu.xml mips-cp0.xml mips-fpu.xml mips-dsp.xml}
     }
     "powerpc*-*-*" {
 	set regdir "rs6000/"

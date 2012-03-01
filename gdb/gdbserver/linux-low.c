@@ -3781,144 +3781,10 @@ unstop_all_lwps (int unsuspend, struct lwp_info *except)
     find_inferior (&all_lwps, proceed_one_lwp, except);
 }
 
-#ifdef HAVE_LINUX_USRREGS
-
-int
-register_addr (int regnum)
-{
-  int addr;
-
-  if (regnum < 0 || regnum >= the_low_target.num_regs)
-    error ("Invalid register number %d.", regnum);
-
-  addr = the_low_target.regmap[regnum];
-
-  return addr;
-}
-
-/* Fetch one register.  */
-static void
-fetch_register (struct regcache *regcache, int regno)
-{
-  CORE_ADDR regaddr;
-  int i, size;
-  char *buf;
-  int pid;
-
-  if (regno >= the_low_target.num_regs)
-    return;
-  if ((*the_low_target.cannot_fetch_register) (regno))
-    return;
-
-  regaddr = register_addr (regno);
-  if (regaddr == -1)
-    return;
-
-  size = ((register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
-	  & -sizeof (PTRACE_XFER_TYPE));
-  buf = alloca (size);
-
-  pid = lwpid_of (get_thread_lwp (current_inferior));
-  for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
-    {
-      errno = 0;
-      *(PTRACE_XFER_TYPE *) (buf + i) =
-	ptrace (PTRACE_PEEKUSER, pid,
-		/* Coerce to a uintptr_t first to avoid potential gcc warning
-		   of coercing an 8 byte integer to a 4 byte pointer.  */
-		(PTRACE_ARG3_TYPE) (uintptr_t) regaddr, 0);
-      regaddr += sizeof (PTRACE_XFER_TYPE);
-      if (errno != 0)
-	error ("reading register %d: %s", regno, strerror (errno));
-    }
-
-  if (the_low_target.supply_ptrace_register)
-    the_low_target.supply_ptrace_register (regcache, regno, buf);
-  else
-    supply_register (regcache, regno, buf);
-}
-
-/* Store one register.  */
-static void
-store_register (struct regcache *regcache, int regno)
-{
-  CORE_ADDR regaddr;
-  int i, size;
-  char *buf;
-  int pid;
-
-  if (regno >= the_low_target.num_regs)
-    return;
-  if ((*the_low_target.cannot_store_register) (regno))
-    return;
-
-  regaddr = register_addr (regno);
-  if (regaddr == -1)
-    return;
-
-  size = ((register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
-	  & -sizeof (PTRACE_XFER_TYPE));
-  buf = alloca (size);
-  memset (buf, 0, size);
-
-  if (the_low_target.collect_ptrace_register)
-    the_low_target.collect_ptrace_register (regcache, regno, buf);
-  else
-    collect_register (regcache, regno, buf);
-
-  pid = lwpid_of (get_thread_lwp (current_inferior));
-  for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
-    {
-      errno = 0;
-      ptrace (PTRACE_POKEUSER, pid,
-	    /* Coerce to a uintptr_t first to avoid potential gcc warning
-	       about coercing an 8 byte integer to a 4 byte pointer.  */
-	      (PTRACE_ARG3_TYPE) (uintptr_t) regaddr,
-	      (PTRACE_ARG4_TYPE) *(PTRACE_XFER_TYPE *) (buf + i));
-      if (errno != 0)
-	{
-	  /* At this point, ESRCH should mean the process is
-	     already gone, in which case we simply ignore attempts
-	     to change its registers.  See also the related
-	     comment in linux_resume_one_lwp.  */
-	  if (errno == ESRCH)
-	    return;
-
-	  if ((*the_low_target.cannot_store_register) (regno) == 0)
-	    error ("writing register %d: %s", regno, strerror (errno));
-	}
-      regaddr += sizeof (PTRACE_XFER_TYPE);
-    }
-}
-
-/* Fetch all registers, or just one, from the child process.  */
-static void
-usr_fetch_inferior_registers (struct regcache *regcache, int regno)
-{
-  if (regno == -1)
-    for (regno = 0; regno < the_low_target.num_regs; regno++)
-      fetch_register (regcache, regno);
-  else
-    fetch_register (regcache, regno);
-}
-
-/* Store our register values back into the inferior.
-   If REGNO is -1, do this for all registers.
-   Otherwise, REGNO specifies which register (so we can save time).  */
-static void
-usr_store_inferior_registers (struct regcache *regcache, int regno)
-{
-  if (regno == -1)
-    for (regno = 0; regno < the_low_target.num_regs; regno++)
-      store_register (regcache, regno);
-  else
-    store_register (regcache, regno);
-}
-#endif /* HAVE_LINUX_USRREGS */
-
-
 
 #ifdef HAVE_LINUX_REGSETS
+
+#define use_linux_regsets 1
 
 static int
 regsets_fetch_inferior_registers (struct regcache *regcache)
@@ -4079,34 +3945,224 @@ regsets_store_inferior_registers (struct regcache *regcache)
     return 0;
   else
     return 1;
-  return 0;
 }
 
-#endif /* HAVE_LINUX_REGSETS */
+#else /* !HAVE_LINUX_REGSETS */
+
+#define use_linux_regsets 0
+#define regsets_fetch_inferior_registers(regcache) 1
+#define regsets_store_inferior_registers(regcache) 1
+
+#endif
+
+/* Return 1 if register REGNO is supported by one of the regset ptrace
+   calls or 0 if it has to be transferred individually.  */
+
+static int
+linux_register_in_regsets (int regno)
+{
+  unsigned char mask = 1 << (regno % 8);
+  size_t index = regno / 8;
+
+  return (use_linux_regsets
+	  && (the_low_target.regset_bitmap == NULL
+	      || (the_low_target.regset_bitmap[index] & mask) != 0));
+}
+
+#ifdef HAVE_LINUX_USRREGS
+
+int
+register_addr (int regnum)
+{
+  int addr;
+
+  if (regnum < 0 || regnum >= the_low_target.num_regs)
+    error ("Invalid register number %d.", regnum);
+
+  addr = the_low_target.regmap[regnum];
+
+  return addr;
+}
+
+/* Fetch one register.  */
+static void
+fetch_register (struct regcache *regcache, int regno)
+{
+  CORE_ADDR regaddr;
+  int i, size;
+  char *buf;
+  int pid;
+
+  if (regno >= the_low_target.num_regs)
+    return;
+  if ((*the_low_target.cannot_fetch_register) (regno))
+    return;
+
+  regaddr = register_addr (regno);
+  if (regaddr == -1)
+    return;
+
+  size = ((register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
+	  & -sizeof (PTRACE_XFER_TYPE));
+  buf = alloca (size);
+
+  pid = lwpid_of (get_thread_lwp (current_inferior));
+  for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
+    {
+      errno = 0;
+      *(PTRACE_XFER_TYPE *) (buf + i) =
+	ptrace (PTRACE_PEEKUSER, pid,
+		/* Coerce to a uintptr_t first to avoid potential gcc warning
+		   of coercing an 8 byte integer to a 4 byte pointer.  */
+		(PTRACE_ARG3_TYPE) (uintptr_t) regaddr, 0);
+      regaddr += sizeof (PTRACE_XFER_TYPE);
+      if (errno != 0)
+	error ("reading register %d: %s", regno, strerror (errno));
+    }
+
+  if (the_low_target.supply_ptrace_register)
+    the_low_target.supply_ptrace_register (regcache, regno, buf);
+  else
+    supply_register (regcache, regno, buf);
+}
+
+/* Store one register.  */
+static void
+store_register (struct regcache *regcache, int regno)
+{
+  CORE_ADDR regaddr;
+  int i, size;
+  char *buf;
+  int pid;
+
+  if (regno >= the_low_target.num_regs)
+    return;
+  if ((*the_low_target.cannot_store_register) (regno))
+    return;
+
+  regaddr = register_addr (regno);
+  if (regaddr == -1)
+    return;
+
+  size = ((register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
+	  & -sizeof (PTRACE_XFER_TYPE));
+  buf = alloca (size);
+  memset (buf, 0, size);
+
+  if (the_low_target.collect_ptrace_register)
+    the_low_target.collect_ptrace_register (regcache, regno, buf);
+  else
+    collect_register (regcache, regno, buf);
+
+  pid = lwpid_of (get_thread_lwp (current_inferior));
+  for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
+    {
+      errno = 0;
+      ptrace (PTRACE_POKEUSER, pid,
+	    /* Coerce to a uintptr_t first to avoid potential gcc warning
+	       about coercing an 8 byte integer to a 4 byte pointer.  */
+	      (PTRACE_ARG3_TYPE) (uintptr_t) regaddr,
+	      (PTRACE_ARG4_TYPE) *(PTRACE_XFER_TYPE *) (buf + i));
+      if (errno != 0)
+	{
+	  /* At this point, ESRCH should mean the process is
+	     already gone, in which case we simply ignore attempts
+	     to change its registers.  See also the related
+	     comment in linux_resume_one_lwp.  */
+	  if (errno == ESRCH)
+	    return;
+
+	  if ((*the_low_target.cannot_store_register) (regno) == 0)
+	    error ("writing register %d: %s", regno, strerror (errno));
+	}
+      regaddr += sizeof (PTRACE_XFER_TYPE);
+    }
+}
+
+/* Fetch all registers, or just one, from the child process.
+   If REGNO is -1, do this for all registers, skipping any that are
+   assumed to have been retrieved by regsets_fetch_inferior_registers,
+   unless ALL is non-zero.
+   Otherwise, REGNO specifies which register (so we can save time).  */
+static void
+usr_fetch_inferior_registers (struct regcache *regcache, int regno, int all)
+{
+  if (regno == -1)
+    {
+      for (regno = 0; regno < the_low_target.num_regs; regno++)
+	if (all || !linux_register_in_regsets (regno))
+	  fetch_register (regcache, regno);
+    }
+  else
+    fetch_register (regcache, regno);
+}
+
+/* Store our register values back into the inferior.
+   If REGNO is -1, do this for all registers, skipping any that are
+   assumed to have been saved by regsets_store_inferior_registers,
+   unless ALL is non-zero.
+   Otherwise, REGNO specifies which register (so we can save time).  */
+static void
+usr_store_inferior_registers (struct regcache *regcache, int regno, int all)
+{
+  if (regno == -1)
+    {
+      for (regno = 0; regno < the_low_target.num_regs; regno++)
+	if (all || !linux_register_in_regsets (regno))
+	  store_register (regcache, regno);
+    }
+  else
+    store_register (regcache, regno);
+}
+
+#else /* !HAVE_LINUX_USRREGS */
+
+#define usr_fetch_inferior_registers(regcache, regno, all) do {} while (0)
+#define usr_store_inferior_registers(regcache, regno, all) do {} while (0)
+
+#endif
 
 
 void
 linux_fetch_registers (struct regcache *regcache, int regno)
 {
-#ifdef HAVE_LINUX_REGSETS
-  if (regsets_fetch_inferior_registers (regcache) == 0)
-    return;
-#endif
-#ifdef HAVE_LINUX_USRREGS
-  usr_fetch_inferior_registers (regcache, regno);
-#endif
+  int use_regsets;
+  int all = 0;
+
+  if (regno == -1)
+    {
+      all = regsets_fetch_inferior_registers (regcache);
+      usr_fetch_inferior_registers (regcache, regno, all);
+    }
+  else
+    {
+      use_regsets = linux_register_in_regsets (regno);
+      if (use_regsets)
+	all = regsets_fetch_inferior_registers (regcache);
+      if (!use_regsets || all)
+	usr_fetch_inferior_registers (regcache, regno, 1);
+    }
 }
 
 void
 linux_store_registers (struct regcache *regcache, int regno)
 {
-#ifdef HAVE_LINUX_REGSETS
-  if (regsets_store_inferior_registers (regcache) == 0)
-    return;
-#endif
-#ifdef HAVE_LINUX_USRREGS
-  usr_store_inferior_registers (regcache, regno);
-#endif
+  int use_regsets;
+  int all = 0;
+
+  if (regno == -1)
+    {
+      all = regsets_store_inferior_registers (regcache);
+      usr_store_inferior_registers (regcache, regno, all);
+    }
+  else
+    {
+      use_regsets = linux_register_in_regsets (regno);
+      if (use_regsets)
+	all = regsets_store_inferior_registers (regcache);
+      if (!use_regsets || all)
+	usr_store_inferior_registers (regcache, regno, 1);
+    }
 }
 
 

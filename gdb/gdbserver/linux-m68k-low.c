@@ -179,6 +179,7 @@ struct linux_target_ops the_low_target = {
   init_registers_m68k,
   m68k_num_regs,
   m68k_regmap,
+  NULL,
   m68k_cannot_fetch_register,
   m68k_cannot_store_register,
   m68k_get_pc,

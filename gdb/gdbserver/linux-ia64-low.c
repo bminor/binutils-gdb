@@ -282,6 +282,7 @@ struct linux_target_ops the_low_target = {
   init_registers_ia64,
   ia64_num_regs,
   ia64_regmap,
+  NULL,
   ia64_cannot_fetch_register,
   ia64_cannot_store_register,
 };

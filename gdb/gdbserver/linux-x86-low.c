@@ -2944,6 +2944,7 @@ struct linux_target_ops the_low_target =
   NULL,
   NULL,
   NULL,
+  NULL,
   x86_get_pc,
   x86_set_pc,
   x86_breakpoint,

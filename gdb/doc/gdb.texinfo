@@ -38636,6 +38636,11 @@ it may be optional in a future version of @value{GDBN}.  It should
 contain registers @samp{f0} through @samp{f31}, @samp{fcsr}, and
 @samp{fir}.  They may be 32-bit or 64-bit depending on the target.
 
+The @samp{org.gnu.gdb.mips.dsp} feature is optional.  It should
+contain registers @samp{hi1} through @samp{hi3}, @samp{lo1} through
+@samp{lo3}, and @samp{dspctl}.  The @samp{dspctl} register should
+be 32-bit and the rest may be 32-bit or 64-bit depending on the target.
+
 The @samp{org.gnu.gdb.mips.linux} feature is optional.  It should
 contain a single register, @samp{restart}, which is used by the
 Linux kernel to control restartable syscalls.
