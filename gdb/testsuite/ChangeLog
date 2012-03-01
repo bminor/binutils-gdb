@@ -1,5 +1,27 @@
 2012-03-01  Keith Seitz  <keiths@redhat.com>
 
+	* gdb.cp/method2.exp: Output of overload menu is now
+	alphabetized.  Update tests for "break A::method".
+	* gdb.cp/ovldbreak.exp: Use gdb_get_line_number instead
+	of hard-coding them.
+	Overload menu is alphabetized: rewrite to accommodate.
+	Unset variables LINE and TYPES which are used in other tests.
+	Compute the output of "info break".
+	Update the breakpoint table after all breakpoints are deleted.
+	(continue_to_bp_overloaded): Rename ACTUALS to ARGUMENT and
+	compute ACTUALS and the method body based on parameters.
+	Update expected output accordingly.
+	* gdb.cp/ovldbreak.cc (foo::overload1arg): Reformat and add
+	unique comments to allow the use of gdb_get_line_number.
+
+2012-03-01  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/method2.exp: Use prepare_for_testing and cleanup
+	some Tcl syntax.
+	* gdb.cp/ovldbreak.exp: Likewise.
+
+2012-03-01  Keith Seitz  <keiths@redhat.com>
+
 	* gdb.base/help.exp (help show user): Update expected result
 	for new doc string changes (add "non-python").
 
