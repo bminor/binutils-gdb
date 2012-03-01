@@ -425,6 +425,9 @@ init_w32_command_list (void)
     }
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_windows_tdep;
+
 void
 _initialize_windows_tdep (void)
 {

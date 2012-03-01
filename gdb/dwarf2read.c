@@ -3387,7 +3387,7 @@ dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
    SECTION is the section the CU/TU comes from,
    either .debug_info or .debug_types.  */
 
-void
+static void
 process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
 			   struct dwarf2_section_info *section,
 			   int is_debug_types_section)

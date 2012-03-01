@@ -864,6 +864,9 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					linux_has_shared_address_space);
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_linux_tdep;
+
 void
 _initialize_linux_tdep (void)
 {

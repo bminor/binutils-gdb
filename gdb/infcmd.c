@@ -664,7 +664,7 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
   return 0;
 }
 
-void
+static void
 ensure_valid_thread (void)
 {
   if (ptid_equal (inferior_ptid, null_ptid)
@@ -676,7 +676,7 @@ ensure_valid_thread (void)
    is likely to mix up recorded and live target data.  So simply
    disallow those commands.  */
 
-void
+static void
 ensure_not_tfind_mode (void)
 {
   if (get_traceframe_number () >= 0)

@@ -151,7 +151,7 @@ free_syscalls_info (void *arg)
   xfree (sysinfo);
 }
 
-struct cleanup *
+static struct cleanup *
 make_cleanup_free_syscalls_info (struct syscalls_info *sysinfo)
 {
   return make_cleanup (free_syscalls_info, sysinfo);

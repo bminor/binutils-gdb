@@ -2924,6 +2924,9 @@ cmd_record_goto (char *arg, int from_tty)
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_record;
+
 void
 _initialize_record (void)
 {

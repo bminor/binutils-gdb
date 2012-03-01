@@ -2600,7 +2600,7 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
    table.  If such an entry cannot be found, return FUNC_ADDR
    unaltered.  */
 
-CORE_ADDR
+static CORE_ADDR
 skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
 {
   CORE_ADDR func_start, func_end;

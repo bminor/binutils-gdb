@@ -68,7 +68,7 @@ enum opencl_primitive_types {
 
 static struct gdbarch_data *opencl_type_data;
 
-struct type **
+static struct type **
 builtin_opencl_type (struct gdbarch *gdbarch)
 {
   return gdbarch_data (gdbarch, opencl_type_data);
@@ -961,7 +961,7 @@ Cannot perform conditional operation on vectors with different sizes"));
   return evaluate_subexp_c (expect_type, exp, pos, noside);
 }
 
-void
+static void
 opencl_language_arch_info (struct gdbarch *gdbarch,
 			   struct language_arch_info *lai)
 {
@@ -1115,6 +1115,9 @@ build_opencl_types (struct gdbarch *gdbarch)
 
   return types;
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_opencl_language;
 
 void
 _initialize_opencl_language (void)

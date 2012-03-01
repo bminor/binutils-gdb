@@ -741,7 +741,7 @@ info_inferiors_command (char *args, int from_tty)
 
 /* remove-inferior ID */
 
-void
+static void
 remove_inferior_command (char *args, int from_tty)
 {
   int num;
@@ -800,7 +800,7 @@ add_inferior_with_spaces (void)
 
 /* add-inferior [-copies N] [-exec FILENAME]  */
 
-void
+static void
 add_inferior_command (char *args, int from_tty)
 {
   int i, copies = 1;
@@ -863,7 +863,7 @@ add_inferior_command (char *args, int from_tty)
 
 /* clone-inferior [-copies N] [ID] */
 
-void
+static void
 clone_inferior_command (char *args, int from_tty)
 {
   int i, copies = 1;

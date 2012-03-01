@@ -459,7 +459,7 @@ i386_linux_intx80_sysenter_syscall_record (struct regcache *regcache)
 #define I386_LINUX_xstate	270
 #define I386_LINUX_frame_size	732
 
-int
+static int
 i386_linux_record_signal (struct gdbarch *gdbarch,
                           struct regcache *regcache,
                           enum target_signal signal)

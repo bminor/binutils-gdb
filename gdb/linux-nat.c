@@ -5091,7 +5091,7 @@ linux_nat_close (int quitting)
    lwpid is a "main" process id or not (it assumes so).  We reverse
    look up the "main" process id from the lwp here.  */
 
-struct address_space *
+static struct address_space *
 linux_nat_thread_address_space (struct target_ops *t, ptid_t ptid)
 {
   struct lwp_info *lwp;
@@ -5184,7 +5184,7 @@ linux_nat_core_of_thread_1 (ptid_t ptid)
 
 /* Return the cached value of the processor core for thread PTID.  */
 
-int
+static int
 linux_nat_core_of_thread (struct target_ops *ops, ptid_t ptid)
 {
   struct lwp_info *info = find_lwp_pid (ptid);

@@ -515,7 +515,7 @@ is_root_p (struct varobj *var)
 #ifdef HAVE_PYTHON
 /* Helper function to install a Python environment suitable for
    use during operations on VAR.  */
-struct cleanup *
+static struct cleanup *
 varobj_ensure_python_env (struct varobj *var)
 {
   return ensure_python_env (var->root->exp->gdbarch,

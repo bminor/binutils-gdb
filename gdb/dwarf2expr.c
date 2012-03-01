@@ -1531,6 +1531,9 @@ ctx_no_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
 		  _("Support for DW_OP_GNU_entry_value is unimplemented"));
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_dwarf2expr;
+
 void
 _initialize_dwarf2expr (void)
 {

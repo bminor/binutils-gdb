@@ -1,5 +1,43 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* amd64-linux-tdep.c (amd64_linux_record_signal): Make static.
+	* breakpoint.c (create_exception_master_breakpoint, trace_command)
+	(ftrace_command, strace_command): Make static.
+	* d-lang.c (_initialize_d_language): Declare.
+	* dwarf2expr.c (_initialize_dwarf2expr): Declare.
+	* dwarf2loc.c (_initialize_dwarf2loc):
+	* dwarf2read.c (process_psymtab_comp_unit): Make static.
+	* exec.c (exec_get_section_table): Make static.
+	* i386-linux-tdep.c (i386_linux_record_signal): Make static.
+	* infcmd.c (ensure_valid_thread, ensure_not_tfind_mode): Make static.
+	* inferior.c (remove_inferior_command, add_inferior_command)
+	(clone_inferior_command): Make static.
+	* linux-nat.c (linux_nat_thread_address_space)
+	(linux_nat_core_of_thread): Make static.
+	* linux-tdep.c (_initialize_linux_tdep): Declare.
+	* objc-lang.c (_initialize_objc_lang): Declare.
+	* opencl-lang.c (builtin_opencl_type, opencl_language_arch_info):
+	Make static.
+	(_initialize_opencl_language): Declare.
+	* record.c (_initialize_record): Declare.
+	* remote.c (demand_private_info, remote_get_tib_address)
+	(remote_supports_cond_tracepoints)
+	(remote_supports_fast_tracepoints, remote_get_tracepoint_status):
+	Make static.
+	* skip.c (_initialize_step_skip): Declare.
+	* symtab.c (skip_prologue_using_lineinfo): Make static.
+	* tracepoint.c (delete_trace_state_variable)
+	(trace_variable_command, delete_trace_variable_command)
+	(get_uploaded_tsv, find_matching_tracepoint_location)
+	(find_matching_tsv, create_tsv_from_upload, get_traceframe_info):
+	Make static.
+	* value.c (pack_unsigned_long): Make static.
+	* varobj.c (varobj_ensure_python_env): Make static.
+	* windows-tdep.c (_initialize_windows_tdep): Declare.
+	* xml-syscall.c (make_cleanup_free_syscalls_info): Make static.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	* linux-tdep.c (linux_has_shared_address_space): Make static.  Add
 	gdbarch parameter.
 	(linux_init_abi): Install it as has_shared_address_space gdbarch

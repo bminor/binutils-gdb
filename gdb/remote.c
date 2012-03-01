@@ -1583,7 +1583,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 
 /* Return the private thread data, creating it if necessary.  */
 
-struct private_thread_info *
+static struct private_thread_info *
 demand_private_info (ptid_t ptid)
 {
   struct thread_info *info = find_thread_ptid (ptid);
@@ -8989,7 +8989,7 @@ remote_get_thread_local_address (struct target_ops *ops,
 /* Provide thread local base, i.e. Thread Information Block address.
    Returns 1 if ptid is found and thread_local_base is non zero.  */
 
-int
+static int
 remote_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 {
   if (remote_protocol_packets[PACKET_qGetTIBAddr].support != PACKET_DISABLE)
@@ -9914,7 +9914,7 @@ remote_supports_multi_process (void)
   return rs->extended && remote_multi_process_p (rs);
 }
 
-int
+static int
 remote_supports_cond_tracepoints (void)
 {
   struct remote_state *rs = get_remote_state ();
@@ -9930,7 +9930,7 @@ remote_supports_cond_breakpoints (void)
   return rs->cond_breakpoints;
 }
 
-int
+static int
 remote_supports_fast_tracepoints (void)
 {
   struct remote_state *rs = get_remote_state ();
@@ -10388,7 +10388,7 @@ remote_get_trace_status (struct trace_status *ts)
   return ts->running;
 }
 
-void
+static void
 remote_get_tracepoint_status (struct breakpoint *bp,
 			      struct uploaded_tp *utp)
 {

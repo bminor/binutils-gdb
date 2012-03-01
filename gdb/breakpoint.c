@@ -2922,7 +2922,7 @@ create_std_terminate_master_breakpoint (void)
 
 /* Install a master breakpoint on the unwinder's debug hook.  */
 
-void
+static void
 create_exception_master_breakpoint (void)
 {
   struct objfile *objfile;
@@ -14096,7 +14096,7 @@ set_tracepoint_count (int num)
   set_internalvar_integer (lookup_internalvar ("tpnum"), num);
 }
 
-void
+static void
 trace_command (char *arg, int from_tty)
 {
   if (create_breakpoint (get_current_arch (),
@@ -14113,7 +14113,7 @@ trace_command (char *arg, int from_tty)
     set_tracepoint_count (breakpoint_count);
 }
 
-void
+static void
 ftrace_command (char *arg, int from_tty)
 {
   if (create_breakpoint (get_current_arch (),
@@ -14132,7 +14132,7 @@ ftrace_command (char *arg, int from_tty)
 
 /* strace command implementation.  Creates a static tracepoint.  */
 
-void
+static void
 strace_command (char *arg, int from_tty)
 {
   struct breakpoint_ops *ops;

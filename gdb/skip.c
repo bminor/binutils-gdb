@@ -542,6 +542,9 @@ skip_re_set (void)
     }
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_step_skip;
+
 void
 _initialize_step_skip (void)
 {

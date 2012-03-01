@@ -277,6 +277,9 @@ static const struct language_defn d_language_defn =
   LANG_MAGIC
 };
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_d_language;
+
 void
 _initialize_d_language (void)
 {

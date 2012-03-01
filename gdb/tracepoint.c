@@ -347,7 +347,7 @@ find_trace_state_variable (const char *name)
   return NULL;
 }
 
-void
+static void
 delete_trace_state_variable (const char *name)
 {
   struct trace_state_variable *tsv;
@@ -367,7 +367,7 @@ delete_trace_state_variable (const char *name)
 /* The 'tvariable' command collects a name and optional expression to
    evaluate into an initial value.  */
 
-void
+static void
 trace_variable_command (char *args, int from_tty)
 {
   struct expression *expr;
@@ -429,7 +429,7 @@ trace_variable_command (char *args, int from_tty)
   do_cleanups (old_chain);
 }
 
-void
+static void
 delete_trace_variable_command (char *args, int from_tty)
 {
   int ix;
@@ -3344,7 +3344,7 @@ free_uploaded_tps (struct uploaded_tp **utpp)
 /* Given a number and address, return an uploaded tracepoint with that
    number, creating if necessary.  */
 
-struct uploaded_tsv *
+static struct uploaded_tsv *
 get_uploaded_tsv (int num, struct uploaded_tsv **utsvp)
 {
   struct uploaded_tsv *utsv;
@@ -3391,7 +3391,7 @@ cond_string_is_same (char *str1, char *str2)
    toggle that freely, and may have done so in anticipation of the
    next trace run.  Return the location of matched tracepoint.  */
 
-struct bp_location *
+static struct bp_location *
 find_matching_tracepoint_location (struct uploaded_tp *utp)
 {
   VEC(breakpoint_p) *tp_vec = all_tracepoints ();
@@ -3474,7 +3474,7 @@ merge_uploaded_tracepoints (struct uploaded_tp **uploaded_tps)
 /* Trace state variables don't have much to identify them beyond their
    name, so just use that to detect matches.  */
 
-struct trace_state_variable *
+static struct trace_state_variable *
 find_matching_tsv (struct uploaded_tsv *utsv)
 {
   if (!utsv->name)
@@ -3483,7 +3483,7 @@ find_matching_tsv (struct uploaded_tsv *utsv)
   return find_trace_state_variable (utsv->name);
 }
 
-struct trace_state_variable *
+static struct trace_state_variable *
 create_tsv_from_upload (struct uploaded_tsv *utsv)
 {
   const char *namebase;
@@ -5052,7 +5052,7 @@ parse_traceframe_info (const char *tframe_info)
    This is where we avoid re-fetching the object from the target if we
    already have it cached.  */
 
-struct traceframe_info *
+static struct traceframe_info *
 get_traceframe_info (void)
 {
   if (traceframe_info == NULL)

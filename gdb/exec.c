@@ -667,7 +667,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
   return 0;			/* We can't help.  */
 }
 
-struct target_section_table *
+static struct target_section_table *
 exec_get_section_table (struct target_ops *ops)
 {
   return current_target_sections;
