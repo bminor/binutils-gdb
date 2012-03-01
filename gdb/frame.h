@@ -500,7 +500,7 @@ extern ULONGEST frame_unwind_register_unsigned (struct frame_info *frame,
 extern ULONGEST get_frame_register_unsigned (struct frame_info *frame,
 					     int regnum);
 
-/* Read a a register from this, or unwind a register from the next
+/* Read a register from this, or unwind a register from the next
    frame.  Note that the read_frame methods are wrappers to
    get_frame_register_value, that do not throw if the result is
    optimized out or unavailable.  */

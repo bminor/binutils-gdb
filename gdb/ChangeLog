@@ -57,6 +57,11 @@
 	registers, as applicable, while parsing the target description.
 	* mips-tdep.h (struct mips_regnum): Add dspacc/dspctl offsets.
 
+2012-03-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* frame.h (read_frame_register_unsigned): Fix typo in function
+	description.
+
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
 	* jit-reader.in [!__cplusplus]
