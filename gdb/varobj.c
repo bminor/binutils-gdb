@@ -3288,11 +3288,6 @@ c_value_of_variable (struct varobj *var, enum varobj_display_formats format)
      catch that case explicitly.  */
   struct type *type = get_type (var);
 
-  /* If we have a custom formatter, return whatever string it has
-     produced.  */
-  if (var->pretty_printer && var->print_value)
-    return xstrdup (var->print_value);
-  
   /* Strip top-level references.  */
   while (TYPE_CODE (type) == TYPE_CODE_REF)
     type = check_typedef (TYPE_TARGET_TYPE (type));

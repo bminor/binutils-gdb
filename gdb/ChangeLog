@@ -1,5 +1,9 @@
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* varobj.c (c_value_of_variable): Remove dead code.
+
+2012-02-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lex.p (processId): Do not modify already encoded IDs.
 	Update function documentation.
 
