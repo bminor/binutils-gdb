@@ -288,6 +288,17 @@ m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
     }
 }
 
+/* Decorations for Modula 2.  */
+
+static const struct generic_val_print_decorations m2_decorations =
+{
+  "",
+  " + ",
+  " * I",
+  "TRUE",
+  "FALSE",
+  "void"
+};
 
 /* See val_print for a description of the various parameters of this
    function; they are identical.  */
@@ -372,36 +383,6 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	}
       break;
 
-    case TYPE_CODE_REF:
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
-      if (options->addressprint)
-	{
-	  CORE_ADDR addr
-	    = extract_typed_address (valaddr + embedded_offset, type);
-
-	  fprintf_filtered (stream, "@");
-	  fputs_filtered (paddress (gdbarch, addr), stream);
-	  if (options->deref_ref)
-	    fputs_filtered (": ", stream);
-	}
-      /* De-reference the reference.  */
-      if (options->deref_ref)
-	{
-	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
-	    {
-	      struct value *deref_val =
-		value_at
-		(TYPE_TARGET_TYPE (type),
-		 unpack_pointer (type, valaddr + embedded_offset));
-
-	      common_val_print (deref_val, stream, recurse, options,
-				current_language);
-	    }
-	  else
-	    fputs_filtered ("???", stream);
-	}
-      break;
-
     case TYPE_CODE_UNION:
       if (recurse && !options->unionprint)
 	{
@@ -420,134 +401,6 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	cp_print_value_fields (type, type, valaddr, embedded_offset,
 			       address, stream, recurse, original_value,
 			       options, NULL, 0);
-      break;
-
-    case TYPE_CODE_ENUM:
-      if (options->format)
-	{
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, options, 0, stream);
-	  break;
-	}
-      len = TYPE_NFIELDS (type);
-      val = unpack_long (type, valaddr + embedded_offset);
-      for (i = 0; i < len; i++)
-	{
-	  QUIT;
-	  if (val == TYPE_FIELD_BITPOS (type, i))
-	    {
-	      break;
-	    }
-	}
-      if (i < len)
-	{
-	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-	}
-      else
-	{
-	  print_longest (stream, 'd', 0, val);
-	}
-      break;
-
-    case TYPE_CODE_FUNC:
-      if (options->format)
-	{
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, options, 0, stream);
-	  break;
-	}
-      /* FIXME, we should consider, at least for ANSI C language, eliminating
-         the distinction made between FUNCs and POINTERs to FUNCs.  */
-      fprintf_filtered (stream, "{");
-      type_print (type, "", stream, -1);
-      fprintf_filtered (stream, "} ");
-      /* Try to print what function it points to, and its address.  */
-      print_address_demangle (gdbarch, address, stream, demangle);
-      break;
-
-    case TYPE_CODE_BOOL:
-      if (options->format || options->output_format)
-	{
-	  struct value_print_options opts = *options;
-
-	  opts.format = (options->format ? options->format
-			 : options->output_format);
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, &opts, 0, stream);
-	}
-      else
-	{
-	  val = unpack_long (type, valaddr + embedded_offset);
-	  if (val == 0)
-	    fputs_filtered ("FALSE", stream);
-	  else if (val == 1)
-	    fputs_filtered ("TRUE", stream);
-	  else
-	    fprintf_filtered (stream, "%ld)", (long int) val);
-	}
-      break;
-
-    case TYPE_CODE_RANGE:
-      if (TYPE_LENGTH (type) == TYPE_LENGTH (TYPE_TARGET_TYPE (type)))
-	{
-	  m2_val_print (TYPE_TARGET_TYPE (type), valaddr, embedded_offset,
-			address, stream, recurse, original_value, options);
-	  break;
-	}
-      /* FIXME: create_range_type does not set the unsigned bit in a
-         range type (I think it probably should copy it from the target
-         type), so we won't print values which are too large to
-         fit in a signed integer correctly.  */
-      /* FIXME: Doesn't handle ranges of enums correctly.  (Can't just
-         print with the target type, though, because the size of our type
-         and the target type might differ).  */
-      /* FALLTHROUGH */
-
-    case TYPE_CODE_INT:
-      if (options->format || options->output_format)
-	{
-	  struct value_print_options opts = *options;
-
-	  opts.format = (options->format ? options->format
-			 : options->output_format);
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, &opts, 0, stream);
-	}
-      else
-	val_print_type_code_int (type, valaddr + embedded_offset, stream);
-      break;
-
-    case TYPE_CODE_CHAR:
-      if (options->format || options->output_format)
-	{
-	  struct value_print_options opts = *options;
-
-	  opts.format = (options->format ? options->format
-			 : options->output_format);
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, &opts, 0, stream);
-	}
-      else
-	{
-	  val = unpack_long (type, valaddr + embedded_offset);
-	  if (TYPE_UNSIGNED (type))
-	    fprintf_filtered (stream, "%u", (unsigned int) val);
-	  else
-	    fprintf_filtered (stream, "%d", (int) val);
-	  fputs_filtered (" ", stream);
-	  LA_PRINT_CHAR ((unsigned char) val, type, stream);
-	}
-      break;
-
-    case TYPE_CODE_FLT:
-      if (options->format)
-	val_print_scalar_formatted (type, valaddr, embedded_offset,
-				    original_value, options, 0, stream);
-      else
-	print_floating (valaddr + embedded_offset, type, stream);
-      break;
-
-    case TYPE_CODE_METHOD:
       break;
 
     case TYPE_CODE_BITSTRING:
@@ -624,23 +477,38 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	}
       break;
 
+    case TYPE_CODE_RANGE:
+      if (TYPE_LENGTH (type) == TYPE_LENGTH (TYPE_TARGET_TYPE (type)))
+	{
+	  m2_val_print (TYPE_TARGET_TYPE (type), valaddr, embedded_offset,
+			address, stream, recurse, original_value, options);
+	  break;
+	}
+      /* FIXME: create_range_type does not set the unsigned bit in a
+         range type (I think it probably should copy it from the target
+         type), so we won't print values which are too large to
+         fit in a signed integer correctly.  */
+      /* FIXME: Doesn't handle ranges of enums correctly.  (Can't just
+         print with the target type, though, because the size of our type
+         and the target type might differ).  */
+      /* FALLTHROUGH */
+
+    case TYPE_CODE_REF:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_INT:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_METHOD:
     case TYPE_CODE_VOID:
-      fprintf_filtered (stream, "void");
-      break;
-
     case TYPE_CODE_ERROR:
-      fprintf_filtered (stream, "%s", TYPE_ERROR_NAME (type));
-      break;
-
     case TYPE_CODE_UNDEF:
-      /* This happens (without TYPE_FLAG_STUB set) on systems which don't use
-         dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
-         and no complete type for struct foo in that file.  */
-      fprintf_filtered (stream, _("<incomplete type>"));
-      break;
-
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_CHAR:
     default:
-      error (_("Invalid m2 type code %d in symbol table."), TYPE_CODE (type));
+      generic_val_print (type, valaddr, embedded_offset, address,
+			 stream, recurse, original_value, options,
+			 &m2_decorations);
+      break;
     }
   gdb_flush (stream);
 }

@@ -842,14 +842,6 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 	}
       break;
 
-    case TYPE_CODE_FLAGS:
-      if (options->format)
-	val_print_scalar_formatted (type, valaddr, offset_aligned,
-				    original_value, options, 0, stream);
-      else
-	val_print_type_code_flags (type, valaddr + offset_aligned, stream);
-      break;
-
     case TYPE_CODE_FLT:
       if (options->format)
 	{

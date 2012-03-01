@@ -163,6 +163,36 @@ extern void val_print_unavailable (struct ui_file *stream);
 
 extern void val_print_invalid_address (struct ui_file *stream);
 
+/* An instance of this is passed to generic_val_print and describes
+   some language-specific ways to print things.  */
+
+struct generic_val_print_decorations
+{
+  /* Printing complex numbers: what to print before, between the
+     elements, and after.  */
+
+  const char *complex_prefix;
+  const char *complex_infix;
+  const char *complex_suffix;
+
+  /* Boolean true and false.  */
+
+  const char *true_name;
+  const char *false_name;
+
+  /* What to print when we see TYPE_CODE_VOID.  */
+
+  const char *void_name;
+};
+
+
+extern void generic_val_print (struct type *type, const gdb_byte *valaddr,
+			       int embedded_offset, CORE_ADDR address,
+			       struct ui_file *stream, int recurse,
+			       const struct value *original_value,
+			       const struct value_print_options *options,
+			       const struct generic_val_print_decorations *);
+
 extern void generic_emit_char (int c, struct type *type, struct ui_file *stream,
 			       int quoter, const char *encoding);
 

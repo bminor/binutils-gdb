@@ -1,5 +1,35 @@
 2012-03-01  Tom Tromey  <tromey@redhat.com>
 
+	* valprint.h (struct generic_val_print_decorations): New.
+	(generic_val_print): Declare.
+	* valprint.c (generic_val_print): New function.
+	* p-valprint.c (p_decorations): New global.
+	(pascal_val_print) <TYPE_CODE_REF, TYPE_CODE_ENUM,
+	TYPE_CODE_FLAGS, TYPE_CODE_FUNC, TYPE_CODE_RANGE, TYPE_CODE_INT,
+	TYPE_CODE_FLT, TYPE_CODE_VOID, TYPE_CODE_ERROR, TYPE_CODE_UNDEF,
+	TYPE_CODE_BOOL, TYPE_CODE_CHAR>: Call generic_val_print.
+	* m2-valprint.c (m2_decorations): New global.
+	(m2_val_print) <TYPE_CODE_REF, TYPE_CODE_ENUM, TYPE_CODE_FUNC,
+	TYPE_CODE_BOOL, TYPE_CODE_RANGE, TYPE_CODE_INT, TYPE_CODE_CHAR,
+	TYPE_CODE_FLT, TYPE_CODE_METHOD, TYPE_CODE_VOID, TYPE_CODE_UNDEF,
+	TYPE_CODE_ERROR>: Call generic_val_print.
+	* f-valprint.c (f_decorations): New global.
+	(f_val_print): Use print_function_pointer_address.
+	<TYPE_CODE_REF, TYPE_CODE_FUNC, TYPE_CODE_CHAR, TYPE_CODE_FLAGS,
+	TYPE_CODE_FLT, TYPE_CODE_VOID, TYPE_CODE_ENUM, TYPE_CODE_RANGE,
+	TYPE_CODE_BOOL, TYPE_CODE_COMPLEX, TYPE_CODE_UNDEF>: Call
+	generic_val_print.
+	* c-valprint.c (c_decorations): New global.
+	(c_val_print) <TYPE_CODE_MEMBERPTR, TYPE_CODE_REF, TYPE_CODE_ENUM,
+	TYPE_CODE_FLAGS, TYPE_CODE_FUNC, TYPE_CODE_METHOD, TYPE_CODE_BOOL,
+	TYPE_CODE_RANGE, TYPE_CODE_CHAR, TYPE_CODE_FLT,
+	TYPE_CODE_DECFLOAT, TYPE_CODE_VOID, TYPE_CODE_ERROR,
+	TYPE_CODE_UNDEF, TYPE_CODE_COMPLEX>: Call generic_val_print.
+	* ada-valprint.c (ada_val_print_1) <TYPE_CODE_FLAGS>: Remove
+	case.
+
+2012-03-01  Tom Tromey  <tromey@redhat.com>
+
 	* valprint.c (val_print): Update.
 	* p-valprint (pascal_val_print): Return void.
 	* p-lang.h (pascal_val_print): Return void.

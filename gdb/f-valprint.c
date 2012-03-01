@@ -242,6 +242,18 @@ Type node corrupt! F77 arrays cannot have %d subscripts (%d Max)"),
 }
 
 
+/* Decorations for Fortran.  */
+
+static const struct generic_val_print_decorations f_decorations =
+{
+  "(",
+  ",",
+  ")",
+  ".TRUE.",
+  ".FALSE.",
+  "VOID",
+};
+
 /* See val_print for a description of the various parameters of this
    function; they are identical.  */
 
@@ -304,7 +316,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
 	      /* Try to print what function it points to.  */
-	      print_address_demangle (gdbarch, addr, stream, demangle);
+	      print_function_pointer_address (gdbarch, addr, stream,
+					      options->addressprint);
 	      return;
 	    }
 
@@ -323,63 +336,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	}
       break;
 
-    case TYPE_CODE_REF:
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
-      if (options->addressprint)
-	{
-	  CORE_ADDR addr
-	    = extract_typed_address (valaddr + embedded_offset, type);
-
-	  fprintf_filtered (stream, "@");
-	  fputs_filtered (paddress (gdbarch, addr), stream);
-	  if (options->deref_ref)
-	    fputs_filtered (": ", stream);
-	}
-      /* De-reference the reference.  */
-      if (options->deref_ref)
-	{
-	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
-	    {
-	      struct value *deref_val;
-
-	      deref_val = coerce_ref_if_computed (original_value);
-	      if (deref_val != NULL)
-		{
-		  /* More complicated computed references are not supported.  */
-		  gdb_assert (embedded_offset == 0);
-		}
-	      else
-		deref_val = value_at (TYPE_TARGET_TYPE (type),
-				      unpack_pointer (type,
-						      (valaddr
-						       + embedded_offset)));
-
-	      common_val_print (deref_val, stream, recurse,
-				options, current_language);
-	    }
-	  else
-	    fputs_filtered ("???", stream);
-	}
-      break;
-
-    case TYPE_CODE_FUNC:
-      if (options->format)
-	{
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, options, 0, stream);
-	  break;
-	}
-      /* FIXME, we should consider, at least for ANSI C language, eliminating
-         the distinction made between FUNCs and POINTERs to FUNCs.  */
-      fprintf_filtered (stream, "{");
-      type_print (type, "", stream, -1);
-      fprintf_filtered (stream, "} ");
-      /* Try to print what function it points to, and its address.  */
-      print_address_demangle (gdbarch, address, stream, demangle);
-      break;
-
     case TYPE_CODE_INT:
-    case TYPE_CODE_CHAR:
       if (options->format || options->output_format)
 	{
 	  struct value_print_options opts = *options;
@@ -396,7 +353,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     Since we don't know whether the value is really intended to
 	     be used as an integer or a character, print the character
 	     equivalent as well.  */
-	  if (TYPE_LENGTH (type) == 1 || TYPE_CODE (type) == TYPE_CODE_CHAR)
+	  if (TYPE_LENGTH (type) == 1)
 	    {
 	      LONGEST c;
 
@@ -405,84 +362,6 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      LA_PRINT_CHAR ((unsigned char) c, type, stream);
 	    }
 	}
-      break;
-
-    case TYPE_CODE_FLAGS:
-      if (options->format)
-	val_print_scalar_formatted (type, valaddr, embedded_offset,
-				    original_value, options, 0, stream);
-      else
-	val_print_type_code_flags (type, valaddr + embedded_offset, stream);
-      break;
-
-    case TYPE_CODE_FLT:
-      if (options->format)
-	val_print_scalar_formatted (type, valaddr, embedded_offset,
-				    original_value, options, 0, stream);
-      else
-	print_floating (valaddr + embedded_offset, type, stream);
-      break;
-
-    case TYPE_CODE_VOID:
-      fprintf_filtered (stream, "VOID");
-      break;
-
-    case TYPE_CODE_ERROR:
-      fprintf_filtered (stream, "%s", TYPE_ERROR_NAME (type));
-      break;
-
-    case TYPE_CODE_RANGE:
-      /* FIXME, we should not ever have to print one of these yet.  */
-      fprintf_filtered (stream, "<range type>");
-      break;
-
-    case TYPE_CODE_BOOL:
-      if (options->format || options->output_format)
-	{
-	  struct value_print_options opts = *options;
-
-	  opts.format = (options->format ? options->format
-			 : options->output_format);
-	  val_print_scalar_formatted (type, valaddr, embedded_offset,
-				      original_value, &opts, 0, stream);
-	}
-      else
-	{
-	  val = extract_unsigned_integer (valaddr + embedded_offset,
-					  TYPE_LENGTH (type), byte_order);
-	  if (val == 0)
-	    fprintf_filtered (stream, ".FALSE.");
-	  else if (val == 1)
-	    fprintf_filtered (stream, ".TRUE.");
-	  else
-	    /* Not a legitimate logical type, print as an integer.  */
-	    {
-	      /* Bash the type code temporarily.  */
-	      TYPE_CODE (type) = TYPE_CODE_INT;
-	      val_print (type, valaddr, embedded_offset,
-			 address, stream, recurse,
-			 original_value, options, current_language);
-	      /* Restore the type code so later uses work as intended.  */
-	      TYPE_CODE (type) = TYPE_CODE_BOOL;
-	    }
-	}
-      break;
-
-    case TYPE_CODE_COMPLEX:
-      type = TYPE_TARGET_TYPE (type);
-      fputs_filtered ("(", stream);
-      print_floating (valaddr + embedded_offset, type, stream);
-      fputs_filtered (",", stream);
-      print_floating (valaddr + embedded_offset + TYPE_LENGTH (type),
-		      type, stream);
-      fputs_filtered (")", stream);
-      break;
-
-    case TYPE_CODE_UNDEF:
-      /* This happens (without TYPE_FLAG_STUB set) on systems which don't use
-         dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
-         and no complete type for struct foo in that file.  */
-      fprintf_filtered (stream, "<incomplete type>");
       break;
 
     case TYPE_CODE_STRUCT:
@@ -504,8 +383,22 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       fprintf_filtered (stream, " )");
       break;     
 
+    case TYPE_CODE_REF:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_FLAGS:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_VOID:
+    case TYPE_CODE_ERROR:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_UNDEF:
+    case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_CHAR:
     default:
-      error (_("Invalid F77 type code %d in symbol table."), TYPE_CODE (type));
+      generic_val_print (type, valaddr, embedded_offset, address,
+			 stream, recurse, original_value, options,
+			 &f_decorations);
+      break;
     }
   gdb_flush (stream);
 }
