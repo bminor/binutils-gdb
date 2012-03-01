@@ -1,5 +1,9 @@
 2012-02-29  Cary Coutant  <ccoutant@google.com>
 
+	* object.cc (need_decompressed_section): Add #ifdef ENABLE_THREADS.
+
+2012-02-29  Cary Coutant  <ccoutant@google.com>
+
 	* dwarf_reader.cc (Sized_dwarf_line_info::Sized_dwarf_line_info):
 	Call Object::decompressed_section_contents.
 	* dwarf_reader.h (Sized_dwarf_line_info::~Sized_dwarf_line_info):

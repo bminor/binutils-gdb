@@ -550,6 +550,8 @@ Sized_relobj_file<size, big_endian>::find_eh_frame(
   return false;
 }
 
+#ifdef ENABLE_THREADS
+
 // Return TRUE if this is a section whose contents will be needed in the
 // Add_symbols task.
 
@@ -563,6 +565,8 @@ need_decompressed_section(const char* name)
 
   return false;
 }
+
+#endif
 
 // Build a table for any compressed debug sections, mapping each section index
 // to the uncompressed size and (if needed) the decompressed contents.
