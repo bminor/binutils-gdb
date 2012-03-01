@@ -6418,10 +6418,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   regnum = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct mips_regnum);
   *regnum = mips_regnum;
-  /* FIXME: cagney/2003-11-15: For MIPS, hasn't gdbarch_pc_regnum been
-     replaced by gdbarch_read_pc?  */
-  set_gdbarch_pc_regnum (gdbarch, regnum->pc + num_regs);
-  set_gdbarch_sp_regnum (gdbarch, MIPS_SP_REGNUM + num_regs);
   set_gdbarch_fp0_regnum (gdbarch, regnum->fp0);
   set_gdbarch_num_regs (gdbarch, num_regs);
   set_gdbarch_num_pseudo_regs (gdbarch, num_regs);
@@ -6649,6 +6645,14 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   info.tdep_info = (void *) tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
+
+  /* The hook may have adjusted num_regs, fetch the final value and
+     set pc_regnum and sp_regnum now that it has been fixed.  */
+  /* FIXME: cagney/2003-11-15: For MIPS, hasn't gdbarch_pc_regnum been
+     replaced by gdbarch_read_pc?  */
+  num_regs = gdbarch_num_regs (gdbarch);
+  set_gdbarch_pc_regnum (gdbarch, regnum->pc + num_regs);
+  set_gdbarch_sp_regnum (gdbarch, MIPS_SP_REGNUM + num_regs);
 
   /* Unwind the frame.  */
   dwarf2_append_unwinders (gdbarch);

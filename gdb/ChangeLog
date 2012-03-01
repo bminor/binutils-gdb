@@ -1,5 +1,10 @@
 2012-03-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (mips_gdbarch_init): Only set pc_regnum and
+	sp_regnum once the gdbarch_init_osabi hook has been called.
+
+2012-03-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c (mips32_bc1_pc): New function.
 	(mips32_next_pc): Handle BC1ANY2F, BC1ANY2T, BC1ANY4F, BC1ANY4T,
 	BPOSGE32 and BPOSGE64 instructions.
