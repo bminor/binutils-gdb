@@ -1,5 +1,27 @@
 2012-03-01  Tom Tromey  <tromey@redhat.com>
 
+	* valprint.c (val_print): Update.
+	* p-valprint (pascal_val_print): Return void.
+	* p-lang.h (pascal_val_print): Return void.
+	* m2-valprint.c (m2_val_print): Return void.
+	* m2-lang.h (m2_val_print): Return void.
+	* language.h (struct language_defn) <la_val_print>: Return void.
+	* language.c (unk_lang_val_print): Return void.
+	* jv-valprint.c (java_val_print): Return void.
+	* jv-lang.h (java_val_print): Return void.
+	* f-valprint.c (f_val_print): Return void.
+	* f-lang.h (f_val_print): Return void.
+	* d-valprint.c (d_val_print): Return void.
+	(dynamic_array_type): Update.
+	* d-lang.h (d_val_print): Return void.
+	* c-valprint.c (c_val_print): Return void.
+	* c-lang.h (c_val_print): Return void.
+	* ada-valprint.c (ada_vada_val_print, ada_val_print_1): Return
+	void.
+	* ada-lang.h (ada_val_print): Return void.
+
+2012-03-01  Tom Tromey  <tromey@redhat.com>
+
 	* value.h (val_print): Return void.
 	* valprint.c (val_print): Return void.
 

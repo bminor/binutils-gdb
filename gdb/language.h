@@ -240,12 +240,12 @@ struct language_defn
        OPTIONS are the formatting options to be used when
        printing.  */
 
-    int (*la_val_print) (struct type *type,
-			 const gdb_byte *contents,
-			 int embedded_offset, CORE_ADDR address,
-			 struct ui_file *stream, int recurse,
-			 const struct value *val,
-			 const struct value_print_options *options);
+    void (*la_val_print) (struct type *type,
+			  const gdb_byte *contents,
+			  int embedded_offset, CORE_ADDR address,
+			  struct ui_file *stream, int recurse,
+			  const struct value *val,
+			  const struct value_print_options *options);
 
     /* Print a top-level value using syntax appropriate for this language.  */
 

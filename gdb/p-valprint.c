@@ -42,10 +42,9 @@
 
 
 /* See val_print for a description of the various parameters of this
-   function; they are identical.  The semantics of the return value is
-   also identical to val_print.  */
+   function; they are identical.  */
 
-int
+void
 pascal_val_print (struct type *type, const gdb_byte *valaddr,
 		  int embedded_offset, CORE_ADDR address,
 		  struct ui_file *stream, int recurse,
@@ -159,8 +158,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	{
 	  /* Try to print what function it points to.  */
 	  print_address_demangle (gdbarch, addr, stream, demangle);
-	  /* Return value is irrelevant except for string pointers.  */
-	  return (0);
+	  return;
 	}
 
       if (options->addressprint && options->format != 's')
@@ -248,12 +246,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	    }
 	}
 
-      /* Return number of characters printed, including the terminating
-	 '\0' if we reached the end.  val_print_string takes care including
-	 the terminating '\0' if necessary.  */
-      return i;
-
-      break;
+      return;
 
     case TYPE_CODE_REF:
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
@@ -576,7 +569,6 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	     TYPE_CODE (type));
     }
   gdb_flush (stream);
-  return (0);
 }
 
 void

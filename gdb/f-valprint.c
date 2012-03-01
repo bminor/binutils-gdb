@@ -243,10 +243,9 @@ Type node corrupt! F77 arrays cannot have %d subscripts (%d Max)"),
 
 
 /* See val_print for a description of the various parameters of this
-   function; they are identical.  The semantics of the return value is
-   also identical to val_print.  */
+   function; they are identical.  */
 
-int
+void
 f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     CORE_ADDR address, struct ui_file *stream, int recurse,
 	     const struct value *original_value,
@@ -306,8 +305,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    {
 	      /* Try to print what function it points to.  */
 	      print_address_demangle (gdbarch, addr, stream, demangle);
-	      /* Return value is irrelevant except for string pointers.  */
-	      return 0;
+	      return;
 	    }
 
 	  if (options->addressprint && options->format != 's')
@@ -321,11 +319,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      && addr != 0)
 	    i = val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
 				  stream, options);
-
-	  /* Return number of characters printed, including the terminating
-	     '\0' if we reached the end.  val_print_string takes care including
-	     the terminating '\0' if necessary.  */
-	  return i;
+	  return;
 	}
       break;
 
@@ -514,7 +508,6 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       error (_("Invalid F77 type code %d in symbol table."), TYPE_CODE (type));
     }
   gdb_flush (stream);
-  return 0;
 }
 
 static void

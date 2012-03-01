@@ -475,10 +475,9 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 }
 
 /* See val_print for a description of the various parameters of this
-   function; they are identical.  The semantics of the return value is
-   also identical to val_print.  */
+   function; they are identical.  */
 
-int
+void
 java_val_print (struct type *type, const gdb_byte *valaddr,
 		int embedded_offset, CORE_ADDR address,
 		struct ui_file *stream, int recurse,
@@ -504,7 +503,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
       if (addr == 0)
 	{
 	  fputs_filtered ("null", stream);
-	  return i;
+	  return;
 	}
       target_type = check_typedef (TYPE_TARGET_TYPE (type));
 
@@ -512,8 +511,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 	{
 	  /* Try to print what function it points to.  */
 	  print_address_demangle (gdbarch, addr, stream, demangle);
-	  /* Return value is irrelevant except for string pointers.  */
-	  return (0);
+	  return;
 	}
 
       if (options->addressprint && options->format != 's')
@@ -522,7 +520,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 	  print_longest (stream, 'x', 0, (ULONGEST) addr);
 	}
 
-      return i;
+      return;
 
     case TYPE_CODE_CHAR:
     case TYPE_CODE_INT:
@@ -553,9 +551,8 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     default:
-      return c_val_print (type, valaddr, embedded_offset, address, stream,
-			  recurse, val, options);
+      c_val_print (type, valaddr, embedded_offset, address, stream,
+		   recurse, val, options);
+      break;
     }
-
-  return 0;
 }

@@ -383,9 +383,9 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      ret = language->la_val_print (type, valaddr, embedded_offset, address,
-				    stream, recurse, val,
-				    &local_opts);
+      language->la_val_print (type, valaddr, embedded_offset, address,
+			      stream, recurse, val,
+			      &local_opts);
     }
   if (except.reason < 0)
     fprintf_filtered (stream, _("<error reading variable>"));

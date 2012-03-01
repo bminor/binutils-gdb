@@ -35,10 +35,10 @@ extern void pascal_print_type (struct type *, const char *, struct ui_file *,
 extern void pascal_print_typedef (struct type *, struct symbol *,
 				  struct ui_file *);
 
-extern int pascal_val_print (struct type *, const gdb_byte *, int,
-			     CORE_ADDR, struct ui_file *, int,
-			     const struct value *,
-			     const struct value_print_options *);
+extern void pascal_val_print (struct type *, const gdb_byte *, int,
+			      CORE_ADDR, struct ui_file *, int,
+			      const struct value *,
+			      const struct value_print_options *);
 
 extern void pascal_value_print (struct value *, struct ui_file *,
 				const struct value_print_options *);

@@ -290,10 +290,9 @@ m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
 
 
 /* See val_print for a description of the various parameters of this
-   function; they are identical.  The semantics of the return value is
-   also identical to val_print.  */
+   function; they are identical.  */
 
-int
+void
 m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      CORE_ADDR address, struct ui_file *stream, int recurse,
 	      const struct value *original_value,
@@ -644,5 +643,4 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       error (_("Invalid m2 type code %d in symbol table."), TYPE_CODE (type));
     }
   gdb_flush (stream);
-  return (0);
 }

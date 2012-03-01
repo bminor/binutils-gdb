@@ -24,10 +24,10 @@
 
 extern char *d_demangle (const char *mangled, int options);
 
-extern int d_val_print (struct type *type, const gdb_byte *valaddr,
-			int embedded_offset, CORE_ADDR address,
-			struct ui_file *stream, int recurse,
-			const struct value *val,
-			const struct value_print_options *options);
+extern void d_val_print (struct type *type, const gdb_byte *valaddr,
+			 int embedded_offset, CORE_ADDR address,
+			 struct ui_file *stream, int recurse,
+			 const struct value *val,
+			 const struct value_print_options *options);
 
 #endif /* !defined (D_LANG_H) */
