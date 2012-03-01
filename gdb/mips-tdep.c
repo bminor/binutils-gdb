@@ -1132,6 +1132,36 @@ mips32_relative_offset (ULONGEST inst)
   return ((itype_immediate (inst) ^ 0x8000) - 0x8000) << 2;
 }
 
+/* Determine the address of the next instruction executed after the INST
+   floating condition branch instruction at PC.  COUNT specifies the
+   number of the floating condition bits tested by the branch.  */
+
+static CORE_ADDR
+mips32_bc1_pc (struct gdbarch *gdbarch, struct frame_info *frame,
+	       ULONGEST inst, CORE_ADDR pc, int count)
+{
+  int fcsr = mips_regnum (gdbarch)->fp_control_status;
+  int cnum = (itype_rt (inst) >> 2) & (count - 1);
+  int tf = itype_rt (inst) & 1;
+  int mask = (1 << count) - 1;
+  ULONGEST fcs;
+  int cond;
+
+  if (fcsr == -1)
+    /* No way to handle; it'll most likely trap anyway.  */
+    return pc;
+
+  fcs = get_frame_register_unsigned (frame, fcsr);
+  cond = ((fcs >> 24) & 0xfe) | ((fcs >> 23) & 0x01);
+
+  if (((cond >> cnum) & mask) != mask * !tf)
+    pc += mips32_relative_offset (inst);
+  else
+    pc += 4;
+
+  return pc;
+}
+
 /* Determine where to set a single step breakpoint while considering
    branch prediction.  */
 static CORE_ADDR
@@ -1164,20 +1194,15 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	}
       else if (itype_op (inst) == 17 && itype_rs (inst) == 8)
 	/* BC1F, BC1FL, BC1T, BC1TL: 010001 01000 */
-	{
-	  int tf = itype_rt (inst) & 0x01;
-	  int cnum = itype_rt (inst) >> 2;
-	  int fcrcs =
-	    get_frame_register_signed (frame,
-				       mips_regnum (get_frame_arch (frame))->
-						fp_control_status);
-	  int cond = ((fcrcs >> 24) & 0xfe) | ((fcrcs >> 23) & 0x01);
-
-	  if (((cond >> cnum) & 0x01) == tf)
-	    pc += mips32_relative_offset (inst) + 4;
-	  else
-	    pc += 8;
-	}
+	pc = mips32_bc1_pc (gdbarch, frame, inst, pc + 4, 1);
+      else if (itype_op (inst) == 17 && itype_rs (inst) == 9
+	       && (itype_rt (inst) & 2) == 0)
+	/* BC1ANY2F, BC1ANY2T: 010001 01001 xxx0x */
+	pc = mips32_bc1_pc (gdbarch, frame, inst, pc + 4, 2);
+      else if (itype_op (inst) == 17 && itype_rs (inst) == 10
+	       && (itype_rt (inst) & 2) == 0)
+	/* BC1ANY4F, BC1ANY4T: 010001 01010 xxx0x */
+	pc = mips32_bc1_pc (gdbarch, frame, inst, pc + 4, 4);
       else
 	pc += 4;		/* Not a branch, next instruction is easy.  */
     }
@@ -1235,6 +1260,25 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 		  pc += mips32_relative_offset (inst) + 4;
 		else
 		  pc += 8;	/* after the delay slot */
+		break;
+	      case 0x1c:	/* BPOSGE32 */
+	      case 0x1e:	/* BPOSGE64 */
+		pc += 4;
+		if (itype_rs (inst) == 0)
+		  {
+		    unsigned int pos = (op & 2) ? 64 : 32;
+		    int dspctl = mips_regnum (gdbarch)->dspctl;
+
+		    if (dspctl == -1)
+		      /* No way to handle; it'll most likely trap anyway.  */
+		      break;
+
+		    if ((get_frame_register_unsigned (frame,
+						      dspctl) & 0x7f) >= pos)
+		      pc += mips32_relative_offset (inst);
+		    else
+		      pc += 4;
+		  }
 		break;
 		/* All of the other instructions in the REGIMM category */
 	      default:
@@ -2618,7 +2662,9 @@ deal_with_atomic_sequence (struct gdbarch *gdbarch,
 	    return 0; /* fallback to the standard single-step code.  */
 	  break;
 	case 1: /* REGIMM */
-	  is_branch = ((itype_rt (insn) & 0xc) == 0); /* B{LT,GE}Z* */
+	  is_branch = ((itype_rt (insn) & 0xc) == 0 /* B{LT,GE}Z* */
+		       || ((itype_rt (insn) & 0x1e) == 0
+			   && itype_rs (insn) == 0)); /* BPOSGE* */
 	  break;
 	case 2: /* J */
 	case 3: /* JAL */
@@ -2634,6 +2680,11 @@ deal_with_atomic_sequence (struct gdbarch *gdbarch,
 	  is_branch = 1;
 	  break;
 	case 17: /* COP1 */
+	  is_branch = ((itype_rs (insn) == 9 || itype_rs (insn) == 10)
+		       && (itype_rt (insn) & 0x2) == 0);
+	  if (is_branch) /* BC1ANY2F, BC1ANY2T, BC1ANY4F, BC1ANY4T */
+	    break;
+	/* Fall through.  */
 	case 18: /* COP2 */
 	case 19: /* COP3 */
 	  is_branch = (itype_rs (insn) == 8); /* BCzF, BCzFL, BCzT, BCzTL */
@@ -5333,6 +5384,8 @@ mips32_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr)
   unsigned long inst;
   int status;
   int op;
+  int rs;
+  int rt;
 
   status = target_read_memory (addr, buf, MIPS_INSN32_SIZE);
   if (status)
@@ -5341,10 +5394,19 @@ mips32_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr)
   inst = mips_fetch_instruction (gdbarch, addr);
   op = itype_op (inst);
   if ((inst & 0xe0000000) != 0)
-    return (op >> 2 == 5	/* BEQL, BNEL, BLEZL, BGTZL: bits 0101xx  */
-	    || op == 29		/* JALX: bits 011101  */
-	    || (op == 17 && itype_rs (inst) == 8));
+    {
+      rs = itype_rs (inst);
+      rt = itype_rt (inst);
+      return (op >> 2 == 5	/* BEQL, BNEL, BLEZL, BGTZL: bits 0101xx  */
+	      || op == 29	/* JALX: bits 011101  */
+	      || (op == 17
+		  && (rs == 8
 				/* BC1F, BC1FL, BC1T, BC1TL: 010001 01000  */
+		      || (rs == 9 && (rt & 0x2) == 0)
+				/* BC1ANY2F, BC1ANY2T: bits 010001 01001  */
+		      || (rs == 10 && (rt & 0x2) == 0))));
+				/* BC1ANY4F, BC1ANY4T: bits 010001 01010  */
+    }
   else
     switch (op & 0x07)		/* extract bits 28,27,26  */
       {
@@ -5354,10 +5416,13 @@ mips32_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr)
 		|| op == 9);	/* JALR  */
 	break;			/* end SPECIAL  */
       case 1:			/* REGIMM  */
-	op = itype_rt (inst);	/* branch condition  */
-	return (op & 0xc) == 0;
+	rs = itype_rs (inst);
+	rt = itype_rt (inst);	/* branch condition  */
+	return ((rt & 0xc) == 0
 				/* BLTZ, BLTZL, BGEZ, BGEZL: bits 000xx  */
 				/* BLTZAL, BLTZALL, BGEZAL, BGEZALL: 100xx  */
+		|| ((rt & 0x1e) == 0x1c && rs == 0));
+				/* BPOSGE32, BPOSGE64: bits 1110x  */
 	break;			/* end REGIMM  */
       default:			/* J, JAL, BEQ, BNE, BLEZ, BGTZ  */
 	return 1;
