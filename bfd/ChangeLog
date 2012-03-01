@@ -1,3 +1,7 @@
+2012-03-01  Alan Modra  <amodra@gmail.com>
+
+	* elfxx-tilegx.c (tilegx_elf_relocate_section): Silence bogus warning.
+
 2012-02-27  Alan Modra  <amodra@gmail.com>
 
 	* elf32-sh.c (sh_elf_osec_to_segment): Check for elf flavour bfd

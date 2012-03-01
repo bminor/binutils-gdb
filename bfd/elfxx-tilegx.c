@@ -3230,7 +3230,7 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      int dest_begin = is_pipe0 ? 0 : 31;
 	      int src_begin;
 	      const bfd_byte *insn;
-	      const bfd_byte *mask;
+	      const bfd_byte *mask = NULL;
 
 	      if (is_tls_le)
 		{
