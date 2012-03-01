@@ -378,16 +378,6 @@ struct dwarf2_cu
   /* Mark used when releasing cached dies.  */
   unsigned int mark : 1;
 
-  /* This flag will be set if this compilation unit might include
-     inter-compilation-unit references.  */
-  unsigned int has_form_ref_addr : 1;
-
-  /* This flag will be set if this compilation unit includes any
-     DW_TAG_namespace DIEs.  If we know that there are explicit
-     DIEs for namespaces, we don't need to try to infer them
-     from mangled names.  */
-  unsigned int has_namespace_info : 1;
-
   /* This CU references .debug_loc.  See the symtab->locations_valid field.
      This test is imperfect as there may exist optimized debug code not using
      any location list and still facing inlining issues if handled as
@@ -9343,9 +9333,6 @@ dwarf2_read_abbrevs (struct dwarf2_cu *cu)
       cur_abbrev->has_children = read_1_byte (abfd, abbrev_ptr);
       abbrev_ptr += 1;
 
-      if (cur_abbrev->tag == DW_TAG_namespace)
-	cu->has_namespace_info = 1;
-
       /* now read in declarations */
       abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
       abbrev_ptr += bytes_read;
@@ -9360,16 +9347,6 @@ dwarf2_read_abbrevs (struct dwarf2_cu *cu)
 		= xrealloc (cur_attrs, (allocated_attrs
 					* sizeof (struct attr_abbrev)));
 	    }
-
-	  /* Record whether this compilation unit might have
-	     inter-compilation-unit references.  If we don't know what form
-	     this attribute will have, then it might potentially be a
-	     DW_FORM_ref_addr, so we conservatively expect inter-CU
-	     references.  */
-
-	  if (abbrev_form == DW_FORM_ref_addr
-	      || abbrev_form == DW_FORM_indirect)
-	    cu->has_form_ref_addr = 1;
 
 	  cur_attrs[cur_abbrev->num_attrs].name = abbrev_name;
 	  cur_attrs[cur_abbrev->num_attrs++].form = abbrev_form;
@@ -10116,9 +10093,7 @@ fixup_partial_die (struct partial_die_info *part_die,
 
   /* If there is no parent die to provide a namespace, and there are
      children, see if we can determine the namespace from their linkage
-     name.
-     NOTE: We need to do this even if cu->has_namespace_info != 0.
-     gcc-4.5 -gdwarf-4 can drop the enclosing namespace.  */
+     name.  */
   if (cu->language == language_cplus
       && !VEC_empty (dwarf2_section_info_def, dwarf2_per_objfile->types)
       && part_die->die_parent == NULL
