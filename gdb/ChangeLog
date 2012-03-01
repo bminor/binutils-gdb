@@ -1,3 +1,9 @@
+2012-03-01  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (decode_line_2): Sort the list of methods
+	alphabetically before presenting the user with a selection
+	menu.
+
 2012-03-01  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_cu): Remove unused members has_form_ref_addr,

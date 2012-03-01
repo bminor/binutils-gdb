@@ -650,6 +650,11 @@ decode_line_2 (struct linespec_state *self,
       return;
     }
 
+  /* Sort the list of method names alphabetically.  */
+  qsort (VEC_address (const_char_ptr, item_names),
+	 VEC_length (const_char_ptr, item_names),
+	 sizeof (const_char_ptr), compare_strings);
+
   printf_unfiltered (_("[0] cancel\n[1] all\n"));
   for (i = 0; VEC_iterate (const_char_ptr, item_names, i, iter); ++i)
     printf_unfiltered ("[%d] %s\n", i + 2, iter);
