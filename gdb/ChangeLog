@@ -1,6 +1,12 @@
 2012-03-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix -Wmissing-prototypes build.
+	* frv-tdep.c (frv_check_watch_resources, frv_stopped_data_address)
+	(frv_have_stopped_data_address): Remove.
+
+2012-03-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix -Wmissing-prototypes build.
 	* Makefile.in (HFILES_NO_SRCDIR): Add sh64-tdep.h.
 	* sh-tdep.c: Include sh64-tdep.h.
 	* sh-tdep.h (sh64_gdbarch_init, sh64_show_regs): Remove declarations.
