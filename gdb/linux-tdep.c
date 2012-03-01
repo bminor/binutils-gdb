@@ -173,8 +173,8 @@ linux_get_siginfo_type (struct gdbarch *gdbarch)
   return siginfo_type;
 }
 
-int
-linux_has_shared_address_space (void)
+static int
+linux_has_shared_address_space (struct gdbarch *gdbarch)
 {
   /* Determine whether we are running on uClinux or normal Linux
      kernel.  */
@@ -860,6 +860,8 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_info_proc (gdbarch, linux_info_proc);
   set_gdbarch_find_memory_regions (gdbarch, linux_find_memory_regions);
   set_gdbarch_make_corefile_notes (gdbarch, linux_make_corefile_notes_1);
+  set_gdbarch_has_shared_address_space (gdbarch,
+					linux_has_shared_address_space);
 }
 
 void

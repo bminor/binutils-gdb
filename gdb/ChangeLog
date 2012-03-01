@@ -1,5 +1,12 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* linux-tdep.c (linux_has_shared_address_space): Make static.  Add
+	gdbarch parameter.
+	(linux_init_abi): Install it as has_shared_address_space gdbarch
+	callback.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	* observer.c (observer_test_first_notification_function)
 	(observer_test_second_notification_function)
 	(observer_test_third_notification_function): Add declarations.
