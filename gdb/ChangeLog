@@ -1,5 +1,11 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* tui/tui-data.c (set_gen_win_origin): Delete.
+	* tui/tui-data.h (tui_set_gen_win_origin): Delete declaration.
+	* tui/tui-regs.c (tui_last_reg_element_no_in_line): Delete.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (encode_actions): Delete declaration.
 	* tracepoint.c (encode_actions): Make extern.
 	* tracepoint.h (encode_actions): Declare.

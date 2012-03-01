@@ -131,19 +131,6 @@ tui_first_reg_element_no_inline (int line_no)
 }
 
 
-/* Answer the index of the last element in line_no.  If line_no is
-   past the register area (-1) is returned.  */
-int
-tui_last_reg_element_no_in_line (int line_no)
-{
-  if ((line_no * TUI_DATA_WIN->detail.data_display_info.regs_column_count) <=
-      TUI_DATA_WIN->detail.data_display_info.regs_content_count)
-    return ((line_no + 1) *
-	    TUI_DATA_WIN->detail.data_display_info.regs_column_count) - 1;
-  else
-    return (-1);
-}
-
 /* Show the registers of the given group in the data window
    and refresh the window.  */
 void

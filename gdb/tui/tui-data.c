@@ -311,16 +311,6 @@ tui_set_current_layout_to (enum tui_layout_type new_layout)
 }
 
 
-/* Set the origin of the window.  */
-void
-set_gen_win_origin (struct tui_gen_win_info *win_info, 
-		    int x, int y)
-{
-  win_info->origin.x = x;
-  win_info->origin.y = y;
-}
-
-
 /*****************************
 ** OTHER PUBLIC FUNCTIONS
 *****************************/
