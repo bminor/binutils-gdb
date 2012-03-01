@@ -1031,6 +1031,26 @@ get_frame_register_unsigned (struct frame_info *frame, int regnum)
   return frame_unwind_register_unsigned (frame->next, regnum);
 }
 
+int
+read_frame_register_unsigned (struct frame_info *frame, int regnum,
+			      ULONGEST *val)
+{
+  struct value *regval = get_frame_register_value (frame, regnum);
+
+  if (!value_optimized_out (regval)
+      && value_entirely_available (regval))
+    {
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      int size = register_size (gdbarch, VALUE_REGNUM (regval));
+
+      *val = extract_unsigned_integer (value_contents (regval), size, byte_order);
+      return 1;
+    }
+
+  return 0;
+}
+
 void
 put_frame_register (struct frame_info *frame, int regnum,
 		    const gdb_byte *buf)

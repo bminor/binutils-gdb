@@ -305,6 +305,39 @@ proc gdb_unavailable_registers_test { } { with_test_prefix "unavailable register
     gdb_test "tfind none" "#0  end .*" "cease trace debugging"
 }}
 
+proc gdb_unavailable_floats { } {
+    global gdb_prompt
+
+    with_test_prefix "unavailable floats" {
+	prepare_for_trace_test
+
+	# We'll simply re-use the globals_test_function for this test
+	gdb_test "trace globals_test_func" \
+	    "Tracepoint \[0-9\]+ at .*" \
+	    "set tracepoint"
+
+	# Collect nothing.
+
+	# Begin the test.
+	run_trace_experiment globals_test_func
+
+	# Necessarily target specific.
+	if {[istarget "x86_64-*-*"] || [istarget i?86-*]} {
+	    send_gdb "info float\n"
+	    gdb_expect_list "info float" ".*$gdb_prompt $" {
+		"Status Word:         <unavailable>"
+		"Control Word:        <unavailable>"
+		"Tag Word:            <unavailable>"
+		"Instruction Pointer: <unavailable>:<unavailable>"
+		"Operand Pointer:     <unavailable>:<unavailable>"
+		"Opcode:              <unavailable>"
+	    }
+	}
+
+	gdb_test "tfind none" "#0  end .*" "cease trace debugging"
+    }
+}
+
 proc gdb_collect_globals_test { } { with_test_prefix "collect globals" {
     global ws
     global cr
@@ -547,6 +580,7 @@ proc gdb_collect_globals_test { } { with_test_prefix "collect globals" {
 proc gdb_trace_collection_test {} {
     gdb_collect_globals_test
     gdb_unavailable_registers_test
+    gdb_unavailable_floats
 
     gdb_collect_args_test
     gdb_collect_locals_test local_test_func "auto locals"

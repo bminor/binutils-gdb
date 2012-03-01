@@ -1,3 +1,14 @@
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13767
+
+	* frame.c (read_frame_register_unsigned): New.
+	* frame.h (read_frame_register_unsigned): Declare.
+	* i387-tdep.c (print_i387_status_word): New parameter `status_p'.
+	Handle it.
+	(print_i387_control_word): New parameter `control_p'.  Handle it.
+	(i387_print_float_info): Handle unavailable float registers.
+
 2012-03-01  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (decode_line_2): Sort the list of methods

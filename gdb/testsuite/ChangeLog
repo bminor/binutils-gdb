@@ -1,3 +1,10 @@
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13767
+
+	* gdb.trace/unavailable.exp (gdb_unavailable_floats): New.
+	(gdb_collect_globals_test): Call it.
+
 2012-03-01  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.cp/method2.exp: Output of overload menu is now

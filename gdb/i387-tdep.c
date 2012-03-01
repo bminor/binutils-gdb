@@ -113,13 +113,21 @@ print_i387_ext (struct gdbarch *gdbarch,
     fputs_filtered (" Unsupported", file);
 }
 
-/* Print the status word STATUS.  */
+/* Print the status word STATUS.  If STATUS_P is false, then STATUS
+   was unavailable.  */
 
 static void
-print_i387_status_word (unsigned int status, struct ui_file *file)
+print_i387_status_word (int status_p,
+			unsigned int status, struct ui_file *file)
 {
-  fprintf_filtered (file, "Status Word:         %s",
-		    hex_string_custom (status, 4));
+  fprintf_filtered (file, "Status Word:         ");
+  if (!status_p)
+    {
+      fprintf_filtered (file, "%s\n", _("<unavailable>"));
+      return;
+    }
+
+  fprintf_filtered (file, "%s", hex_string_custom (status, 4));
   fputs_filtered ("  ", file);
   fprintf_filtered (file, " %s", (status & 0x0001) ? "IE" : "  ");
   fprintf_filtered (file, " %s", (status & 0x0002) ? "DE" : "  ");
@@ -143,13 +151,21 @@ print_i387_status_word (unsigned int status, struct ui_file *file)
 		    "                       TOP: %d\n", ((status >> 11) & 7));
 }
 
-/* Print the control word CONTROL.  */
+/* Print the control word CONTROL.  If CONTROL_P is false, then
+   CONTROL was unavailable.  */
 
 static void
-print_i387_control_word (unsigned int control, struct ui_file *file)
+print_i387_control_word (int control_p,
+			 unsigned int control, struct ui_file *file)
 {
-  fprintf_filtered (file, "Control Word:        %s",
-		    hex_string_custom (control, 4));
+  fprintf_filtered (file, "Control Word:        ");
+  if (!control_p)
+    {
+      fprintf_filtered (file, "%s\n", _("<unavailable>"));
+      return;
+    }
+
+  fprintf_filtered (file, "%s", hex_string_custom (control, 4));
   fputs_filtered ("  ", file);
   fprintf_filtered (file, " %s", (control & 0x0001) ? "IM" : "  ");
   fprintf_filtered (file, " %s", (control & 0x0002) ? "DM" : "  ");
@@ -205,81 +221,119 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
   ULONGEST fctrl;
+  int fctrl_p;
   ULONGEST fstat;
+  int fstat_p;
   ULONGEST ftag;
+  int ftag_p;
   ULONGEST fiseg;
+  int fiseg_p;
   ULONGEST fioff;
+  int fioff_p;
   ULONGEST foseg;
+  int foseg_p;
   ULONGEST fooff;
+  int fooff_p;
   ULONGEST fop;
+  int fop_p;
   int fpreg;
+  int fpreg_p;
   int top;
+  int top_p;
 
   gdb_assert (gdbarch == get_frame_arch (frame));
 
-  fctrl = get_frame_register_unsigned (frame, I387_FCTRL_REGNUM (tdep));
-  fstat = get_frame_register_unsigned (frame, I387_FSTAT_REGNUM (tdep));
-  ftag = get_frame_register_unsigned (frame, I387_FTAG_REGNUM (tdep));
-  fiseg = get_frame_register_unsigned (frame, I387_FISEG_REGNUM (tdep));
-  fioff = get_frame_register_unsigned (frame, I387_FIOFF_REGNUM (tdep));
-  foseg = get_frame_register_unsigned (frame, I387_FOSEG_REGNUM (tdep));
-  fooff = get_frame_register_unsigned (frame, I387_FOOFF_REGNUM (tdep));
-  fop = get_frame_register_unsigned (frame, I387_FOP_REGNUM (tdep));
+  fctrl_p = read_frame_register_unsigned (frame,
+					  I387_FCTRL_REGNUM (tdep), &fctrl);
+  fstat_p = read_frame_register_unsigned (frame,
+					  I387_FSTAT_REGNUM (tdep), &fstat);
+  ftag_p = read_frame_register_unsigned (frame,
+					 I387_FTAG_REGNUM (tdep), &ftag);
+  fiseg_p = read_frame_register_unsigned (frame,
+					  I387_FISEG_REGNUM (tdep), &fiseg);
+  fioff_p = read_frame_register_unsigned (frame,
+					  I387_FIOFF_REGNUM (tdep), &fioff);
+  foseg_p = read_frame_register_unsigned (frame,
+					  I387_FOSEG_REGNUM (tdep), &foseg);
+  fooff_p = read_frame_register_unsigned (frame,
+					  I387_FOOFF_REGNUM (tdep), &fooff);
+  fop_p = read_frame_register_unsigned (frame,
+					I387_FOP_REGNUM (tdep), &fop);
 
-  top = ((fstat >> 11) & 7);
-
-  for (fpreg = 7; fpreg >= 0; fpreg--)
+  if (fstat_p)
     {
-      gdb_byte raw[I386_MAX_REGISTER_SIZE];
-      int tag = (ftag >> (fpreg * 2)) & 3;
-      int i;
+      top = ((fstat >> 11) & 7);
 
-      fprintf_filtered (file, "%sR%d: ", fpreg == top ? "=>" : "  ", fpreg);
-
-      switch (tag)
+      for (fpreg = 7; fpreg >= 0; fpreg--)
 	{
-	case 0:
-	  fputs_filtered ("Valid   ", file);
-	  break;
-	case 1:
-	  fputs_filtered ("Zero    ", file);
-	  break;
-	case 2:
-	  fputs_filtered ("Special ", file);
-	  break;
-	case 3:
-	  fputs_filtered ("Empty   ", file);
-	  break;
+	  struct value *regval;
+	  int regnum;
+	  int i;
+	  int tag = -1;
+
+	  fprintf_filtered (file, "%sR%d: ", fpreg == top ? "=>" : "  ", fpreg);
+
+	  if (ftag_p)
+	    {
+	      tag = (ftag >> (fpreg * 2)) & 3;
+
+	      switch (tag)
+		{
+		case 0:
+		  fputs_filtered ("Valid   ", file);
+		  break;
+		case 1:
+		  fputs_filtered ("Zero    ", file);
+		  break;
+		case 2:
+		  fputs_filtered ("Special ", file);
+		  break;
+		case 3:
+		  fputs_filtered ("Empty   ", file);
+		  break;
+		}
+	    }
+	  else
+	    fputs_filtered ("Unknown ", file);
+
+	  regnum = (fpreg + 8 - top) % 8 + I387_ST0_REGNUM (tdep);
+	  regval = get_frame_register_value (frame, regnum);
+
+	  if (value_entirely_available (regval))
+	    {
+	      const char *raw = value_contents (regval);
+
+	      fputs_filtered ("0x", file);
+	      for (i = 9; i >= 0; i--)
+		fprintf_filtered (file, "%02x", raw[i]);
+
+	      if (tag != -1 && tag != 3)
+		print_i387_ext (gdbarch, raw, file);
+	    }
+	  else
+	    fprintf_filtered (file, "%s", _("<unavailable>"));
+
+	  fputs_filtered ("\n", file);
 	}
-
-      get_frame_register (frame,
-			  (fpreg + 8 - top) % 8 + I387_ST0_REGNUM (tdep),
-			  raw);
-
-      fputs_filtered ("0x", file);
-      for (i = 9; i >= 0; i--)
-	fprintf_filtered (file, "%02x", raw[i]);
-
-      if (tag != 3)
-	print_i387_ext (gdbarch, raw, file);
-
-      fputs_filtered ("\n", file);
     }
 
   fputs_filtered ("\n", file);
-
-  print_i387_status_word (fstat, file);
-  print_i387_control_word (fctrl, file);
+  print_i387_status_word (fstat_p, fstat, file);
+  print_i387_control_word (fctrl_p, fctrl, file);
   fprintf_filtered (file, "Tag Word:            %s\n",
-		    hex_string_custom (ftag, 4));
+		    ftag_p ? hex_string_custom (ftag, 4) : _("<unavailable>"));
   fprintf_filtered (file, "Instruction Pointer: %s:",
-		    hex_string_custom (fiseg, 2));
-  fprintf_filtered (file, "%s\n", hex_string_custom (fioff, 8));
+		    fiseg_p ? hex_string_custom (fiseg, 2) : _("<unavailable>"));
+  fprintf_filtered (file, "%s\n",
+		    fioff_p ? hex_string_custom (fioff, 8) : _("<unavailable>"));
   fprintf_filtered (file, "Operand Pointer:     %s:",
-		    hex_string_custom (foseg, 2));
-  fprintf_filtered (file, "%s\n", hex_string_custom (fooff, 8));
+		    foseg_p ? hex_string_custom (foseg, 2) : _("<unavailable>"));
+  fprintf_filtered (file, "%s\n",
+		    fooff_p ? hex_string_custom (fooff, 8) : _("<unavailable>"));
   fprintf_filtered (file, "Opcode:              %s\n",
-		    hex_string_custom (fop ? (fop | 0xd800) : 0, 4));
+		    fop_p
+		    ? (hex_string_custom (fop ? (fop | 0xd800) : 0, 4))
+		    : _("<unavailable>"));
 }
 
 
