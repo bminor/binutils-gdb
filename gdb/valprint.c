@@ -545,6 +545,7 @@ val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 	}
     }
   fputs_filtered ("]", stream);
+}
 
 /* Print a scalar of data of type TYPE, pointed to in GDB by VALADDR,
    according to OPTIONS and SIZE on STREAM.  Format i is not supported
@@ -552,7 +553,6 @@ val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 
    This is how the elements of an array or structure are printed
    with a format.  */
-}
 
 void
 val_print_scalar_formatted (struct type *type,
