@@ -1,5 +1,19 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	Import fallback definitions from glibc.
+
+	* gdb_proc_service.h [!HAVE_PROC_SERVICE_H] (struct
+	ps_prochandle): Forward declare.
+	(ps_err_e): Use glibc's comments.
+	[!HAVE_PROC_SERVICE_H] (ps_pdread, ps_pdwrite, ps_ptread)
+	(ps_ptwrite, ps_lgetregs, ps_lsetregs, ps_lgetfpregs)
+	(ps_lsetfpregs, ps_getpid, ps_get_thread_area, ps_pglobal_lookup)
+	(ps_pstop, ps_pcontinue, ps_lstop, ps_lcontinue, ps_lgetxregsize)
+	(ps_lgetxregs, ps_lsetxregs, ps_plog): Declare.
+	(struct ps_prochandle): Adjust comment.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_modulus_from_name): Delete.
 	* ada-lex.l (lexer_init): Make static.
 
