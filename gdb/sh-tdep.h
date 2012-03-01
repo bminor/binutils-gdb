@@ -82,9 +82,6 @@ enum
     FV_LAST_REGNUM = 79
   };
 
-extern gdbarch_init_ftype sh64_gdbarch_init;
-extern void sh64_show_regs (struct frame_info *);
-
 /* This structure describes a register in a core-file.  */
 struct sh_corefile_regmap
 {

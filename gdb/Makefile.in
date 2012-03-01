@@ -786,7 +786,7 @@ target.h prologue-value.h cp-abi.h tui/tui-hooks.h tui/tui.h \
 tui/tui-file.h tui/tui-command.h tui/tui-disasm.h tui/tui-wingeneral.h \
 tui/tui-windata.h tui/tui-data.h tui/tui-win.h tui/tui-stack.h \
 tui/tui-winsource.h tui/tui-regs.h tui/tui-io.h tui/tui-layout.h \
-tui/tui-source.h xcoffsolib.h sol2-tdep.h gregset.h sh-tdep.h \
+tui/tui-source.h xcoffsolib.h sol2-tdep.h gregset.h sh-tdep.h sh64-tdep.h \
 expression.h score-tdep.h gdb_select.h ser-tcp.h buildsym.h valprint.h \
 call-cmds.h typeprint.h mi/mi-getopt.h mi/mi-parse.h mi/mi-console.h \
 mi/mi-out.h mi/mi-main.h mi/mi-common.h mi/mi-cmds.h linux-nat.h \

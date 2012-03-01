@@ -44,6 +44,7 @@
 #include "objfiles.h"
 
 #include "sh-tdep.h"
+#include "sh64-tdep.h"
 
 #include "elf-bfd.h"
 #include "solib-svr4.h"

@@ -46,6 +46,7 @@
 /* Register numbers shared with the simulator.  */
 #include "gdb/sim-sh.h"
 #include "language.h"
+#include "sh64-tdep.h"
 
 /* Information that is dependent on the processor variant.  */
 enum sh_abi
