@@ -1131,10 +1131,6 @@ map_symbol_filenames_psymtab (struct objfile *objfile,
     }
 }
 
-int find_and_open_source (const char *filename,
-			  const char *dirname,
-			  char **fullname);
-
 /* Finds the fullname that a partial_symtab represents.
 
    If this functions finds the fullname, it will save it in ps->fullname
