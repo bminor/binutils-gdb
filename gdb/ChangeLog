@@ -1,3 +1,8 @@
+2012-03-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Document the fact that one can provide a condition when
+	creating an Ada exception catchpoint.
+
 2012-03-01  Tom Tromey  <tromey@redhat.com>
 
 	* valprint.c (val_print_type_code_flags): Fix placement of

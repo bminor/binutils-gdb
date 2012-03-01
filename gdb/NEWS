@@ -44,6 +44,16 @@
 * The command "info catch" has been removed.  It has been disabled
   since December 2007.
 
+* The "catch exception" and "catch assert" commands now accept
+  a condition at the end of the command, much like the "break"
+  command does. For instance:
+
+        (gdb) catch exception Constraint_Error if Barrier = True
+
+  Previously, it was possible to add a condition to such catchpoints,
+  but it had to be done as a second step, after the catchpoint had been
+  created, using the "condition" command.
+
 * New commands
 
   ** "catch load" and "catch unload" can be used to stop when a shared
