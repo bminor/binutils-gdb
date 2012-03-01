@@ -1,5 +1,10 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* jit-reader.in (plugin_is_GPL_compatible): Add declarations for
+	both __cplusplus and !__cplusplus.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	* psymtab.c (find_and_open_source): Delete declaration.
 	* source.c (find_and_open_source): Move comment ...
 	* source.h (find_and_open_source): ... to this new declaration.
