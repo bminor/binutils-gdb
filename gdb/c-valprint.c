@@ -31,31 +31,6 @@
 #include "target.h"
 
 
-/* Print function pointer with inferior address ADDRESS onto stdio
-   stream STREAM.  */
-
-static void
-print_function_pointer_address (struct gdbarch *gdbarch,
-				CORE_ADDR address,
-				struct ui_file *stream,
-				int addressprint)
-{
-  CORE_ADDR func_addr
-    = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
-					  &current_target);
-
-  /* If the function pointer is represented by a description, print
-     the address of the description.  */
-  if (addressprint && func_addr != address)
-    {
-      fputs_filtered ("@", stream);
-      fputs_filtered (paddress (gdbarch, address), stream);
-      fputs_filtered (": ", stream);
-    }
-  print_address_demangle (gdbarch, func_addr, stream, demangle);
-}
-
-
 /* A helper for c_textual_element_type.  This checks the name of the
    typedef.  This is bogus but it isn't apparent that the compiler
    provides us the help we may need.  */

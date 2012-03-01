@@ -1161,6 +1161,31 @@ print_char_chars (struct ui_file *stream, struct type *type,
     }
 }
 
+/* Print function pointer with inferior address ADDRESS onto stdio
+   stream STREAM.  */
+
+void
+print_function_pointer_address (struct gdbarch *gdbarch,
+				CORE_ADDR address,
+				struct ui_file *stream,
+				int addressprint)
+{
+  CORE_ADDR func_addr
+    = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
+					  &current_target);
+
+  /* If the function pointer is represented by a description, print
+     the address of the description.  */
+  if (addressprint && func_addr != address)
+    {
+      fputs_filtered ("@", stream);
+      fputs_filtered (paddress (gdbarch, address), stream);
+      fputs_filtered (": ", stream);
+    }
+  print_address_demangle (gdbarch, func_addr, stream, demangle);
+}
+
+
 /* Print on STREAM using the given OPTIONS the index for the element
    at INDEX of an array whose index type is INDEX_TYPE.  */
     

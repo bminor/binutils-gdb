@@ -43,27 +43,6 @@ m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
 			 int len);
 
 
-/* Print function pointer with inferior address ADDRESS onto stdio
-   stream STREAM.  */
-
-static void
-print_function_pointer_address (struct gdbarch *gdbarch, CORE_ADDR address,
-				struct ui_file *stream, int addressprint)
-{
-  CORE_ADDR func_addr = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
-							    &current_target);
-
-  /* If the function pointer is represented by a description, print the
-     address of the description.  */
-  if (addressprint && func_addr != address)
-    {
-      fputs_filtered ("@", stream);
-      fputs_filtered (paddress (gdbarch, address), stream);
-      fputs_filtered (": ", stream);
-    }
-  print_address_demangle (gdbarch, func_addr, stream, demangle);
-}
-
 /* get_long_set_bounds - assigns the bounds of the long set to low and
                          high.  */
 

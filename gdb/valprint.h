@@ -148,6 +148,11 @@ extern void print_hex_chars (struct ui_file *, const gdb_byte *,
 extern void print_char_chars (struct ui_file *, struct type *,
 			      const gdb_byte *, unsigned int, enum bfd_endian);
 
+extern void print_function_pointer_address (struct gdbarch *gdbarch,
+					    CORE_ADDR address,
+					    struct ui_file *stream,
+					    int addressprint);
+
 int read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
 		 enum bfd_endian byte_order, gdb_byte **buffer,
 		 int *bytes_read);
