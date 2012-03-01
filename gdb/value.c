@@ -41,6 +41,7 @@
 #include "python/python.h"
 #include <ctype.h>
 #include "tracepoint.h"
+#include "cp-abi.h"
 
 /* Prototypes for exported functions.  */
 
@@ -2549,10 +2550,17 @@ value_primitive_field (struct value *arg1, int offset,
       /* This field is actually a base subobject, so preserve the
 	 entire object's contents for later references to virtual
 	 bases, etc.  */
+      int boffset;
 
       /* Lazy register values with offsets are not supported.  */
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
 	value_fetch_lazy (arg1);
+
+      boffset = baseclass_offset (arg_type, fieldno,
+				  value_contents (arg1),
+				  value_embedded_offset (arg1),
+				  value_address (arg1),
+				  arg1);
 
       if (value_lazy (arg1))
 	v = allocate_value_lazy (value_enclosing_type (arg1));
@@ -2564,8 +2572,7 @@ value_primitive_field (struct value *arg1, int offset,
 	}
       v->type = type;
       v->offset = value_offset (arg1);
-      v->embedded_offset = (offset + value_embedded_offset (arg1)
-			    + TYPE_FIELD_BITPOS (arg_type, fieldno) / 8);
+      v->embedded_offset = offset + value_embedded_offset (arg1) + boffset;
     }
   else
     {

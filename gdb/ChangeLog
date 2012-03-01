@@ -1,5 +1,9 @@
 2012-03-01  Tom Tromey  <tromey@redhat.com>
 
+	* value.c (value_primitive_field): Handle virtual base classes.
+
+2012-03-01  Tom Tromey  <tromey@redhat.com>
+
 	* gdbtypes.h (struct vbase): Remove.
 
 2012-03-01  Tom Tromey  <tromey@redhat.com>
