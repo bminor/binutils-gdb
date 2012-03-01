@@ -1577,7 +1577,8 @@ encode_actions_1 (struct command_line *action,
 }
 
 /* Render all actions into gdb protocol.  */
-/*static*/ void
+
+void
 encode_actions (struct breakpoint *t, struct bp_location *tloc,
 		char ***tdp_actions, char ***stepping_actions)
 {
