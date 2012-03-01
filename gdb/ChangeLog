@@ -1,5 +1,10 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* configure.ac (build_warnings): Add -Wmissing-prototypes.
+	* configure: Regenerate.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	* amd64-linux-tdep.c (amd64_linux_record_signal): Make static.
 	* breakpoint.c (create_exception_master_breakpoint, trace_command)
 	(ftrace_command, strace_command): Make static.
