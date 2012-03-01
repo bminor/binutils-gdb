@@ -824,10 +824,10 @@ extern int val_print (struct type *type, const gdb_byte *valaddr,
 		      const struct value_print_options *options,
 		      const struct language_defn *language);
 
-extern int common_val_print (struct value *val,
-			     struct ui_file *stream, int recurse,
-			     const struct value_print_options *options,
-			     const struct language_defn *language);
+extern void common_val_print (struct value *val,
+			      struct ui_file *stream, int recurse,
+			      const struct value_print_options *options,
+			      const struct language_defn *language);
 
 extern int val_print_string (struct type *elttype, const char *encoding,
 			     CORE_ADDR addr, int len,

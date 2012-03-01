@@ -432,19 +432,16 @@ value_check_printable (struct value *val, struct ui_file *stream,
 /* Print using the given LANGUAGE the value VAL onto stream STREAM according
    to OPTIONS.
 
-   If the data are a string pointer, returns the number of string characters
-   printed.
-
    This is a preferable interface to val_print, above, because it uses
    GDB's value mechanism.  */
 
-int
+void
 common_val_print (struct value *val, struct ui_file *stream, int recurse,
 		  const struct value_print_options *options,
 		  const struct language_defn *language)
 {
   if (!value_check_printable (val, stream, options))
-    return 0;
+    return;
 
   if (language->la_language == language_ada)
     /* The value might have a dynamic type, which would cause trouble
@@ -453,10 +450,10 @@ common_val_print (struct value *val, struct ui_file *stream, int recurse,
        get a fixed representation of our value.  */
     val = ada_to_fixed_value (val);
 
-  return val_print (value_type (val), value_contents_for_printing (val),
-		    value_embedded_offset (val), value_address (val),
-		    stream, recurse,
-		    val, options, language);
+  val_print (value_type (val), value_contents_for_printing (val),
+	     value_embedded_offset (val), value_address (val),
+	     stream, recurse,
+	     val, options, language);
 }
 
 /* Print on stream STREAM the value VAL according to OPTIONS.  The value
