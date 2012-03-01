@@ -1,5 +1,10 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* jit-reader.in [!__cplusplus]
+	(GDB_DECLARE_GPL_COMPATIBLE_READER): Add missing backslash.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	* configure.ac (build_warnings): Add -Wmissing-prototypes.
 	* configure: Regenerate.
 
