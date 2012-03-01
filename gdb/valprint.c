@@ -330,12 +330,9 @@ val_print_invalid_address (struct ui_file *stream)
 
    RECURSE indicates the amount of indentation to supply before
    continuation lines; this amount is roughly twice the value of
-   RECURSE.
+   RECURSE.  */
 
-   If the data is printed as a string, returns the number of string
-   characters printed.  */
-
-int
+void
 val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	   CORE_ADDR address, struct ui_file *stream, int recurse,
 	   const struct value *val,
@@ -361,11 +358,11 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     {
       fprintf_filtered (stream, _("<incomplete type>"));
       gdb_flush (stream);
-      return (0);
+      return;
     }
 
   if (!valprint_check_validity (stream, real_type, embedded_offset, val))
-    return 0;
+    return;
 
   if (!options->raw)
     {
@@ -373,7 +370,7 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 				      address, stream, recurse,
 				      val, options, language);
       if (ret)
-	return ret;
+	return;
     }
 
   /* Handle summary mode.  If the value is a scalar, print it;
@@ -381,7 +378,7 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   if (options->summary && !scalar_type_p (type))
     {
       fprintf_filtered (stream, "...");
-      return 0;
+      return;
     }
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
@@ -392,8 +389,6 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     }
   if (except.reason < 0)
     fprintf_filtered (stream, _("<error reading variable>"));
-
-  return ret;
 }
 
 /* Check whether the value VAL is printable.  Return 1 if it is;
