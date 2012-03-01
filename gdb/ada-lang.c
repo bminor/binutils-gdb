@@ -10598,37 +10598,6 @@ ada_is_modular_type (struct type *type)
           && TYPE_UNSIGNED (subranged_type));
 }
 
-/* Try to determine the lower and upper bounds of the given modular type
-   using the type name only.  Return non-zero and set L and U as the lower
-   and upper bounds (respectively) if successful.  */
-
-int
-ada_modulus_from_name (struct type *type, ULONGEST *modulus)
-{
-  const char *name = ada_type_name (type);
-  const char *suffix;
-  int k;
-  LONGEST U;
-
-  if (name == NULL)
-    return 0;
-
-  /* Discrete type bounds are encoded using an __XD suffix.  In our case,
-     we are looking for static bounds, which means an __XDLU suffix.
-     Moreover, we know that the lower bound of modular types is always
-     zero, so the actual suffix should start with "__XDLU_0__", and
-     then be followed by the upper bound value.  */
-  suffix = strstr (name, "__XDLU_0__");
-  if (suffix == NULL)
-    return 0;
-  k = 10;
-  if (!ada_scan_number (suffix, k, &U, NULL))
-    return 0;
-
-  *modulus = (ULONGEST) U + 1;
-  return 1;
-}
-
 /* Assuming ada_is_modular_type (TYPE), the modulus of TYPE.  */
 
 ULONGEST

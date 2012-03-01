@@ -293,7 +293,7 @@ false		{ return FALSEKEYWORD; }
 
 /* Initialize the lexer for processing new expression. */
 
-void
+static void
 lexer_init (FILE *inp)
 {
   BEGIN INITIAL;

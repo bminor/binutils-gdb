@@ -1,5 +1,10 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (ada_modulus_from_name): Delete.
+	* ada-lex.l (lexer_init): Make static.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/13767
 
 	* frame.c (read_frame_register_unsigned): New.
