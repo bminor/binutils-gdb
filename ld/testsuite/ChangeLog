@@ -1,3 +1,8 @@
+2012-03-01  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/13789
+	* ld-elf/zerosize1.d: Allow xyzzy to be either OBJECT or NOTYPE.
+
 2012-02-25  Walter Lee  <walt@tilera.com>
 
 	* ld-tilegx/reloc-be.d: New.
