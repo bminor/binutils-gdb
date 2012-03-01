@@ -1,3 +1,7 @@
+2012-03-01  Maciej W. Rozycki <macro@codesourcery.com>
+
+	* mips-tdep.c (mips32_scan_prologue): Correct indentation.
+
 2012-03-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Only set pc_regnum and

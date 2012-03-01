@@ -2269,43 +2269,43 @@ restart:
                || inst == 0x0399e021 /* addu $gp,$gp,$t9 */
                || inst == 0x033ce021 /* addu $gp,$t9,$gp */
               )
-       {
-         /* These instructions are part of the prologue, but we don't
-            need to do anything special to handle them.  */
-       }
+	{
+	  /* These instructions are part of the prologue, but we don't
+	     need to do anything special to handle them.  */
+	}
       /* The instructions below load $at or $t0 with an immediate
          value in preparation for a stack adjustment via
          subu $sp,$sp,[$at,$t0].  These instructions could also
          initialize a local variable, so we accept them only before
          a stack adjustment instruction was seen.  */
       else if (!seen_sp_adjust
-               && (high_word == 0x3c01 /* lui $at,n */
-                   || high_word == 0x3c08 /* lui $t0,n */
-                   || high_word == 0x3421 /* ori $at,$at,n */
-                   || high_word == 0x3508 /* ori $t0,$t0,n */
-                   || high_word == 0x3401 /* ori $at,$zero,n */
-                   || high_word == 0x3408 /* ori $t0,$zero,n */
-                  ))
-       {
-	 if (end_prologue_addr == 0)
-	   load_immediate_bytes += MIPS_INSN32_SIZE;		/* FIXME!  */
-       }
+	       && (high_word == 0x3c01 /* lui $at,n */
+		   || high_word == 0x3c08 /* lui $t0,n */
+		   || high_word == 0x3421 /* ori $at,$at,n */
+		   || high_word == 0x3508 /* ori $t0,$t0,n */
+		   || high_word == 0x3401 /* ori $at,$zero,n */
+		   || high_word == 0x3408 /* ori $t0,$zero,n */
+		  ))
+	{
+	  if (end_prologue_addr == 0)
+	    load_immediate_bytes += MIPS_INSN32_SIZE;		/* FIXME!  */
+	}
       else
-       {
-         /* This instruction is not an instruction typically found
-            in a prologue, so we must have reached the end of the
-            prologue.  */
-         /* FIXME: brobecker/2004-10-10: Can't we just break out of this
-            loop now?  Why would we need to continue scanning the function
-            instructions?  */
-         if (end_prologue_addr == 0)
-           end_prologue_addr = cur_pc;
+	{
+	  /* This instruction is not an instruction typically found
+	     in a prologue, so we must have reached the end of the
+	     prologue.  */
+	  /* FIXME: brobecker/2004-10-10: Can't we just break out of this
+	     loop now?  Why would we need to continue scanning the function
+	     instructions?  */
+	  if (end_prologue_addr == 0)
+	    end_prologue_addr = cur_pc;
 
-	 /* Check for branches and jumps.  For now, only jump to
-	    register are caught (i.e. returns).  */
-	 if ((itype_op (inst) & 0x07) == 0 && rtype_funct (inst) == 8)
-	   in_delay_slot = 1;
-       }
+	  /* Check for branches and jumps.  For now, only jump to
+	     register are caught (i.e. returns).  */
+	  if ((itype_op (inst) & 0x07) == 0 && rtype_funct (inst) == 8)
+	    in_delay_slot = 1;
+	}
 
       /* If the previous instruction was a jump, we must have reached
 	 the end of the prologue by now.  Stop scanning so that we do
