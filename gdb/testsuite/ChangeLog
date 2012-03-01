@@ -1,3 +1,8 @@
+2012-03-01  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/help.exp (help show user): Update expected result
+	for new doc string changes (add "non-python").
+
 2012-03-01  Scott J. Goldman <scottjg@vmware.com>
 
 	* gdb.python/py-cmd.exp: Add test to verify that python commands can

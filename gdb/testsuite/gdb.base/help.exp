@@ -574,7 +574,7 @@ gdb_test "help show radix" "Show the default input and output number radices\.\[
 # test help show symbol-reloading
 gdb_test "help show symbol-reloading" "Show dynamic symbol table reloading multiple times in one run\." "help show symbol-reloading"
 # test help show user
-gdb_test "help show user" "Show definitions of user defined commands\.\[\r\n\]+Argument is the name of the user defined command\.\[\r\n\]+With no argument, show definitions of all user defined commands\." "help show user"
+gdb_test "help show user" "Show definitions of non-python user defined commands\.\[\r\n\]+Argument is the name of the user defined command\.\[\r\n\]+With no argument, show definitions of all user defined commands\." "help show user"
 # test help show values
 gdb_test "help show values" "Elements of value history around item number IDX \\(or last ten\\)\." "help show values"
 # test help show verbose
