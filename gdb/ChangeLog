@@ -1,5 +1,11 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* observer.c (observer_test_first_notification_function)
+	(observer_test_second_notification_function)
+	(observer_test_third_notification_function): Add declarations.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	* common/signals.c (default_target_signal_to_host)
 	(default_target_signal_from_host): Move ...
 	* arch-utils.c: ... here.
