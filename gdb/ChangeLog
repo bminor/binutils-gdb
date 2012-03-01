@@ -1,3 +1,10 @@
+2012-03-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gnulib/extra/update-copyright: Update to the latest from
+	gnulib's git repository.
+	* copyright.py: Set UPDATE_COPYRIGHT_USE_INTERVALS environment
+	variable to 2 instead of 1.
+
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* varobj.c (c_value_of_variable): Remove dead code.
