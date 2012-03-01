@@ -1,3 +1,9 @@
+2012-03-01  Scott J. Goldman <scottjg@vmware.com>
+
+	* gdb.python/py-cmd.exp: Add test to verify that python commands can
+	be put in the user-defined category and that the commands appear in
+	"help user-defined".
+
 2012-02-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/tagged_not_init: New testcase.

@@ -21133,8 +21133,9 @@ command should not be repeated when the user hits @key{RET}
 
 @kindex help user-defined
 @item help user-defined
-List all user-defined commands, with the first line of the documentation
-(if any) for each.
+List all user-defined commands and all python commands defined in class
+COMAND_USER.  The first line of the documentation or docstring is
+included (if any).
 
 @kindex show user
 @item show user
@@ -21142,6 +21143,7 @@ List all user-defined commands, with the first line of the documentation
 Display the @value{GDBN} commands used to define @var{commandname} (but
 not its documentation).  If no @var{commandname} is given, display the
 definitions for all user-defined commands.
+This does not work for user-defined python commands.
 
 @cindex infinite recursion in user-defined commands
 @kindex show max-user-call-depth
@@ -21151,6 +21153,7 @@ definitions for all user-defined commands.
 The value of @code{max-user-call-depth} controls how many recursion
 levels are allowed in user-defined commands before @value{GDBN} suspects an
 infinite recursion and aborts the command.
+This does not apply to user-defined python commands.
 @end table
 
 In addition to the above commands, user-defined commands frequently
@@ -21951,7 +21954,7 @@ to handle this case.  Example:
 >class HelloWorld (gdb.Command):
 >  """Greet the whole world."""
 >  def __init__ (self):
->    super (HelloWorld, self).__init__ ("hello-world", gdb.COMMAND_OBSCURE)
+>    super (HelloWorld, self).__init__ ("hello-world", gdb.COMMAND_USER)
 >  def invoke (self, args, from_tty):
 >    argv = gdb.string_to_argv (args)
 >    if len (argv) != 0:
@@ -23330,6 +23333,15 @@ The command has to do with tracepoints.  For example, @code{trace},
 @kbd{help tracepoints} at the @value{GDBN} prompt to see a list of
 commands in this category.
 
+@findex COMMAND_USER
+@findex gdb.COMMAND_USER
+@item gdb.COMMAND_USER
+The command is a general purpose command for the user, and typically
+does not fit in one of the other categories.
+Type @kbd{help user-defined} at the @value{GDBN} prompt to see
+a list of commands in this category, as well as the list of gdb macros
+(@pxref{Sequences}).
+
 @findex COMMAND_OBSCURE
 @findex gdb.COMMAND_OBSCURE
 @item gdb.COMMAND_OBSCURE
@@ -23391,7 +23403,7 @@ class HelloWorld (gdb.Command):
   """Greet the whole world."""
 
   def __init__ (self):
-    super (HelloWorld, self).__init__ ("hello-world", gdb.COMMAND_OBSCURE)
+    super (HelloWorld, self).__init__ ("hello-world", gdb.COMMAND_USER)
 
   def invoke (self, arg, from_tty):
     print "Hello, World!"

@@ -1,3 +1,18 @@
+2012-03-01  Scott J. Goldman <scottjg@vmware.com>
+
+	* NEWS: Mention new python command class gdb.COMMAND_USER.
+	* cli/cli-cmds.c (show_user): Print error when used on a python
+	command.
+	(init_cli_cmds): Update documentation strings for "show user" and
+	"set/show max-user-call-depth" to clarify that it does not apply to
+	python commands.
+	* python/py-cmd.c (cmdpy_init): Treat class_user as a valid class in
+	error check.
+	(gdbpy_initialize_commands): Add COMMAND_USER as a constant in
+	gdb python api.
+	* top.c (execute_command): Only execute a user-defined command as a
+	legacy macro if c->user_commands is set.
+
 2012-03-01  Tom Tromey  <tromey@redhat.com>
 
 	* valprint.h (struct generic_val_print_decorations): New.

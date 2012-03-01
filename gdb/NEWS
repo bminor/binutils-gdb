@@ -5,6 +5,9 @@
 
 * Python scripting
 
+  ** GDB commands implemented in Python can now be put in command class
+     "gdb.COMMAND_USER".
+
   ** The "maint set python print-stack on|off" is now deleted.
 
   ** A new class, gdb.printing.FlagEnumerationPrinter, can be used to

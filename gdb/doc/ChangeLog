@@ -1,3 +1,13 @@
+2012-03-01  Scott J. Goldman <scottjg@vmware.com>
+
+	* gdb.texinfo (Commands In Python): Put example python macro in
+	COMMAND_USER category rather than COMMAND_OBSCURE.
+	Document gdb.COMMAND_USER.
+	(User-defined Commands): Update documentation to clarify
+	"set/show max-user-call-depth" and "show user" don't apply to python
+	commands.  Update documentation to clarify "help user-defined" may
+	also include python commands defined as COMMAND_USER.
+
 2012-02-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Startup): Add option -ex description to the option -x

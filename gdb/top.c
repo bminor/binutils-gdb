@@ -470,7 +470,8 @@ execute_command (char *p, int from_tty)
       if (c->flags & DEPRECATED_WARN_USER)
 	deprecated_cmd_warning (&line);
 
-      if (c->class == class_user)
+      /* c->user_commands would be NULL in the case of a python command.  */
+      if (c->class == class_user && c->user_commands)
 	execute_user_command (c, arg);
       else if (c->type == set_cmd || c->type == show_cmd)
 	do_setshow_command (arg, from_tty, c);
