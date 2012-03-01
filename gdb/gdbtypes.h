@@ -866,13 +866,6 @@ struct cplus_struct_type
     struct symbol **template_arguments;
   };
 
-/* Struct used in computing virtual base list.  */
-struct vbase
-  {
-    struct type *vbasetype;	/* pointer to virtual base */
-    struct vbase *next;		/* next in chain */
-  };
-
 /* Struct used to store conversion rankings.  */
 struct rank
   {

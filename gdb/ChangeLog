@@ -1,5 +1,9 @@
 2012-03-01  Tom Tromey  <tromey@redhat.com>
 
+	* gdbtypes.h (struct vbase): Remove.
+
+2012-03-01  Tom Tromey  <tromey@redhat.com>
+
 	* c-valprint.c (print_function_pointer_address): Move...
 	* valprint.c: ... here.  Make non-static.
 	* m2-valprint.c (print_function_pointer_address): Remove.
