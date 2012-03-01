@@ -1,5 +1,17 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* python/py-breakpoint.c: Include python.h.
+	* python/py-continueevent.c (create_continue_event_object): Make
+	static.
+	* python/py-lazy-string.c (stpy_get_type): Make static.
+	* python/py-newobjfileevent.c (create_new_objfile_event_object):
+	Make static.
+	* python/py-utils.c (unicode_to_target_python_string): Make
+	static.
+	* python/py-value.c: Include python.h.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	* inferior.c (delete_threads_of_inferior): Delete.
 
 2012-03-01  Pedro Alves  <palves@redhat.com>

@@ -21,7 +21,7 @@
 
 static PyTypeObject new_objfile_event_object_type;
 
-PyObject *
+static PyObject *
 create_new_objfile_event_object (struct objfile *objfile)
 {
   PyObject *objfile_event;

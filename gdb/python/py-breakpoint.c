@@ -21,6 +21,7 @@
 #include "value.h"
 #include "exceptions.h"
 #include "python-internal.h"
+#include "python.h"
 #include "charset.h"
 #include "breakpoint.h"
 #include "gdbcmd.h"

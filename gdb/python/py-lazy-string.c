@@ -84,7 +84,7 @@ stpy_get_length (PyObject *self, void *closure)
   return PyLong_FromLong (self_string->length);
 }
 
-PyObject *
+static PyObject *
 stpy_get_type (PyObject *self, void *closure)
 {
   lazy_string_object *str_obj = (lazy_string_object *) self;

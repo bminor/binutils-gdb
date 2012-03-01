@@ -21,7 +21,7 @@
 
 static PyTypeObject continue_event_object_type;
 
-PyObject *
+static PyObject *
 create_continue_event_object (void)
 {
   return create_thread_event_object (&continue_event_object_type);

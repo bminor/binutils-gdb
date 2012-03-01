@@ -28,6 +28,7 @@
 #include "infcall.h"
 #include "expression.h"
 #include "cp-abi.h"
+#include "python.h"
 
 #ifdef HAVE_PYTHON
 
