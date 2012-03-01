@@ -1,5 +1,9 @@
 2012-03-01  Pedro Alves  <palves@redhat.com>
 
+	* inferior.c (delete_threads_of_inferior): Delete.
+
+2012-03-01  Pedro Alves  <palves@redhat.com>
+
 	Import fallback definitions from glibc.
 
 	* gdb_proc_service.h [!HAVE_PROC_SERVICE_H] (struct

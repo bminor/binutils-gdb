@@ -178,25 +178,6 @@ delete_thread_of_inferior (struct thread_info *tp, void *data)
   return 0;
 }
 
-void
-delete_threads_of_inferior (int pid)
-{
-  struct inferior *inf;
-  struct delete_thread_of_inferior_arg arg;
-
-  for (inf = inferior_list; inf; inf = inf->next)
-    if (inf->pid == pid)
-      break;
-
-  if (!inf)
-    return;
-
-  arg.pid = pid;
-  arg.silent = 1;
-
-  iterate_over_threads (delete_thread_of_inferior, &arg);
-}
-
 /* If SILENT then be quiet -- don't announce a inferior death, or the
    exit of its threads.  */
 
