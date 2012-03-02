@@ -36,7 +36,7 @@ if [get_compiler_info $binfile] {
     return -1
 }
 
-proc altivec_abi_tests { prefix extra_flags force_abi } {
+proc altivec_abi_tests { extra_flags force_abi } {
     global testfile binfile srcfile srcdir subdir
     global gdb_prompt
 

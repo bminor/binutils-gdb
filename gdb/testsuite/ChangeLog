@@ -1,3 +1,8 @@
+2012-03-02  Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.arch/altivec-abi.exp (altivec_abi_tests): Remove obsolete
+	parameter.
+
 2012-03-01  Maciej W. Rozycki  <macro@mips.com>
 
 	* gdb.xml/tdesc-regs.exp: Add "mips-dsp.xml" to the list of MIPS
