@@ -477,48 +477,6 @@ crisv32_single_step_through_delay (struct gdbarch *gdbarch,
   return ret;
 }
 
-/* Hardware watchpoint support.  */
-
-/* We support 6 hardware data watchpoints, but cannot trigger on execute
-   (any combination of read/write is fine).  */
-
-int
-cris_can_use_hardware_watchpoint (int type, int count, int other)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch);
-
-  /* No bookkeeping is done here; it is handled by the remote debug agent.  */
-
-  if (tdep->cris_version != 32)
-    return 0;
-  else
-    /* CRISv32: Six data watchpoints, one for instructions.  */
-    return (((type == bp_read_watchpoint || type == bp_access_watchpoint
-	     || type == bp_hardware_watchpoint) && count <= 6) 
-	    || (type == bp_hardware_breakpoint && count <= 1));
-}
-
-/* The CRISv32 hardware data watchpoints work by specifying ranges,
-   which have no alignment or length restrictions.  */
-
-int
-cris_region_ok_for_watchpoint (CORE_ADDR addr, int len)
-{
-  return 1;
-}
-
-/* If the inferior has some watchpoint that triggered, return the
-   address associated with that watchpoint.  Otherwise, return
-   zero.  */
-
-CORE_ADDR
-cris_stopped_data_address (void)
-{
-  CORE_ADDR eda;
-  eda = get_frame_register_unsigned (get_current_frame (), EDA_REGNUM);
-  return eda;
-}
-
 /* The instruction environment needed to find single-step breakpoints.  */
 
 typedef 

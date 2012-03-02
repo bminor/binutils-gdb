@@ -1,3 +1,9 @@
+2012-03-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix -Wmissing-prototypes build.
+	* cris-tdep.c (cris_can_use_hardware_watchpoint)
+	(cris_region_ok_for_watchpoint, cris_stopped_data_address): Remove.
+
 2012-03-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix -Wmissing-prototypes build.
