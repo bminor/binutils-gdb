@@ -444,6 +444,7 @@ const struct language_defn pascal_language_defn =
   pascal_print_typedef,		/* Print a typedef using appropriate syntax */
   pascal_val_print,		/* Print a value using appropriate syntax */
   pascal_value_print,		/* Print a top-level value */
+  default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
   "this",		        /* name_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */

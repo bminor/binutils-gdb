@@ -917,6 +917,7 @@ const struct language_defn unknown_language_defn =
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
+  default_read_var_value,	/* la_read_var_value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
   "this",        	    	/* name_of_this */
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
@@ -960,6 +961,7 @@ const struct language_defn auto_language_defn =
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
+  default_read_var_value,	/* la_read_var_value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
   "this",		        /* name_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
@@ -1001,6 +1003,7 @@ const struct language_defn local_language_defn =
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
+  default_read_var_value,	/* la_read_var_value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
   "this", 		        /* name_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */

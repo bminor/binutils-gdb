@@ -4041,8 +4041,30 @@ parse_old_style_renaming (struct type *type,
   if (len != NULL)
     *len = suffix - info;
   return kind;
-}  
+}
 
+/* Compute the value of the given RENAMING_SYM, which is expected to
+   be a symbol encoding a renaming expression.  BLOCK is the block
+   used to evaluate the renaming.  */
+
+static struct value *
+ada_read_renaming_var_value (struct symbol *renaming_sym,
+			     struct block *block)
+{
+  char *sym_name;
+  struct expression *expr;
+  struct value *value;
+  struct cleanup *old_chain = NULL;
+
+  sym_name = xstrdup (SYMBOL_LINKAGE_NAME (renaming_sym));
+  old_chain = make_cleanup (xfree, sym_name);
+  expr = parse_exp_1 (&sym_name, block, 0);
+  make_cleanup (free_current_contents, &expr);
+  value = evaluate_expression (expr);
+
+  do_cleanups (old_chain);
+  return value;
+}
 
 
                                 /* Evaluation: Function Calls */
@@ -12437,6 +12459,28 @@ ada_get_symbol_name_cmp (const char *lookup_name)
     return compare_names;
 }
 
+/* Implement the "la_read_var_value" language_defn method for Ada.  */
+
+static struct value *
+ada_read_var_value (struct symbol *var, struct frame_info *frame)
+{
+  struct block *frame_block = NULL;
+  struct symbol *renaming_sym = NULL;
+
+  /* The only case where default_read_var_value is not sufficient
+     is when VAR is a renaming...  */
+  if (frame)
+    frame_block = get_frame_block (frame, NULL);
+  if (frame_block)
+    renaming_sym = ada_find_renaming_symbol (var, frame_block);
+  if (renaming_sym != NULL)
+    return ada_read_renaming_var_value (renaming_sym, frame_block);
+
+  /* This is a typical case where we expect the default_read_var_value
+     function to work.  */
+  return default_read_var_value (var, frame);
+}
+
 const struct language_defn ada_language_defn = {
   "ada",                        /* Language name */
   language_ada,
@@ -12457,6 +12501,7 @@ const struct language_defn ada_language_defn = {
   ada_print_typedef,            /* Print a typedef using appropriate syntax */
   ada_val_print,                /* Print a value using appropriate syntax */
   ada_value_print,              /* Print a top-level value */
+  ada_read_var_value,		/* la_read_var_value */
   NULL,                         /* Language specific skip_trampoline */
   NULL,                         /* name_of_this */
   ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */

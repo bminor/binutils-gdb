@@ -34,6 +34,7 @@
 #include "user-regs.h"
 #include "block.h"
 #include "objfiles.h"
+#include "language.h"
 
 /* Basic byte-swapping routines.  All 'extract' functions return a
    host-format integer from a target-format integer at ADDR which is
@@ -405,13 +406,11 @@ symbol_read_needs_frame (struct symbol *sym)
   return 1;
 }
 
-/* Given a struct symbol for a variable,
-   and a stack frame id, read the value of the variable
-   and return a (pointer to a) struct value containing the value.
-   If the variable cannot be found, throw error.  */
+/* A default implementation for the "la_read_var_value" hook in
+   the language vector which should work in most situations.  */
 
 struct value *
-read_var_value (struct symbol *var, struct frame_info *frame)
+default_read_var_value (struct symbol *var, struct frame_info *frame)
 {
   struct value *v;
   struct type *type = SYMBOL_TYPE (var);
@@ -592,6 +591,19 @@ read_var_value (struct symbol *var, struct frame_info *frame)
   VALUE_LVAL (v) = lval_memory;
   set_value_address (v, addr);
   return v;
+}
+
+/* Calls VAR's language la_read_var_value hook with the given arguments.  */
+
+struct value *
+read_var_value (struct symbol *var, struct frame_info *frame)
+{
+  const struct language_defn *lang = language_def (SYMBOL_LANGUAGE (var));
+
+  gdb_assert (lang != NULL);
+  gdb_assert (lang->la_read_var_value != NULL);
+
+  return lang->la_read_var_value (var, frame);
 }
 
 /* Install default attributes for register values.  */

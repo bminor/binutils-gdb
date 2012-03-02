@@ -524,6 +524,7 @@ const struct language_defn objc_language_defn = {
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
+  default_read_var_value,	/* la_read_var_value */
   objc_skip_trampoline, 	/* Language specific skip_trampoline */
   "self",		        /* name_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */

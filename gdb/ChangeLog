@@ -1,3 +1,19 @@
+2012-03-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* language.h (struct language_defn): New "method" la_read_var_value.
+	* findvar.c: #include "language.h".
+	(default_read_var_value): Renames read_var_value.  Rewrite
+	function description.
+	(read_var_value): New function.
+	* value.h (default_read_var_value): Add prototype.
+	* ada-lang.c (ada_read_renaming_var_value, ada_read_var_value):
+	New functions.
+	(ada_language_defn): Add entry for la_read_var_value.
+	* c-lang.c, d-lang.c, f-lang.c, jv-lang.c, language.c,
+	* m2-lang.c, objc-lang.c, opencl-lang.c, p-lang.c: Update
+	language_defn structures to add entry for new la_read_var_value
+	field.
+
 2012-03-02  Tom Tromey  <tromey@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 

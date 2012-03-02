@@ -289,6 +289,7 @@ const struct language_defn f_language_defn =
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   f_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* FIXME */
+  default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
   NULL,                    	/* name_of_this */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */

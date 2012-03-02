@@ -256,6 +256,7 @@ static const struct language_defn d_language_defn =
 				   syntax.  */
   d_val_print,			/* Print a value using appropriate syntax.  */
   c_value_print,		/* Print a top-level value.  */
+  default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline.  */
   "this",
   basic_lookup_symbol_nonlocal, 

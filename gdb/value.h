@@ -536,6 +536,9 @@ extern int symbol_read_needs_frame (struct symbol *);
 extern struct value *read_var_value (struct symbol *var,
 				     struct frame_info *frame);
 
+extern struct value *default_read_var_value (struct symbol *var,
+					     struct frame_info *frame);
+
 extern struct value *allocate_value (struct type *type);
 extern struct value *allocate_value_lazy (struct type *type);
 extern void allocate_value_contents (struct value *value);
