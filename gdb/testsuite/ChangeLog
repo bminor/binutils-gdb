@@ -1,3 +1,7 @@
+2012-03-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/info_locals_renaming: New testcase.
+
 2012-03-02  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/nextoverexit.c: New file.
