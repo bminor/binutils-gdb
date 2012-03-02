@@ -428,7 +428,7 @@ static const char *mips_irix_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
   "pc", "cause", "bad", "hi", "lo", "fsr", "fir"
 };
 
-/* Names of Linux registers.  */
+/* Names of registers with Linux kernels.  */
 static const char *mips_linux_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
   "sr", "lo", "hi", "bad", "cause", "pc",
   "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",

@@ -1,3 +1,10 @@
+2012-03-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* mips-linux-nat.c (mips_linux_read_description): Add missing i18n
+	marker.
+	* mips-tdep.c (mips_linux_reg_names): Improve comment to avoid ARI
+	violation.
+
 2012-03-02  Pedro Alves  <palves@redhat.com>
 
 	* linux-thread-db.c (attach_thread): Avoid in_thread_list call.
