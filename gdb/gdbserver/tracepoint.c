@@ -4473,7 +4473,7 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 	   preemptively), since the PC had already been adjusted to
 	   contain the tracepoint's address by the jump pad.  */
 	trace_debug ("Storing stop pc (0x%s) in regblock",
-		     paddress (tpoint->address));
+		     paddress (stop_pc));
 
 	/* This changes the regblock, not the thread's
 	   regcache.  */

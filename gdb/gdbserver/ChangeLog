@@ -1,5 +1,10 @@
 2012-03-02  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (do_action_at_tracepoint): Write `stop_pc' in
+	debug log.
+
+2012-03-02  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (collect_ust_data_at_tracepoint): Remove parameters
 	`stop_pc' and `tpoint'.  Update caller.
 
