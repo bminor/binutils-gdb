@@ -891,7 +891,7 @@ windows_clear_solib (void)
 }
 
 /* Load DLL symbol info.  */
-void
+static void
 dll_symbol_command (char *args, int from_tty)
 {
   int n;
@@ -1386,7 +1386,7 @@ windows_resume (struct target_ops *ops,
    handler is in charge of interrupting the inferior using DebugBreakProcess.
    Note that this function is not available prior to Windows XP.  In this case
    we emit a warning.  */
-BOOL WINAPI
+static BOOL WINAPI
 ctrl_c_handler (DWORD event_type)
 {
   const int attach_flag = current_inferior ()->attach_flag;
@@ -2512,6 +2512,9 @@ set_windows_aliases (char *argv0)
   add_info_alias ("dll", "sharedlibrary", 1);
 }
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_windows_nat;
+
 void
 _initialize_windows_nat (void)
 {
@@ -2671,6 +2674,9 @@ windows_thread_alive (struct target_ops *ops, ptid_t ptid)
     ? FALSE : TRUE;
 }
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_check_for_gdb_ini;
+
 void
 _initialize_check_for_gdb_ini (void)
 {
@@ -2764,8 +2770,12 @@ bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
   return size;
 }
  
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_loadable;
+
 /* Load any functions which may not be available in ancient versions
    of Windows.  */
+
 void
 _initialize_loadable (void)
 {
