@@ -1,3 +1,8 @@
+2012-03-02  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (load_full_comp_unit): Remove unnecessary reading of
+	abbrev table, read_comp_unit will do it.
+
 2012-03-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix -Wmissing-prototypes build.

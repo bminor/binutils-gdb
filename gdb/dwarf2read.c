@@ -4655,7 +4655,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
   struct dwarf2_cu *cu;
   unsigned int offset;
   gdb_byte *info_ptr, *beg_of_comp_unit;
-  struct cleanup *free_abbrevs_cleanup = NULL, *free_cu_cleanup = NULL;
+  struct cleanup *free_cu_cleanup = NULL;
   struct attribute *attr;
   int read_cu = 0;
 
@@ -4694,10 +4694,6 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
       cu->header.offset = offset;
       cu->header.first_die_offset = info_ptr - beg_of_comp_unit;
 
-      /* Read the abbrevs for this compilation unit.  */
-      dwarf2_read_abbrevs (cu);
-      free_abbrevs_cleanup = make_cleanup (dwarf2_free_abbrev_table, cu);
-
       /* Link this CU into read_in_chain.  */
       per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
       dwarf2_per_objfile->read_in_chain = per_cu;
@@ -4724,8 +4720,6 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
 
   if (read_cu)
     {
-      do_cleanups (free_abbrevs_cleanup);
-
       /* We've successfully allocated this compilation unit.  Let our
 	 caller clean it up when finished with it.  */
       discard_cleanups (free_cu_cleanup);
