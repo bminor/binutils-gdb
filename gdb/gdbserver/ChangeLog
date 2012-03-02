@@ -1,3 +1,13 @@
+2012-03-02  Pedro Alves  <palves@redhat.com>
+
+	* inferiors.c (add_pid_to_list, pull_pid_from_list): Delete.
+	* linux-low.c (struct simple_pid_list): New.
+	(stopped_pids): New a struct simple_pid_list pointer.
+	(add_to_pid_list, pull_pid_from_list): New.
+	(handle_extended_wait): Don't assume the first signal new children
+	report is SIGSTOP.  Adjust call to pull_pid_from_list.
+	(linux_wait_for_lwp): Adjust.
+
 2012-03-02  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (do_action_at_tracepoint): Write `stop_pc' in

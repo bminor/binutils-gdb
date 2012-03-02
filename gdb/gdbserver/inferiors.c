@@ -239,35 +239,6 @@ clear_inferiors (void)
   current_inferior = NULL;
 }
 
-/* Two utility functions for a truly degenerate inferior_list: a simple
-   PID listing.  */
-
-void
-add_pid_to_list (struct inferior_list *list, unsigned long pid)
-{
-  struct inferior_list_entry *new_entry;
-
-  new_entry = xmalloc (sizeof (struct inferior_list_entry));
-  new_entry->id = pid_to_ptid (pid);
-  add_inferior_to_list (list, new_entry);
-}
-
-int
-pull_pid_from_list (struct inferior_list *list, unsigned long pid)
-{
-  struct inferior_list_entry *new_entry;
-
-  new_entry = find_inferior_id (list, pid_to_ptid (pid));
-  if (new_entry == NULL)
-    return 0;
-  else
-    {
-      remove_inferior (list, new_entry);
-      free (new_entry);
-      return 1;
-    }
-}
-
 struct process_info *
 add_process (int pid, int attached)
 {

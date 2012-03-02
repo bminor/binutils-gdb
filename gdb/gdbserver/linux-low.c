@@ -92,11 +92,54 @@
 
 struct inferior_list all_lwps;
 
-/* A list of all unknown processes which receive stop signals.  Some other
-   process will presumably claim each of these as forked children
-   momentarily.  */
+/* A list of all unknown processes which receive stop signals.  Some
+   other process will presumably claim each of these as forked
+   children momentarily.  */
 
-struct inferior_list stopped_pids;
+struct simple_pid_list
+{
+  /* The process ID.  */
+  int pid;
+
+  /* The status as reported by waitpid.  */
+  int status;
+
+  /* Next in chain.  */
+  struct simple_pid_list *next;
+};
+struct simple_pid_list *stopped_pids;
+
+/* Trivial list manipulation functions to keep track of a list of new
+   stopped processes.  */
+
+static void
+add_to_pid_list (struct simple_pid_list **listp, int pid, int status)
+{
+  struct simple_pid_list *new_pid = xmalloc (sizeof (struct simple_pid_list));
+
+  new_pid->pid = pid;
+  new_pid->status = status;
+  new_pid->next = *listp;
+  *listp = new_pid;
+}
+
+static int
+pull_pid_from_list (struct simple_pid_list **listp, int pid, int *statusp)
+{
+  struct simple_pid_list **p;
+
+  for (p = listp; *p != NULL; p = &(*p)->next)
+    if ((*p)->pid == pid)
+      {
+	struct simple_pid_list *next = (*p)->next;
+
+	*statusp = (*p)->status;
+	xfree (*p);
+	*p = next;
+	return 1;
+      }
+  return 0;
+}
 
 /* FIXME this is a bit of a hack, and could be removed.  */
 int stopping_threads;
@@ -353,12 +396,12 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
     {
       ptid_t ptid;
       unsigned long new_pid;
-      int ret, status = W_STOPCODE (SIGSTOP);
+      int ret, status;
 
       ptrace (PTRACE_GETEVENTMSG, lwpid_of (event_child), 0, &new_pid);
 
       /* If we haven't already seen the new PID stop, wait for it now.  */
-      if (! pull_pid_from_list (&stopped_pids, new_pid))
+      if (!pull_pid_from_list (&stopped_pids, new_pid, &status))
 	{
 	  /* The new child has a pending SIGSTOP.  We can't affect it until it
 	     hits the SIGSTOP, but we're already attached.  */
@@ -1170,7 +1213,7 @@ retry:
      was reported to us by the kernel.  Save its PID.  */
   if (child == NULL && WIFSTOPPED (*wstatp))
     {
-      add_pid_to_list (&stopped_pids, ret);
+      add_to_pid_list (&stopped_pids, ret, *wstatp);
       goto retry;
     }
   else if (child == NULL)
