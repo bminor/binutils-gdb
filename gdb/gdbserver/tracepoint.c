@@ -4264,8 +4264,6 @@ tracepoint_was_hit (struct thread_info *tinfo, CORE_ADDR stop_pc)
 #if defined IN_PROCESS_AGENT && defined HAVE_UST
 struct ust_marker_data;
 static void collect_ust_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-					    CORE_ADDR stop_pc,
-					    struct tracepoint *tpoint,
 					    struct traceframe *tframe);
 #endif
 
@@ -4504,8 +4502,7 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
       {
 #if defined IN_PROCESS_AGENT && defined HAVE_UST
 	trace_debug ("Want to collect static trace data");
-	collect_ust_data_at_tracepoint (ctx, stop_pc,
-					tpoint, tframe);
+	collect_ust_data_at_tracepoint (ctx, tframe);
 #else
 	trace_debug ("warning: collecting static trace data, "
 		     "but static tracepoints are not supported");
@@ -6340,8 +6337,6 @@ gdb_probe (const struct marker *mdata, void *probe_private,
 
 static void
 collect_ust_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-				CORE_ADDR stop_pc,
-				struct tracepoint *tpoint,
 				struct traceframe *tframe)
 {
   struct static_tracepoint_ctx *umd = (struct static_tracepoint_ctx *) ctx;

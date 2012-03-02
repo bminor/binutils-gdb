@@ -1,3 +1,8 @@
+2012-03-02  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (collect_ust_data_at_tracepoint): Remove parameters
+	`stop_pc' and `tpoint'.  Update caller.
+
 2012-03-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* linux-low.h (linux_target_ops): Add regset_bitmap member.
