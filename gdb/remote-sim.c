@@ -1239,7 +1239,7 @@ gdbsim_pid_to_str (struct target_ops *ops, ptid_t ptid)
 
 /* Simulator memory may be accessed after the program has been loaded.  */
 
-int
+static int
 gdbsim_has_all_memory (struct target_ops *ops)
 {
   struct sim_inferior_data *sim_data
@@ -1251,7 +1251,7 @@ gdbsim_has_all_memory (struct target_ops *ops)
   return 1;
 }
 
-int
+static int
 gdbsim_has_memory (struct target_ops *ops)
 {
   struct sim_inferior_data *sim_data

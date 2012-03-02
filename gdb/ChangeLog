@@ -1,3 +1,10 @@
+2012-03-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	Fix -Wmissing-prototypes build.
+	* ppc-linux-nat.c (ppc_linux_get_hwcap): Make static.
+	* remote-sim.c (gdbsim_has_all_memory): Likewise.
+	(gdbsim_has_memory): Likewise.
+
 2012-03-02  Yao Qi  <yao@codesourcery.com>
 
 	Fix -Wmissing-prototypes build.

@@ -1351,7 +1351,8 @@ store_ppc_registers (const struct regcache *regcache, int tid)
 }
 
 /* Fetch the AT_HWCAP entry from the aux vector.  */
-unsigned long ppc_linux_get_hwcap (void)
+static unsigned long
+ppc_linux_get_hwcap (void)
 {
   CORE_ADDR field;
 
