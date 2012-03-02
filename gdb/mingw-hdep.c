@@ -251,6 +251,9 @@ gdb_call_async_signal_handler (struct async_signal_handler *handler,
   SetEvent (sigint_event);
 }
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_mingw_hdep;
+
 void
 _initialize_mingw_hdep (void)
 {

@@ -21,6 +21,14 @@
 
 #include <stdlib.h>
 
+/* -Wmissing-prototypes */
+extern int tgetent (char *buffer, char *termtype);
+extern int tgetnum (char *name);
+extern int tgetflag (char *name);
+extern char* tgetstr (char *name, char **area);
+extern int tputs (char *string, int nlines, int (*outfun) ());
+extern char *tgoto (const char *cap, int col, int row);
+
 /* Each of the files below is a minimal implementation of the standard
    termcap function with the same name, suitable for use in a Windows
    console window.  */

@@ -108,7 +108,7 @@
 #define EILSEQ ENOENT
 #endif
 
-iconv_t
+static iconv_t
 phony_iconv_open (const char *to, const char *from)
 {
   /* We allow conversions from UTF-32BE, wchar_t, and the host charset.
@@ -124,13 +124,13 @@ phony_iconv_open (const char *to, const char *from)
   return !strcmp (from, "UTF-32BE");
 }
 
-int
+static int
 phony_iconv_close (iconv_t arg)
 {
   return 0;
 }
 
-size_t
+static size_t
 phony_iconv (iconv_t utf_flag, const char **inbuf, size_t *inbytesleft,
 	     char **outbuf, size_t *outbytesleft)
 {

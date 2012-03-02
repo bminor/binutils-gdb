@@ -1008,6 +1008,9 @@ i386_linux_read_description (struct target_ops *ops)
     return tdesc_i386_linux;
 }
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_i386_linux_nat;
+
 void
 _initialize_i386_linux_nat (void)
 {

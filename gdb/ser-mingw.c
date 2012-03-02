@@ -428,7 +428,7 @@ typedef DWORD WINAPI (*thread_fn_type)(void *);
 
 /* Create a new select thread for SCB executing THREAD_FN.  The STATE
    will be filled in by this function before return.  */
-void
+static void
 create_select_thread (thread_fn_type thread_fn,
 		      struct serial *scb,
 		      struct ser_console_state *state)
