@@ -1,3 +1,17 @@
+2012-03-02  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/13776:
+	* breakpoint.c (breakpoint_init_inferior): Delete step-resume
+	breakpoints.
+	(delete_longjmp_breakpoint_at_next_stop): New.
+	* breakpoint.h (delete_longjmp_breakpoint_at_next_stop): Declare.
+	* target.c (generic_mourn_inferior): Call mark_breakpoints_out
+	before deleting the inferior.  Add comments.
+	* thread.c (clear_thread_inferior_resources): Don't delete lonjmp
+	breakpoints immediately, but only on next stop.  Move that code
+	next to where we mark other breakpoints for deletion.
+
 2012-03-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* mips-linux-nat.c (mips_linux_read_description): Add missing i18n

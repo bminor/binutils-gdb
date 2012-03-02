@@ -1254,6 +1254,9 @@ extern void set_longjmp_breakpoint (struct thread_info *tp,
 				    struct frame_id frame);
 extern void delete_longjmp_breakpoint (int thread);
 
+/* Mark all longjmp breakpoints from THREAD for later deletion.  */
+extern void delete_longjmp_breakpoint_at_next_stop (int thread);
+
 extern void enable_overlay_breakpoints (void);
 extern void disable_overlay_breakpoints (void);
 

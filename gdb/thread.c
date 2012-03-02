@@ -113,12 +113,12 @@ clear_thread_inferior_resources (struct thread_info *tp)
       tp->control.exception_resume_breakpoint = NULL;
     }
 
+  delete_longjmp_breakpoint_at_next_stop (tp->num);
+
   bpstat_clear (&tp->control.stop_bpstat);
 
   do_all_intermediate_continuations_thread (tp, 1);
   do_all_continuations_thread (tp, 1);
-
-  delete_longjmp_breakpoint (tp->num);
 }
 
 static void

@@ -3341,6 +3341,10 @@ breakpoint_init_inferior (enum inf_context context)
 	   (gdb) tar rem :9999     # remote Windows gdbserver.
 	*/
 
+      case bp_step_resume:
+
+	/* Also remove step-resume breakpoints.  */
+
 	delete_breakpoint (b);
 	break;
 
@@ -6621,6 +6625,19 @@ delete_longjmp_breakpoint (int thread)
       {
 	if (b->thread == thread)
 	  delete_breakpoint (b);
+      }
+}
+
+void
+delete_longjmp_breakpoint_at_next_stop (int thread)
+{
+  struct breakpoint *b, *b_tmp;
+
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+    if (b->type == bp_longjmp || b->type == bp_exception)
+      {
+	if (b->thread == thread)
+	  b->disposition = disp_del_at_next_stop;
       }
 }
 

@@ -3583,13 +3583,22 @@ generic_mourn_inferior (void)
   ptid = inferior_ptid;
   inferior_ptid = null_ptid;
 
+  /* Mark breakpoints uninserted in case something tries to delete a
+     breakpoint while we delete the inferior's threads (which would
+     fail, since the inferior is long gone).  */
+  mark_breakpoints_out ();
+
   if (!ptid_equal (ptid, null_ptid))
     {
       int pid = ptid_get_pid (ptid);
       exit_inferior (pid);
     }
 
+  /* Note this wipes step-resume breakpoints, so needs to be done
+     after exit_inferior, which ends up referencing the step-resume
+     breakpoints through clear_thread_inferior_resources.  */
   breakpoint_init_inferior (inf_exited);
+
   registers_changed ();
 
   reopen_exec_file ();
