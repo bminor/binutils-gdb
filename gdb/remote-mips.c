@@ -2384,7 +2384,7 @@ mips_remove_breakpoint (struct gdbarch *gdbarch,
    is the number of hardware breakpoints already installed.  This
    implements the target_can_use_hardware_watchpoint macro.  */
 
-int
+static int
 mips_can_use_watchpoint (int type, int cnt, int othertype)
 {
   return cnt < MAX_LSI_BREAKPOINTS && strcmp (target_shortname, "lsi") == 0;
@@ -2418,7 +2418,7 @@ calculate_mask (CORE_ADDR addr, int len)
    for a write watchpoint, 1 for a read watchpoint, or 2 for a read/write
    watchpoint.  */
 
-int
+static int
 mips_insert_watchpoint (CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
@@ -2430,7 +2430,7 @@ mips_insert_watchpoint (CORE_ADDR addr, int len, int type,
 
 /* Remove a watchpoint.  */
 
-int
+static int
 mips_remove_watchpoint (CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
@@ -2443,7 +2443,7 @@ mips_remove_watchpoint (CORE_ADDR addr, int len, int type,
 /* Test to see if a watchpoint has been hit.  Return 1 if so; return 0,
    if not.  */
 
-int
+static int
 mips_stopped_by_watchpoint (void)
 {
   return hit_watchpoint;

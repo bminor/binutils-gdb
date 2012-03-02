@@ -771,7 +771,7 @@ static const int stq_c_opcode = 0x2f;
    is found, attempt to step through it.  A breakpoint is placed at the end of 
    the sequence.  */
 
-int 
+static int 
 alpha_deal_with_atomic_sequence (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);

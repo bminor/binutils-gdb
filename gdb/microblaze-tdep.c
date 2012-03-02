@@ -81,7 +81,7 @@ static const char *microblaze_register_names[] =
 
 static int microblaze_debug_flag = 0;
 
-void
+static void
 microblaze_debug (const char *fmt, ...)
 { 
   if (microblaze_debug_flag)
@@ -120,7 +120,7 @@ microblaze_register_type (struct gdbarch *gdbarch, int regnum)
 
 /* Fetch the instruction at PC.  */
 
-unsigned long
+static unsigned long
 microblaze_fetch_instruction (CORE_ADDR pc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
@@ -426,7 +426,7 @@ microblaze_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 /* Return PC of first real instruction of the function starting at
    START_PC.  */
 
-CORE_ADDR
+static CORE_ADDR
 microblaze_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct symtab_and_line sal;
@@ -456,7 +456,7 @@ microblaze_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 
 /* Normal frames.  */
 
-struct microblaze_frame_cache *
+static struct microblaze_frame_cache *
 microblaze_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct microblaze_frame_cache *cache;

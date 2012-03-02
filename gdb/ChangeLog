@@ -1,6 +1,42 @@
 2012-03-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix -Wmissing-prototypes build.
+	* alpha-tdep.c (alpha_deal_with_atomic_sequence): Make it static.
+	* amd64-darwin-tdep.c (_initialize_amd64_darwin_tdep): New prototype.
+	* amd64-windows-tdep.c (_initialize_amd64_windows_tdep): Likewise.
+	* arm-symbian-tdep.c (arm_symbian_skip_trampoline_code): Make it static.
+	(_initialize_arm_symbian_tdep): New prototype.
+	* arm-wince-tdep.c (arm_wince_skip_main_prologue): Make it static.
+	* i386-darwin-tdep.c (_initialize_i386_darwin_tdep): New prototype.
+	* i386-linux-tdep.c (i386_linux_displaced_step_copy_insn): Make it
+	static.
+	* lm32-tdep.c (_initialize_lm32_tdep): New prototype.
+	* microblaze-linux-tdep.c (_initialize_microblaze_linux_tdep): New
+	prototype.
+	* microblaze-tdep.c (microblaze_debug, microblaze_fetch_instruction)
+	(microblaze_skip_prologue, microblaze_frame_cache): Make them static.
+	* mips-linux-tdep.c (mips_linux_regset_from_core_section): Make it
+	static.
+	* moxie-tdep.c (moxie_process_record): Likewise.
+	* remote-mips.c (mips_can_use_watchpoint, mips_insert_watchpoint)
+	(mips_remove_watchpoint, mips_stopped_by_watchpoint): Make them static.
+	* rl78-tdep.c (rl78_breakpoint_from_pc): Make it static.
+	(_initialize_rl78_tdep): New prototype.
+	* rx-tdep.c (rx_breakpoint_from_pc): Make it static.
+	(_initialize_rx_tdep): New prototype.
+	* solib-darwin.c (darwin_in_dynsym_resolve_code): Make it static.
+	(_initialize_darwin_solib): New prototype.
+	* solib-spu.c: Include solib-spu.h.
+	(_initialize_spu_solib): New prototype.
+	* spu-multiarch.c (_initialize_spu_multiarch): New prototype.
+	* tic6x-tdep.c (tic6x_analyze_prologue, tic6x_skip_prologue)
+	(tic6x_breakpoint_from_pc, tic6x_frame_unwind_cache)
+	(tic6x_software_single_step): Make it static.
+	(_initialize_tic6x_tdep): New prototype.
+
+2012-03-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix -Wmissing-prototypes build.
 	* cris-tdep.c (cris_can_use_hardware_watchpoint)
 	(cris_region_ok_for_watchpoint, cris_stopped_data_address): Remove.
 

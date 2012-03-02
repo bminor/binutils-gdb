@@ -29,7 +29,7 @@
 /* If PC is in a DLL import stub, return the address of the `real'
    function belonging to the stub.  */
 
-CORE_ADDR
+static CORE_ADDR
 arm_symbian_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch;
@@ -120,6 +120,9 @@ arm_symbian_osabi_sniffer (bfd *abfd)
   /* Looks like a Symbian binary.  */
   return GDB_OSABI_SYMBIAN;
 }
+
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_arm_symbian_tdep;
 
 void
 _initialize_arm_symbian_tdep (void)

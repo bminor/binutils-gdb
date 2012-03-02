@@ -581,7 +581,7 @@ mips64_fill_fpregset_wrapper (const struct regset *regset,
   mips64_fill_fpregset (regcache, (mips64_elf_fpregset_t *)gregs, regnum);
 }
 
-const struct regset *
+static const struct regset *
 mips_linux_regset_from_core_section (struct gdbarch *gdbarch,
 			             const char *sect_name, size_t sect_size)
 {

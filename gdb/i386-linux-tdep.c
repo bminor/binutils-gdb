@@ -682,7 +682,7 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
    which does not seem worth it.  The same effect is achieved by patching that
    'nop' instruction there instead.  */
 
-struct displaced_step_closure *
+static struct displaced_step_closure *
 i386_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				     CORE_ADDR from, CORE_ADDR to,
 				     struct regcache *regs)

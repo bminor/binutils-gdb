@@ -84,7 +84,7 @@ arm_pe_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
    the address of the instruction following that call.  Otherwise, it
    simply returns PC.  */
 
-CORE_ADDR
+static CORE_ADDR
 arm_wince_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

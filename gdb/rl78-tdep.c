@@ -556,7 +556,7 @@ rl78_pseudo_register_write (struct gdbarch *gdbarch,
 
 /* Implement the "breakpoint_from_pc" gdbarch method.  */
 
-const gdb_byte *
+static const gdb_byte *
 rl78_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
                          int *lenptr)
 {
@@ -1161,6 +1161,9 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
+
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_rl78_tdep;
 
 /* Register the above initialization routine.  */
 

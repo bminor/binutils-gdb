@@ -756,7 +756,7 @@ rx_return_value (struct gdbarch *gdbarch,
 }
 
 /* Implement the "breakpoint_from_pc" gdbarch method.  */
-const gdb_byte *
+static const gdb_byte *
 rx_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   static gdb_byte breakpoint[] = { 0x00 };
@@ -859,7 +859,11 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_rx_tdep;
+
 /* Register the above initialization routine.  */
+
 void
 _initialize_rx_tdep (void)
 {

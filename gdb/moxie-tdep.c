@@ -516,7 +516,7 @@ moxie_process_readu (CORE_ADDR addr, char *buf,
    memory that will be changed in current instruction to "record_arch_list".
    Return -1 if something wrong.  */
 
-int
+static int
 moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		      CORE_ADDR addr)
 {

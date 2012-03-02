@@ -120,6 +120,9 @@ x86_darwin_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_solib_ops (gdbarch, &darwin_so_ops);
 }
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_amd64_darwin_tdep;
+
 void
 _initialize_amd64_darwin_tdep (void)
 {

@@ -137,6 +137,9 @@ microblaze_linux_init_abi (struct gdbarch_info info,
 				&microblaze_linux_sighandler_tramp_frame);
 }
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_microblaze_linux_tdep;
+
 void
 _initialize_microblaze_linux_tdep (void)
 {

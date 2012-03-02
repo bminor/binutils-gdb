@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "solib-spu.h"
 #include "gdbcore.h"
 #include "gdb_string.h"
 #include "gdb_assert.h"
@@ -540,6 +541,9 @@ spu_solib_loaded (struct so_list *so)
       ocl_enable_break (so->objfile);
     }
 }
+
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_spu_solib;
 
 void
 _initialize_spu_solib (void)
