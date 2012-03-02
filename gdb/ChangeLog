@@ -1,3 +1,7 @@
+2012-03-02  Pedro Alves  <palves@redhat.com>
+
+	* linux-thread-db.c (attach_thread): Avoid in_thread_list call.
+
 2012-03-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	Fix -Wmissing-prototypes build.

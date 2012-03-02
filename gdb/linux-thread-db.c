@@ -1116,7 +1116,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 	       const td_thrinfo_t *ti_p)
 {
   struct private_thread_info *private;
-  struct thread_info *tp = NULL;
+  struct thread_info *tp;
   td_err_e err;
   struct thread_db_info *info;
 
@@ -1130,11 +1130,9 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
      thread ID.  In the first case we don't need to do anything; in
      the second case we should discard information about the dead
      thread and attach to the new one.  */
-  if (in_thread_list (ptid))
+  tp = find_thread_ptid (ptid);
+  if (tp != NULL)
     {
-      tp = find_thread_ptid (ptid);
-      gdb_assert (tp != NULL);
-
       /* If tp->private is NULL, then GDB is already attached to this
 	 thread, but we do not know anything about it.  We can learn
 	 about it here.  This can only happen if we have some other
