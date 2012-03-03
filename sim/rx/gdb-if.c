@@ -201,7 +201,7 @@ sim_load (SIM_DESC sd, char *prog, struct bfd *abfd, int from_tty)
   if (!abfd)
     return SIM_RC_FAIL;
 
-  rx_load (abfd);
+  rx_load (abfd, get_callbacks ());
   build_swap_list (abfd);
 
   return SIM_RC_OK;
@@ -214,7 +214,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
 
   if (abfd)
     {
-      rx_load (abfd);
+      rx_load (abfd, NULL);
       build_swap_list (abfd);
     }
 

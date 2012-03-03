@@ -28,8 +28,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "libbfd.h"
 #include "cpu.h"
 #include "mem.h"
+#include "load.h"
 #include "elf/internal.h"
 #include "elf/common.h"
+
+/* Helper function for invoking a GDB-specified printf.  */
+static void
+xprintf (host_callback *callback, const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start (ap, fmt);
+
+  (*callback->vprintf_filtered) (callback, fmt, ap);
+
+  va_end (ap);
+}
+
+/* Given a file offset, look up the section name.  */
+static const char *
+find_section_name_by_offset (bfd *abfd, file_ptr filepos)
+{
+  asection *s;
+
+  for (s = abfd->sections; s; s = s->next)
+    if (s->filepos == filepos)
+      return bfd_get_section_name (abfd, s);
+
+  return "(unknown)";
+}
 
 /* A note about endianness and swapping...
 
@@ -56,7 +83,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    encoded in little-endian format.  */
 
 void
-rx_load (bfd *prog)
+rx_load (bfd *prog, host_callback *callback)
 {
   unsigned long highest_addr_loaded = 0;
   Elf_Internal_Phdr * phdrs;
@@ -105,6 +132,11 @@ rx_load (bfd *prog)
       if (verbose > 1)
 	fprintf (stderr, "[load segment: lma=%08x vma=%08x size=%08x]\n",
 		 (int) base, (int) p->p_vaddr, (int) size);
+      if (callback)
+	xprintf (callback,
+	         "Loading section %s, size %#lx lma %08lx vma %08lx\n",
+	         find_section_name_by_offset (prog, p->p_offset),
+		 size, base, p->p_vaddr);
 
       buf = malloc (size);
       if (buf == NULL)

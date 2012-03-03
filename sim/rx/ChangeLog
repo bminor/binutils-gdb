@@ -1,3 +1,16 @@
+2012-03-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* load.h (rx_load): Add `callback' parameter to function prototype.
+	(gdb/callback.h): Include.
+	* load.c (load.h): Include.
+	(xprintf, find_section_name_by_offset): New functions.
+	(rx_load): Add `callback' parameter.  Add code for printing
+	section loaded using GDB's printf facilities.
+	* gdb-if.c (sim_load, sim_create_inferior): Update calls to
+	rx_load().
+	* main.c (main): Likewise.
+	* syscalls.c, syscalls.h (get_callbacks): New function.
+
 2011-12-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4: New file.

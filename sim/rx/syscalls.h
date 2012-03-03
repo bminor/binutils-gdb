@@ -21,4 +21,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 struct host_callback_struct;
 extern void set_callbacks (struct host_callback_struct *);
+extern struct host_callback_struct * get_callbacks (void);
 extern int rx_syscall (int id);

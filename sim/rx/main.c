@@ -174,7 +174,7 @@ main (int argc, char **argv)
   rx_in_gdb = 0;
   save_trace = trace;
   trace = 0;
-  rx_load (prog);
+  rx_load (prog, NULL);
   trace = save_trace;
 
   sim_disasm_init (prog);

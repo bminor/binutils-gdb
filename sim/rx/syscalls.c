@@ -43,6 +43,12 @@ set_callbacks (struct host_callback_struct *cb)
   callbacks = cb;
 }
 
+struct host_callback_struct *
+get_callbacks (void)
+{
+  return callbacks;
+}
+
 
 /* Arguments 1..4 are in R1..R4, remainder on stack.
 
