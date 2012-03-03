@@ -26,7 +26,8 @@ if { [istarget "spu*-*-*"] } {
 
 set testfile "mb-templates"
 set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
+set executable ${testfile}
+set binfile ${objdir}/${subdir}/${executable}
 
 if [get_compiler_info ${binfile} "c++"] {
     return -1
@@ -37,10 +38,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${executable}
 
 set bp_location [gdb_get_line_number "set breakpoint here"]
 
@@ -52,15 +50,12 @@ gdb_test "break $srcfile:$bp_location if i==1" \
     "initial condition: set breakpoint"
 
 gdb_run_cmd
-gdb_expect {
+
+set test "initial condition: run to breakpoint"
+gdb_test_multiple "" $test {
     -re "Breakpoint \[0-9\]+,.*foo<int> \\(i=1\\).*$gdb_prompt $" {
-	pass "initial condition: run to breakpoint"
-    }
-    -re "$gdb_prompt $" {
-	fail "initial condition: run to breakpoint"
-    }
-    timeout {
-	fail "initial condition: run to breakpoint (timeout)"
+	pass $test
+	break
     }
 }
 
@@ -70,16 +65,16 @@ gdb_test "continue" \
 
 # Set breakpoint with multiple locations.
 # Separately set the condition.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+
+delete_breakpoints
+gdb_test "kill" "" "kill" \
+         {Kill the program being debugged\? \(y or n\) } "y"
 
 gdb_test "break $srcfile:$bp_location" \
     "Breakpoint.*at.*: $srcfile:$bp_location. \\(2 locations\\).*" \
     "separate condition: set breakpoint"
 
-gdb_test_no_output "condition 1 i==1" \
+gdb_test_no_output {condition $bpnum i==1} \
     "separate condition: set condition"
     
 gdb_run_cmd
@@ -102,7 +97,7 @@ gdb_test "continue" \
 # Try disabling a single location. We also test
 # that at least in simple cases, the enable/disable
 # state of locations surive "run".
-gdb_test_no_output "disable 1.1" "disabling location: disable"
+gdb_test_no_output {disable $bpnum.1} "disabling location: disable"
 
 gdb_run_cmd
 gdb_expect {
@@ -118,10 +113,10 @@ gdb_expect {
 }
 
 # Try disabling entire breakpoint
-gdb_test_no_output "enable 1.1" "disabling location: enable"
+gdb_test_no_output {enable $bpnum.1} "disabling location: enable"
 
 
-gdb_test_no_output "disable 1" "disable breakpoint: disable"
+gdb_test_no_output {disable $bpnum} "disable breakpoint: disable"
 
 gdb_run_cmd
 gdb_expect {

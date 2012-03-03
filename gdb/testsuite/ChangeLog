@@ -1,3 +1,11 @@
+2012-03-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* gdb.cp/mb-templates.exp: New variables executable.  Use it for
+	binfile.  use clean_restart.  Replace gdb_expect by gdb_test_multiple.
+	Replace GDB restart by kill and delete_breakpoints.  Replace breakpoint
+	number 1 by $bpnum.  Four times.
+
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/strace.exp: run strace_info_marker in linux native gdb.
