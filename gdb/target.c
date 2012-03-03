@@ -43,6 +43,7 @@
 #include "inline-frame.h"
 #include "tracepoint.h"
 #include "gdb/fileio.h"
+#include "agent.h"
 
 static void target_info (char *, int);
 
@@ -2500,6 +2501,8 @@ target_pre_inferior (int from_tty)
 
       target_clear_description ();
     }
+
+  agent_capability_invalidate ();
 }
 
 /* Callback for iterate_over_inferiors.  Gets rid of the given

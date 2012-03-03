@@ -36,3 +36,20 @@ int agent_look_up_symbols (void);
 extern int debug_agent;
 
 extern int use_agent;
+
+/* Capability of agent.  Different agents may have different capabilities,
+   such as installing fast tracepoint or evaluating breakpoint conditions.
+   Capabilities are represented by bit-maps, and each capability occupies one
+   bit.  */
+
+enum agent_capa
+{
+  /* Capability to install fast tracepoint.  */
+  AGENT_CAPA_FAST_TRACE = 0x1,
+  /* Capability to install static tracepoint.  */
+  AGENT_CAPA_STATIC_TRACE = (0x1 << 1),
+};
+
+int agent_capability_check (enum agent_capa);
+
+void agent_capability_invalidate (void);

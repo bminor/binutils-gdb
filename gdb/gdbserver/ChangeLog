@@ -1,5 +1,15 @@
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (gdb_agent_capability): New global.
+	(in_process_agent_loaded_ust): Renamed to
+	`in_process_agent_supports_ust'.
+	Update callers.
+	(in_process_agent_supports_ust): Call agent_capability_check.
+	(clear_installed_tracepoints): Assert that agent supports
+	agent.
+
+2012-03-03  Yao Qi  <yao@codesourcery.com>
+
 	* linux-low.c (linux_supports_agent): New.
 	(linux_target_ops): Initialize field `supports_agent' with
 	linux_supports_agent.

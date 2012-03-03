@@ -232,10 +232,11 @@ in_process_agent_loaded (void)
 static int read_inferior_integer (CORE_ADDR symaddr, int *val);
 
 /* Returns true if both the in-process agent library and the static
-   tracepoints libraries are loaded in the inferior.  */
+   tracepoints libraries are loaded in the inferior, and agent has
+   capability on static tracepoints.  */
 
 static int
-in_process_agent_loaded_ust (void)
+in_process_agent_supports_ust (void)
 {
   int loaded = 0;
 
@@ -245,13 +246,20 @@ in_process_agent_loaded_ust (void)
       return 0;
     }
 
-  if (read_inferior_integer (ipa_sym_addrs.addr_ust_loaded, &loaded))
+  if (agent_capability_check (AGENT_CAPA_STATIC_TRACE))
     {
-      warning ("Error reading ust_loaded in lib");
-      return 0;
-    }
+      /* Agent understands static tracepoint, then check whether UST is in
+	 fact loaded in the inferior.  */
+      if (read_inferior_integer (ipa_sym_addrs.addr_ust_loaded, &loaded))
+	{
+	  warning ("Error reading ust_loaded in lib");
+	  return 0;
+	}
 
-  return loaded;
+      return loaded;
+    }
+  else
+    return 0;
 }
 
 static void
@@ -303,7 +311,7 @@ maybe_write_ipa_ust_not_loaded (char *buffer)
       write_e_ipa_not_loaded (buffer);
       return 1;
     }
-  else if (!in_process_agent_loaded_ust ())
+  else if (!in_process_agent_supports_ust ())
     {
       write_e_ust_not_loaded (buffer);
       return 1;
@@ -2907,7 +2915,8 @@ install_tracepoint (struct tracepoint *tpoint, char *own_buf)
 	  write_e_ipa_not_loaded (own_buf);
 	  return;
 	}
-      if (tpoint->type == static_tracepoint && !in_process_agent_loaded_ust ())
+      if (tpoint->type == static_tracepoint
+	  && !in_process_agent_supports_ust ())
 	{
 	  trace_debug ("Requested a static tracepoint, but static "
 		       "tracepoints are not supported.");
@@ -6825,6 +6834,8 @@ gdb_agent_helper_thread (void *arg)
 
 #include <signal.h>
 #include <pthread.h>
+
+IP_AGENT_EXPORT int gdb_agent_capability = AGENT_CAPA_STATIC_TRACE;
 
 static void
 gdb_agent_init (void)

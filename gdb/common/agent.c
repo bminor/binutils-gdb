@@ -51,6 +51,7 @@ struct ipa_sym_addresses
 {
   CORE_ADDR addr_helper_thread_id;
   CORE_ADDR addr_cmd_buf;
+  CORE_ADDR addr_capability;
 };
 
 /* Cache of the helper thread id.  FIXME: this global should be made
@@ -65,6 +66,7 @@ static struct
 } symbol_list[] = {
   IPA_SYM(helper_thread_id),
   IPA_SYM(cmd_buf),
+  IPA_SYM(capability),
 };
 
 static struct ipa_sym_addresses ipa_sym_addrs;
@@ -302,4 +304,42 @@ agent_run_command (int pid, const char *cmd)
     }
 
   return 0;
+}
+
+/* Each bit of it stands for a capability of agent.  */
+static unsigned int agent_capability = 0;
+
+/* Return true if agent has capability AGENT_CAP, otherwise return false.  */
+
+int
+agent_capability_check (enum agent_capa agent_capa)
+{
+  if (agent_capability == 0)
+    {
+#ifdef GDBSERVER
+      if (read_inferior_memory (ipa_sym_addrs.addr_capability,
+				(unsigned char *) &agent_capability,
+				sizeof agent_capability))
+#else
+      enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+      gdb_byte buf[4];
+
+      if (target_read_memory (ipa_sym_addrs.addr_capability,
+			      buf, sizeof buf) == 0)
+	agent_capability = extract_unsigned_integer (buf, sizeof buf,
+						     byte_order);
+      else
+#endif
+	warning ("Error reading capability of agent");
+    }
+  return agent_capability & agent_capa;
+}
+
+/* Invalidate the cache of agent capability, so we'll read it from inferior
+   again.  Call it when launches a new program or reconnect to remote stub.  */
+
+void
+agent_capability_invalidate (void)
+{
+  agent_capability = 0;
 }

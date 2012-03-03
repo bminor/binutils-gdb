@@ -1,5 +1,13 @@
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
+	* common/agent.c (struct ipa_sym_addresses) <addr_capability>: New.
+	(agent_capability_check, agent_capability_invalidate): New.
+	(symbol_list): New array element.
+	* common/agent.h (enum agent_capa): New.
+	* target.c (target_pre_inferior): Call agent_capability_invalidate.
+
+2012-03-03  Yao Qi  <yao@codesourcery.com>
+
 	* target.h (struct target_ops) <to_use_agent>: New field.
 	(struct target_ops) <to_can_use_agent>: New field.
 	(target_use_agent, target_can_use_agent): New macro.
