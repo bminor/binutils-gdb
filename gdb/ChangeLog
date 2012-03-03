@@ -1,3 +1,8 @@
+2012-03-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* sh-tdep.c (sh_frame_cache): Don't fetch the FPSCR register
+	unless it exists for this architecture.
+
 2012-03-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* language.h (struct language_defn): New "method" la_read_var_value.

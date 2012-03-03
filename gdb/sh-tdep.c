@@ -2554,7 +2554,16 @@ sh_frame_cache (struct frame_info *this_frame, void **this_cache)
   if (cache->pc != 0)
     {
       ULONGEST fpscr;
-      fpscr = get_frame_register_unsigned (this_frame, FPSCR_REGNUM);
+
+      /* Check for the existence of the FPSCR register.	 If it exists,
+	 fetch its value for use in prologue analysis.	Passing a zero
+	 value is the best choice for architecture variants upon which
+	 there's no FPSCR register.  */
+      if (gdbarch_register_reggroup_p (gdbarch, FPSCR_REGNUM, all_reggroup))
+	fpscr = get_frame_register_unsigned (this_frame, FPSCR_REGNUM);
+      else
+	fpscr = 0;
+
       sh_analyze_prologue (gdbarch, cache->pc, current_pc, cache, fpscr);
     }
 
