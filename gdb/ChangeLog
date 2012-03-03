@@ -1,3 +1,11 @@
+2012-03-03  Yao Qi  <yao@codesourcery.com>
+
+	* common/agent.c: New.
+	* common/agent.h: New.
+	* configure.ac: Add `sys/socket.h' and `sys/un.h' to
+	AC_CHECK_HEADERS.
+	* configure, configh.in: Regenerated.
+
 2012-03-02  Kevin Buettner  <kevinb@redhat.com>
 
 	* sh-tdep.c (sh_frame_cache): Don't fetch the FPSCR register

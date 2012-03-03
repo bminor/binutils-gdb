@@ -134,7 +134,7 @@ LIBOBJS = @LIBOBJS@
 SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
-OBS = ax.o inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
+OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
 	xml-utils.o common-utils.o ptid.o buffer.o \
@@ -337,6 +337,7 @@ signals_def = $(srcdir)/../../include/gdb/signals.def
 signals_h = $(srcdir)/../../include/gdb/signals.h $(signals_def)
 ptid_h = $(srcdir)/../common/ptid.h
 ax_h = $(srcdir)/ax.h
+agent_h = $(srcdir)/../common/agent.h
 linux_osdata_h = $(srcdir)/../common/linux-osdata.h
 server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 		$(srcdir)/mem-break.h $(srcdir)/../common/gdb_signals.h \
@@ -403,7 +404,7 @@ server.o: server.c $(server_h)
 target.o: target.c $(server_h)
 thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h) \
 	$(gdb_thread_db_h)
-tracepoint.o: tracepoint.c $(server_h) $(ax_h)
+tracepoint.o: tracepoint.c $(server_h) $(ax_h) $(agent_h)
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
 dll.o: dll.c $(server_h)
@@ -427,6 +428,9 @@ ptid.o: ../common/ptid.c $(ptid_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 buffer.o: ../common/buffer.c $(server_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
+agent.o: ../common/agent.c $(server_h) $(agent_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 # We build memmem.c without -Werror because this file is not under

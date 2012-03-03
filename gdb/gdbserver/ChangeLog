@@ -1,3 +1,24 @@
+2012-03-03  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (OBS): Add agent.o.
+	Add new rule for agent.o.
+	Track dependence of tracepoint.c on agent.h.
+	* tracepoint.c (run_inferior_command_1):
+	(run_inferior_command): Call agent_run_command.
+	(gdb_ust_connect_sync_socket): Deleted.  Move it to
+	common/agent.c.
+	(resume_thread, stop_thread): Likewise.
+	(gdb_ust_socket_init): Renamed to ...
+	(gdb_agent_socket_init): ... New.
+	(gdb_ust_thread): Renamed to ...
+	(gdb_agent_helper_thread): ... New.
+	(gdb_ust_init): Move some code to ...
+	(gdb_agent_init): ... here.  New.
+	[HAVE_UST]: Call gdb_ust_init.
+	(initialize_tracepoint_ftlib):  Call gdb_agent_init.
+	* configure.ac: Add `sys/un.h' to AC_CHECK_HEADERS.
+	* config.in, configure: Regenerated.
+
 2012-03-02  Pedro Alves  <palves@redhat.com>
 
 	* inferiors.c (add_pid_to_list, pull_pid_from_list): Delete.

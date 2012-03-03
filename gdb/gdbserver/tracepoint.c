@@ -17,6 +17,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
+#include "agent.h"
+
 #include <ctype.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -178,17 +180,7 @@ struct ipa_sym_addresses
   CORE_ADDR addr_get_trace_state_variable_value;
   CORE_ADDR addr_set_trace_state_variable_value;
   CORE_ADDR addr_ust_loaded;
-  CORE_ADDR addr_helper_thread_id;
-  CORE_ADDR addr_cmd_buf;
 };
-
-#define STRINGIZE_1(STR) #STR
-#define STRINGIZE(STR) STRINGIZE_1(STR)
-#define IPA_SYM(SYM)					\
-  {							\
-    STRINGIZE (gdb_agent_ ## SYM),			\
-    offsetof (struct ipa_sym_addresses, addr_ ## SYM)	\
-  }
 
 static struct
 {
@@ -225,11 +217,9 @@ static struct
   IPA_SYM(get_trace_state_variable_value),
   IPA_SYM(set_trace_state_variable_value),
   IPA_SYM(ust_loaded),
-  IPA_SYM(helper_thread_id),
-  IPA_SYM(cmd_buf),
 };
 
-struct ipa_sym_addresses ipa_sym_addrs;
+static struct ipa_sym_addresses ipa_sym_addrs;
 
 int all_tracepoint_symbols_looked_up;
 
@@ -347,6 +337,9 @@ tracepoint_look_up_symbols (void)
 	  return;
 	}
     }
+
+  if (agent_look_up_symbols () != 0)
+    return;
 
   all_tracepoint_symbols_looked_up = 1;
 }
@@ -1241,10 +1234,6 @@ static LONGEST get_timestamp (void);
    unconditionally.  */
 #define cmpxchg(mem, oldval, newval) \
   __sync_val_compare_and_swap (mem, oldval, newval)
-
-/* The size in bytes of the buffer used to talk to the IPA helper
-   thread.  */
-#define CMD_BUF_SIZE 1024
 
 /* Record that an error occurred during expression evaluation.  */
 
@@ -2217,7 +2206,7 @@ cmd_qtinit (char *packet)
 static void
 unprobe_marker_at (CORE_ADDR address)
 {
-  char cmd[CMD_BUF_SIZE];
+  char cmd[IPA_CMD_BUF_SIZE];
 
   sprintf (cmd, "unprobe_marker_at:%s", paddress (address));
   run_inferior_command (cmd);
@@ -2791,7 +2780,7 @@ have_fast_tracepoint_trampoline_buffer (char *buf)
 static int
 probe_marker_at (CORE_ADDR address, char *errout)
 {
-  char cmd[CMD_BUF_SIZE];
+  char cmd[IPA_CMD_BUF_SIZE];
   int err;
 
   sprintf (cmd, "probe_marker_at:%s", paddress (address));
@@ -6144,7 +6133,7 @@ upload_fast_traceframes (void)
 #ifdef IN_PROCESS_AGENT
 
 IP_AGENT_EXPORT int ust_loaded;
-IP_AGENT_EXPORT char cmd_buf[CMD_BUF_SIZE];
+IP_AGENT_EXPORT char cmd_buf[IPA_CMD_BUF_SIZE];
 
 #ifdef HAVE_UST
 
@@ -6393,93 +6382,7 @@ static struct ltt_available_probe gdb_ust_probe =
 #endif /* HAVE_UST */
 #endif /* IN_PROCESS_AGENT */
 
-#ifdef HAVE_UST
-
-#include <sys/socket.h>
-#include <sys/un.h>
-
-#ifndef UNIX_PATH_MAX
-#define UNIX_PATH_MAX sizeof(((struct sockaddr_un *) NULL)->sun_path)
-#endif
-
-/* Where we put the socked used for synchronization.  */
-#define SOCK_DIR P_tmpdir
-
-#endif /* HAVE_UST */
-
 #ifndef IN_PROCESS_AGENT
-
-#ifdef HAVE_UST
-
-static int
-gdb_ust_connect_sync_socket (int pid)
-{
-  struct sockaddr_un addr;
-  int res, fd;
-  char path[UNIX_PATH_MAX];
-
-  res = xsnprintf (path, UNIX_PATH_MAX, "%s/gdb_ust%d", SOCK_DIR, pid);
-  if (res >= UNIX_PATH_MAX)
-    {
-      trace_debug ("string overflow allocating socket name");
-      return -1;
-    }
-
-  res = fd = socket (PF_UNIX, SOCK_STREAM, 0);
-  if (res == -1)
-    {
-      warning ("error opening sync socket: %s\n", strerror (errno));
-      return -1;
-    }
-
-  addr.sun_family = AF_UNIX;
-
-  res = xsnprintf (addr.sun_path, UNIX_PATH_MAX, "%s", path);
-  if (res >= UNIX_PATH_MAX)
-    {
-      warning ("string overflow allocating socket name\n");
-      close (fd);
-      return -1;
-    }
-
-  res = connect (fd, (struct sockaddr *) &addr, sizeof (addr));
-  if (res == -1)
-    {
-      warning ("error connecting sync socket (%s): %s. "
-	       "Make sure the directory exists and that it is writable.",
-	       path, strerror (errno));
-      close (fd);
-      return -1;
-    }
-
-  return fd;
-}
-
-/* Resume thread PTID.  */
-
-static void
-resume_thread (ptid_t ptid)
-{
-  struct thread_resume resume_info;
-
-  resume_info.thread = ptid;
-  resume_info.kind = resume_continue;
-  resume_info.sig = TARGET_SIGNAL_0;
-  (*the_target->resume) (&resume_info, 1);
-}
-
-/* Stop thread PTID.  */
-
-static void
-stop_thread (ptid_t ptid)
-{
-  struct thread_resume resume_info;
-
-  resume_info.thread = ptid;
-  resume_info.kind = resume_stop;
-  resume_info.sig = TARGET_SIGNAL_0;
-  (*the_target->resume) (&resume_info, 1);
-}
 
 /* Ask the in-process agent to run a command.  Since we don't want to
    have to handle the IPA hitting breakpoints while running the
@@ -6492,91 +6395,14 @@ static int
 run_inferior_command (char *cmd)
 {
   int err = -1;
-  int fd = -1;
   int pid = ptid_get_pid (current_inferior->entry.id);
-  int tid;
-  ptid_t ptid = null_ptid;
 
   trace_debug ("run_inferior_command: running: %s", cmd);
 
   pause_all (0);
   uninsert_all_breakpoints ();
 
-  if (read_inferior_integer (ipa_sym_addrs.addr_helper_thread_id, &tid))
-    {
-      warning ("Error reading helper thread's id in lib");
-      goto out;
-    }
-
-  if (tid == 0)
-    {
-      warning ("helper thread not initialized yet");
-      goto out;
-    }
-
-  if (write_inferior_memory (ipa_sym_addrs.addr_cmd_buf,
-			     (unsigned char *) cmd, strlen (cmd) + 1))
-    {
-      warning ("Error writing command");
-      goto out;
-    }
-
-  ptid = ptid_build (pid, tid, 0);
-
-  resume_thread (ptid);
-
-  fd = gdb_ust_connect_sync_socket (pid);
-  if (fd >= 0)
-    {
-      char buf[1] = "";
-      int ret;
-
-      trace_debug ("signalling helper thread");
-
-      do
-	{
-	  ret = write (fd, buf, 1);
-	} while (ret == -1 && errno == EINTR);
-
-      trace_debug ("waiting for helper thread's response");
-
-      do
-	{
-	  ret = read (fd, buf, 1);
-	} while (ret == -1 && errno == EINTR);
-
-      close (fd);
-
-      trace_debug ("helper thread's response received");
-    }
-
- out:
-
-  /* Need to read response with the inferior stopped.  */
-  if (!ptid_equal (ptid, null_ptid))
-    {
-      int was_non_stop = non_stop;
-      struct target_waitstatus status;
-
-      stop_thread (ptid);
-      non_stop = 1;
-      mywait (ptid, &status, 0, 0);
-      non_stop = was_non_stop;
-    }
-
-  if (fd >= 0)
-    {
-      if (read_inferior_memory (ipa_sym_addrs.addr_cmd_buf,
-				(unsigned char *) cmd, CMD_BUF_SIZE))
-	{
-	  warning ("Error reading command response");
-	}
-      else
-	{
-	  err = 0;
-	  trace_debug ("run_inferior_command: response: %s", cmd);
-	}
-    }
+  err = agent_run_command (pid, (const char *) cmd);
 
   reinsert_all_breakpoints ();
   unpause_all (0);
@@ -6584,23 +6410,21 @@ run_inferior_command (char *cmd)
   return err;
 }
 
-#else /* HAVE_UST */
-
-static int
-run_inferior_command (char *cmd)
-{
-  return -1;
-}
-
-#endif /* HAVE_UST */
-
 #else /* !IN_PROCESS_AGENT */
+
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#ifndef UNIX_PATH_MAX
+#define UNIX_PATH_MAX sizeof(((struct sockaddr_un *) NULL)->sun_path)
+#endif
+
+/* Where we put the socked used for synchronization.  */
+#define SOCK_DIR P_tmpdir
 
 /* Thread ID of the helper thread.  GDBserver reads this to know which
    is the help thread.  This is an LWP id on Linux.  */
 int helper_thread_id;
-
-#ifdef HAVE_UST
 
 static int
 init_named_socket (const char *name)
@@ -6654,7 +6478,7 @@ init_named_socket (const char *name)
 }
 
 static int
-gdb_ust_socket_init (void)
+gdb_agent_socket_init (void)
 {
   int result, fd;
   char name[UNIX_PATH_MAX];
@@ -6676,17 +6500,7 @@ gdb_ust_socket_init (void)
   return fd;
 }
 
-/* Return an hexstr version of the STR C string, fit for sending to
-   GDB.  */
-
-static char *
-cstr_to_hexstr (const char *str)
-{
-  int len = strlen (str);
-  char *hexstr = xmalloc (len * 2 + 1);
-  convert_int_to_ascii ((gdb_byte *) str, hexstr, len);
-  return hexstr;
-}
+#ifdef HAVE_UST
 
 /* The next marker to be returned on a qTsSTM command.  */
 static const struct marker *next_st;
@@ -6724,6 +6538,18 @@ next_marker (const struct marker *m)
     }
 
   return NULL;
+}
+
+/* Return an hexstr version of the STR C string, fit for sending to
+   GDB.  */
+
+static char *
+cstr_to_hexstr (const char *str)
+{
+  int len = strlen (str);
+  char *hexstr = xmalloc (len * 2 + 1);
+  convert_int_to_ascii ((gdb_byte *) str, hexstr, len);
+  return hexstr;
 }
 
 /* Compose packet that is the response to the qTsSTM/qTfSTM/qTSTMat
@@ -6886,16 +6712,29 @@ cmd_qtstmat (char *packet)
   return -1;
 }
 
+static void
+gdb_ust_init (void)
+{
+  if (!dlsym_ust ())
+    return;
+
+  USTF(ltt_probe_register) (&gdb_ust_probe);
+}
+
+#endif /* HAVE_UST */
+
 #include <sys/syscall.h>
 
+/* Helper thread of agent.  */
+
 static void *
-gdb_ust_thread (void *arg)
+gdb_agent_helper_thread (void *arg)
 {
   int listen_fd;
 
   while (1)
     {
-      listen_fd = gdb_ust_socket_init ();
+      listen_fd = gdb_agent_socket_init ();
 
       if (helper_thread_id == 0)
 	helper_thread_id = syscall (SYS_gettid);
@@ -6945,6 +6784,7 @@ gdb_ust_thread (void *arg)
 
 	  if (cmd_buf[0])
 	    {
+#ifdef HAVE_UST
 	      if (strcmp ("qTfSTM", cmd_buf) == 0)
 		{
 		  cmd_qtfstm (cmd_buf);
@@ -6971,12 +6811,7 @@ gdb_ust_thread (void *arg)
 		{
 		  cmd_qtstmat (cmd_buf);
 		}
-	      else if (strcmp (cmd_buf, "help") == 0)
-		{
-		  strcpy (cmd_buf, "for help, press F1\n");
-		}
-	      else
-		strcpy (cmd_buf, "");
+#endif /* HAVE_UST */
 	    }
 
 	  /* Fix compiler's warning: ignoring return value of 'write'.  */
@@ -6989,17 +6824,15 @@ gdb_ust_thread (void *arg)
 }
 
 #include <signal.h>
+#include <pthread.h>
 
 static void
-gdb_ust_init (void)
+gdb_agent_init (void)
 {
   int res;
   pthread_t thread;
   sigset_t new_mask;
   sigset_t orig_mask;
-
-  if (!dlsym_ust ())
-    return;
 
   /* We want the helper thread to be as transparent as possible, so
      have it inherit an all-signals-blocked mask.  */
@@ -7011,7 +6844,7 @@ gdb_ust_init (void)
 
   res = pthread_create (&thread,
 			NULL,
-			gdb_ust_thread,
+			gdb_agent_helper_thread,
 			NULL);
 
   res = pthread_sigmask (SIG_SETMASK, &orig_mask, NULL);
@@ -7021,10 +6854,10 @@ gdb_ust_init (void)
   while (helper_thread_id == 0)
     usleep (1);
 
-  USTF(ltt_probe_register) (&gdb_ust_probe);
+#ifdef HAVE_UST
+  gdb_ust_init ();
+#endif
 }
-
-#endif /* HAVE_UST */
 
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -7056,9 +6889,7 @@ initialize_tracepoint_ftlib (void)
 {
   initialize_tracepoint ();
 
-#ifdef HAVE_UST
-  gdb_ust_init ();
-#endif
+  gdb_agent_init ();
 }
 
 #endif /* IN_PROCESS_AGENT */
