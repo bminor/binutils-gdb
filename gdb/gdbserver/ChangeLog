@@ -1,5 +1,14 @@
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
+	* Makefile.in (linux-low.o): Keep dependence on agent.h.
+	(linux-x86-low.o): Likewise.
+	* server.h: Remove in_process_agent_loaded.
+	* tracepoint.c (in_process_agent_loaded): Removed.  Moved it
+	common/agent.c.
+	Update callers.
+
+2012-03-03  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (gdb_agent_capability): New global.
 	(in_process_agent_loaded_ust): Renamed to
 	`in_process_agent_supports_ust'.

@@ -19,6 +19,7 @@
 #include "server.h"
 #include "linux-low.h"
 #include "linux-osdata.h"
+#include "agent.h"
 
 #include <sys/wait.h>
 #include <stdio.h>
@@ -1390,7 +1391,7 @@ maybe_move_out_of_jump_pad (struct lwp_info *lwp, int *wstat)
   if ((wstat == NULL
        || (WIFSTOPPED (*wstat) && WSTOPSIG (*wstat) != SIGTRAP))
       && supports_fast_tracepoints ()
-      && in_process_agent_loaded ())
+      && agent_loaded_p ())
     {
       struct fast_tpoint_collect_status status;
       int r;
@@ -2321,7 +2322,7 @@ retry:
   if (WIFSTOPPED (w)
       && WSTOPSIG (w) != SIGTRAP
       && supports_fast_tracepoints ()
-      && in_process_agent_loaded ())
+      && agent_loaded_p ())
     {
       if (debug_threads)
 	fprintf (stderr,
@@ -2875,7 +2876,7 @@ stuck_in_jump_pad_callback (struct inferior_list_entry *entry, void *data)
 
   /* Allow debugging the jump pad, gdb_collect, etc..  */
   return (supports_fast_tracepoints ()
-	  && in_process_agent_loaded ()
+	  && agent_loaded_p ()
 	  && (gdb_breakpoint_here (lwp->stop_pc)
 	      || lwp->stopped_by_watchpoint
 	      || thread->last_resume_kind == resume_step)

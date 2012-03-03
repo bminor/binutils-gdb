@@ -221,14 +221,6 @@ static struct
 
 static struct ipa_sym_addresses ipa_sym_addrs;
 
-int all_tracepoint_symbols_looked_up;
-
-int
-in_process_agent_loaded (void)
-{
-  return all_tracepoint_symbols_looked_up;
-}
-
 static int read_inferior_integer (CORE_ADDR symaddr, int *val);
 
 /* Returns true if both the in-process agent library and the static
@@ -240,7 +232,7 @@ in_process_agent_supports_ust (void)
 {
   int loaded = 0;
 
-  if (!in_process_agent_loaded ())
+  if (!agent_loaded_p ())
     {
       warning ("In-process agent not loaded");
       return 0;
@@ -291,7 +283,7 @@ write_e_ust_not_loaded (char *buffer)
 static int
 maybe_write_ipa_not_loaded (char *buffer)
 {
-  if (!in_process_agent_loaded ())
+  if (!agent_loaded_p ())
     {
       write_e_ipa_not_loaded (buffer);
       return 1;
@@ -306,7 +298,7 @@ maybe_write_ipa_not_loaded (char *buffer)
 static int
 maybe_write_ipa_ust_not_loaded (char *buffer)
 {
-  if (!in_process_agent_loaded ())
+  if (!agent_loaded_p ())
     {
       write_e_ipa_not_loaded (buffer);
       return 1;
@@ -330,7 +322,7 @@ tracepoint_look_up_symbols (void)
 {
   int i;
 
-  if (all_tracepoint_symbols_looked_up)
+  if (agent_loaded_p ())
     return;
 
   for (i = 0; i < sizeof (symbol_list) / sizeof (symbol_list[0]); i++)
@@ -346,10 +338,7 @@ tracepoint_look_up_symbols (void)
 	}
     }
 
-  if (agent_look_up_symbols () != 0)
-    return;
-
-  all_tracepoint_symbols_looked_up = 1;
+  agent_look_up_symbols ();
 }
 
 #endif
@@ -2907,7 +2896,7 @@ install_tracepoint (struct tracepoint *tpoint, char *own_buf)
     {
       struct tracepoint *tp;
 
-      if (!in_process_agent_loaded ())
+      if (!agent_loaded_p ())
 	{
 	  trace_debug ("Requested a %s tracepoint, but fast "
 		       "tracepoints aren't supported.",
@@ -2983,7 +2972,7 @@ cmd_qtstart (char *packet)
   pause_all (1);
 
   /* Sync the fast tracepoints list in the inferior ftlib.  */
-  if (in_process_agent_loaded ())
+  if (agent_loaded_p ())
     {
       download_tracepoints ();
       download_trace_state_variables ();
@@ -3084,7 +3073,7 @@ cmd_qtstart (char *packet)
   /* Tracing is now active, hits will now start being logged.  */
   tracing = 1;
 
-  if (in_process_agent_loaded ())
+  if (agent_loaded_p ())
     {
       if (write_inferior_integer (ipa_sym_addrs.addr_tracing, 1))
 	fatal ("Error setting tracing variable in lib");
@@ -3143,7 +3132,7 @@ stop_tracing (void)
   /* Stop logging. Tracepoints can still be hit, but they will not be
      recorded.  */
   tracing = 0;
-  if (in_process_agent_loaded ())
+  if (agent_loaded_p ())
     {
       if (write_inferior_integer (ipa_sym_addrs.addr_tracing, 0))
 	fatal ("Error clearing tracing variable in lib");
@@ -3191,7 +3180,7 @@ stop_tracing (void)
   /* Clear out the tracepoints.  */
   clear_installed_tracepoints ();
 
-  if (in_process_agent_loaded ())
+  if (agent_loaded_p ())
     {
       /* Pull in fast tracepoint trace frames from the inferior lib
 	 buffer into our buffer, even if our buffer is already full,
@@ -3354,7 +3343,7 @@ cmd_qtstatus (char *packet)
   trace_debug ("Returning trace status as %d, stop reason %s",
 	       tracing, tracing_stop_reason);
 
-  if (in_process_agent_loaded ())
+  if (agent_loaded_p ())
     {
       pause_all (1);
 
@@ -4022,7 +4011,7 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
 
   /* Pull in fast tracepoint trace frames from the inferior lib buffer into
      our buffer.  */
-  if (in_process_agent_loaded ())
+  if (agent_loaded_p ())
     upload_fast_traceframes ();
 
   /* Check if we were indeed collecting data for one of more
@@ -4123,7 +4112,7 @@ handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc)
   /* Pull in fast tracepoint trace frames from the inferior in-process
      agent's buffer into our buffer.  */
 
-  if (!in_process_agent_loaded ())
+  if (!agent_loaded_p ())
     return 0;
 
   upload_fast_traceframes ();

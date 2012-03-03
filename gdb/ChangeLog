@@ -1,5 +1,11 @@
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
+	* common/agent.c (agent_loaded_p): New.
+        (agent_look_up_symbols): New global.
+	* common/agent.h: Declare agent_loaded_p.
+
+2012-03-03  Yao Qi  <yao@codesourcery.com>
+
 	* common/agent.c (struct ipa_sym_addresses) <addr_capability>: New.
 	(agent_capability_check, agent_capability_invalidate): New.
 	(symbol_list): New array element.

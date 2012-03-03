@@ -28,6 +28,7 @@
 #include "elf/common.h"
 
 #include "gdb_proc_service.h"
+#include "agent.h"
 
 /* Defined in auto-generated file i386-linux.c.  */
 void init_registers_i386_linux (void);
@@ -1586,7 +1587,7 @@ x86_get_min_fast_tracepoint_insn_len (void)
     return 5;
 #endif
 
-  if (in_process_agent_loaded ())
+  if (agent_loaded_p ())
     {
       char errbuf[IPA_BUFSIZ];
 

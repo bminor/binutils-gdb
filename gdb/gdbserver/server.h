@@ -441,8 +441,6 @@ char *pfildes (gdb_fildes_t fd);
    agent back to GDBserver.  */
 #define IPA_BUFSIZ 100
 
-int in_process_agent_loaded (void);
-
 void initialize_tracepoint (void);
 
 extern int tracing;

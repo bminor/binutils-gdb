@@ -33,6 +33,8 @@ int agent_look_up_symbols (void);
    thread.  */
 #define IPA_CMD_BUF_SIZE 1024
 
+int agent_loaded_p (void);
+
 extern int debug_agent;
 
 extern int use_agent;

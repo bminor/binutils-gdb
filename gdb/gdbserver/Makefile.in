@@ -457,7 +457,7 @@ i386-low.o: i386-low.c $(i386_low_h) $(server_h) $(target_h)
 i387-fp.o: i387-fp.c $(server_h)
 
 linux-low.o: linux-low.c $(linux_low_h) $(linux_ptrace_h) $(linux_procfs_h) \
-	$(server_h) $(linux_osdata_h)
+	$(server_h) $(linux_osdata_h) $(agent_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< @USE_THREAD_DB@
 
 linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h) \
@@ -474,7 +474,7 @@ linux-s390-low.o: linux-s390-low.c $(linux_low_h) $(server_h)
 linux-sh-low.o: linux-sh-low.c $(linux_low_h) $(server_h)
 linux-tic6x-low.o: linux-tic6x-low.c $(linux_low_h) $(server_h)
 linux-x86-low.o: linux-x86-low.c $(linux_low_h) $(server_h) \
-	$(gdb_proc_service_h) $(i386_low_h)
+	$(gdb_proc_service_h) $(i386_low_h) $(agent_h)
 linux-xtensa-low.o: linux-xtensa-low.c xtensa-xtregs.c $(linux_low_h) $(server_h)
 
 lynx-low.o: lynx-low.c $(server_h) $(target_h) $(lynx_low_h)

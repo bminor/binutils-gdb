@@ -71,6 +71,14 @@ static struct
 
 static struct ipa_sym_addresses ipa_sym_addrs;
 
+static int all_agent_symbols_looked_up = 0;
+
+int
+agent_loaded_p (void)
+{
+  return all_agent_symbols_looked_up;
+}
+
 /* Look up all symbols needed by agent.  Return 0 if all the symbols are
    found, return non-zero otherwise.  */
 
@@ -78,6 +86,8 @@ int
 agent_look_up_symbols (void)
 {
   int i;
+
+  all_agent_symbols_looked_up = 0;
 
   for (i = 0; i < sizeof (symbol_list) / sizeof (symbol_list[0]); i++)
     {
@@ -100,6 +110,7 @@ agent_look_up_symbols (void)
 	}
     }
 
+  all_agent_symbols_looked_up = 1;
   return 0;
 }
 
