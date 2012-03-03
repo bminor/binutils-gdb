@@ -2850,20 +2850,6 @@ remote_static_tracepoint_marker_at (CORE_ADDR addr,
   return 0;
 }
 
-static void
-free_current_marker (void *arg)
-{
-  struct static_tracepoint_marker **marker_p = arg;
-
-  if (*marker_p != NULL)
-    {
-      release_static_tracepoint_marker (*marker_p);
-      xfree (*marker_p);
-    }
-  else
-    *marker_p = NULL;
-}
-
 static VEC(static_tracepoint_marker_p) *
 remote_static_tracepoint_markers_by_strid (const char *strid)
 {

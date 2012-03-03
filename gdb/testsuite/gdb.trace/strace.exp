@@ -38,20 +38,6 @@ if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $additional_flags
     return -1
 }
 
-clean_restart $executable
-
-if ![runto_main] {
-    fail "Can't run to main to check for trace support"
-    return -1
-}
-
-if { ![gdb_target_supports_trace] } then {
-    unsupported "Current target does not support trace"
-    return -1;
-}
-
-gdb_load_shlibs $libipa
-
 proc strace_info_marker { } { with_test_prefix "info_marker" {
     global executable
     global gdb_prompt
@@ -247,6 +233,27 @@ proc strace_trace_on_diff_addr { } { with_test_prefix "trace_diff_addr" {
     gdb_test "tfind" "Found trace frame 1, tracepoint .*" "tfind frame 1"
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
 }}
+
+clean_restart $executable
+
+if ![runto_main] {
+    fail "Can't run to main to check for trace support"
+    return -1
+}
+
+# Run it on native x86/x86_64 linux.
+if { ![is_remote target]
+     && ([istarget "x86_64-*-linux*"] || [istarget "i\[34567\]86-*-linux*"]) } {
+    strace_info_marker
+    return
+}
+
+if { ![gdb_target_supports_trace] } then {
+    unsupported "Current target does not support trace"
+    return -1;
+}
+
+gdb_load_shlibs $libipa
 
 strace_info_marker
 strace_probe_marker

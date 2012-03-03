@@ -54,9 +54,23 @@ set_can_use_agent (char *args, int from_tty, struct cmd_list_element *c)
 /* -Wmissing-prototypes */
 extern initialize_file_ftype _initialize_agent;
 
+#include "observer.h"
+#include "objfiles.h"
+
+static void
+agent_new_objfile (struct objfile *objfile)
+{
+  if (objfile == NULL || agent_loaded_p ())
+    return;
+
+  agent_look_up_symbols (objfile);
+}
+
 void
 _initialize_agent (void)
 {
+  observer_attach_new_objfile (agent_new_objfile);
+
   add_setshow_enum_cmd ("agent", class_run,
 			can_use_agent_enum,
 			&can_use_agent, _("\

@@ -4701,6 +4701,20 @@ init_tfile_ops (void)
   tfile_ops.to_magic = OPS_MAGIC;
 }
 
+void
+free_current_marker (void *arg)
+{
+  struct static_tracepoint_marker **marker_p = arg;
+
+  if (*marker_p != NULL)
+    {
+      release_static_tracepoint_marker (*marker_p);
+      xfree (*marker_p);
+    }
+  else
+    *marker_p = NULL;
+}
+
 /* Given a line of text defining a static tracepoint marker, parse it
    into a "static tracepoint marker" object.  Throws an error is
    parsing fails.  If PP is non-null, it points to one past the end of

@@ -83,7 +83,7 @@ agent_loaded_p (void)
    found, return non-zero otherwise.  */
 
 int
-agent_look_up_symbols (void)
+agent_look_up_symbols (void *arg)
 {
   int i;
 
@@ -97,8 +97,9 @@ agent_look_up_symbols (void)
 
       if (look_up_one_symbol (symbol_list[i].name, addrp, 1) == 0)
 #else
-      struct minimal_symbol *sym = lookup_minimal_symbol (symbol_list[i].name,
-							  NULL, NULL);
+      struct minimal_symbol *sym =
+	lookup_minimal_symbol (symbol_list[i].name, NULL,
+			       (struct objfile *) arg);
 
       if (sym != NULL)
 	*addrp = SYMBOL_VALUE_ADDRESS (sym);

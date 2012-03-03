@@ -57,6 +57,9 @@
   but it had to be done as a second step, after the catchpoint had been
   created, using the "condition" command.
 
+* The "info static-tracepoint-marker" command will now also work on
+  native Linux targets with in-process agent.
+
 * New commands
 
   ** "catch load" and "catch unload" can be used to stop when a shared

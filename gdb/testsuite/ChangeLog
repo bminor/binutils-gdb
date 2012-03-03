@@ -1,3 +1,7 @@
+2012-03-03  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/strace.exp: run strace_info_marker in linux native gdb.
+
 2012-03-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Setup KFAIL for PR server/13796.

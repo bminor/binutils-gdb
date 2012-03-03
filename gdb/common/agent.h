@@ -19,7 +19,7 @@
 
 int agent_run_command (int pid, const char *cmd);
 
-int agent_look_up_symbols (void);
+int agent_look_up_symbols (void *);
 
 #define STRINGIZE_1(STR) #STR
 #define STRINGIZE(STR) STRINGIZE_1(STR)

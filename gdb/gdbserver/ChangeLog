@@ -1,5 +1,10 @@
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (tracepoint_look_up_symbols): Update call to
+	agent_look_up_symbols.
+
+2012-03-03  Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (linux-low.o): Keep dependence on agent.h.
 	(linux-x86-low.o): Likewise.
 	* server.h: Remove in_process_agent_loaded.

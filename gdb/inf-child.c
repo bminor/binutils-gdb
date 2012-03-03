@@ -29,6 +29,7 @@
 #include "gdb_stat.h"
 #include "inf-child.h"
 #include "gdb/fileio.h"
+#include "agent.h"
 
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>		/* for MAXPATHLEN */
@@ -332,6 +333,23 @@ inf_child_fileio_readlink (const char *filename, int *target_errno)
 #endif
 }
 
+static int
+inf_child_use_agent (int use)
+{
+  if (agent_loaded_p ())
+    {
+      use_agent = use;
+      return 1;
+    }
+  else
+    return 0;
+}
+
+static int
+inf_child_can_use_agent (void)
+{
+  return agent_loaded_p ();
+}
 
 struct target_ops *
 inf_child_target (void)
@@ -371,5 +389,7 @@ inf_child_target (void)
   t->to_fileio_unlink = inf_child_fileio_unlink;
   t->to_fileio_readlink = inf_child_fileio_readlink;
   t->to_magic = OPS_MAGIC;
+  t->to_use_agent = inf_child_use_agent;
+  t->to_can_use_agent = inf_child_can_use_agent;
   return t;
 }

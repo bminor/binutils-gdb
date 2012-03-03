@@ -338,7 +338,7 @@ tracepoint_look_up_symbols (void)
 	}
     }
 
-  agent_look_up_symbols ();
+  agent_look_up_symbols (NULL);
 }
 
 #endif

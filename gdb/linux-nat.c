@@ -60,6 +60,8 @@
 #include "linux-osdata.h"
 #include "linux-tdep.h"
 #include "symfile.h"
+#include "agent.h"
+#include "tracepoint.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -4772,6 +4774,73 @@ linux_xfer_partial (struct target_ops *ops, enum target_object object,
 			     offset, len);
 }
 
+static void
+cleanup_target_stop (void *arg)
+{
+  ptid_t *ptid = (ptid_t *) arg;
+
+  gdb_assert (arg != NULL);
+
+  /* Unpause all */
+  target_resume (*ptid, 0, TARGET_SIGNAL_0);
+}
+
+static VEC(static_tracepoint_marker_p) *
+linux_child_static_tracepoint_markers_by_strid (const char *strid)
+{
+  char s[IPA_CMD_BUF_SIZE];
+  struct cleanup *old_chain;
+  int pid = ptid_get_pid (inferior_ptid);
+  VEC(static_tracepoint_marker_p) *markers = NULL;
+  struct static_tracepoint_marker *marker = NULL;
+  char *p = s;
+  ptid_t ptid = ptid_build (pid, 0, 0);
+
+  /* Pause all */
+  target_stop (ptid);
+
+  memcpy (s, "qTfSTM", sizeof ("qTfSTM"));
+  s[sizeof ("qTfSTM")] = 0;
+
+  agent_run_command (pid, s);
+
+  old_chain = make_cleanup (free_current_marker, &marker);
+  make_cleanup (cleanup_target_stop, &ptid);
+
+  while (*p++ == 'm')
+    {
+      if (marker == NULL)
+	marker = XCNEW (struct static_tracepoint_marker);
+
+      do
+	{
+	  parse_static_tracepoint_marker_definition (p, &p, marker);
+
+	  if (strid == NULL || strcmp (strid, marker->str_id) == 0)
+	    {
+	      VEC_safe_push (static_tracepoint_marker_p,
+			     markers, marker);
+	      marker = NULL;
+	    }
+	  else
+	    {
+	      release_static_tracepoint_marker (marker);
+	      memset (marker, 0, sizeof (*marker));
+	    }
+	}
+      while (*p++ == ',');	/* comma-separated list */
+
+      memcpy (s, "qTsSTM", sizeof ("qTsSTM"));
+      s[sizeof ("qTsSTM")] = 0;
+      agent_run_command (pid, s);
+      p = s;
+    }
+
+  do_cleanups (old_chain);
+
+  return markers;
+}
+
 /* Create a prototype generic GNU/Linux target.  The client can override
    it with local methods.  */
 
@@ -4793,6 +4862,9 @@ linux_target_install_ops (struct target_ops *t)
 
   super_xfer_partial = t->to_xfer_partial;
   t->to_xfer_partial = linux_xfer_partial;
+
+  t->to_static_tracepoint_markers_by_strid
+    = linux_child_static_tracepoint_markers_by_strid;
 }
 
 struct target_ops *
