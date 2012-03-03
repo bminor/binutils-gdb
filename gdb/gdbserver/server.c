@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "server.h"
+#include "agent.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -528,6 +529,30 @@ handle_general_set (char *own_buf)
   if (target_supports_tracepoints ()
       && handle_tracepoint_general_set (own_buf))
     return;
+
+  if (strncmp ("QAgent:", own_buf, strlen ("QAgent:")) == 0)
+    {
+      char *mode = own_buf + strlen ("QAgent:");
+      int req = 0;
+
+      if (strcmp (mode, "0") == 0)
+	req = 0;
+      else if (strcmp (mode, "1") == 0)
+	req = 1;
+      else
+	{
+	  /* We don't know what this value is, so complain to GDB.  */
+	  sprintf (own_buf, "E.Unknown QAgent value");
+	  return;
+	}
+
+      /* Update the flag.  */
+      use_agent = req;
+      if (remote_debug)
+	fprintf (stderr, "[%s agent]\n", req ? "Enable" : "Disable");
+      write_ok (own_buf);
+      return;
+    }
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
@@ -1623,6 +1648,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       /* Support target-side breakpoint conditions.  */
       strcat (own_buf, ";ConditionalBreakpoints+");
+
+      if (target_supports_agent ())
+	strcat (own_buf, ";QAgent+");
 
       return;
     }

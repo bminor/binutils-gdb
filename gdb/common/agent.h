@@ -35,3 +35,4 @@ int agent_look_up_symbols (void);
 
 extern int debug_agent;
 
+extern int use_agent;

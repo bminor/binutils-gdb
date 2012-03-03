@@ -684,6 +684,7 @@ TARGET_FLAGS_TO_PASS = \
 SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	addrmap.c \
 	auxv.c ax-general.c ax-gdb.c \
+	agent.c \
 	bcache.c \
 	bfd-target.c \
 	block.c blockframe.c breakpoint.c buildsym.c \
@@ -740,7 +741,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	annotate.c common/signals.c copying.c dfp.c gdb.c inf-child.c \
 	regset.c sol-thread.c windows-termcap.c \
 	common/common-utils.c common/xml-utils.c \
-	common/ptid.c common/buffer.c gdb-dlfcn.c
+	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -854,6 +855,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	annotate.o \
 	addrmap.o \
 	auxv.o \
+	agent.o \
 	bfd-target.o \
 	blockframe.o breakpoint.o findvar.o regcache.o \
 	charset.o continuations.o corelow.o disasm.o dummy-frame.o dfp.o \
@@ -908,7 +910,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
 	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
 	jit.o progspace.o skip.o \
-	common-utils.o buffer.o ptid.o gdb-dlfcn.o
+	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o
 
 TSOBS = inflow.o
 
@@ -1925,6 +1927,10 @@ linux-osdata.o: ${srcdir}/common/linux-osdata.c
 
 linux-procfs.o: $(srcdir)/common/linux-procfs.c
 	$(COMPILE) $(srcdir)/common/linux-procfs.c
+	$(POSTCOMPILE)
+
+common-agent.o: $(srcdir)/common/agent.c
+	$(COMPILE) $(srcdir)/common/agent.c
 	$(POSTCOMPILE)
 
 #

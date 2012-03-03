@@ -4883,6 +4883,12 @@ info_static_tracepoint_markers_command (char *arg, int from_tty)
   struct ui_out *uiout = current_uiout;
   int i;
 
+  /* We don't have to check target_can_use_agent and agent's capability on
+     static tracepoint here, in order to be compatible with older GDBserver.
+     We don't check USE_AGENT is true or not, because static tracepoints
+     don't work without in-process agent, so we don't bother users to type
+     `set agent on' when to use static tracepoint.  */
+
   old_chain
     = make_cleanup_ui_out_table_begin_end (uiout, 5, -1,
 					   "StaticTracepointMarkersTable");

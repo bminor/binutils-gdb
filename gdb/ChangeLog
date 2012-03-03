@@ -1,5 +1,26 @@
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
+	* target.h (struct target_ops) <to_use_agent>: New field.
+	(struct target_ops) <to_can_use_agent>: New field.
+	(target_use_agent, target_can_use_agent): New macro.
+	* target.c (update_current_target): Update.
+	* remote.c: New enum `PACKET_QAgent'.
+	(remote_protocol_features): Add a new element.
+	(remote_use_agent, remote_can_use_agent): New.
+	(init_remote_ops): Initialize field `can_use_agent' with
+	remote_can_use_agent.  Intiailize field `use_agent' with
+	remote_use_agent.
+	* common/agent.c (use_agent): New global.
+	* common/agent.h: Declare it.
+	* tracepoint.c (info_static_tracepoint_markers_command): Add
+	comment.
+	* Makefile.in (SFILES): Add common/agent.c and agent.c.
+	(COMMON_OBS): Add common/agent.o and agent.o
+	(common-agent.o): New rule.
+	* agent.c: New.
+
+2012-03-03  Yao Qi  <yao@codesourcery.com>
+
 	* common/agent.c: New.
 	* common/agent.h: New.
 	* configure.ac: Add `sys/socket.h' and `sys/un.h' to

@@ -4854,6 +4854,12 @@ linux_supports_disable_randomization (void)
 #endif
 }
 
+static int
+linux_supports_agent (void)
+{
+  return 1;
+}
+
 /* Enumerate spufs IDs for process PID.  */
 static int
 spu_enumerate_spu_ids (long pid, unsigned char *buf, CORE_ADDR offset, int len)
@@ -5576,6 +5582,7 @@ static struct target_ops linux_target_ops = {
   linux_supports_disable_randomization,
   linux_get_min_fast_tracepoint_insn_len,
   linux_qxfer_libraries_svr4,
+  linux_supports_agent,
 };
 
 static void

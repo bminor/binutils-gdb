@@ -65,6 +65,7 @@
 #include "tracepoint.h"
 #include "ax.h"
 #include "ax-gdb.h"
+#include "agent.h"
 
 /* Temp hacks for tracepoint encoding migration.  */
 static char *target_buf;
@@ -1276,6 +1277,7 @@ enum {
   PACKET_QAllow,
   PACKET_qXfer_fdpic,
   PACKET_QDisableRandomization,
+  PACKET_QAgent,
   PACKET_MAX
 };
 
@@ -3848,6 +3850,7 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_fdpic },
   { "QDisableRandomization", PACKET_DISABLE, remote_supported_packet,
     PACKET_QDisableRandomization },
+  { "QAgent", PACKET_DISABLE, remote_supported_packet, PACKET_QAgent},
   { "tracenz", PACKET_DISABLE,
     remote_string_tracing_feature, -1 },
 };
@@ -10757,6 +10760,34 @@ remote_set_trace_notes (char *user, char *notes, char *stop_notes)
   return 1;
 }
 
+static int
+remote_use_agent (int use)
+{
+  if (remote_protocol_packets[PACKET_QAgent].support != PACKET_DISABLE)
+    {
+      struct remote_state *rs = get_remote_state ();
+
+      /* If the stub supports QAgent.  */
+      sprintf (rs->buf, "QAgent:%d", use);
+      putpkt (rs->buf);
+      getpkt (&rs->buf, &rs->buf_size, 0);
+
+      if (strcmp (rs->buf, "OK") == 0)
+	{
+	  use_agent = use;
+	  return 1;
+	}
+    }
+
+  return 0;
+}
+
+static int
+remote_can_use_agent (void)
+{
+  return (remote_protocol_packets[PACKET_QAgent].support != PACKET_DISABLE);
+}
+
 static void
 init_remote_ops (void)
 {
@@ -10869,6 +10900,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_static_tracepoint_markers_by_strid
     = remote_static_tracepoint_markers_by_strid;
   remote_ops.to_traceframe_info = remote_traceframe_info;
+  remote_ops.to_use_agent = remote_use_agent;
+  remote_ops.to_can_use_agent = remote_can_use_agent;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -11381,6 +11414,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QDisableRandomization],
 			 "QDisableRandomization", "disable-randomization", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QAgent],
+			 "QAgent", "agent", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

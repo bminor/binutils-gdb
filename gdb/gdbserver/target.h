@@ -394,6 +394,9 @@ struct target_ops
   int (*qxfer_libraries_svr4) (const char *annex, unsigned char *readbuf,
 			       unsigned const char *writebuf,
 			       CORE_ADDR offset, int len);
+
+  /* Return true if target supports debugging agent.  */
+  int (*supports_agent) (void);
 };
 
 extern struct target_ops *the_target;
@@ -513,6 +516,10 @@ void set_target_ops (struct target_ops *);
 #define target_supports_disable_randomization() \
   (the_target->supports_disable_randomization ? \
    (*the_target->supports_disable_randomization) () : 0)
+
+#define target_supports_agent() \
+  (the_target->supports_agent ? \
+   (*the_target->supports_agent) () : 0)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 

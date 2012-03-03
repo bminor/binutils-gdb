@@ -41,6 +41,9 @@ int debug_agent = 0;
     fprintf_unfiltered (gdb_stdlog, fmt, ##args);
 #endif
 
+/* Global flag to determine using agent or not.  */
+int use_agent = 0;
+
 /* Addresses of in-process agent's symbols both GDB and GDBserver cares
    about.  */
 

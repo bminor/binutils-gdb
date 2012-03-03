@@ -400,7 +400,7 @@ mem-break.o: mem-break.c $(server_h) $(ax_h)
 proc-service.o: proc-service.c $(server_h) $(gdb_proc_service_h)
 regcache.o: regcache.c $(server_h) $(regdef_h)
 remote-utils.o: remote-utils.c terminal.h $(server_h)
-server.o: server.c $(server_h)
+server.o: server.c $(server_h) $(agent_h)
 target.o: target.c $(server_h)
 thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h) \
 	$(gdb_thread_db_h)

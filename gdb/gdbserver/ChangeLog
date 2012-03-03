@@ -1,5 +1,16 @@
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
+	* linux-low.c (linux_supports_agent): New.
+	(linux_target_ops): Initialize field `supports_agent' with
+	linux_supports_agent.
+	* target.h (struct target_ops) <supports_agent>: New.
+	(target_supports_agent): New macro.
+	* server.c (handle_general_set): Handle packet 'QAgent'.
+	(handle_query): Send `QAgent+'.
+	* Makefile.in (server.o): Depends on agent.h.
+
+2012-03-03  Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (OBS): Add agent.o.
 	Add new rule for agent.o.
 	Track dependence of tracepoint.c on agent.h.
