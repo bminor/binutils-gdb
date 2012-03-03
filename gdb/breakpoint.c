@@ -761,6 +761,10 @@ set_condition_evaluation_mode (char *args, int from_tty,
   new_mode = translate_condition_evaluation_mode (condition_evaluation_mode_1);
   old_mode = translate_condition_evaluation_mode (condition_evaluation_mode);
 
+  /* Flip the switch.  Flip it even if OLD_MODE == NEW_MODE as one of the
+     settings was "auto".  */
+  condition_evaluation_mode = condition_evaluation_mode_1;
+
   /* Only update the mode if the user picked a different one.  */
   if (new_mode != old_mode)
     {
@@ -771,9 +775,6 @@ set_condition_evaluation_mode (char *args, int from_tty,
 	 "host" -> "target": Send all (valid) conditions to the target.
 	 "target" -> "host": Remove all the conditions from the target.
       */
-
-      /* Flip the switch.  */
-      condition_evaluation_mode = condition_evaluation_mode_1;
 
       if (new_mode == condition_evaluation_target)
 	{

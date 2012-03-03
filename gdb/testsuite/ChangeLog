@@ -1,5 +1,11 @@
 2012-03-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Implement testsuite workaround for PR breakpoints/13781.
+	* gdb.cp/mb-templates.exp: New loop with variable $workaround.
+	(set breakpoint condition-evaluation host): New conditional command.
+
+2012-03-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* gdb.cp/mb-templates.exp: New variables executable.  Use it for
 	binfile.  use clean_restart.  Replace gdb_expect by gdb_test_multiple.
