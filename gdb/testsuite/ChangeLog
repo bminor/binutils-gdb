@@ -1,3 +1,8 @@
+2012-03-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Setup KFAIL for PR server/13796.
+	* gdb.base/disp-step-syscall.exp (single step over vfork): Setup KFAIL.
+
 2012-03-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/operator_bp: New testcase.

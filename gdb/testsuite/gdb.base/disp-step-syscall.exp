@@ -118,7 +118,20 @@ proc disp_step_cross_syscall { syscall } { with_test_prefix "$syscall" {
     gdb_test_no_output "set displaced-stepping on"
 
     # Check the address of next instruction of syscall.
-    gdb_test "stepi" ".*" "single step over $syscall"
+    if {$syscall == "vfork" && [is_remote target]} {
+	setup_kfail server/13796 "*-*-*"
+    }
+    set test "single step over $syscall"
+    gdb_test_multiple "stepi" $test {
+	-re "Program terminated with signal SIGILL,.*\r\n$gdb_prompt $" {
+	    fail $test
+	    return
+	}
+	-re "\r\n$gdb_prompt $" {
+	    pass $test
+	}
+    }
+
     set syscall_insn_next_addr_found [get_hexadecimal_valueof "\$pc" "0"]
 
     set test "single step over $syscall final pc"
