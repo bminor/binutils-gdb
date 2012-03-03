@@ -27,6 +27,12 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
     return -1
 }
 
+if [get_compiler_info ${binfile}] {
+    return -1;
+}
+set old_gcc [expr [test_compiler_info {gcc-[0-3]-*}] \
+	     || [test_compiler_info {gcc-4-[0-6]-*}]]
+
 clean_restart ${testfile}
 
 set bp_location [gdb_get_line_number "START" ${testdir}/p.adb]
@@ -36,6 +42,9 @@ runto "p.adb:$bp_location"
 
 gdb_test_no_output "set print array-indexes off"
 
+if $old_gcc {
+    setup_xfail "*-*-*"
+}
 gdb_test "print one_two_three" \
          "= \\(1, 2, 3\\)" \
          "print one_two_three, indexes off"
@@ -56,14 +65,23 @@ gdb_test "print p_one_two_three" \
          "= \\(false, true, true\\)" \
          "print p_one_two_three, indexes off"
 
+if $old_gcc {
+    setup_xfail "*-*-*"
+}
 gdb_test "print few_reps" \
          "= \\(1, 2, 3, 3, 3, 3, 3, 4, 5\\)" \
          "print few_reps, indexes off"
 
+if $old_gcc {
+    setup_xfail "*-*-*"
+}
 gdb_test "print many_reps" \
          "= \\(1, 2, 3 <repeats 12 times>, 4, 5\\)" \
          "print many_reps, indexes off"
 
+if $old_gcc {
+    setup_xfail "*-*-*"
+}
 gdb_test "print empty" \
          "= \\(\\)" \
          "print empty, indexes off"
@@ -72,6 +90,9 @@ gdb_test "print empty" \
 
 gdb_test_no_output "set print array-indexes on"
 
+if $old_gcc {
+    setup_xfail "*-*-*"
+}
 gdb_test "print one_two_three" \
          "= \\(1 => 1, 2 => 2, 3 => 3\\)" \
          "print one_two_three"
@@ -92,14 +113,23 @@ gdb_test "print p_one_two_three" \
          "= \\(one => false, two => true, three => true\\)" \
          "print p_one_two_three"
 
+if $old_gcc {
+    setup_xfail "*-*-*"
+}
 gdb_test "print few_reps" \
          "= \\(1 => 1, 2 => 2, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 4, 9 => 5\\)" \
          "print few_reps"
 
+if $old_gcc {
+    setup_xfail "*-*-*"
+}
 gdb_test "print many_reps" \
          "= \\(1 => 1, 2 => 2, 3 => 3 <repeats 12 times>, 15 => 4, 16 => 5\\)" \
          "print many_reps"
 
+if $old_gcc {
+    setup_xfail "*-*-*"
+}
 gdb_test "print empty" \
          "= \\(\\)" \
          "print empty"

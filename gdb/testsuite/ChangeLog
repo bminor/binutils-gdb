@@ -1,5 +1,13 @@
 2012-03-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.ada/arrayidx.exp: Call get_compiler_info.  New variable old_gcc.
+	(print one_two_three, indexes off, print few_reps, indexes off)
+	(print many_reps, indexes off, print empty, indexes off)
+	(print one_two_three, print few_reps, print many_reps, print empty):
+	Call setup_xfail if $gcc_old.
+
+2012-03-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Implement testsuite workaround for PR breakpoints/13781.
 	* gdb.cp/mb-templates.exp: New loop with variable $workaround.
 	(set breakpoint condition-evaluation host): New conditional command.
