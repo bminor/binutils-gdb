@@ -135,7 +135,7 @@ agent_get_helper_thread_id (void)
       else
 #endif
 	{
-	  warning ("Error reading helper thread's id in lib");
+	  warning (_("Error reading helper thread's id in lib"));
 	}
     }
 
@@ -171,7 +171,7 @@ gdb_connect_sync_socket (int pid)
   res = fd = socket (PF_UNIX, SOCK_STREAM, 0);
   if (res == -1)
     {
-      warning ("error opening sync socket: %s\n", strerror (errno));
+      warning (_("error opening sync socket: %s"), strerror (errno));
       return -1;
     }
 
@@ -180,7 +180,7 @@ gdb_connect_sync_socket (int pid)
   res = xsnprintf (addr.sun_path, UNIX_PATH_MAX, "%s", path);
   if (res >= UNIX_PATH_MAX)
     {
-      warning ("string overflow allocating socket name\n");
+      warning (_("string overflow allocating socket name"));
       close (fd);
       return -1;
     }
@@ -188,9 +188,9 @@ gdb_connect_sync_socket (int pid)
   res = connect (fd, (struct sockaddr *) &addr, sizeof (addr));
   if (res == -1)
     {
-      warning ("error connecting sync socket (%s): %s. "
-	       "Make sure the directory exists and that it is writable.",
-	       path, strerror (errno));
+      warning (_("error connecting sync socket (%s): %s. "
+		 "Make sure the directory exists and that it is writable."),
+		 path, strerror (errno));
       close (fd);
       return -1;
     }
@@ -224,7 +224,7 @@ agent_run_command (int pid, const char *cmd)
 
   if (ret != 0)
     {
-      warning ("unable to write");
+      warning (_("unable to write"));
       return -1;
     }
 
@@ -310,7 +310,7 @@ agent_run_command (int pid, const char *cmd)
 			      IPA_CMD_BUF_SIZE))
 #endif
 	{
-	  warning ("Error reading command response");
+	  warning (_("Error reading command response"));
 	  return -1;
 	}
     }
@@ -342,7 +342,7 @@ agent_capability_check (enum agent_capa agent_capa)
 						     byte_order);
       else
 #endif
-	warning ("Error reading capability of agent");
+	warning (_("Error reading capability of agent"));
     }
   return agent_capability & agent_capa;
 }

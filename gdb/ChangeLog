@@ -1,3 +1,10 @@
+2012-03-04  Yao Qi  <yao@codesourcery.com>
+
+	* common/agent.c (gdb_connect_sync_socket): Add _ markup and
+	remove trailing new line.
+	(agent_run_command, agent_run_command): Add _ markup.
+	(agent_capability_check): Likewise.
+
 2012-03-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (set_condition_evaluation_mode): Set
