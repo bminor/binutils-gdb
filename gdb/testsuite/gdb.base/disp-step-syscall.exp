@@ -127,6 +127,10 @@ proc disp_step_cross_syscall { syscall } { with_test_prefix "$syscall" {
 	    fail $test
 	    return
 	}
+	-re "\\\[Inferior .* exited normally\\\].*\r\n$gdb_prompt $" {
+	    fail $test
+	    return
+	}
 	-re "\r\n$gdb_prompt $" {
 	    pass $test
 	}
