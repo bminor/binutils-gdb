@@ -12,12 +12,12 @@
 	(inf_child_target): Initialize fields `to_use_agent'
 	and `to_can_use_agent'.
 	* agent.c (agent_new_objfile): New.
-        (_initialize_agent): Add agent_new_objfile to new_objfile
+	(_initialize_agent): Add agent_new_objfile to new_objfile
 	observer.
 
 	* linux-nat.c (linux_child_static_tracepoint_markers_by_strid):
 	New.
-        (linux_target_install_ops): Initialize field
+	(linux_target_install_ops): Initialize field
 	`to_static_tracepoint_markers_by_strid'.
 	* remote.c (free_current_marker): Move it to ...
 	* tracepoint.c (free_current_marker): ... here.  New.
@@ -28,7 +28,7 @@
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
 	* common/agent.c (agent_loaded_p): New.
-        (agent_look_up_symbols): New global.
+	(agent_look_up_symbols): New global.
 	* common/agent.h: Declare agent_loaded_p.
 
 2012-03-03  Yao Qi  <yao@codesourcery.com>
