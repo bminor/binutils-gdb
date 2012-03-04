@@ -241,17 +241,6 @@ libunwind_find_dyn_list (unw_addr_space_t as, unw_dyn_info_t *di, void *arg)
   return unw_find_dyn_list_p (as, di, arg);
 }
 
-static const struct frame_unwind libunwind_frame_unwind =
-{
-  NORMAL_FRAME,
-  default_frame_unwind_stop_reason,
-  libunwind_frame_this_id,
-  libunwind_frame_prev_register,
-  NULL,
-  libunwind_frame_sniffer,
-  libunwind_frame_dealloc_cache,
-};
-
 /* Verify if there is sufficient libunwind information for the frame to use
    libunwind frame unwinding.  */
 int
@@ -383,17 +372,6 @@ libunwind_frame_prev_register (struct frame_info *this_frame,
 
   return val;
 } 
-
-CORE_ADDR
-libunwind_frame_base_address (struct frame_info *this_frame, void **this_cache)
-{
-  struct libunwind_frame_cache *cache =
-    libunwind_frame_cache (this_frame, this_cache);
-
-  if (cache == NULL)
-    return (CORE_ADDR)NULL;
-  return cache->base;
-}
 
 /* The following is a glue routine to call the libunwind unwind table
    search function to get unwind information for a specified ip address.  */ 

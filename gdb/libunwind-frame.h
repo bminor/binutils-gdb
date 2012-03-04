@@ -60,8 +60,6 @@ void libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
 struct value *libunwind_frame_prev_register (struct frame_info *this_frame,
                                              void **this_cache, int regnum);
 void libunwind_frame_dealloc_cache (struct frame_info *self, void *cache);
-CORE_ADDR libunwind_frame_base_address (struct frame_info *this_frame,
-                                        void **this_cache);
 
 int libunwind_is_initialized (void);
 

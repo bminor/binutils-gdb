@@ -1,3 +1,10 @@
+2012-03-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Removed unused code.
+	* libunwind-frame.c (libunwind_frame_unwind)
+	(libunwind_frame_base_address): Remove.
+	* libunwind-frame.h (libunwind_frame_base_address): Remove declaration.
+
 2012-03-04  Yao Qi  <yao@codesourcery.com>
 
 	* common/agent.c (gdb_connect_sync_socket): Add _ markup and
