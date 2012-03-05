@@ -1,5 +1,5 @@
 /* SPARC-specific support for ELF
-   Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -4069,7 +4069,9 @@ do_relocation:
 		   We don't, but this breaks stabs debugging info, whose
 		   relocations are only 32-bits wide.  Ignore overflows in
 		   this case and also for discarded entries.  */
-		if ((r_type == R_SPARC_32 || r_type == R_SPARC_DISP32)
+		if ((r_type == R_SPARC_32
+		     || r_type == R_SPARC_UA32
+		     || r_type == R_SPARC_DISP32)
 		    && (((input_section->flags & SEC_DEBUGGING) != 0
 			 && strcmp (bfd_section_name (input_bfd,
 						      input_section),
