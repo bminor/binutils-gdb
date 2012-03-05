@@ -1,3 +1,9 @@
+2012-03-05  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-low.c (get_dynamic): Don't warn when PT_PHDR isn't found.
+	New comment why.
+
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (tracepoint_look_up_symbols): Update call to
