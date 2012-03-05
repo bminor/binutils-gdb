@@ -26,6 +26,7 @@
 #include "target.h"
 #include "linux-nat.h"
 #include "auxv.h"
+#include "gregset.h"
 
 #include "s390-tdep.h"
 #include "elf/common.h"
