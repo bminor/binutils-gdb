@@ -1,5 +1,10 @@
 2012-03-05  Tom Tromey  <tromey@redhat.com>
 
+	* value.c (value_primitive_field): Don't fetch contents for
+	non-virtual bases.
+
+2012-03-05  Tom Tromey  <tromey@redhat.com>
+
 	* jv-valprint.c (java_value_print): Correctly compute 'obj_addr'.
 
 2012-03-05  Joel Brobecker  <brobecker@adacore.com>

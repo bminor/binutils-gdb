@@ -2556,11 +2556,17 @@ value_primitive_field (struct value *arg1, int offset,
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
 	value_fetch_lazy (arg1);
 
-      boffset = baseclass_offset (arg_type, fieldno,
-				  value_contents (arg1),
-				  value_embedded_offset (arg1),
-				  value_address (arg1),
-				  arg1);
+      /* We special case virtual inheritance here because this
+	 requires access to the contents, which we would rather avoid
+	 for references to ordinary fields of unavailable values.  */
+      if (BASETYPE_VIA_VIRTUAL (arg_type, fieldno))
+	boffset = baseclass_offset (arg_type, fieldno,
+				    value_contents (arg1),
+				    value_embedded_offset (arg1),
+				    value_address (arg1),
+				    arg1);
+      else
+	boffset = TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
 
       if (value_lazy (arg1))
 	v = allocate_value_lazy (value_enclosing_type (arg1));
