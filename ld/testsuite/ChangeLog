@@ -1,3 +1,8 @@
+2012-03-06  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13683
+	* ld-gc/pr13683.d: Allow non-zero top address digit.
+
 2012-03-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/13803
