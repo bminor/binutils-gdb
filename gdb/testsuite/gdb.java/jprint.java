@@ -61,6 +61,7 @@ public class jprint extends jvclass {
     jprint x = new jprint ();
     x.dothat (44);
     print (k, 33);
+    print (x.addk(0), 33);
   }
 }
 

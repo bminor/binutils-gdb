@@ -51,10 +51,13 @@ java_value_print (struct value *val, struct ui_file *stream,
   if (is_object_type (type))
     {
       CORE_ADDR obj_addr;
+      struct value *tem = val;
 
       /* Get the run-time type, and cast the object into that.  */
+      while (TYPE_CODE (value_type (tem)) == TYPE_CODE_PTR)
+	tem = value_ind (tem);
 
-      obj_addr = unpack_pointer (type, value_contents (val));
+      obj_addr = value_address (tem);
 
       if (obj_addr != 0)
 	{

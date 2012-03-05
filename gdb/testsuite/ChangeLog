@@ -1,3 +1,7 @@
+2012-03-05  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.java/jprint.java (jprint.main): Keep 'x' live.
+
 2012-03-04  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/disp-step-syscall.exp (disp_step_cross_syscall): Catch error
