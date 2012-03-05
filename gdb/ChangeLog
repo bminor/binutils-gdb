@@ -1,3 +1,10 @@
+2012-03-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* libunwind-frame.c (LIBUNWIND_SO): Change .7 to .8.
+	[!LIBUNWIND_SO] (LIBUNWIND_SO_7): New #define.
+	(libunwind_load): New variable so_error, use it for dlerror.  Try to
+	load also LIBUNWIND_SO_7.
+
 2012-03-05  Pedro Alves  <palves@redhat.com>
 
 	* i387-tdep.c (i387_supply_xsave): Assert the xsave section buffer

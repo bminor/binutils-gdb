@@ -95,7 +95,11 @@ struct libunwind_frame_cache
 #ifndef LIBUNWIND_SO
 /* Use the stable ABI major version number.  `libunwind-ia64.so' is a link time
    only library, not a runtime one.  */
-#define LIBUNWIND_SO "libunwind-" STRINGIFY(UNW_TARGET) ".so.7"
+#define LIBUNWIND_SO "libunwind-" STRINGIFY(UNW_TARGET) ".so.8"
+
+/* Provide also compatibility with older .so.  The two APIs are compatible, .8
+   is only extended a bit, GDB does not use the extended API at all.  */
+#define LIBUNWIND_SO_7 "libunwind-" STRINGIFY(UNW_TARGET) ".so.7"
 #endif
 
 static char *get_reg_name = STRINGIFY(UNW_OBJ(get_reg));
@@ -491,14 +495,28 @@ static int
 libunwind_load (void)
 {
   void *handle;
+  char *so_error = NULL;
 
   handle = dlopen (LIBUNWIND_SO, RTLD_NOW);
   if (handle == NULL)
     {
-      fprintf_unfiltered (gdb_stderr, _("[GDB failed to load %s: %s]\n"),
-                          LIBUNWIND_SO, dlerror ());
-      return 0;
+      so_error = xstrdup (dlerror ());
+#ifdef LIBUNWIND_SO_7
+      handle = dlopen (LIBUNWIND_SO_7, RTLD_NOW);
+#endif /* LIBUNWIND_SO_7 */
     }
+  if (handle == NULL)
+    {
+      fprintf_unfiltered (gdb_stderr, _("[GDB failed to load %s: %s]\n"),
+			  LIBUNWIND_SO, so_error);
+#ifdef LIBUNWIND_SO_7
+      fprintf_unfiltered (gdb_stderr, _("[GDB failed to load %s: %s]\n"),
+			  LIBUNWIND_SO_7, dlerror ());
+#endif /* LIBUNWIND_SO_7 */
+    }
+  xfree (so_error);
+  if (handle == NULL)
+    return 0;
 
   /* Initialize pointers to the dynamic library functions we will use.  */
 
