@@ -1,5 +1,10 @@
 2012-03-05  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.ada/operator_bp.exp: Clear debug-file-directory.
+	* gdb.ada/mi_task_arg.exp: Clear debug-file-directory.
+
+2012-03-05  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.java/jprint.java (jprint.main): Keep 'x' live.
 
 2012-03-04  Yao Qi  <yao@codesourcery.com>

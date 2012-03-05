@@ -29,6 +29,9 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
 
 clean_restart ${testfile}
 
+# This test won't work properly if system debuginfo is installed.
+gdb_test_no_output "set debug-file-directory"
+
 set bp_location [gdb_get_line_number "BEGIN" ${testdir}/ops_test.adb]
 runto "ops_test.adb:$bp_location"
 
