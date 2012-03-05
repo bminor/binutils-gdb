@@ -246,6 +246,10 @@ ia64-*-linux*)
 			solib-svr4.o symfile-mem.o"
 	build_gdbserver=yes
 	;;
+ia64-*-*vms*)
+	# Target: Intel IA-64 running OpenVMS
+	gdb_target_obs="ia64-tdep.o ia64-vms-tdep.o"
+	;;
 ia64*-*-*)
 	# Target: Intel IA-64
 	gdb_target_obs="ia64-tdep.o"

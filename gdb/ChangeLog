@@ -1,5 +1,17 @@
 2012-03-05  Tristan Gingold  <gingold@adacore.com>
 
+	* ia64-tdep.h: Include libunwind-frame.h and libunwind-ia64.h.
+	(ia64_unw_accessors, ia64_unw_rse_accessors)
+	(ia64_libunwind_descr): Declare.
+	* ia64-vms-tdep.c: New file.
+	* ia64-tdep.c (ia64_unw_accessors, ia64_unw_rse_accessors)
+	(ia64_libunwind_descr): Make them public.
+	* configure.tgt: Add ia64-*-*vms*.
+	* Makefile.in (ALL_64_TARGET_OBS): Add ia64-vms-tdep.o
+	(ALLDEPFILES): Add ia64-vms-tdep.c
+
+2012-03-05  Tristan Gingold  <gingold@adacore.com>
+
 	* target.h (target_object): Add TARGET_OBJECT_OPENVMS_UIB.
 	* remote.c (PACKET_qXfer_uib): New enum value.
 	(remote_protocol_features): Add entry for PACKET_qXfer_uib.

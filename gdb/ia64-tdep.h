@@ -20,6 +20,11 @@
 #ifndef IA64_TDEP_H
 #define IA64_TDEP_H
 
+#ifdef HAVE_LIBUNWIND_IA64_H
+#include "libunwind-ia64.h"
+#include "libunwind-frame.h"
+#endif
+
 /* Register numbers of various important registers.  */
 
 /* General registers; there are 128 of these 64 bit wide registers.
@@ -249,5 +254,11 @@ struct gdbarch_tdep
 };
 
 extern void ia64_write_pc (struct regcache *, CORE_ADDR);
+
+#ifdef HAVE_LIBUNWIND_IA64_H
+extern unw_accessors_t ia64_unw_accessors;
+extern unw_accessors_t ia64_unw_rse_accessors;
+extern struct libunwind_descr ia64_libunwind_descr;
+#endif
 
 #endif /* ia64-tdep.h */

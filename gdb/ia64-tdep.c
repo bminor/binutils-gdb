@@ -3148,7 +3148,7 @@ static const struct frame_unwind ia64_libunwind_sigtramp_frame_unwind =
 };
 
 /* Set of libunwind callback acccessor functions.  */
-static unw_accessors_t ia64_unw_accessors =
+unw_accessors_t ia64_unw_accessors =
 {
   ia64_find_proc_info_x,
   ia64_put_unwind_info,
@@ -3164,7 +3164,7 @@ static unw_accessors_t ia64_unw_accessors =
    the rse registers.  At the top of the stack, we want libunwind to figure out
    how to read r32 - r127.  Though usually they are found sequentially in
    memory starting from $bof, this is not always true.  */
-static unw_accessors_t ia64_unw_rse_accessors =
+unw_accessors_t ia64_unw_rse_accessors =
 {
   ia64_find_proc_info_x,
   ia64_put_unwind_info,
@@ -3178,7 +3178,7 @@ static unw_accessors_t ia64_unw_rse_accessors =
 
 /* Set of ia64 gdb libunwind-frame callbacks and data for generic
    libunwind-frame code to use.  */
-static struct libunwind_descr ia64_libunwind_descr =
+struct libunwind_descr ia64_libunwind_descr =
 {
   ia64_gdb2uw_regnum, 
   ia64_uw2gdb_regnum, 

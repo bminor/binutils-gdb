@@ -516,7 +516,7 @@ ALL_64_TARGET_OBS = \
 	amd64fbsd-tdep.o amd64-darwin-tdep.o amd64-dicos-tdep.o \
 	amd64-linux-tdep.o amd64nbsd-tdep.o \
 	amd64obsd-tdep.o amd64-sol2-tdep.o amd64-tdep.o amd64-windows-tdep.o \
-	ia64-hpux-tdep.o ia64-linux-tdep.o ia64-tdep.o \
+	ia64-hpux-tdep.o ia64-linux-tdep.o ia64-vms-tdep.o ia64-tdep.o \
 	mips64obsd-tdep.o \
 	sparc64fbsd-tdep.o sparc64-linux-tdep.o sparc64nbsd-tdep.o \
 	sparc64obsd-tdep.o sparc64-sol2-tdep.o sparc64-tdep.o
@@ -1460,7 +1460,7 @@ ALLDEPFILES = \
 	i386-sol2-nat.c i386-sol2-tdep.c \
 	i386gnu-nat.c i386gnu-tdep.c \
 	ia64-hpux-nat.c ia64-hpux-tdep.c \
-	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
+	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c ia64-vms-tdep.c \
 	inf-ptrace.c inf-ttrace.c \
 	irix5-nat.c \
 	libunwind-frame.c \
