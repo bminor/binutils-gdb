@@ -155,10 +155,10 @@ ia64_openvms_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_ia64_hpux_tdep;
+extern initialize_file_ftype _initialize_ia64_vms_tdep;
 
 void
-_initialize_ia64_hpux_tdep (void)
+_initialize_ia64_vms_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_ia64, 0, GDB_OSABI_OPENVMS,
 			  ia64_openvms_init_abi);

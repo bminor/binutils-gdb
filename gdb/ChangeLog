@@ -1,3 +1,8 @@
+2012-03-05  Tom Tromey  <tromey@redhat.com>
+
+	* ia64-vms-tdep.c (_initialize_ia64_vms_tdep): Rename from
+	_initialize_ia64_hpux_tdep.
+
 2012-03-05  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/13766
