@@ -4000,7 +4000,7 @@ retry:
       || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
     lp->core = -1;
   else
-    lp->core = linux_nat_core_of_thread_1 (lp->ptid);
+    lp->core = linux_common_core_of_thread (lp->ptid);
 
   return lp->ptid;
 }
@@ -5187,71 +5187,6 @@ linux_nat_thread_address_space (struct target_ops *t, ptid_t ptid)
   inf = find_inferior_pid (pid);
   gdb_assert (inf != NULL);
   return inf->aspace;
-}
-
-int
-linux_nat_core_of_thread_1 (ptid_t ptid)
-{
-  struct cleanup *back_to;
-  char *filename;
-  FILE *f;
-  char *content = NULL;
-  char *p;
-  char *ts = 0;
-  int content_read = 0;
-  int i;
-  int core;
-
-  filename = xstrprintf ("/proc/%d/task/%ld/stat",
-			 GET_PID (ptid), GET_LWP (ptid));
-  back_to = make_cleanup (xfree, filename);
-
-  f = fopen (filename, "r");
-  if (!f)
-    {
-      do_cleanups (back_to);
-      return -1;
-    }
-
-  make_cleanup_fclose (f);
-
-  for (;;)
-    {
-      int n;
-
-      content = xrealloc (content, content_read + 1024);
-      n = fread (content + content_read, 1, 1024, f);
-      content_read += n;
-      if (n < 1024)
-	{
-	  content[content_read] = '\0';
-	  break;
-	}
-    }
-
-  make_cleanup (xfree, content);
-
-  p = strchr (content, '(');
-
-  /* Skip ")".  */
-  if (p != NULL)
-    p = strchr (p, ')');
-  if (p != NULL)
-    p++;
-
-  /* If the first field after program name has index 0, then core number is
-     the field with index 36.  There's no constant for that anywhere.  */
-  if (p != NULL)
-    p = strtok_r (p, " ", &ts);
-  for (i = 0; p != NULL && i != 36; ++i)
-    p = strtok_r (NULL, " ", &ts);
-
-  if (p == NULL || sscanf (p, "%d", &core) == 0)
-    core = -1;
-
-  do_cleanups (back_to);
-
-  return core;
 }
 
 /* Return the cached value of the processor core for thread PTID.  */

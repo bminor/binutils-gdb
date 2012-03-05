@@ -200,9 +200,6 @@ void linux_nat_switch_fork (ptid_t new_ptid);
 /* Return the saved siginfo associated with PTID.  */
 struct siginfo *linux_nat_get_siginfo (ptid_t ptid);
 
-/* Compute and return the processor core of a given thread.  */
-int linux_nat_core_of_thread_1 (ptid_t ptid);
-
 /* Set alternative SIGTRAP-like events recognizer.  */
 void linux_nat_set_status_is_event (struct target_ops *t,
 				    int (*status_is_event) (int status));

@@ -45,6 +45,8 @@
 #include "gdb_assert.h"
 #include "gdb_dirent.h"
 
+/* Compute and return the processor core of a given thread.  */
+
 int
 linux_common_core_of_thread (ptid_t ptid)
 {

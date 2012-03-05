@@ -40,6 +40,7 @@
 #include "observer.h"
 #include "linux-nat.h"
 #include "linux-procfs.h"
+#include "linux-osdata.h"
 
 #include <signal.h>
 
@@ -1603,7 +1604,7 @@ thread_db_find_new_threads_1 (ptid_t ptid)
 static int
 update_thread_core (struct lwp_info *info, void *closure)
 {
-  info->core = linux_nat_core_of_thread_1 (info->ptid);
+  info->core = linux_common_core_of_thread (info->ptid);
   return 0;
 }
 

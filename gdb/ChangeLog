@@ -1,3 +1,16 @@
+2012-03-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* common/linux-osdata.c (linux_common_core_of_thread): New function
+	comment.
+	* linux-nat.c (linux_nat_wait_1): Replace linux_nat_core_of_thread_1
+	call by linux_common_core_of_thread.
+	(linux_nat_core_of_thread_1): Remove.
+	* linux-nat.h (linux_nat_core_of_thread_1): Remove declaration.
+	* linux-thread-db.c: Include linux-osdata.h.
+	(update_thread_core): Replace linux_nat_core_of_thread_1 call by
+	linux_common_core_of_thread.
+
 2012-03-05  Tom Tromey  <tromey@redhat.com>
 
 	* value.c (value_primitive_field): Don't fetch contents for
