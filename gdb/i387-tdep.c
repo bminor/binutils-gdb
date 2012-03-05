@@ -790,6 +790,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
       all = x87 | sse | avxh
     } regclass;
 
+  gdb_assert (regs != NULL);
   gdb_assert (tdep->st0_regnum >= I386_ST0_REGNUM);
   gdb_assert (tdep->num_xmm_regs > 0);
 
@@ -807,7 +808,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
   else
     regclass = none;
 
-  if (regs != NULL && regclass != none)
+  if (regclass != none)
     {
       /* Get `xstat_bv'.  */
       const gdb_byte *xstate_bv_p = XSAVE_XSTATE_BV_ADDR (regs);
@@ -826,11 +827,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
      time in a program.  This means that from the user-space programs'
      perspective, it's the same as if the registers have always been
      zero from the start of the program.  Therefore, the debugger
-     should provide the same illusion to the user.
-
-     Note however, the case when REGS is NULL is a different case.
-     That case means we do not have access to the x87 states, so we
-     should mark the registers as unavailable (by supplying NULL).  */
+     should provide the same illusion to the user.  */
 
   switch (regclass)
     {
@@ -839,7 +836,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 
     case avxh:
       if ((clear_bv & I386_XSTATE_AVX))
-	regcache_raw_supply (regcache, regnum, regs == NULL ? NULL : zero);
+	regcache_raw_supply (regcache, regnum, zero);
       else
 	regcache_raw_supply (regcache, regnum,
 			     XSAVE_AVXH_ADDR (tdep, regs, regnum));
@@ -847,7 +844,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 
     case sse:
       if ((clear_bv & I386_XSTATE_SSE))
-	regcache_raw_supply (regcache, regnum, regs == NULL ? NULL : zero);
+	regcache_raw_supply (regcache, regnum, zero);
       else
 	regcache_raw_supply (regcache, regnum,
 			     FXSAVE_ADDR (tdep, regs, regnum));
@@ -855,7 +852,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 
     case x87:
       if ((clear_bv & I386_XSTATE_X87))
-	regcache_raw_supply (regcache, regnum, regs == NULL ? NULL : zero);
+	regcache_raw_supply (regcache, regnum, zero);
       else
 	regcache_raw_supply (regcache, regnum,
 			     FXSAVE_ADDR (tdep, regs, regnum));
@@ -870,7 +867,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	      for (i = I387_YMM0H_REGNUM (tdep);
 		   i < I387_YMMENDH_REGNUM (tdep);
 		   i++)
-		regcache_raw_supply (regcache, i, regs == NULL ? NULL : zero);
+		regcache_raw_supply (regcache, i, zero);
 	    }
 	  else
 	    {
@@ -890,7 +887,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	      for (i = I387_XMM0_REGNUM (tdep);
 		   i < I387_MXCSR_REGNUM (tdep);
 		   i++)
-		regcache_raw_supply (regcache, i, regs == NULL ? NULL : zero);
+		regcache_raw_supply (regcache, i, zero);
 	    }
 	  else
 	    {
@@ -909,7 +906,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	      for (i = I387_ST0_REGNUM (tdep);
 		   i < I387_FCTRL_REGNUM (tdep);
 		   i++)
-		regcache_raw_supply (regcache, i, regs == NULL ? NULL : zero);
+		regcache_raw_supply (regcache, i, zero);
 	    }
 	  else
 	    {
@@ -926,12 +923,6 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
   for (i = I387_FCTRL_REGNUM (tdep); i < I387_XMM0_REGNUM (tdep); i++)
     if (regnum == -1 || regnum == i)
       {
-	if (regs == NULL)
-	  {
-	    regcache_raw_supply (regcache, i, NULL);
-	    continue;
-	  }
-
 	/* Most of the FPU control registers occupy only 16 bits in
 	   the xsave extended state.  Give those a special treatment.  */
 	if (i != I387_FIOFF_REGNUM (tdep)
@@ -982,10 +973,8 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
       }
 
   if (regnum == I387_MXCSR_REGNUM (tdep) || regnum == -1)
-    {
-      p = regs == NULL ? NULL : FXSAVE_MXCSR_ADDR (regs);
-      regcache_raw_supply (regcache, I387_MXCSR_REGNUM (tdep), p);
-    }
+    regcache_raw_supply (regcache, I387_MXCSR_REGNUM (tdep),
+			 FXSAVE_MXCSR_ADDR (regs));
 }
 
 /* Similar to i387_collect_fxsave, but use XSAVE extended state.  */

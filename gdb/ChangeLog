@@ -1,3 +1,8 @@
+2012-03-05  Pedro Alves  <palves@redhat.com>
+
+	* i387-tdep.c (i387_supply_xsave): Assert the xsave section buffer
+	is not NULL, and remove resulting dead code.
+
 2012-03-05  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* sh-tdep.c (sh_skip_prologue): Provide an upper limit on the function
