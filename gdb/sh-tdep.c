@@ -535,22 +535,18 @@ sh_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 
 static CORE_ADDR
 sh_analyze_prologue (struct gdbarch *gdbarch,
-		     CORE_ADDR pc, CORE_ADDR current_pc,
+		     CORE_ADDR pc, CORE_ADDR limit_pc,
 		     struct sh_frame_cache *cache, ULONGEST fpscr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST inst;
-  CORE_ADDR opc;
   int offset;
   int sav_offset = 0;
   int r3_val = 0;
   int reg, sav_reg = -1;
 
-  if (pc >= current_pc)
-    return current_pc;
-
   cache->uses_fp = 0;
-  for (opc = pc + (2 * 28); pc < opc; pc += 2)
+  for (; pc < limit_pc; pc += 2)
     {
       inst = read_memory_unsigned_integer (pc, 2, byte_order);
       /* See where the registers will be saved to.  */
@@ -615,7 +611,8 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
 		}
 	    }
 	}
-      else if (IS_MOVI20 (inst))
+      else if (IS_MOVI20 (inst)
+	       && (pc + 2 < limit_pc))
         {
 	  if (sav_reg < 0)
 	    {
@@ -657,14 +654,17 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
 	}
       else if (IS_MOV_SP_FP (inst))
 	{
+	  pc += 2;
+	  /* Don't go any further than six more instructions.  */
+	  limit_pc = min (limit_pc, pc + (2 * 6));
+
 	  cache->uses_fp = 1;
 	  /* At this point, only allow argument register moves to other
 	     registers or argument register moves to @(X,fp) which are
 	     moving the register arguments onto the stack area allocated
 	     by a former add somenumber to SP call.  Don't allow moving
 	     to an fp indirect address above fp + cache->sp_offset.  */
-	  pc += 2;
-	  for (opc = pc + 12; pc < opc; pc += 2)
+	  for (; pc < limit_pc; pc += 2)
 	    {
 	      inst = read_memory_integer (pc, 2, byte_order);
 	      if (IS_MOV_ARG_TO_IND_R14 (inst))
@@ -696,9 +696,12 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
 	     jsr, which will be very confusing.  Most likely the next
 	     instruction is going to be IS_MOV_SP_FP in the delay slot.  If
 	     so, note that before returning the current pc.  */
-	  inst = read_memory_integer (pc + 2, 2, byte_order);
-	  if (IS_MOV_SP_FP (inst))
-	    cache->uses_fp = 1;
+	  if (pc + 2 < limit_pc)
+	    {
+	      inst = read_memory_integer (pc + 2, 2, byte_order);
+	      if (IS_MOV_SP_FP (inst))
+		cache->uses_fp = 1;
+	    }
 	  break;
 	}
 #if 0		/* This used to just stop when it found an instruction
@@ -717,13 +720,13 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
 static CORE_ADDR
 sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  CORE_ADDR post_prologue_pc, func_addr;
+  CORE_ADDR post_prologue_pc, func_addr, func_end_addr, limit_pc;
   struct sh_frame_cache cache;
 
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
      is greater.  */
-  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
+  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end_addr))
     {
       post_prologue_pc = skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
@@ -733,8 +736,21 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   /* Can't determine prologue from the symbol table, need to examine
      instructions.  */
 
+  /* Find an upper limit on the function prologue using the debug
+     information.  If the debug information could not be used to provide
+     that bound, then use an arbitrary large number as the upper bound.  */
+  limit_pc = skip_prologue_using_sal (gdbarch, pc);
+  if (limit_pc == 0)
+    /* Don't go any further than 28 instructions.  */
+    limit_pc = pc + (2 * 28);
+
+  /* Do not allow limit_pc to be past the function end, if we know
+     where that end is...  */
+  if (func_end_addr != 0)
+    limit_pc = min (limit_pc, func_end_addr);
+
   cache.sp_offset = -4;
-  post_prologue_pc = sh_analyze_prologue (gdbarch, pc, (CORE_ADDR) -1, &cache, 0);
+  post_prologue_pc = sh_analyze_prologue (gdbarch, pc, limit_pc, &cache, 0);
   if (cache.uses_fp)
     pc = post_prologue_pc;
 
