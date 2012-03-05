@@ -1,3 +1,7 @@
+2012-03-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS: List Maciej W. Rozycki as the mips maintainer.
+
 2012-03-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

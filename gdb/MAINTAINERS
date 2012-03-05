@@ -293,6 +293,7 @@ the native maintainer when resolving ABI issues.
 			Michael Eager		eager@eagercon.com
 
 	mips		--target=mips-elf ,-Werror
+			Maciej W. Rozycki	macro@codesourcery.com
 
 	mn10300		--target=mn10300-elf broken
 			(sim/ dies with make -j)
