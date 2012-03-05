@@ -241,7 +241,7 @@ build_link_order (lang_statement_union_type *statement)
 	   attached */
 	asection *i = statement->input_section.section;
 
-	if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+	if (!((lang_input_statement_type *) i->owner->usrdata)->flags.just_syms
 	    && (i->flags & SEC_EXCLUDE) == 0)
 	  {
 	    asection *output_section = i->output_section;

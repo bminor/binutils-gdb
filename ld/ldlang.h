@@ -1,6 +1,6 @@
 /* ldlang.h - linker command language support
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -228,36 +228,16 @@ typedef struct
   bfd_vma output_offset;
 } lang_reloc_statement_type;
 
-typedef struct lang_input_statement_struct
+struct lang_input_statement_flags
 {
-  lang_statement_header_type header;
-  /* Name of this file.  */
-  const char *filename;
-  /* Name to use for the symbol giving address of text start.
-     Usually the same as filename, but for a file spec'd with
-     -l this is the -l switch itself rather than the filename.  */
-  const char *local_sym_name;
-
-  bfd *the_bfd;
-
-  struct flag_info *section_flag_list;
-
-  /* Point to the next file - whatever it is, wanders up and down
-     archives */
-  union lang_statement_union *next;
-
-  /* Point to the next file, but skips archive contents.  */
-  union lang_statement_union *next_real_file;
-
-  const char *target;
-
+  /* 1 means this file was specified in a -l option.  */
   unsigned int maybe_archive : 1;
 
   /* 1 means search a set of directories for this file.  */
-  unsigned int search_dirs_flag : 1;
+  unsigned int search_dirs : 1;
 
   /* 1 means this was found in a search directory marked as sysrooted,
-     if search_dirs_flag is false, otherwise, that it should be
+     if search_dirs is false, otherwise, that it should be
      searched in ld_sysroot before any other location, as long as it
      starts with a slash.  */
   unsigned int sysrooted : 1;
@@ -265,7 +245,7 @@ typedef struct lang_input_statement_struct
   /* 1 means this is base file of incremental load.
      Do not load this file's text or data.
      Also default text_start to after this file's bss.  */
-  unsigned int just_syms_flag : 1;
+  unsigned int just_syms : 1;
 
   /* Whether to search for this entry as a dynamic archive.  */
   unsigned int dynamic : 1;
@@ -300,7 +280,32 @@ typedef struct lang_input_statement_struct
   /* Set if reloading an --as-needed lib.  */
   unsigned int reload : 1;
 #endif /* ENABLE_PLUGINS */
+};
 
+typedef struct lang_input_statement_struct
+{
+  lang_statement_header_type header;
+  /* Name of this file.  */
+  const char *filename;
+  /* Name to use for the symbol giving address of text start.
+     Usually the same as filename, but for a file spec'd with
+     -l this is the -l switch itself rather than the filename.  */
+  const char *local_sym_name;
+
+  bfd *the_bfd;
+
+  struct flag_info *section_flag_list;
+
+  /* Point to the next file - whatever it is, wanders up and down
+     archives */
+  union lang_statement_union *next;
+
+  /* Point to the next file, but skips archive contents.  */
+  union lang_statement_union *next_real_file;
+
+  const char *target;
+
+  struct lang_input_statement_flags flags;
 } lang_input_statement_type;
 
 typedef struct
@@ -416,8 +421,6 @@ struct lang_phdr
   etree_type *flags;
 };
 
-extern struct lang_phdr *lang_phdr_list;
-
 /* This structure is used to hold a list of sections which may not
    cross reference each other.  */
 
@@ -434,8 +437,6 @@ struct lang_nocrossrefs
   struct lang_nocrossrefs *next;
   lang_nocrossref_type *list;
 };
-
-extern struct lang_nocrossrefs *nocrossref_list;
 
 /* This structure is used to hold a list of input section names which
    will not match an output section in the linker script.  */
@@ -467,9 +468,12 @@ struct orphan_save
   lang_output_section_statement_type **os_tail;
 };
 
+extern struct lang_phdr *lang_phdr_list;
+extern struct lang_nocrossrefs *nocrossref_list;
 extern const char *output_target;
 extern lang_output_section_statement_type *abs_output_section;
 extern lang_statement_list_type lang_output_section_statement;
+extern struct lang_input_statement_flags input_flags;
 extern bfd_boolean lang_has_input_file;
 extern etree_type *base;
 extern lang_statement_list_type *stat_ptr;
@@ -482,7 +486,6 @@ extern lang_statement_list_type file_chain;
 extern lang_statement_list_type input_file_chain;
 
 extern int lang_statement_iteration;
-extern bfd_boolean missing_file;
 
 extern void lang_init
   (void);

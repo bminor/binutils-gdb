@@ -72,27 +72,29 @@ static search_arch_type **search_arch_tail_ptr = &search_arch_head;
 static bfd_boolean
 is_sysrooted_pathname (const char *name, bfd_boolean notsame)
 {
-  char * realname = ld_canon_sysroot ? lrealpath (name) : NULL;
+  char *realname;
   int len;
   bfd_boolean result;
 
-  if (! realname)
+  if (ld_canon_sysroot == NULL)
     return FALSE;
 
+  realname = lrealpath (name);
   len = strlen (realname);
+  result = FALSE;
+  if (len == ld_canon_sysroot_len)
+    result = !notsame;
+  else if (len > ld_canon_sysroot_len
+	   && IS_DIR_SEPARATOR (realname[ld_canon_sysroot_len]))
+    {
+      result = TRUE;
+      realname[ld_canon_sysroot_len] = '\0';
+    }
 
-  if (((! notsame && len == ld_canon_sysroot_len)
-       || (len >= ld_canon_sysroot_len
-	   && IS_DIR_SEPARATOR (realname[ld_canon_sysroot_len])
-	   && (realname[ld_canon_sysroot_len] = '\0') == '\0'))
-      && FILENAME_CMP (ld_canon_sysroot, realname) == 0)
-    result = TRUE;
-  else
-    result = FALSE;
+  if (result)
+    result = FILENAME_CMP (ld_canon_sysroot, realname) == 0;
 
-  if (realname)
-    free (realname);
-
+  free (realname);
   return result;
 }
 
@@ -164,7 +166,7 @@ ldfile_try_open_bfd (const char *attempt,
      checks out compatible, do not exit early returning TRUE, or
      the plugins will not get a chance to claim the file.  */
 
-  if (entry->search_dirs_flag || !entry->dynamic)
+  if (entry->flags.search_dirs || !entry->flags.dynamic)
     {
       bfd *check;
 
@@ -178,7 +180,7 @@ ldfile_try_open_bfd (const char *attempt,
 	  if (! bfd_check_format (check, bfd_object))
 	    {
 	      if (check == entry->the_bfd
-		  && entry->search_dirs_flag
+		  && entry->flags.search_dirs
 		  && bfd_get_error () == bfd_error_file_not_recognized
 		  && ! ldemul_unrecognized_file (entry))
 		{
@@ -274,7 +276,7 @@ ldfile_try_open_bfd (const char *attempt,
 	      goto success;
 	    }
 
-	  if (!entry->dynamic && (entry->the_bfd->flags & DYNAMIC) != 0)
+	  if (!entry->flags.dynamic && (entry->the_bfd->flags & DYNAMIC) != 0)
 	    {
 	      einfo (_("%F%P: attempted static link of dynamic object `%s'\n"),
 		     attempt);
@@ -283,7 +285,7 @@ ldfile_try_open_bfd (const char *attempt,
 	      return FALSE;
 	    }
 
-	  if (entry->search_dirs_flag
+	  if (entry->flags.search_dirs
 	      && !bfd_arch_get_compatible (check, link_info.output_bfd,
 					   command_line.accept_unknown_input_arch)
 	      /* XCOFF archives can have 32 and 64 bit objects.  */
@@ -348,9 +350,9 @@ ldfile_open_file_search (const char *arch,
 
   /* If this is not an archive, try to open it in the current
      directory first.  */
-  if (! entry->maybe_archive)
+  if (! entry->flags.maybe_archive)
     {
-      if (entry->sysrooted && IS_ABSOLUTE_PATH (entry->filename))
+      if (entry->flags.sysrooted && IS_ABSOLUTE_PATH (entry->filename))
 	{
 	  char *name = concat (ld_sysroot, entry->filename,
 			       (const char *) NULL);
@@ -363,8 +365,9 @@ ldfile_open_file_search (const char *arch,
 	}
       else if (ldfile_try_open_bfd (entry->filename, entry))
 	{
-	  entry->sysrooted = IS_ABSOLUTE_PATH (entry->filename)
-	    && is_sysrooted_pathname (entry->filename, TRUE);
+	  entry->flags.sysrooted
+	    = (IS_ABSOLUTE_PATH (entry->filename)
+	       && is_sysrooted_pathname (entry->filename, TRUE));
 	  return TRUE;
 	}
 
@@ -376,16 +379,16 @@ ldfile_open_file_search (const char *arch,
     {
       char *string;
 
-      if (entry->dynamic && ! link_info.relocatable)
+      if (entry->flags.dynamic && ! link_info.relocatable)
 	{
 	  if (ldemul_open_dynamic_archive (arch, search, entry))
 	    {
-	      entry->sysrooted = search->sysrooted;
+	      entry->flags.sysrooted = search->sysrooted;
 	      return TRUE;
 	    }
 	}
 
-      if (entry->maybe_archive)
+      if (entry->flags.maybe_archive)
 	string = concat (search->name, slash, lib, entry->filename,
 			 arch, suffix, (const char *) NULL);
       else
@@ -395,7 +398,7 @@ ldfile_open_file_search (const char *arch,
       if (ldfile_try_open_bfd (string, entry))
 	{
 	  entry->filename = string;
-	  entry->sysrooted = search->sysrooted;
+	  entry->flags.sysrooted = search->sysrooted;
 	  return TRUE;
 	}
 
@@ -416,7 +419,7 @@ ldfile_open_file (lang_input_statement_type *entry)
   if (entry->the_bfd != NULL)
     return;
 
-  if (! entry->search_dirs_flag)
+  if (! entry->flags.search_dirs)
     {
       if (ldfile_try_open_bfd (entry->filename, entry))
 	return;
@@ -427,8 +430,8 @@ ldfile_open_file (lang_input_statement_type *entry)
       else
 	einfo (_("%P: cannot find %s: %E\n"), entry->local_sym_name);
 
-      entry->missing_file = TRUE;
-      missing_file = TRUE;
+      entry->flags.missing_file = TRUE;
+      input_flags.missing_file = TRUE;
     }
   else
     {
@@ -454,18 +457,18 @@ ldfile_open_file (lang_input_statement_type *entry)
       /* If we have found the file, we don't need to search directories
 	 again.  */
       if (found)
-	entry->search_dirs_flag = FALSE;
+	entry->flags.search_dirs = FALSE;
       else
 	{
-	  if (entry->sysrooted
+	  if (entry->flags.sysrooted
 	       && ld_sysroot
 	       && IS_ABSOLUTE_PATH (entry->local_sym_name))
 	    einfo (_("%P: cannot find %s inside %s\n"),
 		   entry->local_sym_name, ld_sysroot);
 	  else
 	    einfo (_("%P: cannot find %s\n"), entry->local_sym_name);
-	  entry->missing_file = TRUE;
-	  missing_file = TRUE;
+	  entry->flags.missing_file = TRUE;
+	  input_flags.missing_file = TRUE;
 	}
     }
 }

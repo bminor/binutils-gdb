@@ -250,9 +250,6 @@ typedef struct {
   bfd_boolean magic_demand_paged;
   bfd_boolean make_executable;
 
-  /* If TRUE, doing a dynamic link.  */
-  bfd_boolean dynamic_link;
-
   /* If TRUE, -shared is supported.  */
   /* ??? A better way to do this is perhaps to define this in the
      ld_emulation_xfer_struct since this is really a target dependent

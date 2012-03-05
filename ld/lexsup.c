@@ -775,10 +775,10 @@ parse_args (unsigned argc, char **argv)
 	     ``use only shared libraries'' but, then, we don't
 	     currently support shared libraries on HP/UX anyhow.  */
 	  if (strcmp (optarg, "archive") == 0)
-	    config.dynamic_link = FALSE;
+	    input_flags.dynamic = FALSE;
 	  else if (strcmp (optarg, "shared") == 0
 		   || strcmp (optarg, "default") == 0)
-	    config.dynamic_link = TRUE;
+	    input_flags.dynamic = TRUE;
 	  else
 	    einfo (_("%P%F: unrecognized -a option `%s'\n"), optarg);
 	  break;
@@ -807,10 +807,10 @@ parse_args (unsigned argc, char **argv)
 	  yyparse ();
 	  break;
 	case OPTION_CALL_SHARED:
-	  config.dynamic_link = TRUE;
+	  input_flags.dynamic = TRUE;
 	  break;
 	case OPTION_NON_SHARED:
-	  config.dynamic_link = FALSE;
+	  input_flags.dynamic = FALSE;
 	  break;
 	case OPTION_CREF:
 	  command_line.cref = TRUE;
@@ -934,17 +934,17 @@ parse_args (unsigned argc, char **argv)
 	case 'N':
 	  config.text_read_only = FALSE;
 	  config.magic_demand_paged = FALSE;
-	  config.dynamic_link = FALSE;
+	  input_flags.dynamic = FALSE;
 	  break;
 	case OPTION_NO_OMAGIC:
 	  config.text_read_only = TRUE;
 	  config.magic_demand_paged = TRUE;
-	  /* NB/ Does not set dynamic_link to TRUE.
+	  /* NB/ Does not set input_flags.dynamic to TRUE.
 	     Use --call-shared or -Bdynamic for this.  */
 	  break;
 	case 'n':
 	  config.magic_demand_paged = FALSE;
-	  config.dynamic_link = FALSE;
+	  input_flags.dynamic = FALSE;
 	  break;
 	case OPTION_NO_DEFINE_COMMON:
 	  command_line.inhibit_common_definition = TRUE;
@@ -1040,7 +1040,7 @@ parse_args (unsigned argc, char **argv)
 	  config.only_cmd_line_lib_dirs = TRUE;
 	  break;
 	case OPTION_NO_WHOLE_ARCHIVE:
-	  whole_archive = FALSE;
+	  input_flags.whole_archive = FALSE;
 	  break;
 	case 'O':
 	  /* FIXME "-O<non-digits> <value>" used to set the address of
@@ -1092,7 +1092,7 @@ parse_args (unsigned argc, char **argv)
 	  config.build_constructors = FALSE;
 	  config.magic_demand_paged = FALSE;
 	  config.text_read_only = FALSE;
-	  config.dynamic_link = FALSE;
+	  input_flags.dynamic = FALSE;
 	  break;
 	case 'R':
 	  /* The GNU linker traditionally uses -R to mean to include
@@ -1313,7 +1313,7 @@ parse_args (unsigned argc, char **argv)
 	  config.build_constructors = TRUE;
 	  config.magic_demand_paged = FALSE;
 	  config.text_read_only = FALSE;
-	  config.dynamic_link = FALSE;
+	  input_flags.dynamic = FALSE;
 	  break;
 	case 'u':
 	  ldlang_add_undef (optarg, TRUE);
@@ -1437,19 +1437,19 @@ parse_args (unsigned argc, char **argv)
 	  link_info.warn_alternate_em = TRUE;
 	  break;
 	case OPTION_WHOLE_ARCHIVE:
-	  whole_archive = TRUE;
+	  input_flags.whole_archive = TRUE;
 	  break;
 	case OPTION_ADD_DT_NEEDED_FOR_DYNAMIC:
-	  add_DT_NEEDED_for_dynamic = TRUE;
+	  input_flags.add_DT_NEEDED_for_dynamic = TRUE;
 	  break;
 	case OPTION_NO_ADD_DT_NEEDED_FOR_DYNAMIC:
-	  add_DT_NEEDED_for_dynamic = FALSE;
+	  input_flags.add_DT_NEEDED_for_dynamic = FALSE;
 	  break;
 	case OPTION_ADD_DT_NEEDED_FOR_REGULAR:
-	  add_DT_NEEDED_for_regular = TRUE;
+	  input_flags.add_DT_NEEDED_for_regular = TRUE;
 	  break;
 	case OPTION_NO_ADD_DT_NEEDED_FOR_REGULAR:
-	  add_DT_NEEDED_for_regular = FALSE;
+	  input_flags.add_DT_NEEDED_for_regular = FALSE;
 	  break;
 	case OPTION_WRAP:
 	  add_wrap (optarg);

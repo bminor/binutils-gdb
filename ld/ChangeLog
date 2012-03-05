@@ -1,3 +1,42 @@
+2012-03-06  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.h (struct lang_input_statement_flags): New, extract from..
+	(lang_input_statement_type): ..here.  New field "flags".
+	(input_flags): Declare.
+	(missing_file): Delete.
+	* ldmain.h (whole_archive): Delete.
+	(add_DT_NEEDED_for_regular, add_DT_NEEDED_for_dynamic): Delete.
+	* ld.h (ld_config_type <dynamic_link>): Delete.
+	* ldmain.c (whole_archive): Delete.
+	(add_DT_NEEDED_for_regular, add_DT_NEEDED_for_dynamic): Delete.
+	* ldlang.c (missing_file, ldlang_sysrooted_script): Delete.
+	(input_flags): New variable.  Replace all uses of config.dynamic_link,
+	missing_file, ldlang_sysrooted_script, whole_archive,
+	add_DT_NEEDED_for_regular and add_DT_NEEDED_for_dynamic with fields
+	from here.
+	* ldfile.c: Likewise.
+	* ldgram.y: Likewise.
+	* ldmain.c: Likewise.
+	* ldwrite.c: Likewise.
+	* lexsup.c: Likewise.
+	* plugin.c: Likewise.
+	* emultempl/aix.em: Likewise.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/scoreelf.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/vms.em: Likewise.
+	* ldlang.c (new_afile): Use memset to init zero fields.
+	(load_symbols): Simplify save and restore of flags around command
+	file processing.
+	* ldfile.c (is_sysrooted_pathname): Tidy.
+
 2012-03-05  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.tgt (mips64*el-*-freebsd*, mips64*-*-freebsd*)

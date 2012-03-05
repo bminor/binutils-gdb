@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2010
+#   Copyright 2010, 2012
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -29,7 +29,7 @@ static void
 gld${EMULATION_NAME}_before_parse (void)
 {
   ldfile_set_output_arch ("${ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
-  config.dynamic_link = TRUE;
+  input_flags.dynamic = TRUE;
   config.has_shared = FALSE; /* Not yet.  */
 }
 
@@ -54,7 +54,7 @@ gld${EMULATION_NAME}_open_dynamic_archive (const char *arch ATTRIBUTE_UNUSED,
 {
   char *string;
 
-  if (! entry->maybe_archive)
+  if (! entry->flags.maybe_archive)
     return FALSE;
 
   string = (char *) xmalloc (strlen (search->name)

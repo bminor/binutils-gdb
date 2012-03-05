@@ -435,7 +435,7 @@ build_toc_list (lang_statement_union_type *statement)
     {
       asection *i = statement->input_section.section;
 
-      if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+      if (!((lang_input_statement_type *) i->owner->usrdata)->flags.just_syms
 	  && (i->flags & SEC_EXCLUDE) == 0
 	  && i->output_section == toc_section)
 	{
@@ -453,7 +453,7 @@ build_section_lists (lang_statement_union_type *statement)
     {
       asection *i = statement->input_section.section;
 
-      if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+      if (!((lang_input_statement_type *) i->owner->usrdata)->flags.just_syms
 	  && (i->flags & SEC_EXCLUDE) == 0
 	  && i->output_section != NULL
 	  && i->output_section->owner == link_info.output_bfd)

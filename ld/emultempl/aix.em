@@ -10,7 +10,7 @@ fragment <<EOF
 
 /* AIX emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012
    Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    AIX support by Ian Lance Taylor <ian@cygnus.com>
@@ -145,7 +145,7 @@ gld${EMULATION_NAME}_before_parse (void)
 {
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
 
-  config.dynamic_link = TRUE;
+  input_flags.dynamic = TRUE;
   config.has_shared = TRUE;
 
   /* The link_info.[init|fini]_functions are initialized in ld/lexsup.c.
@@ -669,7 +669,7 @@ gld${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry)
       *flpp = n;
 
       ret = TRUE;
-      entry->loaded = TRUE;
+      entry->flags.loaded = TRUE;
     }
 
   fclose (e);
@@ -1505,7 +1505,7 @@ gld${EMULATION_NAME}_open_dynamic_archive (const char *arch,
 {
   char *path;
 
-  if (!entry->maybe_archive)
+  if (!entry->flags.maybe_archive)
     return FALSE;
 
   path = concat (search->name, "/lib", entry->filename, arch, ".a", NULL);

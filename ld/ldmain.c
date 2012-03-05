@@ -95,18 +95,6 @@ bfd_boolean trace_file_tries;
    instead of complaining if no input files are given.  */
 bfd_boolean version_printed;
 
-/* Nonzero means link in every member of an archive.  */
-bfd_boolean whole_archive;
-
-/* True means only create DT_NEEDED entries for dynamic libraries
-   if they actually satisfy some reference in a regular object.  */
-bfd_boolean add_DT_NEEDED_for_regular;
-
-/* True means create DT_NEEDED entries for dynamic libraries that
-   are DT_NEEDED by dynamic libraries specifically mentioned on
-   the command line.  */
-bfd_boolean add_DT_NEEDED_for_dynamic;
-
 /* TRUE if we should demangle symbol names.  */
 bfd_boolean demangling;
 
@@ -767,9 +755,9 @@ add_archive_element (struct bfd_link_info *info,
 	  file.filesize = arelt_size (abfd);
 	  file.fd = fd;
 	  plugin_maybe_claim (&file, input);
-	  if (input->claimed)
+	  if (input->flags.claimed)
 	    {
-	      input->claim_archive = TRUE;
+	      input->flags.claim_archive = TRUE;
 	      *subsbfd = input->the_bfd;
 	    }
 	}

@@ -1,5 +1,5 @@
 /* Plugin control for the GNU linker.
-   Copyright 2010, 2011 Free Software Foundation, Inc.
+   Copyright 2010, 2011, 2012 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -262,7 +262,7 @@ is_ir_dummy_bfd (const bfd *abfd)
      when processing DT_NEEDED dependencies.  */
   return (abfd
 	  && abfd->usrdata
-	  && ((lang_input_statement_type *)(abfd->usrdata))->claimed);
+	  && ((lang_input_statement_type *)(abfd->usrdata))->flags.claimed);
 }
 
 /* Helpers to convert between BFD and GOLD symbol formats.  */
@@ -873,7 +873,7 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
       if (entry->the_bfd->my_archive == NULL)
 	bfd_close (entry->the_bfd);
       entry->the_bfd = file->handle;
-      entry->claimed = TRUE;
+      entry->flags.claimed = TRUE;
       bfd_make_readable (entry->the_bfd);
     }
   else
@@ -881,7 +881,7 @@ plugin_maybe_claim (struct ld_plugin_input_file *file,
       /* If plugin didn't claim the file, we don't need the dummy bfd.
 	 Can't avoid speculatively creating it, alas.  */
       bfd_close_all_done (file->handle);
-      entry->claimed = FALSE;
+      entry->flags.claimed = FALSE;
     }
 }
 

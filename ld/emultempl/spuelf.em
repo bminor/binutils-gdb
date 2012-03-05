@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2006, 2007, 2008, 2009, 2010, 2011
+#   Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -579,7 +579,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
 
   /* Ensure bfd sections are excluded from the output.  */
   bfd_section_list_clear (entry->the_bfd);
-  entry->loaded = TRUE;
+  entry->flags.loaded = TRUE;
   return TRUE;
 }
 

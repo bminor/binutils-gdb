@@ -386,17 +386,20 @@ input_list:
 		{ lang_add_input_file($2,lang_input_file_is_l_enum,
 				 (char *)NULL); }
 	|	AS_NEEDED '('
-		  { $<integer>$ = add_DT_NEEDED_for_regular; add_DT_NEEDED_for_regular = TRUE; }
+		  { $<integer>$ = input_flags.add_DT_NEEDED_for_regular;
+		    input_flags.add_DT_NEEDED_for_regular = TRUE; }
 		     input_list ')'
-		  { add_DT_NEEDED_for_regular = $<integer>3; }
+		  { input_flags.add_DT_NEEDED_for_regular = $<integer>3; }
 	|	input_list ',' AS_NEEDED '('
-		  { $<integer>$ = add_DT_NEEDED_for_regular; add_DT_NEEDED_for_regular = TRUE; }
+		  { $<integer>$ = input_flags.add_DT_NEEDED_for_regular;
+		    input_flags.add_DT_NEEDED_for_regular = TRUE; }
 		     input_list ')'
-		  { add_DT_NEEDED_for_regular = $<integer>5; }
+		  { input_flags.add_DT_NEEDED_for_regular = $<integer>5; }
 	|	input_list AS_NEEDED '('
-		  { $<integer>$ = add_DT_NEEDED_for_regular; add_DT_NEEDED_for_regular = TRUE; }
+		  { $<integer>$ = input_flags.add_DT_NEEDED_for_regular;
+		    input_flags.add_DT_NEEDED_for_regular = TRUE; }
 		     input_list ')'
-		  { add_DT_NEEDED_for_regular = $<integer>4; }
+		  { input_flags.add_DT_NEEDED_for_regular = $<integer>4; }
 	;
 
 sections:
