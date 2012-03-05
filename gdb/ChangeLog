@@ -1,5 +1,7 @@
 2012-03-05  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/13766
+
 	* i387-tdep.c (i387_supply_xsave): If we have an xsave buffer, and
 	the register state is clear, supply explicit zero, instead of
 	marking the register unavailable.
