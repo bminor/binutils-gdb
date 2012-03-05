@@ -1,0 +1,4 @@
+2012-03-05  Tristan Gingold  <gingold@adacore.com>
+
+	* buildvms.com: New file.
+	* ia64vms-stub.c: New file.
