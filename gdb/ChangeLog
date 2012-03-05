@@ -1,3 +1,9 @@
+2012-03-05  Tristan Gingold  <gingold@adacore.com>
+
+        * osabi.c (gdb_osabi_names): Add OpenVMS.
+        (generic_elf_osabi_sniffer): Likewise.
+        * defs.h (gdb_osabi): Add GDB_OSABI_OPENVMS.
+
 2012-03-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Removed unused code.

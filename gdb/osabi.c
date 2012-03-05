@@ -72,6 +72,7 @@ static const char * const gdb_osabi_names[] =
   "DICOS",
   "Darwin",
   "Symbian",
+  "OpenVMS",
 
   "<invalid>"
 };
@@ -548,6 +549,10 @@ generic_elf_osabi_sniffer (bfd *abfd)
       bfd_map_over_sections (abfd,
 			     generic_elf_osabi_sniff_abi_tag_sections,
 			     &osabi);
+      break;
+
+    case ELFOSABI_OPENVMS:
+      osabi = GDB_OSABI_OPENVMS;
       break;
     }
 
