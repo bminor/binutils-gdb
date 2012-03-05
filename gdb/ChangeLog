@@ -1,5 +1,9 @@
 2012-03-05  Tristan Gingold  <gingold@adacore.com>
 
+	* NEWS: Mention OpenVMS ia64 new target.
+
+2012-03-05  Tristan Gingold  <gingold@adacore.com>
+
 	* ia64-tdep.h: Include libunwind-frame.h and libunwind-ia64.h.
 	(ia64_unw_accessors, ia64_unw_rse_accessors)
 	(ia64_libunwind_descr): Declare.

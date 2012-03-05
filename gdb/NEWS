@@ -71,6 +71,7 @@
 * New targets
 
 Renesas RL78			rl78-*-elf
+HP OpenVMS ia64			ia64-hp-openvms*
 
 * GDBserver supports evaluation of breakpoint conditions.  When
   support is advertised by GDBserver, GDB may be told to send the
