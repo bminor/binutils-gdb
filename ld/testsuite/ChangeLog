@@ -1,3 +1,9 @@
+2012-03-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/13803
+	* ld-arm/fix-arm1176-off.d, ld-arm/fix-arm1176-on.d: Regexpify
+	address of func_to_branch_to.
+
 2012-03-01  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/13789
