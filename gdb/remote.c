@@ -1254,6 +1254,7 @@ enum {
   PACKET_qXfer_threads,
   PACKET_qXfer_statictrace_read,
   PACKET_qXfer_traceframe_info,
+  PACKET_qXfer_uib,
   PACKET_qGetTIBAddr,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
@@ -3834,6 +3835,8 @@ static struct protocol_feature remote_protocol_features[] = {
     remote_enable_disable_tracepoint_feature, -1 },
   { "qXfer:fdpic:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_fdpic },
+  { "qXfer:uib:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_uib },
   { "QDisableRandomization", PACKET_DISABLE, remote_supported_packet,
     PACKET_QDisableRandomization },
   { "QAgent", PACKET_DISABLE, remote_supported_packet, PACKET_QAgent},
@@ -8484,6 +8487,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
     case TARGET_OBJECT_FDPIC:
       return remote_read_qxfer (ops, "fdpic", annex, readbuf, offset, len,
 				&remote_protocol_packets[PACKET_qXfer_fdpic]);
+
+    case TARGET_OBJECT_OPENVMS_UIB:
+      return remote_read_qxfer (ops, "uib", annex, readbuf, offset, len,
+				&remote_protocol_packets[PACKET_qXfer_uib]);
+
     default:
       return -1;
     }
@@ -11315,6 +11323,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd
     (&remote_protocol_packets[PACKET_qXfer_traceframe_info],
      "qXfer:trace-frame-info:read", "traceframe-info", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_uib],
+			 "qXfer:uib:read", "unwind-info-block", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",

@@ -1,3 +1,7 @@
+2012-03-05  Tristan Gingold  <gingold@adacore.com>
+
+	* gdb.texinfo (General Query Packets): Document xfer:uib:read.
+
 2012-03-03  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (In-Process Agent): New node.

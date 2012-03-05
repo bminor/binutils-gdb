@@ -280,7 +280,9 @@ enum target_object
   /* Load maps for FDPIC systems.  */
   TARGET_OBJECT_FDPIC,
   /* Darwin dynamic linker info data.  */
-  TARGET_OBJECT_DARWIN_DYLD_INFO
+  TARGET_OBJECT_DARWIN_DYLD_INFO,
+  /* OpenVMS Unwind Information Block.  */
+  TARGET_OBJECT_OPENVMS_UIB
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 

@@ -1,8 +1,17 @@
 2012-03-05  Tristan Gingold  <gingold@adacore.com>
 
-        * osabi.c (gdb_osabi_names): Add OpenVMS.
-        (generic_elf_osabi_sniffer): Likewise.
-        * defs.h (gdb_osabi): Add GDB_OSABI_OPENVMS.
+	* target.h (target_object): Add TARGET_OBJECT_OPENVMS_UIB.
+	* remote.c (PACKET_qXfer_uib): New enum value.
+	(remote_protocol_features): Add entry for PACKET_qXfer_uib.
+	(remote_xfer_partial): Handle TARGET_OBJECT_OPENVMS_UIB.
+	(_initialize_remote): Call add_packet_config_cmd for
+	xfer:uib packet.
+
+2012-03-05  Tristan Gingold  <gingold@adacore.com>
+
+	* osabi.c (gdb_osabi_names): Add OpenVMS.
+	(generic_elf_osabi_sniffer): Likewise.
+	* defs.h (gdb_osabi): Add GDB_OSABI_OPENVMS.
 
 2012-03-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 

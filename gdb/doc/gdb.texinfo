@@ -35220,6 +35220,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:uib:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{qXfer:fdpic:read}
 @tab No
 @tab @samp{-}
@@ -35358,6 +35363,10 @@ The remote stub understands the @samp{qXfer:threads:read} packet
 @item qXfer:traceframe-info:read
 The remote stub understands the @samp{qXfer:traceframe-info:read}
 packet (@pxref{qXfer traceframe info read}).
+
+@item qXfer:uib:read
+The remote stub understands the @samp{qXfer:uib:read}
+packet (@pxref{qXfer unwind info block}).
 
 @item qXfer:fdpic:read
 The remote stub understands the @samp{qXfer:fdpic:read}
@@ -35653,6 +35662,14 @@ Return a description of the current traceframe's contents.
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:uib:read:@var{pc}:@var{offset},@var{length}
+@anchor{qXfer unwind info block}
+
+Return the unwind information block for @var{pc}.  This packet is used
+on OpenVMS/ia64 to ask the kernel unwind information.
+
+This packet is not probed by default.
 
 @item qXfer:fdpic:read:@var{annex}:@var{offset},@var{length}
 @anchor{qXfer fdpic loadmap read}
