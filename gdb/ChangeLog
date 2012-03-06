@@ -1,3 +1,8 @@
+2012-03-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (dwarf2_get_die_type): Pass absolute offset
+	in call to get_die_type_at_offset.
+
 2012-03-06  Stan Shebs  <stan@codesourcery.com>
 
 	* mi/mi-cmd-break.c: Enforce coding standards, fix comments.

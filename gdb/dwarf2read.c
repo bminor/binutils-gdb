@@ -14269,7 +14269,7 @@ dwarf2_get_die_type (unsigned int die_offset,
 		     struct dwarf2_per_cu_data *per_cu)
 {
   dw2_setup (per_cu->objfile);
-  return get_die_type_at_offset (die_offset, per_cu);
+  return get_die_type_at_offset (per_cu->offset + die_offset, per_cu);
 }
 
 /* Follow the signature attribute ATTR in SRC_DIE.
