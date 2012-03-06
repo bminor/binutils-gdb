@@ -1,5 +1,9 @@
 2012-03-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/bp_on_var: New testcase.
+
+2012-03-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/bp_enum_homonym: New testcase.
 
 2012-03-06  Yao Qi  <yao@codesourcery.com>
