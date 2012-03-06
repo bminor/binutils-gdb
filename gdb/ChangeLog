@@ -1,3 +1,8 @@
+2012-03-06  Tom Tromey  <tromey@redhat.com>
+
+	* proc-service.c (ps_pglobal_lookup): Set the current program
+	space.
+
 2012-03-06  Pedro Alves  <palves@redhat.com>
 
 	* gregset.h [HAVE_SYS_PROCFS_H]: Include <sys/procfs.h>.

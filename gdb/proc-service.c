@@ -201,14 +201,24 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
 		   const char *name, psaddr_t *sym_addr)
 {
   struct minimal_symbol *ms;
+  struct cleanup *old_chain = save_current_program_space ();
+  struct inferior *inf = find_inferior_pid (ptid_get_pid (ph->ptid));
+  ps_err_e result;
+
+  set_current_program_space (inf->pspace);
 
   /* FIXME: kettenis/2000-09-03: What should we do with OBJ?  */
   ms = lookup_minimal_symbol (name, NULL, NULL);
   if (ms == NULL)
-    return PS_NOSYM;
+    result = PS_NOSYM;
+  else
+    {
+      *sym_addr = core_addr_to_ps_addr (SYMBOL_VALUE_ADDRESS (ms));
+      result = PS_OK;
+    }
 
-  *sym_addr = core_addr_to_ps_addr (SYMBOL_VALUE_ADDRESS (ms));
-  return PS_OK;
+  do_cleanups (old_chain);
+  return result;
 }
 
 /* Read SIZE bytes from the target process PH at address ADDR and copy
