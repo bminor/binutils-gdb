@@ -1,3 +1,7 @@
+2012-03-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/bp_enum_homonym: New testcase.
+
 2012-03-06  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/ftrace.exp (test_fast_tracepoints): Run test on target
