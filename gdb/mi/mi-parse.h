@@ -62,7 +62,7 @@ struct mi_parse
 
 extern struct mi_parse *mi_parse (char *cmd, char **token);
 
-/* Free a command returned by mi_parse_command. */
+/* Free a command returned by mi_parse_command.  */
 
 extern void mi_parse_free (struct mi_parse *cmd);
 

@@ -39,11 +39,12 @@ static void list_args_or_locals (enum what_to_list what,
 				 enum print_values values,
 				 struct frame_info *fi);
 
-/* Print a list of the stack frames. Args can be none, in which case
+/* Print a list of the stack frames.  Args can be none, in which case
    we want to print the whole backtrace, or a pair of numbers
    specifying the frame numbers at which to start and stop the
-   display. If the two numbers are equal, a single frame will be
-   displayed. */
+   display.  If the two numbers are equal, a single frame will be
+   displayed.  */
+
 void
 mi_cmd_stack_list_frames (char *command, char **argv, int argc)
 {
@@ -64,14 +65,14 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
   else
     {
       /* Called with no arguments, it means we want the whole
-         backtrace. */
+         backtrace.  */
       frame_low = -1;
       frame_high = -1;
     }
 
   /* Let's position fi on the frame at which to start the
      display. Could be the innermost frame if the whole stack needs
-     displaying, or if frame_low is 0. */
+     displaying, or if frame_low is 0.  */
   for (i = 0, fi = get_current_frame ();
        fi && i < frame_low;
        i++, fi = get_prev_frame (fi));
@@ -81,15 +82,15 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
 
   cleanup_stack = make_cleanup_ui_out_list_begin_end (current_uiout, "stack");
 
-  /* Now let;s print the frames up to frame_high, or until there are
-     frames in the stack. */
+  /* Now let's print the frames up to frame_high, or until there are
+     frames in the stack.  */
   for (;
        fi && (i <= frame_high || frame_high == -1);
        i++, fi = get_prev_frame (fi))
     {
       QUIT;
       /* Print the location and the address always, even for level 0.
-         args == 0: don't print the arguments. */
+         If args is 0, don't print the arguments.  */
       print_frame_info (fi, 1, LOC_AND_ADDRESS, 0 /* args */ );
     }
 
@@ -110,7 +111,7 @@ mi_cmd_stack_info_depth (char *command, char **argv, int argc)
     frame_high = atoi (argv[0]);
   else
     /* Called with no arguments, it means we want the real depth of
-       the stack. */
+       the stack.  */
     frame_high = -1;
 
   for (i = 0, fi = get_current_frame ();
@@ -141,7 +142,8 @@ parse_print_values (char *name)
 
 /* Print a list of the locals for the current frame.  With argument of
    0, print only the names, with argument of 1 print also the
-   values. */
+   values.  */
+
 void
 mi_cmd_stack_list_locals (char *command, char **argv, int argc)
 {
@@ -157,7 +159,8 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
 
 /* Print a list of the arguments for the current frame.  With argument
    of 0, print only the names, with argument of 1 print also the
-   values. */
+   values.  */
+
 void
 mi_cmd_stack_list_args (char *command, char **argv, int argc)
 {
@@ -181,7 +184,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
   else
     {
       /* Called with no arguments, it means we want args for the whole
-         backtrace. */
+         backtrace.  */
       frame_low = -1;
       frame_high = -1;
     }
@@ -190,7 +193,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
 
   /* Let's position fi on the frame at which to start the
      display. Could be the innermost frame if the whole stack needs
-     displaying, or if frame_low is 0. */
+     displaying, or if frame_low is 0.  */
   for (i = 0, fi = get_current_frame ();
        fi && i < frame_low;
        i++, fi = get_prev_frame (fi));
@@ -202,7 +205,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
     = make_cleanup_ui_out_list_begin_end (uiout, "stack-args");
 
   /* Now let's print the frames up to frame_high, or until there are
-     frames in the stack. */
+     frames in the stack.  */
   for (;
        fi && (i <= frame_high || frame_high == -1);
        i++, fi = get_prev_frame (fi))
@@ -223,6 +226,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
    current frame.  ARGC must be 1 and ARGV[0] specify if only the names,
    or both names and values of the variables must be printed.  See 
    parse_print_value for possible values.  */
+
 void
 mi_cmd_stack_list_variables (char *command, char **argv, int argc)
 {
@@ -236,11 +240,11 @@ mi_cmd_stack_list_variables (char *command, char **argv, int argc)
   list_args_or_locals (all, parse_print_values (argv[0]), frame);
 }
 
-/* Print single local or argument.  ARG must be already read in.  For WHAT and
-   VALUES see list_args_or_locals.
+/* Print single local or argument.  ARG must be already read in.  For
+   WHAT and VALUES see list_args_or_locals.
 
-   Errors are printed as if they would be the parameter value.  Use zeroed ARG
-   iff it should not be printed accoring to VALUES.  */
+   Errors are printed as if they would be the parameter value.  Use
+   zeroed ARG iff it should not be printed according to VALUES.  */
 
 static void
 list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
@@ -312,7 +316,8 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 /* Print a list of the locals or the arguments for the currently
    selected frame.  If the argument passed is 0, printonly the names
    of the variables, if an argument of 1 is passed, print the values
-   as well. */
+   as well.  */
+
 static void
 list_args_or_locals (enum what_to_list what, enum print_values values,
 		     struct frame_info *fi)
@@ -425,6 +430,7 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 	      xfree (entryarg.error);
 	    }
 	}
+
       if (BLOCK_FUNCTION (block))
 	break;
       else
@@ -447,7 +453,7 @@ void
 mi_cmd_stack_info_frame (char *command, char **argv, int argc)
 {
   if (argc > 0)
-    error (_("-stack-info-frame: No arguments required"));
+    error (_("-stack-info-frame: No arguments allowed"));
 
   print_frame_info (get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 0);
 }

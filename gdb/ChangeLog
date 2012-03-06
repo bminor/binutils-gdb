@@ -1,3 +1,29 @@
+2012-03-06  Stan Shebs  <stan@codesourcery.com>
+
+	* mi/mi-cmd-break.c: Enforce coding standards, fix comments.
+	* mi/mi-cmd-disas.c: Ditto.
+	* mi/mi-cmd-env.c: Ditto.
+	* mi/mi-cmd-file.c: Ditto.
+	* mi/mi-cmd-stack.c: Ditto.
+	* mi/mi-cmd-target.c: Ditto.
+	* mi/mi-cmd-var.c: Ditto.
+	* mi/mi-cmds.c: Ditto.
+	* mi/mi-cmds.h: Ditto.
+	* mi/mi-console.c: Ditto.
+	* mi/mi-getopt.c: Ditto.
+	* mi/mi-getopt.h: Ditto.
+	* mi/mi-interp.c: Ditto.
+	* mi/mi-main.c: Ditto.
+	* mi/mi-out.c: Ditto.
+	* mi/mi-parse.c: Ditto.
+	* mi/mi-parse.h: Ditto.
+	* mi/mi-symbol-cmds.c: Ditto.
+
+	* mi/mi-getopt.h: Move mi_opt struct up.
+	* mi/mi-main.c (captured_mi_execute_command): Remove redundant
+	return.
+	* mi/mi-out.c (_initialize_mi_out): Remove empty initialize.
+
 2012-03-06  Tom Tromey  <tromey@redhat.com>
 
 	* proc-service.c (ps_pglobal_lookup): Set the current program

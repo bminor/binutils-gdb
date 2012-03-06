@@ -35,7 +35,8 @@ extern const char mi_all_values[];
 
 typedef void (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
 
-/* Function implementing each command */
+/* Declarations of the functions implementing each command.  */
+
 extern mi_cmd_argv_ftype mi_cmd_ada_task_info;
 extern mi_cmd_argv_ftype mi_cmd_add_inferior;
 extern mi_cmd_argv_ftype mi_cmd_break_insert;
@@ -117,7 +118,7 @@ extern mi_cmd_argv_ftype mi_cmd_var_update;
 extern mi_cmd_argv_ftype mi_cmd_enable_pretty_printing;
 extern mi_cmd_argv_ftype mi_cmd_var_set_update_range;
 
-/* Description of a single command. */
+/* Description of a single command.  */
 
 struct mi_cli
 {
@@ -129,7 +130,7 @@ struct mi_cli
 
 struct mi_cmd
 {
-  /* official name of the command.  */
+  /* Official name of the command.  */
   const char *name;
   /* The corresponding CLI command that can be used to implement this
      MI command (if cli.lhs is non NULL).  */
@@ -138,7 +139,7 @@ struct mi_cmd
   mi_cmd_argv_ftype *argv_func;
 };
 
-/* Lookup a command in the mi comand table */
+/* Lookup a command in the MI command table.  */
 
 extern struct mi_cmd *mi_lookup (const char *command);
 

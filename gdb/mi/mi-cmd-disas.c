@@ -27,8 +27,7 @@
 #include "ui-out.h"
 #include "disasm.h"
 
-/* The arguments to be passed on the command line and parsed here are:
-
+/* The arguments to be passed on the command line and parsed here are
    either:
 
    START-ADDRESS: address to start the disassembly at.
@@ -50,6 +49,7 @@
          2 -- disassembly and opcodes.
          3 -- disassembly, source and opcodes.
 */
+
 void
 mi_cmd_disassemble (char *command, char **argv, int argc)
 {
@@ -75,24 +75,25 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   CORE_ADDR high = 0;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
-  /* Options processing stuff. */
+  /* Options processing stuff.  */
   int oind = 0;
   char *oarg;
   enum opt
   {
     FILE_OPT, LINE_OPT, NUM_OPT, START_OPT, END_OPT
   };
-  static const struct mi_opt opts[] = {
-    {"f", FILE_OPT, 1},
-    {"l", LINE_OPT, 1},
-    {"n", NUM_OPT, 1},
-    {"s", START_OPT, 1},
-    {"e", END_OPT, 1},
-    { 0, 0, 0 }
-  };
+  static const struct mi_opt opts[] =
+    {
+      {"f", FILE_OPT, 1},
+      {"l", LINE_OPT, 1},
+      {"n", NUM_OPT, 1},
+      {"s", START_OPT, 1},
+      {"e", END_OPT, 1},
+      { 0, 0, 0 }
+    };
 
   /* Get the options with their arguments. Keep track of what we
-     encountered. */
+     encountered.  */
   while (1)
     {
       int opt = mi_getopt ("-data-disassemble", argc, argv, opts,
@@ -128,7 +129,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   argc -= oind;
 
   /* Allow only filename + linenum (with how_many which is not
-     required) OR start_addr + and_addr */
+     required) OR start_addr + end_addr.  */
 
   if (!((line_seen && file_seen && num_seen && !start_seen && !end_seen)
 	|| (line_seen && file_seen && !num_seen && !start_seen && !end_seen)
@@ -144,7 +145,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
   if (mode < 0 || mode > 3)
     error (_("-data-disassemble: Mode argument must be 0, 1, 2, or 3."));
 
-  /* Convert the mode into a set of disassembly flags */
+  /* Convert the mode into a set of disassembly flags.  */
 
   disasm_flags = 0;
   if (mode & 0x1)
@@ -153,7 +154,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
     disasm_flags |= DISASSEMBLY_RAW_INSN;
 
   /* We must get the function beginning and end where line_num is
-     contained. */
+     contained.  */
 
   if (line_seen && file_seen)
     {

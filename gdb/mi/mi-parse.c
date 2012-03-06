@@ -113,7 +113,7 @@ mi_parse_argv (char *args, struct mi_parse *parse)
     {
       char *arg;
 
-      /* skip leading white space */
+      /* Skip leading white space.  */
       while (isspace (*chp))
 	chp++;
       /* Three possibilities: EOF, quoted string, or other text. */
@@ -125,11 +125,11 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 	  return;
 	case '"':
 	  {
-	    /* A quoted string. */
+	    /* A quoted string.  */
 	    int len;
 	    char *start = chp + 1;
 
-	    /* Determine the buffer size. */
+	    /* Determine the buffer size.  */
 	    chp = start;
 	    len = 0;
 	    while (*chp != '\0' && *chp != '"')
@@ -139,7 +139,7 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 		    chp++;
 		    if (mi_parse_escape (&chp) <= 0)
 		      {
-			/* Do not allow split lines or "\000" */
+			/* Do not allow split lines or "\000".  */
 			freeargv (argv);
 			return;
 		      }
@@ -148,21 +148,20 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 		  chp++;
 		len++;
 	      }
-	    /* Insist on a closing quote. */
+	    /* Insist on a closing quote.  */
 	    if (*chp != '"')
 	      {
 		freeargv (argv);
 		return;
 	      }
-	    /* Insist on trailing white space. */
+	    /* Insist on trailing white space.  */
 	    if (chp[1] != '\0' && !isspace (chp[1]))
 	      {
 		freeargv (argv);
 		return;
 	      }
-	    /* create the buffer. */
+	    /* Create the buffer and copy characters in.  */
 	    arg = xmalloc ((len + 1) * sizeof (char));
-	    /* And copy the characters in. */
 	    chp = start;
 	    len = 0;
 	    while (*chp != '\0' && *chp != '"')
@@ -177,13 +176,13 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 		len++;
 	      }
 	    arg[len] = '\0';
-	    chp++;		/* that closing quote. */
+	    chp++;		/* That closing quote.  */
 	    break;
 	  }
 	default:
 	  {
-	    /* An unquoted string.  Accumulate all non blank
-	       characters into a buffer. */
+	    /* An unquoted string.  Accumulate all non-blank
+	       characters into a buffer.  */
 	    int len;
 	    char *start = chp;
 
@@ -198,13 +197,12 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 	    break;
 	  }
 	}
-      /* Append arg to argv. */
+      /* Append arg to argv.  */
       argv = xrealloc (argv, (argc + 2) * sizeof (char *));
       argv[argc++] = arg;
       argv[argc] = NULL;
     }
 }
-
 
 void
 mi_parse_free (struct mi_parse *parse)
@@ -245,18 +243,18 @@ mi_parse (char *cmd, char **token)
 
   cleanup = make_cleanup (mi_parse_cleanup, parse);
 
-  /* Before starting, skip leading white space. */
+  /* Before starting, skip leading white space.  */
   while (isspace (*cmd))
     cmd++;
 
-  /* Find/skip any token and then extract it. */
+  /* Find/skip any token and then extract it.  */
   for (chp = cmd; *chp >= '0' && *chp <= '9'; chp++)
     ;
   *token = xmalloc (chp - cmd + 1);
   memcpy (*token, cmd, (chp - cmd));
   (*token)[chp - cmd] = '\0';
 
-  /* This wasn't a real MI command.  Return it as a CLI_COMMAND. */
+  /* This wasn't a real MI command.  Return it as a CLI_COMMAND.  */
   if (*chp != '-')
     {
       while (isspace (*chp))
@@ -269,7 +267,7 @@ mi_parse (char *cmd, char **token)
       return parse;
     }
 
-  /* Extract the command. */
+  /* Extract the command.  */
   {
     char *tmp = chp + 1;	/* discard ``-'' */
 
@@ -280,20 +278,20 @@ mi_parse (char *cmd, char **token)
     parse->command[chp - tmp] = '\0';
   }
 
-  /* Find the command in the MI table. */
+  /* Find the command in the MI table.  */
   parse->cmd = mi_lookup (parse->command);
   if (parse->cmd == NULL)
     error (_("Undefined MI command: %s"), parse->command);
 
-  /* Skip white space following the command. */
+  /* Skip white space following the command.  */
   while (isspace (*chp))
     chp++;
 
   /* Parse the --thread and --frame options, if present.  At present,
-     some important commands, like '-break-*' are implemented by forwarding
-     to the CLI layer directly.  We want to parse --thread and --frame
-     here, so as not to leave those option in the string that will be passed
-     to CLI.  */
+     some important commands, like '-break-*' are implemented by
+     forwarding to the CLI layer directly.  We want to parse --thread
+     and --frame here, so as not to leave those option in the string
+     that will be passed to CLI.  */
   for (;;)
     {
       const char *option;
@@ -350,7 +348,7 @@ mi_parse (char *cmd, char **token)
     }
 
   /* For new argv commands, attempt to return the parsed argument
-     list. */
+     list.  */
   if (parse->cmd->argv_func != NULL)
     {
       mi_parse_argv (chp, parse);
@@ -366,7 +364,7 @@ mi_parse (char *cmd, char **token)
 
   discard_cleanups (cleanup);
 
-  /* Fully parsed. */
+  /* Fully parsed, flag as an MI command.  */
   parse->op = MI_COMMAND;
   return parse;
 }

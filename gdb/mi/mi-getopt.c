@@ -30,7 +30,7 @@ mi_getopt (const char *prefix,
   char *arg;
   const struct mi_opt *opt;
 
-  /* We assume that argv/argc are ok. */
+  /* We assume that argv/argc are ok.  */
   if (*oind > argc || *oind < 0)
     internal_error (__FILE__, __LINE__,
 		    _("mi_getopt_long: oind out of bounds"));
@@ -44,20 +44,20 @@ mi_getopt (const char *prefix,
       *oarg = NULL;
       return -1;
     }
-  /* End of option list. */
+  /* End of option list.  */
   if (arg[0] != '-')
     {
       *oarg = NULL;
       return -1;
     }
-  /* Look the option up. */
+  /* Look the option up.  */
   for (opt = opts; opt->name != NULL; opt++)
     {
       if (strcmp (opt->name, arg + 1) != 0)
 	continue;
       if (opt->arg_p)
 	{
-	  /* A non-simple oarg option. */
+	  /* A non-simple oarg option.  */
 	  if (argc < *oind + 2)
 	    error (_("%s: Option %s requires an argument"), prefix, arg);
 	  *oarg = argv[(*oind) + 1];
@@ -80,9 +80,9 @@ mi_valid_noargs (const char *prefix, int argc, char **argv)
   int oind = 0;
   char *oarg;
   static const struct mi_opt opts[] =
-  {
-    { 0, 0, 0 }
-  };
+    {
+      { 0, 0, 0 }
+    };
 
   if (mi_getopt (prefix, argc, argv, opts, &oind, &oarg) == -1)
     return 1;

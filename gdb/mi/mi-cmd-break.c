@@ -43,7 +43,7 @@ static int mi_breakpoint_observers_installed;
 
 static int mi_can_breakpoint_notify;
 
-/* Output a single breakpoint, when allowed. */
+/* Output a single breakpoint, when allowed.  */
 
 static void
 breakpoint_notify (struct breakpoint *b)
@@ -142,7 +142,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
     error (_("-break-insert: Garbage following <location>"));
   address = argv[oind];
 
-  /* Now we have what we need, let's insert the breakpoint! */
+  /* Now we have what we need, let's insert the breakpoint!  */
   if (! mi_breakpoint_observers_installed)
     {
       observer_attach_breakpoint_created (breakpoint_notify);
@@ -209,7 +209,7 @@ mi_cmd_break_passcount (char *command, char **argv, int argc)
    first argument: 
    -break-watch <expr> --> insert a regular wp.  
    -break-watch -r <expr> --> insert a read watchpoint.
-   -break-watch -a <expr> --> insert an access wp. */
+   -break-watch -a <expr> --> insert an access wp.  */
 
 void
 mi_cmd_break_watch (char *command, char **argv, int argc)
@@ -254,7 +254,7 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
     error (_("-break-watch: Garbage following <expression>"));
   expr = argv[oind];
 
-  /* Now we have what we need, let's insert the watchpoint! */
+  /* Now we have what we need, let's insert the watchpoint!  */
   switch (type)
     {
     case REG_WP:
