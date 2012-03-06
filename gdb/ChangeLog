@@ -1,3 +1,11 @@
+2012-03-06  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/13766
+
+	* i387-tdep.c (i387_supply_xsave): If we have an xsave buffer, and
+	the register state is clear, supply explicit zero, instead of
+	marking the register unavailable.
+
 2011-10-20  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Changed function
