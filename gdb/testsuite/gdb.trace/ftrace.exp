@@ -86,7 +86,7 @@ proc test_fast_tracepoints {} {
 
     gdb_test "print gdb_agent_gdb_trampoline_buffer_error" ".*" ""
 
-    if { [is_x86_like_target] } {
+    if { [istarget "x86_64-*-*"] || [istarget "i\[34567\]86-*-*"] } {
 
 	gdb_test "ftrace set_point" "Fast tracepoint .*" \
 	    "fast tracepoint at a long insn"
@@ -134,11 +134,13 @@ proc test_fast_tracepoints {} {
 	gdb_test "tfind pc *set_point" "Found trace frame .*" \
 	    "tfind set_point frame, first time"
 
+	setup_kfail_for_target "gdb/13808" "x86_64-*-linux*"
 	gdb_test "print globvar" " = 1"
 
 	gdb_test "tfind pc *set_point" "Found trace frame .*" \
 	    "tfind set_point frame, second time"
 
+	setup_kfail_for_target "gdb/13808" "x86_64-*-linux*"
 	gdb_test "print anarg" " = 200"
 
 	gdb_test "tfind start" "Found trace frame .*" \
