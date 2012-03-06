@@ -1,6 +1,6 @@
 /* X86-64 specific support for ELF
    Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2011
+   2010, 2011, 2012
    Free Software Foundation, Inc.
    Contributed by Jan Hubicka <jh@suse.cz>.
 
@@ -3178,7 +3178,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      /* This symbol is resolved locally.  */
 		      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
 		      outrel.r_addend = relocation;
-		      relocate = FALSE;
+		      relocate = TRUE;
 		    }
 		  else
 		    {
