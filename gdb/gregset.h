@@ -19,6 +19,10 @@
 #ifndef GREGSET_H
 #define GREGSET_H
 
+#ifdef HAVE_SYS_PROCFS_H
+#include <sys/procfs.h>
+#endif
+
 #ifndef GDB_GREGSET_T
 #define GDB_GREGSET_T gregset_t
 #endif
