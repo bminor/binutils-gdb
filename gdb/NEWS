@@ -97,6 +97,11 @@ z0/z1 conditional breakpoints extension
   condition evaluation mode.  The use of this extension can be controlled
   via the "set remote conditional-breakpoints-packet" command.
 
+QProgramSignals:
+
+  Specify the signals which the remote stub may pass to the debugged
+  program without GDB involvement.
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing

@@ -999,36 +999,127 @@ linux_kill (int pid)
   return 0;
 }
 
+/* Get pending signal of THREAD, for detaching purposes.  This is the
+   signal the thread last stopped for, which we need to deliver to the
+   thread when detaching, otherwise, it'd be suppressed/lost.  */
+
+static int
+get_detach_signal (struct thread_info *thread)
+{
+  enum target_signal signo = TARGET_SIGNAL_0;
+  int status;
+  struct lwp_info *lp = get_thread_lwp (thread);
+
+  if (lp->status_pending_p)
+    status = lp->status_pending;
+  else
+    {
+      /* If the thread had been suspended by gdbserver, and it stopped
+	 cleanly, then it'll have stopped with SIGSTOP.  But we don't
+	 want to deliver that SIGSTOP.  */
+      if (thread->last_status.kind != TARGET_WAITKIND_STOPPED
+	  || thread->last_status.value.sig == TARGET_SIGNAL_0)
+	return 0;
+
+      /* Otherwise, we may need to deliver the signal we
+	 intercepted.  */
+      status = lp->last_status;
+    }
+
+  if (!WIFSTOPPED (status))
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "GPS: lwp %s hasn't stopped: no pending signal\n",
+		 target_pid_to_str (ptid_of (lp)));
+      return 0;
+    }
+
+  /* Extended wait statuses aren't real SIGTRAPs.  */
+  if (WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "GPS: lwp %s had stopped with extended "
+		 "status: no pending signal\n",
+		 target_pid_to_str (ptid_of (lp)));
+      return 0;
+    }
+
+  signo = target_signal_from_host (WSTOPSIG (status));
+
+  if (program_signals_p && !program_signals[signo])
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "GPS: lwp %s had signal %s, but it is in nopass state\n",
+		 target_pid_to_str (ptid_of (lp)),
+		 target_signal_to_string (signo));
+      return 0;
+    }
+  else if (!program_signals_p
+	   /* If we have no way to know which signals GDB does not
+	      want to have passed to the program, assume
+	      SIGTRAP/SIGINT, which is GDB's default.  */
+	   && (signo == TARGET_SIGNAL_TRAP || signo == TARGET_SIGNAL_INT))
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "GPS: lwp %s had signal %s, "
+		 "but we don't know if we should pass it.  Default to not.\n",
+		 target_pid_to_str (ptid_of (lp)),
+		 target_signal_to_string (signo));
+      return 0;
+    }
+  else
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "GPS: lwp %s has pending signal %s: delivering it.\n",
+		 target_pid_to_str (ptid_of (lp)),
+		 target_signal_to_string (signo));
+
+      return WSTOPSIG (status);
+    }
+}
+
 static int
 linux_detach_one_lwp (struct inferior_list_entry *entry, void *args)
 {
   struct thread_info *thread = (struct thread_info *) entry;
   struct lwp_info *lwp = get_thread_lwp (thread);
   int pid = * (int *) args;
+  int sig;
 
   if (ptid_get_pid (entry->id) != pid)
     return 0;
 
-  /* If this process is stopped but is expecting a SIGSTOP, then make
-     sure we take care of that now.  This isn't absolutely guaranteed
-     to collect the SIGSTOP, but is fairly likely to.  */
+  /* If there is a pending SIGSTOP, get rid of it.  */
   if (lwp->stop_expected)
     {
-      int wstat;
-      /* Clear stop_expected, so that the SIGSTOP will be reported.  */
+      if (debug_threads)
+	fprintf (stderr,
+		 "Sending SIGCONT to %s\n",
+		 target_pid_to_str (ptid_of (lwp)));
+
+      kill_lwp (lwpid_of (lwp), SIGCONT);
       lwp->stop_expected = 0;
-      linux_resume_one_lwp (lwp, 0, 0, NULL);
-      linux_wait_for_event (lwp->head.id, &wstat, __WALL);
     }
 
   /* Flush any pending changes to the process's registers.  */
   regcache_invalidate_one ((struct inferior_list_entry *)
 			   get_lwp_thread (lwp));
 
+  /* Pass on any pending signal for this thread.  */
+  sig = get_detach_signal (thread);
+
   /* Finally, let it resume.  */
   if (the_low_target.prepare_to_resume != NULL)
     the_low_target.prepare_to_resume (lwp);
-  ptrace (PTRACE_DETACH, lwpid_of (lwp), 0, 0);
+  if (ptrace (PTRACE_DETACH, lwpid_of (lwp), 0, sig) < 0)
+    error (_("Can't detach %s: %s"),
+	   target_pid_to_str (ptid_of (lwp)),
+	   strerror (errno));
 
   delete_lwp (lwp);
   return 0;

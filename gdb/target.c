@@ -639,6 +639,7 @@ update_current_target (void)
       /* Do not inherit to_mourn_inferior.  */
       INHERIT (to_can_run, t);
       /* Do not inherit to_pass_signals.  */
+      /* Do not inherit to_program_signals.  */
       /* Do not inherit to_thread_alive.  */
       /* Do not inherit to_find_new_threads.  */
       /* Do not inherit to_pid_to_str.  */
@@ -2723,6 +2724,36 @@ target_pass_signals (int numsigs, unsigned char *pass_signals)
 	    }
 
 	  (*t->to_pass_signals) (numsigs, pass_signals);
+	  return;
+	}
+    }
+}
+
+void
+target_program_signals (int numsigs, unsigned char *program_signals)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_program_signals != NULL)
+	{
+	  if (targetdebug)
+	    {
+	      int i;
+
+	      fprintf_unfiltered (gdb_stdlog, "target_program_signals (%d, {",
+				  numsigs);
+
+	      for (i = 0; i < numsigs; i++)
+		if (program_signals[i])
+		  fprintf_unfiltered (gdb_stdlog, " %s",
+				      target_signal_to_name (i));
+
+	      fprintf_unfiltered (gdb_stdlog, " })\n");
+	    }
+
+	  (*t->to_program_signals) (numsigs, program_signals);
 	  return;
 	}
     }

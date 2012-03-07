@@ -292,6 +292,8 @@ extern int server_waiting;
 extern int debug_threads;
 extern int debug_hw_points;
 extern int pass_signals[];
+extern int program_signals[];
+extern int program_signals_p;
 
 extern jmp_buf toplevel;
 

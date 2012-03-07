@@ -59,6 +59,8 @@ int debug_threads;
 int debug_hw_points;
 
 int pass_signals[TARGET_SIGNAL_LAST];
+int program_signals[TARGET_SIGNAL_LAST];
+int program_signals_p;
 
 jmp_buf toplevel;
 
@@ -450,6 +452,33 @@ handle_general_set (char *own_buf)
 	    }
 	  else
 	    pass_signals[i] = 0;
+	}
+      strcpy (own_buf, "OK");
+      return;
+    }
+
+  if (strncmp ("QProgramSignals:", own_buf, strlen ("QProgramSignals:")) == 0)
+    {
+      int numsigs = (int) TARGET_SIGNAL_LAST, i;
+      const char *p = own_buf + strlen ("QProgramSignals:");
+      CORE_ADDR cursig;
+
+      program_signals_p = 1;
+
+      p = decode_address_to_semicolon (&cursig, p);
+      for (i = 0; i < numsigs; i++)
+	{
+	  if (i == cursig)
+	    {
+	      program_signals[i] = 1;
+	      if (*p == '\0')
+		/* Keep looping, to clear the remaining signals.  */
+		cursig = -1;
+	      else
+		p = decode_address_to_semicolon (&cursig, p);
+	    }
+	  else
+	    program_signals[i] = 0;
 	}
       strcpy (own_buf, "OK");
       return;
@@ -1584,7 +1613,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  free (qsupported);
 	}
 
-      sprintf (own_buf, "PacketSize=%x;QPassSignals+", PBUFSIZ - 1);
+      sprintf (own_buf,
+	       "PacketSize=%x;QPassSignals+;QProgramSignals+",
+	       PBUFSIZ - 1);
 
       if (the_target->qxfer_libraries_svr4 != NULL)
 	strcat (own_buf, ";qXfer:libraries-svr4:read+");

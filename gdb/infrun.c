@@ -335,6 +335,15 @@ static unsigned char *signal_pass;
 	(flags)[signum] = 0; \
   } while (0)
 
+/* Update the target's copy of SIGNAL_PROGRAM.  The sole purpose of
+   this function is to avoid exporting `signal_program'.  */
+
+void
+update_signals_program_target (void)
+{
+  target_program_signals ((int) TARGET_SIGNAL_LAST, signal_program);
+}
+
 /* Value to pass to target_resume() to cause all threads to resume.  */
 
 #define RESUME_ALL minus_one_ptid
@@ -6363,6 +6372,7 @@ Are you sure you want to change it? "),
       {
 	signal_cache_update (-1);
 	target_pass_signals ((int) TARGET_SIGNAL_LAST, signal_pass);
+	target_program_signals ((int) TARGET_SIGNAL_LAST, signal_program);
 
 	if (from_tty)
 	  {

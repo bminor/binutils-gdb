@@ -645,6 +645,8 @@ extern struct inferior *add_inferior_with_spaces (void);
 
 extern void update_observer_mode (void);
 
+extern void update_signals_program_target (void);
+
 /* In some circumstances we allow a command to specify a numeric
    signal.  The idea is to keep these circumstances limited so that
    users (and scripts) develop portable habits.  For comparison,

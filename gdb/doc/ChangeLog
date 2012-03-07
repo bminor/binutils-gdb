@@ -1,3 +1,10 @@
+2012-03-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (General Query Packets): Document new
+	QProgramSignals packet.
+	* gdb.texinfo (Remote configuration): Mention
+	"program-signals-packet".
+
 2012-03-05  Tristan Gingold  <gingold@adacore.com>
 
 	* gdb.texinfo (General Query Packets): Document xfer:uib:read.

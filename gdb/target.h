@@ -511,6 +511,10 @@ struct target_ops
        target_* macro.  */
     void (*to_pass_signals) (int, unsigned char *);
 
+    /* Documentation of this routine is provided with the
+       corresponding target_* function.  */
+    void (*to_program_signals) (int, unsigned char *);
+
     int (*to_thread_alive) (struct target_ops *, ptid_t ptid);
     void (*to_find_new_threads) (struct target_ops *);
     char *(*to_pid_to_str) (struct target_ops *, ptid_t);
@@ -1260,6 +1264,22 @@ void target_mourn_inferior (void);
    if mentioned in a previous target_pass_signals call.   */
 
 extern void target_pass_signals (int nsig, unsigned char *pass_signals);
+
+/* Set list of signals the target may pass to the inferior.  This
+   directly maps to the "handle SIGNAL pass/nopass" setting.
+
+   PROGRAM_SIGNALS is an array of size NSIG, indexed by target signal
+   number (enum target_signal).  For every signal whose entry in this
+   array is non-zero, the target is allowed to pass the signal to the
+   inferior.  Signals not present in the array shall be silently
+   discarded.  This does not influence whether to pass signals to the
+   inferior as a result of a target_resume call.  This is useful in
+   scenarios where the target needs to decide whether to pass or not a
+   signal to the inferior without GDB core involvement, such as for
+   example, when detaching (as threads may have been suspended with
+   pending signals not reported to GDB).  */
+
+extern void target_program_signals (int nsig, unsigned char *program_signals);
 
 /* Check to see if a thread is still alive.  */
 

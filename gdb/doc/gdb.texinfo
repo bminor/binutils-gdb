@@ -17514,6 +17514,10 @@ are:
 @tab @code{QPassSignals}
 @tab @code{handle @var{signal}}
 
+@item @code{program-signals}
+@tab @code{QProgramSignals}
+@tab @code{handle @var{signal}}
+
 @item @code{hostio-close-packet}
 @tab @code{vFile:close}
 @tab @code{remote get}, @code{remote put}
@@ -34971,6 +34975,48 @@ the stub.
 
 Use of this packet is controlled by the @code{set remote pass-signals}
 command (@pxref{Remote Configuration, set remote pass-signals}).
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item QProgramSignals: @var{signal} @r{[};@var{signal}@r{]}@dots{}
+@cindex signals the inferior may see, remote request
+@cindex @samp{QProgramSignals} packet
+@anchor{QProgramSignals}
+Each listed @var{signal} may be delivered to the inferior process.
+Others should be silently discarded.
+
+In some cases, the remote stub may need to decide whether to deliver a
+signal to the program or not without @value{GDBN} involvement.  One
+example of that is while detaching --- the program's threads may have
+stopped for signals that haven't yet had a chance of being reported to
+@value{GDBN}, and so the remote stub can use the signal list specified
+by this packet to know whether to deliver or ignore those pending
+signals.
+
+This does not influence whether to deliver a signal as requested by a
+resumption packet (@pxref{vCont packet}).
+
+Signals are numbered identically to continue packets and stop replies
+(@pxref{Stop Reply Packets}).  Each @var{signal} list item should be
+strictly greater than the previous item.  Multiple
+@samp{QProgramSignals} packets do not combine; any earlier
+@samp{QProgramSignals} list is completely replaced by the new list.
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+
+@item E @var{nn}
+An error occurred.  @var{nn} are hex digits.
+
+@item
+An empty reply indicates that @samp{QProgramSignals} is not supported
+by the stub.
+@end table
+
+Use of this packet is controlled by the @code{set remote program-signals}
+command (@pxref{Remote Configuration, set remote program-signals}).
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 

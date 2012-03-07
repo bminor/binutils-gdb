@@ -1,5 +1,25 @@
 2012-03-07  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention QProgramSignals.
+	* inferior.h (update_signals_program_target): Declare.
+	* infrun.c: (update_signals_program_target): New.
+	(handle_command): Update the target of the new program signals
+	array changes.
+	* remote.c (PACKET_QProgramSignals): New enum.
+	(last_program_signals_packet): New global.
+	(remote_program_signals): New.
+	(remote_start_remote): Update the target with the program signals
+	list.
+	(remote_protocol_features): Add entry for QPassSignals.
+	(remote_open_1): Free anc clear last_program_signals_packet.
+	(init_remote_ops): Install remote_program_signals.
+	* target.c (update_current_target): Adjust.
+	(target_program_signals): New.
+	* target.h (struct target_ops) <to_program_signals>: New field.
+	(target_program_signals): Declare.
+
+2012-03-07  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Add subtitle for new z0/z1 conditional breakpoint
 	extensions.
 

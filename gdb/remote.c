@@ -1259,6 +1259,7 @@ enum {
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
   PACKET_QPassSignals,
+  PACKET_QProgramSignals,
   PACKET_qSearch_memory,
   PACKET_vAttach,
   PACKET_vRun,
@@ -1666,6 +1667,65 @@ remote_pass_signals (int numsigs, unsigned char *pass_signals)
 	}
       else
 	xfree (pass_packet);
+    }
+}
+
+/* The last QProgramSignals packet sent to the target.  We bypass
+   sending a new program signals list down to the target if the new
+   packet is exactly the same as the last we sent.  IOW, we only let
+   the target know about program signals list changes.  */
+
+static char *last_program_signals_packet;
+
+/* If 'QProgramSignals' is supported, tell the remote stub what
+   signals it should pass through to the inferior when detaching.  */
+
+static void
+remote_program_signals (int numsigs, unsigned char *signals)
+{
+  if (remote_protocol_packets[PACKET_QProgramSignals].support != PACKET_DISABLE)
+    {
+      char *packet, *p;
+      int count = 0, i;
+
+      gdb_assert (numsigs < 256);
+      for (i = 0; i < numsigs; i++)
+	{
+	  if (signals[i])
+	    count++;
+	}
+      packet = xmalloc (count * 3 + strlen ("QProgramSignals:") + 1);
+      strcpy (packet, "QProgramSignals:");
+      p = packet + strlen (packet);
+      for (i = 0; i < numsigs; i++)
+	{
+	  if (signal_pass_state (i))
+	    {
+	      if (i >= 16)
+		*p++ = tohex (i >> 4);
+	      *p++ = tohex (i & 15);
+	      if (count)
+		*p++ = ';';
+	      else
+		break;
+	      count--;
+	    }
+	}
+      *p = 0;
+      if (!last_program_signals_packet
+	  || strcmp (last_program_signals_packet, packet) != 0)
+	{
+	  struct remote_state *rs = get_remote_state ();
+	  char *buf = rs->buf;
+
+	  putpkt (packet);
+	  getpkt (&rs->buf, &rs->buf_size, 0);
+	  packet_ok (buf, &remote_protocol_packets[PACKET_QProgramSignals]);
+	  xfree (last_program_signals_packet);
+	  last_program_signals_packet = packet;
+	}
+      else
+	xfree (packet);
     }
 }
 
@@ -3246,6 +3306,10 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
       getpkt (&rs->buf, &rs->buf_size, 0);
     }
 
+  /* Let the target know which signals it is allowed to pass down to
+     the program.  */
+  update_signals_program_target ();
+
   /* Next, if the target can specify a description, read it.  We do
      this before anything involving memory or registers.  */
   target_find_description ();
@@ -3803,6 +3867,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_traceframe_info },
   { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QPassSignals },
+  { "QProgramSignals", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QProgramSignals },
   { "QStartNoAckMode", PACKET_DISABLE, remote_supported_packet,
     PACKET_QStartNoAckMode },
   { "multiprocess", PACKET_DISABLE, remote_multi_process_feature, -1 },
@@ -4072,6 +4138,11 @@ remote_open_1 (char *name, int from_tty,
   /* Make sure we send the passed signals list the next time we resume.  */
   xfree (last_pass_packet);
   last_pass_packet = NULL;
+
+  /* Make sure we send the program signals list the next time we
+     resume.  */
+  xfree (last_program_signals_packet);
+  last_program_signals_packet = NULL;
 
   remote_fileio_reset ();
   reopen_exec_file ();
@@ -10819,6 +10890,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_load = generic_load;
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_pass_signals = remote_pass_signals;
+  remote_ops.to_program_signals = remote_program_signals;
   remote_ops.to_thread_alive = remote_thread_alive;
   remote_ops.to_find_new_threads = remote_threads_info;
   remote_ops.to_pid_to_str = remote_pid_to_str;
@@ -11262,6 +11334,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QPassSignals],
 			 "QPassSignals", "pass-signals", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QProgramSignals],
+			 "QProgramSignals", "program-signals", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qSymbol],
 			 "qSymbol", "symbol-lookup", 0);

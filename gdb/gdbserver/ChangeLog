@@ -1,3 +1,13 @@
+2012-03-07  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (get_detach_signal): New.
+	(linux_detach_one_lwp): Get rid of a pending SIGSTOP with SIGCONT.
+	Pass on pending signals to PTRACE_DETACH.  Check the result of the
+	ptrace call.
+	* server.c (program_signals, program_signals_p): New.
+	(handle_general_set): Handle QProgramSignals.
+	* server.h (program_signals, program_signals_p): Declare.
+
 2012-03-05  Pedro Alves  <palves@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
