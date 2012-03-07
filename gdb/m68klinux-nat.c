@@ -69,20 +69,20 @@ static const int regmap[] =
 #define NUM_GREGS (18)
 #define MAX_NUM_REGS (NUM_GREGS + 11)
 
-int
+static int
 getregs_supplies (int regno)
 {
   return 0 <= regno && regno < NUM_GREGS;
 }
 
-int
+static int
 getfpregs_supplies (int regno)
 {
   return M68K_FP0_REGNUM <= regno && regno <= M68K_FPI_REGNUM;
 }
 
 /* Does the current host support the GETREGS request?  */
-int have_ptrace_getregs =
+static int have_ptrace_getregs =
 #ifdef HAVE_PTRACE_GETREGS
   1
 #else
