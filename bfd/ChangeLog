@@ -1,3 +1,38 @@
+2012-03-07  Nick Clifton  <nickc@redhat.com>
+
+	* elf-m10300.c (elf32_mn10300_link_hash_entry): Add tls_type
+	field.
+	(elf32_mn10300_link_hash_table): Add tls_ldm_got entry;
+	(elf_mn10300_tdata): Define.
+	(elf_mn10300_local_got_tls_type): Define.
+	(elf_mn10300_howto_table): Add entries for R_MN10300_TLS_GD,
+	R_MN10300_TLS_LD, R_MN10300_TLS_LDO, R_MN10300_TLS_GOTIE,
+	R_MN10300_TLS_IE, R_MN10300_TLS_LE, R_MN10300_TLS_DPTMOD,
+	R_MN10300_TLS_DTPOFF, R_MN10300_TLS_TPOFF relocs.
+	(mn10300_reloc_map): Likewise.
+	(elf_mn10300_tls_transition): New function.
+	(dtpoff, tpoff, mn10300_do_tls_transition): New functions.
+	(mn10300_elf_check_relocs): Add TLS support.
+	(mn10300_elf_final_link_relocate): Likewise.
+	(mn10300_elf_relocate_section): Likewise.
+	(mn10300_elf_relax_section): Likewise.
+	(elf32_mn10300_link_hash_newfunc): Initialise new field.
+	(_bfd_mn10300_copy_indirect_symbol): New function.
+	(elf32_mn10300_link_hash_table_create): Initialise new fields.
+	(_bfd_mn10300_elf_size_dynamic_sections): Add TLS support.
+	(_bfd_mn10300_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mn10300_elf_reloc_type_class): Allocate an
+	elf_mn10300_obj_tdata structure.
+	(elf_backend_copy_indirect_symbol): Define.
+	* reloc.c (BFD_MN10300_TLS_GD, BFD_MN10300_TLS_LD,
+	BFD_MN10300_TLS_LDO, BFD_MN10300_TLS_GOTIE, BFD_MN10300_TLS_IE,
+	BFD_MN10300_TLS_LE, BFD_MN10300_TLS_DPTMOD,
+	BFD_MN10300_TLS_DTPOFF, BFD_MN10300_TLS_TPOFF): New relocations.
+	(BFD_RELOC_MN10300_32_PCREL, BFD_RELOC_MN10300_16_PCREL): Move to
+	alongside other MN10300 relocations.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2012-03-06  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-x86-64.c (elf_x86_64_relocate_section): For R_X86_64_RELATIVE

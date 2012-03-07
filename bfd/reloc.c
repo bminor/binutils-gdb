@@ -2547,6 +2547,36 @@ ENUMDOC
   The addend of this reloc is an alignment power that must
   be honoured at the offset's location, regardless of linker
   relaxation.
+ENUM
+  BFD_RELOC_MN10300_TLS_GD
+ENUMX
+  BFD_RELOC_MN10300_TLS_LD
+ENUMX
+  BFD_RELOC_MN10300_TLS_LDO
+ENUMX
+  BFD_RELOC_MN10300_TLS_GOTIE
+ENUMX
+  BFD_RELOC_MN10300_TLS_IE
+ENUMX
+  BFD_RELOC_MN10300_TLS_LE
+ENUMX
+  BFD_RELOC_MN10300_TLS_DTPMOD
+ENUMX
+  BFD_RELOC_MN10300_TLS_DTPOFF
+ENUMX
+  BFD_RELOC_MN10300_TLS_TPOFF
+ENUMDOC
+  Various TLS-related relocations.
+ENUM
+  BFD_RELOC_MN10300_32_PCREL
+ENUMDOC
+  This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
+  instruction.
+ENUM
+  BFD_RELOC_MN10300_16_PCREL
+ENUMDOC
+  This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
+  instruction.
 COMMENT
 
 ENUM
@@ -3921,16 +3951,6 @@ ENUM
   BFD_RELOC_V850_DATA
 ENUMDOC
   start data in text.
-ENUM
-  BFD_RELOC_MN10300_32_PCREL
-ENUMDOC
-  This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
-  instruction.
-ENUM
-  BFD_RELOC_MN10300_16_PCREL
-ENUMDOC
-  This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
-  instruction.
 
 ENUM
   BFD_RELOC_TIC30_LDP

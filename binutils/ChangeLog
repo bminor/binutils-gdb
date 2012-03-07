@@ -1,3 +1,7 @@
+2012-03-07  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (is_16bit_abs_reloc): Add detection of R_MN10300_16.
+
 2012-02-29  Jeff Law  <law@redhat.com>
 
 	* doc/binutils.texi (c++filt): Fix typos.
