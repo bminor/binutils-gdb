@@ -1,3 +1,8 @@
+2012-03-07  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Add subtitle for new z0/z1 conditional breakpoint
+	extensions.
+
 2012-03-07  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* m68klinux-nat.c (getregs_supplies): Make static.
