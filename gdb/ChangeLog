@@ -1,3 +1,8 @@
+2012-03-08  Luis Machado  <lgustavo@codesourcery.com>
+
+	* ax-gdb.c (gen_fetch): Fail gracefully and use error instead
+	of internal error for unknown/unsupported types.
+
 2012-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix CU relative vs. absolute DIE offsets.

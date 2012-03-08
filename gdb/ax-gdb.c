@@ -553,12 +553,11 @@ gen_fetch (struct agent_expr *ax, struct type *type)
       break;
 
     default:
-      /* Either our caller shouldn't have asked us to dereference that
-         pointer (other code's fault), or we're not implementing
-         something we should be (this code's fault).  In any case,
-         it's a bug the user shouldn't see.  */
-      internal_error (__FILE__, __LINE__,
-		      _("gen_fetch: bad type code"));
+      /* Our caller requested us to dereference a pointer from an unsupported
+	 type.  Error out and give callers a chance to handle the failure
+	 gracefully.  */
+      error (_("gen_fetch: Unsupported type code `%s'."),
+	     TYPE_NAME (type));
     }
 }
 
