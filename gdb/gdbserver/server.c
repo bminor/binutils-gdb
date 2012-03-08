@@ -2908,7 +2908,8 @@ process_point_options (CORE_ADDR point_addr, char **packet)
 	{
 	  case 'X':
 	    /* Conditional expression.  */
-	    fprintf (stderr, "Found breakpoint condition.\n");
+	    if (remote_debug)
+	      fprintf (stderr, "Found breakpoint condition.\n");
 	    add_breakpoint_condition (point_addr, &dataptr);
 	    break;
 	  default:

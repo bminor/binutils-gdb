@@ -1,3 +1,8 @@
+2012-03-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* server.c (process_point_options): If a conditional expression
+	is found, only print a message if remote_debug is nonzero.
+
 2012-03-08  Luis Machado  <lgustavo@codesourcery.com>
 
 	* ax-gdb.c (gen_fetch): Fail gracefully and use error instead
