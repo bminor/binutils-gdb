@@ -123,8 +123,8 @@ ia64_vms_get_dyn_info_list (unw_addr_space_t as,
 static unw_accessors_t ia64_vms_unw_accessors;
 static unw_accessors_t ia64_vms_unw_rse_accessors;
 
-/* Set of ia64 gdb libunwind-frame callbacks and data for generic
-   libunwind-frame code to use.  */
+/* Set of ia64-libunwind-tdep gdb callbacks and data for generic
+   ia64-libunwind-tdep code to use.  */
 static struct libunwind_descr ia64_vms_libunwind_descr;
 
 #endif /* HAVE_LIBUNWIND_IA64_H */

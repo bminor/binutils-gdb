@@ -328,26 +328,44 @@ case $host_os in
     enable_gdbtk=no ;;
 esac
 
-# Libunwind support.
-AC_ARG_WITH(libunwind,
-AS_HELP_STRING([--with-libunwind], [use libunwind frame unwinding support]),
-[case "${withval}" in
-  yes)  enable_libunwind=yes ;;
-  no)   enable_libunwind=no ;;
-  *)    AC_MSG_ERROR(bad value ${withval} for GDB with-libunwind option) ;;
-esac],[
-  AC_CHECK_HEADERS(libunwind-ia64.h)
-  if test x"$ac_cv_header_libunwind_ia64_h" = xyes; then
-    enable_libunwind=yes;
+# Libunwind support for ia64.
+
+AC_ARG_WITH(libunwind-ia64,
+AS_HELP_STRING([--with-libunwind-ia64],
+	       [use libunwind frame unwinding for ia64 targets]),,
+	    [with_libunwind_ia64=auto])
+
+# Backward compatibility option.
+if test "${with_libunwind+set}" = set; then
+  if test x"$with_libunwind_ia64" != xauto; then
+    AC_MSG_ERROR(
+      [option --with-libunwind is deprecated, use --with-libunwind-ia64])
   fi
-])
-   
-if test x"$enable_libunwind" = xyes; then
+  AC_MSG_WARN([option --with-libunwind is deprecated, use --with-libunwind-ia64])
+  with_libunwind_ia64="$with_libunwind"
+fi
+
+case "$with_libunwind_ia64" in
+  yes | no)
+    ;;
+  auto)
+    AC_CHECK_HEADERS(libunwind-ia64.h)
+    with_libunwind_ia64=$ac_cv_header_libunwind_ia64_h
+    ;;
+  *)
+    AC_MSG_ERROR(
+      [bad value $with_libunwind_ia64 for GDB --with-libunwind-ia64 option])
+    ;;
+esac
+
+if test x"$with_libunwind_ia64" = xyes; then
   AC_CHECK_HEADERS(libunwind-ia64.h)
-  AC_DEFINE(HAVE_LIBUNWIND, 1, [Define if libunwind library is being used.])
-  CONFIG_OBS="$CONFIG_OBS libunwind-frame.o"
-  CONFIG_DEPS="$CONFIG_DEPS libunwind-frame.o"
-  CONFIG_SRCS="$CONFIG_SRCS libunwind-frame.c"
+  if test x"$ac_cv_header_libunwind_ia64_h" != xyes; then
+    AC_MSG_ERROR([GDB option --with-libunwind-ia64 requires libunwind-ia64.h])
+  fi
+  CONFIG_OBS="$CONFIG_OBS ia64-libunwind-tdep.o"
+  CONFIG_DEPS="$CONFIG_DEPS ia64-libunwind-tdep.o"
+  CONFIG_SRCS="$CONFIG_SRCS ia64-libunwind-tdep.c"
 fi
 
 opt_curses=no

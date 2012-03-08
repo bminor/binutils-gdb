@@ -780,7 +780,7 @@ ser-unix.h inf-ptrace.h terminal.h ui-out.h frame-base.h \
 f-lang.h dwarf2loc.h value.h sparc-tdep.h defs.h target-descriptions.h \
 objfiles.h vec.h disasm.h mips-tdep.h ser-base.h \
 gdb_curses.h bfd-target.h memattr.h inferior.h ax.h dummy-frame.h \
-inflow.h fbsd-nat.h libunwind-frame.h completer.h inf-ttrace.h \
+inflow.h fbsd-nat.h ia64-libunwind-tdep.h completer.h inf-ttrace.h \
 solib-target.h gdb_vfork.h alpha-tdep.h dwarf2expr.h \
 m2-lang.h stack.h charset.h addrmap.h command.h solist.h source.h \
 target.h prologue-value.h cp-abi.h tui/tui-hooks.h tui/tui.h \
@@ -1463,7 +1463,7 @@ ALLDEPFILES = \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c ia64-vms-tdep.c \
 	inf-ptrace.c inf-ttrace.c \
 	irix5-nat.c \
-	libunwind-frame.c \
+	ia64-libunwind-tdep.c \
 	linux-fork.c \
 	linux-tdep.c \
 	linux-record.c \

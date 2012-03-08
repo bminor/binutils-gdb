@@ -1,4 +1,4 @@
-/* Frame unwinder for frames with libunwind frame information.
+/* Frame unwinder for ia64 frames with libunwind frame information.
 
    Copyright (C) 2003, 2006-2012 Free Software Foundation, Inc.
 
@@ -19,21 +19,21 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef IA64_LIBUNWIND_TDEP_H
+#define IA64_LIBUNWIND_TDEP_H 1
+
 struct frame_info;
 struct frame_id;
 struct regcache;
 struct gdbarch;
 struct frame_unwind;
 
-#ifndef LIBUNWIND_FRAME_H
-#define LIBUNWIND_FRAME_H 1
-
 /* IA-64 is the only target that currently uses libunwind.  If some
    other target wants to use it, we will need to do some abstracting
-   in order to make it possible to have more than one libunwind-frame
-   instance.  Including "libunwind.h" is wrong as that ends up
-   including the libunwind-$(arch).h for the host gdb is running
-   on.  */
+   in order to make it possible to have more than one
+   ia64-libunwind-tdep instance.  Including "libunwind.h" is wrong as
+   that ends up including the libunwind-$(arch).h for the host gdb is
+   running on.  */
 #include "libunwind-ia64.h"
 
 struct libunwind_descr
@@ -74,4 +74,4 @@ int libunwind_get_reg_special (struct gdbarch *gdbarch,
 			       struct regcache *regcache,
 			       int regnum, void *buf);
 
-#endif /* libunwind-frame.h */
+#endif /* IA64_LIBUNWIND_TDEP_H */

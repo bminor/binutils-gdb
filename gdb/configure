@@ -957,7 +957,7 @@ enable_gdbcli
 enable_gdbmi
 enable_tui
 enable_gdbtk
-with_libunwind
+with_libunwind_ia64
 with_curses
 enable_profiling
 with_pkgversion
@@ -1659,7 +1659,7 @@ Optional Packages:
                           [DATADIR/gdb]
   --with-relocated-sources=PATH
                           automatically relocate this path for source files
-  --with-libunwind        use libunwind frame unwinding support
+  --with-libunwind-ia64   use libunwind frame unwinding for ia64 targets
   --with-curses           use the curses library instead of the termcap
                           library
   --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
@@ -8196,37 +8196,51 @@ $as_echo "$as_me: WARNING: gdbtk isn't supported on $host; disabling" >&2;}
     enable_gdbtk=no ;;
 esac
 
-# Libunwind support.
+# Libunwind support for ia64.
 
-# Check whether --with-libunwind was given.
-if test "${with_libunwind+set}" = set; then :
-  withval=$with_libunwind; case "${withval}" in
-  yes)  enable_libunwind=yes ;;
-  no)   enable_libunwind=no ;;
-  *)    as_fn_error "bad value ${withval} for GDB with-libunwind option" "$LINENO" 5 ;;
-esac
+
+# Check whether --with-libunwind-ia64 was given.
+if test "${with_libunwind_ia64+set}" = set; then :
+  withval=$with_libunwind_ia64;
 else
-
-  for ac_header in libunwind-ia64.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "libunwind-ia64.h" "ac_cv_header_libunwind_ia64_h" "$ac_includes_default"
-if test "x$ac_cv_header_libunwind_ia64_h" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBUNWIND_IA64_H 1
-_ACEOF
-
+  with_libunwind_ia64=auto
 fi
 
-done
 
-  if test x"$ac_cv_header_libunwind_ia64_h" = xyes; then
-    enable_libunwind=yes;
+# Backward compatibility option.
+if test "${with_libunwind+set}" = set; then
+  if test x"$with_libunwind_ia64" != xauto; then
+    as_fn_error "option --with-libunwind is deprecated, use --with-libunwind-ia64" "$LINENO" 5
   fi
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: option --with-libunwind is deprecated, use --with-libunwind-ia64" >&5
+$as_echo "$as_me: WARNING: option --with-libunwind is deprecated, use --with-libunwind-ia64" >&2;}
+  with_libunwind_ia64="$with_libunwind"
+fi
+
+case "$with_libunwind_ia64" in
+  yes | no)
+    ;;
+  auto)
+    for ac_header in libunwind-ia64.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "libunwind-ia64.h" "ac_cv_header_libunwind_ia64_h" "$ac_includes_default"
+if test "x$ac_cv_header_libunwind_ia64_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBUNWIND_IA64_H 1
+_ACEOF
 
 fi
 
+done
 
-if test x"$enable_libunwind" = xyes; then
+    with_libunwind_ia64=$ac_cv_header_libunwind_ia64_h
+    ;;
+  *)
+    as_fn_error "bad value $with_libunwind_ia64 for GDB --with-libunwind-ia64 option" "$LINENO" 5
+    ;;
+esac
+
+if test x"$with_libunwind_ia64" = xyes; then
   for ac_header in libunwind-ia64.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "libunwind-ia64.h" "ac_cv_header_libunwind_ia64_h" "$ac_includes_default"
@@ -8239,12 +8253,12 @@ fi
 
 done
 
-
-$as_echo "#define HAVE_LIBUNWIND 1" >>confdefs.h
-
-  CONFIG_OBS="$CONFIG_OBS libunwind-frame.o"
-  CONFIG_DEPS="$CONFIG_DEPS libunwind-frame.o"
-  CONFIG_SRCS="$CONFIG_SRCS libunwind-frame.c"
+  if test x"$ac_cv_header_libunwind_ia64_h" != xyes; then
+    as_fn_error "GDB option --with-libunwind-ia64 requires libunwind-ia64.h" "$LINENO" 5
+  fi
+  CONFIG_OBS="$CONFIG_OBS ia64-libunwind-tdep.o"
+  CONFIG_DEPS="$CONFIG_DEPS ia64-libunwind-tdep.o"
+  CONFIG_SRCS="$CONFIG_SRCS ia64-libunwind-tdep.c"
 fi
 
 opt_curses=no

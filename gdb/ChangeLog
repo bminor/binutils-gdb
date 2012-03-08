@@ -1,5 +1,38 @@
 2012-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* libunwind-frame.c: Rename to ...
+	* ia64-libunwind-tdep.c: ... here.
+	* libunwind-frame.h: Rename to ...
+	* ia64-libunwind-tdep.h: ... here.
+	* Makefile.in (HFILES_NO_SRCDIR): Rename libunwind-frame.h to
+	ia64-libunwind-tdep.h.
+	(ALLDEPFILES): Rename libunwind-frame.c to ia64-libunwind-tdep.c.
+	* README (--with-libunwind): Rename to ...
+	(--with-libunwind-ia64): ... here, note it is ia64 specific now.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: New option --with-libunwind-ia64, make the
+	AS_HELP_STRING ia64 specific.  Deprecate option --with-libunwind.
+	Remove AC_DEFINE for HAVE_LIBUNWIND.
+	* ia64-libunwind-tdep.c: Make the file top comment ia64 specific.
+	Rename libunwind-frame.h #include to ia64-libunwind-tdep.h.
+	Rename libunwind-frame in the general comment.
+	* ia64-libunwind-tdep.h: Make the file top comment ia64 specific.
+	Rename symbol LIBUNWIND_FRAME_H to IA64_TDEP_LIBUNWIND_FRAME_H.
+	Move forward declarations inside #ifndef.  Rename libunwind-frame in
+	the general comment.
+	* ia64-tdep.c: Rename libunwind-frame.h #include to
+	ia64-libunwind-tdep.h.
+	(ia64_gdb2uw_regnum, ia64_uw2gdb_regnum, ia64_is_fpreg)
+	(ia64_libunwind_descr): Rename libunwind-frame to
+	ia64-libunwind-tdep in these function comments.
+	* ia64-tdep.h: Rename libunwind-frame.h #include to
+	ia64-libunwind-tdep.h.
+	* ia64-vms-tdep.c (ia64_vms_libunwind_descr): Rename libunwind-frame to
+	ia64-libunwind-tdep in that data comment.
+
+2012-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* libunwind-frame.h (struct frame_unwind): New declaration.
 
 2012-03-08  Joel Brobecker  <brobecker@adacore.com>

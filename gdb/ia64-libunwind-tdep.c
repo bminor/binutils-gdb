@@ -1,4 +1,4 @@
-/* Frame unwinder for frames using the libunwind library.
+/* Frame unwinder for ia64 frames using the libunwind library.
 
    Copyright (C) 2003-2004, 2006-2012 Free Software Foundation, Inc.
 
@@ -36,12 +36,12 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 
-#include "libunwind-frame.h"
+#include "ia64-libunwind-tdep.h"
 
 #include "complaints.h"
 
-/* IA-64 is the only target that currently uses libunwind-frame.  Note
-   how UNW_TARGET, UNW_OBJ, etc. are compile time constants below.
+/* IA-64 is the only target that currently uses ia64-libunwind-tdep.
+   Note how UNW_TARGET, UNW_OBJ, etc. are compile time constants below.
    Those come from libunwind's headers, and are target dependent.
    Also, some of libunwind's typedefs are target dependent, as e.g.,
    unw_word_t.  If some other target wants to use this, we will need

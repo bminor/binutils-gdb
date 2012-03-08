@@ -22,7 +22,7 @@
 
 #ifdef HAVE_LIBUNWIND_IA64_H
 #include "libunwind-ia64.h"
-#include "libunwind-frame.h"
+#include "ia64-libunwind-tdep.h"
 #endif
 
 /* Register numbers of various important registers.  */
