@@ -1,3 +1,36 @@
+2012-03-08  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (remote_get_noisy_reply): Replace `sprintf' with
+	`xsnprintf'.
+	(remote_query_attached): Likewise.
+	(remote_static_tracepoint_marker_at): Likewise.
+	(remote_set_permissions): Likewise.
+	(remote_detach_1, extended_remote_attach_1): Likewise.
+	(send_g_packet, remote_vkill): Likewise.
+	(extended_remote_disable_randomization): Likewise.
+	(remote_add_target_side_condition): Likewise.
+	(remote_insert_breakpoint): Likewise.
+	(remote_remove_breakpoint): Likewise.
+	(remote_insert_watchpoint): Likewise.
+	(remote_remove_watchpoint): Likewise.
+	(remote_insert_hw_breakpoint): Likewise.
+	(remote_insert_hw_breakpoint): Likewise.
+	(remote_remove_hw_breakpoint): Likewise.
+	(remote_download_command_source): Likewise.
+	(remote_download_tracepoint): Likewise.
+	(remote_download_trace_state_variable): Likewise.
+	(remote_disable_tracepoint): Likewise.
+	(remote_trace_set_readonly_regions): Likewise.
+	(remote_get_tracepoint_status): Likewise.
+	(remote_trace_find): Likewise.
+	(remote_get_trace_state_variable_value): Likewise.
+	(remote_set_disconnected_tracing): Likewise.
+	(remote_set_circular_trace_buffer): Likewise.
+	(remote_get_min_fast_tracepoint_insn_len): Likewise.
+	(remote_use_agent): Likewise.
+	(remote_add_target_side_condition): Add one parameter BUF_SIZE.
+	Update callers.
+
 2012-03-07  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention QProgramSignals.
