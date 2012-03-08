@@ -1,5 +1,11 @@
 2012-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix CU relative vs. absolute DIE offsets.
+	* gdb.dwarf2/dw2-op-call.S: New compilation unit preceding the existing
+	one.
+
+2012-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix false FAIL on distros with relro linkage as default.
 	* gdb.reverse/solib-precsave.exp: Try to compile the test using
 	-Wl,-z,norelro first.

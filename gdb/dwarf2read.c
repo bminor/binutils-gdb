@@ -8031,7 +8031,8 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 	= lookup_signatured_type_at_offset (dwarf2_per_objfile->objfile,
 					    cu->per_cu->debug_types_section,
 					    cu->per_cu->offset);
-      if (type_sig->type_offset != die->offset)
+      if (type_sig->per_cu.offset + type_sig->type_offset
+	  != die->offset)
 	return;
     }
 
@@ -14202,11 +14203,12 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
    dwarf2_locexpr_baton->data has lifetime of PER_CU->OBJFILE.  */
 
 struct dwarf2_locexpr_baton
-dwarf2_fetch_die_location_block (unsigned int offset,
+dwarf2_fetch_die_location_block (unsigned int offset_in_cu,
 				 struct dwarf2_per_cu_data *per_cu,
 				 CORE_ADDR (*get_frame_pc) (void *baton),
 				 void *baton)
 {
+  unsigned int offset = per_cu->offset + offset_in_cu;
   struct dwarf2_cu *cu;
   struct die_info *die;
   struct attribute *attr;

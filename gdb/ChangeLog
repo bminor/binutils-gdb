@@ -1,5 +1,15 @@
 2012-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix CU relative vs. absolute DIE offsets.
+	* dwarf2loc.h (dwarf2_fetch_die_location_block): Rename parameter
+	offset to offset_in_cu.
+	* dwarf2read.c (process_enumeration_scope): Add CU offset to
+	TYPE_OFFSET.
+	(dwarf2_fetch_die_location_block): Rename parameter offset to
+	offset_in_cu.  New variable offset, add CU offset to OFFSET_IN_CU.
+
+2012-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* libunwind-frame.c: Rename to ...
 	* ia64-libunwind-tdep.c: ... here.
 	* libunwind-frame.h: Rename to ...

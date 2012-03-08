@@ -23,6 +23,23 @@ array2:	.2byte	2
 array3:	.2byte	3
 
 	.section .debug_info
+.Lcu0_begin:
+	/* CU header */
+	.4byte	.Lcu0_end - .Lcu0_start		/* Length of Compilation Unit */
+.Lcu0_start:
+	.2byte	2				/* DWARF Version */
+	.4byte	.Labbrev1_begin			/* Offset into abbrev section */
+	.byte	4				/* Pointer size */
+
+	/* CU die */
+	.uleb128 1				/* Abbrev: DW_TAG_compile_unit */
+	.ascii	"file0.txt\0"			/* DW_AT_name */
+	.ascii	"GNU C 3.3.3\0"			/* DW_AT_producer */
+	.byte	2				/* DW_LANG_C (C) */
+
+	.byte	0				/* End of children of CU */
+.Lcu0_end:
+
 .Lcu1_begin:
 	/* CU header */
 	.4byte	.Lcu1_end - .Lcu1_start		/* Length of Compilation Unit */
