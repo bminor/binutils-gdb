@@ -15517,7 +15517,7 @@ inferior in all-stop mode, gdb behaves as if always-inserted mode is off."),
 			&condition_evaluation_mode_1, _("\
 Set mode of breakpoint condition evaluation."), _("\
 Show mode of breakpoint condition evaluation."), _("\
-When this is set to \"gdb\", breakpoint conditions will be\n\
+When this is set to \"host\", breakpoint conditions will be\n\
 evaluated on the host's side by GDB.  When it is set to \"target\",\n\
 breakpoint conditions will be downloaded to the target (if the target\n\
 supports such feature) and conditions will be evaluated on the target's side.\n\

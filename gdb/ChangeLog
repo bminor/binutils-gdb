@@ -1,3 +1,8 @@
+2012-03-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (_initialize_breakpoint): Fix error in help of
+	"set breakpoint condition-evaluation" command.
+
 2012-03-08  Tristan Gingold  <gingold@adacore.com>
 
 	* sparc-stub.c: Move to stubs/
