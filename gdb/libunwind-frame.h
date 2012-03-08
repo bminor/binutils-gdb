@@ -23,6 +23,7 @@ struct frame_info;
 struct frame_id;
 struct regcache;
 struct gdbarch;
+struct frame_unwind;
 
 #ifndef LIBUNWIND_FRAME_H
 #define LIBUNWIND_FRAME_H 1
