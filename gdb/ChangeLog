@@ -1,3 +1,9 @@
+2012-03-08  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* m68klinux-nat.c: Include "gdb_proc_service.h".
+	(PTRACE_GET_THREAD_AREA): Define.
+	(ps_get_thread_area): New function.
+
 2012-03-08  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (remote_get_noisy_reply): Replace `sprintf' with
