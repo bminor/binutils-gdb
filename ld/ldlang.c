@@ -1064,6 +1064,7 @@ new_afile (const char *name,
   p->flags.add_DT_NEEDED_for_dynamic = input_flags.add_DT_NEEDED_for_dynamic;
   p->flags.add_DT_NEEDED_for_regular = input_flags.add_DT_NEEDED_for_regular;
   p->flags.whole_archive = input_flags.whole_archive;
+  p->flags.sysrooted = input_flags.sysrooted;
 
   if (file_type == lang_input_file_is_l_enum
       && name[0] == ':' && name[1] != '\0')
@@ -1101,7 +1102,6 @@ new_afile (const char *name,
       p->local_sym_name = name;
       p->flags.real = TRUE;
       p->flags.search_dirs = TRUE;
-      p->flags.sysrooted = input_flags.sysrooted;
       break;
     case lang_input_file_is_file_enum:
       p->filename = name;
@@ -2716,7 +2716,6 @@ load_symbols (lang_input_statement_type *entry,
       ldfile_open_command_file (entry->filename);
 
       push_stat_ptr (place);
-      input_flags.sysrooted = entry->flags.sysrooted;
       input_flags.add_DT_NEEDED_for_regular
 	= entry->flags.add_DT_NEEDED_for_regular;
       input_flags.add_DT_NEEDED_for_dynamic
@@ -2729,7 +2728,9 @@ load_symbols (lang_input_statement_type *entry,
       yyparse ();
       ldfile_assumed_script = FALSE;
 
-      /* missing_file is sticky.  */
+      /* missing_file is sticky.  sysrooted will already have been
+	 restored when seeing EOF in yyparse, but no harm to restore
+	 again.  */
       save_flags.missing_file |= input_flags.missing_file;
       input_flags = save_flags;
       pop_stat_ptr ();

@@ -236,10 +236,7 @@ struct lang_input_statement_flags
   /* 1 means search a set of directories for this file.  */
   unsigned int search_dirs : 1;
 
-  /* 1 means this was found in a search directory marked as sysrooted,
-     if search_dirs is false, otherwise, that it should be
-     searched in ld_sysroot before any other location, as long as it
-     starts with a slash.  */
+  /* 1 means this was found when processing a script in the sysroot.  */
   unsigned int sysrooted : 1;
 
   /* 1 means this is base file of incremental load.

@@ -70,7 +70,7 @@ static search_arch_type **search_arch_tail_ptr = &search_arch_head;
    sub-directory of the sysroot directory.  */
 
 static bfd_boolean
-is_sysrooted_pathname (const char *name, bfd_boolean notsame)
+is_sysrooted_pathname (const char *name)
 {
   char *realname;
   int len;
@@ -82,17 +82,12 @@ is_sysrooted_pathname (const char *name, bfd_boolean notsame)
   realname = lrealpath (name);
   len = strlen (realname);
   result = FALSE;
-  if (len == ld_canon_sysroot_len)
-    result = !notsame;
-  else if (len > ld_canon_sysroot_len
-	   && IS_DIR_SEPARATOR (realname[ld_canon_sysroot_len]))
+  if (len > ld_canon_sysroot_len
+      && IS_DIR_SEPARATOR (realname[ld_canon_sysroot_len]))
     {
-      result = TRUE;
       realname[ld_canon_sysroot_len] = '\0';
+      result = FILENAME_CMP (ld_canon_sysroot, realname) == 0;
     }
-
-  if (result)
-    result = FILENAME_CMP (ld_canon_sysroot, realname) == 0;
 
   free (realname);
   return result;
@@ -118,15 +113,9 @@ ldfile_add_library_path (const char *name, bfd_boolean cmdline)
   /* If a directory is marked as honoring sysroot, prepend the sysroot path
      now.  */
   if (name[0] == '=')
-    {
-      new_dirs->name = concat (ld_sysroot, name + 1, (const char *) NULL);
-      new_dirs->sysrooted = TRUE;
-    }
+    new_dirs->name = concat (ld_sysroot, name + 1, (const char *) NULL);
   else
-    {
-      new_dirs->name = xstrdup (name);
-      new_dirs->sysrooted = is_sysrooted_pathname (name, FALSE);
-    }
+    new_dirs->name = xstrdup (name);
 }
 
 /* Try to open a BFD for a lang_input_statement.  */
@@ -364,12 +353,7 @@ ldfile_open_file_search (const char *arch,
 	  free (name);
 	}
       else if (ldfile_try_open_bfd (entry->filename, entry))
-	{
-	  entry->flags.sysrooted
-	    = (IS_ABSOLUTE_PATH (entry->filename)
-	       && is_sysrooted_pathname (entry->filename, TRUE));
-	  return TRUE;
-	}
+	return TRUE;
 
       if (IS_ABSOLUTE_PATH (entry->filename))
 	return FALSE;
@@ -382,10 +366,7 @@ ldfile_open_file_search (const char *arch,
       if (entry->flags.dynamic && ! link_info.relocatable)
 	{
 	  if (ldemul_open_dynamic_archive (arch, search, entry))
-	    {
-	      entry->flags.sysrooted = search->sysrooted;
-	      return TRUE;
-	    }
+	    return TRUE;
 	}
 
       if (entry->flags.maybe_archive)
@@ -398,7 +379,6 @@ ldfile_open_file_search (const char *arch,
       if (ldfile_try_open_bfd (string, entry))
 	{
 	  entry->filename = string;
-	  entry->flags.sysrooted = search->sysrooted;
 	  return TRUE;
 	}
 
@@ -473,14 +453,17 @@ ldfile_open_file (lang_input_statement_type *entry)
     }
 }
 
-/* Try to open NAME; if that fails, try NAME with EXTEN appended to it.  */
+/* Try to open NAME.  */
 
 static FILE *
-try_open (const char *name, const char *exten)
+try_open (const char *name, bfd_boolean *sysrooted)
 {
   FILE *result;
 
   result = fopen (name, "r");
+
+  if (result != NULL)
+    *sysrooted = is_sysrooted_pathname (name);
 
   if (trace_file_tries)
     {
@@ -488,26 +471,6 @@ try_open (const char *name, const char *exten)
 	info_msg (_("cannot find script file %s\n"), name);
       else
 	info_msg (_("opened script file %s\n"), name);
-    }
-
-  if (result != NULL)
-    return result;
-
-  if (*exten)
-    {
-      char *buff;
-
-      buff = concat (name, exten, (const char *) NULL);
-      result = fopen (buff, "r");
-
-      if (trace_file_tries)
-	{
-	  if (result == NULL)
-	    info_msg (_("cannot find script file %s\n"), buff);
-	  else
-	    info_msg (_("opened script file %s\n"), buff);
-	}
-      free (buff);
     }
 
   return result;
@@ -570,22 +533,23 @@ find_scripts_dir (void)
 
 /* If DEFAULT_ONLY is false, try to open NAME; if that fails, look for
    it in directories specified with -L, then in the default script
-   directory, without and with EXTEND appended.  If DEFAULT_ONLY is
-   true, the search is restricted to the default script location.  */
+   directory.  If DEFAULT_ONLY is true, the search is restricted to
+   the default script location.  */
 
 static FILE *
-ldfile_find_command_file (const char *name, const char *extend,
-			  bfd_boolean default_only)
+ldfile_find_command_file (const char *name,
+			  bfd_boolean default_only,
+			  bfd_boolean *sysrooted)
 {
   search_dirs_type *search;
   FILE *result = NULL;
-  char *buffer;
+  char *path;
   static search_dirs_type *script_search;
 
   if (!default_only)
     {
       /* First try raw name.  */
-      result = try_open (name, "");
+      result = try_open (name, sysrooted);
       if (result != NULL)
 	return result;
     }
@@ -611,9 +575,9 @@ ldfile_find_command_file (const char *name, const char *extend,
        search != NULL;
        search = search->next)
     {
-      buffer = concat (search->name, slash, name, (const char *) NULL);
-      result = try_open (buffer, extend);
-      free (buffer);
+      path = concat (search->name, slash, name, (const char *) NULL);
+      result = try_open (path, sysrooted);
+      free (path);
       if (result)
 	break;
     }
@@ -630,7 +594,9 @@ static void
 ldfile_open_command_file_1 (const char *name, bfd_boolean default_only)
 {
   FILE *ldlex_input_stack;
-  ldlex_input_stack = ldfile_find_command_file (name, "", default_only);
+  bfd_boolean sysrooted;
+
+  ldlex_input_stack = ldfile_find_command_file (name, default_only, &sysrooted);
 
   if (ldlex_input_stack == NULL)
     {
@@ -638,7 +604,7 @@ ldfile_open_command_file_1 (const char *name, bfd_boolean default_only)
       einfo (_("%P%F: cannot open linker script file %s: %E\n"), name);
     }
 
-  lex_push_file (ldlex_input_stack, name);
+  lex_push_file (ldlex_input_stack, name, sysrooted);
 
   lineno = 1;
 

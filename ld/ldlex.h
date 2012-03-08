@@ -41,7 +41,7 @@ extern const char *lex_string;
 
 /* In ldlex.l.  */
 extern int yylex (void);
-extern void lex_push_file (FILE *, const char *);
+extern void lex_push_file (FILE *, const char *, unsigned int);
 extern void lex_redirect (const char *, const char *, unsigned int);
 extern void ldlex_script (void);
 extern void ldlex_mri_script (void);

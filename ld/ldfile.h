@@ -37,8 +37,6 @@ typedef struct search_dirs {
   const char *name;
   /* TRUE if this is from the command line.  */
   bfd_boolean cmdline;
-  /* true if this is from within the sys-root.  */
-  bfd_boolean sysrooted;
 } search_dirs_type;
 
 extern search_dirs_type *search_head;

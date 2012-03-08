@@ -1,3 +1,25 @@
+2012-03-08  Alan Modra  <amodra@gmail.com>
+
+	PR ld/10340
+	* ldfile.c (is_sysrooted_pathname): Remove notsame param.
+	(ldfile_add_library_path): Don't set sysrooted flag.
+	(ldfile_open_file_search): Likewise, and don't copy them.
+	(try_open): Delete exten and code handling such.  Add sysrooted
+	param and return whether path is in sysroot.
+	(ldfile_find_command_file): Delete extend param.  Add sysrooted
+	param.  Rename local var.  Update try_open calls.
+	(ldfile_open_command_file_1): Pass sysrooted to lex_push_file.
+	* ldfile.h (search_dirs_type): Remove sysrooted field.
+	* ldlang.c (new_afile): Always set sysrooted from input_flags.
+	(load_symbols): Don't set input_flags.sysrooted.
+	* ldlang.h (struct lang_input_statement_flags): Revise sysrooted
+	comment.
+	* ldlex.h (lex_push_file): Update prototype.
+	* ldlex.l (sysrooted_stack): New array.
+	(EOF): Pop input_flags.sysrooted.
+	(lex_push_file): Add sysrooted param.  Save and set
+	input_flags.sysrooted.
+
 2012-03-06  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.h (struct lang_input_statement_flags): New, extract from..

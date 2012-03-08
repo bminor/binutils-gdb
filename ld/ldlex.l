@@ -68,6 +68,7 @@ const char *lex_string = NULL;
 static YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
 static const char *file_name_stack[MAX_INCLUDE_DEPTH];
 static unsigned int lineno_stack[MAX_INCLUDE_DEPTH];
+static unsigned int sysrooted_stack[MAX_INCLUDE_DEPTH];
 static unsigned int include_stack_ptr = 0;
 static int vers_node_nesting = 0;
 
@@ -454,6 +455,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
     yy_switch_to_buffer (include_stack[include_stack_ptr]);
 
   lineno = lineno_stack[include_stack_ptr];
+  input_flags.sysrooted = sysrooted_stack[include_stack_ptr];
 
   return END;
 }
@@ -468,7 +470,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
    saving the current input info on the include stack.  */
 
 void
-lex_push_file (FILE *file, const char *name)
+lex_push_file (FILE *file, const char *name, unsigned int sysrooted)
 {
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
     {
@@ -476,10 +478,12 @@ lex_push_file (FILE *file, const char *name)
     }
   file_name_stack[include_stack_ptr] = name;
   lineno_stack[include_stack_ptr] = lineno;
+  sysrooted_stack[include_stack_ptr] = input_flags.sysrooted;
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
 
   include_stack_ptr++;
   lineno = 1;
+  input_flags.sysrooted = sysrooted;
   yyin = file;
   yy_switch_to_buffer (yy_create_buffer (yyin, YY_BUF_SIZE));
 }
