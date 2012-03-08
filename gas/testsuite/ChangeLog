@@ -1,3 +1,8 @@
+2012-03-08  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* gas/s390/esa-g5.d: Move length field to the second operand.
+	* gas/s390/esa-g5.s: Likewise.
+
 2012-02-14  Alan Modra  <amodra@gmail.com>
 
 	* gas/elf/bad-group.s: Add section attributes.

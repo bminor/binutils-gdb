@@ -1,3 +1,7 @@
+2012-03-08  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-opc.txt: Set instruction type of pku to SS_L2RDRD.
+
 2012-02-27  Alan Modra  <amodra@gmail.com>
 
 	* mt-dis.c: Regenerate.

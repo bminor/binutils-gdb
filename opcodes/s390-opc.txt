@@ -372,7 +372,7 @@ b278 stcke S_RD "store clock extended" g5 esa,zarch
 b2a5 tre RRE_RER "translate extended" g5 esa,zarch
 eb000000008e mvclu RSE_RERERD "move long unicode" g5 esa,zarch
 e9 pka SS_L2RDRD "pack ascii" g5 esa,zarch
-e1 pku SS_L0RDRD "pack unicode" g5 esa,zarch
+e1 pku SS_L2RDRD "pack unicode" g5 esa,zarch
 b993 troo RRE_RER "translate one to one" g5 esa,zarch
 b992 trot RRE_RER "translate one to two" g5 esa,zarch
 b991 trto RRE_RER "translate two to one" g5 esa,zarch
