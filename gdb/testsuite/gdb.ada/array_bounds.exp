@@ -27,7 +27,7 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" }
 
 clean_restart ${testfile}
 
-set bp_location [gdb_get_line_number "STOP" ${testdir}/bar.adb]
+set bp_location [gdb_get_line_number "START" ${testdir}/bar.adb]
 if ![runto "bar.adb:$bp_location" ] then {
   perror "Couldn't run ${testfile}"
   return

@@ -1,3 +1,10 @@
+2012-03-08  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.ada/array_bounds.exp: Get breakpoint for line
+	with "START", not "STOP".
+	* gdb.python/py-infthread.exp: Do not continue to
+	line marked "Break here.", which is undefined.
+
 2012-03-08  Luis Machado  <lgustavo@codesourcery.com>
 
 	Revert:

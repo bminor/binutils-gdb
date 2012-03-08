@@ -37,8 +37,6 @@ if ![runto_main] then {
     return 0
 }
 
-runto [gdb_get_line_number "Break here."]
-
 # Test basic gdb.Inferior attributes and methods.
 
 gdb_py_test_silent_cmd "python t0 = gdb.selected_thread ()" "test gdb.selected_thread" 1
