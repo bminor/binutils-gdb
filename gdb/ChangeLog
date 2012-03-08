@@ -1,3 +1,11 @@
+2012-03-08  Tristan Gingold  <gingold@adacore.com>
+
+	* sparc-stub.c: Move to stubs/
+	* sh-stub.c: Likewise.
+	* m68k-stub.c: Likewise.
+	* m32r-stub.c: Likewise.
+	* i386-stub.c: Likewise.
+
 2012-03-08  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* m68klinux-tdep.c (m68k_linux_init_abi): Register
