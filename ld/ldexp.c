@@ -59,7 +59,7 @@ exp_print_token (token_code_type code, int infix_p)
   static const struct
   {
     token_code_type code;
-    char * name;
+    const char * name;
   }
   table[] =
   {
@@ -1145,6 +1145,17 @@ exp_print_tree (etree_type *tree)
 	case DATA_SEGMENT_ALIGN:
 	case DATA_SEGMENT_RELRO_END:
 	  function_like = TRUE;
+	  break;
+	case SEGMENT_START:
+	  /* Special handling because arguments are in reverse order and
+	     the segment name is quoted.  */
+	  exp_print_token (tree->type.node_code, FALSE);
+	  fputs (" (\"", config.map_file);
+	  exp_print_tree (tree->binary.rhs);
+	  fputs ("\", ", config.map_file);
+	  exp_print_tree (tree->binary.lhs);
+	  fputc (')', config.map_file);
+	  return;
 	}
       if (function_like)
 	{
