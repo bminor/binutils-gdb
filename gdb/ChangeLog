@@ -1,5 +1,8 @@
 2012-03-08  Andreas Schwab  <schwab@linux-m68k.org>
 
+	* m68klinux-tdep.c (m68k_linux_init_abi): Register
+	linux_get_siginfo_type.
+
 	* m68klinux-nat.c: Include "gdb_proc_service.h".
 	(PTRACE_GET_THREAD_AREA): Define.
 	(ps_get_thread_area): New function.
