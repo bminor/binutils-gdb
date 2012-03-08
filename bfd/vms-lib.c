@@ -2006,6 +2006,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
   unsigned int mod_idx_vbn;
   unsigned int sym_idx_vbn;
   bfd_boolean is_elfidx = tdata->kind == vms_lib_ia64;
+  unsigned int max_keylen = is_elfidx ? 1025 : MAX_KEYLEN;
 
   /* Count the number of modules (and do a first sanity check).  */
   nbr_modules = 0;
@@ -2037,7 +2038,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
        current != NULL;
        current = current->archive_next, i++)
     {
-      int nl;
+      unsigned int nl;
 
       modules[i].abfd = current;
       modules[i].name = vms_get_module_name (current->filename, FALSE);
@@ -2045,7 +2046,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
 
       /* FIXME: silently truncate long names ?  */
       nl = strlen (modules[i].name);
-      modules[i].namlen = (nl > MAX_KEYLEN ? MAX_KEYLEN : nl);
+      modules[i].namlen = (nl > max_keylen ? max_keylen : nl);
     }
 
   /* Create the module index.  */
@@ -2236,20 +2237,27 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
     bfd_putl32 (nbr_modules, lhd->modcnt);
     bfd_putl32 (nbr_modules, lhd->modhdrs);
 
+    /* Number of blocks for index.  */
+    bfd_putl32 (nbr_mod_iblk + nbr_sym_iblk, lhd->idxblks);
     bfd_putl32 (vbn - 1, lhd->hipreal);
     bfd_putl32 (vbn - 1, lhd->hiprusd);
+
+    /* VBN of the next free block.  */
+    bfd_putl32 ((off / VMS_BLOCK_SIZE) + 1, lhd->nextvbn);
+    bfd_putl32 ((off / VMS_BLOCK_SIZE) + 1, lhd->nextrfa + 0);
+    bfd_putl16 (0, lhd->nextrfa + 4);
 
     /* First index (modules name).  */
     idd_flags = IDD__FLAGS_ASCII | IDD__FLAGS_VARLENIDX
       | IDD__FLAGS_NOCASECMP | IDD__FLAGS_NOCASENTR;
     bfd_putl16 (idd_flags, idd->flags);
-    bfd_putl16 (MAX_KEYLEN, idd->keylen);
+    bfd_putl16 (max_keylen, idd->keylen);
     bfd_putl16 (mod_idx_vbn, idd->vbn);
     idd++;
 
     /* Second index (symbols name).  */
     bfd_putl16 (idd_flags, idd->flags);
-    bfd_putl16 (MAX_KEYLEN, idd->keylen);
+    bfd_putl16 (max_keylen, idd->keylen);
     bfd_putl16 (sym_idx_vbn, idd->vbn);
     idd++;
 

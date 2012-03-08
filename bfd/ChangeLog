@@ -1,3 +1,9 @@
+2012-03-08  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (_bfd_vms_lib_write_archive_contents): Set maximum
+	keylen according to archive kind.  Set nextvbn and nextrfa lhd
+	fields.  Add comments.
+
 2012-03-07  Nick Clifton  <nickc@redhat.com>
 
 	* elf-m10300.c (elf32_mn10300_link_hash_entry): Add tls_type
