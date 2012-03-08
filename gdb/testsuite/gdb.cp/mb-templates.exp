@@ -38,35 +38,24 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
-# If GDB crashes try it again workarounding PR breakpoints/13781.
+clean_restart ${executable}
 
-foreach workaround [list "" " (workaround)"] {
-    clean_restart ${executable}
+set bp_location [gdb_get_line_number "set breakpoint here"]
 
-    if {${workaround} != ""} {
-	gdb_test_no_output "set breakpoint condition-evaluation host"
-    }
+# Set a breakpoint with multiple locations
+# and a condition.
 
-    set bp_location [gdb_get_line_number "set breakpoint here"]
+gdb_test "break $srcfile:$bp_location if i==1" \
+    "Breakpoint.*at.*: $srcfile:$bp_location. \\(2 locations\\).*" \
+    "initial condition: set breakpoint"
 
-    # Set a breakpoint with multiple locations
-    # and a condition.
+gdb_run_cmd
 
-    gdb_test "break $srcfile:$bp_location if i==1" \
-	"Breakpoint.*at.*: $srcfile:$bp_location. \\(2 locations\\).*" \
-	"initial condition: set breakpoint$workaround"
-
-    gdb_run_cmd
-
-    if {${workaround} == "" && [is_remote target]} {
-	setup_kfail breakpoints/13781 "*-*-*"
-    }
-    set test "initial condition: run to breakpoint$workaround"
-    gdb_test_multiple "" $test {
-	-re "Breakpoint \[0-9\]+,.*foo<int> \\(i=1\\).*$gdb_prompt $" {
-	    pass $test
-	    break
-	}
+set test "initial condition: run to breakpoint"
+gdb_test_multiple "" $test {
+    -re "Breakpoint \[0-9\]+,.*foo<int> \\(i=1\\).*$gdb_prompt $" {
+	pass $test
+	break
     }
 }
 
