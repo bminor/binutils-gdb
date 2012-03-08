@@ -1,3 +1,9 @@
+2012-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix -Wmissing-prototypes build.
+	* arm-linux-nat.c (get_thread_id): Make it static.
+	* xtensa-linux-nat.c (get_thread_id): Likewise.
+
 2012-03-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* server.c (process_point_options): If a conditional expression

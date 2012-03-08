@@ -46,7 +46,7 @@
    hardware-specific overlays.  */
 #include "xtensa-xtregs.c"
 
-int
+static int
 get_thread_id (ptid_t ptid)
 {
   int tid = TIDGET (ptid);

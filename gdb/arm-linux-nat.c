@@ -77,7 +77,7 @@ extern int arm_apcs_32;
    individual thread (process) ID.  get_thread_id () is used to get
    the thread id if it's available, and the process id otherwise.  */
 
-int
+static int
 get_thread_id (ptid_t ptid)
 {
   int tid = TIDGET (ptid);
