@@ -1,3 +1,9 @@
+2012-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix false FAIL on distros with relro linkage as default.
+	* gdb.reverse/solib-precsave.exp: Try to compile the test using
+	-Wl,-z,norelro first.
+
 2012-03-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/bp_on_var: New testcase.

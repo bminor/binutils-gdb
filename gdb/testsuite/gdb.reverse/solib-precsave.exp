@@ -39,7 +39,13 @@ if { [gdb_compile_shlib ${srcdir}/${subdir}/${libsrc} ${library} "debug"] != "" 
 
 set exec_opts [list debug shlib=${library}]
 
-if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opts] != "" } {
+# Attempt to prevent -Wl,-z,relro which may happen by default with some
+# toolchain configurations.  Due to PR corefiles/11804 GDB will then produce
+# invalid core file.
+
+if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable \
+		     [concat $exec_opts additional_flags=-Wl,-z,norelro]] != ""
+     && [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opts] != "" } {
     untested "Could not compile $binfile."
     return -1
 }
