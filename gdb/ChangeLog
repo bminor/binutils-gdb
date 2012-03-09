@@ -222,9 +222,8 @@
 
 	* jv-valprint.c (java_value_print): Correctly compute 'obj_addr'.
 
-2012-03-05  Joel Brobecker  <brobecker@adacore.com>
+2012-03-05  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
-	From Andreas Arnez  <arnez@linux.vnet.ibm.com>:
 	* s390-nat.c: Include "gregset.h".
 
 2012-03-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
@@ -1003,9 +1002,8 @@
 	* infcmd.c (finish_forward): Likewise.
 	* infrun.c (insert_exception_resume_breakpoint): Likewise.
 
-2012-02-28  Joel Brobecker  <brobecker@adacore.com>
+2012-02-28  Tristan Gingold  <gingold@adacore.com>
 
-	From Tristan Gingold  <gingold@adacore.com>.
 	* ada-tasks.c (ada_tasks_inferior_data_sniffer): Rework code to
 	avoid variable assignments inside condition.
 
