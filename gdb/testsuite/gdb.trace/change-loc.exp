@@ -98,7 +98,21 @@ proc tracepoint_change_loc_1 { trace_type } { with_test_prefix "1 $trace_type" {
     gdb_test "continue" ".*Breakpoint.*marker.*at.*$srcfile.*" \
 	"continue to marker 1"
     # Set a tracepoint during tracing.
-    gdb_test "${trace_type} set_tracepoint" ".*" "set tracepoint on set_tracepoint"
+    set test "set tracepoint on set_tracepoint"
+    gdb_test_multiple "${trace_type} set_tracepoint" $test {
+	-re "Target returns error code .* too far .*$gdb_prompt $" {
+	    if [string equal $trace_type "ftrace"] {
+		# The target was unable to install the fast tracepoint
+		# (e.g., jump pad too far from tracepoint).
+		pass "$test (too far)"
+	    } else {
+		fail $test
+	    }
+	}
+	-re "\r\n$gdb_prompt $" {
+	    pass $test
+	}
+    }
 
     gdb_trace_setactions "set action for tracepoint" "" \
 	"collect \$$pcreg" "^$"
@@ -109,15 +123,27 @@ proc tracepoint_change_loc_1 { trace_type } { with_test_prefix "1 $trace_type" {
 \[0-9\]+\[\t \]+\(|fast \)tracepoint\[ \]+keep y.*\<MULTIPLE\>.*4\.1.* in func4.*4\.2.* in func4.*" \
 	"tracepoint with two locations"
 
-    gdb_test_multiple "continue" "continue to marker 2" {
-	-re ".*Breakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
-	    pass "continue to marker 2"
-	}
-	-re ".*$gdb_prompt $" {
-	    kfail "gdb/13392" "continue to marker 2"
-	    return
-	}
+    set test "continue to marker 2"
+    gdb_test_multiple "continue" $test {
+	-re "Target returns error code .* too far .*$gdb_prompt $" {
+            if [string equal $trace_type "ftrace"] {
+		# Expected if the target was unable to install the
+		# fast tracepoint (e.g., jump pad too far from
+		# tracepoint).
+		pass "$test (too far)"
+		# Skip the rest of the tests.
+                return
+            } else {
+		fail "continue to marker 2"
+		fail $test
+            }
+
+       }
+       -re ".*Breakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
+           pass "continue to marker 2"
+       }
     }
+
     # tracepoint has three locations after shlib change-loc-2 is loaded.
     gdb_test "info trace" \
 	"Num     Type\[ \]+Disp Enb Address\[ \]+What.*
@@ -198,17 +224,26 @@ proc tracepoint_change_loc_2 { trace_type } { with_test_prefix "2 $trace_type" {
 	"breakpoint on marker"
 
     # tracepoint with two locations will be downloaded and installed.
-    gdb_test_no_output "tstart"
-
-    gdb_test_multiple "continue" "continue to marker 1" {
-	-re ".*Breakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
-	    pass "continue to marker 1"
-	}
-	-re ".*$gdb_prompt $" {
-	    kfail "gdb/13392" "continue to marker 1"
-	    return
+    set test "tstart"
+    gdb_test_multiple "tstart" $test {
+        -re "^tstart\r\n$gdb_prompt $" {
+	    pass "tstart"
+        }
+	-re "Target returns error code .* too far .*$gdb_prompt $" {
+            if [string equal $trace_type "ftrace"] {
+		# The target was unable to install the fast tracepoint
+		# (e.g., jump pad too far from tracepoint).
+		pass "$test (too far)"
+		# Skip the rest of the tests.
+		return
+            } else {
+		fail $test
+            }
 	}
     }
+
+    gdb_test "continue" ".*Breakpoint.*marker.*at.*$srcfile.*" \
+	"continue to marker 1"
 
     gdb_test "continue" ".*Breakpoint.*marker.*at.*$srcfile.*" \
 	"continue to marker 2"

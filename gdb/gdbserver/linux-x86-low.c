@@ -20,6 +20,7 @@
 #include <stddef.h>
 #include <signal.h>
 #include <limits.h>
+#include <inttypes.h>
 #include "server.h"
 #include "linux-low.h"
 #include "i387-fp.h"
@@ -1200,6 +1201,8 @@ amd64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 {
   unsigned char buf[40];
   int i, offset;
+  int64_t loffset;
+
   CORE_ADDR buildaddr = *jump_entry;
 
   /* Build the jump pad.  */
@@ -1323,7 +1326,17 @@ amd64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
   *adjusted_insn_addr_end = buildaddr;
 
   /* Finally, write a jump back to the program.  */
-  offset = (tpaddr + orig_size) - (buildaddr + sizeof (jump_insn));
+
+  loffset = (tpaddr + orig_size) - (buildaddr + sizeof (jump_insn));
+  if (loffset > INT_MAX || loffset < INT_MIN)
+    {
+      sprintf (err,
+	       "E.Jump back from jump pad too far from tracepoint "
+	       "(offset 0x%" PRIx64 " > int32).", loffset);
+      return 1;
+    }
+
+  offset = (int) loffset;
   memcpy (buf, jump_insn, sizeof (jump_insn));
   memcpy (buf + 1, &offset, 4);
   append_insns (&buildaddr, sizeof (jump_insn), buf);
@@ -1332,7 +1345,17 @@ amd64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
      is always done last (by our caller actually), so that we can
      install fast tracepoints with threads running.  This relies on
      the agent's atomic write support.  */
-  offset = *jump_entry - (tpaddr + sizeof (jump_insn));
+  loffset = *jump_entry - (tpaddr + sizeof (jump_insn));
+  if (loffset > INT_MAX || loffset < INT_MIN)
+    {
+      sprintf (err,
+	       "E.Jump pad too far from tracepoint "
+	       "(offset 0x%" PRIx64 " > int32).", loffset);
+      return 1;
+    }
+
+  offset = (int) loffset;
+
   memcpy (buf, jump_insn, sizeof (jump_insn));
   memcpy (buf + 1, &offset, 4);
   memcpy (jjump_pad_insn, buf, sizeof (jump_insn));

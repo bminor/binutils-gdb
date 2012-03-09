@@ -1684,6 +1684,28 @@ find_tracepoint (int id, CORE_ADDR addr)
   return NULL;
 }
 
+/* Remove TPOINT from global list.  */
+
+static void
+remove_tracepoint (struct tracepoint *tpoint)
+{
+  struct tracepoint *tp, *tp_prev;
+
+  for (tp = tracepoints, tp_prev = NULL; tp && tp != tpoint;
+       tp_prev = tp, tp = tp->next)
+    ;
+
+  if (tp)
+    {
+      if (tp_prev)
+	tp_prev->next = tp->next;
+      else
+	tracepoints = tp->next;
+
+      xfree (tp);
+    }
+}
+
 /* There may be several tracepoints with the same number (because they
    are "locations", in GDB parlance); return the next one after the
    given tracepoint, or search from the beginning of the list if the
@@ -2391,6 +2413,8 @@ cmd_qtdp (char *own_buf)
 
       download_tracepoint (tpoint);
       install_tracepoint (tpoint, own_buf);
+      if (strcmp (own_buf, "OK") != 0)
+	remove_tracepoint (tpoint);
 
       unpause_all (1);
       return;

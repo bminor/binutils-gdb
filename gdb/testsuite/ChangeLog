@@ -1,3 +1,15 @@
+2012-03-08  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	Fix PR server/13392.
+	* gdb.trace/change-loc.exp (tracepoint_change_loc_1): Remove kfail.
+	(tracepoint_change_loc_2): Remove kfail.  Return if failed to
+	download tracepoints.
+	* gdb.trace/pending.exp (pending_tracepoint_works): Likewise.
+	(pending_tracepoint_resolved_during_trace): Likewise.
+	(pending_tracepoint_installed_during_trace): Likewise.
+	(pending_tracepoint_with_action_resolved): Likewise.
+
 2012-03-08  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.ada/array_bounds.exp: Get breakpoint for line

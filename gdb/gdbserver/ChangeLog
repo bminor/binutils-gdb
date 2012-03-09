@@ -1,3 +1,12 @@
+2012-03-08  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	Fix PR server/13392.
+	* linux-x86-low.c (amd64_install_fast_tracepoint_jump_pad): Check
+	offset of JMP insn.
+	* tracepoint.c (remove_tracepoint): New.
+	(cmd_qtdp): Call remove_tracepoint when failed to install.
+
 2012-03-07  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (get_detach_signal): New.

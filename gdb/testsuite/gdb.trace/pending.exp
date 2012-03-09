@@ -132,17 +132,27 @@ proc pending_tracepoint_works { trace_type } { with_test_prefix "$trace_type wor
     gdb_test "break marker" "Breakpoint.*at.* file .*$srcfile, line.*" \
 	"breakpoint on marker"
 
-    gdb_test_no_output "tstart" "start trace experiment"
+    set test "start trace experiment"
+    gdb_test_multiple "tstart" $test {
+	-re "^tstart\r\n$gdb_prompt $" {
+	    pass $test
+	}
+	-re "Target returns error code .* too far .*$gdb_prompt $" {
+	    if [string equal $trace_type "ftrace"] {
+		# The target was unable to install the fast tracepoint
+		# (e.g., jump pad too far from tracepoint).
+		pass "$test (too far)"
+		# Skip the rest of the tests.
+		return
+	    } else {
+		fail $test
+	    }
+	}
 
-    gdb_test_multiple "continue" "continue to marker" {
-	-re "Continuing.\r\n\r\nBreakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
-	    pass "continue to marker"
-	}
-	-re ".*$gdb_prompt $" {
-	    kfail "gdb/13392" "continue to marker"
-	    return
-	}
     }
+
+    gdb_test "continue" "Continuing.\r\n\r\nBreakpoint.*marker.*at.*$srcfile.*" \
+	"continue to marker"
 
     gdb_test "tstop" "\[\r\n\]+" "stop trace experiment"
 
@@ -189,13 +199,22 @@ proc pending_tracepoint_resolved_during_trace { trace_type } \
     gdb_test "continue" "Continuing.\r\n\r\nBreakpoint.*marker.*at.*pending.c.*" \
 	"continue to marker 1"
 
-    gdb_test_multiple "continue" "continue to marker 2" {
-	-re "Continuing.\r\n\r\nBreakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
-	    pass "continue to marker 2"
+    set test "continue to marker 2"
+    gdb_test_multiple "continue" $test {
+	-re "Target returns error code .* too far .*$gdb_prompt $" {
+	    if [string equal $trace_type "ftrace"] {
+		# Expected if the target was unable to install the
+		# fast tracepoint (e.g., jump pad too far from
+		# tracepoint).
+		pass "$test (too far)"
+		# Skip the rest of the tests.
+		return
+	    } else {
+		fail $test
+	    }
 	}
-	-re ".*$gdb_prompt $" {
-	    kfail "gdb/13392" "continue to marker 2"
-	    return
+	-re "Continuing.\r\n\r\nBreakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
+	    pass $test
 	}
     }
 
@@ -253,14 +272,23 @@ proc pending_tracepoint_installed_during_trace { trace_type } \
 \[0-9\]+\[\t \]+\(fast |\)tracepoint\[ \t\]+keep y.*PENDING.*set_point2.*" \
 	"single pending tracepoint on set_point2"
 
-    gdb_test_multiple "continue" "continue to marker 2" {
+    set test "continue to marker 2"
+    gdb_test_multiple "continue" $test {
+	-re "Target returns error code .* too far .*$gdb_prompt $" {
+	    if [string equal $trace_type "ftrace"] {
+		# Expected if the target was unable to install the
+		# fast tracepoint (e.g., jump pad too far from
+		# tracepoint).
+		pass "$test (too far)"
+		# Skip the rest of the tests.
+		return
+	    } else {
+		fail $test
+	    }
+	}
 	-re "Continuing.\r\n\r\nBreakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
-	    pass "continue to marker 2"
-	}
-	-re ".*$gdb_prompt $" {
-	    kfail "gdb/13392" "continue to marker 2"
-	    return
-	}
+           pass $test
+       }
     }
 
     gdb_test "tstop" "\[\r\n\]+" "stop trace experiment"
@@ -423,14 +451,24 @@ proc pending_tracepoint_with_action_resolved { trace_type } \
     gdb_test "continue" "Continuing.\r\n\r\nBreakpoint.*marker.*at.*pending.c.*" \
 	"continue to marker 1"
 
-    gdb_test_multiple "continue" "continue to marker 2" {
+    set test "continue to marker 2"
+    gdb_test_multiple "continue" $test {
+	    -re "Target returns error code .* too far .*$gdb_prompt $" {
+            if [string equal $trace_type "ftrace"] {
+		# Expected if the target was unable to install the
+		# fast tracepoint (e.g., jump pad too far from
+		# tracepoint).
+		pass "$test (too far)"
+		# Skip the rest of the tests.
+		return
+            } else {
+		fail $test
+            }
+	}
 	-re "Continuing.\r\n\r\nBreakpoint.*marker.*at.*$srcfile.*$gdb_prompt $" {
 	    pass "continue to marker 2"
 	}
-	-re ".*$gdb_prompt $" {
-	    kfail "gdb/13392" "continue to marker 2"
-	    return
-	}
+
     }
 
     gdb_test "tstop" "\[\r\n\]+" "stop trace experiment"
