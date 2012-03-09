@@ -3257,7 +3257,6 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  bfd_byte *loc;
 		  asection *sreloc;
 		  bfd_vma offset;
-		  bfd_boolean relocate;
 
 		  /* Need a dynamic relocation to get the real function
 		     adddress.  */
@@ -3278,14 +3277,15 @@ elf_i386_relocate_section (bfd *output_bfd,
 		      || info->executable)
 		    {
 		      /* This symbol is resolved locally.  */
-		      outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
-		      relocate = TRUE;
+		      outrel.r_info = ELF32_R_INFO (0, R_386_IRELATIVE);
+		      bfd_put_32 (output_bfd,
+				  (h->root.u.def.value
+				   + h->root.u.def.section->output_section->vma
+				   + h->root.u.def.section->output_offset),
+				  contents + offset);
 		    }
 		  else
-		    {
-		      outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
-		      relocate = FALSE;
-		    }
+		    outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 
 		  sreloc = htab->elf.irelifunc;
 		  loc = sreloc->contents;
@@ -3298,8 +3298,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		     we need to include the symbol value so that it
 		     becomes an addend for the dynamic reloc.  For an
 		     internal symbol, we have updated addend.  */
-		  if (! relocate)
-		    continue;
+		  continue;
 		}
 	      /* FALLTHROUGH */
 	    case R_386_PC32:

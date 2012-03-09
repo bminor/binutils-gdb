@@ -1,3 +1,12 @@
+2012-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13817
+	* bfd/elf32-i386.c (elf_i386_relocate_section): Restore
+	R_386_IRELATIVE.
+
+	* * elf64-x86-64.c (elf_x86_64_relocate_section): Restore
+	R_X86_64_IRELATIVE.
+
 2012-03-08  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-lib.c (_bfd_vms_lib_write_archive_contents): Set maximum
