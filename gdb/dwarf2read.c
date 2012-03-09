@@ -383,6 +383,13 @@ struct dwarf2_cu
      any location list and still facing inlining issues if handled as
      unoptimized code.  For a future better test see GCC PR other/32998.  */
   unsigned int has_loclist : 1;
+
+  /* These cache the results of producer_is_gxx_lt_4_6.
+     CHECKED_PRODUCER is set if PRODUCER_IS_GXX_LT_4_6 is valid.  This
+     information is cached because profiling CU expansion showed
+     excessive time spent in producer_is_gxx_lt_4_6.  */
+  unsigned int checked_producer : 1;
+  unsigned int producer_is_gxx_lt_4_6 : 1;
 };
 
 /* Persistent data held for a compilation unit, even when not
@@ -6826,6 +6833,7 @@ producer_is_gxx_lt_4_6 (struct dwarf2_cu *cu)
 {
   const char *cs;
   int major, minor, release;
+  int result = 0;
 
   if (cu->producer == NULL)
     {
@@ -6841,26 +6849,33 @@ producer_is_gxx_lt_4_6 (struct dwarf2_cu *cu)
       return 0;
     }
 
+  if (cu->checked_producer)
+    return cu->producer_is_gxx_lt_4_6;
+
   /* Skip any identifier after "GNU " - such as "C++" or "Java".  */
 
   if (strncmp (cu->producer, "GNU ", strlen ("GNU ")) != 0)
     {
       /* For non-GCC compilers expect their behavior is DWARF version
 	 compliant.  */
-
-      return 0;
     }
-  cs = &cu->producer[strlen ("GNU ")];
-  while (*cs && !isdigit (*cs))
-    cs++;
-  if (sscanf (cs, "%d.%d.%d", &major, &minor, &release) != 3)
+  else
     {
-      /* Not recognized as GCC.  */
-
-      return 0;
+      cs = &cu->producer[strlen ("GNU ")];
+      while (*cs && !isdigit (*cs))
+	cs++;
+      if (sscanf (cs, "%d.%d.%d", &major, &minor, &release) != 3)
+	{
+	  /* Not recognized as GCC.  */
+	}
+      else
+	result = major < 4 || (major == 4 && minor < 6);
     }
 
-  return major < 4 || (major == 4 && minor < 6);
+  cu->checked_producer = 1;
+  cu->producer_is_gxx_lt_4_6 = result;
+
+  return result;
 }
 
 /* Return the default accessibility type if it is not overriden by

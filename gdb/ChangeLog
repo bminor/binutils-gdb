@@ -1,5 +1,11 @@
 2012-03-09  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (struct dwarf2_cu) <checked_producer,
+	producer_is_gxx_lt_4_6>: New fields.
+	(producer_is_gxx_lt_4_6): Use and update producer cache fields.
+
+2012-03-09  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (dwarf2_attr): Avoid tail-recursive call.
 
 2012-03-08  Joel Brobecker  <brobecker@adacore.com>
