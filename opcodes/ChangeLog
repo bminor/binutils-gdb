@@ -1,3 +1,15 @@
+2012-03-10  Edmar Wienskoski  <edmar@freescale.com>
+
+	* ppc-dis.c (ppc_opts): Add entries for "e5500" and "e6500".
+	* ppc-opc.c (insert_ls, TMR, ESYNC, XSYNCLE_MASK): New.
+	(PPCVEC2, PPCTMR, E6500): New short names.
+	(powerpc_opcodes): Add vabsdub, vabsduh, vabsduw, dni, mvidsplt,
+	mviwsplt, icblq., mftmr, mttmr, dcblq., miso, lvexbx, lvexhx,
+	lvexwx, stvexbx, stvexhx, stvexwx, lvepx, lvepxl, stvepx, stvepxl,
+	lvtrx, lvtrxl, lvtlx, lvtlxl, stvfrx, stvfrxl, stvflx, stvflxl,
+	lvswx, lvswxl, stvswx, stvswxl, lvsm mnemonics. Accept LS, ESYNC
+	optional operands on sync instruction for E6500 target.
+
 2012-03-08  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-opc.txt: Set instruction type of pku to SS_L2RDRD.

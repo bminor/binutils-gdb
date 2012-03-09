@@ -1,3 +1,10 @@
+2012-03-10  Edmar Wienskoski  <edmar@freescale.com>
+
+	* archures.c: Add bfd_mach_ppc_e5500 and bfd_mach_ppc_e6500.
+	* bfd-in2.h: Regenerate.
+	* cpu-powerpc.c (bfd_powerpc_archs): Add entries for
+	bfd_mach_ppc_e5500 and bfd_mach_ppc_e6500.
+
 2012-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13817

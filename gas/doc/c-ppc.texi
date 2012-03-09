@@ -1,5 +1,5 @@
 @c Copyright 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011
-@c Free Software Foundation, Inc.
+@c 2012 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 @c man end
@@ -87,6 +87,12 @@ Generate code for Freescale e500mc core complex.
 
 @item -me500mc64
 Generate code for Freescale e500mc64 core complex.
+
+@item -me5500
+Generate code for Freescale e5500 core complex.
+
+@item -me6500
+Generate code for Freescale e6500 core complex.
 
 @item -mspe
 Generate code for Motorola SPE instructions.

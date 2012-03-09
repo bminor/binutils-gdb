@@ -1,3 +1,16 @@
+2012-03-10  Edmar Wienskoski  <edmar@freescale.com>
+
+	* gas/ppc/e500mc64_nop.s: New test case for e500mc family
+	termination nops.
+	* gas/ppc/e500mc64_nop.d: Likewise.
+	* gas/ppc/e5500_nop.s: Likewise.
+	* gas/ppc/e5500_nop.d: Likewise.
+	* gas/ppc/e6500_nop.s: Likewise.
+	* gas/ppc/e6500_nop.d: Likewise.
+	* gas/ppc/e6500.s: New.
+	* gas/ppc/e6500.d: Likewise.
+	* gas/ppc/ppc.exp: Run e6500, e500mc64_nop, e5500_nop, and e6500_nop.
+
 2012-03-08  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* gas/s390/esa-g5.d: Move length field to the second operand.

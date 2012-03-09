@@ -1,3 +1,10 @@
+2012-03-10  Edmar Wienskoski  <edmar@freescale.com>
+
+	* config/tc-ppc.c (md_show_usage): Document -me5500 and -me6500.
+	(ppc_handle_align): Add termination nop opcode for e500mc family.
+	* doc/as.texinfo: Document options -me5500 and -me6500.
+	* doc/c-ppc.texi: Likewise.
+
 2012-03-07  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-mn10300.c (other_registers): Add SSP and USP.
