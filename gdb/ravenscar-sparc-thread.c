@@ -175,6 +175,9 @@ ravenscar_sparc_store_registers (struct regcache *regcache, int regnum)
                 buf_size);
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern void _initialize_ravenscar_sparc (void);
+
 void
 _initialize_ravenscar_sparc (void)
 {
