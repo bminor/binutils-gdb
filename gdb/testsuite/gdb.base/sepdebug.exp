@@ -150,7 +150,6 @@ gdb_test "break multi_line_while_conditional" \
     "Breakpoint.*at.* file .*$srcfile, line $bp_location4\\." \
     "breakpoint at start of multi line while conditional"
 
-set bp_location5 [gdb_get_line_number "set breakpoint 5 here"]
 set bp_location6 [gdb_get_line_number "set breakpoint 6 here"]
 
 set main_line $bp_location6

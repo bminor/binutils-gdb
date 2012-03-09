@@ -3243,7 +3243,7 @@ proc setup_kfail_for_target { PR target } {
 # gdb_get_line_number TEXT [FILE]
 #
 # Search the source file FILE, and return the line number of the
-# first line containing TEXT.  If no match is found, return -1.
+# first line containing TEXT.  If no match is found, an error is thrown.
 # 
 # TEXT is a string literal, not a regular expression.
 #
@@ -3316,15 +3316,13 @@ proc gdb_get_line_number { text { file "" } } {
     }
 
     if { [ catch { set fd [open "$file"] } message ] } then {
-	perror "$message"
-	return -1
+	error "$message"
     }
 
     set found -1
     for { set line 1 } { 1 } { incr line } {
 	if { [ catch { set nchar [gets "$fd" body] } message ] } then {
-	    perror "$message"
-	    return -1
+	    error "$message"
 	}
 	if { $nchar < 0 } then {
 	    break
@@ -3336,8 +3334,11 @@ proc gdb_get_line_number { text { file "" } } {
     }
 
     if { [ catch { close "$fd" } message ] } then {
-	perror "$message"
-	return -1
+	error "$message"
+    }
+
+    if {$found == -1} {
+        error "undefined tag \"$text\""
     }
 
     return $found

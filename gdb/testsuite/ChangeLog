@@ -1,3 +1,12 @@
+2012-03-08  Keith Seitz  <keiths@redhat.com>
+
+	* lib/gdb.exp (gdb_get_line_number): Throw an
+	error instead of returning -1.
+	* gdb.base/break.exp: Remove unused variable
+	bp_location5.
+	* gdb.base/hbreak2.exp: Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+
 2012-03-08  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
