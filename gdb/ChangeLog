@@ -1,3 +1,7 @@
+2012-03-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* ravenscar-thread.c (_initialize_ravenscar): Add prototype.
+
 2012-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix -Wmissing-prototypes build.

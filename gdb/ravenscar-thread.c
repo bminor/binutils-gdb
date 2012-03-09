@@ -421,6 +421,9 @@ Support for Ravenscar task/thread switching is enabled\n"));
 Support for Ravenscar task/thread switching is disabled\n"));
 }
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern void _initialize_ravenscar (void);
+
 /* Module startup initialization function, automagically called by
    init.c.  */
 
