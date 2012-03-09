@@ -1,3 +1,7 @@
+2012-03-09  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_attr): Avoid tail-recursive call.
+
 2012-03-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* ravenscar-sparc-thread.c (_initialize_ravenscar_sparc): Add

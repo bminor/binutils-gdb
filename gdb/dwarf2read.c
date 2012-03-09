@@ -10708,22 +10708,24 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
 static struct attribute *
 dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
 {
-  unsigned int i;
-  struct attribute *spec = NULL;
-
-  for (i = 0; i < die->num_attrs; ++i)
+  for (;;)
     {
-      if (die->attrs[i].name == name)
-	return &die->attrs[i];
-      if (die->attrs[i].name == DW_AT_specification
-	  || die->attrs[i].name == DW_AT_abstract_origin)
-	spec = &die->attrs[i];
-    }
+      unsigned int i;
+      struct attribute *spec = NULL;
 
-  if (spec)
-    {
+      for (i = 0; i < die->num_attrs; ++i)
+	{
+	  if (die->attrs[i].name == name)
+	    return &die->attrs[i];
+	  if (die->attrs[i].name == DW_AT_specification
+	      || die->attrs[i].name == DW_AT_abstract_origin)
+	    spec = &die->attrs[i];
+	}
+
+      if (!spec)
+	break;
+
       die = follow_die_ref (die, spec, &cu);
-      return dwarf2_attr (die, name, cu);
     }
 
   return NULL;
