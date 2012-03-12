@@ -85,6 +85,10 @@ static int pending_addrmap_interesting;
 
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
+
+static void record_pending_block (struct objfile *objfile,
+				  struct block *block,
+				  struct pending_block *opblock);
 
 
 /* Initial sizes of data structures.  These are realloc'd larger if
@@ -400,7 +404,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
    Allocate the pending block struct in the objfile_obstack to save
    time.  This wastes a little space.  FIXME: Is it worth it?  */
 
-void
+static void
 record_pending_block (struct objfile *objfile, struct block *block,
 		      struct pending_block *opblock)
 {

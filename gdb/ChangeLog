@@ -1,3 +1,8 @@
+2012-03-12  Tom Tromey  <tromey@redhat.com>
+
+	* buildsym.c (record_pending_block): Now static.
+	* buildsym.h: (record_pending_block): Remove.
+
 2012-03-12  Andreas Tobler  <andreast@fgznet.ch>
 
 	* amd64bsd-nat.c: Include amd64bsd-nat.h.
