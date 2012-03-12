@@ -1,3 +1,7 @@
+2012-03-12  Andreas Tobler  <andreast@fgznet.ch>
+
+	* amd64bsd-nat.c: Include amd64bsd-nat.h.
+
 2012-03-09  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (struct dwarf2_cu) <checked_producer,

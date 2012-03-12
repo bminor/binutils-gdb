@@ -31,6 +31,7 @@
 #include <machine/reg.h>
 
 #include "amd64-tdep.h"
+#include "amd64bsd-nat.h"
 #include "amd64-nat.h"
 #include "inf-ptrace.h"
 
