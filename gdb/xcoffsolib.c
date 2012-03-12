@@ -158,6 +158,8 @@ sharedlibrary_command (char *pattern, int from_tty)
   }
 }
 
+void _initialize_xcoffsolib (void);
+
 void
 _initialize_xcoffsolib (void)
 {

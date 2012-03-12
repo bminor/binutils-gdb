@@ -1214,6 +1214,8 @@ find_toc_address (CORE_ADDR pc)
 }
 
 
+void _initialize_rs6000_nat (void);
+
 void
 _initialize_rs6000_nat (void)
 {

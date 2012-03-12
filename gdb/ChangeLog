@@ -1,3 +1,9 @@
+2012-03-12  Chris January  <chris.january@allinea.com>
+
+	* aix-thread.c (_initialize_aix_thread): Add prototype.
+	* rs6000-nat.c (_initialize_rs6000_nat): Ditto.
+	* xcoffsolib.c (_initialize_xcoffsolib): Ditto.
+
 2012-03-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* amd64bsd-nat.c: Move #include of "amd64bsd-nat.h" after

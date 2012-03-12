@@ -1829,6 +1829,8 @@ init_aix_thread_ops (void)
 /* Module startup initialization function, automagically called by
    init.c.  */
 
+void _initialize_aix_thread (void);
+
 void
 _initialize_aix_thread (void)
 {
