@@ -1,3 +1,7 @@
+2012-03-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ptrace.c (inf_ptrace_post_attach): Make static.
+
 2012-03-12  Chris January  <chris.january@allinea.com>
 
 	* aix-thread.c (_initialize_aix_thread): Add prototype.
