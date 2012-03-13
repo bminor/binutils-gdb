@@ -413,17 +413,16 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
               start += templen;
 
               uint64_t dirindex = read_unsigned_LEB_128(start, &templen);
-              oplen += templen;
 
               if (dirindex >= this->directories_.back().size())
                 dirindex = 0;
 	      int dirindexi = static_cast<int>(dirindex);
 
-              read_unsigned_LEB_128(start, &templen);   // mod_time
-              oplen += templen;
-
-              read_unsigned_LEB_128(start, &templen);   // filelength
-              oplen += templen;
+              // This opcode takes two additional ULEB128 parameters
+              // (mod_time and filelength), but we don't use those
+              // values.  Because OPLEN already tells us how far to
+              // skip to the next opcode, we don't need to read
+              // them at all.
 
               this->files_.back().push_back(std::make_pair(dirindexi,
 							   filename));

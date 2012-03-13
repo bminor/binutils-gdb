@@ -1,5 +1,10 @@
 2012-03-12  Cary Coutant  <ccoutant@google.com>
 
+	* dwarf_reader.cc (Sized_dwarf_line_info::process_one_opcode): Fix
+	handling of DW_LNE_define_file.
+
+2012-03-12  Cary Coutant  <ccoutant@google.com>
+
 	* reduced_debug_output.cc
 	(Output_reduced_debug_info_section::get_die_end): Add new FORM
 	codes to switch.
