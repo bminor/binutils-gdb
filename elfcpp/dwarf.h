@@ -100,6 +100,11 @@ enum DW_TAG
   DW_TAG_condition = 0x3f,
   DW_TAG_shared_type = 0x40,
 
+  // DWARF4.
+  DW_TAG_type_unit = 0x41,
+  DW_TAG_rvalue_reference_type = 0x42,
+  DW_TAG_template_alias = 0x43,
+
   // SGI/MIPS extensions.
   DW_TAG_MIPS_loop = 0x4081,
 
@@ -147,7 +152,226 @@ enum DW_FORM
   DW_FORM_ref4 = 0x13,
   DW_FORM_ref8 = 0x14,
   DW_FORM_ref_udata = 0x15,
-  DW_FORM_indirect = 0x16
+  DW_FORM_indirect = 0x16,
+
+  // DWARF4.
+  DW_FORM_sec_offset = 0x17,
+  DW_FORM_exprloc = 0x18,
+  DW_FORM_flag_present = 0x19,
+  DW_FORM_ref_sig8 = 0x20,
+
+  // Extensions for Fission.  See http://gcc.gnu.org/wiki/DebugFission.
+  DW_FORM_GNU_ref_index = 0x1f00,
+  DW_FORM_GNU_addr_index = 0x1f01,
+  DW_FORM_GNU_str_index = 0x1f02
+};
+
+/* Attribute names and codes.  */
+enum DW_AT
+{
+  DW_AT_sibling = 0x01,
+  DW_AT_location = 0x02,
+  DW_AT_name = 0x03,
+  DW_AT_ordering = 0x09,
+  DW_AT_subscr_data = 0x0a,
+  DW_AT_byte_size = 0x0b,
+  DW_AT_bit_offset = 0x0c,
+  DW_AT_bit_size = 0x0d,
+  DW_AT_element_list = 0x0f,
+  DW_AT_stmt_list = 0x10,
+  DW_AT_low_pc = 0x11,
+  DW_AT_high_pc = 0x12,
+  DW_AT_language = 0x13,
+  DW_AT_member = 0x14,
+  DW_AT_discr = 0x15,
+  DW_AT_discr_value = 0x16,
+  DW_AT_visibility = 0x17,
+  DW_AT_import = 0x18,
+  DW_AT_string_length = 0x19,
+  DW_AT_common_reference = 0x1a,
+  DW_AT_comp_dir = 0x1b,
+  DW_AT_const_value = 0x1c,
+  DW_AT_containing_type = 0x1d,
+  DW_AT_default_value = 0x1e,
+  DW_AT_inline = 0x20,
+  DW_AT_is_optional = 0x21,
+  DW_AT_lower_bound = 0x22,
+  DW_AT_producer = 0x25,
+  DW_AT_prototyped = 0x27,
+  DW_AT_return_addr = 0x2a,
+  DW_AT_start_scope = 0x2c,
+  DW_AT_bit_stride = 0x2e,
+  DW_AT_upper_bound = 0x2f,
+  DW_AT_abstract_origin = 0x31,
+  DW_AT_accessibility = 0x32,
+  DW_AT_address_class = 0x33,
+  DW_AT_artificial = 0x34,
+  DW_AT_base_types = 0x35,
+  DW_AT_calling_convention = 0x36,
+  DW_AT_count = 0x37,
+  DW_AT_data_member_location = 0x38,
+  DW_AT_decl_column = 0x39,
+  DW_AT_decl_file = 0x3a,
+  DW_AT_decl_line = 0x3b,
+  DW_AT_declaration = 0x3c,
+  DW_AT_discr_list = 0x3d,
+  DW_AT_encoding = 0x3e,
+  DW_AT_external = 0x3f,
+  DW_AT_frame_base = 0x40,
+  DW_AT_friend = 0x41,
+  DW_AT_identifier_case = 0x42,
+  DW_AT_macro_info = 0x43,
+  DW_AT_namelist_items = 0x44,
+  DW_AT_priority = 0x45,
+  DW_AT_segment = 0x46,
+  DW_AT_specification = 0x47,
+  DW_AT_static_link = 0x48,
+  DW_AT_type = 0x49,
+  DW_AT_use_location = 0x4a,
+  DW_AT_variable_parameter = 0x4b,
+  DW_AT_virtuality = 0x4c,
+  DW_AT_vtable_elem_location = 0x4d,
+
+  // DWARF3.
+  DW_AT_allocated     = 0x4e,
+  DW_AT_associated    = 0x4f,
+  DW_AT_data_location = 0x50,
+  DW_AT_byte_stride   = 0x51,
+  DW_AT_entry_pc      = 0x52,
+  DW_AT_use_UTF8      = 0x53,
+  DW_AT_extension     = 0x54,
+  DW_AT_ranges        = 0x55,
+  DW_AT_trampoline    = 0x56,
+  DW_AT_call_column   = 0x57,
+  DW_AT_call_file     = 0x58,
+  DW_AT_call_line     = 0x59,
+  DW_AT_description   = 0x5a,
+  DW_AT_binary_scale  = 0x5b,
+  DW_AT_decimal_scale = 0x5c,
+  DW_AT_small         = 0x5d,
+  DW_AT_decimal_sign  = 0x5e,
+  DW_AT_digit_count   = 0x5f,
+  DW_AT_picture_string = 0x60,
+  DW_AT_mutable       = 0x61,
+  DW_AT_threads_scaled = 0x62,
+  DW_AT_explicit      = 0x63,
+  DW_AT_object_pointer = 0x64,
+  DW_AT_endianity     = 0x65,
+  DW_AT_elemental     = 0x66,
+  DW_AT_pure          = 0x67,
+  DW_AT_recursive     = 0x68,
+
+  // DWARF4.
+  DW_AT_signature       = 0x69,
+  DW_AT_main_subprogram = 0x6a,
+  DW_AT_data_bit_offset = 0x6b,
+  DW_AT_const_expr      = 0x6c,
+  DW_AT_enum_class      = 0x6d,
+  DW_AT_linkage_name    = 0x6e,
+
+  DW_AT_lo_user = 0x2000,
+  DW_AT_hi_user = 0x3fff,
+
+  // SGI/MIPS extensions.
+  DW_AT_MIPS_fde = 0x2001,
+  DW_AT_MIPS_loop_begin = 0x2002,
+  DW_AT_MIPS_tail_loop_begin = 0x2003,
+  DW_AT_MIPS_epilog_begin = 0x2004,
+  DW_AT_MIPS_loop_unroll_factor = 0x2005,
+  DW_AT_MIPS_software_pipeline_depth = 0x2006,
+  DW_AT_MIPS_linkage_name = 0x2007,
+  DW_AT_MIPS_stride = 0x2008,
+  DW_AT_MIPS_abstract_name = 0x2009,
+  DW_AT_MIPS_clone_origin = 0x200a,
+  DW_AT_MIPS_has_inlines = 0x200b,
+
+  // HP extensions.
+  DW_AT_HP_block_index         = 0x2000,
+  DW_AT_HP_unmodifiable        = 0x2001, // Same as DW_AT_MIPS_fde.
+  DW_AT_HP_prologue            = 0x2005, // Same as DW_AT_MIPS_loop_unroll.
+  DW_AT_HP_epilogue            = 0x2008, // Same as DW_AT_MIPS_stride.
+  DW_AT_HP_actuals_stmt_list   = 0x2010,
+  DW_AT_HP_proc_per_section    = 0x2011,
+  DW_AT_HP_raw_data_ptr        = 0x2012,
+  DW_AT_HP_pass_by_reference   = 0x2013,
+  DW_AT_HP_opt_level           = 0x2014,
+  DW_AT_HP_prof_version_id     = 0x2015,
+  DW_AT_HP_opt_flags           = 0x2016,
+  DW_AT_HP_cold_region_low_pc  = 0x2017,
+  DW_AT_HP_cold_region_high_pc = 0x2018,
+  DW_AT_HP_all_variables_modifiable = 0x2019,
+  DW_AT_HP_linkage_name        = 0x201a,
+  DW_AT_HP_prof_flags          = 0x201b,  // In comp unit of procs_info for -g.
+  DW_AT_HP_unit_name           = 0x201f,
+  DW_AT_HP_unit_size           = 0x2020,
+  DW_AT_HP_widened_byte_size   = 0x2021,
+  DW_AT_HP_definition_points   = 0x2022,
+  DW_AT_HP_default_location    = 0x2023,
+  DW_AT_HP_is_result_param     = 0x2029,
+
+  // GNU extensions.
+  DW_AT_sf_names   = 0x2101,
+  DW_AT_src_info   = 0x2102,
+  DW_AT_mac_info   = 0x2103,
+  DW_AT_src_coords = 0x2104,
+  DW_AT_body_begin = 0x2105,
+  DW_AT_body_end   = 0x2106,
+  DW_AT_GNU_vector = 0x2107,
+
+  // Thread-safety annotations.
+  // See http://gcc.gnu.org/wiki/ThreadSafetyAnnotation .
+  DW_AT_GNU_guarded_by    = 0x2108,
+  DW_AT_GNU_pt_guarded_by = 0x2109,
+  DW_AT_GNU_guarded       = 0x210a,
+  DW_AT_GNU_pt_guarded    = 0x210b,
+  DW_AT_GNU_locks_excluded = 0x210c,
+  DW_AT_GNU_exclusive_locks_required = 0x210d,
+  DW_AT_GNU_shared_locks_required = 0x210e,
+
+  // One-definition rule violation detection.
+  // See http://gcc.gnu.org/wiki/DwarfSeparateTypeInfo .
+  DW_AT_GNU_odr_signature = 0x210f,
+
+  // Template template argument name.
+  // See http://gcc.gnu.org/wiki/TemplateParmsDwarf .
+  DW_AT_GNU_template_name = 0x2110,
+
+  // The GNU call site extension.
+  // See http://www.dwarfstd.org/ShowIssue.php?issue=100909.2&type=open .
+  DW_AT_GNU_call_site_value = 0x2111,
+  DW_AT_GNU_call_site_data_value = 0x2112,
+  DW_AT_GNU_call_site_target = 0x2113,
+  DW_AT_GNU_call_site_target_clobbered = 0x2114,
+  DW_AT_GNU_tail_call = 0x2115,
+  DW_AT_GNU_all_tail_call_sites = 0x2116,
+  DW_AT_GNU_all_call_sites = 0x2117,
+  DW_AT_GNU_all_source_call_sites = 0x2118,
+  // Section offset into .debug_macro section.
+  DW_AT_GNU_macros = 0x2119,
+  // Extensions for Fission.  See http://gcc.gnu.org/wiki/DebugFission.
+  DW_AT_GNU_dwo_name = 0x2130,
+  DW_AT_GNU_dwo_id = 0x2131,
+  DW_AT_GNU_ref_base = 0x2132,
+  DW_AT_GNU_addr_base = 0x2133,
+  DW_AT_GNU_pubnames = 0x2134,
+  DW_AT_GNU_pubtypes = 0x2135,
+
+  // VMS extensions.
+  DW_AT_VMS_rtnbeg_pd_address = 0x2201,
+
+  // GNAT extensions.
+  // GNAT descriptive type.
+  // See http://gcc.gnu.org/wiki/DW_AT_GNAT_descriptive_type .
+  DW_AT_use_GNAT_descriptive_type = 0x2301,
+  DW_AT_GNAT_descriptive_type	= 0x2302,
+
+  // UPC extension.
+  DW_AT_upc_threads_scaled = 0x3210,
+
+  // PGI (STMicroelectronics) extensions.
+  DW_AT_PGI_lbase    = 0x3a00,
+  DW_AT_PGI_soffset  = 0x3a01,
+  DW_AT_PGI_lstride  = 0x3a02
 };
 
 // Frame unwind information.
@@ -203,6 +427,8 @@ enum DW_LINE_EXTENDED_OPS
   DW_LNE_end_sequence = 1,
   DW_LNE_set_address = 2,
   DW_LNE_define_file = 3,
+  // DWARF4.
+  DW_LNE_set_discriminator = 4,
   // HP extensions.
   DW_LNE_HP_negate_is_UV_update      = 0x11,
   DW_LNE_HP_push_context             = 0x12,
@@ -236,6 +462,8 @@ enum DW_ENCODING
   DW_ATE_signed_fixed                =0xd,
   DW_ATE_unsigned_fixed              =0xe,
   DW_ATE_decimal_float               =0xf,
+  // DWARF4.
+  DW_ATE_UTF                         =0x10,
   DW_ATE_lo_user                     =0x80,
   DW_ATE_hi_user                     =0xff
 };
@@ -397,6 +625,9 @@ enum DW_OP
   DW_OP_form_tls_address             =0x9b,
   DW_OP_call_frame_cfa               =0x9c,
   DW_OP_bit_piece                    =0x9d,
+  // DWARF4.
+  DW_OP_implicit_value               =0x9e,
+  DW_OP_stack_value                  =0x9f,
   DW_OP_lo_user                      =0xe0,
   DW_OP_hi_user                      =0xff,
   // GNU extensions
@@ -448,6 +679,53 @@ enum DW_CFA
   DW_CFA_GNU_args_size = 0x2e,
   DW_CFA_GNU_negative_offset_extended = 0x2f
 };
+
+enum DW_CHILDREN
+{
+  DW_CHILDREN_no		     =0x00,
+  DW_CHILDREN_yes		     =0x01
+};
+
+// Source language names and codes.
+enum DW_LANG
+  {
+    DW_LANG_C89 = 0x0001,
+    DW_LANG_C = 0x0002,
+    DW_LANG_Ada83 = 0x0003,
+    DW_LANG_C_plus_plus = 0x0004,
+    DW_LANG_Cobol74 = 0x0005,
+    DW_LANG_Cobol85 = 0x0006,
+    DW_LANG_Fortran77 = 0x0007,
+    DW_LANG_Fortran90 = 0x0008,
+    DW_LANG_Pascal83 = 0x0009,
+    DW_LANG_Modula2 = 0x000a,
+    // DWARF 3.
+    DW_LANG_Java = 0x000b,
+    DW_LANG_C99 = 0x000c,
+    DW_LANG_Ada95 = 0x000d,
+    DW_LANG_Fortran95 = 0x000e,
+    DW_LANG_PLI = 0x000f,
+    DW_LANG_ObjC = 0x0010,
+    DW_LANG_ObjC_plus_plus = 0x0011,
+    DW_LANG_UPC = 0x0012,
+    DW_LANG_D = 0x0013,
+    // DWARF 4.
+    DW_LANG_Python = 0x0014,
+    // DWARF 5.
+    DW_LANG_Go = 0x0016,
+    DW_LANG_lo_user = 0x8000,	// Implementation-defined range start.
+    DW_LANG_hi_user = 0xffff,	// Implementation-defined range start.
+    // MIPS.
+    DW_LANG_Mips_Assembler = 0x8001,
+    // UPC.
+    DW_LANG_Upc = 0x8765,
+    // HP extensions.
+    DW_LANG_HP_Bliss     = 0x8003,
+    DW_LANG_HP_Basic91   = 0x8004,
+    DW_LANG_HP_Pascal91  = 0x8005,
+    DW_LANG_HP_IMacro    = 0x8006,
+    DW_LANG_HP_Assembler = 0x8007
+  };
 
 } // End namespace elfcpp.
 

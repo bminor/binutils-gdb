@@ -1,3 +1,15 @@
+2012-03-12  Cary Coutant  <ccoutant@google.com>
+
+	Update DWARF enums from ../include/dwarf2.h.
+	* dwarf.h (enum DW_TAG): Add new DWARF-4 tags.
+	(enum DW_FORM): Add new DWARF-4 and Fission extensions.
+	(enum DW_AT): New enum.
+	(enum DW_LINE_EXTENDED_OPS): Add new DWARF-4 opcode.
+	(enum DW_ENCODING): Add new DWARF-4 encoding.
+	(enum DW_OP): Add new DWARF-4 opcodes.
+	(enum DW_CHILDREN): New enum.
+	(enum DW_LANG): New enum.
+
 2012-01-27  Aleksandar Simeonov  <asimeonov@mips.com>
 
 	* mips.h: New file

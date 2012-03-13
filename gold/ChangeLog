@@ -1,3 +1,9 @@
+2012-03-12  Cary Coutant  <ccoutant@google.com>
+
+	* reduced_debug_output.cc
+	(Output_reduced_debug_info_section::get_die_end): Add new FORM
+	codes to switch.
+
 2012-02-29  Cary Coutant  <ccoutant@google.com>
 
 	* object.cc (need_decompressed_section): Add #ifdef ENABLE_THREADS.
