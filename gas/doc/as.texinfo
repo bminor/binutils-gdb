@@ -3970,6 +3970,7 @@ Some machine configurations provide additional directives.
 * Ascii::                       @code{.ascii "@var{string}"}@dots{}
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
 * Balign::                      @code{.balign @var{abs-expr} , @var{abs-expr}}
+* Bundle directives::           @code{.bundle_align_mode @var{abs-expr}}, @code{.bundle_lock}, @code{.bundle_unlock}
 * Byte::                        @code{.byte @var{expressions}}
 * CFI directives::		@code{.cfi_startproc [simple]}, @code{.cfi_endproc}, etc.
 * Comm::                        @code{.comm @var{symbol} , @var{length} }
@@ -4291,6 +4292,59 @@ fill pattern as a four byte longword value.  For example, @code{.balignw
 filled in with the value 0x368d (the exact placement of the bytes depends upon
 the endianness of the processor).  If it skips 1 or 3 bytes, the fill value is
 undefined.
+
+@node Bundle directives
+@section @code{.bundle_align_mode @var{abs-expr}}
+@cindex @code{bundle_align_mode} directive
+@cindex bundle
+@cindex instruction bundle
+@cindex aligned instruction bundle
+@code{.bundle_align_mode} enables or disables @defn{aligned instruction
+bundle} mode.  In this mode, sequences of adjacent instructions are grouped
+into fixed-sized @defn{bundles}.  If the argument is zero, this mode is
+disabled (which is the default state).  If the argument it not zero, it
+gives the size of an instruction bundle as a power of two (as for the
+@code{.p2align} directive, @pxref{P2align}).
+
+For some targets, it's an ABI requirement that no instruction may span a
+certain aligned boundary.  A @defn{bundle} is simply a sequence of
+instructions that starts on an aligned boundary.  For example, if
+@var{abs-expr} is @code{5} then the bundle size is 32, so each aligned
+chunk of 32 bytes is a bundle.  When aligned instruction bundle mode is in
+effect, no single instruction may span a boundary between bundles.  If an
+instruction would start too close to the end of a bundle for the length of
+that particular instruction to fit within the bundle, then the space at the
+end of that bundle is filled with no-op instructions so the instruction
+starts in the next bundle.  As a corollary, it's an error if any single
+instruction's encoding is longer than the bundle size.
+
+@section @code{.bundle_lock} and @code{.bundle_unlock}
+@cindex @code{bundle_lock} directive
+@cindex @code{bundle_unlock} directive
+The @code{.bundle_lock} and directive @code{.bundle_unlock} directives
+allow explicit control over instruction bundle padding.  These directives
+are only valid when @code{.bundle_align_mode} has been used to enable
+aligned instruction bundle mode.  It's an error if they appear when
+@code{.bundle_align_mode} has not been used at all, or when the last
+directive was @w{@code{.bundle_align_mode 0}}.
+
+@cindex bundle-locked
+For some targets, it's an ABI requirement that certain instructions may
+appear only as part of specified permissible sequences of multiple
+instructions, all within the same bundle.  A pair of @code{.bundle_lock}
+and @code{.bundle_unlock} directives define a @defn{bundle-locked}
+instruction sequence.  For purposes of aligned instruction bundle mode, a
+sequence starting with @code{.bundle_lock} and ending with
+@code{.bundle_unlock} is treated as a single instruction.  That is, the
+entire sequence must fit into a single bundle and may not span a bundle
+boundary.  If necessary, no-op instructions will be inserted before the
+first instruction of the sequence so that the whole sequence starts on an
+aligned bundle boundary.  It's an error if the sequence is longer than the
+bundle size.
+
+Bundle-locked sequences do not nest.  It's an error if two
+@code{.bundle_lock} directives appear without an intervening
+@code{.bundle_unlock} directive.
 
 @node Byte
 @section @code{.byte @var{expressions}}
@@ -5521,7 +5575,7 @@ hence @emph{octa}-word for 16 bytes.
 Set the location counter to @var{loc} in the absolute section.  @var{loc} must
 be an absolute expression.  This directive may be useful for defining
 symbols with absolute values.  Do not confuse it with the @code{.org}
-directive. 
+directive.
 
 @node Org
 @section @code{.org @var{new-lc} , @var{fill}}

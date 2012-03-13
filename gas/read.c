@@ -1,7 +1,7 @@
 /* read.c - read a source file -
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
    1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2011  Free Software Foundation, Inc.
+   2010, 2011, 2012  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -209,6 +209,31 @@ static int dwarf_file_string;
 #endif
 #endif
 
+/* If the target defines the md_frag_max_var hook then we know
+   enough to implement the .bundle_align_mode features.  */
+#ifdef md_frag_max_var
+# define HANDLE_BUNDLE
+#endif
+
+#ifdef HANDLE_BUNDLE
+/* .bundle_align_mode sets this.  Normally it's zero.  When nonzero,
+   it's the exponent of the bundle size, and aligned instruction bundle
+   mode is in effect.  */
+static unsigned int bundle_align_p2;
+
+/* These are set by .bundle_lock and .bundle_unlock.  .bundle_lock sets
+   bundle_lock_frag to frag_now and then starts a new frag with
+   frag_align_code.  At the same time, bundle_lock_frain gets frchain_now,
+   so that .bundle_unlock can verify that we didn't change segments.
+   .bundle_unlock resets both to NULL.  If we detect a bundling violation,
+   then we reset bundle_lock_frchain to NULL as an indicator that we've
+   already diagnosed the error with as_bad and don't need a cascade of
+   redundant errors, but bundle_lock_frag remains set to indicate that
+   we are expecting to see .bundle_unlock.  */
+static fragS *bundle_lock_frag;
+static frchainS *bundle_lock_frchain;
+#endif
+
 static void do_s_func (int end_p, const char *default_prefix);
 static void do_align (int, char *, int, int);
 static void s_align (int, int);
@@ -277,6 +302,11 @@ static const pseudo_typeS potable[] = {
   {"balignw", s_align_bytes, -2},
   {"balignl", s_align_bytes, -4},
 /* block  */
+#ifdef HANDLE_BUNDLE
+  {"bundle_align_mode", s_bundle_align_mode, 0},
+  {"bundle_lock", s_bundle_lock, 0},
+  {"bundle_unlock", s_bundle_unlock, 0},
+#endif
   {"byte", cons, 1},
   {"comm", s_comm, 0},
   {"common", s_mri_common, 0},
@@ -583,6 +613,128 @@ try_macro (char term, const char *line)
   return 0;
 }
 
+#ifdef HANDLE_BUNDLE
+/* Start a new instruction bundle.  Returns the rs_align_code frag that
+   will be used to align the new bundle.  */
+static fragS *
+start_bundle (void)
+{
+  fragS *frag = frag_now;
+
+  frag_align_code (0, 0);
+
+  while (frag->fr_type != rs_align_code)
+    frag = frag->fr_next;
+
+  gas_assert (frag != frag_now);
+
+  return frag;
+}
+
+/* Calculate the maximum size after relaxation of the region starting
+   at the given frag and extending through frag_now (which is unfinished).  */
+static unsigned int
+pending_bundle_size (fragS *frag)
+{
+  unsigned int offset = frag->fr_fix;
+  unsigned int size = 0;
+
+  gas_assert (frag != frag_now);
+  gas_assert (frag->fr_type == rs_align_code);
+
+  while (frag != frag_now)
+    {
+      /* This should only happen in what will later become an error case.  */
+      if (frag == NULL)
+	return 0;
+
+      size += frag->fr_fix;
+      if (frag->fr_type == rs_machine_dependent)
+	size += md_frag_max_var (frag);
+
+      frag = frag->fr_next;
+    }
+
+  gas_assert (frag == frag_now);
+  size += frag_now_fix ();
+  if (frag->fr_type == rs_machine_dependent)
+    size += md_frag_max_var (frag);
+
+  gas_assert (size >= offset);
+
+  return size - offset;
+}
+
+/* Finish off the frag created to ensure bundle alignment.  */
+static void
+finish_bundle (fragS *frag, unsigned int size)
+{
+  gas_assert (bundle_align_p2 > 0);
+  gas_assert (frag->fr_type == rs_align_code);
+
+  if (size > 1)
+    {
+      /* If there is more than a single byte, then we need to set up the
+	 alignment frag.  Otherwise we leave it at its initial state from
+	 calling frag_align_code (0, 0), so that it does nothing.  */
+      frag->fr_offset = bundle_align_p2;
+      frag->fr_subtype = size - 1;
+    }
+
+  /* We do this every time rather than just in s_bundle_align_mode
+     so that we catch any affected section without needing hooks all
+     over for all paths that do section changes.  It's cheap enough.  */
+  record_alignment (now_seg, bundle_align_p2 - OCTETS_PER_BYTE_POWER);
+}
+
+/* Assemble one instruction.  This takes care of the bundle features
+   around calling md_assemble.  */
+static void
+assemble_one (char *line)
+{
+  fragS *insn_start_frag;
+
+  if (bundle_lock_frchain != NULL && bundle_lock_frchain != frchain_now)
+    {
+      as_bad (_("cannot change section or subsection inside .bundle_lock"));
+      /* Clearing this serves as a marker that we have already complained.  */
+      bundle_lock_frchain = NULL;
+    }
+
+  if (bundle_lock_frchain == NULL && bundle_align_p2 > 0)
+    insn_start_frag = start_bundle ();
+
+  md_assemble (line);
+
+  if (bundle_lock_frchain != NULL)
+    {
+      /* Make sure this hasn't pushed the locked sequence
+	 past the bundle size.  */
+      unsigned int bundle_size = pending_bundle_size (bundle_lock_frag);
+      if (bundle_size > (1U << bundle_align_p2))
+	as_bad (_("\
+.bundle_lock sequence at %u bytes but .bundle_align_mode limit is %u bytes"),
+		bundle_size, 1U << bundle_align_p2);
+    }
+  else if (bundle_align_p2 > 0)
+    {
+      unsigned int insn_size = pending_bundle_size (insn_start_frag);
+
+      if (insn_size > (1U << bundle_align_p2))
+	as_bad (_("\
+single instruction is %u bytes long but .bundle_align_mode limit is %u"),
+		(unsigned int) insn_size, 1U << bundle_align_p2);
+
+      finish_bundle (insn_start_frag, insn_size);
+    }
+}
+
+#else  /* !HANDLE_BUNDLE */
+
+# define assemble_one(line) md_assemble(line)
+
+#endif  /* HANDLE_BUNDLE */
+
 /* We read the file, putting things into a web that represents what we
    have been reading.  */
 void
@@ -795,7 +947,7 @@ read_a_source_file (char *name)
 		  /* Input_line_pointer->after ':'.  */
 		  SKIP_WHITESPACE ();
 		}
-              else if ((c == '=' && input_line_pointer[1] == '=')
+	      else if ((c == '=' && input_line_pointer[1] == '=')
 		       || ((c == ' ' || c == '\t')
 			   && input_line_pointer[1] == '='
 			   && input_line_pointer[2] == '='))
@@ -803,13 +955,13 @@ read_a_source_file (char *name)
 		  equals (s, -1);
 		  demand_empty_rest_of_line ();
 		}
-              else if ((c == '='
-                       || ((c == ' ' || c == '\t')
-                            && input_line_pointer[1] == '='))
+	      else if ((c == '='
+		       || ((c == ' ' || c == '\t')
+			    && input_line_pointer[1] == '='))
 #ifdef TC_EQUAL_IN_INSN
-                           && !TC_EQUAL_IN_INSN (c, s)
+			   && !TC_EQUAL_IN_INSN (c, s)
 #endif
-                           )
+			   )
 		{
 		  equals (s, 1);
 		  demand_empty_rest_of_line ();
@@ -947,7 +1099,7 @@ read_a_source_file (char *name)
 			    }
 			}
 
-		      md_assemble (s);	/* Assemble 1 instruction.  */
+		      assemble_one (s); /* Assemble 1 instruction.  */
 
 		      *input_line_pointer++ = c;
 
@@ -1127,6 +1279,16 @@ read_a_source_file (char *name)
 
  quit:
   symbol_set_value_now (&dot_symbol);
+
+#ifdef HANDLE_BUNDLE
+  if (bundle_lock_frag != NULL)
+    {
+      as_bad_where (bundle_lock_frag->fr_file, bundle_lock_frag->fr_line,
+		    _(".bundle_lock with no matching .bundle_unlock"));
+      bundle_lock_frag = NULL;
+      bundle_lock_frchain = NULL;
+    }
+#endif
 
 #ifdef md_cleanup
   md_cleanup ();
@@ -1734,7 +1896,7 @@ s_app_line (int appline)
        Besides, it's silly.  GCC however will generate a line number of
        zero when it is pre-processing builtins for assembler-with-cpp files:
 
-          # 0 "<built-in>"
+	  # 0 "<built-in>"
 
        We do not want to barf on this, especially since such files are used
        in the GCC and GDB testsuites.  So we check for negative line numbers
@@ -1763,7 +1925,7 @@ s_app_line (int appline)
 		    /* From GCC's cpp documentation:
 		       1: start of a new file.
 		       2: returning to a file after having included
-		          another file.
+			  another file.
 		       3: following text comes from a system header file.
 		       4: following text should be treated as extern "C".
 
@@ -3606,7 +3768,7 @@ demand_empty_rest_of_line (void)
 		 *input_line_pointer);
       ignore_rest_of_line ();
     }
-  
+
   /* Return pointing just after end-of-line.  */
   know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
 }
@@ -3852,7 +4014,7 @@ cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
 	parse_mri_cons (&exp, (unsigned int) nbytes);
       else
 #endif
-        {
+	{
 	  if (*input_line_pointer == '"')
 	    {
 	      as_bad (_("unexpected `\"' in expression"));
@@ -5691,7 +5853,7 @@ s_include (int arg ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
   path = (char *) xmalloc ((unsigned long) i
-                           + include_dir_maxlen + 5 /* slop */ );
+			   + include_dir_maxlen + 5 /* slop */ );
 
   for (i = 0; i < include_dir_count; i++)
     {
@@ -5866,6 +6028,78 @@ do_s_func (int end_p, const char *default_prefix)
 
   demand_empty_rest_of_line ();
 }
+
+#ifdef HANDLE_BUNDLE
+
+void
+s_bundle_align_mode (int arg ATTRIBUTE_UNUSED)
+{
+  unsigned int align = get_absolute_expression ();
+  SKIP_WHITESPACE ();
+  demand_empty_rest_of_line ();
+
+  if (align > (unsigned int) TC_ALIGN_LIMIT)
+    as_fatal (_(".bundle_align_mode alignment too large (maximum %u)"),
+	      (unsigned int) TC_ALIGN_LIMIT);
+
+  if (bundle_lock_frag != NULL)
+    {
+      as_bad (_("cannot change .bundle_align_mode inside .bundle_lock"));
+      return;
+    }
+
+  bundle_align_p2 = align;
+}
+
+void
+s_bundle_lock (int arg ATTRIBUTE_UNUSED)
+{
+  demand_empty_rest_of_line ();
+
+  if (bundle_align_p2 == 0)
+    {
+      as_bad (_(".bundle_lock is meaningless without .bundle_align_mode"));
+      return;
+    }
+
+  if (bundle_lock_frag != NULL)
+    {
+      as_bad (_("second .bundle_lock without .bundle_unlock"));
+      return;
+    }
+
+  bundle_lock_frchain = frchain_now;
+  bundle_lock_frag = start_bundle ();
+}
+
+void
+s_bundle_unlock (int arg ATTRIBUTE_UNUSED)
+{
+  unsigned int size;
+
+  demand_empty_rest_of_line ();
+
+  if (bundle_lock_frag == NULL)
+    {
+      as_bad (_(".bundle_unlock without preceding .bundle_lock"));
+      return;
+    }
+
+  gas_assert (bundle_align_p2 > 0);
+
+  size = pending_bundle_size (bundle_lock_frag);
+
+  if (size > (1U << bundle_align_p2))
+    as_bad (_(".bundle_lock sequence is %u bytes, but bundle size only %u"),
+	    size, 1 << bundle_align_p2);
+  else
+    finish_bundle (bundle_lock_frag, size);
+
+  bundle_lock_frag = NULL;
+  bundle_lock_frchain = NULL;
+}
+
+#endif  /* HANDLE_BUNDLE */
 
 void
 s_ignore (int arg ATTRIBUTE_UNUSED)

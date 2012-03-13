@@ -204,6 +204,9 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "fsgs-intel"
     run_dump_test "rdrnd"
     run_dump_test "rdrnd-intel"
+    run_dump_test "bundle"
+    run_dump_test "bundle-lock"
+    run_dump_test "bundle-bad"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
@@ -432,6 +435,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-fsgs-intel"
     run_dump_test "x86-64-rdrnd"
     run_dump_test "x86-64-rdrnd-intel"
+    run_dump_test "x86-64-bundle"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]

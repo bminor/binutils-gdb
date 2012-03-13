@@ -84,6 +84,9 @@ struct fix;
 
 #define TC_FORCE_RELOCATION(FIX) arm_force_relocation (FIX)
 
+extern unsigned int arm_frag_max_var (struct frag *);
+#define md_frag_max_var arm_frag_max_var
+
 #define md_relax_frag(segment, fragp, stretch) \
   arm_relax_frag (segment, fragp, stretch)
 extern int arm_relax_frag (asection *, struct frag *, long);

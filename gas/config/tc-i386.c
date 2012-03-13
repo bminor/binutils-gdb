@@ -7715,6 +7715,18 @@ i386_att_operand (char *operand_string)
   return 1;			/* Normal return.  */
 }
 
+/* Calculate the maximum variable size (i.e., excluding fr_fix)
+   that an rs_machine_dependent frag may reach.  */
+
+unsigned int
+i386_frag_max_var (fragS *frag)
+{
+  /* The only relaxable frags are for jumps.
+     Unconditional jumps can grow by 4 bytes and others by 5 bytes.  */
+  gas_assert (frag->fr_type == rs_machine_dependent);
+  return TYPE_FROM_RELAX_STATE (frag->fr_subtype) == UNCOND_JUMP ? 4 : 5;
+}
+
 /* md_estimate_size_before_relax()
 
    Called just before relax() for rs_machine_dependent frags.  The x86

@@ -1,3 +1,31 @@
+2012-03-12  Roland McGrath  <mcgrathr@google.com>
+
+	* config/tc-arm.c (arm_frag_max_var): New function.
+	* config/tc-arm.h: Declare it.
+	(md_frag_max_var): New macro.
+
+	* config/tc-i386.c (i386_frag_max_var): New function.
+	* config/tc-i386.h: Declare it.
+	(md_frag_max_var): New macro.
+
+	* doc/as.texinfo (Bundle directives): New node.
+	(Pseudo Ops): Add it to the menu.
+	* NEWS: Mention new feature.
+	* read.c [md_frag_max_var] (HANDLE_BUNDLE): New macro.
+	[HANDLE_BUNDLE] (bundle_align_p2): New variable.
+	[HANDLE_BUNDLE] (bundle_lock_frchain, bundle_lock_frag): New variables.
+	[HANDLE_BUNDLE] (start_bundle, pending_bundle_size, finish_bundle):
+	New functions.
+	(assemble_one): New function if [HANDLE_BUNDLE], #define directly
+	to md_assembly if not.
+	(read_a_source_file): Call assemble_one in place of md_assemble.
+	(read_a_source_file) [HANDLE_BUNDLE]: Check for unterminated
+	.bundle_lock at end of processing.
+	[HANDLE_BUNDLE] (s_bundle_align_mode, s_bundle_lock, s_bundle_unlock):
+	New functions.
+	[HANDLE_BUNDLE] (potable): Add their entries.
+	* read.h: Declare new functions.
+
 2012-03-10  Edmar Wienskoski  <edmar@freescale.com>
 
 	* config/tc-ppc.c (md_show_usage): Document -me5500 and -me6500.

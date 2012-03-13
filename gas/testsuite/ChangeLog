@@ -1,3 +1,23 @@
+2012-03-12  Roland McGrath  <mcgrathr@google.com>
+
+	* gas/i386/bundle-bad.s: New file.
+	* gas/i386/bundle-bad.d: New file.
+	* gas/i386/bundle-bad.l: New file.
+	* gas/i386/i386.exp: Run it.
+
+	* gas/arm/bundle.s: New file.
+	* gas/arm/bundle.d: New file.
+	* gas/arm/bundle-lock.s: New file.
+	* gas/arm/bundle-lock.d: New file.
+
+	* gas/i386/bundle.s: New file.
+	* gas/i386/bundle.d: New file.
+	* gas/i386/x86-64-bundle.s: New file.
+	* gas/i386/x86-64-bundle.d: New file.
+	* gas/i386/bundle-lock.s: New file.
+	* gas/i386/bundle-lock.d: New file.
+	* gas/i386/i386.exp: Run them.
+
 2012-03-10  Edmar Wienskoski  <edmar@freescale.com>
 
 	* gas/ppc/e500mc64_nop.s: New test case for e500mc family

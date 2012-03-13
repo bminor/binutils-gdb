@@ -215,6 +215,9 @@ if (fragP->fr_type == rs_align_code) 					\
 void i386_print_statistics (FILE *);
 #define tc_print_statistics i386_print_statistics
 
+extern unsigned int i386_frag_max_var (fragS *);
+#define md_frag_max_var i386_frag_max_var
+
 #define md_number_to_chars number_to_chars_littleendian
 
 enum processor_type

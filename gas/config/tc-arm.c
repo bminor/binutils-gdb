@@ -1,6 +1,6 @@
 /* tc-arm.c -- Assemble for the ARM
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -98,7 +98,7 @@ enum arm_float_abi
 /* Types of processor to assemble for.	*/
 #ifndef CPU_DEFAULT
 /* The code that was here used to select a default CPU depending on compiler
-   pre-defines which were only present when doing native builds, thus 
+   pre-defines which were only present when doing native builds, thus
    changing gas' default behaviour depending upon the build host.
 
    If you have a target that requires a default CPU option then the you
@@ -5064,7 +5064,7 @@ parse_shifter_operand_group_reloc (char **str, int i)
 
 /* Parse a Neon alignment expression.  Information is written to
    inst.operands[i].  We assume the initial ':' has been skipped.
-   
+
    align	.imm = align << 8, .immisalign=1, .preind=0  */
 static parse_operand_result
 parse_neon_alignment (char **str, int i)
@@ -5177,7 +5177,7 @@ parse_address_main (char **str, int i, int group_relocations,
 	     code before we get to see it here. This may be subject to
 	     change.  */
 	  parse_operand_result result = parse_neon_alignment (&p, i);
-	  
+
 	  if (result != PARSE_OPERAND_SUCCESS)
 	    return result;
 	}
@@ -5265,7 +5265,7 @@ parse_address_main (char **str, int i, int group_relocations,
       /* FIXME: '@' should be used here, but it's filtered out by generic code
 	 before we get to see it here. This may be subject to change.  */
       parse_operand_result result = parse_neon_alignment (&p, i);
-      
+
       if (result != PARSE_OPERAND_SUCCESS)
 	return result;
     }
@@ -5448,7 +5448,7 @@ parse_psr (char **str, bfd_boolean lhs)
     {
       if (m_profile)
 	goto unsupported_psr;
-	
+
       psr_field = SPSR_BIT;
     }
   else if (strncasecmp (p, "CPSR", 4) == 0)
@@ -5521,7 +5521,7 @@ check_suffix:
 	  unsigned int nzcvq_bits = 0;
 	  unsigned int g_bit = 0;
 	  char *bit;
-	  
+
 	  for (bit = start; bit != p; bit++)
 	    {
 	      switch (TOLOWER (*bit))
@@ -5541,24 +5541,24 @@ check_suffix:
 		case 'v':
 		  nzcvq_bits |= (nzcvq_bits & 0x08) ? 0x20 : 0x08;
 		  break;
-		
+
 		case 'q':
 		  nzcvq_bits |= (nzcvq_bits & 0x10) ? 0x20 : 0x10;
 		  break;
-		
+
 		case 'g':
 		  g_bit |= (g_bit & 0x1) ? 0x2 : 0x1;
 		  break;
-		
+
 		default:
 		  inst.error = _("unexpected bit specified after APSR");
 		  return FAIL;
 		}
 	    }
-	  
+
 	  if (nzcvq_bits == 0x1f)
 	    psr_field |= PSR_f;
-	  
+
 	  if (g_bit == 0x1)
 	    {
 	      if (!ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6_dsp))
@@ -5570,7 +5570,7 @@ check_suffix:
 
 	      psr_field |= PSR_s;
 	    }
-	  
+
 	  if ((nzcvq_bits & 0x20) != 0
 	      || (nzcvq_bits != 0x1f && nzcvq_bits != 0)
 	      || (g_bit & 0x2) != 0)
@@ -6063,7 +6063,7 @@ enum operand_parse_code
   OP_RRnpc,	/* ARM register, not r15 */
   OP_RRnpcsp,	/* ARM register, neither r15 nor r13 (a.k.a. 'BadReg') */
   OP_RRnpcb,	/* ARM register, not r15, in square brackets */
-  OP_RRnpctw,	/* ARM register, not r15 in Thumb-state or with writeback, 
+  OP_RRnpctw,	/* ARM register, not r15 in Thumb-state or with writeback,
 		   optional trailing ! */
   OP_RRw,	/* ARM register, not r15, optional trailing ! */
   OP_RCP,	/* Coprocessor number */
@@ -6620,7 +6620,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
             goto failure;
 	  break;
 
-	case OP_wPSR:	 
+	case OP_wPSR:
 	case OP_rPSR:
 	  po_reg_or_goto (REG_TYPE_RNB, try_psr);
 	  if (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_virt))
@@ -6780,8 +6780,8 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  break;
 
 	case OP_RRnpctw:
-	  if (inst.operands[i].isreg 
-	      && inst.operands[i].reg == REG_PC 
+	  if (inst.operands[i].isreg
+	      && inst.operands[i].reg == REG_PC
 	      && (inst.operands[i].writeback || thumb))
 	    inst.error = BAD_PC;
 	  break;
@@ -8088,7 +8088,7 @@ static void
 do_vmrs (void)
 {
   unsigned Rt = inst.operands[0].reg;
-  
+
   if (thumb_mode && inst.operands[0].reg == REG_SP)
     {
       inst.error = BAD_SP;
@@ -8112,7 +8112,7 @@ static void
 do_vmsr (void)
 {
   unsigned Rt = inst.operands[1].reg;
-  
+
   if (thumb_mode)
     reject_bad_reg (Rt);
   else if (Rt == REG_PC)
@@ -8812,14 +8812,14 @@ vfp_conv (int srcsize)
 {
   int immbits = srcsize - inst.operands[1].imm;
 
-  if (srcsize == 16 && !(immbits >= 0 && immbits <= srcsize)) 
-    {  
+  if (srcsize == 16 && !(immbits >= 0 && immbits <= srcsize))
+    {
       /* If srcsize is 16, inst.operands[1].imm must be in the range 0-16.
          i.e. immbits must be in range 0 - 16.  */
       inst.error = _("immediate value out of range, expected range [0, 16]");
       return;
     }
-  else if (srcsize == 32 && !(immbits >= 0 && immbits < srcsize)) 
+  else if (srcsize == 32 && !(immbits >= 0 && immbits < srcsize))
     {
       /* If srcsize is 32, inst.operands[1].imm must be in the range 1-32.
          i.e. immbits must be in range 0 - 31.  */
@@ -10046,7 +10046,7 @@ do_t_branch23 (void)
 {
   set_it_insn_type_last ();
   encode_branch (BFD_RELOC_THUMB_PCREL_BRANCH23);
-  
+
   /* md_apply_fix blows up with 'bl foo(PLT)' where foo is defined in
      this file.  We used to simply ignore the PLT reloc type here --
      the branch encoding is now needed to deal with TLSCALL relocs.
@@ -10353,11 +10353,11 @@ do_t_ldmstm (void)
 		  /* First, record an error for Case 3.  */
 		  if (inst.operands[1].imm & mask
 		      && inst.operands[0].writeback)
-    		    inst.error = 
+		    inst.error =
 			_("having the base register in the register list when "
 			  "using write back is UNPREDICTABLE");
-		    
-		  opcode = (inst.instruction == T_MNEM_stmia ? T_MNEM_str 
+
+		  opcode = (inst.instruction == T_MNEM_stmia ? T_MNEM_str
 							     : T_MNEM_ldr);
 		  inst.instruction = THUMB_OP16 (opcode);
 		  inst.instruction |= inst.operands[0].reg << 3;
@@ -10369,7 +10369,7 @@ do_t_ldmstm (void)
 	    {
 	      if (inst.operands[0].writeback)
 		{
-		  inst.instruction = 
+		  inst.instruction =
 			THUMB_OP16 (inst.instruction == T_MNEM_stmia
 			            ? T_MNEM_push : T_MNEM_pop);
 		  inst.instruction |= inst.operands[1].imm;
@@ -10377,7 +10377,7 @@ do_t_ldmstm (void)
 		}
 	      else if ((inst.operands[1].imm & (inst.operands[1].imm-1)) == 0)
 		{
-		  inst.instruction = 
+		  inst.instruction =
 			THUMB_OP16 (inst.instruction == T_MNEM_stmia
 			            ? T_MNEM_str_sp : T_MNEM_ldr_sp);
 		  inst.instruction |= ((ffs (inst.operands[1].imm)-1) << 8);
@@ -10934,7 +10934,7 @@ do_t_mov_cmp (void)
 		constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6),
 			    "MOV Rd, Rs with two low registers is not "
 			    "permitted on this architecture");
-		ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, 
+		ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 					arm_ext_v6);
 	      }
 
@@ -15256,7 +15256,7 @@ do_neon_ldr_str (void)
 
   /* Use of PC in vstr in ARM mode is deprecated in ARMv7.
      And is UNPREDICTABLE in thumb mode.  */
-  if (!is_ldr 
+  if (!is_ldr
       && inst.operands[1].reg == REG_PC
       && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v7))
     {
@@ -16713,7 +16713,7 @@ static const struct reg_entry reg_names[] =
   SPLRBANK(12,MON,RNB), SPLRBANK(12,mon,RNB),
   REGDEF(elr_hyp,768|(14<<16),RNB), REGDEF(ELR_hyp,768|(14<<16),RNB),
   REGDEF(sp_hyp,768|(15<<16),RNB), REGDEF(SP_hyp,768|(15<<16),RNB),
-  REGDEF(spsr_hyp,768|(14<<16)|SPSR_BIT,RNB), 
+  REGDEF(spsr_hyp,768|(14<<16)|SPSR_BIT,RNB),
   REGDEF(SPSR_hyp,768|(14<<16)|SPSR_BIT,RNB),
 
   /* FPA registers.  */
@@ -18998,6 +18998,26 @@ md_chars_to_number (char * buf, int n)
 
 /* MD interface: Sections.  */
 
+/* Calculate the maximum variable size (i.e., excluding fr_fix)
+   that an rs_machine_dependent frag may reach.  */
+
+unsigned int
+arm_frag_max_var (fragS *fragp)
+{
+  /* We only use rs_machine_dependent for variable-size Thumb instructions,
+     which are either THUMB_SIZE (2) or INSN_SIZE (4).
+
+     Note that we generate relaxable instructions even for cases that don't
+     really need it, like an immediate that's a trivial constant.  So we're
+     overestimating the instruction size for some of those cases.  Rather
+     than putting more intelligence here, it would probably be better to
+     avoid generating a relaxation frag in the first place when it can be
+     determined up front that a short instruction will suffice.  */
+
+  gas_assert (fragp->fr_type == rs_machine_dependent);
+  return INSN_SIZE;
+}
+
 /* Estimate the size of a frag before relaxing.  Assume everything fits in
    2 bytes.  */
 
@@ -19569,7 +19589,7 @@ arm_frag_align_code (int n, int max)
     {
       char err_msg[128];
 
-      sprintf (err_msg, 
+      sprintf (err_msg,
         _("alignments greater than %d bytes not supported in .text sections."),
         MAX_MEM_FOR_RS_ALIGN_CODE + 1);
       as_fatal ("%s", err_msg);
@@ -20474,7 +20494,7 @@ encode_thumb2_b_bl_offset (char * buf, offsetT value)
   I1 = (value >> 23) & 0x01;
   I2 = (value >> 22) & 0x01;
   hi = (value >> 12) & 0x3ff;
-  lo = (value >> 1) & 0x7ff; 
+  lo = (value >> 1) & 0x7ff;
   newval   = md_chars_to_number (buf, THUMB_SIZE);
   newval2  = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
   newval  |= (S << 10) | hi;
@@ -20591,7 +20611,7 @@ md_apply_fix (fixS *	fixP,
 		break;
 	      }
 	  }
-	
+
 	newimm = encode_arm_immediate (value);
 	temp = md_chars_to_number (buf, INSN_SIZE);
 
@@ -23217,10 +23237,10 @@ arm_parse_extension (char *str, const arm_feature_set **opt_p)
       xmalloc (sizeof (arm_feature_set));
 
   /* We insist on extensions being specified in alphabetical order, and with
-     extensions being added before being removed.  We achieve this by having 
-     the global ARM_EXTENSIONS table in alphabetical order, and using the 
+     extensions being added before being removed.  We achieve this by having
+     the global ARM_EXTENSIONS table in alphabetical order, and using the
      ADDING_VALUE variable to indicate whether we are adding an extension (1)
-     or removing it (0) and only allowing it to change in the order 
+     or removing it (0) and only allowing it to change in the order
      -1 -> 1 -> 0.  */
   const struct arm_option_extension_value_table * opt = NULL;
   int adding_value = -1;
@@ -23803,7 +23823,7 @@ aeabi_set_public_attributes (void)
     aeabi_set_attribute_int
       (Tag_Advanced_SIMD_arch, (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_fma)
 				? 2 : 1));
-  
+
   /* Tag_VFP_HP_extension (formerly Tag_NEON_FP16_arch).  */
   if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_fp16))
     aeabi_set_attribute_int (Tag_VFP_HP_extension, 1);
