@@ -1356,7 +1356,8 @@ fill_fprs (const struct regcache *regcache, double *vals)
        regno < tdep->ppc_fp0_regnum + ppc_num_fprs;
        regno++)
     if (REG_VALID == regcache_register_status (regcache, regno))
-      regcache_raw_collect (regcache, regno, vals + regno);
+      regcache_raw_collect (regcache, regno,
+			    vals + regno - tdep->ppc_fp0_regnum);
 }
 
 /* Store the special registers into the specified 64-bit and 32-bit

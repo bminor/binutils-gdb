@@ -1,3 +1,8 @@
+2012-03-13  Chris January  <chris.january@allinea.com>
+
+	* aix-thread.c (fill_sprs): Store the floating point registers
+	at the correct offsets into vals.
+
 2012-03-13  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention symbol-reloading has been deleted.
