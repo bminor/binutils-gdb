@@ -98,7 +98,7 @@ static void
 patch_block_stabs (struct pending *, struct pending_stabs *,
 		   struct objfile *);
 
-static void fix_common_block (struct symbol *, int);
+static void fix_common_block (struct symbol *, CORE_ADDR);
 
 static int read_type_number (char **, int *);
 
@@ -4397,7 +4397,7 @@ common_block_end (struct objfile *objfile)
    the common block name).  */
 
 static void
-fix_common_block (struct symbol *sym, int valu)
+fix_common_block (struct symbol *sym, CORE_ADDR valu)
 {
   struct pending *next = (struct pending *) SYMBOL_TYPE (sym);
 

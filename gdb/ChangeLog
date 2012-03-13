@@ -1,5 +1,10 @@
 2012-03-13  Chris January  <chris.january@allinea.com>
 
+	* stabsread.c (fix_common_block): Change type of valu argument
+	to CORE_ADDR.
+
+2012-03-13  Chris January  <chris.january@allinea.com>
+
 	* rs6000-tdep.c (skip_prologue): Support the oril r29, r1, 0x0
 	instruction.
 
