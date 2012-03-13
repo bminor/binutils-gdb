@@ -1075,9 +1075,11 @@ supply_fprs (struct regcache *regcache, double *vals)
      floating-point registers.  */
   gdb_assert (ppc_floating_point_unit_p (gdbarch));
 
-  for (regno = 0; regno < ppc_num_fprs; regno++)
-    regcache_raw_supply (regcache, regno + tdep->ppc_fp0_regnum,
-			 (char *) (vals + regno));
+  for (regno = tdep->ppc_fp0_regnum;
+       regno < tdep->ppc_fp0_regnum + ppc_num_fprs;
+       regno++)
+    regcache_raw_supply (regcache, regno,
+			 (char *) (vals + regno - tdep->ppc_fp0_regnum));
 }
 
 /* Predicate to test whether given register number is a "special" register.  */
