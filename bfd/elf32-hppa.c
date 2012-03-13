@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    Original code by
@@ -1898,13 +1898,6 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
 	}
     }
 
-  if (eh->size == 0)
-    {
-      (*_bfd_error_handler) (_("dynamic variable `%s' is zero size"),
-			     eh->root.root.string);
-      return TRUE;
-    }
-
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
      an entry for this symbol in the .dynsym section.  The dynamic
@@ -1922,7 +1915,7 @@ elf32_hppa_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
      runtime process image.  */
-  if ((eh->root.u.def.section->flags & SEC_ALLOC) != 0)
+  if ((eh->root.u.def.section->flags & SEC_ALLOC) != 0 && eh->size != 0)
     {
       htab->srelbss->size += sizeof (Elf32_External_Rela);
       eh->needs_copy = 1;

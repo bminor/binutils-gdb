@@ -1,5 +1,5 @@
 /* BFD back-end for National Semiconductor's CR16 ELF
-   Copyright 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright 2007, 2008, 2009, 2010, 2012 Free Software Foundation, Inc.
    Written by M R Swami Reddy.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2446,13 +2446,6 @@ _bfd_cr16_elf_adjust_dynamic_symbol (struct bfd_link_info * info,
   if (!h->non_got_ref)
     return TRUE;
 
-  if (h->size == 0)
-    {
-      (*_bfd_error_handler) (_("dynamic variable `%s' is zero size"),
-                             h->root.root.string);
-      return TRUE;
-    }
-
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
      an entry for this symbol in the .dynsym section.  The dynamic
@@ -2470,7 +2463,7 @@ _bfd_cr16_elf_adjust_dynamic_symbol (struct bfd_link_info * info,
      copy the initial value out of the dynamic object and into the
      runtime process image.  We need to remember the offset into the
      .rela.bss section we are going to use.  */
-  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
+  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
       asection * srel;
 

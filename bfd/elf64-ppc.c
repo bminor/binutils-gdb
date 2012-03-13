@@ -6562,13 +6562,6 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* This is a reference to a symbol defined by a dynamic object which
      is not a function.  */
 
-  if (h->size == 0)
-    {
-      info->callbacks->einfo (_("%P: dynamic variable `%s' is zero size\n"),
-			      h->root.root.string);
-      return TRUE;
-    }
-
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
      an entry for this symbol in the .dynsym section.  The dynamic
@@ -6583,7 +6576,7 @@ ppc64_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      to copy the initial value out of the dynamic object and into the
      runtime process image.  We need to remember the offset into the
      .rela.bss section we are going to use.  */
-  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
+  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
       htab->relbss->size += sizeof (Elf64_External_Rela);
       h->needs_copy = 1;

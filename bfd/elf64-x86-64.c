@@ -2166,13 +2166,6 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
 	}
     }
 
-  if (h->size == 0)
-    {
-      (*_bfd_error_handler) (_("dynamic variable `%s' is zero size"),
-			     h->root.root.string);
-      return TRUE;
-    }
-
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.	 There will be
      an entry for this symbol in the .dynsym section.  The dynamic
@@ -2190,7 +2183,7 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a R_X86_64_COPY reloc to tell the dynamic linker
      to copy the initial value out of the dynamic object and into the
      runtime process image.  */
-  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
+  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
       const struct elf_backend_data *bed;
       bed = get_elf_backend_data (info->output_bfd);

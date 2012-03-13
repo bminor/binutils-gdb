@@ -1,5 +1,5 @@
 /* 32-bit ELF support for TI C6X
-   Copyright 2010, 2011
+   Copyright 2010, 2011, 2012
    Free Software Foundation, Inc.
    Contributed by Joseph Myers <joseph@codesourcery.com>
    		  Bernd Schmidt  <bernds@codesourcery.com>
@@ -2157,13 +2157,6 @@ elf32_tic6x_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (htab == NULL)
     return FALSE;
 
-  if (h->size == 0)
-    {
-      (*_bfd_error_handler) (_("dynamic variable `%s' is zero size"),
-			     h->root.root.string);
-      return TRUE;
-    }
-
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
      an entry for this symbol in the .dynsym section.  The dynamic
@@ -2177,7 +2170,7 @@ elf32_tic6x_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* We must generate a R_C6000_COPY reloc to tell the dynamic linker to
      copy the initial value out of the dynamic object and into the
      runtime process image.  */
-  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
+  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0 && h->size != 0)
     {
       htab->srelbss->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
