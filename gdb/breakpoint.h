@@ -583,9 +583,6 @@ enum watchpoint_triggered
   watch_triggered_yes  
 };
 
-/* This is used to declare the VEC syscalls_to_be_caught.  */
-DEF_VEC_I(int);
-
 typedef struct bp_location *bp_location_p;
 DEF_VEC_P(bp_location_p);
 

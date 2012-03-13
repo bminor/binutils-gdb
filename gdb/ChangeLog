@@ -1,3 +1,24 @@
+2012-03-13  Yao Qi  <yao@codesourcery.com>
+
+	* inferior.h (struct inferior): Remove fields any_syscall_count,
+	syscalls_counts and total_syscalls_count.  Move them to new
+	struct catch_syscall_inferior_data in breakpoint.c.
+	* breakpoint.c: Call DEF_VEC_I(int).
+	(struct catch_syscall_inferior_data): New.
+	(get_catch_syscall_inferior_data): New.
+	(catch_syscall_inferior_data_cleanup): New.
+	(insert_catch_syscall): Update to access data in
+	struct catch_syscall_inferior_data.
+	(insert_catch_syscall): Likewise.
+	(remove_catch_syscall): Likewise.
+	(remove_catch_syscall): Likewise.
+	(is_syscall_catchpoint_enabled): Likewise.
+	(add_catch_command): Likewise.
+	(_initialize_breakpoint): Register cleanup.
+	* breakpoint.h: Removed DEF_VEC_I(int).
+	* dwarf2loc.c: Call DEF_VEC_I(int).
+	* mi/mi-main.c: Likewise.
+
 2012-03-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ptrace.c (inf_ptrace_post_attach): Make static.

@@ -7374,6 +7374,8 @@ catch_unload_command_1 (char *arg, int from_tty,
   catch_load_or_unload (arg, from_tty, 0, command);
 }
 
+DEF_VEC_I(int);
+
 /* An instance of this type is used to represent a syscall catchpoint.
    It includes a "struct breakpoint" as a kind of base class; users
    downcast to "struct breakpoint *" when needed.  A breakpoint is
@@ -7405,6 +7407,47 @@ dtor_catch_syscall (struct breakpoint *b)
   base_breakpoint_ops.dtor (b);
 }
 
+static const struct inferior_data *catch_syscall_inferior_data = NULL;
+
+struct catch_syscall_inferior_data
+{
+  /* We keep a count of the number of times the user has requested a
+     particular syscall to be tracked, and pass this information to the
+     target.  This lets capable targets implement filtering directly.  */
+
+  /* Number of times that "any" syscall is requested.  */
+  int any_syscall_count;
+
+  /* Count of each system call.  */
+  VEC(int) *syscalls_counts;
+
+  /* This counts all syscall catch requests, so we can readily determine
+     if any catching is necessary.  */
+  int total_syscalls_count;
+};
+
+static struct catch_syscall_inferior_data*
+get_catch_syscall_inferior_data (struct inferior *inf)
+{
+  struct catch_syscall_inferior_data *inf_data;
+
+  inf_data = inferior_data (inf, catch_syscall_inferior_data);
+  if (inf_data == NULL)
+    {
+      inf_data = XZALLOC (struct catch_syscall_inferior_data);
+      set_inferior_data (inf, catch_syscall_inferior_data, inf_data);
+    }
+
+  return inf_data;
+}
+
+static void
+catch_syscall_inferior_data_cleanup (struct inferior *inf, void *arg)
+{
+  xfree (arg);
+}
+
+
 /* Implement the "insert" breakpoint_ops method for syscall
    catchpoints.  */
 
@@ -7413,10 +7456,12 @@ insert_catch_syscall (struct bp_location *bl)
 {
   struct syscall_catchpoint *c = (struct syscall_catchpoint *) bl->owner;
   struct inferior *inf = current_inferior ();
+  struct catch_syscall_inferior_data *inf_data
+    = get_catch_syscall_inferior_data (inf);
 
-  ++inf->total_syscalls_count;
+  ++inf_data->total_syscalls_count;
   if (!c->syscalls_to_be_caught)
-    ++inf->any_syscall_count;
+    ++inf_data->any_syscall_count;
   else
     {
       int i, iter;
@@ -7427,28 +7472,31 @@ insert_catch_syscall (struct bp_location *bl)
 	{
           int elem;
 
-	  if (iter >= VEC_length (int, inf->syscalls_counts))
+	  if (iter >= VEC_length (int, inf_data->syscalls_counts))
 	    {
-              int old_size = VEC_length (int, inf->syscalls_counts);
+              int old_size = VEC_length (int, inf_data->syscalls_counts);
               uintptr_t vec_addr_offset
 		= old_size * ((uintptr_t) sizeof (int));
               uintptr_t vec_addr;
-              VEC_safe_grow (int, inf->syscalls_counts, iter + 1);
-              vec_addr = (uintptr_t) VEC_address (int, inf->syscalls_counts) +
-		vec_addr_offset;
+              VEC_safe_grow (int, inf_data->syscalls_counts, iter + 1);
+              vec_addr = ((uintptr_t) VEC_address (int,
+						  inf_data->syscalls_counts)
+			  + vec_addr_offset);
               memset ((void *) vec_addr, 0,
                       (iter + 1 - old_size) * sizeof (int));
 	    }
-          elem = VEC_index (int, inf->syscalls_counts, iter);
-          VEC_replace (int, inf->syscalls_counts, iter, ++elem);
+          elem = VEC_index (int, inf_data->syscalls_counts, iter);
+          VEC_replace (int, inf_data->syscalls_counts, iter, ++elem);
 	}
     }
 
   return target_set_syscall_catchpoint (PIDGET (inferior_ptid),
-					inf->total_syscalls_count != 0,
-					inf->any_syscall_count,
-					VEC_length (int, inf->syscalls_counts),
-					VEC_address (int, inf->syscalls_counts));
+					inf_data->total_syscalls_count != 0,
+					inf_data->any_syscall_count,
+					VEC_length (int,
+						    inf_data->syscalls_counts),
+					VEC_address (int,
+						     inf_data->syscalls_counts));
 }
 
 /* Implement the "remove" breakpoint_ops method for syscall
@@ -7459,10 +7507,12 @@ remove_catch_syscall (struct bp_location *bl)
 {
   struct syscall_catchpoint *c = (struct syscall_catchpoint *) bl->owner;
   struct inferior *inf = current_inferior ();
+  struct catch_syscall_inferior_data *inf_data
+    = get_catch_syscall_inferior_data (inf);
 
-  --inf->total_syscalls_count;
+  --inf_data->total_syscalls_count;
   if (!c->syscalls_to_be_caught)
-    --inf->any_syscall_count;
+    --inf_data->any_syscall_count;
   else
     {
       int i, iter;
@@ -7472,20 +7522,21 @@ remove_catch_syscall (struct bp_location *bl)
            i++)
 	{
           int elem;
-	  if (iter >= VEC_length (int, inf->syscalls_counts))
+	  if (iter >= VEC_length (int, inf_data->syscalls_counts))
 	    /* Shouldn't happen.  */
 	    continue;
-          elem = VEC_index (int, inf->syscalls_counts, iter);
-          VEC_replace (int, inf->syscalls_counts, iter, --elem);
+          elem = VEC_index (int, inf_data->syscalls_counts, iter);
+          VEC_replace (int, inf_data->syscalls_counts, iter, --elem);
         }
     }
 
   return target_set_syscall_catchpoint (PIDGET (inferior_ptid),
-					inf->total_syscalls_count != 0,
-					inf->any_syscall_count,
-					VEC_length (int, inf->syscalls_counts),
+					inf_data->total_syscalls_count != 0,
+					inf_data->any_syscall_count,
+					VEC_length (int,
+						    inf_data->syscalls_counts),
 					VEC_address (int,
-						     inf->syscalls_counts));
+						     inf_data->syscalls_counts));
 }
 
 /* Implement the "breakpoint_hit" breakpoint_ops method for syscall
@@ -14060,9 +14111,10 @@ is_syscall_catchpoint_enabled (struct breakpoint *bp)
 int
 catch_syscall_enabled (void)
 {
-  struct inferior *inf = current_inferior ();
+  struct catch_syscall_inferior_data *inf_data
+    = get_catch_syscall_inferior_data (current_inferior ());
 
-  return inf->total_syscalls_count != 0;
+  return inf_data->total_syscalls_count != 0;
 }
 
 int
@@ -14727,9 +14779,12 @@ add_catch_command (char *name, char *docstring,
 static void
 clear_syscall_counts (struct inferior *inf)
 {
-  inf->total_syscalls_count = 0;
-  inf->any_syscall_count = 0;
-  VEC_free (int, inf->syscalls_counts);
+  struct catch_syscall_inferior_data *inf_data
+    = get_catch_syscall_inferior_data (inf);
+
+  inf_data->total_syscalls_count = 0;
+  inf_data->any_syscall_count = 0;
+  VEC_free (int, inf_data->syscalls_counts);
 }
 
 static void
@@ -14981,6 +15036,9 @@ _initialize_breakpoint (void)
   observer_attach_memory_changed (invalidate_bp_value_on_memory_change);
 
   breakpoint_objfile_key = register_objfile_data ();
+
+  catch_syscall_inferior_data
+    = register_inferior_data_with_cleanup (catch_syscall_inferior_data_cleanup);
 
   breakpoint_chain = 0;
   /* Don't bother to call set_breakpoint_count.  $bpnum isn't useful

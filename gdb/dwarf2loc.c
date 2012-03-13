@@ -42,6 +42,8 @@
 #include "gdb_string.h"
 #include "gdb_assert.h"
 
+DEF_VEC_I(int);
+
 extern int dwarf2_always_disassemble;
 
 static void dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,

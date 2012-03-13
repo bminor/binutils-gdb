@@ -502,20 +502,6 @@ struct inferior
   int has_exit_code;
   LONGEST exit_code;
 
-  /* We keep a count of the number of times the user has requested a
-     particular syscall to be tracked, and pass this information to the
-     target.  This lets capable targets implement filtering directly.  */
-
-  /* Number of times that "any" syscall is requested.  */
-  int any_syscall_count;
-
-  /* Count of each system call.  */
-  VEC(int) *syscalls_counts;
-
-  /* This counts all syscall catch requests, so we can readily determine
-     if any catching is necessary.  */
-  int total_syscalls_count;
-
   /* Default flags to pass to the symbol reading functions.  These are
      used whenever a new objfile is created.  The valid values come
      from enum symfile_add_flags.  */

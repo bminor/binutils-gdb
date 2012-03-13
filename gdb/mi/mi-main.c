@@ -508,6 +508,8 @@ mi_cmd_thread_info (char *command, char **argv, int argc)
   print_thread_info (current_uiout, argv[0], -1);
 }
 
+DEF_VEC_I(int);
+
 struct collect_cores_data
 {
   int pid;
