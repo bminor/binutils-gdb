@@ -692,7 +692,7 @@ finish_bundle (fragS *frag, unsigned int size)
 static void
 assemble_one (char *line)
 {
-  fragS *insn_start_frag;
+  fragS *insn_start_frag = NULL;
 
   if (bundle_lock_frchain != NULL && bundle_lock_frchain != frchain_now)
     {
