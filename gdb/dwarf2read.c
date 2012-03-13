@@ -3686,10 +3686,6 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
 	  do_cleanups (free_cu_cleanup);
 	  return;
 	}
-
-      /* Link this CU into read_in_chain.  */
-      this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
-      dwarf2_per_objfile->read_in_chain = this_cu;
     }
   else
     {
@@ -3722,6 +3718,10 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
       /* We've successfully allocated this compilation unit.  Let our
 	 caller clean it up when finished with it.  */
       discard_cleanups (free_cu_cleanup);
+
+      /* Link this CU into read_in_chain.  */
+      this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
+      dwarf2_per_objfile->read_in_chain = this_cu;
     }
 }
 
@@ -4700,10 +4700,6 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
       /* Complete the cu_header.  */
       cu->header.offset = offset;
       cu->header.first_die_offset = info_ptr - beg_of_comp_unit;
-
-      /* Link this CU into read_in_chain.  */
-      per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
-      dwarf2_per_objfile->read_in_chain = per_cu;
     }
   else
     {
@@ -4730,6 +4726,10 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
       /* We've successfully allocated this compilation unit.  Let our
 	 caller clean it up when finished with it.  */
       discard_cleanups (free_cu_cleanup);
+
+      /* Link this CU into read_in_chain.  */
+      per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
+      dwarf2_per_objfile->read_in_chain = per_cu;
     }
 }
 
@@ -14445,6 +14445,7 @@ read_signatured_type (struct signatured_type *type_sig)
      clean it up when finished with it.	 */
   discard_cleanups (free_cu_cleanup);
 
+  /* Link this TU into read_in_chain.  */
   type_sig->per_cu.cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
   dwarf2_per_objfile->read_in_chain = &type_sig->per_cu;
 }

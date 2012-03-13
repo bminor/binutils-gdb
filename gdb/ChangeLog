@@ -1,3 +1,10 @@
+2012-03-13  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (load_partial_comp_unit): Defer adding cu to
+	read_in_chain until we have successfully read it in.
+	(load_full_comp_unit): Ditto.
+	(read_signatured_type): Add comment.
+
 2012-03-13  Chris January  <chris.january@allinea.com>
 
 	* stabsread.c (fix_common_block): Change type of valu argument
