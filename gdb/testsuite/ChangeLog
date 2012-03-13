@@ -1,3 +1,10 @@
+2012-03-13  Doug Evans  <dje@google.com>
+
+	* gdb.base/default.exp: Delete tests for symbol-reloading.
+	* gdb.base/help.exp: Ditto.
+	* gdb.base/setshow.exp: Ditto.
+	* gdb.base/gdb_history: Delete references to symbol-reloading.
+
 2012-03-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/attach-twice.c: New files.

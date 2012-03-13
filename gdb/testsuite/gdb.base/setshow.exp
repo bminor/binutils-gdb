@@ -242,10 +242,6 @@ gdb_test_no_output "set write on" "set write on"
 #test show write on
 # This is only supported on targets which use exec.o.
 gdb_test "show write" "Writing into executable and core files is on..*" "show write (on)" 
-#test set symbol-reloading on
-gdb_test_no_output "set symbol-reloading on" "set symbol-reloading on" 
-#test show symbol-reloading on
-gdb_test "show symbol-reloading" "Dynamic symbol table reloading multiple times in one run is on..*" "show symbol-reloading (on)" 
 #test show user
 gdb_test_no_output "show user" "show user" 
 #test set verbose on

@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.4
 
+* The option "symbol-reloading" has been deleted as it is no longer used.
+
 * Python scripting
 
   ** GDB commands implemented in Python can now be put in command class

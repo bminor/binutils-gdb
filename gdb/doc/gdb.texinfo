@@ -1700,7 +1700,7 @@ commands, and their documentation, for the regular expression specified in
 @var{args}.  It prints out all matches found.  For example:
 
 @smallexample
-apropos reload
+apropos alias
 @end smallexample
 
 @noindent
@@ -1708,10 +1708,11 @@ results in:
 
 @smallexample
 @c @group
-set symbol-reloading -- Set dynamic symbol table reloading
-                        multiple times in one run
-show symbol-reloading -- Show dynamic symbol table reloading
-                        multiple times in one run
+alias -- Define a new command that is an alias of an existing command
+aliases -- Aliases of other commands
+d -- Delete some breakpoints or auto-display expressions
+del -- Delete some breakpoints or auto-display expressions
+delete -- Delete some breakpoints or auto-display expressions
 @c @end group
 @end smallexample
 
@@ -14720,33 +14721,6 @@ from the @code{ptype} command can be overwhelming and hard to use.  The
 @code{info-methods} command filters the methods, printing only those
 which match the regular-expression @var{regexp}.
 @end ignore
-
-@cindex reloading symbols
-Some systems allow individual object files that make up your program to
-be replaced without stopping and restarting your program.  For example,
-in VxWorks you can simply recompile a defective object file and keep on
-running.  If you are running on one of these systems, you can allow
-@value{GDBN} to reload the symbols for automatically relinked modules:
-
-@table @code
-@kindex set symbol-reloading
-@item set symbol-reloading on
-Replace symbol definitions for the corresponding source file when an
-object file with a particular name is seen again.
-
-@item set symbol-reloading off
-Do not replace symbol definitions when encountering object files of the
-same name more than once.  This is the default state; if you are not
-running on a system that permits automatic relinking of modules, you
-should leave @code{symbol-reloading} off, since otherwise @value{GDBN}
-may discard symbols when linking large programs, that may contain
-several modules (from different directories or libraries) with the same
-name.
-
-@kindex show symbol-reloading
-@item show symbol-reloading
-Show the current @code{on} or @code{off} setting.
-@end table
 
 @cindex opaque data types
 @kindex set opaque-type-resolution

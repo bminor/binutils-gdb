@@ -458,8 +458,6 @@ gdb_test "help set print vtbl" "Set printing of C\[+\]+ virtual function tables\
 gdb_test "help set prompt" "Set gdb's prompt" "help set prompt"
 # test help set radix
 gdb_test "help set radix" "Set default input and output number radices\.\[\r\n\]+Use \'set input-radix\' or \'set output-radix\' to independently set each\.\[\r\n\]+Without an argument, sets both radices back to the default value of 10\." "help set radix"
-# test help set symbol-reloading
-gdb_test "help set symbol-reloading" "Set dynamic symbol table reloading multiple times in one run\." "help set symbol-reloading"
 # test help set variable
 gdb_test "help set variable" "Evaluate expression EXP and assign result to variable VAR, using assignment\[\r\n\]+syntax appropriate for the current language \\(VAR = EXP or VAR := EXP for\[\r\n\]+example\\)\.  VAR may be a debugger \"convenience\" variable \\(names starting\[\r\n\]+with \\\$\\), a register \\(a few standard names starting with \\\$\\), or an actual\[\r\n\]+variable in the program being debugged\.  EXP is any valid expression\.\[\r\n\]+This may usually be abbreviated to simply \"set\"\." "help set variable"
 # test help set verbose
@@ -571,8 +569,6 @@ gdb_test "help show print vtbl" "Show printing of C\[+\]+ virtual function table
 gdb_test "help show prompt" "Show gdb's prompt" "help show prompt"
 # test help show radix
 gdb_test "help show radix" "Show the default input and output number radices\.\[\r\n\]+Use \'show input-radix\' or \'show output-radix\' to independently show each\." "help show radix"
-# test help show symbol-reloading
-gdb_test "help show symbol-reloading" "Show dynamic symbol table reloading multiple times in one run\." "help show symbol-reloading"
 # test help show user
 gdb_test "help show user" "Show definitions of non-python user defined commands\.\[\r\n\]+Argument is the name of the user defined command\.\[\r\n\]+With no argument, show definitions of all user defined commands\." "help show user"
 # test help show values

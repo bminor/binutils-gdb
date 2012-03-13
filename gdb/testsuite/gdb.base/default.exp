@@ -560,8 +560,6 @@ gdb_test_no_output "set print vtbl" "set print vtbl"
 # FIXME -- need a test for "set prompt"
 #test set radix
 gdb_test "set radix" "Input and output radices now set to decimal 10, hex a, octal 12.*" "set radix"
-#test set symbol-reloading
-gdb_test_no_output "set symbol-reloading" "set symbol-reloading"
 #test set variable
 gdb_test "set variable" "Argument required .expression to compute.*" "set variable"
 #test set verbose
@@ -663,8 +661,6 @@ gdb_test "show print vtbl" "Printing of C\[+\]+ virtual function tables is on." 
 gdb_test "show prompt" "Gdb's prompt is \"$gdb_prompt \".*" "show prompt"
 #test show radix
 gdb_test "show radix" "Input and output radices set to decimal 10, hex a, octal 12." "show radix"
-#test show symbol-reloading
-gdb_test "show symbol-reloading" "Dynamic symbol table reloading multiple times in one run is on." "show symbol-reloading"
 #test show user
 gdb_test_no_output "show user" "show user"
 #test show values

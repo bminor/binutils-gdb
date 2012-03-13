@@ -4916,11 +4916,6 @@ number of that register.
 Use this function to convert stab register @var{stab_regnr} into @value{GDBN}
 regnum.  If not defined, no conversion will be done.
 
-@item SYMBOL_RELOADING_DEFAULT
-@findex SYMBOL_RELOADING_DEFAULT
-The default value of the ``symbol-reloading'' variable.  (Never defined in
-current sources.)
-
 @item TARGET_CHAR_BIT
 @findex TARGET_CHAR_BIT
 Number of bits in a char; defaults to 8.

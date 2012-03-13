@@ -1,3 +1,12 @@
+2012-03-13  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Help): Change apropos example to use "alias" instead
+	of "reload".
+	(Symbols): Delete docs for set/show symbol-reloading.
+	* gdbint.texinfo (Defining Other Architecture Features): Delete
+	SYMBOL_RELOADING_DEFAULT.
+	* refcard.tex: Delete reference to symbol-reloading.
+
 2012-03-07  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (General Query Packets): Document new
