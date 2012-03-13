@@ -271,6 +271,10 @@ struct remote_state
   char *buf;
   long buf_size;
 
+  /* True if we're going through initial connection setup (finding out
+     about the remote side's threads, relocating symbols, etc.).  */
+  int starting_up;
+
   /* If we negotiated packet size explicitly (and thus can bypass
      heuristics for the largest packet size that will not overflow
      a buffer in the stub), this will be set to that packet size.
@@ -3266,6 +3270,10 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   /* Ack any packet which the remote side has already sent.  */
   serial_write (remote_desc, "+", 1);
 
+  /* Signal other parts that we're going through the initial setup,
+     and so things may not be stable yet.  */
+  rs->starting_up = 1;
+
   /* The first packet we send to the target is the optional "supported
      packets" request.  If the target can answer this, it will tell us
      which later probes to skip.  */
@@ -3512,6 +3520,12 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
       merge_uploaded_tracepoints (&uploaded_tps);
     }
+
+  /* The thread and inferior lists are now synchronized with the
+     target, our symbols have been relocated, and we're merged the
+     target's tracepoints with ours.  We're done with basic start
+     up.  */
+  rs->starting_up = 0;
 
   /* If breakpoints are global, insert them now.  */
   if (gdbarch_has_global_breakpoints (target_gdbarch)
@@ -10298,8 +10312,18 @@ remote_download_tracepoint (struct bp_location *loc)
 static int
 remote_can_download_tracepoint (void)
 {
-  struct trace_status *ts = current_trace_status ();
-  int status = remote_get_trace_status (ts);
+  struct remote_state *rs = get_remote_state ();
+  struct trace_status *ts;
+  int status;
+
+  /* Don't try to install tracepoints until we've relocated our
+     symbols, and fetched and merged the target's tracepoint list with
+     ours.  */
+  if (rs->starting_up)
+    return 0;
+
+  ts = current_trace_status ();
+  status = remote_get_trace_status (ts);
 
   if (status == -1 || !ts->running_known || !ts->running)
     return 0;
