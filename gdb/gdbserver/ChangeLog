@@ -1,5 +1,10 @@
 2012-03-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linux-low.c (linux_attach_lwp_1): New variable buffer.  Call
+	linux_ptrace_attach_warnings.
+
+2012-03-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* Makefile.in (linux-ptrace.o): New.
 	* configure.srv (arm*-*-linux*, bfin-*-*linux*, crisv32-*-linux*)
 	(cris-*-linux*, i[34567]86-*-linux*, ia64-*-linux*, m32r*-*-linux*)

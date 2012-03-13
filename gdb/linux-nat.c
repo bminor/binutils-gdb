@@ -62,6 +62,9 @@
 #include "symfile.h"
 #include "agent.h"
 #include "tracepoint.h"
+#include "exceptions.h"
+#include "linux-ptrace.h"
+#include "buffer.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -1612,11 +1615,33 @@ linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
   struct lwp_info *lp;
   int status;
   ptid_t ptid;
+  volatile struct gdb_exception ex;
 
   /* Make sure we report all signals during attach.  */
   linux_nat_pass_signals (0, NULL);
 
-  linux_ops->to_attach (ops, args, from_tty);
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      linux_ops->to_attach (ops, args, from_tty);
+    }
+  if (ex.reason < 0)
+    {
+      pid_t pid = parse_pid_to_attach (args);
+      struct buffer buffer;
+      char *message, *buffer_s;
+
+      message = xstrdup (ex.message);
+      make_cleanup (xfree, message);
+
+      buffer_init (&buffer);
+      linux_ptrace_attach_warnings (pid, &buffer);
+
+      buffer_grow_str0 (&buffer, "");
+      buffer_s = buffer_finish (&buffer);
+      make_cleanup (xfree, buffer_s);
+
+      throw_error (ex.error, "%s%s", buffer_s, message);
+    }
 
   /* The ptrace base target adds the main thread with (pid,0,0)
      format.  Decorate it with lwp info.  */

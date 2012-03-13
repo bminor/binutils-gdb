@@ -24,7 +24,12 @@
 /* Return the TGID of LWPID from /proc/pid/status.  Returns -1 if not
    found.  */
 
-extern int linux_proc_get_tgid (int lwpid);
+extern int linux_proc_get_tgid (pid_t lwpid);
+
+/* Return the TracerPid of LWPID from /proc/pid/status.  Returns -1 if not
+   found.  */
+
+extern pid_t linux_proc_get_tracerpid (pid_t lwpid);
 
 /* Detect `T (stopped)' in `/proc/PID/status'.
    Other states including `T (tracing stop)' are reported as false.  */

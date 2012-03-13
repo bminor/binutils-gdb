@@ -28,67 +28,54 @@
 /* Return the TGID of LWPID from /proc/pid/status.  Returns -1 if not
    found.  */
 
-int
-linux_proc_get_tgid (int lwpid)
+static int
+linux_proc_get_int (pid_t lwpid, const char *field)
 {
+  size_t field_len = strlen (field);
   FILE *status_file;
   char buf[100];
-  int tgid = -1;
+  int retval = -1;
 
   snprintf (buf, sizeof (buf), "/proc/%d/status", (int) lwpid);
   status_file = fopen (buf, "r");
-  if (status_file != NULL)
+  if (status_file == NULL)
     {
-      while (fgets (buf, sizeof (buf), status_file))
-	{
-	  if (strncmp (buf, "Tgid:", 5) == 0)
-	    {
-	      tgid = strtoul (buf + strlen ("Tgid:"), NULL, 10);
-	      break;
-	    }
-	}
-
-      fclose (status_file);
+      warning (_("unable to open /proc file '%s'"), buf);
+      return -1;
     }
 
-  return tgid;
-}
+  while (fgets (buf, sizeof (buf), status_file))
+    if (strncmp (buf, field, field_len) == 0 && buf[field_len] == ':')
+      {
+	retval = strtol (&buf[field_len + 1], NULL, 10);
+	break;
+      }
 
-/* Detect `T (stopped)' in `/proc/PID/status'.
-   Other states including `T (tracing stop)' are reported as false.  */
-
-int
-linux_proc_pid_is_stopped (pid_t pid)
-{
-  FILE *status_file;
-  char buf[100];
-  int retval = 0;
-
-  snprintf (buf, sizeof (buf), "/proc/%d/status", (int) pid);
-  status_file = fopen (buf, "r");
-  if (status_file != NULL)
-    {
-      int have_state = 0;
-
-      while (fgets (buf, sizeof (buf), status_file))
-	{
-	  if (strncmp (buf, "State:", 6) == 0)
-	    {
-	      have_state = 1;
-	      break;
-	    }
-	}
-      if (have_state && strstr (buf, "T (stopped)") != NULL)
-	retval = 1;
-      fclose (status_file);
-    }
+  fclose (status_file);
   return retval;
 }
 
-/* See linux-procfs.h declaration.  */
+/* Return the TGID of LWPID from /proc/pid/status.  Returns -1 if not
+   found.  */
 
 int
-linux_proc_pid_is_zombie (pid_t pid)
+linux_proc_get_tgid (pid_t lwpid)
+{
+  return linux_proc_get_int (lwpid, "Tgid");
+}
+
+/* See linux-procfs.h.  */
+
+pid_t
+linux_proc_get_tracerpid (pid_t lwpid)
+{
+  return linux_proc_get_int (lwpid, "TracerPid");
+}
+
+/* Return non-zero if 'State' of /proc/PID/status contains STATE.  */
+
+static int
+linux_proc_pid_has_state (pid_t pid, const char *state)
 {
   char buffer[100];
   FILE *procfile;
@@ -110,8 +97,24 @@ linux_proc_pid_is_zombie (pid_t pid)
 	have_state = 1;
 	break;
       }
-  retval = (have_state
-	    && strcmp (buffer, "State:\tZ (zombie)\n") == 0);
+  retval = (have_state && strstr (buffer, state) != NULL);
   fclose (procfile);
   return retval;
+}
+
+/* Detect `T (stopped)' in `/proc/PID/status'.
+   Other states including `T (tracing stop)' are reported as false.  */
+
+int
+linux_proc_pid_is_stopped (pid_t pid)
+{
+  return linux_proc_pid_has_state (pid, "T (stopped)");
+}
+
+/* See linux-procfs.h declaration.  */
+
+int
+linux_proc_pid_is_zombie (pid_t pid)
+{
+  return linux_proc_pid_has_state (pid, "Z (zombie)");
 }

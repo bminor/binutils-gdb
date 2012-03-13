@@ -652,6 +652,8 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
 
   if (ptrace (PTRACE_ATTACH, lwpid, 0, 0) != 0)
     {
+      struct buffer buffer;
+
       if (!initial)
 	{
 	  /* If we fail to attach to an LWP, just warn.  */
@@ -662,8 +664,11 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
 	}
 
       /* If we fail to attach to a process, report an error.  */
-      error ("Cannot attach to lwp %ld: %s (%d)\n", lwpid,
-	     strerror (errno), errno);
+      buffer_init (&buffer);
+      linux_ptrace_attach_warnings (lwpid, &buffer);
+      buffer_grow_str0 (&buffer, "");
+      error ("%sCannot attach to lwp %ld: %s (%d)", buffer_finish (&buffer),
+	     lwpid, strerror (errno), errno);
     }
 
   if (initial)

@@ -24,3 +24,26 @@
 #endif
 
 #include "linux-ptrace.h"
+#include "linux-procfs.h"
+#include "buffer.h"
+
+/* Find all possible reasons we could fail to attach PID and append these
+   newline terminated reason strings to initialized BUFFER.  '\0' termination
+   of BUFFER must be done by the caller.  */
+
+void
+linux_ptrace_attach_warnings (pid_t pid, struct buffer *buffer)
+{
+  pid_t tracerpid;
+
+  tracerpid = linux_proc_get_tracerpid (pid);
+  if (tracerpid > 0)
+    buffer_xml_printf (buffer, _("warning: process %d is already traced "
+				 "by process %d\n"),
+		       (int) pid, (int) tracerpid);
+
+  if (linux_proc_pid_is_zombie (pid))
+    buffer_xml_printf (buffer, _("warning: process %d is a zombie "
+				 "- the process has already terminated\n"),
+		       (int) pid);
+}
