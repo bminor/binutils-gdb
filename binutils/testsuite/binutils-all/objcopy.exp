@@ -980,9 +980,19 @@ if [is_elf_format] {
 	}
     }
 
-    # The symbol table for MIPS targets is not sorted by ascending value,
-    # so the regexps in localize-hidden-1.d fail to match.
-    setup_xfail "mips-*-*"
+    # The symbol table for some MIPS targets is sorted differently than
+    # the ELF canonical order, so the regexps in localize-hidden-1.d fail
+    # to match.  These tests must be matched to targets for which
+    # targ_defvec=bfd_elf32_bigmips_vec,
+    # targ_defvec=bfd_elf32_littlemips_vec,
+    # targ_defvec=bfd_elf32_nbigmips_vec or
+    # targ_defvec=bfd_elf32_nlittlemips_vec in config.bfd.  When syncing,
+    # don't forget that earlier case-matches trump later ones.
+    if { ![istarget "mips*-sde-elf*"] && ![istarget "mips64*-*-openbsd*"] } {
+	setup_xfail "mips*-*-irix5*" "mips*-*-irix6*" "mips*-*-elf*" \
+	    "mips*-*-rtems*" "mips*-*-windiss" "mips*-*-none" \
+	    "mips*-*-openbsd*" "mips*-*-chorus*"
+    }
     run_dump_test "localize-hidden-1"
     run_dump_test "testranges"
     run_dump_test "testranges-ia64"
