@@ -415,6 +415,9 @@ signals.o: ../common/signals.c $(server_h) $(signals_def)
 linux-procfs.o: ../common/linux-procfs.c $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
+linux-ptrace.o: ../common/linux-ptrace.c $(server_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
 common-utils.o: ../common/common-utils.c $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 

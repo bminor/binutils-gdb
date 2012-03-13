@@ -1,3 +1,30 @@
+2012-03-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (linux-ptrace.o): New.
+	* common/linux-procfs.c (linux_proc_pid_is_zombie): New,
+	from linux-nat.c.
+	* common/linux-procfs.h (linux_proc_pid_is_zombie): New declaration.
+	* common/linux-ptrace.c: New file.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Add linux-ptrace.o.
+	* config/arm/linux.mh: Likewise.
+	* config/i386/linux.mh: Likewise.
+	* config/i386/linux64.mh: Likewise.
+	* config/ia64/linux.mh: Likewise.
+	* config/m32r/linux.mh: Likewise.
+	* config/m68k/linux.mh: Likewise.
+	* config/mips/linux.mh: Likewise.
+	* config/pa/linux.mh: Likewise.
+	* config/powerpc/linux.mh: Likewise.
+	* config/powerpc/ppc64-linux.mh: Likewise.
+	* config/powerpc/spu-linux.mh: Likewise.
+	* config/s390/s390.mh: Likewise.
+	* config/sparc/linux.mh: Likewise.
+	* config/sparc/linux64.mh: Likewise.
+	* config/xtensa/linux.mh: Likewise.
+	* linux-nat.c (linux_lwp_is_zombie): Remove, move it to
+	common/linux-procfs.c.
+	(wait_lwp): Rename linux_lwp_is_zombie to linux_proc_pid_is_zombie.
+
 2012-03-13  Hui Zhu  <teawater@gmail.com>
 	    Pedro Alves  <palves@redhat.com>
 

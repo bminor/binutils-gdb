@@ -1,5 +1,5 @@
-/* Linux-specific PROCFS manipulation routines.
-   Copyright (C) 2011-2012 Free Software Foundation, Inc.
+/* Linux-specific ptrace manipulation routines.
+   Copyright (C) 2012 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -16,23 +16,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef COMMON_LINUX_PROCFS_H
-#define COMMON_LINUX_PROCFS_H
+#ifdef GDBSERVER
+#include "server.h"
+#else
+#include "defs.h"
+#include "gdb_string.h"
+#endif
 
-#include <unistd.h>
-
-/* Return the TGID of LWPID from /proc/pid/status.  Returns -1 if not
-   found.  */
-
-extern int linux_proc_get_tgid (int lwpid);
-
-/* Detect `T (stopped)' in `/proc/PID/status'.
-   Other states including `T (tracing stop)' are reported as false.  */
-
-extern int linux_proc_pid_is_stopped (pid_t pid);
-
-/* Return non-zero if PID is a zombie.  */
-
-extern int linux_proc_pid_is_zombie (pid_t pid);
-
-#endif /* COMMON_LINUX_PROCFS_H */
+#include "linux-ptrace.h"

@@ -1929,6 +1929,10 @@ linux-procfs.o: $(srcdir)/common/linux-procfs.c
 	$(COMPILE) $(srcdir)/common/linux-procfs.c
 	$(POSTCOMPILE)
 
+linux-ptrace.o: $(srcdir)/common/linux-ptrace.c
+	$(COMPILE) $(srcdir)/common/linux-ptrace.c
+	$(POSTCOMPILE)
+
 common-agent.o: $(srcdir)/common/agent.c
 	$(COMPILE) $(srcdir)/common/agent.c
 	$(POSTCOMPILE)

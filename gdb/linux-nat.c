@@ -2465,37 +2465,6 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 		  _("unknown ptrace event %d"), event);
 }
 
-/* Return non-zero if LWP is a zombie.  */
-
-static int
-linux_lwp_is_zombie (long lwp)
-{
-  char buffer[MAXPATHLEN];
-  FILE *procfile;
-  int retval;
-  int have_state;
-
-  xsnprintf (buffer, sizeof (buffer), "/proc/%ld/status", lwp);
-  procfile = fopen (buffer, "r");
-  if (procfile == NULL)
-    {
-      warning (_("unable to open /proc file '%s'"), buffer);
-      return 0;
-    }
-
-  have_state = 0;
-  while (fgets (buffer, sizeof (buffer), procfile) != NULL)
-    if (strncmp (buffer, "State:", 6) == 0)
-      {
-	have_state = 1;
-	break;
-      }
-  retval = (have_state
-	    && strcmp (buffer, "State:\tZ (zombie)\n") == 0);
-  fclose (procfile);
-  return retval;
-}
-
 /* Wait for LP to stop.  Returns the wait status, or 0 if the LWP has
    exited.  */
 
@@ -2549,10 +2518,10 @@ wait_lwp (struct lwp_info *lp)
 
 	 This is racy, what if the tgl becomes a zombie right after we check?
 	 Therefore always use WNOHANG with sigsuspend - it is equivalent to
-	 waiting waitpid but the linux_lwp_is_zombie is safe this way.  */
+	 waiting waitpid but linux_proc_pid_is_zombie is safe this way.  */
 
       if (GET_PID (lp->ptid) == GET_LWP (lp->ptid)
-	  && linux_lwp_is_zombie (GET_LWP (lp->ptid)))
+	  && linux_proc_pid_is_zombie (GET_LWP (lp->ptid)))
 	{
 	  thread_dead = 1;
 	  if (debug_linux_nat)
@@ -3499,7 +3468,7 @@ check_zombie_leaders (void)
 	  /* Check if there are other threads in the group, as we may
 	     have raced with the inferior simply exiting.  */
 	  && num_lwps (inf->pid) > 1
-	  && linux_lwp_is_zombie (inf->pid))
+	  && linux_proc_pid_is_zombie (inf->pid))
 	{
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,

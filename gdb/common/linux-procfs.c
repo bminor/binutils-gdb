@@ -84,3 +84,34 @@ linux_proc_pid_is_stopped (pid_t pid)
     }
   return retval;
 }
+
+/* See linux-procfs.h declaration.  */
+
+int
+linux_proc_pid_is_zombie (pid_t pid)
+{
+  char buffer[100];
+  FILE *procfile;
+  int retval;
+  int have_state;
+
+  xsnprintf (buffer, sizeof (buffer), "/proc/%d/status", (int) pid);
+  procfile = fopen (buffer, "r");
+  if (procfile == NULL)
+    {
+      warning (_("unable to open /proc file '%s'"), buffer);
+      return 0;
+    }
+
+  have_state = 0;
+  while (fgets (buffer, sizeof (buffer), procfile) != NULL)
+    if (strncmp (buffer, "State:", 6) == 0)
+      {
+	have_state = 1;
+	break;
+      }
+  retval = (have_state
+	    && strcmp (buffer, "State:\tZ (zombie)\n") == 0);
+  fclose (procfile);
+  return retval;
+}

@@ -1,3 +1,14 @@
+2012-03-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (linux-ptrace.o): New.
+	* configure.srv (arm*-*-linux*, bfin-*-*linux*, crisv32-*-linux*)
+	(cris-*-linux*, i[34567]86-*-linux*, ia64-*-linux*, m32r*-*-linux*)
+	(m68*-*-linux*, m68*-*-uclinux*, mips*-*-linux*, powerpc*-*-linux*)
+	(s390*-*-linux*, sh*-*-linux*, sparc*-*-linux*, tic6x-*-uclinux)
+	(x86_64-*-linux*, xtensa*-*-linux*): Add linux-ptrace.o to SRV_TGTOBJ
+	of these targets.
+	* linux-low.c (linux_attach_lwp_1): Remove redundent else clause.
+
 2012-03-08  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 

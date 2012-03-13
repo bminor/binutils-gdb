@@ -660,10 +660,10 @@ linux_attach_lwp_1 (unsigned long lwpid, int initial)
 	  fflush (stderr);
 	  return;
 	}
-      else
-	/* If we fail to attach to a process, report an error.  */
-	error ("Cannot attach to lwp %ld: %s (%d)\n", lwpid,
-	       strerror (errno), errno);
+
+      /* If we fail to attach to a process, report an error.  */
+      error ("Cannot attach to lwp %ld: %s (%d)\n", lwpid,
+	     strerror (errno), errno);
     }
 
   if (initial)
