@@ -550,7 +550,7 @@ struct breakpoint_ops
 				  struct linespec_sals *, char *,
 				  enum bptype, enum bpdisp, int, int,
 				  int, const struct breakpoint_ops *,
-				  int, int, int);
+				  int, int, int, unsigned);
 
   /* Given the address string (second parameter), this method decodes it
      and provides the SAL locations related to it.  For ordinary breakpoints,
@@ -1190,6 +1190,16 @@ extern void
 extern void install_breakpoint (int internal, struct breakpoint *b,
 				int update_gll);
 
+/* Flags that can be passed down to create_breakpoint, etc., to affect
+   breakpoint creation in several ways.  */
+
+enum breakpoint_create_flags
+  {
+    /* We're adding a breakpoint to our tables that is already
+       inserted in the target.  */
+    CREATE_BREAKPOINT_FLAGS_INSERTED = 1 << 0
+  };
+
 extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      char *cond_string, int thread,
 			      int parse_condition_and_thread,
@@ -1199,7 +1209,7 @@ extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      const struct breakpoint_ops *ops,
 			      int from_tty,
 			      int enabled,
-			      int internal);
+			      int internal, unsigned flags);
 
 extern void insert_breakpoints (void);
 

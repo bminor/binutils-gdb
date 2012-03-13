@@ -168,7 +168,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 		     temp_p, type_wanted,
 		     ignore_count,
 		     pending ? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
-		     &bkpt_breakpoint_ops, 0, enabled, 0);
+		     &bkpt_breakpoint_ops, 0, enabled, 0, 0);
   do_cleanups (back_to);
 
 }
