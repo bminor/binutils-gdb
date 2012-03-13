@@ -1947,7 +1947,7 @@ spu_catch_start (struct objfile *objfile)
 		     0 /* ignore_count */,
 		     AUTO_BOOLEAN_FALSE /* pending_break_support */,
 		     &bkpt_breakpoint_ops /* ops */, 0 /* from_tty */,
-		     1 /* enabled */, 0 /* internal  */);
+		     1 /* enabled */, 0 /* internal  */, 0);
 }
 
 

@@ -1,3 +1,21 @@
+2012-03-13  Hui Zhu  <teawater@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (init_breakpoint_sal): New flags parameter.  Handle
+	CREATE_BREAKPOINT_FLAGS_INSERTED.
+	(create_breakpoint_sal, create_breakpoints_sal)
+	(create_breakpoint): New flags parameter.  Pass it down.
+	(break_command_1, handle_gnu_v3_exceptions, trace_command)
+	(ftrace_command, strace_command): Adjust.
+	(create_tracepoint_from_upload): Pass
+	CREATE_BREAKPOINT_FLAGS_INSERTED.
+	* breakpoint.h (enum breakpoint_create_flags): New.
+	(create_breakpoint): New flags parameter.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Adjust.
+	* python/py-breakpoint.c (bppy_init): Adjust.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Adjust.
+	* spu-tdep.c (spu_catch_start): Adjust.
+
 2012-03-13  Pedro Alves  <palves@redhat.com>
 	    Hui Zhu  <teawater@gmail.com>
 	    Yao Qi  <yao@codesourcery.com>
