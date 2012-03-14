@@ -2029,9 +2029,6 @@ mi_execute_command (char *cmd, int from_tty)
 
       mi_parse_free (command);
     }
-
-  fputs_unfiltered ("(gdb) \n", raw_stdout);
-  gdb_flush (raw_stdout);
 }
 
 static void

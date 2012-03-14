@@ -1,3 +1,7 @@
+2012-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.mi/mi2-prompt.exp: New file.
+
 2012-03-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/enum_cond.c, gdb.base/enum_cond.exp: New testcase.

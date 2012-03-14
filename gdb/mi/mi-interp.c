@@ -40,6 +40,7 @@
    interpreter.  */
 
 static void mi_execute_command_wrapper (char *cmd);
+static void mi_execute_command_input_handler (char *cmd);
 static void mi_command_loop (int mi_version);
 
 /* These are hooks that we put in place while doing interpreter_exec
@@ -151,7 +152,7 @@ mi_interpreter_resume (void *data)
   /* These overwrite some of the initialization done in
      _intialize_event_loop.  */
   call_readline = gdb_readline2;
-  input_handler = mi_execute_command_wrapper;
+  input_handler = mi_execute_command_input_handler;
   add_file_handler (input_fd, stdin_event_handler, 0);
   async_command_editing_p = 0;
   /* FIXME: This is a total hack for now.  PB's use of the MI
@@ -295,6 +296,17 @@ static void
 mi_execute_command_wrapper (char *cmd)
 {
   mi_execute_command (cmd, stdin == instream);
+}
+
+/* mi_execute_command_wrapper wrapper suitable for INPUT_HANDLER.  */
+
+static void
+mi_execute_command_input_handler (char *cmd)
+{
+  mi_execute_command_wrapper (cmd);
+
+  fputs_unfiltered ("(gdb) \n", raw_stdout);
+  gdb_flush (raw_stdout);
 }
 
 static void

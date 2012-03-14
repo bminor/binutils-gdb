@@ -1,3 +1,12 @@
+2012-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix double prompt of 'interpreter-exec mi'.
+	* mi/mi-interp.c (mi_execute_command_input_handler): New prototype.
+	(mi_interpreter_resume): use it.
+	(mi_execute_command_input_handler): New function.
+	* mi/mi-main.c (mi_execute_command): Move prompt printing to
+	mi_execute_command_input_handler.
+
 2012-03-13  Josh Matthews  <josh@joshmatthews.net>  (tiny change)
 
 	* darwin-nat-info.c (_initialize_darwin_info_commands): Add
