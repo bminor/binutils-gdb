@@ -606,7 +606,8 @@ fold_name (etree_type *tree)
 			 output_section);
 	    }
 	  else if (expld.phase == lang_final_phase_enum
-		   || expld.assigning_to_dot)
+		   || (expld.phase != lang_mark_phase_enum
+		       && expld.assigning_to_dot))
 	    einfo (_("%F%S: undefined symbol `%s'"
 		     " referenced in expression\n"),
 		   tree, tree->name.name);
@@ -797,14 +798,7 @@ exp_fold_tree_1 (etree_type *tree)
 	  if (tree->type.node_class != etree_assign)
 	    einfo (_("%F%S can not PROVIDE assignment to"
 		     " location counter\n"), tree);
-	  /* After allocation, assignment to dot should not be done inside
-	     an output section since allocation adds a padding statement
-	     that effectively duplicates the assignment.  */
-	  if (expld.phase == lang_mark_phase_enum
-	      || expld.phase == lang_allocating_phase_enum
-	      || ((expld.phase == lang_assigning_phase_enum
-		   || expld.phase == lang_final_phase_enum)
-		  && expld.section == bfd_abs_section_ptr))
+	  if (expld.phase != lang_first_phase_enum)
 	    {
 	      /* Notify the folder that this is an assignment to dot.  */
 	      expld.assigning_to_dot = TRUE;
@@ -819,8 +813,14 @@ exp_fold_tree_1 (etree_type *tree)
 		}
 	      else if (expld.dotp == NULL)
 		einfo (_("%F%S assignment to location counter"
-			 " invalid outside of SECTION\n"), tree);
-	      else
+			 " invalid outside of SECTIONS\n"), tree);
+
+	      /* After allocation, assignment to dot should not be
+		 done inside an output section since allocation adds a
+		 padding statement that effectively duplicates the
+		 assignment.  */
+	      else if (expld.phase <= lang_allocating_phase_enum
+		       || expld.section == bfd_abs_section_ptr)
 		{
 		  bfd_vma nextdot;
 

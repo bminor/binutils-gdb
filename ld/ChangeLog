@@ -1,3 +1,11 @@
+2012-03-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13839
+	* ldexp.c (fold_name): Ignore undefined symbols when assigning to
+	dot in mark phase.
+	(exp_fold_tree_1): Evaluate assignment to dot expressions even when
+	discarding result, for side effects.  Fix typo in error message.
+
 2012-03-08  Tristan Gingold  <gingold@adacore.com>
 
 	* ldexp.c (exp_print_tree): Special case for SEGMENT_START.
