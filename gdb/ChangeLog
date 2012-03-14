@@ -1,3 +1,16 @@
+2012-03-13  Josh Matthews  <josh@joshmatthews.net>
+
+	* darwin-nat-info.c (_initialize_darwin_info_commands): Add
+	prototype.
+	(darwin_debug_port_info): Make static.
+	* darwin-nat.c (_initialize_darwin_inferior): Add prototype.
+	* machoread.c (_initialize_machoread): Add prototype.
+	* i386-darwin-nat.c (i386_darwin_dr_set, i386_darwin_dr_get)
+	(i386_darwin_set_control, i386_darwin_get_control)
+	i386_darwin_dr_set_addr, i386_darwin_get_addr)
+	i386_darwin_get_status, i386_darwin_get_control):
+	Comment out with HW_WATCHPOINT_NOT_YET_ENABLED macro.
+
 2012-03-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* ax-gdb.c (gen_usual_unary): Remove special handling of

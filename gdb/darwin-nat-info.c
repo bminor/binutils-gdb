@@ -301,7 +301,7 @@ info_mach_ports_command (char *args, int from_tty)
 }
 
 
-void
+static void
 darwin_debug_port_info (task_t task, mach_port_t port)
 {
   kern_return_t kret;
@@ -842,6 +842,9 @@ info_mach_exceptions_command (char *args, int from_tty)
       disp_exception (&info);
     }
 }
+
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_darwin_info_commands;
 
 void
 _initialize_darwin_info_commands (void)

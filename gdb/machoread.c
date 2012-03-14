@@ -1035,6 +1035,9 @@ static const struct sym_fns macho_sym_fns = {
   &psym_functions
 };
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_machoread;
+
 void
 _initialize_machoread ()
 {

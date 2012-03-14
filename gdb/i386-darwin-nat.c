@@ -260,7 +260,7 @@ i386_darwin_store_inferior_registers (struct target_ops *ops,
     }
 }
 
-
+#ifdef HW_WATCHPOINT_NOT_YET_ENABLED
 /* Support for debug registers, boosted mostly from i386-linux-nat.c.  */
 
 static void
@@ -410,6 +410,7 @@ i386_darwin_dr_get_control (void)
 {
   return i386_darwin_dr_get (DR_CONTROL);
 }
+#endif
 
 void
 darwin_check_osabi (darwin_inferior *inf, thread_t thread)
