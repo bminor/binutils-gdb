@@ -2817,36 +2817,160 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
     }
 }
 
-static struct bfd_link_hash_entry *found_sym;
+static int undef_count = 0;
+
+struct key_value
+{
+  char *key;
+  const char *oname;
+};
+
+struct key_value *udef_table;
+
+static int undef_sort_cmp (const void *l1, const void *r1)
+{
+  const struct key_value *l = l1;
+  const struct key_value *r = r1;
+
+  return strcmp (l->key, r->key);
+}
+
+static struct bfd_link_hash_entry *
+pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
+{
+  struct bfd_link_hash_entry *h = NULL;
+  struct key_value *kv;
+  struct key_value key;
+  char *at, *lname = (char *) alloca (strlen (name) + 3);
+  
+  strcpy (lname, name);
+
+  at = strchr (lname + (lname[0] == '@'), '@');
+  if (at)
+    at[1] = 0;
+
+  key.key = lname;
+  kv = bsearch (&key, udef_table, undef_count, sizeof (struct key_value),
+		undef_sort_cmp);
+
+  if (kv)
+    {
+      h = bfd_link_hash_lookup (linfo->hash, kv->oname, FALSE, FALSE, FALSE);
+      if (h->type == bfd_link_hash_undefined)
+        return h;
+    }
+  if (lname[0] == '?')
+    return NULL;
+  if (at || lname[0] == '@')
+    {
+      if (lname[0] == '@')
+        {
+	  if (pe_details->underscored)
+	    lname[0] = '_';
+	  else
+	    strcpy (lname, lname + 1);
+	  key.key = lname;
+	  kv = bsearch (&key, udef_table, undef_count,
+			sizeof (struct key_value), undef_sort_cmp);
+	  if (kv)
+	    {
+	      h = bfd_link_hash_lookup (linfo->hash, kv->oname, FALSE, FALSE, FALSE);
+	      if (h->type == bfd_link_hash_undefined)
+		return h;
+	    }
+	}
+      if (at)
+        *strchr (lname, '@') = 0;
+      key.key = lname;
+      kv = bsearch (&key, udef_table, undef_count,
+		    sizeof (struct key_value), undef_sort_cmp);
+      if (kv)
+	{
+	  h = bfd_link_hash_lookup (linfo->hash, kv->oname, FALSE, FALSE, FALSE);
+	  if (h->type == bfd_link_hash_undefined)
+	    return h;
+	}
+      return NULL;
+    }
+
+  strcat (lname, "@");
+  key.key = lname;
+  kv = bsearch (&key, udef_table, undef_count,
+		sizeof (struct key_value), undef_sort_cmp);
+
+  if (kv)
+    {
+      h = bfd_link_hash_lookup (linfo->hash, kv->oname, FALSE, FALSE, FALSE);
+      if (h->type == bfd_link_hash_undefined)
+	return h;
+    }
+
+  if (lname[0] == '_' && pe_details->underscored)
+    lname[0] = '@';
+  else
+    {
+      memmove (lname + 1, lname, strlen (lname) + 1);
+      lname[0] = '@';
+    }
+  key.key = lname;
+
+  kv = bsearch (&key, udef_table, undef_count,
+		sizeof (struct key_value), undef_sort_cmp);
+
+  if (kv)
+    {
+      h = bfd_link_hash_lookup (linfo->hash, kv->oname, FALSE, FALSE, FALSE);
+      if (h->type == bfd_link_hash_undefined)
+        return h;
+    }
+  
+  return NULL;
+}
 
 static bfd_boolean
-pe_undef_alias_cdecl_match (struct bfd_link_hash_entry *h, void *inf)
+pe_undef_count (struct bfd_link_hash_entry *h ATTRIBUTE_UNUSED,
+                void *inf ATTRIBUTE_UNUSED)
 {
-  int sl;
-  char *string = inf;
-  const char *hs = h->root.string;
+  if (h->type == bfd_link_hash_undefined)
+    undef_count++;
+  return TRUE;
+}
 
-  sl = strlen (string);
-  if (h->type == bfd_link_hash_undefined
-      && ((*hs == '@' && (!pe_details->underscored || *string == '_')
-	   && strncmp (hs + 1, string + (pe_details->underscored != 0),
-		       sl - (pe_details->underscored != 0)) == 0)
-	  || strncmp (hs, string, sl) == 0)
-      && h->root.string[sl] == '@')
+static bfd_boolean
+pe_undef_fill (struct bfd_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
+{
+  if (h->type == bfd_link_hash_undefined)
     {
-      found_sym = h;
-      return FALSE;
+      char *at;
+
+      udef_table[undef_count].key = xstrdup (h->root.string);
+      at = strchr (udef_table[undef_count].key
+		   + (udef_table[undef_count].key[0] == '@'), '@');
+      if (at)
+        at[1] = 0;
+      udef_table[undef_count].oname = h->root.string;
+      undef_count++;
     }
   return TRUE;
 }
 
-static struct bfd_link_hash_entry *
-pe_find_cdecl_alias_match (char *name)
+static void
+pe_create_undef_table (void)
 {
-  found_sym = 0;
-  bfd_link_hash_traverse (link_info.hash, pe_undef_alias_cdecl_match,
-			  (char *) name);
-  return found_sym;
+  undef_count = 0;
+
+  /* count undefined symbols */
+
+  bfd_link_hash_traverse (link_info.hash, pe_undef_count, "");
+
+  /* create and fill the corresponding table */
+  udef_table = xmalloc (undef_count * sizeof (struct key_value));
+
+  undef_count = 0;
+  bfd_link_hash_traverse (link_info.hash, pe_undef_fill, "");
+
+  /* sort items */
+  qsort (udef_table, undef_count, sizeof (struct key_value), undef_sort_cmp);
 }
 
 static void
@@ -2878,6 +3002,8 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *linfo)
 
   imp = pe_def_file->imports;
 
+  pe_create_undef_table ();
+
   for (module = pe_def_file->modules; module; module = module->next)
     {
       int do_this_dll = 0;
@@ -2903,6 +3029,8 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *linfo)
 	  char *name = xmalloc (len + 2 + 6);
 	  bfd_boolean include_jmp_stub = FALSE;
 	  bfd_boolean is_cdecl = FALSE;
+	  bfd_boolean is_undef = FALSE;
+
 	  if (!lead_at && strchr (imp[i].internal_name, '@') == NULL)
 	      is_cdecl = TRUE;
 
@@ -2926,20 +3054,27 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *linfo)
 
 	      blhe = bfd_link_hash_lookup (linfo->hash, name,
 					   FALSE, FALSE, FALSE);
+	      if (blhe)
+	        is_undef = (blhe->type == bfd_link_hash_undefined);
 	    }
 	  else
-	    include_jmp_stub = TRUE;
+	    {
+	      include_jmp_stub = TRUE;
+	      is_undef = (blhe->type == bfd_link_hash_undefined);
+	    }
 
-	  if (is_cdecl && !blhe)
+	  if (is_cdecl && (!blhe || (blhe && blhe->type != bfd_link_hash_undefined)))
 	    {
 	      sprintf (name, "%s%s",U (""), imp[i].internal_name);
-	      blhe = pe_find_cdecl_alias_match (name);
+	      blhe = pe_find_cdecl_alias_match (linfo, name);
 	      include_jmp_stub = TRUE;
+	      if (blhe)
+	        is_undef = (blhe->type == bfd_link_hash_undefined);
 	    }
 
 	  free (name);
 
-	  if (blhe && blhe->type == bfd_link_hash_undefined)
+	  if (is_undef)
 	    {
 	      bfd *one;
 	      /* We do.  */
@@ -2970,6 +3105,13 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *linfo)
 
       free (dll_symname);
     }
+
+  while (undef_count)
+    {
+      --undef_count;
+      free (udef_table[undef_count].key);
+    }
+  free (udef_table);
 }
 
 /* We were handed a *.DLL file.  Parse it and turn it into a set of

@@ -1,3 +1,17 @@
+2012-03-14  Kai Tietz  <ktietz@redhat.com>
+	    Pascal Obry  <pascal@obry.net>
+
+	* pe-dll.c (found_sym): New static variable.
+	(undef_count): Likewise.
+	(key_value): New structure.
+	(undef_sort_cmp): Compare routine for qsort/bsearch.
+	(pe_find_cdecl_alias_match): Add new argument.
+	(pe_undef_alias_cdecl_match): Removed.
+	(pe_undef_count): New helper routine.
+	(pe_create_undef_table): Likewise.
+	(pe_process_import_defs): Use pe_create_undef_table and
+	new pe_undef_alias_cdecl_match function.
+
 2012-03-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13839
