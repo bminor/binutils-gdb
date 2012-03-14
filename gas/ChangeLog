@@ -1,3 +1,7 @@
+2012-03-14  Ryan Mansfield  <rmansfield@qnx.com>
+
+	* doc/as.texinfo (Bundle directives): Replace @defn with @dfn.
+
 2012-03-13  Roland McGrath  <mcgrathr@google.com>
 
 	* config/tc-arm.c (arm_frag_max_var): New function.

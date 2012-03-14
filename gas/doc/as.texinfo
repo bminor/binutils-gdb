@@ -4299,15 +4299,15 @@ undefined.
 @cindex bundle
 @cindex instruction bundle
 @cindex aligned instruction bundle
-@code{.bundle_align_mode} enables or disables @defn{aligned instruction
+@code{.bundle_align_mode} enables or disables @dfn{aligned instruction
 bundle} mode.  In this mode, sequences of adjacent instructions are grouped
-into fixed-sized @defn{bundles}.  If the argument is zero, this mode is
-disabled (which is the default state).  If the argument it not zero, it
+into fixed-sized @dfn{bundles}.  If the argument is zero, this mode is
+disabled (which is the dfault state).  If the argument it not zero, it
 gives the size of an instruction bundle as a power of two (as for the
 @code{.p2align} directive, @pxref{P2align}).
 
 For some targets, it's an ABI requirement that no instruction may span a
-certain aligned boundary.  A @defn{bundle} is simply a sequence of
+certain aligned boundary.  A @dfn{bundle} is simply a sequence of
 instructions that starts on an aligned boundary.  For example, if
 @var{abs-expr} is @code{5} then the bundle size is 32, so each aligned
 chunk of 32 bytes is a bundle.  When aligned instruction bundle mode is in
@@ -4332,7 +4332,7 @@ directive was @w{@code{.bundle_align_mode 0}}.
 For some targets, it's an ABI requirement that certain instructions may
 appear only as part of specified permissible sequences of multiple
 instructions, all within the same bundle.  A pair of @code{.bundle_lock}
-and @code{.bundle_unlock} directives define a @defn{bundle-locked}
+and @code{.bundle_unlock} directives define a @dfn{bundle-locked}
 instruction sequence.  For purposes of aligned instruction bundle mode, a
 sequence starting with @code{.bundle_lock} and ending with
 @code{.bundle_unlock} is treated as a single instruction.  That is, the
