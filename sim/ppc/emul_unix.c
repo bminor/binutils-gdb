@@ -1034,6 +1034,11 @@ typedef	unsigned32	solaris_nlink_t;
 #ifdef HAVE_SYS_STAT_H
 #define	SOLARIS_ST_FSTYPSZ 16		/* array size for file system type name */
 
+/* AIX 7.1 defines st_pad[123] to st_[amc]tim.tv_pad, respectively */
+#undef st_pad1
+#undef st_pad2
+#undef st_pad3
+
 struct solaris_stat {
   solaris_dev_t		st_dev;
   signed32		st_pad1[3];	/* reserved for network id */
