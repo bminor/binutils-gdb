@@ -1,3 +1,7 @@
+2012-03-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/bp_range_type: New testcase.
+
 2012-03-13  Doug Evans  <dje@google.com>
 
 	* gdb.base/default.exp: Delete tests for symbol-reloading.
