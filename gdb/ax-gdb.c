@@ -880,12 +880,6 @@ gen_usual_unary (struct expression *exp, struct agent_expr *ax,
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       return;
-
-      /* If the value is an enum or a bool, call it an integer.  */
-    case TYPE_CODE_ENUM:
-    case TYPE_CODE_BOOL:
-      value->type = builtin_type (exp->gdbarch)->builtin_int;
-      break;
     }
 
   /* If the value is an lvalue, dereference it.  */
