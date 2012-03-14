@@ -1,4 +1,4 @@
-2012-03-13  Josh Matthews  <josh@joshmatthews.net>
+2012-03-13  Josh Matthews  <josh@joshmatthews.net>  (tiny change)
 
 	* darwin-nat-info.c (_initialize_darwin_info_commands): Add
 	prototype.
