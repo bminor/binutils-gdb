@@ -1,3 +1,10 @@
+2012-03-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13839
+	* ld-elf/pr13839.d: New.
+	* ld-elf/pr13839.s: Likewise.
+	* ld-elf/pr13839.t: Likewise.
+
 2012-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13817
