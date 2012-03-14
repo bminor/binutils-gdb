@@ -1,3 +1,8 @@
+2012-03-14  Roland McGrath  <mcgrathr@google.com>
+
+	* elf32-i386.c (elf_i386_nacl_pic_plt0_entry): Initialize up
+	to the full size, padding out with nop instructions.
+
 2012-03-12  Alan Modra  <amodra@gmail.com>
 
 	* elf-m10300.c (_bfd_mn10300_elf_adjust_dynamic_symbol): Don't warn
