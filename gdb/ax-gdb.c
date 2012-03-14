@@ -515,6 +515,9 @@ gen_fetch (struct agent_expr *ax, struct type *type)
       ax_trace_quick (ax, TYPE_LENGTH (type));
     }
 
+  if (TYPE_CODE (type) == TYPE_CODE_RANGE)
+    type = TYPE_TARGET_TYPE (type);
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:

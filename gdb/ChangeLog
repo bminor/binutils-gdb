@@ -1,5 +1,9 @@
 2012-03-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* ax-gdb.c (gen_fetch): Add handling for TYPE_CODE_RANGE types.
+
+2012-03-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* aix-thread.c (supply_fprs): Make more consistent with fill_fprs.
 
 2012-03-13  Chris January  <chris.january@allinea.com>
