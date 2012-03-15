@@ -1,5 +1,8 @@
 2012-03-15  Roland McGrath  <mcgrathr@google.com>
 
+	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Use
+	elf_x86_64_backend_data parameters for plt_eh_frame.
+
 	* elf64-x86-64.c (struct elf_x86_64_backend_data): New type.
 	(get_elf_x86_64_backend_data, GET_PLT_ENTRY_SIZE): New macros.
 	(elf_x86_64_arch_bed): New variable.

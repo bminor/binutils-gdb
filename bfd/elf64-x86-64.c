@@ -981,6 +981,8 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
       && bfd_get_section_by_name (dynobj, ".eh_frame") == NULL
       && htab->elf.splt != NULL)
     {
+      const struct elf_x86_64_backend_data *const abed
+        = get_elf_x86_64_backend_data (dynobj);
       flagword flags = get_elf_backend_data (dynobj)->dynamic_sec_flags;
       htab->plt_eh_frame
 	= bfd_make_section_with_flags (dynobj, ".eh_frame",
@@ -989,11 +991,11 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
 	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame, 3))
 	return FALSE;
 
-      htab->plt_eh_frame->size = sizeof (elf_x86_64_eh_frame_plt);
+      htab->plt_eh_frame->size = abed->eh_frame_plt_size;
       htab->plt_eh_frame->contents
-	= bfd_alloc (dynobj, htab->plt_eh_frame->size);
-      memcpy (htab->plt_eh_frame->contents, elf_x86_64_eh_frame_plt,
-	      sizeof (elf_x86_64_eh_frame_plt));
+        = bfd_alloc (dynobj, htab->plt_eh_frame->size);
+      memcpy (htab->plt_eh_frame->contents,
+              abed->eh_frame_plt, abed->eh_frame_plt_size);
     }
   return TRUE;
 }
