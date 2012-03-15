@@ -2191,3 +2191,4 @@ Disassembly of section \.text:
  *8820:\s+([0-9a-f][0-9a-f] )+\s+[a-z].+
 #...
  *8840:\s+([0-9a-f][0-9a-f] )+\s+[a-z].+
+#pass

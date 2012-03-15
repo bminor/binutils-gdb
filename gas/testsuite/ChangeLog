@@ -1,3 +1,9 @@
+2012-03-15  Alan Modra  <amodra@gmail.com>
+
+	* gas/i386/bundle-lock.d: Ignore trailing nops.
+	* gas/i386/bundle.d: Likewise.
+	* gas/i386/x86-64-bundle.d: Likewise.
+
 2012-03-13  Roland McGrath  <mcgrathr@google.com>
 
 	* gas/i386/bundle-bad.s: New file.
