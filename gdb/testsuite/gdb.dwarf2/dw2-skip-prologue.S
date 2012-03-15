@@ -46,8 +46,8 @@
 
 	.uleb128	0x7			/* (DIE (0x42) DW_TAG_formal_parameter) */
 	.ascii		"param\0"		/* DW_AT_name */
-	.long		.Ltype_int - .Lcu1_begin	/* DW_AT_type */
-	.long		loclist			/* DW_AT_location */
+	.4byte		.Ltype_int - .Lcu1_begin	/* DW_AT_type */
+	.4byte		loclist			/* DW_AT_location */
 
 	.uleb128	4			/* Abbrev: DW_TAG_inlined_subroutine */
 	.ascii		"inlined\0"		/* DW_AT_name */
@@ -115,14 +115,14 @@
 	.section	.debug_loc
 loclist:
 	/* Reset the location list base address first.  */
-	.long		-1, 0
+	.4byte		-1, 0
 
-	.long		func_start, func_end
+	.4byte		func_start, func_end
 	.2byte		2f-1f
 1:	.byte		0x50	/* DW_OP_reg0 */
 2:
 	/* Location list end.  */
-	.long	0, 0
+	.4byte	0, 0
 
 /* Abbrev table */
 	.section .debug_abbrev

@@ -1,3 +1,20 @@
+2012-03-15  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* gdb.dwarf2/dw2-ada-ffffffff.S: Use .4byte instead of .long for
+	describing DWARF data structures.
+	* gdb.dwarf2/dw2-bad-parameter-type.S: Likewise.
+	* gdb.dwarf2/dw2-double-set-die-type.S: Likewise.
+	* gdb.dwarf2/dw2-empty-pc-range.S: Likewise.
+	* gdb.dwarf2/dw2-entry-value.S: Likewise.
+	* gdb.dwarf2/dw2-modula2-self-type.S: Likewise.
+	* gdb.dwarf2/dw2-param-error.S: Likewise.
+	* gdb.dwarf2/dw2-skip-prologue.S: Likewise.
+	* gdb.dwarf2/dw2-stack-boundary.S: Likewise.
+	* gdb.dwarf2/dw4-sig-type-unused.S: Likewise.
+	* gdb.dwarf2/implptr-optimized-out.S: Likewise.
+	* gdb.dwarf2/member-ptr-forwardref.S: Likewise.
+	* gdb.dwarf2/pr11465.S: Likewise.
+
 2012-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.mi/mi2-prompt.exp: New file.

@@ -26,35 +26,35 @@ v:	.long	0
 
 	.section	.debug_info
 d:
-	.long	.Ldebug_info_end - 1f	/* Length of Compilation Unit Info */
+	.4byte	.Ldebug_info_end - 1f	/* Length of Compilation Unit Info */
 1:
 	.2byte	0x3	/* DWARF version number */
-	.long	.Ldebug_abbrev0	/* Offset Into Abbrev. Section */
+	.4byte	.Ldebug_abbrev0	/* Offset Into Abbrev. Section */
 	.byte	0x4	/* Pointer Size (in bytes) */
 dieb:
 	.uleb128 0x1	/* (DIE (0xb) DW_TAG_compile_unit) */
-	.long	.LASF0	/* DW_AT_producer */
+	.4byte	.LASF0	/* DW_AT_producer */
 	.byte	0xa	/* DW_AT_language = DW_LANG_Modula2 */
-	.long	.LASF1	/* DW_AT_name: "2.mod" */
-	.long	.LASF2	/* DW_AT_comp_dir: "" */
+	.4byte	.LASF1	/* DW_AT_name: "2.mod" */
+	.4byte	.LASF2	/* DW_AT_comp_dir: "" */
 
 die210:
 	.uleb128 0x5	/* (DIE (0x210) DW_TAG_subroutine_type) */
 die215:
 	.uleb128 0x6	/* (DIE (0x215) DW_TAG_formal_parameter) */
-	.long	die21b-d	/* DW_AT_type */
+	.4byte	die21b-d	/* DW_AT_type */
 	.byte	0x0	/* end of children of DIE 0x210 */
 die21b:
 	.uleb128 0x7	/* (DIE (0x21b) DW_TAG_pointer_type) */
 	.byte	0x4	/* DW_AT_byte_size */
-	.long	die210-d	/* DW_AT_type */
+	.4byte	die210-d	/* DW_AT_type */
 die221:
 	.uleb128 0x8	/* (DIE (0x221) DW_TAG_variable) */
 	.ascii "v\0"	/* DW_AT_name */
-	.long	die21b-d	/* DW_AT_type */
+	.4byte	die21b-d	/* DW_AT_type */
 	.byte	2f-1f	/* DW_AT_location */
 1:	.byte	0x3	/* DW_OP_addr */
-	.long	v
+	.4byte	v
 2:
 
 	.byte	0x0	/* end of children of DIE 0xb */

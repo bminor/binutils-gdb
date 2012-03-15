@@ -15,10 +15,10 @@
 
 	.section	.debug_info
 d:
-	.long	debug_end - 1f	/* Length of Compilation Unit Info */
+	.4byte	debug_end - 1f	/* Length of Compilation Unit Info */
 1:
 	.2byte	0x3	/* DWARF version number */
-	.long	.Ldebug_abbrev0	/* Offset Into Abbrev. Section */
+	.4byte	.Ldebug_abbrev0	/* Offset Into Abbrev. Section */
 	.byte	0x4	/* Pointer Size (in bytes) */
 	.uleb128 0x1	/* (DIE (0xb) DW_TAG_compile_unit) */
 	.ascii "GNU C 4.4.3\0"	/* DW_AT_producer */
@@ -53,7 +53,7 @@ d:
 .Ltype_structptr:
 	.uleb128 0x5	/* DW_TAG_pointer_type */
 	.byte	0x4	/* DW_AT_byte_size */
-	.long	.Ltype_struct - d	/* DW_AT_type */
+	.4byte	.Ltype_struct - d	/* DW_AT_type */
 
 .Lvar_out:
 	.uleb128 0x4	/* (DW_TAG_variable) */
