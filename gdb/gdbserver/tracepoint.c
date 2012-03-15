@@ -459,12 +459,28 @@ write_inferior_uinteger (CORE_ADDR symaddr, unsigned int val)
   return write_inferior_memory (symaddr, (unsigned char *) &val, sizeof (val));
 }
 
+static CORE_ADDR target_malloc (ULONGEST size);
+static int write_inferior_data_ptr (CORE_ADDR where, CORE_ADDR ptr);
 #endif
+
+/* Operations on various types of tracepoint actions.  */
+
+struct tracepoint_action;
+
+struct tracepoint_action_ops
+{
+  /* Download tracepoint action ACTION to IPA.  Return the address of action
+     in IPA/inferior.  */
+  CORE_ADDR (*download) (const struct tracepoint_action *action);
+};
 
 /* Base action.  Concrete actions inherit this.  */
 
 struct tracepoint_action
 {
+#ifndef IN_PROCESS_AGENT
+  const struct tracepoint_action_ops *ops;
+#endif
   char type;
 };
 
@@ -499,6 +515,87 @@ struct collect_static_trace_data_action
 {
   struct tracepoint_action base;
 };
+
+#ifndef IN_PROCESS_AGENT
+static CORE_ADDR
+m_tracepoint_action_download (const struct tracepoint_action *action)
+{
+  int size_in_ipa = (sizeof (struct collect_memory_action)
+		     - offsetof (struct tracepoint_action, type));
+  CORE_ADDR ipa_action = target_malloc (size_in_ipa);
+
+  write_inferior_memory (ipa_action, (unsigned char *) &action->type,
+			 size_in_ipa);
+
+  return ipa_action;
+}
+
+static const struct tracepoint_action_ops m_tracepoint_action_ops =
+{
+  m_tracepoint_action_download,
+};
+
+static CORE_ADDR
+r_tracepoint_action_download (const struct tracepoint_action *action)
+{
+  int size_in_ipa = (sizeof (struct collect_registers_action)
+		     - offsetof (struct tracepoint_action, type));
+  CORE_ADDR ipa_action  = target_malloc (size_in_ipa);
+
+  write_inferior_memory (ipa_action, (unsigned char *) &action->type,
+			size_in_ipa);
+
+  return ipa_action;
+}
+
+static const struct tracepoint_action_ops r_tracepoint_action_ops =
+{
+  r_tracepoint_action_download,
+};
+
+static CORE_ADDR download_agent_expr (struct agent_expr *expr);
+
+static CORE_ADDR
+x_tracepoint_action_download (const struct tracepoint_action *action)
+{
+  int size_in_ipa = (sizeof (struct eval_expr_action)
+		     - offsetof (struct tracepoint_action, type));
+  CORE_ADDR ipa_action = target_malloc (size_in_ipa);
+  CORE_ADDR expr;
+
+  write_inferior_memory (ipa_action, (unsigned char *) &action->type,
+			 size_in_ipa);
+  expr = download_agent_expr (((struct eval_expr_action *)action)->expr);
+  write_inferior_data_ptr (ipa_action + offsetof (struct eval_expr_action, expr)
+			   - offsetof (struct tracepoint_action, type),
+			   expr);
+
+  return ipa_action;
+}
+
+static const struct tracepoint_action_ops x_tracepoint_action_ops =
+{
+  x_tracepoint_action_download,
+};
+
+static CORE_ADDR
+l_tracepoint_action_download (const struct tracepoint_action *action)
+{
+  int size_in_ipa = (sizeof (struct collect_static_trace_data_action)
+		     - offsetof (struct tracepoint_action, type));
+  CORE_ADDR ipa_action = target_malloc (size_in_ipa);
+
+  write_inferior_memory (ipa_action, (unsigned char *) &action->type,
+			 size_in_ipa);
+
+  return ipa_action;
+}
+
+static const struct tracepoint_action_ops l_tracepoint_action_ops =
+{
+  l_tracepoint_action_download,
+};
+#endif
 
 /* This structure describes a piece of the source-level definition of
    the tracepoint.  The contents are not interpreted by the target,
@@ -1771,6 +1868,7 @@ add_tracepoint_action (struct tracepoint *tpoint, char *packet)
 
 	    maction = xmalloc (sizeof *maction);
 	    maction->base.type = *act;
+	    maction->base.ops = &m_tracepoint_action_ops;
 	    action = &maction->base;
 
 	    ++act;
@@ -1796,6 +1894,7 @@ add_tracepoint_action (struct tracepoint *tpoint, char *packet)
 
 	    raction = xmalloc (sizeof *raction);
 	    raction->base.type = *act;
+	    raction->base.ops = &r_tracepoint_action_ops;
 	    action = &raction->base;
 
 	    trace_debug ("Want to collect registers");
@@ -1811,6 +1910,7 @@ add_tracepoint_action (struct tracepoint *tpoint, char *packet)
 
 	    raction = xmalloc (sizeof *raction);
 	    raction->base.type = *act;
+	    raction->base.ops = &l_tracepoint_action_ops;
 	    action = &raction->base;
 
 	    trace_debug ("Want to collect static trace data");
@@ -1827,6 +1927,7 @@ add_tracepoint_action (struct tracepoint *tpoint, char *packet)
 
 	    xaction = xmalloc (sizeof (*xaction));
 	    xaction->base.type = *act;
+	    xaction->base.ops = &x_tracepoint_action_ops;
 	    action = &xaction->base;
 
 	    trace_debug ("Want to evaluate expression");
@@ -5678,55 +5779,8 @@ download_tracepoint_1 (struct tracepoint *tpoint)
       /* Now for each pointer, download the action.  */
       for (i = 0; i < tpoint->numactions; i++)
 	{
-	  CORE_ADDR ipa_action = 0;
 	  struct tracepoint_action *action = tpoint->actions[i];
-
-	  switch (action->type)
-	    {
-	    case 'M':
-	      ipa_action
-		= target_malloc (sizeof (struct collect_memory_action));
-	      write_inferior_memory (ipa_action,
-				     (unsigned char *) action,
-				     sizeof (struct collect_memory_action));
-	      break;
-	    case 'R':
-	      ipa_action
-		= target_malloc (sizeof (struct collect_registers_action));
-	      write_inferior_memory (ipa_action,
-				     (unsigned char *) action,
-				     sizeof (struct collect_registers_action));
-	      break;
-	    case 'X':
-	      {
-		CORE_ADDR expr;
-		struct eval_expr_action *eaction
-		  = (struct eval_expr_action *) action;
-
-		ipa_action = target_malloc (sizeof (*eaction));
-		write_inferior_memory (ipa_action,
-				       (unsigned char *) eaction,
-				       sizeof (*eaction));
-
-		expr = download_agent_expr (eaction->expr);
-		write_inferior_data_ptr
-		  (ipa_action + offsetof (struct eval_expr_action, expr),
-		   expr);
-		break;
-	      }
-	    case 'L':
-	      ipa_action = target_malloc
-		(sizeof (struct collect_static_trace_data_action));
-	      write_inferior_memory
-		(ipa_action,
-		 (unsigned char *) action,
-		 sizeof (struct collect_static_trace_data_action));
-	      break;
-	    default:
-	      trace_debug ("unknown trace action '%c', ignoring",
-			   action->type);
-	      break;
-	    }
+	  CORE_ADDR ipa_action = action->ops->download (action);
 
 	  if (ipa_action != 0)
 	    write_inferior_data_ptr

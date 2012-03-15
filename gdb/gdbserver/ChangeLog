@@ -1,3 +1,15 @@
+2012-03-15  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (struct tracepoint_action_ops): New.
+	(struct tracepoint_action) [!IN_PROCESS_AGENT] <ops>: New field.
+	(m_tracepoint_action_download): New.
+	(r_tracepoint_action_download): New.
+	(x_tracepoint_action_download): New.
+	(l_tracepoint_action_download): New.
+	(add_tracepoint_action): Install `action->ops' according type.
+	(download_tracepoint_1): Move code `download' function pointer
+	of various tracepoint_action_ops.
+
 2012-03-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-low.c (linux_attach_lwp_1): New variable buffer.  Call
