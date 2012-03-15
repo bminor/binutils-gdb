@@ -4174,11 +4174,22 @@ Target_arm<big_endian>::got_section(Symbol_table* symtab, Layout* layout)
     {
       gold_assert(symtab != NULL && layout != NULL);
 
+      // When using -z now, we can treat .got as a relro section.
+      // Without -z now, it is modified after program startup by lazy
+      // PLT relocations.
+      bool is_got_relro = parameters->options().now();
+      Output_section_order got_order = (is_got_relro
+					? ORDER_RELRO_LAST
+					: ORDER_DATA);
+
+      // Unlike some targets (.e.g x86), ARM does not use separate .got and
+      // .got.plt sections in output.  The output .got section contains both
+      // PLT and non-PLT GOT entries.
       this->got_ = new Arm_output_data_got<big_endian>(symtab, layout);
 
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
-				      this->got_, ORDER_DATA, false);
+				      this->got_, got_order, is_got_relro);
 
       // The old GNU linker creates a .got.plt section.  We just
       // create another set of data in the .got section.  Note that we
@@ -4187,7 +4198,7 @@ Target_arm<big_endian>::got_section(Symbol_table* symtab, Layout* layout)
       this->got_plt_ = new Output_data_space(4, "** GOT PLT");
       layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE),
-				      this->got_plt_, ORDER_DATA, false);
+				      this->got_plt_, got_order, is_got_relro);
 
       // The first three entries are reserved.
       this->got_plt_->set_current_data_size(3 * 4);

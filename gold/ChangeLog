@@ -1,3 +1,8 @@
+2012-03-15  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::got_section): Make .got section read-only
+	if -z now is given.
+
 2012-03-15  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/13850
