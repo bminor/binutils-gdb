@@ -1,3 +1,14 @@
+2012-03-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (breakpoint_xfer_memory): Add assertion.
+	Update function description.
+	(insert_bp_location): Do not wipe bl->target_info out.
+	* mem-break.c: #include "gdb_string.h".
+	(default_memory_insert_breakpoint): Do not call target_read_memory
+	with a pointer to the breakpoint's shadow_contents buffer.  Use
+	a local buffer instead.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint): Ditto.
+
 2012-03-15  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Mention "info vtbl", not "info vtable".

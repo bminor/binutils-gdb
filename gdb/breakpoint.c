@@ -1318,6 +1318,10 @@ bp_location_has_shadow (struct bp_location *bl)
 /* Update BUF, which is LEN bytes read from the target address MEMADDR,
    by replacing any memory breakpoints with their shadowed contents.
 
+   If READBUF is not NULL, this buffer must not overlap with any of
+   the breakpoint location's shadow_contents buffers.  Otherwise,
+   a failed assertion internal error will be raised.
+
    The range of shadowed area by each bp_location is:
      bl->address - bp_location_placed_address_before_address_max
      up to bl->address + bp_location_shadow_len_after_address_max
@@ -1446,6 +1450,12 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
 
     if (readbuf != NULL)
       {
+	/* Verify that the readbuf buffer does not overlap with
+	   the shadow_contents buffer.  */
+	gdb_assert (bl->target_info.shadow_contents >= readbuf + len
+		    || readbuf >= (bl->target_info.shadow_contents
+				   + bl->target_info.shadow_len));
+
 	/* Update the read buffer with this inserted breakpoint's
 	   shadow.  */
 	memcpy (readbuf + bp_addr - memaddr,
@@ -2082,8 +2092,15 @@ insert_bp_location (struct bp_location *bl,
   if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
     return 0;
 
-  /* Initialize the target-specific information.  */
-  memset (&bl->target_info, 0, sizeof (bl->target_info));
+  /* Note we don't initialize bl->target_info, as that wipes out
+     the breakpoint location's shadow_contents if the breakpoint
+     is still inserted at that location.  This in turn breaks
+     target_read_memory which depends on these buffers when
+     a memory read is requested at the breakpoint location:
+     Once the target_info has been wiped, we fail to see that
+     we have a breakpoint inserted at that address and thus
+     read the breakpoint instead of returning the data saved in
+     the breakpoint location's shadow contents.  */
   bl->target_info.placed_address = bl->address;
   bl->target_info.placed_address_space = bl->pspace->aspace;
   bl->target_info.length = bl->length;

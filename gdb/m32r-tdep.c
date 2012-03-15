@@ -85,7 +85,7 @@ m32r_memory_insert_breakpoint (struct gdbarch *gdbarch,
   CORE_ADDR addr = bp_tgt->placed_address;
   int val;
   gdb_byte buf[4];
-  gdb_byte *contents_cache = bp_tgt->shadow_contents;
+  gdb_byte contents_cache[4];
   gdb_byte bp_entry[] = { 0x10, 0xf1 };	/* dpt */
 
   /* Save the memory contents.  */
@@ -93,6 +93,7 @@ m32r_memory_insert_breakpoint (struct gdbarch *gdbarch,
   if (val != 0)
     return val;			/* return error */
 
+  memcpy (bp_tgt->shadow_contents, contents_cache, 4);
   bp_tgt->placed_size = bp_tgt->shadow_len = 4;
 
   /* Determine appropriate breakpoint contents and size for this address.  */

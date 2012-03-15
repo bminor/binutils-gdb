@@ -29,6 +29,7 @@
 #include "breakpoint.h"
 #include "inferior.h"
 #include "target.h"
+#include "gdb_string.h"
 
 
 /* Insert a breakpoint on targets that don't have any better
@@ -46,6 +47,7 @@ default_memory_insert_breakpoint (struct gdbarch *gdbarch,
 {
   int val;
   const unsigned char *bp;
+  gdb_byte *readbuf;
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   bp = gdbarch_breakpoint_from_pc
@@ -53,15 +55,18 @@ default_memory_insert_breakpoint (struct gdbarch *gdbarch,
   if (bp == NULL)
     error (_("Software breakpoints not implemented for this target."));
 
-  /* Save the memory contents.  */
+  /* Save the memory contents in the shadow_contents buffer and then
+     write the breakpoint instruction.  */
   bp_tgt->shadow_len = bp_tgt->placed_size;
-  val = target_read_memory (bp_tgt->placed_address, bp_tgt->shadow_contents,
+  readbuf = alloca (bp_tgt->placed_size);
+  val = target_read_memory (bp_tgt->placed_address, readbuf,
 			    bp_tgt->placed_size);
-
-  /* Write the breakpoint.  */
   if (val == 0)
-    val = target_write_raw_memory (bp_tgt->placed_address, bp,
-				   bp_tgt->placed_size);
+    {
+      memcpy (bp_tgt->shadow_contents, readbuf, bp_tgt->placed_size);
+      val = target_write_raw_memory (bp_tgt->placed_address, bp,
+				     bp_tgt->placed_size);
+    }
 
   return val;
 }
