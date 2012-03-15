@@ -585,6 +585,70 @@ static const bfd_byte elf_x86_64_eh_frame_plt[] =
   DW_CFA_nop, DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
 };
 
+/* Architecture-specific backend data for x86-64.  */
+
+struct elf_x86_64_backend_data
+{
+  /* Templates for the initial PLT entry and for subsequent entries.  */
+  const bfd_byte *plt0_entry;
+  const bfd_byte *plt_entry;
+  unsigned int plt_entry_size;          /* Size of each PLT entry.  */
+
+  /* Offsets into plt0_entry that are to be replaced with GOT[1] and GOT[2].  */
+  unsigned int plt0_got1_offset;
+  unsigned int plt0_got2_offset;
+
+  /* Offset of the end of the PC-relative instruction containing
+     plt0_got2_offset.  */
+  unsigned int plt0_got2_insn_end;
+
+  /* Offsets into plt_entry that are to be replaced with...  */
+  unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
+  unsigned int plt_reloc_offset;  /* ... offset into relocation table. */
+  unsigned int plt_plt_offset;    /* ... offset to start of .plt. */
+
+  /* Length of the PC-relative instruction containing plt_got_offset.  */
+  unsigned int plt_got_insn_size;
+
+  /* Offset of the end of the PC-relative jump to plt0_entry.  */
+  unsigned int plt_plt_insn_end;
+
+  /* Offset into plt_entry where the initial value of the GOT entry points.  */
+  unsigned int plt_lazy_offset;
+
+  /* .eh_frame covering the .plt section.  */
+  const bfd_byte *eh_frame_plt;
+  unsigned int eh_frame_plt_size;
+};
+
+#define get_elf_x86_64_backend_data(abfd) \
+  ((const struct elf_x86_64_backend_data *) \
+   get_elf_backend_data (abfd)->arch_data)
+
+#define GET_PLT_ENTRY_SIZE(abfd) \
+  get_elf_x86_64_backend_data (abfd)->plt_entry_size
+
+/* These are the standard parameters.  */
+static const struct elf_x86_64_backend_data elf_x86_64_arch_bed =
+  {
+    elf_x86_64_plt0_entry,              /* plt0_entry */
+    elf_x86_64_plt_entry,               /* plt_entry */
+    sizeof (elf_x86_64_plt_entry),      /* plt_entry_size */
+    2,                                  /* plt0_got1_offset */
+    8,                                  /* plt0_got2_offset */
+    12,                                 /* plt0_got2_insn_end */
+    2,                                  /* plt_got_offset */
+    7,                                  /* plt_reloc_offset */
+    12,                                 /* plt_plt_offset */
+    6,                                  /* plt_got_insn_size */
+    PLT_ENTRY_SIZE,                     /* plt_plt_insn_end */
+    6,                                  /* plt_lazy_offset */
+    elf_x86_64_eh_frame_plt,            /* eh_frame_plt */
+    sizeof (elf_x86_64_eh_frame_plt),   /* eh_frame_plt_size */
+  };
+
+#define	elf_backend_arch_data	&elf_x86_64_arch_bed
+
 /* x86-64 ELF linker hash entry.  */
 
 struct elf_x86_64_link_hash_entry
@@ -721,8 +785,8 @@ elf_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
   if (entry == NULL)
     {
       entry = (struct bfd_hash_entry *)
-          bfd_hash_allocate (table,
-                             sizeof (struct elf_x86_64_link_hash_entry));
+	  bfd_hash_allocate (table,
+			     sizeof (struct elf_x86_64_link_hash_entry));
       if (entry == NULL)
 	return entry;
     }
@@ -839,7 +903,7 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
   ret->tls_ld_got.refcount = 0;
   ret->sgotplt_jump_table_size = 0;
   ret->tls_module_base = NULL;
-  ret->next_jump_slot_index = 0; 
+  ret->next_jump_slot_index = 0;
   ret->next_irelative_index = 0;
 
   if (ABI_64_P (abfd))
@@ -1107,7 +1171,7 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
       /* Use strncmp to check __tls_get_addr since __tls_get_addr
-	 may be versioned.  */ 
+	 may be versioned.  */
       return (h != NULL
 	      && h->root.root.string != NULL
 	      && (ELF32_R_TYPE (rel[1].r_info) == R_X86_64_PC32
@@ -2007,7 +2071,7 @@ elf_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	  if (h != NULL)
 	    {
 	      if (r_type == R_X86_64_GOTPLT64 && h->plt.refcount > 0)
-	        h->plt.refcount -= 1;
+		h->plt.refcount -= 1;
 	      if (h->got.refcount > 0)
 		h->got.refcount -= 1;
 	      if (h->type == STT_GNU_IFUNC)
@@ -2207,6 +2271,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   struct elf_x86_64_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
   const struct elf_backend_data *bed;
+  unsigned int plt_entry_size;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -2218,6 +2283,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   if (htab == NULL)
     return FALSE;
   bed = get_elf_backend_data (info->output_bfd);
+  plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
 
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
      here if it is defined and referenced in a non-shared object.  */
@@ -2225,7 +2291,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
       && h->def_regular)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
 					       &eh->dyn_relocs,
-					       PLT_ENTRY_SIZE,
+					       plt_entry_size,
 					       GOT_ENTRY_SIZE);
   else if (htab->elf.dynamic_sections_created
 	   && h->plt.refcount > 0)
@@ -2247,7 +2313,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	  /* If this is the first .plt entry, make room for the special
 	     first entry.  */
 	  if (s->size == 0)
-	    s->size += PLT_ENTRY_SIZE;
+	    s->size += plt_entry_size;
 
 	  h->plt.offset = s->size;
 
@@ -2264,7 +2330,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    }
 
 	  /* Make room for this entry.  */
-	  s->size += PLT_ENTRY_SIZE;
+	  s->size += plt_entry_size;
 
 	  /* We also need to make an entry in the .got.plt section, which
 	     will be placed in the .got section by the linker script.  */
@@ -2688,9 +2754,9 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  /* Reserve room for the initial entry.
 	     FIXME: we could probably do away with it in this case.  */
 	  if (htab->elf.splt->size == 0)
-	    htab->elf.splt->size += PLT_ENTRY_SIZE;
+	    htab->elf.splt->size += GET_PLT_ENTRY_SIZE (output_bfd);
 	  htab->tlsdesc_plt = htab->elf.splt->size;
-	  htab->elf.splt->size += PLT_ENTRY_SIZE;
+	  htab->elf.splt->size += GET_PLT_ENTRY_SIZE (output_bfd);
 	}
     }
 
@@ -2702,7 +2768,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 				  FALSE, FALSE, FALSE);
 
       /* Don't allocate .got.plt section if there are no GOT nor PLT
-         entries and there is no refeence to _GLOBAL_OFFSET_TABLE_.  */
+	 entries and there is no refeence to _GLOBAL_OFFSET_TABLE_.  */
       if ((got == NULL
 	   || !got->ref_regular_nonweak)
 	  && (htab->elf.sgotplt->size
@@ -2828,7 +2894,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
 	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->elf, 
+	    elf_link_hash_traverse (&htab->elf,
 				    elf_x86_64_readonly_dynrelocs,
 				    info);
 
@@ -2981,6 +3047,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
   bfd_vma *local_tlsdesc_gotents;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
+  const unsigned int plt_entry_size = GET_PLT_ENTRY_SIZE (info->output_bfd);
 
   BFD_ASSERT (is_x86_64_elf (input_bfd));
 
@@ -3023,7 +3090,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	}
 
       if (r_type != (int) R_X86_64_32
-	  || ABI_64_P (output_bfd)) 
+	  || ABI_64_P (output_bfd))
 	howto = x86_64_elf_howto_table + r_type;
       else
 	howto = (x86_64_elf_howto_table
@@ -3050,7 +3117,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	      if (h == NULL)
 		abort ();
 
-	      /* Set STT_GNU_IFUNC symbol value.  */ 
+	      /* Set STT_GNU_IFUNC symbol value.  */
 	      h->root.u.def.value = sym->st_value;
 	      h->root.u.def.section = sec;
 	    }
@@ -3126,7 +3193,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	      if (ABI_64_P (output_bfd))
 		goto do_relocation;
 	      /* FALLTHROUGH */
-	    case R_X86_64_64: 
+	    case R_X86_64_64:
 	      if (rel->r_addend != 0)
 		{
 		  if (h->root.root.string)
@@ -3211,13 +3278,13 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 
 		  if (htab->elf.splt != NULL)
 		    {
-		      plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
+		      plt_index = h->plt.offset / plt_entry_size - 1;
 		      off = (plt_index + 3) * GOT_ENTRY_SIZE;
 		      base_got = htab->elf.sgotplt;
 		    }
 		  else
 		    {
-		      plt_index = h->plt.offset / PLT_ENTRY_SIZE;
+		      plt_index = h->plt.offset / plt_entry_size;
 		      off = plt_index * GOT_ENTRY_SIZE;
 		      base_got = htab->elf.igotplt;
 		    }
@@ -3226,9 +3293,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      || h->forced_local
 		      || info->symbolic)
 		    {
-		      /* This references the local defitionion.  We must 
+		      /* This references the local defitionion.  We must
 			 initialize this entry in the global offset table.
-			 Since the offset must always be a multiple of 8, 
+			 Since the offset must always be a multiple of 8,
 			 we use the least significant bit to record
 			 whether we have initialized it already.
 
@@ -3284,14 +3351,14 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 
 	      off = h->got.offset;
 	      if (h->needs_plt
-	          && h->plt.offset != (bfd_vma)-1
+		  && h->plt.offset != (bfd_vma)-1
 		  && off == (bfd_vma)-1)
 		{
 		  /* We can't use h->got.offset here to save
 		     state, or even just remember the offset, as
 		     finish_dynamic_symbol would use that as offset into
 		     .got.  */
-		  bfd_vma plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
+		  bfd_vma plt_index = h->plt.offset / plt_entry_size - 1;
 		  off = (plt_index + 3) * GOT_ENTRY_SIZE;
 		  base_got = htab->elf.sgotplt;
 		}
@@ -3322,7 +3389,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      bfd_put_64 (output_bfd, relocation,
 				  base_got->contents + off);
 		      /* Note that this is harmless for the GOTPLT64 case,
-		         as -1 | 1 still is -1.  */
+			 as -1 | 1 still is -1.  */
 		      h->got.offset |= 1;
 		    }
 		}
@@ -3420,7 +3487,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	case R_X86_64_PLTOFF64:
 	  /* Relocation is PLT entry relative to GOT.  For local
 	     symbols it's the symbol itself relative to GOT.  */
-          if (h != NULL
+	  if (h != NULL
 	      /* See PLT32 handling.  */
 	      && h->plt.offset != (bfd_vma) -1
 	      && htab->elf.splt != NULL)
@@ -4154,6 +4221,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 				  Elf_Internal_Sym *sym)
 {
   struct elf_x86_64_link_hash_table *htab;
+  const struct elf_x86_64_backend_data *const abed
+    = get_elf_x86_64_backend_data (output_bfd);
 
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
@@ -4207,39 +4276,38 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 
       if (plt == htab->elf.splt)
 	{
-	  got_offset = h->plt.offset / PLT_ENTRY_SIZE - 1;
+	  got_offset = h->plt.offset / abed->plt_entry_size - 1;
 	  got_offset = (got_offset + 3) * GOT_ENTRY_SIZE;
 	}
       else
 	{
-	  got_offset = h->plt.offset / PLT_ENTRY_SIZE;
+	  got_offset = h->plt.offset / abed->plt_entry_size;
 	  got_offset = got_offset * GOT_ENTRY_SIZE;
 	}
 
       /* Fill in the entry in the procedure linkage table.  */
-      memcpy (plt->contents + h->plt.offset, elf_x86_64_plt_entry,
-	      PLT_ENTRY_SIZE);
+      memcpy (plt->contents + h->plt.offset, abed->plt_entry,
+	      abed->plt_entry_size);
 
-      /* Insert the relocation positions of the plt section.  The magic
-	 numbers at the end of the statements are the positions of the
-	 relocations in the plt section.  */
-      /* Put offset for jmp *name@GOTPCREL(%rip), since the
-	 instruction uses 6 bytes, subtract this value.  */
+      /* Insert the relocation positions of the plt section.  */
+
+      /* Put offset the PC-relative instruction referring to the GOT entry,
+	 subtracting the size of that instruction.  */
       bfd_put_32 (output_bfd,
-		      (gotplt->output_section->vma
-		       + gotplt->output_offset
-		       + got_offset
-		       - plt->output_section->vma
-		       - plt->output_offset
-		       - h->plt.offset
-		       - 6),
-		  plt->contents + h->plt.offset + 2);
+		  (gotplt->output_section->vma
+		   + gotplt->output_offset
+		   + got_offset
+		   - plt->output_section->vma
+		   - plt->output_offset
+		   - h->plt.offset
+		   - abed->plt_got_insn_size),
+		  plt->contents + h->plt.offset + abed->plt_got_offset);
 
       /* Fill in the entry in the global offset table, initially this
-	 points to the pushq instruction in the PLT which is at offset 6.  */
+	 points to the second part of the PLT entry.  */
       bfd_put_64 (output_bfd, (plt->output_section->vma
 			       + plt->output_offset
-			       + h->plt.offset + 6),
+			       + h->plt.offset + abed->plt_lazy_offset),
 		  gotplt->contents + got_offset);
 
       /* Fill in the entry in the .rela.plt section.  */
@@ -4273,10 +4341,10 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	{
 	  /* Put relocation index.  */
 	  bfd_put_32 (output_bfd, plt_index,
-		      plt->contents + h->plt.offset + 7);
+		      plt->contents + h->plt.offset + abed->plt_reloc_offset);
 	  /* Put offset for jmp .PLT0.  */
-	  bfd_put_32 (output_bfd, - (h->plt.offset + PLT_ENTRY_SIZE),
-		      plt->contents + h->plt.offset + 12);
+	  bfd_put_32 (output_bfd, - (h->plt.offset + abed->plt_plt_insn_end),
+		      plt->contents + h->plt.offset + abed->plt_plt_offset);
 	}
 
       bed = get_elf_backend_data (output_bfd);
@@ -4408,7 +4476,7 @@ elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
   struct elf_link_hash_entry *h
     = (struct elf_link_hash_entry *) *slot;
   struct bfd_link_info *info
-    = (struct bfd_link_info *) inf; 
+    = (struct bfd_link_info *) inf;
 
   return elf_x86_64_finish_dynamic_symbol (info->output_bfd,
 					     info, h, NULL);
@@ -4442,6 +4510,8 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
   struct elf_x86_64_link_hash_table *htab;
   bfd *dynobj;
   asection *sdyn;
+  const struct elf_x86_64_backend_data *const abed
+    = get_elf_x86_64_backend_data (output_bfd);
 
   htab = elf_x86_64_hash_table (info);
   if (htab == NULL)
@@ -4524,8 +4594,8 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
       if (htab->elf.splt && htab->elf.splt->size > 0)
 	{
 	  /* Fill in the first entry in the procedure linkage table.  */
-	  memcpy (htab->elf.splt->contents, elf_x86_64_plt0_entry,
-		  PLT_ENTRY_SIZE);
+	  memcpy (htab->elf.splt->contents,
+		  abed->plt0_entry, abed->plt_entry_size);
 	  /* Add offset for pushq GOT+8(%rip), since the instruction
 	     uses 6 bytes subtract this value.  */
 	  bfd_put_32 (output_bfd,
@@ -4535,20 +4605,20 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 		       - htab->elf.splt->output_section->vma
 		       - htab->elf.splt->output_offset
 		       - 6),
-		      htab->elf.splt->contents + 2);
-	  /* Add offset for jmp *GOT+16(%rip). The 12 is the offset to
-	     the end of the instruction.  */
+		      htab->elf.splt->contents + abed->plt0_got1_offset);
+	  /* Add offset for the PC-relative instruction accessing GOT+16,
+	     subtracting the offset to the end of that instruction.  */
 	  bfd_put_32 (output_bfd,
 		      (htab->elf.sgotplt->output_section->vma
 		       + htab->elf.sgotplt->output_offset
 		       + 16
 		       - htab->elf.splt->output_section->vma
 		       - htab->elf.splt->output_offset
-		       - 12),
-		      htab->elf.splt->contents + 8);
+		       - abed->plt0_got2_insn_end),
+		      htab->elf.splt->contents + abed->plt0_got2_offset);
 
-	  elf_section_data (htab->elf.splt->output_section)->this_hdr.sh_entsize =
-	    PLT_ENTRY_SIZE;
+	  elf_section_data (htab->elf.splt->output_section)
+	    ->this_hdr.sh_entsize = abed->plt_entry_size;
 
 	  if (htab->tlsdesc_plt)
 	    {
@@ -4556,8 +4626,7 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 			  htab->elf.sgot->contents + htab->tlsdesc_got);
 
 	      memcpy (htab->elf.splt->contents + htab->tlsdesc_plt,
-		      elf_x86_64_plt0_entry,
-		      PLT_ENTRY_SIZE);
+		      abed->plt0_entry, abed->plt_entry_size);
 
 	      /* Add offset for pushq GOT+8(%rip), since the
 		 instruction uses 6 bytes subtract this value.  */
@@ -4569,10 +4638,11 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 			   - htab->elf.splt->output_offset
 			   - htab->tlsdesc_plt
 			   - 6),
-			  htab->elf.splt->contents + htab->tlsdesc_plt + 2);
-	      /* Add offset for jmp *GOT+TDG(%rip), where TGD stands for
-		 htab->tlsdesc_got. The 12 is the offset to the end of
-		 the instruction.  */
+			  htab->elf.splt->contents
+			  + htab->tlsdesc_plt + abed->plt0_got1_offset);
+	  /* Add offset for the PC-relative instruction accessing GOT+TDG,
+	     where TGD stands for htab->tlsdesc_got, subtracting the offset
+	     to the end of that instruction.  */
 	      bfd_put_32 (output_bfd,
 			  (htab->elf.sgot->output_section->vma
 			   + htab->elf.sgot->output_offset
@@ -4580,8 +4650,9 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 			   - htab->elf.splt->output_section->vma
 			   - htab->elf.splt->output_offset
 			   - htab->tlsdesc_plt
-			   - 12),
-			  htab->elf.splt->contents + htab->tlsdesc_plt + 8);
+			   - abed->plt0_got2_insn_end),
+			  htab->elf.splt->contents
+			  + htab->tlsdesc_plt + abed->plt0_got2_offset);
 	    }
 	}
     }
@@ -4661,7 +4732,7 @@ static bfd_vma
 elf_x86_64_plt_sym_val (bfd_vma i, const asection *plt,
 			const arelent *rel ATTRIBUTE_UNUSED)
 {
-  return plt->vma + (i + 1) * PLT_ENTRY_SIZE;
+  return plt->vma + (i + 1) * GET_PLT_ENTRY_SIZE (plt->owner);
 }
 
 /* Handle an x86-64 specific section when reading an object file.  This
