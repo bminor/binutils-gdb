@@ -1,5 +1,10 @@
 2012-03-15  Tom Tromey  <tromey@redhat.com>
 
+	* cp-valprint.c (cp_print_value_fields): Use
+	print_function_pointer_address for vtable slot.
+
+2012-03-15  Tom Tromey  <tromey@redhat.com>
+
 	* gnu-v3-abi.c (struct value_and_voffset): New.
 	(hash_value_and_voffset, eq_value_and_voffset)
 	(compare_value_and_voffset, compute_vtable_size)

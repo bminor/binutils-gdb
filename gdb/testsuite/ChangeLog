@@ -1,5 +1,14 @@
 2012-03-15  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.cp/virtfunc2.exp: Update expected output.
+	* gdb.cp/pr9631.exp: Update expected output.
+	* gdb.cp/member-ptr.exp: Update expected output.
+	* gdb.cp/inherit.exp (test_print_mvi_classes): Update expected
+	output.
+	* gdb.cp/casts.exp: Update expected output.
+
+2012-03-15  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.cp/virtfunc.exp (make_one_vtable_result): New proc.
 	(test_info_vtbl): Likewise.
 	(do_tests): Call test_info_vtbl.

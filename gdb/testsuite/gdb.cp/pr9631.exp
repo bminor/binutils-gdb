@@ -45,4 +45,4 @@ gdb_continue_to_breakpoint "after bar tender is initialized"
 
 gdb_test \
   "print tender" \
-  "\\\$1 = {<foo::vbase> = {_vptr.vbase = $hex}, <empty_base> = {<No data fields>}, <No data fields>}"
+  "\\\$1 = {<foo::vbase> = {_vptr.vbase = ${hex}( <vtable for bar.*>)?}, <empty_base> = {<No data fields>}, <No data fields>}"

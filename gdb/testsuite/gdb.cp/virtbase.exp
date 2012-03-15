@@ -78,5 +78,5 @@ gdb_test "print $" \
     " = \\(Virtual \\*\\) $hex" \
     "print same pointer from history value"
 gdb_test "print *$$" \
-    " = \\(Virtual\\) {<VirtualMiddleA> = {<VirtualBase> = {_vptr.VirtualBase = $hex, x = 0}, _vptr.VirtualMiddleA = $hex, y = \\{0 <repeats 300 times>\\}}, <VirtualMiddleB> = {_vptr.VirtualMiddleB = $hex, y = 0}, _vptr.Virtual = $hex, z = 0}" \
+    " = \\(Virtual\\) {<VirtualMiddleA> = {<VirtualBase> = {_vptr.VirtualBase = ${hex}( <vtable for Virtual.*>)?, x = 0}, _vptr.VirtualMiddleA = ${hex}( <vtable for Virtual.*>)?, y = \\{0 <repeats 300 times>\\}}, <VirtualMiddleB> = {_vptr.VirtualMiddleB = ${hex}( <vtable for Virtual.*>)?, y = 0}, _vptr.Virtual = ${hex}( <vtable for Virtual.*>)?, z = 0}" \
     "print whole pointed-to object, starting from the virtual base pointer"

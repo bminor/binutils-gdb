@@ -137,7 +137,7 @@ gdb_test "print dynamic_cast<Alpha *> (&doublyderived)" \
     "dynamic_cast upcast to unique base"
 
 gdb_test "print dynamic_cast<Alpha &> (derived)" \
-    " = \\(Alpha \\&\\) @$nonzero_hex: {.* = $nonzero_hex}" \
+    " = \\(Alpha \\&\\) @$nonzero_hex: {.* = ${nonzero_hex}( <vtable for Derived.*>)?}" \
     "dynamic_cast simple upcast to reference"
 
 gdb_test "print dynamic_cast<Derived *> (ad)" \

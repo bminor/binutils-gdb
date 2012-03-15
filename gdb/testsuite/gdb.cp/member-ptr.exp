@@ -257,7 +257,7 @@ gdb_test_multiple "print a" $name {
     -re "$vhn = \{c = 120 'x', j = 33, jj = 1331, (static|static int) s = 10, Virtual table at $hex\}\r\n$gdb_prompt $" {
 	pass $name
     }
-    -re "$vhn = \{(_vptr.A|_vptr\\$) = $hex, c = 120 'x', j = 33, jj = 1331, (static|static int) s = 10\}\r\n$gdb_prompt $" {
+    -re "$vhn = \{(_vptr.A|_vptr\\$) = ${hex}( <vtable for A.*>)?, c = 120 'x', j = 33, jj = 1331, (static|static int) s = 10\}\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "$vhn = \{(_vptr.A|_vptr\\$) = $hex, c = 120 'x', j = 121, jj = 1331, (static|static int) s = 10\}\r\n$gdb_prompt $" {
@@ -305,7 +305,7 @@ gdb_test_multiple "print a" $name {
     -re "$vhn = \{c = 120 'x', j = 44, jj = 1331, (static|static int) s = 10, Virtual table at $hex\}\r\n$gdb_prompt $" {
 	pass $name
     }
-    -re "$vhn = \{(_vptr.A|_vptr\\$) = $hex, c = 120 'x', j = 44, jj = 1331, (static|static int) s = 10\}\r\n$gdb_prompt $" {
+    -re "$vhn = \{(_vptr.A|_vptr\\$) = ${hex}( <vtable for A.*>), c = 120 'x', j = 44, jj = 1331, (static|static int) s = 10\}\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "$vhn = \{(_vptr.A|_vptr\\$) = $hex, c = 120 'x', j = 121, jj = 1331, (static|static int) s = 10\}\r\n$gdb_prompt $" {

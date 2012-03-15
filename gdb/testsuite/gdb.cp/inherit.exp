@@ -670,7 +670,7 @@ proc test_print_mvi_classes { } {
 	    # gcc 2.95.3 -gstabs+
 	    pass $name
 	}
-	-re "$vhn = \{<vB> = \{<vA> = \{va = 19, vx = 20\}, $re_vbptr_3_vB = $hex, vb = 21, vx = 22\}, <vC> = \{$re_vbptr_3_vC = $hex, vc = 23, vx = 24\}, $re_vbptr_3_vD = $hex, vd = 25, vx = 26\}$nl$gdb_prompt $" {
+	-re "$vhn = \{<vB> = \{<vA> = \{va = 19, vx = 20\}, $re_vbptr_3_vB = ${hex}( <vtable for vD.*>)?, vb = 21, vx = 22\}, <vC> = \{$re_vbptr_3_vC = ${hex}( <vtable for vC.*>)?, vc = 23, vx = 24\}, $re_vbptr_3_vD = ${hex}( <vtable for vD.*>)?, vd = 25, vx = 26\}$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gdwarf-2
 	    # gcc HEAD 2004-01-21 -gdwarf-2
 	    # gcc HEAD 2004-01-21 -gstabs+
@@ -691,7 +691,7 @@ proc test_print_mvi_classes { } {
 	    # gcc 2.95.3 -gstabs+
 	    pass $name
 	}
-	-re "$vhn = \{<vD> = \{<vB> = \{<vA> = \{va = 0, vx = 0\}, $re_vbptr_3_vB = $hex, vb = 0, vx = 0\}, <vC> = \{$re_vbptr_3_vC = $hex, vc = 0, vx = 0\}, $re_vbptr_3_vD = $hex, vd = 0, vx = 0\}, $re_vbptr_3_vE = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
+	-re "$vhn = \{<vD> = \{<vB> = \{<vA> = \{va = 0, vx = 0\}, $re_vbptr_3_vB = ${hex}( <vtable for vE.*>)?, vb = 0, vx = 0\}, <vC> = \{$re_vbptr_3_vC = ${hex}( <vtable for vE.*>)?, vc = 0, vx = 0\}, $re_vbptr_3_vD = ${hex}( <vtable for vE.*>)?, vd = 0, vx = 0\}, $re_vbptr_3_vE = ${hex}( <vtable for vE.*>)?, ve = 27, vx = 28\}$nl$gdb_prompt $" {
 	    # gcc 3.3.4 -gdwarf-2
 	    # gcc 3.3.4 -gstabs+
 	    # gcc 3.4.1 -gdwarf-2

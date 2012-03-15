@@ -358,6 +358,17 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 					   v, stream, recurse + 1,
 					   options);
 		}
+	      else if (i == TYPE_VPTR_FIELDNO (type))
+		{
+		  CORE_ADDR addr
+		    = extract_typed_address (valaddr + offset
+					     + TYPE_FIELD_BITSIZE (type, i) / 8,
+					     TYPE_FIELD_TYPE (type, i));
+
+		  print_function_pointer_address (get_type_arch (type),
+						  addr, stream,
+						  options->addressprint);
+		}
 	      else
 		{
 		  struct value_print_options opts = *options;
