@@ -1564,7 +1564,7 @@ cp_validate_operator (const char *input)
   return 0;
 }
 
-/* Implement "info vtable".  */
+/* Implement "info vtbl".  */
 
 static void
 info_vtbl_command (char *arg, int from_tty)
@@ -1595,7 +1595,7 @@ _initialize_cp_support (void)
 	   &maint_cplus_cmd_list);
 
   add_info ("vtbl", info_vtbl_command,
-	    _("Show the vtable for a C++ object.\n\
+	    _("Show the virtual function table for a C++ object.\n\
 Usage: info vtbl EXPRESSION\n\
 Evaluate EXPRESSION and display the virtual function table for the\n\
 resulting object."));

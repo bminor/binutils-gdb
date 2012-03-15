@@ -1,5 +1,11 @@
 2012-03-15  Tom Tromey  <tromey@redhat.com>
 
+	* NEWS: Mention "info vtbl", not "info vtable".
+	* cp-support.c (info_vtbl_command): Fix comment.
+	(_initialize_cp_support): Fix text.
+
+2012-03-15  Tom Tromey  <tromey@redhat.com>
+
 	* cp-valprint.c (cp_print_value_fields): Use
 	print_function_pointer_address for vtable slot.
 
