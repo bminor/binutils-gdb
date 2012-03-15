@@ -1,3 +1,8 @@
+2012-03-15  Tom Tromey  <tromey@redhat.com>
+
+	* d-lang.c (d_language_defn) <la_iterate_over_symbols>: Set to
+	iterate_over_symbols.
+
 2012-03-14  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf_stack_op_name): Add DW_OP_GNU_encoded_addr,

@@ -274,7 +274,7 @@ static const struct language_defn d_language_defn =
   default_pass_by_reference,
   c_get_string,
   NULL,				/* la_get_symbol_name_cmp */
-  NULL,
+  iterate_over_symbols,
   LANG_MAGIC
 };
 
