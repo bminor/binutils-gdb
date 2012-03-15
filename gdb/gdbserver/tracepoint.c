@@ -1313,6 +1313,8 @@ static struct tracepoint *fast_tracepoint_from_ipa_tpoint_address (CORE_ADDR);
 static void install_tracepoint (struct tracepoint *, char *own_buf);
 static void download_tracepoint (struct tracepoint *);
 static int install_fast_tracepoint (struct tracepoint *, char *errbuf);
+static void clone_fast_tracepoint (struct tracepoint *to,
+				   const struct tracepoint *from);
 #endif
 
 static LONGEST get_timestamp (void);
@@ -2502,6 +2504,8 @@ cmd_qtdp (char *own_buf)
      trailing hyphen in QTDP packet.  */
   if (tracing && !trail_hyphen)
     {
+      struct tracepoint *tp = NULL;
+
       /* Pause all threads temporarily while we patch tracepoints.  */
       pause_all (0);
 
@@ -2512,10 +2516,37 @@ cmd_qtdp (char *own_buf)
       /* Freeze threads.  */
       pause_all (1);
 
+
+      if (tpoint->type != trap_tracepoint)
+	{
+	  /* Find another fast or static tracepoint at the same address.  */
+	  for (tp = tracepoints; tp; tp = tp->next)
+	    {
+	      if (tp->address == tpoint->address && tp->type == tpoint->type
+		  && tp->number != tpoint->number)
+		break;
+	    }
+
+	  /* TPOINT is installed at the same address as TP.  */
+	  if (tp)
+	    {
+	      if (tpoint->type == fast_tracepoint)
+		clone_fast_tracepoint (tpoint, tp);
+	      else if (tpoint->type == static_tracepoint)
+		tpoint->handle = (void *) -1;
+	    }
+	}
+
       download_tracepoint (tpoint);
-      install_tracepoint (tpoint, own_buf);
-      if (strcmp (own_buf, "OK") != 0)
-	remove_tracepoint (tpoint);
+
+      if (tpoint->type == trap_tracepoint || tp == NULL)
+	{
+	  install_tracepoint (tpoint, own_buf);
+	  if (strcmp (own_buf, "OK") != 0)
+	    remove_tracepoint (tpoint);
+	}
+      else
+	write_ok (own_buf);
 
       unpause_all (1);
       return;
@@ -3019,8 +3050,6 @@ install_tracepoint (struct tracepoint *tpoint, char *own_buf)
     }
   else if (tpoint->type == fast_tracepoint || tpoint->type == static_tracepoint)
     {
-      struct tracepoint *tp;
-
       if (!agent_loaded_p ())
 	{
 	  trace_debug ("Requested a %s tracepoint, but fast "
@@ -3038,30 +3067,12 @@ install_tracepoint (struct tracepoint *tpoint, char *own_buf)
 	  return;
 	}
 
-      /* Find another fast or static tracepoint at the same address.  */
-      for (tp = tracepoints; tp; tp = tp->next)
-	{
-	  if (tp->address == tpoint->address && tp->type == tpoint->type
-	      && tp->number != tpoint->number)
-	    break;
-	}
-
       if (tpoint->type == fast_tracepoint)
-	{
-	  if (tp) /* TPOINT is installed at the same address as TP.  */
-	    clone_fast_tracepoint (tpoint, tp);
-	  else
-	    install_fast_tracepoint (tpoint, own_buf);
-	}
+	install_fast_tracepoint (tpoint, own_buf);
       else
 	{
-	  if (tp)
+	  if (probe_marker_at (tpoint->address, own_buf) == 0)
 	    tpoint->handle = (void *) -1;
-	  else
-	    {
-	      if (probe_marker_at (tpoint->address, own_buf) == 0)
-		tpoint->handle = (void *) -1;
-	    }
 	}
 
     }

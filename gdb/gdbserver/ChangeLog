@@ -1,5 +1,11 @@
 2012-03-15  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (install_tracepoint): Move duplicated tracepoint
+	handling to ...
+	(cmd_qtdp): ... here.
+
+2012-03-15  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (struct tracepoint_action_ops): New.
 	(struct tracepoint_action) [!IN_PROCESS_AGENT] <ops>: New field.
 	(m_tracepoint_action_download): New.
