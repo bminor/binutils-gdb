@@ -1,3 +1,7 @@
+2012-03-15  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* doc/as.texinfo (Bundle directives): Fix typo.
+
 2012-03-14  Ryan Mansfield  <rmansfield@qnx.com>
 
 	* doc/as.texinfo (Bundle directives): Replace @defn with @dfn.

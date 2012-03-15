@@ -4302,7 +4302,7 @@ undefined.
 @code{.bundle_align_mode} enables or disables @dfn{aligned instruction
 bundle} mode.  In this mode, sequences of adjacent instructions are grouped
 into fixed-sized @dfn{bundles}.  If the argument is zero, this mode is
-disabled (which is the dfault state).  If the argument it not zero, it
+disabled (which is the default state).  If the argument it not zero, it
 gives the size of an instruction bundle as a power of two (as for the
 @code{.p2align} directive, @pxref{P2align}).
 
