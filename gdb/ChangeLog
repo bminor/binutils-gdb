@@ -1,5 +1,19 @@
 2012-03-15  Tom Tromey  <tromey@redhat.com>
 
+	* gnu-v3-abi.c (struct value_and_voffset): New.
+	(hash_value_and_voffset, eq_value_and_voffset)
+	(compare_value_and_voffset, compute_vtable_size)
+	(print_one_vtable, gnuv3_print_vtable): New functions.
+	(init_gnuv3_ops): Initialize 'print_vtable' field.
+	* cp-support.c (info_vtbl_command): New function.
+	(_initialize_cp_support): Add "info vtbl".
+	* cp-abi.h (cplus_print_vtable): Declare.
+	(struct cp_abi_ops) <print_vtable>: New field.
+	* cp-abi.c (cplus_print_vtable): New function.
+	* NEWS: Update.
+
+2012-03-15  Tom Tromey  <tromey@redhat.com>
+
 	* d-lang.c (d_language_defn) <la_iterate_over_symbols>: Set to
 	iterate_over_symbols.
 

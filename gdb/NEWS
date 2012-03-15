@@ -70,6 +70,9 @@
   ** "enable count" can be used to auto-disable a breakpoint after
      several hits.
 
+  ** "info vtable" can be used to show the virtual method tables for
+     C++ and Java objects.
+
 * New targets
 
 Renesas RL78			rl78-*-elf

@@ -34,6 +34,7 @@
 #include "exceptions.h"
 #include "expression.h"
 #include "value.h"
+#include "cp-abi.h"
 
 #include "safe-ctype.h"
 
@@ -1563,6 +1564,17 @@ cp_validate_operator (const char *input)
   return 0;
 }
 
+/* Implement "info vtable".  */
+
+static void
+info_vtbl_command (char *arg, int from_tty)
+{
+  struct value *value;
+
+  value = parse_and_eval (arg);
+  cplus_print_vtable (value);
+}
+
 void
 _initialize_cp_support (void)
 {
@@ -1581,4 +1593,10 @@ _initialize_cp_support (void)
 	   first_component_command,
 	   _("Print the first class/namespace component of NAME."),
 	   &maint_cplus_cmd_list);
+
+  add_info ("vtbl", info_vtbl_command,
+	    _("Show the vtable for a C++ object.\n\
+Usage: info vtbl EXPRESSION\n\
+Evaluate EXPRESSION and display the virtual function table for the\n\
+resulting object."));
 }

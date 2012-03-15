@@ -169,6 +169,16 @@ cplus_method_ptr_to_value (struct value **this_p,
   return (*current_cp_abi.method_ptr_to_value) (this_p, method_ptr);
 }
 
+/* See cp-abi.h.  */
+
+void
+cplus_print_vtable (struct value *value)
+{
+  if (current_cp_abi.print_vtable == NULL)
+    error (_("GDB cannot print the vtable on this target"));
+  return (*current_cp_abi.print_vtable) (value);
+}
+
 int
 cp_pass_by_reference (struct type *type)
 {

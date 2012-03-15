@@ -12788,6 +12788,12 @@ Print inheritance relationships as well as other information for type
 @var{typename}.
 @xref{Symbols, ,Examining the Symbol Table}.
 
+@item info vtbl @var{expression}.
+The @code{info vtbl} command can be used to display the virtual
+method tables of the object computed by @var{expression}.  This shows
+one entry per virtual table; there may be multiple virtual tables when
+multiple inheritance is in use.
+
 @cindex C@t{++} symbol display
 @item set print demangle
 @itemx show print demangle

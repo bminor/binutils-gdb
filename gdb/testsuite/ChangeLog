@@ -1,3 +1,10 @@
+2012-03-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/virtfunc.exp (make_one_vtable_result): New proc.
+	(test_info_vtbl): Likewise.
+	(do_tests): Call test_info_vtbl.
+	* gdb.cp/virtfunc.cc (va): New global.
+
 2012-03-15  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* gdb.dwarf2/dw2-ada-ffffffff.S: Use .4byte instead of .long for

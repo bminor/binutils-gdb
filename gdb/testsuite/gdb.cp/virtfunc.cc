@@ -111,6 +111,7 @@ D   d;
 E   e;
 V   v;
 VB  vb;
+VA  va;
 
 
 A* 	pAa	= 	&a;

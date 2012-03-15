@@ -1,3 +1,7 @@
+2012-03-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Debugging C Plus Plus): Document "info vtbl".
+
 2012-03-13  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Help): Change apropos example to use "alias" instead

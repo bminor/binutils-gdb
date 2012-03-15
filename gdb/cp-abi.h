@@ -173,6 +173,11 @@ struct value *cplus_method_ptr_to_value (struct value **this_p,
 void cplus_make_method_ptr (struct type *type, gdb_byte *CONTENTS,
 			    CORE_ADDR address, int is_virtual);
 
+/* Print the vtable for VALUE, if there is one.  If there is no
+   vtable, print a message, but do not throw.  */
+
+void cplus_print_vtable (struct value *value);
+
 /* Determine if we are currently in a C++ thunk.  If so, get the
    address of the routine we are thunking to and continue to there
    instead.  */
@@ -213,6 +218,7 @@ struct cp_abi_ops
 			   CORE_ADDR, int);
   struct value * (*method_ptr_to_value) (struct value **,
 					 struct value *);
+  void (*print_vtable) (struct value *);
   CORE_ADDR (*skip_trampoline) (struct frame_info *, CORE_ADDR);
   int (*pass_by_reference) (struct type *type);
 };
