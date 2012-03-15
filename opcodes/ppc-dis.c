@@ -38,7 +38,7 @@ struct dis_private
 {
   /* Stash the result of parsing disassembler_options here.  */
   ppc_cpu_t dialect;
-};
+} private;
 
 #define POWERPC_DIALECT(INFO) \
   (((struct dis_private *) ((INFO)->private_data))->dialect)
@@ -217,7 +217,7 @@ ppc_parse_cpu (ppc_cpu_t ppc_cpu, const char *arg)
 
 /* Determine which set of machines to disassemble for.  */
 
-static int
+static void
 powerpc_init_dialect (struct disassemble_info *info)
 {
   ppc_cpu_t dialect = 0;
@@ -225,7 +225,7 @@ powerpc_init_dialect (struct disassemble_info *info)
   struct dis_private *priv = calloc (sizeof (*priv), 1);
 
   if (priv == NULL)
-    return FALSE;
+    priv = &private;
 
   arg = info->disassembler_options;
   while (arg != NULL)
@@ -263,8 +263,34 @@ powerpc_init_dialect (struct disassemble_info *info)
 
   info->private_data = priv;
   POWERPC_DIALECT(info) = dialect;
+}
 
-  return TRUE;
+#define PPC_OPCD_SEGS 64
+#define PPC_OP_TO_SEG(i) (i)
+static unsigned short powerpc_opcd_indices[PPC_OPCD_SEGS];
+
+/* Calculate opcode table indices to speed up disassembly,
+   and init dialect.  */
+
+void
+disassemble_init_powerpc (struct disassemble_info *info)
+{
+  int i;
+
+  for (i = 0; i < PPC_OPCD_SEGS; ++i)
+    powerpc_opcd_indices[i] = powerpc_num_opcodes;
+
+  i = powerpc_num_opcodes;
+  while (--i >= 0)
+    {
+      unsigned op = PPC_OP (powerpc_opcodes[i].opcode);
+      unsigned seg = PPC_OP_TO_SEG (op);
+
+      powerpc_opcd_indices[seg] = i;
+    }
+
+  if (info->arch == bfd_arch_powerpc)
+    powerpc_init_dialect (info);
 }
 
 /* Print a big endian PowerPC instruction.  */
@@ -272,8 +298,6 @@ powerpc_init_dialect (struct disassemble_info *info)
 int
 print_insn_big_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 {
-  if (info->private_data == NULL && !powerpc_init_dialect (info))
-    return -1;
   return print_insn_powerpc (memaddr, info, 1, POWERPC_DIALECT(info));
 }
 
@@ -282,8 +306,6 @@ print_insn_big_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 int
 print_insn_little_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 {
-  if (info->private_data == NULL && !powerpc_init_dialect (info))
-    return -1;
   return print_insn_powerpc (memaddr, info, 0, POWERPC_DIALECT(info));
 }
 
@@ -375,11 +397,14 @@ print_insn_powerpc (bfd_vma memaddr,
   /* Get the major opcode of the instruction.  */
   op = PPC_OP (insn);
 
-  /* Find the first match in the opcode table.  We could speed this up
-     a bit by doing a binary search on the major opcode.  */
+  /* Find the first match in the opcode table.
+     We speed this up by segmenting the opcode table and starting the search
+     at one of the segment boundaries.  */
   opcode_end = powerpc_opcodes + powerpc_num_opcodes;
  again:
-  for (opcode = powerpc_opcodes; opcode < opcode_end; opcode++)
+  for (opcode = powerpc_opcodes + powerpc_opcd_indices[PPC_OP_TO_SEG (op)];
+       opcode < opcode_end;
+       ++opcode)
     {
       unsigned long table_op;
       const unsigned char *opindex;
@@ -390,10 +415,10 @@ print_insn_powerpc (bfd_vma memaddr,
       int skip_optional;
 
       table_op = PPC_OP (opcode->opcode);
-      if (op < table_op)
-	break;
       if (op > table_op)
 	continue;
+      if (op < table_op)
+	break;
 
       if ((insn & opcode->mask) != opcode->opcode
 	  || (opcode->flags & dialect) == 0

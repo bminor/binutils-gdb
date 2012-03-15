@@ -1,3 +1,17 @@
+2012-03-15  Alan Modra  <amodra@gmail.com>
+	    James Lemke  <jwlemke@codesourcery.com>
+
+	* disassemble.c (disassemble_init_for_target): Handle ppc init.
+	* ppc-dis.c (private): New var.
+	(powerpc_init_dialect): Don't return calloc failure, instead use
+	private.
+	(PPC_OPCD_SEGS, PPC_OP_TO_SEG): Define.
+	(powerpc_opcd_indices): New array.
+	(disassemble_init_powerpc): New function.
+	(print_insn_big_powerpc): Don't init dialect here.
+	(print_insn_little_powerpc): Likewise.
+	(print_insn_powerpc): Start search using powerpc_opcd_indices.
+
 2012-03-10  Edmar Wienskoski  <edmar@freescale.com>
 
 	* ppc-dis.c (ppc_opts): Add entries for "e5500" and "e6500".
