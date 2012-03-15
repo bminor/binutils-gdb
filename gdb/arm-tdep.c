@@ -40,6 +40,7 @@
 #include "dwarf2-frame.h"
 #include "gdbtypes.h"
 #include "prologue-value.h"
+#include "remote.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
 #include "observer.h"
@@ -55,6 +56,7 @@
 #include "vec.h"
 
 #include "features/arm-with-m.c"
+#include "features/arm-with-m-fpa-layout.c"
 #include "features/arm-with-iwmmxt.c"
 #include "features/arm-with-vfpv2.c"
 #include "features/arm-with-vfpv3.c"
@@ -9665,6 +9667,41 @@ arm_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 }
 
 
+/* For backward-compatibility we allow two 'g' packet lengths with
+   the remote protocol depending on whether FPA registers are
+   supplied.  M-profile targets do not have FPA registers, but some
+   stubs already exist in the wild which use a 'g' packet which
+   supplies them albeit with dummy values.  The packet format which
+   includes FPA registers should be considered deprecated for
+   M-profile targets.  */
+
+static void
+arm_register_g_packet_guesses (struct gdbarch *gdbarch)
+{
+  if (gdbarch_tdep (gdbarch)->is_m)
+    {
+      /* If we know from the executable this is an M-profile target,
+	 cater for remote targets whose register set layout is the
+	 same as the FPA layout.  */
+      register_remote_g_packet_guess (gdbarch,
+				      /* r0-r12,sp,lr,pc; f0-f7; fps,cpsr */
+				      (16 * INT_REGISTER_SIZE)
+				      + (8 * FP_REGISTER_SIZE)
+				      + (2 * INT_REGISTER_SIZE),
+				      tdesc_arm_with_m_fpa_layout);
+
+      /* The regular M-profile layout.  */
+      register_remote_g_packet_guess (gdbarch,
+				      /* r0-r12,sp,lr,pc; xpsr */
+				      (16 * INT_REGISTER_SIZE)
+				      + INT_REGISTER_SIZE,
+				      tdesc_arm_with_m);
+    }
+
+  /* Otherwise we don't have a useful guess.  */
+}
+
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -9798,7 +9835,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		  && (attr_arch == TAG_CPU_ARCH_V6_M
 		      || attr_arch == TAG_CPU_ARCH_V6S_M
 		      || attr_profile == 'M'))
-		tdesc = tdesc_arm_with_m;
+		is_m = 1;
 #endif
 	    }
 
@@ -10055,6 +10092,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->have_neon_pseudos = have_neon_pseudos;
   tdep->have_neon = have_neon;
 
+  arm_register_g_packet_guesses (gdbarch);
+
   /* Breakpoints.  */
   switch (info.byte_order_for_code)
     {
@@ -10291,6 +10330,7 @@ _initialize_arm_tdep (void)
 
   /* Initialize the standard target descriptions.  */
   initialize_tdesc_arm_with_m ();
+  initialize_tdesc_arm_with_m_fpa_layout ();
   initialize_tdesc_arm_with_iwmmxt ();
   initialize_tdesc_arm_with_vfpv2 ();
   initialize_tdesc_arm_with_vfpv3 ();

@@ -1,3 +1,15 @@
+2012-03-15  Jonathan Larmour  <jifl@eCosCentric.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* arm-tdep.c: Include "remote.h" and "features/arm-with-m-fpa-layout.c".
+	(arm_register_g_packet_guesses): New function.
+	(arm_gdbarch_init): Don't force a target description with
+	registers when the executable is detected as M-profile.  Instead
+	set gdbarch->tdep->is_m.  Register `g' packet guesses.
+	(_initialize_arm_tdep): Initialize the new target description.
+	* features/arm-with-m-fpa-layout.xml: New description.
+	* features/arm-with-m-fpa-layout.c: New, generated.
+
 2012-03-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (breakpoint_xfer_memory): Add assertion.
