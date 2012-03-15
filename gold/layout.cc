@@ -1379,24 +1379,26 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
   bool is_relro_local = false;
   if (!this->script_options_->saw_sections_clause()
       && parameters->options().relro()
-      && type == elfcpp::SHT_PROGBITS
       && (flags & elfcpp::SHF_ALLOC) != 0
       && (flags & elfcpp::SHF_WRITE) != 0)
     {
-      if (strcmp(name, ".data.rel.ro") == 0)
-	is_relro = true;
-      else if (strcmp(name, ".data.rel.ro.local") == 0)
+      if (type == elfcpp::SHT_PROGBITS)
 	{
-	  is_relro = true;
-	  is_relro_local = true;
+	  if (strcmp(name, ".data.rel.ro") == 0)
+	    is_relro = true;
+	  else if (strcmp(name, ".data.rel.ro.local") == 0)
+	    {
+	      is_relro = true;
+	      is_relro_local = true;
+	    }
+	  else if (strcmp(name, ".ctors") == 0
+		   || strcmp(name, ".dtors") == 0
+		   || strcmp(name, ".jcr") == 0)
+	    is_relro = true;
 	}
       else if (type == elfcpp::SHT_INIT_ARRAY
 	       || type == elfcpp::SHT_FINI_ARRAY
 	       || type == elfcpp::SHT_PREINIT_ARRAY)
-	is_relro = true;
-      else if (strcmp(name, ".ctors") == 0
-	       || strcmp(name, ".dtors") == 0
-	       || strcmp(name, ".jcr") == 0)
 	is_relro = true;
     }
 

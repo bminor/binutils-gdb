@@ -1,3 +1,9 @@
+2012-03-15  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/13850
+	* layout.cc (Layout::make_output_section): Correctly mark
+	SHT_INIT_ARRAY, et. al., as relro.
+
 2012-03-14  Doug Kwan  <dougkwan@google.com>
 
 	* gold/arm.cc (Target_arm::Scan::global): Generate R_ARM_GLOB_DAT
