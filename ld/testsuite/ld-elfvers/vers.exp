@@ -1,6 +1,6 @@
 # Expect script for ld-version tests
 #   Copyright 1997, 1998, 1999, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-#   2009, 2010 Free Software Foundation, Inc.
+#   2009, 2010, 2011, 2012 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -884,7 +884,7 @@ test_strip_vers_lib "vers14" vers1.so vers14 vers1.ver vers1.dsym
 # try and override something from the library, and we shouldn't get
 # any errors.
 #
-build_exec "vers15" vers15.c vers15 "" vers1.so vers15.ver vers15.dsym vers15.sym
+build_exec "vers15" vers15.c vers15 "-Wl,--no-as-needed" vers1.so vers15.ver vers15.dsym vers15.sym
 
 #
 # Test that when we override a versioned symbol from the library this

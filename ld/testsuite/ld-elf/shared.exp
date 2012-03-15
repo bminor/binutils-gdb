@@ -1,5 +1,6 @@
 # Expect script for various ELF tests.
-#   Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+#   Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+#   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -161,7 +162,7 @@ set build_tests {
    "-shared" "-fPIC"
    {pr13250-1.c} {} "libpr13250-1.so"}
   {"Build pr13250-2.so with libpr13250-1.so"
-   "-shared tmpdir/libpr13250-1.so" "-fPIC"
+   "-shared -Wl,--no-as-needed tmpdir/libpr13250-1.so" "-fPIC"
    {pr13250-2.c} {} "libpr13250-2.so"}
   {"Build libpr13250-3.o"
    "-r -nostdlib" ""
@@ -325,14 +326,14 @@ set build_cxx_tests {
 
 set run_cxx_tests {
     {"Run with libdl3a.so"
-     "tmpdir/libdl3a.so" ""
+     "-Wl,--no-as-needed tmpdir/libdl3a.so" ""
      {dl3main.cc} "dl3a" "dl3a.out" "" "c++"}
 # "-shared -Bsymbolic" only works with gcc 4.5.0 and newer.
 #    {"Run with libdl3b.so"
 #     "tmpdir/libdl3b.so" ""
 #     {dl3main.cc} "dl3b" "dl3b.out" "" "c++"}
     {"Run with libdl3c.so"
-     "tmpdir/libdl3c.so" ""
+     "-Wl,--no-as-needed tmpdir/libdl3c.so" ""
      {dl3main.cc} "dl3c" "dl3a.out" "" "c++"}
     {"Run with libnew1a.so"
      "tmpdir/libnew1a.so" ""

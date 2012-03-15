@@ -1,3 +1,10 @@
+2012-03-15  Alan Modra  <amodra@gmail.com>
+
+	* config/default.exp: Update copyright date.
+	* ld-elf/shared.exp: Pass --no-as-needed to various tests linking
+	shared libs.
+	* ld-elfvers/vers.exp: Likewise.
+
 2012-03-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13839
