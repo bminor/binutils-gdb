@@ -869,8 +869,9 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
 
   for (i = 0; i <= max_voffset; ++i)
     {
+      /* Initialize it just to avoid a GCC false warning.  */
+      CORE_ADDR addr = 0;
       struct value *vfn;
-      CORE_ADDR addr;
       volatile struct gdb_exception ex;
 
       printf_filtered ("[%d]: ", i);

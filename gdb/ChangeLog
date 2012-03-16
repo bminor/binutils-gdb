@@ -1,3 +1,9 @@
+2012-03-16  Yao Qi  <yao@codesourcery.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix false compilation warning.
+	* gnu-v3-abi.c (print_one_vtable): Initialize ADDR.
+
 2012-03-15  Jonathan Larmour  <jifl@eCosCentric.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
