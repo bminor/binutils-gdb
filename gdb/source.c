@@ -588,7 +588,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
 		  p--;		/* Back over leading separator.  */
 		if (prefix > p - *which_path)
 		  goto skip_dup;	/* Same dir twice in one cmd.  */
-		strcpy (p, &p[len + 1]);	/* Copy from next \0 or  : */
+		memmove (p, &p[len + 1], strlen (&p[len + 1]) + 1);	/* Copy from next \0 or  : */
 	      }
 	    p = strchr (p, DIRNAME_SEPARATOR);
 	    if (p != 0)

@@ -1,3 +1,8 @@
+2012-03-16  Chris January  <chris.january@allinea.com>
+
+	* source.c (add_path): Use memmove instead of strcpy because the
+	strings overlap.
+
 2012-03-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* value.h (set_value_parent): Add declaration.
