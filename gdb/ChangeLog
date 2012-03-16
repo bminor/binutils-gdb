@@ -1,5 +1,10 @@
 2012-03-16  Chris January  <chris.january@allinea.com>
 
+	* tui-tui.win.c (tui_resize_all): Use erase and clearok instead
+	of clear.
+
+2012-03-16  Chris January  <chris.january@allinea.com>
+
 	* source.c (add_path): Use memmove instead of strcpy because the
 	strings overlap.
 

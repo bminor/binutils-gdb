@@ -690,13 +690,16 @@ tui_resize_all (void)
 	  if (height_diff < 0)
 	    cmd_split_diff--;
 	  else
-	    cmd_split_diff++;
-	}
+           cmd_split_diff++;
+       }
       /* Now adjust each window.  */
-      clear ();
+      /* erase + clearok are used instead of a straightforward clear as
+         AIX 5.3 does not define clear.  */
+      erase ();
+      clearok (curscr, TRUE);
       refresh ();
       switch (cur_layout)
-	{
+       {
 	case SRC_COMMAND:
 	case DISASSEM_COMMAND:
 	  first_win = (struct tui_win_info *) (tui_source_windows ())->list[0];
