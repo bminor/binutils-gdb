@@ -1,3 +1,8 @@
+2012-03-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/13777
+	* gdb.dwarf2/dw2-skip-prologue.S (DW_AT_producer): Set it to 4.5.0.
+
 2012-03-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/set_pckd_arr_elt: New testcase.

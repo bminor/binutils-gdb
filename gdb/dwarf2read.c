@@ -4868,7 +4868,9 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
 
       /* GCC-4.0 has started to support -fvar-tracking.  GCC-3.x still can
 	 produce DW_AT_location with location lists but it can be possibly
-	 invalid without -fvar-tracking.
+	 invalid without -fvar-tracking.  Still up to GCC-4.4.x incl. 4.4.0
+	 there were bugs in prologue debug info, fixed later in GCC-4.5
+	 by "unwind info for epilogues" patch (which is not directly related).
 
 	 For -gdwarf-4 type units LOCATIONS_VALID indication is fortunately not
 	 needed, it would be wrong due to missing DW_AT_producer there.
@@ -4876,7 +4878,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
 	 Still one can confuse GDB by using non-standard GCC compilation
 	 options - this waits on GCC PR other/32998 (-frecord-gcc-switches).
 	 */ 
-      if (cu->has_loclist && gcc_4_minor >= 0)
+      if (cu->has_loclist && gcc_4_minor >= 5)
 	symtab->locations_valid = 1;
 
       if (gcc_4_minor >= 5)

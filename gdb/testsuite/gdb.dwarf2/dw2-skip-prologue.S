@@ -30,7 +30,7 @@
 	.4byte	func_start			/* DW_AT_low_pc */
 	.4byte	func_end			/* DW_AT_high_pc */
 	.ascii	"main.c\0"			/* DW_AT_name */
-	.ascii	"GNU C 4.0.0\0"			/* DW_AT_producer must be >= 4.0  */
+	.ascii	"GNU C 4.5.0\0"			/* DW_AT_producer must be >= 4.5  */
 	.byte	2				/* DW_AT_language (DW_LANG_C) */
 
 	.uleb128	2			/* Abbrev: DW_TAG_subprogram */

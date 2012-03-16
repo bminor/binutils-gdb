@@ -1,3 +1,9 @@
+2012-03-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/13777
+	* dwarf2read.c (process_full_comp_unit): Set LOCATIONS_VALID only for
+	GCC >=4.5.
+
 2012-03-16  Chris January  <chris.january@allinea.com>
 
 	* tui-tui.win.c (tui_resize_all): Use erase and clearok instead
