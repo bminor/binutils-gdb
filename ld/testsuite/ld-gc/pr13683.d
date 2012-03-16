@@ -7,6 +7,6 @@
 # Note - look for both "foo" and "foo2" being defined, non-zero function symbols
 
 #...
-0*[1-9a-f]+[0-9a-f]*[ 	]T[ 	]_*foo
-0*[1-9a-f]+[0-9a-f]*[ 	]T[ 	]_*foo2
+0*[1-9a-f]+[0-9a-f]*[ 	](T|D)[ 	]_*foo
+0*[1-9a-f]+[0-9a-f]*[ 	](T|D)[ 	]_*foo2
 #...
