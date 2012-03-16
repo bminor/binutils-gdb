@@ -982,7 +982,7 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
       && htab->elf.splt != NULL)
     {
       const struct elf_x86_64_backend_data *const abed
-        = get_elf_x86_64_backend_data (dynobj);
+	= get_elf_x86_64_backend_data (dynobj);
       flagword flags = get_elf_backend_data (dynobj)->dynamic_sec_flags;
       htab->plt_eh_frame
 	= bfd_make_section_with_flags (dynobj, ".eh_frame",
@@ -993,9 +993,9 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
 
       htab->plt_eh_frame->size = abed->eh_frame_plt_size;
       htab->plt_eh_frame->contents
-        = bfd_alloc (dynobj, htab->plt_eh_frame->size);
+	= bfd_alloc (dynobj, htab->plt_eh_frame->size);
       memcpy (htab->plt_eh_frame->contents,
-              abed->eh_frame_plt, abed->eh_frame_plt_size);
+	      abed->eh_frame_plt, abed->eh_frame_plt_size);
     }
   return TRUE;
 }
@@ -1072,6 +1072,14 @@ elf64_x86_64_elf_object_p (bfd *abfd)
 {
   /* Set the right machine number for an x86-64 elf64 file.  */
   bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x86_64);
+  return TRUE;
+}
+
+static bfd_boolean
+elf32_x86_64_elf_object_p (bfd *abfd)
+{
+  /* Set the right machine number for an x86-64 elf32 file.  */
+  bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x64_32);
   return TRUE;
 }
 
@@ -5087,6 +5095,179 @@ static const struct bfd_elf_special_section
 
 #include "elf64-target.h"
 
+/* Native Client support.  */
+
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf64_x86_64_nacl_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf64-x86-64-nacl"
+#undef	elf64_bed
+#define	elf64_bed			elf64_x86_64_nacl_bed
+
+#undef	ELF_MAXPAGESIZE
+#undef	ELF_MINPAGESIZE
+#undef	ELF_COMMONPAGESIZE
+#define ELF_MAXPAGESIZE			0x10000
+#define ELF_MINPAGESIZE			0x10000
+#define ELF_COMMONPAGESIZE		0x10000
+
+/* Restore defaults.  */
+#undef	ELF_OSABI
+#undef	elf_backend_static_tls_alignment
+#undef	elf_backend_want_plt_sym
+#define elf_backend_want_plt_sym	0
+
+/* NaCl uses substantially different PLT entries for the same effects.  */
+
+#undef	elf_backend_plt_alignment
+#define elf_backend_plt_alignment	5
+#define NACL_PLT_ENTRY_SIZE		64
+#define	NACLMASK			0xe0 /* 32-byte alignment mask.  */
+
+static const bfd_byte elf_x86_64_nacl_plt0_entry[NACL_PLT_ENTRY_SIZE] =
+  {
+    0xff, 0x35, 8, 0, 0, 0,             /* pushq GOT+8(%rip) 		*/
+    0x4c, 0x8b, 0x1d, 16, 0, 0, 0,	/* mov GOT+16(%rip), %r11	*/
+    0x41, 0x83, 0xe3, NACLMASK,         /* and $-32, %r11d		*/
+    0x4d, 0x01, 0xfb,             	/* add %r15, %r11		*/
+    0x41, 0xff, 0xe3,             	/* jmpq *%r11			*/
+
+    /* 41 bytes of nop to pad out to the standard size.  */
+    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data32 prefixes	*/
+    0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
+    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data32 prefixes	*/
+    0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
+    0x66, 0x66,                            /* excess data32 prefixes	*/
+    0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
+  };
+
+static const bfd_byte elf_x86_64_nacl_plt_entry[NACL_PLT_ENTRY_SIZE] =
+  {
+    0x4c, 0x8b, 0x1d, 0, 0, 0, 0,	/* mov name@GOTPCREL(%rip),%r11	*/
+    0x41, 0x83, 0xe3, NACLMASK,         /* and $-32, %r11d		*/
+    0x4d, 0x01, 0xfb,             	/* add %r15, %r11		*/
+    0x41, 0xff, 0xe3,             	/* jmpq *%r11			*/
+
+    /* 15-byte nop sequence to pad out to the next 32-byte boundary.  */
+    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data32 prefixes	*/
+    0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
+
+    /* Lazy GOT entries point here (32-byte aligned).  */
+    0x68,                 /* pushq immediate */
+    0, 0, 0, 0,           /* replaced with index into relocation table.  */
+    0xe9,                 /* jmp relative */
+    0, 0, 0, 0,           /* replaced with offset to start of .plt0.  */
+
+    /* 22 bytes of nop to pad out to the standard size.  */
+    0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data32 prefixes	*/
+    0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
+    0x0f, 0x1f, 0x80, 0, 0, 0, 0,          /* nopl 0x0(%rax)		*/
+  };
+
+/* .eh_frame covering the .plt section.  */
+
+static const bfd_byte elf_x86_64_nacl_eh_frame_plt[] =
+  {
+#if (PLT_CIE_LENGTH != 20                               \
+     || PLT_FDE_LENGTH != 36                            \
+     || PLT_FDE_START_OFFSET != 4 + PLT_CIE_LENGTH + 8  \
+     || PLT_FDE_LEN_OFFSET != 4 + PLT_CIE_LENGTH + 12)
+# error "Need elf_x86_64_backend_data parameters for eh_frame_plt offsets!"
+#endif
+    PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
+    0, 0, 0, 0,			/* CIE ID */
+    1,				/* CIE version */
+    'z', 'R', 0,                /* Augmentation string */
+    1,				/* Code alignment factor */
+    0x78,                       /* Data alignment factor */
+    16,				/* Return address column */
+    1,				/* Augmentation size */
+    DW_EH_PE_pcrel | DW_EH_PE_sdata4, /* FDE encoding */
+    DW_CFA_def_cfa, 7, 8,	/* DW_CFA_def_cfa: r7 (rsp) ofs 8 */
+    DW_CFA_offset + 16, 1,	/* DW_CFA_offset: r16 (rip) at cfa-8 */
+    DW_CFA_nop, DW_CFA_nop,
+
+    PLT_FDE_LENGTH, 0, 0, 0,	/* FDE length */
+    PLT_CIE_LENGTH + 8, 0, 0, 0,/* CIE pointer */
+    0, 0, 0, 0,			/* R_X86_64_PC32 .plt goes here */
+    0, 0, 0, 0,			/* .plt size goes here */
+    0,				/* Augmentation size */
+    DW_CFA_def_cfa_offset, 16,	/* DW_CFA_def_cfa_offset: 16 */
+    DW_CFA_advance_loc + 6,	/* DW_CFA_advance_loc: 6 to __PLT__+6 */
+    DW_CFA_def_cfa_offset, 24,	/* DW_CFA_def_cfa_offset: 24 */
+    DW_CFA_advance_loc + 58,	/* DW_CFA_advance_loc: 58 to __PLT__+64 */
+    DW_CFA_def_cfa_expression,	/* DW_CFA_def_cfa_expression */
+    13,				/* Block length */
+    DW_OP_breg7, 8,		/* DW_OP_breg7 (rsp): 8 */
+    DW_OP_breg16, 0,		/* DW_OP_breg16 (rip): 0 */
+    DW_OP_const1u, 63, DW_OP_and, DW_OP_const1u, 37, DW_OP_ge,
+    DW_OP_lit3, DW_OP_shl, DW_OP_plus,
+    DW_CFA_nop, DW_CFA_nop
+  };
+
+static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
+  {
+    elf_x86_64_nacl_plt0_entry,              /* plt0_entry */
+    elf_x86_64_nacl_plt_entry,               /* plt_entry */
+    NACL_PLT_ENTRY_SIZE,                     /* plt_entry_size */
+    2,                                       /* plt0_got1_offset */
+    9,                                       /* plt0_got2_offset */
+    13,                                      /* plt0_got2_insn_end */
+    3,                                       /* plt_got_offset */
+    33,                                      /* plt_reloc_offset */
+    38,                                      /* plt_plt_offset */
+    7,                                       /* plt_got_insn_size */
+    42,                                      /* plt_plt_insn_end */
+    32,                                      /* plt_lazy_offset */
+    elf_x86_64_nacl_eh_frame_plt,            /* eh_frame_plt */
+    sizeof (elf_x86_64_nacl_eh_frame_plt),   /* eh_frame_plt_size */
+  };
+
+#undef	elf_backend_arch_data
+#define	elf_backend_arch_data	&elf_x86_64_nacl_arch_bed
+
+#include "elf64-target.h"
+
+/* Native Client x32 support.  */
+
+#undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		bfd_elf32_x86_64_nacl_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		"elf32-x86-64-nacl"
+#undef	elf32_bed
+#define	elf32_bed			elf32_x86_64_nacl_bed
+
+#define bfd_elf32_bfd_link_hash_table_create \
+  elf_x86_64_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_free \
+  elf_x86_64_link_hash_table_free
+#define bfd_elf32_bfd_reloc_type_lookup	\
+  elf_x86_64_reloc_type_lookup
+#define bfd_elf32_bfd_reloc_name_lookup \
+  elf_x86_64_reloc_name_lookup
+#define bfd_elf32_mkobject \
+  elf_x86_64_mkobject
+
+#undef elf_backend_object_p
+#define elf_backend_object_p \
+  elf32_x86_64_elf_object_p
+
+#undef elf_backend_bfd_from_remote_memory
+#define elf_backend_bfd_from_remote_memory \
+  _bfd_elf32_bfd_from_remote_memory
+
+#undef elf_backend_size_info
+#define elf_backend_size_info \
+  _bfd_elf32_size_info
+
+#include "elf32-target.h"
+
+/* Restore defaults.  */
+#undef elf_backend_object_p
+#define elf_backend_object_p		    elf64_x86_64_elf_object_p
+#undef elf_backend_bfd_from_remote_memory
+#undef elf_backend_size_info
+
 /* Intel L1OM support.  */
 
 static bfd_boolean
@@ -5115,10 +5296,17 @@ elf64_l1om_elf_object_p (bfd *abfd)
 #undef elf_backend_object_p
 #define elf_backend_object_p		    elf64_l1om_elf_object_p
 
-#undef  elf_backend_static_tls_alignment
-
-#undef elf_backend_want_plt_sym
-#define elf_backend_want_plt_sym	    0
+/* Restore defaults.  */
+#undef	ELF_MAXPAGESIZE
+#undef	ELF_MINPAGESIZE
+#undef	ELF_COMMONPAGESIZE
+#define ELF_MAXPAGESIZE			0x200000
+#define ELF_MINPAGESIZE			0x1000
+#define ELF_COMMONPAGESIZE		0x1000
+#undef	elf_backend_plt_alignment
+#define elf_backend_plt_alignment	4
+#undef	elf_backend_arch_data
+#define	elf_backend_arch_data	&elf_x86_64_arch_bed
 
 #include "elf64-target.h"
 
@@ -5189,35 +5377,17 @@ elf64_k1om_elf_object_p (bfd *abfd)
 
 /* 32bit x86-64 support.  */
 
-static bfd_boolean
-elf32_x86_64_elf_object_p (bfd *abfd)
-{
-  /* Set the right machine number for an x86-64 elf32 file.  */
-  bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x64_32);
-  return TRUE;
-}
-
 #undef  TARGET_LITTLE_SYM
 #define TARGET_LITTLE_SYM		    bfd_elf32_x86_64_vec
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf32-x86-64"
+#undef	elf32_bed
 
 #undef ELF_ARCH
 #define ELF_ARCH			    bfd_arch_i386
 
 #undef	ELF_MACHINE_CODE
 #define ELF_MACHINE_CODE		    EM_X86_64
-
-#define bfd_elf32_bfd_link_hash_table_create \
-  elf_x86_64_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_free \
-  elf_x86_64_link_hash_table_free
-#define bfd_elf32_bfd_reloc_type_lookup	\
-  elf_x86_64_reloc_type_lookup
-#define bfd_elf32_bfd_reloc_name_lookup \
-  elf_x86_64_reloc_name_lookup
-#define bfd_elf32_mkobject \
-  elf_x86_64_mkobject
 
 #undef	ELF_OSABI
 

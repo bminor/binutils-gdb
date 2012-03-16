@@ -183,7 +183,10 @@ case ${generic_target} in
   i386-*-elf)				fmt=elf ;;
   i386-*-kaos*)				fmt=elf ;;
   i386-*-bsd*)				fmt=aout em=386bsd ;;
-  i386-*-nacl*)				fmt=elf  em=nacl ;;
+  i386-*-nacl*)				fmt=elf em=nacl
+    case ${cpu} in
+      x86_64*)				arch=x86_64:32 ;;
+    esac ;;
   i386-*-netbsd0.8)			fmt=aout em=386bsd ;;
   i386-*-netbsdpe*)			fmt=coff em=pe ;;
   i386-*-netbsd*-gnu* | \

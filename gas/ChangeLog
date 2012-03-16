@@ -1,3 +1,9 @@
+2012-03-16  Roland McGrath  <mcgrathr@google.com>
+
+	* config/tc-i386.h [TE_NACL] (ELF_TARGET_FORMAT32, ELF_TARGET_FORMAT64):
+	Define for this case.
+	* configure.tgt (i386-*-nacl*): If ${cpu} is x86_64*, default to x32.
+
 2012-03-16  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (aeabi_set_public_attributes): Correct

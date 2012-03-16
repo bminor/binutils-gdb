@@ -1,3 +1,12 @@
+2012-03-16  Roland McGrath  <mcgrathr@google.com>
+
+	* config.bfd: Handle x86_64-*-nacl*.
+	* elf64-x86-64.c (bfd_elf64_x86_64_nacl_vec): New backend vector stanza.
+	(bfd_elf32_x86_64_nacl_vec): Likewise.
+	* targets.c: Support them.
+	* configure.in: Likewise.
+	* configure: Regenerated.
+
 2012-03-16  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* elf32-arm.c (elf32_arm_attributes_accept_div): New function.
