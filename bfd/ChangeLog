@@ -1,3 +1,10 @@
+2012-03-16  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* elf32-arm.c (elf32_arm_attributes_accept_div): New function.
+	(elf32_arm_attributes_forbid_div): Likewise.
+	(elf32_arm_merge_eabi_attributes): Correct handling of
+	Tag_DIV_use.
+
 2012-03-15  Roland McGrath  <mcgrathr@google.com>
 
 	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Use

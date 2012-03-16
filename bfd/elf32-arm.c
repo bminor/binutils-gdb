@@ -11268,6 +11268,46 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
 #undef T
 }
 
+/* Query attributes object to see if integer divide instructions may be
+   present in an object.  */
+static bfd_boolean
+elf32_arm_attributes_accept_div (const obj_attribute *attr)
+{
+  int arch = attr[Tag_CPU_arch].i;
+  int profile = attr[Tag_CPU_arch_profile].i;
+
+  switch (attr[Tag_DIV_use].i)
+    {
+    case 0:
+      /* Integer divide allowed if instruction contained in archetecture.  */
+      if (arch == TAG_CPU_ARCH_V7 && (profile == 'R' || profile == 'M'))
+	return TRUE;
+      else if (arch >= TAG_CPU_ARCH_V7E_M)
+	return TRUE;
+      else
+	return FALSE;
+
+    case 1:
+      /* Integer divide explicitly prohibited.  */
+      return FALSE;
+
+    default:
+      /* Unrecognised case - treat as allowing divide everywhere.  */
+    case 2:
+      /* Integer divide allowed in ARM state.  */
+      return TRUE;
+    }
+}
+
+/* Query attributes object to see if integer divide instructions are
+   forbidden to be in the object.  This is not the inverse of
+   elf32_arm_attributes_accept_div.  */
+static bfd_boolean
+elf32_arm_attributes_forbid_div (const obj_attribute *attr)
+{
+  return attr[Tag_DIV_use].i == 1;
+}
+
 /* Merge EABI object attributes from IBFD into OBFD.  Raise an error if there
    are conflicting attributes.  */
 
@@ -11709,29 +11749,22 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	  break;
 
 	case Tag_DIV_use:
-	  /* This tag is set to zero if we can use UDIV and SDIV in Thumb
-	     mode on a v7-M or v7-R CPU; to one if we can not use UDIV or
-	     SDIV at all; and to two if we can use UDIV or SDIV on a v7-A
-	     CPU.  We will merge as follows: If the input attribute's value
-	     is one then the output attribute's value remains unchanged.  If
-	     the input attribute's value is zero or two then if the output
-	     attribute's value is one the output value is set to the input
-	     value, otherwise the output value must be the same as the
-	     inputs.  */ 
-	  if (in_attr[i].i != 1 && out_attr[i].i != 1) 
-	    { 
-	      if (in_attr[i].i != out_attr[i].i)
-		{
-		  _bfd_error_handler
-		    (_("DIV usage mismatch between %B and %B"),
-		     ibfd, obfd); 
-		  result = FALSE;
-		}
-	    } 
-
-	  if (in_attr[i].i != 1)
-	    out_attr[i].i = in_attr[i].i; 
-	  
+	  /* A value of zero on input means that the divide instruction may
+	     be used if available in the base architecture as specified via
+	     Tag_CPU_arch and Tag_CPU_arch_profile.  A value of 1 means that
+	     the user did not want divide instructions.  A value of 2
+	     explicitly means that divide instructions were allowed in ARM
+	     and Thumb state.  */
+	  if (in_attr[i].i == out_attr[i].i)
+	    /* Do nothing.  */ ;
+	  else if (elf32_arm_attributes_forbid_div (in_attr)
+		   && !elf32_arm_attributes_accept_div (out_attr))
+	    out_attr[i].i = 1;
+	  else if (elf32_arm_attributes_forbid_div (out_attr)
+		   && elf32_arm_attributes_accept_div (in_attr))
+	    out_attr[i].i = in_attr[i].i;
+	  else if (in_attr[i].i == 2)
+	    out_attr[i].i = in_attr[i].i;
 	  break;
 
 	case Tag_MPextension_use_legacy:
