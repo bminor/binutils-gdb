@@ -1,3 +1,8 @@
+2012-03-16  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.c (aeabi_set_public_attributes): Correct
+	handling of Tag_DIV_use.
+
 2012-03-15  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* doc/as.texinfo (Bundle directives): Fix typo.

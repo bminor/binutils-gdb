@@ -690,6 +690,18 @@ set armeabitests {
 }
 
 run_ld_link_tests $armeabitests
+run_dump_test "attr-merge-div-00"
+run_dump_test "attr-merge-div-01"
+run_dump_test "attr-merge-div-10"
+run_dump_test "attr-merge-div-01-m3"
+run_dump_test "attr-merge-div-10-m3"
+run_dump_test "attr-merge-div-11"
+run_dump_test "attr-merge-div-12"
+run_dump_test "attr-merge-div-120"
+run_dump_test "attr-merge-div-21"
+run_dump_test "attr-merge-div-22"
+run_dump_test "attr-merge-div-02"
+run_dump_test "attr-merge-div-20"
 run_dump_test "attr-merge-wchar-00"
 run_dump_test "attr-merge-wchar-02"
 run_dump_test "attr-merge-wchar-04"

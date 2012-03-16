@@ -23698,6 +23698,7 @@ static void
 aeabi_set_public_attributes (void)
 {
   int arch;
+  char profile;
   int virt_sec = 0;
   arm_feature_set flags;
   arm_feature_set tmp;
@@ -23775,11 +23776,16 @@ aeabi_set_public_attributes (void)
 
   /* Tag_CPU_arch_profile.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a))
-    aeabi_set_attribute_int (Tag_CPU_arch_profile, 'A');
+    profile = 'A';
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7r))
-    aeabi_set_attribute_int (Tag_CPU_arch_profile, 'R');
+    profile = 'R';
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_m))
-    aeabi_set_attribute_int (Tag_CPU_arch_profile, 'M');
+    profile = 'M';
+  else
+    profile = '\0';
+
+  if (profile != '\0')
+    aeabi_set_attribute_int (Tag_CPU_arch_profile, profile);
 
   /* Tag_ARM_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v1)
@@ -23828,13 +23834,19 @@ aeabi_set_public_attributes (void)
   if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_fp16))
     aeabi_set_attribute_int (Tag_VFP_HP_extension, 1);
 
-  /* Tag_DIV_use.  */
-  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_adiv))
+  /* Tag_DIV_use.
+
+     We set Tag_DIV_use to two when integer divide instructions have been used
+     in ARM state, or when Thumb integer divide instructions have been used,
+     but we have no architecture profile set, nor have we any ARM instructions.
+
+     For new architectures we will have to check these tests.  */
+  gas_assert (arch <= TAG_CPU_ARCH_V7E_M);
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_adiv)
+      || (profile == '\0'
+	  && ARM_CPU_HAS_FEATURE (flags, arm_ext_div)
+	  && !ARM_CPU_HAS_FEATURE (arm_arch_used, arm_arch_any)))
     aeabi_set_attribute_int (Tag_DIV_use, 2);
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_div))
-    aeabi_set_attribute_int (Tag_DIV_use, 0);
-  else
-    aeabi_set_attribute_int (Tag_DIV_use, 1);
 
   /* Tag_MP_extension_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_mp))

@@ -1,3 +1,64 @@
+2012-03-16  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ld-arm/arm-elf.exp: Add new testcases.
+	* ld-arm/attr-merge-2.attr: Update ouput.
+	* ld-arm/attr-merge-2a.s: Remove Tag_DIV_use test.
+	* ld-arm/attr-merge-2b.s: Likewise.
+	* ld-arm/attr-merge-3.attr: Updated expected output.
+	* ld-arm/attr-merge-4.attr: Likewise.
+	* ld-arm/attr-merge-5.attr: Likewise.
+	* ld-arm/attr-merge-6.attr: Likewise.
+	* ld-arm/attr-merge-7.attr: Likewise.
+	* ld-arm/attr-merge-arch-1.attr: Likewise.
+	* ld-arm/attr-merge-arch-2.attr: Likewise.
+	* ld-arm/attr-merge-unknown-2.d: Likewise.
+	* ld-arm/attr-merge-unknown-2r.d: Likewise.
+	* ld-arm/attr-merge-unknown-3.d: Likewise.
+	* ld-arm/attr-merge-vfp-1.d: Likewise.
+	* ld-arm/attr-merge-vfp-1r.d: Likewise.
+	* ld-arm/attr-merge-vfp-2.d: Likewise.
+	* ld-arm/attr-merge-vfp-2r.d: Likewise.
+	* ld-arm/attr-merge-vfp-3.d: Likewise.
+	* ld-arm/attr-merge-vfp-3r.d: Likewise.
+	* ld-arm/attr-merge-vfp-4.d: Likewise.
+	* ld-arm/attr-merge-vfp-4r.d: Likewise.
+	* ld-arm/attr-merge-vfp-5.d: Likewise.
+	* ld-arm/attr-merge-vfp-5r.d: Likewise.
+	* ld-arm/attr-merge-vfp-6.d: Likewise.
+	* ld-arm/attr-merge-vfp-6r.d: Likewise.
+	* ld-arm/attr-merge-wchar-00-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-00.d: Likewise.
+	* ld-arm/attr-merge-wchar-02-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-02.d: Likewise.
+	* ld-arm/attr-merge-wchar-04-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-04.d: Likewise.
+	* ld-arm/attr-merge-wchar-20-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-20.d: Likewise.
+	* ld-arm/attr-merge-wchar-22-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-22.d: Likewise.
+	* ld-arm/attr-merge-wchar-24-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-40-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-40.d: Likewise.
+	* ld-arm/attr-merge-wchar-42-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-44-nowarn.d: Likewise.
+	* ld-arm/attr-merge-wchar-44.d: Likewise.
+	* ld-arm/attr-merge.attr: Likewise.
+	* ld-arm/attr-merge-div-0.s: New testcase.
+	* ld-arm/attr-merge-div-00.d: Likewise.
+	* ld-arm/attr-merge-div-01-m3.d: Likewise.
+	* ld-arm/attr-merge-div-01.d: Likewise.
+	* ld-arm/attr-merge-div-02.d: Likewise.
+	* ld-arm/attr-merge-div-1.s: Likewise.
+	* ld-arm/attr-merge-div-10-m3.d: Likewise.
+	* ld-arm/attr-merge-div-10.d: Likewise.
+	* ld-arm/attr-merge-div-11.d: Likewise.
+	* ld-arm/attr-merge-div-12.d: Likewise.
+	* ld-arm/attr-merge-div-120.d: Likewise.
+	* ld-arm/attr-merge-div-2.s: Likewise.
+	* ld-arm/attr-merge-div-20.d: Likewise.
+	* ld-arm/attr-merge-div-21.d: Likewise.
+	* ld-arm/attr-merge-div-22.d: Likewise.
+
 2012-03-16  Alan Modra  <amodra@gmail.com>
 
 	* ld-gc/pr13683.d: Accept powerpc64 function descriptor syms.

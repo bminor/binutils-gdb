@@ -13,4 +13,3 @@ File Attributes
   Tag_ARM_ISA_use: Yes
   Tag_THUMB_ISA_use: Thumb-2
   Tag_MPextension_use: Allowed
-  Tag_DIV_use: Not allowed

@@ -10,4 +10,3 @@ File Attributes
   Tag_CPU_name: "7"
   Tag_CPU_arch: v7
   Tag_THUMB_ISA_use: Thumb-2
-  Tag_DIV_use: Not allowed
