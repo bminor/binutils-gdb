@@ -85,6 +85,9 @@ static const int mappings[] =
 };
 #undef context_offset
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_amd64_windows_nat;
+
 void
 _initialize_amd64_windows_nat (void)
 {
