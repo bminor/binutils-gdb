@@ -806,6 +806,14 @@ value_parent (struct value *value)
   return value->parent;
 }
 
+/* See value.h.  */
+
+void
+set_value_parent (struct value *value, struct value *parent)
+{
+  value->parent = parent;
+}
+
 gdb_byte *
 value_contents_raw (struct value *value)
 {
@@ -1101,7 +1109,10 @@ value_address (const struct value *value)
   if (value->lval == lval_internalvar
       || value->lval == lval_internalvar_component)
     return 0;
-  return value->location.address + value->offset;
+  if (value->parent != NULL)
+    return value_address (value->parent) + value->offset;
+  else
+    return value->location.address + value->offset;
 }
 
 CORE_ADDR

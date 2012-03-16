@@ -1,3 +1,13 @@
+2012-03-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* value.h (set_value_parent): Add declaration.
+	* value.c (set_value_parent): New function.
+	(value_address): If VALUE->PARENT is not NULL, then use it as
+	the base address instead of VALUE->LOCATION.address.
+	* ada-lang.c (ada_value_primitive_packed_val): Keep V's address
+	the same as OBJ's address.  Adjust V's offset accordingly.
+	Set V's parent.
+
 2012-03-16  Gary Benson  <gbenson@redhat.com>
 
 	PR breakpoints/10738

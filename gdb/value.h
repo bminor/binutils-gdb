@@ -74,6 +74,7 @@ extern void set_value_bitpos (struct value *, int bit);
    bitfields.  */
 
 struct value *value_parent (struct value *);
+extern void set_value_parent (struct value *value, struct value *parent);
 
 /* Describes offset of a value within lval of a structure in bytes.
    If lval == lval_memory, this is an offset to the address.  If lval

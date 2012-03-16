@@ -2297,10 +2297,9 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
-      v = value_at (type,
-                    value_address (obj) + offset);
+      v = value_at (type, value_address (obj));
       bytes = (unsigned char *) alloca (len);
-      read_memory (value_address (v), bytes, len);
+      read_memory (value_address (v) + offset, bytes, len);
     }
   else
     {
@@ -2310,18 +2309,22 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 
   if (obj != NULL)
     {
-      CORE_ADDR new_addr;
+      long new_offset = offset;
 
       set_value_component_location (v, obj);
-      new_addr = value_address (obj) + offset;
       set_value_bitpos (v, bit_offset + value_bitpos (obj));
       set_value_bitsize (v, bit_size);
       if (value_bitpos (v) >= HOST_CHAR_BIT)
         {
-	  ++new_addr;
+	  ++new_offset;
           set_value_bitpos (v, value_bitpos (v) - HOST_CHAR_BIT);
         }
-      set_value_address (v, new_addr);
+      set_value_offset (v, new_offset);
+
+      /* Also set the parent value.  This is needed when trying to
+	 assign a new value (in inferior memory).  */
+      set_value_parent (v, obj);
+      value_incref (obj);
     }
   else
     set_value_bitsize (v, bit_size);
