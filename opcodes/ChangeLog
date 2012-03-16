@@ -1,3 +1,12 @@
+2012-03-16  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (PPC_OPC_SEGS, PPC_OP_TO_SEG): Delete.
+	(powerpc_opcd_indices): Bump array size.
+	(disassemble_init_powerpc): Set powerpc_opcd_indices entries
+	corresponding to unused opcodes to following entry.
+	(lookup_powerpc): New function, extracted and optimised from..
+	(print_insn_powerpc): ..here.
+
 2012-03-15  Alan Modra  <amodra@gmail.com>
 	    James Lemke  <jwlemke@codesourcery.com>
 

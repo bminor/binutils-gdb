@@ -265,9 +265,7 @@ powerpc_init_dialect (struct disassemble_info *info)
   POWERPC_DIALECT(info) = dialect;
 }
 
-#define PPC_OPCD_SEGS 64
-#define PPC_OP_TO_SEG(i) (i)
-static unsigned short powerpc_opcd_indices[PPC_OPCD_SEGS];
+static unsigned short powerpc_opcd_indices[65];
 
 /* Calculate opcode table indices to speed up disassembly,
    and init dialect.  */
@@ -276,17 +274,22 @@ void
 disassemble_init_powerpc (struct disassemble_info *info)
 {
   int i;
-
-  for (i = 0; i < PPC_OPCD_SEGS; ++i)
-    powerpc_opcd_indices[i] = powerpc_num_opcodes;
+  unsigned short last;
 
   i = powerpc_num_opcodes;
   while (--i >= 0)
     {
       unsigned op = PPC_OP (powerpc_opcodes[i].opcode);
-      unsigned seg = PPC_OP_TO_SEG (op);
 
-      powerpc_opcd_indices[seg] = i;
+      powerpc_opcd_indices[op] = i;
+    }
+
+  last = powerpc_num_opcodes;
+  for (i = 64; i > 0; --i)
+    {
+      if (powerpc_opcd_indices[i] == 0)
+	powerpc_opcd_indices[i] = last;
+      last = powerpc_opcd_indices[i];
     }
 
   if (info->arch == bfd_arch_powerpc)
@@ -367,6 +370,52 @@ skip_optional_operands (const unsigned char *opindex,
   return 1;
 }
 
+/* Find a match for INSN in the opcode table, given machine DIALECT.
+   A DIALECT of -1 is special, matching all machine opcode variations.  */
+   
+static const struct powerpc_opcode *
+lookup_powerpc (unsigned long insn, ppc_cpu_t dialect)
+{
+  const struct powerpc_opcode *opcode;
+  const struct powerpc_opcode *opcode_end;
+  unsigned long op;
+
+  /* Get the major opcode of the instruction.  */
+  op = PPC_OP (insn);
+
+  /* Find the first match in the opcode table for this major opcode.  */
+  opcode_end = powerpc_opcodes + powerpc_opcd_indices[op + 1];
+  for (opcode = powerpc_opcodes + powerpc_opcd_indices[op];
+       opcode < opcode_end;
+       ++opcode)
+    {
+      const unsigned char *opindex;
+      const struct powerpc_operand *operand;
+      int invalid;
+
+      if ((insn & opcode->mask) != opcode->opcode
+	  || (dialect != (ppc_cpu_t) -1
+	      && ((opcode->flags & dialect) == 0
+		  || (opcode->deprecated & dialect) != 0)))
+	continue;
+
+      /* Check validity of operands.  */
+      invalid = 0;
+      for (opindex = opcode->operands; *opindex != 0; opindex++)
+	{
+	  operand = powerpc_operands + *opindex;
+	  if (operand->extract)
+	    (*operand->extract) (insn, dialect, &invalid);
+	}
+      if (invalid)
+	continue;
+
+      return opcode;
+    }
+
+  return NULL;
+}
+
 /* Print a PowerPC or POWER instruction.  */
 
 static int
@@ -379,8 +428,6 @@ print_insn_powerpc (bfd_vma memaddr,
   int status;
   unsigned long insn;
   const struct powerpc_opcode *opcode;
-  const struct powerpc_opcode *opcode_end;
-  unsigned long op;
 
   status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status != 0)
@@ -394,52 +441,18 @@ print_insn_powerpc (bfd_vma memaddr,
   else
     insn = bfd_getl32 (buffer);
 
-  /* Get the major opcode of the instruction.  */
-  op = PPC_OP (insn);
+  opcode = lookup_powerpc (insn, dialect);
+  if (opcode == NULL && (dialect & PPC_OPCODE_ANY) != 0)
+    opcode = lookup_powerpc (insn, (ppc_cpu_t) -1);
 
-  /* Find the first match in the opcode table.
-     We speed this up by segmenting the opcode table and starting the search
-     at one of the segment boundaries.  */
-  opcode_end = powerpc_opcodes + powerpc_num_opcodes;
- again:
-  for (opcode = powerpc_opcodes + powerpc_opcd_indices[PPC_OP_TO_SEG (op)];
-       opcode < opcode_end;
-       ++opcode)
+  if (opcode != NULL)
     {
-      unsigned long table_op;
       const unsigned char *opindex;
       const struct powerpc_operand *operand;
-      int invalid;
       int need_comma;
       int need_paren;
       int skip_optional;
 
-      table_op = PPC_OP (opcode->opcode);
-      if (op > table_op)
-	continue;
-      if (op < table_op)
-	break;
-
-      if ((insn & opcode->mask) != opcode->opcode
-	  || (opcode->flags & dialect) == 0
-	  || (dialect != ~(ppc_cpu_t) PPC_OPCODE_ANY
-	      && (opcode->deprecated & dialect) != 0))
-	continue;
-
-      /* Make two passes over the operands.  First see if any of them
-	 have extraction functions, and, if they do, make sure the
-	 instruction is valid.  */
-      invalid = 0;
-      for (opindex = opcode->operands; *opindex != 0; opindex++)
-	{
-	  operand = powerpc_operands + *opindex;
-	  if (operand->extract)
-	    (*operand->extract) (insn, dialect, &invalid);
-	}
-      if (invalid)
-	continue;
-
-      /* The instruction is valid.  */
       if (opcode->operands[0] != 0)
 	(*info->fprintf_func) (info->stream, "%-7s ", opcode->name);
       else
@@ -538,12 +551,6 @@ print_insn_powerpc (bfd_vma memaddr,
 
       /* We have found and printed an instruction; return.  */
       return 4;
-    }
-
-  if ((dialect & PPC_OPCODE_ANY) != 0)
-    {
-      dialect = ~(ppc_cpu_t) PPC_OPCODE_ANY;
-      goto again;
     }
 
   /* We could not find a match.  */
