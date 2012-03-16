@@ -1221,6 +1221,13 @@ memory usage after it completes each command and returns to the prompt.
 This option causes @value{GDBN} to print its version number and
 no-warranty blurb, and exit.
 
+@item -use-deprecated-index-sections
+@cindex @code{--use-deprecated-index-sections}
+This option causes @value{GDBN} to read and use deprecated
+@samp{.gdb_index} sections from symbol files.  This can speed up
+startup, but may result in some functionality being lost.
+@xref{Index Section Format}.
+
 @end table
 
 @node Startup
@@ -9889,14 +9896,6 @@ There are some ways that @value{GDBN} does not pretend that inlined
 function calls are the same as normal calls:
 
 @itemize @bullet
-@item
-You cannot set breakpoints on inlined functions.  @value{GDBN}
-either reports that there is no symbol with that name, or else sets the
-breakpoint only on non-inlined copies of the function.  This limitation
-will be removed in a future version of @value{GDBN}; until then,
-set a breakpoint by line number on the first line of the inlined
-function instead.
-
 @item
 Setting breakpoints at the call site of an inlined function may not
 work, because the call site does not contain any code.  @value{GDBN}
@@ -38956,8 +38955,11 @@ unless otherwise noted:
 
 @enumerate
 @item
-The version number, currently 5.  Versions 1, 2 and 3 are obsolete.
-Version 4 differs by its hashing function.
+The version number, currently 6.  Versions 1, 2 and 3 are obsolete.
+Version 4 uses a different hashing function from versions 5 and 6.
+Version 6 includes symbols for inlined functions, whereas versions
+4 and 5 do not.  @value{GDBN} will only read version 4 and 5 indices
+if the @code{--use-deprecated-index-sections} option is used.
 
 @item
 The offset, from the start of the file, of the CU list.
@@ -39032,7 +39034,7 @@ index version:
 @item Version 4
 The formula is @code{r = r * 67 + c - 113}.
 
-@item Version 5
+@item Versions 5 and 6
 The formula is @code{r = r * 67 + tolower (c) - 113}.
 @end table
 

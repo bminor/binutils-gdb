@@ -1,3 +1,27 @@
+2012-03-16  Gary Benson  <gbenson@redhat.com>
+
+	PR breakpoints/10738
+	* dwarf2read.c (use_deprecated_index_sections): New global.
+	(struct partial_die_info): New member may_be_inlined.
+	(read_partial_die): Set may_be_inlined where appropriate.
+	(add_partial_subprogram): Add partial symbols for partial
+	DIEs that may be inlined.
+	(new_symbol_full): Add inlined subroutines to the current
+	scope.
+	(write_psymtabs_to_index): Bump version number.
+	(dwarf2_read_index): Read only version 6 indices unless
+	use_deprecated_index_sections is set.
+	* linespec.c (symbol_and_data_callback): New structure.
+	(iterate_inline_only): New function.
+	(iterate_over_all_matching_symtabs): New argument
+	"include_inline".  If nonzero, also call the callback for
+	symbols representing inlined subroutines.
+	(lookup_prefix_sym): Pass extra argument to the above.
+	(find_function_symbols): Likewise.
+	(add_matching_symbols_to_info): Likewise.
+	* NEWS: Mention that GDB can now set breakpoints on inlined
+	functions.
+
 2012-03-16  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-typeprint.c (pascal_type_print_method_args):

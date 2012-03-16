@@ -62,6 +62,17 @@
 * The "info static-tracepoint-marker" command will now also work on
   native Linux targets with in-process agent.
 
+* GDB can now set breakpoints on inlined functions.
+
+* The .gdb_index section has been updated to include symbols for
+  inlined functions.  GDB will ignore older .gdb_index sections by
+  default, which could cause symbol files to be loaded more slowly
+  until their .gdb_index sections can be recreated.  The new option
+  --use-deprecated-index-sections will cause GDB to use any older
+  .gdb_index sections it finds.  This will restore performance, but
+  the ability to set breakpoints on inlined functions will be lost
+  in symbol files with older .gdb_index sections.
+
 * New commands
 
   ** "catch load" and "catch unload" can be used to stop when a shared

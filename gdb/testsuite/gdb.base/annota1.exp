@@ -133,7 +133,7 @@ gdb_test_multiple "info break" "breakpoint info" {
 #exp_internal 1
 set binexp [string_to_regexp $binfile]
 gdb_test_multiple "run" "run until main breakpoint" {
-    -re "\r\n\032\032post-prompt\r\nStarting program: $binexp \(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)+\r\n\r\n\032\032starting\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n\032\032breakpoint 1\r\n\r\nBreakpoint 1, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*annota1.c\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$main_line\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped.*$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\nStarting program: $binexp \(\r\nwarning: Skipping \[^\r\n\]+ .gdb_index section in \[^\r\n\]+\)?\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)+\r\n\r\n\032\032starting\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n\032\032breakpoint 1\r\n\r\nBreakpoint 1, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*annota1.c\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$main_line\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped.*$gdb_prompt$" {
 	pass "run until main breakpoint" 
     }
 }

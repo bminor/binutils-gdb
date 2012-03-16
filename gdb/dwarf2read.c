@@ -85,6 +85,9 @@ static int dwarf2_die_debug = 0;
 /* When non-zero, cross-check physname against demangler.  */
 static int check_physname = 0;
 
+/* When non-zero, do not reject deprecated .gdb_index sections.  */
+int use_deprecated_index_sections = 0;
+
 static int pagesize;
 
 /* When set, the file that we're processing is known to have debugging
@@ -539,6 +542,7 @@ struct partial_die_info
     unsigned int has_type : 1;
     unsigned int has_specification : 1;
     unsigned int has_pc_info : 1;
+    unsigned int may_be_inlined : 1;
 
     /* Flag set if the SCOPE field of this structure has been
        computed.  */
@@ -2118,13 +2122,41 @@ dwarf2_read_index (struct objfile *objfile)
   /* Versions earlier than 3 emitted every copy of a psymbol.  This
      causes the index to behave very poorly for certain requests.  Version 3
      contained incomplete addrmap.  So, it seems better to just ignore such
-     indices.  Index version 4 uses a different hash function than index
-     version 5 and later.  */
+     indices.  */
   if (version < 4)
-    return 0;
-  /* Indices with higher version than the one supported by GDB may be no
+    {
+      static int warning_printed = 0;
+      if (!warning_printed)
+	{
+	  warning (_("Skipping obsolete .gdb_index section in %s."),
+		   objfile->name);
+	  warning_printed = 1;
+	}
+      return 0;
+    }
+  /* Index version 4 uses a different hash function than index version
+     5 and later.
+
+     Versions earlier than 6 did not emit psymbols for inlined
+     functions.  Using these files will cause GDB not to be able to
+     set breakpoints on inlined functions by name, so we ignore these
+     indices unless the --use-deprecated-index-sections command line
+     option was supplied.  */
+  if (version < 6 && !use_deprecated_index_sections)
+    {
+      static int warning_printed = 0;
+      if (!warning_printed)
+	{
+	  warning (_("Skipping deprecated .gdb_index section in %s, pass "
+		     "--use-deprecated-index-sections to use them anyway"),
+		   objfile->name);
+	  warning_printed = 1;
+	}
+      return 0;
+    }
+  /* Indexes with higher version than the one supported by GDB may be no
      longer backward compatible.  */
-  if (version > 5)
+  if (version > 6)
     return 0;
 
   map = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct mapped_index);
@@ -4244,6 +4276,10 @@ add_partial_subprogram (struct partial_die_info *pdi,
 				 pdi->highpc - 1 + baseaddr,
 				 cu->per_cu->v.psymtab);
 	    }
+        }
+
+      if (pdi->has_pc_info || (!pdi->is_external && pdi->may_be_inlined))
+	{
           if (!pdi->is_declaration)
 	    /* Ignore subprogram DIEs that do not have a name, they are
 	       illegal.  Do not emit a complaint at this point, we will
@@ -9874,6 +9910,11 @@ read_partial_die (struct partial_die_info *part_die,
 	      language_of_main = language_fortran;
 	    }
 	  break;
+	case DW_AT_inline:
+	  if (DW_UNSND (&attr) == DW_INL_inlined
+	      || DW_UNSND (&attr) == DW_INL_declared_inlined)
+	    part_die->may_be_inlined = 1;
+	  break;
 	default:
 	  break;
 	}
@@ -11718,8 +11759,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	     finish_block.  */
 	  SYMBOL_CLASS (sym) = LOC_BLOCK;
 	  SYMBOL_INLINED (sym) = 1;
-	  /* Do not add the symbol to any lists.  It will be found via
-	     BLOCK_FUNCTION from the blockvector.  */
+	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_template_value_param:
 	  suppress_add = 1;
@@ -17027,7 +17067,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   total_len = size_of_contents;
 
   /* The version number.  */
-  val = MAYBE_SWAP (5);
+  val = MAYBE_SWAP (6);
   obstack_grow (&contents, &val, sizeof (val));
 
   /* The offset of the CU list from the start of the file.  */

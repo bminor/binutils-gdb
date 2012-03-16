@@ -31,7 +31,8 @@ global mi_inferior_tty_name
 set MIFLAGS "-i=mi"
 
 set thread_selected_re "=thread-selected,id=\"\[0-9\]+\"\r\n"
-set library_loaded_re "=library-loaded\[^\n\]+\"\r\n"
+set gdbindex_warning_re "&\"warning: Skipping \[^\r\n\]+ \.gdb_index section in \[^\"\]+\"\r\n"
+set library_loaded_re "=library-loaded\[^\n\]+\"\r\n(?:$gdbindex_warning_re)?"
 set breakpoint_re "=(?:breakpoint-created|breakpoint-deleted)\[^\n\]+\"\r\n"
 
 #

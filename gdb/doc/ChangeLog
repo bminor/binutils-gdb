@@ -1,3 +1,11 @@
+2012-03-16  Gary Benson  <gbenson@redhat.com>
+
+	PR breakpoints/10738
+	* gdb.texinfo (Inline Functions): Remove the now-unnecessary @item
+	stating that GDB cannot set breakpoints on inlined functions.
+	(Mode Options): Document --use-deprecated-index-sections.
+	(Index Section Format): Document new index section version format.
+
 2012-03-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Debugging C Plus Plus): Document "info vtbl".
