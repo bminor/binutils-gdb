@@ -1,3 +1,8 @@
+2012-03-16  Doug Kwan  <dougkwan@google.com>
+
+	* testsuite/Makefile.am: Disable test initpri3b.
+	* testsuite/Makefile.in: Regenerate.
+
 2012-03-15  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::got_section): Make .got section read-only

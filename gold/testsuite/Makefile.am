@@ -873,11 +873,16 @@ initpri3a_DEPENDENCIES = gcctestdir/ld
 initpri3a_LDFLAGS = -Bgcctestdir/
 initpri3a_LDADD =
 
-check_PROGRAMS += initpri3b
-initpri3b_SOURCES = initpri3.c
-initpri3b_DEPENDENCIES = gcctestdir/ld
-initpri3b_LDFLAGS = -Bgcctestdir/ -Wl,--no-ctors-in-init-array
-initpri3b_LDADD =
+# This test fails on targets not using .ctors and .dtors sections (e.g. ARM
+# EABI). Given that gcc is moving towards using .init_array in all cases,
+# this test is commented out.  A better fix would be checking whether gcc
+# uses .ctors or .init_array sections in configure.
+
+# check_PROGRAMS += initpri3b
+# initpri3b_SOURCES = initpri3.c
+# initpri3b_DEPENDENCIES = gcctestdir/ld
+# initpri3b_LDFLAGS = -Bgcctestdir/ -Wl,--no-ctors-in-init-array
+# initpri3b_LDADD =
 
 # Test --detect-odr-violations
 check_SCRIPTS += debug_msg.sh
