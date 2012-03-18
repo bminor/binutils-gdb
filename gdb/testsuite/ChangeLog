@@ -1,3 +1,7 @@
+2012-03-17  Doug Evans  <dje@google.com>
+
+	* dg-extract-results.sh: Handle KFAILs.
+
 2012-03-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR symtab/13777
