@@ -29,7 +29,7 @@ struct bfin_ebiu_amc
 {
   bu32 base;
   int type;
-  bu32 bank_size;
+  bu32 bank_base, bank_size;
   unsigned (*io_write) (struct hw *, const void *, int, address_word,
 			unsigned, struct bfin_ebiu_amc *, bu32, bu32);
   unsigned (*io_read) (struct hw *, void *, int, address_word, unsigned,
@@ -89,7 +89,7 @@ bfin_ebiu_amc_write_amgctl (struct hw *me, struct bfin_ebiu_amc *amc,
 
   for (i = 0; i < 4; ++i)
     {
-      addr = BFIN_EBIU_AMC_BASE + i * amc->bank_size;
+      addr = amc->bank_base + i * amc->bank_size;
 
       if (i < amben_old)
 	{
@@ -401,6 +401,7 @@ bfin_ebiu_amc_finish (struct hw *me)
       reg_size = sizeof (amc->bf50x) + 4;
 
       /* Initialize the AMC.  */
+      amc->bank_base     = BFIN_EBIU_AMC_BASE;
       amc->bank_size     = 1 * 1024 * 1024;
       amgctl             = 0x00F3;
       amc->bf50x.ambctl0 = 0x0000FFC2;
@@ -415,6 +416,7 @@ bfin_ebiu_amc_finish (struct hw *me)
       reg_size = sizeof (amc->bf54x) + 4;
 
       /* Initialize the AMC.  */
+      amc->bank_base     = BFIN_EBIU_AMC_BASE;
       amc->bank_size     = 64 * 1024 * 1024;
       amgctl             = 0x0002;
       amc->bf54x.ambctl0 = 0xFFC2FFC2;
@@ -435,6 +437,7 @@ bfin_ebiu_amc_finish (struct hw *me)
       reg_size = sizeof (amc->bf53x) + 4;
 
       /* Initialize the AMC.  */
+      amc->bank_base     = BFIN_EBIU_AMC_BASE;
       if (amc->type == 561)
 	amc->bank_size   = 64 * 1024 * 1024;
       else
