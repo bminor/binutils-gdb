@@ -20,6 +20,8 @@
 #if !defined (DWARF2LOC_H)
 #define DWARF2LOC_H
 
+#include "dwarf2expr.h"
+
 struct symbol_computed_ops;
 struct objfile;
 struct dwarf2_per_cu_data;
@@ -61,11 +63,11 @@ const gdb_byte *dwarf2_find_location_expression
    CORE_ADDR pc);
 
 struct dwarf2_locexpr_baton dwarf2_fetch_die_location_block
-  (unsigned int offset_in_cu, struct dwarf2_per_cu_data *per_cu,
+  (cu_offset offset_in_cu, struct dwarf2_per_cu_data *per_cu,
    CORE_ADDR (*get_frame_pc) (void *baton),
    void *baton);
 
-struct type *dwarf2_get_die_type (unsigned int die_offset,
+struct type *dwarf2_get_die_type (cu_offset die_offset,
 				  struct dwarf2_per_cu_data *per_cu);
 
 /* Evaluate a location description, starting at DATA and with length

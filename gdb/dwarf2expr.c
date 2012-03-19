@@ -342,7 +342,7 @@ add_piece (struct dwarf_expr_context *ctx, ULONGEST size, ULONGEST offset)
     }
   else if (p->location == DWARF_VALUE_IMPLICIT_POINTER)
     {
-      p->v.ptr.die = ctx->len;
+      p->v.ptr.die.cu_off = ctx->len;
       p->v.ptr.offset = value_as_long (dwarf_expr_fetch (ctx, 0));
     }
   else if (p->location == DWARF_VALUE_REGISTER)
@@ -464,7 +464,7 @@ base_types_equal_p (struct type *t1, struct type *t2)
    size.  */
 
 static struct type *
-dwarf_get_base_type (struct dwarf_expr_context *ctx, ULONGEST die, int size)
+dwarf_get_base_type (struct dwarf_expr_context *ctx, cu_offset die, int size)
 {
   struct type *result;
 
@@ -869,7 +869,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      error (_("DWARF-2 expression error: DW_OP_GNU_implicit_pointer "
 		       "is not allowed in frame context"));
 
-	    /* The referred-to DIE.  */
+	    /* The referred-to DIE of cu_offset kind.  */
 	    ctx->len = extract_unsigned_integer (op_ptr, ctx->ref_addr_size,
 						 byte_order);
 	    op_ptr += ctx->ref_addr_size;
@@ -1031,9 +1031,10 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	    if (op == DW_OP_GNU_deref_type)
 	      {
-		ULONGEST type_die;
+		cu_offset type_die;
 
-		op_ptr = read_uleb128 (op_ptr, op_end, &type_die);
+		op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+		type_die.cu_off = uoffset;
 		type = dwarf_get_base_type (ctx, type_die, 0);
 	      }
 	    else
@@ -1335,15 +1336,23 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  goto no_push;
 
 	case DW_OP_call2:
-	  result = extract_unsigned_integer (op_ptr, 2, byte_order);
-	  op_ptr += 2;
-	  ctx->funcs->dwarf_call (ctx, result);
+	  {
+	    cu_offset offset;
+
+	    offset.cu_off = extract_unsigned_integer (op_ptr, 2, byte_order);
+	    op_ptr += 2;
+	    ctx->funcs->dwarf_call (ctx, offset);
+	  }
 	  goto no_push;
 
 	case DW_OP_call4:
-	  result = extract_unsigned_integer (op_ptr, 4, byte_order);
-	  op_ptr += 4;
-	  ctx->funcs->dwarf_call (ctx, result);
+	  {
+	    cu_offset offset;
+
+	    offset.cu_off = extract_unsigned_integer (op_ptr, 4, byte_order);
+	    op_ptr += 4;
+	    ctx->funcs->dwarf_call (ctx, offset);
+	  }
 	  goto no_push;
 	
 	case DW_OP_GNU_entry_value:
@@ -1386,12 +1395,13 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_GNU_const_type:
 	  {
-	    ULONGEST type_die;
+	    cu_offset type_die;
 	    int n;
 	    const gdb_byte *data;
 	    struct type *type;
 
-	    op_ptr = read_uleb128 (op_ptr, op_end, &type_die);
+	    op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	    type_die.cu_off = uoffset;
 	    n = *op_ptr++;
 	    data = op_ptr;
 	    op_ptr += n;
@@ -1403,11 +1413,12 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_GNU_regval_type:
 	  {
-	    ULONGEST type_die;
+	    cu_offset type_die;
 	    struct type *type;
 
 	    op_ptr = read_uleb128 (op_ptr, op_end, &reg);
-	    op_ptr = read_uleb128 (op_ptr, op_end, &type_die);
+	    op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	    type_die.cu_off = uoffset;
 
 	    type = dwarf_get_base_type (ctx, type_die, 0);
 	    result = (ctx->funcs->read_reg) (ctx->baton, reg);
@@ -1420,12 +1431,13 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_GNU_convert:
 	case DW_OP_GNU_reinterpret:
 	  {
-	    ULONGEST type_die;
+	    cu_offset type_die;
 	    struct type *type;
 
-	    op_ptr = read_uleb128 (op_ptr, op_end, &type_die);
+	    op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	    type_die.cu_off = uoffset;
 
-	    if (type_die == 0)
+	    if (type_die.cu_off == 0)
 	      type = address_type;
 	    else
 	      type = dwarf_get_base_type (ctx, type_die, 0);
@@ -1506,7 +1518,7 @@ ctx_no_get_tls_address (void *baton, CORE_ADDR offset)
 /* Stub dwarf_expr_context_funcs.dwarf_call implementation.  */
 
 void
-ctx_no_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
+ctx_no_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset)
 {
   error (_("%s is invalid in this context"), "DW_OP_call*");
 }
@@ -1514,7 +1526,7 @@ ctx_no_dwarf_call (struct dwarf_expr_context *ctx, size_t die_offset)
 /* Stub dwarf_expr_context_funcs.get_base_type implementation.  */
 
 struct type *
-ctx_no_get_base_type (struct dwarf_expr_context *ctx, size_t die)
+ctx_no_get_base_type (struct dwarf_expr_context *ctx, cu_offset die)
 {
   error (_("Support for typed DWARF is not supported in this context"));
 }

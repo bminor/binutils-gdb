@@ -1,5 +1,56 @@
 2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanupp: Use cu_offset and sect_offset compile time type checking.
+	* dwarf2expr.c (add_piece, dwarf_get_base_type, execute_stack_op)
+	(ctx_no_dwarf_call, ctx_no_get_base_type): Use cu_offset and
+	sect_offset.
+	* dwarf2expr.h (cu_offset, sect_offset): New types.
+	(struct dwarf_expr_context_funcs) <dwarf_call>
+	(struct dwarf_expr_context_funcs) <get_base_type>: Use cu_offset and
+	sect_offset.
+	(struct dwarf_expr_context) <len>: Improve the comment.
+	(struct dwarf_expr_piece, ctx_no_dwarf_call, ctx_no_get_base_type): Use
+	cu_offset and sect_offset.
+	* dwarf2loc.c (per_cu_dwarf_call, dwarf_expr_dwarf_call)
+	(dwarf_expr_get_base_type, needs_frame_dwarf_call)
+	(dwarf2_compile_expr_to_ax, disassemble_dwarf_expression): Likewise.
+	* dwarf2loc.h: Include dwarf2expr.h.
+	(dwarf2_fetch_die_location_block, dwarf2_get_die_type): Use cu_offset
+	and sect_offset.
+	* dwarf2read.c (struct dwarf2_per_objfile) <debug_types_type_hash>:
+	Improve the comment.
+	(struct comp_unit_head, struct dwarf2_cu, struct dwarf2_per_cu_data)
+	(struct signatured_type, struct line_header, struct partial_die_info)
+	(struct die_info, find_partial_die, dwarf2_get_ref_die_offset)
+	(lookup_signatured_type_at_offset, dwarf2_find_containing_comp_unit)
+	(get_die_type_at_offset, create_cus_from_index)
+	(create_signatured_type_table_from_index, dw2_get_file_names)
+	(offset_in_cu_p, read_comp_unit_head, error_check_comp_unit_head)
+	(read_and_check_comp_unit_head, read_and_check_type_unit_head)
+	(create_debug_types_hash_table, process_psymtab_comp_unit)
+	(load_partial_comp_unit, create_all_comp_units)
+	(partial_die_parent_scope, partial_die_full_name, skip_one_die)
+	(load_full_comp_unit, dwarf2_physname, read_import_statement)
+	(inherit_abstract_dies, read_func_scope, read_call_site_scope)
+	(dwarf2_add_member_fn, process_enumeration_scope, read_module_type)
+	(read_typedef, die_hash, die_eq, read_full_die, dwarf2_read_abbrevs)
+	(load_partial_dies, read_partial_die, find_partial_die_in_comp_unit)
+	(find_partial_die, read_attribute_value, lookup_die_type)
+	(dump_die_shallow, store_in_ref_table): Use cu_offset and sect_offset.
+	(is_ref_attr): New function comment.
+	(dwarf2_get_ref_die_offset): New function comment, new variable retval.
+	Use cu_offset and sect_offset.
+	(follow_die_offset, follow_die_ref, dwarf2_fetch_die_location_block)
+	(dwarf2_get_die_type, follow_die_sig, lookup_signatured_type_at_offset)
+	(load_full_type_unit, read_signatured_type, per_cu_header_read_in)
+	(dwarf2_find_containing_comp_unit, struct dwarf2_offset_and_type)
+	(offset_and_type_hash, offset_and_type_eq, set_die_type)
+	(get_die_type_at_offset, partial_die_hash, partial_die_eq)
+	(write_one_signatured_type, write_psymtabs_to_index): Use cu_offset and
+	sect_offset.
+
+2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* python/py-auto-load.c (source_section_scripts): New variable back_to.
 	Turn fclose and xfree calls into make_cleanup_fclose and make_cleanup
