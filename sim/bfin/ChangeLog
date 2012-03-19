@@ -1,3 +1,8 @@
+2012-03-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_ebiu_amc.c (bfin_ebiu_amc_attach_address_callback): Use
+	ARRAY_SIZE rather than hardcoded constant.
+
 2012-02-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in: Regenerate.

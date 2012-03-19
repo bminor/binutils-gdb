@@ -335,7 +335,7 @@ bfin_ebiu_amc_attach_address_callback (struct hw *me,
   HW_TRACE ((me, "attach - level=%d, space=%d, addr=0x%lx, nr_bytes=%lu, client=%s",
 	     level, space, (unsigned long) addr, (unsigned long) nr_bytes, hw_path (client)));
 
-  if (addr + nr_bytes > 4)
+  if (addr + nr_bytes > ARRAY_SIZE (amc->slaves))
     hw_abort (me, "ebiu amc attaches are done in terms of banks");
 
   while (nr_bytes--)
