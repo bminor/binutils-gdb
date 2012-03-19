@@ -30,7 +30,19 @@
 #include <sys/wait.h>
 #endif
 
+/* The thread set with an `Hc' packet.  `Hc' is deprecated in favor of
+   `vCont'.  Note the multi-process extensions made `vCont' a
+   requirement, so `Hc pPID.TID' is pretty much undefined.  So
+   CONT_THREAD can be null_ptid for no `Hc' thread, minus_one_ptid for
+   resuming all threads of the process (again, `Hc' isn't used for
+   multi-process), or a specific thread ptid_t.
+
+   We also set this when handling a single-thread `vCont' resume, as
+   some places in the backends check it to know when (and for which
+   thread) single-thread scheduler-locking is in effect.  */
 ptid_t cont_thread;
+
+/* The thread set with an `Hg' packet.  */
 ptid_t general_thread;
 
 int server_waiting;
@@ -261,6 +273,10 @@ start_inferior (char **argv)
   signal (SIGTTOU, SIG_DFL);
   signal (SIGTTIN, SIG_DFL);
 #endif
+
+  /* Clear this so the backend doesn't get confused, thinking
+     CONT_THREAD died, and it needs to resume all threads.  */
+  cont_thread = null_ptid;
 
   signal_pid = create_inferior (new_argv[0], new_argv);
 
@@ -1962,9 +1978,13 @@ handle_v_cont (char *own_buf)
   if (i < n)
     resume_info[i] = default_action;
 
-  /* Still used in occasional places in the backend.  */
+  /* `cont_thread' is still used in occasional places in the backend,
+     to implement single-thread scheduler-locking.  Doesn't make sense
+     to set it if we see a stop request, or any form of wildcard
+     vCont.  */
   if (n == 1
-      && !ptid_equal (resume_info[0].thread, minus_one_ptid)
+      && !(ptid_equal (resume_info[0].thread, minus_one_ptid)
+	   || ptid_get_lwp (resume_info[0].thread) == -1)
       && resume_info[0].kind != resume_stop)
     cont_thread = resume_info[0].thread;
   else

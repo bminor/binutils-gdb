@@ -1,3 +1,11 @@
+2012-03-19  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* server.c (cont_thread, general_thread): Add describing comments.
+	(start_inferior): Clear `cont_thread'.
+	(handle_v_cont): Don't set `cont_thread' if resuming all threads
+	of a process.
+
 2012-03-15  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (install_tracepoint): Move duplicated tracepoint
