@@ -1,3 +1,7 @@
+2012-03-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* se_all16bitopcodes.S: Merge code from se_all32bitopcodes.S.
+
 2011-09-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* vit_max2.s: New tests for parallel VIT_MAX insns.
