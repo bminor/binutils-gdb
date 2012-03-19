@@ -239,6 +239,25 @@ captured_command_loop (void *data)
   return 1;
 }
 
+/* Arguments of --command option and its counterpart.  */
+typedef struct cmdarg {
+  /* Type of this option.  */
+  enum {
+    /* Option type -x.  */
+    CMDARG_FILE,
+
+    /* Option type -ex.  */
+    CMDARG_COMMAND
+  } type;
+
+  /* Value of this option - filename or the GDB command itself.  String memory
+     is not owned by this structure despite it is 'const'.  */
+  char *string;
+} cmdarg_s;
+
+/* Define type VEC (cmdarg_s).  */
+DEF_VEC_O (cmdarg_s);
+
 static int
 captured_main (void *data)
 {
@@ -263,17 +282,8 @@ captured_main (void *data)
   static int print_version;
 
   /* Pointers to all arguments of --command option.  */
-  struct cmdarg {
-    enum {
-      CMDARG_FILE,
-      CMDARG_COMMAND
-    } type;
-    char *string;
-  } *cmdarg;
-  /* Allocated size of cmdarg.  */
-  int cmdsize;
-  /* Number of elements of cmdarg used.  */
-  int ncmd;
+  VEC (cmdarg_s) *cmdarg_vec = NULL;
+  struct cmdarg *cmdarg_p;
 
   /* Indices of all arguments of --directory option.  */
   char **dirarg;
@@ -309,9 +319,7 @@ captured_main (void *data)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
-  cmdsize = 1;
-  cmdarg = (struct cmdarg *) xmalloc (cmdsize * sizeof (*cmdarg));
-  ncmd = 0;
+  make_cleanup (VEC_cleanup (cmdarg_s), &cmdarg_vec);
   dirsize = 1;
   dirarg = (char **) xmalloc (dirsize * sizeof (*dirarg));
   ndir = 0;
@@ -536,24 +544,19 @@ captured_main (void *data)
 	    pidarg = optarg;
 	    break;
 	  case 'x':
-	    cmdarg[ncmd].type = CMDARG_FILE;
-	    cmdarg[ncmd++].string = optarg;
-	    if (ncmd >= cmdsize)
-	      {
-		cmdsize *= 2;
-		cmdarg = xrealloc ((char *) cmdarg,
-				   cmdsize * sizeof (*cmdarg));
-	      }
+	    {
+	      struct cmdarg cmdarg = { CMDARG_FILE, optarg };
+
+	      VEC_safe_push (cmdarg_s, cmdarg_vec, &cmdarg);
+	    }
 	    break;
 	  case 'X':
-	    cmdarg[ncmd].type = CMDARG_COMMAND;
-	    cmdarg[ncmd++].string = optarg;
-	    if (ncmd >= cmdsize)
-	      {
-		cmdsize *= 2;
-		cmdarg = xrealloc ((char *) cmdarg,
-				   cmdsize * sizeof (*cmdarg));
-	      }
+	    {
+	      struct cmdarg cmdarg = { CMDARG_COMMAND, optarg };
+
+	      VEC_safe_push (cmdarg_s, cmdarg_vec, &cmdarg);
+	    }
+	    break;
 	    break;
 	  case 'B':
 	    batch_flag = batch_silent = 1;
@@ -908,16 +911,18 @@ captured_main (void *data)
   ALL_OBJFILES (objfile)
     load_auto_scripts_for_objfile (objfile);
 
-  for (i = 0; i < ncmd; i++)
+  for (i = 0; VEC_iterate (cmdarg_s, cmdarg_vec, i, cmdarg_p); i++)
+    switch (cmdarg_p->type)
     {
-      if (cmdarg[i].type == CMDARG_FILE)
-        catch_command_errors (source_script, cmdarg[i].string,
+      case CMDARG_FILE:
+        catch_command_errors (source_script, cmdarg_p->string,
 			      !batch_flag, RETURN_MASK_ALL);
-      else  /* cmdarg[i].type == CMDARG_COMMAND */
-        catch_command_errors (execute_command, cmdarg[i].string,
+	break;
+      case CMDARG_COMMAND:
+        catch_command_errors (execute_command, cmdarg_p->string,
 			      !batch_flag, RETURN_MASK_ALL);
+	break;
     }
-  xfree (cmdarg);
 
   /* Read in the old history after all the command files have been
      read.  */

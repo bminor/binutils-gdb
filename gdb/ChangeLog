@@ -1,3 +1,14 @@
+2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* main.c (struct cmdarg): Move it here from main.  Add more comments.
+	(cmdarg_s, VEC (cmdarg_s)): New.
+	(main): Move struct cmdarg from here.  New variables cmdarg_vec and
+	cmdarg_p.  Remove variables cmdsize and ncmd and their initialization.
+	Install cleanup for cmdarg_vec.  Update filling for options 'x' and
+	'X'.  Replace cmdarg processing by cmdarg_vec processing.  Remove xfree
+	of CMDARG.
+
 2012-03-19  Tom Tromey  <tromey@redhat.com>
 
 	* gnu-v3-abi.c (gnuv3_print_vtable): Initialize 'result_vec'.
