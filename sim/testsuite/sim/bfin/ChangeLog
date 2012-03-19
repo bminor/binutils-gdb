@@ -1,3 +1,7 @@
+2012-03-19  Stuart Henderson  <stuart.henderson@analog.com>
+
+	* c_dsp32shiftim_amix.s: Check edge cases in shift behavior.
+
 2012-03-19  Robin Getz  <robin.getz@analog.com>
 
 	* random_0014.S, random_0015.S, random_0016.S: New tests for shifts.

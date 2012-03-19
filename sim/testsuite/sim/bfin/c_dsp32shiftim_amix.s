@@ -114,6 +114,13 @@ R7 = R2 << 5 (S); /* r7 = 0x80000000 */
 CHECKREG r6, 0x80000000;
 CHECKREG r7, 0x80000000;
 
+imm32 r0, 0xFFFFFFF4;
+imm32 r2, 0xFFF00001;
+R6 = R0 << 31 (S); /* r6 = 0x80000000 */
+R7 = R2 << 31 (S); /* r7 = 0x80000000 */
+CHECKREG r6, 0x80000000;
+CHECKREG r7, 0x80000000;
+
 
 // Ashift : NEGATIVE data, count (-)=right (half reg) Working ok
 imm32 r0, 0x80f080f0;
