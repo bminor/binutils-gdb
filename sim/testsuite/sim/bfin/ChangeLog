@@ -1,3 +1,9 @@
+2012-03-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* se_allopcodes.h: New framework for testing opcode regions.
+	* se_all16bitopcodes.S: Convert over to se_allopcodes.h.
+	* se_all32bitopcodes.S: Likewise.
+
 2012-03-19  Stuart Henderson  <stuart.henderson@analog.com>
 
 	* c_dsp32shiftim_amix.s: Check edge cases in shift behavior.
