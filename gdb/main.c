@@ -247,7 +247,13 @@ typedef struct cmdarg {
     CMDARG_FILE,
 
     /* Option type -ex.  */
-    CMDARG_COMMAND
+    CMDARG_COMMAND,
+
+    /* Option type -ix.  */
+    CMDARG_INIT_FILE,
+    
+    /* Option type -iex.  */
+    CMDARG_INIT_COMMAND
   } type;
 
   /* Value of this option - filename or the GDB command itself.  String memory
@@ -394,7 +400,9 @@ captured_main (void *data)
       OPT_STATISTICS,
       OPT_TUI,
       OPT_NOWINDOWS,
-      OPT_WINDOWS
+      OPT_WINDOWS,
+      OPT_IX,
+      OPT_IEX
     };
     static struct option long_options[] =
     {
@@ -434,6 +442,10 @@ captured_main (void *data)
       {"version", no_argument, &print_version, 1},
       {"x", required_argument, 0, 'x'},
       {"ex", required_argument, 0, 'X'},
+      {"init-command", required_argument, 0, OPT_IX},
+      {"init-eval-command", required_argument, 0, OPT_IEX},
+      {"ix", required_argument, 0, OPT_IX},
+      {"iex", required_argument, 0, OPT_IEX},
 #ifdef GDBTK
       {"tclcommand", required_argument, 0, 'z'},
       {"enable-external-editor", no_argument, 0, 'y'},
@@ -557,6 +569,19 @@ captured_main (void *data)
 	      VEC_safe_push (cmdarg_s, cmdarg_vec, &cmdarg);
 	    }
 	    break;
+	  case OPT_IX:
+	    {
+	      struct cmdarg cmdarg = { CMDARG_INIT_FILE, optarg };
+
+	      VEC_safe_push (cmdarg_s, cmdarg_vec, &cmdarg);
+	    }
+	    break;
+	  case OPT_IEX:
+	    {
+	      struct cmdarg cmdarg = { CMDARG_INIT_COMMAND, optarg };
+
+	      VEC_safe_push (cmdarg_s, cmdarg_vec, &cmdarg);
+	    }
 	    break;
 	  case 'B':
 	    batch_flag = batch_silent = 1;
@@ -809,6 +834,20 @@ captured_main (void *data)
   quit_pre_print = error_pre_print;
   warning_pre_print = _("\nwarning: ");
 
+  /* Process '-ix' and '-iex' options early.  */
+  for (i = 0; VEC_iterate (cmdarg_s, cmdarg_vec, i, cmdarg_p); i++)
+    switch (cmdarg_p->type)
+    {
+      case CMDARG_INIT_FILE:
+        catch_command_errors (source_script, cmdarg_p->string,
+			      !batch_flag, RETURN_MASK_ALL);
+	break;
+      case CMDARG_INIT_COMMAND:
+        catch_command_errors (execute_command, cmdarg_p->string,
+			      !batch_flag, RETURN_MASK_ALL);
+	break;
+    }
+
   /* Read and execute the system-wide gdbinit file, if it exists.
      This is done *before* all the command line arguments are
      processed; it sets global parameters, which are independent of
@@ -911,6 +950,7 @@ captured_main (void *data)
   ALL_OBJFILES (objfile)
     load_auto_scripts_for_objfile (objfile);
 
+  /* Process '-x' and '-ex' options.  */
   for (i = 0; VEC_iterate (cmdarg_s, cmdarg_vec, i, cmdarg_p); i++)
     switch (cmdarg_p->type)
     {
@@ -993,6 +1033,8 @@ Options:\n\n\
                      Execute a single GDB command.\n\
                      May be used multiple times and in conjunction\n\
                      with --command.\n\
+  --init-command=FILE, -ix Like -x but execute it before loading inferior.\n\
+  --init-eval-command=COMMAND, -iex Like -ex but before loading inferior.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
   --pid=PID          Attach to running process PID.\n\
 "), stream);

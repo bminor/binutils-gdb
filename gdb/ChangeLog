@@ -1,5 +1,18 @@
 2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* NEWS: Describe new options --init-command=FILE, -ix and
+	--init-eval-command=COMMAND, -iex.
+	* main.c (struct cmdarg): New enum items CMDARG_INIT_FILE and
+	CMDARG_INIT_COMMAND.
+	(captured_main): New enum items OPT_IX and OPT_IEX.  Add
+	"init-command", "init-eval-command", "ix" and "iex" to the variable
+	long_options.  Handle OPT_IX and OPT_IEX.  Process them from CMDARG_VEC.
+	New comment for CMDARG_FILE and CMDARG_COMMAND processing.
+	(print_gdb_help): Describe --init-command=FILE, -ix and
+	--init-eval-command=COMMAND, -iex.
+
+2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* main.c (struct cmdarg): Move it here from main.  Add more comments.
 	(cmdarg_s, VEC (cmdarg_s)): New.

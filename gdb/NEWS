@@ -118,6 +118,13 @@ QProgramSignals:
   Specify the signals which the remote stub may pass to the debugged
   program without GDB involvement.
 
+* New command line options
+
+--init-command=FILE, -ix          Like --command, -x but execute it
+                                  before loading inferior.
+--init-eval-command=COMMAND, -iex Like --eval-command=COMMAND, -ex but
+                                  execute it before loading inferior.
+
 *** Changes in GDB 7.4
 
 * GDB now handles ambiguous linespecs more consistently; the existing

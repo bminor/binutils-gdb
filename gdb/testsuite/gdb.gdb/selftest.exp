@@ -88,6 +88,10 @@ proc do_steps_and_nexts {} {
 		set description "step over ttyarg initialization"
 		set command "step"
 	    }
+	    -re ".*cmdarg_vec = NULL.*$gdb_prompt $" {
+		set description "step over cmdarg_vec initialization"
+		set command "step"
+	    }
 	    -re ".*pre_stat_chain = make_command_stats_cleanup.*$gdb_prompt $" {
 		set description "next over make_command_stats_cleanup and everything it calls"
 		set command "next"
@@ -124,18 +128,6 @@ proc do_steps_and_nexts {} {
 		set description "next over conditional stack alignment alloca"
 		set command "next"
 	    }
-	    -re ".*cmdsize = 1.*$gdb_prompt $" {
-		set description "step over cmdsize initialization"
-		set command "next"
-	    }
-	    -re ".*cmdarg = .* xmalloc.*$gdb_prompt $" {
-		set description "next over cmdarg initialization via xmalloc"
-		set command "next"
-	    }
-	    -re ".*ncmd = 0.*$gdb_prompt $" {
-		set description "next over ncmd initialization"
-		set command "next"
-	    }
 	    -re ".*dirsize = 1.*$gdb_prompt $" {
 		set description "next over dirsize initialization"
 		set command "next"
@@ -157,6 +149,10 @@ proc do_steps_and_nexts {} {
 	    }
 	    -re ".*textdomain .PACKAGE.;.*$gdb_prompt $" {
 		set description "next over textdomain PACKAGE"
+		set command "next"
+	    }
+	    -re ".*VEC_cleanup .cmdarg_s.*$gdb_prompt $" {
+		set description "next over cmdarg_s VEC_cleanup"
 		set command "next"
 	    }
 	    -re "\[0-9\]+\[\t \]+\{\r\n$gdb_prompt $" {

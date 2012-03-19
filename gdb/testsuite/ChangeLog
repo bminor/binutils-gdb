@@ -1,3 +1,9 @@
+2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): New entry
+	for cmdarg_vec = NULL.  Remove entries for cmdsize = 1, cmdarg = and
+	ncmd = 0.  New entry for VEC_cleanup cmdarg_s.
+
 2012-03-19  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* gdb.base/cond-eval-mode.exp: Fix the anticipated warning string.

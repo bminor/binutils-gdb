@@ -990,6 +990,22 @@ also be interleaved with @samp{-command} as required.
    -x setbreakpoints -ex 'run' a.out
 @end smallexample
 
+@item -init-command @var{file}
+@itemx -ix @var{file}
+@cindex @code{--init-command}
+@cindex @code{-ix}
+Execute commands from file @var{file} before loading gdbinit files or the
+inferior.
+@xref{Startup}.
+
+@item -init-eval-command @var{command}
+@itemx -iex @var{command}
+@cindex @code{--init-eval-command}
+@cindex @code{-iex}
+Execute a single @value{GDBN} command before loading gdbinit files or the
+inferior.
+@xref{Startup}.
+
 @item -directory @var{directory}
 @itemx -d @var{directory}
 @cindex @code{--directory}
@@ -1242,6 +1258,13 @@ Sets up the command interpreter as specified by the command line
 (@pxref{Mode Options, interpreter}).
 
 @item
+Executes commands and command files specified by the @samp{-iex} and
+@samp{-ix} options in their specified order.  Usually you should use the
+@samp{-ex} and @samp{-x} options instead, but this way you can apply
+settings before @value{GDBN} init files get executed and before inferior
+gets loaded.
+
+@item
 @cindex init file
 Reads the system-wide @dfn{init file} (if @option{--with-system-gdbinit} was
 used when building @value{GDBN}; @pxref{System-wide configuration,
@@ -1275,14 +1298,11 @@ If you wish to disable the auto-loading during startup,
 you must do something like the following:
 
 @smallexample
-$ gdb -ex "set auto-load-scripts off" -ex "file myprogram"
+$ gdb -iex "set auto-load-scripts off" myprogram
 @end smallexample
 
-The following does not work because the auto-loading is turned off too late:
-
-@smallexample
-$ gdb -ex "set auto-load-scripts off" myprogram
-@end smallexample
+Option @samp{-ex} does not work because the auto-loading is then turned
+off too late.
 
 @item
 Executes commands and command files specified by the @samp{-ex} and
