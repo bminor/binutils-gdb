@@ -2505,7 +2505,7 @@ check_SCRIPTS += arm_exidx_test.sh
 check_DATA += arm_exidx_test.stdout
 
 arm_exidx_test.stdout: arm_exidx_test.so
-	$(TEST_READELF) -S $< > $@
+	$(TEST_READELF) -Sr $< > $@
 
 arm_exidx_test.so: arm_exidx_test.o ../ld-new
 	../ld-new -shared -o $@ $<

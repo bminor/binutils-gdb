@@ -29,10 +29,23 @@ check()
 {
     if ! grep -q "$2" "$1"
     then
-	echo "Did not find section header in $1:"
+	echo "Did not find expected output in $1:"
 	echo "   $2"
 	echo ""
-	echo "Actual headers below:"
+	echo "Actual output below:"
+	cat "$1"
+	exit 1
+    fi
+}
+
+check_not()
+{
+    if grep -q "$2" "$1"
+    then
+	echo "Found unexpected output in $1:"
+	echo "   $2"
+	echo ""
+	echo "Actual output below:"
 	cat "$1"
 	exit 1
     fi
@@ -41,5 +54,7 @@ check()
 # Check that SHF_LINK_ORDER is set.
 check arm_exidx_test.stdout ".* .ARM.exidx .* ARM_EXIDX .* AL .*"
 check arm_exidx_test.stdout ".* .ARM.extab .* PROGBITS .* A .*"
+check_not arm_exidx_test.stdout ".* .* R_ARM_GLOB_DAT .* __exidx_start"
+check_not arm_exidx_test.stdout ".* .* R_ARM_GLOB_DAT .* __exidx_end"
 
 exit 0

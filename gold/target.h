@@ -396,6 +396,11 @@ class Target
   set_osabi(elfcpp::ELFOSABI osabi)
   { this->osabi_ = osabi; }
 
+  // Define target-specific standard symbols.
+  void
+  define_standard_symbols(Symbol_table* symtab, Layout* layout)
+  { this->do_define_standard_symbols(symtab, layout); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -627,6 +632,11 @@ class Target
   // This may be overridden by the child class.
   virtual void
   do_select_as_default_target()
+  { }
+
+  // This may be overridden by the child class.
+  virtual void
+  do_define_standard_symbols(Symbol_table*, Layout*)
   { }
 
  private:

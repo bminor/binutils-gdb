@@ -1,3 +1,20 @@
+2012-03-19  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::do_define_standard_symbols): New method.
+ 	(Target_arm::do_finalize_sections): Remove code which defines
+	__exidx_start and __exidx_end.  Make symbol table parameter
+	anonymous as it is not used.
+	* gold.cc (queue_middle_tasks): Call target hook to define any
+	target-specific symbols.
+	* target.h (Target::define_standard_symbols): New method.
+	(Target::do_define_standard_symbols): Same.
+	* testsuite/Makefile.am (arm_exidx_test): Dump relocations also.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_exidx.s: Generate data relocations for __exidx_start
+	and __exidx_end.
+	* testsuite/arm_exidx_test.sh: Check that no unused dynamic
+	relocations are generated for __exidx_start and __exidx_end.
+
 2012-03-16  Doug Kwan  <dougkwan@google.com>
 
 	* testsuite/Makefile.am: Disable test initpri3b.

@@ -23,3 +23,9 @@ empty:
         .fnend
         .size   empty, .-empty
 
+# Check that no dynamic relocations for __exidx_start and __exidx_stop
+# generated.
+	.data
+	.align	12
+	.word	__exidx_start(got)
+	.word	__exidx_end(got)
