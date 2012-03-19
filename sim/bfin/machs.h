@@ -52,7 +52,6 @@ extern const SIM_MACH * const bfin_sim_machs[];
 #define BFIN_COREMMR_WP_SIZE		0x204
 
 #define BFIN_MMR_DMA_SIZE		(4 * 16)
-#define BFIN_MMR_DMAC_SIZE		0x20
 #define BFIN_MMR_DMAC0_BASE		0xFFC00C00
 #define BFIN_MMR_DMAC1_BASE		0xFFC01C00
 #define BFIN_MMR_EBIU_AMC_SIZE		(4 * 3)

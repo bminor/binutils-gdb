@@ -37,21 +37,7 @@ struct bfin_dmac
 
   const char * const *pmap;
   unsigned int pmap_count;
-
-  /* Order after here is important -- matches hardware MMR layout.  */
-  bu32 _pad0[3];
-  bu16 BFIN_MMR_16 (tc_per);
-  bu16 BFIN_MMR_16 (tc_cnt);
 };
-#define mmr_base()      offsetof(struct bfin_dmac, _pad0[0])
-#define mmr_offset(mmr) (offsetof(struct bfin_dmac, mmr) - mmr_base())
-#define mmr_idx(mmr)    (mmr_offset (mmr) / 4)
-
-static const char * const mmr_names[] =
-{
-  [mmr_idx (tc_per)] = "DMAC_TC_PER", "DMAC_TC_CNT",
-};
-#define mmr_name(off) (mmr_names[(off) / 4] ? : "<INV>")
 
 struct hw *
 bfin_dmac_get_peer (struct hw *dma, bu16 pmap)
@@ -386,34 +372,6 @@ bfin_dmac_port_event (struct hw *me, int my_port, struct hw *source,
 }
 
 static void
-attach_bfin_dmac_regs (struct hw *me, struct bfin_dmac *dmac)
-{
-  address_word attach_address;
-  int attach_space;
-  unsigned attach_size;
-  reg_property_spec reg;
-
-  if (hw_find_property (me, "reg") == NULL)
-    hw_abort (me, "Missing \"reg\" property");
-
-  if (!hw_find_reg_array_property (me, "reg", 0, &reg))
-    hw_abort (me, "\"reg\" property must contain three addr/size entries");
-
-  hw_unit_address_to_attach_address (hw_parent (me),
-				     &reg.address,
-				     &attach_space, &attach_address, me);
-  hw_unit_size_to_attach_size (hw_parent (me), &reg.size, &attach_size, me);
-
-  if (attach_size != BFIN_MMR_DMAC_SIZE)
-    hw_abort (me, "\"reg\" size must be %#x", BFIN_MMR_DMAC_SIZE);
-
-  hw_attach_address (hw_parent (me),
-		     0, attach_space, attach_address, attach_size, me);
-
-  dmac->base = attach_address;
-}
-
-static void
 bfin_dmac_finish (struct hw *me)
 {
   struct bfin_dmac *dmac;
@@ -423,8 +381,6 @@ bfin_dmac_finish (struct hw *me)
 
   set_hw_data (me, dmac);
   set_hw_port_event (me, bfin_dmac_port_event);
-
-  attach_bfin_dmac_regs (me, dmac);
 
   /* Initialize the DMA Controller.  */
   if (hw_find_property (me, "type") == NULL)
