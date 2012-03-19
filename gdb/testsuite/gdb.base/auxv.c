@@ -35,6 +35,13 @@
 #define ABORT {char *invalid = 0; *invalid = 0xFF;}
 #endif
 
+#ifdef USE_RLIMIT
+# include <sys/resource.h>
+# ifndef RLIM_INFINITY
+#  define RLIM_INFINITY -1
+# endif
+#endif /* USE_RLIMIT */
+
 /* Don't make these automatic vars or we will have to walk back up the
    stack to access them. */
 
@@ -52,6 +59,14 @@ func2 (int x)
   int coremaker_local[5];
   int i;
   static int y;
+
+#ifdef USE_RLIMIT
+  {
+    struct rlimit rlim = { RLIM_INFINITY, RLIM_INFINITY };
+
+    setrlimit (RLIMIT_CORE, &rlim);
+  }
+#endif
 
   /* Make sure that coremaker_local doesn't get optimized away. */
   for (i = 0; i < 5; i++)

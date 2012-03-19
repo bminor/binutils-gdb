@@ -1,4 +1,12 @@
 2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* gdb.base/auxv.c (func2): setrlimit to infinity to enable core dumps.
+	* gdb.base/auxv.exp: Try to compile it with -DUSE_RLIMIT first.
+	(generate native core dump): Make the test unsupported if core cannot
+	be generated.
+
+2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.gdb/selftest.exp (do_steps_and_nexts): New entry
 	for cmdarg_vec = NULL.  Remove entries for cmdsize = 1, cmdarg = and
