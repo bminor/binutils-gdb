@@ -178,7 +178,7 @@ AC_ARG_ENABLE(sim-trace,
   no)	sim_trace="-DTRACE=0 -DWITH_TRACE=0";;
   [[-0-9]]*)
 	sim_trace="-DTRACE='(${enableval})' -DWITH_TRACE='(${enableval})'";;
-  [[a-z]]*)
+  [[[:lower:]]]*)
 	sim_trace=""
 	for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
 	  if test x"$sim_trace" = x; then

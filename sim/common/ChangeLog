@@ -1,3 +1,10 @@
+2012-03-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (TAGS): Change a-z to [:lower:].
+	* acinclude.m4 (sim-trace): Likewise.
+	* gennltvals.sh: Change A-Z0-9 to [:upper:][:digit:].
+	Change A-Za-z0-9 to [:alnum:].
+
 2012-03-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* nrun.c (main): Display strsignal of sigrc.
