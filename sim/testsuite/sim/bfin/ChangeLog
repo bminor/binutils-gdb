@@ -1,5 +1,10 @@
 2012-03-19  Mike Frysinger  <vapier@gentoo.org>
 
+	* se_all64bitg0opcodes.S, se_all64bitg1opcodes.S,
+	se_all64bitg2opcodes.S: New exhaustive parallel insn tests.
+
+2012-03-19  Mike Frysinger  <vapier@gentoo.org>
+
 	* se_allopcodes.h: New framework for testing opcode regions.
 	* se_all16bitopcodes.S: Convert over to se_allopcodes.h.
 	* se_all32bitopcodes.S: Likewise.
