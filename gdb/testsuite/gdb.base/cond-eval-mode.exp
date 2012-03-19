@@ -30,7 +30,7 @@ gdb_test_no_output $test_auto
 
 # If target-side condition evaluation is not supported, this warning will be
 # displayed.
-set warning "warning: Target does not support breakpoint condition evaluation.\r\nUsing GDB evaluation mode instead.\r\n"
+set warning "warning: Target does not support breakpoint condition evaluation.\r\nUsing host evaluation mode instead.\r\n"
 
 gdb_test_multiple $test_target $test_target {
     -re "$warning$gdb_prompt $" {

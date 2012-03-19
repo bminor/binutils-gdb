@@ -1,3 +1,7 @@
+2012-03-19  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* gdb.base/cond-eval-mode.exp: Fix the anticipated warning string.
+
 2012-03-17  Doug Evans  <dje@google.com>
 
 	* dg-extract-results.sh: Handle KFAILs.
