@@ -1,3 +1,8 @@
+2012-03-19  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ld-m68k/m68k.exp ("TLS indirect symbol use"): Pass
+	--copy-dt-needed-entries.
+
 2012-03-16  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-arm/arm-elf.exp: Add new testcases.
