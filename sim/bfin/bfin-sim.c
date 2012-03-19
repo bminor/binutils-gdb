@@ -748,12 +748,12 @@ lshiftrt (SIM_CPU *cpu, bu64 val, int cnt, int size)
 }
 
 static bu64
-lshift (SIM_CPU *cpu, bu64 val, int cnt, int size, bool saturate)
+lshift (SIM_CPU *cpu, bu64 val, int cnt, int size, bool saturate, bool overflow)
 {
-  int i, j, real_cnt = cnt > size ? size : cnt;
+  int v_i, real_cnt = cnt > size ? size : cnt;
   bu64 sgn = ~((val >> (size - 1)) - 1);
   int mask_cnt = size - 1;
-  bu64 masked, new_val = val, tmp;
+  bu64 masked, new_val = val;
   bu64 mask = ~0;
 
   mask <<= mask_cnt;
@@ -777,31 +777,35 @@ lshift (SIM_CPU *cpu, bu64 val, int cnt, int size, bool saturate)
 
      However, it's a little more complex than looking at sign bits, we need
      to see if we are shifting the sign information away...  */
-  tmp = val & ((~mask << 1) | 1);
-
-  j = 0;
-  for (i = 1; i <= real_cnt && saturate; i++)
-    {
-      if ((tmp & ((bu64)1 << (size - 1))) !=
-	  (((val >> mask_cnt) & 0x1) << mask_cnt))
-	j++;
-      tmp <<= 1;
-    }
-  saturate &= (!sgn && (new_val & (1 << mask_cnt)))
-	      || (sgn && !(new_val & (1 << mask_cnt)));
+  if (((val << cnt) >> size) == 0
+      || (((val << cnt) >> size) == ~(~0 << cnt)
+	  && ((new_val >> (size - 1)) & 0x1)))
+    v_i = 0;
+  else
+    v_i = 1;
 
   switch (size)
     {
     case 16:
-      if (j || (saturate && (new_val & mask)))
-	new_val = sgn == 0 ? 0x7fff : 0x8000, saturate = 1;
       new_val &= 0xFFFF;
+      if (saturate && (v_i || ((val >> (size - 1)) != (new_val >> (size - 1)))))
+	{
+	  new_val = (val >> (size - 1)) == 0 ? 0x7fff : 0x8000;
+	  v_i = 1;
+	}
       break;
     case 32:
       new_val &= 0xFFFFFFFF;
       masked &= 0xFFFFFFFF;
-      if (j || (saturate && ((sgn != masked) || (!sgn && new_val == 0))))
-	new_val = sgn == 0 ? 0x7fffffff : 0x80000000, saturate = 1;
+      sgn &= 0xFFFFFFFF;
+      if (saturate
+	  && (v_i
+	      || (sgn != masked)
+	      || (!sgn && new_val == 0 && val != 0)))
+	{
+	  new_val = sgn == 0 ? 0x7fffffff : 0x80000000;
+	  v_i = 1;
+	}
       break;
     case 40:
       new_val &= 0xFFFFFFFFFFull;
@@ -814,9 +818,13 @@ lshift (SIM_CPU *cpu, bu64 val, int cnt, int size, bool saturate)
 
   SET_ASTATREG (an, new_val >> (size - 1));
   SET_ASTATREG (az, new_val == 0);
-  SET_ASTATREG (v, !!(saturate || j));
-  if (saturate || j)
-    SET_ASTATREG (vs, 1);
+  if (size != 40)
+    {
+      SET_ASTATREG (v, overflow && v_i);
+      if (overflow && v_i)
+	SET_ASTATREG (vs, 1);
+    }
+
   return new_val;
 }
 
@@ -2557,7 +2565,7 @@ decode_ALU2op_0 (SIM_CPU *cpu, bu16 iw0)
   else if (opc == 2)
     {
       TRACE_INSN (cpu, "R%i <<= R%i;", dst, src);
-      SET_DREG (dst, lshift (cpu, DREG (dst), DREG (src), 32, 0));
+      SET_DREG (dst, lshift (cpu, DREG (dst), DREG (src), 32, 0, 0));
     }
   else if (opc == 3)
     {
@@ -2760,7 +2768,7 @@ decode_LOGI2op_0 (SIM_CPU *cpu, bu16 iw0)
       TRACE_INSN (cpu, "R%i <<= %s;", dst, uimm_str);
       if (INSN_LEN == 8)
 	illegal_instruction_combination (cpu);
-      SET_DREG (dst, lshift (cpu, DREG (dst), uimm, 32, 0));
+      SET_DREG (dst, lshift (cpu, DREG (dst), uimm, 32, 0, 0));
     }
 }
 
@@ -5158,7 +5166,7 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       if (shft <= 0)
 	val = ashiftrt (cpu, val, -shft, 16);
       else
-	val = lshift (cpu, val, shft, 16, sop == 1);
+	val = lshift (cpu, val, shft, 16, sop == 1, 1);
 
       if ((HLs & 2) == 0)
 	STORE (DREG (dst0), REG_H_L (DREG (dst0), val));
@@ -5219,7 +5227,7 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       if (shft <= 0)
 	val = ashiftrt (cpu, val, -shft, 40);
       else
-	val = lshift (cpu, val, shft, 40, 0);
+	val = lshift (cpu, val, shft, 40, 0, 0);
 
       STORE (AXREG (HLs), (val >> 32) & 0xff);
       STORE (AWREG (HLs), (val & 0xffffffff));
@@ -5239,7 +5247,7 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       if (shft <= 0)
 	val = lshiftrt (cpu, val, -shft, 40);
       else
-	val = lshift (cpu, val, shft, 40, 0);
+	val = lshift (cpu, val, shft, 40, 0, 0);
 
       STORE (AXREG (HLs), (val >> 32) & 0xff);
       STORE (AWREG (HLs), (val & 0xffffffff));
@@ -5267,9 +5275,9 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	}
       else
 	{
-	  val0 = lshift (cpu, val0, shft, 16, sop == 1);
+	  val0 = lshift (cpu, val0, shft, 16, sop == 1, 1);
 	  astat = ASTAT;
-	  val1 = lshift (cpu, val1, shft, 16, sop == 1);
+	  val1 = lshift (cpu, val1, shft, 16, sop == 1, 1);
 	}
       SET_ASTAT (ASTAT | astat);
       STORE (DREG (dst0), (val1 << 16) | val0);
@@ -5294,7 +5302,7 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	    STORE (DREG (dst0), ashiftrt (cpu, v, -shft, 32));
 	}
       else
-	STORE (DREG (dst0), lshift (cpu, v, shft, 32, sop == 1));
+	STORE (DREG (dst0), lshift (cpu, v, shft, 32, sop == 1, 1));
     }
   else if (sop == 3 && sopcde == 2)
     {
@@ -5330,9 +5338,9 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	}
       else
 	{
-	  val0 = lshift (cpu, val0, shft, 16, 0);
+	  val0 = lshift (cpu, val0, shft, 16, 0, 0);
 	  astat = ASTAT;
-	  val1 = lshift (cpu, val1, shft, 16, 0);
+	  val1 = lshift (cpu, val1, shft, 16, 0, 0);
 	}
       SET_ASTAT (ASTAT | astat);
       STORE (DREG (dst0), (val1 << 16) | val0);
@@ -5702,7 +5710,7 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 		      dst0, (HLs & 2) ? 'H' : 'L',
 		      src1, (HLs & 1) ? 'H' : 'L', newimmag);
 	  if (newimmag > 16)
-	    result = lshift (cpu, in, 16 - (newimmag & 0xF), 16, 0);
+	    result = lshift (cpu, in, 16 - (newimmag & 0xF), 16, 0, 1);
 	  else
 	    result = ashiftrt (cpu, in, newimmag, 16);
 	}
@@ -5711,14 +5719,14 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	  TRACE_INSN (cpu, "R%i.%c = R%i.%c << %i (S);",
 		      dst0, (HLs & 2) ? 'H' : 'L',
 		      src1, (HLs & 1) ? 'H' : 'L', immag);
-	  result = lshift (cpu, in, immag, 16, 1);
+	  result = lshift (cpu, in, immag, 16, 1, 1);
 	}
       else if (sop == 1 && bit8)
 	{
 	  TRACE_INSN (cpu, "R%i.%c = R%i.%c >>> %i (S);",
 		      dst0, (HLs & 2) ? 'H' : 'L',
 		      src1, (HLs & 1) ? 'H' : 'L', immag);
-	  result = lshift (cpu, in, immag, 16, 1);
+	  result = lshift (cpu, in, immag, 16, 1, 1);
 	}
       else if (sop == 2 && bit8)
 	{
@@ -5732,7 +5740,7 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	  TRACE_INSN (cpu, "R%i.%c = R%i.%c << %i;",
 		      dst0, (HLs & 2) ? 'H' : 'L',
 		      src1, (HLs & 1) ? 'H' : 'L', immag);
-	  result = lshift (cpu, in, immag, 16, 0);
+	  result = lshift (cpu, in, immag, 16, 0, 1);
 	}
       else
 	illegal_instruction (cpu);
@@ -5820,9 +5828,9 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       TRACE_INSN (cpu, "R%i = R%i << %i (V,S);", dst0, src1, count);
       if (count >= 0)
 	{
-	  val0 = lshift (cpu, val0, count, 16, 1);
+	  val0 = lshift (cpu, val0, count, 16, 1, 1);
 	  astat = ASTAT;
-	  val1 = lshift (cpu, val1, count, 16, 1);
+	  val1 = lshift (cpu, val1, count, 16, 1, 1);
 	}
       else
 	{
@@ -5857,9 +5865,9 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       bu32 astat;
 
       TRACE_INSN (cpu, "R%i = R%i << %i (V);", dst0, src1, count);
-      val0 = lshift (cpu, val0, count, 16, 0);
+      val0 = lshift (cpu, val0, count, 16, 0, 1);
       astat = ASTAT;
-      val1 = lshift (cpu, val1, count, 16, 0);
+      val1 = lshift (cpu, val1, count, 16, 0, 1);
       SET_ASTAT (ASTAT | astat);
 
       STORE (DREG (dst0), val0 | (val1 << 16));
@@ -5876,9 +5884,9 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 
       if (count & 0x10)
 	{
-	  val0 = lshift (cpu, val0, 16 - (count & 0xF), 16, 0);
+	  val0 = lshift (cpu, val0, 16 - (count & 0xF), 16, 0, 1);
 	  astat = ASTAT;
-	  val1 = lshift (cpu, val1, 16 - (count & 0xF), 16, 0);
+	  val1 = lshift (cpu, val1, 16 - (count & 0xF), 16, 0, 1);
 	}
       else
 	{
@@ -5896,7 +5904,7 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       int count = imm6 (immag);
 
       TRACE_INSN (cpu, "R%i = R%i << %i (S);", dst0, src1, count);
-      STORE (DREG (dst0), lshift (cpu, DREG (src1), count, 32, 1));
+      STORE (DREG (dst0), lshift (cpu, DREG (src1), count, 32, 1, 1));
     }
   else if (sop == 2 && sopcde == 2)
     {
@@ -5905,7 +5913,7 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       TRACE_INSN (cpu, "R%i = R%i >> %i;", dst0, src1, count);
 
       if (count < 0)
-	STORE (DREG (dst0), lshift (cpu, DREG (src1), -count, 32, 0));
+	STORE (DREG (dst0), lshift (cpu, DREG (src1), -count, 32, 0, 1));
       else
 	STORE (DREG (dst0), lshiftrt (cpu, DREG (src1), count, 32));
     }
@@ -5931,7 +5939,7 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       TRACE_INSN (cpu, "R%i = R%i >>> %i;", dst0, src1, count);
 
       if (count < 0)
-	STORE (DREG (dst0), lshift (cpu, DREG (src1), -count, 32, 0));
+	STORE (DREG (dst0), lshift (cpu, DREG (src1), -count, 32, 0, 1));
       else
 	STORE (DREG (dst0), ashiftrt (cpu, DREG (src1), count, 32));
     }

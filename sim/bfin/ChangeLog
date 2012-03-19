@@ -1,3 +1,14 @@
+2012-03-19  Robin Getz  <robin.getz@analog.com>
+	    Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-sim.c (lshift): Add an overflow flag.  Delete now unused
+	i, j, and tmp vars.  Add a new v_i var.  Split the overflow logic
+	out from the saturate logic.  Do not set V ASTAT bits when working
+	with accumulators.
+	(decode_ALU2op_0): Add new argument to lshift call.
+	(decode_LOGI2op_0, decode_dsp32shift_0, decode_dsp32shiftimm_0):
+	Likewise.
+
 2012-03-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_ebiu_amc.c (struct bfin_ebiu_amc): Add bank_base.
