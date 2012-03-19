@@ -1,5 +1,13 @@
 2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup.
+	* python/py-auto-load.c (source_section_scripts): New variable back_to.
+	Turn fclose and xfree calls into make_cleanup_fclose and make_cleanup
+	with xfree.
+	(auto_load_objfile_script): Turn fclose into make_cleanup_fclose.
+
+2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* NEWS: Describe new options --init-command=FILE, -ix and
 	--init-eval-command=COMMAND, -iex.
 	* main.c (struct cmdarg): New enum items CMDARG_INIT_FILE and

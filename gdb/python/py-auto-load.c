@@ -254,6 +254,7 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
       FILE *stream;
       char *full_path;
       int opened, in_hash_table;
+      struct cleanup *back_to;
 
       if (*p != 1)
 	{
@@ -286,6 +287,13 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
       opened = find_and_open_script (file, 1 /*search_path*/,
 				     &stream, &full_path);
 
+      back_to = make_cleanup (null_cleanup, NULL);
+      if (opened)
+	{
+	  make_cleanup_fclose (stream);
+	  make_cleanup (xfree, full_path);
+	}
+
       /* If one script isn't found it's not uncommon for more to not be
 	 found either.  We don't want to print an error message for each
 	 script, too much noise.  Instead, we print the warning once and tell
@@ -313,9 +321,9 @@ Use `info auto-load-scripts [REGEXP]' to list them."),
 	  /* If this file is not currently loaded, load it.  */
 	  if (! in_hash_table)
 	    source_python_script_for_objfile (objfile, stream, full_path);
-	  fclose (stream);
-	  xfree (full_path);
 	}
+
+      do_cleanups (back_to);
     }
 }
 
@@ -420,6 +428,8 @@ auto_load_objfile_script (struct objfile *objfile, const char *suffix)
     {
       struct auto_load_pspace_info *pspace_info;
 
+      make_cleanup_fclose (input);
+
       /* Add this script to the hash table too so "info auto-load-scripts"
 	 can print it.  */
       pspace_info =
@@ -432,7 +442,6 @@ auto_load_objfile_script (struct objfile *objfile, const char *suffix)
 	 and these scripts are required to be idempotent under multiple
 	 loads anyway.  */
       source_python_script_for_objfile (objfile, input, debugfile);
-      fclose (input);
     }
 
   do_cleanups (cleanups);
