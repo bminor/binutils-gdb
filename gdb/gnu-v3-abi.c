@@ -907,7 +907,7 @@ gnuv3_print_vtable (struct value *value)
   struct value_print_options opts;
   htab_t offset_hash;
   struct cleanup *cleanup;
-  VEC (value_and_voffset_p) *result_vec;
+  VEC (value_and_voffset_p) *result_vec = NULL;
   struct value_and_voffset *iter;
   int i, count;
 

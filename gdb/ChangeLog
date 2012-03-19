@@ -1,3 +1,7 @@
+2012-03-19  Tom Tromey  <tromey@redhat.com>
+
+	* gnu-v3-abi.c (gnuv3_print_vtable): Initialize 'result_vec'.
+
 2012-03-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR symtab/13777
