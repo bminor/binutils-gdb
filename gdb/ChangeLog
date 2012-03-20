@@ -1,3 +1,8 @@
+2012-03-20  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_start_remote): Clear `rs->starting_up' on early
+	returns.
+
 2012-03-13  Hui Zhu  <teawater@gmail.com>
 	    Pedro Alves  <palves@redhat.com>
 
