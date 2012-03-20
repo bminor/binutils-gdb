@@ -8102,8 +8102,18 @@ do_vmrs (void)
       return;
     }
 
-  if (inst.operands[1].reg != 1)
-    first_error (_("operand 1 must be FPSCR"));
+  switch (inst.operands[1].reg)
+    {
+    case 0: /* FPSID */
+    case 1: /* FPSCR */
+    case 6: /* MVFR1 */
+    case 7: /* MVFR0 */
+    case 8: /* FPEXC */
+      inst.instruction |= (inst.operands[1].reg << 16);
+      break;
+    default:
+      first_error (_("operand 1 must be a VFP extension System Register"));
+    }
 
   inst.instruction |= (Rt << 12);
 }
@@ -8121,8 +8131,16 @@ do_vmsr (void)
       return;
     }
 
-  if (inst.operands[0].reg != 1)
-    first_error (_("operand 0 must be FPSCR"));
+  switch (inst.operands[0].reg)
+    {
+    case 0: /* FPSID  */
+    case 1: /* FPSCR  */
+    case 8: /* FPEXC */
+      inst.instruction |= (inst.operands[0].reg << 16);
+      break;
+    default:
+      first_error (_("operand 0 must be FPSID or FPSCR pr FPEXC"));
+    }
 
   inst.instruction |= (Rt << 12);
 }
@@ -18147,8 +18165,8 @@ static const struct asm_opcode insns[] =
  cCE("fmrs",	e100a10, 2, (RR, RVS),	      vfp_reg_from_sp),
  cCE("fmsr",	e000a10, 2, (RVS, RR),	      vfp_sp_from_reg),
  cCE("fmstat",	ef1fa10, 0, (),		      noargs),
- cCE("vmrs",	ef10a10, 2, (APSR_RR, RVC),   vmrs),
- cCE("vmsr",	ee10a10, 2, (RVC, RR),        vmsr),
+ cCE("vmrs",	ef00a10, 2, (APSR_RR, RVC),   vmrs),
+ cCE("vmsr",	ee00a10, 2, (RVC, RR),        vmsr),
  cCE("fsitos",	eb80ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
  cCE("fuitos",	eb80a40, 2, (RVS, RVS),	      vfp_sp_monadic),
  cCE("ftosis",	ebd0a40, 2, (RVS, RVS),	      vfp_sp_monadic),

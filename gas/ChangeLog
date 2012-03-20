@@ -1,3 +1,11 @@
+2012-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (do_vmrs): Accept priviledged mode VFP system
+	registers.
+	(do_vmsr): Likewise.
+	(arm_opcode_insns): Do not default to using the FPSCR register in
+	the VMRS and VMSR registers.
+
 2012-03-16  Roland McGrath  <mcgrathr@google.com>
 
 	* config/tc-i386.h [TE_NACL] (ELF_TARGET_FORMAT32, ELF_TARGET_FORMAT64):

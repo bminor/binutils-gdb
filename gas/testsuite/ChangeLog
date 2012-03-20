@@ -1,3 +1,9 @@
+2012-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/vfp1xD.s: Add tests of the VMSR ad VMRS instructions in
+	priviledged modes.
+	* gas/arm/vfp1xD.d: Update expected output.
+
 2012-03-16  Matthew Gretton-Dann  <matther.gretton-dann@arm.com>
 
 	* gas/testsuite/gas/arm/any-idiv.d: New testcase.
