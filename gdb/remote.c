@@ -3378,6 +3378,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
 	  /* We're connected, but not running.  Drop out before we
 	     call start_remote.  */
+	  rs->starting_up = 0;
 	  return;
 	}
       else
@@ -3469,6 +3470,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
 	  /* We're connected, but not running.  Drop out before we
 	     call start_remote.  */
+	  rs->starting_up = 0;
 	  return;
 	}
 
