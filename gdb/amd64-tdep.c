@@ -1258,7 +1258,7 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				struct regcache *regs)
 {
   int len = gdbarch_max_insn_length (gdbarch);
-  /* Extra space for sentinels so fixup_{riprel,displaced_copy don't have to
+  /* Extra space for sentinels so fixup_{riprel,displaced_copy} don't have to
      continually watch for running off the end of the buffer.  */
   int fixup_sentinel_space = len;
   struct displaced_step_closure *dsc =

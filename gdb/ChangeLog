@@ -1,3 +1,8 @@
+2012-03-20  Yao Qi  <yao@codesourcery.com>
+
+	* amd64-tdep.c (amd64_displaced_step_copy_insn): Complete missing "}" in
+	comment.
+
 2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanupp: Use cu_offset and sect_offset compile time type checking.
