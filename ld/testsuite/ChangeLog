@@ -1,3 +1,18 @@
+2012-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13880
+	* ld-i386/i386.exp: Run protected4 and protected5.
+	* ld-x86-64/x86-64.exp: Likewise.
+
+	* ld-i386/protected4.d: New.
+	* ld-i386/protected4.s: Likewise.
+	* ld-i386/protected5.d: Likewise.
+	* ld-i386/protected5.s: Likewise.
+	* ld-x86-64/protected4.d: Likewise.
+	* ld-x86-64/protected4.s: Likewise.
+	* ld-x86-64/protected5.d: Likewise.
+	* ld-x86-64/protected5.s: Likewise.
+
 2012-03-19  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ld-m68k/m68k.exp ("TLS indirect symbol use"): Pass

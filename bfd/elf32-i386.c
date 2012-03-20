@@ -3503,6 +3503,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  return FALSE;
 		}
 	      else if (!info->executable
+		       && !SYMBOLIC_BIND (info, h)
 		       && h->type == STT_FUNC
 		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
 		{

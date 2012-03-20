@@ -3464,8 +3464,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  /* Check to make sure it isn't a protected function symbol
 	     for shared library since it may not be local when used
 	     as function address.  */
-	  if (info->shared
+	  if (!info->executable
 	      && h
+	      && !SYMBOLIC_BIND (info, h)
 	      && h->def_regular
 	      && h->type == STT_FUNC
 	      && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)

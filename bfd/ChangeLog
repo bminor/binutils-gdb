@@ -1,3 +1,14 @@
+2012-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13880
+	* elf32-i386.c (elf_i386_relocate_section): Don't issue an error
+	for R_386_GOTOFF relocation against protected function if
+	SYMBOLIC_BIND is true.
+
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Don't issue an
+	error for R_X86_64_GOTOFF64 relocation against protected function
+	when building executable or SYMBOLIC_BIND is true.
+
 2012-03-16  Roland McGrath  <mcgrathr@google.com>
 
 	* config.bfd: Handle x86_64-*-nacl*.
