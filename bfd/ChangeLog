@@ -1,3 +1,17 @@
+2012-03-20  Kai Tietz  <ktietz@redhat.com>
+
+	PR ld/12742
+	* configure.in (AC_CHECK_HEADERS): Test for windows.h and dlfcn.h.
+	* plugin.c: Guard include of dlfcn.h if HAVE_DLFCN_H is defined.
+	Add windows.h header include if HAVE_WINDOWS_H is defined.
+	(dlerror): New static function if windows variant is used instead
+	of dlfcn.h.
+	(dlclose): Likewise.
+	(dlopen): Likewise.
+	(dlsym): Likewise.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+
 2012-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13880

@@ -190,6 +190,9 @@ AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h sys/stat.h)
 GCC_HEADER_STDINT(bfd_stdint.h)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
+
+AC_CHECK_HEADERS(windows.h dlfcn.h)
+
 ACX_HEADER_STRING
 AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid fileno)
 AC_CHECK_FUNCS(strtoull)
