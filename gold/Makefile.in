@@ -77,11 +77,11 @@ am__objects_1 = archive.$(OBJEXT) attributes.$(OBJEXT) \
 	descriptors.$(OBJEXT) dirsearch.$(OBJEXT) dynobj.$(OBJEXT) \
 	dwarf_reader.$(OBJEXT) ehframe.$(OBJEXT) errors.$(OBJEXT) \
 	expression.$(OBJEXT) fileread.$(OBJEXT) gc.$(OBJEXT) \
-	gold.$(OBJEXT) gold-threads.$(OBJEXT) icf.$(OBJEXT) \
-	incremental.$(OBJEXT) int_encoding.$(OBJEXT) layout.$(OBJEXT) \
-	mapfile.$(OBJEXT) merge.$(OBJEXT) object.$(OBJEXT) \
-	options.$(OBJEXT) output.$(OBJEXT) parameters.$(OBJEXT) \
-	plugin.$(OBJEXT) readsyms.$(OBJEXT) \
+	gdb-index.$(OBJEXT) gold.$(OBJEXT) gold-threads.$(OBJEXT) \
+	icf.$(OBJEXT) incremental.$(OBJEXT) int_encoding.$(OBJEXT) \
+	layout.$(OBJEXT) mapfile.$(OBJEXT) merge.$(OBJEXT) \
+	object.$(OBJEXT) options.$(OBJEXT) output.$(OBJEXT) \
+	parameters.$(OBJEXT) plugin.$(OBJEXT) readsyms.$(OBJEXT) \
 	reduced_debug_output.$(OBJEXT) reloc.$(OBJEXT) \
 	resolve.$(OBJEXT) script-sections.$(OBJEXT) script.$(OBJEXT) \
 	stringpool.$(OBJEXT) symtab.$(OBJEXT) target.$(OBJEXT) \
@@ -399,6 +399,7 @@ CCFILES = \
 	expression.cc \
 	fileread.cc \
         gc.cc \
+        gdb-index.cc \
 	gold.cc \
 	gold-threads.cc \
 	icf.cc \
@@ -446,6 +447,7 @@ HFILES = \
 	fileread.h \
 	freebsd.h \
         gc.h \
+        gdb-index.h \
 	gold.h \
 	gold-threads.h \
 	icf.h \
@@ -650,6 +652,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/expression.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdb-index.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold-threads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386.Po@am__quote@

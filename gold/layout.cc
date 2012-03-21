@@ -44,6 +44,7 @@
 #include "symtab.h"
 #include "dynobj.h"
 #include "ehframe.h"
+#include "gdb-index.h"
 #include "compressed_output.h"
 #include "reduced_debug_output.h"
 #include "object.h"
@@ -390,6 +391,7 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     eh_frame_data_(NULL),
     added_eh_frame_data_(false),
     eh_frame_hdr_section_(NULL),
+    gdb_index_data_(NULL),
     build_id_note_(NULL),
     debug_abbrev_(NULL),
     debug_info_(NULL),
@@ -905,6 +907,13 @@ Layout::init_fixed_output_section(const char* name,
   if (!can_incremental_update(sh_type))
     return NULL;
 
+  // If we're generating a .gdb_index section, we need to regenerate
+  // it from scratch.
+  if (parameters->options().gdb_index()
+      && sh_type == elfcpp::SHT_PROGBITS
+      && strcmp(name, ".gdb_index") == 0)
+    return NULL;
+
   typename elfcpp::Elf_types<size>::Elf_Addr sh_addr = shdr.get_sh_addr();
   typename elfcpp::Elf_types<size>::Elf_Off sh_offset = shdr.get_sh_offset();
   typename elfcpp::Elf_types<size>::Elf_WXword sh_size = shdr.get_sh_size();
@@ -1290,6 +1299,38 @@ Layout::add_eh_frame_for_plt(Output_data* plt, const unsigned char* cie_data,
       os->add_output_section_data(this->eh_frame_data_);
       this->added_eh_frame_data_ = true;
     }
+}
+
+// Scan a .debug_info or .debug_types section, and add summary
+// information to the .gdb_index section.
+
+template<int size, bool big_endian>
+void
+Layout::add_to_gdb_index(bool is_type_unit,
+			 Sized_relobj<size, big_endian>* object,
+			 const unsigned char* symbols,
+			 off_t symbols_size,
+			 unsigned int shndx,
+			 unsigned int reloc_shndx,
+			 unsigned int reloc_type)
+{
+  if (this->gdb_index_data_ == NULL)
+    {
+      Output_section* os = this->choose_output_section(NULL, ".gdb_index",
+						       elfcpp::SHT_PROGBITS, 0,
+						       false, ORDER_INVALID,
+						       false);
+      if (os == NULL)
+        return;
+
+      this->gdb_index_data_ = new Gdb_index(os);
+      os->add_output_section_data(this->gdb_index_data_);
+      os->set_after_input_sections();
+    }
+
+  this->gdb_index_data_->scan_debug_info(is_type_unit, object, symbols,
+					 symbols_size, shndx, reloc_shndx,
+					 reloc_type);
 }
 
 // Add POSD to an output section using NAME, TYPE, and FLAGS.  Return
@@ -5295,6 +5336,54 @@ Layout::layout_eh_frame<64, true>(Sized_relobj_file<64, true>* object,
 				  unsigned int reloc_shndx,
 				  unsigned int reloc_type,
 				  off_t* off);
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+void
+Layout::add_to_gdb_index(bool is_type_unit,
+			 Sized_relobj<32, false>* object,
+			 const unsigned char* symbols,
+			 off_t symbols_size,
+			 unsigned int shndx,
+			 unsigned int reloc_shndx,
+			 unsigned int reloc_type);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+void
+Layout::add_to_gdb_index(bool is_type_unit,
+			 Sized_relobj<32, true>* object,
+			 const unsigned char* symbols,
+			 off_t symbols_size,
+			 unsigned int shndx,
+			 unsigned int reloc_shndx,
+			 unsigned int reloc_type);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+void
+Layout::add_to_gdb_index(bool is_type_unit,
+			 Sized_relobj<64, false>* object,
+			 const unsigned char* symbols,
+			 off_t symbols_size,
+			 unsigned int shndx,
+			 unsigned int reloc_shndx,
+			 unsigned int reloc_type);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Layout::add_to_gdb_index(bool is_type_unit,
+			 Sized_relobj<64, true>* object,
+			 const unsigned char* symbols,
+			 off_t symbols_size,
+			 unsigned int shndx,
+			 unsigned int reloc_shndx,
+			 unsigned int reloc_type);
 #endif
 
 } // End namespace gold.

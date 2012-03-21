@@ -2002,6 +2002,11 @@ Sized_relobj_incr<size, big_endian>::do_layout(
   Output_sections& out_sections(this->output_sections());
   out_sections.resize(shnum);
   this->section_offsets().resize(shnum);
+
+  // Keep track of .debug_info and .debug_types sections.
+  std::vector<unsigned int> debug_info_sections;
+  std::vector<unsigned int> debug_types_sections;
+
   for (unsigned int i = 1; i < shnum; i++)
     {
       typename Input_entry_reader::Input_section_info sect =
@@ -2015,6 +2020,18 @@ Sized_relobj_incr<size, big_endian>::do_layout(
       gold_assert(os != NULL);
       out_sections[i] = os;
       this->section_offsets()[i] = static_cast<Address>(sect.sh_offset);
+
+      // When generating a .gdb_index section, we do additional
+      // processing of .debug_info and .debug_types sections after all
+      // the other sections.
+      if (parameters->options().gdb_index())
+	{
+	  const char* name = os->name();
+	  if (strcmp(name, ".debug_info") == 0)
+	    debug_info_sections.push_back(i);
+	  else if (strcmp(name, ".debug_types") == 0)
+	    debug_types_sections.push_back(i);
+	}
     }
 
   // Process the COMDAT groups.
@@ -2031,6 +2048,25 @@ Sized_relobj_incr<size, big_endian>::do_layout(
       else
         this->error(_("COMDAT group %s included twice in incremental link"),
 		    signature);
+    }
+
+  // When building a .gdb_index section, scan the .debug_info and
+  // .debug_types sections.
+  for (std::vector<unsigned int>::const_iterator p
+	   = debug_info_sections.begin();
+       p != debug_info_sections.end();
+       ++p)
+    {
+      unsigned int i = *p;
+      layout->add_to_gdb_index(false, this, NULL, 0, i, 0, 0);
+    }
+  for (std::vector<unsigned int>::const_iterator p
+	   = debug_types_sections.begin();
+       p != debug_types_sections.end();
+       ++p)
+    {
+      unsigned int i = *p;
+      layout->add_to_gdb_index(true, this, 0, 0, i, 0, 0);
     }
 }
 
@@ -2193,22 +2229,39 @@ Sized_relobj_incr<size, big_endian>::do_section_size(unsigned int)
   gold_unreachable();
 }
 
-// Get the name of a section.
+// Get the name of a section.  This returns the name of the output
+// section, because we don't usually track the names of the input
+// sections.
 
 template<int size, bool big_endian>
 std::string
-Sized_relobj_incr<size, big_endian>::do_section_name(unsigned int)
+Sized_relobj_incr<size, big_endian>::do_section_name(unsigned int shndx)
 {
-  gold_unreachable();
+  Output_sections& out_sections(this->output_sections());
+  Output_section* os = out_sections[shndx];
+  if (os == NULL)
+    return NULL;
+  return os->name();
 }
 
 // Return a view of the contents of a section.
 
 template<int size, bool big_endian>
-Object::Location
-Sized_relobj_incr<size, big_endian>::do_section_contents(unsigned int)
+const unsigned char*
+Sized_relobj_incr<size, big_endian>::do_section_contents(
+    unsigned int shndx,
+    section_size_type* plen,
+    bool)
 {
-  gold_unreachable();
+  Output_sections& out_sections(this->output_sections());
+  Output_section* os = out_sections[shndx];
+  gold_assert(os != NULL);
+  off_t section_offset = os->offset();
+  typename Input_entry_reader::Input_section_info sect =
+      this->input_reader_.get_input_section(shndx - 1);
+  section_offset += sect.sh_offset;
+  *plen = sect.sh_size;
+  return this->ibase_->view(section_offset, sect.sh_size).data();
 }
 
 // Return section flags.
@@ -2780,8 +2833,11 @@ Sized_incr_dynobj<size, big_endian>::do_section_name(unsigned int)
 // Return a view of the contents of a section.
 
 template<int size, bool big_endian>
-Object::Location
-Sized_incr_dynobj<size, big_endian>::do_section_contents(unsigned int)
+const unsigned char*
+Sized_incr_dynobj<size, big_endian>::do_section_contents(
+    unsigned int,
+    section_size_type*,
+    bool)
 {
   gold_unreachable();
 }

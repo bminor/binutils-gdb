@@ -178,16 +178,7 @@ Object::error(const char* format, ...) const
 const unsigned char*
 Object::section_contents(unsigned int shndx, section_size_type* plen,
 			 bool cache)
-{
-  Location loc(this->do_section_contents(shndx));
-  *plen = convert_to_section_size_type(loc.data_size);
-  if (*plen == 0)
-    {
-      static const unsigned char empty[1] = { '\0' };
-      return empty;
-    }
-  return this->get_view(loc.file_offset, *plen, true, cache);
-}
+{ return this->do_section_contents(shndx, plen, cache); }
 
 // Read the section data into SD.  This is code common to Sized_relobj_file
 // and Sized_dynobj, so we put it into Object.
@@ -550,23 +541,54 @@ Sized_relobj_file<size, big_endian>::find_eh_frame(
   return false;
 }
 
-#ifdef ENABLE_THREADS
-
 // Return TRUE if this is a section whose contents will be needed in the
-// Add_symbols task.
+// Add_symbols task.  This function is only called for sections that have
+// already passed the test in is_compressed_debug_section(), so we know
+// that the section name begins with ".zdebug".
 
 static bool
 need_decompressed_section(const char* name)
 {
-  // We will need .zdebug_str if this is not an incremental link
-  // (i.e., we are processing string merge sections).
-  if (!parameters->incremental() && strcmp(name, ".zdebug_str") == 0)
+  // Skip over the ".zdebug" and a quick check for the "_".
+  name += 7;
+  if (*name++ != '_')
+    return false;
+
+#ifdef ENABLE_THREADS
+  // Decompressing these sections now will help only if we're
+  // multithreaded.
+  if (parameters->options().threads())
+    {
+      // We will need .zdebug_str if this is not an incremental link
+      // (i.e., we are processing string merge sections) or if we need
+      // to build a gdb index.
+      if ((!parameters->incremental() || parameters->options().gdb_index())
+	  && strcmp(name, "str") == 0)
+	return true;
+
+      // We will need these other sections when building a gdb index.
+      if (parameters->options().gdb_index()
+	  && (strcmp(name, "info") == 0
+	      || strcmp(name, "types") == 0
+	      || strcmp(name, "pubnames") == 0
+	      || strcmp(name, "pubtypes") == 0
+	      || strcmp(name, "ranges") == 0
+	      || strcmp(name, "abbrev") == 0))
+	return true;
+    }
+#endif
+
+  // Even when single-threaded, we will need .zdebug_str if this is
+  // not an incremental link and we are building a gdb index.
+  // Otherwise, we would decompress the section twice: once for
+  // string merge processing, and once for building the gdb index.
+  if (!parameters->incremental()
+      && parameters->options().gdb_index()
+      && strcmp(name, "str") == 0)
     return true;
 
   return false;
 }
-
-#endif
 
 // Build a table for any compressed debug sections, mapping each section index
 // to the uncompressed size and (if needed) the decompressed contents.
@@ -604,33 +626,22 @@ build_compressed_section_map(
 	      const unsigned char* contents =
 		  obj->section_contents(i, &len, false);
 	      uint64_t uncompressed_size = get_uncompressed_size(contents, len);
+	      Compressed_section_info info;
+	      info.size = convert_to_section_size_type(uncompressed_size);
+	      info.contents = NULL;
 	      if (uncompressed_size != -1ULL)
 		{
-		  Compressed_section_info info;
-		  info.size = convert_to_section_size_type(uncompressed_size);
-		  info.contents = NULL;
-
-#ifdef ENABLE_THREADS
-		  // If we're multi-threaded, it will help to decompress
-		  // any sections that will be needed during the Add_symbols
-		  // task, so that several decompressions can run in
-		  // parallel.
-		  if (parameters->options().threads())
+		  unsigned char* uncompressed_data = NULL;
+		  if (need_decompressed_section(name))
 		    {
-		      unsigned char* uncompressed_data = NULL;
-		      if (need_decompressed_section(name))
-			{
-			  uncompressed_data = new unsigned char[uncompressed_size];
-			  if (decompress_input_section(contents, len,
-						       uncompressed_data,
-						       uncompressed_size))
-			    info.contents = uncompressed_data;
-			  else
-			    delete[] uncompressed_data;
-			}
+		      uncompressed_data = new unsigned char[uncompressed_size];
+		      if (decompress_input_section(contents, len,
+						   uncompressed_data,
+						   uncompressed_size))
+			info.contents = uncompressed_data;
+		      else
+			delete[] uncompressed_data;
 		    }
-#endif
-
 		  (*uncompressed_map)[i] = info;
 		}
 	    }
@@ -645,6 +656,8 @@ template<int size, bool big_endian>
 void
 Sized_relobj_file<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
+  bool need_local_symbols = false;
+
   this->read_section_data(&this->elf_file_, sd);
 
   const unsigned char* const pshdrs = sd->section_headers->data();
@@ -663,6 +676,14 @@ Sized_relobj_file<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
         build_compressed_section_map(pshdrs, this->shnum(), names,
 				     sd->section_names_size, this);
 
+  if (this->has_eh_frame_
+      || (!parameters->options().relocatable()
+	  && parameters->options().gdb_index()
+	  && (memmem(names, sd->section_names_size, "debug_info", 12) == 0
+	      || memmem(names, sd->section_names_size, "debug_types",
+			13) == 0)))
+    need_local_symbols = true;
+
   sd->symbols = NULL;
   sd->symbols_size = 0;
   sd->external_symbols_offset = 0;
@@ -680,7 +701,8 @@ Sized_relobj_file<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 				 + this->symtab_shndx_ * This::shdr_size);
   gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
-  // If this object has a .eh_frame section, we need all the symbols.
+  // If this object has a .eh_frame section, or if building a .gdb_index
+  // section and there is debug info, we need all the symbols.
   // Otherwise we only need the external symbols.  While it would be
   // simpler to just always read all the symbols, I've seen object
   // files with well over 2000 local symbols, which for a 64-bit
@@ -698,8 +720,8 @@ Sized_relobj_file<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   off_t extoff = dataoff + locsize;
   section_size_type extsize = datasize - locsize;
 
-  off_t readoff = this->has_eh_frame_ ? dataoff : extoff;
-  section_size_type readsize = this->has_eh_frame_ ? datasize : extsize;
+  off_t readoff = need_local_symbols ? dataoff : extoff;
+  section_size_type readsize = need_local_symbols ? datasize : extsize;
 
   if (readsize == 0)
     {
@@ -731,7 +753,7 @@ Sized_relobj_file<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   sd->symbols = fvsymtab;
   sd->symbols_size = readsize;
-  sd->external_symbols_offset = this->has_eh_frame_ ? locsize : 0;
+  sd->external_symbols_offset = need_local_symbols ? locsize : 0;
   sd->symbol_names = fvstrtab;
   sd->symbol_names_size =
     convert_to_section_size_type(strtabshdr.get_sh_size());
@@ -1318,6 +1340,10 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
   // Keep track of .eh_frame sections.
   std::vector<unsigned int> eh_frame_sections;
 
+  // Keep track of .debug_info and .debug_types sections.
+  std::vector<unsigned int> debug_info_sections;
+  std::vector<unsigned int> debug_types_sections;
+
   // Skip the first, dummy, section.
   pshdrs = shdrs + This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i, pshdrs += This::shdr_size)
@@ -1558,6 +1584,21 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
           // only happens in the second call.
           this->layout_section(layout, i, name, shdr, reloc_shndx[i],
                                reloc_type[i]);
+
+	  // When generating a .gdb_index section, we do additional
+	  // processing of .debug_info and .debug_types sections after all
+	  // the other sections for the same reason as above.
+	  if (!relocatable
+	      && parameters->options().gdb_index()
+	      && !(shdr.get_sh_flags() & elfcpp::SHF_ALLOC))
+	    {
+	      if (strcmp(name, ".debug_info") == 0
+		  || strcmp(name, ".zdebug_info") == 0)
+		debug_info_sections.push_back(i);
+	      else if (strcmp(name, ".debug_types") == 0
+		       || strcmp(name, ".zdebug_types") == 0)
+		debug_types_sections.push_back(i);
+	    }
         }
     }
 
@@ -1636,6 +1677,29 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 				    shdr,
 				    reloc_shndx[i],
 				    reloc_type[i]);
+    }
+
+  // When building a .gdb_index section, scan the .debug_info and
+  // .debug_types sections.
+  gold_assert(!is_gc_pass_one
+	      || (debug_info_sections.empty() && debug_types_sections.empty()));
+  for (std::vector<unsigned int>::const_iterator p
+	   = debug_info_sections.begin();
+       p != debug_info_sections.end();
+       ++p)
+    {
+      unsigned int i = *p;
+      layout->add_to_gdb_index(false, this, symbols_data, symbols_size,
+			       i, reloc_shndx[i], reloc_type[i]);
+    }
+  for (std::vector<unsigned int>::const_iterator p
+	   = debug_types_sections.begin();
+       p != debug_types_sections.end();
+       ++p)
+    {
+      unsigned int i = *p;
+      layout->add_to_gdb_index(true, this, symbols_data, symbols_size,
+			       i, reloc_shndx[i], reloc_type[i]);
     }
 
   if (is_gc_pass_two)
@@ -2614,8 +2678,8 @@ Sized_relobj_file<size, big_endian>::do_decompressed_section_contents(
     bool* is_new)
 {
   section_size_type buffer_size;
-  const unsigned char* buffer = this->section_contents(shndx, &buffer_size,
-						       false);
+  const unsigned char* buffer = this->do_section_contents(shndx, &buffer_size,
+							  false);
 
   if (this->compressed_sections_ == NULL)
     {

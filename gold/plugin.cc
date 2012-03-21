@@ -1159,13 +1159,14 @@ Sized_pluginobj<size, big_endian>::do_section_name(unsigned int)
 // Return a view of the contents of a section.  Not used for plugin objects.
 
 template<int size, bool big_endian>
-Object::Location
-Sized_pluginobj<size, big_endian>::do_section_contents(unsigned int)
+const unsigned char*
+Sized_pluginobj<size, big_endian>::do_section_contents(
+    unsigned int,
+    section_size_type*,
+    bool)
 {
-  Location loc(0, 0);
-
   gold_unreachable();
-  return loc;
+  return NULL;
 }
 
 // Return section flags.  Not used for plugin objects.

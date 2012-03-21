@@ -1,3 +1,112 @@
+2012-03-21  Cary Coutant  <ccoutant@google.com>
+
+	* Makefile.am: Add gdb-index.cc, gdb-index.h.
+	* Makefile.in: Regenerate.
+	* dwarf_reader.cc (Sized_elf_reloc_mapper::do_initialize): New function.
+	(Sized_elf_reloc_mapper::symbol_section): New function.
+	(Sized_elf_reloc_mapper::do_get_reloc_target): New function.
+	(make_elf_reloc_mapper): New function.
+	(Dwarf_abbrev_table::clear_abbrev_codes): New function.
+	(Dwarf_abbrev_table::do_read_abbrevs): New function.
+	(Dwarf_abbrev_table::do_get_abbrev): New function.
+	(Dwarf_ranges_table::read_ranges_table): New function.
+	(Dwarf_ranges_table::read_range_list): New function.
+	(Dwarf_pubnames_table::read_section): New function.
+	(Dwarf_pubnames_table::read_header): New function.
+	(Dwarf_pubnames_table::next_name): New function.
+	(Dwarf_die::Dwarf_die): New function.
+	(Dwarf_die::read_attributes): New function.
+	(Dwarf_die::skip_attributes): New function.
+	(Dwarf_die::set_name): New function.
+	(Dwarf_die::set_linkage_name): New function.
+	(Dwarf_die::attribute): New function.
+	(Dwarf_die::string_attribute): New function.
+	(Dwarf_die::int_attribute): New function.
+	(Dwarf_die::uint_attribute): New function.
+	(Dwarf_die::ref_attribute): New function.
+	(Dwarf_die::child_offset): New function.
+	(Dwarf_die::sibling_offset): New function.
+	(Dwarf_info_reader::check_buffer): New function.
+	(Dwarf_info_reader::parse): New function.
+	(Dwarf_info_reader::do_parse): New function.
+	(Dwarf_info_reader::do_read_string_table): New function.
+	(Dwarf_info_reader::lookup_reloc): New function.
+	(Dwarf_info_reader::get_string): New function.
+	(Dwarf_info_reader::visit_compilation_unit): New function.
+	(Dwarf_info_reader::visit_type_unit): New function.
+	(Sized_dwarf_line_info::Sized_dwarf_line_info): Use
+	Sized_elf_reloc_mapper.
+	(Sized_dwarf_line_info::symbol_section): Remove function.
+	(Sized_dwarf_line_info::read_relocs): Use Sized_elf_reloc_mapper.
+	(Sized_dwarf_line_info::read_line_mappings): Remove object
+	parameter, adjust callers.
+	(Sized_dwarf_line_info::format_file_lineno): Fix type of cast.
+	* dwarf_reader.h: Include <sys/types.h>.
+	(class Track_relocs): Remove forward declaration.
+	(class Elf_reloc_mapper): New class.
+	(class Sized_elf_reloc_mapper): New class.
+	(class Dwarf_abbrev_table): New class.
+	(class Dwarf_range_list): New class.
+	(class Dwarf_ranges_table): New class.
+	(class Dwarf_pubnames_table): New class.
+	(class Dwarf_die): New class.
+	(class Dwarf_info_reader): New class.
+	(Sized_dwarf_line_info::read_line_mappings): Remove object parameter.
+	(Sized_dwarf_line_info::symbol_section): Remove member function.
+	* dynobj.h (Sized_dynobj::do_section_contents): Refactor code from
+	base class.
+	* gdb-index.cc: New source file.
+	* gdb-index.h: New source file.
+	* incremental.cc (Sized_relobj_incr::do_layout): Track .debug_info
+	and .debug_types sections, call Layout::add_to_gdb_index.
+	(Sized_relobj_incr::do_section_name): Implement.
+	(Sized_relobj_incr::do_section_contents): Adjust parameter list and
+	return type; Implement.
+	(Sized_incr_dynobj::do_section_contents): Adjust parameter list and
+	return type.
+	* incremental.h (Sized_relobj_incr::do_section_contents): Adjust
+	parameter list and return type.
+	(Sized_incr_dynobj::do_section_contents): Likewise.
+	* layout.cc: Include gdb-index.h.
+	(Layout::Layout): Initialize gdb_index_data_.
+	(Layout::init_fixed_output_section): Check for .gdb_index section.
+	(Layout::add_to_gdb_index): New function. Instantiate.
+	* layout.h: Add forward declaration for class Gdb_index.
+	(Layout::add_to_gdb_index): New member function.
+	(Layout::gdb_index_data_): New data member.
+	* main.cc: Include gdb-index.h.
+	(main): Print statistics for gdb index.
+	* object.cc (Object::section_contents): Move code into
+	do_section_contents.
+	(need_decompressed_section): Check for sections needed when building
+	gdb index.
+	(build_compressed_section_map): Likewise.
+	(Sized_relobj_file::do_read_symbols): Need local symbols when building
+	gdb index.
+	(Sized_relobj_file::do_layout): Track .debug_info and .debug_types
+	sections; call Layout::add_to_gdb_index.
+	(Sized_relobj_file::do_decompressed_section_contents): Call
+	do_section_contents directly.
+	* object.h (Object::do_section_contents): Adjust parameter list and
+	return type.
+	(Object::do_decompressed_section_contents): Call do_section_contents
+	directly.
+	(Sized_relobj_file::do_section_contents): Adjust parameter list and
+	return type.
+	* options.h (class General_options): Add --gdb-index option.
+	* plugin.cc (Sized_pluginobj::do_section_contents): Adjust parameter
+	list and return type.
+	* plugin.h (Sized_pluginobj::do_section_contents): Likewise.
+	* reloc.h (Track_relocs::checkpoint): New function.
+	(Track_relocs::reset): New function.
+
+	* testsuite/Makefile.am (gdb_index_test_1.sh, gdb_index_test_2.sh):
+	New test cases.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/gdb_index_test.cc: New test source file.
+	* testsuite/gdb_index_test_1.sh: New test source file.
+	* testsuite/gdb_index_test_2.sh: New test source file.
+
 2012-03-19  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::do_define_standard_symbols): New method.

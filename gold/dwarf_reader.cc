@@ -1,6 +1,6 @@
 // dwarf_reader.cc -- parse dwarf2/3 debug information
 
-// Copyright 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2007, 2008, 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -36,6 +36,1367 @@
 
 namespace gold {
 
+// Class Sized_elf_reloc_mapper
+
+// Initialize the relocation tracker for section RELOC_SHNDX.
+
+template<int size, bool big_endian>
+bool
+Sized_elf_reloc_mapper<size, big_endian>::do_initialize(
+    unsigned int reloc_shndx, unsigned int reloc_type)
+{
+  this->reloc_type_ = reloc_type;
+  return this->track_relocs_.initialize(this->object_, reloc_shndx,
+					reloc_type);
+}
+
+// Looks in the symtab to see what section a symbol is in.
+
+template<int size, bool big_endian>
+unsigned int
+Sized_elf_reloc_mapper<size, big_endian>::symbol_section(
+    unsigned int symndx, Address* value, bool* is_ordinary)
+{
+  const int symsize = elfcpp::Elf_sizes<size>::sym_size;
+  gold_assert((symndx + 1) * symsize <= this->symtab_size_);
+  elfcpp::Sym<size, big_endian> elfsym(this->symtab_ + symndx * symsize);
+  *value = elfsym.get_st_value();
+  return this->object_->adjust_sym_shndx(symndx, elfsym.get_st_shndx(),
+					 is_ordinary);
+}
+
+// Return the section index and offset within the section of
+// the target of the relocation for RELOC_OFFSET.
+
+template<int size, bool big_endian>
+unsigned int
+Sized_elf_reloc_mapper<size, big_endian>::do_get_reloc_target(
+    off_t reloc_offset, off_t* target_offset)
+{
+  this->track_relocs_.advance(reloc_offset);
+  if (reloc_offset != this->track_relocs_.next_offset())
+    return 0;
+  unsigned int symndx = this->track_relocs_.next_symndx();
+  typename elfcpp::Elf_types<size>::Elf_Addr value;
+  bool is_ordinary;
+  unsigned int target_shndx = this->symbol_section(symndx, &value,
+						   &is_ordinary);
+  if (!is_ordinary)
+    return 0;
+  if (this->reloc_type_ == elfcpp::SHT_RELA)
+    value += this->track_relocs_.next_addend();
+  *target_offset = value;
+  return target_shndx;
+}
+
+static inline Elf_reloc_mapper*
+make_elf_reloc_mapper(Object* object, const unsigned char* symtab,
+		      off_t symtab_size)
+{
+  switch (parameters->size_and_endianness())
+    {
+#ifdef HAVE_TARGET_32_LITTLE
+      case Parameters::TARGET_32_LITTLE:
+	return new Sized_elf_reloc_mapper<32, false>(object, symtab,
+						     symtab_size);
+#endif
+#ifdef HAVE_TARGET_32_BIG
+      case Parameters::TARGET_32_BIG:
+	return new Sized_elf_reloc_mapper<32, true>(object, symtab,
+						    symtab_size);
+#endif
+#ifdef HAVE_TARGET_64_LITTLE
+      case Parameters::TARGET_64_LITTLE:
+	return new Sized_elf_reloc_mapper<64, false>(object, symtab,
+						     symtab_size);
+#endif
+#ifdef HAVE_TARGET_64_BIG
+      case Parameters::TARGET_64_BIG:
+	return new Sized_elf_reloc_mapper<64, true>(object, symtab,
+						    symtab_size);
+#endif
+      default:
+	gold_unreachable();
+    }
+}
+
+// class Dwarf_abbrev_table
+
+void
+Dwarf_abbrev_table::clear_abbrev_codes()
+{
+  for (unsigned int code = 0; code < this->low_abbrev_code_max_; ++code)
+    {
+      if (this->low_abbrev_codes_[code] != NULL)
+	{
+	  delete this->low_abbrev_codes_[code];
+	  this->low_abbrev_codes_[code] = NULL;
+	}
+    }
+  for (Abbrev_code_table::iterator it = this->high_abbrev_codes_.begin();
+       it != this->high_abbrev_codes_.end();
+       ++it)
+    {
+      if (it->second != NULL)
+	delete it->second;
+    }
+  this->high_abbrev_codes_.clear();
+}
+
+// Read the abbrev table from an object file.
+
+bool
+Dwarf_abbrev_table::do_read_abbrevs(
+    Relobj* object,
+    unsigned int abbrev_shndx,
+    off_t abbrev_offset)
+{
+  this->clear_abbrev_codes();
+
+  // If we don't have relocations, abbrev_shndx will be 0, and
+  // we'll have to hunt for the .debug_abbrev section.
+  if (abbrev_shndx == 0 && this->abbrev_shndx_ > 0)
+    abbrev_shndx = this->abbrev_shndx_;
+  else if (abbrev_shndx == 0)
+    {
+      for (unsigned int i = 1; i < object->shnum(); ++i)
+	{
+	  std::string name = object->section_name(i);
+	  if (name == ".debug_abbrev")
+	    {
+	      abbrev_shndx = i;
+	      // Correct the offset.  For incremental update links, we have a
+	      // relocated offset that is relative to the output section, but
+	      // here we need an offset relative to the input section.
+	      abbrev_offset -= object->output_section_offset(i);
+	      break;
+	    }
+	}
+      if (abbrev_shndx == 0)
+	return false;
+    }
+
+  // Get the section contents and decompress if necessary.
+  if (abbrev_shndx != this->abbrev_shndx_)
+    {
+      if (this->owns_buffer_ && this->buffer_ != NULL)
+        {
+	  delete[] this->buffer_;
+	  this->owns_buffer_ = false;
+        }
+
+      section_size_type buffer_size;
+      this->buffer_ =
+	  object->decompressed_section_contents(abbrev_shndx,
+						&buffer_size,
+						&this->owns_buffer_);
+      this->buffer_end_ = this->buffer_ + buffer_size;
+      this->abbrev_shndx_ = abbrev_shndx;
+    }
+
+  this->buffer_pos_ = this->buffer_ + abbrev_offset;
+  return true;
+}
+
+// Lookup the abbrev code entry for CODE.  This function is called
+// only when the abbrev code is not in the direct lookup table.
+// It may be in the hash table, it may not have been read yet,
+// or it may not exist in the abbrev table.
+
+const Dwarf_abbrev_table::Abbrev_code*
+Dwarf_abbrev_table::do_get_abbrev(unsigned int code)
+{
+  // See if the abbrev code is already in the hash table.
+  Abbrev_code_table::const_iterator it = this->high_abbrev_codes_.find(code);
+  if (it != this->high_abbrev_codes_.end())
+    return it->second;
+
+  // Read and store abbrev code definitions until we find the
+  // one we're looking for.
+  for (;;)
+    {
+      // Read the abbrev code.  A zero here indicates the end of the
+      // abbrev table.
+      size_t len;
+      if (this->buffer_pos_ >= this->buffer_end_)
+	return NULL;
+      uint64_t nextcode = read_unsigned_LEB_128(this->buffer_pos_, &len);
+      if (nextcode == 0)
+	{
+	  this->buffer_pos_ = this->buffer_end_;
+	  return NULL;
+	}
+      this->buffer_pos_ += len;
+
+      // Read the tag.
+      if (this->buffer_pos_ >= this->buffer_end_)
+	return NULL;
+      uint64_t tag = read_unsigned_LEB_128(this->buffer_pos_, &len);
+      this->buffer_pos_ += len;
+
+      // Read the has_children flag.
+      if (this->buffer_pos_ >= this->buffer_end_)
+	return NULL;
+      bool has_children = *this->buffer_pos_ == elfcpp::DW_CHILDREN_yes;
+      this->buffer_pos_ += 1;
+
+      // Read the list of (attribute, form) pairs.
+      Abbrev_code* entry = new Abbrev_code(tag, has_children);
+      for (;;)
+	{
+	  // Read the attribute.
+	  if (this->buffer_pos_ >= this->buffer_end_)
+	    return NULL;
+	  uint64_t attr = read_unsigned_LEB_128(this->buffer_pos_, &len);
+	  this->buffer_pos_ += len;
+
+	  // Read the form.
+	  if (this->buffer_pos_ >= this->buffer_end_)
+	    return NULL;
+	  uint64_t form = read_unsigned_LEB_128(this->buffer_pos_, &len);
+	  this->buffer_pos_ += len;
+
+	  // A (0,0) pair terminates the list.
+	  if (attr == 0 && form == 0)
+	    break;
+
+	  if (attr == elfcpp::DW_AT_sibling)
+	    entry->has_sibling_attribute = true;
+
+	  entry->add_attribute(attr, form);
+	}
+
+      this->store_abbrev(nextcode, entry);
+      if (nextcode == code)
+	return entry;
+    }
+
+  return NULL;
+}
+
+// class Dwarf_ranges_table
+
+// Read the ranges table from an object file.
+
+bool
+Dwarf_ranges_table::read_ranges_table(
+    Relobj* object,
+    const unsigned char* symtab,
+    off_t symtab_size,
+    unsigned int ranges_shndx)
+{
+  // If we've already read this abbrev table, return immediately.
+  if (this->ranges_shndx_ > 0
+      && this->ranges_shndx_ == ranges_shndx)
+    return true;
+
+  // If we don't have relocations, ranges_shndx will be 0, and
+  // we'll have to hunt for the .debug_ranges section.
+  if (ranges_shndx == 0 && this->ranges_shndx_ > 0)
+    ranges_shndx = this->ranges_shndx_;
+  else if (ranges_shndx == 0)
+    {
+      for (unsigned int i = 1; i < object->shnum(); ++i)
+	{
+	  std::string name = object->section_name(i);
+	  if (name == ".debug_ranges")
+	    {
+	      ranges_shndx = i;
+	      this->output_section_offset_ = object->output_section_offset(i);
+	      break;
+	    }
+	}
+      if (ranges_shndx == 0)
+	return false;
+    }
+
+  // Get the section contents and decompress if necessary.
+  if (ranges_shndx != this->ranges_shndx_)
+    {
+      if (this->owns_ranges_buffer_ && this->ranges_buffer_ != NULL)
+        {
+	  delete[] this->ranges_buffer_;
+	  this->owns_ranges_buffer_ = false;
+        }
+
+      section_size_type buffer_size;
+      this->ranges_buffer_ =
+	  object->decompressed_section_contents(ranges_shndx,
+						&buffer_size,
+						&this->owns_ranges_buffer_);
+      this->ranges_buffer_end_ = this->ranges_buffer_ + buffer_size;
+      this->ranges_shndx_ = ranges_shndx;
+    }
+
+  if (this->ranges_reloc_mapper_ != NULL)
+    {
+      delete this->ranges_reloc_mapper_;
+      this->ranges_reloc_mapper_ = NULL;
+    }
+
+  // For incremental objects, we have no relocations.
+  if (object->is_incremental())
+    return true;
+
+  // Find the relocation section for ".debug_ranges".
+  unsigned int reloc_shndx = 0;
+  unsigned int reloc_type = 0;
+  for (unsigned int i = 0; i < object->shnum(); ++i)
+    {
+      reloc_type = object->section_type(i);
+      if ((reloc_type == elfcpp::SHT_REL
+	   || reloc_type == elfcpp::SHT_RELA)
+	  && object->section_info(i) == ranges_shndx)
+	{
+	  reloc_shndx = i;
+	  break;
+	}
+    }
+
+  this->ranges_reloc_mapper_ = make_elf_reloc_mapper(object, symtab,
+						     symtab_size);
+  this->ranges_reloc_mapper_->initialize(reloc_shndx, reloc_type);
+
+  return true;
+}
+
+// Read a range list from section RANGES_SHNDX at offset RANGES_OFFSET.
+
+Dwarf_range_list*
+Dwarf_ranges_table::read_range_list(
+    Relobj* object,
+    const unsigned char* symtab,
+    off_t symtab_size,
+    unsigned int addr_size,
+    unsigned int ranges_shndx,
+    off_t offset)
+{
+  Dwarf_range_list* ranges;
+
+  if (!this->read_ranges_table(object, symtab, symtab_size, ranges_shndx))
+    return NULL;
+
+  // Correct the offset.  For incremental update links, we have a
+  // relocated offset that is relative to the output section, but
+  // here we need an offset relative to the input section.
+  offset -= this->output_section_offset_;
+
+  // Read the range list at OFFSET.
+  ranges = new Dwarf_range_list();
+  off_t base = 0;
+  for (;
+       this->ranges_buffer_ + offset < this->ranges_buffer_end_;
+       offset += 2 * addr_size)
+    {
+      off_t start;
+      off_t end;
+
+      // Read the raw contents of the section.
+      if (addr_size == 4)
+	{
+	  start = read_from_pointer<32>(this->ranges_buffer_ + offset);
+	  end = read_from_pointer<32>(this->ranges_buffer_ + offset + 4);
+	}
+      else
+	{
+	  start = read_from_pointer<64>(this->ranges_buffer_ + offset);
+	  end = read_from_pointer<64>(this->ranges_buffer_ + offset + 8);
+	}
+
+      // Check for relocations and adjust the values.
+      unsigned int shndx1 = 0;
+      unsigned int shndx2 = 0;
+      if (this->ranges_reloc_mapper_ != NULL)
+        {
+	  shndx1 =
+	      this->ranges_reloc_mapper_->get_reloc_target(offset, &start);
+	  shndx2 =
+	      this->ranges_reloc_mapper_->get_reloc_target(offset + addr_size,
+							   &end);
+        }
+
+      // End of list is marked by a pair of zeroes.
+      if (shndx1 == 0 && start == 0 && end == 0)
+        break;
+
+      // A "base address selection entry" is identified by
+      // 0xffffffff for the first value of the pair.  The second
+      // value is used as a base for subsequent range list entries.
+      if (shndx1 == 0 && start == -1)
+	base = end;
+      else if (shndx1 == shndx2)
+	{
+	  if (shndx1 == 0 || object->is_section_included(shndx1))
+	    ranges->add(shndx1, base + start, base + end);
+	}
+      else
+	gold_warning(_("%s: DWARF info may be corrupt; offsets in a "
+		       "range list entry are in different sections"),
+		     object->name().c_str());
+    }
+
+  return ranges;
+}
+
+// class Dwarf_pubnames_table
+
+// Read the pubnames section SHNDX from the object file.
+
+bool
+Dwarf_pubnames_table::read_section(Relobj* object, unsigned int shndx)
+{
+  section_size_type buffer_size;
+
+  // If we don't have relocations, shndx will be 0, and
+  // we'll have to hunt for the .debug_pubnames/pubtypes section.
+  if (shndx == 0)
+    {
+      const char* name = (this->is_pubtypes_
+			  ? ".debug_pubtypes"
+			  : ".debug_pubnames");
+      for (unsigned int i = 1; i < object->shnum(); ++i)
+	{
+	  if (object->section_name(i) == name)
+	    {
+	      shndx = i;
+	      this->output_section_offset_ = object->output_section_offset(i);
+	      break;
+	    }
+	}
+      if (shndx == 0)
+	return false;
+    }
+
+  this->buffer_ = object->decompressed_section_contents(shndx,
+							&buffer_size,
+							&this->owns_buffer_);
+  if (this->buffer_ == NULL)
+    return false;
+  this->buffer_end_ = this->buffer_ + buffer_size;
+  return true;
+}
+
+// Read the header for the set at OFFSET.
+
+bool
+Dwarf_pubnames_table::read_header(off_t offset)
+{
+  // Correct the offset.  For incremental update links, we have a
+  // relocated offset that is relative to the output section, but
+  // here we need an offset relative to the input section.
+  offset -= this->output_section_offset_;
+
+  if (offset < 0 || offset + 14 >= this->buffer_end_ - this->buffer_)
+    return false;
+
+  const unsigned char* pinfo = this->buffer_ + offset;
+
+  // Read the unit_length field.
+  uint32_t unit_length = read_from_pointer<32>(pinfo);
+  pinfo += 4;
+  if (unit_length == 0xffffffff)
+    {
+      unit_length = read_from_pointer<64>(pinfo);
+      pinfo += 8;
+      this->offset_size_ = 8;
+    }
+  else
+    this->offset_size_ = 4;
+
+  // Check the version.
+  unsigned int version = read_from_pointer<16>(pinfo);
+  pinfo += 2;
+  if (version != 2)
+    return false;
+  
+  // Skip the debug_info_offset and debug_info_size fields.
+  pinfo += 2 * this->offset_size_;
+
+  if (pinfo >= this->buffer_end_)
+    return false;
+
+  this->pinfo_ = pinfo;
+  return true;
+}
+
+// Read the next name from the set.
+
+const char*
+Dwarf_pubnames_table::next_name()
+{
+  const unsigned char* pinfo = this->pinfo_;
+
+  // Read the offset within the CU.  If this is zero, we have reached
+  // the end of the list.
+  uint32_t offset;
+  if (this->offset_size_ == 4)
+    offset = read_from_pointer<32>(&pinfo);
+  else
+    offset = read_from_pointer<64>(&pinfo);
+  if (offset == 0)
+    return NULL;
+
+  // Return a pointer to the string at the current location,
+  // and advance the pointer to the next entry.
+  const char* ret = reinterpret_cast<const char*>(pinfo);
+  while (pinfo < this->buffer_end_ && *pinfo != '\0')
+    ++pinfo;
+  if (pinfo < this->buffer_end_)
+    ++pinfo;
+
+  this->pinfo_ = pinfo;
+  return ret;
+}
+
+// class Dwarf_die
+
+Dwarf_die::Dwarf_die(
+    Dwarf_info_reader* dwinfo,
+    off_t die_offset,
+    Dwarf_die* parent)
+  : dwinfo_(dwinfo), parent_(parent), die_offset_(die_offset),
+    child_offset_(0), sibling_offset_(0), abbrev_code_(NULL), attributes_(),
+    attributes_read_(false), name_(NULL), name_off_(-1), linkage_name_(NULL),
+    linkage_name_off_(-1), string_shndx_(0), specification_(0),
+    abstract_origin_(0)
+{
+  size_t len;
+  const unsigned char* pdie = dwinfo->buffer_at_offset(die_offset);
+  if (pdie == NULL)
+    return;
+  unsigned int code = read_unsigned_LEB_128(pdie, &len);
+  if (code == 0)
+    {
+      if (parent != NULL)
+	parent->set_sibling_offset(die_offset + len);
+      return;
+    }
+  this->attr_offset_ = len;
+
+  // Lookup the abbrev code in the abbrev table.
+  this->abbrev_code_ = dwinfo->get_abbrev(code);
+}
+
+// Read all the attributes of the DIE.
+
+bool
+Dwarf_die::read_attributes()
+{
+  if (this->attributes_read_)
+    return true;
+
+  gold_assert(this->abbrev_code_ != NULL);
+
+  const unsigned char* pdie =
+      this->dwinfo_->buffer_at_offset(this->die_offset_);
+  if (pdie == NULL)
+    return false;
+  const unsigned char* pattr = pdie + this->attr_offset_;
+
+  unsigned int nattr = this->abbrev_code_->attributes.size();
+  this->attributes_.reserve(nattr);
+  for (unsigned int i = 0; i < nattr; ++i)
+    {
+      size_t len;
+      unsigned int attr = this->abbrev_code_->attributes[i].attr;
+      unsigned int form = this->abbrev_code_->attributes[i].form;
+      if (form == elfcpp::DW_FORM_indirect)
+        {
+          form = read_unsigned_LEB_128(pattr, &len);
+          pattr += len;
+        }
+      off_t attr_off = this->die_offset_ + (pattr - pdie);
+      bool ref_form = false;
+      Attribute_value attr_value;
+      attr_value.attr = attr;
+      attr_value.form = form;
+      attr_value.aux.shndx = 0;
+      switch(form)
+	{
+	  case elfcpp::DW_FORM_null:
+	    attr_value.val.intval = 0;
+	    break;
+	  case elfcpp::DW_FORM_flag_present:
+	    attr_value.val.intval = 1;
+	    break;
+	  case elfcpp::DW_FORM_strp:
+	    {
+	      off_t str_off;
+	      if (this->dwinfo_->offset_size() == 4)
+		str_off = read_from_pointer<32>(&pattr);
+	      else
+		str_off = read_from_pointer<64>(&pattr);
+	      unsigned int shndx =
+		  this->dwinfo_->lookup_reloc(attr_off, &str_off);
+	      attr_value.aux.shndx = shndx;
+	      attr_value.val.refval = str_off;
+	      break;
+	    }
+	  case elfcpp::DW_FORM_sec_offset:
+	    {
+	      off_t sec_off;
+	      if (this->dwinfo_->offset_size() == 4)
+		sec_off = read_from_pointer<32>(&pattr);
+	      else
+		sec_off = read_from_pointer<64>(&pattr);
+	      unsigned int shndx =
+		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
+	      attr_value.aux.shndx = shndx;
+	      attr_value.val.refval = sec_off;
+	      ref_form = true;
+	      break;
+	    }
+	  case elfcpp::DW_FORM_addr:
+	  case elfcpp::DW_FORM_ref_addr:
+	    {
+	      off_t sec_off;
+	      if (this->dwinfo_->address_size() == 4)
+		sec_off = read_from_pointer<32>(&pattr);
+	      else
+		sec_off = read_from_pointer<64>(&pattr);
+	      unsigned int shndx =
+		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
+	      attr_value.aux.shndx = shndx;
+	      attr_value.val.refval = sec_off;
+	      ref_form = true;
+	      break;
+	    }
+	  case elfcpp::DW_FORM_block1:
+	    attr_value.aux.blocklen = *pattr++;
+	    attr_value.val.blockval = pattr;
+	    pattr += attr_value.aux.blocklen;
+	    break;
+	  case elfcpp::DW_FORM_block2:
+	    attr_value.aux.blocklen = read_from_pointer<16>(&pattr);
+	    attr_value.val.blockval = pattr;
+	    pattr += attr_value.aux.blocklen;
+	    break;
+	  case elfcpp::DW_FORM_block4:
+	    attr_value.aux.blocklen = read_from_pointer<32>(&pattr);
+	    attr_value.val.blockval = pattr;
+	    pattr += attr_value.aux.blocklen;
+	    break;
+	  case elfcpp::DW_FORM_block:
+	  case elfcpp::DW_FORM_exprloc:
+	    attr_value.aux.blocklen = read_unsigned_LEB_128(pattr, &len);
+	    attr_value.val.blockval = pattr + len;
+	    pattr += len + attr_value.aux.blocklen;
+	    break;
+	  case elfcpp::DW_FORM_data1:
+	  case elfcpp::DW_FORM_flag:
+	    attr_value.val.intval = *pattr++;
+	    break;
+	  case elfcpp::DW_FORM_ref1:
+	    attr_value.val.refval = *pattr++;
+	    ref_form = true;
+	    break;
+	  case elfcpp::DW_FORM_data2:
+	    attr_value.val.intval = read_from_pointer<16>(&pattr);
+	    break;
+	  case elfcpp::DW_FORM_ref2:
+	    attr_value.val.refval = read_from_pointer<16>(&pattr);
+	    ref_form = true;
+	    break;
+	  case elfcpp::DW_FORM_data4:
+	    {
+	      off_t sec_off;
+	      sec_off = read_from_pointer<32>(&pattr);
+	      unsigned int shndx =
+		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
+	      attr_value.aux.shndx = shndx;
+	      attr_value.val.intval = sec_off;
+	      break;
+	    }
+	  case elfcpp::DW_FORM_ref4:
+	    {
+	      off_t sec_off;
+	      sec_off = read_from_pointer<32>(&pattr);
+	      unsigned int shndx =
+		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
+	      attr_value.aux.shndx = shndx;
+	      attr_value.val.refval = sec_off;
+	      ref_form = true;
+	      break;
+	    }
+	  case elfcpp::DW_FORM_data8:
+	    {
+	      off_t sec_off;
+	      sec_off = read_from_pointer<64>(&pattr);
+	      unsigned int shndx =
+		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
+	      attr_value.aux.shndx = shndx;
+	      attr_value.val.intval = sec_off;
+	      break;
+	    }
+	  case elfcpp::DW_FORM_ref_sig8:
+	    attr_value.val.uintval = read_from_pointer<64>(&pattr);
+	    break;
+	  case elfcpp::DW_FORM_ref8:
+	    {
+	      off_t sec_off;
+	      sec_off = read_from_pointer<64>(&pattr);
+	      unsigned int shndx =
+		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
+	      attr_value.aux.shndx = shndx;
+	      attr_value.val.refval = sec_off;
+	      ref_form = true;
+	      break;
+	    }
+	  case elfcpp::DW_FORM_ref_udata:
+	    attr_value.val.refval = read_unsigned_LEB_128(pattr, &len);
+	    ref_form = true;
+	    pattr += len;
+	    break;
+	  case elfcpp::DW_FORM_udata:
+	    attr_value.val.uintval = read_unsigned_LEB_128(pattr, &len);
+	    pattr += len;
+	    break;
+	  case elfcpp::DW_FORM_sdata:
+	    attr_value.val.intval = read_signed_LEB_128(pattr, &len);
+	    pattr += len;
+	    break;
+	  case elfcpp::DW_FORM_string:
+	    attr_value.val.stringval = reinterpret_cast<const char*>(pattr);
+	    len = strlen(attr_value.val.stringval);
+	    pattr += len + 1;
+	    break;
+	  default:
+	    return false;
+	}
+
+      // Cache the most frequently-requested attributes.
+      switch (attr)
+	{
+	  case elfcpp::DW_AT_name:
+	    if (form == elfcpp::DW_FORM_string)
+	      this->name_ = attr_value.val.stringval;
+	    else if (form == elfcpp::DW_FORM_strp)
+	      {
+		// All indirect strings should refer to the same
+		// string section, so we just save the last one seen.
+		this->string_shndx_ = attr_value.aux.shndx;
+		this->name_off_ = attr_value.val.refval;
+	      }
+	    break;
+	  case elfcpp::DW_AT_linkage_name:
+	  case elfcpp::DW_AT_MIPS_linkage_name:
+	    if (form == elfcpp::DW_FORM_string)
+	      this->linkage_name_ = attr_value.val.stringval;
+	    else if (form == elfcpp::DW_FORM_strp)
+	      {
+		// All indirect strings should refer to the same
+		// string section, so we just save the last one seen.
+		this->string_shndx_ = attr_value.aux.shndx;
+		this->linkage_name_off_ = attr_value.val.refval;
+	      }
+	    break;
+	  case elfcpp::DW_AT_specification:
+	    if (ref_form)
+	      this->specification_ = attr_value.val.refval;
+	    break;
+	  case elfcpp::DW_AT_abstract_origin:
+	    if (ref_form)
+	      this->abstract_origin_ = attr_value.val.refval;
+	    break;
+	  case elfcpp::DW_AT_sibling:
+	    if (ref_form && attr_value.aux.shndx == 0)
+	      this->sibling_offset_ = attr_value.val.refval;
+	  default:
+	    break;
+	}
+
+      this->attributes_.push_back(attr_value);
+    }
+
+  // Now that we know where the next DIE begins, record the offset
+  // to avoid later recalculation.
+  if (this->has_children())
+    this->child_offset_ = this->die_offset_ + (pattr - pdie);
+  else
+    this->sibling_offset_ = this->die_offset_ + (pattr - pdie);
+
+  this->attributes_read_ = true;
+  return true;
+}
+
+// Skip all the attributes of the DIE and return the offset of the next DIE.
+
+off_t
+Dwarf_die::skip_attributes()
+{
+  typedef Dwarf_abbrev_table::Attribute Attribute;
+
+  gold_assert(this->abbrev_code_ != NULL);
+
+  const unsigned char* pdie =
+      this->dwinfo_->buffer_at_offset(this->die_offset_);
+  if (pdie == NULL)
+    return 0;
+  const unsigned char* pattr = pdie + this->attr_offset_;
+
+  for (unsigned int i = 0; i < this->abbrev_code_->attributes.size(); ++i)
+    {
+      size_t len;
+      unsigned int form = this->abbrev_code_->attributes[i].form;
+      if (form == elfcpp::DW_FORM_indirect)
+        {
+          form = read_unsigned_LEB_128(pattr, &len);
+          pattr += len;
+        }
+      switch(form)
+	{
+	  case elfcpp::DW_FORM_null:
+	  case elfcpp::DW_FORM_flag_present:
+	    break;
+	  case elfcpp::DW_FORM_strp:
+	  case elfcpp::DW_FORM_sec_offset:
+	    pattr += this->dwinfo_->offset_size();
+	    break;
+	  case elfcpp::DW_FORM_addr:
+	  case elfcpp::DW_FORM_ref_addr:
+	    pattr += this->dwinfo_->address_size();
+	    break;
+	  case elfcpp::DW_FORM_block1:
+	    pattr += 1 + *pattr;
+	    break;
+	  case elfcpp::DW_FORM_block2:
+	    {
+	      uint16_t block_size;
+	      block_size = read_from_pointer<16>(&pattr);
+	      pattr += block_size;
+	      break;
+	    }
+	  case elfcpp::DW_FORM_block4:
+	    {
+	      uint32_t block_size;
+	      block_size = read_from_pointer<32>(&pattr);
+	      pattr += block_size;
+	      break;
+	    }
+	  case elfcpp::DW_FORM_block:
+	  case elfcpp::DW_FORM_exprloc:
+	    {
+	      uint64_t block_size;
+	      block_size = read_unsigned_LEB_128(pattr, &len);
+	      pattr += len + block_size;
+	      break;
+	    }
+	  case elfcpp::DW_FORM_data1:
+	  case elfcpp::DW_FORM_ref1:
+	  case elfcpp::DW_FORM_flag:
+	    pattr += 1;
+	    break;
+	  case elfcpp::DW_FORM_data2:
+	  case elfcpp::DW_FORM_ref2:
+	    pattr += 2;
+	    break;
+	  case elfcpp::DW_FORM_data4:
+	  case elfcpp::DW_FORM_ref4:
+	    pattr += 4;
+	    break;
+	  case elfcpp::DW_FORM_data8:
+	  case elfcpp::DW_FORM_ref8:
+	  case elfcpp::DW_FORM_ref_sig8:
+	    pattr += 8;
+	    break;
+	  case elfcpp::DW_FORM_ref_udata:
+	  case elfcpp::DW_FORM_udata:
+	    read_unsigned_LEB_128(pattr, &len);
+	    pattr += len;
+	    break;
+	  case elfcpp::DW_FORM_sdata:
+	    read_signed_LEB_128(pattr, &len);
+	    pattr += len;
+	    break;
+	  case elfcpp::DW_FORM_string:
+	    len = strlen(reinterpret_cast<const char*>(pattr));
+	    pattr += len + 1;
+	    break;
+	  default:
+	    return 0;
+	}
+    }
+
+  return this->die_offset_ + (pattr - pdie);
+}
+
+// Get the name of the DIE and cache it.
+
+void
+Dwarf_die::set_name()
+{
+  if (this->name_ != NULL || !this->read_attributes())
+    return;
+  if (this->name_off_ != -1)
+    this->name_ = this->dwinfo_->get_string(this->name_off_,
+					    this->string_shndx_);
+}
+
+// Get the linkage name of the DIE and cache it.
+
+void
+Dwarf_die::set_linkage_name()
+{
+  if (this->linkage_name_ != NULL || !this->read_attributes())
+    return;
+  if (this->linkage_name_off_ != -1)
+    this->linkage_name_ = this->dwinfo_->get_string(this->linkage_name_off_,
+						    this->string_shndx_);
+}
+
+// Return the value of attribute ATTR.
+
+const Dwarf_die::Attribute_value*
+Dwarf_die::attribute(unsigned int attr)
+{
+  if (!this->read_attributes())
+    return NULL;
+  for (unsigned int i = 0; i < this->attributes_.size(); ++i)
+    {
+      if (this->attributes_[i].attr == attr)
+        return &this->attributes_[i];
+    }
+  return NULL;
+}
+
+const char*
+Dwarf_die::string_attribute(unsigned int attr)
+{
+  const Attribute_value* attr_val = this->attribute(attr);
+  if (attr_val == NULL)
+    return NULL;
+  switch (attr_val->form)
+    {
+      case elfcpp::DW_FORM_string:
+        return attr_val->val.stringval;
+      case elfcpp::DW_FORM_strp:
+	return this->dwinfo_->get_string(attr_val->val.refval,
+					 attr_val->aux.shndx);
+      default:
+        return NULL;
+    }
+}
+
+int64_t
+Dwarf_die::int_attribute(unsigned int attr)
+{
+  const Attribute_value* attr_val = this->attribute(attr);
+  if (attr_val == NULL)
+    return 0;
+  switch (attr_val->form)
+    {
+      case elfcpp::DW_FORM_null:
+      case elfcpp::DW_FORM_flag_present:
+      case elfcpp::DW_FORM_data1:
+      case elfcpp::DW_FORM_flag:
+      case elfcpp::DW_FORM_data2:
+      case elfcpp::DW_FORM_data4:
+      case elfcpp::DW_FORM_data8:
+      case elfcpp::DW_FORM_sdata:
+        return attr_val->val.intval;
+      default:
+        return 0;
+    }
+}
+
+uint64_t
+Dwarf_die::uint_attribute(unsigned int attr)
+{
+  const Attribute_value* attr_val = this->attribute(attr);
+  if (attr_val == NULL)
+    return 0;
+  switch (attr_val->form)
+    {
+      case elfcpp::DW_FORM_null:
+      case elfcpp::DW_FORM_flag_present:
+      case elfcpp::DW_FORM_data1:
+      case elfcpp::DW_FORM_flag:
+      case elfcpp::DW_FORM_data4:
+      case elfcpp::DW_FORM_data8:
+      case elfcpp::DW_FORM_ref_sig8:
+      case elfcpp::DW_FORM_udata:
+        return attr_val->val.uintval;
+      default:
+        return 0;
+    }
+}
+
+off_t
+Dwarf_die::ref_attribute(unsigned int attr, unsigned int* shndx)
+{
+  const Attribute_value* attr_val = this->attribute(attr);
+  if (attr_val == NULL)
+    return -1;
+  switch (attr_val->form)
+    {
+      case elfcpp::DW_FORM_sec_offset:
+      case elfcpp::DW_FORM_addr:
+      case elfcpp::DW_FORM_ref_addr:
+      case elfcpp::DW_FORM_ref1:
+      case elfcpp::DW_FORM_ref2:
+      case elfcpp::DW_FORM_ref4:
+      case elfcpp::DW_FORM_ref8:
+      case elfcpp::DW_FORM_ref_udata:
+        *shndx = attr_val->aux.shndx;
+        return attr_val->val.refval;
+      case elfcpp::DW_FORM_ref_sig8:
+        *shndx = attr_val->aux.shndx;
+        return attr_val->val.uintval;
+      case elfcpp::DW_FORM_data4:
+      case elfcpp::DW_FORM_data8:
+        *shndx = attr_val->aux.shndx;
+        return attr_val->val.intval;
+      default:
+        return -1;
+    }
+}
+
+// Return the offset of this DIE's first child.
+
+off_t
+Dwarf_die::child_offset()
+{
+  gold_assert(this->abbrev_code_ != NULL);
+  if (!this->has_children())
+    return 0;
+  if (this->child_offset_ == 0)
+    this->child_offset_ = this->skip_attributes();
+  return this->child_offset_;
+}
+
+// Return the offset of this DIE's next sibling.
+
+off_t
+Dwarf_die::sibling_offset()
+{
+  gold_assert(this->abbrev_code_ != NULL);
+
+  if (this->sibling_offset_ != 0)
+    return this->sibling_offset_;
+
+  if (!this->has_children())
+    {
+      this->sibling_offset_ = this->skip_attributes();
+      return this->sibling_offset_;
+    }
+
+  if (this->has_sibling_attribute())
+    {
+      if (!this->read_attributes())
+	return 0;
+      if (this->sibling_offset_ != 0)
+	return this->sibling_offset_;
+    }
+
+  // Skip over the children.
+  off_t child_offset = this->child_offset();
+  while (child_offset > 0)
+    {
+      Dwarf_die die(this->dwinfo_, child_offset, this);
+      // The Dwarf_die ctor will set this DIE's sibling offset
+      // when it reads a zero abbrev code.
+      if (die.tag() == 0)
+	break;
+      child_offset = die.sibling_offset();
+    }
+
+  // This should be set by now.  If not, there was a problem reading
+  // the DWARF info, and we return 0.
+  return this->sibling_offset_;
+}
+
+// class Dwarf_info_reader
+
+// Check that the pointer P is within the current compilation unit.
+
+inline bool
+Dwarf_info_reader::check_buffer(const unsigned char* p) const
+{
+  if (p > this->buffer_ + this->cu_offset_ + this->cu_length_)
+    {
+      gold_warning(_("%s: corrupt debug info in %s"),
+		   this->object_->name().c_str(),
+		   this->object_->section_name(this->shndx_).c_str());
+      return false;
+    }
+  return true;
+}
+
+// Begin parsing the debug info.  This calls visit_compilation_unit()
+// or visit_type_unit() for each compilation or type unit found in the
+// section, and visit_die() for each top-level DIE.
+
+void
+Dwarf_info_reader::parse()
+{
+  switch (parameters->size_and_endianness())
+    {
+#ifdef HAVE_TARGET_32_LITTLE
+      case Parameters::TARGET_32_LITTLE:
+        this->do_parse<false>();
+        break;
+#endif
+#ifdef HAVE_TARGET_32_BIG
+      case Parameters::TARGET_32_BIG:
+        this->do_parse<true>();
+        break;
+#endif
+#ifdef HAVE_TARGET_64_LITTLE
+      case Parameters::TARGET_64_LITTLE:
+        this->do_parse<false>();
+        break;
+#endif
+#ifdef HAVE_TARGET_64_BIG
+      case Parameters::TARGET_64_BIG:
+        this->do_parse<true>();
+        break;
+#endif
+      default:
+	gold_unreachable();
+    }
+}
+
+template<bool big_endian>
+void
+Dwarf_info_reader::do_parse()
+{
+  // Get the section contents and decompress if necessary.
+  section_size_type buffer_size;
+  bool buffer_is_new;
+  this->buffer_ = this->object_->decompressed_section_contents(this->shndx_,
+							       &buffer_size,
+							       &buffer_is_new);
+  if (this->buffer_ == NULL || buffer_size == 0)
+    return;
+  this->buffer_end_ = this->buffer_ + buffer_size;
+
+  // The offset of this input section in the output section.
+  off_t section_offset = this->object_->output_section_offset(this->shndx_);
+
+  // Start tracking relocations for this section.
+  this->reloc_mapper_ = make_elf_reloc_mapper(this->object_, this->symtab_,
+					      this->symtab_size_);
+  this->reloc_mapper_->initialize(this->reloc_shndx_, this->reloc_type_);
+
+  // Loop over compilation units (or type units).
+  unsigned int abbrev_shndx = 0;
+  off_t abbrev_offset = 0;
+  const unsigned char* pinfo = this->buffer_;
+  while (pinfo < this->buffer_end_)
+    {
+      // Read the compilation (or type) unit header.
+      const unsigned char* cu_start = pinfo;
+      this->cu_offset_ = cu_start - this->buffer_;
+      this->cu_length_ = this->buffer_end_ - cu_start;
+
+      // Read unit_length (4 or 12 bytes).
+      if (!this->check_buffer(pinfo + 4))
+	break;
+      uint32_t unit_length =
+          elfcpp::Swap_unaligned<32, big_endian>::readval(pinfo);
+      pinfo += 4;
+      if (unit_length == 0xffffffff)
+	{
+	  if (!this->check_buffer(pinfo + 8))
+	    break;
+	  unit_length = elfcpp::Swap_unaligned<64, big_endian>::readval(pinfo);
+	  pinfo += 8;
+	  this->offset_size_ = 8;
+	}
+      else
+	this->offset_size_ = 4;
+      if (!this->check_buffer(pinfo + unit_length))
+	break;
+      const unsigned char* cu_end = pinfo + unit_length;
+      this->cu_length_ = cu_end - cu_start;
+      if (!this->check_buffer(pinfo + 2 + this->offset_size_ + 1))
+	break;
+
+      // Read version (2 bytes).
+      this->cu_version_ =
+	  elfcpp::Swap_unaligned<16, big_endian>::readval(pinfo);
+      pinfo += 2;
+
+      // Read debug_abbrev_offset (4 or 8 bytes).
+      if (this->offset_size_ == 4)
+	abbrev_offset = elfcpp::Swap_unaligned<32, big_endian>::readval(pinfo);
+      else
+	abbrev_offset = elfcpp::Swap_unaligned<64, big_endian>::readval(pinfo);
+      if (this->reloc_shndx_ > 0)
+	{
+	  off_t reloc_offset = pinfo - this->buffer_;
+	  off_t value;
+	  abbrev_shndx =
+	      this->reloc_mapper_->get_reloc_target(reloc_offset, &value);
+	  if (abbrev_shndx == 0)
+	    return;
+	  if (this->reloc_type_ == elfcpp::SHT_REL)
+	    abbrev_offset += value;
+	  else
+	    abbrev_offset = value;
+	}
+      pinfo += this->offset_size_;
+
+      // Read address_size (1 byte).
+      this->address_size_ = *pinfo++;
+
+      // For type units, read the two extra fields.
+      uint64_t signature = 0;
+      off_t type_offset = 0;
+      if (this->is_type_unit_)
+        {
+	  if (!this->check_buffer(pinfo + 8 + this->offset_size_))
+	    break;
+
+	  // Read type_signature (8 bytes).
+	  signature = elfcpp::Swap_unaligned<64, big_endian>::readval(pinfo);
+	  pinfo += 8;
+
+	  // Read type_offset (4 or 8 bytes).
+	  if (this->offset_size_ == 4)
+	    type_offset =
+		elfcpp::Swap_unaligned<32, big_endian>::readval(pinfo);
+	  else
+	    type_offset =
+		elfcpp::Swap_unaligned<64, big_endian>::readval(pinfo);
+	  pinfo += this->offset_size_;
+	}
+
+      // Read the .debug_abbrev table.
+      this->abbrev_table_.read_abbrevs(this->object_, abbrev_shndx,
+				       abbrev_offset);
+
+      // Visit the root DIE.
+      Dwarf_die root_die(this,
+			 pinfo - (this->buffer_ + this->cu_offset_),
+			 NULL);
+      if (root_die.tag() != 0)
+	{
+	  // Visit the CU or TU.
+	  if (this->is_type_unit_)
+	    this->visit_type_unit(section_offset + this->cu_offset_,
+				  type_offset, signature, &root_die);
+	  else
+	    this->visit_compilation_unit(section_offset + this->cu_offset_,
+					 cu_end - cu_start, &root_die);
+	}
+
+      // Advance to the next CU.
+      pinfo = cu_end;
+    }
+
+  if (buffer_is_new)
+    {
+      delete[] this->buffer_;
+      this->buffer_ = NULL;
+    }
+}
+
+// Read the DWARF string table.
+
+bool
+Dwarf_info_reader::do_read_string_table(unsigned int string_shndx)
+{
+  Relobj* object = this->object_;
+
+  // If we don't have relocations, string_shndx will be 0, and
+  // we'll have to hunt for the .debug_str section.
+  if (string_shndx == 0)
+    {
+      for (unsigned int i = 1; i < this->object_->shnum(); ++i)
+	{
+	  std::string name = object->section_name(i);
+	  if (name == ".debug_str")
+	    {
+	      string_shndx = i;
+	      this->string_output_section_offset_ =
+		  object->output_section_offset(i);
+	      break;
+	    }
+	}
+      if (string_shndx == 0)
+	return false;
+    }
+
+  if (this->owns_string_buffer_ && this->string_buffer_ != NULL)
+    {
+      delete[] this->string_buffer_;
+      this->owns_string_buffer_ = false;
+    }
+
+  // Get the secton contents and decompress if necessary.
+  section_size_type buffer_size;
+  const unsigned char* buffer =
+      object->decompressed_section_contents(string_shndx,
+					    &buffer_size,
+					    &this->owns_string_buffer_);
+  this->string_buffer_ = reinterpret_cast<const char*>(buffer);
+  this->string_buffer_end_ = this->string_buffer_ + buffer_size;
+  this->string_shndx_ = string_shndx;
+  return true;
+}
+
+// Look for a relocation at offset ATTR_OFF in the dwarf info,
+// and return the section index and offset of the target.
+
+unsigned int
+Dwarf_info_reader::lookup_reloc(off_t attr_off, off_t* target_off)
+{
+  off_t value;
+  attr_off += this->cu_offset_;
+  unsigned int shndx = this->reloc_mapper_->get_reloc_target(attr_off, &value);
+  if (shndx == 0)
+    return 0;
+  if (this->reloc_type_ == elfcpp::SHT_REL)
+    *target_off += value;
+  else
+    *target_off = value;
+  return shndx;
+}
+
+// Return a string from the DWARF string table.
+
+const char*
+Dwarf_info_reader::get_string(off_t str_off, unsigned int string_shndx)
+{
+  if (!this->read_string_table(string_shndx))
+    return NULL;
+
+  // Correct the offset.  For incremental update links, we have a
+  // relocated offset that is relative to the output section, but
+  // here we need an offset relative to the input section.
+  str_off -= this->string_output_section_offset_;
+
+  const char* p = this->string_buffer_ + str_off;
+
+  if (p < this->string_buffer_ || p >= this->string_buffer_end_)
+    return NULL;
+
+  return p;
+}
+
+// The following are default, do-nothing, implementations of the
+// hook methods normally provided by a derived class.  We provide
+// default implementations rather than no implementation so that
+// a derived class needs to implement only the hooks that it needs
+// to use.
+
+// Process a compilation unit and parse its child DIE.
+
+void
+Dwarf_info_reader::visit_compilation_unit(off_t, off_t, Dwarf_die*)
+{
+}
+
+// Process a type unit and parse its child DIE.
+
+void
+Dwarf_info_reader::visit_type_unit(off_t, off_t, uint64_t, Dwarf_die*)
+{
+}
+
+// class Sized_dwarf_line_info
+
 struct LineStateMachine
 {
   int file_num;
@@ -66,7 +1427,8 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(
     Object* object,
     unsigned int read_shndx)
   : data_valid_(false), buffer_(NULL), buffer_start_(NULL),
-    symtab_buffer_(NULL), directories_(), files_(), current_header_index_(-1)
+    reloc_mapper_(NULL), symtab_buffer_(NULL), directories_(), files_(),
+    current_header_index_(-1)
 {
   unsigned int debug_shndx;
 
@@ -92,42 +1454,46 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(
 
   // Find the relocation section for ".debug_line".
   // We expect these for relobjs (.o's) but not dynobjs (.so's).
-  bool got_relocs = false;
-  for (unsigned int reloc_shndx = 0;
-       reloc_shndx < object->shnum();
-       ++reloc_shndx)
+  unsigned int reloc_shndx = 0;
+  for (unsigned int i = 0; i < object->shnum(); ++i)
     {
-      unsigned int reloc_sh_type = object->section_type(reloc_shndx);
+      unsigned int reloc_sh_type = object->section_type(i);
       if ((reloc_sh_type == elfcpp::SHT_REL
 	   || reloc_sh_type == elfcpp::SHT_RELA)
-	  && object->section_info(reloc_shndx) == debug_shndx)
+	  && object->section_info(i) == debug_shndx)
 	{
-	  got_relocs = this->track_relocs_.initialize(object, reloc_shndx,
-                                                      reloc_sh_type);
+	  reloc_shndx = i;
 	  this->track_relocs_type_ = reloc_sh_type;
 	  break;
 	}
     }
 
   // Finally, we need the symtab section to interpret the relocs.
-  if (got_relocs)
+  if (reloc_shndx != 0)
     {
       unsigned int symtab_shndx;
       for (symtab_shndx = 0; symtab_shndx < object->shnum(); ++symtab_shndx)
         if (object->section_type(symtab_shndx) == elfcpp::SHT_SYMTAB)
           {
-            this->symtab_buffer_ = object->section_contents(
-                symtab_shndx, &this->symtab_buffer_size_, false);
+	    this->symtab_buffer_ = object->section_contents(
+		symtab_shndx, &this->symtab_buffer_size_, false);
             break;
           }
       if (this->symtab_buffer_ == NULL)
         return;
     }
 
+  this->reloc_mapper_ =
+      new Sized_elf_reloc_mapper<size, big_endian>(object,
+						   this->symtab_buffer_,
+						   this->symtab_buffer_size_);
+  if (!this->reloc_mapper_->initialize(reloc_shndx, this->track_relocs_type_))
+    return;
+
   // Now that we have successfully read all the data, parse the debug
   // info.
   this->data_valid_ = true;
-  this->read_line_mappings(object, read_shndx);
+  this->read_line_mappings(read_shndx);
 }
 
 // Read the DWARF header.
@@ -504,51 +1870,28 @@ Sized_dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr
   return lengthstart + header_.total_length;
 }
 
-// Looks in the symtab to see what section a symbol is in.
-
-template<int size, bool big_endian>
-unsigned int
-Sized_dwarf_line_info<size, big_endian>::symbol_section(
-    Object* object,
-    unsigned int sym,
-    typename elfcpp::Elf_types<size>::Elf_Addr* value,
-    bool* is_ordinary)
-{
-  const int symsize = elfcpp::Elf_sizes<size>::sym_size;
-  gold_assert(sym * symsize < this->symtab_buffer_size_);
-  elfcpp::Sym<size, big_endian> elfsym(this->symtab_buffer_ + sym * symsize);
-  *value = elfsym.get_st_value();
-  return object->adjust_sym_shndx(sym, elfsym.get_st_shndx(), is_ordinary);
-}
-
 // Read the relocations into a Reloc_map.
 
 template<int size, bool big_endian>
 void
-Sized_dwarf_line_info<size, big_endian>::read_relocs(Object* object)
+Sized_dwarf_line_info<size, big_endian>::read_relocs()
 {
   if (this->symtab_buffer_ == NULL)
     return;
 
-  typename elfcpp::Elf_types<size>::Elf_Addr value;
+  off_t value;
   off_t reloc_offset;
-  while ((reloc_offset = this->track_relocs_.next_offset()) != -1)
+  while ((reloc_offset = this->reloc_mapper_->next_offset()) != -1)
     {
-      const unsigned int sym = this->track_relocs_.next_symndx();
-
-      bool is_ordinary;
-      const unsigned int shndx = this->symbol_section(object, sym, &value,
-						      &is_ordinary);
+      const unsigned int shndx =
+          this->reloc_mapper_->get_reloc_target(reloc_offset, &value);
 
       // There is no reason to record non-ordinary section indexes, or
       // SHN_UNDEF, because they will never match the real section.
-      if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
-	{
-	  value += this->track_relocs_.next_addend();
-	  this->reloc_map_[reloc_offset] = std::make_pair(shndx, value);
-	}
+      if (shndx != 0)
+	this->reloc_map_[reloc_offset] = std::make_pair(shndx, value);
 
-      this->track_relocs_.advance(reloc_offset + 1);
+      this->reloc_mapper_->advance(reloc_offset + 1);
     }
 }
 
@@ -556,12 +1899,11 @@ Sized_dwarf_line_info<size, big_endian>::read_relocs(Object* object)
 
 template<int size, bool big_endian>
 void
-Sized_dwarf_line_info<size, big_endian>::read_line_mappings(Object* object,
-							    unsigned int shndx)
+Sized_dwarf_line_info<size, big_endian>::read_line_mappings(unsigned int shndx)
 {
   gold_assert(this->data_valid_ == true);
 
-  this->read_relocs(object);
+  this->read_relocs();
   while (this->buffer_ < this->buffer_end_)
     {
       const unsigned char* lineptr = this->buffer_;
@@ -765,7 +2107,7 @@ Sized_dwarf_line_info<size, big_endian>::format_file_lineno(
 
   gold_assert(loc.header_num < static_cast<int>(this->files_.size()));
   gold_assert(loc.file_num
-	      < static_cast<int>(this->files_[loc.header_num].size()));
+	      < static_cast<unsigned int>(this->files_[loc.header_num].size()));
   const std::pair<int, std::string>& filename_pair
       = this->files_[loc.header_num][loc.file_num];
   const std::string& filename = filename_pair.second;

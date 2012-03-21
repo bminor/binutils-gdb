@@ -47,6 +47,7 @@
 #include "gc.h"
 #include "icf.h"
 #include "incremental.h"
+#include "gdb-index.h"
 #include "timer.h"
 
 using namespace gold;
@@ -301,6 +302,7 @@ main(int argc, char** argv)
 	      program_name, static_cast<long long>(layout.output_file_size()));
       symtab.print_stats();
       layout.print_stats();
+      Gdb_index::print_stats();
       Free_list::print_stats();
     }
 

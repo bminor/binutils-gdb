@@ -55,6 +55,7 @@ CCFILES = \
 	expression.cc \
 	fileread.cc \
         gc.cc \
+        gdb-index.cc \
 	gold.cc \
 	gold-threads.cc \
 	icf.cc \
@@ -102,6 +103,7 @@ HFILES = \
 	fileread.h \
 	freebsd.h \
         gc.h \
+        gdb-index.h \
 	gold.h \
 	gold-threads.h \
 	icf.h \

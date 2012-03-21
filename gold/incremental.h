@@ -1880,8 +1880,9 @@ class Sized_relobj_incr : public Sized_relobj<size, big_endian>
   do_section_name(unsigned int shndx);
 
   // Return a view of the contents of a section.
-  Object::Location
-  do_section_contents(unsigned int shndx);
+  const unsigned char*
+  do_section_contents(unsigned int shndx, section_size_type* plen,
+		      bool cache);
 
   // Return section flags.
   uint64_t
@@ -2086,8 +2087,9 @@ class Sized_incr_dynobj : public Dynobj
   do_section_name(unsigned int shndx);
 
   // Return a view of the contents of a section.
-  Object::Location
-  do_section_contents(unsigned int shndx);
+  const unsigned char*
+  do_section_contents(unsigned int shndx, section_size_type* plen,
+		      bool cache);
 
   // Return section flags.
   uint64_t

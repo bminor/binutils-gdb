@@ -1967,6 +1967,31 @@ memory_test: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t
 memory_test.stdout: memory_test
 	$(TEST_READELF) -lWS  $< > $@
 
+# Test that --gdb-index functions correctly.
+check_SCRIPTS += gdb_index_test_1.sh
+check_DATA += gdb_index_test_1.stdout
+MOSTLYCLEANFILES += gdb_index_test_1.stdout gdb_index_test_1
+gdb_index_test.o: gdb_index_test.cc
+	$(CXXCOMPILE) -O0 -g -c -o $@ $<
+gdb_index_test_1: gdb_index_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
+gdb_index_test_1.stdout: gdb_index_test_1
+	$(TEST_READELF) --debug-dump=gdb_index $< > $@
+
+if HAVE_ZLIB
+
+check_SCRIPTS += gdb_index_test_2.sh
+check_DATA += gdb_index_test_2.stdout
+MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2
+gdb_index_test_cdebug.o: gdb_index_test.cc
+	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections -c -o $@ $<
+gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
+gdb_index_test_2.stdout: gdb_index_test_2
+	$(TEST_READELF) --debug-dump=gdb_index $< > $@
+
+endif HAVE_ZLIB
+
 # End-to-end incremental linking tests.
 # Incremental linking is currently supported only on the x86_64 target.
 

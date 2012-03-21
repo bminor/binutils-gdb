@@ -208,9 +208,19 @@ class Sized_dynobj : public Dynobj
 
   // Return a view of the contents of a section.  Set *PLEN to the
   // size.
-  Object::Location
-  do_section_contents(unsigned int shndx)
-  { return this->elf_file_.section_contents(shndx); }
+  const unsigned char*
+  do_section_contents(unsigned int shndx, section_size_type* plen,
+		      bool cache)
+  {
+    Location loc(this->elf_file_.section_contents(shndx));
+    *plen = convert_to_section_size_type(loc.data_size);
+    if (*plen == 0)
+      {
+	static const unsigned char empty[1] = { '\0' };
+	return empty;
+      }
+    return this->get_view(loc.file_offset, *plen, true, cache);
+  }
 
   // Return section flags.
   uint64_t

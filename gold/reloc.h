@@ -873,6 +873,16 @@ class Track_relocs
   int
   advance(off_t offset);
 
+  // Checkpoint the current position in the reloc section.
+  section_size_type
+  checkpoint() const
+  { return this->pos_; }
+
+  // Reset the position to CHECKPOINT.
+  void
+  reset(section_size_type checkpoint)
+  { this->pos_ = checkpoint; }
+
  private:
   // The contents of the input object's reloc section.
   const unsigned char* prelocs_;

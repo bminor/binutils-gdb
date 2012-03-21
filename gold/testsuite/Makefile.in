@@ -360,13 +360,16 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # weak reference in a DSO.
 
 # Test that MEMORY region support works.
+
+# Test that --gdb-index functions correctly.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_38 = exclude_libs_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	no_version_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	strong_ref_weak_def.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.sh memory_test.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.sh memory_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_1.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_39 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_relocatable_test1.syms \
@@ -376,7 +379,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	no_version_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	strong_ref_weak_def.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_1.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_40 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_1.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a \
@@ -402,7 +406,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref_2.so \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.stdout memory_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_1.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gdb_index_test_1
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_41 = large
 @GCC_FALSE@large_DEPENDENCIES =
 @MCMODEL_MEDIUM_FALSE@large_DEPENDENCIES =
@@ -477,10 +483,13 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 
 # Test that --start-lib and --end-lib function correctly.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_53 = start_lib_test
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_54 = gdb_index_test_2.sh
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_55 = gdb_index_test_2.stdout
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_56 = gdb_index_test_2.stdout gdb_index_test_2
 
 # Test the --incremental-unchanged flag with an archive library.
 # The second link should not update the library.
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_54 = incremental_test_2 \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_57 = incremental_test_2 \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_3 \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_4 \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_5 \
@@ -488,7 +497,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_copy_test \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_common_test_1 \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_comdat_test_1
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_55 = two_file_test_tmp_2.o \
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_58 = two_file_test_tmp_2.o \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_tmp_3.o \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test_4.base \
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_tmp_4.o \
@@ -498,22 +507,22 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # These tests work with native and cross linkers.
 
 # Test script section order.
-@NATIVE_OR_CROSS_LINKER_TRUE@am__append_56 = script_test_10.sh
-@NATIVE_OR_CROSS_LINKER_TRUE@am__append_57 = script_test_10.stdout
+@NATIVE_OR_CROSS_LINKER_TRUE@am__append_59 = script_test_10.sh
+@NATIVE_OR_CROSS_LINKER_TRUE@am__append_60 = script_test_10.stdout
 
 # These tests work with cross linkers only.
-@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_58 = split_i386.sh
-@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_59 = split_i386_1.stdout split_i386_2.stdout \
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_61 = split_i386.sh
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_62 = split_i386_1.stdout split_i386_2.stdout \
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_i386_3.stdout split_i386_4.stdout split_i386_r.stdout
 
-@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_60 = split_i386_1 split_i386_2 split_i386_3 \
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_63 = split_i386_1 split_i386_2 split_i386_3 \
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_i386_4 split_i386_r
 
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_61 = split_x86_64.sh
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_62 = split_x86_64_1.stdout split_x86_64_2.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_64 = split_x86_64.sh
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_65 = split_x86_64_1.stdout split_x86_64_2.stdout \
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_3.stdout split_x86_64_4.stdout split_x86_64_r.stdout
 
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_63 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_66 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_4 split_x86_64_r
 
 
@@ -528,7 +537,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Check Thumb to Thumb farcall veneers
 
 # Check Thumb to ARM farcall veneers
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_64 = arm_abs_global.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_67 = arm_abs_global.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_in_range.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_out_of_range.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_fix_v4bx.sh \
@@ -542,7 +551,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_arm_thumb.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm.sh
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_65 = arm_abs_global.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_68 = arm_abs_global.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_in_range.stdout \
@@ -587,7 +596,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb_6m.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm_5t.stdout
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_66 = arm_abs_global \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_69 = arm_abs_global \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_in_range \
@@ -1997,18 +2006,19 @@ TEST_AS = $(top_builddir)/../gas/as-new
 MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_4) \
 	$(am__append_17) $(am__append_26) $(am__append_28) \
 	$(am__append_30) $(am__append_36) $(am__append_40) \
-	$(am__append_55) $(am__append_60) $(am__append_63) \
-	$(am__append_66)
+	$(am__append_56) $(am__append_58) $(am__append_63) \
+	$(am__append_66) $(am__append_69)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
 check_SCRIPTS = $(am__append_2) $(am__append_34) $(am__append_38) \
-	$(am__append_56) $(am__append_58) $(am__append_61) \
-	$(am__append_64)
+	$(am__append_54) $(am__append_59) $(am__append_61) \
+	$(am__append_64) $(am__append_67)
 check_DATA = $(am__append_3) $(am__append_27) $(am__append_29) \
-	$(am__append_35) $(am__append_39) $(am__append_57) \
-	$(am__append_59) $(am__append_62) $(am__append_65)
+	$(am__append_35) $(am__append_39) $(am__append_55) \
+	$(am__append_60) $(am__append_62) $(am__append_65) \
+	$(am__append_68)
 BUILT_SOURCES = $(am__append_25)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
@@ -3721,6 +3731,10 @@ dyn_weak_ref.sh.log: dyn_weak_ref.sh
 	@p='dyn_weak_ref.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 memory_test.sh.log: memory_test.sh
 	@p='memory_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+gdb_index_test_1.sh.log: gdb_index_test_1.sh
+	@p='gdb_index_test_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+gdb_index_test_2.sh.log: gdb_index_test_2.sh
+	@p='gdb_index_test_2.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 script_test_10.sh.log: script_test_10.sh
 	@p='script_test_10.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 split_i386.sh.log: split_i386.sh
@@ -5042,6 +5056,18 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -T $(srcdir)/memory_test.t -o $@ memory_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@memory_test.stdout: memory_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lWS  $< > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test.o: gdb_index_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_1: gdb_index_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_1.stdout: gdb_index_test_1
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) --debug-dump=gdb_index $< > $@
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_cdebug.o: gdb_index_test.cc
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -Bgcctestdir/ -O0 -g -Wa,--compress-debug-sections -c -o $@ $<
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_2: gdb_index_test_cdebug.o gcctestdir/ld
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@gdb_index_test_2.stdout: gdb_index_test_2
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) --debug-dump=gdb_index $< > $@
 
 # End-to-end incremental linking tests.
 # Incremental linking is currently supported only on the x86_64 target.

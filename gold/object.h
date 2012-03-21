@@ -725,7 +725,7 @@ class Object
 			section_size_type* uncompressed_size) const
   { return this->do_section_is_compressed(shndx, uncompressed_size); }
 
-  // Return a view of the uncompressed contents of a section.  Set *PLEN
+  // Return a view of the decompressed contents of a section.  Set *PLEN
   // to the size.  Set *IS_NEW to true if the contents need to be freed
   // by the caller.
   const unsigned char*
@@ -805,8 +805,9 @@ class Object
 
   // Return the location of the contents of a section.  Implemented by
   // child class.
-  virtual Location
-  do_section_contents(unsigned int shndx) = 0;
+  virtual const unsigned char*
+  do_section_contents(unsigned int shndx, section_size_type* plen,
+		      bool cache) = 0;
 
   // Get the size of a section--implemented by child class.
   virtual uint64_t
@@ -918,7 +919,7 @@ class Object
 				   bool* is_new)
   {
     *is_new = false;
-    return this->section_contents(shndx, plen, false);
+    return this->do_section_contents(shndx, plen, false);
   }
 
   // Discard any buffers of decompressed sections.  This is done
@@ -2237,9 +2238,19 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   { return this->elf_file_.section_name(shndx); }
 
   // Return the location of the contents of a section.
-  Object::Location
-  do_section_contents(unsigned int shndx)
-  { return this->elf_file_.section_contents(shndx); }
+  const unsigned char*
+  do_section_contents(unsigned int shndx, section_size_type* plen,
+		      bool cache)
+  {
+    Object::Location loc(this->elf_file_.section_contents(shndx));
+    *plen = convert_to_section_size_type(loc.data_size);
+    if (*plen == 0)
+      {
+	static const unsigned char empty[1] = { '\0' };
+	return empty;
+      }
+    return this->get_view(loc.file_offset, *plen, true, cache);
+  }
 
   // Return section flags.
   uint64_t
@@ -2373,7 +2384,7 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 				   section_size_type* plen,
 				   bool* is_new);
 
-  // Discard any buffers of uncompressed sections.  This is done
+  // Discard any buffers of decompressed sections.  This is done
   // at the end of the Add_symbols task.
   void
   do_discard_decompressed_sections();
