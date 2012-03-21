@@ -1,3 +1,14 @@
+2012-03-21  Thomas Schwinge  <thomas@codesourcery.com>
+
+	[SH] Support the .uaquad and .8byte directives also for non-sh64
+	configurations.
+
+	* config/tc-sh.c (sh_cons_fix_new, md_apply_fix) [!HAVE_SH64]: Handle
+	BFD_RELOC_64.
+	* doc/c-sh64.texi (SH64 Machine Directives): Move .uaquad
+	description...
+	* doc/c-sh.texi (SH Machine Directives): ... here.
+
 2012-03-20  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (do_vmrs): Accept priviledged mode VFP system
