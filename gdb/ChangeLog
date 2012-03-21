@@ -1,3 +1,7 @@
+2012-03-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* .gitignore: Ignore more files.
+
 2012-03-20  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_start_remote): Clear `rs->starting_up' on early

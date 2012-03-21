@@ -7,7 +7,9 @@
 /cp-name-parser.c
 /f-exp.c
 /gdb
+/gdbtui
 /init.c
+/jit-reader.h
 /jv-exp.c
 /m2-exp.c
 /objc-exp.c
