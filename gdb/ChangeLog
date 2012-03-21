@@ -2172,7 +2172,7 @@
 
 2012-02-01  Gary Benson  <gbenson@redhat.com>
 
-	* symtab.h (symbol_name_match_p_ftype): New typedef.
+	* symtab.h (symbol_found_callback_ftype): New typedef.
 	(iterate_over_symbols): Use the above.
 	* symtab.c (iterate_over_symbols): Likewise.
 	* language.h (language_defn->la_iterate_over_symbols): Likewise.
