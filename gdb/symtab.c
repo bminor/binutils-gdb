@@ -2776,7 +2776,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 	 to `__main' in `main' between the prologue and before user
 	 code.  */
       if (gdbarch_skip_main_prologue_p (gdbarch)
-	  && name && strcmp (name, "main") == 0)
+	  && name && strcmp_iw (name, "main") == 0)
 	{
 	  pc = gdbarch_skip_main_prologue (gdbarch, pc);
 	  /* Recalculate the line number (might not be N+1).  */

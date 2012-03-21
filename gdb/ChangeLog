@@ -1,3 +1,8 @@
+2012-03-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* symtab.c (skip_prologue_sal): Change test to check for "main()"
+	in addition to "main".
+
 2012-03-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* expression.h (op_name): Add declaration.
