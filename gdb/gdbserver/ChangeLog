@@ -1,3 +1,7 @@
+2012-03-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* .gitignore: Ignore more files.
+
 2012-03-19  Pedro Alves  <palves@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
