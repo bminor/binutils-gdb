@@ -77,7 +77,10 @@ proc mips_comm_data_test { abi flag emul reloc } {
     ]
 }
 
-set abis { o32 -32 elf32btsmip n32 -n32 elf32btsmipn32 n64 -64 elf64btsmip }
+# For targets that default to a specific ISA (instead of "from-abi"),
+# the 64-bit -march option is required to override it, like for
+# "mipsisa32r2el-*-*".
+set abis { o32 -32 elf32btsmip n32 "-n32 -march=mips3" elf32btsmipn32 n64 "-64 -march=mips3" elf64btsmip }
 set relocs { copyreloc nocopyreloc }
 foreach { abi flag emul } $abis {
     foreach reloc $relocs {
