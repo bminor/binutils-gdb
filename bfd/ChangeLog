@@ -1,3 +1,8 @@
+2012-03-21  Eliot Dresselhaus  <eliot@sonic.net>
+
+	* elf32-tic6x.c (elf32_tic6x_merge_private_bfd_data): Return TRUE
+	for non-C6X objects.
+
 2012-03-20  Kai Tietz  <ktietz@redhat.com>
 
 	PR ld/12742

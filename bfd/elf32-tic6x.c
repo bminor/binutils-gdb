@@ -4011,6 +4011,9 @@ elf32_tic6x_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (!_bfd_generic_verify_endian_match (ibfd, obfd))
     return FALSE;
 
+  if (! is_tic6x_elf (ibfd) || ! is_tic6x_elf (obfd))
+    return TRUE;
+
   if (!elf32_tic6x_merge_attributes (ibfd, obfd))
     return FALSE;
 
