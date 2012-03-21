@@ -1,3 +1,16 @@
+2012-03-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* asm/addqpc.ms: Update output to ignore decoded signal string.
+	* asm/boundmv32.ms, asm/fidxd.ms, asm/fidxi.ms, asm/ftagd.ms,
+	asm/ftagi.ms, asm/halt.ms, asm/io6.ms, asm/io7.ms, asm/io8.ms,
+	asm/io9.ms, asm/movecpc.ms, asm/movempc.ms, asm/movepcb.ms,
+	asm/movepcd.ms, asm/movepcw.ms, asm/moveqpc.ms, asm/moverbpc.ms,
+	asm/moverdpc.ms, asm/moverpcb.ms, asm/moverpcw.ms, asm/moverwpc.ms,
+	asm/movppc.ms, asm/movrss.ms, asm/movscpc.ms, asm/movsmpc.ms,
+	asm/movsrpc.ms, asm/movssr.ms, asm/movucpc.ms, asm/movumpc.ms,
+	asm/movurpc.ms, asm/msteppc1.ms, asm/msteppc2.ms, asm/msteppc3.ms,
+	asm/rfg.ms, asm/sbfs.ms, asm/subqpc.ms: Likewise.
+
 2010-10-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	* c/seek3.c, c/seek4.c: New tests.
