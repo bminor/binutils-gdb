@@ -1,3 +1,18 @@
+2012-03-21  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* amd64-linux-nat.c (amd64_linux_siginfo_fixup): Use siginfo_t instead
+	of struct siginfo.
+	* arm-linux-nat.c (arm_linux_stopped_data_address): Likewise.
+	* ia64-linux-nat.c (ia64_linux_stopped_data_address): Likewise.
+	* linux-nat.c (linux_nat_siginfo_fixup, siginfo_fixup)
+	(linux_xfer_siginfo, linux_nat_set_siginfo_fixup)
+	(linux_nat_get_siginfo): Likewise.
+	* linux-nat.h (struct lwp_info, linux_nat_set_siginfo_fixup)
+	(linux_nat_get_siginfo): Likewise.
+	* linux-tdep.c (linux_get_siginfo_type): Likewise.
+	* ppc-linux-nat.c (ppc_linux_stopped_data_address): Likewise.
+	* procfs.c (gdb_siginfo_t): Likewise.
+
 2012-03-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore: Ignore more files.

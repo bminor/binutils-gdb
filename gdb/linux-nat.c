@@ -188,7 +188,7 @@ static void (*linux_nat_prepare_to_resume) (struct lwp_info *);
 /* The method to call, if any, when the siginfo object needs to be
    converted between the layout returned by ptrace, and the layout in
    the architecture of the inferior.  */
-static int (*linux_nat_siginfo_fixup) (struct siginfo *,
+static int (*linux_nat_siginfo_fixup) (siginfo_t *,
 				       gdb_byte *,
 				       int);
 
@@ -4232,7 +4232,7 @@ linux_nat_mourn_inferior (struct target_ops *ops)
    layout of the inferiors' architecture.  */
 
 static void
-siginfo_fixup (struct siginfo *siginfo, gdb_byte *inf_siginfo, int direction)
+siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo, int direction)
 {
   int done = 0;
 
@@ -4244,9 +4244,9 @@ siginfo_fixup (struct siginfo *siginfo, gdb_byte *inf_siginfo, int direction)
   if (!done)
     {
       if (direction == 1)
-	memcpy (siginfo, inf_siginfo, sizeof (struct siginfo));
+	memcpy (siginfo, inf_siginfo, sizeof (siginfo_t));
       else
-	memcpy (inf_siginfo, siginfo, sizeof (struct siginfo));
+	memcpy (inf_siginfo, siginfo, sizeof (siginfo_t));
     }
 }
 
@@ -4256,8 +4256,8 @@ linux_xfer_siginfo (struct target_ops *ops, enum target_object object,
 		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
   int pid;
-  struct siginfo siginfo;
-  gdb_byte inf_siginfo[sizeof (struct siginfo)];
+  siginfo_t siginfo;
+  gdb_byte inf_siginfo[sizeof (siginfo_t)];
 
   gdb_assert (object == TARGET_OBJECT_SIGNAL_INFO);
   gdb_assert (readbuf || writebuf);
@@ -5266,7 +5266,7 @@ linux_nat_set_new_thread (struct target_ops *t,
    inferior.  */
 void
 linux_nat_set_siginfo_fixup (struct target_ops *t,
-			     int (*siginfo_fixup) (struct siginfo *,
+			     int (*siginfo_fixup) (siginfo_t *,
 						   gdb_byte *,
 						   int))
 {
@@ -5285,7 +5285,7 @@ linux_nat_set_prepare_to_resume (struct target_ops *t,
 }
 
 /* Return the saved siginfo associated with PTID.  */
-struct siginfo *
+siginfo_t *
 linux_nat_get_siginfo (ptid_t ptid)
 {
   struct lwp_info *lp = find_lwp_pid (ptid);

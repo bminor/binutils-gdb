@@ -266,7 +266,7 @@ typedef struct sigaction gdb_sigaction_t;
 #ifdef HAVE_PR_SIGINFO64_T
 typedef pr_siginfo64_t gdb_siginfo_t;
 #else
-typedef struct siginfo gdb_siginfo_t;
+typedef siginfo_t gdb_siginfo_t;
 #endif
 
 /* On mips-irix, praddset and prdelset are defined in such a way that

@@ -918,13 +918,13 @@ siginfo_from_compat_siginfo (siginfo_t *to, compat_siginfo_t *from)
    INF.  */
 
 static int
-x86_siginfo_fixup (struct siginfo *native, void *inf, int direction)
+x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
 {
 #ifdef __x86_64__
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (register_size (0) == 4)
     {
-      if (sizeof (struct siginfo) != sizeof (compat_siginfo_t))
+      if (sizeof (siginfo_t) != sizeof (compat_siginfo_t))
 	fatal ("unexpected difference in siginfo");
 
       if (direction == 0)

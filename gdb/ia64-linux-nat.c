@@ -637,7 +637,7 @@ static int
 ia64_linux_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 {
   CORE_ADDR psr;
-  struct siginfo *siginfo_p;
+  siginfo_t *siginfo_p;
   struct regcache *regcache = get_current_regcache ();
 
   siginfo_p = linux_nat_get_siginfo (inferior_ptid);

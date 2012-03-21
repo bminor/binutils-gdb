@@ -1,3 +1,14 @@
+2012-03-21  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* linux-arm-low.c (arm_stopped_by_watchpoint): Use siginfo_t instead of
+	struct siginfo.
+	* linux-low.c (siginfo_fixup, linux_xfer_siginfo): Likewise.
+	* linux-x86-low.c (x86_siginfo_fixup): Likewise.
+	* linux-low.h: Include <signal.h>.
+	(struct siginfo): Remove forward declaration.
+	(struct linux_target_ops) <siginfo_fixup>: Use siginfo_t instead of
+	struct siginfo.
+
 2012-03-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore: Ignore more files.

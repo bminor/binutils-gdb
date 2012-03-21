@@ -1137,7 +1137,7 @@ arm_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
 static int
 arm_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 {
-  struct siginfo *siginfo_p = linux_nat_get_siginfo (inferior_ptid);
+  siginfo_t *siginfo_p = linux_nat_get_siginfo (inferior_ptid);
   int slot = siginfo_p->si_errno;
 
   /* This must be a hardware breakpoint.  */

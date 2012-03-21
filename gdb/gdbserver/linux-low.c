@@ -4779,7 +4779,7 @@ linux_qxfer_osdata (const char *annex,
    layout of the inferiors' architecture.  */
 
 static void
-siginfo_fixup (struct siginfo *siginfo, void *inf_siginfo, int direction)
+siginfo_fixup (siginfo_t *siginfo, void *inf_siginfo, int direction)
 {
   int done = 0;
 
@@ -4791,9 +4791,9 @@ siginfo_fixup (struct siginfo *siginfo, void *inf_siginfo, int direction)
   if (!done)
     {
       if (direction == 1)
-	memcpy (siginfo, inf_siginfo, sizeof (struct siginfo));
+	memcpy (siginfo, inf_siginfo, sizeof (siginfo_t));
       else
-	memcpy (inf_siginfo, siginfo, sizeof (struct siginfo));
+	memcpy (inf_siginfo, siginfo, sizeof (siginfo_t));
     }
 }
 
@@ -4802,8 +4802,8 @@ linux_xfer_siginfo (const char *annex, unsigned char *readbuf,
 		    unsigned const char *writebuf, CORE_ADDR offset, int len)
 {
   int pid;
-  struct siginfo siginfo;
-  char inf_siginfo[sizeof (struct siginfo)];
+  siginfo_t siginfo;
+  char inf_siginfo[sizeof (siginfo_t)];
 
   if (current_inferior == NULL)
     return -1;
