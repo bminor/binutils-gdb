@@ -1,3 +1,9 @@
+2012-03-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* expression.h (op_name): Add declaration.
+	* expprint.c (op_name): Remove declaration.  Make non-static.
+	* ax-gdb.c (gen_expr): Use op_name instead of op_string.
+
 2012-03-21  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* amd64-linux-nat.c (amd64_linux_siginfo_fixup): Use siginfo_t instead

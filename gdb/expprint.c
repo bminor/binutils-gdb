@@ -647,12 +647,11 @@ op_string (enum exp_opcode op)
 /* Support for dumping the raw data from expressions in a human readable
    form.  */
 
-static char *op_name (struct expression *, enum exp_opcode);
 static int dump_subexp_body (struct expression *exp, struct ui_file *, int);
 
 /* Name for OPCODE, when it appears in expression EXP.  */
 
-static char *
+char *
 op_name (struct expression *exp, enum exp_opcode opcode)
 {
   return exp->language_defn->la_exp_desc->op_name (opcode);

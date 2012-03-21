@@ -2217,7 +2217,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
     default:
       error (_("Unsupported operator %s (%d) in expression."),
-	     op_string (op), op);
+	     op_name (exp, op), op);
     }
 }
 
