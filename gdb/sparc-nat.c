@@ -255,7 +255,7 @@ sparc_store_inferior_registers (struct target_ops *ops,
 
 /* Fetch StackGhost Per-Process XOR cookie.  */
 
-LONGEST
+static LONGEST
 sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
 		    const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)

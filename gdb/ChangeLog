@@ -1,5 +1,10 @@
 2012-03-22  Richard Henderson  <rth@redhat.com>
 
+	* sparc-linux-nat.c (_initialize_sparc_linux_nat): Fix prototype.
+	* sparc-nat.c (sparc_xfer_wcookie): Make static.
+
+2012-03-22  Richard Henderson  <rth@redhat.com>
+
 	* jit.c (jit_read_code_entry): Compute alignment and offset of
 	int64_t member before computing entry_size.
 
