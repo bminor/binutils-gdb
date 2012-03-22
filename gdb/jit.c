@@ -384,7 +384,13 @@ jit_read_code_entry (struct gdbarch *gdbarch,
   /* Figure out how big the entry is on the remote and how to read it.  */
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   ptr_size = TYPE_LENGTH (ptr_type);
-  entry_size = 3 * ptr_size + 8;  /* Three pointers and one 64-bit int.  */
+
+  /* Figure out where the longlong value will be.  */
+  align_bytes = gdbarch_long_long_align_bit (gdbarch) / 8;
+  off = 3 * ptr_size;
+  off = (off + (align_bytes - 1)) & ~(align_bytes - 1);
+
+  entry_size = off + 8;  /* Three pointers and one 64-bit int.  */
   entry_buf = alloca (entry_size);
 
   /* Read the entry.  */
@@ -399,11 +405,6 @@ jit_read_code_entry (struct gdbarch *gdbarch,
       extract_typed_address (&entry_buf[ptr_size], ptr_type);
   code_entry->symfile_addr =
       extract_typed_address (&entry_buf[2 * ptr_size], ptr_type);
-
-  align_bytes = gdbarch_long_long_align_bit (gdbarch) / 8;
-  off = 3 * ptr_size;
-  off = (off + (align_bytes - 1)) & ~(align_bytes - 1);
-
   code_entry->symfile_size =
       extract_unsigned_integer (&entry_buf[off], 8, byte_order);
 }
