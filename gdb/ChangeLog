@@ -1,5 +1,16 @@
 2012-03-22  Siva Chandra Reddy  <sivachandra@google.com>
 
+	Python scripting: Add new method Value.referenced_value to
+	gdb.Value which can dereference pointer as well as reference
+	values.
+	* NEWS: Add entry under 'Python scripting' about the new method
+	Value.referenced_value on gdb.Value objects.
+	* python/py-value.c (valpy_referenced_value): New function
+	defining a new method on gdb.Value objects which can dereference
+	pointer and reference values.
+
+2012-03-22  Siva Chandra Reddy  <sivachandra@google.com>
+
 	* MAINTAINERS (Write After Approval): Add myself to the list.
 
 2012-03-21  Kevin Buettner  <kevinb@redhat.com>

@@ -192,6 +192,47 @@ valpy_dereference (PyObject *self, PyObject *args)
   return result;
 }
 
+/* Given a value of a pointer type or a reference type, return the value
+   referenced. The difference between this function and valpy_dereference is
+   that the latter applies * unary operator to a value, which need not always
+   result in the value referenced. For example, for a value which is a reference
+   to an 'int' pointer ('int *'), valpy_dereference will result in a value of
+   type 'int' while valpy_referenced_value will result in a value of type
+   'int *'.  */
+
+static PyObject *
+valpy_referenced_value (PyObject *self, PyObject *args)
+{
+  volatile struct gdb_exception except;
+  PyObject *result = NULL;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      struct value *self_val, *res_val;
+      struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
+
+      self_val = ((value_object *) self)->value;
+      switch (TYPE_CODE (check_typedef (value_type (self_val))))
+        {
+        case TYPE_CODE_PTR:
+          res_val = value_ind (self_val);
+          break;
+        case TYPE_CODE_REF:
+          res_val = coerce_ref (self_val);
+          break;
+        default:
+          error(_("Trying to get the referenced value from a value which is "
+                  "neither a pointer nor a reference."));
+        }
+
+      result = value_to_value_object (res_val);
+      do_cleanups (cleanup);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  return result;
+}
+
 /* Return "&value".  */
 static PyObject *
 valpy_get_address (PyObject *self, void *closure)
@@ -1379,6 +1420,8 @@ Cast the value to the supplied type, as if by the C++\n\
 reinterpret_cast operator."
   },
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
+  { "referenced_value", valpy_referenced_value, METH_NOARGS,
+    "Return the value referenced by a TYPE_CODE_REF or TYPE_CODE_PTR value." },
   { "lazy_string", (PyCFunction) valpy_lazy_string,
     METH_VARARGS | METH_KEYWORDS,
     "lazy_string ([encoding]  [, length]) -> lazy_string\n\

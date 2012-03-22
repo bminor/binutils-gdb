@@ -22136,6 +22136,79 @@ bar = foo.dereference ()
 
 The result @code{bar} will be a @code{gdb.Value} object holding the
 value pointed to by @code{foo}.
+
+A similar function @code{Value.referenced_value} exists which also
+returns @code{gdb.Value} objects corresonding to the values pointed to
+by pointer values (and additionally, values referenced by reference
+values).  However, the behavior of @code{Value.dereference}
+differs from @code{Value.referenced_value} by the fact that the
+behavior of @code{Value.dereference} is identical to applying the C
+unary operator @code{*} on a given value.  For example, consider a
+reference to a pointer @code{ptrref}, declared in your C@t{++} program
+as
+
+@smallexample
+typedef int *intptr;
+...
+int val = 10;
+intptr ptr = &val;
+intptr &ptrref = ptr;
+@end smallexample
+
+Though @code{ptrref} is a reference value, one can apply the method
+@code{Value.dereference} to the @code{gdb.Value} object corresponding
+to it and obtain a @code{gdb.Value} which is identical to that
+corresponding to @code{val}.  However, if you apply the method
+@code{Value.referenced_value}, the result would be a @code{gdb.Value}
+object identical to that corresponding to @code{ptr}.
+
+@smallexample
+py_ptrref = gdb.parse_and_eval ("ptrref")
+py_val = py_ptrref.dereference ()
+py_ptr = py_ptrref.referenced_value ()
+@end smallexample
+
+The @code{gdb.Value} object @code{py_val} is identical to that
+corresponding to @code{val}, and @code{py_ptr} is identical to that
+corresponding to @code{ptr}.  In general, @code{Value.dereference} can
+be applied whenever the C unary operator @code{*} can be applied
+to the corresponding C value.  For those cases where applying both
+@code{Value.dereference} and @code{Value.referenced_value} is allowed,
+the results obtained need not be identical (as we have seen in the above
+example).  The results are however identical when applied on
+@code{gdb.Value} objects corresponding to pointers (@code{gdb.Value}
+objects with type code @code{TYPE_CODE_PTR}) in a C/C@t{++} program.
+@end defun
+
+@defun Value.referenced_value ()
+For pointer or reference data types, this method returns a new
+@code{gdb.Value} object corresponding to the value referenced by the
+pointer/reference value.  For pointer data types,
+@code{Value.dereference} and @code{Value.referenced_value} produce
+identical results.  The difference between these methods is that
+@code{Value.dereference} cannot get the values referenced by reference
+values.  For example, consider a reference to an @code{int}, declared
+in your C@t{++} program as
+
+@smallexample
+int val = 10;
+int &ref = val;
+@end smallexample
+
+@noindent
+then applying @code{Value.dereference} to the @code{gdb.Value} object
+corresponding to @code{ref} will result in an error, while applying
+@code{Value.referenced_value} will result in a @code{gdb.Value} object
+identical to that corresponding to @code{val}.
+
+@smallexample
+py_ref = gdb.parse_and_eval ("ref")
+er_ref = py_ref.dereference ()       # Results in error
+py_val = py_ref.referenced_value ()  # Returns the referenced value
+@end smallexample
+
+The @code{gdb.Value} object @code{py_val} is identical to that
+corresponding to @code{val}.
 @end defun
 
 @defun Value.dynamic_cast (type)

@@ -1,3 +1,10 @@
+2012-03-22  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.texinfo (Python API/Values From Inferior): Add description
+	about the new method Value.referenced_value.  Add description on
+	how Value.dereference is different (and similar) to
+	Value.referenced_value.
+
 2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (File Options): Describe --init-command=FILE, -ix and

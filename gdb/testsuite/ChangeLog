@@ -1,3 +1,11 @@
+2012-03-22  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/py-value.cc: Add test case for testing the
+	methodology exposing C++ values to Python.
+	* gdb.python/py-value-cc.exp: Add tests testing the methodology
+	exposing C++ values to Python.
+	* gdb.python/Makefile.in: Add py-value-cc to EXECUTABLES.
+
 2012-03-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Siddhesh Poyarekar  <siddhesh@redhat.com>
 
