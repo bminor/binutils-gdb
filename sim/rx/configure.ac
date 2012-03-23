@@ -44,14 +44,14 @@ echo enable_cycle_accurate is $enable_cycle_accurate
 echo enable_cycle_stats is $enable_cycle_stats
 
 if test "x${enable_cycle_accurate}" != xno; then
-AC_DEFINE([CYCLE_ACCURATE])
+  AC_DEFINE([CYCLE_ACCURATE], 1, [--enable-cycle-accurate])
 
   if test "x${enable_cycle_stats}" != xno; then
-  AC_DEFINE([CYCLE_STATS])
+    AC_DEFINE([CYCLE_STATS], 1, [--enable-cycle-stats])
   fi
 else
   if test "x${enable_cycle_stats}" != xno; then
-  AC_ERROR([cycle-stats not available without cycle-accurate])
+    AC_ERROR([cycle-stats not available without cycle-accurate])
   fi
 fi
 
