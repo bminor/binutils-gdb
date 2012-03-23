@@ -5585,15 +5585,18 @@ opd_entry_value (asection *opd_sec,
 	      unsigned long symndx = ELF64_R_SYM (look->r_info);
 	      asection *sec;
 
-	      if (symndx < symtab_hdr->sh_info)
+	      if (symndx < symtab_hdr->sh_info
+		  || elf_sym_hashes (opd_bfd) == NULL)
 		{
 		  Elf_Internal_Sym *sym;
 
 		  sym = (Elf_Internal_Sym *) symtab_hdr->contents;
 		  if (sym == NULL)
 		    {
-		      sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr,
-						  symtab_hdr->sh_info,
+		      size_t symcnt = symtab_hdr->sh_info;
+		      if (elf_sym_hashes (opd_bfd) == NULL)
+			symcnt = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
+		      sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr, symcnt,
 						  0, NULL, NULL, NULL);
 		      if (sym == NULL)
 			break;

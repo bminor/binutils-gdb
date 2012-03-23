@@ -1,3 +1,9 @@
+2012-03-23  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/13894
+	* elf64-ppc.c (opd_entry_value): Read full symbol table when
+	sym hashes unavailable.
+
 2012-03-21  Eliot Dresselhaus  <eliot@sonic.net>
 
 	* elf32-tic6x.c (elf32_tic6x_merge_private_bfd_data): Return TRUE
