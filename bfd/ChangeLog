@@ -1,5 +1,10 @@
 2012-03-23  Alan Modra  <amodra@gmail.com>
 
+	* elf.c (assign_file_positions_for_non_load_sections): Don't warn
+	on empty alloc sections.
+
+2012-03-23  Alan Modra  <amodra@gmail.com>
+
 	* linker.c (_bfd_nearby_section): New function, split out from..
 	(fix_syms): ..here.
 	* bfd-in.h (_bfd_nearby_section): Declare.
