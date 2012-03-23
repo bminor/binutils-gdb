@@ -2380,6 +2380,7 @@ lang_add_section (lang_statement_list_type *ptr,
   section->output_section = output->bfd_section;
 
   if (!link_info.relocatable
+      && !link_info.emitrelocations
       && !stripped_excluded_sections)
     {
       asection *s = output->bfd_section->map_tail.s;

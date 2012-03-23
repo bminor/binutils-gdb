@@ -1,3 +1,9 @@
+2012-03-23  Alan Modra  <amodra@gmail.com>
+
+	* ldemul.c (before_allocation_default): When emitrelocations,
+	don't strip sections..
+	* ldlang.c (lang_add_section): ..and don't set up map_head, map_tail.
+
 2012-03-14  Kai Tietz  <ktietz@redhat.com>
 	    Pascal Obry  <pascal@obry.net>
 
