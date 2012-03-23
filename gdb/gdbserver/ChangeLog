@@ -1,3 +1,9 @@
+2012-03-23  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (read_one_ptr): Read the inferior's pointer through
+	a variable whose type size is the same as the inferior's pointer
+	size.
+
 2012-03-21  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* linux-arm-low.c (arm_stopped_by_watchpoint): Use siginfo_t instead of
