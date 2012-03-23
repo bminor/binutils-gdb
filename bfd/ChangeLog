@@ -1,5 +1,15 @@
 2012-03-23  Alan Modra  <amodra@gmail.com>
 
+	* linker.c (_bfd_nearby_section): New function, split out from..
+	(fix_syms): ..here.
+	* bfd-in.h (_bfd_nearby_section): Declare.
+	* bfd-in2.h: Regenerate.
+	* elflink.c (elf_link_input_bfd): Don't use text_index_section or
+	data_index_section with ld -q or ld -r output relocs against
+	stripped output sections.  Instead use _bfd_nearby_section.
+
+2012-03-23  Alan Modra  <amodra@gmail.com>
+
 	PR binutils/13894
 	* elf64-ppc.c (opd_entry_value): Read full symbol table when
 	sym hashes unavailable.

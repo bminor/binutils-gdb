@@ -9747,23 +9747,12 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			      r_symndx = osec->target_index;
 			      if (r_symndx == STN_UNDEF)
 				{
-				  struct elf_link_hash_table *htab;
-				  asection *oi;
-
-				  htab = elf_hash_table (finfo->info);
-				  oi = htab->text_index_section;
-				  if ((osec->flags & SEC_READONLY) == 0
-				      && htab->data_index_section != NULL)
-				    oi = htab->data_index_section;
-
-				  if (oi != NULL)
-				    {
-				      irela->r_addend += osec->vma - oi->vma;
-				      r_symndx = oi->target_index;
-				    }
+				  irela->r_addend += osec->vma;
+				  osec = _bfd_nearby_section (output_bfd, osec,
+							      osec->vma);
+				  irela->r_addend -= osec->vma;
+				  r_symndx = osec->target_index;
 				}
-
-			      BFD_ASSERT (r_symndx != STN_UNDEF);
 			    }
 			}
 

@@ -3130,6 +3130,81 @@ _bfd_generic_section_already_linked (bfd *abfd ATTRIBUTE_UNUSED,
   return FALSE;
 }
 
+/* Choose a neighbouring section to S in OBFD that will be output, or
+   the absolute section if ADDR is out of bounds of the neighbours.  */
+
+asection *
+_bfd_nearby_section (bfd *obfd, asection *s, bfd_vma addr)
+{
+  asection *next, *prev, *best;
+
+  /* Find preceding kept section.  */
+  for (prev = s->prev; prev != NULL; prev = prev->prev)
+    if ((prev->flags & SEC_EXCLUDE) == 0
+	&& !bfd_section_removed_from_list (obfd, prev))
+      break;
+
+  /* Find following kept section.  Start at prev->next because
+     other sections may have been added after S was removed.  */
+  if (s->prev != NULL)
+    next = s->prev->next;
+  else
+    next = s->owner->sections;
+  for (; next != NULL; next = next->next)
+    if ((next->flags & SEC_EXCLUDE) == 0
+	&& !bfd_section_removed_from_list (obfd, next))
+      break;
+
+  /* Choose better of two sections, based on flags.  The idea
+     is to choose a section that will be in the same segment
+     as S would have been if it was kept.  */
+  best = next;
+  if (prev == NULL)
+    {
+      if (next == NULL)
+	best = bfd_abs_section_ptr;
+    }
+  else if (next == NULL)
+    best = prev;
+  else if (((prev->flags ^ next->flags)
+	    & (SEC_ALLOC | SEC_THREAD_LOCAL | SEC_LOAD)) != 0)
+    {
+      if (((next->flags ^ s->flags)
+	   & (SEC_ALLOC | SEC_THREAD_LOCAL)) != 0
+	  /* We prefer to choose a loaded section.  Section S
+	     doesn't have SEC_LOAD set (it being excluded, that
+	     part of the flag processing didn't happen) so we
+	     can't compare that flag to those of NEXT and PREV.  */
+	  || ((prev->flags & SEC_LOAD) != 0
+	      && (next->flags & SEC_LOAD) == 0))
+	best = prev;
+    }
+  else if (((prev->flags ^ next->flags) & SEC_READONLY) != 0)
+    {
+      if (((next->flags ^ s->flags) & SEC_READONLY) != 0)
+	best = prev;
+    }
+  else if (((prev->flags ^ next->flags) & SEC_CODE) != 0)
+    {
+      if (((next->flags ^ s->flags) & SEC_CODE) != 0)
+	best = prev;
+    }
+  else
+    {
+      /* Flags we care about are the same.  Prefer the following
+	 section if that will result in a positive valued sym.  */
+      if (addr < next->vma)
+	best = prev;
+    }
+
+  /* Refuse to choose a section for which we are out of bounds.  */
+  /* ??? This may make most of the above moot.  */
+  if (addr < best->vma || addr > best->vma + best->size)
+    best = bfd_abs_section_ptr;
+
+  return best;
+}
+
 /* Convert symbols in excluded output sections to use a kept section.  */
 
 static bfd_boolean
@@ -3146,74 +3221,10 @@ fix_syms (struct bfd_link_hash_entry *h, void *data)
 	  && (s->output_section->flags & SEC_EXCLUDE) != 0
 	  && bfd_section_removed_from_list (obfd, s->output_section))
 	{
-	  asection *op, *op1;
+	  asection *op;
 
 	  h->u.def.value += s->output_offset + s->output_section->vma;
-
-	  /* Find preceding kept section.  */
-	  for (op1 = s->output_section->prev; op1 != NULL; op1 = op1->prev)
-	    if ((op1->flags & SEC_EXCLUDE) == 0
-		&& !bfd_section_removed_from_list (obfd, op1))
-	      break;
-
-	  /* Find following kept section.  Start at prev->next because
-	     other sections may have been added after S was removed.  */
-	  if (s->output_section->prev != NULL)
-	    op = s->output_section->prev->next;
-	  else
-	    op = s->output_section->owner->sections;
-	  for (; op != NULL; op = op->next)
-	    if ((op->flags & SEC_EXCLUDE) == 0
-		&& !bfd_section_removed_from_list (obfd, op))
-	      break;
-
-	  /* Choose better of two sections, based on flags.  The idea
-	     is to choose a section that will be in the same segment
-	     as S would have been if it was kept.  */
-	  if (op1 == NULL)
-	    {
-	      if (op == NULL)
-		op = bfd_abs_section_ptr;
-	    }
-	  else if (op == NULL)
-	    op = op1;
-	  else if (((op1->flags ^ op->flags)
-		    & (SEC_ALLOC | SEC_THREAD_LOCAL | SEC_LOAD)) != 0)
-	    {
-	      if (((op->flags ^ s->flags)
-		   & (SEC_ALLOC | SEC_THREAD_LOCAL)) != 0
-		  /* We prefer to choose a loaded section.  Section S
-		     doesn't have SEC_LOAD set (it being excluded, that
-		     part of the flag processing didn't happen) so we
-		     can't compare that flag to those of OP and OP1.  */
-		  || ((op1->flags & SEC_LOAD) != 0
-		      && (op->flags & SEC_LOAD) == 0))
-		op = op1;
-	    }
-	  else if (((op1->flags ^ op->flags) & SEC_READONLY) != 0)
-	    {
-	      if (((op->flags ^ s->flags) & SEC_READONLY) != 0)
-		op = op1;
-	    }
-	  else if (((op1->flags ^ op->flags) & SEC_CODE) != 0)
-	    {
-	      if (((op->flags ^ s->flags) & SEC_CODE) != 0)
-		op = op1;
-	    }
-	  else
-	    {
-	      /* Flags we care about are the same.  Prefer the following
-		 section if that will result in a positive valued sym.  */
-	      if (h->u.def.value < op->vma)
-		op = op1;
-	    }
-
-	  /* Refuse to choose a section for which we are out of bounds.  */
-	  /* ??? This may make most of the above moot.  */
-	  if (h->u.def.value < op->vma
-	      || h->u.def.value > op->vma + op->size)
-	    op = bfd_abs_section_ptr;
-
+	  op = _bfd_nearby_section (obfd, s->output_section, h->u.def.value);
 	  h->u.def.value -= op->vma;
 	  h->u.def.section = op;
 	}
