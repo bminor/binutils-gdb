@@ -1,3 +1,9 @@
+2012-03-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (SIM_AC_OPTION_WARNINGS): Copy AC_ARG_ENABLE(werror),
+	WERROR_CFLAGS, and build_warnings from gdb/configure.ac.  Comment
+	out -Werror initialization.
+
 2012-03-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (TAGS): Change a-z to [:lower:].
