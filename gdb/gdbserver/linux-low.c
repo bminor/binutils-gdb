@@ -5630,7 +5630,13 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 	  lm_addr = l_next;
 	}
     done:
-      strcpy (p, "</library-list-svr4>");
+      if (!header_done)
+	{
+	  /* Empty list; terminate `<library-list-svr4'.  */
+	  strcpy (p, "/>");
+	}
+      else
+	strcpy (p, "</library-list-svr4>");
     }
 
   document_len = strlen (document);
