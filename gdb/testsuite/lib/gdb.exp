@@ -52,10 +52,13 @@ if ![info exists GDBFLAGS] {
 }
 verbose "using GDBFLAGS = $GDBFLAGS" 2
 
+# Make the build data directory available to tests.
+set BUILD_DATA_DIRECTORY "[pwd]/../data-directory"
+
 # INTERNAL_GDBFLAGS contains flags that the testsuite requires.
 global INTERNAL_GDBFLAGS
 if ![info exists INTERNAL_GDBFLAGS] {
-    set INTERNAL_GDBFLAGS "-nw -nx -data-directory [pwd]/../data-directory"
+    set INTERNAL_GDBFLAGS "-nw -nx -data-directory $BUILD_DATA_DIRECTORY"
 }
 
 # The variable gdb_prompt is a regexp which matches the gdb prompt.
