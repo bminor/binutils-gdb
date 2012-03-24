@@ -1,3 +1,12 @@
+2012-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* c/clone5.c: Update output to ignore decoded signal string.
+	* c/fcntl1.c, c/kill2.c, c/kill3.c, c/mprotect1.c, c/pipe5.c,
+	c/readlink5.c, c/rtsigprocmask1.c, c/rtsigsuspend1.c, c/sig10.c,
+	c/sig11.c, c/sig3.c, c/sig4.c, c/sig5.c, c/sig6.c, c/sig7.c,
+	c/sig8.c, c/sigreturn1.c, c/sigreturn2.c, c/syscall1.c,
+	c/syscall2.c, c/syscall3.c, c/syscall4.c, c/sysctl2.c: Likewise.
+
 2012-03-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* asm/addqpc.ms: Update output to ignore decoded signal string.
