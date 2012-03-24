@@ -1,3 +1,8 @@
+2012-03-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* nrun.c: Add #ifdef HAVE_CONFIG_H and associated includes stanza
+	missing in last change.
+
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4 (SIM_AC_COMMON): Call AC_USE_SYSTEM_EXTENSIONS.
