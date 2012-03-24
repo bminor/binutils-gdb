@@ -19115,6 +19115,11 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   /* RMI Xlr */
   { "xlr",	      0,      ISA_MIPS64,     CPU_XLR },
 
+  /* Broadcom XLP.
+     XLP is mostly like XLR, with the prominent exception that it is
+     MIPS64R2 rather than MIPS64.  */
+  { "xlp",	      0,      ISA_MIPS64R2,     CPU_XLR },
+
   /* End marker */
   { NULL, 0, 0, 0 }
 };

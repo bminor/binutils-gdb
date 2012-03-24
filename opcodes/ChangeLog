@@ -1,3 +1,7 @@
+2012-03-23  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* mips-dis.c (mips_arch_choices): Add entry for Broadcom XLP.
+
 2012-03-16  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (PPC_OPC_SEGS, PPC_OP_TO_SEG): Delete.

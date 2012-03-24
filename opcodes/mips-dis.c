@@ -619,6 +619,14 @@ const struct mips_arch_choice mips_arch_choices[] =
     mips_cp0sel_names_xlr, ARRAY_SIZE (mips_cp0sel_names_xlr),
     mips_hwr_names_numeric },
 
+  /* XLP is mostly like XLR, with the prominent exception it is being
+     MIPS64R2.  */
+  { "xlp", 1, bfd_mach_mips_xlr, CPU_XLR,
+    ISA_MIPS64R2 | INSN_XLR,
+    mips_cp0_names_xlr,
+    mips_cp0sel_names_xlr, ARRAY_SIZE (mips_cp0sel_names_xlr),
+    mips_hwr_names_numeric },
+
   /* This entry, mips16, is here only for ISA/processor selection; do
      not print its name.  */
   { "",		1, bfd_mach_mips16, CPU_MIPS16, ISA_MIPS3,

@@ -1,3 +1,8 @@
+2012-03-23  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Add entry for Broadcom XLP.
+	* doc/c-mips.texi: Mention XLP.
+
 2012-03-21  Thomas Schwinge  <thomas@codesourcery.com>
 
 	[SH] Support the .uaquad and .8byte directives also for non-sh64

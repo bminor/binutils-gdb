@@ -325,7 +325,8 @@ loongson3a,
 octeon,
 octeon+,
 octeon2,
-xlr
+xlr,
+xlp
 @end quotation
 
 For compatibility reasons, @samp{@var{n}x} and @samp{@var{b}fx} are
