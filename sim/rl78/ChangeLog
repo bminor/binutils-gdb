@@ -1,3 +1,7 @@
+2012-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
 2012-02-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in (SIM_OBJS): Add gdb-if.o.

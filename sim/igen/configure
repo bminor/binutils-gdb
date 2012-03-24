@@ -685,6 +685,7 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+enable_werror
 enable_build_warnings
 enable_sim_build_warnings
 '
@@ -1315,8 +1316,11 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-build-warnings Enable build-time compiler warnings if gcc is used
-  --enable-gdb-build-warnings Enable SIM specific build-time compiler warnings if gcc is used
+  --enable-werror         treat compile warnings as errors
+  --enable-build-warnings enable build-time compiler warnings if gcc is used
+  --enable-sim-build-warnings
+                          enable SIM specific build-time compiler warnings if
+                          gcc is used
 
 Some influential environment variables:
   CC          C compiler command
@@ -2107,6 +2111,44 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+##                                                          -*- Autoconf -*-
+
+# Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007
+# Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# serial 8
+
+# Based on depend.m4 from automake 1.9, modified for standalone use in
+# an environment where GNU make is required.
+
+# ZW_PROG_COMPILER_DEPENDENCIES
+# -----------------------------
+# Variant of _AM_DEPENDENCIES which just does the dependency probe and
+# sets fooDEPMODE accordingly.  Cache-variable compatible with
+# original; not side-effect compatible.  As the users of this macro
+# may require accurate dependencies for correct builds, it does *not*
+# honor --disable-dependency-checking, and failure to detect a usable
+# method is an error.  depcomp is assumed to be located in
+# $ac_aux_dir.
+#
+# FIXME: Should use the Autoconf 2.5x language-selection mechanism.
+
+
+
+# AM_SET_DEPDIR
+# -------------
+# Choose a directory name for dependency files.
+
+
+# ZW_CREATE_DEPDIR
+# ----------------
+# As AM_SET_DEPDIR, but also create the directory at config.status time.
+
+
 
 
 
@@ -2282,9 +2324,9 @@ sim_inline="-DDEFAULT_INLINE=0"
 # AC_PROG_CPP_WERROR
 
 # Test for GNAT.
-# We require the gnatbind program, and a compiler driver that
-# understands Ada.  We use the user's CC setting, already found,
-# and possibly add $1 to the command-line parameters.
+# We require the gnatbind & gnatmake programs, as well as a compiler driver
+# that understands Ada.  We use the user's CC setting, already found, and
+# possibly add $1 to the command-line parameters.
 #
 # Sets the shell variable have_gnat to yes or no as appropriate, and
 # substitutes GNATBIND and GNATMAKE.
@@ -3197,29 +3239,44 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-# NOTE: Don't add -Wall or -Wunused, they both include
-# -Wunused-parameter which reports bogus warnings.
-# NOTE: If you add to this list, remember to update
-# gdb/doc/gdbint.texinfo.
-build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
--Wformat -Wparentheses -Wpointer-arith"
-# GCC supports -Wuninitialized only with -O or -On, n != 0.
-if test x${CFLAGS+set} = xset; then
-  case "${CFLAGS}" in
-    *"-O0"* ) ;;
-    *"-O"* )
-      build_warnings="${build_warnings} -Wuninitialized"
-    ;;
-  esac
-else
-  build_warnings="${build_warnings} -Wuninitialized"
+# Check whether --enable-werror was given.
+if test "${enable_werror+set}" = set; then :
+  enableval=$enable_werror; case "${enableval}" in
+     yes | y) ERROR_ON_WARNING="yes" ;;
+     no | n)  ERROR_ON_WARNING="no" ;;
+     *) as_fn_error "bad value ${enableval} for --enable-werror" "$LINENO" 5 ;;
+   esac
 fi
-# Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
-# -Wunused-function -Wunused-label -Wunused-variable -Wunused-value
-# -Wchar-subscripts -Wtraditional -Wshadow -Wcast-qual
-# -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes
-# -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
-# -Woverloaded-virtual -Winline -Werror"
+
+
+# Enable -Werror by default when using gcc
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+    ERROR_ON_WARNING=yes
+fi
+
+WERROR_CFLAGS=""
+if test "${ERROR_ON_WARNING}" = yes ; then
+# NOTE: Disabled in the sim dir due to most sims generating warnings.
+#    WERROR_CFLAGS="-Werror"
+     true
+fi
+
+# The entries after -Wno-pointer-sign are disabled warnings which may
+# be enabled in the future, which can not currently be used to build
+# GDB.
+# NOTE: If you change this list, remember to update
+# gdb/doc/gdbint.texinfo.
+build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
+-Wformat-nonliteral -Wno-pointer-sign \
+-Wno-unused -Wunused-value -Wunused-function \
+-Wno-switch -Wno-char-subscripts -Wmissing-prototypes"
+
+# Enable -Wno-format by default when using gcc on mingw since many
+# GCC versions complain about %I64.
+case "${host}" in
+  *-*-mingw32*) build_warnings="$build_warnings -Wno-format" ;;
+esac
+
 # Check whether --enable-build-warnings was given.
 if test "${enable_build_warnings+set}" = set; then :
   enableval=$enable_build_warnings; case "${enableval}" in
@@ -3251,7 +3308,6 @@ if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
 fi
 fi
 WARN_CFLAGS=""
-WERROR_CFLAGS=""
 if test "x${build_warnings}" != x -a "x$GCC" = xyes
 then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler warning flags" >&5
@@ -3282,8 +3338,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 	    CFLAGS="$saved_CFLAGS"
 	esac
     done
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS}${WERROR_CFLAGS}" >&5
-$as_echo "${WARN_CFLAGS}${WERROR_CFLAGS}" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
+$as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
 
 

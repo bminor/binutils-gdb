@@ -29,6 +29,7 @@ AC_REQUIRE([AC_PROG_CC])
 # autoconf.info says this should be called right after AC_INIT.
 AC_CONFIG_HEADER(ifelse([$1],,config.h,[$1]):config.in)
 AC_CANONICAL_SYSTEM
+AC_USE_SYSTEM_EXTENSIONS
 AC_ARG_PROGRAM
 AC_PROG_INSTALL
 

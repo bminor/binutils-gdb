@@ -1,3 +1,7 @@
+2012-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2011-10-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Change include to common/acinclude.m4.
