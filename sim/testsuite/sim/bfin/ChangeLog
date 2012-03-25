@@ -8,6 +8,12 @@
 
 	* fact.s: Comment out test with too large a number (6227020800).
 
+	* allinsn.exp: If preprocessing usp.S fails, set has_cpp to 0,
+	else set it to 1.  If compiling argc.c fails, set has_cc to 0,
+	else set it to 1.  When processing each src file, if has_ccp is
+	0 and the file ends in .S, skip it; if it has_cc is 0 and the
+	file ends in .c, skip it.
+
 2012-03-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* se_all64bitg0opcodes.S, se_all64bitg1opcodes.S,
