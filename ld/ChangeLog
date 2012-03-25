@@ -1,3 +1,10 @@
+2012-03-25  Alan Modra  <amodra@gmail.com>
+
+	* ldemul.c (before_allocation_default): Revert last change.
+	ldlang.c (lang_add_section): Likewise.
+	(strip_excluded_output_sections): Don't strip output sections with
+	user input sections when emitrelocations, unless all are SEC_EXCLUDE.
+
 2012-03-23  Alan Modra  <amodra@gmail.com>
 
 	* ldemul.c (before_allocation_default): When emitrelocations,

@@ -237,7 +237,7 @@ after_allocation_default (void)
 void
 before_allocation_default (void)
 {
-  if (!link_info.relocatable && !link_info.emitrelocations)
+  if (!link_info.relocatable)
     strip_excluded_output_sections ();
 }
 
