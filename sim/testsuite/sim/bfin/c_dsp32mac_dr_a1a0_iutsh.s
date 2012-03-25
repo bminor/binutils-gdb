@@ -14,7 +14,7 @@
 	imm32 r1, 0xb2bcfec7;
 	imm32 r2, 0xc1348679;
 	imm32 r3, 0xd0049007;
-	imm32 r4, 0x12efbc556;
+	imm32 r4, 0x2efbc556;
 	imm32 r5, 0xcd35560b;
 	imm32 r6, 0xe00c807d;
 	imm32 r7, 0xf78e9008;

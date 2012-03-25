@@ -1,3 +1,11 @@
+2012-03-25  Mike Frysinger  <vapier@gentoo.org>
+
+	* c_dsp32mac_dr_a1a0.s: Change 0x12efbc5569 to 0xefbc5569.
+	* c_dsp32mac_dr_a1a0_iutsh.s: Change 0x12efbc556 to 0x2efbc556.
+	* c_dsp32mac_dr_a1a0_m.s: Change 0x12efbc5569 to 0xefbc5569.
+	* c_dsp32shift_vmaxvmax.s: Change 0xa11002001 to 0x11002001.
+	* c_dsp32shiftim_af_s.s: Change 0x3a1230001 to 0xa1230001.
+
 2012-03-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* se_all64bitg0opcodes.S, se_all64bitg1opcodes.S,
