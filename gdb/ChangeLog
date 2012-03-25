@@ -1,3 +1,8 @@
+2012-03-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (set breakpoint condition-evaluation): Change "gdb" to "host".
+	Describe also the option "auto".
+
 2012-03-22  Richard Henderson  <rth@redhat.com>
 
 	* sparc-linux-nat.c (_initialize_sparc_linux_nat): Fix prototype.

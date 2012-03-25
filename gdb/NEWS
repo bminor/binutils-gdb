@@ -102,8 +102,9 @@ HP OpenVMS ia64			ia64-hp-openvms*
 
 set breakpoint condition-evaluation
 show breakpoint condition-evaluation
-  Controls whether breakpoint conditions are evaluated by GDB ("gdb") or by
-  GDBserver ("target").
+  Controls whether breakpoint conditions are evaluated by GDB ("host") or by
+  GDBserver ("target").  Default option "auto" chooses the most efficient
+  available mode.
   This option can improve debugger efficiency depending on the speed of the
   target.
 
