@@ -6,6 +6,8 @@
 	* c_dsp32shift_vmaxvmax.s: Change 0xa11002001 to 0x11002001.
 	* c_dsp32shiftim_af_s.s: Change 0x3a1230001 to 0xa1230001.
 
+	* fact.s: Comment out test with too large a number (6227020800).
+
 2012-03-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* se_all64bitg0opcodes.S, se_all64bitg1opcodes.S,

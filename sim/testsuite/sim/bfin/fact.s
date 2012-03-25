@@ -28,7 +28,11 @@ _test:
 	factorial 10 3628800
 	factorial 11 39916800
 	factorial 12 479001600
-	factorial 13 6227020800
+# This is the real answer, but it overflows 32bits.  Since gas itself
+# likes to choke on 64bit values when compiled for 32bit systems, just
+# specify the truncated 32bit value since that's what the Blackfin will
+# come up with too.
+#	factorial 13 6227020800
 	factorial 13 1932053504
 	pass
 
