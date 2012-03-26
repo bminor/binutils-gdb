@@ -5478,7 +5478,7 @@ struct link_map_offsets
     int l_prev_offset;
   };
 
-/* Construct qXfer:libraries:read reply.  */
+/* Construct qXfer:libraries-svr4:read reply.  */
 
 static int
 linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
