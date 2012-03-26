@@ -1,3 +1,7 @@
+2012-03-26 Oza Pawandeep  <oza.pawandeep@gmail.com>
+
+        * MAINTAINERS (Write After Approval): Add myself to the list.
+
 2012-03-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (set breakpoint condition-evaluation): Change "gdb" to "host".
