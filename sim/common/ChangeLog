@@ -1,3 +1,7 @@
+2012-03-25  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-core.h (sim_core_trans_addr): Add prototype.
+
 2012-03-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	* nrun.c: Add #ifdef HAVE_CONFIG_H and associated includes stanza

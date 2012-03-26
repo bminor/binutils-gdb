@@ -241,6 +241,14 @@ extern unsigned sim_core_xor_write_buffer
  unsigned nr_bytes);
 
 
+/* Translate an address based on a map.  */
+
+extern void *sim_core_trans_addr
+(SIM_DESC sd,
+ sim_cpu *cpu,
+ unsigned map,
+ address_word addr);
+
 
 /* Fixed sized, processor oriented, read/write.
 

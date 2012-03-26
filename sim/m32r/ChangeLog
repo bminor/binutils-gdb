@@ -1,3 +1,7 @@
+2012-03-25  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps-linux.c (sim_core_trans_addr): Delete prototype.
+
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, config.in, configure: Regenerate.
