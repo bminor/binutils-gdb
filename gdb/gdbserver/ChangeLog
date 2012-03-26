@@ -1,5 +1,10 @@
 2012-03-26  Pedro Alves  <palves@redhat.com>
 
+	* server.c (handle_qxfer_libraries): Don't bail early if
+	the_target->qxfer_libraries_svr4 is not NULL.
+
+2012-03-26  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (linux_qxfer_libraries_svr4): Fix pasto in comment.
 
 2012-03-23  Pedro Alves  <palves@redhat.com>

@@ -1015,10 +1015,6 @@ handle_qxfer_libraries (const char *annex,
   if (annex[0] != '\0' || !target_running ())
     return -1;
 
-  /* Do not confuse this packet with qXfer:libraries-svr4:read.  */
-  if (the_target->qxfer_libraries_svr4 != NULL)
-    return 0;
-
   /* Over-estimate the necessary memory.  Assume that every character
      in the library name must be escaped.  */
   total_len = 64;
