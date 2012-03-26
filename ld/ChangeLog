@@ -1,3 +1,7 @@
+2012-03-26  Tristan Gingold  <gingold@adacore.com>
+
+	* lexsup.c (parse_args): Add a missing '\n'.
+
 2012-03-25  Alan Modra  <amodra@gmail.com>
 
 	* ldemul.c (before_allocation_default): Revert last change.

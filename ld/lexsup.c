@@ -834,7 +834,7 @@ parse_args (unsigned argc, char **argv)
 
 	      style = cplus_demangle_name_to_style (optarg);
 	      if (style == unknown_demangling)
-		einfo (_("%F%P: unknown demangling style `%s'"),
+		einfo (_("%F%P: unknown demangling style `%s'\n"),
 		       optarg);
 
 	      cplus_demangle_set_style (style);
