@@ -1,3 +1,38 @@
+2012-03-27  Pedro Alves  <palves@redhat.com>
+
+	Eliminate struct ui_stream.
+
+	* ui-out.h (struct ui_stream): Delete.
+	(ui_out_field_stream): Adjust prototype.
+	(ui_out_stream_new, ui_out_stream_delete)
+	(make_cleanup_ui_out_stream_delete): Delete declarations.
+	* ui-out.c (ui_out_field_stream): Change prototype to take a
+	ui_file instead of a ui_stream.  Adjust.
+	(ui_out_stream_new, ui_out_stream_delete, do_stream_delete)
+	(make_cleanup_ui_out_stream_delete): Delete.
+	* breakpoint.c (print_breakpoint_location)
+	(print_one_detail_ranged_breakpoint, print_it_watchpoint): Use
+	ui_file/mem_fileopen instead of ui_stream/ui_out_stream_new.
+	* disasm.c (dump_insns): Ditto.
+	(do_mixed_source_and_assembly, do_assembly_only): Adjust
+	prototype.
+	(gdb_disassembly): Use ui_file/mem_fileopen instead of
+	ui_stream/ui_out_stream_new.
+	* infcmd.c (print_return_value): Ditto.
+	* osdata.c (info_osdata_command): Don't allocate a local
+	ui_stream.
+	* stack.c (print_frame_arg, print_frame_args, print_frame): Use
+	ui_file/mem_fileopen instead of ui_stream/ui_out_stream_new.
+	* tracepoint.c (print_one_static_tracepoint_marker): Don't
+	allocate a local ui_stream.
+	* mi/mi-cmd-stack.c (list_arg_or_local): Use ui_file/mem_fileopen
+	instead of ui_stream/ui_out_stream_new.
+	(list_args_or_locals): Don't allocate a local ui_stream.
+	* mi/mi-main.c (get_register, mi_cmd_data_evaluate_expression)
+	(mi_cmd_data_read_memory): Use ui_file/mem_fileopen instead of
+	ui_stream/ui_out_stream_new.
+	* cli/cli-setshow.c (do_setshow_command): Ditto.
+
 2012-03-27 Oza Pawandeep   <oza.pawandeep@gmail.com>
 
        * arm-linux-tdep.c (arm_linux_init_abi): Call

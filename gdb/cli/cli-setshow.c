@@ -314,10 +314,10 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
   else if (c->type == show_cmd)
     {
       struct cleanup *old_chain;
-      struct ui_stream *stb;
+      struct ui_file *stb;
 
-      stb = ui_out_stream_new (uiout);
-      old_chain = make_cleanup_ui_out_stream_delete (stb);
+      stb = mem_fileopen ();
+      old_chain = make_cleanup_ui_file_delete (stb);
 
       /* Possibly call the pre hook.  */
       if (c->pre_show_hook)
@@ -327,29 +327,29 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	{
 	case var_string:
 	  if (*(char **) c->var)
-	    fputstr_filtered (*(char **) c->var, '"', stb->stream);
+	    fputstr_filtered (*(char **) c->var, '"', stb);
 	  break;
 	case var_string_noescape:
 	case var_optional_filename:
 	case var_filename:
 	case var_enum:
 	  if (*(char **) c->var)
-	    fputs_filtered (*(char **) c->var, stb->stream);
+	    fputs_filtered (*(char **) c->var, stb);
 	  break;
 	case var_boolean:
-	  fputs_filtered (*(int *) c->var ? "on" : "off", stb->stream);
+	  fputs_filtered (*(int *) c->var ? "on" : "off", stb);
 	  break;
 	case var_auto_boolean:
 	  switch (*(enum auto_boolean*) c->var)
 	    {
 	    case AUTO_BOOLEAN_TRUE:
-	      fputs_filtered ("on", stb->stream);
+	      fputs_filtered ("on", stb);
 	      break;
 	    case AUTO_BOOLEAN_FALSE:
-	      fputs_filtered ("off", stb->stream);
+	      fputs_filtered ("off", stb);
 	      break;
 	    case AUTO_BOOLEAN_AUTO:
-	      fputs_filtered ("auto", stb->stream);
+	      fputs_filtered ("auto", stb);
 	      break;
 	    default:
 	      internal_error (__FILE__, __LINE__,
@@ -362,17 +362,17 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	case var_zuinteger:
 	  if (c->var_type == var_uinteger
 	      && *(unsigned int *) c->var == UINT_MAX)
-	    fputs_filtered ("unlimited", stb->stream);
+	    fputs_filtered ("unlimited", stb);
 	  else
-	    fprintf_filtered (stb->stream, "%u", *(unsigned int *) c->var);
+	    fprintf_filtered (stb, "%u", *(unsigned int *) c->var);
 	  break;
 	case var_integer:
 	case var_zinteger:
 	  if (c->var_type == var_integer
 	      && *(int *) c->var == INT_MAX)
-	    fputs_filtered ("unlimited", stb->stream);
+	    fputs_filtered ("unlimited", stb);
 	  else
-	    fprintf_filtered (stb->stream, "%d", *(int *) c->var);
+	    fprintf_filtered (stb, "%d", *(int *) c->var);
 	  break;
 
 	default:
@@ -389,7 +389,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	ui_out_field_stream (uiout, "value", stb);
       else
 	{
-	  char *value = ui_file_xstrdup (stb->stream, NULL);
+	  char *value = ui_file_xstrdup (stb, NULL);
 
 	  make_cleanup (xfree, value);
 	  if (c->show_value_func != NULL)

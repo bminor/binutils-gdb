@@ -52,17 +52,6 @@ enum ui_flags
   };
 
 
-/* The ui_out stream structure.  */
-/* NOTE: cagney/2000-02-01: The ui_stream object can be subsumed by
-   the more generic ui_file object.  */
-
-struct ui_stream
-  {
-    struct ui_out *uiout;
-    struct ui_file *stream;
-  };
-
-
 /* Prototypes for ui-out API.  */
 
 /* A result is a recursive data structure consisting of lists and
@@ -122,7 +111,7 @@ extern void ui_out_field_string (struct ui_out * uiout, const char *fldname,
 				 const char *string);
 
 extern void ui_out_field_stream (struct ui_out *uiout, const char *fldname,
-				 struct ui_stream *buf);
+				 struct ui_file *stream);
 
 extern void ui_out_field_fmt (struct ui_out *uiout, const char *fldname,
 			      const char *format, ...)
@@ -137,12 +126,6 @@ extern void ui_out_text (struct ui_out *uiout, const char *string);
 extern void ui_out_message (struct ui_out *uiout, int verbosity,
 			    const char *format, ...)
      ATTRIBUTE_PRINTF (3, 4);
-
-extern struct ui_stream *ui_out_stream_new (struct ui_out *uiout);
-
-extern void ui_out_stream_delete (struct ui_stream *buf);
-
-struct cleanup *make_cleanup_ui_out_stream_delete (struct ui_stream *buf);
 
 extern void ui_out_wrap_hint (struct ui_out *uiout, char *identstring);
 

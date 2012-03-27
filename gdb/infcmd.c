@@ -1471,23 +1471,23 @@ static void
 print_return_value (struct type *func_type, struct type *value_type)
 {
   struct value *value = get_return_value (func_type, value_type);
-  struct cleanup *old_chain;
-  struct ui_stream *stb;
   struct ui_out *uiout = current_uiout;
 
   if (value)
     {
       struct value_print_options opts;
+      struct ui_file *stb;
+      struct cleanup *old_chain;
 
       /* Print it.  */
-      stb = ui_out_stream_new (uiout);
-      old_chain = make_cleanup_ui_out_stream_delete (stb);
+      stb = mem_fileopen ();
+      old_chain = make_cleanup_ui_file_delete (stb);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
 			record_latest_value (value));
       ui_out_text (uiout, " = ");
       get_raw_print_options (&opts);
-      value_print (value, stb->stream, &opts);
+      value_print (value, stb, &opts);
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");
       do_cleanups (old_chain);

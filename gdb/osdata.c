@@ -355,13 +355,10 @@ info_osdata_command (char *type, int from_tty)
           ix_items++)
        {
          struct cleanup *old_chain;
-         struct ui_stream *stb;
          int ix_cols;
          struct osdata_column *col;
 
-         stb = ui_out_stream_new (uiout);
-         old_chain = make_cleanup_ui_out_stream_delete (stb);
-         make_cleanup_ui_out_tuple_begin_end (uiout, "item");
+         old_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "item");
 
          for (ix_cols = 0;
               VEC_iterate (osdata_column_s, item->columns,

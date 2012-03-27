@@ -1133,10 +1133,7 @@ get_register (struct frame_info *frame, int regnum, int format)
   struct ui_out *uiout = current_uiout;
   CORE_ADDR addr;
   enum lval_type lval;
-  struct ui_stream *stb;
   struct value *val;
-
-  stb = ui_out_stream_new (uiout);
 
   if (format == 'N')
     format = 0;
@@ -1167,15 +1164,20 @@ get_register (struct frame_info *frame, int regnum, int format)
   else
     {
       struct value_print_options opts;
+      struct ui_file *stb;
+      struct cleanup *old_chain;
+
+      stb = mem_fileopen ();
+      old_chain = make_cleanup_ui_file_delete (stb);
 
       get_formatted_print_options (&opts, format);
       opts.deref_ref = 1;
       val_print (value_type (val),
 		 value_contents_for_printing (val),
 		 value_embedded_offset (val), 0,
-		 stb->stream, 0, val, &opts, current_language);
+		 stb, 0, val, &opts, current_language);
       ui_out_field_stream (uiout, "value", stb);
-      ui_out_stream_delete (stb);
+      do_cleanups (old_chain);
     }
 }
 
@@ -1247,34 +1249,31 @@ void
 mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 {
   struct expression *expr;
-  struct cleanup *old_chain = NULL;
+  struct cleanup *old_chain;
   struct value *val;
-  struct ui_stream *stb = NULL;
+  struct ui_file *stb;
   struct value_print_options opts;
   struct ui_out *uiout = current_uiout;
 
-  stb = ui_out_stream_new (uiout);
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
 
   if (argc != 1)
-    {
-      ui_out_stream_delete (stb);
-      error (_("-data-evaluate-expression: "
-	       "Usage: -data-evaluate-expression expression"));
-    }
+    error (_("-data-evaluate-expression: "
+	     "Usage: -data-evaluate-expression expression"));
 
   expr = parse_expression (argv[0]);
 
-  old_chain = make_cleanup (free_current_contents, &expr);
+  make_cleanup (free_current_contents, &expr);
 
   val = evaluate_expression (expr);
 
   /* Print the result of the expression evaluation.  */
   get_user_print_options (&opts);
   opts.deref_ref = 0;
-  common_val_print (val, stb->stream, 0, &opts, current_language);
+  common_val_print (val, stb, 0, &opts, current_language);
 
   ui_out_field_stream (uiout, "value", stb);
-  ui_out_stream_delete (stb);
 
   do_cleanups (old_chain);
 }
@@ -1420,12 +1419,15 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 
   /* Build the result as a two dimentional table.  */
   {
-    struct ui_stream *stream = ui_out_stream_new (uiout);
-    struct cleanup *cleanup_list_memory;
+    struct ui_file *stream;
+    struct cleanup *cleanup_stream;
     int row;
     int row_byte;
 
-    cleanup_list_memory = make_cleanup_ui_out_list_begin_end (uiout, "memory");
+    stream = mem_fileopen ();
+    cleanup_stream = make_cleanup_ui_file_delete (stream);
+
+    make_cleanup_ui_out_list_begin_end (uiout, "memory");
     for (row = 0, row_byte = 0;
 	 row < nr_rows;
 	 row++, row_byte += nr_cols * word_size)
@@ -1452,9 +1454,9 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	      }
 	    else
 	      {
-		ui_file_rewind (stream->stream);
+		ui_file_rewind (stream);
 		print_scalar_formatted (mbuf + col_byte, word_type, &opts,
-					word_asize, stream->stream);
+					word_asize, stream);
 		ui_out_field_stream (uiout, NULL, stream);
 	      }
 	  }
@@ -1463,23 +1465,22 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	  {
 	    int byte;
 
-	    ui_file_rewind (stream->stream);
+	    ui_file_rewind (stream);
 	    for (byte = row_byte;
 		 byte < row_byte + word_size * nr_cols; byte++)
 	      {
 		if (byte >= nr_bytes)
-		  fputc_unfiltered ('X', stream->stream);
+		  fputc_unfiltered ('X', stream);
 		else if (mbuf[byte] < 32 || mbuf[byte] > 126)
-		  fputc_unfiltered (aschar, stream->stream);
+		  fputc_unfiltered (aschar, stream);
 		else
-		  fputc_unfiltered (mbuf[byte], stream->stream);
+		  fputc_unfiltered (mbuf[byte], stream);
 	      }
 	    ui_out_field_stream (uiout, "ascii", stream);
 	  }
 	do_cleanups (cleanup_tuple);
       }
-    ui_out_stream_delete (stream);
-    do_cleanups (cleanup_list_memory);
+    do_cleanups (cleanup_stream);
   }
   do_cleanups (cleanups);
 }

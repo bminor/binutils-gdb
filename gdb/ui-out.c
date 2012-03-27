@@ -501,17 +501,17 @@ ui_out_field_core_addr (struct ui_out *uiout,
 void
 ui_out_field_stream (struct ui_out *uiout,
 		     const char *fldname,
-		     struct ui_stream *buf)
+		     struct ui_file *stream)
 {
   long length;
-  char *buffer = ui_file_xstrdup (buf->stream, &length);
+  char *buffer = ui_file_xstrdup (stream, &length);
   struct cleanup *old_cleanup = make_cleanup (xfree, buffer);
 
   if (length > 0)
     ui_out_field_string (uiout, fldname, buffer);
   else
     ui_out_field_skip (uiout, fldname);
-  ui_file_rewind (buf->stream);
+  ui_file_rewind (stream);
   do_cleanups (old_cleanup);
 }
 
@@ -588,37 +588,6 @@ ui_out_message (struct ui_out *uiout, int verbosity,
   uo_message (uiout, verbosity, format, args);
   va_end (args);
 }
-
-struct ui_stream *
-ui_out_stream_new (struct ui_out *uiout)
-{
-  struct ui_stream *tempbuf;
-
-  tempbuf = XMALLOC (struct ui_stream);
-  tempbuf->uiout = uiout;
-  tempbuf->stream = mem_fileopen ();
-  return tempbuf;
-}
-
-void
-ui_out_stream_delete (struct ui_stream *buf)
-{
-  ui_file_delete (buf->stream);
-  xfree (buf);
-}
-
-static void
-do_stream_delete (void *buf)
-{
-  ui_out_stream_delete (buf);
-}
-
-struct cleanup *
-make_cleanup_ui_out_stream_delete (struct ui_stream *buf)
-{
-  return make_cleanup (do_stream_delete, buf);
-}
-
 
 void
 ui_out_wrap_hint (struct ui_out *uiout, char *identstring)

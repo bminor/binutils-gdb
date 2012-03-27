@@ -250,9 +250,13 @@ static void
 list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 		   enum print_values values)
 {
+  struct cleanup *old_chain;
   struct cleanup *cleanup_tuple = NULL;
   struct ui_out *uiout = current_uiout;
-  struct ui_stream *stb = ui_out_stream_new (uiout);
+  struct ui_file *stb;
+
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
 
   gdb_assert (!arg->val || !arg->error);
   gdb_assert ((values == PRINT_NO_VALUES && arg->val == NULL
@@ -267,9 +271,9 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
   if (values != PRINT_NO_VALUES || what == all)
     cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
-  fputs_filtered (SYMBOL_PRINT_NAME (arg->sym), stb->stream);
+  fputs_filtered (SYMBOL_PRINT_NAME (arg->sym), stb);
   if (arg->entry_kind == print_entry_values_only)
-    fputs_filtered ("@entry", stb->stream);
+    fputs_filtered ("@entry", stb);
   ui_out_field_stream (uiout, "name", stb);
 
   if (what == all && SYMBOL_IS_ARGUMENT (arg->sym))
@@ -278,7 +282,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
   if (values == PRINT_SIMPLE_VALUES)
     {
       check_typedef (arg->sym->type);
-      type_print (arg->sym->type, "", stb->stream, -1);
+      type_print (arg->sym->type, "", stb, -1);
       ui_out_field_stream (uiout, "type", stb);
     }
 
@@ -298,19 +302,19 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 
 	      get_raw_print_options (&opts);
 	      opts.deref_ref = 1;
-	      common_val_print (arg->val, stb->stream, 0, &opts,
+	      common_val_print (arg->val, stb, 0, &opts,
 				language_def (SYMBOL_LANGUAGE (arg->sym)));
 	    }
 	}
       if (except.message)
-	fprintf_filtered (stb->stream, _("<error reading variable: %s>"),
+	fprintf_filtered (stb, _("<error reading variable: %s>"),
 			  except.message);
       ui_out_field_stream (uiout, "value", stb);
     }
 
-  ui_out_stream_delete (stb);
   if (values != PRINT_NO_VALUES || what == all)
     do_cleanups (cleanup_tuple);
+  do_cleanups (old_chain);
 }
 
 /* Print a list of the locals or the arguments for the currently
@@ -326,12 +330,9 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
   struct symbol *sym;
   struct dict_iterator iter;
   struct cleanup *cleanup_list;
-  struct ui_stream *stb;
   struct type *type;
   char *name_of_result;
   struct ui_out *uiout = current_uiout;
-
-  stb = ui_out_stream_new (uiout);
 
   block = get_frame_block (fi, 0);
 
@@ -437,7 +438,6 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 	block = BLOCK_SUPERBLOCK (block);
     }
   do_cleanups (cleanup_list);
-  ui_out_stream_delete (stb);
 }
 
 void

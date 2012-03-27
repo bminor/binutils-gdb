@@ -4777,8 +4777,6 @@ print_one_static_tracepoint_marker (int count,
   char wrap_indent[80];
   char extra_field_indent[80];
   struct ui_out *uiout = current_uiout;
-  struct ui_stream *stb = ui_out_stream_new (uiout);
-  struct cleanup *old_chain = make_cleanup_ui_out_stream_delete (stb);
   struct cleanup *bkpt_chain;
   VEC(breakpoint_p) *tracepoints;
 
@@ -4885,7 +4883,6 @@ print_one_static_tracepoint_marker (int count,
   VEC_free (breakpoint_p, tracepoints);
 
   do_cleanups (bkpt_chain);
-  do_cleanups (old_chain);
 }
 
 static void

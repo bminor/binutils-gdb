@@ -210,10 +210,10 @@ print_frame_arg (const struct frame_arg *arg)
   struct ui_out *uiout = current_uiout;
   volatile struct gdb_exception except;
   struct cleanup *old_chain;
-  struct ui_stream *stb;
+  struct ui_file *stb;
 
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
 
   gdb_assert (!arg->val || !arg->error);
   gdb_assert (arg->entry_kind == print_entry_values_no
@@ -224,21 +224,21 @@ print_frame_arg (const struct frame_arg *arg)
   annotate_arg_begin ();
 
   make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-  fprintf_symbol_filtered (stb->stream, SYMBOL_PRINT_NAME (arg->sym),
+  fprintf_symbol_filtered (stb, SYMBOL_PRINT_NAME (arg->sym),
 			   SYMBOL_LANGUAGE (arg->sym), DMGL_PARAMS | DMGL_ANSI);
   if (arg->entry_kind == print_entry_values_compact)
     {
       /* It is OK to provide invalid MI-like stream as with
 	 PRINT_ENTRY_VALUE_COMPACT we never use MI.  */
-      fputs_filtered ("=", stb->stream);
+      fputs_filtered ("=", stb);
 
-      fprintf_symbol_filtered (stb->stream, SYMBOL_PRINT_NAME (arg->sym),
+      fprintf_symbol_filtered (stb, SYMBOL_PRINT_NAME (arg->sym),
 			       SYMBOL_LANGUAGE (arg->sym),
 			       DMGL_PARAMS | DMGL_ANSI);
     }
   if (arg->entry_kind == print_entry_values_only
       || arg->entry_kind == print_entry_values_compact)
-    fputs_filtered ("@entry", stb->stream);
+    fputs_filtered ("@entry", stb);
   ui_out_field_stream (uiout, "name", stb);
   annotate_arg_name_end ();
   ui_out_text (uiout, "=");
@@ -279,17 +279,17 @@ print_frame_arg (const struct frame_arg *arg)
 	      /* True in "summary" mode, false otherwise.  */
 	      opts.summary = !strcmp (print_frame_arguments, "scalars");
 
-	      common_val_print (arg->val, stb->stream, 2, &opts, language);
+	      common_val_print (arg->val, stb, 2, &opts, language);
 	    }
 	}
       if (except.message)
-	fprintf_filtered (stb->stream, _("<error reading variable: %s>"),
+	fprintf_filtered (stb, _("<error reading variable: %s>"),
 			  except.message);
     }
 
   ui_out_field_stream (uiout, "value", stb);
 
-  /* Aleo invoke ui_out_tuple_end.  */
+  /* Also invoke ui_out_tuple_end.  */
   do_cleanups (old_chain);
 
   annotate_arg_end ();
@@ -500,14 +500,14 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
   /* Number of ints of arguments that we have printed so far.  */
   int args_printed = 0;
   struct cleanup *old_chain, *list_chain;
-  struct ui_stream *stb;
+  struct ui_file *stb;
   /* True if we should print arguments, false otherwise.  */
   int print_args = strcmp (print_frame_arguments, "none");
   /* True in "summary" mode, false otherwise.  */
   int summary = !strcmp (print_frame_arguments, "scalars");
 
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
 
   if (func)
     {
@@ -1103,7 +1103,7 @@ print_frame (struct frame_info *frame, int print_level,
   struct ui_out *uiout = current_uiout;
   const char *funname = NULL;
   enum language funlang = language_unknown;
-  struct ui_stream *stb;
+  struct ui_file *stb;
   struct cleanup *old_chain, *list_chain;
   struct value_print_options opts;
   struct symbol *func;
@@ -1112,8 +1112,8 @@ print_frame (struct frame_info *frame, int print_level,
 
   pc_p = get_frame_pc_if_available (frame, &pc);
 
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
 
   find_frame_funname (frame, &funname, &funlang, &func);
 
@@ -1143,7 +1143,7 @@ print_frame (struct frame_info *frame, int print_level,
 	ui_out_text (uiout, " in ");
       }
   annotate_frame_function_name ();
-  fprintf_symbol_filtered (stb->stream, funname ? funname : "??",
+  fprintf_symbol_filtered (stb, funname ? funname : "??",
 			   funlang, DMGL_ANSI);
   ui_out_field_stream (uiout, "func", stb);
   ui_out_wrap_hint (uiout, "   ");

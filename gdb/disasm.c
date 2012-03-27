@@ -97,7 +97,7 @@ static int
 dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 	    struct disassemble_info * di,
 	    CORE_ADDR low, CORE_ADDR high,
-	    int how_many, int flags, struct ui_stream *stb)
+	    int how_many, int flags, struct ui_file *stb)
 {
   int num_displayed = 0;
   CORE_ADDR pc;
@@ -145,7 +145,7 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
       if (name != NULL)
 	xfree (name);
 
-      ui_file_rewind (stb->stream);
+      ui_file_rewind (stb);
       if (flags & DISASSEMBLY_RAW_INSN)
         {
           CORE_ADDR old_pc = pc;
@@ -155,9 +155,9 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 
           /* Build the opcodes using a temporary stream so we can
              write them out in a single go for the MI.  */
-          struct ui_stream *opcode_stream = ui_out_stream_new (uiout);
+          struct ui_file *opcode_stream = mem_fileopen ();
           struct cleanup *cleanups =
-            make_cleanup_ui_out_stream_delete (opcode_stream);
+            make_cleanup_ui_file_delete (opcode_stream);
 
           pc += gdbarch_print_insn (gdbarch, pc, di);
           for (;old_pc < pc; old_pc++)
@@ -165,7 +165,7 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
               status = (*di->read_memory_func) (old_pc, &data, 1, di);
               if (status != 0)
                 (*di->memory_error_func) (status, old_pc, di);
-              fprintf_filtered (opcode_stream->stream, "%s%02x",
+              fprintf_filtered (opcode_stream, "%s%02x",
                                 spacer, (unsigned) data);
               spacer = " ";
             }
@@ -177,7 +177,7 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
       else
         pc += gdbarch_print_insn (gdbarch, pc, di);
       ui_out_field_stream (uiout, "inst", stb);
-      ui_file_rewind (stb->stream);
+      ui_file_rewind (stb);
       do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
     }
@@ -195,7 +195,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 			      struct linetable_entry *le,
 			      CORE_ADDR low, CORE_ADDR high,
 			      struct symtab *symtab,
-			      int how_many, int flags, struct ui_stream *stb)
+			      int how_many, int flags, struct ui_file *stb)
 {
   int newlines = 0;
   struct dis_line_entry *mle;
@@ -342,7 +342,7 @@ static void
 do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
 		  struct disassemble_info * di,
 		  CORE_ADDR low, CORE_ADDR high,
-		  int how_many, int flags, struct ui_stream *stb)
+		  int how_many, int flags, struct ui_file *stb)
 {
   int num_displayed = 0;
   struct cleanup *ui_out_chain;
@@ -402,9 +402,9 @@ gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		 char *file_string, int flags, int how_many,
 		 CORE_ADDR low, CORE_ADDR high)
 {
-  struct ui_stream *stb = ui_out_stream_new (uiout);
-  struct cleanup *cleanups = make_cleanup_ui_out_stream_delete (stb);
-  struct disassemble_info di = gdb_disassemble_info (gdbarch, stb->stream);
+  struct ui_file *stb = mem_fileopen ();
+  struct cleanup *cleanups = make_cleanup_ui_file_delete (stb);
+  struct disassemble_info di = gdb_disassemble_info (gdbarch, stb);
   /* To collect the instruction outputted from opcodes.  */
   struct symtab *symtab = NULL;
   struct linetable_entry *le = NULL;

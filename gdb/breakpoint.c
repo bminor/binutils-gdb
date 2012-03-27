@@ -5277,10 +5277,10 @@ print_breakpoint_location (struct breakpoint *b,
     }
   else if (loc)
     {
-      struct ui_stream *stb = ui_out_stream_new (uiout);
-      struct cleanup *stb_chain = make_cleanup_ui_out_stream_delete (stb);
+      struct ui_file *stb = mem_fileopen ();
+      struct cleanup *stb_chain = make_cleanup_ui_file_delete (stb);
 
-      print_address_symbolic (loc->gdbarch, loc->address, stb->stream,
+      print_address_symbolic (loc->gdbarch, loc->address, stb,
 			      demangle, "");
       ui_out_field_stream (uiout, "at", stb);
 
@@ -9222,8 +9222,8 @@ print_one_detail_ranged_breakpoint (const struct breakpoint *b,
 {
   CORE_ADDR address_start, address_end;
   struct bp_location *bl = b->loc;
-  struct ui_stream *stb = ui_out_stream_new (uiout);
-  struct cleanup *cleanup = make_cleanup_ui_out_stream_delete (stb);
+  struct ui_file *stb = mem_fileopen ();
+  struct cleanup *cleanup = make_cleanup_ui_file_delete (stb);
 
   gdb_assert (bl);
 
@@ -9231,7 +9231,7 @@ print_one_detail_ranged_breakpoint (const struct breakpoint *b,
   address_end = address_start + bl->length - 1;
 
   ui_out_text (uiout, "\taddress range: ");
-  fprintf_unfiltered (stb->stream, "[%s, %s]",
+  fprintf_unfiltered (stb, "[%s, %s]",
 		      print_core_address (bl->gdbarch, address_start),
 		      print_core_address (bl->gdbarch, address_end));
   ui_out_field_stream (uiout, "addr", stb);
@@ -9666,7 +9666,7 @@ print_it_watchpoint (bpstat bs)
   struct cleanup *old_chain;
   struct breakpoint *b;
   const struct bp_location *bl;
-  struct ui_stream *stb;
+  struct ui_file *stb;
   enum print_stop_action result;
   struct watchpoint *w;
   struct ui_out *uiout = current_uiout;
@@ -9677,8 +9677,8 @@ print_it_watchpoint (bpstat bs)
   b = bs->breakpoint_at;
   w = (struct watchpoint *) b;
 
-  stb = ui_out_stream_new (uiout);
-  old_chain = make_cleanup_ui_out_stream_delete (stb);
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
 
   switch (b->type)
     {
@@ -9692,10 +9692,10 @@ print_it_watchpoint (bpstat bs)
       mention (b);
       make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       ui_out_text (uiout, "\nOld value = ");
-      watchpoint_value_print (bs->old_val, stb->stream);
+      watchpoint_value_print (bs->old_val, stb);
       ui_out_field_stream (uiout, "old", stb);
       ui_out_text (uiout, "\nNew value = ");
-      watchpoint_value_print (w->val, stb->stream);
+      watchpoint_value_print (w->val, stb);
       ui_out_field_stream (uiout, "new", stb);
       ui_out_text (uiout, "\n");
       /* More than one watchpoint may have been triggered.  */
@@ -9710,7 +9710,7 @@ print_it_watchpoint (bpstat bs)
       mention (b);
       make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       ui_out_text (uiout, "\nValue = ");
-      watchpoint_value_print (w->val, stb->stream);
+      watchpoint_value_print (w->val, stb);
       ui_out_field_stream (uiout, "value", stb);
       ui_out_text (uiout, "\n");
       result = PRINT_UNKNOWN;
@@ -9727,7 +9727,7 @@ print_it_watchpoint (bpstat bs)
 	  mention (b);
 	  make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
-	  watchpoint_value_print (bs->old_val, stb->stream);
+	  watchpoint_value_print (bs->old_val, stb);
 	  ui_out_field_stream (uiout, "old", stb);
 	  ui_out_text (uiout, "\nNew value = ");
 	}
@@ -9741,7 +9741,7 @@ print_it_watchpoint (bpstat bs)
 	  make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
 	}
-      watchpoint_value_print (w->val, stb->stream);
+      watchpoint_value_print (w->val, stb);
       ui_out_field_stream (uiout, "new", stb);
       ui_out_text (uiout, "\n");
       result = PRINT_UNKNOWN;
