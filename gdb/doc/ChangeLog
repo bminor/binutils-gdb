@@ -1,3 +1,12 @@
+2012-03-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Auto-loading): Rename node reference
+	'.debug_gdb_scripts section' to 'dotdebug_gdb_scripts section'.
+	Twice.
+	(.debug_gdb_scripts section): Rename the node ...
+	(dotdebug_gdb_scripts section): ... here.
+	(Maintenance Commands): Also rename this node reference.
+
 2012-03-22  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.texinfo (Python API/Values From Inferior): Add description

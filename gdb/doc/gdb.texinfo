@@ -24717,8 +24717,8 @@ command, or because the inferior has loaded a shared library),
 @file{@var{objfile}-gdb.py} and @code{.debug_gdb_scripts} section.
 
 @menu
-* objfile-gdb.py file::         The @file{@var{objfile}-gdb.py} file
-* .debug_gdb_scripts section::  The @code{.debug_gdb_scripts} section
+* objfile-gdb.py file::          The @file{@var{objfile}-gdb.py} file
+* dotdebug_gdb_scripts section:: The @code{.debug_gdb_scripts} section
 * Which flavor to choose?::
 @end menu
 
@@ -24744,7 +24744,7 @@ Print the list of all scripts that @value{GDBN} auto-loaded.
 
 Also printed is the list of scripts that were mentioned in
 the @code{.debug_gdb_scripts} section and were not found
-(@pxref{.debug_gdb_scripts section}).
+(@pxref{dotdebug_gdb_scripts section}).
 This is useful because their names are not printed when @value{GDBN}
 tries to load them and fails.  There may be many of them, and printing
 an error message for each one is problematic.
@@ -24795,7 +24795,7 @@ is the object file's real name, as described above.
 So your @file{-gdb.py} file should be careful to avoid errors if it
 is evaluated more than once.
 
-@node .debug_gdb_scripts section
+@node dotdebug_gdb_scripts section
 @subsubsection The @code{.debug_gdb_scripts} section
 @cindex @code{.debug_gdb_scripts} section
 
@@ -33475,7 +33475,7 @@ If @var{regexp} is specified, only print scripts loaded by object files
 matching @var{regexp}.
 For each script, this command prints its name as specified in the objfile,
 and the full path if known.
-@xref{.debug_gdb_scripts section}.
+@xref{dotdebug_gdb_scripts section}.
 
 @kindex maint print statistics
 @cindex bcache statistics
