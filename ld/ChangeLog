@@ -1,3 +1,9 @@
+2012-03-27  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.in: Set want64 on a 64-bit host regardless of
+	--enable-targets=all.
+	* configure: Regenerated.
+
 2012-03-26  Tristan Gingold  <gingold@adacore.com>
 
 	* lexsup.c (parse_args): Add a missing '\n'.
