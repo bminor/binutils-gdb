@@ -107,7 +107,7 @@ static void
 fetch_register (struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  long regaddr;
+  long regaddr, val;
   int i;
   char buf[MAX_REGISTER_SIZE];
   int tid;
@@ -122,7 +122,8 @@ fetch_register (struct regcache *regcache, int regno)
   for (i = 0; i < register_size (gdbarch, regno); i += sizeof (long))
     {
       errno = 0;
-      *(long *) &buf[i] = ptrace (PTRACE_PEEKUSER, tid, regaddr, 0);
+      val = ptrace (PTRACE_PEEKUSER, tid, regaddr, 0);
+      memcpy (&buf[i], &val, sizeof (long));
       regaddr += sizeof (long);
       if (errno != 0)
 	error (_("Couldn't read register %s (#%d): %s."), 
@@ -160,7 +161,7 @@ static void
 store_register (const struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  long regaddr;
+  long regaddr, val;
   int i;
   int tid;
   char buf[MAX_REGISTER_SIZE];
@@ -180,7 +181,8 @@ store_register (const struct regcache *regcache, int regno)
   for (i = 0; i < register_size (gdbarch, regno); i += sizeof (long))
     {
       errno = 0;
-      ptrace (PTRACE_POKEUSER, tid, regaddr, *(long *) &buf[i]);
+      memcpy (&val, &buf[i], sizeof (long));
+      ptrace (PTRACE_POKEUSER, tid, regaddr, val);
       regaddr += sizeof (long);
       if (errno != 0)
 	error (_("Couldn't write register %s (#%d): %s."),

@@ -1,3 +1,8 @@
+2012-03-27  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* m68klinux-nat.c (fetch_register): Fix strict-aliasing violation.
+	(store_register): Likewise.
+
 2012-03-26 Oza Pawandeep  <oza.pawandeep@gmail.com>
 
         * MAINTAINERS (Write After Approval): Add myself to the list.
