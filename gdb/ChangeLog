@@ -33,48 +33,45 @@
 	ui_stream/ui_out_stream_new.
 	* cli/cli-setshow.c (do_setshow_command): Ditto.
 
-2012-03-27 Oza Pawandeep   <oza.pawandeep@gmail.com>
+2012-03-27  Oza Pawandeep  <oza.pawandeep@gmail.com>
 
-       * arm-linux-tdep.c (arm_linux_init_abi): Call
-       set_gdbarch_process_record.
-       Initialize `arm_swi_record' field.
-
-       * arm-tdep.c (arm_process_record): New function.
-       (deallocate_reg_mem): New function.
-       (decode_insn): New function.
-       (thumb_record_branch): New function.
-       (thumb_record_ldm_stm_swi(): New function.
-       (thumb_record_misc): New function.
-       (thumb_record_ld_st_stack): New function.
-       (thumb_record_ld_st_imm_offset): New function.
-       (thumb_record_ld_st_reg_offset(): New function.
-       (thumb_record_add_sub_cmp_mov): New function.
-       (thumb_record_shift_add_sub): New function.
-       (arm_record_coproc_data_proc): New function.
-       (arm_record_coproc): New function.
-       (arm_record_b_bl): New function.
-       (arm_record_ld_st_multiple): New function.
-       (arm_record_ld_st_reg_offset): New function.
-       (arm_record_ld_st_imm_offset): New function.
-       (arm_record_data_proc_imm): New function.
-       (arm_record_data_proc_misc_ld_str): New function.
-       (arm_record_extension_space): New function.
-       (arm_record_strx): New function.
-       (sbo_sbz): New function.
-       (struct insn_decode_record): New structure for arm insn record.
-       (REG_ALLOC): New macro for reg allocations.
-       (MEM_ALLOC): New macro for memory allocations.
-
-       * arm-tdep.h (struct gdbarch_tdep): New field 'arm_swi_record'
+	* arm-linux-tdep.c (arm_linux_init_abi): Call
+	set_gdbarch_process_record.  Initialize `arm_swi_record' field.
+	* arm-tdep.c (arm_process_record): New function.
+	(deallocate_reg_mem): New function.
+	(decode_insn): New function.
+	(thumb_record_branch): New function.
+	(thumb_record_ldm_stm_swi(): New function.
+	(thumb_record_misc): New function.
+	(thumb_record_ld_st_stack): New function.
+	(thumb_record_ld_st_imm_offset): New function.
+	(thumb_record_ld_st_reg_offset(): New function.
+	(thumb_record_add_sub_cmp_mov): New function.
+	(thumb_record_shift_add_sub): New function.
+	(arm_record_coproc_data_proc): New function.
+	(arm_record_coproc): New function.
+	(arm_record_b_bl): New function.
+	(arm_record_ld_st_multiple): New function.
+	(arm_record_ld_st_reg_offset): New function.
+	(arm_record_ld_st_imm_offset): New function.
+	(arm_record_data_proc_imm): New function.
+	(arm_record_data_proc_misc_ld_str): New function.
+	(arm_record_extension_space): New function.
+	(arm_record_strx): New function.
+	(sbo_sbz): New function.
+	(struct insn_decode_record): New structure for arm insn record.
+	(REG_ALLOC): New macro for reg allocations.
+	(MEM_ALLOC): New macro for memory allocations.
+	* arm-tdep.h (struct gdbarch_tdep): New field 'arm_swi_record'.
 
 2012-03-27  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* m68klinux-nat.c (fetch_register): Fix strict-aliasing violation.
 	(store_register): Likewise.
 
-2012-03-26 Oza Pawandeep  <oza.pawandeep@gmail.com>
+2012-03-26  Oza Pawandeep  <oza.pawandeep@gmail.com>
 
-        * MAINTAINERS (Write After Approval): Add myself to the list.
+	* MAINTAINERS (Write After Approval): Add myself to the list.
 
 2012-03-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
