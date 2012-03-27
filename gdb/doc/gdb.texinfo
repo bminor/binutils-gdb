@@ -24714,13 +24714,9 @@ writable.
 When a new object file is read (for example, due to the @code{file}
 command, or because the inferior has loaded a shared library),
 @value{GDBN} will look for Python support scripts in several ways:
-@file{@var{objfile}-gdb.py} and @code{.debug_gdb_scripts} section.
-
-@menu
-* objfile-gdb.py file::          The @file{@var{objfile}-gdb.py} file
-* dotdebug_gdb_scripts section:: The @code{.debug_gdb_scripts} section
-* Which flavor to choose?::
-@end menu
+@file{@var{objfile}-gdb.py} (@pxref{objfile-gdb.py file})
+and @code{.debug_gdb_scripts} section
+(@pxref{dotdebug_gdb_scripts section}).
 
 The auto-loading feature is useful for supplying application-specific
 debugging commands and scripts.
@@ -24766,6 +24762,12 @@ When reading an auto-loaded file, @value{GDBN} sets the
 @dfn{current objfile}.  This is available via the @code{gdb.current_objfile}
 function (@pxref{Objfiles In Python}).  This can be useful for
 registering objfile-specific pretty-printers.
+
+@menu
+* objfile-gdb.py file::          The @file{@var{objfile}-gdb.py} file
+* dotdebug_gdb_scripts section:: The @code{.debug_gdb_scripts} section
+* Which flavor to choose?::
+@end menu
 
 @node objfile-gdb.py file
 @subsubsection The @file{@var{objfile}-gdb.py} file

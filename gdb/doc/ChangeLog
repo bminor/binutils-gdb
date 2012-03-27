@@ -1,5 +1,11 @@
 2012-03-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.texinfo (Auto-loading): Move @menu to the end of @node.
+	Create two new links fir 'objfile-gdb.py file'
+	and 'dotdebug_gdb_scripts section'.
+
+2012-03-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.texinfo (Auto-loading): Rename node reference
 	'.debug_gdb_scripts section' to 'dotdebug_gdb_scripts section'.
 	Twice.
