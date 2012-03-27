@@ -4,6 +4,7 @@
 
 2011-12-31  Mike Frysinger  <vapier@gentoo.org>
 
+	PR sim/9971:
 	* configure.ac: Change AC_CHECK_LIB to AC_SEARCH_LIBS to match
 	the code in gdb's configure.ac with $TERMCAP.
 	* configure: Regenerated.
