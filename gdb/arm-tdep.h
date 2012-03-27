@@ -200,6 +200,9 @@ struct gdbarch_tdep
   /* Return the expected next PC if FRAME is stopped at a syscall
      instruction.  */
   CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);
+
+   /* Parse swi insn args, sycall record.  */
+  int (*arm_swi_record) (struct regcache *regcache);
 };
 
 /* Structures used for displaced stepping.  */
@@ -330,6 +333,8 @@ extern int arm_psr_thumb_bit (struct gdbarch *);
    instruction?  */
 extern int arm_pc_is_thumb (struct gdbarch *, CORE_ADDR);
 
+extern int arm_process_record (struct gdbarch *gdbarch, 
+                               struct regcache *regcache, CORE_ADDR addr);
 /* Functions exported from armbsd-tdep.h.  */
 
 /* Return the appropriate register set for the core section identified

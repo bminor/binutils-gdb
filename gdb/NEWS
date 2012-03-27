@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.4
 
+* GDB now supports reversible debugging on ARM, it allows you to
+  debug basic ARM and THUMB instructions, and provides 
+  record/replay support.  
+
 * The option "symbol-reloading" has been deleted as it is no longer used.
 
 * Python scripting

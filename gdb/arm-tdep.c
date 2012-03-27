@@ -55,6 +55,8 @@
 #include "gdb_assert.h"
 #include "vec.h"
 
+#include "record.h"
+
 #include "features/arm-with-m.c"
 #include "features/arm-with-m-fpa-layout.c"
 #include "features/arm-with-iwmmxt.c"
@@ -10444,3 +10446,2062 @@ vfp - VFP co-processor."),
 			   NULL, /* FIXME: i18n: "ARM debugging is %s.  */
 			   &setdebuglist, &showdebuglist);
 }
+
+/* ARM-reversible process record data structures.  */
+
+#define ARM_INSN_SIZE_BYTES 4    
+#define THUMB_INSN_SIZE_BYTES 2
+#define THUMB2_INSN_SIZE_BYTES 4
+
+
+#define INSN_S_L_BIT_NUM 20
+
+#define REG_ALLOC(REGS, LENGTH, RECORD_BUF) \
+        do  \
+          { \
+            unsigned int reg_len = LENGTH; \
+            if (reg_len) \
+              { \
+                REGS = XNEWVEC (uint32_t, reg_len); \
+                memcpy(&REGS[0], &RECORD_BUF[0], sizeof(uint32_t)*LENGTH); \
+              } \
+          } \
+        while (0)
+
+#define MEM_ALLOC(MEMS, LENGTH, RECORD_BUF) \
+        do  \
+          { \
+            unsigned int mem_len = LENGTH; \
+            if (mem_len) \
+            { \
+              MEMS =  XNEWVEC (struct arm_mem_r, mem_len);  \
+              memcpy(&MEMS->len, &RECORD_BUF[0], \
+                     sizeof(struct arm_mem_r) * LENGTH); \
+            } \
+          } \
+          while (0)
+
+/* Checks whether insn is already recorded or yet to be decoded. (boolean expression).  */
+#define INSN_RECORDED(ARM_RECORD) \
+        (0 != (ARM_RECORD)->reg_rec_count || 0 != (ARM_RECORD)->mem_rec_count)
+
+/* ARM memory record structure.  */
+struct arm_mem_r
+{
+  uint32_t len;    /* Record length.  */
+  CORE_ADDR addr;  /* Memory address.  */
+};
+
+/* ARM instruction record contains opcode of current insn
+   and execution state (before entry to decode_insn()),
+   contains list of to-be-modified registers and
+   memory blocks (on return from decode_insn()).  */
+
+typedef struct insn_decode_record_t
+{
+  struct gdbarch *gdbarch;
+  struct regcache *regcache;
+  CORE_ADDR this_addr;          /* Address of the insn being decoded.  */
+  uint32_t arm_insn;            /* Should accommodate thumb.  */
+  uint32_t cond;                /* Condition code.  */
+  uint32_t opcode;              /* Insn opcode.  */
+  uint32_t decode;              /* Insn decode bits.  */
+  uint32_t mem_rec_count;       /* No of mem records.  */
+  uint32_t reg_rec_count;       /* No of reg records.  */
+  uint32_t *arm_regs;           /* Registers to be saved for this record.  */
+  struct arm_mem_r *arm_mems;   /* Memory to be saved for this record.  */
+} insn_decode_record;
+
+
+/* Checks ARM SBZ and SBO mandatory fields.  */
+
+static int
+sbo_sbz (uint32_t insn, uint32_t bit_num, uint32_t len, uint32_t sbo)
+{
+  uint32_t ones = bits (insn, bit_num - 1, (bit_num -1) + (len - 1));
+
+  if (!len)
+    return 1;
+
+  if (!sbo)
+    ones = ~ones;
+
+  while (ones)
+    {
+      if (!(ones & sbo))
+        {
+          return 0;
+        }
+      ones = ones >> 1;
+    }
+  return 1;
+}
+
+typedef enum
+{
+  ARM_RECORD_STRH=1,
+  ARM_RECORD_STRD
+} arm_record_strx_t;
+
+typedef enum
+{
+  ARM_RECORD=1,
+  THUMB_RECORD,
+  THUMB2_RECORD
+} record_type_t;
+
+
+static int
+arm_record_strx (insn_decode_record *arm_insn_r, uint32_t *record_buf, 
+                 uint32_t *record_buf_mem, arm_record_strx_t str_type)
+{
+
+  struct regcache *reg_cache = arm_insn_r->regcache;
+  ULONGEST u_regval[2]= {0};
+
+  uint32_t reg_src1 = 0, reg_src2 = 0;
+  uint32_t immed_high = 0, immed_low = 0,offset_8 = 0, tgt_mem_addr = 0;
+  uint32_t opcode1 = 0;
+
+  arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 21, 24);
+  arm_insn_r->decode = bits (arm_insn_r->arm_insn, 4, 7);
+  opcode1 = bits (arm_insn_r->arm_insn, 20, 24);
+
+
+  if (14 == arm_insn_r->opcode || 10 == arm_insn_r->opcode)
+    {
+      /* 1) Handle misc store, immediate offset.  */
+      immed_low = bits (arm_insn_r->arm_insn, 0, 3);
+      immed_high = bits (arm_insn_r->arm_insn, 8, 11);
+      reg_src1 = bits (arm_insn_r->arm_insn, 16, 19);
+      regcache_raw_read_unsigned (reg_cache, reg_src1,
+                                  &u_regval[0]);
+      if (ARM_PC_REGNUM == reg_src1)
+        {
+          /* If R15 was used as Rn, hence current PC+8.  */
+          u_regval[0] = u_regval[0] + 8;
+        }
+      offset_8 = (immed_high << 4) | immed_low;
+      /* Calculate target store address.  */
+      if (14 == arm_insn_r->opcode)
+        {
+          tgt_mem_addr = u_regval[0] + offset_8;
+        }
+      else
+        {
+          tgt_mem_addr = u_regval[0] - offset_8;
+        }
+      if (ARM_RECORD_STRH == str_type)
+        {
+          record_buf_mem[0] = 2;
+          record_buf_mem[1] = tgt_mem_addr;
+          arm_insn_r->mem_rec_count = 1;
+        }
+      else if (ARM_RECORD_STRD == str_type)
+        {
+          record_buf_mem[0] = 4;
+          record_buf_mem[1] = tgt_mem_addr;
+          record_buf_mem[2] = 4;
+          record_buf_mem[3] = tgt_mem_addr + 4;
+          arm_insn_r->mem_rec_count = 2;
+        }
+    }
+  else if (12 == arm_insn_r->opcode || 8 == arm_insn_r->opcode)
+    {
+      /* 2) Store, register offset.  */
+      /* Get Rm.  */
+      reg_src1 = bits (arm_insn_r->arm_insn, 0, 3);
+      /* Get Rn.  */
+      reg_src2 = bits (arm_insn_r->arm_insn, 16, 19);
+      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval[0]);
+      regcache_raw_read_unsigned (reg_cache, reg_src2, &u_regval[1]);
+      if (15 == reg_src2)
+        {
+          /* If R15 was used as Rn, hence current PC+8.  */
+          u_regval[0] = u_regval[0] + 8;
+        }
+      /* Calculate target store address, Rn +/- Rm, register offset.  */
+      if (12 == arm_insn_r->opcode)
+        {
+          tgt_mem_addr = u_regval[0] + u_regval[1];
+        }
+      else
+        {
+          tgt_mem_addr = u_regval[1] - u_regval[0];
+        }
+      if (ARM_RECORD_STRH == str_type)
+        {
+          record_buf_mem[0] = 2;
+          record_buf_mem[1] = tgt_mem_addr;
+          arm_insn_r->mem_rec_count = 1;
+        }
+      else if (ARM_RECORD_STRD == str_type)
+        {
+          record_buf_mem[0] = 4;
+          record_buf_mem[1] = tgt_mem_addr;
+          record_buf_mem[2] = 4;
+          record_buf_mem[3] = tgt_mem_addr + 4;
+          arm_insn_r->mem_rec_count = 2;
+        }
+    }
+  else if (11 == arm_insn_r->opcode || 15 == arm_insn_r->opcode
+           || 2 == arm_insn_r->opcode  || 6 == arm_insn_r->opcode)
+    {
+      /* 3) Store, immediate pre-indexed.  */
+      /* 5) Store, immediate post-indexed.  */
+      immed_low = bits (arm_insn_r->arm_insn, 0, 3);
+      immed_high = bits (arm_insn_r->arm_insn, 8, 11);
+      offset_8 = (immed_high << 4) | immed_low;
+      reg_src1 = bits (arm_insn_r->arm_insn, 16, 19);
+      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval[0]);
+      /* Calculate target store address, Rn +/- Rm, register offset.  */
+      if (15 == arm_insn_r->opcode || 6 == arm_insn_r->opcode)
+        {
+          tgt_mem_addr = u_regval[0] + offset_8;
+        }
+      else
+        {
+          tgt_mem_addr = u_regval[0] - offset_8;
+        }
+      if (ARM_RECORD_STRH == str_type)
+        {
+          record_buf_mem[0] = 2;
+          record_buf_mem[1] = tgt_mem_addr;
+          arm_insn_r->mem_rec_count = 1;
+        }
+      else if (ARM_RECORD_STRD == str_type)
+        {
+          record_buf_mem[0] = 4;
+          record_buf_mem[1] = tgt_mem_addr;
+          record_buf_mem[2] = 4;
+          record_buf_mem[3] = tgt_mem_addr + 4;
+          arm_insn_r->mem_rec_count = 2;
+        }
+      /* Record Rn also as it changes.  */
+      *(record_buf) = bits (arm_insn_r->arm_insn, 16, 19);
+      arm_insn_r->reg_rec_count = 1;
+    }
+  else if (9 == arm_insn_r->opcode || 13 == arm_insn_r->opcode
+           || 0 == arm_insn_r->opcode || 4 == arm_insn_r->opcode)
+    {
+      /* 4) Store, register pre-indexed.  */
+      /* 6) Store, register post -indexed.  */
+      reg_src1 = bits (arm_insn_r->arm_insn, 0, 3);
+      reg_src2 = bits (arm_insn_r->arm_insn, 16, 19);
+      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval[0]);
+      regcache_raw_read_unsigned (reg_cache, reg_src2, &u_regval[1]);
+      /* Calculate target store address, Rn +/- Rm, register offset.  */
+      if (13 == arm_insn_r->opcode || 4 == arm_insn_r->opcode)
+        {
+          tgt_mem_addr = u_regval[0] + u_regval[1];
+        }
+      else
+        {
+          tgt_mem_addr = u_regval[1] - u_regval[0];
+        }
+      if (ARM_RECORD_STRH == str_type)
+        {
+          record_buf_mem[0] = 2;
+          record_buf_mem[1] = tgt_mem_addr;
+          arm_insn_r->mem_rec_count = 1;
+        }
+      else if (ARM_RECORD_STRD == str_type)
+        {
+          record_buf_mem[0] = 4;
+          record_buf_mem[1] = tgt_mem_addr;
+          record_buf_mem[2] = 4;
+          record_buf_mem[3] = tgt_mem_addr + 4;
+          arm_insn_r->mem_rec_count = 2;
+        }
+      /* Record Rn also as it changes.  */
+      *(record_buf) = bits (arm_insn_r->arm_insn, 16, 19);
+      arm_insn_r->reg_rec_count = 1;
+    }
+  return 0;
+}
+
+/* Handling ARM extension space insns.  */
+
+static int
+arm_record_extension_space (insn_decode_record *arm_insn_r)
+{
+  uint32_t ret = 0;  /* Return value: -1:record failure ;  0:success  */
+  uint32_t opcode1 = 0, opcode2 = 0, insn_op1 = 0;
+  uint32_t record_buf[8], record_buf_mem[8];
+  uint32_t reg_src1 = 0;
+  uint32_t immed_high = 0, immed_low = 0,offset_8 = 0, tgt_mem_addr = 0;
+  struct regcache *reg_cache = arm_insn_r->regcache;
+  ULONGEST u_regval = 0;
+
+  gdb_assert (!INSN_RECORDED(arm_insn_r));
+  /* Handle unconditional insn extension space.  */
+
+  opcode1 = bits (arm_insn_r->arm_insn, 20, 27);
+  opcode2 = bits (arm_insn_r->arm_insn, 4, 7);
+  if (arm_insn_r->cond)
+    {
+      /* PLD has no affect on architectural state, it just affects
+         the caches.  */
+      if (5 == ((opcode1 & 0xE0) >> 5))
+        {
+          /* BLX(1) */
+          record_buf[0] = ARM_PS_REGNUM;
+          record_buf[1] = ARM_LR_REGNUM;
+          arm_insn_r->reg_rec_count = 2;
+        }
+      /* STC2, LDC2, MCR2, MRC2, CDP2: <TBD>, co-processor insn.  */
+    }
+
+
+  opcode1 = bits (arm_insn_r->arm_insn, 25, 27);
+  if (3 == opcode1 && bit (arm_insn_r->arm_insn, 4))
+    {
+      ret = -1;
+      /* Undefined instruction on ARM V5; need to handle if later 
+         versions define it.  */
+    }
+
+  opcode1 = bits (arm_insn_r->arm_insn, 24, 27);
+  opcode2 = bits (arm_insn_r->arm_insn, 4, 7);
+  insn_op1 = bits (arm_insn_r->arm_insn, 20, 23);
+
+  /* Handle arithmetic insn extension space.  */
+  if (!opcode1 && 9 == opcode2 && 1 != arm_insn_r->cond
+      && !INSN_RECORDED(arm_insn_r))
+    {
+      /* Handle MLA(S) and MUL(S).  */
+      if (0 <= insn_op1 && 3 >= insn_op1)
+      {
+        record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+        record_buf[1] = ARM_PS_REGNUM;
+        arm_insn_r->reg_rec_count = 2;
+      }
+      else if (4 <= insn_op1 && 15 >= insn_op1)
+      {
+        /* Handle SMLAL(S), SMULL(S), UMLAL(S), UMULL(S).  */
+        record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
+        record_buf[1] = bits (arm_insn_r->arm_insn, 12, 15);
+        record_buf[2] = ARM_PS_REGNUM;
+        arm_insn_r->reg_rec_count = 3;
+      }
+    }
+
+  opcode1 = bits (arm_insn_r->arm_insn, 26, 27);
+  opcode2 = bits (arm_insn_r->arm_insn, 23, 24);
+  insn_op1 = bits (arm_insn_r->arm_insn, 21, 22);
+
+  /* Handle control insn extension space.  */
+
+  if (!opcode1 && 2 == opcode2 && !bit (arm_insn_r->arm_insn, 20)
+      && 1 != arm_insn_r->cond && !INSN_RECORDED(arm_insn_r))
+    {
+      if (!bit (arm_insn_r->arm_insn,25))
+        {
+          if (!bits (arm_insn_r->arm_insn, 4, 7))
+            {
+              if ((0 == insn_op1) || (2 == insn_op1))
+                {
+                  /* MRS.  */
+                  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+                  arm_insn_r->reg_rec_count = 1;
+                }
+              else if (1 == insn_op1)
+                {
+                  /* CSPR is going to be changed.  */
+                  record_buf[0] = ARM_PS_REGNUM;
+                  arm_insn_r->reg_rec_count = 1;
+                }
+              else if (3 == insn_op1)
+                {
+                  /* SPSR is going to be changed.  */
+                  /* We need to get SPSR value, which is yet to be done.  */
+                  printf_unfiltered (_("Process record does not support "
+                                     "instruction  0x%0x at address %s.\n"),
+                                     arm_insn_r->arm_insn,
+                                     paddress (arm_insn_r->gdbarch, 
+                                     arm_insn_r->this_addr));
+                  return -1;
+                }
+            }
+          else if (1 == bits (arm_insn_r->arm_insn, 4, 7))
+            {
+              if (1 == insn_op1)
+                {
+                  /* BX.  */
+                  record_buf[0] = ARM_PS_REGNUM;
+                  arm_insn_r->reg_rec_count = 1;
+                }
+              else if (3 == insn_op1)
+                {
+                  /* CLZ.  */
+                  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+                  arm_insn_r->reg_rec_count = 1;
+                }
+            }
+          else if (3 == bits (arm_insn_r->arm_insn, 4, 7))
+            {
+              /* BLX.  */
+              record_buf[0] = ARM_PS_REGNUM;
+              record_buf[1] = ARM_LR_REGNUM;
+              arm_insn_r->reg_rec_count = 2;
+            }
+          else if (5 == bits (arm_insn_r->arm_insn, 4, 7))
+            {
+              /* QADD, QSUB, QDADD, QDSUB */
+              record_buf[0] = ARM_PS_REGNUM;
+              record_buf[1] = bits (arm_insn_r->arm_insn, 12, 15);
+              arm_insn_r->reg_rec_count = 2;
+            }
+          else if (7 == bits (arm_insn_r->arm_insn, 4, 7))
+            {
+              /* BKPT.  */
+              record_buf[0] = ARM_PS_REGNUM;
+              record_buf[1] = ARM_LR_REGNUM;
+              arm_insn_r->reg_rec_count = 2;
+
+              /* Save SPSR also;how?  */
+              printf_unfiltered (_("Process record does not support "
+                                  "instruction 0x%0x at address %s.\n"),
+                                  arm_insn_r->arm_insn,
+                  paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
+              return -1;
+            }
+          else if(8 == bits (arm_insn_r->arm_insn, 4, 7) 
+                  || 10 == bits (arm_insn_r->arm_insn, 4, 7)
+                  || 12 == bits (arm_insn_r->arm_insn, 4, 7)
+                  || 14 == bits (arm_insn_r->arm_insn, 4, 7)
+                 )
+            {
+              if (0 == insn_op1 || 1 == insn_op1)
+                {
+                  /* SMLA<x><y>, SMLAW<y>, SMULW<y>.  */
+                  /* We dont do optimization for SMULW<y> where we
+                     need only Rd.  */
+                  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+                  record_buf[1] = ARM_PS_REGNUM;
+                  arm_insn_r->reg_rec_count = 2;
+                }
+              else if (2 == insn_op1)
+                {
+                  /* SMLAL<x><y>.  */
+                  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+                  record_buf[1] = bits (arm_insn_r->arm_insn, 16, 19);
+                  arm_insn_r->reg_rec_count = 2;
+                }
+              else if (3 == insn_op1)
+                {
+                  /* SMUL<x><y>.  */
+                  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+                  arm_insn_r->reg_rec_count = 1;
+                }
+            }
+        }
+      else
+        {
+          /* MSR : immediate form.  */
+          if (1 == insn_op1)
+            {
+              /* CSPR is going to be changed.  */
+              record_buf[0] = ARM_PS_REGNUM;
+              arm_insn_r->reg_rec_count = 1;
+            }
+          else if (3 == insn_op1)
+            {
+              /* SPSR is going to be changed.  */
+              /* we need to get SPSR value, which is yet to be done  */
+              printf_unfiltered (_("Process record does not support "
+                                   "instruction 0x%0x at address %s.\n"),
+                                    arm_insn_r->arm_insn,
+                                    paddress (arm_insn_r->gdbarch, 
+                                    arm_insn_r->this_addr));
+              return -1;
+            }
+        }
+    }
+
+  opcode1 = bits (arm_insn_r->arm_insn, 25, 27);
+  opcode2 = bits (arm_insn_r->arm_insn, 20, 24);
+  insn_op1 = bits (arm_insn_r->arm_insn, 5, 6);
+
+  /* Handle load/store insn extension space.  */
+
+  if (!opcode1 && bit (arm_insn_r->arm_insn, 7) 
+      && bit (arm_insn_r->arm_insn, 4) && 1 != arm_insn_r->cond
+      && !INSN_RECORDED(arm_insn_r))
+    {
+      /* SWP/SWPB.  */
+      if (0 == insn_op1)
+        {
+          /* These insn, changes register and memory as well.  */
+          /* SWP or SWPB insn.  */
+          /* Get memory address given by Rn.  */
+          reg_src1 = bits (arm_insn_r->arm_insn, 16, 19);
+          regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval);
+          /* SWP insn ?, swaps word.  */
+          if (8 == arm_insn_r->opcode)
+            {
+              record_buf_mem[0] = 4;
+            }
+          else
+            {
+              /* SWPB insn, swaps only byte.  */
+              record_buf_mem[0] = 1;
+            }
+          record_buf_mem[1] = u_regval;
+          arm_insn_r->mem_rec_count = 1;
+          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+          arm_insn_r->reg_rec_count = 1;
+        }
+      else if (1 == insn_op1 && !bit (arm_insn_r->arm_insn, 20))
+        {
+          /* STRH.  */
+          arm_record_strx(arm_insn_r, &record_buf[0], &record_buf_mem[0],
+                          ARM_RECORD_STRH);
+        }
+      else if (2 == insn_op1 && !bit (arm_insn_r->arm_insn, 20))
+        {
+          /* LDRD.  */
+          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+          record_buf[1] = record_buf[0] + 1;
+          arm_insn_r->reg_rec_count = 2;
+        }
+      else if (3 == insn_op1 && !bit (arm_insn_r->arm_insn, 20))
+        {
+          /* STRD.  */
+          arm_record_strx(arm_insn_r, &record_buf[0], &record_buf_mem[0],
+                        ARM_RECORD_STRD);
+        }
+      else if (bit (arm_insn_r->arm_insn, 20) && insn_op1 <= 3)
+        {
+          /* LDRH, LDRSB, LDRSH.  */
+          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+          arm_insn_r->reg_rec_count = 1;
+        }
+
+    }
+
+  opcode1 = bits (arm_insn_r->arm_insn, 23, 27);
+  if (24 == opcode1 && bit (arm_insn_r->arm_insn, 21)
+      && !INSN_RECORDED(arm_insn_r))
+    {
+      ret = -1;
+      /* Handle coprocessor insn extension space.  */
+    }
+
+  /* To be done for ARMv5 and later; as of now we return -1.  */
+  if (-1 == ret)
+    printf_unfiltered (_("Process record does not support instruction x%0x "
+                         "at address %s.\n"),arm_insn_r->arm_insn,
+                         paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
+
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (arm_insn_r->arm_mems, arm_insn_r->mem_rec_count, record_buf_mem);
+
+  return ret;
+}
+
+/* Handling opcode 000 insns.  */
+
+static int
+arm_record_data_proc_misc_ld_str (insn_decode_record *arm_insn_r)
+{
+  struct regcache *reg_cache = arm_insn_r->regcache;
+  uint32_t record_buf[8], record_buf_mem[8];
+  ULONGEST u_regval[2] = {0};
+
+  uint32_t reg_src1 = 0, reg_src2 = 0, reg_dest = 0;
+  uint32_t immed_high = 0, immed_low = 0, offset_8 = 0, tgt_mem_addr = 0;
+  uint32_t opcode1 = 0;
+
+  arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 21, 24);
+  arm_insn_r->decode = bits (arm_insn_r->arm_insn, 4, 7);
+  opcode1 = bits (arm_insn_r->arm_insn, 20, 24);
+
+  /* Data processing insn /multiply insn.  */
+  if (9 == arm_insn_r->decode
+      && ((4 <= arm_insn_r->opcode && 7 >= arm_insn_r->opcode)
+      ||  (0 == arm_insn_r->opcode || 1 == arm_insn_r->opcode)))
+    {
+      /* Handle multiply instructions.  */
+      /* MLA, MUL, SMLAL, SMULL, UMLAL, UMULL.  */
+        if (0 == arm_insn_r->opcode || 1 == arm_insn_r->opcode)
+          {
+            /* Handle MLA and MUL.  */
+            record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
+            record_buf[1] = ARM_PS_REGNUM;
+            arm_insn_r->reg_rec_count = 2;
+          }
+        else if (4 <= arm_insn_r->opcode && 7 >= arm_insn_r->opcode)
+          {
+            /* Handle SMLAL, SMULL, UMLAL, UMULL.  */
+            record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
+            record_buf[1] = bits (arm_insn_r->arm_insn, 12, 15);
+            record_buf[2] = ARM_PS_REGNUM;
+            arm_insn_r->reg_rec_count = 3;
+          }
+    }
+  else if (bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM)
+           && (11 == arm_insn_r->decode || 13 == arm_insn_r->decode))
+    {
+      /* Handle misc load insns, as 20th bit  (L = 1).  */
+      /* LDR insn has a capability to do branching, if
+         MOV LR, PC is precceded by LDR insn having Rn as R15
+         in that case, it emulates branch and link insn, and hence we 
+         need to save CSPR and PC as well. I am not sure this is right
+         place; as opcode = 010 LDR insn make this happen, if R15 was
+         used.  */
+      reg_dest = bits (arm_insn_r->arm_insn, 12, 15);
+      if (15 != reg_dest)
+        {
+          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+          arm_insn_r->reg_rec_count = 1;
+        }
+      else
+        {
+          record_buf[0] = reg_dest;
+          record_buf[1] = ARM_PS_REGNUM;
+          arm_insn_r->reg_rec_count = 2;
+        }
+    }
+  else if ((9 == arm_insn_r->opcode || 11 == arm_insn_r->opcode)
+           && sbo_sbz (arm_insn_r->arm_insn, 5, 12, 0)
+           && sbo_sbz (arm_insn_r->arm_insn, 13, 4, 1)
+           && 2 == bits (arm_insn_r->arm_insn, 20, 21))
+    {
+      /* Handle MSR insn.  */
+      if (9 == arm_insn_r->opcode)
+        {
+          /* CSPR is going to be changed.  */
+          record_buf[0] = ARM_PS_REGNUM;
+          arm_insn_r->reg_rec_count = 1;
+        }
+      else
+        {
+          /* SPSR is going to be changed.  */
+          /* How to read SPSR value?  */
+          printf_unfiltered (_("Process record does not support instruction "
+                            "0x%0x at address %s.\n"),
+                            arm_insn_r->arm_insn,
+                        paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
+          return -1;
+        }
+    }
+  else if (9 == arm_insn_r->decode
+           && (8 == arm_insn_r->opcode || 10 == arm_insn_r->opcode)
+           && !bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM))
+    {
+      /* Handling SWP, SWPB.  */
+      /* These insn, changes register and memory as well.  */
+      /* SWP or SWPB insn.  */
+
+      reg_src1 = bits (arm_insn_r->arm_insn, 16, 19);
+      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval[0]);
+      /* SWP insn ?, swaps word.  */
+      if (8 == arm_insn_r->opcode)
+        {
+          record_buf_mem[0] = 4;
+        }
+        else
+        {
+          /* SWPB insn, swaps only byte.  */
+          record_buf_mem[0] = 1;
+        }
+      record_buf_mem[1] = u_regval[0];
+      arm_insn_r->mem_rec_count = 1;
+      record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+      arm_insn_r->reg_rec_count = 1;
+    }
+  else if (3 == arm_insn_r->decode && 0x12 == opcode1
+           && sbo_sbz (arm_insn_r->arm_insn, 9, 12, 1))
+    {
+      /* Handle BLX, branch and link/exchange.  */
+      if (9 == arm_insn_r->opcode)
+      {
+        /* Branch is chosen by setting T bit of CSPR, bitp[0] of Rm,
+           and R14 stores the return address.  */
+        record_buf[0] = ARM_PS_REGNUM;
+        record_buf[1] = ARM_LR_REGNUM;
+        arm_insn_r->reg_rec_count = 2;
+      }
+    }
+  else if (7 == arm_insn_r->decode && 0x12 == opcode1)
+    {
+      /* Handle enhanced software breakpoint insn, BKPT.  */
+      /* CPSR is changed to be executed in ARM state,  disabling normal
+         interrupts, entering abort mode.  */
+      /* According to high vector configuration PC is set.  */
+      /* user hit breakpoint and type reverse, in
+         that case, we need to go back with previous CPSR and
+         Program Counter.  */
+      record_buf[0] = ARM_PS_REGNUM;
+      record_buf[1] = ARM_LR_REGNUM;
+      arm_insn_r->reg_rec_count = 2;
+
+      /* Save SPSR also; how?  */
+      printf_unfiltered (_("Process record does not support instruction "
+                           "0x%0x at address %s.\n"),arm_insn_r->arm_insn,
+                           paddress (arm_insn_r->gdbarch, 
+                           arm_insn_r->this_addr));
+      return -1;
+    }
+  else if (11 == arm_insn_r->decode
+           && !bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM))
+  {
+    /* Handle enhanced store insns and DSP insns (e.g. LDRD).  */
+
+    /* Handle str(x) insn */
+    arm_record_strx(arm_insn_r, &record_buf[0], &record_buf_mem[0],
+                    ARM_RECORD_STRH);
+  }
+  else if (1 == arm_insn_r->decode && 0x12 == opcode1
+           && sbo_sbz (arm_insn_r->arm_insn, 9, 12, 1))
+    {
+      /* Handle BX, branch and link/exchange.  */
+      /* Branch is chosen by setting T bit of CSPR, bitp[0] of Rm.  */
+      record_buf[0] = ARM_PS_REGNUM;
+      arm_insn_r->reg_rec_count = 1;
+    }
+  else if (1 == arm_insn_r->decode && 0x16 == opcode1
+           && sbo_sbz (arm_insn_r->arm_insn, 9, 4, 1)
+           && sbo_sbz (arm_insn_r->arm_insn, 17, 4, 1))
+    {
+      /* Count leading zeros: CLZ.  */
+      record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+      arm_insn_r->reg_rec_count = 1;
+    }
+  else if (!bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM)
+           && (8 == arm_insn_r->opcode || 10 == arm_insn_r->opcode)
+           && sbo_sbz (arm_insn_r->arm_insn, 17, 4, 1)
+           && sbo_sbz (arm_insn_r->arm_insn, 1, 12, 0)
+          )
+    {
+      /* Handle MRS insn.  */
+      record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+      arm_insn_r->reg_rec_count = 1;
+    }
+  else if (arm_insn_r->opcode <= 15)
+    {
+      /* Normal data processing insns.  */
+      /* Out of 11 shifter operands mode, all the insn modifies destination
+         register, which is specified by 13-16 decode.  */
+      record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+      record_buf[1] = ARM_PS_REGNUM;
+      arm_insn_r->reg_rec_count = 2;
+    }
+  else
+    {
+      return -1;
+    }
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (arm_insn_r->arm_mems, arm_insn_r->mem_rec_count, record_buf_mem);
+  return 0;
+}
+
+/* Handling opcode 001 insns.  */
+
+static int
+arm_record_data_proc_imm (insn_decode_record *arm_insn_r)
+{
+  uint32_t record_buf[8], record_buf_mem[8];
+
+  arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 21, 24);
+  arm_insn_r->decode = bits (arm_insn_r->arm_insn, 4, 7);
+
+  if ((9 == arm_insn_r->opcode || 11 == arm_insn_r->opcode)
+      && 2 == bits (arm_insn_r->arm_insn, 20, 21)
+      && sbo_sbz (arm_insn_r->arm_insn, 13, 4, 1)
+     )
+    {
+      /* Handle MSR insn.  */
+      if (9 == arm_insn_r->opcode)
+        {
+          /* CSPR is going to be changed.  */
+          record_buf[0] = ARM_PS_REGNUM;
+          arm_insn_r->reg_rec_count = 1;
+        }
+      else
+        {
+          /* SPSR is going to be changed.  */
+        }
+    }
+  else if (arm_insn_r->opcode <= 15)
+    {
+      /* Normal data processing insns.  */
+      /* Out of 11 shifter operands mode, all the insn modifies destination
+         register, which is specified by 13-16 decode.  */
+      record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+      record_buf[1] = ARM_PS_REGNUM;
+      arm_insn_r->reg_rec_count = 2;
+    }
+  else
+    {
+      return -1;
+    }
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (arm_insn_r->arm_mems, arm_insn_r->mem_rec_count, record_buf_mem);
+  return 0;
+}
+
+/* Handling opcode 010 insns.  */
+
+static int
+arm_record_ld_st_imm_offset (insn_decode_record *arm_insn_r)
+{
+  struct regcache *reg_cache = arm_insn_r->regcache;
+
+  uint32_t reg_src1 = 0 , reg_dest = 0;
+  uint32_t offset_12 = 0, tgt_mem_addr = 0;
+  uint32_t record_buf[8], record_buf_mem[8];
+
+  ULONGEST u_regval = 0;
+
+  arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 21, 24);
+  arm_insn_r->decode = bits (arm_insn_r->arm_insn, 4, 7);
+
+  if (bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM))
+    {
+      reg_dest = bits (arm_insn_r->arm_insn, 12, 15);
+      /* LDR insn has a capability to do branching, if
+         MOV LR, PC is precedded by LDR insn having Rn as R15
+         in that case, it emulates branch and link insn, and hence we
+         need to save CSPR and PC as well.  */
+      if (ARM_PC_REGNUM != reg_dest)
+        {
+          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+          arm_insn_r->reg_rec_count = 1;
+        }
+      else
+        {
+          record_buf[0] = reg_dest;
+          record_buf[1] = ARM_PS_REGNUM;
+          arm_insn_r->reg_rec_count = 2;
+        }
+    }
+  else
+    {
+      /* Store, immediate offset, immediate pre-indexed,
+         immediate post-indexed.  */
+      reg_src1 = bits (arm_insn_r->arm_insn, 16, 19);
+      offset_12 = bits (arm_insn_r->arm_insn, 0, 11);
+      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval);
+      /* U == 1 */
+      if (bit (arm_insn_r->arm_insn, 23))
+        {
+          tgt_mem_addr = u_regval + offset_12;
+        }
+      else
+        {
+          tgt_mem_addr = u_regval - offset_12;
+        }
+
+      switch (arm_insn_r->opcode)
+        {
+          /* STR.  */
+          case 8:
+          case 12:
+          /* STR.  */
+          case 9:
+          case 13:
+          /* STRT.  */    
+          case 1:
+          case 5:
+          /* STR.  */    
+          case 4:
+          case 0:
+            record_buf_mem[0] = 4;
+          break;
+
+          /* STRB.  */
+          case 10:
+          case 14:
+          /* STRB.  */    
+          case 11:
+          case 15:
+          /* STRBT.  */    
+          case 3:
+          case 7:
+          /* STRB.  */    
+          case 2:
+          case 6:
+            record_buf_mem[0] = 1;
+          break;
+
+          default:
+            gdb_assert_not_reached ("no decoding pattern found");
+          break;
+        }
+      record_buf_mem[1] = tgt_mem_addr;
+      arm_insn_r->mem_rec_count = 1;
+
+      if (9 == arm_insn_r->opcode || 11 == arm_insn_r->opcode
+          || 13 == arm_insn_r->opcode || 15 == arm_insn_r->opcode
+          || 0 == arm_insn_r->opcode || 2 == arm_insn_r->opcode
+          || 4 == arm_insn_r->opcode || 6 == arm_insn_r->opcode
+          || 1 == arm_insn_r->opcode || 3 == arm_insn_r->opcode
+          || 5 == arm_insn_r->opcode || 7 == arm_insn_r->opcode
+         )
+        {
+          /* We are handling pre-indexed mode; post-indexed mode;
+             where Rn is going to be changed.  */
+          record_buf[0] = reg_src1;
+          arm_insn_r->reg_rec_count = 1;
+        }
+    }
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (arm_insn_r->arm_mems, arm_insn_r->mem_rec_count, record_buf_mem);
+  return 0;
+}
+
+/* Handling opcode 011 insns.  */
+
+static int
+arm_record_ld_st_reg_offset (insn_decode_record *arm_insn_r)
+{
+  struct regcache *reg_cache = arm_insn_r->regcache;
+
+  uint32_t shift_imm = 0;
+  uint32_t reg_src1 = 0, reg_src2 = 0, reg_dest = 0;
+  uint32_t offset_12 = 0, tgt_mem_addr = 0;
+  uint32_t record_buf[8], record_buf_mem[8];
+
+  LONGEST s_word;
+  ULONGEST u_regval[2];
+
+  arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 21, 24);
+  arm_insn_r->decode = bits (arm_insn_r->arm_insn, 4, 7);
+
+  /* Handle enhanced store insns and LDRD DSP insn,
+     order begins according to addressing modes for store insns
+     STRH insn.  */
+
+  /* LDR or STR?  */
+  if (bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM))
+    {
+      reg_dest = bits (arm_insn_r->arm_insn, 12, 15);
+      /* LDR insn has a capability to do branching, if
+         MOV LR, PC is precedded by LDR insn having Rn as R15
+         in that case, it emulates branch and link insn, and hence we
+         need to save CSPR and PC as well.  */
+      if (15 != reg_dest)
+        {
+          record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+          arm_insn_r->reg_rec_count = 1;
+        }
+      else
+        {
+          record_buf[0] = reg_dest;
+          record_buf[1] = ARM_PS_REGNUM;
+          arm_insn_r->reg_rec_count = 2;
+        }
+    }
+  else
+    {
+      if (! bits (arm_insn_r->arm_insn, 4, 11))
+        {
+          /* Store insn, register offset and register pre-indexed,
+             register post-indexed.  */
+          /* Get Rm.  */
+          reg_src1 = bits (arm_insn_r->arm_insn, 0, 3);
+          /* Get Rn.  */
+          reg_src2 = bits (arm_insn_r->arm_insn, 16, 19);
+          regcache_raw_read_unsigned (reg_cache, reg_src1
+                                      , &u_regval[0]);
+          regcache_raw_read_unsigned (reg_cache, reg_src2
+                                      , &u_regval[1]);
+          if (15 == reg_src2)
+            {
+              /* If R15 was used as Rn, hence current PC+8.  */
+              /* Pre-indexed mode doesnt reach here ; illegal insn.  */
+                u_regval[0] = u_regval[0] + 8;
+            }
+          /* Calculate target store address, Rn +/- Rm, register offset.  */
+          /* U == 1.  */
+          if (bit (arm_insn_r->arm_insn, 23))
+            {
+              tgt_mem_addr = u_regval[0] + u_regval[1];
+            }
+          else
+            {
+              tgt_mem_addr = u_regval[1] - u_regval[0];
+            }
+
+          switch (arm_insn_r->opcode)
+            {
+              /* STR.  */
+              case 8:
+              case 12:
+              /* STR.  */    
+              case 9:
+              case 13:
+              /* STRT.  */
+              case 1:
+              case 5:
+              /* STR.  */
+              case 0:
+              case 4:
+                record_buf_mem[0] = 4;
+              break;
+
+              /* STRB.  */
+              case 10:
+              case 14:
+              /* STRB.  */
+              case 11:
+              case 15:
+              /* STRBT.  */    
+              case 3:
+              case 7:
+              /* STRB.  */
+              case 2:
+              case 6:
+                record_buf_mem[0] = 1;
+              break;
+
+              default:
+                gdb_assert_not_reached ("no decoding pattern found");
+              break;
+            }
+          record_buf_mem[1] = tgt_mem_addr;
+          arm_insn_r->mem_rec_count = 1;
+
+          if (9 == arm_insn_r->opcode || 11 == arm_insn_r->opcode
+              || 13 == arm_insn_r->opcode || 15 == arm_insn_r->opcode
+              || 0 == arm_insn_r->opcode || 2 == arm_insn_r->opcode
+              || 4 == arm_insn_r->opcode || 6 == arm_insn_r->opcode
+              || 1 == arm_insn_r->opcode || 3 == arm_insn_r->opcode
+              || 5 == arm_insn_r->opcode || 7 == arm_insn_r->opcode
+             )
+            {
+              /* Rn is going to be changed in pre-indexed mode and
+                 post-indexed mode as well.  */
+              record_buf[0] = reg_src2;
+              arm_insn_r->reg_rec_count = 1;
+            }
+        }
+      else
+        {
+          /* Store insn, scaled register offset; scaled pre-indexed.  */
+          offset_12 = bits (arm_insn_r->arm_insn, 5, 6);
+          /* Get Rm.  */
+          reg_src1 = bits (arm_insn_r->arm_insn, 0, 3);
+          /* Get Rn.  */
+          reg_src2 = bits (arm_insn_r->arm_insn, 16, 19);
+          /* Get shift_imm.  */
+          shift_imm = bits (arm_insn_r->arm_insn, 7, 11);
+          regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval[0]);
+          regcache_raw_read_signed (reg_cache, reg_src1, &s_word);
+          regcache_raw_read_unsigned (reg_cache, reg_src2, &u_regval[1]);
+          /* Offset_12 used as shift.  */
+          switch (offset_12)
+            {
+              case 0:
+                /* Offset_12 used as index.  */
+                offset_12 = u_regval[0] << shift_imm;
+              break;
+
+              case 1:
+                offset_12 = (!shift_imm)?0:u_regval[0] >> shift_imm;
+              break;
+
+              case 2:
+                if (!shift_imm)
+                  {
+                    if (bit (u_regval[0], 31))
+                      {
+                        offset_12 = 0xFFFFFFFF;
+                      }
+                    else
+                      {
+                        offset_12 = 0;
+                      }
+                  }
+                else
+                  {
+                    /* This is arithmetic shift.  */
+                    offset_12 = s_word >> shift_imm;
+                  }
+                break;
+
+              case 3:
+                if (!shift_imm)
+                  {
+                    regcache_raw_read_unsigned (reg_cache, ARM_PS_REGNUM,
+                                                &u_regval[1]);
+                    /* Get C flag value and shift it by 31.  */
+                    offset_12 = (((bit (u_regval[1], 29)) << 31) \
+                                  | (u_regval[0]) >> 1);
+                  }
+                else
+                  {
+                    offset_12 = (u_regval[0] >> shift_imm) \
+                                | (u_regval[0] <<
+                                (sizeof(uint32_t) - shift_imm));
+                  }
+              break;
+
+              default:
+                gdb_assert_not_reached ("no decoding pattern found");
+              break;
+            }
+
+          regcache_raw_read_unsigned (reg_cache, reg_src2, &u_regval[1]);
+          /* bit U set.  */
+          if (bit (arm_insn_r->arm_insn, 23))
+            {
+              tgt_mem_addr = u_regval[1] + offset_12;
+            }
+          else
+            {
+              tgt_mem_addr = u_regval[1] - offset_12;
+            }
+
+          switch (arm_insn_r->opcode)
+            {
+              /* STR.  */
+              case 8:
+              case 12:
+              /* STR.  */    
+              case 9:
+              case 13:
+              /* STRT.  */
+              case 1:
+              case 5:
+              /* STR.  */
+              case 0:
+              case 4:
+                record_buf_mem[0] = 4;
+              break;
+
+              /* STRB.  */
+              case 10:
+              case 14:
+              /* STRB.  */
+              case 11:
+              case 15:
+              /* STRBT.  */    
+              case 3:
+              case 7:
+              /* STRB.  */
+              case 2:
+              case 6:
+                record_buf_mem[0] = 1;
+              break;
+
+              default:
+                gdb_assert_not_reached ("no decoding pattern found");
+              break;
+            }
+          record_buf_mem[1] = tgt_mem_addr;
+          arm_insn_r->mem_rec_count = 1;
+
+          if (9 == arm_insn_r->opcode || 11 == arm_insn_r->opcode
+              || 13 == arm_insn_r->opcode || 15 == arm_insn_r->opcode
+              || 0 == arm_insn_r->opcode || 2 == arm_insn_r->opcode
+              || 4 == arm_insn_r->opcode || 6 == arm_insn_r->opcode
+              || 1 == arm_insn_r->opcode || 3 == arm_insn_r->opcode
+              || 5 == arm_insn_r->opcode || 7 == arm_insn_r->opcode
+             )
+            {
+              /* Rn is going to be changed in register scaled pre-indexed
+                 mode,and scaled post indexed mode.  */
+              record_buf[0] = reg_src2;
+              arm_insn_r->reg_rec_count = 1;
+            }
+        }
+    }
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (arm_insn_r->arm_mems, arm_insn_r->mem_rec_count, record_buf_mem);
+  return 0;
+}
+
+/* Handling opcode 100 insns.  */
+
+static int
+arm_record_ld_st_multiple (insn_decode_record *arm_insn_r)
+{
+  struct regcache *reg_cache = arm_insn_r->regcache;
+
+  uint32_t register_list[16] = {0}, register_count = 0, register_bits = 0;
+  uint32_t reg_src1 = 0, addr_mode = 0, no_of_regs = 0;
+  uint32_t start_address = 0, index = 0;
+  uint32_t record_buf[24], record_buf_mem[48];
+
+  ULONGEST u_regval[2] = {0};
+
+  /* This mode is exclusively for load and store multiple.  */
+  /* Handle incremenrt after/before and decrment after.before mode;
+     Rn is changing depending on W bit, but as of now we store Rn too
+     without optimization.  */
+
+  if (bit (arm_insn_r->arm_insn, INSN_S_L_BIT_NUM))
+    {
+      /* LDM  (1,2,3) where LDM  (3) changes CPSR too.  */
+
+      if (bit (arm_insn_r->arm_insn, 20) && !bit (arm_insn_r->arm_insn, 22))
+        {
+          register_bits = bits (arm_insn_r->arm_insn, 0, 15);
+          no_of_regs = 15;
+        }
+      else
+        {
+          register_bits = bits (arm_insn_r->arm_insn, 0, 14);
+          no_of_regs = 14;
+        }
+      /* Get Rn.  */
+      reg_src1 = bits (arm_insn_r->arm_insn, 16, 19);
+      while (register_bits)
+      {
+        if (register_bits & 0x00000001)
+          register_list[register_count++] = 1;
+        register_bits = register_bits >> 1;
+      }
+
+        /* Extra space for Base Register and CPSR; wihtout optimization.  */
+        record_buf[register_count] = reg_src1;
+        record_buf[register_count + 1] = ARM_PS_REGNUM;
+        arm_insn_r->reg_rec_count = register_count + 2;
+
+        for (register_count = 0; register_count < no_of_regs; register_count++)
+          {
+            if  (register_list[register_count])
+              {
+                /* Register_count gives total no of registers
+                and dually working as reg number.  */
+                record_buf[index] = register_count;
+                index++;
+              }
+          }
+
+    }
+  else
+    {
+      /* It handles both STM(1) and STM(2).  */
+      addr_mode = bits (arm_insn_r->arm_insn, 23, 24);    
+
+      register_bits = bits (arm_insn_r->arm_insn, 0, 15);
+      /* Get Rn.  */
+      reg_src1 = bits (arm_insn_r->arm_insn, 16, 19);
+      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval[0]);
+      while (register_bits)
+        {
+          if (register_bits & 0x00000001)
+            register_count++;
+          register_bits = register_bits >> 1;
+        }
+
+      switch (addr_mode)
+        {
+          /* Decrement after.  */
+          case 0:                          
+            start_address = (u_regval[0]) - (register_count * 4) + 4;
+            arm_insn_r->mem_rec_count = register_count;
+            while (register_count)
+              {
+                record_buf_mem[(register_count * 2) - 1] = start_address;
+                record_buf_mem[(register_count * 2) - 2] = 4;
+                start_address = start_address + 4;
+                register_count--;
+              }
+          break;    
+
+          /* Increment after.  */
+          case 1:
+            start_address = u_regval[0];
+            arm_insn_r->mem_rec_count = register_count;
+            while (register_count)
+              {
+                record_buf_mem[(register_count * 2) - 1] = start_address;
+                record_buf_mem[(register_count * 2) - 2] = 4;
+                start_address = start_address + 4;
+                register_count--;
+              }
+          break;    
+
+          /* Decrement before.  */
+          case 2:
+
+            start_address = (u_regval[0]) - (register_count * 4);
+            arm_insn_r->mem_rec_count = register_count;
+            while (register_count)
+              {
+                record_buf_mem[(register_count * 2) - 1] = start_address;
+                record_buf_mem[(register_count * 2) - 2] = 4;
+                start_address = start_address + 4;
+                register_count--;
+              }
+          break;    
+
+          /* Increment before.  */
+          case 3:
+            start_address = u_regval[0] + 4;
+            arm_insn_r->mem_rec_count = register_count;
+            while (register_count)
+              {
+                record_buf_mem[(register_count * 2) - 1] = start_address;
+                record_buf_mem[(register_count * 2) - 2] = 4;
+                start_address = start_address + 4;
+                register_count--;
+              }
+          break;    
+
+          default:
+            gdb_assert_not_reached ("no decoding pattern found");
+          break;    
+        }
+
+      /* Base register also changes; based on condition and W bit.  */
+      /* We save it anyway without optimization.  */
+      record_buf[0] = reg_src1;
+      arm_insn_r->reg_rec_count = 1;
+    }
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (arm_insn_r->arm_mems, arm_insn_r->mem_rec_count, record_buf_mem);
+  return 0;
+}
+
+/* Handling opcode 101 insns.  */
+
+static int
+arm_record_b_bl (insn_decode_record *arm_insn_r)
+{
+  uint32_t record_buf[8];
+
+  /* Handle B, BL, BLX(1) insns.  */
+  /* B simply branches so we do nothing here.  */
+  /* Note: BLX(1) doesnt fall here but instead it falls into
+     extension space.  */
+  if (bit (arm_insn_r->arm_insn, 24))
+  {
+    record_buf[0] = ARM_LR_REGNUM;
+    arm_insn_r->reg_rec_count = 1;
+  }
+
+  REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
+
+  return 0;
+}
+
+/* Handling opcode 110 insns.  */
+
+static int
+arm_record_coproc (insn_decode_record *arm_insn_r)
+{
+  printf_unfiltered (_("Process record does not support instruction "
+                    "0x%0x at address %s.\n"),arm_insn_r->arm_insn,
+                    paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
+
+  return -1;
+}
+
+/* Handling opcode 111 insns.  */
+
+static int
+arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (arm_insn_r->gdbarch);
+  struct regcache *reg_cache = arm_insn_r->regcache;
+  uint32_t ret = 0; /* function return value: -1:record failure ;  0:success  */
+
+  /* Handle SWI insn; system call would be handled over here.  */
+
+  arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 24, 27);
+  if (15 == arm_insn_r->opcode)
+  {
+    /* Handle arm syscall insn.  */
+    if (tdep->arm_swi_record != NULL)
+      {
+        ret = tdep->arm_swi_record(reg_cache);
+      }
+    else
+      {
+        printf_unfiltered (_("no syscall record support\n"));
+        ret = -1;
+      }
+  }
+
+  printf_unfiltered (_("Process record does not support instruction "
+                        "0x%0x at address %s.\n"),arm_insn_r->arm_insn,
+                        paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
+  return ret;
+}
+
+/* Handling opcode 000 insns.  */
+
+static int
+thumb_record_shift_add_sub (insn_decode_record *thumb_insn_r)
+{
+  uint32_t record_buf[8];
+  uint32_t reg_src1 = 0;
+
+  reg_src1 = bits (thumb_insn_r->arm_insn, 0, 2);
+
+  record_buf[0] = ARM_PS_REGNUM;
+  record_buf[1] = reg_src1;
+  thumb_insn_r->reg_rec_count = 2;
+
+  REG_ALLOC (thumb_insn_r->arm_regs, thumb_insn_r->reg_rec_count, record_buf);
+
+  return 0;
+}
+
+
+/* Handling opcode 001 insns.  */
+
+static int
+thumb_record_add_sub_cmp_mov (insn_decode_record *thumb_insn_r)
+{
+  uint32_t record_buf[8];
+  uint32_t reg_src1 = 0;
+
+  reg_src1 = bits (thumb_insn_r->arm_insn, 8, 10);
+
+  record_buf[0] = ARM_PS_REGNUM;
+  record_buf[1] = reg_src1;
+  thumb_insn_r->reg_rec_count = 2;
+
+  REG_ALLOC (thumb_insn_r->arm_regs, thumb_insn_r->reg_rec_count, record_buf);
+
+  return 0;
+}
+
+/* Handling opcode 010 insns.  */
+
+static int
+thumb_record_ld_st_reg_offset (insn_decode_record *thumb_insn_r)
+{
+  struct regcache *reg_cache =  thumb_insn_r->regcache;
+  uint32_t record_buf[8], record_buf_mem[8];
+
+  uint32_t reg_src1 = 0, reg_src2 = 0;
+  uint32_t opcode1 = 0, opcode2 = 0, opcode3 = 0;
+
+  ULONGEST u_regval[2] = {0};
+
+  opcode1 = bits (thumb_insn_r->arm_insn, 10, 12);
+
+  if (bit (thumb_insn_r->arm_insn, 12))
+    {
+      /* Handle load/store register offset.  */
+      opcode2 = bits (thumb_insn_r->arm_insn, 9, 10);
+      if (opcode2 >= 12 && opcode2 <= 15)
+        {
+          /* LDR(2), LDRB(2) , LDRH(2), LDRSB, LDRSH.  */
+          reg_src1 = bits (thumb_insn_r->arm_insn,0, 2);
+          record_buf[0] = reg_src1;
+          thumb_insn_r->reg_rec_count = 1;
+        }
+      else if (opcode2 >= 8 && opcode2 <= 10)
+        {
+          /* STR(2), STRB(2), STRH(2) .  */
+          reg_src1 = bits (thumb_insn_r->arm_insn, 3, 5);
+          reg_src2 = bits (thumb_insn_r->arm_insn, 6, 8);
+          regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval[0]);
+          regcache_raw_read_unsigned (reg_cache, reg_src2, &u_regval[1]);
+          if (8 == opcode2)
+            record_buf_mem[0] = 4;    /* STR (2).  */
+          else if (10 == opcode2)
+            record_buf_mem[0] = 1;    /*  STRB (2).  */
+          else if (9 == opcode2)
+            record_buf_mem[0] = 2;    /* STRH (2).  */
+          record_buf_mem[1] = u_regval[0] + u_regval[1];
+          thumb_insn_r->mem_rec_count = 1;
+        }
+    }
+  else if (bit (thumb_insn_r->arm_insn, 11))
+    {
+      /* Handle load from literal pool.  */
+      /* LDR(3).  */
+      reg_src1 = bits (thumb_insn_r->arm_insn, 8, 10);
+      record_buf[0] = reg_src1;
+      thumb_insn_r->reg_rec_count = 1;
+    }
+  else if (opcode1)
+    {
+      opcode2 = bits (thumb_insn_r->arm_insn, 8, 9);
+      opcode3 = bits (thumb_insn_r->arm_insn, 0, 2);
+      if ((3 == opcode2) && (!opcode3))
+        {
+          /* Branch with exchange.  */
+          record_buf[0] = ARM_PS_REGNUM;
+          thumb_insn_r->reg_rec_count = 1;
+        }
+      else
+        {
+          /* Format 8; special data processing insns.  */
+          reg_src1 = bits (thumb_insn_r->arm_insn, 0, 2);
+          record_buf[0] = ARM_PS_REGNUM;
+          record_buf[1] = reg_src1;
+          thumb_insn_r->reg_rec_count = 2;
+        }
+    }
+  else
+    {
+      /* Format 5; data processing insns.  */
+      reg_src1 = bits (thumb_insn_r->arm_insn, 0, 2);
+      if (bit (thumb_insn_r->arm_insn, 7))
+        {
+          reg_src1 = reg_src1 + 8;
+        }
+      record_buf[0] = ARM_PS_REGNUM;
+      record_buf[1] = reg_src1;
+      thumb_insn_r->reg_rec_count = 2;
+    }
+
+  REG_ALLOC (thumb_insn_r->arm_regs, thumb_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (thumb_insn_r->arm_mems, thumb_insn_r->mem_rec_count,
+             record_buf_mem);
+
+  return 0;
+}
+
+/* Handling opcode 001 insns.  */
+
+static int
+thumb_record_ld_st_imm_offset (insn_decode_record *thumb_insn_r)
+{
+  struct regcache *reg_cache = thumb_insn_r->regcache;
+  uint32_t record_buf[8], record_buf_mem[8];
+
+  uint32_t reg_src1 = 0;
+  uint32_t opcode = 0, immed_5 = 0;
+
+  ULONGEST u_regval = 0;
+
+  opcode = bits (thumb_insn_r->arm_insn, 11, 12);
+
+  if (opcode)
+    {
+      /* LDR(1).  */
+      reg_src1 = bits (thumb_insn_r->arm_insn, 0, 2);
+      record_buf[0] = reg_src1;
+      thumb_insn_r->reg_rec_count = 1;
+    }
+  else
+    {
+      /* STR(1).  */
+      reg_src1 = bits (thumb_insn_r->arm_insn, 3, 5);
+      immed_5 = bits (thumb_insn_r->arm_insn, 6, 10);
+      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval);
+      record_buf_mem[0] = 4;
+      record_buf_mem[1] = u_regval + (immed_5 * 4);
+      thumb_insn_r->mem_rec_count = 1;
+    }
+
+  REG_ALLOC (thumb_insn_r->arm_regs, thumb_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (thumb_insn_r->arm_mems, thumb_insn_r->mem_rec_count, 
+             record_buf_mem);
+
+  return 0;
+}
+
+/* Handling opcode 100 insns.  */
+
+static int
+thumb_record_ld_st_stack (insn_decode_record *thumb_insn_r)
+{
+  struct regcache *reg_cache = thumb_insn_r->regcache;
+  uint32_t record_buf[8], record_buf_mem[8];
+
+  uint32_t reg_src1 = 0;
+  uint32_t opcode = 0, immed_8 = 0, immed_5 = 0;
+
+  ULONGEST u_regval = 0;
+
+  opcode = bits (thumb_insn_r->arm_insn, 11, 12);
+
+  if (3 == opcode)
+    {
+      /* LDR(4).  */
+      reg_src1 = bits (thumb_insn_r->arm_insn, 8, 10);
+      record_buf[0] = reg_src1;
+      thumb_insn_r->reg_rec_count = 1;
+    }
+  else if (1 == opcode)
+    {
+      /* LDRH(1).  */
+      reg_src1 = bits (thumb_insn_r->arm_insn, 0, 2);
+      record_buf[0] = reg_src1;
+      thumb_insn_r->reg_rec_count = 1;
+    }
+  else if (2 == opcode)
+    {
+      /* STR(3).  */
+      immed_8 = bits (thumb_insn_r->arm_insn, 0, 7);
+      regcache_raw_read_unsigned (reg_cache, ARM_SP_REGNUM, &u_regval);
+      record_buf_mem[0] = 4;
+      record_buf_mem[1] = u_regval + (immed_8 * 4);
+      thumb_insn_r->mem_rec_count = 1;
+    }
+  else if (0 == opcode)
+    {
+      /* STRH(1).  */
+      immed_5 = bits (thumb_insn_r->arm_insn, 6, 10);
+      reg_src1 = bits (thumb_insn_r->arm_insn, 3, 5);
+      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval);
+      record_buf_mem[0] = 2;
+      record_buf_mem[1] = u_regval + (immed_5 * 2);
+      thumb_insn_r->mem_rec_count = 1;
+    }
+
+  REG_ALLOC (thumb_insn_r->arm_regs, thumb_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (thumb_insn_r->arm_mems, thumb_insn_r->mem_rec_count,
+             record_buf_mem);
+
+  return 0;
+}
+
+/* Handling opcode 101 insns.  */
+
+static int
+thumb_record_misc (insn_decode_record *thumb_insn_r)
+{
+  struct regcache *reg_cache = thumb_insn_r->regcache;
+
+  uint32_t opcode = 0, opcode1 = 0, opcode2 = 0;
+  uint32_t register_bits = 0, register_count = 0;
+  uint32_t register_list[8] = {0}, index = 0, start_address = 0;
+  uint32_t record_buf[24], record_buf_mem[48];
+  uint32_t reg_src1;
+
+  ULONGEST u_regval = 0;
+
+  opcode = bits (thumb_insn_r->arm_insn, 11, 12);
+  opcode1 = bits (thumb_insn_r->arm_insn, 8, 12);
+  opcode2 = bits (thumb_insn_r->arm_insn, 9, 12);
+
+  if (14 == opcode2)
+    {
+      /* POP.  */
+      register_bits = bits (thumb_insn_r->arm_insn, 0, 7);
+      while (register_bits)
+        {
+          if (register_bits & 0x00000001)
+            register_list[register_count++] = 1;
+          register_bits = register_bits >> 1;
+        }
+      record_buf[register_count] = ARM_PS_REGNUM;
+      record_buf[register_count + 1] = ARM_SP_REGNUM;
+      thumb_insn_r->reg_rec_count = register_count + 2;
+      for (register_count = 0; register_count < 8; register_count++)
+        {
+          if  (register_list[register_count])
+            {
+              record_buf[index] = register_count;
+              index++;
+            }
+        }
+    }
+  else if (10 == opcode2)
+    {
+      /* PUSH.  */
+      register_bits = bits (thumb_insn_r->arm_insn, 0, 7);
+      regcache_raw_read_unsigned (reg_cache, ARM_PC_REGNUM, &u_regval);
+      while (register_bits)
+        {
+          if (register_bits & 0x00000001)
+            register_count++;
+          register_bits = register_bits >> 1;
+        }
+      start_address = u_regval -  \
+                  (4 * (bit (thumb_insn_r->arm_insn, 8) + register_count));
+      thumb_insn_r->mem_rec_count = register_count;
+      while (register_count)
+        {
+          record_buf_mem[(register_count * 2) - 1] = start_address;
+          record_buf_mem[(register_count * 2) - 2] = 4;
+          start_address = start_address + 4;
+          register_count--;
+        }
+      record_buf[0] = ARM_SP_REGNUM;
+      thumb_insn_r->reg_rec_count = 1;
+    }
+  else if (0x1E == opcode1)
+    {
+      /* BKPT insn.  */
+      /* Handle enhanced software breakpoint insn, BKPT.  */
+      /* CPSR is changed to be executed in ARM state,  disabling normal
+         interrupts, entering abort mode.  */
+      /* According to high vector configuration PC is set.  */
+      /* User hits breakpoint and type reverse, in that case, we need to go back with 
+      previous CPSR and Program Counter.  */
+      record_buf[0] = ARM_PS_REGNUM;
+      record_buf[1] = ARM_LR_REGNUM;
+      thumb_insn_r->reg_rec_count = 2;
+      /* We need to save SPSR value, which is not yet done.  */
+      printf_unfiltered (_("Process record does not support instruction "
+                           "0x%0x at address %s.\n"),
+                           thumb_insn_r->arm_insn,
+                           paddress (thumb_insn_r->gdbarch,
+                           thumb_insn_r->this_addr));
+      return -1;
+    }
+  else if ((0 == opcode) || (1 == opcode))
+    {
+      /* ADD(5), ADD(6).  */
+      reg_src1 = bits (thumb_insn_r->arm_insn, 8, 10);
+      record_buf[0] = reg_src1;
+      thumb_insn_r->reg_rec_count = 1;
+    }
+  else if (2 == opcode)
+    {
+      /* ADD(7), SUB(4).  */
+      reg_src1 = bits (thumb_insn_r->arm_insn, 8, 10);
+      record_buf[0] = ARM_SP_REGNUM;
+      thumb_insn_r->reg_rec_count = 1;
+    }
+
+  REG_ALLOC (thumb_insn_r->arm_regs, thumb_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (thumb_insn_r->arm_mems, thumb_insn_r->mem_rec_count,
+             record_buf_mem);
+
+  return 0;
+}
+
+/* Handling opcode 110 insns.  */
+
+static int
+thumb_record_ldm_stm_swi (insn_decode_record *thumb_insn_r)                
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (thumb_insn_r->gdbarch);
+  struct regcache *reg_cache = thumb_insn_r->regcache;
+
+  uint32_t ret = 0; /* function return value: -1:record failure ;  0:success  */
+  uint32_t reg_src1 = 0;
+  uint32_t opcode1 = 0, opcode2 = 0, register_bits = 0, register_count = 0;
+  uint32_t register_list[8] = {0}, index = 0, start_address = 0;
+  uint32_t record_buf[24], record_buf_mem[48];
+
+  ULONGEST u_regval = 0;
+
+  opcode1 = bits (thumb_insn_r->arm_insn, 8, 12);
+  opcode2 = bits (thumb_insn_r->arm_insn, 11, 12);
+
+  if (1 == opcode2)
+    {
+
+      /* LDMIA.  */
+      register_bits = bits (thumb_insn_r->arm_insn, 0, 7);
+      /* Get Rn.  */
+      reg_src1 = bits (thumb_insn_r->arm_insn, 8, 10);
+      while (register_bits)
+        {
+          if (register_bits & 0x00000001)
+            register_list[register_count++] = 1;
+          register_bits = register_bits >> 1;
+        }
+      record_buf[register_count] = reg_src1;
+      thumb_insn_r->reg_rec_count = register_count + 1;
+      for (register_count = 0; register_count < 8; register_count++)
+        {
+          if (register_list[register_count])
+            {
+              record_buf[index] = register_count;
+              index++;
+            }
+        }
+    }
+  else if (0 == opcode2)
+    {
+      /* It handles both STMIA.  */
+      register_bits = bits (thumb_insn_r->arm_insn, 0, 7);
+      /* Get Rn.  */
+      reg_src1 = bits (thumb_insn_r->arm_insn, 8, 10);
+      regcache_raw_read_unsigned (reg_cache, reg_src1, &u_regval);
+      while (register_bits)
+        {
+          if (register_bits & 0x00000001)
+            register_count++;
+          register_bits = register_bits >> 1;
+        }
+      start_address = u_regval;
+      thumb_insn_r->mem_rec_count = register_count;
+      while (register_count)
+        {
+          record_buf_mem[(register_count * 2) - 1] = start_address;
+          record_buf_mem[(register_count * 2) - 2] = 4;
+          start_address = start_address + 4;
+          register_count--;
+        }
+    }
+  else if (0x1F == opcode1)
+    {
+        /* Handle arm syscall insn.  */
+        if (tdep->arm_swi_record != NULL)
+          {
+            ret = tdep->arm_swi_record(reg_cache);
+          }
+        else
+          {
+            printf_unfiltered (_("no syscall record support\n"));
+            return -1;
+          }
+    }
+
+  /* B (1), conditional branch is automatically taken care in process_record,
+    as PC is saved there.  */
+
+  REG_ALLOC (thumb_insn_r->arm_regs, thumb_insn_r->reg_rec_count, record_buf);
+  MEM_ALLOC (thumb_insn_r->arm_mems, thumb_insn_r->mem_rec_count,
+             record_buf_mem);
+
+  return ret;
+}
+
+/* Handling opcode 111 insns.  */
+
+static int
+thumb_record_branch (insn_decode_record *thumb_insn_r)
+{
+  uint32_t record_buf[8];
+  uint32_t bits_h = 0;
+
+  bits_h = bits (thumb_insn_r->arm_insn, 11, 12);
+
+  if (2 == bits_h || 3 == bits_h)
+    {
+      /* BL */
+      record_buf[0] = ARM_LR_REGNUM;
+      thumb_insn_r->reg_rec_count = 1;
+    }
+  else if (1 == bits_h)
+    {
+      /* BLX(1). */
+      record_buf[0] = ARM_PS_REGNUM;
+      record_buf[1] = ARM_LR_REGNUM;
+      thumb_insn_r->reg_rec_count = 2;
+    }
+
+  /* B(2) is automatically taken care in process_record, as PC is 
+     saved there.  */
+
+  REG_ALLOC (thumb_insn_r->arm_regs, thumb_insn_r->reg_rec_count, record_buf);
+
+  return 0;     
+}
+
+
+/* Extracts arm/thumb/thumb2 insn depending on the size, and returns 0 on success 
+and positive val on fauilure.  */
+
+static int
+extract_arm_insn (insn_decode_record *insn_record, uint32_t insn_size)
+{
+  gdb_byte buf[insn_size];
+
+  memset (&buf[0], 0, insn_size);
+  
+  if (target_read_memory (insn_record->this_addr, &buf[0], insn_size))
+    return 1;
+  insn_record->arm_insn = (uint32_t) extract_unsigned_integer (&buf[0],
+                           insn_size, 
+                           gdbarch_byte_order (insn_record->gdbarch));
+  return 0;
+}
+
+typedef int (*sti_arm_hdl_fp_t) (insn_decode_record*);
+
+/* Decode arm/thumb insn depending on condition cods and opcodes; and
+   dispatch it.  */
+
+static int
+decode_insn (insn_decode_record *arm_record, record_type_t record_type,
+                uint32_t insn_size)
+{
+
+  /* (Starting from numerical 0); bits 25, 26, 27 decodes type of arm instruction.  */
+  static const sti_arm_hdl_fp_t const arm_handle_insn[8] =                    
+  {
+    arm_record_data_proc_misc_ld_str,   /* 000.  */
+    arm_record_data_proc_imm,           /* 001.  */
+    arm_record_ld_st_imm_offset,        /* 010.  */
+    arm_record_ld_st_reg_offset,        /* 011.  */
+    arm_record_ld_st_multiple,          /* 100.  */
+    arm_record_b_bl,                    /* 101.  */
+    arm_record_coproc,                  /* 110.  */
+    arm_record_coproc_data_proc         /* 111.  */
+  };
+
+  /* (Starting from numerical 0); bits 13,14,15 decodes type of thumb instruction.  */
+  static const sti_arm_hdl_fp_t const thumb_handle_insn[8] =
+  { \
+    thumb_record_shift_add_sub,        /* 000.  */
+    thumb_record_add_sub_cmp_mov,      /* 001.  */
+    thumb_record_ld_st_reg_offset,     /* 010.  */
+    thumb_record_ld_st_imm_offset,     /* 011.  */
+    thumb_record_ld_st_stack,          /* 100.  */
+    thumb_record_misc,                 /* 101.  */
+    thumb_record_ldm_stm_swi,          /* 110.  */
+    thumb_record_branch                /* 111.  */
+  };
+
+  uint32_t ret = 0;    /* return value: negative:failure   0:success.  */
+  uint32_t insn_id = 0;
+
+  if (extract_arm_insn (arm_record, insn_size))
+    {
+      if (record_debug)
+        {
+          printf_unfiltered (_("Process record: error reading memory at "
+                              "addr %s len = %d.\n"),
+          paddress (arm_record->gdbarch, arm_record->this_addr), insn_size);        
+        }
+      return -1;
+    }
+  else if (ARM_RECORD == record_type)
+    {
+      arm_record->cond = bits (arm_record->arm_insn, 28, 31);
+      insn_id = bits (arm_record->arm_insn, 25, 27);
+      ret = arm_record_extension_space (arm_record);
+      /* If this insn has fallen into extension space 
+         then we need not decode it anymore.  */
+      if (ret != -1 && !INSN_RECORDED(arm_record))
+        {
+          ret = arm_handle_insn[insn_id] (arm_record);
+        }
+    }
+  else if (THUMB_RECORD == record_type)
+    {
+      /* As thumb does not have condition codes, we set negative.  */
+      arm_record->cond = -1;
+      insn_id = bits (arm_record->arm_insn, 13, 15);
+      ret = thumb_handle_insn[insn_id] (arm_record);
+    }
+  else if (THUMB2_RECORD == record_type)
+    {
+      printf_unfiltered (_("Process record doesnt support thumb32 instruction "
+                           "0x%0x at address %s.\n"),arm_record->arm_insn,
+                           paddress (arm_record->gdbarch, 
+                           arm_record->this_addr));
+      ret = -1;
+    }
+  else
+    {
+      /* Throw assertion.  */
+      gdb_assert_not_reached ("not a valid instruction, could not decode");
+    }
+
+  return ret;
+}
+
+
+/* Cleans up local record registers and memory allocations.  */
+
+static void 
+deallocate_reg_mem (insn_decode_record *record)
+{
+  xfree (record->arm_regs);
+  xfree (record->arm_mems);    
+}
+
+
+/* Parse the current instruction and record the values of the registers and    
+   memory that will be changed in current instruction to record_arch_list".
+   Return -1 if something is wrong.  */
+
+int
+arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache, 
+                        CORE_ADDR insn_addr)
+{
+
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  uint32_t no_of_rec = 0;
+  uint32_t ret = 0;  /* return value: -1:record failure ;  0:success  */
+  ULONGEST t_bit = 0, insn_id = 0;
+
+  ULONGEST u_regval = 0;
+
+  insn_decode_record arm_record;
+
+  memset (&arm_record, 0, sizeof (insn_decode_record));
+  arm_record.regcache = regcache;
+  arm_record.this_addr = insn_addr;
+  arm_record.gdbarch = gdbarch;
+
+
+  if (record_debug > 1)
+    {
+      fprintf_unfiltered (gdb_stdlog, "Process record: arm_process_record "
+                                      "addr = %s\n",
+      paddress (gdbarch, arm_record.this_addr));
+    }
+
+  if (extract_arm_insn (&arm_record, 2))
+    {
+      if (record_debug)
+        {
+          printf_unfiltered (_("Process record: error reading memory at "
+                             "addr %s len = %d.\n"),
+                             paddress (arm_record.gdbarch, 
+                             arm_record.this_addr), 2);
+        }
+      return -1;
+    }
+
+  /* Check the insn, whether it is thumb or arm one.  */
+
+  t_bit = arm_psr_thumb_bit (arm_record.gdbarch);
+  regcache_raw_read_unsigned (arm_record.regcache, ARM_PS_REGNUM, &u_regval);
+
+
+  if (!(u_regval & t_bit))
+    {
+      /* We are decoding arm insn.  */
+      ret = decode_insn (&arm_record, ARM_RECORD, ARM_INSN_SIZE_BYTES);
+    }
+  else
+    {
+      insn_id = bits (arm_record.arm_insn, 11, 15);
+      /* is it thumb2 insn?  */
+      if ((0x1D == insn_id) || (0x1E == insn_id) || (0x1F == insn_id))
+        {
+          ret = decode_insn (&arm_record, THUMB2_RECORD, 
+                             THUMB2_INSN_SIZE_BYTES);
+        }
+      else
+        {
+          /* We are decoding thumb insn.  */
+          ret = decode_insn (&arm_record, THUMB_RECORD, THUMB_INSN_SIZE_BYTES);
+        }
+    }
+
+  if (0 == ret)
+    {
+      /* Record registers.  */
+      record_arch_list_add_reg (arm_record.regcache, ARM_PC_REGNUM);
+      if (arm_record.arm_regs)
+        {
+          for (no_of_rec = 0; no_of_rec < arm_record.reg_rec_count; no_of_rec++)
+            {
+              if (record_arch_list_add_reg (arm_record.regcache , 
+                                            arm_record.arm_regs[no_of_rec]))
+              ret = -1;
+            }
+        }
+      /* Record memories.  */
+      if (arm_record.arm_mems)
+        {
+          for (no_of_rec = 0; no_of_rec < arm_record.mem_rec_count; no_of_rec++)
+            {
+              if (record_arch_list_add_mem 
+                  ((CORE_ADDR)arm_record.arm_mems[no_of_rec].addr,
+                  arm_record.arm_mems[no_of_rec].len))
+                ret = -1;
+            }
+        }
+
+      if (record_arch_list_add_end ())
+        ret = -1;
+    }
+
+
+  deallocate_reg_mem (&arm_record);
+
+  return ret;
+}
+

@@ -1155,8 +1155,13 @@ arm_linux_init_abi (struct gdbarch_info info,
 					   simple_displaced_step_free_closure);
   set_gdbarch_displaced_step_location (gdbarch, displaced_step_at_entry_point);
 
+  /* Reversible debugging, process record.  */
+  set_gdbarch_process_record (gdbarch, arm_process_record);
 
   tdep->syscall_next_pc = arm_linux_syscall_next_pc;
+
+  /* Syscall record.  */
+  tdep->arm_swi_record = NULL;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
