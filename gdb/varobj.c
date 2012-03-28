@@ -33,6 +33,8 @@
 #include "vec.h"
 #include "gdbthread.h"
 #include "inferior.h"
+#include "ada-varobj.h"
+#include "ada-lang.h"
 
 #if HAVE_PYTHON
 #include "python/python.h"
@@ -2921,6 +2923,29 @@ varobj_value_is_changeable_p (struct varobj *var)
   if (CPLUS_FAKE_CHILD (var))
     return 0;
 
+  /* FIXME: This, and the check above, show that this routine
+     should be language-specific.  */
+  if (variable_language (var) == vlang_ada)
+    {
+      struct type *type = var->value ? value_type (var->value) : var->type;
+
+      if (ada_is_array_descriptor_type (type)
+	  && TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+	{
+	  /* This is in reality a pointer to an unconstrained array.
+	     its value is changeable.  */
+	  return 1;
+	}
+
+      if (ada_is_string_type (type))
+	{
+	  /* We display the contents of the string in the array's
+	     "value" field.  The contents can change, so consider
+	     that the array is changeable.  */
+	  return 1;
+	}
+    }
+
   type = get_value_type (var);
 
   switch (TYPE_CODE (type))
@@ -3881,7 +3906,7 @@ java_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 static int
 ada_number_of_children (struct varobj *var)
 {
-  return c_number_of_children (var);
+  return ada_varobj_get_number_of_children (var->value, var->type);
 }
 
 static char *
@@ -3893,13 +3918,21 @@ ada_name_of_variable (struct varobj *parent)
 static char *
 ada_name_of_child (struct varobj *parent, int index)
 {
-  return c_name_of_child (parent, index);
+  return ada_varobj_get_name_of_child (parent->value, parent->type,
+				       parent->name, index);
 }
 
 static char*
 ada_path_expr_of_child (struct varobj *child)
 {
-  return c_path_expr_of_child (child);
+  struct varobj *parent = child->parent;
+  const char *parent_path_expr = varobj_get_path_expr (parent);
+
+  return ada_varobj_get_path_expr_of_child (parent->value,
+					    parent->type,
+					    parent->name,
+					    parent_path_expr,
+					    child->index);
 }
 
 static struct value *
@@ -3911,19 +3944,27 @@ ada_value_of_root (struct varobj **var_handle)
 static struct value *
 ada_value_of_child (struct varobj *parent, int index)
 {
-  return c_value_of_child (parent, index);
+  return ada_varobj_get_value_of_child (parent->value, parent->type,
+					parent->name, index);
 }
 
 static struct type *
 ada_type_of_child (struct varobj *parent, int index)
 {
-  return c_type_of_child (parent, index);
+  return ada_varobj_get_type_of_child (parent->value, parent->type,
+				       index);
 }
 
 static char *
 ada_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 {
-  return c_value_of_variable (var, format);
+  struct value_print_options opts;
+
+  get_formatted_print_options (&opts, format_code[(int) format]);
+  opts.deref_ref = 0;
+  opts.raw = 1;
+
+  return ada_varobj_get_value_of_variable (var->value, var->type, &opts);
 }
 
 /* Implement the "value_has_mutated" routine for Ada.  */
@@ -3932,7 +3973,36 @@ static int
 ada_value_has_mutated (struct varobj *var, struct value *new_val,
 		       struct type *new_type)
 {
-  /* Unimplemented for now.  */
+  int i;
+  int from = -1;
+  int to = -1;
+
+  /* If the number of fields have changed, then for sure the type
+     has mutated.  */
+  if (ada_varobj_get_number_of_children (new_val, new_type)
+      != var->num_children)
+    return 1;
+
+  /* If the number of fields have remained the same, then we need
+     to check the name of each field.  If they remain the same,
+     then chances are the type hasn't mutated.  This is technically
+     an incomplete test, as the child's type might have changed
+     despite the fact that the name remains the same.  But we'll
+     handle this situation by saying that the child has mutated,
+     not this value.
+
+     If only part (or none!) of the children have been fetched,
+     then only check the ones we fetched.  It does not matter
+     to the frontend whether a child that it has not fetched yet
+     has mutated or not. So just assume it hasn't.  */
+
+  restrict_range (var->children, &from, &to);
+  for (i = from; i < to; i++)
+    if (strcmp (ada_varobj_get_name_of_child (new_val, new_type,
+					      var->name, i),
+		VEC_index (varobj_p, var->children, i)->name) != 0)
+      return 1;
+
   return 0;
 }
 

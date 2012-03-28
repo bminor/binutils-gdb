@@ -1,5 +1,12 @@
 2012-03-28  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-varobj.h, ada-varobj.c: New files.
+	* Makefile.in (SFILES): Add ada-varobj.c.
+	(HFILES_NO_SRCDIR): Add ada-varobj.h.
+	(COMMON_OBS): Add ada-varobj.o.
+
+2012-03-28  Joel Brobecker  <brobecker@adacore.com>
+
 	* varobj.c (ada_value_has_mutated): Add declaration.  New function.
 	(struct language_specific): New field "value_has_mutated".
 	(languages): Set field "value_has_mutated" in each entry of array.
