@@ -1,5 +1,11 @@
 2012-03-28  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-inferior.c (infpy_read_memory): Remove cleanups and
+	explicitly free 'buffer' on exit paths.  Decref 'membuf_object'
+	before returning.
+
+2012-03-28  Tom Tromey  <tromey@redhat.com>
+
 	* .dir-locals.el: New file.
 
 2012-03-28  Pedro Alves  <palves@redhat.com>
