@@ -1,3 +1,8 @@
+2012-03-28  Pedro Alves  <palves@redhat.com>
+
+	* ia64-linux-nat.c (supply_fpregset, ia64_linux_fetch_register):
+	Always supply $fr0 as 0.0 and $fr1 as 1.0.
+
 2012-03-28  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-inferior.c (infpy_read_memory): Remove cleanups and

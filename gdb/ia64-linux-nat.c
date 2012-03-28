@@ -447,8 +447,20 @@ supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
 {
   int regi;
   const char *from;
+  const gdb_byte f_zero[16] = { 0 };
+  const gdb_byte f_one[16] =
+    { 0, 0, 0, 0, 0, 0, 0, 0x80, 0xff, 0xff, 0, 0, 0, 0, 0, 0 };
 
-  for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
+  /* Kernel generated cores have fr1==0 instead of 1.0.  Older GDBs
+     did the same.  So ignore whatever might be recorded in fpregset_t
+     for fr0/fr1 and always supply their expected values.  */
+
+  /* fr0 is always read as zero.  */
+  regcache_raw_supply (regcache, IA64_FR0_REGNUM, f_zero);
+  /* fr1 is always read as one (1.0).  */
+  regcache_raw_supply (regcache, IA64_FR1_REGNUM, f_one);
+
+  for (regi = IA64_FR2_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
     {
       from = (const char *) &((*fpregsetp)[regi - IA64_FR0_REGNUM]);
       regcache_raw_supply (regcache, regi, from);
@@ -687,6 +699,27 @@ ia64_linux_fetch_register (struct regcache *regcache, int regnum)
 
       gdb_assert (sizeof (zero) == register_size (gdbarch, regnum));
       regcache_raw_supply (regcache, regnum, zero);
+      return;
+    }
+
+  /* fr0 cannot be fetched but is always zero.  */
+  if (regnum == IA64_FR0_REGNUM)
+    {
+      const gdb_byte f_zero[16] = { 0 };
+
+      gdb_assert (sizeof (f_zero) == register_size (gdbarch, regnum));
+      regcache_raw_supply (regcache, regnum, f_zero);
+      return;
+    }
+
+  /* fr1 cannot be fetched but is always one (1.0).  */
+  if (regnum == IA64_FR1_REGNUM)
+    {
+      const gdb_byte f_one[16] =
+	{ 0, 0, 0, 0, 0, 0, 0, 0x80, 0xff, 0xff, 0, 0, 0, 0, 0, 0 };
+
+      gdb_assert (sizeof (f_one) == register_size (gdbarch, regnum));
+      regcache_raw_supply (regcache, regnum, f_one);
       return;
     }
 
