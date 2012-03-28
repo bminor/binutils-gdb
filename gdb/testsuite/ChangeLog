@@ -1,4 +1,9 @@
-2012-03-26  Keith Seitz  <keiths@redhat.com>
+2012-03-28  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.linespec/ls-dollar.cc: New file.
+	* gdb.linespec/ls-dollar.exp: New test.
+
+2012-03-28  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.cp/namespace.exp: Add breakpoint tests for functions
 	starting with the global namespace.
