@@ -1,3 +1,7 @@
+2012-03-28  Tom Tromey  <tromey@redhat.com>
+
+	* .dir-locals.el: New file.
+
 2012-03-28  Pedro Alves  <palves@redhat.com>
 
 	* ia64-linux-nat.c (u_offsets): Map IA64_EC_REGNUM to PT_AR_EC.
