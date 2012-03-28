@@ -1,3 +1,8 @@
+2012-03-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* ia64-linux-nat.c (ia64_linux_fetch_register): Add special
+	handling for r0.
+
 2012-03-27  Pedro Alves  <palves@redhat.com>
 
 	Eliminate struct ui_stream.

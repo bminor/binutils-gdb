@@ -680,6 +680,16 @@ ia64_linux_fetch_register (struct regcache *regcache, int regnum)
   PTRACE_TYPE_RET *buf;
   int pid, i;
 
+  /* r0 cannot be fetched but is always zero.  */
+  if (regnum == IA64_GR0_REGNUM)
+    {
+      const gdb_byte zero[8] = { 0 };
+
+      gdb_assert (sizeof (zero) == register_size (gdbarch, regnum));
+      regcache_raw_supply (regcache, regnum, zero);
+      return;
+    }
+
   if (ia64_cannot_fetch_register (gdbarch, regnum))
     {
       regcache_raw_supply (regcache, regnum, NULL);
