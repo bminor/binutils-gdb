@@ -1,3 +1,30 @@
+2012-03-28  Pedro Alves  <palves@redhat.com>
+
+	* linux-ia64-low.c (ia64_regmap): Map IA64_EC_REGNUM to PT_AR_EC.
+	(IA64_GR0_REGNUM, IA64_FR0_REGNUM)
+	(IA64_FR1_REGNUM): New defines.
+	(ia64_fetch_register): New.
+	(the_low_target): Install it.
+	* linux-low.h (struct linux_target_ops) <fetch_register>: New
+	field.
+	* linux-low.c (linux_fetch_registers): Try the
+	the_low_target.fetch_register hook first.
+
+	* linux-arm-low.c (the_low_target): Adjust.
+	* linux-bfin-low.c (the_low_target): Adjust.
+	* linux-cris-low.c (the_low_target): Adjust.
+	* linux-crisv32-low.c (the_low_target): Adjust.
+	* linux-m32r-low.c (the_low_target): Adjust.
+	* linux-m68k-low.c (the_low_target): Adjust.
+	* linux-mips-low.c (the_low_target): Adjust.
+	* linux-ppc-low.c (the_low_target): Adjust.
+	* linux-s390-low.c (the_low_target): Adjust.
+	* linux-sh-low.c (the_low_target): Adjust.
+	* linux-sparc-low.c (the_low_target): Adjust.
+	* linux-tic6x-low.c (the_low_target): Adjust.
+	* linux-x86-low.c (the_low_target): Adjust.
+	* linux-xtensa-low.c (the_low_target): Adjust.
+
 2012-03-26  Pedro Alves  <palves@redhat.com>
 
 	* server.c (handle_qxfer_libraries): Don't bail early if

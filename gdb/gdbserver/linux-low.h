@@ -81,6 +81,14 @@ struct linux_target_ops
      store the register, and 2 if failure to store the register
      is acceptable.  */
   int (*cannot_store_register) (int);
+
+  /* Hook to fetch a register in some non-standard way.  Used for
+     example by backends that have read-only registers with hardcoded
+     values (e.g., IA64's gr0/fr0/fr1).  Returns true if register
+     REGNO was supplied, false if not, and we should fallback to the
+     standard ptrace methods.  */
+  int (*fetch_register) (struct regcache *regcache, int regno);
+
   CORE_ADDR (*get_pc) (struct regcache *regcache);
   void (*set_pc) (struct regcache *regcache, CORE_ADDR newpc);
   const unsigned char *breakpoint;

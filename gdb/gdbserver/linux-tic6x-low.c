@@ -324,6 +324,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   tic6x_cannot_fetch_register,
   tic6x_cannot_store_register,
+  NULL, /* fetch_register */
   tic6x_get_pc,
   tic6x_set_pc,
   (const unsigned char *) &tic6x_breakpoint,

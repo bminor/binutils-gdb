@@ -97,6 +97,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   bfin_cannot_fetch_register,
   bfin_cannot_store_register,
+  NULL, /* fetch_register */
   bfin_get_pc,
   bfin_set_pc,
   bfin_breakpoint,

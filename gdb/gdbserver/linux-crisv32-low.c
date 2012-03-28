@@ -377,6 +377,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   NULL,
   NULL,
+  NULL, /* fetch_register */
   cris_get_pc,
   cris_set_pc,
   (const unsigned char *) &cris_breakpoint,

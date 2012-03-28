@@ -430,6 +430,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   mips_cannot_fetch_register,
   mips_cannot_store_register,
+  NULL, /* fetch_register */
   mips_get_pc,
   mips_set_pc,
   (const unsigned char *) &mips_breakpoint,

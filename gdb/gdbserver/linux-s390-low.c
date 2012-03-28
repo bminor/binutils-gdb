@@ -464,6 +464,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   s390_cannot_fetch_register,
   s390_cannot_store_register,
+  NULL, /* fetch_register */
   s390_get_pc,
   s390_set_pc,
   s390_breakpoint,

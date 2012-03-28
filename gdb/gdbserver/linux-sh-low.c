@@ -115,6 +115,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   sh_cannot_fetch_register,
   sh_cannot_store_register,
+  NULL, /* fetch_register */
   sh_get_pc,
   sh_set_pc,
   (const unsigned char *) &sh_breakpoint,

@@ -182,6 +182,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   m68k_cannot_fetch_register,
   m68k_cannot_store_register,
+  NULL, /* fetch_register */
   m68k_get_pc,
   m68k_set_pc,
   m68k_breakpoint,

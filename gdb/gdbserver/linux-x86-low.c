@@ -2969,6 +2969,7 @@ struct linux_target_ops the_low_target =
   NULL,
   NULL,
   NULL,
+  NULL, /* fetch_register */
   x86_get_pc,
   x86_set_pc,
   x86_breakpoint,

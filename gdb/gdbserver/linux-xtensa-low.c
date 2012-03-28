@@ -183,6 +183,7 @@ struct linux_target_ops the_low_target = {
   NULL,
   0,
   0,
+  NULL, /* fetch_register */
   xtensa_get_pc,
   xtensa_set_pc,
   xtensa_breakpoint,
