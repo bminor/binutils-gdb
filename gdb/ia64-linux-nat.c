@@ -272,7 +272,7 @@ static int u_offsets[] =
     -1, -1, -1, -1, -1, -1, -1, -1, -1,
     PT_AR_PFS,
     PT_AR_LC,
-    -1,		/* Not available: EC, the Epilog Count register.  */
+    PT_AR_EC,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
