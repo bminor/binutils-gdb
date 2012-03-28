@@ -306,6 +306,8 @@ static struct varobj *varobj_add_child (struct varobj *var,
 
 #endif /* HAVE_PYTHON */
 
+static int default_value_is_changeable_p (struct varobj *var);
+
 /* C implementation */
 
 static int c_number_of_children (struct varobj *var);
@@ -384,6 +386,8 @@ static struct type *ada_type_of_child (struct varobj *parent, int index);
 static char *ada_value_of_variable (struct varobj *var,
 				    enum varobj_display_formats format);
 
+static int ada_value_is_changeable_p (struct varobj *var);
+
 static int ada_value_has_mutated (struct varobj *var, struct value *new_val,
 				  struct type *new_type);
 
@@ -421,6 +425,16 @@ struct language_specific
   char *(*value_of_variable) (struct varobj * var,
 			      enum varobj_display_formats format);
 
+  /* Return non-zero if changes in value of VAR must be detected and
+     reported by -var-update.  Return zero if -var-update should never
+     report changes of such values.  This makes sense for structures
+     (since the changes in children values will be reported separately),
+     or for artifical objects (like 'public' pseudo-field in C++).
+
+     Return value of 0 means that gdb need not call value_fetch_lazy
+     for the value of this variable object.  */
+  int (*value_is_changeable_p) (struct varobj *var);
+
   /* Return nonzero if the type of VAR has mutated.
 
      VAR's value is still the varobj's previous value, while NEW_VALUE
@@ -450,6 +464,7 @@ static struct language_specific languages[vlang_end] = {
    c_value_of_child,
    c_type_of_child,
    c_value_of_variable,
+   default_value_is_changeable_p,
    NULL /* value_has_mutated */}
   ,
   /* C */
@@ -463,6 +478,7 @@ static struct language_specific languages[vlang_end] = {
    c_value_of_child,
    c_type_of_child,
    c_value_of_variable,
+   default_value_is_changeable_p,
    NULL /* value_has_mutated */}
   ,
   /* C++ */
@@ -476,6 +492,7 @@ static struct language_specific languages[vlang_end] = {
    cplus_value_of_child,
    cplus_type_of_child,
    cplus_value_of_variable,
+   default_value_is_changeable_p,
    NULL /* value_has_mutated */}
   ,
   /* Java */
@@ -489,6 +506,7 @@ static struct language_specific languages[vlang_end] = {
    java_value_of_child,
    java_type_of_child,
    java_value_of_variable,
+   default_value_is_changeable_p,
    NULL /* value_has_mutated */},
   /* Ada */
   {
@@ -501,6 +519,7 @@ static struct language_specific languages[vlang_end] = {
    ada_value_of_child,
    ada_type_of_child,
    ada_value_of_variable,
+   ada_value_is_changeable_p,
    ada_value_has_mutated}
 };
 
@@ -700,11 +719,11 @@ varobj_create (char *objname,
       else 
 	var->type = value_type (value);
 
-      install_new_value (var, value, 1 /* Initial assignment */);
-
       /* Set language info */
       lang = variable_language (var);
       var->root->lang = &languages[lang];
+
+      install_new_value (var, value, 1 /* Initial assignment */);
 
       /* Set ourselves as our root.  */
       var->root->rootvar = var;
@@ -2905,62 +2924,12 @@ varobj_editable_p (struct varobj *var)
     }
 }
 
-/* Return non-zero if changes in value of VAR
-   must be detected and reported by -var-update.
-   Return zero is -var-update should never report
-   changes of such values.  This makes sense for structures
-   (since the changes in children values will be reported separately),
-   or for artifical objects (like 'public' pseudo-field in C++).
+/* Call VAR's value_is_changeable_p language-specific callback.  */
 
-   Return value of 0 means that gdb need not call value_fetch_lazy
-   for the value of this variable object.  */
 static int
 varobj_value_is_changeable_p (struct varobj *var)
 {
-  int r;
-  struct type *type;
-
-  if (CPLUS_FAKE_CHILD (var))
-    return 0;
-
-  /* FIXME: This, and the check above, show that this routine
-     should be language-specific.  */
-  if (variable_language (var) == vlang_ada)
-    {
-      struct type *type = var->value ? value_type (var->value) : var->type;
-
-      if (ada_is_array_descriptor_type (type)
-	  && TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
-	{
-	  /* This is in reality a pointer to an unconstrained array.
-	     its value is changeable.  */
-	  return 1;
-	}
-
-      if (ada_is_string_type (type))
-	{
-	  /* We display the contents of the string in the array's
-	     "value" field.  The contents can change, so consider
-	     that the array is changeable.  */
-	  return 1;
-	}
-    }
-
-  type = get_value_type (var);
-
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-    case TYPE_CODE_ARRAY:
-      r = 0;
-      break;
-
-    default:
-      r = 1;
-    }
-
-  return r;
+  return var->root->lang->value_is_changeable_p (var);
 }
 
 /* Return 1 if that varobj is floating, that is is always evaluated in the
@@ -3037,7 +3006,37 @@ adjust_value_for_child_access (struct value **value,
      need to call check_typedef here.  */
 }
 
+/* Implement the "value_is_changeable_p" varobj callback for most
+   languages.  */
+
+static int
+default_value_is_changeable_p (struct varobj *var)
+{
+  int r;
+  struct type *type;
+
+  if (CPLUS_FAKE_CHILD (var))
+    return 0;
+
+  type = get_value_type (var);
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_ARRAY:
+      r = 0;
+      break;
+
+    default:
+      r = 1;
+    }
+
+  return r;
+}
+
 /* C */
+
 static int
 c_number_of_children (struct varobj *var)
 {
@@ -3965,6 +3964,32 @@ ada_value_of_variable (struct varobj *var, enum varobj_display_formats format)
   opts.raw = 1;
 
   return ada_varobj_get_value_of_variable (var->value, var->type, &opts);
+}
+
+/* Implement the "value_is_changeable_p" routine for Ada.  */
+
+static int
+ada_value_is_changeable_p (struct varobj *var)
+{
+  struct type *type = var->value ? value_type (var->value) : var->type;
+
+  if (ada_is_array_descriptor_type (type)
+      && TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+    {
+      /* This is in reality a pointer to an unconstrained array.
+	 its value is changeable.  */
+      return 1;
+    }
+
+  if (ada_is_string_type (type))
+    {
+      /* We display the contents of the string in the array's
+	 "value" field.  The contents can change, so consider
+	 that the array is changeable.  */
+      return 1;
+    }
+
+  return default_value_is_changeable_p (var);
 }
 
 /* Implement the "value_has_mutated" routine for Ada.  */
