@@ -29382,6 +29382,12 @@ This is only present if the varobj is still valid.  If the type
 changed, then this will be the string @samp{true}; otherwise it will
 be @samp{false}.
 
+When a varobj's type changes, its children are also likely to have
+become incorrect.  Therefore, the varobj's children are automatically
+deleted when this attribute is @samp{true}.  Also, the varobj's update
+range, when set using the @code{-var-set-update-range} command, is
+unset.
+
 @item new_type
 If the varobj's type changed, then this field will be present and will
 hold the new type.

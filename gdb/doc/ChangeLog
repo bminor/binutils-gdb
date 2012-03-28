@@ -1,3 +1,9 @@
+2012-03-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Document what happens
+	to the children of a varobj and its update range when -var-update
+	returns that the varobj's type changed.
+
 2012-03-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Auto-loading): Move @menu to the end of @node.
