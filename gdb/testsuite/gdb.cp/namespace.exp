@@ -138,6 +138,11 @@ gdb_test "print AAA::xyzq('x')" \
 gdb_test "break AAA::xyzq" \
     "Breakpoint.*at $hex: file.*namespace.cc, line 47\\."
 
+# Break on a function in the global namespace.
+
+gdb_test "break ::ensureOtherRefs" \
+    "Breakpoint.*at $hex: file.*$srcfile1, line $decimal\\."
+
 # Call a function in a nested namespace
 
 gdb_test "print 'BBB::CCC::xyzq'('x')" \
@@ -152,6 +157,11 @@ gdb_test "print BBB::CCC::xyzq('x')" \
 
 gdb_test "break BBB::CCC::xyzq" \
     "Breakpoint.*at $hex: file.*namespace.cc, line 63\\."
+
+# Break on the same function, starting with the global namespace.
+
+gdb_test "break ::BBB::CCC::xyzq" \
+    ".*Breakpoint.*at $hex: file.*$srcfile, line 63\\."
 
 # Print address of a function in a class in a namespace
 

@@ -1,3 +1,8 @@
+2012-03-26  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/namespace.exp: Add breakpoint tests for functions
+	starting with the global namespace.
+
 2012-03-23  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (BUILD_DATA_DIRECTORY): New global.
