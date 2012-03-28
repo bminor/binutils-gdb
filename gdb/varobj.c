@@ -382,6 +382,9 @@ static struct type *ada_type_of_child (struct varobj *parent, int index);
 static char *ada_value_of_variable (struct varobj *var,
 				    enum varobj_display_formats format);
 
+static int ada_value_has_mutated (struct varobj *var, struct value *new_val,
+				  struct type *new_type);
+
 /* The language specific vector */
 
 struct language_specific
@@ -415,6 +418,21 @@ struct language_specific
   /* The current value of VAR.  */
   char *(*value_of_variable) (struct varobj * var,
 			      enum varobj_display_formats format);
+
+  /* Return nonzero if the type of VAR has mutated.
+
+     VAR's value is still the varobj's previous value, while NEW_VALUE
+     is VAR's new value and NEW_TYPE is the var's new type.  NEW_VALUE
+     may be NULL indicating that there is no value available (the varobj
+     may be out of scope, of may be the child of a null pointer, for
+     instance).  NEW_TYPE, on the other hand, must never be NULL.
+
+     This function should also be able to assume that var's number of
+     children is set (not < 0).
+
+     Languages where types do not mutate can set this to NULL.  */
+  int (*value_has_mutated) (struct varobj *var, struct value *new_value,
+			    struct type *new_type);
 };
 
 /* Array of known source language routines.  */
@@ -429,7 +447,8 @@ static struct language_specific languages[vlang_end] = {
    c_value_of_root,
    c_value_of_child,
    c_type_of_child,
-   c_value_of_variable}
+   c_value_of_variable,
+   NULL /* value_has_mutated */}
   ,
   /* C */
   {
@@ -441,7 +460,8 @@ static struct language_specific languages[vlang_end] = {
    c_value_of_root,
    c_value_of_child,
    c_type_of_child,
-   c_value_of_variable}
+   c_value_of_variable,
+   NULL /* value_has_mutated */}
   ,
   /* C++ */
   {
@@ -453,7 +473,8 @@ static struct language_specific languages[vlang_end] = {
    cplus_value_of_root,
    cplus_value_of_child,
    cplus_type_of_child,
-   cplus_value_of_variable}
+   cplus_value_of_variable,
+   NULL /* value_has_mutated */}
   ,
   /* Java */
   {
@@ -465,7 +486,8 @@ static struct language_specific languages[vlang_end] = {
    java_value_of_root,
    java_value_of_child,
    java_type_of_child,
-   java_value_of_variable},
+   java_value_of_variable,
+   NULL /* value_has_mutated */},
   /* Ada */
   {
    vlang_ada,
@@ -476,7 +498,8 @@ static struct language_specific languages[vlang_end] = {
    ada_value_of_root,
    ada_value_of_child,
    ada_type_of_child,
-   ada_value_of_variable}
+   ada_value_of_variable,
+   ada_value_has_mutated}
 };
 
 /* A little convenience enum for dealing with C++/Java.  */
@@ -1824,6 +1847,30 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
 #endif
 }
 
+/* If NEW_VALUE is the new value of the given varobj (var), return
+   non-zero if var has mutated.  In other words, if the type of
+   the new value is different from the type of the varobj's old
+   value.
+
+   NEW_VALUE may be NULL, if the varobj is now out of scope.  */
+
+static int
+varobj_value_has_mutated (struct varobj *var, struct value *new_value,
+			  struct type *new_type)
+{
+  /* If we haven't previously computed the number of children in var,
+     it does not matter from the front-end's perspective whether
+     the type has mutated or not.  For all intents and purposes,
+     it has not mutated.  */
+  if (var->num_children < 0)
+    return 0;
+
+  if (var->root->lang->value_has_mutated)
+    return var->root->lang->value_has_mutated (var, new_value, new_type);
+  else
+    return 0;
+}
+
 /* Update the values for a variable and its children.  This is a
    two-pronged attack.  First, re-parse the value for the root's
    expression to see if it's changed.  Then go all the way
@@ -1918,9 +1965,28 @@ varobj_update (struct varobj **varp, int explicit)
       /* Update this variable, unless it's a root, which is already
 	 updated.  */
       if (!r.value_installed)
-	{	  
+	{
+	  struct type *new_type;
+
 	  new = value_of_child (v->parent, v->index);
-	  if (install_new_value (v, new, 0 /* type not changed */))
+	  if (new)
+	    new_type = value_type (new);
+	  else
+	    new_type = v->root->lang->type_of_child (v->parent, v->index);
+
+	  if (varobj_value_has_mutated (v, new, new_type))
+	    {
+	      /* The children are no longer valid; delete them now.
+	         Report the fact that its type changed as well.  */
+	      varobj_delete (v, NULL, 1 /* only_children */);
+	      v->num_children = -1;
+	      v->to = -1;
+	      v->from = -1;
+	      v->type = new_type;
+	      r.type_changed = 1;
+	    }
+
+	  if (install_new_value (v, new, r.type_changed))
 	    {
 	      r.changed = 1;
 	      v->updated = 0;
@@ -2627,7 +2693,28 @@ value_of_root (struct varobj **var_handle, int *type_changed)
       *type_changed = 0;
     }
 
-  return (*var->root->lang->value_of_root) (var_handle);
+  {
+    struct value *value;
+
+    value = (*var->root->lang->value_of_root) (var_handle);
+    if (var->value == NULL || value == NULL)
+      {
+	/* For root varobj-s, a NULL value indicates a scoping issue.
+	   So, nothing to do in terms of checking for mutations.  */
+      }
+    else if (varobj_value_has_mutated (var, value, value_type (value)))
+      {
+	/* The type has mutated, so the children are no longer valid.
+	   Just delete them, and tell our caller that the type has
+	   changed.  */
+	varobj_delete (var, NULL, 1 /* only_children */);
+	var->num_children = -1;
+	var->to = -1;
+	var->from = -1;
+	*type_changed = 1;
+      }
+    return value;
+  }
 }
 
 /* What is the ``struct value *'' for the INDEX'th child of PARENT?  */
@@ -3837,6 +3924,16 @@ static char *
 ada_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 {
   return c_value_of_variable (var, format);
+}
+
+/* Implement the "value_has_mutated" routine for Ada.  */
+
+static int
+ada_value_has_mutated (struct varobj *var, struct value *new_val,
+		       struct type *new_type)
+{
+  /* Unimplemented for now.  */
+  return 0;
 }
 
 /* Iterate all the existing _root_ VAROBJs and call the FUNC callback for them

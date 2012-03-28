@@ -1,3 +1,13 @@
+2012-03-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* varobj.c (ada_value_has_mutated): Add declaration.  New function.
+	(struct language_specific): New field "value_has_mutated".
+	(languages): Set field "value_has_mutated" in each entry of array.
+	(varobj_value_has_mutated): New function.
+	(varobj_udpdate): Add handling of type mutation.
+	(value_of_root): Add handling of type mutation.
+	(ada_value_has_mutated): New function.
+
 2012-03-28  Pedro Alves  <palves@redhat.com>
 
 	* ia64-linux-nat.c (supply_fpregset, ia64_linux_fetch_register):
