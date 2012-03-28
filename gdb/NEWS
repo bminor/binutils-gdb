@@ -80,6 +80,8 @@
   the ability to set breakpoints on inlined functions will be lost
   in symbol files with older .gdb_index sections.
 
+* Ada support for GDB/MI Variable Objects has been added.
+
 * New commands
 
   ** "catch load" and "catch unload" can be used to stop when a shared

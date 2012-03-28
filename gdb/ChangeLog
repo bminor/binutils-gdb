@@ -1,5 +1,9 @@
 2012-03-28  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Add entry for Ada varobj support.
+
+2012-03-28  Joel Brobecker  <brobecker@adacore.com>
+
 	* varobj.c (default_value_is_changeable_p): New function,
 	extracted from varobj_value_is_changeable_p.  Add declaration.
 	(ada_value_is_changeable_p): New function, extracted from
