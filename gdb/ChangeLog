@@ -1,3 +1,8 @@
+2012-03-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h (struct ada_symbol_info): Reformat.  Improve
+	documentation.
+
 2012-03-28  Rathish C  <rathish.c@kpitcummins.com>
 
 	* v850-tdep.c: Add the enum values for mpu and fpu registers.
