@@ -2,6 +2,14 @@
 	    Andrey Smirnov  <andrew.smirnov@gmail.com>
 
 	-Wshadow warning fix.
+	* ada-lang.c (ada_add_local_symbols): Rename "wild_match"
+	parameter into "wild_match_p".  Adjust code accordingly.
+	Document this parameter in the function description.
+
+2012-03-29  Joel Brobecker  <brobecker@adacore.com>
+	    Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	-Wshadow warning fix.
 	* ada-lang.c (add_symbols_from_enclosing_procs): Rename
 	"wild_match" parameter to "wild_match_p" (-Wshadow).
 

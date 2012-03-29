@@ -4882,20 +4882,23 @@ remove_irrelevant_renamings (struct ada_symbol_info *syms,
    If no match was found, then extend the search to "enclosing"
    routines (in other words, if we're inside a nested function,
    search the symbols defined inside the enclosing functions).
+   If WILD_MATCH_P is nonzero, perform the naming matching in
+   "wild" mode (see function "wild_match" for more info).
 
    Note: This function assumes that OBSTACKP has 0 (zero) element in it.  */
 
 static void
 ada_add_local_symbols (struct obstack *obstackp, const char *name,
                        struct block *block, domain_enum domain,
-                       int wild_match)
+                       int wild_match_p)
 {
   int block_depth = 0;
 
   while (block != NULL)
     {
       block_depth += 1;
-      ada_add_block_symbols (obstackp, block, name, domain, NULL, wild_match);
+      ada_add_block_symbols (obstackp, block, name, domain, NULL,
+			     wild_match_p);
 
       /* If we found a non-function match, assume that's the one.  */
       if (is_nonfunction (defns_collected (obstackp, 0),
@@ -4908,7 +4911,7 @@ ada_add_local_symbols (struct obstack *obstackp, const char *name,
   /* If no luck so far, try to find NAME as a local symbol in some lexically
      enclosing subprogram.  */
   if (num_defns_collected (obstackp) == 0 && block_depth > 2)
-    add_symbols_from_enclosing_procs (obstackp, name, domain, wild_match);
+    add_symbols_from_enclosing_procs (obstackp, name, domain, wild_match_p);
 }
 
 /* An object of this type is used as the user_data argument when
