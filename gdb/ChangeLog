@@ -1,4 +1,11 @@
 2012-03-29  Joel Brobecker  <brobecker@adacore.com>
+	    Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	-Wshadow warning fix.
+	* ada-lang.c (add_symbols_from_enclosing_procs): Rename
+	"wild_match" parameter to "wild_match_p" (-Wshadow).
+
+2012-03-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_lookup_simple_minsym): Remove trailing spaces
 	in function documentation.

@@ -4439,13 +4439,13 @@ ada_lookup_simple_minsym (const char *name)
 /* For all subprograms that statically enclose the subprogram of the
    selected frame, add symbols matching identifier NAME in DOMAIN
    and their blocks to the list of data in OBSTACKP, as for
-   ada_add_block_symbols (q.v.).   If WILD, treat as NAME with a
-   wildcard prefix.  */
+   ada_add_block_symbols (q.v.).   If WILD_MATCH_P, treat as NAME
+   with a wildcard prefix.  */
 
 static void
 add_symbols_from_enclosing_procs (struct obstack *obstackp,
                                   const char *name, domain_enum namespace,
-                                  int wild_match)
+                                  int wild_match_p)
 {
 }
 
