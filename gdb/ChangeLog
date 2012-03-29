@@ -2,6 +2,14 @@
 	    Andrey Smirnov  <andrew.smirnov@gmail.com>
 
 	-Wshadow warning fix.
+	* ada-lang.c (symbol_completion_match): Rename parameter
+	"wild_match" into "wild_match_p".  Adjust code and function
+	documentation accordingly.
+
+2012-03-29  Joel Brobecker  <brobecker@adacore.com>
+	    Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	-Wshadow warning fix.
 	* ada-lang.c (ada_lookup_encoded_symbol): Rename parameter
 	"symbol_info" into "info".  Adjust code accordingly.
 	(ada_lookup_symbol): Likewise.

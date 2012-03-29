@@ -5640,14 +5640,14 @@ ada_add_block_symbols (struct obstack *obstackp,
    does not need to be deallocated, but is only good until the next call.
 
    TEXT_LEN is equal to the length of TEXT.
-   Perform a wild match if WILD_MATCH is set.
+   Perform a wild match if WILD_MATCH_P is set.
    ENCODED should be set if TEXT represents the start of a symbol name
    in its encoded form.  */
 
 static const char *
 symbol_completion_match (const char *sym_name,
                          const char *text, int text_len,
-                         int wild_match, int encoded)
+                         int wild_match_p, int encoded)
 {
   const int verbatim_match = (text[0] == '<');
   int match = 0;
@@ -5695,7 +5695,7 @@ symbol_completion_match (const char *sym_name,
 
   /* Second: Try wild matching...  */
 
-  if (!match && wild_match)
+  if (!match && wild_match_p)
     {
       /* Since we are doing wild matching, this means that TEXT
          may represent an unqualified symbol name.  We therefore must
