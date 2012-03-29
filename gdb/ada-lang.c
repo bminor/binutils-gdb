@@ -4405,8 +4405,8 @@ defns_collected (struct obstack *obstackp, int finish)
 }
 
 /* Return a minimal symbol matching NAME according to Ada decoding
-   rules.  Returns NULL if there is no such minimal symbol.  Names 
-   prefixed with "standard__" are handled specially: "standard__" is 
+   rules.  Returns NULL if there is no such minimal symbol.  Names
+   prefixed with "standard__" are handled specially: "standard__" is
    first stripped off, and only static and global symbols are searched.  */
 
 struct minimal_symbol *
