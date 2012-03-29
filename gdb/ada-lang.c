@@ -5731,7 +5731,7 @@ symbol_completion_match (const char *sym_name,
    determine which part of the symbol name should be added to the
    completion vector.
    if WILD_MATCH_P is set, then wild matching is performed.
-   ENCODED should be set if TEXT represents a symbol name in its
+   ENCODED_P should be set if TEXT represents a symbol name in its
    encoded formed (in which case the completion should also be
    encoded).  */
 
@@ -5740,10 +5740,10 @@ symbol_completion_add (VEC(char_ptr) **sv,
                        const char *sym_name,
                        const char *text, int text_len,
                        const char *orig_text, const char *word,
-                       int wild_match_p, int encoded)
+                       int wild_match_p, int encoded_p)
 {
   const char *match = symbol_completion_match (sym_name, text, text_len,
-                                               wild_match_p, encoded);
+                                               wild_match_p, encoded_p);
   char *completion;
 
   if (match == NULL)
