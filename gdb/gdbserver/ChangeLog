@@ -1,3 +1,8 @@
+2012-03-29  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (regsets_store_inferior_registers) [__sparc__]:
+	Correct ptrace arguments.
+
 2012-03-28  Pedro Alves  <palves@redhat.com>
 
 	* linux-ia64-low.c (ia64_regmap): Map IA64_EC_REGNUM to PT_AR_EC.

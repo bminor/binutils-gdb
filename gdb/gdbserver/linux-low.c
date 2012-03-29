@@ -4036,7 +4036,7 @@ regsets_store_inferior_registers (struct regcache *regcache)
 #ifndef __sparc__
       res = ptrace (regset->get_request, pid, nt_type, data);
 #else
-      res = ptrace (regset->get_request, pid, &iov, data);
+      res = ptrace (regset->get_request, pid, data, nt_type);
 #endif
 
       if (res == 0)
