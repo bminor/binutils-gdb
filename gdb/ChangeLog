@@ -1,5 +1,16 @@
 2012-03-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_lookup_encoded_symbol): Now returns void.
+	Replace block_found argument by symbol_info.  Adjust
+	implementation accordingly.  Add function documentation.
+	(ada_lookup_symbol): Adjust to new ada_lookup_encoded_symbol.
+	Fix documentation.
+	* ada-lang.h (ada_lookup_encoded_symbol): Update declaration.
+	* ada-exp.y (write_object_renaming): Adjust to new
+	ada_lookup_encoded_symbol API.
+
+2012-03-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (struct ada_symbol_info): Reformat.  Improve
 	documentation.
 

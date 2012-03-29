@@ -235,9 +235,9 @@ extern char *ada_fold_name (const char *);
 extern struct symbol *ada_lookup_symbol (const char *, const struct block *,
                                          domain_enum, int *);
 
-extern struct symbol *
-ada_lookup_encoded_symbol (const char *, const struct block *,
-			   domain_enum namespace, struct block **);
+extern void ada_lookup_encoded_symbol
+  (const char *name, const struct block *block, domain_enum namespace,
+   struct ada_symbol_info *symbol_info);
 
 extern struct minimal_symbol *ada_lookup_simple_minsym (const char *);
 

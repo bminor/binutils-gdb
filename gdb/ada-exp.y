@@ -867,8 +867,7 @@ write_object_renaming (struct block *orig_left_context,
 {
   char *name;
   enum { SIMPLE_INDEX, LOWER_BOUND, UPPER_BOUND } slice_state;
-  struct symbol *sym;
-  struct block *block;
+  struct ada_symbol_info sym_info;
 
   if (max_depth <= 0)
     error (_("Could not find renamed symbol"));
@@ -877,29 +876,28 @@ write_object_renaming (struct block *orig_left_context,
     orig_left_context = get_selected_block (NULL);
 
   name = obsavestring (renamed_entity, renamed_entity_len, &temp_parse_space);
-  sym = ada_lookup_encoded_symbol (name, orig_left_context, VAR_DOMAIN, 
-				   &block);
-  if (sym == NULL)
+  ada_lookup_encoded_symbol (name, orig_left_context, VAR_DOMAIN, &sym_info);
+  if (sym_info.sym == NULL)
     error (_("Could not find renamed variable: %s"), ada_decode (name));
-  else if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+  else if (SYMBOL_CLASS (sym_info.sym) == LOC_TYPEDEF)
     /* We have a renaming of an old-style renaming symbol.  Don't
        trust the block information.  */
-    block = orig_left_context;
+    sym_info.block = orig_left_context;
 
   {
     const char *inner_renamed_entity;
     int inner_renamed_entity_len;
     const char *inner_renaming_expr;
 
-    switch (ada_parse_renaming (sym, &inner_renamed_entity, 
+    switch (ada_parse_renaming (sym_info.sym, &inner_renamed_entity,
 				&inner_renamed_entity_len,
 				&inner_renaming_expr))
       {
       case ADA_NOT_RENAMING:
-	write_var_from_sym (orig_left_context, block, sym);
+	write_var_from_sym (orig_left_context, sym_info.block, sym_info.sym);
 	break;
       case ADA_OBJECT_RENAMING:
-	write_object_renaming (block,
+	write_object_renaming (sym_info.block,
 			       inner_renamed_entity, inner_renamed_entity_len,
 			       inner_renaming_expr, max_depth - 1);
 	break;
@@ -939,7 +937,7 @@ write_object_renaming (struct block *orig_left_context,
 	  {
 	    const char *end;
 	    char *index_name;
-	    struct symbol *index_sym;
+	    struct ada_symbol_info index_sym_info;
 
 	    end = strchr (renaming_expr, 'X');
 	    if (end == NULL)
@@ -950,14 +948,15 @@ write_object_renaming (struct block *orig_left_context,
 			    &temp_parse_space);
 	    renaming_expr = end;
 
-	    index_sym = ada_lookup_encoded_symbol (index_name, NULL,
-						   VAR_DOMAIN, &block);
-	    if (index_sym == NULL)
+	    ada_lookup_encoded_symbol (index_name, NULL, VAR_DOMAIN,
+				       &index_sym_info);
+	    if (index_sym_info.sym == NULL)
 	      error (_("Could not find %s"), index_name);
-	    else if (SYMBOL_CLASS (index_sym) == LOC_TYPEDEF)
+	    else if (SYMBOL_CLASS (index_sym_info.sym) == LOC_TYPEDEF)
 	      /* Index is an old-style renaming symbol.  */
-	      block = orig_left_context;
-	    write_var_from_sym (NULL, block, index_sym);
+	      index_sym_info.block = orig_left_context;
+	    write_var_from_sym (NULL, index_sym_info.block,
+				index_sym_info.sym);
 	  }
 	if (slice_state == SIMPLE_INDEX)
 	  {

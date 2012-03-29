@@ -5191,42 +5191,52 @@ ada_iterate_over_symbols (const struct block *block,
     }
 }
 
-struct symbol *
-ada_lookup_encoded_symbol (const char *name, const struct block *block0,
-			   domain_enum namespace, struct block **block_found)
+/* The result is as for ada_lookup_symbol_list with FULL_SEARCH set
+   to 1, but choosing the first symbol found if there are multiple
+   choices.
+
+   The result is stored in *SYMBOL_INFO, which must be non-NULL.
+   If no match is found, SYMBOL_INFO->SYM is set to NULL.  */
+
+void
+ada_lookup_encoded_symbol (const char *name, const struct block *block,
+			   domain_enum namespace,
+			   struct ada_symbol_info *symbol_info)
 {
   struct ada_symbol_info *candidates;
   int n_candidates;
 
-  n_candidates = ada_lookup_symbol_list (name, block0, namespace, &candidates,
+  gdb_assert (symbol_info != NULL);
+  memset (symbol_info, 0, sizeof (struct ada_symbol_info));
+
+  n_candidates = ada_lookup_symbol_list (name, block, namespace, &candidates,
 					 1);
 
   if (n_candidates == 0)
-    return NULL;
+    return;
 
-  if (block_found != NULL)
-    *block_found = candidates[0].block;
-
-  return fixup_symbol_section (candidates[0].sym, NULL);
-}  
+  *symbol_info = candidates[0];
+  symbol_info->sym = fixup_symbol_section (symbol_info->sym, NULL);
+}
 
 /* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing
    scope and in global scopes, or NULL if none.  NAME is folded and
    encoded first.  Otherwise, the result is as for ada_lookup_symbol_list,
    choosing the first symbol if there are multiple choices.
-   *IS_A_FIELD_OF_THIS is set to 0 and *SYMTAB is set to the symbol
-   table in which the symbol was found (in both cases, these
-   assignments occur only if the pointers are non-null).  */
+   If IS_A_FIELD_OF_THIS is not NULL, it is set to zero.  */
+
 struct symbol *
 ada_lookup_symbol (const char *name, const struct block *block0,
                    domain_enum namespace, int *is_a_field_of_this)
 {
+  struct ada_symbol_info symbol_info;
+
   if (is_a_field_of_this != NULL)
     *is_a_field_of_this = 0;
 
-  return
-    ada_lookup_encoded_symbol (ada_encode (ada_fold_name (name)),
-			       block0, namespace, NULL);
+  ada_lookup_encoded_symbol (ada_encode (ada_fold_name (name)),
+			     block0, namespace, &symbol_info);
+  return symbol_info.sym;
 }
 
 static struct symbol *
