@@ -1,4 +1,12 @@
 2012-03-29  Joel Brobecker  <brobecker@adacore.com>
+	    Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	-Wshadow warning fix.
+	* ada-lang.c (ada_lookup_encoded_symbol): Rename parameter
+	"symbol_info" into "info".  Adjust code accordingly.
+	(ada_lookup_symbol): Likewise.
+
+2012-03-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_lookup_symbol_list): Minor reformatting
 	of this function's documentation.

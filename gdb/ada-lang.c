@@ -5198,19 +5198,19 @@ ada_iterate_over_symbols (const struct block *block,
    to 1, but choosing the first symbol found if there are multiple
    choices.
 
-   The result is stored in *SYMBOL_INFO, which must be non-NULL.
-   If no match is found, SYMBOL_INFO->SYM is set to NULL.  */
+   The result is stored in *INFO, which must be non-NULL.
+   If no match is found, INFO->SYM is set to NULL.  */
 
 void
 ada_lookup_encoded_symbol (const char *name, const struct block *block,
 			   domain_enum namespace,
-			   struct ada_symbol_info *symbol_info)
+			   struct ada_symbol_info *info)
 {
   struct ada_symbol_info *candidates;
   int n_candidates;
 
-  gdb_assert (symbol_info != NULL);
-  memset (symbol_info, 0, sizeof (struct ada_symbol_info));
+  gdb_assert (info != NULL);
+  memset (info, 0, sizeof (struct ada_symbol_info));
 
   n_candidates = ada_lookup_symbol_list (name, block, namespace, &candidates,
 					 1);
@@ -5218,8 +5218,8 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
   if (n_candidates == 0)
     return;
 
-  *symbol_info = candidates[0];
-  symbol_info->sym = fixup_symbol_section (symbol_info->sym, NULL);
+  *info = candidates[0];
+  info->sym = fixup_symbol_section (info->sym, NULL);
 }
 
 /* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing
@@ -5232,14 +5232,14 @@ struct symbol *
 ada_lookup_symbol (const char *name, const struct block *block0,
                    domain_enum namespace, int *is_a_field_of_this)
 {
-  struct ada_symbol_info symbol_info;
+  struct ada_symbol_info info;
 
   if (is_a_field_of_this != NULL)
     *is_a_field_of_this = 0;
 
   ada_lookup_encoded_symbol (ada_encode (ada_fold_name (name)),
-			     block0, namespace, &symbol_info);
-  return symbol_info.sym;
+			     block0, namespace, &info);
+  return info.sym;
 }
 
 static struct symbol *
