@@ -1,6 +1,13 @@
 2012-03-29  Joel Brobecker  <brobecker@adacore.com>
 	    Andrey Smirnov  <andrew.smirnov@gmail.com>
 
+	-Wshadow warning fix.
+	* ada-lang.c (ada_lookup_simple_minsym): Rename wild_match local
+	variable into wild_match_p.  Adjust code accordingly.
+
+2012-03-29  Joel Brobecker  <brobecker@adacore.com>
+	    Andrey Smirnov  <andrew.smirnov@gmail.com>
+
 	* ada-valprint.c (ada_val_print_1): Move the code handling
 	TYPE_CODE_ENUM inside its own lexical block.  Declare
 	variables len and val there, instead of in the function's

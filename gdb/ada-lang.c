@@ -4414,7 +4414,7 @@ ada_lookup_simple_minsym (const char *name)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
-  const int wild_match = should_use_wild_match (name);
+  const int wild_match_p = should_use_wild_match (name);
 
   /* Special case: If the user specifies a symbol name inside package
      Standard, do a non-wild matching of the symbol name without
@@ -4428,7 +4428,7 @@ ada_lookup_simple_minsym (const char *name)
 
   ALL_MSYMBOLS (objfile, msymbol)
   {
-    if (match_name (SYMBOL_LINKAGE_NAME (msymbol), name, wild_match)
+    if (match_name (SYMBOL_LINKAGE_NAME (msymbol), name, wild_match_p)
         && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
       return msymbol;
   }
