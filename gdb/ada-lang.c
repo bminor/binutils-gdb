@@ -5641,13 +5641,13 @@ ada_add_block_symbols (struct obstack *obstackp,
 
    TEXT_LEN is equal to the length of TEXT.
    Perform a wild match if WILD_MATCH_P is set.
-   ENCODED should be set if TEXT represents the start of a symbol name
+   ENCODED_P should be set if TEXT represents the start of a symbol name
    in its encoded form.  */
 
 static const char *
 symbol_completion_match (const char *sym_name,
                          const char *text, int text_len,
-                         int wild_match_p, int encoded)
+                         int wild_match_p, int encoded_p)
 {
   const int verbatim_match = (text[0] == '<');
   int match = 0;
@@ -5664,7 +5664,7 @@ symbol_completion_match (const char *sym_name,
   if (strncmp (sym_name, text, text_len) == 0)
     match = 1;
 
-  if (match && !encoded)
+  if (match && !encoded_p)
     {
       /* One needed check before declaring a positive match is to verify
          that iff we are doing a verbatim match, the decoded version
@@ -5714,7 +5714,7 @@ symbol_completion_match (const char *sym_name,
   if (verbatim_match)
     sym_name = add_angle_brackets (sym_name);
 
-  if (!encoded)
+  if (!encoded_p)
     sym_name = ada_decode (sym_name);
 
   return sym_name;
