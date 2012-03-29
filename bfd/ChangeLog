@@ -1,3 +1,8 @@
+2012-03-30  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_gc_mark_reloc): Don't delve into dynamic
+	libraries.
+
 2012-03-29  Alan Modra  <amodra@gmail.com>
 
 	* bfd-in.h (bfd_get_arch_size, bfd_get_sign_extend_vma): Delete.
