@@ -5807,8 +5807,8 @@ ada_make_symbol_completion_list (char *text0, char *word)
 {
   char *text;
   int text_len;
-  int wild_match;
-  int encoded;
+  int wild_match_p;
+  int encoded_p;
   VEC(char_ptr) *completions = VEC_alloc (char_ptr, 128);
   struct symbol *sym;
   struct symtab *s;
@@ -5823,8 +5823,8 @@ ada_make_symbol_completion_list (char *text0, char *word)
       text = xstrdup (text0);
       make_cleanup (xfree, text);
       text_len = strlen (text);
-      wild_match = 0;
-      encoded = 1;
+      wild_match_p = 0;
+      encoded_p = 1;
     }
   else
     {
@@ -5834,12 +5834,12 @@ ada_make_symbol_completion_list (char *text0, char *word)
       for (i = 0; i < text_len; i++)
         text[i] = tolower (text[i]);
 
-      encoded = (strstr (text0, "__") != NULL);
+      encoded_p = (strstr (text0, "__") != NULL);
       /* If the name contains a ".", then the user is entering a fully
          qualified entity name, and the match must not be done in wild
          mode.  Similarly, if the user wants to complete what looks like
          an encoded name, the match must not be done in wild mode.  */
-      wild_match = (strchr (text0, '.') == NULL && !encoded);
+      wild_match_p = (strchr (text0, '.') == NULL && !encoded_p);
     }
 
   /* First, look at the partial symtab symbols.  */
@@ -5851,8 +5851,8 @@ ada_make_symbol_completion_list (char *text0, char *word)
     data.text_len = text_len;
     data.text0 = text0;
     data.word = word;
-    data.wild_match = wild_match;
-    data.encoded = encoded;
+    data.wild_match = wild_match_p;
+    data.encoded = encoded_p;
     expand_partial_symbol_names (ada_expand_partial_symbol_name, &data);
   }
 
@@ -5865,7 +5865,8 @@ ada_make_symbol_completion_list (char *text0, char *word)
   {
     QUIT;
     symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (msymbol),
-                           text, text_len, text0, word, wild_match, encoded);
+			   text, text_len, text0, word, wild_match_p,
+			   encoded_p);
   }
 
   /* Search upwards from currently selected frame (so that we can
@@ -5880,7 +5881,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
       {
         symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
                                text, text_len, text0, word,
-                               wild_match, encoded);
+                               wild_match_p, encoded_p);
       }
     }
 
@@ -5895,7 +5896,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
     {
       symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
                              text, text_len, text0, word,
-                             wild_match, encoded);
+                             wild_match_p, encoded_p);
     }
   }
 
@@ -5910,7 +5911,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
     {
       symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
                              text, text_len, text0, word,
-                             wild_match, encoded);
+                             wild_match_p, encoded_p);
     }
   }
 
