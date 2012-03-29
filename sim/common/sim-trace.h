@@ -249,8 +249,25 @@ extern void trace_generic PARAMS ((SIM_DESC sd,
 				   ...))
      __attribute__((format (printf, 4, 5)));
 
+typedef enum {
+  trace_fmt_invalid,
+  trace_fmt_word,
+  trace_fmt_fp,
+  trace_fmt_fpu,
+  trace_fmt_string,
+  trace_fmt_bool,
+  trace_fmt_addr,
+  trace_fmt_instruction_incomplete,
+} data_fmt;
+
 /* Trace a varying number of word sized inputs/outputs.  trace_result*
    must be called to close the trace operation. */
+
+extern void save_data PARAMS ((SIM_DESC sd,
+                               TRACE_DATA *data,
+                               data_fmt fmt,
+                               long size,
+                               const void *buf));
 
 extern void trace_input0 PARAMS ((SIM_DESC sd,
 				  sim_cpu *cpu,

@@ -101,7 +101,97 @@ enum
     E_R62_REGNUM,
     E_R63_REGNUM,
     E_R64_REGNUM, E_PC_REGNUM = E_R64_REGNUM,
-    E_R65_REGNUM,
+    E_R65_REGNUM, E_NUM_OF_V850_REGS = E_R65_REGNUM, E_NUM_OF_V850E_REGS = E_R65_REGNUM,
+
+    /* mpu0 system registers */
+    E_R66_REGNUM,
+    E_R67_REGNUM,
+    E_R68_REGNUM,
+    E_R69_REGNUM,
+    E_R70_REGNUM,
+    E_R71_REGNUM,
+    E_R72_REGNUM,
+    E_R73_REGNUM,
+    E_R74_REGNUM,
+    E_R75_REGNUM,
+    E_R76_REGNUM,
+    E_R77_REGNUM,
+    E_R78_REGNUM,
+    E_R79_REGNUM,
+    E_R80_REGNUM,
+    E_R81_REGNUM,
+    E_R82_REGNUM,
+    E_R83_REGNUM,
+    E_R84_REGNUM,
+    E_R85_REGNUM,
+    E_R86_REGNUM,
+    E_R87_REGNUM,
+    E_R88_REGNUM,
+    E_R89_REGNUM,
+    E_R90_REGNUM,
+    E_R91_REGNUM,
+    E_R92_REGNUM,
+    E_R93_REGNUM,
+
+    /* mpu1 system registers */
+
+    E_R94_REGNUM,
+    E_R95_REGNUM,
+    E_R96_REGNUM,
+    E_R97_REGNUM,
+    E_R98_REGNUM,
+    E_R99_REGNUM,
+    E_R100_REGNUM,
+    E_R101_REGNUM,
+    E_R102_REGNUM,
+    E_R103_REGNUM,
+    E_R104_REGNUM,
+    E_R105_REGNUM,
+    E_R106_REGNUM,
+    E_R107_REGNUM,
+    E_R108_REGNUM,
+    E_R109_REGNUM,
+    E_R110_REGNUM,
+    E_R111_REGNUM,
+    E_R112_REGNUM,
+    E_R113_REGNUM,
+    E_R114_REGNUM,
+    E_R115_REGNUM,
+    E_R116_REGNUM,
+    E_R117_REGNUM,
+    E_R118_REGNUM,
+    E_R119_REGNUM,
+    E_R120_REGNUM,
+    E_R121_REGNUM,
+
+    /* fpu system registers */
+    E_R122_REGNUM,
+    E_R123_REGNUM,
+    E_R124_REGNUM,
+    E_R125_REGNUM,
+    E_R126_REGNUM,
+    E_R127_REGNUM,
+    E_R128_REGNUM, E_FPSR_REGNUM = E_R128_REGNUM,
+    E_R129_REGNUM, E_FPEPC_REGNUM = E_R129_REGNUM,
+    E_R130_REGNUM, E_FPST_REGNUM = E_R130_REGNUM,
+    E_R131_REGNUM, E_FPCC_REGNUM = E_R131_REGNUM,
+    E_R132_REGNUM, E_FPCFG_REGNUM = E_R132_REGNUM,
+    E_R133_REGNUM,
+    E_R134_REGNUM,
+    E_R135_REGNUM,
+    E_R136_REGNUM,
+    E_R137_REGNUM,
+    E_R138_REGNUM,
+    E_R139_REGNUM,
+    E_R140_REGNUM,
+    E_R141_REGNUM,
+    E_R142_REGNUM,
+    E_R143_REGNUM,
+    E_R144_REGNUM,
+    E_R145_REGNUM,
+    E_R146_REGNUM,
+    E_R147_REGNUM,
+    E_R148_REGNUM,
     E_NUM_REGS
   };
 
@@ -152,7 +242,7 @@ v850_register_name (struct gdbarch *gdbarch, int regnum)
     "sr24", "sr25", "sr26", "sr27", "sr28", "sr29", "sr30", "sr31",
     "pc", "fp"
   };
-  if (regnum < 0 || regnum >= E_NUM_REGS)
+  if (regnum < 0 || regnum > E_NUM_OF_V850_REGS)
     return NULL;
   return v850_reg_names[regnum];
 }
@@ -172,9 +262,48 @@ v850e_register_name (struct gdbarch *gdbarch, int regnum)
     "sr24", "sr25", "sr26", "sr27", "sr28", "sr29", "sr30", "sr31",
     "pc", "fp"
   };
-  if (regnum < 0 || regnum >= E_NUM_REGS)
+  if (regnum < 0 || regnum > E_NUM_OF_V850E_REGS)
     return NULL;
   return v850e_reg_names[regnum];
+}
+
+static const char *
+v850e2_register_name (struct gdbarch *gdbarch, int regnum)
+{
+  static const char *v850e2_reg_names[] =
+  {
+    "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+    "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
+    "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",
+
+    "eipc", "eipsw", "fepc", "fepsw", "ecr", "psw", "sr6", "sr7",
+    "sr8", "sr9", "sr10", "sr11", "sr12", "sr13", "sr14", "sr15",
+    "ctpc", "ctpsw", "dbpc", "dbpsw", "ctbp", "sr21", "sr22", "sr23",
+    "sr24", "sr25", "sr26", "sr27", "sr28", "sr29", "sr30", "sr31",
+    "pc", "fp"
+
+    /* mpu0 system registers */
+    "vip", "sr33", "sr34", "sr35", "vmecr", "vmtid", "vmadr", "sr39",
+    "vpecr", "vptid", "vpadr", "sr43", "vdecr", "vdtid", "sr46", "sr47",
+    "sr48", "sr49", "sr50", "sr51", "sr52", "sr53", "sr54", "sr55",
+    "sr56", "sr57", "sr58", "sr59",
+
+    /* mpu1 system registers */
+    "mpm", "mpc", "tid", "ppa", "ppm", "ppc", "dcc", "dcv0",
+    "dcv1", "sr69", "spal", "spau", "ipa0l", "ipa0u", "ipa1l", "ipa1u",
+    "iap2l", "ipa2u", "ipa3l", "ipa3u", "dpa0l", "dpa0u", "dpa1l", "dpa1u",
+    "dpa2l", "dpa2u", "dpa3l", "dpa3u",
+
+    /* fpu system registers */
+    "sr88", "sr89", "sr90", "sr91", "sr92", "sr93", "fpsr", "fpepc",
+    "fpst", "fpcc", "fpcfg", "sr99", "sr100", "sr101", "sr102", "sr103",
+    "sr104", "sr105", "sr106", "sr107", "sr108", "sr109", "sr110", "sr111",
+    "sr112", "sr113", "sr114", "sr115"
+  };
+  if (regnum < 0 || regnum >= E_NUM_REGS)
+    return NULL;
+  return v850e2_reg_names[regnum];
 }
 
 /* Returns the default type for register N.  */
@@ -998,6 +1127,10 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_v850e:
     case bfd_mach_v850e1:
       set_gdbarch_register_name (gdbarch, v850e_register_name);
+      break;
+    case bfd_mach_v850e2:
+    case bfd_mach_v850e2v3:
+      set_gdbarch_register_name (gdbarch, v850e2_register_name);
       break;
     }
 

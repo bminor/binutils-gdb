@@ -1,3 +1,10 @@
+2012-03-28  Rathish C  <rathish.c@kpitcummins.com>
+
+	* sim-trace.c: Update the function prototype of save_data_size.
+	Move the enum data_fmt from here...
+	* sim-trace.h: ...to here.
+	Add function prototype of save_data.
+
 2012-03-25  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-core.h (sim_core_trans_addr): Add prototype.

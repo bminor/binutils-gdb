@@ -1,3 +1,12 @@
+2012-03-28  Rathish C  <rathish.c@kpitcummins.com>
+
+	* v850-tdep.c: Add the enum values for mpu and fpu registers.
+	(v850_register_name): Add the mpu and fpu register names.
+	(v850e_register_name): Add the mpu and fpu register names.
+	(v850e2_register_name): New function.
+	(v850_gdbarch_init): Add case for bfd_mach_v850e2 and 
+	bfd_mach_v850e2v3.
+
 2012-03-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Add entry for Ada varobj support.

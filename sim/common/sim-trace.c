@@ -497,17 +497,6 @@ trace_uninstall (SIM_DESC sd)
     }
 }
 
-typedef enum {
-  trace_fmt_invalid,
-  trace_fmt_word,
-  trace_fmt_fp,
-  trace_fmt_fpu,
-  trace_fmt_string,
-  trace_fmt_bool,
-  trace_fmt_addr,
-  trace_fmt_instruction_incomplete,
-} data_fmt;
-
 /* compute the nr of trace data units consumed by data */
 static int
 save_data_size (TRACE_DATA *data,
@@ -519,7 +508,7 @@ save_data_size (TRACE_DATA *data,
 
 
 /* Archive DATA into the trace buffer */
-static void
+void
 save_data (SIM_DESC sd,
 	   TRACE_DATA *data,
 	   data_fmt fmt,
