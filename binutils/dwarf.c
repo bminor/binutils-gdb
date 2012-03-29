@@ -1,5 +1,5 @@
 /* dwarf.c -- display DWARF contents of a BFD binary file
-   Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -5551,6 +5551,9 @@ display_gdb_index (struct dwarf_section *section,
       warn (_("Version 4 does not support case insensitive lookups.\n"));
       break;
     case 5:
+      warn (_("Version 5 does not include inlined functions.\n"));
+      break;
+    case 6:
       break;
     default:
       warn (_("Unsupported version %lu.\n"), (unsigned long) version);

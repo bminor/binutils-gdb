@@ -1,3 +1,7 @@
+2012-03-28  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf.c (display_gdb_index): Handle index version 6.
+
 2012-03-07  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (is_16bit_abs_reloc): Add detection of R_MN10300_16.
