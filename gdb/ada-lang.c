@@ -5050,18 +5050,18 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
 }
 
 /* Find symbols in DOMAIN matching NAME0, in BLOCK0 and enclosing
-   scope and in global scopes, returning the number of matches.  Sets
-   *RESULTS to point to a vector of (SYM,BLOCK) tuples,
+   scope and in global scopes, returning the number of matches.
+   Sets *RESULTS to point to a vector of (SYM,BLOCK) tuples,
    indicating the symbols found and the blocks and symbol tables (if
-   any) in which they were found.  This vector are transient---good only to 
-   the next call of ada_lookup_symbol_list.  Any non-function/non-enumeral 
+   any) in which they were found.  This vector are transient---good only to
+   the next call of ada_lookup_symbol_list.  Any non-function/non-enumeral
    symbol match within the nest of blocks whose innermost member is BLOCK0,
    is the one match returned (no other matches in that or
    enclosing blocks is returned).  If there are any matches in or
    surrounding BLOCK0, then these alone are returned.  Otherwise, if
    FULL_SEARCH is non-zero, then the search extends to global and
    file-scope (static) symbol tables.
-   Names prefixed with "standard__" are handled specially: "standard__" 
+   Names prefixed with "standard__" are handled specially: "standard__"
    is first stripped off, and only static and global symbols are searched.  */
 
 int

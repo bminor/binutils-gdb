@@ -1,4 +1,9 @@
 2012-03-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_lookup_symbol_list): Minor reformatting
+	of this function's documentation.
+
+2012-03-29  Joel Brobecker  <brobecker@adacore.com>
 	    Andrey Smirnov  <andrew.smirnov@gmail.com>
 
 	-Wshadow warning fix.
