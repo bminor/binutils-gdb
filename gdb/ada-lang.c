@@ -5073,7 +5073,7 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
   struct symbol *sym;
   struct block *block;
   const char *name;
-  const int wild_match = should_use_wild_match (name0);
+  const int wild_match_p = should_use_wild_match (name0);
   int cacheIfUnique;
   int ndefns;
 
@@ -5105,7 +5105,7 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
   /* Check the non-global symbols.  If we have ANY match, then we're done.  */
 
   ada_add_local_symbols (&symbol_list_obstack, name, block, namespace,
-                         wild_match);
+                         wild_match_p);
   if (num_defns_collected (&symbol_list_obstack) > 0 || !full_search)
     goto done;
 
@@ -5124,14 +5124,14 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
   /* Search symbols from all global blocks.  */
  
   add_nonlocal_symbols (&symbol_list_obstack, name, namespace, 1,
-			wild_match);
+			wild_match_p);
 
   /* Now add symbols from all per-file blocks if we've gotten no hits
      (not strictly correct, but perhaps better than an error).  */
 
   if (num_defns_collected (&symbol_list_obstack) == 0)
     add_nonlocal_symbols (&symbol_list_obstack, name, namespace, 0,
-			  wild_match);
+			  wild_match_p);
 
 done:
   ndefns = num_defns_collected (&symbol_list_obstack);
