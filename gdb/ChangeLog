@@ -1,4 +1,12 @@
 2012-03-29  Joel Brobecker  <brobecker@adacore.com>
+	    Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	-Wshadow warning fix.
+	* ada-lang.c (symbol_completion_add): Rename parameter
+	"wild_match" into wild_match_p.  Update code and documentation
+	accordingly.
+
+2012-03-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (symbol_completion_match): Rename parameter
 	"encoded" into "encoded_p".  Ajust code and documentation
