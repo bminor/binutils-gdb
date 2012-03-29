@@ -1,4 +1,15 @@
 2012-03-29  Joel Brobecker  <brobecker@adacore.com>
+	    Andrey Smirnov  <andrew.smirnov@gmail.com>
+
+	* ada-valprint.c (ada_val_print_1): Move the code handling
+	TYPE_CODE_ENUM inside its own lexical block.  Declare
+	variables len and val there, instead of in the function's
+	top level block.  Avoid declaring deref_val again in a way
+	that shadows another variable of the same name declared
+	in one of the up-level blocks.  Just re-use the up-level
+	variable instead.
+
+2012-03-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_lookup_encoded_symbol): Now returns void.
 	Replace block_found argument by symbol_info.  Adjust

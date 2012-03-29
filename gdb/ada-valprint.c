@@ -659,10 +659,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 		 const struct value *original_value,
 		 const struct value_print_options *options)
 {
-  unsigned int len;
   int i;
   struct type *elttype;
-  LONGEST val;
   int offset_aligned;
 
   type = ada_check_typedef (type);
@@ -811,36 +809,41 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 	}
 
     case TYPE_CODE_ENUM:
-      if (options->format)
-	{
-	  val_print_scalar_formatted (type, valaddr, offset_aligned,
-				      original_value, options, 0, stream);
-	  break;
-	}
-      len = TYPE_NFIELDS (type);
-      val = unpack_long (type, valaddr + offset_aligned);
-      for (i = 0; i < len; i++)
-	{
-	  QUIT;
-	  if (val == TYPE_FIELD_BITPOS (type, i))
-	    {
-	      break;
-	    }
-	}
-      if (i < len)
-	{
-	  const char *name = ada_enum_name (TYPE_FIELD_NAME (type, i));
+      {
+	unsigned int len;
+	LONGEST val;
 
-	  if (name[0] == '\'')
-	    fprintf_filtered (stream, "%ld %s", (long) val, name);
-	  else
-	    fputs_filtered (name, stream);
-	}
-      else
-	{
-	  print_longest (stream, 'd', 0, val);
-	}
-      break;
+	if (options->format)
+	  {
+	    val_print_scalar_formatted (type, valaddr, offset_aligned,
+					original_value, options, 0, stream);
+	    break;
+	  }
+	len = TYPE_NFIELDS (type);
+	val = unpack_long (type, valaddr + offset_aligned);
+	for (i = 0; i < len; i++)
+	  {
+	    QUIT;
+	    if (val == TYPE_FIELD_BITPOS (type, i))
+	      {
+		break;
+	      }
+	  }
+	if (i < len)
+	  {
+	    const char *name = ada_enum_name (TYPE_FIELD_NAME (type, i));
+
+	    if (name[0] == '\'')
+	      fprintf_filtered (stream, "%ld %s", (long) val, name);
+	    else
+	      fputs_filtered (name, stream);
+	  }
+	else
+	  {
+	    print_longest (stream, 'd', 0, val);
+	  }
+	break;
+      }
 
     case TYPE_CODE_FLT:
       if (options->format)
@@ -897,7 +900,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
           deref_val_int = unpack_pointer (type, valaddr + offset_aligned);
           if (deref_val_int != 0)
             {
-              struct value *deref_val =
+              deref_val =
                 ada_value_ind (value_from_pointer
                                (lookup_pointer_type (elttype),
                                 deref_val_int));
