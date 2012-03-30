@@ -747,11 +747,6 @@ struct elf_s390_link_hash_table
   struct elf_link_hash_table elf;
 
   /* Short-cuts to get to dynamic linker sections.  */
-  asection *sgot;
-  asection *sgotplt;
-  asection *srelgot;
-  asection *splt;
-  asection *srelplt;
   asection *sdynbss;
   asection *srelbss;
 
@@ -824,11 +819,11 @@ elf_s390_link_hash_table_create (abfd)
       return NULL;
     }
 
-  ret->sgot = NULL;
-  ret->sgotplt = NULL;
-  ret->srelgot = NULL;
-  ret->splt = NULL;
-  ret->srelplt = NULL;
+  ret->elf.sgot = NULL;
+  ret->elf.sgotplt = NULL;
+  ret->elf.srelgot = NULL;
+  ret->elf.splt = NULL;
+  ret->elf.srelplt = NULL;
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
   ret->tls_ldm_got.refcount = 0;
@@ -851,10 +846,10 @@ create_got_section (dynobj, info)
     return FALSE;
 
   htab = elf_s390_hash_table (info);
-  htab->sgot = bfd_get_section_by_name (dynobj, ".got");
-  htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
-  htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
-  if (!htab->sgot || !htab->sgotplt || !htab->srelgot)
+  htab->elf.sgot = bfd_get_section_by_name (dynobj, ".got");
+  htab->elf.sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+  htab->elf.srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+  if (!htab->elf.sgot || !htab->elf.sgotplt || !htab->elf.srelgot)
     abort ();
 
   return TRUE;
@@ -872,19 +867,19 @@ elf_s390_create_dynamic_sections (dynobj, info)
   struct elf_s390_link_hash_table *htab;
 
   htab = elf_s390_hash_table (info);
-  if (!htab->sgot && !create_got_section (dynobj, info))
+  if (!htab->elf.sgot && !create_got_section (dynobj, info))
     return FALSE;
 
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab->splt = bfd_get_section_by_name (dynobj, ".plt");
-  htab->srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
+  htab->elf.splt = bfd_get_section_by_name (dynobj, ".plt");
+  htab->elf.srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
   htab->sdynbss = bfd_get_section_by_name (dynobj, ".dynbss");
   if (!info->shared)
     htab->srelbss = bfd_get_section_by_name (dynobj, ".rela.bss");
 
-  if (!htab->splt || !htab->srelplt || !htab->sdynbss
+  if (!htab->elf.splt || !htab->elf.srelplt || !htab->sdynbss
       || (!info->shared && !htab->srelbss))
     abort ();
 
@@ -1086,7 +1081,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 	case R_390_GOTOFF32:
 	case R_390_GOTPC:
 	case R_390_GOTPCDBL:
-	  if (htab->sgot == NULL)
+	  if (htab->elf.sgot == NULL)
 	    {
 	      if (htab->elf.dynobj == NULL)
 		htab->elf.dynobj = abfd;
@@ -1737,7 +1732,7 @@ allocate_dynrelocs (h, inf)
       if (info->shared
 	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
 	{
-	  asection *s = htab->splt;
+	  asection *s = htab->elf.splt;
 
 	  /* If this is the first .plt entry, make room for the special
 	     first entry.  */
@@ -1763,10 +1758,10 @@ allocate_dynrelocs (h, inf)
 
 	  /* We also need to make an entry in the .got.plt section, which
 	     will be placed in the .got section by the linker script.  */
-	  htab->sgotplt->size += GOT_ENTRY_SIZE;
+	  htab->elf.sgotplt->size += GOT_ENTRY_SIZE;
 
 	  /* We also need to make an entry in the .rela.plt section.  */
-	  htab->srelplt->size += sizeof (Elf32_External_Rela);
+	  htab->elf.srelplt->size += sizeof (Elf32_External_Rela);
 	}
       else
 	{
@@ -1796,8 +1791,8 @@ allocate_dynrelocs (h, inf)
 	   to be stored somewhere. The immediate value in the instruction
 	   is not bit enough so the value is stored in the got.  */
 	{
-	  h->got.offset = htab->sgot->size;
-	  htab->sgot->size += GOT_ENTRY_SIZE;
+	  h->got.offset = htab->elf.sgot->size;
+	  htab->elf.sgot->size += GOT_ENTRY_SIZE;
 	}
       else
 	h->got.offset = (bfd_vma) -1;
@@ -1817,7 +1812,7 @@ allocate_dynrelocs (h, inf)
 	    return FALSE;
 	}
 
-      s = htab->sgot;
+      s = htab->elf.sgot;
       h->got.offset = s->size;
       s->size += GOT_ENTRY_SIZE;
       /* R_390_TLS_GD32 needs 2 consecutive GOT slots.  */
@@ -1828,14 +1823,14 @@ allocate_dynrelocs (h, inf)
 	 R_390_TLS_GD32 needs one if local symbol and two if global.  */
       if ((tls_type == GOT_TLS_GD && h->dynindx == -1)
 	  || tls_type >= GOT_TLS_IE)
-	htab->srelgot->size += sizeof (Elf32_External_Rela);
+	htab->elf.srelgot->size += sizeof (Elf32_External_Rela);
       else if (tls_type == GOT_TLS_GD)
-	htab->srelgot->size += 2 * sizeof (Elf32_External_Rela);
+	htab->elf.srelgot->size += 2 * sizeof (Elf32_External_Rela);
       else if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		|| h->root.type != bfd_link_hash_undefweak)
 	       && (info->shared
 		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-	htab->srelgot->size += sizeof (Elf32_External_Rela);
+	htab->elf.srelgot->size += sizeof (Elf32_External_Rela);
     }
   else
     h->got.offset = (bfd_vma) -1;
@@ -2034,8 +2029,8 @@ elf_s390_size_dynamic_sections (output_bfd, info)
       locsymcount = symtab_hdr->sh_info;
       end_local_got = local_got + locsymcount;
       local_tls_type = elf_s390_local_got_tls_type (ibfd);
-      s = htab->sgot;
-      srela = htab->srelgot;
+      s = htab->elf.sgot;
+      srela = htab->elf.srelgot;
       for (; local_got < end_local_got; ++local_got, ++local_tls_type)
 	{
 	  if (*local_got > 0)
@@ -2056,9 +2051,9 @@ elf_s390_size_dynamic_sections (output_bfd, info)
     {
       /* Allocate 2 got entries and 1 dynamic reloc for R_390_TLS_LDM32
 	 relocs.  */
-      htab->tls_ldm_got.offset = htab->sgot->size;
-      htab->sgot->size += 2 * GOT_ENTRY_SIZE;
-      htab->srelgot->size += sizeof (Elf32_External_Rela);
+      htab->tls_ldm_got.offset = htab->elf.sgot->size;
+      htab->elf.sgot->size += 2 * GOT_ENTRY_SIZE;
+      htab->elf.srelgot->size += sizeof (Elf32_External_Rela);
     }
   else
     htab->tls_ldm_got.offset = -1;
@@ -2075,9 +2070,9 @@ elf_s390_size_dynamic_sections (output_bfd, info)
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
-      if (s == htab->splt
-	  || s == htab->sgot
-	  || s == htab->sgotplt
+      if (s == htab->elf.splt
+	  || s == htab->elf.sgot
+	  || s == htab->elf.sgotplt
 	  || s == htab->sdynbss)
 	{
 	  /* Strip this section if we don't need it; see the
@@ -2143,7 +2138,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 	    return FALSE;
 	}
 
-      if (htab->splt->size != 0)
+      if (htab->elf.splt->size != 0)
 	{
 	  if (!add_dynamic_entry (DT_PLTGOT, 0)
 	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
@@ -2343,7 +2338,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      unresolved_reloc = FALSE;
 
 	      if (r_type == R_390_GOTPLTENT)
-		relocation += htab->sgot->output_section->vma;
+		relocation += htab->elf.sgot->output_section->vma;
 	      break;
 	    }
 	  /* Fall through.  */
@@ -2355,7 +2350,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_390_GOTENT:
 	  /* Relocation is to the entry for this symbol in the global
 	     offset table.  */
-	  if (htab->sgot == NULL)
+	  if (htab->elf.sgot == NULL)
 	    abort ();
 
 	  if (h != NULL)
@@ -2387,7 +2382,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		  else
 		    {
 		      bfd_put_32 (output_bfd, relocation,
-				  htab->sgot->contents + off);
+				  htab->elf.sgot->contents + off);
 		      h->got.offset |= 1;
 		    }
 		}
@@ -2409,7 +2404,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  bfd_put_32 (output_bfd, relocation,
-			      htab->sgot->contents + off);
+			      htab->elf.sgot->contents + off);
 
 		  if (info->shared)
 		    {
@@ -2417,12 +2412,12 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		      Elf_Internal_Rela outrel;
 		      bfd_byte *loc;
 
-		      srelgot = htab->srelgot;
+		      srelgot = htab->elf.srelgot;
 		      if (srelgot == NULL)
 			abort ();
 
-		      outrel.r_offset = (htab->sgot->output_section->vma
-					 + htab->sgot->output_offset
+		      outrel.r_offset = (htab->elf.sgot->output_section->vma
+					 + htab->elf.sgot->output_offset
 					 + off);
 		      outrel.r_info = ELF32_R_INFO (0, R_390_RELATIVE);
 		      outrel.r_addend = relocation;
@@ -2438,7 +2433,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = htab->sgot->output_offset + off;
+	  relocation = htab->elf.sgot->output_offset + off;
 
 	  /* For @GOTENT the relocation is against the offset between
 	     the instruction and the symbols entry in the GOT and not
@@ -2446,7 +2441,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	     add the vma of the GOT to get the correct value.  */
 	  if (   r_type == R_390_GOTENT
 	      || r_type == R_390_GOTPLTENT)
-	    relocation += htab->sgot->output_section->vma;
+	    relocation += htab->elf.sgot->output_section->vma;
 
 	  break;
 
@@ -2460,13 +2455,13 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	     defined _GLOBAL_OFFSET_TABLE in a different way, as is
 	     permitted by the ABI, we might have to change this
 	     calculation.  */
-	  relocation -= htab->sgot->output_section->vma;
+	  relocation -= htab->elf.sgot->output_section->vma;
 	  break;
 
 	case R_390_GOTPC:
 	case R_390_GOTPCDBL:
 	  /* Use global offset table as symbol value.  */
-	  relocation = htab->sgot->output_section->vma;
+	  relocation = htab->elf.sgot->output_section->vma;
 	  unresolved_reloc = FALSE;
 	  break;
 
@@ -2482,7 +2477,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	    break;
 
 	  if (h->plt.offset == (bfd_vma) -1
-	      || htab->splt == NULL)
+	      || htab->elf.splt == NULL)
 	    {
 	      /* We didn't make a PLT entry for this symbol.  This
 		 happens when statically linking PIC code, or when
@@ -2490,8 +2485,8 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      break;
 	    }
 
-	  relocation = (htab->splt->output_section->vma
-			+ htab->splt->output_offset
+	  relocation = (htab->elf.splt->output_section->vma
+			+ htab->elf.splt->output_offset
 			+ h->plt.offset);
 	  unresolved_reloc = FALSE;
 	  break;
@@ -2505,16 +2500,16 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	     this symbol resolve the symbol directly.  */
 	  if (   h == NULL
 	      || h->plt.offset == (bfd_vma) -1
-	      || htab->splt == NULL)
+	      || htab->elf.splt == NULL)
 	    {
-	      relocation -= htab->sgot->output_section->vma;
+	      relocation -= htab->elf.sgot->output_section->vma;
 	      break;
 	    }
 
-	  relocation = (htab->splt->output_section->vma
-			+ htab->splt->output_offset
+	  relocation = (htab->elf.splt->output_section->vma
+			+ htab->elf.splt->output_offset
 			+ h->plt.offset
-			- htab->sgot->output_section->vma);
+			- htab->elf.sgot->output_section->vma);
 	  unresolved_reloc = FALSE;
 	  break;
 
@@ -2691,7 +2686,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      continue;
 	    }
 
-	  if (htab->sgot == NULL)
+	  if (htab->elf.sgot == NULL)
 	    abort ();
 
 	  if (h != NULL)
@@ -2714,11 +2709,11 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_byte *loc;
 	      int dr_type, indx;
 
-	      if (htab->srelgot == NULL)
+	      if (htab->elf.srelgot == NULL)
 		abort ();
 
-	      outrel.r_offset = (htab->sgot->output_section->vma
-				 + htab->sgot->output_offset + off);
+	      outrel.r_offset = (htab->elf.sgot->output_section->vma
+				 + htab->elf.sgot->output_offset + off);
 
 	      indx = h && h->dynindx != -1 ? h->dynindx : 0;
 	      if (r_type == R_390_TLS_GD32)
@@ -2730,8 +2725,8 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		outrel.r_addend = 0;
 	      outrel.r_info = ELF32_R_INFO (indx, dr_type);
-	      loc = htab->srelgot->contents;
-	      loc += htab->srelgot->reloc_count++
+	      loc = htab->elf.srelgot->contents;
+	      loc += htab->elf.srelgot->reloc_count++
 		* sizeof (Elf32_External_Rela);
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 
@@ -2742,14 +2737,14 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_32 (output_bfd,
 				  relocation - dtpoff_base (info),
-				  htab->sgot->contents + off + GOT_ENTRY_SIZE);
+				  htab->elf.sgot->contents + off + GOT_ENTRY_SIZE);
 		    }
 		  else
 		    {
 		      outrel.r_info = ELF32_R_INFO (indx, R_390_TLS_DTPOFF);
 		      outrel.r_offset += GOT_ENTRY_SIZE;
 		      outrel.r_addend = 0;
-		      htab->srelgot->reloc_count++;
+		      htab->elf.srelgot->reloc_count++;
 		      loc += sizeof (Elf32_External_Rela);
 		      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 		    }
@@ -2765,14 +2760,14 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	    abort ();
 	  if (r_type == ELF32_R_TYPE (rel->r_info))
 	    {
-	      relocation = htab->sgot->output_offset + off;
+	      relocation = htab->elf.sgot->output_offset + off;
 	      if (r_type == R_390_TLS_IE32 || r_type == R_390_TLS_IEENT)
-		relocation += htab->sgot->output_section->vma;
+		relocation += htab->elf.sgot->output_section->vma;
 	      unresolved_reloc = FALSE;
 	    }
 	  else
 	    {
-	      bfd_put_32 (output_bfd, htab->sgot->output_offset + off,
+	      bfd_put_32 (output_bfd, htab->elf.sgot->output_offset + off,
 			  contents + rel->r_offset);
 	      continue;
 	    }
@@ -2797,15 +2792,15 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		goto emit_tls_relocs;
 	    }
 
-	  if (htab->sgot == NULL)
+	  if (htab->elf.sgot == NULL)
 	    abort ();
 
 	  BFD_ASSERT (! unresolved_reloc);
 	  bfd_put_32 (output_bfd, -tpoff (info, relocation),
-		      htab->sgot->contents + off);
-	  relocation = htab->sgot->output_offset + off;
+		      htab->elf.sgot->contents + off);
+	  relocation = htab->elf.sgot->output_offset + off;
 	  if (r_type == R_390_TLS_IEENT)
-	    relocation += htab->sgot->output_section->vma;
+	    relocation += htab->elf.sgot->output_section->vma;
 	  unresolved_reloc = FALSE;
 	  break;
 
@@ -2816,7 +2811,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	       and the value will turn out zero.  */
 	    continue;
 
-	  if (htab->sgot == NULL)
+	  if (htab->elf.sgot == NULL)
 	    abort ();
 
 	  off = htab->tls_ldm_got.offset;
@@ -2827,23 +2822,23 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
 
-	      if (htab->srelgot == NULL)
+	      if (htab->elf.srelgot == NULL)
 		abort ();
 
-	      outrel.r_offset = (htab->sgot->output_section->vma
-				 + htab->sgot->output_offset + off);
+	      outrel.r_offset = (htab->elf.sgot->output_section->vma
+				 + htab->elf.sgot->output_offset + off);
 
 	      bfd_put_32 (output_bfd, 0,
-			  htab->sgot->contents + off + GOT_ENTRY_SIZE);
+			  htab->elf.sgot->contents + off + GOT_ENTRY_SIZE);
 	      outrel.r_info = ELF32_R_INFO (0, R_390_TLS_DTPMOD);
 	      outrel.r_addend = 0;
-	      loc = htab->srelgot->contents;
-	      loc += htab->srelgot->reloc_count++
+	      loc = htab->elf.srelgot->contents;
+	      loc += htab->elf.srelgot->reloc_count++
 		* sizeof (Elf32_External_Rela);
 	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
 	      htab->tls_ldm_got.offset |= 1;
 	    }
-	  relocation = htab->sgot->output_offset + off;
+	  relocation = htab->elf.sgot->output_offset + off;
 	  unresolved_reloc = FALSE;
 	  break;
 
@@ -3131,9 +3126,9 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
       if (h->dynindx == -1
-	  || htab->splt == NULL
-	  || htab->sgotplt == NULL
-	  || htab->srelplt == NULL)
+	  || htab->elf.splt == NULL
+	  || htab->elf.sgotplt == NULL
+	  || htab->elf.srelplt == NULL)
 	abort ();
 
       /* Calc. index no.
@@ -3156,25 +3151,25 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
       /* Fill in the entry in the procedure linkage table.  */
       if (!info->shared)
 	{
-	  memcpy (htab->splt->contents + h->plt.offset, elf_s390_plt_entry,
+	  memcpy (htab->elf.splt->contents + h->plt.offset, elf_s390_plt_entry,
 		  PLT_ENTRY_SIZE);
 
 	  /* Adjust jump to the first plt entry.  */
 	  bfd_put_32 (output_bfd, (bfd_vma) 0+(relative_offset << 16),
-		      htab->splt->contents + h->plt.offset + 20);
+		      htab->elf.splt->contents + h->plt.offset + 20);
 
 	  /* Push the GOT offset field.  */
 	  bfd_put_32 (output_bfd,
-		      (htab->sgotplt->output_section->vma
-		       + htab->sgotplt->output_offset
+		      (htab->elf.sgotplt->output_section->vma
+		       + htab->elf.sgotplt->output_offset
 		       + got_offset),
-		      htab->splt->contents + h->plt.offset + 24);
+		      htab->elf.splt->contents + h->plt.offset + 24);
 	}
       else if (got_offset < 4096)
 	{
 	  /* The GOT offset is small enough to be used directly as
 	     displacement.  */
-	  memcpy (htab->splt->contents + h->plt.offset,
+	  memcpy (htab->elf.splt->contents + h->plt.offset,
 		  elf_s390_plt_pic12_entry,
 		  PLT_ENTRY_SIZE);
 
@@ -3182,63 +3177,63 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 	     value comes from the first word of the plt entry.  Look
 	     at the elf_s390_plt_pic16_entry content.  */
 	  bfd_put_16 (output_bfd, (bfd_vma)0xc000 | got_offset,
-		      htab->splt->contents + h->plt.offset + 2);
+		      htab->elf.splt->contents + h->plt.offset + 2);
 
 	  /* Adjust the jump to the first plt entry.  */
 	  bfd_put_32 (output_bfd, (bfd_vma) 0+(relative_offset << 16),
-		      htab->splt->contents + h->plt.offset + 20);
+		      htab->elf.splt->contents + h->plt.offset + 20);
 	}
       else if (got_offset < 32768)
 	{
 	  /* The GOT offset is too big for a displacement but small
 	     enough to be a signed 16 bit immediate value as it can be
 	     used in an lhi instruction.  */
-	  memcpy (htab->splt->contents + h->plt.offset,
+	  memcpy (htab->elf.splt->contents + h->plt.offset,
 		  elf_s390_plt_pic16_entry,
 		  PLT_ENTRY_SIZE);
 
 	  /* Put in the GOT offset for the lhi instruction.  */
 	  bfd_put_16 (output_bfd, (bfd_vma)got_offset,
-		      htab->splt->contents + h->plt.offset + 2);
+		      htab->elf.splt->contents + h->plt.offset + 2);
 
 	  /* Adjust the jump to the first plt entry.  */
 	  bfd_put_32 (output_bfd, (bfd_vma) 0+(relative_offset << 16),
-		      htab->splt->contents + h->plt.offset + 20);
+		      htab->elf.splt->contents + h->plt.offset + 20);
 	}
       else
 	{
-	  memcpy (htab->splt->contents + h->plt.offset,
+	  memcpy (htab->elf.splt->contents + h->plt.offset,
 		  elf_s390_plt_pic_entry,
 		  PLT_ENTRY_SIZE);
 
 	  /* Adjust the jump to the first plt entry.  */
 	  bfd_put_32 (output_bfd, (bfd_vma) 0+(relative_offset << 16),
-		      htab->splt->contents + h->plt.offset + 20);
+		      htab->elf.splt->contents + h->plt.offset + 20);
 
 	  /* Push the GOT offset field.  */
 	  bfd_put_32 (output_bfd, got_offset,
-		      htab->splt->contents + h->plt.offset + 24);
+		      htab->elf.splt->contents + h->plt.offset + 24);
 	}
       /* Insert offset into  reloc. table here.  */
       bfd_put_32 (output_bfd, plt_index * sizeof (Elf32_External_Rela),
-		  htab->splt->contents + h->plt.offset + 28);
+		  htab->elf.splt->contents + h->plt.offset + 28);
 
       /* Fill in the entry in the global offset table.
 	 Points to instruction after GOT offset.  */
       bfd_put_32 (output_bfd,
-		  (htab->splt->output_section->vma
-		   + htab->splt->output_offset
+		  (htab->elf.splt->output_section->vma
+		   + htab->elf.splt->output_offset
 		   + h->plt.offset
 		   + 12),
-		  htab->sgotplt->contents + got_offset);
+		  htab->elf.sgotplt->contents + got_offset);
 
       /* Fill in the entry in the .rela.plt section.  */
-      rela.r_offset = (htab->sgotplt->output_section->vma
-		       + htab->sgotplt->output_offset
+      rela.r_offset = (htab->elf.sgotplt->output_section->vma
+		       + htab->elf.sgotplt->output_offset
 		       + got_offset);
       rela.r_info = ELF32_R_INFO (h->dynindx, R_390_JMP_SLOT);
       rela.r_addend = 0;
-      loc = htab->srelplt->contents + plt_index * sizeof (Elf32_External_Rela);
+      loc = htab->elf.srelplt->contents + plt_index * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
 
       if (!h->def_regular)
@@ -3263,11 +3258,11 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
 
-      if (htab->sgot == NULL || htab->srelgot == NULL)
+      if (htab->elf.sgot == NULL || htab->elf.srelgot == NULL)
 	abort ();
 
-      rela.r_offset = (htab->sgot->output_section->vma
-		       + htab->sgot->output_offset
+      rela.r_offset = (htab->elf.sgot->output_section->vma
+		       + htab->elf.sgot->output_offset
 		       + (h->got.offset &~ (bfd_vma) 1));
 
       /* If this is a static link, or it is a -Bsymbolic link and the
@@ -3289,13 +3284,13 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
       else
 	{
 	  BFD_ASSERT((h->got.offset & 1) == 0);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->sgot->contents + h->got.offset);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->elf.sgot->contents + h->got.offset);
 	  rela.r_info = ELF32_R_INFO (h->dynindx, R_390_GLOB_DAT);
 	  rela.r_addend = 0;
 	}
 
-      loc = htab->srelgot->contents;
-      loc += htab->srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
+      loc = htab->elf.srelgot->contents;
+      loc += htab->elf.srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rela, loc);
     }
 
@@ -3370,7 +3365,7 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
     {
       Elf32_External_Dyn *dyncon, *dynconend;
 
-      if (sdyn == NULL || htab->sgot == NULL)
+      if (sdyn == NULL || htab->elf.sgot == NULL)
 	abort ();
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
@@ -3388,15 +3383,15 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
 	      continue;
 
 	    case DT_PLTGOT:
-	      dyn.d_un.d_ptr = htab->sgot->output_section->vma;
+	      dyn.d_un.d_ptr = htab->elf.sgot->output_section->vma;
 	      break;
 
 	    case DT_JMPREL:
-	      dyn.d_un.d_ptr = htab->srelplt->output_section->vma;
+	      dyn.d_un.d_ptr = htab->elf.srelplt->output_section->vma;
 	      break;
 
 	    case DT_PLTRELSZ:
-	      s = htab->srelplt->output_section;
+	      s = htab->elf.srelplt->output_section;
 	      dyn.d_un.d_val = s->size;
 	      break;
 	    }
@@ -3405,45 +3400,45 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
 	}
 
       /* Fill in the special first entry in the procedure linkage table.  */
-      if (htab->splt && htab->splt->size > 0)
+      if (htab->elf.splt && htab->elf.splt->size > 0)
 	{
-	  memset (htab->splt->contents, 0, PLT_FIRST_ENTRY_SIZE);
+	  memset (htab->elf.splt->contents, 0, PLT_FIRST_ENTRY_SIZE);
 	  if (info->shared)
 	    {
-	      memcpy (htab->splt->contents, elf_s390_plt_pic_first_entry,
+	      memcpy (htab->elf.splt->contents, elf_s390_plt_pic_first_entry,
 		      PLT_FIRST_ENTRY_SIZE);
 	    }
 	  else
 	    {
-	      memcpy (htab->splt->contents, elf_s390_plt_first_entry,
+	      memcpy (htab->elf.splt->contents, elf_s390_plt_first_entry,
 		      PLT_FIRST_ENTRY_SIZE);
 	      bfd_put_32 (output_bfd,
-			  htab->sgotplt->output_section->vma
-			  + htab->sgotplt->output_offset,
-			  htab->splt->contents + 24);
+			  htab->elf.sgotplt->output_section->vma
+			  + htab->elf.sgotplt->output_offset,
+			  htab->elf.splt->contents + 24);
 	   }
-	  elf_section_data (htab->splt->output_section)
+	  elf_section_data (htab->elf.splt->output_section)
 	    ->this_hdr.sh_entsize = 4;
 	}
 
     }
 
-  if (htab->sgotplt)
+  if (htab->elf.sgotplt)
     {
       /* Fill in the first three entries in the global offset table.  */
-      if (htab->sgotplt->size > 0)
+      if (htab->elf.sgotplt->size > 0)
 	{
 	  bfd_put_32 (output_bfd,
 		      (sdyn == NULL ? (bfd_vma) 0
 		       : sdyn->output_section->vma + sdyn->output_offset),
-		      htab->sgotplt->contents);
+		      htab->elf.sgotplt->contents);
 	  /* One entry for shared object struct ptr.  */
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->sgotplt->contents + 4);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents + 4);
 	  /* One entry for _dl_runtime_resolve.  */
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->sgotplt->contents + 8);
+	  bfd_put_32 (output_bfd, (bfd_vma) 0, htab->elf.sgotplt->contents + 8);
 	}
 
-      elf_section_data (htab->sgotplt->output_section)
+      elf_section_data (htab->elf.sgotplt->output_section)
 	->this_hdr.sh_entsize = 4;
     }
   return TRUE;
