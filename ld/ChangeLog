@@ -1,3 +1,7 @@
+2012-03-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2012-03-27  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.in: Set want64 on a 64-bit host regardless of
