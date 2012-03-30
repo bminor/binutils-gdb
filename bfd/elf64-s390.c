@@ -553,14 +553,16 @@ elf_s390_is_local_label_name (abfd, name)
    the program that manages to have a symbol table of more than 2 GB with a
    total size of at max 4 GB.  */
 
-#define PLT_ENTRY_WORD0     (bfd_vma) 0xc0100000
-#define PLT_ENTRY_WORD1     (bfd_vma) 0x0000e310
-#define PLT_ENTRY_WORD2     (bfd_vma) 0x10000004
-#define PLT_ENTRY_WORD3     (bfd_vma) 0x07f10d10
-#define PLT_ENTRY_WORD4     (bfd_vma) 0xe310100c
-#define PLT_ENTRY_WORD5     (bfd_vma) 0x0014c0f4
-#define PLT_ENTRY_WORD6     (bfd_vma) 0x00000000
-#define PLT_ENTRY_WORD7     (bfd_vma) 0x00000000
+static const bfd_byte elf_s390x_plt_entry[PLT_ENTRY_SIZE] =
+  {
+    0xc0, 0x10, 0x00, 0x00, 0x00, 0x00,     /* larl    %r1,.       */
+    0xe3, 0x10, 0x10, 0x00, 0x00, 0x04,     /* lg      %r1,0(%r1)  */
+    0x07, 0xf1,                             /* br      %r1         */
+    0x0d, 0x10,                             /* basr    %r1,%r0     */
+    0xe3, 0x10, 0x10, 0x0c, 0x00, 0x14,     /* lgf     %r1,12(%r1) */
+    0xc0, 0xf4, 0x00, 0x00, 0x00, 0x00,     /* jg      first plt   */
+    0x00, 0x00, 0x00, 0x00                  /* .long   0x00000000  */
+  };
 
 /* The first PLT entry pushes the offset into the symbol table
    from R1 onto the stack at 8(15) and the loader object info
@@ -577,14 +579,17 @@ elf_s390_is_local_label_name (abfd, name)
 
      Fixup at offset 8: relative address to start of GOT.  */
 
-#define PLT_FIRST_ENTRY_WORD0     (bfd_vma) 0xe310f038
-#define PLT_FIRST_ENTRY_WORD1     (bfd_vma) 0x0024c010
-#define PLT_FIRST_ENTRY_WORD2     (bfd_vma) 0x00000000
-#define PLT_FIRST_ENTRY_WORD3     (bfd_vma) 0xd207f030
-#define PLT_FIRST_ENTRY_WORD4     (bfd_vma) 0x1008e310
-#define PLT_FIRST_ENTRY_WORD5     (bfd_vma) 0x10100004
-#define PLT_FIRST_ENTRY_WORD6     (bfd_vma) 0x07f10700
-#define PLT_FIRST_ENTRY_WORD7     (bfd_vma) 0x07000700
+static const bfd_byte elf_s390x_first_plt_entry[PLT_FIRST_ENTRY_SIZE] =
+  {
+    0xe3, 0x10, 0xf0, 0x38, 0x00, 0x24,     /* stg     %r1,56(%r15)      */
+    0xc0, 0x10, 0x00, 0x00, 0x00, 0x00,     /* larl    %r1,.             */
+    0xd2, 0x07, 0xf0, 0x30, 0x10, 0x08,     /* mvc     48(8,%r15),8(%r1) */
+    0xe3, 0x10, 0x10, 0x10, 0x00, 0x04,     /* lg      %r1,16(%r1)       */
+    0x07, 0xf1,                             /* br      %r1               */
+    0x07, 0x00,                             /* nopr    %r0               */
+    0x07, 0x00,                             /* nopr    %r0               */
+    0x07, 0x00                              /* nopr    %r0               */
+  };
 
 
 /* s390 ELF linker hash entry.  */
@@ -3052,22 +3057,9 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
       got_offset = (plt_index + 3) * GOT_ENTRY_SIZE;
 
       /* Fill in the blueprint of a PLT.  */
-      bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD0,
-		  htab->splt->contents + h->plt.offset);
-      bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD1,
-		  htab->splt->contents + h->plt.offset + 4);
-      bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD2,
-		  htab->splt->contents + h->plt.offset + 8);
-      bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD3,
-		  htab->splt->contents + h->plt.offset + 12);
-      bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD4,
-		  htab->splt->contents + h->plt.offset + 16);
-      bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD5,
-		  htab->splt->contents + h->plt.offset + 20);
-      bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD6,
-		  htab->splt->contents + h->plt.offset + 24);
-      bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD7,
-		  htab->splt->contents + h->plt.offset + 28);
+      memcpy (htab->splt->contents + h->plt.offset, elf_s390x_plt_entry,
+	      PLT_ENTRY_SIZE);
+
       /* Fixup the relative address to the GOT entry */
       bfd_put_32 (output_bfd,
 		  (htab->sgotplt->output_section->vma +
@@ -3280,20 +3272,8 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
       if (htab->splt && htab->splt->size > 0)
 	{
 	  /* fill in blueprint for plt 0 entry */
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD0,
-		      htab->splt->contents );
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD1,
-		      htab->splt->contents +4 );
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD3,
-		      htab->splt->contents +12 );
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD4,
-		      htab->splt->contents +16 );
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD5,
-		      htab->splt->contents +20 );
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD6,
-		      htab->splt->contents + 24);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD7,
-		      htab->splt->contents + 28 );
+	  memcpy (htab->splt->contents, elf_s390x_first_plt_entry,
+		  PLT_FIRST_ENTRY_SIZE);
 	  /* Fixup relative address to start of GOT */
 	  bfd_put_32 (output_bfd,
 		      (htab->sgotplt->output_section->vma +

@@ -569,29 +569,65 @@ RET1: BASR 1,0         # 2 bytes  Return from GOT 1st time
       .long ?          # 4 bytes  address of GOT entry
       .long ?          # 4 bytes  offset into symbol table  */
 
-#define PLT_PIC_ENTRY_WORD0 0x0d105810
-#define PLT_PIC_ENTRY_WORD1 0x10165811
-#define PLT_PIC_ENTRY_WORD2 0xc00007f1
-#define PLT_PIC_ENTRY_WORD3 0x0d105810
-#define PLT_PIC_ENTRY_WORD4 0x100ea7f4
+static const bfd_byte elf_s390_plt_entry[PLT_ENTRY_SIZE] =
+  {
+    0x0d, 0x10,                             /* basr    %r1,%r0     */
+    0x58, 0x10, 0x10, 0x16,                 /* l       %r1,22(%r1) */
+    0x58, 0x10, 0x10, 0x00,                 /* l       %r1,0(%r1)  */
+    0x07, 0xf1,                             /* br      %r1         */
+    0x0d, 0x10,                             /* basr    %r1,%r0     */
+    0x58, 0x10, 0x10, 0x0e,                 /* l       %r1,14(%r1) */
+    0xa7, 0xf4, 0x00, 0x00,                 /* j       first plt   */
+    0x00, 0x00,                             /* padding             */
+    0x00, 0x00, 0x00, 0x00,                 /* GOT offset          */
+    0x00, 0x00, 0x00, 0x00                  /* rela.plt offset     */
+  };
 
-#define PLT_PIC12_ENTRY_WORD0 0x5810c000
-#define PLT_PIC12_ENTRY_WORD1 0x07f10000
-#define PLT_PIC12_ENTRY_WORD2 0x00000000
-#define PLT_PIC12_ENTRY_WORD3 0x0d105810
-#define PLT_PIC12_ENTRY_WORD4 0x100ea7f4
+/* Generic PLT pic entry.  */
+static const bfd_byte elf_s390_plt_pic_entry[PLT_ENTRY_SIZE] =
+  {
+    0x0d, 0x10,                             /* basr    %r1,%r0         */
+    0x58, 0x10, 0x10, 0x16,                 /* l       %r1,22(%r1)     */
+    0x58, 0x11, 0xc0, 0x00,                 /* l       %r1,0(%r1,%r12) */
+    0x07, 0xf1,                             /* br      %r1             */
+    0x0d, 0x10,                             /* basr    %r1,%r0         */
+    0x58, 0x10, 0x10, 0x0e,                 /* l       %r1,14(%r1)     */
+    0xa7, 0xf4, 0x00, 0x00,                 /* j       first plt       */
+    0x00, 0x00,                             /* padding                 */
+    0x00, 0x00, 0x00, 0x00,                 /* GOT offset              */
+    0x00, 0x00, 0x00, 0x00                  /* rela.plt offset         */
+  };
 
-#define PLT_PIC16_ENTRY_WORD0 0xa7180000
-#define PLT_PIC16_ENTRY_WORD1 0x5811c000
-#define PLT_PIC16_ENTRY_WORD2 0x07f10000
-#define PLT_PIC16_ENTRY_WORD3 0x0d105810
-#define PLT_PIC16_ENTRY_WORD4 0x100ea7f4
+/* Optimized PLT pic entry for GOT offset < 4k.  xx will be replaced
+   when generating the PLT slot with the GOT offset.  */
+static const bfd_byte elf_s390_plt_pic12_entry[PLT_ENTRY_SIZE] =
+  {
+    0x58, 0x10, 0xc0, 0x00,                 /* l       %r1,xx(%r12) */
+    0x07, 0xf1,                             /* br      %r1          */
+    0x00, 0x00, 0x00, 0x00,                 /* padding              */
+    0x00, 0x00,
+    0x0d, 0x10,                             /* basr    %r1,%r0      */
+    0x58, 0x10, 0x10, 0x0e,                 /* l       %r1,14(%r1)  */
+    0xa7, 0xf4, 0x00, 0x00,                 /* j       first plt    */
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+  };
 
-#define PLT_ENTRY_WORD0     0x0d105810
-#define PLT_ENTRY_WORD1     0x10165810
-#define PLT_ENTRY_WORD2     0x100007f1
-#define PLT_ENTRY_WORD3     0x0d105810
-#define PLT_ENTRY_WORD4     0x100ea7f4
+/* Optimized PLT pic entry for GOT offset < 32k.  xx will be replaced
+   when generating the PLT slot with the GOT offset.  */
+static const bfd_byte elf_s390_plt_pic16_entry[PLT_ENTRY_SIZE] =
+  {
+    0xa7, 0x18, 0x00, 0x00,                 /* lhi     %r1,xx          */
+    0x58, 0x11, 0xc0, 0x00,                 /* l       %r1,0(%r1,%r12) */
+    0x07, 0xf1,                             /* br      %r1             */
+    0x00, 0x00,
+    0x0d, 0x10,                             /* basr    %r1,%r0         */
+    0x58, 0x10, 0x10, 0x0e,                 /* l       %r1,14(%r1)     */
+    0xa7, 0xf4, 0x00, 0x00,                 /* j       first plt       */
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00
+  };
 
 /* The first PLT entry pushes the offset into the symbol table
    from R1 onto the stack at 8(15) and the loader object info
@@ -618,18 +654,31 @@ PLT0:
    .word 0            # filler
    .long got          # address of GOT  */
 
-#define PLT_PIC_FIRST_ENTRY_WORD0 0x5010f01c
-#define PLT_PIC_FIRST_ENTRY_WORD1 0x5810c004
-#define PLT_PIC_FIRST_ENTRY_WORD2 0x5010f018
-#define PLT_PIC_FIRST_ENTRY_WORD3 0x5810c008
-#define PLT_PIC_FIRST_ENTRY_WORD4 0x07f10000
+static const bfd_byte elf_s390_plt_first_entry[PLT_FIRST_ENTRY_SIZE] =
+  {
+    0x50, 0x10, 0xf0, 0x1c,                   /* st      %r1,28(%r15)      */
+    0x0d, 0x10,                               /* basr    %r1,%r0           */
+    0x58, 0x10, 0x10, 0x12,                   /* l       %r1,18(%r1)       */
+    0xd2, 0x03, 0xf0, 0x18, 0x10, 0x04,       /* mvc     24(4,%r15),4(%r1) */
+    0x58, 0x10, 0x10, 0x08,                   /* l       %r1,8(%r1)        */
+    0x07, 0xf1,                               /* br      %r1               */
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00
+  };
 
-#define PLT_FIRST_ENTRY_WORD0     0x5010f01c
-#define PLT_FIRST_ENTRY_WORD1     0x0d105810
-#define PLT_FIRST_ENTRY_WORD2     0x1012D203
-#define PLT_FIRST_ENTRY_WORD3     0xf0181004
-#define PLT_FIRST_ENTRY_WORD4     0x58101008
-#define PLT_FIRST_ENTRY_WORD5     0x07f10000
+static const bfd_byte elf_s390_plt_pic_first_entry[PLT_FIRST_ENTRY_SIZE] =
+  {
+    0x50, 0x10, 0xf0, 0x1c,                     /* st      %r1,28(%r15)  */
+    0x58, 0x10, 0xc0, 0x04,                     /* l       %r1,4(%r12)   */
+    0x50, 0x10, 0xf0, 0x18,                     /* st      %r1,24(%r15)  */
+    0x58, 0x10, 0xc0, 0x08,                     /* l       %r1,8(%r12)   */
+    0x07, 0xf1,                                 /* br      %r1           */
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00
+  };
 
 
 /* s390 ELF linker hash entry.  */
@@ -3107,18 +3156,14 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
       /* Fill in the entry in the procedure linkage table.  */
       if (!info->shared)
 	{
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD0,
-		      htab->splt->contents + h->plt.offset);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD1,
-		      htab->splt->contents + h->plt.offset + 4);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD2,
-		      htab->splt->contents + h->plt.offset + 8);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD3,
-		      htab->splt->contents + h->plt.offset + 12);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_ENTRY_WORD4,
-		      htab->splt->contents + h->plt.offset + 16);
+	  memcpy (htab->splt->contents + h->plt.offset, elf_s390_plt_entry,
+		  PLT_ENTRY_SIZE);
+
+	  /* Adjust jump to the first plt entry.  */
 	  bfd_put_32 (output_bfd, (bfd_vma) 0+(relative_offset << 16),
 		      htab->splt->contents + h->plt.offset + 20);
+
+	  /* Push the GOT offset field.  */
 	  bfd_put_32 (output_bfd,
 		      (htab->sgotplt->output_section->vma
 		       + htab->sgotplt->output_offset
@@ -3127,52 +3172,50 @@ elf_s390_finish_dynamic_symbol (output_bfd, info, h, sym)
 	}
       else if (got_offset < 4096)
 	{
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC12_ENTRY_WORD0 + got_offset,
-		      htab->splt->contents + h->plt.offset);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC12_ENTRY_WORD1,
-		      htab->splt->contents + h->plt.offset + 4);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC12_ENTRY_WORD2,
-		      htab->splt->contents + h->plt.offset + 8);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC12_ENTRY_WORD3,
-		      htab->splt->contents + h->plt.offset + 12);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC12_ENTRY_WORD4,
-		      htab->splt->contents + h->plt.offset + 16);
+	  /* The GOT offset is small enough to be used directly as
+	     displacement.  */
+	  memcpy (htab->splt->contents + h->plt.offset,
+		  elf_s390_plt_pic12_entry,
+		  PLT_ENTRY_SIZE);
+
+	  /* Put in the GOT offset as displacement value.  The 0xc000
+	     value comes from the first word of the plt entry.  Look
+	     at the elf_s390_plt_pic16_entry content.  */
+	  bfd_put_16 (output_bfd, (bfd_vma)0xc000 | got_offset,
+		      htab->splt->contents + h->plt.offset + 2);
+
+	  /* Adjust the jump to the first plt entry.  */
 	  bfd_put_32 (output_bfd, (bfd_vma) 0+(relative_offset << 16),
 		      htab->splt->contents + h->plt.offset + 20);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0,
-		      htab->splt->contents + h->plt.offset + 24);
 	}
       else if (got_offset < 32768)
 	{
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC16_ENTRY_WORD0 + got_offset,
-		      htab->splt->contents + h->plt.offset);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC16_ENTRY_WORD1,
-		      htab->splt->contents + h->plt.offset + 4);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC16_ENTRY_WORD2,
-		      htab->splt->contents + h->plt.offset + 8);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC16_ENTRY_WORD3,
-		      htab->splt->contents + h->plt.offset + 12);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC16_ENTRY_WORD4,
-		      htab->splt->contents + h->plt.offset + 16);
+	  /* The GOT offset is too big for a displacement but small
+	     enough to be a signed 16 bit immediate value as it can be
+	     used in an lhi instruction.  */
+	  memcpy (htab->splt->contents + h->plt.offset,
+		  elf_s390_plt_pic16_entry,
+		  PLT_ENTRY_SIZE);
+
+	  /* Put in the GOT offset for the lhi instruction.  */
+	  bfd_put_16 (output_bfd, (bfd_vma)got_offset,
+		      htab->splt->contents + h->plt.offset + 2);
+
+	  /* Adjust the jump to the first plt entry.  */
 	  bfd_put_32 (output_bfd, (bfd_vma) 0+(relative_offset << 16),
 		      htab->splt->contents + h->plt.offset + 20);
-	  bfd_put_32 (output_bfd, (bfd_vma) 0,
-		      htab->splt->contents + h->plt.offset + 24);
 	}
       else
 	{
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_ENTRY_WORD0,
-		      htab->splt->contents + h->plt.offset);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_ENTRY_WORD1,
-		      htab->splt->contents + h->plt.offset + 4);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_ENTRY_WORD2,
-		      htab->splt->contents + h->plt.offset + 8);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_ENTRY_WORD3,
-		      htab->splt->contents + h->plt.offset + 12);
-	  bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_ENTRY_WORD4,
-		      htab->splt->contents + h->plt.offset + 16);
+	  memcpy (htab->splt->contents + h->plt.offset,
+		  elf_s390_plt_pic_entry,
+		  PLT_ENTRY_SIZE);
+
+	  /* Adjust the jump to the first plt entry.  */
 	  bfd_put_32 (output_bfd, (bfd_vma) 0+(relative_offset << 16),
 		      htab->splt->contents + h->plt.offset + 20);
+
+	  /* Push the GOT offset field.  */
 	  bfd_put_32 (output_bfd, got_offset,
 		      htab->splt->contents + h->plt.offset + 24);
 	}
@@ -3367,31 +3410,13 @@ elf_s390_finish_dynamic_sections (output_bfd, info)
 	  memset (htab->splt->contents, 0, PLT_FIRST_ENTRY_SIZE);
 	  if (info->shared)
 	    {
-	      bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_FIRST_ENTRY_WORD0,
-			  htab->splt->contents );
-	      bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_FIRST_ENTRY_WORD1,
-			  htab->splt->contents +4 );
-	      bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_FIRST_ENTRY_WORD2,
-			  htab->splt->contents +8 );
-	      bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_FIRST_ENTRY_WORD3,
-			  htab->splt->contents +12 );
-	      bfd_put_32 (output_bfd, (bfd_vma) PLT_PIC_FIRST_ENTRY_WORD4,
-			  htab->splt->contents +16 );
-	   }
+	      memcpy (htab->splt->contents, elf_s390_plt_pic_first_entry,
+		      PLT_FIRST_ENTRY_SIZE);
+	    }
 	  else
-	   {
-	      bfd_put_32 (output_bfd, (bfd_vma)PLT_FIRST_ENTRY_WORD0,
-			  htab->splt->contents );
-	      bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD1,
-			  htab->splt->contents +4 );
-	      bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD2,
-			  htab->splt->contents +8 );
-	      bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD3,
-			  htab->splt->contents +12 );
-	      bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD4,
-			  htab->splt->contents +16 );
-	      bfd_put_32 (output_bfd, (bfd_vma) PLT_FIRST_ENTRY_WORD5,
-			  htab->splt->contents +20 );
+	    {
+	      memcpy (htab->splt->contents, elf_s390_plt_first_entry,
+		      PLT_FIRST_ENTRY_SIZE);
 	      bfd_put_32 (output_bfd,
 			  htab->sgotplt->output_section->vma
 			  + htab->sgotplt->output_offset,

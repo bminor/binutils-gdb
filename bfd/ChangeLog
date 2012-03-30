@@ -1,5 +1,18 @@
 2012-03-30  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
+	* elf64-s390.c (elf_s390x_plt_entry, elf_s390x_first_plt_entry):
+	New definitions.
+	(PLT_PIC_ENTRY_WORD*, PLT_PIC12_ENTRY_WORD*): Remove.
+	(elf_s390_finish_dynamic_symbol): Use memcpy instead of bfd_put_32.
+	(elf_s390_finish_dynamic_sections): Likewise.
+	* elf32-s390.c (elf_s390_plt_entry, elf_s390_plt_pic_entry)
+	(elf_s390_plt_pic12_entry, elf_s390_plt_pic16_entry)
+	(elf_s390_plt_first_entry, elf_s390_plt_pic_first_entry): New definitions.
+	(PLT_PIC16_ENTRY_WORD*, PLT_ENTRY_WORD*)
+	(PLT_PIC_FIRST_ENTRY_WORD*, PLT_FIRST_ENTRY_WORD*): Remove.
+
+2012-03-30  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
 	* elf32-s390.c (struct elf_s390_dyn_relocs): Remove.
 	Rename all occurrences in the file to elf_dyn_relocs.
 	* elf64-s390.c: Likewise.
