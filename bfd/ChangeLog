@@ -1,3 +1,9 @@
+2012-03-30  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* elf32-s390.c (struct elf_s390_dyn_relocs): Remove.
+	Rename all occurrences in the file to elf_dyn_relocs.
+	* elf64-s390.c: Likewise.
+
 2012-03-30  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_gc_mark_reloc): Don't delve into dynamic

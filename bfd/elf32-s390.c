@@ -631,25 +631,6 @@ PLT0:
 #define PLT_FIRST_ENTRY_WORD4     0x58101008
 #define PLT_FIRST_ENTRY_WORD5     0x07f10000
 
-/* The s390 linker needs to keep track of the number of relocs that it
-   decides to copy as dynamic relocs in check_relocs for each symbol.
-   This is so that it can later discard them if they are found to be
-   unnecessary.  We store the information in a field extending the
-   regular ELF linker hash table.  */
-
-struct elf_s390_dyn_relocs
-{
-  struct elf_s390_dyn_relocs *next;
-
-  /* The input section of the reloc.  */
-  asection *sec;
-
-  /* Total number of relocs copied for the input section.  */
-  bfd_size_type count;
-
-  /* Number of pc-relative relocs copied for the input section.  */
-  bfd_size_type pc_count;
-};
 
 /* s390 ELF linker hash entry.  */
 
@@ -658,7 +639,7 @@ struct elf_s390_link_hash_entry
   struct elf_link_hash_entry elf;
 
   /* Track dynamic relocs copied for this symbol.  */
-  struct elf_s390_dyn_relocs *dyn_relocs;
+  struct elf_dyn_relocs *dyn_relocs;
 
   /* Number of GOTPLT references for a function.  */
   bfd_signed_vma gotplt_refcount;
@@ -877,14 +858,14 @@ elf_s390_copy_indirect_symbol (info, dir, ind)
     {
       if (edir->dyn_relocs != NULL)
 	{
-	  struct elf_s390_dyn_relocs **pp;
-	  struct elf_s390_dyn_relocs *p;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
 	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
 	    {
-	      struct elf_s390_dyn_relocs *q;
+	      struct elf_dyn_relocs *q;
 
 	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
@@ -1265,8 +1246,8 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		  && (h->root.type == bfd_link_hash_defweak
 		      || !h->def_regular)))
 	    {
-	      struct elf_s390_dyn_relocs *p;
-	      struct elf_s390_dyn_relocs **head;
+	      struct elf_dyn_relocs *p;
+	      struct elf_dyn_relocs **head;
 
 	      /* We must copy these reloc types into the output file.
 		 Create a reloc section in dynobj and make room for
@@ -1308,7 +1289,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
-		  head = (struct elf_s390_dyn_relocs **) vpp;
+		  head = (struct elf_dyn_relocs **) vpp;
 		}
 
 	      p = *head;
@@ -1316,7 +1297,7 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
 		{
 		  bfd_size_type amt = sizeof *p;
 
-		  p = ((struct elf_s390_dyn_relocs *)
+		  p = ((struct elf_dyn_relocs *)
 		       bfd_alloc (htab->elf.dynobj, amt));
 		  if (p == NULL)
 		    return FALSE;
@@ -1414,8 +1395,8 @@ elf_s390_gc_sweep_hook (bfd *abfd,
       if (r_symndx >= symtab_hdr->sh_info)
 	{
 	  struct elf_s390_link_hash_entry *eh;
-	  struct elf_s390_dyn_relocs **pp;
-	  struct elf_s390_dyn_relocs *p;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
@@ -1628,7 +1609,7 @@ elf_s390_adjust_dynamic_symbol (info, h)
   if (ELIMINATE_COPY_RELOCS)
     {
       struct elf_s390_link_hash_entry * eh;
-      struct elf_s390_dyn_relocs *p;
+      struct elf_dyn_relocs *p;
 
       eh = (struct elf_s390_link_hash_entry *) h;
       for (p = eh->dyn_relocs; p != NULL; p = p->next)
@@ -1684,7 +1665,7 @@ allocate_dynrelocs (h, inf)
   struct bfd_link_info *info;
   struct elf_s390_link_hash_table *htab;
   struct elf_s390_link_hash_entry *eh;
-  struct elf_s390_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -1824,7 +1805,7 @@ allocate_dynrelocs (h, inf)
     {
       if (SYMBOL_CALLS_LOCAL (info, h))
 	{
-	  struct elf_s390_dyn_relocs **pp;
+	  struct elf_dyn_relocs **pp;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
 	    {
@@ -1907,7 +1888,7 @@ readonly_dynrelocs (h, inf)
      PTR inf;
 {
   struct elf_s390_link_hash_entry *eh;
-  struct elf_s390_dyn_relocs *p;
+  struct elf_dyn_relocs *p;
 
   eh = (struct elf_s390_link_hash_entry *) h;
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
@@ -1974,7 +1955,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  struct elf_s390_dyn_relocs *p;
+	  struct elf_dyn_relocs *p;
 
 	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
