@@ -1,3 +1,7 @@
+2012-03-30  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.python: Add test for linespecs with commas.
+
 2012-03-28  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.linespec/ls-dollar.cc: New file.

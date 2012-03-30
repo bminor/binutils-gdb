@@ -182,6 +182,9 @@ gdb_test "python print len(symtab)" "2" "Test decode_line func1 length"
 gdb_test "python print len(symtab\[1\])" "1" "Test decode_line func1 length"
 gdb_test "python print symtab\[1\]\[0\].symtab" ".*gdb.python/python-1.c.*" "Test decode_line func1 filename"
 gdb_test "python print symtab\[1\]\[0\].line" "19" "Test decode_line func1 line number"
+gdb_py_test_silent_cmd {python symtab = gdb.decode_line ("func1,func2")} \
+    "test decode_line func1,func2" 1
+gdb_test {python print symtab[0]} ",func2" "stop at comma in linespec"
 
 # gdb.write
 gdb_test "python print sys.stderr" ".*__main__.GdbOutputErrorFile instance at.*" "Test stderr location"
