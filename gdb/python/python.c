@@ -503,7 +503,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 						  appease gcc.  */
   struct symtab_and_line sal;
   const char *arg = NULL;
-  char *copy = NULL;
+  char *copy_to_free = NULL, *copy = NULL;
   struct cleanup *cleanups;
   PyObject *result = NULL;
   PyObject *return_result = NULL;
@@ -515,14 +515,14 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 
   cleanups = make_cleanup (null_cleanup, NULL);
 
+  sals.sals = NULL;
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       if (arg)
 	{
 	  copy = xstrdup (arg);
-	  make_cleanup (xfree, copy);
+	  copy_to_free = copy;
 	  sals = decode_line_1 (&copy, 0, 0, 0);
-	  make_cleanup (xfree, sals.sals);
 	}
       else
 	{
@@ -532,6 +532,13 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
 	  sals.nelts = 1;
 	}
     }
+
+  if (sals.sals != NULL && sals.sals != &sal)
+    {
+      make_cleanup (xfree, copy_to_free);
+      make_cleanup (xfree, sals.sals);
+    }
+
   if (except.reason < 0)
     {
       do_cleanups (cleanups);
@@ -575,7 +582,16 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
     }
 
   if (copy && strlen (copy) > 0)
-    unparsed = PyString_FromString (copy);
+    {
+      unparsed = PyString_FromString (copy);
+      if (unparsed == NULL)
+	{
+	  Py_DECREF (result);
+	  Py_DECREF (return_result);
+	  return_result = NULL;
+	  goto error;
+	}
+    }
   else
     {
       unparsed = Py_None;
@@ -585,13 +601,10 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   PyTuple_SetItem (return_result, 0, unparsed);
   PyTuple_SetItem (return_result, 1, result);
 
+ error:
   do_cleanups (cleanups);
 
   return return_result;
-
- error:
-  do_cleanups (cleanups);
-  return NULL;
 }
 
 /* Parse a string and evaluate it as an expression.  */

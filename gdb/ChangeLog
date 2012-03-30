@@ -1,3 +1,10 @@
+2012-03-30  Tom Tromey  <tromey@redhat.com>
+
+	* python/python.c (gdbpy_decode_line): Move cleanup creation out
+	of TRY_CATCH.  Fix error handling.
+	* python/py-value.c (convert_value_from_python): Move 'old'
+	declaration to innermost scope.
+
 2012-03-29  Joel Brobecker  <brobecker@adacore.com>
 	    Andrey Smirnov  <andrew.smirnov@gmail.com>
 

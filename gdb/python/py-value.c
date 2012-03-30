@@ -1250,7 +1250,6 @@ struct value *
 convert_value_from_python (PyObject *obj)
 {
   struct value *value = NULL; /* -Wall */
-  struct cleanup *old;
   volatile struct gdb_exception except;
   int cmp;
 
@@ -1319,6 +1318,8 @@ convert_value_from_python (PyObject *obj)
 	  s = python_string_to_target_string (obj);
 	  if (s != NULL)
 	    {
+	      struct cleanup *old;
+
 	      old = make_cleanup (xfree, s);
 	      value = value_cstring (s, strlen (s), builtin_type_pychar);
 	      do_cleanups (old);
