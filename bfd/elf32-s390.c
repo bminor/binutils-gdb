@@ -509,7 +509,7 @@ elf_s390_is_local_label_name (abfd, name)
    The GOT holds the address in the PLT to be executed.
    The loader then gets:
    24(15) =  Pointer to the structure describing the object.
-   28(15) =  Offset in symbol table
+   28(15) =  Offset into rela.plt
 
    The loader  must  then find the module where the function is
    and insert the address in the GOT.
@@ -527,7 +527,7 @@ RET1: BASR 1,0         # 2 bytes  Return from GOT 1st time
       BRC  15,-x       # 4 bytes  Jump to start of PLT
       .word 0          # 2 bytes filler
       .long ?          # 4 bytes  offset in GOT
-      .long ?          # 4 bytes  offset into symbol table
+      .long ?          # 4 bytes  offset into rela.plt
 
   This was the general case. There are two additional, optimizes PLT
   definitions. One for GOT offsets < 4096 and one for GOT offsets < 32768.
@@ -537,10 +537,10 @@ PLT1: L    1,<offset>(12) # 4 bytes  Load address from GOT in R1
       BCR  15,1           # 2 bytes  Jump to address
       .word 0,0,0         # 6 bytes  filler
 RET1: BASR 1,0            # 2 bytes  Return from GOT 1st time
-      L    1,14(1)        # 4 bytes  Load offset in symbol table in r1
+      L    1,14(1)        # 4 bytes  Load offset in rela.plt in r1
       BRC  15,-x          # 4 bytes  Jump to start of PLT
       .word 0,0,0         # 6 bytes  filler
-      .long ?             # 4 bytes  offset into symbol table
+      .long ?             # 4 bytes  offset into rela.plt
 
   Second the one for GOT offsets < 32768:
 
@@ -549,10 +549,10 @@ PLT1: LHI  1,<offset>     # 4 bytes  Load offset in GOT to r1
       BCR  15,1           # 2 bytes  Jump to address
       .word 0             # 2 bytes  filler
 RET1: BASR 1,0            # 2 bytes  Return from GOT 1st time
-      L    1,14(1)        # 4 bytes  Load offset in symbol table in r1
+      L    1,14(1)        # 4 bytes  Load offset in rela.plt in r1
       BRC  15,-x          # 4 bytes  Jump to start of PLT
       .word 0,0,0         # 6 bytes  filler
-      .long ?             # 4 bytes  offset into symbol table
+      .long ?             # 4 bytes  offset into rela.plt
 
 Total = 32 bytes per PLT entry
 
@@ -567,7 +567,7 @@ RET1: BASR 1,0         # 2 bytes  Return from GOT 1st time
       BRC  15,-x       # 4 bytes  Jump to start of PLT
       .word 0          # 2 bytes  filler
       .long ?          # 4 bytes  address of GOT entry
-      .long ?          # 4 bytes  offset into symbol table  */
+      .long ?          # 4 bytes  offset into rela.plt  */
 
 static const bfd_byte elf_s390_plt_entry[PLT_ENTRY_SIZE] =
   {
@@ -629,14 +629,14 @@ static const bfd_byte elf_s390_plt_pic16_entry[PLT_ENTRY_SIZE] =
     0x00, 0x00
   };
 
-/* The first PLT entry pushes the offset into the symbol table
+/* The first PLT entry pushes the offset into the rela.plt
    from R1 onto the stack at 8(15) and the loader object info
    at 12(15), loads the loader address in R1 and jumps to it.  */
 
 /* The first entry in the PLT for PIC code:
 
 PLT0:
-   ST   1,28(15)  # R1 has offset into symbol table
+   ST   1,28(15)  # R1 has offset into rela.plt
    L    1,4(12)   # Get loader ino(object struct address)
    ST   1,24(15)  # Store address
    L    1,8(12)   # Entry address of loader in R1
@@ -645,7 +645,7 @@ PLT0:
    The first entry in the PLT for static code:
 
 PLT0:
-   ST   1,28(15)      # R1 has offset into symbol table
+   ST   1,28(15)      # R1 has offset into rela.plt
    BASR 1,0
    L    1,18(0,1)     # Get address of GOT
    MVC  24(4,15),4(1) # Move loader ino to stack

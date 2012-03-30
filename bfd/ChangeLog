@@ -1,5 +1,11 @@
 2012-03-30  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
+	* elf64-s390.c: Fix several comments regarding PLT entry
+	description.
+	* elf32-s390.c: Likewise.
+
+2012-03-30  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
 	* elf64-s390.c: Use the section pointer shortcuts in
 	elf_link_hash_table and remove them from the target specific
 	variant.

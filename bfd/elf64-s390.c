@@ -540,18 +540,18 @@ elf_s390_is_local_label_name (abfd, name)
    RET1: BASR 1,0         # 2 bytes  Return from GOT 1st time
          LGF  1,12(1)     # 6 bytes  Load offset in symbl table in r1
          BRCL 15,-x       # 6 bytes  Jump to start of PLT
-         .long ?          # 4 bytes  offset into symbol table
+         .long ?          # 4 bytes  offset into .rela.plt
 
    Total = 32 bytes per PLT entry
    Fixup at offset 2: relative address to GOT entry
    Fixup at offset 22: relative branch to PLT0
-   Fixup at offset 28: 32 bit offset into symbol table
+   Fixup at offset 28: 32 bit offset into .rela.plt
 
-   A 32 bit offset into the symbol table is enough. It allows for symbol
-   tables up to a size of 2 gigabyte. A single dynamic object (the main
-   program, any shared library) is limited to 4GB in size and I want to see
-   the program that manages to have a symbol table of more than 2 GB with a
-   total size of at max 4 GB.  */
+   A 32 bit offset into the symbol table is enough. It allows for
+   .rela.plt sections up to a size of 2 gigabyte.  A single dynamic
+   object (the main program, any shared library) is limited to 4GB in
+   size.  Having a .rela.plt of 2GB would already make the .plt
+   section bigger than 8GB.  */
 
 static const bfd_byte elf_s390x_plt_entry[PLT_ENTRY_SIZE] =
   {
@@ -565,8 +565,8 @@ static const bfd_byte elf_s390x_plt_entry[PLT_ENTRY_SIZE] =
   };
 
 /* The first PLT entry pushes the offset into the symbol table
-   from R1 onto the stack at 8(15) and the loader object info
-   at 12(15), loads the loader address in R1 and jumps to it.  */
+   from R1 onto the stack at 56(15) and the loader object info
+   at 48(15), loads the loader address in R1 and jumps to it.  */
 
 /* The first entry in the PLT:
 
@@ -3065,7 +3065,7 @@ elf_s390_finish_dynamic_symbol (bfd *output_bfd,
       bfd_put_32 (output_bfd, - (PLT_FIRST_ENTRY_SIZE +
 				 (PLT_ENTRY_SIZE * plt_index) + 22)/2,
 		  htab->elf.splt->contents + h->plt.offset + 24);
-      /* Fixup offset into symbol table */
+      /* Fixup offset into .rela.plt section.  */
       bfd_put_32 (output_bfd, plt_index * sizeof (Elf64_External_Rela),
 		  htab->elf.splt->contents + h->plt.offset + 28);
 
