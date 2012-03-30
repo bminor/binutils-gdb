@@ -5169,6 +5169,11 @@ stab_demangle_v3_arglist (void *dhandle, struct stab_handle *info,
 	  return NULL;
 	}
 
+      /* PR 13925: Cope if the demangler returns an empty
+	 context for a function with no arguments.  */
+      if (dc->u.s_binary.left == NULL)
+	break;
+ 
       arg = stab_demangle_v3_arg (dhandle, info, dc->u.s_binary.left,
 				  NULL, &varargs);
       if (arg == NULL)

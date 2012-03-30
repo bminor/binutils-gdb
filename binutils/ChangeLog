@@ -1,3 +1,9 @@
+2012-03-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13925
+	* stabs.c (stab_demangle_v3_arglist): Cope with the demangler
+	returning an empty context for a function with no arguments.
+
 2012-03-28  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf.c (display_gdb_index): Handle index version 6.
