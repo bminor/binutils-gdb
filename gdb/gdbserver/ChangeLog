@@ -1,3 +1,12 @@
+2012-03-30  Thiago Jung Bauermann  <thiago.bauermann@linaro.org>
+
+	* configure.ac: Check whether Elf32_auxv_t and Elf64_auxv_t
+	are available.
+	* linux-low.c [HAVE_ELF32_AUXV_T] (Elf32_auxv_t): Add typedef.
+	[HAVE_ELF64_AUXV_T] (Elf64_auxv_t): Likewise.
+	* config.in: Regenerate.
+	* configure: Likewise.
+
 2012-03-29  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (regsets_store_inferior_registers) [__sparc__]:

@@ -82,6 +82,36 @@
 #endif
 #endif
 
+#ifndef HAVE_ELF32_AUXV_T
+/* Copied from glibc's elf.h.  */
+typedef struct
+{
+  uint32_t a_type;		/* Entry type */
+  union
+    {
+      uint32_t a_val;		/* Integer value */
+      /* We use to have pointer elements added here.  We cannot do that,
+	 though, since it does not work when using 32-bit definitions
+	 on 64-bit platforms and vice versa.  */
+    } a_un;
+} Elf32_auxv_t;
+#endif
+
+#ifndef HAVE_ELF64_AUXV_T
+/* Copied from glibc's elf.h.  */
+typedef struct
+{
+  uint64_t a_type;		/* Entry type */
+  union
+    {
+      uint64_t a_val;		/* Integer value */
+      /* We use to have pointer elements added here.  We cannot do that,
+	 though, since it does not work when using 32-bit definitions
+	 on 64-bit platforms and vice versa.  */
+    } a_un;
+} Elf64_auxv_t;
+#endif
+
 /* ``all_threads'' is keyed by the LWP ID, which we use as the GDB protocol
    representation of the thread ID.
 

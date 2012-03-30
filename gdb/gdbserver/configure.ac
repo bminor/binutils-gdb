@@ -168,6 +168,10 @@ AC_CHECK_TYPES(socklen_t, [], [],
 #include <sys/socket.h>
 ])
 
+AC_CHECK_TYPES([Elf32_auxv_t, Elf64_auxv_t], [], [],
+#include <elf.h>
+)
+
 ACX_PKGVERSION([GDB])
 ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
 AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])

@@ -4474,6 +4474,30 @@ _ACEOF
 fi
 
 
+ac_fn_c_check_type "$LINENO" "Elf32_auxv_t" "ac_cv_type_Elf32_auxv_t" "#include <elf.h>
+
+"
+if test "x$ac_cv_type_Elf32_auxv_t" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_ELF32_AUXV_T 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_type "$LINENO" "Elf64_auxv_t" "ac_cv_type_Elf64_auxv_t" "#include <elf.h>
+
+"
+if test "x$ac_cv_type_Elf64_auxv_t" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_ELF64_AUXV_T 1
+_ACEOF
+
+
+fi
+
+
 
 
 # Check whether --with-pkgversion was given.

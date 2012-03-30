@@ -49,6 +49,12 @@
 /* Define to 1 if you have the `dladdr' function. */
 #undef HAVE_DLADDR
 
+/* Define to 1 if the system has the type `Elf32_auxv_t'. */
+#undef HAVE_ELF32_AUXV_T
+
+/* Define to 1 if the system has the type `Elf64_auxv_t'. */
+#undef HAVE_ELF64_AUXV_T
+
 /* Define if <sys/procfs.h> has elf_fpregset_t. */
 #undef HAVE_ELF_FPREGSET_T
 
