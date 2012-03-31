@@ -23,6 +23,7 @@
 #include "sim-main.h"
 #include "sim-hw.h"
 #include "hw-device.h"
+#include "devices.h"
 #include "dv-bfin_cec.h"
 #include "dv-bfin_mmu.h"
 

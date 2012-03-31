@@ -1,3 +1,7 @@
+2012-03-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* devices.c: Include devices.h.
+
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, config.in, configure: Regenerate.
