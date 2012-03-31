@@ -1,5 +1,9 @@
 2012-03-31  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-bfin_sic.c (bfin_sic_finish): Change iwr1 to iwr2.
+
+2012-03-31  Mike Frysinger  <vapier@gentoo.org>
+
 	* devices.c: Include devices.h.
 
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>

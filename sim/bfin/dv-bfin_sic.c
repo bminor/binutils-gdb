@@ -926,7 +926,7 @@ bfin_sic_finish (struct hw *me)
       /* Initialize the SIC.  */
       sic->bf54x.imask0 = sic->bf54x.imask1 = sic->bf54x.imask2 = 0;
       sic->bf54x.isr0 = sic->bf54x.isr1 = sic->bf54x.isr2 = 0;
-      sic->bf54x.iwr0 = sic->bf54x.iwr1 = sic->bf54x.iwr1 = 0xFFFFFFFF;
+      sic->bf54x.iwr0 = sic->bf54x.iwr1 = sic->bf54x.iwr2 = 0xFFFFFFFF;
       sic->bf54x.iar0 = 0x10000000;
       sic->bf54x.iar1 = 0x33322221;
       sic->bf54x.iar2 = 0x66655444;
