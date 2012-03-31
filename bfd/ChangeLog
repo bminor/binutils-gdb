@@ -1,3 +1,8 @@
+2012-03-31  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* elf32-m68k.c (elf_m68k_relocate_section): Allow
+	R_68K_TLS_LE{8,16,32} for PIE.
+
 2012-03-30  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* elf64-s390.c: Fix several comments regarding PLT entry
