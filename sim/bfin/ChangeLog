@@ -1,3 +1,8 @@
+2012-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (bfin_user_init): Move auxvt_size decl from top to
+	inside of auxvt check.
+
 2012-03-31  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_sic.c (bfin_sic_finish): Change iwr1 to iwr2.
