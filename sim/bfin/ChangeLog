@@ -1,5 +1,10 @@
 2012-04-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-dis.c (fmtconst): Replace decimal handling with a single
+	sprintf call and the '*' field width.
+
+2012-04-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* machs.c (bfin_model_map_bfrom): Return when mnum is 535.
 
 2012-04-01  Mike Frysinger  <vapier@gentoo.org>

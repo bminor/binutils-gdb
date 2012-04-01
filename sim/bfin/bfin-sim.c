@@ -223,16 +223,7 @@ fmtconst_str (const_forms_t cf, bs32 x, bu32 pc)
     x <<= constant_formats[cf].scale;
 
   if (constant_formats[cf].decimal)
-    {
-      if (constant_formats[cf].leading)
-	{
-	  char ps[10];
-	  sprintf (ps, "%%%ii", constant_formats[cf].leading);
-	  sprintf (buf, ps, x);
-	}
-      else
-	sprintf (buf, "%i", x);
-    }
+    sprintf (buf, "%*i", constant_formats[cf].leading, x);
   else
     {
       if (constant_formats[cf].issigned && x < 0)
