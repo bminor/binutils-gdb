@@ -1583,7 +1583,7 @@ bfin_model_map_bfrom (SIM_DESC sd, SIM_CPU *cpu)
   else if (mnum >= 531 && mnum <= 533)
     bfrom = bf533_roms;
   else if (mnum == 535)
-    /* Stub.  */;
+    return; /* Stub.  */
   else if (mnum >= 534 && mnum <= 537)
     bfrom = bf537_roms;
   else if (mnum >= 538 && mnum <= 539)

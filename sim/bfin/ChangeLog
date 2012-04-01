@@ -1,5 +1,9 @@
 2012-04-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* machs.c (bfin_model_map_bfrom): Return when mnum is 535.
+
+2012-04-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (bfin_user_init): Move auxvt_size decl from top to
 	inside of auxvt check.
 
