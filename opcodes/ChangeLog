@@ -1,3 +1,8 @@
+2012-04-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (fmtconst): Replace decimal handling with a single
+	sprintf call and the '*' field width.
+
 2012-03-23  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* mips-dis.c (mips_arch_choices): Add entry for Broadcom XLP.

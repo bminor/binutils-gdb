@@ -162,16 +162,7 @@ fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info *outf)
     x <<= constant_formats[cf].scale;
 
   if (constant_formats[cf].decimal)
-    {
-      if (constant_formats[cf].leading)
-	{
-	  char ps[10];
-	  sprintf (ps, "%%%ii", constant_formats[cf].leading);
-	  sprintf (buf, ps, x);
-	}
-      else
-	sprintf (buf, "%li", x);
-    }
+    sprintf (buf, "%*li", constant_formats[cf].leading, x);
   else
     {
       if (constant_formats[cf].issigned && x < 0)
