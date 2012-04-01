@@ -6187,6 +6187,9 @@ _interp_insn_bfin (SIM_CPU *cpu, bu32 pc)
   /* Only cache on first run through (in case of parallel insns).  */
   if (INSN_LEN == 0)
     INSN_LEN = insn_len;
+  else
+    /* Once you're past the first slot, only 16bit insns are valid.  */
+    illegal_instruction_combination (cpu);
 
   if ((iw0 & 0xf7ff) == 0xc003 && (iw1 & 0xfe00) == 0x1800)
     {

@@ -1,5 +1,10 @@
 2012-04-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-sim.c (_interp_insn_bfin): Call illegal_instruction_combination
+	when INSN_LEN is non-zero before 32bit decode.
+
+2012-04-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-dis.c (fmtconst): Replace decimal handling with a single
 	sprintf call and the '*' field width.
 
