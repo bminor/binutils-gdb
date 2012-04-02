@@ -286,7 +286,7 @@ hw_port_decode (struct hw *me,
 	    }
 	}
     }
-  hw_abort (me, "Unreconized port %s", port_name);
+  hw_abort (me, "Unrecognized port %s", port_name);
   return 0;
 }
 
