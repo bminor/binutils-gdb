@@ -1,3 +1,7 @@
+2012-04-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (set breakpoint condition-evaluation): Use imperative mood.
+
 2012-03-30  Tom Tromey  <tromey@redhat.com>
 
 	* python/python.c (gdbpy_decode_line): Move cleanup creation out
