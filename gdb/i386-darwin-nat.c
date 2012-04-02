@@ -70,7 +70,7 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
 	  if (ret != KERN_SUCCESS)
 	    {
 	      printf_unfiltered (_("Error calling thread_get_state for "
-				   "GP registers for thread 0x%ulx"),
+				   "GP registers for thread 0x%lx\n"),
 				 current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
@@ -90,7 +90,7 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
 	  if (ret != KERN_SUCCESS)
 	    {
 	      printf_unfiltered (_("Error calling thread_get_state for "
-				   "float registers for thread 0x%ulx"),
+				   "float registers for thread 0x%lx\n"),
 				 current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
@@ -114,8 +114,8 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
 	  if (ret != KERN_SUCCESS)
 	    {
 	      printf_unfiltered (_("Error calling thread_get_state for "
-				   "GP registers for thread 0x%ulx"),
-				 current_thread);
+				   "GP registers for thread 0x%lx\n"),
+				 (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
 	  for (i = 0; i < I386_NUM_GREGS; i++)
@@ -139,8 +139,8 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
 	  if (ret != KERN_SUCCESS)
 	    {
 	      printf_unfiltered (_("Error calling thread_get_state for "
-				   "float registers for thread 0x%ulx"),
-				 current_thread);
+				   "float registers for thread 0x%lx\n"),
+				 (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
           i387_supply_fxsave (regcache, -1, &fp_regs.__fpu_fcw);

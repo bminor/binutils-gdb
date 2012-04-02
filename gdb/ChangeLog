@@ -1,5 +1,12 @@
 2012-04-02  Tristan Gingold  <gingold@adacore.com>
 
+	* i386-darwin-tdep.c (i386_darwin_thread_state_reg_offset): Fix
+	SS offset.
+	* i386-darwin-nat.c (i386_darwin_fetch_inferior_registers): Fix
+	format_string.
+
+2012-04-02  Tristan Gingold  <gingold@adacore.com>
+
 	PR gdb/13901
 	* darwin-nat.c (darwin_execvp): Sey binary preference.
 
