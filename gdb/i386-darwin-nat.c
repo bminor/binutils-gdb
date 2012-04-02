@@ -103,13 +103,13 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
     {
       if (regno == -1 || regno < I386_NUM_GREGS)
         {
-          i386_thread_state_t gp_regs;
-          unsigned int gp_count = i386_THREAD_STATE_COUNT;
+          x86_thread_state32_t gp_regs;
+          unsigned int gp_count = x86_THREAD_STATE32_COUNT;
           kern_return_t ret;
 	  int i;
 
 	  ret = thread_get_state
-            (current_thread, i386_THREAD_STATE, (thread_state_t) & gp_regs,
+            (current_thread, x86_THREAD_STATE32, (thread_state_t) &gp_regs,
              &gp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
@@ -129,12 +129,12 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
       if (regno == -1
 	  || (regno >= I386_ST0_REGNUM && regno < I386_SSE_NUM_REGS))
         {
-          i386_float_state_t fp_regs;
-          unsigned int fp_count = i386_FLOAT_STATE_COUNT;
+          x86_float_state32_t fp_regs;
+          unsigned int fp_count = x86_FLOAT_STATE32_COUNT;
           kern_return_t ret;
 
 	  ret = thread_get_state
-            (current_thread, i386_FLOAT_STATE, (thread_state_t) & fp_regs,
+            (current_thread, x86_FLOAT_STATE32, (thread_state_t) &fp_regs,
              &fp_count);
 	  if (ret != KERN_SUCCESS)
 	    {
@@ -216,13 +216,13 @@ i386_darwin_store_inferior_registers (struct target_ops *ops,
     {
       if (regno == -1 || regno < I386_NUM_GREGS)
         {
-          i386_thread_state_t gp_regs;
+          x86_thread_state32_t gp_regs;
           kern_return_t ret;
-          unsigned int gp_count = i386_THREAD_STATE_COUNT;
+          unsigned int gp_count = x86_THREAD_STATE32_COUNT;
 	  int i;
 
           ret = thread_get_state
-            (current_thread, i386_THREAD_STATE, (thread_state_t) & gp_regs,
+            (current_thread, x86_THREAD_STATE32, (thread_state_t) &gp_regs,
              &gp_count);
 	  MACH_CHECK_ERROR (ret);
 
@@ -232,29 +232,29 @@ i386_darwin_store_inferior_registers (struct target_ops *ops,
 		(regcache, i,
 		 (char *)&gp_regs + i386_darwin_thread_state_reg_offset[i]);
 
-          ret = thread_set_state (current_thread, i386_THREAD_STATE,
-                                  (thread_state_t) & gp_regs,
-                                  i386_THREAD_STATE_COUNT);
+          ret = thread_set_state (current_thread, x86_THREAD_STATE32,
+                                  (thread_state_t) &gp_regs,
+                                  x86_THREAD_STATE32_COUNT);
           MACH_CHECK_ERROR (ret);
         }
 
       if (regno == -1
 	  || (regno >= I386_ST0_REGNUM && regno < I386_SSE_NUM_REGS))
         {
-          i386_float_state_t fp_regs;
-          unsigned int fp_count = i386_FLOAT_STATE_COUNT;
+          x86_float_state32_t fp_regs;
+          unsigned int fp_count = x86_FLOAT_STATE32_COUNT;
           kern_return_t ret;
 
 	  ret = thread_get_state
-            (current_thread, i386_FLOAT_STATE, (thread_state_t) & fp_regs,
+            (current_thread, x86_FLOAT_STATE32, (thread_state_t) & fp_regs,
              &fp_count);
 	  MACH_CHECK_ERROR (ret);
 
 	  i387_collect_fxsave (regcache, regno, &fp_regs.__fpu_fcw);
 
-	  ret = thread_set_state (current_thread, i386_FLOAT_STATE,
-				  (thread_state_t) & fp_regs,
-				  i386_FLOAT_STATE_COUNT);
+	  ret = thread_set_state (current_thread, x86_FLOAT_STATE32,
+				  (thread_state_t) &fp_regs,
+				  x86_FLOAT_STATE32_COUNT);
 	  MACH_CHECK_ERROR (ret);
         }
     }
