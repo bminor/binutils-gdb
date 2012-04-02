@@ -1,3 +1,8 @@
+2012-04-02  Tristan Gingold  <gingold@adacore.com>
+
+	PR gdb/13901
+	* darwin-nat.c (darwin_execvp): Sey binary preference.
+
 2012-04-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (set breakpoint condition-evaluation): Use imperative mood.

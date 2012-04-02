@@ -39,6 +39,7 @@
 #include "value.h"
 #include "arch-utils.h"
 #include "bfd.h"
+#include "bfd/mach-o.h"
 
 #include <sys/ptrace.h>
 #include <sys/signal.h>
@@ -1536,6 +1537,22 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
     {
       fprintf_unfiltered (gdb_stderr, "Cannot set posix_spawn flags\n");
       return;
+    }
+
+  /* Specify the same binary preference to spawn the shell as the
+     exec binary.  This avoids spawning a 64bit shell while debugging
+     a 32bit program, which may confuse gdb.
+     Also, this slightly breaks internal layers as we suppose the binary
+     is Mach-O.  Doesn't harm in practice.  */
+  if (exec_bfd != NULL)
+    {
+      cpu_type_t pref;
+      size_t ocount;
+
+      pref = bfd_mach_o_get_data (exec_bfd)->header.cputype;
+      res = posix_spawnattr_setbinpref_np (&attr, 1, &pref, &ocount);
+      if (res != 0 || ocount != 1)
+	fprintf_unfiltered (gdb_stderr, "Cannot set posix_spawn binpref\n");
     }
 
   posix_spawnp (NULL, argv[0], NULL, &attr, argv, env);
