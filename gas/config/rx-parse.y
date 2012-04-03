@@ -816,7 +816,7 @@ op_subadd
 op_dp20_rm_l
 	: REG ',' REG
 	  { id24 (1, 0x03 + (sub_op<<2), 0x00); F ($1, 16, 4); F ($3, 20, 4); }
-	| disp '[' REG ']' DOT_L ',' REG
+	| disp '[' REG ']' opt_l ',' REG
 	  { B4 (MEMEX, 0xa0, 0x00 + sub_op, 0x00);
 	  F ($3, 24, 4); F ($7, 28, 4); DSP ($1, 14, LSIZE); }
 	;

@@ -1,3 +1,7 @@
+2012-04-03  DJ Delorie  <dj@redhat.com>
+
+	* config/rx-parse.y: Make the .L optional for ADC and SBB.
+
 2012-04-02  DJ Delorie  <dj@redhat.com>
 
 	* config/rx-parse.y: IMM->IMM_, take an extra parameter for the
