@@ -72,11 +72,14 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 
   while (*fmt != '\0')
     {
+      const char *str = fmt;
       while (*fmt != '%' && *fmt != '\0')
-	{
-	  putc (*fmt, fp);
-	  fmt++;
-	}
+	fmt++;
+      if (fmt != str)
+	if (fwrite (str, 1, fmt - str, fp))
+	  {
+	    /* Ignore.  */
+	  }
 
       if (*fmt == '%')
 	{

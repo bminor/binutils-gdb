@@ -1,3 +1,9 @@
+2012-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* ldmisc.c (vfinfo): Assign new local str to fmt.  Delete
+	putc call.  If str and fmt are different, call fwrite on
+	the difference.
+
 2012-03-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
