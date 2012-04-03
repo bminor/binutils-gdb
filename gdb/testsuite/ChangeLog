@@ -1,3 +1,12 @@
+2012-04-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.trace/unavailable.exp
+	(collect globals: print object on: print derived_partial)
+	(collect globals: print object on: print derived_whole)
+	(collect globals: print object off: print derived_partial)
+	(collect globals: print object off: print derived_whole): Update
+	expected output.
+
 2012-03-30  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.python: Add test for linespecs with commas.

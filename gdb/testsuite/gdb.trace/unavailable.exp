@@ -542,11 +542,11 @@ proc gdb_collect_globals_test { } { with_test_prefix "collect globals" {
 
 	# vtable pointer available, but nothing else
 	gdb_test "print derived_partial" \
-	    " = \\(Derived\\) {<Middle> = {<Base> = <unavailable>, _vptr.Middle = <unavailable>, y = <unavailable>}, _vptr.Derived = $hex, z = <unavailable>}"
+	    " = \\(Derived\\) {<Middle> = {<Base> = <unavailable>, _vptr.Middle = <unavailable>, y = <unavailable>}, _vptr.Derived = $hex <vtable for Derived.*>, z = <unavailable>}"
 
 	# whole object available
 	gdb_test "print derived_whole" \
-	    " = \\(Derived\\) {<Middle> = {<Base> = {x = 2}, _vptr.Middle = $hex, y = 3}, _vptr.Derived = $hex, z = 4}"
+	    " = \\(Derived\\) {<Middle> = {<Base> = {x = 2}, _vptr.Middle = $hex, y = 3}, _vptr.Derived = $hex <vtable for Derived.*>, z = 4}"
     }
 
     gdb_test_no_output "set print object off"
@@ -560,11 +560,11 @@ proc gdb_collect_globals_test { } { with_test_prefix "collect globals" {
 
 	# vtable pointer available, but nothing else
 	gdb_test "print derived_partial" \
-	    " = {<Middle> = {<Base> = <unavailable>, _vptr.Middle = <unavailable>, y = <unavailable>}, _vptr.Derived = $hex, z = <unavailable>}"
+	    " = {<Middle> = {<Base> = <unavailable>, _vptr.Middle = <unavailable>, y = <unavailable>}, _vptr.Derived = $hex <vtable for Derived.*>, z = <unavailable>}"
 
 	# whole object available
 	gdb_test "print derived_whole" \
-	    " = {<Middle> = {<Base> = {x = 2}, _vptr.Middle = $hex, y = 3}, _vptr.Derived = $hex, z = 4}"
+	    " = {<Middle> = {<Base> = {x = 2}, _vptr.Middle = $hex, y = 3}, _vptr.Derived = $hex <vtable for Derived.*>, z = 4}"
     }
 
     # An instance of a virtual class where we collected everything but
