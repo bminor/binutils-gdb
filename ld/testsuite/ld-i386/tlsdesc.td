@@ -5,7 +5,7 @@
 #objdump: -sj.tdata
 #target: i?86-*-*
 
-.*:     file format elf32-i386
+.*:     file format elf32-i386.*
 
 Contents of section \.tdata:
  [0-9a-f]+ 11000000 12000000 13000000 14000000  .*

@@ -1,3 +1,27 @@
+2012-04-03  Roland McGrath  <mcgrathr@google.com>
+
+	* elf-nacl.c: New file.
+	* elf-nacl.h: New file.
+	* elf32-i386.c (elf_backend_modify_segment_map): Define for
+	bfd_elf32_i386_nacl_vec.
+	(elf_backend_modify_program_headers): Likewise.
+	* elf64-x86-64.c (elf_backend_modify_segment_map): Define for
+	bfd_elf64_x86_64_nacl_vec and bfd_elf32_x86_64_nacl_vec.
+	(elf_backend_modify_program_headers): Likewise.
+	* Makefile.am (BFD32_BACKENDS, BFD64_BACKENDS): Add elf-nacl.lo here.
+	(BFD32_BACKENDS_CFILES, BFD64_BACKENDS_CFILES): Add elf-nacl.c here.
+	* Makefile.in: Regenerated.
+	* configure.in (bfd_elf64_x86_64_nacl_vec): Add elf-nacl.o to tb here.
+	(bfd_elf32_x86_64_nacl_vec): Likewise.
+	(bfd_elf64_x86_64_vec, bfd_elf32_x86_64_vec): Likewise.
+	(bfd_elf64_x86_64_freebsd_vec, bfd_elf64_x86_64_sol2_vec): Likewise.
+	(bfd_elf64_l1om_vec, bfd_elf64_l1om_freebsd_vec): Likewise.
+	(bfd_elf64_k1om_vec, bfd_elf64_k1om_freebsd_vec): Likewise.
+	(bfd_elf32_i386_nacl_vec): Likewise.
+	(bfd_elf32_i386_sol2_vec, bfd_elf32_i386_freebsd_vec): Likewise.
+	(bfd_elf32_i386_vxworks_vec, bfd_elf32_i386_vec): Likewise.
+	* configure: Regenerated.
+
 2012-03-31  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* elf32-m68k.c (elf_m68k_relocate_section): Allow

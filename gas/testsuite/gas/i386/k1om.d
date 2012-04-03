@@ -2,6 +2,7 @@
 #as: -J -march=k1om
 #objdump: -dw
 #name: k1om
+#not-target: *-*-nacl*
 
 .*: +file format elf64-k1om.*
 

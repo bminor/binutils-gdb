@@ -26,6 +26,7 @@
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+#include "elf-nacl.h"
 #include "bfd_stdint.h"
 #include "objalloc.h"
 #include "hashtab.h"
@@ -5227,6 +5228,11 @@ static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
 #undef	elf_backend_arch_data
 #define	elf_backend_arch_data	&elf_x86_64_nacl_arch_bed
 
+#undef	elf_backend_modify_segment_map
+#define	elf_backend_modify_segment_map		nacl_modify_segment_map
+#undef	elf_backend_modify_program_headers
+#define	elf_backend_modify_program_headers	nacl_modify_program_headers
+
 #include "elf64-target.h"
 
 /* Native Client x32 support.  */
@@ -5264,10 +5270,12 @@ static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
 #include "elf32-target.h"
 
 /* Restore defaults.  */
-#undef elf_backend_object_p
+#undef	elf_backend_object_p
 #define elf_backend_object_p		    elf64_x86_64_elf_object_p
-#undef elf_backend_bfd_from_remote_memory
-#undef elf_backend_size_info
+#undef	elf_backend_bfd_from_remote_memory
+#undef	elf_backend_size_info
+#undef	elf_backend_modify_segment_map
+#undef	elf_backend_modify_program_headers
 
 /* Intel L1OM support.  */
 

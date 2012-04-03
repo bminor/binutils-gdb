@@ -1,6 +1,7 @@
 #as: --x32
 #ld: -m elf32_x86_64 -shared --no-ld-generated-unwind-info
 #readelf: -d -S --wide
+#target: x86_64-*-linux*
 
 There are 9 section headers, starting at offset 0x1d8:
 

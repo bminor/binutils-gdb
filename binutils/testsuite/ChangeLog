@@ -1,3 +1,13 @@
+2012-04-03  Roland McGrath  <mcgrathr@google.com>
+
+	* lib/binutils-common.exp (is_elf_format): Consider *-*-nacl* to
+	be ELF too.
+
+	* binutils-all/elfedit-4.d: Add "#as: --64" option.
+
+	* binutils-all/i386/i386.exp: Accept nacl targets too.
+	* binutils-all/x86-64/x86-64.exp: Likewise.
+
 2012-03-13  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR binutils/3807

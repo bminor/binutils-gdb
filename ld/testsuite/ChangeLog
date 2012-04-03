@@ -1,3 +1,135 @@
+2012-04-03  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-x86-64/ilp32-4-nacl.d: New file.
+	* ld-x86-64/x86-64.exp: Run it.
+
+	* ld-discard/discard.exp: Accept nacl targets too.
+	* ld-elf/binutils.exp: Likewise.
+	* ld-elf/comm-data.exp: Likewise.
+	* ld-elf/elf.exp: Likewise.
+	* ld-elf/tls_common.exp: Likewise.
+	* ld-elfvers/vers.exp: Likewise.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+	* ld-elfweak/elfweak.exp: Likewise.
+	* ld-gc/gc.exp: Likewise.
+	* ld-ifunc/binutils.exp: Likewise.
+	* ld-ifunc/ifunc.exp: Likewise.
+	* ld-linkonce/linkonce.exp:Likewise.
+	* ld-pie/pie.exp: Likewise.
+	* ld-shared/shared.exp: Likewise.
+	* ld-undefined/weak-undef.exp: Likewise.
+	* ld-unique/unique.exp: Likewise.
+	* ld-x86-64/dwarfreloc.exp: Likewise.
+	* ld-x86-64/line.exp: Likewise.
+
+	* lib/ld-lib.exp (slurp_options): Support global array
+	options_regsub to apply substitutions to the contents
+	of options lines read from the file.
+	* ld-i386/emit-relocs.d: Renamed to ...
+	* ld-i386/emit-relocs.rd: ... this.
+	* ld-i386/i386.exp: Accept nacl targets too.
+	For them, use options_regsub to replace elf_i386 with
+	elf_i386_nacl in run_dump_test cases; apply the same
+	substitution in $i386tests; replace foo.rd expectations
+	files with foo-nacl.rd in $i386tests.
+	(i386tests): Change emit-relocs.d to emit-relocs.rd here.
+	* ld-i386/emit-relocs-nacl.rd: New file.
+	* ld-i386/plt-nacl.pd: New file.
+	* ld-i386/plt-pic-nacl.pd: New file.
+	* ld-i386/tlsbin-nacl.rd: New file.
+	* ld-i386/tlsbindesc-nacl.rd: New file.
+	* ld-i386/tlsdesc-nacl.rd: New file.
+	* ld-i386/tlsgdesc-nacl.rd: New file.
+	* ld-i386/tlsnopic-nacl.rd: New file.
+	* ld-i386/tlspic-nacl.rd: New file.
+	* ld-x86-64/x86-64.exp: Accept nacl targets too.
+	For them, use options_regsub to replace elf_x86_64 with
+	elf_x86_64_nacl in run_dump_test cases; apply the same
+	substitution in $x86_64tests; replace foo.rd expectations
+	files with foo-nacl.rd in $x86_64tests.
+	Add explicit -melf_x86_64 to ld options in tests that need it,
+	in case the default emulation is x32 (as it is for x86_64-nacl).
+	* ld/testsuite/ld-x86-64/plt-nacl.pd: New file.
+	* ld/testsuite/ld-x86-64/split-by-file-nacl.rd: New file.
+	* ld/testsuite/ld-x86-64/tlsbin-nacl.rd: New file.
+	* ld/testsuite/ld-x86-64/tlsbindesc-nacl.rd: New file.
+	* ld/testsuite/ld-x86-64/tlsdesc-nacl.pd: New file.
+	* ld/testsuite/ld-x86-64/tlsdesc-nacl.rd: New file.
+	* ld/testsuite/ld-x86-64/tlsgdesc-nacl.rd: New file.
+	* ld/testsuite/ld-x86-64/tlspic-nacl.rd: New file.
+
+	* ld-i386/hidden2.d: Loosen regexps to match any file format variant,
+	and not to depend on exact addresses, displacements, etc. where
+	they are irrelevant.
+	* ld-i386/pcrel16.d: Likewise.
+	* ld-i386/pcrel16abs.d: Likewise.
+	* ld-i386/pr12718.d: Likewise.
+	* ld-i386/pr12921.d: Likewise.
+	* ld-i386/reloc.d: Likewise.
+	* ld-i386/tlsbin.dd: Likewise.
+	* ld-i386/tlsbin.sd: Likewise.
+	* ld-i386/tlsbin.td: Likewise.
+	* ld-i386/tlsbindesc.dd: Likewise.
+	* ld-i386/tlsbindesc.sd: Likewise.
+	* ld-i386/tlsbindesc.td: Likewise.
+	* ld-i386/tlsdesc.dd: Likewise.
+	* ld-i386/tlsdesc.sd: Likewise.
+	* ld-i386/tlsdesc.td: Likewise.
+	* ld-i386/tlsg.sd: Likewise.
+	* ld-i386/tlsgdesc.dd: Likewise.
+	* ld-i386/tlsindntpoff.dd: Likewise.
+	* ld-i386/tlsnopic.dd: Likewise.
+	* ld-i386/tlsnopic.sd: Likewise.
+	* ld-i386/tlspic.dd: Likewise.
+	* ld-i386/tlspic.sd: Likewise.
+	* ld-i386/tlspic.td: Likewise.
+	* ld-i386/tlspie2.d: Likewise.
+	* ld-x86-64/hidden2.d: Likewise.
+	* ld-x86-64/pcrel16.d: Likewise.
+	* ld-x86-64/pr12718.d: Likewise.
+	* ld-x86-64/pr12921.d: Likewise.
+	* ld-x86-64/protected3.d: Likewise.
+	* ld-x86-64/tlsbin.dd: Likewise.
+	* ld-x86-64/tlsbin.sd: Likewise.
+	* ld-x86-64/tlsbin.td: Likewise.
+	* ld-x86-64/tlsbindesc.dd: Likewise.
+	* ld-x86-64/tlsbindesc.sd: Likewise.
+	* ld-x86-64/tlsbindesc.td: Likewise.
+	* ld-x86-64/tlsdesc.dd: Likewise.
+	* ld-x86-64/tlsdesc.sd: Likewise.
+	* ld-x86-64/tlsdesc.td: Likewise.
+	* ld-x86-64/tlsg.sd: Likewise.
+	* ld-x86-64/tlsgd5.dd: Likewise.
+	* ld-x86-64/tlsgd6.dd: Likewise.
+	* ld-x86-64/tlsgdesc.dd: Likewise.
+	* ld-x86-64/tlspic.dd: Likewise.
+	* ld-x86-64/tlspic.sd: Likewise.
+	* ld-x86-64/tlspic.td: Likewise.
+
+	* ld-x86-64/ilp32-8.d: Match any file format variant.
+	Use a -Ttext and adjust expected results, to handle variant layouts.
+	* ld-x86-64/ilp32-9.d: Likewise.
+
+	* ld-i386/alloc.t: Remove superfluous OUTPUT_FORMAT statement.
+	* ld-i386/pr12627.t: Likewise.
+
+	* ld-x86-64/abs-l1om.d: Add target: constraint.
+	* ld-x86-64/protected2-l1om.d: Likewise.
+	* ld-x86-64/protected3-l1om.d: Likewise.
+	* ld-x86-64/ilp32-4.d: Likewise.
+
+	* ld-x86-64/plt.s: New file.
+	* ld-x86-64/pltlib.s: New file.
+	* ld-x86-64/plt.pd: New file.
+	* ld-x86-64/x86-64.exp (x86_64tests): Add them.
+
+	* ld-i386/plt.s: New file.
+	* ld-i386/pltlib.s: New file.
+	* ld-i386/plt.pd: New file.
+	* ld-i386/plt-pic.s: New file.
+	* ld-i386/plt-pic.pd: New file.
+	* ld-i386/i386.exp (i386tests): Add them.
+
 2012-03-25  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/vxworks-relax.rd: Remove check on reloc section

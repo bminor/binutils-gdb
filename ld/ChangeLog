@@ -1,3 +1,19 @@
+2012-04-03  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.tgt (i[3-7]86-*-nacl*, x86_64-*-nacl*): Handle them.
+	* emulparams/elf_nacl.sh: New file.
+	* emulparams/elf_i386_nacl.sh: New file.
+	* emulparams/elf32_x86_64_nacl.sh: New file.
+	* emulparams/elf_x86_64_nacl.sh: New file.
+	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf_i386_nacl.c here.
+	(ALL_64_EMULATION_SOURCES): Add eelf32_x86_64_nacl.c and
+	eelf_x86_64_nacl.c here.
+	(eelf_i386_nacl.c, eelf32_x86_64_nacl.c, eelf_x86_64_nacl.c):
+	New targets.
+	* Makefile.in: Regenerated.
+
+	* scripttempl/elf.sc: Handle SEPARATE_CODE cases.
+
 2012-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* ldmisc.c (vfinfo): Assign new local str to fmt.  Delete

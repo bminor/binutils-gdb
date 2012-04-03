@@ -145,7 +145,7 @@ fr30-*-*)		targ_emul=elf32fr30
 frv-*-*linux*)		targ_emul=elf32frvfd ;;
 frv-*-*)		targ_emul=elf32frv ; targ_extra_emuls="elf32frvfd"
 			;;
-moxie-*-*)		targ_emul=elf32moxie 
+moxie-*-*)		targ_emul=elf32moxie
 			;;
 h8300-*-hms* | h8300-*-coff* | h8300-*-rtemscoff*)
 			targ_emul=h8300; targ_extra_emuls="h8300h h8300s h8300hn h8300sn h8300sx h8300sxn" ;;
@@ -281,6 +281,15 @@ i[3-7]86-*-beos*)	targ_emul=elf_i386_be ;;
 i[3-7]86-*-vxworks*)	targ_emul=elf_i386_vxworks ;;
 i[3-7]86-*-chaos)	targ_emul=elf_i386_chaos
 			;;
+i[3-7]86-*-nacl*)	targ_emul=elf_i386_nacl
+			targ64_extra_emuls="elf32_x86_64_nacl elf_x86_64_nacl"
+			targ64_extra_libpath="elf32_x86_64_nacl elf_x86_64_nacl"
+			;;
+x86_64-*-nacl*)		targ_emul=elf32_x86_64_nacl
+			targ_extra_emuls="elf_i386_nacl elf_x86_64_nacl"
+			targ_extra_libpath="elf_i386_nacl elf_x86_64_nacl"
+			tdir_elf_i386_nacl=`echo ${targ_alias} | sed -e 's/x86_64/i386/'`
+			;;
 i860-*-coff)		targ_emul=coff_i860 ;;
 i860-stardent-sysv4* | i860-stardent-elf*)
 			targ_emul=elf32_i860
@@ -306,7 +315,7 @@ ip2k-*-elf)		targ_emul=elf32ip2k
 iq2000-*-elf)           targ_emul=elf32iq2000 ; targ_extra_emuls="elf32iq10"
 			;;
 lm32-*-*linux*)         targ_emul=elf32lm32fd ;;
-lm32-*-*)               targ_emul=elf32lm32 ; targ_extra_emuls="elf32lm32fd" 
+lm32-*-*)               targ_emul=elf32lm32 ; targ_extra_emuls="elf32lm32fd"
                         ;;
 m32c-*-elf | m32c-*-rtems*)
 			targ_emul=elf32m32c
@@ -317,9 +326,9 @@ m32r*-*-elf* | m32r*-*-rtems*)
 m32r*le-*-linux-*)      targ_emul=m32rlelf_linux ;;
 m32r*-*-linux-*)        targ_emul=m32relf_linux
 			;;
-m68hc11-*-*|m6811-*-*)	targ_emul=m68hc11elf 
+m68hc11-*-*|m6811-*-*)	targ_emul=m68hc11elf
 			targ_extra_emuls="m68hc11elfb m68hc12elf m68hc12elfb" ;;
-m68hc12-*-*|m6812-*-*)	targ_emul=m68hc12elf 
+m68hc12-*-*|m6812-*-*)	targ_emul=m68hc12elf
 			targ_extra_emuls="m68hc12elfb m68hc11elf m68hc11elfb" ;;
 m68*-sun-sunos[34]*)	targ_emul=sun3 ;;
 m68*-wrs-vxworks*)	targ_emul=sun3 ;;
@@ -672,7 +681,7 @@ vax-*-linux-*)  	targ_emul=elf32vax
 			;;
 w65-*-*)		targ_emul=w65
 			;;
-xc16x-*-elf)		targ_emul=elf32xc16x 
+xc16x-*-elf)		targ_emul=elf32xc16x
                         targ_extra_emuls="elf32xc16xl elf32xc16xs"
                         ;;
 xstormy16-*-*)		targ_emul=elf32xstormy16

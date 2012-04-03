@@ -36,6 +36,7 @@ if { ![istarget hppa*64*-*-hpux*]
      && ![istarget i?86-*-elf*]
      && ![istarget i?86-*-linux*]
      && ![istarget i?86-*-gnu*]
+     && ![istarget i?86-*-nacl*]
      && ![istarget ia64-*-elf*]
      && ![istarget ia64-*-linux*]
      && ![istarget m68k-*-linux*]
@@ -51,7 +52,8 @@ if { ![istarget hppa*64*-*-hpux*]
      && ![istarget alpha*-*-linux*]
      && ![istarget s390*-*-linux*]
      && ![istarget sh\[34\]*-*-linux*]
-     && ![istarget x86_64-*-linux*] } {
+     && ![istarget x86_64-*-linux*]
+     && ![istarget x86_64-*-nacl*] } {
     return
 }
 
@@ -119,7 +121,7 @@ proc test_ar { test lib object expect } {
 	unresolved "$test"
 	return
     }
-    
+
     verbose -log "$nm --print-armap $tmpdir/$lib | grep \" in \" | egrep \"VERS\\|bar\\|foo\" | sort > $tmpdir/nm.out"
 
     catch "exec $nm --print-armap $tmpdir/$lib | grep \\\ in\\\  | egrep VERS\\\|bar\\\|foo | sort > $tmpdir/nm.out" exec_output
@@ -261,7 +263,7 @@ proc objdump_symstuff { objdump object expectfile } {
 	    perror "$expectfile doesn't exist"
 	    return 0
 	}
-	
+
 	if [file exists $tmpdir/objdump.out] then {
 	    set file_b [open $tmpdir/objdump.out r]
 	} else {
@@ -291,11 +293,11 @@ proc objdump_symstuff { objdump object expectfile } {
 	    }
 	}
 	close $file_b
-	
+
 	for { set i 0 } { $i < [llength $list_a] } { incr i } {
 	    set line_a [lindex $list_a $i]
 	    set line_b [lindex $list_b $i]
-	    
+
 
 	    verbose "\t$expectfile: $i: $line_a" 3
 	    verbose "\t/tmp/objdump.out: $i: $line_b" 3
@@ -304,20 +306,20 @@ proc objdump_symstuff { objdump object expectfile } {
 	    } else {
 		verbose -log "\t$expectfile: $i: $line_a"
 		verbose -log "\t$tmpdir/objdump.out: $i: $line_b"
-		
+
 		return 0
 	    }
 	}
-	
+
 	if { [llength $list_a] != [llength $list_b] } {
 	    verbose -log "Line count"
 	    return 0
 	}
-	
+
 	if $differences<1 then {
 	    return 1
 	}
-	
+
 	return 0
     } else {
 	verbose -log "$exec_output"
@@ -356,7 +358,7 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 	    warning "$expectfile doesn't exist"
 	    return 0
 	}
-	
+
 	if [file exists $tmpdir/objdump.out] then {
 	    set file_b [open $tmpdir/objdump.out r]
 	} else {
@@ -386,7 +388,7 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 	    }
 	}
 	close $file_b
-	
+
 	# Support empty files.
 	if { ![info exists list_a] && ![info exists list_b] } then {
 	    return 1
@@ -394,12 +396,12 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 
 	for { set i 0 } { $i < [llength $list_b] } { incr i } {
 	    set line_b [lindex $list_b $i]
-	    
+
 # The tests are rigged so that we should never export a symbol with the
 # word 'hide' in it.  Thus we just search for it, and bail if we find it.
 	    if [regexp "hide" $line_b] then {
 		verbose -log "\t$tmpdir/objdump.out: $i: $line_b"
-		
+
 		return 0
 	    }
 
@@ -419,20 +421,20 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 
 	    if { $j >= [llength $list_a] } {
 		verbose -log "\t$tmpdir/objdump.out: $i: $line_b"
-		
+
 		return 0
 	    }
 	}
-	
+
 	if { [llength $list_a] != [llength $list_b] } {
 	    verbose -log "Line count"
 	    return 0
 	}
-	
+
 	if $differences<1 then {
 	    return 1
 	}
-	
+
 	return 0
     } else {
 	verbose -log "$exec_output"
@@ -564,7 +566,7 @@ proc build_binary { shared pic test source libname other mapfile verexp versymex
     }
 
     pass $test
-    
+
 }
 
 proc build_executable { test source libname other mapfile verexp versymexp symexp } {
@@ -678,12 +680,12 @@ proc test_strip_vers_lib { test srclib libname verexp versymexp } {
 	    fail "$test"
 	    return
 	}
-	
+
 	if {![objdump_dynsymstuff $objdump $tmpdir/$libname.so $srcdir/$subdir/$versymexp ]}     {
 	    fail "$test"
 	    return
 	}
-	
+
     } else {
 	verbose -log "$exec_output"
 	fail "$test"
@@ -876,11 +878,11 @@ test_ar "ar with versioned solib" vers13.a vers1.so vers13.asym
 #
 # Strip a shared library, and make sure we didn't screw something up in there.
 #
-test_strip_vers_lib "vers14" vers1.so vers14 vers1.ver vers1.dsym 
+test_strip_vers_lib "vers14" vers1.so vers14 vers1.ver vers1.dsym
 
 
 #
-# Build another test with some versioned symbols.  Here we are going to 
+# Build another test with some versioned symbols.  Here we are going to
 # try and override something from the library, and we shouldn't get
 # any errors.
 #
@@ -912,7 +914,7 @@ build_vers_lib_pic "vers22" vers22.c vers22 "vers22a.so vers22b.so" "" vers22.ve
 
 # Test versioned definitions in different files.
 if [string match "yes" $pic] then {
-    xfail "vers23a" 
+    xfail "vers23a"
     xfail "vers23b"
     xfail "vers23c"
     xfail "vers23d"

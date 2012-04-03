@@ -1,5 +1,5 @@
 # Expect script for ld-x86_64 tests
-#   Copyright (C) 2002, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+#   Copyright (C) 2002, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
 #   Free Software Foundation
 #
 # This file is part of the GNU Binutils.
@@ -24,8 +24,15 @@
 # tools like objdump as well as the linker.
 
 if { !([istarget "x86_64-*-elf*"]
+       || [istarget "x86_64-*-nacl*"]
        || [istarget "x86_64-*-linux*"]) } {
     return
+}
+
+if [istarget "*-*-nacl*"] {
+    set emul "elf_x86_64_nacl"
+} else {
+    set emul "elf_x86_64"
 }
 
 # List contains test-items with 3 items followed by 2 lists:
@@ -38,6 +45,11 @@ if { !([istarget "x86_64-*-elf*"]
 # readelf: Apply readelf options on result.  Compare with regex (last arg).
 
 set x86_64tests {
+    {"Helper shared library (basic PLT test)"
+      "-shared -melf_x86_64" "--64" {pltlib.s} {} "libpltlib.so"}
+    {"basic PLT generation"
+     "-melf_x86_64 tmpdir/libpltlib.so" "--64" {plt.s}
+     {{objdump -drj.plt plt.pd}} "plt"}
     {"TLS -fpic -shared transitions"
      "-shared -melf_x86_64 --no-ld-generated-unwind-info"
      "--64" {tlspic1.s tlspic2.s}
@@ -111,10 +123,35 @@ set x86_64tests {
     {"TLS X32 LD->LE transition" "-melf32_x86_64"
      "--x32" {tlsld2.s}
      {{objdump -dwr tlsld2.dd}} "tlsld2"}
- 
-     {"build 32-bit object with 33 locals" "-e 0" "--32" {32bit.s} {{ ld incompatible.l }} "dummy" }
-     {"build 64-bit object" "-e 0 --defsym foo=1" "--64" {64bit.s} {} "dummy" }
-     {"link mixed objects"  "-e 0 tmpdir/32bit.o tmpdir/64bit.o" "" {} { { ld incompatible.l } } "mixed"}
+
+     {"build 32-bit object with 33 locals" "-melf_x86_64 -e 0" "--32" {32bit.s} {{ ld incompatible.l }} "dummy" }
+     {"build 64-bit object" "-melf_x86_64 -e 0 --defsym foo=1" "--64" {64bit.s} {} "dummy" }
+     {"link mixed objects"  "-melf_x86_64 -e 0 tmpdir/32bit.o tmpdir/64bit.o" "" {} { { ld incompatible.l } } "mixed"}
+}
+
+# So as to avoid rewriting every last test case here in a nacl variant,
+# we use black magic to massage the generic cases into nacl-variant cases.
+if [istarget "*-*-nacl*"] {
+    set emul elf_x86_64_nacl
+
+    set lhs {elf(32)?_(i386|x86_64)[[:>:]]}
+    set rhs {&_nacl}
+
+    # Change all the -melf_x86_64 to -melf_x86_64_nacl so linking can succeed.
+    regsub -all -- $lhs $x86_64tests $rhs x86_64tests
+
+    # Same, applied to all the run_dump_test cases.
+    set options_regsub(ld) [list $lhs $rhs]
+
+    # The section/segment layout differs too much for the vanilla
+    # readelf output files to match.  So massage the cases so that
+    # they refer to a foo-nacl.rd file instead of a foo.rd file.
+    regsub -all -- {([a-z0-9]+)\.rd} $x86_64tests {\1-nacl.rd} x86_64tests
+
+    # Likewise for PLTs.
+    regsub -all -- {([a-z0-9]+)\.pd} $x86_64tests {\1-nacl.pd} x86_64tests
+} else {
+    set emul elf_x86_64
 }
 
 run_ld_link_tests $x86_64tests
@@ -124,21 +161,21 @@ global ld
 
 set test_name "Mixed x86_64 and i386 input test 1"
 set test mixed1
-if { ![ld_simple_link $ld tmpdir/$test "-melf_x86_64 tmpdir/${test}a.o tmpdir/${test}b.o"] } {
+if { ![ld_simple_link $ld tmpdir/$test "-m$emul tmpdir/${test}a.o tmpdir/${test}b.o"] } {
     if [string match "*i386 architecture of input file `tmpdir/${test}b.o' is incompatible with i386:x86-64 output*" $link_output] {
-	pass "$test_name" 
+	pass "$test_name"
     } {
-	fail "$test_name" 
+	fail "$test_name"
     }
 }
 
 set test_name "Mixed x86_64 and i386 input test 2"
 set test mixed2
-if { ![ld_simple_link $ld tmpdir/$test "-melf_x86_64 tmpdir/${test}a.o tmpdir/${test}b.o"] } {
+if { ![ld_simple_link $ld tmpdir/$test "-m$emul tmpdir/${test}a.o tmpdir/${test}b.o"] } {
     if [string match "*i386 architecture of input file `tmpdir/${test}b.o' is incompatible with i386:x86-64 output*" $link_output] {
-	pass "$test_name" 
+	pass "$test_name"
     } {
-	fail "$test_name" 
+	fail "$test_name"
     }
 }
 
@@ -169,36 +206,36 @@ run_dump_test "discarded1"
 run_dump_test "pr12718"
 run_dump_test "pr12921"
 
-if { ![istarget "x86_64-*-linux*"] } {
+if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
 }
 
-if ![ld_assemble $as "--x32 $srcdir/$subdir/start.s" tmpdir/startx32.o] { 
+if ![ld_assemble $as "--x32 $srcdir/$subdir/start.s" tmpdir/startx32.o] {
     unresolved "Build ILP32 start.o"
     return
 }
 
-if ![ld_assemble $as "--32 $srcdir/$subdir/start.s" tmpdir/start32.o] { 
+if ![ld_assemble $as "--32 $srcdir/$subdir/start.s" tmpdir/start32.o] {
     unresolved "Build ia32 start.o"
     return
 }
 
-if ![ld_assemble $as "--64 $srcdir/$subdir/start.s" tmpdir/start64.o] { 
+if ![ld_assemble $as "--64 $srcdir/$subdir/start.s" tmpdir/start64.o] {
     unresolved "Build LP64 start.o"
     return
 }
 
-if ![ld_assemble $as "--x32 $srcdir/$subdir/foo.s" tmpdir/foox32.o] { 
+if ![ld_assemble $as "--x32 $srcdir/$subdir/foo.s" tmpdir/foox32.o] {
     unresolved "Build ILP32 foo.o"
     return
 }
 
-if ![ld_assemble $as "--32 $srcdir/$subdir/foo.s" tmpdir/foo32.o] { 
+if ![ld_assemble $as "--32 $srcdir/$subdir/foo.s" tmpdir/foo32.o] {
     unresolved "Build ia32 foo.o"
     return
 }
 
-if ![ld_assemble $as "--64 $srcdir/$subdir/foo.s" tmpdir/foo64.o] { 
+if ![ld_assemble $as "--64 $srcdir/$subdir/foo.s" tmpdir/foo64.o] {
     unresolved "Build LP64 foo.o"
     return
 }
@@ -208,6 +245,7 @@ run_dump_test "ilp32-1"
 run_dump_test "ilp32-2"
 run_dump_test "ilp32-3"
 run_dump_test "ilp32-4"
+run_dump_test "ilp32-4-nacl"
 run_dump_test "ilp32-5"
 run_dump_test "ilp32-6"
 run_dump_test "ilp32-7"

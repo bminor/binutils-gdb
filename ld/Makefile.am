@@ -263,6 +263,7 @@ ALL_EMULATION_SOURCES = \
 	eelf_i386_chaos.c \
 	eelf_i386_fbsd.c \
 	eelf_i386_ldso.c \
+	eelf_i386_nacl.c \
 	eelf_i386_sol2.c \
 	eelf_i386_vxworks.c \
 	eelf_s390.c \
@@ -462,6 +463,7 @@ ALL_EMULATIONS = $(ALL_EMULATION_SOURCES:.c=.@OBJEXT@)
 
 ALL_64_EMULATION_SOURCES = \
 	eelf32_x86_64.c \
+	eelf32_x86_64_nacl.c \
 	eelf64_aix.c \
 	eelf64_ia64.c \
 	eelf64_ia64_fbsd.c \
@@ -483,13 +485,14 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64ppc.c \
 	eelf64ppc_fbsd.c \
 	eelf64tilegx.c \
- 	eelf64tilegx_be.c \
+	eelf64tilegx_be.c \
 	eelf_l1om.c \
 	eelf_l1om_fbsd.c \
 	eelf_k1om.c \
 	eelf_k1om_fbsd.c \
 	eelf_x86_64.c \
 	eelf_x86_64_fbsd.c \
+	eelf_x86_64_nacl.c \
 	eelf_x86_64_sol2.c \
 	ehppa64linux.c \
 	emmo.c \
@@ -1030,8 +1033,8 @@ eelf32lm32.c: $(srcdir)/emulparams/elf32lm32.sh \
 	${GENSCRIPTS} elf32lm32 "$(tdir_elf32lm32)"
 eelf32lm32fd.c: $(srcdir)/emulparams/elf32lm32fd.sh \
   $(srcdir)/emulparams/elf32lm32.sh $(ELF_DEPS) \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS} 
-	${GENSCRIPTS} elf32lm32fd "$(tdir_elf32lm32fd)" 
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32lm32fd "$(tdir_elf32lm32fd)"
 eelf32lmip.c: $(srcdir)/emulparams/elf32lmip.sh \
   $(srcdir)/emulparams/elf32bmip.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
@@ -1202,6 +1205,11 @@ eelf_i386_fbsd.c: $(srcdir)/emulparams/elf_i386_fbsd.sh \
 eelf_i386_ldso.c: $(srcdir)/emulparams/elf_i386_ldso.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_ldso "$(tdir_elf_i386_ldso)"
+eelf_i386_nacl.c: $(srcdir)/emulparams/elf_i386_nacl.sh \
+  $(srcdir)/emulparams/elf_i386.sh \
+  $(srcdir)/emulparams/elf_nacl.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_i386_nacl "$(tdir_elf_i386_nacl)"
 eelf_i386_sol2.c: $(srcdir)/emulparams/elf_i386_sol2.sh \
   $(srcdir)/emulparams/solaris2.sh \
   $(srcdir)/emultempl/solaris2.em \
@@ -1729,11 +1737,11 @@ eriscix.c: $(srcdir)/emulparams/riscix.sh \
 	${GENSCRIPTS} riscix "$(tdir_riscix)"
 escore3_elf.c: $(srcdir)/emulparams/scoreelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/scoreelf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS} 
-	${GENSCRIPTS} score3_elf "$(tdir_score3_elf)" scoreelf 
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} score3_elf "$(tdir_score3_elf)" scoreelf
 escore7_elf.c: $(srcdir)/emulparams/scoreelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/scoreelf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS} 
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} score7_elf "$(tdir_score7_elf)" scoreelf
 esh.c: $(srcdir)/emulparams/sh.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}
@@ -1901,6 +1909,11 @@ ez8002.c: $(srcdir)/emulparams/z8002.sh \
 eelf32_x86_64.c: $(srcdir)/emulparams/elf32_x86_64.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_x86_64 "$(tdir_elf32_x86_64)"
+eelf32_x86_64_nacl.c: $(srcdir)/emulparams/elf32_x86_64_nacl.sh \
+  $(srcdir)/emulparams/elf32_x86_64.sh \
+  $(srcdir)/emulparams/elf_nacl.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_x86_64_nacl "$(tdir_elf32_x86_64_nacl)"
 eelf64_aix.c: $(srcdir)/emulparams/elf64_aix.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_aix "$(tdir_elf64_aix)"
@@ -2020,6 +2033,11 @@ eelf_x86_64_fbsd.c: $(srcdir)/emulparams/elf_x86_64_fbsd.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_x86_64_fbsd "$(tdir_elf_x86_64_fbsd)"
+eelf_x86_64_nacl.c: $(srcdir)/emulparams/elf_x86_64_nacl.sh \
+  $(srcdir)/emulparams/elf_x86_64.sh \
+  $(srcdir)/emulparams/elf_nacl.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_x86_64_nacl "$(tdir_elf_x86_64_nacl)"
 eelf_x86_64_sol2.c: $(srcdir)/emulparams/elf_x86_64_sol2.sh \
   $(srcdir)/emulparams/elf_x86_64.sh \
   $(srcdir)/emulparams/solaris2.sh \
@@ -2139,7 +2157,7 @@ bootstrap: ld3$(EXEEXT)
 
 # END OF CHECK TARGETS
 
-# 
+#
 # Build a dummy plugin using libtool.
 #
 if ENABLE_PLUGINS
@@ -2164,9 +2182,9 @@ ld.1: $(srcdir)/ld.texinfo configdoc.texi
 	touch $@
 	-$(TEXI2POD) $(MANCONF) < $(srcdir)/ld.texinfo > ld.pod
 	-($(POD2MAN) ld.pod | \
-	        sed -e '/^.if n .na/d' > $@.T$$$$ && \
-	        mv -f $@.T$$$$ $@) || \
-	        (rm -f $@.T$$$$ && exit 1)
+		sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || \
+		(rm -f $@.T$$$$ && exit 1)
 	rm -f ld.pod
 
 MAINTAINERCLEANFILES = configdoc.texi ld.1

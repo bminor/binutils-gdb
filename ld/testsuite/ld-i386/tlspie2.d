@@ -8,6 +8,6 @@
 
 Disassembly of section .text:
 
-0+188 <_start>:
+[0-9a-f]+ <_start>:
 [ 	]*[a-f0-9]+:	8d 05 fc ff ff ff    	lea    0xfffffffc,%eax
 #pass

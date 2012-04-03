@@ -25,6 +25,7 @@
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+#include "elf-nacl.h"
 #include "elf-vxworks.h"
 #include "bfd_stdint.h"
 #include "objalloc.h"
@@ -5207,7 +5208,16 @@ static const struct elf_i386_backend_data elf_i386_nacl_arch_bed =
 #undef	elf_backend_arch_data
 #define elf_backend_arch_data	&elf_i386_nacl_arch_bed
 
+#undef	elf_backend_modify_segment_map
+#define	elf_backend_modify_segment_map		nacl_modify_segment_map
+#undef	elf_backend_modify_program_headers
+#define	elf_backend_modify_program_headers	nacl_modify_program_headers
+
 #include "elf32-target.h"
+
+/* Restore defaults.  */
+#undef	elf_backend_modify_segment_map
+#undef	elf_backend_modify_program_headers
 
 /* VxWorks support.  */
 
