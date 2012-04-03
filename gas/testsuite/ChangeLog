@@ -1,3 +1,7 @@
+2012-04-02  DJ Delorie  <dj@redhat.com>
+
+	* gas/rx/mov.d: Update patterns for fixed MOV.W encoding.
+
 2012-03-20  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/vfp1xD.s: Add tests of the VMSR ad VMRS instructions in

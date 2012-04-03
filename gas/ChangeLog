@@ -1,3 +1,20 @@
+2012-04-02  DJ Delorie  <dj@redhat.com>
+
+	* config/rx-parse.y: IMM->IMM_, take an extra parameter for the
+	transfer size.
+	(IMM): New, call IMM_ with the default 32.
+	(IMMW,IMMB): Likewise, for 16 and 8.
+	(NIMM, MBIMM): Add size parameter.
+	(immediate): Likewise.  Allow 32768..65535 for 16-bit transfers.
+	(MOV.W): Use IMMW instead of IMM.
+
+	* config/rx-parse.y (ADC,SBB): ADC and SBB only allow .L.
+	(op_dp20_rm_l): New.
+	(op_dp20_rim_l): New.
+
+	* config/rx-parse.y (op_dp20_rms): Rename to op_dp20_rr, don't allow mem.
+	(ABS, NEG, NOT): These only take REG or REG,REG (rr, not rms).
+
 2012-03-29  Terry Guo  <terry.guo@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add cortex-m0plus.

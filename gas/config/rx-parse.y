@@ -91,10 +91,13 @@ static int sizemap[] = { BSIZE, WSIZE, LSIZE, WSIZE };
 #define PC2(v)             rx_op (v, 2, RXREL_PCREL)
 #define PC3(v)             rx_op (v, 3, RXREL_PCREL)
 
-#define IMM(v,pos)	   F (immediate (v, RXREL_SIGNED, pos), pos, 2); \
+#define IMM_(v,pos,size)   F (immediate (v, RXREL_SIGNED, pos, size), pos, 2); \
 			   if (v.X_op != O_constant && v.X_op != O_big) rx_linkrelax_imm (pos)
-#define NIMM(v,pos)	   F (immediate (v, RXREL_NEGATIVE, pos), pos, 2)
-#define NBIMM(v,pos)	   F (immediate (v, RXREL_NEGATIVE_BORROW, pos), pos, 2)
+#define IMM(v,pos)	   IMM_ (v, pos, 32)
+#define IMMW(v,pos)	   IMM_ (v, pos, 16)
+#define IMMB(v,pos)	   IMM_ (v, pos, 8)
+#define NIMM(v,pos)	   F (immediate (v, RXREL_NEGATIVE, pos, 32), pos, 2)
+#define NBIMM(v,pos)	   F (immediate (v, RXREL_NEGATIVE_BORROW, pos, 32), pos, 2)
 #define DSP(v,pos,msz)	   if (!v.X_md) rx_relax (RX_RELAX_DISP, pos); \
 			   else rx_linkrelax_dsp (pos); \
 			   F (displacement (v, msz), pos, 2)
@@ -108,7 +111,7 @@ static int         rx_disp5op (expressionS *, int);
 static int         rx_disp5op0 (expressionS *, int);
 static int         exp_val (expressionS exp);
 static expressionS zero_expr (void);
-static int         immediate (expressionS, int, int);
+static int         immediate (expressionS, int, int, int);
 static int         displacement (expressionS, int);
 static void        rtsd_immediate (expressionS);
 
@@ -278,7 +281,7 @@ statement :
 	  { if ($8 <= 7 && rx_uintop ($4, 8) && rx_disp5op0 (&$6, WSIZE))
 	      { B2 (0x3d, 0); rx_field5s2 ($6); F ($8, 9, 3); O1 ($4); }
 	    else
-	      { B2 (0xf8, 0x01); F ($8, 8, 4); DSP ($6, 6, WSIZE); IMM ($4, 12); } }
+	      { B2 (0xf8, 0x01); F ($8, 8, 4); DSP ($6, 6, WSIZE); IMMW ($4, 12); } }
 
 	| MOV DOT_L '#' EXPR ',' disp '[' REG ']'
 	  { if ($8 <= 7 && rx_uintop ($4, 8) && rx_disp5op0 (&$6, LSIZE))
@@ -598,10 +601,10 @@ statement :
 
 /* ---------------------------------------------------------------------- */
 
-	| SBB   { sub_op = 0; } op_dp20_rm
-	| NEG   { sub_op = 1; sub_op2 = 1; } op_dp20_rms
-	| ADC   { sub_op = 2; } op_dp20_rim
-	| ABS   { sub_op = 3; sub_op2 = 2; } op_dp20_rms
+	| SBB   { sub_op = 0; } op_dp20_rm_l
+	| NEG   { sub_op = 1; sub_op2 = 1; } op_dp20_rr
+	| ADC   { sub_op = 2; } op_dp20_rim_l
+	| ABS   { sub_op = 3; sub_op2 = 2; } op_dp20_rr
 	| MAX   { sub_op = 4; } op_dp20_rim
 	| MIN   { sub_op = 5; } op_dp20_rim
 	| EMUL  { sub_op = 6; } op_dp20_i
@@ -610,7 +613,7 @@ statement :
 	| DIVU  { sub_op = 9; } op_dp20_rim
 	| TST   { sub_op = 12; } op_dp20_rim
 	| XOR   { sub_op = 13; } op_dp20_rim
-	| NOT   { sub_op = 14; sub_op2 = 0; } op_dp20_rms
+	| NOT   { sub_op = 14; sub_op2 = 0; } op_dp20_rr
 	| STZ   { sub_op = 14; } op_dp20_i
 	| STNZ  { sub_op = 15; } op_dp20_i
 
@@ -810,6 +813,16 @@ op_subadd
 
 /* sbb, neg, adc, abs, max, min, div, divu, tst, not, xor, stz, stnz, emul, emulu */
 
+op_dp20_rm_l
+	: REG ',' REG
+	  { id24 (1, 0x03 + (sub_op<<2), 0x00); F ($1, 16, 4); F ($3, 20, 4); }
+	| disp '[' REG ']' DOT_L ',' REG
+	  { B4 (MEMEX, 0xa0, 0x00 + sub_op, 0x00);
+	  F ($3, 24, 4); F ($7, 28, 4); DSP ($1, 14, LSIZE); }
+	;
+
+/* neg, adc, abs, max, min, div, divu, tst, not, xor, stz, stnz, emul, emulu */
+
 op_dp20_rm
 	: REG ',' REG
 	  { id24 (1, 0x03 + (sub_op<<2), 0x00); F ($1, 16, 4); F ($3, 20, 4); }
@@ -830,8 +843,14 @@ op_dp20_rim
 	| op_dp20_i
 	;
 
-op_dp20_rms
-	: op_dp20_rm
+op_dp20_rim_l
+	: op_dp20_rm_l
+	| op_dp20_i
+	;
+
+op_dp20_rr
+	: REG ',' REG
+	  { id24 (1, 0x03 + (sub_op<<2), 0x00); F ($1, 16, 4); F ($3, 20, 4); }
 	| REG
 	  { B2 (0x7e, sub_op2 << 4); F ($1, 12, 4); }
 	;
@@ -1429,7 +1448,7 @@ zero_expr (void)
 }
 
 static int
-immediate (expressionS exp, int type, int pos)
+immediate (expressionS exp, int type, int pos, int bits)
 {
   /* We will emit constants ourself here, so negate them.  */
   if (type == RXREL_NEGATIVE && exp.X_op == O_constant)
@@ -1448,6 +1467,11 @@ immediate (expressionS exp, int type, int pos)
       return 1;
     }
   else if (rx_intop (exp, 16))
+    {
+      rx_op (exp, 2, type);
+      return 2;
+    }
+  else if (rx_uintop (exp, 16) && bits == 16)
     {
       rx_op (exp, 2, type);
       return 2;
