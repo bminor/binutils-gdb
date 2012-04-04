@@ -119,19 +119,21 @@ sparc_fill_gregset_to_stack (struct regcache *regcache, const void *buf)
   int i;
   CORE_ADDR addr = 0;
   unsigned char tmp_reg_buf[8];
-  const int l0_regno = find_regno("l0");
+  const int l0_regno = find_regno ("l0");
   const int i7_regno = l0_regno + 15;
 
   /* These registers have to be stored in the stack.  */
-  memcpy(&addr, ((char *) buf) + sparc_regmap[find_regno("sp")], sizeof(addr));
+  memcpy (&addr,
+	  ((char *) buf) + sparc_regmap[find_regno ("sp")],
+	  sizeof (addr));
 
   addr += BIAS;
 
   for (i = l0_regno; i <= i7_regno; i++)
     {
       collect_register (regcache, i, tmp_reg_buf);
-      (*the_target->write_memory) (addr, tmp_reg_buf, sizeof(tmp_reg_buf));
-      addr += sizeof(tmp_reg_buf);
+      (*the_target->write_memory) (addr, tmp_reg_buf, sizeof (tmp_reg_buf));
+      addr += sizeof (tmp_reg_buf);
     }
 }
 
@@ -169,19 +171,21 @@ sparc_store_gregset_from_stack (struct regcache *regcache, const void *buf)
   int i;
   CORE_ADDR addr = 0;
   unsigned char tmp_reg_buf[8];
-  const int l0_regno = find_regno("l0");
+  const int l0_regno = find_regno ("l0");
   const int i7_regno = l0_regno + 15;
 
   /* These registers have to be obtained from the stack.  */
-  memcpy(&addr, ((char *) buf) + sparc_regmap[find_regno("sp")], sizeof(addr));
+  memcpy (&addr,
+	  ((char *) buf) + sparc_regmap[find_regno ("sp")],
+	  sizeof (addr));
 
   addr += BIAS;
 
   for (i = l0_regno; i <= i7_regno; i++)
     {
-      (*the_target->read_memory) (addr, tmp_reg_buf, sizeof(tmp_reg_buf));
+      (*the_target->read_memory) (addr, tmp_reg_buf, sizeof (tmp_reg_buf));
       supply_register (regcache, i, tmp_reg_buf);
-      addr += sizeof(tmp_reg_buf);
+      addr += sizeof (tmp_reg_buf);
     }
 }
 
@@ -192,7 +196,7 @@ sparc_store_gregset (struct regcache *regcache, const void *buf)
   char zerobuf[8];
   int range;
 
-  memset (zerobuf, 0, sizeof(zerobuf));
+  memset (zerobuf, 0, sizeof (zerobuf));
 
   for (range = 0; range < N_GREGS_RANGES; range++)
     for (i = gregs_ranges[range].regno_start;
@@ -241,9 +245,9 @@ sparc_breakpoint_at (CORE_ADDR where)
 {
   unsigned char insn[INSN_SIZE];
 
-  (*the_target->read_memory) (where, (unsigned char *) insn, sizeof(insn));
+  (*the_target->read_memory) (where, (unsigned char *) insn, sizeof (insn));
 
-  if (memcmp(sparc_breakpoint, insn, sizeof(insn)) == 0)
+  if (memcmp (sparc_breakpoint, insn, sizeof (insn)) == 0)
     return 1;
 
   /* If necessary, recognize more trap instructions here.  GDB only

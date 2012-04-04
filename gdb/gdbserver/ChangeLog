@@ -1,3 +1,9 @@
+2012-04-04  Pedro Alves  <palves@redhat.com>
+
+	* linux-sparc-low.c (sparc_fill_gregset_to_stack)
+	(sparc_store_gregset_from_stack, sparc_store_gregset)
+	(sparc_breakpoint_at): Fix formatting.
+
 2012-03-30  Thiago Jung Bauermann  <thiago.bauermann@linaro.org>
 
 	* configure.ac: Check whether Elf32_auxv_t and Elf64_auxv_t
