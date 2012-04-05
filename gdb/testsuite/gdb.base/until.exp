@@ -40,7 +40,8 @@ gdb_test "until $bp_location1" \
 # Verify that a malformed "advance" is gracefully caught.
 #
 gdb_test "until 80 then stop" \
-	"Junk at end of arguments." "malformed until"
+    "malformed linespec error: unexpected string, \"then stop\"." \
+    "malformed until"
 
 # Rerun up to factorial, outer invocation
 if { ![runto factorial] } then { gdb_suppress_tests; }

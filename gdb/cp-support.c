@@ -73,19 +73,6 @@ struct cmd_list_element *maint_cplus_cmd_list = NULL;
 static void maint_cplus_command (char *arg, int from_tty);
 static void first_component_command (char *arg, int from_tty);
 
-/* Operator validation.
-   NOTE: Multi-byte operators (usually the assignment variety
-   operator) must appear before the single byte version, i.e., "+="
-   before "+".  */
-static const char *operator_tokens[] =
-  {
-    "++", "+=", "+", "->*", "->", "--", "-=", "-", "*=", "*",
-    "/=", "/", "%=", "%", "!=", "==", "!", "&&", "<<=", "<<",
-    ">>=", ">>", "<=", "<", ">=", ">", "~", "&=", "&", "|=",
-    "||", "|", "^=", "^", "=", "()", "[]", ",", "new", "delete"
-    /* new[] and delete[] require special whitespace handling */
-  };
-
 /* A list of typedefs which should not be substituted by replace_typedefs.  */
 static const char * const ignore_typedefs[] =
   {
@@ -1459,110 +1446,6 @@ first_component_command (char *arg, int from_tty)
 
 extern initialize_file_ftype _initialize_cp_support; /* -Wmissing-prototypes */
 
-#define SKIP_SPACE(P)				\
-  do						\
-  {						\
-    while (*(P) == ' ' || *(P) == '\t')		\
-      ++(P);					\
-  }						\
-  while (0)
-
-/* Returns the length of the operator name or 0 if INPUT does not
-   point to a valid C++ operator.  INPUT should start with
-   "operator".  */
-int
-cp_validate_operator (const char *input)
-{
-  int i;
-  char *copy;
-  const char *p;
-  struct expression *expr;
-  struct value *val;
-  volatile struct gdb_exception except;
-
-  p = input;
-
-  if (strncmp (p, "operator", 8) == 0)
-    {
-      int valid = 0;
-
-      p += 8;
-      SKIP_SPACE (p);
-      for (i = 0;
-	   i < sizeof (operator_tokens) / sizeof (operator_tokens[0]);
-	   ++i)
-	{
-	  int length = strlen (operator_tokens[i]);
-
-	  /* By using strncmp here, we MUST have operator_tokens
-	     ordered!  See additional notes where operator_tokens is
-	     defined above.  */
-	  if (strncmp (p, operator_tokens[i], length) == 0)
-	    {
-	      const char *op = p;
-
-	      valid = 1;
-	      p += length;
-
-	      if (strncmp (op, "new", 3) == 0
-		  || strncmp (op, "delete", 6) == 0)
-		{
-
-		  /* Special case: new[] and delete[].  We must be
-		     careful to swallow whitespace before/in "[]".  */
-		  SKIP_SPACE (p);
-
-		  if (*p == '[')
-		    {
-		      ++p;
-		      SKIP_SPACE (p);
-		      if (*p == ']')
-			++p;
-		      else
-			valid = 0;
-		    }
-		}
-
-	      if (valid)
-		return (p - input);
-	    }
-	}
-
-      /* Check input for a conversion operator.  */
-
-      /* Skip past base typename.  */
-      while (*p != '*' && *p != '&' && *p != 0 && *p != ' ')
-	++p;
-      SKIP_SPACE (p);
-
-      /* Add modifiers '*' / '&'.  */
-      while (*p == '*' || *p == '&')
-	{
-	  ++p;
-	  SKIP_SPACE (p);
-	}
-
-      /* Check for valid type.  [Remember: input starts with 
-	 "operator".]  */
-      copy = savestring (input + 8, p - input - 8);
-      expr = NULL;
-      val = NULL;
-      TRY_CATCH (except, RETURN_MASK_ALL)
-	{
-	  expr = parse_expression (copy);
-	  val = evaluate_type (expr);
-	}
-
-      xfree (copy);
-      if (expr)
-	xfree (expr);
-
-      if (val != NULL && value_type (val) != NULL)
-	return (p - input);
-    }
-
-  return 0;
-}
 
 /* Implement "info vtbl".  */
 

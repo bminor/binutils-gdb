@@ -1,3 +1,23 @@
+2012-04-05  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/advance.exp: Update error message for
+	"advance malformed" test.
+	* gdb.base/break.exp: Likewise for "breakpoint with
+	trailing garbage" test.
+	* gdb.base/hbreak2.exp: Likewise for "hardware breakpoint
+	with trailing garbage" test.
+	* gdb.base/sepdebug.exp: Likewise for "breakpoint with
+	trailng garbage" test.
+	* gdb.base/until.exp: Likewise for "malformed until" test.
+	* gdb.cp/ovldbreak.exp: Create the breakpoint table
+	for "breakpoint info (after setting on all)".
+	* gdb.cp/userdef.exp: Remove quoting for "break A2::operator+"
+	tests.
+	* gdb.cp/cplabel.cc: New file.
+	* gdb.cp/cplabel.exp: New test.
+	* gdb.linespec/ls-errs.c: New file.
+	* gdb.linespec/ls-errs.exp: New test.
+
 2012-04-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.trace/unavailable.exp

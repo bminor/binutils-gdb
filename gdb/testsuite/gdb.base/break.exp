@@ -600,7 +600,7 @@ gdb_test "break $bp_location12 thread foo" \
 # trailing garbage.
 #
 gdb_test "break $bp_location12 foo" \
-    "Junk at end of arguments.*" \
+    "malformed linespec error: unexpected string, \"foo\".*" \
     "breakpoint with trailing garbage disallowed"
 
 # Verify that GDB responds gracefully to a "clear" command that has

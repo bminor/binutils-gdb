@@ -320,23 +320,17 @@ gdb_expect {
     }
 }
 
-gdb_test "info break" \
-    "Num     Type\[\t \]+Disp Enb Address\[\t \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+<MULTIPLE>\[\t \]*\r
-\[0-9\]+.1\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(double\\) at.*$srcfile:140\r
-\[0-9\]+.2\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(float\\) at.*$srcfile:137\r
-\[0-9\]+.3\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned long|long unsigned)( int)?\\) at.*$srcfile:134\r
-\[0-9\]+.4\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(long( int)?\\) at.*$srcfile:131\r
-\[0-9\]+.5\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned|unsigned int)\\) at.*$srcfile:128\r
-\[0-9\]+.6\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(int\\) at.*$srcfile:125\r
-\[0-9\]+.7\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned short|short unsigned)( int)?\\) at.*$srcfile:122\r
-\[0-9\]+.8\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(short( int)?\\) at.*$srcfile:119\r
-\[0-9\]+.9\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned char\\) at.*$srcfile:116\r
-\[0-9\]+.10\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(signed char\\) at.*$srcfile:113\r
-\[0-9\]+.11\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(char\\) at.*$srcfile:110\r
-\[0-9\]+.12\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((void|)\\) at.*$srcfile:107" \
-    "breakpoint info (after setting on all)"
+# Create the breakpoint table for "info breakpoint".
+set bptable "Num     Type\[\t \]+Disp Enb Address\[\t \]+What.*\[\r\n]+"
+append bptable "\[0-9\]+\[\t \]+breakpoint\[\t \]+keep\[\t \]y\[\t \]+<MULTIPLE>.*\[\r\n\]+"
+foreach ovld {void char signed_char unsigned_char short_int \
+		  unsigned_short_int int unsigned_int long_int \
+		  unsigned_long_int float double} {
+  append bptable [format "\[0-9\]+.\[0-9\]+\[\t \]+y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(%s\\) at.*$srcfile:%d\[\r\n\]+" \
+		      $types($ovld) $line($ovld)]
+}
 
+gdb_test "info break" $bptable "breakpoint info (after setting on all)"
 
 # Run through each breakpoint.
 proc continue_to_bp_overloaded {bpnumber might_fail line argtype argument} {

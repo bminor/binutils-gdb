@@ -1,3 +1,95 @@
+2012-04-05  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (decode_compound): Remove.
+	(enum offset_relative_sign): New enum.
+	(struct line_offset): New struct.
+	(struct linespec): New struct.
+	(struct linespec_state): Move file_symtabs,
+	user_filename, and user_function into struct linespec.
+	Make result an anonymous struct holding vectors of
+	symbolp and minsym_and_objfile_d.
+	Add language member.
+	(enum ls_token_type): New enum.
+	(linespec_keywords): New array.
+	(struct ls_token): New struct.
+	(struct ls_parser): New struct.
+	(linespec_lexer_lex_number): New function.
+	(linespec_lexer_lex_keyword): New function.
+	(is_ada_operator): New function.
+	(skip_quote_char): New function.
+	(copy_token_string): New function.
+	(is_closing_quote_enclosed): New function.
+	(find_parameter_list_end): New function.
+	(linespec_lexer_lex_string): New function.
+	(linespec_lexer_lex_one): New function.
+	(linespec_lexer_consume_token): New function.
+	(linespec_lexer_peek_token): New function.
+	(cplusplus_error): Remove unused function.
+	(find_methods): Update comment.
+	(find_toplevel_char): Return const.
+	(is_objc_method_format): Remove unused function.
+	(find_toplevel_string): New function.
+	(is_linespec_boundary): Remove.
+	(symbol_not_found_error): New function.
+	(find_method_overload_end): Remove function.
+	(unexpected_linespec_error): New function.
+	(keep_name_info): Remove.
+	(linespec_parse_line_offset): New function.
+	(linespec_parse_basic): New function.
+	(canonicalize_linespec): New function.
+	(decode_line_internal): Remove.
+	(create_sals_line_offset): New function adapted from
+	decode_all_digits.
+	(convert_linespec_to_sals): New function.
+	(parse_linespec): New function.
+	(linespec_parser_new): New function.
+	(linespec_state_destructor): Change parameter type to
+	struct linespec_state *.
+	Add language parameter.
+	Remove freeing of moved members.
+	(linespec_parser_delete): New function.
+	(decode_line_full): Use parse_linespec and linespec_parser_new.
+	(decode_line_1): Likewise.
+	(decode_indirect): Rename to ...
+	(linespec_expression_to_pc): ... this and rewrite
+	to simply find CORE_ADDR, storing this result for later
+	conversion to SALs.
+	(locate_first_half): Remove.
+	(deocde_objc): Add parameter LS.
+	Initialize new struct collect_info members.
+	Handle minimal symbols, too.
+	(decode_compound): Delete.
+	(lookup_prefix_sym): Rewrite.
+	(compare_msymbols): New function.
+	(find_method): Rewrite.
+	Do not call cplusplus_error.
+	(symtabs_from_filename): Rewrite.
+	(collect_function_symbols): Delete.
+	(find_function_symbols): Rewrite without ARGPTR-style
+	processing.
+	(decode_all_digits): Delete. (Rewritten as create_sals_line_offset.)
+	(decode_dollar): Adapted and renamed to ...
+	(linespec_parse_variable): ... this.
+	(find_linespec_symbols): New function.
+	(decode_label): Adapted and renamed to ...
+	(find_label_symbols): ... this.
+	(decode_digits_list_mode): Add and use LS argument.
+	(decode_digits_ordinary): Likewise.
+	(collect_symbols): Do not collect SALs, just symbols and msymbols.
+	If in list mode, allow any symbol class.  Otherwise, only
+	permit LOC_BLOCK symbols.
+	(minsym_found): Update comments.
+	(search_minsyms_for_name): Do not convert the matching symbol
+	into a SAL.  Simply push the symbol and objfile into the
+	result vector.
+	(decode_variable): Delete. Contents adapted into
+	find_linespec_symbols.
+
+	* cp-support.c (SKIP_SPACE): Remove.
+	(operator_tokens): Remove unused global.
+	(cp_validate_operator): Remove.
+	* cp-support.h (cp_validate_operator): Remove declaration.
+
 2012-04-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* cp-valprint.c (cp_print_value_fields): Check valprint_check_validity

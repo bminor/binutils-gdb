@@ -92,7 +92,7 @@ gdb_test "jump" "Argument required .starting address.*" \
 # trailing junk.
 #
 gdb_test "jump 21 100" \
-    "Junk at end of line specification: 100.*" \
+    "malformed linespec error: unexpected number, \"100\"" \
     "jump with trailing argument junk"
 
 
