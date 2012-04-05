@@ -1,3 +1,11 @@
+2012-04-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* v850-tdep.c (E_NUM_OF_V850_REGS, E_NUM_OF_V850E_REGS): Fix
+	fencepost error.
+	(v850_frame_cache): Use gdbarch_num_regs() instead of E_NUM_REGS.
+	(v850_gdbarch_init): Set `num_regs' as appropriate for the
+	architecture.
+
 2012-04-05  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (decode_compound): Remove.

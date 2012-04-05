@@ -101,10 +101,12 @@ enum
     E_R62_REGNUM,
     E_R63_REGNUM,
     E_R64_REGNUM, E_PC_REGNUM = E_R64_REGNUM,
-    E_R65_REGNUM, E_NUM_OF_V850_REGS = E_R65_REGNUM, E_NUM_OF_V850E_REGS = E_R65_REGNUM,
+    E_R65_REGNUM,
+    E_NUM_OF_V850_REGS,
+    E_NUM_OF_V850E_REGS = E_NUM_OF_V850_REGS,
 
     /* mpu0 system registers */
-    E_R66_REGNUM,
+    E_R66_REGNUM = E_NUM_OF_V850_REGS,
     E_R67_REGNUM,
     E_R68_REGNUM,
     E_R69_REGNUM,
@@ -1023,7 +1025,7 @@ v850_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
-  for (i = 0; i < E_NUM_REGS; i++)
+  for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
     if (trad_frame_addr_p (cache->saved_regs, i))
       cache->saved_regs[i].addr += cache->base;
 
@@ -1123,18 +1125,20 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
     case bfd_mach_v850:
       set_gdbarch_register_name (gdbarch, v850_register_name);
+      set_gdbarch_num_regs (gdbarch, E_NUM_OF_V850_REGS);
       break;
     case bfd_mach_v850e:
     case bfd_mach_v850e1:
       set_gdbarch_register_name (gdbarch, v850e_register_name);
+      set_gdbarch_num_regs (gdbarch, E_NUM_OF_V850E_REGS);
       break;
     case bfd_mach_v850e2:
     case bfd_mach_v850e2v3:
       set_gdbarch_register_name (gdbarch, v850e2_register_name);
+      set_gdbarch_num_regs (gdbarch, E_NUM_REGS);
       break;
     }
 
-  set_gdbarch_num_regs (gdbarch, E_NUM_REGS);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
   set_gdbarch_sp_regnum (gdbarch, E_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, E_PC_REGNUM);
