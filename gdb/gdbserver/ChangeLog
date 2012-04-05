@@ -1,3 +1,10 @@
+2012-04-05  Pedro Alves  <palves@redhat.com>
+
+	-Werror=strict-aliasing
+
+	* spu-low.c (parse_spufs_run): Avoid dereferencing type-punned
+	pointer.
+
 2012-04-04  Pedro Alves  <palves@redhat.com>
 
 	* linux-sparc-low.c (sparc_fill_gregset_to_stack)
