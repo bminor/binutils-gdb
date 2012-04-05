@@ -1,3 +1,11 @@
+2012-04-05  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (AC_CHECK_FUNCS): Add setlocale.
+	(AM_LC_MESSAGES): Add.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2012-03-21  Cary Coutant  <ccoutant@google.com>
 
 	* Makefile.am: Add gdb-index.cc, gdb-index.h.

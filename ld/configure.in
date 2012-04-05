@@ -120,6 +120,8 @@ esac
 
 AM_BINUTILS_WARNINGS
 
+AM_LC_MESSAGES
+
 AC_CONFIG_HEADERS([config.h:config.in])
 
 if test -z "$target" ; then
@@ -162,7 +164,7 @@ AC_SUBST(NATIVE_LIB_DIRS)
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h elf-hints.h limits.h sys/param.h)
 AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h sys/stat.h)
-AC_CHECK_FUNCS(glob mkstemp realpath sbrk waitpid)
+AC_CHECK_FUNCS(glob mkstemp realpath sbrk setlocale waitpid)
 AC_CHECK_FUNCS(open lseek close)
 AC_HEADER_DIRENT
 

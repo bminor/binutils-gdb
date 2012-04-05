@@ -657,6 +657,9 @@ AC_CHECK_FUNCS(unlink remove, break)
 # Some systems don't have sbrk().
 AC_CHECK_FUNCS(sbrk)
 
+AC_CHECK_FUNCS(setlocale)
+AM_LC_MESSAGES
+
 # do we need the math library?
 case "${need_libm}" in
 yes)

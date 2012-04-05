@@ -1,3 +1,11 @@
+2012-04-05  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (AC_CHECK_FUNCS): Add setlocale.
+	(AM_LC_MESSAGES): Add.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2012-04-03  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.tgt (i[3-7]86-*-nacl*, x86_64-*-nacl*): Handle them.

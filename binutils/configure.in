@@ -92,7 +92,7 @@ AC_SUBST(DEMANGLER_NAME)
 AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h limits.h sys/param.h)
 AC_HEADER_SYS_WAIT
 AC_FUNC_ALLOCA
-AC_CHECK_FUNCS(sbrk utimes setmode getc_unlocked strcoll)
+AC_CHECK_FUNCS(sbrk utimes setmode getc_unlocked strcoll setlocale)
 AC_CHECK_FUNC([mkstemp],
 	      AC_DEFINE([HAVE_MKSTEMP], 1,
 	      [Define to 1 if you have the `mkstemp' function.]))
@@ -102,6 +102,8 @@ AC_CHECK_FUNC([mkdtemp],
 
 # Some systems have frexp only in -lm, not in -lc.
 AC_SEARCH_LIBS(frexp, m)
+
+AM_LC_MESSAGES
 
 AC_MSG_CHECKING(for time_t in time.h)
 AC_CACHE_VAL(bu_cv_decl_time_t_time_h,

@@ -982,6 +982,7 @@ AC_SUBST([am__untar])
 
 m4_include([../config/depstand.m4])
 m4_include([../config/gettext-sister.m4])
+m4_include([../config/lcmessage.m4])
 m4_include([../config/lead-dot.m4])
 m4_include([../config/nls.m4])
 m4_include([../config/override.m4])

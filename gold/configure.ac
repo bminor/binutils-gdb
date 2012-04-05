@@ -536,6 +536,9 @@ fi
 
 AC_LANG_POP(C++)
 
+AC_CHECK_FUNCS(setlocale)
+AM_LC_MESSAGES
+
 AM_MAINTAINER_MODE
 
 AC_OUTPUT(Makefile testsuite/Makefile po/Makefile.in:po/Make-in)
