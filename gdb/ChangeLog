@@ -1,3 +1,8 @@
+2012-04-06  Doug Evans  <dje@google.com>
+
+	* amd64-tdep.c (amd64_analyze_prologue): Recognize both variations of
+	"mov %rsp,%rbp".
+
 2012-04-05  Kevin Buettner  <kevinb@redhat.com>
 
 	* v850-tdep.c (E_NUM_OF_V850_REGS, E_NUM_OF_V850E_REGS): Fix
