@@ -211,7 +211,7 @@ all problems in hand-written assembler code.
 Insert nops to work around the VR4130 @samp{mflo}/@samp{mfhi} errata.
 
 @item -mfix-24k
-@itemx -no-mfix-24k
+@itemx -mno-fix-24k
 Insert nops to work around the 24K @samp{eret}/@samp{deret} errata.
 
 @item -mfix-cn63xxp1
