@@ -1,3 +1,7 @@
+2012-04-06  Ian Lance Taylor  <iant@google.com>
+
+	* timer.cc: #include <unistd.h>.
+
 2011-12-19  Ian Lance Taylor  <iant@google.com>
 
 	Copy from mainline to binutils 2.22 branch:
