@@ -1,3 +1,7 @@
+2012-04-06  Ian Lance Taylor  <iant@google.com>
+
+	* timer.cc: #include <unistd.h>.
+
 2012-04-06  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.in (AC_CHECK_HEADERS): Add locale.h.

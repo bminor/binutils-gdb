@@ -22,6 +22,8 @@
 
 #include "gold.h"
 
+#include <unistd.h>
+
 #ifdef HAVE_TIMES
 #include <sys/times.h>
 #endif
