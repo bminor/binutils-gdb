@@ -156,7 +156,7 @@ proc tracepoint_change_loc_1 { trace_type } { with_test_prefix "1 $trace_type" {
     # shlib is unloaded, there are still three locations, but one is pending.
     gdb_test "info trace" \
         "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
-\[0-9\]+\[\t \]+\(|fast \)tracepoint\[ \]+keep y.*\<MULTIPLE\>.*4\.1.* in func4.*4\.2.* in func4.*4\.3.* \<PENDING\>\[\t \]+set_tracepoint.*" \
+\[0-9\]+\[\t \]+\(|fast \)tracepoint\[ \]+keep y.*\<MULTIPLE\>.*4\.1.* in func4.*(4\.2.* in func4.*4\.3.* \<PENDING\>\[\t \]+set_tracepoint|4\.2.* \<PENDING\>\[\t \]+set_tracepoint\r\n4\.3.* in func4).*" \
         "tracepoint with two locations (unload)"
 
     gdb_test_no_output "tstop"
@@ -260,7 +260,7 @@ proc tracepoint_change_loc_2 { trace_type } { with_test_prefix "2 $trace_type" {
     # shlib is unloaded, there are still three locations, but one is pending.
     gdb_test "info trace" \
 	"Num     Type\[ \]+Disp Enb Address\[ \]+What.*
-\[0-9\]+\[\t \]+\(|fast \)tracepoint\[ \]+keep y.*\<MULTIPLE\>.*1\.1.* in func4.*1\.2.* in func4.*1\.3.* \<PENDING\>\[\t \]+set_tracepoint.*" \
+\[0-9\]+\[\t \]+\(|fast \)tracepoint\[ \]+keep y.*\<MULTIPLE\>.*1\.1.* in func4.*(1\.2.* in func4.*1\.3.* \<PENDING\>\[\t \]+set_tracepoint|1\.2.* \<PENDING\>\[\t \]+set_tracepoint\r\n1\.3.* in func4).*" \
 	"tracepoint with two locations (unload)"
 
     gdb_test_no_output "tstop"

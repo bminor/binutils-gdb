@@ -1,3 +1,8 @@
+2012-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.trace/change-loc.exp (tracepoint_change_loc_1)
+	(tracepoint_change_loc_2): Accept both orders of pending set_tracepoint.
+
 2012-04-05  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.base/advance.exp: Update error message for
