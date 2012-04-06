@@ -45,7 +45,7 @@ dnl "installed_linker" is the installed gold linker name.
 default_ld=
 AC_ARG_ENABLE(ld,
 [[  --enable-ld[=ARG]     build ld [ARG={default,yes,no}]]],
-[case "${enableval}" in 
+[case "${enableval}" in
   default)
     default_ld=ld.bfd
     ;;
@@ -536,6 +536,7 @@ fi
 
 AC_LANG_POP(C++)
 
+AC_CHECK_HEADERS(locale.h)
 AC_CHECK_FUNCS(setlocale)
 AM_LC_MESSAGES
 

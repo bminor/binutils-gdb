@@ -1,3 +1,9 @@
+2012-04-06  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.in (AC_CHECK_HEADERS): Add locale.h.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2012-04-05  Nick Clifton  <nickc@redhat.com>
 
 	* configure.ac (AC_CHECK_FUNCS): Add setlocale.
@@ -913,7 +919,7 @@
 	(get_section_name): New function.
 	(get_section_contents): New function.
 	(update_section_order): New function.
-	(allow_section_ordering): New function.	
+	(allow_section_ordering): New function.
 	(Plugin::load): Add the new interfaces to the transfer vector.
 	(Plugin_manager::load_plugins): New parameter.
 	(Plugin_manager::all_symbols_read): New parameter.
@@ -1979,7 +1985,7 @@
 	(Incremental_input_entry_reader::get_global_symbol_count): Rewrite.
 	(Incremental_input_entry_reader::get_output_symbol_index): Adjust
 	size of shared library info entry.
-	* layout.cc (Layout::finish_dynamic_section): Don't test for 
+	* layout.cc (Layout::finish_dynamic_section): Don't test for
 	incremental link when adding DT_NEEDED entries.
 	* object.h (Object::Object): Initialize new data member.
 	(Object::dynobj): New function.
@@ -3335,7 +3341,7 @@
 	(Arm_exidx_merge_section::section_contents_): New data member.
 	(Arm_input_section::Arm_input_section): Initialize original_contents_.
 	(Arm_input_section::~Arm_input_section): De-allocate memory.
-	(Arm_input_section::original_contents_): New data member.	
+	(Arm_input_section::original_contents_): New data member.
 	(Arm_exidx_fixup::process_exidx_section): Pass EXIDX section contents
 	in parameters instead of calling Object::section_contents without
 	locking.
