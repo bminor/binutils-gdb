@@ -265,7 +265,7 @@ proc complex_args {} {
 	timeout { fail "(timeout) run to callca" ; gdb_suppress_tests; }
     }
     gdb_test "cont" ".* callcb \\(d1=3 \\+ 4 \\* I, d2=3 \\+ 4 \\* I, d3=3 \\+ 4 \\* I\\) .*" "continue to callcb"
-    gdb_test "cont" ".* callcc \\(ld1=5 \\+ 6 \\* I, ld2=5 \\+ 6 \\* I, ld3=5 \\+ 6 \\* I\\) .*" "continue to callcb"
+    gdb_test "cont" ".* callcc \\(ld1=5 \\+ 6 \\* I, ld2=5 \\+ 6 \\* I, ld3=5 \\+ 6 \\* I\\) .*" "continue to callcc"
     gdb_test "cont" ".* callcd \\(fc1=1 \\+ 2 \\* I, dc1=3 \\+ 4 \\* I, ldc1=5 \\+ 6 \\* I\\) .*" "continue to callcd"
     gdb_test "cont" ".* callce \\(dc1=3 \\+ 4 \\* I, ldc1=5 \\+ 6 \\* I, fc1=1 \\+ 2 \\* I\\) .*" "continue to callce"
     gdb_test "cont" ".* callcf \\(ldc1=5 \\+ 6 \\* I, fc1=1 \\+ 2 \\* I, dc1=3 \\+ 4 \\* I\\) .*" "continue to callcf"
