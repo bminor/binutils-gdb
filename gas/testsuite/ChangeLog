@@ -1,3 +1,7 @@
+2012-04-07  David S. Miller  <davem@davemloft.net>
+
+	* gas/all/gas.exp: Sparc can handle BFD_RELOC_8 for constants.
+
 2012-04-03  Roland McGrath  <mcgrathr@google.com>
 
 	* gas/i386/k1om.d: Add not-target match for *-*-nacl*.
