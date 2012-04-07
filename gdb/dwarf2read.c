@@ -9522,7 +9522,8 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
   parent_die = NULL;
   last_die = NULL;
 
-  if (cu->per_cu && cu->per_cu->load_all_dies)
+  gdb_assert (cu->per_cu != NULL);
+  if (cu->per_cu->load_all_dies)
     load_all = 1;
 
   cu->partial_dies
