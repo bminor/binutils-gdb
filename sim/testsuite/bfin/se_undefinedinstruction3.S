@@ -4787,6 +4787,7 @@ BEGIN:
     .dw 0xC000 ;
     .dw 0xC406 ;
     .dw 0xC000 ;
+// This is R1 = -R1 (NS) ??
     .dw 0xC407 ;
     .dw 0xC000 ;
     .dw 0xC40A ;
