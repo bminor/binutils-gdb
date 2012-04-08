@@ -1,3 +1,10 @@
+2012-04-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64-tdep.c (sparc64_store_arguments): Fix handling of
+	complex floats, adjust some related comments and tighten a related
+	assertion.
+	(sparc64_extract_return_value): Handle complex floats.
+
 2012-04-07  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (load_partial_dies): Change condition to assert.

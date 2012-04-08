@@ -785,7 +785,8 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
 
-      if (sparc64_structure_or_union_p (type))
+      if (sparc64_structure_or_union_p (type) ||
+	  (sparc64_complex_floating_p (type) && len == 32))
 	{
 	  /* Structure or Union arguments.  */
 	  if (len <= 16)
@@ -816,10 +817,9 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 	      num_elements++;
 	    }
 	}
-      else if (sparc64_floating_p (type))
+      else if (sparc64_floating_p (type) || sparc64_complex_floating_p (type))
 	{
 	  /* Floating arguments.  */
-
 	  if (len == 16)
 	    {
 	      /* The psABI says that "Each quad-precision parameter
@@ -887,7 +887,8 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
       int regnum = -1;
       gdb_byte buf[16];
 
-      if (sparc64_structure_or_union_p (type))
+      if (sparc64_structure_or_union_p (type) ||
+	  (sparc64_complex_floating_p (type) && len == 32))
 	{
 	  /* Structure or Union arguments.  */
 	  gdb_assert (len <= 16);
@@ -927,7 +928,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 	      /* The psABI says "Each single-precision parameter value
                  will be assigned to one extended word in the
                  parameter array, and right-justified within that
-                 word; the left half (even floatregister) is
+                 word; the left half (even float register) is
                  undefined."  Even though the psABI says that "the
                  left half is undefined", set it to zero here.  */
 	      memset (buf, 0, 4);
@@ -960,7 +961,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 	    }
 	  else if (regnum >= SPARC64_Q0_REGNUM && regnum <= SPARC64_Q8_REGNUM)
 	    {
-	      gdb_assert (element < 6);
+	      gdb_assert (element < 5);
 	      regnum = SPARC_O0_REGNUM + element;
 	      regcache_cooked_write (regcache, regnum, valbuf);
 	      regcache_cooked_write (regcache, regnum + 1, valbuf + 8);
@@ -1034,7 +1035,7 @@ sparc64_extract_return_value (struct type *type, struct regcache *regcache,
 	sparc64_extract_floating_fields (regcache, type, buf, 0);
       memcpy (valbuf, buf, len);
     }
-  else if (sparc64_floating_p (type))
+  else if (sparc64_floating_p (type) || sparc64_complex_floating_p (type))
     {
       /* Floating return values.  */
       for (i = 0; i < len / 4; i++)
