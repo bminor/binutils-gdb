@@ -4965,7 +4965,7 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
     {
       bu32 val = DREG (src0);
 
-      TRACE_INSN (cpu, "R%i = - R%i %s;", dst0, src0, amod1 (s, 0));
+      TRACE_INSN (cpu, "R%i = - R%i%s;", dst0, src0, amod1 (s, 0));
 
       if (s && val == 0x80000000)
 	{

@@ -1,3 +1,7 @@
+2012-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-sim.c (decode_dsp32alu_0): Delete extra space in TRACE_INSN.
+
 2012-04-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-sim.c (_interp_insn_bfin): Call illegal_instruction_combination
