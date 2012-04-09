@@ -825,7 +825,7 @@ Gdb_index_info_reader::record_cu_ranges(Dwarf_die* die)
 
   off_t low_pc = die->ref_attribute(elfcpp::DW_AT_low_pc, &shndx);
   off_t high_pc = die->ref_attribute(elfcpp::DW_AT_high_pc, &shndx2);
-  if (low_pc != 0 && high_pc != 0 && low_pc != -1 && high_pc != -1)
+  if ((low_pc != 0 || high_pc != 0) && low_pc != -1 && high_pc != -1)
     {
       if (shndx != shndx2)
         {

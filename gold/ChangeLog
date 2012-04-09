@@ -1,3 +1,8 @@
+2012-04-09  Cary Coutant  <ccoutant@google.com>
+
+	* gdb-index.cc (Gdb_index_info_reader::record_cu_ranges): Allow
+	low_pc == 0.
+
 2012-04-06  Ian Lance Taylor  <iant@google.com>
 
 	* timer.cc: #include <unistd.h>.
