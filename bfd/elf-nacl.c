@@ -62,12 +62,17 @@ segment_nonexecutable_and_has_contents (struct elf_segment_map *seg)
    The first non-executable PT_LOAD segment appears first in the file
    and contains the ELF file header and phdrs.  */
 bfd_boolean
-nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
+nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 {
   struct elf_segment_map **m = &elf_tdata (abfd)->segment_map;
   struct elf_segment_map **first_load = NULL;
   struct elf_segment_map **last_load = NULL;
   bfd_boolean moved_headers = FALSE;
+
+  if (info != NULL && info->user_phdrs)
+    /* The linker script used PHDRS explicitly, so don't change what the
+       user asked for.  */
+    return TRUE;
 
   while (*m != NULL)
     {
@@ -140,6 +145,11 @@ nacl_modify_program_headers (bfd *abfd,
   struct elf_segment_map **m = &elf_tdata (abfd)->segment_map;
   Elf_Internal_Phdr *phdr = elf_tdata (abfd)->phdr;
   Elf_Internal_Phdr *p = phdr;
+
+  if (info != NULL && info->user_phdrs)
+    /* The linker script used PHDRS explicitly, so don't change what the
+       user asked for.  */
+    return TRUE;
 
   /* Find the PT_LOAD that contains the headers (should be the first).  */
   while (*m != NULL)

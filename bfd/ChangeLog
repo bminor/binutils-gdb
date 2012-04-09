@@ -1,3 +1,9 @@
+2012-04-09  Roland McGrath  <mcgrathr@google.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Set INFO->user_phdrs.
+	* elf-nacl.c (nacl_modify_segment_map): Do nothing if INFO->user_phdrs.
+	(nacl_modify_program_headers): Likewise.
+
 2012-04-03  Roland McGrath  <mcgrathr@google.com>
 
 	* elf-nacl.c: New file.

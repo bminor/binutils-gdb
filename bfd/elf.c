@@ -2527,7 +2527,7 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
   rel_hdr = bfd_zalloc (abfd, amt);
   reldata->hdr = rel_hdr;
 
-  amt = sizeof ".rela" + strlen (asect->name);      
+  amt = sizeof ".rela" + strlen (asect->name);
   name = (char *) bfd_alloc (abfd, amt);
   if (name == NULL)
     return FALSE;
@@ -3744,6 +3744,10 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
   bfd_boolean no_user_phdrs;
 
   no_user_phdrs = elf_tdata (abfd)->segment_map == NULL;
+
+  if (info != NULL)
+    info->user_phdrs = !no_user_phdrs;
+
   if (no_user_phdrs && bfd_count_sections (abfd) != 0)
     {
       asection *s;
@@ -4351,7 +4355,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
       elf_elfheader (abfd)->e_phoff = 0;
       elf_elfheader (abfd)->e_phentsize = 0;
     }
-  
+
   elf_elfheader (abfd)->e_phnum = alloc;
 
   if (elf_tdata (abfd)->program_header_size == (bfd_size_type) -1)
@@ -5428,7 +5432,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
        1. It is within the address space of the segment -- we use the LMA
 	  if that is set for the segment and the VMA otherwise,
        2. It is an allocated section or a NOTE section in a PT_NOTE
-	  segment.         
+	  segment.
        3. There is an output section associated with it,
        4. The section has not already been allocated to a previous segment.
        5. PT_GNU_STACK segments do not include any sections.
@@ -6148,7 +6152,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       if (map->includes_filehdr && lowest_section != NULL)
 	/* We need to keep the space used by the headers fixed.  */
 	map->header_size = lowest_section->vma - segment->p_vaddr;
-      
+
       if (!map->includes_phdrs
 	  && !map->includes_filehdr
 	  && map->p_paddr_valid)
@@ -9633,7 +9637,7 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
       if (p->addend != 0)
 	{
 	  char buf[30], *a;
-	  
+
 	  memcpy (names, "+0x", sizeof ("+0x") - 1);
 	  names += sizeof ("+0x") - 1;
 	  bfd_sprintf_vma (abfd, buf, p->addend);
