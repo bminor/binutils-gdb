@@ -1,5 +1,19 @@
 2012-04-08  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-sim.h (bfin_parallel_group): New enum.
+	(bfin_cpu_state): Add new "group" member.
+	(PARALLEL_GROUP): Define.
+	* bfin-sim.c (decode_ProgCtrl_0): Change INSN_LEN check to
+	PARALLEL_GROUP.
+	(decode_CaCTRL_0, decode_PushPopReg_0, decode_ccMV_0, decode_CCflag_0,
+	decode_CC2dreg_0, decode_CC2stat_0, decode_BRCC_0, decode_UJUMP_0,
+	decode_LOGI2op_0, decode_LoopSetup_0, decode_LDIMMhalf_0,
+	decode_CALLa_0, decode_linkage_0): Likewise.
+	(_interp_insn_bfin): Set PARALLEL_GROUP.
+	(interp_insn_bfin): Likewise.
+
+2012-04-08  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-sim.c (decode_dsp32alu_0): Delete extra space in TRACE_INSN.
 
 2012-04-01  Mike Frysinger  <vapier@gentoo.org>
