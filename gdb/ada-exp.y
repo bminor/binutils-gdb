@@ -94,6 +94,12 @@
 #define yytoks	ada_toks		/* With YYDEBUG defined */
 #define yyname	ada_name		/* With YYDEBUG defined */
 #define yyrule	ada_rule		/* With YYDEBUG defined */
+#define yyss	ada_yyss
+#define yysslim	ada_yysslim
+#define yyssp	ada_yyssp
+#define yystacksize ada_yystacksize
+#define yyvs	ada_yyvs
+#define yyvsp	ada_yyvsp
 
 #ifndef YYDEBUG
 #define	YYDEBUG	1		/* Default to yydebug support */

@@ -102,6 +102,12 @@
 #define yygindex	objc_yygindex
 #define yytable		objc_yytable
 #define yycheck		objc_yycheck
+#define yyss		objc_yyss
+#define yysslim		objc_yysslim
+#define yyssp		objc_yyssp
+#define yystacksize	objc_yystacksize
+#define yyvs		objc_yyvs
+#define yyvsp		objc_yyvsp
 
 #ifndef YYDEBUG
 #define	YYDEBUG	0		/* Default to no yydebug support.  */

@@ -103,6 +103,12 @@
 #define yygindex c_yygindex
 #define yytable	 c_yytable
 #define yycheck	 c_yycheck
+#define yyss	c_yyss
+#define yysslim	c_yysslim
+#define yyssp	c_yyssp
+#define yystacksize c_yystacksize
+#define yyvs	c_yyvs
+#define yyvsp	c_yyvsp
 
 #ifndef YYDEBUG
 #define	YYDEBUG 1		/* Default to yydebug support */

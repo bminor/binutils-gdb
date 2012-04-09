@@ -98,6 +98,12 @@
 #define yygindex java_yygindex
 #define yytable	 java_yytable
 #define yycheck	 java_yycheck
+#define yyss	java_yyss
+#define yysslim	java_yysslim
+#define yyssp	java_yyssp
+#define yystacksize java_yystacksize
+#define yyvs	java_yyvs
+#define yyvsp	java_yyvsp
 
 #ifndef YYDEBUG
 #define	YYDEBUG 1		/* Default to yydebug support */

@@ -170,6 +170,12 @@ static struct demangle_component *d_binary (const char *,
 #define yygindex cpname_yygindex
 #define yytable	 cpname_yytable
 #define yycheck	 cpname_yycheck
+#define yyss	cpname_yyss
+#define yysslim	cpname_yysslim
+#define yyssp	cpname_yyssp
+#define yystacksize cpname_yystacksize
+#define yyvs	cpname_yyvs
+#define yyvsp	cpname_yyvsp
 
 int yyparse (void);
 static int yylex (void);

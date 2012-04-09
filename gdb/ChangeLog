@@ -1,5 +1,24 @@
 2012-04-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* ada-exp.y (yyss, yysslim, yyssp, yystacksize, yyvs, yyvsp): New
+	defines.
+	* c-exp.y (yyss, yysslim, yyssp, yystacksize, yyvs, yyvsp): New
+	defines.
+	* cp-name-parser.y (yyss, yysslim, yyssp, yystacksize, yyvs) 
+	(yyvsp): New defines.
+	* f-exp.y (yyss, yysslim, yyssp, yystacksize, yyvs, yyvsp): New
+	defines.
+	* jv-exp.y (yyss, yysslim, yyssp, yystacksize, yyvs, yyvsp): New
+	defines.
+	* m2-exp.y (yyss, yysslim, yyssp, yystacksize, yyvs, yyvsp): New
+	defines.
+	* objc-exp.y (yyss, yysslim, yyssp, yystacksize, yyvs, yyvsp): New
+	defines.
+	* p-exp.y (yyss, yysslim, yyssp, yystacksize, yyvs, yyvsp): New
+	defines.
+
+2012-04-09  Mark Kettenis  <kettenis@gnu.org>
+
 	* sparc64-tdep.c (sparc64_store_arguments) 
 	(sparc64_store_arguments): Fix coding style.
 
