@@ -1,5 +1,16 @@
 2012-04-09  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Add bfin_pint.
+	* configure: Regenerate.
+	* dv-bfin_pint.c, dv-bfin_pint.h: New device model.
+	* machs.c (bf542_dev): Add PINT register blocks.
+	(bf544_dev, bf547_dev): Likewise.
+	(PINT_PIQS): Define.
+	(bf54x_port): Add pint/gpio routing.
+	* machs.h (BFIN_MMR_PINT_SIZE): Define.
+
+2012-04-09  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_OPTION_HARDWARE): Add bfin_gpio2.
 	* configure: Regenerate.
 	* dv-bfin_gpio2.c, dv-bfin_gpio2.h: New device model.

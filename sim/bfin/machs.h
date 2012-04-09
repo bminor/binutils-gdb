@@ -89,6 +89,7 @@ enum {
           0xFFC03600 0x10 - Control
           0xFFC03680 0x10 - Data  */
 #define BFIN_MMR_OTP_SIZE		0xa0
+#define BFIN_MMR_PINT_SIZE		0x28
 #define BFIN_MMR_PLL_BASE		0xFFC00000
 #define BFIN_MMR_PLL_SIZE		(4 * 6)
 #define BFIN_MMR_PPI_SIZE		(4 * 5)
