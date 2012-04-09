@@ -1,3 +1,15 @@
+2012-04-09  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-elf/eh1.d: Add explicit --64 to as options, and explicit
+	-melf_x86_64 and -Ttext to ld options, so we don't assume every
+	x86_64-*-* target uses --64 (vs --x32) by default or has the
+	same address space layout.
+	* ld-elf/eh2.d: Likewise.
+	* ld-elf/eh3.d: Likewise.
+	* ld-elf/eh4.d: Likewise.
+	* ld-elf/elf.exp: For target *-*-nacl*, use options_regsub(ld) to
+	map -melf_x86_64 to -melf_x86_64_nacl.
+
 2012-04-07  David S. Miller  <davem@davemloft.net>
 
 	* ld-sparc/tlssunbin32.rd: Fix regexp.

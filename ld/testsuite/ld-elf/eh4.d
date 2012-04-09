@@ -1,6 +1,7 @@
 #source: eh4.s
 #source: eh4a.s
-#ld: -shared
+#as: --64
+#ld: -melf_x86_64 -shared -Ttext 0x400
 #readelf: -wf
 #target: x86_64-*-*
 

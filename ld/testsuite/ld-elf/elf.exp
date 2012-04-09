@@ -37,6 +37,13 @@ if { [istarget alpha*-*-* ] } {
     set LDFLAGS "$LDFLAGS -Ttext-segment 0x1000000"
 }
 
+if { [istarget "*-*-nacl*"] } {
+    # The eh[1-4] cases are written to expect ELFCLASS64 layout on x86-64.
+    # But the target default is ELFCLASS32.  So the cases explicitly use
+    # -melf_x86_64 to select that, but NaCl needs a different emulation name.
+    set options_regsub(ld) {-melf_x86_64 -melf_x86_64_nacl}
+}
+
 if { [is_remote host] } then {
     remote_download host merge.ld
 }
