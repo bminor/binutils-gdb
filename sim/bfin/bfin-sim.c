@@ -52,6 +52,15 @@ illegal_instruction_combination (SIM_CPU *cpu)
 }
 
 static __attribute__ ((noreturn)) void
+illegal_instruction_or_combination (SIM_CPU *cpu)
+{
+  if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
+    illegal_instruction_combination (cpu);
+  else
+    illegal_instruction (cpu);
+}
+
+static __attribute__ ((noreturn)) void
 unhandled_instruction (SIM_CPU *cpu, const char *insn)
 {
   SIM_DESC sd = CPU_STATE (cpu);
@@ -1975,7 +1984,7 @@ decode_ProgCtrl_0 (SIM_CPU *cpu, bu16 iw0, bu32 pc)
       CYCLE_DELAY = 2;
     }
   else
-    illegal_instruction (cpu);
+    illegal_instruction_or_combination (cpu);
 }
 
 static void
@@ -2045,13 +2054,13 @@ decode_PushPopReg_0 (SIM_CPU *cpu, bu16 iw0)
 
   /* Can't push/pop reserved registers  */
   if (reg_is_reserved (grp, reg))
-    illegal_instruction (cpu);
+    illegal_instruction_or_combination (cpu);
 
   if (W == 0)
     {
       /* Dreg and Preg are not supported by this instruction.  */
       if (grp == 0 || grp == 1)
-	illegal_instruction (cpu);
+	illegal_instruction_or_combination (cpu);
       TRACE_INSN (cpu, "%s = [SP++];", reg_name);
       /* Can't pop USP while in userspace.  */
       if (PARALLEL_GROUP != BFIN_PARALLEL_NONE
@@ -2103,6 +2112,9 @@ decode_PushPopMultiple_0 (SIM_CPU *cpu, bu16 iw0)
   PROFILE_COUNT_INSN (cpu, pc, BFIN_INSN_PushPopMultiple);
   TRACE_EXTRACT (cpu, "%s: d:%i p:%i W:%i dr:%i pr:%i",
 		 __func__, d, p, W, dr, pr);
+
+  if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
+    illegal_instruction_combination (cpu);
 
   if ((d == 0 && p == 0) || (p && imm5 (pr) > 5)
       || (d && !p && pr) || (p && !d && dr))
@@ -2215,7 +2227,7 @@ decode_CCflag_0 (SIM_CPU *cpu, bu16 iw0)
       bs64 diff = acc0 - acc1;
 
       if (x != 0 || y != 0)
-	illegal_instruction (cpu);
+	illegal_instruction_or_combination (cpu);
 
       if (opc == 5 && I == 0 && G == 0)
 	{
@@ -2239,7 +2251,7 @@ decode_CCflag_0 (SIM_CPU *cpu, bu16 iw0)
 	  SET_CCREG (acc0 <= acc1);
 	}
       else
-	illegal_instruction (cpu);
+	illegal_instruction_or_combination (cpu);
 
       SET_ASTATREG (az, diff == 0);
       SET_ASTATREG (an, diff < 0);
@@ -2304,6 +2316,9 @@ decode_CCflag_0 (SIM_CPU *cpu, bu16 iw0)
 	  TRACE_INSN (cpu, "CC = %c%i %s %c%i%s;", s, x, op, d, y, sign);
 	}
 
+      if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
+	illegal_instruction_combination (cpu);
+
       SET_CCREG (cc);
       /* Pointer compares only touch CC.  */
       if (!G)
@@ -2350,7 +2365,7 @@ decode_CC2dreg_0 (SIM_CPU *cpu, bu16 iw0)
       SET_CCREG (!CCREG);
     }
   else
-    illegal_instruction (cpu);
+    illegal_instruction_or_combination (cpu);
 }
 
 static void
@@ -2373,12 +2388,12 @@ decode_CC2stat_0 (SIM_CPU *cpu, bu16 iw0)
   TRACE_INSN (cpu, "%s %s= %s;", D ? astat_names[cbit] : "CC",
 	      op_names[op], D ? "CC" : astat_names[cbit]);
 
+  if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
+    illegal_instruction_combination (cpu);
+
   /* CC = CC; is invalid.  */
   if (cbit == 5)
     illegal_instruction (cpu);
-
-  if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
-    illegal_instruction_combination (cpu);
 
   pval = !!(ASTAT & (1 << cbit));
   if (D == 0)
@@ -2491,6 +2506,9 @@ decode_REGMV_0 (SIM_CPU *cpu, bu16 iw0)
 
   TRACE_INSN (cpu, "%s = %s;", dstreg_name, srcreg_name);
 
+  if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
+    illegal_instruction_combination (cpu);
+
   /* Reserved slots cannot be a src/dst.  */
   if (reg_is_reserved (gs, src) || reg_is_reserved (gd, dst))
     goto invalid_move;
@@ -2538,6 +2556,9 @@ decode_ALU2op_0 (SIM_CPU *cpu, bu16 iw0)
 
   PROFILE_COUNT_INSN (cpu, pc, BFIN_INSN_ALU2op);
   TRACE_EXTRACT (cpu, "%s: opc:%i src:%i dst:%i", __func__, opc, src, dst);
+
+  if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
+    illegal_instruction_combination (cpu);
 
   if (opc == 0)
     {
@@ -2646,6 +2667,9 @@ decode_PTR2op_0 (SIM_CPU *cpu, bu16 iw0)
 
   PROFILE_COUNT_INSN (cpu, pc, BFIN_INSN_PTR2op);
   TRACE_EXTRACT (cpu, "%s: opc:%i src:%i dst:%i", __func__, opc, src, dst);
+
+  if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
+    illegal_instruction_combination (cpu);
 
   if (opc == 0)
     {
@@ -2780,6 +2804,9 @@ decode_COMP3op_0 (SIM_CPU *cpu, bu16 iw0)
   TRACE_EXTRACT (cpu, "%s: opc:%i dst:%i src1:%i src0:%i",
 		 __func__, opc, dst, src1, src0);
 
+  if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
+    illegal_instruction_combination (cpu);
+
   if (opc == 0)
     {
       TRACE_INSN (cpu, "R%i = R%i + R%i;", dst, src0, src1);
@@ -2843,6 +2870,9 @@ decode_COMPI2opD_0 (SIM_CPU *cpu, bu16 iw0)
   TRACE_EXTRACT (cpu, "%s: op:%i src:%i dst:%i", __func__, op, src, dst);
   TRACE_DECODE (cpu, "%s: imm7:%#x", __func__, imm);
 
+  if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
+    illegal_instruction_combination (cpu);
+
   if (op == 0)
     {
       TRACE_INSN (cpu, "R%i = %s (X);", dst, imm7_str (imm));
@@ -2871,6 +2901,9 @@ decode_COMPI2opP_0 (SIM_CPU *cpu, bu16 iw0)
   PROFILE_COUNT_INSN (cpu, pc, BFIN_INSN_COMPI2opP);
   TRACE_EXTRACT (cpu, "%s: op:%i src:%i dst:%i", __func__, op, src, dst);
   TRACE_DECODE (cpu, "%s: imm:%#x", __func__, imm);
+
+  if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
+    illegal_instruction_combination (cpu);
 
   if (op == 0)
     {
@@ -2903,6 +2936,9 @@ decode_LDSTpmod_0 (SIM_CPU *cpu, bu16 iw0)
   PROFILE_COUNT_INSN (cpu, pc, BFIN_INSN_LDSTpmod);
   TRACE_EXTRACT (cpu, "%s: W:%i aop:%i reg:%i idx:%i ptr:%i",
 		 __func__, W, aop, reg, idx, ptr);
+
+  if (PARALLEL_GROUP == BFIN_PARALLEL_GROUP2)
+    illegal_instruction_combination (cpu);
 
   if (aop == 1 && W == 0 && idx == ptr)
     {
@@ -3000,7 +3036,7 @@ decode_LDSTpmod_0 (SIM_CPU *cpu, bu16 iw0)
 	STORE (PREG (ptr), addr + PREG (idx));
     }
   else
-    illegal_instruction (cpu);
+    illegal_instruction_or_combination (cpu);
 }
 
 static void
@@ -3018,6 +3054,9 @@ decode_dagMODim_0 (SIM_CPU *cpu, bu16 iw0)
   PROFILE_COUNT_INSN (cpu, pc, BFIN_INSN_dagMODim);
   TRACE_EXTRACT (cpu, "%s: br:%i op:%i m:%i i:%i", __func__, br, op, m, i);
 
+  if (PARALLEL_GROUP == BFIN_PARALLEL_GROUP2)
+    illegal_instruction_combination (cpu);
+
   if (op == 0 && br == 1)
     {
       TRACE_INSN (cpu, "I%i += M%i (BREV);", i, m);
@@ -3034,7 +3073,7 @@ decode_dagMODim_0 (SIM_CPU *cpu, bu16 iw0)
       dagsub (cpu, i, MREG (m));
     }
   else
-    illegal_instruction (cpu);
+    illegal_instruction_or_combination (cpu);
 }
 
 static void
@@ -3049,6 +3088,9 @@ decode_dagMODik_0 (SIM_CPU *cpu, bu16 iw0)
 
   PROFILE_COUNT_INSN (cpu, pc, BFIN_INSN_dagMODik);
   TRACE_EXTRACT (cpu, "%s: op:%i i:%i", __func__, op, i);
+
+  if (PARALLEL_GROUP == BFIN_PARALLEL_GROUP2)
+    illegal_instruction_combination (cpu);
 
   if (op == 0)
     {
@@ -3071,7 +3113,7 @@ decode_dagMODik_0 (SIM_CPU *cpu, bu16 iw0)
       dagsub (cpu, i, 4);
     }
   else
-    illegal_instruction (cpu);
+    illegal_instruction_or_combination (cpu);
 }
 
 static void
@@ -3234,7 +3276,7 @@ decode_dspLDST_0 (SIM_CPU *cpu, bu16 iw0)
       PUT_LONG (addr, DREG (reg));
     }
   else
-    illegal_instruction (cpu);
+    illegal_instruction_or_combination (cpu);
 }
 
 static void
@@ -3258,8 +3300,8 @@ decode_LDST_0 (SIM_CPU *cpu, bu16 iw0)
   TRACE_EXTRACT (cpu, "%s: sz:%i W:%i aop:%i Z:%i ptr:%i reg:%i",
 		 __func__, sz, W, aop, Z, ptr, reg);
 
-  if (aop == 3)
-    illegal_instruction (cpu);
+  if (aop == 3 || PARALLEL_GROUP == BFIN_PARALLEL_GROUP2)
+    illegal_instruction_or_combination (cpu);
 
   if (W == 0)
     {
@@ -3296,7 +3338,7 @@ decode_LDST_0 (SIM_CPU *cpu, bu16 iw0)
 	  SET_DREG (reg, (bs32) (bs8) GET_BYTE (PREG (ptr)));
 	}
       else
-	illegal_instruction (cpu);
+	illegal_instruction_or_combination (cpu);
     }
   else
     {
@@ -3321,7 +3363,7 @@ decode_LDST_0 (SIM_CPU *cpu, bu16 iw0)
 	  PUT_BYTE (PREG (ptr), DREG (reg));
 	}
       else
-	illegal_instruction (cpu);
+	illegal_instruction_or_combination (cpu);
     }
 
   if (aop == 0)
@@ -3352,6 +3394,9 @@ decode_LDSTiiFP_0 (SIM_CPU *cpu, bu16 iw0)
   TRACE_EXTRACT (cpu, "%s: W:%i offset:%#x grp:%i reg:%i", __func__,
 		 W, offset, grp, reg);
   TRACE_DECODE (cpu, "%s: negimm5s4:%#x", __func__, imm);
+
+  if (PARALLEL_GROUP == BFIN_PARALLEL_GROUP2)
+    illegal_instruction_or_combination (cpu);
 
   if (W == 0)
     {
@@ -3392,6 +3437,9 @@ decode_LDSTii_0 (SIM_CPU *cpu, bu16 iw0)
   ea = PREG (ptr) + imm;
 
   TRACE_DECODE (cpu, "%s: uimm4s4/uimm4s2:%#x", __func__, imm);
+
+  if (PARALLEL_GROUP == BFIN_PARALLEL_GROUP2)
+    illegal_instruction_combination (cpu);
 
   if (W == 1 && op == 2)
     illegal_instruction (cpu);
@@ -6165,7 +6213,7 @@ _interp_insn_bfin (SIM_CPU *cpu, bu32 pc)
       else
 	{
 	  TRACE_EXTRACT (cpu, "%s: no matching 16-bit pattern", __func__);
-	  illegal_instruction (cpu);
+	  illegal_instruction_or_combination (cpu);
 	}
       return insn_len;
     }

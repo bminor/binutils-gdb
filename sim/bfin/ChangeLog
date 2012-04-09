@@ -1,5 +1,23 @@
 2012-04-08  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-sim.c (illegal_instruction_or_combination): New helper.
+	(decode_ProgCtrl_0): Call illegal_instruction_or_combination instead
+	of illegal_instruction.
+	(decode_PushPopReg_0, decode_CCflag_0, decode_CC2dreg_0,
+	decode_LDSTpmod_0, decode_dagMODim_0, decode_dagMODik_0,
+	decode_dspLDST_0, decode_LDST_0, _interp_insn_bfin): Likewise.
+	(decode_PushPopMultiple_0): Call illegal_instruction_combination when
+	PARALLEL_GROUP is not BFIN_PARALLEL_NONE.
+	(decode_CCflag_0, decode_REGMV_0, decode_ALU2op_0, decode_PTR2op_0,
+	decode_COMPI2opD_0, decode_COMPI2opP_0): Likewise.
+	(decode_CC2stat_0): Check PARALLEL_GROUP before cbit.
+	(decode_LDSTpmod_0): Call illegal_instruction_combination when
+	PARALLEL_GROUP is BFIN_PARALLEL_GROUP2.
+	(decode_dagMODim_0, decode_dagMODik_0, decode_LDST_0,
+	decode_LDSTiiFP_0, decode_LDSTii_0): Likewise.
+
+2012-04-08  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-sim.h (bfin_parallel_group): New enum.
 	(bfin_cpu_state): Add new "group" member.
 	(PARALLEL_GROUP): Define.
