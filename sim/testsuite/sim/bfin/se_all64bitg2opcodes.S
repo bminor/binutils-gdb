@@ -6,7 +6,7 @@
  * and walk every instruction from 0x0000 to 0xffff
  */
 
-# mach: none
+# mach: bfin
 # sim: --environment operating
 # xfail: wrong excause (0x21 instead of 0x22)
 
@@ -32,10 +32,6 @@
 	IF CC JUMP pass_lvl;
 
 	W[P5 + 6] = R0;
-.endm
-
-.macro se_all_new_insn_stub
-	jump fail_lvl;
 .endm
 
 .macro se_all_insn_init

@@ -8,12 +8,16 @@
  * and walk every instruction from 0x00000000 to 0xffffffff (and have 0xc000 set)
  */
 
-# don't try to run normally as it takes way too long in sim
+# Don't want to enable for normal `make check` as it takes way too long in
+# the sim -- executes over 3 billion insns, and even at 10 MIPS, that's 10+
+# minutes :(.  Useful for directed testing, but that's about it.
 # mach: none
 # sim: --environment operating
 # xfail: too many invalid insns are decoded as valid
 
 #include "test.h"
+
+#define SE_ALL_BITS 32
 #include "se_allopcodes.h"
 	.include "testutils.inc"
 
@@ -22,11 +26,6 @@
 	R0 = R2 << 16;
 	R1 = R2 >> 16;
 	R0 = R0 | R1;
-.endm
-.macro se_all_load_table
-	R7 = [P1++];
-	R6 = [P1++];
-	R5 = [P1++];
 .endm
 
 .macro se_all_next_insn
@@ -66,13 +65,6 @@
 1:
 
 	[P5] = R0;
-.endm
-
-.macro se_all_new_insn_stub
-	jump fail_lvl;
-.endm
-.macro se_all_new_insn_log
-	se_all_new_32bit_insn_log
 .endm
 
 .macro se_all_insn_init

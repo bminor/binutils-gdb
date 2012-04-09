@@ -12,17 +12,15 @@
 # sim: --environment operating
 
 #include "test.h"
+
+#define SE_ALL_BITS 16
+#define SE_ALL_NEW_INSN_STUB
 #include "se_allopcodes.h"
 	.include "testutils.inc"
 
 .macro se_all_load_insn
 	R2 = W[P5];
 	R0 = R2;
-.endm
-.macro se_all_load_table
-	R7 = W[P1++];
-	R6 = W[P1++];
-	R5 = W[P1++];
 .endm
 
 .macro se_all_next_insn
@@ -40,9 +38,6 @@
 
 .macro se_all_new_insn_stub
 	jump _legal_instruction;
-.endm
-.macro se_all_new_insn_log
-	se_all_new_16bit_insn_log
 .endm
 
 .macro se_all_insn_init

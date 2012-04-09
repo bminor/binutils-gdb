@@ -7,7 +7,9 @@
  * (and have 0x8000000 set)
  */
 
-# don't try to run normally as it takes way too long in sim
+# Don't want to enable for normal `make check` as it takes way too long in
+# the sim -- executes over 3 billion insns, and even at 10 MIPS, that's 10+
+# minutes :(.  Useful for directed testing, but that's about it.
 # mach: none
 # sim: --environment operating
 # xfail: too many invalid insns are decoded as valid
@@ -62,10 +64,6 @@
 	IF CC R0 = R2;
 
 	[P5] = R0;
-.endm
-
-.macro se_all_new_insn_stub
-	jump fail_lvl;
 .endm
 
 .macro se_all_insn_init

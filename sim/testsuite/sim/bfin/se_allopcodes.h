@@ -10,6 +10,14 @@
 	b0 = r0; b1 = r0; b2 = r0; b3 = r0;
 .endm
 
+#if SE_ALL_BITS == 32
+# define LOAD_PFX
+#elif SE_ALL_BITS == 16
+# define LOAD_PFX W
+#else
+# error "Please define SE_ALL_BITS"
+#endif
+
 /*
  * execute a test of an opcode space.  host test
  * has to fill out a number of callbacks.
@@ -176,36 +184,39 @@ _table:
 _table_end:
 .endm
 
-.macro se_all_new_16bit_insn_log
-.ifdef BFIN_JTAG_xxxxx
-	R1 = R0;
-	R0 = 0x4;
-	call __emu_out;
-	R0 = R1 << 16;
-	R0 = R0 | R3;
-	call __emu_out;
-.else
-	loadsym P0, _next_location;
-	P1 = [P0];
-	W[P1++] = R0;
-	W[P1++] = R3;
-	[P0] = P1;
-.endif
+.macro se_all_load_table
+	R7 = LOAD_PFX[P1++];
+	R6 = LOAD_PFX[P1++];
+	R5 = LOAD_PFX[P1++];
 .endm
-.macro se_all_new_32bit_insn_log
+
+#ifndef SE_ALL_NEW_INSN_STUB
+.macro se_all_new_insn_stub
+	jump fail_lvl;
+.endm
+#endif
+
+.macro se_all_new_insn_log
 .ifdef BFIN_JTAG_xxxxx
 	R1 = R0;
+#if SE_ALL_BITS == 32
 	R0 = 0x8;
 	call __emu_out;
 	R0 = R1;
 	call __emu_out;
 	R0 = R3;
+#else
+	R0 = 0x4;
+	call __emu_out;
+	R0 = R1 << 16;
+	R0 = R0 | R3;
+#endif
 	call __emu_out;
 .else
 	loadsym P0, _next_location;
 	P1 = [P0];
-	[P1++] = R0;
-	[P1++] = R3;
+	LOAD_PFX[P1++] = R0;
+	LOAD_PFX[P1++] = R3;
 	[P0] = P1;
 .endif
 .endm
