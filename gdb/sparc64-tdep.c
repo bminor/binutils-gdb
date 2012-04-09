@@ -785,8 +785,8 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
       struct type *type = value_type (args[i]);
       int len = TYPE_LENGTH (type);
 
-      if (sparc64_structure_or_union_p (type) ||
-	  (sparc64_complex_floating_p (type) && len == 32))
+      if (sparc64_structure_or_union_p (type)
+	  || (sparc64_complex_floating_p (type) && len == 32))
 	{
 	  /* Structure or Union arguments.  */
 	  if (len <= 16)
@@ -887,8 +887,8 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
       int regnum = -1;
       gdb_byte buf[16];
 
-      if (sparc64_structure_or_union_p (type) ||
-	  (sparc64_complex_floating_p (type) && len == 32))
+      if (sparc64_structure_or_union_p (type)
+	  || (sparc64_complex_floating_p (type) && len == 32))
 	{
 	  /* Structure or Union arguments.  */
 	  gdb_assert (len <= 16);
