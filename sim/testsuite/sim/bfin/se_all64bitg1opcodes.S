@@ -8,7 +8,6 @@
 
 # mach: bfin
 # sim: --environment operating
-# xfail: wrong excause (0x21 instead of 0x22)
 
 #include "test.h"
 	.include "testutils.inc"

@@ -1,3 +1,8 @@
+2012-04-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* se_all64bitg1opcodes.S: Delete xfail line.
+	* se_all64bitg2opcodes.S: Likewise.
+
 2012-04-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* se_all16bitopcodes.S (SE_ALL_BITS): Define to 16.
