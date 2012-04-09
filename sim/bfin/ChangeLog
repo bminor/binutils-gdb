@@ -1,3 +1,10 @@
+2012-04-09  Robin Getz  <robin.getz@analog.com>
+
+	* bfin-sim.c (sgn_extend): New helper.
+	(decode_dsp32shiftimm_0): Call lshift when newimmag is more
+	than 16, otherwise call ashiftrt.  Set ASTAT fields as needed.
+	For accumulator shifts, call new sgn_extend helper.
+
 2012-04-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-sim.c (illegal_instruction_or_combination): New helper.

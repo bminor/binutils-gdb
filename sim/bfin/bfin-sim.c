@@ -5716,6 +5716,26 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
     illegal_instruction (cpu);
 }
 
+static bu64
+sgn_extend (bu40 org, bu40 val, int size)
+{
+  bu64 ret = val;
+
+  if (org & (1ULL << (size - 1)))
+    {
+      /* We need to shift in to the MSB which is set.  */
+      int n;
+
+      for (n = 40; n >= 0; n--)
+	if (ret & (1ULL << n))
+	  break;
+      ret |= (-1ULL << n);
+    }
+  else
+    ret &= ~(-1ULL << 39);
+
+  return ret;
+}
 static void
 decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 {
@@ -5765,8 +5785,37 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	{
 	  TRACE_INSN (cpu, "R%i.%c = R%i.%c >>> %i (S);",
 		      dst0, (HLs & 2) ? 'H' : 'L',
-		      src1, (HLs & 1) ? 'H' : 'L', immag);
-	  result = lshift (cpu, in, immag, 16, 1, 1);
+		      src1, (HLs & 1) ? 'H' : 'L', newimmag);
+	  if (newimmag > 16)
+	    {
+	      int shift = 32 - newimmag;
+	      bu16 inshift = in << shift;
+
+	      if (((inshift & ~0xFFFF)
+		   && ((inshift & ~0xFFFF) >> 16) != ~(~0 << shift))
+		  || (inshift & 0x8000) != (in & 0x8000))
+		{
+		  if (in & 0x8000)
+		    result = 0x8000;
+		  else
+		    result = 0x7fff;
+		  SET_ASTATREG (v, 1);
+		  SET_ASTATREG (vs, 1);
+		}
+	      else
+		{
+		  result = inshift;
+		  SET_ASTATREG (v, 0);
+		}
+
+	      SET_ASTATREG (az, !result);
+	      SET_ASTATREG (an, !!(result & 0x8000));
+	    }
+	  else
+	    {
+	      result = ashiftrt (cpu, in, newimmag, 16);
+	      result = sgn_extend (in, result, 16);
+	    }
 	}
       else if (sop == 2 && bit8)
 	{
@@ -5808,22 +5857,23 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
   else if (sop == 0 && sopcde == 3 && bit8 == 1)
     {
       /* Arithmetic shift, so shift in sign bit copies.  */
-      bu64 acc;
+      bu64 acc, val;
       int shift = uimm5 (newimmag);
       HLs = !!HLs;
 
       TRACE_INSN (cpu, "A%i = A%i >>> %i;", HLs, HLs, shift);
 
       acc = get_extended_acc (cpu, HLs);
-      acc >>= shift;
-      /* Sign extend again.  */
-      if (acc & (1ULL << 39))
-	acc |= -(1ULL << 39);
-      else
-	acc &= ~(-(1ULL << 39));
+      val = acc >> shift;
 
-      STORE (AXREG (HLs), (acc >> 32) & 0xFF);
-      STORE (AWREG (HLs), acc & 0xFFFFFFFF);
+      /* Sign extend again.  */
+      val = sgn_extend (acc, val, 40);
+
+      STORE (AXREG (HLs), (val >> 32) & 0xFF);
+      STORE (AWREG (HLs), val & 0xFFFFFFFF);
+      STORE (ASTATREG (an), !!(val & (1ULL << 39)));
+      STORE (ASTATREG (az), !val);
+      STORE (ASTATREG (av[HLs]), 0);
     }
   else if ((sop == 0 && sopcde == 3 && bit8 == 0)
 	   || (sop == 1 && sopcde == 3))
