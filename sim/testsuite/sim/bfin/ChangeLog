@@ -1,3 +1,7 @@
+2012-04-09  Robin Getz  <robin.getz@analog.com>
+
+	* random_0036.S, random_0037.S: New astat tests.
+
 2012-04-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* se_all64bitg1opcodes.S: Delete xfail line.
