@@ -82,6 +82,7 @@ enum {
 #define BFIN_MMR_EMAC_SIZE		0x200
 #define BFIN_MMR_EPPI_SIZE		0x40
 #define BFIN_MMR_GPIO_SIZE		(17 * 4)
+#define BFIN_MMR_GPIO2_SIZE		(8 * 4)
 #define BFIN_MMR_GPTIMER_SIZE		(4 * 4)
 #define BFIN_MMR_NFC_SIZE		0x50
 /* XXX: Not exactly true; it's two sets of 4 regs near each other:

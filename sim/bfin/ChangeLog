@@ -1,3 +1,13 @@
+2012-04-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Add bfin_gpio2.
+	* configure: Regenerate.
+	* dv-bfin_gpio2.c, dv-bfin_gpio2.h: New device model.
+	* machs.c (bf54x_mem): Delete GPIO mem stub.
+	(bf542_dev): Add GPIO register blocks.
+	(bf544_dev, bf547_dev): Likewise.
+	* machs.h (BFIN_MMR_GPIO2_SIZE): Define.
+
 2012-04-09  Robin Getz  <robin.getz@analog.com>
 
 	* bfin-sim.c (decode_dsp32shift_0): Extract the sign for ASHIFT

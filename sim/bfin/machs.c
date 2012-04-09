@@ -885,7 +885,6 @@ static const struct bfin_memory_layout bf54x_mem[] =
 {
   LAYOUT (0xFFC00800, 0x60, read_write),	/* SPORT0 stub XXX: not on BF542/4 */
   LAYOUT (0xFFC00900, 0x60, read_write),	/* SPORT1 stub */
-  LAYOUT (0xFFC01400, 0x200, read_write),	/* PORT/GPIO stub */
   LAYOUT (0xFFC02500, 0x60, read_write),	/* SPORT2 stub */
   LAYOUT (0xFFC02600, 0x60, read_write),	/* SPORT3 stub */
   LAYOUT (0xFFC03800, 0x70, read_write),	/* ATAPI stub */
@@ -915,6 +914,16 @@ static const struct bfin_dev_layout bf542_dev[] =
   DEVICE (0xFFC00A00, BF54X_MMR_EBIU_AMC_SIZE, "bfin_ebiu_amc"),
   DEVICE (0xFFC00A20, BFIN_MMR_EBIU_DDRC_SIZE, "bfin_ebiu_ddrc"),
  _DEVICE (0xFFC01300, BFIN_MMR_EPPI_SIZE,      "bfin_eppi@1", 1),
+  DEVICE (0xFFC014C0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@0"),
+  DEVICE (0xFFC014E0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@1"),
+  DEVICE (0xFFC01500, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@2"),
+  DEVICE (0xFFC01520, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@3"),
+  DEVICE (0xFFC01540, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@4"),
+  DEVICE (0xFFC01560, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@5"),
+  DEVICE (0xFFC01580, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@6"),
+  DEVICE (0xFFC015A0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@7"),
+  DEVICE (0xFFC015C0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@8"),
+  DEVICE (0xFFC015E0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@9"),
   DEVICE (0xFFC01600, BFIN_MMR_GPTIMER_SIZE,   "bfin_gptimer@0"),
   DEVICE (0xFFC01610, BFIN_MMR_GPTIMER_SIZE,   "bfin_gptimer@1"),
   DEVICE (0xFFC01620, BFIN_MMR_GPTIMER_SIZE,   "bfin_gptimer@2"),
@@ -945,6 +954,16 @@ static const struct bfin_dev_layout bf544_dev[] =
   DEVICE (0xFFC00A20, BFIN_MMR_EBIU_DDRC_SIZE, "bfin_ebiu_ddrc"),
  _DEVICE (0xFFC01000, BFIN_MMR_EPPI_SIZE,      "bfin_eppi@0", 1),
  _DEVICE (0xFFC01300, BFIN_MMR_EPPI_SIZE,      "bfin_eppi@1", 1),
+  DEVICE (0xFFC014C0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@0"),
+  DEVICE (0xFFC014E0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@1"),
+  DEVICE (0xFFC01500, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@2"),
+  DEVICE (0xFFC01520, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@3"),
+  DEVICE (0xFFC01540, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@4"),
+  DEVICE (0xFFC01560, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@5"),
+  DEVICE (0xFFC01580, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@6"),
+  DEVICE (0xFFC015A0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@7"),
+  DEVICE (0xFFC015C0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@8"),
+  DEVICE (0xFFC015E0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@9"),
   DEVICE (0xFFC01600, BFIN_MMR_GPTIMER_SIZE,   "bfin_gptimer@0"),
   DEVICE (0xFFC01610, BFIN_MMR_GPTIMER_SIZE,   "bfin_gptimer@1"),
   DEVICE (0xFFC01620, BFIN_MMR_GPTIMER_SIZE,   "bfin_gptimer@2"),
@@ -976,6 +995,16 @@ static const struct bfin_dev_layout bf547_dev[] =
   DEVICE (0xFFC00A20, BFIN_MMR_EBIU_DDRC_SIZE, "bfin_ebiu_ddrc"),
  _DEVICE (0xFFC01000, BFIN_MMR_EPPI_SIZE,      "bfin_eppi@0", 1),
  _DEVICE (0xFFC01300, BFIN_MMR_EPPI_SIZE,      "bfin_eppi@1", 1),
+  DEVICE (0xFFC014C0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@0"),
+  DEVICE (0xFFC014E0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@1"),
+  DEVICE (0xFFC01500, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@2"),
+  DEVICE (0xFFC01520, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@3"),
+  DEVICE (0xFFC01540, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@4"),
+  DEVICE (0xFFC01560, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@5"),
+  DEVICE (0xFFC01580, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@6"),
+  DEVICE (0xFFC015A0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@7"),
+  DEVICE (0xFFC015C0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@8"),
+  DEVICE (0xFFC015E0, BFIN_MMR_GPIO2_SIZE,     "bfin_gpio2@9"),
   DEVICE (0xFFC01600, BFIN_MMR_GPTIMER_SIZE,   "bfin_gptimer@0"),
   DEVICE (0xFFC01610, BFIN_MMR_GPTIMER_SIZE,   "bfin_gptimer@1"),
   DEVICE (0xFFC01620, BFIN_MMR_GPTIMER_SIZE,   "bfin_gptimer@2"),
