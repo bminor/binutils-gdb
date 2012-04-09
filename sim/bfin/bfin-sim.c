@@ -3816,18 +3816,40 @@ decode_dsp32mac_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
   int _MM = MM;
 
   PROFILE_COUNT_INSN (cpu, pc, BFIN_INSN_dsp32mac);
-  TRACE_EXTRACT (cpu, "%s: M:%i mmod:%i MM:%i P:%i w1:%i op1:%i h01:%i h11:%i "
+  TRACE_EXTRACT (cpu, "%s: M:%i mmod:%i%s MM:%i P:%i w1:%i op1:%i h01:%i h11:%i "
 		      "w0:%i op0:%i h00:%i h10:%i dst:%i src0:%i src1:%i",
-		 __func__, M, mmod, MM, P, w1, op1, h01, h11, w0, op0, h00, h10,
+		 __func__, M, mmod, mac_optmode (mmod, 0), MM, P, w1, op1, h01, h11, w0, op0, h00, h10,
 		 dst, src0, src1);
 
-  if (w0 == 0 && w1 == 0 && op1 == 3 && op0 == 3)
+  /* NOPS (op = 3) need to have half fields set to 0.  */
+  if (op0 == 3 && (h10 != 0 || h00 != 0))
     illegal_instruction (cpu);
 
+  if (op1 == 3 && (h11 != 0 || h01 != 0))
+    illegal_instruction (cpu);
+
+  /* when writing to a register pair, a register write needs to take place.  */
+  if (P && w0 == 0 && w1 == 0)
+    illegal_instruction (cpu);
+
+  /* when writing to a register pair, then the dest needs to be even.  */
+  if (P && (dst % 2))
+    illegal_instruction (cpu);
+
+  /* Mixed Mode (which only effects MAC1), requires MAC1 not to be a NOP.  */
+  if (MM && op1 == 3 && w1 == 0)
+    illegal_instruction (cpu);
+
+  /* Certain flags are only applicable to instructions which extract registers */
+  if (w0 == 0 && w1 == 0 && (mmod == M_S2RND || mmod == M_T || mmod == M_TFU || mmod == M_ISS2 || mmod == M_IH || mmod == M_IU))
+    illegal_instruction (cpu);
+
+  /* Certain flags are only applicable to instructions which don't extract registers.  */
   if ((w1 || w0) && mmod == M_W32)
     illegal_instruction (cpu);
 
-  if (((1 << mmod) & (P ? 0x131b : 0x1b5f)) == 0)
+  /* if opt_mode flag is not legal.  */
+  if (mmod == 5 || mmod == 7 || mmod == 10 || mmod >= 13)
     illegal_instruction (cpu);
 
   /* First handle MAC1 side.  */
@@ -3980,13 +4002,36 @@ decode_dsp32mult_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 		 __func__, M, mmod, MM, P, w1, op1, h01, h11, w0, op0, h00, h10,
 		 dst, src0, src1);
 
+  /* Must write to at least half the register.  */
   if (w1 == 0 && w0 == 0)
     illegal_instruction (cpu);
-  if (((1 << mmod) & (P ? 0x313 : 0x1b57)) == 0)
+
+  /* If you don't write to w1, you can't use the stored information in h01 and h11.  */
+  if (w1 == 0 && (h01 != 0 || h11 != 0) )
+     illegal_instruction (cpu);
+
+  /*Comment*/
+  if (MM && w1 == 0)
     illegal_instruction (cpu);
-  if (P && ((dst & 1) || (op1 != 0) || (op0 != 0) || !is_macmod_pmove (mmod)))
+
+  /* If you don't write to w0, you can't use the stored information in h00 and h10.  */
+  if (w0 == 0 && (h00 != 0 || h10 != 0))
     illegal_instruction (cpu);
-  if (!P && ((op1 != 0) || (op0 != 0) || !is_macmod_hmove (mmod)))
+
+  /* Must use the MAC0.  */
+  if (op0 != 0)
+     illegal_instruction (cpu);
+
+  /* Must use the MAC1.  */
+  if (op1 != 0)
+     illegal_instruction (cpu);
+
+  /*Comment*/
+  if (P && (dst & 1))
+    illegal_instruction (cpu);
+
+  /*comment*/
+  if (!P && !is_macmod_hmove (mmod))
     illegal_instruction (cpu);
 
   /* First handle MAC1 side.  */
