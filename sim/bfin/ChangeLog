@@ -1,5 +1,11 @@
 2012-04-09  Robin Getz  <robin.getz@analog.com>
 
+	* bfin-sim.c (decode_dsp32shift_0): Extract the sign for ASHIFT
+	and LSHIFT, and set ASTAT based on the before/after values.
+	Rename "val" to "acc" to be consistent with other code branches.
+
+2012-04-09  Robin Getz  <robin.getz@analog.com>
+
 	* bfin-sim.c (sgn_extend): New helper.
 	(decode_dsp32shiftimm_0): Call lshift when newimmag is more
 	than 16, otherwise call ashiftrt.  Set ASTAT fields as needed.

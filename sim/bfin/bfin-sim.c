@@ -5206,7 +5206,16 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       if (shft <= 0)
 	val = ashiftrt (cpu, val, -shft, 16);
       else
-	val = lshift (cpu, val, shft, 16, sop == 1, 1);
+	{
+	  int sgn = (val >> 15) & 0x1;
+
+	  val = lshift (cpu, val, shft, 16, sop == 1, 1);
+	  if (((val >> 15) & 0x1) != sgn)
+	    {
+	      SET_ASTATREG (v, 1);
+	      SET_ASTATREG (vs, 1);
+	    }
+	}
 
       if ((HLs & 2) == 0)
 	STORE (DREG (dst0), REG_H_L (DREG (dst0), val));
@@ -5258,42 +5267,40 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
   else if (sop == 0 && sopcde == 3 && (HLs == 0 || HLs == 1))
     {
       bs32 shft = (bs8)(DREG (src0) << 2) >> 2;
-      bu64 val = get_extended_acc (cpu, HLs);
+      bu64 acc = get_extended_acc (cpu, HLs);
+      bu64 val;
 
       HLs = !!HLs;
       TRACE_INSN (cpu, "A%i = ASHIFT A%i BY R%i.L;", HLs, HLs, src0);
-      TRACE_DECODE (cpu, "A%i:%#"PRIx64" shift:%i", HLs, val, shft);
+      TRACE_DECODE (cpu, "A%i:%#"PRIx64" shift:%i", HLs, acc, shft);
 
       if (shft <= 0)
-	val = ashiftrt (cpu, val, -shft, 40);
+	val = ashiftrt (cpu, acc, -shft, 40);
       else
-	val = lshift (cpu, val, shft, 40, 0, 0);
+	val = lshift (cpu, acc, shft, 40, 0, 0);
 
       STORE (AXREG (HLs), (val >> 32) & 0xff);
       STORE (AWREG (HLs), (val & 0xffffffff));
-      STORE (ASTATREG (av[HLs]), val == 0);
-      if (val == 0)
-	STORE (ASTATREG (avs[HLs]), 1);
+      STORE (ASTATREG (av[HLs]), 0);
     }
   else if (sop == 1 && sopcde == 3 && (HLs == 0 || HLs == 1))
     {
       bs32 shft = (bs8)(DREG (src0) << 2) >> 2;
+      bu64 acc = get_unextended_acc (cpu, HLs);
       bu64 val;
 
       HLs = !!HLs;
       TRACE_INSN (cpu, "A%i = LSHIFT A%i BY R%i.L;", HLs, HLs, src0);
-      val = get_unextended_acc (cpu, HLs);
+      TRACE_DECODE (cpu, "A%i:%#"PRIx64" shift:%i", HLs, acc, shft);
 
       if (shft <= 0)
-	val = lshiftrt (cpu, val, -shft, 40);
+	val = lshiftrt (cpu, acc, -shft, 40);
       else
-	val = lshift (cpu, val, shft, 40, 0, 0);
+	val = lshift (cpu, acc, shft, 40, 0, 0);
 
       STORE (AXREG (HLs), (val >> 32) & 0xff);
       STORE (AWREG (HLs), (val & 0xffffffff));
-      STORE (ASTATREG (av[HLs]), val == 0);
-      if (val == 0)
-	STORE (ASTATREG (avs[HLs]), 1);
+      STORE (ASTATREG (av[HLs]), 0);
     }
   else if ((sop == 0 || sop == 1) && sopcde == 1)
     {
@@ -5315,9 +5322,18 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	}
       else
 	{
+	  int sgn0 = (val0 >> 15) & 0x1;
+	  int sgn1 = (val1 >> 15) & 0x1;
+
 	  val0 = lshift (cpu, val0, shft, 16, sop == 1, 1);
 	  astat = ASTAT;
 	  val1 = lshift (cpu, val1, shft, 16, sop == 1, 1);
+
+	  if ((sgn0 != ((val0 >> 15) & 0x1)) || (sgn1 != ((val1 >> 15) & 0x1)))
+	    {
+	      SET_ASTATREG (v, 1);
+	      SET_ASTATREG (vs, 1);
+	    }
 	}
       SET_ASTAT (ASTAT | astat);
       STORE (DREG (dst0), (val1 << 16) | val0);
@@ -5342,7 +5358,16 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 	    STORE (DREG (dst0), ashiftrt (cpu, v, -shft, 32));
 	}
       else
-	STORE (DREG (dst0), lshift (cpu, v, shft, 32, sop == 1, 1));
+	{
+	  bu32 val = lshift (cpu, v, shft, 32, sop == 1, 1);
+
+	  STORE (DREG (dst0), val);
+	  if (((v >> 31) & 0x1) != ((val >> 31) & 0x1))
+	    {
+	      SET_ASTATREG (v, 1);
+	      SET_ASTATREG (vs, 1);
+	    }
+	}
     }
   else if (sop == 3 && sopcde == 2)
     {
@@ -5770,7 +5795,14 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
 		      dst0, (HLs & 2) ? 'H' : 'L',
 		      src1, (HLs & 1) ? 'H' : 'L', newimmag);
 	  if (newimmag > 16)
-	    result = lshift (cpu, in, 16 - (newimmag & 0xF), 16, 0, 1);
+	    {
+	      result = lshift (cpu, in, 16 - (newimmag & 0xF), 16, 0, 1);
+	      if (((result >> 15) & 0x1) != ((in >> 15) & 0x1))
+		{
+		  SET_ASTATREG (v, 1);
+		  SET_ASTATREG (vs, 1);
+		}
+	    }
 	  else
 	    result = ashiftrt (cpu, in, newimmag, 16);
 	}
@@ -5972,11 +6004,20 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       TRACE_INSN (cpu, "R%i = R%i >>> %i %s;", dst0, src1, count,
 		  sop == 0 ? "(V)" : "(V,S)");
 
-      if (count & 0x10)
+      if (count > 16)
 	{
+	  int sgn0 = (val0 >> 15) & 0x1;
+	  int sgn1 = (val1 >> 15) & 0x1;
+
 	  val0 = lshift (cpu, val0, 16 - (count & 0xF), 16, 0, 1);
 	  astat = ASTAT;
 	  val1 = lshift (cpu, val1, 16 - (count & 0xF), 16, 0, 1);
+
+	  if ((sgn0 != ((val0 >> 15) & 0x1)) || (sgn1 != ((val1 >> 15) & 0x1)))
+	    {
+	      SET_ASTATREG (v, 1);
+	      SET_ASTATREG (vs, 1);
+	    }
 	}
       else
 	{
