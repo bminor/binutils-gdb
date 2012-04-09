@@ -1,5 +1,9 @@
 2012-04-09  Robin Getz  <robin.getz@analog.com>
 
+	* random_0017.S, random_0018.S, random_0025.S: New ASTAT shift tests.
+
+2012-04-09  Robin Getz  <robin.getz@analog.com>
+
 	* random_0036.S, random_0037.S: New astat tests.
 
 2012-04-09  Mike Frysinger  <vapier@gentoo.org>
