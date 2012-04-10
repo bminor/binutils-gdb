@@ -1203,6 +1203,16 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	       && (itype_rt (inst) & 2) == 0)
 	/* BC1ANY4F, BC1ANY4T: 010001 01010 xxx0x */
 	pc = mips32_bc1_pc (gdbarch, frame, inst, pc + 4, 4);
+      else if (itype_op (inst) == 29)
+	/* JALX: 011101 */
+	/* The new PC will be alternate mode.  */
+	{
+	  unsigned long reg;
+
+	  reg = jtype_target (inst) << 2;
+	  /* Add 1 to indicate 16-bit mode -- invert ISA mode.  */
+	  pc = ((pc + 4) & ~(CORE_ADDR) 0x0fffffff) + reg + 1;
+	}
       else
 	pc += 4;		/* Not a branch, next instruction is easy.  */
     }
@@ -1295,14 +1305,6 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	    pc = reg + ((pc + 4) & ~(CORE_ADDR) 0x0fffffff);
 	  }
 	  break;
-	  /* FIXME case JALX : */
-	  {
-	    unsigned long reg;
-	    reg = jtype_target (inst) << 2;
-	    pc = reg + ((pc + 4) & ~(CORE_ADDR) 0x0fffffff) + 1;  /* yes, +1 */
-	    /* Add 1 to indicate 16 bit mode - Invert ISA mode */
-	  }
-	  break;		/* The new PC will be alternate mode */
 	case 4:		/* BEQ, BEQL */
 	equal_branch:
 	  if (get_frame_register_signed (frame, itype_rs (inst)) ==
