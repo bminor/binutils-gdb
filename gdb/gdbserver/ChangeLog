@@ -1,3 +1,7 @@
+2012-04-10  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* linux-low.c (get_r_debug): Handle DT_MIPS_RLD_MAP.
+
 2012-04-05  Pedro Alves  <palves@redhat.com>
 
 	-Werror=strict-aliasing

@@ -5419,7 +5419,9 @@ get_dynamic (const int pid, const int is_elf64)
 }
 
 /* Return &_r_debug in the inferior, or -1 if not present.  Return value
-   can be 0 if the inferior does not yet have the library list initialized.  */
+   can be 0 if the inferior does not yet have the library list initialized.
+   We look for DT_MIPS_RLD_MAP first.  MIPS executables use this instead of
+   DT_DEBUG, although they sometimes contain an unused DT_DEBUG entry too.  */
 
 static CORE_ADDR
 get_r_debug (const int pid, const int is_elf64)
@@ -5427,19 +5429,35 @@ get_r_debug (const int pid, const int is_elf64)
   CORE_ADDR dynamic_memaddr;
   const int dyn_size = is_elf64 ? sizeof (Elf64_Dyn) : sizeof (Elf32_Dyn);
   unsigned char buf[sizeof (Elf64_Dyn)];  /* The larger of the two.  */
+  CORE_ADDR map = -1;
 
   dynamic_memaddr = get_dynamic (pid, is_elf64);
   if (dynamic_memaddr == 0)
-    return (CORE_ADDR) -1;
+    return map;
 
   while (linux_read_memory (dynamic_memaddr, buf, dyn_size) == 0)
     {
       if (is_elf64)
 	{
 	  Elf64_Dyn *const dyn = (Elf64_Dyn *) buf;
+	  union
+	    {
+	      Elf64_Xword map;
+	      unsigned char buf[sizeof (Elf64_Xword)];
+	    }
+	  rld_map;
 
-	  if (dyn->d_tag == DT_DEBUG)
-	    return dyn->d_un.d_val;
+	  if (dyn->d_tag == DT_MIPS_RLD_MAP)
+	    {
+	      if (linux_read_memory (dyn->d_un.d_val,
+				     rld_map.buf, sizeof (rld_map.buf)) == 0)
+		return rld_map.map;
+	      else
+		break;
+	    }
+
+	  if (dyn->d_tag == DT_DEBUG && map == -1)
+	    map = dyn->d_un.d_val;
 
 	  if (dyn->d_tag == DT_NULL)
 	    break;
@@ -5447,9 +5465,24 @@ get_r_debug (const int pid, const int is_elf64)
       else
 	{
 	  Elf32_Dyn *const dyn = (Elf32_Dyn *) buf;
+	  union
+	    {
+	      Elf32_Word map;
+	      unsigned char buf[sizeof (Elf32_Word)];
+	    }
+	  rld_map;
 
-	  if (dyn->d_tag == DT_DEBUG)
-	    return dyn->d_un.d_val;
+	  if (dyn->d_tag == DT_MIPS_RLD_MAP)
+	    {
+	      if (linux_read_memory (dyn->d_un.d_val,
+				     rld_map.buf, sizeof (rld_map.buf)) == 0)
+		return rld_map.map;
+	      else
+		break;
+	    }
+
+	  if (dyn->d_tag == DT_DEBUG && map == -1)
+	    map = dyn->d_un.d_val;
 
 	  if (dyn->d_tag == DT_NULL)
 	    break;
@@ -5458,7 +5491,7 @@ get_r_debug (const int pid, const int is_elf64)
       dynamic_memaddr += dyn_size;
     }
 
-  return (CORE_ADDR) -1;
+  return map;
 }
 
 /* Read one pointer from MEMADDR in the inferior.  */
