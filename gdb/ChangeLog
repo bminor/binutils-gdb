@@ -1,3 +1,8 @@
+2012-04-10  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (aclocal_m4_deps): Add gnulib/m4/gnulib-cache.m4
+	and gnulib/m4/gnulib-tool.m4.
+
 2012-04-10  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_per_cu_data). Clarify comment.

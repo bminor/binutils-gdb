@@ -1307,8 +1307,10 @@ aclocal_m4_deps = \
 	configure.ac \
 	gnulib/m4/00gnulib.m4 \
 	gnulib/m4/extensions.m4 \
+	gnulib/m4/gnulib-cache.m4 \
 	gnulib/m4/gnulib-common.m4 \
 	gnulib/m4/gnulib-comp.m4 \
+	gnulib/m4/gnulib-tool.m4 \
 	gnulib/m4/include_next.m4 \
 	gnulib/m4/longlong.m4 \
 	gnulib/m4/memchr.m4 \
