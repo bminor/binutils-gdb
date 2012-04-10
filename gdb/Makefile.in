@@ -1273,7 +1273,7 @@ Makefile: Makefile.in config.status @frags@
 	  CONFIG_HEADERS= \
 	  $(SHELL) config.status
 
-gnulib/Makefile: gnulib/Makefile.in gnulib/Makefile.in config.status @frags@
+gnulib/Makefile: gnulib/Makefile.in config.status @frags@
 	CONFIG_FILES="gnulib/Makefile" \
 	  CONFIG_COMMANDS="depfiles" \
 	  CONFIG_HEADERS= \

@@ -1,5 +1,9 @@
 2012-04-10  Yao Qi  <yao@codesourcery.com>
 
+	* Makefile.in (gnulib/Makefile): Remove duplicated dependency.
+
+2012-04-10  Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (aclocal_m4_deps): Add gnulib/m4/gnulib-cache.m4
 	and gnulib/m4/gnulib-tool.m4.
 
