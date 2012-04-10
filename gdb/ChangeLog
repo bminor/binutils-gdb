@@ -1,5 +1,10 @@
 2011-04-10  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (mips_skip_pic_trampoline_code): Correct sign
+	extension in jump target calculation.
+
+2011-04-10  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c (mips32_next_pc): Handle JALX.
 
 2012-04-10  Yao Qi  <yao@codesourcery.com>

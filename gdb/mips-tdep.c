@@ -5768,8 +5768,8 @@ mips_skip_pic_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	  && (stub_words[1] & 0xfc000000U) == 0x08000000
 	  && (stub_words[2] & 0xffff0000U) == 0x27390000
 	  && stub_words[3] == 0x00000000)
-	return (((stub_words[0] & 0x0000ffff) << 16)
-		+ (stub_words[2] & 0x0000ffff));
+	return ((((stub_words[0] & 0x0000ffff) << 16)
+		 + (stub_words[2] & 0x0000ffff)) ^ 0x8000) - 0x8000;
     }
 
   /* Not a recognized stub.  */
