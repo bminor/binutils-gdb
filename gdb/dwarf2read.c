@@ -415,9 +415,9 @@ struct dwarf2_per_cu_data
      any of the current compilation units are processed.  */
   unsigned int queued : 1;
 
-  /* This flag will be set if we need to load absolutely all DIEs
-     for this compilation unit, instead of just the ones we think
-     are interesting.  It gets set if we look for a DIE in the
+  /* This flag will be set when reading partial DIEs if we need to load
+     absolutely all DIEs for this compilation unit, instead of just the ones
+     we think are interesting.  It gets set if we look for a DIE in the
      hash table and don't find it.  */
   unsigned int load_all_dies : 1;
 
@@ -9516,7 +9516,6 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
   struct abbrev_info *abbrev;
   unsigned int bytes_read;
   unsigned int load_all = 0;
-
   int nesting_level = 1;
 
   parent_die = NULL;
@@ -9579,7 +9578,7 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
 	    }
 	}
 
-      /* We only recurse into subprograms looking for template arguments.
+      /* We only recurse into c++ subprograms looking for template arguments.
 	 Skip their other children.  */
       if (!load_all
 	  && cu->language == language_cplus
@@ -9996,28 +9995,33 @@ find_partial_die (sect_offset offset, struct dwarf2_cu *cu)
   struct dwarf2_per_cu_data *per_cu = NULL;
   struct partial_die_info *pd = NULL;
 
-  if (cu->per_cu->debug_types_section)
-    {
-      pd = find_partial_die_in_comp_unit (offset, cu);
-      if (pd != NULL)
-	return pd;
-      goto not_found;
-    }
-
   if (offset_in_cu_p (&cu->header, offset))
     {
       pd = find_partial_die_in_comp_unit (offset, cu);
       if (pd != NULL)
 	return pd;
+      /* We missed recording what we needed.
+	 Load all dies and try again.  */
+      per_cu = cu->per_cu;
     }
+  else
+    {
+      /* TUs don't reference other CUs/TUs (except via type signatures).  */
+      if (cu->per_cu->debug_types_section)
+	{
+	  error (_("Dwarf Error: Type Unit at offset 0x%lx contains"
+		   " external reference to offset 0x%lx [in module %s].\n"),
+		 (long) cu->header.offset.sect_off, (long) offset.sect_off,
+		 bfd_get_filename (objfile->obfd));
+	}
+      per_cu = dwarf2_find_containing_comp_unit (offset, objfile);
 
-  per_cu = dwarf2_find_containing_comp_unit (offset, objfile);
+      if (per_cu->cu == NULL || per_cu->cu->partial_dies == NULL)
+	load_partial_comp_unit (per_cu);
 
-  if (per_cu->cu == NULL || per_cu->cu->partial_dies == NULL)
-    load_partial_comp_unit (per_cu);
-
-  per_cu->cu->last_used = 0;
-  pd = find_partial_die_in_comp_unit (offset, per_cu->cu);
+      per_cu->cu->last_used = 0;
+      pd = find_partial_die_in_comp_unit (offset, per_cu->cu);
+    }
 
   if (pd == NULL && per_cu->load_all_dies == 0)
     {
@@ -10026,34 +10030,38 @@ find_partial_die (sect_offset offset, struct dwarf2_cu *cu)
       struct abbrev_info *abbrev;
       unsigned int bytes_read;
       char *info_ptr;
+      struct dwarf2_section_info *sec;
 
       per_cu->load_all_dies = 1;
 
-      /* Re-read the DIEs.  */
+      if (per_cu->debug_types_section)
+	sec = per_cu->debug_types_section;
+      else
+	sec = &dwarf2_per_objfile->info;
+
+      /* Re-read the DIEs, this time reading all of them.
+	 NOTE: We don't discard the previous set of DIEs.
+	 This doesn't happen very often so it's (hopefully) not a problem.  */
       back_to = make_cleanup (null_cleanup, 0);
       if (per_cu->cu->dwarf2_abbrevs == NULL)
 	{
 	  dwarf2_read_abbrevs (per_cu->cu);
 	  make_cleanup (dwarf2_free_abbrev_table, per_cu->cu);
 	}
-      info_ptr = (dwarf2_per_objfile->info.buffer
+      info_ptr = (sec->buffer
 		  + per_cu->cu->header.offset.sect_off
 		  + per_cu->cu->header.first_die_offset.cu_off);
       abbrev = peek_die_abbrev (info_ptr, &bytes_read, per_cu->cu);
       info_ptr = read_partial_die (&comp_unit_die, abbrev, bytes_read,
-				   objfile->obfd,
-				   dwarf2_per_objfile->info.buffer, info_ptr,
+				   objfile->obfd, sec->buffer, info_ptr,
 				   per_cu->cu);
       if (comp_unit_die.has_children)
-	load_partial_dies (objfile->obfd,
-			   dwarf2_per_objfile->info.buffer, info_ptr,
-			   0, per_cu->cu);
+	load_partial_dies (objfile->obfd, sec->buffer, info_ptr, 0,
+			   per_cu->cu);
       do_cleanups (back_to);
 
       pd = find_partial_die_in_comp_unit (offset, per_cu->cu);
     }
-
- not_found:
 
   if (pd == NULL)
     internal_error (__FILE__, __LINE__,
