@@ -1,3 +1,8 @@
+2012-04-10  Tristan Gingold  <gingold@adacore.com>
+
+	* darwin-nat.c (darwin_kill_inferior): Always use the no ptrace
+	code to kill the inferior.
+
 2012-04-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* ada-exp.y (yyss, yysslim, yyssp, yystacksize, yyvs, yyvsp): New
