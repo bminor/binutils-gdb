@@ -1,3 +1,31 @@
+2012-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* features/Makefile (WHICH): Add i386/x32, i386/x32-linux,
+	i386/x32-avx and i386/x32-avx-linux.
+	(i386/x32-expedite): New.
+	(i386/x32-linux-expedite): Likewise.
+	(i386/x32-avx-expedite): Likewise.
+	(i386/x32-avx-linux-expedite): Likewise.
+	($(outdir)/i386/x32.dat): Likewise.
+	($(outdir)/i386/x32-linux.dat): Likewise.
+	($(outdir)/i386/x32-avx.dat): Likewise.
+	($(outdir)/i386/x32-avx-linux.dat): Likewise.
+
+	* features/i386/x32-avx-linux.xml: New file.
+	* features/i386/x32-avx.xml: Likewise.
+	* features/i386/x32-core.xml: Likewise.
+	* features/i386/x32-linux.xml: Likewise.
+	* features/i386/x32.xml: Likewise.
+
+	* features/i386/x32-avx-linux.c: New.  Generated.
+	* features/i386/x32-avx.c: Likewise.
+	* features/i386/x32-linux.c: Likewise.
+	* features/i386/x32.c: Likewise.
+	* regformats/i386/x32-avx-linux.dat: Likewise.
+	* regformats/i386/x32-avx.dat: Likewise.
+	* regformats/i386/x32-linux.dat: Likewise.
+	* regformats/i386/x32.dat: Likewise.
+
 2012-04-10  Tristan Gingold  <gingold@adacore.com>
 
 	* darwin-nat.c (darwin_kill_inferior): Always use the no ptrace
