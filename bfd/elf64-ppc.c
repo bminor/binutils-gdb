@@ -5533,28 +5533,46 @@ opd_entry_value (asection *opd_sec,
      at a final linked executable with addr2line or somesuch.  */
   if (opd_sec->reloc_count == 0)
     {
-      char buf[8];
-
+      /* PR 13897: Cache the loaded section to speed up the search.  */
+      static asection * buf_sec = NULL;
+      static char       buf[8];
+      static bfd_vma    buf_val = 0;
+      static asection * buf_likely = NULL;
+      
+      if (buf_sec == opd_sec)
+	{
+	  if (code_sec != NULL)
+	    * code_sec = buf_likely;
+	  if (code_off != NULL && buf_likely != NULL)
+	    * code_off = buf_val - buf_likely->vma;
+	  return buf_val;
+	}
+   
       if (!bfd_get_section_contents (opd_bfd, opd_sec, buf, offset, 8))
 	return (bfd_vma) -1;
+      buf_sec = opd_sec;
 
-      val = bfd_get_64 (opd_bfd, buf);
+      buf_val = bfd_get_64 (opd_bfd, buf);
       if (code_sec != NULL)
 	{
-	  asection *sec, *likely = NULL;
+	  asection *sec;
+
+	  buf_likely = NULL;
 	  for (sec = opd_bfd->sections; sec != NULL; sec = sec->next)
-	    if (sec->vma <= val
+	    if (sec->vma <= buf_val
 		&& (sec->flags & SEC_LOAD) != 0
 		&& (sec->flags & SEC_ALLOC) != 0)
-	      likely = sec;
-	  if (likely != NULL)
+	      buf_likely = sec;
+	  if (buf_likely != NULL)
 	    {
-	      *code_sec = likely;
+	      *code_sec = buf_likely;
 	      if (code_off != NULL)
-		*code_off = val - likely->vma;
+		*code_off = buf_val - buf_likely->vma;
 	    }
 	}
-      return val;
+      else
+	buf_likely = NULL;
+      return buf_val;
     }
 
   BFD_ASSERT (is_ppc64_elf (opd_bfd));

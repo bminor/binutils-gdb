@@ -1,3 +1,10 @@
+2012-04-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13897
+	* elf64-ppc.c (opd_entry_value): When dealing with sections
+	without relocs, keep the last section loaded in order to avoid
+	unnecessary reloads.
+
 2012-04-09  Roland McGrath  <mcgrathr@google.com>
 
 	* elf.c (_bfd_elf_map_sections_to_segments): Set INFO->user_phdrs.
