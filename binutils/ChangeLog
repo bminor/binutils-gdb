@@ -1,3 +1,8 @@
+2012-04-11  Ryan Mansfield  <rmansfield@qnx.com>
+
+        * objdump.c (dump_bfd): If defaulting to dwarf call
+        dwarf_select_sections_all to enable displays.
+
 2012-04-06  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.in (AC_CHECK_HEADERS): Add locale.h.

@@ -3230,6 +3230,7 @@ dump_bfd (bfd *abfd)
 	 info in the file, try DWARF instead.  */
       else if (! dump_dwarf_section_info)
 	{
+	  dwarf_select_sections_all (); 
 	  dump_dwarf (abfd);
 	}
     }
