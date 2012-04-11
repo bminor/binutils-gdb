@@ -1,3 +1,8 @@
+2012-04-11  Yuanhui Zhang  <asmwarrior@gmail.com>
+
+	* source.c (find_and_open_source): Consistently pass resulting
+	full path through xfullpath.
+
 2012-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Provide more specific displaced-stepping memory error message.

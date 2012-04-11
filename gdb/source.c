@@ -997,7 +997,16 @@ find_and_open_source (const char *filename,
 
       result = open (*fullname, OPEN_MODE);
       if (result >= 0)
-	return result;
+	{
+	  /* Call xfullpath here to be consistent with openp
+	     which we use below.  */
+	  char *lpath = xfullpath (*fullname);
+
+	  xfree (*fullname);
+	  *fullname = lpath;
+	  return result;
+	}
+
       /* Didn't work -- free old one, try again.  */
       xfree (*fullname);
       *fullname = NULL;
