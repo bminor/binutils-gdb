@@ -71,7 +71,7 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
 	    {
 	      printf_unfiltered (_("Error calling thread_get_state for "
 				   "GP registers for thread 0x%lx\n"),
-				 current_thread);
+				 (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
 	  amd64_supply_native_gregset (regcache, &gp_regs.uts, -1);
@@ -91,7 +91,7 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
 	    {
 	      printf_unfiltered (_("Error calling thread_get_state for "
 				   "float registers for thread 0x%lx\n"),
-				 current_thread);
+				 (unsigned long) current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
           amd64_supply_fxsave (regcache, -1, &fp_regs.ufs.fs64.__fpu_fcw);
