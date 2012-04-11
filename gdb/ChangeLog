@@ -1,6 +1,11 @@
 2012-04-11  Tristan Gingold  <gingold@adacore.com>
 
 	PR gdb/13901
+	* darwin-nat.c (darwin_execvp): Revert previous patch.
+
+2012-04-11  Tristan Gingold  <gingold@adacore.com>
+
+	PR gdb/13901
 	* darwin-nat.c (darwin_resume_thread): Call darwin_set_sstep only
 	in case of change.
 
