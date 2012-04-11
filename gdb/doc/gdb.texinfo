@@ -7198,6 +7198,153 @@ fields of a struct or a class are declared, use the @code{ptype @var{exp}}
 command rather than @code{print}.  @xref{Symbols, ,Examining the Symbol
 Table}.
 
+@cindex exploring hierarchical data structures
+@kindex explore
+Another way of examining values of expressions and type information is
+through the Python extension command @code{explore} (available only if
+the @value{GDBN} build is configured with @code{--with-python}).  It
+offers an interactive way to start at the highest level (or, the most
+abstract level) of the data type of an expression (or, the data type
+itself) and explore all the way down to leaf scalar values/fields
+embedded in the higher level data types.
+
+@table @code
+@item explore @var{arg}
+@var{arg} is either an expression (in the source language), or a type
+visible in the current context of the program being debugged.
+@end table
+
+The working of the @code{explore} command can be illustrated with an
+example.  If a data type @code{struct ComplexStruct} is defined in your
+C program as
+
+@smallexample
+struct SimpleStruct
+@{
+  int i;
+  double d;
+@};
+
+struct ComplexStruct
+@{
+  struct SimpleStruct *ss_p;
+  int arr[10];
+@};
+@end smallexample
+
+@noindent
+followed by variable declarations as
+
+@smallexample
+struct SimpleStruct ss = @{ 10, 1.11 @};
+struct ComplexStruct cs = @{ &ss, @{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 @} @};
+@end smallexample
+
+@noindent
+then, the value of the variable @code{cs} can be explored using the
+@code{explore} command as follows.
+
+@smallexample
+(gdb) explore cs
+The value of `cs' is a struct/class of type `struct ComplexStruct' with
+the following fields:
+
+  ss_p = <Enter 0 to explore this field of type `struct SimpleStruct *'>
+   arr = <Enter 1 to explore this field of type `int [10]'>
+
+Enter the field number of choice:
+@end smallexample
+
+@noindent
+Since the fields of @code{cs} are not scalar values, you are being
+prompted to chose the field you want to explore.  Let's say you choose
+the field @code{ss_p} by entering @code{0}.  Then, since this field is a
+pointer, you will be asked if it is pointing to a single value.  From
+the declaration of @code{cs} above, it is indeed pointing to a single
+value, hence you enter @code{y}.  If you enter @code{n}, then you will
+be asked if it were pointing to an array of values, in which case this
+field will be explored as if it were an array.
+
+@smallexample
+`cs.ss_p' is a pointer to a value of type `struct SimpleStruct'
+Continue exploring it as a pointer to a single value [y/n]: y
+The value of `*(cs.ss_p)' is a struct/class of type `struct
+SimpleStruct' with the following fields:
+
+  i = 10 .. (Value of type `int')
+  d = 1.1100000000000001 .. (Value of type `double')
+
+Press enter to return to parent value:
+@end smallexample
+
+@noindent
+If the field @code{arr} of @code{cs} was chosen for exploration by
+entering @code{1} earlier, then since it is as array, you will be
+prompted to enter the index of the element in the array that you want
+to explore.
+
+@smallexample
+`cs.arr' is an array of `int'.
+Enter the index of the element you want to explore in `cs.arr': 5
+
+`(cs.arr)[5]' is a scalar value of type `int'.
+
+(cs.arr)[5] = 4
+
+Press enter to return to parent value: 
+@end smallexample
+
+In general, at any stage of exploration, you can go deeper towards the
+leaf values by responding to the prompts appropriately, or hit the
+return key to return to the enclosing data structure (the @i{higher}
+level data structure).
+
+Similar to exploring values, you can use the @code{explore} command to
+explore types.  Instead of specifying a value (which is typically a
+variable name or an expression valid in the current context of the
+program being debugged), you specify a type name.  If you consider the
+same example as above, your can explore the type
+@code{struct ComplexStruct} by passing the argument
+@code{struct ComplexStruct} to the @code{explore} command.
+
+@smallexample
+(gdb) explore struct ComplexStruct
+@end smallexample
+
+@noindent
+By responding to the prompts appropriately in the subsequent interactive
+session, you can explore the type @code{struct ComplexStruct} in a
+manner similar to how the value @code{cs} was explored in the above
+example.
+
+The @code{explore} command also has two sub-commands,
+@code{explore value} and @code{explore type}. The former sub-command is
+a way to explicitly specify that value exploration of the argument is
+being invoked, while the latter is a way to explicitly specify that type
+exploration of the argument is being invoked.
+
+@table @code
+@item explore value @var{expr}
+@cindex explore value
+This sub-command of @code{explore} explores the value of the
+expression @var{expr} (if @var{expr} is an expression valid in the
+current context of the program being debugged).  The behavior of this
+command is identical to that of the behavior of the @code{explore}
+command being passed the argument @var{expr}.
+
+@item explore type @var{arg}
+@cindex explore type
+This sub-command of @code{explore} explores the type of @var{arg} (if
+@var{arg} is a type visible in the current context of program being
+debugged), or the type of the value/expression @var{arg} (if @var{arg}
+is an expression valid in the current context of the program being
+debugged).  If @var{arg} is a type, then the behavior of this command is
+identical to that of the @code{explore} command being passed the
+argument @var{arg}.  If @var{arg} is an expression, then the behavior of
+this command will be identical to that of the @code{explore} command
+being passed the type of @var{arg} as the argument.
+@end table
+
 @menu
 * Expressions::                 Expressions
 * Ambiguous Expressions::       Ambiguous Expressions

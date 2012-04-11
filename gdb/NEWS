@@ -93,6 +93,11 @@
   ** "info vtbl" can be used to show the virtual method tables for
      C++ and Java objects.
 
+  ** "explore" and its sub commands "explore value" and "explore type"
+     can be used to reccursively explore values and types of
+     expressions.  These commands are available only if GDB is
+     configured with '--with-python'.
+
 * New targets
 
 Renesas RL78			rl78-*-elf

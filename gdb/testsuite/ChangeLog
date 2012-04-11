@@ -1,3 +1,16 @@
+2012-04-02  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/Makefile.in: Add py-explore and py-explore-cc to
+	EXECUTABLES.
+	* gdb.python/py-explore.c: C program used for testing the new
+	'explore' command on C constructs.
+	* gdb.python/py-explore.cc: C++ program used for testing the new
+	'explore' command on C++ constructs.
+	* gdb-python/py-explore.exp: Tests for the new 'explore'
+	command on C constructs.
+	* gdb-python/py-explore-cc.exp: Tests for the new 'explore'
+	command on C++ constructs.
+
 2012-04-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/funcargs.exp (complex_args): Fix typo.

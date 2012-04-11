@@ -58,7 +58,8 @@ PYTHON_FILES = \
 	gdb/prompt.py \
 	gdb/command/__init__.py \
 	gdb/command/pretty_printers.py \
-	gdb/command/prompt.py
+	gdb/command/prompt.py \
+	gdb/command/explore.py
 
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \

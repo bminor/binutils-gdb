@@ -1,3 +1,7 @@
+2012-04-11  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.texinfo (Examining Data): Document the 'explore' command.
+
 2012-03-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Document what happens

@@ -1,3 +1,12 @@
+2012-04-11  Siva Chandra Reddy  <sivachandra@google.com>
+
+	New command 'explore' which helps explore values and types in
+	scope.
+	* NEWS: Add an entry about the new 'explore' command.
+	* data-directory/Makefile.in: Add gdb/command/explore.py
+	* python/lib/gdb/command/explore.py: Implemention of the 'explore'
+	command using the GDB Python API. 
+
 2011-04-10  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_skip_pic_trampoline_code): Correct sign
