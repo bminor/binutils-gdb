@@ -1,3 +1,10 @@
+2012-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Provide more specific displaced-stepping memory error message.
+	* infrun.c (displaced_step_prepare): New variable status.  Call
+	target_read_memory instead of read_memory, provide more specific
+	error message.
+
 2012-04-11  Tristan Gingold  <gingold@adacore.com>
 
 	PR gdb/13901

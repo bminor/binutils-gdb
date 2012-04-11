@@ -1296,6 +1296,7 @@ displaced_step_prepare (ptid_t ptid)
   ULONGEST len;
   struct displaced_step_closure *closure;
   struct displaced_step_inferior_state *displaced;
+  int status;
 
   /* We should never reach this function if the architecture does not
      support displaced stepping.  */
@@ -1356,7 +1357,12 @@ displaced_step_prepare (ptid_t ptid)
   displaced->step_saved_copy = xmalloc (len);
   ignore_cleanups = make_cleanup (free_current_contents,
 				  &displaced->step_saved_copy);
-  read_memory (copy, displaced->step_saved_copy, len);
+  status = target_read_memory (copy, displaced->step_saved_copy, len);
+  if (status != 0)
+    throw_error (MEMORY_ERROR,
+		 _("Error accessing memory address %s (%s) for "
+		   "displaced-stepping scratch space."),
+		 paddress (gdbarch, copy), safe_strerror (status));
   if (debug_displaced)
     {
       fprintf_unfiltered (gdb_stdlog, "displaced: saved %s: ",
