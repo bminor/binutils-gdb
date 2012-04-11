@@ -705,11 +705,14 @@ darwin_resume_thread (struct inferior *inf, darwin_thread_t *thread,
 	  thread->signaled = 1;
 	}
 
-      /* Set single step.  */
-      inferior_debug (4, _("darwin_set_sstep (thread=%x, enable=%d)\n"),
-                      thread->gdb_port, step);
-      darwin_set_sstep (thread->gdb_port, step);
-      thread->single_step = step;
+      /* Set or reset single step.  */
+      if (step != thread->single_step)
+	{
+	  inferior_debug (4, _("darwin_set_sstep (thread=%x, enable=%d)\n"),
+			  thread->gdb_port, step);
+	  darwin_set_sstep (thread->gdb_port, step);
+	  thread->single_step = step;
+	}
 
       darwin_send_reply (inf, thread);
       thread->msg_state = DARWIN_RUNNING;
