@@ -1186,7 +1186,7 @@ static struct signatured_type *lookup_signatured_type_at_offset
 
 static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
 
-static void read_signatured_type (struct signatured_type *type_sig);
+static void read_signatured_type (struct signatured_type *);
 
 /* memory allocation interface */
 
@@ -1924,31 +1924,31 @@ create_signatured_type_table_from_index (struct objfile *objfile,
 
   for (i = 0; i < elements; i += 3)
     {
-      struct signatured_type *type_sig;
-      ULONGEST offset, type_offset, signature;
+      struct signatured_type *sig_type;
+      ULONGEST offset, type_offset_in_tu, signature;
       void **slot;
 
       if (!extract_cu_value (bytes, &offset)
-	  || !extract_cu_value (bytes + 8, &type_offset))
+	  || !extract_cu_value (bytes + 8, &type_offset_in_tu))
 	return 0;
       signature = extract_unsigned_integer (bytes + 16, 8, BFD_ENDIAN_LITTLE);
       bytes += 3 * 8;
 
-      type_sig = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+      sig_type = OBSTACK_ZALLOC (&objfile->objfile_obstack,
 				 struct signatured_type);
-      type_sig->signature = signature;
-      type_sig->type_offset.cu_off = type_offset;
-      type_sig->per_cu.debug_types_section = section;
-      type_sig->per_cu.offset.sect_off = offset;
-      type_sig->per_cu.objfile = objfile;
-      type_sig->per_cu.v.quick
+      sig_type->signature = signature;
+      sig_type->type_offset.cu_off = type_offset_in_tu;
+      sig_type->per_cu.debug_types_section = section;
+      sig_type->per_cu.offset.sect_off = offset;
+      sig_type->per_cu.objfile = objfile;
+      sig_type->per_cu.v.quick
 	= OBSTACK_ZALLOC (&objfile->objfile_obstack,
 			  struct dwarf2_per_cu_quick_data);
 
-      slot = htab_find_slot (sig_types_hash, type_sig, INSERT);
-      *slot = type_sig;
+      slot = htab_find_slot (sig_types_hash, sig_type, INSERT);
+      *slot = sig_type;
 
-      dwarf2_per_objfile->all_type_units[i / 3] = &type_sig->per_cu;
+      dwarf2_per_objfile->all_type_units[i / 3] = &sig_type->per_cu;
     }
 
   dwarf2_per_objfile->signatured_types = sig_types_hash;
@@ -3195,16 +3195,16 @@ dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
 }
 
 static hashval_t
-hash_type_signature (const void *item)
+hash_signatured_type (const void *item)
 {
-  const struct signatured_type *type_sig = item;
+  const struct signatured_type *sig_type = item;
 
   /* This drops the top 32 bits of the signature, but is ok for a hash.  */
-  return type_sig->signature;
+  return sig_type->signature;
 }
 
 static int
-eq_type_signature (const void *item_lhs, const void *item_rhs)
+eq_signatured_type (const void *item_lhs, const void *item_rhs)
 {
   const struct signatured_type *lhs = item_lhs;
   const struct signatured_type *rhs = item_rhs;
@@ -3218,8 +3218,8 @@ static htab_t
 allocate_signatured_type_table (struct objfile *objfile)
 {
   return htab_create_alloc_ex (41,
-			       hash_type_signature,
-			       eq_type_signature,
+			       hash_signatured_type,
+			       eq_signatured_type,
 			       NULL,
 			       &objfile->objfile_obstack,
 			       hashtab_obstack_allocate,
@@ -3283,7 +3283,7 @@ create_debug_types_hash_table (struct objfile *objfile)
 	  sect_offset offset;
 	  cu_offset type_offset;
 	  ULONGEST signature;
-	  struct signatured_type *type_sig;
+	  struct signatured_type *sig_type;
 	  void **slot;
 	  gdb_byte *ptr = info_ptr;
 	  struct comp_unit_head header;
@@ -3303,15 +3303,15 @@ create_debug_types_hash_table (struct objfile *objfile)
 	      continue;
 	    }
 
-	  type_sig = obstack_alloc (&objfile->objfile_obstack, sizeof (*type_sig));
-	  memset (type_sig, 0, sizeof (*type_sig));
-	  type_sig->signature = signature;
-	  type_sig->type_offset = type_offset;
-	  type_sig->per_cu.objfile = objfile;
-	  type_sig->per_cu.debug_types_section = section;
-	  type_sig->per_cu.offset = offset;
+	  sig_type = obstack_alloc (&objfile->objfile_obstack, sizeof (*sig_type));
+	  memset (sig_type, 0, sizeof (*sig_type));
+	  sig_type->signature = signature;
+	  sig_type->type_offset = type_offset;
+	  sig_type->per_cu.objfile = objfile;
+	  sig_type->per_cu.debug_types_section = section;
+	  sig_type->per_cu.offset = offset;
 
-	  slot = htab_find_slot (types_htab, type_sig, INSERT);
+	  slot = htab_find_slot (types_htab, sig_type, INSERT);
 	  gdb_assert (slot != NULL);
 	  if (*slot != NULL)
 	    {
@@ -3324,7 +3324,7 @@ create_debug_types_hash_table (struct objfile *objfile)
 			 phex (signature, sizeof (signature)));
 	      gdb_assert (signature == dup_sig->signature);
 	    }
-	  *slot = type_sig;
+	  *slot = sig_type;
 
 	  if (dwarf2_die_debug)
 	    fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, signature 0x%s\n",
@@ -8083,13 +8083,13 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (cu->per_cu->debug_types_section
       && die_is_declaration (die, cu))
     {
-      struct signatured_type *type_sig;
+      struct signatured_type *sig_type;
 
-      type_sig
+      sig_type
 	= lookup_signatured_type_at_offset (dwarf2_per_objfile->objfile,
 					    cu->per_cu->debug_types_section,
 					    cu->per_cu->offset);
-      if (type_sig->per_cu.offset.sect_off + type_sig->type_offset.cu_off
+      if (sig_type->per_cu.offset.sect_off + sig_type->type_offset.cu_off
 	  != die->offset.sect_off)
 	return;
     }
@@ -14427,7 +14427,7 @@ lookup_signatured_type_at_offset (struct objfile *objfile,
   gdb_byte *info_ptr = section->buffer + offset.sect_off;
   unsigned int length, initial_length_size;
   unsigned int sig_offset;
-  struct signatured_type find_entry, *type_sig;
+  struct signatured_type find_entry, *sig_type;
 
   length = read_initial_length (objfile->obfd, info_ptr, &initial_length_size);
   sig_offset = (initial_length_size
@@ -14435,14 +14435,14 @@ lookup_signatured_type_at_offset (struct objfile *objfile,
 		+ (initial_length_size == 4 ? 4 : 8) /*debug_abbrev_offset*/
 		+ 1 /*address_size*/);
   find_entry.signature = bfd_get_64 (objfile->obfd, info_ptr + sig_offset);
-  type_sig = htab_find (dwarf2_per_objfile->signatured_types, &find_entry);
+  sig_type = htab_find (dwarf2_per_objfile->signatured_types, &find_entry);
 
   /* This is only used to lookup previously recorded types.
      If we didn't find it, it's our bug.  */
-  gdb_assert (type_sig != NULL);
-  gdb_assert (offset.sect_off == type_sig->per_cu.offset.sect_off);
+  gdb_assert (sig_type != NULL);
+  gdb_assert (offset.sect_off == sig_type->per_cu.offset.sect_off);
 
-  return type_sig;
+  return sig_type;
 }
 
 /* Load the DIEs associated with type unit PER_CU into memory.  */
@@ -14453,7 +14453,7 @@ load_full_type_unit (struct dwarf2_per_cu_data *per_cu)
   struct objfile *objfile = per_cu->objfile;
   struct dwarf2_section_info *sect = per_cu->debug_types_section;
   sect_offset offset = per_cu->offset;
-  struct signatured_type *type_sig;
+  struct signatured_type *sig_type;
 
   dwarf2_read_section (objfile, sect);
 
@@ -14463,42 +14463,42 @@ load_full_type_unit (struct dwarf2_per_cu_data *per_cu)
      the signature to assert we found the right one.
      Ok, but it's a lot of work.  We should simplify things so any needed
      assert doesn't require all this clumsiness.  */
-  type_sig = lookup_signatured_type_at_offset (objfile, sect, offset);
+  sig_type = lookup_signatured_type_at_offset (objfile, sect, offset);
 
-  gdb_assert (type_sig->per_cu.cu == NULL);
+  gdb_assert (sig_type->per_cu.cu == NULL);
 
-  read_signatured_type (type_sig);
+  read_signatured_type (sig_type);
 
-  gdb_assert (type_sig->per_cu.cu != NULL);
+  gdb_assert (sig_type->per_cu.cu != NULL);
 }
 
 /* Read in a signatured type and build its CU and DIEs.  */
 
 static void
-read_signatured_type (struct signatured_type *type_sig)
+read_signatured_type (struct signatured_type *sig_type)
 {
-  struct objfile *objfile = type_sig->per_cu.objfile;
+  struct objfile *objfile = sig_type->per_cu.objfile;
   gdb_byte *types_ptr;
   struct die_reader_specs reader_specs;
   struct dwarf2_cu *cu;
   ULONGEST signature;
   struct cleanup *back_to, *free_cu_cleanup;
-  struct dwarf2_section_info *section = type_sig->per_cu.debug_types_section;
+  struct dwarf2_section_info *section = sig_type->per_cu.debug_types_section;
 
   dwarf2_read_section (objfile, section);
-  types_ptr = section->buffer + type_sig->per_cu.offset.sect_off;
+  types_ptr = section->buffer + sig_type->per_cu.offset.sect_off;
 
-  gdb_assert (type_sig->per_cu.cu == NULL);
+  gdb_assert (sig_type->per_cu.cu == NULL);
 
   cu = xmalloc (sizeof (*cu));
-  init_one_comp_unit (cu, &type_sig->per_cu);
+  init_one_comp_unit (cu, &sig_type->per_cu);
 
   /* If an error occurs while loading, release our storage.  */
   free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
 
   types_ptr = read_and_check_type_unit_head (&cu->header, section, types_ptr,
 					     &signature, NULL);
-  gdb_assert (signature == type_sig->signature);
+  gdb_assert (signature == sig_type->signature);
 
   cu->die_hash
     = htab_create_alloc_ex (cu->header.length / 12,
@@ -14530,8 +14530,8 @@ read_signatured_type (struct signatured_type *type_sig)
   discard_cleanups (free_cu_cleanup);
 
   /* Link this TU into read_in_chain.  */
-  type_sig->per_cu.cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
-  dwarf2_per_objfile->read_in_chain = &type_sig->per_cu;
+  sig_type->per_cu.cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
+  dwarf2_per_objfile->read_in_chain = &sig_type->per_cu;
 }
 
 /* Decode simple location descriptions.
