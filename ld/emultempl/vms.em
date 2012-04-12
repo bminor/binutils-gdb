@@ -31,6 +31,10 @@ gld${EMULATION_NAME}_before_parse (void)
   ldfile_set_output_arch ("${ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
   input_flags.dynamic = TRUE;
   config.has_shared = FALSE; /* Not yet.  */
+
+  /* For ia64, harmless for alpha.  */
+  link_info.emit_hash = FALSE;
+  link_info.spare_dynamic_tags = 0;
 }
 
 /* This is called before the input files are opened.  We add the
@@ -132,7 +136,8 @@ gld${EMULATION_NAME}_add_options
    int nrl ATTRIBUTE_UNUSED,
    struct option **really_longopts ATTRIBUTE_UNUSED)
 {
-  static const struct option xtra_long[] = {
+  static const struct option xtra_long[] =
+  {
     {"identification", required_argument, NULL, OPTION_IDENTIFICATION},
     {NULL, no_argument, NULL, 0}
   };
@@ -165,6 +170,63 @@ gld${EMULATION_NAME}_handle_option (int optc)
 }
 
 EOF
+
+if test "$OUTPUT_FORMAT" = "elf64-ia64-vms"; then
+
+fragment <<EOF
+#include "elf-bfd.h"
+EOF
+
+source_em ${srcdir}/emultempl/elf-generic.em
+
+fragment <<EOF
+
+/* This is called after the sections have been attached to output
+   sections, but before any sizes or addresses have been set.  */
+
+static void
+gld${EMULATION_NAME}_before_allocation (void)
+{
+  const struct elf_backend_data *bed;
+
+  if (!is_elf_hash_table (link_info.hash))
+    return;
+
+  bed = get_elf_backend_data (link_info.output_bfd);
+
+  /* The backend must work out the sizes of all the other dynamic
+     sections.  */
+  if (elf_hash_table (&link_info)->dynamic_sections_created
+      && bed->elf_backend_size_dynamic_sections
+      && ! (*bed->elf_backend_size_dynamic_sections) (link_info.output_bfd,
+                                                      &link_info))
+    einfo ("%P%F: failed to set dynamic section sizes: %E\n");
+
+  before_allocation_default ();
+}
+
+static void
+gld${EMULATION_NAME}_after_allocation (void)
+{
+  bfd_boolean need_layout = bfd_elf_discard_info (link_info.output_bfd,
+						  &link_info);
+  gld${EMULATION_NAME}_map_segments (need_layout);
+}
+
+static void
+gld${EMULATION_NAME}_after_parse (void)
+{
+  link_info.relax_pass = 2;
+  after_parse_default ();
+}
+EOF
+
+LDEMUL_BEFORE_ALLOCATION=gld"$EMULATION_NAME"_before_allocation
+LDEMUL_AFTER_ALLOCATION=gld"$EMULATION_NAME"_after_allocation
+
+LDEMUL_AFTER_PARSE=gld${EMULATION_NAME}_after_parse
+source_em ${srcdir}/emultempl/needrelax.em
+fi
 
 LDEMUL_PLACE_ORPHAN=vms_place_orphan
 LDEMUL_BEFORE_PARSE=gld"$EMULATION_NAME"_before_parse

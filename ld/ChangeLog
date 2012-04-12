@@ -1,3 +1,14 @@
+2012-04-11  Tristan Gingold  <gingold@adacore.com>
+
+	* scripttempl/ia64vms.sc: New file.
+	* emultempl/vms.em (_before_parse): Support for ia64.
+	(elf64-ia64-vms): New fragment for ia64.
+	* emulparams/elf64_ia64_vms.sh: New file.
+	* configure.tgt (ia64-*-*vms*): Add.
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eelf64_ia64_vms.c
+	(eelf64_ia64_vms.c): New rule.
+	* Makefile.in: Regenerate.
+
 2012-04-06  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.in (AC_CHECK_HEADERS): Add locale.h.

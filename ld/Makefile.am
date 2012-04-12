@@ -467,6 +467,7 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64_aix.c \
 	eelf64_ia64.c \
 	eelf64_ia64_fbsd.c \
+	eelf64_ia64_vms.c \
 	eelf64_s390.c \
 	eelf64_sparc.c \
 	eelf64_sparc_fbsd.c \
@@ -1928,6 +1929,10 @@ eelf64_ia64_fbsd.c: $(srcdir)/emulparams/elf64_ia64_fbsd.sh \
   $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_ia64_fbsd "$(tdir_elf64_ia64_fbsd)"
+eelf64_ia64_vms.c: $(srcdir)/emulparams/elf64_ia64_vms.sh \
+  $(srcdir)/emultempl/vms.em \
+  $(srcdir)/scripttempl/ia64vms.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64_ia64_vms "$(tdir_elf64_ia64_vms)"
 eelf64_s390.c: $(srcdir)/emulparams/elf64_s390.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_s390 "$(tdir_elf64_s390)"

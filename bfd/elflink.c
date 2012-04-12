@@ -8908,7 +8908,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   /* If this symbol should be put in the .dynsym section, then put it
      there now.  We already know the symbol index.  We also fill in
      the entry in the .hash section.  */
-  if (h->dynindx != -1
+  if (finfo->dynsym_sec != NULL
+      && h->dynindx != -1
       && elf_hash_table (finfo->info)->dynamic_sections_created)
     {
       bfd_byte *esym;
@@ -10305,7 +10306,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       finfo.dynsym_sec = bfd_get_section_by_name (dynobj, ".dynsym");
       finfo.hash_sec = bfd_get_section_by_name (dynobj, ".hash");
-      BFD_ASSERT (finfo.dynsym_sec != NULL);
+      /* Note that dynsym_sec can be NULL (on VMS).  */
       finfo.symver_sec = bfd_get_section_by_name (dynobj, ".gnu.version");
       /* Note that it is OK if symver_sec is NULL.  */
     }
@@ -10825,6 +10826,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   symtab_hdr->sh_info = bfd_get_symcount (abfd);
 
   if (dynamic
+      && finfo.dynsym_sec != NULL
       && finfo.dynsym_sec->output_section != bfd_abs_section_ptr)
     {
       Elf_Internal_Sym sym;

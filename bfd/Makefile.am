@@ -619,6 +619,7 @@ BFD64_BACKENDS = \
 	elf64-gen.lo \
 	elf64-hppa.lo \
 	elf64-ia64.lo \
+	elf64-ia64-vms.lo \
 	elf64-mips.lo \
 	elf64-mmix.lo \
 	elf64-ppc.lo \
@@ -654,6 +655,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-alpha.c \
 	elf64-gen.c \
 	elf64-hppa.c \
+	elf64-ia64-vms.c \
 	elf64-mips.c \
 	elf64-mmix.c \
 	elf64-ppc.c \

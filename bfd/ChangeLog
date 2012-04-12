@@ -1,3 +1,21 @@
+2012-04-12  Tristan Gingold  <gingold@adacore.com>
+
+	* elflink.c (elf_link_output_extsym): Add a guard.
+	(bfd_elf_final_link): Remove assertion.
+	(bfd_elf_final_link): Add a guard.
+	* elfnn-ia64.c (INCLUDE_IA64_VMS): Removed.
+	(elfNN_vms_section_from_shdr, elfNN_vms_object_p)
+	(elfNN_vms_post_process_headers, elfNN_vms_section_processing)
+	(elfNN_vms_final_write_processing, elfNN_vms_close_and_cleanup):
+	Remove.
+	(elfNN-ia64-vms target): Move to ...
+	* elf64-ia64-vms.c: New file.
+	* configure.in (bfd_elf64_ia64_vms_vec): Add elf64-ia64-vms.lo
+	* Makefile.am (BFD64_BACKENDS): Add elf64-ia64-vms.lo.
+	(BFD64_BACKENDS_CFILES): Ad elf64-ia64-vms.c.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2012-04-11  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/13897
