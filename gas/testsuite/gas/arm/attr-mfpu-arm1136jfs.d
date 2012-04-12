@@ -3,7 +3,7 @@
 # as: -mfpu=arm1136jfs
 # readelf: -A
 # This test is only valid on EABI based ports.
-# target: *-*-*eabi
+# target: *-*-*eabi *-*-nacl*
 
 Attribute Section: aeabi
 File Attributes

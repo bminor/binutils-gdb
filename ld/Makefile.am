@@ -143,11 +143,13 @@ ALL_EMULATION_SOURCES = \
 	earmelf_fbsd.c \
 	earmelf_linux.c \
 	earmelf_linux_eabi.c \
+	earmelf_nacl.c \
 	earmelf_nbsd.c \
 	earmelf_vxworks.c \
 	earmelfb.c \
 	earmelfb_linux.c \
 	earmelfb_linux_eabi.c \
+	earmelfb_nacl.c \
 	earmelfb_nbsd.c \
 	earmnbsd.c \
 	earmnto.c \
@@ -712,6 +714,12 @@ earmelf_linux_eabi.c: $(srcdir)/emulparams/armelf_linux_eabi.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf_linux_eabi "$(tdir_armelf_linux_abi)"
+earmelf_nacl.c: $(srcdir)/emulparams/armelf_nacl.sh \
+  $(srcdir)/emulparams/armelf_linux_eabi.sh \
+  $(srcdir)/emulparams/armelf_linux.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} armelf_nacl "$(tdir_armelf_nacl)"
 earmelf_nbsd.c: $(srcdir)/emulparams/armelf_nbsd.sh \
   $(srcdir)/emulparams/armelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
@@ -738,6 +746,13 @@ earmelfb_linux_eabi.c: $(srcdir)/emulparams/armelfb_linux_eabi.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelfb_linux_eabi "$(tdir_armelfb_linux_abi)"
+earmelfb_nacl.c: $(srcdir)/emulparams/armelfb_nacl.sh \
+  $(srcdir)/emulparams/armelf_nacl.sh \
+  $(srcdir)/emulparams/armelf_linux_eabi.sh \
+  $(srcdir)/emulparams/armelf_linux.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} armelfb_nacl "$(tdir_armelfb_nacl)"
 earmelfb_nbsd.c: $(srcdir)/emulparams/armelfb_nbsd.sh \
   $(srcdir)/emulparams/armelf_nbsd.sh \
   $(srcdir)/emulparams/armelf.sh \

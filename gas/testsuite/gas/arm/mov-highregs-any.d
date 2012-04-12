@@ -1,6 +1,6 @@
 # name: MOV highregs
 # readelf: -A
-# target: *-*-*eabi
+# target: *-*-*eabi *-*-nacl*
 Attribute Section: aeabi
 File Attributes
   Tag_CPU_arch: v4T

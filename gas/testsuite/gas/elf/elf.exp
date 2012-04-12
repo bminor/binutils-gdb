@@ -61,6 +61,7 @@ if { [is_elf_format] } then {
 
 	if { ([istarget "*-*-*eabi"]
 	      || [istarget "*-*-linux-*"]
+	      || [istarget "*-*-nacl*"]
 	      || [istarget "*-*-symbianelf"])} then {
 	    set target_machine -armeabi
 	} else {

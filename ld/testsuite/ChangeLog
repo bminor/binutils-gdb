@@ -1,3 +1,56 @@
+2012-04-12  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-arm/arm-elf.exp (armelftests): Split out into ...
+	(armelftests_common, armelftests_nonacl): ... these two.
+	(armeabitests): Split out into ...
+	(armeabitests_common, armeabitests_nonacl): ... these two.
+	Omit _nonacl sets for arm*-*-nacl* targets.
+
+	* ld-arm/farcall-mix.d: Don't match exact addresses, only symbolic ones.
+	* ld-arm/farcall-mix2.d: Likewise.
+	* ld-arm/farcall-group.d: Likewise.
+
+	* ld-arm/tls-gdesc-got.d: Match variant file formats too.
+	Accept some variation in exact addresses.
+
+	* ld-arm/thumb2-b-interwork.d: Match variant file formats too.
+	Fix regexps not to care about exact addresses where not relevant.
+
+	* ld-arm/thumb2-bl-undefweak.d: Match any hex strings, not any
+	strings of particular exact lengths.
+	* ld-arm/thumb2-bl-undefweak1.d: Likewise.
+
+	* ld-arm/arm-app.r: Match variant file formats too.
+	* ld-arm/arm-app-abs32.r: Likewise.
+	* ld-arm/arm-lib.d: Likewise.
+	* ld-arm/arm-lib.r: Likewise.
+	* ld-arm/arm-static-app.r: Likewise.
+	* ld-arm/armv4-bx.d: Likewise.
+	* ld-arm/data-only-map.d: Likewise.
+	* ld-arm/group-relocs.d: Likewise.
+	* ld-arm/jump19.d: Likewise.
+	* ld-arm/reloc-boundaries.d: Likewise.
+	* ld-arm/thumb1-bl.d: Likewise.
+	* ld-arm/thumb2-bl.d: Likewise.
+	* ld-arm/tls-app.d: Likewise.
+	* ld-arm/tls-app.r: Likewise.
+	* ld-arm/tls-gdierelax.d: Likewise.
+	* ld-arm/tls-gdierelax2.d: Likewise.
+	* ld-arm/tls-gdlerelax.d: Likewise.
+	* ld-arm/tls-lib.d: Likewise.
+	* ld-arm/tls-lib.r: Likewise.
+	* ld-arm/tls-mixed.r: Likewise.
+	* ld-arm/vfp11-fix-none.d: Likewise.
+	* ld-arm/vfp11-fix-scalar.d: Likewise.
+	* ld-arm/vfp11-fix-vector.d: Likewise.
+	* ld-arm/arm-static-app.d: Likewise.
+	Fix regexps not to care about exact number of leading spaces.
+	* ld-arm/arm-app-abs32.d: Likewise.
+	* ld-arm/fix-arm1176-off.d: Likewise.
+	* ld-arm/fix-arm1176-on.d: Likewise.
+
+	* ld-arm/arm-elf.exp: Treat nacl targets like eabi targets.
+
 2012-04-09  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-elf/eh1.d: Add explicit --64 to as options, and explicit

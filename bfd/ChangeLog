@@ -1,3 +1,29 @@
+2012-04-12  Roland McGrath  <mcgrathr@google.com>
+
+	* elf32-arm.c (elf32_arm_nacl_plt0_entry, elf32_arm_nacl_plt_entry):
+	New variables.
+	(struct elf32_arm_link_hash_table): New member `nacl_p'.
+	(elf32_arm_link_hash_table_create): Initialize it.
+	(elf32_arm_nacl_link_hash_table_create): New function.
+	(arm_movw_immediate, arm_movt_immediate): New functions.
+	(elf32_arm_populate_plt_entry): Test HTAB->nacl_p.
+	(elf32_arm_finish_dynamic_sections): Likewise.
+	(elf32_arm_output_plt_map_1): Likewise.
+	(bfd_elf32_littlearm_nacl_vec, bfd_elf32_bigarm_nacl_vec):
+	New backend vector stanza.
+	(elf32_arm_nacl_modify_segment_map): New function.
+	* config.bfd: Handle arm-*-nacl*, armeb-*-nacl*.
+	* targets.c: Support bfd_elf32_{big,little}_nacl_vec.
+	* configure.in: Likewise.
+	(bfd_elf32_bigarm_nacl_vec): Add elf-nacl.lo here.
+	(bfd_elf32_littlearm_nacl_vec): Likewise.
+	(bfd_elf32_bigarm_vec, bfd_elf32_littlearm_vec): Likewise.
+	(bfd_elf32_bigarm_symbian_vec): Likewise.
+	(bfd_elf32_littlearm_symbian_vec): Likewise.
+	(bfd_elf32_bigarm_vxworks_vec): Likewise.
+	(bfd_elf32_littlearm_vxworks_vec): Likewise.
+	* configure: Regenerated.
+
 2012-04-12  Tristan Gingold  <gingold@adacore.com>
 
 	* elflink.c (elf_link_output_extsym): Add a guard.

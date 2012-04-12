@@ -1,3 +1,13 @@
+2012-04-12  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.tgt (arm*-*-nacl*, arm*b-*-nacl*): Handle them.
+	* emulparams/armelf_nacl.sh: New file.
+	* emulparams/armelfb_nacl.sh: New file.
+	* Makefile.am (ALL_EMULATION_SOURCES): Add earmelf_nacl.c
+	and earmelfb_nacl.c here.
+	(earmelf_nacl.c, earmelfb_nacl.c): New targets.
+	* Makefile.in: Regenerated.
+
 2012-04-11  Tristan Gingold  <gingold@adacore.com>
 
 	* scripttempl/ia64vms.sc: New file.

@@ -1,5 +1,5 @@
 
-.*:     file format elf32-.*arm
+.*:     file format elf32-.*arm.*
 architecture: arm, flags 0x00000112:
 EXEC_P, HAS_SYMS, D_PAGED
 start address 0x000081c8

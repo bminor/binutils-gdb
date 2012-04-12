@@ -1,3 +1,11 @@
+2012-04-12  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.tgt (arm-*-nacl*): Match it.
+	* config/te-nacl.h (FPU_DEFAULT, EABI_DEFAULT): Define.
+	(LOCAL_LABELS_DOLLAR): Define.
+	* config/tc-arm.c (elf32_arm_target_format) [TE_NACL]:
+	Use nacl format variants.
+
 2012-04-12  Jie Zhang  <jie@codesourcery.com>
             Meador Inge  <meadori@codesourcery.com>
 

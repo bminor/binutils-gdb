@@ -15200,11 +15200,12 @@ do
     bfd_elf32_bfinfdpic_vec)	tb="$tb elf32-bfin.lo elf32.lo $elf" ;;
     bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.lo elf32.lo $elf" ;;
     bfd_elf32_bigarc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
-    bfd_elf32_bigarm_vec)	tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
+    bfd_elf32_bigarm_vec)	tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
+    bfd_elf32_bigarm_nacl_vec)	tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
     bfd_elf32_bigarm_symbian_vec)
-                                tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
+                                tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
     bfd_elf32_bigarm_vxworks_vec)
-                                tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
+                                tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
     bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_bigmips_vxworks_vec)
 			 	tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
@@ -15242,10 +15243,11 @@ do
     bfd_elf32_little_generic_vec) tb="$tb elf32-gen.lo elf32.lo $elf" ;;
     bfd_elf32_littlearc_vec)	tb="$tb elf32-arc.lo elf32.lo $elf" ;;
     bfd_elf32_littlearm_symbian_vec)
-                                tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
+                                tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
     bfd_elf32_littlearm_vxworks_vec)
-                                tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
-    bfd_elf32_littlearm_vec)	tb="$tb elf32-arm.lo elf32.lo elf-vxworks.lo $elf" ;;
+                                tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
+    bfd_elf32_littlearm_vec)	tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
+    bfd_elf32_littlearm_nacl_vec) tb="$tb elf32-arm.lo elf32.lo elf-nacl.lo elf-vxworks.lo $elf" ;;
     bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_littlemips_vxworks_vec)
 			 	tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;

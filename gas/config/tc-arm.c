@@ -22284,6 +22284,10 @@ elf32_arm_target_format (void)
   return (target_big_endian
 	  ? "elf32-bigarm-vxworks"
 	  : "elf32-littlearm-vxworks");
+#elif defined (TE_NACL)
+  return (target_big_endian
+	  ? "elf32-bigarm-nacl"
+	  : "elf32-littlearm-nacl");
 #else
   if (target_big_endian)
     return "elf32-bigarm";

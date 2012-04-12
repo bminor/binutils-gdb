@@ -26,6 +26,7 @@
 #include "libiberty.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
+#include "elf-nacl.h"
 #include "elf-vxworks.h"
 #include "elf/arm.h"
 
@@ -2078,24 +2079,24 @@ typedef unsigned short int insn16;
 #define ELF_DYNAMIC_INTERPRETER     "/usr/lib/ld.so.1"
 
 static const unsigned long tls_trampoline [] =
-  {
-    0xe08e0000,		/* add r0, lr, r0 */
-    0xe5901004,		/* ldr r1, [r0,#4] */
-    0xe12fff11,		/* bx  r1 */
-  };
+{
+  0xe08e0000,		/* add r0, lr, r0 */
+  0xe5901004,		/* ldr r1, [r0,#4] */
+  0xe12fff11,		/* bx  r1 */
+};
 
 static const unsigned long dl_tlsdesc_lazy_trampoline [] =
-  {
-    0xe52d2004, /*	push    {r2}			*/
-    0xe59f200c, /*      ldr     r2, [pc, #3f - . - 8]	*/
-    0xe59f100c, /*      ldr     r1, [pc, #4f - . - 8]	*/
-    0xe79f2002, /* 1:   ldr     r2, [pc, r2]		*/
-    0xe081100f, /* 2:   add     r1, pc			*/
-    0xe12fff12, /*      bx      r2			*/
-    0x00000014, /* 3:   .word  _GLOBAL_OFFSET_TABLE_ - 1b - 8
+{
+  0xe52d2004, /*	push    {r2}			*/
+  0xe59f200c, /*      ldr     r2, [pc, #3f - . - 8]	*/
+  0xe59f100c, /*      ldr     r1, [pc, #4f - . - 8]	*/
+  0xe79f2002, /* 1:   ldr     r2, [pc, r2]		*/
+  0xe081100f, /* 2:   add     r1, pc			*/
+  0xe12fff12, /*      bx      r2			*/
+  0x00000014, /* 3:   .word  _GLOBAL_OFFSET_TABLE_ - 1b - 8
 		   		+ dl_tlsdesc_lazy_resolver(GOT)   */
-    0x00000018, /* 4:   .word  _GLOBAL_OFFSET_TABLE_ - 2b - 8 */ 
-  };
+  0x00000018, /* 4:   .word  _GLOBAL_OFFSET_TABLE_ - 2b - 8 */
+};
 
 #ifdef FOUR_WORD_PLT
 
@@ -2104,22 +2105,22 @@ static const unsigned long dl_tlsdesc_lazy_trampoline [] =
    called before the relocation has been set up calls the dynamic
    linker first.  */
 static const bfd_vma elf32_arm_plt0_entry [] =
-  {
-    0xe52de004,		/* str   lr, [sp, #-4]! */
-    0xe59fe010,		/* ldr   lr, [pc, #16]  */
-    0xe08fe00e,		/* add   lr, pc, lr     */
-    0xe5bef008,		/* ldr   pc, [lr, #8]!  */
-  };
+{
+  0xe52de004,		/* str   lr, [sp, #-4]! */
+  0xe59fe010,		/* ldr   lr, [pc, #16]  */
+  0xe08fe00e,		/* add   lr, pc, lr     */
+  0xe5bef008,		/* ldr   pc, [lr, #8]!  */
+};
 
 /* Subsequent entries in a procedure linkage table look like
    this.  */
 static const bfd_vma elf32_arm_plt_entry [] =
-  {
-    0xe28fc600,		/* add   ip, pc, #NN	*/
-    0xe28cca00,		/* add	 ip, ip, #NN	*/
-    0xe5bcf000,		/* ldr	 pc, [ip, #NN]! */
-    0x00000000,		/* unused		*/
-  };
+{
+  0xe28fc600,		/* add   ip, pc, #NN	*/
+  0xe28cca00,		/* add	 ip, ip, #NN	*/
+  0xe5bcf000,		/* ldr	 pc, [ip, #NN]! */
+  0x00000000,		/* unused		*/
+};
 
 #else
 
@@ -2128,72 +2129,111 @@ static const bfd_vma elf32_arm_plt_entry [] =
    called before the relocation has been set up calls the dynamic
    linker first.  */
 static const bfd_vma elf32_arm_plt0_entry [] =
-  {
-    0xe52de004,		/* str   lr, [sp, #-4]! */
-    0xe59fe004,		/* ldr   lr, [pc, #4]   */
-    0xe08fe00e,		/* add   lr, pc, lr     */
-    0xe5bef008,		/* ldr   pc, [lr, #8]!  */
-    0x00000000,		/* &GOT[0] - .          */
-  };
+{
+  0xe52de004,		/* str   lr, [sp, #-4]! */
+  0xe59fe004,		/* ldr   lr, [pc, #4]   */
+  0xe08fe00e,		/* add   lr, pc, lr     */
+  0xe5bef008,		/* ldr   pc, [lr, #8]!  */
+  0x00000000,		/* &GOT[0] - .          */
+};
 
 /* Subsequent entries in a procedure linkage table look like
    this.  */
 static const bfd_vma elf32_arm_plt_entry [] =
-  {
-    0xe28fc600,		/* add   ip, pc, #0xNN00000 */
-    0xe28cca00,		/* add	 ip, ip, #0xNN000   */
-    0xe5bcf000,		/* ldr	 pc, [ip, #0xNNN]!  */
-  };
+{
+  0xe28fc600,		/* add   ip, pc, #0xNN00000 */
+  0xe28cca00,		/* add	 ip, ip, #0xNN000   */
+  0xe5bcf000,		/* ldr	 pc, [ip, #0xNNN]!  */
+};
 
 #endif
 
 /* The format of the first entry in the procedure linkage table
    for a VxWorks executable.  */
 static const bfd_vma elf32_arm_vxworks_exec_plt0_entry[] =
-  {
-    0xe52dc008,	        /* str    ip,[sp,#-8]!			*/
-    0xe59fc000,         /* ldr    ip,[pc]			*/
-    0xe59cf008,         /* ldr    pc,[ip,#8]			*/
-    0x00000000,         /* .long  _GLOBAL_OFFSET_TABLE_		*/
-  };
+{
+  0xe52dc008,	        /* str    ip,[sp,#-8]!			*/
+  0xe59fc000,   	/* ldr    ip,[pc]			*/
+  0xe59cf008,   	/* ldr    pc,[ip,#8]			*/
+  0x00000000,   	/* .long  _GLOBAL_OFFSET_TABLE_		*/
+};
 
 /* The format of subsequent entries in a VxWorks executable.  */
 static const bfd_vma elf32_arm_vxworks_exec_plt_entry[] =
-  {
-    0xe59fc000,         /* ldr    ip,[pc]			*/
-    0xe59cf000,         /* ldr    pc,[ip]			*/
-    0x00000000,         /* .long  @got				*/
-    0xe59fc000,         /* ldr    ip,[pc]			*/
-    0xea000000,         /* b      _PLT				*/
-    0x00000000,         /* .long  @pltindex*sizeof(Elf32_Rela)	*/
-  };
+{
+  0xe59fc000,         /* ldr    ip,[pc]			*/
+  0xe59cf000,         /* ldr    pc,[ip]			*/
+  0x00000000,         /* .long  @got				*/
+  0xe59fc000,         /* ldr    ip,[pc]			*/
+  0xea000000,         /* b      _PLT				*/
+  0x00000000,         /* .long  @pltindex*sizeof(Elf32_Rela)	*/
+};
 
 /* The format of entries in a VxWorks shared library.  */
 static const bfd_vma elf32_arm_vxworks_shared_plt_entry[] =
-  {
-    0xe59fc000,         /* ldr    ip,[pc]			*/
-    0xe79cf009,         /* ldr    pc,[ip,r9]			*/
-    0x00000000,         /* .long  @got				*/
-    0xe59fc000,         /* ldr    ip,[pc]			*/
-    0xe599f008,         /* ldr    pc,[r9,#8]			*/
-    0x00000000,         /* .long  @pltindex*sizeof(Elf32_Rela)	*/
-  };
+{
+  0xe59fc000,         /* ldr    ip,[pc]			*/
+  0xe79cf009,         /* ldr    pc,[ip,r9]			*/
+  0x00000000,         /* .long  @got				*/
+  0xe59fc000,         /* ldr    ip,[pc]			*/
+  0xe599f008,         /* ldr    pc,[r9,#8]			*/
+  0x00000000,         /* .long  @pltindex*sizeof(Elf32_Rela)	*/
+};
 
 /* An initial stub used if the PLT entry is referenced from Thumb code.  */
 #define PLT_THUMB_STUB_SIZE 4
 static const bfd_vma elf32_arm_plt_thumb_stub [] =
-  {
-    0x4778,		/* bx pc */
-    0x46c0		/* nop   */
-  };
+{
+  0x4778,		/* bx pc */
+  0x46c0		/* nop   */
+};
 
 /* The entries in a PLT when using a DLL-based target with multiple
    address spaces.  */
 static const bfd_vma elf32_arm_symbian_plt_entry [] =
-  {
-    0xe51ff004,         /* ldr   pc, [pc, #-4] */
-    0x00000000,         /* dcd   R_ARM_GLOB_DAT(X) */
-  };
+{
+  0xe51ff004,         /* ldr   pc, [pc, #-4] */
+  0x00000000,         /* dcd   R_ARM_GLOB_DAT(X) */
+};
+
+/* The first entry in a procedure linkage table looks like
+   this.  It is set up so that any shared library function that is
+   called before the relocation has been set up calls the dynamic
+   linker first.  */
+static const bfd_vma elf32_arm_nacl_plt0_entry [] =
+{
+  /* First bundle: */
+  0xe300c000,		/* movw	ip, #:lower16:&GOT[2]-.+8	*/
+  0xe340c000,		/* movt	ip, #:upper16:&GOT[2]-.+8	*/
+  0xe08cc00f,		/* add	ip, ip, pc			*/
+  0xe52dc008,		/* str	ip, [sp, #-8]!			*/
+  /* Second bundle: */
+  0xe7dfcf1f, 	/* bfc	ip, #30, #2			*/
+  0xe59cc000, 	/* ldr	ip, [ip]			*/
+  0xe3ccc13f,		/* bic	ip, ip, #0xc000000f		*/
+  0xe12fff1c, 	/* bx	ip				*/
+  /* Third bundle: */
+  0xe320f000, 	/* nop					*/
+  0xe320f000, 	/* nop					*/
+  0xe320f000, 	/* nop					*/
+  /* .Lplt_tail: */
+  0xe50dc004,		/* str	ip, [sp, #-4]			*/
+  /* Fourth bundle: */
+  0xe7dfcf1f,		/* bfc	ip, #30, #2			*/
+  0xe59cc000, 	/* ldr	ip, [ip]			*/
+  0xe3ccc13f,		/* bic	ip, ip, #0xc000000f		*/
+  0xe12fff1c, 	/* bx	ip				*/
+};
+#define ARM_NACL_PLT_TAIL_OFFSET	(11 * 4)
+
+/* Subsequent entries in a procedure linkage table look like this.  */
+static const bfd_vma elf32_arm_nacl_plt_entry [] =
+{
+  0xe300c000,		/* movw	ip, #:lower16:&GOT[n]-.+8	*/
+  0xe340c000,		/* movt	ip, #:upper16:&GOT[n]-.+8	*/
+  0xe08cc00f,		/* add	ip, ip, pc			*/
+  0xea000000,		/* b	.Lplt_tail			*/
+};
 
 #define ARM_MAX_FWD_BRANCH_OFFSET  ((((1 << 23) - 1) << 2) + 8)
 #define ARM_MAX_BWD_BRANCH_OFFSET  ((-((1 << 23) << 2)) + 8)
@@ -2203,12 +2243,12 @@ static const bfd_vma elf32_arm_symbian_plt_entry [] =
 #define THM2_MAX_BWD_BRANCH_OFFSET (-(1 << 24) + 4)
 
 enum stub_insn_type
-  {
-    THUMB16_TYPE = 1,
-    THUMB32_TYPE,
-    ARM_TYPE,
-    DATA_TYPE
-  };
+{
+  THUMB16_TYPE = 1,
+  THUMB32_TYPE,
+  ARM_TYPE,
+  DATA_TYPE
+};
 
 #define THUMB16_INSN(X)		{(X), THUMB16_TYPE, R_ARM_NONE, 0}
 /* A bit of a hack.  A Thumb conditional branch, in which the proper condition
@@ -2222,154 +2262,154 @@ enum stub_insn_type
 
 typedef struct
 {
-  bfd_vma data;
-  enum stub_insn_type type;
-  unsigned int r_type;
-  int reloc_addend;
+  bfd_vma              data;
+  enum stub_insn_type  type;
+  unsigned int         r_type;
+  int                  reloc_addend;
 }  insn_sequence;
 
 /* Arm/Thumb -> Arm/Thumb long branch stub. On V5T and above, use blx
    to reach the stub if necessary.  */
 static const insn_sequence elf32_arm_stub_long_branch_any_any[] =
-  {
-    ARM_INSN(0xe51ff004),            /* ldr   pc, [pc, #-4] */
-    DATA_WORD(0, R_ARM_ABS32, 0),    /* dcd   R_ARM_ABS32(X) */
-  };
+{
+  ARM_INSN (0xe51ff004),            /* ldr   pc, [pc, #-4] */
+  DATA_WORD (0, R_ARM_ABS32, 0),    /* dcd   R_ARM_ABS32(X) */
+};
 
 /* V4T Arm -> Thumb long branch stub. Used on V4T where blx is not
    available.  */
 static const insn_sequence elf32_arm_stub_long_branch_v4t_arm_thumb[] =
-  {
-    ARM_INSN(0xe59fc000),            /* ldr   ip, [pc, #0] */
-    ARM_INSN(0xe12fff1c),            /* bx    ip */
-    DATA_WORD(0, R_ARM_ABS32, 0),    /* dcd   R_ARM_ABS32(X) */
-  };
+{
+  ARM_INSN (0xe59fc000),            /* ldr   ip, [pc, #0] */
+  ARM_INSN (0xe12fff1c),            /* bx    ip */
+  DATA_WORD (0, R_ARM_ABS32, 0),    /* dcd   R_ARM_ABS32(X) */
+};
 
 /* Thumb -> Thumb long branch stub. Used on M-profile architectures.  */
 static const insn_sequence elf32_arm_stub_long_branch_thumb_only[] =
-  {
-    THUMB16_INSN(0xb401),             /* push {r0} */
-    THUMB16_INSN(0x4802),             /* ldr  r0, [pc, #8] */
-    THUMB16_INSN(0x4684),             /* mov  ip, r0 */
-    THUMB16_INSN(0xbc01),             /* pop  {r0} */
-    THUMB16_INSN(0x4760),             /* bx   ip */
-    THUMB16_INSN(0xbf00),             /* nop */
-    DATA_WORD(0, R_ARM_ABS32, 0),     /* dcd  R_ARM_ABS32(X) */
-  };
+{
+  THUMB16_INSN (0xb401),             /* push {r0} */
+  THUMB16_INSN (0x4802),             /* ldr  r0, [pc, #8] */
+  THUMB16_INSN (0x4684),             /* mov  ip, r0 */
+  THUMB16_INSN (0xbc01),             /* pop  {r0} */
+  THUMB16_INSN (0x4760),             /* bx   ip */
+  THUMB16_INSN (0xbf00),             /* nop */
+  DATA_WORD (0, R_ARM_ABS32, 0),     /* dcd  R_ARM_ABS32(X) */
+};
 
 /* V4T Thumb -> Thumb long branch stub. Using the stack is not
    allowed.  */
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_thumb[] =
-  {
-    THUMB16_INSN(0x4778),             /* bx   pc */
-    THUMB16_INSN(0x46c0),             /* nop */
-    ARM_INSN(0xe59fc000),             /* ldr  ip, [pc, #0] */
-    ARM_INSN(0xe12fff1c),             /* bx   ip */
-    DATA_WORD(0, R_ARM_ABS32, 0),     /* dcd  R_ARM_ABS32(X) */
-  };
+{
+  THUMB16_INSN (0x4778),             /* bx   pc */
+  THUMB16_INSN (0x46c0),             /* nop */
+  ARM_INSN (0xe59fc000),             /* ldr  ip, [pc, #0] */
+  ARM_INSN (0xe12fff1c),             /* bx   ip */
+  DATA_WORD (0, R_ARM_ABS32, 0),     /* dcd  R_ARM_ABS32(X) */
+};
 
 /* V4T Thumb -> ARM long branch stub. Used on V4T where blx is not
    available.  */
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_arm[] =
-  {
-    THUMB16_INSN(0x4778),             /* bx   pc */
-    THUMB16_INSN(0x46c0),             /* nop   */
-    ARM_INSN(0xe51ff004),             /* ldr   pc, [pc, #-4] */
-    DATA_WORD(0, R_ARM_ABS32, 0),     /* dcd   R_ARM_ABS32(X) */
-  };
+{
+  THUMB16_INSN (0x4778),             /* bx   pc */
+  THUMB16_INSN (0x46c0),             /* nop   */
+  ARM_INSN (0xe51ff004),             /* ldr   pc, [pc, #-4] */
+  DATA_WORD (0, R_ARM_ABS32, 0),     /* dcd   R_ARM_ABS32(X) */
+};
 
 /* V4T Thumb -> ARM short branch stub. Shorter variant of the above
    one, when the destination is close enough.  */
 static const insn_sequence elf32_arm_stub_short_branch_v4t_thumb_arm[] =
-  {
-    THUMB16_INSN(0x4778),             /* bx   pc */
-    THUMB16_INSN(0x46c0),             /* nop   */
-    ARM_REL_INSN(0xea000000, -8),     /* b    (X-8) */
-  };
+{
+  THUMB16_INSN (0x4778),             /* bx   pc */
+  THUMB16_INSN (0x46c0),             /* nop   */
+  ARM_REL_INSN (0xea000000, -8),     /* b    (X-8) */
+};
 
 /* ARM/Thumb -> ARM long branch stub, PIC.  On V5T and above, use
    blx to reach the stub if necessary.  */
 static const insn_sequence elf32_arm_stub_long_branch_any_arm_pic[] =
-  {
-    ARM_INSN(0xe59fc000),             /* ldr   ip, [pc] */
-    ARM_INSN(0xe08ff00c),             /* add   pc, pc, ip */
-    DATA_WORD(0, R_ARM_REL32, -4),    /* dcd   R_ARM_REL32(X-4) */
-  };
+{
+  ARM_INSN (0xe59fc000),             /* ldr   ip, [pc] */
+  ARM_INSN (0xe08ff00c),             /* add   pc, pc, ip */
+  DATA_WORD (0, R_ARM_REL32, -4),    /* dcd   R_ARM_REL32(X-4) */
+};
 
 /* ARM/Thumb -> Thumb long branch stub, PIC.  On V5T and above, use
    blx to reach the stub if necessary.  We can not add into pc;
    it is not guaranteed to mode switch (different in ARMv6 and
    ARMv7).  */
 static const insn_sequence elf32_arm_stub_long_branch_any_thumb_pic[] =
-  {
-    ARM_INSN(0xe59fc004),             /* ldr   ip, [pc, #4] */
-    ARM_INSN(0xe08fc00c),             /* add   ip, pc, ip */
-    ARM_INSN(0xe12fff1c),             /* bx    ip */
-    DATA_WORD(0, R_ARM_REL32, 0),     /* dcd   R_ARM_REL32(X) */
-  };
+{
+  ARM_INSN (0xe59fc004),             /* ldr   ip, [pc, #4] */
+  ARM_INSN (0xe08fc00c),             /* add   ip, pc, ip */
+  ARM_INSN (0xe12fff1c),             /* bx    ip */
+  DATA_WORD (0, R_ARM_REL32, 0),     /* dcd   R_ARM_REL32(X) */
+};
 
 /* V4T ARM -> ARM long branch stub, PIC.  */
 static const insn_sequence elf32_arm_stub_long_branch_v4t_arm_thumb_pic[] =
-  {
-    ARM_INSN(0xe59fc004),             /* ldr   ip, [pc, #4] */
-    ARM_INSN(0xe08fc00c),             /* add   ip, pc, ip */
-    ARM_INSN(0xe12fff1c),             /* bx    ip */
-    DATA_WORD(0, R_ARM_REL32, 0),     /* dcd   R_ARM_REL32(X) */
-  };
+{
+  ARM_INSN (0xe59fc004),             /* ldr   ip, [pc, #4] */
+  ARM_INSN (0xe08fc00c),             /* add   ip, pc, ip */
+  ARM_INSN (0xe12fff1c),             /* bx    ip */
+  DATA_WORD (0, R_ARM_REL32, 0),     /* dcd   R_ARM_REL32(X) */
+};
 
 /* V4T Thumb -> ARM long branch stub, PIC.  */
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_arm_pic[] =
-  {
-    THUMB16_INSN(0x4778),             /* bx   pc */
-    THUMB16_INSN(0x46c0),             /* nop  */
-    ARM_INSN(0xe59fc000),             /* ldr  ip, [pc, #0] */
-    ARM_INSN(0xe08cf00f),             /* add  pc, ip, pc */
-    DATA_WORD(0, R_ARM_REL32, -4),     /* dcd  R_ARM_REL32(X) */
-  };
+{
+  THUMB16_INSN (0x4778),             /* bx   pc */
+  THUMB16_INSN (0x46c0),             /* nop  */
+  ARM_INSN (0xe59fc000),             /* ldr  ip, [pc, #0] */
+  ARM_INSN (0xe08cf00f),             /* add  pc, ip, pc */
+  DATA_WORD (0, R_ARM_REL32, -4),     /* dcd  R_ARM_REL32(X) */
+};
 
 /* Thumb -> Thumb long branch stub, PIC. Used on M-profile
    architectures.  */
 static const insn_sequence elf32_arm_stub_long_branch_thumb_only_pic[] =
-  {
-    THUMB16_INSN(0xb401),             /* push {r0} */
-    THUMB16_INSN(0x4802),             /* ldr  r0, [pc, #8] */
-    THUMB16_INSN(0x46fc),             /* mov  ip, pc */
-    THUMB16_INSN(0x4484),             /* add  ip, r0 */
-    THUMB16_INSN(0xbc01),             /* pop  {r0} */
-    THUMB16_INSN(0x4760),             /* bx   ip */
-    DATA_WORD(0, R_ARM_REL32, 4),     /* dcd  R_ARM_REL32(X) */
-  };
+{
+  THUMB16_INSN (0xb401),             /* push {r0} */
+  THUMB16_INSN (0x4802),             /* ldr  r0, [pc, #8] */
+  THUMB16_INSN (0x46fc),             /* mov  ip, pc */
+  THUMB16_INSN (0x4484),             /* add  ip, r0 */
+  THUMB16_INSN (0xbc01),             /* pop  {r0} */
+  THUMB16_INSN (0x4760),             /* bx   ip */
+  DATA_WORD (0, R_ARM_REL32, 4),     /* dcd  R_ARM_REL32(X) */
+};
 
 /* V4T Thumb -> Thumb long branch stub, PIC. Using the stack is not
    allowed.  */
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_thumb_pic[] =
-  {
-    THUMB16_INSN(0x4778),             /* bx   pc */
-    THUMB16_INSN(0x46c0),             /* nop */
-    ARM_INSN(0xe59fc004),             /* ldr  ip, [pc, #4] */
-    ARM_INSN(0xe08fc00c),             /* add   ip, pc, ip */
-    ARM_INSN(0xe12fff1c),             /* bx   ip */
-    DATA_WORD(0, R_ARM_REL32, 0),     /* dcd  R_ARM_REL32(X) */
-  };
+{
+  THUMB16_INSN (0x4778),             /* bx   pc */
+  THUMB16_INSN (0x46c0),             /* nop */
+  ARM_INSN (0xe59fc004),             /* ldr  ip, [pc, #4] */
+  ARM_INSN (0xe08fc00c),             /* add   ip, pc, ip */
+  ARM_INSN (0xe12fff1c),             /* bx   ip */
+  DATA_WORD (0, R_ARM_REL32, 0),     /* dcd  R_ARM_REL32(X) */
+};
 
 /* Thumb2/ARM -> TLS trampoline.  Lowest common denominator, which is a
    long PIC stub.  We can use r1 as a scratch -- and cannot use ip.  */
 static const insn_sequence elf32_arm_stub_long_branch_any_tls_pic[] =
 {
-    ARM_INSN(0xe59f1000),             /* ldr   r1, [pc] */
-    ARM_INSN(0xe08ff001),             /* add   pc, pc, r1 */
-    DATA_WORD(0, R_ARM_REL32, -4),    /* dcd   R_ARM_REL32(X-4) */
+  ARM_INSN (0xe59f1000),             /* ldr   r1, [pc] */
+  ARM_INSN (0xe08ff001),             /* add   pc, pc, r1 */
+  DATA_WORD (0, R_ARM_REL32, -4),    /* dcd   R_ARM_REL32(X-4) */
 };
 
 /* V4T Thumb -> TLS trampoline.  lowest common denominator, which is a
    long PIC stub.  We can use r1 as a scratch -- and cannot use ip.  */
 static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_tls_pic[] =
 {
-    THUMB16_INSN(0x4778),             /* bx   pc */
-    THUMB16_INSN(0x46c0),             /* nop */
-    ARM_INSN(0xe59f1000),             /* ldr  r1, [pc, #0] */
-    ARM_INSN(0xe081f00f),             /* add  pc, r1, pc */
-    DATA_WORD(0, R_ARM_REL32, -4),    /* dcd  R_ARM_REL32(X) */
+  THUMB16_INSN (0x4778),             /* bx   pc */
+  THUMB16_INSN (0x46c0),             /* nop */
+  ARM_INSN (0xe59f1000),             /* ldr  r1, [pc, #0] */
+  ARM_INSN (0xe081f00f),             /* add  pc, r1, pc */
+  DATA_WORD (0, R_ARM_REL32, -4),    /* dcd  R_ARM_REL32(X) */
 };
 
 /* Cortex-A8 erratum-workaround stubs.  */
@@ -2378,32 +2418,32 @@ static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_tls_pic[] =
    can't use a conditional branch to reach this stub).  */
 
 static const insn_sequence elf32_arm_stub_a8_veneer_b_cond[] =
-  {
-    THUMB16_BCOND_INSN(0xd001),         /* b<cond>.n true.  */
-    THUMB32_B_INSN(0xf000b800, -4),     /* b.w insn_after_original_branch.  */
-    THUMB32_B_INSN(0xf000b800, -4)      /* true: b.w original_branch_dest.  */
-  };
+{
+  THUMB16_BCOND_INSN (0xd001),         /* b<cond>.n true.  */
+  THUMB32_B_INSN (0xf000b800, -4),     /* b.w insn_after_original_branch.  */
+  THUMB32_B_INSN (0xf000b800, -4)      /* true: b.w original_branch_dest.  */
+};
 
 /* Stub used for b.w and bl.w instructions.  */
 
 static const insn_sequence elf32_arm_stub_a8_veneer_b[] =
-  {
-    THUMB32_B_INSN(0xf000b800, -4)	/* b.w original_branch_dest.  */
-  };
+{
+  THUMB32_B_INSN (0xf000b800, -4)	/* b.w original_branch_dest.  */
+};
 
 static const insn_sequence elf32_arm_stub_a8_veneer_bl[] =
-  {
-    THUMB32_B_INSN(0xf000b800, -4)	/* b.w original_branch_dest.  */
-  };
+{
+  THUMB32_B_INSN (0xf000b800, -4)	/* b.w original_branch_dest.  */
+};
 
 /* Stub used for Thumb-2 blx.w instructions.  We modified the original blx.w
    instruction (which switches to ARM mode) to point to this stub.  Jump to the
    real destination using an ARM-mode branch.  */
 
 static const insn_sequence elf32_arm_stub_a8_veneer_blx[] =
-  {
-    ARM_REL_INSN(0xea000000, -8)	/* b original_branch_dest.  */
-  };
+{
+  ARM_REL_INSN (0xea000000, -8)	/* b original_branch_dest.  */
+};
 
 /* For each section group there can be a specially created linker section
    to hold the stubs for that group.  The name of the stub section is based
@@ -2413,7 +2453,7 @@ static const insn_sequence elf32_arm_stub_a8_veneer_blx[] =
    PR 13049: STUB_SUFFIX used to be ".stub", but this allowed the user to
    create what appeared to be a linker stub section when it actually
    contained user code/data.  For example, consider this fragment:
-   
+
      const char * stubborn_problems[] = { "np" };
 
    If this is compiled with "-fPIC -fdata-sections" then gcc produces a
@@ -2454,7 +2494,8 @@ static const insn_sequence elf32_arm_stub_a8_veneer_blx[] =
   DEF_STUB(a8_veneer_blx)
 
 #define DEF_STUB(x) arm_stub_##x,
-enum elf32_arm_stub_type {
+enum elf32_arm_stub_type
+{
   arm_stub_none,
   DEF_STUBS
   /* Note the first a8_veneer type */
@@ -2469,7 +2510,8 @@ typedef struct
 } stub_def;
 
 #define DEF_STUB(x) {elf32_arm_stub_##x, ARRAY_SIZE(elf32_arm_stub_##x)},
-static const stub_def stub_definitions[] = {
+static const stub_def stub_definitions[] =
+{
   {NULL, 0},
   DEF_STUBS
 };
@@ -2622,7 +2664,8 @@ _arm_elf_section_data;
    relaxing which we can refresh easily, then create stubs for each potentially
    erratum-triggering instruction once we've settled on a solution.  */
 
-struct a8_erratum_fix {
+struct a8_erratum_fix
+{
   bfd *input_bfd;
   asection *section;
   bfd_vma offset;
@@ -2636,7 +2679,8 @@ struct a8_erratum_fix {
 /* A table of relocs applied to branches which might trigger Cortex-A8
    erratum.  */
 
-struct a8_erratum_reloc {
+struct a8_erratum_reloc
+{
   bfd_vma from;
   bfd_vma destination;
   struct elf32_arm_link_hash_entry *hash;
@@ -2651,7 +2695,8 @@ struct a8_erratum_reloc {
 
 /* ARM-specific information about a PLT entry, over and above the usual
    gotplt_union.  */
-struct arm_plt_info {
+struct arm_plt_info
+{
   /* We reference count Thumb references to a PLT entry separately,
      so that we can emit the Thumb trampoline only if needed.  */
   bfd_signed_vma thumb_refcount;
@@ -2674,7 +2719,8 @@ struct arm_plt_info {
 };
 
 /* Information about an .iplt entry for a local STT_GNU_IFUNC symbol.  */
-struct arm_local_iplt_info {
+struct arm_local_iplt_info
+{
   /* The information that is usually found in the generic ELF part of
      the hash table entry.  */
   union gotplt_union root;
@@ -2735,14 +2781,14 @@ elf32_arm_mkobject (bfd *abfd)
 
 /* Arm ELF linker hash entry.  */
 struct elf32_arm_link_hash_entry
-  {
-    struct elf_link_hash_entry root;
+{
+  struct elf_link_hash_entry root;
 
-    /* Track dynamic relocs copied for this symbol.  */
-    struct elf_dyn_relocs *dyn_relocs;
+  /* Track dynamic relocs copied for this symbol.  */
+  struct elf_dyn_relocs *dyn_relocs;
 
-    /* ARM-specific PLT information.  */
-    struct arm_plt_info plt;
+  /* ARM-specific PLT information.  */
+  struct arm_plt_info plt;
 
 #define GOT_UNKNOWN	0
 #define GOT_NORMAL	1
@@ -2750,25 +2796,25 @@ struct elf32_arm_link_hash_entry
 #define GOT_TLS_IE	4
 #define GOT_TLS_GDESC	8
 #define GOT_TLS_GD_ANY_P(type)	((type & GOT_TLS_GD) || (type & GOT_TLS_GDESC))
-    unsigned int tls_type : 8;
+  unsigned int tls_type : 8;
 
-    /* True if the symbol's PLT entry is in .iplt rather than .plt.  */
-    unsigned int is_iplt : 1;
+  /* True if the symbol's PLT entry is in .iplt rather than .plt.  */
+  unsigned int is_iplt : 1;
 
-    unsigned int unused : 23;
+  unsigned int unused : 23;
 
-    /* Offset of the GOTPLT entry reserved for the TLS descriptor,
-       starting at the end of the jump table.  */
-    bfd_vma tlsdesc_got;
+  /* Offset of the GOTPLT entry reserved for the TLS descriptor,
+     starting at the end of the jump table.  */
+  bfd_vma tlsdesc_got;
 
-    /* The symbol marking the real symbol location for exported thumb
-       symbols with Arm stubs.  */
-    struct elf_link_hash_entry *export_glue;
+  /* The symbol marking the real symbol location for exported thumb
+     symbols with Arm stubs.  */
+  struct elf_link_hash_entry *export_glue;
 
-   /* A pointer to the most recently used stub hash entry against this
+  /* A pointer to the most recently used stub hash entry against this
      symbol.  */
-    struct elf32_arm_stub_hash_entry *stub_cache;
-  };
+  struct elf32_arm_stub_hash_entry *stub_cache;
+};
 
 /* Traverse an arm ELF linker hash table.  */
 #define elf32_arm_link_hash_traverse(table, func, info)			\
@@ -2878,6 +2924,9 @@ struct elf32_arm_link_hash_table
   /* True if the target system is Symbian OS.  */
   int symbian_p;
 
+  /* True if the target system is Native Client.  */
+  int nacl_p;
+
   /* True if the target uses REL relocations.  */
   int use_rel;
 
@@ -2902,7 +2951,7 @@ struct elf32_arm_link_hash_table
 
   /* The offset into sgot of the GOT entry used by the PLT entry
      above.  */
-  bfd_vma dt_tlsdesc_got;    
+  bfd_vma dt_tlsdesc_got;
 
   /* Offset in .plt section of tls_arm_trampoline.  */
   bfd_vma tls_trampoline;
@@ -3198,7 +3247,7 @@ create_ifunc_sections (struct bfd_link_info *info)
   bfd *dynobj;
   asection *s;
   flagword flags;
-  
+
   htab = elf32_arm_hash_table (info);
   dynobj = htab->root.dynobj;
   bed = get_elf_backend_data (dynobj);
@@ -3408,6 +3457,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->use_blx = 0;
   ret->vxworks_p = 0;
   ret->symbian_p = 0;
+  ret->nacl_p = 0;
   ret->use_rel = 1;
   ret->sym_cache.abfd = NULL;
   ret->obfd = abfd;
@@ -3576,7 +3626,7 @@ arm_type_of_stub (struct bfd_link_info *info,
       else
 	splt = globals->root.splt;
       if (splt != NULL)
-	{	
+	{
 	  use_plt = 1;
 
 	  /* Note when dealing with PLT entries: the main PLT stub is in
@@ -3860,7 +3910,7 @@ elf32_arm_get_stub_entry (const asection *input_section,
 }
 
 /* Find or create a stub section.  Returns a pointer to the stub section, and
-   the section to which the stub section will be attached (in *LINK_SEC_P). 
+   the section to which the stub section will be attached (in *LINK_SEC_P).
    LINK_SEC_P may be NULL.  */
 
 static asection *
@@ -3898,10 +3948,10 @@ elf32_arm_create_or_find_stub_sec (asection **link_sec_p, asection *section,
 	}
       htab->stub_group[section->id].stub_sec = stub_sec;
     }
-  
+
   if (link_sec_p)
     *link_sec_p = link_sec;
-  
+
   return stub_sec;
 }
 
@@ -3969,7 +4019,7 @@ put_thumb_insn (struct elf32_arm_link_hash_table * htab,
    model, return the new reloc type.  */
 
 static unsigned
-elf32_arm_tls_transition (struct bfd_link_info *info, int r_type, 
+elf32_arm_tls_transition (struct bfd_link_info *info, int r_type,
 			  struct elf_link_hash_entry *h)
 {
   int is_local = (h == NULL);
@@ -3977,7 +4027,7 @@ elf32_arm_tls_transition (struct bfd_link_info *info, int r_type,
   if (info->shared || (h && h->root.type == bfd_link_hash_undefweak))
     return r_type;
 
-  /* We do not support relaxations for Old TLS models.  */ 
+  /* We do not support relaxations for Old TLS models.  */
   switch (r_type)
     {
     case R_ARM_TLS_GOTDESC:
@@ -4023,7 +4073,7 @@ arm_stub_required_alignment (enum elf32_arm_stub_type stub_type)
     case arm_stub_long_branch_v4t_thumb_tls_pic:
     case arm_stub_a8_veneer_blx:
       return 4;
-    
+
     default:
       abort ();  /* Should be unreachable.  */
     }
@@ -4996,13 +5046,13 @@ elf32_arm_size_stubs (bfd *output_bfd,
 			free (internal_relocs);
 		      goto error_ret_free_local;
 		    }
-		  
+
 		  hash = NULL;
 		  if (r_indx >= symtab_hdr->sh_info)
 		    hash = elf32_arm_hash_entry
 		      (elf_sym_hashes (input_bfd)
 		       [r_indx - symtab_hdr->sh_info]);
-		  
+
 		  /* Only look for stubs on branch instructions, or
 		     non-relaxed TLSCALL  */
 		  if ((r_type != (unsigned int) R_ARM_CALL)
@@ -5028,7 +5078,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		  sym_value = 0;
 		  destination = 0;
 		  sym_name = NULL;
-		  
+
 		  if (r_type == (unsigned int) R_ARM_TLS_CALL
 		      || r_type == (unsigned int) R_ARM_THM_TLS_CALL)
 		    {
@@ -5573,9 +5623,9 @@ static const insn32 a2t3p_bx_r12_insn = 0xe12fff1c;
      .arm                               mov  lr, pc
      b func                             bx   r6
                                         .arm
-		 		    ;; back_to_thumb       
+		 		    ;; back_to_thumb
                  		        ldmia r13! {r6, lr}
- 				        bx    lr           
+ 				        bx    lr
                                     __func_addr:
                                         .word        func  */
 
@@ -6012,7 +6062,7 @@ check_use_blx (struct elf32_arm_link_hash_table *globals)
 {
   int cpu_arch;
 
-  cpu_arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, 
+  cpu_arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
 				       Tag_CPU_arch);
 
   if (globals->fix_arm1176)
@@ -7403,6 +7453,18 @@ elf32_arm_allocate_plt_entry (struct bfd_link_info *info,
     }
 }
 
+static bfd_vma
+arm_movw_immediate (bfd_vma value)
+{
+  return (value & 0x00000fff) | ((value & 0x0000f000) << 4);
+}
+
+static bfd_vma
+arm_movt_immediate (bfd_vma value)
+{
+  return ((value & 0x0fff0000) >> 16) | ((value & 0xf0000000) >> 12);
+}
+
 /* Fill in a PLT entry and its associated GOT slot.  If DYNINDX == -1,
    the entry lives in .iplt and resolves to (*SYM_VALUE)().
    Otherwise, DYNINDX is the index of the symbol in the dynamic
@@ -7563,6 +7625,44 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	  rel.r_addend = 0;
 	  SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
 	}
+      else if (htab->nacl_p)
+	{
+	  /* Calculate the displacement between the PLT slot and the
+	     common tail that's part of the special initial PLT slot.  */
+	  bfd_vma tail_displacement
+	    = ((splt->output_section->vma + splt->output_offset
+		+ ARM_NACL_PLT_TAIL_OFFSET)
+	       - (plt_address + htab->plt_entry_size + 4));
+	  BFD_ASSERT ((tail_displacement & 3) == 0);
+	  tail_displacement >>= 2;
+
+	  BFD_ASSERT ((tail_displacement & 0xff000000) == 0
+		      || (-tail_displacement & 0xff000000) == 0);
+
+	  /* Calculate the displacement between the PLT slot and the entry
+	     in the GOT.  The offset accounts for the value produced by
+	     adding to pc in the penultimate instruction of the PLT stub.  */
+	  got_displacement = got_address - (plt_address + htab->plt_entry_size);
+
+	  /* NaCl does not support interworking at all.  */
+	  BFD_ASSERT (!elf32_arm_plt_needs_thumb_stub_p (info, arm_plt));
+
+	  put_arm_insn (htab, output_bfd,
+			elf32_arm_nacl_plt_entry[0]
+			| arm_movw_immediate (got_displacement),
+			ptr + 0);
+	  put_arm_insn (htab, output_bfd,
+			elf32_arm_nacl_plt_entry[1]
+			| arm_movt_immediate (got_displacement),
+			ptr + 4);
+	  put_arm_insn (htab, output_bfd,
+			elf32_arm_nacl_plt_entry[2],
+			ptr + 8);
+	  put_arm_insn (htab, output_bfd,
+			elf32_arm_nacl_plt_entry[3]
+			| (tail_displacement & 0x00ffffff),
+			ptr + 12);
+	}
       else
 	{
 	  /* Calculate the displacement between the PLT slot and the
@@ -7703,18 +7803,18 @@ elf32_arm_abs12_reloc (bfd *abfd, void *data, bfd_vma value)
    the pre-relaxed code.  It would be nice if the relocs were updated
    to match the optimization.   */
 
-static bfd_reloc_status_type 
+static bfd_reloc_status_type
 elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
-		     bfd *input_bfd, asection *input_sec, bfd_byte *contents, 
+		     bfd *input_bfd, asection *input_sec, bfd_byte *contents,
 		     Elf_Internal_Rela *rel, unsigned long is_local)
 {
   unsigned long insn;
-  
+
   switch (ELF32_R_TYPE (rel->r_info))
     {
     default:
       return bfd_reloc_notsupported;
-      
+
     case R_ARM_TLS_GOTDESC:
       if (is_local)
 	insn = 0;
@@ -7770,7 +7870,7 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
 	  return bfd_reloc_notsupported;
 	}
       break;
-      
+
     case R_ARM_TLS_DESCSEQ:
       /* arm insn.  */
       insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
@@ -7816,7 +7916,7 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
       insn = is_local ? 0xe1a00000 : 0xe79f0000;
       bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
       break;
-      
+
     case R_ARM_THM_TLS_CALL:
       /* GD->IE relaxation */
       if (!is_local)
@@ -7828,7 +7928,7 @@ elf32_arm_tls_relax (struct elf32_arm_link_hash_table *globals,
       else
 	/* nop; nop */
 	insn = 0xbf00bf00;
-	
+
       bfd_put_16 (input_bfd, insn >> 16, contents + rel->r_offset);
       bfd_put_16 (input_bfd, insn & 0xffff, contents + rel->r_offset + 2);
       break;
@@ -9249,9 +9349,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  }
 
 	/* Linker relaxations happens from one of the
-	   R_ARM_{GOTDESC,CALL,DESCSEQ} relocations to IE or LE.  */ 
+	   R_ARM_{GOTDESC,CALL,DESCSEQ} relocations to IE or LE.  */
 	if (ELF32_R_TYPE(rel->r_info) != r_type)
-	  tls_type = GOT_TLS_IE; 
+	  tls_type = GOT_TLS_IE;
 
 	BFD_ASSERT (tls_type != GOT_UNKNOWN);
 
@@ -9292,7 +9392,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 				   + globals->root.sgotplt->output_offset
 				   + offplt
 				   + globals->sgotplt_jump_table_size);
-		
+
 		outrel.r_info = ELF32_R_INFO (indx, R_ARM_TLS_DESC);
 		sreloc = globals->root.srelplt;
 		loc = sreloc->contents;
@@ -9310,13 +9410,13 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			    !h ? value - elf_hash_table (info)->tls_sec->vma
 			    : info->flags & DF_BIND_NOW ? 0
 			    : 0x80000000 | ELF32_R_SYM (outrel.r_info),
-			    globals->root.sgotplt->contents + offplt +
-			    globals->sgotplt_jump_table_size);
-		
+			    globals->root.sgotplt->contents + offplt
+			    + globals->sgotplt_jump_table_size);
+
 		/* Second word in the relocation is always zero.  */
 	    	bfd_put_32 (output_bfd, 0,
-			    globals->root.sgotplt->contents + offplt +
-			    globals->sgotplt_jump_table_size + 4);
+			    globals->root.sgotplt->contents + offplt
+			    + globals->sgotplt_jump_table_size + 4);
 	      }
 	    if (tls_type & GOT_TLS_GD)
 	      {
@@ -9436,9 +9536,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    if (ELF32_R_TYPE(rel->r_info) == R_ARM_TLS_CALL)
 	      {
 		unsigned long inst;
-		
-		offset -= (input_section->output_section->vma +
-			   input_section->output_offset + rel->r_offset + 8);
+
+		offset -= (input_section->output_section->vma
+			   + input_section->output_offset
+			   + rel->r_offset + 8);
 
 		inst = offset >> 2;
 		inst &= 0x00ffffff;
@@ -9451,10 +9552,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		unsigned upper_insn, lower_insn;
 		unsigned neg;
 
-		offset -= (input_section->output_section->vma + 
-			   input_section->output_offset
+		offset -= (input_section->output_section->vma
+			   + input_section->output_offset
 			   + rel->r_offset + 4);
-	    
+
 		if (stub_type != arm_stub_none
 		    && arm_stub_is_thumb (stub_type))
 		  {
@@ -9487,11 +9588,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  {
 	    unsigned long data, insn;
 	    unsigned thumb;
-	    
+
 	    data = bfd_get_32 (input_bfd, hit_data);
 	    thumb = data & 1;
 	    data &= ~1u;
-	    
+
 	    if (thumb)
 	      {
 		insn = bfd_get_16 (input_bfd, contents + rel->r_offset - data);
@@ -9528,7 +9629,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		  case 0xe0:	/* add */
 		    value = -8;
 		    break;
-		    
+
 		  default:
 		    (*_bfd_error_handler)
 		      (_("%B(%A+0x%lx):unexpected ARM instruction '0x%x' referenced by TLS_GOTDESC"),
@@ -9537,7 +9638,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		    return bfd_reloc_notsupported;
 		  }
 	      }
- 
+
 	    value += ((globals->root.sgotplt->output_section->vma
 		       + globals->root.sgotplt->output_offset + off)
 		      - (input_section->output_section->vma
@@ -10271,7 +10372,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 		   rel->r_offset, TRUE))
 		return FALSE;
 	    }
-	  
+
 	  if (globals->use_rel)
 	    {
 	      relocation = (sec->output_section->vma
@@ -10436,7 +10537,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
          both in relaxed and non-relaxed cases */
      if ((elf32_arm_tls_transition (info, r_type, h) != (unsigned)r_type)
 	 || (IS_ARM_TLS_GNU_RELOC (r_type)
-	     && !((h ? elf32_arm_hash_entry (h)->tls_type : 
+	     && !((h ? elf32_arm_hash_entry (h)->tls_type :
 		   elf32_arm_local_got_tls_type (input_bfd)[r_symndx])
 		  & GOT_TLS_GDESC)))
        {
@@ -10448,7 +10549,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
        }
      else
        r = bfd_reloc_continue;
-     
+
      if (r == bfd_reloc_continue)
        r = elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 					  input_section, contents, rel,
@@ -10544,11 +10645,11 @@ add_unwind_table_edit (arm_unwind_table_edit **head,
 {
   arm_unwind_table_edit *new_edit = (arm_unwind_table_edit *)
       xmalloc (sizeof (arm_unwind_table_edit));
-  
+
   new_edit->type = type;
   new_edit->linked_section = linked_section;
   new_edit->index = tindex;
-  
+
   if (tindex > 0)
     {
       new_edit->next = NULL;
@@ -10606,7 +10707,7 @@ insert_cantunwind_after(asection *text_sec, asection *exidx_sec)
 
 /* Scan .ARM.exidx tables, and create a list describing edits which should be
    made to those tables, such that:
-   
+
      1. Regions without unwind data are marked with EXIDX_CANTUNWIND entries.
      2. Duplicate entries are merged together (EXIDX_CANTUNWIND, or unwind
         codes which have been inlined into the index).
@@ -10614,8 +10715,7 @@ insert_cantunwind_after(asection *text_sec, asection *exidx_sec)
    If MERGE_EXIDX_ENTRIES is false, duplicate entries are not merged.
 
    The edits are applied when the tables are written
-   (in elf32_arm_write_section).
-*/
+   (in elf32_arm_write_section).  */
 
 bfd_boolean
 elf32_arm_fix_exidx_coverage (asection **text_section_order,
@@ -10634,15 +10734,15 @@ elf32_arm_fix_exidx_coverage (asection **text_section_order,
   for (inp = info->input_bfds; inp != NULL; inp = inp->link_next)
     {
       asection *sec;
-      
+
       for (sec = inp->sections; sec != NULL; sec = sec->next)
         {
 	  struct bfd_elf_section_data *elf_sec = elf_section_data (sec);
 	  Elf_Internal_Shdr *hdr = &elf_sec->this_hdr;
-	  
+
 	  if (!hdr || hdr->sh_type != SHT_ARM_EXIDX)
 	    continue;
-	  
+
 	  if (elf_sec->linked_to)
 	    {
 	      Elf_Internal_Shdr *linked_hdr
@@ -10704,13 +10804,13 @@ elf32_arm_fix_exidx_coverage (asection **text_section_order,
       hdr = &elf_section_data (exidx_sec)->this_hdr;
       if (hdr->sh_type != SHT_ARM_EXIDX)
         continue;
-      
+
       exidx_arm_data = get_arm_elf_section_data (exidx_sec);
       if (exidx_arm_data == NULL)
         continue;
-      
+
       ibfd = exidx_sec->owner;
-	  
+
       if (hdr->contents != NULL)
 	contents = hdr->contents;
       else if (! bfd_malloc_and_get_section (ibfd, exidx_sec, &contents))
@@ -10762,7 +10862,7 @@ elf32_arm_fix_exidx_coverage (asection **text_section_order,
       /* Record edits to be applied later (in elf32_arm_write_section).  */
       exidx_arm_data->u.exidx.unwind_edit_list = unwind_edit_head;
       exidx_arm_data->u.exidx.unwind_edit_tail = unwind_edit_tail;
-	  
+
       if (deleted_exidx_bytes > 0)
 	adjust_exidx_size(exidx_sec, -deleted_exidx_bytes);
 
@@ -11776,7 +11876,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		{
 		  _bfd_error_handler
 		    (_("%B has has both the current and legacy "
-		       "Tag_MPextension_use attributes"), 
+		       "Tag_MPextension_use attributes"),
 		     ibfd);
 		  result = FALSE;
 		}
@@ -12250,7 +12350,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   symtab_hdr = & elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   nsyms = NUM_SHDR_ENTRIES (symtab_hdr);
-  
+
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
@@ -12322,14 +12422,14 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      switch (r_type)
 		{
 		case R_ARM_TLS_GD32: tls_type = GOT_TLS_GD; break;
-		  
+
 		case R_ARM_TLS_IE32: tls_type = GOT_TLS_IE; break;
-		  
+
 		case R_ARM_TLS_GOTDESC:
 		case R_ARM_TLS_CALL: case R_ARM_THM_TLS_CALL:
 		case R_ARM_TLS_DESCSEQ: case R_ARM_THM_TLS_DESCSEQ:
 		  tls_type = GOT_TLS_GDESC; break;
-		  
+
 		default: tls_type = GOT_NORMAL; break;
 		}
 
@@ -13089,7 +13189,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	      if (tls_type & GOT_TLS_GD)
 		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 
-	      if (tls_type & GOT_TLS_GDESC) 
+	      if (tls_type & GOT_TLS_GDESC)
 		{
 		  elf32_arm_allocate_dynrelocs (info, htab->root.srelplt, 1);
 		  /* GDESC needs a trampoline to jump to.  */
@@ -13098,7 +13198,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 
 	      /* Only GD needs it.  GDESC just emits one relocation per
 		 2 entries.  */
-	      if ((tls_type & GOT_TLS_GD) && indx != 0)  
+	      if ((tls_type & GOT_TLS_GD) && indx != 0)
 		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 	    }
 	  else if (!SYMBOL_REFERENCES_LOCAL (info, h))
@@ -13553,10 +13653,10 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
     {
       if (htab->root.splt->size == 0)
 	htab->root.splt->size += htab->plt_header_size;
-      
+
       htab->tls_trampoline = htab->root.splt->size;
       htab->root.splt->size += htab->plt_entry_size;
-      
+
       /* If we're not using lazy TLS relocations, don't generate the
          PLT and GOT entries they require.  */
       if (!(info->flags & DF_BIND_NOW))
@@ -13664,9 +13764,9 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	    return FALSE;
 
 	  if (htab->dt_tlsdesc_plt &&
-		(!add_dynamic_entry (DT_TLSDESC_PLT,0) 
+		(!add_dynamic_entry (DT_TLSDESC_PLT,0)
 		 || !add_dynamic_entry (DT_TLSDESC_GOT,0)))
-	    return FALSE; 
+	    return FALSE;
 	}
 
       if (relocs)
@@ -13739,7 +13839,7 @@ elf32_arm_always_size_sections (bfd *output_bfd,
 		 tls_sec, 0, NULL, FALSE,
 		 bed->collect, &bh)))
 	    return FALSE;
-	  
+
       	  tlsbase->type = STT_TLS;
           tlsbase = (struct elf_link_hash_entry *)bh;
           tlsbase->def_regular = 1;
@@ -13840,7 +13940,7 @@ arm_put_trampoline (struct elf32_arm_link_hash_table *htab, bfd *output_bfd,
 		    const unsigned long *template, unsigned count)
 {
   unsigned ix;
-  
+
   for (ix = 0; ix != count; ix++)
     {
       unsigned long insn = template[ix];
@@ -14082,6 +14182,25 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	      SWAP_RELOC_OUT (htab) (output_bfd, &rel,
 				     htab->srelplt2->contents);
 	    }
+	  else if (htab->nacl_p)
+	    {
+	      unsigned int i;
+
+	      got_displacement = got_address + 8 - (plt_address + 16);
+
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_nacl_plt0_entry[0]
+			    | arm_movw_immediate (got_displacement),
+			    splt->contents + 0);
+	      put_arm_insn (htab, output_bfd,
+			    elf32_arm_nacl_plt0_entry[1]
+			    | arm_movt_immediate (got_displacement),
+			    splt->contents + 4);
+	      for (i = 2; i < ARRAY_SIZE (elf32_arm_nacl_plt0_entry); ++i)
+		put_arm_insn (htab, output_bfd,
+			      elf32_arm_nacl_plt0_entry[i],
+			      splt->contents + (i * 4));
+	    }
 	  else
 	    {
 	      got_displacement = got_address - (plt_address + 16);
@@ -14120,7 +14239,7 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	  bfd_vma plt_address
 	    = splt->output_section->vma + splt->output_offset;
 
-	  arm_put_trampoline (htab, output_bfd, 
+	  arm_put_trampoline (htab, output_bfd,
 			      splt->contents + htab->dt_tlsdesc_plt,
 			      dl_tlsdesc_lazy_trampoline, 6);
 
@@ -14137,13 +14256,13 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 
       if (htab->tls_trampoline)
 	{
-	  arm_put_trampoline (htab, output_bfd, 
+	  arm_put_trampoline (htab, output_bfd,
 			      splt->contents + htab->tls_trampoline,
 			      tls_trampoline, 3);
 #ifdef FOUR_WORD_PLT
 	  bfd_put_32 (output_bfd, 0x00000000,
 		      splt->contents + htab->tls_trampoline + 12);
-#endif 
+#endif
 	}
 
       if (htab->vxworks_p && !info->shared && htab->root.splt->size > 0)
@@ -14397,6 +14516,11 @@ elf32_arm_output_plt_map_1 (output_arch_syminfo *osi,
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 12))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 20))
+	return FALSE;
+    }
+  else if (htab->nacl_p)
+    {
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
 	return FALSE;
     }
   else
@@ -14725,6 +14849,11 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 		return FALSE;
 	    }
 	}
+      else if (htab->nacl_p)
+	{
+	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, 0))
+	    return FALSE;
+	}
       else if (!htab->symbian_p)
 	{
 	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, 0))
@@ -14764,7 +14893,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
       /* Mapping symbols for the lazy tls trampoline.  */
       if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, htab->dt_tlsdesc_plt))
 	return FALSE;
-       
+
       if (!elf32_arm_output_map_sym (&osi, ARM_MAP_DATA,
 				     htab->dt_tlsdesc_plt + 24))
 	return FALSE;
@@ -14778,9 +14907,9 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
       if (!elf32_arm_output_map_sym (&osi, ARM_MAP_DATA,
 				     htab->tls_trampoline + 12))
 	return FALSE;
-#endif 
+#endif
     }
-  
+
   return TRUE;
 }
 
@@ -14843,23 +14972,24 @@ copy_exidx_entry (bfd *output_bfd, bfd_byte *to, bfd_byte *from, bfd_vma offset)
 {
   unsigned long first_word = bfd_get_32 (output_bfd, from);
   unsigned long second_word = bfd_get_32 (output_bfd, from + 4);
-  
+
   /* High bit of first word is supposed to be zero.  */
   if ((first_word & 0x80000000ul) == 0)
     first_word = offset_prel31 (first_word, offset);
-  
+
   /* If the high bit of the first word is clear, and the bit pattern is not 0x1
      (EXIDX_CANTUNWIND), this is an offset to an .ARM.extab entry.  */
   if ((second_word != 0x1) && ((second_word & 0x80000000ul) == 0))
     second_word = offset_prel31 (second_word, offset);
-  
+
   bfd_put_32 (output_bfd, first_word, to);
   bfd_put_32 (output_bfd, second_word, to + 4);
 }
 
 /* Data for make_branch_to_a8_stub().  */
 
-struct a8_branch_to_stub_data {
+struct a8_branch_to_stub_data
+{
   asection *writing_section;
   bfd_byte *contents;
 };
@@ -15097,7 +15227,7 @@ elf32_arm_write_section (bfd *output_bfd,
 	  if (edit_node)
 	    {
 	      unsigned int edit_index = edit_node->index;
-	      
+
 	      if (in_index < edit_index && in_index * 8 < input_size)
 	        {
 		  copy_exidx_entry (output_bfd, edited_contents + out_index * 8,
@@ -15115,7 +15245,7 @@ elf32_arm_write_section (bfd *output_bfd,
 		      in_index++;
 		      add_to_offsets += 8;
 		      break;
-		    
+
 		    case INSERT_EXIDX_CANTUNWIND_AT_END:
 		      {
 		        asection *text_sec = edit_node->linked_section;
@@ -15145,7 +15275,7 @@ elf32_arm_write_section (bfd *output_bfd,
 		      }
 		      break;
 		    }
-		  
+
 		  edit_node = edit_node->next;
 		}
 	    }
@@ -15435,7 +15565,7 @@ const struct elf_size_info elf32_arm_size_info =
 #define bfd_elf32_bfd_link_hash_table_create    elf32_arm_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_free      elf32_arm_hash_table_free
 #define bfd_elf32_bfd_reloc_type_lookup		elf32_arm_reloc_type_lookup
-#define bfd_elf32_bfd_reloc_name_lookup	elf32_arm_reloc_name_lookup
+#define bfd_elf32_bfd_reloc_name_lookup		elf32_arm_reloc_name_lookup
 #define bfd_elf32_find_nearest_line	        elf32_arm_find_nearest_line
 #define bfd_elf32_find_inliner_info	        elf32_arm_find_inliner_info
 #define bfd_elf32_new_section_hook		elf32_arm_new_section_hook
@@ -15489,10 +15619,77 @@ const struct elf_size_info elf32_arm_size_info =
 #define elf_backend_obj_attrs_arg_type		elf32_arm_obj_attrs_arg_type
 #undef  elf_backend_obj_attrs_section_type
 #define elf_backend_obj_attrs_section_type	SHT_ARM_ATTRIBUTES
-#define elf_backend_obj_attrs_order	elf32_arm_obj_attrs_order
-#define elf_backend_obj_attrs_handle_unknown elf32_arm_obj_attrs_handle_unknown
+#define elf_backend_obj_attrs_order		elf32_arm_obj_attrs_order
+#define elf_backend_obj_attrs_handle_unknown 	elf32_arm_obj_attrs_handle_unknown
 
 #include "elf32-target.h"
+
+/* Native Client targets.  */
+
+#undef	TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM		bfd_elf32_littlearm_nacl_vec
+#undef	TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		"elf32-littlearm-nacl"
+#undef	TARGET_BIG_SYM
+#define TARGET_BIG_SYM			bfd_elf32_bigarm_nacl_vec
+#undef	TARGET_BIG_NAME
+#define TARGET_BIG_NAME			"elf32-bigarm-nacl"
+
+/* Like elf32_arm_link_hash_table_create -- but overrides
+   appropriately for NaCl.  */
+
+static struct bfd_link_hash_table *
+elf32_arm_nacl_link_hash_table_create (bfd *abfd)
+{
+  struct bfd_link_hash_table *ret;
+
+  ret = elf32_arm_link_hash_table_create (abfd);
+  if (ret)
+    {
+      struct elf32_arm_link_hash_table *htab
+	= (struct elf32_arm_link_hash_table *) ret;
+
+      htab->nacl_p = 1;
+
+      htab->plt_header_size = 4 * ARRAY_SIZE (elf32_arm_nacl_plt0_entry);
+      htab->plt_entry_size = 4 * ARRAY_SIZE (elf32_arm_nacl_plt_entry);
+    }
+  return ret;
+}
+
+/* Since NaCl doesn't use the ARM-specific unwind format, we don't
+   really need to use elf32_arm_modify_segment_map.  But we do it
+   anyway just to reduce gratuitous differences with the stock ARM backend.  */
+
+static bfd_boolean
+elf32_arm_nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
+{
+  return (elf32_arm_modify_segment_map (abfd, info)
+	  && nacl_modify_segment_map (abfd, info));
+}
+
+#undef	elf32_bed
+#define elf32_bed			elf32_arm_nacl_bed
+#undef  bfd_elf32_bfd_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_create	\
+  elf32_arm_nacl_link_hash_table_create
+#undef	elf_backend_plt_alignment
+#define elf_backend_plt_alignment	4
+#undef	elf_backend_modify_segment_map
+#define	elf_backend_modify_segment_map		elf32_arm_nacl_modify_segment_map
+#undef	elf_backend_modify_program_headers
+#define	elf_backend_modify_program_headers	nacl_modify_program_headers
+
+#undef	ELF_MAXPAGESIZE
+#define ELF_MAXPAGESIZE			0x10000
+
+#include "elf32-target.h"
+
+/* Reset to defaults.  */
+#undef	elf_backend_plt_alignment
+#undef	elf_backend_modify_segment_map
+#define elf_backend_modify_segment_map		elf32_arm_modify_segment_map
+#undef	elf_backend_modify_program_headers
 
 /* VxWorks Targets.  */
 

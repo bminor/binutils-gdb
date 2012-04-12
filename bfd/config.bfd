@@ -216,6 +216,18 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_bigarc_vec
     ;;
 
+  arm-*-nacl*)
+    targ_defvec=bfd_elf32_littlearm_nacl_vec
+    targ_selvecs="bfd_elf32_bigarm_nacl_vec bfd_elf32_i386_nacl_vec"
+    targ64_selvecs="bfd_elf32_x86_64_nacl_vec bfd_elf64_x86_64_nacl_vec"
+    targ_archs="$targ_archs bfd_i386_arch"
+    ;;
+  armeb-*-nacl*)
+    targ_defvec=bfd_elf32_bigarm_nacl_vec
+    targ_selvecs="bfd_elf32_littlearm_nacl_vec bfd_elf32_i386_nacl_vec"
+    targ64_selvecs="bfd_elf32_x86_64_nacl_vec bfd_elf64_x86_64_nacl_vec"
+    targ_archs="$targ_archs bfd_i386_arch"
+    ;;
   armeb-*-netbsdelf*)
     targ_defvec=bfd_elf32_bigarm_vec
     targ_selvecs="bfd_elf32_littlearm_vec armnetbsd_vec"
@@ -573,8 +585,9 @@ case "${targ}" in
     ;;
   i[3-7]86-*-nacl*)
     targ_defvec=bfd_elf32_i386_nacl_vec
-    targ_selvecs="bfd_elf32_i386_vec"
+    targ_selvecs="bfd_elf32_bigarm_nacl_vec bfd_elf32_littlearm_nacl_vec"
     targ64_selvecs="bfd_elf64_x86_64_nacl_vec bfd_elf32_x86_64_nacl_vec"
+    targ_archs="$targ_archs bfd_arm_arch"
     ;;
 #ifdef BFD64
   x86_64-*-darwin*)
@@ -615,7 +628,8 @@ case "${targ}" in
     ;;
   x86_64-*-nacl*)
     targ_defvec=bfd_elf32_x86_64_nacl_vec
-    targ_selvecs="bfd_elf32_i386_nacl_vec bfd_elf64_x86_64_nacl_vec"
+    targ_selvecs="bfd_elf32_i386_nacl_vec bfd_elf64_x86_64_nacl_vec bfd_elf32_bigarm_nacl_vec bfd_elf32_littlearm_nacl_vec"
+    targ_archs="$targ_archs bfd_arm_arch"
     want64=true
     ;;
   x86_64-*-mingw* | x86_64-*-pe | x86_64-*-pep)
