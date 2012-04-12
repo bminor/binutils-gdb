@@ -1,3 +1,16 @@
+2012-04-12  Jie Zhang  <jie@codesourcery.com>
+            Meador Inge  <meadori@codesourcery.com>
+
+	* config/tc-arm.c (only_one_reg_in_list): New function.
+	(encode_ldmstm): Ditto.
+	(do_ldmstm): Use a different encoding when pushing or poping
+	a single register.
+	(A_COND_MASK): New macro.
+	(A_PUSH_POP_OP_MASK): Ditto.
+	(A1_OPCODE_PUSH): Ditto.
+	(A2_OPCODE_PUSH): Ditto.
+	(A2_OPCODE_POP): Ditto.
+
 2012-04-06  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* doc/c-mips.texi (MIPS Opts): Correct -no-mfix-24k to

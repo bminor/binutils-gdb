@@ -622,6 +622,14 @@ struct asm_opcode
 #define T2_OPCODE_MASK	0xfe1fffff
 #define T2_DATA_OP_SHIFT 21
 
+#define A_COND_MASK         0xf0000000
+#define A_PUSH_POP_OP_MASK  0x0fff0000
+
+/* Opcodes for pushing/poping registers to/from the stack.  */
+#define A1_OPCODE_PUSH    0x092d0000
+#define A2_OPCODE_PUSH    0x052d0004
+#define A2_OPCODE_POP     0x049d0004
+
 /* Codes to distinguish the arithmetic instructions.  */
 #define OPCODE_AND	0
 #define OPCODE_EOR	1
@@ -7795,11 +7803,21 @@ do_it (void)
     }
 }
 
+/* If there is only one register in the register list,
+   then return its register number.  Otherwise return -1.  */
+static int
+only_one_reg_in_list (int range)
+{
+  int i = ffs (range) - 1;
+  return (i > 15 || range != (1 << i)) ? -1 : i;
+}
+
 static void
-do_ldmstm (void)
+encode_ldmstm(int from_push_pop_mnem)
 {
   int base_reg = inst.operands[0].reg;
   int range = inst.operands[1].imm;
+  int one_reg;
 
   inst.instruction |= base_reg << 16;
   inst.instruction |= range;
@@ -7832,6 +7850,23 @@ do_ldmstm (void)
 	    as_warn (_("if writeback register is in list, it must be the lowest reg in the list"));
 	}
     }
+
+  /* If PUSH/POP has only one register, then use the A2 encoding.  */
+  one_reg = only_one_reg_in_list (range);
+  if (from_push_pop_mnem && one_reg >= 0)
+    {
+      int is_push = (inst.instruction & A_PUSH_POP_OP_MASK) == A1_OPCODE_PUSH;
+
+      inst.instruction &= A_COND_MASK;
+      inst.instruction |= is_push ? A2_OPCODE_PUSH : A2_OPCODE_POP;
+      inst.instruction |= one_reg << 12;
+    }
+}
+
+static void
+do_ldmstm (void)
+{
+  encode_ldmstm (/*from_push_pop_mnem=*/FALSE);
 }
 
 /* ARMv5TE load-consecutive (argument parse)
@@ -8333,7 +8368,7 @@ do_push_pop (void)
   inst.operands[0].isreg = 1;
   inst.operands[0].writeback = 1;
   inst.operands[0].reg = REG_SP;
-  do_ldmstm ();
+  encode_ldmstm (/*from_push_pop_mnem=*/TRUE);
 }
 
 /* ARM V6 RFE (Return from Exception) loads the PC and CPSR from the
