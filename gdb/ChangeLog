@@ -1,3 +1,9 @@
+2012-04-12  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (async_remote_interrupt): Correct function name in
+	debug message.
+	(async_remote_interrupt_twice): Ditto.
+
 2012-04-11  Yuanhui Zhang  <asmwarrior@gmail.com>
 
 	* source.c (find_and_open_source): Consistently pass resulting

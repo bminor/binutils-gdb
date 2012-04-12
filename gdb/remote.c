@@ -4834,7 +4834,7 @@ static void
 async_remote_interrupt (gdb_client_data arg)
 {
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
+    fprintf_unfiltered (gdb_stdlog, "async_remote_interrupt called\n");
 
   target_stop (inferior_ptid);
 }
@@ -4845,7 +4845,7 @@ void
 async_remote_interrupt_twice (gdb_client_data arg)
 {
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "remote_interrupt_twice called\n");
+    fprintf_unfiltered (gdb_stdlog, "async_remote_interrupt_twice called\n");
 
   interrupt_query ();
 }
