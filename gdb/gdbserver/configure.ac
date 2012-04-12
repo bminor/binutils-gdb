@@ -22,9 +22,11 @@ AC_PREREQ(2.59)dnl
 
 AC_INIT(server.c)
 AC_CONFIG_HEADER(config.h:config.in)
-AC_CONFIG_LIBOBJ_DIR(../gnulib)
+
+AM_MAINTAINER_MODE
 
 AC_PROG_CC
+gl_EARLY
 AC_GNU_SOURCE
 
 AC_CANONICAL_SYSTEM
@@ -37,6 +39,10 @@ AC_HEADER_STDC
 AC_HEADER_DIRENT
 
 AC_FUNC_ALLOCA
+
+# Check for the 'make' the user wants to use.
+AC_CHECK_PROGS(MAKE, make)
+
 AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 proc_service.h sys/procfs.h thread_db.h linux/elf.h dnl
 		 stdlib.h unistd.h dnl
@@ -44,7 +50,7 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
 		 netinet/tcp.h arpa/inet.h sys/wait.h sys/un.h)
 AC_CHECK_FUNCS(pread pwrite pread64 readlink)
-AC_REPLACE_FUNCS(memmem vasprintf vsnprintf)
+AC_REPLACE_FUNCS(vasprintf vsnprintf)
 
 # Check for UST
 ustlibs=""
@@ -423,7 +429,18 @@ AC_SUBST(srv_xmlfiles)
 AC_SUBST(IPA_DEPFILES)
 AC_SUBST(extra_libraries)
 
-AC_OUTPUT(Makefile,
+gl_INIT
+# GDBserver does not use automake, but gnulib does.  This line lets
+# us generate its Makefile.in.
+AM_INIT_AUTOMAKE(gdbserver, UNUSED-VERSION, [no-define])
+
+GNULIB_STDINT_H=
+if test x"$STDINT_H" != x; then
+  GNULIB_STDINT_H=gnulib/$STDINT_H
+fi
+AC_SUBST(GNULIB_STDINT_H)
+
+AC_OUTPUT(Makefile gnulib/Makefile:${srcdir}/../gnulib/Makefile.in,
 [case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;

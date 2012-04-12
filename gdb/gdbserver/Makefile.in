@@ -47,12 +47,15 @@ EXEEXT = @EXEEXT@
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
+RANLIB = @RANLIB@
 
 CC = @CC@
 
 # Directory containing source files.  Don't clean up the spacing,
 # this exact string is matched for by the "configure" script.
 srcdir = @srcdir@
+abs_top_srcdir=@abs_top_srcdir@
+abs_srcdir=@abs_srcdir@
 VPATH = @srcdir@
 
 # It is also possible that you will need to add -I/usr/include/sys to the
@@ -72,12 +75,21 @@ INCLUDE_DEP = $$(INCLUDE_DIR)
 ustlibs = @ustlibs@
 ustinc = @ustinc@
 
+# gnulib
+GNULIB_INCLUDE_DIR = $(srcdir)/../gnulib
+GNULIB_LIB = gnulib/libgnu.a
+
+# Generated headers in the gnulib directory.  These must be listed
+# so that they are generated before other files are compiled.
+GNULIB_H = gnulib/string.h @GNULIB_STDINT_H@
+
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I${srcdir} for our headers.
 # -I$(srcdir)/../regformats for regdef.h.
 INCLUDE_CFLAGS = -I. -I${srcdir} -I$(srcdir)/../common \
-	-I$(srcdir)/../regformats -I$(INCLUDE_DIR)
+	-I$(srcdir)/../regformats -I$(INCLUDE_DIR) \
+	-I$(GNULIB_INCLUDE_DIR)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -157,6 +169,8 @@ extra_libraries = @extra_libraries@
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
+	"top_srcdir=$(abs_top_srcdir)/.." "srcdir=$(abs_srcdir)/../gnulib" \
+	"VPATH=$(abs_top_srcdir)/../gnulib:$(abs_top_srcdir)" \
 	"infodir=$(infodir)" \
 	"datarootdir=$(datarootdir)" \
 	"docdir=$(docdir)" \
@@ -192,6 +206,7 @@ FLAGS_TO_PASS = \
 	${CC} -c ${INTERNAL_CFLAGS} $<
 
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) all
 
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a
@@ -212,11 +227,13 @@ install-only:
 	$(INSTALL_PROGRAM) gdbserver$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT); \
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(man1dir); \
 	$(INSTALL_DATA) $(srcdir)/gdbserver.1 $(DESTDIR)$(man1dir)/$$n.1
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) install
 
 uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
 	rm -f $(DESTDIR)/$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(man1dir)/$$n.1
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) uninstall
 
 installcheck:
 check:
@@ -225,12 +242,19 @@ install-info:
 install-pdf:
 html:
 install-html:
-clean-info:
+clean-info: force
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $@
 
-gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS}
+gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(GNULIB_LIB)
 	rm -f gdbserver$(EXEEXT)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver$(EXEEXT) $(OBS) \
-	  $(GDBSERVER_LIBS) $(XM_CLIBS)
+	$(GNULIB_LIB) $(GDBSERVER_LIBS) $(XM_CLIBS)
+
+$(GNULIB_LIB) $(GNULIB_H): all-lib
+all-lib: gnulib/Makefile
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) all
+
+.PHONY: all-lib
 
 gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
 	rm -f gdbreplay$(EXEEXT)
@@ -284,10 +308,12 @@ clean:
 	rm -f i386-avx.c i386-avx-linux.c
 	rm -f amd64-avx.c amd64-avx-linux.c
 	rm -f i386-mmx.c i386-mmx-linux.c
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) clean
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
 	rm -f Makefile
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $@
 
 config.h: stamp-h ; @true
 stamp-h: config.in config.status
@@ -296,8 +322,21 @@ stamp-h: config.in config.status
 Makefile: Makefile.in config.status
 	CONFIG_HEADERS="" $(SHELL) ./config.status
 
+gnulib/Makefile: $(srcdir)/../gnulib/Makefile.in config.status
+	  CONFIG_COMMANDS="depfiles" \
+	  CONFIG_HEADERS= \
+	  CONFIG_LINKS= \
+	  $(SHELL) config.status "gnulib/Makefile"
+
 config.status: configure configure.srv
 	$(SHELL) ./config.status --recheck
+
+# automatic rebuilding in automake-generated Makefiles requires
+# this rule in the toplevel Makefile, which, with GNU make, causes
+# the desired updates through the implicit regeneration of the Makefile
+# and all of its prerequisites.
+am--refresh:
+	@:
 
 force:
 
@@ -435,14 +474,6 @@ buffer.o: ../common/buffer.c $(server_h)
 
 agent.o: ../common/agent.c $(server_h) $(agent_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
-
-# We build memmem.c without -Werror because this file is not under
-# our control.  On LynxOS, the compiler generates some warnings
-# because str-two-way.h uses a constant (MAX_SIZE) whose definition
-# makes it ambiguous whether it is signed or unsigned ("warning: this
-# decimal constant is unsigned only in ISO C90").
-memmem.o: ../gnulib/memmem.c
-	$(CC) -o memmem.o -c $(CPPFLAGS) $(INTERNAL_WARN_CFLAGS) $<
 
 # We build vasprintf with -DHAVE_CONFIG_H because we want that unit to
 # include our config.h file.  Otherwise, some system headers do not get

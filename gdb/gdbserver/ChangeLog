@@ -1,3 +1,17 @@
+2012-04-12  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in: Define abs_top_srcdir and abs_srcdir.
+	(INCLUDE_CFLAGS): Append GNULIB_INCLUDE_DIR.
+	(install-only, install-info, clean): Handle sub dir gnulib.
+	(all-lib, am--refresh): New targets.
+	(memmem.o): Remove target.
+	* configure.ac: Remove AC_CONFIG_LIBOBJ_DIR.
+	Invoke gl_EARLY.  Invoke AC_CHECK_PROGS for make.
+	(AC_REPLACE_FUNCS): Remove memmem.
+	Invoke gl_INIT and AM_INIT_AUTOMAKE.
+	(AC_OUTPUT): Generate Makefile in gnulib/.
+	* aclocal.m4, config.in, configure: Regenerated.
+
 2012-04-10  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* linux-low.c (get_r_debug): Handle DT_MIPS_RLD_MAP.
