@@ -1,3 +1,7 @@
+2012-04-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386bsd-nat.c (_initialize_i386bsd_nat): Add missing prototype.
+
 2012-04-12  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (create_all_type_units): Renamed from

@@ -331,6 +331,9 @@ i386bsd_dr_get_control (void)
 #endif /* PT_GETDBREGS */
 
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_i386bsd_nat (void);
+
 void
 _initialize_i386bsd_nat (void)
 {
