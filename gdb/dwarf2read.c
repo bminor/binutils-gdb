@@ -1247,7 +1247,7 @@ static struct type *set_die_type (struct die_info *, struct type *,
 
 static void create_all_comp_units (struct objfile *);
 
-static int create_debug_types_hash_table (struct objfile *objfile);
+static int create_all_type_units (struct objfile *);
 
 static void load_full_comp_unit (struct dwarf2_per_cu_data *);
 
@@ -2952,7 +2952,7 @@ dwarf2_initialize_objfile (struct objfile *objfile)
 
       dwarf2_per_objfile->using_index = 1;
       create_all_comp_units (objfile);
-      create_debug_types_hash_table (objfile);
+      create_all_type_units (objfile);
       dwarf2_per_objfile->quick_file_names_table =
 	create_quick_file_names_table (dwarf2_per_objfile->n_comp_units);
 
@@ -3241,11 +3241,11 @@ add_signatured_type_cu_to_table (void **slot, void *datum)
 }
 
 /* Create the hash table of all entries in the .debug_types section(s).
-   The result is zero if there is an error (e.g. missing .debug_types section),
-   otherwise non-zero.	*/
+   The result is zero if there are no .debug_types sections,
+   otherwise non-zero.  */
 
 static int
-create_debug_types_hash_table (struct objfile *objfile)
+create_all_type_units (struct objfile *objfile)
 {
   htab_t types_htab = NULL;
   struct dwarf2_per_cu_data **iter;
@@ -3618,7 +3618,7 @@ process_type_comp_unit (void **slot, void *info)
 static void
 build_type_psymtabs (struct objfile *objfile)
 {
-  if (! create_debug_types_hash_table (objfile))
+  if (! create_all_type_units (objfile))
     return;
 
   htab_traverse_noresize (dwarf2_per_objfile->signatured_types,

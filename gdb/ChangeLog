@@ -1,5 +1,8 @@
 2012-04-12  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (create_all_type_units): Renamed from
+	create_debug_types_hash_table.  All callers updated.
+
 	* dwarf2read.c (create_signatured_type_table_from_index): Rename
 	local type_sig to sig_type, type_offset to type_offset_in_tu.
 	(hash_signatured_type): Renamed from hash_type_signature,
