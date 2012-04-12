@@ -1,3 +1,7 @@
+2012-04-12  David S. Miller  <davem@davemloft.net>
+
+	* sparc.h (R_SPARC_WDISP10): New relocation.
+
 2012-03-12  Cary Coutant  <ccoutant@google.com>
 
 	Update DWARF enums from ../include/dwarf2.h.

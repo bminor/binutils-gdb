@@ -1,3 +1,10 @@
+2012-04-12  David S. Miller  <davem@davemloft.net>
+
+	* config/tc-sparc.c (sparc_ip): Handle '=', "%h34", "%l34", and
+	BFD_RELOC_SPARC_H34.
+	(md_apply_fix): Handle BFD_RELOC_SPARC_WDISP10 and BFD_RELOC_SPARC_H34.
+	(tc_gen_reloc): Likewise.
+
 2012-04-12  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.tgt (arm-*-nacl*): Match it.

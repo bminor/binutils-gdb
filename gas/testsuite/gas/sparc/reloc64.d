@@ -74,3 +74,9 @@ Disassembly of section .text:
   ac:	82 18 60 00 	xor  %g1, 0, %g1
 			ac: R_SPARC_LOX10	.text\+0xffffffff76543210
   b0:	01 00 00 00 	nop 
+  b4:	03 00 00 00 	sethi  %hi\((0x|)0\), %g1
+			b4: R_SPARC_H34	.text\+0xa9876543210
+  b8:	83 28 70 02 	sllx  %g1, 2, %g1
+  bc:	82 10 60 00 	mov  %g1, %g1
+			bc: R_SPARC_L44	.text\+0xa9876543210
+  c0:	01 00 00 00 	nop 

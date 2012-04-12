@@ -1,3 +1,17 @@
+2012-04-12  David S. Miller  <davem@davemloft.net>
+
+	* reloc.c (BFD_RELOC_SPARC_H34, BFD_RELOC_SPARC_SIZE32,
+	BFD_RELOC_SPARC_SIZE64, BFD_RELOC_SPARC_WDISP10): New relocs.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Likewise.
+	* elfxx-sparc.c (sparc_elf_wdisp10_reloc): New function.
+	(_bfd_sparc_elf_howto_table): Add entries for R_SPARC_H34,
+	R_SPARC_SIZE32, R_SPARC_64, and R_SPARC_WDISP10.
+	(_bfd_sparc_elf_reloc_type_lookup): Handle new relocs.
+	(_bfd_sparc_elf_check_relocs): Likewise.
+	(_bfd_sparc_elf_gc_sweep_hook): Likewise.
+	(_bfd_sparc_elf_relocate_section): Likewise.
+
 2012-04-12  Roland McGrath  <mcgrathr@google.com>
 
 	* elf32-arm.c (elf32_arm_nacl_plt0_entry, elf32_arm_nacl_plt_entry):

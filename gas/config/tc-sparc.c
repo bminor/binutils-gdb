@@ -1835,6 +1835,11 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      the_insn.pcrel = 1;
 	      goto immediate;
 
+	    case '=':
+	      the_insn.reloc = /* RELOC_WDISP2_8 */ BFD_RELOC_SPARC_WDISP10;
+	      the_insn.pcrel = 1;
+	      goto immediate;
+
 	    case 'G':
 	      the_insn.reloc = BFD_RELOC_SPARC_WDISP19;
 	      the_insn.pcrel = 1;
@@ -2418,6 +2423,8 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		      { "hh", 2, BFD_RELOC_SPARC_HH22, 1, 1 },
 		      { "hm", 2, BFD_RELOC_SPARC_HM10, 1, 1 },
 		      { "lm", 2, BFD_RELOC_SPARC_LM22, 1, 1 },
+		      { "h34", 3, BFD_RELOC_SPARC_H34, 1, 0 },
+		      { "l34", 3, BFD_RELOC_SPARC_L44, 1, 0 },
 		      { "h44", 3, BFD_RELOC_SPARC_H44, 1, 0 },
 		      { "m44", 3, BFD_RELOC_SPARC_M44, 1, 0 },
 		      { "l44", 3, BFD_RELOC_SPARC_L44, 1, 0 },
@@ -2579,6 +2586,11 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 
 			  case BFD_RELOC_LO10:
 			    val &= 0x3ff;
+			    break;
+
+			  case BFD_RELOC_SPARC_H34:
+			    val >>= 12;
+			    val &= 0x3fffff;
 			    break;
 
 			  case BFD_RELOC_SPARC_H44:
@@ -3360,6 +3372,18 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 	  insn |= val & 0x1f;
 	  break;
 
+	case BFD_RELOC_SPARC_WDISP10:
+	  if ((val & 3)
+	      || val >= 0x007fc
+	      || val <= -(offsetT) 0x808)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("relocation overflow"));
+	  /* FIXME: The +1 deserves a comment.  */
+	  val = (val >> 2) + 1;
+	  insn |= ((val & 0x300) << 11)
+	    | ((val & 0xff) << 5);
+	  break;
+
 	case BFD_RELOC_SPARC_WDISP16:
 	  if ((val & 3)
 	      || val >= 0x1fffc
@@ -3431,6 +3455,15 @@ md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 	  /* Fall through.  */
 	case BFD_RELOC_SPARC_BASE22:
 	  insn |= val & 0x3fffff;
+	  break;
+
+	case BFD_RELOC_SPARC_H34:
+	  if (!fixP->fx_addsy)
+	    {
+	      bfd_vma tval = val;
+	      tval >>= 12;
+	      insn |= tval & 0x3fffff;
+	    }
 	  break;
 
 	case BFD_RELOC_SPARC_H44:
@@ -3513,6 +3546,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_SPARC_PC22:
     case BFD_RELOC_SPARC_PC10:
     case BFD_RELOC_SPARC_BASE13:
+    case BFD_RELOC_SPARC_WDISP10:
     case BFD_RELOC_SPARC_WDISP16:
     case BFD_RELOC_SPARC_WDISP19:
     case BFD_RELOC_SPARC_WDISP22:
@@ -3528,6 +3562,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_SPARC_PC_HH22:
     case BFD_RELOC_SPARC_PC_HM10:
     case BFD_RELOC_SPARC_PC_LM22:
+    case BFD_RELOC_SPARC_H34:
     case BFD_RELOC_SPARC_H44:
     case BFD_RELOC_SPARC_M44:
     case BFD_RELOC_SPARC_L44:
@@ -3683,6 +3718,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
       && code != BFD_RELOC_SPARC_WDISP22
       && code != BFD_RELOC_SPARC_WDISP16
       && code != BFD_RELOC_SPARC_WDISP19
+      && code != BFD_RELOC_SPARC_WDISP10
       && code != BFD_RELOC_SPARC_WPLT30
       && code != BFD_RELOC_SPARC_TLS_GD_CALL
       && code != BFD_RELOC_SPARC_TLS_LDM_CALL)

@@ -1,3 +1,8 @@
+2012-04-12  David S. Miller  <davem@davemloft.net>
+
+	* gas/sparc/reloc64.s: Add abs34 code model tests.
+	* gas/sparc/reloc64.d: Update.
+
 2012-04-12  Roland McGrath  <mcgrathr@google.com>
 
 	* gas/elf/elf.exp (run_elf_list_test): Treat arm-*-nacl* targets

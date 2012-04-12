@@ -129,6 +129,7 @@ static char *v9a_asr_reg_names[] =
 
 /* These are for v9.  */
 #define X_DISP16(i)  (((((i) >> 20) & 3) << 14) | (((i) >> 0) & 0x3fff))
+#define X_DISP10(i)  (((((i) >> 19) & 3) << 8) | (((i) >> 5) & 0xff))
 #define X_DISP19(i)  (((i) >> 0) & 0x7ffff)
 #define X_MEMBAR(i)  ((i) & 0x7f)
 
@@ -742,6 +743,11 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 			  }
 		      break;
 		    }
+
+		  case '=':
+		    info->target = memaddr + SEX (X_DISP10 (insn), 10) * 4;
+		    (*info->print_address_func) (info->target, info);
+		    break;
 
 		  case 'k':
 		    info->target = memaddr + SEX (X_DISP16 (insn), 16) * 4;

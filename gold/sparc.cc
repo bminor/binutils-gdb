@@ -617,6 +617,29 @@ public:
     elfcpp::Swap<32, true>::writeval(wv, val | reloc);
   }
 
+  // R_SPARC_WDISP10: (Symbol + Addend - Address) >> 2
+  static inline void
+  wdisp10(unsigned char* view,
+	  const Sized_relobj_file<size, big_endian>* object,
+	  const Symbol_value<size>* psymval,
+	  typename elfcpp::Elf_types<size>::Elf_Addr addend,
+	  typename elfcpp::Elf_types<size>::Elf_Addr address)
+  {
+    typedef typename elfcpp::Swap<32, true>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<32, true>::readval(wv);
+    Valtype reloc = ((psymval->value(object, addend) - address)
+		     >> 2);
+
+    // The relocation value is split between the low bits 5-12,
+    // and high bits 19-20.
+    val &= ~((0x3 << 19) | (0xff << 5));
+    reloc = (((reloc & 0x300) << (19 - 8))
+	     | ((reloc & 0xff) << (5 - 0)));
+
+    elfcpp::Swap<32, true>::writeval(wv, val | reloc);
+  }
+
   // R_SPARC_PC22: (Symbol + Addend - Address) >> 10
   static inline void
   pc22(unsigned char* view,
@@ -830,6 +853,16 @@ public:
   {
     This::template pcrela_unaligned<64>(view, object, psymval,
 					addend, address);
+  }
+
+  // R_SPARC_H34: (Symbol + Addend) >> 12
+  static inline void
+  h34(unsigned char* view,
+      const Sized_relobj_file<size, big_endian>* object,
+      const Symbol_value<size>* psymval,
+      typename elfcpp::Elf_types<size>::Elf_Addr  addend)
+  {
+    This_insn::template rela<32>(view, 12, 0x003fffff, object, psymval, addend);
   }
 
   // R_SPARC_H44: (Symbol + Addend) >> 22
@@ -1605,6 +1638,7 @@ Target_sparc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_SPARC_64:
     case elfcpp::R_SPARC_HIX22:
     case elfcpp::R_SPARC_LOX10:
+    case elfcpp::R_SPARC_H34:
     case elfcpp::R_SPARC_H44:
     case elfcpp::R_SPARC_M44:
     case elfcpp::R_SPARC_L44:
@@ -1639,6 +1673,7 @@ Target_sparc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_SPARC_WDISP22:
     case elfcpp::R_SPARC_WDISP19:
     case elfcpp::R_SPARC_WDISP16:
+    case elfcpp::R_SPARC_WDISP10:
       return Symbol::RELATIVE_REF;
 
     case elfcpp::R_SPARC_PLT64:
@@ -1755,6 +1790,7 @@ Target_sparc<size, big_endian>::Scan::check_non_pic(Relobj* object, unsigned int
 	case elfcpp::R_SPARC_LO10:
 	case elfcpp::R_SPARC_HI22:
 	case elfcpp::R_SPARC_OLO10:
+	case elfcpp::R_SPARC_H34:
 	case elfcpp::R_SPARC_H44:
 	case elfcpp::R_SPARC_M44:
 	case elfcpp::R_SPARC_L44:
@@ -1861,6 +1897,7 @@ Target_sparc<size, big_endian>::Scan::local(
 
     case elfcpp::R_SPARC_HIX22:
     case elfcpp::R_SPARC_LOX10:
+    case elfcpp::R_SPARC_H34:
     case elfcpp::R_SPARC_H44:
     case elfcpp::R_SPARC_M44:
     case elfcpp::R_SPARC_L44:
@@ -1911,6 +1948,7 @@ Target_sparc<size, big_endian>::Scan::local(
     case elfcpp::R_SPARC_WDISP22:
     case elfcpp::R_SPARC_WDISP19:
     case elfcpp::R_SPARC_WDISP16:
+    case elfcpp::R_SPARC_WDISP10:
     case elfcpp::R_SPARC_DISP8:
     case elfcpp::R_SPARC_DISP16:
     case elfcpp::R_SPARC_DISP32:
@@ -2186,6 +2224,7 @@ Target_sparc<size, big_endian>::Scan::global(
     case elfcpp::R_SPARC_WDISP22:
     case elfcpp::R_SPARC_WDISP19:
     case elfcpp::R_SPARC_WDISP16:
+    case elfcpp::R_SPARC_WDISP10:
       {
 	if (gsym->needs_plt_entry())
 	  target->make_plt_entry(symtab, layout, gsym);
@@ -2214,6 +2253,7 @@ Target_sparc<size, big_endian>::Scan::global(
     case elfcpp::R_SPARC_64:
     case elfcpp::R_SPARC_HIX22:
     case elfcpp::R_SPARC_LOX10:
+    case elfcpp::R_SPARC_H34:
     case elfcpp::R_SPARC_H44:
     case elfcpp::R_SPARC_M44:
     case elfcpp::R_SPARC_L44:
@@ -2749,6 +2789,10 @@ Target_sparc<size, big_endian>::Relocate::relocate(
       Reloc::wdisp16(view, object, psymval, addend, address);
       break;
 
+    case elfcpp::R_SPARC_WDISP10:
+      Reloc::wdisp10(view, object, psymval, addend, address);
+      break;
+
     case elfcpp::R_SPARC_HI22:
       Reloc::hi22(view, object, psymval, addend);
       break;
@@ -2898,6 +2942,10 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 
     case elfcpp::R_SPARC_LOX10:
       Reloc::lox10(view, object, psymval, addend);
+      break;
+
+    case elfcpp::R_SPARC_H34:
+      Reloc::h34(view, object, psymval, addend);
       break;
 
     case elfcpp::R_SPARC_H44:
