@@ -1,5 +1,16 @@
 2012-04-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* linux-x86-low.c (compat_x32_clock_t): New.
+	(compat_x32_siginfo_t): Likewise.
+	(compat_x32_siginfo_from_siginfo): Likewise.
+	(siginfo_from_compat_x32_siginfo): Likewise.
+	(linux_is_elf64): Likewise.
+	(x86_siginfo_fixup): Call compat_x32_siginfo_from_siginfo
+	and siginfo_from_compat_x32_siginfo for x32.
+	(x86_arch_setup): Set linux_is_elf64.
+
+2012-04-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gdb/13969
 	* linux-low.c (linux_pid_exe_is_elf_64_file): Also return the
 	e_machine field.
