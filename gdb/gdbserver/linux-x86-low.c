@@ -1106,17 +1106,28 @@ x86_linux_process_qsupported (const char *query)
 static void
 x86_arch_setup (void)
 {
-#ifdef __x86_64__
   int pid = pid_of (get_thread_lwp (current_inferior));
-  int use_64bit = linux_pid_exe_is_elf_64_file (pid);
+  unsigned int machine;
+  int is_elf64 = linux_pid_exe_is_elf_64_file (pid, &machine);
 
-  if (use_64bit < 0)
+  if (sizeof (void *) == 4)
+    {
+      if (is_elf64 > 0)
+	error (_("Can't debug 64-bit process with 32-bit GDBserver"));
+#ifndef __x86_64__
+      else if (machine == EM_X86_64)
+	error (_("Can't debug x86-64 process with 32-bit GDBserver"));
+#endif
+    }
+
+#ifdef __x86_64__
+  if (is_elf64 < 0)
     {
       /* This can only happen if /proc/<pid>/exe is unreadable,
 	 but "that can't happen" if we've gotten this far.
 	 Fall through and assume this is a 32-bit program.  */
     }
-  else if (use_64bit)
+  else if (machine == EM_X86_64)
     {
       /* Amd64 doesn't have HAVE_LINUX_USRREGS.  */
       the_low_target.num_regs = -1;

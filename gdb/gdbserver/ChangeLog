@@ -1,3 +1,13 @@
+2012-04-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gdb/13969
+	* linux-low.c (linux_pid_exe_is_elf_64_file): Also return the
+	e_machine field.
+	(linux_qxfer_libraries_svr4): Update call to elf_64_file_p.
+	* linux-low.h (linux_pid_exe_is_elf_64_file): Updated.
+	* linux-x86-low.c (x86_arch_setup): Check if GDBserver is
+	compatible with process.
+
 2012-04-12  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in: Define abs_top_srcdir and abs_srcdir.

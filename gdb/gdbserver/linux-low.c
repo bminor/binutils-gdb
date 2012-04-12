@@ -263,13 +263,19 @@ static void wait_for_sigstop (struct inferior_list_entry *entry);
 /* Return non-zero if HEADER is a 64-bit ELF file.  */
 
 static int
-elf_64_header_p (const Elf64_Ehdr *header)
+elf_64_header_p (const Elf64_Ehdr *header, unsigned int *machine)
 {
-  return (header->e_ident[EI_MAG0] == ELFMAG0
-          && header->e_ident[EI_MAG1] == ELFMAG1
-          && header->e_ident[EI_MAG2] == ELFMAG2
-          && header->e_ident[EI_MAG3] == ELFMAG3
-          && header->e_ident[EI_CLASS] == ELFCLASS64);
+  if (header->e_ident[EI_MAG0] == ELFMAG0
+      && header->e_ident[EI_MAG1] == ELFMAG1
+      && header->e_ident[EI_MAG2] == ELFMAG2
+      && header->e_ident[EI_MAG3] == ELFMAG3)
+    {
+      *machine = header->e_machine;
+      return header->e_ident[EI_CLASS] == ELFCLASS64;
+
+    }
+  *machine = EM_NONE;
+  return -1;
 }
 
 /* Return non-zero if FILE is a 64-bit ELF file,
@@ -277,7 +283,7 @@ elf_64_header_p (const Elf64_Ehdr *header)
    and -1 if the file is not accessible or doesn't exist.  */
 
 static int
-elf_64_file_p (const char *file)
+elf_64_file_p (const char *file, unsigned int *machine)
 {
   Elf64_Ehdr header;
   int fd;
@@ -293,19 +299,19 @@ elf_64_file_p (const char *file)
     }
   close (fd);
 
-  return elf_64_header_p (&header);
+  return elf_64_header_p (&header, machine);
 }
 
 /* Accepts an integer PID; Returns true if the executable PID is
    running is a 64-bit ELF file..  */
 
 int
-linux_pid_exe_is_elf_64_file (int pid)
+linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine)
 {
   char file[MAXPATHLEN];
 
   sprintf (file, "/proc/%d/exe", pid);
-  return elf_64_file_p (file);
+  return elf_64_file_p (file, machine);
 }
 
 static void
@@ -5584,6 +5590,7 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
       32     /* l_prev offset in link_map.  */
     };
   const struct link_map_offsets *lmo;
+  unsigned int machine;
 
   if (writebuf != NULL)
     return -2;
@@ -5592,7 +5599,7 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 
   pid = lwpid_of (get_thread_lwp (current_inferior));
   xsnprintf (filename, sizeof filename, "/proc/%d/exe", pid);
-  is_elf64 = elf_64_file_p (filename);
+  is_elf64 = elf_64_file_p (filename, &machine);
   lmo = is_elf64 ? &lmo_64bit_offsets : &lmo_32bit_offsets;
 
   if (priv->r_debug == 0)
