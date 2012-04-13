@@ -1789,6 +1789,10 @@ a command like `return' or `jump' to continue execution."));
 	  return;
 	}
 
+      /* Update pc to reflect the new address from which we will execute
+	 instructions due to displaced stepping.  */
+      pc = regcache_read_pc (get_thread_regcache (inferior_ptid));
+
       displaced = get_displaced_stepping_state (ptid_get_pid (inferior_ptid));
       step = gdbarch_displaced_step_hw_singlestep (gdbarch,
 						   displaced->step_closure);

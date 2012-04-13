@@ -1,3 +1,8 @@
+2012-04-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* infrun.c (resume): Update PC address to the real PC after
+	preparing to do displaced stepping.
+
 2012-04-12  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (lookup_signatured_type): Remove arg "objfile", unused.
