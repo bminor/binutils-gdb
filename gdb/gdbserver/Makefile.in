@@ -314,6 +314,8 @@ clean:
 	rm -f i386-avx.c i386-avx-linux.c
 	rm -f amd64-avx.c amd64-avx-linux.c
 	rm -f i386-mmx.c i386-mmx-linux.c
+	rm -f x32.c x32-linux.c
+	rm -f x32-avx.c x32-avx-linux.c
 	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) clean
 
 maintainer-clean realclean distclean: clean
@@ -704,6 +706,18 @@ amd64-avx.c : $(srcdir)/../regformats/i386/amd64-avx.dat $(regdat_sh)
 amd64-avx-linux.o : amd64-avx-linux.c $(regdef_h)
 amd64-avx-linux.c : $(srcdir)/../regformats/i386/amd64-avx-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-avx-linux.dat amd64-avx-linux.c
+x32.o : x32.c $(regdef_h)
+x32.c : $(srcdir)/../regformats/i386/x32.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32.dat x32.c
+x32-linux.o : x32-linux.c $(regdef_h)
+x32-linux.c : $(srcdir)/../regformats/i386/x32-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-linux.dat x32-linux.c
+x32-avx.o : x32-avx.c $(regdef_h)
+x32-avx.c : $(srcdir)/../regformats/i386/x32-avx.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-avx.dat x32-avx.c
+x32-avx-linux.o : x32-avx-linux.c $(regdef_h)
+x32-avx-linux.c : $(srcdir)/../regformats/i386/x32-avx-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/x32-avx-linux.dat x32-avx-linux.c
 reg-xtensa.o : reg-xtensa.c $(regdef_h)
 reg-xtensa.c : $(srcdir)/../regformats/reg-xtensa.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-xtensa.dat reg-xtensa.c

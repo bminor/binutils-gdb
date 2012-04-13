@@ -41,6 +41,10 @@ void init_registers_i386_avx_linux (void);
 void init_registers_amd64_avx_linux (void);
 /* Defined in auto-generated file i386-mmx-linux.c.  */
 void init_registers_i386_mmx_linux (void);
+/* Defined in auto-generated file x32-linux.c.  */
+void init_registers_x32_linux (void);
+/* Defined in auto-generated file x32-avx-linux.c.  */
+void init_registers_x32_avx_linux (void);
 
 static unsigned char jump_insn[] = { 0xe9, 0, 0, 0, 0 };
 static unsigned char small_jump_insn[] = { 0x66, 0xe9, 0, 0 };
@@ -1158,8 +1162,10 @@ x86_linux_update_xmltarget (void)
 #ifdef __x86_64__
   if (num_xmm_registers == 8)
     init_registers_i386_linux ();
-  else
+  else if (linux_is_elf64)
     init_registers_amd64_linux ();
+  else
+    init_registers_x32_linux ();
 #else
     {
 # ifdef HAVE_PTRACE_GETFPXREGS
@@ -1254,8 +1260,10 @@ x86_linux_update_xmltarget (void)
 	  /* I386 has 8 xmm regs.  */
 	  if (num_xmm_registers == 8)
 	    init_registers_i386_avx_linux ();
-	  else
+	  else if (linux_is_elf64)
 	    init_registers_amd64_avx_linux ();
+	  else
+	    init_registers_x32_avx_linux ();
 #else
 	  init_registers_i386_avx_linux ();
 #endif

@@ -1,3 +1,28 @@
+2012-04-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (clean): Also remove x32.c x32-linux.c
+	x32-avx.c x32-avx-linux.c.
+	(x32.o): New target.
+	(x32.c): Likewise.
+	(x32-linux.o): Likewise.
+	(x32-linux.c): Likewise.
+	(x32-avx.o): Likewise.
+	(x32-avx.c): Likewise.
+	(x32-avx-linux.o): Likewise.
+	(x32-avx-linux.c): Likewise.
+
+	* configure.srv (srv_amd64_regobj): Add x32.o x32-avx.o.
+	(srv_amd64_linux_regobj): Add x32-linux.o x32-avx-linux.o.
+	(srv_i386_64bit_xmlfiles): Add i386/x32-core.xml.
+	(srv_amd64_xmlfiles): Add i386/x32.xml i386/x32-avx.xml.
+	(srv_amd64_linux_xmlfiles): Add i386/x32-linux.xml
+	i386/x32-avx-linux.xml.
+
+	* linux-x86-low.c (init_registers_x32_linux): New prototype.
+	(init_registers_x32_avx_linux): Likwise.
+	(x86_linux_update_xmltarget): Call init_registers_x32_linux
+	or init_registers_x32_avx_linux if linux_is_elf64 is false.
+
 2012-04-13  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (GNULIB_FLAGS_TO_PASS): New.
