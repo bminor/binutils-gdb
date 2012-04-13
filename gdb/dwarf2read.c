@@ -3351,10 +3351,10 @@ create_all_type_units (struct objfile *objfile)
 }
 
 /* Lookup a signature based type.
-   Returns NULL if SIG is not present in the table.  */
+   Returns NULL if signature SIG is not present in the table.  */
 
 static struct signatured_type *
-lookup_signatured_type (struct objfile *objfile, ULONGEST sig)
+lookup_signatured_type (ULONGEST sig)
 {
   struct signatured_type find_entry, *entry;
 
@@ -10336,7 +10336,7 @@ read_attribute_value (struct attribute *attr, unsigned form,
 	 for later lookup.
          NOTE: This is NULL if the type wasn't found.  */
       DW_SIGNATURED_TYPE (attr) =
-	lookup_signatured_type (cu->objfile, read_8_bytes (abfd, info_ptr));
+	lookup_signatured_type (read_8_bytes (abfd, info_ptr));
       info_ptr += 8;
       break;
     case DW_FORM_ref_udata:

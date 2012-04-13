@@ -1,3 +1,8 @@
+2012-04-12  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (lookup_signatured_type): Remove arg "objfile", unused.
+	All callers updated.
+
 2012-04-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-nat.c (_initialize_i386bsd_nat): Add missing prototype.
