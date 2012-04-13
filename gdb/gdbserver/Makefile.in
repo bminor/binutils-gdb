@@ -79,6 +79,14 @@ ustinc = @ustinc@
 GNULIB_INCLUDE_DIR = $(srcdir)/../gnulib
 GNULIB_LIB = gnulib/libgnu.a
 
+# We build gnulib directly under the gdbserver build directory, but
+# its sources don't live directly under gdbserver's source directory.
+# Tweak $srcdir and VPATH to make that work.
+GNULIB_FLAGS_TO_PASS = \
+	"top_srcdir=$(abs_top_srcdir)/.." \
+	"srcdir=$(abs_srcdir)/../gnulib" \
+	"VPATH=$(abs_top_srcdir)/../gnulib:$(abs_top_srcdir)"
+
 # Generated headers in the gnulib directory.  These must be listed
 # so that they are generated before other files are compiled.
 GNULIB_H = gnulib/string.h @GNULIB_STDINT_H@
@@ -169,8 +177,6 @@ extra_libraries = @extra_libraries@
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
-	"top_srcdir=$(abs_top_srcdir)/.." "srcdir=$(abs_srcdir)/../gnulib" \
-	"VPATH=$(abs_top_srcdir)/../gnulib:$(abs_top_srcdir)" \
 	"infodir=$(infodir)" \
 	"datarootdir=$(datarootdir)" \
 	"docdir=$(docdir)" \
@@ -206,7 +212,7 @@ FLAGS_TO_PASS = \
 	${CC} -c ${INTERNAL_CFLAGS} $<
 
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
-	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) all
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) all
 
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a
@@ -227,13 +233,13 @@ install-only:
 	$(INSTALL_PROGRAM) gdbserver$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT); \
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(man1dir); \
 	$(INSTALL_DATA) $(srcdir)/gdbserver.1 $(DESTDIR)$(man1dir)/$$n.1
-	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) install
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) install
 
 uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
 	rm -f $(DESTDIR)/$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(man1dir)/$$n.1
-	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) uninstall
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) uninstall
 
 installcheck:
 check:
@@ -243,7 +249,7 @@ install-pdf:
 html:
 install-html:
 clean-info: force
-	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $@
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) $@
 
 gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(GNULIB_LIB)
 	rm -f gdbserver$(EXEEXT)
@@ -252,7 +258,7 @@ gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(GNULIB_LIB)
 
 $(GNULIB_LIB) $(GNULIB_H): all-lib
 all-lib: gnulib/Makefile
-	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) all
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) all
 
 .PHONY: all-lib
 
@@ -308,12 +314,12 @@ clean:
 	rm -f i386-avx.c i386-avx-linux.c
 	rm -f amd64-avx.c amd64-avx-linux.c
 	rm -f i386-mmx.c i386-mmx-linux.c
-	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) clean
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) clean
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
 	rm -f Makefile
-	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $@
+	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) $@
 
 config.h: stamp-h ; @true
 stamp-h: config.in config.status
