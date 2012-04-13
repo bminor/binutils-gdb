@@ -2468,9 +2468,9 @@ sim_inline="-DDEFAULT_INLINE=0"
 # AC_PROG_CPP_WERROR
 
 # Test for GNAT.
-# We require the gnatbind program, and a compiler driver that
-# understands Ada.  We use the user's CC setting, already found,
-# and possibly add $1 to the command-line parameters.
+# We require the gnatbind & gnatmake programs, as well as a compiler driver
+# that understands Ada.  We use the user's CC setting, already found, and
+# possibly add $1 to the command-line parameters.
 #
 # Sets the shell variable have_gnat to yes or no as appropriate, and
 # substitutes GNATBIND and GNATMAKE.
@@ -5414,7 +5414,14 @@ _ACEOF
 fi
 done
 
-for ac_header in sys/ioctl.h sys/mman.h net/if.h linux/if_tun.h linux/mii.h
+for ac_header in  \
+	linux/if_tun.h \
+	linux/mii.h \
+	linux/types.h \
+	net/if.h \
+	sys/ioctl.h \
+	sys/mman.h \
+
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"

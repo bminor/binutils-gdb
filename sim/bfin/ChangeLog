@@ -1,3 +1,11 @@
+2012-04-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in: Regenerate.
+	* configure: Likewise.
+	* configure.ac: Add linux/types.h to AC_CHECK_HEADERS.
+	* dv-eth_phy.c: Check for HAVE_LINUX_TYPES_H, and delete __u16 and
+	_LINUX_TYPES_H defines.
+
 2011-12-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (bfin_syscall): Increase _tbuf storage.  Declare new local
