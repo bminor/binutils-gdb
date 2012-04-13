@@ -1,3 +1,10 @@
+2012-04-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13947
+	* ld-x86-64/x86-64.exp: Run pr13947.
+	* ld-x86-64/pr13947.d: New file.
+	* ld-x86-64/pr13947.s: Likewise.
+
 2012-04-13  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-arm/arm-elf.exp (armelftests_common): Move cases using

@@ -1,3 +1,9 @@
+2012-04-13  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13947
+	* elflink.c (bfd_elf_final_link): Set reloc_count to 0 for
+	reloc sections.
+
 2012-04-12  David S. Miller  <davem@davemloft.net>
 
 	* reloc.c (BFD_RELOC_SPARC_H34, BFD_RELOC_SPARC_SIZE32,

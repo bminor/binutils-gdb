@@ -10396,7 +10396,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (sec->flags & SEC_MERGE)
 		merged = TRUE;
 
-	      if (info->relocatable || info->emitrelocations)
+	      if (esdo->this_hdr.sh_type == SHT_REL
+		  || esdo->this_hdr.sh_type == SHT_RELA)
+		/* Some backends use reloc_count in relocation sections
+		   to count particular types of relocs.  Of course,
+		   reloc sections themselves can't have relocations.  */
+		reloc_count = 0;
+	      else if (info->relocatable || info->emitrelocations)
 		reloc_count = sec->reloc_count;
 	      else if (bed->elf_backend_count_relocs)
 		reloc_count = (*bed->elf_backend_count_relocs) (info, sec);
