@@ -1,3 +1,12 @@
+2012-04-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/13947
+	* objcopy.c (copy_object): Call copy_relocations_in_section
+	before copy_section.
+	(skip_section): New.
+	(copy_relocations_in_section): Likewise.
+	(copy_section): Use skip_section.  Don't copy relocations here.
+
 2012-04-11  Ryan Mansfield  <rmansfield@qnx.com>
 
         * objdump.c (dump_bfd): If defaulting to dwarf call

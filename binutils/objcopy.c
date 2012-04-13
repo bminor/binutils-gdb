@@ -459,6 +459,7 @@ extern bfd_boolean S3Forced;
 /* Forward declarations.  */
 static void setup_section (bfd *, asection *, void *);
 static void setup_bfd_headers (bfd *, bfd *);
+static void copy_relocations_in_section (bfd *, asection *, void *);
 static void copy_section (bfd *, asection *, void *);
 static void get_sections (bfd *, asection *, void *);
 static int compare_section_lma (const void *, const void *);
@@ -1885,6 +1886,9 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
   bfd_set_symtab (obfd, osympp, symcount);
 
+  /* This has to happen before section positions are set.  */
+  bfd_map_over_sections (ibfd, copy_relocations_in_section, obfd);
+
   /* This has to happen after the symbol table has been set.  */
   bfd_map_over_sections (ibfd, copy_section, obfd);
 
@@ -2588,44 +2592,56 @@ loser:
   bfd_nonfatal_message (NULL, obfd, osection, err);
 }
 
-/* Copy the data of input section ISECTION of IBFD
-   to an output section with the same name in OBFD.
-   If stripping then don't copy any relocation info.  */
+/* Return TRUE if input section ISECTION should be skipped.  */
 
-static void
-copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
+static bfd_boolean
+skip_section (bfd *ibfd, sec_ptr isection)
 {
-  bfd *obfd = (bfd *) obfdarg;
-  struct section_list *p;
-  arelent **relpp;
-  long relcount;
   sec_ptr osection;
   bfd_size_type size;
-  long relsize;
   flagword flags;
 
   /* If we have already failed earlier on,
      do not keep on generating complaints now.  */
   if (status != 0)
-    return;
+    return TRUE;
+
+  if (extract_symbol)
+    return TRUE;
 
   if (is_strip_section (ibfd, isection))
-    return;
+    return TRUE;
 
   flags = bfd_get_section_flags (ibfd, isection);
   if ((flags & SEC_GROUP) != 0)
-    return;
+    return TRUE;
 
   osection = isection->output_section;
   size = bfd_get_section_size (isection);
 
   if (size == 0 || osection == 0)
+    return TRUE;
+
+  return FALSE;
+}
+
+/* Copy relocations in input section ISECTION of IBFD to an output
+   section with the same name in OBFDARG.  If stripping then don't
+   copy any relocation info.  */
+
+static void
+copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
+{
+  bfd *obfd = (bfd *) obfdarg;
+  long relsize;
+  arelent **relpp;
+  long relcount;
+  sec_ptr osection;
+
+  if (skip_section (ibfd, isection))
     return;
 
-  if (extract_symbol)
-    return;
-
-  p = find_section_list (bfd_get_section_name (ibfd, isection), FALSE);
+  osection = isection->output_section;
 
   /* Core files do not need to be relocated.  */
   if (bfd_get_format (obfd) == bfd_core)
@@ -2682,8 +2698,31 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
       bfd_set_reloc (obfd, osection, relcount == 0 ? NULL : relpp, relcount);
       if (relcount == 0)
-	free (relpp);
+	{
+	  osection->flags &= ~SEC_RELOC;
+	  free (relpp);
+	}
     }
+}
+
+/* Copy the data of input section ISECTION of IBFD
+   to an output section with the same name in OBFD.  */
+
+static void
+copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
+{
+  bfd *obfd = (bfd *) obfdarg;
+  struct section_list *p;
+  sec_ptr osection;
+  bfd_size_type size;
+
+  if (skip_section (ibfd, isection))
+    return;
+
+  osection = isection->output_section;
+  size = bfd_get_section_size (isection);
+
+  p = find_section_list (bfd_get_section_name (ibfd, isection), FALSE);
 
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
