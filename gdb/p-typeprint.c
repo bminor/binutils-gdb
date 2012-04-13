@@ -183,8 +183,7 @@ pascal_type_print_method_args (const char *physname, const char *methodname,
 	  physname += len;
 
 	  for (j = 0; j < i; ++j)
-	    fputc_filtered (physname[i], stream);
-	  fputs_filtered (physname, stream);
+	    fputc_filtered (physname[j], stream);
 
 	  physname += i;
 	  if (physname[0] != 0)

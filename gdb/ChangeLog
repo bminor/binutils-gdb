@@ -1,3 +1,8 @@
+2012-04-13  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-typeprint.c (pascal_type_print_method_args):
+	Fix display of parameter of methods.
+
 2012-03-20  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_start_remote): Clear `rs->starting_up' on early
