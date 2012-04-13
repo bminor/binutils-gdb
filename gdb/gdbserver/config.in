@@ -113,7 +113,7 @@
 /* Define to 1 if the system has the type `long long int'. */
 #undef HAVE_LONG_LONG_INT
 
-/* Define if <sys/procfs.h> has lwpid_t. */
+/* Define if <thread_db.h> has lwpid_t. */
 #undef HAVE_LWPID_T
 
 /* Define to 1 if you have the <malloc.h> header file. */
@@ -162,7 +162,7 @@
 /* Define to 1 if you have the <proc_service.h> header file. */
 #undef HAVE_PROC_SERVICE_H
 
-/* Define if <sys/procfs.h> has psaddr_t. */
+/* Define if <thread_db.h> has psaddr_t. */
 #undef HAVE_PSADDR_T
 
 /* Define if the target supports PTRACE_GETFPXREGS for extended register

@@ -1,3 +1,11 @@
+2012-04-13  Thiago Jung Bauermann  <thiago.bauermann@linaro.org>
+
+	* acinclude.m4 (GDBSERVER_HAVE_THREAD_DB_TYPE): New macro based
+	on BFD_HAVE_SYS_PROCFS_TYPE.
+	* configure.ac: Look for lwpid_t and psaddr_t in libthread_db.h.
+	* configure: Regenerate.
+	* config.in: Likewise.
+
 2012-04-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in (clean): Also remove x32.c x32-linux.c
