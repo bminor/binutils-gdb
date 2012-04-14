@@ -319,9 +319,9 @@ clean:
 	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) clean
 
 maintainer-clean realclean distclean: clean
-	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
-	rm -f Makefile
+	rm -f nm.h tm.h xm.h config.h stamp-h config.log
 	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) $@
+	rm -f Makefile config.status
 
 config.h: stamp-h ; @true
 stamp-h: config.in config.status
