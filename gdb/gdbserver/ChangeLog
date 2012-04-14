@@ -1,5 +1,15 @@
 2012-04-14  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c: Include inttypes.h.
+	(struct collect_memory_action): Use sized types.
+	(struct tracepoint): Likewise.
+	(cmd_qtdp, stop_tracing): Update print specifiers.
+	(cmd_qtp, response_tracepoint): Likewise.
+	(collect_data_at_tracepoint): Likewise.
+	(collect_data_at_step): Likewise.
+
+2012-04-14  Yao Qi  <yao@codesourcery.com>
+
 	Import gnulib module inttypes.
 	* aclocal.m4, config.in, configure: Regenerated.
 

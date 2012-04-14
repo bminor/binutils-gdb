@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <stddef.h>
+#include <inttypes.h>
 #include <stdint.h>
 
 #include "ax.h"
@@ -490,7 +491,7 @@ struct collect_memory_action
 
   ULONGEST addr;
   ULONGEST len;
-  int basereg;
+  int32_t basereg;
 };
 
 /* An 'R' (collect registers) action.  */
@@ -650,7 +651,7 @@ struct tracepoint
 {
   /* The number of the tracepoint, as specified by GDB.  Several
      tracepoint objects here may share a number.  */
-  int number;
+  uint32_t number;
 
   /* Address at which the tracepoint is supposed to trigger.  Several
      tracepoints may share an address.  */
@@ -660,30 +661,30 @@ struct tracepoint
   enum tracepoint_type type;
 
   /* True if the tracepoint is currently enabled.  */
-  int enabled;
+  int8_t enabled;
 
   /* The number of single steps that will be performed after each
      tracepoint hit.  */
-  long step_count;
+  uint64_t step_count;
 
   /* The number of times the tracepoint may be hit before it will
      terminate the entire tracing run.  */
-  long pass_count;
+  uint64_t pass_count;
 
   /* Pointer to the agent expression that is the tracepoint's
      conditional, or NULL if the tracepoint is unconditional.  */
   struct agent_expr *cond;
 
   /* The list of actions to take when the tracepoint triggers.  */
-  int numactions;
+  uint32_t numactions;
   struct tracepoint_action **actions;
 
   /* Count of the times we've hit this tracepoint during the run.
      Note that while-stepping steps are not counted as "hits".  */
-  long hit_count;
+  uint64_t hit_count;
 
   /* Cached sum of the sizes of traceframes created by this point.  */
-  long traceframe_usage;
+  uint64_t traceframe_usage;
 
   CORE_ADDR compiled_cond;
 
@@ -703,7 +704,7 @@ struct tracepoint
   /* The number of bytes displaced by fast tracepoints. It may subsume
      multiple instructions, for multi-byte fast tracepoints.  This
      field is only valid for fast tracepoints.  */
-  int orig_size;
+  uint32_t orig_size;
 
   /* Only for fast tracepoints.  */
   CORE_ADDR obj_addr_on_target;
@@ -2481,7 +2482,7 @@ cmd_qtdp (char *own_buf)
 	}
 
       trace_debug ("Defined %stracepoint %d at 0x%s, "
-		   "enabled %d step %ld pass %ld",
+		   "enabled %d step %" PRIu64 " pass %" PRIu64,
 		   tpoint->type == fast_tracepoint ? "fast "
 		   : tpoint->type == static_tracepoint ? "static " : "",
 		   tpoint->number, paddress (tpoint->address), tpoint->enabled,
@@ -3279,7 +3280,7 @@ stop_tracing (void)
   if (stopping_tracepoint)
     {
       trace_debug ("Stopping the trace because "
-		   "tracepoint %d was hit %ld times",
+		   "tracepoint %d was hit %" PRIu64 " times",
 		   stopping_tracepoint->number,
 		   stopping_tracepoint->pass_count);
       tracing_stop_reason = "tpasscount";
@@ -3557,7 +3558,8 @@ cmd_qtp (char *own_buf)
       return;
     }
 
-  sprintf (own_buf, "V%lx:%lx", tpoint->hit_count, tpoint->traceframe_usage);
+  sprintf (own_buf, "V%" PRIu64 ":%" PRIu64 "", tpoint->hit_count,
+	   tpoint->traceframe_usage);
 }
 
 /* State variables to help return all the tracepoint bits.  */
@@ -3575,7 +3577,7 @@ response_tracepoint (char *packet, struct tracepoint *tpoint)
 {
   char *buf;
 
-  sprintf (packet, "T%x:%s:%c:%lx:%lx", tpoint->number,
+  sprintf (packet, "T%x:%s:%c:%" PRIx64 ":%" PRIx64, tpoint->number,
 	   paddress (tpoint->address),
 	   (tpoint->enabled ? 'E' : 'D'), tpoint->step_count,
 	   tpoint->pass_count);
@@ -4412,7 +4414,7 @@ collect_data_at_tracepoint (struct tracepoint_hit_ctx *ctx, CORE_ADDR stop_pc,
       && stopping_tracepoint == NULL)
     stopping_tracepoint = tpoint;
 
-  trace_debug ("Making new traceframe for tracepoint %d at 0x%s, hit %ld",
+  trace_debug ("Making new traceframe for tracepoint %d at 0x%s, hit %" PRIu64,
 	       tpoint->number, paddress (tpoint->address), tpoint->hit_count);
 
   tframe = add_traceframe (tpoint);
@@ -4449,7 +4451,7 @@ collect_data_at_step (struct tracepoint_hit_ctx *ctx,
   int acti;
 
   trace_debug ("Making new step traceframe for "
-	       "tracepoint %d at 0x%s, step %d of %ld, hit %ld",
+	       "tracepoint %d at 0x%s, step %d of %" PRIu64 ", hit %" PRIu64,
 	       tpoint->number, paddress (tpoint->address),
 	       current_step, tpoint->step_count,
 	       tpoint->hit_count);
