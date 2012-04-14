@@ -78,6 +78,9 @@
 /* Define to the default OS ABI for this configuration. */
 #undef GDB_OSABI_DEFAULT
 
+/* Define to make the limit macros in <stdint.h> visible. */
+#undef GL_TRIGGER_STDC_LIMIT_MACROS
+
 /* Define to 1 when the gnulib module memchr should be tested. */
 #undef GNULIB_TEST_MEMCHR
 
@@ -125,6 +128,14 @@
    don't. */
 #undef HAVE_DECL_GETTHRDS
 
+/* Define to 1 if you have the declaration of `imaxabs', and to 0 if you
+   don't. */
+#undef HAVE_DECL_IMAXABS
+
+/* Define to 1 if you have the declaration of `imaxdiv', and to 0 if you
+   don't. */
+#undef HAVE_DECL_IMAXDIV
+
 /* Define to 1 if you have the declaration of `malloc', and to 0 if you don't.
    */
 #undef HAVE_DECL_MALLOC
@@ -152,6 +163,14 @@
 /* Define to 1 if you have the declaration of `strstr', and to 0 if you don't.
    */
 #undef HAVE_DECL_STRSTR
+
+/* Define to 1 if you have the declaration of `strtoimax', and to 0 if you
+   don't. */
+#undef HAVE_DECL_STRTOIMAX
+
+/* Define to 1 if you have the declaration of `strtoumax', and to 0 if you
+   don't. */
+#undef HAVE_DECL_STRTOUMAX
 
 /* Define to 1 if you have the declaration of `vsnprintf', and to 0 if you
    don't. */
@@ -387,6 +406,12 @@
 /* Define to 1 if btowc is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_BTOWC
 
+/* Define to 1 if imaxabs is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_IMAXABS
+
+/* Define to 1 if imaxdiv is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_IMAXDIV
+
 /* Define to 1 if mbrlen is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_MBRLEN
 
@@ -447,8 +472,14 @@
 /* Define to 1 if strsignal is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_STRSIGNAL
 
+/* Define to 1 if strtoimax is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_STRTOIMAX
+
 /* Define to 1 if strtok_r is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_STRTOK_R
+
+/* Define to 1 if strtoumax is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_STRTOUMAX
 
 /* Define to 1 if strverscmp is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_STRVERSCMP
@@ -793,6 +824,9 @@
 /* Define to 1 if the "%ll" format works to print long longs. */
 #undef PRINTF_HAS_LONG_LONG
 
+/* Define if <inttypes.h> exists and defines unusable PRI* macros. */
+#undef PRI_MACROS_BROKEN
+
 /* Define if <proc_service.h> on solaris uses int instead of size_t, and
    assorted other type changes. */
 #undef PROC_SERVICE_IS_OLD
@@ -968,6 +1002,13 @@
 /* Enable general extensions on Solaris.  */
 #ifndef __EXTENSIONS__
 # undef __EXTENSIONS__
+#endif
+
+
+/* Ensure that <stdint.h> defines the limit macros, since gnulib's
+   <inttypes.h> relies on them.  */
+#if defined __cplusplus && !defined __STDC_LIMIT_MACROS && GL_TRIGGER_STDC_LIMIT_MACROS
+# define __STDC_LIMIT_MACROS 1
 #endif
 
 

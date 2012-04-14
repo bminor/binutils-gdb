@@ -1,3 +1,18 @@
+2012-04-14  Yao Qi  <yao@codesourcery.com>
+
+	Import gnulib module inttypes from git
+	(250b80067c1e1d8faa0c42fb572f721975b929c5)
+	* Makefile.in (HFILES_NO_SRCDIR): Add gnulib/inttypes.in.h.
+	(aclocal_m4_deps): Add gnulib/m4/inttypes.m4 and gnulib/m4/inttypes-pri.m4
+	* aclocal.m4, config.in, configure: Regenerated.
+	* gnulib/Makefile.am: Update.
+	* gnulib/Makefile.in: Update.
+	* gnulib/m4/gnulib-cache.m4: Update.
+	* gnulib/m4/gnulib-comp.m4: Update.
+	* gnulib/inttypes.in.h: New.
+	* gnulib/m4/inttypes-pri.m4: New.
+ 	* gnulib/m4/inttypes.m4: New.
+
 2012-04-13  Luis Machado  <lgustavo@codesourcery.com>
 
 	* infrun.c (resume): Update PC address to the real PC after

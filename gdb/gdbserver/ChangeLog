@@ -1,5 +1,10 @@
 2012-04-14  Yao Qi  <yao@codesourcery.com>
 
+	Import gnulib module inttypes.
+	* aclocal.m4, config.in, configure: Regenerated.
+
+2012-04-14  Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (maintainer-clean, realclean, distclean): Remove
 	Makefile and config.status at last.
 

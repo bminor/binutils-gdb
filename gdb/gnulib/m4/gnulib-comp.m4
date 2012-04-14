@@ -30,6 +30,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module extensions:
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   # Code from module include_next:
+  # Code from module inttypes:
   # Code from module memchr:
   # Code from module memmem:
   # Code from module memmem-simple:
@@ -61,6 +62,8 @@ AC_DEFUN([gl_INIT],
   # Code from module c++defs:
   # Code from module extensions:
   # Code from module include_next:
+  # Code from module inttypes:
+  gl_INTTYPES_H
   # Code from module memchr:
   gl_FUNC_MEMCHR
   gl_STRING_MODULE_INDICATOR([memchr])
@@ -225,6 +228,7 @@ AC_DEFUN([gl_FILE_LIST], [
   build-aux/c++defs.h
   build-aux/warn-on-use.h
   lib/dummy.c
+  lib/inttypes.in.h
   lib/memchr.c
   lib/memchr.valgrind
   lib/memmem.c
@@ -237,6 +241,8 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/extensions.m4
   m4/gnulib-common.m4
   m4/include_next.m4
+  m4/inttypes-pri.m4
+  m4/inttypes.m4
   m4/longlong.m4
   m4/memchr.m4
   m4/memmem.m4

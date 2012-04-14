@@ -821,7 +821,7 @@ osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
 solib-darwin.h solib-ia64-hpux.h solib-spu.h windows-nat.h xcoffread.h \
 gnulib/extra/arg-nonnull.h gnulib/extra/c++defs.h gnulib/extra/warn-on-use.h \
-gnulib/stddef.in.h inline-frame.h skip.h \
+gnulib/stddef.in.h gnulib/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/linux-osdata.h gdb-dlfcn.h
 
@@ -1312,6 +1312,8 @@ aclocal_m4_deps = \
 	gnulib/m4/gnulib-comp.m4 \
 	gnulib/m4/gnulib-tool.m4 \
 	gnulib/m4/include_next.m4 \
+	gnulib/m4/inttypes.m4 \
+	gnulib/m4/inttypes-pri.m4 \
 	gnulib/m4/longlong.m4 \
 	gnulib/m4/memchr.m4 \
 	gnulib/m4/memmem.m4 \
