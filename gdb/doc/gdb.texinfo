@@ -8666,7 +8666,8 @@ When displaying a pointer to an object, identify the @emph{actual}
 the virtual function table.  Note that the virtual function table is
 required---this feature can only work for objects that have run-time
 type identification; a single virtual method in the object's declared
-type is sufficient.
+type is sufficient.  Note that this setting is also taken into account when
+working with variable objects via MI (@pxref{GDB/MI}).
 
 @item set print object off
 Display only the declared type of objects, without reference to the
@@ -29103,7 +29104,10 @@ will not be interesting.
 
 @item type
 The varobj's type.  This is a string representation of the type, as
-would be printed by the @value{GDBN} CLI.
+would be printed by the @value{GDBN} CLI.  If @samp{print object}
+(@pxref{Print Settings, set print object}) is set to @code{on}, the
+@emph{actual} (derived) type of the object is shown rather than the
+@emph{declared} one.
 
 @item thread-id
 If a variable object is bound to a specific thread, then this is the
@@ -29274,7 +29278,10 @@ Number of children this child has.  For a dynamic varobj, this will be
 0.
 
 @item type
-The type of the child.
+The type of the child.  If @samp{print object}
+(@pxref{Print Settings, set print object}) is set to @code{on}, the
+@emph{actual} (derived) type of the object is shown rather than the
+@emph{declared} one.
 
 @item value
 If values were requested, this is the value.

@@ -270,6 +270,9 @@ static void cppush (struct cpstack **pstack, char *name);
 
 static char *cppop (struct cpstack **pstack);
 
+static int update_type_if_necessary (struct varobj *var,
+				     struct value *new_value);
+
 static int install_new_value (struct varobj *var, struct value *value, 
 			      int initial);
 
@@ -716,8 +719,14 @@ varobj_create (char *objname,
 
 	  var->type = value_type (type_only_value);
 	}
-      else 
-	var->type = value_type (value);
+	else
+	  {
+	    int real_type_found = 0;
+
+	    var->type = value_actual_type (value, 0, &real_type_found);
+	    if (real_type_found)
+	      value = value_cast (var->type, value);
+	  }
 
       /* Set language info */
       lang = variable_language (var);
@@ -1005,6 +1014,7 @@ restrict_range (VEC (varobj_p) *children, int *from, int *to)
 static void
 install_dynamic_child (struct varobj *var,
 		       VEC (varobj_p) **changed,
+		       VEC (varobj_p) **type_changed,
 		       VEC (varobj_p) **new,
 		       VEC (varobj_p) **unchanged,
 		       int *cchanged,
@@ -1027,12 +1037,18 @@ install_dynamic_child (struct varobj *var,
     {
       varobj_p existing = VEC_index (varobj_p, var->children, index);
 
+      int type_updated = update_type_if_necessary (existing, value);
+      if (type_updated)
+	{
+	  if (type_changed)
+	    VEC_safe_push (varobj_p, *type_changed, existing);
+	}
       if (install_new_value (existing, value, 0))
 	{
-	  if (changed)
+	  if (!type_updated && changed)
 	    VEC_safe_push (varobj_p, *changed, existing);
 	}
-      else if (unchanged)
+      else if (!type_updated && unchanged)
 	VEC_safe_push (varobj_p, *unchanged, existing);
     }
 }
@@ -1055,6 +1071,7 @@ dynamic_varobj_has_child_method (struct varobj *var)
 static int
 update_dynamic_varobj_children (struct varobj *var,
 				VEC (varobj_p) **changed,
+				VEC (varobj_p) **type_changed,
 				VEC (varobj_p) **new,
 				VEC (varobj_p) **unchanged,
 				int *cchanged,
@@ -1190,6 +1207,7 @@ update_dynamic_varobj_children (struct varobj *var,
 	  if (v == NULL)
 	    gdbpy_print_stack ();
 	  install_dynamic_child (var, can_mention ? changed : NULL,
+				 can_mention ? type_changed : NULL,
 				 can_mention ? new : NULL,
 				 can_mention ? unchanged : NULL,
 				 can_mention ? cchanged : NULL, i, name, v);
@@ -1245,7 +1263,7 @@ varobj_get_num_children (struct varobj *var)
 
 	  /* If we have a dynamic varobj, don't report -1 children.
 	     So, try to fetch some children first.  */
-	  update_dynamic_varobj_children (var, NULL, NULL, NULL, &dummy,
+	  update_dynamic_varobj_children (var, NULL, NULL, NULL, NULL, &dummy,
 					  0, 0, 0);
 	}
       else
@@ -1271,8 +1289,8 @@ varobj_list_children (struct varobj *var, int *from, int *to)
       /* This, in theory, can result in the number of children changing without
 	 frontend noticing.  But well, calling -var-list-children on the same
 	 varobj twice is not something a sane frontend would do.  */
-      update_dynamic_varobj_children (var, NULL, NULL, NULL, &children_changed,
-				      0, 0, *to);
+      update_dynamic_varobj_children (var, NULL, NULL, NULL, NULL,
+				      &children_changed, 0, 0, *to);
       restrict_range (var->children, from, to);
       return var->children;
     }
@@ -1619,6 +1637,43 @@ install_new_value_visualizer (struct varobj *var)
 #endif
 }
 
+/* When using RTTI to determine variable type it may be changed in runtime when
+   the variable value is changed.  This function checks whether type of varobj
+   VAR will change when a new value NEW_VALUE is assigned and if it is so
+   updates the type of VAR.  */
+
+static int
+update_type_if_necessary (struct varobj *var, struct value *new_value)
+{
+  if (new_value)
+    {
+      struct value_print_options opts;
+
+      get_user_print_options (&opts);
+      if (opts.objectprint)
+	{
+	  struct type *new_type;
+	  char *curr_type_str, *new_type_str;
+
+	  new_type = value_actual_type (new_value, 0, 0);
+	  new_type_str = type_to_string (new_type);
+	  curr_type_str = varobj_get_type (var);
+	  if (strcmp (curr_type_str, new_type_str) != 0)
+	    {
+	      var->type = new_type;
+
+	      /* This information may be not valid for a new type.  */
+	      varobj_delete (var, NULL, 1);
+	      VEC_free (varobj_p, var->children);
+	      var->num_children = -1;
+	      return 1;
+	    }
+	}
+    }
+
+  return 0;
+}
+
 /* Assign a new value to a variable object.  If INITIAL is non-zero,
    this is the first assignement after the variable object was just
    created, or changed type.  In that case, just assign the value 
@@ -1948,8 +2003,9 @@ varobj_update (struct varobj **varp, int explicit)
 	 value_of_root variable dispose of the varobj if the type
 	 has changed.  */
       new = value_of_root (varp, &type_changed);
+      if (update_type_if_necessary(*varp, new))
+	  type_changed = 1;
       r.varobj = *varp;
-
       r.type_changed = type_changed;
       if (install_new_value ((*varp), new, type_changed))
 	r.changed = 1;
@@ -1990,6 +2046,8 @@ varobj_update (struct varobj **varp, int explicit)
 	  struct type *new_type;
 
 	  new = value_of_child (v->parent, v->index);
+	  if (update_type_if_necessary(v, new))
+	    r.type_changed = 1;
 	  if (new)
 	    new_type = value_type (new);
 	  else
@@ -2019,7 +2077,8 @@ varobj_update (struct varobj **varp, int explicit)
 	 invoked.  */
       if (v->pretty_printer)
 	{
-	  VEC (varobj_p) *changed = 0, *new = 0, *unchanged = 0;
+	  VEC (varobj_p) *changed = 0, *type_changed = 0, *unchanged = 0;
+	  VEC (varobj_p) *new = 0;
 	  int i, children_changed = 0;
 
 	  if (v->frozen)
@@ -2037,7 +2096,7 @@ varobj_update (struct varobj **varp, int explicit)
 		 it.  */
 	      if (!varobj_has_more (v, 0))
 		{
-		  update_dynamic_varobj_children (v, NULL, NULL, NULL,
+		  update_dynamic_varobj_children (v, NULL, NULL, NULL, NULL,
 						  &dummy, 0, 0, 0);
 		  if (varobj_has_more (v, 0))
 		    r.changed = 1;
@@ -2051,8 +2110,8 @@ varobj_update (struct varobj **varp, int explicit)
 
 	  /* If update_dynamic_varobj_children returns 0, then we have
 	     a non-conforming pretty-printer, so we skip it.  */
-	  if (update_dynamic_varobj_children (v, &changed, &new, &unchanged,
-					      &children_changed, 1,
+	  if (update_dynamic_varobj_children (v, &changed, &type_changed, &new,
+					      &unchanged, &children_changed, 1,
 					      v->from, v->to))
 	    {
 	      if (children_changed || new)
@@ -2064,6 +2123,18 @@ varobj_update (struct varobj **varp, int explicit)
 		 popped from the work stack first, and so will be
 		 added to result first.  This does not affect
 		 correctness, just "nicer".  */
+	      for (i = VEC_length (varobj_p, type_changed) - 1; i >= 0; --i)
+		{
+		  varobj_p tmp = VEC_index (varobj_p, type_changed, i);
+		  varobj_update_result r = {0};
+
+		  /* Type may change only if value was changed.  */
+		  r.varobj = tmp;
+		  r.changed = 1;
+		  r.type_changed = 1;
+		  r.value_installed = 1;
+		  VEC_safe_push (varobj_update_result, stack, &r);
+		}
 	      for (i = VEC_length (varobj_p, changed) - 1; i >= 0; --i)
 		{
 		  varobj_p tmp = VEC_index (varobj_p, changed, i);
@@ -2090,9 +2161,10 @@ varobj_update (struct varobj **varp, int explicit)
 	      if (r.changed || r.children_changed)
 		VEC_safe_push (varobj_update_result, result, &r);
 
-	      /* Free CHANGED and UNCHANGED, but not NEW, because NEW
-		 has been put into the result vector.  */
+	      /* Free CHANGED, TYPE_CHANGED and UNCHANGED, but not NEW,
+		 because NEW has been put into the result vector.  */
 	      VEC_free (varobj_p, changed);
+	      VEC_free (varobj_p, type_changed);
 	      VEC_free (varobj_p, unchanged);
 
 	      continue;
@@ -2367,7 +2439,7 @@ create_child_with_value (struct varobj *parent, int index, const char *name,
   if (value != NULL)
     /* If the child had no evaluation errors, var->value
        will be non-NULL and contain a valid type.  */
-    child->type = value_type (value);
+    child->type = value_actual_type (value, 0, NULL);
   else
     /* Otherwise, we must compute the type.  */
     child->type = (*child->root->lang->type_of_child) (child->parent, 
@@ -2948,6 +3020,10 @@ varobj_floating_p (struct varobj *var)
    to all types and dereferencing pointers to
    structures.
 
+   If LOOKUP_ACTUAL_TYPE is set the enclosing type of the
+   value will be fetched and if it differs from static type
+   the value will be casted to it.
+
    Both TYPE and *TYPE should be non-null.  VALUE
    can be null if we want to only translate type.
    *VALUE can be null as well -- if the parent
@@ -2959,7 +3035,8 @@ varobj_floating_p (struct varobj *var)
 static void
 adjust_value_for_child_access (struct value **value,
 				  struct type **type,
-				  int *was_ptr)
+				  int *was_ptr,
+				  int lookup_actual_type)
 {
   gdb_assert (type && *type);
 
@@ -3004,6 +3081,20 @@ adjust_value_for_child_access (struct value **value,
   /* The 'get_target_type' function calls check_typedef on
      result, so we can immediately check type code.  No
      need to call check_typedef here.  */
+
+  /* Access a real type of the value (if necessary and possible).  */
+  if (value && *value && lookup_actual_type)
+    {
+      struct type *enclosing_type;
+      int real_type_found = 0;
+
+      enclosing_type = value_actual_type (*value, 1, &real_type_found);
+      if (real_type_found)
+        {
+          *type = enclosing_type;
+          *value = value_cast (enclosing_type, *value);
+        }
+    }
 }
 
 /* Implement the "value_is_changeable_p" varobj callback for most
@@ -3044,7 +3135,7 @@ c_number_of_children (struct varobj *var)
   int children = 0;
   struct type *target;
 
-  adjust_value_for_child_access (NULL, &type, NULL);
+  adjust_value_for_child_access (NULL, &type, NULL, 0);
   target = get_target_type (type);
 
   switch (TYPE_CODE (type))
@@ -3160,7 +3251,7 @@ c_describe_child (struct varobj *parent, int index,
       *cfull_expression = NULL;
       parent_expression = varobj_get_path_expr (get_path_expr_parent (parent));
     }
-  adjust_value_for_child_access (&value, &type, &was_ptr);
+  adjust_value_for_child_access (&value, &type, &was_ptr, 0);
       
   switch (TYPE_CODE (type))
     {
@@ -3456,16 +3547,29 @@ c_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 static int
 cplus_number_of_children (struct varobj *var)
 {
+  struct value *value = NULL;
   struct type *type;
   int children, dont_know;
+  int lookup_actual_type = 0;
+  struct value_print_options opts;
 
   dont_know = 1;
   children = 0;
 
+  get_user_print_options (&opts);
+
   if (!CPLUS_FAKE_CHILD (var))
     {
       type = get_value_type (var);
-      adjust_value_for_child_access (NULL, &type, NULL);
+
+      /* It is necessary to access a real type (via RTTI).  */
+      if (opts.objectprint)
+        {
+          value = var->value;
+          lookup_actual_type = (TYPE_CODE (var->type) == TYPE_CODE_REF
+				|| TYPE_CODE (var->type) == TYPE_CODE_PTR);
+        }
+      adjust_value_for_child_access (&value, &type, NULL, lookup_actual_type);
 
       if (((TYPE_CODE (type)) == TYPE_CODE_STRUCT) ||
 	  ((TYPE_CODE (type)) == TYPE_CODE_UNION))
@@ -3492,7 +3596,17 @@ cplus_number_of_children (struct varobj *var)
       int kids[3];
 
       type = get_value_type (var->parent);
-      adjust_value_for_child_access (NULL, &type, NULL);
+
+      /* It is necessary to access a real type (via RTTI).  */
+      if (opts.objectprint)
+        {
+	  struct varobj *parent = var->parent;
+
+	  value = parent->value;
+	  lookup_actual_type = (TYPE_CODE (parent->type) == TYPE_CODE_REF
+				|| TYPE_CODE (parent->type) == TYPE_CODE_PTR);
+        }
+      adjust_value_for_child_access (&value, &type, NULL, lookup_actual_type);
 
       cplus_class_num_children (type, kids);
       if (strcmp (var->name, "public") == 0)
@@ -3574,7 +3688,10 @@ cplus_describe_child (struct varobj *parent, int index,
   struct value *value;
   struct type *type;
   int was_ptr;
+  int lookup_actual_type = 0;
   char *parent_expression = NULL;
+  struct varobj *var;
+  struct value_print_options opts;
 
   if (cname)
     *cname = NULL;
@@ -3585,24 +3702,18 @@ cplus_describe_child (struct varobj *parent, int index,
   if (cfull_expression)
     *cfull_expression = NULL;
 
-  if (CPLUS_FAKE_CHILD (parent))
-    {
-      value = parent->parent->value;
-      type = get_value_type (parent->parent);
-      if (cfull_expression)
-	parent_expression
-	  = varobj_get_path_expr (get_path_expr_parent (parent->parent));
-    }
-  else
-    {
-      value = parent->value;
-      type = get_value_type (parent);
-      if (cfull_expression)
-	parent_expression
-	  = varobj_get_path_expr (get_path_expr_parent (parent));
-    }
+  get_user_print_options (&opts);
 
-  adjust_value_for_child_access (&value, &type, &was_ptr);
+  var = (CPLUS_FAKE_CHILD (parent)) ? parent->parent : parent;
+  if (opts.objectprint)
+    lookup_actual_type = (TYPE_CODE (var->type) == TYPE_CODE_REF
+			  || TYPE_CODE (var->type) == TYPE_CODE_PTR);
+  value = var->value;
+  type = get_value_type (var);
+  if (cfull_expression)
+    parent_expression = varobj_get_path_expr (get_path_expr_parent (var));
+
+  adjust_value_for_child_access (&value, &type, &was_ptr, lookup_actual_type);
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       || TYPE_CODE (type) == TYPE_CODE_UNION)

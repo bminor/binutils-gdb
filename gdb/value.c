@@ -834,6 +834,47 @@ value_enclosing_type (struct value *value)
   return value->enclosing_type;
 }
 
+/* Look at value.h for description.  */
+
+struct type *
+value_actual_type (struct value *value, int resolve_simple_types,
+		   int *real_type_found)
+{
+  struct value_print_options opts;
+  struct value *target;
+  struct type *result;
+
+  get_user_print_options (&opts);
+
+  if (real_type_found)
+    *real_type_found = 0;
+  result = value_type (value);
+  if (opts.objectprint)
+    {
+      if (TYPE_CODE (result) == TYPE_CODE_PTR
+	  || TYPE_CODE (result) == TYPE_CODE_REF)
+        {
+          struct type *real_type;
+
+          real_type = value_rtti_indirect_type (value, NULL, NULL, NULL);
+          if (real_type)
+            {
+              if (real_type_found)
+                *real_type_found = 1;
+              result = real_type;
+            }
+        }
+      else if (resolve_simple_types)
+        {
+          if (real_type_found)
+            *real_type_found = 1;
+          result = value_enclosing_type (value);
+        }
+    }
+
+  return result;
+}
+
 static void
 require_not_optimized_out (const struct value *value)
 {

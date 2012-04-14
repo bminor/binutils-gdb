@@ -1,3 +1,12 @@
+2012-04-14  Anton Gorenkov <xgsa@yandex.ru>
+
+	PR mi/13393
+	* gdb.mi/mi-var-rtti.cc: New file.
+	* gdb.mi/mi-var-rtti.exp: New file.
+	* lib/mi-support.exp (mi_varobj_update_with_child_type_change): New
+	function.
+	(mi_varobj_update_with_type_change): updated to avoid code duplication.
+
 2012-04-11  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.python/Makefile.in: Add py-explore and py-explore-cc to

@@ -1,3 +1,11 @@
+2012-04-14  Anton Gorenkov <xgsa@yandex.ru>
+
+	PR mi/13393
+	* gdb.texinfo (Print Settings): Extend the description for "set print
+	object".
+	(GDB/MI Variable Objects): Extend the description for -var-create and
+	-var-list-children.
+
 2012-04-11  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.texinfo (Examining Data): Document the 'explore' command.

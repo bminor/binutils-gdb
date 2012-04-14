@@ -1,3 +1,23 @@
+2012-04-14  Anton Gorenkov <xgsa@yandex.ru>
+
+	PR mi/13393
+	* value.c (value_actual_type): New function.
+	* value.h (value_actual_type): New declaration.
+	* varobj.c (update_type_if_necessary): New function.
+	(varobj_create): Call value_actual_type instead of
+	value_type.
+	(install_dynamic_child): distinct changed and type changed MI variable
+	objects.
+	(update_dynamic_varobj_children): Updated for install_dynamic_child
+	change.  All callers updated.
+	(varobj_update): Support for MI variable object type change if 
+	the value changed and RTTI is used to determine the type.
+	(create_child_with_value): Call value_actual_type instead of
+	value_type.
+	(adjust_value_for_child_access): Extended with a new parameter which 
+	specify whether the given value should be casted to enclosing type.
+	All callers updated.
+
 2012-04-14  Yao Qi  <yao@codesourcery.com>
 
 	Import gnulib module inttypes from git

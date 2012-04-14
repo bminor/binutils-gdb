@@ -1298,11 +1298,15 @@ proc mi_varobj_update { name expected testname } {
     mi_gdb_test "-var-update $name" $er $testname
 }
 
-proc mi_varobj_update_with_type_change { name new_type new_children testname } {
-    set v "{name=\"$name\",in_scope=\"true\",type_changed=\"true\",new_type=\"$new_type\",new_num_children=\"$new_children\",has_more=\".\"}"
+proc mi_varobj_update_with_child_type_change { name child_name new_type new_children testname } {
+    set v "{name=\"$child_name\",in_scope=\"true\",type_changed=\"true\",new_type=\"$new_type\",new_num_children=\"$new_children\",has_more=\".\"}"
     set er "\\^done,changelist=\\\[$v\\\]"
     verbose -log "Expecting: $er"
     mi_gdb_test "-var-update $name" $er $testname
+}
+
+proc mi_varobj_update_with_type_change { name new_type new_children testname } {
+    mi_varobj_update_with_child_type_change $name $name $new_type $new_children $testname
 }
 
 # A helper that turns a key/value list into a regular expression
