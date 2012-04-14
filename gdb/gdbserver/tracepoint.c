@@ -24,9 +24,8 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <stddef.h>
-#if HAVE_STDINT_H
 #include <stdint.h>
-#endif
+
 #include "ax.h"
 
 /* This file is built for both GDBserver, and the in-process
