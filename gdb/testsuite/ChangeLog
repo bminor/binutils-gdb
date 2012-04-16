@@ -1,5 +1,8 @@
 2012-04-16  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* gdb.asm/sh.inc (gdbasm_startup): Only set up the stack pointer if the
+	symbol _stack is defined.  Get rid of a hard-coded constant for _stack.
+
 	* gdb.asm/sh.inc (gdbasm_end) <.size>: Refer to the function's name.
 
 2012-04-14  Anton Gorenkov <xgsa@yandex.ru>

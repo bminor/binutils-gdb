@@ -65,13 +65,19 @@
 
 	comment "crt0 startup"
 	.macro gdbasm_startup
-	mov.l	.stackaddr,r15
+	comment "If there is a _stack symbol, use it for setting up the stack"
+	comment "pointer.  In hosted mode (when there is no _stack symbol),"
+	comment "the operating system will have initialized it already."
+	mov.l	.stackaddr, r0
+	tst	r0, r0
+	bt	.afterstackaddr
+	mov	r0, r15
 	bra	.afterstackaddr
-	nop
 	nop
 	.align 2
 .stackaddr:
-	.long	196608		! 0x30000
+	.weak	_stack
+	.long	_stack
 	.align	1
 .afterstackaddr:
 	.endm
