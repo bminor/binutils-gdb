@@ -1,3 +1,8 @@
+2012-04-16  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* elfxx-mips.c (mips16_stub_symndx): Handle n64 compound relocs.
+	(_bfd_mips_elf_check_relocs): Update accordingly.
+
 2012-04-13  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13947
