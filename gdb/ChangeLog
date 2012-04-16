@@ -1,3 +1,12 @@
+2012-04-16  Yao Qi  <yao@codesourcery.com>
+
+	* common/agent.c (agent_run_command): Add one more parameter `len'.
+	Update callers.
+	* common/agent.h: Update declaration.
+	* linux-nat.c (linux_child_static_tracepoint_markers_by_strid):
+	Update.
+	(linux_child_static_tracepoint_markers_by_strid): Ditto.
+
 2012-04-14  Anton Gorenkov <xgsa@yandex.ru>
 
 	PR mi/13393

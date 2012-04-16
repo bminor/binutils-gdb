@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-int agent_run_command (int pid, const char *cmd);
+int agent_run_command (int pid, const char *cmd, int len);
 
 int agent_look_up_symbols (void *);
 

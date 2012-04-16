@@ -4796,7 +4796,7 @@ linux_child_static_tracepoint_markers_by_strid (const char *strid)
   memcpy (s, "qTfSTM", sizeof ("qTfSTM"));
   s[sizeof ("qTfSTM")] = 0;
 
-  agent_run_command (pid, s);
+  agent_run_command (pid, s, strlen (s) + 1);
 
   old_chain = make_cleanup (free_current_marker, &marker);
   make_cleanup (cleanup_target_stop, &ptid);
@@ -4826,7 +4826,7 @@ linux_child_static_tracepoint_markers_by_strid (const char *strid)
 
       memcpy (s, "qTsSTM", sizeof ("qTsSTM"));
       s[sizeof ("qTsSTM")] = 0;
-      agent_run_command (pid, s);
+      agent_run_command (pid, s, strlen (s) + 1);
       p = s;
     }
 

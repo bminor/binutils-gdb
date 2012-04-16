@@ -1,5 +1,19 @@
 2012-04-16  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (COPY_FIELD_TO_BUF): New macro.
+	(struct tracepoint_action_ops) <send>: New field.
+	(m_tracepoint_action_send, r_tracepoint_action_send): New.
+	(agent_expr_send, x_tracepoint_action_send): New.
+	(l_tracepoint_action_send): New.
+	(cmd_qtdp): Download and install tracepoint
+	according to `use_agent'.
+	(run_inferior_command): Add one more parameter `len'.
+	Update callers.
+	(tracepoint_send_agent): New.
+	(cmd_qtdp, cmd_qtstart): Call tracepoint_send_agent.
+
+2012-04-16  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (download_tracepoints): Moved to ...
 	(cmd_qtstart): ... here.
 

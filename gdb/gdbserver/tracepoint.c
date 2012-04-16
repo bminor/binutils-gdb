@@ -411,7 +411,7 @@ static int flush_trace_buffer_handler (CORE_ADDR);
 static void download_trace_state_variables (void);
 static void upload_fast_traceframes (void);
 
-static int run_inferior_command (char *cmd);
+static int run_inferior_command (char *cmd, int len);
 
 static int
 read_inferior_integer (CORE_ADDR symaddr, int *val)
@@ -419,6 +419,9 @@ read_inferior_integer (CORE_ADDR symaddr, int *val)
   return read_inferior_memory (symaddr, (unsigned char *) val,
 			       sizeof (*val));
 }
+
+struct tracepoint;
+static int tracepoint_send_agent (struct tracepoint *tpoint);
 
 static int
 read_inferior_uinteger (CORE_ADDR symaddr, unsigned int *val)
@@ -460,6 +463,13 @@ write_inferior_uinteger (CORE_ADDR symaddr, unsigned int val)
 
 static CORE_ADDR target_malloc (ULONGEST size);
 static int write_inferior_data_ptr (CORE_ADDR where, CORE_ADDR ptr);
+
+#define COPY_FIELD_TO_BUF(BUF, OBJ, FIELD)	\
+  do {							\
+    memcpy (BUF, &(OBJ)->FIELD, sizeof ((OBJ)->FIELD)); \
+    BUF += sizeof ((OBJ)->FIELD);			\
+  } while (0)
+
 #endif
 
 /* Operations on various types of tracepoint actions.  */
@@ -471,6 +481,10 @@ struct tracepoint_action_ops
   /* Download tracepoint action ACTION to IPA.  Return the address of action
      in IPA/inferior.  */
   CORE_ADDR (*download) (const struct tracepoint_action *action);
+
+  /* Send ACTION to agent via command buffer started from BUFFER.  Return
+     updated head of command buffer.  */
+  char* (*send) (char *buffer, const struct tracepoint_action *action);
 };
 
 /* Base action.  Concrete actions inherit this.  */
@@ -528,10 +542,23 @@ m_tracepoint_action_download (const struct tracepoint_action *action)
 
   return ipa_action;
 }
+static char *
+m_tracepoint_action_send (char *buffer, const struct tracepoint_action *action)
+{
+  struct collect_memory_action *maction
+    = (struct collect_memory_action *) action;
+
+  COPY_FIELD_TO_BUF (buffer, maction, addr);
+  COPY_FIELD_TO_BUF (buffer, maction, len);
+  COPY_FIELD_TO_BUF (buffer, maction, basereg);
+
+  return buffer;
+}
 
 static const struct tracepoint_action_ops m_tracepoint_action_ops =
 {
   m_tracepoint_action_download,
+  m_tracepoint_action_send,
 };
 
 static CORE_ADDR
@@ -547,9 +574,16 @@ r_tracepoint_action_download (const struct tracepoint_action *action)
   return ipa_action;
 }
 
+static char *
+r_tracepoint_action_send (char *buffer, const struct tracepoint_action *action)
+{
+  return buffer;
+}
+
 static const struct tracepoint_action_ops r_tracepoint_action_ops =
 {
   r_tracepoint_action_download,
+  r_tracepoint_action_send,
 };
 
 static CORE_ADDR download_agent_expr (struct agent_expr *expr);
@@ -572,9 +606,42 @@ x_tracepoint_action_download (const struct tracepoint_action *action)
   return ipa_action;
 }
 
+/* Copy agent expression AEXPR to buffer pointed by P.  If AEXPR is NULL,
+   copy 0 to P.  Return updated header of buffer.  */
+
+static char *
+agent_expr_send (char *p, const struct agent_expr *aexpr)
+{
+  /* Copy the length of condition first, and then copy its
+     content.  */
+  if (aexpr == NULL)
+    {
+      memset (p, 0, 4);
+      p += 4;
+    }
+  else
+    {
+      memcpy (p, &aexpr->length, 4);
+      p +=4;
+
+      memcpy (p, aexpr->bytes, aexpr->length);
+      p += aexpr->length;
+    }
+  return p;
+}
+
+static char *
+x_tracepoint_action_send ( char *buffer, const struct tracepoint_action *action)
+{
+  struct eval_expr_action *eaction = (struct eval_expr_action *) action;
+
+  return agent_expr_send (buffer, eaction->expr);
+}
+
 static const struct tracepoint_action_ops x_tracepoint_action_ops =
 {
   x_tracepoint_action_download,
+  x_tracepoint_action_send,
 };
 
 static CORE_ADDR
@@ -590,9 +657,16 @@ l_tracepoint_action_download (const struct tracepoint_action *action)
   return ipa_action;
 }
 
+static char *
+l_tracepoint_action_send (char *buffer, const struct tracepoint_action *action)
+{
+  return buffer;
+}
+
 static const struct tracepoint_action_ops l_tracepoint_action_ops =
 {
   l_tracepoint_action_download,
+  l_tracepoint_action_send,
 };
 #endif
 
@@ -2330,7 +2404,7 @@ unprobe_marker_at (CORE_ADDR address)
   char cmd[IPA_CMD_BUF_SIZE];
 
   sprintf (cmd, "unprobe_marker_at:%s", paddress (address));
-  run_inferior_command (cmd);
+  run_inferior_command (cmd, strlen (cmd) + 1);
 }
 
 /* Restore the program to its pre-tracing state.  This routine may be called
@@ -2536,16 +2610,31 @@ cmd_qtdp (char *own_buf)
 	    }
 	}
 
-      download_tracepoint (tpoint);
-
-      if (tpoint->type == trap_tracepoint || tp == NULL)
+      if (use_agent && tpoint->type == fast_tracepoint
+	  && agent_capability_check (AGENT_CAPA_FAST_TRACE))
 	{
-	  install_tracepoint (tpoint, own_buf);
-	  if (strcmp (own_buf, "OK") != 0)
-	    remove_tracepoint (tpoint);
+	  /* Download and install fast tracepoint by agent.  */
+	  if (tracepoint_send_agent (tpoint) == 0)
+	    write_ok (own_buf);
+	  else
+	    {
+	      write_enn (own_buf);
+	      remove_tracepoint (tpoint);
+	    }
 	}
       else
-	write_ok (own_buf);
+	{
+	  download_tracepoint (tpoint);
+
+	  if (tpoint->type == trap_tracepoint || tp == NULL)
+	    {
+	      install_tracepoint (tpoint, own_buf);
+	      if (strcmp (own_buf, "OK") != 0)
+		remove_tracepoint (tpoint);
+	    }
+	  else
+	    write_ok (own_buf);
+	}
 
       unpause_all (1);
       return;
@@ -2936,7 +3025,7 @@ probe_marker_at (CORE_ADDR address, char *errout)
   int err;
 
   sprintf (cmd, "probe_marker_at:%s", paddress (address));
-  err = run_inferior_command (cmd);
+  err = run_inferior_command (cmd, strlen (cmd) + 1);
 
   if (err == 0)
     {
@@ -3155,14 +3244,25 @@ cmd_qtstart (char *packet)
 
 	  if (tpoint->type == fast_tracepoint)
 	    {
-	      download_tracepoint_1 (tpoint);
-
 	      if (prev_ftpoint != NULL
 		  && prev_ftpoint->address == tpoint->address)
 		clone_fast_tracepoint (tpoint, prev_ftpoint);
 	      else
 		{
-		  if (install_fast_tracepoint (tpoint, packet) == 0)
+		  /* Tracepoint is installed successfully?  */
+		  int installed = 0;
+
+		  /* Download and install fast tracepoint by agent.  */
+		  if (use_agent
+		      && agent_capability_check (AGENT_CAPA_FAST_TRACE))
+		    installed = !tracepoint_send_agent (tpoint);
+		  else
+		    {
+		      download_tracepoint_1 (tpoint);
+		      installed = !install_fast_tracepoint (tpoint, packet);
+		    }
+
+		  if (installed)
 		    prev_ftpoint = tpoint;
 		}
 	    }
@@ -3791,7 +3891,7 @@ static void
 cmd_qtfstm (char *packet)
 {
   if (!maybe_write_ipa_ust_not_loaded (packet))
-    run_inferior_command (packet);
+    run_inferior_command (packet, strlen (packet) + 1);
 }
 
 /* Return additional static tracepoints markers.  */
@@ -3800,7 +3900,7 @@ static void
 cmd_qtsstm (char *packet)
 {
   if (!maybe_write_ipa_ust_not_loaded (packet))
-    run_inferior_command (packet);
+    run_inferior_command (packet, strlen (packet) + 1);
 }
 
 /* Return the definition of the static tracepoint at a given address.
@@ -3810,7 +3910,7 @@ static void
 cmd_qtstmat (char *packet)
 {
   if (!maybe_write_ipa_ust_not_loaded (packet))
-    run_inferior_command (packet);
+    run_inferior_command (packet, strlen (packet) + 1);
 }
 
 /* Return the minimum instruction size needed for fast tracepoints as a
@@ -5826,6 +5926,91 @@ download_tracepoint_1 (struct tracepoint *tpoint)
     }
 }
 
+#define IPA_PROTO_FAST_TRACE_FLAG 0
+#define IPA_PROTO_FAST_TRACE_ADDR_ON_TARGET 2
+#define IPA_PROTO_FAST_TRACE_JUMP_PAD 10
+#define IPA_PROTO_FAST_TRACE_FJUMP_SIZE 18
+#define IPA_PROTO_FAST_TRACE_FJUMP_INSN 22
+
+/* Send a command to agent to download and install tracepoint TPOINT.  */
+
+static int
+tracepoint_send_agent (struct tracepoint *tpoint)
+{
+  char buf[IPA_CMD_BUF_SIZE];
+  char *p;
+  int i, ret;
+
+  p = buf;
+  strcpy (p, "FastTrace:");
+  p += 10;
+
+  COPY_FIELD_TO_BUF (p, tpoint, number);
+  COPY_FIELD_TO_BUF (p, tpoint, address);
+  COPY_FIELD_TO_BUF (p, tpoint, type);
+  COPY_FIELD_TO_BUF (p, tpoint, enabled);
+  COPY_FIELD_TO_BUF (p, tpoint, step_count);
+  COPY_FIELD_TO_BUF (p, tpoint, pass_count);
+  COPY_FIELD_TO_BUF (p, tpoint, numactions);
+  COPY_FIELD_TO_BUF (p, tpoint, hit_count);
+  COPY_FIELD_TO_BUF (p, tpoint, traceframe_usage);
+  COPY_FIELD_TO_BUF (p, tpoint, compiled_cond);
+  COPY_FIELD_TO_BUF (p, tpoint, orig_size);
+
+  /* condition */
+  p = agent_expr_send (p, tpoint->cond);
+
+  /* tracepoint_action */
+  for (i = 0; i < tpoint->numactions; i++)
+    {
+      struct tracepoint_action *action = tpoint->actions[i];
+
+      p[0] = action->type;
+      p = action->ops->send (&p[1], action);
+    }
+
+  get_jump_space_head ();
+  /* Copy the value of GDB_JUMP_PAD_HEAD to command buffer, so that
+     agent can use jump pad from it.  */
+  if (tpoint->type == fast_tracepoint)
+    {
+      memcpy (p, &gdb_jump_pad_head, 8);
+      p += 8;
+    }
+
+  ret = run_inferior_command (buf, (int) (ptrdiff_t) (p - buf));
+  if (ret)
+    return ret;
+
+  if (strncmp (buf, "OK", 2) != 0)
+    return 1;
+
+  /* The value of tracepoint's target address is stored in BUF.  */
+  memcpy (&tpoint->obj_addr_on_target,
+	  &buf[IPA_PROTO_FAST_TRACE_ADDR_ON_TARGET], 8);
+
+  if (tpoint->type == fast_tracepoint)
+    {
+      unsigned char *insn
+	= (unsigned char *) &buf[IPA_PROTO_FAST_TRACE_FJUMP_INSN];
+      int fjump_size;
+
+     trace_debug ("agent: read from cmd_buf 0x%x 0x%x\n",
+		  (unsigned int) tpoint->obj_addr_on_target,
+		  (unsigned int) gdb_jump_pad_head);
+
+      memcpy (&gdb_jump_pad_head, &buf[IPA_PROTO_FAST_TRACE_JUMP_PAD], 8);
+
+      /* This has been done in agent.  We should also set up record for it.  */
+      memcpy (&fjump_size, &buf[IPA_PROTO_FAST_TRACE_FJUMP_SIZE], 4);
+      /* Wire it in.  */
+      tpoint->handle
+	= set_fast_tracepoint_jump (tpoint->address, insn, fjump_size);
+    }
+
+  return 0;
+}
+
 static void
 download_tracepoint (struct tracepoint *tpoint)
 {
@@ -6468,7 +6653,7 @@ static struct ltt_available_probe gdb_ust_probe =
    synchronization.  */
 
 static int
-run_inferior_command (char *cmd)
+run_inferior_command (char *cmd, int len)
 {
   int err = -1;
   int pid = ptid_get_pid (current_inferior->entry.id);
@@ -6478,7 +6663,7 @@ run_inferior_command (char *cmd)
   pause_all (0);
   uninsert_all_breakpoints ();
 
-  err = agent_run_command (pid, (const char *) cmd);
+  err = agent_run_command (pid, (const char *) cmd, len);
 
   reinsert_all_breakpoints ();
   unpause_all (0);
