@@ -3244,17 +3244,26 @@ cmd_qtstart (char *packet)
 
 	  if (tpoint->type == fast_tracepoint)
 	    {
+	      int use_agent_p
+		= use_agent && agent_capability_check (AGENT_CAPA_FAST_TRACE);
+
 	      if (prev_ftpoint != NULL
 		  && prev_ftpoint->address == tpoint->address)
-		clone_fast_tracepoint (tpoint, prev_ftpoint);
+		{
+		  if (use_agent_p)
+		    tracepoint_send_agent (tpoint);
+		  else
+		    download_tracepoint_1 (tpoint);
+
+		  clone_fast_tracepoint (tpoint, prev_ftpoint);
+		}
 	      else
 		{
 		  /* Tracepoint is installed successfully?  */
 		  int installed = 0;
 
 		  /* Download and install fast tracepoint by agent.  */
-		  if (use_agent
-		      && agent_capability_check (AGENT_CAPA_FAST_TRACE))
+		  if (use_agent_p)
 		    installed = !tracepoint_send_agent (tpoint);
 		  else
 		    {

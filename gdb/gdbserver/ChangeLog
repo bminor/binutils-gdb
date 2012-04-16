@@ -1,5 +1,10 @@
 2012-04-16  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (cmd_qtstart): Download tracepoints even when they are
+	duplicated on address.
+
+2012-04-16  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (COPY_FIELD_TO_BUF): New macro.
 	(struct tracepoint_action_ops) <send>: New field.
 	(m_tracepoint_action_send, r_tracepoint_action_send): New.
