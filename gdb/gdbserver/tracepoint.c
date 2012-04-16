@@ -408,7 +408,6 @@ static int stop_tracing_handler (CORE_ADDR);
 struct breakpoint *flush_trace_buffer_bkpt;
 static int flush_trace_buffer_handler (CORE_ADDR);
 
-static void download_tracepoints (void);
 static void download_trace_state_variables (void);
 static void upload_fast_traceframes (void);
 
@@ -3088,10 +3087,13 @@ install_tracepoint (struct tracepoint *tpoint, char *own_buf)
     write_ok (own_buf);
 }
 
+static void download_tracepoint_1 (struct tracepoint *tpoint);
+
 static void
 cmd_qtstart (char *packet)
 {
   struct tracepoint *tpoint, *prev_ftpoint, *prev_stpoint;
+  CORE_ADDR tpptr = 0, prev_tpptr = 0;
 
   trace_debug ("Starting the trace");
 
@@ -3109,10 +3111,7 @@ cmd_qtstart (char *packet)
 
   /* Sync the fast tracepoints list in the inferior ftlib.  */
   if (agent_loaded_p ())
-    {
-      download_tracepoints ();
-      download_trace_state_variables ();
-    }
+    download_trace_state_variables ();
 
   /* No previous fast tpoint yet.  */
   prev_ftpoint = NULL;
@@ -3122,7 +3121,11 @@ cmd_qtstart (char *packet)
 
   *packet = '\0';
 
-  /* Install tracepoints.  */
+  /* Start out empty.  */
+  if (agent_loaded_p ())
+    write_inferior_data_ptr (ipa_sym_addrs.addr_tracepoints, 0);
+
+  /* Download and install tracepoints.  */
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     {
       /* Ensure all the hit counts start at zero.  */
@@ -3138,48 +3141,69 @@ cmd_qtstart (char *packet)
 	  tpoint->handle = set_breakpoint_at (tpoint->address,
 					      tracepoint_handler);
 	}
-      else if (tpoint->type == fast_tracepoint)
+      else if (tpoint->type == fast_tracepoint
+	       || tpoint->type == static_tracepoint)
 	{
 	  if (maybe_write_ipa_not_loaded (packet))
 	    {
-	      trace_debug ("Requested a fast tracepoint, but fast "
-			   "tracepoints aren't supported.");
+	      trace_debug ("Requested a %s tracepoint, but fast "
+			   "tracepoints aren't supported.",
+			   tpoint->type == static_tracepoint
+			   ? "static" : "fast");
 	      break;
 	    }
 
-	  if (prev_ftpoint != NULL && prev_ftpoint->address == tpoint->address)
-	    clone_fast_tracepoint (tpoint, prev_ftpoint);
-	  else
+	  if (tpoint->type == fast_tracepoint)
 	    {
-	      if (install_fast_tracepoint (tpoint, packet) == 0)
-		prev_ftpoint = tpoint;
-	    }
-	}
-      else if (tpoint->type == static_tracepoint)
-	{
-	  if (maybe_write_ipa_ust_not_loaded (packet))
-	    {
-	      trace_debug ("Requested a static tracepoint, but static "
-			   "tracepoints are not supported.");
-	      break;
-	    }
+	      download_tracepoint_1 (tpoint);
 
-	  /* Can only probe a given marker once.  */
-	  if (prev_stpoint != NULL && prev_stpoint->address == tpoint->address)
-	    {
-	      tpoint->handle = (void *) -1;
-	    }
-	  else
-	    {
-	      if (probe_marker_at (tpoint->address, packet) == 0)
+	      if (prev_ftpoint != NULL
+		  && prev_ftpoint->address == tpoint->address)
+		clone_fast_tracepoint (tpoint, prev_ftpoint);
+	      else
 		{
-		  tpoint->handle = (void *) -1;
-
-		  /* So that we can handle multiple static tracepoints
-		     at the same address easily.  */
-		  prev_stpoint = tpoint;
+		  if (install_fast_tracepoint (tpoint, packet) == 0)
+		    prev_ftpoint = tpoint;
 		}
 	    }
+	  else
+	    {
+	      if (!in_process_agent_supports_ust ())
+		{
+		  trace_debug ("Requested a static tracepoint, but static "
+			       "tracepoints are not supported.");
+		  break;
+		}
+
+	      download_tracepoint_1 (tpoint);
+	      /* Can only probe a given marker once.  */
+	      if (prev_stpoint != NULL
+		  && prev_stpoint->address == tpoint->address)
+		tpoint->handle = (void *) -1;
+	      else
+		{
+		  if (probe_marker_at (tpoint->address, packet) == 0)
+		    {
+		      tpoint->handle = (void *) -1;
+
+		      /* So that we can handle multiple static tracepoints
+			 at the same address easily.  */
+		      prev_stpoint = tpoint;
+		    }
+		}
+	    }
+
+	  prev_tpptr = tpptr;
+	  tpptr = tpoint->obj_addr_on_target;
+
+	  if (tpoint == tracepoints)
+	    /* First object in list, set the head pointer in the
+	       inferior.  */
+	    write_inferior_data_ptr (ipa_sym_addrs.addr_tracepoints, tpptr);
+	  else
+	    write_inferior_data_ptr (prev_tpptr + offsetof (struct tracepoint,
+							    next),
+				     tpptr);
 	}
 
       /* Any failure in the inner loop is sufficient cause to give
@@ -5847,42 +5871,6 @@ download_tracepoint (struct tracepoint *tpoint)
     write_inferior_data_ptr (ipa_sym_addrs.addr_tracepoints,
 			     tpoint->obj_addr_on_target);
 
-}
-
-static void
-download_tracepoints (void)
-{
-  CORE_ADDR tpptr = 0, prev_tpptr = 0;
-  struct tracepoint *tpoint;
-
-  /* Start out empty.  */
-  write_inferior_data_ptr (ipa_sym_addrs.addr_tracepoints, 0);
-
-  for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
-    {
-      if (tpoint->type != fast_tracepoint
-	  && tpoint->type != static_tracepoint)
-	continue;
-
-      prev_tpptr = tpptr;
-
-      download_tracepoint_1 (tpoint);
-
-      tpptr = tpoint->obj_addr_on_target;
-
-      if (tpoint == tracepoints)
-	{
-	  /* First object in list, set the head pointer in the
-	     inferior.  */
-	  write_inferior_data_ptr (ipa_sym_addrs.addr_tracepoints, tpptr);
-	}
-      else
-	{
-	  write_inferior_data_ptr (prev_tpptr + offsetof (struct tracepoint,
-							  next),
-				   tpptr);
-	}
-    }
 }
 
 static void

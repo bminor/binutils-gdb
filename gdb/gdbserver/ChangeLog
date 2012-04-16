@@ -1,3 +1,8 @@
+2012-04-16  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (download_tracepoints): Moved to ...
+	(cmd_qtstart): ... here.
+
 2012-04-14  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c: Include inttypes.h.
