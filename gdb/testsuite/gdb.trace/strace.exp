@@ -23,7 +23,7 @@ set srcfile $testfile.c
 set binfile $objdir/$subdir/$testfile
 set executable $testfile
 
-set libipa $objdir/../gdbserver/libinproctrace.so
+set libipa [get_in_proc_agent]
 
 set lib_opts debug
 

@@ -1,3 +1,16 @@
+2012-04-16  Yao Qi  <yao@codesourcery.com>
+
+	* lib/trace-support.exp (get_in_proc_agent): New.
+	* gdb.trace/change-loc.exp: Call get_in_proc_agent to get the location
+	of in process trace agent.
+	* gdb.trace/ftrace.exp: Likewise.
+	* gdb.trace/pending.exp: Likewise.
+	* gdb.trace/trace-break.exp: Likewise.
+	* gdb.trace/trace-mt.exp
+	* gdb.trace/tspeed.exp: Likewise.
+	* gdb.trace/tstatus.exp
+	* gdb.trace/strace.exp: Likewise.
+
 2012-04-16  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* gdb.asm/sh.inc (gdbasm_startup): Only set up the stack pointer if the

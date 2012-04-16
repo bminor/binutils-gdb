@@ -499,7 +499,7 @@ pending_tracepoint_with_action_resolved "trace"
 pending_tracepoint_installed_during_trace "trace"
 
 # Re-compile test case with IPA.
-set libipa $objdir/../gdbserver/libinproctrace.so
+set libipa [get_in_proc_agent]
 gdb_load_shlibs $libipa
 
 lappend exec_opts "shlib=$libipa"

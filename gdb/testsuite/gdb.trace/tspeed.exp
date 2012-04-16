@@ -20,7 +20,7 @@ set srcfile ${testfile}.c
 set executable $testfile
 set binfile $objdir/$subdir/$executable
 
-set ipalib $objdir/../gdbserver/libinproctrace.so
+set ipalib [get_in_proc_agent]
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable [concat {debug nowarnings c} libs=$ipalib]] != "" } {
