@@ -1,3 +1,7 @@
+2012-04-16  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* gdb.asm/sh.inc (gdbasm_end) <.size>: Refer to the function's name.
+
 2012-04-14  Anton Gorenkov <xgsa@yandex.ru>
 
 	PR mi/13393

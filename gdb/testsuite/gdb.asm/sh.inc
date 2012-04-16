@@ -31,7 +31,7 @@
 	comment "subroutine end"
 	.purgem gdbasm_end
 	.macro gdbasm_end name
-	.size   \name, .-_foo1
+	.size   \name, . - \name
 	.align	1
 	.endm
 
