@@ -1,5 +1,11 @@
 2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	New option "set debug auto-load".
+	* gdb.texinfo (Auto-loading): New menu item for auto-load verbose mode.
+	(auto-load verbose mode): New node.
+
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	New option "set auto-load safe-path".
 	* gdb.texinfo (Auto-loading): Extend the "show auto-load"
 	and "info auto-load" examples for safe-path.  Put there also references

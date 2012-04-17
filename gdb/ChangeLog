@@ -1,5 +1,27 @@
 2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	New option "set debug auto-load".
+	* NEWS: New commands "set debug auto-load" and "show debug auto-load".
+	* auto-load.c (debug_auto_load, show_debug_auto_load: New.
+	(auto_load_safe_path_vec_update)
+	(filename_is_in_auto_load_safe_path_vec): Call fprintf_unfiltered
+	if DEBUG_AUTO_LOAD.
+	(file_is_auto_load_safe): New parameters debug_fmt and ....
+	Call fprintf_unfiltered if DEBUG_AUTO_LOAD.
+	(source_gdb_script_for_objfile): Extend the file_is_auto_load_safe
+	caller by explanatory string.
+	(_initialize_auto_load): Register "set debug auto-load".
+	* auto-load.h (file_is_auto_load_safe): New parameters debug_fmt
+	and ....
+	* linux-thread-db.c (try_thread_db_load_from_pdir_1)
+	(try_thread_db_load_from_dir): Extend the file_is_auto_load_safe caller
+	by explanatory string.
+	* main.c (captured_main): Likewise.
+	* python/py-auto-load.c (gdbpy_load_auto_script_for_objfile)
+	(source_section_scripts): Likewise.
+
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	New option "set auto-load safe-path".
 	* NEWS: New commands "set auto-load safe-path"
 	and "show auto-load safe-path".

@@ -55,6 +55,7 @@ extern struct cmd_list_element **auto_load_set_cmdlist_get (void);
 extern struct cmd_list_element **auto_load_show_cmdlist_get (void);
 extern struct cmd_list_element **auto_load_info_cmdlist_get (void);
 
-extern int file_is_auto_load_safe (const char *filename);
+extern int file_is_auto_load_safe (const char *filename,
+				   const char *debug_fmt, ...);
 
 #endif /* AUTO_LOAD_H */

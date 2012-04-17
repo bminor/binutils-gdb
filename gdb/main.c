@@ -945,7 +945,10 @@ captured_main (void *data)
       auto_load_local_gdbinit_pathname = gdb_realpath (local_gdbinit);
 
       if (!inhibit_gdbinit && auto_load_local_gdbinit
-	  && file_is_auto_load_safe (local_gdbinit))
+	  && file_is_auto_load_safe (local_gdbinit,
+				     _("auto-load: Loading .gdbinit "
+				       "file \"%s\".\n"),
+				     local_gdbinit))
 	{
 	  auto_load_local_gdbinit_loaded = 1;
 

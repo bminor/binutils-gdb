@@ -43,6 +43,20 @@
 static void source_gdb_script_for_objfile (struct objfile *objfile, FILE *file,
 					   const char *filename);
 
+/* Value of the 'set debug auto-load' configuration variable.  */
+static int debug_auto_load = 0;
+
+/* "show" command for the debug_auto_load configuration variable.  */
+
+static void
+show_debug_auto_load (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Debugging output for files "
+			    "of 'set auto-load ...' is %s.\n"),
+		    value);
+}
+
 /* User-settable option to enable/disable auto-loading of GDB_AUTO_FILE_NAME
    scripts:
    set auto-load gdb-scripts on|off
@@ -112,6 +126,11 @@ auto_load_safe_path_vec_update (void)
   unsigned len;
   int ix;
 
+  if (debug_auto_load)
+    fprintf_unfiltered (gdb_stdlog,
+			_("auto-load: Updating directories of \"%s\".\n"),
+			auto_load_safe_path);
+
   free_char_ptr_vec (auto_load_safe_path_vec);
 
   auto_load_safe_path_vec = dirnames_to_char_ptr_vec (auto_load_safe_path);
@@ -126,14 +145,34 @@ auto_load_safe_path_vec_update (void)
       char *real_path = gdb_realpath (expanded);
 
       /* Ensure the current entry is at least tilde_expand-ed.  */
-      xfree (dir);
       VEC_replace (char_ptr, auto_load_safe_path_vec, ix, expanded);
+
+      if (debug_auto_load)
+	{
+	  if (strcmp (expanded, dir) == 0)
+	    fprintf_unfiltered (gdb_stdlog,
+				_("auto-load: Using directory \"%s\".\n"),
+				expanded);
+	  else
+	    fprintf_unfiltered (gdb_stdlog,
+				_("auto-load: Resolved directory \"%s\" "
+				  "as \"%s\".\n"),
+				dir, expanded);
+	}
+      xfree (dir);
 
       /* If gdb_realpath returns a different content, append it.  */
       if (strcmp (real_path, expanded) == 0)
 	xfree (real_path);
       else
-	VEC_safe_push (char_ptr, auto_load_safe_path_vec, real_path);
+	{
+	  VEC_safe_push (char_ptr, auto_load_safe_path_vec, real_path);
+
+	  if (debug_auto_load)
+	    fprintf_unfiltered (gdb_stdlog,
+				_("auto-load: And canonicalized as \"%s\".\n"),
+				real_path);
+	}
     }
 }
 
@@ -217,16 +256,30 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
   if (dir == NULL)
     {
       if (*filename_realp == NULL)
-	*filename_realp = gdb_realpath (filename);
+	{
+	  *filename_realp = gdb_realpath (filename);
+	  if (debug_auto_load && strcmp (*filename_realp, filename) != 0)
+	    fprintf_unfiltered (gdb_stdlog,
+				_("auto-load: Resolved "
+				  "file \"%s\" as \"%s\".\n"),
+				filename, *filename_realp);
+	}
 
-      for (ix = 0; VEC_iterate (char_ptr, auto_load_safe_path_vec, ix, dir);
-	   ++ix)
-	if (filename_is_in_dir (*filename_realp, dir))
-	  break;
+      if (strcmp (*filename_realp, filename) != 0)
+	for (ix = 0; VEC_iterate (char_ptr, auto_load_safe_path_vec, ix, dir);
+	     ++ix)
+	  if (filename_is_in_dir (*filename_realp, dir))
+	    break;
     }
 
   if (dir != NULL)
-    return 1;
+    {
+      if (debug_auto_load)
+	fprintf_unfiltered (gdb_stdlog, _("auto-load: File \"%s\" matches "
+					  "directory \"%s\".\n"),
+			    filename, dir);
+      return 1;
+    }
 
   return 0;
 }
@@ -240,10 +293,19 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
    directory.  */
 
 int
-file_is_auto_load_safe (const char *filename)
+file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
 {
   char *filename_real = NULL;
   struct cleanup *back_to;
+
+  if (debug_auto_load)
+    {
+      va_list debug_args;
+
+      va_start (debug_args, debug_fmt);
+      vfprintf_unfiltered (gdb_stdlog, debug_fmt, debug_args);
+      va_end (debug_args);
+    }
 
   back_to = make_cleanup (free_current_contents, &filename_real);
 
@@ -281,7 +343,10 @@ source_gdb_script_for_objfile (struct objfile *objfile, FILE *file,
   struct auto_load_pspace_info *pspace_info;
   volatile struct gdb_exception e;
 
-  is_safe = file_is_auto_load_safe (filename);
+  is_safe = file_is_auto_load_safe (filename, _("auto-load: Loading canned "
+						"sequences of commands script "
+						"\"%s\" for objfile \"%s\".\n"),
+				    filename, objfile->name);
 
   /* Add this script to the hash table too so "info auto-load gdb-scripts"
      can print it.  */
@@ -975,4 +1040,13 @@ See the commands 'set auto-load safe-path' and 'show auto-load safe-path' to\n\
 access the current full list setting."),
 		 &cmdlist);
   set_cmd_completer (cmd, filename_completer);
+
+  add_setshow_boolean_cmd ("auto-load", class_maintenance,
+			   &debug_auto_load, _("\
+Set auto-load verifications debugging."), _("\
+Show auto-load verifications debugging."), _("\
+When non-zero, debugging output for files of 'set auto-load ...'\n\
+is displayed."),
+			    NULL, show_debug_auto_load,
+			    &setdebuglist, &showdebuglist);
 }

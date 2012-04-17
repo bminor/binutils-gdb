@@ -870,7 +870,9 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj)
   gdb_assert (cp != NULL);
   strcpy (cp + 1, LIBTHREAD_DB_SO);
 
-  if (!file_is_auto_load_safe (path))
+  if (!file_is_auto_load_safe (path, _("auto-load: Loading libthread-db "
+				       "library \"%s\" from $pdir.\n"),
+			       path))
     result = 0;
   else
     result = try_thread_db_load (path);
@@ -940,7 +942,10 @@ try_thread_db_load_from_dir (const char *dir, size_t dir_len)
   path[dir_len] = '/';
   strcpy (path + dir_len + 1, LIBTHREAD_DB_SO);
 
-  if (!file_is_auto_load_safe (path))
+  if (!file_is_auto_load_safe (path, _("auto-load: Loading libthread-db "
+				       "library \"%s\" from explicit "
+				       "directory.\n"),
+			       path))
     result = 0;
   else
     result = try_thread_db_load (path);

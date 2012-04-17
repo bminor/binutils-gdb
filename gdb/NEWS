@@ -159,6 +159,10 @@ show auto-load safe-path
   Set a list of directories from which it is safe to auto-load files.
   The delimiter (':' above) may differ according to the host platform.
 
+set debug auto-load on|off
+show debug auto-load
+  Control display of debugging info for auto-loading the files above.
+
 * New remote packets
 
 z0/z1 conditional breakpoints extension

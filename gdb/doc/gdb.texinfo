@@ -20978,6 +20978,7 @@ These are @value{GDBN} control commands for the auto-loading:
 * libthread_db.so.1 file::             @samp{set/show/info auto-load libthread-db}
 * objfile-gdb.gdb file::               @samp{set/show/info auto-load gdb-script}
 * Auto-loading safe path::             @samp{set/show/info auto-load safe-path}
+* Auto-loading verbose mode::          @samp{set/show debug auto-load}
 @xref{Python Auto-loading}.
 @end menu
 
@@ -21175,6 +21176,45 @@ their canonical form (typically resolving symbolic links) and compare the
 entries again.  @value{GDBN} already canonicalizes most of the filenames on its
 own before starting the comparison so a canonical form of directories is
 recommended to be entered.
+
+@node Auto-loading verbose mode
+@subsection Displaying files tried for auto-load
+@cindex auto-loading verbose mode
+
+For better visibility of all the file locations where you can place scripts to
+be auto-loaded with inferior --- or to protect yourself against accidental
+execution of untrusted scripts --- @value{GDBN} provides a feature for printing
+all the files attempted to be loaded.  Both existing and non-existing files may
+be printed.
+
+For example the list of directories from which it is safe to auto-load files
+(@pxref{Auto-loading safe path}) applies also to canonicalized filenames which
+may not be too obvious while setting it up.
+
+@smallexample
+(gdb) set debug auto-load ues
+(gdb) file ~/src/t/true
+auto-load: Loading canned sequences of commands script "/tmp/true-gdb.gdb"
+           for objfile "/tmp/true".
+auto-load: Updating directories of "/usr:/opt".
+auto-load: Using directory "/usr".
+auto-load: Using directory "/opt".
+warning: File "/tmp/true-gdb.gdb" auto-loading has been declined
+         by your `auto-load safe-path' set to "/usr:/opt".
+@end smallexample
+
+@table @code
+@anchor{set debug auto-load}
+@kindex set debug auto-load
+@item set debug auto-load [on|off]
+Set whether to print the filenames attempted to be auto-loaded.
+
+@anchor{show debug auto-load}
+@kindex show debug auto-load
+@item show debug auto-load
+Show whether printing of the filenames attempted to be auto-loaded is turned
+on or off.
+@end table
 
 @node Messages/Warnings
 @section Optional Warnings and Messages

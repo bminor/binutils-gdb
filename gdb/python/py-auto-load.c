@@ -75,7 +75,10 @@ gdbpy_load_auto_script_for_objfile (struct objfile *objfile, FILE *file,
   int is_safe;
   struct auto_load_pspace_info *pspace_info;
 
-  is_safe = file_is_auto_load_safe (filename);
+  is_safe = file_is_auto_load_safe (filename,
+				    _("auto-load: Loading Python script \"%s\" "
+				      "by extension for objfile \"%s\".\n"),
+				    filename, objfile->name);
 
   /* Add this script to the hash table too so "info auto-load python-scripts"
      can print it.  */
@@ -153,7 +156,12 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
 	  make_cleanup_fclose (stream);
 	  make_cleanup (xfree, full_path);
 
-	  if (!file_is_auto_load_safe (full_path))
+	  if (!file_is_auto_load_safe (full_path,
+				       _("auto-load: Loading Python script "
+					 "\"%s\" from section \"%s\" of "
+					 "objfile \"%s\".\n"),
+				       full_path, GDBPY_AUTO_SECTION_NAME,
+				       objfile->name))
 	    opened = 0;
 	}
       else
