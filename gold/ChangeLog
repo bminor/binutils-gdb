@@ -1,5 +1,9 @@
 2012-04-16  David S. Miller  <davem@davemloft.net>
 
+	* Makefile.am: Build IFUNC tests with -fPIC and -fPIE instead of
+	-fpic and -fpie respectively.
+	* Makefile.in: Regenerate.
+
 	* sparc.cc (class Target_sparc): Add rela_ifunc_.
 	(Target_sparc::Target_sparc): Initialize new field.
 	(Target_sparc::do_plt_section_for_global): New function.

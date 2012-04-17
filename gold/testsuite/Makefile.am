@@ -1673,7 +1673,7 @@ no_version_test.stdout: libno_version_test.so
 if IFUNC
 
 ifuncmod1.o: ifuncmod1.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 ifuncmod1.so: ifuncmod1.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared ifuncmod1.o
 
@@ -1681,9 +1681,9 @@ ifuncdep1.o: ifuncmod1.c
 	$(COMPILE) -c -o $@ $<
 
 ifuncmain1pic.o: ifuncmain1.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 ifuncmain1pie.o: ifuncmain1.c
-	$(COMPILE) -c -fpie -o $@ $<
+	$(COMPILE) -c -fPIE -o $@ $<
 
 if HAVE_STATIC
 if IFUNC_STATIC
@@ -1717,7 +1717,7 @@ ifuncmain1vis_LDADD = ifuncmod1.so
 
 check_PROGRAMS += ifuncmain1vispic
 ifuncmain1vispic.o: ifuncmain1vis.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 ifuncmain1vispic: ifuncmain1vispic.o ifuncmod1.so gcctestdir/ld
 	$(LINK) -Bgcctestdir/ ifuncmain1pic.o ifuncmod1.so -Wl,-R,.
 
@@ -1731,7 +1731,7 @@ ifuncmain1pie: ifuncmain1pie.o ifuncmod1.so gcctestdir/ld
 
 check_PROGRAMS += ifuncmain1vispie
 ifuncmain1vispie.o: ifuncmain1vis.c
-	$(COMPILE) -c -fpie -o $@ $<
+	$(COMPILE) -c -fPIE -o $@ $<
 ifuncmain1vispie: ifuncmain1vispie.o ifuncmod1.so gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -pie ifuncmain1vispie.o ifuncmod1.so -Wl,-R,.
 
@@ -1740,10 +1740,10 @@ ifuncmain1staticpie: ifuncmain1pie.o ifuncmod1.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -pie ifuncmain1pie.o ifuncmod1.o
 
 ifuncmain2pic.o: ifuncmain2.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 
 ifuncdep2pic.o: ifuncdep2.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 
 if HAVE_STATIC
 if IFUNC_STATIC
@@ -1770,7 +1770,7 @@ ifuncmain2pic: ifuncmain2pic.o ifuncdep2pic.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ ifuncmain2pic.o ifuncdep2pic.o
 
 ifuncmod3.o: ifuncmod3.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 ifuncmod3.so: ifuncmod3.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared ifuncmod3.o
 
@@ -1781,7 +1781,7 @@ ifuncmain3_LDFLAGS = -Bgcctestdir/ -Wl,--export-dynamic -Wl,-R,.
 ifuncmain3_LDADD = -ldl
 
 ifuncmain4pic.o: ifuncmain4.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 
 if HAVE_STATIC
 if IFUNC_STATIC
@@ -1804,13 +1804,13 @@ ifuncmain4_LDFLAGS = -Bgcctestdir/
 ifuncmain4_LDADD =
 
 ifuncmain5pic.o: ifuncmain5.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 
 ifuncmain5pie.o: ifuncmain5.c
-	$(COMPILE) -c -fpie -o $@ $<
+	$(COMPILE) -c -fPIE -o $@ $<
 
 ifuncmod5.o: ifuncmod5.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 ifuncmod5.so: ifuncmod5.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared ifuncmod5.o
 
@@ -1850,10 +1850,10 @@ ifuncmain5pie: ifuncmain5pie.o ifuncmod5.so gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -pie ifuncmain5pie.o ifuncmod5.so -Wl,-R,.
 
 ifuncmain6pie.o: ifuncmain6pie.c
-	$(COMPILE) -c -fpie -o $@ $<
+	$(COMPILE) -c -fPIE -o $@ $<
 
 ifuncmod6.o: ifuncmod6.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 ifuncmod6.so: ifuncmod6.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared ifuncmod6.o
 
@@ -1862,10 +1862,10 @@ ifuncmain6pie: ifuncmain6pie.o ifuncmod6.so gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -pie ifuncmain6pie.o ifuncmod6.so -Wl,-R,.
 
 ifuncmain7pic.o: ifuncmain7.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 
 ifuncmain7pie.o: ifuncmain7.c
-	$(COMPILE) -c -fpie -o $@ $<
+	$(COMPILE) -c -fPIE -o $@ $<
 
 if HAVE_STATIC
 if IFUNC_STATIC
@@ -1897,9 +1897,9 @@ ifuncmain7pie: ifuncmain7pie.o gcctestdir/ld
 
 check_PROGRAMS += ifuncvar
 ifuncvar1_pic.o: ifuncvar1.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 ifuncvar2_pic.o: ifuncvar2.c	
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fPIC -o $@ $<
 ifuncvar.so: ifuncvar1_pic.o ifuncvar2_pic.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared ifuncvar1_pic.o ifuncvar2_pic.o
 ifuncvar_SOURCES = ifuncvar3.c
