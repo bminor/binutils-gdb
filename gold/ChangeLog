@@ -1,5 +1,8 @@
 2012-04-16  David S. Miller  <davem@davemloft.net>
 
+	* gdb-index.cc (Gdb_index::do_write): Use Swap_unaligned when
+	writing out 64-bit part of ranges.
+
 	* Makefile.am: Build IFUNC tests with -fPIC and -fPIE instead of
 	-fpic and -fpie respectively.
 	* Makefile.in: Regenerate.

@@ -1166,8 +1166,8 @@ Gdb_index::do_write(Output_file* of)
 	      base = (os->address()
 		      + object->output_section_offset(range.shndx));
 	    }
-	  elfcpp::Swap<64, false>::writeval(pov, base + range.start);
-	  elfcpp::Swap<64, false>::writeval(pov + 8, base + range.end);
+	  elfcpp::Swap_unaligned<64, false>::writeval(pov, base + range.start);
+	  elfcpp::Swap_unaligned<64, false>::writeval(pov + 8, base + range.end);
 	  elfcpp::Swap<32, false>::writeval(pov + 16, cu_index);
 	  pov += 20;
 	}
