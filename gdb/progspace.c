@@ -509,13 +509,10 @@ switch_to_program_space_and_thread (struct program_space *pspace)
 void
 clear_program_space_solib_cache (struct program_space *pspace)
 {
-  int ix;
-  char *name;
-
   VEC_free (so_list_ptr, pspace->added_solibs);
-  for (ix = 0; VEC_iterate (char_ptr, pspace->deleted_solibs, ix, name); ++ix)
-    xfree (name);
-  VEC_free (char_ptr, pspace->deleted_solibs);
+
+  free_char_ptr_vec (pspace->deleted_solibs);
+  pspace->deleted_solibs = NULL;
 }
 
 

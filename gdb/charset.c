@@ -909,11 +909,8 @@ find_charset_names (void)
   if (fail)
     {
       /* Some error occurred, so drop the vector.  */
-      int ix;
-      char *elt;
-      for (ix = 0; VEC_iterate (char_ptr, charsets, ix, elt); ++ix)
-	xfree (elt);
-      VEC_truncate (char_ptr, charsets, 0);
+      free_char_ptr_vec (charsets);
+      charsets = NULL;
     }
   else
     VEC_safe_push (char_ptr, charsets, NULL);

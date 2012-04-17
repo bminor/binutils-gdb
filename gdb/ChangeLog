@@ -1,6 +1,34 @@
 2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
+	* charset.c (find_charset_names): Remove variables ix and elt.
+	Use free_char_ptr_vec.
+	* elfread.c (build_id_to_debug_filename): New variables debugdir_vec,
+	back_to and ix.  Use dirnames_to_char_ptr_vec.  Remove variable
+	debugdir_end.  New variable debugdir_len.
+	* gdb_vecs.h (free_char_ptr_vec, make_cleanup_free_char_ptr_vec)
+	(dirnames_to_char_ptr_vec_append, dirnames_to_char_ptr_vec): New
+	declarations.
+	* progspace.c (clear_program_space_solib_cache): Remove variables ix
+	and elt.  Use free_char_ptr_vec.
+	* source.c (add_path): Remove variables argv, arg and argv_index.
+	New variables dir_vec, back_to, ix and name.
+	Use dirnames_to_char_ptr_vec_append.  Use freeargv instead of
+	make_cleanup_freeargv.  Remove variable separator.  Simplify the code
+	no longer expecting DIRNAME_SEPARATOR.
+	(openp): Remove variable p, p1 and len.  New variables dir_vec,
+	back_to, ix and dir.  Use dirnames_to_char_ptr_vec.  Simplify the code
+	no longer expecting DIRNAME_SEPARATOR.
+	* symfile.c (find_separate_debug_file): New variables debugdir_vec,
+	back_to and ix.  Use dirnames_to_char_ptr_vec.  Remove variable
+	debugdir_end.
+	* utils.c (free_char_ptr_vec, do_free_char_ptr_vec)
+	(make_cleanup_free_char_ptr_vec, dirnames_to_char_ptr_vec_append)
+	(dirnames_to_char_ptr_vec): New functions.
+
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
 	* source.c (add_path): Remove always true conditional 'p == 0' and
 	unindent its code block.
 

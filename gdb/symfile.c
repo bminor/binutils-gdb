@@ -1441,6 +1441,9 @@ find_separate_debug_file (const char *dir,
   char *debugdir;
   char *debugfile;
   int i;
+  VEC (char_ptr) *debugdir_vec;
+  struct cleanup *back_to;
+  int ix;
 
   /* Set I to max (strlen (canon_dir), strlen (dir)).  */
   i = strlen (dir);
@@ -1475,20 +1478,12 @@ find_separate_debug_file (const char *dir,
      Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
      cause "/..." lookups.  */
 
-  debugdir = debug_file_directory;
-  do
+  debugdir_vec = dirnames_to_char_ptr_vec (debug_file_directory);
+  back_to = make_cleanup_free_char_ptr_vec (debugdir_vec);
+
+  for (ix = 0; VEC_iterate (char_ptr, debugdir_vec, ix, debugdir); ++ix)
     {
-      char *debugdir_end;
-
-      while (*debugdir == DIRNAME_SEPARATOR)
-	debugdir++;
-
-      debugdir_end = strchr (debugdir, DIRNAME_SEPARATOR);
-      if (debugdir_end == NULL)
-	debugdir_end = &debugdir[strlen (debugdir)];
-
-      memcpy (debugfile, debugdir, debugdir_end - debugdir);
-      debugfile[debugdir_end - debugdir] = 0;
+      strcpy (debugfile, debugdir);
       strcat (debugfile, "/");
       strcat (debugfile, dir);
       strcat (debugfile, debuglink);
@@ -1503,8 +1498,7 @@ find_separate_debug_file (const char *dir,
 			    strlen (gdb_sysroot)) == 0
 	  && IS_DIR_SEPARATOR (canon_dir[strlen (gdb_sysroot)]))
 	{
-	  memcpy (debugfile, debugdir, debugdir_end - debugdir);
-	  debugfile[debugdir_end - debugdir] = 0;
+	  strcpy (debugfile, debugdir);
 	  strcat (debugfile, canon_dir + strlen (gdb_sysroot));
 	  strcat (debugfile, "/");
 	  strcat (debugfile, debuglink);
@@ -1512,11 +1506,9 @@ find_separate_debug_file (const char *dir,
 	  if (separate_debug_file_exists (debugfile, crc32, objfile))
 	    return debugfile;
 	}
-
-      debugdir = debugdir_end;
     }
-  while (*debugdir != 0);
 
+  do_cleanups (back_to);
   xfree (debugfile);
   return NULL;
 }

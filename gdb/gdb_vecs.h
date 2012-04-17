@@ -25,4 +25,16 @@
 
 DEF_VEC_P (char_ptr);
 
+/* From utils.c: */
+
+extern void free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec);
+
+extern struct cleanup *
+  make_cleanup_free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec);
+
+extern void dirnames_to_char_ptr_vec_append (VEC (char_ptr) **vecp,
+					     const char *dirnames);
+
+extern VEC (char_ptr) *dirnames_to_char_ptr_vec (const char *dirnames);
+
 #endif /* GDB_VECS_H */

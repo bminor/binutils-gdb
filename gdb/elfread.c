@@ -1123,6 +1123,9 @@ static char *
 build_id_to_debug_filename (struct build_id *build_id)
 {
   char *link, *debugdir, *retval = NULL;
+  VEC (char_ptr) *debugdir_vec;
+  struct cleanup *back_to;
+  int ix;
 
   /* DEBUG_FILE_DIRECTORY/.build-id/ab/cdef */
   link = alloca (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
@@ -1131,22 +1134,18 @@ build_id_to_debug_filename (struct build_id *build_id)
   /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
      cause "/.build-id/..." lookups.  */
 
-  debugdir = debug_file_directory;
-  do
+  debugdir_vec = dirnames_to_char_ptr_vec (debug_file_directory);
+  back_to = make_cleanup_free_char_ptr_vec (debugdir_vec);
+
+  for (ix = 0; VEC_iterate (char_ptr, debugdir_vec, ix, debugdir); ++ix)
     {
-      char *s, *debugdir_end;
+      size_t debugdir_len = strlen (debugdir);
       gdb_byte *data = build_id->data;
       size_t size = build_id->size;
+      char *s;
 
-      while (*debugdir == DIRNAME_SEPARATOR)
-	debugdir++;
-
-      debugdir_end = strchr (debugdir, DIRNAME_SEPARATOR);
-      if (debugdir_end == NULL)
-	debugdir_end = &debugdir[strlen (debugdir)];
-
-      memcpy (link, debugdir, debugdir_end - debugdir);
-      s = &link[debugdir_end - debugdir];
+      memcpy (link, debugdir, debugdir_len);
+      s = &link[debugdir_len];
       s += sprintf (s, "/.build-id/");
       if (size > 0)
 	{
@@ -1171,11 +1170,9 @@ build_id_to_debug_filename (struct build_id *build_id)
 
       if (retval != NULL)
 	break;
-
-      debugdir = debugdir_end;
     }
-  while (*debugdir != 0);
 
+  do_cleanups (back_to);
   return retval;
 }
 
