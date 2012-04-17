@@ -185,6 +185,15 @@ class Target_sparc : public Sized_target<size, big_endian>
     return this->got_size() / (size / 8);
   }
 
+  // Return the address of the GOT.
+  uint64_t
+  got_address() const
+  {
+    if (this->got_ == NULL)
+      return 0;
+    return this->got_->address();
+  }
+
   // Return the number of entries in the PLT.
   unsigned int
   plt_entry_count() const;
@@ -1065,6 +1074,28 @@ public:
     elfcpp::Swap<32, true>::writeval(wv, val | reloc);
   }
 
+  // R_SPARC_GOTDATA_OP_HIX22: @gdopoff(Symbol + Addend) >> 10
+  static inline void
+  gdop_hix22(unsigned char* view,
+	     typename elfcpp::Elf_types<size>::Elf_Addr value,
+	     typename elfcpp::Elf_types<size>::Elf_Addr addend)
+  {
+    typedef typename elfcpp::Swap<32, true>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<32, true>::readval(wv);
+    int32_t reloc = static_cast<int32_t>(value + addend);
+
+    val &= ~0x3fffff;
+
+    if (reloc < 0)
+      reloc ^= ~static_cast<int32_t>(0);
+    reloc >>= 10;
+
+    reloc &= 0x3fffff;
+
+    elfcpp::Swap<32, true>::writeval(wv, val | reloc);
+  }
+
   // R_SPARC_HIX22: ((Symbol + Addend) ^ 0xffffffffffffffff) >> 10
   static inline void
   hix22(unsigned char* view,
@@ -1103,6 +1134,26 @@ public:
     reloc &= 0x3ff;
     reloc |= 0x1c00;
 
+    elfcpp::Swap<32, true>::writeval(wv, val | reloc);
+  }
+
+  // R_SPARC_GOTDATA_OP_LOX10: (@gdopoff(Symbol + Addend) & 0x3ff) | 0x1c00
+  static inline void
+  gdop_lox10(unsigned char* view,
+	     typename elfcpp::Elf_types<size>::Elf_Addr value,
+	     typename elfcpp::Elf_types<size>::Elf_Addr addend)
+  {
+    typedef typename elfcpp::Swap<32, true>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<32, true>::readval(wv);
+    int32_t reloc = static_cast<int32_t>(value + addend);
+
+    if (reloc < 0)
+      reloc = (reloc & 0x3ff) | 0x1c00;
+    else
+      reloc = (reloc & 0x3ff);
+
+    val &= ~0x1fff;
     elfcpp::Swap<32, true>::writeval(wv, val | reloc);
   }
 
@@ -2266,6 +2317,10 @@ Target_sparc<size, big_endian>::Scan::local(
     case elfcpp::R_SPARC_GOTDATA_OP:
     case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
     case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
+      // We will optimize this into a GOT relative relocation
+      // and code transform the GOT load into an addition.
+      break;
+
     case elfcpp::R_SPARC_GOT10:
     case elfcpp::R_SPARC_GOT13:
     case elfcpp::R_SPARC_GOT22:
@@ -2695,6 +2750,15 @@ Target_sparc<size, big_endian>::Scan::global(
     case elfcpp::R_SPARC_GOTDATA_OP:
     case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
     case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
+      if (gsym->is_defined()
+          && !gsym->is_from_dynobj()
+          && !gsym->is_preemptible()
+	  && !is_ifunc)
+	{
+	  // We will optimize this into a GOT relative relocation
+	  // and code transform the GOT load into an addition.
+	  break;
+	}
     case elfcpp::R_SPARC_GOT10:
     case elfcpp::R_SPARC_GOT13:
     case elfcpp::R_SPARC_GOT22:
@@ -3076,6 +3140,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 			typename elfcpp::Elf_types<size>::Elf_Addr address,
 			section_size_type view_size)
 {
+  bool orig_is_ifunc = psymval->is_ifunc_symbol();
   r_type &= 0xff;
 
   if (this->ignore_gd_add_)
@@ -3108,7 +3173,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 
       psymval = &symval;
     }
-  else if (gsym == NULL && psymval->is_ifunc_symbol())
+  else if (gsym == NULL && orig_is_ifunc)
     {
       unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
       if (object->local_has_plt_offset(r_sym))
@@ -3125,11 +3190,24 @@ Target_sparc<size, big_endian>::Relocate::relocate(
   // pointer points to the beginning, not the end, of the table.
   // So we just use the plain offset.
   unsigned int got_offset = 0;
+  bool gdop_valid = false;
   switch (r_type)
     {
     case elfcpp::R_SPARC_GOTDATA_OP:
     case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
     case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
+      // If this is local, we did not create a GOT entry because we
+      // intend to transform this into a GOT relative relocation.
+      if (gsym == NULL
+	  || (gsym->is_defined()
+	      && !gsym->is_from_dynobj()
+	      && !gsym->is_preemptible()
+	      && !orig_is_ifunc))
+	{
+	  got_offset = psymval->value(object, 0) - target->got_address();
+	  gdop_valid = true;
+	  break;
+	}
     case elfcpp::R_SPARC_GOT10:
     case elfcpp::R_SPARC_GOT13:
     case elfcpp::R_SPARC_GOT22:
@@ -3248,14 +3326,37 @@ Target_sparc<size, big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_SPARC_GOTDATA_OP:
+      if (gdop_valid)
+	{
+	  typedef typename elfcpp::Swap<32, true>::Valtype Insntype;
+	  Insntype* wv = reinterpret_cast<Insntype*>(view);
+	  Insntype val;
+
+	  // {ld,ldx} [%rs1 + %rs2], %rd --> add %rs1, %rs2, %rd
+	  val = elfcpp::Swap<32, true>::readval(wv);
+	  val = 0x80000000 | (val & 0x3e07c01f);
+	  elfcpp::Swap<32, true>::writeval(wv, val);
+	}
       break;
 
     case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
+      if (gdop_valid)
+	{
+	  Reloc::gdop_lox10(view, got_offset, addend);
+	  break;
+	}
+      /* Fall through.  */
     case elfcpp::R_SPARC_GOT13:
       Reloc::rela32_13(view, got_offset, addend);
       break;
 
     case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
+      if (gdop_valid)
+	{
+	  Reloc::gdop_hix22(view, got_offset, addend);
+	  break;
+	}
+      /* Fall through.  */
     case elfcpp::R_SPARC_GOT22:
       Reloc::hi22(view, got_offset, addend);
       break;

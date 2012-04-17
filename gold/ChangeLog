@@ -1,5 +1,16 @@
 2012-04-16  David S. Miller  <davem@davemloft.net>
 
+	* sparc.cc (Target_sparc::got_address): New function.
+	(Sparc_relocate_functions::gdop_hix22): New function.
+	(Sparc_relocate_functions::gdop_lox10): New function.
+	(Target_sparc::Scan::local): Do not emit a GOT entry for GOTDATA
+	relocs.
+	(Target_sparc::Scan::local): Likewise if the global symbol is not
+	preemptible and is not IFUNC.
+	(Target_sparc::Relocate::relocate): Perform GOTDATA code
+	transformations for local and non-preemptible non-IFUNC global
+	symbols.
+
 	* gdb-index.cc (Gdb_index::do_write): Use Swap_unaligned when
 	writing out 64-bit part of ranges.
 
