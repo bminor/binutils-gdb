@@ -3104,6 +3104,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      && (got_type == GOT_NORMAL || got_type == GOT_FUNCDESC))
 	    htab->srofixup->size += 4;
 	}
+      /* No dynamic relocations required when IE->LE conversion happens.  */
+      else if (got_type == GOT_TLS_IE && !h->def_dynamic && !info->shared)
+	;
       /* R_SH_TLS_IE_32 needs one dynamic relocation if dynamic,
 	 R_SH_TLS_GD needs one if local symbol and two if global.  */
       else if ((got_type == GOT_TLS_GD && h->dynindx == -1)

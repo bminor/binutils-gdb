@@ -1,3 +1,8 @@
+2012-04-17  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (allocate_dynrelocs): Don't allocate dynamic
+	relocations when LE conversion happens on the IE tls symbol.
+
 2012-04-17  Roland McGrath  <mcgrathr@google.com>
 
 	* elf64-x86-64.c (elf_x86_64_nacl_plt0_entry): Fix nop padding
