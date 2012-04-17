@@ -1,5 +1,10 @@
 2012-04-17  Doug Evans  <dje@google.com>
 
+	* cleanups.c (make_my_cleanup,make_my_cleanup2): Make static.
+	(discard_my_cleanups,save_my_cleanups,restore_my_cleanups): Ditto.
+	* cleanups.h (make_my_cleanup,make_my_cleanup2): Delete
+	(discard_my_cleanups,save_my_cleanups,restore_my_cleanups): Delete.
+
 	* cleanups.h: New file.
 	* cleanups.c: New file.
 	* Makefile.in (SFILES): Add cleanups.c.

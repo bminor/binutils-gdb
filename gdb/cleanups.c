@@ -37,7 +37,7 @@ static struct cleanup *final_cleanup_chain;
    The result is a pointer to the previous chain pointer
    to be passed later to do_cleanups or discard_cleanups.  */
 
-struct cleanup *
+static struct cleanup *
 make_my_cleanup2 (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 		  void *arg,  void (*free_arg) (void *))
 {
@@ -62,7 +62,7 @@ make_my_cleanup2 (struct cleanup **pmy_chain, make_cleanup_ftype *function,
    The result is a pointer to the previous chain pointer
    to be passed later to do_cleanups or discard_cleanups.  */
 
-struct cleanup *
+static struct cleanup *
 make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 		 void *arg)
 {
@@ -143,7 +143,7 @@ do_final_cleanups (struct cleanup *old_chain)
    OLD_CHAIN is the result of a "make" cleanup routine.
    Cleanups are discarded until we get back to the old end of the chain.  */
 
-void
+static void
 discard_my_cleanups (struct cleanup **pmy_chain,
 		     struct cleanup *old_chain)
 {
@@ -180,7 +180,7 @@ discard_final_cleanups (struct cleanup *old_chain)
    PMY_CHAIN is a pointer to either cleanup_chain or final_cleanup_chain.
    The chain is emptied and the result is a pointer to the old chain.  */
 
-struct cleanup *
+static struct cleanup *
 save_my_cleanups (struct cleanup **pmy_chain)
 {
   struct cleanup *old_chain = *pmy_chain;
@@ -210,7 +210,7 @@ save_final_cleanups (void)
    PMY_CHAIN is a pointer to either cleanup_chain or final_cleanup_chain.
    The chain is restored from CHAIN.  */
 
-void
+static void
 restore_my_cleanups (struct cleanup **pmy_chain, struct cleanup *chain)
 {
   *pmy_chain = chain;

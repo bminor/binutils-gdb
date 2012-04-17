@@ -61,12 +61,6 @@ extern struct cleanup *make_cleanup_dtor (make_cleanup_ftype *, void *,
 
 extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
-extern struct cleanup *make_my_cleanup (struct cleanup **,
-					make_cleanup_ftype *, void *);
-extern struct cleanup *make_my_cleanup2 (struct cleanup **,
-					 make_cleanup_ftype *, void *,
-					 void (*free_arg) (void *));
-
 /* A special value to pass to do_cleanups and do_final_cleanups
    to tell them to do all cleanups.  */
 #define	ALL_CLEANUPS	((struct cleanup *)0)
@@ -76,15 +70,12 @@ extern void do_final_cleanups (struct cleanup *);
 
 extern void discard_cleanups (struct cleanup *);
 extern void discard_final_cleanups (struct cleanup *);
-extern void discard_my_cleanups (struct cleanup **, struct cleanup *);
 
 extern struct cleanup *save_cleanups (void);
 extern struct cleanup *save_final_cleanups (void);
-extern struct cleanup *save_my_cleanups (struct cleanup **);
 
 extern void restore_cleanups (struct cleanup *);
 extern void restore_final_cleanups (struct cleanup *);
-extern void restore_my_cleanups (struct cleanup **, struct cleanup *);
 
 /* A no-op cleanup.
    This is useful when you want to establish a known reference point
