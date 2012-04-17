@@ -1,3 +1,12 @@
+2012-04-17  Tristan Gingold  <gingold@adacore.com>
+
+	* vms-lib.c (MAX_EKEYLEN): Define.
+	(MAX_KEYLEN): Fix value.
+	(vms_write_index): Add comments and fix indentation.
+	Adjust comparaison.  Add assertions.  Free kbn_blk.
+	(_bfd_vms_lib_write_archive_contents): Use MAX_EKEYLEN.
+	Compense MAX_KEYLEN adjustment.
+
 2012-04-16  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elfxx-mips.c (mips16_stub_symndx): Handle n64 compound relocs.

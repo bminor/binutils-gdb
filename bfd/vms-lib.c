@@ -35,7 +35,8 @@
 #endif
 
 /* Maximum key length (which is also the maximum symbol length in archive).  */
-#define MAX_KEYLEN 129
+#define MAX_KEYLEN 128
+#define MAX_EKEYLEN 1024
 
 /* DCX Submaps.  */
 
@@ -1567,15 +1568,23 @@ vms_write_index (bfd *abfd,
                  struct lib_index *idx, unsigned int nbr, unsigned int *vbn,
                  unsigned int *topvbn, bfd_boolean is_elfidx)
 {
+  /* The index is organized as a tree.  This function implements a naive
+     algorithm to balance the tree: it fills the leaves, and create a new
+     branch when all upper leaves and branches are full.  We only keep in
+     memory a path to the current leaf.  */
   unsigned int i;
   int j;
   int level;
+  /* Disk blocks for the current path.  */
   struct vms_indexdef *rblk[MAX_LEVEL];
+  /* Info on the current blocks.  */
   struct idxblk
   {
-    unsigned int vbn;
-    unsigned short len;
-    unsigned short lastlen;
+    unsigned int vbn;		/* VBN of the block.  */
+    /* The last entry is identified so that it could be copied to the
+       parent block.  */
+    unsigned short len;		/* Length up to the last entry.  */
+    unsigned short lastlen;	/* Length of the last entry.  */
   } blk[MAX_LEVEL];
 
   /* The kbn blocks are used to store long symbol names.  */
@@ -1614,7 +1623,7 @@ vms_write_index (bfd *abfd,
 
       idxlen = get_idxlen (idx, is_elfidx);
 
-      if (is_elfidx && idx->namlen >= MAX_KEYLEN)
+      if (is_elfidx && idx->namlen > MAX_KEYLEN)
         {
           /* If the key (ie name) is too long, write it in the kbn block.  */
           unsigned int kl = idx->namlen;
@@ -1693,7 +1702,7 @@ vms_write_index (bfd *abfd,
          block and all the blocks below it.  */
       for (j = 0; j < level; j++)
         if (blk[j].len + blk[j].lastlen + idxlen > INDEXDEF__BLKSIZ)
-          flush = j + 1;
+	  flush = j + 1;
 
       for (j = 0; j < level; j++)
         {
@@ -1714,23 +1723,25 @@ vms_write_index (bfd *abfd,
                     }
                   blk[level].vbn = (*vbn)++;
                   blk[level].len = 0;
-                  blk[level].lastlen = 0;
+                  blk[level].lastlen = blk[j].lastlen;
 
                   level++;
                 }
 
-              /* Update parent block: write the new entry.  */
+              /* Update parent block: write the last entry from the current
+		 block.  */
               if (abfd != NULL)
                 {
                   struct vms_rfa *rfa;
 
+		  /* Pointer to the last entry in parent block.  */
+		  rfa = (struct vms_rfa *)(rblk[j + 1]->keys + blk[j + 1].len);
+
                   /* Copy the whole entry.  */
-                  memcpy (rblk[j + 1]->keys + blk[j + 1].len,
-                          rblk[j]->keys + blk[j].len,
-                          blk[j].lastlen);
+		  BFD_ASSERT (blk[j + 1].lastlen == blk[j].lastlen);
+                  memcpy (rfa, rblk[j]->keys + blk[j].len, blk[j].lastlen);
                   /* Fix the entry (which in always the first field of an
 		     entry.  */
-                  rfa = (struct vms_rfa *)(rblk[j + 1]->keys + blk[j + 1].len);
                   bfd_putl32 (blk[j].vbn, rfa->vbn);
                   bfd_putl16 (RFADEF__C_INDEX, rfa->offset);
                 }
@@ -1740,7 +1751,7 @@ vms_write_index (bfd *abfd,
                   /* And allocate it.  Do it only on the block that won't be
                      flushed (so that the parent of the parent can be
                      updated too).  */
-                  blk[j + 1].len += blk[j].lastlen;
+                  blk[j + 1].len += blk[j + 1].lastlen;
                   blk[j + 1].lastlen = 0;
                 }
 
@@ -1761,6 +1772,7 @@ vms_write_index (bfd *abfd,
           /* Append it to the block.  */
           if (j == 0)
             {
+	      /* Keep the previous last entry.  */
               blk[j].len += blk[j].lastlen;
 
               if (abfd != NULL)
@@ -1805,12 +1817,14 @@ vms_write_index (bfd *abfd,
                       memcpy (en->keyname, idx->name, idx->namlen);
                     }
                 }
-            }
-
-          blk[j].lastlen = idxlen;
+	    }
+	  /* The last added key can now be the last one all blocks in the
+	     path.  */
+	  blk[j].lastlen = idxlen;
         }
     }
 
+  /* Save VBN of the root.  */
   if (topvbn != NULL)
     *topvbn = blk[level - 1].vbn;
 
@@ -1827,6 +1841,7 @@ vms_write_index (bfd *abfd,
 
       en = rblk[j - 1]->keys + blk[j - 1].len;
       par = rblk[j]->keys + blk[j].len;
+      BFD_ASSERT (blk[j].lastlen == blk[j - 1].lastlen);
       memcpy (par, en, blk[j - 1].lastlen);
       rfa = (struct vms_rfa *)par;
       bfd_putl32 (blk[j - 1].vbn, rfa->vbn);
@@ -1848,6 +1863,7 @@ vms_write_index (bfd *abfd,
     {
       if (vms_write_block (abfd, kbn_vbn, kbn_blk) != TRUE)
         return FALSE;
+      free (kbn_blk);
     }
 
   return TRUE;
@@ -2006,7 +2022,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
   unsigned int mod_idx_vbn;
   unsigned int sym_idx_vbn;
   bfd_boolean is_elfidx = tdata->kind == vms_lib_ia64;
-  unsigned int max_keylen = is_elfidx ? 1025 : MAX_KEYLEN;
+  unsigned int max_keylen = is_elfidx ? MAX_EKEYLEN : MAX_KEYLEN;
 
   /* Count the number of modules (and do a first sanity check).  */
   nbr_modules = 0;
@@ -2251,13 +2267,13 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
     idd_flags = IDD__FLAGS_ASCII | IDD__FLAGS_VARLENIDX
       | IDD__FLAGS_NOCASECMP | IDD__FLAGS_NOCASENTR;
     bfd_putl16 (idd_flags, idd->flags);
-    bfd_putl16 (max_keylen, idd->keylen);
+    bfd_putl16 (max_keylen + 1, idd->keylen);
     bfd_putl16 (mod_idx_vbn, idd->vbn);
     idd++;
 
     /* Second index (symbols name).  */
     bfd_putl16 (idd_flags, idd->flags);
-    bfd_putl16 (max_keylen, idd->keylen);
+    bfd_putl16 (max_keylen + 1, idd->keylen);
     bfd_putl16 (sym_idx_vbn, idd->vbn);
     idd++;
 
