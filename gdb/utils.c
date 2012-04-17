@@ -207,7 +207,7 @@ do_freeargv (void *arg)
 struct cleanup *
 make_cleanup_freeargv (char **arg)
 {
-  return make_my_cleanup (&cleanup_chain, do_freeargv, arg);
+  return make_cleanup (do_freeargv, arg);
 }
 
 static void
@@ -219,7 +219,7 @@ do_dyn_string_delete (void *arg)
 struct cleanup *
 make_cleanup_dyn_string_delete (dyn_string_t arg)
 {
-  return make_my_cleanup (&cleanup_chain, do_dyn_string_delete, arg);
+  return make_cleanup (do_dyn_string_delete, arg);
 }
 
 static void
@@ -296,7 +296,7 @@ do_ui_file_delete (void *arg)
 struct cleanup *
 make_cleanup_ui_file_delete (struct ui_file *arg)
 {
-  return make_my_cleanup (&cleanup_chain, do_ui_file_delete, arg);
+  return make_cleanup (do_ui_file_delete, arg);
 }
 
 /* Helper function for make_cleanup_ui_out_redirect_pop.  */
@@ -316,7 +316,7 @@ do_ui_out_redirect_pop (void *arg)
 struct cleanup *
 make_cleanup_ui_out_redirect_pop (struct ui_out *uiout)
 {
-  return make_my_cleanup (&cleanup_chain, do_ui_out_redirect_pop, uiout);
+  return make_cleanup (do_ui_out_redirect_pop, uiout);
 }
 
 static void
@@ -328,7 +328,7 @@ do_free_section_addr_info (void *arg)
 struct cleanup *
 make_cleanup_free_section_addr_info (struct section_addr_info *addrs)
 {
-  return make_my_cleanup (&cleanup_chain, do_free_section_addr_info, addrs);
+  return make_cleanup (do_free_section_addr_info, addrs);
 }
 
 struct restore_integer_closure
@@ -357,8 +357,7 @@ make_cleanup_restore_integer (int *variable)
   c->variable = variable;
   c->value = *variable;
 
-  return make_my_cleanup2 (&cleanup_chain, restore_integer, (void *)c,
-			   xfree);
+  return make_cleanup_dtor (restore_integer, (void *) c, xfree);
 }
 
 /* Remember the current value of *VARIABLE and make it restored when
@@ -385,7 +384,7 @@ do_unpush_target (void *arg)
 struct cleanup *
 make_cleanup_unpush_target (struct target_ops *ops)
 {
-  return make_my_cleanup (&cleanup_chain, do_unpush_target, ops);
+  return make_cleanup (do_unpush_target, ops);
 }
 
 /* Helper for make_cleanup_htab_delete compile time checking the types.  */
@@ -448,7 +447,7 @@ do_value_free_to_mark (void *value)
 struct cleanup *
 make_cleanup_value_free_to_mark (struct value *mark)
 {
-  return make_my_cleanup (&cleanup_chain, do_value_free_to_mark, mark);
+  return make_cleanup (do_value_free_to_mark, mark);
 }
 
 /* Helper for make_cleanup_value_free.  */
@@ -464,7 +463,7 @@ do_value_free (void *value)
 struct cleanup *
 make_cleanup_value_free (struct value *value)
 {
-  return make_my_cleanup (&cleanup_chain, do_value_free, value);
+  return make_cleanup (do_value_free, value);
 }
 
 /* Helper for make_cleanup_free_so.  */
@@ -482,7 +481,7 @@ do_free_so (void *arg)
 struct cleanup *
 make_cleanup_free_so (struct so_list *so)
 {
-  return make_my_cleanup (&cleanup_chain, do_free_so, so);
+  return make_cleanup (do_free_so, so);
 }
 
 struct cleanup *

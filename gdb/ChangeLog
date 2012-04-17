@@ -1,3 +1,17 @@
+2012-04-17  Doug Evans  <dje@google.com>
+
+	* utils.c (make_cleanup_freeargv): Use make_cleanup instead of
+	make_my_cleanup.
+	(make_cleanup_dyn_string_delete): Ditto.
+	(make_cleanup_ui_file_delete): Ditto.
+	(make_cleanup_ui_out_redirect_pop): Ditto.
+	(make_cleanup_free_section_addr_info): Ditto.
+	(make_cleanup_restore_integer): Ditto.
+	(make_cleanup_unpush_target): Ditto.
+	(make_cleanup_value_free_to_mark): Ditto.
+	(make_cleanup_value_free): Ditto.
+	(make_cleanup_free_so): Ditto.
+
 2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	New option "set debug auto-load".
