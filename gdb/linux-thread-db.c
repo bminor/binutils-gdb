@@ -869,7 +869,11 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj)
   /* This should at minimum hit the first character.  */
   gdb_assert (cp != NULL);
   strcpy (cp + 1, LIBTHREAD_DB_SO);
-  result = try_thread_db_load (path);
+
+  if (!file_is_auto_load_safe (path))
+    result = 0;
+  else
+    result = try_thread_db_load (path);
 
   do_cleanups (cleanup);
   return result;
@@ -935,7 +939,11 @@ try_thread_db_load_from_dir (const char *dir, size_t dir_len)
   memcpy (path, dir, dir_len);
   path[dir_len] = '/';
   strcpy (path + dir_len + 1, LIBTHREAD_DB_SO);
-  result = try_thread_db_load (path);
+
+  if (!file_is_auto_load_safe (path))
+    result = 0;
+  else
+    result = try_thread_db_load (path);
 
   do_cleanups (cleanup);
   return result;

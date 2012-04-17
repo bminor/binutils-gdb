@@ -967,6 +967,7 @@ enable_dependency_tracking
 with_separate_debug_dir
 with_gdb_datadir
 with_relocated_sources
+with_auto_load_safe_path
 enable_targets
 enable_64_bit_bfd
 enable_gdbcli
@@ -1675,6 +1676,10 @@ Optional Packages:
                           [DATADIR/gdb]
   --with-relocated-sources=PATH
                           automatically relocate this path for source files
+  --with-auto-load-safe-path=PATH
+                          directories safe to hold auto-loaded files
+  --without-auto-load-safe-path
+                          do not restrict auto-loaded files locations
   --with-libunwind-ia64   use libunwind frame unwinding for ia64 targets
   --with-curses           use the curses library instead of the termcap
                           library
@@ -9335,6 +9340,32 @@ _ACEOF
 
 fi
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default auto-load safe-path" >&5
+$as_echo_n "checking for default auto-load safe-path... " >&6; }
+
+# Check whether --with-auto-load-safe-path was given.
+if test "${with_auto_load_safe_path+set}" = set; then :
+  withval=$with_auto_load_safe_path; if test "$with_auto_load_safe_path" = "no"; then
+   with_auto_load_safe_path=""
+ fi
+else
+  with_auto_load_safe_path="$prefix"
+fi
+
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $with_auto_load_safe_path`
+  ac_define_dir=`eval echo $ac_define_dir`
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_AUTO_LOAD_SAFE_PATH "$ac_define_dir"
+_ACEOF
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_auto_load_safe_path" >&5
+$as_echo "$with_auto_load_safe_path" >&6; }
 
 
 

@@ -1,5 +1,16 @@
 2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	New option "set auto-load safe-path".
+	* gdb.texinfo (Auto-loading): Extend the "show auto-load"
+	and "info auto-load" examples for safe-path.  Put there also references
+	for "set auto-load safe-path" and "show auto-load safe-path".
+	New menu item for Auto-loading safe path.
+	(Auto-loading safe path): New node.
+	(Python Auto-loading): Update the expected output from "Missing"
+	to "No".
+
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	auto-load: Implementation.
 	* gdb.texinfo (Mode Options): New anchor for -nx.
 	(Startup): New anchors for Option -init-eval-command,

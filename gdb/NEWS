@@ -154,6 +154,11 @@ set auto-load libthread-db on|off
 show auto-load libthread-db
   Control auto-loading of inferior specific thread debugging shared library.
 
+set auto-load safe-path <dir1>[:<dir2>...]
+show auto-load safe-path
+  Set a list of directories from which it is safe to auto-load files.
+  The delimiter (':' above) may differ according to the host platform.
+
 * New remote packets
 
 z0/z1 conditional breakpoints extension

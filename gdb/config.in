@@ -43,6 +43,9 @@
    moved. */
 #undef DEBUGDIR_RELOCATABLE
 
+/* Directories safe to hold auto-loaded files. */
+#undef DEFAULT_AUTO_LOAD_SAFE_PATH
+
 /* Define to BFD's default architecture. */
 #undef DEFAULT_BFD_ARCH
 

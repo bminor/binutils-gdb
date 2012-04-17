@@ -134,6 +134,18 @@ AS_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this pat
               [Relocated directory for source files. ])
 ])
 
+AC_MSG_CHECKING([for default auto-load safe-path])
+AC_ARG_WITH(auto-load-safe-path,
+AS_HELP_STRING([--with-auto-load-safe-path=PATH], [directories safe to hold auto-loaded files])
+AS_HELP_STRING([--without-auto-load-safe-path], [do not restrict auto-loaded files locations]),
+[if test "$with_auto_load_safe_path" = "no"; then
+   with_auto_load_safe_path=""
+ fi],
+[with_auto_load_safe_path="$prefix"])
+AC_DEFINE_DIR(DEFAULT_AUTO_LOAD_SAFE_PATH, with_auto_load_safe_path,
+	      [Directories safe to hold auto-loaded files.])
+AC_MSG_RESULT([$with_auto_load_safe_path])
+
 AC_CONFIG_SUBDIRS(testsuite)
 
 # Check whether to support alternative target configurations

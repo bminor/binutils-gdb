@@ -49,6 +49,7 @@ if { [skip_python_tests] } { continue }
 set remote_python_file [remote_download host ${srcdir}/${subdir}/${testfile}.py]
 
 gdb_reinitialize_dir $srcdir/$subdir
+gdb_test_no_output "set auto-load safe-path ${remote_python_file}" "set auto-load safe-path"
 gdb_load ${binfile}
 
 # Verify gdb loaded the script.

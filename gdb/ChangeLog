@@ -1,5 +1,39 @@
 2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	New option "set auto-load safe-path".
+	* NEWS: New commands "set auto-load safe-path"
+	and "show auto-load safe-path".
+	* auto-load.c: Include gdb_vecs.h, readline/tilde.h and completer.h.
+	(auto_load_safe_path, auto_load_safe_path_vec)
+	(auto_load_safe_path_vec_update, set_auto_load_safe_path)
+	(show_auto_load_safe_path, add_auto_load_safe_path, filename_is_in_dir)
+	(filename_is_in_auto_load_safe_path_vec, file_is_auto_load_safe): New.
+	(source_gdb_script_for_objfile): New variable is_safe.  Call
+	file_is_auto_load_safe.  Return if it is not.
+	(struct loaded_script): New field loaded.
+	(maybe_add_script): Add parameter loaded.  Initialize SLOT with it.
+	(print_script): Use LOADED indicator instead of FULL_PATH.  Change
+	output "Missing" to "No".
+	(_initialize_auto_load): New variable cmd.  Initialize
+	auto_load_safe_path.  Register "set auto-load safe-path",
+	"show auto-load safe-path" and "add-auto-load-safe-path".
+	* auto-load.h (maybe_add_script): Add parameter loaded.
+	(file_is_auto_load_safe): New declaration.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: New parameters --with-auto-load-safe-path
+	and --without-auto-load-safe-path.
+	* linux-thread-db.c (try_thread_db_load_from_pdir_1)
+	(try_thread_db_load_from_dir): Check file_is_auto_load_safe first.
+	* main.c (captured_main): Check file_is_auto_load_safe for
+	LOCAL_GDBINIT.
+	* python/py-auto-load.c (gdbpy_load_auto_script_for_objfile): New
+	variable is_safe.  Call file_is_auto_load_safe.  Return if it is not.
+	(source_section_scripts): Call file_is_auto_load_safe.  Return if it is
+	not.
+
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	auto-load: Implementation.
 	* NEWS: New descriptions for "info auto-load",
 	"info auto-load gdb-scripts", "info auto-load python-scripts",

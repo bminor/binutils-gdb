@@ -72,14 +72,19 @@ static void
 gdbpy_load_auto_script_for_objfile (struct objfile *objfile, FILE *file,
 				    const char *filename)
 {
+  int is_safe;
   struct auto_load_pspace_info *pspace_info;
+
+  is_safe = file_is_auto_load_safe (filename);
 
   /* Add this script to the hash table too so "info auto-load python-scripts"
      can print it.  */
   pspace_info = get_auto_load_pspace_data_for_loading (current_program_space);
-  maybe_add_script (pspace_info, filename, filename, &script_language_python);
+  maybe_add_script (pspace_info, is_safe, filename, filename,
+		    &script_language_python);
 
-  source_python_script_for_objfile (objfile, file, filename);
+  if (is_safe)
+    source_python_script_for_objfile (objfile, file, filename);
 }
 
 /* Load scripts specified in OBJFILE.
@@ -147,6 +152,9 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
 	{
 	  make_cleanup_fclose (stream);
 	  make_cleanup (xfree, full_path);
+
+	  if (!file_is_auto_load_safe (full_path))
+	    opened = 0;
 	}
       else
 	{
@@ -167,7 +175,7 @@ Use `info auto-load python [REGEXP]' to list them."),
 
 	 IWBN if complaints.c were more general-purpose.  */
 
-      in_hash_table = maybe_add_script (pspace_info, file, full_path,
+      in_hash_table = maybe_add_script (pspace_info, opened, file, full_path,
 					&script_language_python);
 
       /* If this file is not currently loaded, load it.  */

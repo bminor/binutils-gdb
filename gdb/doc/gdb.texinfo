@@ -20892,6 +20892,8 @@ gdb-scripts:  Auto-loading of canned sequences of commands scripts is on.
 libthread-db:  Auto-loading of inferior specific libthread_db is on.
 local-gdbinit:  Auto-loading of .gdbinit script from current directory is on.
 python-scripts:  Auto-loading of Python scripts is on.
+safe-path:  List of directories from which it is safe to auto-load files
+            is /usr/local.
 @end smallexample
 
 @anchor{info auto-load}
@@ -20963,12 +20965,19 @@ These are @value{GDBN} control commands for the auto-loading:
 @tab Show setting of thread debugging library.
 @item @xref{info auto-load libthread-db}.
 @tab Show state of thread debugging library.
+@item @xref{set auto-load safe-path}.
+@tab Control directories trusted for automatic loading.
+@item @xref{show auto-load safe-path}.
+@tab Show directories trusted for automatic loading.
+@item @xref{add-auto-load-safe-path}.
+@tab Add directory trusted for automatic loading.
 @end multitable
 
 @menu
 * Init File in the Current Directory:: @samp{set/show/info auto-load local-gdbinit}
 * libthread_db.so.1 file::             @samp{set/show/info auto-load libthread-db}
 * objfile-gdb.gdb file::               @samp{set/show/info auto-load gdb-script}
+* Auto-loading safe path::             @samp{set/show/info auto-load safe-path}
 @xref{Python Auto-loading}.
 @end menu
 
@@ -21068,6 +21077,104 @@ auto-loaded.
 
 If @var{regexp} is supplied only canned sequences of commands scripts with
 matching names are printed.
+
+@node Auto-loading safe path
+@subsection Security restriction for auto-loading
+@cindex auto-loading safe-path
+
+As the files of inferior can come from untrusted source (such as submitted by
+an application user) @value{GDBN} does not always load any files automatically.
+@value{GDBN} provides the @samp{set auto-load safe-path} setting to list
+directories trusted for loading files not explicitly requested by user.
+
+If the path is not set properly you will see a warning and the file will not
+get loaded:
+
+@smallexample
+$ ./gdb -q ./gdb
+Reading symbols from /home/user/gdb/gdb...done.
+warning: File "/home/user/gdb/gdb-gdb.gdb" auto-loading has been
+         declined by your `auto-load safe-path' set to "/usr/local".
+warning: File "/home/user/gdb/gdb-gdb.py" auto-loading has been
+         declined by your `auto-load safe-path' set to "/usr/local".
+@end smallexample
+
+The list of trusted directories is controlled by the following commands:
+
+@table @code
+@anchor{set auto-load safe-path}
+@kindex set auto-load safe-path
+@item set auto-load safe-path @var{directories}
+Set the list of directories (and their subdirectories) trusted for automatic
+loading and execution of scripts.  You can also enter a specific trusted file.
+The list of directories uses directory separator (@samp{:} on GNU and Unix
+systems, @samp{;} on MS-Windows and MS-DOS) to separate directories, similarly
+to the @env{PATH} environment variable.
+
+@anchor{show auto-load safe-path}
+@kindex show auto-load safe-path
+@item show auto-load safe-path
+Show the list of directories trusted for automatic loading and execution of
+scripts.
+
+@anchor{add-auto-load-safe-path}
+@kindex add-auto-load-safe-path
+@item add-auto-load-safe-path
+Add an entry (or list of entries) the list of directories trusted for automatic
+loading and execution of scripts.  Multiple entries may be delimited by the
+host platform directory separator in use.
+@end table
+
+Setting this variable to an empty string disables this security protection.
+This variable is supposed to be set to the system directories writable by the
+system superuser only.  Users can add their source directories in init files in
+their home directories (@pxref{Home Directory Init File}).  See also deprecated
+init file in the current directory
+(@pxref{Init File in the Current Directory during Startup}).
+
+To force @value{GDBN} to load the files it declined to load in the previous
+example, you could use one of the following ways:
+
+@itemize @bullet
+@item ~/.gdbinit: add-auto-load-safe-path ~/src/gdb
+Specify this trusted directory (or a file) as additional component of the list.
+You have to specify also any existing directories displayed by
+by @samp{show auto-load safe-path} (such as @samp{/usr:/bin} in this example).
+
+@item @kbd{gdb -iex "set auto-load safe-path /usr:/bin:~/src/gdb" [@dots{}]}
+Specify this directory as in the previous case but just for a single
+@value{GDBN} session.
+
+@item @kbd{gdb -iex "set auto-load safe-path" [@dots{}]}
+Disable auto-loading safety for a single @value{GDBN} session.
+This assumes all the files you debug during this @value{GDBN} session will come
+from trusted sources.
+
+@item @kbd{./configure --without-auto-load-safe-path}
+During compilation of @value{GDBN} you may disable any auto-loading safety.
+This assumes all the files you will ever debug with this @value{GDBN} come from
+trusted sources.
+@end itemize
+
+On the other hand you can also explicitly forbid automatic files loading which
+also suppresses any such warning messages:
+
+@itemize @bullet
+@item @kbd{gdb -iex "set auto-load no" [@dots{}]}
+You can use @value{GDBN} command-line option for a single @value{GDBN} session.
+
+@item @samp{~/.gdbinit}: @samp{set auto-load no}
+Disable auto-loading globally for the user
+(@pxref{Home Directory Init File}).  While it is improbable, you could also
+use system init file instead (@pxref{System-wide configuration}).
+@end itemize
+
+This setting applies to the file names as entered by user.  If no entry matches
+@value{GDBN} tries as a last resort to also resolve all the file names into
+their canonical form (typically resolving symbolic links) and compare the
+entries again.  @value{GDBN} already canonicalizes most of the filenames on its
+own before starting the comparison so a canonical form of directories is
+recommended to be entered.
 
 @node Messages/Warnings
 @section Optional Warnings and Messages
@@ -25135,10 +25242,10 @@ Example:
 
 @smallexample
 (gdb) info auto-load python-scripts
-Loaded  Script
-Yes     py-section-script.py
-        full name: /tmp/py-section-script.py
-Missing my-foo-pretty-printers.py
+Loaded Script
+Yes    py-section-script.py
+       full name: /tmp/py-section-script.py
+No     my-foo-pretty-printers.py
 @end smallexample
 @end table
 

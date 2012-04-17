@@ -1,5 +1,11 @@
 2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	New option "set auto-load safe-path".
+	* gdb.python/py-objfile-script.exp (set auto-load safe-path): New.
+	* gdb.python/py-section-script.exp (set auto-load safe-path): New.
+
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	auto-load: Implementation.
 	* gdb.base/help.exp (test set height): Increase the height.
 	* gdb.python/py-objfile-script.exp (info auto-load-scripts): Change

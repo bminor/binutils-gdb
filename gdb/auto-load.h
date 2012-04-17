@@ -39,7 +39,8 @@ extern int auto_load_local_gdbinit_loaded;
 extern struct auto_load_pspace_info *
   get_auto_load_pspace_data_for_loading (struct program_space *pspace);
 extern int maybe_add_script (struct auto_load_pspace_info *pspace_info,
-			     const char *name, const char *full_path,
+			     int loaded, const char *name,
+			     const char *full_path,
 			     const struct script_language *language);
 extern void auto_load_objfile_script (struct objfile *objfile,
 				      const struct script_language *language);
@@ -53,5 +54,7 @@ extern void auto_load_info_scripts (char *pattern, int from_tty,
 extern struct cmd_list_element **auto_load_set_cmdlist_get (void);
 extern struct cmd_list_element **auto_load_show_cmdlist_get (void);
 extern struct cmd_list_element **auto_load_info_cmdlist_get (void);
+
+extern int file_is_auto_load_safe (const char *filename);
 
 #endif /* AUTO_LOAD_H */
