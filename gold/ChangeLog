@@ -1,3 +1,13 @@
+2012-04-16  Cary Coutant  <ccoutant@google.com>
+
+	* archive.cc (Library_base::should_include_member): Check for
+	--export-dynamic-symbol.
+	* options.h (class General_options): Add --export-dynamic-symbol.
+	* symtab.cc (Symbol::should_add_dynsym_entry): Check for
+	--export-dynamic-symbol.
+	(Symbol_table::gc_mark_undef_symbols): Likewise.
+	(Symbol_table::do_add_undefined_symbols_from_command_line): Likewise.
+
 2012-04-12  David S. Miller  <davem@davemloft.net>
 
 	* sparc.cc (Reloc::wdisp10): New relocation method.

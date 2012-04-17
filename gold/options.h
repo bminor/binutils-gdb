@@ -739,6 +739,9 @@ class General_options
               N_("Export all dynamic symbols"),
 	      N_("Do not export all dynamic symbols (default)"));
 
+  DEFINE_set(export_dynamic_symbol, options::TWO_DASHES, '\0',
+	     N_("Export SYMBOL to dynamic symbol table"), N_("SYMBOL"));
+
   DEFINE_special(EB, options::ONE_DASH, '\0',
 		 N_("Link big-endian objects."), NULL);
 

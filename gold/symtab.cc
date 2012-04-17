@@ -363,13 +363,21 @@ Symbol::should_add_dynsym_entry(Symbol_table* symtab) const
         return false;
     }
 
+  // If the symbol was forced dynamic in a --dynamic-list file
+  // or an --export-dynamic-symbol option, add it.
+  if (parameters->options().in_dynamic_list(this->name())
+      || parameters->options().is_export_dynamic_symbol(this->name()))
+    {
+      if (!this->is_forced_local())
+        return true;
+      gold_warning(_("Cannot export local symbol '%s'"),
+		   this->demangled_name().c_str());
+      return false;
+    }
+
   // If the symbol was forced local in a version script, do not add it.
   if (this->is_forced_local())
     return false;
-
-  // If the symbol was forced dynamic in a --dynamic-list file, add it.
-  if (parameters->options().in_dynamic_list(this->name()))
-    return true;
 
   // If dynamic-list-data was specified, add any STT_OBJECT.
   if (parameters->options().dynamic_list_data()
@@ -551,8 +559,8 @@ Symbol_table::is_section_folded(Object* obj, unsigned int shndx) const
           && this->icf_->is_section_folded(obj, shndx));
 }
 
-// For symbols that have been listed with -u option, add them to the
-// work list to avoid gc'ing them.
+// For symbols that have been listed with a -u or --export-dynamic-symbol
+// option, add them to the work list to avoid gc'ing them.
 
 void 
 Symbol_table::gc_mark_undef_symbols(Layout* layout)
@@ -560,6 +568,28 @@ Symbol_table::gc_mark_undef_symbols(Layout* layout)
   for (options::String_set::const_iterator p =
 	 parameters->options().undefined_begin();
        p != parameters->options().undefined_end();
+       ++p)
+    {
+      const char* name = p->c_str();
+      Symbol* sym = this->lookup(name);
+      gold_assert(sym != NULL);
+      if (sym->source() == Symbol::FROM_OBJECT 
+          && !sym->object()->is_dynamic())
+        {
+          Relobj* obj = static_cast<Relobj*>(sym->object());
+          bool is_ordinary;
+          unsigned int shndx = sym->shndx(&is_ordinary);
+          if (is_ordinary)
+            {
+              gold_assert(this->gc_ != NULL);
+              this->gc_->worklist().push(Section_id(obj, shndx));
+            }
+        }
+    }
+
+  for (options::String_set::const_iterator p =
+	 parameters->options().export_dynamic_symbol_begin();
+       p != parameters->options().export_dynamic_symbol_end();
        ++p)
     {
       const char* name = p->c_str();
@@ -2288,6 +2318,12 @@ Symbol_table::do_add_undefined_symbols_from_command_line(Layout* layout)
   for (options::String_set::const_iterator p =
 	 parameters->options().undefined_begin();
        p != parameters->options().undefined_end();
+       ++p)
+    this->add_undefined_symbol_from_command_line<size>(p->c_str());
+
+  for (options::String_set::const_iterator p =
+	 parameters->options().export_dynamic_symbol_begin();
+       p != parameters->options().export_dynamic_symbol_end();
        ++p)
     this->add_undefined_symbol_from_command_line<size>(p->c_str());
 
