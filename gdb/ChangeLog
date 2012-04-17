@@ -1,3 +1,19 @@
+2012-04-17  Pedro Alves  <palves@redhat.com>
+
+	* gdbtypes.h (FIELD_BITPOS): Rename to ...
+	(FIELD_BITPOS_LVAL): ... this.
+	(FIELD_BITPOS): New.
+	(SET_FIELD_BITPOS): Adjust to use FIELD_BITPOS_LVAL.
+	* dwarf2read.c (dwarf2_add_field): Use SET_FIELD_BITPOS.
+	* gdbtypes.c (append_composite_type_field_aligned): Adjust to use
+	SET_FIELD_BITPOS.
+	* gnu-v3-abi.c (build_gdb_vtable_type): Adjust to use
+	SET_FIELD_BITPOS.
+	* stabsread.c (read_cpp_abbrev, read_one_struct_field)
+	(read_baseclasses): Adjust to use SET_FIELD_BITPOS.
+	* target-descriptions.c (tdesc_gdb_type): Adjust to use
+	SET_FIELD_BITPOS.
+
 2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Do not rely on FIELD_LOC_KIND_BITPOS being zero.

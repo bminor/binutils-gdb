@@ -657,9 +657,9 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 		bitsize = f->end - f->start + 1;
 		total_size = tdesc_type->u.u.size * TARGET_CHAR_BIT;
 		if (gdbarch_bits_big_endian (gdbarch))
-		  FIELD_BITPOS (fld[0]) = total_size - f->start - bitsize;
+		  SET_FIELD_BITPOS (fld[0], total_size - f->start - bitsize);
 		else
-		  FIELD_BITPOS (fld[0]) = f->start;
+		  SET_FIELD_BITPOS (fld[0], f->start);
 		FIELD_BITSIZE (fld[0]) = bitsize;
 	      }
 	    else

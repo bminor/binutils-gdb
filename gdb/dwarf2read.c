@@ -7066,7 +7066,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	         anonymous object to the MSB of the field.  We don't
 	         have to do anything special since we don't need to
 	         know the size of the anonymous object.  */
-	      FIELD_BITPOS (*fp) += DW_UNSND (attr);
+	      SET_FIELD_BITPOS (*fp, FIELD_BITPOS (*fp) + DW_UNSND (attr));
 	    }
 	  else
 	    {
@@ -7095,8 +7095,10 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		     bit field.  */
 		  anonymous_size = TYPE_LENGTH (fp->type);
 		}
-	      FIELD_BITPOS (*fp) += anonymous_size * bits_per_byte
-		- bit_offset - FIELD_BITSIZE (*fp);
+	      SET_FIELD_BITPOS (*fp,
+				(FIELD_BITPOS (*fp)
+				 + anonymous_size * bits_per_byte
+				 - bit_offset - FIELD_BITSIZE (*fp)));
 	    }
 	}
 

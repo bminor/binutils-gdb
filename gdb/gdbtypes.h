@@ -1087,13 +1087,14 @@ extern void allocate_gnat_aux_type (struct type *);
 #define FIELD_TYPE(thisfld) ((thisfld).type)
 #define FIELD_NAME(thisfld) ((thisfld).name)
 #define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind)
-#define FIELD_BITPOS(thisfld) ((thisfld).loc.bitpos)
+#define FIELD_BITPOS_LVAL(thisfld) ((thisfld).loc.bitpos)
+#define FIELD_BITPOS(thisfld) (FIELD_BITPOS_LVAL (thisfld) + 0)
 #define FIELD_STATIC_PHYSNAME(thisfld) ((thisfld).loc.physname)
 #define FIELD_STATIC_PHYSADDR(thisfld) ((thisfld).loc.physaddr)
 #define FIELD_DWARF_BLOCK(thisfld) ((thisfld).loc.dwarf_block)
 #define SET_FIELD_BITPOS(thisfld, bitpos)			\
   (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_BITPOS,		\
-   FIELD_BITPOS (thisfld) = (bitpos))
+   FIELD_BITPOS_LVAL (thisfld) = (bitpos))
 #define SET_FIELD_PHYSNAME(thisfld, name)			\
   (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_PHYSNAME,		\
    FIELD_STATIC_PHYSNAME (thisfld) = (name))

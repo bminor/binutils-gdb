@@ -2830,8 +2830,8 @@ read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
       {
 	int nbits;
 
-	FIELD_BITPOS (fip->list->field) = read_huge_number (pp, ';', &nbits,
-                                                            0);
+	SET_FIELD_BITPOS (fip->list->field,
+			  read_huge_number (pp, ';', &nbits, 0));
 	if (nbits != 0)
 	  return 0;
       }
@@ -2907,7 +2907,8 @@ read_one_struct_field (struct field_info *fip, char **pp, char *p,
   {
     int nbits;
 
-    FIELD_BITPOS (fip->list->field) = read_huge_number (pp, ',', &nbits, 0);
+    SET_FIELD_BITPOS (fip->list->field,
+		      read_huge_number (pp, ',', &nbits, 0));
     if (nbits != 0)
       {
 	stabs_general_complaint ("bad structure-type format");
@@ -3187,7 +3188,7 @@ read_baseclasses (struct field_info *fip, char **pp, struct type *type,
 	   corresponding to this baseclass.  Always zero in the absence of
 	   multiple inheritance.  */
 
-	FIELD_BITPOS (new->field) = read_huge_number (pp, ',', &nbits, 0);
+	SET_FIELD_BITPOS (new->field, read_huge_number (pp, ',', &nbits, 0));
 	if (nbits != 0)
 	  return 0;
       }

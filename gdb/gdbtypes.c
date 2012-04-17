@@ -3666,9 +3666,10 @@ append_composite_type_field_aligned (struct type *t, char *name,
       TYPE_LENGTH (t) = TYPE_LENGTH (t) + TYPE_LENGTH (field);
       if (TYPE_NFIELDS (t) > 1)
 	{
-	  FIELD_BITPOS (f[0]) = (FIELD_BITPOS (f[-1])
-				 + (TYPE_LENGTH (FIELD_TYPE (f[-1]))
-				    * TARGET_CHAR_BIT));
+	  SET_FIELD_BITPOS (f[0],
+			    (FIELD_BITPOS (f[-1])
+			     + (TYPE_LENGTH (FIELD_TYPE (f[-1]))
+				* TARGET_CHAR_BIT)));
 
 	  if (alignment)
 	    {
@@ -3679,7 +3680,7 @@ append_composite_type_field_aligned (struct type *t, char *name,
 
 	      if (left)
 		{
-		  FIELD_BITPOS (f[0]) += (alignment - left);
+		  SET_FIELD_BITPOS (f[0], FIELD_BITPOS (f[0]) + (alignment - left));
 		  TYPE_LENGTH (t) += (alignment - left) / TARGET_CHAR_BIT;
 		}
 	    }
