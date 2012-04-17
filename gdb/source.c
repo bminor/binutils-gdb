@@ -573,6 +573,7 @@ add_path (char *dirname, char **which_path, int parse_separators)
     append:
       {
 	unsigned int len = strlen (name);
+	char tinybuf[2];
 
 	p = *which_path;
 	while (1)
@@ -596,37 +597,33 @@ add_path (char *dirname, char **which_path, int parse_separators)
 	    else
 	      break;
 	  }
-	if (p == 0)
+
+	tinybuf[0] = DIRNAME_SEPARATOR;
+	tinybuf[1] = '\0';
+
+	/* If we have already tacked on a name(s) in this command,
+	   be sure they stay on the front as we tack on some
+	   more.  */
+	if (prefix)
 	  {
-	    char tinybuf[2];
+	    char *temp, c;
 
-	    tinybuf[0] = DIRNAME_SEPARATOR;
-	    tinybuf[1] = '\0';
-
-	    /* If we have already tacked on a name(s) in this command,
-	       be sure they stay on the front as we tack on some
-	       more.  */
-	    if (prefix)
-	      {
-		char *temp, c;
-
-		c = old[prefix];
-		old[prefix] = '\0';
-		temp = concat (old, tinybuf, name, (char *)NULL);
-		old[prefix] = c;
-		*which_path = concat (temp, "", &old[prefix], (char *) NULL);
-		prefix = strlen (temp);
-		xfree (temp);
-	      }
-	    else
-	      {
-		*which_path = concat (name, (old[0] ? tinybuf : old),
-				      old, (char *)NULL);
-		prefix = strlen (name);
-	      }
-	    xfree (old);
-	    old = *which_path;
+	    c = old[prefix];
+	    old[prefix] = '\0';
+	    temp = concat (old, tinybuf, name, (char *)NULL);
+	    old[prefix] = c;
+	    *which_path = concat (temp, "", &old[prefix], (char *) NULL);
+	    prefix = strlen (temp);
+	    xfree (temp);
 	  }
+	else
+	  {
+	    *which_path = concat (name, (old[0] ? tinybuf : old),
+				  old, (char *)NULL);
+	    prefix = strlen (name);
+	  }
+	xfree (old);
+	old = *which_path;
       }
     skip_dup:
       ;
