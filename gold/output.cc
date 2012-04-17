@@ -705,10 +705,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Output_data* od,
     Address address,
     bool is_relative,
-    bool is_symbolless)
+    bool is_symbolless,
+    bool use_plt_offset)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
     is_relative_(is_relative), is_symbolless_(is_symbolless),
-    is_section_symbol_(false), use_plt_offset_(false), shndx_(INVALID_CODE)
+    is_section_symbol_(false), use_plt_offset_(use_plt_offset), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -726,10 +727,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int shndx,
     Address address,
     bool is_relative,
-    bool is_symbolless)
+    bool is_symbolless,
+    bool use_plt_offset)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
     is_relative_(is_relative), is_symbolless_(is_symbolless),
-    is_section_symbol_(false), use_plt_offset_(false), shndx_(shndx)
+    is_section_symbol_(false), use_plt_offset_(use_plt_offset), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -1116,7 +1118,14 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
     {
       const Sized_symbol<size>* sym;
       sym = static_cast<const Sized_symbol<size>*>(this->u1_.gsym);
-      return sym->value() + addend;
+      if (this->use_plt_offset_ && sym->has_plt_offset())
+	{
+	  uint64_t plt_address =
+	    parameters->target().plt_address_for_global(sym);
+	  return plt_address + sym->plt_offset();
+	}
+      else
+	return sym->value() + addend;
     }
   gold_assert(this->local_sym_index_ != SECTION_CODE
 	      && this->local_sym_index_ != TARGET_CODE

@@ -1667,24 +1667,24 @@ Target_x86_64<size>::reserve_global_got_entry(unsigned int got_index,
 				 this->got_, got_offset, 0);
 	  else
 	    rela_dyn->add_global_relative(gsym, elfcpp::R_X86_64_RELATIVE,
-					  this->got_, got_offset, 0);
+					  this->got_, got_offset, 0, false);
 	}
       break;
     case GOT_TYPE_TLS_OFFSET:
       rela_dyn->add_global_relative(gsym, elfcpp::R_X86_64_TPOFF64,
-				    this->got_, got_offset, 0);
+				    this->got_, got_offset, 0, false);
       break;
     case GOT_TYPE_TLS_PAIR:
       this->got_->reserve_slot(got_index + 1);
       rela_dyn->add_global_relative(gsym, elfcpp::R_X86_64_DTPMOD64,
-				    this->got_, got_offset, 0);
+				    this->got_, got_offset, 0, false);
       rela_dyn->add_global_relative(gsym, elfcpp::R_X86_64_DTPOFF64,
-				    this->got_, got_offset + 8, 0);
+				    this->got_, got_offset + 8, 0, false);
       break;
     case GOT_TYPE_TLS_DESC:
       this->got_->reserve_slot(got_index + 1);
       rela_dyn->add_global_relative(gsym, elfcpp::R_X86_64_TLSDESC,
-				    this->got_, got_offset, 0);
+				    this->got_, got_offset, 0, false);
       break;
     default:
       gold_unreachable();
@@ -2505,7 +2505,7 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 					      output_section, object,
 					      data_shndx,
 					      reloc.get_r_offset(),
-					      reloc.get_r_addend());
+					      reloc.get_r_addend(), false);
               }
             else
               {
@@ -2612,7 +2612,7 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 		    unsigned int got_off = gsym->got_offset(GOT_TYPE_STANDARD);
 		    rela_dyn->add_global_relative(gsym,
 						  elfcpp::R_X86_64_RELATIVE,
-						  got, got_off, 0);
+						  got, got_off, 0, false);
 		  }
               }
           }

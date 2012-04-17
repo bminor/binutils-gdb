@@ -1,3 +1,16 @@
+2012-04-16  David S. Miller  <davem@davemloft.net>
+
+	* output.h (Output_reloc): Allow use_plt_offset for global relocs too.
+	(class Output_data_reloc): Adjust calls to Output_reloc_type.
+	(Output_data_reloc::add_global_relative): (RELA only) Add use_plt_offset.
+	* output.cc (Output_reloc::Output_reloc): Add use_plt_offset flag for
+	global relocs too.
+	(Output_reloc::symbol_value): Respect use_plt_offset_ for global symbols.
+	* powerpc.cc (Target_powerpc::Scan::global): Adjust add_global_relative
+	calls.
+	* sparc.cc (Target_sparc::Scan::global): Likewise.
+	* x86_64.cc (Target_x86_64::Scan::global): Likewise.
+
 2012-04-16  Cary Coutant  <ccoutant@google.com>
 
 	* archive.cc (Library_base::should_include_member): Check for

@@ -1486,7 +1486,7 @@ Target_powerpc<size, big_endian>::Scan::global(
                 rela_dyn->add_global_relative(gsym, elfcpp::R_POWERPC_RELATIVE,
 					      output_section, object,
 					      data_shndx, reloc.get_r_offset(),
-					      reloc.get_r_addend());
+					      reloc.get_r_addend(), false);
               }
             else
               {
@@ -1505,7 +1505,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 						output_section, object,
 						data_shndx,
 						reloc.get_r_offset(),
-						reloc.get_r_addend());
+						reloc.get_r_addend(), false);
               }
           }
       }
@@ -1574,7 +1574,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 
 		gsym->set_got_offset(GOT_TYPE_STANDARD, off);
 		rela_dyn->add_global_relative(gsym, elfcpp::R_POWERPC_RELATIVE,
-					      got, off, 0);
+					      got, off, 0, false);
 	      }
           }
       }
