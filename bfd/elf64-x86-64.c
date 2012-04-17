@@ -5134,13 +5134,16 @@ static const bfd_byte elf_x86_64_nacl_plt0_entry[NACL_PLT_ENTRY_SIZE] =
     0x4d, 0x01, 0xfb,             	/* add %r15, %r11		*/
     0x41, 0xff, 0xe3,             	/* jmpq *%r11			*/
 
-    /* 41 bytes of nop to pad out to the standard size.  */
+    /* 9-byte nop sequence to pad out to the next 32-byte boundary.  */
+    0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopl %cs:0x0(%rax,%rax,1)	*/
+
+    /* 32 bytes of nop to pad out to the standard size.  */
     0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data32 prefixes	*/
     0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
     0x66, 0x66, 0x66, 0x66, 0x66, 0x66,    /* excess data32 prefixes	*/
     0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
-    0x66, 0x66,                            /* excess data32 prefixes	*/
-    0x2e, 0x0f, 0x1f, 0x84, 0, 0, 0, 0, 0, /* nopw %cs:0x0(%rax,%rax,1)	*/
+    0x66,                                  /* excess data32 prefix	*/
+    0x90                                   /* nop */
   };
 
 static const bfd_byte elf_x86_64_nacl_plt_entry[NACL_PLT_ENTRY_SIZE] =

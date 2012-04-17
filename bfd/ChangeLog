@@ -1,3 +1,8 @@
+2012-04-17  Roland McGrath  <mcgrathr@google.com>
+
+	* elf64-x86-64.c (elf_x86_64_nacl_plt0_entry): Fix nop padding
+	so that 32-byte boundary is a proper instruction boundary.
+
 2012-04-17  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-lib.c (_bfd_vms_lib_get_module): Append .obj extension to
