@@ -1,3 +1,12 @@
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Do not rely on FIELD_LOC_KIND_BITPOS being zero.
+	* ada-lang.c (ada_template_to_fixed_record_type_1): Replace
+	TYPE_FIELD_BITPOS used as lvalue by SET_FIELD_BITPOS.
+	* gdbtypes.c (append_flags_type_flag): Likewise, twice.
+	* jv-lang.c (java_link_class_type): Likewise, once.
+	* stabsread.c (read_enum_type): Likewise.
+
 2012-04-16  Yao Qi  <yao@codesourcery.com>
 
 	* common/agent.c (agent_run_command): Add one more parameter `len'.

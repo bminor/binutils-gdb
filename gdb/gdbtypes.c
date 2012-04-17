@@ -3606,12 +3606,12 @@ append_flags_type_flag (struct type *type, int bitpos, char *name)
   if (name)
     {
       TYPE_FIELD_NAME (type, bitpos) = xstrdup (name);
-      TYPE_FIELD_BITPOS (type, bitpos) = bitpos;
+      SET_FIELD_BITPOS (TYPE_FIELD (type, bitpos), bitpos);
     }
   else
     {
       /* Don't show this field to the user.  */
-      TYPE_FIELD_BITPOS (type, bitpos) = -1;
+      SET_FIELD_BITPOS (TYPE_FIELD (type, bitpos), -1);
     }
 }
 

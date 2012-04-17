@@ -7445,7 +7445,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
     {
       off = align_value (off, field_alignment (type, f))
 	+ TYPE_FIELD_BITPOS (type, f);
-      TYPE_FIELD_BITPOS (rtype, f) = off;
+      SET_FIELD_BITPOS (TYPE_FIELD (rtype, f), off);
       TYPE_FIELD_BITSIZE (rtype, f) = 0;
 
       if (ada_is_variant_part (type, f))

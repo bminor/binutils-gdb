@@ -480,7 +480,7 @@ java_link_class_type (struct gdbarch *gdbarch,
       if (accflags & 0x0008)	/* ACC_STATIC */
 	SET_FIELD_PHYSADDR (TYPE_FIELD (type, i), boffset);
       else
-	TYPE_FIELD_BITPOS (type, i) = 8 * boffset;
+	SET_FIELD_BITPOS (TYPE_FIELD (type, i), 8 * boffset);
       if (accflags & 0x8000)	/* FIELD_UNRESOLVED_FLAG */
 	{
 	  TYPE_FIELD_TYPE (type, i) = get_java_object_type ();	/* FIXME */
