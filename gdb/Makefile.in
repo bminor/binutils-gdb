@@ -683,7 +683,7 @@ TARGET_FLAGS_TO_PASS = \
 
 SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	ada-varobj.c \
-	addrmap.c \
+	addrmap.c auto-load.c \
 	auxv.c ax-general.c ax-gdb.c \
 	agent.c \
 	bcache.c \
@@ -823,7 +823,7 @@ solib-darwin.h solib-ia64-hpux.h solib-spu.h windows-nat.h xcoffread.h \
 gnulib/extra/arg-nonnull.h gnulib/extra/c++defs.h gnulib/extra/warn-on-use.h \
 gnulib/stddef.in.h gnulib/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
-common/linux-osdata.h gdb-dlfcn.h
+common/linux-osdata.h gdb-dlfcn.h auto-load.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -855,7 +855,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	version.o \
 	annotate.o \
 	addrmap.o \
-	auxv.o \
+	auto-load.o auxv.o \
 	agent.o \
 	bfd-target.o \
 	blockframe.o breakpoint.o findvar.o regcache.o \
@@ -1221,7 +1221,7 @@ distclean: clean
 	rm -f gdbserver/config.status gdbserver/config.log
 	rm -f gdbserver/tm.h gdbserver/xm.h gdbserver/nm.h
 	rm -f gdbserver/Makefile gdbserver/config.cache
-	rm -f nm.h config.status config.h stamp-h .gdbinit jit-reader.h
+	rm -f nm.h config.status config.h stamp-h gdb-gdb.gdb jit-reader.h
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
 	rm -f Makefile

@@ -41,6 +41,7 @@
 #include "cli/cli-cmds.h"
 #include "python/python.h"
 #include "objfiles.h"
+#include "auto-load.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since

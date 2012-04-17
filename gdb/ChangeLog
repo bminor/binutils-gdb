@@ -1,5 +1,39 @@
 2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	auto-load: Move files.
+	* Makefile.in (SFILES): Add auto-load.c.
+	(HFILES_NO_SRCDIR): Add auto-load.h.
+	(COMMON_OBS): Add auto-load.o.
+	(distclean): Change .gdbinit for gdb-gdb.gdb.
+	* auto-load.c: New file, with parts from python/py-auto-load.c.
+	* auto-load.h: New file, with parts from python/python.h.
+	* configure: Regenerate.
+	* configure.ac (AC_OUTPUT): Change .gdbinit for gdb-gdb.gdb.
+	* gdb-gdb.gdb.in: New file, renamed from gdbinit.in.
+	* gdbinit.in: Remove file, rename it to gdb-gdb.gdb.in.
+	* main.c: Include auto-load.h.
+	* python/py-auto-load.c: Move include filenames.h, gdb_regex.h,
+	command.h, observer.h and progspace.h to auto-load.c.  Add include
+	auto-load.h.
+	(gdbpy_global_auto_load, struct auto_load_pspace_info)
+	(struct loaded_script, auto_load_pspace_data)
+	(auto_load_pspace_data_cleanup, get_auto_load_pspace_data)
+	(hash_loaded_script_entry, eq_loaded_script_entry)
+	(init_loaded_scripts_info, get_auto_load_pspace_data_for_loading)
+	(maybe_add_script): Move to auto-load.c.
+	(source_section_scripts): Change maybe_add_script parameters passing,
+	use script_not_found_warning_print.
+	(clear_section_scripts, auto_load_objfile_script)
+	(auto_load_new_objfile, loaded_script_ptr)
+	(DEF_VEC_P (loaded_script_ptr), collect_matching_scripts, print_script)
+	(sort_scripts_by_name, info_auto_load_scripts): Move to auto-load.c.
+	(gdbpy_initialize_auto_load): Move auto_load_pspace_data,
+	auto_load_new_objfile and info_auto_load_scripts initizations to
+	auto-load.c.
+	* python/python.h (gdbpy_global_auto_load): Move to auto-load.h.
+
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* charset.c (find_charset_names): Remove variables ix and elt.
 	Use free_char_ptr_vec.
