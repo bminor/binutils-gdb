@@ -1,5 +1,10 @@
 2012-04-17  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-lib.c (_bfd_vms_lib_get_module): Append .obj extension to
+	member of an object archive.<
+
+2012-04-17  Tristan Gingold  <gingold@adacore.com>
+
 	* vms-lib.c (MAX_EKEYLEN): Define.
 	(MAX_KEYLEN): Fix value.
 	(vms_write_index): Add comments and fix indentation.

@@ -1296,6 +1296,7 @@ _bfd_vms_lib_get_module (bfd *abfd, unsigned int modidx)
   struct lib_tdata *tdata = bfd_libdata (abfd);
   bfd *res;
   file_ptr file_off;
+  char *name;
 
   /* Sanity check.  */
   if (modidx >= tdata->nbr_modules)
@@ -1357,7 +1358,25 @@ _bfd_vms_lib_get_module (bfd *abfd, unsigned int modidx)
       res->origin = file_off + tdata->mhd_size;
     }
 
-  res->filename = tdata->modules[modidx].name;
+  /* Set filename.  */
+  name = tdata->modules[modidx].name;
+  switch (tdata->type)
+    {
+    case LBR__C_TYP_IOBJ:
+    case LBR__C_TYP_EOBJ:
+      /* For object archives, append .obj to mimic standard behaviour.  */
+      {
+	size_t namelen = strlen (name);
+	char *name1 = bfd_alloc (res, namelen + 4 + 1);
+	memcpy (name1, name, namelen);
+	strcpy (name1 + namelen, ".obj");
+	name = name1;
+      }
+      break;
+    default:
+      break;
+    }
+  res->filename = name;
 
   tdata->cache[modidx] = res;
 
