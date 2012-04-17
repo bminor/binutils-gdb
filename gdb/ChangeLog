@@ -1,5 +1,29 @@
 2012-04-17  Doug Evans  <dje@google.com>
 
+	* cleanups.h: New file.
+	* cleanups.c: New file.
+	* Makefile.in (SFILES): Add cleanups.c.
+	(HFILES_NO_SRCDIR): Add cleanups.h.
+	(COMMON_OBS): Add cleanups.o.
+	* defs.h (struct cleanup): Moved to cleanups.h.
+	(do_cleanups,do_final_cleanups): Ditto.
+	(discard_cleanups,discard_final_cleanups): Ditto
+	(make_cleanup,make_cleanup_dtor,make_final_cleanup): Ditto.
+	(save_cleanups,save_final_cleanups): Ditto.
+	(restore_cleanups,restore_final_cleanups): Ditto.
+	(null_cleanup): Ditto.
+	(make_my_cleanup,make_my_cleanup2): Ditto.
+	(discard_my_cleanups,save_my_cleanups,restore_my_cleanups): Ditto.
+	* utils.c (cleanup_chain,final_cleanup_chain): Moved to cleanups.c.
+	(do_cleanups,do_final_cleanups): Ditto.
+	(discard_cleanups,discard_final_cleanups): Ditto
+	(make_cleanup,make_cleanup_dtor,make_final_cleanup): Ditto.
+	(save_cleanups,save_final_cleanups): Ditto.
+	(restore_cleanups,restore_final_cleanups): Ditto.
+	(null_cleanup): Ditto.
+	(make_my_cleanup,make_my_cleanup2): Ditto.
+	(discard_my_cleanups,save_my_cleanups,restore_my_cleanups): Ditto.
+
 	* utils.c (make_cleanup_freeargv): Use make_cleanup instead of
 	make_my_cleanup.
 	(make_cleanup_dyn_string_delete): Ditto.

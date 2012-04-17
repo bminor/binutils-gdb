@@ -251,29 +251,6 @@ enum return_value_convention
   RETURN_VALUE_ABI_PRESERVES_ADDRESS,
 };
 
-/* the cleanup list records things that have to be undone
-   if an error happens (descriptors to be closed, memory to be freed, etc.)
-   Each link in the chain records a function to call and an
-   argument to give it.
-
-   Use make_cleanup to add an element to the cleanup chain.
-   Use do_cleanups to do all cleanup actions back to a given
-   point in the chain.  Use discard_cleanups to remove cleanups
-   from the chain back to a given point, not doing them.
-
-   If the argument is pointer to allocated memory, then you need
-   to additionally set the 'free_arg' member to a function that will
-   free that memory.  This function will be called both when the cleanup
-   is executed and when it's discarded.  */
-
-struct cleanup
-  {
-    struct cleanup *next;
-    void (*function) (void *);
-    void (*free_arg) (void *);
-    void *arg;
-  };
-
 /* vec.h-style vectors of strings want a typedef for char * or const char *.  */
 
 typedef char * char_ptr;
@@ -313,26 +290,9 @@ extern void set_display_time (int);
 
 extern void set_display_space (int);
 
-#define	ALL_CLEANUPS	((struct cleanup *)0)
+/* Cleanup utilities.  */
 
-extern void do_cleanups (struct cleanup *);
-extern void do_final_cleanups (struct cleanup *);
-
-extern void discard_cleanups (struct cleanup *);
-extern void discard_final_cleanups (struct cleanup *);
-extern void discard_my_cleanups (struct cleanup **, struct cleanup *);
-
-/* NOTE: cagney/2000-03-04: This typedef is strictly for the
-   make_cleanup function declarations below.  Do not use this typedef
-   as a cast when passing functions into the make_cleanup() code.
-   Instead either use a bounce function or add a wrapper function.
-   Calling a f(char*) function with f(void*) is non-portable.  */
-typedef void (make_cleanup_ftype) (void *);
-
-extern struct cleanup *make_cleanup (make_cleanup_ftype *, void *);
-
-extern struct cleanup *make_cleanup_dtor (make_cleanup_ftype *, void *,
-					  void (*dtor) (void *));
+#include "cleanups.h"
 
 extern struct cleanup *make_cleanup_freeargv (char **);
 
@@ -374,28 +334,9 @@ extern struct cleanup *make_cleanup_value_free (struct value *);
 struct so_list;
 extern struct cleanup *make_cleanup_free_so (struct so_list *so);
 
-extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
-
-extern struct cleanup *make_my_cleanup (struct cleanup **,
-					make_cleanup_ftype *, void *);
-
 extern struct cleanup *make_cleanup_htab_delete (htab_t htab);
 
-extern struct cleanup *make_my_cleanup2 (struct cleanup **,
-					 make_cleanup_ftype *, void *,
-					 void (*free_arg) (void *));
-
-extern struct cleanup *save_cleanups (void);
-extern struct cleanup *save_final_cleanups (void);
-extern struct cleanup *save_my_cleanups (struct cleanup **);
-
-extern void restore_cleanups (struct cleanup *);
-extern void restore_final_cleanups (struct cleanup *);
-extern void restore_my_cleanups (struct cleanup **, struct cleanup *);
-
 extern void free_current_contents (void *);
-
-extern void null_cleanup (void *);
 
 extern struct cleanup *make_command_stats_cleanup (int);
 
