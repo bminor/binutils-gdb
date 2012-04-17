@@ -1224,7 +1224,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  break;
 
 	case BFD_RELOC_32:
-	  bfd_putl16 ((bfd_vma) value, where);
+	  bfd_putl32 ((bfd_vma) value, where);
 	  break;
 
 	case BFD_RELOC_16:

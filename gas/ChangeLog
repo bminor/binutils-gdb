@@ -1,3 +1,7 @@
+2012-04-17  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* config/tc-avr.c (md_apply_fix): Fix handling of BFD_RELOC32.
+
 2012-04-12  David S. Miller  <davem@davemloft.net>
 
 	* config/tc-sparc.c (sparc_ip): Handle '=', "%h34", "%l34", and
