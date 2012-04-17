@@ -1,5 +1,43 @@
 2012-04-16  David S. Miller  <davem@davemloft.net>
 
+	* sparc.cc (class Target_sparc): Add rela_ifunc_.
+	(Target_sparc::Target_sparc): Initialize new field.
+	(Target_sparc::do_plt_section_for_global): New function.
+	(Target_sparc::do_plt_section_for_local): New function.
+	(Target_sparc::reloc_needs_plt_for_ifunc): New function.
+	(Target_sparc::make_plt_section): New function, broken out of
+	make_plt_entry.  Use ORDER_NON_RELRO_FIRST for ".plt".
+	(Target_sparc::make_plt_entry): Call make_plt_section.
+	(Target_sparc::make_local_ifunc_plt_entry): New function.
+	(Target_sparc::rela_ifunc_section): New function.
+	(Target_sparc::plt_section): Remove const.
+	(Output_data_plt_sparc): Update declarations.  Define Global_ifunc
+	and Local_ifunc types.  Add global_ifuncs_, local_ifuncs_, ifunc_rel_,
+	and ifunc_count_ fields.
+	(Output_data_plt_sparc::Output_data_plt_sparc): Initialize new fields.
+	(Output_data_plt_sparc::add_entry): Handle IFUNC symbols.
+	(Output_data_plt_sparc::add_local_ifunc_entry): New function.
+	(Output_data_plt_sparc::rela_ifunc): New function.
+	(Output_data_plt_sparc::emit_pending_ifunc_relocs): New function.
+	(Output_data_plt_sparc::has_ifunc_section): New function.
+	(Output_data_plt_sparc::entry_count): Include ifunc_count_.
+	(Output_data_plt_sparc::address_for_global): New function.
+	(Output_data_plt_sparc::address_for_local): New function.
+	(Output_data_plt_sparc::plt_index_to_offset): New function.
+	(Output_data_plt_sparc::set_final_data_size): Use plt_index_to_offset
+	and entry_count.
+	(Output_data_plt_sparc::do_write): Use first_plt_entry_offset and
+	entry_count.
+	(Target_sparc::Scan::get_reference_flags): Add R_SPARC_IRELATIVE and
+	R_SPARC_JMP_IREL to switch.
+	(Target_sparc::Scan::check_non_pic): Likewise.
+	(Target_sparc::Scan::local): Handle IFUNC symbols.
+	(Target_sparc::Scan::local): Likewise.
+	(Target_sparc::Relocate::relocate): Likewise, use plt_address_for_global
+	and plt_address_for_local.
+	(Target_sparc::do_finalize_sections): Call emit_pending_ifunc_relocs.
+	Define __rel_iplt_start and __rel_iplt_end if doing a static link.
+
 	* output.h (Output_reloc): Allow use_plt_offset for global relocs too.
 	(class Output_data_reloc): Adjust calls to Output_reloc_type.
 	(Output_data_reloc::add_global_relative): (RELA only) Add use_plt_offset.

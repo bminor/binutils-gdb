@@ -1,3 +1,7 @@
+2012-04-16  David S. Miller  <davem@davemloft.net>
+
+	* sparc.h (R_SPARC_JMP_IREL): New relocation.
+
 2012-04-12  David S. Miller  <davem@davemloft.net>
 
 	* sparc.h (R_SPARC_WDISP10): New relocation.
