@@ -41,8 +41,10 @@
 #include "linux-nat.h"
 #include "linux-procfs.h"
 #include "linux-osdata.h"
+#include "auto-load.h"
 
 #include <signal.h>
+#include <ctype.h>
 
 #ifdef HAVE_GNU_LIBC_VERSION_H
 #include <gnu/libc-version.h>
@@ -75,6 +77,21 @@
    loaded or unloaded.  */
 
 static char *libthread_db_search_path;
+
+/* Set to non-zero if thread_db auto-loading is enabled
+   by the "set auto-load libthread-db" command.  */
+static int auto_load_thread_db = 1;
+
+/* "show" command for the auto_load_thread_db configuration variable.  */
+
+static void
+show_auto_load_thread_db (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Auto-loading of inferior specific libthread_db "
+			    "is %s.\n"),
+		    value);
+}
 
 static void
 set_libthread_db_search_path (char *ignored, int from_tty,
@@ -119,6 +136,10 @@ struct thread_db_info
 
   /* Handle from dlopen for libthread_db.so.  */
   void *handle;
+
+  /* Absolute pathname from gdb_realpath to disk file used for dlopen-ing
+     HANDLE.  It may be NULL for system library.  */
+  char *filename;
 
   /* Structure that identifies the child process for the
      <proc_service.h> interface.  */
@@ -248,6 +269,8 @@ delete_thread_db_info (int pid)
 
   if (info->handle != NULL)
     dlclose (info->handle);
+
+  xfree (info->filename);
 
   if (info_prev)
     info_prev->next = info->next;
@@ -808,6 +831,10 @@ try_thread_db_load (const char *library)
 
   info = add_thread_db_info (handle);
 
+  /* Do not save system library name, that one is always trusted.  */
+  if (strchr (library, '/') != NULL)
+    info->filename = gdb_realpath (library);
+
   if (try_thread_db_load_1 (info))
     return 1;
 
@@ -857,6 +884,9 @@ try_thread_db_load_from_pdir (void)
 {
   struct objfile *obj;
 
+  if (!auto_load_thread_db)
+    return 0;
+
   ALL_OBJFILES (obj)
     if (libpthread_name_p (obj->name))
       {
@@ -895,6 +925,9 @@ try_thread_db_load_from_dir (const char *dir, size_t dir_len)
   struct cleanup *cleanup;
   char *path;
   int result;
+
+  if (!auto_load_thread_db)
+    return 0;
 
   path = xmalloc (dir_len + 1 + strlen (LIBTHREAD_DB_SO) + 1);
   cleanup = make_cleanup (xfree, path);
@@ -1801,6 +1834,150 @@ thread_db_resume (struct target_ops *ops,
   beneath->to_resume (beneath, ptid, step, signo);
 }
 
+/* qsort helper function for info_auto_load_libthread_db, sort the
+   thread_db_info pointers primarily by their FILENAME and secondarily by their
+   PID, both in ascending order.  */
+
+static int
+info_auto_load_libthread_db_compare (const void *ap, const void *bp)
+{
+  struct thread_db_info *a = *(struct thread_db_info **) ap;
+  struct thread_db_info *b = *(struct thread_db_info **) bp;
+  int retval;
+
+  retval = strcmp (a->filename, b->filename);
+  if (retval)
+    return retval;
+
+  return (a->pid > b->pid) - (a->pid - b->pid);
+}
+
+/* Implement 'info auto-load libthread-db'.  */
+
+static void
+info_auto_load_libthread_db (char *args, int from_tty)
+{
+  struct ui_out *uiout = current_uiout;
+  const char *cs = args ? args : "";
+  struct thread_db_info *info, **array;
+  unsigned info_count, unique_filenames;
+  size_t max_filename_len, max_pids_len, pids_len;
+  struct cleanup *back_to;
+  char *pids;
+  int i;
+
+  while (isspace (*cs))
+    cs++;
+  if (*cs)
+    error (_("'info auto-load libthread-db' does not accept any parameters"));
+
+  info_count = 0;
+  for (info = thread_db_list; info; info = info->next)
+    if (info->filename != NULL)
+      info_count++;
+
+  array = xmalloc (sizeof (*array) * info_count);
+  back_to = make_cleanup (xfree, array);
+
+  info_count = 0;
+  for (info = thread_db_list; info; info = info->next)
+    if (info->filename != NULL)
+      array[info_count++] = info;
+
+  /* Sort ARRAY by filenames and PIDs.  */
+
+  qsort (array, info_count, sizeof (*array),
+	 info_auto_load_libthread_db_compare);
+
+  /* Calculate the number of unique filenames (rows) and the maximum string
+     length of PIDs list for the unique filenames (columns).  */
+
+  unique_filenames = 0;
+  max_filename_len = 0;
+  max_pids_len = 0;
+  pids_len = 0;
+  for (i = 0; i < info_count; i++)
+    {
+      int pid = array[i]->pid;
+      size_t this_pid_len;
+
+      for (this_pid_len = 0; pid != 0; pid /= 10)
+	this_pid_len++;
+
+      if (i == 0 || strcmp (array[i - 1]->filename, array[i]->filename) != 0)
+	{
+	  unique_filenames++;
+	  max_filename_len = max (max_filename_len,
+				  strlen (array[i]->filename));
+
+	  if (i > 0)
+	    {
+	      pids_len -= strlen (", ");
+	      max_pids_len = max (max_pids_len, pids_len);
+	    }
+	  pids_len = 0;
+	}
+      pids_len += this_pid_len + strlen (", ");
+    }
+  if (i)
+    {
+      pids_len -= strlen (", ");
+      max_pids_len = max (max_pids_len, pids_len);
+    }
+
+  /* Table header shifted right by preceding "libthread-db:  " would not match
+     its columns.  */
+  if (info_count > 0 && args == auto_load_info_scripts_pattern_nl)
+    ui_out_text (uiout, "\n");
+
+  make_cleanup_ui_out_table_begin_end (uiout, 2, unique_filenames,
+				       "LinuxThreadDbTable");
+
+  ui_out_table_header (uiout, max_filename_len, ui_left, "filename",
+		       "Filename");
+  ui_out_table_header (uiout, pids_len, ui_left, "PIDs", "Pids");
+  ui_out_table_body (uiout);
+
+  pids = xmalloc (max_pids_len + 1);
+  make_cleanup (xfree, pids);
+
+  /* Note I is incremented inside the cycle, not at its end.  */
+  for (i = 0; i < info_count;)
+    {
+      struct cleanup *chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      char *pids_end;
+
+      info = array[i];
+      ui_out_field_string (uiout, "filename", info->filename);
+      pids_end = pids;
+
+      while (i < info_count && strcmp (info->filename, array[i]->filename) == 0)
+	{
+	  if (pids_end != pids)
+	    {
+	      *pids_end++ = ',';
+	      *pids_end++ = ' ';
+	    }
+	  pids_end += xsnprintf (pids_end, &pids[max_pids_len + 1] - pids_end,
+				 "%u", array[i]->pid);
+	  gdb_assert (pids_end < &pids[max_pids_len + 1]);
+
+	  i++;
+	}
+      *pids_end = '\0';
+
+      ui_out_field_string (uiout, "pids", pids);
+
+      ui_out_text (uiout, "\n");
+      do_cleanups (chain);
+    }
+
+  do_cleanups (back_to);
+
+  if (info_count == 0)
+    ui_out_message (uiout, 0, _("No auto-loaded libthread-db.\n"));
+}
+
 static void
 init_thread_db_ops (void)
 {
@@ -1861,6 +2038,23 @@ When non-zero, libthread-db debugging is enabled."),
 			    NULL,
 			    show_libthread_db_debug,
 			    &setdebuglist, &showdebuglist);
+
+  add_setshow_boolean_cmd ("libthread-db", class_support,
+			   &auto_load_thread_db, _("\
+Enable or disable auto-loading of inferior specific libthread_db."), _("\
+Show whether auto-loading inferior specific libthread_db is enabled."), _("\
+If enabled, libthread_db will be searched in 'set libthread-db-search-path'\n\
+locations to load libthread_db compatible with the inferior.\n\
+Standard system libthread_db still gets loaded even with this option off.\n\
+This options has security implications for untrusted inferiors."),
+			   NULL, show_auto_load_thread_db,
+			   auto_load_set_cmdlist_get (),
+			   auto_load_show_cmdlist_get ());
+
+  add_cmd ("libthread-db", class_info, info_auto_load_libthread_db,
+	   _("Print the list of loaded inferior specific libthread_db.\n\
+Usage: info auto-load libthread-db"),
+	   auto_load_info_cmdlist_get ());
 
   /* Add ourselves to objfile event chain.  */
   observer_attach_new_objfile (thread_db_new_objfile);

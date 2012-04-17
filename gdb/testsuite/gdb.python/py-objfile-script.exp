@@ -40,7 +40,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 # Verify gdb loaded the script.
-gdb_test "info auto-load-scripts" "Yes.*/${testfile}-gdb.py.*"
+gdb_test "info auto-load python-scripts" "Yes.*/${testfile}-gdb.py.*"
 
 if ![runto_main] {
     perror "couldn't run to main"

@@ -52,11 +52,11 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 # Verify gdb loaded the script.
-gdb_test "info auto-load-scripts" "Yes.*${testfile}.py.*full name: .*/${testfile}.py.*"
+gdb_test "info auto-load python-scripts" "Yes.*${testfile}.py.*full name: .*/${testfile}.py.*"
 # Again, with a regexp this time.
-gdb_test "info auto-load-scripts ${testfile}" "Yes.*${testfile}.py.*full name: .*/${testfile}.py.*"
+gdb_test "info auto-load python-scripts ${testfile}" "Yes.*${testfile}.py.*full name: .*/${testfile}.py.*"
 # Again, with a regexp that matches no scripts.
-gdb_test "info auto-load-scripts no-script-matches-this" \
+gdb_test "info auto-load python-scripts no-script-matches-this" \
   "No auto-load scripts matching no-script-matches-this."
 
 if ![runto_main] {

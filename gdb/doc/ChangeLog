@@ -1,3 +1,28 @@
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	auto-load: Implementation.
+	* gdb.texinfo (Mode Options): New anchor for -nx.
+	(Startup): New anchors for Option -init-eval-command,
+	Home Directory Init File
+	and Init File in the Current Directory during Startup.
+	Mention set auto-load local-gdbinit with a reference.
+	Change the sample code to "set auto-load python-scripts".
+	(Threads): New anchor set libthread-db-search-path.
+	Provide references to libthread_db.so.1 file.
+	(Controlling GDB): New menu item for Auto-loading.
+	(Auto-loading, Init File in the Current Directory)
+	(libthread_db.so.1 file, objfile-gdb.gdb file): New nodes.
+	(Python): Rename the menu item Auto-loading to Python Auto-loading.
+	(Writing a Pretty-Printer, Objfiles In Python): Update the renamed
+	reference.
+	(Auto-loading): Rename to ...
+	(Python Auto-loading): ... here.  Change "set auto-load-scripts" to
+	"set auto-load python-scripts", new anchor for it.  Change
+	"show auto-load-scripts" to "show auto-load python-scripts", new anchor
+	for it.  Change "info auto-load-scripts"
+	to "info auto-load python-scripts", new anchor for it.  Change "scripts"
+	to "Python scripts".
+
 2012-04-14  Anton Gorenkov <xgsa@yandex.ru>
 
 	PR mi/13393

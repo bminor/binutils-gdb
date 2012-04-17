@@ -1,5 +1,101 @@
 2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	auto-load: Implementation.
+	* NEWS: New descriptions for "info auto-load",
+	"info auto-load gdb-scripts", "info auto-load python-scripts",
+	"info auto-load local-gdbinit" and "info auto-load libthread-db".
+	Deprecate "info auto-load-scripts", "set auto-load-scripts on|off"
+	and "show auto-load-scripts".  New description for "set auto-load",
+	"show auto-load", "set auto-load gdb-scripts",
+	"show auto-load gdb-scripts", "set auto-load python-scripts",
+	"show auto-load python-scripts", "set auto-load local-gdbinit",
+	"show auto-load local-gdbinit", "set auto-load libthread-db" and
+	"show auto-load libthread-db".
+	* auto-load.c: Remove include python/python-internal.h.  Add includes
+	exceptions.h, cli/cli-script.h, gdbcmd.h, cli/cli-decode.h and
+	cli/cli-setshow.h.
+	(GDB_AUTO_FILE_NAME, source_gdb_script_for_objfile)
+	(auto_load_gdb_scripts, show_auto_load_gdb_scripts): New.
+	(gdbpy_global_auto_load): Rename to ...
+	(global_auto_load): ... here.
+	(auto_load_local_gdbinit, auto_load_local_gdbinit_pathname)
+	(auto_load_local_gdbinit_loaded, show_auto_load_local_gdbinit)
+	(script_language_gdb, source_gdb_script_for_objfile): New.
+	(struct loaded_script): New field language.
+	(hash_loaded_script_entry, eq_loaded_script_entry): Calculate also
+	LANGUAGE.
+	(maybe_add_script): Add parameter language.  Drop redundant
+	entry.full_path initialization.  Initialize entry.language and
+	(*slot)->language.
+	(auto_load_objfile_script): Change parameter suffix to language.
+	Remove the call of maybe_add_script.
+	Call language->source_script_for_objfile.
+	(load_auto_scripts_for_objfile, struct collect_matching_scripts_data):
+	New.
+	(collect_matching_scripts): Adjust it for
+	struct collect_matching_scripts_data.
+	(auto_load_info_scripts_pattern_nl): New variable.
+	(info_auto_load_scripts): Rename to ...
+	(auto_load_info_scripts): ... here, add parameter language.  Adjust it
+	for struct collect_matching_scripts_data.
+	(info_auto_load_gdb_scripts, info_auto_load_local_gdbinit)
+	(set_auto_load_cmd, auto_load_set_cmdlist_get, show_auto_load_cmd)
+	(auto_load_show_cmdlist_get, info_auto_load_cmd)
+	(auto_load_info_cmdlist_get): New.
+	(_initialize_auto_load): Move add_info of "auto-load-scripts" to
+	python/py-auto-load.c.  New installment for "set auto-load gdb-scripts",
+	"info auto-load gdb-scripts", "set auto-load local-gdbinit" and
+	"info auto-load local-gdbinit".
+	* auto-load.h (struct script_language): New.
+	(gdbpy_global_auto_load): Rename to ...
+	(global_auto_load): ... here.
+	(auto_load_local_gdbinit, auto_load_local_gdbinit_pathname)
+	(auto_load_local_gdbinit_loaded): New declarations.
+	(maybe_add_script): New parameter language.
+	(auto_load_objfile_script): Change parameter suffix to language.
+	(load_auto_scripts_for_objfile, auto_load_info_scripts_pattern_nl)
+	(auto_load_info_scripts, auto_load_set_cmdlist_get)
+	(auto_load_show_cmdlist_get, auto_load_info_cmdlist_get): New
+	declarations.
+	* linux-thread-db.c: Include auto-load.h and ctype.h.
+	(auto_load_thread_db, show_auto_load_thread_db): New.
+	(struct thread_db_info): New field filename.
+	(delete_thread_db_info): Call xfree for FILENAME.
+	(try_thread_db_load): Initialize FILENAME.
+	(try_thread_db_load_from_pdir, try_thread_db_load_from_dir): Return
+	if !AUTO_LOAD_THREAD_DB.
+	(info_auto_load_libthread_db_compare, info_auto_load_libthread_db): New.
+	(_initialize_thread_db): Install auto_load_thread_db
+	as "set auto-load libthread-db" and install info_auto_load_libthread_db
+	as "info auto-load libthread-db".
+	* main.c (captured_main): Rename gdbpy_global_auto_load to
+	global_auto_load.  Initialize AUTO_LOAD_LOCAL_GDBINIT_PATHNAME and
+	AUTO_LOAD_LOCAL_GDBINIT_LOADED.
+	(print_gdb_help): Extend the help for 'local init file'.
+	* python/py-auto-load.c: Remove a comment about gdb scripts extension.
+	(GDBPY_AUTO_SECTION_NAME): Extend the comment it is Python specific.
+	(auto_load_scripts): Rename to ...
+	(auto_load_python_scripts): ... here, update the comment.
+	(gdbpy_load_auto_script_for_objfile): New declaration.
+	(show_auto_load_python_scripts, script_language_python)
+	(gdbpy_load_auto_script_for_objfile): New.
+	(source_section_scripts): Refactor the code.
+	(load_auto_scripts_for_objfile): Rename to ...
+	(gdbpy_load_auto_scripts_for_objfile): ... here, update the
+	auto_load_objfile_script caller, drop GDBPY_GLOBAL_AUTO_LOAD checking.
+	(info_auto_load_python_scripts): New.
+	(gdbpy_initialize_auto_load): New variables cmd and cmd_name.
+	Rename "set auto-load-scripts" to "set auto-load python-scripts".
+	Register "set auto-load-scripts" as its deprecated alias.  Register
+	"info auto-load python-scripts".  Register "info auto-load-scripts" as
+	its deprecated alias.
+	(load_auto_scripts_for_objfile): Rename to ...
+	(gdbpy_load_auto_scripts_for_objfile): ... here.
+	* python/python.h (load_auto_scripts_for_objfile): Rename to ...
+	(gdbpy_load_auto_scripts_for_objfile): ... here.
+
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	auto-load: Move files.
 	* Makefile.in (SFILES): Add auto-load.c.
 	(HFILES_NO_SRCDIR): Add auto-load.h.

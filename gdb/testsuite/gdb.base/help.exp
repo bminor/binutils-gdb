@@ -24,7 +24,7 @@
 gdb_start
 
 # force the height of the debugger to be pretty large so no pagers get used
-gdb_test_no_output "set height 400" "test set height"
+gdb_test_no_output "set height 500" "test set height"
 
 # use a larger expect input buffer for long help outputs.
 # test help add-symbol-file

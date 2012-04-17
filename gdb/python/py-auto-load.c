@@ -31,29 +31,56 @@
 
 #include "python-internal.h"
 
-/* NOTE: It's trivial to also support auto-loading normal gdb scripts.
-   There has yet to be a need so it's not implemented.  */
-
 /* The suffix of per-objfile scripts to auto-load.
    E.g. When the program loads libfoo.so, look for libfoo-gdb.py.  */
 #define GDBPY_AUTO_FILE_NAME "-gdb.py"
 
-/* The section to look for scripts (in file formats that support sections).
+/* The section to look for Python auto-loaded scripts (in file formats that
+   support sections).
    Each entry in this section is a byte of value 1, and then the nul-terminated
    name of the script.  The script name may include a directory.
    The leading byte is to allow upward compatible extensions.  */
 #define GDBPY_AUTO_SECTION_NAME ".debug_gdb_scripts"
 
-/* User-settable option to enable/disable auto-loading:
-   set auto-load-scripts on|off
-   This is true if we should auto-load associated scripts when an objfile
-   is opened, false otherwise.
-   At the moment, this only affects python scripts, but there's no reason
-   one couldn't also have other kinds of auto-loaded scripts, and there's
-   no reason to have them each controlled by a separate flag.
-   So we elide "python" from the name here and in the option.
-   The fact that it lives here is just an implementation detail.  */
-static int auto_load_scripts = 1;
+/* User-settable option to enable/disable auto-loading of Python scripts:
+   set auto-load python-scripts on|off
+   This is true if we should auto-load associated Python scripts when an
+   objfile is opened, false otherwise.  */
+static int auto_load_python_scripts = 1;
+
+static void gdbpy_load_auto_script_for_objfile (struct objfile *objfile,
+						FILE *file,
+						const char *filename);
+
+/* "show" command for the auto_load_python_scripts configuration variable.  */
+
+static void
+show_auto_load_python_scripts (struct ui_file *file, int from_tty,
+			       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Auto-loading of Python scripts is %s.\n"), value);
+}
+
+/* Definition of script language for Python scripts.  */
+
+static const struct script_language script_language_python
+  = { GDBPY_AUTO_FILE_NAME, gdbpy_load_auto_script_for_objfile };
+
+/* Wrapper of source_python_script_for_objfile for script_language_python.  */
+
+static void
+gdbpy_load_auto_script_for_objfile (struct objfile *objfile, FILE *file,
+				    const char *filename)
+{
+  struct auto_load_pspace_info *pspace_info;
+
+  /* Add this script to the hash table too so "info auto-load python-scripts"
+     can print it.  */
+  pspace_info = get_auto_load_pspace_data_for_loading (current_program_space);
+  maybe_add_script (pspace_info, filename, filename, &script_language_python);
+
+  source_python_script_for_objfile (objfile, file, filename);
+}
 
 /* Load scripts specified in OBJFILE.
    START,END delimit a buffer containing a list of nul-terminated
@@ -121,6 +148,17 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
 	  make_cleanup_fclose (stream);
 	  make_cleanup (xfree, full_path);
 	}
+      else
+	{
+	  full_path = NULL;
+
+	  /* We don't throw an error, the program is still debuggable.  */
+	  if (script_not_found_warning_print (pspace_info))
+	    warning (_("Missing auto-load scripts referenced in section %s\n\
+of file %s\n\
+Use `info auto-load python [REGEXP]' to list them."),
+		     GDBPY_AUTO_SECTION_NAME, objfile->name);
+	}
 
       /* If one script isn't found it's not uncommon for more to not be
 	 found either.  We don't want to print an error message for each
@@ -129,24 +167,12 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
 
 	 IWBN if complaints.c were more general-purpose.  */
 
-      in_hash_table = maybe_add_script (pspace_info, file,
-					opened ? full_path : NULL);
+      in_hash_table = maybe_add_script (pspace_info, file, full_path,
+					&script_language_python);
 
-      if (! opened)
-	{
-	  /* We don't throw an error, the program is still debuggable.  */
-	  if (script_not_found_warning_print (pspace_info))
-	    warning (_("Missing auto-load scripts referenced in section %s\n\
-of file %s\n\
-Use `info auto-load-scripts [REGEXP]' to list them."),
-		     GDBPY_AUTO_SECTION_NAME, objfile->name);
-	}
-      else
-	{
-	  /* If this file is not currently loaded, load it.  */
-	  if (! in_hash_table)
-	    source_python_script_for_objfile (objfile, stream, full_path);
-	}
+      /* If this file is not currently loaded, load it.  */
+      if (opened && !in_hash_table)
+	source_python_script_for_objfile (objfile, stream, full_path);
 
       do_cleanups (back_to);
     }
@@ -181,36 +207,75 @@ auto_load_section_scripts (struct objfile *objfile, const char *section_name)
   do_cleanups (cleanups);
 }
 
-/* Load any auto-loaded scripts for OBJFILE.  */
+/* Load any Python auto-loaded scripts for OBJFILE.  */
 
 void
-load_auto_scripts_for_objfile (struct objfile *objfile)
+gdbpy_load_auto_scripts_for_objfile (struct objfile *objfile)
 {
-  if (auto_load_scripts && gdbpy_global_auto_load)
+  if (auto_load_python_scripts)
     {
-      auto_load_objfile_script (objfile, GDBPY_AUTO_FILE_NAME);
+      auto_load_objfile_script (objfile, &script_language_python);
       auto_load_section_scripts (objfile, GDBPY_AUTO_SECTION_NAME);
     }
+}
+
+/* Wrapper for "info auto-load python-scripts".  */
+
+static void
+info_auto_load_python_scripts (char *pattern, int from_tty)
+{
+  auto_load_info_scripts (pattern, from_tty, &script_language_python);
 }
 
 void
 gdbpy_initialize_auto_load (void)
 {
+  struct cmd_list_element *cmd;
+  char *cmd_name;
+
+  add_setshow_boolean_cmd ("python-scripts", class_support,
+			   &auto_load_python_scripts, _("\
+Set the debugger's behaviour regarding auto-loaded Python scripts."), _("\
+Show the debugger's behaviour regarding auto-loaded Python scripts."), _("\
+If enabled, auto-loaded Python scripts are loaded when the debugger reads\n\
+an executable or shared library.\n\
+This options has security implications for untrusted inferiors."),
+			   NULL, show_auto_load_python_scripts,
+			   auto_load_set_cmdlist_get (),
+			   auto_load_show_cmdlist_get ());
+
   add_setshow_boolean_cmd ("auto-load-scripts", class_support,
-			   &auto_load_scripts, _("\
-Set the debugger's behaviour regarding auto-loaded scripts."), _("\
-Show the debugger's behaviour regarding auto-loaded scripts."), _("\
-If enabled, auto-loaded scripts are loaded when the debugger reads\n\
-an executable or shared library."),
-			   NULL, NULL,
-			   &setlist,
-			   &showlist);
+			   &auto_load_python_scripts, _("\
+Set the debugger's behaviour regarding auto-loaded Python scripts, "
+								 "deprecated."),
+			   _("\
+Show the debugger's behaviour regarding auto-loaded Python scripts, "
+								 "deprecated."),
+			   NULL, NULL, show_auto_load_python_scripts,
+			   &setlist, &showlist);
+  cmd_name = "auto-load-scripts";
+  cmd = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  deprecate_cmd (cmd, "set auto-load python-scripts");
+
+  /* It is needed because lookup_cmd updates the CMD_NAME pointer.  */
+  cmd_name = "auto-load-scripts";
+  cmd = lookup_cmd (&cmd_name, showlist, "", -1, 1);
+  deprecate_cmd (cmd, "show auto-load python-scripts");
+
+  add_cmd ("python-scripts", class_info, info_auto_load_python_scripts,
+	   _("Print the list of automatically loaded Python scripts.\n\
+Usage: info auto-load python-scripts [REGEXP]"),
+	   auto_load_info_cmdlist_get ());
+
+  cmd = add_info ("auto-load-scripts", info_auto_load_python_scripts, _("\
+Print the list of automatically loaded Python scripts, deprecated."));
+  deprecate_cmd (cmd, "info auto-load python-scripts");
 }
 
 #else /* ! HAVE_PYTHON */
 
 void
-load_auto_scripts_for_objfile (struct objfile *objfile)
+gdbpy_load_auto_scripts_for_objfile (struct objfile *objfile)
 {
 }
 

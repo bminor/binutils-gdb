@@ -98,6 +98,19 @@
      expressions.  These commands are available only if GDB is
      configured with '--with-python'.
 
+  ** "info auto-load" shows status of all kinds of auto-loaded files,
+     "info auto-load gdb-scripts" shows status of auto-loading GDB canned
+     sequences of commands files, "info auto-load python-scripts"
+     shows status of auto-loading Python script files,
+     "info auto-load local-gdbinit" shows status of loading init file
+     (.gdbinit) from current directory and "info auto-load libthread-db" shows
+     status of inferior specific thread debugging shared library loading.
+
+  ** "info auto-load-scripts", "set auto-load-scripts on|off"
+     and "show auto-load-scripts" commands have been deprecated, use their
+     "info auto-load python-scripts", "set auto-load python-scripts on|off"
+     and "show auto-load python-scripts" counterparts instead.
+
 * New targets
 
 Renesas RL78			rl78-*-elf
@@ -118,6 +131,28 @@ show breakpoint condition-evaluation
   available mode.
   This option can improve debugger efficiency depending on the speed of the
   target.
+
+set auto-load off
+  Disable auto-loading globally.
+
+show auto-load
+  Show auto-loading setting of all kinds of auto-loaded files.
+
+set auto-load gdb-scripts on|off
+show auto-load gdb-scripts
+  Control auto-loading of GDB canned sequences of commands files.
+
+set auto-load python-scripts on|off
+show auto-load python-scripts
+  Control auto-loading of Python script files.
+
+set auto-load local-gdbinit on|off
+show auto-load local-gdbinit
+  Control loading of init file (.gdbinit) from current directory.
+
+set auto-load libthread-db on|off
+show auto-load libthread-db
+  Control auto-loading of inferior specific thread debugging shared library.
 
 * New remote packets
 

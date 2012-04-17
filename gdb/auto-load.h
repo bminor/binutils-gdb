@@ -22,15 +22,36 @@
 
 struct program_space;
 
-extern int gdbpy_global_auto_load;
+struct script_language
+{
+  const char *suffix;
+
+  void (*source_script_for_objfile) (struct objfile *objfile, FILE *file,
+				     const char *filename);
+};
+
+extern int global_auto_load;
+
+extern int auto_load_local_gdbinit;
+extern char *auto_load_local_gdbinit_pathname;
+extern int auto_load_local_gdbinit_loaded;
 
 extern struct auto_load_pspace_info *
   get_auto_load_pspace_data_for_loading (struct program_space *pspace);
 extern int maybe_add_script (struct auto_load_pspace_info *pspace_info,
-			     const char *name, const char *full_path);
+			     const char *name, const char *full_path,
+			     const struct script_language *language);
 extern void auto_load_objfile_script (struct objfile *objfile,
-				      const char *suffix);
+				      const struct script_language *language);
+extern void load_auto_scripts_for_objfile (struct objfile *objfile);
 extern int
   script_not_found_warning_print (struct auto_load_pspace_info *pspace_info);
+extern char auto_load_info_scripts_pattern_nl[];
+extern void auto_load_info_scripts (char *pattern, int from_tty,
+				    const struct script_language *language);
+
+extern struct cmd_list_element **auto_load_set_cmdlist_get (void);
+extern struct cmd_list_element **auto_load_show_cmdlist_get (void);
+extern struct cmd_list_element **auto_load_info_cmdlist_get (void);
 
 #endif /* AUTO_LOAD_H */

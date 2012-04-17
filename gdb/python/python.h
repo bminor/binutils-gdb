@@ -39,7 +39,7 @@ int apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
 
 void preserve_python_values (struct objfile *objfile, htab_t copied_types);
 
-void load_auto_scripts_for_objfile (struct objfile *objfile);
+void gdbpy_load_auto_scripts_for_objfile (struct objfile *objfile);
 
 int gdbpy_should_stop (struct breakpoint_object *bp_obj);
 

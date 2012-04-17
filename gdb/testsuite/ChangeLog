@@ -1,3 +1,14 @@
+2012-04-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	auto-load: Implementation.
+	* gdb.base/help.exp (test set height): Increase the height.
+	* gdb.python/py-objfile-script.exp (info auto-load-scripts): Change
+	to ...
+	(info auto-load python-scripts): ... here.
+	* gdb.python/py-section-script.exp (info auto-load-scripts *): Change
+	to ...
+	(info auto-load python-scripts *): ... here.
+
 2012-04-16  Yao Qi  <yao@codesourcery.com>
 
 	* lib/trace-support.exp (get_in_proc_agent): New.
