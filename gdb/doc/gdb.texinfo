@@ -21192,7 +21192,7 @@ For example the list of directories from which it is safe to auto-load files
 may not be too obvious while setting it up.
 
 @smallexample
-(gdb) set debug auto-load ues
+(gdb) set debug auto-load on
 (gdb) file ~/src/t/true
 auto-load: Loading canned sequences of commands script "/tmp/true-gdb.gdb"
            for objfile "/tmp/true".
