@@ -1,5 +1,20 @@
 2012-04-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* xcoffread.c (xcoff_secnum_to_sections): New function.
+	(secnum_to_section, secnum_to_bfd_section): Reimplement
+	using xcoff_secnum_to_sections.  Rename "secnum" parameter
+	into "n_scnum".
+	(RECORD_MINIMAL_SYMBOL): Delete.
+	(record_minimal_symbol): New function.
+	(scan_xcoff_symtab): Replace uses of RECORD_MINIMAL_SYMBOL
+	by call to record_minimal_symbol and set misc_func_recorded
+	to 1.  Set last_csect_sec to the XCOFF section index instead
+	of GDB's section_offset index.  Update calls to
+	prim_record_minimal_symbol_and_info to pass the BFD section
+	as well.
+
+2012-04-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* xcoffread.c (read_xcoff_symtab): Delete variables
 	last_csect_val and last_csect_sec and associated code.
 
