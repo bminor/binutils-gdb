@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2002, 2004-2011 Free Software Foundation, Inc.
+/* Copyright (C) 2001-2002, 2004-2010 Free Software Foundation, Inc.
    Written by Paul Eggert, Bruno Haible, Sam Steingold, Peter Burwood.
    This file is part of gnulib.
 

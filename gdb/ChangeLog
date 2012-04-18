@@ -1,3 +1,9 @@
+2012-04-18  Pedro Alves  <palves@redhat.com>
+
+	Revert gnulib/ part of:
+	2011-01-01  Joel Brobecker  <brobecker@adacore.com>
+	Copyright year update in most files (performed by copyright.sh).
+
 2012-04-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix 64-bit constants on 32-bit hosts.
