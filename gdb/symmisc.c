@@ -509,9 +509,9 @@ print_symbol (void *args)
       switch (SYMBOL_CLASS (symbol))
 	{
 	case LOC_CONST:
-	  fprintf_filtered (outfile, "const %ld (0x%lx)",
-			    SYMBOL_VALUE (symbol),
-			    SYMBOL_VALUE (symbol));
+	  fprintf_filtered (outfile, "const %s (%s)",
+			    plongest (SYMBOL_VALUE (symbol)),
+			    hex_string (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_CONST_BYTES:
@@ -539,28 +539,31 @@ print_symbol (void *args)
 
 	case LOC_REGISTER:
 	  if (SYMBOL_IS_ARGUMENT (symbol))
-	    fprintf_filtered (outfile, "parameter register %ld",
-			      SYMBOL_VALUE (symbol));
+	    fprintf_filtered (outfile, "parameter register %s",
+			      plongest (SYMBOL_VALUE (symbol)));
 	  else
-	    fprintf_filtered (outfile, "register %ld", SYMBOL_VALUE (symbol));
+	    fprintf_filtered (outfile, "register %s",
+			      plongest (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_ARG:
-	  fprintf_filtered (outfile, "arg at offset 0x%lx",
-			    SYMBOL_VALUE (symbol));
+	  fprintf_filtered (outfile, "arg at offset %s",
+			    hex_string (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_REF_ARG:
-	  fprintf_filtered (outfile, "reference arg at 0x%lx", SYMBOL_VALUE (symbol));
+	  fprintf_filtered (outfile, "reference arg at %s",
+			    hex_string (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_REGPARM_ADDR:
-	  fprintf_filtered (outfile, "address parameter register %ld", SYMBOL_VALUE (symbol));
+	  fprintf_filtered (outfile, "address parameter register %s",
+			    plongest (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_LOCAL:
-	  fprintf_filtered (outfile, "local at offset 0x%lx",
-			    SYMBOL_VALUE (symbol));
+	  fprintf_filtered (outfile, "local at offset %s",
+			    hex_string (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_TYPEDEF:

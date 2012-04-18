@@ -957,9 +957,9 @@ static char *read_indirect_string (bfd *, gdb_byte *,
                                    const struct comp_unit_head *,
                                    unsigned int *);
 
-static unsigned long read_unsigned_leb128 (bfd *, gdb_byte *, unsigned int *);
+static ULONGEST read_unsigned_leb128 (bfd *, gdb_byte *, unsigned int *);
 
-static long read_signed_leb128 (bfd *, gdb_byte *, unsigned int *);
+static LONGEST read_signed_leb128 (bfd *, gdb_byte *, unsigned int *);
 
 static gdb_byte *skip_leb128 (bfd *, gdb_byte *);
 
@@ -1008,7 +1008,7 @@ static void dwarf2_const_value_attr (struct attribute *attr,
 				     struct type *type,
 				     const char *name,
 				     struct obstack *obstack,
-				     struct dwarf2_cu *cu, long *value,
+				     struct dwarf2_cu *cu, LONGEST *value,
 				     gdb_byte **bytes,
 				     struct dwarf2_locexpr_baton **baton);
 
@@ -5146,7 +5146,7 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 	      for (child = die->child; child != NULL; child = child->sibling)
 		{
 		  struct type *type;
-		  long value;
+		  LONGEST value;
 		  gdb_byte *bytes;
 		  struct dwarf2_locexpr_baton *baton;
 		  struct value *v;
@@ -10664,10 +10664,10 @@ read_indirect_string (bfd *abfd, gdb_byte *buf,
   return read_indirect_string_at_offset (abfd, str_offset);
 }
 
-static unsigned long
+static ULONGEST
 read_unsigned_leb128 (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
 {
-  unsigned long result;
+  ULONGEST result;
   unsigned int num_read;
   int i, shift;
   unsigned char byte;
@@ -10681,7 +10681,7 @@ read_unsigned_leb128 (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
       byte = bfd_get_8 (abfd, buf);
       buf++;
       num_read++;
-      result |= ((unsigned long)(byte & 127) << shift);
+      result |= ((ULONGEST) (byte & 127) << shift);
       if ((byte & 128) == 0)
 	{
 	  break;
@@ -10692,10 +10692,10 @@ read_unsigned_leb128 (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
   return result;
 }
 
-static long
+static LONGEST
 read_signed_leb128 (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
 {
-  long result;
+  LONGEST result;
   int i, shift, num_read;
   unsigned char byte;
 
@@ -10708,7 +10708,7 @@ read_signed_leb128 (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
       byte = bfd_get_8 (abfd, buf);
       buf++;
       num_read++;
-      result |= ((long)(byte & 127) << shift);
+      result |= ((LONGEST) (byte & 127) << shift);
       shift += 7;
       if ((byte & 128) == 0)
 	{
@@ -10716,7 +10716,7 @@ read_signed_leb128 (bfd *abfd, gdb_byte *buf, unsigned int *bytes_read_ptr)
 	}
     }
   if ((shift < 8 * sizeof (result)) && (byte & 0x40))
-    result |= -(((long)1) << shift);
+    result |= -(((LONGEST) 1) << shift);
   *bytes_read_ptr = num_read;
   return result;
 }
@@ -12041,7 +12041,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 static gdb_byte *
 dwarf2_const_value_data (struct attribute *attr, struct type *type,
 			 const char *name, struct obstack *obstack,
-			 struct dwarf2_cu *cu, long *value, int bits)
+			 struct dwarf2_cu *cu, LONGEST *value, int bits)
 {
   struct objfile *objfile = cu->objfile;
   enum bfd_endian byte_order = bfd_big_endian (objfile->obfd) ?
@@ -12075,7 +12075,7 @@ static void
 dwarf2_const_value_attr (struct attribute *attr, struct type *type,
 			 const char *name, struct obstack *obstack,
 			 struct dwarf2_cu *cu,
-			 long *value, gdb_byte **bytes,
+			 LONGEST *value, gdb_byte **bytes,
 			 struct dwarf2_locexpr_baton **baton)
 {
   struct objfile *objfile = cu->objfile;
@@ -12182,7 +12182,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
 {
   struct objfile *objfile = cu->objfile;
   struct comp_unit_head *cu_header = &cu->header;
-  long value;
+  LONGEST value;
   gdb_byte *bytes;
   struct dwarf2_locexpr_baton *baton;
 

@@ -740,10 +740,10 @@ validate_actionline (char **line, struct breakpoint *b)
 		{
 		  if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
 		    {
-		      error (_("constant `%s' (value %ld) "
+		      error (_("constant `%s' (value %s) "
 			       "will not be collected."),
 			     SYMBOL_PRINT_NAME (exp->elts[2].symbol),
-			     SYMBOL_VALUE (exp->elts[2].symbol));
+			     plongest (SYMBOL_VALUE (exp->elts[2].symbol)));
 		    }
 		  else if (SYMBOL_CLASS (exp->elts[2].symbol)
 			   == LOC_OPTIMIZED_OUT)
@@ -980,8 +980,8 @@ collect_symbol (struct collection_list *collect,
 		       SYMBOL_CLASS (sym));
       break;
     case LOC_CONST:
-      printf_filtered ("constant %s (value %ld) will not be collected.\n",
-		       SYMBOL_PRINT_NAME (sym), SYMBOL_VALUE (sym));
+      printf_filtered ("constant %s (value %s) will not be collected.\n",
+		       SYMBOL_PRINT_NAME (sym), plongest (SYMBOL_VALUE (sym)));
       break;
     case LOC_STATIC:
       offset = SYMBOL_VALUE_ADDRESS (sym);
@@ -2623,8 +2623,9 @@ scope_info (char *args, int from_tty)
 	      count--;		/* Don't count this one.  */
 	      continue;
 	    case LOC_CONST:
-	      printf_filtered ("a constant with value %ld (0x%lx)",
-			       SYMBOL_VALUE (sym), SYMBOL_VALUE (sym));
+	      printf_filtered ("a constant with value %s (%s)",
+			       plongest (SYMBOL_VALUE (sym)),
+			       hex_string (SYMBOL_VALUE (sym)));
 	      break;
 	    case LOC_CONST_BYTES:
 	      printf_filtered ("constant bytes: ");
@@ -2657,16 +2658,16 @@ scope_info (char *args, int from_tty)
 				 gdbarch_register_name (gdbarch, regno));
 	      break;
 	    case LOC_ARG:
-	      printf_filtered ("an argument at stack/frame offset %ld",
-			       SYMBOL_VALUE (sym));
+	      printf_filtered ("an argument at stack/frame offset %s",
+			       plongest (SYMBOL_VALUE (sym)));
 	      break;
 	    case LOC_LOCAL:
-	      printf_filtered ("a local variable at frame offset %ld",
-			       SYMBOL_VALUE (sym));
+	      printf_filtered ("a local variable at frame offset %s",
+			       plongest (SYMBOL_VALUE (sym)));
 	      break;
 	    case LOC_REF_ARG:
-	      printf_filtered ("a reference argument at offset %ld",
-			       SYMBOL_VALUE (sym));
+	      printf_filtered ("a reference argument at offset %s",
+			       plongest (SYMBOL_VALUE (sym)));
 	      break;
 	    case LOC_REGPARM_ADDR:
 	      /* Note comment at LOC_REGISTER.  */

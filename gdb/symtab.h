@@ -109,10 +109,7 @@ struct general_symbol_info
 
   union
   {
-    /* The fact that this is a long not a LONGEST mainly limits the
-       range of a LOC_CONST.  Since LOC_CONST_BYTES exists, I'm not
-       sure that is a big deal.  */
-    long ivalue;
+    LONGEST ivalue;
 
     struct block *block;
 

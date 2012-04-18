@@ -1,3 +1,27 @@
+2012-04-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix 64-bit constants on 32-bit hosts.
+	* dwarf2read.c (read_unsigned_leb128): Change declaration return type
+	from unsigned long to ULONGEST.
+	(read_signed_leb128): Change declaration return type from long to
+	LONGEST.
+	(dwarf2_const_value_attr): Change declaration parameter value from long
+	to LONGEST.
+	(dwarf2_compute_name): Change variable value from long to LONGEST.
+	(read_unsigned_leb128): Change return type, variable result and some
+	casts from unsigned long to ULONGEST.
+	(read_signed_leb128): Change return type, variable result and some
+	casts from long to LONGEST.
+	(dwarf2_const_value_data, dwarf2_const_value_attr): Change parameter
+	value from long to LONGEST.
+	(dwarf2_const_value): Change variable value from long to LONGEST.
+	* symmisc.c (print_symbol): Change SYMBOL_VALUE format strings to use
+	plongest and hex_string.
+	* symtab.h (struct general_symbol_info): Change ivalue from long to
+	LONGEST, remove the comment.
+	* tracepoint.c (validate_actionline, collect_symbol, scope_info):
+	Change SYMBOL_VALUE format strings to use plongest and hex_string.
+
 2012-04-18  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	PR symtab/7259:
