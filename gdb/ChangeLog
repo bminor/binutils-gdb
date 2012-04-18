@@ -1,3 +1,9 @@
+2012-04-17  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c: Whitespace fixes.
+	(lookup_signatured_type): Tweak comment.
+	(get_die_type_at_offset): Fix comment.
+
 2012-04-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* xcoffread.c (xcoff_secnum_to_sections): New function.

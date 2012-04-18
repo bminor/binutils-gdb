@@ -3350,7 +3350,7 @@ create_all_type_units (struct objfile *objfile)
   return 1;
 }
 
-/* Lookup a signature based type.
+/* Lookup a signature based type for DW_FORM_ref_sig8.
    Returns NULL if signature SIG is not present in the table.  */
 
 static struct signatured_type *
@@ -6600,6 +6600,7 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 /* Get low and high pc attributes from a die.  Return 1 if the attributes
    are present and valid, otherwise, return 0.  Return -1 if the range is
    discontinuous, i.e. derived from DW_AT_ranges information.  */
+
 static int
 dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 		      CORE_ADDR *highpc, struct dwarf2_cu *cu,
@@ -6757,6 +6758,7 @@ get_scope_pc_bounds (struct die_info *die,
 
 /* Record the address ranges for BLOCK, offset by BASEADDR, as given
    in DIE.  */
+
 static void
 dwarf2_record_block_ranges (struct die_info *die, struct block *block,
                             CORE_ADDR baseaddr, struct dwarf2_cu *cu)
@@ -15670,6 +15672,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
 
 /* Check if the attribute's form is a DW_FORM_block*
    if so return true else false.  */
+
 static int
 attr_form_is_block (struct attribute *attr)
 {
@@ -15689,6 +15692,7 @@ attr_form_is_block (struct attribute *attr)
    may have a value that belongs to more than one of these classes; it
    would be ambiguous if we did, because we use the same forms for all
    of them.  */
+
 static int
 attr_form_is_section_offset (struct attribute *attr)
 {
@@ -15710,6 +15714,7 @@ attr_form_is_section_offset (struct attribute *attr)
    that, if an attribute's can be either a constant or one of the
    section offset classes, DW_FORM_data4 and DW_FORM_data8 should be
    taken as section offsets, not constants.  */
+
 static int
 attr_form_is_constant (struct attribute *attr)
 {
@@ -16231,7 +16236,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   return type;
 }
 
-/* Look up the type for the die at DIE_OFFSET in the appropriate type_hash
+/* Look up the type for the die at OFFSET in the appropriate type_hash
    table, or return NULL if the die does not have a saved type.  */
 
 static struct type *
