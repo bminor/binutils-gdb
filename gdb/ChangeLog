@@ -27,8 +27,8 @@
 	PR symtab/7259:
 	* ada-exp.y (convert_char_literal): Use TYPE_FIELD_ENUMVAL.
 	* ada-lang.c (ada_discrete_type_high_bound)
-	(ada_discrete_type_low_bound): Use TYPE_FIELD_ENUMVAL for
-	TYPE_CODE_ENUM.
+	(ada_discrete_type_low_bound): Fix function comment.  Use
+	TYPE_FIELD_ENUMVAL for TYPE_CODE_ENUM.
 	(ada_identical_enum_types_p): Use TYPE_FIELD_ENUMVAL.
 	(pos_atr, value_val_atr): Use TYPE_FIELD_ENUMVAL for TYPE_CODE_ENUM.
 	* ada-typeprint.c (print_enum_type): Change variable lastval to LONGEST.
