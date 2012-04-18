@@ -1,5 +1,7 @@
 2012-04-17  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (lookup_signatured_type): Return NULL instead of 0.
+
 	* dwarf2read.c: Whitespace fixes.
 	(lookup_signatured_type): Tweak comment.
 	(get_die_type_at_offset): Fix comment.

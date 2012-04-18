@@ -3362,7 +3362,7 @@ lookup_signatured_type (ULONGEST sig)
     {
       complaint (&symfile_complaints,
 		 _("missing `.debug_types' section for DW_FORM_ref_sig8 die"));
-      return 0;
+      return NULL;
     }
 
   find_entry.signature = sig;
