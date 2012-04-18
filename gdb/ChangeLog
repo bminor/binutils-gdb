@@ -1,3 +1,8 @@
+2012-04-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* xcoffread.c (read_xcoff_symtab): Delete variables
+	last_csect_val and last_csect_sec and associated code.
+
 2012-04-17  Doug Evans  <dje@google.com>
 
 	* cleanups.c (make_my_cleanup,make_my_cleanup2): Make static.

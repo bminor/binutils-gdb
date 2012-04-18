@@ -986,9 +986,7 @@ read_xcoff_symtab (struct partial_symtab *pst)
 
   char *filestring = " _start_ ";	/* Name of the current file.  */
 
-  const char *last_csect_name;	/* Last seen csect's name and value.  */
-  CORE_ADDR last_csect_val;
-  int last_csect_sec;
+  const char *last_csect_name;	/* Last seen csect's name.  */
 
   this_symtab_psymtab = pst;
 
@@ -998,7 +996,6 @@ read_xcoff_symtab (struct partial_symtab *pst)
 
   last_source_file = NULL;
   last_csect_name = 0;
-  last_csect_val = 0;
 
   start_stabs ();
   start_symtab (filestring, (char *) NULL, file_start_addr);
@@ -1171,14 +1168,8 @@ read_xcoff_symtab (struct partial_symtab *pst)
 						SECT_OFF_TEXT (objfile));
 		      file_end_addr = file_start_addr + CSECT_LEN (&main_aux);
 
-		      if (cs->c_name && (cs->c_name[0] == '.'
-					 || cs->c_name[0] == '@'))
-			{
-			  last_csect_name = cs->c_name;
-			  last_csect_val = cs->c_value;
-			  last_csect_sec = secnum_to_section (cs->c_secnum,
-							      objfile);
-			}
+		      if (cs->c_name && (cs->c_name[0] == '.' || cs->c_name[0] == '@'))
+			last_csect_name = cs->c_name;
 		    }
 		    continue;
 
