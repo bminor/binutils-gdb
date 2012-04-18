@@ -1,3 +1,10 @@
+2012-04-18  Tom Tromey  <tromey@redhat.com>
+
+	* linespec.c (convert_linespec_to_sals): Don't use
+	SYMBOL_OBJ_SECTION.
+	(compare_msymbols): Arguments are minsym_and_objfile, not
+	minimal_symbol*.  Don't use SYMBOL_OBJ_SECTION.
+
 2012-04-18  Pedro Alves  <palves@redhat.com>
 
 	Revert gnulib/ part of:

@@ -1899,7 +1899,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	       VEC_iterate (minsym_and_objfile_d, ls->minimal_symbols, i, elem);
 	       ++i)
 	    {
-	      pspace = SYMBOL_OBJ_SECTION (elem->minsym)->objfile->pspace;
+	      pspace = elem->objfile->pspace;
 	      set_current_program_space (pspace);
 	      minsym_found (state, elem->objfile, elem->minsym, &sals);
 	    }
@@ -2584,20 +2584,20 @@ compare_symbols (const void *a, const void *b)
 static int
 compare_msymbols (const void *a, const void *b)
 {
-  struct minimal_symbol * const *sa = a;
-  struct minimal_symbol * const *sb = b;
+  const struct minsym_and_objfile *sa = a;
+  const struct minsym_and_objfile *sb = b;
   uintptr_t uia, uib;
 
-  uia = (uintptr_t) SYMBOL_OBJ_SECTION (*sa)->objfile->pspace;
-  uib = (uintptr_t) SYMBOL_OBJ_SECTION (*sb)->objfile->pspace;
+  uia = (uintptr_t) sa->objfile->pspace;
+  uib = (uintptr_t) sa->objfile->pspace;
 
   if (uia < uib)
     return -1;
   if (uia > uib)
     return 1;
 
-  uia = (uintptr_t) *sa;
-  uib = (uintptr_t) *sb;
+  uia = (uintptr_t) sa->minsym;
+  uib = (uintptr_t) sb->minsym;
 
   if (uia < uib)
     return -1;
