@@ -717,7 +717,6 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 {
   int i;
   int len, real_len;
-  int lastval;
   enum
     {
       s_none, s_public, s_private, s_protected
@@ -1194,9 +1193,10 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 	}
       else if (show > 0 || TYPE_TAG_NAME (type) == NULL)
 	{
+	  LONGEST lastval = 0;
+
 	  fprintf_filtered (stream, "{");
 	  len = TYPE_NFIELDS (type);
-	  lastval = 0;
 	  for (i = 0; i < len; i++)
 	    {
 	      QUIT;
@@ -1204,11 +1204,11 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		fprintf_filtered (stream, ", ");
 	      wrap_here ("    ");
 	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-	      if (lastval != TYPE_FIELD_BITPOS (type, i))
+	      if (lastval != TYPE_FIELD_ENUMVAL (type, i))
 		{
-		  fprintf_filtered (stream, " = %d", 
-				    TYPE_FIELD_BITPOS (type, i));
-		  lastval = TYPE_FIELD_BITPOS (type, i);
+		  fprintf_filtered (stream, " = %s",
+				    plongest (TYPE_FIELD_ENUMVAL (type, i)));
+		  lastval = TYPE_FIELD_ENUMVAL (type, i);
 		}
 	      lastval++;
 	    }

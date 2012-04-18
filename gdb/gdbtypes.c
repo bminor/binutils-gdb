@@ -775,13 +775,13 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 	     entries.  */
 	  int i;
 
-	  *lowp = *highp = TYPE_FIELD_BITPOS (type, 0);
+	  *lowp = *highp = TYPE_FIELD_ENUMVAL (type, 0);
 	  for (i = 0; i < TYPE_NFIELDS (type); i++)
 	    {
-	      if (TYPE_FIELD_BITPOS (type, i) < *lowp)
-		*lowp = TYPE_FIELD_BITPOS (type, i);
-	      if (TYPE_FIELD_BITPOS (type, i) > *highp)
-		*highp = TYPE_FIELD_BITPOS (type, i);
+	      if (TYPE_FIELD_ENUMVAL (type, i) < *lowp)
+		*lowp = TYPE_FIELD_ENUMVAL (type, i);
+	      if (TYPE_FIELD_ENUMVAL (type, i) > *highp)
+		*highp = TYPE_FIELD_ENUMVAL (type, i);
 	    }
 
 	  /* Set unsigned indicator if warranted.  */
@@ -3197,10 +3197,15 @@ recursive_dump_type (struct type *type, int spaces)
   puts_filtered ("\n");
   for (idx = 0; idx < TYPE_NFIELDS (type); idx++)
     {
-      printfi_filtered (spaces + 2,
-			"[%d] bitpos %d bitsize %d type ",
-			idx, TYPE_FIELD_BITPOS (type, idx),
-			TYPE_FIELD_BITSIZE (type, idx));
+      if (TYPE_CODE (type) == TYPE_CODE_ENUM)
+	printfi_filtered (spaces + 2,
+			  "[%d] enumval %s type ",
+			  idx, plongest (TYPE_FIELD_ENUMVAL (type, idx)));
+      else
+	printfi_filtered (spaces + 2,
+			  "[%d] bitpos %d bitsize %d type ",
+			  idx, TYPE_FIELD_BITPOS (type, idx),
+			  TYPE_FIELD_BITSIZE (type, idx));
       gdb_print_host_address (TYPE_FIELD_TYPE (type, idx), gdb_stdout);
       printf_filtered (" name '%s' (",
 		       TYPE_FIELD_NAME (type, idx) != NULL
@@ -3396,6 +3401,10 @@ copy_type_recursive (struct objfile *objfile,
 	    case FIELD_LOC_KIND_BITPOS:
 	      SET_FIELD_BITPOS (TYPE_FIELD (new_type, i),
 				TYPE_FIELD_BITPOS (type, i));
+	      break;
+	    case FIELD_LOC_KIND_ENUMVAL:
+	      SET_FIELD_ENUMVAL (TYPE_FIELD (new_type, i),
+				 TYPE_FIELD_ENUMVAL (type, i));
 	      break;
 	    case FIELD_LOC_KIND_PHYSADDR:
 	      SET_FIELD_PHYSADDR (TYPE_FIELD (new_type, i),

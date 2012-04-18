@@ -1,3 +1,12 @@
+2012-04-18  Siddhesh Poyarekar  <siddhesh@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/7259:
+	* gdb.base/enumval.c: New test case.
+	* gdb.base/enumval.exp: New test case.
+	* gdb.python/py-type.exp (test_enums): Use field.enumval instead of
+	field.bitpos.
+
 2012-04-17  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (site.exp): Make site.exp source

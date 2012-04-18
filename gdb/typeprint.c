@@ -206,7 +206,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       len = TYPE_NFIELDS (type);
       for (i = 0; i < len; i++)
 	{
-	  if (TYPE_FIELD_BITPOS (type, i) == val)
+	  if (TYPE_FIELD_ENUMVAL (type, i) == val)
 	    {
 	      break;
 	    }

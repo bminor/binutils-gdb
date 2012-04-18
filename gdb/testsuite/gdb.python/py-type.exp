@@ -136,8 +136,8 @@ proc test_enums {} {
   gdb_test "python print len(e.type)" "3" "Check the number of enum fields"
   gdb_test "python print e.type\['v1'\].name" "v1" "Check enum field lookup by name"
   gdb_test "python print e.type\['v3'\].name" "v3" "Check enum field lookup by name"
-    gdb_test "python print \[v.bitpos for v in e.type.itervalues()\]" {\[0L, 1L, 2L\]} "Check num fields iteration over values"
-    gdb_test "python print \[(n, v.bitpos) for (n, v) in e.type.items()\]" {\[\('v1', 0L\), \('v2', 1L\), \('v3', 2L\)\]} "Check enum fields items list"
+    gdb_test "python print \[v.enumval for v in e.type.itervalues()\]" {\[0L, 1L, 2L\]} "Check num fields iteration over values"
+    gdb_test "python print \[(n, v.enumval) for (n, v) in e.type.items()\]" {\[\('v1', 0L\), \('v2', 1L\), \('v3', 2L\)\]} "Check enum fields items list"
 }
 proc test_base_class {} {
   gdb_py_test_silent_cmd "print d" "print value" 1

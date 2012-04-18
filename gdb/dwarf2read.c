@@ -8051,7 +8051,7 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 
 		  FIELD_NAME (fields[num_fields]) = SYMBOL_LINKAGE_NAME (sym);
 		  FIELD_TYPE (fields[num_fields]) = NULL;
-		  SET_FIELD_BITPOS (fields[num_fields], SYMBOL_VALUE (sym));
+		  SET_FIELD_ENUMVAL (fields[num_fields], SYMBOL_VALUE (sym));
 		  FIELD_BITSIZE (fields[num_fields]) = 0;
 
 		  num_fields++;

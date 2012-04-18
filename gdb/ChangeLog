@@ -1,3 +1,52 @@
+2012-04-18  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	PR symtab/7259:
+	* ada-exp.y (convert_char_literal): Use TYPE_FIELD_ENUMVAL.
+	* ada-lang.c (ada_discrete_type_high_bound)
+	(ada_discrete_type_low_bound): Use TYPE_FIELD_ENUMVAL for
+	TYPE_CODE_ENUM.
+	(ada_identical_enum_types_p): Use TYPE_FIELD_ENUMVAL.
+	(pos_atr, value_val_atr): Use TYPE_FIELD_ENUMVAL for TYPE_CODE_ENUM.
+	* ada-typeprint.c (print_enum_type): Change variable lastval to LONGEST.
+	Use TYPE_FIELD_ENUMVAL.
+	* ada-valprint.c (print_optional_low_bound, ada_print_scalar)
+	(ada_val_print_1): Use TYPE_FIELD_ENUMVAL for TYPE_CODE_ENUM.
+	* c-typeprint.c (c_type_print_base): Move variable lastval to inner
+	block, change it to LONGEST.  Use TYPE_FIELD_ENUMVAL for
+	TYPE_CODE_ENUM.
+	* coffread.c (coff_read_enum_type): Use SET_FIELD_ENUMVAL.
+	* dwarf2read.c (process_enumeration_scope): Likewise.
+	* gdb-gdb.py (TypeFlagsPrinter): Use field.enumval instead of
+	field.bitpos.
+	(class StructMainTypePrettyPrinter): Support also
+	FIELD_LOC_KIND_ENUMVAL.
+	* gdbtypes.c (get_discrete_bounds): Use TYPE_FIELD_ENUMVAL for
+	TYPE_CODE_ENUM.
+	(recursive_dump_type): Use TYPE_FIELD_ENUMVAL for TYPE_CODE_ENUM.
+	(copy_type_recursive): Support also FIELD_LOC_KIND_ENUMVAL.
+	* gdbtypes.h (enum field_loc_kind): New FIELD_LOC_KIND_ENUMVAL.
+	(struct main_type.flds_bnds.fields.loc): Adjust bitpos comment.  New
+	field enumval.
+	(struct main_type.flds_bnds.bields): Adjust loc_kind and bitsize to
+	accommodate enumval.
+	(struct call_site): Adjust loc_kind to accommodate enumval.
+	(FIELD_ENUMVAL, FIELD_ENUMVAL_LVAL, SET_FIELD_ENUMVAL)
+	(TYPE_FIELD_ENUMVAL): New macros.
+	* m2-typeprint.c (m2_enum): Use TYPE_FIELD_ENUMVAL.
+	* mdebugread.c (parse_symbol): Use TYPE_FIELD_ENUMVAL for
+	TYPE_CODE_ENUM.
+	* p-typeprint.c (pascal_type_print_base): Likewise.
+	* python/lib/gdb/printing.py (class FlagEnumerationPrinter): Use
+	enumval.
+	* python/lib/gdb/types.py (make_enum_dict): Likewise.
+	* python/py-type.c (convert_field): New variable addrstring.  Use
+	TYPE_FIELD_ENUMVAL for TYPE_CODE_ENUM.
+	(check_types_equal): Support also FIELD_LOC_KIND_ENUMVAL.
+	* stabsread.c (read_enum_type): Use SET_FIELD_ENUMVAL.
+	* typepint.c (print_type_scalar): Use TYPE_FIELD_ENUMVAL for
+	TYPE_CODE_ENUM.
+	* valprint.c (generic_val_print): Likewise.
+
 2012-04-17  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (lookup_signatured_type): Return NULL instead of 0.

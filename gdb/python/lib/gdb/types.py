@@ -86,8 +86,8 @@ def make_enum_dict(enum_type):
         raise TypeError("not an enum type")
     enum_dict = {}
     for field in enum_type.fields():
-        # The enum's value is stored in "bitpos".
-        enum_dict[field.name] = field.bitpos
+        # The enum's value is stored in "enumval".
+        enum_dict[field.name] = field.enumval
     return enum_dict
 
 

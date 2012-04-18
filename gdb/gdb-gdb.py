@@ -99,10 +99,10 @@ class TypeFlagsPrinter:
             return
         # Note: TYPE_FLAG_MIN is a duplicate of TYPE_FLAG_UNSIGNED,
         # so exclude it from the list we are building.
-        TYPE_FLAGS = [TypeFlag(field.name, field.bitpos)
+        TYPE_FLAGS = [TypeFlag(field.name, field.enumval)
                       for field in flags.fields()
                       if field.name != 'TYPE_FLAG_MIN']
-        TYPE_FLAGS += [TypeFlag(field.name, field.bitpos)
+        TYPE_FLAGS += [TypeFlag(field.name, field.enumval)
                        for field in iflags.fields()]
         TYPE_FLAGS.sort()
 
@@ -154,6 +154,8 @@ class StructMainTypePrettyPrinter:
         loc_kind = str(field_val['loc_kind'])
         if loc_kind == "FIELD_LOC_KIND_BITPOS":
             return 'bitpos = %d' % loc_val['bitpos']
+        elif loc_kind == "FIELD_LOC_KIND_ENUMVAL":
+            return 'enumval = %d' % loc_val['enumval']
         elif loc_kind == "FIELD_LOC_KIND_PHYSADDR":
             return 'physaddr = 0x%x' % loc_val['physaddr']
         elif loc_kind == "FIELD_LOC_KIND_PHYSNAME":

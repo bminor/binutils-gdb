@@ -247,10 +247,10 @@ class FlagEnumerationPrinter(PrettyPrinter):
             flags = gdb.lookup_type(self.name)
             self.enumerators = []
             for field in flags.fields():
-                self.enumerators.append((field.name, field.bitpos))
+                self.enumerators.append((field.name, field.enumval))
             # Sorting the enumerators by value usually does the right
             # thing.
-            self.enumerators.sort(key = lambda x: x.bitpos)
+            self.enumerators.sort(key = lambda x: x.enumval)
 
         if self.enabled:
             return _EnumInstance(self.enumerators, val)

@@ -274,7 +274,8 @@ static void
 print_enum_type (struct type *type, struct ui_file *stream)
 {
   int len = TYPE_NFIELDS (type);
-  int i, lastval;
+  int i;
+  LONGEST lastval;
 
   fprintf_filtered (stream, "(");
   wrap_here (" ");
@@ -287,10 +288,11 @@ print_enum_type (struct type *type, struct ui_file *stream)
 	fprintf_filtered (stream, ", ");
       wrap_here ("    ");
       fputs_filtered (ada_enum_name (TYPE_FIELD_NAME (type, i)), stream);
-      if (lastval != TYPE_FIELD_BITPOS (type, i))
+      if (lastval != TYPE_FIELD_ENUMVAL (type, i))
 	{
-	  fprintf_filtered (stream, " => %d", TYPE_FIELD_BITPOS (type, i));
-	  lastval = TYPE_FIELD_BITPOS (type, i);
+	  fprintf_filtered (stream, " => %s",
+			    plongest (TYPE_FIELD_ENUMVAL (type, i)));
+	  lastval = TYPE_FIELD_ENUMVAL (type, i);
 	}
       lastval += 1;
     }

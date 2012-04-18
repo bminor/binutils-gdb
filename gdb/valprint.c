@@ -445,7 +445,7 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       for (i = 0; i < len; i++)
 	{
 	  QUIT;
-	  if (val == TYPE_FIELD_BITPOS (type, i))
+	  if (val == TYPE_FIELD_ENUMVAL (type, i))
 	    {
 	      break;
 	    }
@@ -466,13 +466,13 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
 	    {
 	      QUIT;
 
-	      if ((val & TYPE_FIELD_BITPOS (type, i)) != 0)
+	      if ((val & TYPE_FIELD_ENUMVAL (type, i)) != 0)
 		{
 		  if (!first)
 		    fputs_filtered (" | ", stream);
 		  first = 0;
 
-		  val &= ~TYPE_FIELD_BITPOS (type, i);
+		  val &= ~TYPE_FIELD_ENUMVAL (type, i);
 		  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
 		}
 	    }

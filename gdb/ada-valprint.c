@@ -109,7 +109,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
 	return 0;
       break;
     case TYPE_CODE_ENUM:
-      if (low_bound == TYPE_FIELD_BITPOS (index_type, 0))
+      if (low_bound == TYPE_FIELD_ENUMVAL (index_type, 0))
 	return 0;
       break;
     case TYPE_CODE_UNDEF:
@@ -402,7 +402,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       len = TYPE_NFIELDS (type);
       for (i = 0; i < len; i++)
 	{
-	  if (TYPE_FIELD_BITPOS (type, i) == val)
+	  if (TYPE_FIELD_ENUMVAL (type, i) == val)
 	    {
 	      break;
 	    }
@@ -824,7 +824,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 	for (i = 0; i < len; i++)
 	  {
 	    QUIT;
-	    if (val == TYPE_FIELD_BITPOS (type, i))
+	    if (val == TYPE_FIELD_ENUMVAL (type, i))
 	      {
 		break;
 	      }

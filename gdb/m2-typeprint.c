@@ -607,10 +607,11 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
 	    fprintf_filtered (stream, ", ");
 	  wrap_here ("    ");
 	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
-	  if (lastval != TYPE_FIELD_BITPOS (type, i))
+	  if (lastval != TYPE_FIELD_ENUMVAL (type, i))
 	    {
-	      fprintf_filtered (stream, " = %d", TYPE_FIELD_BITPOS (type, i));
-	      lastval = TYPE_FIELD_BITPOS (type, i);
+	      fprintf_filtered (stream, " = %s",
+				plongest (TYPE_FIELD_ENUMVAL (type, i)));
+	      lastval = TYPE_FIELD_ENUMVAL (type, i);
 	    }
 	  lastval++;
 	}

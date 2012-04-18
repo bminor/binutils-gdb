@@ -1463,7 +1463,7 @@ convert_char_literal (struct type *type, LONGEST val)
   for (f = 0; f < TYPE_NFIELDS (type); f += 1)
     {
       if (strcmp (name, TYPE_FIELD_NAME (type, f)) == 0)
-	return TYPE_FIELD_BITPOS (type, f);
+	return TYPE_FIELD_ENUMVAL (type, f);
     }
   return val;
 }

@@ -167,11 +167,23 @@ convert_field (struct type *type, int field)
 
   if (!field_is_static (&TYPE_FIELD (type, field)))
     {
-      arg = PyLong_FromLong (TYPE_FIELD_BITPOS (type, field));
+      const char *attrstring;
+
+      if (TYPE_CODE (type) == TYPE_CODE_ENUM)
+	{
+	  arg = gdb_py_long_from_longest (TYPE_FIELD_ENUMVAL (type, field));
+	  attrstring = "enumval";
+	}
+      else
+	{
+	  arg = PyLong_FromLong (TYPE_FIELD_BITPOS (type, field));
+	  attrstring = "bitpos";
+	}
+
       if (!arg)
 	goto fail;
 
-      if (PyObject_SetAttrString (result, "bitpos", arg) < 0)
+      if (PyObject_SetAttrString (result, attrstring, arg) < 0)
 	goto failarg;
     }
 
@@ -1016,6 +1028,10 @@ check_types_equal (struct type *type1, struct type *type2,
 	    {
 	    case FIELD_LOC_KIND_BITPOS:
 	      if (FIELD_BITPOS (*field1) != FIELD_BITPOS (*field2))
+		return Py_NE;
+	      break;
+	    case FIELD_LOC_KIND_ENUMVAL:
+	      if (FIELD_ENUMVAL (*field1) != FIELD_ENUMVAL (*field2))
 		return Py_NE;
 	      break;
 	    case FIELD_LOC_KIND_PHYSADDR:
