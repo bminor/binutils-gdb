@@ -1,5 +1,67 @@
 2012-04-18  Pedro Alves  <palves@redhat.com>
 
+	Update gnulib from latest git.
+	(639ea5ae15e39fe48d43e04864b2997301e4b969)
+
+	* gnulib/Makefile.am: Update.
+	* gnulib/dummy.c: Update.
+	* gnulib/extra/arg-nonnull.h: Update.
+	* gnulib/extra/c++defs.h: Update.
+	* gnulib/extra/update-copyright: Update.
+	* gnulib/extra/warn-on-use.h: Update.
+	* gnulib/inttypes.in.h: Update.
+	* gnulib/m4/00gnulib.m4: Update.
+	* gnulib/m4/extensions.m4: Update.
+	* gnulib/m4/gnulib-cache.m4: Update.
+	* gnulib/m4/gnulib-common.m4: Update.
+	* gnulib/m4/gnulib-comp.m4: Update.
+	* gnulib/m4/gnulib-tool.m4: Update.
+	* gnulib/m4/include_next.m4: Update.
+	* gnulib/m4/inttypes-pri.m4: Update.
+	* gnulib/m4/inttypes.m4: Update.
+	* gnulib/m4/longlong.m4: Update.
+	* gnulib/m4/memchr.m4: Update.
+	* gnulib/m4/memmem.m4: Update.
+	* gnulib/m4/mmap-anon.m4: Update.
+	* gnulib/m4/multiarch.m4: Update.
+	* gnulib/m4/onceonly.m4: Update.
+	* gnulib/m4/stddef_h.m4: Update.
+	* gnulib/m4/stdint.m4: Update.
+	* gnulib/m4/string_h.m4: Update.
+	* gnulib/m4/warn-on-use.m4: Update.
+	* gnulib/m4/wchar_h.m4: Update.
+	* gnulib/m4/wchar_t.m4: Update.
+	* gnulib/m4/wint_t.m4: Update.
+	* gnulib/memchr.c: Update.
+	* gnulib/memmem.c: Update.
+	* gnulib/stddef.in.h: Update.
+	* gnulib/stdint.in.h: Update.
+	* gnulib/str-two-way.h: Update.
+	* gnulib/string.in.h: Update.
+	* gnulib/wchar.in.h: Update.
+
+	* gnulib/extra/arg-nonnull.h: Delete.
+	* gnulib/extra/c++defs.h: Delete.
+	* gnulib/extra/warn-on-use.h: Delete.
+	* gnulib/m4/wchar_h.m4: Delete.
+	* gnulib/m4/wint_t.m4: Delete.
+	* gnulib/wchar.in.h: Delete.
+
+	* gnulib/extra/snippets/arg-nonnull.h: New.
+	* gnulib/extra/snippets/c++defs.h: New.
+	* gnulib/extra/snippets/warn-on-use.h: New.
+
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* gnulib/Makefile.in: Regenerate.
+
+	* gdbserver/aclocal.m4: Regenerate.
+	* gdbserver/config.in: Regenerate.
+	* gdbserver/configure: Regenerate.
+
+2012-04-18  Pedro Alves  <palves@redhat.com>
+
 	Reimport the update-copyright module from gnulib
 	(250b80067c1e1d8faa0c42fb572f721975b929c5).
 

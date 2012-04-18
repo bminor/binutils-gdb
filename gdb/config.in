@@ -1,9 +1,5 @@
 /* config.in.  Generated from configure.ac by autoheader.  */
 
-/* Define if the compiler is building for multiple architectures of Apple
-   platforms at once. */
-#undef AA_APPLE_UNIVERSAL_BUILD
-
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
@@ -81,9 +77,6 @@
 /* Define to the default OS ABI for this configuration. */
 #undef GDB_OSABI_DEFAULT
 
-/* Define to make the limit macros in <stdint.h> visible. */
-#undef GL_TRIGGER_STDC_LIMIT_MACROS
-
 /* Define to 1 when the gnulib module memchr should be tested. */
 #undef GNULIB_TEST_MEMCHR
 
@@ -131,14 +124,6 @@
    don't. */
 #undef HAVE_DECL_GETTHRDS
 
-/* Define to 1 if you have the declaration of `imaxabs', and to 0 if you
-   don't. */
-#undef HAVE_DECL_IMAXABS
-
-/* Define to 1 if you have the declaration of `imaxdiv', and to 0 if you
-   don't. */
-#undef HAVE_DECL_IMAXDIV
-
 /* Define to 1 if you have the declaration of `malloc', and to 0 if you don't.
    */
 #undef HAVE_DECL_MALLOC
@@ -166,14 +151,6 @@
 /* Define to 1 if you have the declaration of `strstr', and to 0 if you don't.
    */
 #undef HAVE_DECL_STRSTR
-
-/* Define to 1 if you have the declaration of `strtoimax', and to 0 if you
-   don't. */
-#undef HAVE_DECL_STRTOIMAX
-
-/* Define to 1 if you have the declaration of `strtoumax', and to 0 if you
-   don't. */
-#undef HAVE_DECL_STRTOUMAX
 
 /* Define to 1 if you have the declaration of `vsnprintf', and to 0 if you
    don't. */
@@ -276,7 +253,7 @@
 /* Define to 1 if the compiler supports long double. */
 #undef HAVE_LONG_DOUBLE
 
-/* Define to 1 if the system has the type `long long int'. */
+/* Define to 1 if the system has the type 'long long int'. */
 #undef HAVE_LONG_LONG_INT
 
 /* Define to 1 if you have the `lstat' function. */
@@ -292,9 +269,6 @@
    config.h and <sys/mman.h>. */
 #undef HAVE_MAP_ANONYMOUS
 
-/* Define to 1 if you have the `memchr' function. */
-#undef HAVE_MEMCHR
-
 /* Define to 1 if you have the `memmem' function. */
 #undef HAVE_MEMMEM
 
@@ -307,7 +281,7 @@
 /* Define to 1 if you have the `monstartup' function. */
 #undef HAVE_MONSTARTUP
 
-/* Define to 1 if you have the `mprotect' function. */
+/* Define to 1 if you have the 'mprotect' function. */
 #undef HAVE_MPROTECT
 
 /* Define to 1 if you have the <ncurses.h> header file. */
@@ -406,29 +380,17 @@
 /* Define if Python interpreter is being linked in. */
 #undef HAVE_PYTHON
 
-/* Define to 1 if btowc is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_BTOWC
+/* Define to 1 if ffsl is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_FFSL
+
+/* Define to 1 if ffsll is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_FFSLL
 
 /* Define to 1 if imaxabs is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_IMAXABS
 
 /* Define to 1 if imaxdiv is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_IMAXDIV
-
-/* Define to 1 if mbrlen is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_MBRLEN
-
-/* Define to 1 if mbrtowc is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_MBRTOWC
-
-/* Define to 1 if mbsinit is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_MBSINIT
-
-/* Define to 1 if mbsnrtowcs is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_MBSNRTOWCS
-
-/* Define to 1 if mbsrtowcs is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_MBSRTOWCS
 
 /* Define to 1 if memmem is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_MEMMEM
@@ -456,6 +418,9 @@
 
 /* Define to 1 if strdup is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_STRDUP
+
+/* Define to 1 if strerror_r is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_STRERROR_R
 
 /* Define to 1 if strncat is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_STRNCAT
@@ -486,21 +451,6 @@
 
 /* Define to 1 if strverscmp is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_STRVERSCMP
-
-/* Define to 1 if wcrtomb is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_WCRTOMB
-
-/* Define to 1 if wcsnrtombs is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_WCSNRTOMBS
-
-/* Define to 1 if wcsrtombs is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_WCSRTOMBS
-
-/* Define to 1 if wctob is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_WCTOB
-
-/* Define to 1 if wcwidth is declared even after undefining macros. */
-#undef HAVE_RAW_DECL_WCWIDTH
 
 /* Define to 1 if you have the `readlink' function. */
 #undef HAVE_READLINK
@@ -720,7 +670,7 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
-/* Define to 1 if the system has the type `unsigned long long int'. */
+/* Define to 1 if the system has the type 'unsigned long long int'. */
 #undef HAVE_UNSIGNED_LONG_LONG_INT
 
 /* Define to 1 if you have the `vfork' function. */
@@ -743,9 +693,6 @@
 
 /* Define if you have the 'wchar_t' type. */
 #undef HAVE_WCHAR_T
-
-/* Define if you have the 'wint_t' type. */
-#undef HAVE_WINT_T
 
 /* Define to 1 if `fork' works. */
 #undef HAVE_WORKING_FORK
@@ -973,11 +920,24 @@
    2.[789] when using GCC. */
 #undef _MSE_INT_H
 
+/* The _Noreturn keyword of C11.  */
+#ifndef _Noreturn
+# if (3 <= __GNUC__ || (__GNUC__ == 2 && 8 <= __GNUC_MINOR__) \
+      || 0x5110 <= __SUNPRO_C)
+#  define _Noreturn __attribute__ ((__noreturn__))
+# elif defined _MSC_VER && 1200 <= _MSC_VER
+#  define _Noreturn __declspec (noreturn)
+# else
+#  define _Noreturn
+# endif
+#endif
+
+
 /* Define to 2 if the system does not provide POSIX.1 features except with
    this defined. */
 #undef _POSIX_1_SOURCE
 
-/* Define to 1 if you need to in order for `stat' and other things to work. */
+/* Define to 1 if you need to in order for 'stat' and other things to work. */
 #undef _POSIX_SOURCE
 
 /* Define if <sys/link.h> has link_map32 (solaris sparc-64 target) */
@@ -989,6 +949,10 @@
 /* Enable extensions on AIX 3, Interix.  */
 #ifndef _ALL_SOURCE
 # undef _ALL_SOURCE
+#endif
+/* Enable general extensions on MacOS X.  */
+#ifndef _DARWIN_C_SOURCE
+# undef _DARWIN_C_SOURCE
 #endif
 /* Enable GNU extensions on systems that have them.  */
 #ifndef _GNU_SOURCE
@@ -1005,13 +969,6 @@
 /* Enable general extensions on Solaris.  */
 #ifndef __EXTENSIONS__
 # undef __EXTENSIONS__
-#endif
-
-
-/* Ensure that <stdint.h> defines the limit macros, since gnulib's
-   <inttypes.h> relies on them.  */
-#if defined __cplusplus && !defined __STDC_LIMIT_MACROS && GL_TRIGGER_STDC_LIMIT_MACROS
-# define __STDC_LIMIT_MACROS 1
 #endif
 
 
@@ -1062,6 +1019,20 @@
 /* The name _UNUSED_PARAMETER_ is an earlier spelling, although the name
    is a misnomer outside of parameter lists.  */
 #define _UNUSED_PARAMETER_ _GL_UNUSED
+
+/* The __pure__ attribute was added in gcc 2.96.  */
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
+# define _GL_ATTRIBUTE_PURE __attribute__ ((__pure__))
+#else
+# define _GL_ATTRIBUTE_PURE /* empty */
+#endif
+
+/* The __const__ attribute was added in gcc 2.95.  */
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95)
+# define _GL_ATTRIBUTE_CONST __attribute__ ((__const__))
+#else
+# define _GL_ATTRIBUTE_CONST /* empty */
+#endif
 
 
 /* Define as `fork' if `vfork' does not work. */
