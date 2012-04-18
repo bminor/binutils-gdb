@@ -38,6 +38,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module stddef:
   # Code from module stdint:
   # Code from module string:
+  # Code from module update-copyright:
   # Code from module warn-on-use:
   # Code from module wchar:
 ])
@@ -80,6 +81,7 @@ AC_DEFUN([gl_INIT],
   gl_STDINT_H
   # Code from module string:
   gl_HEADER_STRING_H
+  # Code from module update-copyright:
   # Code from module warn-on-use:
   # Code from module wchar:
   gl_WCHAR_H
@@ -226,6 +228,7 @@ AC_DEFUN([gltests_LIBSOURCES], [
 AC_DEFUN([gl_FILE_LIST], [
   build-aux/arg-nonnull.h
   build-aux/c++defs.h
+  build-aux/update-copyright
   build-aux/warn-on-use.h
   lib/dummy.c
   lib/inttypes.in.h

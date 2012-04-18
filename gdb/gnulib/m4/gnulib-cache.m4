@@ -15,13 +15,14 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --doc-base=doc --tests-base=tests --aux-dir=gnulib/extra --no-libtool --macro-prefix=gl --no-vc-files inttypes memmem
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --doc-base=doc --tests-base=tests --aux-dir=gnulib/extra --no-libtool --macro-prefix=gl --no-vc-files inttypes memmem update-copyright
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
 gl_MODULES([
   inttypes
   memmem
+  update-copyright
 ])
 gl_AVOID([])
 gl_SOURCE_BASE([gnulib])

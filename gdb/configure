@@ -4319,6 +4319,7 @@ fi
   # Code from module stddef:
   # Code from module stdint:
   # Code from module string:
+  # Code from module update-copyright:
   # Code from module warn-on-use:
   # Code from module wchar:
 
@@ -8372,6 +8373,7 @@ _ACEOF
 
 
 
+  # Code from module update-copyright:
   # Code from module warn-on-use:
   # Code from module wchar:
 

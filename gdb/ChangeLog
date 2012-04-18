@@ -1,3 +1,15 @@
+2012-04-18  Pedro Alves  <palves@redhat.com>
+
+	Reimport the update-copyright module from gnulib
+	(250b80067c1e1d8faa0c42fb572f721975b929c5).
+
+	* configure: Regenerate.
+	* gnulib/Makefile.am: Update.
+	* gnulib/Makefile.in: Regenerate.
+	* gnulib/extra/update-copyright: Update.
+	* gnulib/m4/gnulib-cache.m4: Update.
+	* gnulib/m4/gnulib-comp.m4: Update.
+
 2012-04-18  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.ac (aix): Put -lpthread into libs.
