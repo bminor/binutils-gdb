@@ -77,7 +77,7 @@ ustinc = @ustinc@
 
 # gnulib
 LIBGNU = gnulib/libgnu.a
-INCGNU = -I$(srcdir)/../gnulib
+INCGNU = -I$(srcdir)/../gnulib -Ignulib
 
 # We build gnulib directly under the gdbserver build directory, but
 # its sources don't live directly under gdbserver's source directory.

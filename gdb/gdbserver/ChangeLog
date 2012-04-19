@@ -1,5 +1,9 @@
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (INCGNU): Add -Ignulib.
+
+2012-04-19  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (GNULIB_INCLUDE_DIR): Rename to ...
 	(INCGNU): ... this, and spell out -I here.
 	(GNULIB_LIB): Rename to ...
