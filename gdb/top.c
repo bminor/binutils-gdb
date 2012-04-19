@@ -1297,8 +1297,8 @@ quit_target (void *arg)
   if (write_history_p && history_filename)
     write_history (history_filename);
 
-  do_final_cleanups (ALL_CLEANUPS);    /* Do any final cleanups before
-					  exiting.  */
+  do_final_cleanups (all_cleanups ());    /* Do any final cleanups before
+					     exiting.  */
   return 0;
 }
 

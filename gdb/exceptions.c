@@ -224,7 +224,7 @@ throw_exception (struct gdb_exception exception)
   quit_flag = 0;
   immediate_quit = 0;
 
-  do_cleanups (ALL_CLEANUPS);
+  do_cleanups (all_cleanups ());
 
   /* Jump to the containing catch_errors() call, communicating REASON
      to that call via setjmp's return value.  Note that REASON can't

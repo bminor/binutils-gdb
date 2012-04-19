@@ -1,3 +1,9 @@
+2012-04-19  Tom Tromey  <tromey@redhat.com>
+
+	* top.c (quit_target): Use all_cleanups.
+	* main.c (captured_command_loop): Use all_cleanups.
+	* exceptions.c (throw_exception): Use all_cleanups.
+
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (GNULIB_BUILDDIR): New.

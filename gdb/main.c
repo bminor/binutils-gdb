@@ -231,7 +231,7 @@ captured_command_loop (void *data)
      are not that well behaved.  do_cleanups should either be replaced
      with a do_cleanups call (to cover the problem) or an assertion
      check to detect bad FUNCs code.  */
-  do_cleanups (ALL_CLEANUPS);
+  do_cleanups (all_cleanups ());
   /* If the command_loop returned, normally (rather than threw an
      error) we try to quit.  If the quit is aborted, catch_errors()
      which called this catch the signal and restart the command
