@@ -21,8 +21,11 @@
 #define GDB_VEC_H
 
 #include <stddef.h>
+
+#ifndef GDBSERVER
 #include "gdb_string.h"
 #include "gdb_assert.h"
+#endif
 
 /* The macros here implement a set of templated vector types and
    associated interfaces.  These templates are implemented with

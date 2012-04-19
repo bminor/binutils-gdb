@@ -143,6 +143,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/win32-arm-low.c $(srcdir)/win32-i386-low.c \
 	$(srcdir)/win32-low.c $(srcdir)/wincecompat.c \
 	$(srcdir)/hostio.c $(srcdir)/hostio-errno.c \
+	$(srcdir)/common/vec.c \
 	$(srcdir)/common/common-utils.c $(srcdir)/common/xml-utils.c \
 	$(srcdir)/common/linux-osdata.c $(srcdir)/common/ptid.c \
 	$(srcdir)/common/buffer.c
@@ -155,7 +156,7 @@ SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
 OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
-	utils.o version.o \
+	utils.o version.o vec.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
 	xml-utils.o common-utils.o ptid.o buffer.o \
 	dll.o \
@@ -386,6 +387,7 @@ ptid_h = $(srcdir)/../common/ptid.h
 ax_h = $(srcdir)/ax.h
 agent_h = $(srcdir)/../common/agent.h
 linux_osdata_h = $(srcdir)/../common/linux-osdata.h
+vec_h = $(srcdir)/../common/vec.h
 server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 		$(srcdir)/mem-break.h $(srcdir)/../common/gdb_signals.h \
 		$(srcdir)/../common/common-utils.h \
@@ -466,6 +468,9 @@ linux-ptrace.o: ../common/linux-ptrace.c $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 common-utils.o: ../common/common-utils.c $(server_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
+vec.o: ../common/vec.c $(vec_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 xml-utils.o: ../common/xml-utils.c $(server_h)

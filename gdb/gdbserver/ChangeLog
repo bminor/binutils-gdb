@@ -1,5 +1,11 @@
 2012-04-19  Yao Qi  <yao@codesourcery.com>
 
+	* Makefile.in (SFILES): Add common/vec.c.
+	(OBS): Add vec.o.
+	(vec.o): New rule.
+
+2012-04-19  Yao Qi  <yao@codesourcery.com>
+
 	* remote-utils.c (prepare_resume_reply): Replace with macro
 	target_core_of_thread.
 	* server.c (handle_qxfer_threads_proper): Likewise.

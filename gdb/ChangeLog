@@ -1,5 +1,14 @@
 2012-04-19  Yao Qi  <yao@codesourcery.com>
 
+	* Makefile.in (SFILES): Add common/vec.c and remove vec.c.
+	(vec.o): New rule.
+	* vec.c: Move it ...
+	* common/vec.c: ... here.
+	* vec.h: Move it ...
+	* common/vec.h: ... here.
+
+2012-04-19  Yao Qi  <yao@codesourcery.com>
+
 	* gdb-code-style.el: New.
 
 2012-04-18  Pedro Alves  <palves@redhat.com>

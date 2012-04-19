@@ -733,7 +733,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	typeprint.c \
 	ui-out.c utils.c ui-file.h ui-file.c \
 	user-regs.c \
-	valarith.c valops.c valprint.c value.c varobj.c vec.c \
+	valarith.c valops.c valprint.c value.c varobj.c common/vec.c \
 	xml-tdesc.c xml-support.c \
 	inferior.c gdb_usleep.c \
 	record.c gcore.c \
@@ -779,7 +779,7 @@ gdbarch.h bsd-uthread.h gdb_stat.h memory-map.h	memrange.h \
 mdebugread.h m88k-tdep.h stabsread.h hppa-linux-offsets.h linux-fork.h \
 ser-unix.h inf-ptrace.h terminal.h ui-out.h frame-base.h \
 f-lang.h dwarf2loc.h value.h sparc-tdep.h defs.h target-descriptions.h \
-objfiles.h vec.h disasm.h mips-tdep.h ser-base.h \
+objfiles.h common/vec.h disasm.h mips-tdep.h ser-base.h \
 gdb_curses.h bfd-target.h memattr.h inferior.h ax.h dummy-frame.h \
 inflow.h fbsd-nat.h ia64-libunwind-tdep.h completer.h inf-ttrace.h \
 solib-target.h gdb_vfork.h alpha-tdep.h dwarf2expr.h \
@@ -1940,6 +1940,10 @@ linux-ptrace.o: $(srcdir)/common/linux-ptrace.c
 
 common-agent.o: $(srcdir)/common/agent.c
 	$(COMPILE) $(srcdir)/common/agent.c
+	$(POSTCOMPILE)
+
+vec.o: ${srcdir}/common/vec.c
+	$(COMPILE) $(srcdir)/common/vec.c
 	$(POSTCOMPILE)
 
 #
