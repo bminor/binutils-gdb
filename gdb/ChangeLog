@@ -1,5 +1,40 @@
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (GNULIB_BUILDDIR): New.
+	(LIBGNU, INCGNU, GNULIB_H): Adjust.
+	(SUBDIRS): Add $(GNULIB_BUILDDIR).
+	(CLEANDIRS). Remove gnulib/import.
+	(REQUIRED_SUBDIRS): Replace gnulib/import with $(GNULIB_BUILDDIR).
+	(all-lib): Ditto.
+	(distclean): Remove the $(GNULIB_BUILDDIR) directory.
+	(gnulib/import/Makefile): Replace gnulib/import with
+	$(GNULIB_BUILDDIR).  Set CONFIG_FILES to just Makefile.
+	(ACLOCAL_AMFLAGS): Remove '-I gnulib/import/m4'.
+	(aclocal_m4_deps): Remove the gnulib dependencies.  Add
+	acx_configure_dir.m4.
+	* acinclude.m4: Include acx_configure_dir.m4.
+	* acx_configure_dir.m4: New file.
+	* aclocal.m4: Regenerate.
+        * configure.ac: Remove gl_EARLY, gl_INIT and AM_INIT_AUTOMAKE
+        calls.  Configure gnulib using ACX_CONFIGURE_DIR.
+        (GNULIB): New variable.
+        (GNULIB_STDINT_H): Adjust.
+        (AC_OUTPUT): Don't output gnulib/Makefile.
+        * gdb/defs.h: Include build-gnulib/config.h.
+        * acx_configure_dir.m4: New file.
+        * aclocal.m4: Regenerate.
+        * config.in: Regenerate.
+        * configure: Regenerate.
+
+        * gnulib/Makefile.in: New file.
+        * gnulib/configure.ac: New file.
+        * gnulib/aclocal.m4: New file.
+        * gnulib/config.in: New file.
+        * gnulib/configure: New file.
+	* gnulib/: Re-run gnulib-tool to adjust.
+
+2012-04-19  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Remove gnulib/wchar.in.h.
 	Adjust paths to gnulib imported files.
 
