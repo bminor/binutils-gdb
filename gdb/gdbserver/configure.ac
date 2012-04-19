@@ -26,12 +26,12 @@ AC_CONFIG_HEADER(config.h:config.in)
 AM_MAINTAINER_MODE
 
 AC_PROG_CC
-gl_EARLY
 AC_GNU_SOURCE
 
 AC_CANONICAL_SYSTEM
 
 AC_PROG_INSTALL
+AC_PROG_RANLIB
 
 AC_ARG_PROGRAM
 
@@ -42,6 +42,13 @@ AC_FUNC_ALLOCA
 
 # Check for the 'make' the user wants to use.
 AC_CHECK_PROGS(MAKE, make)
+
+# Configure gnulib.  We can't use AC_CONFIG_SUBDIRS as that'd expect
+# to find the the source subdir to be configured directly under
+# gdbserver/.  We need to build gnulib under some other directory not
+# "gnulib", to avoid the problem of both GDB and GDBserver wanting to
+# build it in the same directory, when building in the source dir.
+ACX_CONFIGURE_DIR(["../gnulib"], ["build-gnulib-gdbserver"])
 
 AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 proc_service.h sys/procfs.h thread_db.h linux/elf.h dnl
@@ -439,18 +446,15 @@ AC_SUBST(srv_xmlfiles)
 AC_SUBST(IPA_DEPFILES)
 AC_SUBST(extra_libraries)
 
-gl_INIT
-# GDBserver does not use automake, but gnulib does.  This line lets
-# us generate its Makefile.in.
-AM_INIT_AUTOMAKE(gdbserver, UNUSED-VERSION, [no-define])
+GNULIB=build-gnulib-gdbserver/import
 
 GNULIB_STDINT_H=
 if test x"$STDINT_H" != x; then
-  GNULIB_STDINT_H=gnulib/$STDINT_H
+  GNULIB_STDINT_H=$GNULIB/$STDINT_H
 fi
 AC_SUBST(GNULIB_STDINT_H)
 
-AC_OUTPUT(Makefile gnulib/import/Makefile:${srcdir}/../gnulib/import/Makefile.in,
+AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;

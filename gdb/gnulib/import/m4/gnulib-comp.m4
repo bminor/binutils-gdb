@@ -64,14 +64,14 @@ AC_DEFUN([gl_INIT],
   gl_cond_libtool=false
   gl_libdeps=
   gl_ltlibdeps=
-  gl_m4_base='gnulib/import/m4'
+  gl_m4_base='import/m4'
   m4_pushdef([AC_LIBOBJ], m4_defn([gl_LIBOBJ]))
   m4_pushdef([AC_REPLACE_FUNCS], m4_defn([gl_REPLACE_FUNCS]))
   m4_pushdef([AC_LIBSOURCES], m4_defn([gl_LIBSOURCES]))
   m4_pushdef([gl_LIBSOURCES_LIST], [])
   m4_pushdef([gl_LIBSOURCES_DIR], [])
   gl_COMMON
-  gl_source_base='gnulib/import'
+  gl_source_base='import'
 gl_INTTYPES_H
 gl_INTTYPES_INCOMPLETE
 gl_FUNC_MEMCHR
@@ -197,7 +197,7 @@ AC_DEFUN([gl_REPLACE_FUNCS], [
 AC_DEFUN([gl_LIBSOURCES], [
   m4_foreach([_gl_NAME], [$1], [
     m4_if(_gl_NAME, [alloca.c], [], [
-      m4_define([gl_LIBSOURCES_DIR], [gnulib/import])
+      m4_define([gl_LIBSOURCES_DIR], [import])
       m4_append([gl_LIBSOURCES_LIST], _gl_NAME, [ ])
     ])
   ])
@@ -257,7 +257,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/memmem.m4
   m4/mmap-anon.m4
   m4/multiarch.m4
-  m4/onceonly.m4
   m4/stddef_h.m4
   m4/stdint.m4
   m4/string_h.m4

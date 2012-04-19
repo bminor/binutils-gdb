@@ -25,7 +25,6 @@ AM_MAINTAINER_MODE
 
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
-gl_EARLY
 ACX_LARGEFILE
 AM_PROG_CC_STDC
 
@@ -46,6 +45,12 @@ case "`$MAKE --version 2>&1 | sed 1q`" in
 esac
 AM_CONDITIONAL(GMAKE, test "$MAKE_IS_GNU" = yes)
 AC_PROG_MAKE_SET
+
+# Configure gnulib.  We need to build gnulib under some other
+# directory not "gnulib", to avoid the problem of both GDB and
+# GDBserver wanting to build it in the same directory, when building
+# in the source dir.
+ACX_CONFIGURE_DIR(["gnulib"], ["build-gnulib"])
 
 dnl List of object files and targets accumulated by configure.
 
@@ -72,12 +77,12 @@ if test x"$USE_NLS" = xyes; then
    CONFIG_UNINSTALL="$CONFIG_UNINSTALL uninstall-po"
 fi
 
-gl_INIT
+GNULIB=build-gnulib/import
 
 # For Makefile dependencies.
 GNULIB_STDINT_H=
 if test x"$STDINT_H" != x; then
-  GNULIB_STDINT_H=gnulib/$STDINT_H
+  GNULIB_STDINT_H=$GNULIB/$STDINT_H
 fi
 AC_SUBST(GNULIB_STDINT_H)
 
@@ -104,10 +109,6 @@ if test x"$gdb_cv_have_makeinfo_click" = xyes; then
   MAKEINFO_EXTRA_FLAGS="$MAKEINFO_EXTRA_FLAGS -DHAVE_MAKEINFO_CLICK"
 fi
 AC_SUBST(MAKEINFO_EXTRA_FLAGS)
-
-# GDB does not use automake, but gnulib does.  This line lets us
-# generate its Makefile.in.
-AM_INIT_AUTOMAKE(gdb, UNUSED-VERSION, [no-define])
 
 GDB_AC_WITH_DIR(DEBUGDIR, separate-debug-dir,
     [look for global separate debug info in this path @<:@LIBDIR/debug@:>@],
@@ -2242,7 +2243,7 @@ dnl  At the moment, we just assume it's UTF-8.
 AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
           [Define to be a string naming the default host character set.])
 
-AC_OUTPUT(Makefile gdb-gdb.gdb doc/Makefile gnulib/import/Makefile data-directory/Makefile,
+AC_OUTPUT(Makefile gdb-gdb.gdb doc/Makefile data-directory/Makefile,
 [
 case x$CONFIG_HEADERS in
 xconfig.h:config.in)

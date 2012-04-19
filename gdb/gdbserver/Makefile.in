@@ -76,20 +76,13 @@ ustlibs = @ustlibs@
 ustinc = @ustinc@
 
 # gnulib
-LIBGNU = gnulib/import/libgnu.a
-INCGNU = -I$(srcdir)/../gnulib/import -Ignulib/import
-
-# We build gnulib directly under the gdbserver build directory, but
-# its sources don't live directly under gdbserver's source directory.
-# Tweak $srcdir and VPATH to make that work.
-GNULIB_FLAGS_TO_PASS = \
-	"top_srcdir=$(abs_top_srcdir)/.." \
-	"srcdir=$(abs_srcdir)/../gnulib/import" \
-	"VPATH=$(abs_top_srcdir)/../gnulib/import:$(abs_top_srcdir)"
+GNULIB_BUILDDIR = build-gnulib-gdbserver
+LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
+INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import
 
 # Generated headers in the gnulib directory.  These must be listed
 # so that they are generated before other files are compiled.
-GNULIB_H = gnulib/import/string.h @GNULIB_STDINT_H@
+GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
 
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
@@ -175,6 +168,15 @@ XML_BUILTIN = @srv_xmlbuiltin@
 IPA_DEPFILES = @IPA_DEPFILES@
 extra_libraries = @extra_libraries@
 
+SUBDIRS = $(GNULIB_BUILDDIR)
+CLEANDIRS = $(SUBDIRS)
+
+# List of subdirectories in the build tree that must exist.
+# This is used to force build failures in existing trees when
+# a new directory is added.
+# The format here is for the `case' shell command.
+REQUIRED_SUBDIRS = $(GNULIB_BUILDDIR)
+
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
@@ -216,7 +218,7 @@ generated_files = config.h $(GNULIB_H)
 	${CC} -c ${INTERNAL_CFLAGS} $<
 
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
-	@cd gnulib/import; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) all
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a
@@ -237,13 +239,13 @@ install-only:
 	$(INSTALL_PROGRAM) gdbserver$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT); \
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(man1dir); \
 	$(INSTALL_DATA) $(srcdir)/gdbserver.1 $(DESTDIR)$(man1dir)/$$n.1
-	@cd gnulib/import; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) install
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
 	rm -f $(DESTDIR)/$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(man1dir)/$$n.1
-	@cd gnulib/import; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) uninstall
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 installcheck:
 check:
@@ -253,7 +255,7 @@ install-pdf:
 html:
 install-html:
 clean-info: force
-	@cd gnulib/import; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) $@
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(LIBGNU)
 	rm -f gdbserver$(EXEEXT)
@@ -261,9 +263,8 @@ gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(LIBGNU)
 	$(LIBGNU) $(GDBSERVER_LIBS) $(XM_CLIBS)
 
 $(LIBGNU) $(GNULIB_H): all-lib
-all-lib: gnulib/import/Makefile
-	@cd gnulib/import/; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) all
-
+all-lib: $(GNULIB_BUILDDIR)/Makefile
+	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=$(GNULIB_BUILDDIR) subdir_do
 .PHONY: all-lib
 
 gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
@@ -320,12 +321,29 @@ clean:
 	rm -f i386-mmx.c i386-mmx-linux.c
 	rm -f x32.c x32-linux.c
 	rm -f x32-avx.c x32-avx-linux.c
-	@cd gnulib/import; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) clean
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 maintainer-clean realclean distclean: clean
-	rm -f nm.h tm.h xm.h config.h stamp-h config.log
-	@cd gnulib/import; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) $@
-	rm -f Makefile config.status
+	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
+	rm -rf $(GNULIB_BUILDDIR)
+	rm -f Makefile config.status config.h stamp-h config.log
+	rm -f Makefile
+
+subdir_do: force
+	@for i in $(DODIRS); do \
+		case $$i in \
+		$(REQUIRED_SUBDIRS)) \
+			if [ ! -f ./$$i/Makefile ] ; then \
+				echo "Missing $$i/Makefile" >&2 ; \
+				exit 1 ; \
+			fi ;; \
+		esac ; \
+		if [ -f ./$$i/Makefile ] ; then \
+			if (cd ./$$i; \
+				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
+			else exit 1 ; fi ; \
+		else true ; fi ; \
+	done
 
 config.h: stamp-h ; @true
 stamp-h: config.in config.status
@@ -334,11 +352,12 @@ stamp-h: config.in config.status
 Makefile: Makefile.in config.status
 	CONFIG_HEADERS="" $(SHELL) ./config.status
 
-gnulib/import/Makefile: $(srcdir)/../gnulib/import/Makefile.in config.status
+$(GNULIB_BUILDDIR)/Makefile: $(srcdir)/../gnulib/Makefile.in config.status
+	  @cd $(GNULIB_BUILDDIR); CONFIG_FILES="Makefile" \
 	  CONFIG_COMMANDS="depfiles" \
 	  CONFIG_HEADERS= \
 	  CONFIG_LINKS= \
-	  $(SHELL) config.status "gnulib/import/Makefile"
+	  $(SHELL) config.status
 
 config.status: configure configure.srv
 	$(SHELL) ./config.status --recheck

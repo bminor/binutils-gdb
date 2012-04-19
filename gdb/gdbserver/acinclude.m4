@@ -1,6 +1,8 @@
 dnl gdb/gdbserver/configure.in uses BFD_HAVE_SYS_PROCFS_TYPE.
 sinclude(../../bfd/bfd.m4)
 
+sinclude(../acx_configure_dir.m4)
+
 dnl This gets autoconf bugfixes
 sinclude(../../config/override.m4)
 

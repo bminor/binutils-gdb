@@ -1,5 +1,29 @@
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
+        * Makefile.in (GNULIB_BUILDDIR): New.
+	(LIBGNU, INCGNU, GNULIB_H): Adjust.
+        (SUBDIRS, CLEANDIRS, REQUIRED_SUBDIRS): New.
+        (all, install-only, uninstall, clean-info, all-lib, clean): No
+        longer pass GNULIB_FLAGS_TO_PASS.  Use subdir_do.
+        (maintainer-clean realclean distclean): Use subdir_do.
+        (subdir_do): New.
+        (gnulib/import/Makefile): Adjust.  Replace gnulib/import with
+	$(GNULIB_BUILDDIR).  Don't pass argument to config.status.
+        * acinclude.m4: Include acx_configure_dir.m4.
+        * configure.ac: Remove gl_EARLY, gl_INIT, and AM_INIT_AUTOMAKE
+        calls.  Call AC_PROG_RANLIB.  Configure gnulib using
+        ACX_CONFIGURE_DIR.
+        (GNULIB): New.
+        (GNULIB_STDINT_H): Adjust.
+        (AC_OUTPUT): Don't output gnulib/Makefile anymore.
+        * gdbreplay.c: Include build-gnulib/config.h.
+        * server.h: Likewise.
+        * aclocal.m4: Regenerate.
+        * config.in: Regenerate.
+        * configure: Regenerate.
+
+2012-04-19  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (LIBGNU, INCGNU): Adjust.
 	(GNULIB_FLAGS_TO_PASS, GNULIB_H): Adjust.
 	(all, install-only, uninstall, clean-info, all-lib, clean)
