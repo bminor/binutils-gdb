@@ -2406,7 +2406,7 @@ struct elf_sh_link_hash_entry
      and thus require fixups or relocations.  */
   bfd_signed_vma abs_funcdesc_refcount;
 
-  enum {
+  enum got_type {
     GOT_UNKNOWN = 0, GOT_NORMAL, GOT_TLS_GD, GOT_TLS_IE, GOT_FUNCDESC
   } got_type;
 };
@@ -3078,7 +3078,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       asection *s;
       bfd_boolean dyn;
-      int got_type = sh_elf_hash_entry (h)->got_type;
+      enum got_type got_type = sh_elf_hash_entry (h)->got_type;
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -3980,7 +3980,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       bfd_reloc_status_type r;
       int seen_stt_datalabel = 0;
       bfd_vma off;
-      int got_type;
+      enum got_type got_type;
       const char *symname = NULL;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
@@ -6093,7 +6093,7 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
   unsigned int r_type;
-  int got_type, old_got_type;
+  enum got_type got_type, old_got_type;
 
   sreloc = NULL;
 
