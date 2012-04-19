@@ -69,10 +69,6 @@
 	* configure: Regenerate.
 	* gnulib/Makefile.in: Regenerate.
 
-	* gdbserver/aclocal.m4: Regenerate.
-	* gdbserver/config.in: Regenerate.
-	* gdbserver/configure: Regenerate.
-
 2012-04-18  Pedro Alves  <palves@redhat.com>
 
 	Reimport the update-copyright module from gnulib
