@@ -770,9 +770,9 @@ i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
 ia64-tdep.h ada-lang.h ada-varobj.h varobj.h frv-tdep.h nto-tdep.h serial.h \
 c-lang.h d-lang.h frame.h event-loop.h block.h cli/cli-setshow.h	\
 cli/cli-decode.h cli/cli-cmds.h cli/cli-dump.h cli/cli-utils.h \
-cli/cli-script.h macrotab.h symtab.h version.h gnulib/wchar.in.h \
-gnulib/string.in.h gnulib/str-two-way.h \
-gnulib/stdint.in.h remote.h gdb.h sparc-nat.h \
+cli/cli-script.h macrotab.h symtab.h version.h \
+gnulib/import/string.in.h gnulib/import/str-two-way.h \
+gnulib/import/stdint.in.h remote.h gdb.h sparc-nat.h \
 gdbthread.h dwarf2-frame.h dwarf2-frame-tailcall.h nbsd-nat.h dcache.h \
 amd64-nat.h s390-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
 gdbarch.h bsd-uthread.h gdb_stat.h memory-map.h	memrange.h \
@@ -820,8 +820,9 @@ i386-darwin-tdep.h i386-nat.h linux-record.h moxie-tdep.h \
 osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
 solib-darwin.h solib-ia64-hpux.h solib-spu.h windows-nat.h xcoffread.h \
-gnulib/extra/arg-nonnull.h gnulib/extra/c++defs.h gnulib/extra/warn-on-use.h \
-gnulib/stddef.in.h gnulib/inttypes.in.h inline-frame.h skip.h \
+gnulib/import/extra/snippet/arg-nonnull.h gnulib/import/extra/snippet/c++defs.h \
+gnulib/import/extra/snippet/warn-on-use.h \
+gnulib/import/stddef.in.h gnulib/import/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h
 
