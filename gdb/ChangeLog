@@ -1,5 +1,10 @@
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Remove gnulib/wchar.in.h.
+	Adjust paths to gnulib imported files.
+
+2012-04-19  Pedro Alves  <palves@redhat.com>
+
 	* gnulib/: Move whole directory ...
 	* gnulib/import/: ... here, and re-rerun gnulib-tool to adjust.
 	* Makefile.in (LIBGNU, INCGNU, GNULIB_H, CLEANDIRS)
