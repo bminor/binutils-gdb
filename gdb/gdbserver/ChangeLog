@@ -1,5 +1,9 @@
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
+	* config.in: Regenerate.
+
+2012-04-19  Pedro Alves  <palves@redhat.com>
+
 	* configure.ac: Remove AC_CHECK_DECLS check for memmem.
 	* server.h (memmem): Remove declaration.
 	* config.in: Regenerate.
