@@ -22,10 +22,6 @@
    you don't. */
 #undef HAVE_DECL_ADDR_NO_RANDOMIZE
 
-/* Define to 1 if you have the declaration of `memmem', and to 0 if you don't.
-   */
-#undef HAVE_DECL_MEMMEM
-
 /* Define to 1 if you have the declaration of `perror', and to 0 if you don't.
    */
 #undef HAVE_DECL_PERROR

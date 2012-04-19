@@ -59,10 +59,6 @@ extern void perror (const char *);
 #endif
 #endif
 
-#if !HAVE_DECL_MEMMEM
-extern void *memmem (const void *, size_t , const void *, size_t);
-#endif
-
 #if !HAVE_DECL_VASPRINTF
 extern int vasprintf(char **strp, const char *fmt, va_list ap);
 #endif
