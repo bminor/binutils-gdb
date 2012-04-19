@@ -1,5 +1,11 @@
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (generated_files): New.
+	(server_h): Remove the explicit dependency on config.h, and depend
+	on $generated_files.
+
+2012-04-19  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (INCGNU): Add -Ignulib.
 
 2012-04-19  Pedro Alves  <palves@redhat.com>

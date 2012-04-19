@@ -207,6 +207,9 @@ FLAGS_TO_PASS = \
 	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
+# All generated files which can be included by another file.
+generated_files = config.h $(GNULIB_H)
+
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
 .c.o:
@@ -388,7 +391,9 @@ ax_h = $(srcdir)/ax.h
 agent_h = $(srcdir)/../common/agent.h
 linux_osdata_h = $(srcdir)/../common/linux-osdata.h
 vec_h = $(srcdir)/../common/vec.h
-server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
+# Since everything must include server.h, we make that depend on
+# generated files.
+server_h = $(srcdir)/server.h $(regcache_h) $(srcdir)/target.h \
 		$(srcdir)/mem-break.h $(srcdir)/../common/gdb_signals.h \
 		$(srcdir)/../common/common-utils.h \
 		$(srcdir)/../common/xml-utils.h \
@@ -396,7 +401,8 @@ server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 		$(srcdir)/../common/gdb_assert.h \
 		$(srcdir)/../common/gdb_locale.h \
 		$(ptid_h) \
-		$(signals_h)
+		$(signals_h) \
+		$(generated_files)
 
 linux_low_h = $(srcdir)/linux-low.h
 
