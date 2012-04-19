@@ -1161,13 +1161,10 @@ handle_qxfer_threads_proper (struct buffer *buffer)
     {
       ptid_t ptid = thread_to_gdb_id ((struct thread_info *)thread);
       char ptid_s[100];
-      int core = -1;
+      int core = target_core_of_thread (ptid);
       char core_s[21];
 
       write_ptid (ptid_s, ptid);
-
-      if (the_target->core_of_thread)
-	core = (*the_target->core_of_thread) (ptid);
 
       if (core != -1)
 	{

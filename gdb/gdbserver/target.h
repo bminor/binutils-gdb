@@ -540,6 +540,10 @@ ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 	(*the_target->done_accessing_memory) ();  	\
     } while (0)
 
+#define target_core_of_thread(ptid)		\
+  (the_target->core_of_thread ? (*the_target->core_of_thread) (ptid) \
+   : -1)
+
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 
 int write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,

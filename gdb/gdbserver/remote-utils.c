@@ -1390,8 +1390,8 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 		strcat (buf, ";");
 		buf += strlen (buf);
 
-		if (the_target->core_of_thread)
-		  core = (*the_target->core_of_thread) (ptid);
+		core = target_core_of_thread (ptid);
+
 		if (core != -1)
 		  {
 		    sprintf (buf, "core:");
