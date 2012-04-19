@@ -18,15 +18,53 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "gdb_assert.h"
+
+/* The cleanup list records things that have to be undone
+   if an error happens (descriptors to be closed, memory to be freed, etc.)
+   Each link in the chain records a function to call and an
+   argument to give it.
+
+   Use make_cleanup to add an element to the cleanup chain.
+   Use do_cleanups to do all cleanup actions back to a given
+   point in the chain.  Use discard_cleanups to remove cleanups
+   from the chain back to a given point, not doing them.
+
+   If the argument is pointer to allocated memory, then you need
+   to additionally set the 'free_arg' member to a function that will
+   free that memory.  This function will be called both when the cleanup
+   is executed and when it's discarded.  */
+
+struct cleanup
+{
+  struct cleanup *next;
+  void (*function) (void *);
+  void (*free_arg) (void *);
+  void *arg;
+};
+
+/* Used to mark the end of a cleanup chain.
+   The value is chosen so that it:
+   - is non-NULL so that make_cleanup never returns NULL,
+   - causes a segv if dereferenced
+     [though this won't catch errors that a value of, say,
+     ((struct cleanup *) -1) will]
+   - displays as something useful when printed in gdb.
+   This is const for a bit of extra robustness.
+   It is initialized to coax gcc into putting it into .rodata.
+   All fields are initialized to survive -Wextra.  */
+static const struct cleanup sentinel_cleanup = { 0, 0, 0, 0 };
+
+/* Handy macro to use when referring to sentinel_cleanup.  */
+#define SENTINEL_CLEANUP ((struct cleanup *) &sentinel_cleanup)
 
 /* Chain of cleanup actions established with make_cleanup,
    to be executed if an error happens.  */
+static struct cleanup *cleanup_chain = SENTINEL_CLEANUP;
 
-/* Cleaned up after a failed command.  */
-static struct cleanup *cleanup_chain;
-
-/* Cleaned up when gdb exits.  */
-static struct cleanup *final_cleanup_chain;
+/* Chain of cleanup actions established with make_final_cleanup,
+   to be executed when gdb exits.  */
+static struct cleanup *final_cleanup_chain = SENTINEL_CLEANUP;
 
 /* Main worker routine to create a cleanup.
    PMY_CHAIN is a pointer to either cleanup_chain or final_cleanup_chain.
@@ -51,6 +89,7 @@ make_my_cleanup2 (struct cleanup **pmy_chain, make_cleanup_ftype *function,
   new->arg = arg;
   *pmy_chain = new;
 
+  gdb_assert (old_chain != NULL);
   return old_chain;
 }
 
@@ -120,6 +159,15 @@ do_my_cleanups (struct cleanup **pmy_chain,
     }
 }
 
+/* Return a value that can be passed to do_cleanups, do_final_cleanups to
+   indicate perform all cleanups.  */
+
+struct cleanup *
+all_cleanups (void)
+{
+  return SENTINEL_CLEANUP;
+}
+
 /* Discard cleanups and do the actions they describe
    until we get back to the point OLD_CHAIN in the cleanup_chain.  */
 
@@ -185,7 +233,7 @@ save_my_cleanups (struct cleanup **pmy_chain)
 {
   struct cleanup *old_chain = *pmy_chain;
 
-  *pmy_chain = 0;
+  *pmy_chain = SENTINEL_CLEANUP;
   return old_chain;
 }
 

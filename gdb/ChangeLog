@@ -1,3 +1,19 @@
+2012-04-19  Doug Evans  <dje@google.com>
+
+	* cleanups.h (struct cleanup): Move to cleanups.c.
+	(make_cleanup_dtor_ftype): New typedef.
+	(make_cleanup_dtor): Use it.
+	(ALL_CLEANUPS): Replace with ...
+	(all_cleanups): ... this.  Declare.  All uses updated.
+	* cleanups.c: #include "gdb_assert.h".
+	(sentinel_cleanup): New static global.
+	(SENTINEL_CLEANUP): Define.
+	(cleanup_chain, final_cleanup_chain): Initialize to SENTINEL_CLEANUP.
+	(make_my_cleanup2): Assert result is non-NULL.
+	(all_cleanups): New function.
+	(save_my_cleanups): Initialize new chain to SENTINEL_CLEANUP instead
+	of NULL.
+
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (GNULIB_BUILDDIR): New.

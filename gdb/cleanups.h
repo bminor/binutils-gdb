@@ -19,28 +19,8 @@
 #ifndef CLEANUPS_H
 #define CLEANUPS_H
 
-/* The cleanup list records things that have to be undone
-   if an error happens (descriptors to be closed, memory to be freed, etc.)
-   Each link in the chain records a function to call and an
-   argument to give it.
-
-   Use make_cleanup to add an element to the cleanup chain.
-   Use do_cleanups to do all cleanup actions back to a given
-   point in the chain.  Use discard_cleanups to remove cleanups
-   from the chain back to a given point, not doing them.
-
-   If the argument is pointer to allocated memory, then you need
-   to additionally set the 'free_arg' member to a function that will
-   free that memory.  This function will be called both when the cleanup
-   is executed and when it's discarded.  */
-
-struct cleanup
-  {
-    struct cleanup *next;
-    void (*function) (void *);
-    void (*free_arg) (void *);
-    void *arg;
-  };
+/* Outside of cleanups.c, this is an opaque type.  */
+struct cleanup;
 
 /* NOTE: cagney/2000-03-04: This typedef is strictly for the
    make_cleanup function declarations below.  Do not use this typedef
@@ -49,21 +29,25 @@ struct cleanup
    Calling a f(char*) function with f(void*) is non-portable.  */
 typedef void (make_cleanup_ftype) (void *);
 
+/* Function type for the dtor in make_cleanup_dtor.  */
+typedef void (make_cleanup_dtor_ftype) (void *);
+
 /* WARNING: The result of the "make cleanup" routines is not the intuitive
    choice of being a handle on the just-created cleanup.  Instead it is an
    opaque handle of the cleanup mechanism and represents all cleanups created
-   from that point onwards.  */
+   from that point onwards.
+   The result is guaranteed to be non-NULL though.  */
 
 extern struct cleanup *make_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_cleanup_dtor (make_cleanup_ftype *, void *,
-					  void (*dtor) (void *));
+					  make_cleanup_dtor_ftype *);
 
 extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
 /* A special value to pass to do_cleanups and do_final_cleanups
    to tell them to do all cleanups.  */
-#define	ALL_CLEANUPS	((struct cleanup *)0)
+extern struct cleanup *all_cleanups (void);
 
 extern void do_cleanups (struct cleanup *);
 extern void do_final_cleanups (struct cleanup *);
