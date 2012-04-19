@@ -450,7 +450,7 @@ if test x"$STDINT_H" != x; then
 fi
 AC_SUBST(GNULIB_STDINT_H)
 
-AC_OUTPUT(Makefile gnulib/Makefile:${srcdir}/../gnulib/Makefile.in,
+AC_OUTPUT(Makefile gnulib/import/Makefile:${srcdir}/../gnulib/import/Makefile.in,
 [case x$CONFIG_HEADERS in
 xconfig.h:config.in)
 echo > stamp-h ;;

@@ -27,7 +27,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --doc-base=doc --tests-base=tests --aux-dir=gnulib/extra --no-conditional-dependencies --no-libtool --macro-prefix=gl --no-vc-files inttypes memmem update-copyright
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib/import --m4-base=gnulib/import/m4 --doc-base=doc --tests-base=tests --aux-dir=gnulib/import/extra --no-conditional-dependencies --no-libtool --macro-prefix=gl --no-vc-files inttypes memmem update-copyright
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -37,8 +37,8 @@ gl_MODULES([
   update-copyright
 ])
 gl_AVOID([])
-gl_SOURCE_BASE([gnulib])
-gl_M4_BASE([gnulib/m4])
+gl_SOURCE_BASE([gnulib/import])
+gl_M4_BASE([gnulib/import/m4])
 gl_PO_BASE([])
 gl_DOC_BASE([doc])
 gl_TESTS_BASE([tests])

@@ -1,5 +1,15 @@
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (LIBGNU, INCGNU): Adjust.
+	(GNULIB_FLAGS_TO_PASS, GNULIB_H): Adjust.
+	(all, install-only, uninstall, clean-info, all-lib, clean)
+	(maintainer-clean, Makefile, gnulib/Makefile): Adjust.
+	* configure.ac: Adjust AC_OUTPUT output.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2012-04-19  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (generated_files): New.
 	(server_h): Remove the explicit dependency on config.h, and depend
 	on $generated_files.

@@ -6988,7 +6988,7 @@ fi
   gl_cond_libtool=false
   gl_libdeps=
   gl_ltlibdeps=
-  gl_m4_base='gnulib/m4'
+  gl_m4_base='gnulib/import/m4'
 
 
 
@@ -6998,7 +6998,7 @@ fi
 
 
 
-  gl_source_base='gnulib'
+  gl_source_base='gnulib/import'
 
 
 
@@ -16833,7 +16833,7 @@ ac_config_links="$ac_config_links $ac_config_links_1"
 $as_echo "#define GDB_DEFAULT_HOST_CHARSET \"UTF-8\"" >>confdefs.h
 
 
-ac_config_files="$ac_config_files Makefile gdb-gdb.gdb doc/Makefile gnulib/Makefile data-directory/Makefile"
+ac_config_files="$ac_config_files Makefile gdb-gdb.gdb doc/Makefile gnulib/import/Makefile data-directory/Makefile"
 
 ac_config_commands="$ac_config_commands default"
 
@@ -17609,7 +17609,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "gdb-gdb.gdb") CONFIG_FILES="$CONFIG_FILES gdb-gdb.gdb" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
-    "gnulib/Makefile") CONFIG_FILES="$CONFIG_FILES gnulib/Makefile" ;;
+    "gnulib/import/Makefile") CONFIG_FILES="$CONFIG_FILES gnulib/import/Makefile" ;;
     "data-directory/Makefile") CONFIG_FILES="$CONFIG_FILES data-directory/Makefile" ;;
     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
 

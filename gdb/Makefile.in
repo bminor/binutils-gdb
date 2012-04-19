@@ -170,12 +170,12 @@ INTL_CFLAGS = @INCINTL@
 GDB_DATADIR = @GDB_DATADIR@
 
 # Helper code from gnulib.
-LIBGNU = gnulib/libgnu.a
-INCGNU = -I$(srcdir)/gnulib -Ignulib
+LIBGNU = gnulib/import/libgnu.a
+INCGNU = -I$(srcdir)/gnulib/import -Ignulib/import
 
 # Generated headers in the gnulib directory.  These must be listed
 # so that they are generated before other files are compiled.
-GNULIB_H = gnulib/string.h @GNULIB_STDINT_H@
+GNULIB_H = gnulib/import/string.h @GNULIB_STDINT_H@
 
 #
 # CLI sub directory definitons
@@ -916,13 +916,13 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 TSOBS = inflow.o
 
 SUBDIRS = doc @subdirs@ data-directory
-CLEANDIRS = $(SUBDIRS) gnulib 
+CLEANDIRS = $(SUBDIRS) gnulib/import
 
 # List of subdirectories in the build tree that must exist.
 # This is used to force build failures in existing trees when
 # a new directory is added.
 # The format here is for the `case' shell command.
-REQUIRED_SUBDIRS = doc | testsuite | gnulib | data-directory
+REQUIRED_SUBDIRS = doc | testsuite | gnulib/import | data-directory
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.c \
@@ -1162,8 +1162,8 @@ gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 
 # Convenience rule to handle recursion.
 $(LIBGNU) $(GNULIB_H): all-lib
-all-lib: gnulib/Makefile
-	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=gnulib subdir_do
+all-lib: gnulib/import/Makefile
+	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=gnulib/import subdir_do
 .PHONY: all-lib
 
 # Convenience rule to handle recursion.
@@ -1273,8 +1273,8 @@ Makefile: Makefile.in config.status @frags@
 	  CONFIG_HEADERS= \
 	  $(SHELL) config.status
 
-gnulib/Makefile: gnulib/Makefile.in config.status @frags@
-	CONFIG_FILES="gnulib/Makefile" \
+gnulib/import/Makefile: gnulib/import/Makefile.in config.status @frags@
+	CONFIG_FILES="gnulib/import/Makefile" \
 	  CONFIG_COMMANDS="depfiles" \
 	  CONFIG_HEADERS= \
 	  CONFIG_LINKS= \
@@ -1302,31 +1302,31 @@ config.status: $(srcdir)/configure configure.tgt configure.host
 	$(SHELL) config.status --recheck
 
 ACLOCAL = aclocal
-ACLOCAL_AMFLAGS = -I gnulib/m4 -I ../config
+ACLOCAL_AMFLAGS = -I gnulib/import/m4 -I ../config
 aclocal_m4_deps = \
 	configure.ac \
-	gnulib/m4/00gnulib.m4 \
-	gnulib/m4/extensions.m4 \
-	gnulib/m4/gnulib-cache.m4 \
-	gnulib/m4/gnulib-common.m4 \
-	gnulib/m4/gnulib-comp.m4 \
-	gnulib/m4/gnulib-tool.m4 \
-	gnulib/m4/include_next.m4 \
-	gnulib/m4/inttypes.m4 \
-	gnulib/m4/inttypes-pri.m4 \
-	gnulib/m4/longlong.m4 \
-	gnulib/m4/memchr.m4 \
-	gnulib/m4/memmem.m4 \
-	gnulib/m4/mmap-anon.m4 \
-	gnulib/m4/multiarch.m4 \
-	gnulib/m4/onceonly.m4 \
-	gnulib/m4/stddef_h.m4 \
-	gnulib/m4/stdint.m4 \
-	gnulib/m4/string_h.m4 \
-	gnulib/m4/warn-on-use.m4 \
-	gnulib/m4/wchar_h.m4 \
-	gnulib/m4/wchar_t.m4 \
-	gnulib/m4/wint_t.m4 \
+	gnulib/import/m4/00gnulib.m4 \
+	gnulib/import/m4/extensions.m4 \
+	gnulib/import/m4/gnulib-cache.m4 \
+	gnulib/import/m4/gnulib-common.m4 \
+	gnulib/import/m4/gnulib-comp.m4 \
+	gnulib/import/m4/gnulib-tool.m4 \
+	gnulib/import/m4/include_next.m4 \
+	gnulib/import/m4/inttypes.m4 \
+	gnulib/import/m4/inttypes-pri.m4 \
+	gnulib/import/m4/longlong.m4 \
+	gnulib/import/m4/memchr.m4 \
+	gnulib/import/m4/memmem.m4 \
+	gnulib/import/m4/mmap-anon.m4 \
+	gnulib/import/m4/multiarch.m4 \
+	gnulib/import/m4/onceonly.m4 \
+	gnulib/import/m4/stddef_h.m4 \
+	gnulib/import/m4/stdint.m4 \
+	gnulib/import/m4/string_h.m4 \
+	gnulib/import/m4/warn-on-use.m4 \
+	gnulib/import/m4/wchar_h.m4 \
+	gnulib/import/m4/wchar_t.m4 \
+	gnulib/import/m4/wint_t.m4 \
 	../config/extensions.m4 \
 	../config/lead-dot.m4 \
 	../config/proginstall.m4 \

@@ -7848,7 +7848,7 @@ fi
   gl_cond_libtool=false
   gl_libdeps=
   gl_ltlibdeps=
-  gl_m4_base='gnulib/m4'
+  gl_m4_base='gnulib/import/m4'
 
 
 
@@ -7858,7 +7858,7 @@ fi
 
 
 
-  gl_source_base='gnulib'
+  gl_source_base='gnulib/import'
 
 
 
@@ -9125,7 +9125,7 @@ if test x"$STDINT_H" != x; then
 fi
 
 
-ac_config_files="$ac_config_files Makefile gnulib/Makefile:${srcdir}/../gnulib/Makefile.in"
+ac_config_files="$ac_config_files Makefile gnulib/import/Makefile:${srcdir}/../gnulib/import/Makefile.in"
 
 ac_config_commands="$ac_config_commands default"
 
@@ -9886,7 +9886,7 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "gnulib/Makefile") CONFIG_FILES="$CONFIG_FILES gnulib/Makefile:${srcdir}/../gnulib/Makefile.in" ;;
+    "gnulib/import/Makefile") CONFIG_FILES="$CONFIG_FILES gnulib/import/Makefile:${srcdir}/../gnulib/import/Makefile.in" ;;
     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
