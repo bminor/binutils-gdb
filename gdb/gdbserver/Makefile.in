@@ -76,8 +76,8 @@ ustlibs = @ustlibs@
 ustinc = @ustinc@
 
 # gnulib
-GNULIB_INCLUDE_DIR = $(srcdir)/../gnulib
-GNULIB_LIB = gnulib/libgnu.a
+LIBGNU = gnulib/libgnu.a
+INCGNU = -I$(srcdir)/../gnulib
 
 # We build gnulib directly under the gdbserver build directory, but
 # its sources don't live directly under gdbserver's source directory.
@@ -97,7 +97,7 @@ GNULIB_H = gnulib/string.h @GNULIB_STDINT_H@
 # -I$(srcdir)/../regformats for regdef.h.
 INCLUDE_CFLAGS = -I. -I${srcdir} -I$(srcdir)/../common \
 	-I$(srcdir)/../regformats -I$(INCLUDE_DIR) \
-	-I$(GNULIB_INCLUDE_DIR)
+	$(INCGNU)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -252,12 +252,12 @@ install-html:
 clean-info: force
 	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) $@
 
-gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(GNULIB_LIB)
+gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS} $(LIBGNU)
 	rm -f gdbserver$(EXEEXT)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver$(EXEEXT) $(OBS) \
-	$(GNULIB_LIB) $(GDBSERVER_LIBS) $(XM_CLIBS)
+	$(LIBGNU) $(GDBSERVER_LIBS) $(XM_CLIBS)
 
-$(GNULIB_LIB) $(GNULIB_H): all-lib
+$(LIBGNU) $(GNULIB_H): all-lib
 all-lib: gnulib/Makefile
 	@cd gnulib; $(MAKE) $(FLAGS_TO_PASS) $(GNULIB_FLAGS_TO_PASS) all
 

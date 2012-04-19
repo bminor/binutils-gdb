@@ -1,5 +1,13 @@
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (GNULIB_INCLUDE_DIR): Rename to ...
+	(INCGNU): ... this, and spell out -I here.
+	(GNULIB_LIB): Rename to ...
+	(LIBGNU): ... this.
+	(INCLUDE_CFLAGS, gdbserver$(EXEEXT), $(GNULIB_LIB) rule): Adjust.
+
+2012-04-19  Pedro Alves  <palves@redhat.com>
+
 	* config.in: Regenerate.
 
 2012-04-19  Pedro Alves  <palves@redhat.com>
