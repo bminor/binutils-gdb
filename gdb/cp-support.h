@@ -26,6 +26,7 @@
 
 #include "symtab.h"
 #include "vec.h"
+#include "gdb_vecs.h"
 #include "gdb_obstack.h"
 
 /* Opaque declarations.  */
@@ -173,8 +174,6 @@ extern struct type *cp_lookup_rtti_type (const char *name,
 /* Functions/variables from cp-namespace.c.  */
 
 extern int cp_is_anonymous (const char *namespace);
-
-DEF_VEC_P (const_char_ptr);
 
 extern void cp_add_using_directive (const char *dest,
                                     const char *src,

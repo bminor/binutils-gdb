@@ -25,6 +25,8 @@
 
 DEF_VEC_P (char_ptr);
 
+DEF_VEC_P (const_char_ptr);
+
 /* From utils.c: */
 
 extern void free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec);
