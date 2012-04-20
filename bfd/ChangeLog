@@ -1,6 +1,14 @@
+2012-04-20  Nick Clifton  <nickc@redhat.com>
+
+	Import this patch from the mainline:
+	2012-03-21  Eliot Dresselhaus  <eliot@sonic.net>
+
+	* elf32-tic6x.c (elf32_tic6x_merge_private_bfd_data): Return TRUE
+	for non-C6X objects.
+
 2012-02-01  Nick Clifton  <nickc@redhat.com>
 
-	* Import this patch from the mainline:
+	Import this patch from the mainline:
 	2012-01-05  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/12161
