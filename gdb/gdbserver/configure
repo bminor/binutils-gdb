@@ -4391,7 +4391,12 @@ done
   $as_echo "$ac_msg" >&6
   as_dir="$ac_dir"; as_fn_mkdir_p
 
-  ac_srcdir=../$srcdir/$in_src
+  case $srcdir in
+  [\\/]* | ?:[\\/]* )
+    ac_srcdir=$srcdir/$in_src ;;
+  *) # Relative name.
+    ac_srcdir=../$srcdir/$in_src ;;
+  esac
 
   cd "$ac_dir"
 

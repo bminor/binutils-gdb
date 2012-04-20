@@ -1,3 +1,9 @@
+2012-04-20  Pedro Alves  <palves@redhat.com>
+
+	* acx_configure_dir.m4 (ACX_CONFIGURE_DIR): Handle absolute
+	$srcdir.
+	* configure: Regenerate.
+
 2012-04-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* cp-support.h: Include `gdb_vecs.h'.  Delete `const_char_ptr' VEC

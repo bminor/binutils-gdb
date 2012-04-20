@@ -89,7 +89,12 @@ AC_DEFUN([ACX_CONFIGURE_DIR],
   _AS_ECHO([$ac_msg])
   AS_MKDIR_P(["$ac_dir"])
 
-  ac_srcdir=../$srcdir/$in_src
+  case $srcdir in
+  [[\\/]]* | ?:[[\\/]]* )
+    ac_srcdir=$srcdir/$in_src ;;
+  *) # Relative name.
+    ac_srcdir=../$srcdir/$in_src ;;
+  esac
 
   cd "$ac_dir"
 
