@@ -1,3 +1,10 @@
+2012-04-20  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-ia64.c (obj_elf_vms_common): New function.
+	(md_pseudo_table): Add .vms_common pseudo.
+	* config/obj-elf.h (obj_elf_section_name): Add a prototype.
+	* config/obj-elf.c (obj_elf_section_name): Make it public.
+
 2012-04-17  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* config/tc-avr.c (md_apply_fix): Fix handling of BFD_RELOC32.

@@ -1039,6 +1039,141 @@ ia64_cons_align (int nbytes)
     }
 }
 
+#ifdef TE_VMS
+
+/* .vms_common section, symbol, size, alignment  */
+
+static void
+obj_elf_vms_common (int ignore ATTRIBUTE_UNUSED)
+{
+  char *sec_name;
+  char *sym_name;
+  char c;
+  offsetT size;
+  offsetT cur_size;
+  offsetT temp;
+  symbolS *symbolP;
+  segT current_seg = now_seg;
+  subsegT current_subseg = now_subseg;
+  offsetT log_align;
+
+  /* Section name.  */
+  sec_name = obj_elf_section_name ();
+  if (sec_name == NULL)
+    return;
+
+  /* Symbol name.  */
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == ',')
+    {
+      input_line_pointer++;
+      SKIP_WHITESPACE ();
+    }
+  else
+    {
+      as_bad (_("expected ',' after section name"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  sym_name = input_line_pointer;
+  c = get_symbol_end ();
+
+  if (input_line_pointer == sym_name)
+    {
+      *input_line_pointer = c;
+      as_bad (_("expected symbol name"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  symbolP = symbol_find_or_make (sym_name);
+  *input_line_pointer = c;
+
+  if ((S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
+      && !S_IS_COMMON (symbolP))
+    {
+      as_bad (_("Ignoring attempt to re-define symbol"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* Symbol size.  */
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == ',')
+    {
+      input_line_pointer++;
+      SKIP_WHITESPACE ();
+    }
+  else
+    {
+      as_bad (_("expected ',' after symbol name"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  temp = get_absolute_expression ();
+  size = temp;
+  size &= ((offsetT) 2 << (stdoutput->arch_info->bits_per_address - 1)) - 1;
+  if (temp != size)
+    {
+      as_warn (_("size (%ld) out of range, ignored"), (long) temp);
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* Alignment.  */
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer == ',')
+    {
+      input_line_pointer++;
+      SKIP_WHITESPACE ();
+    }
+  else
+    {
+      as_bad (_("expected ',' after symbol size"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  log_align = get_absolute_expression ();
+
+  demand_empty_rest_of_line ();
+
+  obj_elf_change_section
+    (sec_name, SHT_NOBITS,
+     SHF_ALLOC | SHF_WRITE | SHF_IA_64_VMS_OVERLAID | SHF_IA_64_VMS_GLOBAL,
+     0, NULL, 1, 0);
+
+  S_SET_VALUE (symbolP, 0);
+  S_SET_SIZE (symbolP, size);
+  S_SET_EXTERNAL (symbolP);
+  S_SET_SEGMENT (symbolP, now_seg);
+
+  symbol_get_bfdsym (symbolP)->flags |= BSF_OBJECT;
+
+  record_alignment (now_seg, log_align);
+
+  cur_size = bfd_section_size (stdoutput, now_seg);
+  if ((int) size > cur_size)
+    {
+      char *pfrag
+        = frag_var (rs_fill, 1, 1, (relax_substateT)0, NULL,
+                    (valueT)size - (valueT)cur_size, NULL);
+      *pfrag = 0;
+      bfd_section_size (stdoutput, now_seg) = size;
+    }
+
+  /* Switch back to current segment.  */
+  subseg_set (current_seg, current_subseg);
+
+#ifdef md_elf_section_change_hook
+  md_elf_section_change_hook ();
+#endif
+}
+
+#endif /* TE_VMS */
+
 /* Output COUNT bytes to a memory location.  */
 static char *vbyte_mem_ptr = NULL;
 
@@ -5231,6 +5366,10 @@ const pseudo_typeS md_pseudo_table[] =
     {"2byte", stmt_cons_ua, 2},
     {"4byte", stmt_cons_ua, 4},
     {"8byte", stmt_cons_ua, 8},
+
+#ifdef TE_VMS
+    {"vms_common", obj_elf_vms_common, 0},
+#endif
 
     { NULL, 0, 0 }
   };
