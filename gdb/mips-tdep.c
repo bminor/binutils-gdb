@@ -179,6 +179,18 @@ mips_fpa0_regnum (struct gdbarch *gdbarch)
   return mips_regnum (gdbarch)->fp0 + 12;
 }
 
+/* Return 1 if REGNUM refers to a floating-point general register, raw
+   or cooked.  Otherwise return 0.  */
+
+static int
+mips_float_register_p (struct gdbarch *gdbarch, int regnum)
+{
+  int rawnum = regnum % gdbarch_num_regs (gdbarch);
+
+  return (rawnum >= mips_regnum (gdbarch)->fp0
+	  && rawnum < mips_regnum (gdbarch)->fp0 + 32);
+}
+
 #define MIPS_EABI(gdbarch) (gdbarch_tdep (gdbarch)->mips_abi \
 		     == MIPS_ABI_EABI32 \
 		   || gdbarch_tdep (gdbarch)->mips_abi == MIPS_ABI_EABI64)
@@ -717,10 +729,7 @@ mips_convert_register_float_case_p (struct gdbarch *gdbarch, int regnum,
 {
   return (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG
 	  && register_size (gdbarch, regnum) == 4
-	  && (regnum % gdbarch_num_regs (gdbarch))
-		>= mips_regnum (gdbarch)->fp0
-	  && (regnum % gdbarch_num_regs (gdbarch))
-		< mips_regnum (gdbarch)->fp0 + 32
+	  && mips_float_register_p (gdbarch, regnum)
 	  && TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8);
 }
 
@@ -843,9 +852,7 @@ static struct type *
 mips_register_type (struct gdbarch *gdbarch, int regnum)
 {
   gdb_assert (regnum >= 0 && regnum < 2 * gdbarch_num_regs (gdbarch));
-  if ((regnum % gdbarch_num_regs (gdbarch)) >= mips_regnum (gdbarch)->fp0
-      && (regnum % gdbarch_num_regs (gdbarch))
-	 < mips_regnum (gdbarch)->fp0 + 32)
+  if (mips_float_register_p (gdbarch, regnum))
     {
       /* The floating-point registers raw, or cooked, always match
          mips_isa_regsize(), and also map 1:1, byte for byte.  */
@@ -4761,7 +4768,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
   struct value_print_options opts;
   struct value *val;
 
-  if (TYPE_CODE (register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
+  if (mips_float_register_p (gdbarch, regnum))
     {
       mips_print_fp_register (file, frame, regnum);
       return;
@@ -4830,8 +4837,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
     {
       if (*gdbarch_register_name (gdbarch, regnum) == '\0')
 	continue;		/* unused register */
-      if (TYPE_CODE (register_type (gdbarch, regnum)) ==
-	  TYPE_CODE_FLT)
+      if (mips_float_register_p (gdbarch, regnum))
 	break;			/* End the row: reached FP register.  */
       /* Large registers are handled separately.  */
       if (register_size (gdbarch, regnum) > mips_abi_regsize (gdbarch))
@@ -4870,8 +4876,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
     {
       if (*gdbarch_register_name (gdbarch, regnum) == '\0')
 	continue;		/* unused register */
-      if (TYPE_CODE (register_type (gdbarch, regnum)) ==
-	  TYPE_CODE_FLT)
+      if (mips_float_register_p (gdbarch, regnum))
 	break;			/* End row: reached FP register.  */
       if (register_size (gdbarch, regnum) > mips_abi_regsize (gdbarch))
 	break;			/* End row: large register.  */
@@ -4926,8 +4931,7 @@ mips_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
       while (regnum < gdbarch_num_regs (gdbarch)
 		      + gdbarch_num_pseudo_regs (gdbarch))
 	{
-	  if (TYPE_CODE (register_type (gdbarch, regnum)) ==
-	      TYPE_CODE_FLT)
+	  if (mips_float_register_p (gdbarch, regnum))
 	    {
 	      if (all)		/* True for "INFO ALL-REGISTERS" command.  */
 		regnum = print_fp_register_row (file, frame, regnum);

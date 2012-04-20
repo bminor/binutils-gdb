@@ -1,3 +1,13 @@
+2012-04-20  Nigel Stephens  <nigel@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_float_register_p): New function.
+	(mips_convert_register_float_case_p): Use mips_float_register_p.
+	(mips_register_type): Likewise.
+	(mips_print_register): Likewise.
+	(print_gp_register_row): Likewise.
+	(mips_print_registers_info): Likewise.
+
 2012-04-20  Shun-Yen Lu  <dark.asparagus@gmail.com>
 
 	* mips-tdep.c (mips_elf_make_msymbol_special): Fix identification
