@@ -1,3 +1,7 @@
+2012-04-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* MAINTAINERS: Update my e-mail address.
+
 2012-04-20  Pedro Alves  <palves@redhat.com>
 
 	* acx_configure_dir.m4 (ACX_CONFIGURE_DIR): Handle absolute
