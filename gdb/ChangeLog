@@ -27,21 +27,21 @@
 	* acinclude.m4: Include acx_configure_dir.m4.
 	* acx_configure_dir.m4: New file.
 	* aclocal.m4: Regenerate.
-        * configure.ac: Remove gl_EARLY, gl_INIT and AM_INIT_AUTOMAKE
-        calls.  Configure gnulib using ACX_CONFIGURE_DIR.
-        (GNULIB): New variable.
-        (GNULIB_STDINT_H): Adjust.
-        (AC_OUTPUT): Don't output gnulib/Makefile.
-        * gdb/defs.h: Include build-gnulib/config.h.
-        * aclocal.m4: Regenerate.
-        * config.in: Regenerate.
-        * configure: Regenerate.
+	* configure.ac: Remove gl_EARLY, gl_INIT and AM_INIT_AUTOMAKE
+	calls.	Configure gnulib using ACX_CONFIGURE_DIR.
+	(GNULIB): New variable.
+	(GNULIB_STDINT_H): Adjust.
+	(AC_OUTPUT): Don't output gnulib/Makefile.
+	* gdb/defs.h: Include build-gnulib/config.h.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
 
-        * gnulib/Makefile.in: New file.
-        * gnulib/configure.ac: New file.
-        * gnulib/aclocal.m4: New file.
-        * gnulib/config.in: New file.
-        * gnulib/configure: New file.
+	* gnulib/Makefile.in: New file.
+	* gnulib/configure.ac: New file.
+	* gnulib/aclocal.m4: New file.
+	* gnulib/config.in: New file.
+	* gnulib/configure: New file.
 	* gnulib/: Re-run gnulib-tool to adjust.
 
 2012-04-19  Doug Evans  <dje@google.com>
@@ -587,11 +587,11 @@
 	objects.
 	(update_dynamic_varobj_children): Updated for install_dynamic_child
 	change.  All callers updated.
-	(varobj_update): Support for MI variable object type change if 
+	(varobj_update): Support for MI variable object type change if
 	the value changed and RTTI is used to determine the type.
 	(create_child_with_value): Call value_actual_type instead of
 	value_type.
-	(adjust_value_for_child_access): Extended with a new parameter which 
+	(adjust_value_for_child_access): Extended with a new parameter which
 	specify whether the given value should be casted to enclosing type.
 	All callers updated.
 
@@ -600,7 +600,8 @@
 	Import gnulib module inttypes from git
 	(250b80067c1e1d8faa0c42fb572f721975b929c5)
 	* Makefile.in (HFILES_NO_SRCDIR): Add gnulib/inttypes.in.h.
-	(aclocal_m4_deps): Add gnulib/m4/inttypes.m4 and gnulib/m4/inttypes-pri.m4
+	(aclocal_m4_deps): Add gnulib/m4/inttypes.m4 and
+	gnulib/m4/inttypes-pri.m4
 	* aclocal.m4, config.in, configure: Regenerated.
 	* gnulib/Makefile.am: Update.
 	* gnulib/Makefile.in: Update.
@@ -608,7 +609,7 @@
 	* gnulib/m4/gnulib-comp.m4: Update.
 	* gnulib/inttypes.in.h: New.
 	* gnulib/m4/inttypes-pri.m4: New.
- 	* gnulib/m4/inttypes.m4: New.
+	* gnulib/m4/inttypes.m4: New.
 
 2012-04-13  Luis Machado  <lgustavo@codesourcery.com>
 
@@ -681,7 +682,7 @@
 	* NEWS: Add an entry about the new 'explore' command.
 	* data-directory/Makefile.in: Add gdb/command/explore.py
 	* python/lib/gdb/command/explore.py: Implemention of the 'explore'
-	command using the GDB Python API. 
+	command using the GDB Python API.
 
 2012-04-10  Maciej W. Rozycki  <macro@codesourcery.com>
 
@@ -748,7 +749,7 @@
 	defines.
 	* c-exp.y (yyss, yysslim, yyssp, yystacksize, yyvs, yyvsp): New
 	defines.
-	* cp-name-parser.y (yyss, yysslim, yyssp, yystacksize, yyvs) 
+	* cp-name-parser.y (yyss, yysslim, yyssp, yystacksize, yyvs)
 	(yyvsp): New defines.
 	* f-exp.y (yyss, yysslim, yyssp, yystacksize, yyvs, yyvsp): New
 	defines.
@@ -763,7 +764,7 @@
 
 2012-04-09  Mark Kettenis  <kettenis@gnu.org>
 
-	* sparc64-tdep.c (sparc64_store_arguments) 
+	* sparc64-tdep.c (sparc64_store_arguments)
 	(sparc64_store_arguments): Fix coding style.
 
 2012-04-07  Mark Kettenis  <kettenis@gnu.org>
@@ -1035,7 +1036,7 @@
 	(v850_register_name): Add the mpu and fpu register names.
 	(v850e_register_name): Add the mpu and fpu register names.
 	(v850e2_register_name): New function.
-	(v850_gdbarch_init): Add case for bfd_mach_v850e2 and 
+	(v850_gdbarch_init): Add case for bfd_mach_v850e2 and
 	bfd_mach_v850e2v3.
 
 2012-03-28  Joel Brobecker  <brobecker@adacore.com>
@@ -2171,9 +2172,9 @@
 	(mips32_instruction_has_delay_slot): Likewise.
 
 2012-03-01  Maciej W. Rozycki  <macro@mips.com>
-            Chris Dearman  <chris@mips.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Chris Dearman  <chris@mips.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* features/mips-dsp.xml: New file.
 	* features/mips64-dsp.xml: New file.
@@ -2659,8 +2660,8 @@
 	uninitialized BUF for size 2.
 
 2012-02-27  Chris Dearman  <chris@mips.com>
-            Nathan Froyd  <froydnj@codesourcery.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
+	    Nathan Froyd  <froydnj@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips32_instruction_has_delay_slot): New function.
 	(mips16_instruction_has_delay_slot): Likewise.
@@ -2669,7 +2670,7 @@
 	(mips_gdbarch_init): Use mips_adjust_breakpoint_address.
 
 2012-02-27  Maciej W. Rozycki  <macro@mips.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): Don't proceed through
 	shared library trampolines if stepping at the machine
@@ -2826,15 +2827,15 @@
 
 2012-02-23  Tristan Gingold  <gingold@adacore.com>
 
-       * ada-tasks.c (struct ada_tasks_inferior_data): Add
-        known_tasks_element and known_tasks_length fields.
-        (read_known_tasks_array): Change argument type.  Use pointer type
-        and number of elements from DATA.  Adjust.
-        (read_known_tasks_list): Likewise.
-        (get_known_tasks_addr): Remove.
-        (ada_set_current_inferior_known_tasks_addr): Renamed to ...
-        (ada_tasks_inferior_data_sniffer): ... this.  Use symtab for element
-        type and array length.  Merge former get_known_tasks_addr code.
+	* ada-tasks.c (struct ada_tasks_inferior_data): Add
+	known_tasks_element and known_tasks_length fields.
+	(read_known_tasks_array): Change argument type.  Use pointer type
+	and number of elements from DATA.  Adjust.
+	(read_known_tasks_list): Likewise.
+	(get_known_tasks_addr): Remove.
+	(ada_set_current_inferior_known_tasks_addr): Renamed to ...
+	(ada_tasks_inferior_data_sniffer): ... this.  Use symtab for element
+	type and array length.	Merge former get_known_tasks_addr code.
 
 2012-02-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
