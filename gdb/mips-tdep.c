@@ -268,7 +268,8 @@ mips_abi_regsize (struct gdbarch *gdbarch)
 static void
 mips_elf_make_msymbol_special (asymbol * sym, struct minimal_symbol *msym)
 {
-  if (((elf_symbol_type *) (sym))->internal_elf_sym.st_other == STO_MIPS16)
+  if (ELF_ST_IS_MIPS16 (((elf_symbol_type *)
+			 (sym))->internal_elf_sym.st_other))
     {
       MSYMBOL_TARGET_FLAG_1 (msym) = 1;
     }
