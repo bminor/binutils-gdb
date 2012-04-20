@@ -1,3 +1,8 @@
+2012-04-21  Jonathan Larmour  <jifl@eCosCentric.com>
+
+	* features/Makefile (WHICH): Add arm-with-m and arm-with-m-fpa-layout.
+	* arm-tdep.c (arm_register_g_packet_guesses): Fix comment.
+
 2012-04-20  Nigel Stephens  <nigel@mips.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 

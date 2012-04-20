@@ -9686,7 +9686,7 @@ arm_register_g_packet_guesses (struct gdbarch *gdbarch)
 	 cater for remote targets whose register set layout is the
 	 same as the FPA layout.  */
       register_remote_g_packet_guess (gdbarch,
-				      /* r0-r12,sp,lr,pc; f0-f7; fps,cpsr */
+				      /* r0-r12,sp,lr,pc; f0-f7; fps,xpsr */
 				      (16 * INT_REGISTER_SIZE)
 				      + (8 * FP_REGISTER_SIZE)
 				      + (2 * INT_REGISTER_SIZE),
