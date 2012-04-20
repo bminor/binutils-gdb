@@ -217,13 +217,13 @@ Sized_target<size, big_endian>::do_adjust_elf_header(unsigned char* view,
     {
       gold_assert(len == elfcpp::Elf_sizes<size>::ehdr_size);
 
-      elfcpp::Ehdr<size, false> ehdr(view);
+      elfcpp::Ehdr<size, big_endian> ehdr(view);
       unsigned char e_ident[elfcpp::EI_NIDENT];
       memcpy(e_ident, ehdr.get_e_ident(), elfcpp::EI_NIDENT);
 
       e_ident[elfcpp::EI_OSABI] = osabi;
 
-      elfcpp::Ehdr_write<size, false> oehdr(view);
+      elfcpp::Ehdr_write<size, big_endian> oehdr(view);
       oehdr.put_e_ident(e_ident);
     }
 }
