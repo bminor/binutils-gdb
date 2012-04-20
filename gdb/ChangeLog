@@ -1,3 +1,9 @@
+2012-04-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compilation compatibility with python-2.4
+	* python/py-type.c (convert_field): Cast ADDRSTRING for
+	PyObject_SetAttrString as non-const.  New comment.
+
 2012-04-19  Tom Tromey  <tromey@redhat.com>
 
 	* top.c (quit_target): Use all_cleanups.

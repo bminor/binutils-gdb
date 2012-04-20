@@ -183,7 +183,8 @@ convert_field (struct type *type, int field)
       if (!arg)
 	goto fail;
 
-      if (PyObject_SetAttrString (result, attrstring, arg) < 0)
+      /* At least python-2.4 had the second parameter non-const.  */
+      if (PyObject_SetAttrString (result, (char *) attrstring, arg) < 0)
 	goto failarg;
     }
 
