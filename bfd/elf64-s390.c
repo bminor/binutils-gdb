@@ -493,7 +493,7 @@ elf_s390_is_local_label_name (abfd, name)
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
 
-#define ELF_DYNAMIC_INTERPRETER "/usr/lib/ld.so.1"
+#define ELF_DYNAMIC_INTERPRETER "/lib/ld64.so.1"
 
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss

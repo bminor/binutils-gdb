@@ -1,3 +1,8 @@
+2012-04-20  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* elf32-s390.c (ELF_DYNAMIC_INTERPRETER): Set to the GCC default.
+	* elf64-s390.c (ELF_DYNAMIC_INTERPRETER): Set to the GCC default.
+
 2012-04-19  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* elf32-sh.c (elf_sh_link_hash_entry): Specify an enum identifier for
