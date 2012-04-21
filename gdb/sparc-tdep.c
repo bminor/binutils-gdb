@@ -85,6 +85,7 @@ struct regset;
 /* Sign extension macros.  */
 #define X_DISP22(i) ((X_IMM22 (i) ^ 0x200000) - 0x200000)
 #define X_DISP19(i) ((((i) & 0x7ffff) ^ 0x40000) - 0x40000)
+#define X_DISP10(i) ((((((i) >> 11) && 0x300) | (((i) >> 5) & 0xff)) ^ 0x200) - 0x200)
 #define X_SIMM13(i) ((((i) & 0x1fff) ^ 0x1000) - 0x1000)
 
 /* Fetch the instruction at PC.  Instructions are always big-endian
@@ -1451,14 +1452,24 @@ sparc_analyze_control_transfer (struct frame_info *frame,
 {
   unsigned long insn = sparc_fetch_instruction (pc);
   int conditional_p = X_COND (insn) & 0x7;
-  int branch_p = 0;
+  int branch_p = 0, fused_p = 0;
   long offset = 0;			/* Must be signed for sign-extend.  */
 
-  if (X_OP (insn) == 0 && X_OP2 (insn) == 3 && (insn & 0x1000000) == 0)
+  if (X_OP (insn) == 0 && X_OP2 (insn) == 3)
     {
-      /* Branch on Integer Register with Prediction (BPr).  */
-      branch_p = 1;
-      conditional_p = 1;
+      if ((insn & 0x10000000) == 0)
+	{
+	  /* Branch on Integer Register with Prediction (BPr).  */
+	  branch_p = 1;
+	  conditional_p = 1;
+	}
+      else
+	{
+	  /* Compare and Branch  */
+	  branch_p = 1;
+	  fused_p = 1;
+	  offset = 4 * X_DISP10 (insn);
+	}
     }
   else if (X_OP (insn) == 0 && X_OP2 (insn) == 6)
     {
@@ -1495,7 +1506,16 @@ sparc_analyze_control_transfer (struct frame_info *frame,
 
   if (branch_p)
     {
-      if (conditional_p)
+      if (fused_p)
+	{
+	  /* Fused compare-and-branch instructions are non-delayed,
+	     and do not have an annuling capability.  So we need to
+	     always set a breakpoint on both the NPC and the branch
+	     target address.  */
+	  gdb_assert (offset != 0);
+	  return pc + offset;
+	}
+      else if (conditional_p)
 	{
 	  /* For conditional branches, return nPC + 4 iff the annul
 	     bit is 1.  */

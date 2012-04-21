@@ -1,3 +1,8 @@
+2012-04-21  David S. Miller  <davem@davemloft.net>
+
+	* sparc-tdep.c (X_DISP10): Define.
+	(sparc_analyze_control_transfer): Handle compare-and-branch.
+
 2012-04-21  Jonathan Larmour  <jifl@eCosCentric.com>
 
 	* features/Makefile (WHICH): Add arm-with-m and arm-with-m-fpa-layout.
