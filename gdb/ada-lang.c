@@ -9717,8 +9717,25 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         {
         case TYPE_CODE_FUNC:
           if (noside == EVAL_AVOID_SIDE_EFFECTS)
-            return allocate_value (TYPE_TARGET_TYPE (type));
+	    {
+	      struct type *rtype = TYPE_TARGET_TYPE (type);
+
+	      if (TYPE_GNU_IFUNC (type))
+		return allocate_value (TYPE_TARGET_TYPE (rtype));
+	      return allocate_value (rtype);
+	    }
           return call_function_by_hand (argvec[0], nargs, argvec + 1);
+	case TYPE_CODE_INTERNAL_FUNCTION:
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    /* We don't know anything about what the internal
+	       function might return, but we have to return
+	       something.  */
+	    return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+			       not_lval);
+	  else
+	    return call_internal_function (exp->gdbarch, exp->language_defn,
+					   argvec[0], nargs, argvec + 1);
+
         case TYPE_CODE_STRUCT:
           {
             int arity;

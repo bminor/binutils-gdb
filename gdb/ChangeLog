@@ -1,3 +1,9 @@
+2012-04-21  Paul Hilfinger  <hilfinger@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp): Add cases for
+        TYPE_CODE_INTERNAL_FUNCTION and for TYPE_GNU_IFUNC, following
+        their treatment in eval.c.
+
 2012-04-21  David S. Miller  <davem@davemloft.net>
 
 	* sparc-tdep.c (X_DISP10): Define.
