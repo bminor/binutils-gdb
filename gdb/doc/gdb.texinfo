@@ -21136,8 +21136,8 @@ init file in the current directory
 To force @value{GDBN} to load the files it declined to load in the previous
 example, you could use one of the following ways:
 
-@itemize @bullet
-@item ~/.gdbinit: add-auto-load-safe-path ~/src/gdb
+@table @asis
+@item @file{~/.gdbinit}: @samp{add-auto-load-safe-path ~/src/gdb}
 Specify this trusted directory (or a file) as additional component of the list.
 You have to specify also any existing directories displayed by
 by @samp{show auto-load safe-path} (such as @samp{/usr:/bin} in this example).
@@ -21155,20 +21155,20 @@ from trusted sources.
 During compilation of @value{GDBN} you may disable any auto-loading safety.
 This assumes all the files you will ever debug with this @value{GDBN} come from
 trusted sources.
-@end itemize
+@end table
 
 On the other hand you can also explicitly forbid automatic files loading which
 also suppresses any such warning messages:
 
-@itemize @bullet
+@table @asis
 @item @kbd{gdb -iex "set auto-load no" [@dots{}]}
 You can use @value{GDBN} command-line option for a single @value{GDBN} session.
 
-@item @samp{~/.gdbinit}: @samp{set auto-load no}
+@item @file{~/.gdbinit}: @samp{set auto-load no}
 Disable auto-loading globally for the user
 (@pxref{Home Directory Init File}).  While it is improbable, you could also
 use system init file instead (@pxref{System-wide configuration}).
-@end itemize
+@end table
 
 This setting applies to the file names as entered by user.  If no entry matches
 @value{GDBN} tries as a last resort to also resolve all the file names into
