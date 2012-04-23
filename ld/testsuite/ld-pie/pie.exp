@@ -23,7 +23,7 @@
 if ![isnative] then {return}
 
 if { ![istarget *-*-linux*]
-     && ![istarget *-*-nacl*] } {
+     && ![istarget *-*-nacl*]
      && ![istarget *-*-gnu*] } {
     return
 }
