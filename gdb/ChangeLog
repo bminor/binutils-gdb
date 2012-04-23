@@ -1,3 +1,9 @@
+2012-04-23  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_n32n64_return_value): Fix coding style.
+	(mips_o32_return_value): Likewise.
+	(mips_o64_return_value): Likewise.
+
 2012-04-21  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp): Add cases for

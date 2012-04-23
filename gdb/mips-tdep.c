@@ -3672,13 +3672,13 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct type *func_type,
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $f0 and $f2\n");
       mips_xfer_register (gdbarch, regcache,
-			  gdbarch_num_regs (gdbarch)
-			  + mips_regnum (gdbarch)->fp0,
+			  (gdbarch_num_regs (gdbarch)
+			   + mips_regnum (gdbarch)->fp0),
 			  8, gdbarch_byte_order (gdbarch),
 			  readbuf, writebuf, 0);
       mips_xfer_register (gdbarch, regcache,
-			  gdbarch_num_regs (gdbarch)
-			  + mips_regnum (gdbarch)->fp0 + 2,
+			  (gdbarch_num_regs (gdbarch)
+			   + mips_regnum (gdbarch)->fp0 + 2),
 			  8, gdbarch_byte_order (gdbarch),
 			  readbuf ? readbuf + 8 : readbuf,
 			  writebuf ? writebuf + 8 : writebuf, 0);
@@ -3691,8 +3691,8 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct type *func_type,
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
       mips_xfer_register (gdbarch, regcache,
-			  gdbarch_num_regs (gdbarch)
-			  + mips_regnum (gdbarch)->fp0,
+			  (gdbarch_num_regs (gdbarch)
+			   + mips_regnum (gdbarch)->fp0),
 			  TYPE_LENGTH (type),
 			  gdbarch_byte_order (gdbarch),
 			  readbuf, writebuf, 0);
@@ -4131,8 +4131,8 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *func_type,
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
       mips_xfer_register (gdbarch, regcache,
-			  gdbarch_num_regs (gdbarch)
-			    + mips_regnum (gdbarch)->fp0,
+			  (gdbarch_num_regs (gdbarch)
+			   + mips_regnum (gdbarch)->fp0),
 			  TYPE_LENGTH (type),
 			  gdbarch_byte_order (gdbarch),
 			  readbuf, writebuf, 0);
@@ -4150,25 +4150,25 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	{
 	case BFD_ENDIAN_LITTLE:
 	  mips_xfer_register (gdbarch, regcache,
-			      gdbarch_num_regs (gdbarch)
-				+ mips_regnum (gdbarch)->fp0 +
-			      0, 4, gdbarch_byte_order (gdbarch),
+			      (gdbarch_num_regs (gdbarch)
+			       + mips_regnum (gdbarch)->fp0 + 0),
+			      4, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, 0);
 	  mips_xfer_register (gdbarch, regcache,
-			      gdbarch_num_regs (gdbarch)
-				+ mips_regnum (gdbarch)->fp0 + 1,
+			      (gdbarch_num_regs (gdbarch)
+			       + mips_regnum (gdbarch)->fp0 + 1),
 			      4, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, 4);
 	  break;
 	case BFD_ENDIAN_BIG:
 	  mips_xfer_register (gdbarch, regcache,
-			      gdbarch_num_regs (gdbarch)
-				+ mips_regnum (gdbarch)->fp0 + 1,
+			      (gdbarch_num_regs (gdbarch)
+			       + mips_regnum (gdbarch)->fp0 + 1),
 			      4, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, 0);
 	  mips_xfer_register (gdbarch, regcache,
-			      gdbarch_num_regs (gdbarch)
-				+ mips_regnum (gdbarch)->fp0 + 0,
+			      (gdbarch_num_regs (gdbarch)
+			       + mips_regnum (gdbarch)->fp0 + 0),
 			      4, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, 4);
 	  break;
@@ -4538,8 +4538,8 @@ mips_o64_return_value (struct gdbarch *gdbarch, struct type *func_type,
       if (mips_debug)
 	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
       mips_xfer_register (gdbarch, regcache,
-			  gdbarch_num_regs (gdbarch)
-			    + mips_regnum (gdbarch)->fp0,
+			  (gdbarch_num_regs (gdbarch)
+			   + mips_regnum (gdbarch)->fp0),
 			  TYPE_LENGTH (type),
 			  gdbarch_byte_order (gdbarch),
 			  readbuf, writebuf, 0);
