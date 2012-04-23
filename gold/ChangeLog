@@ -1,3 +1,11 @@
+2012-04-23  David S. Miller  <davem@davemloft.net>
+
+	* sparc.cc (class Target_sparc): Add elf_machine_, elf_flags_,
+	and elf_flags_set_.
+	(Target_sparc::Target_sparc): Initialize new fields.
+	(Target_sparc::do_make_elf_object): New function.
+	(Target_sparc::do_adjust_elf_header): New function.
+
 2012-04-23  Cary Coutant  <ccoutant@google.com>
 
 	* gdb-index.cc (Gdb_index::do_write): Use Swap_aligned32 for writing

@@ -60,7 +60,9 @@ class Target_sparc : public Sized_target<size, big_endian>
     : Sized_target<size, big_endian>(&sparc_info),
       got_(NULL), plt_(NULL), rela_dyn_(NULL), rela_ifunc_(NULL),
       copy_relocs_(elfcpp::R_SPARC_COPY), dynbss_(NULL),
-      got_mod_index_offset_(-1U), tls_get_addr_sym_(NULL)
+      got_mod_index_offset_(-1U), tls_get_addr_sym_(NULL),
+      elf_machine_(sparc_info.machine_code), elf_flags_(0),
+      elf_flags_set_(false)
   {
   }
 
@@ -205,6 +207,15 @@ class Target_sparc : public Sized_target<size, big_endian>
   // Return the size of each PLT entry.
   unsigned int
   plt_entry_size() const;
+
+ protected:
+  // Make an ELF object.
+  Object*
+  do_make_elf_object(const std::string&, Input_file*, off_t,
+		     const elfcpp::Ehdr<size, big_endian>& ehdr);
+
+  void
+  do_adjust_elf_header(unsigned char* view, int len) const;
 
  private:
 
@@ -432,6 +443,12 @@ class Target_sparc : public Sized_target<size, big_endian>
   unsigned int got_mod_index_offset_;
   // Cached pointer to __tls_get_addr symbol
   Symbol* tls_get_addr_sym_;
+  // Accumulated elf machine type
+  elfcpp::Elf_Half elf_machine_;
+  // Accumulated elf header flags
+  elfcpp::Elf_Word elf_flags_;
+  // Whether elf_flags_ has been set for the first time yet
+  bool elf_flags_set_;
 };
 
 template<>
@@ -4069,6 +4086,100 @@ Target_sparc<size, big_endian>::do_dynsym_value(const Symbol* gsym) const
 {
   gold_assert(gsym->is_from_dynobj() && gsym->has_plt_offset());
   return this->plt_section()->address() + gsym->plt_offset();
+}
+
+// do_make_elf_object to override the same function in the base class.
+// We need to use a target-specific sub-class of
+// Sized_relobj_file<size, big_endian> to process SPARC specific bits
+// of the ELF headers.  Hence we need to have our own ELF object creation.
+
+template<int size, bool big_endian>
+Object*
+Target_sparc<size, big_endian>::do_make_elf_object(
+    const std::string& name,
+    Input_file* input_file,
+    off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr)
+{
+  elfcpp::Elf_Half machine = ehdr.get_e_machine();
+  elfcpp::Elf_Word flags = ehdr.get_e_flags();
+  elfcpp::Elf_Word omm, mm;
+  
+  switch (machine)
+    {
+    case elfcpp::EM_SPARC32PLUS:
+      this->elf_machine_ = elfcpp::EM_SPARC32PLUS;
+      break;
+
+    case elfcpp::EM_SPARC:
+    case elfcpp::EM_SPARCV9:
+      break;
+
+    default:
+      break;
+    }
+
+  if (!this->elf_flags_set_)
+    {
+      this->elf_flags_ = flags;
+      this->elf_flags_set_ = true;
+    }
+  else
+    {
+      // Accumulate cpu feature bits.
+      this->elf_flags_ |= (flags & (elfcpp::EF_SPARC_32PLUS
+				    | elfcpp::EF_SPARC_SUN_US1
+				    | elfcpp::EF_SPARC_HAL_R1
+				    | elfcpp::EF_SPARC_SUN_US3));
+
+      // Bump the memory model setting to the most restrictive
+      // one we encounter.
+      omm = (this->elf_flags_ & elfcpp::EF_SPARCV9_MM);
+      mm = (flags & elfcpp::EF_SPARCV9_MM);
+      if (omm != mm)
+	{
+	  if (mm == elfcpp::EF_SPARCV9_TSO)
+	    {
+	      this->elf_flags_ &= ~elfcpp::EF_SPARCV9_MM;
+	      this->elf_flags_ |= elfcpp::EF_SPARCV9_TSO;
+	    }
+	  else if (mm == elfcpp::EF_SPARCV9_PSO
+		   && omm == elfcpp::EF_SPARCV9_RMO)
+	    {
+	      this->elf_flags_ &= ~elfcpp::EF_SPARCV9_MM;
+	      this->elf_flags_ |= elfcpp::EF_SPARCV9_PSO;
+	    }
+	}
+    }
+
+  // Validate that the little-endian flag matches how we've
+  // been instantiated.
+  if (!(flags & elfcpp::EF_SPARC_LEDATA) != big_endian)
+    {
+      if (big_endian)
+	gold_error(_("%s: little endian elf flag set on BE object"),
+		     name.c_str());
+      else
+	gold_error(_("%s: little endian elf flag clear on LE object"),
+		     name.c_str());
+    }
+
+  return Target::do_make_elf_object(name, input_file, offset, ehdr);
+}
+
+// Adjust ELF file header.
+
+template<int size, bool big_endian>
+void
+Target_sparc<size, big_endian>::do_adjust_elf_header(
+    unsigned char* view,
+    int len) const
+{
+  elfcpp::Ehdr_write<size, big_endian> oehdr(view);
+
+  oehdr.put_e_machine(this->elf_machine_);
+  oehdr.put_e_flags(this->elf_flags_);
+
+  Sized_target<size, big_endian>::do_adjust_elf_header(view, len);
 }
 
 // The selector for sparc object files.
