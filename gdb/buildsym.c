@@ -101,20 +101,6 @@ static void record_pending_block (struct objfile *objfile,
 
 /* Maintain the lists of symbols and blocks.  */
 
-/* Add a pending list to free_pendings.  */
-void
-add_free_pendings (struct pending *list)
-{
-  struct pending *link = list;
-
-  if (list)
-    {
-      while (link->next) link = link->next;
-      link->next = free_pendings;
-      free_pendings = list;
-    }
-}
-
 /* Add a symbol to one of the lists of symbols.  */
 
 void

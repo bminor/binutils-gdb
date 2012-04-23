@@ -233,8 +233,6 @@ EXTERN int type_vector_length;
 
 #define	INITIAL_TYPE_VECTOR_LENGTH	160
 
-extern void add_free_pendings (struct pending *list);
-
 extern void add_symbol_to_list (struct symbol *symbol,
 				struct pending **listhead);
 

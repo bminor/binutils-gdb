@@ -1,3 +1,8 @@
+2012-04-23  Tom Tromey  <tromey@redhat.com>
+
+	* buildsym.c (add_free_pendings): Remove.
+	* buildsym.h (add_free_pendings): Remove.
+
 2012-04-23  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (partial_die_full_name): Record DW_FORM_ref_addr in
