@@ -1,3 +1,8 @@
+2012-04-23  Cary Coutant  <ccoutant@google.com>
+
+	* gdb-index.cc (Gdb_index::do_write): Use Swap_aligned32 for writing
+	CU range table of gdb index.
+
 2012-04-20  David S. Miller  <davem@davemloft.net>
 
 	* target.cc (Sized_target::do_adjust_elf_header): Use big_endian
