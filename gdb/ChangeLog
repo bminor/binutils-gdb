@@ -1,3 +1,15 @@
+2012-04-23  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (partial_die_full_name): Record DW_FORM_ref_addr in
+	attr.u.unsnd instead of attr.u.addr.
+	(read_attribute_value) Ditto for cases DW_FORM_ref_addr,
+	DW_FORM_ref1, DW_FORM_ref2, DW_FORM_ref4, DW_FORM_reg8,
+	DW_FORM_ref_udata.
+	(dump_die_shallow): Update cases DW_FORM_ref_addr,
+	DW_FORM_ref1, DW_FORM_ref2, DW_FORM_ref4.  Add cases DW_FORM_ref8,
+	DW_FORM_ref_udata.
+	(dwarf2_get_ref_die_offset): Use DW_UNSND for reference attributes.
+
 2012-04-23  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_n32n64_return_value): Fix coding style.

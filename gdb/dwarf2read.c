@@ -3996,6 +3996,7 @@ partial_die_parent_scope (struct partial_die_info *pdi,
 
 /* Return the fully scoped name associated with PDI, from compilation unit
    CU.  The result will be allocated with malloc.  */
+
 static char *
 partial_die_full_name (struct partial_die_info *pdi,
 		       struct dwarf2_cu *cu)
@@ -4019,7 +4020,7 @@ partial_die_full_name (struct partial_die_info *pdi,
 	  /* DW_FORM_ref_addr is using section offset.  */
 	  attr.name = 0;
 	  attr.form = DW_FORM_ref_addr;
-	  attr.u.addr = pdi->offset.sect_off;
+	  attr.u.unsnd = pdi->offset.sect_off;
 	  die = follow_die_ref (NULL, &attr, &ref_cu);
 
 	  return xstrdup (dwarf2_full_name (NULL, die, ref_cu));
@@ -10226,10 +10227,10 @@ read_attribute_value (struct attribute *attr, unsigned form,
     {
     case DW_FORM_ref_addr:
       if (cu->header.version == 2)
-	DW_ADDR (attr) = read_address (abfd, info_ptr, cu, &bytes_read);
+	DW_UNSND (attr) = read_address (abfd, info_ptr, cu, &bytes_read);
       else
-	DW_ADDR (attr) = read_offset (abfd, info_ptr,
-				      &cu->header, &bytes_read);
+	DW_UNSND (attr) = read_offset (abfd, info_ptr,
+				       &cu->header, &bytes_read);
       info_ptr += bytes_read;
       break;
     case DW_FORM_addr:
@@ -10316,23 +10317,23 @@ read_attribute_value (struct attribute *attr, unsigned form,
       info_ptr += bytes_read;
       break;
     case DW_FORM_ref1:
-      DW_ADDR (attr) = (cu->header.offset.sect_off
-			+ read_1_byte (abfd, info_ptr));
+      DW_UNSND (attr) = (cu->header.offset.sect_off
+			 + read_1_byte (abfd, info_ptr));
       info_ptr += 1;
       break;
     case DW_FORM_ref2:
-      DW_ADDR (attr) = (cu->header.offset.sect_off
-			+ read_2_bytes (abfd, info_ptr));
+      DW_UNSND (attr) = (cu->header.offset.sect_off
+			 + read_2_bytes (abfd, info_ptr));
       info_ptr += 2;
       break;
     case DW_FORM_ref4:
-      DW_ADDR (attr) = (cu->header.offset.sect_off
-			+ read_4_bytes (abfd, info_ptr));
+      DW_UNSND (attr) = (cu->header.offset.sect_off
+			 + read_4_bytes (abfd, info_ptr));
       info_ptr += 4;
       break;
     case DW_FORM_ref8:
-      DW_ADDR (attr) = (cu->header.offset.sect_off
-			+ read_8_bytes (abfd, info_ptr));
+      DW_UNSND (attr) = (cu->header.offset.sect_off
+			 + read_8_bytes (abfd, info_ptr));
       info_ptr += 8;
       break;
     case DW_FORM_ref_sig8:
@@ -10344,8 +10345,8 @@ read_attribute_value (struct attribute *attr, unsigned form,
       info_ptr += 8;
       break;
     case DW_FORM_ref_udata:
-      DW_ADDR (attr) = (cu->header.offset.sect_off
-			+ read_unsigned_leb128 (abfd, info_ptr, &bytes_read));
+      DW_UNSND (attr) = (cu->header.offset.sect_off
+			 + read_unsigned_leb128 (abfd, info_ptr, &bytes_read));
       info_ptr += bytes_read;
       break;
     case DW_FORM_indirect:
@@ -13970,7 +13971,6 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 
       switch (die->attrs[i].form)
 	{
-	case DW_FORM_ref_addr:
 	case DW_FORM_addr:
 	  fprintf_unfiltered (f, "address: ");
 	  fputs_filtered (hex_string (DW_ADDR (&die->attrs[i])), f);
@@ -13986,11 +13986,17 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  fprintf_unfiltered (f, "expression: size %u",
 			      DW_BLOCK (&die->attrs[i])->size);
 	  break;
+	case DW_FORM_ref_addr:
+	  fprintf_unfiltered (f, "ref address: ");
+	  fputs_filtered (hex_string (DW_UNSND (&die->attrs[i])), f);
+	  break;
 	case DW_FORM_ref1:
 	case DW_FORM_ref2:
 	case DW_FORM_ref4:
+	case DW_FORM_ref8:
+	case DW_FORM_ref_udata:
 	  fprintf_unfiltered (f, "constant ref: 0x%lx (adjusted)",
-			      (long) (DW_ADDR (&die->attrs[i])));
+			      (long) (DW_UNSND (&die->attrs[i])));
 	  break;
 	case DW_FORM_data1:
 	case DW_FORM_data2:
@@ -14129,7 +14135,7 @@ is_ref_attr (struct attribute *attr)
 static sect_offset
 dwarf2_get_ref_die_offset (struct attribute *attr)
 {
-  sect_offset retval = { DW_ADDR (attr) };
+  sect_offset retval = { DW_UNSND (attr) };
 
   if (is_ref_attr (attr))
     return retval;
