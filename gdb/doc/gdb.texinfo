@@ -21142,11 +21142,11 @@ Specify this trusted directory (or a file) as additional component of the list.
 You have to specify also any existing directories displayed by
 by @samp{show auto-load safe-path} (such as @samp{/usr:/bin} in this example).
 
-@item @kbd{gdb -iex "set auto-load safe-path /usr:/bin:~/src/gdb" [@dots{}]}
+@item @kbd{gdb -iex "set auto-load safe-path /usr:/bin:~/src/gdb"}
 Specify this directory as in the previous case but just for a single
 @value{GDBN} session.
 
-@item @kbd{gdb -iex "set auto-load safe-path" [@dots{}]}
+@item @kbd{gdb -iex "set auto-load safe-path"}
 Disable auto-loading safety for a single @value{GDBN} session.
 This assumes all the files you debug during this @value{GDBN} session will come
 from trusted sources.
@@ -21161,7 +21161,7 @@ On the other hand you can also explicitly forbid automatic files loading which
 also suppresses any such warning messages:
 
 @table @asis
-@item @kbd{gdb -iex "set auto-load no" [@dots{}]}
+@item @kbd{gdb -iex "set auto-load no"}
 You can use @value{GDBN} command-line option for a single @value{GDBN} session.
 
 @item @file{~/.gdbinit}: @samp{set auto-load no}

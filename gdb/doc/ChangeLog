@@ -1,3 +1,8 @@
+2012-04-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Auto-loading safe path): Remove trailing [@dots{}].
+	Three times.
+
 2012-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Auto-loading safe path): Replace @itemize @bullet
