@@ -333,6 +333,12 @@ class Target_sparc : public Sized_target<size, big_endian>
 		 typename elfcpp::Elf_types<size>::Elf_Addr,
 		 section_size_type);
 
+    inline void
+    relax_call(Target_sparc<size, big_endian>* target,
+	       unsigned char* view,
+	       const elfcpp::Rela<size, big_endian>& rela,
+	       section_size_type view_size);
+
     // Ignore the next relocation which should be R_SPARC_TLS_GD_ADD
     bool ignore_gd_add_;
 
@@ -3304,6 +3310,8 @@ Target_sparc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_SPARC_WDISP30:
     case elfcpp::R_SPARC_WPLT30:
       Reloc::wdisp30(view, object, psymval, addend, address);
+      if (target->may_relax())
+	relax_call(target, view, rela, view_size);
       break;
 
     case elfcpp::R_SPARC_WDISP22:
@@ -3951,6 +3959,150 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
 	  Reloc::lox10(view, value, addend);
 	}
       break;
+    }
+}
+
+// Relax a call instruction.
+
+template<int size, bool big_endian>
+inline void
+Target_sparc<size, big_endian>::Relocate::relax_call(
+    Target_sparc<size, big_endian>* target,
+    unsigned char* view,
+    const elfcpp::Rela<size, big_endian>& rela,
+    section_size_type view_size)
+{
+  typedef typename elfcpp::Swap<32, true>::Valtype Insntype;
+  Insntype *wv = reinterpret_cast<Insntype*>(view);
+  Insntype call_insn, delay_insn, set_insn;
+  uint32_t op3, reg, off;
+
+  // This code tries to relax call instructions that meet
+  // certain criteria.
+  //
+  // The first criteria is that the call must be such that the return
+  // address which the call writes into %o7 is unused.  Two sequences
+  // meet this criteria, and are used to implement tail calls.
+  //
+  // Leaf function tail call:
+  //
+  // or %o7, %g0, %ANY_REG
+  // call FUNC
+  //  or %ANY_REG, %g0, %o7
+  //
+  // Non-leaf function tail call:
+  //
+  // call FUNC
+  //  restore
+  //
+  // The second criteria is that the call destination is close.  If
+  // the displacement can fit in a signed 22-bit immediate field of a
+  // pre-V9 branch, we can do it.  If we are generating a 64-bit
+  // object or a 32-bit object with ELF machine type EF_SPARC32PLUS,
+  // and the displacement fits in a signed 19-bit immediate field,
+  // then we can use a V9 branch.
+
+  // Make sure the delay instruction can be safely accessed.
+  if (rela.get_r_offset() + 8 > view_size)
+    return;
+
+  call_insn = elfcpp::Swap<32, true>::readval(wv);
+  delay_insn = elfcpp::Swap<32, true>::readval(wv + 1);
+
+  // Make sure it is really a call instruction.
+  if (((call_insn >> 30) & 0x3) != 1)
+    return;
+
+  if (((delay_insn >> 30) & 0x3) != 2)
+    return;
+
+  // Accept only a restore or an integer arithmetic operation whose
+  // sole side effect is to write the %o7 register (and perhaps set
+  // the condition codes, which are considered clobbered across
+  // function calls).
+  //
+  // For example, we don't want to match a tagged addition or
+  // subtraction.  We also don't want to match something like a
+  // divide.
+  //
+  // Specifically we accept add{,cc}, and{,cc}, or{,cc},
+  // xor{,cc}, sub{,cc}, andn{,cc}, orn{,cc}, and xnor{,cc}.
+
+  op3 = (delay_insn >> 19) & 0x3f;
+  reg = (delay_insn >> 25) & 0x1f;
+  if (op3 != 0x3d
+      && ((op3 & 0x28) != 0 || reg != 15))
+    return;
+
+  // For non-restore instructions, make sure %o7 isn't
+  // an input.
+  if (op3 != 0x3d)
+    {
+      // First check RS1
+      reg = (delay_insn >> 14) & 0x15;
+      if (reg == 15)
+	return;
+
+      // And if non-immediate, check RS2
+      if (((delay_insn >> 13) & 1) == 0)
+	{
+	  reg = (delay_insn & 0x1f);
+	  if (reg == 15)
+	    return;
+	}
+    }
+
+  // Now check the branch distance.  We are called after the
+  // call has been relocated, so we just have to peek at the
+  // offset contained in the instruction.
+  off = call_insn & 0x3fffffff;
+  if ((off & 0x3fe00000) != 0
+      && (off & 0x3fe00000) != 0x3fe00000)
+    return;
+
+  if ((size == 64 || target->elf_machine_ == elfcpp::EM_SPARC32PLUS)
+      && ((off & 0x3c0000) == 0
+	  || (off & 0x3c0000) == 0x3c0000))
+    {
+      // ba,pt %xcc, FUNC
+      call_insn = 0x10680000 | (off & 0x07ffff);
+    }
+  else
+    {
+      // ba FUNC
+      call_insn = 0x10800000 | (off & 0x3fffff);
+    }
+  elfcpp::Swap<32, true>::writeval(wv, call_insn);
+
+  // See if we can NOP out the delay slot instruction.  We peek
+  // at the instruction before the call to make sure we're dealing
+  // with exactly the:
+  //
+  // or %o7, %g0, %ANY_REG
+  // call
+  //  or %ANY_REG, %g0, %o7
+  //
+  // case.  Otherwise this might be a tricky piece of hand written
+  // assembler calculating %o7 in some non-trivial way, and therefore
+  // we can't be sure that NOP'ing out the delay slot is safe.
+  if (op3 == 0x02
+      && rela.get_r_offset() >= 4)
+    {
+      if ((delay_insn & ~(0x1f << 14)) != 0x9e100000)
+	return;
+
+      set_insn = elfcpp::Swap<32, true>::readval(wv - 1);
+      if ((set_insn & ~(0x1f << 25)) != 0x8013c000)
+	return;
+
+      reg = (set_insn >> 25) & 0x1f;
+      if (reg == 0 || reg == 15)
+	return;
+      if (reg != ((delay_insn >> 14) & 0x1f))
+	return;
+
+      // All tests pass, nop it out.
+      elfcpp::Swap<32, true>::writeval(wv + 1, sparc_nop);
     }
 }
 

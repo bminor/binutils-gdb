@@ -1,3 +1,9 @@
+2012-04-24  David S. Miller  <davem@davemloft.net>
+
+	* sparc.cc (Target_sparc::Relocate::relax_call): New function.
+	(Target_sparc::Relocate::relocate): Call it for R_SPARC_WDISP30
+	and R_SPARC_WPLT30.
+
 2012-04-24  Cary Coutant  <ccoutant@google.com>
 
 	* incremental-dump.cc (find_input_containing_global): Replace
