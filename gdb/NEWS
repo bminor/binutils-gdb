@@ -82,6 +82,9 @@
 
 * Ada support for GDB/MI Variable Objects has been added.
 
+* GDB can now support 'breakpoint always-inserted mode' in 'record'
+  target.
+
 * New commands
 
   ** "catch load" and "catch unload" can be used to stop when a shared

@@ -64,7 +64,6 @@
 #include "continuations.h"
 #include "stack.h"
 #include "skip.h"
-#include "record.h"
 #include "gdb_regex.h"
 #include "ax-gdb.h"
 
@@ -404,9 +403,8 @@ show_always_inserted_mode (struct ui_file *file, int from_tty,
 int
 breakpoints_always_inserted_mode (void)
 {
-  return ((always_inserted_mode == always_inserted_on
-	   || (always_inserted_mode == always_inserted_auto && non_stop))
-	  && !RECORD_IS_USED);
+  return (always_inserted_mode == always_inserted_on
+	  || (always_inserted_mode == always_inserted_auto && non_stop));
 }
 
 static const char condition_evaluation_both[] = "host or target";
@@ -2423,6 +2421,19 @@ insert_breakpoints (void)
      now.  */
   if (!breakpoints_always_inserted_mode ())
     insert_breakpoint_locations ();
+}
+
+/* Invoke CALLBACK for each of bp_location.  */
+
+void
+iterate_over_bp_locations (walk_bp_location_callback callback)
+{
+  struct bp_location *loc, **loc_tmp;
+
+  ALL_BP_LOCATIONS (loc, loc_tmp)
+    {
+      callback (loc, NULL);
+    }
 }
 
 /* This is used when we need to synch breakpoint conditions between GDB and the

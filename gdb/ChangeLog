@@ -1,3 +1,21 @@
+2012-04-24  Yao Qi  <yao@codesourcery.com>
+
+	Revert this patch to allow breakpoint always-inserted
+	in record target.
+	2011-12-05  Pedro Alves  <pedro@codesourcery.com>
+        * breakpoint.c: Include record.h.
+        (breakpoints_always_inserted_mode): Return false when the record
+        target is in use.
+
+	* breakpoint.c (iterate_over_bp_locations): New.
+	* breakpoint.h: Declare.
+	New typedef walk_bp_location_callback.
+	* record.c (record_open): Call record_init_record_breakpoints.
+	(record_sync_record_breakpoints): New.
+	(record_init_record_breakpoints): New.
+	* NEWS: Mention supporting breakpoint always-inserted mode in
+	record target.
+
 2012-04-24  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* mi/mi-main.c (mi_cmd_execute): Choose a live thread not just

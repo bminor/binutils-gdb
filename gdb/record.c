@@ -896,6 +896,8 @@ record_open_1 (char *name, int from_tty)
   push_target (&record_ops);
 }
 
+static void record_init_record_breakpoints (void);
+
 /* "to_open" target method.  Open the process record target.  */
 
 static void
@@ -993,6 +995,8 @@ record_open (char *name, int from_tty)
   record_async_inferior_event_token
     = create_async_event_handler (record_async_inferior_event_handler,
 				  NULL);
+
+  record_init_record_breakpoints ();
 }
 
 /* "to_close" target method.  Close the process record target.  */
@@ -1743,6 +1747,35 @@ DEF_VEC_P(record_breakpoint_p);
 /* The list of breakpoints inserted while the record target is
    active.  */
 VEC(record_breakpoint_p) *record_breakpoints = NULL;
+
+static void
+record_sync_record_breakpoints (struct bp_location *loc, void *data)
+{
+  if (loc->loc_type != bp_loc_software_breakpoint)
+      return;
+
+  if (loc->inserted)
+    {
+      struct record_breakpoint *bp = XNEW (struct record_breakpoint);
+
+      bp->addr = loc->target_info.placed_address;
+      bp->address_space = loc->target_info.placed_address_space;
+
+      bp->in_target_beneath = 1;
+
+      VEC_safe_push (record_breakpoint_p, record_breakpoints, bp);
+    }
+}
+
+/* Sync existing breakpoints to record_breakpoints.  */
+
+static void
+record_init_record_breakpoints (void)
+{
+  VEC_free (record_breakpoint_p, record_breakpoints);
+
+  iterate_over_bp_locations (record_sync_record_breakpoints);
+}
 
 /* Behavior is conditional on RECORD_IS_REPLAY.  We will not actually
    insert or remove breakpoints in the real target when replaying, nor
