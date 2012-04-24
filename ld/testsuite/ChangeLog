@@ -1,3 +1,8 @@
+2012-04-24  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-x86-64/plt-nacl.pd: Fix expected nop padding.
+	* ld-x86-64/tlsdesc-nacl.pd: Likewise.
+
 2012-04-24  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/13990
