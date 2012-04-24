@@ -203,27 +203,6 @@ mips_float_register_p (struct gdbarch *gdbarch, int regnum)
 
 #define MIPS_FPU_TYPE(gdbarch) (gdbarch_tdep (gdbarch)->mips_fpu_type)
 
-/* MIPS16 function addresses are odd (bit 0 is set).  Here are some
-   functions to test, set, or clear bit 0 of addresses.  */
-
-static CORE_ADDR
-is_mips16_addr (CORE_ADDR addr)
-{
-  return ((addr) & 1);
-}
-
-static CORE_ADDR
-unmake_mips16_addr (CORE_ADDR addr)
-{
-  return ((addr) & ~(CORE_ADDR) 1);
-}
-
-static CORE_ADDR
-make_mips16_addr (CORE_ADDR addr)
-{
-  return ((addr) | (CORE_ADDR) 1);
-}
-
 /* Return the MIPS ABI associated with GDBARCH.  */
 enum mips_abi
 mips_abi (struct gdbarch *gdbarch)
@@ -265,6 +244,27 @@ mips_abi_regsize (struct gdbarch *gdbarch)
     default:
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
+}
+
+/* MIPS16 function addresses are odd (bit 0 is set).  Here are some
+   functions to test, set, or clear bit 0 of addresses.  */
+
+static CORE_ADDR
+is_mips16_addr (CORE_ADDR addr)
+{
+  return ((addr) & 1);
+}
+
+static CORE_ADDR
+unmake_mips16_addr (CORE_ADDR addr)
+{
+  return ((addr) & ~(CORE_ADDR) 1);
+}
+
+static CORE_ADDR
+make_mips16_addr (CORE_ADDR addr)
+{
+  return ((addr) | (CORE_ADDR) 1);
 }
 
 /* Functions for setting and testing a bit in a minimal symbol that
