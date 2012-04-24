@@ -1,3 +1,7 @@
+2012-04-23  David S. Miller  <davem@davemloft.net>
+
+	* configure.tgt (sparc-*-linux*): Set build_gdbserver to yes.
+
 2012-04-23  Tom Tromey  <tromey@redhat.com>
 
 	* buildsym.c (add_free_pendings): Remove.

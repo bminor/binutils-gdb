@@ -481,6 +481,7 @@ sparc-*-linux*)
 	    gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o \
 			    sparc64-linux-tdep.o ${gdb_target_obs}"
 	fi
+	build_gdbserver=yes
 	;;
 sparc64-*-linux*)
 	# Target: GNU/Linux UltraSPARC
