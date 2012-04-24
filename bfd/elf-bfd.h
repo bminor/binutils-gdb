@@ -1812,8 +1812,7 @@ extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
 extern asection *_bfd_elf_check_kept_section
   (asection *, struct bfd_link_info *);
-extern void _bfd_elf_link_just_syms
-  (asection *, struct bfd_link_info *);
+#define _bfd_elf_link_just_syms _bfd_generic_link_just_syms
 extern void _bfd_elf_copy_link_hash_symbol_type
   (bfd *, struct bfd_link_hash_entry *, struct bfd_link_hash_entry *);
 extern bfd_boolean _bfd_elf_size_group_sections

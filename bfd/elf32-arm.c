@@ -4611,7 +4611,7 @@ cortex_a8_erratum_scan (bfd *input_bfd,
       if (elf_section_type (section) != SHT_PROGBITS
           || (elf_section_flags (section) & SHF_EXECINSTR) == 0
           || (section->flags & SEC_EXCLUDE) != 0
-          || (section->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+          || (section->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
           || (section->output_section == bfd_abs_section_ptr))
         continue;
 
@@ -6682,7 +6682,7 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
       if (elf_section_type (sec) != SHT_PROGBITS
           || (elf_section_flags (sec) & SHF_EXECINSTR) == 0
           || (sec->flags & SEC_EXCLUDE) != 0
-	  || sec->sec_info_type == ELF_INFO_TYPE_JUST_SYMS
+	  || sec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS
 	  || sec->output_section == bfd_abs_section_ptr
           || strcmp (sec->name, VFP11_ERRATUM_VENEER_SECTION_NAME) == 0)
         continue;
@@ -10481,7 +10481,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	  sym_type = h->type;
 	}
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 

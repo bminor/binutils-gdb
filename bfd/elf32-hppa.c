@@ -3734,7 +3734,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 	  hh = hppa_elf_hash_entry (eh);
 	}
 
-      if (sym_sec != NULL && elf_discarded_section (sym_sec))
+      if (sym_sec != NULL && discarded_section (sym_sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rela, relend,
 					 elf_hppa_howto_table + r_type,

@@ -6224,7 +6224,7 @@ ppc_elf_relax_section (bfd *abfd,
 	 attribute for a code section, and we are only looking at
 	 branches.  However, implement it correctly here as a
 	 reference for other target relax_section functions.  */
-      if (0 && tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
+      if (0 && tsec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	{
 	  /* At this stage in linking, no SEC_MERGE symbol has been
 	     adjusted, so all references to such symbols need to be
@@ -6879,7 +6879,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  sym_name = h->root.root.string;
 	}
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	{
 	  /* For relocs against symbols from removed linkonce sections,
 	     or sections discarded by a linker script, we just want the
@@ -9049,7 +9049,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
       BFD_ASSERT ((bfd_vma) ((p + 3 - htab->glink_eh_frame->contents) & -4)
 		  == htab->glink_eh_frame->size);
 
-      if (htab->glink_eh_frame->sec_info_type == ELF_INFO_TYPE_EH_FRAME
+      if (htab->glink_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME
 	  && !_bfd_elf_write_section_eh_frame (output_bfd, info,
 					       htab->glink_eh_frame,
 					       htab->glink_eh_frame->contents))

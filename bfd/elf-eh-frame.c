@@ -1,6 +1,6 @@
 /* .eh_frame section optimization.
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+   2012 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -491,7 +491,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
     return;
 
   if (sec->size == 0
-      || sec->sec_info_type != ELF_INFO_TYPE_NONE)
+      || sec->sec_info_type != SEC_INFO_TYPE_NONE)
     {
       /* This file does not contain .eh_frame information.  */
       return;
@@ -904,7 +904,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   BFD_ASSERT (cie_count == num_cies);
 
   elf_section_data (sec)->sec_info = sec_info;
-  sec->sec_info_type = ELF_INFO_TYPE_EH_FRAME;
+  sec->sec_info_type = SEC_INFO_TYPE_EH_FRAME;
   if (hdr_info->merge_cies)
     {
       sec_info->cies = local_cies;
@@ -1137,7 +1137,7 @@ _bfd_elf_discard_section_eh_frame
   struct eh_frame_hdr_info *hdr_info;
   unsigned int ptr_size, offset;
 
-  if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
+  if (sec->sec_info_type != SEC_INFO_TYPE_EH_FRAME)
     return FALSE;
 
   sec_info = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
@@ -1307,7 +1307,7 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
   struct eh_frame_sec_info *sec_info;
   unsigned int lo, hi, mid;
 
-  if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
+  if (sec->sec_info_type != SEC_INFO_TYPE_EH_FRAME)
     return offset;
   sec_info = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
 
@@ -1395,7 +1395,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
   unsigned int ptr_size;
   struct eh_cie_fde *ent;
 
-  if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
+  if (sec->sec_info_type != SEC_INFO_TYPE_EH_FRAME)
     /* FIXME: octets_per_byte.  */
     return bfd_set_section_contents (abfd, sec->output_section, contents,
 				     sec->output_offset, sec->size);

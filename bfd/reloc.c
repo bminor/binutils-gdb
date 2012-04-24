@@ -1,6 +1,7 @@
 /* BFD support for handling relocation entries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+   2012
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -6375,7 +6376,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	  bfd_reloc_status_type r;
 
 	  symbol = *(*parent)->sym_ptr_ptr;
-	  if (symbol->section && elf_discarded_section (symbol->section))
+	  if (symbol->section && discarded_section (symbol->section))
 	    {
 	      bfd_byte *p;
 	      static reloc_howto_type none_howto

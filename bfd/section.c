@@ -1,6 +1,7 @@
 /* Object file "section" support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+   2012
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -382,11 +383,11 @@ CODE_FRAGMENT
 .
 .  {* Type of sec_info information.  *}
 .  unsigned int sec_info_type:3;
-.#define ELF_INFO_TYPE_NONE      0
-.#define ELF_INFO_TYPE_STABS     1
-.#define ELF_INFO_TYPE_MERGE     2
-.#define ELF_INFO_TYPE_EH_FRAME  3
-.#define ELF_INFO_TYPE_JUST_SYMS 4
+.#define SEC_INFO_TYPE_NONE      0
+.#define SEC_INFO_TYPE_STABS     1
+.#define SEC_INFO_TYPE_MERGE     2
+.#define SEC_INFO_TYPE_EH_FRAME  3
+.#define SEC_INFO_TYPE_JUST_SYMS 4
 .
 .  {* Nonzero if this section uses RELA relocations, rather than REL.  *}
 .  unsigned int use_rela_p:1;

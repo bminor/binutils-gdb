@@ -3445,7 +3445,7 @@ elf64_ia64_relocate_section (bfd *output_bfd,
 	  if (!info->relocatable
 	      && (sym_sec->flags & SEC_MERGE) != 0
 	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
+	      && sym_sec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	    {
 	      struct elf64_ia64_local_hash_entry *loc_h;
 
@@ -3506,7 +3506,7 @@ elf64_ia64_relocate_section (bfd *output_bfd,
       /* For relocs against symbols from removed linkonce sections,
 	 or sections discarded by a linker script, we just want the
 	 section contents zeroed.  Avoid any special processing.  */
-      if (sym_sec != NULL && elf_discarded_section (sym_sec))
+      if (sym_sec != NULL && discarded_section (sym_sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 
@@ -4771,7 +4771,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       /* ld --just-symbols and dynamic objects don't mix very well.
 	 ld shouldn't allow it.  */
       if ((s = abfd->sections) != NULL
-	  && s->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+	  && s->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
 	abort ();
 
       /* Be sure there are dynamic sections.  */

@@ -3143,7 +3143,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 				   unresolved_reloc, warned);
 	}
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 
@@ -4715,8 +4715,7 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 			     htab->plt_eh_frame->contents
 			     + PLT_FDE_START_OFFSET);
 	}
-      if (htab->plt_eh_frame->sec_info_type
-	  == ELF_INFO_TYPE_EH_FRAME)
+      if (htab->plt_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
 	{
 	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
 						 htab->plt_eh_frame,

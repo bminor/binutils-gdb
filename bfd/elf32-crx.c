@@ -1,5 +1,5 @@
 /* BFD back-end for National Semiconductor's CRX ELF
-   Copyright 2004, 2005, 2006, 2007, 2009, 2010
+   Copyright 2004, 2005, 2006, 2007, 2009, 2010, 2012
    Free Software Foundation, Inc.
    Written by Tomer Levi, NSC, Israel.
 
@@ -873,7 +873,7 @@ elf32_crx_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 				   unresolved_reloc, warned);
 	}
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 

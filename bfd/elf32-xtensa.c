@@ -1,5 +1,5 @@
 /* Xtensa-specific support for 32-bit ELF.
-   Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1712,7 +1712,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    continue;
 	  for (s = abfd->sections; s != NULL; s = s->next)
 	    {
-	      if (! elf_discarded_section (s)
+	      if (! discarded_section (s)
 		  && xtensa_is_littable_section (s)
 		  && s != spltlittbl)
 		sgotloc->size += s->size;
@@ -2656,7 +2656,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	  sym_type = h->type;
 	}
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 
@@ -8962,9 +8962,9 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 	     that here and adjust things accordingly.  */
 	  if (! elf_xtensa_ignore_discarded_relocs (sec)
 	      && elf_xtensa_action_discarded (sec) == PRETEND
-	      && sec->sec_info_type != ELF_INFO_TYPE_STABS
+	      && sec->sec_info_type != SEC_INFO_TYPE_STABS
 	      && target_sec != NULL
-	      && elf_discarded_section (target_sec))
+	      && discarded_section (target_sec))
 	    {
 	      /* It would be natural to call _bfd_elf_check_kept_section
 		 here, but it's not exported from elflink.c.  It's also a

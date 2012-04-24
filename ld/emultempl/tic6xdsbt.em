@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2011 Free Software Foundation, Inc.
+#   Copyright 2011, 2012 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -122,7 +122,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 		  && elf_section_type (sec) == SHT_PROGBITS
 		  && (elf_section_flags (sec) & SHF_EXECINSTR) != 0
 		  && (sec->flags & SEC_EXCLUDE) == 0
-		  && sec->sec_info_type != ELF_INFO_TYPE_JUST_SYMS
+		  && sec->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
 		  && out_sec != bfd_abs_section_ptr)
 		{
 		  if (sec_count == list_size)

@@ -4619,7 +4619,7 @@ size_input_section
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
 
-  if (!((lang_input_statement_type *) i->owner->usrdata)->flags.just_syms
+  if (i->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
       && (i->flags & SEC_EXCLUDE) == 0)
     {
       bfd_size_type alignment_needed;

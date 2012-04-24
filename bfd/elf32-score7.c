@@ -1,5 +1,5 @@
 /* 32-bit ELF support for S+core.
-   Copyright 2009, 2010, 2011 Free Software Foundation, Inc.
+   Copyright 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
    Contributed by
    Brain.lin (brain.lin@sunplusct.com)
    Mei Ligang (ligang@sunnorth.com.cn)
@@ -2443,7 +2443,7 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
             }
         }
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 
