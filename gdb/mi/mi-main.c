@@ -2065,7 +2065,7 @@ mi_cmd_execute (struct mi_parse *parse)
 	 This is not a problem -- frontend should always provide --thread if
 	 it wishes to operate on a specific thread.  */
       if (inf->pid != 0)
-	tp = any_thread_of_process (inf->pid);
+	tp = any_live_thread_of_process (inf->pid);
       switch_to_thread (tp ? tp->ptid : null_ptid);
       set_current_program_space (inf->pspace);
     }
