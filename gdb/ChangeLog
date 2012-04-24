@@ -1,3 +1,10 @@
+2012-04-24  Yao Qi  <yao@codesourcery.com>
+
+	* breakpoint.c (ep_is_catchpoint): Renamed to ...
+	(is_catchpoint): ... it.
+	(print_one_breakpoint_location): Caller update.
+	* breakpoint.h: Update declaration.
+
 2012-04-23  David S. Miller  <davem@davemloft.net>
 
 	* configure.tgt (sparc-*-linux*): Set build_gdbserver to yes.

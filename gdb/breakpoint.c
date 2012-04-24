@@ -3635,7 +3635,7 @@ breakpoint_thread_match (struct address_space *aspace, CORE_ADDR pc,
    in breakpoint.h.  */
 
 int
-ep_is_catchpoint (struct breakpoint *ep)
+is_catchpoint (struct breakpoint *ep)
 {
   return (ep->type == bp_catchpoint);
 }
@@ -5600,7 +5600,7 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (!part_of_multiple && b->hit_count)
     {
       /* FIXME should make an annotation for this.  */
-      if (ep_is_catchpoint (b))
+      if (is_catchpoint (b))
 	ui_out_text (uiout, "\tcatchpoint");
       else if (is_tracepoint (b))
 	ui_out_text (uiout, "\ttracepoint");

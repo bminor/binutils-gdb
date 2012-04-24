@@ -1365,7 +1365,7 @@ extern void remove_thread_event_breakpoints (void);
 extern void disable_breakpoints_in_shlibs (void);
 
 /* This function returns TRUE if ep is a catchpoint.  */
-extern int ep_is_catchpoint (struct breakpoint *);
+extern int is_catchpoint (struct breakpoint *);
 
 /* Enable breakpoints and delete when hit.  Called with ARG == NULL
    deletes all breakpoints.  */
