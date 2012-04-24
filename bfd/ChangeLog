@@ -1,3 +1,9 @@
+2012-04-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/13990
+	* elf32-arm.c (elf32_arm_gc_sweep_hook): Handle a forced-local
+	symbol, where PLT refcount is set to -1.
+
 2012-04-24  Alan Modra  <amodra@gmail.com>
 
 	PR ld/13991
