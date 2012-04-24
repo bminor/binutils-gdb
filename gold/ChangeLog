@@ -1,3 +1,26 @@
+2012-04-24  Cary Coutant  <ccoutant@google.com>
+
+	* incremental-dump.cc (find_input_containing_global): Replace
+	magic number with symbolic constant.
+	(dump_incremental_inputs): Update version number.
+	* incremental.cc (Output_section_incremental_inputs): Update version
+	number; import symbolic constants from Incremental_inputs_reader.
+	(Incremental_inputs::create_data_sections): Align relocations
+	section correctly for 64-bit targets.
+	(Output_section_incremental_inputs::set_final_data_size): Use symbolic
+	constants; add padding.
+	(Output_section_incremental_inputs::write_header): Add assert for
+	header_size.
+	(Output_section_incremental_inputs::write_input_files): Add assert
+	for input_entry_size.
+	(Output_section_incremental_inputs::write_info_blocks): Add padding;
+	add assert for object_info_size, input_section_entry_size,
+	global_sym_entry_size.
+	* incremental.h (Incremental_inputs_reader): Add symbolic constants
+	for data structure sizes; use them.
+	(Incremental_input_entry_reader): Import symbolic constants from
+	Incremental_inputs_reader; use them.
+
 2012-04-23  David S. Miller  <davem@davemloft.net>
 
 	* sparc.cc (class Target_sparc): Add elf_machine_, elf_flags_,

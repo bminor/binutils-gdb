@@ -41,9 +41,10 @@
 
 namespace gold {
 
-// Version information. Will change frequently during the development, later
-// we could think about backward (and forward?) compatibility.
-const unsigned int INCREMENTAL_LINK_VERSION = 1;
+// Version number for the .gnu_incremental_inputs section.
+// Version 1 was the initial checkin.
+// Version 2 adds some padding to ensure 8-byte alignment where necessary.
+const unsigned int INCREMENTAL_LINK_VERSION = 2;
 
 // This class manages the .gnu_incremental_inputs section, which holds
 // the header information, a directory of input files, and separate
@@ -112,8 +113,18 @@ class Output_section_incremental_inputs : public Output_section_data
 
   // Sizes of various structures.
   static const int sizeof_addr = size / 8;
-  static const int header_size = 16;
-  static const int input_entry_size = 24;
+  static const int header_size =
+      Incremental_inputs_reader<size, big_endian>::header_size;
+  static const int input_entry_size =
+      Incremental_inputs_reader<size, big_endian>::input_entry_size;
+  static const unsigned int object_info_size =
+      Incremental_inputs_reader<size, big_endian>::object_info_size;
+  static const unsigned int input_section_entry_size =
+      Incremental_inputs_reader<size, big_endian>::input_section_entry_size;
+  static const unsigned int global_sym_entry_size =
+      Incremental_inputs_reader<size, big_endian>::global_sym_entry_size;
+  static const unsigned int incr_reloc_size =
+      Incremental_relocs_reader<size, big_endian>::reloc_size;
 
   // The Incremental_inputs object.
   const Incremental_inputs* inputs_;
@@ -1193,37 +1204,44 @@ Incremental_inputs::finalize()
 void
 Incremental_inputs::create_data_sections(Symbol_table* symtab)
 {
+  int reloc_align = 4;
+
   switch (parameters->size_and_endianness())
     {
 #ifdef HAVE_TARGET_32_LITTLE
     case Parameters::TARGET_32_LITTLE:
       this->inputs_section_ =
           new Output_section_incremental_inputs<32, false>(this, symtab);
+      reloc_align = 4;
       break;
 #endif
 #ifdef HAVE_TARGET_32_BIG
     case Parameters::TARGET_32_BIG:
       this->inputs_section_ =
           new Output_section_incremental_inputs<32, true>(this, symtab);
+      reloc_align = 4;
       break;
 #endif
 #ifdef HAVE_TARGET_64_LITTLE
     case Parameters::TARGET_64_LITTLE:
       this->inputs_section_ =
           new Output_section_incremental_inputs<64, false>(this, symtab);
+      reloc_align = 8;
       break;
 #endif
 #ifdef HAVE_TARGET_64_BIG
     case Parameters::TARGET_64_BIG:
       this->inputs_section_ =
           new Output_section_incremental_inputs<64, true>(this, symtab);
+      reloc_align = 8;
       break;
 #endif
     default:
       gold_unreachable();
     }
   this->symtab_section_ = new Output_data_space(4, "** incremental_symtab");
-  this->relocs_section_ = new Output_data_space(4, "** incremental_relocs");
+  this->relocs_section_ = new Output_data_space(reloc_align,
+						"** incremental_relocs");
   this->got_plt_section_ = new Output_data_space(4, "** incremental_got_plt");
 }
 
@@ -1244,8 +1262,6 @@ void
 Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
 {
   const Incremental_inputs* inputs = this->inputs_;
-  const unsigned int sizeof_addr = size / 8;
-  const unsigned int rel_size = 8 + 2 * sizeof_addr;
 
   // Offset of each input entry.
   unsigned int input_offset = this->header_size;
@@ -1289,13 +1305,13 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
 	    // Input section count, global symbol count, local symbol offset,
 	    // local symbol count, first dynamic reloc, dynamic reloc count,
 	    // comdat group count.
-	    info_offset += 28;
+	    info_offset += this->object_info_size;
 	    // Each input section.
 	    info_offset += (entry->get_input_section_count()
-			    * (8 + 2 * sizeof_addr));
+			    * this->input_section_entry_size);
 	    // Each global symbol.
 	    const Object::Symbols* syms = entry->object()->get_global_symbols();
-	    info_offset += syms->size() * 20;
+	    info_offset += syms->size() * this->global_sym_entry_size;
 	    // Each comdat group.
 	    info_offset += entry->get_comdat_group_count() * 4;
 	  }
@@ -1341,7 +1357,11 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
 	default:
 	  gold_unreachable();
 	}
-    }
+
+     // Pad so each supplemental info block begins at an 8-byte boundary.
+     if (info_offset & 4)
+       info_offset += 4;
+   }
 
   this->set_data_size(info_offset);
 
@@ -1351,7 +1371,7 @@ Output_section_incremental_inputs<size, big_endian>::set_final_data_size()
 
   // Set the size of the .gnu_incremental_relocs section.
   inputs->relocs_section()->set_current_data_size(inputs->get_reloc_count()
-						  * rel_size);
+						  * this->incr_reloc_size);
 
   // Set the size of the .gnu_incremental_got_plt section.
   Sized_target<size, big_endian>* target =
@@ -1442,6 +1462,7 @@ Output_section_incremental_inputs<size, big_endian>::write_header(
   Swap32::writeval(pov + 4, input_file_count);
   Swap32::writeval(pov + 8, command_line_offset);
   Swap32::writeval(pov + 12, 0);
+  gold_assert(this->header_size == 16);
   return pov + this->header_size;
 }
 
@@ -1476,6 +1497,7 @@ Output_section_incremental_inputs<size, big_endian>::write_input_files(
       Swap32::writeval(pov + 16, mtime.nanoseconds);
       Swap16::writeval(pov + 20, flags);
       Swap16::writeval(pov + 22, (*p)->arg_serial());
+      gold_assert(this->input_entry_size == 24);
       pov += this->input_entry_size;
     }
   return pov;
@@ -1549,7 +1571,9 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 	    Swap32::writeval(pov + 16, first_dynrel);
 	    Swap32::writeval(pov + 20, ndynrel);
 	    Swap32::writeval(pov + 24, ncomdat);
-	    pov += 28;
+	    Swap32::writeval(pov + 28, 0);
+	    gold_assert(this->object_info_size == 32);
+	    pov += this->object_info_size;
 
 	    // Build a temporary array to map input section indexes
 	    // from the original object file index to the index in the
@@ -1581,7 +1605,9 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 		Swap32::writeval(pov + 4, out_shndx);
 		Swap::writeval(pov + 8, out_offset);
 		Swap::writeval(pov + 8 + sizeof_addr, sh_size);
-		pov += 8 + 2 * sizeof_addr;
+		gold_assert(this->input_section_entry_size
+			    == 8 + 2 * sizeof_addr);
+		pov += this->input_section_entry_size;
 	      }
 
 	    // For each global symbol, write its associated relocations,
@@ -1634,7 +1660,8 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 		Swap32::writeval(pov + 12, nrelocs);
 		Swap32::writeval(pov + 16,
 				 first_reloc * (8 + 2 * sizeof_addr));
-		pov += 20;
+		gold_assert(this->global_sym_entry_size == 20);
+		pov += this->global_sym_entry_size;
 	      }
 
 	    // For each kept COMDAT group, write the group signature.
@@ -1745,6 +1772,13 @@ Output_section_incremental_inputs<size, big_endian>::write_info_blocks(
 	default:
 	  gold_unreachable();
 	}
+
+     // Pad the info block to a multiple of 8 bytes.
+     if (static_cast<unsigned int>(pov - oview) & 4)
+      {
+	Swap32::writeval(pov, 0);
+	pov += 4;
+      }
     }
   return pov;
 }
