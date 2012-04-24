@@ -1,3 +1,8 @@
+2012-04-24  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* observer.sh: Conditionally declare `args', thus cleaning up
+	unused instances of this variable.
+
 2012-04-24  Yao Qi  <yao@codesourcery.com>
 
 	Revert this patch to allow breakpoint always-inserted
