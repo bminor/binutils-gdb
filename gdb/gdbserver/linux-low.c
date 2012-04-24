@@ -241,10 +241,6 @@ struct pending_signals
   struct pending_signals *prev;
 };
 
-#define PTRACE_ARG3_TYPE void *
-#define PTRACE_ARG4_TYPE void *
-#define PTRACE_XFER_TYPE long
-
 #ifdef HAVE_LINUX_REGSETS
 static char *disabled_regsets;
 static int num_regsets;
@@ -1157,7 +1153,8 @@ linux_detach_one_lwp (struct inferior_list_entry *entry, void *args)
   /* Finally, let it resume.  */
   if (the_low_target.prepare_to_resume != NULL)
     the_low_target.prepare_to_resume (lwp);
-  if (ptrace (PTRACE_DETACH, lwpid_of (lwp), 0, sig) < 0)
+  if (ptrace (PTRACE_DETACH, lwpid_of (lwp), 0,
+	      (PTRACE_ARG4_TYPE) (long) sig) < 0)
     error (_("Can't detach %s: %s"),
 	   target_pid_to_str (ptid_of (lwp)),
 	   strerror (errno));
@@ -3997,7 +3994,8 @@ regsets_fetch_inferior_registers (struct regcache *regcache)
 	data = buf;
 
 #ifndef __sparc__
-      res = ptrace (regset->get_request, pid, nt_type, data);
+      res = ptrace (regset->get_request, pid,
+		    (PTRACE_ARG3_TYPE) (long) nt_type, data);
 #else
       res = ptrace (regset->get_request, pid, data, nt_type);
 #endif
@@ -4070,7 +4068,8 @@ regsets_store_inferior_registers (struct regcache *regcache)
 	data = buf;
 
 #ifndef __sparc__
-      res = ptrace (regset->get_request, pid, nt_type, data);
+      res = ptrace (regset->get_request, pid,
+		    (PTRACE_ARG3_TYPE) (long) nt_type, data);
 #else
       res = ptrace (regset->get_request, pid, data, nt_type);
 #endif
@@ -4082,7 +4081,8 @@ regsets_store_inferior_registers (struct regcache *regcache)
 
 	  /* Only now do we write the register set.  */
 #ifndef __sparc__
-	  res = ptrace (regset->set_request, pid, nt_type, data);
+	  res = ptrace (regset->set_request, pid,
+			(PTRACE_ARG3_TYPE) (long) nt_type, data);
 #else
 	  res = ptrace (regset->set_request, pid, data, nt_type);
 #endif

@@ -1,3 +1,19 @@
+2012-04-24  Thiago Jung Bauermann  <thiago.bauermann@linaro.org>
+
+	* linux-low.h (PTRACE_ARG3_TYPE): Move macro from linux-low.c.
+	(PTRACE_ARG4_TYPE): Likewise.
+	(PTRACE_XFER_TYPE): Likewise.
+	* linux-arm-low.c (arm_prepare_to_resume): Cast third argument of
+	ptrace to PTRACE_ARG3_TYPE.
+	* linux-low.c (PTRACE_ARG3_TYPE): Move macro to linux-low.h.
+	(PTRACE_ARG4_TYPE): Likewise.
+	(PTRACE_XFER_TYPE): Likewise.
+	(linux_detach_one_lwp): Cast fourth argument of
+	ptrace to long then PTRACE_ARG4_TYPE.
+	(regsets_fetch_inferior_registers): Cast third argument of
+	ptrace to long then PTRACE_ARG3_TYPE.
+	(regsets_store_inferior_registers): Likewise.
+
 2012-04-20  Pedro Alves  <palves@redhat.com>
 
 	* configure: Regenerate.

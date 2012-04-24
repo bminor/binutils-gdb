@@ -709,13 +709,15 @@ arm_prepare_to_resume (struct lwp_info *lwp)
 	errno = 0;
 
 	if (arm_hwbp_control_is_enabled (proc_info->bpts[i].control))
-	  if (ptrace (PTRACE_SETHBPREGS, pid, ((i << 1) + 1),
-	      &proc_info->bpts[i].address) < 0)
+	  if (ptrace (PTRACE_SETHBPREGS, pid,
+		      (PTRACE_ARG3_TYPE) ((i << 1) + 1),
+		      &proc_info->bpts[i].address) < 0)
 	    perror_with_name ("Unexpected error setting breakpoint address");
 
 	if (arm_hwbp_control_is_initialized (proc_info->bpts[i].control))
-	  if (ptrace (PTRACE_SETHBPREGS, pid, ((i << 1) + 2),
-	      &proc_info->bpts[i].control) < 0)
+	  if (ptrace (PTRACE_SETHBPREGS, pid,
+		      (PTRACE_ARG3_TYPE) ((i << 1) + 2),
+		      &proc_info->bpts[i].control) < 0)
 	    perror_with_name ("Unexpected error setting breakpoint");
 
 	lwp_info->bpts_changed[i] = 0;
@@ -727,13 +729,15 @@ arm_prepare_to_resume (struct lwp_info *lwp)
 	errno = 0;
 
 	if (arm_hwbp_control_is_enabled (proc_info->wpts[i].control))
-	  if (ptrace (PTRACE_SETHBPREGS, pid, -((i << 1) + 1),
-	      &proc_info->wpts[i].address) < 0)
+	  if (ptrace (PTRACE_SETHBPREGS, pid,
+		      (PTRACE_ARG3_TYPE) -((i << 1) + 1),
+		      &proc_info->wpts[i].address) < 0)
 	    perror_with_name ("Unexpected error setting watchpoint address");
 
 	if (arm_hwbp_control_is_initialized (proc_info->wpts[i].control))
-	  if (ptrace (PTRACE_SETHBPREGS, pid, -((i << 1) + 2),
-	      &proc_info->wpts[i].control) < 0)
+	  if (ptrace (PTRACE_SETHBPREGS, pid,
+		      (PTRACE_ARG3_TYPE) -((i << 1) + 2),
+		      &proc_info->wpts[i].control) < 0)
 	    perror_with_name ("Unexpected error setting watchpoint");
 
 	lwp_info->wpts_changed[i] = 0;
