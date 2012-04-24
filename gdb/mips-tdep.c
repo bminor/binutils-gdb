@@ -2763,16 +2763,16 @@ mips_software_single_step (struct frame_info *frame)
 static int
 mips_about_to_return (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  if (mips_pc_is_mips16 (pc))
-    /* This mips16 case isn't necessarily reliable.  Sometimes the compiler
-       generates a "jr $ra"; other times it generates code to load
-       the return address from the stack to an accessible register (such
-       as $a3), then a "jr" using that register.  This second case
-       is almost impossible to distinguish from an indirect jump
-       used for switch statements, so we don't even try.  */
-    return mips_fetch_instruction (gdbarch, pc) == 0xe820;	/* jr $ra */
-  else
-    return mips_fetch_instruction (gdbarch, pc) == 0x3e00008;	/* jr $ra */
+  ULONGEST insn;
+  ULONGEST hint;
+
+  /* This used to check for MIPS16, but this piece of code is never
+     called for MIPS16 functions.  */
+  gdb_assert (!mips_pc_is_mips16 (pc));
+
+  insn = mips_fetch_instruction (gdbarch, pc);
+  hint = 0x7c0;
+  return (insn & ~hint) == 0x3e00008;			/* jr(.hb) $ra */
 }
 
 

@@ -1,5 +1,10 @@
 2012-04-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (mips_about_to_return): Remove dead MIPS16 support
+	code.  Handle JR.HB correctly.
+
+2012-04-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c
 	(is_mips16_addr, unmake_mips16_addr, make_mips16_addr): Group
 	with the other MIPS16 helpers.
