@@ -1,3 +1,7 @@
+2012-04-25  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.threads/linux-dp.exp: Unset 'seen' before 'array set'.
+
 2012-04-18  Siddhesh Poyarekar  <siddhesh@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

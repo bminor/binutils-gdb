@@ -339,8 +339,8 @@ proc check_philosopher_stack {thread seen_name} {
 }
 
 set any_interesting 0
+catch {unset seen}
 array set seen {}
-unset seen
 for {set i 1} {$i <= $nthreads} {incr i} {
     if [check_philosopher_stack $i seen] {
 	set any_interesting 1
