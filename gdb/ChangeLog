@@ -1,3 +1,8 @@
+2012-04-25  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* CONTRIBUTE: Use unified diff instead of context diff when
+	generating patches.
+
 2012-04-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_about_to_return): Remove dead MIPS16 support
