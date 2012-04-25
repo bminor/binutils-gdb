@@ -1,3 +1,17 @@
+2012-04-25  Cary Coutant  <ccoutant@google.com>
+
+	* doc/binutils.texi: Add -D/--enable-deterministic-archives option
+	to strip and objcopy.
+	* objcopy.c (deterministic): New global variable.
+	(strip_options): Add --enable-deterministic-archives.
+	(copy_options): Likewise.
+	(copy_usage): Likewise.
+	(strip_usage): Likewise.
+	(copy_archive): When stripping all, don't add archive map; set
+	deterministic output when requested.
+	(strip_main): Add -D/--enable-deterministic-archives option.
+	(copy_main): Likewise.
+
 2012-04-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/13947

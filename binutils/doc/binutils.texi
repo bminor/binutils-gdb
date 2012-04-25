@@ -1059,6 +1059,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{-j} @var{sectionname}|@option{--only-section=}@var{sectionname}]
         [@option{-R} @var{sectionname}|@option{--remove-section=}@var{sectionname}]
         [@option{-p}|@option{--preserve-dates}]
+        [@option{-D}|@option{--enable-deterministic-archives}]
         [@option{--debugging}]
         [@option{--gap-fill=}@var{val}]
         [@option{--pad-to=}@var{address}]
@@ -1322,6 +1323,12 @@ commands.  If the input was '12345678' then the outputs would be
 @itemx --preserve-dates
 Set the access and modification dates of the output file to be the same
 as those of the input file.
+
+@item -D
+@itemx --enable-deterministic-archives
+Operate in @emph{deterministic} mode.  When copying archive members
+and writing the archive index, use zero for UIDs, GIDs, timestamps,
+and use consistent file modes for all files.
 
 @item --debugging
 Convert debugging information, if possible.  This is not the default
@@ -2679,6 +2686,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-x}|@option{--discard-all}] [@option{-X} |@option{--discard-locals}]
       [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
+      [@option{-D}|@option{--enable-deterministic-archives}]
       [@option{--keep-file-symbols}]
       [@option{--only-keep-debug}]
       [@option{-v} |@option{--verbose}] [@option{-V}|@option{--version}]
@@ -2762,6 +2770,12 @@ argument may be specified.
 @item -p
 @itemx --preserve-dates
 Preserve the access and modification dates of the file.
+
+@item -D
+@itemx --enable-deterministic-archives
+Operate in @emph{deterministic} mode.  When copying archive members
+and writing the archive index, use zero for UIDs, GIDs, timestamps,
+and use consistent file modes for all files.
 
 @item -w
 @itemx --wildcard

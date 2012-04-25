@@ -86,6 +86,7 @@ static int copy_width = 1;
 
 static bfd_boolean verbose;		/* Print file and target names.  */
 static bfd_boolean preserve_dates;	/* Preserve input file timestamp.  */
+static bfd_boolean deterministic;	/* Enable deterministic archives.  */
 static int status = 0;		/* Exit status.  */
 
 enum strip_action
@@ -322,6 +323,7 @@ static struct option strip_options[] =
 {
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
+  {"enable-deterministic-archives", no_argument, 0, 'D'},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"help", no_argument, 0, 'h'},
   {"info", no_argument, 0, OPTION_FORMATS_INFO},
@@ -371,6 +373,7 @@ static struct option copy_options[] =
   {"decompress-debug-sections", no_argument, 0, OPTION_DECOMPRESS_DEBUG_SECTIONS},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
+  {"enable-deterministic-archives", no_argument, 0, 'D'},
   {"extract-symbol", no_argument, 0, OPTION_EXTRACT_SYMBOL},
   {"format", required_argument, 0, 'F'}, /* Obsolete */
   {"gap-fill", required_argument, 0, OPTION_GAP_FILL},
@@ -480,6 +483,8 @@ copy_usage (FILE *stream, int exit_status)
   -F --target <bfdname>            Set both input and output format to <bfdname>\n\
      --debugging                   Convert debugging information, if possible\n\
   -p --preserve-dates              Copy modified/access timestamps to the output\n\
+  -D --enable-deterministic-archives\n\
+                                   Produce deterministic output when stripping archives\n\
   -j --only-section <name>         Only copy section <name> into the output\n\
      --add-gnu-debuglink=<file>    Add section .gnu_debuglink linking to <file>\n\
   -R --remove-section <name>       Remove section <name> from the output\n\
@@ -588,6 +593,8 @@ strip_usage (FILE *stream, int exit_status)
   -O --output-target=<bfdname>     Create an output file in format <bfdname>\n\
   -F --target=<bfdname>            Set both input and output format to <bfdname>\n\
   -p --preserve-dates              Copy modified/access timestamps to the output\n\
+  -D --enable-deterministic-archives\n\
+                                   Produce deterministic output when stripping archives\n\
   -R --remove-section=<name>       Remove section <name> from the output\n\
   -s --strip-all                   Remove all symbol and relocation information\n\
   -g -S -d --strip-debug           Remove all debugging symbols & sections\n\
@@ -2030,8 +2037,14 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       fatal (_("cannot create tempdir for archive copying (error: %s)"),
 	   strerror (errno));
 
-  obfd->has_armap = ibfd->has_armap;
+  if (strip_symbols == STRIP_ALL)
+    obfd->has_armap = FALSE;
+  else
+    obfd->has_armap = ibfd->has_armap;
   obfd->is_thin_archive = ibfd->is_thin_archive;
+
+  if (deterministic)
+    obfd->flags |= BFD_DETERMINISTIC_OUTPUT;
 
   list = NULL;
 
@@ -3024,6 +3037,9 @@ strip_main (int argc, char *argv[])
 	case 'p':
 	  preserve_dates = TRUE;
 	  break;
+	case 'D':
+	  deterministic = TRUE;
+	  break;
 	case 'x':
 	  discard_locals = LOCALS_ALL;
 	  break;
@@ -3382,6 +3398,10 @@ copy_main (int argc, char *argv[])
 
 	case 'p':
 	  preserve_dates = TRUE;
+	  break;
+
+	case 'D':
+	  deterministic = TRUE;
 	  break;
 
 	case 'w':
