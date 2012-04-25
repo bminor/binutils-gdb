@@ -1,3 +1,7 @@
+2012-04-25  Yao Qi  <yao@codesourcery.com>
+
+	* gdbint.texinfo (Testsuite): New section `Board settings'.
+
 2012-04-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Auto-loading safe path): Remove trailing [@dots{}].

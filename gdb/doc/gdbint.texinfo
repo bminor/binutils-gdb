@@ -7873,6 +7873,57 @@ gdb_test "python print ttype.template_argument(2)" "&C::c"
 @end smallexample
 @end table
 
+@section Board settings
+In @value{GDBN} testsuite, the tests can be configured or customized in the board
+file by means of @dfn{Board Settings}.  Each setting   should be consulted by
+test cases that depend on the corresponding feature.
+
+Here are the supported board settings:
+
+@table @code
+
+@item gdb,cannot_call_functions
+The board does not support inferior call, that is, invoking inferior functions
+in @value{GDBN}.
+@item gdb,can_reverse
+The board supports reverse execution.
+@item gdb,no_hardware_watchpoints
+The board does not support hardware watchpoints.
+@item gdb,nofileio
+@value{GDBN} is unable to intercept target file operations in remote and perform
+them on the host.
+@item gdb,noinferiorio
+The board is unable to provide I/O capability to the inferior.
+@c @item gdb,noresults
+@c NEED DOCUMENT.
+@item gdb,nosignals
+The board does not support signals.
+@item gdb,skip_huge_test
+Skip time-consuming tests on the board with slow connection.
+@item gdb,skip_float_tests
+Skip tests related to float points on target board.
+@item gdb,use_precord
+The board supports process record.
+@item gdb_server_prog
+The location of GDBserver.  If GDBserver somewhere other than its default
+location is used in test, specify the location of GDBserver in this variable.
+The location is a file name of GDBserver that can be either absolute or
+relative to testsuite subdirectory in build directory.
+@item in_proc_agent
+The location of in-process agent.  If in-process agent other than its default
+location is used in test, specify the location of in-process agent in
+this variable.  The location is a file name of in-process agent that can be
+either  absolute or relative to testsuite subdirectory in build directory.
+@item noargs
+@value{GDBN} does not support argument passing for inferior.
+@item no_long_long
+The board does not support type @code{long long}.
+@c @item use_cygmon
+@c NEED DOCUMENT.
+@item use_gdb_stub
+The tests are running with gdb stub.
+@end table
+
 @node Hints
 
 @chapter Hints
