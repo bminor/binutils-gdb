@@ -1,3 +1,33 @@
+2012-04-25  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* features/arm-with-iwmmxt.c: Regenerate.
+	* features/arm-with-m-fpa-layout.c: Likewise.
+	* features/arm-with-m.c: Likewise.
+	* features/arm-with-neon.c: Likewise.
+	* features/arm-with-vfpv2.c: Likewise.
+	* features/arm-with-vfpv3.c: Likewise.
+	* features/mips-dsp-linux.c: Likewise.
+	* features/mips-linux.c: Likewise.
+	* features/mips64-dsp-linux.c: Likewise.
+	* features/mips64-linux.c: Likewise.
+	* features/s390-linux32.c: Likewise.
+	* features/s390-linux32v1.c: Likewise.
+	* features/s390-linux32v2.c: Likewise.
+	* features/s390-linux64.c: Likewise.
+	* features/s390-linux64v1.c: Likewise.
+	* features/s390-linux64v2.c: Likewise.
+	* features/s390x-linux64.c: Likewise.
+	* features/s390x-linux64v1.c: Likewise.
+	* features/s390x-linux64v2.c: Likewise.
+	* features/tic6x-c62x-linux.c: Likewise.
+	* features/tic6x-c62x.c: Likewise.
+	* features/tic6x-c64x-linux.c: Likewise.
+	* features/tic6x-c64x.c: Likewise.
+	* features/tic6x-c64xp-linux.c: Likewise.
+	* features/tic6x-c64xp.c: Likewise.
+	* target-descriptions.c: Only generate `field_type' and `type'
+	variables when needed.
+
 2012-04-25  Fredrik Hederstierna  <fredrikh.hederstierna@securitas-direct.com>
 
 	* cli/cli-cmds.c (cd_command): Use memmove instead of strcpy.

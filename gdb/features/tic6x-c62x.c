@@ -10,7 +10,6 @@ initialize_tdesc_tic6x_c62x (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
-  struct tdesc_type *field_type, *type;
 
   set_tdesc_architecture (result, bfd_scan_arch ("tic6x"));
 

@@ -10,7 +10,6 @@ initialize_tdesc_arm_with_m (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
-  struct tdesc_type *field_type, *type;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.arm.m-profile");
   tdesc_create_reg (feature, "r0", 0, 1, NULL, 32, "int");

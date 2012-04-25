@@ -10,7 +10,6 @@ initialize_tdesc_s390_linux32v2 (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
-  struct tdesc_type *field_type, *type;
 
   set_tdesc_architecture (result, bfd_scan_arch ("s390:31-bit"));
 

@@ -1550,6 +1550,7 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
   struct tdesc_type_field *f;
   struct tdesc_type_flag *flag;
   int ix, ix2, ix3;
+  int printed_field_type = 0;
 
   /* Use the global target-supplied description, not the current
      architecture's.  This lets a GDB for one architecture generate C
@@ -1588,7 +1589,39 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
   printf_unfiltered
     ("  struct target_desc *result = allocate_target_description ();\n");
   printf_unfiltered ("  struct tdesc_feature *feature;\n");
-  printf_unfiltered ("  struct tdesc_type *field_type, *type;\n");
+
+  /* Now we do some "filtering" in order to know which variables to
+     declare.  This is needed because otherwise we would declare unused
+     variables `field_type' and `type'.  */
+  for (ix = 0;
+       VEC_iterate (tdesc_feature_p, tdesc->features, ix, feature);
+       ix++)
+    {
+      int printed_desc_type = 0;
+
+      for (ix2 = 0;
+	   VEC_iterate (tdesc_type_p, feature->types, ix2, type);
+	   ix2++)
+	{
+	  if (!printed_field_type)
+	    {
+	      printf_unfiltered ("  struct tdesc_type *field_type;\n");
+	      printed_field_type = 1;
+	    }
+
+	  if (type->kind == TDESC_TYPE_UNION
+	      && VEC_length (tdesc_type_field, type->u.u.fields) > 0)
+	    {
+	      printf_unfiltered ("  struct tdesc_type *type;\n");
+	      printed_desc_type = 1;
+	      break;
+	    }
+	}
+
+      if (printed_desc_type)
+	break;
+    }
+
   printf_unfiltered ("\n");
 
   if (tdesc_architecture (tdesc) != NULL)
