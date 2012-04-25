@@ -417,7 +417,7 @@ cd_command (char *dir, int from_tty)
     {
       if (IS_DIR_SEPARATOR (p[0]) && p[1] == '.'
 	  && (p[2] == 0 || IS_DIR_SEPARATOR (p[2])))
-	strcpy (p, p + 2);
+	memmove (p, p + 2, strlen (p + 2) + 1);
       else if (IS_DIR_SEPARATOR (p[0]) && p[1] == '.' && p[2] == '.'
 	       && (p[3] == 0 || IS_DIR_SEPARATOR (p[3])))
 	{
@@ -436,7 +436,7 @@ cd_command (char *dir, int from_tty)
 		++p;
 	      else
 		{
-		  strcpy (q - 1, p + 3);
+		  memmove (q - 1, p + 3, strlen (p + 3) + 1);
 		  p = q - 1;
 		}
 	    }
