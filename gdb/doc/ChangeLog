@@ -1,5 +1,7 @@
 2012-04-25  Doug Evans  <dje@google.com>
 
+	* gdb.texinfo (Go): Fix thinko.
+
 	* gdb.texinfo (Supported Languages): Add Go.
 	(Go): New node.
 

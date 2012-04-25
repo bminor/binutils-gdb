@@ -13101,13 +13101,13 @@ as a string.
 @item Builtin Go functions
 The @value{GDBN} expression parser recognizes the @code{unsafe.Sizeof}
 function and handles it internally.
-@end table
 
 @cindex restrictions on Go expressions
 @item Restrictions on Go expressions
 All Go operators are supported except @code{&^}.
 The Go @code{_} ``blank identifier'' is not supported.
 Automatic dereferencing of pointers is not supported.
+@end table
 
 @node Objective-C
 @subsection Objective-C
