@@ -1,3 +1,7 @@
+2012-04-25  Fredrik Hederstierna  <fredrikh.hederstierna@securitas-direct.com>
+
+	* cli/cli-cmds.c (cd_command): Use memmove instead of strcpy.
+
 2012-04-25  Doug Evans  <dje@google.com>
 
 	Initial pass at Go language support.
@@ -110,10 +114,6 @@
 	* mips-tdep.c (mips_n32n64_return_value): Fix coding style.
 	(mips_o32_return_value): Likewise.
 	(mips_o64_return_value): Likewise.
-
-2012-04-25  Fredrik Hederstierna  <fredrikh.hederstierna@securitas-direct.com>
-
-	* cli/cli-cmds.c (cd_command): Use memmove instead of strcpy.
 
 2012-04-21  Paul Hilfinger  <hilfinger@adacore.com>
 
