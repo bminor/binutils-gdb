@@ -1,8 +1,3 @@
-2012-04-25  Doug Evans  <dje@google.com>
-
-	* cli/cli-decode.c (print_doc_line): Use stream instead of
-	current_uiout.
-
 2012-04-25  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* features/arm-with-iwmmxt.c: Regenerate.
