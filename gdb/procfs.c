@@ -5725,8 +5725,9 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   if (get_exec_file (0))
     {
       strncpy (fname, lbasename (get_exec_file (0)), sizeof (fname));
-      strncpy (psargs, get_exec_file (0),
-	       sizeof (psargs));
+      fname[sizeof (fname) - 1] = 0;
+      strncpy (psargs, get_exec_file (0), sizeof (psargs));
+      psargs[sizeof (psargs) - 1] = 0;
 
       inf_args = get_inferior_args ();
       if (inf_args && *inf_args &&

@@ -1,3 +1,11 @@
+2012-04-24  Jim Meyering  <meyering@redhat.com>
+
+	avoid a few strncpy-induced buffer overruns
+	* procfs.c (procfs_make_note_section): Be sure to NUL-terminate
+	fname and psargs before trying to concatenate.
+	* tui/tui-stack.c (tui_get_function_from_frame): NUL-terminate
+	"name" before applying strchr.
+
 2012-04-25  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* CONTRIBUTE: Use unified diff instead of context diff when
