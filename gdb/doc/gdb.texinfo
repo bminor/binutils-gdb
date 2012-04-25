@@ -12487,8 +12487,8 @@ being set automatically by @value{GDBN}.
 @node Supported Languages
 @section Supported Languages
 
-@value{GDBN} supports C, C@t{++}, D, Objective-C, Fortran, Java, OpenCL C, Pascal,
-assembly, Modula-2, and Ada.
+@value{GDBN} supports C, C@t{++}, D, Go, Objective-C, Fortran, Java,
+OpenCL C, Pascal, assembly, Modula-2, and Ada.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -12507,6 +12507,7 @@ language reference or tutorial.
 @menu
 * C::                           C and C@t{++}
 * D::                           D
+* Go::                          Go
 * Objective-C::                 Objective-C
 * OpenCL C::                    OpenCL C
 * Fortran::                     Fortran
@@ -13058,6 +13059,55 @@ See @ref{PowerPC,,PowerPC} for more details.
 @value{GDBN} can be used to debug programs written in D and compiled with
 GDC, LDC or DMD compilers. Currently @value{GDBN} supports only one D
 specific feature --- dynamic arrays.
+
+@node Go
+@subsection Go
+
+@cindex Go (programming language)
+@value{GDBN} can be used to debug programs written in Go and compiled with
+@file{gccgo} or @file{6g} compilers.
+
+Here is a summary of the Go-specific features and restrictions:
+
+@table @code
+@cindex current Go package
+@item The current Go package
+The name of the current package does not need to be specified when
+specifying global variables and functions.
+
+For example, given the program:
+
+@example
+package main
+var myglob = "Shall we?"
+func main () @{
+  // ...
+@}
+@end example
+
+When stopped inside @code{main} either of these work:
+
+@example
+(gdb) p myglob
+(gdb) p main.myglob
+@end example
+
+@cindex builtin Go types
+@item Builtin Go types
+The @code{string} type is recognized by @value{GDBN} and is printed
+as a string.
+
+@cindex builtin Go functions
+@item Builtin Go functions
+The @value{GDBN} expression parser recognizes the @code{unsafe.Sizeof}
+function and handles it internally.
+@end table
+
+@cindex restrictions on Go expressions
+@item Restrictions on Go expressions
+All Go operators are supported except @code{&^}.
+The Go @code{_} ``blank identifier'' is not supported.
+Automatic dereferencing of pointers is not supported.
 
 @node Objective-C
 @subsection Objective-C

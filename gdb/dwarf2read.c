@@ -59,6 +59,7 @@
 #include "completer.h"
 #include "vec.h"
 #include "c-lang.h"
+#include "go-lang.h"
 #include "valprint.h"
 #include <ctype.h>
 
@@ -4822,6 +4823,78 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
     }
 }
 
+/* Go objects should be embedded in a DW_TAG_module DIE,
+   and it's not clear if/how imported objects will appear.
+   To keep Go support simple until that's worked out,
+   go back through what we've read and create something usable.
+   We could do this while processing each DIE, and feels kinda cleaner,
+   but that way is more invasive.
+   This is to, for example, allow the user to type "p var" or "b main"
+   without having to specify the package name, and allow lookups
+   of module.object to work in contexts that use the expression
+   parser.  */
+
+static void
+fixup_go_packaging (struct dwarf2_cu *cu)
+{
+  char *package_name = NULL;
+  struct pending *list;
+  int i;
+
+  for (list = global_symbols; list != NULL; list = list->next)
+    {
+      for (i = 0; i < list->nsyms; ++i)
+	{
+	  struct symbol *sym = list->symbol[i];
+
+	  if (SYMBOL_LANGUAGE (sym) == language_go
+	      && SYMBOL_CLASS (sym) == LOC_BLOCK)
+	    {
+	      char *this_package_name = go_symbol_package_name (sym);
+
+	      if (this_package_name == NULL)
+		continue;
+	      if (package_name == NULL)
+		package_name = this_package_name;
+	      else
+		{
+		  if (strcmp (package_name, this_package_name) != 0)
+		    complaint (&symfile_complaints,
+			       _("Symtab %s has objects from two different Go packages: %s and %s"),
+			       (sym->symtab && sym->symtab->filename
+				? sym->symtab->filename
+				: cu->objfile->name),
+			       this_package_name, package_name);
+		  xfree (this_package_name);
+		}
+	    }
+	}
+    }
+
+  if (package_name != NULL)
+    {
+      struct objfile *objfile = cu->objfile;
+      struct type *type = init_type (TYPE_CODE_MODULE, 0, 0,
+				     package_name, objfile);
+      struct symbol *sym;
+
+      TYPE_TAG_NAME (type) = TYPE_NAME (type);
+
+      sym = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symbol);
+      SYMBOL_SET_LANGUAGE (sym, language_go);
+      SYMBOL_SET_NAMES (sym, package_name, strlen (package_name), 1, objfile);
+      /* This is not VAR_DOMAIN because we want a way to ensure a lookup of,
+	 e.g., "main" finds the "main" module and not C's main().  */
+      SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
+      SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+      SYMBOL_TYPE (sym) = type;
+
+      add_symbol_to_list (sym, &global_symbols);
+
+      xfree (package_name);
+    }
+}
+
 /* Generate full symbol information for PER_CU, whose DIEs have
    already been loaded into memory.  */
 
@@ -4845,6 +4918,10 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
 
   /* Do line number decoding in read_file_scope () */
   process_die (cu->dies, cu);
+
+  /* For now fudge the Go package.  */
+  if (cu->language == language_go)
+    fixup_go_packaging (cu);
 
   /* Now that we have processed all the DIEs in the CU, all the types 
      should be complete, and it should now be safe to compute all of the
@@ -5055,8 +5132,14 @@ do_ui_file_peek_last (void *object, const char *buffer, long length)
 }
 
 /* Compute the fully qualified name of DIE in CU.  If PHYSNAME is nonzero,
-   compute the physname for the object, which include a method's
-   formal parameters (C++/Java) and return type (Java).
+   compute the physname for the object, which include a method's:
+   - formal parameters (C++/Java),
+   - receiver type (Go),
+   - return type (Java).
+
+   The term "physname" is a bit confusing.
+   For C++, for example, it is the demangled name.
+   For Go, for example, it's the mangled name.
 
    For Ada, return the DIE's linkage name rather than the fully qualified
    name.  PHYSNAME is ignored..
@@ -5353,10 +5436,21 @@ dwarf2_physname (char *name, struct die_info *die, struct dwarf2_cu *cu)
 	 variant `long name(params)' does not have the proper inferior type.
 	 */
 
-      demangled = cplus_demangle (mangled, (DMGL_PARAMS | DMGL_ANSI
-					    | (cu->language == language_java
-					       ? DMGL_JAVA | DMGL_RET_POSTFIX
-					       : DMGL_RET_DROP)));
+      if (cu->language == language_go)
+	{
+	  /* This is a lie, but we already lie to the caller new_symbol_full.
+	     new_symbol_full assumes we return the mangled name.
+	     This just undoes that lie until things are cleaned up.  */
+	  demangled = NULL;
+	}
+      else
+	{
+	  demangled = cplus_demangle (mangled,
+				      (DMGL_PARAMS | DMGL_ANSI
+				       | (cu->language == language_java
+					  ? DMGL_JAVA | DMGL_RET_POSTFIX
+					  : DMGL_RET_DROP)));
+	}
       if (demangled)
 	{
 	  make_cleanup (xfree, demangled);
@@ -5683,6 +5777,10 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
      back to the DW_AT_producer string.  */
   if (cu->producer && strstr (cu->producer, "IBM XL C for OpenCL") != NULL)
     cu->language = language_opencl;
+
+  /* Similar hack for Go.  */
+  if (cu->producer && strstr (cu->producer, "GNU Go ") != NULL)
+    set_cu_language (DW_LANG_Go, cu);
 
   /* We assume that we're processing GCC output.  */
   processing_gcc_compilation = 2;
@@ -10758,6 +10856,9 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
     case DW_LANG_Fortran90:
     case DW_LANG_Fortran95:
       cu->language = language_fortran;
+      break;
+    case DW_LANG_Go:
+      cu->language = language_go;
       break;
     case DW_LANG_Mips_Assembler:
       cu->language = language_asm;

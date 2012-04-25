@@ -1,3 +1,30 @@
+2012-04-25  Doug Evans  <dje@google.com>
+
+	Initial pass at Go language support.
+	* NEWS: Mention Go.
+	* Makefile.in (SFILES): Add go-exp.y, go-lang.c, go-typeprint.c,
+	go-valprint.c.
+	(COMMON_OBS): Add go-lang.o, go-val.print.o, go-typeprint.o.
+	(YYFILES): Add go-exp.c.
+	(YYOBJ): Add go-exp.o.
+	(local-maintainer-clean): Delete go-exp.c.
+	* defs.h (enum language): Add language_go.
+	* dwarf2read.c: #include "go-lang.h".
+	(fixup_go_packaging): New function.
+	(process_full_comp_unit): Call it when processing Go CUs.
+	(dwarf2_physname): Add Go support.
+	(read_file_scope): Handle missing language spec for GNU Go.
+	(set_cu_language): Handle DW_LANG_Go.
+	* go-exp.y: New file.
+	* go-lang.h: New file.
+	* go-lang.c: New file.
+	* go-typeprint.c: New file.
+	* go-valprint.c: New file.
+	* symtab.c: #include "go-lang.h".
+	(symbol_set_language): Handle language_go.
+	(symbol_find_demangled_name, symbol_set_names): Ditto.
+	(symbol_natural_name, demangle_for_lookup, find_main_name): Ditto.
+
 2012-04-24  Jim Meyering  <meyering@redhat.com>
 
 	avoid a few strncpy-induced buffer overruns

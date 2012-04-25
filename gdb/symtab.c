@@ -39,6 +39,7 @@
 #include "objc-lang.h"
 #include "d-lang.h"
 #include "ada-lang.h"
+#include "go-lang.h"
 #include "p-lang.h"
 #include "addrmap.h"
 
@@ -500,6 +501,7 @@ symbol_set_language (struct general_symbol_info *gsymbol,
 {
   gsymbol->language = language;
   if (gsymbol->language == language_d
+      || gsymbol->language == language_go
       || gsymbol->language == language_java
       || gsymbol->language == language_objc
       || gsymbol->language == language_fortran)
@@ -620,6 +622,22 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 	  return demangled;
 	}
     }
+  /* FIXME(dje): Continually adding languages here is clumsy.
+     Better to just call la_demangle if !auto, and if auto then call
+     a utility routine that tries successive languages in turn and reports
+     which one it finds.  I realize the la_demangle options may be different
+     for different languages but there's already a FIXME for that.  */
+  if (gsymbol->language == language_go
+      || gsymbol->language == language_auto)
+    {
+      demangled = go_demangle (mangled, 0);
+      if (demangled != NULL)
+	{
+	  gsymbol->language = language_go;
+	  return demangled;
+	}
+    }
+
   /* We could support `gsymbol->language == language_fortran' here to provide
      module namespaces also for inferiors with only minimal symbol table (ELF
      symbols).  Just the mangling standard is not standardized across compilers
@@ -742,7 +760,11 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 			  &entry, INSERT));
 
   /* If this name is not in the hash table, add it.  */
-  if (*slot == NULL)
+  if (*slot == NULL
+      /* A C version of the symbol may have already snuck into the table.
+	 This happens to, e.g., main.init (__go_init_main).  Cope.  */
+      || (gsymbol->language == language_go
+	  && (*slot)->demangled[0] == '\0'))
     {
       char *demangled_name = symbol_find_demangled_name (gsymbol,
 							 linkage_name_copy);
@@ -804,6 +826,7 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
     {
     case language_cplus:
     case language_d:
+    case language_go:
     case language_java:
     case language_objc:
     case language_fortran:
@@ -832,6 +855,7 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
     {
     case language_cplus:
     case language_d:
+    case language_go:
     case language_java:
     case language_objc:
     case language_fortran:
@@ -1123,7 +1147,7 @@ demangle_for_lookup (const char *name, enum language lang,
 
   modified_name = name;
 
-  /* If we are using C++, D, or Java, demangle the name before doing a
+  /* If we are using C++, D, Go, or Java, demangle the name before doing a
      lookup, so we can always binary search.  */
   if (lang == language_cplus)
     {
@@ -1158,6 +1182,15 @@ demangle_for_lookup (const char *name, enum language lang,
   else if (lang == language_d)
     {
       demangled_name = d_demangle (name, 0);
+      if (demangled_name)
+	{
+	  modified_name = demangled_name;
+	  make_cleanup (xfree, demangled_name);
+	}
+    }
+  else if (lang == language_go)
+    {
+      demangled_name = go_demangle (name, 0);
       if (demangled_name)
 	{
 	  modified_name = demangled_name;
@@ -4796,6 +4829,13 @@ find_main_name (void)
      that order of call for these methods becomes important, which means
      a more complicated approach.  */
   new_main_name = ada_main_name ();
+  if (new_main_name != NULL)
+    {
+      set_main_name (new_main_name);
+      return;
+    }
+
+  new_main_name = go_main_name ();
   if (new_main_name != NULL)
     {
       set_main_name (new_main_name);

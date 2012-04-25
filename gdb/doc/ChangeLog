@@ -1,3 +1,8 @@
+2012-04-25  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Supported Languages): Add Go.
+	(Go): New node.
+
 2012-04-25  Yao Qi  <yao@codesourcery.com>
 
 	* gdbint.texinfo (Testsuite): New section `Board settings'.

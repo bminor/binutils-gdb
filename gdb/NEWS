@@ -32,6 +32,10 @@
   ** A new method 'referenced_value' on gdb.Value objects which can
      dereference pointer as well as C++ reference values.
 
+* Go language support.
+  GDB now supports debugging programs written in the Go programming
+  language.
+
 * GDBserver now supports stdio connections.
   E.g. (gdb) target remote | ssh myhost gdbserver - hello
 

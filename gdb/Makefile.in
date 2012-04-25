@@ -704,6 +704,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c filesystem.c \
 	findcmd.c findvar.c frame.c frame-base.c frame-unwind.c \
 	gdbarch.c arch-utils.c gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
+	go-exp.y go-lang.c go-typeprint.c go-valprint.c \
 	inf-loop.c \
 	infcall.c \
 	infcmd.c inflow.c infrun.c \
@@ -769,7 +770,7 @@ cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
 exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h amd64bsd-nat.h \
 i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
 ia64-tdep.h ada-lang.h ada-varobj.h varobj.h frv-tdep.h nto-tdep.h serial.h \
-c-lang.h d-lang.h frame.h event-loop.h block.h cli/cli-setshow.h	\
+c-lang.h d-lang.h golang.h frame.h event-loop.h block.h cli/cli-setshow.h \
 cli/cli-decode.h cli/cli-cmds.h cli/cli-dump.h cli/cli-utils.h \
 cli/cli-script.h macrotab.h symtab.h version.h \
 gnulib/import/string.in.h gnulib/import/str-two-way.h \
@@ -889,6 +890,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	ada-tasks.o ada-varobj.o \
 	ui-out.o cli-out.o \
 	varobj.o vec.o \
+	go-lang.o go-valprint.o go-typeprint.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \
 	m2-lang.o opencl-lang.o p-lang.o p-typeprint.o p-valprint.o \
 	sentinel-frame.o \
@@ -933,13 +935,13 @@ YYFILES = c-exp.c \
 	ada-lex.c \
 	ada-exp.c \
 	jv-exp.c \
-	f-exp.c m2-exp.c p-exp.c
+	f-exp.c go-exp.c m2-exp.c p-exp.c
 YYOBJ = c-exp.o \
 	cp-name-parser.o \
 	objc-exp.o \
 	ada-exp.o \
 	jv-exp.o \
-	f-exp.o m2-exp.o p-exp.o
+	f-exp.o go-exp.o m2-exp.o p-exp.o
 
 # Things which need to be built when making a distribution.
 
@@ -1241,7 +1243,7 @@ local-maintainer-clean:
 		ada-lex.c ada-exp.c \
 	        objc-exp.c \
 		jv-exp.tab \
-		f-exp.c m2-exp.c p-exp.c
+		f-exp.c go-exp.c m2-exp.c p-exp.c
 	rm -f TAGS $(INFOFILES)
 	rm -f $(YYFILES)
 	rm -f nm.h config.status

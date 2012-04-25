@@ -1,3 +1,36 @@
+2012-04-25  Doug Evans  <dje@google.com>
+
+	* configure.ac: Create gdb.go/Makefile.
+	* configure: Regenerate.
+	* gdb.base/default.exp: Add "go" to "set language" testing.
+	* gdb.go/Makefile.in: New file.
+	* gdb.go/basic-types.exp: New file.
+	* gdb.go/chan.exp: New file.
+	* gdb.go/chan.go: New file.
+	* gdb.go/handcall.exp: New file.
+	* gdb.go/handcall.go: New file.
+	* gdb.go/hello.exp: New file.
+	* gdb.go/hello.go: New file.
+	* gdb.go/integers.exp: New file.
+	* gdb.go/integers.go: New file.
+	* gdb.go/methods.exp: New file.
+	* gdb.go/methods.go: New file.
+	* gdb.go/package.exp: New file.
+	* gdb.go/package1.go: New file.
+	* gdb.go/package2.go: New file.
+	* gdb.go/print.exp: New file.
+	* gdb.go/strings.exp: New file.
+	* gdb.go/strings.go: New file.
+	* gdb.go/types.exp: New file.
+	* gdb.go/types.go: New file.
+	* gdb.go/unsafe.exp: New file.
+	* gdb.go/unsafe.go: New file.
+	* lib/future.exp: Add Go support.
+	(gdb_find_go, gdb_find_go_linker): New procs.
+	(gdb_default_target_compile): Add Go support.
+	* lib/gdb.exp (skip_go_tests): New proc.
+	* lib/go.exp: New file.
+
 2012-04-25  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.threads/linux-dp.exp: Unset 'seen' before 'array set'.

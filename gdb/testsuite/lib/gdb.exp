@@ -1440,6 +1440,12 @@ proc skip_ada_tests {} {
     return 0
 }
 
+# Return a 1 if I don't even want to try to test GO.
+
+proc skip_go_tests {} {
+    return 0
+}
+
 # Return a 1 if I don't even want to try to test java.
 
 proc skip_java_tests {} {
