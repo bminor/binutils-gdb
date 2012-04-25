@@ -1018,7 +1018,7 @@ print_doc_line (struct ui_file *stream, char *str)
   line_buffer[p - str] = '\0';
   if (islower (line_buffer[0]))
     line_buffer[0] = toupper (line_buffer[0]);
-  ui_out_text (current_uiout, line_buffer);
+  fputs_filtered (line_buffer, stream);
 }
 
 /* Print one-line help for command C.
