@@ -1,3 +1,11 @@
+2012-04-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix DW_AT_lower_bound defaults for DWARF-4+.
+	* dwarf2read.c (read_subrange_type): Remove initialization of low and
+	high.  New variable low_default_is_valid.  Implement DWARF-4+
+	DW_AT_lower_bound defaults.  Print complaint for DW_AT_lower_bound with
+	no default by the DWARF standard.
+
 2012-04-26  Maciej W. Rozycki  <macro@mips.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 

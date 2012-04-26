@@ -9086,8 +9086,8 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *base_type;
   struct type *range_type;
   struct attribute *attr;
-  LONGEST low = 0;
-  LONGEST high = -1;
+  LONGEST low, high;
+  int low_default_is_valid;
   char *name;
   LONGEST negative_mask;
 
@@ -9100,10 +9100,35 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   if (range_type)
     return range_type;
 
-  if (cu->language == language_fortran)
+  /* Set LOW_DEFAULT_IS_VALID if current language and DWARF version allow
+     omitting DW_AT_lower_bound.  */
+  switch (cu->language)
     {
-      /* FORTRAN implies a lower bound of 1, if not given.  */
+    case language_c:
+    case language_cplus:
+      low = 0;
+      low_default_is_valid = 1;
+      break;
+    case language_fortran:
       low = 1;
+      low_default_is_valid = 1;
+      break;
+    case language_d:
+    case language_java:
+    case language_objc:
+      low = 0;
+      low_default_is_valid = (cu->header.version >= 4);
+      break;
+    case language_ada:
+    case language_m2:
+    case language_pascal:
+      low = 1;
+      low_default_is_valid = (cu->header.version >= 4);
+      break;
+    default:
+      low = 0;
+      low_default_is_valid = 0;
+      break;
     }
 
   /* FIXME: For variable sized arrays either of these could be
@@ -9111,7 +9136,11 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
      but we don't know how to handle it.  */
   attr = dwarf2_attr (die, DW_AT_lower_bound, cu);
   if (attr)
-    low = dwarf2_get_attr_constant_value (attr, 0);
+    low = dwarf2_get_attr_constant_value (attr, low);
+  else if (!low_default_is_valid)
+    complaint (&symfile_complaints, _("Missing DW_AT_lower_bound "
+				      "- DIE at 0x%x [in module %s]"),
+	       die->offset.sect_off, cu->objfile->name);
 
   attr = dwarf2_attr (die, DW_AT_upper_bound, cu);
   if (attr)
