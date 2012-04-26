@@ -1,3 +1,7 @@
+2012-04-26  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.4.1 released.
+
 2012-04-26  Jonathan Larmour  <jifl@eCosCentric.com>
 
 	* arm-tdep.h (VFP_REGISTER_SIZE): Define.
