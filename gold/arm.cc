@@ -8374,7 +8374,9 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
 	    Reloc_section* rel_dyn = target->rel_dyn_section(layout);
 	    if (gsym->is_from_dynobj()
 		|| gsym->is_undefined()
-		|| gsym->is_preemptible())
+		|| gsym->is_preemptible()
+		|| (gsym->visibility() == elfcpp::STV_PROTECTED
+		    && parameters->options().shared()))
 	      got->add_global_with_rel(gsym, GOT_TYPE_STANDARD,
 				       rel_dyn, elfcpp::R_ARM_GLOB_DAT);
 	    else

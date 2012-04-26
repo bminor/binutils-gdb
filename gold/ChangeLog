@@ -1,3 +1,18 @@
+2012-04-27  Doug Kwan  <dougkwan@google.com>
+
+	Backport from mainline:
+
+	2012-03-16  Doug Kwan  <dougkwan@google.com>
+
+		* testsuite/Makefile.am: Disable test initpri3b.
+		* testsuite/Makefile.in: Regenerate.
+
+	2012-03-14  Doug Kwan  <dougkwan@google.com>
+
+		* gold/arm.cc (Target_arm::Scan::global): Generate
+		 R_ARM_GLOB_DAT dynamic relocations for protected symbols in
+		shared objects.
+
 2012-04-06  Ian Lance Taylor  <iant@google.com>
 
 	* timer.cc: #include <unistd.h>.

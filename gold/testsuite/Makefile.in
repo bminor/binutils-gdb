@@ -56,6 +56,17 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @NATIVE_OR_CROSS_LINKER_TRUE@am__append_1 = object_unittest \
 @NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest
 
+# This test fails on targets not using .ctors and .dtors sections (e.g. ARM
+# EABI). Given that gcc is moving towards using .init_array in all cases,
+# this test is commented out.  A better fix would be checking whether gcc
+# uses .ctors or .init_array sections in configure.
+
+# check_PROGRAMS += initpri3b
+# initpri3b_SOURCES = initpri3.c
+# initpri3b_DEPENDENCIES = gcctestdir/ld
+# initpri3b_LDFLAGS = -Bgcctestdir/ -Wl,--no-ctors-in-init-array
+# initpri3b_LDADD =
+
 # Test --detect-odr-violations
 
 # Similar to --detect-odr-violations: check for undefined symbols in .so's
@@ -189,7 +200,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Test -o when emitting to a special file (such as something in /dev).
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_24 = many_sections_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test initpri1 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri2 initpri3a initpri3b \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri2 initpri3a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile
 @GCC_FALSE@many_sections_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@many_sections_test_DEPENDENCIES =
@@ -204,8 +215,6 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @NATIVE_LINKER_FALSE@initpri2_DEPENDENCIES =
 @GCC_FALSE@initpri3a_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@initpri3a_DEPENDENCIES =
-@GCC_FALSE@initpri3b_DEPENDENCIES =
-@NATIVE_LINKER_FALSE@initpri3b_DEPENDENCIES =
 
 # Check that --detect-odr-violations works with compressed debug sections.
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = debug_msg_cdebug.err
@@ -712,7 +721,6 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri3a$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri3b$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile$(EXEEXT)
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_21 = flagstest_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
@@ -1199,11 +1207,6 @@ initpri2_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(initpri2_LDFLAGS) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri3.$(OBJEXT)
 initpri3a_OBJECTS = $(am_initpri3a_OBJECTS)
 initpri3a_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(initpri3a_LDFLAGS) \
-	$(LDFLAGS) -o $@
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am_initpri3b_OBJECTS =  \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	initpri3.$(OBJEXT)
-initpri3b_OBJECTS = $(am_initpri3b_OBJECTS)
-initpri3b_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(initpri3b_LDFLAGS) \
 	$(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_justsyms_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_1.$(OBJEXT)
@@ -1698,7 +1701,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	incremental_copy_test.c incremental_test_2.c \
 	incremental_test_3.c incremental_test_4.c incremental_test_5.c \
 	incremental_test_6.c $(initpri1_SOURCES) $(initpri2_SOURCES) \
-	$(initpri3a_SOURCES) $(initpri3b_SOURCES) $(justsyms_SOURCES) \
+	$(initpri3a_SOURCES) $(justsyms_SOURCES) \
 	$(justsyms_exec_SOURCES) $(large_SOURCES) local_labels_test.c \
 	many_sections_r_test.c $(many_sections_test_SOURCES) \
 	$(object_unittest_SOURCES) permission_test.c plugin_test_1.c \
@@ -2281,10 +2284,6 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@initpri3a_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@initpri3a_LDFLAGS = -Bgcctestdir/
 @GCC_TRUE@@NATIVE_LINKER_TRUE@initpri3a_LDADD = 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri3b_SOURCES = initpri3.c
-@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri3b_DEPENDENCIES = gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri3b_LDFLAGS = -Bgcctestdir/ -Wl,--no-ctors-in-init-array
-@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri3b_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_SOURCES = ver_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_DEPENDENCIES = gcctestdir/ld ver_test_1.so ver_test_2.so ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
@@ -2928,9 +2927,6 @@ initpri2$(EXEEXT): $(initpri2_OBJECTS) $(initpri2_DEPENDENCIES)
 initpri3a$(EXEEXT): $(initpri3a_OBJECTS) $(initpri3a_DEPENDENCIES) 
 	@rm -f initpri3a$(EXEEXT)
 	$(initpri3a_LINK) $(initpri3a_OBJECTS) $(initpri3a_LDADD) $(LIBS)
-initpri3b$(EXEEXT): $(initpri3b_OBJECTS) $(initpri3b_DEPENDENCIES) 
-	@rm -f initpri3b$(EXEEXT)
-	$(initpri3b_LINK) $(initpri3b_OBJECTS) $(initpri3b_LDADD) $(LIBS)
 justsyms$(EXEEXT): $(justsyms_OBJECTS) $(justsyms_DEPENDENCIES) 
 	@rm -f justsyms$(EXEEXT)
 	$(justsyms_LINK) $(justsyms_OBJECTS) $(justsyms_LDADD) $(LIBS)
@@ -3869,8 +3865,6 @@ initpri2.log: initpri2$(EXEEXT)
 	@p='initpri2$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 initpri3a.log: initpri3a$(EXEEXT)
 	@p='initpri3a$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
-initpri3b.log: initpri3b$(EXEEXT)
-	@p='initpri3b$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 flagstest_o_specialfile.log: flagstest_o_specialfile$(EXEEXT)
 	@p='flagstest_o_specialfile$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 flagstest_compress_debug_sections.log: flagstest_compress_debug_sections$(EXEEXT)
