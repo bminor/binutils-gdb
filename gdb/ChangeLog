@@ -1,3 +1,7 @@
+2012-04-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Update GDB version number to 7.4.1.
+
 2012-04-24  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* mi/mi-main.c (mi_cmd_execute): Choose a live thread not just
