@@ -1026,12 +1026,6 @@ bfd_assert (const char *file, int line)
 {
   (*_bfd_assert_handler) (_("BFD %s assertion fail %s:%d"),
 			  BFD_VERSION_STRING, file, line);
-
-  /* We used to just return from bfd_assert, but that caused more
-     grief than relief.  The different code paths for bfd_assert and
-     _bfd_abort could be united but keeping them separate can
-     simplify debugging.  */
-  _exit (EXIT_FAILURE);
 }
 
 /* A more or less friendly abort message.  In libbfd.h abort is
