@@ -1,3 +1,10 @@
+2012-04-26  Hans-Peter Nilsson  <hp@axis.com>
+
+	Make bfd asserts cause linker errors.
+	* ldmain.c (default_bfd_assert_handler): New variable.
+	(ld_bfd_assert_handler): New function.
+	(main): Call bfd_set_assert_handler.
+
 2012-04-24  Alan Modra  <amodra@gmail.com>
 
 	* ld/ldlang.c (size_input_section): Use sec_info_type rather than
