@@ -71,6 +71,10 @@ enum gdb_regnum {
    bits.  DWORD aligned they use 96 bits.  */
 #define FP_REGISTER_SIZE	12
 
+/* Say how long VFP double precision registers are.  Used for documentation
+   purposes and code readability.  These are fixed at 64 bits.  */
+#define VFP_REGISTER_SIZE	8
+
 /* Number of machine registers.  The only define actually required 
    is gdbarch_num_regs.  The other definitions are used for documentation
    purposes and code readability.  */

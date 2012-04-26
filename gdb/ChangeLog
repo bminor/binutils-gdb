@@ -1,3 +1,14 @@
+2012-04-26  Jonathan Larmour  <jifl@eCosCentric.com>
+
+	* arm-tdep.h (VFP_REGISTER_SIZE): Define.
+	* features/arm-with-m-vfp-d16.xml: New file. Describes
+	Cortex-M with VFPv4-sp-d16 FPU register layout.
+	* features/Makefile (WHICH): Add arm-with-m-vfp-d16.
+	* features/arm-with-m-vfp-d16.c: New. Generated from above.
+	* arm-tdep.c: Include arm-with-m-vfp-d16.c.
+	(arm-register_g_packet_guesses): Add vfp-d16 guess.
+	(_initialise_arm_tdep): Initialize arm-with-m-vfp-d16 tdesc.
+
 2012-04-25  Doug Evans  <dje@google.com>
 
 	* cli/cli-decode.c (print_doc_line): Use stream instead of
