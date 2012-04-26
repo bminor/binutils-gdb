@@ -38,7 +38,7 @@ namespace gold
 class General_options;
 class Object;
 class Relobj;
-class Read_relocs_data;
+struct Read_relocs_data;
 class Symbol;
 class Layout;
 class Output_data;

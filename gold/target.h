@@ -1,6 +1,7 @@
 // target.h -- target support for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -49,7 +50,7 @@ template<int size, bool big_endian>
 class Sized_relobj_file;
 class Relocatable_relocs;
 template<int size, bool big_endian>
-class Relocate_info;
+struct Relocate_info;
 class Reloc_symbol_changes;
 class Symbol;
 template<int size>

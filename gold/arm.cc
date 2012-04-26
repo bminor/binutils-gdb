@@ -2314,7 +2314,7 @@ class Target_arm : public Sized_target<32, big_endian>
  
   // Return whether SYM is defined by the ABI.
   bool
-  do_is_defined_by_abi(Symbol* sym) const
+  do_is_defined_by_abi(const Symbol* sym) const
   { return strcmp(sym->name(), "__tls_get_addr") == 0; }
 
   // Return whether there is a GOT section.
@@ -6993,7 +6993,7 @@ Stub_addend_reader<elfcpp::SHT_REL, big_endian>::operator()(
     const unsigned char* view,
     const typename Reloc_types<elfcpp::SHT_REL, 32, big_endian>::Reloc&) const
 {
-  typedef struct Arm_relocate_functions<big_endian> RelocFuncs;
+  typedef class Arm_relocate_functions<big_endian> RelocFuncs;
   
   switch (r_type)
     {
@@ -11709,7 +11709,7 @@ Target_arm<big_endian>::scan_span_for_cortex_a8_erratum(
 	  // Check if we have an offending branch instruction.
 	  uint16_t upper_insn = (insn >> 16) & 0xffffU;
 	  uint16_t lower_insn = insn & 0xffffU;
-	  typedef struct Arm_relocate_functions<big_endian> RelocFuncs;
+	  typedef class Arm_relocate_functions<big_endian> RelocFuncs;
 
 	  if (cortex_a8_reloc != NULL
 	      && cortex_a8_reloc->reloc_stub() != NULL)
@@ -11812,7 +11812,7 @@ Target_arm<big_endian>::apply_cortex_a8_workaround(
   Valtype lower_insn = elfcpp::Swap<16, big_endian>::readval(wv + 1);
   off_t branch_offset = stub_address - (insn_address + 4);
 
-  typedef struct Arm_relocate_functions<big_endian> RelocFuncs;
+  typedef class Arm_relocate_functions<big_endian> RelocFuncs;
   switch (stub->stub_template()->type())
     {
     case arm_stub_a8_veneer_b_cond:

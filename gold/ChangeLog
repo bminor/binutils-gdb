@@ -1,3 +1,16 @@
+2012-04-25  Ian Lance Taylor  <iant@google.com>
+
+	* arm.cc (Target_arm::do_is_defined_by_abi): Make sym a const
+	pointer.
+	(Stub_addend_reader::operator()): Declare Arm_relocate_functions
+	as a class, not a struct.
+	(Target_arm::scan_span_for_cortex_a8_erratum): Likewise.
+	(Target_arm::apply_cortex_a8_workaround): Likewise.
+	* gc.h: Declare Reloc_types as a struct, not a class.
+	* object.h: Declare Symbols_data as a struct.
+	* reloc.h: Declare Read_relocs_data as a struct.
+	* target.h: Declare Relocate_info as a struct.
+
 2012-04-24  David S. Miller  <davem@davemloft.net>
 
 	* sparc.cc (Target_sparc::Relocate::relax_call): New function.
