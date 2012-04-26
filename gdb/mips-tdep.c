@@ -1035,6 +1035,45 @@ mips_pc_is_mips16 (CORE_ADDR memaddr)
     return is_mips16_addr (memaddr);
 }
 
+/* Various MIPS16 thunk (aka stub or trampoline) names.  */
+
+static const char mips_str_mips16_call_stub[] = "__mips16_call_stub_";
+static const char mips_str_mips16_ret_stub[] = "__mips16_ret_";
+static const char mips_str_call_fp_stub[] = "__call_stub_fp_";
+static const char mips_str_call_stub[] = "__call_stub_";
+static const char mips_str_fn_stub[] = "__fn_stub_";
+
+/* This is used as a PIC thunk prefix.  */
+
+static const char mips_str_pic[] = ".pic.";
+
+/* Return non-zero if the PC is inside a call thunk (aka stub or
+   trampoline) that should be treated as a temporary frame.  */
+
+static int
+mips_in_frame_stub (CORE_ADDR pc)
+{
+  CORE_ADDR start_addr;
+  const char *name;
+
+  /* Find the starting address of the function containing the PC.  */
+  if (find_pc_partial_function (pc, &name, &start_addr, NULL) == 0)
+    return 0;
+
+  /* If the PC is in __mips16_call_stub_*, this is a call/return stub.  */
+  if (strncmp (name, mips_str_mips16_call_stub,
+	       strlen (mips_str_mips16_call_stub)) == 0)
+    return 1;
+  /* If the PC is in __call_stub_*, this is a call/return or a call stub.  */
+  if (strncmp (name, mips_str_call_stub, strlen (mips_str_call_stub)) == 0)
+    return 1;
+  /* If the PC is in __fn_stub_*, this is a call stub.  */
+  if (strncmp (name, mips_str_fn_stub, strlen (mips_str_fn_stub)) == 0)
+    return 1;
+
+  return 0;			/* Not a stub.  */
+}
+
 /* MIPS believes that the PC has a sign extended value.  Perhaps the
    all registers should be sign extended for simplicity?  */
 
@@ -1052,12 +1091,31 @@ mips_read_pc (struct regcache *regcache)
 static CORE_ADDR
 mips_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  ULONGEST pc;
+  CORE_ADDR pc;
 
   pc = frame_unwind_register_signed
 	 (next_frame, gdbarch_num_regs (gdbarch) + mips_regnum (gdbarch)->pc);
   if (is_mips16_addr (pc))
     pc = unmake_mips16_addr (pc);
+  /* macro/2012-04-20: This hack skips over MIPS16 call thunks as
+     intermediate frames.  In this case we can get the caller's address
+     from $ra, or if $ra contains an address within a thunk as well, then
+     it must be in the return path of __mips16_call_stub_{s,d}{f,c}_{0..10}
+     and thus the caller's address is in $s2.  */
+  if (frame_relative_level (next_frame) >= 0 && mips_in_frame_stub (pc))
+    {
+      pc = frame_unwind_register_signed
+	     (next_frame, gdbarch_num_regs (gdbarch) + MIPS_RA_REGNUM);
+      if (is_mips16_addr (pc))
+	pc = unmake_mips16_addr (pc);
+      if (mips_in_frame_stub (pc))
+	{
+	  pc = frame_unwind_register_signed
+		 (next_frame, gdbarch_num_regs (gdbarch) + MIPS_S2_REGNUM);
+	  if (is_mips16_addr (pc))
+	    pc = unmake_mips16_addr (pc);
+	}
+    }
   return pc;
 }
 
@@ -5624,104 +5682,335 @@ mips_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
   return bpaddr;
 }
 
-/* If PC is in a mips16 call or return stub, return the address of the target
-   PC, which is either the callee or the caller.  There are several
+/* Return non-zero if SUFFIX is one of the numeric suffixes used for MIPS16
+   call stubs, one of 1, 2, 5, 6, 9, 10, or, if ZERO is non-zero, also 0.  */
+
+static int
+mips_is_stub_suffix (const char *suffix, int zero)
+{
+  switch (suffix[0])
+   {
+   case '0':
+     return zero && suffix[1] == '\0';
+   case '1':
+     return suffix[1] == '\0' || (suffix[1] == '0' && suffix[2] == '\0');
+   case '2':
+   case '5':
+   case '6':
+   case '9':
+     return suffix[1] == '\0';
+   default:
+     return 0;
+   }
+}
+
+/* Return non-zero if MODE is one of the mode infixes used for MIPS16
+   call stubs, one of sf, df, sc, or dc.  */
+
+static int
+mips_is_stub_mode (const char *mode)
+{
+  return ((mode[0] == 's' || mode[0] == 'd')
+	  && (mode[1] == 'f' || mode[1] == 'c'));
+}
+
+/* Code at PC is a compiler-generated stub.  Such a stub for a function
+   bar might have a name like __fn_stub_bar, and might look like this:
+
+      mfc1    $4, $f13
+      mfc1    $5, $f12
+      mfc1    $6, $f15
+      mfc1    $7, $f14
+
+   followed by (or interspersed with):
+
+      j       bar
+
+   or:
+
+      lui     $25, %hi(bar)
+      addiu   $25, $25, %lo(bar)
+      jr      $25
+
+   ($1 may be used in old code; for robustness we accept any register)
+   or, in PIC code:
+
+      lui     $28, %hi(_gp_disp)
+      addiu   $28, $28, %lo(_gp_disp)
+      addu    $28, $28, $25
+      lw      $25, %got(bar)
+      addiu   $25, $25, %lo(bar)
+      jr      $25
+
+   In the case of a __call_stub_bar stub, the sequence to set up
+   arguments might look like this:
+
+      mtc1    $4, $f13
+      mtc1    $5, $f12
+      mtc1    $6, $f15
+      mtc1    $7, $f14
+
+   followed by (or interspersed with) one of the jump sequences above.
+
+   In the case of a __call_stub_fp_bar stub, JAL or JALR is used instead
+   of J or JR, respectively, followed by:
+
+      mfc1    $2, $f0
+      mfc1    $3, $f1
+      jr      $18
+
+   We are at the beginning of the stub here, and scan down and extract
+   the target address from the jump immediate instruction or, if a jump
+   register instruction is used, from the register referred.  Return
+   the value of PC calculated or 0 if inconclusive.
+
+   The limit on the search is arbitrarily set to 20 instructions.  FIXME.  */
+
+static CORE_ADDR
+mips_get_mips16_fn_stub_pc (struct frame_info *frame, CORE_ADDR pc)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int addrreg = MIPS_ZERO_REGNUM;
+  CORE_ADDR start_pc = pc;
+  CORE_ADDR target_pc = 0;
+  CORE_ADDR addr = 0;
+  CORE_ADDR gp = 0;
+  int status = 0;
+  int i;
+
+  for (i = 0;
+       status == 0 && target_pc == 0 && i < 20;
+       i++, pc += MIPS_INSN32_SIZE)
+    {
+      ULONGEST inst = mips_fetch_instruction (gdbarch, pc);
+      CORE_ADDR imm;
+      int rt;
+      int rs;
+      int rd;
+
+      switch (itype_op (inst))
+	{
+	case 0:		/* SPECIAL */
+	  switch (rtype_funct (inst))
+	    {
+	    case 8:		/* JR */
+	    case 9:		/* JALR */
+	      rs = rtype_rs (inst);
+	      if (rs == MIPS_GP_REGNUM)
+		target_pc = gp;				/* Hmm...  */
+	      else if (rs == addrreg)
+		target_pc = addr;
+	      break;
+
+	    case 0x21:		/* ADDU */
+	      rt = rtype_rt (inst);
+	      rs = rtype_rs (inst);
+	      rd = rtype_rd (inst);
+	      if (rd == MIPS_GP_REGNUM
+		  && ((rs == MIPS_GP_REGNUM && rt == MIPS_T9_REGNUM)
+		      || (rs == MIPS_T9_REGNUM && rt == MIPS_GP_REGNUM)))
+		gp += start_pc;
+	      break;
+	    }
+	  break;
+
+	case 2:		/* J */
+	case 3:		/* JAL */
+	  target_pc = jtype_target (inst) << 2;
+	  target_pc += ((pc + 4) & ~(CORE_ADDR) 0x0fffffff);
+	  break;
+
+	case 9:		/* ADDIU */
+	  rt = itype_rt (inst);
+	  rs = itype_rs (inst);
+	  if (rt == rs)
+	    {
+	      imm = (itype_immediate (inst) ^ 0x8000) - 0x8000;
+	      if (rt == MIPS_GP_REGNUM)
+		gp += imm;
+	      else if (rt == addrreg)
+		addr += imm;
+	    }
+	  break;
+
+	case 0xf:	/* LUI */
+	  rt = itype_rt (inst);
+	  imm = ((itype_immediate (inst) ^ 0x8000) - 0x8000) << 16;
+	  if (rt == MIPS_GP_REGNUM)
+	    gp = imm;
+	  else if (rt != MIPS_ZERO_REGNUM)
+	    {
+	      addrreg = rt;
+	      addr = imm;
+	    }
+	  break;
+
+	case 0x23:	/* LW */
+	  rt = itype_rt (inst);
+	  rs = itype_rs (inst);
+	  imm = (itype_immediate (inst) ^ 0x8000) - 0x8000;
+	  if (gp != 0 && rs == MIPS_GP_REGNUM)
+	    {
+	      gdb_byte buf[4];
+
+	      memset (buf, 0, sizeof (buf));
+	      status = target_read_memory (gp + imm, buf, sizeof (buf));
+	      addrreg = rt;
+	      addr = extract_signed_integer (buf, sizeof (buf), byte_order);
+	    }
+	  break;
+	}
+    }
+
+  return target_pc;
+}
+
+/* If PC is in a MIPS16 call or return stub, return the address of the
+   target PC, which is either the callee or the caller.  There are several
    cases which must be handled:
 
-   * If the PC is in __mips16_ret_{d,s}f, this is a return stub and the
-   target PC is in $31 ($ra).
+   * If the PC is in __mips16_ret_{d,s}{f,c}, this is a return stub
+     and the target PC is in $31 ($ra).
    * If the PC is in __mips16_call_stub_{1..10}, this is a call stub
-   and the target PC is in $2.
-   * If the PC at the start of __mips16_call_stub_{s,d}f_{0..10}, i.e.
-   before the jal instruction, this is effectively a call stub
-   and the target PC is in $2.  Otherwise this is effectively
-   a return stub and the target PC is in $18.
+     and the target PC is in $2.
+   * If the PC at the start of __mips16_call_stub_{s,d}{f,c}_{0..10},
+     i.e. before the JALR instruction, this is effectively a call stub
+     and the target PC is in $2.  Otherwise this is effectively
+     a return stub and the target PC is in $18.
+   * If the PC is at the start of __call_stub_fp_*, i.e. before the
+     JAL or JALR instruction, this is effectively a call stub and the
+     target PC is buried in the instruction stream.  Otherwise this
+     is effectively a return stub and the target PC is in $18.
+   * If the PC is in __call_stub_* or in __fn_stub_*, this is a call
+     stub and the target PC is buried in the instruction stream.
 
-   See the source code for the stubs in gcc/config/mips/mips16.S for
+   See the source code for the stubs in gcc/config/mips/mips16.S, or the
+   stub builder in gcc/config/mips/mips.c (mips16_build_call_stub) for the
    gory details.  */
 
 static CORE_ADDR
 mips_skip_mips16_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  const char *name;
   CORE_ADDR start_addr;
+  const char *name;
+  size_t prefixlen;
 
   /* Find the starting address and name of the function containing the PC.  */
   if (find_pc_partial_function (pc, &name, &start_addr, NULL) == 0)
     return 0;
 
-  /* If the PC is in __mips16_ret_{d,s}f, this is a return stub and the
-     target PC is in $31 ($ra).  */
-  if (strcmp (name, "__mips16_ret_sf") == 0
-      || strcmp (name, "__mips16_ret_df") == 0)
-    return get_frame_register_signed (frame, MIPS_RA_REGNUM);
+  /* If the PC is in __mips16_ret_{d,s}{f,c}, this is a return stub
+     and the target PC is in $31 ($ra).  */
+  prefixlen = strlen (mips_str_mips16_ret_stub);
+  if (strncmp (name, mips_str_mips16_ret_stub, prefixlen) == 0
+      && mips_is_stub_mode (name + prefixlen)
+      && name[prefixlen + 2] == '\0')
+    return get_frame_register_signed
+	     (frame, gdbarch_num_regs (gdbarch) + MIPS_RA_REGNUM);
 
-  if (strncmp (name, "__mips16_call_stub_", 19) == 0)
+  /* If the PC is in __mips16_call_stub_*, this is one of the call
+     call/return stubs.  */
+  prefixlen = strlen (mips_str_mips16_call_stub);
+  if (strncmp (name, mips_str_mips16_call_stub, prefixlen) == 0)
     {
       /* If the PC is in __mips16_call_stub_{1..10}, this is a call stub
          and the target PC is in $2.  */
-      if (name[19] >= '0' && name[19] <= '9')
-	return get_frame_register_signed (frame, 2);
+      if (mips_is_stub_suffix (name + prefixlen, 0))
+	return get_frame_register_signed
+		 (frame, gdbarch_num_regs (gdbarch) + MIPS_V0_REGNUM);
 
-      /* If the PC at the start of __mips16_call_stub_{s,d}f_{0..10}, i.e.
-         before the jal instruction, this is effectively a call stub
+      /* If the PC at the start of __mips16_call_stub_{s,d}{f,c}_{0..10},
+         i.e. before the JALR instruction, this is effectively a call stub
          and the target PC is in $2.  Otherwise this is effectively
          a return stub and the target PC is in $18.  */
-      else if (name[19] == 's' || name[19] == 'd')
+      else if (mips_is_stub_mode (name + prefixlen)
+	       && name[prefixlen + 2] == '_'
+	       && mips_is_stub_suffix (name + prefixlen + 3, 0))
 	{
 	  if (pc == start_addr)
-	    {
-	      /* Check if the target of the stub is a compiler-generated
-	         stub.  Such a stub for a function bar might have a name
-	         like __fn_stub_bar, and might look like this:
-	         mfc1    $4,$f13
-	         mfc1    $5,$f12
-	         mfc1    $6,$f15
-	         mfc1    $7,$f14
-	         la      $1,bar   (becomes a lui/addiu pair)
-	         jr      $1
-	         So scan down to the lui/addi and extract the target
-	         address from those two instructions.  */
-
-	      CORE_ADDR target_pc = get_frame_register_signed (frame, 2);
-	      int i;
-
-	      /* See if the name of the target function is  __fn_stub_*.  */
-	      if (find_pc_partial_function (target_pc, &name, NULL, NULL) ==
-		  0)
-		return target_pc;
-	      if (strncmp (name, "__fn_stub_", 10) != 0
-		  && strcmp (name, "etext") != 0
-		  && strcmp (name, "_etext") != 0)
-		return target_pc;
-
-	      /* Scan through this _fn_stub_ code for the lui/addiu pair.
-	         The limit on the search is arbitrarily set to 20
-	         instructions.  FIXME.  */
-	      for (i = 0, pc = 0; i < 20; i++, target_pc += MIPS_INSN32_SIZE)
-		{
-		  ULONGEST inst = mips_fetch_instruction (gdbarch, target_pc);
-		  CORE_ADDR addr = inst;
-
-		  if ((inst & 0xffff0000) == 0x3c010000)	/* lui $at */
-		    pc = (((addr & 0xffff) ^ 0x8000) - 0x8000) << 16;
-								/* high word */
-		  else if ((inst & 0xffff0000) == 0x24210000)	/* addiu $at */
-		    return pc + ((addr & 0xffff) ^ 0x8000) - 0x8000;
-								/* low word */
-		}
-
-	      /* Couldn't find the lui/addui pair, so return stub address.  */
-	      return target_pc;
-	    }
+	    /* This is the 'call' part of a call stub.  The return
+	       address is in $2.  */
+	    return get_frame_register_signed
+		     (frame, gdbarch_num_regs (gdbarch) + MIPS_V0_REGNUM);
 	  else
 	    /* This is the 'return' part of a call stub.  The return
-	       address is in $r18.  */
-	    return get_frame_register_signed (frame, 18);
+	       address is in $18.  */
+	    return get_frame_register_signed
+		     (frame, gdbarch_num_regs (gdbarch) + MIPS_S2_REGNUM);
 	}
+      else
+	return 0;		/* Not a stub.  */
     }
-  return 0;			/* not a stub */
+
+  /* If the PC is in __call_stub_* or __fn_stub*, this is one of the
+     compiler-generated call or call/return stubs.  */
+  if (strncmp (name, mips_str_fn_stub, strlen (mips_str_fn_stub)) == 0
+      || strncmp (name, mips_str_call_stub, strlen (mips_str_call_stub)) == 0)
+    {
+      if (pc == start_addr)
+	/* This is the 'call' part of a call stub.  Call this helper
+	   to scan through this code for interesting instructions
+	   and determine the final PC.  */
+	return mips_get_mips16_fn_stub_pc (frame, pc);
+      else
+	/* This is the 'return' part of a call stub.  The return address
+	   is in $18.  */
+	return get_frame_register_signed
+		 (frame, gdbarch_num_regs (gdbarch) + MIPS_S2_REGNUM);
+    }
+
+  return 0;			/* Not a stub.  */
+}
+
+/* Return non-zero if the PC is inside a return thunk (aka stub or trampoline).
+   This implements the IN_SOLIB_RETURN_TRAMPOLINE macro.  */
+
+static int
+mips_in_return_stub (struct gdbarch *gdbarch, CORE_ADDR pc, const char *name)
+{
+  CORE_ADDR start_addr;
+  size_t prefixlen;
+
+  /* Find the starting address of the function containing the PC.  */
+  if (find_pc_partial_function (pc, NULL, &start_addr, NULL) == 0)
+    return 0;
+
+  /* If the PC is in __mips16_call_stub_{s,d}{f,c}_{0..10} but not at
+     the start, i.e. after the JALR instruction, this is effectively
+     a return stub.  */
+  prefixlen = strlen (mips_str_mips16_call_stub);
+  if (pc != start_addr
+      && strncmp (name, mips_str_mips16_call_stub, prefixlen) == 0
+      && mips_is_stub_mode (name + prefixlen)
+      && name[prefixlen + 2] == '_'
+      && mips_is_stub_suffix (name + prefixlen + 3, 1))
+    return 1;
+
+  /* If the PC is in __call_stub_fp_* but not at the start, i.e. after
+     the JAL or JALR instruction, this is effectively a return stub.  */
+  prefixlen = strlen (mips_str_call_fp_stub);
+  if (pc != start_addr
+      && strncmp (name, mips_str_call_fp_stub, prefixlen) == 0)
+    return 1;
+
+  /* Consume the .pic. prefix of any PIC stub, this function must return
+     true when the PC is in a PIC stub of a __mips16_ret_{d,s}{f,c} stub
+     or the call stub path will trigger in handle_inferior_event causing
+     it to go astray.  */
+  prefixlen = strlen (mips_str_pic);
+  if (strncmp (name, mips_str_pic, prefixlen) == 0)
+    name += prefixlen;
+
+  /* If the PC is in __mips16_ret_{d,s}{f,c}, this is a return stub.  */
+  prefixlen = strlen (mips_str_mips16_ret_stub);
+  if (strncmp (name, mips_str_mips16_ret_stub, prefixlen) == 0
+      && mips_is_stub_mode (name + prefixlen)
+      && name[prefixlen + 2] == '\0')
+    return 1;
+
+  return 0;			/* Not a stub.  */
 }
 
 /* If the current PC is the start of a non-PIC-to-PIC stub, return the
@@ -5784,21 +6073,41 @@ mips_skip_pic_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 static CORE_ADDR
 mips_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
+  CORE_ADDR requested_pc = pc;
   CORE_ADDR target_pc;
+  CORE_ADDR new_pc;
 
-  target_pc = mips_skip_mips16_trampoline_code (frame, pc);
-  if (target_pc)
-    return target_pc;
+  do
+    {
+      target_pc = pc;
 
-  target_pc = find_solib_trampoline_target (frame, pc);
-  if (target_pc)
-    return target_pc;
+      new_pc = mips_skip_mips16_trampoline_code (frame, pc);
+      if (new_pc)
+	{
+	  pc = new_pc;
+	  if (is_mips16_addr (pc))
+	    pc = unmake_mips16_addr (pc);
+	}
 
-  target_pc = mips_skip_pic_trampoline_code (frame, pc);
-  if (target_pc)
-    return target_pc;
+      new_pc = find_solib_trampoline_target (frame, pc);
+      if (new_pc)
+	{
+	  pc = new_pc;
+	  if (is_mips16_addr (pc))
+	    pc = unmake_mips16_addr (pc);
+	}
 
-  return 0;
+      new_pc = mips_skip_pic_trampoline_code (frame, pc);
+      if (new_pc)
+	{
+	  pc = new_pc;
+	  if (is_mips16_addr (pc))
+	    pc = unmake_mips16_addr (pc);
+	}
+    }
+  while (pc != target_pc);
+
+  return pc != requested_pc ? pc : 0;
 }
 
 /* Convert a dbx stab register number (from `r' declaration) to a GDB
@@ -6640,6 +6949,16 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);
 
   set_gdbarch_skip_trampoline_code (gdbarch, mips_skip_trampoline_code);
+
+  /* NOTE drow/2012-04-25: We overload the core solib trampoline code
+     to support MIPS16.  This is a bad thing.  Make sure not to do it
+     if we have an OS ABI that actually supports shared libraries, since
+     shared library support is more important.  If we have an OS someday
+     that supports both shared libraries and MIPS16, we'll have to find
+     a better place for these.
+     macro/2012-04-25: But that applies to return trampolines only and
+     currently no MIPS OS ABI uses shared libraries that have them.  */
+  set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_return_stub);
 
   set_gdbarch_single_step_through_delay (gdbarch,
 					 mips_single_step_through_delay);

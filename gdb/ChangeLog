@@ -1,3 +1,29 @@
+2012-04-26  Maciej W. Rozycki  <macro@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Move the check for return
+	trampolines ahead of the check for function trampolines.
+	* mips-tdep.h (MIPS_S2_REGNUM, MIPS_GP_REGNUM): New macros.
+	* mips-tdep.c (mips_str_mips16_call_stub): New variable.
+	(mips_str_mips16_ret_stub): Likewise.
+	(mips_str_call_fp_stub): Likewise.
+	(mips_str_call_stub): Likewise.
+	(mips_str_fn_stub): Likewise.
+	(mips_str_pic): Likewise.
+	(mips_in_frame_stub): New function.
+	(mips_unwind_pc): Return the return address rather than the PC
+	if the PC of an intermediate frame is inside a call thunk.
+	(mips_is_stub_suffix): New function.
+	(mips_is_stub_mode): Likewise.
+	(mips_get_mips16_fn_stub_pc): Likewise.
+	(mips_skip_mips16_trampoline_code): Update to handle all the
+	currently generated stub types.  Don't recurse into __fn_stub
+	thunks.  Remove heuristics to handle stubs beyond etext/_etext.
+	Use cooked register accesses.
+	(mips_in_return_stub): Reintroduce function.
+	(mips_skip_trampoline_code): Traverse trampolines recursively.
+	(mips_gdbarch_init): Handle MIPS16 return trampolines.
+
 2012-04-26  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.4.1 released.

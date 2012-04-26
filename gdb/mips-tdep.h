@@ -119,7 +119,9 @@ enum
   MIPS_AT_REGNUM = 1,
   MIPS_V0_REGNUM = 2,		/* Function integer return value.  */
   MIPS_A0_REGNUM = 4,		/* Loc of first arg during a subr call.  */
+  MIPS_S2_REGNUM = 18,		/* Contains return address in MIPS16 thunks. */
   MIPS_T9_REGNUM = 25,		/* Contains address of callee in PIC.  */
+  MIPS_GP_REGNUM = 28,
   MIPS_SP_REGNUM = 29,
   MIPS_RA_REGNUM = 31,
   MIPS_PS_REGNUM = 32,		/* Contains processor status.  */

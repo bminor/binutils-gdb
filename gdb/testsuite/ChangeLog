@@ -1,3 +1,14 @@
+2012-04-26  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.arch/mips16-thunks-inmain.c: New file.
+	* gdb.arch/mips16-thunks-main.c: New file.
+	* gdb.arch/mips16-thunks-sin.c: New file.
+	* gdb.arch/mips16-thunks-sinfrob.c: New file.
+	* gdb.arch/mips16-thunks-sinfrob16.c: New file.
+	* gdb.arch/mips16-thunks-sinmain.c: New file.
+	* gdb.arch/mips16-thunks-sinmips16.c: New file.
+	* gdb.arch/mips16-thunks.exp: New file.
+
 2012-04-25  Doug Evans  <dje@google.com>
 
 	* configure.ac: Create gdb.go/Makefile.

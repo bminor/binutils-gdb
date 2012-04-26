@@ -4814,6 +4814,48 @@ process_event_stop_test:
       return;
     }
 
+  /* If we're in the return path from a shared library trampoline,
+     we want to proceed through the trampoline when stepping.  */
+  /* macro/2012-04-25: This needs to come before the subroutine
+     call check below as on some targets return trampolines look
+     like subroutine calls (MIPS16 return thunks).  */
+  if (gdbarch_in_solib_return_trampoline (gdbarch,
+					  stop_pc, ecs->stop_func_name)
+      && ecs->event_thread->control.step_over_calls != STEP_OVER_NONE)
+    {
+      /* Determine where this trampoline returns.  */
+      CORE_ADDR real_stop_pc;
+
+      real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
+
+      if (debug_infrun)
+	 fprintf_unfiltered (gdb_stdlog,
+			     "infrun: stepped into solib return tramp\n");
+
+      /* Only proceed through if we know where it's going.  */
+      if (real_stop_pc)
+	{
+	  /* And put the step-breakpoint there and go until there.  */
+	  struct symtab_and_line sr_sal;
+
+	  init_sal (&sr_sal);	/* initialize to zeroes */
+	  sr_sal.pc = real_stop_pc;
+	  sr_sal.section = find_pc_overlay (sr_sal.pc);
+	  sr_sal.pspace = get_frame_program_space (frame);
+
+	  /* Do not specify what the fp should be when we stop since
+	     on some machines the prologue is where the new fp value
+	     is established.  */
+	  insert_step_resume_breakpoint_at_sal (gdbarch,
+						sr_sal, null_frame_id);
+
+	  /* Restart without fiddling with the step ranges or
+	     other state.  */
+	  keep_going (ecs);
+	  return;
+	}
+    }
+
   /* Check for subroutine calls.  The check for the current frame
      equalling the step ID is not necessary - the check of the
      previous frame's ID is sufficient - but it is a common case and
@@ -5019,45 +5061,6 @@ process_event_stop_test:
 	  sr_sal.pspace = get_frame_program_space (frame);
 	  insert_step_resume_breakpoint_at_sal (gdbarch, 
 						sr_sal, null_frame_id);
-	  keep_going (ecs);
-	  return;
-	}
-    }
-
-  /* If we're in the return path from a shared library trampoline,
-     we want to proceed through the trampoline when stepping.  */
-  if (gdbarch_in_solib_return_trampoline (gdbarch,
-					  stop_pc, ecs->stop_func_name)
-      && ecs->event_thread->control.step_over_calls != STEP_OVER_NONE)
-    {
-      /* Determine where this trampoline returns.  */
-      CORE_ADDR real_stop_pc;
-
-      real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
-
-      if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog,
-			     "infrun: stepped into solib return tramp\n");
-
-      /* Only proceed through if we know where it's going.  */
-      if (real_stop_pc)
-	{
-	  /* And put the step-breakpoint there and go until there.  */
-	  struct symtab_and_line sr_sal;
-
-	  init_sal (&sr_sal);	/* initialize to zeroes */
-	  sr_sal.pc = real_stop_pc;
-	  sr_sal.section = find_pc_overlay (sr_sal.pc);
-	  sr_sal.pspace = get_frame_program_space (frame);
-
-	  /* Do not specify what the fp should be when we stop since
-	     on some machines the prologue is where the new fp value
-	     is established.  */
-	  insert_step_resume_breakpoint_at_sal (gdbarch,
-						sr_sal, null_frame_id);
-
-	  /* Restart without fiddling with the step ranges or
-	     other state.  */
 	  keep_going (ecs);
 	  return;
 	}
