@@ -2827,7 +2827,7 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 		 turns out to be a function defined by a dynamic object.  */
 	      h->plt.refcount++;
 
-	      if (!info->shared)
+	      if (info->executable)
 		/* This symbol needs a non-GOT reference.  */
 		h->non_got_ref = 1;
 	    }
@@ -3477,6 +3477,18 @@ elf_m68k_discard_copies (h, inf)
 		info->flags |= DF_TEXTREL;
 		break;
 	      }
+	}
+
+      /* Make sure undefined weak symbols are output as a dynamic symbol
+	 in PIEs.  */
+      if (h->non_got_ref
+	  && h->root.type == bfd_link_hash_undefweak
+	  && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	  && h->dynindx == -1
+	  && !h->forced_local)
+	{
+	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
+	    return FALSE;
 	}
 
       return TRUE;
