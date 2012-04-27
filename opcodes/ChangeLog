@@ -1,5 +1,8 @@
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
+	* sparc-opc.c (sparc_opcodes): Add 'wr X, %pause' and 'pause'.
+	* sparc-dis.c (v9a_asr_reg_names): Add 'pause'.
+
 	* sparc-opc.c (CBCOND): New define.
 	(CBCOND_XCC): Likewise.
 	(cbcond): New helper macro.

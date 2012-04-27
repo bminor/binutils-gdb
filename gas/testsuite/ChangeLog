@@ -1,5 +1,9 @@
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
+	* gas/sparc/sparc.exp: Run pause test.
+	* gas/sparc/pause.s: New testcase.
+	* gas/sparc/pause.d: Likewise.
+
 	* gas/sparc/cbcond.s: New file.
 	* gas/sparc/cbcond.d: New file.
 	* gas/sparc/sparc.exp: Run cbcond test.

@@ -1,5 +1,9 @@
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
+	* config/tc-sparc.c (sparc_arch_table): Add HWCAP_PAUSE to sparc4,
+	v8pluse, v8plusv, v9e, and v9v.
+	(v9a_asr_table): Add 'pause'.
+
 	* config/tc-sparc.c (sparc_arch_table): Add HWCAP_CBCOND to
 	sparc4, v8pluse, v8plusv, v9e, and v9v.
 	(sparc_ip): Handle R_SPARC_5 of immediate constants inline in

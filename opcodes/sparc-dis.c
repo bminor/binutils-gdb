@@ -109,7 +109,7 @@ static char *v9a_asr_reg_names[] =
 {
   "pcr", "pic", "dcr", "gsr", "set_softint", "clear_softint",
   "softint", "tick_cmpr", "stick", "stick_cmpr", "resv26",
-  "resv27", "cps"
+  "pause", "cps"
 };
 
 /* Macros used to extract instruction fields.  Not all fields have
