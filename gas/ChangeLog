@@ -1,5 +1,7 @@
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
+	* doc/c-sparc.text: Document %l34 and %h34.
+
 	* config/tc-sparc.c (v9a_asr_table): Add 'cfr'.
 
 	* config/tc-sparc.c (sparc_arch_table): Add HWCAP_PAUSE to sparc4,
