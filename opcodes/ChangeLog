@@ -1,3 +1,8 @@
+2012-04-27  David S. Miller  <davem@davemloft.net>
+
+	* sparc-opc.c (sparc_opcodes): Rework table to put HWCAP values
+	into new struct sparc_opcode 'hwcaps' field instead of 'flags'.
+
 2012-04-12  David S. Miller  <davem@davemloft.net>
 
 	* sparc-dis.c (X_DISP10): Define.

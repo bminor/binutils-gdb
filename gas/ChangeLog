@@ -1,3 +1,12 @@
+2012-04-27  David S. Miller  <davem@davemloft.net>
+
+	* config/tc-sparc.c (sparc_arch_table): Rework to use HWCAP_*
+	masks.
+	(sparc_md_end): No longer need to translate hwcap_seen values into
+	ELF hwcap bits, they now match exactly.
+	(get_hwcap_name): Use HWCAP_* and handle new values.
+	(sparc_ip): Fetch hwcaps from insn->hwcaps instead of insn->flags.
+
 2012-04-20  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ia64.c (obj_elf_vms_common): New function.

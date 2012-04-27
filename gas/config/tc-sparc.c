@@ -237,33 +237,33 @@ static struct sparc_arch {
 } sparc_arch_table[] = {
   { "v6", "v6", v6, 0, 1, 0 },
   { "v7", "v7", v7, 0, 1, 0 },
-  { "v8", "v8", v8, 32, 1, F_MUL32|F_DIV32|F_FSMULD },
-  { "v8a", "v8", v8, 32, 1, F_MUL32|F_DIV32|F_FSMULD },
-  { "sparc", "v9", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS },
-  { "sparcvis", "v9a", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS },
-  { "sparcvis2", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2 },
-  { "sparcfmaf", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_FMAF },
-  { "sparcima", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_FMAF|F_IMA },
-  { "sparcvis3", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_FMAF|F_VIS3|F_HPC },
-  { "sparcvis3r", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_FMAF|F_VIS3|F_HPC|F_RANDOM|F_TRANS|F_FJFMAU },
-  { "sparclet", "sparclet", sparclet, 32, 1, F_MUL32|F_DIV32|F_FSMULD },
-  { "sparclite", "sparclite", sparclite, 32, 1, F_MUL32|F_DIV32|F_FSMULD },
-  { "sparc86x", "sparclite", sparc86x, 32, 1, F_MUL32|F_DIV32|F_FSMULD },
-  { "v8plus", "v9", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS },
-  { "v8plusa", "v9a", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS|F_VIS },
-  { "v8plusb", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS|F_VIS|F_VIS2 },
-  { "v8plusc", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS|F_VIS|F_VIS2|F_ASI_BLK_INIT },
-  { "v8plusd", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS|F_VIS|F_VIS2|F_ASI_BLK_INIT|F_FMAF|F_VIS3|F_HPC },
-  { "v8plusv", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_V8PLUS|F_VIS|F_VIS2|F_ASI_BLK_INIT|F_FMAF|F_VIS3|F_HPC|F_RANDOM|F_TRANS|F_FJFMAU|F_IMA|F_ASI_CACHE_SPARING },
-  { "v9", "v9", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC },
-  { "v9a", "v9a", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS },
-  { "v9b", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2 },
-  { "v9c", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_ASI_BLK_INIT },
-  { "v9d", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_ASI_BLK_INIT|F_FMAF|F_VIS3|F_HPC },
-  { "v9v", "v9b", v9, 0, 1, F_MUL32|F_DIV32|F_FSMULD|F_POPC|F_VIS|F_VIS2|F_ASI_BLK_INIT|F_FMAF|F_VIS3|F_HPC|F_RANDOM|F_TRANS|F_FJFMAU|F_IMA|F_ASI_CACHE_SPARING },
+  { "v8", "v8", v8, 32, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD },
+  { "v8a", "v8", v8, 32, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD },
+  { "sparc", "v9", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_V8PLUS },
+  { "sparcvis", "v9a", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS },
+  { "sparcvis2", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2 },
+  { "sparcfmaf", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2|HWCAP_FMAF },
+  { "sparcima", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2|HWCAP_FMAF|HWCAP_IMA },
+  { "sparcvis3", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC },
+  { "sparcvis3r", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC|HWCAP_RANDOM|HWCAP_TRANS|HWCAP_FJFMAU },
+  { "sparclet", "sparclet", sparclet, 32, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD },
+  { "sparclite", "sparclite", sparclite, 32, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD },
+  { "sparc86x", "sparclite", sparc86x, 32, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD },
+  { "v8plus", "v9", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_V8PLUS },
+  { "v8plusa", "v9a", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_V8PLUS|HWCAP_VIS },
+  { "v8plusb", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_V8PLUS|HWCAP_VIS|HWCAP_VIS2 },
+  { "v8plusc", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_V8PLUS|HWCAP_VIS|HWCAP_VIS2|HWCAP_ASI_BLK_INIT },
+  { "v8plusd", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_V8PLUS|HWCAP_VIS|HWCAP_VIS2|HWCAP_ASI_BLK_INIT|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC },
+  { "v8plusv", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_V8PLUS|HWCAP_VIS|HWCAP_VIS2|HWCAP_ASI_BLK_INIT|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC|HWCAP_RANDOM|HWCAP_TRANS|HWCAP_FJFMAU|HWCAP_IMA|HWCAP_ASI_CACHE_SPARING },
+  { "v9", "v9", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC },
+  { "v9a", "v9a", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS },
+  { "v9b", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2 },
+  { "v9c", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2|HWCAP_ASI_BLK_INIT },
+  { "v9d", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2|HWCAP_ASI_BLK_INIT|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC },
+  { "v9v", "v9b", v9, 0, 1, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC|HWCAP_VIS|HWCAP_VIS2|HWCAP_ASI_BLK_INIT|HWCAP_FMAF|HWCAP_VIS3|HWCAP_HPC|HWCAP_RANDOM|HWCAP_TRANS|HWCAP_FJFMAU|HWCAP_IMA|HWCAP_ASI_CACHE_SPARING },
   /* This exists to allow configure.in/Makefile.in to pass one
      value to specify both the default machine and default word size.  */
-  { "v9-64", "v9", v9, 64, 0, F_MUL32|F_DIV32|F_FSMULD|F_POPC },
+  { "v9-64", "v9", v9, 64, 0, HWCAP_MUL32|HWCAP_DIV32|HWCAP_FSMULD|HWCAP_POPC },
   { NULL, NULL, v8, 0, 0, 0 }
 };
 
@@ -945,44 +945,7 @@ sparc_md_end (void)
 
 #if defined(OBJ_ELF) && !defined(TE_SOLARIS)
   if (hwcap_seen)
-    {
-      int bits = 0;
-
-      if (hwcap_seen & F_MUL32)
-	bits |= ELF_SPARC_HWCAP_MUL32;
-      if (hwcap_seen & F_DIV32)
-	bits |= ELF_SPARC_HWCAP_DIV32;
-      if (hwcap_seen & F_FSMULD)
-	bits |= ELF_SPARC_HWCAP_FSMULD;
-      if (hwcap_seen & F_V8PLUS)
-	bits |= ELF_SPARC_HWCAP_V8PLUS;
-      if (hwcap_seen & F_POPC)
-	bits |= ELF_SPARC_HWCAP_POPC;
-      if (hwcap_seen & F_VIS)
-	bits |= ELF_SPARC_HWCAP_VIS;
-      if (hwcap_seen & F_VIS2)
-	bits |= ELF_SPARC_HWCAP_VIS2;
-      if (hwcap_seen & F_ASI_BLK_INIT)
-	bits |= ELF_SPARC_HWCAP_ASI_BLK_INIT;
-      if (hwcap_seen & F_FMAF)
-	bits |= ELF_SPARC_HWCAP_FMAF;
-      if (hwcap_seen & F_VIS3)
-	bits |= ELF_SPARC_HWCAP_VIS3;
-      if (hwcap_seen & F_HPC)
-	bits |= ELF_SPARC_HWCAP_HPC;
-      if (hwcap_seen & F_RANDOM)
-	bits |= ELF_SPARC_HWCAP_RANDOM;
-      if (hwcap_seen & F_TRANS)
-	bits |= ELF_SPARC_HWCAP_TRANS;
-      if (hwcap_seen & F_FJFMAU)
-	bits |= ELF_SPARC_HWCAP_FJFMAU;
-      if (hwcap_seen & F_IMA)
-	bits |= ELF_SPARC_HWCAP_IMA;
-      if (hwcap_seen & F_ASI_CACHE_SPARING)
-	bits |= ELF_SPARC_HWCAP_ASI_CACHE_SPARING;
-
-      bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU, Tag_GNU_Sparc_HWCAPS, bits);
-    }
+    bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_GNU, Tag_GNU_Sparc_HWCAPS, hwcap_seen);
 #endif
 }
 
@@ -1440,38 +1403,64 @@ md_assemble (char *str)
 static const char *
 get_hwcap_name (int mask)
 {
-  if (mask & F_MUL32)
+  if (mask & HWCAP_MUL32)
     return "mul32";
-  if (mask & F_DIV32)
+  if (mask & HWCAP_DIV32)
     return "div32";
-  if (mask & F_FSMULD)
+  if (mask & HWCAP_FSMULD)
     return "fsmuld";
-  if (mask & F_V8PLUS)
+  if (mask & HWCAP_V8PLUS)
     return "v8plus";
-  if (mask & F_POPC)
+  if (mask & HWCAP_POPC)
     return "popc";
-  if (mask & F_VIS)
+  if (mask & HWCAP_VIS)
     return "vis";
-  if (mask & F_VIS2)
+  if (mask & HWCAP_VIS2)
     return "vis2";
-  if (mask & F_ASI_BLK_INIT)
+  if (mask & HWCAP_ASI_BLK_INIT)
     return "ASIBlkInit";
-  if (mask & F_FMAF)
+  if (mask & HWCAP_FMAF)
     return "fmaf";
-  if (mask & F_VIS3)
+  if (mask & HWCAP_VIS3)
     return "vis3";
-  if (mask & F_HPC)
+  if (mask & HWCAP_HPC)
     return "hpc";
-  if (mask & F_RANDOM)
+  if (mask & HWCAP_RANDOM)
     return "random";
-  if (mask & F_TRANS)
+  if (mask & HWCAP_TRANS)
     return "trans";
-  if (mask & F_FJFMAU)
+  if (mask & HWCAP_FJFMAU)
     return "fjfmau";
-  if (mask & F_IMA)
+  if (mask & HWCAP_IMA)
     return "ima";
-  if (mask & F_ASI_CACHE_SPARING)
+  if (mask & HWCAP_ASI_CACHE_SPARING)
     return "cspare";
+  if (mask & HWCAP_AES)
+    return "aes";
+  if (mask & HWCAP_DES)
+    return "des";
+  if (mask & HWCAP_KASUMI)
+    return "kasumi";
+  if (mask & HWCAP_CAMELLIA)
+    return "camellia";
+  if (mask & HWCAP_MD5)
+    return "md5";
+  if (mask & HWCAP_SHA1)
+    return "sha1";
+  if (mask & HWCAP_SHA256)
+    return "sha256";
+  if (mask & HWCAP_SHA512)
+    return "sha512";
+  if (mask & HWCAP_MPMUL)
+    return "mpmul";
+  if (mask & HWCAP_MONT)
+    return "mont";
+  if (mask & HWCAP_PAUSE)
+    return "pause";
+  if (mask & HWCAP_CBCOND)
+    return "cbcond";
+  if (mask & HWCAP_CRC32C)
+    return "crc32c";
   return "UNKNOWN";
 }
 
@@ -2862,7 +2851,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	{
 	  /* We have a match.  Now see if the architecture is OK.  */
 	  int needed_arch_mask = insn->architecture;
-	  int hwcaps = insn->flags & F_HWCAP_MASK;
+	  int hwcaps = insn->hwcaps;
 
 #if defined(OBJ_ELF) && !defined(TE_SOLARIS)
 	  if (hwcaps)
