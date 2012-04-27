@@ -1,5 +1,8 @@
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
+	* sparc-dis.c (print_insn_sparc): Handle ')'.
+	* sparc-opc.c (sparc_opcodes): Add crypto instructions.
+
 	* sparc-opc.c (sparc_opcodes): Rework table to put HWCAP values
 	into new struct sparc_opcode 'hwcaps' field instead of 'flags'.
 

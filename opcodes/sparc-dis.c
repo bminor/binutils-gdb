@@ -704,6 +704,10 @@ print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 		    }
 		    break;
 
+		  case ')':	/* 5 bit unsigned immediate from RS3.  */
+		    (info->fprintf_func) (stream, "%#x", X_RS3 (insn));
+		    break;
+
 		  case 'X':	/* 5 bit unsigned immediate.  */
 		  case 'Y':	/* 6 bit unsigned immediate.  */
 		    {

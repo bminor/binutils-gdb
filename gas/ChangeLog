@@ -1,5 +1,10 @@
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
+	* config/tc-sparc.c (sparc_ip): Likewise.  Accept instruction
+	names containing "_".
+	(sparc_arch_table): Add sparc4, v8pluse, and v9e.  Add crypto
+	hwcap masks to v8plusv and v9v.
+
 	* config/tc-sparc.c (sparc_arch_table): Rework to use HWCAP_*
 	masks.
 	(sparc_md_end): No longer need to translate hwcap_seen values into

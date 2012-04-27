@@ -1,3 +1,9 @@
+2012-04-27  David S. Miller  <davem@davemloft.net>
+
+	* gas/sparc/crypto.s: New file.
+	* gas/sparc/crypto.d: New file.
+	* gas/sparc/sparc.exp: Run crypto test.
+
 2012-04-12  David S. Miller  <davem@davemloft.net>
 
 	* gas/sparc/reloc64.s: Add abs34 code model tests.
