@@ -1,3 +1,9 @@
+2012-04-26  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2.c (scan_unit_for_symbols): Account for DW_AT_high_pc
+	possibly being relative to DW_AT_low_pc.
+	(parse_comp_unit): Likewise.
+
 2012-04-26  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* elf32-m68k.c (elf_m68k_check_relocs): Mark non-GOT references

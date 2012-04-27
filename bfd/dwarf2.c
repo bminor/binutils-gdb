@@ -2092,6 +2092,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
       struct varinfo *var;
       bfd_vma low_pc = 0;
       bfd_vma high_pc = 0;
+      bfd_boolean high_pc_relative = FALSE;
 
       abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
@@ -2197,6 +2198,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 		case DW_AT_high_pc:
 		  high_pc = attr.u.val;
+		  high_pc_relative = attr.form != DW_FORM_addr;
 		  break;
 
 		case DW_AT_ranges:
@@ -2275,6 +2277,9 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	    }
 	}
 
+      if (high_pc_relative)
+	high_pc += low_pc;
+
       if (func && high_pc != 0)
 	{
 	  if (!arange_add (unit->abfd, &func->arange, low_pc, high_pc))
@@ -2338,6 +2343,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
   bfd_vma low_pc = 0;
   bfd_vma high_pc = 0;
   bfd *abfd = stash->bfd_ptr;
+  bfd_boolean high_pc_relative = FALSE;
 
   version = read_2_bytes (abfd, info_ptr);
   info_ptr += 2;
@@ -2440,6 +2446,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
 
 	case DW_AT_high_pc:
 	  high_pc = attr.u.val;
+	  high_pc_relative = attr.form != DW_FORM_addr;
 	  break;
 
 	case DW_AT_ranges:
@@ -2467,6 +2474,8 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	  break;
 	}
     }
+  if (high_pc_relative)
+    high_pc += low_pc;
   if (high_pc != 0)
     {
       if (!arange_add (unit->abfd, &unit->arange, low_pc, high_pc))
