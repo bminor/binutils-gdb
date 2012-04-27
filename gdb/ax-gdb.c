@@ -2038,7 +2038,8 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
     case OP_INTERNALVAR:
       {
-	const char *name = internalvar_name ((*pc)[1].internalvar);
+	struct internalvar *var = (*pc)[1].internalvar;
+	const char *name = internalvar_name (var);
 	struct trace_state_variable *tsv;
 
 	(*pc) += 3;
@@ -2052,7 +2053,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	    value->kind = axs_rvalue;
 	    value->type = builtin_type (exp->gdbarch)->builtin_long_long;
 	  }
-	else
+	else if (! compile_internalvar_to_ax (var, ax, value))
 	  error (_("$%s is not a trace state variable; GDB agent "
 		   "expressions cannot use convenience variables."), name);
       }

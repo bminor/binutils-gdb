@@ -1439,7 +1439,8 @@ update_thread_list (void)
    no thread is selected, or no threads exist.  */
 
 static struct value *
-thread_id_make_value (struct gdbarch *gdbarch, struct internalvar *var)
+thread_id_make_value (struct gdbarch *gdbarch, struct internalvar *var,
+		      void *ignore)
 {
   struct thread_info *tp = find_thread_ptid (inferior_ptid);
 
@@ -1449,6 +1450,15 @@ thread_id_make_value (struct gdbarch *gdbarch, struct internalvar *var)
 
 /* Commands with a prefix of `thread'.  */
 struct cmd_list_element *thread_cmd_list = NULL;
+
+/* Implementation of `thread' variable.  */
+
+static const struct internalvar_funcs thread_funcs =
+{
+  thread_id_make_value,
+  NULL,
+  NULL
+};
 
 void
 _initialize_thread (void)
@@ -1495,5 +1505,5 @@ Show printing of thread events (such as thread start and exit)."), NULL,
          show_print_thread_events,
          &setprintlist, &showprintlist);
 
-  create_internalvar_type_lazy ("_thread", thread_id_make_value);
+  create_internalvar_type_lazy ("_thread", &thread_funcs, NULL);
 }

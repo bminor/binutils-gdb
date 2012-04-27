@@ -268,7 +268,7 @@ static const struct lval_funcs tlb_value_funcs =
    if there's no object available.  */
 
 static struct value *
-tlb_make_value (struct gdbarch *gdbarch, struct internalvar *var)
+tlb_make_value (struct gdbarch *gdbarch, struct internalvar *var, void *ignore)
 {
   if (target_has_stack && !ptid_equal (inferior_ptid, null_ptid))
     {
@@ -428,6 +428,15 @@ init_w32_command_list (void)
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_windows_tdep;
 
+/* Implementation of `tlb' variable.  */
+
+static const struct internalvar_funcs tlb_funcs =
+{
+  tlb_make_value,
+  NULL,
+  NULL
+};
+
 void
 _initialize_windows_tdep (void)
 {
@@ -454,5 +463,5 @@ even if their meaning is unknown."),
      value with a void typed value, and when we get here, gdbarch
      isn't initialized yet.  At this point, we're quite sure there
      isn't another convenience variable of the same name.  */
-  create_internalvar_type_lazy ("_tlb", tlb_make_value);
+  create_internalvar_type_lazy ("_tlb", &tlb_funcs, NULL);
 }

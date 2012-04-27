@@ -6602,7 +6602,8 @@ static const struct lval_funcs siginfo_value_funcs =
    if there's no object available.  */
 
 static struct value *
-siginfo_make_value (struct gdbarch *gdbarch, struct internalvar *var)
+siginfo_make_value (struct gdbarch *gdbarch, struct internalvar *var,
+		    void *ignore)
 {
   if (target_has_stack
       && !ptid_equal (inferior_ptid, null_ptid)
@@ -7024,6 +7025,15 @@ show_schedule_multiple (struct ui_file *file, int from_tty,
 			    "of all processes is %s.\n"), value);
 }
 
+/* Implementation of `siginfo' variable.  */
+
+static const struct internalvar_funcs siginfo_funcs =
+{
+  siginfo_make_value,
+  NULL,
+  NULL
+};
+
 void
 _initialize_infrun (void)
 {
@@ -7312,7 +7322,7 @@ enabled by default on some platforms."),
      value with a void typed value, and when we get here, gdbarch
      isn't initialized yet.  At this point, we're quite sure there
      isn't another convenience variable of the same name.  */
-  create_internalvar_type_lazy ("_siginfo", siginfo_make_value);
+  create_internalvar_type_lazy ("_siginfo", &siginfo_funcs, NULL);
 
   add_setshow_boolean_cmd ("observer", no_class,
 			   &observer_mode_1, _("\

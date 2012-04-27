@@ -4944,7 +4944,8 @@ info_static_tracepoint_markers_command (char *arg, int from_tty)
    available.  */
 
 static struct value *
-sdata_make_value (struct gdbarch *gdbarch, struct internalvar *var)
+sdata_make_value (struct gdbarch *gdbarch, struct internalvar *var,
+		  void *ignore)
 {
   LONGEST size;
   gdb_byte *buf;
@@ -5123,6 +5124,15 @@ traceframe_available_memory (VEC(mem_range_s) **result,
   return 0;
 }
 
+/* Implementation of `sdata' variable.  */
+
+static const struct internalvar_funcs sdata_funcs =
+{
+  sdata_make_value,
+  NULL,
+  NULL
+};
+
 /* module initialization */
 void
 _initialize_tracepoint (void)
@@ -5133,7 +5143,7 @@ _initialize_tracepoint (void)
      value with a void typed value, and when we get here, gdbarch
      isn't initialized yet.  At this point, we're quite sure there
      isn't another convenience variable of the same name.  */
-  create_internalvar_type_lazy ("_sdata", sdata_make_value);
+  create_internalvar_type_lazy ("_sdata", &sdata_funcs, NULL);
 
   traceframe_number = -1;
   tracepoint_number = -1;

@@ -1,3 +1,36 @@
+2012-04-27  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* ax-gdb.c (gen_expr): Clean up code to handle internal variables
+	and to compile agent expressions.
+	* infrun.c (siginfo_make_value): New argument `ignore'.
+	(siginfo_funcs): New struct.
+	(_initialize_infrun): New argument when calling
+	`create_internalvar_type_lazy'.
+	* thread.c (thread_id_make_value): New argument `ignore'.
+	(thread_funcs): New struct.
+	(_initialize_thread): New argument when calling
+	`create_internalvar_type_lazy'.
+	* tracepoint.c (sdata_make_value): New argument `ignore'.
+	(sdata_funcs): New struct.
+	(_initialize_tracepoint): New argument when calling
+	`create_internalvar_type_lazy'.
+	* value.c (make_value): New struct.
+	(create_internalvar_type_lazy): New argument `data'.
+	(compile_internalvar_to_ax): New function.
+	(value_of_internalvar): Properly handling `make_value' case.
+	(clear_internalvar): Likewise.
+	(show_convenience): Adding `TRY_CATCH' block.
+	* value.h (internalvar_make_value): Delete, replace by...
+	(struct internalvar_funcs): ... this.
+	(create_internalvar_type_lazy) <fun>: Delete argument.
+	(create_internalvar_type_lazy) <funcs>, <data>: New arguments.
+	(compile_internalvar_to_ax): New function.
+	* windows-tdep.c (tlb_make_value): New argument `ignore'.
+	(tlb_funcs): New struct.
+	(_initialize_windows_tdep): New argument when calling
+	`create_internalvar_type_lazy'.
+
 2012-04-27  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2read.c (dwarf2_get_pc_bounds): Check DW_AT_high_pc form to
