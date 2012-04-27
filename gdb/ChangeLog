@@ -1,3 +1,10 @@
+2012-04-27  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2read.c (dwarf2_get_pc_bounds): Check DW_AT_high_pc form to
+	see whether it is an address or a constant offset from DW_AT_low_pc.
+	(dwarf2_record_block_ranges): Likewise.
+	(read_partial_die): Likewise.
+
 2012-04-26  Mark Wielaard  <mjw@redhat.com>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.

@@ -6706,17 +6706,23 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 		      struct partial_symtab *pst)
 {
   struct attribute *attr;
+  struct attribute *attr_high;
   CORE_ADDR low = 0;
   CORE_ADDR high = 0;
   int ret = 0;
 
-  attr = dwarf2_attr (die, DW_AT_high_pc, cu);
-  if (attr)
+  attr_high = dwarf2_attr (die, DW_AT_high_pc, cu);
+  if (attr_high)
     {
-      high = DW_ADDR (attr);
       attr = dwarf2_attr (die, DW_AT_low_pc, cu);
       if (attr)
-	low = DW_ADDR (attr);
+        {
+	  low = DW_ADDR (attr);
+	  if (attr_high->form == DW_FORM_addr)
+	    high = DW_ADDR (attr_high);
+	  else
+	    high = low + DW_UNSND (attr_high);
+	}
       else
 	/* Found high w/o low attribute.  */
 	return 0;
@@ -6864,16 +6870,20 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 {
   struct objfile *objfile = cu->objfile;
   struct attribute *attr;
+  struct attribute *attr_high;
 
-  attr = dwarf2_attr (die, DW_AT_high_pc, cu);
-  if (attr)
+  attr_high = dwarf2_attr (die, DW_AT_high_pc, cu);
+  if (attr_high)
     {
-      CORE_ADDR high = DW_ADDR (attr);
-
       attr = dwarf2_attr (die, DW_AT_low_pc, cu);
       if (attr)
         {
           CORE_ADDR low = DW_ADDR (attr);
+	  CORE_ADDR high;
+	  if (attr_high->form == DW_FORM_addr)
+	    high = DW_ADDR (attr_high);
+	  else
+	    high = low + DW_UNSND (attr_high);
 
           record_block_range (block, baseaddr + low, baseaddr + high - 1);
         }
@@ -9925,6 +9935,7 @@ read_partial_die (struct partial_die_info *part_die,
   struct attribute attr;
   int has_low_pc_attr = 0;
   int has_high_pc_attr = 0;
+  int high_pc_relative = 0;
 
   memset (part_die, 0, sizeof (struct partial_die_info));
 
@@ -9981,7 +9992,13 @@ read_partial_die (struct partial_die_info *part_die,
 	  break;
 	case DW_AT_high_pc:
 	  has_high_pc_attr = 1;
-	  part_die->highpc = DW_ADDR (&attr);
+	  if (attr.form == DW_FORM_addr)
+	    part_die->highpc = DW_ADDR (&attr);
+	  else
+	    {
+	      high_pc_relative = 1;
+	      part_die->highpc = DW_UNSND (&attr);
+	    }
 	  break;
 	case DW_AT_location:
           /* Support the .debug_loc offsets.  */
@@ -10060,6 +10077,9 @@ read_partial_die (struct partial_die_info *part_die,
 	  break;
 	}
     }
+
+  if (high_pc_relative)
+    part_die->highpc += part_die->lowpc;
 
   if (has_low_pc_attr && has_high_pc_attr)
     {
