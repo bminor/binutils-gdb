@@ -1,5 +1,27 @@
 2012-04-26  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* proc-utils.h (proc_prettyprint_signalset): New prototype.
+	(proc_prettyprint_signal): Likewise.
+	(proc_prettyprint_faultset): Likewise.
+	(proc_prettyprint_fault): Likewise.
+	(proc_prettyprint_actionset): Likewise.
+	(proc_prettyprint_flags): Move to new proc-flags.c section.
+	(proc_prettyfprint_flags): New prototype.
+	* procfs.c (proc_nsysarg, proc_sysargs): Add prototypes.
+	(proc_syscall, proc_cursig): Likewise.
+	(proc_set_kill_on_last_close): Likewise.
+	(proc_unset_kill_on_last_close): Likewise.
+	(proc_set_watchpoint): Make static.
+	(proc_delete_dead_threads): Likewise.
+	(procfs_set_watchpoint): Likewise.
+	(_initialize_procfs): Add prototype.
+	* proc-events.c: Include proc-utils.h.
+	(init_syscall_table): Make static.
+	* proc-api.c (_initialize_proc_api): Add prototype.
+	* proc-flags.c: Include proc-utils.h.
+
+2012-04-26  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* configure.ac: Add AC_ARG_PROGRAM.
 	* configure: Regenerate.
 

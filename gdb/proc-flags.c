@@ -35,6 +35,8 @@
 #include <sys/types.h>
 #include <sys/procfs.h>
 
+#include "proc-utils.h"
+
 /*  Much of the information used in the /proc interface, particularly for
     printing status information, is kept as tables of structures of the
     following form.  These tables can be used to map numeric values to

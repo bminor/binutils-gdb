@@ -775,6 +775,9 @@ proc_prettyfprint_status (long flags, int why, int what, int thread)
 }
 
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern void _initialize_proc_api (void);
+
 void
 _initialize_proc_api (void)
 {

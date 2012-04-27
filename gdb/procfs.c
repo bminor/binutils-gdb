@@ -1023,8 +1023,14 @@ int proc_get_status (procinfo * pi);
 long proc_flags (procinfo * pi);
 int proc_why (procinfo * pi);
 int proc_what (procinfo * pi);
+int proc_nsysarg (procinfo * pi);
+long *proc_sysargs (procinfo * pi);
+int proc_syscall (procinfo * pi);
+long proc_cursig (struct procinfo * pi);
 int proc_set_run_on_last_close (procinfo * pi);
 int proc_unset_run_on_last_close (procinfo * pi);
+int proc_set_kill_on_last_close (procinfo * pi);
+int proc_unset_kill_on_last_close (procinfo * pi);
 int proc_set_inherit_on_fork (procinfo * pi);
 int proc_unset_inherit_on_fork (procinfo * pi);
 int proc_set_async (procinfo * pi);
@@ -2673,7 +2679,7 @@ procfs_address_to_host_pointer (CORE_ADDR addr)
 }
 #endif
 
-int
+static int
 proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
 {
 #if !defined (PCWATCH) && !defined (PIOCSWATCH)
@@ -2943,7 +2949,7 @@ proc_get_current_thread (procinfo *pi)
    unfortunately requires a different method on every OS.  Returns
    non-zero for success, zero for failure.  */
 
-int
+static int
 proc_delete_dead_threads (procinfo *parent, procinfo *thread, void *ignore)
 {
   if (thread && parent)	/* sanity */
@@ -5019,7 +5025,7 @@ procfs_pid_to_str (struct target_ops *ops, ptid_t ptid)
 
 /* Insert a watchpoint.  */
 
-int
+static int
 procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
 		       int after)
 {
@@ -5572,6 +5578,9 @@ proc_untrace_sysexit_cmd (char *args, int from_tty)
   proc_trace_syscalls (args, from_tty, PR_SYSEXIT, FLAG_RESET);
 }
 
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern void _initialize_procfs (void);
 
 void
 _initialize_procfs (void)
