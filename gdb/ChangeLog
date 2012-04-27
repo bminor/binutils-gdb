@@ -1,3 +1,7 @@
+2012-04-26  Mark Wielaard  <mjw@redhat.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2012-04-26  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* proc-utils.h (proc_prettyprint_signalset): New prototype.
