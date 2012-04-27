@@ -104,6 +104,9 @@ sparc_opcode_lookup_arch (const char *name)
 /* Branch condition field.  */
 #define COND(x)		(((x) & 0xf) << 25)
 
+/* Compare And Branch condition field.  */
+#define CBCOND(x)	(((x) & 0x1f) << 25)
+
 /* v9: Move (MOVcc and FMOVcc) condition field.  */
 #define MCOND(x,i_or_f)	((((i_or_f) & 1) << 18) | (((x) >> 11) & (0xf << 14))) /* v9 */
 
@@ -154,6 +157,7 @@ sparc_opcode_lookup_arch (const char *name)
 
 #define ICC 		(0)	/* v9 */
 #define XCC 		(1 << 12) /* v9 */
+#define CBCOND_XCC	(1 << 21)
 #define FCC(x)		(((x) & 0x3) << 11) /* v9 */
 #define FBFCC(x)	(((x) & 0x3) << 20)	/* v9 */
 
@@ -1191,6 +1195,32 @@ cond ("bz",	"tz",   CONDZ, F_CONDBR|F_ALIAS), /* for e */
 /* v9 */ condr("brlez", 0x2, F_CONDBR),
 /* v9 */ condr("brgz", 0x6, F_CONDBR),
 
+#define cbcond(cop, cmask) \
+  { "cw" cop, F2(0, 3)|CBCOND(cmask)|F3I(0),F2(~0,~3)|CBCOND(~(cmask))|F3I(~0)|CBCOND_XCC, \
+    "1,2,=", F_CONDBR, HWCAP_CBCOND, v9}, \
+  { "cw" cop, F2(0, 3)|CBCOND(cmask)|F3I(1),F2(~0,~3)|CBCOND(~(cmask))|F3I(~1)|CBCOND_XCC, \
+    "1,X,=", F_CONDBR, HWCAP_CBCOND, v9}, \
+  { "cx" cop, F2(0, 3)|CBCOND(cmask)|F3I(0)|CBCOND_XCC,F2(~0,~3)|CBCOND(~(cmask))|F3I(~0), \
+    "1,2,=", F_CONDBR, HWCAP_CBCOND, v9}, \
+  { "cx" cop, F2(0, 3)|CBCOND(cmask)|F3I(1)|CBCOND_XCC,F2(~0,~3)|CBCOND(~(cmask))|F3I(~1), \
+    "1,X,=", F_CONDBR, HWCAP_CBCOND, v9},
+
+cbcond("be",   0x09)
+cbcond("ble",  0x0a)
+cbcond("bl",   0x0b)
+cbcond("bleu", 0x0c)
+cbcond("bcs",  0x0d)
+cbcond("bneg", 0x0e)
+cbcond("bvs",  0x0f)
+cbcond("bne",  0x19)
+cbcond("bg",   0x1a)
+cbcond("bge",  0x1b)
+cbcond("bgu",  0x1c)
+cbcond("bcc",  0x1d)
+cbcond("bpos", 0x1e)
+cbcond("bvc",  0x1f)
+
+#undef cbcond
 #undef condr /* v9 */
 #undef brr /* v9 */
 

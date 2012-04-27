@@ -1,5 +1,11 @@
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
+	* config/tc-sparc.c (sparc_arch_table): Add HWCAP_CBCOND to
+	sparc4, v8pluse, v8plusv, v9e, and v9v.
+	(sparc_ip): Handle R_SPARC_5 of immediate constants inline in
+	order to accomodate cbcond which otherwise would require two
+	relocations to be handled in a single instruction..
+
 	* config/tc-sparc.c (sparc_ip): Likewise.  Accept instruction
 	names containing "_".
 	(sparc_arch_table): Add sparc4, v8pluse, and v9e.  Add crypto

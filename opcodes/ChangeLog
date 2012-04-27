@@ -1,5 +1,10 @@
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
+	* sparc-opc.c (CBCOND): New define.
+	(CBCOND_XCC): Likewise.
+	(cbcond): New helper macro.
+	(sparc_opcodes): Add compare-and-branch instructions.
+
 	* sparc-dis.c (print_insn_sparc): Handle ')'.
 	* sparc-opc.c (sparc_opcodes): Add crypto instructions.
 

@@ -1,5 +1,9 @@
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
+	* gas/sparc/cbcond.s: New file.
+	* gas/sparc/cbcond.d: New file.
+	* gas/sparc/sparc.exp: Run cbcond test.
+
 	* gas/sparc/crypto.s: New file.
 	* gas/sparc/crypto.d: New file.
 	* gas/sparc/sparc.exp: Run crypto test.
