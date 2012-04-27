@@ -1,3 +1,8 @@
+2012-04-26  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* configure.ac: Add AC_ARG_PROGRAM.
+	* configure: Regenerate.
+
 2012-04-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix DW_AT_lower_bound defaults for DWARF-4+.
