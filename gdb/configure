@@ -12462,7 +12462,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_var_elf" >&5
 $as_echo "$gdb_cv_var_elf" >&6; }
 if test $gdb_cv_var_elf = yes; then
-  CONFIG_OBS="$CONFIG_OBS elfread.o"
+  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o"
 
 $as_echo "#define HAVE_ELF 1" >>confdefs.h
 

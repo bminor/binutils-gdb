@@ -1,5 +1,126 @@
 2012-04-27  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (SFILES): Add `probe' and `stap-probe'.
+	(COMMON_OBS): Likewise.
+	(HFILES_NO_SRCDIR): Add `probe'.
+	* NEWS: Mention support for static and SystemTap probes.
+	* amd64-tdep.c (amd64_init_abi): Initializing proper fields used by
+	SystemTap probes' arguments parser.
+	* arm-linux-tdep.c: Including headers needed to perform the parsing
+	of SystemTap probes' arguments.
+	(arm_stap_is_single_operand): New function.
+	(arm_stap_parse_special_token): Likewise.
+	(arm_linux_init_abi): Initializing proper fields used by SystemTap
+	probes' arguments parser.
+	* ax-gdb.c (require_rvalue): Removing static declaration.
+	(gen_expr): Likewise.
+	* ax-gdb.h (gen_expr): Declaring function.
+	(require_rvalue): Likewise.
+	* breakpoint.c: Include `gdb_regex.h' and `probe.h'.
+	(bkpt_probe_breakpoint_ops): New variable.
+	(momentary_breakpoint_from_master): Set the `probe' value.
+	(add_location_to_breakpoint): Likewise.
+	(break_command_1): Using proper breakpoint_ops according to the
+	argument passed by the user in the command line.
+	(bkpt_probe_insert_location): New function.
+	(bkpt_probe_remove_location): Likewise.
+	(bkpt_probe_create_sals_from_address): Likewise.
+	(bkpt_probe_decode_linespec): Likewise.
+	(tracepoint_probe_create_sals_from_address): Likewise.
+	(tracepoint_probe_decode_linespec): Likewise.
+	(tracepoint_probe_breakpoint_ops): New variable.
+	(trace_command): Using proper breakpoint_ops according to the
+	argument passed by the user in the command line.
+	(initialize_breakpoint_ops): Initializing breakpoint_ops for
+	static probes on breakpoints and tracepoints.
+	* breakpoint.h (struct bp_location) <probe>: New field.
+	* cli-utils.c (skip_spaces_const): New function.
+	(extract_arg): Likewise.
+	* cli-utils.h (skip_spaces_const): Likewise.
+	(extract_arg): Likewise.
+	* coffread.c (coff_sym_fns): Add `sym_probe_fns' value.
+	* configure.ac: Append `stap-probe.o' to be generated when ELF
+	support is present.
+	* configure: Regenerate.
+	* dbxread.c (aout_sym_fns): Add `sym_probe_fns' value.
+	* elfread.c: Include `probe.h' and `arch-utils.h'.
+	(probe_key): New variable.
+	(elf_get_probes): New function.
+	(elf_get_probe_argument_count): Likewise.
+	(elf_evaluate_probe_argument): Likewise.
+	(elf_compile_to_ax): Likewise.
+	(elf_symfile_relocate_probe): Likewise.
+	(stap_probe_key_free): Likewise.
+	(elf_probe_fns): New variable.
+	(elf_sym_fns): Add `sym_probe_fns' value.
+	(elf_sym_fns_lazy_psyms): Likewise.
+	(elf_sym_fns_gdb_index): Likewise.
+	(_initialize_elfread): Initialize objfile cache for static
+	probes.
+	* gdb_vecs.h (struct probe): New forward declaration.
+	(probe_p): New VEC declaration.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (stap_integer_prefix): New variable.
+	(stap_integer_suffix): Likewise.
+	(stap_register_prefix): Likewise.
+	(stap_register_suffix): Likewise.
+	(stap_register_indirection_prefix): Likewise.
+	(stap_register_indirection_suffix): Likewise.
+	(stap_gdb_register_prefix): Likewise.
+	(stap_gdb_register_suffix): Likewise.
+	(stap_is_single_operand): New function.
+	(stap_parse_special_token): Likewise.
+	(struct stap_parse_info): Forward declaration.
+	* i386-tdep.c: Including headers needed to perform the parsing
+	of SystemTap probes' arguments.
+	(i386_stap_is_single_operand): New function.
+	(i386_stap_parse_special_token): Likewise.
+	(i386_elf_init_abi): Initializing proper fields used by SystemTap
+	probes' arguments parser.
+	* i386-tdep.h (i386_stap_is_single_operand): New function.
+	(i386_stap_parse_special_token): Likewise.
+	* machoread.c (macho_sym_fns): Add `sym_probe_fns' value.
+	* mipsread.c (ecoff_sym_fns): Likewise.
+	* objfiles.c (objfile_relocate1): Support relocation for static
+	probes.
+	* parse.c (prefixify_expression): Remove static declaration.
+	(initialize_expout): Likewise.
+	(reallocate_expout): Likewise.
+	* parser-defs.h (initialize_expout): Declare function.
+	(reallocate_expout): Likewise.
+	(prefixify_expression): Likewise.
+	* ppc-linux-tdep.c: Including headers needed to perform the parsing
+	of SystemTap probes' arguments.
+	(ppc_stap_is_single_operand): New function.
+	(ppc_stap_parse_special_token): Likewise.
+	(ppc_linux_init_abi): Initializing proper fields used by SystemTap
+	probes' arguments parser.
+	* probe.c: New file, for generic statically defined probe support.
+	* probe.h: Likewise.
+	* s390-tdep.c: Including headers needed to perform the parsing of
+	SystemTap probes' arguments.
+	(s390_stap_is_single_operand): New function.
+	(s390_gdbarch_init): Initializing proper fields used by SystemTap
+	probes' arguments parser.
+	* somread.c (som_sym_fns): Add `sym_probe_fns' value.
+	* stap-probe.c: New file, for SystemTap probe support.
+	* stap-probe.h: Likewise.
+	* symfile.h: Include `gdb_vecs.h'.
+	(struct sym_probe_fns): New struct.
+	(struct sym_fns) <sym_probe_fns>: New field.
+	* symtab.c (init_sal): Initialize `probe' field.
+	* symtab.h (struct probe): Forward declaration.
+	(struct symtab_and_line) <probe>: New field.
+	* tracepoint.c (start_tracing): Adjust semaphore on breakpoints
+	locations.
+	(stop_tracing): Likewise.
+	* xcoffread.c (xcoff_sym_fns): Add `sym_probe_fns' value.
+
+2012-04-27  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
 
 	* ax-gdb.c (gen_expr): Clean up code to handle internal variables
 	and to compile agent expressions.

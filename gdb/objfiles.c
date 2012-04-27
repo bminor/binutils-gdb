@@ -795,6 +795,11 @@ objfile_relocate1 (struct objfile *objfile,
 				obj_section_addr (s));
     }
 
+  /* Relocating probes.  */
+  if (objfile->sf && objfile->sf->sym_probe_fns)
+    objfile->sf->sym_probe_fns->sym_relocate_probe (objfile,
+						    new_offsets, delta);
+
   /* Data changed.  */
   return 1;
 }

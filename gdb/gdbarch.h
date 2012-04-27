@@ -55,6 +55,7 @@ struct core_regset_section;
 struct syscall;
 struct agent_expr;
 struct axs_value;
+struct stap_parse_info;
 
 /* The architecture associated with the connection to the target.
  
@@ -978,6 +979,125 @@ extern int gdbarch_get_syscall_number_p (struct gdbarch *gdbarch);
 typedef LONGEST (gdbarch_get_syscall_number_ftype) (struct gdbarch *gdbarch, ptid_t ptid);
 extern LONGEST gdbarch_get_syscall_number (struct gdbarch *gdbarch, ptid_t ptid);
 extern void set_gdbarch_get_syscall_number (struct gdbarch *gdbarch, gdbarch_get_syscall_number_ftype *get_syscall_number);
+
+/* SystemTap related fields and functions.
+   Prefix used to mark an integer constant on the architecture's assembly
+   For example, on x86 integer constants are written as:
+  
+    $10 ;; integer constant 10
+  
+   in this case, this prefix would be the character `$'. */
+
+extern const char * gdbarch_stap_integer_prefix (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_integer_prefix (struct gdbarch *gdbarch, const char * stap_integer_prefix);
+
+/* Suffix used to mark an integer constant on the architecture's assembly. */
+
+extern const char * gdbarch_stap_integer_suffix (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_integer_suffix (struct gdbarch *gdbarch, const char * stap_integer_suffix);
+
+/* Prefix used to mark a register name on the architecture's assembly.
+   For example, on x86 the register name is written as:
+  
+    %eax ;; register eax
+  
+   in this case, this prefix would be the character `%'. */
+
+extern const char * gdbarch_stap_register_prefix (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_prefix (struct gdbarch *gdbarch, const char * stap_register_prefix);
+
+/* Suffix used to mark a register name on the architecture's assembly */
+
+extern const char * gdbarch_stap_register_suffix (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_suffix (struct gdbarch *gdbarch, const char * stap_register_suffix);
+
+/* Prefix used to mark a register indirection on the architecture's assembly.
+   For example, on x86 the register indirection is written as:
+  
+    (%eax) ;; indirecting eax
+  
+   in this case, this prefix would be the charater `('.
+  
+   Please note that we use the indirection prefix also for register
+   displacement, e.g., `4(%eax)' on x86. */
+
+extern const char * gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarch, const char * stap_register_indirection_prefix);
+
+/* Suffix used to mark a register indirection on the architecture's assembly.
+   For example, on x86 the register indirection is written as:
+  
+    (%eax) ;; indirecting eax
+  
+   in this case, this prefix would be the charater `)'.
+  
+   Please note that we use the indirection suffix also for register
+   displacement, e.g., `4(%eax)' on x86. */
+
+extern const char * gdbarch_stap_register_indirection_suffix (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_indirection_suffix (struct gdbarch *gdbarch, const char * stap_register_indirection_suffix);
+
+/* Prefix used to name a register using GDB's nomenclature.
+  
+   For example, on PPC a register is represented by a number in the assembly
+   language (e.g., `10' is the 10th general-purpose register).  However,
+   inside GDB this same register has an `r' appended to its name, so the 10th
+   register would be represented as `r10' internally. */
+
+extern const char * gdbarch_stap_gdb_register_prefix (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_gdb_register_prefix (struct gdbarch *gdbarch, const char * stap_gdb_register_prefix);
+
+/* Suffix used to name a register using GDB's nomenclature. */
+
+extern const char * gdbarch_stap_gdb_register_suffix (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_gdb_register_suffix (struct gdbarch *gdbarch, const char * stap_gdb_register_suffix);
+
+/* Check if S is a single operand.
+  
+   Single operands can be:
+    - Literal integers, e.g. `$10' on x86
+    - Register access, e.g. `%eax' on x86
+    - Register indirection, e.g. `(%eax)' on x86
+    - Register displacement, e.g. `4(%eax)' on x86
+  
+   This function should check for these patterns on the string
+   and return 1 if some were found, or zero otherwise.  Please try to match
+   as much info as you can from the string, i.e., if you have to match
+   something like `(%', do not match just the `('. */
+
+extern int gdbarch_stap_is_single_operand_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_stap_is_single_operand_ftype) (struct gdbarch *gdbarch, const char *s);
+extern int gdbarch_stap_is_single_operand (struct gdbarch *gdbarch, const char *s);
+extern void set_gdbarch_stap_is_single_operand (struct gdbarch *gdbarch, gdbarch_stap_is_single_operand_ftype *stap_is_single_operand);
+
+/* Function used to handle a "special case" in the parser.
+  
+   A "special case" is considered to be an unknown token, i.e., a token
+   that the parser does not know how to parse.  A good example of special
+   case would be ARM's register displacement syntax:
+  
+    [R0, #4]  ;; displacing R0 by 4
+  
+   Since the parser assumes that a register displacement is of the form:
+  
+    <number> <indirection_prefix> <register_name> <indirection_suffix>
+  
+   it means that it will not be able to recognize and parse this odd syntax.
+   Therefore, we should add a special case function that will handle this token.
+  
+   This function should generate the proper expression form of the expression
+   using GDB's internal expression mechanism (e.g., `write_exp_elt_opcode'
+   and so on).  It should also return 1 if the parsing was successful, or zero
+   if the token was not recognized as a special token (in this case, returning
+   zero means that the special parser is deferring the parsing to the generic
+   parser), and should advance the buffer pointer (p->arg). */
+
+extern int gdbarch_stap_parse_special_token_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_stap_parse_special_token_ftype) (struct gdbarch *gdbarch, struct stap_parse_info *p);
+extern int gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, struct stap_parse_info *p);
+extern void set_gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, gdbarch_stap_parse_special_token_ftype *stap_parse_special_token);
 
 /* True if the list of shared libraries is one and only for all
    processes, as opposed to a list of shared libraries per inferior.

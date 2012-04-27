@@ -1948,7 +1948,7 @@ AC_CACHE_CHECK([for ELF support in BFD], gdb_cv_var_elf,
 [bfd *abfd = NULL; bfd_get_elf_phdr_upper_bound (abfd); ],
 gdb_cv_var_elf=yes, gdb_cv_var_elf=no)])
 if test $gdb_cv_var_elf = yes; then
-  CONFIG_OBS="$CONFIG_OBS elfread.o"
+  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o"
   AC_DEFINE(HAVE_ELF, 1,
 	    [Define if ELF support should be included.])
   # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.

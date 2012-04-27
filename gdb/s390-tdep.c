@@ -45,6 +45,13 @@
 #include "linux-tdep.h"
 #include "s390-tdep.h"
 
+#include "stap-probe.h"
+#include "ax.h"
+#include "ax-gdb.h"
+#include "user-regs.h"
+#include "cli/cli-utils.h"
+#include <ctype.h>
+
 #include "features/s390-linux32.c"
 #include "features/s390-linux32v1.c"
 #include "features/s390-linux32v2.c"
@@ -54,7 +61,6 @@
 #include "features/s390x-linux64.c"
 #include "features/s390x-linux64v1.c"
 #include "features/s390x-linux64v2.c"
-
 
 /* The tdep structure.  */
 
@@ -2953,6 +2959,18 @@ s390_address_class_name_to_type_flags (struct gdbarch *gdbarch,
     return 0;
 }
 
+/* Implementation of `gdbarch_stap_is_single_operand', as defined in
+   gdbarch.h.  */
+
+static int
+s390_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
+{
+  return ((isdigit (*s) && s[1] == '(' && s[2] == '%') /* Displacement
+							  or indirection.  */
+	  || *s == '%' /* Register access.  */
+	  || isdigit (*s)); /* Literal number.  */
+}
+
 /* Set up gdbarch struct.  */
 
 static struct gdbarch *
@@ -3282,6 +3300,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                              svr4_fetch_objfile_link_map);
 
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
+
+  /* SystemTap functions.  */
+  set_gdbarch_stap_register_prefix (gdbarch, "%");
+  set_gdbarch_stap_register_indirection_prefix (gdbarch, "(");
+  set_gdbarch_stap_register_indirection_suffix (gdbarch, ")");
+  set_gdbarch_stap_is_single_operand (gdbarch, s390_stap_is_single_operand);
 
   return gdbarch;
 }

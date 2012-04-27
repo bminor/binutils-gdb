@@ -418,6 +418,10 @@ struct bp_location
      processor's architectual constraints.  */
   CORE_ADDR requested_address;
 
+  /* If the location comes from a probe point, this is the probe associated
+     with it.  */
+  struct probe *probe;
+
   char *function_name;
 
   /* Details of the placed breakpoint, when inserted.  */

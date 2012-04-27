@@ -23,6 +23,8 @@
 
 #include "vec.h"
 
+struct probe;
+
 DEF_VEC_P (char_ptr);
 
 DEF_VEC_P (const_char_ptr);
@@ -38,5 +40,8 @@ extern void dirnames_to_char_ptr_vec_append (VEC (char_ptr) **vecp,
 					     const char *dirnames);
 
 extern VEC (char_ptr) *dirnames_to_char_ptr_vec (const char *dirnames);
+
+typedef struct probe *probe_p;
+DEF_VEC_P (probe_p);
 
 #endif /* GDB_VECS_H */

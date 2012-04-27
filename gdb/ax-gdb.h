@@ -110,6 +110,11 @@ extern struct agent_expr *gen_trace_for_return_address (CORE_ADDR,
 
 extern struct agent_expr *gen_eval_for_expr (CORE_ADDR, struct expression *);
 
+extern void gen_expr (struct expression *exp, union exp_element **pc,
+		      struct agent_expr *ax, struct axs_value *value);
+
+extern void require_rvalue (struct agent_expr *ax, struct axs_value *value);
+
 extern int trace_kludge;
 extern int trace_string_kludge;
 

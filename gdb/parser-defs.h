@@ -130,6 +130,30 @@ union type_stack_elt
 extern union type_stack_elt *type_stack;
 extern int type_stack_depth, type_stack_size;
 
+/* Helper function to initialize the expout, expout_size, expout_ptr
+   trio before it is used to store expression elements created during
+   the parsing of an expression.  INITIAL_SIZE is the initial size of
+   the expout array.  LANG is the language used to parse the expression.
+   And GDBARCH is the gdbarch to use during parsing.  */
+
+extern void initialize_expout (int, const struct language_defn *,
+			       struct gdbarch *);
+
+/* Helper function that frees any unsed space in the expout array.
+   It is generally used when the parser has just been parsed and
+   created.  */
+
+extern void reallocate_expout (void);
+
+/* Reverse an expression from suffix form (in which it is constructed)
+   to prefix form (in which we can conveniently print or execute it).
+   Ordinarily this always returns -1.  However, if EXPOUT_LAST_STRUCT
+   is not -1 (i.e., we are trying to complete a field name), it will
+   return the index of the subexpression which is the left-hand-side
+   of the struct operation at EXPOUT_LAST_STRUCT.  */
+
+extern int prefixify_expression (struct expression *expr);
+
 extern void write_exp_elt_opcode (enum exp_opcode);
 
 extern void write_exp_elt_sym (struct symbol *);

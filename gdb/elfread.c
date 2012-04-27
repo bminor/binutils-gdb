@@ -36,6 +36,8 @@
 #include "demangle.h"
 #include "psympriv.h"
 #include "filenames.h"
+#include "probe.h"
+#include "arch-utils.h"
 #include "gdbtypes.h"
 #include "value.h"
 #include "infcall.h"
@@ -59,6 +61,10 @@ struct elfinfo
     asection *stabindexsect;	/* Section pointer for .stab.index section */
     asection *mdebugsect;	/* Section pointer for .mdebug section */
   };
+
+/* Per-objfile data for probe info.  */
+
+static const struct objfile_data *probe_key = NULL;
 
 static void free_elfinfo (void *);
 
@@ -1576,7 +1582,117 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
     complaint (&symfile_complaints,
 	       _("elf/stab section information missing for %s"), filename);
 }
+
+/* Implementation of `sym_get_probes', as documented in symfile.h.  */
+
+static VEC (probe_p) *
+elf_get_probes (struct objfile *objfile)
+{
+  VEC (probe_p) *probes_per_objfile;
+
+  /* Have we parsed this objfile's probes already?  */
+  probes_per_objfile = objfile_data (objfile, probe_key);
+
+  if (!probes_per_objfile)
+    {
+      int ix;
+      const struct probe_ops *probe_ops;
+
+      /* Here we try to gather information about all types of probes from the
+	 objfile.  */
+      for (ix = 0; VEC_iterate (probe_ops_cp, all_probe_ops, ix, probe_ops);
+	   ix++)
+	probe_ops->get_probes (&probes_per_objfile, objfile);
+
+      if (probes_per_objfile == NULL)
+	{
+	  VEC_reserve (probe_p, probes_per_objfile, 1);
+	  gdb_assert (probes_per_objfile != NULL);
+	}
+
+      set_objfile_data (objfile, probe_key, probes_per_objfile);
+    }
+
+  return probes_per_objfile;
+}
+
+/* Implementation of `sym_get_probe_argument_count', as documented in
+   symfile.h.  */
+
+static unsigned
+elf_get_probe_argument_count (struct objfile *objfile,
+			      struct probe *probe)
+{
+  return probe->pops->get_probe_argument_count (probe, objfile);
+}
+
+/* Implementation of `sym_evaluate_probe_argument', as documented in
+   symfile.h.  */
+
+static struct value *
+elf_evaluate_probe_argument (struct objfile *objfile,
+			     struct probe *probe,
+			     unsigned n)
+{
+  return probe->pops->evaluate_probe_argument (probe, objfile, n);
+}
+
+/* Implementation of `sym_compile_to_ax', as documented in symfile.h.  */
+
+static void
+elf_compile_to_ax (struct objfile *objfile,
+		   struct probe *probe,
+		   struct agent_expr *expr,
+		   struct axs_value *value,
+		   unsigned n)
+{
+  probe->pops->compile_to_ax (probe, objfile, expr, value, n);
+}
+
+/* Implementation of `sym_relocate_probe', as documented in symfile.h.  */
+
+static void
+elf_symfile_relocate_probe (struct objfile *objfile,
+			    struct section_offsets *new_offsets,
+			    struct section_offsets *delta)
+{
+  int ix;
+  VEC (probe_p) *probes = objfile_data (objfile, probe_key);
+  struct probe *probe;
+
+  for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+    probe->pops->relocate (probe, ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
+}
+
+/* Helper function used to free the space allocated for storing SystemTap
+   probe information.  */
+
+static void
+probe_key_free (struct objfile *objfile, void *d)
+{
+  int ix;
+  VEC (probe_p) *probes = d;
+  struct probe *probe;
+
+  for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
+    probe->pops->destroy (probe);
+
+  VEC_free (probe_p, probes);
+}
+
 
+
+/* Implementation `sym_probe_fns', as documented in symfile.h.  */
+
+static const struct sym_probe_fns elf_probe_fns =
+{
+  elf_get_probes,		/* sym_get_probes */
+  elf_get_probe_argument_count,	/* sym_get_probe_argument_count */
+  elf_evaluate_probe_argument,	/* sym_evaluate_probe_argument */
+  elf_compile_to_ax,		/* sym_compile_to_ax */
+  elf_symfile_relocate_probe,	/* sym_relocate_probe */
+};
+
 /* Register that we are able to handle ELF object file formats.  */
 
 static const struct sym_fns elf_sym_fns =
@@ -1591,6 +1707,7 @@ static const struct sym_fns elf_sym_fns =
   elf_symfile_segments,		/* Get segment information from a file.  */
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */
+  &elf_probe_fns,		/* sym_probe_fns */
   &psym_functions
 };
 
@@ -1609,6 +1726,7 @@ static const struct sym_fns elf_sym_fns_lazy_psyms =
   elf_symfile_segments,		/* Get segment information from a file.  */
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */
+  &elf_probe_fns,		/* sym_probe_fns */
   &psym_functions
 };
 
@@ -1626,6 +1744,7 @@ static const struct sym_fns elf_sym_fns_gdb_index =
   elf_symfile_segments,		/* Get segment information from a file.  */
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */
+  &elf_probe_fns,		/* sym_probe_fns */
   &dwarf2_gdb_index_functions
 };
 
@@ -1642,6 +1761,7 @@ static const struct gnu_ifunc_fns elf_gnu_ifunc_fns =
 void
 _initialize_elfread (void)
 {
+  probe_key = register_objfile_data_with_cleanup (NULL, probe_key_free);
   add_symtab_fns (&elf_sym_fns);
 
   elf_objfile_gnu_ifunc_cache_data = register_objfile_data ();

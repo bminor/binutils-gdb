@@ -22,6 +22,7 @@
 
 /* This file requires that you first include "bfd.h".  */
 #include "symtab.h"
+#include "gdb_vecs.h"
 
 /* Opaque declarations.  */
 struct target_section;
@@ -29,6 +30,11 @@ struct objfile;
 struct obj_section;
 struct obstack;
 struct block;
+struct probe;
+struct value;
+struct frame_info;
+struct agent_expr;
+struct axs_value;
 
 /* Comparison function for symbol look ups.  */
 
@@ -297,6 +303,52 @@ struct quick_symbol_functions
 				int need_fullname);
 };
 
+/* Structure of functions used for probe support.  If one of these functions
+   is provided, all must be.  */
+
+struct sym_probe_fns
+{
+  /* If non-NULL, return an array of probe objects.
+
+     The returned value does not have to be freed and it has lifetime of the
+     OBJFILE.  */
+  VEC (probe_p) *(*sym_get_probes) (struct objfile *);
+
+  /* Return the number of arguments available to PROBE.  PROBE will
+     have come from a call to this objfile's sym_get_probes method.
+     If you provide an implementation of sym_get_probes, you must
+     implement this method as well.  */
+  unsigned (*sym_get_probe_argument_count) (struct objfile *objfile,
+					    struct probe *probe);
+
+  /* Evaluate the Nth argument available to PROBE.  PROBE will have
+     come from a call to this objfile's sym_get_probes method.  N will
+     be between 0 and the number of arguments available to this probe.
+     FRAME is the frame in which the evaluation is done; the frame's
+     PC will match the address of the probe.  If you provide an
+     implementation of sym_get_probes, you must implement this method
+     as well.  */
+  struct value *(*sym_evaluate_probe_argument) (struct objfile *objfile,
+						struct probe *probe,
+						unsigned n);
+
+  /* Compile the Nth probe argument to an agent expression.  PROBE
+     will have come from a call to this objfile's sym_get_probes
+     method.  N will be between 0 and the number of arguments
+     available to this probe.  EXPR and VALUE are the agent expression
+     that is being updated.  */
+  void (*sym_compile_to_ax) (struct objfile *objfile,
+			     struct probe *probe,
+			     struct agent_expr *expr,
+			     struct axs_value *value,
+			     unsigned n);
+
+  /* Relocate the probe section of OBJFILE.  */
+  void (*sym_relocate_probe) (struct objfile *objfile,
+			      struct section_offsets *new_offsets,
+			      struct section_offsets *delta);
+};
+
 /* Structure to keep track of symbol reading functions for various
    object file types.  */
 
@@ -366,6 +418,10 @@ struct sym_fns
      malloc'd buffer otherwise.  */
 
   bfd_byte *(*sym_relocate) (struct objfile *, asection *sectp, bfd_byte *buf);
+
+  /* If non-NULL, this objfile has probe support, and all the probe
+     functions referred to here will be non-NULL.  */
+  const struct sym_probe_fns *sym_probe_fns;
 
   /* The "quick" (aka partial) symbol functions for this symbol
      reader.  */

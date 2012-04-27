@@ -35,6 +35,7 @@ struct axs_value;
 struct agent_expr;
 struct program_space;
 struct language_defn;
+struct probe;
 
 /* Some of the structures in this file are space critical.
    The space-critical structures are:
@@ -1042,6 +1043,9 @@ struct symtab_and_line
   CORE_ADDR end;
   int explicit_pc;
   int explicit_line;
+
+  /* The probe associated with this symtab_and_line.  */
+  struct probe *probe;
 };
 
 extern void init_sal (struct symtab_and_line *sal);

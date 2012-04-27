@@ -3589,6 +3589,7 @@ static const struct sym_fns aout_sym_fns =
   default_symfile_segments,	/* Get segment information from a file.  */
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */
+  NULL,				/* sym_probe_fns */
   &psym_functions
 };
 

@@ -3,6 +3,13 @@
 
 *** Changes since GDB 7.4
 
+* GDB now has support for SDT (Static Defined Tracing) probes.  Currently,
+  the only implemented backend is for SystemTap probes (<sys/sdt.h>).  You
+  can set a breakpoint using the new "-probe, "-pstap" or "-probe-stap"
+  options and inspect the probe arguments using the new $_probe_arg family
+  of convenience variables.  You can obtain more information about SystemTap
+  in <http://sourceware.org/systemtap/>.
+
 * GDB now supports reversible debugging on ARM, it allows you to
   debug basic ARM and THUMB instructions, and provides 
   record/replay support.  

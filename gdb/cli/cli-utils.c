@@ -223,6 +223,18 @@ skip_spaces (char *chp)
   return chp;
 }
 
+/* A const-correct version of the above.  */
+
+const char *
+skip_spaces_const (const char *chp)
+{
+  if (chp == NULL)
+    return NULL;
+  while (*chp && isspace (*chp))
+    chp++;
+  return chp;
+}
+
 /* See documentation in cli-utils.h.  */
 
 char *
@@ -244,4 +256,33 @@ remove_trailing_whitespace (const char *start, char *s)
     --s;
 
   return s;
+}
+
+/* See documentation in cli-utils.h.  */
+
+char *
+extract_arg (char **arg)
+{
+  char *result, *copy;
+
+  if (!*arg)
+    return NULL;
+
+  /* Find the start of the argument.  */
+  *arg = skip_spaces (*arg);
+  if (!**arg)
+    return NULL;
+  result = *arg;
+
+  /* Find the end of the argument.  */
+  *arg = skip_to_space (*arg + 1);
+
+  if (result == *arg)
+    return NULL;
+
+  copy = xmalloc (*arg - result + 1);
+  memcpy (copy, result, *arg - result);
+  copy[*arg - result] = '\0';
+
+  return copy;
 }

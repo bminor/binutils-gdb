@@ -95,8 +95,6 @@ static void gen_int_literal (struct agent_expr *ax,
 			     struct axs_value *value,
 			     LONGEST k, struct type *type);
 
-
-static void require_rvalue (struct agent_expr *ax, struct axs_value *value);
 static void gen_usual_unary (struct expression *exp, struct agent_expr *ax,
 			     struct axs_value *value);
 static int type_wider_than (struct type *type1, struct type *type2);
@@ -157,8 +155,6 @@ static void gen_repeat (struct expression *exp, union exp_element **pc,
 static void gen_sizeof (struct expression *exp, union exp_element **pc,
 			struct agent_expr *ax, struct axs_value *value,
 			struct type *size_type);
-static void gen_expr (struct expression *exp, union exp_element **pc,
-		      struct agent_expr *ax, struct axs_value *value);
 static void gen_expr_binop_rest (struct expression *exp,
 				 enum exp_opcode op, union exp_element **pc,
 				 struct agent_expr *ax,
@@ -791,7 +787,7 @@ gen_int_literal (struct agent_expr *ax, struct axs_value *value, LONGEST k,
 /* Take what's on the top of the stack (as described by VALUE), and
    try to make an rvalue out of it.  Signal an error if we can't do
    that.  */
-static void
+void
 require_rvalue (struct agent_expr *ax, struct axs_value *value)
 {
   /* Only deal with scalars, structs and such may be too large
@@ -1803,7 +1799,7 @@ gen_sizeof (struct expression *exp, union exp_element **pc,
 /* XXX: i18n */
 /* A gen_expr function written by a Gen-X'er guy.
    Append code for the subexpression of EXPR starting at *POS_P to AX.  */
-static void
+void
 gen_expr (struct expression *exp, union exp_element **pc,
 	  struct agent_expr *ax, struct axs_value *value)
 {

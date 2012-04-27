@@ -1032,6 +1032,7 @@ static const struct sym_fns macho_sym_fns = {
   default_symfile_segments,	/* Get segment information from a file.  */
   NULL,
   macho_symfile_relocate,	/* Relocate a debug section.  */
+  NULL,				/* sym_get_probes */
   &psym_functions
 };
 

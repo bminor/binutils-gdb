@@ -94,6 +94,10 @@ extern int number_is_in_list (char *list, int number);
 
 extern char *skip_spaces (char *inp);
 
+/* A const-correct version of the above.  */
+
+extern const char *skip_spaces_const (const char *inp);
+
 /* Skip leading non-whitespace characters in INP, returning an updated
    pointer.  If INP is NULL, return NULL.  */
 
@@ -103,4 +107,11 @@ extern char *skip_to_space (char *inp);
    START.  */
 
 extern char *remove_trailing_whitespace (const char *start, char *s);
+
+/* A helper function to extract an argument from *ARG.  An argument is
+   delimited by whitespace.  The return value is either NULL if no
+   argument was found, or an xmalloc'd string.  */
+
+extern char *extract_arg (char **arg);
+
 #endif /* CLI_UTILS_H */

@@ -113,8 +113,6 @@ show_parserdebug (struct ui_file *file, int from_tty,
 
 static void free_funcalls (void *ignore);
 
-static int prefixify_expression (struct expression *);
-
 static int prefixify_subexp (struct expression *, struct expression *, int,
 			     int);
 
@@ -182,13 +180,9 @@ free_funcalls (void *ignore)
 /* This page contains the functions for adding data to the struct expression
    being constructed.  */
 
-/* Helper function to initialize the expout, expout_size, expout_ptr
-   trio before it is used to store expression elements created during
-   the parsing of an expression.  INITIAL_SIZE is the initial size of
-   the expout array.  LANG is the language used to parse the expression.
-   And GDBARCH is the gdbarch to use during parsing.  */
+/* See definition in parser-defs.h.  */
 
-static void
+void
 initialize_expout (int initial_size, const struct language_defn *lang,
 		   struct gdbarch *gdbarch)
 {
@@ -200,11 +194,9 @@ initialize_expout (int initial_size, const struct language_defn *lang,
   expout->gdbarch = gdbarch;
 }
 
-/* Helper function that frees any unsed space in the expout array.
-   It is generally used when the parser has just been parsed and
-   created.  */
+/* See definition in parser-defs.h.  */
 
-static void
+void
 reallocate_expout (void)
 {
   /* Record the actual number of expression elements, and then
@@ -804,14 +796,10 @@ copy_name (struct stoken token)
   return namecopy;
 }
 
-/* Reverse an expression from suffix form (in which it is constructed)
-   to prefix form (in which we can conveniently print or execute it).
-   Ordinarily this always returns -1.  However, if EXPOUT_LAST_STRUCT
-   is not -1 (i.e., we are trying to complete a field name), it will
-   return the index of the subexpression which is the left-hand-side
-   of the struct operation at EXPOUT_LAST_STRUCT.  */
 
-static int
+/* See comments on parser-defs.h.  */
+
+int
 prefixify_expression (struct expression *expr)
 {
   int len = sizeof (struct expression) + EXP_ELEM_TO_BYTES (expr->nelts);

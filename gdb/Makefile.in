@@ -726,8 +726,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	sentinel-frame.c \
 	serial.c ser-base.c ser-unix.c skip.c \
 	solib.c solib-target.c source.c \
-	stabsread.c stack.c std-regs.c symfile.c symfile-mem.c symmisc.c \
-	symtab.c \
+	stabsread.c stack.c probe.c stap-probe.c std-regs.c \
+	symfile.c symfile-mem.c symmisc.c symtab.c \
 	target.c target-descriptions.c target-memory.c \
 	thread.c top.c tracepoint.c \
 	trad-frame.c \
@@ -826,7 +826,7 @@ gnulib/import/extra/snippet/arg-nonnull.h gnulib/import/extra/snippet/c++defs.h 
 gnulib/import/extra/snippet/warn-on-use.h \
 gnulib/import/stddef.in.h gnulib/import/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
-common/linux-osdata.h gdb-dlfcn.h auto-load.h
+common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -914,7 +914,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	xml-support.o xml-syscall.o xml-utils.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
 	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
-	jit.o progspace.o skip.o \
+	jit.o progspace.o skip.o probe.o \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o
 
 TSOBS = inflow.o

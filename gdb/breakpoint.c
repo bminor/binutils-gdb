@@ -60,6 +60,8 @@
 #include "jit.h"
 #include "xml-syscall.h"
 #include "parser-defs.h"
+#include "gdb_regex.h"
+#include "probe.h"
 #include "cli/cli-utils.h"
 #include "continuations.h"
 #include "stack.h"
@@ -288,6 +290,9 @@ static struct breakpoint_ops momentary_breakpoint_ops;
 /* The breakpoint_ops structure to be used in regular user created
    breakpoints.  */
 struct breakpoint_ops bkpt_breakpoint_ops;
+
+/* Breakpoints set on probes.  */
+static struct breakpoint_ops bkpt_probe_breakpoint_ops;
 
 /* A reference-counted struct command_line.  This lets multiple
    breakpoints share a single command list.  */
@@ -8149,6 +8154,7 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
   copy->loc->address = orig->loc->address;
   copy->loc->section = orig->loc->section;
   copy->loc->pspace = orig->loc->pspace;
+  copy->loc->probe = orig->loc->probe;
 
   if (orig->loc->source_file != NULL)
     copy->loc->source_file = xstrdup (orig->loc->source_file);
@@ -8234,6 +8240,7 @@ add_location_to_breakpoint (struct breakpoint *b,
   loc->requested_address = sal->pc;
   loc->address = adjusted_address;
   loc->pspace = sal->pspace;
+  loc->probe = sal->probe;
   gdb_assert (loc->pspace != NULL);
   loc->section = sal->section;
   loc->gdbarch = loc_gdbarch;
@@ -8973,6 +8980,14 @@ break_command_1 (char *arg, int flag, int from_tty)
   enum bptype type_wanted = (flag & BP_HARDWAREFLAG
 			     ? bp_hardware_breakpoint
 			     : bp_breakpoint);
+  struct breakpoint_ops *ops;
+  const char *arg_cp = arg;
+
+  /* Matching breakpoints on probes.  */
+  if (arg && probe_linespec_to_ops (&arg_cp) != NULL)
+    ops = &bkpt_probe_breakpoint_ops;
+  else
+    ops = &bkpt_breakpoint_ops;
 
   create_breakpoint (get_current_arch (),
 		     arg,
@@ -8980,7 +8995,7 @@ break_command_1 (char *arg, int flag, int from_tty)
 		     tempflag, type_wanted,
 		     0 /* Ignore count */,
 		     pending_break_support,
-		     &bkpt_breakpoint_ops,
+		     ops,
 		     from_tty,
 		     1 /* enabled */,
 		     0 /* internal */,
@@ -12454,6 +12469,57 @@ momentary_bkpt_print_mention (struct breakpoint *b)
   /* Nothing to mention.  These breakpoints are internal.  */
 }
 
+/* Specific methods for probe breakpoints.  */
+
+static int
+bkpt_probe_insert_location (struct bp_location *bl)
+{
+  int v = bkpt_insert_location (bl);
+
+  if (v == 0)
+    {
+      /* The insertion was successful, now let's set the probe's semaphore
+	 if needed.  */
+      bl->probe->pops->set_semaphore (bl->probe, bl->gdbarch);
+    }
+
+  return v;
+}
+
+static int
+bkpt_probe_remove_location (struct bp_location *bl)
+{
+  /* Let's clear the semaphore before removing the location.  */
+  bl->probe->pops->clear_semaphore (bl->probe, bl->gdbarch);
+
+  return bkpt_remove_location (bl);
+}
+
+static void
+bkpt_probe_create_sals_from_address (char **arg,
+				     struct linespec_result *canonical,
+				     enum bptype type_wanted,
+				     char *addr_start, char **copy_arg)
+{
+  struct linespec_sals lsal;
+
+  lsal.sals = parse_probes (arg, canonical);
+
+  *copy_arg = xstrdup (canonical->addr_string);
+  lsal.canonical = xstrdup (*copy_arg);
+
+  VEC_safe_push (linespec_sals, canonical->sals, &lsal);
+}
+
+static void
+bkpt_probe_decode_linespec (struct breakpoint *b, char **s,
+			    struct symtabs_and_lines *sals)
+{
+  *sals = parse_probes (s, NULL);
+  if (!sals->sals)
+    error (_("probe not found"));
+}
+
 /* The breakpoint_ops structure to be used in tracepoints.  */
 
 static void
@@ -12576,6 +12642,30 @@ tracepoint_decode_linespec (struct breakpoint *b, char **s,
 }
 
 struct breakpoint_ops tracepoint_breakpoint_ops;
+
+/* The breakpoint_ops structure to be use on tracepoints placed in a
+   static probe.  */
+
+static void
+tracepoint_probe_create_sals_from_address (char **arg,
+					   struct linespec_result *canonical,
+					   enum bptype type_wanted,
+					   char *addr_start, char **copy_arg)
+{
+  /* We use the same method for breakpoint on probes.  */
+  bkpt_probe_create_sals_from_address (arg, canonical, type_wanted,
+				       addr_start, copy_arg);
+}
+
+static void
+tracepoint_probe_decode_linespec (struct breakpoint *b, char **s,
+				  struct symtabs_and_lines *sals)
+{
+  /* We use the same method for breakpoint on probes.  */
+  bkpt_probe_decode_linespec (b, s, sals);
+}
+
+static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
 
 /* The breakpoint_ops structure to be used on static tracepoints with
    markers (`-m').  */
@@ -14208,6 +14298,14 @@ set_tracepoint_count (int num)
 static void
 trace_command (char *arg, int from_tty)
 {
+  struct breakpoint_ops *ops;
+  const char *arg_cp = arg;
+
+  if (arg && probe_linespec_to_ops (&arg_cp))
+    ops = &tracepoint_probe_breakpoint_ops;
+  else
+    ops = &tracepoint_breakpoint_ops;
+
   if (create_breakpoint (get_current_arch (),
 			 arg,
 			 NULL, 0, 1 /* parse arg */,
@@ -14215,7 +14313,7 @@ trace_command (char *arg, int from_tty)
 			 bp_tracepoint /* type_wanted */,
 			 0 /* Ignore count */,
 			 pending_break_support,
-			 &tracepoint_breakpoint_ops,
+			 ops,
 			 from_tty,
 			 1 /* enabled */,
 			 0 /* internal */, 0))
@@ -14950,6 +15048,14 @@ initialize_breakpoint_ops (void)
   ops->print_it = momentary_bkpt_print_it;
   ops->print_mention = momentary_bkpt_print_mention;
 
+  /* Probe breakpoints.  */
+  ops = &bkpt_probe_breakpoint_ops;
+  *ops = bkpt_breakpoint_ops;
+  ops->insert_location = bkpt_probe_insert_location;
+  ops->remove_location = bkpt_probe_remove_location;
+  ops->create_sals_from_address = bkpt_probe_create_sals_from_address;
+  ops->decode_linespec = bkpt_probe_decode_linespec;
+
   /* GNU v3 exception catchpoints.  */
   ops = &gnu_v3_exception_catchpoint_ops;
   *ops = bkpt_breakpoint_ops;
@@ -14996,6 +15102,12 @@ initialize_breakpoint_ops (void)
   ops->create_sals_from_address = tracepoint_create_sals_from_address;
   ops->create_breakpoints_sal = tracepoint_create_breakpoints_sal;
   ops->decode_linespec = tracepoint_decode_linespec;
+
+  /* Probe tracepoints.  */
+  ops = &tracepoint_probe_breakpoint_ops;
+  *ops = tracepoint_breakpoint_ops;
+  ops->create_sals_from_address = tracepoint_probe_create_sals_from_address;
+  ops->decode_linespec = tracepoint_probe_decode_linespec;
 
   /* Static tracepoints with marker (`-m').  */
   ops = &strace_marker_breakpoint_ops;
@@ -15075,7 +15187,8 @@ _initialize_breakpoint (void)
   observer_attach_inferior_exit (clear_syscall_counts);
   observer_attach_memory_changed (invalidate_bp_value_on_memory_change);
 
-  breakpoint_objfile_key = register_objfile_data ();
+  breakpoint_objfile_key
+    = register_objfile_data_with_cleanup (NULL, free_breakpoint_probes);
 
   catch_syscall_inferior_data
     = register_inferior_data_with_cleanup (catch_syscall_inferior_data_cleanup);

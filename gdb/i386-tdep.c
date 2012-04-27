@@ -61,6 +61,13 @@
 #include "ax.h"
 #include "ax-gdb.h"
 
+#include "stap-probe.h"
+#include "user-regs.h"
+#include "cli/cli-utils.h"
+#include "expression.h"
+#include "parser-defs.h"
+#include <ctype.h>
+
 /* Register names.  */
 
 static const char *i386_register_names[] =
@@ -3363,6 +3370,325 @@ i386_svr4_sigcontext_addr (struct frame_info *this_frame)
 
   return read_memory_unsigned_integer (sp + 8, 4, byte_order);
 }
+
+
+
+/* Implementation of `gdbarch_stap_is_single_operand', as defined in
+   gdbarch.h.  */
+
+int
+i386_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
+{
+  return (*s == '$' /* Literal number.  */
+	  || (isdigit (*s) && s[1] == '(' && s[2] == '%') /* Displacement.  */
+	  || (*s == '(' && s[1] == '%') /* Register indirection.  */
+	  || (*s == '%' && isalpha (s[1]))); /* Register access.  */
+}
+
+/* Implementation of `gdbarch_stap_parse_special_token', as defined in
+   gdbarch.h.  */
+
+int
+i386_stap_parse_special_token (struct gdbarch *gdbarch,
+			       struct stap_parse_info *p)
+{
+  const char *s = p->arg;
+
+  /* In order to parse special tokens, we use a state-machine that go
+     through every known token and try to get a match.  */
+  enum
+    {
+      TRIPLET,
+      THREE_ARG_DISPLACEMENT,
+      DONE
+    } current_state;
+
+  current_state = TRIPLET;
+
+  /* The special tokens to be parsed here are:
+
+     - `register base + (register index * size) + offset', as represented
+     in `(%rcx,%rax,8)', or `[OFFSET](BASE_REG,INDEX_REG[,SIZE])'.
+
+     - Operands of the form `-8+3+1(%rbp)', which must be interpreted as
+     `*(-8 + 3 - 1 + (void *) $eax)'.  */
+
+  while (current_state != DONE)
+    {
+      const char *s = p->arg;
+
+      switch (current_state)
+	{
+	case TRIPLET:
+	    {
+	      if (isdigit (*s) || *s == '-' || *s == '+')
+		{
+		  int got_minus[3];
+		  int i;
+		  long displacements[3];
+		  const char *start;
+		  char *regname;
+		  int len;
+		  struct stoken str;
+
+		  got_minus[0] = 0;
+		  if (*s == '+')
+		    ++s;
+		  else if (*s == '-')
+		    {
+		      ++s;
+		      got_minus[0] = 1;
+		    }
+
+		  displacements[0] = strtol (s, (char **) &s, 10);
+
+		  if (*s != '+' && *s != '-')
+		    {
+		      /* We are not dealing with a triplet.  */
+		      break;
+		    }
+
+		  got_minus[1] = 0;
+		  if (*s == '+')
+		    ++s;
+		  else
+		    {
+		      ++s;
+		      got_minus[1] = 1;
+		    }
+
+		  displacements[1] = strtol (s, (char **) &s, 10);
+
+		  if (*s != '+' && *s != '-')
+		    {
+		      /* We are not dealing with a triplet.  */
+		      break;
+		    }
+
+		  got_minus[2] = 0;
+		  if (*s == '+')
+		    ++s;
+		  else
+		    {
+		      ++s;
+		      got_minus[2] = 1;
+		    }
+
+		  displacements[2] = strtol (s, (char **) &s, 10);
+
+		  if (*s != '(' || s[1] != '%')
+		    break;
+
+		  s += 2;
+		  start = s;
+
+		  while (isalnum (*s))
+		    ++s;
+
+		  if (*s++ != ')')
+		    break;
+
+		  len = s - start;
+		  regname = alloca (len + 1);
+
+		  strncpy (regname, start, len);
+		  regname[len] = '\0';
+
+		  if (user_reg_map_name_to_regnum (gdbarch,
+						   regname, len) == -1)
+		    error (_("Invalid register name `%s' "
+			     "on expression `%s'."),
+			   regname, p->saved_arg);
+
+		  for (i = 0; i < 3; i++)
+		    {
+		      write_exp_elt_opcode (OP_LONG);
+		      write_exp_elt_type
+			(builtin_type (gdbarch)->builtin_long);
+		      write_exp_elt_longcst (displacements[i]);
+		      write_exp_elt_opcode (OP_LONG);
+		      if (got_minus[i])
+			write_exp_elt_opcode (UNOP_NEG);
+		    }
+
+		  write_exp_elt_opcode (OP_REGISTER);
+		  str.ptr = regname;
+		  str.length = len;
+		  write_exp_string (str);
+		  write_exp_elt_opcode (OP_REGISTER);
+
+		  write_exp_elt_opcode (UNOP_CAST);
+		  write_exp_elt_type (builtin_type (gdbarch)->builtin_data_ptr);
+		  write_exp_elt_opcode (UNOP_CAST);
+
+		  write_exp_elt_opcode (BINOP_ADD);
+		  write_exp_elt_opcode (BINOP_ADD);
+		  write_exp_elt_opcode (BINOP_ADD);
+
+		  write_exp_elt_opcode (UNOP_CAST);
+		  write_exp_elt_type (lookup_pointer_type (p->arg_type));
+		  write_exp_elt_opcode (UNOP_CAST);
+
+		  write_exp_elt_opcode (UNOP_IND);
+
+		  p->arg = s;
+
+		  return 1;
+		}
+	      break;
+	    }
+	case THREE_ARG_DISPLACEMENT:
+	    {
+	      if (isdigit (*s) || *s == '(' || *s == '-' || *s == '+')
+		{
+		  int offset_minus = 0;
+		  long offset = 0;
+		  int size_minus = 0;
+		  long size = 0;
+		  const char *start;
+		  char *base;
+		  int len_base;
+		  char *index;
+		  int len_index;
+		  struct stoken base_token, index_token;
+
+		  if (*s == '+')
+		    ++s;
+		  else if (*s == '-')
+		    {
+		      ++s;
+		      offset_minus = 1;
+		    }
+
+		  if (offset_minus && !isdigit (*s))
+		    break;
+
+		  if (isdigit (*s))
+		    offset = strtol (s, (char **) &s, 10);
+
+		  if (*s != '(' || s[1] != '%')
+		    break;
+
+		  s += 2;
+		  start = s;
+
+		  while (isalnum (*s))
+		    ++s;
+
+		  if (*s != ',' || s[1] != '%')
+		    break;
+
+		  len_base = s - start;
+		  base = alloca (len_base + 1);
+		  strncpy (base, start, len_base);
+		  base[len_base] = '\0';
+
+		  if (user_reg_map_name_to_regnum (gdbarch,
+						   base, len_base) == -1)
+		    error (_("Invalid register name `%s' "
+			     "on expression `%s'."),
+			   base, p->saved_arg);
+
+		  s += 2;
+		  start = s;
+
+		  while (isalnum (*s))
+		    ++s;
+
+		  len_index = s - start;
+		  index = alloca (len_index + 1);
+		  strncpy (index, start, len_index);
+		  index[len_index] = '\0';
+
+		  if (user_reg_map_name_to_regnum (gdbarch,
+						   index, len_index) == -1)
+		    error (_("Invalid register name `%s' "
+			     "on expression `%s'."),
+			   index, p->saved_arg);
+
+		  if (*s != ',' && *s != ')')
+		    break;
+
+		  if (*s == ',')
+		    {
+		      ++s;
+		      if (*s == '+')
+			++s;
+		      else if (*s == '-')
+			{
+			  ++s;
+			  size_minus = 1;
+			}
+
+		      size = strtol (s, (char **) &s, 10);
+
+		      if (*s != ')')
+			break;
+		    }
+
+		  ++s;
+
+		  if (offset)
+		    {
+		      write_exp_elt_opcode (OP_LONG);
+		      write_exp_elt_type
+			(builtin_type (gdbarch)->builtin_long);
+		      write_exp_elt_longcst (offset);
+		      write_exp_elt_opcode (OP_LONG);
+		      if (offset_minus)
+			write_exp_elt_opcode (UNOP_NEG);
+		    }
+
+		  write_exp_elt_opcode (OP_REGISTER);
+		  base_token.ptr = base;
+		  base_token.length = len_base;
+		  write_exp_string (base_token);
+		  write_exp_elt_opcode (OP_REGISTER);
+
+		  if (offset)
+		    write_exp_elt_opcode (BINOP_ADD);
+
+		  write_exp_elt_opcode (OP_REGISTER);
+		  index_token.ptr = index;
+		  index_token.length = len_index;
+		  write_exp_string (index_token);
+		  write_exp_elt_opcode (OP_REGISTER);
+
+		  if (size)
+		    {
+		      write_exp_elt_opcode (OP_LONG);
+		      write_exp_elt_type
+			(builtin_type (gdbarch)->builtin_long);
+		      write_exp_elt_longcst (size);
+		      write_exp_elt_opcode (OP_LONG);
+		      if (size_minus)
+			write_exp_elt_opcode (UNOP_NEG);
+		      write_exp_elt_opcode (BINOP_MUL);
+		    }
+
+		  write_exp_elt_opcode (BINOP_ADD);
+
+		  write_exp_elt_opcode (UNOP_CAST);
+		  write_exp_elt_type (lookup_pointer_type (p->arg_type));
+		  write_exp_elt_opcode (UNOP_CAST);
+
+		  write_exp_elt_opcode (UNOP_IND);
+
+		  p->arg = s;
+
+		  return 1;
+		}
+	      break;
+	    }
+	}
+
+      /* Advancing to the next state.  */
+      ++current_state;
+    }
+
+  return 0;
+}
+
 
 
 /* Generic ELF.  */
@@ -3372,6 +3698,16 @@ i386_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* We typically use stabs-in-ELF with the SVR4 register numbering.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
+
+  /* Registering SystemTap handlers.  */
+  set_gdbarch_stap_integer_prefix (gdbarch, "$");
+  set_gdbarch_stap_register_prefix (gdbarch, "%");
+  set_gdbarch_stap_register_indirection_prefix (gdbarch, "(");
+  set_gdbarch_stap_register_indirection_suffix (gdbarch, ")");
+  set_gdbarch_stap_is_single_operand (gdbarch,
+				      i386_stap_is_single_operand);
+  set_gdbarch_stap_parse_special_token (gdbarch,
+					i386_stap_parse_special_token);
 }
 
 /* System V Release 4 (SVR4).  */

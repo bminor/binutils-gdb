@@ -2691,6 +2691,16 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_relocate_instruction (gdbarch, amd64_relocate_instruction);
 
   set_gdbarch_gen_return_address (gdbarch, amd64_gen_return_address);
+
+  /* SystemTap variables and functions.  */
+  set_gdbarch_stap_integer_prefix (gdbarch, "$");
+  set_gdbarch_stap_register_prefix (gdbarch, "%");
+  set_gdbarch_stap_register_indirection_prefix (gdbarch, "(");
+  set_gdbarch_stap_register_indirection_suffix (gdbarch, ")");
+  set_gdbarch_stap_is_single_operand (gdbarch,
+				      i386_stap_is_single_operand);
+  set_gdbarch_stap_parse_special_token (gdbarch,
+					i386_stap_parse_special_token);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

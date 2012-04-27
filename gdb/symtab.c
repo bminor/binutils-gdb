@@ -901,6 +901,7 @@ init_sal (struct symtab_and_line *sal)
   sal->end = 0;
   sal->explicit_pc = 0;
   sal->explicit_line = 0;
+  sal->probe = NULL;
 }
 
 

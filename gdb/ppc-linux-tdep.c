@@ -50,6 +50,14 @@
 #include "xml-syscall.h"
 #include "linux-tdep.h"
 
+#include "stap-probe.h"
+#include "ax.h"
+#include "ax-gdb.h"
+#include "cli/cli-utils.h"
+#include "parser-defs.h"
+#include "user-regs.h"
+#include <ctype.h>
+
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
 #include "features/rs6000/powerpc-cell32l.c"
@@ -1276,6 +1284,75 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
     }
 }
 
+/* Implementation of `gdbarch_stap_is_single_operand', as defined in
+   gdbarch.h.  */
+
+static int
+ppc_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
+{
+  return (*s == 'i' /* Literal number.  */
+	  || (isdigit (*s) && s[1] == '('
+	      && isdigit (s[2])) /* Displacement.  */
+	  || (*s == '(' && isdigit (s[1])) /* Register indirection.  */
+	  || isdigit (*s)); /* Register value.  */
+}
+
+/* Implementation of `gdbarch_stap_parse_special_token', as defined in
+   gdbarch.h.  */
+
+static int
+ppc_stap_parse_special_token (struct gdbarch *gdbarch,
+			      struct stap_parse_info *p)
+{
+  if (isdigit (*p->arg))
+    {
+      /* This temporary pointer is needed because we have to do a lookahead.
+	  We could be dealing with a register displacement, and in such case
+	  we would not need to do anything.  */
+      const char *s = p->arg;
+      char *regname;
+      int len;
+      struct stoken str;
+
+      while (isdigit (*s))
+	++s;
+
+      if (*s == '(')
+	{
+	  /* It is a register displacement indeed.  Returning 0 means we are
+	     deferring the treatment of this case to the generic parser.  */
+	  return 0;
+	}
+
+      len = s - p->arg;
+      regname = alloca (len + 2);
+      regname[0] = 'r';
+
+      strncpy (regname + 1, p->arg, len);
+      ++len;
+      regname[len] = '\0';
+
+      if (user_reg_map_name_to_regnum (gdbarch, regname, len) == -1)
+	error (_("Invalid register name `%s' on expression `%s'."),
+	       regname, p->saved_arg);
+
+      write_exp_elt_opcode (OP_REGISTER);
+      str.ptr = regname;
+      str.length = len;
+      write_exp_string (str);
+      write_exp_elt_opcode (OP_REGISTER);
+
+      p->arg = s;
+    }
+  else
+    {
+      /* All the other tokens should be handled correctly by the generic
+	 parser.  */
+      return 0;
+    }
+
+  return 1;
+}
 
 /* Cell/B.E. active SPE context tracking support.  */
 
@@ -1592,6 +1669,15 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
   /* Get the syscall number from the arch's register.  */
   set_gdbarch_get_syscall_number (gdbarch, ppc_linux_get_syscall_number);
+
+  /* SystemTap functions.  */
+  set_gdbarch_stap_integer_prefix (gdbarch, "i");
+  set_gdbarch_stap_register_indirection_prefix (gdbarch, "(");
+  set_gdbarch_stap_register_indirection_suffix (gdbarch, ")");
+  set_gdbarch_stap_gdb_register_prefix (gdbarch, "r");
+  set_gdbarch_stap_is_single_operand (gdbarch, ppc_stap_is_single_operand);
+  set_gdbarch_stap_parse_special_token (gdbarch,
+					ppc_stap_parse_special_token);
 
   if (tdep->wordsize == 4)
     {
