@@ -1,5 +1,9 @@
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
+	* gas/sparc/sparc.exp: Run cfr test.
+	* gas/sparc/cfr.s: New testcase.
+	* gas/sparc/cfr.d: Likewise.
+
 	* gas/sparc/sparc.exp: Run pause test.
 	* gas/sparc/pause.s: New testcase.
 	* gas/sparc/pause.d: Likewise.

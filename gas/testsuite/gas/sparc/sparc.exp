@@ -65,6 +65,7 @@ if [istarget sparc*-*-*] {
     run_dump_test "crypto"
     run_dump_test "cbcond"
     run_dump_test "pause"
+    run_dump_test "cfr"
 
     run_list_test "pr4587" ""
 }

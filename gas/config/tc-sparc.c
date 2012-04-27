@@ -805,6 +805,7 @@ struct priv_reg_entry v9a_asr_table[] =
   {"gsr", 19},
   {"dcr", 18},
   {"cps", 28},
+  {"cfr", 26},
   {"clear_softint", 21},
   {"", -1},			/* End marker.  */
 };

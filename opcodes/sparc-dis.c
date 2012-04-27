@@ -108,7 +108,7 @@ static char *v9_hpriv_reg_names[] =
 static char *v9a_asr_reg_names[] =
 {
   "pcr", "pic", "dcr", "gsr", "set_softint", "clear_softint",
-  "softint", "tick_cmpr", "stick", "stick_cmpr", "resv26",
+  "softint", "tick_cmpr", "stick", "stick_cmpr", "cfr",
   "pause", "cps"
 };
 

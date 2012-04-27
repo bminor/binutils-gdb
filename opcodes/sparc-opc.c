@@ -876,6 +876,8 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "wr", F3(2, 0x30, 1)|RD(24),	F3(~2, ~0x30, ~1)|RD(~24),		"1,i,_", HWCAP_VIS2, 0, v9b }, /* wr r,i,%sys_tick */
 { "wr", F3(2, 0x30, 0)|RD(25),	F3(~2, ~0x30, ~0)|RD(~25)|ASI(~0),	"1,2,_", HWCAP_VIS2, 0, v9b }, /* wr r,r,%sys_tick_cmpr */
 { "wr", F3(2, 0x30, 1)|RD(25),	F3(~2, ~0x30, ~1)|RD(~25),		"1,i,_", HWCAP_VIS2, 0, v9b }, /* wr r,i,%sys_tick_cmpr */
+{ "wr", F3(2, 0x30, 0)|RD(26),	F3(~2, ~0x30, ~0)|RD(~26)|ASI(~0),	"1,2,_", 0, HWCAP_CBCOND, v9b }, /* wr r,r,%cfr */
+{ "wr", F3(2, 0x30, 1)|RD(26),	F3(~2, ~0x30, ~1)|RD(~26),		"1,i,_", 0, HWCAP_CBCOND, v9b }, /* wr r,i,%cfr */
 { "wr", F3(2, 0x30, 0)|RD(27),	F3(~2, ~0x30, ~0)|RD(~27)|ASI(~0),	"1,2,_", 0, HWCAP_PAUSE, v9b }, /* wr r,r,%pause */
 { "wr", F3(2, 0x30, 1)|RD(27),	F3(~2, ~0x30, ~1)|RD(~27),		"1,i,_", 0, HWCAP_PAUSE, v9b }, /* wr r,i,%pause */
 { "wr", F3(2, 0x30, 0)|RD(28),	F3(~2, ~0x30, ~0)|RD(~28)|ASI(~0),	"1,2,_", 0, HWCAP_VIS3, v9b }, /* wr r,r,%cps */
@@ -903,6 +905,7 @@ const struct sparc_opcode sparc_opcodes[] = {
 { "rd",	F3(2, 0x28, 0)|RS1(23),		F3(~2, ~0x28, ~0)|RS1(~23)|SIMM13(~0),	"/,d", 0, HWCAP_VIS, v9a }, /* rd %tick_cmpr,r */
 { "rd",	F3(2, 0x28, 0)|RS1(24),		F3(~2, ~0x28, ~0)|RS1(~24)|SIMM13(~0),	"/,d", HWCAP_VIS2, 0, v9b }, /* rd %sys_tick,r */
 { "rd",	F3(2, 0x28, 0)|RS1(25),		F3(~2, ~0x28, ~0)|RS1(~25)|SIMM13(~0),	"/,d", HWCAP_VIS2, 0, v9b }, /* rd %sys_tick_cmpr,r */
+{ "rd",	F3(2, 0x28, 0)|RS1(26),		F3(~2, ~0x28, ~0)|RS1(~26)|SIMM13(~0),	"/,d", HWCAP_CBCOND, 0, v9b }, /* rd %cfr,r */
 { "rd",	F3(2, 0x28, 0)|RS1(28),		F3(~2, ~0x28, ~0)|RS1(~28)|SIMM13(~0),	"/,d", 0, HWCAP_VIS3, v9b }, /* rd %cps,r */
 
 { "rdpr",	F3(2, 0x2a, 0),		F3(~2, ~0x2a, ~0)|SIMM13(~0),	"?,d", 0, 0, v9 },   /* rdpr %priv,r */
