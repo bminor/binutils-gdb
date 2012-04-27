@@ -1,5 +1,24 @@
 2012-04-27  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (struct breakpoint_objfile_data)
+	<longjmp_searched>,<longjmp_probes>,<exception_searched>,
+	<exception_probes>: New fields.
+	(free_breakpoint_probes): New function.
+	(create_longjmp_master_breakpoint): Prefer SystemTap probe over
+	`_Unwind_DebugHook'.
+	(create_exception_master_breakpoint): Likewise.
+	(_initialize_breakpoint): Registering cleanup for SystemTap probes.
+	* infrun.c: Including necessary header files for handling SystemTap
+	probes.
+	(handle_inferior_event): Handling longjmp breakpoint and exceptions
+	via SystemTap probes.
+	(check_exception_resume): Remove `func' argument.  Handle exception
+	unwinding breakpoint set via a SystemTap probe.
+	(insert_exception_resume_from_probe): New function.
+
+2012-04-27  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (SFILES): Add `probe' and `stap-probe'.

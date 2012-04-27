@@ -2744,11 +2744,23 @@ struct breakpoint_objfile_data
   /* Minimal symbol(s) for "longjmp", "siglongjmp", etc. (if any).  */
   struct minimal_symbol *longjmp_msym[NUM_LONGJMP_NAMES];
 
+  /* True if we have looked for longjmp probes.  */
+  int longjmp_searched;
+
+  /* SystemTap probe points for longjmp (if any).  */
+  VEC (probe_p) *longjmp_probes;
+
   /* Minimal symbol for "std::terminate()" (if any).  */
   struct minimal_symbol *terminate_msym;
 
   /* Minimal symbol for "_Unwind_DebugHook" (if any).  */
   struct minimal_symbol *exception_msym;
+
+  /* True if we have looked for exception probes.  */
+  int exception_searched;
+
+  /* SystemTap probe points for unwinding (if any).  */
+  VEC (probe_p) *exception_probes;
 };
 
 static const struct objfile_data *breakpoint_objfile_key;
@@ -2782,6 +2794,15 @@ get_breakpoint_objfile_data (struct objfile *objfile)
       set_objfile_data (objfile, breakpoint_objfile_key, bp_objfile_data);
     }
   return bp_objfile_data;
+}
+
+static void
+free_breakpoint_probes (struct objfile *obj, void *data)
+{
+  struct breakpoint_objfile_data *bp_objfile_data = data;
+
+  VEC_free (probe_p, bp_objfile_data->longjmp_probes);
+  VEC_free (probe_p, bp_objfile_data->exception_probes);
 }
 
 static void
@@ -2860,6 +2881,37 @@ create_longjmp_master_breakpoint (void)
 	continue;
 
       bp_objfile_data = get_breakpoint_objfile_data (objfile);
+
+      if (!bp_objfile_data->longjmp_searched)
+	{
+	  bp_objfile_data->longjmp_probes
+	    = find_probes_in_objfile (objfile, "libc", "longjmp");
+	  bp_objfile_data->longjmp_searched = 1;
+	}
+
+      if (bp_objfile_data->longjmp_probes != NULL)
+	{
+	  int i;
+	  struct probe *probe;
+	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
+	  for (i = 0;
+	       VEC_iterate (probe_p,
+			    bp_objfile_data->longjmp_probes,
+			    i, probe);
+	       ++i)
+	    {
+	      struct breakpoint *b;
+
+	      b = create_internal_breakpoint (gdbarch, probe->address,
+					      bp_longjmp_master,
+					      &internal_breakpoint_ops);
+	      b->addr_string = xstrdup ("-probe-stap libc:longjmp");
+	      b->enable_state = bp_disabled;
+	    }
+
+	  continue;
+	}
 
       for (i = 0; i < NUM_LONGJMP_NAMES; i++)
 	{
@@ -2970,6 +3022,40 @@ create_exception_master_breakpoint (void)
       CORE_ADDR addr;
 
       bp_objfile_data = get_breakpoint_objfile_data (objfile);
+
+      /* We prefer the SystemTap probe point if it exists.  */
+      if (!bp_objfile_data->exception_searched)
+	{
+	  bp_objfile_data->exception_probes
+	    = find_probes_in_objfile (objfile, "libgcc", "unwind");
+	  bp_objfile_data->exception_searched = 1;
+	}
+
+      if (bp_objfile_data->exception_probes != NULL)
+	{
+	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	  int i;
+	  struct probe *probe;
+
+	  for (i = 0;
+	       VEC_iterate (probe_p,
+			    bp_objfile_data->exception_probes,
+			    i, probe);
+	       ++i)
+	    {
+	      struct breakpoint *b;
+
+	      b = create_internal_breakpoint (gdbarch, probe->address,
+					      bp_exception_master,
+					      &internal_breakpoint_ops);
+	      b->addr_string = xstrdup ("-probe-stap libgcc:unwind");
+	      b->enable_state = bp_disabled;
+	    }
+
+	  continue;
+	}
+
+      /* Otherwise, try the hook function.  */
 
       if (msym_not_found_p (bp_objfile_data->exception_msym))
 	continue;
