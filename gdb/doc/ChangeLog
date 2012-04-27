@@ -1,3 +1,9 @@
+2012-04-27  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Static Probe Points): New entry, explaining SystemTap
+	and generic static probe support on GDB.
+
 2012-04-25  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Go): Fix thinko.

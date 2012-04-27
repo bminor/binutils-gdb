@@ -3342,6 +3342,7 @@ all breakpoints in that range are operated on.
 * Conditions::                  Break conditions
 * Break Commands::              Breakpoint command lists
 * Save Breakpoints::            How to save breakpoints in a file
+* Static Probe Points::         Listing static probe points
 * Error in Breakpoints::        ``Cannot insert breakpoints''
 * Breakpoint-related Warnings:: ``Breakpoint address adjusted...''
 @end menu
@@ -4651,6 +4652,69 @@ breakpoints, you can edit the file in your favorite editing program,
 and remove the breakpoint definitions you're not interested in, or
 that can no longer be recreated.
 @end table
+
+@node Static Probe Points
+@subsection Static Probe Points
+
+@cindex static probe point, SystemTap
+@value{GDBN} supports @dfn{SDT} probes in the code.  @acronym{SDT} stands
+for Statically Defined Tracing, and the probes are designed to have a tiny
+runtime code and data footprint, and no dynamic relocations.  They are
+usable from assembly, C and C@t{++} languages.  See
+@uref{http://sourceware.org/systemtap/wiki/UserSpaceProbeImplementation}
+for a good reference on how the @acronym{SDT} probes are implemented.
+
+Currently, @code{SystemTap} (@uref{http://sourceware.org/systemtap/})
+@acronym{SDT} probes are supported on ELF-compatible systems.  See
+@uref{http://sourceware.org/systemtap/wiki/AddingUserSpaceProbingToApps}
+for more information on how to add @code{SystemTap} @acronym{SDT} probes
+in your applications.
+
+@cindex semaphores on static probe points
+Some probes have an associated semaphore variable; for instance, this
+happens automatically if you defined your probe using a DTrace-style
+@file{.d} file.  If your probe has a semaphore, @value{GDBN} will
+automatically enable it when you specify a breakpoint using the
+@samp{-probe-stap} notation.  But, if you put a breakpoint at a probe's
+location by some other method (e.g., @code{break file:line}), then
+@value{GDBN} will not automatically set the semaphore.
+
+You can examine the available static static probes using @code{info
+probes}, with optional arguments:
+
+@table @code
+@kindex info probes
+@item info probes stap @r{[}@var{provider} @r{[}@var{name} @r{[}@var{objfile}@r{]}@r{]}@r{]}
+If given, @var{provider} is a regular expression used to match against provider
+names when selecting which probes to list.  If omitted, probes by all
+probes from all providers are listed.
+
+If given, @var{name} is a regular expression to match against probe names
+when selecting which probes to list.  If omitted, probe names are not
+considered when deciding whether to display them.
+
+If given, @var{objfile} is a regular expression used to select which
+object files (executable or shared libraries) to examine.  If not
+given, all object files are considered.
+
+@item info probes all
+List the available static probes, from all types.
+@end table
+
+@vindex $_probe_arg@r{, convenience variable}
+A probe may specify up to twelve arguments.  These are available at the
+point at which the probe is defined---that is, when the current PC is
+at the probe's location.  The arguments are available using the
+convenience variables (@pxref{Convenience Vars})
+@code{$_probe_arg0}@dots{}@code{$_probe_arg11}.  Each probe argument is
+an integer of the appropriate size; types are not preserved.  The
+convenience variable @code{$_probe_argc} holds the number of arguments
+at the current probe point.
+
+These variables are always available, but attempts to access them at
+any location other than a probe point will cause @value{GDBN} to give
+an error message.
+
 
 @c  @ifclear BARETARGET
 @node Error in Breakpoints
@@ -6666,6 +6730,19 @@ file explicitly.  This is useful if the name of the function does not
 specify the function unambiguously, e.g., if there are several
 functions with identical names in different source files.
 @end table
+
+@cindex breakpoint at static probe point
+@item -pstap|-probe-stap @r{[}@var{objfile}:@r{[}@var{provider}:@r{]}@r{]}@var{name}
+The @sc{gnu}/Linux tool @code{SystemTap} provides a way for
+applications to embed static probes.  @xref{Static Probe Points}, for more
+information on finding and using static probes.  This form of linespec
+specifies the location of such a static probe.
+
+If @var{objfile} is given, only probes coming from that shared library
+or executable matching @var{objfile} as a regular expression are considered.
+If @var{provider} is given, then only probes from that provider are considered.
+If several probes match the spec, @value{GDBN} will insert a breakpoint at
+each one of those probes.
 
 @end table
 
@@ -9071,6 +9148,10 @@ to match the format in which the data was printed.
 The variable @code{$_exitcode} is automatically set to the exit code when
 the program being debugged terminates.
 
+@item $_probe_argc
+@itemx $_probe_arg0@dots{}$_probe_arg11
+Arguments to a static probe.  @xref{Static Probe Points}.
+
 @item $_sdata
 @vindex $_sdata@r{, inspect, convenience variable}
 The variable @code{$_sdata} contains extra collected static tracepoint
@@ -11014,6 +11095,16 @@ Collect all local variables.
 @item $_ret
 Collect the return address.  This is helpful if you want to see more
 of a backtrace.
+
+@item $_probe_argc
+Collects the number of arguments from the static probe at which the
+tracepoint is located.
+@xref{Static Probe Points}.
+
+@item $_probe_arg@var{n}
+@var{n} is an integer between 0 and 11.  Collects the @var{n}th argument
+from the static probe at which the tracepoint is located.
+@xref{Static Probe Points}.
 
 @item $_sdata
 @vindex $_sdata@r{, collect}

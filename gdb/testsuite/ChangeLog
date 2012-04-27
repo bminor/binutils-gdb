@@ -1,3 +1,15 @@
+2012-04-27  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/default.exp: Add `$_probe_arg*' convenience
+	variables.
+	* gdb.base/stap-probe.c: New file.
+	* gdb.base/stap-probe.exp: New file.
+	* gdb.trace/stap-trace.c: New file.
+	* gdb.trace/stap-trace.exp: New file.
+	* gdb.cp/nextoverthrow.exp: Add check for SystemTap probe in
+	libgcc's unwinder.
+
 2012-04-26  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.arch/mips16-thunks-inmain.c: New file.

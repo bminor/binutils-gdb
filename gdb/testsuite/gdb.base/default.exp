@@ -604,6 +604,19 @@ gdb_test_list_exact "show convenience" "show convenience" \
 	{$_sdata = void} \
 	{$_siginfo = void} \
 	{$_thread = 0} \
+	{$_probe_argc = <error: No frame selected>} \
+	{$_probe_arg0 = <error: No frame selected>} \
+	{$_probe_arg1 = <error: No frame selected>} \
+	{$_probe_arg2 = <error: No frame selected>} \
+	{$_probe_arg3 = <error: No frame selected>} \
+	{$_probe_arg4 = <error: No frame selected>} \
+	{$_probe_arg5 = <error: No frame selected>} \
+	{$_probe_arg6 = <error: No frame selected>} \
+	{$_probe_arg7 = <error: No frame selected>} \
+	{$_probe_arg8 = <error: No frame selected>} \
+	{$_probe_arg9 = <error: No frame selected>} \
+	{$_probe_arg10 = <error: No frame selected>} \
+	{$_probe_arg11 = <error: No frame selected>} \
     }
 
 #test show directories

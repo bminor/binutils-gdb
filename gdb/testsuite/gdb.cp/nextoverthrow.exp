@@ -54,6 +54,17 @@ gdb_test_multiple "print _Unwind_DebugHook" "check for unwinder hook" {
     }
 }
 if {!$ok} {
+    gdb_test_multiple "info probe" "check for stap probe in unwinder" {
+	-re ".*libgcc.*unwind.*\r\n$gdb_prompt $" {
+	    pass "check for stap probe in unwinder"
+	    set ok 1
+	}
+	-re "\r\n$gdb_prompt $" {
+	}
+    }
+}
+
+if {!$ok} {
     unsupported "nextoverthrow.exp could not find _Unwind_DebugHook"
     return -1
 }
