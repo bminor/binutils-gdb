@@ -1,3 +1,8 @@
+2012-04-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* probe.c (compile_rx_or_error): Silence ARI warning about missing
+	 gettext function on `error'.
+
 2012-04-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_read_index): Don't use index if symbol table

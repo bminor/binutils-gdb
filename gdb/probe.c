@@ -270,7 +270,7 @@ compile_rx_or_error (regex_t *pattern, const char *rx, const char *message)
       char *err = get_regcomp_error (code, pattern);
 
       make_cleanup (xfree, err);
-      error ("%s: %s", message, err);
+      error (("%s: %s"), message, err);
     }
 }
 
