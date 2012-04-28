@@ -3625,7 +3625,9 @@ bfd_byte *
 default_symfile_relocate (struct objfile *objfile, asection *sectp,
                           bfd_byte *buf)
 {
-  bfd *abfd = objfile->obfd;
+  /* Use sectp->owner instead of objfile->obfd.  sectp may point to a
+     DWO file.  */
+  bfd *abfd = sectp->owner;
 
   /* We're only interested in sections with relocation
      information.  */

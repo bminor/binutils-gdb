@@ -732,6 +732,12 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
+	case DW_OP_GNU_addr_index:
+	  op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	  result = (ctx->funcs->get_addr_index) (ctx->baton, uoffset);
+	  result_val = value_from_ulongest (address_type, result);
+	  break;
+
 	case DW_OP_const1u:
 	  result = extract_unsigned_integer (op_ptr, 1, byte_order);
 	  result_val = value_from_ulongest (address_type, result);
@@ -1541,6 +1547,14 @@ ctx_no_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
 {
   internal_error (__FILE__, __LINE__,
 		  _("Support for DW_OP_GNU_entry_value is unimplemented"));
+}
+
+/* Stub dwarf_expr_context_funcs.get_addr_index implementation.  */
+
+CORE_ADDR
+ctx_no_get_addr_index (void *baton, unsigned int index)
+{
+  error (_("%s is invalid in this context"), "DW_OP_GNU_addr_index");
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

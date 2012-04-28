@@ -80,6 +80,9 @@ struct value *dwarf2_evaluate_loc_desc (struct type *type,
 					unsigned short size,
 					struct dwarf2_per_cu_data *per_cu);
 
+CORE_ADDR dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
+				  unsigned int addr_index);
+
 /* The symbol location baton types used by the DWARF-2 reader (i.e.
    SYMBOL_LOCATION_BATON for a LOC_COMPUTED symbol).  "struct
    dwarf2_locexpr_baton" is for a symbol with a single location

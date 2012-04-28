@@ -162,6 +162,7 @@ static const struct dwarf2_debug_sections dwarf2_xcoff_names = {
   { ".dwstr", NULL },
   { ".dwrnges", NULL },
   { NULL, NULL }, /* debug_types */
+  { NULL, NULL }, /* debug_addr */
   { ".dwframe", NULL },
   { NULL, NULL }, /* eh_frame */
   { NULL, NULL }, /* gdb_index */

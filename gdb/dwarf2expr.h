@@ -85,6 +85,10 @@ struct dwarf_expr_context_funcs
 				      int dwarf_reg, CORE_ADDR fb_offset,
 				      int deref_size);
 
+  /* Return the address indexed by DW_OP_GNU_addr_index.
+     This can throw an exception if the index is out of range.  */
+  CORE_ADDR (*get_addr_index) (void *baton, unsigned int index);
+
 #if 0
   /* Not yet implemented.  */
 
@@ -293,6 +297,7 @@ struct type *ctx_no_get_base_type (struct dwarf_expr_context *ctx,
 void ctx_no_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
 					int dwarf_reg, CORE_ADDR fb_offset,
 					int deref_size);
+CORE_ADDR ctx_no_get_addr_index (void *baton, unsigned int index);
 
 int dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end);
 

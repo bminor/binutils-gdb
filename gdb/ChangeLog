@@ -1,5 +1,107 @@
 2012-04-28  Doug Evans  <dje@google.com>
 
+	Initial support for Fission.  http://gcc.gnu.org/wiki/DebugFission
+	* symfile.c (default_symfile_relocate): Use sectp->owner instead of
+	objfile->obfd.
+	* symfile.h (dwarf2_debug_sections): New member addr.
+	* dwarf2expr.c (execute_stack_op): New case DW_OP_GNU_addr_index.
+	(ctx_no_get_addr_index): New function.
+	* dwarf2expr.h (dwarf_expr_context_funcs): New member get_addr_index.
+	(ctx_no_get_addr_index): Declare.
+	* dwarf2-frame.c (dwarf2_frame_ctx_funcs): Update.
+	* dwarf2loc.c (dwarf_expr_get_addr_index): New function.
+	(dwarf_expr_ctx_funcs): Update.
+	(needs_get_addr_index): New function.
+	(needs_frame_ctx_funcs): Update.
+	* dwarf2loc.h (dwarf2_read_addr_index): Declare.
+	* dwarf2read.c: #include "gdbcore.h".
+	(dwarf2_per_objfile): New members addr, dwo_files.
+	(dwarf2_elf_names): Add entry for addr.
+	(struct dwo_section_names): New type.
+	(dwo_section_names): New static global.
+	(dwarf2_cu): New members dwo_unit, addr_base, have_addr_base.
+	(dwarf2_per_cu_data): New member is_debug_types, all boolean uses of
+	old debug_types_section member updated to use this.
+	Rename member debug_types_section to info_or_types_section,
+	all uses updated.
+	(signatured_type): Rename member type_offset to type_offset_in_tu,
+	all uses updated.  New member type_offset_in_section.
+	(struct dwo_sections): New type.
+	(struct dwo_unit): New type.
+	(struct dwo_file): New type.
+	(die_reader_specs): New member dwo_file.
+	(dwarf2_locate_sections): Watch for .debug_addr.
+	(zlib_decompress_section): Use sectp->owner instead of objfile->obfd.
+	(dwarf2_read_section): Get bfd of section from bfd's asection,
+	instead of objfile.
+	(create_cus_from_index): Initialize the_cu->info_or_types_section.
+	(create_signatured_type_table_from_index): Initialize
+	sig_type->info_or_types_section.
+	(dw2_get_file_names): Statement lists for type units with DWO files
+	live in the DWO file.
+	(create_debug_types_hash_table): New function.
+	(create_all_type_units): Rewrite.
+	(init_cu_die_reader): New arg dwo_file, all callers updated.
+	(init_and_read_dies_worker): Get section from
+	this_cu->info_or_types_section.  Set sig_type->type_offset_in_section.
+	Watch for DW_AT_GNU_dwo_name and if present lookup the file and
+	continue reading the CU/TU from there.
+	(init_cutu_and_read_dies_no_follow): New arg dwo_file, all callers
+	updated.  Get section from this_cu->info_or_types_section.
+	(create_all_comp_units): Initialize this_cu->info_or_types_section.
+	(skip_one_die): New cases DW_FORM_GNU_addr_index,
+	DW_FORM_GNU_str_index.
+	(hash_dwo_file, eq_dwo_file): New functions.
+	(allocate_dwo_file_hash_table): New function.
+	(hash_dwo_unit, eq_dwo_unit): New functions.
+	(allocate_dwo_unit_table): New function.
+	(dwarf2_locate_dwo_sections): New function.
+	(struct create_dwo_info_table_data): New type.
+	(create_debug_info_hash_table_reader): New function.
+	(create_debug_info_hash_table): New function.
+	(try_open_dwo_file, open_dwo_file, init_dwo_file): New function.
+	(lookup_dwo_file): New function.
+	(lookup_dwo_comp_unit, lookup_dwo_type_unit): New functions.
+	(free_dwo_file, free_dwo_file_cleanup): New functions.
+	(free_dwo_file_from_slot, free_dwo_files): New functions.
+	(dwarf2_get_pc_bounds): Handle DW_FORM_GNU_addr_index.
+	(dwarf2_record_block_ranges): Ditto.
+	(read_partial_die): Ditto.
+	(process_enumeration_scope): Update to use type_offset_in_section.
+	(read_full_die_1): New function.
+	(read_full_die): Rewrite.
+	(read_attribute_value): New cases DW_FORM_GNU_addr_index,
+	DW_FORM_GNU_str_index.
+	(read_addr_index_1, read_addr_index): New functions.
+	(read_addr_index_from_leb128): New function.
+	(struct dwarf2_read_addr_index_data): New type.
+	(dwarf2_read_addr_index_reader): New function.
+	(dwarf2_read_addr_index): New function.
+	(read_str_index): New function.
+	(leb128_size): New function.
+	(dwarf_decode_line_header): Delete arg abfd, all callers updated.
+	If processing a type unit from a DWO file, get the line section
+	from the DWO file.
+	(var_decode_location): Watch for DW_OP_GNU_addr_index.
+	(dwarf2_const_value_attr): New cases DW_FORM_GNU_addr_index,
+	DW_FORM_GNU_str_index.
+	(lookup_die_type): Check whether section offset of type's die is
+	known before looking it up.  Remove assert.  Condition can
+	legimately happen for inter-cu type references.
+	(dwarf_attr_name): Handle Fission attributes.
+	(dwarf_form_name): Handle Fission forms.
+	(dump_die_shallow): New cases DW_FORM_GNU_addr_index,
+	DW_FORM_GNU_str_index.
+	(follow_die_sig): Update to use type_offset_in_section.
+	(decode_locdesc): New case DW_OP_GNU_addr_index.
+	(skip_form_bytes): New cases DW_FORM_GNU_addr_index,
+	DW_FORM_GNU_str_index.
+	(cu_debug_loc_section): New function.
+	(fill_in_loclist_baton, dwarf2_symbol_mark_computed): Call it.
+	(dwarf2_per_objfile_free): Unmap .debug_addr section.
+	Free DWO files if present.
+	* xcoffread.c (dwarf2_xcoff_names): Add .debug_addr.
+
 	Refactor DIE reading.
 	* dwarf2read.c (dwarf2_per_objfile): Replace members
 	debug_info_type_hash and debug_types_type_hash with die_type_hash.
