@@ -1,3 +1,65 @@
+2012-04-28  Doug Evans  <dje@google.com>
+
+	Refactor DIE reading.
+	* dwarf2read.c (dwarf2_per_objfile): Replace members
+	debug_info_type_hash and debug_types_type_hash with die_type_hash.
+	(die_reader_specs): New member "die_section".  Temporarily make
+	member "buffer" non-const, pending constifying all info_ptr uses.
+	(die_reader_func_ftype): New typedef.
+	(dw2_get_file_names_reader): New function.
+	(dw2_get_file_names): Rewrite.
+	(read_and_check_type_unit_head): Rename arg type_offset to
+	type_offset_in_tu.
+	(create_all_type_units): Improve debugging message.
+	Improve dummy type unit check.
+	(init_cu_die_reader): New arg "section".  All callers updated.
+	(init_and_read_dies_worker): New function.
+	(init_cu_and_read_dies, init_tu_and_read_dies): New functions.
+	(init_cutu_and_read_dies_no_follow): New function.
+	(init_cutu_and_read_dies_simple): New function.
+	(process_psymtab_comp_unit_reader): New function.
+	(process_psymtab_comp_unit): Delete args section,
+	is_debug_types_section.  Rewrite.  All callers updated.
+	(process_psymtab_type_unit): Renamed from process_type_comp_unit.
+	All callers updated.  Rewrite.
+	(load_partial_comp_unit_reader): New function.
+	(load_partial_comp_unit): Rewrite.
+	(skip_children): New arg reader.  Delete args buffer, cu.
+	All callers updated.
+	(skip_one_die): New arg reader.  Delete args buffer, cu.
+	All callers updated.
+	(locate_pdi_sibling): New arg reader.  Delete args buffer, abfd, cu.
+	All callers updated.
+	(load_full_comp_unit_reader): New function.
+	(load_full_comp_unit): Rewrite.
+	(read_comp_unit): Delete.
+	(read_die_and_children_1): Delete, contents moved ...
+	(read_die_and_children): ... here.
+	(dwarf2_read_abbrevs): New arg abbrev_section.  All callers updated.
+	(load_partial_dies): New arg reader.  Delete args abfd, buffer, cu.
+	All callers updated.
+	(read_partial_die): New arg reader.  Delete args abfd, buffer, cu.
+	All callers updated.
+	(find_partial_die): Rewrite load_all_dies support.
+	(read_attribute_value): New arg reader.  Delete args abfd, cu.
+	All callers updated.
+	(read_attribute): New arg reader.  Delete args abfd, cu.
+	All callers updated.
+	(load_full_type_unit): Add assert.
+	(read_signatured_type_reader): New function.
+	(read_signatured_type): Rewrite.
+	(free_stack_comp_unit): Remove call to age_cached_comp_units.
+	(free_one_cached_comp_unit): Change target_cu arg to target_per_cu.
+	All callers updated.  Set per_cu->cu = NULL after freeing it.
+	(dwarf2_per_cu_offset_and_type): Renamed from dwarf2_offset_and_type.
+	(per_cu_offset_and_type_hash): Renamed from offset_and_type_hash.
+	(per_cu_offset_and_type_eq): Renamed from offset_and_type_eq.
+	(set_die_type): Update.
+	(get_die_type_at_offset): Update.
+	(read_file_scope): Call prepare_one_comp_unit.
+	(read_type_unit_scope): Ditto.
+	(prepare_one_comp_unit): Set producer if present.
+
 2012-04-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* probe.c (compile_rx_or_error): Silence ARI warning about missing
