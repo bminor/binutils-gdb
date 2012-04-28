@@ -1,3 +1,8 @@
+2012-04-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_read_index): Don't use index if symbol table
+	is empty.
+
 2012-04-27  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 

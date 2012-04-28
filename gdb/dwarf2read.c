@@ -2192,6 +2192,10 @@ dwarf2_read_index (struct objfile *objfile)
 
   map->constant_pool = addr + MAYBE_SWAP (metadata[i]);
 
+  /* Don't use the index if it's empty.  */
+  if (map->symbol_table_slots == 0)
+    return 0;
+
   if (!create_cus_from_index (objfile, cu_list, cu_list_elements))
     return 0;
 
