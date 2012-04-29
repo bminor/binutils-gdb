@@ -1,3 +1,8 @@
+2012-04-29  Yao Qi  <yao@codesourcery.com>
+
+	* gdb-code-style.el: New hook gdb-markup-hook
+	and gdb-comment-hook.
+
 2012-04-28  Doug Evans  <dje@google.com>
 
 	Initial support for Fission.  http://gcc.gnu.org/wiki/DebugFission

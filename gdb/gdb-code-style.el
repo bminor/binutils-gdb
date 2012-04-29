@@ -45,4 +45,33 @@
 
 (add-hook 'c-mode-common-hook 'gdb-include-hook)
 
+;; Check marker up.  If the marker up is missing, like,
+;;   warning ("abc");
+;; The '(' and '"' will be highlight.
+(defun gdb-markup-hook ()
+  (font-lock-add-keywords
+   nil
+   '(("\\<\\(warning\\|error\\)[ ]*\\(\([^_]\\)" 2 font-lock-warning-face t))))
+
+(add-hook 'c-mode-common-hook 'gdb-markup-hook)
+
+(defun gdb-comment-hook ()
+  ;; A space should follow "/*", otherwise report a warning.
+  ;; If the comment is like:
+  ;; /*F.  */
+  ;; The 'F' will be highlight.
+  (font-lock-add-keywords
+   nil
+   '(("/\\*\\([^ ]\\).*\\*/" 1 font-lock-warning-face t)))
+  ;; Two spaces are needed between "." and "*/".  Report warning if there
+  ;; is no space (".*/") or only one space (". */").
+  ;; If the comment is like:
+  ;; /* ABC. */ or /* ABC.*/
+  ;; the '.' is highlight.
+  (font-lock-add-keywords
+   nil
+   '(("\\<[[:ascii:]]*\\(\\.[ ]?\\)\\*/" 1 font-lock-warning-face t)))
+  )
+(add-hook 'c-mode-common-hook 'gdb-comment-hook)
+
 ;;; gdb-code-style.el ends here
