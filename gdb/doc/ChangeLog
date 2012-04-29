@@ -1,3 +1,8 @@
+2012-04-29  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Architectures): Remove menu entry `A29K'.
+	(A29K): Remove.
+
 2012-04-27  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 

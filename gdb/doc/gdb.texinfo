@@ -20282,7 +20282,6 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 
 @menu
 * i386::
-* A29K::
 * Alpha::
 * MIPS::
 * HPPA::               HP PA architecture
@@ -20310,32 +20309,6 @@ be returned in a register.
 @kindex show struct-convention
 Show the current setting of the convention to return @code{struct}s
 from functions.
-@end table
-
-@node A29K
-@subsection A29K
-
-@table @code
-
-@kindex set rstack_high_address
-@cindex AMD 29K register stack
-@cindex register stack, AMD29K
-@item set rstack_high_address @var{address}
-On AMD 29000 family processors, registers are saved in a separate
-@dfn{register stack}.  There is no way for @value{GDBN} to determine the
-extent of this stack.  Normally, @value{GDBN} just assumes that the
-stack is ``large enough''.  This may result in @value{GDBN} referencing
-memory locations that do not exist.  If necessary, you can get around
-this problem by specifying the ending address of the register stack with
-the @code{set rstack_high_address} command.  The argument should be an
-address, which you probably want to precede with @samp{0x} to specify in
-hexadecimal.
-
-@kindex show rstack_high_address
-@item show rstack_high_address
-Display the current limit of the register stack, on AMD 29000 family
-processors.
-
 @end table
 
 @node Alpha
