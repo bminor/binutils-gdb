@@ -19,6 +19,7 @@
 #include "server.h"
 #include "terminal.h"
 #include "target.h"
+#include "gdbthread.h"
 #include <stdio.h>
 #include <string.h>
 #if HAVE_SYS_IOCTL_H

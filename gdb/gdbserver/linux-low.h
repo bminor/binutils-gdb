@@ -22,6 +22,7 @@
 #endif
 #include <signal.h>
 
+#include "gdbthread.h"
 #include "gdb_proc_service.h"
 
 #define PTRACE_ARG3_TYPE void *

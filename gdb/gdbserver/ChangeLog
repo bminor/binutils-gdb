@@ -1,3 +1,14 @@
+2012-04-29  Yao Qi  <yao@codesourcery.com>
+
+	* server.h: Move some code to ...
+	* gdbthread.h: ... here.  New.
+	* Makefile.in (inferiors.o, regcache.o): Depends on gdbthread.h
+	(remote-utils.o, server.o, target.o tracepoint.o): Likewise.
+	(nto-low.o, win32-low.o): Likewise.
+	* inferiors.c, linux-low.h, nto-low.c: Include gdbthread.h.
+	* regcache.c, remote-utils.c, server.c: Likewise.
+	* target.c, tracepoint.c, win32-low.c: Likewise.
+
 2012-04-24  Thiago Jung Bauermann  <thiago.bauermann@linaro.org>
 
 	* linux-low.h (PTRACE_ARG3_TYPE): Move macro from linux-low.c.

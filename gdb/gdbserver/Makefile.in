@@ -423,7 +423,8 @@ server_h = $(srcdir)/server.h $(regcache_h) $(srcdir)/target.h \
 		$(signals_h) \
 		$(generated_files)
 
-linux_low_h = $(srcdir)/linux-low.h
+gdbthread_h = $(srcdir)/gdbthread.h $(target_h) $(srcdir)/server.h
+linux_low_h = $(srcdir)/linux-low.h $(gdbthread_h)
 
 linux_ptrace_h = $(srcdir)/../common/linux-ptrace.h
 
@@ -469,16 +470,16 @@ ax.o: ax.c $(server_h) $(ax_h) $(srcdir)/../common/ax.def
 event-loop.o: event-loop.c $(server_h)
 hostio.o: hostio.c $(server_h)
 hostio-errno.o: hostio-errno.c $(server_h)
-inferiors.o: inferiors.c $(server_h)
+inferiors.o: inferiors.c $(server_h) $(gdbthread_h)
 mem-break.o: mem-break.c $(server_h) $(ax_h)
 proc-service.o: proc-service.c $(server_h) $(gdb_proc_service_h)
-regcache.o: regcache.c $(server_h) $(regdef_h)
-remote-utils.o: remote-utils.c terminal.h $(server_h)
-server.o: server.c $(server_h) $(agent_h)
-target.o: target.c $(server_h)
+regcache.o: regcache.c $(server_h) $(regdef_h) $(gdbthread_h)
+remote-utils.o: remote-utils.c terminal.h $(server_h) $(gdbthread_h)
+server.o: server.c $(server_h) $(agent_h) $(gdbthread_h)
+target.o: target.c $(server_h) 
 thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h) \
 	$(gdb_thread_db_h)
-tracepoint.o: tracepoint.c $(server_h) $(ax_h) $(agent_h)
+tracepoint.o: tracepoint.c $(server_h) $(ax_h) $(agent_h) $(gdbthread_h)
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
 dll.o: dll.c $(server_h)
@@ -551,12 +552,12 @@ linux-xtensa-low.o: linux-xtensa-low.c xtensa-xtregs.c $(linux_low_h) $(server_h
 
 lynx-low.o: lynx-low.c $(server_h) $(target_h) $(lynx_low_h)
 lynx-ppc-low.o: lynx-ppc-low.c $(server_h) $(lynx_low_h)
-nto-low.o: nto-low.c $(server_h) $(nto_low_h)
+nto-low.o: nto-low.c $(server_h) $(nto_low_h) $(gdbthread_h)
 nto-x86-low.o: nto-x86-low.c $(server_h) $(nto_low_h) $(regdef_h) $(regcache_h)
 
 win32_low_h = $(srcdir)/win32-low.h
 
-win32-low.o: win32-low.c $(win32_low_h) $(server_h) $(regdef_h) $(regcache_h)
+win32-low.o: win32-low.c $(win32_low_h) $(server_h) $(regdef_h) $(regcache_h) $(gdbthread_h)
 
 win32-arm-low.o: win32-arm-low.c $(win32_low_h) $(server_h)
 win32-i386-low.o: win32-i386-low.c $(win32_low_h) $(server_h) $(i386_low_h)

@@ -24,6 +24,7 @@
 #include "gdb/fileio.h"
 #include "mem-break.h"
 #include "win32-low.h"
+#include "gdbthread.h"
 
 #include <stdint.h>
 #include <windows.h>

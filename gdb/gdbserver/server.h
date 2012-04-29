@@ -141,44 +141,7 @@ struct regcache;
 #include "gdb_signals.h"
 #include "target.h"
 #include "mem-break.h"
-
-struct thread_info
-{
-  struct inferior_list_entry entry;
-  void *target_data;
-  void *regcache_data;
-
-  /* The last resume GDB requested on this thread.  */
-  enum resume_kind last_resume_kind;
-
-  /* The last wait status reported for this thread.  */
-  struct target_waitstatus last_status;
-
-  /* Given `while-stepping', a thread may be collecting data for more
-     than one tracepoint simultaneously.  E.g.:
-
-    ff0001  INSN1 <-- TP1, while-stepping 10 collect $regs
-    ff0002  INSN2
-    ff0003  INSN3 <-- TP2, collect $regs
-    ff0004  INSN4 <-- TP3, while-stepping 10 collect $regs
-    ff0005  INSN5
-
-   Notice that when instruction INSN5 is reached, the while-stepping
-   actions of both TP1 and TP3 are still being collected, and that TP2
-   had been collected meanwhile.  The whole range of ff0001-ff0005
-   should be single-stepped, due to at least TP1's while-stepping
-   action covering the whole range.
-
-   On the other hand, the same tracepoint with a while-stepping action
-   may be hit by more than one thread simultaneously, hence we can't
-   keep the current step count in the tracepoint itself.
-
-   This is the head of the list of the states of `while-stepping'
-   tracepoint actions this thread is now collecting; NULL if empty.
-   Each item in the list holds the current step of the while-stepping
-   action.  */
-  struct wstep_state *while_stepping;
-};
+#include "gdbthread.h"
 
 struct dll_info
 {
@@ -235,7 +198,6 @@ void initialize_low ();
 /* From inferiors.c.  */
 
 extern struct inferior_list all_processes;
-extern struct inferior_list all_threads;
 extern struct inferior_list all_dlls;
 extern int dlls_changed;
 extern void clear_dlls (void);
@@ -248,8 +210,6 @@ void for_each_inferior (struct inferior_list *list,
 extern struct thread_info *current_inferior;
 void remove_inferior (struct inferior_list *list,
 		      struct inferior_list_entry *entry);
-void remove_thread (struct thread_info *thread);
-void add_thread (ptid_t ptid, void *target_data);
 
 struct process_info *add_process (int pid, int attached);
 void remove_process (struct process_info *process);
@@ -257,12 +217,10 @@ struct process_info *find_process_pid (int pid);
 int have_started_inferiors_p (void);
 int have_attached_inferiors_p (void);
 
-struct thread_info *find_thread_ptid (ptid_t ptid);
-
 ptid_t thread_id_to_gdb_id (ptid_t);
 ptid_t thread_to_gdb_id (struct thread_info *);
 ptid_t gdb_id_to_thread_id (ptid_t);
-struct thread_info *gdb_id_to_thread (unsigned int);
+
 void clear_inferiors (void);
 struct inferior_list_entry *find_inferior
      (struct inferior_list *,
