@@ -1,3 +1,7 @@
+2012-04-29  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.dwarf2/dw2-ifort-parameter.exp: Use proc `dwarf2_support'.
+
 2012-04-28  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/dw2-intercu.S (.Ltype_int2_in_cu2): Renamed from

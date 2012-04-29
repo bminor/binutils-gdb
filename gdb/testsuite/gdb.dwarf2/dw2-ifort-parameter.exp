@@ -15,15 +15,10 @@
 
 # Verify DW_AT_variable_parameter does not modify the data structures meaning
 # for GDB, as being used by iFort.
+load_lib dwarf.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
-# For now pick a sampling of likely targets.
-if {![istarget *-*-linux*]
-    && ![istarget *-*-gnu*]
-    && ![istarget *-*-elf*]
-    && ![istarget *-*-openbsd*]
-    && ![istarget arm-*-eabi*]
-    && ![istarget powerpc-*-eabi*]} {
+if {![dwarf2_support]} {
     return 0
 }
 
