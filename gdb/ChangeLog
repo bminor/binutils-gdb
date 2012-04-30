@@ -1,3 +1,11 @@
+2012-04-30  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf_decode_macros): New arg section_name.
+	All callers updated.
+	(init_cu_die_reader): Verify the section is non-empty.
+	(dwarf_decode_line_header): Don't dereference section->asection
+	until we know the section is present.
+
 2012-04-29  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* tracepoint.c (start_tracing, stop_tracing): Checking for NULL

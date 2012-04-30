@@ -1317,7 +1317,7 @@ static struct die_info *dwarf_alloc_die (struct dwarf2_cu *, int);
 static void dwarf_decode_macros (struct line_header *, unsigned int,
                                  char *, bfd *, struct dwarf2_cu *,
 				 struct dwarf2_section_info *,
-				 int);
+				 int, const char *);
 
 static int attr_form_is_block (struct attribute *);
 
@@ -1671,7 +1671,8 @@ zlib_decompress_section (struct objfile *objfile, asection *sectp,
 #endif
 }
 
-/* A helper function that decides whether a section is empty.  */
+/* A helper function that decides whether a section is empty,
+   or not present.  */
 
 static int
 dwarf2_section_empty_p (struct dwarf2_section_info *info)
@@ -3588,7 +3589,7 @@ init_cu_die_reader (struct die_reader_specs *reader,
 		    struct dwarf2_section_info *section,
 		    struct dwo_file *dwo_file)
 {
-  gdb_assert (section->readin);
+  gdb_assert (section->readin && section->buffer != NULL);
   reader->abfd = section->asection->owner;
   reader->cu = cu;
   reader->dwo_file = dwo_file;
@@ -6354,7 +6355,8 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       dwarf_decode_macros (cu->line_header, DW_UNSND (attr),
 			   comp_dir, abfd, cu,
-			   &dwarf2_per_objfile->macro, 1);
+			   &dwarf2_per_objfile->macro, 1,
+			   ".debug_macro");
     }
   else
     {
@@ -6365,7 +6367,8 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
 	  dwarf_decode_macros (cu->line_header, macro_offset,
 			       comp_dir, abfd, cu,
-			       &dwarf2_per_objfile->macinfo, 0);
+			       &dwarf2_per_objfile->macinfo, 0,
+			       ".debug_macinfo");
 	}
     }
 
@@ -12317,7 +12320,6 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
     section = &cu->dwo_unit->dwo_file->sections.line;
   else
     section = &dwarf2_per_objfile->line;
-  abfd = section->asection->owner;
 
   dwarf2_read_section (dwarf2_per_objfile->objfile, section);
   if (section->buffer == NULL)
@@ -12328,6 +12330,10 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
 	complaint (&symfile_complaints, _("missing .debug_line section"));
       return 0;
     }
+
+  /* We can't do this until we know the section is non-empty.
+     Only then do we know we have such a section.  */
+  abfd = section->asection->owner;
 
   /* Make sure that at least there's room for the total_length field.
      That could be 12 bytes long, but we're just going to fudge that.  */
@@ -16894,7 +16900,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
                      char *comp_dir, bfd *abfd,
                      struct dwarf2_cu *cu,
 		     struct dwarf2_section_info *section,
-		     int section_is_gnu)
+		     int section_is_gnu, const char *section_name)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   gdb_byte *mac_ptr, *mac_end;
@@ -16909,8 +16915,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
   dwarf2_read_section (objfile, section);
   if (section->buffer == NULL)
     {
-      complaint (&symfile_complaints, _("missing %s section"),
-		 section->asection->name);
+      complaint (&symfile_complaints, _("missing %s section"), section_name);
       return;
     }
 
