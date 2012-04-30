@@ -1,3 +1,8 @@
+2012-04-26  Sterling Augustine  <saugustine@google.com>
+
+	* contrib: New directory.
+	* contrib/test_pubnames_and_indexes.py: New file.
+
 2012-04-30  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf_decode_macros): New arg section_name.
