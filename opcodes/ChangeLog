@@ -1,3 +1,9 @@
+2012-04-30  DJ Delorie  <dj@redhat.com>
+
+	* rx-decode.opc (MOV): Do not sign-extend immediates which are
+	already the maximum bit size.
+	* rx-decode.c: Regenerate.
+
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
 	* sparc-dis.c (v9a_asr_reg_names): Add 'cfr'.

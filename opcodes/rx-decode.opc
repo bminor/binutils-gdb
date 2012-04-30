@@ -262,7 +262,20 @@ rx_decode_opcode (unsigned long pc AU,
   ID(mov); DR(rdst); SC(IMM (1)); F_____;
 
 /** 1111 10sd rdst im sz	mov%s	#%1, %0 */
-  ID(mov); sBWL (sz); DD(sd, rdst, sz); SC(IMMex(im)); F_____;
+  ID(mov); DD(sd, rdst, sz);
+  if ((im == 1 && sz == 0)
+      || (im == 2 && sz == 1)
+      || (im == 0 && sz == 2))
+    {
+      BWL (sz);
+      SC(IMM(im));
+    }
+  else
+    {
+      sBWL (sz);
+      SC(IMMex(im));
+    }
+   F_____;
 
 /** 0110 0110 immm rdst		mov%s	#%1, %0 */
   ID(mov); DR(rdst); SC(immm); F_____;
