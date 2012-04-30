@@ -93,6 +93,16 @@
 #define DWARF2_VERSION 2
 #endif
 
+/* The .debug_aranges version has been 2 in DWARF version 2, 3 and 4. */
+#ifndef DWARF2_ARANGES_VERSION
+#define DWARF2_ARANGES_VERSION 2
+#endif
+
+/* This implementation output version 2 .debug_line information. */
+#ifndef DWARF2_LINE_VERSION
+#define DWARF2_LINE_VERSION 2
+#endif
+
 #include "subsegs.h"
 
 #include "dwarf2.h"
@@ -1457,7 +1467,7 @@ out_debug_line (segT line_seg)
   line_end = exp.X_add_symbol;
 
   /* Version.  */
-  out_two (DWARF2_VERSION);
+  out_two (DWARF2_LINE_VERSION);
 
   /* Length of the prologue following this length.  */
   prologue_end = symbol_temp_make ();
@@ -1565,7 +1575,7 @@ out_debug_aranges (segT aranges_seg, segT info_seg)
   aranges_end = exp.X_add_symbol;
 
   /* Version.  */
-  out_two (DWARF2_VERSION);
+  out_two (DWARF2_ARANGES_VERSION);
 
   /* Offset to .debug_info.  */
   TC_DWARF2_EMIT_OFFSET (section_symbol (info_seg), sizeof_offset);
@@ -1631,7 +1641,11 @@ out_debug_abbrev (segT abbrev_seg,
   if (all_segs->next == NULL)
     {
       out_abbrev (DW_AT_low_pc, DW_FORM_addr);
-      out_abbrev (DW_AT_high_pc, DW_FORM_addr);
+      if (DWARF2_VERSION < 4)
+	out_abbrev (DW_AT_high_pc, DW_FORM_addr);
+      else
+	out_abbrev (DW_AT_high_pc, (sizeof_address == 4
+				    ? DW_FORM_data4 : DW_FORM_data8));
     }
   else
     {
@@ -1694,7 +1708,13 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
       emit_expr (&exp, sizeof_address);
 
       /* DW_AT_high_pc */
-      exp.X_op = O_symbol;
+      if (DWARF2_VERSION < 4)
+	exp.X_op = O_symbol;
+      else
+	{
+	  exp.X_op = O_subtract;
+	  exp.X_op_symbol = all_segs->text_start;
+	}
       exp.X_add_symbol = all_segs->text_end;
       exp.X_add_number = 0;
       emit_expr (&exp, sizeof_address);

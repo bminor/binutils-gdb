@@ -1,3 +1,15 @@
+2012-04-26  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf2dbg.c (DWARF2_ARANGES_VERSION): New define to 2.
+	(DWARF2_LINE_VERSION): Likewise.
+	(out_debug_line): Use DWARF2_LINE_VERSION not DWARF2_VERSION.
+	(out_debug_aranges): Use DWARF2_ARANGES_VERSION not DWARF2_VERSION.
+	(out_debug_abbrev): Use DW_FORM_data for DW_AT_high_pc when
+	DWARF2_VERSION >= 4.
+	(out_debug_info): Use difference between start and end as data
+	value for DW_AT_high_pc when DWARF2_VERSION >= 4.
+	* config/tc-ia64.h (DWARF2_LINE_VERSION): Override it.
+
 2012-04-27  David S. Miller  <davem@davemloft.net>
 
 	* doc/c-sparc.text: Document %l34 and %h34.
