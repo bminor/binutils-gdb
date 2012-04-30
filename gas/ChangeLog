@@ -1,3 +1,11 @@
+2012-04-30  DJ Delorie  <dj@redhat.com>
+
+	* config/rx-parse.y (rx_intop): Add parameter for operation size.
+	Check for large positive constants really being small negative
+	ones.
+	(BRA, BSR): Update calls to rx_intop.
+	(immediate): Likewise.
+
 2012-04-26  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2dbg.c (DWARF2_ARANGES_VERSION): New define to 2.

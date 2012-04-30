@@ -104,7 +104,7 @@ static int sizemap[] = { BSIZE, WSIZE, LSIZE, WSIZE };
 
 #define id24(a,b2,b3)	   B3 (0xfb+a, b2, b3)
 
-static int         rx_intop (expressionS, int);
+static int         rx_intop (expressionS, int, int);
 static int         rx_uintop (expressionS, int);
 static int         rx_disp3op (expressionS);
 static int         rx_disp5op (expressionS *, int);
@@ -192,11 +192,11 @@ statement :
 	| BRA EXPR
 	  { if (rx_disp3op ($2))
 	      { B1 (0x08); rx_disp3 ($2, 5); }
-	    else if (rx_intop ($2, 8))
+	    else if (rx_intop ($2, 8, 8))
 	      { B1 (0x2e); PC1 ($2); }
-	    else if (rx_intop ($2, 16))
+	    else if (rx_intop ($2, 16, 16))
 	      { B1 (0x38); PC2 ($2); }
-	    else if (rx_intop ($2, 24))
+	    else if (rx_intop ($2, 24, 24))
 	      { B1 (0x04); PC3 ($2); }
 	    else
 	      { rx_relax (RX_RELAX_BRANCH, 0);
@@ -213,9 +213,9 @@ statement :
 /* ---------------------------------------------------------------------- */
 
 	| BSR EXPR
-	  { if (rx_intop ($2, 16))
+	  { if (rx_intop ($2, 16, 16))
 	      { B1 (0x39); PC2 ($2); }
-	    else if (rx_intop ($2, 24))
+	    else if (rx_intop ($2, 24, 24))
 	      { B1 (0x05); PC3 ($2); }
 	    else
 	      { rx_relax (RX_RELAX_BRANCH, 0);
@@ -1308,15 +1308,22 @@ rx_error (const char * str)
 }
 
 static int
-rx_intop (expressionS exp, int nbits)
+rx_intop (expressionS exp, int nbits, int opbits)
 {
   long v;
+  long mask, msb;
 
   if (exp.X_op == O_big && nbits == 32)
       return 1;
   if (exp.X_op != O_constant)
     return 0;
   v = exp.X_add_number;
+
+  msb = 1UL << (opbits - 1);
+  mask = (1UL << opbits) - 1;
+
+  if ((v & msb) && ! (v & ~mask))
+    v -= 1UL << opbits;
 
   switch (nbits)
     {
@@ -1461,12 +1468,12 @@ immediate (expressionS exp, int type, int pos, int bits)
 	rx_error (_("sbb cannot use symbolic immediates"));
     }
 
-  if (rx_intop (exp, 8))
+  if (rx_intop (exp, 8, bits))
     {
       rx_op (exp, 1, type);
       return 1;
     }
-  else if (rx_intop (exp, 16))
+  else if (rx_intop (exp, 16, bits))
     {
       rx_op (exp, 2, type);
       return 2;
@@ -1476,12 +1483,12 @@ immediate (expressionS exp, int type, int pos, int bits)
       rx_op (exp, 2, type);
       return 2;
     }
-  else if (rx_intop (exp, 24))
+  else if (rx_intop (exp, 24, bits))
     {
       rx_op (exp, 3, type);
       return 3;
     }
-  else if (rx_intop (exp, 32))
+  else if (rx_intop (exp, 32, bits))
     {
       rx_op (exp, 4, type);
       return 0;
