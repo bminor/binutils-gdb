@@ -1051,6 +1051,17 @@ Dwarf_die::ref_attribute(unsigned int attr, unsigned int* shndx)
     }
 }
 
+off_t
+Dwarf_die::address_attribute(unsigned int attr, unsigned int* shndx)
+{
+  const Attribute_value* attr_val = this->attribute(attr);
+  if (attr_val == NULL || attr_val->form != elfcpp::DW_FORM_addr)
+    return -1;
+
+  *shndx = attr_val->aux.shndx;
+  return attr_val->val.refval;
+}
+
 // Return the offset of this DIE's first child.
 
 off_t

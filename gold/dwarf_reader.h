@@ -547,8 +547,11 @@ class Dwarf_die
 
   // Return the value of attribute ATTR as a reference.
   off_t
-  ref_attribute(unsigned int attr,
-		unsigned int* shndx);
+  ref_attribute(unsigned int attr, unsigned int* shndx);
+
+  // Return the value of attribute ATTR as a address.
+  off_t
+  address_attribute(unsigned int attr, unsigned int* shndx);
 
   // Return the value of attribute ATTR as a flag.
   bool

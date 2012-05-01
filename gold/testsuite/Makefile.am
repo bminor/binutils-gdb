@@ -1992,6 +1992,18 @@ gdb_index_test_2.stdout: gdb_index_test_2
 
 endif HAVE_ZLIB
 
+# Another simple C test (DW_AT_high_pc encoding) for --gdb-index
+check_SCRIPTS += gdb_index_test_3.sh
+check_DATA += gdb_index_test_3.stdout
+MOSTLYCLEANFILES += gdb_index_test_3.stdout gdb_index_test_3
+gdb_index_test_3.o: gdb_index_test_3.c
+	$(COMPILE) -O0 -g -c -o $@ $<
+gdb_index_test_3: gdb_index_test_3.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -Wl,--gdb-index,--fatal-warnings $<
+gdb_index_test_3.stdout: gdb_index_test_3
+	$(TEST_READELF) --debug-dump=gdb_index $< > $@
+
+
 # End-to-end incremental linking tests.
 # Incremental linking is currently supported only on the x86_64 target.
 

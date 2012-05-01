@@ -1,3 +1,15 @@
+2012-04-26  Mark Wielaard  <mjw@redhat.com>
+
+	* dwarf_reader.cc (Dwarf_die::address_attribute): New function.
+	* dwarf_reader.h (Dwarf_die::address_attribute): Likewise.
+	* gdb-index.cc (Gdb_index_info_reader::record_cu_ranges): Handle
+	DW_AT_high_pc as offset from DW_AT_low_pc.
+
+	* testsuite/Makefile.am (gdb_index_test_3.sh): New test case.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/gdb_index_test_3.c: New test source file.
+	* testsuite/gdb_index_test_3.sh: New test source file.
+
 2012-04-25  Ian Lance Taylor  <iant@google.com>
 
 	* arm.cc (Target_arm::do_is_defined_by_abi): Make sym a const
