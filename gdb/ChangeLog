@@ -1,3 +1,12 @@
+2012-04-30  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (init_cutu_and_read_dies): Renamed from
+	init_and_read_dies_worker.  All callers updated.
+	(init_cu_and_read_dies, init_tu_and_read_dies): Delete.  All calls
+	replaced with init_cutu_and_read_dies.
+	(load_partial_comp_unit): Pass 1 for use_existing_cu.
+	(find_partial_die): Remove FIXME.  Don't free current CU.
+
 2012-04-30  Sterling Augustine  <saugustine@google.com>
 
 	* contrib: New directory.

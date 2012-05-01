@@ -597,7 +597,7 @@ struct die_reader_specs
   gdb_byte *buffer;
 };
 
-/* Type of function passed to init_cu_and_read_dies, et.al.  */
+/* Type of function passed to init_cutu_and_read_dies, et.al.  */
 typedef void (die_reader_func_ftype) (const struct die_reader_specs *reader,
 				      gdb_byte *info_ptr,
 				      struct die_info *comp_unit_die,
@@ -1401,8 +1401,8 @@ static gdb_byte *read_and_check_comp_unit_head
    struct dwarf2_section_info *section, gdb_byte *info_ptr,
    int is_debug_types_section);
 
-static void init_tu_and_read_dies
-  (struct dwarf2_per_cu_data *this_cu, int keep,
+static void init_cutu_and_read_dies
+  (struct dwarf2_per_cu_data *this_cu, int use_existing_cu, int keep,
    die_reader_func_ftype *die_reader_func, void *data);
 
 static void init_cutu_and_read_dies_simple
@@ -2474,7 +2474,7 @@ dw2_get_file_names (struct objfile *objfile,
      However, that's not the case for TUs where DW_AT_stmt_list lives in the
      DWO file.  */
   if (this_cu->is_debug_types)
-    init_tu_and_read_dies (this_cu, 0, dw2_get_file_names_reader, NULL);
+    init_cutu_and_read_dies (this_cu, 0, 0, dw2_get_file_names_reader, NULL);
   else
     init_cutu_and_read_dies_simple (this_cu, dw2_get_file_names_reader, NULL);
 
@@ -3628,8 +3628,7 @@ dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* Subroutine of init_{cu,tu}_and_read_dies.
-   Do all the work necessary to initialize THIS_CU->cu and read in its DIE(s).
+/* Initialize a CU (or TU) and read its DIEs.
    If the CU defers to a DWO file, read the DWO file as well.
 
    If USE_EXISTING_CU is non-zero, and THIS_CU->cu is non-NULL, then use it.
@@ -3639,18 +3638,13 @@ dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
    read_in_chain.  Otherwise the dwarf2_cu data is freed at the end.
 
    WARNING: If THIS_CU is a "dummy CU" (used as filler by the incremental
-   linker) then DIE_READER_FUNC will not get called.
-
-   FIXME: As an implementation detail between our callers and us,
-   USE_EXISTING_CU and KEEP are OK.  But bubbling them up into their callers
-   isn't as clean as I'd like.  Having more callers with good names
-   may be the way to go.  */
+   linker) then DIE_READER_FUNC will not get called.  */
 
 static void
-init_and_read_dies_worker (struct dwarf2_per_cu_data *this_cu,
-			   int use_existing_cu, int keep,
-			   die_reader_func_ftype *die_reader_func,
-			   void *data)
+init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
+			 int use_existing_cu, int keep,
+			 die_reader_func_ftype *die_reader_func,
+			 void *data)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->info_or_types_section;
@@ -3666,8 +3660,6 @@ init_and_read_dies_worker (struct dwarf2_per_cu_data *this_cu,
 
   if (use_existing_cu)
     gdb_assert (keep);
-  if (this_cu->is_debug_types)
-    gdb_assert (! use_existing_cu);
 
   cleanups = make_cleanup (null_cleanup, NULL);
 
@@ -3918,43 +3910,6 @@ init_and_read_dies_worker (struct dwarf2_per_cu_data *this_cu,
   do_cleanups (cleanups);
 }
 
-/* Main entry point for reading a CU.
-   Do all the work necessary to initialize THIS_CU->cu and read in its DIE(s).
-   If the CU defers to a DWO file, read the DWO file as well.
-
-   If USE_EXISTING_CU is non-zero, and THIS_CU->cu is non-NULL, then use it.
-   Otherwise, a new CU is allocated with xmalloc.
-
-   If KEEP is non-zero, then if we allocated a dwarf2_cu we add it to
-   read_in_chain.  Otherwise the dwarf2_cu data is freed at the end.  */
-
-static void
-init_cu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
-		       int use_existing_cu, int keep,
-		       die_reader_func_ftype *die_reader_func,
-		       void *data)
-{
-  init_and_read_dies_worker (this_cu, use_existing_cu, keep,
-			     die_reader_func, data);
-}
-
-/* Main entry point for reading a TU.
-   Do all the work necessary to initialize THIS_CU->cu and read in its DIE(s).
-   If the TU defers to a DWO file, read the DWO file as well.
-
-   If KEEP is non-zero, then if we allocated a dwarf2_cu we add it to
-   read_in_chain.  Otherwise the dwarf2_cu data is freed at the end.  */
-
-static void
-init_tu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
-		       int keep,
-		       die_reader_func_ftype *die_reader_func,
-		       void *data)
-{
-  gdb_assert (this_cu->is_debug_types);
-  init_and_read_dies_worker (this_cu, 0, keep, die_reader_func, data);
-}
-
 /* Read CU/TU THIS_CU in section SECTION,
    but do not follow DW_AT_GNU_dwo_name if present.
    DWO_FILE, if non-NULL, is the DWO file to read (the caller is assumed to
@@ -4176,8 +4131,8 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu)
     free_one_cached_comp_unit (this_cu);
 
   gdb_assert (! this_cu->is_debug_types);
-  init_cu_and_read_dies (this_cu, 0, 0, process_psymtab_comp_unit_reader,
-			 NULL);
+  init_cutu_and_read_dies (this_cu, 0, 0, process_psymtab_comp_unit_reader,
+			   NULL);
 
   /* Age out any secondary CUs.  */
   age_cached_comp_units ();
@@ -4192,6 +4147,7 @@ process_psymtab_type_unit (void **slot, void *info)
   struct signatured_type *sig_type = (struct signatured_type *) *slot;
   struct dwarf2_per_cu_data *per_cu = &sig_type->per_cu;
 
+  gdb_assert (per_cu->is_debug_types);
   gdb_assert (info == NULL);
 
   /* If this compilation unit was already read in, free the
@@ -4202,8 +4158,8 @@ process_psymtab_type_unit (void **slot, void *info)
   if (per_cu->cu != NULL)
     free_one_cached_comp_unit (per_cu);
 
-  gdb_assert (per_cu->is_debug_types);
-  init_tu_and_read_dies (per_cu, 0, process_psymtab_comp_unit_reader, NULL);
+  init_cutu_and_read_dies (per_cu, 0, 0, process_psymtab_comp_unit_reader,
+			   NULL);
 
   /* Age out any secondary CUs.  */
   age_cached_comp_units ();
@@ -4303,10 +4259,7 @@ load_partial_comp_unit_reader (const struct die_reader_specs *reader,
 static void
 load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
 {
-  if (this_cu->is_debug_types)
-    init_tu_and_read_dies (this_cu, 1, load_partial_comp_unit_reader, NULL);
-  else
-    init_cu_and_read_dies (this_cu, 0, 1, load_partial_comp_unit_reader, NULL);
+  init_cutu_and_read_dies (this_cu, 1, 1, load_partial_comp_unit_reader, NULL);
 }
 
 /* Create a list of all compilation units in OBJFILE.
@@ -5315,7 +5268,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *this_cu)
 {
   gdb_assert (! this_cu->is_debug_types);
 
-  init_cu_and_read_dies (this_cu, 1, 1, load_full_comp_unit_reader, NULL);
+  init_cutu_and_read_dies (this_cu, 1, 1, load_full_comp_unit_reader, NULL);
 }
 
 /* Add a DIE to the delayed physname list.  */
@@ -11176,11 +11129,14 @@ find_partial_die (sect_offset offset, struct dwarf2_cu *cu)
 
   if (pd == NULL && per_cu->load_all_dies == 0)
     {
-      /* FIXME: The testsuite doesn't trigger this code path.
-	 http://sourceware.org/bugzilla/show_bug.cgi?id=13961  */
-
-      free_one_cached_comp_unit (per_cu);
       per_cu->load_all_dies = 1;
+
+      /* This is nasty.  When we reread the DIEs, somewhere up the call chain
+	 THIS_CU->cu may already be in use.  So we can't just free it and
+	 replace its DIEs with the ones we read in.  Instead, we leave those
+	 DIEs alone (which can still be in use, e.g. in scan_partial_symbols),
+	 and clobber THIS_CU->cu->partial_dies with the hash table for the new
+	 set.  */
       load_partial_comp_unit (per_cu);
 
       pd = find_partial_die_in_comp_unit (offset, per_cu->cu);
@@ -15913,7 +15869,7 @@ read_signatured_type (struct signatured_type *sig_type)
   gdb_assert (per_cu->is_debug_types);
   gdb_assert (per_cu->cu == NULL);
 
-  init_tu_and_read_dies (per_cu, 1, read_signatured_type_reader, NULL);
+  init_cutu_and_read_dies (per_cu, 0, 1, read_signatured_type_reader, NULL);
 }
 
 /* Decode simple location descriptions.

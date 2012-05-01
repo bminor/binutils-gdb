@@ -1,3 +1,9 @@
+2012-04-30  Doug Evans  <dje@google.com>
+
+	PR testsuite/13961
+	* gdb.dwarf2/pr13961.S: New file.
+	* gdb.dwarf2/pr13961.exp: New file.
+
 2012-04-29  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.dwarf2/dw2-ifort-parameter.exp: Use proc `dwarf2_support'.
