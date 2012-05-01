@@ -14440,7 +14440,7 @@ get_arm_elf_section_data (asection * sec)
 
 typedef struct
 {
-  void *finfo;
+  void *flaginfo;
   struct bfd_link_info *info;
   asection *sec;
   int sec_shndx;
@@ -14475,7 +14475,7 @@ elf32_arm_output_map_sym (output_arch_syminfo *osi,
   sym.st_shndx = osi->sec_shndx;
   sym.st_target_internal = 0;
   elf32_arm_section_map_add (osi->sec, names[type][1], offset);
-  return osi->func (osi->finfo, names[type], &sym, osi->sec, NULL) == 1;
+  return osi->func (osi->flaginfo, names[type], &sym, osi->sec, NULL) == 1;
 }
 
 /* Output mapping symbols for the PLT entry described by ROOT_PLT and ARM_PLT.
@@ -14602,7 +14602,7 @@ elf32_arm_output_stub_sym (output_arch_syminfo *osi, const char *name,
   sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FUNC);
   sym.st_shndx = osi->sec_shndx;
   sym.st_target_internal = 0;
-  return osi->func (osi->finfo, name, &sym, osi->sec, NULL) == 1;
+  return osi->func (osi->flaginfo, name, &sym, osi->sec, NULL) == 1;
 }
 
 static bfd_boolean
@@ -14714,7 +14714,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
 static bfd_boolean
 elf32_arm_output_arch_local_syms (bfd *output_bfd,
 				  struct bfd_link_info *info,
-				  void *finfo,
+				  void *flaginfo,
 				  int (*func) (void *, const char *,
 					       Elf_Internal_Sym *,
 					       asection *,
@@ -14732,7 +14732,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 
   check_use_blx (htab);
 
-  osi.finfo = finfo;
+  osi.flaginfo = flaginfo;
   osi.info = info;
   osi.func = func;
 

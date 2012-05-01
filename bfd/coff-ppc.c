@@ -2050,7 +2050,7 @@ ppc_bfd_coff_final_link (abfd, info)
      struct bfd_link_info *info;
 {
   bfd_size_type symesz;
-  struct coff_final_link_info finfo;
+  struct coff_final_link_info flaginfo;
   bfd_boolean debug_merge_allocated;
   asection *o;
   struct bfd_link_order *p;
@@ -2070,29 +2070,29 @@ ppc_bfd_coff_final_link (abfd, info)
 
   symesz = bfd_coff_symesz (abfd);
 
-  finfo.info = info;
-  finfo.output_bfd = abfd;
-  finfo.strtab = NULL;
-  finfo.section_info = NULL;
-  finfo.last_file_index = -1;
-  finfo.last_bf_index = -1;
-  finfo.internal_syms = NULL;
-  finfo.sec_ptrs = NULL;
-  finfo.sym_indices = NULL;
-  finfo.outsyms = NULL;
-  finfo.linenos = NULL;
-  finfo.contents = NULL;
-  finfo.external_relocs = NULL;
-  finfo.internal_relocs = NULL;
+  flaginfo.info = info;
+  flaginfo.output_bfd = abfd;
+  flaginfo.strtab = NULL;
+  flaginfo.section_info = NULL;
+  flaginfo.last_file_index = -1;
+  flaginfo.last_bf_index = -1;
+  flaginfo.internal_syms = NULL;
+  flaginfo.sec_ptrs = NULL;
+  flaginfo.sym_indices = NULL;
+  flaginfo.outsyms = NULL;
+  flaginfo.linenos = NULL;
+  flaginfo.contents = NULL;
+  flaginfo.external_relocs = NULL;
+  flaginfo.internal_relocs = NULL;
   debug_merge_allocated = FALSE;
 
   coff_data (abfd)->link_info = info;
 
-  finfo.strtab = _bfd_stringtab_init ();
-  if (finfo.strtab == NULL)
+  flaginfo.strtab = _bfd_stringtab_init ();
+  if (flaginfo.strtab == NULL)
     goto error_return;
 
-  if (! coff_debug_merge_hash_table_init (&finfo.debug_merge))
+  if (! coff_debug_merge_hash_table_init (&flaginfo.debug_merge))
     goto error_return;
   debug_merge_allocated = TRUE;
 
@@ -2171,15 +2171,15 @@ ppc_bfd_coff_final_link (abfd, info)
          the target_index fields are 1 based.  */
       amt = abfd->section_count + 1;
       amt *= sizeof (struct coff_link_section_info);
-      finfo.section_info = (struct coff_link_section_info *) bfd_malloc (amt);
+      flaginfo.section_info = (struct coff_link_section_info *) bfd_malloc (amt);
 
-      if (finfo.section_info == NULL)
+      if (flaginfo.section_info == NULL)
 	goto error_return;
 
       for (i = 0; i <= abfd->section_count; i++)
 	{
-	  finfo.section_info[i].relocs = NULL;
-	  finfo.section_info[i].rel_hashes = NULL;
+	  flaginfo.section_info[i].relocs = NULL;
+	  flaginfo.section_info[i].rel_hashes = NULL;
 	}
     }
 
@@ -2217,14 +2217,14 @@ ppc_bfd_coff_final_link (abfd, info)
 	  BFD_ASSERT (info->relocatable);
 	  amt = o->reloc_count;
 	  amt *= sizeof (struct internal_reloc);
-	  finfo.section_info[o->target_index].relocs =
+	  flaginfo.section_info[o->target_index].relocs =
 	    (struct internal_reloc *) bfd_malloc (amt);
 	  amt = o->reloc_count;
 	  amt *= sizeof (struct coff_link_hash_entry *);
-	  finfo.section_info[o->target_index].rel_hashes =
+	  flaginfo.section_info[o->target_index].rel_hashes =
 	    (struct coff_link_hash_entry **) bfd_malloc (amt);
-	  if (finfo.section_info[o->target_index].relocs == NULL
-	      || finfo.section_info[o->target_index].rel_hashes == NULL)
+	  if (flaginfo.section_info[o->target_index].relocs == NULL
+	      || flaginfo.section_info[o->target_index].rel_hashes == NULL)
 	    goto error_return;
 
 	  if (o->reloc_count > max_output_reloc_count)
@@ -2255,31 +2255,31 @@ ppc_bfd_coff_final_link (abfd, info)
 
   /* Allocate some buffers used while linking.  */
   amt = max_sym_count * sizeof (struct internal_syment);
-  finfo.internal_syms = (struct internal_syment *) bfd_malloc (amt);
+  flaginfo.internal_syms = (struct internal_syment *) bfd_malloc (amt);
   amt = max_sym_count * sizeof (asection *);
-  finfo.sec_ptrs = (asection **) bfd_malloc (amt);
+  flaginfo.sec_ptrs = (asection **) bfd_malloc (amt);
   amt = max_sym_count * sizeof (long);
-  finfo.sym_indices = (long *) bfd_malloc (amt);
+  flaginfo.sym_indices = (long *) bfd_malloc (amt);
   amt = (max_sym_count + 1) * symesz;
-  finfo.outsyms = (bfd_byte *) bfd_malloc (amt);
+  flaginfo.outsyms = (bfd_byte *) bfd_malloc (amt);
   amt = max_lineno_count * bfd_coff_linesz (abfd);
-  finfo.linenos = (bfd_byte *) bfd_malloc (amt);
-  finfo.contents = (bfd_byte *) bfd_malloc (max_contents_size);
-  finfo.external_relocs = (bfd_byte *) bfd_malloc (max_reloc_count * relsz);
+  flaginfo.linenos = (bfd_byte *) bfd_malloc (amt);
+  flaginfo.contents = (bfd_byte *) bfd_malloc (max_contents_size);
+  flaginfo.external_relocs = (bfd_byte *) bfd_malloc (max_reloc_count * relsz);
   if (! info->relocatable)
     {
       amt = max_reloc_count * sizeof (struct internal_reloc);
-      finfo.internal_relocs = (struct internal_reloc *) bfd_malloc (amt);
+      flaginfo.internal_relocs = (struct internal_reloc *) bfd_malloc (amt);
     }
-  if ((finfo.internal_syms == NULL && max_sym_count > 0)
-      || (finfo.sec_ptrs == NULL && max_sym_count > 0)
-      || (finfo.sym_indices == NULL && max_sym_count > 0)
-      || finfo.outsyms == NULL
-      || (finfo.linenos == NULL && max_lineno_count > 0)
-      || (finfo.contents == NULL && max_contents_size > 0)
-      || (finfo.external_relocs == NULL && max_reloc_count > 0)
+  if ((flaginfo.internal_syms == NULL && max_sym_count > 0)
+      || (flaginfo.sec_ptrs == NULL && max_sym_count > 0)
+      || (flaginfo.sym_indices == NULL && max_sym_count > 0)
+      || flaginfo.outsyms == NULL
+      || (flaginfo.linenos == NULL && max_lineno_count > 0)
+      || (flaginfo.contents == NULL && max_contents_size > 0)
+      || (flaginfo.external_relocs == NULL && max_reloc_count > 0)
       || (! info->relocatable
-	  && finfo.internal_relocs == NULL
+	  && flaginfo.internal_relocs == NULL
 	  && max_reloc_count > 0))
     goto error_return;
 
@@ -2311,7 +2311,7 @@ ppc_bfd_coff_final_link (abfd, info)
 	      if (! sub->output_has_begun)
 #endif
 		{
-		  if (! _bfd_coff_link_input_bfd (&finfo, sub))
+		  if (! _bfd_coff_link_input_bfd (&flaginfo, sub))
 		    goto error_return;
 		  sub->output_has_begun = TRUE;
 		}
@@ -2319,7 +2319,7 @@ ppc_bfd_coff_final_link (abfd, info)
 	  else if (p->type == bfd_section_reloc_link_order
 		   || p->type == bfd_symbol_reloc_link_order)
 	    {
-	      if (! _bfd_coff_reloc_link_order (abfd, &finfo, o, p))
+	      if (! _bfd_coff_reloc_link_order (abfd, &flaginfo, o, p))
 		goto error_return;
 	    }
 	  else
@@ -2335,7 +2335,7 @@ ppc_bfd_coff_final_link (abfd, info)
     bfd* last_one = ppc_get_last();
     if (last_one)
       {
-	if (! _bfd_coff_link_input_bfd (&finfo, last_one))
+	if (! _bfd_coff_link_input_bfd (&flaginfo, last_one))
 	  goto error_return;
       }
     last_one->output_has_begun = TRUE;
@@ -2343,73 +2343,73 @@ ppc_bfd_coff_final_link (abfd, info)
 #endif
 
   /* Free up the buffers used by _bfd_coff_link_input_bfd.  */
-  coff_debug_merge_hash_table_free (&finfo.debug_merge);
+  coff_debug_merge_hash_table_free (&flaginfo.debug_merge);
   debug_merge_allocated = FALSE;
 
-  if (finfo.internal_syms != NULL)
+  if (flaginfo.internal_syms != NULL)
     {
-      free (finfo.internal_syms);
-      finfo.internal_syms = NULL;
+      free (flaginfo.internal_syms);
+      flaginfo.internal_syms = NULL;
     }
-  if (finfo.sec_ptrs != NULL)
+  if (flaginfo.sec_ptrs != NULL)
     {
-      free (finfo.sec_ptrs);
-      finfo.sec_ptrs = NULL;
+      free (flaginfo.sec_ptrs);
+      flaginfo.sec_ptrs = NULL;
     }
-  if (finfo.sym_indices != NULL)
+  if (flaginfo.sym_indices != NULL)
     {
-      free (finfo.sym_indices);
-      finfo.sym_indices = NULL;
+      free (flaginfo.sym_indices);
+      flaginfo.sym_indices = NULL;
     }
-  if (finfo.linenos != NULL)
+  if (flaginfo.linenos != NULL)
     {
-      free (finfo.linenos);
-      finfo.linenos = NULL;
+      free (flaginfo.linenos);
+      flaginfo.linenos = NULL;
     }
-  if (finfo.contents != NULL)
+  if (flaginfo.contents != NULL)
     {
-      free (finfo.contents);
-      finfo.contents = NULL;
+      free (flaginfo.contents);
+      flaginfo.contents = NULL;
     }
-  if (finfo.external_relocs != NULL)
+  if (flaginfo.external_relocs != NULL)
     {
-      free (finfo.external_relocs);
-      finfo.external_relocs = NULL;
+      free (flaginfo.external_relocs);
+      flaginfo.external_relocs = NULL;
     }
-  if (finfo.internal_relocs != NULL)
+  if (flaginfo.internal_relocs != NULL)
     {
-      free (finfo.internal_relocs);
-      finfo.internal_relocs = NULL;
+      free (flaginfo.internal_relocs);
+      flaginfo.internal_relocs = NULL;
     }
 
   /* The value of the last C_FILE symbol is supposed to be the symbol
      index of the first external symbol.  Write it out again if
      necessary.  */
-  if (finfo.last_file_index != -1
-      && (unsigned int) finfo.last_file.n_value != obj_raw_syment_count (abfd))
+  if (flaginfo.last_file_index != -1
+      && (unsigned int) flaginfo.last_file.n_value != obj_raw_syment_count (abfd))
     {
       file_ptr pos;
 
-      finfo.last_file.n_value = obj_raw_syment_count (abfd);
-      bfd_coff_swap_sym_out (abfd, (PTR) &finfo.last_file,
-			     (PTR) finfo.outsyms);
-      pos = obj_sym_filepos (abfd) + finfo.last_file_index * symesz;
+      flaginfo.last_file.n_value = obj_raw_syment_count (abfd);
+      bfd_coff_swap_sym_out (abfd, (PTR) &flaginfo.last_file,
+			     (PTR) flaginfo.outsyms);
+      pos = obj_sym_filepos (abfd) + flaginfo.last_file_index * symesz;
       if (bfd_seek (abfd, pos, SEEK_SET) != 0
-	  || bfd_bwrite (finfo.outsyms, symesz, abfd) != symesz)
+	  || bfd_bwrite (flaginfo.outsyms, symesz, abfd) != symesz)
 	return FALSE;
     }
 
   /* Write out the global symbols.  */
-  finfo.failed = FALSE;
-  bfd_hash_traverse (&info->hash->table, _bfd_coff_write_global_sym, &finfo);
-  if (finfo.failed)
+  flaginfo.failed = FALSE;
+  bfd_hash_traverse (&info->hash->table, _bfd_coff_write_global_sym, &flaginfo);
+  if (flaginfo.failed)
     goto error_return;
 
   /* The outsyms buffer is used by _bfd_coff_write_global_sym.  */
-  if (finfo.outsyms != NULL)
+  if (flaginfo.outsyms != NULL)
     {
-      free (finfo.outsyms);
-      finfo.outsyms = NULL;
+      free (flaginfo.outsyms);
+      flaginfo.outsyms = NULL;
     }
 
   if (info->relocatable)
@@ -2432,9 +2432,9 @@ ppc_bfd_coff_final_link (abfd, info)
 	  if (o->reloc_count == 0)
 	    continue;
 
-	  irel = finfo.section_info[o->target_index].relocs;
+	  irel = flaginfo.section_info[o->target_index].relocs;
 	  irelend = irel + o->reloc_count;
-	  rel_hash = finfo.section_info[o->target_index].rel_hashes;
+	  rel_hash = flaginfo.section_info[o->target_index].rel_hashes;
 	  erel = external_relocs;
 	  for (; irel < irelend; irel++, rel_hash++, erel += relsz)
 	    {
@@ -2457,19 +2457,19 @@ ppc_bfd_coff_final_link (abfd, info)
     }
 
   /* Free up the section information.  */
-  if (finfo.section_info != NULL)
+  if (flaginfo.section_info != NULL)
     {
       unsigned int i;
 
       for (i = 0; i < abfd->section_count; i++)
 	{
-	  if (finfo.section_info[i].relocs != NULL)
-	    free (finfo.section_info[i].relocs);
-	  if (finfo.section_info[i].rel_hashes != NULL)
-	    free (finfo.section_info[i].rel_hashes);
+	  if (flaginfo.section_info[i].relocs != NULL)
+	    free (flaginfo.section_info[i].relocs);
+	  if (flaginfo.section_info[i].rel_hashes != NULL)
+	    free (flaginfo.section_info[i].rel_hashes);
 	}
-      free (finfo.section_info);
-      finfo.section_info = NULL;
+      free (flaginfo.section_info);
+      flaginfo.section_info = NULL;
     }
 
   /* If we have optimized stabs strings, output them.  */
@@ -2490,7 +2490,7 @@ ppc_bfd_coff_final_link (abfd, info)
 
 #if STRING_SIZE_SIZE == 4
       H_PUT_32 (abfd,
-		_bfd_stringtab_size (finfo.strtab) + STRING_SIZE_SIZE,
+		_bfd_stringtab_size (flaginfo.strtab) + STRING_SIZE_SIZE,
 		strbuf);
 #else
  #error Change H_PUT_32 above
@@ -2500,11 +2500,11 @@ ppc_bfd_coff_final_link (abfd, info)
 	  != STRING_SIZE_SIZE)
 	return FALSE;
 
-      if (! _bfd_stringtab_emit (abfd, finfo.strtab))
+      if (! _bfd_stringtab_emit (abfd, flaginfo.strtab))
 	return FALSE;
     }
 
-  _bfd_stringtab_free (finfo.strtab);
+  _bfd_stringtab_free (flaginfo.strtab);
 
   /* Setting bfd_get_symcount to 0 will cause write_object_contents to
      not try to write out the symbols.  */
@@ -2514,38 +2514,38 @@ ppc_bfd_coff_final_link (abfd, info)
 
  error_return:
   if (debug_merge_allocated)
-    coff_debug_merge_hash_table_free (&finfo.debug_merge);
-  if (finfo.strtab != NULL)
-    _bfd_stringtab_free (finfo.strtab);
-  if (finfo.section_info != NULL)
+    coff_debug_merge_hash_table_free (&flaginfo.debug_merge);
+  if (flaginfo.strtab != NULL)
+    _bfd_stringtab_free (flaginfo.strtab);
+  if (flaginfo.section_info != NULL)
     {
       unsigned int i;
 
       for (i = 0; i < abfd->section_count; i++)
 	{
-	  if (finfo.section_info[i].relocs != NULL)
-	    free (finfo.section_info[i].relocs);
-	  if (finfo.section_info[i].rel_hashes != NULL)
-	    free (finfo.section_info[i].rel_hashes);
+	  if (flaginfo.section_info[i].relocs != NULL)
+	    free (flaginfo.section_info[i].relocs);
+	  if (flaginfo.section_info[i].rel_hashes != NULL)
+	    free (flaginfo.section_info[i].rel_hashes);
 	}
-      free (finfo.section_info);
+      free (flaginfo.section_info);
     }
-  if (finfo.internal_syms != NULL)
-    free (finfo.internal_syms);
-  if (finfo.sec_ptrs != NULL)
-    free (finfo.sec_ptrs);
-  if (finfo.sym_indices != NULL)
-    free (finfo.sym_indices);
-  if (finfo.outsyms != NULL)
-    free (finfo.outsyms);
-  if (finfo.linenos != NULL)
-    free (finfo.linenos);
-  if (finfo.contents != NULL)
-    free (finfo.contents);
-  if (finfo.external_relocs != NULL)
-    free (finfo.external_relocs);
-  if (finfo.internal_relocs != NULL)
-    free (finfo.internal_relocs);
+  if (flaginfo.internal_syms != NULL)
+    free (flaginfo.internal_syms);
+  if (flaginfo.sec_ptrs != NULL)
+    free (flaginfo.sec_ptrs);
+  if (flaginfo.sym_indices != NULL)
+    free (flaginfo.sym_indices);
+  if (flaginfo.outsyms != NULL)
+    free (flaginfo.outsyms);
+  if (flaginfo.linenos != NULL)
+    free (flaginfo.linenos);
+  if (flaginfo.contents != NULL)
+    free (flaginfo.contents);
+  if (flaginfo.external_relocs != NULL)
+    free (flaginfo.external_relocs);
+  if (flaginfo.internal_relocs != NULL)
+    free (flaginfo.internal_relocs);
   if (external_relocs != NULL)
     free (external_relocs);
   return FALSE;

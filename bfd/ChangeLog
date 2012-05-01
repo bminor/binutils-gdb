@@ -1,3 +1,16 @@
+2012-05-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13121
+	* aoutx.h: Rename 'finfo' to 'flaginfo' to avoid conflicts with
+	AIX system headers.
+	* coff-ppc.c: Likewise.
+	* cofflink.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elflink.c: Likewise.
+	* pdp11.c: Likewise.
+	* rescoff.c: Likewise.
+
 2012-04-26  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf2.c (scan_unit_for_symbols): Account for DW_AT_high_pc

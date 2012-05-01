@@ -1,3 +1,9 @@
+2012-05-01  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/13121
+	* rescoff.c: Rename 'finfo' to 'flaginfo' to avoid conflicts with
+	AIX system headers.
+
 2012-04-25  Cary Coutant  <ccoutant@google.com>
 
 	* doc/binutils.texi: Add -D/--enable-deterministic-archives option
