@@ -1,3 +1,12 @@
+2012-05-01  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf_reader.cc (Dwarf_die::read_attributes)
+	(Dwarf_die::skip_attributes, Dwarf_die::int_attribute)
+	(Dwarf_die::uint_attribute): Remove DW_FORM_null.
+	* reduced_debug_output.cc
+	(Output_reduced_debug_info_section::get_die_end): Remove
+	DW_FORM_GNU_ref_index.  Add default case.
+
 2012-04-26  Mark Wielaard  <mjw@redhat.com>
 
 	* dwarf_reader.cc (Dwarf_die::address_attribute): New function.

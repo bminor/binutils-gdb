@@ -1,3 +1,9 @@
+2012-05-01  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.h (enum DW_TAG, enum DW_FORM, enum DW_AT, enum DW_ENCODING)
+	(enum DW_OP, enum DW_CFA): Remove.
+	Include dwarf2.def.
+
 2012-04-23  Cary Coutant  <ccoutant@google.com>
 
 	* elfcpp_swap.h (struct Swap_aligned32): New template.

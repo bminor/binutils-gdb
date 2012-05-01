@@ -1,6 +1,6 @@
 // reduced_debug_output.cc -- output reduced debugging information to save space
 
-// Copyright 2008, 2010 Free Software Foundation, Inc.
+// Copyright 2008, 2010, 2012 Free Software Foundation, Inc.
 // Written by Caleb Howe <cshowe@google.com>.
 
 // This file is part of gold.
@@ -60,7 +60,6 @@ Output_reduced_debug_info_section::get_die_end(
         return false;
       switch(form)
         {
-          case elfcpp::DW_FORM_null:
           case elfcpp::DW_FORM_flag_present:
             break;
           case elfcpp::DW_FORM_strp:
@@ -128,9 +127,9 @@ Output_reduced_debug_info_section::get_die_end(
               break;
             }
           case elfcpp::DW_FORM_indirect:
-          case elfcpp::DW_FORM_GNU_ref_index:
           case elfcpp::DW_FORM_GNU_addr_index:
           case elfcpp::DW_FORM_GNU_str_index:
+          default:
             return false;
       }
     }

@@ -613,9 +613,6 @@ Dwarf_die::read_attributes()
       attr_value.aux.shndx = 0;
       switch(form)
 	{
-	  case elfcpp::DW_FORM_null:
-	    attr_value.val.intval = 0;
-	    break;
 	  case elfcpp::DW_FORM_flag_present:
 	    attr_value.val.intval = 1;
 	    break;
@@ -845,7 +842,6 @@ Dwarf_die::skip_attributes()
         }
       switch(form)
 	{
-	  case elfcpp::DW_FORM_null:
 	  case elfcpp::DW_FORM_flag_present:
 	    break;
 	  case elfcpp::DW_FORM_strp:
@@ -985,7 +981,6 @@ Dwarf_die::int_attribute(unsigned int attr)
     return 0;
   switch (attr_val->form)
     {
-      case elfcpp::DW_FORM_null:
       case elfcpp::DW_FORM_flag_present:
       case elfcpp::DW_FORM_data1:
       case elfcpp::DW_FORM_flag:
@@ -1007,7 +1002,6 @@ Dwarf_die::uint_attribute(unsigned int attr)
     return 0;
   switch (attr_val->form)
     {
-      case elfcpp::DW_FORM_null:
       case elfcpp::DW_FORM_flag_present:
       case elfcpp::DW_FORM_data1:
       case elfcpp::DW_FORM_flag:
