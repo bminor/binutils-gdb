@@ -1,3 +1,9 @@
+2012-05-02  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.texinfo (Blocks In Python): Add a note saying that future
+	improvements to GDB and its infrastructure can move symbols
+	across blocks within a symbol table.
+
 2012-04-29  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Architectures): Remove menu entry `A29K'.

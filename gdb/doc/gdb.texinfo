@@ -24644,7 +24644,11 @@ detailed technical information on @value{GDBN}'s book-keeping of the
 stack.
 
 A @code{gdb.Block} is iterable.  The iterator returns the symbols
-(@pxref{Symbols In Python}) local to the block.
+(@pxref{Symbols In Python}) local to the block.  Python programs
+should not assume that a specific block object will always contain a
+given symbol, since changes in @value{GDBN} features and
+infrastructure may cause symbols move across blocks in a symbol
+table.
 
 The following block-related functions are available in the @code{gdb}
 module:
