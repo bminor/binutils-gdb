@@ -9,7 +9,6 @@ initialize_tdesc_powerpc_e500l (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
-  struct tdesc_type *field_type, *type;
 
   set_tdesc_architecture (result, bfd_scan_arch ("powerpc:e500"));
 

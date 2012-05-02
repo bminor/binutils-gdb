@@ -1,5 +1,28 @@
 2012-05-02  Sergio Durigan Junior  <sergiodj@gmail.com>
 
+	* features/i386/i386-mmx-linux.c: Regenerate.
+	* features/rs6000/powerpc-32.c: Likewise.
+	* features/rs6000/powerpc-32l.c: Likewise.
+	* features/rs6000/powerpc-403.c: Likewise.
+	* features/rs6000/powerpc-403gc.c: Likewise.
+	* features/rs6000/powerpc-405.c: Likewise.
+	* features/rs6000/powerpc-505.c: Likewise.
+	* features/rs6000/powerpc-601.c: Likewise.
+	* features/rs6000/powerpc-602.c: Likewise.
+	* features/rs6000/powerpc-603.c: Likewise.
+	* features/rs6000/powerpc-604.c: Likewise.
+	* features/rs6000/powerpc-64.c: Likewise.
+	* features/rs6000/powerpc-64l.c: Likewise.
+	* features/rs6000/powerpc-750.c: Likewise.
+	* features/rs6000/powerpc-860.c: Likewise.
+	* features/rs6000/powerpc-e500.c: Likewise.
+	* features/rs6000/powerpc-e500l.c: Likewise.
+	* features/rs6000/powerpc-isa205-32l.c: Likewise.
+	* features/rs6000/powerpc-isa205-64l.c: Likewise.
+	* features/rs6000/rs6000.c: Likewise.
+
+2012-05-02  Sergio Durigan Junior  <sergiodj@gmail.com>
+
 	* i386-tdep.c (i386_stap_parse_special_token) <s>: Remove unused
 	variable.
 	* stap-probe.c (stap_parse_single_operand) <reg_suffix,

@@ -10,7 +10,7 @@ initialize_tdesc_i386_mmx_linux (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
-  struct tdesc_type *field_type, *type;
+  struct tdesc_type *field_type;
 
   set_tdesc_architecture (result, bfd_scan_arch ("i386"));
 
