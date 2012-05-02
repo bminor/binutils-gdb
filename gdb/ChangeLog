@@ -1,3 +1,7 @@
+2012-05-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* sol-thread.c (procfs_pid_to_str): Delete extern declaration.
+
 2012-05-02  Christopher Faylor  <me.cygwin2012@cgf.cx>
 
 	* MAINTAINERS: Remove myself.

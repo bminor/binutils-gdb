@@ -69,8 +69,6 @@
 
 struct target_ops sol_thread_ops;
 
-extern char *procfs_pid_to_str (struct target_ops *ops, ptid_t ptid);
-
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
