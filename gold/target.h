@@ -143,6 +143,16 @@ class Target
 		      this->abi_pagesize());
   }
 
+  // Return whether PF_X segments must contain nothing but the contents of
+  // SHF_EXECINSTR sections (no non-executable data, no headers).
+  bool
+  isolate_execinstr() const
+  { return this->pti_->isolate_execinstr; }
+
+  uint64_t
+  rosegment_gap() const
+  { return this->pti_->rosegment_gap; }
+
   // If we see some object files with .note.GNU-stack sections, and
   // some objects files without them, this returns whether we should
   // consider the object files without them to imply that the stack
@@ -345,7 +355,7 @@ class Target
       return pass < 2;
 
     return this->do_relax(pass, input_objects, symtab, layout, task);
-  } 
+  }
 
   // Return the target-specific name of attributes section.  This is
   // NULL if a target does not use attributes section or if it uses
@@ -365,7 +375,7 @@ class Target
   {
     return ((this->pti_->attributes_section != NULL
 	     && strcmp(name, this->pti_->attributes_section) == 0)
-	    || strcmp(name, ".gnu.attributes") == 0); 
+	    || strcmp(name, ".gnu.attributes") == 0);
   }
 
   // Return a bit mask of argument types for attribute with TAG.
@@ -384,7 +394,7 @@ class Target
   // which may be used for expensive, target-specific initialization.
   void
   select_as_default_target()
-  { this->do_select_as_default_target(); } 
+  { this->do_select_as_default_target(); }
 
   // Return the value to store in the EI_OSABI field in the ELF
   // header.
@@ -436,6 +446,11 @@ class Target
     uint64_t abi_pagesize;
     // The common page size used by actual implementations.
     uint64_t common_pagesize;
+    // Whether PF_X segments must contain nothing but the contents of
+    // SHF_EXECINSTR sections (no non-executable data, no headers).
+    bool isolate_execinstr;
+    // If nonzero, distance from the text segment to the read-only segment.
+    uint64_t rosegment_gap;
     // The special section index for small common symbols; SHN_UNDEF
     // if none.
     elfcpp::Elf_Half small_common_shndx;
@@ -563,7 +578,7 @@ class Target
     this->processor_specific_flags_ = flags;
     this->are_processor_specific_flags_set_ = true;
   }
-  
+
 #ifdef HAVE_TARGET_32_LITTLE
   // Virtual functions which may be overridden by the child class.
   virtual Object*
@@ -620,7 +635,7 @@ class Target
 		  section_offset_type offset, size_t len) const;
 
   // This must be overridden by the child class if it has target-specific
-  // attributes subsection in the attribute section. 
+  // attributes subsection in the attribute section.
   virtual int
   do_attribute_arg_type(int) const
   { gold_unreachable(); }
@@ -789,7 +804,7 @@ class Sized_target : public Target
 			   section_size_type view_size,
 			   unsigned char* reloc_view,
 			   section_size_type reloc_view_size) = 0;
- 
+
   // Perform target-specific processing in a relocatable link.  This is
   // only used if we use the relocation strategy RELOC_SPECIAL.
   // RELINFO points to a Relocation_info structure. SH_TYPE is the relocation
@@ -819,7 +834,7 @@ class Sized_target : public Target
 			       section_size_type /* view_size */,
 			       unsigned char* /* preloc_out*/)
   { gold_unreachable(); }
- 
+
   // Return the number of entries in the GOT.  This is only used for
   // laying out the incremental link info sections.  A target needs
   // to implement this to support incremental linking.

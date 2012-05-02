@@ -1,6 +1,7 @@
 // layout.h -- lay out output file sections for gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -171,7 +172,7 @@ class Layout_task_runner : public Task_function_runner
   Layout_task_runner(const General_options& options,
 		     const Input_objects* input_objects,
 		     Symbol_table* symtab,
-                     Target* target,
+		     Target* target,
 		     Layout* layout,
 		     Mapfile* mapfile)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
@@ -526,7 +527,7 @@ class Layout
   std::map<Section_id, unsigned int>*
   get_section_order_map()
   { return &this->section_order_map_; }
- 
+
   bool
   is_section_ordering_specified()
   { return this->section_ordering_specified_; }
@@ -709,11 +710,11 @@ class Layout
   {
     // Debugging sections can only be recognized by name.
     return (strncmp(name, ".debug", sizeof(".debug") - 1) == 0
-            || strncmp(name, ".zdebug", sizeof(".zdebug") - 1) == 0
-            || strncmp(name, ".gnu.linkonce.wi.",
-                       sizeof(".gnu.linkonce.wi.") - 1) == 0
-            || strncmp(name, ".line", sizeof(".line") - 1) == 0
-            || strncmp(name, ".stab", sizeof(".stab") - 1) == 0);
+	    || strncmp(name, ".zdebug", sizeof(".zdebug") - 1) == 0
+	    || strncmp(name, ".gnu.linkonce.wi.",
+		       sizeof(".gnu.linkonce.wi.") - 1) == 0
+	    || strncmp(name, ".line", sizeof(".line") - 1) == 0
+	    || strncmp(name, ".stab", sizeof(".stab") - 1) == 0);
   }
 
   // Return true if RELOBJ is an input file whose base name matches
@@ -736,7 +737,7 @@ class Layout
   // *KEPT_SECTION is set to the internal copy and the function return
   // false.
   bool
-  find_or_add_kept_section(const std::string& name, Relobj* object, 
+  find_or_add_kept_section(const std::string& name, Relobj* object,
 			   unsigned int shndx, bool is_comdat,
 			   bool is_group_name, Kept_section** kept_section);
 
@@ -903,7 +904,7 @@ class Layout
 
   // Attach sections to segments.
   void
-  attach_sections_to_segments();
+  attach_sections_to_segments(const Target*);
 
   // For relaxation clean up, we need to know output section data created
   // from a linker script.
@@ -982,7 +983,7 @@ class Layout
   // Find the first read-only PT_LOAD segment, creating one if
   // necessary.
   Output_segment*
-  find_first_load_seg();
+  find_first_load_seg(const Target*);
 
   // Count the local symbols in the regular symbol table and the dynamic
   // symbol table, and build the respective string pools.
@@ -1079,7 +1080,7 @@ class Layout
 
   // Attach a section to a segment.
   void
-  attach_section_to_segment(Output_section*);
+  attach_section_to_segment(const Target*, Output_section*);
 
   // Get section order.
   Output_section_order
@@ -1087,7 +1088,7 @@ class Layout
 
   // Attach an allocated section to a segment.
   void
-  attach_allocated_section_to_segment(Output_section*);
+  attach_allocated_section_to_segment(const Target*, Output_section*);
 
   // Make the .eh_frame section.
   Output_section*
@@ -1134,7 +1135,7 @@ class Layout
   bool
   segment_precedes(const Output_segment* seg1, const Output_segment* seg2);
 
-  // Use to save and restore segments during relaxation. 
+  // Use to save and restore segments during relaxation.
   typedef Unordered_map<const Output_segment*, const Output_segment*>
     Segment_states;
 
@@ -1205,12 +1206,12 @@ class Layout
     Relaxation_debug_check()
       : section_infos_()
     { }
- 
+
     // Check that sections and special data are in reset states.
     void
     check_output_data_for_reset_values(const Layout::Section_list&,
 				       const Layout::Data_list&);
-  
+
     // Record information of a section list.
     void
     read_sections(const Layout::Section_list&);
@@ -1218,7 +1219,7 @@ class Layout
     // Verify a section list with recorded information.
     void
     verify_sections(const Layout::Section_list&);
- 
+
    private:
     // Information we care about a section.
     struct Section_info

@@ -1,6 +1,7 @@
 // gold.cc -- main linker functions
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -136,7 +137,7 @@ Middle_runner::run(Workqueue* workqueue, const Task* task)
 
 // This class arranges the tasks to process the relocs for garbage collection.
 
-class Gc_runner : public Task_function_runner 
+class Gc_runner : public Task_function_runner
 {
   public:
    Gc_runner(const General_options& options,
@@ -161,9 +162,9 @@ class Gc_runner : public Task_function_runner
 void
 Gc_runner::run(Workqueue* workqueue, const Task* task)
 {
-  queue_middle_gc_tasks(this->options_, task, this->input_objects_, 
-                        this->symtab_, this->layout_, workqueue, 
-                        this->mapfile_);
+  queue_middle_gc_tasks(this->options_, task, this->input_objects_,
+			this->symtab_, this->layout_, workqueue,
+			this->mapfile_);
 }
 
 // Queue up the initial set of tasks for this link job.
@@ -287,21 +288,21 @@ queue_initial_tasks(const General_options& options,
     {
       workqueue->queue(new Task_function(new Gc_runner(options,
 						       input_objects,
-                                                       symtab,
-                                                       layout,
-                                                       mapfile),
-                                         this_blocker,
-                                         "Task_function Gc_runner"));
+						       symtab,
+						       layout,
+						       mapfile),
+					 this_blocker,
+					 "Task_function Gc_runner"));
     }
   else
     {
       workqueue->queue(new Task_function(new Middle_runner(options,
-                                                           input_objects,
-                                                           symtab,
-                                                           layout,
-                                                           mapfile),
-                                         this_blocker,
-                                         "Task_function Middle_runner"));
+							   input_objects,
+							   symtab,
+							   layout,
+							   mapfile),
+					 this_blocker,
+					 "Task_function Middle_runner"));
     }
 }
 
@@ -467,12 +468,12 @@ queue_middle_gc_tasks(const General_options& options,
     }
 
   workqueue->queue(new Task_function(new Middle_runner(options,
-                                                       input_objects,
-                                                       symtab,
-                                                       layout,
-                                                       mapfile),
-                                     this_blocker,
-                                     "Task_function Middle_runner"));
+						       input_objects,
+						       symtab,
+						       layout,
+						       mapfile),
+				     this_blocker,
+				     "Task_function Middle_runner"));
 }
 
 // Queue up the middle set of tasks.  These are the tasks which run
@@ -496,22 +497,22 @@ queue_middle_tasks(const General_options& options,
   symtab->add_undefined_symbols_from_command_line(layout);
 
   // If garbage collection was chosen, relocs have been read and processed
-  // at this point by pre_middle_tasks.  Layout can then be done for all 
+  // at this point by pre_middle_tasks.  Layout can then be done for all
   // objects.
   if (parameters->options().gc_sections())
     {
       // Find the start symbol if any.
       Symbol* start_sym = symtab->lookup(parameters->entry());
       if (start_sym != NULL)
-        {
-          bool is_ordinary;
-          unsigned int shndx = start_sym->shndx(&is_ordinary);
-          if (is_ordinary) 
-            {
-              symtab->gc()->worklist().push(
-                Section_id(start_sym->object(), shndx));
-            }
-        }
+	{
+	  bool is_ordinary;
+	  unsigned int shndx = start_sym->shndx(&is_ordinary);
+	  if (is_ordinary)
+	    {
+	      symtab->gc()->worklist().push(
+		Section_id(start_sym->object(), shndx));
+	    }
+	}
       // Symbols named with -u should not be considered garbage.
       symtab->gc_mark_undef_symbols(layout);
       gold_assert(symtab->gc() != NULL);
@@ -519,29 +520,29 @@ queue_middle_tasks(const General_options& options,
       symtab->gc()->do_transitive_closure();
     }
 
-  // If identical code folding (--icf) is chosen it makes sense to do it 
-  // only after garbage collection (--gc-sections) as we do not want to 
+  // If identical code folding (--icf) is chosen it makes sense to do it
+  // only after garbage collection (--gc-sections) as we do not want to
   // be folding sections that will be garbage.
   if (parameters->options().icf_enabled())
     {
       symtab->icf()->find_identical_sections(input_objects, symtab);
     }
 
-  // Call Object::layout for the second time to determine the 
-  // output_sections for all referenced input sections.  When 
-  // --gc-sections or --icf is turned on, Object::layout is 
-  // called twice.  It is called the first time when the 
+  // Call Object::layout for the second time to determine the
+  // output_sections for all referenced input sections.  When
+  // --gc-sections or --icf is turned on, Object::layout is
+  // called twice.  It is called the first time when the
   // symbols are added.
   if (parameters->options().gc_sections()
       || parameters->options().icf_enabled())
     {
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
-           p != input_objects->relobj_end();
-           ++p)
-        {
-          Task_lock_obj<Object> tlo(task, *p);
-          (*p)->layout(symtab, layout, NULL);
-        }
+	   p != input_objects->relobj_end();
+	   ++p)
+	{
+	  Task_lock_obj<Object> tlo(task, *p);
+	  (*p)->layout(symtab, layout, NULL);
+	}
     }
 
   /* If plugins have specified a section order, re-arrange input sections
@@ -553,9 +554,9 @@ queue_middle_tasks(const General_options& options,
     {
       for (Layout::Section_list::const_iterator p
 	     = layout->section_list().begin();
-           p != layout->section_list().end();
-           ++p)
-        (*p)->update_section_layout(layout->get_section_order_map());
+	   p != layout->section_list().end();
+	   ++p)
+	(*p)->update_section_layout(layout->get_section_order_map());
     }
 
   // Layout deferred objects due to plugins.
@@ -564,26 +565,26 @@ queue_middle_tasks(const General_options& options,
       Plugin_manager* plugins = parameters->options().plugins();
       gold_assert(plugins != NULL);
       plugins->layout_deferred_objects();
-    }     
+    }
 
   if (parameters->options().gc_sections()
       || parameters->options().icf_enabled())
     {
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
-           p != input_objects->relobj_end();
-           ++p)
-        {
-          // Update the value of output_section stored in rd.
-          Read_relocs_data* rd = (*p)->get_relocs_data();
-          for (Read_relocs_data::Relocs_list::iterator q = rd->relocs.begin();
-               q != rd->relocs.end();
-               ++q)
-            {
-              q->output_section = (*p)->output_section(q->data_shndx);
-              q->needs_special_offset_handling = 
-                      (*p)->is_output_section_offset_invalid(q->data_shndx);
-            }
-        }
+	   p != input_objects->relobj_end();
+	   ++p)
+	{
+	  // Update the value of output_section stored in rd.
+	  Read_relocs_data* rd = (*p)->get_relocs_data();
+	  for (Read_relocs_data::Relocs_list::iterator q = rd->relocs.begin();
+	       q != rd->relocs.end();
+	       ++q)
+	    {
+	      q->output_section = (*p)->output_section(q->data_shndx);
+	      q->needs_special_offset_handling =
+		      (*p)->is_output_section_offset_invalid(q->data_shndx);
+	    }
+	}
     }
 
   // We have to support the case of not seeing any input objects, and
@@ -676,11 +677,12 @@ queue_middle_tasks(const General_options& options,
   // Define symbols from any linker scripts.
   layout->define_script_symbols(symtab);
 
-  // Attach sections to segments.
-  layout->attach_sections_to_segments();
-
   // TODO(csilvers): figure out a more principled way to get the target
   Target* target = const_cast<Target*>(&parameters->target());
+
+  // Attach sections to segments.
+  layout->attach_sections_to_segments(target);
+
   if (!parameters->options().relocatable())
     {
       // Predefine standard symbols.
@@ -716,12 +718,12 @@ queue_middle_tasks(const General_options& options,
       || parameters->options().icf_enabled())
     {
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
-           p != input_objects->relobj_end();
-           ++p)
+	   p != input_objects->relobj_end();
+	   ++p)
 	{
 	  Task_token* next_blocker = new Task_token(true);
 	  next_blocker->add_blocker();
-	  workqueue->queue(new Scan_relocs(symtab, layout, *p, 
+	  workqueue->queue(new Scan_relocs(symtab, layout, *p,
 					   (*p)->get_relocs_data(),
 					   this_blocker, next_blocker));
 	  this_blocker = next_blocker;
@@ -741,15 +743,15 @@ queue_middle_tasks(const General_options& options,
       // some of the sections, and thus change our minds about the types
       // of references made to the symbols.
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
-           p != input_objects->relobj_end();
-           ++p)
-        {
+	   p != input_objects->relobj_end();
+	   ++p)
+	{
 	  Task_token* next_blocker = new Task_token(true);
 	  next_blocker->add_blocker();
-          workqueue->queue(new Read_relocs(symtab, layout, *p, this_blocker,
+	  workqueue->queue(new Read_relocs(symtab, layout, *p, this_blocker,
 					   next_blocker));
 	  this_blocker = next_blocker;
-        }
+	}
     }
 
   if (this_blocker == NULL)
@@ -761,7 +763,7 @@ queue_middle_tasks(const General_options& options,
 	  // blocker here so that we can run the layout task immediately.
 	  this_blocker = new Task_token(true);
 	}
-      else 
+      else
 	{
 	  // If we failed to open any input files, it's possible for
 	  // THIS_BLOCKER to be NULL here.  There's no real point in
@@ -776,7 +778,7 @@ queue_middle_tasks(const General_options& options,
   workqueue->queue(new Task_function(new Layout_task_runner(options,
 							    input_objects,
 							    symtab,
-                                                            target,
+							    target,
 							    layout,
 							    mapfile),
 				     this_blocker,

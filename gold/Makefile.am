@@ -64,6 +64,7 @@ CCFILES = \
 	layout.cc \
 	mapfile.cc \
 	merge.cc \
+	nacl.cc \
 	object.cc \
 	options.cc \
 	output.cc \
@@ -111,6 +112,7 @@ HFILES = \
 	layout.h \
 	mapfile.h \
 	merge.h \
+	nacl.h \
 	object.h \
 	options.h \
 	output.h \

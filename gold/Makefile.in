@@ -52,6 +52,7 @@ DIST_COMMON = NEWS README ChangeLog $(srcdir)/Makefile.in \
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
+	$(top_srcdir)/../config/lcmessage.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
 	$(top_srcdir)/../config/nls.m4 \
 	$(top_srcdir)/../config/override.m4 \
@@ -80,13 +81,14 @@ am__objects_1 = archive.$(OBJEXT) attributes.$(OBJEXT) \
 	gdb-index.$(OBJEXT) gold.$(OBJEXT) gold-threads.$(OBJEXT) \
 	icf.$(OBJEXT) incremental.$(OBJEXT) int_encoding.$(OBJEXT) \
 	layout.$(OBJEXT) mapfile.$(OBJEXT) merge.$(OBJEXT) \
-	object.$(OBJEXT) options.$(OBJEXT) output.$(OBJEXT) \
-	parameters.$(OBJEXT) plugin.$(OBJEXT) readsyms.$(OBJEXT) \
-	reduced_debug_output.$(OBJEXT) reloc.$(OBJEXT) \
-	resolve.$(OBJEXT) script-sections.$(OBJEXT) script.$(OBJEXT) \
-	stringpool.$(OBJEXT) symtab.$(OBJEXT) target.$(OBJEXT) \
-	target-select.$(OBJEXT) timer.$(OBJEXT) version.$(OBJEXT) \
-	workqueue.$(OBJEXT) workqueue-threads.$(OBJEXT)
+	nacl.$(OBJEXT) object.$(OBJEXT) options.$(OBJEXT) \
+	output.$(OBJEXT) parameters.$(OBJEXT) plugin.$(OBJEXT) \
+	readsyms.$(OBJEXT) reduced_debug_output.$(OBJEXT) \
+	reloc.$(OBJEXT) resolve.$(OBJEXT) script-sections.$(OBJEXT) \
+	script.$(OBJEXT) stringpool.$(OBJEXT) symtab.$(OBJEXT) \
+	target.$(OBJEXT) target-select.$(OBJEXT) timer.$(OBJEXT) \
+	version.$(OBJEXT) workqueue.$(OBJEXT) \
+	workqueue-threads.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
 am_libgold_a_OBJECTS = $(am__objects_1) $(am__objects_2) \
@@ -408,6 +410,7 @@ CCFILES = \
 	layout.cc \
 	mapfile.cc \
 	merge.cc \
+	nacl.cc \
 	object.cc \
 	options.cc \
 	output.cc \
@@ -455,6 +458,7 @@ HFILES = \
 	layout.h \
 	mapfile.h \
 	merge.h \
+	nacl.h \
 	object.h \
 	options.h \
 	output.h \
@@ -664,6 +668,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mapfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nacl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/output.Po@am__quote@

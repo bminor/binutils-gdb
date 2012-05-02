@@ -1,6 +1,7 @@
 // target-select.cc -- select a target for an object file
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -98,8 +99,9 @@ Target_selector::do_target_bfd_name(const Target* target)
 // Find the target for an ELF file.
 
 Target*
-select_target(int machine, int size, bool is_big_endian, int osabi,
-	      int abiversion)
+select_target(Input_file* input_file, off_t offset,
+	      int machine, int size, bool is_big_endian,
+	      int osabi, int abiversion)
 {
   for (Target_selector* p = target_selectors; p != NULL; p = p->next())
     {
@@ -108,7 +110,8 @@ select_target(int machine, int size, bool is_big_endian, int osabi,
 	  && p->get_size() == size
 	  && (p->is_big_endian() ? is_big_endian : !is_big_endian))
 	{
-	  Target* ret = p->recognize(machine, osabi, abiversion);
+	  Target* ret = p->recognize(input_file, offset,
+				     machine, osabi, abiversion);
 	  if (ret != NULL)
 	    return ret;
 	}

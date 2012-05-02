@@ -1,6 +1,7 @@
 // target-select.h -- select a target for an object file  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -30,6 +31,7 @@
 namespace gold
 {
 
+class Input_file;
 class Target;
 class Target_selector;
 
@@ -76,8 +78,9 @@ class Target_selector
   // If we can handle this target, return a pointer to a target
   // structure.  The size and endianness are known.
   Target*
-  recognize(int machine, int osabi, int abiversion)
-  { return this->do_recognize(machine, osabi, abiversion); }
+  recognize(Input_file* input_file, off_t offset,
+	    int machine, int osabi, int abiversion)
+  { return this->do_recognize(input_file, offset, machine, osabi, abiversion); }
 
   // If NAME matches the target, return a pointer to a target
   // structure.
@@ -160,7 +163,7 @@ class Target_selector
   // checks, or to check for multiple machine codes if the machine_
   // field is EM_NONE.
   virtual Target*
-  do_recognize(int, int, int)
+  do_recognize(Input_file*, off_t, int, int, int)
   { return this->instantiate_target(); }
 
   // Recognize a target by name.  When this is called we already know
@@ -241,7 +244,8 @@ class Target_selector
 // Select the target for an ELF file.
 
 extern Target*
-select_target(int machine, int size, bool big_endian, int osabi,
+select_target(Input_file*, off_t,
+	      int machine, int size, bool big_endian, int osabi,
 	      int abiversion);
 
 // Select a target using a BFD name.

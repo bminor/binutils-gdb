@@ -1,6 +1,6 @@
 // testfile.cc -- Dummy ELF objects for testing purposes.
 
-// Copyright 2006, 2007, 2008, 2009, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2011, 2012 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -100,6 +100,8 @@ const Target::Target_info Target_test<size, big_endian>::test_target_info =
   0x08000000,				// default_text_segment_address
   0x1000,				// abi_pagesize
   0x1000,				// common_pagesize
+  false,                                // isolate_execinstr
+  0,                                    // rosegment_gap
   elfcpp::SHN_UNDEF,			// small_common_shndx
   elfcpp::SHN_UNDEF,			// large_common_shndx
   0,					// small_common_section_flags
@@ -154,15 +156,15 @@ class Target_selector_test : public Target_selector
     : Target_selector(0xffff, size, big_endian, NULL, NULL)
   { }
 
-  Target*
+  virtual Target*
   do_instantiate_target()
   {
     gold_unreachable();
     return NULL;
   }
 
-  Target*
-  do_recognize(int, int, int)
+  virtual Target*
+  do_recognize(Input_file*, off_t, int, int, int)
   {
     if (size == 32)
       {
@@ -198,11 +200,11 @@ class Target_selector_test : public Target_selector
     return NULL;
   }
 
-  Target*
+  virtual Target*
   do_recognize_by_name(const char*)
   { return NULL; }
 
-  void
+  virtual void
   do_supported_names(std::vector<const char*>*)
   { }
 };

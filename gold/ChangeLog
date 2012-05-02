@@ -1,3 +1,199 @@
+2012-05-02  Roland McGrath  <mcgrathr@google.com>
+
+	* nacl.cc: New file.
+	* nacl.h: New file.
+	* Makefile.am (CCFILES, HFILES): Add them.
+	* Makefile.in: Regenerate.
+	* i386.cc (Output_data_plt_i386_nacl): New class.
+	(Output_data_plt_i386_nacl_exec): New class.
+	(Output_data_plt_i386_nacl_dyn): New class.
+	(Target_i386_nacl): New class.
+	(Target_selector_i386_nacl): New class.
+	(target_selector_i386): Use it instead of Target_selector_i386.
+	* x86_64.cc (Output_data_plt_x86_64_nacl): New class.
+	(Target_x86_64_nacl): New class.
+	(Target_selector_x86_64_nacl): New class.
+	(target_selector_x86_64, target_selector_x32): Use it instead of
+	Target_selector_x86_64.
+	* arm.cc (Output_data_plt_arm_nacl): New class.
+	(Target_arm_nacl): New class.
+	(Target_selector_arm_nacl): New class.
+	(target_selector_arm, target_selector_armbe): Use it instead of
+	Target_selector_arm.
+
+	* target-select.cc (select_target): Take new Input_file* and off_t
+	arguments, pass them on to recognize method of selector.
+	* object.cc (make_elf_sized_object): Update caller.
+	* parameters.cc (parameters_force_valid_target): Likewise.
+	* incremental.cc (make_sized_incremental_binary): Likewise.
+	* target-select.h: Update decl.
+	(Target_selector::recognize): Take new Input_file* argument,
+	pass it on to do_recognize.
+	(Target_selector::do_recognize): Take new Input_file* argument.
+	* freebsd.h (Target_selector_freebsd::do_recognize): Likewise.
+	* powerpc.cc (Target_selector_powerpc::do_recognize): Likewise.
+	* sparc.cc (Target_selector_sparc::do_recognize): Likewise.
+	* testsuite/testfile.cc (Target_selector::do_recognize): Likewise.
+
+	* target.h (Target::Target_info): New members isolate_execinstr
+	and rosegment_gap.
+	(Target::isolate_execinstr, Target::rosegment_gap): New methods.
+	* arm.cc (Target_arm::arm_info): Update initializer.
+	* i386.cc (Target_i386::i386_info): Likewise.
+	* powerpc.cc (Target_powerpc::powerpc_info): Likewise.
+	* sparc.cc (Target_sparc::sparc_info): Likewise.
+	* x86_64.cc (Target_x86_64::x86_64_info): Likewise.
+	* testsuite/testfile.cc (Target_test::test_target_info): Likewise.
+	* layout.cc (Layout::attach_allocated_section_to_segment):
+	Take new const Target* argument.  If target->isolate_execinstr(), act
+	like --rosegment.
+	(Layout::find_first_load_seg): Take new const Target* argument;
+	if target->isolate_execinstr(), reject PF_X segments.
+	(Layout::relaxation_loop_body): Update caller.
+	(Layout::set_segment_offsets): If target->isolate_execinstr(),
+	reset file offset to zero when we hit LOAD_SEG, and then do a second
+	loop over the segments before LOAD_SEG to reassign offsets after
+	addresses have been determined.  Handle target->rosegment_gap().
+	(Layout::attach_section_to_segment): Take new const Target* argument;
+	pass it to attach_allocated_section_to_segment.
+	(Layout::make_output_section): Update caller.
+	(Layout::attach_sections_to_segments): Take new const Target* argument;
+	pass it to attach_section_to_segment.
+	* gold.cc (queue_middle_tasks): Update caller.
+	* layout.h (Layout): Update method decls with new arguments.
+
+	* arm.cc (Target_arm::Target_arm): Take optional argument for the
+	Target_info pointer to use.
+	(Target_arm::do_make_data_plt): New virtual method.
+	(Target_arm::make_data_plt): New method that calls it.
+	(Target_arm::make_plt_entry): Use it.
+	(Output_data_plt_arm::Output_data_plt_arm): Take additional argument
+	for the section alignment.
+	(Output_data_plt_arm::do_first_plt_entry_offset): New abstract virtual
+	method.
+	(Output_data_plt_arm::first_plt_entry_offset): Call it.
+	(Output_data_plt_arm::do_get_plt_entry_size): New abstract virtual
+	method.
+	(Output_data_plt_arm::get_plt_entry_size): Call it.
+	(Output_data_plt_arm::do_fill_plt_entry): New abstract virtual method.
+	(Output_data_plt_arm::fill_plt_entry): New method that calls it.
+	(Output_data_plt_arm::do_fill_first_plt_entry): New abstract virtual
+	method.
+	(Output_data_plt_arm::fill_first_plt_entry): New method that calls it.
+	(Output_data_plt_arm::set_final_data_size): Use get_plt_entry_size
+	method instead of sizeof(plt_entry).
+	(Output_data_plt_arm::add_entry): Likewise.
+	Use first_plt_entry_offset method instead of sizeof(first_plt_entry).
+	(Target_arm::first_plt_entry_offset): Call method on this->plt_ rather
+	than static method.
+	(Target_arm::plt_entry_size): Likewise.
+	(Output_data_plt_arm::first_plt_entry, Output_data_plt_arm::plt_entry):
+	Move to ...
+	(Output_data_plt_arm_standard): ... here, new class.
+	(Output_data_plt_arm::do_write): Move guts of PLT filling to...
+	(Output_data_plt_arm_standard::do_fill_first_plt_entry): ... here ...
+	(Output_data_plt_arm_standard::do_fill_plt_entry): ... and here.
+
+	* x86_64.cc (Output_data_plt_x86_64::Output_data_plt_x86_64):
+	Take additional argument for the PLT entry size.
+	(Output_data_plt_x86_64::get_tlsdesc_plt_offset):
+	Use get_plt_entry_size method rather than plt_entry_size variable.
+	(Output_data_plt_x86_64::reserve_slot): Likewise.
+	(Output_data_plt_x86_64::do_adjust_output_section): Likewise.
+	(Output_data_plt_x86_64::add_entry): Likewise.
+	(Output_data_plt_x86_64::add_local_ifunc_entry): Likewise.
+	(Output_data_plt_x86_64::address_for_global): Likewise.
+	(Output_data_plt_x86_64::address_for_local): Likewise.
+	(Output_data_plt_x86_64::set_final_data_size): Likewise.
+	(Output_data_plt_x86_64::first_plt_entry_offset): Likewise.
+	Make method non-static.
+	(Output_data_plt_x86_64::do_get_plt_entry_size): New abstract virtual
+	method.
+	(Output_data_plt_x86_64::get_plt_entry_size): Just call that.
+	(Output_data_plt_x86_64::do_add_eh_frame): New abstract virtual method.
+	(Output_data_plt_x86_64::add_eh_frame): New method to call it.
+	(Output_data_plt_x86_64::do_fill_first_plt_entry): New abstract
+	virtual method.
+	(Output_data_plt_x86_64::fill_first_plt_entry): New method to call it.
+	(Output_data_plt_x86_64::do_fill_plt_entry): New abstract
+	virtual method.
+	(Output_data_plt_x86_64::fill_plt_entry): New method to call it.
+	(Output_data_plt_x86_64::do_fill_tlsdesc_entry): New abstract
+	virtual method.
+	(Output_data_plt_x86_64::fill_tlsdesc_entry): New method to call it.
+	(Output_data_plt_x86_64::plt_entry_size)
+	(Output_data_plt_x86_64::first_plt_entry)
+	(Output_data_plt_x86_64::plt_entry)
+	(Output_data_plt_x86_64::tlsdesc_plt_entry)
+	(Output_data_plt_x86_64::plt_eh_frame_fde_size)
+	(Output_data_plt_x86_64::plt_eh_frame_fde): Move to ...
+	(Output_data_plt_x86_64_standard): ... here, new class.
+	(Target_x86_64::Target_x86_64): Take optional argument for the
+	Target_info pointer to use.
+	(Target_x86_64::do_make_data_plt): New virtual method.
+	(Target_x86_64::make_data_plt): New method to call it.
+	(Target_x86_64::init_got_plt_for_update): Use that.
+	Call this->plt_->add_eh_frame method here.
+	(Output_data_plt_x86_64::init):	Don't do add_eh_frame_for_plt here.
+	(Target_x86_64::first_plt_entry_offset): Call method on this->plt_
+	rather than static method.
+	(Target_x86_64::plt_entry_size): Likewise.
+	(Output_data_plt_x86_64::do_write): Use get_plt_entry_size method
+	rather than plt_entry_size variable.  Move guts of PLT filling to...
+	(Output_data_plt_x86_64_standard::do_fill_first_plt_entry): ... here ...
+	(Output_data_plt_x86_64_standard::do_fill_plt_entry): ... and here ...
+	(Output_data_plt_x86_64_standard::do_fill_tlsdesc_entry): ... and here.
+
+	* i386.cc (Output_data_plt_i386::Output_data_plt_i386): Take
+	additional argument for the section alignment.
+	Don't do add_eh_frame_for_plt here.
+	(Output_data_plt_i386::first_plt_entry_offset): Make the method
+	non-static.  Use get_plt_entry_size method rather than plt_entry_size
+	variable.
+	(Output_data_plt_i386::do_get_plt_entry_size): New abstract virtual
+	method.
+	(Output_data_plt_i386::get_plt_entry_size): Call it.
+	(Output_data_plt_i386::do_add_eh_frame): New abstract virtual method.
+	(Output_data_plt_i386::add_eh_frame): New method to call it.
+	(Output_data_plt_i386::do_fill_first_plt_entry): New abstract virtual
+	method.
+	(Output_data_plt_i386::fill_first_plt_entry): New method to call it.
+	(Output_data_plt_i386::do_fill_plt_entry): New abstract virtual
+	method.
+	(Output_data_plt_i386::fill_plt_entry): New method to call it.
+	(Output_data_plt_i386::set_final_data_size): Use get_plt_entry_size
+	method instead of plt_entry_size.
+	(Output_data_plt_i386::plt_entry_size)
+	(Output_data_plt_i386::plt_eh_frame_fde_size)
+	(Output_data_plt_i386::plt_eh_frame_fde): Move to ...
+	(Output_data_plt_i386_standard): ... here, new class.
+	(Output_data_plt_i386_exec): New class.
+	(Output_data_plt_i386::exec_first_plt_entry): Move to ...
+	(Output_data_plt_i386_exec::first_plt_entry): ... here.
+	(Output_data_plt_i386::exec_plt_entry): Move to ...
+	(Output_data_plt_i386_exec::plt_entry): ... here.
+	(Output_data_plt_i386_dyn): New class.
+	(Output_data_plt_i386::first_plt_entry): Move to ...
+	(Output_data_plt_i386_dyn::first_plt_entry): ... here.
+	(Output_data_plt_i386::dyn_plt_entry): Move to ...
+	(Output_data_plt_i386_dyn::plt_entry): ... here.
+	(Target_i386::Target_i386): Take optional argument for the Target_info
+	pointer to use.
+	(Target_i386::do_make_data_plt): New virtual method.
+	(Target_i386::make_data_plt): New method to call it.
+	(Target_i386::make_plt_section): Use that.
+	Call this->plt_->add_eh_frame method here.
+	(Output_data_plt_i386::add_entry): Use get_plt_entry_size method
+	rather than plt_entry_size variable.
+	(Output_data_plt_i386::add_local_ifunc_entry): Likewise.
+	(Output_data_plt_i386::address_for_local): Likewise.
+	(Output_data_plt_i386::do_write): Likewise.
+	Move guts of PLT filling to...
+	(Output_data_plt_i386_exec::do_fill_first_plt_entry): ... here ...
+	(Output_data_plt_i386_exec::do_fill_plt_entry): ... and here ...
+	(Output_data_plt_i386_dyn::do_fill_first_plt_entry): ... and here ...
+	(Output_data_plt_i386_dyn::do_fill_plt_entry): ... and here.
+
 2012-05-01  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf_reader.cc (Dwarf_die::read_attributes)
@@ -304,7 +500,7 @@
 2012-03-19  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::do_define_standard_symbols): New method.
- 	(Target_arm::do_finalize_sections): Remove code which defines
+	(Target_arm::do_finalize_sections): Remove code which defines
 	__exidx_start and __exidx_end.  Make symbol table parameter
 	anonymous as it is not used.
 	* gold.cc (queue_middle_tasks): Call target hook to define any
@@ -2008,7 +2204,7 @@
 	* output.cc: Likewise.
 
 2011-05-31  Doug Kwan  <dougkwan@google.com>
-            Asier Llano
+	    Asier Llano
 
 	PR gold/12826
 	* arm.cc (Target_arm::tag_cpu_arch_combine): Fix handling of
@@ -2495,7 +2691,7 @@
 
 	* arm.cc (Arm_output_section::Arm_output_section): Set SHF_LINK_ORDER
 	flag of a SHT_ARM_EXIDX section.
-        * testsuite/Makefile.am (arm_exidx_test): New test rules.
+	* testsuite/Makefile.am (arm_exidx_test): New test rules.
 	* testsuite/Makefile.in: Regenerate.
 	* testsuite/arm_exidx_test.s: New file.
 	* testsuite/arm_exidx_test.sh: Same.
@@ -3251,9 +3447,9 @@
 2011-02-02  Sriraman Tallam  <tmsriram@google.com>
 
 	* icf.h (is_section_foldable_candidate): Change type of parameter
-        to std::string.
+	to std::string.
 	* icf.cc (Icf::find_identical_sections): Change type of local variable
-        section_name to be std::string.
+	section_name to be std::string.
 	(is_function_ctor_or_dtor): Change type of parameter to std::string.
 
 2011-01-25  Ian Lance Taylor  <iant@google.com>
@@ -3542,7 +3738,7 @@
 	and updating local symbols.
 	(Arm_input_section<big_endian>::init): Copy contents of original
 	input section.
- 	(Arm_input_section<big_endian>::do_write): Use saved contents of
+	(Arm_input_section<big_endian>::do_write): Use saved contents of
 	original input section instead of calling Object::section_contents
 	without locking.
 	(Arm_exidx_cantunwind::do_fixed_endian_write): Find out text section
@@ -3550,7 +3746,7 @@
 	(Arm_exidx_merged_section::Arm_exidx_merged_section): Add sanity check
 	for size.  Allocate a buffer for merged EXIDX entries.
 	(Arm_exidx_merged_section::build_contents): New method.
- 	(Arm_exidx_merged_section::do_write): Move merge section contents
+	(Arm_exidx_merged_section::do_write): Move merge section contents
 	building code to Arm_exidx_merged_section::build_contetns.  Write
 	out contetns in buffer instead of building it on the fly.
 	(Arm_relobj::make_exidx_input_section): Also pass text section size
@@ -3609,7 +3805,7 @@
 2010-10-29  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* testsuite/Makefile.am: Move gcctestdir/ld rule to
-        NATIVE_OR_CROSS_LINKER.
+	NATIVE_OR_CROSS_LINKER.
 	* testsuite/Makefile.in: Regenerate.
 
 2010-10-20  Doug Kwan  <dougkwan@google.com>
@@ -3636,43 +3832,43 @@
 2010-10-14  Cary Coutant  <ccoutant@google.com>
 
 	* debug.h (DEBUG_INCREMENTAL): New flag.
- 	(debug_string_to_enum): Add DEBUG_INCREMENTAL).
- 	* gold.cc (queue_initial_tasks): Check parameters for incremental link
- 	mode.
- 	* incremental.cc (report_command_line): Ignore all forms of
- 	--incremental.
- 	* layout.cc (Layout::Layout): Check parameters for incremental link
- 	mode.
- 	* options.cc (General_options::parse_incremental): New function.
- 	(General_options::parse_no_incremental): New function.
- 	(General_options::parse_incremental_full): New function.
- 	(General_options::parse_incremental_update): New function.
- 	(General_options::incremental_mode_): New data member.
- 	(General_options::finalize): Check incremental_mode_.
- 	* options.h (General_options): Update help text for --incremental.
- 	Add --no-incremental, --incremental-full, --incremental-update.
- 	(General_options::Incremental_mode): New enum type.
- 	(General_options::incremental_mode): New function.
- 	(General_options::incremental_mode_): New data member.
- 	* parameters.cc (Parameters::incremental_mode_): New data member.
- 	(Parameters::set_options): Set incremental_mode_.
- 	(Parameters::set_incremental_full): New function.
- 	(Parameters::incremental): New function.
- 	(Parameters::incremental_update): New function.
- 	(set_parameters_incremental_full): New function.
- 	* parameters.h (Parameters::set_incremental_full): New function.
- 	(Parameters::incremental): New function.
- 	(Parameters::incremental_update): New function.
- 	(Parameters::incremental_mode_): New data member.
- 	(set_parameters_incremental_full): New function.
- 	* plugin.cc (Plugin_manager::add_input_file): Check parameters for
- 	incremental link mode.
- 	* reloc.cc (Sized_relobj::do_read_relocs): Likewise.
- 	(Sized_relobj::do_relocate_sections): Likewise.
- 	* testsuite/Makefile.am (incremental_test): Use --incremental-full
- 	option.
- 	* testsuite/Makefile.in: Regenerate.
- 	* testsuite/incremental_test.sh: Filter all forms of --incremental.
+	(debug_string_to_enum): Add DEBUG_INCREMENTAL).
+	* gold.cc (queue_initial_tasks): Check parameters for incremental link
+	mode.
+	* incremental.cc (report_command_line): Ignore all forms of
+	--incremental.
+	* layout.cc (Layout::Layout): Check parameters for incremental link
+	mode.
+	* options.cc (General_options::parse_incremental): New function.
+	(General_options::parse_no_incremental): New function.
+	(General_options::parse_incremental_full): New function.
+	(General_options::parse_incremental_update): New function.
+	(General_options::incremental_mode_): New data member.
+	(General_options::finalize): Check incremental_mode_.
+	* options.h (General_options): Update help text for --incremental.
+	Add --no-incremental, --incremental-full, --incremental-update.
+	(General_options::Incremental_mode): New enum type.
+	(General_options::incremental_mode): New function.
+	(General_options::incremental_mode_): New data member.
+	* parameters.cc (Parameters::incremental_mode_): New data member.
+	(Parameters::set_options): Set incremental_mode_.
+	(Parameters::set_incremental_full): New function.
+	(Parameters::incremental): New function.
+	(Parameters::incremental_update): New function.
+	(set_parameters_incremental_full): New function.
+	* parameters.h (Parameters::set_incremental_full): New function.
+	(Parameters::incremental): New function.
+	(Parameters::incremental_update): New function.
+	(Parameters::incremental_mode_): New data member.
+	(set_parameters_incremental_full): New function.
+	* plugin.cc (Plugin_manager::add_input_file): Check parameters for
+	incremental link mode.
+	* reloc.cc (Sized_relobj::do_read_relocs): Likewise.
+	(Sized_relobj::do_relocate_sections): Likewise.
+	* testsuite/Makefile.am (incremental_test): Use --incremental-full
+	option.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/incremental_test.sh: Filter all forms of --incremental.
 
 2010-10-12  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
@@ -4707,7 +4903,7 @@
 	section without SHF_EXECINSTR.
 	(Arm_output_section::fix_exidx_coverage): Skip input sections with
 	errors.
- 	(Arm_relobj::make_exidx_input_section): Add new parameter for text
+	(Arm_relobj::make_exidx_input_section): Add new parameter for text
 	section header.  Make error messages more verbose.  Check for
 	a non-executable section linked to an EXIDX section.
 	(Arm_relobj::do_read_symbols): Remove error checking, which has been
@@ -4719,7 +4915,7 @@
 	in a relocatable link.
 	(Target_arm::do_relax): Look for the EXIDX output section instead of
 	assuming that it is called .ARM.exidx.
- 	(Target_arm::fix_exidx_coverage): Add a new parameter for input
+	(Target_arm::fix_exidx_coverage): Add a new parameter for input
 	section list.  Do not check for SHF_EXECINSTR section flags but
 	skip any input section with errors.
 	* output.cc (Output_section::Output_section): Initialize
@@ -5078,15 +5274,15 @@
 	to use Output_section_lookup_maps class.
 	(Output_section::add_relaxed_input_section): Adjst code for lookup
 	maps code refactoring.
- 	(Output_section::add_merge_input_section): Add a new parameter
+	(Output_section::add_merge_input_section): Add a new parameter
 	KEEPS_INPUT_SECTION.  Adjust code to use Output_section_lookup_maps
 	class.  If adding input section to a newly created merge output
 	section fails, remove the new merge section.
 	(Output_section::convert_input_sections_in_list_to_relaxed_input_sections):
 	Adjust code for use of the Output_section_lookup_maps class.
- 	(Output_section::find_merge_section): Ditto.
+	(Output_section::find_merge_section): Ditto.
 	(Output_section::build_lookup_maps): New method defintion.
- 	(Output_section::find_relaxed_input_section): Adjust code to use
+	(Output_section::find_relaxed_input_section): Adjust code to use
 	Output_section_lookup_maps class.
 	(Output_section::get_input_sections): Export merge sections.  Adjust
 	code to use Output_section_lookup_maps class.
@@ -5104,12 +5300,12 @@
 	defintion.  Declare method only.
 	(Output_section::Input_section::shndx): Ditto.
 	(Output_section::Input_section::output_merge_base): New method defintion.
-     	(Output_section::Input_section::u2_.pomb): New union field.
+	(Output_section::Input_section::u2_.pomb): New union field.
 	(Output_section::Merge_section_by_properties_map,
 	Output_section::Output_section_data_by_input_section_map,
 	Output_section::Ouptut_relaxed_input_section_by_input_section_map):
 	Remove types.
-   	(Output_section::add_merge_input_section): Add new parameter
+	(Output_section::add_merge_input_section): Add new parameter
 	KEEPS_INPUT_SECTIONS.
 	(Output_section::build_lookup_maps): New method declaration.
 	(Output_section::merge_section_map_,
@@ -5385,7 +5581,7 @@
 	section elements.  Handle discard sections.
 	(Sort_output_sections::operator()): Handle NOLOAD sections.
 	* script-sections.h (Script_sections::Section_type): New enum type.
-   	(Script_sections::output_section_name): Add a new parameter for
+	(Script_sections::output_section_name): Add a new parameter for
 	returning script section type.
 	* script.cc (script_keyword_parsecodes): Add keywords COPY, DSECT,
 	INFO and NOLOAD.
@@ -5556,7 +5752,7 @@
 	thumb2_blx_in_range, thumb2_blx_in_range.o,
 	thumb2_blx_out_of_range.stdout, thumb2_blx_out_of_range,
 	thumb2_blx_out_of_range.o): New rules.
- 	(MOSTLYCLEANFILES): Add thumb_blx_in_range, thumb_blx_out_of_range,
+	(MOSTLYCLEANFILES): Add thumb_blx_in_range, thumb_blx_out_of_range,
 	thumb2_blx_in_range and	thumb2_blx_out_of_range.
 	* testsuite/Makefile.in: Regenerate.
 	* arm_branch_in_range.sh: Add tests for THUMB BLX.
@@ -5622,13 +5818,13 @@
 	Stub_table::reloc_stubs_size_ and Stub_table::reloc_stubs_addralign_.
 	(Stub_table::reloc_stubs_size_, Stub_table::reloc_stubs_addralign_):
 	New data members.
- 	(Stub_table::update_data_size_and_addralign): Use
+	(Stub_table::update_data_size_and_addralign): Use
 	Stub_table::reloc_stubs_size_ and Stub_table::reloc_stubs_addralign_
 	instead of going over all reloc stubs.
- 	(Stub_table::finalize_stubs): Do not assign reloc stub offsets.
+	(Stub_table::finalize_stubs): Do not assign reloc stub offsets.
 	* stringpool.cc (Stringpool_template::Stringpool_template): Initialize
 	Stringpool_template::offset_ to size of Stringpool_char.
- 	(Stringpool_template::new_key_offset): Remove code to initialize
+	(Stringpool_template::new_key_offset): Remove code to initialize
 	Stringpool_template::offset_.
 	* stringpool.h (Stringpool_template::set_no_zero_null): Set
 	Stringpool_template::offset_ to zero.
@@ -5644,10 +5840,10 @@
 	when not optimizing.
 	* stringpool.h (Chunked_vector::Chunked_vector): Initialize data
 	member size_.
-   	(Chunked_vector::clear): Clear size_.
-   	(Chunked_vector::reserve): Call reserve method of all Element_vectors.
-   	(Chunked_vector::size): Return size_.
-   	(Chunked_vector::push_back): Use size_ to find insert position.
+	(Chunked_vector::clear): Clear size_.
+	(Chunked_vector::reserve): Call reserve method of all Element_vectors.
+	(Chunked_vector::size): Return size_.
+	(Chunked_vector::push_back): Use size_ to find insert position.
 	(Chunked_vector::size_): New data member.
 	(Stringpool_template::set_no_zero_null): Assert string set is empty.
 	(Stringpool_template::new_key_offset): New method declaration.
@@ -5850,7 +6046,7 @@
 	flags and attributes merging if an input file is a binary file.
 	* fileread.cc (Input_file::open): Record format of original file.
 	* fileread.h (Input_file::Format): New enum type.
-   	(Input_file::Input_file): Initialize data member format_.
+	(Input_file::Input_file): Initialize data member format_.
 	(Input_file::format): New method definition.
 	(Input_file::format_):: New data member.
 
@@ -5862,7 +6058,7 @@
 	(Arm_output_section::fix_exidx_coverage): Add a parameter for layout.
 	If user uses a script with a SECTIONS clause, issue only a warning
 	for a misplaced EXIDX input section.  Otherwise, issue an error.
- 	(Arm_relobj::do_gc_process_relocs): Exit early if we are not doing
+	(Arm_relobj::do_gc_process_relocs): Exit early if we are not doing
 	garbage collection.
 	(Target_arm::got_mode_index_entry): Handle static linking.
 	(Target_arm::Scan::local): Ditto.
@@ -5900,7 +6096,7 @@
 
 	* arm.cc (Arm_relocate_functions::arm_branch_common): Fix bug in
 	handling of the maximum backward branch offset.
-     	(Arm_relocate_functions::thumb_branch_common): Ditto.
+	(Arm_relocate_functions::thumb_branch_common): Ditto.
 	* testsuite/Makefile.am (check_SCRIPTS): Add arm_branch_in_range.sh.
 	(check_DATA): Add arm_bl_in_range.stdout, arm_bl_out_of_range.stdout
 	thumb_bl_in_range.stdout, thumb_bl_out_of_range.stdout,
@@ -5954,7 +6150,7 @@
 	(Target_arm::optimize_tls_reloc, Target_arm::define_tls_base_symbol,
 	 Target_arm::got_mod_index_entry, Target_arm::rel_tls_desc_section):
 	New methods.
-   	(Target_arm::Got_type): Add GOT_TYPE_TLS_NOFFSET, GOT_TYPE_OFFSET,
+	(Target_arm::Got_type): Add GOT_TYPE_TLS_NOFFSET, GOT_TYPE_OFFSET,
 	GOT_TYPE_TLS_PAIR and GOT_TYPE_TLS_DESC.
 	(Target_arm::got_mod_index_offset_,
 	Target_arm::tls_base_symbol_defined_): New data members.
@@ -6296,8 +6492,8 @@
 
 	* Makefile.am (HFILES): Add arm-reloc-property.h.
 	(DEFFILES): New.
- 	(TARGETSOURCES): Add arm-reloc-property.cc
- 	(ALL_TARGETOBJS): Add arm-reloc-property.$(OBJEXT)
+	(TARGETSOURCES): Add arm-reloc-property.cc
+	(ALL_TARGETOBJS): Add arm-reloc-property.$(OBJEXT)
 	(libgold_a_SOURCES): $(DEFFILES)
 	* Makefile.in: Regenerate.
 	* arm-reloc-property.cc: New file.
@@ -6416,14 +6612,14 @@
 	* arm.cc (set): Include.
 	(class Arm_exidx_fixup): Change type of last_input_section_ to const
 	pointer type.
- 	(Arm_output_section::Text_section_list): New type.
+	(Arm_output_section::Text_section_list): New type.
 	(Arm_output_section::append_text_sections_to_list): New method.
 	(Arm_output_section::fix_exidx_coverage): Ditto.
 	(Arm_relobj::Arm_relobj): Initialize exidx_section_map_.
-   	(Arm_relobj::convert_input_section_to_relaxed_section): Use
+	(Arm_relobj::convert_input_section_to_relaxed_section): Use
 	Relobj::set_section_offset() instead of
 	Sized_relobj::invalidate_section_offset().
-   	(Arm_relobj::section_needs_reloc_stub_scanning): Add an extra
+	(Arm_relobj::section_needs_reloc_stub_scanning): Add an extra
 	parameter for section headers. Ignore relocation sections for
 	unallocated sections and EXIDX sections.
 	(Target_arm::fix_exidx_coverage): New method.
@@ -6435,7 +6631,7 @@
 	(Arm_output_section::append_text_sections_to_list): New method.
 	(Arm_output_section::fix_exidx_coverage): Ditto.
 	(Arm_relobj::scan_sections_for_stubs): Adjust call to
-   	Arm_relobj::section_needs_reloc_stub_scanning.
+	Arm_relobj::section_needs_reloc_stub_scanning.
 	(Target_arm::do_relax): Fix EXIDX output section coverage in the
 	first pass.
 	(Target_arm::fix_exidx_coverage): New method.
@@ -6527,11 +6723,11 @@
 	(Output_section::add_merge_input_section): Ditto.
 	(Output_section::build_relaxation_map): Change to use Section_id
 	instead of Input_section_specifier as key type.
- 	(Output_section::convert_input_sections_in_list_to_relaxed_sections):
+	(Output_section::convert_input_sections_in_list_to_relaxed_sections):
 	Ditto.
 	(Output_section::convert_input_sections_to_relaxed_sections): Change
 	to use Const_section_id instead of Input_section_specifier as key type.
- 	(Output_section::find_merge_section): Ditto.
+	(Output_section::find_merge_section): Ditto.
 	(Output_section::find_relaxed_input_section): Ditto.
 	* output.h (Input_section_specifier): Remove class.
 	(Output_section::Output_section_data_by_input_section_map): Change
@@ -6803,7 +6999,7 @@
 	   Stub_table::update_data_size_and_addralign,
 	   Stub_table::apply_cortex_a8_workaround_to_address_range): New method
 	  definitions.
- 	  (Stub_table::relocate_stubs): Handle Cortex-A8 stubs.
+	  (Stub_table::relocate_stubs): Handle Cortex-A8 stubs.
 	  (Stub_table::do_write): Ditto.
 	  (Target_arm::do_relax): Adjust code for changes in Stub_table.
 
@@ -7514,7 +7710,7 @@
 	(Arm_dynobj::attributes_section_data_): New data member declaration.
 	(Target_arm::Target_arm): Initialize attributes_section_data_.  Change
 	initialization value of may_use_blx_ to false.
-   	(Target_arm::using_thumb2, Target_arm::using_thumb_only,
+	(Target_arm::using_thumb2, Target_arm::using_thumb_only,
 	Target_arm::may_use_arm_nop, Target_arm::may_use_thumb2_nop): Use
 	object attributes to compute results instead of hard-coding.
 	(Target_arm::do_attribute_arg_type, Target_arm::do_attributes_order,
@@ -8505,7 +8701,7 @@
 	base class initializer.
 	(Output_section::add_relaxed_input_section): New method declaration.
 	(Output_section::Input_section): Change visibility to protected.
-     	(Output_section::Input_section::relobj,
+	(Output_section::Input_section::relobj,
 	Output_section::Input_section::shndx): Handle relaxed input sections.
 	Output_section::input_sections) Change visibility to protected.  Also
 	define overload to return a non-const pointer.
@@ -8931,7 +9127,7 @@
 	Output_section_data.
 	(Output_data_dynamic::set_final_data_size): Add DT_NULL tag only once.
 	(Output_symtab_xindex::do_write): Add array bound check.
- 	(Output_section::Input_section::print_to_mapfile): Handle
+	(Output_section::Input_section::print_to_mapfile): Handle
 	RELAXED_INPUT_SECTION_CODE.
 	(Output_section::Output_section): Initialize data member checkpoint_.
 	(Output_section::~Output_section): Delete checkpoint object pointed
@@ -9158,7 +9354,7 @@
 	an elfcpp:Ehdr as parameter.
 	* target.cc: Include dynobj.h.
 	(Target::do_make_elf_object_implementation): New.
- 	(Target::do_make_elf_object): New.
+	(Target::do_make_elf_object): New.
 	* target.h (Target::make_elf_object): New template declaration.
 	(Target::do_make_elf_object): New method declarations.
 	(Target::do_make_elf_object_implementation): New template declaration.
@@ -9419,7 +9615,7 @@
 
 	* Makefile.am (libgold_a_LIBADD): New.
 	(ld_new_DEPENDENCIES, ld_new_LDADD): Remove LIBOBJS
- 	* Makefile.in: Regenerate.
+	* Makefile.in: Regenerate.
 	* config.in (HAVE_DECL_MEMMEM, HAVE_DECL_STRNDUP): New.
 	* configure: Regenerate.
 	* configure.ac (AC_CHECK_DECLS): Add strndup and memmem.
@@ -10345,11 +10541,11 @@
 	dispositions.
 	* options.cc (General_options::parse_incremental_changed): New
 	function.
-        (General_options::parse_incremental_unchanged): New function.
-        (General_options::parse_incremental_unknown): New function.
-        (General_options::General_options): Initialize new fields
+	(General_options::parse_incremental_unchanged): New function.
+	(General_options::parse_incremental_unknown): New function.
+	(General_options::General_options): Initialize new fields
 	incremental_disposition_ and implicit_incremental_.
-        (General_options::finalize): Check for uasge of --incremental-*
+	(General_options::finalize): Check for uasge of --incremental-*
 	without --incremental.
 
 2009-02-06  Chris Demetriou  <cgd@google.com>
@@ -10389,7 +10585,7 @@
 2009-01-31  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* script.cc (Lazy_demangler): New class.
-        (Version_script_info::get_symbol_version_helper): Demangle a
+	(Version_script_info::get_symbol_version_helper): Demangle a
 	symbol only once.
 
 2009-01-29  Cary Coutant  <ccoutant@google.com>

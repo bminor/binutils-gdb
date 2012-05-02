@@ -1,6 +1,6 @@
 // powerpc.cc -- powerpc target support for gold.
 
-// Copyright 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2008, 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
 // Written by David S. Miller <davem@davemloft.net>
 //        and David Edelsohn <edelsohn@gnu.org>
 
@@ -62,20 +62,20 @@ class Target_powerpc : public Sized_target<size, big_endian>
   {
   }
 
-  // Process the relocations to determine unreferenced sections for 
+  // Process the relocations to determine unreferenced sections for
   // garbage collection.
   void
   gc_process_relocs(Symbol_table* symtab,
-	            Layout* layout,
-	            Sized_relobj_file<size, big_endian>* object,
-	            unsigned int data_shndx,
-	            unsigned int sh_type,
-	            const unsigned char* prelocs,
-	            size_t reloc_count,
-	            Output_section* output_section,
-	            bool needs_special_offset_handling,
-	            size_t local_symbol_count,
-	            const unsigned char* plocal_symbols);
+		    Layout* layout,
+		    Sized_relobj_file<size, big_endian>* object,
+		    unsigned int data_shndx,
+		    unsigned int sh_type,
+		    const unsigned char* prelocs,
+		    size_t reloc_count,
+		    Output_section* output_section,
+		    bool needs_special_offset_handling,
+		    size_t local_symbol_count,
+		    const unsigned char* plocal_symbols);
 
   // Scan the relocations to look for symbol adjustments.
   void
@@ -210,21 +210,21 @@ class Target_powerpc : public Sized_target<size, big_endian>
     inline bool
     local_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
 					Target_powerpc* ,
-	          			Sized_relobj_file<size, big_endian>* ,
-			                unsigned int ,
-	          			Output_section* ,
-	          			const elfcpp::Rela<size, big_endian>& ,
+					Sized_relobj_file<size, big_endian>* ,
 					unsigned int ,
-	          			const elfcpp::Sym<size, big_endian>&)
+					Output_section* ,
+					const elfcpp::Rela<size, big_endian>& ,
+					unsigned int ,
+					const elfcpp::Sym<size, big_endian>&)
     { return false; }
 
     inline bool
     global_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
 					 Target_powerpc* ,
-		   			 Sized_relobj_file<size, big_endian>* ,
-		   			 unsigned int ,
-		   			 Output_section* ,
-		   			 const elfcpp::Rela<size,
+					 Sized_relobj_file<size, big_endian>* ,
+					 unsigned int ,
+					 Output_section* ,
+					 const elfcpp::Rela<size,
 							    big_endian>& ,
 					 unsigned int , Symbol*)
     { return false; }
@@ -270,7 +270,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     inline void
     relocate_tls(const Relocate_info<size, big_endian>*,
 		 Target_powerpc* target,
-                 size_t relnum, const elfcpp::Rela<size, big_endian>&,
+		 size_t relnum, const elfcpp::Rela<size, big_endian>&,
 		 unsigned int r_type, const Sized_symbol<size>*,
 		 const Symbol_value<size>*,
 		 unsigned char*,
@@ -330,7 +330,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
   // Copy a relocation against a global symbol.
   void
   copy_reloc(Symbol_table* symtab, Layout* layout,
-             Sized_relobj_file<size, big_endian>* object,
+	     Sized_relobj_file<size, big_endian>* object,
 	     unsigned int shndx, Output_section* output_section,
 	     Symbol* sym, const elfcpp::Rela<size, big_endian>& reloc)
   {
@@ -389,6 +389,8 @@ Target::Target_info Target_powerpc<32, true>::powerpc_info =
   0x10000000,		// default_text_segment_address
   64 * 1024,		// abi_pagesize (overridable by -z max-page-size)
   4 * 1024,		// common_pagesize (overridable by -z common-page-size)
+  false,                // isolate_execinstr
+  0,                    // rosegment_gap
   elfcpp::SHN_UNDEF,	// small_common_shndx
   elfcpp::SHN_UNDEF,	// large_common_shndx
   0,			// small_common_section_flags
@@ -413,6 +415,8 @@ Target::Target_info Target_powerpc<32, false>::powerpc_info =
   0x10000000,		// default_text_segment_address
   64 * 1024,		// abi_pagesize (overridable by -z max-page-size)
   4 * 1024,		// common_pagesize (overridable by -z common-page-size)
+  false,                // isolate_execinstr
+  0,                    // rosegment_gap
   elfcpp::SHN_UNDEF,	// small_common_shndx
   elfcpp::SHN_UNDEF,	// large_common_shndx
   0,			// small_common_section_flags
@@ -437,6 +441,8 @@ Target::Target_info Target_powerpc<64, true>::powerpc_info =
   0x10000000,		// default_text_segment_address
   64 * 1024,		// abi_pagesize (overridable by -z max-page-size)
   8 * 1024,		// common_pagesize (overridable by -z common-page-size)
+  false,                // isolate_execinstr
+  0,                    // rosegment_gap
   elfcpp::SHN_UNDEF,	// small_common_shndx
   elfcpp::SHN_UNDEF,	// large_common_shndx
   0,			// small_common_section_flags
@@ -461,6 +467,8 @@ Target::Target_info Target_powerpc<64, false>::powerpc_info =
   0x10000000,		// default_text_segment_address
   64 * 1024,		// abi_pagesize (overridable by -z max-page-size)
   8 * 1024,		// common_pagesize (overridable by -z common-page-size)
+  false,                // isolate_execinstr
+  0,                    // rosegment_gap
   elfcpp::SHN_UNDEF,	// small_common_shndx
   elfcpp::SHN_UNDEF,	// large_common_shndx
   0,			// small_common_section_flags
@@ -952,7 +960,7 @@ static const unsigned int addis_r12_r2    = 0x3d820000;  /* addis %r12,%r2,xxx@h
 static const unsigned int std_r2_40r1     = 0xf8410028;  /* std   %r2,40(%r1)         */
 static const unsigned int ld_r11_0r12     = 0xe96c0000;  /* ld    %r11,xxx+0@l(%r12)  */
 static const unsigned int ld_r2_0r12      = 0xe84c0000;  /* ld    %r2,xxx+8@l(%r12)   */
-                                                         /* ld    %r11,xxx+16@l(%r12) */
+							 /* ld    %r11,xxx+16@l(%r12) */
 
 
 // Write out the PLT.
@@ -1311,27 +1319,27 @@ Target_powerpc<size, big_endian>::Scan::local(
       // executable), we need to create a dynamic relocation for
       // this location.
       if (parameters->options().output_is_position_independent())
-        {
-          Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	{
+	  Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 
 	  check_non_pic(object, r_type);
-          if (lsym.get_st_type() != elfcpp::STT_SECTION)
-            {
-              unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
-              rela_dyn->add_local(object, r_sym, r_type, output_section,
+	  if (lsym.get_st_type() != elfcpp::STT_SECTION)
+	    {
+	      unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
+	      rela_dyn->add_local(object, r_sym, r_type, output_section,
 				  data_shndx, reloc.get_r_offset(),
 				  reloc.get_r_addend());
-            }
-          else
-            {
+	    }
+	  else
+	    {
 	      unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
-              gold_assert(lsym.get_st_value() == 0);
-              rela_dyn->add_local_relative(object, r_sym, r_type,
+	      gold_assert(lsym.get_st_value() == 0);
+	      rela_dyn->add_local_relative(object, r_sym, r_type,
 					   output_section, data_shndx,
 					   reloc.get_r_offset(),
 					   reloc.get_r_addend(), false);
-            }
-        }
+	    }
+	}
       break;
 
     case elfcpp::R_POWERPC_REL24:
@@ -1352,8 +1360,8 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_PPC64_TOC16_DS:
     case elfcpp::R_PPC64_TOC16_LO_DS:
       {
-        // The symbol requires a GOT entry.
-        Output_data_got<size, big_endian>* got;
+	// The symbol requires a GOT entry.
+	Output_data_got<size, big_endian>* got;
 	unsigned int r_sym;
 
 	got = target->got_section(symtab, layout);
@@ -1374,7 +1382,7 @@ Target_powerpc<size, big_endian>::Scan::local(
 					     elfcpp::R_POWERPC_RELATIVE,
 					     got, off, 0, false);
 	      }
-          }
+	  }
 	else
 	  got->add_local(object, r_sym, GOT_TYPE_STANDARD);
       }
@@ -1446,8 +1454,8 @@ Target_powerpc<size, big_endian>::Scan::global(
       // if the symbol is defined in the output file and is protected
       // or hidden.
       if (gsym->is_defined()
-          && !gsym->is_from_dynobj()
-          && !gsym->is_preemptible())
+	  && !gsym->is_from_dynobj()
+	  && !gsym->is_preemptible())
 	break;
       target->make_plt_entry(symtab, layout, gsym);
       break;
@@ -1459,38 +1467,38 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_ADDR32:
     case elfcpp::R_PPC64_ADDR64:
       {
-        // Make a PLT entry if necessary.
-        if (gsym->needs_plt_entry())
-          {
-            target->make_plt_entry(symtab, layout, gsym);
-            // Since this is not a PC-relative relocation, we may be
-            // taking the address of a function. In that case we need to
-            // set the entry in the dynamic symbol table to the address of
-            // the PLT entry.
-            if (gsym->is_from_dynobj() && !parameters->options().shared())
-              gsym->set_needs_dynsym_value();
-          }
-        // Make a dynamic relocation if necessary.
-        if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
-          {
-            if (gsym->may_need_copy_reloc())
-              {
-	        target->copy_reloc(symtab, layout, object,
-	                           data_shndx, output_section, gsym, reloc);
-              }
-            else if ((r_type == elfcpp::R_POWERPC_ADDR32
+	// Make a PLT entry if necessary.
+	if (gsym->needs_plt_entry())
+	  {
+	    target->make_plt_entry(symtab, layout, gsym);
+	    // Since this is not a PC-relative relocation, we may be
+	    // taking the address of a function. In that case we need to
+	    // set the entry in the dynamic symbol table to the address of
+	    // the PLT entry.
+	    if (gsym->is_from_dynobj() && !parameters->options().shared())
+	      gsym->set_needs_dynsym_value();
+	  }
+	// Make a dynamic relocation if necessary.
+	if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
+	  {
+	    if (gsym->may_need_copy_reloc())
+	      {
+		target->copy_reloc(symtab, layout, object,
+				   data_shndx, output_section, gsym, reloc);
+	      }
+	    else if ((r_type == elfcpp::R_POWERPC_ADDR32
 		      || r_type == elfcpp::R_PPC64_ADDR64)
-                     && gsym->can_use_relative_reloc(false))
-              {
-                Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-                rela_dyn->add_global_relative(gsym, elfcpp::R_POWERPC_RELATIVE,
+		     && gsym->can_use_relative_reloc(false))
+	      {
+		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+		rela_dyn->add_global_relative(gsym, elfcpp::R_POWERPC_RELATIVE,
 					      output_section, object,
 					      data_shndx, reloc.get_r_offset(),
 					      reloc.get_r_addend(), false);
-              }
-            else
-              {
-                Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	      }
+	    else
+	      {
+		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 
 		check_non_pic(object, r_type);
 		if (gsym->is_from_dynobj()
@@ -1506,8 +1514,8 @@ Target_powerpc<size, big_endian>::Scan::global(
 						data_shndx,
 						reloc.get_r_offset(),
 						reloc.get_r_addend(), false);
-              }
-          }
+	      }
+	  }
       }
       break;
 
@@ -1552,31 +1560,31 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_PPC64_TOC16_DS:
     case elfcpp::R_PPC64_TOC16_LO_DS:
       {
-        // The symbol requires a GOT entry.
-        Output_data_got<size, big_endian>* got;
+	// The symbol requires a GOT entry.
+	Output_data_got<size, big_endian>* got;
 
 	got = target->got_section(symtab, layout);
-        if (gsym->final_value_is_known())
-          got->add_global(gsym, GOT_TYPE_STANDARD);
-        else
-          {
-            // If this symbol is not fully resolved, we need to add a
-            // dynamic relocation for it.
-            Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-            if (gsym->is_from_dynobj()
-                || gsym->is_undefined()
-                || gsym->is_preemptible())
-              got->add_global_with_rel(gsym, GOT_TYPE_STANDARD, rela_dyn,
+	if (gsym->final_value_is_known())
+	  got->add_global(gsym, GOT_TYPE_STANDARD);
+	else
+	  {
+	    // If this symbol is not fully resolved, we need to add a
+	    // dynamic relocation for it.
+	    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	    if (gsym->is_from_dynobj()
+		|| gsym->is_undefined()
+		|| gsym->is_preemptible())
+	      got->add_global_with_rel(gsym, GOT_TYPE_STANDARD, rela_dyn,
 				       elfcpp::R_POWERPC_GLOB_DAT);
-            else if (!gsym->has_got_offset(GOT_TYPE_STANDARD))
-              {
+	    else if (!gsym->has_got_offset(GOT_TYPE_STANDARD))
+	      {
 		unsigned int off = got->add_constant(0);
 
 		gsym->set_got_offset(GOT_TYPE_STANDARD, off);
 		rela_dyn->add_global_relative(gsym, elfcpp::R_POWERPC_RELATIVE,
 					      got, off, 0, false);
 	      }
-          }
+	  }
       }
       break;
 
@@ -1788,20 +1796,20 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_PPC64_GOT16_DS:
     case elfcpp::R_PPC64_GOT16_LO_DS:
       if (gsym != NULL)
-        {
-          gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
-          got_offset = gsym->got_offset(GOT_TYPE_STANDARD);
-        }
+	{
+	  gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
+	  got_offset = gsym->got_offset(GOT_TYPE_STANDARD);
+	}
       else
-        {
-          unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
-          gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
-          got_offset = object->local_got_offset(r_sym, GOT_TYPE_STANDARD);
-        }
+	{
+	  unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
+	  gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
+	  got_offset = object->local_got_offset(r_sym, GOT_TYPE_STANDARD);
+	}
       break;
 
       // R_PPC_PLTREL24 is rather special.  If non-zero,
-      // the addend specifies the GOT pointer offset within .got2.  
+      // the addend specifies the GOT pointer offset within .got2.
     case elfcpp::R_PPC_PLTREL24:
       if (addend >= 32768)
 	{
@@ -2132,7 +2140,8 @@ public:
 		       : (big_endian ? "elf32ppc" : "elf32lppc")))
   { }
 
-  Target* do_recognize(int machine, int, int)
+  virtual Target*
+  do_recognize(Input_file*, off_t, int machine, int, int)
   {
     switch (size)
       {
@@ -2153,7 +2162,8 @@ public:
     return this->instantiate_target();
   }
 
-  Target* do_instantiate_target()
+  virtual Target*
+  do_instantiate_target()
   { return new Target_powerpc<size, big_endian>(); }
 };
 

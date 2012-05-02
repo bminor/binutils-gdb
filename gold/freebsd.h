@@ -1,6 +1,6 @@
 // freebsd.h -- FreeBSD support for gold    -*- C++ -*-
 
-// Copyright 2009, 2011 Free Software Foundation, Inc.
+// Copyright 2009, 2011, 2012 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -48,14 +48,14 @@ class Target_selector_freebsd : public Target_selector
   // If we see a FreeBSD input file, mark the output file as using
   // FreeBSD.
   virtual Target*
-  do_recognize(int, int osabi, int)
+  do_recognize(Input_file*, off_t, int, int osabi, int)
   {
     Target* ret = this->instantiate_target();
     if (osabi == elfcpp::ELFOSABI_FREEBSD)
       ret->set_osabi(static_cast<elfcpp::ELFOSABI>(osabi));
     return ret;
   }
-  
+
   // Recognize two names.
   virtual Target*
   do_recognize_by_bfd_name(const char* name)

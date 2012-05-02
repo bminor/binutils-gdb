@@ -1,6 +1,7 @@
 // parameters.cc -- general parameters for a link using gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -212,7 +213,7 @@ Parameters::check_target_endianness()
 	  gold_assert(endianness == General_options::ENDIANNESS_LITTLE);
 	  big_endian = false;;
 	}
-      
+
       if (this->target().is_big_endian() != big_endian)
 	gold_error(_("input file does not match -EB/EL option"));
     }
@@ -352,7 +353,8 @@ parameters_force_valid_target()
   else
     is_big_endian = GOLD_DEFAULT_BIG_ENDIAN;
 
-  Target* target = select_target(elfcpp::GOLD_DEFAULT_MACHINE,
+  Target* target = select_target(NULL, 0,
+				 elfcpp::GOLD_DEFAULT_MACHINE,
 				 GOLD_DEFAULT_SIZE,
 				 is_big_endian,
 				 elfcpp::GOLD_DEFAULT_OSABI,
