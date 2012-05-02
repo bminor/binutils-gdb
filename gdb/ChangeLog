@@ -1,3 +1,9 @@
+2012-05-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb_curses.h: Undefine KEY_EVENT before including curses
+	headers.  Move "#undef MOUSE_MOVED" before any curses header
+	inclusion.
+
 2012-05-02  Sergio Durigan Junior  <sergiodj@gmail.com>
 
 	* features/i386/i386-mmx-linux.c: Regenerate.
