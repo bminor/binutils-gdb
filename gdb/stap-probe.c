@@ -562,12 +562,7 @@ stap_parse_single_operand (struct stap_parse_info *p)
 
   /* Suffixes for the parser.  */
   const char *const_suffix = gdbarch_stap_integer_suffix (gdbarch);
-  const char *reg_suffix = gdbarch_stap_register_suffix (gdbarch);
-  const char *reg_ind_suffix
-    = gdbarch_stap_register_indirection_suffix (gdbarch);
   int const_suffix_len = const_suffix ? strlen (const_suffix) : 0;
-  int reg_suffix_len = reg_suffix ? strlen (reg_suffix) : 0;
-  int reg_ind_suffix_len = reg_ind_suffix ? strlen (reg_ind_suffix) : 0;
 
   /* We first try to parse this token as a "special token".  */
   if (gdbarch_stap_parse_special_token_p (gdbarch))
@@ -867,7 +862,6 @@ stap_parse_argument (const char **arg, struct type *atype,
 		     struct gdbarch *gdbarch)
 {
   struct stap_parse_info p;
-  volatile struct gdb_exception e;
   struct cleanup *back_to;
 
   /* We need to initialize the expression buffer, in order to begin
@@ -1275,7 +1269,6 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   bfd *abfd = objfile->obfd;
   int size = bfd_get_arch_size (abfd) / 8;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   CORE_ADDR base_ref;
   const char *probe_args = NULL;

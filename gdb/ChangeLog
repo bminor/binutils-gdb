@@ -1,3 +1,12 @@
+2012-05-02  Sergio Durigan Junior  <sergiodj@gmail.com>
+
+	* i386-tdep.c (i386_stap_parse_special_token) <s>: Remove unused
+	variable.
+	* stap-probe.c (stap_parse_single_operand) <reg_suffix,
+	reg_ind_suffix, reg_suffix_len, reg_ind_suffix_len>: Likewise.
+	(stap_parse_argument) <e>: Likewise.
+	(handle_stap_probe) <byte_order>: Likewise.
+
 2012-04-30  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (init_cutu_and_read_dies): Renamed from

@@ -3392,8 +3392,6 @@ int
 i386_stap_parse_special_token (struct gdbarch *gdbarch,
 			       struct stap_parse_info *p)
 {
-  const char *s = p->arg;
-
   /* In order to parse special tokens, we use a state-machine that go
      through every known token and try to get a match.  */
   enum
