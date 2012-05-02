@@ -1,3 +1,7 @@
+2012-05-02  Christopher Faylor  <me.cygwin2012@cgf.cx>
+
+	* MAINTAINERS: Remove myself.
+
 2012-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix --without-auto-load-safe-path for MS-Windows host platform.

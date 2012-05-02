@@ -364,8 +364,6 @@ AIX			Joel Brobecker		brobecker@adacore.com
 Darwin			Tristan Gingold		gingold@adacore.com
 djgpp native		Eli Zaretskii		eliz@gnu.org
 GNU Hurd		Alfred M. Szmidt	ams@gnu.org
-MS Windows (NT, '00, 9x, Me, XP) host & native
-			Chris Faylor		cgf@alum.bu.edu
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
 GNU/Linux MIPS native & host
