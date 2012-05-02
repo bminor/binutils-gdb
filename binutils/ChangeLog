@@ -1,3 +1,10 @@
+2012-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+	* po/it.po: New Italian translation.
+	* configure.in (ALL_LINGUAS): Add it.
+	* configure: Regenerate.
+
 2012-05-01  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/13121
