@@ -231,6 +231,12 @@ filename_is_in_dir (const char *filename, const char *dir)
   while (dir_len && IS_DIR_SEPARATOR (dir[dir_len - 1]))
     dir_len--;
 
+  /* Ensure auto_load_safe_path "/" matches any FILENAME.  On MS-Windows
+     platform FILENAME even after gdb_realpath does not have to start with
+     IS_DIR_SEPARATOR character, such as the 'C:\x.exe' filename.  */
+  if (dir_len == 0)
+    return 1;
+
   return (filename_ncmp (dir, filename, dir_len) == 0
 	  && (IS_DIR_SEPARATOR (filename[dir_len])
 	      || filename[dir_len] == '\0'));

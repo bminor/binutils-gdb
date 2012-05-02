@@ -1,3 +1,8 @@
+2012-05-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix --without-auto-load-safe-path for MS-Windows host platform.
+	* auto-load.c (filename_is_in_dir): Return 1 for DIR_LEN 0.
+
 2012-05-02  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb_curses.h: Undefine KEY_EVENT before including curses
