@@ -1132,7 +1132,7 @@ ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
 /* Convert PTID to printable form.  */
 
-char *
+static char *
 solaris_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[100];
@@ -1339,6 +1339,9 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_get_ada_task_ptid = sol_get_ada_task_ptid;
   sol_thread_ops.to_magic = OPS_MAGIC;
 }
+
+/* Silence -Wmissing-prototypes.  */
+extern void _initialize_sol_thread (void);
 
 void
 _initialize_sol_thread (void)
