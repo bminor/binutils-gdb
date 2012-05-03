@@ -1,3 +1,14 @@
+2012-05-03  Siva Chandra Reddy  <sivachandra@google.com>
+
+	Add two new methods global_block and static_block to gdb.Symtab
+	objects.
+	* NEWS (Python scripting): Add entry about the new methods.
+	* python/py-symtab.c (stpy_global_block): New function which
+	implements the gdb.Symtab.global_block() method.
+	(stpy_static_block): New function which implements the
+	gdb.Symtab.static_block() method.
+	(symtab_object_methods): Add entries for the two new methods.
+
 2012-05-03  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dw2_find_symbol_file): Don't crash if there are no

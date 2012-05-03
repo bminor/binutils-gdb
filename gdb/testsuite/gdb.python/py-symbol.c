@@ -44,6 +44,11 @@ int func (int arg)
   return arg; /* Block break here.  */
 }
 
+struct simple_struct
+{
+  int a;
+};
+
 int main (int argc, char *argv[])
 {
 #ifdef __cplusplus
@@ -51,6 +56,7 @@ int main (int argc, char *argv[])
 #endif
   int a = 0;
   int result;
+  struct simple_struct ss = { 10 };
   enum tag {one, two, three};
   enum tag t = one;
 

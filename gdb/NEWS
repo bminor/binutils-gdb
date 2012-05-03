@@ -39,6 +39,10 @@
   ** A new method 'referenced_value' on gdb.Value objects which can
      dereference pointer as well as C++ reference values.
 
+  ** New methods 'global_block' and 'static_block' on gdb.Symtab objects
+     which return the global and static blocks (as gdb.Block objects),
+     of the underlying symbol table, respectively.
+
 * Go language support.
   GDB now supports debugging programs written in the Go programming
   language.

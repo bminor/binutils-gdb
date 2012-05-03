@@ -25038,6 +25038,16 @@ if it is invalid at the time the method is called.
 @defun Symtab.fullname ()
 Return the symbol table's source absolute file name.
 @end defun
+
+@defun Symtab.global_block ()
+Return the global block of the underlying symbol table.
+@xref{Blocks In Python}.
+@end defun
+
+@defun Symtab.static_block ()
+Return the static block of the underlying symbol table.
+@xref{Blocks In Python}.
+@end defun
 @end table
 
 @node Breakpoints In Python

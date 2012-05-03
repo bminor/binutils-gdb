@@ -23,6 +23,7 @@
 #include "source.h"
 #include "python-internal.h"
 #include "objfiles.h"
+#include "block.h"
 
 typedef struct stpy_symtab_object {
   PyObject_HEAD
@@ -151,6 +152,38 @@ stpy_is_valid (PyObject *self, PyObject *args)
     Py_RETURN_FALSE;
 
   Py_RETURN_TRUE;
+}
+
+/* Return the GLOBAL_BLOCK of the underlying symtab.  */
+
+static PyObject *
+stpy_global_block (PyObject *self, PyObject *args)
+{
+  struct symtab *symtab = NULL;
+  struct block *block = NULL;
+  struct blockvector *blockvector;
+
+  STPY_REQUIRE_VALID (self, symtab);
+
+  blockvector = BLOCKVECTOR (symtab);
+  block = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
+  return block_to_block_object (block, symtab->objfile);
+}
+
+/* Return the STATIC_BLOCK of the underlying symtab.  */
+
+static PyObject *
+stpy_static_block (PyObject *self, PyObject *args)
+{
+  struct symtab *symtab = NULL;
+  struct block *block = NULL;
+  struct blockvector *blockvector;
+
+  STPY_REQUIRE_VALID (self, symtab);
+
+  blockvector = BLOCKVECTOR (symtab);
+  block = BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK);
+  return block_to_block_object (block, symtab->objfile);
 }
 
 static PyObject *
@@ -477,6 +510,12 @@ Return true if this symbol table is valid, false if not." },
   { "fullname", stpy_fullname, METH_NOARGS,
     "fullname () -> String.\n\
 Return the symtab's full source filename." },
+  { "global_block", stpy_global_block, METH_NOARGS,
+    "global_block () -> gdb.Block.\n\
+Return the global block of the symbol table." },
+  { "static_block", stpy_static_block, METH_NOARGS,
+    "static_block () -> gdb.Block.\n\
+Return the static block of the symbol table." },
   {NULL}  /* Sentinel */
 };
 

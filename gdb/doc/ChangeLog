@@ -1,3 +1,9 @@
+2012-05-03  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.texinfo (Symbol Tables In Python): Add documentation about
+	the new methods global_block and static_block on gdb.Symtab
+	objects.
+
 2012-05-02  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.texinfo (Blocks In Python): Add a note saying that future
