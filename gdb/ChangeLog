@@ -1,5 +1,9 @@
 2012-05-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* infcall.c (unwind_on_signal_p): Make static.
+
+2012-05-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* sol-thread.c (solaris_pid_to_str): Make static.
 	(_initialize_sol_thread): Add prototype.
 

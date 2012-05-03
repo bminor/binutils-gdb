@@ -88,7 +88,7 @@ show_coerce_float_to_double_p (struct ui_file *file, int from_tty,
 
    The default is to stop in the frame where the signal was received.  */
 
-int unwind_on_signal_p = 0;
+static int unwind_on_signal_p = 0;
 static void
 show_unwind_on_signal_p (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
