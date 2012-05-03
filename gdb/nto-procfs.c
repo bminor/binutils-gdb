@@ -312,7 +312,7 @@ update_thread_private_data (struct thread_info *new_thread,
 #endif /* _NTO_VERSION */
 }
 
-void
+static void
 procfs_find_new_threads (struct target_ops *ops)
 {
   procfs_status status;
@@ -1353,7 +1353,7 @@ procfs_thread_info (pid_t pid, short tid)
   return NULL;
 }
 
-char *
+static char *
 procfs_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   static char buf[1024];

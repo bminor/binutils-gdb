@@ -1,3 +1,8 @@
+2012-05-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* nto-procfs.c (procfs_find_new_threads, procfs_pid_to_str):
+	Make static.
+
 2012-05-03  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* stap-probe.c (stap_is_operator): Change declaration.
