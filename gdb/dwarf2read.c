@@ -2833,7 +2833,8 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
   per_cu = dw2_get_cu (MAYBE_SWAP (vec[1]));
 
   file_data = dw2_get_file_names (objfile, per_cu);
-  if (file_data == NULL)
+  if (file_data == NULL
+      || file_data->num_file_names == 0)
     return NULL;
 
   return file_data->file_names[file_data->num_file_names - 1];

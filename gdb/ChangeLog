@@ -1,3 +1,8 @@
+2012-05-03  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dw2_find_symbol_file): Don't crash if there are no
+	files.
+
 2012-05-03  Yao Qi  <yao@codesourcery.com>
 
 	* i386-tdep.c (i386_fetch_pointer_argument): Remove extra
