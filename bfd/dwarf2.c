@@ -1401,6 +1401,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
   unsigned int i, bytes_read, offset_size;
   char *cur_file, *cur_dir;
   unsigned char op_code, extended_op, adj_opcode;
+  unsigned int exop_len;
   bfd_size_type amt;
 
   if (! read_section (abfd, &stash->debug_sections[debug_line],
@@ -1604,8 +1605,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	  else switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
-	      /* Ignore length.  */
-	      line_ptr += 1;
+              exop_len = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	      line_ptr += bytes_read;
 	      extended_op = read_1_byte (abfd, line_ptr);
 	      line_ptr += 1;
 
@@ -1658,6 +1659,9 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		  (void) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 		  line_ptr += bytes_read;
 		  break;
+                case DW_LNE_HP_source_file_correlation:
+                  line_ptr += exop_len - 1;
+                  break;
 		default:
 		  (*_bfd_error_handler) (_("Dwarf Error: mangled line number section."));
 		  bfd_set_error (bfd_error_bad_value);

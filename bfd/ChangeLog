@@ -1,3 +1,8 @@
+2012-05-03  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf2.c (decode_line_info): Ignore
+	DW_LNE_HP_source_file_correlation.
+
 2012-05-01  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/13121
