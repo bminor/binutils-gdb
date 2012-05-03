@@ -1,3 +1,9 @@
+2012-05-03  Yao Qi  <yao@codesourcery.com>
+
+	* i386-tdep.c (i386_fetch_pointer_argument): Remove extra
+	space.
+	(i386_process_record): Ditto.
+
 2012-05-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* infcall.c (unwind_on_signal_p): Make static.

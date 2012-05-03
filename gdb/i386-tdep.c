@@ -3854,7 +3854,7 @@ i386_fetch_pointer_argument (struct frame_info *frame, int argi,
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  CORE_ADDR sp = get_frame_register_unsigned  (frame, I386_ESP_REGNUM);
+  CORE_ADDR sp = get_frame_register_unsigned (frame, I386_ESP_REGNUM);
   return read_memory_unsigned_integer (sp + (4 * (argi + 1)), 4, byte_order);
 }
 
@@ -4317,7 +4317,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   int prefixes = 0;
   int regnum = 0;
   uint32_t opcode;
-  uint8_t  opcode8;
+  uint8_t opcode8;
   ULONGEST addr;
   gdb_byte buf[MAX_REGISTER_SIZE];
   struct i386_record_s ir;
