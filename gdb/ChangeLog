@@ -1,3 +1,8 @@
+2012-05-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (displaced_step_fixup): Add "displaced:" prefix to
+	debug log.
+
 2012-05-03  Siva Chandra Reddy  <sivachandra@google.com>
 
 	Add two new methods global_block and static_block to gdb.Symtab
