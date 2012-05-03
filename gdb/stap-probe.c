@@ -154,7 +154,7 @@ static void stap_parse_argument_conditionally (struct stap_parse_info *p);
 
 /* Returns 1 if *S is an operator, zero otherwise.  */
 
-static int stap_is_operator (char op);
+static int stap_is_operator (const char *op);
 
 static void
 show_stapexpressiondebug (struct ui_file *file, int from_tty,
@@ -209,111 +209,107 @@ stap_get_operator_prec (enum exp_opcode op)
 /* Given S, read the operator in it and fills the OP pointer with its code.
    Return 1 on success, zero if the operator was not recognized.  */
 
-static int
-stap_get_opcode (const char **s, enum exp_opcode *op)
+static enum exp_opcode
+stap_get_opcode (const char **s)
 {
   const char c = **s;
-  int ret = 1;
+  enum exp_opcode op;
 
   *s += 1;
 
   switch (c)
     {
     case '*':
-      *op = BINOP_MUL;
+      op = BINOP_MUL;
       break;
 
     case '/':
-      *op = BINOP_DIV;
+      op = BINOP_DIV;
       break;
 
     case '%':
-      *op = BINOP_REM;
+      op = BINOP_REM;
     break;
 
     case '<':
-      *op = BINOP_LESS;
+      op = BINOP_LESS;
       if (**s == '<')
 	{
 	  *s += 1;
-	  *op = BINOP_LSH;
+	  op = BINOP_LSH;
 	}
       else if (**s == '=')
 	{
 	  *s += 1;
-	  *op = BINOP_LEQ;
+	  op = BINOP_LEQ;
 	}
       else if (**s == '>')
 	{
 	  *s += 1;
-	  *op = BINOP_NOTEQUAL;
+	  op = BINOP_NOTEQUAL;
 	}
     break;
 
     case '>':
-      *op = BINOP_GTR;
+      op = BINOP_GTR;
       if (**s == '>')
 	{
 	  *s += 1;
-	  *op = BINOP_RSH;
+	  op = BINOP_RSH;
 	}
       else if (**s == '=')
 	{
 	  *s += 1;
-	  *op = BINOP_GEQ;
+	  op = BINOP_GEQ;
 	}
     break;
 
     case '|':
-      *op = BINOP_BITWISE_IOR;
+      op = BINOP_BITWISE_IOR;
       if (**s == '|')
 	{
 	  *s += 1;
-	  *op = BINOP_LOGICAL_OR;
+	  op = BINOP_LOGICAL_OR;
 	}
     break;
 
     case '&':
-      *op = BINOP_BITWISE_AND;
+      op = BINOP_BITWISE_AND;
       if (**s == '&')
 	{
 	  *s += 1;
-	  *op = BINOP_LOGICAL_AND;
+	  op = BINOP_LOGICAL_AND;
 	}
     break;
 
     case '^':
-      *op = BINOP_BITWISE_XOR;
+      op = BINOP_BITWISE_XOR;
       break;
 
     case '!':
-      *op = UNOP_LOGICAL_NOT;
+      op = UNOP_LOGICAL_NOT;
       break;
 
     case '+':
-      *op = BINOP_ADD;
+      op = BINOP_ADD;
       break;
 
     case '-':
-      *op = BINOP_SUB;
+      op = BINOP_SUB;
       break;
 
     case '=':
-      if (**s != '=')
-	{
-	  ret = 0;
-	  break;
-	}
-      *op = BINOP_EQUAL;
+      gdb_assert (**s == '=');
+      op = BINOP_EQUAL;
       break;
 
     default:
-      /* We didn't find any operator.  */
-      *s -= 1;
-      return 0;
+      internal_error (__FILE__, __LINE__,
+		      _("Invalid opcode in expression `%s' for SystemTap"
+			"probe"), *s);
     }
 
-  return ret;
+  return op;
 }
 
 /* Given the bitness of the argument, represented by B, return the
@@ -773,7 +769,7 @@ stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
       enum exp_opcode opcode;
       enum stap_operand_prec cur_prec;
 
-      if (!stap_is_operator (*p->arg))
+      if (!stap_is_operator (p->arg))
 	error (_("Invalid operator `%c' on expression `%s'."), *p->arg,
 	       p->saved_arg);
 
@@ -782,7 +778,7 @@ stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
 	 operator.  If this operator's precedence is lower than PREC, we
 	 should return and not advance the expression buffer pointer.  */
       tmp_exp_buf = p->arg;
-      stap_get_opcode (&tmp_exp_buf, &opcode);
+      opcode = stap_get_opcode (&tmp_exp_buf);
 
       cur_prec = stap_get_operator_prec (opcode);
       if (cur_prec < prec)
@@ -803,7 +799,7 @@ stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
 
       /* While we still have operators, try to parse another
 	 right-side, but using the current right-side as a left-side.  */
-      while (*p->arg && stap_is_operator (*p->arg))
+      while (*p->arg && stap_is_operator (p->arg))
 	{
 	  enum exp_opcode lookahead_opcode;
 	  enum stap_operand_prec lookahead_prec;
@@ -811,7 +807,7 @@ stap_parse_argument_1 (struct stap_parse_info *p, int has_lhs,
 	  /* Saving the current expression buffer position.  The explanation
 	     is the same as above.  */
 	  tmp_exp_buf = p->arg;
-	  stap_get_opcode (&tmp_exp_buf, &lookahead_opcode);
+	  lookahead_opcode = stap_get_opcode (&tmp_exp_buf);
 	  lookahead_prec = stap_get_operator_prec (lookahead_opcode);
 
 	  if (lookahead_prec <= prec)
@@ -1013,11 +1009,36 @@ stap_get_probe_argument_count (struct probe *probe_generic,
    otherwise.  */
 
 static int
-stap_is_operator (char op)
+stap_is_operator (const char *op)
 {
-  return (op == '+' || op == '-' || op == '*' || op == '/'
-	  || op == '>' || op == '<' || op == '!' || op == '^'
-	  || op == '|' || op == '&' || op == '%' || op == '=');
+  int ret = 1;
+
+  switch (*op)
+    {
+    case '*':
+    case '/':
+    case '%':
+    case '^':
+    case '!':
+    case '+':
+    case '-':
+    case '<':
+    case '>':
+    case '|':
+    case '&':
+      break;
+
+    case '=':
+      if (op[1] != '=')
+	ret = 0;
+      break;
+
+    default:
+      /* We didn't find any operator.  */
+      ret = 0;
+    }
+
+  return ret;
 }
 
 static struct stap_probe_arg *

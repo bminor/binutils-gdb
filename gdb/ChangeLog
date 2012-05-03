@@ -1,3 +1,10 @@
+2012-05-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* stap-probe.c (stap_is_operator): Change declaration.
+	(stap_get_opcode): Change return value.
+	(stap_parse_argument_1): Update calls to `stap_get_opcode' and
+	`stap_parse_argument_1'.
+
 2012-05-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (displaced_step_fixup): Add "displaced:" prefix to
