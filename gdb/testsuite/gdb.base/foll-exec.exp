@@ -17,6 +17,11 @@ if { [is_remote target] || ![isnative] } then {
     continue
 }
 
+# Until "catch exec" is implemented on other targets...
+#
+if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
+    continue
+}
 
 set testfile "foll-exec"
 set testfile2 "execd-prog"
@@ -34,13 +39,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {d
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested foll-exec.exp
      return -1
-}
-
-
-# Until "catch exec" is implemented on other targets...
-#
-if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
-    continue
 }
 
 proc zap_session {} {

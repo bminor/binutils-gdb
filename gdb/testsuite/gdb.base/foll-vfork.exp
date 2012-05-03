@@ -17,6 +17,20 @@ if { [is_remote target] || ![isnative] } then {
     continue
 }
 
+# Until "set follow-fork-mode" and "catch vfork" are implemented on
+# other targets...
+#
+if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
+    continue
+}
+
+# Test to see if we are on an HP-UX 10.20 and if so,
+# do not run these tests as catching vfork is disabled for
+# 10.20.
+
+if [istarget "hppa*-hp-hpux10.20"] then {
+    return 0
+}
 
 # NOTE drow/2002-12-06: I don't know what the referenced kernel problem
 # is, but it appears to be fixed in recent HP/UX versions.
@@ -42,22 +56,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {debug}] != "" } {
      untested foll-vfork.exp
      return -1
-}
-
-
-# Until "set follow-fork-mode" and "catch vfork" are implemented on
-# other targets...
-#
-if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
-    continue
-}
-
-# Test to see if we are on an HP-UX 10.20 and if so,
-# do not run these tests as catching vfork is disabled for
-# 10.20.
-
-if [istarget "hppa*-hp-hpux10.20"] then {
-    return 0
 }
 
 # A few of these tests require a little more time than the standard

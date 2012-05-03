@@ -1,5 +1,12 @@
 2012-05-03  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.base/catch-syscall.exp: Skip it before compilation if target
+	doesn't support.
+	* gdb.base/foll-exec.exp, gdb.base/foll-fork.exp: Likewise.
+	* gdb.base/foll-vfork.exp, gdb.multi/bkpt-multi-exec.exp: Likewise.
+
+2012-05-03  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.mi/mi-solib.exp: Setup kfail for gdb/13860.
 
 2012-04-30  Doug Evans  <dje@google.com>

@@ -17,6 +17,12 @@ if { [is_remote target] || ![isnative] } then {
     continue
 }
 
+# Until "catch exec" is implemented on other targets...
+#
+if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
+    continue
+}
+
 set testfile "bkpt-multi-exec"
 
 set exec1 "bkpt-multi-exec"
@@ -33,11 +39,6 @@ if { [prepare_for_testing ${testfile}.exp ${exec1} "${srcfile1}" {debug nowarnin
 
 if { [prepare_for_testing ${testfile}.exp ${exec2} "${srcfile2}" {debug nowarnings}] } {
     return -1
-}
-# Until "catch exec" is implemented on other targets...
-#
-if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
-    continue
 }
 
 # Start with a fresh gdb

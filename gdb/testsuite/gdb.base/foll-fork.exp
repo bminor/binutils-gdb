@@ -17,6 +17,12 @@ if { [is_remote target] || ![isnative] } then {
     continue
 }
 
+# Until "set follow-fork-mode" and "catch fork" are implemented on
+# other targets...
+#
+if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
+    continue
+}
 
 global srcfile
 set testfile "foll-fork"
@@ -26,15 +32,6 @@ set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested foll-fork.exp
      return -1
-}
-
-
-
-# Until "set follow-fork-mode" and "catch fork" are implemented on
-# other targets...
-#
-if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
-    continue
 }
 
 proc check_fork_catchpoints {} {
