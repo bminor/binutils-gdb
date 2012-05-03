@@ -818,6 +818,7 @@ do
     bfd_elf32_vax_vec)		tb="$tb elf32-vax.lo elf32.lo $elf" ;;
     bfd_elf32_xstormy16_vec)	tb="$tb elf32-xstormy16.lo elf32.lo $elf" ;;
     bfd_elf32_xc16x_vec)		tb="$tb elf32-xc16x.lo elf32.lo $elf" ;;
+    bfd_elf32_xgate_vec)  	tb="$tb elf32-xgate.lo elf32.lo $elf" ;;
     bfd_elf32_xtensa_le_vec)	tb="$tb xtensa-isa.lo xtensa-modules.lo elf32-xtensa.lo elf32.lo $elf" ;;
     bfd_elf32_xtensa_be_vec)	tb="$tb xtensa-isa.lo xtensa-modules.lo elf32-xtensa.lo elf32.lo $elf" ;;
     bfd_elf64_alpha_freebsd_vec) tb="$tb elf64-alpha.lo elf64.lo $elf"; target_size=64 ;;

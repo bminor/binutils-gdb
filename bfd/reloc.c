@@ -4979,7 +4979,69 @@ ENUM
 ENUMDOC
   Motorola 68HC12 reloc.
   This is the 5 bits of a value.
-
+ENUM
+  BFD_RELOC_XGATE_RL_JUMP
+ENUMDOC
+  Freescale XGATE reloc.
+  This reloc marks the beginning of a bra/jal instruction.
+ENUM
+  BFD_RELOC_XGATE_RL_GROUP
+ENUMDOC
+  Freescale XGATE reloc.
+  This reloc marks a group of several instructions that gcc generates
+  and for which the linker relaxation pass can modify and/or remove
+  some of them.
+ENUM
+  BFD_RELOC_XGATE_LO16
+ENUMDOC
+  Freescale XGATE reloc.
+  This is the 16-bit lower part of an address.  It is used for the '16-bit'
+  instructions.
+ENUM
+  BFD_RELOC_XGATE_GPAGE
+ENUMDOC
+  Freescale XGATE reloc.
+ENUM
+  BFD_RELOC_XGATE_24
+ENUMDOC
+  Freescale XGATE reloc.
+ENUM
+  BFD_RELOC_XGATE_PCREL_9
+ENUMDOC
+  Freescale XGATE reloc.
+  This is a 9-bit pc-relative reloc.
+ENUM
+  BFD_RELOC_XGATE_PCREL_10
+ENUMDOC
+  Freescale XGATE reloc.
+  This is a 10-bit pc-relative reloc.
+ENUM
+  BFD_RELOC_XGATE_IMM8_LO
+ENUMDOC
+  Freescale XGATE reloc.
+  This is the 16-bit lower part of an address.  It is used for the '16-bit'
+  instructions.
+ENUM
+  BFD_RELOC_XGATE_IMM8_HI
+ENUMDOC
+  Freescale XGATE reloc.
+  This is the 16-bit higher part of an address.  It is used for the '16-bit'
+  instructions.
+ENUM
+  BFD_RELOC_XGATE_IMM3
+ENUMDOC
+  Freescale XGATE reloc.
+  This is a 3-bit pc-relative reloc.
+ENUM
+  BFD_RELOC_XGATE_IMM4
+ENUMDOC
+  Freescale XGATE reloc.
+  This is a 4-bit pc-relative reloc.
+ENUM
+  BFD_RELOC_XGATE_IMM5
+ENUMDOC
+  Freescale XGATE reloc.
+  This is a 5-bit pc-relative reloc.
 ENUM
   BFD_RELOC_16C_NUM08
 ENUMX

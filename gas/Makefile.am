@@ -169,6 +169,7 @@ TARGET_CPU_CFILES = \
 	config/tc-v850.c \
 	config/tc-xstormy16.c \
 	config/tc-xc16x.c \
+	config/tc-xgate.c \
 	config/tc-xtensa.c \
 	config/tc-z80.c \
 	config/tc-z8k.c \
@@ -236,6 +237,7 @@ TARGET_CPU_HFILES = \
 	config/tc-v850.h \
 	config/tc-xstormy16.h \
 	config/tc-xc16x.h \
+	config/tc-xgate.h \
 	config/tc-xtensa.h \
 	config/tc-z80.h \
 	config/tc-z8k.h \

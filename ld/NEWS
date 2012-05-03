@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the Freescale XGATE architecture.
+
 * Add option -f FILE on AIX (for response file).
 
 * Add support for the Renesas RL78 architecture.

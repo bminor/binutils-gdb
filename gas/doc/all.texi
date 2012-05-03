@@ -72,6 +72,7 @@
 @set TILEPRO
 @set V850
 @set VAX
+@set XGATE
 @set XSTORMY16
 @set XTENSA
 @set Z80

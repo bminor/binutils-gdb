@@ -1,3 +1,23 @@
+2012-05-03  Sean Keys  <skeys@ipdatasys.com>
+
+	* cpu-xgate.c: New file. Added XGATE support.
+	* archures.c (bfd_architecture): Add XGATE architecture.
+	(bfd_archures_list): Add reference to XGATE architecture info.
+	* elf-bfd.h (prep_headers): Handle bfd_arch_xgate.
+	* reloc.c: Add various XGATE relocation enums.
+	* targets.c (bfd_elf32_xgate_vec): Declare and add to target vector
+	list.
+	* Makefile.am: Add support for XGATE elf.
+	* configure.in: Ditto.
+	* config.bfd: Ditto.
+	* Makefile.in: Regenerate.
+	* configure: Ditto.
+	* bfd-in2.h: Ditto.
+	* libbfd.h: Ditto.
+	Added files for XGATE relocations.
+	* elf32-xgate.c: Created minimal relocation file.
+	* elf32-xgate.h: Created minimal header file for elf32-xgate.
+
 2012-05-03  Tristan Gingold  <gingold@adacore.com>
 
 	* dwarf2.c (decode_line_info): Ignore

@@ -1,3 +1,7 @@
+2012-05-03  Sean Keys  <skeys@ipdatasys.com>
+
+	* readelf.c: Add support for XGATE.
+
 2012-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.

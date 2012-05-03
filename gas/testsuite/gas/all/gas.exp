@@ -133,10 +133,10 @@ case $target_triplet in {
 	# These targets fail redef2 because they disallow redefined
 	# symbols on relocs.
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*"
-	setup_xfail "rx-*-*" "vax*-*-*" "z8k-*-*"
+	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	run_dump_test redef2
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*"
-	setup_xfail "rx-*-*" "vax*-*-*" "z8k-*-*"
+	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	# rs6000-aix disallows redefinition via .comm.
 	setup_xfail "*-*-aix*"
 	# SOM uses a different syntax for .comm

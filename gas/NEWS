@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the Freescale XGATE architecture.
+
 * Add support for .bundle_align_mode, .bundle_lock, and .bundle_unlock
   directives.  These are currently available only for x86 and ARM targets.
 

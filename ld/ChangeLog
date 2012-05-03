@@ -1,3 +1,13 @@
+2012-05-03  Sean Keys  <skeys@ipdatasys.com>
+
+	* Makefile.am (ALL_EMULATIONS): Added new emulation for XGATE
+	and XGATE (elf).
+	* Makefile.in: Rebuild.
+	* configure.tgt: Recognize XGATE.
+	* scripttempl/elfxgate.sc: New file, mostly cloned from m68hc12.
+	* emulparams/xgateelf: New emulation, mostly cloned from m68hc12.
+	* NEWS: Mention new support.
+
 2012-04-26  Hans-Peter Nilsson  <hp@axis.com>
 
 	Make bfd asserts cause linker errors.

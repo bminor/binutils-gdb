@@ -1,3 +1,18 @@
+2012-05-03  Sean Keys  <skeys@ipdatasys.com>
+
+	* configure, Makefile.in: Regenerate.
+	* Makefile.am (CPU_TYPES, TARGET_CPU_CFILES, TARGET_CPU_HFILES):
+	* configure.tgt: Added cpu type.
+	Added files for XGATE assembler.
+	* config/tc-xgate.c: Assembler for XGATE.
+	* config/tc-xgate.h: Header definition for assembler
+	Added files for XGATE testsuite.
+	* doc/Makefile.am (CPU_DOCS): Added XGATE file.
+	* doc/c-xgate.texi: Document XGATE and XGATE port.
+	* doc/as.texinfo: Ditto.
+	* doc/all.texi: Ditto
+	* NEWS: Mention the new support.
+
 2012-04-30  DJ Delorie  <dj@redhat.com>
 
 	* config/rx-parse.y (rx_intop): Add parameter for operation size.

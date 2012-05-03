@@ -2141,7 +2141,9 @@ enum bfd_architecture
   bfd_arch_xc16x,     /* Infineon's XC16X Series.               */
 #define bfd_mach_xc16x         1
 #define bfd_mach_xc16xl        2
-#define bfd_mach_xc16xs         3
+#define bfd_mach_xc16xs        3
+  bfd_arch_xgate,   /* Freescale XGATE */
+#define bfd_mach_xgate         1
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
 #define bfd_mach_xtensa        1
   bfd_arch_z80,
@@ -4471,6 +4473,57 @@ to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
 /* Motorola 68HC12 reloc.
 This is the 5 bits of a value.  */
   BFD_RELOC_M68HC12_5B,
+
+/* Freescale XGATE reloc.
+This reloc marks the beginning of a bra/jal instruction.  */
+  BFD_RELOC_XGATE_RL_JUMP,
+
+/* Freescale XGATE reloc.
+This reloc marks a group of several instructions that gcc generates
+and for which the linker relaxation pass can modify and/or remove
+some of them.  */
+  BFD_RELOC_XGATE_RL_GROUP,
+
+/* Freescale XGATE reloc.
+This is the 16-bit lower part of an address.  It is used for the '16-bit'
+instructions.  */
+  BFD_RELOC_XGATE_LO16,
+
+/* Freescale XGATE reloc.  */
+  BFD_RELOC_XGATE_GPAGE,
+
+/* Freescale XGATE reloc.  */
+  BFD_RELOC_XGATE_24,
+
+/* Freescale XGATE reloc.
+This is a 9-bit pc-relative reloc.  */
+  BFD_RELOC_XGATE_PCREL_9,
+
+/* Freescale XGATE reloc.
+This is a 10-bit pc-relative reloc.  */
+  BFD_RELOC_XGATE_PCREL_10,
+
+/* Freescale XGATE reloc.
+This is the 16-bit lower part of an address.  It is used for the '16-bit'
+instructions.  */
+  BFD_RELOC_XGATE_IMM8_LO,
+
+/* Freescale XGATE reloc.
+This is the 16-bit higher part of an address.  It is used for the '16-bit'
+instructions.  */
+  BFD_RELOC_XGATE_IMM8_HI,
+
+/* Freescale XGATE reloc.
+This is a 3-bit pc-relative reloc.  */
+  BFD_RELOC_XGATE_IMM3,
+
+/* Freescale XGATE reloc.
+This is a 4-bit pc-relative reloc.  */
+  BFD_RELOC_XGATE_IMM4,
+
+/* Freescale XGATE reloc.
+This is a 5-bit pc-relative reloc.  */
+  BFD_RELOC_XGATE_IMM5,
 
 /* NS CR16C Relocations.  */
   BFD_RELOC_16C_NUM08,

@@ -53,6 +53,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/largefile.m4 \
+	$(top_srcdir)/../config/lcmessage.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
 	$(top_srcdir)/../config/nls.m4 \
 	$(top_srcdir)/../config/override.m4 \
@@ -436,6 +437,7 @@ TARGET_CPU_CFILES = \
 	config/tc-v850.c \
 	config/tc-xstormy16.c \
 	config/tc-xc16x.c \
+	config/tc-xgate.c \
 	config/tc-xtensa.c \
 	config/tc-z80.c \
 	config/tc-z8k.c \
@@ -503,6 +505,7 @@ TARGET_CPU_HFILES = \
 	config/tc-v850.h \
 	config/tc-xstormy16.h \
 	config/tc-xc16x.h \
+	config/tc-xgate.h \
 	config/tc-xtensa.h \
 	config/tc-z80.h \
 	config/tc-z8k.h \
@@ -851,6 +854,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-v850.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-vax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-xc16x.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-xgate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-xstormy16.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-xtensa.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-z80.Po@am__quote@
@@ -1747,6 +1751,20 @@ tc-xc16x.obj: config/tc-xc16x.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-xc16x.c' object='tc-xc16x.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-xc16x.obj `if test -f 'config/tc-xc16x.c'; then $(CYGPATH_W) 'config/tc-xc16x.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-xc16x.c'; fi`
+
+tc-xgate.o: config/tc-xgate.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-xgate.o -MD -MP -MF $(DEPDIR)/tc-xgate.Tpo -c -o tc-xgate.o `test -f 'config/tc-xgate.c' || echo '$(srcdir)/'`config/tc-xgate.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-xgate.Tpo $(DEPDIR)/tc-xgate.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-xgate.c' object='tc-xgate.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-xgate.o `test -f 'config/tc-xgate.c' || echo '$(srcdir)/'`config/tc-xgate.c
+
+tc-xgate.obj: config/tc-xgate.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-xgate.obj -MD -MP -MF $(DEPDIR)/tc-xgate.Tpo -c -o tc-xgate.obj `if test -f 'config/tc-xgate.c'; then $(CYGPATH_W) 'config/tc-xgate.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-xgate.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-xgate.Tpo $(DEPDIR)/tc-xgate.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-xgate.c' object='tc-xgate.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-xgate.obj `if test -f 'config/tc-xgate.c'; then $(CYGPATH_W) 'config/tc-xgate.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-xgate.c'; fi`
 
 tc-xtensa.o: config/tc-xtensa.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-xtensa.o -MD -MP -MF $(DEPDIR)/tc-xtensa.Tpo -c -o tc-xtensa.o `test -f 'config/tc-xtensa.c' || echo '$(srcdir)/'`config/tc-xtensa.c

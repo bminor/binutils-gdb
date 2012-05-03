@@ -146,6 +146,7 @@
 #include "elf/vax.h"
 #include "elf/x86-64.h"
 #include "elf/xc16x.h"
+#include "elf/xgate.h"
 #include "elf/xstormy16.h"
 #include "elf/xtensa.h"
 
@@ -547,6 +548,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_OPENRISC:
     case EM_OR32:
     case EM_SCORE:
+    case EM_XGATE:
       return FALSE;
 
       /* Targets that use RELA relocations.  */
@@ -559,7 +561,6 @@ guess_is_rela (unsigned int e_machine)
     case EM_AVR_OLD:
     case EM_BLACKFIN:
     case EM_CR16:
-    case EM_CR16_OLD:
     case EM_CRIS:
     case EM_CRX:
     case EM_D30V:
@@ -1210,7 +1211,6 @@ dump_relocations (FILE * file,
 	  break;
 
 	case EM_CR16:
-	case EM_CR16_OLD:
 	  rtype = elf_cr16_reloc_type (type);
 	  break;
 
@@ -1242,6 +1242,10 @@ dump_relocations (FILE * file,
 
 	case EM_TILEPRO:
 	  rtype = elf_tilepro_reloc_type (type);
+	  break;
+
+	case EM_XGATE:
+	  rtype = elf_xgate_reloc_type (type);
 	  break;
 	}
 
@@ -1869,7 +1873,7 @@ get_machine_name (unsigned e_machine)
     case EM_CYGNUS_M32R:
     case EM_M32R:		return "Renesas M32R (formerly Mitsubishi M32r)";
     case EM_CYGNUS_V850:
-    case EM_V850:		return "Renesas v850";
+    case EM_V850:		return "Renesas V850";
     case EM_CYGNUS_MN10300:
     case EM_MN10300:		return "mn10300";
     case EM_CYGNUS_MN10200:
@@ -1979,8 +1983,7 @@ get_machine_name (unsigned e_machine)
     case EM_CRAYNV2:		return "Cray Inc. NV2 vector architecture";
     case EM_CYGNUS_MEP:         return "Toshiba MeP Media Engine";
     case EM_CR16:
-    case EM_CR16_OLD:		return "National Semiconductor's CR16";
-    case EM_MICROBLAZE:		return "Xilinx MicroBlaze";
+    case EM_MICROBLAZE:
     case EM_MICROBLAZE_OLD:	return "Xilinx MicroBlaze";
     case EM_RL78:		return "Renesas RL78";
     case EM_RX:			return "Renesas RX";
@@ -1995,6 +1998,7 @@ get_machine_name (unsigned e_machine)
     case EM_TILEPRO:		return "Tilera TILEPro multicore architecture family";
     case EM_TILEGX:		return "Tilera TILE-Gx multicore architecture family";
     case EM_CUDA:		return "NVIDIA CUDA architecture";
+    case EM_XGATE:		return "Motorola XGATE embedded processor";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
       return buff;
@@ -9778,7 +9782,6 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_CRIS:
       return reloc_type == 3; /* R_CRIS_32.  */
     case EM_CR16:
-    case EM_CR16_OLD:
       return reloc_type == 3; /* R_CR16_NUM32.  */
     case EM_CRX:
       return reloc_type == 15; /* R_CRX_NUM32.  */
@@ -9890,6 +9893,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_XC16X:
     case EM_C166:
       return reloc_type == 3; /* R_XC16C_ABS_32.  */
+    case EM_XGATE:
+      return reloc_type == 4; /* R_XGATE_32.  */
     case EM_XSTORMY16:
       return reloc_type == 1; /* R_XSTROMY16_32.  */
     case EM_XTENSA_OLD:
@@ -10087,6 +10092,8 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_CYGNUS_MN10300:
     case EM_MN10300:
       return reloc_type == 2; /* R_MN10300_16.  */
+    case EM_XGATE:
+      return reloc_type == 3; /* R_XGATE_16.  */
     default:
       return FALSE;
     }
