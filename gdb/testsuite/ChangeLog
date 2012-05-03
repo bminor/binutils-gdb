@@ -1,3 +1,8 @@
+2012-05-03  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/pr13961.S: Add file and source location, but leave
+	commented out.
+
 2012-05-03  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/catch-syscall.exp: Skip it before compilation if target

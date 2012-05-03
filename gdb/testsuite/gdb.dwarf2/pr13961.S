@@ -45,6 +45,12 @@
 	.type	baz, @object
 	.size	baz, 4
 baz:
+#if 0
+	/* This is disabled because when it was accidentally left out it
+	   caused a segv when used with .gdb_index.  */
+	.file	1 "foo.c"
+	.loc	1 12 0
+#endif
 	.zero	4
 
 	.text
