@@ -1,3 +1,7 @@
+2012-05-03  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-solib.exp: Setup kfail for gdb/13860.
+
 2012-04-30  Doug Evans  <dje@google.com>
 
 	PR testsuite/13961

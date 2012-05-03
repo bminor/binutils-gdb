@@ -59,4 +59,9 @@ mi_gdb_test "777-gdb-set stop-on-solib-events 1" "777\\^done" \
 # We use "run" rather than "-exec-run" here in order to test that CLI
 # commands still cause the correct MI output to be generated.
 mi_run_with_cli
+
+global async
+if { $async } {
+    setup_kfail gdb/13860 *-*-*
+}
 mi_expect_stop solib-event .* .* .* .* .* "check for solib event"
