@@ -1,5 +1,9 @@
 2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (output_insn): Reformat.
+
+2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (output_insn): Remove the extra VEX check.
 
 2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>

@@ -6218,7 +6218,7 @@ output_insn (void)
       unsigned int prefix;
 
       /* Since the VEX prefix contains the implicit prefix, we don't
-	  need the explicit prefix.  */
+	 need the explicit prefix.  */
       if (!i.tm.opcode_modifier.vex)
 	{
 	  switch (i.tm.opcode_length)
