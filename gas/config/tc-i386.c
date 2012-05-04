@@ -4353,8 +4353,9 @@ check_reverse:
 	  err_msg = _("unsupported syntax");
 	  break;
 	case unsupported:
-	  err_msg = _("unsupported");
-	  break;
+	  as_bad (_("unsupported `%s'"),
+		  current_templates->start->name);
+	  return NULL;
 	case invalid_vsib_address:
 	  err_msg = _("invalid VSIB address");
 	  break;

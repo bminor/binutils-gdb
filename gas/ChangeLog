@@ -1,3 +1,8 @@
+2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (match_template): Improve unsupported error
+	message.
+
 2012-05-03  Sean Keys  <skeys@ipdatasys.com>
 
 	* configure, Makefile.in: Regenerate.
