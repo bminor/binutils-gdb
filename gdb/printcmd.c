@@ -1080,6 +1080,12 @@ set_command (char *exp, int from_tty)
   struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);
 
+  if (expr->nelts >= 1
+      && expr->elts[0].opcode != BINOP_ASSIGN
+      && expr->elts[0].opcode != BINOP_ASSIGN_MODIFY
+      && expr->elts[0].opcode != BINOP_COMMA)
+    warning (_("Expression is not an assignment (and might have no effect)"));
+
   evaluate_expression (expr);
   do_cleanups (old_chain);
 }

@@ -1,3 +1,8 @@
+2012-05-04  Tristan Gingold  <gingold@adacore.com>
+
+	* printcmd.c (set_command): Emit a warning if the expression is not
+	an assignment.
+
 2012-05-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* nto-procfs.c (procfs_find_new_threads, procfs_pid_to_str):

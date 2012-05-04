@@ -1,3 +1,7 @@
+2012-05-04  Tristan Gingold  <gingold@adacore.com>
+
+	* gdb.base/set-noassign.exp: New test.
+
 2012-05-03  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.python/py-symbol.exp: Add tests to test the new methods
