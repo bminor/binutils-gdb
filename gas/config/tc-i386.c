@@ -6257,8 +6257,7 @@ check_prefix:
 	    if (*q)
 	      FRAG_APPEND_1_CHAR (*q);
 	}
-
-      if (i.tm.opcode_modifier.vex)
+      else
 	{
 	  for (j = 0, q = i.prefix; j < ARRAY_SIZE (i.prefix); j++, q++)
 	    if (*q)
