@@ -1,3 +1,15 @@
+2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/eh1.d: Skip x86_64-*-linux-gnux32.
+	* ld-elf/eh2.d: Likewise.
+	* ld-elf/eh3.d: Likewise.
+	* ld-elf/eh4.d: Likewise.
+
+	* ld-elfvsb/elfvsb.exp: Xfail x86_64-*-linux-gnux32.
+	* ld-shared/shared.exp: Likewise.
+
+	* ld-ifunc/ifunc-3a-x86.d: Support x86_64-*-linux-gnux32.
+
 2012-04-24  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-x86-64/plt-nacl.pd: Fix expected nop padding.

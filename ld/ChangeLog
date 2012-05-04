@@ -1,3 +1,7 @@
+2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt: Support x86_64-*-linux-gnux32.
+
 2012-05-03  Sean Keys  <skeys@ipdatasys.com>
 
 	* Makefile.am (ALL_EMULATIONS): Added new emulation for XGATE

@@ -240,6 +240,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	if { [is_elf64 $tmpdir/mainnp.o] } {
 	    setup_xfail "x86_64-*-linux*"
 	}
+	setup_xfail "x86_64-*-linux-gnux32"
 	setup_xfail "s390x-*-linux*"
 	if [ string match $shared_needs_pic "yes" ] {
 	    setup_xfail "arm*-*-linux*"
@@ -265,6 +266,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	if { [is_elf64 $tmpdir/mainnp.o] } {
 	    setup_xfail "x86_64-*-linux*"
 	}
+	setup_xfail "x86_64-*-linux-gnux32"
 	setup_xfail "s390x-*-linux*"
 	if [ string match $shared_needs_pic "yes" ] {
 	    setup_xfail "arm*-*-linux*"
@@ -320,6 +322,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/m
 	    if { [is_elf64 $tmpdir/mainp.o] } {
 		setup_xfail "x86_64-*-linux*"
 	    }
+	    setup_xfail "x86_64-*-linux-gnux32"
 	    setup_xfail "s390x-*-linux*"
 	    if [ string match $shared_needs_pic "yes" ] {
 		setup_xfail "arm*-*-linux*"

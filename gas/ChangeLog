@@ -1,5 +1,9 @@
 2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* configure.tgt: Support x86_64-*-linux-gnux32.
+
+2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (match_template): Add `instruction' to
 	unsupported error message.
 

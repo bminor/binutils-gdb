@@ -308,6 +308,7 @@ proc visibility_run {visibility} {
 	    if { [is_elf64 $tmpdir/mainnp.o] } {
 		setup_xfail "x86_64-*-linux*"
 	    }
+	    setup_xfail "x86_64-*-linux-gnux32"
 	    if { ![istarget hppa*64*-*-linux*] } {
 		setup_xfail "hppa*-*-linux*"
 	    }
@@ -351,6 +352,7 @@ proc visibility_run {visibility} {
 	    if { [is_elf64 $tmpdir/mainnp.o] } {
 		setup_xfail "x86_64-*-linux*"
 	    }
+	    setup_xfail "x86_64-*-linux-gnux32"
 	    if { ![istarget hppa*64*-*-linux*] } {
 		setup_xfail "hppa*-*-linux*"
 	    }
@@ -425,6 +427,7 @@ proc visibility_run {visibility} {
 		if { [is_elf64 $tmpdir/mainp.o] } {
 		    setup_xfail "x86_64-*-linux*"
 		}
+		setup_xfail "x86_64-*-linux-gnux32"
 		if { ![istarget hppa*64*-*-linux*] } {
 		    setup_xfail "hppa*-*-linux*"
 		}
