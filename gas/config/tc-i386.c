@@ -4353,7 +4353,7 @@ check_reverse:
 	  err_msg = _("unsupported syntax");
 	  break;
 	case unsupported:
-	  as_bad (_("unsupported `%s'"),
+	  as_bad (_("unsupported instruction `%s'"),
 		  current_templates->start->name);
 	  return NULL;
 	case invalid_vsib_address:

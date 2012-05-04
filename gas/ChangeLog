@@ -1,5 +1,10 @@
 2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (match_template): Add `instruction' to
+	unsupported error message.
+
+2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (output_insn): Reformat.
 
 2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
