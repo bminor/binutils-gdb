@@ -1,3 +1,18 @@
+2012-05-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.h (segment_register_p_ftype): New typedef.
+	(windows_set_segment_register_p): Add declaration.
+	* windows-nat.c (segment_register_p): New static global.
+	(windows_set_segment_register_p): New function.
+	(do_windows_fetch_inferior_registers): Add special handling
+	for segment registers.
+	* amd64-windows-nat.c: #include "amd64-tdep.h".
+	(amd64_windows_segment_register_p): New function.
+	(_initialize_amd64_windows_nat): Call windows_set_segment_register_p.
+	* i386-windows-nat.c: #include "i386-tdep.h".
+	(i386_windows_segment_register_p): New function.
+	(_initialize_i386_windows_nat): Call windows_set_segment_register_p.
+
 2012-05-04  Tristan Gingold  <gingold@adacore.com>
 
 	* printcmd.c (set_command): Emit a warning if the expression is not

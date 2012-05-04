@@ -243,6 +243,10 @@ static int useshell = 0;		/* use shell for subprocesses */
 
 static const int *mappings;
 
+/* The function to use in order to determine whether a register is
+   a segment register or not.  */
+static segment_register_p_ftype *segment_register_p;
+
 /* This vector maps the target's idea of an exception (extracted
    from the DEBUG_EVENT structure) to GDB's idea.  */
 
@@ -270,6 +274,14 @@ void
 windows_set_context_register_offsets (const int *offsets)
 {
   mappings = offsets;
+}
+
+/* See windows-nat.h.  */
+
+void
+windows_set_segment_register_p (segment_register_p_ftype *fun)
+{
+  segment_register_p = fun;
 }
 
 static void
@@ -454,6 +466,14 @@ do_windows_fetch_inferior_registers (struct regcache *regcache, int r)
   else if (r == I387_FOP_REGNUM (tdep))
     {
       l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
+      regcache_raw_supply (regcache, r, (char *) &l);
+    }
+  else if (segment_register_p (r))
+    {
+      /* GDB treats segment registers as 32bit registers, but they are
+	 in fact only 16 bits long.  Make sure we do not read extra
+	 bits from our source buffer.  */
+      l = *((long *) context_offset) & 0xffff;
       regcache_raw_supply (regcache, r, (char *) &l);
     }
   else if (r >= 0)

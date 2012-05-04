@@ -20,5 +20,13 @@
 
 extern void windows_set_context_register_offsets (const int *offsets);
 
+/* A pointer to a function that should return non-zero iff REGNUM
+   corresponds to one of the segment registers.  */
+typedef int (segment_register_p_ftype) (int regnum);
+
+/* Set the function that should be used by this module to determine
+   whether a given register is a segment register or not.  */
+extern void windows_set_segment_register_p (segment_register_p_ftype *fun);
+
 #endif
 

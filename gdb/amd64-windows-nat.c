@@ -18,6 +18,8 @@
 #include "defs.h"
 #include "windows-nat.h"
 #include "i386-nat.h"
+#include "amd64-tdep.h"
+
 #include <windows.h>
 
 #define context_offset(x) (offsetof (CONTEXT, x))
@@ -85,6 +87,14 @@ static const int mappings[] =
 };
 #undef context_offset
 
+/* segment_register_p_ftype implementation for amd64.  */
+
+static int
+amd64_windows_segment_register_p (int regnum)
+{
+  return regnum >= AMD64_CS_REGNUM && regnum <= AMD64_GS_REGNUM;
+}
+
 /* -Wmissing-prototypes */
 extern initialize_file_ftype _initialize_amd64_windows_nat;
 
@@ -92,5 +102,6 @@ void
 _initialize_amd64_windows_nat (void)
 {
   windows_set_context_register_offsets (mappings);
+  windows_set_segment_register_p (amd64_windows_segment_register_p);
   i386_set_debug_register_length (8);
 }
