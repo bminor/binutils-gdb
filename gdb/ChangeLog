@@ -1,5 +1,9 @@
 2012-05-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* MAINTAINER (Past Maintainers): Add Chris Faylor.
+
+2012-05-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* windows-nat.h (segment_register_p_ftype): New typedef.
 	(windows_set_segment_register_p): Add declaration.
 	* windows-nat.c (segment_register_p): New static global.
