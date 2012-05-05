@@ -1,3 +1,10 @@
+2012-05-05  Alan Modra  <amodra@gmail.com>
+
+	* elfread.c (elf_symtab_read): Use bfd_abs_section_ptr and
+	bfd_und_section_ptr.
+	* machoread.c (macho_symtab_add_minsym): Use bfd_abs_section_ptr
+	and bfd_com_section_ptr.
+
 2012-05-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS (Past Maintainers): Add Chris Faylor.

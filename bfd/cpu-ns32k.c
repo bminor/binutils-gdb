@@ -1,6 +1,6 @@
 /* BFD support for the ns32k architecture.
    Copyright 1990, 1991, 1994, 1995, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2007, 2012 Free Software Foundation, Inc.
    Almost totally rewritten by Ian Dall from initial work
    by Andrew Cagney.
 
@@ -177,7 +177,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   asection *reloc_target_output_section;
   bfd_byte *location;
 
-  if ((symbol->section == &bfd_abs_section)
+  if (bfd_is_abs_section (symbol->section)
       && output_bfd != (bfd *) NULL)
     {
       reloc_entry->address += input_section->output_offset;
@@ -187,7 +187,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
   /* If we are not producing relocatable output, return an error if
      the symbol is not defined.  An undefined weak symbol is
      considered to have a value of zero (SVR4 ABI, p. 4-27).  */
-  if (symbol->section == &bfd_und_section
+  if (bfd_is_und_section (symbol->section)
       && (symbol->flags & BSF_WEAK) == 0
       && output_bfd == (bfd *) NULL)
     flag = bfd_reloc_undefined;

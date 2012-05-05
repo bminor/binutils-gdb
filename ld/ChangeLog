@@ -1,3 +1,8 @@
+2012-05-05  Alan Modra  <amodra@gmail.com>
+
+	* pe-dll.c (process_def_file_and_drectve): Use bfd_und_section_ptr.
+	(generate_reloc): Use bfd_abs_section_ptr.
+
 2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt: Support x86_64-*-linux-gnux32.

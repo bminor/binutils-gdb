@@ -1,6 +1,6 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
@@ -17009,8 +17009,8 @@ pic_need_relax (symbolS *sym, asection *segtype)
   symsec = S_GET_SEGMENT (sym);
 
   /* This must duplicate the test in adjust_reloc_syms.  */
-  return (symsec != &bfd_und_section
-	  && symsec != &bfd_abs_section
+  return (!bfd_is_und_section (symsec)
+	  && !bfd_is_abs_section (symsec)
 	  && !bfd_is_com_section (symsec)
 	  && !s_is_linkonce (sym, segtype)
 #ifdef OBJ_ELF

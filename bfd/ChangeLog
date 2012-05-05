@@ -1,3 +1,27 @@
+2012-05-05  Alan Modra  <amodra@gmail.com>
+
+	* aout-arm.c: Replace all uses of bfd_abs_section, bfd_com_section,
+	bfd_und_section and bfd_ind_section with their _ptr variants, or
+	use corresponding bfd_is_* macros.
+	* aout-ns32k.c: Likewise.
+	* aout-tic30.c: Likewise.
+	* coff-arm.c: Likewise.
+	* coff-tic54x.c: Likewise.
+	* cpu-ns32k.c: Likewise.
+	* elf-attrs.c: Likewise.
+	* elfcode.h: Likewise.
+	* peicode.h: Likewise.
+	* reloc.c: Likewise.
+	* riscix.c: Likewise.
+	* versados.c: Likewise.
+	* section.c: Likewise.
+	(bfd_abs_section, bfd_ind_section, bfd_com_section,
+	bfd_ind_section): Delete.
+	(std_section): New array replacing above.
+	(bfd_abs_section_ptr, bfd_ind_section_ptr, bfd_com_section_ptr,
+	bfd_ind_section_ptr, STD_SECTION): Update.
+	(BFD_FAKE_SECTION, GLOBAL_SYM_INIT): Remove unnecessary casts.
+
 2012-05-03  Sean Keys  <skeys@ipdatasys.com>
 
 	* cpu-xgate.c: New file. Added XGATE support.

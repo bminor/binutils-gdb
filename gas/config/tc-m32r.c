@@ -1,6 +1,6 @@
 /* tc-m32r.c -- Assembler for the Renesas M32R.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2009 Free Software Foundation, Inc.
+   2006, 2007, 2009, 2011, 2012 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -723,12 +723,12 @@ md_begin (void)
 
   /* We must construct a fake section similar to bfd_com_section
      but with the name .scommon.  */
-  scom_section                = bfd_com_section;
+  scom_section                = *bfd_com_section_ptr;
   scom_section.name           = ".scommon";
   scom_section.output_section = & scom_section;
   scom_section.symbol         = & scom_symbol;
   scom_section.symbol_ptr_ptr = & scom_section.symbol;
-  scom_symbol                 = * bfd_com_section.symbol;
+  scom_symbol                 = * bfd_com_section_ptr->symbol;
   scom_symbol.name            = ".scommon";
   scom_symbol.section         = & scom_section;
 

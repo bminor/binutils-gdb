@@ -720,9 +720,10 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	      /* We should export symbols which are either global or not
 		 anything at all.  (.bss data is the latter)
 		 We should not export undefined symbols.  */
-	      bfd_boolean would_export = symbols[j]->section != &bfd_und_section
-		      && ((symbols[j]->flags & BSF_GLOBAL)
-			  || (symbols[j]->flags == 0));
+	      bfd_boolean would_export
+		= (symbols[j]->section != bfd_und_section_ptr
+		   && ((symbols[j]->flags & BSF_GLOBAL)
+		       || (symbols[j]->flags == 0)));
 	      if (link_info.version_info && would_export)
 		  would_export
 		    = !bfd_hide_sym_by_version (link_info.version_info,
@@ -1351,7 +1352,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
 	  /* I don't know why there would be a reloc for these, but I've
 	     seen it happen - DJ  */
-	  if (s->output_section == &bfd_abs_section)
+	  if (s->output_section == bfd_abs_section_ptr)
 	    continue;
 
 	  if (s->output_section->vma == 0)
@@ -1408,7 +1409,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 			     no reason we'd want a reference to any absolute
 			     address to get relocated during rebasing).  */
 			  if (!h2 || h2->root.type == bfd_link_hash_undefined
-				|| h2->root.u.def.section == &bfd_abs_section)
+				|| h2->root.u.def.section == bfd_abs_section_ptr)
 			    continue;
 			}
 		      else if (!blhe || blhe->type != bfd_link_hash_defined)
@@ -1767,7 +1768,7 @@ static int tmp_seq2;
 static const char *dll_filename;
 static char *dll_symname;
 
-#define UNDSEC (asection *) &bfd_und_section
+#define UNDSEC bfd_und_section_ptr
 
 static asection *
 quick_section (bfd *abfd, const char *name, int flags, int align)

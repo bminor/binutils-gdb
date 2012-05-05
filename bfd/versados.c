@@ -1,6 +1,6 @@
 /* BFD back-end for VERSAdos-E objects.
    Copyright 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2009, 2010, 2011 Free Software Foundation, Inc.
+   2006, 2007, 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
    Versados is a Motorola trademark.
@@ -287,7 +287,7 @@ process_esd (bfd *abfd, struct ext_esd *esd, int pass)
 	  sec->flags |= SEC_ALLOC;
 	  break;
 	case ESD_XDEF_IN_ABS:
-	  sec = (asection *) & bfd_abs_section;
+	  sec = bfd_abs_section_ptr;
 	case ESD_XDEF_IN_SEC:
 	  {
 	    int snum = VDATA (abfd)->def_idx++;
@@ -768,7 +768,7 @@ versados_canonicalize_reloc (bfd *abfd,
 	  int esdid = (int) (size_t) src[count].sym_ptr_ptr;
 
 	  if (esdid == 0)
-	    src[count].sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+	    src[count].sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	  else if (esdid < ES_BASE)
 	    {
 	      /* Section relative thing.  */

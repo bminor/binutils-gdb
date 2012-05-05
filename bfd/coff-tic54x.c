@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C54X coff binaries.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2011
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2011, 2012
    Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
@@ -111,12 +111,12 @@ bfd_ticoff_get_section_load_page (sect)
   int page;
 
   /* Provide meaningful defaults for predefined sections.  */
-  if (sect == &bfd_com_section)
+  if (sect == bfd_com_section_ptr)
     page = PG_DATA;
 
-  else if (sect == &bfd_und_section
-      || sect == &bfd_abs_section
-      || sect == &bfd_ind_section)
+  else if (bfd_is_und_section (sect)
+	   || bfd_is_abs_section (sect)
+	   || bfd_is_ind_section (sect))
     page = PG_PROG;
 
   else

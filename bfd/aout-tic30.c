@@ -1,6 +1,6 @@
 /* BFD back-end for TMS320C30 a.out binaries.
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2009,
-   2010, 2011
+   2010, 2011, 2012
    Free Software Foundation, Inc.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
@@ -189,7 +189,7 @@ tic30_aout_fix_16 (bfd *abfd,
   bfd_vma relocation;
 
   /* Make sure that the symbol's section is defined.  */
-  if (symbol->section == &bfd_und_section && (symbol->flags & BSF_WEAK) == 0)
+  if (bfd_is_und_section (symbol->section) && (symbol->flags & BSF_WEAK) == 0)
     return output_bfd ? bfd_reloc_ok : bfd_reloc_undefined;
   /* Get the size of the input section and turn it into the TMS320C30
      32-bit address format.  */
@@ -214,7 +214,7 @@ tic30_aout_fix_32 (bfd *abfd,
   bfd_vma relocation;
 
   /* Make sure that the symbol's section is defined.  */
-  if (symbol->section == &bfd_und_section && (symbol->flags & BSF_WEAK) == 0)
+  if (bfd_is_und_section (symbol->section) && (symbol->flags & BSF_WEAK) == 0)
     return output_bfd ? bfd_reloc_ok : bfd_reloc_undefined;
   /* Get the size of the input section and turn it into the TMS320C30
      32-bit address format.  */

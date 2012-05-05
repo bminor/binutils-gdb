@@ -1,7 +1,7 @@
 /* symbols.c -symbol table-
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
    1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
-   2011 Free Software Foundation, Inc.
+   2011, 2012 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -2778,7 +2778,7 @@ symbol_begin (void)
 
   memset ((char *) (&abs_symbol), '\0', sizeof (abs_symbol));
 #if defined (EMIT_SECTION_SYMBOLS) || !defined (RELOC_REQUIRES_SYMBOL)
-  abs_symbol.bsym = bfd_abs_section.symbol;
+  abs_symbol.bsym = bfd_abs_section_ptr->symbol;
 #endif
   abs_symbol.sy_value.X_op = O_constant;
   abs_symbol.sy_frag = &zero_address_frag;

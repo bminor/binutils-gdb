@@ -1,5 +1,5 @@
 /* tc-score.c -- Assembler for Score
-   Copyright 2006, 2007, 2008, 2009, 2011 Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2008, 2009, 2011, 2012 Free Software Foundation, Inc.
    Contributed by:
    Brain.lin (brain.lin@sunplusct.com)
    Mei Ligang (ligang@sunnorth.com.cn)
@@ -5316,9 +5316,9 @@ s3_pic_need_relax (symbolS *sym, asection *segtype)
     }
 
   /* This must duplicate the test in adjust_reloc_syms.  */
-  return (symsec != &bfd_und_section
-	  && symsec != &bfd_abs_section
-	  && ! bfd_is_com_section (symsec)
+  return (!bfd_is_und_section (symsec)
+	  && !bfd_is_abs_section (symsec)
+	  && !bfd_is_com_section (symsec)
 	  && !linkonce
 #ifdef OBJ_ELF
 	  /* A global or weak symbol is treated as external.  */

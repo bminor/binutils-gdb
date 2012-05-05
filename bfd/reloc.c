@@ -6448,7 +6448,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	      p = data + (*parent)->address * bfd_octets_per_byte (input_bfd);
 	      _bfd_clear_contents ((*parent)->howto, input_bfd, input_section,
 				   p);
-	      (*parent)->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
+	      (*parent)->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
 	      (*parent)->addend = 0;
 	      (*parent)->howto = &none_howto;
 	      r = bfd_reloc_ok;

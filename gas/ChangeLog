@@ -1,3 +1,21 @@
+2012-05-05  Alan Modra  <amodra@gmail.com>
+
+	* ecoff.c: Replace all uses of bfd_abs_section, bfd_com_section,
+	bfd_und_section and bfd_ind_section with their _ptr variants, or
+	use corresponding bfd_is_* macros.
+	* symbols.c: Likewise.
+	* config/obj-aout.c: Likewise.
+	* config/obj-coff-seh.h: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-hppa.h: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-microblaze.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-score.c: Likewise.
+	* config/tc-score7.c: Likewise.
+	* config/tc-tic6x.c: Likewise.
+
 2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt: Support x86_64-*-linux-gnux32.

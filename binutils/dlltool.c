@@ -2530,7 +2530,7 @@ make_one_lib_file (export_type *exp, int i, int delay)
   iname_lab = bfd_make_empty_symbol (abfd);
 
   iname_lab->name = head_label;
-  iname_lab->section = (asection *) &bfd_und_section;
+  iname_lab->section = bfd_und_section_ptr;
   iname_lab->flags = 0;
   iname_lab->value = 0;
 
@@ -2563,7 +2563,7 @@ make_one_lib_file (export_type *exp, int i, int delay)
 
     toc_symbol = bfd_make_empty_symbol (abfd);
     toc_symbol->name = make_label (".", "toc");
-    toc_symbol->section = (asection *)&bfd_und_section;
+    toc_symbol->section = bfd_und_section_ptr;
     toc_symbol->flags = BSF_GLOBAL;
     toc_symbol->value = 0;
 
