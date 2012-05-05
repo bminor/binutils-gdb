@@ -1,3 +1,7 @@
+2012-05-05  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* stap-probe.h: Do not include unecessary `probe.h'.
+
 2012-05-05  Alan Modra  <amodra@gmail.com>
 
 	* elfread.c (elf_symtab_read): Use bfd_abs_section_ptr and
