@@ -3198,11 +3198,6 @@ _bfd_nearby_section (bfd *obfd, asection *s, bfd_vma addr)
 	best = prev;
     }
 
-  /* Refuse to choose a section for which we are out of bounds.  */
-  /* ??? This may make most of the above moot.  */
-  if (addr < best->vma || addr > best->vma + best->size)
-    best = bfd_abs_section_ptr;
-
   return best;
 }
 

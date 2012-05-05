@@ -1,3 +1,10 @@
+2012-05-05  Alan Modra  <amodra@gmail.com>
+
+	PR ld/14052
+	PR ld/13621
+	* ld-elf/warn2.d: Revert 2012-02-13 change.
+	* ld-elf/zerosize1.d, ld-elf/zerosize1.s: Delete.
+
 2012-05-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/eh1.d: Skip x86_64-*-linux-gnux32.

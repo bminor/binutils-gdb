@@ -13,5 +13,5 @@
 # construct and that the symbol still appears as expected.
 
 #...
- +[0-9]+: +[0-9a-f]+ +20 +OBJECT +GLOBAL +DEFAULT +ABS Foo
+ +[0-9]+: +[0-9a-f]+ +20 +OBJECT +GLOBAL +DEFAULT +[1-9] Foo
 #pass

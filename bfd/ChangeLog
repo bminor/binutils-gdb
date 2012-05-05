@@ -1,5 +1,11 @@
 2012-05-05  Alan Modra  <amodra@gmail.com>
 
+	PR ld/14052
+	PR ld/13621
+	* linker.c (_bfd_nearby_section): Revert 2012-02-13 change.
+
+2012-05-05  Alan Modra  <amodra@gmail.com>
+
 	* aout-arm.c: Replace all uses of bfd_abs_section, bfd_com_section,
 	bfd_und_section and bfd_ind_section with their _ptr variants, or
 	use corresponding bfd_is_* macros.
