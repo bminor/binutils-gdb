@@ -21,6 +21,7 @@
 	(bfd_abs_section_ptr, bfd_ind_section_ptr, bfd_com_section_ptr,
 	bfd_ind_section_ptr, STD_SECTION): Update.
 	(BFD_FAKE_SECTION, GLOBAL_SYM_INIT): Remove unnecessary casts.
+	* bfd-in2.h: Regenerate.
 
 2012-05-03  Sean Keys  <skeys@ipdatasys.com>
 

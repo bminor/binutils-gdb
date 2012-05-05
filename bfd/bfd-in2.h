@@ -1542,28 +1542,25 @@ struct relax_table {
 
 /* These sections are global, and are managed by BFD.  The application
    and target back end are not permitted to change the values in
-   these sections.  New code should use the section_ptr macros rather
-   than referring directly to the const sections.  The const sections
-   may eventually vanish.  */
+   these sections.  */
+extern asection std_section[4];
+
 #define BFD_ABS_SECTION_NAME "*ABS*"
 #define BFD_UND_SECTION_NAME "*UND*"
 #define BFD_COM_SECTION_NAME "*COM*"
 #define BFD_IND_SECTION_NAME "*IND*"
 
-/* The absolute section.  */
-extern asection bfd_abs_section;
-#define bfd_abs_section_ptr ((asection *) &bfd_abs_section)
-#define bfd_is_abs_section(sec) ((sec) == bfd_abs_section_ptr)
-/* Pointer to the undefined section.  */
-extern asection bfd_und_section;
-#define bfd_und_section_ptr ((asection *) &bfd_und_section)
-#define bfd_is_und_section(sec) ((sec) == bfd_und_section_ptr)
 /* Pointer to the common section.  */
-extern asection bfd_com_section;
-#define bfd_com_section_ptr ((asection *) &bfd_com_section)
+#define bfd_com_section_ptr (&std_section[0])
+/* Pointer to the undefined section.  */
+#define bfd_und_section_ptr (&std_section[1])
+/* Pointer to the absolute section.  */
+#define bfd_abs_section_ptr (&std_section[2])
 /* Pointer to the indirect section.  */
-extern asection bfd_ind_section;
-#define bfd_ind_section_ptr ((asection *) &bfd_ind_section)
+#define bfd_ind_section_ptr (&std_section[3])
+
+#define bfd_is_und_section(sec) ((sec) == bfd_und_section_ptr)
+#define bfd_is_abs_section(sec) ((sec) == bfd_abs_section_ptr)
 #define bfd_is_ind_section(sec) ((sec) == bfd_ind_section_ptr)
 
 #define bfd_is_const_section(SEC)              \
@@ -1678,8 +1675,8 @@ extern asection bfd_ind_section;
   /* vma, lma, size, rawsize, compressed_size, relax, relax_count, */  \
      0,   0,   0,    0,       0,               0,     0,               \
                                                                        \
-  /* output_offset, output_section,              alignment_power,  */  \
-     0,             (struct bfd_section *) &SEC, 0,                    \
+  /* output_offset, output_section, alignment_power,               */  \
+     0,             &SEC,           0,                                 \
                                                                        \
   /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */  \
      NULL,       NULL,        0,           0,       0,                 \
