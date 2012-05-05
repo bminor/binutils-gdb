@@ -1,3 +1,9 @@
+2012-05-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14052
+	* ld-elf/pr14052.d: New file.
+	* ld-elf/pr14052.t: Likewise.
+
 2012-05-05  Alan Modra  <amodra@gmail.com>
 
 	PR ld/14052
