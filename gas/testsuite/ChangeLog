@@ -1,3 +1,11 @@
+2012-05-06  Arnold Metselaar  <arnold_m@operamail.com>
+
+	* gas/z80/jr-forwf.s: New file, adapted from z8k version.
+	* gas/z80/jr-backf.s: Likewise.
+	* gas/z80/djnz-backf.s: Likewise.
+	* gas/z80/ill_op: New file, with illegal operand.
+	* gas/z80/z80.exp: Run new tests.
+
 2012-05-03  Sean Keys  <skeys@ipdatasys.com>
 
 	* gas/all/gas.exp: Added xgate tex entry.
