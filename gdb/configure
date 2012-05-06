@@ -4964,7 +4964,7 @@ $as_echo_n "checking for default auto-load safe-path... " >&6; }
 # Check whether --with-auto-load-safe-path was given.
 if test "${with_auto_load_safe_path+set}" = set; then :
   withval=$with_auto_load_safe_path; if test "$with_auto_load_safe_path" = "no"; then
-   with_auto_load_safe_path=""
+   with_auto_load_safe_path="/"
  fi
 else
   with_auto_load_safe_path="$prefix"

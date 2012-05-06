@@ -21219,9 +21219,12 @@ The list of trusted directories is controlled by the following commands:
 @table @code
 @anchor{set auto-load safe-path}
 @kindex set auto-load safe-path
-@item set auto-load safe-path @var{directories}
+@item set auto-load safe-path @r{[}@var{directories}@r{]}
 Set the list of directories (and their subdirectories) trusted for automatic
 loading and execution of scripts.  You can also enter a specific trusted file.
+If you omit @var{directories}, @samp{auto-load safe-path} will be reset to
+its default value as specified during @value{GDBN} compilation.
+
 The list of directories uses directory separator (@samp{:} on GNU and Unix
 systems, @samp{;} on MS-Windows and MS-DOS) to separate directories, similarly
 to the @env{PATH} environment variable.
@@ -21240,7 +21243,7 @@ loading and execution of scripts.  Multiple entries may be delimited by the
 host platform directory separator in use.
 @end table
 
-Setting this variable to an empty string disables this security protection.
+Setting this variable to @file{/} disables this security protection.
 This variable is supposed to be set to the system directories writable by the
 system superuser only.  Users can add their source directories in init files in
 their home directories (@pxref{Home Directory Init File}).  See also deprecated
@@ -21260,7 +21263,7 @@ by @samp{show auto-load safe-path} (such as @samp{/usr:/bin} in this example).
 Specify this directory as in the previous case but just for a single
 @value{GDBN} session.
 
-@item @kbd{gdb -iex "set auto-load safe-path" @dots{}}
+@item @kbd{gdb -iex "set auto-load safe-path /" @dots{}}
 Disable auto-loading safety for a single @value{GDBN} session.
 This assumes all the files you debug during this @value{GDBN} session will come
 from trusted sources.

@@ -1,3 +1,9 @@
+2012-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Auto-loading safe path): Make 'directories'
+	for 'set auto-load safe-path' optional.  Mention if it is omitted.
+	Change disabling security protection condition to "/", twice.
+
 2012-05-03  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.texinfo (Symbol Tables In Python): Add documentation about

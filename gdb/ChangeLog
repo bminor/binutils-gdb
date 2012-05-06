@@ -1,3 +1,14 @@
+2012-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* auto-load.c (set_auto_load_safe_path): Reset AUTO_LOAD_SAFE_PATH
+	back to DEFAULT_AUTO_LOAD_SAFE_PATH if it is being set to "".
+	(show_auto_load_safe_path): Check any-directory by comparison with "/".
+	(add_auto_load_safe_path): Change the error message.
+	(_initialize_auto_load): Change the "safe-path" help text.
+	* configure: Regenerate
+	* configure.ac (--without-auto-load-safe-path): Set
+	WITH_AUTO_LOAD_SAFE_PATH to /.
+
 2012-05-05  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* stap-probe.h: Do not include unecessary `probe.h'.

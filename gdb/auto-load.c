@@ -181,6 +181,12 @@ auto_load_safe_path_vec_update (void)
 static void
 set_auto_load_safe_path (char *args, int from_tty, struct cmd_list_element *c)
 {
+  if (auto_load_safe_path[0] == '\0')
+    {
+      xfree (auto_load_safe_path);
+      auto_load_safe_path = xstrdup (DEFAULT_AUTO_LOAD_SAFE_PATH);
+    }
+
   auto_load_safe_path_vec_update ();
 }
 
@@ -190,7 +196,7 @@ static void
 show_auto_load_safe_path (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  if (*value == 0)
+  if (strcmp (value, "/") == 0)
     fprintf_filtered (file, _("Auto-load files are safe to load from any "
 			      "directory.\n"));
   else
@@ -209,8 +215,9 @@ add_auto_load_safe_path (char *args, int from_tty)
 
   if (args == NULL || *args == 0)
     error (_("\
-Adding empty directory element disables the auto-load safe-path security.  \
-Use 'set auto-load safe-path' instead if you mean that."));
+Directory argument required.\n\
+Use 'set auto-load safe-path /' for disabling the auto-load safe-path security.\
+"));
 
   s = xstrprintf ("%s%c%s", auto_load_safe_path, DIRNAME_SEPARATOR, args);
   xfree (auto_load_safe_path);
@@ -1029,8 +1036,10 @@ Set the list of directories from which it is safe to auto-load files."), _("\
 Show the list of directories from which it is safe to auto-load files."), _("\
 Various files loaded automatically for the 'set auto-load ...' options must\n\
 be located in one of the directories listed by this option.  Warning will be\n\
-printed and file will not be used otherwise.  Use empty string (or even\n\
-empty directory entry) to allow any file for the 'set auto-load ...' options.\n\
+printed and file will not be used otherwise.\n\
+Setting this parameter to an empty list resets it to its default value.\n\
+Setting this parameter to '/' (without the quotes) allows any file\n\
+for the 'set auto-load ...' options.\n\
 This option is ignored for the kinds of files having 'set auto-load ... off'.\n\
 This options has security implications for untrusted inferiors."),
 				     set_auto_load_safe_path,
