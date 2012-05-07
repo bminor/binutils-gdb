@@ -1,3 +1,9 @@
+2012-05-07  Mark Kettenis  <kettenis@gnu.org>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-tdep.c (amd64_analyze_prologue): Additionally check for
+	`movl %esp, %ebp' for the X32 ABI.
+
 2012-05-07  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf_tag_name): Return const char *.  Use

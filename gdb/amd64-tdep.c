@@ -1867,8 +1867,14 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
       pushq %rbp        0x55
       movq %rsp, %rbp   0x48 0x89 0xe5 (or 0x48 0x8b 0xec)
 
-   Any function that doesn't start with this sequence will be assumed
-   to have no prologue and thus no valid frame pointer in %rbp.  */
+   or (for the X32 ABI):
+
+      pushq %rbp        0x55
+      movl %esp, %ebp   0x89 0xe5 (or 0x8b 0xec)
+
+   Any function that doesn't start with one of these sequences will be
+   assumed to have no prologue and thus no valid frame pointer in
+   %rbp.  */
 
 static CORE_ADDR
 amd64_analyze_prologue (struct gdbarch *gdbarch,
@@ -1879,6 +1885,10 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
   /* There are two variations of movq %rsp, %rbp.  */
   static const gdb_byte mov_rsp_rbp_1[3] = { 0x48, 0x89, 0xe5 };
   static const gdb_byte mov_rsp_rbp_2[3] = { 0x48, 0x8b, 0xec };
+  /* Ditto for movl %esp, %ebp.  */
+  static const gdb_byte mov_esp_ebp_1[2] = { 0x89, 0xe5 };
+  static const gdb_byte mov_esp_ebp_2[2] = { 0x8b, 0xec };
+
   gdb_byte buf[3];
   gdb_byte op;
 
@@ -1900,15 +1910,30 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
       if (current_pc <= pc + 1)
         return current_pc;
 
-      /* Check for `movq %rsp, %rbp'.  */
       read_memory (pc + 1, buf, 3);
-      if (memcmp (buf, mov_rsp_rbp_1, 3) != 0
-	  && memcmp (buf, mov_rsp_rbp_2, 3) != 0)
-	return pc + 1;
 
-      /* OK, we actually have a frame.  */
-      cache->frameless_p = 0;
-      return pc + 4;
+      /* Check for `movq %rsp, %rbp'.  */
+      if (memcmp (buf, mov_rsp_rbp_1, 3) == 0
+	  || memcmp (buf, mov_rsp_rbp_2, 3) == 0)
+	{
+	  /* OK, we actually have a frame.  */
+	  cache->frameless_p = 0;
+	  return pc + 4;
+	}
+
+      /* For X32, also check for `movq %esp, %ebp'.  */
+      if (gdbarch_ptr_bit (gdbarch) == 32)
+	{
+	  if (memcmp (buf, mov_esp_ebp_1, 2) == 0
+	      || memcmp (buf, mov_esp_ebp_2, 2) == 0)
+	    {
+	      /* OK, we actually have a frame.  */
+	      cache->frameless_p = 0;
+	      return pc + 3;
+	    }
+	}
+
+      return pc + 1;
     }
 
   return pc;
