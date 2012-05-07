@@ -1,3 +1,8 @@
+2012-05-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Declare and use
+	local variable i_ instead of assuming and using a variable i.
+
 2012-05-07  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Handle compound

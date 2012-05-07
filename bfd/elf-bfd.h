@@ -2411,6 +2411,7 @@ extern asection _bfd_elf_large_com_section;
 					rel, count, relend,		\
 					howto, index, contents)		\
   {									\
+    int i_;								\
     _bfd_clear_contents (howto, input_bfd, input_section,		\
 			 contents + rel[index].r_offset);		\
 									\
@@ -2440,10 +2441,10 @@ extern asection _bfd_elf_large_com_section;
 	  }								\
       }									\
 									\
-    for (i = 0; i < count; i++)						\
+    for (i_ = 0; i_ < count; i_++)					\
       {									\
-	rel[i].r_info = 0;						\
-	rel[i].r_addend = 0;						\
+	rel[i_].r_info = 0;						\
+	rel[i_].r_addend = 0;						\
       }									\
     rel += count - 1;							\
     continue;								\
