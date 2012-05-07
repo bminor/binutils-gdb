@@ -1,3 +1,18 @@
+2012-05-07  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* sh-linux-tdep.c: Include trad-frame.h and tramp-frame.h.
+	(sh_linux_sigtramp_cache): New function.
+	(sh_linux_sigreturn_init): New function.
+	(sh_linux_rt_sigreturn_init): New function.
+	(SH_MOVW,SH_TRAP,SH_OR_R0_R0): New symbols for instruction
+	patterns.
+	(SH_NR_SIGRETURN,SH_NR_RT_SIGRETURN): New symbols for sigreturn
+	syscall codes.
+	(sh_linux_sigreturn_tramp_frame): New tramp_frame definition.
+	(sh_linux_rt_sigreturn_tramp_frame): Likewise.
+	(sh_linux_init_abi): Add init calls to register new tramp_frame
+	definitions under 32-bit SH, update comments.
+
 2012-05-07  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/10952
