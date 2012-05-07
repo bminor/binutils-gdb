@@ -38,6 +38,7 @@
 #include "amd64-tdep.h"
 #include "solib-svr4.h"
 #include "xml-syscall.h"
+#include "glibc-tdep.h"
 
 #include "features/i386/amd64-linux.c"
 #include "features/i386/amd64-avx-linux.c"
@@ -1341,6 +1342,9 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+
+  /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
+  set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 
   /* Install supported register note sections.  */
   set_gdbarch_core_regset_sections (gdbarch, amd64_linux_regset_sections);

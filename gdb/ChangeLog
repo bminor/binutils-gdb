@@ -1,3 +1,9 @@
+2012-05-07  Pedro Alves  <palves@redhat.com>
+
+	* amd64-linux-tdep.c: Include glibc-tdep.h.
+	(amd64_linux_init_abi): Install glibc_skip_solib_resolver as
+	gdbarch_skip_solib_resolver callback.
+
 2012-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* auto-load.c (set_auto_load_safe_path): Reset AUTO_LOAD_SAFE_PATH
