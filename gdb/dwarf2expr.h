@@ -279,8 +279,6 @@ const gdb_byte *read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
 const gdb_byte *read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
 			      LONGEST * r);
 
-const char *dwarf_stack_op_name (unsigned int);
-
 void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,
 				     const char *);
 

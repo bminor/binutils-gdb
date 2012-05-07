@@ -1,3 +1,17 @@
+2012-05-07  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf_tag_name): Return const char *.  Use
+	get_DW_TAG_name.
+	(dwarf_attr_name): Return const char *.  Use get_DW_AT_name.
+	(dwarf_form_name): Return const char *.  Use get_DW_FORM_name.
+	(dwarf_stack_op_name): Remove.
+	(dwarf_cfi_name): Return const char *.  Use get_DW_ATE_name.
+	(decode_locdesc): Use get_DW_OP_name.
+	* dwarf2loc.c (unimplemented): Use get_DW_OP_name.
+	(dwarf2_compile_expr_to_ax): Likewise.
+	(disassemble_dwarf_expression): Likewise.
+	* dwarf2expr.h: (dwarf_stack_op_name): Remove.
+
 2012-05-07  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* sh-linux-tdep.c: Include trad-frame.h and tramp-frame.h.

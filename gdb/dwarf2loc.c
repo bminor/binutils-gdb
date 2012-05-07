@@ -2331,7 +2331,7 @@ dwarf2_loc_desc_needs_frame (const gdb_byte *data, unsigned short size,
 static void
 unimplemented (unsigned int op)
 {
-  const char *name = dwarf_stack_op_name (op);
+  const char *name = get_DW_OP_name (op);
 
   if (name)
     error (_("DWARF operator %s cannot be translated to an agent expression"),
@@ -2777,10 +2777,10 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 		ax_simple (expr, aop_ref64);
 		break;
 	      default:
-		/* Note that dwarf_stack_op_name will never return
+		/* Note that get_DW_OP_name will never return
 		   NULL here.  */
 		error (_("Unsupported size %d in %s"),
-		       size, dwarf_stack_op_name (op));
+		       size, get_DW_OP_name (op));
 	      }
 	  }
 	  break;
@@ -3299,7 +3299,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
       LONGEST l;
       const char *name;
 
-      name = dwarf_stack_op_name (op);
+      name = get_DW_OP_name (op);
 
       if (!name)
 	error (_("Unrecognized DWARF opcode 0x%02x at %ld"),
