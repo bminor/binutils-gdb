@@ -1,3 +1,7 @@
+2012-05-07  Tristan Gingold  <gingold@adacore.com>
+
+	* pe-dll.c (udef_table): Make it static.
+
 2012-05-05  Alan Modra  <amodra@gmail.com>
 
 	* pe-dll.c (process_def_file_and_drectve): Use bfd_und_section_ptr.

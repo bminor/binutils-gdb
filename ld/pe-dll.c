@@ -2826,7 +2826,7 @@ struct key_value
   const char *oname;
 };
 
-struct key_value *udef_table;
+static struct key_value *udef_table;
 
 static int undef_sort_cmp (const void *l1, const void *r1)
 {
