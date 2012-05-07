@@ -1,3 +1,8 @@
+2012-05-07  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (check-DEJAGNU): Clear LC_COLLATE, LC_ALL and LANG.
+	* Makefile.in: Regenerate.
+
 2012-05-05  Alan Modra  <amodra@gmail.com>
 
 	* dlltool.c (make_one_lib_file): Use bfd_und_section_ptr.
