@@ -4110,8 +4110,8 @@ elf64_alpha_relocate_section_r (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
-					 rel, relend,
-					 elf64_alpha_howto_table + r_type,
+					 rel, 1, relend,
+					 elf64_alpha_howto_table + r_type, 0,
 					 contents);
 
       if (sym != NULL && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
@@ -4319,7 +4319,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
       if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
-					 rel, relend, howto, contents);
+					 rel, 1, relend, howto, 0, contents);
 
       addend = rel->r_addend;
       value += addend;

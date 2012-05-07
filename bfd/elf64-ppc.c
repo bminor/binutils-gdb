@@ -12275,8 +12275,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
       if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
-					 rel, relend,
-					 ppc64_elf_howto_table[r_type],
+					 rel, 1, relend,
+					 ppc64_elf_howto_table[r_type], 0,
 					 contents);
 
       if (info->relocatable)
