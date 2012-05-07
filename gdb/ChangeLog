@@ -1,5 +1,7 @@
 2012-05-07  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/10952
+
 	* amd64-linux-tdep.c: Include glibc-tdep.h.
 	(amd64_linux_init_abi): Install glibc_skip_solib_resolver as
 	gdbarch_skip_solib_resolver callback.
