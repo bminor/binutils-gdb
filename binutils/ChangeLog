@@ -1,3 +1,9 @@
+2012-05-08  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (check_DEJAGNU): Export LC_ALL=C in place of other
+	LC and LANG environment vars.
+	* Makefile.in: Regenerate.
+
 2012-05-07  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf.c (get_TAG_name): Use get_DW_TAG_name.

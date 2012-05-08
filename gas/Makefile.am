@@ -393,7 +393,7 @@ check-DEJAGNU: site.exp
 	cp site.exp testsuite/site.exp
 	rootme=`pwd`; export rootme; \
 	srcdir=`cd ${srcdir}; pwd` ; export srcdir ; \
-	LC_COLLATE=; LC_ALL=; LANG=; export LC_COLLATE LC_ALL LANG; \
+	LC_ALL=C; export LC_ALL; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
 	runtest=$(RUNTEST); \
 	cd testsuite; \

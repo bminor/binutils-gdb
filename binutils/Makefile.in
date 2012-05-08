@@ -1238,7 +1238,7 @@ po/POTFILES.in: @MAINT@ Makefile
 check-DEJAGNU: site.exp
 	srcdir=`cd $(srcdir) && pwd`; export srcdir; \
 	r=`pwd`; export r; \
-	LC_COLLATE=; LC_ALL=; LANG=; export LC_COLLATE LC_ALL LANG; \
+	LC_ALL=C; export LC_ALL; \
 	EXPECT=$(EXPECT); export EXPECT; \
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \

@@ -2113,7 +2113,7 @@ TESTBFDLIB = @TESTBFDLIB@
 check-DEJAGNU: site.exp
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
 	r=`pwd`; export r; \
-	LC_COLLATE=; LC_ALL=; LANG=; export LC_COLLATE LC_ALL LANG; \
+	LC_ALL=C; export LC_ALL; \
 	EXPECT=$(EXPECT); export EXPECT; \
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \

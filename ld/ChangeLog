@@ -1,3 +1,9 @@
+2012-05-08  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (check_DEJAGNU): Export LC_ALL=C in place of other
+	LC and LANG environment vars.
+	* Makefile.in: Regenerate.
+
 2012-05-07  Tristan Gingold  <gingold@adacore.com>
 
 	* pe-dll.c (udef_table): Make it static.
