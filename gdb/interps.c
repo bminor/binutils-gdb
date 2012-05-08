@@ -253,6 +253,18 @@ interp_ui_out (struct interp *interp)
   return current_interpreter->procs->ui_out_proc (current_interpreter);
 }
 
+/* Temporarily overrides the current interpreter.  */
+struct interp *
+interp_set_temp (const char *name)
+{
+  struct interp *interp = interp_lookup (name);
+  struct interp *old_interp = current_interpreter;
+
+  if (interp)
+    current_interpreter = interp;
+  return old_interp;
+}
+
 /* Returns the interpreter's cookie.  */
 
 void *

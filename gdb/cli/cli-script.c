@@ -1178,6 +1178,12 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
   return ret;
 }
 
+static void
+restore_interp (void *arg)
+{
+  interp_set_temp (interp_name ((struct interp *)arg));
+}
+
 /* Read lines from the input stream and accumulate them in a chain of
    struct command_line's, which is then returned.  For input from a
    terminal, the special command "end" is used to mark the end of the
@@ -1210,8 +1216,21 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
 	}
     }
 
-  head = read_command_lines_1 (read_next_line, parse_commands,
-			       validator, closure);
+
+  /* Reading commands assumes the CLI behavior, so temporarily
+     override the current interpreter with CLI.  */
+  if (current_interp_named_p (INTERP_CONSOLE))
+    head = read_command_lines_1 (read_next_line, parse_commands,
+				 validator, closure);
+  else
+    {
+      struct interp *old_interp = interp_set_temp (INTERP_CONSOLE);
+      struct cleanup *old_chain = make_cleanup (restore_interp, old_interp);
+
+      head = read_command_lines_1 (read_next_line, parse_commands,
+				   validator, closure);
+      do_cleanups (old_chain);
+    }
 
   if (deprecated_readline_end_hook && from_tty && input_from_terminal_p ())
     {

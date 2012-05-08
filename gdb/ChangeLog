@@ -1,3 +1,16 @@
+2012-05-08  Eli Zaretskii  <eliz@gnu.org>
+
+	Display the ">" prompt in interactive mode while reading canned
+	commands, even when the current interpreter is MI.
+
+	* interps.c (interp_set_temp): New function.
+
+	* interps.h (interp_set_temp): Add prototype.
+
+	* cli/cli-script.c (restore_interp): New cleanup function.
+	(read_command_lines): Temporarily override the current interpreter
+	with CLI and arrange for restoring the original one.
+
 2012-05-12  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* microblaze-rom.c (_initialize_picobug_rom): Add prototype.
