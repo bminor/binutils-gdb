@@ -1,3 +1,8 @@
+2012-05-08  Ben Cheng  <bccheng@google.com>
+
+	* bfd/elf.c: Preserve the original p_align and p_flags if they are
+	valid.
+
 2012-05-07  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ia64-vms.c (elf64_ia64_relocate_section): Update
