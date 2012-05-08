@@ -1,3 +1,8 @@
+2012-05-08  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (gdb_sections): Update GDB version, add .debug_addr.
+	(lines_only_debug_sections): Likewise.
+
 2012-05-02  Roland McGrath  <mcgrathr@google.com>
 
 	* nacl.cc: New file.

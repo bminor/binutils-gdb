@@ -455,32 +455,36 @@ Layout::Hash_key::operator()(const Layout::Key& k) const
 
 // Returns whether the given section is in the list of
 // debug-sections-used-by-some-version-of-gdb.  Currently,
-// we've checked versions of gdb up to and including 6.7.1.
+// we've checked versions of gdb up to and including 7.4.
 
 static const char* gdb_sections[] =
 { ".debug_abbrev",
-  // ".debug_aranges",   // not used by gdb as of 6.7.1
+  ".debug_addr",         // Fission extension
+  // ".debug_aranges",   // not used by gdb as of 7.4
   ".debug_frame",
   ".debug_info",
   ".debug_types",
   ".debug_line",
   ".debug_loc",
   ".debug_macinfo",
-  // ".debug_pubnames",  // not used by gdb as of 6.7.1
+  // ".debug_pubnames",  // not used by gdb as of 7.4
+  // ".debug_pubtypes",  // not used by gdb as of 7.4
   ".debug_ranges",
   ".debug_str",
 };
 
 static const char* lines_only_debug_sections[] =
 { ".debug_abbrev",
-  // ".debug_aranges",   // not used by gdb as of 6.7.1
+  // ".debug_addr",      // Fission extension
+  // ".debug_aranges",   // not used by gdb as of 7.4
   // ".debug_frame",
   ".debug_info",
   // ".debug_types",
   ".debug_line",
   // ".debug_loc",
   // ".debug_macinfo",
-  // ".debug_pubnames",  // not used by gdb as of 6.7.1
+  // ".debug_pubnames",  // not used by gdb as of 7.4
+  // ".debug_pubtypes",  // not used by gdb as of 7.4
   // ".debug_ranges",
   ".debug_str",
 };
