@@ -614,9 +614,13 @@ mi_gdb_test "-var-create a1 * a" \
 	"\\^done,name=\"a1\",numchild=\"0\",value=\".*\",type=\"char\".*" \
 	"create local variable a1"
 
-mi_gdb_test "-var-create a2 $fp a" \
+if { [info exists fp] } {
+    mi_gdb_test "-var-create a2 $fp a" \
 	"\\^done,name=\"a2\",numchild=\"0\",value=\".*\",type=\"int\".*" \
 	"create variable a2 in different scope"
+} else {
+    untested "create variable a2 in different scope"
+}
 
 #gdbtk_test c_variable-7.81 {create variables in different scopes} {
 #  set a1 [gdb_variable create -expr a]
