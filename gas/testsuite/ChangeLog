@@ -1,3 +1,7 @@
+2012-05-08  Alan Modra  <amodra@gmail.com>
+
+	* lib/gas-defs.exp (run_dump_test): Don't set LC_ALL here.
+
 2012-05-06  Arnold Metselaar  <arnold_m@operamail.com>
 
 	* gas/z80/jr-forwf.s: New file, adapted from z8k version.

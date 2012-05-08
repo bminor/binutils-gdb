@@ -738,19 +738,9 @@ proc run_dump_test { name {extra_options {}} } {
 	set redir ""
     }
 
-    # Ensure consistent sorting of symbols
-    if {[info exists env(LC_ALL)]} {
-	set old_lc_all $env(LC_ALL)
-    }
-    set env(LC_ALL) "C"
     send_log "$cmd\n"
     set status [gas_host_run "$cmd" "$redir"]
     set comp_output [prune_warnings [lindex $status 1]]
-    if {[info exists old_lc_all]} {
-	set env(LC_ALL) $old_lc_all
-    } else {
-	unset env(LC_ALL)
-    }
     set comp_output [prune_warnings $comp_output]
     if ![string match "" $comp_output] then {
 	send_log "$comp_output\n"
