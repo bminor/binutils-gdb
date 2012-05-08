@@ -1094,6 +1094,8 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--add-gnu-debuglink=}@var{path-to-file}]
         [@option{--keep-file-symbols}]
         [@option{--only-keep-debug}]
+        [@option{--strip-dwo}]
+        [@option{--extract-dwo}]
         [@option{--extract-symbol}]
         [@option{--writable-text}]
         [@option{--readonly-text}]
@@ -1663,6 +1665,21 @@ information may be incomplete.  Besides the gnu_debuglink feature
 currently only supports the presence of one filename containing
 debugging information, not multiple filenames on a one-per-object-file
 basis.
+
+@item --strip-dwo
+Remove the contents of all DWARF .dwo sections, leaving the
+remaining debugging sections and all symbols intact.
+This option is intended for use by the compiler as part of
+the @option{-gsplit-dwarf} option, which splits debug information
+between the .o file and a separate .dwo file.  The compiler
+generates all debug information in the same file, then uses
+the @option{--extract-dwo} option to copy the .dwo sections to
+the .dwo file, then the @option{--strip-dwo} option to remove
+those sections from the original .o file.
+
+@item --extract-dwo
+Extract the contents of all DWARF .dwo sections.  See the
+@option{--strip-dwo} option for more information.
 
 @item --file-alignment @var{num}
 Specify the file alignment.  Sections in the file will always begin at
@@ -2680,6 +2697,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-O} @var{bfdname} |@option{--output-target=}@var{bfdname}]
       [@option{-s}|@option{--strip-all}]
       [@option{-S}|@option{-g}|@option{-d}|@option{--strip-debug}]
+      [@option{--strip-dwo}]
       [@option{-K} @var{symbolname} |@option{--keep-symbol=}@var{symbolname}]
       [@option{-N} @var{symbolname} |@option{--strip-symbol=}@var{symbolname}]
       [@option{-w}|@option{--wildcard}]
@@ -2747,6 +2765,12 @@ Remove all symbols.
 @itemx -d
 @itemx --strip-debug
 Remove debugging symbols only.
+
+@item --strip-dwo
+Remove the contents of all DWARF .dwo sections, leaving the
+remaining debugging sections and all symbols intact.
+See the description of this option in the @command{objcopy} section
+for more information.
 
 @item --strip-unneeded
 Remove all symbols that are not needed for relocation processing.
