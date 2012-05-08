@@ -1411,6 +1411,12 @@ stap_get_probes (VEC (probe_p) **probesp, struct objfile *objfile)
   struct sdt_note *iter;
   unsigned save_probesp_len = VEC_length (probe_p, *probesp);
 
+  if (objfile->separate_debug_objfile_backlink != NULL)
+    {
+      /* This is a .debug file, not the objfile itself.  */
+      return;
+    }
+
   if (!elf_tdata (obfd)->sdt_note_head)
     {
       /* There isn't any probe here.  */

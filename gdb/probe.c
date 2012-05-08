@@ -120,9 +120,6 @@ parse_probes (char **argptr, struct linespec_result *canonical)
 	    && FILENAME_CMP (lbasename (objfile->name), objfile_name) != 0)
 	  continue;
 
-	if (objfile->separate_debug_objfile_backlink != NULL)
-	  continue;
-
 	probes = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
 
 	for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)

@@ -1,3 +1,9 @@
+2012-05-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* probe.c (parse_probes): Move conditional to check for
+	debuginfo files from here...
+	* stap-probe.c (stap_get_probes): ... to here.
+
 2012-05-07  Mark Kettenis  <kettenis@gnu.org>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
