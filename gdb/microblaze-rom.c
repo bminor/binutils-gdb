@@ -25,6 +25,8 @@
 #include "serial.h"
 #include "regcache.h"
 
+void _initialize_picobug_rom (void);
+
 static char *picobug_inits[] =
 {"\r", NULL};
 
@@ -174,7 +176,7 @@ init_picobug_cmds (void)
 }
 
 void
-_initialize_picobug_rom ()
+_initialize_picobug_rom (void)
 {
   int i;
 

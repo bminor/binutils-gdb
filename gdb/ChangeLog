@@ -1,3 +1,7 @@
+2012-05-12  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* microblaze-rom.c (_initialize_picobug_rom): Add prototype.
+
 2012-05-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* probe.c (parse_probes): Move conditional to check for
