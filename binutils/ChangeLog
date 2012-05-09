@@ -1,3 +1,7 @@
+2012-05-08  Sean Keys  <skeys@ipdatasys.com>
+	
+	* binutils/MAINTAINERS: Added my entry to the maintainers secion.
+ 
 2012-05-08  Cary Coutant  <ccoutant@google.com>
 
 	* doc/binutils.texi (objcopy): Add --strip-dwo, --extract-dwo options.
