@@ -128,6 +128,7 @@ responsibility among the other maintainers.
   x86_64	   Andreas Jaeger <aj@suse.de>
   x86_64	   H.J. Lu <hjl.tools@gmail.com>
   XCOFF 	   Richard Sandiford <r.sandiford@uk.ibm.com>
+  XGATE            Sean Keys <skeys@ipdatasys.com>
   Xtensa	   Sterling Augustine <augustine.sterling@gmail.com> 
   z80		   Arnold Metselaar <arnold.metselaar@planet.nl>
   z8k		   Christian Groessler <chris@groessler.org>
