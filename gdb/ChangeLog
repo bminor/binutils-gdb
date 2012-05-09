@@ -1,5 +1,10 @@
 2012-05-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* infcall.c (call_function_by_hand): Remove AT_SYMBOL handling.
+	* inferior.h (AT_SYMBOL): Delete.
+
+2012-05-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* mips-tdep.c (mips_push_dummy_code): New function.
 	(mips_gdbarch_init): Set the gdbarch call_dummy_location to
 	ON_STACK and install mips_push_dummy_code as our gdbarch
