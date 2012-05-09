@@ -1,3 +1,10 @@
+2012-05-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* mips-tdep.c (mips_push_dummy_code): New function.
+	(mips_gdbarch_init): Set the gdbarch call_dummy_location to
+	ON_STACK and install mips_push_dummy_code as our gdbarch
+	push_dummy_code routine.
+
 2012-05-09  Pedro Alves  <palves@redhat.com>
 
 	* target.c (set_maintenance_target_async_permitted): Rename to ...

@@ -3009,6 +3009,38 @@ mips_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
   return align_down (addr, 16);
 }
 
+/* Implement the "push_dummy_call" gdbarch method.  */
+
+static CORE_ADDR
+mips_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
+		      CORE_ADDR funaddr, struct value **args,
+		      int nargs, struct type *value_type,
+		      CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
+		      struct regcache *regcache)
+{
+  CORE_ADDR nop_addr;
+  static gdb_byte nop_insn[] = { 0, 0, 0, 0 };
+
+  /* Reserve enough room on the stack for our breakpoint instruction.  */
+  *bp_addr = sp - sizeof (nop_insn);
+
+  /* The breakpoint layer automatically adjusts the address of
+     breakpoints inserted in a branch delay slot.  With enough
+     bad luck, the 4 bytes located just before our breakpoint
+     instruction could look like a branch instruction, and thus
+     trigger the adjustement, and break the function call entirely.
+     So, we reserve those 4 bytes and write a nop instruction
+     to prevent that from happening.  */
+  nop_addr = *bp_addr - sizeof (nop_insn);
+  write_memory (nop_addr, nop_insn, sizeof (nop_insn));
+  sp = mips_frame_align (gdbarch, nop_addr);
+
+  /* Inferior resumes at the function entry point.  */
+  *real_pc = funaddr;
+
+  return sp;
+}
+
 static CORE_ADDR
 mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			   struct regcache *regcache, CORE_ADDR bp_addr,
@@ -6906,10 +6938,8 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* MIPS version of CALL_DUMMY.  */
 
-  /* NOTE: cagney/2003-08-05: Eventually call dummy location will be
-     replaced by a command, and all targets will default to on stack
-     (regardless of the stack's execute status).  */
-  set_gdbarch_call_dummy_location (gdbarch, AT_SYMBOL);
+  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_push_dummy_code (gdbarch, mips_push_dummy_code);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
 
   set_gdbarch_convert_register_p (gdbarch, mips_convert_register_p);
