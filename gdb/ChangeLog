@@ -1,3 +1,8 @@
+2012-05-08  Doug Evans  <dje@google.com>
+
+	* go-exp.y (classify_name): Add missing assignment of fields of
+	yylval.ssym.
+
 2012-05-08  Eli Zaretskii  <eliz@gnu.org>
 
 	Display the ">" prompt in interactive mode while reading canned

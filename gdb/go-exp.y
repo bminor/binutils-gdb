@@ -1482,7 +1482,7 @@ classify_name (struct block *block)
 			     &is_a_field_of_this);
 	if (sym)
 	  {
-	    yylval.sval = sval;
+	    yylval.ssym.stoken = sval;
 	    yylval.ssym.sym = sym;
 	    yylval.ssym.is_a_field_of_this = is_a_field_of_this;
 	    return NAME;
@@ -1499,9 +1499,15 @@ classify_name (struct block *block)
       YYSTYPE newlval;	/* Its value is ignored.  */
       int hextype = parse_number (copy, yylval.sval.length, 0, &newlval);
       if (hextype == INT)
-	return NAME_OR_INT;
+	{
+	  yylval.ssym.sym = NULL;
+	  yylval.ssym.is_a_field_of_this = 0;
+	  return NAME_OR_INT;
+	}
     }
 
+  yylval.ssym.sym = NULL;
+  yylval.ssym.is_a_field_of_this = 0;
   return NAME;
 }
 
