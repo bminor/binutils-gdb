@@ -33,7 +33,10 @@ gdb \- The GNU Debugger
 .I core\c
 \&\|]
 .RB "[\|" "\-x "\c
-.I cmds\c
+.I file\c
+\&\|]
+.RB "[\|" "\-ex "\c
+.I cmd\c
 \&\|]
 .RB "[\|" "\-d "\c
 .I dir\c
@@ -261,6 +264,13 @@ Use file \c
 Execute GDB commands from file \c
 .I file\c
 \&.  
+
+.TP
+.BI "\-ex " "command"\c
+\&
+Execute given GDB \c
+.I command\c
+\&.
 
 .TP
 .BI "\-directory=" "directory"\c

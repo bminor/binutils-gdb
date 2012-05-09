@@ -1,3 +1,7 @@
+2012-05-09  Frank Ch. Eigler  <fche@redhat.com>
+
+	* gdb.1: Document -ex option.
+
 2012-05-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* infcall.c (call_function_by_hand): Remove AT_SYMBOL handling.
