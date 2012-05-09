@@ -4655,8 +4655,8 @@ int target_async_permitted = 0;
 static int target_async_permitted_1 = 0;
 
 static void
-set_maintenance_target_async_permitted (char *args, int from_tty,
-					struct cmd_list_element *c)
+set_target_async_command (char *args, int from_tty,
+			  struct cmd_list_element *c)
 {
   if (have_live_inferiors ())
     {
@@ -4668,9 +4668,9 @@ set_maintenance_target_async_permitted (char *args, int from_tty,
 }
 
 static void
-show_maintenance_target_async_permitted (struct ui_file *file, int from_tty,
-					 struct cmd_list_element *c,
-					 const char *value)
+show_target_async_command (struct ui_file *file, int from_tty,
+			   struct cmd_list_element *c,
+			   const char *value)
 {
   fprintf_filtered (file,
 		    _("Controlling the inferior in "
@@ -4775,8 +4775,8 @@ result in significant performance improvement for remote targets."),
 Set whether gdb controls the inferior in asynchronous mode."), _("\
 Show whether gdb controls the inferior in asynchronous mode."), _("\
 Tells gdb whether to control the inferior in asynchronous mode."),
-			   set_maintenance_target_async_permitted,
-			   show_maintenance_target_async_permitted,
+			   set_target_async_command,
+			   show_target_async_command,
 			   &setlist,
 			   &showlist);
 

@@ -1,3 +1,11 @@
+2012-05-09  Pedro Alves  <palves@redhat.com>
+
+	* target.c (set_maintenance_target_async_permitted): Rename to ...
+	(set_target_async_command): ... this.
+	(show_maintenance_target_async_permitted): Rename to ...
+	(show_target_async_command): ... this.
+	(initialize_targets): Adjust.
+
 2012-05-08  Doug Evans  <dje@google.com>
 
 	* go-exp.y (classify_name): Add missing assignment of fields of
