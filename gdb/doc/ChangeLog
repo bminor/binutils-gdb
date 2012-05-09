@@ -1,3 +1,8 @@
+2012-05-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Auto-loading): Wrap too long lines in @smallexample.
+	Twice.
+
 2012-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Auto-loading safe path): Make 'directories'

@@ -21004,7 +21004,8 @@ or disabled.
 (gdb) show auto-load
 gdb-scripts:  Auto-loading of canned sequences of commands scripts is on.
 libthread-db:  Auto-loading of inferior specific libthread_db is on.
-local-gdbinit:  Auto-loading of .gdbinit script from current directory is on.
+local-gdbinit:  Auto-loading of .gdbinit script from current directory
+                is on.
 python-scripts:  Auto-loading of Python scripts is on.
 safe-path:  List of directories from which it is safe to auto-load files
             is /usr/local.
@@ -21022,7 +21023,8 @@ gdb-scripts:
 Loaded  Script
 Yes     /home/user/gdb/gdb-gdb.gdb
 libthread-db:  No auto-loaded libthread-db.
-local-gdbinit:  Local .gdbinit file "/home/user/gdb/.gdbinit" has been loaded.
+local-gdbinit:  Local .gdbinit file "/home/user/gdb/.gdbinit" has been
+                loaded.
 python-scripts:
 Loaded  Script
 Yes     /home/user/gdb/gdb-gdb.py
