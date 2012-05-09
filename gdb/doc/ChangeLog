@@ -3,6 +3,9 @@
 	* gdb.texinfo (Auto-loading): Wrap too long lines in @smallexample.
 	Twice.
 
+	* gdb.texinfo (Separate Debug Files, Auto-loading safe path): Replace
+	directory separator by path separator.
+
 2012-05-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Auto-loading safe path): Make 'directories'

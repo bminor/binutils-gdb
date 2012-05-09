@@ -16285,8 +16285,8 @@ name @value{GDBN} is currently using.
 @kindex set debug-file-directory
 @item set debug-file-directory @var{directories}
 Set the directories which @value{GDBN} searches for separate debugging
-information files to @var{directory}.  Multiple directory components can be set
-concatenating them by a directory separator.
+information files to @var{directory}.  Multiple path components can be set
+concatenating them by a path separator.
 
 @kindex show debug-file-directory
 @item show debug-file-directory
@@ -21227,7 +21227,7 @@ loading and execution of scripts.  You can also enter a specific trusted file.
 If you omit @var{directories}, @samp{auto-load safe-path} will be reset to
 its default value as specified during @value{GDBN} compilation.
 
-The list of directories uses directory separator (@samp{:} on GNU and Unix
+The list of directories uses path separator (@samp{:} on GNU and Unix
 systems, @samp{;} on MS-Windows and MS-DOS) to separate directories, similarly
 to the @env{PATH} environment variable.
 
@@ -21242,7 +21242,7 @@ scripts.
 @item add-auto-load-safe-path
 Add an entry (or list of entries) the list of directories trusted for automatic
 loading and execution of scripts.  Multiple entries may be delimited by the
-host platform directory separator in use.
+host platform path separator in use.
 @end table
 
 Setting this variable to @file{/} disables this security protection.
