@@ -1,3 +1,7 @@
+2012-05-09  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.trace/strace.exp: Add 'quiet' to compiler flags.
+
 2012-05-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* lib/gdb.exp (gdb_test_multiple): Correct formatting.

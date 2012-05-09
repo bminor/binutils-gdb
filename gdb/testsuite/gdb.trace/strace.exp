@@ -31,7 +31,7 @@ if [get_compiler_info ${binfile}] {
     return -1
 }
 
-set additional_flags [list debug shlib=$libipa shlib_load "additional_flags=-lust -lurcu-bp" ]
+set additional_flags [list quiet debug shlib=$libipa shlib_load "additional_flags=-lust -lurcu-bp" ]
 
 if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $additional_flags] != ""} {
     untested "UST library or headers are not installed"
