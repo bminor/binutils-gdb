@@ -587,7 +587,7 @@ proc gdb_test_multiple { command message user_code } {
     }
 
     if {$use_gdb_stub
-        && [regexp -nocase {^\s*(r|run|star|start|at|att|atta|attac|attach)\M} \
+	&& [regexp -nocase {^\s*(r|run|star|start|at|att|atta|attac|attach)\M} \
 	    $command]} {
 	error "gdbserver does not support $command without extended-remote"
     }
@@ -727,21 +727,21 @@ proc gdb_test_multiple { command message user_code } {
     }
 
     set code {
-         -re ".*A problem internal to GDB has been detected" {
-             fail "$message (GDB internal error)"
-             gdb_internal_error_resync
-         }
-	 -re "\\*\\*\\* DOSEXIT code.*" {
-	     if { $message != "" } {
-		 fail "$message";
-	     }
-	     gdb_suppress_entire_file "GDB died";
-	     set result -1;
-	 }
+	-re ".*A problem internal to GDB has been detected" {
+	    fail "$message (GDB internal error)"
+	    gdb_internal_error_resync
+	}
+	-re "\\*\\*\\* DOSEXIT code.*" {
+	    if { $message != "" } {
+		fail "$message";
+	    }
+	    gdb_suppress_entire_file "GDB died";
+	    set result -1;
+	}
     }
     append code $processed_code
     append code {
-	 -re "Ending remote debugging.*$gdb_prompt $" {
+	-re "Ending remote debugging.*$gdb_prompt $" {
 	    if ![isnative] then {
 		warning "Can`t communicate to remote target."
 	    }
@@ -749,17 +749,17 @@ proc gdb_test_multiple { command message user_code } {
 	    gdb_start
 	    set result -1
 	}
-	 -re "Undefined\[a-z\]* command:.*$gdb_prompt $" {
+	-re "Undefined\[a-z\]* command:.*$gdb_prompt $" {
 	    perror "Undefined command \"$command\"."
-            fail "$message"
+	    fail "$message"
 	    set result 1
 	}
-	 -re "Ambiguous command.*$gdb_prompt $" {
+	-re "Ambiguous command.*$gdb_prompt $" {
 	    perror "\"$command\" is not a unique command name."
-            fail "$message"
+	    fail "$message"
 	    set result 1
 	}
-	 -re "$inferior_exited_re with code \[0-9\]+.*$gdb_prompt $" {
+	-re "$inferior_exited_re with code \[0-9\]+.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		set errmsg "$message (the program exited)"
 	    } else {
@@ -768,7 +768,7 @@ proc gdb_test_multiple { command message user_code } {
 	    fail "$errmsg"
 	    set result -1
 	}
-	 -re "$inferior_exited_re normally.*$gdb_prompt $" {
+	-re "$inferior_exited_re normally.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		set errmsg "$message (the program exited)"
 	    } else {
@@ -777,7 +777,7 @@ proc gdb_test_multiple { command message user_code } {
 	    fail "$errmsg"
 	    set result -1
 	}
-	 -re "The program is not being run.*$gdb_prompt $" {
+	-re "The program is not being run.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		set errmsg "$message (the program is no longer running)"
 	    } else {
@@ -786,16 +786,16 @@ proc gdb_test_multiple { command message user_code } {
 	    fail "$errmsg"
 	    set result -1
 	}
-	 -re "\r\n$gdb_prompt $" {
+	-re "\r\n$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		fail "$message"
 	    }
 	    set result 1
 	}
-	 "<return>" {
+	"<return>" {
 	    send_gdb "\n"
 	    perror "Window too small."
-            fail "$message"
+	    fail "$message"
 	    set result -1
 	}
 	-re "\\((y or n|y or \\\[n\\\]|\\\[y\\\] or n)\\) " {
@@ -810,16 +810,16 @@ proc gdb_test_multiple { command message user_code } {
 	    fail "$message (got breakpoint menu)"
 	    set result -1
 	}
-	 eof {
-	     perror "Process no longer exists"
-	     if { $message != "" } {
-		 fail "$message"
-	     }
-	     return -1
+	eof {
+	    perror "Process no longer exists"
+	    if { $message != "" } {
+		fail "$message"
+	    }
+	    return -1
 	}
-	 full_buffer {
+	full_buffer {
 	    perror "internal buffer is full."
-            fail "$message"
+	    fail "$message"
 	    set result -1
 	}
 	timeout	{

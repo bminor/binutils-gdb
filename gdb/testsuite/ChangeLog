@@ -1,3 +1,7 @@
+2012-05-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/gdb.exp (gdb_test_multiple): Correct formatting.
+
 2012-05-08  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.mi/mi-var-display.exp: Check for the existence of $fp
