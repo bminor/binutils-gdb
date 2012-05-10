@@ -1,5 +1,64 @@
 2012-05-10  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (recursively_write_psymbols): New function.
+	(write_psymtabs_to_index): Use it.
+
+	* dwarf2read.c (struct dwarf2_queue_item) <pretend_language>: New
+	field.
+	(load_cu, dw2_do_instantiate_symtab, process_psymtab_comp_unit)
+	(load_partial_comp_unit): Update.
+	(queue_comp_unit): Add argument 'pretend_language'.
+	(process_queue): Update.
+	(psymtab_to_symtab_1): Skip dependencies that have a user.
+	(load_partial_comp_unit_reader): Give meaning to the 'data'
+	argument.
+	(load_full_comp_unit): Add 'pretend_language' argument.
+	(process_full_comp_unit): Add 'pretend_language' argument.  Set
+	language on CU.
+	(process_imported_unit_die, read_file_scope, read_type_unit_scope):
+	Update.
+	(maybe_queue_comp_unit): Add 'pretend_language' argument.
+	(follow_die_offset, follow_die_sig, read_signatured_type_reader):
+	Update.
+	(prepare_one_comp_unit): Add 'pretend_language' argument.
+
+	* dwarf2read.c: (dwarf2_per_cu_ptr): New typedef.
+	(struct dwarf2_per_objfile) <just_read_cus>: New field.
+	(struct dwarf2_per_cu_data) <imported_symtabs>: New field.
+	(dw2_do_instantiate_symtab): Check whether symtab was read in
+	before queueing.
+	(dw2_instantiate_symtab): Add assertion.  Call
+	process_cu_includes.
+	(process_psymtab_comp_unit): Compute 'dependencies' for psymtab.
+	(partial_symtab_p): New typedef.
+	(set_partial_user): New function.
+	(dwarf2_build_psymtabs_hard): Use set_partial_user.
+	(scan_partial_symbols): Add imported CU to imported_symtabs.
+	(dwarf2_psymtab_to_symtab): Call process_cu_includes.
+	(psymtab_to_symtab_1): Do nothing if psymtab is readin.
+	(get_symtab, recursively_compute_inclusions)
+	(compute_symtab_includes, process_cu_includes)
+	(process_imported_unit_die): New functions.
+	(process_die) <DW_TAG_imported_unit>: New case.
+	(dwarf2_per_objfile_free): Free 'imported_symtabs'.
+
+	* dwarf2read.c (struct dwarf2_per_cu_data) <psymtab>: Update
+	comment.
+	(struct partial_die_info) <locdesc>: Remove.
+	<d>: New field.
+	(process_psymtab_comp_unit): Add 'read_partial' argument.
+	Update.
+	(process_type_comp_unit, dwarf2_build_psymtabs_hard): Update.
+	(scan_partial_symbols): Handle DW_TAG_imported_unit.
+	(add_partial_symbol): Update.
+	(process_die): Handle DW_TAG_partial_unit.
+	(read_file_scope): Update comment.
+	(load_partial_dies): Handle DW_TAG_imported_unit.
+	(read_partial_die): Handle DW_TAG_partial_unit, DW_AT_import.
+	(determine_prefix, dwarf2_name): Handle DW_TAG_partial_unit.
+
+2012-05-10  Tom Tromey  <tromey@redhat.com>
+
 	* cc-with-dwz.sh: New file.
 
 2012-05-10  Tom Tromey  <tromey@redhat.com>

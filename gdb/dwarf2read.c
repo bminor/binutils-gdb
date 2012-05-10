@@ -148,6 +148,9 @@ struct mapped_index
   const char *constant_pool;
 };
 
+typedef struct dwarf2_per_cu_data *dwarf2_per_cu_ptr;
+DEF_VEC_P (dwarf2_per_cu_ptr);
+
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.  */
 
@@ -221,6 +224,9 @@ struct dwarf2_per_objfile
      This is NULL if not allocated yet.
      The mapping is done via (CU/TU signature + DIE offset) -> type.  */
   htab_t die_type_hash;
+
+  /* The CUs we recently read.  */
+  VEC (dwarf2_per_cu_ptr) *just_read_cus;
 };
 
 static struct dwarf2_per_objfile *dwarf2_per_objfile;
@@ -483,13 +489,18 @@ struct dwarf2_per_cu_data
   union
   {
     /* The partial symbol table associated with this compilation unit,
-       or NULL for partial units (which do not have an associated
-       symtab).  */
+       or NULL for unread partial units.  */
     struct partial_symtab *psymtab;
 
     /* Data needed by the "quick" functions.  */
     struct dwarf2_per_cu_quick_data *quick;
   } v;
+
+  /* The CUs we import using DW_TAG_imported_unit.  This is filled in
+     while reading psymtabs, used to compute the psymtab dependencies,
+     and then cleared.  Then it is filled in again while reading full
+     symbols, and only deleted when the objfile is destroyed.  */
+  VEC (dwarf2_per_cu_ptr) *imported_symtabs;
 };
 
 /* Entry in the signatured_types hash table.  */
@@ -695,8 +706,15 @@ struct partial_die_info
        when this compilation unit leaves the cache.  */
     char *scope;
 
-    /* The location description associated with this DIE, if any.  */
-    struct dwarf_block *locdesc;
+    /* Some data associated with the partial DIE.  The tag determines
+       which field is live.  */
+    union
+    {
+      /* The location description associated with this DIE, if any.  */
+      struct dwarf_block *locdesc;
+      /* The offset of an import, for DW_TAG_imported_unit.  */
+      sect_offset offset;
+    } d;
 
     /* If HAS_PC_INFO, the PC range associated with this DIE.  */
     CORE_ADDR lowpc;
@@ -887,6 +905,7 @@ struct field_info
 struct dwarf2_queue_item
 {
   struct dwarf2_per_cu_data *per_cu;
+  enum language pretend_language;
   struct dwarf2_queue_item *next;
 };
 
@@ -1346,7 +1365,8 @@ static void init_one_comp_unit (struct dwarf2_cu *cu,
 				struct dwarf2_per_cu_data *per_cu);
 
 static void prepare_one_comp_unit (struct dwarf2_cu *cu,
-				   struct die_info *comp_unit_die);
+				   struct die_info *comp_unit_die,
+				   enum language pretend_language);
 
 static void free_heap_comp_unit (void *);
 
@@ -1363,9 +1383,11 @@ static void create_all_comp_units (struct objfile *);
 
 static int create_all_type_units (struct objfile *);
 
-static void load_full_comp_unit (struct dwarf2_per_cu_data *);
+static void load_full_comp_unit (struct dwarf2_per_cu_data *,
+				 enum language);
 
-static void process_full_comp_unit (struct dwarf2_per_cu_data *);
+static void process_full_comp_unit (struct dwarf2_per_cu_data *,
+				    enum language);
 
 static void dwarf2_add_dependence (struct dwarf2_cu *,
 				   struct dwarf2_per_cu_data *);
@@ -1381,7 +1403,12 @@ static struct type *get_die_type (struct die_info *die, struct dwarf2_cu *cu);
 
 static void dwarf2_release_queue (void *dummy);
 
-static void queue_comp_unit (struct dwarf2_per_cu_data *per_cu);
+static void queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
+			     enum language pretend_language);
+
+static int maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
+				  struct dwarf2_per_cu_data *per_cu,
+				  enum language pretend_language);
 
 static void process_queue (void);
 
@@ -1407,7 +1434,7 @@ static void init_cutu_and_read_dies_simple
 
 static htab_t allocate_signatured_type_table (struct objfile *objfile);
 
-static void process_psymtab_comp_unit (struct dwarf2_per_cu_data *);
+static void process_psymtab_comp_unit (struct dwarf2_per_cu_data *, int);
 
 static htab_t allocate_dwo_unit_table (struct objfile *objfile);
 
@@ -1420,6 +1447,8 @@ static struct dwo_unit *lookup_dwo_type_unit
 static void free_dwo_file_cleanup (void *);
 
 static void munmap_section_buffer (struct dwarf2_section_info *);
+
+static void process_cu_includes (void);
 
 #if WORDS_BIGENDIAN
 
@@ -1926,7 +1955,7 @@ load_cu (struct dwarf2_per_cu_data *per_cu)
   if (per_cu->is_debug_types)
     load_full_type_unit (per_cu);
   else
-    load_full_comp_unit (per_cu);
+    load_full_comp_unit (per_cu, language_minimal);
 
   gdb_assert (per_cu->cu != NULL);
 
@@ -1942,9 +1971,13 @@ dw2_do_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
 
   back_to = make_cleanup (dwarf2_release_queue, NULL);
 
-  queue_comp_unit (per_cu);
-
-  load_cu (per_cu);
+  if (dwarf2_per_objfile->using_index
+      ? per_cu->v.quick->symtab == NULL
+      : (per_cu->v.psymtab == NULL || !per_cu->v.psymtab->readin))
+    {
+      queue_comp_unit (per_cu, language_minimal);
+      load_cu (per_cu);
+    }
 
   process_queue ();
 
@@ -1962,11 +1995,13 @@ dw2_do_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
 static struct symtab *
 dw2_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
 {
+  gdb_assert (dwarf2_per_objfile->using_index);
   if (!per_cu->v.quick->symtab)
     {
       struct cleanup *back_to = make_cleanup (free_cached_comp_units, NULL);
       increment_reading_symtab ();
       dw2_do_instantiate_symtab (per_cu);
+      process_cu_includes ();
       do_cleanups (back_to);
     }
   return per_cu->v.quick->symtab;
@@ -4014,11 +4049,14 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   struct partial_symtab *pst;
   int has_pc_info;
   const char *filename;
+  int *want_partial_unit_ptr = data;
 
-  if (comp_unit_die->tag == DW_TAG_partial_unit)
+  if (comp_unit_die->tag == DW_TAG_partial_unit
+      && (want_partial_unit_ptr == NULL
+	  || !*want_partial_unit_ptr))
     return;
 
-  prepare_one_comp_unit (cu, comp_unit_die);
+  prepare_one_comp_unit (cu, comp_unit_die, language_minimal);
 
   cu->list_in_scope = &file_symbols;
 
@@ -4100,6 +4138,26 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
     (objfile->static_psymbols.list + pst->statics_offset);
   sort_pst_symbols (pst);
 
+  if (!VEC_empty (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs))
+    {
+      int i;
+      int len = VEC_length (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs);
+      struct dwarf2_per_cu_data *iter;
+
+      /* Fill in 'dependencies' here; we fill in 'users' in a
+	 post-pass.  */
+      pst->number_of_dependencies = len;
+      pst->dependencies = obstack_alloc (&objfile->objfile_obstack,
+					 len * sizeof (struct symtab *));
+      for (i = 0;
+	   VEC_iterate (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs,
+			i, iter);
+	   ++i)
+	pst->dependencies[i] = iter->v.psymtab;
+
+      VEC_free (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs);
+    }
+
   if (per_cu->is_debug_types)
     {
       /* It's not clear we want to do anything with stmt lists here.
@@ -4117,7 +4175,8 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
    Process compilation unit THIS_CU for a psymtab.  */
 
 static void
-process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu)
+process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
+			   int want_partial_unit)
 {
   /* If this compilation unit was already read in, free the
      cached copy in order to read it in again.	This is
@@ -4129,7 +4188,7 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu)
 
   gdb_assert (! this_cu->is_debug_types);
   init_cutu_and_read_dies (this_cu, 0, 0, process_psymtab_comp_unit_reader,
-			   NULL);
+			   &want_partial_unit);
 
   /* Age out any secondary CUs.  */
   age_cached_comp_units ();
@@ -4187,6 +4246,28 @@ psymtabs_addrmap_cleanup (void *o)
   objfile->psymtabs_addrmap = NULL;
 }
 
+/* Compute the 'user' field for each psymtab in OBJFILE.  */
+
+static void
+set_partial_user (struct objfile *objfile)
+{
+  int i;
+
+  for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+    {
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+      struct partial_symtab *pst = per_cu->v.psymtab;
+      int j;
+
+      for (j = 0; j < pst->number_of_dependencies; ++j)
+	{
+	  /* Set the 'user' field only if it is not already set.  */
+	  if (pst->dependencies[j]->user == NULL)
+	    pst->dependencies[j]->user = pst;
+	}
+    }
+}
+
 /* Build the partial symbol table by doing a quick pass through the
    .debug_info and .debug_abbrev sections.  */
 
@@ -4220,8 +4301,10 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile)
     {
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
-      process_psymtab_comp_unit (per_cu);
+      process_psymtab_comp_unit (per_cu, 0);
     }
+
+  set_partial_user (objfile);
 
   objfile->psymtabs_addrmap = addrmap_create_fixed (objfile->psymtabs_addrmap,
 						    &objfile->objfile_obstack);
@@ -4241,7 +4324,7 @@ load_partial_comp_unit_reader (const struct die_reader_specs *reader,
 {
   struct dwarf2_cu *cu = reader->cu;
 
-  prepare_one_comp_unit (cu, comp_unit_die);
+  prepare_one_comp_unit (cu, comp_unit_die, language_minimal);
 
   /* Check if comp unit has_children.
      If so, read the rest of the partial symbols from this comp unit.
@@ -4350,7 +4433,8 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	 enums.  */
 
       if (pdi->name != NULL || pdi->tag == DW_TAG_namespace
-	  || pdi->tag == DW_TAG_module || pdi->tag == DW_TAG_enumeration_type)
+	  || pdi->tag == DW_TAG_module || pdi->tag == DW_TAG_enumeration_type
+	  || pdi->tag == DW_TAG_imported_unit)
 	{
 	  switch (pdi->tag)
 	    {
@@ -4389,6 +4473,21 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	      break;
 	    case DW_TAG_module:
 	      add_partial_module (pdi, lowpc, highpc, need_pc, cu);
+	      break;
+	    case DW_TAG_imported_unit:
+	      {
+		struct dwarf2_per_cu_data *per_cu;
+
+		per_cu = dwarf2_find_containing_comp_unit (pdi->d.offset,
+							   cu->objfile);
+
+		/* Go read the partial unit, if needed.  */
+		if (per_cu->v.psymtab == NULL)
+		  process_psymtab_comp_unit (per_cu, 1);
+
+		VEC_safe_push (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs,
+			       per_cu);
+	      }
 	      break;
 	    default:
 	      break;
@@ -4598,10 +4697,10 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       }
       break;
     case DW_TAG_variable:
-      if (pdi->locdesc)
-	addr = decode_locdesc (pdi->locdesc, cu);
+      if (pdi->d.locdesc)
+	addr = decode_locdesc (pdi->d.locdesc, cu);
 
-      if (pdi->locdesc
+      if (pdi->d.locdesc
 	  && addr == 0
 	  && !dwarf2_per_objfile->has_section_at_zero)
 	{
@@ -4625,7 +4724,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	     used by GDB, but it comes in handy for debugging partial symbol
 	     table building.  */
 
-	  if (pdi->locdesc || pdi->has_type)
+	  if (pdi->d.locdesc || pdi->has_type)
 	    add_psymbol_to_list (actual_name, strlen (actual_name),
 				 built_actual_name,
 				 VAR_DOMAIN, LOC_STATIC,
@@ -4636,7 +4735,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       else
 	{
 	  /* Static Variable.  Skip symbols without location descriptors.  */
-	  if (pdi->locdesc == NULL)
+	  if (pdi->d.locdesc == NULL)
 	    {
 	      if (built_actual_name)
 		xfree (actual_name);
@@ -5079,6 +5178,8 @@ dwarf2_psymtab_to_symtab (struct partial_symtab *pst)
 	    printf_filtered (_("done.\n"));
 	}
     }
+
+  process_cu_includes ();
 }
 
 /* Reading in full CUs.  */
@@ -5086,13 +5187,15 @@ dwarf2_psymtab_to_symtab (struct partial_symtab *pst)
 /* Add PER_CU to the queue.  */
 
 static void
-queue_comp_unit (struct dwarf2_per_cu_data *per_cu)
+queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
+		 enum language pretend_language)
 {
   struct dwarf2_queue_item *item;
 
   per_cu->queued = 1;
   item = xmalloc (sizeof (*item));
   item->per_cu = per_cu;
+  item->pretend_language = pretend_language;
   item->next = NULL;
 
   if (dwarf2_queue == NULL)
@@ -5117,7 +5220,7 @@ process_queue (void)
       if (dwarf2_per_objfile->using_index
 	  ? !item->per_cu->v.quick->symtab
 	  : (item->per_cu->v.psymtab && !item->per_cu->v.psymtab->readin))
-	process_full_comp_unit (item->per_cu);
+	process_full_comp_unit (item->per_cu, item->pretend_language);
 
       item->per_cu->queued = 0;
       next_item = item->next;
@@ -5165,8 +5268,12 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   struct cleanup *back_to;
   int i;
 
+  if (pst->readin)
+    return;
+
   for (i = 0; i < pst->number_of_dependencies; i++)
-    if (!pst->dependencies[i]->readin)
+    if (!pst->dependencies[i]->readin
+	&& pst->dependencies[i]->user == NULL)
       {
         /* Inform about additional files that need to be read in.  */
         if (info_verbose)
@@ -5232,6 +5339,7 @@ load_full_comp_unit_reader (const struct die_reader_specs *reader,
 {
   struct dwarf2_cu *cu = reader->cu;
   struct attribute *attr;
+  enum language *language_ptr = data;
 
   gdb_assert (cu->die_hash == NULL);
   cu->die_hash =
@@ -5255,17 +5363,19 @@ load_full_comp_unit_reader (const struct die_reader_specs *reader,
      or we won't be able to build types correctly.
      Similarly, if we do not read the producer, we can not apply
      producer-specific interpretation.  */
-  prepare_one_comp_unit (cu, cu->dies);
+  prepare_one_comp_unit (cu, cu->dies, *language_ptr);
 }
 
 /* Load the DIEs associated with PER_CU into memory.  */
 
 static void
-load_full_comp_unit (struct dwarf2_per_cu_data *this_cu)
+load_full_comp_unit (struct dwarf2_per_cu_data *this_cu,
+		     enum language pretend_language)
 {
   gdb_assert (! this_cu->is_debug_types);
 
-  init_cutu_and_read_dies (this_cu, 1, 1, load_full_comp_unit_reader, NULL);
+  init_cutu_and_read_dies (this_cu, 1, 1, load_full_comp_unit_reader,
+			   &pretend_language);
 }
 
 /* Add a DIE to the delayed physname list.  */
@@ -5390,11 +5500,117 @@ fixup_go_packaging (struct dwarf2_cu *cu)
     }
 }
 
+static void compute_symtab_includes (struct dwarf2_per_cu_data *per_cu);
+
+/* Return the symtab for PER_CU.  This works properly regardless of
+   whether we're using the index or psymtabs.  */
+
+static struct symtab *
+get_symtab (struct dwarf2_per_cu_data *per_cu)
+{
+  return (dwarf2_per_objfile->using_index
+	  ? per_cu->v.quick->symtab
+	  : per_cu->v.psymtab->symtab);
+}
+
+/* A helper function for computing the list of all symbol tables
+   included by PER_CU.  */
+
+static void
+recursively_compute_inclusions (VEC (dwarf2_per_cu_ptr) **result,
+				htab_t all_children,
+				struct dwarf2_per_cu_data *per_cu)
+{
+  void **slot;
+  int ix;
+  struct dwarf2_per_cu_data *iter;
+
+  slot = htab_find_slot (all_children, per_cu, INSERT);
+  if (*slot != NULL)
+    {
+      /* This inclusion and its children have been processed.  */
+      return;
+    }
+
+  *slot = per_cu;
+  /* Only add a CU if it has a symbol table.  */
+  if (get_symtab (per_cu) != NULL)
+    VEC_safe_push (dwarf2_per_cu_ptr, *result, per_cu);
+
+  for (ix = 0;
+       VEC_iterate (dwarf2_per_cu_ptr, per_cu->imported_symtabs, ix, iter);
+       ++ix)
+    recursively_compute_inclusions (result, all_children, iter);
+}
+
+/* Compute the symtab 'includes' fields for the symtab related to
+   PER_CU.  */
+
+static void
+compute_symtab_includes (struct dwarf2_per_cu_data *per_cu)
+{
+  if (!VEC_empty (dwarf2_per_cu_ptr, per_cu->imported_symtabs))
+    {
+      int ix, len;
+      struct dwarf2_per_cu_data *iter;
+      VEC (dwarf2_per_cu_ptr) *result_children = NULL;
+      htab_t all_children;
+      struct symtab *symtab = get_symtab (per_cu);
+
+      /* If we don't have a symtab, we can just skip this case.  */
+      if (symtab == NULL)
+	return;
+
+      all_children = htab_create_alloc (1, htab_hash_pointer, htab_eq_pointer,
+					NULL, xcalloc, xfree);
+
+      for (ix = 0;
+	   VEC_iterate (dwarf2_per_cu_ptr, per_cu->imported_symtabs,
+			ix, iter);
+	   ++ix)
+	recursively_compute_inclusions (&result_children, all_children, iter);
+
+      /* Now we have a transitive closure of all the included CUs, so
+	 we can convert it to a list of symtabs.  */
+      len = VEC_length (dwarf2_per_cu_ptr, result_children);
+      symtab->includes
+	= obstack_alloc (&dwarf2_per_objfile->objfile->objfile_obstack,
+			 (len + 1) * sizeof (struct symtab *));
+      for (ix = 0;
+	   VEC_iterate (dwarf2_per_cu_ptr, result_children, ix, iter);
+	   ++ix)
+	symtab->includes[ix] = get_symtab (iter);
+      symtab->includes[len] = NULL;
+
+      VEC_free (dwarf2_per_cu_ptr, result_children);
+      htab_delete (all_children);
+    }
+}
+
+/* Compute the 'includes' field for the symtabs of all the CUs we just
+   read.  */
+
+static void
+process_cu_includes (void)
+{
+  int ix;
+  struct dwarf2_per_cu_data *iter;
+
+  for (ix = 0;
+       VEC_iterate (dwarf2_per_cu_ptr, dwarf2_per_objfile->just_read_cus,
+		    ix, iter);
+       ++ix)
+    compute_symtab_includes (iter);
+
+  VEC_free (dwarf2_per_cu_ptr, dwarf2_per_objfile->just_read_cus);
+}
+
 /* Generate full symbol information for PER_CU, whose DIEs have
    already been loaded into memory.  */
 
 static void
-process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
+process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
+			enum language pretend_language)
 {
   struct dwarf2_cu *cu = per_cu->cu;
   struct objfile *objfile = per_cu->objfile;
@@ -5410,6 +5626,9 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
   delayed_list_cleanup = make_cleanup (free_delayed_list, cu);
 
   cu->list_in_scope = &file_symbols;
+
+  cu->language = pretend_language;
+  cu->language_defn = language_def (cu->language);
 
   /* Do line number decoding in read_file_scope () */
   process_die (cu->dies, cu);
@@ -5471,7 +5690,36 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu)
       pst->readin = 1;
     }
 
+  /* Push it for inclusion processing later.  */
+  VEC_safe_push (dwarf2_per_cu_ptr, dwarf2_per_objfile->just_read_cus, per_cu);
+
   do_cleanups (back_to);
+}
+
+/* Process an imported unit DIE.  */
+
+static void
+process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct attribute *attr;
+
+  attr = dwarf2_attr (die, DW_AT_import, cu);
+  if (attr != NULL)
+    {
+      struct dwarf2_per_cu_data *per_cu;
+      struct symtab *imported_symtab;
+      sect_offset offset;
+
+      offset = dwarf2_get_ref_die_offset (attr);
+      per_cu = dwarf2_find_containing_comp_unit (offset, cu->objfile);
+
+      /* Queue the unit, if needed.  */
+      if (maybe_queue_comp_unit (cu, per_cu, cu->language))
+	load_full_comp_unit (per_cu, cu->language);
+
+      VEC_safe_push (dwarf2_per_cu_ptr, cu->per_cu->imported_symtabs,
+		     per_cu);
+    }
 }
 
 /* Process a die and its children.  */
@@ -5484,6 +5732,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_padding:
       break;
     case DW_TAG_compile_unit:
+    case DW_TAG_partial_unit:
       read_file_scope (die, cu);
       break;
     case DW_TAG_type_unit:
@@ -5552,6 +5801,11 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
 		   dwarf_tag_name (die->tag));
       read_import_statement (die, cu);
       break;
+
+    case DW_TAG_imported_unit:
+      process_imported_unit_die (die, cu);
+      break;
+
     default:
       new_symbol (die, NULL, cu);
       break;
@@ -6226,7 +6480,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
     }
 }
 
-/* Process DW_TAG_compile_unit.  */
+/* Process DW_TAG_compile_unit or DW_TAG_partial_unit.  */
 
 static void
 read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
@@ -6255,7 +6509,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   find_file_and_directory (die, cu, &name, &comp_dir);
 
-  prepare_one_comp_unit (cu, die);
+  prepare_one_comp_unit (cu, die, cu->language);
 
   /* The XLCL doesn't generate DW_LANG_OpenCL because this attribute is not
      standardised yet.  As a workaround for the language detection we fall
@@ -6365,7 +6619,7 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (name == NULL)
     name = "<unknown>";
 
-  prepare_one_comp_unit (cu, die);
+  prepare_one_comp_unit (cu, die, language_minimal);
 
   /* We assume that we're processing GCC output.  */
   processing_gcc_compilation = 2;
@@ -10688,7 +10942,8 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  && abbrev->tag != DW_TAG_variable
 	  && abbrev->tag != DW_TAG_namespace
 	  && abbrev->tag != DW_TAG_module
-	  && abbrev->tag != DW_TAG_member)
+	  && abbrev->tag != DW_TAG_member
+	  && abbrev->tag != DW_TAG_imported_unit)
 	{
 	  /* Otherwise we skip to the next sibling, if any.  */
 	  info_ptr = skip_one_die (reader, info_ptr + bytes_read, abbrev);
@@ -10906,6 +11161,7 @@ read_partial_die (const struct die_reader_specs *reader,
 	  switch (part_die->tag)
 	    {
 	    case DW_TAG_compile_unit:
+	    case DW_TAG_partial_unit:
 	    case DW_TAG_type_unit:
 	      /* Compilation units have a DW_AT_name that is a filename, not
 		 a source language identifier.  */
@@ -10950,7 +11206,7 @@ read_partial_die (const struct die_reader_specs *reader,
           /* Support the .debug_loc offsets.  */
           if (attr_form_is_block (&attr))
             {
-	       part_die->locdesc = DW_BLOCK (&attr);
+	       part_die->d.locdesc = DW_BLOCK (&attr);
             }
           else if (attr_form_is_section_offset (&attr))
             {
@@ -11019,6 +11275,12 @@ read_partial_die (const struct die_reader_specs *reader,
 	      || DW_UNSND (&attr) == DW_INL_declared_inlined)
 	    part_die->may_be_inlined = 1;
 	  break;
+
+	case DW_AT_import:
+	  if (part_die->tag == DW_TAG_imported_unit)
+	    part_die->d.offset = dwarf2_get_ref_die_offset (&attr);
+	  break;
+
 	default:
 	  break;
 	}
@@ -14021,6 +14283,7 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	     So it does not need a prefix.  */
 	  return "";
       case DW_TAG_compile_unit:
+      case DW_TAG_partial_unit:
 	/* gcc-4.5 -gdwarf-4 can drop the enclosing namespace.  Cope.  */
 	if (cu->language == language_cplus
 	    && !VEC_empty (dwarf2_section_info_def, dwarf2_per_objfile->types)
@@ -14141,6 +14404,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
   switch (die->tag)
     {
     case DW_TAG_compile_unit:
+    case DW_TAG_partial_unit:
       /* Compilation units have a DW_AT_name that is a filename, not
 	 a source language identifier.  */
     case DW_TAG_enumeration_type:
@@ -14174,7 +14438,8 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	      if (die->tag == DW_TAG_class_type)
 		return dwarf2_name (die, cu);
 	    }
-	  while (die->tag != DW_TAG_compile_unit);
+	  while (die->tag != DW_TAG_compile_unit
+		 && die->tag != DW_TAG_partial_unit);
 	}
       break;
 
@@ -14571,7 +14836,8 @@ dwarf2_get_attr_constant_value (struct attribute *attr, int default_value)
 
 static int
 maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
-		       struct dwarf2_per_cu_data *per_cu)
+		       struct dwarf2_per_cu_data *per_cu,
+		       enum language pretend_language)
 {
   /* We may arrive here during partial symbol reading, if we need full
      DIEs to process an unusual case (e.g. template arguments).  Do
@@ -14600,7 +14866,7 @@ maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
     }
 
   /* Add it to the queue.  */
-  queue_comp_unit (per_cu);
+  queue_comp_unit (per_cu, pretend_language);
 
   return 1;
 }
@@ -14659,8 +14925,8 @@ follow_die_offset (sect_offset offset, struct dwarf2_cu **ref_cu)
       per_cu = dwarf2_find_containing_comp_unit (offset, cu->objfile);
 
       /* If necessary, add it to the queue and load its DIEs.  */
-      if (maybe_queue_comp_unit (cu, per_cu))
-	load_full_comp_unit (per_cu);
+      if (maybe_queue_comp_unit (cu, per_cu, cu->language))
+	load_full_comp_unit (per_cu, cu->language);
 
       target_cu = per_cu->cu;
     }
@@ -14668,7 +14934,7 @@ follow_die_offset (sect_offset offset, struct dwarf2_cu **ref_cu)
     {
       /* We're loading full DIEs during partial symbol reading.  */
       gdb_assert (dwarf2_per_objfile->reading_partial_symbols);
-      load_full_comp_unit (cu->per_cu);
+      load_full_comp_unit (cu->per_cu, language_minimal);
     }
 
   *ref_cu = target_cu;
@@ -14800,7 +15066,7 @@ follow_die_sig (struct die_info *src_die, struct attribute *attr,
 
   /* If necessary, add it to the queue and load its DIEs.  */
 
-  if (maybe_queue_comp_unit (*ref_cu, &sig_type->per_cu))
+  if (maybe_queue_comp_unit (*ref_cu, &sig_type->per_cu, language_minimal))
     read_signatured_type (sig_type);
 
   gdb_assert (sig_type->per_cu.cu != NULL);
@@ -14913,7 +15179,7 @@ read_signatured_type_reader (const struct die_reader_specs *reader,
      or we won't be able to build types correctly.
      Similarly, if we do not read the producer, we can not apply
      producer-specific interpretation.  */
-  prepare_one_comp_unit (cu, cu->dies);
+  prepare_one_comp_unit (cu, cu->dies, language_minimal);
 }
 
 /* Read in a signatured type and build its CU and DIEs.
@@ -16379,7 +16645,8 @@ init_one_comp_unit (struct dwarf2_cu *cu, struct dwarf2_per_cu_data *per_cu)
 /* Initialize basic fields of dwarf_cu CU according to DIE COMP_UNIT_DIE.  */
 
 static void
-prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die)
+prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
+		       enum language pretend_language)
 {
   struct attribute *attr;
 
@@ -16389,7 +16656,7 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die)
     set_cu_language (DW_UNSND (attr), cu);
   else
     {
-      cu->language = language_minimal;
+      cu->language = pretend_language;
       cu->language_defn = language_def (cu->language);
     }
 
@@ -16832,6 +17099,10 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
        VEC_iterate (dwarf2_section_info_def, data->types, ix, section);
        ++ix)
     munmap_section_buffer (section);
+
+  for (ix = 0; ix < dwarf2_per_objfile->n_comp_units; ++ix)
+    VEC_free (dwarf2_per_cu_ptr,
+	      dwarf2_per_objfile->all_comp_units[ix]->imported_symtabs);
 
   VEC_free (dwarf2_section_info_def, data->types);
 
@@ -17393,6 +17664,35 @@ write_one_signatured_type (void **slot, void *d)
   return 1;
 }
 
+/* Recurse into all "included" dependencies and write their symbols as
+   if they appeared in this psymtab.  */
+
+static void
+recursively_write_psymbols (struct objfile *objfile,
+			    struct partial_symtab *psymtab,
+			    struct mapped_symtab *symtab,
+			    htab_t psyms_seen,
+			    offset_type cu_index)
+{
+  int i;
+
+  for (i = 0; i < psymtab->number_of_dependencies; ++i)
+    if (psymtab->dependencies[i]->user != NULL)
+      recursively_write_psymbols (objfile, psymtab->dependencies[i],
+				  symtab, psyms_seen, cu_index);
+
+  write_psymbols (symtab,
+		  psyms_seen,
+		  objfile->global_psymbols.list + psymtab->globals_offset,
+		  psymtab->n_global_syms, cu_index,
+		  0);
+  write_psymbols (symtab,
+		  psyms_seen,
+		  objfile->static_psymbols.list + psymtab->statics_offset,
+		  psymtab->n_static_syms, cu_index,
+		  1);
+}
+
 /* Create an index file for OBJFILE in the directory DIR.  */
 
 static void
@@ -17477,16 +17777,8 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
       struct psymtab_cu_index_map *map;
       void **slot;
 
-      write_psymbols (symtab,
-		      psyms_seen,
-		      objfile->global_psymbols.list + psymtab->globals_offset,
-		      psymtab->n_global_syms, i,
-		      0);
-      write_psymbols (symtab,
-		      psyms_seen,
-		      objfile->static_psymbols.list + psymtab->statics_offset,
-		      psymtab->n_static_syms, i,
-		      1);
+      if (psymtab->user == NULL)
+	recursively_write_psymbols (objfile, psymtab, symtab, psyms_seen, i);
 
       map = &psymtab_cu_index_map[i];
       map->psymtab = psymtab;
