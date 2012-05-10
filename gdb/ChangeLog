@@ -1,5 +1,9 @@
 2012-05-10  Tom Tromey  <tromey@redhat.com>
 
+	* cc-with-dwz.sh: New file.
+
+2012-05-10  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.h (struct symtab) <includes, user>: New fields.
 	* block.h (struct block_iterator) <d, idx, which>: New fields.
 	* block.c (initialize_block_iterator, find_iterator_symtab)
