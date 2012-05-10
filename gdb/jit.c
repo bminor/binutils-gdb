@@ -695,7 +695,11 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   block_iter = NULL;
   for (i = 0; i < FIRST_LOCAL_BLOCK; i++)
     {
-      struct block *new_block = allocate_block (&objfile->objfile_obstack);
+      struct block *new_block;
+
+      new_block = (i == GLOBAL_BLOCK
+		   ? allocate_global_block (&objfile->objfile_obstack)
+		   : allocate_block (&objfile->objfile_obstack));
       BLOCK_DICT (new_block) = dict_create_linear (&objfile->objfile_obstack,
                                                    NULL);
       BLOCK_SUPERBLOCK (new_block) = block_iter;
@@ -705,6 +709,9 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       BLOCK_END (new_block) = (CORE_ADDR) end;
 
       BLOCKVECTOR_BLOCK (symtab->blockvector, i) = new_block;
+
+      if (i == GLOBAL_BLOCK)
+	set_block_symtab (new_block, symtab);
     }
 
   /* Fill up the superblock fields for the real blocks, using the

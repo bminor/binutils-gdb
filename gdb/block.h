@@ -99,6 +99,21 @@ struct block
   language_specific;
 };
 
+/* The global block is singled out so that we can provide a back-link
+   to the primary symtab.  */
+
+struct global_block
+{
+  /* The block.  */
+
+  struct block block;
+
+  /* This holds a pointer to the primary symtab holding this
+     block.  */
+
+  struct symtab *symtab;
+};
+
 #define BLOCK_START(bl)		(bl)->startaddr
 #define BLOCK_END(bl)		(bl)->endaddr
 #define BLOCK_FUNCTION(bl)	(bl)->function
@@ -161,6 +176,9 @@ extern const struct block *block_global_block (const struct block *block);
 
 extern struct block *allocate_block (struct obstack *obstack);
 
+extern struct block *allocate_global_block (struct obstack *obstack);
+
+extern void set_block_symtab (struct block *, struct symtab *);
 
 /* A block iterator.  This structure should be treated as though it
    were opaque; it is only defined here because we want to support

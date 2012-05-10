@@ -370,6 +370,29 @@ allocate_block (struct obstack *obstack)
   return bl;
 }
 
+/* Allocate a global block.  */
+
+struct block *
+allocate_global_block (struct obstack *obstack)
+{
+  struct global_block *bl = OBSTACK_ZALLOC (obstack, struct global_block);
+
+  return &bl->block;
+}
+
+/* Set the symtab of the global block.  */
+
+void
+set_block_symtab (struct block *block, struct symtab *symtab)
+{
+  struct global_block *gb;
+
+  gdb_assert (BLOCK_SUPERBLOCK (block) == NULL);
+  gb = (struct global_block *) block;
+  gdb_assert (gb->symtab == NULL);
+  gb->symtab = symtab;
+}
+
 
 
 /* See block.h.  */

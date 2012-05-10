@@ -214,11 +214,12 @@ free_pending_blocks (void)
    the order the symbols have in the list (reversed from the input
    file).  Put the block on the list of pending blocks.  */
 
-struct block *
-finish_block (struct symbol *symbol, struct pending **listhead,
-	      struct pending_block *old_blocks,
-	      CORE_ADDR start, CORE_ADDR end,
-	      struct objfile *objfile)
+static struct block *
+finish_block_internal (struct symbol *symbol, struct pending **listhead,
+		       struct pending_block *old_blocks,
+		       CORE_ADDR start, CORE_ADDR end,
+		       struct objfile *objfile,
+		       int is_global)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct pending *next, *next1;
@@ -226,7 +227,9 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   struct pending_block *pblock;
   struct pending_block *opblock;
 
-  block = allocate_block (&objfile->objfile_obstack);
+  block = (is_global
+	   ? allocate_global_block (&objfile->objfile_obstack)
+	   : allocate_block (&objfile->objfile_obstack));
 
   if (symbol)
     {
@@ -241,9 +244,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 
   BLOCK_START (block) = start;
   BLOCK_END (block) = end;
-  /* Superblock filled in when containing block is made.  */
-  BLOCK_SUPERBLOCK (block) = NULL;
-  BLOCK_NAMESPACE (block) = NULL;
 
   /* Put the block in as the value of the symbol that names it.  */
 
@@ -387,6 +387,15 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   return block;
 }
 
+struct block *
+finish_block (struct symbol *symbol, struct pending **listhead,
+	      struct pending_block *old_blocks,
+	      CORE_ADDR start, CORE_ADDR end,
+	      struct objfile *objfile)
+{
+  return finish_block_internal (symbol, listhead, old_blocks,
+				start, end, objfile, 0);
+}
 
 /* Record BLOCK on the list of all blocks in the file.  Put it after
    OPBLOCK, or at the beginning if opblock is NULL.  This puts the
@@ -1017,8 +1026,8 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
          blockvector.  */
       finish_block (0, &file_symbols, 0, last_source_start_addr,
 		    end_addr, objfile);
-      finish_block (0, &global_symbols, 0, last_source_start_addr,
-		    end_addr, objfile);
+      finish_block_internal (0, &global_symbols, 0, last_source_start_addr,
+			     end_addr, objfile, 1);
       blockvector = make_blockvector (objfile);
     }
 
@@ -1158,6 +1167,14 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
   if (symtab)
     {
       symtab->primary = 1;
+
+      if (symtab->blockvector)
+	{
+	  struct block *b = BLOCKVECTOR_BLOCK (symtab->blockvector,
+					       GLOBAL_BLOCK);
+
+	  set_block_symtab (b, symtab);
+	}
     }
 
   /* Default any symbols without a specified symtab to the primary

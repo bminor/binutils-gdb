@@ -1,5 +1,20 @@
 2012-05-10  Tom Tromey  <tromey@redhat.com>
 
+	* jv-lang.c (get_java_class_symtab): Use allocate_global_block,
+	set_block_symtab.
+	* jit.c (finalize_symtab): Use allocate_global_block,
+	set_block_symtab.
+	* buildsym.c (finish_block_internal): New function, from old
+	finish_block.
+	(finish_block): Rewrite.
+	(end_symtab): Use finish_block_internal, set_block_symtab.
+	* block.h (struct global_block): New.
+	(allocate_global_block, set_block_symtab): Declare.
+	* block.c (allocate_global_block, set_block_symtab): New
+	functions.
+
+2012-05-10  Tom Tromey  <tromey@redhat.com>
+
 	* psymtab.c (partial_map_expand_apply): Add assertion.
 	(partial_map_symtabs_matching_filename): Skip included psymtabs.
 	(psymtab_to_symtab): Find unshared psymtab.
