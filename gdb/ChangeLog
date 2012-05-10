@@ -1,3 +1,7 @@
+2012-05-10  Tristan Gingold  <gingold@adacore.com>
+
+	* printcmd.c (set_command): Add pre/post inc/dec.
+
 2012-05-09  Frank Ch. Eigler  <fche@redhat.com>
 
 	* gdb.1: Document -ex option.
