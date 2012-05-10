@@ -4524,6 +4524,7 @@ elf_x86_64_reloc_type_class (const Elf_Internal_Rela *rela)
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {
     case R_X86_64_RELATIVE:
+    case R_X86_64_RELATIVE64:
       return reloc_class_relative;
     case R_X86_64_JUMP_SLOT:
       return reloc_class_plt;
