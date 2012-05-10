@@ -9175,8 +9175,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	  {
 	  case BFD_RELOC_64:
 	    /* Check addend overflow.  */
-	    if ((long long) fixp->fx_offset > 0x7fffffffLL
-		|| (long long) fixp->fx_offset < -0x80000000LL)
+	    if (!fits_in_signed_long (fixp->fx_offset))
 	      {
 		as_bad_where (fixp->fx_file, fixp->fx_line,
 			      _("cannot represent relocation %s with addend %lld in x32 mode"),

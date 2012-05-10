@@ -1,5 +1,9 @@
 2012-05-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (tc_gen_reloc): Use fits_in_signed_long.
+
+2012-05-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (tc_gen_reloc): Check x32 addend overflow
 	for BFD_RELOC_64.
 
