@@ -1,5 +1,10 @@
 2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Display signed
+	hex number in x32 addend overflow check.
+
+2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-x86-64.c (elf_x86_64_reloc_type_class): Handle
 	R_X86_64_RELATIVE64.
 

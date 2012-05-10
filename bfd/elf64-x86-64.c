@@ -3686,19 +3686,28 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 			  != (rel->r_addend & 0x80000000))
 			{
 			  const char *name;
+			  long addend = rel->r_addend;
 			  if (h && h->root.root.string)
 			    name = h->root.root.string;
 			  else
 			    name = bfd_elf_sym_name (input_bfd, symtab_hdr,
 						     sym, NULL);
-			  (*_bfd_error_handler)
-			    (_("%B: addend %ld in relocation %s against "
-			       "symbol `%s' at 0x%lx in section `%A' is "
-			       "out of range"),
-			     input_bfd, input_section,
-			     (long) rel->r_addend,
-			     x86_64_elf_howto_table[r_type].name,
-			     name, (unsigned long) rel->r_offset);
+			  if (addend < 0)
+			    (*_bfd_error_handler)
+			      (_("%B: addend -0x%lx in relocation %s against "
+				 "symbol `%s' at 0x%lx in section `%A' is "
+				 "out of range"),
+			       input_bfd, input_section, addend,
+			       x86_64_elf_howto_table[r_type].name,
+			       name, (unsigned long) rel->r_offset);
+			  else
+			    (*_bfd_error_handler)
+			      (_("%B: addend 0x%lx in relocation %s against "
+				 "symbol `%s' at 0x%lx in section `%A' is "
+				 "out of range"),
+			       input_bfd, input_section, addend,
+			       x86_64_elf_howto_table[r_type].name,
+			       name, (unsigned long) rel->r_offset);
 			  bfd_set_error (bfd_error_bad_value);
 			  return FALSE;
 			}

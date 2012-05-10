@@ -1,5 +1,9 @@
 2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-x86-64/ilp32-11.d: Updated.
+
+2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-x86-64/pr13082-1a.d: Check RELACOUNT.
 	* ld-x86-64/pr13082-1b.d: Likewise.
 

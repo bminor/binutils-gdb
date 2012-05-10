@@ -9177,10 +9177,17 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	    /* Check addend overflow.  */
 	    if (!fits_in_signed_long (fixp->fx_offset))
 	      {
-		as_bad_where (fixp->fx_file, fixp->fx_line,
-			      _("cannot represent relocation %s with addend %lld in x32 mode"),
-			      bfd_get_reloc_code_name (code),
-			      (long long) fixp->fx_offset);
+		long long addend = fixp->fx_offset;
+		if (addend < 0)
+		  as_bad_where (fixp->fx_file, fixp->fx_line,
+				_("cannot represent relocation %s with "
+				  "addend -0x%llx in x32 mode"),
+				bfd_get_reloc_code_name (code), -addend);
+		else
+		  as_bad_where (fixp->fx_file, fixp->fx_line,
+				_("cannot represent relocation %s with "
+				  "addend 0x%llx in x32 mode"),
+				bfd_get_reloc_code_name (code), addend);
 	      }
 	    break;
 	  case BFD_RELOC_X86_64_DTPOFF64:
