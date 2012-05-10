@@ -1,3 +1,8 @@
+2012-05-10  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf.c (read_and_display_attr_value): Don't look up tag from
+	abbrev for DW_FORM_ref_addr.
+
 2012-05-08  Sean Keys  <skeys@ipdatasys.com>
 	
 	* binutils/MAINTAINERS: Added my entry to the maintainers secion.

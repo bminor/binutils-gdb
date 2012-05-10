@@ -1716,11 +1716,17 @@ read_and_display_attr_value (unsigned long attribute,
 	    abbrev_number = read_leb128 (section->start + uvalue, NULL, 0);
 
 	    printf (_("[Abbrev Number: %ld"), abbrev_number);
-	    for (entry = first_abbrev; entry != NULL; entry = entry->next)
-	      if (entry->entry == abbrev_number)
-		break;
-	    if (entry != NULL)
-	      printf (" (%s)", get_TAG_name (entry->tag));
+	    /* Don't look up abbrev for DW_FORM_ref_addr, as it very often will
+	       use different abbrev table, and we don't track .debug_info chunks
+	       yet.  */
+	    if (form != DW_FORM_ref_addr)
+	      {
+		for (entry = first_abbrev; entry != NULL; entry = entry->next)
+		  if (entry->entry == abbrev_number)
+		    break;
+		if (entry != NULL)
+		  printf (" (%s)", get_TAG_name (entry->tag));
+	      }
 	    printf ("]");
 	  }
       }
