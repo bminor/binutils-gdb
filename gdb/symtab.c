@@ -95,7 +95,8 @@ struct symbol *lookup_symbol_aux_local (const char *name,
 static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  const char *name,
-					  const domain_enum domain);
+					  const domain_enum domain,
+					  struct objfile *exclude_objfile);
 
 static
 struct symbol *lookup_symbol_aux_quick (struct objfile *objfile,
@@ -1361,7 +1362,7 @@ lookup_static_symbol_aux (const char *name, const domain_enum domain)
   struct objfile *objfile;
   struct symbol *sym;
 
-  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, domain);
+  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, domain, NULL);
   if (sym != NULL)
     return sym;
 
@@ -1500,40 +1501,61 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
   return NULL;
 }
 
-/* Check to see if the symbol is defined in one of the symtabs.
-   BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
+/* Check to see if the symbol is defined in one of the OBJFILE's
+   symtabs.  BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
    depending on whether or not we want to search global symbols or
    static symbols.  */
 
 static struct symbol *
-lookup_symbol_aux_symtabs (int block_index, const char *name,
-			   const domain_enum domain)
+lookup_symbol_aux_objfile (struct objfile *objfile, int block_index,
+			   const char *name, const domain_enum domain)
 {
-  struct symbol *sym;
-  struct objfile *objfile;
+  struct symbol *sym = NULL;
   struct blockvector *bv;
   const struct block *block;
   struct symtab *s;
 
+  if (objfile->sf)
+    objfile->sf->qf->pre_expand_symtabs_matching (objfile, block_index,
+						  name, domain);
+
+  ALL_OBJFILE_SYMTABS (objfile, s)
+    if (s->primary)
+      {
+	bv = BLOCKVECTOR (s);
+	block = BLOCKVECTOR_BLOCK (bv, block_index);
+	sym = lookup_block_symbol (block, name, domain);
+	if (sym)
+	  {
+	    block_found = block;
+	    return fixup_symbol_section (sym, objfile);
+	  }
+      }
+
+  return NULL;
+}
+
+/* Same as lookup_symbol_aux_objfile, except that it searches all
+   objfiles except for EXCLUDE_OBJFILE.  Return the first match found.
+
+   If EXCLUDE_OBJFILE is NULL, then all objfiles are searched.  */
+
+static struct symbol *
+lookup_symbol_aux_symtabs (int block_index, const char *name,
+			   const domain_enum domain,
+			   struct objfile *exclude_objfile)
+{
+  struct symbol *sym;
+  struct objfile *objfile;
+
   ALL_OBJFILES (objfile)
   {
-    if (objfile->sf)
-      objfile->sf->qf->pre_expand_symtabs_matching (objfile,
-						    block_index,
-						    name, domain);
-
-    ALL_OBJFILE_SYMTABS (objfile, s)
-      if (s->primary)
-	{
-	  bv = BLOCKVECTOR (s);
-	  block = BLOCKVECTOR_BLOCK (bv, block_index);
-	  sym = lookup_block_symbol (block, name, domain);
-	  if (sym)
-	    {
-	      block_found = block;
-	      return fixup_symbol_section (sym, objfile);
-	    }
-	}
+    if (objfile != exclude_objfile)
+      {
+	sym = lookup_symbol_aux_objfile (objfile, block_index, name, domain);
+	if (sym)
+	  return sym;
+      }
   }
 
   return NULL;
@@ -1659,24 +1681,46 @@ lookup_symbol_global (const char *name,
 		      const domain_enum domain)
 {
   struct symbol *sym = NULL;
+  struct objfile *block_objfile = NULL;
   struct objfile *objfile = NULL;
 
   /* Call library-specific lookup procedure.  */
-  objfile = lookup_objfile_from_block (block);
-  if (objfile != NULL)
-    sym = solib_global_lookup (objfile, name, domain);
+  block_objfile = lookup_objfile_from_block (block);
+  if (block_objfile != NULL)
+    sym = solib_global_lookup (block_objfile, name, domain);
   if (sym != NULL)
     return sym;
 
-  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, domain);
+  /* If BLOCK_OBJFILE is not NULL, then search this objfile first.
+     In case the global symbol is defined in multiple objfiles,
+     we have a better chance of finding the most relevant symbol.  */
+
+  if (block_objfile != NULL)
+    {
+      sym = lookup_symbol_aux_objfile (block_objfile, GLOBAL_BLOCK,
+				       name, domain);
+      if (sym == NULL)
+	sym = lookup_symbol_aux_quick (block_objfile, GLOBAL_BLOCK,
+				       name, domain);
+      if (sym != NULL)
+	return sym;
+    }
+
+  /* Symbol not found in the BLOCK_OBJFILE, so try all the other
+     objfiles, starting with symtabs first, and then partial symtabs.  */
+
+  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, domain, block_objfile);
   if (sym != NULL)
     return sym;
 
   ALL_OBJFILES (objfile)
   {
-    sym = lookup_symbol_aux_quick (objfile, GLOBAL_BLOCK, name, domain);
-    if (sym)
-      return sym;
+    if (objfile != block_objfile)
+      {
+	sym = lookup_symbol_aux_quick (objfile, GLOBAL_BLOCK, name, domain);
+	if (sym)
+	  return sym;
+      }
   }
 
   return NULL;
