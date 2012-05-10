@@ -1,3 +1,8 @@
+2012-05-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/ctxobj-f.c, gdb.base/ctxobj-m.c, gdb.base/ctxobj-v.c,
+	gdb.base/ctxobj.exp: New files.
+
 2012-05-09  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.trace/strace.exp: Add 'quiet' to compiler flags.
