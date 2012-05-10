@@ -393,7 +393,125 @@ set_block_symtab (struct block *block, struct symtab *symtab)
   gb->symtab = symtab;
 }
 
+/* Return the symtab of the global block.  */
+
+static struct symtab *
+get_block_symtab (const struct block *block)
+{
+  struct global_block *gb;
+
+  gdb_assert (BLOCK_SUPERBLOCK (block) == NULL);
+  gb = (struct global_block *) block;
+  gdb_assert (gb->symtab != NULL);
+  return gb->symtab;
+}
+
 
+
+/* Initialize a block iterator, either to iterate over a single block,
+   or, for static and global blocks, all the included symtabs as
+   well.  */
+
+static void
+initialize_block_iterator (const struct block *block,
+			   struct block_iterator *iter)
+{
+  enum block_enum which;
+  struct symtab *symtab;
+
+  iter->idx = -1;
+
+  if (BLOCK_SUPERBLOCK (block) == NULL)
+    {
+      which = GLOBAL_BLOCK;
+      symtab = get_block_symtab (block);
+    }
+  else if (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL)
+    {
+      which = STATIC_BLOCK;
+      symtab = get_block_symtab (BLOCK_SUPERBLOCK (block));
+    }
+  else
+    {
+      iter->d.block = block;
+      /* A signal value meaning that we're iterating over a single
+	 block.  */
+      iter->which = FIRST_LOCAL_BLOCK;
+      return;
+    }
+
+  /* If this is an included symtab, find the canonical includer and
+     use it instead.  */
+  while (symtab->user != NULL)
+    symtab = symtab->user;
+
+  /* Putting this check here simplifies the logic of the iterator
+     functions.  If there are no included symtabs, we only need to
+     search a single block, so we might as well just do that
+     directly.  */
+  if (symtab->includes == NULL)
+    {
+      iter->d.block = block;
+      /* A signal value meaning that we're iterating over a single
+	 block.  */
+      iter->which = FIRST_LOCAL_BLOCK;
+    }
+  else
+    {
+      iter->d.symtab = symtab;
+      iter->which = which;
+    }
+}
+
+/* A helper function that finds the current symtab over whose static
+   or global block we should iterate.  */
+
+static struct symtab *
+find_iterator_symtab (struct block_iterator *iterator)
+{
+  if (iterator->idx == -1)
+    return iterator->d.symtab;
+  return iterator->d.symtab->includes[iterator->idx];
+}
+
+/* Perform a single step for a plain block iterator, iterating across
+   symbol tables as needed.  Returns the next symbol, or NULL when
+   iteration is complete.  */
+
+static struct symbol *
+block_iterator_step (struct block_iterator *iterator, int first)
+{
+  struct symbol *sym;
+
+  gdb_assert (iterator->which != FIRST_LOCAL_BLOCK);
+
+  while (1)
+    {
+      if (first)
+	{
+	  struct symtab *symtab = find_iterator_symtab (iterator);
+	  const struct block *block;
+
+	  /* Iteration is complete.  */
+	  if (symtab == NULL)
+	    return  NULL;
+
+	  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), iterator->which);
+	  sym = dict_iterator_first (BLOCK_DICT (block), &iterator->dict_iter);
+	}
+      else
+	sym = dict_iterator_next (&iterator->dict_iter);
+
+      if (sym != NULL)
+	return sym;
+
+      /* We have finished iterating the appropriate block of one
+	 symtab.  Now advance to the next symtab and begin iteration
+	 there.  */
+      ++iterator->idx;
+      first = 1;
+    }
+}
 
 /* See block.h.  */
 
@@ -401,7 +519,12 @@ struct symbol *
 block_iterator_first (const struct block *block,
 		      struct block_iterator *iterator)
 {
-  return dict_iterator_first (block->dict, &iterator->dict_iter);
+  initialize_block_iterator (block, iterator);
+
+  if (iterator->which == FIRST_LOCAL_BLOCK)
+    return dict_iterator_first (block->dict, &iterator->dict_iter);
+
+  return block_iterator_step (iterator, 1);
 }
 
 /* See block.h.  */
@@ -409,7 +532,51 @@ block_iterator_first (const struct block *block,
 struct symbol *
 block_iterator_next (struct block_iterator *iterator)
 {
-  return dict_iterator_next (&iterator->dict_iter);
+  if (iterator->which == FIRST_LOCAL_BLOCK)
+    return dict_iterator_next (&iterator->dict_iter);
+
+  return block_iterator_step (iterator, 0);
+}
+
+/* Perform a single step for a "name" block iterator, iterating across
+   symbol tables as needed.  Returns the next symbol, or NULL when
+   iteration is complete.  */
+
+static struct symbol *
+block_iter_name_step (struct block_iterator *iterator, const char *name,
+		      int first)
+{
+  struct symbol *sym;
+
+  gdb_assert (iterator->which != FIRST_LOCAL_BLOCK);
+
+  while (1)
+    {
+      if (first)
+	{
+	  struct symtab *symtab = find_iterator_symtab (iterator);
+	  const struct block *block;
+
+	  /* Iteration is complete.  */
+	  if (symtab == NULL)
+	    return  NULL;
+
+	  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), iterator->which);
+	  sym = dict_iter_name_first (BLOCK_DICT (block), name,
+				      &iterator->dict_iter);
+	}
+      else
+	sym = dict_iter_name_next (name, &iterator->dict_iter);
+
+      if (sym != NULL)
+	return sym;
+
+      /* We have finished iterating the appropriate block of one
+	 symtab.  Now advance to the next symtab and begin iteration
+	 there.  */
+      ++iterator->idx;
+      first = 1;
+    }
 }
 
 /* See block.h.  */
@@ -419,7 +586,12 @@ block_iter_name_first (const struct block *block,
 		       const char *name,
 		       struct block_iterator *iterator)
 {
-  return dict_iter_name_first (block->dict, name, &iterator->dict_iter);
+  initialize_block_iterator (block, iterator);
+
+  if (iterator->which == FIRST_LOCAL_BLOCK)
+    return dict_iter_name_first (block->dict, name, &iterator->dict_iter);
+
+  return block_iter_name_step (iterator, name, 1);
 }
 
 /* See block.h.  */
@@ -427,7 +599,53 @@ block_iter_name_first (const struct block *block,
 struct symbol *
 block_iter_name_next (const char *name, struct block_iterator *iterator)
 {
-  return dict_iter_name_next (name, &iterator->dict_iter);
+  if (iterator->which == FIRST_LOCAL_BLOCK)
+    return dict_iter_name_next (name, &iterator->dict_iter);
+
+  return block_iter_name_step (iterator, name, 0);
+}
+
+/* Perform a single step for a "match" block iterator, iterating
+   across symbol tables as needed.  Returns the next symbol, or NULL
+   when iteration is complete.  */
+
+static struct symbol *
+block_iter_match_step (struct block_iterator *iterator,
+		       const char *name,
+		       symbol_compare_ftype *compare,
+		       int first)
+{
+  struct symbol *sym;
+
+  gdb_assert (iterator->which != FIRST_LOCAL_BLOCK);
+
+  while (1)
+    {
+      if (first)
+	{
+	  struct symtab *symtab = find_iterator_symtab (iterator);
+	  const struct block *block;
+
+	  /* Iteration is complete.  */
+	  if (symtab == NULL)
+	    return  NULL;
+
+	  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), iterator->which);
+	  sym = dict_iter_match_first (BLOCK_DICT (block), name,
+				       compare, &iterator->dict_iter);
+	}
+      else
+	sym = dict_iter_match_next (name, compare, &iterator->dict_iter);
+
+      if (sym != NULL)
+	return sym;
+
+      /* We have finished iterating the appropriate block of one
+	 symtab.  Now advance to the next symtab and begin iteration
+	 there.  */
+      ++iterator->idx;
+      first = 1;
+    }
 }
 
 /* See block.h.  */
@@ -438,8 +656,13 @@ block_iter_match_first (const struct block *block,
 			symbol_compare_ftype *compare,
 			struct block_iterator *iterator)
 {
-  return dict_iter_match_first (block->dict, name, compare,
-				&iterator->dict_iter);
+  initialize_block_iterator (block, iterator);
+
+  if (iterator->which == FIRST_LOCAL_BLOCK)
+    return dict_iter_match_first (block->dict, name, compare,
+				  &iterator->dict_iter);
+
+  return block_iter_match_step (iterator, name, compare, 1);
 }
 
 /* See block.h.  */
@@ -449,5 +672,8 @@ block_iter_match_next (const char *name,
 		       symbol_compare_ftype *compare,
 		       struct block_iterator *iterator)
 {
-  return dict_iter_match_next (name, compare, &iterator->dict_iter);
+  if (iterator->which == FIRST_LOCAL_BLOCK)
+    return dict_iter_match_next (name, compare, &iterator->dict_iter);
+
+  return block_iter_match_step (iterator, name, compare, 0);
 }

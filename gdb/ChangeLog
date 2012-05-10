@@ -1,5 +1,17 @@
 2012-05-10  Tom Tromey  <tromey@redhat.com>
 
+	* symtab.h (struct symtab) <includes, user>: New fields.
+	* block.h (struct block_iterator) <d, idx, which>: New fields.
+	* block.c (initialize_block_iterator, find_iterator_symtab)
+	(block_iterator_step, block_iter_name_step)
+	(block_iter_match_step): New functions.
+	(block_iterator_first, block_iterator_next)
+	(block_iter_name_first, block_iter_name_next)
+	(block_iter_match_first, block_iter_match_next): Rewrite.
+	(get_block_symtab): New function.
+
+2012-05-10  Tom Tromey  <tromey@redhat.com>
+
 	* jv-lang.c (get_java_class_symtab): Use allocate_global_block,
 	set_block_symtab.
 	* jit.c (finalize_symtab): Use allocate_global_block,

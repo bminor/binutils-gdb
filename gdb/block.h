@@ -186,6 +186,28 @@ extern void set_block_symtab (struct block *, struct symtab *);
 
 struct block_iterator
 {
+  /* If we're iterating over a single block, this holds the block.
+     Otherwise, it holds the canonical symtab.  */
+
+  union
+  {
+    struct symtab *symtab;
+    const struct block *block;
+  } d;
+
+  /* If we're iterating over a single block, this is always -1.
+     Otherwise, it holds the index of the current "included" symtab in
+     the canonical symtab (that is, d.symtab->includes[idx]), with -1
+     meaning the canonical symtab itself.  */
+
+  int idx;
+
+  /* Which block, either static or global, to iterate over.  If this
+     is FIRST_LOCAL_BLOCK, then we are iterating over a single block.
+     This is used to select which field of 'd' is in use.  */
+
+  enum block_enum which;
+
   /* The underlying dictionary iterator.  */
 
   struct dict_iterator dict_iter;
