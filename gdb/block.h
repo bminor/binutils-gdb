@@ -20,6 +20,8 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+#include "dictionary.h"
+
 /* Opaque declarations.  */
 
 struct symbol;
@@ -27,7 +29,6 @@ struct symtab;
 struct block_namespace_info;
 struct using_direct;
 struct obstack;
-struct dictionary;
 struct addrmap;
 
 /* All of the name-scope contours of the program
@@ -105,13 +106,6 @@ struct block
 #define BLOCK_DICT(bl)		(bl)->dict
 #define BLOCK_NAMESPACE(bl)   (bl)->language_specific.cplus_specific.namespace
 
-/* Macro to loop through all symbols in a block BL, in no particular
-   order.  ITER helps keep track of the iteration, and should be a
-   struct dict_iterator.  SYM points to the current symbol.  */
-
-#define ALL_BLOCK_SYMBOLS(block, iter, sym)			\
-	ALL_DICT_SYMBOLS (BLOCK_DICT (block), iter, sym)
-
 struct blockvector
 {
   /* Number of blocks in the list.  */
@@ -166,5 +160,81 @@ extern const struct block *block_static_block (const struct block *block);
 extern const struct block *block_global_block (const struct block *block);
 
 extern struct block *allocate_block (struct obstack *obstack);
+
+
+/* A block iterator.  This structure should be treated as though it
+   were opaque; it is only defined here because we want to support
+   stack allocation of iterators.  */
+
+struct block_iterator
+{
+  /* The underlying dictionary iterator.  */
+
+  struct dict_iterator dict_iter;
+};
+
+/* Initialize ITERATOR to point at the first symbol in BLOCK, and
+   return that first symbol, or NULL if BLOCK is empty.  */
+
+extern struct symbol *block_iterator_first (const struct block *block,
+					    struct block_iterator *iterator);
+
+/* Advance ITERATOR, and return the next symbol, or NULL if there are
+   no more symbols.  Don't call this if you've previously received
+   NULL from block_iterator_first or block_iterator_next on this
+   iteration.  */
+
+extern struct symbol *block_iterator_next (struct block_iterator *iterator);
+
+/* Initialize ITERATOR to point at the first symbol in BLOCK whose
+   SYMBOL_SEARCH_NAME is NAME (as tested using strcmp_iw), and return
+   that first symbol, or NULL if there are no such symbols.  */
+
+extern struct symbol *block_iter_name_first (const struct block *block,
+					     const char *name,
+					     struct block_iterator *iterator);
+
+/* Advance ITERATOR to point at the next symbol in BLOCK whose
+   SYMBOL_SEARCH_NAME is NAME (as tested using strcmp_iw), or NULL if
+   there are no more such symbols.  Don't call this if you've
+   previously received NULL from block_iterator_first or
+   block_iterator_next on this iteration.  And don't call it unless
+   ITERATOR was created by a previous call to block_iter_name_first
+   with the same NAME.  */
+
+extern struct symbol *block_iter_name_next (const char *name,
+					    struct block_iterator *iterator);
+
+/* Initialize ITERATOR to point at the first symbol in BLOCK whose
+   SYMBOL_SEARCH_NAME is NAME, as tested using COMPARE (which must use
+   the same conventions as strcmp_iw and be compatible with any
+   block hashing function), and return that first symbol, or NULL
+   if there are no such symbols.  */
+
+extern struct symbol *block_iter_match_first (const struct block *block,
+					      const char *name,
+					      symbol_compare_ftype *compare,
+					      struct block_iterator *iterator);
+
+/* Advance ITERATOR to point at the next symbol in BLOCK whose
+   SYMBOL_SEARCH_NAME is NAME, as tested using COMPARE (see
+   block_iter_match_first), or NULL if there are no more such symbols.
+   Don't call this if you've previously received NULL from 
+   block_iterator_match_first or block_iterator_match_next on this
+   iteration.  And don't call it unless ITERATOR was created by a
+   previous call to block_iter_match_first with the same NAME and COMPARE.  */
+
+extern struct symbol *block_iter_match_next (const char *name,
+					     symbol_compare_ftype *compare,
+					     struct block_iterator *iterator);
+
+/* Macro to loop through all symbols in a block BL, in no particular
+   order.  ITER helps keep track of the iteration, and should be a
+   struct block_iterator.  SYM points to the current symbol.  */
+
+#define ALL_BLOCK_SYMBOLS(block, iter, sym)		\
+  for ((sym) = block_iterator_first ((block), &(iter));	\
+       (sym);						\
+       (sym) = block_iterator_next (&(iter)))
 
 #endif /* BLOCK_H */

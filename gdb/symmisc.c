@@ -353,8 +353,9 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 	    }
 	  fprintf_filtered (outfile, "\n");
 	  /* Now print each symbol in this block (in no particular order, if
-	     we're using a hashtable).  */
-	  ALL_BLOCK_SYMBOLS (b, iter, sym)
+	     we're using a hashtable).  Note that we only want this
+	     block, not any blocks from included symtabs.  */
+	  ALL_DICT_SYMBOLS (BLOCK_DICT (b), iter, sym)
 	    {
 	      struct print_symbol_args s;
 

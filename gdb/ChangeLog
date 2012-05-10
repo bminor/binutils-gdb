@@ -1,5 +1,39 @@
 2012-05-10  Tom Tromey  <tromey@redhat.com>
 
+	* tracepoint.c (scope_info): Update.
+	* symtab.c (lookup_block_symbol, iterate_over_symbols)
+	(find_pc_sect_symtab, search_symbols)
+	(default_make_symbol_completion_list_break_on)
+	(make_file_symbol_completion_list): Update.
+	* symmisc.c (dump_symtab_1): Update.
+	* stack.c (print_frame_args, iterate_over_block_locals)
+	(print_frame_labels, iterate_over_block_arg_vars): Update.
+	* python/py-block.c (block_object) <dict>: Remove.
+	<block>: New field.
+	<iter>: Change type.
+	(blpy_iter): Update.
+	(blpy_block_syms_iternext): Update.
+	* psymtab.c (map_block): Use block iterators.
+	* objfiles.c (objfile_relocate1): Use ALL_DICT_SYMBOLS.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Update.
+	* mdebugread.c (parse_symbol, mylookup_symbol): Update.
+	* infrun.c (check_exception_resume): Update.
+	* cp-support.c (make_symbol_overload_list_block): Update.
+	* coffread.c (patch_opaque_types): Update.
+	* buildsym.c (finish_block, end_symtab): Use ALL_DICT_SYMBOLS.
+	* block.h (struct block_iterator): New.
+	(block_iterator_first, block_iterator_next, block_iter_name_first)
+	(block_iter_name_next, block_iter_match_first)
+	(block_iter_match_next): Declare.
+	(ALL_BLOCK_SYMBOLS): Redefine.
+	* block.c (block_iterator_first, block_iterator_next)
+	(block_iter_name_first, block_iter_name_next)
+	(block_iter_match_first, block_iter_match_next): New functions.
+	* ada-lang.c (ada_add_block_symbols)
+	(ada_make_symbol_completion_list): Use block iterator.
+
+2012-05-10  Tom Tromey  <tromey@redhat.com>
+
 	* psymtab.c (PSYMTAB_TO_SYMTAB): Remove.
 	(find_pc_sect_symtab_from_partial, lookup_symbol_aux_psymtabs)
 	(lookup_partial_symbol, find_last_source_symtab_from_partial)

@@ -2612,7 +2612,7 @@ scope_info (char *args, int from_tty)
   struct block *block;
   const char *symname;
   char *save_args = args;
-  struct dict_iterator iter;
+  struct block_iterator iter;
   int j, count = 0;
   struct gdbarch *gdbarch;
   int regno;

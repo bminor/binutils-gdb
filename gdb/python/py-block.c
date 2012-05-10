@@ -41,10 +41,10 @@ typedef struct blpy_block_object {
 
 typedef struct {
   PyObject_HEAD
-  /* The block dictionary of symbols.  */
-  struct dictionary *dict;
-  /* The iterator for that dictionary.  */
-  struct dict_iterator iter;
+  /* The block.  */
+  const struct block *block;
+  /* The iterator for that block.  */
+  struct block_iterator iter;
   /* Has the iterator been initialized flag.  */
   int initialized_p;
   /* Pointer back to the original source block object.  Needed to
@@ -94,7 +94,7 @@ blpy_iter (PyObject *self)
   if (block_iter_obj == NULL)
       return NULL;
 
-  block_iter_obj->dict = BLOCK_DICT (block);
+  block_iter_obj->block = block;
   block_iter_obj->initialized_p = 0;
   Py_INCREF (self);
   block_iter_obj->source = (block_object *) self;
@@ -311,11 +311,11 @@ blpy_block_syms_iternext (PyObject *self)
 
   if (!iter_obj->initialized_p)
     {
-      sym = dict_iterator_first (iter_obj->dict,  &(iter_obj->iter));
+      sym = block_iterator_first (iter_obj->block,  &(iter_obj->iter));
       iter_obj->initialized_p = 1;
     }
   else
-    sym = dict_iterator_next (&(iter_obj->iter));
+    sym = block_iterator_next (&(iter_obj->iter));
 
   if (sym == NULL)
     {

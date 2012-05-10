@@ -5620,7 +5620,7 @@ check_exception_resume (struct execution_control_state *ecs,
   TRY_CATCH (e, RETURN_MASK_ERROR)
     {
       struct block *b;
-      struct dict_iterator iter;
+      struct block_iterator iter;
       struct symbol *sym;
       int argno = 0;
 

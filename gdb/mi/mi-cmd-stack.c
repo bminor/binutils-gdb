@@ -328,7 +328,7 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 {
   struct block *block;
   struct symbol *sym;
-  struct dict_iterator iter;
+  struct block_iterator iter;
   struct cleanup *cleanup_list;
   struct type *type;
   char *name_of_result;

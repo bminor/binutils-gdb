@@ -1184,7 +1184,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	      if (nparams > 0)
 		{
-		  struct dict_iterator iter;
+		  struct block_iterator iter;
 
 		  TYPE_NFIELDS (ftype) = nparams;
 		  TYPE_FIELDS (ftype) = (struct field *)
@@ -4607,7 +4607,7 @@ static struct symbol *
 mylookup_symbol (char *name, struct block *block,
 		 domain_enum domain, enum address_class class)
 {
-  struct dict_iterator iter;
+  struct block_iterator iter;
   int inc;
   struct symbol *sym;
 

@@ -1182,11 +1182,11 @@ map_block (const char *name, domain_enum namespace, struct objfile *objfile,
 	   int (*callback) (struct block *, struct symbol *, void *),
 	   void *data, symbol_compare_ftype *match)
 {
-  struct dict_iterator iter;
+  struct block_iterator iter;
   struct symbol *sym;
 
-  for (sym = dict_iter_match_first (BLOCK_DICT (block), name, match, &iter);
-       sym != NULL; sym = dict_iter_match_next (name, match, &iter))
+  for (sym = block_iter_match_first (block, name, match, &iter);
+       sym != NULL; sym = block_iter_match_next (name, match, &iter))
     {
       if (symbol_matches_domain (SYMBOL_LANGUAGE (sym), 
 				 SYMBOL_DOMAIN (sym), namespace))

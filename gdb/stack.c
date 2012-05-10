@@ -512,7 +512,7 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
   if (func)
     {
       struct block *b = SYMBOL_BLOCK_VALUE (func);
-      struct dict_iterator iter;
+      struct block_iterator iter;
       struct symbol *sym;
 
       ALL_BLOCK_SYMBOLS (b, iter, sym)
@@ -1821,7 +1821,7 @@ iterate_over_block_locals (struct block *b,
 			   iterate_over_block_arg_local_vars_cb cb,
 			   void *cb_data)
 {
-  struct dict_iterator iter;
+  struct block_iterator iter;
   struct symbol *sym;
 
   ALL_BLOCK_SYMBOLS (b, iter, sym)
@@ -1858,7 +1858,7 @@ static int
 print_block_frame_labels (struct gdbarch *gdbarch, struct block *b,
 			  int *have_default, struct ui_file *stream)
 {
-  struct dict_iterator iter;
+  struct block_iterator iter;
   struct symbol *sym;
   int values_printed = 0;
 
@@ -1990,7 +1990,7 @@ iterate_over_block_arg_vars (struct block *b,
 			     iterate_over_block_arg_local_vars_cb cb,
 			     void *cb_data)
 {
-  struct dict_iterator iter;
+  struct block_iterator iter;
   struct symbol *sym, *sym2;
 
   ALL_BLOCK_SYMBOLS (b, iter, sym)

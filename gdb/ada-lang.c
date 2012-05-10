@@ -5515,7 +5515,7 @@ ada_add_block_symbols (struct obstack *obstackp,
                        domain_enum domain, struct objfile *objfile,
                        int wild)
 {
-  struct dict_iterator iter;
+  struct block_iterator iter;
   int name_len = strlen (name);
   /* A matching argument symbol, if any.  */
   struct symbol *arg_sym;
@@ -5527,9 +5527,8 @@ ada_add_block_symbols (struct obstack *obstackp,
   found_sym = 0;
   if (wild)
     {
-      for (sym = dict_iter_match_first (BLOCK_DICT (block), name,
-					wild_match, &iter);
-	   sym != NULL; sym = dict_iter_match_next (name, wild_match, &iter))
+      for (sym = block_iter_match_first (block, name, wild_match, &iter);
+	   sym != NULL; sym = block_iter_match_next (name, wild_match, &iter))
       {
         if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
                                    SYMBOL_DOMAIN (sym), domain)
@@ -5551,9 +5550,8 @@ ada_add_block_symbols (struct obstack *obstackp,
     }
   else
     {
-     for (sym = dict_iter_match_first (BLOCK_DICT (block), name,
-				       full_match, &iter);
-	   sym != NULL; sym = dict_iter_match_next (name, full_match, &iter))
+     for (sym = block_iter_match_first (block, name, full_match, &iter);
+	  sym != NULL; sym = block_iter_match_next (name, full_match, &iter))
       {
         if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
                                    SYMBOL_DOMAIN (sym), domain))
@@ -5816,7 +5814,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
   struct objfile *objfile;
   struct block *b, *surrounding_static_block = 0;
   int i;
-  struct dict_iterator iter;
+  struct block_iterator iter;
 
   if (text0[0] == '<')
     {

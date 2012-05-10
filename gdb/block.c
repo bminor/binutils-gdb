@@ -369,3 +369,62 @@ allocate_block (struct obstack *obstack)
 
   return bl;
 }
+
+
+
+/* See block.h.  */
+
+struct symbol *
+block_iterator_first (const struct block *block,
+		      struct block_iterator *iterator)
+{
+  return dict_iterator_first (block->dict, &iterator->dict_iter);
+}
+
+/* See block.h.  */
+
+struct symbol *
+block_iterator_next (struct block_iterator *iterator)
+{
+  return dict_iterator_next (&iterator->dict_iter);
+}
+
+/* See block.h.  */
+
+struct symbol *
+block_iter_name_first (const struct block *block,
+		       const char *name,
+		       struct block_iterator *iterator)
+{
+  return dict_iter_name_first (block->dict, name, &iterator->dict_iter);
+}
+
+/* See block.h.  */
+
+struct symbol *
+block_iter_name_next (const char *name, struct block_iterator *iterator)
+{
+  return dict_iter_name_next (name, &iterator->dict_iter);
+}
+
+/* See block.h.  */
+
+struct symbol *
+block_iter_match_first (const struct block *block,
+			const char *name,
+			symbol_compare_ftype *compare,
+			struct block_iterator *iterator)
+{
+  return dict_iter_match_first (block->dict, name, compare,
+				&iterator->dict_iter);
+}
+
+/* See block.h.  */
+
+struct symbol *
+block_iter_match_next (const char *name,
+		       symbol_compare_ftype *compare,
+		       struct block_iterator *iterator)
+{
+  return dict_iter_match_next (name, compare, &iterator->dict_iter);
+}

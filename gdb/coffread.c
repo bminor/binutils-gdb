@@ -1471,7 +1471,7 @@ static void
 patch_opaque_types (struct symtab *s)
 {
   struct block *b;
-  struct dict_iterator iter;
+  struct block_iterator iter;
   struct symbol *real_sym;
 
   /* Go through the per-file symbols only.  */

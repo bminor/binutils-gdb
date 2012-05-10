@@ -1924,14 +1924,14 @@ struct symbol *
 lookup_block_symbol (const struct block *block, const char *name,
 		     const domain_enum domain)
 {
-  struct dict_iterator iter;
+  struct block_iterator iter;
   struct symbol *sym;
 
   if (!BLOCK_FUNCTION (block))
     {
-      for (sym = dict_iter_name_first (BLOCK_DICT (block), name, &iter);
+      for (sym = block_iter_name_first (block, name, &iter);
 	   sym != NULL;
-	   sym = dict_iter_name_next (name, &iter))
+	   sym = block_iter_name_next (name, &iter))
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				     SYMBOL_DOMAIN (sym), domain))
@@ -1949,9 +1949,9 @@ lookup_block_symbol (const struct block *block, const char *name,
 
       struct symbol *sym_found = NULL;
 
-      for (sym = dict_iter_name_first (BLOCK_DICT (block), name, &iter);
+      for (sym = block_iter_name_first (block, name, &iter);
 	   sym != NULL;
-	   sym = dict_iter_name_next (name, &iter))
+	   sym = block_iter_name_next (name, &iter))
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				     SYMBOL_DOMAIN (sym), domain))
@@ -1986,12 +1986,12 @@ iterate_over_symbols (const struct block *block, const char *name,
 {
   while (block)
     {
-      struct dict_iterator iter;
+      struct block_iterator iter;
       struct symbol *sym;
 
-      for (sym = dict_iter_name_first (BLOCK_DICT (block), name, &iter);
+      for (sym = block_iter_name_first (block, name, &iter);
 	   sym != NULL;
-	   sym = dict_iter_name_next (name, &iter))
+	   sym = block_iter_name_next (name, &iter))
 	{
 	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
 				     SYMBOL_DOMAIN (sym), domain))
@@ -2081,7 +2081,7 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
 	  }
 	if (section != 0)
 	  {
-	    struct dict_iterator iter;
+	    struct block_iterator iter;
 	    struct symbol *sym = NULL;
 
 	    ALL_BLOCK_SYMBOLS (b, iter, sym)
@@ -3329,7 +3329,7 @@ search_symbols (char *regexp, enum search_domain kind,
   struct blockvector *bv;
   struct block *b;
   int i = 0;
-  struct dict_iterator iter;
+  struct block_iterator iter;
   struct symbol *sym;
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
@@ -4131,7 +4131,7 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
   struct objfile *objfile;
   struct block *b;
   const struct block *surrounding_static_block, *surrounding_global_block;
-  struct dict_iterator iter;
+  struct block_iterator iter;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   char *sym_text;
   /* Length of sym_text.  */
@@ -4363,7 +4363,7 @@ make_file_symbol_completion_list (char *text, char *word, char *srcfile)
   struct symbol *sym;
   struct symtab *s;
   struct block *b;
-  struct dict_iterator iter;
+  struct block_iterator iter;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   char *sym_text;
   /* Length of sym_text.  */
