@@ -1,5 +1,11 @@
 2012-05-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* config/djgpp/fnchange.lst: Add entries for print-file-var-lib1.c,
+	print-file-var-lib2.c, print-file-var-main.c and
+	print-file-var.exp (located in gdb/testsuite/gdb.base).
+
+2012-05-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.base/ctxobj-f.c, gdb.base/ctxobj-m.c, gdb.base/ctxobj-v.c,
 	gdb.base/ctxobj.exp: New files.
 
