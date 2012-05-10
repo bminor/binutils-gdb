@@ -178,3 +178,8 @@ bad	.byte	xtrn@tpoff
 
 	.text
 	mov	xtrn@tpoff (%rbx), %eax
+
+	.data
+	.quad	xtrn
+	.quad	xtrn + 0x7fffffff
+	.quad	xtrn - 0x80000000

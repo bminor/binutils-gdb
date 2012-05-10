@@ -1,3 +1,13 @@
+2012-05-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/ilp32/ilp32.exp: Run reloc64-inval.
+
+	* gas/i386/ilp32/reloc64.s: Add tests for ".quad".
+	* gas/i386/ilp32/reloc64.d: Updated.
+
+	* gas/i386/ilp32/reloc64-inval.l: New file.
+	* gas/i386/ilp32/reloc64-inval.s: Likewise.
+
 2012-05-08  Alan Modra  <amodra@gmail.com>
 
 	* lib/gas-defs.exp (run_dump_test): Don't set LC_ALL here.

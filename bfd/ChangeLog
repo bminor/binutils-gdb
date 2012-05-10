@@ -1,3 +1,8 @@
+2012-05-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Check addend
+	overflow for R_X86_64_RELATIVE64.
+
 2012-05-08  Ben Cheng  <bccheng@google.com>
 
 	* bfd/elf.c: Preserve the original p_align and p_flags if they are
