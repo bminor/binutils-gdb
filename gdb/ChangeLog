@@ -1,5 +1,17 @@
 2012-05-10  Tom Tromey  <tromey@redhat.com>
 
+	* psymtab.c (partial_map_expand_apply): Add assertion.
+	(partial_map_symtabs_matching_filename): Skip included psymtabs.
+	(psymtab_to_symtab): Find unshared psymtab.
+	(dump_psymtab): Print including psymtabs.
+	(recursively_search_psymtabs): New function.
+	(expand_symtabs_matching_via_partial): Use it.
+	* psympriv.h (struct partial_symtab) <user, searched_flag>: New
+	fields.
+	(enum psymtab_search_status): New.
+
+2012-05-10  Tom Tromey  <tromey@redhat.com>
+
 	* tracepoint.c (scope_info): Update.
 	* symtab.c (lookup_block_symbol, iterate_over_symbols)
 	(find_pc_sect_symtab, search_symbols)

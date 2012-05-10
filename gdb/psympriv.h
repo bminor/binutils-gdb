@@ -54,6 +54,17 @@ struct partial_symbol
 #define PSYMBOL_DOMAIN(psymbol)	(psymbol)->domain
 #define PSYMBOL_CLASS(psymbol)		(psymbol)->aclass
 
+/* A convenience enum to give names to some constants used when
+   searching psymtabs.  This is internal to psymtab and should not be
+   used elsewhere.  */
+
+enum psymtab_search_status
+  {
+    PST_NOT_SEARCHED,
+    PST_SEARCHED_AND_FOUND,
+    PST_SEARCHED_AND_NOT_FOUND
+  };
+
 /* Each source file that has not been fully read in is represented by
    a partial_symtab.  This contains the information on where in the
    executable the debugging symbols for a specific file are, and a
@@ -111,6 +122,35 @@ struct partial_symtab
 
   int number_of_dependencies;
 
+  /* If NULL, this is an ordinary partial symbol table.
+
+     If non-NULL, this holds a single includer of this partial symbol
+     table, and this partial symbol table is a shared one.
+
+     A shared psymtab is one that is referenced by multiple other
+     psymtabs, and which conceptually has its contents directly
+     included in those.
+
+     Shared psymtabs have special semantics.  When a search finds a
+     symbol in a shared table, we instead return one of the non-shared
+     tables that include this one.
+
+     A shared psymtabs can be referred to by other shared ones.
+
+     The psymtabs that refer to a shared psymtab will list the shared
+     psymtab in their 'dependencies' array.
+
+     In DWARF terms, a shared psymtab is a DW_TAG_partial_unit; but
+     of course using a name based on that would be too confusing, so
+     "shared" was chosen instead.
+     
+     Only a single user is needed because, when expanding a shared
+     psymtab, we only need to expand its "canonical" non-shared user.
+     The choice of which one should be canonical is left to the
+     debuginfo reader; it can be arbitrary.  */
+
+  struct partial_symtab *user;
+
   /* Global symbol list.  This list will be sorted after readin to
      improve access.  Binary search will be the usual method of
      finding a symbol within it.  globals_offset is an integer offset
@@ -141,6 +181,10 @@ struct partial_symtab
      info in PSYMTABS_ADDRMAP.  */
 
   unsigned char psymtabs_addrmap_supported;
+
+  /* A flag that is temporarily used when searching psymtabs.  */
+
+  ENUM_BITFIELD (psymtab_search_status) searched_flag : 2;
 
   /* Pointer to symtab eventually allocated for this source file, 0 if
      !readin or if we haven't looked for the symtab after it was readin.  */
