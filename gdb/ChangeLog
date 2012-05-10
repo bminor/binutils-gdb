@@ -1,3 +1,12 @@
+2012-05-10  Tom Tromey  <tromey@redhat.com>
+
+	* psymtab.c (PSYMTAB_TO_SYMTAB): Remove.
+	(find_pc_sect_symtab_from_partial, lookup_symbol_aux_psymtabs)
+	(lookup_partial_symbol, find_last_source_symtab_from_partial)
+	(read_psymtabs_with_filename, map_matching_symbols_psymtab)
+	(expand_symtabs_matching_via_partial, maintenance_check_symtabs):
+	Update.
+
 2012-05-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* config/djgpp/fnchange.lst: Add entries for print-file-var-lib1.c,

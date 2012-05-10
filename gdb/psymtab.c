@@ -45,10 +45,6 @@ struct psymbol_bcache
   struct bcache *bcache;
 };
 
-/* A fast way to get from a psymtab to its symtab (after the first time).  */
-#define PSYMTAB_TO_SYMTAB(pst)  \
-    ((pst) -> symtab != NULL ? (pst) -> symtab : psymtab_to_symtab (pst))
-
 static struct partial_symbol *match_partial_symbol (struct partial_symtab *,
 						    int,
 						    const char *, domain_enum,
@@ -392,7 +388,7 @@ find_pc_sect_symtab_from_partial (struct objfile *objfile,
 	warning (_("\
 (Internal error: pc %s in read in psymtab, but not in symtab.)\n"),
 		 paddress (get_objfile_arch (ps->objfile), pc));
-      return PSYMTAB_TO_SYMTAB (ps);
+      return psymtab_to_symtab (ps);
     }
   return NULL;
 }
@@ -510,7 +506,7 @@ lookup_symbol_aux_psymtabs (struct objfile *objfile,
     if (!ps->readin && lookup_partial_symbol (ps, name, psymtab_index, domain))
       {
 	struct symbol *sym = NULL;
-	struct symtab *stab = PSYMTAB_TO_SYMTAB (ps);
+	struct symtab *stab = psymtab_to_symtab (ps);
 
 	/* Some caution must be observed with overloaded functions
 	   and methods, since the psymtab will not contain any overload
@@ -759,9 +755,7 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 }
 
 /* Get the symbol table that corresponds to a partial_symtab.
-   This is fast after the first time you do it.  In fact, there
-   is an even faster macro PSYMTAB_TO_SYMTAB that does the fast
-   case inline.  */
+   This is fast after the first time you do it.  */
 
 static struct symtab *
 psymtab_to_symtab (struct partial_symtab *pst)
@@ -841,7 +835,7 @@ find_last_source_symtab_from_partial (struct objfile *ofp)
 			  "readin pst found and no symtabs."));
 	}
       else
-	return PSYMTAB_TO_SYMTAB (cs_pst);
+	return psymtab_to_symtab (cs_pst);
     }
   return NULL;
 }
@@ -1104,7 +1098,7 @@ read_psymtabs_with_filename (struct objfile *objfile, const char *filename)
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, p)
     {
       if (filename_cmp (filename, p->filename) == 0)
-	PSYMTAB_TO_SYMTAB (p);
+	psymtab_to_symtab (p);
     }
 }
 
@@ -1227,7 +1221,7 @@ map_matching_symbols_psymtab (const char *name, domain_enum namespace,
 	  || match_partial_symbol (ps, global, name, namespace, match,
 				   ordered_compare))
 	{
-	  struct symtab *s = PSYMTAB_TO_SYMTAB (ps);
+	  struct symtab *s = psymtab_to_symtab (ps);
 	  struct block *block;
 
 	  if (s == NULL || !s->primary)
@@ -1300,7 +1294,7 @@ expand_symtabs_matching_via_partial
 		       && SYMBOL_CLASS (*psym) == LOC_TYPEDEF))
 		  && (*name_matcher) (SYMBOL_SEARCH_NAME (*psym), data))
 		{
-		  PSYMTAB_TO_SYMTAB (ps);
+		  psymtab_to_symtab (ps);
 		  keep_going = 0;
 		}
 	    }
@@ -1855,7 +1849,7 @@ maintenance_check_symtabs (char *ignore, int from_tty)
   {
     struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
-    s = PSYMTAB_TO_SYMTAB (ps);
+    s = psymtab_to_symtab (ps);
     if (s == NULL)
       continue;
     bv = BLOCKVECTOR (s);
