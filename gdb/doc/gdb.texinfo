@@ -9409,23 +9409,109 @@ most appropriate form for a recognized tag, and in hexadecimal for
 an unrecognized tag.
 @end table
 
-On some targets, @value{GDBN} can access operating-system-specific information
-and display it to user, without interpretation.  For remote targets,
-this functionality depends on the remote stub's support of the 
+On some targets, @value{GDBN} can access operating system-specific
+information and show it to you.  The types of information available
+will differ depending on the type of operating system running on the
+target.  The mechanism used to fetch the data is described in
+@ref{Operating System Information}.  For remote targets, this
+functionality depends on the remote stub's support of the
 @samp{qXfer:osdata:read} packet, see @ref{qXfer osdata read}.
 
 @table @code
 @kindex info os
-@item info os
-List the types of OS information available for the target.  If the
-target does not return a list of possible types, this command will
-report an error.
+@item info os @var{infotype}
 
+Display OS information of the requested type.
+
+On @sc{gnu}/Linux, the following values of @var{infotype} are valid:
+
+@anchor{linux info os infotypes}
+@table @code
 @kindex info os processes
-@item info os processes
+@item processes
 Display the list of processes on the target.  For each process,
-@value{GDBN} prints the process identifier, the name of the user, and
-the command corresponding to the process.
+@value{GDBN} prints the process identifier, the name of the user, the
+command corresponding to the process, and the list of processor cores
+that the process is currently running on.  (To understand what these
+properties mean, for this and the following info types, please consult
+the general @sc{gnu}/Linux documentation.)
+
+@kindex info os procgroups
+@item procgroups
+Display the list of process groups on the target.  For each process,
+@value{GDBN} prints the identifier of the process group that it belongs
+to, the command corresponding to the process group leader, the process
+identifier, and the command line of the process.  The list is sorted
+first by the process group identifier, then by the process identifier,
+so that processes belonging to the same process group are grouped together
+and the process group leader is listed first.
+
+@kindex info os threads
+@item threads
+Display the list of threads running on the target.  For each thread,
+@value{GDBN} prints the identifier of the process that the thread
+belongs to, the command of the process, the thread identifier, and the
+processor core that it is currently running on.  The main thread of a
+process is not listed.
+
+@kindex info os files
+@item files
+Display the list of open file descriptors on the target.  For each
+file descriptor, @value{GDBN} prints the identifier of the process
+owning the descriptor, the command of the owning process, the value
+of the descriptor, and the target of the descriptor.
+
+@kindex info os sockets
+@item sockets
+Display the list of Internet-domain sockets on the target.  For each
+socket, @value{GDBN} prints the address and port of the local and
+remote endpoints, the current state of the connection, the creator of
+the socket, the IP address family of the socket, and the type of the
+connection.
+
+@kindex info os shm
+@item shm
+Display the list of all System V shared-memory regions on the target.
+For each shared-memory region, @value{GDBN} prints the region key,
+the shared-memory identifier, the access permissions, the size of the
+region, the process that created the region, the process that last
+attached to or detached from the region, the current number of live
+attaches to the region, and the times at which the region was last
+attached to, detach from, and changed.
+
+@kindex info os semaphores
+@item semaphores
+Display the list of all System V semaphore sets on the target.  For each
+semaphore set, @value{GDBN} prints the semaphore set key, the semaphore
+set identifier, the access permissions, the number of semaphores in the
+set, the user and group of the owner and creator of the semaphore set,
+and the times at which the semaphore set was operated upon and changed.
+
+@kindex info os msg
+@item msg
+Display the list of all System V message queues on the target.  For each
+message queue, @value{GDBN} prints the message queue key, the message
+queue identifier, the access permissions, the current number of bytes
+on the queue, the current number of messages on the queue, the processes
+that last sent and received a message on the queue, the user and group
+of the owner and creator of the message queue, the times at which a
+message was last sent and received on the queue, and the time at which
+the message queue was last changed.
+
+@kindex info os modules
+@item modules
+Display the list of all loaded kernel modules on the target.  For each
+module, @value{GDBN} prints the module name, the size of the module in
+bytes, the number of times the module is used, the dependencies of the
+module, the status of the module, and the address of the loaded module
+in memory.
+@end table
+
+@item info os
+If @var{infotype} is omitted, then list the possible values for
+@var{infotype} and the kind of OS information available for each
+@var{infotype}.  If the target does not return a list of possible
+types, this command will report an error.
 @end table
 
 @node Memory Region Attributes

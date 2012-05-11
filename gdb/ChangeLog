@@ -1,3 +1,37 @@
+2012-05-11  Stan Shebs  <stan@codesourcery.com>
+	    Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* NEWS: Describe new info os commands.
+	* common/linux-osdata.c (PID_T, TIME_T): Define.
+	(MAX_PID_T_STRLEN): New.
+	(linux_common_core_of_thread): Add comment.  Change to use PID_T and
+	MAX_PID_T_STRLEN.
+	(command_from_pid): Add comment.  Change to use PID_T.
+	(commandline_from_pid):  Change to use PID_T.
+	(user_from_pid): Add comment.
+	(get_process_owner): Add comment. Change to use PID_T and
+	MAX_PID_T_STRLEN.
+	(get_number_of_cpu_cores): Add comment.
+	(get_cores_used_by_process): Add comment.  Change to use PID_T and
+	MAX_PID_T_STRLEN.
+	(linux_xfer_osdata_processes): Change to use PID_T and
+	MAX_PID_T_STRLEN.
+	(compare_processes): New function.
+	(linux_xfer_osdata_processgroups): New function.
+	(linux_xfer_osdata_threads): Change to use PID_T.
+	(linux_xfer_osdata_fds): New function.
+	(format_socket_state, print_sockets): New functions.
+	(union socket_addr): New union.
+	(linux_xfer_osdata_isockets): New function.
+	(time_from_time_t, group_from_gid): New functions.
+	(linux_xfer_osdata_shm): New function.
+	(linux_xfer_osdata_sem): New function.
+	(linux_xfer_osdata_msg): New function.
+	(linux_xfer_osdata_modules): New function.
+	(osdata_table): Add new entries.
+	* common/buffer.c (buffer_xml_printf): Add support for long and
+	long long format specifiers.
+
 2012-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* amd64-linux-tdep.h (tdesc_x32_linux): New.

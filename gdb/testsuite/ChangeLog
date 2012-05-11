@@ -1,3 +1,8 @@
+2011-12-26  Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* gdb.base/info-os.exp: New file.
+	* gdb.base/info-os.c: New file.
+
 2012-05-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* config/djgpp/fnchange.lst: Add entries for print-file-var-lib1.c,

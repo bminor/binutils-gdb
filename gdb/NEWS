@@ -3,6 +3,16 @@
 
 *** Changes since GDB 7.4
 
+* The "info os" command on GNU/Linux can now display information on
+  several new classes of objects managed by the operating system:
+    "info os procgroups" lists process groups
+    "info os files" lists file descriptors
+    "info os sockets" lists internet-domain sockets
+    "info os shm" lists shared-memory regions
+    "info os semaphores" lists semaphores
+    "info os msg" lists message queues
+    "info os modules" lists loaded kernel modules
+
 * GDB now has support for SDT (Static Defined Tracing) probes.  Currently,
   the only implemented backend is for SystemTap probes (<sys/sdt.h>).  You
   can set a breakpoint using the new "-probe, "-pstap" or "-probe-stap"

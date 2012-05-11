@@ -1,3 +1,9 @@
+2012-05-11  Stan Shebs  <stan@codesourcery.com>
+	    Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* gdb.texinfo (Operating System Auxiliary Information): Document new
+	'info os' subcommands.
+
 2012-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Auto-loading, Init File in the Current Directory)

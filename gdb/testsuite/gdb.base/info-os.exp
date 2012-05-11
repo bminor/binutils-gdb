@@ -1,0 +1,110 @@
+# Copyright 2011 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set testfile "info-os"
+set srcfile ${testfile}.c
+
+# This test is Linux-only.
+if ![istarget *-*-linux*] then {
+    unsupported "info-os.exp"
+    return -1
+}
+
+# Support for XML-output is needed to run this test.
+if [gdb_skip_xml_test] then {
+    unsupported "info-os.exp"
+    return -1
+}
+
+# Compile test program.
+if { [prepare_for_testing ${testfile}.exp $testfile $srcfile {debug additional_flags=-lpthread}] } {
+    fail "cannot compile test program"
+    return -1
+}
+
+if ![runto_main] then {
+    fail "cannot run to main"
+    return -1;
+}
+
+# Get PID of test program.
+set inferior_pid -1
+set test "get inferior process ID"
+gdb_test_multiple "call getpid()" $test {
+    -re ".* = ($decimal).*$gdb_prompt $" {
+	set inferior_pid $expect_out(1,string)
+	pass $test
+    }
+}
+
+gdb_breakpoint ${srcfile}:[gdb_get_line_number "Set breakpoint here"]
+gdb_continue_to_breakpoint "Set breakpoint here"
+
+# Get IDs of the IPC object instances.
+set shmid -1
+set test "get shared memory ID"
+gdb_test_multiple "print shmid" $test {
+    -re ".* = ($decimal).*$gdb_prompt $" {
+	set shmid $expect_out(1,string)
+	pass $test
+    }
+}
+
+set semid -1
+set test "get semaphore ID"
+gdb_test_multiple "print semid" $test {
+    -re ".* = ($decimal).*$gdb_prompt $" {
+	set semid $expect_out(1,string)
+	pass $test
+    }
+}
+
+set msqid -1
+set test "get message queue ID"
+gdb_test_multiple "print msqid" $test {
+    -re ".* = ($decimal).*$gdb_prompt $" {
+	set msqid $expect_out(1,string)
+	pass $test
+    }
+}
+
+# Get port number of test socket.
+set port -1
+set test "get socket port number"
+gdb_test_multiple "print port" $test {
+    -re ".* = ($decimal).*$gdb_prompt $" {
+	set port $expect_out(1,string)
+	pass $test
+    }
+}
+
+# Test output of the 'info os' commands against the expected results.
+gdb_test "info os processes" ".*pid +user +command +cores.*$inferior_pid +\\S+ +\\S*info-os +\[0-9\]+.*" "get process list"
+gdb_test "info os procgroups" ".*pgid +leader command +pid +command line.*$inferior_pid +info-os +$inferior_pid +\\S*info-os.*" "get process groups"
+gdb_test "info os threads" ".*pid +command +tid +core.*$inferior_pid +info-os +\\d+ +\\d+.*" "get threads"
+gdb_test "info os files" ".*pid +command +file descriptor +name.*$inferior_pid +info-os +\\d+ +/dev/null.*" "get file descriptors"
+gdb_test "info os sockets" ".*local address +local port +remote address +remote port +state +user +family +protocol.*0\\.0\\.0\\.0 +$port +0\\.0\\.0\\.0 +0 +LISTEN +\\S+ +INET +STREAM.*" "get internet-domain sockets"
+gdb_test "info os shm" ".*key +shmid +permissions +size +creator command +last op\\. command +num attached +user +group +creator user +creator group +last shmat\\(\\) time +last shmdt\\(\\) time +last shmctl\\(\\) time.*3925 +$shmid +666 +4096 +info-os +.*" "get shared-memory regions"
+gdb_test "info os semaphores" ".*key +semid +permissions +num semaphores +user +group +creator user +creator group +last semop\\(\\) time +last semctl\\(\\) time.*7428 +$semid +666 +1 +.*" "get semaphores"
+gdb_test "info os msg" ".*key +msqid +permissions +num used bytes +num messages +last msgsnd\\(\\) command +last msgrcv\\(\\) command +user +group +creator user +creator group +last msgsnd\\(\\) time +last msgrcv\\(\\) time +last msgctl\\(\\) time.*5294 +$msqid +666 +.*" "get message queues"
+
+# The SysV IPC primitives linger on after the creating process is killed
+# unless they are destroyed explicitly, so allow the test program to tidy
+# up after itself.  Note that the test program attempts to delete and
+# recreate the shared-memory region if it already exists, in case a
+# previous run failed before having a chance to clean up.  The tests for
+# semaphores and message queues should still work with primitives from
+# previous runs.
+send_gdb "continue\n"
