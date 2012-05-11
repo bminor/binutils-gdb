@@ -42,6 +42,8 @@
 
 #include "features/i386/amd64-linux.c"
 #include "features/i386/amd64-avx-linux.c"
+#include "features/i386/x32-linux.c"
+#include "features/i386/x32-avx-linux.c"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
