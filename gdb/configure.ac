@@ -136,16 +136,26 @@ AS_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this pat
               [Relocated directory for source files. ])
 ])
 
+AC_MSG_CHECKING([for default auto-load directory])
+AC_ARG_WITH(auto-load-dir,
+AS_HELP_STRING([--with-auto-load-dir=PATH],
+  [directories from which to load auto-loaded scripts, use '$ddir' for -data-directory @<:@$ddir/auto-load@:>@]),,
+  [with_auto_load_dir='$ddir/auto-load'])
+escape_dir=`echo $with_auto_load_dir | sed 's/[[$]]ddir\>/\\\\\\\\\\\\&/g'`
+AC_DEFINE_DIR(AUTO_LOAD_DIR, escape_dir,
+	      [Directories from which to load auto-loaded scripts.])
+AC_MSG_RESULT([$with_auto_load_dir])
+
 AC_MSG_CHECKING([for default auto-load safe-path])
 AC_ARG_WITH(auto-load-safe-path,
 AS_HELP_STRING([--with-auto-load-safe-path=PATH],
-  [directories safe to hold auto-loaded files, use $ddir for --with-gdb-datadir path @<:@$ddir/auto-load@:>@])
+  [directories safe to hold auto-loaded files, use $ddir for --with-gdb-datadir path @<:@--with-auto-load-dir@:>@])
 AS_HELP_STRING([--without-auto-load-safe-path],
                [do not restrict auto-loaded files locations]),
     [if test "$with_auto_load_safe_path" = "no"; then
      with_auto_load_safe_path="/"
      fi],
-[with_auto_load_safe_path='$ddir/auto-load'])
+[with_auto_load_safe_path="$with_auto_load_dir"])
 escape_dir=`echo $with_auto_load_safe_path | sed 's/[[$]]ddir\>/\\\\\\\\\\\\&/g'`
 AC_DEFINE_DIR(AUTO_LOAD_SAFE_PATH, escape_dir,
 	      [Directories safe to hold auto-loaded files.])

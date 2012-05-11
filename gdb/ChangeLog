@@ -1,5 +1,23 @@
 2012-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Implement multi-component --with-auto-load-dir.
+	* NEWS (set auto-load scripts-directory, --with-auto-load-dir): New
+	entries.
+	(--with-auto-load-safe-path): Update the default value description.
+	* auto-load.c (auto_load_dir, set_auto_load_dir, show_auto_load_dir):
+	New.
+	(auto_load_objfile_script): Add DEBUG_AUTO_LOAD output.  Remove
+	GDB_DATADIR NULL check.  Replace GDB_DATADIR/auto-load by
+	AUTO_LOAD_DIR.  Support $ddir and multiple components in it.
+	(_initialize_auto_load): Initialize also auto_load_dir.  Install new
+	"set auto-load scripts-directory".
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac (--with-auto-load-dir): New configure option.
+	(--auto-load-safe-path): Change the default to --with-auto-load-dir.
+
+2012-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Provide $ddir substitution for --with-auto-load-safe-path.
 	* NEWS (--with-auto-load-safe-path, --without-auto-load-safe-path): New
 	entries.

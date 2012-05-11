@@ -778,6 +778,7 @@ enable_largefile
 with_separate_debug_dir
 with_gdb_datadir
 with_relocated_sources
+with_auto_load_dir
 with_auto_load_safe_path
 enable_targets
 enable_64_bit_bfd
@@ -1485,9 +1486,13 @@ Optional Packages:
                           [DATADIR/gdb]
   --with-relocated-sources=PATH
                           automatically relocate this path for source files
+  --with-auto-load-dir=PATH
+                          directories from which to load auto-loaded scripts,
+                          use '$ddir' for -data-directory [$ddir/auto-load]
   --with-auto-load-safe-path=PATH
                           directories safe to hold auto-loaded files, use
-                          $ddir for --with-gdb-datadir path [$ddir/auto-load]
+                          $ddir for --with-gdb-datadir path
+                          [--with-auto-load-dir]
   --without-auto-load-safe-path
                           do not restrict auto-loaded files locations
   --with-libunwind-ia64   use libunwind frame unwinding for ia64 targets
@@ -4959,6 +4964,31 @@ _ACEOF
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default auto-load directory" >&5
+$as_echo_n "checking for default auto-load directory... " >&6; }
+
+# Check whether --with-auto-load-dir was given.
+if test "${with_auto_load_dir+set}" = set; then :
+  withval=$with_auto_load_dir;
+else
+  with_auto_load_dir='$ddir/auto-load'
+fi
+
+escape_dir=`echo $with_auto_load_dir | sed 's/[$]ddir\>/\\\\\\\\\\\\&/g'`
+
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo $escape_dir`
+  ac_define_dir=`eval echo $ac_define_dir`
+
+cat >>confdefs.h <<_ACEOF
+#define AUTO_LOAD_DIR "$ac_define_dir"
+_ACEOF
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_auto_load_dir" >&5
+$as_echo "$with_auto_load_dir" >&6; }
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default auto-load safe-path" >&5
 $as_echo_n "checking for default auto-load safe-path... " >&6; }
 
@@ -4968,7 +4998,7 @@ if test "${with_auto_load_safe_path+set}" = set; then :
      with_auto_load_safe_path="/"
      fi
 else
-  with_auto_load_safe_path='$ddir/auto-load'
+  with_auto_load_safe_path="$with_auto_load_dir"
 fi
 
 escape_dir=`echo $with_auto_load_safe_path | sed 's/[$]ddir\>/\\\\\\\\\\\\&/g'`

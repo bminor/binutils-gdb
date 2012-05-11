@@ -108,6 +108,35 @@ show_auto_load_local_gdbinit (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* Directory list from which to load auto-loaded scripts.  It is not checked
+   for absolute paths but they are strongly recommended.  It is initialized by
+   _initialize_auto_load.  */
+static char *auto_load_dir;
+
+/* "set" command for the auto_load_dir configuration variable.  */
+
+static void
+set_auto_load_dir (char *args, int from_tty, struct cmd_list_element *c)
+{
+  /* Setting the variable to "" resets it to the compile time defaults.  */
+  if (auto_load_dir[0] == '\0')
+    {
+      xfree (auto_load_dir);
+      auto_load_dir = xstrdup (AUTO_LOAD_DIR);
+    }
+}
+
+/* "show" command for the auto_load_dir configuration variable.  */
+
+static void
+show_auto_load_dir (struct ui_file *file, int from_tty,
+		    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("List of directories from which to load "
+			    "auto-loaded scripts is %s.\n"),
+		    value);
+}
+
 /* Directory list safe to hold auto-loaded files.  It is not checked for
    absolute paths but they are strongly recommended.  It is initialized by
    _initialize_auto_load.  */
@@ -602,6 +631,9 @@ auto_load_objfile_script (struct objfile *objfile,
 
   input = fopen (filename, "r");
   debugfile = filename;
+  if (debug_auto_load)
+    fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file \"%s\" %s.\n"),
+			debugfile, input ? _("exists") : _("does not exist"));
 
   if (!input)
     {
@@ -611,6 +643,12 @@ auto_load_objfile_script (struct objfile *objfile,
 
       debugdir_vec = dirnames_to_char_ptr_vec (debug_file_directory);
       make_cleanup_free_char_ptr_vec (debugdir_vec);
+
+      if (debug_auto_load)
+	fprintf_unfiltered (gdb_stdlog,
+			    _("auto-load: Searching 'set debug-file-directory' "
+			      "path \"%s\".\n"),
+			    debug_file_directory);
 
       for (ix = 0; VEC_iterate (char_ptr, debugdir_vec, ix, debugdir); ++ix)
 	{
@@ -623,24 +661,53 @@ auto_load_objfile_script (struct objfile *objfile,
 
 	  make_cleanup (xfree, debugfile);
 	  input = fopen (debugfile, "r");
+	  if (debug_auto_load)
+	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file "
+					      "\"%s\" %s.\n"),
+				debugfile,
+				input ? _("exists") : _("does not exist"));
 	  if (input != NULL)
 	    break;
 	}
     }
 
-  if (!input && gdb_datadir)
+  if (!input)
     {
+      VEC (char_ptr) *vec;
+      int ix;
+      char *dir;
+
       /* Also try the same file in a subdirectory of gdb's data
 	 directory.  */
-      debugfile = xmalloc (strlen (gdb_datadir) + strlen (filename)
-			   + strlen ("/auto-load") + 1);
-      strcpy (debugfile, gdb_datadir);
-      strcat (debugfile, "/auto-load");
-      /* FILENAME is absolute, so we don't need a "/" here.  */
-      strcat (debugfile, filename);
 
-      make_cleanup (xfree, debugfile);
-      input = fopen (debugfile, "r");
+      vec = dirnames_to_char_ptr_vec (auto_load_dir);
+      make_cleanup_free_char_ptr_vec (vec);
+
+      if (debug_auto_load)
+	fprintf_unfiltered (gdb_stdlog, _("auto-load: Searching 'set auto-load "
+					  "scripts-directory' path \"%s\".\n"),
+			    auto_load_dir);
+
+      for (ix = 0; VEC_iterate (char_ptr, vec, ix, dir); ++ix)
+	{
+	  debugfile = xstrdup (dir);
+	  substitute_path_component (&debugfile, "$ddir", gdb_datadir);
+	  debugfile = xrealloc (debugfile, (strlen (debugfile)
+					    + strlen (filename) + 1));
+
+	  /* FILENAME is absolute, so we don't need a "/" here.  */
+	  strcat (debugfile, filename);
+
+	  make_cleanup (xfree, debugfile);
+	  input = fopen (debugfile, "r");
+	  if (debug_auto_load)
+	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file "
+					      "\"%s\" %s.\n"),
+				debugfile,
+				input ? _("exists") : _("does not exist"));
+	  if (input != NULL)
+	    break;
+	}
     }
 
   if (input)
@@ -1055,6 +1122,19 @@ This options has security implications for untrusted inferiors."),
 	   _("Print whether current directory .gdbinit file has been loaded.\n\
 Usage: info auto-load local-gdbinit"),
 	   auto_load_info_cmdlist_get ());
+
+  auto_load_dir = xstrdup (AUTO_LOAD_DIR);
+  add_setshow_optional_filename_cmd ("scripts-directory", class_support,
+				     &auto_load_dir, _("\
+Set the list of directories from which to load auto-loaded scripts."), _("\
+Show the list of directories from which to load auto-loaded scripts."), _("\
+Automatically loaded Python scripts and GDB scripts are located in one of the\n\
+directories listed by this option.  This option is ignored for the kinds of\n\
+scripts having 'set auto-load ... off'.  Directories listed here need to be\n\
+present also in the 'set auto-load safe-path' option."),
+				     set_auto_load_dir, show_auto_load_dir,
+				     auto_load_set_cmdlist_get (),
+				     auto_load_show_cmdlist_get ());
 
   auto_load_safe_path = xstrdup (AUTO_LOAD_SAFE_PATH);
   auto_load_safe_path_vec_update ();

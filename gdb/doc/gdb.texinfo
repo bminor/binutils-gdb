@@ -21009,6 +21009,8 @@ local-gdbinit:  Auto-loading of .gdbinit script from current directory
 python-scripts:  Auto-loading of Python scripts is on.
 safe-path:  List of directories from which it is safe to auto-load files
             is $ddir/auto-load.
+scripts-directory:  List of directories from which to load auto-loaded scripts
+                    is $ddir/auto-load.
 @end smallexample
 
 @anchor{info auto-load}
@@ -21069,6 +21071,10 @@ These are @value{GDBN} control commands for the auto-loading:
 @tab Show setting of @value{GDBN} Python scripts.
 @item @xref{info auto-load python-scripts}.
 @tab Show state of @value{GDBN} Python scripts.
+@item @xref{set auto-load scripts-directory}.
+@tab Control for @value{GDBN} auto-loaded scripts location.
+@item @xref{show auto-load scripts-directory}.
+@tab Show @value{GDBN} auto-loaded scripts location.
 @item @xref{set auto-load local-gdbinit}.
 @tab Control for init file in the current directory.
 @item @xref{show auto-load local-gdbinit}.
@@ -21245,14 +21251,12 @@ loading and execution of scripts.  Multiple entries may be delimited by the
 host platform path separator in use.
 @end table
 
-This variable defaults to @file{$ddir/auto-load}.  The default @code{set
+This variable defaults to what @code{--with-auto-load-dir} has been configured
+to (@pxref{with-auto-load-dir}).  @file{$ddir} substituation applies the same
+as for @xref{set auto-load scripts-directory}.
+The default @code{set
 auto-load safe-path} value can be also overriden by @value{GDBN} configuration
 option @option{--with-auto-load-safe-path}.
-
-Any used string @file{$ddir} will get replaced by @var{data-directory} which is
-determined at @value{GDBN} startup (@pxref{Data Files}).  @file{$ddir} must be
-be placed as a directory component --- either alone or delimited by @file{/} or
-@file{\} directory separators, depending on the host platform.
 
 Setting this variable to @file{/} disables this security protection,
 corresponding @value{GDBN} configuration option is
@@ -25449,7 +25453,7 @@ registering objfile-specific pretty-printers.
 @cindex @file{@var{objfile}-gdb.py}
 
 When a new object file is read, @value{GDBN} looks for
-a file named @file{@var{objfile}-gdb.py},
+a file named @file{@var{objfile}-gdb.py} (we call it @var{script-name} below),
 where @var{objfile} is the object file's real name, formed by ensuring
 that the file name is absolute, following all symlinks, and resolving
 @code{.} and @code{..} components.  If this file exists and is
@@ -25457,14 +25461,42 @@ readable, @value{GDBN} will evaluate it as a Python script.
 
 If this file does not exist, and if the parameter
 @code{debug-file-directory} is set (@pxref{Separate Debug Files}),
-then @value{GDBN} will look for @var{real-name} in all of the
+then @value{GDBN} will look for @var{script-name} in all of the
 directories mentioned in the value of @code{debug-file-directory}.
 
 Finally, if this file does not exist, then @value{GDBN} will look for
-a file named @file{@var{data-directory}/auto-load/@var{real-name}}, where
-@var{data-directory} is @value{GDBN}'s data directory (available via
-@code{show data-directory}, @pxref{Data Files}), and @var{real-name}
-is the object file's real name, as described above.
+@var{script-name} file in all of the directories specified by:
+
+@table @code
+@anchor{set auto-load scripts-directory}
+@kindex set auto-load scripts-directory
+@item set auto-load scripts-directory @r{[}@var{directories}@r{]}
+Control @value{GDBN} auto-loaded scripts location.  Multiple directory entries
+may be delimited by the host platform path separator in use
+(@samp{:} on Unix, @samp{;} on MS-Windows and MS-DOS).
+
+Each entry here needs to be covered also by the security setting
+@code{set auto-load safe-path} (@pxref{set auto-load safe-path}).
+
+@anchor{with-auto-load-dir}
+This variable defaults to @file{$ddir/auto-load}.  The default @code{set
+auto-load safe-path} value can be also overriden by @value{GDBN} configuration
+option @option{--with-auto-load-dir}.
+
+Any used string @file{$ddir} will get replaced by @var{data-directory} which is
+determined at @value{GDBN} startup (@pxref{Data Files}).  @file{$ddir} must be
+be placed as a directory component --- either alone or delimited by @file{/} or
+@file{\} directory separators, depending on the host platform.
+
+The list of directories uses path separator (@samp{:} on GNU and Unix
+systems, @samp{;} on MS-Windows and MS-DOS) to separate directories, similarly
+to the @env{PATH} environment variable.
+
+@anchor{show auto-load scripts-directory}
+@kindex show auto-load scripts-directory
+@item show auto-load scripts-directory
+Show @value{GDBN} auto-loaded scripts location.
+@end table
 
 @value{GDBN} does not track which files it has already auto-loaded this way.
 @value{GDBN} will load the associated script every time the corresponding

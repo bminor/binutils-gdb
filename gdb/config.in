@@ -3,6 +3,9 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* Directories from which to load auto-loaded scripts. */
+#undef AUTO_LOAD_DIR
+
 /* Directories safe to hold auto-loaded files. */
 #undef AUTO_LOAD_SAFE_PATH
 

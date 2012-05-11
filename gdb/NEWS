@@ -172,6 +172,12 @@ set auto-load libthread-db on|off
 show auto-load libthread-db
   Control auto-loading of inferior specific thread debugging shared library.
 
+set auto-load scripts-directory <dir1>[:<dir2>...]
+  Set a list of directories from which to load auto-loaded scripts.
+  Automatically loaded Python scripts and GDB scripts are located in one
+  of the directories listed by this option.
+  The delimiter (':' above) may differ according to the host platform.
+
 set auto-load safe-path <dir1>[:<dir2>...]
 show auto-load safe-path
   Set a list of directories from which it is safe to auto-load files.
@@ -183,10 +189,14 @@ show debug auto-load
 
 * New configure options
 
+--with-auto-load-dir
+  Configure default value for the 'set auto-load scripts-directory'
+  setting above.  It defaults to '$ddir/auto-load', $ddir representing
+  GDB's data directory (available via show data-directory).
+
 --with-auto-load-safe-path
   Configure default value for the 'set auto-load safe-path' setting
-  above.  It defaults to '$ddir/auto-load', $ddir representing GDB's
-  data directory (available via show data-directory).
+  above.  It defaults to the --with-auto-load-dir setting.
 
 --without-auto-load-safe-path
   Set 'set auto-load safe-path' to '/', effectively disabling this
