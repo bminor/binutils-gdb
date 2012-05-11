@@ -1,3 +1,15 @@
+2012-05-11  Georg-Johann Lay  <avr@gjlay.de
+
+	PR target/13503
+	* reloc.c: Add new ENUM for BFD_RELOC_AVR_8_LO,
+	BFD_RELOC_AVR_8_HI, BFD_RELOC_AVR_8_HHI.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenrate.
+	* elf32-avr.c (elf_avr_howto_table): Add entries for
+	R_AVR_8_LO8, R_AVR_8_HI8, R_AVR_8_HHI8.
+	(avr_reloc_map): Add RELOC mappings for R_AVR_8_LO8, R_AVR_8_HI8,
+	R_AVR_8_HHI8.
+
 2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_relocate_section): Use int in x32

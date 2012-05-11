@@ -4360,6 +4360,21 @@ ENUM
 ENUMDOC
   This is a 6 bit reloc for the AVR that stores offset for adiw/sbiw
   instructions
+ENUM
+  BFD_RELOC_AVR_8_LO
+ENUMDOC
+  This is a 8 bit reloc for the AVR that stores bits 0..7 of a symbol
+  in .byte lo8(symbol)
+ENUM
+  BFD_RELOC_AVR_8_HI
+ENUMDOC
+  This is a 8 bit reloc for the AVR that stores bits 8..15 of a symbol
+  in .byte hi8(symbol)
+ENUM
+  BFD_RELOC_AVR_8_HHI
+ENUMDOC
+  This is a 8 bit reloc for the AVR that stores bits 16..23 of a symbol
+  in .byte hhi8(symbol)
 
 ENUM
   BFD_RELOC_RL78_NEG8

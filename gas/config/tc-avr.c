@@ -1,7 +1,7 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
    Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010  Free Software Foundation, Inc.
+   2010, 2012  Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -65,19 +65,19 @@ static struct mcu_type_s mcu_types[] =
 {
   {"avr1",       AVR_ISA_AVR1,    bfd_mach_avr1},
 /* TODO: insruction set for avr2 architecture should be AVR_ISA_AVR2,
- but set to AVR_ISA_AVR25 for some following version 
- of GCC (from 4.3) for backward compatibility.  */  
+ but set to AVR_ISA_AVR25 for some following version
+ of GCC (from 4.3) for backward compatibility.  */
   {"avr2",       AVR_ISA_AVR25,   bfd_mach_avr2},
   {"avr25",      AVR_ISA_AVR25,   bfd_mach_avr25},
-/* TODO: insruction set for avr3 architecture should be AVR_ISA_AVR3, 
- but set to AVR_ISA_AVR3_ALL for some following version 
+/* TODO: insruction set for avr3 architecture should be AVR_ISA_AVR3,
+ but set to AVR_ISA_AVR3_ALL for some following version
  of GCC (from 4.3) for backward compatibility.  */
   {"avr3",       AVR_ISA_AVR3_ALL, bfd_mach_avr3},
   {"avr31",      AVR_ISA_AVR31,   bfd_mach_avr31},
   {"avr35",      AVR_ISA_AVR35,   bfd_mach_avr35},
   {"avr4",       AVR_ISA_AVR4,    bfd_mach_avr4},
-/* TODO: insruction set for avr5 architecture should be AVR_ISA_AVR5, 
- but set to AVR_ISA_AVR51 for some following version 
+/* TODO: insruction set for avr5 architecture should be AVR_ISA_AVR5,
+ but set to AVR_ISA_AVR51 for some following version
  of GCC (from 4.3) for backward compatibility.  */
   {"avr5",       AVR_ISA_AVR51,   bfd_mach_avr5},
   {"avr51",      AVR_ISA_AVR51,   bfd_mach_avr51},
@@ -1013,7 +1013,7 @@ avr_operand (struct avr_opcodes_s *opcode,
 	op_mask |= (x << 4);
       }
       break;
-    
+
     case '?':
       break;
 
@@ -1334,7 +1334,19 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  }
 	  break;
 
-	default:
+        case BFD_RELOC_AVR_8_LO:
+          *where = 0xff & value;
+          break;
+
+        case BFD_RELOC_AVR_8_HI:
+          *where = 0xff & (value >> 8);
+          break;
+
+        case BFD_RELOC_AVR_8_HHI:
+          *where = 0xff & (value >> 16);
+          break;
+
+        default:
 	  as_fatal (_("line %d: unknown relocation type: 0x%x"),
 		    fixP->fx_line, fixP->fx_r_type);
 	  break;
@@ -1465,40 +1477,75 @@ md_assemble (char *str)
   }
 }
 
-/* Flag to pass `pm' mode between `avr_parse_cons_expression' and
-   `avr_cons_fix_new'.  */
-static int exp_mod_pm = 0;
+typedef struct
+{
+  /* Name of the expression modifier allowed with .byte, .word, etc.  */
+  const char *name;
 
-/* Parse special CONS expression: pm (expression)
-   or alternatively: gs (expression).
-   These are used for addressing program memory.
-   Relocation: BFD_RELOC_AVR_16_PM.  */
+  /* Only allowed with n bytes of data.  */
+  int nbytes;
+
+  /* Associated RELOC.  */
+  bfd_reloc_code_real_type reloc;
+
+  /* Part of the error message.  */
+  const char *error;
+} exp_mod_data_t;
+
+static const exp_mod_data_t exp_mod_data[] =
+{
+  /* Default, must be first.  */
+  { "", 0, BFD_RELOC_16, "" },
+  /* Divides by 2 to get word address.  Generate Stub.  */
+  { "gs", 2, BFD_RELOC_AVR_16_PM, "`gs' " },
+  { "pm", 2, BFD_RELOC_AVR_16_PM, "`pm' " },
+  /* The following are used together with avr-gcc's __memx address space
+     in order to initialize a 24-bit pointer variable with a 24-bit address.
+     For address in flash, hhi8 will contain the flash segment if the
+     symbol is located in flash. If the symbol is located in RAM; hhi8
+     will contain 0x80 which matches avr-gcc's notion of how 24-bit RAM/flash
+     addresses linearize address space.  */
+  { "lo8",  1, BFD_RELOC_AVR_8_LO,  "`lo8' "  },
+  { "hi8",  1, BFD_RELOC_AVR_8_HI,  "`hi8' "  },
+  { "hhi8", 1, BFD_RELOC_AVR_8_HHI, "`hhi8' " },
+  { "hh8",  1, BFD_RELOC_AVR_8_HHI, "`hh8' "  },
+  /* End of list.  */
+  { NULL, 0, 0, NULL }
+};
+
+/* Data to pass between `avr_parse_cons_expression' and `avr_cons_fix_new'.  */
+static const exp_mod_data_t *pexp_mod_data = &exp_mod_data[0];
+
+/* Parse special CONS expression: pm (expression) or alternatively
+   gs (expression).  These are used for addressing program memory.  Moreover,
+   define lo8 (expression), hi8 (expression) and hhi8 (expression).  */
 
 void
 avr_parse_cons_expression (expressionS *exp, int nbytes)
 {
+  const exp_mod_data_t *pexp = &exp_mod_data[0];
   char *tmp;
 
-  exp_mod_pm = 0;
+  pexp_mod_data = pexp;
 
   tmp = input_line_pointer = skip_space (input_line_pointer);
 
-  if (nbytes == 2)
-    {
-      char *pm_name1 = "pm";
-      char *pm_name2 = "gs";
-      int len = strlen (pm_name1);
-      /* len must be the same for both pm identifiers.  */
+  /* The first entry of exp_mod_data[] contains an entry if no
+     expression modifier is present.  Skip it.  */
 
-      if (strncasecmp (input_line_pointer, pm_name1, len) == 0
-          || strncasecmp (input_line_pointer, pm_name2, len) == 0)
+  for (pexp++; pexp->name; pexp++)
+    {
+      int len = strlen (pexp->name);
+
+      if (nbytes == pexp->nbytes
+          && strncasecmp (input_line_pointer, pexp->name, len) == 0)
 	{
 	  input_line_pointer = skip_space (input_line_pointer + len);
 
 	  if (*input_line_pointer == '(')
 	    {
 	      input_line_pointer = skip_space (input_line_pointer + 1);
-	      exp_mod_pm = 1;
+	      pexp_mod_data = pexp;
 	      expression (exp);
 
 	      if (*input_line_pointer == ')')
@@ -1506,13 +1553,15 @@ avr_parse_cons_expression (expressionS *exp, int nbytes)
 	      else
 		{
 		  as_bad (_("`)' required"));
-		  exp_mod_pm = 0;
+		  pexp_mod_data = &exp_mod_data[0];
 		}
 
 	      return;
 	    }
 
 	  input_line_pointer = tmp;
+
+          break;
 	}
     }
 
@@ -1525,8 +1574,11 @@ avr_cons_fix_new (fragS *frag,
 		  int nbytes,
 		  expressionS *exp)
 {
-  if (exp_mod_pm == 0)
+  int bad = 0;
+
+  switch (pexp_mod_data->reloc)
     {
+    default:
       if (nbytes == 1)
 	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_8);
       else if (nbytes == 2)
@@ -1534,16 +1586,24 @@ avr_cons_fix_new (fragS *frag,
       else if (nbytes == 4)
 	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_32);
       else
-	as_bad (_("illegal %srelocation size: %d"), "", nbytes);
-    }
-  else
-    {
-      if (nbytes == 2)
-	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_AVR_16_PM);
+	bad = 1;
+      break;
+
+    case BFD_RELOC_AVR_16_PM:
+    case BFD_RELOC_AVR_8_LO:
+    case BFD_RELOC_AVR_8_HI:
+    case BFD_RELOC_AVR_8_HHI:
+      if (nbytes == pexp_mod_data->nbytes)
+        fix_new_exp (frag, where, nbytes, exp, FALSE, pexp_mod_data->reloc);
       else
-	as_bad (_("illegal %srelocation size: %d"), "`pm' ", nbytes);
-      exp_mod_pm = 0;
+        bad = 1;
+      break;
     }
+
+  if (bad)
+    as_bad (_("illegal %srelocation size: %d"), pexp_mod_data->error, nbytes);
+
+  pexp_mod_data = &exp_mod_data[0];
 }
 
 void

@@ -1,3 +1,17 @@
+2012-05-11  Georg-Johann Lay  <avr@gjlay.de
+
+	PR target/13503
+	* config/tc-avr.c (exp_mod_pm): Remove variable.
+	(exp_mod_data_t): New typedef.
+	(pexp_mod_data, exp_mod_data): New variables.
+	(avr_parse_cons_expression): Scan through exp_mod_data[] to find
+	data expression modifiers "pm", "gs", "lo8", hi8", "hhi8", "hh8"
+	and set pexp_mod_data accordingly to be used in avr_cons_fix_new.
+	(avr_cons_fix_new): Handle new data expression modifiers shipped
+	in pexp_mod_data.
+	(md_apply_fix): Handle BFD_RELOC_AVR_8_LO, BFD_RELOC_AVR_8_HI,
+	BFD_RELOC_AVR_8_HHI.
+
 2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (tc_gen_reloc): Use bfd_signed_vma in x32

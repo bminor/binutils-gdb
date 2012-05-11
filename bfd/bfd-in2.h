@@ -4088,6 +4088,18 @@ instructions  */
 instructions  */
   BFD_RELOC_AVR_6_ADIW,
 
+/* This is a 8 bit reloc for the AVR that stores bits 0..7 of a symbol
+in .byte lo8(symbol)  */
+  BFD_RELOC_AVR_8_LO,
+
+/* This is a 8 bit reloc for the AVR that stores bits 8..15 of a symbol
+in .byte hi8(symbol)  */
+  BFD_RELOC_AVR_8_HI,
+
+/* This is a 8 bit reloc for the AVR that stores bits 16..23 of a symbol
+in .byte hhi8(symbol)  */
+  BFD_RELOC_AVR_8_HHI,
+
 /* Renesas RL78 Relocations.  */
   BFD_RELOC_RL78_NEG8,
   BFD_RELOC_RL78_NEG16,
