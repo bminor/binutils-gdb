@@ -1,3 +1,16 @@
+2012-05-11  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (enum stopping_threads_kind): New.
+	(stopping_threads): Change type to `enum stopping_threads_kind'.
+	(handle_extended_wait): If stopping and suspending threads, leave
+	the new_lwp suspended too.
+	(linux_wait_for_event): Adjust.
+	(stop_all_lwps): Set `stopping_threads' to
+	STOPPING_AND_SUSPENDING_THREADS or STOPPING_THREADS depending on
+	whether we're suspending threads or just stopping them.  Assert no
+	recursion happens.
+
 2012-04-29  Yao Qi  <yao@codesourcery.com>
 
 	* server.h: Move some code to ...
