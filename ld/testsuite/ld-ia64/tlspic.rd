@@ -48,9 +48,9 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 6 entries:
 [0-9a-f ]+R_IA64_DTPMOD64LSB +0+ sg1 \+ 0
 [0-9a-f ]+R_IA64_DTPREL64LSB +0+ sg1 \+ 0
 [0-9a-f ]+R_IA64_TPREL64LSB +0+4 sg2 \+ 0
-[0-9a-f ]+R_IA64_DTPMOD64LSB +0+
-[0-9a-f ]+R_IA64_TPREL64LSB +0+44
-[0-9a-f ]+R_IA64_TPREL64LSB +0+24
+[0-9a-f ]+R_IA64_DTPMOD64LSB +0
+[0-9a-f ]+R_IA64_TPREL64LSB +44
+[0-9a-f ]+R_IA64_TPREL64LSB +24
 
 Relocation section '.rela.IA_64.pltoff' at offset 0x[0-9a-f]+ contains 1 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend

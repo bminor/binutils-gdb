@@ -1,3 +1,12 @@
+2012-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14088
+	* ld-ia64/tlspic.rd: Updated.
+	* ld-x86-64/tlsdesc-nacl.rd: Likewise.
+	* ld-x86-64/tlsdesc.rd: Likewise.
+	* ld-x86-64/tlspic-nacl.rd: Likewise.
+	* ld-x86-64/tlspic.rd: Likewise.
+
 2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/ilp32-11.d: Updated.

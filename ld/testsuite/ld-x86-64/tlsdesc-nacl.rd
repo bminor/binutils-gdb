@@ -71,22 +71,22 @@ Dynamic section at offset 0x[0-9a-f]+ contains 16 entries:
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 8 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
-0+10010638 +[0-9a-f]+ R_X86_64_TPOFF64 +0+24
-0+10010640 +[0-9a-f]+ R_X86_64_TPOFF64 +0+30
-0+10010648 +[0-9a-f]+ R_X86_64_TPOFF64 +0+64
-0+10010658 +[0-9a-f]+ R_X86_64_TPOFF64 +0+50
-0+10010660 +[0-9a-f]+ R_X86_64_TPOFF64 +0+70
-0+10010670 +[0-9a-f]+ R_X86_64_TPOFF64 +0+44
+0+10010638 +[0-9a-f]+ R_X86_64_TPOFF64 +24
+0+10010640 +[0-9a-f]+ R_X86_64_TPOFF64 +30
+0+10010648 +[0-9a-f]+ R_X86_64_TPOFF64 +64
+0+10010658 +[0-9a-f]+ R_X86_64_TPOFF64 +50
+0+10010660 +[0-9a-f]+ R_X86_64_TPOFF64 +70
+0+10010670 +[0-9a-f]+ R_X86_64_TPOFF64 +44
 0+10010650 +[0-9a-f]+ R_X86_64_TPOFF64 +0+10 sg5 \+ 0
 0+10010668 +[0-9a-f]+ R_X86_64_TPOFF64 +0+4 sg2 \+ 0
 
 Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 5 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
 0+100106c8 +[0-9a-f]+ R_X86_64_TLSDESC +0+ sg1 \+ 0
-0+10010698 +[0-9a-f]+ R_X86_64_TLSDESC +0+20
-0+100106d8 +[0-9a-f]+ R_X86_64_TLSDESC +0+40
-0+100106a8 +[0-9a-f]+ R_X86_64_TLSDESC +0+60
-0+100106b8 +[0-9a-f]+ R_X86_64_TLSDESC +0+
+0+10010698 +[0-9a-f]+ R_X86_64_TLSDESC +20
+0+100106d8 +[0-9a-f]+ R_X86_64_TLSDESC +40
+0+100106a8 +[0-9a-f]+ R_X86_64_TLSDESC +60
+0+100106b8 +[0-9a-f]+ R_X86_64_TLSDESC +0
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name

@@ -1387,9 +1387,13 @@ dump_relocations (FILE * file,
 	}
       else if (is_rela)
 	{
-	  printf ("%*c", is_32bit_elf ?
-		  (do_wide ? 34 : 28) : (do_wide ? 26 : 20), ' ');
-	  print_vma (rels[i].r_addend, LONG_HEX);
+	  bfd_signed_vma off = rels[i].r_addend;
+
+	  printf ("%*c", is_32bit_elf ? 12 : 20, ' ');
+	  if (off < 0)
+	    printf ("-%" BFD_VMA_FMT "x", - off);
+	  else
+	    printf ("%" BFD_VMA_FMT "x", off);
 	}
 
       if (elf_header.e_machine == EM_SPARCV9
