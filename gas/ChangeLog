@@ -1,5 +1,10 @@
 2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (tc_gen_reloc): Use bfd_signed_vma in x32
+	addend overflow check.
+
+2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (tc_gen_reloc): Display signed hex number in
 	x32 addend overflow check.
 
