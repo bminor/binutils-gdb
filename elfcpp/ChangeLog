@@ -1,3 +1,8 @@
+2012-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/14091
+	* x86_64.h (R_X86_64_RELATIVE64): New.
+
 2012-05-01  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf.h (enum DW_TAG, enum DW_FORM, enum DW_AT, enum DW_ENCODING)

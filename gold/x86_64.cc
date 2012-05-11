@@ -2299,7 +2299,9 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 	  Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 	  rela_dyn->add_local_relative(object, r_sym,
-				       elfcpp::R_X86_64_RELATIVE,
+				       (size == 32 
+					? elfcpp::R_X86_64_RELATIVE64
+					: elfcpp::R_X86_64_RELATIVE),
 				       output_section, data_shndx,
 				       reloc.get_r_offset(),
 				       reloc.get_r_addend(), is_ifunc);

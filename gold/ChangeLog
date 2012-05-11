@@ -1,3 +1,10 @@
+2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/14091
+	* x86_64.cc (Target_x86_64::Scan::local): For x32, generate
+	R_X86_64_RELATIVE64 instead of R_X86_64_RELATIVE in case of
+	R_X86_64_64.
+
 2012-05-08  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (gdb_sections): Update GDB version, add .debug_addr.
