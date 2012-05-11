@@ -67,6 +67,7 @@ AC_SUBST(HDEFINES)
 AC_PROG_INSTALL
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h limits.h)
+ACX_HEADER_STRING
 
 AC_CHECK_DECLS([basename, stpcpy])
 

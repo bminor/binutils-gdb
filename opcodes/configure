@@ -12089,6 +12089,38 @@ fi
 
 done
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether string.h and strings.h may both be included" >&5
+$as_echo_n "checking whether string.h and strings.h may both be included... " >&6; }
+if test "${gcc_cv_header_string+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <string.h>
+#include <strings.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gcc_cv_header_string=yes
+else
+  gcc_cv_header_string=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gcc_cv_header_string" >&5
+$as_echo "$gcc_cv_header_string" >&6; }
+if test $gcc_cv_header_string = yes; then
+
+$as_echo "#define STRING_WITH_STRINGS 1" >>confdefs.h
+
+fi
+
 
 ac_fn_c_check_decl "$LINENO" "basename" "ac_cv_have_decl_basename" "$ac_includes_default"
 if test "x$ac_cv_have_decl_basename" = x""yes; then :

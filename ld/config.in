@@ -178,6 +178,9 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* Define if you can safely include both <string.h> and <strings.h>. */
+#undef STRING_WITH_STRINGS
+
 /* Use b modifier when opening binary files? */
 #undef USE_BINARY_FOPEN
 

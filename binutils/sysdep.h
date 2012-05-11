@@ -46,6 +46,10 @@ extern int errno;
 #include <unistd.h>
 #endif
 
+#ifdef STRING_WITH_STRINGS
+#include <string.h>
+#include <strings.h>
+#else
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -54,6 +58,7 @@ extern int errno;
 #else
 extern char *strchr ();
 extern char *strrchr ();
+#endif
 #endif
 #endif
 

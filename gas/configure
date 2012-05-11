@@ -13180,6 +13180,7 @@ fi
 
 done
 
+ACX_HEADER_STRING
 
 # Put this here so that autoconf's "cross-compiling" message doesn't confuse
 # people who are not cross-compiling but are compiling cross-assemblers.

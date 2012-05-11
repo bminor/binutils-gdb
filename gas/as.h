@@ -1,6 +1,6 @@
 /* as.h - global header file
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2012
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -42,6 +42,11 @@
 
 /* System include files first...  */
 #include <stdio.h>
+
+#ifdef STRING_WITH_STRINGS
+#include <string.h>
+#include <strings.h>
+#else
 #ifdef HAVE_STRING_H
 #include <string.h>
 #else
@@ -49,6 +54,8 @@
 #include <strings.h>
 #endif
 #endif
+#endif
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif

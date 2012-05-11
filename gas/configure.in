@@ -634,6 +634,7 @@ AM_CONDITIONAL(GENINSRC_NEVER, false)
 AC_EXEEXT
 
 AC_CHECK_HEADERS(string.h stdlib.h memory.h strings.h unistd.h errno.h sys/types.h limits.h locale.h time.h sys/stat.h)
+ACX_HEADER_STRING
 
 # Put this here so that autoconf's "cross-compiling" message doesn't confuse
 # people who are not cross-compiling but are compiling cross-assemblers.
