@@ -1,3 +1,41 @@
+2012-05-11  Ralf Corsépius  <ralf.corsepius@rtems.org>
+
+	Backport from mainline:
+
+	2012-04-24  Alan Modra  <amodra@gmail.com>
+	PR ld/13991
+	* bfd/elf-bfd.h (_bfd_elf_link_just_syms): Define as
+	_bfd_generic_link_just_syms.
+	* bfd/elflink.c (_bfd_elf_link_just_syms): Delete.
+	* bfd/linker.c (_bfd_generic_link_just_syms): Set sec_info_type.
+
+	* bfd/bfd-in.h (discarded_section): Renamed from elf_discarded_section.
+	* bfd/section.c (SEC_INFO_TYPE_NONE, SEC_INFO_TYPE_STABS,
+	SEC_INFO_TYPE_MERGE, SEC_INFO_TYPE_EH_FRAME,
+	SEC_INFO_TYPE_JUST_SYMS): Renamed from corresponding ELF_INFO_TYPE.
+	* bfd/elf-eh-frame.c, * bfd/elf-m10200.c, * bfd/elf-m10300.c,
+	* bfd/elf.c, * bfd/elf32-arm.c, * bfd/elf32-avr.c, * bfd/elf32-bfin.c,
+	* bfd/elf32-cr16.c, * bfd/elf32-cr16c.c, * bfd/elf32-cris.c,
+	* bfd/elf32-crx.c, * bfd/elf32-d10v.c, * bfd/elf32-epiphany.c,
+	* bfd/elf32-fr30.c, * bfd/elf32-frv.c, * bfd/elf32-h8300.c,
+	* bfd/elf32-hppa.c, * bfd/elf32-i370.c, * bfd/elf32-i386.c,
+	* bfd/elf32-i860.c, * bfd/elf32-ip2k.c, * bfd/elf32-iq2000.c,
+	* bfd/elf32-lm32.c, * bfd/elf32-m32c.c, * bfd/elf32-m32r.c,
+	* bfd/elf32-m68hc1x.c, * bfd/elf32-m68k.c, * bfd/elf32-mcore.c,
+	* bfd/elf32-mep.c, * bfd/elf32-moxie.c, * bfd/elf32-msp430.c,
+	* bfd/elf32-mt.c, * bfd/elf32-openrisc.c, * bfd/elf32-ppc.c,
+	* bfd/elf32-rl78.c, * bfd/elf32-rx.c, * bfd/elf32-s390.c,
+	* bfd/elf32-score.c, * bfd/elf32-score7.c, * bfd/elf32-sh.c,
+	* bfd/elf32-spu.c, * bfd/elf32-tic6x.c, * bfd/elf32-tilepro.c,
+	* bfd/elf32-v850.c, * bfd/elf32-vax.c, * bfd/elf32-xc16x.c,
+	* bfd/elf32-xstormy16.c, * bfd/elf32-xtensa.c, * bfd/elf64-alpha.c,
+	* bfd/elf64-hppa.c, * bfd/elf64-ia64-vms.c, * bfd/elf64-mmix.c,
+	* bfd/elf64-ppc.c, * bfd/elf64-s390.c, * bfd/elf64-sh64.c,
+	* bfd/elf64-x86-64.c, * bfd/elflink.c, * bfd/elfnn-ia64.c,
+	* bfd/elfxx-mips.c, * bfd/elfxx-sparc.c, * bfd/elfxx-tilegx.c,
+	* bfd/reloc.c: Update all references.
+	* bfd/bfd-in2.h: Regenerate.
+
 2012-04-20  Nick Clifton  <nickc@redhat.com>
 
 	Import this patch from the mainline:

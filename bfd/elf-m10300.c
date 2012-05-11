@@ -1509,7 +1509,7 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 	       h->root.root.root.string);
 	}
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 
@@ -2763,7 +2763,7 @@ mn10300_elf_relax_section (bfd *abfd,
 						      isym->st_name);
 
 	  if ((sym_sec->flags & SEC_MERGE)
-	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
+	      && sym_sec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	    {
 	      symval = isym->st_value;
 

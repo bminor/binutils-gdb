@@ -4106,7 +4106,7 @@ elf64_alpha_relocate_section_r (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  sec = h->root.u.def.section;
 	}
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend,
 					 elf64_alpha_howto_table + r_type,
@@ -4263,7 +4263,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	     unless it has been done already.  */
 	  if ((sec->flags & SEC_MERGE)
 	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-	      && sec->sec_info_type == ELF_INFO_TYPE_MERGE
+	      && sec->sec_info_type == SEC_INFO_TYPE_MERGE
 	      && gotent
 	      && !gotent->reloc_xlated)
 	    {
@@ -4315,7 +4315,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  gotent = h->got_entries;
 	}
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 
@@ -4717,7 +4717,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	    if (r_symndx < symtab_hdr->sh_info
 		&& sec != NULL && howto->pc_relative
-		&& elf_discarded_section (sec))
+		&& discarded_section (sec))
 	      break;
 
 	    if (h != NULL)

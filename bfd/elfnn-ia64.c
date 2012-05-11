@@ -530,7 +530,7 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 	  symtype = h->type;
 	}
 
-      if (tsec->sec_info_type == ELF_INFO_TYPE_MERGE)
+      if (tsec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	{
 	  /* At this stage in linking, no SEC_MERGE symbol has been
 	     adjusted, so all references to such symbols need to be
@@ -3861,7 +3861,7 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	  if (!info->relocatable
 	      && (sym_sec->flags & SEC_MERGE) != 0
 	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
+	      && sym_sec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	    {
 	      struct elfNN_ia64_local_hash_entry *loc_h;
 
@@ -3919,7 +3919,7 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	    continue;
 	}
 
-      if (sym_sec != NULL && elf_discarded_section (sym_sec))
+      if (sym_sec != NULL && discarded_section (sym_sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 

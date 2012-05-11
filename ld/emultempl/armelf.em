@@ -240,7 +240,7 @@ build_section_lists (lang_statement_union_type *statement)
     {
       asection *i = statement->input_section.section;
 
-      if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+      if (i->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
 	  && (i->flags & SEC_EXCLUDE) == 0
 	  && i->output_section != NULL
 	  && i->output_section->owner == link_info.output_bfd)
@@ -299,7 +299,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 		  && elf_section_type (sec) == SHT_PROGBITS
 		  && (elf_section_flags (sec) & SHF_EXECINSTR) != 0
 		  && (sec->flags & SEC_EXCLUDE) == 0
-		  && sec->sec_info_type != ELF_INFO_TYPE_JUST_SYMS
+		  && sec->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
 		  && out_sec != bfd_abs_section_ptr)
 		{
 		  if (sec_count == list_size)

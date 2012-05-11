@@ -4648,7 +4648,7 @@ size_input_section
   lang_input_section_type *is = &((*this_ptr)->input_section);
   asection *i = is->section;
 
-  if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+  if (i->sec_info_type != SEC_INFO_TYPE_JUST_SYMS
       && (i->flags & SEC_EXCLUDE) == 0)
     {
       unsigned int alignment_needed;

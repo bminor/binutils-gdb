@@ -6852,7 +6852,7 @@ adjust_opd_syms (struct elf_link_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 	  if (dsec == NULL)
 	    {
 	      for (dsec = sym_sec->owner->sections; dsec; dsec = dsec->next)
-		if (elf_discarded_section (dsec))
+		if (discarded_section (dsec))
 		  {
 		    ppc64_elf_tdata (sym_sec->owner)->deleted_section = dsec;
 		    break;
@@ -7033,7 +7033,7 @@ ppc64_elf_edit_opd (struct bfd_link_info *info, bfd_boolean non_overlapping)
       if (sec == NULL || sec->size == 0)
 	continue;
 
-      if (sec->sec_info_type == ELF_INFO_TYPE_JUST_SYMS)
+      if (sec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
 	continue;
 
       if (sec->output_section == bfd_abs_section_ptr)
@@ -8077,8 +8077,8 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
       toc = bfd_get_section_by_name (ibfd, ".toc");
       if (toc == NULL
 	  || toc->size == 0
-	  || toc->sec_info_type == ELF_INFO_TYPE_JUST_SYMS
-	  || elf_discarded_section (toc))
+	  || toc->sec_info_type == SEC_INFO_TYPE_JUST_SYMS
+	  || discarded_section (toc))
 	continue;
 
       toc_relocs = NULL;
@@ -8091,7 +8091,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	{
 	  if (sec->reloc_count == 0
-	      || !elf_discarded_section (sec)
+	      || !discarded_section (sec)
 	      || get_opd_info (sec)
 	      || (sec->flags & SEC_ALLOC) == 0
 	      || (sec->flags & SEC_DEBUGGING) != 0)
@@ -8201,7 +8201,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		goto error_ret;
 
 	      if (sym_sec == NULL
-		  || elf_discarded_section (sym_sec))
+		  || discarded_section (sym_sec))
 		continue;
 
 	      if (!SYMBOL_CALLS_LOCAL (info, h))
@@ -8281,7 +8281,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	  int repeat;
 
 	  if (sec->reloc_count == 0
-	      || elf_discarded_section (sec)
+	      || discarded_section (sec)
 	      || get_opd_info (sec)
 	      || (sec->flags & SEC_ALLOC) == 0
 	      || (sec->flags & SEC_DEBUGGING) != 0)
@@ -8503,7 +8503,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	    {
 	      if (sec->reloc_count == 0
-		  || elf_discarded_section (sec))
+		  || discarded_section (sec))
 		continue;
 
 	      relstart = _bfd_elf_link_read_relocs (ibfd, sec, NULL, NULL,
@@ -12036,7 +12036,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	}
       h = (struct ppc_link_hash_entry *) h_elf;
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend,
 					 ppc64_elf_howto_table[r_type],
@@ -13865,7 +13865,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 
 
   if (htab->glink_eh_frame != NULL
-      && htab->glink_eh_frame->sec_info_type == ELF_INFO_TYPE_EH_FRAME
+      && htab->glink_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME
       && !_bfd_elf_write_section_eh_frame (output_bfd, info,
 					   htab->glink_eh_frame,
 					   htab->glink_eh_frame->contents))

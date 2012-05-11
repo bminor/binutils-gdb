@@ -893,7 +893,7 @@ lm32_elf_relocate_section (bfd *output_bfd,
 	  name = h->root.root.string;
         }
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 
@@ -2372,7 +2372,7 @@ lm32_elf_size_dynamic_sections (bfd *output_bfd,
                           /* Don't generate entries for weak symbols.  */
                           if (!h || (h && h->root.type != bfd_link_hash_undefweak))
                             {
-                              if (!elf_discarded_section (s) && !((bfd_get_section_flags (ibfd, s) & SEC_ALLOC) == 0))
+                              if (!discarded_section (s) && !((bfd_get_section_flags (ibfd, s) & SEC_ALLOC) == 0))
                                 {
                                   switch (ELF32_R_TYPE (internal_relocs->r_info))
                                     {
@@ -2394,7 +2394,7 @@ lm32_elf_size_dynamic_sections (bfd *output_bfd,
                                   if (!strcmp (current->name, h->root.root.string))
                                     break;
                                 }
-                              if (!current && !elf_discarded_section (s) && (bfd_get_section_flags (ibfd, s) & SEC_ALLOC))
+                              if (!current && !discarded_section (s) && (bfd_get_section_flags (ibfd, s) & SEC_ALLOC))
                                 {
                                   /* Will this have an entry in the GOT.  */
                                   if (ELF32_R_TYPE (internal_relocs->r_info) == R_LM32_16_GOT)

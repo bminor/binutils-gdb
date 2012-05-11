@@ -302,11 +302,11 @@ typedef struct bfd_section *sec_ptr;
     ? (sec)->rawsize : (sec)->size) / bfd_octets_per_byte (bfd))
 
 /* Return TRUE if input section SEC has been discarded.  */
-#define elf_discarded_section(sec)				\
+#define discarded_section(sec)					\
   (!bfd_is_abs_section (sec)					\
    && bfd_is_abs_section ((sec)->output_section)		\
-   && (sec)->sec_info_type != ELF_INFO_TYPE_MERGE		\
-   && (sec)->sec_info_type != ELF_INFO_TYPE_JUST_SYMS)
+   && (sec)->sec_info_type != SEC_INFO_TYPE_MERGE		\
+   && (sec)->sec_info_type != SEC_INFO_TYPE_JUST_SYMS)
 
 /* Forward define.  */
 struct stat;
@@ -1384,11 +1384,11 @@ typedef struct bfd_section
 
   /* Type of sec_info information.  */
   unsigned int sec_info_type:3;
-#define ELF_INFO_TYPE_NONE      0
-#define ELF_INFO_TYPE_STABS     1
-#define ELF_INFO_TYPE_MERGE     2
-#define ELF_INFO_TYPE_EH_FRAME  3
-#define ELF_INFO_TYPE_JUST_SYMS 4
+#define SEC_INFO_TYPE_NONE      0
+#define SEC_INFO_TYPE_STABS     1
+#define SEC_INFO_TYPE_MERGE     2
+#define SEC_INFO_TYPE_EH_FRAME  3
+#define SEC_INFO_TYPE_JUST_SYMS 4
 
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
   unsigned int use_rela_p:1;

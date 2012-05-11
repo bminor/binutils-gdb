@@ -1,6 +1,6 @@
 /* linker.c -- BFD linker routines
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
@@ -810,6 +810,7 @@ void
 _bfd_generic_link_just_syms (asection *sec,
 			     struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
+  sec->sec_info_type = SEC_INFO_TYPE_JUST_SYMS;
   sec->output_section = bfd_abs_section_ptr;
   sec->output_offset = sec->vma;
 }

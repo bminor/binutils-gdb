@@ -510,7 +510,7 @@ rx_elf_relocate_section
 	  name = h->root.root.string;
 	}
 
-      if (sec != NULL && elf_discarded_section (sec))
+      if (sec != NULL && discarded_section (sec))
 	RELOC_AGAINST_DISCARDED_SECTION (info, input_bfd, input_section,
 					 rel, relend, howto, contents);
 
@@ -1588,7 +1588,7 @@ rx_offset_for_reloc (bfd *                    abfd,
 	  if (ssec)
 	    {
 	      if ((ssec->flags & SEC_MERGE)
-		  && ssec->sec_info_type == ELF_INFO_TYPE_MERGE)
+		  && ssec->sec_info_type == SEC_INFO_TYPE_MERGE)
 		symval = _bfd_merged_section_offset (abfd, & ssec,
 						     elf_section_data (ssec)->sec_info,
 						     symval);

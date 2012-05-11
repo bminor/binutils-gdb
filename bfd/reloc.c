@@ -6235,7 +6235,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	  bfd_reloc_status_type r;
 
 	  symbol = *(*parent)->sym_ptr_ptr;
-	  if (symbol->section && elf_discarded_section (symbol->section))
+	  if (symbol->section && discarded_section (symbol->section))
 	    {
 	      bfd_byte *p;
 	      static reloc_howto_type none_howto
