@@ -1,3 +1,10 @@
+2012-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Make auto-load handle multiple components of DEBUG_FILE_DIRECTORY.
+	* auto-load.c (auto_load_objfile_script): Remove check for NULL
+	DEBUG_FILE_DIRECTORY.  Handle multiple components of
+	DEBUG_FILE_DIRECTORY.
+
 2012-05-10  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (recursively_write_psymbols): New function.

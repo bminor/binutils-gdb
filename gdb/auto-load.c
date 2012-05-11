@@ -587,17 +587,29 @@ auto_load_objfile_script (struct objfile *objfile,
   input = fopen (filename, "r");
   debugfile = filename;
 
-  if (!input && debug_file_directory)
+  if (!input)
     {
-      /* Also try the same file in the separate debug info directory.  */
-      debugfile = xmalloc (strlen (filename)
-			   + strlen (debug_file_directory) + 1);
-      strcpy (debugfile, debug_file_directory);
-      /* FILENAME is absolute, so we don't need a "/" here.  */
-      strcat (debugfile, filename);
+      char *debugdir;
+      VEC (char_ptr) *debugdir_vec;
+      int ix;
 
-      make_cleanup (xfree, debugfile);
-      input = fopen (debugfile, "r");
+      debugdir_vec = dirnames_to_char_ptr_vec (debug_file_directory);
+      make_cleanup_free_char_ptr_vec (debugdir_vec);
+
+      for (ix = 0; VEC_iterate (char_ptr, debugdir_vec, ix, debugdir); ++ix)
+	{
+	  /* Also try the same file in the separate debug info directory.  */
+	  debugfile = xmalloc (strlen (debugdir) + strlen (filename) + 1);
+	  strcpy (debugfile, debugdir);
+
+	  /* FILENAME is absolute, so we don't need a "/" here.  */
+	  strcat (debugfile, filename);
+
+	  make_cleanup (xfree, debugfile);
+	  input = fopen (debugfile, "r");
+	  if (input != NULL)
+	    break;
+	}
     }
 
   if (!input && gdb_datadir)
