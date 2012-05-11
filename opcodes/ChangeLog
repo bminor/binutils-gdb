@@ -1,3 +1,9 @@
+2012-05-11  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/14006
+	* arm-dis.c (print_insn): Fix detection of instruction mode in
+	files containing multiple executable sections.
+
 2012-05-03  Sean Keys  <skeys@ipdatasys.com>
 
 	* Makefile.in, configure: regenerate
