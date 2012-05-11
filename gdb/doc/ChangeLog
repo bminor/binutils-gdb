@@ -1,5 +1,12 @@
 2012-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.texinfo (Auto-loading, Init File in the Current Directory)
+	(libthread_db.so.1 file, objfile-gdb.gdb file, objfile-gdb.py file)
+	(dotdebug_gdb_scripts section): Add reference
+	to 'Auto-loading safe path'.
+
+2012-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Implement multi-component --with-auto-load-dir.
 	* gdb.texinfo (Auto-loading): New references
 	for 'set auto-load scripts-directory'

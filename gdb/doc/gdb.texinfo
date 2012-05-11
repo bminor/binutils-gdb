@@ -20973,6 +20973,10 @@ without being explicitly told so by the user.  We call this feature
 results or introduce security risks (e.g., if the file comes from untrusted
 sources).
 
+Note that loading of these associated files (including the local @file{.gdbinit}
+file) requires accordingly configured @code{auto-load safe-path}
+(@pxref{Auto-loading safe path}).
+
 For these reasons, @value{GDBN} includes commands and options to let you
 control when to auto-load files and which files should be auto-loaded.
 
@@ -21112,6 +21116,9 @@ By default, @value{GDBN} reads and executes the canned sequences of commands
 from init file (if any) in the current working directory,
 see @ref{Init File in the Current Directory during Startup}.
 
+Note that loading of this local @file{.gdbinit} file also requires accordingly
+configured @code{auto-load safe-path} (@pxref{Auto-loading safe path}).
+
 @table @code
 @anchor{set auto-load local-gdbinit}
 @kindex set auto-load local-gdbinit
@@ -21148,6 +21155,9 @@ libraries have to be trusted in general.  In all other cases of
 auto-load libthread-db} is enabled before trying to open such thread debugging
 library.
 
+Note that loading of this debugging library also requires accordingly configured
+@code{auto-load safe-path} (@pxref{Auto-loading safe path}).
+
 @table @code
 @anchor{set auto-load libthread-db}
 @kindex set auto-load libthread-db
@@ -21174,6 +21184,9 @@ for each such library print list of inferior @var{pid}s using it.
 @value{GDBN} tries to load an @file{@var{objfile}-gdb.gdb} file containing
 canned sequences of commands (@pxref{Sequences}), as long as @samp{set
 auto-load gdb-scripts} is set to @samp{on}.
+
+Note that loading of this script file also requires accordingly configured
+@code{auto-load safe-path} (@pxref{Auto-loading safe path}).
 
 For more background refer to the similar Python scripts auto-loading
 description (@pxref{objfile-gdb.py file}).
@@ -25465,7 +25478,10 @@ then @value{GDBN} will look for @var{script-name} in all of the
 directories mentioned in the value of @code{debug-file-directory}.
 
 Finally, if this file does not exist, then @value{GDBN} will look for
-@var{script-name} file in all of the directories specified by:
+@var{script-name} file in all of the directories as specified below.
+
+Note that loading of this script file also requires accordingly configured
+@code{auto-load safe-path} (@pxref{Auto-loading safe path}).
 
 @table @code
 @anchor{set auto-load scripts-directory}
@@ -25541,6 +25557,9 @@ DEFINE_GDB_SCRIPT ("my-app-scripts.py")
 @end example
 
 The script name may include directories if desired.
+
+Note that loading of this script file also requires accordingly configured
+@code{auto-load safe-path} (@pxref{Auto-loading safe path}).
 
 If the macro is put in a header, any application or library
 using this header will get a reference to the specified script.
