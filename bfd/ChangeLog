@@ -1,3 +1,7 @@
+2012-05-10  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rx.c (rx_elf_object_p): Ignore empty segments.
+
 2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_relocate_section): Display signed
