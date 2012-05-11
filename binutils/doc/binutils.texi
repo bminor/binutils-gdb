@@ -2198,7 +2198,8 @@ Note that there is no single letter option to display the content of
 trace sections or .gdb_index.
 
 Note: the output from the @option{=info} option can also be affected
-by the options @option{--dwarf-depth} and @option{--dwarf-start}.
+by the options @option{--dwarf-depth}, the @option{--dwarf-start} and
+the @option{--dwarf-check}.
 
 @item --dwarf-depth=@var{n}
 Limit the dump of the @code{.debug_info} section to @var{n} children.
@@ -2218,6 +2219,9 @@ information and all DIEs before the DIE numbered @var{n}.  Only
 siblings and children of the specified DIE will be printed.
 
 This can be used in conjunction with @option{--dwarf-depth}.
+
+@item --dwarf-check
+Enable additional checks for consistency of Dwarf information.
 
 @item -G
 @itemx --stabs

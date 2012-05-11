@@ -3128,6 +3128,7 @@ get_section_type_name (unsigned int sh_type)
 #define OPTION_DYN_SYMS		513
 #define OPTION_DWARF_DEPTH	514
 #define OPTION_DWARF_START	515
+#define OPTION_DWARF_CHECK	516
 
 static struct option options[] =
 {
@@ -3163,6 +3164,7 @@ static struct option options[] =
 
   {"dwarf-depth",      required_argument, 0, OPTION_DWARF_DEPTH},
   {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
+  {"dwarf-check",      no_argument, 0, OPTION_DWARF_CHECK},
 
   {"version",	       no_argument, 0, 'v'},
   {"wide",	       no_argument, 0, 'W'},
@@ -3430,6 +3432,9 @@ parse_args (int argc, char ** argv)
 
 	    dwarf_start_die = strtoul (optarg, & cp, 0);
 	  }
+	  break;
+	case OPTION_DWARF_CHECK:
+	  dwarf_check = 1;
 	  break;
 	case OPTION_DYN_SYMS:
 	  do_dyn_syms++;
@@ -4639,19 +4644,19 @@ process_section_headers (FILE * file)
             name += sizeof (".debug_") - 1;
 
 	  if (do_debugging
-	      || (do_debug_info     && streq (name, "info"))
-	      || (do_debug_info     && streq (name, "types"))
-	      || (do_debug_abbrevs  && streq (name, "abbrev"))
-	      || (do_debug_lines    && streq (name, "line"))
-	      || (do_debug_pubnames && streq (name, "pubnames"))
-	      || (do_debug_pubtypes && streq (name, "pubtypes"))
-	      || (do_debug_aranges  && streq (name, "aranges"))
-	      || (do_debug_ranges   && streq (name, "ranges"))
-	      || (do_debug_frames   && streq (name, "frame"))
-	      || (do_debug_macinfo  && streq (name, "macinfo"))
-	      || (do_debug_macinfo  && streq (name, "macro"))
-	      || (do_debug_str      && streq (name, "str"))
-	      || (do_debug_loc      && streq (name, "loc"))
+	      || (do_debug_info     && const_strneq (name, "info"))
+	      || (do_debug_info     && const_strneq (name, "types"))
+	      || (do_debug_abbrevs  && const_strneq (name, "abbrev"))
+	      || (do_debug_lines    && const_strneq (name, "line"))
+	      || (do_debug_pubnames && const_strneq (name, "pubnames"))
+	      || (do_debug_pubtypes && const_strneq (name, "pubtypes"))
+	      || (do_debug_aranges  && const_strneq (name, "aranges"))
+	      || (do_debug_ranges   && const_strneq (name, "ranges"))
+	      || (do_debug_frames   && const_strneq (name, "frame"))
+	      || (do_debug_macinfo  && const_strneq (name, "macinfo"))
+	      || (do_debug_macinfo  && const_strneq (name, "macro"))
+	      || (do_debug_str      && const_strneq (name, "str"))
+	      || (do_debug_loc      && const_strneq (name, "loc"))
 	      )
 	    request_dump_bynumber (i, DEBUG_DUMP);
 	}
