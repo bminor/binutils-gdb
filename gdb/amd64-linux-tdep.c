@@ -1275,9 +1275,15 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
   switch ((xcr0 & I386_XSTATE_AVX_MASK))
     {
     case I386_XSTATE_AVX_MASK:
-      return tdesc_amd64_avx_linux;
+      if (gdbarch_ptr_bit (gdbarch) == 32)
+	return tdesc_x32_avx_linux;
+      else
+	return tdesc_amd64_avx_linux;
     default:
-      return tdesc_amd64_linux;
+      if (gdbarch_ptr_bit (gdbarch) == 32)
+	return tdesc_x32_linux;
+      else
+	return tdesc_amd64_linux;
     }
 }
 

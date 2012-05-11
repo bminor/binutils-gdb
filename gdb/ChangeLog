@@ -1,5 +1,10 @@
 2012-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* amd64-linux-tdep.c (amd64_linux_core_read_description): Check
+	gdbarch_ptr_bit for x32 core dump.
+
+2012-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* amd64-linux-tdep.c: Include features/i386/x32-linux.c
 	and features/i386/x32-avx-linux.c.
 
