@@ -1,3 +1,8 @@
+2012-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-linux-tdep.h (tdesc_x32_linux): New.
+	(tdesc_x32_avx_linux): Likewise.
+
 2012-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Implement multi-component --with-auto-load-dir.
