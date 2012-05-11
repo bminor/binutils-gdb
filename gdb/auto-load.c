@@ -35,6 +35,7 @@
 #include "gdb_vecs.h"
 #include "readline/tilde.h"
 #include "completer.h"
+#include "observer.h"
 
 /* The suffix of per-objfile scripts to auto-load as non-Python command files.
    E.g. When the program loads libfoo.so, look for libfoo-gdb.gdb.  */
@@ -141,10 +142,16 @@ auto_load_safe_path_vec_update (void)
   for (ix = 0; ix < len; ix++)
     {
       char *dir = VEC_index (char_ptr, auto_load_safe_path_vec, ix);
-      char *expanded = tilde_expand (dir);
-      char *real_path = gdb_realpath (expanded);
+      char *ddir_subst, *expanded, *real_path;
 
-      /* Ensure the current entry is at least tilde_expand-ed.  */
+      ddir_subst = xstrdup (dir);
+      substitute_path_component (&ddir_subst, "$ddir", gdb_datadir);
+      expanded = tilde_expand (ddir_subst);
+      xfree (ddir_subst);
+      real_path = gdb_realpath (expanded);
+
+      /* Ensure the current entry is at least a valid path (therefore
+	 $ddir-expanded and tilde-expanded).  */
       VEC_replace (char_ptr, auto_load_safe_path_vec, ix, expanded);
 
       if (debug_auto_load)
@@ -176,15 +183,24 @@ auto_load_safe_path_vec_update (void)
     }
 }
 
+/* Variable gdb_datadir has been set.  Update content depending on $ddir.  */
+
+static void
+auto_load_gdb_datadir_changed (void)
+{
+  auto_load_safe_path_vec_update ();
+}
+
 /* "set" command for the auto_load_safe_path configuration variable.  */
 
 static void
 set_auto_load_safe_path (char *args, int from_tty, struct cmd_list_element *c)
 {
+  /* Setting the variable to "" resets it to the compile time defaults.  */
   if (auto_load_safe_path[0] == '\0')
     {
       xfree (auto_load_safe_path);
-      auto_load_safe_path = xstrdup (DEFAULT_AUTO_LOAD_SAFE_PATH);
+      auto_load_safe_path = xstrdup (AUTO_LOAD_SAFE_PATH);
     }
 
   auto_load_safe_path_vec_update ();
@@ -1040,7 +1056,7 @@ This options has security implications for untrusted inferiors."),
 Usage: info auto-load local-gdbinit"),
 	   auto_load_info_cmdlist_get ());
 
-  auto_load_safe_path = xstrdup (DEFAULT_AUTO_LOAD_SAFE_PATH);
+  auto_load_safe_path = xstrdup (AUTO_LOAD_SAFE_PATH);
   auto_load_safe_path_vec_update ();
   add_setshow_optional_filename_cmd ("safe-path", class_support,
 				     &auto_load_safe_path, _("\
@@ -1058,6 +1074,7 @@ This options has security implications for untrusted inferiors."),
 				     show_auto_load_safe_path,
 				     auto_load_set_cmdlist_get (),
 				     auto_load_show_cmdlist_get ());
+  observer_attach_gdb_datadir_changed (auto_load_gdb_datadir_changed);
 
   cmd = add_cmd ("add-auto-load-safe-path", class_support,
 		 add_auto_load_safe_path,

@@ -1,5 +1,29 @@
 2012-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Provide $ddir substitution for --with-auto-load-safe-path.
+	* NEWS (--with-auto-load-safe-path, --without-auto-load-safe-path): New
+	entries.
+	* auto-load.c: Include observer.h.
+	(auto_load_safe_path_vec_update): Call substitute_path_component for
+	each component.  New variable ddir_subst.
+	(auto_load_gdb_datadir_changed): New function.
+	(set_auto_load_safe_path): Rename DEFAULT_AUTO_LOAD_SAFE_PATH to
+	AUTO_LOAD_SAFE_PATH.  New comment.
+	(_initialize_auto_load): Rename DEFAULT_AUTO_LOAD_SAFE_PATH to
+	AUTO_LOAD_SAFE_PATH.  Install auto_load_gdb_datadir_changed.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac (--auto-load-safe-path): Rename
+	DEFAULT_AUTO_LOAD_SAFE_PATH to AUTO_LOAD_SAFE_PATH.  Default to
+	GDB_DATADIR/auto-load.
+	* defs.h (substitute_path_component): New declaration.
+	* top.c: Include observer.h.
+	(set_gdb_datadir): New function.
+	(init_main): Install it for "set data-directory".
+	* utils.c (substitute_path_component): New function.
+
+2012-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Make auto-load handle multiple components of DEBUG_FILE_DIRECTORY.
 	* auto-load.c (auto_load_objfile_script): Remove check for NULL
 	DEBUG_FILE_DIRECTORY.  Handle multiple components of

@@ -21008,7 +21008,7 @@ local-gdbinit:  Auto-loading of .gdbinit script from current directory
                 is on.
 python-scripts:  Auto-loading of Python scripts is on.
 safe-path:  List of directories from which it is safe to auto-load files
-            is /usr/local.
+            is $ddir/auto-load.
 @end smallexample
 
 @anchor{info auto-load}
@@ -21211,9 +21211,9 @@ get loaded:
 $ ./gdb -q ./gdb
 Reading symbols from /home/user/gdb/gdb...done.
 warning: File "/home/user/gdb/gdb-gdb.gdb" auto-loading has been
-         declined by your `auto-load safe-path' set to "/usr/local".
+         declined by your `auto-load safe-path' set to "$ddir/auto-load".
 warning: File "/home/user/gdb/gdb-gdb.py" auto-loading has been
-         declined by your `auto-load safe-path' set to "/usr/local".
+         declined by your `auto-load safe-path' set to "$ddir/auto-load".
 @end smallexample
 
 The list of trusted directories is controlled by the following commands:
@@ -21245,7 +21245,18 @@ loading and execution of scripts.  Multiple entries may be delimited by the
 host platform path separator in use.
 @end table
 
-Setting this variable to @file{/} disables this security protection.
+This variable defaults to @file{$ddir/auto-load}.  The default @code{set
+auto-load safe-path} value can be also overriden by @value{GDBN} configuration
+option @option{--with-auto-load-safe-path}.
+
+Any used string @file{$ddir} will get replaced by @var{data-directory} which is
+determined at @value{GDBN} startup (@pxref{Data Files}).  @file{$ddir} must be
+be placed as a directory component --- either alone or delimited by @file{/} or
+@file{\} directory separators, depending on the host platform.
+
+Setting this variable to @file{/} disables this security protection,
+corresponding @value{GDBN} configuration option is
+@option{--without-auto-load-safe-path}.
 This variable is supposed to be set to the system directories writable by the
 system superuser only.  Users can add their source directories in init files in
 their home directories (@pxref{Home Directory Init File}).  See also deprecated

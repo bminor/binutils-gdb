@@ -1,3 +1,12 @@
+2012-05-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Provide $ddir substitution for --with-auto-load-safe-path.
+	* gdb.texinfo (Auto-loading): Replace /usr/local by $ddir/auto-load.
+	(Auto-loading safe path): Likewise.  Mention the default value,
+	$ddir substitution, --with-auto-load-safe-path and
+	--without-auto-load-safe-path.
+	* observer.texi (gdb_datadir_changed): New.
+
 2012-05-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (Auto-loading): Wrap too long lines in @smallexample.

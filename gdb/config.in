@@ -3,6 +3,9 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* Directories safe to hold auto-loaded files. */
+#undef AUTO_LOAD_SAFE_PATH
+
 /* Directory of programs. */
 #undef BINDIR
 
@@ -23,9 +26,6 @@
 /* Define if the separate-debug-dir directory should be relocated when GDB is
    moved. */
 #undef DEBUGDIR_RELOCATABLE
-
-/* Directories safe to hold auto-loaded files. */
-#undef DEFAULT_AUTO_LOAD_SAFE_PATH
 
 /* Define to BFD's default architecture. */
 #undef DEFAULT_BFD_ARCH

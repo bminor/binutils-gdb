@@ -226,6 +226,10 @@ Called before a top-level prompt is displayed.  @var{current_prompt} is
 the current top-level prompt.
 @end deftypefun
 
+@deftypefun void gdb_datadir_changed (void)
+Variable gdb_datadir has been set.  The value may not necessarily change.
+@end deftypefun
+
 @deftypefun void test_notification (int @var{somearg})
 This observer is used for internal testing.  Do not use.  
 See testsuite/gdb.gdb/observer.exp.

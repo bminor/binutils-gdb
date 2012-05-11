@@ -181,6 +181,17 @@ set debug auto-load on|off
 show debug auto-load
   Control display of debugging info for auto-loading the files above.
 
+* New configure options
+
+--with-auto-load-safe-path
+  Configure default value for the 'set auto-load safe-path' setting
+  above.  It defaults to '$ddir/auto-load', $ddir representing GDB's
+  data directory (available via show data-directory).
+
+--without-auto-load-safe-path
+  Set 'set auto-load safe-path' to '/', effectively disabling this
+  security feature.
+
 * New remote packets
 
 z0/z1 conditional breakpoints extension
