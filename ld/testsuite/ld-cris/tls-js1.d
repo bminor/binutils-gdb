@@ -20,7 +20,7 @@
 #...
 Relocation section '\.rela\.dyn' at offset 0x20c contains 2 entries:
  Offset     Info    Type            Sym\.Value  Sym\. Name \+ Addend
-00002354  0000001e R_CRIS_DTPMOD                                00000000
+00002354  0000001e R_CRIS_DTPMOD +0
 00002364  0000050a R_CRIS_GLOB_DAT   00002368   expobj \+ 0
 
 Relocation section '\.rela\.plt' at offset 0x224 contains 2 entries:
