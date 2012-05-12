@@ -1,3 +1,8 @@
+2012-05-12  Pedro Alves  <palves@redhat.com>
+
+	* amd64-linux-tdep.c (_initialize_amd64_linux_tdep): Call
+	initialize_tdesc_x32_linux and initialize_tdesc_x32_avx_linux.
+
 2012-05-12  Eli Zaretskii  <eliz@gnu.org>
 
 	* inferior.c: Include completer.h
