@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "command.h"
+#include "completer.h"
 #include "gdbcmd.h"
 #include "gdbthread.h"
 #include "ui-out.h"
@@ -1056,6 +1057,8 @@ inferior_data (struct inferior *inf, const struct inferior_data *data)
 void
 initialize_inferiors (void)
 {
+  struct cmd_list_element *c = NULL;
+
   /* There's always one inferior.  Note that this function isn't an
      automatic _initialize_foo function, since other _initialize_foo
      routines may need to install their per-inferior data keys.  We
@@ -1069,12 +1072,13 @@ initialize_inferiors (void)
   add_info ("inferiors", info_inferiors_command, 
 	    _("IDs of specified inferiors (all inferiors if no argument)."));
 
-  add_com ("add-inferior", no_class, add_inferior_command, _("\
+  c = add_com ("add-inferior", no_class, add_inferior_command, _("\
 Add a new inferior.\n\
 Usage: add-inferior [-copies <N>] [-exec <FILENAME>]\n\
 N is the optional number of inferiors to add, default is 1.\n\
 FILENAME is the file name of the executable to use\n\
 as main program."));
+  set_cmd_completer (c, filename_completer);
 
   add_com ("remove-inferiors", no_class, remove_inferior_command, _("\
 Remove inferior ID (or list of IDs).\n\

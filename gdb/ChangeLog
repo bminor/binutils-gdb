@@ -1,3 +1,9 @@
+2012-05-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* inferior.c: Include completer.h
+	(initialize_inferiors): Set completer of add-inferior to
+	filename_completer.
+
 2012-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* amd64-linux-tdep.c (amd64_linux_core_read_description): Check
