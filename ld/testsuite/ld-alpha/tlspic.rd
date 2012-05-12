@@ -45,10 +45,10 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 7 entries:
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_DTPMOD64 +0+ sg1 \+ 0
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_DTPREL64 +0+ sg1 \+ 0
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_TPREL64 +0+4 sg2 \+ 0
-[0-9a-f]+ +[0-9a-f]+ R_ALPHA_TPREL64 +0+44
+[0-9a-f]+ +[0-9a-f]+ R_ALPHA_TPREL64 +44
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_DTPMOD64 +0+
 [0-9a-f]+ +[0-9a-f]+ R_ALPHA_DTPMOD64 +0+
-[0-9a-f]+ +[0-9a-f]+ R_ALPHA_TPREL64 +0+24
+[0-9a-f]+ +[0-9a-f]+ R_ALPHA_TPREL64 +24
 
 Relocation section '.rela.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend

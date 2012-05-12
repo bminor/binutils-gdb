@@ -49,16 +49,16 @@ Program Headers:
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 14 entries:
  Offset +Info +Type +Sym.Value +Sym. Name \+ Addend
-[0-9a-f ]+R_390_TLS_DTPMOD +0+
-[0-9a-f ]+R_390_TLS_TPOFF +0+24
-[0-9a-f ]+R_390_TLS_TPOFF +0+30
-[0-9a-f ]+R_390_TLS_DTPMOD +0+
-[0-9a-f ]+R_390_TLS_DTPMOD +0+
-[0-9a-f ]+R_390_TLS_TPOFF +0+64
-[0-9a-f ]+R_390_TLS_TPOFF +0+50
-[0-9a-f ]+R_390_TLS_TPOFF +0+70
-[0-9a-f ]+R_390_TLS_DTPMOD +0+
-[0-9a-f ]+R_390_TLS_TPOFF +0+44
+[0-9a-f ]+R_390_TLS_DTPMOD +0
+[0-9a-f ]+R_390_TLS_TPOFF +24
+[0-9a-f ]+R_390_TLS_TPOFF +30
+[0-9a-f ]+R_390_TLS_DTPMOD +0
+[0-9a-f ]+R_390_TLS_DTPMOD +0
+[0-9a-f ]+R_390_TLS_TPOFF +64
+[0-9a-f ]+R_390_TLS_TPOFF +50
+[0-9a-f ]+R_390_TLS_TPOFF +70
+[0-9a-f ]+R_390_TLS_DTPMOD +0
+[0-9a-f ]+R_390_TLS_TPOFF +44
 [0-9a-f ]+R_390_TLS_TPOFF +0+10 +sg5 \+ 0
 [0-9a-f ]+R_390_TLS_DTPMOD +0+ +sg1 \+ 0
 [0-9a-f ]+R_390_TLS_DTPOFF +0+ +sg1 \+ 0

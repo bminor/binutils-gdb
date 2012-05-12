@@ -55,9 +55,9 @@ Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 18 entries:
 [0-9a-f ]+R_PPC_TPREL16 +0+103d0 +\.tdata \+ 103e4
 [0-9a-f ]+R_PPC_TPREL16_HA +0+103d0 +\.tdata \+ 103e8
 [0-9a-f ]+R_PPC_TPREL16_LO +0+103d0 +\.tdata \+ 103e8
-[0-9a-f ]+R_PPC_DTPMOD32 +0+
-[0-9a-f ]+R_PPC_DTPREL32 +0+
-[0-9a-f ]+R_PPC_DTPMOD32 +0+
+[0-9a-f ]+R_PPC_DTPMOD32 +0
+[0-9a-f ]+R_PPC_DTPREL32 +0
+[0-9a-f ]+R_PPC_DTPMOD32 +0
 [0-9a-f ]+R_PPC_DTPMOD32 +0+ +gd \+ 0
 [0-9a-f ]+R_PPC_DTPREL32 +0+ +gd \+ 0
 [0-9a-f ]+R_PPC_DTPMOD32 +0+1c +gd0 \+ 0

@@ -38,14 +38,14 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 12 entries:
  Offset +Info +Type +Sym. Value +Symbol's Name \+ Addend
 [0-9a-f ]+R_SPARC_HI22 +0+12080 +\.got \+ 12080
 [0-9a-f ]+R_SPARC_LO10 +0+12080 +\.got \+ 12080
-[0-9a-f ]+R_SPARC_TLS_LE_HIX22 +0+9
-[0-9a-f ]+R_SPARC_TLS_LE_LOX10 +0+9
-[0-9a-f ]+R_SPARC_TLS_LE_HIX22 +0+1c
-[0-9a-f ]+R_SPARC_TLS_LE_LOX10 +0+1c
-[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+
-[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+4
-[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+14
-[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+18
+[0-9a-f ]+R_SPARC_TLS_LE_HIX22 +9
+[0-9a-f ]+R_SPARC_TLS_LE_LOX10 +9
+[0-9a-f ]+R_SPARC_TLS_LE_HIX22 +1c
+[0-9a-f ]+R_SPARC_TLS_LE_LOX10 +1c
+[0-9a-f ]+R_SPARC_TLS_TPOFF32 +0
+[0-9a-f ]+R_SPARC_TLS_TPOFF32 +4
+[0-9a-f ]+R_SPARC_TLS_TPOFF32 +14
+[0-9a-f ]+R_SPARC_TLS_TPOFF32 +18
 [0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+ +sg1 \+ 0
 [0-9a-f ]+R_SPARC_TLS_TPOFF32 +0+ +sg2 \+ 0
 

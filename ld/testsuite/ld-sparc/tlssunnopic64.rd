@@ -40,14 +40,14 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 14 entries:
 [0-9a-f ]+R_SPARC_LM22 +0+102100 +\.got \+ 102100
 [0-9a-f ]+R_SPARC_HM10 +0+102100 +\.got \+ 102100
 [0-9a-f ]+R_SPARC_LO10 +0+102100 +\.got \+ 102100
-[0-9a-f ]+R_SPARC_TLS_LE_HIX22 +0+9
-[0-9a-f ]+R_SPARC_TLS_LE_LOX10 +0+9
-[0-9a-f ]+R_SPARC_TLS_LE_HIX22 +0+1c
-[0-9a-f ]+R_SPARC_TLS_LE_LOX10 +0+1c
-[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+
-[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+4
-[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+14
-[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+18
+[0-9a-f ]+R_SPARC_TLS_LE_HIX22 +9
+[0-9a-f ]+R_SPARC_TLS_LE_LOX10 +9
+[0-9a-f ]+R_SPARC_TLS_LE_HIX22 +1c
+[0-9a-f ]+R_SPARC_TLS_LE_LOX10 +1c
+[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0
+[0-9a-f ]+R_SPARC_TLS_TPOFF64 +4
+[0-9a-f ]+R_SPARC_TLS_TPOFF64 +14
+[0-9a-f ]+R_SPARC_TLS_TPOFF64 +18
 [0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+ +sg1 \+ 0
 [0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+ +sg2 \+ 0
 

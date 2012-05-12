@@ -1,3 +1,18 @@
+2012-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-alpha/tlspic.rd: Updated.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlsso32.r: Likewise.
+	* ld-powerpc/vxworks1-lib.rd: Likewise.
+	* ld-s390/tlspic.rd: Likewise.
+	* ld-s390/tlspic_64.rd: Likewise.
+	* ld-sh/shared-1.d: Likewise.
+	* ld-sh/tlspic-2.d: Likewise.
+	* ld-sparc/tlssunnopic32.rd: Likewise.
+	* ld-sparc/tlssunnopic64.rd: Likewise.
+	* ld-sparc/tlssunpic32.rd: Likewise.
+	* ld-sparc/tlssunpic64.rd: Likewise.
+
 2012-05-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-cris/hiddef1.d: Updated.

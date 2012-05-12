@@ -40,16 +40,16 @@ Program Headers:
 
 Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 14 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
-[0-9a-f ]+R_SPARC_TLS_DTPMOD64 +0+
-[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+24
-[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+30
-[0-9a-f ]+R_SPARC_TLS_DTPMOD64 +0+
-[0-9a-f ]+R_SPARC_TLS_DTPMOD64 +0+
-[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+64
-[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+50
-[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+70
-[0-9a-f ]+R_SPARC_TLS_DTPMOD64 +0+
-[0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+44
+[0-9a-f ]+R_SPARC_TLS_DTPMOD64 +0
+[0-9a-f ]+R_SPARC_TLS_TPOFF64 +24
+[0-9a-f ]+R_SPARC_TLS_TPOFF64 +30
+[0-9a-f ]+R_SPARC_TLS_DTPMOD64 +0
+[0-9a-f ]+R_SPARC_TLS_DTPMOD64 +0
+[0-9a-f ]+R_SPARC_TLS_TPOFF64 +64
+[0-9a-f ]+R_SPARC_TLS_TPOFF64 +50
+[0-9a-f ]+R_SPARC_TLS_TPOFF64 +70
+[0-9a-f ]+R_SPARC_TLS_DTPMOD64 +0
+[0-9a-f ]+R_SPARC_TLS_TPOFF64 +44
 [0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+10 +sg5 \+ 0
 [0-9a-f ]+R_SPARC_TLS_DTPMOD64 +0+ +sg1 \+ 0
 [0-9a-f ]+R_SPARC_TLS_DTPOFF64 +0+ +sg1 \+ 0

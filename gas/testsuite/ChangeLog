@@ -1,5 +1,11 @@
 2012-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/mips/elf-rel10.d: Updated.
+	* gas/mips/elf-rel22.d: Likewise.
+	* gas/mmix/comment-1.d: Likewise.
+
+2012-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/ilp32/ilp32.exp: Don't run reloc64-inval.
 
 	* gas/i386/ilp32/reloc64.s: Add test for -4294967295 addend.
