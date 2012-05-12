@@ -16287,7 +16287,7 @@ Show whether a source file may have multiple base names.
 @cindex debugging information in separate files
 @cindex @file{.debug} subdirectories
 @cindex debugging information directory, global
-@cindex global debugging information directory
+@cindex global debugging information directories
 @cindex build ID, and separate debugging files
 @cindex @file{.build-id} directory
 
@@ -16332,14 +16332,14 @@ uses two different methods of looking for the debug file:
 @item
 For the ``debug link'' method, @value{GDBN} looks up the named file in
 the directory of the executable file, then in a subdirectory of that
-directory named @file{.debug}, and finally under the global debug
-directory, in a subdirectory whose name is identical to the leading
+directory named @file{.debug}, and finally under each one of the global debug
+directories, in a subdirectory whose name is identical to the leading
 directories of the executable's absolute file name.
 
 @item
 For the ``build ID'' method, @value{GDBN} looks in the
-@file{.build-id} subdirectory of the global debug directory for a file
-named @file{@var{nn}/@var{nnnnnnnn}.debug}, where @var{nn} are the
+@file{.build-id} subdirectory of each one of the global debug directories for
+a file named @file{@var{nn}/@var{nnnnnnnn}.debug}, where @var{nn} are the
 first 2 hex characters of the build ID bit string, and @var{nnnnnnnn}
 are the rest of the bit string.  (Real build ID strings are 32 or more
 hex characters, not 10.)
@@ -16348,7 +16348,7 @@ hex characters, not 10.)
 So, for example, suppose you ask @value{GDBN} to debug
 @file{/usr/bin/ls}, which has a debug link that specifies the
 file @file{ls.debug}, and a build ID whose value in hex is
-@code{abcdef1234}.  If the global debug directory is
+@code{abcdef1234}.  If the list of the global debug directories includes
 @file{/usr/lib/debug}, then @value{GDBN} will look for the following
 debug information files, in the indicated order:
 
@@ -16363,8 +16363,8 @@ debug information files, in the indicated order:
 @file{/usr/lib/debug/usr/bin/ls.debug}.
 @end itemize
 
-You can set the global debugging info directory's name, and view the
-name @value{GDBN} is currently using.
+You can set the global debugging info directories, and view the
+list @value{GDBN} is currently using.
 
 @table @code
 
