@@ -9173,25 +9173,6 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       if (disallow_64bit_reloc)
 	switch (code)
 	  {
-	  case BFD_RELOC_64:
-	    /* Check addend overflow.  */
-	    if (!fits_in_signed_long (fixp->fx_offset))
-	      {
-		bfd_signed_vma addend = fixp->fx_offset;
-		if (addend < 0)
-		  as_bad_where (fixp->fx_file, fixp->fx_line,
-				_("cannot represent relocation %s with "
-				  "addend -0x%" BFD_VMA_FMT "x in x32 "
-				  "mode"),
-				bfd_get_reloc_code_name (code), -addend);
-		else
-		  as_bad_where (fixp->fx_file, fixp->fx_line,
-				_("cannot represent relocation %s with "
-				  "addend 0x%" BFD_VMA_FMT "x in x32 "
-				  "mode"),
-				bfd_get_reloc_code_name (code), addend);
-	      }
-	    break;
 	  case BFD_RELOC_X86_64_DTPOFF64:
 	  case BFD_RELOC_X86_64_TPOFF64:
 	  case BFD_RELOC_64_PCREL:

@@ -26,7 +26,6 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check] &&
     }
 
     run_list_test "reloc64" "--defsym _bad_=1"
-    run_list_test "reloc64-inval"
 
     set ASFLAGS "$old_ASFLAGS"
 }

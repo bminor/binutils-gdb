@@ -1,3 +1,8 @@
+2012-05-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (tc_gen_reloc): Remove x32 addend overflow
+	for BFD_RELOC_64.
+
 2012-05-11  Daniel Richard G.  <skunk@iskunk.org>
 
 	PR binutils/14028
