@@ -503,7 +503,7 @@ if {[istarget mips*-*-linux*]} {
 
 set mips16_call_global_test [list \
     [list "Global calls from mips16" \
-	 "$o32_ld_flags" \
+	 "$o32_ld_flags -T no-shared-1.ld" \
 	 "$o32_as_flags -mips32r2" \
 	 {mips16-call-global-1.s mips16-call-global-2.s mips16-call-global-3.s} \
 	 {{objdump -dr mips16-call-global.d}} \

@@ -1,5 +1,14 @@
 2012-05-13  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* ld-mips-elf/mips-elf.exp (mips16_call_global_test): Use the
+	no-shared-1.ld linker script.
+	* ld-mips-elf/mips16-call-global-1.s: Add alignment directive.
+	* ld-mips-elf/mips16-call-global-2.s: Likewise.
+	* ld-mips-elf/mips16-call-global-3.s: Likewise.
+	* ld-mips-elf/mips16-call-global.d: Use 50000 as the base address.
+
+2012-05-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* ld-mips-elf/attr-gnu-4-00.d: Remove assembler options and emulator
 	linker option.
 	* ld-mips-elf/attr-gnu-4-01.d, ld-mips-elf/attr-gnu-4-02.d,
