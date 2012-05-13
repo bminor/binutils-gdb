@@ -1,3 +1,11 @@
+2012-05-13  Siva Chandra Reddy  <sivachandra@google.com>
+
+	Add a new function gdb.find_pc_line to the Python API.
+	* NEWS (Python Scripting): Add entry about the new function.
+	* python/python.c (gdbpy_find_pc_line): New function which
+	implements gdb.find_pc_line.
+	(GdbMethods): Add entry for the new function.
+
 2012-05-12  Pedro Alves  <palves@redhat.com>
 
 	* amd64-linux-tdep.c (_initialize_amd64_linux_tdep): Call

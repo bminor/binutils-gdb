@@ -631,6 +631,24 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args)
   return value_to_value_object (result);
 }
 
+/* Implementation of gdb.find_pc_line function.
+   Returns the gdb.Symtab_and_line object corresponding to a PC value.  */
+
+static PyObject *
+gdbpy_find_pc_line (PyObject *self, PyObject *args)
+{
+  struct symtab_and_line sal;
+  CORE_ADDR pc;
+  unsigned long long pc_llu;
+
+  if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc_llu))
+    return NULL;
+
+  pc = (CORE_ADDR) pc_llu;
+  sal = find_pc_line (pc, 0);
+  return symtab_and_line_to_sal_object (sal);
+}
+
 /* Read a file as Python code.
    FILE is the file to run.  FILENAME is name of the file FILE.
    This does not throw any errors.  If an exception occurs python will print
@@ -1458,6 +1476,9 @@ gdb.Symtab_and_line objects (or None)."},
     "parse_and_eval (String) -> Value.\n\
 Parse String as an expression, evaluate it, and return the result as a Value."
   },
+  { "find_pc_line", gdbpy_find_pc_line, METH_VARARGS,
+    "find_pc_line (pc) -> Symtab_and_line.\n\
+Return the gdb.Symtab_and_line object corresponding to the pc value." },
 
   { "post_event", gdbpy_post_event, METH_VARARGS,
     "Post an event into gdb's event loop." },

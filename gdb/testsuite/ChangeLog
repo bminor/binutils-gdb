@@ -1,3 +1,8 @@
+2012-05-13  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/python.c: Add a new breakpoint comment.
+	* gdb.python/python.exp: Add tests to test gdb.find_pc_line.
+
 2011-12-26  Kwok Cheung Yeung  <kcy@codesourcery.com>
 
 	* gdb.base/info-os.exp: New file.

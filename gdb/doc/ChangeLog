@@ -1,3 +1,8 @@
+2012-05-13  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.texinfo (Basic Python): Add description about the function
+	gdb.find_pc_line
+
 2012-05-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 

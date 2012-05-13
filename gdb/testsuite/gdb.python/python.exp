@@ -367,3 +367,23 @@ gdb_test_multiple "python gdb.prompt_hook = error_prompt" "set the hook" {
 
 gdb_py_test_silent_cmd "python gdb.prompt_hook = None" \
     "set the hook to default" 1
+
+# Start with a fresh gdb.
+clean_restart ${testfile}
+
+# The following tests require execution.
+
+if ![runto_main] then {
+    fail "Can't run to main"
+    return 0
+}
+
+runto [gdb_get_line_number "Break at func2 call site."]
+
+gdb_py_test_silent_cmd "python line = gdb.selected_frame().find_sal().line" "Get line number of func2 call site" 1
+gdb_test "python print gdb.find_pc_line(gdb.selected_frame().pc()).line == line" "True" "Test find_pc_line at func2 call site"
+
+gdb_py_test_silent_cmd "step" "Step into func2" 1
+gdb_py_test_silent_cmd "up" "Step out of func2" 1
+
+gdb_test "python print gdb.find_pc_line(gdb.selected_frame().pc()).line > line" "True" "Test find_pc_line with resume address"

@@ -23,6 +23,6 @@ int
 main (int argc, char *argv[])
 {
   func1 ();
-  func2 ();
+  func2 ();      /* Break at func2 call site.  */
   return 0;      /* Break to end.  */
 }

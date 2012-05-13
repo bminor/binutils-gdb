@@ -53,6 +53,9 @@
      which return the global and static blocks (as gdb.Block objects),
      of the underlying symbol table, respectively.
 
+  ** New function gdb.find_pc_line which returns the gdb.Symtab_and_line
+     object associated with a PC value.
+
 * Go language support.
   GDB now supports debugging programs written in the Go programming
   language.

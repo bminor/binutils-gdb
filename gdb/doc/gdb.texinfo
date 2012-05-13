@@ -22508,6 +22508,15 @@ compute values, for example, it is the only way to get the value of a
 convenience variable (@pxref{Convenience Vars}) as a @code{gdb.Value}.
 @end defun
 
+@findex gdb.find_pc_line
+@defun gdb.find_pc_line (pc)
+Return the @code{gdb.Symtab_and_line} object corresponding to the
+@var{pc} value.  @xref{Symbol Tables In Python}.  If an invalid
+value of @var{pc} is passed as an argument, then the @code{symtab} and
+@code{line} attributes of the returned @code{gdb.Symtab_and_line} object
+will be @code{None} and 0 respectively.
+@end defun
+
 @findex gdb.post_event
 @defun gdb.post_event (event)
 Put @var{event}, a callable object taking no arguments, into
