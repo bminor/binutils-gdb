@@ -1,3 +1,10 @@
+2012-05-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* ld-mips-elf/eh-frame1.ld (.gcc_compiled_long32): Add KEEP.
+	* ld-mips-elf/eh-frame3.d: Move definition of foo to the link line
+	and change to a 32-bit value.  Expect CIEs to be marged.
+	* ld-mips-elf/eh-frame4.d: Move definition of foo to the link line.
+
 2012-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-alpha/tlspic.rd: Updated.
