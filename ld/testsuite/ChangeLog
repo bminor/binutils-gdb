@@ -1,5 +1,25 @@
 2012-05-13  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* ld-mips-elf/attr-gnu-4-00.d: Remove assembler options and emulator
+	linker option.
+	* ld-mips-elf/attr-gnu-4-01.d, ld-mips-elf/attr-gnu-4-02.d,
+	ld-mips-elf/attr-gnu-4-03.d, ld-mips-elf/attr-gnu-4-04.d,
+	ld-mips-elf/attr-gnu-4-05.d, ld-mips-elf/attr-gnu-4-10.d,
+	ld-mips-elf/attr-gnu-4-11.d, ld-mips-elf/attr-gnu-4-12.d,
+	ld-mips-elf/attr-gnu-4-13.d, ld-mips-elf/attr-gnu-4-14.d,
+	ld-mips-elf/attr-gnu-4-15.d, ld-mips-elf/attr-gnu-4-20.d,
+	ld-mips-elf/attr-gnu-4-21.d, ld-mips-elf/attr-gnu-4-22.d,
+	ld-mips-elf/attr-gnu-4-23.d, ld-mips-elf/attr-gnu-4-24.d,
+	ld-mips-elf/attr-gnu-4-25.d, ld-mips-elf/attr-gnu-4-30.d,
+	ld-mips-elf/attr-gnu-4-31.d, ld-mips-elf/attr-gnu-4-32.d,
+	ld-mips-elf/attr-gnu-4-33.d, ld-mips-elf/attr-gnu-4-34.d,
+	ld-mips-elf/attr-gnu-4-35.d, ld-mips-elf/attr-gnu-4-40.d,
+	ld-mips-elf/attr-gnu-4-41.d, ld-mips-elf/attr-gnu-4-42.d,
+	ld-mips-elf/attr-gnu-4-43.d, ld-mips-elf/attr-gnu-4-44.d,
+	ld-mips-elf/attr-gnu-4-45.d, ld-mips-elf/attr-gnu-4-51.d: Likewise.
+
+2012-05-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* ld-mips-elf/eh-frame1.ld (.gcc_compiled_long32): Add KEEP.
 	* ld-mips-elf/eh-frame3.d: Move definition of foo to the link line
 	and change to a 32-bit value.  Expect CIEs to be marged.
