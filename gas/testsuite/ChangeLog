@@ -1,3 +1,9 @@
+2012-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/cris/rd-pic-1.d: Expect addend as signed.
+	* gas/cris/rd-tls-1.d: Likewise.
+	* gas/cris/rd-tls-2.d: Likewise.
+
 2012-05-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/all/fwdexp.d: Expect addend as signed.
