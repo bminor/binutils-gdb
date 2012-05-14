@@ -1,3 +1,8 @@
+2012-05-14  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python/python.c (gdbpy_find_pc_line): Use ULONGEST instead of
+	unsigned long long.
+
 2012-05-13  Siva Chandra Reddy  <sivachandra@google.com>
 
 	Add a new function gdb.find_pc_line to the Python API.
