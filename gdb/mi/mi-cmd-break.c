@@ -164,6 +164,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 		 : (hardware ? bp_hardware_breakpoint : bp_breakpoint));
 
   create_breakpoint (get_current_arch (), address, condition, thread,
+		     NULL,
 		     0 /* condition and thread are valid.  */,
 		     temp_p, type_wanted,
 		     ignore_count,

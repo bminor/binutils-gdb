@@ -154,6 +154,13 @@ enum bptype
     bp_fast_tracepoint,
     bp_static_tracepoint,
 
+    /* A dynamic printf stops at the given location, does a formatted
+       print, then automatically continues.  (Although this is sort of
+       like a macro packaging up standard breakpoint functionality,
+       GDB doesn't have a way to construct types of breakpoint from
+       elements of behavior.)  */
+    bp_dprintf,
+
     /* Event for JIT compiled code generation or deletion.  */
     bp_jit_event,
 
@@ -552,6 +559,7 @@ struct breakpoint_ops
   void (*create_breakpoints_sal) (struct gdbarch *,
 				  struct linespec_result *,
 				  struct linespec_sals *, char *,
+				  char *,
 				  enum bptype, enum bpdisp, int, int,
 				  int, const struct breakpoint_ops *,
 				  int, int, int, unsigned);
@@ -674,8 +682,9 @@ struct breakpoint
     /* String form of the breakpoint condition (malloc'd), or NULL if
        there is no condition.  */
     char *cond_string;
-    /* String form of exp to use for displaying to the user
-       (malloc'd), or NULL if none.  */
+
+    /* String form of extra parameters, or NULL if there are none.  */
+    char *extra_string;
 
     /* Holds the address of the related watchpoint_scope breakpoint
        when using watchpoints on local variables (might the concept of
@@ -1210,6 +1219,7 @@ enum breakpoint_create_flags
 
 extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      char *cond_string, int thread,
+			      char *extra_string,
 			      int parse_condition_and_thread,
 			      int tempflag, enum bptype wanted_type,
 			      int ignore_count,

@@ -3341,6 +3341,7 @@ all breakpoints in that range are operated on.
 * Disabling::                   Disabling breakpoints
 * Conditions::                  Break conditions
 * Break Commands::              Breakpoint command lists
+* Dynamic Printf::              Dynamic printf
 * Save Breakpoints::            How to save breakpoints in a file
 * Static Probe Points::         Listing static probe points
 * Error in Breakpoints::        ``Cannot insert breakpoints''
@@ -4627,6 +4628,89 @@ set x = y + 4
 cont
 end
 @end smallexample
+
+@node Dynamic Printf
+@subsection Dynamic Printf
+
+@cindex dynamic printf
+@cindex dprintf
+The dynamic printf command @code{dprintf} combines a breakpoint with
+formatted printing of your program's data to give you the effect of
+inserting @code{printf} calls into your program on-the-fly, without
+having to recompile it.
+
+In its most basic form, the output goes to the GDB console.  However,
+you can set the variable @code{dprintf-style} for alternate handling.
+For instance, you can ask to format the output by calling your
+program's @code{printf} function.  This has the advantage that the
+characters go to the program's output device, so they can recorded in
+redirects to files and so forth.
+
+@table @code
+@kindex dprintf
+@item dprintf @var{location},@var{template},@var{expression}[,@var{expression}@dots{}]
+Whenever execution reaches @var{location}, print the values of one or
+more @var{expressions} under the control of the string @var{template}.
+To print several values, separate them with commas.
+
+@item set dprintf-style @var{style}
+Set the dprintf output to be handled in one of several different
+styles enumerated below.  A change of style affects all existing
+dynamic printfs immediately.  (If you need individual control over the
+print commands, simply define normal breakpoints with
+explicitly-supplied command lists.)
+
+@item gdb
+@kindex dprintf-style gdb
+Handle the output using the @value{GDBN} @code{printf} command.
+
+@item call
+@kindex dprintf-style call
+Handle the output by calling a function in your program (normally
+@code{printf}).
+
+@item set dprintf-function @var{function}
+Set the function to call if the dprintf style is @code{call}.  By
+default its value is @code{printf}.  You may set it to any expression.
+that @value{GDBN} can evaluate to a function, as per the @code{call}
+command.
+
+@item set dprintf-channel @var{channel}
+Set a ``channel'' for dprintf.  If set to a non-empty value,
+@value{GDBN} will evaluate it as an expression and pass the result as
+a first argument to the @code{dprintf-function}, in the manner of
+@code{fprintf} and similar functions.  Otherwise, the dprintf format
+string will be the first argument, in the manner of @code{printf}.
+
+As an example, if you wanted @code{dprintf} output to go to a logfile
+that is a standard I/O stream assigned to the variable @code{mylog},
+you could do the following:
+
+@example
+(gdb) set dprintf-style call
+(gdb) set dprintf-function fprintf
+(gdb) set dprintf-channel mylog
+(gdb) dprintf 25,"at line 25, glob=%d\n",glob
+Dprintf 1 at 0x123456: file main.c, line 25.
+(gdb) info break
+1       dprintf        keep y   0x00123456 in main at main.c:25
+        call (void) fprintf (mylog,"at line 25, glob=%d\n",glob)
+        continue
+(gdb)
+@end example
+
+Note that the @code{info break} displays the dynamic printf commands
+as normal breakpoint commands; you can thus easily see the effect of
+the variable settings.
+
+@end table
+
+@value{GDBN} does not check the validity of function and channel,
+relying on you to supply values that are meaningful for the contexts
+in which they are being used.  For instance, the function and channel
+may be the values of local variables, but if that is the case, then
+all enabled dynamic prints must be at locations within the scope of
+those locals.  If evaluation fails, @value{GDBN} will report an error.
 
 @node Save Breakpoints
 @subsection How to save breakpoints to a file

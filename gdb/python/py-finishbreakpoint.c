@@ -281,7 +281,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
       addr_str = small_buf;
 
       create_breakpoint (python_gdbarch,
-                         addr_str, NULL, thread,
+                         addr_str, NULL, thread, NULL,
                          0,
                          1 /*temp_flag*/,
                          bp_breakpoint,

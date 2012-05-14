@@ -1,3 +1,41 @@
+2012-05-14  Stan Shebs  <stan@codesourcery.com>
+
+	Add dynamic printf.
+	* breakpoint.h (enum bptype): New type bp_dprintf.
+	(struct breakpoint): New field extra_string.
+	(struct breakpoint_ops): Add arg to create_breakpoints_sal.
+	(create_breakpoint): Add extra_string arg.
+	* breakpoint.c (dprintf_breakpoint_ops): New.
+	(is_breakpoint): Add bp_dprintf.
+	(bpstat_what): Add dprintf case.
+	(bptype_string): Ditto.
+	(print_one_breakpoint_location): Ditto.
+	(init_bp_location): Ditto.
+	(bkpt_print_mention): Ditto.
+	(dprintf_style_enums): New array.
+	(dprintf_style): New global.
+	(dprintf_function): New global.
+	(dprintf_channel): New global.
+	(update_dprintf_command_list): New function.
+	(update_dprintf_commands): New function.
+	(init_breakpoint_sal): Add extra_string argument, handle it.
+	(create_breakpoint_sal): Add extra_string argument.
+	(create_breakpoints_sal): Add extra_string argument, update callers.
+	(find_condition_and_thread): Add extra argument.
+	(create_breakpoint): Add extra_string argument, record it.
+	(dprintf_command): New function.
+	(break_command_1): Add arg to create_breakpoint call.
+	(handle_gnu_v3_exceptions): Ditto.
+	(trace_command): Ditto.
+	(ftrace_command): Ditto.
+	(strace_command): Ditto.
+	(bkpt_print_mention): Add dprintf case.
+	(create_breakpoint_sal_default): Add extra_string argument.
+	(_initialize_breakpoint): Add new commands.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Add arg to call.
+	* python/py-breakpoint.c (bppy_init): Ditto.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Ditto.
+
 2012-05-14  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_push_dummy_code): Correct description typo.

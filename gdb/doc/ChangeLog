@@ -1,3 +1,7 @@
+2012-05-14  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.texinfo (Dynamic Printf): New subsection.
+
 2012-05-13  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.texinfo (Basic Python): Add description about the function
