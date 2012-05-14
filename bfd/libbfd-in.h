@@ -459,7 +459,7 @@ extern bfd_boolean _bfd_generic_set_section_contents
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
    bfd_false)
 #define _bfd_nolink_bfd_lookup_section_flags \
-  ((void (*) (struct bfd_link_info *, struct flag_info *)) \
+  ((bfd_boolean (*) (struct bfd_link_info *, struct flag_info *, asection *)) \
    bfd_0)
 #define _bfd_nolink_bfd_merge_sections \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \

@@ -64,13 +64,39 @@ static int set_target_endian = 0;
 /* #lo(value) denotes the least significant 16 bits of the indicated.  */
 #define PPC_LO(v) ((v) & 0xffff)
 
+/* Split the indicated value with the msbs in bits 11-15
+   and the lsbs in bits 21-31.  */
+#define PPC_VLE_SPLIT16A(v) ((v & 0xf800) << 11) | (v & 0x7ff)
+
+/* Split the indicated value with the msbs in bits 6-10
+   and the lsbs in bits 21-31.  */
+#define PPC_VLE_SPLIT16D(v) ((v & 0xf800) << 5) | (v & 0x7ff)
+
+/* #lo(value) denotes the lsb 16 bits in split16a format.  */
+#define PPC_VLE_LO16A(v) PPC_VLE_SPLIT16A(PPC_LO(v))
+
+/* #lo(value) denotes the lsb 16 bits in split16d format.  */
+#define PPC_VLE_LO16D(v) PPC_VLE_SPLIT16D(PPC_LO(v))
+
 /* #hi(value) denotes bits 16 through 31 of the indicated value.  */
 #define PPC_HI(v) (((v) >> 16) & 0xffff)
+
+/* #lo(value) denotes the msb 16 bits in split16a format.  */
+#define PPC_VLE_HI16A(v) PPC_VLE_SPLIT16A(PPC_HI(v))
+
+/* #lo(value) denotes the msb 16 bits in split16d format.  */
+#define PPC_VLE_HI16D(v) PPC_VLE_SPLIT16D(PPC_HI(v))
 
 /* #ha(value) denotes the high adjusted value: bits 16 through 31 of
   the indicated value, compensating for #lo() being treated as a
   signed number.  */
 #define PPC_HA(v) PPC_HI ((v) + 0x8000)
+
+/* #ha(value) denotes the high adjusted value in split16a format.  */
+#define PPC_VLE_HA16A(v) PPC_VLE_SPLIT16A(PPC_HA(v))
+
+/* #ha(value) denotes the high adjusted value in split16d format.  */
+#define PPC_VLE_HA16D(v) PPC_VLE_SPLIT16D(PPC_HA(v))
 
 /* #higher(value) denotes bits 32 through 47 of the indicated value.  */
 #define PPC_HIGHER(v) (((v) >> 16 >> 16) & 0xffff)
@@ -1038,6 +1064,7 @@ symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE" */
 #define PPC_APUINFO_SPE		0x100
 #define PPC_APUINFO_EFS		0x101
 #define PPC_APUINFO_BRLOCK	0x102
+#define PPC_APUINFO_VLE		0x104
 
 /*
  * We keep a list of APUinfo
@@ -1059,6 +1086,35 @@ const struct option md_longopts[] = {
 };
 const size_t md_longopts_size = sizeof (md_longopts);
 
+/* Convert the target integer stored in N bytes in BUF to a host
+   integer, returning that value.  */
+
+static valueT
+md_chars_to_number (char *buf, int n)
+{
+  valueT result = 0;
+  unsigned char *p = (unsigned char *) buf;
+
+  if (target_big_endian)
+    {
+      while (n--)
+	{
+	  result <<= 8;
+	  result |= (*p++ & 0xff);
+	}
+    }
+  else
+    {
+      while (n--)
+	{
+	  result <<= 8;
+	  result |= (p[n] & 0xff);
+	}
+    }
+
+  return result;
+}
+
 int
 md_parse_option (int c, char *arg)
 {
@@ -1079,6 +1135,8 @@ md_parse_option (int c, char *arg)
 	{
 	  target_big_endian = 0;
 	  set_target_endian = 1;
+	  if (ppc_cpu & PPC_OPCODE_VLE)
+	    as_bad (_("The use of -mvle requires big endian."));
 	}
       else
 	return 0;
@@ -1126,8 +1184,13 @@ md_parse_option (int c, char *arg)
       break;
 
     case 'm':
-      if ((new_cpu = ppc_parse_cpu (ppc_cpu, arg)) != 0)
-	ppc_cpu = new_cpu;
+      new_cpu = ppc_parse_cpu (ppc_cpu, arg);
+      if (new_cpu != 0)
+	{
+	  ppc_cpu = new_cpu;
+	  if (set_target_endian && target_big_endian == 0)
+	    as_bad (_("The use of -mvle requires big endian."));
+	}
 
       else if (strcmp (arg, "regnames") == 0)
 	reg_names_p = TRUE;
@@ -1160,6 +1223,8 @@ md_parse_option (int c, char *arg)
 	{
 	  target_big_endian = 0;
 	  set_target_endian = 1;
+	  if (ppc_cpu & PPC_OPCODE_VLE)
+	    as_bad (_("The use of -mvle requires big endian."));
 	}
 
       else if (strcmp (arg, "big") == 0 || strcmp (arg, "big-endian") == 0)
@@ -1268,6 +1333,7 @@ PowerPC options:\n\
 -me5500,                generate code for Freescale e5500 core complex\n\
 -me6500,                generate code for Freescale e6500 core complex\n\
 -mspe                   generate code for Motorola SPE instructions\n\
+-mvle                   generate code for Freescale VLE instructions\n\
 -mtitan                 generate code for AppliedMicro Titan core complex\n\
 -mregnames              Allow symbolic names for registers\n\
 -mno-regnames           Do not allow symbolic names for registers\n"));
@@ -1328,9 +1394,11 @@ ppc_arch (void)
 
   if ((ppc_cpu & PPC_OPCODE_PPC) != 0)
     return bfd_arch_powerpc;
-  else if ((ppc_cpu & PPC_OPCODE_POWER) != 0)
+  if ((ppc_cpu & PPC_OPCODE_VLE) != 0)
+    return bfd_arch_powerpc;
+  if ((ppc_cpu & PPC_OPCODE_POWER) != 0)
     return bfd_arch_rs6000;
-  else if ((ppc_cpu & (PPC_OPCODE_COMMON | PPC_OPCODE_ANY)) != 0)
+  if ((ppc_cpu & (PPC_OPCODE_COMMON | PPC_OPCODE_ANY)) != 0)
     {
       if (strcmp (default_cpu, "rs6000") == 0)
 	return bfd_arch_rs6000;
@@ -1351,6 +1419,8 @@ ppc_mach (void)
     return bfd_mach_rs6k;
   else if (ppc_cpu & PPC_OPCODE_TITAN)
     return bfd_mach_ppc_titan;
+  else if (ppc_cpu & PPC_OPCODE_VLE)
+    return bfd_mach_ppc_vle;
   else
     return bfd_mach_ppc;
 }
@@ -1382,6 +1452,54 @@ ppc_target_format (void)
 	  : (ppc_obj64 ? "elf64-powerpcle" : "elf32-powerpcle"));
 # endif
 #endif
+}
+
+/* Validate one entry in powerpc_opcodes[] or vle_opcodes[].
+   Return TRUE if there's a problem, otherwise FALSE.  */
+
+static bfd_boolean
+insn_validate (const struct powerpc_opcode *op)
+{
+  const unsigned char *o;
+  unsigned long omask = op->mask;
+
+  /* The mask had better not trim off opcode bits.  */
+  if ((op->opcode & omask) != op->opcode)
+    {
+      as_bad (_("mask trims opcode bits for %s"), op->name);
+      return TRUE;
+    }
+
+  /* The operands must not overlap the opcode or each other.  */
+  for (o = op->operands; *o; ++o)
+    {
+      if (*o >= num_powerpc_operands)
+        {
+	  as_bad (_("operand index error for %s"), op->name);
+	  return TRUE;
+        }
+      else
+        {
+	  const struct powerpc_operand *operand = &powerpc_operands[*o];
+	  if (operand->shift != PPC_OPSHIFT_INV)
+	    {
+	      unsigned long mask;
+
+	      if (operand->shift >= 0)
+		mask = operand->bitm << operand->shift;
+	      else
+		mask = operand->bitm >> -operand->shift;
+	      if (omask & mask)
+		{
+		  as_bad (_("operand %d overlap in %s"),
+			  (int) (o - op->operands), op->name);
+		  return TRUE;
+		}
+	      omask |= mask;
+	    }
+        }
+    }
+  return FALSE;
 }
 
 /* Insert opcodes and macros into hash tables.  Called at startup and
@@ -1440,89 +1558,29 @@ ppc_setup_opcodes (void)
     {
       if (ENABLE_CHECKING)
 	{
-	  const unsigned char *o;
-	  unsigned long omask = op->mask;
-
 	  if (op != powerpc_opcodes)
 	    {
+	      int old_opcode = PPC_OP (op[-1].opcode);
+	      int new_opcode = PPC_OP (op[0].opcode);
+
+#ifdef PRINT_OPCODE_TABLE
+	      printf ("%-14s\t#%04d\tmajor op: 0x%x\top: 0x%x\tmask: 0x%x\tflags: 0x%llx\n",
+		      op->name, op - powerpc_opcodes, (unsigned int) new_opcode,
+		      (unsigned int) op->opcode, (unsigned int) op->mask,
+		      (unsigned long long) op->flags);
+#endif
+
 	      /* The major opcodes had better be sorted.  Code in the
 		 disassembler assumes the insns are sorted according to
 		 major opcode.  */
-	      if (PPC_OP (op[0].opcode) < PPC_OP (op[-1].opcode))
+	      if (new_opcode < old_opcode)
 		{
 		  as_bad (_("major opcode is not sorted for %s"),
 			  op->name);
 		  bad_insn = TRUE;
 		}
-
-	      /* Warn if the table isn't more strictly ordered.
-		 Unfortunately it doesn't seem possible to order the
-		 table on much more than the major opcode, which makes
-		 it difficult to implement a binary search in the
-		 disassembler.  The problem is that we have multiple
-		 ways to disassemble instructions, and we usually want
-		 to choose a more specific form (with more bits set in
-		 the opcode) than a more general form.  eg. all of the
-		 following are equivalent:
-		 bne label	# opcode = 0x40820000, mask = 0xff830003
-		 bf  2,label	# opcode = 0x40800000, mask = 0xff800003
-		 bc  4,2,label	# opcode = 0x40000000, mask = 0xfc000003
-
-		 There are also cases where the table needs to be out
-		 of order to disassemble the correct instruction for
-		 processor variants.  */
-	      else if (0)
-		{
-		  unsigned long t1 = op[0].opcode;
-		  unsigned long t2 = op[-1].opcode;
-
-		  if (((t1 ^ t2) & 0xfc0007ff) == 0
-		      && (t1 & 0xfc0006df) == 0x7c000286)
-		    {
-		      /* spr field is split.  */
-		      t1 = ((t1 & ~0x1ff800)
-			    | ((t1 & 0xf800) << 5) | ((t1 & 0x1f0000) >> 5));
-		      t2 = ((t2 & ~0x1ff800)
-			    | ((t2 & 0xf800) << 5) | ((t2 & 0x1f0000) >> 5));
-		    }
-		  if (t1 < t2)
-		    as_warn (_("%s (%08lx %08lx) after %s (%08lx %08lx)"),
-			     op[0].name, op[0].opcode, op[0].mask,
-			     op[-1].name, op[-1].opcode, op[-1].mask);
-		}
 	    }
-
-	  /* The mask had better not trim off opcode bits.  */
-	  if ((op->opcode & omask) != op->opcode)
-	    {
-	      as_bad (_("mask trims opcode bits for %s"),
-		      op->name);
-	      bad_insn = TRUE;
-	    }
-
-	  /* The operands must not overlap the opcode or each other.  */
-	  for (o = op->operands; *o; ++o)
-	    if (*o >= num_powerpc_operands)
-	      {
-		as_bad (_("operand index error for %s"),
-			op->name);
-		bad_insn = TRUE;
-	      }
-	    else
-	      {
-		const struct powerpc_operand *operand = &powerpc_operands[*o];
-		if (operand->shift >= 0)
-		  {
-		    unsigned long mask = operand->bitm << operand->shift;
-		    if (omask & mask)
-		      {
-			as_bad (_("operand %d overlap in %s"),
-				(int) (o - op->operands), op->name);
-			bad_insn = TRUE;
-		      }
-		    omask |= mask;
-		  }
-	      }
+	  bad_insn |= insn_validate (op);
 	}
 
       if ((ppc_cpu & op->flags) != 0
@@ -1542,6 +1600,59 @@ ppc_setup_opcodes (void)
 
   if ((ppc_cpu & PPC_OPCODE_ANY) != 0)
     for (op = powerpc_opcodes; op < op_end; op++)
+      hash_insert (ppc_hash, op->name, (void *) op);
+
+  op_end = vle_opcodes + vle_num_opcodes;
+  for (op = vle_opcodes; op < op_end; op++)
+    {
+      if (ENABLE_CHECKING)
+	{
+	  if (op != vle_opcodes)
+	    {
+	      unsigned old_seg, new_seg;
+
+	      old_seg = VLE_OP (op[-1].opcode, op[-1].mask);
+	      old_seg = VLE_OP_TO_SEG (old_seg);
+	      new_seg = VLE_OP (op[0].opcode, op[0].mask);
+	      new_seg = VLE_OP_TO_SEG (new_seg);
+
+#ifdef PRINT_OPCODE_TABLE
+	      printf ("%-14s\t#%04d\tmajor op: 0x%x\top: 0x%x\tmask: 0x%x\tflags: 0x%llx\n",
+		      op->name, op - powerpc_opcodes, (unsigned int) new_opcode,
+		      (unsigned int) op->opcode, (unsigned int) op->mask,
+		      (unsigned long long) op->flags);
+#endif
+	      /* The major opcodes had better be sorted.  Code in the
+		 disassembler assumes the insns are sorted according to
+		 major opcode.  */
+	      if (new_seg < old_seg)
+		{
+		  as_bad (_("major opcode is not sorted for %s"),
+			  op->name);
+		  bad_insn = TRUE;
+		}
+	    }
+
+	  bad_insn |= insn_validate (op);
+	}
+
+      if ((ppc_cpu & op->flags) != 0
+	  && !(ppc_cpu & op->deprecated))
+	{
+	  const char *retval;
+
+	  retval = hash_insert (ppc_hash, op->name, (void *) op);
+	  if (retval != NULL)
+	    {
+	      as_bad (_("duplicate instruction %s"),
+		      op->name);
+	      bad_insn = TRUE;
+	    }
+	}
+    }
+
+  if ((ppc_cpu & PPC_OPCODE_VLE) != 0)
+    for (op = vle_opcodes; op < op_end; op++)
       hash_insert (ppc_hash, op->name, (void *) op);
 
   /* Insert the macros into a hash table.  */
@@ -1743,8 +1854,10 @@ ppc_insert_operand (unsigned long insn,
       if (errmsg != (const char *) NULL)
 	as_bad_where (file, line, "%s", errmsg);
     }
-  else
+  else if (operand->shift >= 0)
     insn |= ((long) val & operand->bitm) << operand->shift;
+  else
+    insn |= ((long) val & operand->bitm) >> -operand->shift;
 
   return insn;
 }
@@ -1826,6 +1939,9 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
     MAP32 ("local",		BFD_RELOC_PPC_LOCAL24PC),
     MAP32 ("pltrel",		BFD_RELOC_32_PLT_PCREL),
     MAP32 ("sdarel",		BFD_RELOC_GPREL16),
+    MAP32 ("sdarel@l",		BFD_RELOC_PPC_VLE_SDAREL_LO16A),
+    MAP32 ("sdarel@h",		BFD_RELOC_PPC_VLE_SDAREL_HI16A),
+    MAP32 ("sdarel@ha",		BFD_RELOC_PPC_VLE_SDAREL_HA16A),
     MAP32 ("naddr",		BFD_RELOC_PPC_EMB_NADDR32),
     MAP32 ("naddr16",		BFD_RELOC_PPC_EMB_NADDR16),
     MAP32 ("naddr@l",		BFD_RELOC_PPC_EMB_NADDR16_LO),
@@ -1835,6 +1951,7 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
     MAP32 ("sda2rel",		BFD_RELOC_PPC_EMB_SDA2REL),
     MAP32 ("sda2i16",		BFD_RELOC_PPC_EMB_SDA2I16),
     MAP32 ("sda21",		BFD_RELOC_PPC_EMB_SDA21),
+    MAP32 ("sda21@l",		BFD_RELOC_PPC_VLE_SDA21_LO),
     MAP32 ("mrkref",		BFD_RELOC_PPC_EMB_MRKREF),
     MAP32 ("relsect",		BFD_RELOC_PPC_EMB_RELSEC16),
     MAP32 ("relsect@l",		BFD_RELOC_PPC_EMB_RELST_LO),
@@ -2371,6 +2488,22 @@ struct ppc_fixup
 
 #define MAX_INSN_FIXUPS (5)
 
+/* Form I16L.  */
+#define E_OR2I_INSN		0x7000C000
+#define E_AND2I_DOT_INSN	0x7000C800
+#define E_OR2IS_INSN		0x7000D000
+#define E_LIS_INSN		0x7000E000
+#define	E_AND2IS_DOT_INSN	0x7000E800
+
+/* Form I16A.  */
+#define E_ADD2I_DOT_INSN	0x70008800
+#define E_ADD2IS_INSN		0x70009000
+#define E_CMP16I_INSN		0x70009800
+#define E_MULL2I_INSN		0x7000A000
+#define E_CMPL16I_INSN		0x7000A800
+#define E_CMPH16I_INSN		0x7000B000
+#define E_CMPHL16I_INSN		0x7000B800
+
 /* This routine is called for each instruction to be assembled.  */
 
 void
@@ -2388,6 +2521,7 @@ md_assemble (char *str)
   char *f;
   int addr_mod;
   int i;
+  unsigned int insn_length;
 #ifdef OBJ_ELF
   bfd_reloc_code_real_type reloc;
 #endif
@@ -2637,12 +2771,15 @@ md_assemble (char *str)
       else
 #endif		/* TE_PE */
 	{
-	  if ((reg_names_p && (operand->flags & PPC_OPERAND_CR) != 0)
+	  if ((reg_names_p
+               && (((operand->flags & PPC_OPERAND_CR_BIT) != 0)
+		   || ((operand->flags & PPC_OPERAND_CR_REG) != 0)))
 	      || !register_name (&ex))
 	    {
 	      char save_lex = lex_type['%'];
 
-	      if ((operand->flags & PPC_OPERAND_CR) != 0)
+	      if (((operand->flags & PPC_OPERAND_CR_REG) != 0)
+		  || (operand->flags & PPC_OPERAND_CR_BIT) != 0)
 		{
 		  cr_operand = TRUE;
 		  lex_type['%'] |= LEX_BEGIN_NAME;
@@ -2810,6 +2947,73 @@ md_assemble (char *str)
 		  break;
 		}
 
+	      /* If VLE-mode convert LO/HI/HA relocations.  */
+      	      if (opcode->flags & PPC_OPCODE_VLE)
+		{
+		  int tmp_insn = insn & opcode->mask;
+		  
+		  int use_d_reloc = (tmp_insn == E_OR2I_INSN
+				     || tmp_insn == E_AND2I_DOT_INSN
+				     || tmp_insn == E_OR2IS_INSN
+				     || tmp_insn == E_LIS_INSN
+				     || tmp_insn == E_AND2IS_DOT_INSN);
+
+
+		  int use_a_reloc = (tmp_insn == E_ADD2I_DOT_INSN
+				     || tmp_insn == E_ADD2IS_INSN
+				     || tmp_insn == E_CMP16I_INSN
+				     || tmp_insn == E_MULL2I_INSN
+				     || tmp_insn == E_CMPL16I_INSN
+				     || tmp_insn == E_CMPH16I_INSN
+				     || tmp_insn == E_CMPHL16I_INSN);
+
+		  switch (reloc)
+		    {
+		    default:
+		      break;
+
+		    case BFD_RELOC_PPC_EMB_SDA21:
+		      reloc = BFD_RELOC_PPC_VLE_SDA21;
+		      break;
+
+		    case BFD_RELOC_LO16:
+		      if (use_d_reloc)
+			reloc = BFD_RELOC_PPC_VLE_LO16D;
+		      else if (use_a_reloc)
+			reloc = BFD_RELOC_PPC_VLE_LO16A;
+		      break;
+
+		    case BFD_RELOC_HI16:
+		      if (use_d_reloc)
+			reloc = BFD_RELOC_PPC_VLE_HI16D;
+		      else if (use_a_reloc)
+			reloc = BFD_RELOC_PPC_VLE_HI16A;
+		      break;
+	 
+		    case BFD_RELOC_HI16_S:
+		      if (use_d_reloc)
+			reloc = BFD_RELOC_PPC_VLE_HA16D;
+		      else if (use_a_reloc)
+			reloc = BFD_RELOC_PPC_VLE_HA16A;
+		      break;
+
+		    case BFD_RELOC_PPC_VLE_SDAREL_LO16A:
+		      if (use_d_reloc)
+			reloc = BFD_RELOC_PPC_VLE_SDAREL_LO16D;
+		      break;
+
+		    case BFD_RELOC_PPC_VLE_SDAREL_HI16A:
+		      if (use_d_reloc)
+			reloc = BFD_RELOC_PPC_VLE_SDAREL_HI16D;
+		      break;
+
+		    case BFD_RELOC_PPC_VLE_SDAREL_HA16A:
+		      if (use_d_reloc)
+			reloc = BFD_RELOC_PPC_VLE_SDAREL_HA16D;
+		      break;
+		    }
+		}
+
 	      /* For the absolute forms of branches, convert the PC
 		 relative form back into the absolute.  */
 	      if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
@@ -2974,8 +3178,8 @@ md_assemble (char *str)
     as_bad (_("junk at end of line: `%s'"), str);
 
 #ifdef OBJ_ELF
-  /* Do we need/want a APUinfo section? */
-  if ((ppc_cpu & (PPC_OPCODE_E500 | PPC_OPCODE_E500MC)) != 0)
+  /* Do we need/want an APUinfo section? */
+  if ((ppc_cpu & (PPC_OPCODE_E500 | PPC_OPCODE_E500MC | PPC_OPCODE_VLE)) != 0)
     {
       /* These are all version "1".  */
       if (opcode->flags & PPC_OPCODE_SPE)
@@ -2992,20 +3196,41 @@ md_assemble (char *str)
 	ppc_apuinfo_section_add (PPC_APUINFO_CACHELCK, 1);
       if (opcode->flags & PPC_OPCODE_RFMCI)
 	ppc_apuinfo_section_add (PPC_APUINFO_RFMCI, 1);
+      if (opcode->flags & PPC_OPCODE_VLE)
+	ppc_apuinfo_section_add (PPC_APUINFO_VLE, 1);
     }
 #endif
 
   /* Write out the instruction.  */
-  f = frag_more (4);
-  addr_mod = frag_now_fix () & 3;
+  /* Differentiate between two and four byte insns.  */
+  if (ppc_mach () == bfd_mach_ppc_vle)
+    {
+      if (PPC_OP_SE_VLE (insn))
+        insn_length = 2;
+      else
+        insn_length = 4;
+      addr_mod = frag_now_fix () & 1;
+    }
+  else
+    {
+      insn_length = 4;
+      addr_mod = frag_now_fix () & 3;
+    }
+  /* All instructions can start on a 2 byte boundary for VLE.  */
+  f = frag_more (insn_length);
   if (frag_now->has_code && frag_now->insn_addr != addr_mod)
-    as_bad (_("instruction address is not a multiple of 4"));
+    {
+      if (ppc_mach() == bfd_mach_ppc_vle)
+        as_bad (_("instruction address is not a multiple of 2"));
+      else
+        as_bad (_("instruction address is not a multiple of 4"));
+    }
   frag_now->insn_addr = addr_mod;
   frag_now->has_code = 1;
-  md_number_to_chars (f, insn, 4);
+  md_number_to_chars (f, insn, insn_length);
 
 #ifdef OBJ_ELF
-  dwarf2_emit_insn (4);
+  dwarf2_emit_insn (insn_length);
 #endif
 
   /* Create any fixups.  At this point we do not use a
@@ -3049,6 +3274,12 @@ md_assemble (char *str)
 	    case BFD_RELOC_LO16:
 	    case BFD_RELOC_HI16:
 	    case BFD_RELOC_HI16_S:
+	    case BFD_RELOC_PPC_VLE_LO16A:
+	    case BFD_RELOC_PPC_VLE_LO16D:
+	    case BFD_RELOC_PPC_VLE_HI16A:
+	    case BFD_RELOC_PPC_VLE_HI16D:
+	    case BFD_RELOC_PPC_VLE_HA16A:
+	    case BFD_RELOC_PPC_VLE_HA16D:
 #ifdef OBJ_ELF
 	    case BFD_RELOC_PPC64_HIGHER:
 	    case BFD_RELOC_PPC64_HIGHER_S:
@@ -3068,7 +3299,7 @@ md_assemble (char *str)
 	  operand = &powerpc_operands[fixups[i].opindex];
 	  fix_new_exp (frag_now,
 		       f - frag_now->fr_literal,
-		       4,
+		       insn_length,
 		       &fixups[i].exp,
 		       (operand->flags & PPC_OPERAND_RELATIVE) != 0,
 		       ((bfd_reloc_code_real_type)
@@ -5953,6 +6184,24 @@ ppc_fix_adjustable (fixS *fix)
 }
 #endif
 
+void
+ppc_frag_check (struct frag *fragP)
+{
+  if (!fragP->has_code)
+    return;
+
+  if (ppc_mach() == bfd_mach_ppc_vle)
+    {
+      if (((fragP->fr_address + fragP->insn_addr) & 1) != 0)
+        as_bad (_("instruction address is not a multiple of 2"));
+    }
+  else
+    {
+      if (((fragP->fr_address + fragP->insn_addr) & 3) != 0)
+        as_bad (_("instruction address is not a multiple of 4"));
+    }
+}
+
 /* Implement HANDLE_ALIGN.  This writes the NOP pattern into an
    rs_align_code frag.  */
 
@@ -5962,7 +6211,14 @@ ppc_handle_align (struct frag *fragP)
   valueT count = (fragP->fr_next->fr_address
 		  - (fragP->fr_address + fragP->fr_fix));
 
-  if (count != 0 && (count & 3) == 0)
+  if (ppc_mach() == bfd_mach_ppc_vle && count != 0 && (count & 1) == 0)
+    {
+      char *dest = fragP->fr_literal + fragP->fr_fix;
+
+      fragP->fr_var = 2;
+      md_number_to_chars (dest, 0x4400, 2);
+    }
+  else if (count != 0 && (count & 3) == 0)
     {
       char *dest = fragP->fr_literal + fragP->fr_fix;
 
@@ -6117,16 +6373,36 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	 value, and stuff the instruction back again.  */
       where = fixP->fx_frag->fr_literal + fixP->fx_where;
       if (target_big_endian)
-	insn = bfd_getb32 ((unsigned char *) where);
+	{
+	  if (fixP->fx_size == 4)
+	    insn = bfd_getb32 ((unsigned char *) where);
+	  else
+	    insn = bfd_getb16 ((unsigned char *) where);
+	}
       else
-	insn = bfd_getl32 ((unsigned char *) where);
+	{
+	  if (fixP->fx_size == 4)
+	    insn = bfd_getl32 ((unsigned char *) where);
+	  else
+	    insn = bfd_getl16 ((unsigned char *) where);
+	}
       insn = ppc_insert_operand (insn, operand, (offsetT) value,
 				 fixP->tc_fix_data.ppc_cpu,
 				 fixP->fx_file, fixP->fx_line);
       if (target_big_endian)
-	bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+	{
+	  if (fixP->fx_size == 4)
+	    bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
+	  else
+	    bfd_putb16 ((bfd_vma) insn, (unsigned char *) where);
+	}
       else
-	bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+	{
+	  if (fixP->fx_size == 4)
+	    bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+	  else
+	    bfd_putl16 ((bfd_vma) insn, (unsigned char *) where);
+	}
 
       if (fixP->fx_done)
 	/* Nothing else to do here.  */
@@ -6152,6 +6428,18 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	    fixP->fx_where += 2;
 #endif
 	}
+      else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
+	  && operand->bitm == 0x1fe
+	  && operand->shift == -1)
+	fixP->fx_r_type = BFD_RELOC_PPC_VLE_REL8;
+      else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
+	  && operand->bitm == 0xfffe
+	  && operand->shift == 0)
+	fixP->fx_r_type = BFD_RELOC_PPC_VLE_REL15;
+      else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
+	  && operand->bitm == 0x1fffffe
+	  && operand->shift == 0)
+	fixP->fx_r_type = BFD_RELOC_PPC_VLE_REL24;
       else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
 	       && operand->bitm == 0x3fffffc
 	       && operand->shift == 0)
@@ -6334,6 +6622,91 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	case BFD_RELOC_HI16_S_PCREL:
 	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      PPC_HA (value), 2);
+	  break;
+
+	case BFD_RELOC_PPC_VLE_SDAREL_LO16A:
+	case BFD_RELOC_PPC_VLE_LO16A:
+	  {
+	    int tval = PPC_VLE_LO16A (value);
+  	    valueT oldval = md_chars_to_number (
+				fixP->fx_frag->fr_literal + fixP->fx_where, 4);
+	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			        (oldval | tval), 4);
+	  }
+	  break;
+
+	case BFD_RELOC_PPC_VLE_SDAREL_LO16D:
+	case BFD_RELOC_PPC_VLE_LO16D:
+	  {
+	    int tval = PPC_VLE_LO16D (value);
+  	    valueT oldval = md_chars_to_number (
+				fixP->fx_frag->fr_literal + fixP->fx_where, 4);
+	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			        (oldval | tval), 4);
+	  }
+	  break;
+
+	case BFD_RELOC_PPC_VLE_SDAREL_HI16A:
+	case BFD_RELOC_PPC_VLE_HI16A:
+	  {
+	    int tval = PPC_VLE_HI16A (value);
+  	    valueT oldval = md_chars_to_number (
+				fixP->fx_frag->fr_literal + fixP->fx_where, 4);
+	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			        (oldval | tval), 4);
+	  }
+	  break;
+
+	case BFD_RELOC_PPC_VLE_SDAREL_HI16D:
+	case BFD_RELOC_PPC_VLE_HI16D:
+	  {
+	    int tval = PPC_VLE_HI16D (value);
+  	    valueT oldval = md_chars_to_number (
+				fixP->fx_frag->fr_literal + fixP->fx_where, 4);
+	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			        (oldval | tval), 4);
+	  }
+	  break;
+
+	case BFD_RELOC_PPC_VLE_SDAREL_HA16A:
+	case BFD_RELOC_PPC_VLE_HA16A:
+	  {
+	    int tval = PPC_VLE_HA16A (value);
+  	    valueT oldval = md_chars_to_number (
+				fixP->fx_frag->fr_literal + fixP->fx_where, 4);
+	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			        (oldval | tval), 4);
+	  }
+	  break;
+
+	case BFD_RELOC_PPC_VLE_SDAREL_HA16D:
+	case BFD_RELOC_PPC_VLE_HA16D:
+	  {
+	    int tval = PPC_VLE_HA16D (value);
+  	    valueT oldval = md_chars_to_number (
+				fixP->fx_frag->fr_literal + fixP->fx_where, 4);
+	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			        (oldval | tval), 4);
+	  }
+	  break;
+
+	case BFD_RELOC_PPC_VLE_SDA21_LO:
+	  {
+	    int tval = PPC_LO (value);
+  	    valueT oldval = md_chars_to_number (
+			     fixP->fx_frag->fr_literal + fixP->fx_where, 4);
+	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			        (oldval | tval), 4);
+	  }
+	  break;
+
+	case BFD_RELOC_PPC_VLE_SDA21:
+	  {
+  	    valueT oldval = md_chars_to_number (
+			     fixP->fx_frag->fr_literal + fixP->fx_where, 4);
+	    md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			        (oldval | value), 4);
+	  }
 	  break;
 
 #ifdef OBJ_XCOFF

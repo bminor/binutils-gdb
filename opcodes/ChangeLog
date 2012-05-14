@@ -1,3 +1,67 @@
+2012-05-14  James Lemke  <jwlemke@codesourcery.com>
+
+	* ppc-dis.c (get_powerpc_dialect): Use is_ppc_vle.
+	(PPC_OPCD_SEGS, VLE_OPCD_SEGS): New defines.
+	(vle_opcd_indices): New array.
+	(lookup_vle): New function.
+	(disassemble_init_powerpc): Revise for second (VLE) opcode table.
+	(print_insn_powerpc): Likewise.
+	* ppc-opc.c: Likewise.
+
+2012-05-14  Catherine Moore  <clm@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+	    Rhonda Wittels  <rhonda@codesourcery.com>
+	    Nathan Froyd <froydnj@codesourcery.com>
+
+	* ppc-opc.c (insert_arx, extract_arx): New functions.
+	(insert_ary, extract_ary): New functions.
+	(insert_li20, extract_li20): New functions.
+	(insert_rx, extract_rx): New functions.
+	(insert_ry, extract_ry): New functions.
+	(insert_sci8, extract_sci8): New functions.
+	(insert_sci8n, extract_sci8n): New functions.
+	(insert_sd4h, extract_sd4h): New functions.
+	(insert_sd4w, extract_sd4w): New functions.
+	(insert_vlesi, extract_vlesi): New functions.
+	(insert_vlensi, extract_vlensi): New functions.
+	(insert_vleui, extract_vleui): New functions.
+	(insert_vleil, extract_vleil): New functions.
+	(BI_MASK, BB_MASK, BT): Use PPC_OPERAND_CR_BIT.
+	(BI16, BI32, BO32, B8): New.
+	(B15, B24, CRD32, CRS): New.
+	(CRD, OBF, BFA, CR, CRFS): Use PPC_OPERAND_CR_REG.
+	(DB, IMM20, RD, Rx, ARX, RY, RZ): New.
+	(ARY, SCLSCI8, SCLSCI8N, SE_SD, SE_SDH): New.
+	(SH6_MASK): Use PPC_OPSHIFT_INV.
+	(SI8, UI5, OIMM5, UI7, BO16): New.
+	(VLESIMM, VLENSIMM, VLEUIMM, VLEUIMML): New.
+	(XT6, XA6, XB6, XB6S, XC6): Use PPC_OPSHIFT_INV.
+	(ALLOW8_SPRG): New.
+	(insert_sprg, extract_sprg): Check ALLOW8_SPRG.
+	(OPVUP, OPVUP_MASK OPVUP): New
+	(BD8, BD8_MASK, BD8IO, BD8IO_MASK): New.
+	(EBD8IO, EBD8IO1_MASK, EBD8IO2_MASK, EBD8IO3_MASK): New.
+	(BD15, BD15_MASK, EBD15, EBD15_MASK, EBD15BI, EBD15BI_MASK): New.
+	(BD24,BD24_MASK, C_LK, C_LK_MASK, C, C_MASK): New.
+	(IA16, IA16_MASK, I16A, I16A_MASK, I16L, I16L_MASK): New.
+	(IM7, IM7_MASK, LI20, LI20_MASK, SCI8, SCI8_MASK): New.
+	(SCI8BF, SCI8BF_MASK, SD4, SD4_MASK): New.
+	(SE_IM5, SE_IM5_MASK): New.
+	(SE_R, SE_R_MASK, SE_RR, SE_RR_MASK): New.
+	(EX, EX_MASK, BO16F, BO16T, BO32F, BO32T): New.
+	(BO32DNZ, BO32DZ): New.
+	(NO371, PPCSPE, PPCISEL, PPCEFS, MULHW): Include PPC_OPCODE_VLE.
+	(PPCVLE): New.
+	(powerpc_opcodes): Add new VLE instructions.  Update existing
+	instruction to include PPCVLE if supported.
+	* ppc-dis.c (ppc_opts): Add vle entry.
+	(get_powerpc_dialect): New function.
+	(powerpc_init_dialect): VLE support.
+	(print_insn_big_powerpc): Call get_powerpc_dialect.
+	(print_insn_little_powerpc): Likewise.
+	(operand_value_powerpc): Handle negative shift counts.
+	(print_insn_powerpc): Handle 2-byte instruction lengths.
+
 2012-05-11  Daniel Richard G.  <skunk@iskunk.org>
 
 	PR binutils/14028

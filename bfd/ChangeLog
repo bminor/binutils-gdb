@@ -1,3 +1,53 @@
+2012-05-14  James Lemke  <jwlemke@codesourcery.com>
+	    Catherine Moore  <clm@codesourcery.com>
+
+	* bfd.c (bfd_lookup_section_flags): Add section parm.
+	* ecoff.c (bfd_debug_section): Remove flag_info initializer.
+	* elf-bfd.h (bfd_elf_section_data): Move in section_flag_info.
+	(bfd_elf_lookup_section_flags): Add section parm.
+	* elf32-ppc.c (is_ppc_vle): New function.
+	(ppc_elf_modify_segment_map): New function.
+	(elf_backend_modify_segment_map): Define.
+	(has_vle_insns): New define.
+	* elf32-ppc.h (ppc_elf_modify_segment_map): Declare.
+	* elflink.c (bfd_elf_lookup_section_flags): Add return value & parm.
+	Move in logic to omit / include a section.
+	* libbfd-in.h (bfd_link_info): Add section parm.
+	(bfd_generic_lookup_section_flags): Likewise.
+	* reloc.c (bfd_generic_lookup_section_flags): Likewise.
+	* section.c (bfd_section): Move out section_flag_info.
+	(BFD_FAKE_SECTION): Remove flag_info initializer.
+	* targets.c (_bfd_lookup_section_flags): Add section parm.
+
+2012-05-14  Catherine Moore  <clm@codesourcery.com>
+
+	* archures.c (bfd_mach_ppc_vle): New.
+	* bfd-in2.h: Regenerated.
+	* cpu-powerpc.c (bfd_powerpc_archs): New entry for vle.
+	* elf32-ppc.c (split16_format_type): New enumeration.
+	(ppc_elf_vle_split16): New function.
+	(HOWTO): Add entries for R_PPC_VLE relocations.
+	(ppc_elf_reloc_type_lookup): Handle PPC_VLE relocations.
+	(ppc_elf_section_flags): New function.
+	(ppc_elf_lookup_section_flags): New function.
+	(ppc_elf_section_processing): New function.
+	(ppc_elf_check_relocs): Handle PPC_VLE relocations.
+	(ppc_elf_relocation_section): Likewise.
+	(elf_backend_lookup_section_flags_hook): Define.
+	(elf_backend_section_flags): Define.
+	(elf_backend_section_processing): Define.
+	* elf32-ppc.h (ppc_elf_section_processing): Declare. 
+	* libbfd.h: Regenerated.
+	* reloc.c (BFD_RELOC_PPC_VLE_REL8, BFD_RELOC_PPC_VLE_REL15,
+	BFD_RELOC_PPC_VLE_REL24, BFD_RELOC_PPC_VLE_LO16A,
+	BFD_RELOC_PPC_VLE_LO16D, BFD_RELOC_PPC_VLE_HI16A,
+	BFD_RELOC_PPC_VLE_HI16D, BFD_RELOC_PPC_VLE_HA16A,
+	BFD_RELOC_PPC_VLE_HA16D, BFD_RELOC_PPC_VLE_SDA21,
+	BFD_RELOC_PPC_VLE_SDA21_LO, BFD_RELOC_PPC_VLE_SDAREL_LO16A,
+	BFD_RELOC_PPC_VLE_SDAREL_LO16D, BFD_RELOC_PPC_VLE_SDAREL_HI16A,
+	BFD_RELOC_PPC_VLE_SDAREL_HI16D, BFD_RELOC_PPC_VLE_SDAREL_HA16A,
+	BFD_RELOC_PPC_VLE_SDAREL_HA16D): New bfd relocations.
+
 2012-05-11  Georg-Johann Lay  <avr@gjlay.de
 
 	PR target/13503

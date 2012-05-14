@@ -517,9 +517,6 @@ CODE_FRAGMENT
 .  {* The BFD which owns the section.  *}
 .  bfd *owner;
 .
-.  {* INPUT_SECTION_FLAGS if specified in the linker script.  *}
-.  struct flag_info *section_flag_info;
-.
 .  {* A symbol which points at this section only.  *}
 .  struct bfd_symbol *symbol;
 .  struct bfd_symbol **symbol_ptr_ptr;
@@ -694,9 +691,6 @@ CODE_FRAGMENT
 .									\
 .  {* target_index, used_by_bfd, constructor_chain, owner,          *}	\
 .     0,            NULL,        NULL,              NULL,		\
-.									\
-.  {* flag_info,						    *}  \
-.     NULL,								\
 .									\
 .  {* symbol,                    symbol_ptr_ptr,                    *}	\
 .     (struct bfd_symbol *) SYM, &SEC.symbol,				\

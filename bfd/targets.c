@@ -497,8 +497,9 @@ BFD_JUMP_TABLE macros.
 .  bfd_boolean (*_bfd_gc_sections) (bfd *, struct bfd_link_info *);
 .
 .  {* Sets the bitmask of allowed and disallowed section flags.  *}
-.  void (*_bfd_lookup_section_flags) (struct bfd_link_info *,
-.				      struct flag_info *);
+.  bfd_boolean (*_bfd_lookup_section_flags) (struct bfd_link_info *,
+.					     struct flag_info *,
+.					     asection *);
 .
 .  {* Attempt to merge SEC_MERGE sections.  *}
 .  bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);

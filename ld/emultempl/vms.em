@@ -117,7 +117,7 @@ vms_place_orphan (asection *s,
 
   if (hold_data.os != NULL)
     {
-      lang_add_section (&hold_data.os->children, s, hold_data.os);
+      lang_add_section (&hold_data.os->children, s, NULL, hold_data.os);
       return hold_data.os;
     }
   else

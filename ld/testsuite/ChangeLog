@@ -1,3 +1,38 @@
+2012-05-14  James Lemke  <jwlemke@codesourcery.com>
+
+	* ld-powerpc/powerpc.exp: Create ppceabitests.
+	* ld-powerpc/vle-multiseg.s: New.
+	* ld-powerpc/vle-multiseg-1.d: New.
+	* ld-powerpc/vle-multiseg-1.ld: New.
+	* ld-powerpc/vle-multiseg-2.d: New.
+	* ld-powerpc/vle-multiseg-2.ld: New.
+	* ld-powerpc/vle-multiseg-3.d: New.
+	* ld-powerpc/vle-multiseg-3.ld: New.
+	* ld-powerpc/vle-multiseg-4.d: New.
+	* ld-powerpc/vle-multiseg-4.ld: New.
+	* ld-powerpc/vle-multiseg-5.d: New.
+	* ld-powerpc/vle-multiseg-5.ld: New.
+	* ld-powerpc/vle-multiseg-6.d: New.
+	* ld-powerpc/vle-multiseg-6.ld: New.
+	* ld-powerpc/vle-multiseg-6a.s: New.
+	* ld-powerpc/vle-multiseg-6b.s: New.
+	* ld-powerpc/vle-multiseg-6c.s: New.
+	* ld-powerpc/vle-multiseg-6d.s: New.
+	* ld-powerpc/powerpc.exp: Run new tests.
+
+2012-05-14  Catherine Moore  <clm@codesourcery.com>
+
+	* ld-powerpc/apuinfo.rd: Update for VLE.
+	* ld-powerpc/vle-reloc-1.d: New.
+	* ld-powerpc/vle-reloc-1.s: New.
+	* ld-powerpc/vle-reloc-2.d: New.
+	* ld-powerpc/vle-reloc-2.s: New.
+	* ld-powerpc/vle-reloc-3.d: New.
+	* ld-powerpc/vle-reloc-3.s: New.
+	* ld-powerpc/vle-reloc-def-1.s: New.
+	* ld-powerpc/vle-reloc-def-2.s: New.
+	* ld-powerpc/vle-reloc-def-3.s: New.
+
 2012-05-13  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* ld-mips-elf/mips-elf.exp (mips16_call_global_test): Use the

@@ -658,7 +658,7 @@ process_abbrev_section (unsigned char *start, unsigned char *end)
 static const char *
 get_TAG_name (unsigned long tag)
 {
-  const char *name = get_DW_TAG_name (tag);
+  const char *name = get_DW_TAG_name ((unsigned int)tag);
 
   if (name == NULL)
     {

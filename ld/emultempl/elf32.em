@@ -1861,7 +1861,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	       If the section already exists but does not have any flags
 	       set, then it has been created by the linker, probably as a
 	       result of a --section-start command line switch.  */
-	    lang_add_section (&os->children, s, os);
+	    lang_add_section (&os->children, s, NULL, os);
 	    return os;
 	  }
 
@@ -1875,7 +1875,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
      unused one and use that.  */
   if (match_by_name)
     {
-      lang_add_section (&match_by_name->children, s, match_by_name);
+      lang_add_section (&match_by_name->children, s, NULL, match_by_name);
       return match_by_name;
     }
 
@@ -1901,7 +1901,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
       && hold[orphan_text].os != NULL)
     {
       os = hold[orphan_text].os;
-      lang_add_section (&os->children, s, os);
+      lang_add_section (&os->children, s, NULL, os);
       return os;
     }
 

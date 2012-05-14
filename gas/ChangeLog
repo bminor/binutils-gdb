@@ -1,3 +1,47 @@
+2012-05-14  James Lemke  <jwlemke@codesourcery.com>
+
+	* config/tc-ppc.c (insn_validate): New func of existing code to call..
+	(ppc_setup_opcodes): ..from 2 places here.
+	Revise for second (VLE) opcode table.
+	Add #ifdef'd code to print opcode tables.
+
+2012-05-14  James Lemke  <jwlemke@codesourcery.com>
+
+	* config/tc-ppc.c (ppc_setup_opcodes): Allow out-of-order
+	for the VLE conditional branches.
+
+2012-05-14  Catherine Moore  <clm@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+	    Rhonda Wittels  <rhonda@codesourcery.com>
+
+	* config/tc-ppc.c (PPC_VLE_SPLIT16A): New macro.
+	(PPC_VLE_SPLIT16D): New macro.
+	(PPC_VLE_LO16A): New macro.
+	(PPC_VLE_LO16D): New macro.
+	(PPC_VLE_HI16A): New macro.
+	(PPC_VLE_HI16D): New macro.
+	(PPC_VLE_HA16A): New macro.
+	(PPC_VLE_HA16D): New macro.
+	(PPC_APUINFO_VLE): New definition.
+	(md_chars_to_number): New function.
+	(md_parse_option): Check for combinations of little
+	endian and -mvle.
+	(md_show_usage): Document -mvle.
+	(ppc_arch): Recognize VLE.
+	(ppc_mach): Recognize bfd_mach_ppc_vle.
+	(ppc_setup_opcodes): Print the opcode table if 
+	* config/tc-ppc.h (ppc_frag_check): Declare.
+	* doc/c-ppc.texi: Document -mvle.
+	* NEWS:  Mention PowerPC VLE port.
+
+2012-05-14  Catherine Moore  <clm@codesourcery.com>
+
+	* config/tc-ppc.h (ppc_dw2_line_min_insn_length): Declare.
+	(DWARF2_LINE_MIN_INSN_LENGTH): Redefine.
+	* config/tc-ppc.c (ppc_dw2_line_min_insn_length): New.
+	* dwarf2dbg.c (scale_addr_delta): Handle values of 1
+	for DWARF2_LINE_MIN_INSN_LENGTH. 
+
 2012-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (tc_gen_reloc): Remove x32 addend overflow

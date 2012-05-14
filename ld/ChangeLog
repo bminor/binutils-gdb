@@ -1,3 +1,37 @@
+2012-05-14  James Lemke  <jwlemke@codesourcery.com>
+
+	* ldlang.c (walk_wild_consider_section): Don't copy section_flag_list.
+	Pass it to callback.
+	(walk_wild_section_general): Pass section_flag_list to callback.
+	(lang_add_section): Add sflag_list parm.
+	Move out logic to keep / omit a section & call bfd_lookup_section_flags.
+	(output_section_callback_fast): Add sflag_list parm.
+	Add new parm to lang_add_section calls.
+	(output_section_callback): Likewise.
+	(check_section_callback): Add sflag_list parm.
+	(lang_place_orphans): Add new parm to lang_add_section calls.
+	(gc_section_callback): Add sflag_list parm.
+	(find_relro_section_callback): Likewise.
+	* ldlang.h (callback_t): Add flag_info parm.
+	(lang_add_section): Add sflag_list parm.
+	* emultempl/armelf.em (elf32_arm_add_stub_section):
+	Add lang_add_section parm.
+	* emultempl/beos.em (gld*_place_orphan): Likewise.
+	* emultempl/elf32.em (gld*_place_orphan): Likewise.
+	* emultempl/hppaelf.em (hppaelf_add_stub_section): Likewise.
+	* emultempl/m68hc1xelf.em (m68hc11elf_add_stub_section): Likewise.
+	* emultempl/mipself.em (mips_add_stub_section): Likewise.
+	* emultempl/mmo.em (mmo_place_orphan): Likewise.
+	* emultempl/pe.em (gld_*_place_orphan): Likewise.
+	* emultempl/pep.em (gld_*_place_orphan): Likewise.
+	* emultempl/ppc64elf.em (ppc_add_stub_section): Likewise.
+	* emultempl/spuelf.em (spu_place_special_section): Likewise.
+	* emultempl/vms.em (vms_place_orphan): Likewise.
+
+2012-05-14  Catherine Moore  <clm@codesourcery.com>
+
+	* NEWS:  Mention PowerPC VLE port.
+
 2012-05-11  Daniel Richard G.  <skunk@iskunk.org>
 
 	PR binutils/14028

@@ -55,5 +55,13 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "vsx"
 	run_dump_test "476"
 	run_dump_test "titan"
+        run_dump_test "vle"
+        run_dump_test "vle-reloc"
+        run_dump_test "vle-simple-1"
+        run_dump_test "vle-simple-2"
+        run_dump_test "vle-simple-3"
+        run_dump_test "vle-simple-4"
+        run_dump_test "vle-simple-5"
+        run_dump_test "vle-simple-6"
     }
 }

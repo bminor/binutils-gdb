@@ -718,7 +718,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
      The sections still have to be sorted, but that has to wait until
      all such sections have been processed by us.  The sorting is done by
      sort_sections.  */
-  lang_add_section (&l->wild_statement.children, s, os);
+  lang_add_section (&l->wild_statement.children, s, NULL, os);
 
   return os;
 }

@@ -1512,9 +1512,6 @@ typedef struct bfd_section
   /* The BFD which owns the section.  */
   bfd *owner;
 
-  /* INPUT_SECTION_FLAGS if specified in the linker script.  */
-  struct flag_info *section_flag_info;
-
   /* A symbol which points at this section only.  */
   struct bfd_symbol *symbol;
   struct bfd_symbol **symbol_ptr_ptr;
@@ -1689,9 +1686,6 @@ extern asection std_section[4];
                                                                        \
   /* target_index, used_by_bfd, constructor_chain, owner,          */  \
      0,            NULL,        NULL,              NULL,               \
-                                                                       \
-  /* flag_info,                                                    */  \
-     NULL,                                                             \
                                                                        \
   /* symbol,                    symbol_ptr_ptr,                    */  \
      (struct bfd_symbol *) SYM, &SEC.symbol,                           \
@@ -1942,6 +1936,7 @@ enum bfd_architecture
 #define bfd_mach_ppc_e5500     5006
 #define bfd_mach_ppc_e6500     5007
 #define bfd_mach_ppc_titan     83
+#define bfd_mach_ppc_vle       84
   bfd_arch_rs6000,    /* IBM RS/6000 */
 #define bfd_mach_rs6k          6000
 #define bfd_mach_rs6k_rs1      6001
@@ -3095,6 +3090,23 @@ instruction.  */
   BFD_RELOC_PPC_EMB_RELST_HA,
   BFD_RELOC_PPC_EMB_BIT_FLD,
   BFD_RELOC_PPC_EMB_RELSDA,
+  BFD_RELOC_PPC_VLE_REL8,
+  BFD_RELOC_PPC_VLE_REL15,
+  BFD_RELOC_PPC_VLE_REL24,
+  BFD_RELOC_PPC_VLE_LO16A,
+  BFD_RELOC_PPC_VLE_LO16D,
+  BFD_RELOC_PPC_VLE_HI16A,
+  BFD_RELOC_PPC_VLE_HI16D,
+  BFD_RELOC_PPC_VLE_HA16A,
+  BFD_RELOC_PPC_VLE_HA16D,
+  BFD_RELOC_PPC_VLE_SDA21,
+  BFD_RELOC_PPC_VLE_SDA21_LO,
+  BFD_RELOC_PPC_VLE_SDAREL_LO16A,
+  BFD_RELOC_PPC_VLE_SDAREL_LO16D,
+  BFD_RELOC_PPC_VLE_SDAREL_HI16A,
+  BFD_RELOC_PPC_VLE_SDAREL_HI16D,
+  BFD_RELOC_PPC_VLE_SDAREL_HA16A,
+  BFD_RELOC_PPC_VLE_SDAREL_HA16D,
   BFD_RELOC_PPC64_HIGHER,
   BFD_RELOC_PPC64_HIGHER_S,
   BFD_RELOC_PPC64_HIGHEST,
@@ -5788,8 +5800,8 @@ bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 #define bfd_gc_sections(abfd, link_info) \
        BFD_SEND (abfd, _bfd_gc_sections, (abfd, link_info))
 
-#define bfd_lookup_section_flags(link_info, flag_info) \
-       BFD_SEND (abfd, _bfd_lookup_section_flags, (link_info, flag_info))
+#define bfd_lookup_section_flags(link_info, flag_info, section) \
+       BFD_SEND (abfd, _bfd_lookup_section_flags, (link_info, flag_info, section))
 
 #define bfd_merge_sections(abfd, link_info) \
        BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
@@ -6265,8 +6277,9 @@ typedef struct bfd_target
   bfd_boolean (*_bfd_gc_sections) (bfd *, struct bfd_link_info *);
 
   /* Sets the bitmask of allowed and disallowed section flags.  */
-  void (*_bfd_lookup_section_flags) (struct bfd_link_info *,
-                                     struct flag_info *);
+  bfd_boolean (*_bfd_lookup_section_flags) (struct bfd_link_info *,
+					    struct flag_info *,
+					    asection *);
 
   /* Attempt to merge SEC_MERGE sections.  */
   bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);

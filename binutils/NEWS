@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the VLE extension to the PowerPC architecture.
+
 * Add support for x64 Windows target of the delayed-load-library.
 
 * Add support for the Renesas RL78 architecture.

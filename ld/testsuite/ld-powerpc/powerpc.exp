@@ -215,12 +215,43 @@ set ppc64elftests {
 	{{objdump -s tocopt5.d}} "tocopt5"}
 }
 
+set ppceabitests {
+    {"VLE multiple segments 1" "-T vle-multiseg-1.ld"
+     "-mregnames -mvle" {vle-multiseg.s}
+    {{readelf "-l" vle-multiseg-1.d}} "vle-multiseg-1"}
+    {"VLE multiple segments 2" "-T vle-multiseg-2.ld"
+     "-mregnames -mvle" {vle-multiseg.s}
+    {{readelf "-l" vle-multiseg-2.d}} "vle-multiseg-2"}
+    {"VLE multiple segments 3" "-T vle-multiseg-3.ld"
+     "-mregnames -mvle" {vle-multiseg.s}
+    {{readelf "-l" vle-multiseg-3.d}} "vle-multiseg-3"}
+    {"VLE multiple segments 4" "-T vle-multiseg-4.ld"
+     "-mregnames -mvle" {vle-multiseg.s}
+    {{readelf "-l" vle-multiseg-4.d}} "vle-multiseg-4"}
+    {"VLE multiple segments 5" "-T vle-multiseg-5.ld"
+     "-mregnames -mvle" {vle-multiseg.s}
+    {{readelf "-l" vle-multiseg-5.d}} "vle-multiseg-5"}
+    {"VLE relocations 1" ""
+     "-mvle" {vle-reloc-1.s vle-reloc-def-1.s}
+    {{objdump "-Mvle -d" vle-reloc-1.d}} "vle-reloc-1"}
+    {"VLE relocations 2" ""
+     "-mvle" {vle-reloc-2.s vle-reloc-def-2.s}
+    {{objdump "-Mvle -d" vle-reloc-2.d}} "vle-reloc-2"}
+    {"VLE relocations 3" ""
+     "-mvle" {vle-reloc-3.s vle-reloc-def-3.s}
+    {{objdump "-Mvle -d" vle-reloc-3.d}} "vle-reloc-3"}
+}
+
 
 run_ld_link_tests $ppcelftests
 
 if [ supports_ppc64 ] then {
     run_ld_link_tests $ppc64elftests
     run_dump_test "relbrlt"
+}
+
+if { [istarget "powerpc*-eabi*"] } {
+    run_ld_link_tests $ppceabitests
 }
 
 run_dump_test "plt1"
@@ -251,3 +282,5 @@ run_dump_test "attr-gnu-8-31"
 
 run_dump_test "attr-gnu-12-11"
 run_dump_test "attr-gnu-12-21"
+
+run_dump_test "vle-multiseg-6"

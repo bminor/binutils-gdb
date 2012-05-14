@@ -26,8 +26,12 @@ enum ppc_elf_plt_type
   PLT_VXWORKS
 };
 
+bfd_boolean is_ppc_vle (asection *);
 int ppc_elf_select_plt_layout (bfd *, struct bfd_link_info *,
 			       enum ppc_elf_plt_type, int);
 asection *ppc_elf_tls_setup (bfd *, struct bfd_link_info *, int);
 bfd_boolean ppc_elf_tls_optimize (bfd *, struct bfd_link_info *);
 void ppc_elf_set_sdata_syms (bfd *, struct bfd_link_info *);
+extern bfd_boolean ppc_elf_modify_segment_map (bfd *,
+		           struct bfd_link_info * ATTRIBUTE_UNUSED);
+extern bfd_boolean ppc_elf_section_processing (bfd *, Elf_Internal_Shdr *);

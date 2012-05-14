@@ -1,3 +1,25 @@
+2012-05-14  Catherine Moore  <clm@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+	    Rhonda Wittels  <rhonda@codesourcery.com>
+
+	* gas/ppc/ppc.exp: Run new tests.
+	* gas/ppc/vle-reloc.d: New test.
+	* gas/ppc/vle-reloc.s: New test.
+	* gas/ppc/vle-simple-1.d: New test.
+	* gas/ppc/vle-simple-1.s: New test.
+	* gas/ppc/vle-simple-2.d: New test.
+	* gas/ppc/vle-simple-2.s: New test.
+	* gas/ppc/vle-simple-3.d: New test.
+	* gas/ppc/vle-simple-3.s: New test.
+	* gas/ppc/vle-simple-4.d: New test.
+	* gas/ppc/vle-simple-4.s: New test.
+	* gas/ppc/vle-simple-5.d: New test.
+	* gas/ppc/vle-simple-5.s: New test.
+	* gas/ppc/vle-simple-6.d: New test.
+	* gas/ppc/vle-simple-6.s: New test.
+	* gas/ppc/vle.d: New test.
+	* gas/ppc/vle.s: New test.
+
 2012-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/cris/rd-pic-1.d: Expect addend as signed.

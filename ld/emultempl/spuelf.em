@@ -151,7 +151,7 @@ spu_place_special_section (asection *s, asection *o, const char *output_name)
       lang_statement_list_type add;
 
       lang_list_init (&add);
-      lang_add_section (&add, s, os);
+      lang_add_section (&add, s, NULL, os);
       *add.tail = os->children.head;
       os->children.head = add.head;
     }
@@ -168,7 +168,7 @@ spu_place_special_section (asection *s, asection *o, const char *output_name)
 	  lang_add_assignment (exp_assign (".", e_size));
 	  pop_stat_ptr ();
 	}
-      lang_add_section (&os->children, s, os);
+      lang_add_section (&os->children, s, NULL, os);
     }
 
   s->output_section->size += s->size;

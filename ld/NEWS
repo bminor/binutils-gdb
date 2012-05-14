@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the VLE extension to the PowerPC architecture.
+
 * Add support for the Freescale XGATE architecture.
 
 * Add option -f FILE on AIX (for response file).

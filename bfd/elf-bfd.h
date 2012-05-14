@@ -1367,6 +1367,9 @@ struct bfd_elf_section_data
   /* The ELF header for this section.  */
   Elf_Internal_Shdr this_hdr;
 
+  /* INPUT_SECTION_FLAGS if specified in the linker script.  */
+  struct flag_info *section_flag_info;
+
   /* Information about the REL and RELA reloc sections associated
      with this section, if any.  */
   struct bfd_elf_section_reloc_data rel, rela;
@@ -2207,8 +2210,8 @@ extern bfd_boolean _bfd_elf_maybe_function_sym (const asymbol *,
 
 extern int bfd_elf_get_default_section_type (flagword);
 
-extern void bfd_elf_lookup_section_flags
-  (struct bfd_link_info *, struct flag_info *);
+extern bfd_boolean bfd_elf_lookup_section_flags
+  (struct bfd_link_info *, struct flag_info *, asection *);
 
 extern Elf_Internal_Phdr * _bfd_elf_find_segment_containing_section
   (bfd * abfd, asection * section);

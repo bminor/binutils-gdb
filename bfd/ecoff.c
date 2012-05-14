@@ -73,8 +73,6 @@ static asection bfd_debug_section =
      0,       NULL,         0,
   /* target_index, used_by_bfd, constructor_chain, owner,          */
      0,            NULL,        NULL,              NULL,
-  /* flag_info,                                                    */
-     NULL,
   /* symbol,                                                       */
      NULL,
   /* symbol_ptr_ptr,                                               */

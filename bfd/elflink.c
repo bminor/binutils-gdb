@@ -12220,58 +12220,84 @@ static elf_flags_to_name_table elf_flags_to_names [] =
   { "SHF_EXCLUDE", SHF_EXCLUDE },
 };
 
-void
+/* Returns TRUE if the section is to be included, otherwise FALSE.  */
+bfd_boolean
 bfd_elf_lookup_section_flags (struct bfd_link_info *info,
-			      struct flag_info *flaginfo)
+			      struct flag_info *finfo,
+			      asection *section)
 {
-  bfd *output_bfd = info->output_bfd;
-  const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
-  struct flag_info_list *tf = flaginfo->flag_list;
-  int with_hex = 0;
-  int without_hex = 0;
+  const bfd_vma sh_flags = elf_section_flags(section);
 
-  for (tf = flaginfo->flag_list; tf != NULL; tf = tf->next)
+  if (finfo->flags_initialized == FALSE)
     {
-      int i;
-      if (bed->elf_backend_lookup_section_flags_hook)
-	{
-	  flagword hexval =
-	     (*bed->elf_backend_lookup_section_flags_hook) ((char *) tf->name);
+      const struct elf_backend_data *bed =
+	get_elf_backend_data (info->output_bfd);
+      struct flag_info_list *tf = finfo->flag_list;
+      int with_hex = 0;
+      int without_hex = 0;
 
-	  if (hexval != 0)
+      for (tf = finfo->flag_list; tf != NULL; tf = tf->next)
+	{
+	  unsigned i;
+
+	  if (bed->elf_backend_lookup_section_flags_hook)
 	    {
-	      if (tf->with == with_flags)
-		with_hex |= hexval;
-	      else if (tf->with == without_flags)
-		without_hex |= hexval;
-	      tf->valid = TRUE;
-	      continue;
+	      flagword hexval =
+	        (*bed->elf_backend_lookup_section_flags_hook) ((char*)tf->name);
+
+	      if (hexval != 0)
+		{
+		  if (tf->with == with_flags)
+		    with_hex |= hexval;
+		  else if (tf->with == without_flags)
+		    without_hex |= hexval;
+		  tf->valid = TRUE;
+		  continue;
+		}
+	    }
+	  for (i = 0;
+	       i < sizeof(elf_flags_to_names) / sizeof(elf_flags_to_name_table);
+	       ++i)
+	    {
+	      if (!strcmp (tf->name, elf_flags_to_names[i].flag_name))
+		{
+		  if (tf->with == with_flags)
+		    with_hex |= elf_flags_to_names[i].flag_value;
+		  else if (tf->with == without_flags)
+		    without_hex |= elf_flags_to_names[i].flag_value;
+		  tf->valid = TRUE;
+		  break;
+		}
+	    }
+	  if (tf->valid == FALSE)
+	    {
+	      info->callbacks->einfo 
+		    (_("Unrecognized INPUT_SECTION_FLAG %s\n"), tf->name);
+	      return FALSE;
 	    }
 	}
-      for (i = 0; i < 12; i++)
-	{
-	  if (!strcmp (tf->name, elf_flags_to_names[i].flag_name))
-	    {
-	      if (tf->with == with_flags)
-		with_hex |= elf_flags_to_names[i].flag_value;
-	      else if (tf->with == without_flags)
-		without_hex |= elf_flags_to_names[i].flag_value;
-	      tf->valid = TRUE;
-	      continue;
-	    }
-	}
-      if (tf->valid == FALSE)
-	{
-	  info->callbacks->einfo 
-		(_("Unrecognized INPUT_SECTION_FLAG %s\n"), tf->name);
-	  return;
-	}
+      finfo->flags_initialized = TRUE;
+      finfo->only_with_flags |= with_hex;
+      finfo->not_with_flags |= without_hex;
     }
- flaginfo->flags_initialized = TRUE;
- flaginfo->only_with_flags |= with_hex;
- flaginfo->not_with_flags |= without_hex;
 
- return;
+  if (finfo->only_with_flags != 0
+      && finfo->not_with_flags != 0
+      && ((finfo->not_with_flags & sh_flags) != 0
+           || (finfo->only_with_flags & sh_flags)
+               != finfo->only_with_flags))
+    return FALSE;
+
+  if (finfo->only_with_flags != 0
+      && (finfo->only_with_flags & sh_flags)
+          != finfo->only_with_flags)
+    return FALSE;
+
+  if (finfo->not_with_flags != 0
+      && (finfo->not_with_flags & sh_flags) != 0)
+    return FALSE;
+
+  return TRUE;
 }
 
 struct alloc_got_off_arg {

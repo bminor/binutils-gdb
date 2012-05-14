@@ -1456,8 +1456,8 @@ DESCRIPTION
 .#define bfd_gc_sections(abfd, link_info) \
 .	BFD_SEND (abfd, _bfd_gc_sections, (abfd, link_info))
 .
-.#define bfd_lookup_section_flags(link_info, flag_info) \
-.	BFD_SEND (abfd, _bfd_lookup_section_flags, (link_info, flag_info))
+.#define bfd_lookup_section_flags(link_info, flag_info, section) \
+.	BFD_SEND (abfd, _bfd_lookup_section_flags, (link_info, flag_info, section))
 .
 .#define bfd_merge_sections(abfd, link_info) \
 .	BFD_SEND (abfd, _bfd_merge_sections, (abfd, link_info))
