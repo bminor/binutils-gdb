@@ -1430,7 +1430,9 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
     {
       if (type == elfcpp::SHT_PROGBITS)
 	{
-	  if (strcmp(name, ".data.rel.ro") == 0)
+	  if ((flags & elfcpp::SHF_TLS) != 0)
+	    is_relro = true;
+	  else if (strcmp(name, ".data.rel.ro") == 0)
 	    is_relro = true;
 	  else if (strcmp(name, ".data.rel.ro.local") == 0)
 	    {

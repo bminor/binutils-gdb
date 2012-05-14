@@ -1,3 +1,9 @@
+2012-05-14  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Layout::make_output_section): Mark .tdata section
+	as RELRO.
+	* testsuite/relro_test.cc: Add a TLS variable.
+
 2012-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/14091
