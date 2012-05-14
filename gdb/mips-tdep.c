@@ -3009,7 +3009,7 @@ mips_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
   return align_down (addr, 16);
 }
 
-/* Implement the "push_dummy_call" gdbarch method.  */
+/* Implement the "push_dummy_code" gdbarch method.  */
 
 static CORE_ADDR
 mips_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,

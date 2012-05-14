@@ -1,3 +1,7 @@
+2012-05-14  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_push_dummy_code): Correct description typo.
+
 2012-05-14  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* python/python.c (gdbpy_find_pc_line): Use ULONGEST instead of
