@@ -1,0 +1,76 @@
+#   Copyright 2012 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test of disconnected-tracing.
+
+load_lib "trace-support.exp";
+
+set testfile "disconnected-tracing"
+set executable $testfile
+set srcfile ${testfile}.c
+set binfile $objdir/$subdir/$testfile
+set expfile $testfile.exp
+set gdbserver_reconnect_p 1
+
+if { [info proc gdb_reconnect] == "" } {
+    unsupported "target does not support reconnect"
+    return -1
+}
+
+if [prepare_for_testing $expfile $executable $srcfile \
+        {debug nowarnings}] {
+    untested "failed to prepare for trace tests"
+    return -1
+}
+
+if ![runto_main] {
+    fail "can't run to main to check for trace support"
+    return -1
+}
+
+if ![gdb_target_supports_trace] {
+    unsupported "target does not support trace"
+    return -1;
+}
+
+delete_breakpoints
+gdb_test_no_output "set confirm off"
+gdb_test_no_output "set disconnected-tracing on"
+gdb_test "trace main" ".*"
+gdb_test_no_output "tstart"
+
+gdb_test "info tracepoints" ".*in main at.*" "first info tracepoints"
+
+gdb_test "disconnect" "Ending remote debugging\\." "first disconnect"
+if { [gdb_reconnect] == 0 } {
+    pass "first reconnect after unload"
+} else {
+    fail "first reconnect after unload"
+    return 0
+}
+gdb_test "info tracepoints" ".*in main at.*" "second info tracepoints"
+
+delete_breakpoints
+gdb_test "info tracepoints" ".*No tracepoints..*" "third info tracepoints"
+
+gdb_test "disconnect" "Ending remote debugging\\." "second disconnect"
+if { [gdb_reconnect] == 0 } {
+    pass "second reconnect after unload"
+} else {
+    fail "second reconnect after unload"
+    return 0
+}
+gdb_test "info tracepoints" ".*in main at.*" "fourth info tracepoints"
+
