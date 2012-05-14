@@ -59,7 +59,6 @@ proc stap_test {exec_name {arg ""}} {
 
     # Reinit GDB, set a breakpoint on probe m4.
     delete_breakpoints
-    rerun_to_main
     if {[runto "-pstap test:m4"]} {
       pass "run to -pstap test:m4"
     } else {
@@ -79,7 +78,6 @@ proc stap_test {exec_name {arg ""}} {
 
     # Reinit GDB, set a breakpoint on probe ps.
     delete_breakpoints
-    rerun_to_main
     if {[runto "-pstap test:ps"]} {
       pass "run to -pstap test:m4"
     } else {
@@ -127,7 +125,6 @@ proc stap_test_no_debuginfo {exec_name {arg ""}} {
 
     # Reinit GDB, set a breakpoint on probe m4.
     delete_breakpoints
-    rerun_to_main
     if {[runto "-pstap test:m4"]} {
       pass "run to -pstap test:m4"
     } else {
@@ -147,7 +144,6 @@ proc stap_test_no_debuginfo {exec_name {arg ""}} {
 
     # Reinit GDB, set a breakpoint on probe ps.
     delete_breakpoints
-    rerun_to_main
     if {[runto "-pstap test:ps"]} {
       pass "run to -pstap test:m4"
     } else {

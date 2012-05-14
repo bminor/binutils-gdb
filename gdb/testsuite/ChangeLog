@@ -1,3 +1,9 @@
+2012-05-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/stap-probe.exp (stap_test): Remove calls to
+	`rerun_to_main'.
+	(stap_test_no_debuginfo): Likewise.
+
 2012-05-14  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.base/dprintf.c: New file.
