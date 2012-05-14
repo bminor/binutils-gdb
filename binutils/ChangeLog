@@ -1,3 +1,8 @@
+2012-05-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objdump.c (disassemble_bytes): Print addend as signed.
+	(dump_reloc_set): Likewise.
+
 2012-05-04  Sterling Augustine  <saugustine@google.com>
 	    Cary Coutant  <ccoutant@google.com>
 

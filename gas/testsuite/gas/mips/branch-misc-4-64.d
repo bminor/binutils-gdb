@@ -10,9 +10,9 @@
 Disassembly of section \.text:
 	\.\.\.
 [0-9a-f]+ <[^>]*> 10000000 	b	[0-9a-f]+ <foo\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MIPS_PC16	bar\+0xf+fffc
-[ 	]*[0-9a-f]+: R_MIPS_NONE	\*ABS\*\+0xf+fffc
-[ 	]*[0-9a-f]+: R_MIPS_NONE	\*ABS\*\+0xf+fffc
+[ 	]*[0-9a-f]+: R_MIPS_PC16	bar\-0x4
+[ 	]*[0-9a-f]+: R_MIPS_NONE	\*ABS\*\-0x4
+[ 	]*[0-9a-f]+: R_MIPS_NONE	\*ABS\*\-0x4
 [0-9a-f]+ <[^>]*> 00000000 	nop
 [0-9a-f]+ <[^>]*> 10000000 	b	[0-9a-f]+ <foo\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MIPS_PC16	\.init\+0x4
@@ -23,9 +23,9 @@ Disassembly of section \.text:
 
 Disassembly of section \.init:
 [0-9a-f]+ <[^>]*> 10000000 	b	[0-9a-f]+ <bar\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MIPS_PC16	foo\+0xf+fffc
-[ 	]*[0-9a-f]+: R_MIPS_NONE	\*ABS\*\+0xf+fffc
-[ 	]*[0-9a-f]+: R_MIPS_NONE	\*ABS\*\+0xf+fffc
+[ 	]*[0-9a-f]+: R_MIPS_PC16	foo\-0x4
+[ 	]*[0-9a-f]+: R_MIPS_NONE	\*ABS\*\-0x4
+[ 	]*[0-9a-f]+: R_MIPS_NONE	\*ABS\*\-0x4
 [0-9a-f]+ <[^>]*> 00000000 	nop
 [0-9a-f]+ <[^>]*> 10000000 	b	[0-9a-f]+ <bar\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MIPS_PC16	\.text\+0x40004

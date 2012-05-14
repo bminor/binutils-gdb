@@ -114,7 +114,7 @@ Disassembly of section \.data:
 
 0000000000000014 <dat0>:
   14:	ff ff ff fc 	fnmsub  f31,f31,f31,f31
-			14: R_PPC64_REL32	jk\+0xfffffffffffffffc
+			14: R_PPC64_REL32	jk-0x4
 
 0000000000000018 <dat1>:
   18:	00 00 00 00 	\.long 0x0

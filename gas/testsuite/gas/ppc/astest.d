@@ -52,11 +52,11 @@ Disassembly of section \.text:
   60:	00 00 00 00 	\.long 0x0
 			60: R_PPC_ADDR32	z
   64:	ff ff ff fc 	fnmsub  f31,f31,f31,f31
-			64: R_PPC_ADDR32	x\+0xf+ffffffc
+			64: R_PPC_ADDR32	x-0x4
   68:	00 00 00 00 	\.long 0x0
 			68: R_PPC_ADDR32	\.data
   6c:	ff ff ff fc 	fnmsub  f31,f31,f31,f31
-			6c: R_PPC_ADDR32	z\+0xf+ffffffc
+			6c: R_PPC_ADDR32	z-0x4
   70:	ff ff ff 9c 	\.long 0xffffff9c
   74:	ff ff ff 9c 	\.long 0xffffff9c
   78:	00 00 00 00 	\.long 0x0

@@ -1,3 +1,28 @@
+2012-05-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/all/fwdexp.d: Expect addend as signed.
+	* gas/alpha/elf-reloc-1.d: Likewise.
+	* gas/i386/mixed-mode-reloc64.d: Likewise.
+	* gas/i386/reloc64.d: Likewise.
+	* gas/i386/ilp32/mixed-mode-reloc64.d: Expect addend as signed.
+	* gas/i386/ilp32/reloc64.d: Likewise.
+	* gas/ia64/pcrel.d: Likewise.
+	* gas/mips/branch-misc-2-64.d: Likewise.
+	* gas/mips/branch-misc-2pic-64.d: Likewise.
+	* gas/mips/branch-misc-4-64.d: Likewise.
+	* gas/mips/ldstla-n64-sym32.d: Likewise.
+	* gas/mips/micromips@branch-misc-2-64.d: Likewise.
+	* gas/mips/micromips@branch-misc-2pic-64.d: Likewise.
+	* gas/mips/micromips@branch-misc-4-64.d: Likewise.
+	* gas/mips/mips16-hilo-n32.d: Likewise.
+	* gas/ppc/astest.d: Likewise.
+	* gas/ppc/astest2.d: Likewise.
+	* gas/ppc/astest2_64.d: Likewise.
+	* gas/ppc/astest64.d: Likewise.
+	* gas/ppc/test1elf32.d: Likewise.
+	* gas/ppc/test1elf64.d: Likewise.
+	* gas/sparc/reloc64.d: Likewise.
+
 2012-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/mips/elf-rel10.d: Updated.

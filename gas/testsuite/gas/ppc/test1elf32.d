@@ -79,7 +79,7 @@ Disassembly of section \.data:
 
 0+000c <dat0>:
    c:	ff ff ff fc 	fnmsub  f31,f31,f31,f31
-			c: R_PPC_REL32	jk\+0xf+fffc
+			c: R_PPC_REL32	jk-0x4
 
 0+0010 <dat1>:
   10:	00 00 00 00 	\.long 0x0

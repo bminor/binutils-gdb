@@ -1840,8 +1840,15 @@ disassemble_bytes (struct disassemble_info * inf,
 
 	      if (q->addend)
 		{
-		  printf ("+0x");
-		  objdump_print_value (q->addend, inf, TRUE);
+		  bfd_signed_vma addend = q->addend;
+		  if (addend < 0)
+		    {
+		      printf ("-0x");
+		      addend = -addend;
+		    }
+		  else
+		    printf ("+0x");
+		  objdump_print_value (addend, inf, TRUE);
 		}
 
 	      printf ("\n");
@@ -3017,8 +3024,15 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 
       if (q->addend)
 	{
-	  printf ("+0x");
-	  bfd_printf_vma (abfd, q->addend);
+	  bfd_signed_vma addend = q->addend;
+	  if (addend < 0)
+	    {
+	      printf ("-0x");
+	      addend = -addend;
+	    }
+	  else
+	    printf ("+0x");
+	  bfd_printf_vma (abfd, addend);
 	}
       if (addend2)
 	{
