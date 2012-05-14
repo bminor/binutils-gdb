@@ -43,6 +43,8 @@
 
 #include "features/i386/amd64.c"
 #include "features/i386/amd64-avx.c"
+#include "features/i386/x32.c"
+#include "features/i386/x32-avx.c"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -2736,6 +2738,8 @@ _initialize_amd64_tdep (void)
 {
   initialize_tdesc_amd64 ();
   initialize_tdesc_amd64_avx ();
+  initialize_tdesc_x32 ();
+  initialize_tdesc_x32_avx ();
 }
 
 
