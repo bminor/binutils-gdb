@@ -8629,7 +8629,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	  char *arg = b->cond_string;
 	  loc->cond = parse_exp_1 (&arg, block_for_pc (loc->address), 0);
 	  if (*arg)
-              error (_("Garbage %s follows condition"), arg);
+              error (_("Garbage '%s' follows condition"), arg);
 	}
 
       /* Dynamic printf requires and uses additional arguments on the
@@ -8642,7 +8642,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	    error (_("Format string required"));
 	}
       else if (b->extra_string)
-	error (_("Garbage %s at end of command"), b->extra_string);
+	error (_("Garbage '%s' at end of command"), b->extra_string);
     }
 
   b->display_canonical = display_canonical;
