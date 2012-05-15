@@ -56,6 +56,8 @@ static int rx_num_int_regs = 0;
 int rx_pid_register;
 int rx_gp_register;
 
+static void rx_fetchalign (int ignore ATTRIBUTE_UNUSED);
+
 enum options
 {
   OPTION_BIG = OPTION_MD_BASE,
@@ -600,6 +602,8 @@ const pseudo_typeS md_pseudo_table[] =
   { "int",	cons,		4 },
   { "word",	cons,		4 },
 
+  { "fetchalign", rx_fetchalign, 0 },
+
   /* End of list marker.  */
   { NULL, 	NULL, 		0 }
 };
@@ -648,9 +652,14 @@ md_begin (void)
 char * rx_lex_start;
 char * rx_lex_end;
 
+/* These negative numbers are found in rx_bytesT.n_base for non-opcode
+   md_frags */
+#define RX_NBASE_FETCHALIGN	-1
+
 typedef struct rx_bytesT
 {
   char base[4];
+  /* If this is negative, it's a special-purpose frag as per the defines above. */
   int n_base;
   char ops[8];
   int n_ops;
@@ -678,6 +687,31 @@ typedef struct rx_bytesT
 } rx_bytesT;
 
 static rx_bytesT rx_bytes;
+/* We set n_ops to be "size of next opcode" if the next opcode doesn't relax.  */
+static rx_bytesT *fetchalign_bytes = NULL;
+
+static void
+rx_fetchalign (int ignore ATTRIBUTE_UNUSED)
+{
+  char * bytes;
+  fragS * frag_then;
+
+  memset (& rx_bytes, 0, sizeof (rx_bytes));
+  rx_bytes.n_base = RX_NBASE_FETCHALIGN;
+
+  bytes = frag_more (8);
+  frag_then = frag_now;
+  frag_variant (rs_machine_dependent,
+		0 /* max_chars */,
+		0 /* var */,
+		0 /* subtype */,
+		0 /* symbol */,
+		0 /* offset */,
+		0 /* opcode */);
+  frag_then->fr_opcode = bytes;
+  frag_then->fr_subtype = 0;
+  fetchalign_bytes = frag_then->tc_frag_data;
+}
 
 void
 rx_relax (int type, int pos)
@@ -933,7 +967,7 @@ rx_wrap (void)
 void
 rx_frag_init (fragS * fragP)
 {
-  if (rx_bytes.n_relax || rx_bytes.link_relax)
+  if (rx_bytes.n_relax || rx_bytes.link_relax || rx_bytes.n_base < 0)
     {
       fragP->tc_frag_data = malloc (sizeof (rx_bytesT));
       memcpy (fragP->tc_frag_data, & rx_bytes, sizeof (rx_bytesT));
@@ -1049,7 +1083,11 @@ md_assemble (char * str)
     {
       bytes = frag_more (rx_bytes.n_base + rx_bytes.n_ops);
       frag_then = frag_now;
+      if (fetchalign_bytes)
+	fetchalign_bytes->n_ops = rx_bytes.n_base + rx_bytes.n_ops;
     }
+
+  fetchalign_bytes = NULL;
 
   APPEND (base, n_base);
   APPEND (ops, n_ops);
@@ -1413,6 +1451,18 @@ md_estimate_size_before_relax (fragS * fragP ATTRIBUTE_UNUSED, segT segment ATTR
   return delta;
 }
 
+/* Given a frag FRAGP, return the "next" frag that contains an
+   opcode.  Assumes the next opcode is relaxable, and thus rs_machine_dependent.  */
+
+static fragS *
+rx_next_opcode (fragS *fragP)
+{
+  do {
+    fragP = fragP->fr_next;
+  } while (fragP && fragP->fr_type != rs_machine_dependent);
+  return fragP;
+}
+
 /* Given the new addresses for this relax pass, figure out how big
    each opcode must be.  We store the total number of bytes needed in
    fr_subtype.  The return value is the difference between the size
@@ -1436,6 +1486,34 @@ rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
 			    + (fragP->fr_opcode - fragP->fr_literal)),
 	   (long) fragP->fr_fix, (long) fragP->fr_var, (long) fragP->fr_offset,
 	   fragP->fr_literal, fragP->fr_opcode, fragP->fr_type, fragP->fr_subtype, stretch);
+
+  mypc = fragP->fr_address + (fragP->fr_opcode - fragP->fr_literal);
+
+  if (fragP->tc_frag_data->n_base == RX_NBASE_FETCHALIGN)
+    {
+      unsigned int next_size;
+      if (fragP->fr_next == NULL)
+	return 0;
+
+      next_size = fragP->tc_frag_data->n_ops;
+      if (next_size == 0)
+	{
+	  fragS *n = rx_next_opcode (fragP);
+	  next_size = n->fr_subtype;
+	}
+
+      fragP->fr_subtype = (8-(mypc & 7)) & 7;
+      tprintf("subtype %u\n", fragP->fr_subtype);
+      if (fragP->fr_subtype >= next_size)
+	fragP->fr_subtype = 0;
+      tprintf ("\033[34m -> mypc %lu next_size %u new %d old %d delta %d (fetchalign)\033[0m\n",
+	       mypc & 7,
+	       next_size, fragP->fr_subtype, oldsize, fragP->fr_subtype-oldsize);
+
+      newsize = fragP->fr_subtype;
+
+      return newsize - oldsize;
+    }
 
   optype = rx_opcode_type (fragP->fr_opcode);
 
@@ -1485,7 +1563,6 @@ rx_relax_frag (segT segment ATTRIBUTE_UNUSED, fragS * fragP, long stretch)
       return newsize - oldsize;
     }
 
-  mypc = fragP->fr_address + (fragP->fr_opcode - fragP->fr_literal);
   if (sym_addr > mypc)
     addr0 += stretch;
 
@@ -1644,12 +1721,28 @@ md_convert_frag (bfd *   abfd ATTRIBUTE_UNUSED,
   {
     int i;
 
-    printf ("lit %08x opc %08x", (int) fragP->fr_literal, (int) fragP->fr_opcode);
+    printf ("lit 0x%p opc 0x%p", fragP->fr_literal, fragP->fr_opcode);
     for (i = 0; i < 10; i++)
       printf (" %02x", (unsigned char) (fragP->fr_opcode[i]));
     printf ("\n");
   }
 #endif
+
+  if (fragP->tc_frag_data->n_base == RX_NBASE_FETCHALIGN)
+    {
+      int count = fragP->fr_subtype;
+      if (count == 0)
+	;
+      else if (count > BIGGEST_NOP)
+	{
+	  op[0] = 0x2e;
+	  op[1] = count;
+	}
+      else if (count > 0)
+	{
+	  memcpy (op, nops[count], count);
+	}
+    }
 
   /* In the one case where we have both a disp and imm relaxation, we want
      the imm relaxation here.  */

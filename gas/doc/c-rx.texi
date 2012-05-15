@@ -155,6 +155,16 @@ assembler directives:
 @cindex RX assembler directive .3byte
 Inserts a 3-byte value into the output file at the current location.
 
+@item .fetchalign
+@cindex assembler directive .fetchalign, RX
+@cindex RX assembler directive .fetchalign
+If the next opcode following this directive spans a fetch line
+boundary (8 byte boundary), the opcode is aligned to that boundary.
+If the next opcode does not span a fetch line, this directive has no
+effect.  Note that one or more labels may be between this directive
+and the opcode; those labels are aligned as well.  Any inserted bytes
+due to alignment will form a NOP opcode.
+
 @end table
 
 @node RX-Float

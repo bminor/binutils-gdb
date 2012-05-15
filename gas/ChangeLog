@@ -1,3 +1,18 @@
+2012-05-14  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rx.c (rx_fetchalign): Declare.
+	(md_pseudo_table): Add .fetchalign.
+	(RX_NBASE_FETCHALIGN): New.
+	(fetchalign_bytes): New.
+	(rx_fetchalign): New.
+	(rx_frag_init): If a "magic" value is found, also init the
+	machine-specific data.
+	(md_assemble): Note following opcode size if called for.
+	(rx_next_opcode): New.
+	(rx_relax_frag): Support .fetchalign.
+	(md_convert_frag): Likewise.
+	* doc/c-rx.texi (RX-Directives): Add .fetchalign.
+
 2012-05-14  James Lemke  <jwlemke@codesourcery.com>
 
 	* config/tc-ppc.c (insn_validate): New func of existing code to call..
