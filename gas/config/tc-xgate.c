@@ -341,7 +341,7 @@ md_begin (void)
       prev_op_name = op_handles[j].name;
     }
 
-  while (op_handles->name)
+  for (i = 1; i < (int)number_of_handle_rows; i++)
     {
       hash_insert (xgate_hash, op_handles->name, (char *) op_handles);
       op_handles++;
