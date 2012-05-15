@@ -1,5 +1,9 @@
 2012-05-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* NEWS (show auto-load scripts-directory): Add forgotten command.
+
+2012-05-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* spu-tdep.c (spu_catch_start): Update create_breakpoint caller
 	parameters.
 

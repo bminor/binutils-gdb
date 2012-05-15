@@ -191,6 +191,7 @@ show auto-load libthread-db
   Control auto-loading of inferior specific thread debugging shared library.
 
 set auto-load scripts-directory <dir1>[:<dir2>...]
+show auto-load scripts-directory
   Set a list of directories from which to load auto-loaded scripts.
   Automatically loaded Python scripts and GDB scripts are located in one
   of the directories listed by this option.
