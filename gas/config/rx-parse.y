@@ -72,14 +72,14 @@ static int sizemap[] = { BSIZE, WSIZE, LSIZE, WSIZE };
 #define F(val,pos,sz)      rx_field (val, pos, sz)
 #define FE(exp,pos,sz)	   rx_field (exp_val (exp), pos, sz);
 
-#define O1(v)              rx_op (v, 1, RXREL_SIGNED)
-#define O2(v)              rx_op (v, 2, RXREL_SIGNED)
-#define O3(v)              rx_op (v, 3, RXREL_SIGNED)
+#define O1(v)              rx_op (v, 1, RXREL_SIGNED); rx_range (v, -128, 255)
+#define O2(v)              rx_op (v, 2, RXREL_SIGNED); rx_range (v, -32768, 65536)
+#define O3(v)              rx_op (v, 3, RXREL_SIGNED); rx_range (v, -8388608, 16777216)
 #define O4(v)              rx_op (v, 4, RXREL_SIGNED)
 
-#define UO1(v)             rx_op (v, 1, RXREL_UNSIGNED)
-#define UO2(v)             rx_op (v, 2, RXREL_UNSIGNED)
-#define UO3(v)             rx_op (v, 3, RXREL_UNSIGNED)
+#define UO1(v)             rx_op (v, 1, RXREL_UNSIGNED); rx_range (v, 0, 255)
+#define UO2(v)             rx_op (v, 2, RXREL_UNSIGNED); rx_range (v, 0, 65536)
+#define UO3(v)             rx_op (v, 3, RXREL_UNSIGNED); rx_range (v, 0, 16777216)
 #define UO4(v)             rx_op (v, 4, RXREL_UNSIGNED)
 
 #define NO1(v)             rx_op (v, 1, RXREL_NEGATIVE)
@@ -94,8 +94,8 @@ static int sizemap[] = { BSIZE, WSIZE, LSIZE, WSIZE };
 #define IMM_(v,pos,size)   F (immediate (v, RXREL_SIGNED, pos, size), pos, 2); \
 			   if (v.X_op != O_constant && v.X_op != O_big) rx_linkrelax_imm (pos)
 #define IMM(v,pos)	   IMM_ (v, pos, 32)
-#define IMMW(v,pos)	   IMM_ (v, pos, 16)
-#define IMMB(v,pos)	   IMM_ (v, pos, 8)
+#define IMMW(v,pos)	   IMM_ (v, pos, 16); rx_range (v, -32768, 65536)
+#define IMMB(v,pos)	   IMM_ (v, pos, 8); rx_range (v, -128, 255)
 #define NIMM(v,pos)	   F (immediate (v, RXREL_NEGATIVE, pos, 32), pos, 2)
 #define NBIMM(v,pos)	   F (immediate (v, RXREL_NEGATIVE_BORROW, pos, 32), pos, 2)
 #define DSP(v,pos,msz)	   if (!v.X_md) rx_relax (RX_RELAX_DISP, pos); \
@@ -114,6 +114,7 @@ static expressionS zero_expr (void);
 static int         immediate (expressionS, int, int, int);
 static int         displacement (expressionS, int);
 static void        rtsd_immediate (expressionS);
+static void	   rx_range (expressionS, int, int);
 
 static int    need_flag = 0;
 static int    rx_in_brackets = 0;
@@ -1614,4 +1615,17 @@ rtsd_immediate (expressionS exp)
   val >>= 2;
   exp.X_add_number = val;
   O1 (exp);
+}
+
+static void
+rx_range (expressionS exp, int minv, int maxv)
+{
+  int val;
+
+  if (exp.X_op != O_constant)
+    return;
+
+  val = exp.X_add_number;
+  if (val < minv || val > maxv)
+    as_warn (_("Value %d out of range %d..%d"), val, minv, maxv);
 }

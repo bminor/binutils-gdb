@@ -1,5 +1,11 @@
 2012-05-14  DJ Delorie  <dj@redhat.com>
 
+	* config/rx-parse.y (rx_range): declare.
+	(O1,O2,O3,O4): Add calls to rx_range.
+	(UO1,UO2,UO3): Likewise.
+	(IMM2,IMMB): Likewise.
+	(rx_range): New.
+
 	* config/tc-rx.c (rx_fetchalign): Declare.
 	(md_pseudo_table): Add .fetchalign.
 	(RX_NBASE_FETCHALIGN): New.
