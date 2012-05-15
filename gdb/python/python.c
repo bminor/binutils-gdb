@@ -639,7 +639,7 @@ gdbpy_find_pc_line (PyObject *self, PyObject *args)
 {
   struct symtab_and_line sal;
   CORE_ADDR pc;
-  ULONGEST pc_llu;
+  gdb_py_ulongest pc_llu;
 
   if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc_llu))
     return NULL;
