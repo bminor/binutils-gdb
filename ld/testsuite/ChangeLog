@@ -1,3 +1,8 @@
+2012-05-14  David S. Miller  <davem@davemloft.net>
+
+	* ld-sparc/tlssunbin32.rd: Update.
+	* ld-sparc/tlssunbin64.rd: Likewise.
+
 2012-05-14  James Lemke  <jwlemke@codesourcery.com>
 
 	* ld-powerpc/powerpc.exp: Create ppceabitests.
