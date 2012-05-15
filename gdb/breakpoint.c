@@ -8564,7 +8564,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	  init_raw_breakpoint (b, gdbarch, sal, type, ops);
 	  b->thread = thread;
 	  b->task = task;
-  
+
 	  b->cond_string = cond_string;
 	  b->extra_string = extra_string;
 	  b->ignore_count = ignore_count;
@@ -8643,7 +8643,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	}
       else if (b->extra_string)
 	error (_("Garbage %s at end of command"), b->extra_string);
-    }   
+    }
 
   b->display_canonical = display_canonical;
   if (addr_string)
