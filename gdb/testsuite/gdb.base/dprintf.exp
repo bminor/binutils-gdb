@@ -23,7 +23,6 @@ set srcfile dprintf.c
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 set dp_location1 [gdb_get_line_number "set dprintf 1 here"]
 
-gdb_breakpoint "main"
 if ![runto main] {
     return -1
 }

@@ -3,6 +3,8 @@
 	PR testsuite/12649
 	* gdb.base/dprintf.exp: Replace gdb_run_cmd by runto main.
 
+	* gdb.base/dprintf.exp: Remove now redundant breakpoint for main.
+
 2012-05-14  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/stap-probe.exp (stap_test): Remove calls to
