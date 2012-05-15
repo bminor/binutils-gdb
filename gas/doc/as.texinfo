@@ -369,7 +369,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset M68HC11
 
 @emph{Target M68HC11 options:}
-   [@b{-m68hc11}|@b{-m68hc12}|@b{-m68hcs12}]
+   [@b{-m68hc11}|@b{-m68hc12}|@b{-m68hcs12}|@b{-mm9s12x}|@b{-mm9s12xg}]
    [@b{-mshort}|@b{-mlong}]
    [@b{-mshort-double}|@b{-mlong-double}]
    [@b{--force-long-branches}] [@b{--short-branches}]
@@ -1050,9 +1050,13 @@ Motorola 68HC11 or 68HC12 series.
 
 @table @gcctabopt
 
-@item -m68hc11 | -m68hc12 | -m68hcs12
+@item -m68hc11 | -m68hc12 | -m68hcs12 | -mm9s12x | -mm9s12xg
 Specify what processor is the target.  The default is
 defined by the configuration option when building the assembler.
+
+@item --xgate-ramoffset
+Instruct the linker to offset RAM addresses from S12X address space into
+XGATE address space.
 
 @item -mshort
 Specify to use the 16-bit integer ABI.
@@ -1083,10 +1087,10 @@ when the instruction does not support direct addressing mode.
 Print the syntax of instruction in case of error.
 
 @item --print-opcodes
-print the list of instructions with syntax and then exit.
+Print the list of instructions with syntax and then exit.
 
 @item --generate-example
-print an example of instruction for each possible instruction and then exit.
+Print an example of instruction for each possible instruction and then exit.
 This option is only useful for testing @command{@value{AS}}.
 
 @end table

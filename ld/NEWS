@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for S12X processor.
+
 * Add support for the VLE extension to the PowerPC architecture.
 
 * Add support for the Freescale XGATE architecture.

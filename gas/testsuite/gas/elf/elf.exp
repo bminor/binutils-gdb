@@ -126,6 +126,7 @@ if { [is_elf_format] } then {
 	    # against ordinary symbols into relocations against section symbols.
 	    # This is usually revealed by the error message:
 	    #  symbol `sym' required but not present
+    	setup_xfail "m681*-*-*" "m68hc*-*-*"
 	    run_dump_test redef
 	    run_dump_test equ-reloc
 	}

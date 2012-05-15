@@ -1,3 +1,20 @@
+2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
+	    Stephane Carrez <stcarrez@nerim.fr>
+
+	* archures.c: Add bfd_arch_m9s12x and bfd_arch_m9s12xg.
+	* config.bfd: Likewise.
+	* cpu-m9s12x.c: New.
+	* cpu-m9s12xg.c: New.
+	* elf32-m68hc12.c: Add S12X and XGATE co-processor support.
+	Add option to offset S12 addresses into XGATE memory space.
+	Fix carry bug in IMM16 (IMM8 low/high) relocate.
+	* Makefile.am (ALL_MACHINES): Add cpu-m9s12x and cpu-m9s12xg.
+	(ALL_MACHINES_CFILES): Likewise.
+	* reloc.c: Add S12X relocs.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2012-05-14  James Lemke  <jwlemke@codesourcery.com>
 	    Catherine Moore  <clm@codesourcery.com>
 
@@ -36,7 +53,7 @@
 	(elf_backend_lookup_section_flags_hook): Define.
 	(elf_backend_section_flags): Define.
 	(elf_backend_section_processing): Define.
-	* elf32-ppc.h (ppc_elf_section_processing): Declare. 
+	* elf32-ppc.h (ppc_elf_section_processing): Declare.
 	* libbfd.h: Regenerated.
 	* reloc.c (BFD_RELOC_PPC_VLE_REL8, BFD_RELOC_PPC_VLE_REL15,
 	BFD_RELOC_PPC_VLE_REL24, BFD_RELOC_PPC_VLE_LO16A,

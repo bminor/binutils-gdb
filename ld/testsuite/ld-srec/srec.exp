@@ -276,6 +276,21 @@ proc run_srec_test { test objs } {
 	setup_xfail "epiphany*-*-*"
     }
 
+    if [istarget m681*-*-*] {
+	set flags "$flags --defsym _start=0xc000"
+	setup_xfail "m681*-*-*"
+    }
+
+    if [istarget m68hc1*-*-*] {
+	set flags "$flags --defsym _start=0xc000"
+	setup_xfail "m68hc1*-*-*"
+    }
+
+    if [istarget m9s12x*-*-*] {
+	set flags "$flags --defsym _start=0xc000"
+	setup_xfail "m9s12x*-*-*"
+    }
+
     if { ![ld_simple_link $ld tmpdir/sr1 "$flags $objs"] \
 	 || ![ld_simple_link $ld tmpdir/sr2.sr "$flags --oformat srec $objs"] } {
 	fail $test

@@ -1,3 +1,18 @@
+2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
+
+	* ld-m68hc11/xgate-link.s: New.
+	* ld-m68hc11/xgate-link.d: New.
+	* ld-m68hc11/xgate-offset.s: New.
+	* ld-m68hc11/xgate-offset.d: New.
+	* ld-m68hc11/xgate1.s: New.
+	* ld-m68hc11/xgate1.d: New.
+	* ld-m68hc11/xgate2.s: New.
+	* ld-m68hc11/m68hc11.exp: Updated.
+	* ld-m68hc11/*.d: Brought in line with changed objdump output.
+	* ld-gc/gc.exp: Update CFLAGS for m68hc11.
+	* ld-plugin/plugin.exp: Likewise.
+	* ld-srec/srec.exp: XFAIL for m68hc11 and m68hc12.
+
 2012-05-14  David S. Miller  <davem@davemloft.net>
 
 	* ld-sparc/tlssunbin32.rd: Update.

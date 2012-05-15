@@ -1,3 +1,20 @@
+2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
+
+	* gas/m68hc11/insns9s12x.s: New
+	* gas/m68hc11/insns9s12x.d: New
+	* gas/m68hc11/hexprefix.s: New
+	* gas/m68hc11/hexprefix.d: New
+	* gas/m68hc11/9s12x-exg-sex-tfr.s: New
+	* gas/m68hc11/9s12x-exg-sex-tfr.d: New
+	* gas/m68hc11/insns9s12xg.s: New
+	* gas/m68hc11/insns9s12xg.d: New
+	* gas/m68hc11/9s12x-mov.s: New
+	* gas/m68hc11/9s12x-mov.d: New
+	* gas/m68hc11/m68hc11.exp: Updated
+	* gas/m68hc11/*.d: Brought in line with changed objdump output.
+	* gas/all/gas.exp: XFAIL all hc11/12 targets for redef2,3.
+	* gas/elf/elf.exp: XFAIL all hc11/12 targets for redef.
+
 2012-05-14  Catherine Moore  <clm@codesourcery.com>
 	    Maciej W. Rozycki  <macro@codesourcery.com>
 	    Rhonda Wittels  <rhonda@codesourcery.com>

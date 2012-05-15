@@ -1,3 +1,7 @@
+2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
+
+	* readelf.c (get_machine_name): Update m68hc12 entry.
+
 2012-05-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objdump.c (disassemble_bytes): Print addend as signed.

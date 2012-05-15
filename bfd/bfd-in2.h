@@ -1958,6 +1958,8 @@ enum bfd_architecture
 #define bfd_mach_m6812_default 0
 #define bfd_mach_m6812         1
 #define bfd_mach_m6812s        2
+  bfd_arch_m9s12x,   /* Freescale S12X */
+  bfd_arch_m9s12xg,  /* Freescale XGATE */
   bfd_arch_z8k,       /* Zilog Z8000 */
 #define bfd_mach_z8001         1
 #define bfd_mach_z8002         2
@@ -4545,6 +4547,32 @@ This is a 4-bit pc-relative reloc.  */
 /* Freescale XGATE reloc.
 This is a 5-bit pc-relative reloc.  */
   BFD_RELOC_XGATE_IMM5,
+
+/* Motorola 68HC12 reloc.
+This is the 9 bits of a value.  */
+  BFD_RELOC_M68HC12_9B,
+
+/* Motorola 68HC12 reloc.
+This is the 16 bits of a value.  */
+  BFD_RELOC_M68HC12_16B,
+
+/* Motorola 68HC12/XGATE reloc.
+This is a PCREL9 branch.  */
+  BFD_RELOC_M68HC12_9_PCREL,
+
+/* Motorola 68HC12/XGATE reloc.
+This is a PCREL10 branch.  */
+  BFD_RELOC_M68HC12_10_PCREL,
+
+/* Motorola 68HC12/XGATE reloc.
+This is the 8 bit low part of an absolute address and immediately precedes
+a matching HI8XG part.  */
+  BFD_RELOC_M68HC12_LO8XG,
+
+/* Motorola 68HC12/XGATE reloc.
+This is the 8 bit high part of an absolute address and immediately follows
+a matching LO8XG part.  */
+  BFD_RELOC_M68HC12_HI8XG,
 
 /* NS CR16C Relocations.  */
   BFD_RELOC_16C_NUM08,

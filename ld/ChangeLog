@@ -1,3 +1,7 @@
+2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
+
+	* NEWS: Mention the support for S12X processors.
+
 2012-05-14  James Lemke  <jwlemke@codesourcery.com>
 
 	* ldlang.c (walk_wild_consider_section): Don't copy section_flag_list.

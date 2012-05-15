@@ -5092,6 +5092,38 @@ ENUMDOC
   Freescale XGATE reloc.
   This is a 5-bit pc-relative reloc.
 ENUM
+  BFD_RELOC_M68HC12_9B
+ENUMDOC
+  Motorola 68HC12 reloc.
+  This is the 9 bits of a value.
+ENUM
+  BFD_RELOC_M68HC12_16B
+ENUMDOC
+  Motorola 68HC12 reloc.
+  This is the 16 bits of a value.
+ENUM
+  BFD_RELOC_M68HC12_9_PCREL
+ENUMDOC
+  Motorola 68HC12/XGATE reloc.
+  This is a PCREL9 branch.
+ENUM
+  BFD_RELOC_M68HC12_10_PCREL
+ENUMDOC
+  Motorola 68HC12/XGATE reloc.
+  This is a PCREL10 branch.
+ENUM
+  BFD_RELOC_M68HC12_LO8XG
+ENUMDOC
+  Motorola 68HC12/XGATE reloc.
+  This is the 8 bit low part of an absolute address and immediately precedes
+  a matching HI8XG part.
+ENUM
+  BFD_RELOC_M68HC12_HI8XG
+ENUMDOC
+  Motorola 68HC12/XGATE reloc.
+  This is the 8 bit high part of an absolute address and immediately follows
+  a matching LO8XG part.
+ENUM
   BFD_RELOC_16C_NUM08
 ENUMX
   BFD_RELOC_16C_NUM08_C

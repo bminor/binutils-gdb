@@ -1,3 +1,14 @@
+2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
+	    Stephane Carrez <stcarrez@nerim.fr>
+
+	* configure.in: Add S12X and XGATE co-processor support to m68hc11
+	target.
+	* disassemble.c: Likewise.
+	* configure: Regenerate.
+	* m68hc11-dis.c: Make objdump output more consistent, use hex
+	instead of decimal and use 0x prefix for hex.
+	* m68hc11-opc.c: Add S12X and XGATE opcodes.
+
 2012-05-14  James Lemke  <jwlemke@codesourcery.com>
 
 	* ppc-dis.c (get_powerpc_dialect): Use is_ppc_vle.

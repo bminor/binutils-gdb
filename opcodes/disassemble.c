@@ -248,12 +248,19 @@ disassembler (abfd)
       disassemble = print_insn_m32r;
       break;
 #endif
-#if defined(ARCH_m68hc11) || defined(ARCH_m68hc12)
+#if defined(ARCH_m68hc11) || defined(ARCH_m68hc12) \
+    || defined(ARCH_9s12x) || defined(ARCH_m9s12xg)
     case bfd_arch_m68hc11:
       disassemble = print_insn_m68hc11;
       break;
     case bfd_arch_m68hc12:
       disassemble = print_insn_m68hc12;
+      break;
+    case bfd_arch_m9s12x:
+      disassemble = print_insn_m9s12x;
+      break;
+    case bfd_arch_m9s12xg:
+      disassemble = print_insn_m9s12xg;
       break;
 #endif
 #ifdef ARCH_m68k

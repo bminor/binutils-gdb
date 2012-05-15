@@ -1,3 +1,12 @@
+2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
+
+	* config/tc-m68hc11.c: Add S12X and XGATE co-processor support.
+	Add option to offset S12 addresses into XGATE memory space.
+	Tweak target flags to match other tools. (i.e. -m m68hc11).
+	* doc/as.texinfo: Mention new options.
+	* doc/c-m68hc11.texi: Document new options.
+	* NEWS: Mention new support.
+
 2012-05-14  DJ Delorie  <dj@redhat.com>
 
 	* config/rx-parse.y (rx_range): declare.
@@ -50,7 +59,7 @@
 	(md_show_usage): Document -mvle.
 	(ppc_arch): Recognize VLE.
 	(ppc_mach): Recognize bfd_mach_ppc_vle.
-	(ppc_setup_opcodes): Print the opcode table if 
+	(ppc_setup_opcodes): Print the opcode table if
 	* config/tc-ppc.h (ppc_frag_check): Declare.
 	* doc/c-ppc.texi: Document -mvle.
 	* NEWS:  Mention PowerPC VLE port.
@@ -61,7 +70,7 @@
 	(DWARF2_LINE_MIN_INSN_LENGTH): Redefine.
 	* config/tc-ppc.c (ppc_dw2_line_min_insn_length): New.
 	* dwarf2dbg.c (scale_addr_delta): Handle values of 1
-	for DWARF2_LINE_MIN_INSN_LENGTH. 
+	for DWARF2_LINE_MIN_INSN_LENGTH.
 
 2012-05-12  H.J. Lu  <hongjiu.lu@intel.com>
 
