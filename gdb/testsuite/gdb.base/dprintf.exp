@@ -24,7 +24,9 @@ set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 set dp_location1 [gdb_get_line_number "set dprintf 1 here"]
 
 gdb_breakpoint "main"
-gdb_run_cmd
+if ![runto main] {
+    return -1
+}
 
 gdb_test "dprintf" "Format string required"
 
