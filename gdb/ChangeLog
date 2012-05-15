@@ -1,3 +1,8 @@
+2012-05-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* spu-tdep.c (spu_catch_start): Update create_breakpoint caller
+	parameters.
+
 2012-05-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* amd64-tdep.c: Include features/i386/x32.c and

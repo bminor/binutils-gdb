@@ -1942,6 +1942,7 @@ spu_catch_start (struct objfile *objfile)
   xsnprintf (buf, sizeof buf, "*%s", core_addr_to_string (pc));
   create_breakpoint (get_objfile_arch (objfile), buf /* arg */,
 		     NULL /* cond_string */, -1 /* thread */,
+		     NULL /* extra_string */,
 		     0 /* parse_condition_and_thread */, 1 /* tempflag */,
 		     bp_breakpoint /* type_wanted */,
 		     0 /* ignore_count */,
