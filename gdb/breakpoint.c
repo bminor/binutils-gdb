@@ -8875,8 +8875,9 @@ check_fast_tracepoint_sals (struct gdbarch *gdbarch,
    PC identifies the context at which the condition should be parsed.
    If no condition is found, *COND_STRING is set to NULL.
    If no thread is found, *THREAD is set to -1.  */
-static void 
-find_condition_and_thread (char *tok, CORE_ADDR pc, 
+
+static void
+find_condition_and_thread (char *tok, CORE_ADDR pc,
 			   char **cond_string, int *thread, int *task,
 			   char **rest)
 {
@@ -8898,9 +8899,9 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
 	}
 
       end_tok = skip_to_space (tok);
-      
+
       toklen = end_tok - tok;
-      
+
       if (toklen >= 1 && strncmp (tok, "if", toklen) == 0)
 	{
 	  struct expression *expr;
@@ -8909,13 +8910,12 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
 	  expr = parse_exp_1 (&tok, block_for_pc (pc), 0);
 	  xfree (expr);
 	  cond_end = tok;
-	  *cond_string = savestring (cond_start, 
-				     cond_end - cond_start);
+	  *cond_string = savestring (cond_start, cond_end - cond_start);
 	}
       else if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)
 	{
 	  char *tmptok;
-	  
+
 	  tok = end_tok + 1;
 	  tmptok = tok;
 	  *thread = strtol (tok, &tok, 0);

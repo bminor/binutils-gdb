@@ -1,3 +1,7 @@
+2012-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (find_condition_and_thread): Minor reformatting.
+
 2012-05-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (show auto-load scripts-directory): Add forgotten command.
