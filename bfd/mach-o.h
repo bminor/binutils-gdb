@@ -23,6 +23,7 @@
 #ifndef _BFD_MACH_O_H_
 #define _BFD_MACH_O_H_
 
+#include "sysdep.h"
 #include "bfd.h"
 #include "mach-o/loader.h"
 

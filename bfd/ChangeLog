@@ -1,3 +1,32 @@
+2012-05-16  Daniel Richard G.  <skunk@iskunk.org>
+
+	PR binutils/13558
+	* bfd/aout-cris.c: Include sysdep.h before bfd.h.
+	* bfd/aout-ns32k.c: Likewise.
+	* bfd/aout-sparcle.c: Likewise.
+	* bfd/aout0.c: Likewise.
+	* bfd/bfd-in2.h: Likewise.
+	* bfd/coff-stgo32.c: Likewise.
+	* bfd/cpu-lm32.c: Likewise.
+	* bfd/cpu-microblaze.c: Likewise.
+	* bfd/cpu-score.c: Likewise.
+	* bfd/cpu-tilegx.c: Likewise.
+	* bfd/cpu-tilepro.c: Likewise.
+	* bfd/elf32-lm32.c: Likewise.
+	* bfd/elf32-microblaze.c: Likewise.
+	* bfd/elf32-score7.c: Likewise.
+	* bfd/elf32-tilepro.c: Likewise.
+	* bfd/elfxx-tilegx.c: Likewise.
+	* bfd/mach-o.h: Likewise.
+	* bfd/nlm32-ppc.c: Likewise.
+	* bfd/ns32knetbsd.c: Likewise.
+	* bfd/pef.h: Likewise.
+	* bfd/plugin.c: Likewise.
+	* bfd/stab-syms.c: Likewise.
+	* bfd/sunos.c: Likewise.
+	* bfd/syms.c: Likewise.
+	* bfd/xsym.h: Likewise.
+
 2012-05-16  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c: Rename flaginfo to flinfo throughout, except..

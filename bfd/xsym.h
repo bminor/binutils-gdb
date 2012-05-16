@@ -1,5 +1,5 @@
 /* xSYM symbol-file support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2012
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -19,6 +19,7 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include "sysdep.h"
 #include "bfd.h"
 #include <stdio.h>
 

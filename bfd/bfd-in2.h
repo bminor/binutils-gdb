@@ -6306,8 +6306,8 @@ typedef struct bfd_target
 
   /* Sets the bitmask of allowed and disallowed section flags.  */
   bfd_boolean (*_bfd_lookup_section_flags) (struct bfd_link_info *,
-					    struct flag_info *,
-					    asection *);
+                                            struct flag_info *,
+                                            asection *);
 
   /* Attempt to merge SEC_MERGE sections.  */
   bfd_boolean (*_bfd_merge_sections) (bfd *, struct bfd_link_info *);

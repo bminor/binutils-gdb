@@ -1,3 +1,13 @@
+2012-05-16  Daniel Richard G.  <skunk@iskunk.org>
+
+	PR binutils/13558
+	* Makefile.am (CFILES): Add syslex_wrap.c.
+	(sysinfo): Depend upon syslex_wrap.o.
+	(syslex_wrap.o): New rule.
+	(syslex.o): Delete rule.
+	* syslex_wrap.c: New file.
+	* Makefile.in: Regenerate.
+
 2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
 
 	* readelf.c (get_machine_name): Update m68hc12 entry.

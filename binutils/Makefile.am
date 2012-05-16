@@ -106,7 +106,7 @@ CFILES = \
 	rclex.c rdcoff.c rddbg.c readelf.c rename.c \
 	resbin.c rescoff.c resrc.c resres.c \
 	size.c srconv.c stabs.c strings.c sysdump.c \
-	unwind-ia64.c elfedit.c version.c \
+	syslex_wrap.c unwind-ia64.c elfedit.c version.c \
 	windres.c winduni.c wrstabs.c \
 	windmc.c mclex.c
 
@@ -268,15 +268,11 @@ sysroff.c: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info
 sysroff.h: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info
 	./sysinfo$(EXEEXT_FOR_BUILD) -d <$(srcdir)/sysroff.info >sysroff.h
 
-sysinfo$(EXEEXT_FOR_BUILD): sysinfo.@OBJEXT@ syslex.@OBJEXT@
-	$(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ sysinfo.@OBJEXT@ syslex.@OBJEXT@
+sysinfo$(EXEEXT_FOR_BUILD): sysinfo.@OBJEXT@ syslex_wrap.@OBJEXT@
+	$(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ sysinfo.@OBJEXT@ syslex_wrap.@OBJEXT@
 
-syslex.@OBJEXT@: syslex.c sysinfo.h config.h
-	if [ -r syslex.c ]; then \
-	  $(CC_FOR_BUILD) -c -I. -I$(srcdir) $(AM_CFLAGS) $(CFLAGS_FOR_BUILD) $(NO_WERROR) syslex.c ; \
-	else \
-	  $(CC_FOR_BUILD) -c -I. -I$(srcdir) $(AM_CFLAGS) $(CFLAGS_FOR_BUILD) $(NO_WERROR) $(srcdir)/syslex.c ;\
-	fi
+syslex_wrap.@OBJEXT@: syslex_wrap.c syslex.c sysinfo.h config.h
+	$(CC_FOR_BUILD) -c -I. -I$(srcdir) $(AM_CFLAGS) $(CFLAGS_FOR_BUILD) $(NO_WERROR) $(srcdir)/syslex_wrap.c
 
 sysinfo.@OBJEXT@: sysinfo.c
 	if [ -r sysinfo.c ]; then \

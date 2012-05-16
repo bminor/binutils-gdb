@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 386 COFF files (DJGPP variant with a stub).
    Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006, 2007, 2009,
-   2011  Free Software Foundation, Inc.
+   2011, 2012  Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -54,6 +54,7 @@
 { COFF_SECTION_NAME_PARTIAL_MATCH (".gnu.linkonce.wi"), \
   COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 0 }
 
+#include "sysdep.h"
 #include "bfd.h"
 
 /* At first the prototypes.  */

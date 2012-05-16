@@ -20,6 +20,7 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include "sysdep.h"
 #include "bfd.h"
 #include "aout/aout64.h"
 #include "ns32k.h"
