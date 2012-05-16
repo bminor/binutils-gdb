@@ -91,7 +91,7 @@ macscp_expr (void)
 #define MACRO_TO_EXPAND foo
   foo = 1;
 #undef MACRO_TO_EXPAND
-  foo = 2;
+  foo = 2;			/* stopping point for line test */
 }
 
 #define TWENTY_THREE 23

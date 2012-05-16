@@ -15572,9 +15572,12 @@ macro_start_file (int file, int line,
                                       objfile->macro_cache);
 
   if (! current_file)
-    /* If we have no current file, then this must be the start_file
-       directive for the compilation unit's main source file.  */
-    current_file = macro_set_main (pending_macros, full_name);
+    {
+      /* If we have no current file, then this must be the start_file
+	 directive for the compilation unit's main source file.  */
+      current_file = macro_set_main (pending_macros, full_name);
+      macro_define_special (pending_macros);
+    }
   else
     current_file = macro_include (current_file, line, full_name);
 

@@ -1,3 +1,8 @@
+2012-05-16  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/macscp1.c (macscp_expr): Add comment.
+	* gdb.base/macscp.exp: Test __FILE__ and __LINE__.
+
 2012-05-16  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.base/return-nodebug.exp: Also test float and double types.

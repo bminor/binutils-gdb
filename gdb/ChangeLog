@@ -1,3 +1,22 @@
+2012-05-16  Tom Tromey  <tromey@redhat.com>
+
+	PR macros/13205:
+	* macrotab.h: (macro_define_special): Declare.
+	(enum macro_special_kind): New.
+	(struct macro_definition) <argc, replacement>: Update comments.
+	* macrotab.c (new_macro_definition): Unconditionally set 'argc'.
+	(macro_define_object_internal): New function.
+	(macro_define_object): Use it.
+	(macro_define_special): New function.
+	(fixup_definition): New function.
+	(macro_lookup_definition, foreach_macro_in_scope)
+	(foreach_macro): Use fixup_definition.
+	* macroexp.h (macro_stringify): Declare.
+	* macroexp.c (free_buffer_return_text): New function.
+	(stringify): Constify "arg".
+	(macro_stringify): New function.
+	* dwarf2read.c (macro_start_file): Call macro_define_special.
+
 2012-05-16  Maciej W. Rozycki  <macro@codesourcery.com>
             Maciej W. Rozycki  <macro@mips.com>
 

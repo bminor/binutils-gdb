@@ -212,6 +212,10 @@ struct macro_source_file *macro_include (struct macro_source_file *source,
                                          int line,
                                          const char *included);
 
+/* Define any special macros, like __FILE__ or __LINE__.  This should
+   be called once, on the main source file.  */
+
+void macro_define_special (struct macro_table *table);
 
 /* Find any source file structure for a file named NAME, either
    included into SOURCE, or SOURCE itself.  Return zero if we have
@@ -261,6 +265,17 @@ enum macro_kind
   macro_function_like
 };
 
+/* Different kinds of special macros.  */
+
+enum macro_special_kind
+{
+  /* Ordinary.  */
+  macro_ordinary,
+  /* The special macro __FILE__.  */
+  macro_FILE,
+  /* The special macro __LINE__.  */
+  macro_LINE
+};
 
 /* A preprocessor symbol definition.  */
 struct macro_definition
@@ -273,12 +288,17 @@ struct macro_definition
 
   /* If `kind' is `macro_function_like', the number of arguments it
      takes, and their names.  The names, and the array of pointers to
-     them, are in the table's bcache, if it has one.  */
-  int argc : 31;
+     them, are in the table's bcache, if it has one.  If `kind' is
+     `macro_object_like', then this is actually a `macro_special_kind'
+     describing the macro.  */
+  int argc : 30;
   const char * const *argv;
 
-  /* The replacement string (body) of the macro.  This is in the
-     table's bcache, if it has one.  */
+  /* The replacement string (body) of the macro.  For ordinary macros,
+     this is in the table's bcache, if it has one.  For special macros
+     like __FILE__, this value is only valid until the next use of any
+     special macro definition; that is, it is reset each time any
+     special macro is looked up or iterated over.  */
   const char *replacement;
 };
 

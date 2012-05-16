@@ -91,4 +91,9 @@ int macro_is_identifier_nondigit (int c);
 int macro_is_digit (int c);
 
 
+/* Stringify STR according to C rules and return an xmalloc'd pointer
+   to the result.  */
+
+char *macro_stringify (const char *str);
+
 #endif /* MACROEXP_H */
