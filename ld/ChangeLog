@@ -1,3 +1,8 @@
+2012-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* emultempl/m68hc1xelf.em (hook_in_stub): Pass proper `bfd'
+	as the first argument for `bfd_get_section_name'.
+
 2012-05-16  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
 	PR ld/14069

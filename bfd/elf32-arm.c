@@ -3258,7 +3258,7 @@ create_ifunc_sections (struct bfd_link_info *info)
       s = bfd_make_section_with_flags (dynobj, ".iplt",
 				       flags | SEC_READONLY | SEC_CODE);
       if (s == NULL
-	  || !bfd_set_section_alignment (abfd, s, bed->plt_alignment))
+	  || !bfd_set_section_alignment (dynobj, s, bed->plt_alignment))
 	return FALSE;
       htab->root.iplt = s;
     }
@@ -3268,7 +3268,7 @@ create_ifunc_sections (struct bfd_link_info *info)
       s = bfd_make_section_with_flags (dynobj, RELOC_SECTION (htab, ".iplt"),
 				       flags | SEC_READONLY);
       if (s == NULL
-	  || !bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+	  || !bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
 	return FALSE;
       htab->root.irelplt = s;
     }

@@ -1771,7 +1771,9 @@ mmix_final_link_relocate (reloc_howto_type *howto, asection *input_section,
 	first_global = 255;
       else
 	{
-	  first_global = bfd_get_section_vma (abfd, regsec) / 8;
+	  first_global
+	    = bfd_get_section_vma (input_section->output_section->owner,
+				   regsec) / 8;
 	  if (strcmp (bfd_get_section_name (symsec->owner, symsec),
 		      MMIX_REG_CONTENTS_SECTION_NAME) == 0)
 	    {

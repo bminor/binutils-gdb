@@ -1,6 +1,6 @@
 /* Xilinx MicroBlaze-specific support for 32-bit ELF
 
-   Copyright 2009, 2010, 2011 Free Software Foundation, Inc.
+   Copyright 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -839,7 +839,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		/* Only relocate if the symbol is defined.  */
 		if (sec)
 		  {
-		    name = bfd_get_section_name (abfd, sec);
+		    name = bfd_get_section_name (sec->owner, sec);
 
 		    if (strcmp (name, ".sdata2") == 0
 			|| strcmp (name, ".sbss2") == 0)
@@ -868,7 +868,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 					       bfd_get_filename (input_bfd),
 					       sym_name,
 					       microblaze_elf_howto_table[(int) r_type]->name,
-					       bfd_get_section_name (abfd, sec));
+					       bfd_get_section_name (sec->owner, sec));
 			/*bfd_set_error (bfd_error_bad_value); ??? why? */
 			ret = FALSE;
 			continue;
@@ -884,7 +884,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 		/* Only relocate if the symbol is defined.  */
 		if (sec)
 		  {
-		    name = bfd_get_section_name (abfd, sec);
+		    name = bfd_get_section_name (sec->owner, sec);
 
 		    if (strcmp (name, ".sdata") == 0
 			|| strcmp (name, ".sbss") == 0)
@@ -913,7 +913,7 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 					       bfd_get_filename (input_bfd),
 					       sym_name,
 					       microblaze_elf_howto_table[(int) r_type]->name,
-					       bfd_get_section_name (abfd, sec));
+					       bfd_get_section_name (sec->owner, sec));
 			/*bfd_set_error (bfd_error_bad_value); ??? why? */
 			ret = FALSE;
 			continue;

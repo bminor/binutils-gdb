@@ -5302,7 +5302,7 @@ maybe_set_gp (asection *sec)
 
   if (!sec)
     return;
-  vma = bfd_get_section_vma (foo, sec);
+  vma = bfd_get_section_vma (sec->owner, sec);
   if (vma && vma < alpha_gp_value)
     alpha_gp_value = vma;
 }

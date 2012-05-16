@@ -3007,7 +3007,7 @@ m32r_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		const char *name;
 
 		BFD_ASSERT (sec != NULL);
-		name = bfd_get_section_name (abfd, sec);
+		name = bfd_get_section_name (sec->owner, sec);
 
 		if (   strcmp (name, ".sdata") == 0
 		    || strcmp (name, ".sbss") == 0

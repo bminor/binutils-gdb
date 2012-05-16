@@ -1,3 +1,24 @@
+2012-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* bfd-in.h (bfd_get_section_name, bfd_get_section_vma,
+	bfd_get_section_lma, bfd_get_section_alignment,
+	bfd_get_section_flags, bfd_get_section_userdata): Rewrite macros
+	in order to use the `bfd' argument.
+	* bfd-in2.h: Regenerate.
+	* elf-vxworks.c (elf_vxworks_finish_dynamic_entry): Pass proper `bfd'
+	as the first argument for `bfd_get_section_alignment'.
+	* elf32-arm.c (create_ifunc_sections): Likewise, for
+	`bfd_set_section_alignment'.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise, for
+	`bfd_get_section_name'.
+	* elf32-microblaze.c (microblaze_elf_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	* elf64-mmix.c (mmix_final_link_relocate): Likewise, for
+	`bfd_get_section_vma'.
+	* elf64-ppc.c (create_linkage_sections): Likewise, for
+	`bfd_set_section_alignment'.
+
 2012-05-16  Georg-Johann Lay  <avr@gjlay.de>
 
 	PR target/13503

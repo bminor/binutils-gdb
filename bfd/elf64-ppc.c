@@ -4245,7 +4245,7 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
 								 ".eh_frame",
 								 flags);
       if (htab->glink_eh_frame == NULL
-	  || !bfd_set_section_alignment (abfd, htab->glink_eh_frame, 2))
+	  || !bfd_set_section_alignment (dynobj, htab->glink_eh_frame, 2))
 	return FALSE;
     }
 

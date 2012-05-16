@@ -1,3 +1,8 @@
+2012-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* config/tc-alpha.c (maybe_set_gp): Pass proper `bfd'
+	as the first argument for `bfd_get_section_vma'.
+
 2012-05-16  Alberto Garcia  <agarcia@igalia.com>
 
 	PR gas/14082
