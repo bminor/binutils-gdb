@@ -1646,7 +1646,15 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (hdr->sh_entsize != bed->s->sizeof_sym)
 	return FALSE;
       if (hdr->sh_info * hdr->sh_entsize > hdr->sh_size)
-	return FALSE;
+	{
+	  if (hdr->sh_size != 0)
+	    return FALSE;
+	  /* Some assemblers erroneously set sh_info to one with a
+	     zero sh_size.  ld sees this as a global symbol count
+	     of (unsigned) -1.  Fix it here.  */
+	  hdr->sh_info = 0;
+	  return TRUE;
+	}
       BFD_ASSERT (elf_onesymtab (abfd) == 0);
       elf_onesymtab (abfd) = shindex;
       elf_tdata (abfd)->symtab_hdr = *hdr;
@@ -1699,6 +1707,16 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
       if (hdr->sh_entsize != bed->s->sizeof_sym)
 	return FALSE;
+      if (hdr->sh_info * hdr->sh_entsize > hdr->sh_size)
+	{
+	  if (hdr->sh_size != 0)
+	    return FALSE;
+	  /* Some linkers erroneously set sh_info to one with a
+	     zero sh_size.  ld sees this as a global symbol count
+	     of (unsigned) -1.  Fix it here.  */
+	  hdr->sh_info = 0;
+	  return TRUE;
+	}
       BFD_ASSERT (elf_dynsymtab (abfd) == 0);
       elf_dynsymtab (abfd) = shindex;
       elf_tdata (abfd)->dynsymtab_hdr = *hdr;

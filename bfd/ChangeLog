@@ -1,3 +1,11 @@
+2012-05-16  Alan Modra  <amodra@gmail.com>
+
+ 	PR ld/13962
+ 	PR ld/7023
+	* elf.c (bfd_section_from_shdr): Fail when .dynsym sh_info is
+	out of range.  As a special case, fix sh_info for zero sh_size.
+	Do the same for .symtab.
+
 2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
 	    Stephane Carrez <stcarrez@nerim.fr>
 
