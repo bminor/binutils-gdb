@@ -1,3 +1,7 @@
+2012-05-16  Meador Inge  <meadori@codesourcery.com>
+
+	* ld-arm/gc-hidden-1.d: Fix disassembly pattern.
+
 2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
 
 	* ld-m68hc11/xgate-link.s: New.

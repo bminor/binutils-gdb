@@ -19,7 +19,7 @@ Disassembly of section .text:
 0+124 <_start>:
  124:	e52de004 	push	{lr}		; \(str lr, \[sp, #-4\]!\)
  128:	eb000000 	bl	130 <hidfn>
- 12c:	e8bd8000 	pop	{pc}
+ 12c:	e8bd8000 	ldmfd	sp!, {pc}
 
 0+130 <hidfn>:
- 130:	e8bd8000 	pop	{pc}
+ 130:	e8bd8000 	ldmfd	sp!, {pc}
