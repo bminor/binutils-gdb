@@ -1,3 +1,12 @@
+2012-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* coffread.c (cs_section_address): Passing proper argument for
+	`bfd_get_section_vma'.
+	* dwarf2read.c (dwarf2_locate_sections): Likewise, for
+	`bfd_get_section_flags'.
+	* remote.c (remote_trace_set_readonly_regions): Likewise, for
+	`bfd_get_section_vma'.
+
 2012-05-16  Tom Tromey  <tromey@redhat.com>
 
 	PR macros/13205:

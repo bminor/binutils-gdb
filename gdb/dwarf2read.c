@@ -1582,7 +1582,7 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
     }
   else if (section_is_p (sectp->name, &names->eh_frame))
     {
-      flagword aflag = bfd_get_section_flags (ignore_abfd, sectp);
+      flagword aflag = bfd_get_section_flags (abfd, sectp);
 
       if (aflag & SEC_HAS_CONTENTS)
         {

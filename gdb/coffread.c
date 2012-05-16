@@ -311,7 +311,7 @@ cs_section_address (struct coff_symbol *cs, bfd *abfd)
   args.resultp = &sect;
   bfd_map_over_sections (abfd, find_targ_sec, &args);
   if (sect != NULL)
-    addr = bfd_get_section_vma (objfile->obfd, sect);
+    addr = bfd_get_section_vma (abfd, sect);
   return addr;
 }
 

@@ -10399,6 +10399,7 @@ static void
 remote_trace_set_readonly_regions (void)
 {
   asection *s;
+  bfd *abfd = NULL;
   bfd_size_type size;
   bfd_vma vma;
   int anysecs = 0;
@@ -10419,7 +10420,7 @@ remote_trace_set_readonly_regions (void)
 	continue;
 
       anysecs = 1;
-      vma = bfd_get_section_vma (,s);
+      vma = bfd_get_section_vma (abfd, s);
       size = bfd_get_section_size (s);
       sprintf_vma (tmp1, vma);
       sprintf_vma (tmp2, vma + size);
