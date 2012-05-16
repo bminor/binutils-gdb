@@ -72,7 +72,7 @@ EOF
 
 if [ "x${USE_LIBPATH}" = xyes ] ; then
   case ${target} in
-    *-*-linux-* | *-*-k*bsd*-*)
+    *-*-linux-* | *-*-k*bsd*-* | *-*-gnu*)
   fragment <<EOF
 #ifdef HAVE_GLOB
 #include <glob.h>
@@ -374,7 +374,7 @@ gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
 
 EOF
 case ${target} in
-  *-*-linux-* | *-*-k*bsd*-*)
+  *-*-linux-* | *-*-k*bsd*-* | *-*-gnu*)
     fragment <<EOF
 	  {
 	    struct bfd_link_needed_list *l;
@@ -620,7 +620,7 @@ EOF
     # FreeBSD
     ;;
 
-    *-*-linux-* | *-*-k*bsd*-*)
+    *-*-linux-* | *-*-k*bsd*-* | *-*-gnu*)
       fragment <<EOF
 /* For a native linker, check the file /etc/ld.so.conf for directories
    in which we may find shared libraries.  /etc/ld.so.conf is really
@@ -1310,7 +1310,7 @@ EOF
     # FreeBSD
     ;;
 
-    *-*-linux-* | *-*-k*bsd*-*)
+    *-*-linux-* | *-*-k*bsd*-* | *-*-gnu*)
     # Linux
       fragment <<EOF
 	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))

@@ -1,3 +1,9 @@
+2012-05-16  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	PR ld/14069
+	* emultempl/elf32.em: Include *-*-gnu* targets in ld.so.conf
+	support.
+
 2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
 
 	* NEWS: Mention the support for S12X processors.
