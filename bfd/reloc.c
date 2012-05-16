@@ -4405,10 +4405,10 @@ ENUMDOC
   This is a 8 bit reloc for the AVR that stores bits 8..15 of a symbol
   in .byte hi8(symbol)
 ENUM
-  BFD_RELOC_AVR_8_HHI
+  BFD_RELOC_AVR_8_HLO
 ENUMDOC
   This is a 8 bit reloc for the AVR that stores bits 16..23 of a symbol
-  in .byte hhi8(symbol)
+  in .byte hlo8(symbol)
 
 ENUM
   BFD_RELOC_RL78_NEG8

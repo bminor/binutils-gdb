@@ -1,3 +1,11 @@
+2012-05-16  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR target/13503
+	* config/tc-avr.c (avr_cons_fix_new): Rename R_AVR_8_HHI8 to
+	R_AVR_8_HLO8.
+	(exp_mod_data) Ditto. And replace "hhi8" with "hlo8".
+	(md_apply_fix): Rename BFD_RELOC_AVR_8_HHI to BFD_RELOC_AVR_8_HLO.
+
 2012-05-16  Nathan Sidwell  <nathan@codesourcery.com>
 	    Kwok Cheung Yeung  <kcy@codesourcery.com>
 

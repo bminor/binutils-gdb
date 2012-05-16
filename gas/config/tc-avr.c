@@ -327,7 +327,7 @@ static struct exp_mod_s exp_mod[] =
   {"lo8",    BFD_RELOC_AVR_LO8_LDI,    BFD_RELOC_AVR_LO8_LDI_NEG,    1},
   {"pm_lo8", BFD_RELOC_AVR_LO8_LDI_PM, BFD_RELOC_AVR_LO8_LDI_PM_NEG, 0},
   {"hlo8",   BFD_RELOC_AVR_HH8_LDI,    BFD_RELOC_AVR_HH8_LDI_NEG,    0},
-  {"hhi8",   BFD_RELOC_AVR_MS8_LDI,    BFD_RELOC_AVR_MS8_LDI_NEG,    0},
+  {"hlo8",   BFD_RELOC_AVR_MS8_LDI,    BFD_RELOC_AVR_MS8_LDI_NEG,    0},
 };
 
 /* A union used to store indicies into the exp_mod[] array
@@ -1342,7 +1342,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
           *where = 0xff & (value >> 8);
           break;
 
-        case BFD_RELOC_AVR_8_HHI:
+        case BFD_RELOC_AVR_8_HLO:
           *where = 0xff & (value >> 16);
           break;
 
@@ -1501,14 +1501,14 @@ static const exp_mod_data_t exp_mod_data[] =
   { "pm", 2, BFD_RELOC_AVR_16_PM, "`pm' " },
   /* The following are used together with avr-gcc's __memx address space
      in order to initialize a 24-bit pointer variable with a 24-bit address.
-     For address in flash, hhi8 will contain the flash segment if the
-     symbol is located in flash. If the symbol is located in RAM; hhi8
+     For address in flash, hlo8 will contain the flash segment if the
+     symbol is located in flash. If the symbol is located in RAM; hlo8
      will contain 0x80 which matches avr-gcc's notion of how 24-bit RAM/flash
      addresses linearize address space.  */
   { "lo8",  1, BFD_RELOC_AVR_8_LO,  "`lo8' "  },
   { "hi8",  1, BFD_RELOC_AVR_8_HI,  "`hi8' "  },
-  { "hhi8", 1, BFD_RELOC_AVR_8_HHI, "`hhi8' " },
-  { "hh8",  1, BFD_RELOC_AVR_8_HHI, "`hh8' "  },
+  { "hlo8", 1, BFD_RELOC_AVR_8_HLO, "`hlo8' " },
+  { "hh8",  1, BFD_RELOC_AVR_8_HLO, "`hh8' "  },
   /* End of list.  */
   { NULL, 0, 0, NULL }
 };
@@ -1518,7 +1518,7 @@ static const exp_mod_data_t *pexp_mod_data = &exp_mod_data[0];
 
 /* Parse special CONS expression: pm (expression) or alternatively
    gs (expression).  These are used for addressing program memory.  Moreover,
-   define lo8 (expression), hi8 (expression) and hhi8 (expression).  */
+   define lo8 (expression), hi8 (expression) and hlo8 (expression).  */
 
 void
 avr_parse_cons_expression (expressionS *exp, int nbytes)
@@ -1592,7 +1592,7 @@ avr_cons_fix_new (fragS *frag,
     case BFD_RELOC_AVR_16_PM:
     case BFD_RELOC_AVR_8_LO:
     case BFD_RELOC_AVR_8_HI:
-    case BFD_RELOC_AVR_8_HHI:
+    case BFD_RELOC_AVR_8_HLO:
       if (nbytes == pexp_mod_data->nbytes)
         fix_new_exp (frag, where, nbytes, exp, FALSE, pexp_mod_data->reloc);
       else
