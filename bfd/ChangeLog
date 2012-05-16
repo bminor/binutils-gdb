@@ -1,5 +1,17 @@
 2012-05-16  Alan Modra  <amodra@gmail.com>
 
+	* dwarf2.c: Formatting.
+	(arange_add): Pass in unit rather than bfd.  Update callers.
+	Ignore empty ranges.  Don't ask for cleared memory.
+	(parse_comp_unit): Only set unit->base_address if processing
+	DW_TAG_compile_unit.
+	(find_debug_info): Optimise section lookup.
+	(place_sections): Use bfd_alloc for stash->adjusted_sections.
+	(find_line): Match previously parsed comp unit addresses as we
+	do for newly parsed comp units.
+
+2012-05-16  Alan Modra  <amodra@gmail.com>
+
 	* archive.c (_bfd_generic_read_ar_hdr_mag):  Ensure sscanf
 	stops at end of ar_size field.
 
