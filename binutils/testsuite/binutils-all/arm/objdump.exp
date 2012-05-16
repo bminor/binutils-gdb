@@ -80,7 +80,7 @@ if [is_remote host] {
 
 set got [binutils_run $OBJDUMP "-dr $objfile $objfile"]
 
-set want "$objfile:\[ \]*file format.*$objfile:\[ \]*file format.*push.*add.*sub.*str.*add.*pop"
+set want "$objfile:\[ \]*file format.*$objfile:\[ \]*file format.*push.*add.*sub.*str.*add.*ldmfd"
 
 if [regexp $want $got] then {
     pass "multiple input files"

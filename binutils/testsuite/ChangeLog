@@ -1,3 +1,8 @@
+2012-05-16  Meador Inge  <meadori@codesourcery.com>
+
+	* binutils-all/arm/objdump.exp:
+	STMFD/LDMIA sp!, {reg} don't disassemble to PUSH/POP {reg} any longer.
+
 2012-04-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/13947

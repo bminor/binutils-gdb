@@ -1,3 +1,8 @@
+2012-05-16  Meador Inge  <meadori@codesourcery.com>
+
+	* arm-dis.c (arm_opcodes): Don't disassemble STMFD/LDMIA sp!, {reg}
+	to PUSH/POP {reg}.
+
 2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
 	    Stephane Carrez <stcarrez@nerim.fr>
 

@@ -1,3 +1,9 @@
+2012-05-16  Meador Inge  <meadori@codesourcery.com>
+
+	* gas/arm/stm-ldm.d: STMFD/LDMIA sp!, {reg} don't disassemble to
+	PUSH/POP {reg} any longer.  Some new test cases have been added as well.
+	* gas/arm/stm-ldm.s: Likewise.
+
 2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
 
 	* gas/m68hc11/insns9s12x.s: New
