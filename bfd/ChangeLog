@@ -1,5 +1,10 @@
 2012-05-16  Alan Modra  <amodra@gmail.com>
 
+	* archive.c (_bfd_generic_read_ar_hdr_mag):  Ensure sscanf
+	stops at end of ar_size field.
+
+2012-05-16  Alan Modra  <amodra@gmail.com>
+
  	PR ld/13962
  	PR ld/7023
 	* elf.c (bfd_section_from_shdr): Fail when .dynsym sh_info is

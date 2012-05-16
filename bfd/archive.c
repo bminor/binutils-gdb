@@ -471,6 +471,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
     }
 
   errno = 0;
+  hdr.ar_fmag[0] = 0;
   if (sscanf (hdr.ar_size, "%" BFD_VMA_FMT "u", &parsed_size) != 1)
     {
       bfd_set_error (bfd_error_malformed_archive);
