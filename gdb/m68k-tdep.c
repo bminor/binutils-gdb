@@ -403,7 +403,7 @@ m68k_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
    from WRITEBUF into REGCACHE.  */
 
 static enum return_value_convention
-m68k_return_value (struct gdbarch *gdbarch, struct type *func_type,
+m68k_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *type, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
@@ -438,7 +438,7 @@ m68k_return_value (struct gdbarch *gdbarch, struct type *func_type,
 }
 
 static enum return_value_convention
-m68k_svr4_return_value (struct gdbarch *gdbarch, struct type *func_type,
+m68k_svr4_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *type, struct regcache *regcache,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {
@@ -477,7 +477,7 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct type *func_type,
   if (code == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
     {
       type = check_typedef (TYPE_FIELD_TYPE (type, 0));
-      return m68k_svr4_return_value (gdbarch, func_type, type, regcache,
+      return m68k_svr4_return_value (gdbarch, function, type, regcache,
 				     readbuf, writebuf);
     }
 

@@ -3340,7 +3340,7 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
 }
   
 static enum return_value_convention
-ia64_return_value (struct gdbarch *gdbarch, struct type *func_type,
+ia64_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *valtype, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {

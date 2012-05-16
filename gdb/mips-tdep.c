@@ -3332,7 +3332,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 /* Determine the return value convention being used.  */
 
 static enum return_value_convention
-mips_eabi_return_value (struct gdbarch *gdbarch, struct type *func_type,
+mips_eabi_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *type, struct regcache *regcache,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {
@@ -3722,7 +3722,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 static enum return_value_convention
-mips_n32n64_return_value (struct gdbarch *gdbarch, struct type *func_type,
+mips_n32n64_return_value (struct gdbarch *gdbarch, struct value *function,
 			  struct type *type, struct regcache *regcache,
 			  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
@@ -3890,6 +3890,20 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct type *func_type,
     }
 }
 
+/* Which registers to use for passing floating-point values between
+   function calls, one of floating-point, general and both kinds of
+   registers.  O32 and O64 use different register kinds for standard
+   MIPS and MIPS16 code; to make the handling of cases where we may
+   not know what kind of code is being used (e.g. no debug information)
+   easier we sometimes use both kinds.  */
+
+enum mips_fval_reg
+{
+  mips_fval_fpr,
+  mips_fval_gpr,
+  mips_fval_both
+};
+
 /* O32 ABI stuff.  */
 
 static CORE_ADDR
@@ -3980,8 +3994,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* 32-bit ABIs always start floating point arguments in an
          even-numbered floating point register.  Round the FP register
          up before the check to see if there are any FP registers
-         left.  O32/O64 targets also pass the FP in the integer
-         registers so also round up normal registers.  */
+         left.  O32 targets also pass the FP in the integer registers
+         so also round up normal registers.  */
       if (fp_register_arg_p (gdbarch, typecode, arg_type))
 	{
 	  if ((float_argreg & 1))
@@ -3989,46 +4003,48 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
 
       /* Floating point arguments passed in registers have to be
-         treated specially.  On 32-bit architectures, doubles
-         are passed in register pairs; the even register gets
-         the low word, and the odd register gets the high word.
-         On O32/O64, the first two floating point arguments are
-         also copied to general registers, because MIPS16 functions
-         don't use float registers for arguments.  This duplication of
-         arguments in general registers can't hurt non-MIPS16 functions
-         because those registers are normally skipped.  */
+         treated specially.  On 32-bit architectures, doubles are
+         passed in register pairs; the even FP register gets the
+         low word, and the odd FP register gets the high word.
+         On O32, the first two floating point arguments are also
+         copied to general registers, following their memory order,
+         because MIPS16 functions don't use float registers for
+         arguments.  This duplication of arguments in general
+         registers can't hurt non-MIPS16 functions, because those
+         registers are normally skipped.  */
 
       if (fp_register_arg_p (gdbarch, typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM (gdbarch))
 	{
 	  if (register_size (gdbarch, float_argreg) < 8 && len == 8)
 	    {
-	      int low_offset = gdbarch_byte_order (gdbarch)
-			       == BFD_ENDIAN_BIG ? 4 : 0;
+	      int freg_offset = gdbarch_byte_order (gdbarch)
+				== BFD_ENDIAN_BIG ? 1 : 0;
 	      unsigned long regval;
 
-	      /* Write the low word of the double to the even register(s).  */
-	      regval = extract_unsigned_integer (val + low_offset,
-						 4, byte_order);
+	      /* First word.  */
+	      regval = extract_unsigned_integer (val, 4, byte_order);
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
-				    float_argreg, phex (regval, 4));
+				    float_argreg + freg_offset,
+				    phex (regval, 4));
 	      regcache_cooked_write_unsigned (regcache,
-					      float_argreg++, regval);
+					      float_argreg++ + freg_offset,
+					      regval);
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
 				    argreg, phex (regval, 4));
 	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
 
-	      /* Write the high word of the double to the odd register(s).  */
-	      regval = extract_unsigned_integer (val + 4 - low_offset,
-						 4, byte_order);
+	      /* Second word.  */
+	      regval = extract_unsigned_integer (val + 4, 4, byte_order);
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
-				    float_argreg, phex (regval, 4));
+				    float_argreg - freg_offset,
+				    phex (regval, 4));
 	      regcache_cooked_write_unsigned (regcache,
-					      float_argreg++, regval);
-
+					      float_argreg++ - freg_offset,
+					      regval);
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
 				    argreg, phex (regval, 4));
@@ -4203,12 +4219,16 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 static enum return_value_convention
-mips_o32_return_value (struct gdbarch *gdbarch, struct type *func_type,
+mips_o32_return_value (struct gdbarch *gdbarch, struct value *function,
 		       struct type *type, struct regcache *regcache,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
+  CORE_ADDR func_addr = function ? find_function_addr (function, NULL) : 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int mips16 = mips_pc_is_mips16 (func_addr);
+  enum mips_fval_reg fval_reg;
 
+  fval_reg = readbuf ? mips16 ? mips_fval_gpr : mips_fval_fpr : mips_fval_both;
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       || TYPE_CODE (type) == TYPE_CODE_UNION
       || TYPE_CODE (type) == TYPE_CODE_ARRAY)
@@ -4216,54 +4236,110 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *func_type,
   else if (TYPE_CODE (type) == TYPE_CODE_FLT
 	   && TYPE_LENGTH (type) == 4 && tdep->mips_fpu_type != MIPS_FPU_NONE)
     {
-      /* A single-precision floating-point value.  It fits in the
-         least significant part of FP0.  */
+      /* A single-precision floating-point value.  If reading in or copying,
+         then we get it from/put it to FP0 for standard MIPS code or GPR2
+         for MIPS16 code.  If writing out only, then we put it to both FP0
+         and GPR2.  We do not support reading in with no function known, if
+         this safety check ever triggers, then we'll have to try harder.  */
+      gdb_assert (function || !readbuf);
       if (mips_debug)
-	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
-      mips_xfer_register (gdbarch, regcache,
-			  (gdbarch_num_regs (gdbarch)
-			   + mips_regnum (gdbarch)->fp0),
-			  TYPE_LENGTH (type),
-			  gdbarch_byte_order (gdbarch),
-			  readbuf, writebuf, 0);
+	switch (fval_reg)
+	  {
+	  case mips_fval_fpr:
+	    fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
+	    break;
+	  case mips_fval_gpr:
+	    fprintf_unfiltered (gdb_stderr, "Return float in $2\n");
+	    break;
+	  case mips_fval_both:
+	    fprintf_unfiltered (gdb_stderr, "Return float in $fp0 and $2\n");
+	    break;
+	  }
+      if (fval_reg != mips_fval_gpr)
+	mips_xfer_register (gdbarch, regcache,
+			    (gdbarch_num_regs (gdbarch)
+			     + mips_regnum (gdbarch)->fp0),
+			    TYPE_LENGTH (type),
+			    gdbarch_byte_order (gdbarch),
+			    readbuf, writebuf, 0);
+      if (fval_reg != mips_fval_fpr)
+	mips_xfer_register (gdbarch, regcache,
+			    gdbarch_num_regs (gdbarch) + 2,
+			    TYPE_LENGTH (type),
+			    gdbarch_byte_order (gdbarch),
+			    readbuf, writebuf, 0);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else if (TYPE_CODE (type) == TYPE_CODE_FLT
 	   && TYPE_LENGTH (type) == 8 && tdep->mips_fpu_type != MIPS_FPU_NONE)
     {
-      /* A double-precision floating-point value.  The most
-         significant part goes in FP1, and the least significant in
-         FP0.  */
+      /* A double-precision floating-point value.  If reading in or copying,
+         then we get it from/put it to FP1 and FP0 for standard MIPS code or
+         GPR2 and GPR3 for MIPS16 code.  If writing out only, then we put it
+         to both FP1/FP0 and GPR2/GPR3.  We do not support reading in with
+         no function known, if this safety check ever triggers, then we'll
+         have to try harder.  */
+      gdb_assert (function || !readbuf);
       if (mips_debug)
-	fprintf_unfiltered (gdb_stderr, "Return float in $fp1/$fp0\n");
-      switch (gdbarch_byte_order (gdbarch))
+	switch (fval_reg)
+	  {
+	  case mips_fval_fpr:
+	    fprintf_unfiltered (gdb_stderr, "Return float in $fp1/$fp0\n");
+	    break;
+	  case mips_fval_gpr:
+	    fprintf_unfiltered (gdb_stderr, "Return float in $2/$3\n");
+	    break;
+	  case mips_fval_both:
+	    fprintf_unfiltered (gdb_stderr,
+				"Return float in $fp1/$fp0 and $2/$3\n");
+	    break;
+	  }
+      if (fval_reg != mips_fval_gpr)
 	{
-	case BFD_ENDIAN_LITTLE:
+	  /* The most significant part goes in FP1, and the least significant
+	     in FP0.  */
+	  switch (gdbarch_byte_order (gdbarch))
+	    {
+	    case BFD_ENDIAN_LITTLE:
+	      mips_xfer_register (gdbarch, regcache,
+				  (gdbarch_num_regs (gdbarch)
+				   + mips_regnum (gdbarch)->fp0 + 0),
+				  4, gdbarch_byte_order (gdbarch),
+				  readbuf, writebuf, 0);
+	      mips_xfer_register (gdbarch, regcache,
+				  (gdbarch_num_regs (gdbarch)
+				   + mips_regnum (gdbarch)->fp0 + 1),
+				  4, gdbarch_byte_order (gdbarch),
+				  readbuf, writebuf, 4);
+	      break;
+	    case BFD_ENDIAN_BIG:
+	      mips_xfer_register (gdbarch, regcache,
+				  (gdbarch_num_regs (gdbarch)
+				   + mips_regnum (gdbarch)->fp0 + 1),
+				  4, gdbarch_byte_order (gdbarch),
+				  readbuf, writebuf, 0);
+	      mips_xfer_register (gdbarch, regcache,
+				  (gdbarch_num_regs (gdbarch)
+				   + mips_regnum (gdbarch)->fp0 + 0),
+				  4, gdbarch_byte_order (gdbarch),
+				  readbuf, writebuf, 4);
+	      break;
+	    default:
+	      internal_error (__FILE__, __LINE__, _("bad switch"));
+	    }
+	}
+      if (fval_reg != mips_fval_fpr)
+	{
+	  /* The two 32-bit parts are always placed in GPR2 and GPR3
+	     following these registers' memory order.  */
 	  mips_xfer_register (gdbarch, regcache,
-			      (gdbarch_num_regs (gdbarch)
-			       + mips_regnum (gdbarch)->fp0 + 0),
+			      gdbarch_num_regs (gdbarch) + 2,
 			      4, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, 0);
 	  mips_xfer_register (gdbarch, regcache,
-			      (gdbarch_num_regs (gdbarch)
-			       + mips_regnum (gdbarch)->fp0 + 1),
+			      gdbarch_num_regs (gdbarch) + 3,
 			      4, gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, 4);
-	  break;
-	case BFD_ENDIAN_BIG:
-	  mips_xfer_register (gdbarch, regcache,
-			      (gdbarch_num_regs (gdbarch)
-			       + mips_regnum (gdbarch)->fp0 + 1),
-			      4, gdbarch_byte_order (gdbarch),
-			      readbuf, writebuf, 0);
-	  mips_xfer_register (gdbarch, regcache,
-			      (gdbarch_num_regs (gdbarch)
-			       + mips_regnum (gdbarch)->fp0 + 0),
-			      4, gdbarch_byte_order (gdbarch),
-			      readbuf, writebuf, 4);
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__, _("bad switch"));
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -4459,14 +4535,14 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
 
       /* Floating point arguments passed in registers have to be
-         treated specially.  On 32-bit architectures, doubles
-         are passed in register pairs; the even register gets
-         the low word, and the odd register gets the high word.
-         On O32/O64, the first two floating point arguments are
-         also copied to general registers, because MIPS16 functions
-         don't use float registers for arguments.  This duplication of
-         arguments in general registers can't hurt non-MIPS16 functions
-         because those registers are normally skipped.  */
+         treated specially.  On 32-bit architectures, doubles are
+         passed in register pairs; the even FP register gets the
+         low word, and the odd FP register gets the high word.
+         On O64, the first two floating point arguments are also
+         copied to general registers, because MIPS16 functions
+         don't use float registers for arguments.  This duplication
+         of arguments in general registers can't hurt non-MIPS16
+         functions because those registers are normally skipped.  */
 
       if (fp_register_arg_p (gdbarch, typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM (gdbarch))
@@ -4611,28 +4687,54 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 static enum return_value_convention
-mips_o64_return_value (struct gdbarch *gdbarch, struct type *func_type,
+mips_o64_return_value (struct gdbarch *gdbarch, struct value *function,
 		       struct type *type, struct regcache *regcache,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
+  CORE_ADDR func_addr = function ? find_function_addr (function, NULL) : 0;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int mips16 = mips_pc_is_mips16 (func_addr);
+  enum mips_fval_reg fval_reg;
 
+  fval_reg = readbuf ? mips16 ? mips_fval_gpr : mips_fval_fpr : mips_fval_both;
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       || TYPE_CODE (type) == TYPE_CODE_UNION
       || TYPE_CODE (type) == TYPE_CODE_ARRAY)
     return RETURN_VALUE_STRUCT_CONVENTION;
   else if (fp_register_arg_p (gdbarch, TYPE_CODE (type), type))
     {
-      /* A floating-point value.  It fits in the least significant
-         part of FP0.  */
+      /* A floating-point value.  If reading in or copying, then we get it
+         from/put it to FP0 for standard MIPS code or GPR2 for MIPS16 code.
+         If writing out only, then we put it to both FP0 and GPR2.  We do
+         not support reading in with no function known, if this safety
+         check ever triggers, then we'll have to try harder.  */
+      gdb_assert (function || !readbuf);
       if (mips_debug)
-	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
-      mips_xfer_register (gdbarch, regcache,
-			  (gdbarch_num_regs (gdbarch)
-			   + mips_regnum (gdbarch)->fp0),
-			  TYPE_LENGTH (type),
-			  gdbarch_byte_order (gdbarch),
-			  readbuf, writebuf, 0);
+	switch (fval_reg)
+	  {
+	  case mips_fval_fpr:
+	    fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
+	    break;
+	  case mips_fval_gpr:
+	    fprintf_unfiltered (gdb_stderr, "Return float in $2\n");
+	    break;
+	  case mips_fval_both:
+	    fprintf_unfiltered (gdb_stderr, "Return float in $fp0 and $2\n");
+	    break;
+	  }
+      if (fval_reg != mips_fval_gpr)
+	mips_xfer_register (gdbarch, regcache,
+			    (gdbarch_num_regs (gdbarch)
+			     + mips_regnum (gdbarch)->fp0),
+			    TYPE_LENGTH (type),
+			    gdbarch_byte_order (gdbarch),
+			    readbuf, writebuf, 0);
+      if (fval_reg != mips_fval_fpr)
+	mips_xfer_register (gdbarch, regcache,
+			    gdbarch_num_regs (gdbarch) + 2,
+			    TYPE_LENGTH (type),
+			    gdbarch_byte_order (gdbarch),
+			    readbuf, writebuf, 0);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else

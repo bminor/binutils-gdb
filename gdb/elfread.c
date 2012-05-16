@@ -1020,20 +1020,13 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   struct type *func_func_type = builtin_type (gdbarch)->builtin_func_func;
   struct type *value_type = TYPE_TARGET_TYPE (func_func_type);
   struct regcache *regcache = get_thread_regcache (inferior_ptid);
+  struct value *func_func;
   struct value *value;
   CORE_ADDR resolved_address, resolved_pc;
   struct symtab_and_line sal;
   struct symtabs_and_lines sals, sals_end;
 
   gdb_assert (b->type == bp_gnu_ifunc_resolver_return);
-
-  value = allocate_value (value_type);
-  gdbarch_return_value (gdbarch, func_func_type, value_type, regcache,
-			value_contents_raw (value), NULL);
-  resolved_address = value_as_address (value);
-  resolved_pc = gdbarch_convert_from_func_ptr_addr (gdbarch,
-						    resolved_address,
-						    &current_target);
 
   while (b->related_breakpoint != b)
     {
@@ -1055,6 +1048,18 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
       b = b_next;
     }
   gdb_assert (b->type == bp_gnu_ifunc_resolver);
+  gdb_assert (b->loc->next == NULL);
+
+  func_func = allocate_value (func_func_type);
+  set_value_address (func_func, b->loc->related_address);
+
+  value = allocate_value (value_type);
+  gdbarch_return_value (gdbarch, func_func, value_type, regcache,
+			value_contents_raw (value), NULL);
+  resolved_address = value_as_address (value);
+  resolved_pc = gdbarch_convert_from_func_ptr_addr (gdbarch,
+						    resolved_address,
+						    &current_target);
 
   gdb_assert (current_program_space == b->pspace || b->pspace == NULL);
   elf_gnu_ifunc_record_cache (b->addr_string, resolved_pc);

@@ -1323,7 +1323,7 @@ m68hc11_extract_return_value (struct type *type, struct regcache *regcache,
 }
 
 static enum return_value_convention
-m68hc11_return_value (struct gdbarch *gdbarch, struct type *func_type,
+m68hc11_return_value (struct gdbarch *gdbarch, struct value *function,
 		      struct type *valtype, struct regcache *regcache,
 		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {

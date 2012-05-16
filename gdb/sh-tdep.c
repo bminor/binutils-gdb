@@ -1398,10 +1398,12 @@ sh_store_return_value_fpu (struct type *type, struct regcache *regcache,
 }
 
 static enum return_value_convention
-sh_return_value_nofpu (struct gdbarch *gdbarch, struct type *func_type,
+sh_return_value_nofpu (struct gdbarch *gdbarch, struct value *function,
 		       struct type *type, struct regcache *regcache,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
+  struct type *func_type = function ? value_type (function) : NULL;
+
   if (sh_use_struct_convention_nofpu (
   	sh_is_renesas_calling_convention (func_type), type))
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -1413,10 +1415,12 @@ sh_return_value_nofpu (struct gdbarch *gdbarch, struct type *func_type,
 }
 
 static enum return_value_convention
-sh_return_value_fpu (struct gdbarch *gdbarch, struct type *func_type,
+sh_return_value_fpu (struct gdbarch *gdbarch, struct value *function,
 		     struct type *type, struct regcache *regcache,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
+  struct type *func_type = function ? value_type (function) : NULL;
+
   if (sh_use_struct_convention (
 	sh_is_renesas_calling_convention (func_type), type))
     return RETURN_VALUE_STRUCT_CONVENTION;

@@ -335,7 +335,7 @@ mt_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
    values.  */
 
 static enum return_value_convention
-mt_return_value (struct gdbarch *gdbarch, struct type *func_type,
+mt_return_value (struct gdbarch *gdbarch, struct value *function,
 		 struct type *type, struct regcache *regcache,
 		 gdb_byte *readbuf, const gdb_byte *writebuf)
 {

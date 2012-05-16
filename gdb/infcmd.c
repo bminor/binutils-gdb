@@ -75,7 +75,7 @@ void interrupt_target_command (char *args, int from_tty);
 
 static void nofp_registers_info (char *, int);
 
-static void print_return_value (struct type *func_type,
+static void print_return_value (struct value *function,
 				struct type *value_type);
 
 static void until_next_command (int);
@@ -1416,7 +1416,7 @@ advance_command (char *arg, int from_tty)
    command/BP.  */
 
 struct value *
-get_return_value (struct type *func_type, struct type *value_type)
+get_return_value (struct value *function, struct type *value_type)
 {
   struct regcache *stop_regs = stop_registers;
   struct gdbarch *gdbarch;
@@ -1443,14 +1443,14 @@ get_return_value (struct type *func_type, struct type *value_type)
      inferior function call code.  In fact, when inferior function
      calls are made async, this will likely be made the norm.  */
 
-  switch (gdbarch_return_value (gdbarch, func_type, value_type,
+  switch (gdbarch_return_value (gdbarch, function, value_type,
   				NULL, NULL, NULL))
     {
     case RETURN_VALUE_REGISTER_CONVENTION:
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
     case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
       value = allocate_value (value_type);
-      gdbarch_return_value (gdbarch, func_type, value_type, stop_regs,
+      gdbarch_return_value (gdbarch, function, value_type, stop_regs,
 			    value_contents_raw (value), NULL);
       break;
     case RETURN_VALUE_STRUCT_CONVENTION:
@@ -1468,9 +1468,9 @@ get_return_value (struct type *func_type, struct type *value_type)
 /* Print the result of a function at the end of a 'finish' command.  */
 
 static void
-print_return_value (struct type *func_type, struct type *value_type)
+print_return_value (struct value *function, struct type *value_type)
 {
-  struct value *value = get_return_value (func_type, value_type);
+  struct value *value = get_return_value (function, value_type);
   struct ui_out *uiout = current_uiout;
 
   if (value)
@@ -1548,13 +1548,15 @@ finish_command_continuation (void *arg, int err)
 	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
 	    {
 	      volatile struct gdb_exception ex;
+	      struct value *func;
 
+	      func = read_var_value (a->function, get_current_frame ());
 	      TRY_CATCH (ex, RETURN_MASK_ALL)
 		{
 		  /* print_return_value can throw an exception in some
 		     circumstances.  We need to catch this so that we still
 		     delete the breakpoint.  */
-		  print_return_value (SYMBOL_TYPE (a->function), value_type);
+		  print_return_value (func, value_type);
 		}
 	      if (ex.reason < 0)
 		exception_print (gdb_stdout, ex);

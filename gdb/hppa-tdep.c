@@ -1114,7 +1114,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 /* Handle 32/64-bit struct return conventions.  */
 
 static enum return_value_convention
-hppa32_return_value (struct gdbarch *gdbarch, struct type *func_type,
+hppa32_return_value (struct gdbarch *gdbarch, struct value *function,
 		     struct type *type, struct regcache *regcache,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
@@ -1154,7 +1154,7 @@ hppa32_return_value (struct gdbarch *gdbarch, struct type *func_type,
 }
 
 static enum return_value_convention
-hppa64_return_value (struct gdbarch *gdbarch, struct type *func_type,
+hppa64_return_value (struct gdbarch *gdbarch, struct value *function,
 		     struct type *type, struct regcache *regcache,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {

@@ -29,6 +29,7 @@
 #include "language.h"
 #include "observer.h"
 #include "inferior.h"
+#include "block.h"
 
 static PyTypeObject finish_breakpoint_object_type;
 
@@ -45,9 +46,9 @@ struct finish_breakpoint_object
      May be NULL if no debug information was available or return type
      was VOID.  */
   PyObject *return_type;
-  /* gdb.Type object of the function finished by this breakpoint.  Will be
+  /* gdb.Value object of the function finished by this breakpoint.  Will be
      NULL if return_type is NULL.  */
-  PyObject *function_type;
+  PyObject *function_value;
   /* When stopped at this FinishBreakpoint, gdb.Value object returned by
      the function; Py_None if the value is not computable; NULL if GDB is
      not stopped at a FinishBreakpoint.  */
@@ -78,7 +79,7 @@ bpfinishpy_dealloc (PyObject *self)
   struct finish_breakpoint_object *self_bpfinish =
         (struct finish_breakpoint_object *) self;
 
-  Py_XDECREF (self_bpfinish->function_type);
+  Py_XDECREF (self_bpfinish->function_value);
   Py_XDECREF (self_bpfinish->return_type);
   Py_XDECREF (self_bpfinish->return_value);
 }
@@ -102,9 +103,11 @@ bpfinishpy_pre_stop_hook (struct breakpoint_object *bp_obj)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      struct value *ret =
-          get_return_value (type_object_to_type (self_finishbp->function_type),
-                            type_object_to_type (self_finishbp->return_type));
+      struct value *function =
+        value_object_to_value (self_finishbp->function_value);
+      struct type *value_type =
+        type_object_to_type (self_finishbp->return_type);
+      struct value *ret = get_return_value (function, value_type);
 
       if (ret)
         {
@@ -233,7 +236,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
   /* Find the function we will return from.  */
   self_bpfinish->return_type = NULL;
-  self_bpfinish->function_type = NULL;
+  self_bpfinish->function_value = NULL;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
@@ -248,25 +251,28 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
               /* Remember only non-void return types.  */
               if (TYPE_CODE (ret_type) != TYPE_CODE_VOID)
                 {
+                  struct value *func_value;
+
                   /* Ignore Python errors at this stage.  */
                   self_bpfinish->return_type = type_to_type_object (ret_type);
                   PyErr_Clear ();
-                  self_bpfinish->function_type =
-                      type_to_type_object (SYMBOL_TYPE (function));
+                  func_value = read_var_value (function, frame);
+                  self_bpfinish->function_value =
+                      value_to_value_object (func_value);
                   PyErr_Clear ();
                 }
             }
         }
     }
   if (except.reason < 0
-      || !self_bpfinish->return_type || !self_bpfinish->function_type)
+      || !self_bpfinish->return_type || !self_bpfinish->function_value)
     {
       /* Won't be able to compute return value.  */
       Py_XDECREF (self_bpfinish->return_type);
-      Py_XDECREF (self_bpfinish->function_type);
+      Py_XDECREF (self_bpfinish->function_value);
 
       self_bpfinish->return_type = NULL;
-      self_bpfinish->function_type = NULL;
+      self_bpfinish->function_value = NULL;
     }
 
   bppy_pending_object = &self_bpfinish->py_bp;

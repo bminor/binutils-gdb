@@ -1450,10 +1450,11 @@ spu_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 /* Function return value access.  */
 
 static enum return_value_convention
-spu_return_value (struct gdbarch *gdbarch, struct type *func_type,
+spu_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *type, struct regcache *regcache,
 		  gdb_byte *out, const gdb_byte *in)
 {
+  struct type *func_type = function ? value_type (function) : NULL;
   enum return_value_convention rvc;
   int opencl_vector = 0;
 

@@ -6598,9 +6598,10 @@ set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
     {
       int is_gnu_ifunc;
       const char *function_name;
+      CORE_ADDR func_addr;
 
       find_pc_partial_function_gnu_ifunc (loc->address, &function_name,
-					  NULL, NULL, &is_gnu_ifunc);
+					  &func_addr, NULL, &is_gnu_ifunc);
 
       if (is_gnu_ifunc && !explicit_loc)
 	{
@@ -6621,6 +6622,9 @@ set_breakpoint_location_function (struct bp_location *loc, int explicit_loc)
 	      /* Create only the whole new breakpoint of this type but do not
 		 mess more complicated breakpoints with multiple locations.  */
 	      b->type = bp_gnu_ifunc_resolver;
+	      /* Remember the resolver's address for use by the return
+	         breakpoint.  */
+	      loc->related_address = func_addr;
 	    }
 	}
 

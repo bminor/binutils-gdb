@@ -1,3 +1,101 @@
+2012-05-16  Maciej W. Rozycki  <macro@codesourcery.com>
+            Maciej W. Rozycki  <macro@mips.com>
+
+	* breakpoint.h (bp_location): Add related_address member.
+	* inferior.h (get_return_value): Take a pointer to struct value
+	instead of struct type for the function requested.
+	* value.h (using_struct_return): Likewise.
+	* gdbarch.sh (return_value): Take a pointer to struct value
+	instead of struct type for the function requested.
+	* breakpoint.c (set_breakpoint_location_function): Initialize
+	related_address for bp_gnu_ifunc_resolver breakpoints.
+	* elfread.c (elf_gnu_ifunc_resolver_return_stop): Pass the
+	requested function's address to gdbarch_return_value.
+	* eval.c (evaluate_subexp_standard): Pass the requested
+	function's address to using_struct_return.
+	* infcall.c (call_function_by_hand): Pass the requested
+	function's address to using_struct_return and
+	gdbarch_return_value.
+	* infcmd.c (get_return_value): Take a pointer to struct value
+	instead of struct type for the function requested.
+	(print_return_value): Update accordingly.
+	(finish_command_continuation): Likewise.
+	* stack.c (return_command): Pass the requested function's
+	address to using_struct_return and gdbarch_return_value.
+	* value.c (using_struct_return): Take a pointer to struct value
+	instead of struct type for the function requested.  Pass the
+	requested function's address to gdbarch_return_value.
+	* python/py-finishbreakpoint.c (finish_breakpoint_object):
+	New function_value member, replacing function_type.
+	(bpfinishpy_dealloc): Update accordingly.
+	(bpfinishpy_pre_stop_hook): Likewise.
+	(bpfinishpy_init): Likewise.  Record the requested function's
+	address.
+	* mips-tdep.c (mips_fval_reg): New enum.
+	(mips_o32_push_dummy_call): For MIPS16 FP doubles do not swap
+	words put in GP registers.
+	(mips_o64_push_dummy_call): Update a comment.
+	(mips_o32_return_value): Take a pointer to struct value instead
+	of struct type for the function requested and use it to check if
+	using the MIPS16 calling convention.  Return the designated
+	general purpose registers for floating-point values returned in
+	MIPS16 mode.
+	(mips_o64_return_value): Likewise.
+	* ppc-tdep.h (ppc_sysv_abi_return_value): Update prototype.
+	(ppc_sysv_abi_broken_return_value): Likewise.
+	(ppc64_sysv_abi_return_value): Likewise.
+	* alpha-tdep.c (alpha_return_value): Take a pointer to struct
+	value instead of struct type for the function requested.
+	* amd64-tdep.c (amd64_return_value): Likewise.
+	* amd64-windows-tdep.c (amd64_windows_return_value): Likewise.
+	* arm-tdep.c (arm_return_value): Likewise.
+	* avr-tdep.c (avr_return_value): Likewise.
+	* bfin-tdep.c (bfin_return_value): Likewise.
+	* cris-tdep.c (cris_return_value): Likewise.
+	* frv-tdep.c (frv_return_value): Likewise.
+	* h8300-tdep.c (h8300_return_value): Likewise.
+	(h8300h_return_value): Likewise.
+	* hppa-tdep.c (hppa32_return_value): Likewise.
+	(hppa64_return_value): Likewise.
+	* i386-tdep.c (i386_return_value): Likewise.
+	* ia64-tdep.c (ia64_return_value): Likewise.
+	* iq2000-tdep.c (iq2000_return_value): Likewise.
+	* lm32-tdep.c (lm32_return_value): Likewise.
+	* m32c-tdep.c (m32c_return_value): Likewise.
+	* m32r-tdep.c (m32r_return_value): Likewise.
+	* m68hc11-tdep.c (m68hc11_return_value): Likewise.
+	* m68k-tdep.c (m68k_return_value): Likewise.
+	(m68k_svr4_return_value): Likewise.
+	* m88k-tdep.c (m88k_return_value): Likewise.
+	* mep-tdep.c (mep_return_value): Likewise.
+	* microblaze-tdep.c (microblaze_return_value): Likewise.
+	* mn10300-tdep.c (mn10300_return_value): Likewise.
+	* moxie-tdep.c (moxie_return_value): Likewise.
+	* mt-tdep.c (mt_return_value): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_return_value): Likewise.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_return_value): Likewise.
+	(ppc_sysv_abi_broken_return_value): Likewise.
+	(ppc64_sysv_abi_return_value): Likewise.
+	* ppcnbsd-tdep.c (ppcnbsd_return_value): Likewise.
+	* rl78-tdep.c (rl78_return_value): Likewise.
+	* rs6000-aix-tdep.c (rs6000_return_value): Likewise.
+	* rx-tdep.c (rx_return_value): Likewise.
+	* s390-tdep.c (s390_return_value): Likewise.
+	* score-tdep.c (score_return_value): Likewise.
+	* sh-tdep.c (sh_return_value_nofpu): Likewise.
+	(sh_return_value_fpu): Likewise.
+	* sh64-tdep.c (sh64_return_value): Likewise.
+	* sparc-tdep.c (sparc32_return_value): Likewise.
+	* sparc64-tdep.c (sparc64_return_value): Likewise.
+	* spu-tdep.c (spu_return_value): Likewise.
+	* tic6x-tdep.c (tic6x_return_value): Likewise.
+	* v850-tdep.c (v850_return_value): Likewise.
+	* vax-tdep.c (vax_return_value): Likewise.
+	* xstormy16-tdep.c (xstormy16_return_value): Likewise.
+	* xtensa-tdep.c (xtensa_return_value): Likewise.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+
 2012-05-15  Tom Tromey  <tromey@redhat.com>
 
 	* python/python.c (gdbpy_find_pc_line): Use gdb_py_ulongest.

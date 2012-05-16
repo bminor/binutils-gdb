@@ -450,7 +450,7 @@ score_xfer_register (struct regcache *regcache, int regnum, int length,
 }
 
 static enum return_value_convention
-score_return_value (struct gdbarch *gdbarch, struct type *func_type,
+score_return_value (struct gdbarch *gdbarch, struct value *function,
                     struct type *type, struct regcache *regcache,
                     gdb_byte * readbuf, const gdb_byte * writebuf)
 {

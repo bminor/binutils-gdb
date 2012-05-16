@@ -594,7 +594,7 @@ amd64_classify (struct type *type, enum amd64_reg_class class[2])
 }
 
 static enum return_value_convention
-amd64_return_value (struct gdbarch *gdbarch, struct type *func_type,
+amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 		    struct type *type, struct regcache *regcache,
 		    gdb_byte *readbuf, const gdb_byte *writebuf)
 {

@@ -902,7 +902,7 @@ avr_breakpoint_from_pc (struct gdbarch *gdbarch,
    from WRITEBUF into REGCACHE.  */
 
 static enum return_value_convention
-avr_return_value (struct gdbarch *gdbarch, struct type *func_type,
+avr_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *valtype, struct regcache *regcache,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {

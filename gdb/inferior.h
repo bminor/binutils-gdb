@@ -266,7 +266,7 @@ extern void detach_command (char *, int);
 
 extern void notice_new_inferior (ptid_t, int, int);
 
-extern struct value *get_return_value (struct type *func_type,
+extern struct value *get_return_value (struct value *function,
                                        struct type *value_type);
 
 /* Address at which inferior stopped.  */

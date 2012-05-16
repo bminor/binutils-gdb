@@ -28,13 +28,13 @@ struct type;
 
 /* From ppc-sysv-tdep.c ...  */
 enum return_value_convention ppc_sysv_abi_return_value (struct gdbarch *gdbarch,
-							struct type *func_type,
+							struct value *function,
 							struct type *valtype,
 							struct regcache *regcache,
 							gdb_byte *readbuf,
 							const gdb_byte *writebuf);
 enum return_value_convention ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
-							       struct type *func_type,
+							       struct value *function,
 							       struct type *valtype,
 							       struct regcache *regcache,
 							       gdb_byte *readbuf,
@@ -54,7 +54,7 @@ CORE_ADDR ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					  int struct_return,
 					  CORE_ADDR struct_addr);
 enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
-							  struct type *func_type,
+							  struct value *function,
 							  struct type *valtype,
 							  struct regcache *regcache,
 							  gdb_byte *readbuf,

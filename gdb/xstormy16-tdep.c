@@ -197,7 +197,7 @@ xstormy16_store_return_value (struct type *type, struct regcache *regcache,
 }
 
 static enum return_value_convention
-xstormy16_return_value (struct gdbarch *gdbarch, struct type *func_type,
+xstormy16_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *type, struct regcache *regcache,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {

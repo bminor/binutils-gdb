@@ -934,7 +934,7 @@ rl78_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 
 static enum return_value_convention
 rl78_return_value (struct gdbarch *gdbarch,
-		   struct type *func_type,
+		   struct value *function,
 		   struct type *valtype,
 		   struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)

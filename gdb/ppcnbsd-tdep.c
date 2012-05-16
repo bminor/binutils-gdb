@@ -76,7 +76,7 @@ ppcnbsd_regset_from_core_section (struct gdbarch *gdbarch,
    the moment use the broken convention.  Ulgh!  */
 
 static enum return_value_convention
-ppcnbsd_return_value (struct gdbarch *gdbarch, struct type *func_type,
+ppcnbsd_return_value (struct gdbarch *gdbarch, struct value *function,
 		      struct type *valtype, struct regcache *regcache,
 		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
@@ -92,7 +92,7 @@ ppcnbsd_return_value (struct gdbarch *gdbarch, struct type *func_type,
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
 #endif
-    return ppc_sysv_abi_broken_return_value (gdbarch, func_type, valtype,
+    return ppc_sysv_abi_broken_return_value (gdbarch, function, valtype,
 					     regcache, readbuf, writebuf);
 }
 

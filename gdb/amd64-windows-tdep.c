@@ -73,7 +73,7 @@ amd64_windows_classify (struct type *type, enum amd64_reg_class class[2])
 /* Implement the "return_value" gdbarch method for amd64-windows.  */
 
 static enum return_value_convention
-amd64_windows_return_value (struct gdbarch *gdbarch, struct type *func_type,
+amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
 			    struct type *type, struct regcache *regcache,
 			    gdb_byte *readbuf, const gdb_byte *writebuf)
 {

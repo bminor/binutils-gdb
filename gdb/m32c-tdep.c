@@ -2206,7 +2206,7 @@ m32c_return_by_passed_buf (struct type *type)
 
 static enum return_value_convention
 m32c_return_value (struct gdbarch *gdbarch,
-		   struct type *func_type,
+		   struct value *function,
 		   struct type *valtype,
 		   struct regcache *regcache,
 		   gdb_byte *readbuf,

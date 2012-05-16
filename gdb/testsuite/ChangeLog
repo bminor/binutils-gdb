@@ -1,3 +1,7 @@
+2012-05-16  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.base/return-nodebug.exp: Also test float and double types.
+
 2012-05-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR testsuite/12649

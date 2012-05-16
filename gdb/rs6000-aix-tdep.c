@@ -424,7 +424,7 @@ ran_out_of_registers_for_arguments:
 }
 
 static enum return_value_convention
-rs6000_return_value (struct gdbarch *gdbarch, struct type *func_type,
+rs6000_return_value (struct gdbarch *gdbarch, struct value *function,
 		     struct type *valtype, struct regcache *regcache,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {

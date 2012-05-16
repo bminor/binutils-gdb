@@ -503,8 +503,8 @@ m:CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf:
 m:void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
 M:CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 
-# Return the return-value convention that will be used by FUNCTYPE
-# to return a value of type VALTYPE.  FUNCTYPE may be NULL in which
+# Return the return-value convention that will be used by FUNCTION
+# to return a value of type VALTYPE.  FUNCTION may be NULL in which
 # case the return convention is computed based only on VALTYPE.
 #
 # If READBUF is not NULL, extract the return value and save it in this buffer.
@@ -513,7 +513,7 @@ M:CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 # stored into the appropriate register.  This can be used when we want
 # to force the value returned by a function (see the "return" command
 # for instance).
-M:enum return_value_convention:return_value:struct type *functype, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:functype, valtype, regcache, readbuf, writebuf
+M:enum return_value_convention:return_value:struct value *function, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:function, valtype, regcache, readbuf, writebuf
 
 m:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 M:CORE_ADDR:skip_main_prologue:CORE_ADDR ip:ip

@@ -374,7 +374,7 @@ lm32_store_return_value (struct type *type, struct regcache *regcache,
 
 /* Determine whether a functions return value is in a register or memory.  */
 static enum return_value_convention
-lm32_return_value (struct gdbarch *gdbarch, struct type *func_type,
+lm32_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *valtype, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {

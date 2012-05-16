@@ -425,6 +425,11 @@ struct bp_location
      processor's architectual constraints.  */
   CORE_ADDR requested_address;
 
+  /* An additional address assigned with this location.  This is currently
+     only used by STT_GNU_IFUNC resolver breakpoints to hold the address
+     of the resolver function.  */
+  CORE_ADDR related_address;
+
   /* If the location comes from a probe point, this is the probe associated
      with it.  */
   struct probe *probe;

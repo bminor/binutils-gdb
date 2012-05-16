@@ -383,7 +383,7 @@ m88k_dummy_id (struct gdbarch *arch, struct frame_info *this_frame)
    from WRITEBUF into REGCACHE.  */
 
 static enum return_value_convention
-m88k_return_value (struct gdbarch *gdbarch, struct type *func_type,
+m88k_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *type, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {

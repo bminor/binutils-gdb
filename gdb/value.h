@@ -698,7 +698,7 @@ extern int value_bit_index (struct type *type, const gdb_byte *addr,
 			    int index);
 
 extern int using_struct_return (struct gdbarch *gdbarch,
-				struct type *func_type,
+				struct value *function,
 				struct type *value_type);
 
 extern struct value *evaluate_expression (struct expression *exp);

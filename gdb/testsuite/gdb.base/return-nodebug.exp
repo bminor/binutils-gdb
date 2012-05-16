@@ -41,7 +41,7 @@ proc do_test {type} {
     }
 }
 
-foreach type {{signed char} {short} {int} {long} {long long}} {
+foreach type {{signed char} {short} {int} {long} {long long} {float} {double}} {
     set typeesc [string map {{ } {\ }} $type]
     set typenospace [string map {{ } -} $type]
 

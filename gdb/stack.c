@@ -2238,6 +2238,7 @@ return_command (char *retval_exp, int from_tty)
   struct gdbarch *gdbarch;
   struct symbol *thisfun;
   struct value *return_value = NULL;
+  struct value *function = NULL;
   const char *query_prefix = "";
 
   thisframe = get_selected_frame ("No selected frame.");
@@ -2282,6 +2283,9 @@ return_command (char *retval_exp, int from_tty)
       if (value_lazy (return_value))
 	value_fetch_lazy (return_value);
 
+      if (thisfun != NULL)
+	function = read_var_value (thisfun, thisframe);
+
       if (TYPE_CODE (return_type) == TYPE_CODE_VOID)
 	/* If the return-type is "void", don't try to find the
            return-value's location.  However, do still evaluate the
@@ -2290,8 +2294,7 @@ return_command (char *retval_exp, int from_tty)
            occur.  */
 	return_value = NULL;
       else if (thisfun != NULL
-	       && using_struct_return (gdbarch,
-				       SYMBOL_TYPE (thisfun), return_type))
+	       && using_struct_return (gdbarch, function, return_type))
 	{
 	  query_prefix = "The location at which to store the "
 	    "function's return value is unknown.\n"
@@ -2326,12 +2329,11 @@ return_command (char *retval_exp, int from_tty)
     {
       struct type *return_type = value_type (return_value);
       struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
-      struct type *func_type = thisfun == NULL ? NULL : SYMBOL_TYPE (thisfun);
 
-      gdb_assert (gdbarch_return_value (gdbarch, func_type, return_type, NULL,
+      gdb_assert (gdbarch_return_value (gdbarch, function, return_type, NULL,
 					NULL, NULL)
 		  == RETURN_VALUE_REGISTER_CONVENTION);
-      gdbarch_return_value (gdbarch, func_type, return_type,
+      gdbarch_return_value (gdbarch, function, return_type,
 			    get_current_regcache (), NULL /*read*/,
 			    value_contents (return_value) /*write*/);
     }
