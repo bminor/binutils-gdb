@@ -1344,7 +1344,7 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	      else
 		{
 		  state = 9;
-		  if (!IS_SYMBOL_COMPONENT (ch)) 
+		  if (ch == EOF || !IS_SYMBOL_COMPONENT (ch))
 		    {
 		      if (ch != EOF)
 			UNGET (ch);

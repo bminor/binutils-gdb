@@ -1,3 +1,9 @@
+2012-05-16  Alberto Garcia  <agarcia@igalia.com>
+
+	PR gas/14082
+	* app.c (do_scrub_chars): Prevent possible out of bounds access to
+	lex[] array.
+
 2012-05-16  Georg-Johann Lay  <avr@gjlay.de>
 
 	PR target/13503
