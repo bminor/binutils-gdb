@@ -1,3 +1,9 @@
+2012-05-16  Nathan Sidwell  <nathan@codesourcery.com>
+	    Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* config/tc-m68k.c (m68k_cpus): Add 51ag, 51je, 51jf, 51jg, 51mm,
+	51qm variants.
+
 2012-05-15  James Murray <jsm@jsm-net.demon.co.uk>
 
 	* config/tc-m68hc11.c: Add S12X and XGATE co-processor support.
