@@ -1,5 +1,9 @@
 2012-05-17  Alan Modra  <amodra@gmail.com>
 
+	* ld-m68k/tls-ld-1.d: Update.
+
+2012-05-17  Alan Modra  <amodra@gmail.com>
+
 	* ld-powerpc/tlsso.r: Update for dynamic sym changes.
 	* ld-powerpc/tlsso32.d: Likewise.
 	* ld-powerpc/tlsso32.r: Likewise.
