@@ -1,3 +1,7 @@
+2012-05-17  Alan Modra  <amodra@gmail.com>
+
+	* ppc_dis.c: Don't include elf/ppc.h.
+
 2012-05-16  Meador Inge  <meadori@codesourcery.com>
 
 	* arm-dis.c (arm_opcodes): Don't disassemble STMFD/LDMIA sp!, {reg}

@@ -2094,26 +2094,6 @@ struct ppc_elf_obj_tdata
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
    && elf_object_id (bfd) == PPC32_ELF_DATA)
 
-/* Rename some of the generic section flags to better document how they
-   are used for ppc32.  */
-
-/* Nonzero if this section has TLS related relocations.  */
-#define has_tls_reloc sec_flg0
-
-/* Nonzero if this section has a call to __tls_get_addr.  */
-#define has_tls_get_addr_call sec_flg1
-
-/* Nonzero if this secs_tls_get_addr_calltion has the VLE bit set.  */
-#define has_vle_insns sec_flg2
-
-bfd_boolean
-is_ppc_vle (asection *sec)
-{
-  return (sec->owner != NULL
-	  && is_ppc_elf (sec->owner)
-	  && sec->has_vle_insns);
-}
-
 /* Override the generic function because we store some extras.  */
 
 static bfd_boolean

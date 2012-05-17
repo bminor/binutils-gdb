@@ -1,5 +1,5 @@
 /* PowerPC-specific support for 64-bit ELF.
-   Copyright 2003, 2005, 2007 Free Software Foundation, Inc.
+   Copyright 2003, 2005, 2007, 2009, 2012 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -26,7 +26,26 @@ enum ppc_elf_plt_type
   PLT_VXWORKS
 };
 
-bfd_boolean is_ppc_vle (asection *);
+/* Rename some of the generic section flags to better document how they
+   are used for ppc32.  These macros should be private to elf32-ppc.c,
+   but opcodes/ppc-dis.c needs is_ppc_vle.  The flags are only valid
+   for ppc32 elf objects.  */
+
+/* Nonzero if this section has TLS related relocations.  */
+#define has_tls_reloc sec_flg0
+
+/* Nonzero if this section has a call to __tls_get_addr.  */
+#define has_tls_get_addr_call sec_flg1
+
+/* Nonzero if this section has the VLE bit set.  */
+#define has_vle_insns sec_flg2
+
+#define is_ppc_vle(SEC) \
+  ((SEC)->owner != NULL						\
+   && bfd_get_flavour ((SEC)->owner) == bfd_target_elf_flavour	\
+   && elf_object_id ((SEC)->owner) == PPC32_ELF_DATA		\
+   && (SEC)->has_vle_insns)
+
 int ppc_elf_select_plt_layout (bfd *, struct bfd_link_info *,
 			       enum ppc_elf_plt_type, int);
 asection *ppc_elf_tls_setup (bfd *, struct bfd_link_info *, int);

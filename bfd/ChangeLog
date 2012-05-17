@@ -1,3 +1,9 @@
+2012-05-17  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (has_tls_reloc, has_tls_get_addr_call, has_vle_insns,
+	is_ppc_vle): Move to..
+	* elf32-ppc.h: ..here, making is_ppc_vle a macro.
+
 2012-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* bfd-in.h (bfd_get_section_name, bfd_get_section_vma,

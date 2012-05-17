@@ -25,7 +25,6 @@
 #include "dis-asm.h"
 #include "elf-bfd.h"
 #include "elf32-ppc.h"
-#include "elf/ppc.h"
 #include "opintl.h"
 #include "opcode/ppc.h"
 
