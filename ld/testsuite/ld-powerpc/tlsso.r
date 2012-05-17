@@ -107,7 +107,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +7 ie4
 .* TLS +LOCAL +DEFAULT +7 le4
 .* TLS +LOCAL +DEFAULT +7 le5
-.* OBJECT +LOCAL +DEFAULT +ABS _DYNAMIC
+.* OBJECT +LOCAL +DEFAULT +9 _DYNAMIC
 .* NOTYPE +LOCAL +DEFAULT +6 00000010\.plt_call\.__tls_get_addr\+0
 .* NOTYPE +LOCAL +DEFAULT +6 __glink_PLTresolve
 .* NOTYPE +LOCAL +DEFAULT +UND \.__tls_get_addr

@@ -1,3 +1,10 @@
+2012-05-17  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tlsso.r: Update for dynamic sym changes.
+	* ld-powerpc/tlsso32.d: Likewise.
+	* ld-powerpc/tlsso32.r: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+
 2012-05-16  Meador Inge  <meadori@codesourcery.com>
 
 	* ld-arm/gc-hidden-1.d: Fix disassembly pattern.

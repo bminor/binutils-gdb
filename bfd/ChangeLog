@@ -1,5 +1,12 @@
 2012-05-17  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (ppc_elf_finish_dynamic_symbol): Don't make _DYNAMIC,
+	_GLOBAL_OFFSET_TABLE_ or _PROCEDURE_LINKAGE_TABLE_ absolute.
+	* elf64-ppc.c (ppc64_elf_finish_dynamic_symbol): Don't make _DYNAMIC
+	absolute.
+
+2012-05-17  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (has_tls_reloc, has_tls_get_addr_call, has_vle_insns,
 	is_ppc_vle): Move to..
 	* elf32-ppc.h: ..here, making is_ppc_vle a macro.

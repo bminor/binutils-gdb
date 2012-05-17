@@ -9139,14 +9139,6 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
   fprintf (stderr, "\n");
 #endif
 
-  /* Mark some specially defined symbols as absolute.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
-      || (!htab->is_vxworks
-	  && (h == htab->elf.hgot
-	      || strcmp (h->root.root.string,
-			 "_PROCEDURE_LINKAGE_TABLE_") == 0)))
-    sym->st_shndx = SHN_ABS;
-
   return TRUE;
 }
 

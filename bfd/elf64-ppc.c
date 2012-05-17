@@ -13869,7 +13869,7 @@ static bfd_boolean
 ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 				 struct bfd_link_info *info,
 				 struct elf_link_hash_entry *h,
-				 Elf_Internal_Sym *sym)
+				 Elf_Internal_Sym *sym ATTRIBUTE_UNUSED)
 {
   struct ppc_link_hash_table *htab;
   struct plt_entry *ent;
@@ -13937,10 +13937,6 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
       loc += htab->relbss->reloc_count++ * sizeof (Elf64_External_Rela);
       bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
     }
-
-  /* Mark some specially defined symbols as absolute.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0)
-    sym->st_shndx = SHN_ABS;
 
   return TRUE;
 }
