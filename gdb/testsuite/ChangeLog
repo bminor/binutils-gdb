@@ -1,3 +1,39 @@
+2012-05-17  Doug Evans  <dje@google.com>
+
+	* Makefile.in (clean): Remove Fission .dwo and .dwp files.
+	* gdb.ada/Makefile.in (clean): Ditto.
+	* gdb.arch/Makefile.in (clean): Ditto.
+	* gdb.asm/Makefile.in (clean): Ditto.
+	* gdb.base/Makefile.in (clean): Ditto.
+	* gdb.cell/Makefile.in (clean): Ditto.
+	* gdb.cp/Makefile.in (clean): Ditto.
+	* gdb.disasm/Makefile.in (clean): Ditto.
+	* gdb.dwarf2/Makefile.in (clean): Ditto.
+	* gdb.fortran/Makefile.in (clean): Ditto.
+	* gdb.go/Makefile.in (clean): Ditto.
+	* gdb.hp/Makefile.in (clean): Ditto.
+	* gdb.hp/gdb.aCC/Makefile.in (clean): Ditto.
+	* gdb.hp/gdb.base-hp/Makefile.in (clean): Ditto.
+	* gdb.hp/gdb.compat/Makefile.in (clean): Ditto.
+	* gdb.hp/gdb.defects/Makefile.in (clean): Ditto.
+	* gdb.hp/gdb.objdbg/Makefile.in (clean): Ditto.
+	* gdb.java/Makefile.in (clean): Ditto.
+	* gdb.linespec/Makefile.in (clean): Ditto.
+	* gdb.mi/Makefile.in (clean): Ditto.
+	* gdb.modula2/Makefile.in (clean): Ditto.
+	* gdb.multi/Makefile.in (clean): Ditto.
+	* gdb.objc/Makefile.in (clean): Ditto.
+	* gdb.opencl/Makefile.in (clean): Ditto.
+	* gdb.opt/Makefile.in (clean): Ditto.
+	* gdb.pascal/Makefile.in (clean): Ditto.
+	* gdb.python/Makefile.in (clean): Ditto.
+	* gdb.reverse/Makefile.in (clean): Ditto.
+	* gdb.server/Makefile.in (clean): Ditto.
+	* gdb.stabs/Makefile.in (clean): Ditto.
+	* gdb.threads/Makefile.in (clean): Ditto.
+	* gdb.trace/Makefile.in (clean): Ditto.
+	* gdb.xml/Makefile.in (clean): Ditto.
+
 2012-05-16  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/macscp1.c (macscp_expr): Add comment.

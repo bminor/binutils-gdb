@@ -19,6 +19,7 @@ all info install-info dvi install uninstall installcheck check:
 clean mostlyclean:
 	-rm -f *~ *.o a.out xgdb *.x *.ci *.tmp core core.* $(EXECUTABLES) \
 	 *.core gcore.test
+	-rm -f *.dwo *.dwp
 
 distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status config.log config.h gdb.log gdb.sum

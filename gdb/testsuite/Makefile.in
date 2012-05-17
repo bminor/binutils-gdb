@@ -215,6 +215,7 @@ subdirs:
 clean mostlyclean:
 	-rm -f *~ core *.o a.out xgdb *.x *.grt bigcore.corefile .gdb_history
 	-rm -f core.* *.tf *.cl *.py tracecommandsscript copy1.txt zzz-gdbscript
+	-rm -f *.dwo *.dwp
 	if [ x"${ALL_SUBDIRS}" != x ] ; then \
 	    for dir in ${ALL_SUBDIRS}; \
 	    do \

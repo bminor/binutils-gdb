@@ -30,7 +30,7 @@ EXECUTABLES = a2-run advance all-types annota1 annota1-watch_thread_num \
 	sepsymtab.debug sepsymtab.stripped setshow setvar shmain shreloc \
 	sigall sigaltstack sigbpt sigchld siginfo siginfo-addr \
 	siginfo-infcall siginfo-obj signals signull sigrepeat sigstep \
-	sizeof skip skip-solib solib solib-corrupted solib-display-main
+	sizeof skip skip-solib solib solib-corrupted solib-display-main \
 	solib-nodir solib-overlap-main-0x40000000 solib-symbol-main solib-weak \
 	solib-weak-lib2 solib_sl so-impl-ld so-indr-cl \
 	stack-checking start step-break step-bt step-line step-resume-infcall \
@@ -57,6 +57,7 @@ all info install-info dvi install uninstall installcheck check:
 
 clean mostlyclean:
 	-rm -f *~ *.o a.out xgdb *.x *.ci *.tmp
+	-rm -f *.dwo *.dwp
 	-rm -f core core.coremaker coremaker.core corefile $(EXECUTABLES)
 	-rm -f $(MISCELLANEOUS)
 

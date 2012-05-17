@@ -13,6 +13,7 @@ all info install-info dvi install uninstall installcheck check:
 
 clean mostlyclean:
 	rm -f *~ *.o *.x *.ci *.sl a.out core
+	rm -f *.dwo *.dwp
 	rm -f $(EXECUTABLES) $(MISCELLANEOUS)
 
 distclean maintainer-clean realclean: clean
