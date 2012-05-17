@@ -4419,6 +4419,7 @@ display_debug_ranges (struct dwarf_section *section,
 		      void *file ATTRIBUTE_UNUSED)
 {
   unsigned char *start = section->start;
+  unsigned char *last_start = start;
   unsigned long bytes;
   unsigned char *section_begin = start;
   unsigned int num_range_list, i;
@@ -4502,11 +4503,16 @@ display_debug_ranges (struct dwarf_section *section,
 		  (unsigned long) (start - section_begin),
 		  (unsigned long) (next - section_begin), section->name);
 	  else if (start > next)
-	    warn (_("There is an overlap [0x%lx - 0x%lx] in %s section.\n"),
-		  (unsigned long) (start - section_begin),
-		  (unsigned long) (next - section_begin), section->name);
+	    {
+	      if (next == last_start)
+		continue;
+	      warn (_("There is an overlap [0x%lx - 0x%lx] in %s section.\n"),
+		    (unsigned long) (start - section_begin),
+		    (unsigned long) (next - section_begin), section->name);
+	    }
 	}
       start = next;
+      last_start = next;
 
       while (1)
 	{

@@ -1,3 +1,8 @@
+2012-05-17  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_ranges): Don't report more than one use
+	of the same range set as an overlap.
+
 2012-05-16  Daniel Richard G.  <skunk@iskunk.org>
 
 	PR binutils/13558
