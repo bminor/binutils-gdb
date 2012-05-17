@@ -1,3 +1,11 @@
+2012-05-17  Maciej W. Rozycki  <macro@linux-mips.org>
+	    Alan Modra  <amodra@gmail.com>
+
+	* elf.c (ignore_section_sym): Correct comment.  Don't return
+	true for absolute section.
+	(elf_map_symbols): Move stray comment.  Adjust for above change.
+	Don't discard global section symbols.
+
 2012-05-17  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_finish_dynamic_symbol): Don't make _DYNAMIC,

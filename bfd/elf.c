@@ -3243,9 +3243,6 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   return TRUE;
 }
 
-/* Map symbol from it's internal number to the external number, moving
-   all local symbols to be at the head of the list.  */
-
 static bfd_boolean
 sym_is_global (bfd *abfd, asymbol *sym)
 {
@@ -3260,7 +3257,7 @@ sym_is_global (bfd *abfd, asymbol *sym)
 }
 
 /* Don't output section symbols for sections that are not going to be
-   output.  */
+   output, or that are duplicates.  */
 
 static bfd_boolean
 ignore_section_sym (bfd *abfd, asymbol *sym)
@@ -3268,8 +3265,12 @@ ignore_section_sym (bfd *abfd, asymbol *sym)
   return ((sym->flags & BSF_SECTION_SYM) != 0
 	  && !(sym->section->owner == abfd
 	       || (sym->section->output_section->owner == abfd
-		   && sym->section->output_offset == 0)));
+		   && sym->section->output_offset == 0)
+	       || bfd_is_abs_section (sym->section)));
 }
+
+/* Map symbol from it's internal number to the external number, moving
+   all local symbols to be at the head of the list.  */
 
 static bfd_boolean
 elf_map_symbols (bfd *abfd)
@@ -3312,7 +3313,8 @@ elf_map_symbols (bfd *abfd)
 
       if ((sym->flags & BSF_SECTION_SYM) != 0
 	  && sym->value == 0
-	  && !ignore_section_sym (abfd, sym))
+	  && !ignore_section_sym (abfd, sym)
+	  && !bfd_is_abs_section (sym->section))
 	{
 	  asection *sec = sym->section;
 
@@ -3326,12 +3328,10 @@ elf_map_symbols (bfd *abfd)
   /* Classify all of the symbols.  */
   for (idx = 0; idx < symcount; idx++)
     {
-      if (ignore_section_sym (abfd, syms[idx]))
-	continue;
-      if (!sym_is_global (abfd, syms[idx]))
-	num_locals++;
-      else
+      if (sym_is_global (abfd, syms[idx]))
 	num_globals++;
+      else if (!ignore_section_sym (abfd, syms[idx]))
+	num_locals++;
     }
 
   /* We will be adding a section symbol for each normal BFD section.  Most
@@ -3361,12 +3361,12 @@ elf_map_symbols (bfd *abfd)
       asymbol *sym = syms[idx];
       unsigned int i;
 
-      if (ignore_section_sym (abfd, sym))
-	continue;
-      if (!sym_is_global (abfd, sym))
+      if (sym_is_global (abfd, sym))
+	i = num_locals + num_globals2++;
+      else if (!ignore_section_sym (abfd, sym))
 	i = num_locals2++;
       else
-	i = num_locals + num_globals2++;
+	continue;
       new_syms[i] = sym;
       sym->udata.i = i + 1;
     }
