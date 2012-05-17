@@ -1,3 +1,32 @@
+2012-05-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* procfs.c (procfs_find_new_threads, procfs_pid_to_str,
+	proc_warn, proc_error, proc_get_status, proc_flags,
+	proc_why, proc_what, proc_nsysarg, proc_sysargs,
+	proc_set_run_on_last_close, proc_unset_run_on_last_close,
+	proc_unset_inherit_on_fork, proc_set_async, proc_unset_async,
+	proc_stop_process, proc_wait_for_stop, proc_run_process,
+	proc_set_traced_signals, proc_set_traced_faults,
+	proc_set_traced_sysentry, proc_set_traced_sysexit,
+	proc_set_held_signals, proc_get_held_signals,
+	proc_get_traced_signals, proc_get_traced_faults,
+	proc_get_traced_sysentry, proc_get_traced_sysexit,
+	proc_clear_current_fault, proc_set_current_signal,
+	proc_clear_current_signal, proc_get_gregs, proc_get_fpregs,
+	proc_set_gregs, proc_set_fpregs, proc_kill, proc_parent_pid,
+	proc_get_nthreads, proc_get_nthreads, proc_get_nthreads,
+	proc_get_current_thread, proc_get_current_thread,
+	proc_get_current_thread, proc_update_threads,
+	proc_update_threads, proc_update_threads, proc_update_threads,
+	proc_iterate_over_threads, procfs_find_new_threads,
+	procfs_pid_to_str): Make static.  Remove advance declaration.
+	(proc_cursig): Make static.  Conditionalized defintion on
+	PROCFS_DONT_PIOCSSIG_CURSIG being defined.
+	(proc_syscall, proc_set_kill_on_last_close,
+	proc_unset_kill_on_last_close, proc_set_inherit_on_fork,
+	proc_get_pending_signals, proc_get_signal_actions,
+	proc_trace_signal, proc_ignore_signal): Delete.
+
 2012-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* coffread.c (cs_section_address): Passing proper argument for
