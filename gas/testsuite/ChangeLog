@@ -1,3 +1,54 @@
+2012-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/all/weakref1.d: Expect addend as signed.
+	* gas/arm/pic_vxworks.d: Likewise.
+	* gas/arm/wince.d: Likewise.
+	* gas/h8300/h8300.exp: Likewise.
+	* gas/i386/sub.d: Likewise.
+	* gas/mips/ecoff@ld.d: Likewise.
+	* gas/mips/ecoff@sd.d: Likewise.
+	* gas/mips/l_d-n32.d: Likewise.
+	* gas/mips/l_d-n64.d: Likewise.
+	* gas/mips/l_d.d: Likewise.
+	* gas/mips/ld-n32.d: Likewise.
+	* gas/mips/ld-n64.d: Likewise.
+	* gas/mips/ld.d: Likewise.
+	* gas/mips/mips1@l_d.d: Likewise.
+	* gas/mips/mips1@ld-forward.d: Likewise.
+	* gas/mips/mips1@ld.d: Likewise.
+	* gas/mips/mips1@s_d.d: Likewise.
+	* gas/mips/s_d-n32.d: Likewise.
+	* gas/mips/s_d-n64.d: Likewise.
+	* gas/mips/s_d.d: Likewise.
+	* gas/mips/sd-n32.d: Likewise.
+	* gas/mips/sd-n64.d: Likewise.
+	* gas/mips/sd.d: Likewise.
+	* gas/mmix/bz-c.d: Likewise.
+	* gas/mmix/geta-c.d: Likewise.
+	* gas/mmix/jump-c.d: Likewise.
+	* gas/mmix/pushj-c.d: Likewise.
+	* gas/mmix/pushj-cs.d: Likewise.
+	* gas/mmix/reloc16-n.d: Likewise.
+	* gas/mmix/reloc16-r.d: Likewise.
+	* gas/mmix/reloc16.d: Likewise.
+	* gas/mmix/reloc8-r.d: Likewise.
+	* gas/mmix/reloc8.d: Likewise.
+	* gas/mmix/relocxrn.d: Likewise.
+	* gas/sh/sh64/case-1.d: Likewise.
+	* gas/sh/sh64/mix-1.d: Likewise.
+	* gas/sh/sh64/pt32-1.d: Likewise.
+	* gas/sh/sh64/pt64-1.d: Likewise.
+	* gas/sh/sh64/pt64-32-2.d: Likewise.
+	* gas/sh/sh64/rel32-2.d: Likewise.
+	* gas/sh/sh64/rel32-4.d: Likewise.
+	* gas/sh/sh64/rel64-2.d: Likewise.
+	* gas/sh/sh64/rel64-4.d: Likewise.
+	* gas/tic6x/data-reloc.d: Likewise.
+	* gas/tic6x/pcr-relocs.d: Likewise.
+	* gas/xstormy16/allinsn.d: Likewise.
+	* gas/xstormy16/reloc-1.d: Likewise.
+	* gas/xstormy16/reloc-2.d: Likewise.
+
 2012-05-17  Alan Modra  <amodra@gmail.com>
 
 	* gas/elf/dwarf2-1.d: Update.

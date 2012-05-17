@@ -1,3 +1,7 @@
+2012-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/hppa/objdump.exp: Expect addend as signed.
+
 2012-05-17  Alan Modra  <amodra@gmail.com>
 
 	* binutils-all/objdump.W: Update.

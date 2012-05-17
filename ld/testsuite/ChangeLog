@@ -1,3 +1,8 @@
+2012-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-arm/emit-relocs1-vxworks.d: Expect addend as signed.
+	* ld-spu/pic.d: Likewise.
+
 2012-05-17  Hans-Peter Nilsson  <hp@axis.com>
 
 	* lib/ld-lib.exp (run_dump_test): For options "warning" and
