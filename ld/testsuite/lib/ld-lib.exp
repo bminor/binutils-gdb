@@ -623,7 +623,18 @@ proc run_dump_test { name } {
 	if { $opt_name == "as" || $opt_name == "ld" } {
 	    set opt_val [subst $opt_val]
 	}
-	set opts($opt_name) [concat $opts($opt_name) $opt_val]
+
+	# Append differently whether it's a message (without space) or
+	# an option or list (with space).
+	switch -- $opt_name {
+	    warning -
+	    error {
+		append opts($opt_name) $opt_val
+	    }
+	    default {
+		set opts($opt_name) [concat $opts($opt_name) $opt_val]
+	    }
+	}
     }
     foreach opt { as ld } {
 	regsub {\[big_or_little_endian\]} $opts($opt) \

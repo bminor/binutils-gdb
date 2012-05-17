@@ -1,3 +1,8 @@
+2012-05-17  Hans-Peter Nilsson  <hp@axis.com>
+
+	* lib/ld-lib.exp (run_dump_test): For options "warning" and
+	"error", append to earlier option values without adding a space.
+
 2012-05-17  Alan Modra  <amodra@gmail.com>
 
 	* ld-m68k/tls-ld-1.d: Update.
