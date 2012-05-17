@@ -94,14 +94,14 @@
 
 2012-04-24  Alan Modra  <amodra@gmail.com>
 
-	* ld/ldlang.c (size_input_section): Use sec_info_type rather than
+	* ldlang.c (size_input_section): Use sec_info_type rather than
 	usrdata->flags.just_syms.
-	* ld/ldwrite.c (build_link_order): Likewise.
-	* ld/emultempl/hppaelf.em (build_section_lists): Likewise.
-	* ld/emultempl/ppc64elf.em (build_toc_list): Likewise.
-	* ld/emultempl/armelf.em (build_section_lists): Likewise.
+	* ldwrite.c (build_link_order): Likewise.
+	* emultempl/hppaelf.em (build_section_lists): Likewise.
+	* emultempl/ppc64elf.em (build_toc_list): Likewise.
+	* emultempl/armelf.em (build_section_lists): Likewise.
 	(after_allocation): Update for renamed sec_info_type value.
-	* ld/emultempl/tic6xdsbt.em: Likewise.
+	* emultempl/tic6xdsbt.em: Likewise.
 
 2012-04-12  Roland McGrath  <mcgrathr@google.com>
 
@@ -177,7 +177,7 @@
 2012-03-25  Alan Modra  <amodra@gmail.com>
 
 	* ldemul.c (before_allocation_default): Revert last change.
-	ldlang.c (lang_add_section): Likewise.
+	* ldlang.c (lang_add_section): Likewise.
 	(strip_excluded_output_sections): Don't strip output sections with
 	user input sections when emitrelocations, unless all are SEC_EXCLUDE.
 
