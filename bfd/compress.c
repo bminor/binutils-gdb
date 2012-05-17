@@ -1,5 +1,5 @@
 /* Compressed section support (intended for debug sections).
-   Copyright 2008, 2010, 2011
+   Copyright 2008, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -19,7 +19,6 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#include "config.h"
 #include "sysdep.h"
 #include "bfd.h"
 #include "libbfd.h"

@@ -4750,6 +4750,9 @@ $as_echo "#define HAVE_LC_MESSAGES 1" >>confdefs.h
 ac_config_headers="$ac_config_headers config.h:config.in"
 
 
+# PR 14072
+
+
 if test -z "$target" ; then
     as_fn_error "Unrecognized target system type; please check config.sub." "$LINENO" 5
 fi
@@ -12174,7 +12177,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12177 "configure"
+#line 12180 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12280,7 +12283,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12283 "configure"
+#line 12286 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

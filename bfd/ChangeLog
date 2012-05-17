@@ -1,3 +1,22 @@
+2012-05-17  Daniel Richard G.  <skunk@iskunk.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 14072
+	* configure.in: Add check that sysdep.h has been included before
+	any system header files.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* bfd-in.h: Generate an error if included before config.h.
+	* sysdep.h: Likewise.
+	* bfd-in2.h: Regenerate.
+	* compress.c: Remove #include "config.h".
+	* plugin.c: Likewise.
+	* elf32-m68hc1x.c: Include sysdep.h before alloca-conf.h.
+	* elf64-hppa.c: Likewise.
+	* som.c: Likewise.
+	* xsymc.c: Likewise.
+
 2012-05-17  Maciej W. Rozycki  <macro@linux-mips.org>
 	    Alan Modra  <amodra@gmail.com>
 

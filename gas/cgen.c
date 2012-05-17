@@ -1,6 +1,6 @@
 /* GAS interface for targets using CGEN: Cpu tools GENerator.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2009, 2010, 2011 Free Software Foundation, Inc.
+   2006, 2007, 2009, 2010, 2011, 2012  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -18,8 +18,8 @@
    along with GAS; see the file COPYING.  If not, write to the Free Software
    Foundation, 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#include <setjmp.h>
 #include "as.h"
+#include <setjmp.h>
 #include "symcat.h"
 #include "cgen-desc.h"
 #include "subsegs.h"

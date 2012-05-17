@@ -1,3 +1,59 @@
+2012-05-17  Daniel Richard G.  <skunk@iskunk.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 14072
+	* configure.in: Add check that sysdep.h has been included before
+	any system header files.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* sysdep.h: Generate an error if included before config.h.
+	* alpha-opc.c: Include sysdep.h before any other header file.
+	* alpha-dis.c: Likewise.
+	* avr-dis.c: Likewise.
+	* cgen-opc.c: Likewise.
+	* cr16-dis.c: Likewise.
+	* cris-dis.c: Likewise.
+	* crx-dis.c: Likewise.
+	* d10v-dis.c: Likewise.
+	* d10v-opc.c: Likewise.
+	* d30v-dis.c: Likewise.
+	* d30v-opc.c: Likewise.
+	* h8500-dis.c: Likewise.
+	* i370-dis.c: Likewise.
+	* i370-opc.c: Likewise.
+	* m10200-dis.c: Likewise.
+	* m10300-dis.c: Likewise.
+	* micromips-opc.c: Likewise.
+	* mips-opc.c: Likewise.
+	* mips61-opc.c: Likewise.
+	* moxie-dis.c: Likewise.
+	* or32-opc.c: Likewise.
+	* pj-dis.c: Likewise.
+	* ppc-dis.c: Likewise.
+	* ppc-opc.c: Likewise.
+	* s390-dis.c: Likewise.
+	* sh-dis.c: Likewise.
+	* sh64-dis.c: Likewise.
+	* sparc-dis.c: Likewise.
+	* sparc-opc.c: Likewise.
+	* spu-dis.c: Likewise.
+	* tic30-dis.c: Likewise.
+	* tic54x-dis.c: Likewise.
+	* tic80-dis.c: Likewise.
+	* tic80-opc.c: Likewise.
+	* tilegx-dis.c: Likewise.
+	* tilepro-dis.c: Likewise.
+	* v850-dis.c: Likewise.
+	* v850-opc.c: Likewise.
+	* vax-dis.c: Likewise.
+	* w65-dis.c: Likewise.
+	* xgate-dis.c: Likewise.
+	* xtensa-dis.c: Likewise.
+	* rl78-decode.opc: Likewise.
+	* rl78-decode.c: Regenerate.
+	* rx-decode.opc: Likewise.
+	* rx-decode.c: Regenerate.
+
 2012-05-17  Alan Modra  <amodra@gmail.com>
 
 	* ppc_dis.c: Don't include elf/ppc.h.

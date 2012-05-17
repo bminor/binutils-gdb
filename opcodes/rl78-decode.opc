@@ -1,9 +1,8 @@
 /* -*- c -*- */
+#include "sysdep.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "config.h"
 #include "ansidecl.h"
 #include "opcode/rl78.h"
 

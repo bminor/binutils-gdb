@@ -1,6 +1,6 @@
 /* tc-mmix.c -- Assembler for Don Knuth's MMIX.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
-   Free Software Foundation.
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
+   2012  Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -27,8 +27,8 @@
    compatible syntax, but the main purpose is to serve GCC.  */
 
 
-#include <limits.h>
 #include "as.h"
+#include <limits.h>
 #include "subsegs.h"
 #include "elf/mmix.h"
 #include "opcode/mmix.h"
@@ -40,11 +40,11 @@
    for example assert something of what it became or make a relocation.  */
 
 enum mmix_fixup_action
- {
-   mmix_fixup_byte,
-   mmix_fixup_register,
-   mmix_fixup_register_or_adjust_for_byte
- };
+{
+  mmix_fixup_byte,
+  mmix_fixup_register,
+  mmix_fixup_register_or_adjust_for_byte
+};
 
 static int get_spec_regno (char *);
 static int get_operands (int, char *, expressionS *);

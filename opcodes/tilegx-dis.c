@@ -1,5 +1,5 @@
 /* tilegx-dis.c.  Disassembly routines for the TILE-Gx architecture.
-   Copyright 2011 Free Software Foundation, Inc.
+   Copyright 2011, 2012 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -18,12 +18,12 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include "sysdep.h"
 #include <stddef.h>
 #include <assert.h>
 #include "bfd.h"
 #include "elf/tilegx.h"
 #include "elf-bfd.h"
-#include "sysdep.h"
 #include "dis-asm.h"
 #include "opcode/tilegx.h"
 

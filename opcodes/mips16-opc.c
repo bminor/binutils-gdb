@@ -1,5 +1,5 @@
 /* mips16-opc.c.  Mips16 opcode table.
-   Copyright 1996, 1997, 1998, 2000, 2005, 2006, 2007
+   Copyright 1996, 1997, 1998, 2000, 2005, 2006, 2007, 2012
    Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support
 
@@ -20,8 +20,8 @@
    Free Software Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#include <stdio.h>
 #include "sysdep.h"
+#include <stdio.h>
 #include "opcode/mips.h"
 
 /* This is the opcodes table for the mips16 processor.  The format of

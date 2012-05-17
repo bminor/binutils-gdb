@@ -1,10 +1,9 @@
 #line 1 "rl78-decode.opc"
 /* -*- c -*- */
+#include "sysdep.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "config.h"
 #include "ansidecl.h"
 #include "opcode/rl78.h"
 

@@ -27,6 +27,10 @@
    trying to replace often did that.  If it can be dropped from this
    file (check in a non-ANSI environment!), it should be.  */
 
+#ifdef PACKAGE
+#error sysdep.h must be included in lieu of config.h
+#endif
+
 #include "config.h"
 
 #include "ansidecl.h"

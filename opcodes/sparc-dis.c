@@ -1,6 +1,6 @@
 /* Print SPARC instructions.
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2010
+   2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2010, 2012
    Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
@@ -20,9 +20,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#include <stdio.h>
-
 #include "sysdep.h"
+#include <stdio.h>
 #include "opcode/sparc.h"
 #include "dis-asm.h"
 #include "libiberty.h"

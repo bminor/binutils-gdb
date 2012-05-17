@@ -1,6 +1,6 @@
 /* Table of opcodes for the sparc.
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2002, 2004, 2005, 2006, 2007, 2008, 2011
+   2000, 2002, 2004, 2005, 2006, 2007, 2008, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
@@ -25,8 +25,8 @@
    instruction's name rather than the args.  This would make gas faster, pinsn
    slower, but would mess up some macros a bit.  xoxorich. */
 
-#include <stdio.h>
 #include "sysdep.h"
+#include <stdio.h>
 #include "opcode/sparc.h"
 
 /* Some defines to make life easy.  */

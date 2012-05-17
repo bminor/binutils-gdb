@@ -32,6 +32,10 @@
 #ifndef __BFD_H_SEEN__
 #define __BFD_H_SEEN__
 
+#ifndef PACKAGE
+#error config.h must be included before this header
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

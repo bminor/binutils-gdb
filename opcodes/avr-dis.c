@@ -1,5 +1,5 @@
 /* Disassemble AVR instructions.
-   Copyright 1999, 2000, 2002, 2004, 2005, 2006, 2007, 2008
+   Copyright 1999, 2000, 2002, 2004, 2005, 2006, 2007, 2008, 2012
    Free Software Foundation, Inc.
 
    Contributed by Denis Chertykov <denisc@overta.ru>
@@ -21,8 +21,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#include <assert.h>
 #include "sysdep.h"
+#include <assert.h>
 #include "dis-asm.h"
 #include "opintl.h"
 #include "libiberty.h"

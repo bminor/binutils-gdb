@@ -58,6 +58,15 @@ AM_BINUTILS_WARNINGS
 # Generate a header file
 AC_CONFIG_HEADERS(config.h:config.in)
 
+# PR 14072
+AH_VERBATIM([00_CONFIG_H_CHECK],
+[/* Check that config.h is #included before system headers
+   (this works only for glibc, but that should be enough).  */
+#if defined(__GLIBC__) && !defined(__CONFIG_H__)
+#  error config.h must be #included before system headers
+#endif
+#define __CONFIG_H__ 1])
+
 # If we are on a DOS filesystem, we must use gdb.ini rather than
 # .gdbinit.
 case "${host}" in
@@ -299,9 +308,9 @@ changequote([,])dnl
           extra_objects="$extra_objects bfin-parse.o"
         fi
 
-        echo ${extra_objects} | grep -s "bfin-lex.o"
+        echo ${extra_objects} | grep -s "bfin-lex-wrapper.o"
         if test $? -ne 0 ; then
-          extra_objects="$extra_objects bfin-lex.o"
+          extra_objects="$extra_objects bfin-lex-wrapper.o"
         fi
         ;;
 
@@ -332,9 +341,9 @@ changequote([,])dnl
 	  extra_objects="$extra_objects itbl-parse.o"
 	fi
 
-	echo ${extra_objects} | grep -s "itbl-lex.o"
+	echo ${extra_objects} | grep -s "itbl-lex-wrapper.o"
 	if test $? -ne 0 ; then
-	  extra_objects="$extra_objects itbl-lex.o"
+	  extra_objects="$extra_objects itbl-lex-wrapper.o"
 	fi
 
 	echo ${extra_objects} | grep -s "itbl-ops.o"

@@ -22,6 +22,10 @@
 #ifndef LD_SYSDEP_H
 #define LD_SYSDEP_H
 
+#ifdef PACKAGE
+#error sysdep.h must be included in lieu of config.h
+#endif
+
 #include "config.h"
 
 #include <stdio.h>

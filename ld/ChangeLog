@@ -1,3 +1,13 @@
+2012-05-17  Daniel Richard G.  <skunk@iskunk.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 14072
+	* configure.in: Add check that sysdep.h has been included before
+	any system header files.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* sysdep.h: Generate an error if included before config.h.
+
 2012-05-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* emultempl/m68hc1xelf.em (hook_in_stub): Pass proper `bfd'

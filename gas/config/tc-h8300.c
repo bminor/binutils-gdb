@@ -359,7 +359,6 @@ static int parse_reg (char *, op_type *, unsigned *, int);
 static char *skip_colonthing (char *, int *);
 static char *parse_exp (char *, struct h8_op *);
 
-static int constant_fits_width_p (struct h8_op *, unsigned int);
 static int constant_fits_size_p (struct h8_op *, int, int);
 
 /*
@@ -556,7 +555,7 @@ skip_colonthing (char *src, int *mode)
    @@aa[:8]		memory indirect.  */
 
 static int
-constant_fits_width_p (struct h8_op *operand, unsigned int width)
+constant_fits_width_p (struct h8_op *operand, offsetT width)
 {
   offsetT num;
 

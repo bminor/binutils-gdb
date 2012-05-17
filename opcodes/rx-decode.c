@@ -1,10 +1,9 @@
 #line 1 "rx-decode.opc"
 /* -*- c -*- */
+#include "sysdep.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "config.h"
 #include "ansidecl.h"
 #include "opcode/rx.h"
 

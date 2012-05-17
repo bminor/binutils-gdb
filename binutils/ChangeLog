@@ -1,3 +1,13 @@
+2012-05-17  Daniel Richard G.  <skunk@iskunk.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 14072
+	* configure.in: Add check that sysdep.h has been included before
+	any system header files.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* unwind-ia64.h: Include config.h.
+
 2012-05-17  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.c (process_debug_info): Display abbrev offset in hex.

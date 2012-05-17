@@ -43,11 +43,10 @@
   o Evaluation of constant floating point expressions (expr.c needs
     work!)
 
-  o Support 'abc' constants (that is 0x616263)
-*/
+  o Support 'abc' constants (that is 0x616263).  */
 
-#include "safe-ctype.h"
 #include "as.h"
+#include "safe-ctype.h"
 #include "opcode/tic4x.h"
 #include "subsegs.h"
 #include "obstack.h"

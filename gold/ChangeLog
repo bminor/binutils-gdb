@@ -1,3 +1,12 @@
+2012-05-17  Daniel Richard G.  <skunk@iskunk.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 14072
+	* configure.in: Add check that sysdep.h has been included before
+	any system header files.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2012-05-14  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (Layout::make_output_section): Mark .tdata section
