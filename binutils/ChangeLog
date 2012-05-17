@@ -1,5 +1,10 @@
 2012-05-17  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (process_debug_info): Display abbrev offset in hex.
+	(display_debug_abbrev): Show offset of abbrev.
+
+2012-05-17  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (display_debug_ranges): Don't report more than one use
 	of the same range set as an overlap.
 

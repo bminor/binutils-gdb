@@ -1,5 +1,11 @@
 2012-05-17  Alan Modra  <amodra@gmail.com>
 
+	* gas/elf/dwarf2-1.d: Update.
+	* gas/elf/dwarf2-2.d: Update.
+	* gas/i386/dw2-compress-1.d: Update.
+
+2012-05-17  Alan Modra  <amodra@gmail.com>
+
 	* gas/ppc/vle.d: Pass -a32 to assembler.
 	* gas/ppc/vle-reloc.d: Likewise.
 	* gas/ppc/vle-simple-1.d: Likewise, also match wider addresses.

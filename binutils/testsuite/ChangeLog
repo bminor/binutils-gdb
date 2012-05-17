@@ -1,3 +1,10 @@
+2012-05-17  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/objdump.W: Update.
+	* binutils-all/readelf.wa: Update.
+	* binutils-all/i386/compressed-1a.d: Update.
+	* binutils-all/x86-64/compressed-1a.d: Update.
+
 2012-05-16  Meador Inge  <meadori@codesourcery.com>
 
 	* binutils-all/arm/objdump.exp:

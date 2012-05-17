@@ -7,7 +7,7 @@
 
 Contents of the .[z]?debug_abbrev section:
 
-  Number TAG
+  Number TAG \(0x0\)
    1      DW_TAG_compile_unit    \[has children\]
     DW_AT_producer     DW_FORM_strp
     DW_AT_language     DW_FORM_data1
@@ -30,7 +30,7 @@ Contents of the .[z]?debug_info section:
   Compilation Unit @ offset 0x0:
    Length:        0x46 \(32-bit\)
    Version:       3
-   Abbrev Offset: 0
+   Abbrev Offset: 0x0
    Pointer Size:  4
  <0><b>: Abbrev Number: 1 \(DW_TAG_compile_unit\)
     <c>   DW_AT_producer    : \(indirect string, offset: 0x0\): GNU C 4.4.4	
