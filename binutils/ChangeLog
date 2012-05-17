@@ -1,3 +1,10 @@
+2012-05-18  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.in: Regenerate.
+
 2012-05-17  Daniel Richard G.  <skunk@iskunk.org>
 	    Nick Clifton  <nickc@redhat.com>
 
