@@ -1,4 +1,4 @@
-#as: -mvle
+#as: -a32 -mvle
 #objdump: -dr -Mvle
 #name: VLE relocations
 

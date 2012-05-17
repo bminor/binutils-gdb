@@ -1,4 +1,4 @@
-#as: -mvle
+#as: -a32 -mvle
 #objdump: -dr -Mvle
 #name: VLE Simplified mnemonics 4
 
@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-00000000 <subtract>:
+0+0 <subtract>:
    0:	7c 23 10 50 	subf    r1,r3,r2
    4:	7c a3 20 51 	subf.   r5,r3,r4
    8:	7c 21 14 50 	subfo   r1,r1,r2

@@ -1,3 +1,14 @@
+2012-05-17  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/vle.d: Pass -a32 to assembler.
+	* gas/ppc/vle-reloc.d: Likewise.
+	* gas/ppc/vle-simple-1.d: Likewise, also match wider addresses.
+	* gas/ppc/vle-simple-2.d: Likewise.
+	* gas/ppc/vle-simple-3.d: Likewise.
+	* gas/ppc/vle-simple-4.d: Likewise.
+	* gas/ppc/vle-simple-5.d: Likewise.
+	* gas/ppc/vle-simple-6.d: Likewise.
+
 2012-05-16  Meador Inge  <meadori@codesourcery.com>
 
 	* gas/arm/stm-ldm.d: STMFD/LDMIA sp!, {reg} don't disassemble to
