@@ -1487,11 +1487,10 @@ Optional Packages:
   --with-relocated-sources=PATH
                           automatically relocate this path for source files
   --with-auto-load-dir=PATH
-                          directories from which to load auto-loaded scripts,
-                          use '$ddir' for -data-directory [$ddir/auto-load]
+                          directories from which to load auto-loaded scripts
+                          [$datadir/auto-load]
   --with-auto-load-safe-path=PATH
-                          directories safe to hold auto-loaded files, use
-                          $ddir for --with-gdb-datadir path
+                          directories safe to hold auto-loaded files
                           [--with-auto-load-dir]
   --without-auto-load-safe-path
                           do not restrict auto-loaded files locations
@@ -4971,10 +4970,10 @@ $as_echo_n "checking for default auto-load directory... " >&6; }
 if test "${with_auto_load_dir+set}" = set; then :
   withval=$with_auto_load_dir;
 else
-  with_auto_load_dir='$ddir/auto-load'
+  with_auto_load_dir='$datadir/auto-load'
 fi
 
-escape_dir=`echo $with_auto_load_dir | sed 's/[$]ddir\>/\\\\\\\\\\\\&/g'`
+escape_dir=`echo $with_auto_load_dir | sed 's/[$]datadir\>/\\\\\\\\\\\\&/g'`
 
   test "x$prefix" = xNONE && prefix="$ac_default_prefix"
   test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
@@ -5001,7 +5000,7 @@ else
   with_auto_load_safe_path="$with_auto_load_dir"
 fi
 
-escape_dir=`echo $with_auto_load_safe_path | sed 's/[$]ddir\>/\\\\\\\\\\\\&/g'`
+escape_dir=`echo $with_auto_load_safe_path | sed 's/[$]datadir\>/\\\\\\\\\\\\&/g'`
 
   test "x$prefix" = xNONE && prefix="$ac_default_prefix"
   test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'

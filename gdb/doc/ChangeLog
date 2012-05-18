@@ -1,3 +1,9 @@
+2012-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Rename $ddir to $datadir.
+	* gdb.texinfo (Auto-loading, Auto-loading safe path)
+	(objfile-gdb.py file): Rename $ddir to $datadir.
+
 2012-05-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Print Settings): Document 'set print symbol'.

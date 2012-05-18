@@ -174,13 +174,13 @@ auto_load_safe_path_vec_update (void)
       char *ddir_subst, *expanded, *real_path;
 
       ddir_subst = xstrdup (dir);
-      substitute_path_component (&ddir_subst, "$ddir", gdb_datadir);
+      substitute_path_component (&ddir_subst, "$datadir", gdb_datadir);
       expanded = tilde_expand (ddir_subst);
       xfree (ddir_subst);
       real_path = gdb_realpath (expanded);
 
       /* Ensure the current entry is at least a valid path (therefore
-	 $ddir-expanded and tilde-expanded).  */
+	 $datadir-expanded and tilde-expanded).  */
       VEC_replace (char_ptr, auto_load_safe_path_vec, ix, expanded);
 
       if (debug_auto_load)
@@ -212,7 +212,7 @@ auto_load_safe_path_vec_update (void)
     }
 }
 
-/* Variable gdb_datadir has been set.  Update content depending on $ddir.  */
+/* Variable gdb_datadir has been set.  Update content depending on $datadir.  */
 
 static void
 auto_load_gdb_datadir_changed (void)
@@ -699,7 +699,7 @@ auto_load_objfile_script (struct objfile *objfile,
       for (ix = 0; VEC_iterate (char_ptr, vec, ix, dir); ++ix)
 	{
 	  debugfile = xstrdup (dir);
-	  substitute_path_component (&debugfile, "$ddir", gdb_datadir);
+	  substitute_path_component (&debugfile, "$datadir", gdb_datadir);
 	  debugfile = xrealloc (debugfile, (strlen (debugfile)
 					    + strlen (filename) + 1));
 

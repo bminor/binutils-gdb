@@ -1,5 +1,15 @@
 2012-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Rename $ddir to $datadir.
+	* NEWS (--with-auto-load-dir): Rename $ddir to $datadir.
+	* auto-load.c (auto_load_safe_path_vec_update)
+	(auto_load_gdb_datadir_changed, auto_load_objfile_script): Likewise.
+	* configure: Regenerate.
+	* configure.ac (--with-auto-load-dir, --with-auto-load-safe-path):
+	Likewise.  Remove the 'use $ddir' help string.
+
+2012-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* auto-load.c (show_auto_load_safe_path): Accept any combination of
 	DIRNAME_SEPARATOR and IS_DIR_SEPARATOR for wild-match.
 
