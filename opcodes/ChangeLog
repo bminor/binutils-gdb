@@ -1,5 +1,9 @@
 2012-05-17  James Lemke  <jwlemke@codesourcery.com>
 
+	* ppc-opc.c (powerpc_macros): Add entries for e_extlwi to e_clrlslwi.
+
+2012-05-17  James Lemke  <jwlemke@codesourcery.com>
+
 	* ppc-opc.c (extract_sprg): Use ALLOW8_SPRG to include VLE.
 
 2012-05-17  Daniel Richard G.  <skunk@iskunk.org>

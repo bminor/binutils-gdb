@@ -6450,6 +6450,18 @@ const struct powerpc_macro powerpc_macros[] = {
 {"clrrwi.",  3,	PPCCOM,	"rlwinm. %0,%1,0,0,31-(%2)"},
 {"clrlslwi", 4,	PPCCOM,	"rlwinm %0,%1,%3,(%2)-(%3),31-(%3)"},
 {"clrlslwi.",4, PPCCOM,	"rlwinm. %0,%1,%3,(%2)-(%3),31-(%3)"},
+
+{"e_extlwi", 4,	PPCVLE, "e_rlwinm %0,%1,%3,0,(%2)-1"},
+{"e_extrwi", 4,	PPCVLE, "e_rlwinm %0,%1,((%2)+(%3))&((%2)+(%3)<>32),32-(%2),31"},
+{"e_inslwi", 4,	PPCVLE, "e_rlwimi %0,%1,(-(%3)!31)&((%3)|31),%3,(%2)+(%3)-1"},
+{"e_insrwi", 4,	PPCVLE, "e_rlwimi %0,%1,32-((%2)+(%3)),%3,(%2)+(%3)-1"},
+{"e_rotlwi", 3,	PPCVLE, "e_rlwinm %0,%1,%2,0,31"},
+{"e_rotrwi", 3,	PPCVLE, "e_rlwinm %0,%1,(-(%2)!31)&((%2)|31),0,31"},
+{"e_slwi",   3,	PPCVLE, "e_rlwinm %0,%1,%2,0,31-(%2)"},
+{"e_srwi",   3,	PPCVLE, "e_rlwinm %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
+{"e_clrlwi", 3,	PPCVLE, "e_rlwinm %0,%1,0,%2,31"},
+{"e_clrrwi", 3,	PPCVLE, "e_rlwinm %0,%1,0,0,31-(%2)"},
+{"e_clrlslwi",4, PPCVLE, "e_rlwinm %0,%1,%3,(%2)-(%3),31-(%3)"},
 };
 
 const int powerpc_num_macros =
