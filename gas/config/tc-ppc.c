@@ -1136,7 +1136,7 @@ md_parse_option (int c, char *arg)
 	  target_big_endian = 0;
 	  set_target_endian = 1;
 	  if (ppc_cpu & PPC_OPCODE_VLE)
-	    as_bad (_("The use of -mvle requires big endian."));
+	    as_bad (_("the use of -mvle requires big endian."));
 	}
       else
 	return 0;
@@ -1173,6 +1173,8 @@ md_parse_option (int c, char *arg)
 	{
 #ifdef BFD64
 	  ppc_obj64 = 1;
+	  if (ppc_cpu & PPC_OPCODE_VLE)
+	    as_bad (_("the use of -mvle requires -a32."));
 #else
 	  as_fatal (_("%s unsupported"), "-a64");
 #endif
@@ -1188,8 +1190,13 @@ md_parse_option (int c, char *arg)
       if (new_cpu != 0)
 	{
 	  ppc_cpu = new_cpu;
-	  if (set_target_endian && target_big_endian == 0)
-	    as_bad (_("The use of -mvle requires big endian."));
+	  if (strcmp (arg, "vle") == 0)
+	    {
+	      if (set_target_endian && target_big_endian == 0)
+		as_bad (_("the use of -mvle requires big endian."));
+	      if (ppc_obj64)
+		as_bad (_("the use of -mvle requires -a32."));
+	    }
 	}
 
       else if (strcmp (arg, "regnames") == 0)
@@ -1224,7 +1231,7 @@ md_parse_option (int c, char *arg)
 	  target_big_endian = 0;
 	  set_target_endian = 1;
 	  if (ppc_cpu & PPC_OPCODE_VLE)
-	    as_bad (_("The use of -mvle requires big endian."));
+	    as_bad (_("the use of -mvle requires big endian."));
 	}
 
       else if (strcmp (arg, "big") == 0 || strcmp (arg, "big-endian") == 0)
@@ -1378,7 +1385,7 @@ ppc_set_cpu (void)
       else if (strncmp (default_cpu, "powerpc", 7) == 0)
 	ppc_cpu |= PPC_OPCODE_PPC;
       else
-	as_fatal (_("Unknown default cpu = %s, os = %s"),
+	as_fatal (_("unknown default cpu = %s, os = %s"),
 		  default_cpu, default_os);
     }
 }
@@ -1406,7 +1413,7 @@ ppc_arch (void)
 	return bfd_arch_powerpc;
     }
 
-  as_fatal (_("Neither Power nor PowerPC opcodes were selected."));
+  as_fatal (_("neither Power nor PowerPC opcodes were selected."));
   return bfd_arch_unknown;
 }
 
@@ -2165,7 +2172,7 @@ ppc_elf_lcomm (int xxx ATTRIBUTE_UNUSED)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad (_("Expected comma after symbol-name: rest of line ignored."));
+      as_bad (_("expected comma after symbol-name: rest of line ignored."));
       ignore_rest_of_line ();
       return;
     }
@@ -2198,7 +2205,7 @@ ppc_elf_lcomm (int xxx ATTRIBUTE_UNUSED)
 
   if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
-      as_bad (_("Ignoring attempt to re-define symbol `%s'."),
+      as_bad (_("ignoring attempt to re-define symbol `%s'."),
 	      S_GET_NAME (symbolP));
       ignore_rest_of_line ();
       return;
@@ -2206,7 +2213,7 @@ ppc_elf_lcomm (int xxx ATTRIBUTE_UNUSED)
 
   if (S_GET_VALUE (symbolP) && S_GET_VALUE (symbolP) != (valueT) size)
     {
-      as_bad (_("Length of .lcomm \"%s\" is already %ld. Not changed to %ld."),
+      as_bad (_("length of .lcomm \"%s\" is already %ld. Not changed to %ld."),
 	      S_GET_NAME (symbolP),
 	      (long) S_GET_VALUE (symbolP),
 	      (long) size);
@@ -2224,7 +2231,7 @@ ppc_elf_lcomm (int xxx ATTRIBUTE_UNUSED)
       for (align2 = 0; (align & 1) == 0; align >>= 1, ++align2);
       if (align != 1)
 	{
-	  as_bad (_("Common alignment not a power of 2"));
+	  as_bad (_("common alignment not a power of 2"));
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -2286,7 +2293,7 @@ ppc_elf_validate_fix (fixS *fixp, segT seg)
 	      || fixp->fx_r_type != BFD_RELOC_CTOR)
 	    {
 	      as_bad_where (fixp->fx_file, fixp->fx_line,
-			    _("Relocation cannot be done when using -mrelocatable"));
+			    _("relocation cannot be done when using -mrelocatable"));
 	    }
 	}
       return;
@@ -2540,7 +2547,7 @@ md_assemble (char *str)
 
       macro = (const struct powerpc_macro *) hash_find (ppc_macro_hash, str);
       if (macro == (const struct powerpc_macro *) NULL)
-	as_bad (_("Unrecognized opcode: `%s'"), str);
+	as_bad (_("unrecognized opcode: `%s'"), str);
       else
 	ppc_macro (s, macro);
 
@@ -2735,12 +2742,12 @@ md_assemble (char *str)
 		 toc entries.  We don't support them today.  Is this
 		 the right way to say that?  */
 	      toc_reloc = BFD_RELOC_UNUSED;
-	      as_bad (_("Unimplemented toc32 expression modifier"));
+	      as_bad (_("unimplemented toc32 expression modifier"));
 	      break;
 	    case must_be_64:
 	      /* FIXME: see above.  */
 	      toc_reloc = BFD_RELOC_UNUSED;
-	      as_bad (_("Unimplemented toc64 expression modifier"));
+	      as_bad (_("unimplemented toc64 expression modifier"));
 	      break;
 	    default:
 	      fprintf (stderr,
@@ -3811,7 +3818,7 @@ ppc_dwsect (int ignore ATTRIBUTE_UNUSED)
   /* Return now in case of unknown subsection.  */
   if (dw == NULL)
     {
-      as_bad (_("No known dwarf XCOFF section for flag 0x%08x\n"),
+      as_bad (_("no known dwarf XCOFF section for flag 0x%08x\n"),
               (unsigned)flag);
       return;
     }
@@ -3940,7 +3947,7 @@ ppc_named_section (int ignore ATTRIBUTE_UNUSED)
     real_name = ".data[RW]";
   else
     {
-      as_bad (_("The XCOFF file format does not support arbitrary sections"));
+      as_bad (_("the XCOFF file format does not support arbitrary sections"));
       *input_line_pointer = c;
       ignore_rest_of_line ();
       return;
@@ -4881,7 +4888,7 @@ ppc_previous (int ignore ATTRIBUTE_UNUSED)
 
   if (ppc_previous_section == NULL)
     {
-      as_warn (_("No previous section to return to. Directive ignored."));
+      as_warn (_("no previous section to return to, ignored."));
       return;
     }
 
@@ -5116,7 +5123,7 @@ ppc_pe_comm (int lcomm)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad (_("Expected comma after symbol-name: rest of line ignored."));
+      as_bad (_("expected comma after symbol-name: rest of line ignored."));
       ignore_rest_of_line ();
       return;
     }
@@ -5152,7 +5159,7 @@ ppc_pe_comm (int lcomm)
   *p = c;
   if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
-      as_bad (_("Ignoring attempt to re-define symbol `%s'."),
+      as_bad (_("ignoring attempt to re-define symbol `%s'."),
 	      S_GET_NAME (symbolP));
       ignore_rest_of_line ();
       return;
@@ -5161,7 +5168,7 @@ ppc_pe_comm (int lcomm)
   if (S_GET_VALUE (symbolP))
     {
       if (S_GET_VALUE (symbolP) != (valueT) temp)
-	as_bad (_("Length of .comm \"%s\" is already %ld. Not changed to %ld."),
+	as_bad (_("length of .comm \"%s\" is already %ld. Not changed to %ld."),
 		S_GET_NAME (symbolP),
 		(long) S_GET_VALUE (symbolP),
 		(long) temp);
@@ -5291,7 +5298,7 @@ ppc_pe_section (int ignore ATTRIBUTE_UNUSED)
 		{
 		  /* Section Contents */
 		case 'a': /* unknown */
-		  as_bad (_("Unsupported section attribute -- 'a'"));
+		  as_bad (_("unsupported section attribute -- 'a'"));
 		  break;
 		case 'c': /* code section */
 		  flags |= SEC_CODE;
@@ -5568,7 +5575,7 @@ ppc_symbol_new_hook (symbolS *sym)
     }
 
   if (tc->symbol_class == -1)
-    as_bad (_("Unrecognized symbol suffix"));
+    as_bad (_("unrecognized symbol suffix"));
 }
 
 /* Set the class of a label based on where it is defined.  This
@@ -6847,10 +6854,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      /* This can occur if there is a bug in the input assembler, eg:
 		 ".byte <undefined_symbol> - ."  */
 	      if (fixP->fx_addsy)
-		as_bad (_("Unable to handle reference to symbol %s"),
+		as_bad (_("unable to handle reference to symbol %s"),
 			S_GET_NAME (fixP->fx_addsy));
 	      else
-		as_bad (_("Unable to resolve expression"));
+		as_bad (_("unable to resolve expression"));
 	      fixP->fx_done = 1;
 	    }
 	  else
