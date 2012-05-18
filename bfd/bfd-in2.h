@@ -32,7 +32,8 @@
 #ifndef __BFD_H_SEEN__
 #define __BFD_H_SEEN__
 
-#ifndef PACKAGE
+/* PR 14072: Ensure that config.h is included first.  */
+#if !defined PACKAGE && !defined PACKAGE_VERSION
 #error config.h must be included before this header
 #endif
 

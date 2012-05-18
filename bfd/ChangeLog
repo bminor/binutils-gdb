@@ -1,3 +1,10 @@
+2012-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 14072
+	* bfd-in.h: Check for PACKAGE or PACKAGE_VERSION before
+	complaining about config.h not having been included.
+	* bfd-in2.h: Regenerate.
+
 2012-05-18  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* aclocal.m4: Regenerate.
