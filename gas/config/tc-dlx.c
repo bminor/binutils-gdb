@@ -246,8 +246,10 @@ s_proc (int end_p)
 	     char prepended.  */
 	  if (leading_char)
 	    {
-	      if (asprintf (&label, "%c%s", leading_char, name))
-		{ /* Avoid warning */ }
+	      unsigned len = strlen (name) + 1;
+	      label = xmalloc (len + 1);
+	      label[0] = leading_char;
+	      memcpy (label + 1, name, len);
 	    }
 	  else
 	    label = name;

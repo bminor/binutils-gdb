@@ -1,3 +1,7 @@
+2012-05-19  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-dlx.c (s_proc): Don't use asprintf.
+
 2012-05-18  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-dlx.c (s_proc): Avoid warning about ignoring asprintf
