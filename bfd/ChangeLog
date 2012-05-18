@@ -1,3 +1,7 @@
+2012-05-18  Pedro Alves  <palves@redhat.com>
+
+	* mach-o.h: Don't include sysdep.h.
+
 2012-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 14072
