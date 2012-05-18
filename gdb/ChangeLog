@@ -1,3 +1,127 @@
+2012-05-18  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* NEWS: Add microMIPS support and "set mips compression",
+	"show mips compression" commands.
+	* mips-tdep.h (mips_isa): New enum.
+	(gdbarch_tdep): Add mips_isa.
+	(mips_pc_is_mips16): Update prototype.
+	(mips_pc_is_mips, mips_pc_is_micromips): New prototypes.
+	* mips-tdep.c (mips_compression_mips16): New variable.
+	(mips_compression_micromips): Likewise.
+	(mips_compression_strings): Likewise.
+	(mips_compression_string): Likewise.
+	(is_mips16_isa, is_micromips_isa): New functions.
+	(is_mips16_addr): Rename to...
+	(is_compact_addr): ... this.
+	(unmake_mips16_addr): Likewise to...
+	(unmake_compact_addr): ... this.
+	(make_mips16_addr): Likewise to...
+	(make_compact_addr): ... this.
+	(is_mips_addr, is_mips16_addr, is_micromips_addr): New
+	functions.
+	(mips_elf_make_msymbol_special): Handle microMIPS code.
+	(msymbol_is_special): Rename to...
+	(msymbol_is_mips16): ... this.
+	(mips_make_symbol_special, mips_pc_is_mips16): Update
+	accordingly.
+	(msymbol_is_mips, msymbol_is_micromips): New functions.
+	(mips16_to_32_reg): Rename to...
+	(mips_reg3_to_reg): ... this.
+	(mips_pc_is_mips, mips_pc_is_micromips): New functions.
+	(mips_pc_isa): Likewise.
+	(mips_read_pc, mips_unwind_pc, mips_write_pc): Handle microMIPS
+	code.
+	(mips_fetch_instruction): Pass return status instead of printing
+	an error message if requested.  Handle microMIPS code.  Bail out
+	on an invalid ISA.
+	(micromips_op): New macro.
+	(b0s4_imm, b0s5_imm, b0s5_reg, b0s7_imm, b0s10_imm): Likewise.
+	(b1s9_imm, b2s3_cc, b4s2_regl, b5s5_op, b5s5_reg): Likewise.
+	(b6s4_op, b7s3_reg): Likewise.
+	(b0s6_op, b0s11_op, b0s12_imm, b0s16_imm, b0s26_imm): Likewise.
+	(b6s10_ext, b11s5_reg, b12s4_op): Likewise.
+	(mips_insn_size): New function.
+	(mips32_next_pc): Update mips_fetch_instruction call.
+	(micromips_relative_offset7): New function.
+	(micromips_relative_offset10): Likewise.
+	(micromips_relative_offset16): Likewise.
+	(micromips_pc_insn_size): Likewise.
+	(micromips_bc1_pc): Likewise.
+	(micromips_next_pc): Likewise.
+	(unpack_mips16): Update mips_fetch_instruction call.
+	(extended_mips16_next_pc): Update according to change to
+	mips16_to_32_reg.
+	(mips_next_pc): Update mips_pc_is_mips16 call.  Handle microMIPS
+	code.
+	(mips16_scan_prologue): Update mips_fetch_instruction call.
+	Update according to change to mips16_to_32_reg.
+	(mips_insn16_frame_sniffer): Update mips_pc_is_mips16 call.
+	(mips_insn16_frame_base_sniffer): Likewise.
+	(micromips_decode_imm9): New function.
+	(micromips_scan_prologue): Likewise.
+	(mips_micro_frame_cache): Likewise.
+	(mips_micro_frame_this_id): Likewise.
+	(mips_micro_frame_prev_register): Likewise.
+	(mips_micro_frame_sniffer): Likewise.
+	(mips_micro_frame_unwind): New variable.
+	(mips_micro_frame_base_address): New function.
+	(mips_micro_frame_base): New variable.
+	(mips_micro_frame_base_sniffer): New function.
+	(mips32_scan_prologue): Update mips_fetch_instruction call.
+	(mips_insn32_frame_sniffer): Check for the standard MIPS ISA
+	rather than for MIPS16.
+	(mips_insn32_frame_base_sniffer): Likewise.
+	(mips_addr_bits_remove): Handle microMIPS code.
+	(deal_with_atomic_sequence): Rename to...
+	(mips_deal_with_atomic_sequence): ... this.  Update the type
+	of the variable used to hold an instruction.  Remove the ISA bit
+	check.  Update mips_fetch_instruction call.
+	(micromips_deal_with_atomic_sequence): New function.
+	(deal_with_atomic_sequence): Likewise.
+	(mips_about_to_return): Handle microMIPS code.  Update
+	mips_fetch_instruction call.
+	(heuristic_proc_start): Check for the standard MIPS ISA rather
+	than for MIPS16.  Update mips_pc_is_mips16 and
+	mips_fetch_instruction calls.  Handle microMIPS code.
+	(mips_push_dummy_code): Handle microMIPS code.
+	(mips_eabi_push_dummy_call): Likewise.
+	(mips_o32_return_value): Update mips_pc_is_mips16 call.
+	(mips_o64_push_dummy_call): Handle microMIPS code.
+	(mips_o64_return_value): Update mips_pc_is_mips16 call.
+	(is_delayed): Remove function.
+	(mips_single_step_through_delay): Replace the call to is_delayed
+	with mips32_instruction_has_delay_slot.  Correct MIPS16 handling.
+	Handle microMIPS code.
+	(mips_skip_prologue): Update mips_pc_is_mips16 call.  Handle
+	microMIPS code.
+	(mips32_in_function_epilogue_p): Update mips_fetch_instruction
+	call.
+	(micromips_in_function_epilogue_p): New function.
+	(mips16_in_function_epilogue_p): Update mips_fetch_instruction
+	call.
+	(mips_in_function_epilogue_p): Update mips_pc_is_mips16 call.
+	Handle microMIPS.
+	(gdb_print_insn_mips): Likewise.
+	(mips_breakpoint_from_pc): Likewise.
+	(mips_remote_breakpoint_from_pc): New function.
+	(mips32_instruction_has_delay_slot): Simplify making use of the
+	updated mips_fetch_instruction interface.
+	(micromips_instruction_has_delay_slot): New function.
+	(mips16_instruction_has_delay_slot): Simplify making use of the
+	updated mips_fetch_instruction interface.
+	(mips_adjust_breakpoint_address): Check for the standard MIPS
+	ISA rather than for MIPS16 ISA.  Update for unmake_compact_addr 
+	calls.  Handle microMIPS code.
+	(mips_get_mips16_fn_stub_pc): Update mips_fetch_instruction call.
+	(mips_skip_trampoline_code): Handle microMIPS code.
+	(global_mips_compression): New function.
+	(mips_gdbarch_init): Handle the compressed ISA setting from ELF
+	file flags.  Register the microMIPS remote breakpoint handler
+	and heuristic frame unwinder.
+	(show_mips_compression): New function.
+	(_initialize_mips_tdep): Add the "set mips compression" and
+	"show mips compression" commands.
+
 2012-05-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* ada-lang.c:

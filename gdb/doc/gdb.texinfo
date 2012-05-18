@@ -20565,6 +20565,38 @@ default).
 @kindex show mips abi
 Show the MIPS ABI used by @value{GDBN} to debug the inferior.
 
+@item set mips compression @var{arg}
+@kindex set mips compression
+@cindex code compression, @acronym{MIPS}
+Tell @value{GDBN} which @acronym{MIPS} compressed
+@acronym{ISA, Instruction Set Architecture} encoding is used by the
+inferior.  @value{GDBN} uses this for code disassembly and other
+internal interpretation purposes.  This setting is only referred to
+when no executable has been associated with the debugging session or
+the executable does not provide information about the encoding it uses.
+Otherwise this setting is automatically updated from information
+provided by the executable.
+
+Possible values of @var{arg} are @samp{mips16} and @samp{micromips}.
+The default compressed @acronym{ISA} encoding is @samp{mips16}, as
+executables containing @acronym{MIPS16} code frequently are not
+identified as such.
+
+This setting is ``sticky''; that is, it retains its value across
+debugging sessions until reset either explicitly with this command or
+implicitly from an executable.
+
+The compiler and/or assembler typically add symbol table annotations to
+identify functions compiled for the @acronym{MIPS16} or
+@acronym{microMIPS} @acronym{ISA}s.  If these function-scope annotations
+are present, @value{GDBN} uses them in preference to the global
+compressed @acronym{ISA} encoding setting.
+
+@item show mips compression
+@kindex show mips compression
+Show the @acronym{MIPS} compressed @acronym{ISA} encoding used by
+@value{GDBN} to debug the inferior.
+
 @item set mipsfpu
 @itemx show mipsfpu
 @xref{MIPS Embedded, set mipsfpu}.
@@ -36903,6 +36935,7 @@ These breakpoint kinds are defined for the @samp{Z0} and @samp{Z1} packets.
 
 @menu
 * MIPS Register packet Format::
+* MIPS Breakpoint Kinds::
 @end menu
 
 @node MIPS Register packet Format
@@ -36926,6 +36959,28 @@ registers; fsr; fir; fp.
 All registers are transferred as sixty-four bit quantities (including
 thirty-two bit registers such as @code{sr}).  The ordering is the same
 as @code{MIPS32}.
+
+@end table
+
+@node MIPS Breakpoint Kinds
+@subsubsection @acronym{MIPS} Breakpoint Kinds
+@cindex breakpoint kinds, @acronym{MIPS}
+
+These breakpoint kinds are defined for the @samp{Z0} and @samp{Z1} packets.
+
+@table @r
+
+@item 2
+16-bit @acronym{MIPS16} mode breakpoint.
+
+@item 3
+16-bit @acronym{microMIPS} mode breakpoint.
+
+@item 4
+32-bit standard @acronym{MIPS} mode breakpoint.
+
+@item 5
+32-bit @acronym{microMIPS} mode breakpoint.
 
 @end table
 

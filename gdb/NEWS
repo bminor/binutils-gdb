@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.4
 
+* GDB now supports debugging microMIPS binaries.
+
 * The "info os" command on GNU/Linux can now display information on
   several new classes of objects managed by the operating system:
     "info os procgroups" lists process groups
@@ -165,6 +167,14 @@ HP OpenVMS ia64			ia64-hp-openvms*
   evaluates to true.
 
 * New options
+
+set mips compression
+show mips compression
+  Select the compressed ISA encoding used in functions that have no symbol
+  information available.  The encoding can be set to either of:
+    mips16
+    micromips
+  and is updated automatically from ELF file flags if available.
 
 set breakpoint condition-evaluation
 show breakpoint condition-evaluation
