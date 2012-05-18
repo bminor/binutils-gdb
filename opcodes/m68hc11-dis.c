@@ -21,9 +21,9 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include "sysdep.h"
 #include <stdio.h>
 
-#include "ansidecl.h"
 #include "opcode/m68hc11.h"
 #include "dis-asm.h"
 

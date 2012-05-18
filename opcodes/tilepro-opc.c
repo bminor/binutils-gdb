@@ -17,9 +17,10 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include "sysdep.h"
+
 /* This define is BFD_RELOC_##x for real bfd, or -1 for everyone else.  */
 #define BFD_RELOC(x) BFD_RELOC_##x
-
 #include "bfd.h"
 
 /* Special registers.  */

@@ -1,3 +1,21 @@
+2012-05-18  Alan Modra  <amodra@gmail.com>
+
+	* arc-dis.c: Include sysdep.h first, remove some redundant includes.
+	* bfin-dis.c: Likewise.
+	* i860-dis.c: Likewise.
+	* ia64-dis.c: Likewise.
+	* ia64-gen.c: Likewise.
+	* m68hc11-dis.c: Likewise.
+	* mmix-dis.c: Likewise.
+	* msp430-dis.c: Likewise.
+	* or32-dis.c: Likewise.
+	* rl78-dis.c: Likewise.
+	* rx-dis.c: Likewise.
+	* tic4x-dis.c: Likewise.
+	* tilegx-opc.c: Likewise.
+	* tilepro-opc.c: Likewise.
+	* rx-decode.c: Regenerate.
+
 2012-05-17  James Lemke  <jwlemke@codesourcery.com>
 
 	* ppc-opc.c (powerpc_macros): Add entries for e_extlwi to e_clrlslwi.

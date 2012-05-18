@@ -1,5 +1,5 @@
 /* Disassemble ADI Blackfin Instructions.
-   Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   Copyright 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of libopcodes.
@@ -19,9 +19,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include "sysdep.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "opcode/bfin.h"
 

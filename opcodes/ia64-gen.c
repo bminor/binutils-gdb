@@ -1,5 +1,5 @@
 /* ia64-gen.c -- Generate a shrunk set of opcode tables
-   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007, 2008, 2009
+   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007, 2008, 2009, 2012
    Free Software Foundation, Inc.
    Written by Bob Manson, Cygnus Solutions, <manson@cygnus.com>
 
@@ -34,14 +34,13 @@
    The resource table is constructed based on some text dependency tables, 
    which are also easier to maintain than the final representation.  */
 
+#include "sysdep.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <errno.h>
 
-#include "ansidecl.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
-#include "sysdep.h"
 #include "getopt.h"
 #include "ia64-opc.h"
 #include "ia64-opc-a.c"
