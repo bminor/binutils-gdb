@@ -152,6 +152,8 @@ extern struct blockvector *blockvector_for_pc_sect (CORE_ADDR,
 						    struct block **,
                                                     struct symtab *);
 
+extern int blockvector_contains_pc (struct blockvector *bv, CORE_ADDR pc);
+
 extern struct call_site *call_site_for_pc (struct gdbarch *gdbarch,
 					   CORE_ADDR pc);
 

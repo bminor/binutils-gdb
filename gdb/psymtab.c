@@ -397,7 +397,8 @@ find_pc_sect_symtab_from_partial (struct objfile *objfile,
 	warning (_("\
 (Internal error: pc %s in read in psymtab, but not in symtab.)\n"),
 		 paddress (get_objfile_arch (ps->objfile), pc));
-      return psymtab_to_symtab (ps);
+      psymtab_to_symtab (ps);
+      return ps->symtab;
     }
   return NULL;
 }

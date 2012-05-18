@@ -103,46 +103,19 @@ block_inlined_p (const struct block *bl)
   return BLOCK_FUNCTION (bl) != NULL && SYMBOL_INLINED (BLOCK_FUNCTION (bl));
 }
 
-/* Return the blockvector immediately containing the innermost lexical
-   block containing the specified pc value and section, or 0 if there
-   is none.  PBLOCK is a pointer to the block.  If PBLOCK is NULL, we
-   don't pass this information back to the caller.  */
+/* A helper function that checks whether PC is in the blockvector BL.
+   It returns the containing block if there is one, or else NULL.  */
 
-struct blockvector *
-blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
-			 struct block **pblock, struct symtab *symtab)
+static struct block *
+find_block_in_blockvector (struct blockvector *bl, CORE_ADDR pc)
 {
   struct block *b;
   int bot, top, half;
-  struct blockvector *bl;
-
-  if (symtab == 0)		/* if no symtab specified by caller */
-    {
-      /* First search all symtabs for one whose file contains our pc */
-      symtab = find_pc_sect_symtab (pc, section);
-      if (symtab == 0)
-	return 0;
-    }
-
-  bl = BLOCKVECTOR (symtab);
-
-  /* Then search that symtab for the smallest block that wins.  */
 
   /* If we have an addrmap mapping code addresses to blocks, then use
      that.  */
   if (BLOCKVECTOR_MAP (bl))
-    {
-      b = addrmap_find (BLOCKVECTOR_MAP (bl), pc);
-      if (b)
-        {
-          if (pblock)
-            *pblock = b;
-          return bl;
-        }
-      else
-        return 0;
-    }
-
+    return addrmap_find (BLOCKVECTOR_MAP (bl), pc);
 
   /* Otherwise, use binary search to find the last block that starts
      before PC.  */
@@ -165,14 +138,51 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
     {
       b = BLOCKVECTOR_BLOCK (bl, bot);
       if (BLOCK_END (b) > pc)
-	{
-	  if (pblock)
-	    *pblock = b;
-	  return bl;
-	}
+	return b;
       bot--;
     }
-  return 0;
+
+  return NULL;
+}
+
+/* Return the blockvector immediately containing the innermost lexical
+   block containing the specified pc value and section, or 0 if there
+   is none.  PBLOCK is a pointer to the block.  If PBLOCK is NULL, we
+   don't pass this information back to the caller.  */
+
+struct blockvector *
+blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
+			 struct block **pblock, struct symtab *symtab)
+{
+  struct blockvector *bl;
+  struct block *b;
+
+  if (symtab == 0)		/* if no symtab specified by caller */
+    {
+      /* First search all symtabs for one whose file contains our pc */
+      symtab = find_pc_sect_symtab (pc, section);
+      if (symtab == 0)
+	return 0;
+    }
+
+  bl = BLOCKVECTOR (symtab);
+
+  /* Then search that symtab for the smallest block that wins.  */
+  b = find_block_in_blockvector (bl, pc);
+  if (b == NULL)
+    return NULL;
+
+  if (pblock)
+    *pblock = b;
+  return bl;
+}
+
+/* Return true if the blockvector BV contains PC, false otherwise.  */
+
+int
+blockvector_contains_pc (struct blockvector *bv, CORE_ADDR pc)
+{
+  return find_block_in_blockvector (bv, pc) != NULL;
 }
 
 /* Return call_site for specified PC in GDBARCH.  PC must match exactly, it

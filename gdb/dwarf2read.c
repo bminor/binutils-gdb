@@ -2992,6 +2992,30 @@ dw2_expand_symtabs_matching
     }
 }
 
+/* A helper for dw2_find_pc_sect_symtab which finds the most specific
+   symtab.  */
+
+static struct symtab *
+recursively_find_pc_sect_symtab (struct symtab *symtab, CORE_ADDR pc)
+{
+  int i;
+
+  if (BLOCKVECTOR (symtab) != NULL
+      && blockvector_contains_pc (BLOCKVECTOR (symtab), pc))
+    return symtab;
+
+  for (i = 0; symtab->includes[i]; ++i)
+    {
+      struct symtab *s;
+
+      s = recursively_find_pc_sect_symtab (s, pc);
+      if (s != NULL)
+	return s;
+    }
+
+  return NULL;
+}
+
 static struct symtab *
 dw2_find_pc_sect_symtab (struct objfile *objfile,
 			 struct minimal_symbol *msymbol,
@@ -3000,6 +3024,7 @@ dw2_find_pc_sect_symtab (struct objfile *objfile,
 			 int warn_if_readin)
 {
   struct dwarf2_per_cu_data *data;
+  struct symtab *result;
 
   dw2_setup (objfile);
 
@@ -3014,7 +3039,9 @@ dw2_find_pc_sect_symtab (struct objfile *objfile,
     warning (_("(Internal error: pc %s in read in CU, but not in symtab.)"),
 	     paddress (get_objfile_arch (objfile), pc));
 
-  return dw2_instantiate_symtab (data);
+  result = recursively_find_pc_sect_symtab (dw2_instantiate_symtab (data), pc);
+  gdb_assert (result != NULL);
+  return result;
 }
 
 static void

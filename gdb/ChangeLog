@@ -1,3 +1,14 @@
+2012-05-18  Tom Tromey  <tromey@redhat.com>
+
+	* psymtab.c (find_pc_sect_symtab_from_partial): Return the symtab
+	directly corresponding to the found psymtab.
+	* dwarf2read.c (recursively_find_pc_sect_symtab): New function.
+	(dw2_find_pc_sect_symtab): Use it.
+	* block.h (blockvector_contains_pc): Declare.
+	* block.c (find_block_in_blockvector): New function.
+	(blockvector_for_pc_sect): Use it.
+	(blockvector_contains_pc): New function.
+
 2012-05-18  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.h (mips_write_pc): New prototype.
