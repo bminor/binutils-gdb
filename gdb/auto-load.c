@@ -241,7 +241,15 @@ static void
 show_auto_load_safe_path (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  if (strcmp (value, "/") == 0)
+  const char *cs;
+
+  /* Check if user has entered either "/" or for example ":".
+     But while more complicate content like ":/foo" would still also
+     permit any location do not hide those.  */
+
+  for (cs = value; *cs && (*cs == DIRNAME_SEPARATOR || IS_DIR_SEPARATOR (*cs));
+       cs++);
+  if (*cs == 0)
     fprintf_filtered (file, _("Auto-load files are safe to load from any "
 			      "directory.\n"));
   else

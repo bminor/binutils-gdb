@@ -1,3 +1,8 @@
+2012-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* auto-load.c (show_auto_load_safe_path): Accept any combination of
+	DIRNAME_SEPARATOR and IS_DIR_SEPARATOR for wild-match.
+
 2012-05-18  Tom Tromey  <tromey@redhat.com>
 
 	PR exp/13907:
