@@ -1,5 +1,5 @@
 #ld: -T unwind.ld
-#source unwind-4.s
+#source: unwind-4.s
 #as: -mgenerate-rel
 #objdump: -s
 

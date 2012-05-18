@@ -1,5 +1,10 @@
 2012-05-18  Alan Modra  <amodra@gmail.com>
 
+	* ld-tic6x/mvk-reloc-local-r.d: Adjust for signed addend.
+	* ld-tic6x/unwind-6.d: Typo fix.
+
+2012-05-18  Alan Modra  <amodra@gmail.com>
+
 	* ld-elf/init-mixed.c: Include config.h first.
 
 2012-05-17  H.J. Lu  <hongjiu.lu@intel.com>
