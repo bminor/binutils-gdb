@@ -161,7 +161,7 @@ if {![gdb_skip_float_test "continuing to breakpoint 1220"] && \
 
 #step
 gdb_test "step" \
-    "print_all_arrays \\(array_i=, array_c=.ZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZa., array_f=, array_d=\\) at .*call-ar-st.c:306\[ \t\r\n\]+306.*print_int_array\\(array_i\\);.*" \
+    "print_all_arrays \\(array_i=<integer_array.*>, array_c=<char_array.*> .ZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZa., array_f=<float_array.*>, array_d=<double_array.*>\\) at .*call-ar-st.c:306\[ \t\r\n\]+306.*print_int_array\\(array_i\\);.*" \
     "step inside print_all_arrays"
 
 #step -over

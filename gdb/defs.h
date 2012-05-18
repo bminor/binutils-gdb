@@ -583,8 +583,8 @@ extern int info_verbose;
 
 extern void set_next_address (struct gdbarch *, CORE_ADDR);
 
-extern void print_address_symbolic (struct gdbarch *, CORE_ADDR,
-				    struct ui_file *, int, char *);
+extern int print_address_symbolic (struct gdbarch *, CORE_ADDR,
+				   struct ui_file *, int, char *);
 
 extern int build_address_symbolic (struct gdbarch *,
 				   CORE_ADDR addr,

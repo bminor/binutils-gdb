@@ -1,5 +1,24 @@
 2012-05-18  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.mi/mi-var-cmd.exp: Update.
+	* gdb.objc/basicclass.exp (do_objc_tests): Update.
+	* gdb.cp/virtbase.exp: Update.
+	* gdb.cp/classes.exp (test_static_members): Update.
+	* gdb.cp/casts.exp: Update.
+	* gdb.base/pointers.exp: Update.
+	* gdb.base/funcargs.exp (pointer_args): Update.
+	(structs_by_reference): Update.
+	* gdb.base/find.exp: Update.
+	* gdb.base/call-strs.exp: Send "set print symbol off".
+	* gdb.base/call-ar-st.exp: Update.
+	* gdb.ada/fun_addr.exp: Update.
+	* gdb.base/printcmds.exp (test_print_symbol): New proc.
+	Call it.
+	(test_print_repeats_10, test_print_strings)
+	(test_print_char_arrays): Update.
+
+2012-05-18  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/charset.exp (string_display): Update.
 
 2012-05-18  Tom Tromey  <tromey@redhat.com>

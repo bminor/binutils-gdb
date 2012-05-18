@@ -226,7 +226,9 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  struct minimal_symbol *msymbol =
 	    lookup_minimal_symbol_by_pc (vt_address);
 
-	  if ((msymbol != NULL)
+	  /* If 'symbol_print' is set, we did the work above.  */
+	  if (!options->symbol_print
+	      && (msymbol != NULL)
 	      && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
 	    {
 	      if (want_space)

@@ -148,7 +148,7 @@ gdb_test "print self" \
     " print self"
 
 gdb_test "print \*self" \
-    "\\$\[0-9\] = \{{?isa = 0x\[0-9a-f\]+}?, object = 0x0\}" \
+    "\\$\[0-9\] = \{{?isa = 0x\[0-9a-f\]+( <.*>)?}?, object = 0x0\}" \
     " print contents of self"
 
 #

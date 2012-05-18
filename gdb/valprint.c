@@ -85,7 +85,8 @@ struct value_print_options user_print_options =
   1,				/* static_field_print */
   1,				/* pascal_static_field_print */
   0,				/* raw */
-  0				/* summary */
+  0,				/* summary */
+  1				/* symbol_print */
 };
 
 /* Initialize *OPTS to be a copy of the user print options.  */
@@ -219,6 +220,16 @@ show_addressprint (struct ui_file *file, int from_tty,
 {
   fprintf_filtered (file, _("Printing of addresses is %s.\n"), value);
 }
+
+static void
+show_symbol_print (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("Printing of symbols when printing pointers is %s.\n"),
+		    value);
+}
+
 
 
 /* A helper function for val_print.  When printing in "summary" mode,
@@ -388,7 +399,9 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
 	      return;
 	    }
 
-	  if (options->addressprint)
+	  if (options->symbol_print)
+	    print_address_demangle (options, gdbarch, addr, stream, demangle);
+	  else if (options->addressprint)
 	    fputs_filtered (paddress (gdbarch, addr), stream);
 	}
       break;
@@ -2598,6 +2611,14 @@ Set printing of addresses."), _("\
 Show printing of addresses."), NULL,
 			   NULL,
 			   show_addressprint,
+			   &setprintlist, &showprintlist);
+
+  add_setshow_boolean_cmd ("symbol", class_support,
+			   &user_print_options.symbol_print, _("\
+Set printing of symbol names when printing pointers."), _("\
+Show printing of symbol names when printing pointers."),
+			   NULL, NULL,
+			   show_symbol_print,
 			   &setprintlist, &showprintlist);
 
   add_setshow_zuinteger_cmd ("input-radix", class_support, &input_radix_1,

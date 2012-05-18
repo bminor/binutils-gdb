@@ -519,8 +519,8 @@ proc test_static_members {} {
     gdb_test "print Foo::st" "\\$\[0-9\]+ = 100"
     gdb_test_no_output "set foo.st = 200" ""
     gdb_test "print bar.st" "\\$\[0-9\]+ = 200"
-    gdb_test "print &foo.st" "\\$\[0-9\]+ = \\(int ?\\*\\) $hex"
-    gdb_test "print &Bar::st" "\\$\[0-9\]+ = \\(int ?\\*\\) $hex"
+    gdb_test "print &foo.st" "\\$\[0-9\]+ = \\(int ?\\*\\) $hex <Foo::st>"
+    gdb_test "print &Bar::st" "\\$\[0-9\]+ = \\(int ?\\*\\) $hex <Foo::st>"
     gdb_test "print *\$" "\\$\[0-9\]+ = 200"
 
     gdb_test_no_output "set print static-members off"

@@ -491,9 +491,9 @@ extern void read_value_memory (struct value *val, int embedded_offset,
 struct frame_info;
 struct fn_field;
 
-extern void print_address_demangle (const struct value_print_options *,
-				    struct gdbarch *, CORE_ADDR,
-				    struct ui_file *, int);
+extern int print_address_demangle (const struct value_print_options *,
+				   struct gdbarch *, CORE_ADDR,
+				   struct ui_file *, int);
 
 extern LONGEST value_as_long (struct value *val);
 extern DOUBLEST value_as_double (struct value *val);

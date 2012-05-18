@@ -568,9 +568,10 @@ set_next_address (struct gdbarch *gdbarch, CORE_ADDR addr)
    DO_DEMANGLE controls whether to print a symbol in its native "raw" form,
    or to interpret it as a possible C++ name and convert it back to source
    form.  However note that DO_DEMANGLE can be overridden by the specific
-   settings of the demangle and asm_demangle variables.  */
+   settings of the demangle and asm_demangle variables.  Returns
+   non-zero if anything was printed; zero otherwise.  */
 
-void
+int
 print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
 			struct ui_file *stream,
 			int do_demangle, char *leadin)
@@ -589,7 +590,7 @@ print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
 			      &filename, &line, &unmapped))
     {
       do_cleanups (cleanup_chain);
-      return;
+      return 0;
     }
 
   fputs_filtered (leadin, stream);
@@ -616,6 +617,7 @@ print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
     fputs_filtered (">", stream);
 
   do_cleanups (cleanup_chain);
+  return 1;
 }
 
 /* Given an address ADDR return all the elements needed to print the
@@ -682,6 +684,13 @@ build_address_symbolic (struct gdbarch *gdbarch,
       else
 	name_temp = SYMBOL_LINKAGE_NAME (symbol);
     }
+
+  if (msymbol != NULL
+      && MSYMBOL_SIZE (msymbol) == 0
+      && MSYMBOL_TYPE (msymbol) != mst_text
+      && MSYMBOL_TYPE (msymbol) != mst_text_gnu_ifunc
+      && MSYMBOL_TYPE (msymbol) != mst_file_text)
+    msymbol = NULL;
 
   if (msymbol != NULL)
     {
@@ -763,10 +772,9 @@ pc_prefix (CORE_ADDR addr)
 
 /* Print address ADDR symbolically on STREAM.  Parameter DEMANGLE
    controls whether to print the symbolic name "raw" or demangled.
-   Global setting "addressprint" controls whether to print hex address
-   or not.  */
+   Return non-zero if anything was printed; zero otherwise.  */
 
-void
+int
 print_address_demangle (const struct value_print_options *opts,
 			struct gdbarch *gdbarch, CORE_ADDR addr,
 			struct ui_file *stream, int do_demangle)
@@ -778,8 +786,9 @@ print_address_demangle (const struct value_print_options *opts,
     }
   else
     {
-      print_address_symbolic (gdbarch, addr, stream, do_demangle, "");
+      return print_address_symbolic (gdbarch, addr, stream, do_demangle, "");
     }
+  return 1;
 }
 
 

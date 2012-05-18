@@ -141,7 +141,7 @@ gdb_test "print dynamic_cast<Alpha &> (derived)" \
     "dynamic_cast simple upcast to reference"
 
 gdb_test "print dynamic_cast<Derived *> (ad)" \
-    " = \\(Derived \\*\\) $nonzero_hex" \
+    " = \\(Derived \\*\\) ${nonzero_hex}( <vtable for Derived.*>)?" \
     "dynamic_cast simple downcast"
 
 gdb_test "print dynamic_cast<VirtuallyDerived *> (add)" \
@@ -157,7 +157,7 @@ gdb_test "print dynamic_cast<VirtuallyDerived &> (*ad)" \
     "dynamic_cast to reference to non-existing base"
 
 gdb_test "print dynamic_cast<DoublyDerived *> (add)" \
-    " = \\(DoublyDerived \\*\\) $nonzero_hex" \
+    " = \\(DoublyDerived \\*\\) ${nonzero_hex}( <vtable for DoublyDerived.*>)?" \
     "dynamic_cast unique downcast"
 
 gdb_test "print dynamic_cast<Gamma *> (add)" \

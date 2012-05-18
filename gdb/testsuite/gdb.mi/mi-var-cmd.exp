@@ -377,11 +377,11 @@ mi_gdb_test "-var-update *" \
 	"assign same value to func (update)"
 
 mi_gdb_test "-var-create array_ptr * array_ptr" \
-	"\\^done,name=\"array_ptr\",numchild=\"1\",value=\"$hex\",type=\"int \\*\",has_more=\"0\"" \
+	"\\^done,name=\"array_ptr\",numchild=\"1\",value=\"$hex <array>\",type=\"int \\*\",has_more=\"0\"" \
 	"create global variable array_ptr"
 
 mi_gdb_test "-var-assign array_ptr array2" \
-	"\\^done,value=\"$hex\"" \
+	"\\^done,value=\"$hex <array2>\"" \
 	"assign array to pointer"
 
 mi_gdb_test "-var-update *" \
@@ -389,7 +389,7 @@ mi_gdb_test "-var-update *" \
 	"assign array to pointer (update)"
 
 mi_gdb_test "-var-assign array_ptr array2" \
-	"\\^done,value=\"$hex\"" \
+	"\\^done,value=\"$hex <array2>\"" \
 	"assign same array to pointer"
 
 mi_gdb_test "-var-update *" \

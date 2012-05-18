@@ -31,7 +31,7 @@ clean_restart ${testfile}
 # the inferior is *not* running (no frame).
 
 gdb_test "print foo'address" \
-         "= .* 0x\[0-9a-zA-Z\]+" \
+         "= .* 0x\[0-9a-zA-Z\]+ <foo>" \
          "print foo'address"
 
 

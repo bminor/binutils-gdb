@@ -83,7 +83,7 @@ gdb_test "find /1 &int8_search_buf\[0\], +sizeof(int8_search_buf), 'a', 'a', 'a'
     "max-count"
 
 gdb_test "print \$_" \
-    "${history_prefix}.*${hex_number}" \
+    "${history_prefix}.*${hex_number} <int8_search_buf\\+10>" \
     "\$_"
 
 gdb_test "print \$numfound" \

@@ -90,6 +90,10 @@ struct value_print_options
 
   /* If nonzero, print the value in "summary" form.  */
   int summary;
+
+  /* If nonzero, when printing a pointer, print the symbol to which it
+     points, if any.  */
+  int symbol_print;
 };
 
 /* The global print options set by the user.  In general this should

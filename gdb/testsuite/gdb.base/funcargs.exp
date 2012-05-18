@@ -332,7 +332,7 @@ proc pointer_args {} {
 
     gdb_run_cmd
     gdb_expect {
-	 -re ".* call3a \\(cp=$hex \"a.*\", sp=$hex, ip=$hex, lp=$hex\\) .*$gdb_prompt $" { pass "run to call3a" }
+	 -re ".* call3a \\(cp=$hex <c> \"a.*\", sp=$hex <s>, ip=$hex <i>, lp=$hex <l>\\) .*$gdb_prompt $" { pass "run to call3a" }
 	 -re "$gdb_prompt $" { fail "run to call3a" ; gdb_suppress_tests; }
 	 timeout { fail "(timeout) run to call3a" ; gdb_suppress_tests; }
     }
@@ -344,7 +344,7 @@ proc pointer_args {} {
 
     # Continue; should stop at call3b and print actual arguments.
     # Try dereferencing the arguments.
-    if [gdb_test "cont" ".* call3b \\(ucp=$hex \"b.*\", usp=$hex, uip=$hex, ulp=$hex\\) .*" "continue to call3b"] {
+    if [gdb_test "cont" ".* call3b \\(ucp=$hex <uc> \"b.*\", usp=$hex <us>, uip=$hex <ui>, ulp=$hex <ul>\\) .*" "continue to call3b"] {
 	gdb_suppress_tests;
     }
 
@@ -355,7 +355,7 @@ proc pointer_args {} {
 
     # Continue; should stop at call3c and print actual arguments.
     # Try dereferencing the arguments.
-    if [gdb_test "cont" ".* call3c \\(fp=$hex, dp=$hex\\) .*" "continue to call3c"] {
+    if [gdb_test "cont" ".* call3c \\(fp=$hex <f>, dp=$hex <d>\\) .*" "continue to call3c"] {
 	gdb_suppress_tests;
     }
 
@@ -388,7 +388,7 @@ proc structs_by_reference {} {
 
     gdb_run_cmd
     gdb_expect {
-	 -re ".* call4a \\(stp=$hex\\) .*$gdb_prompt $" {
+	 -re ".* call4a \\(stp=$hex <st>\\) .*$gdb_prompt $" {
 	    pass "run to call4a"
 	}
 	 -re "$gdb_prompt $" { fail "run to call4a" ; gdb_suppress_tests; }
@@ -399,7 +399,7 @@ proc structs_by_reference {} {
 
     # Continue; should stop at call4b and print actual arguments.
 
-    gdb_test "cont" ".* call4b \\(unp=$hex\\) .*" "continue to call4b"
+    gdb_test "cont" ".* call4b \\(unp=$hex <un>\\) .*" "continue to call4b"
 
     # Try dereferencing the arguments.
     if { $target_sizeof_long == $target_sizeof_int } {

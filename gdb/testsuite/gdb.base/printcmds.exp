@@ -422,7 +422,7 @@ proc test_print_all_chars {} {
 # repeat count, set to the default of 10.
 
 proc test_print_repeats_10 {} {
-    global gdb_prompt
+    global gdb_prompt decimal
 
     for { set x 1; } { $x <= 16 } { incr x; } {
 	gdb_test_no_output "set print elements $x"
@@ -464,7 +464,7 @@ proc test_print_repeats_10 {} {
 	    if { $aval < 16 } {
 		set xstr "${xstr}\[.\]\[.\]\[.\]"
 	    }
-	    set string " = \[(\]unsigned char \[*\]\[)\] ${a}${xstr}";
+	    set string " = \[(\]unsigned char \[*\]\[)\] <ctable2(\\+$decimal)?> ${a}${xstr}";
 	    gdb_test "$command" "$string" "$command with print elements set to $x";
 	}
     }
@@ -483,7 +483,7 @@ proc test_print_repeats_embedded_array {} {
 }
 
 proc test_print_strings {} {
-    global gdb_prompt
+    global gdb_prompt decimal
 
     # We accept "(unsigned char *) " before the string.  char vs. unsigned char
     # is already tested elsewhere.
@@ -509,71 +509,71 @@ proc test_print_strings {} {
     gdb_test_no_output "set print elements 8"
 
     gdb_test "p &ctable1\[0\]" \
-	" = \\(unsigned char \\*\\) \"\""
+	" = \\(unsigned char \\*\\) <ctable1> \"\""
     gdb_test "p &ctable1\[1\]" \
-	" = \\(unsigned char \\*\\) \"\\\\001\\\\002\\\\003\\\\004\\\\005\\\\006\\\\a\\\\b\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\001\\\\002\\\\003\\\\004\\\\005\\\\006\\\\a\\\\b\"..."
     gdb_test "p &ctable1\[1*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\b\\\\t\\\\n\\\\v\\\\f\\\\r\\\\016\\\\017\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\b\\\\t\\\\n\\\\v\\\\f\\\\r\\\\016\\\\017\"..."
     gdb_test "p &ctable1\[2*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\020\\\\021\\\\022\\\\023\\\\024\\\\025\\\\026\\\\027\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\020\\\\021\\\\022\\\\023\\\\024\\\\025\\\\026\\\\027\"..."
     gdb_test "p &ctable1\[3*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\030\\\\031\\\\032\\\\033\\\\034\\\\035\\\\036\\\\037\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\030\\\\031\\\\032\\\\033\\\\034\\\\035\\\\036\\\\037\"..."
     gdb_test "p &ctable1\[4*8\]" \
-	" = \\(unsigned char \\*\\) \" !\\\\\"#\\\$%&'\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \" !\\\\\"#\\\$%&'\"..."
     gdb_test "p &ctable1\[5*8\]" \
-	" = \\(unsigned char \\*\\) \"\\(\\)\\*\\+,-./\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\(\\)\\*\\+,-./\"..."
     gdb_test "p &ctable1\[6*8\]" \
-	" = \\(unsigned char \\*\\) \"01234567\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"01234567\"..."
     gdb_test "p &ctable1\[7*8\]" \
-	" = \\(unsigned char \\*\\) \"89:;<=>\\?\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"89:;<=>\\?\"..."
     gdb_test "p &ctable1\[8*8\]" \
-	" = \\(unsigned char \\*\\) \"@ABCDEFG\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"@ABCDEFG\"..."
     gdb_test "p &ctable1\[9*8\]" \
-	" = \\(unsigned char \\*\\) \"HIJKLMNO\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"HIJKLMNO\"..."
     gdb_test "p &ctable1\[10*8\]" \
-	" = \\(unsigned char \\*\\) \"PQRSTUVW\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"PQRSTUVW\"..."
     gdb_test "p &ctable1\[11*8\]" \
-	" = \\(unsigned char \\*\\) \"XYZ\\\[\\\\\\\\\\\]\\^_\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"XYZ\\\[\\\\\\\\\\\]\\^_\"..."
     gdb_test "p &ctable1\[12*8\]" \
-	" = \\(unsigned char \\*\\) \"`abcdefg\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"`abcdefg\"..."
     gdb_test "p &ctable1\[13*8\]" \
-	" = \\(unsigned char \\*\\) \"hijklmno\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"hijklmno\"..."
     gdb_test "p &ctable1\[14*8\]" \
-	" = \\(unsigned char \\*\\) \"pqrstuvw\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"pqrstuvw\"..."
     gdb_test "p &ctable1\[15*8\]" \
-	" = \\(unsigned char \\*\\) \"xyz\[{|}\]+\\~\\\\177\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"xyz\[{|}\]+\\~\\\\177\"..."
     gdb_test "p &ctable1\[16*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\200\\\\201\\\\202\\\\203\\\\204\\\\205\\\\206\\\\207\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\200\\\\201\\\\202\\\\203\\\\204\\\\205\\\\206\\\\207\"..."
     gdb_test "p &ctable1\[17*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\210\\\\211\\\\212\\\\213\\\\214\\\\215\\\\216\\\\217\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\210\\\\211\\\\212\\\\213\\\\214\\\\215\\\\216\\\\217\"..."
     gdb_test "p &ctable1\[18*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\220\\\\221\\\\222\\\\223\\\\224\\\\225\\\\226\\\\227\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\220\\\\221\\\\222\\\\223\\\\224\\\\225\\\\226\\\\227\"..."
     gdb_test "p &ctable1\[19*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\230\\\\231\\\\232\\\\233\\\\234\\\\235\\\\236\\\\237\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\230\\\\231\\\\232\\\\233\\\\234\\\\235\\\\236\\\\237\"..."
     gdb_test "p &ctable1\[20*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\240\\\\241\\\\242\\\\243\\\\244\\\\245\\\\246\\\\247\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\240\\\\241\\\\242\\\\243\\\\244\\\\245\\\\246\\\\247\"..."
     gdb_test "p &ctable1\[21*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\250\\\\251\\\\252\\\\253\\\\254\\\\255\\\\256\\\\257\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\250\\\\251\\\\252\\\\253\\\\254\\\\255\\\\256\\\\257\"..."
     gdb_test "p &ctable1\[22*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\260\\\\261\\\\262\\\\263\\\\264\\\\265\\\\266\\\\267\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\260\\\\261\\\\262\\\\263\\\\264\\\\265\\\\266\\\\267\"..."
     gdb_test "p &ctable1\[23*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\270\\\\271\\\\272\\\\273\\\\274\\\\275\\\\276\\\\277\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\270\\\\271\\\\272\\\\273\\\\274\\\\275\\\\276\\\\277\"..."
     gdb_test "p &ctable1\[24*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\300\\\\301\\\\302\\\\303\\\\304\\\\305\\\\306\\\\307\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\300\\\\301\\\\302\\\\303\\\\304\\\\305\\\\306\\\\307\"..."
     gdb_test "p &ctable1\[25*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\310\\\\311\\\\312\\\\313\\\\314\\\\315\\\\316\\\\317\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\310\\\\311\\\\312\\\\313\\\\314\\\\315\\\\316\\\\317\"..."
     gdb_test "p &ctable1\[26*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\320\\\\321\\\\322\\\\323\\\\324\\\\325\\\\326\\\\327\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\320\\\\321\\\\322\\\\323\\\\324\\\\325\\\\326\\\\327\"..."
     gdb_test "p &ctable1\[27*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\330\\\\331\\\\332\\\\333\\\\334\\\\335\\\\336\\\\337\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\330\\\\331\\\\332\\\\333\\\\334\\\\335\\\\336\\\\337\"..."
     gdb_test "p &ctable1\[28*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\340\\\\341\\\\342\\\\343\\\\344\\\\345\\\\346\\\\347\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\340\\\\341\\\\342\\\\343\\\\344\\\\345\\\\346\\\\347\"..."
     gdb_test "p &ctable1\[29*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\350\\\\351\\\\352\\\\353\\\\354\\\\355\\\\356\\\\357\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\350\\\\351\\\\352\\\\353\\\\354\\\\355\\\\356\\\\357\"..."
     gdb_test "p &ctable1\[30*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\360\\\\361\\\\362\\\\363\\\\364\\\\365\\\\366\\\\367\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\360\\\\361\\\\362\\\\363\\\\364\\\\365\\\\366\\\\367\"..."
     gdb_test "p &ctable1\[31*8\]" \
-	" = \\(unsigned char \\*\\) \"\\\\370\\\\371\\\\372\\\\373\\\\374\\\\375\\\\376\\\\377\"..."
+	" = \\(unsigned char \\*\\) <ctable1\\+$decimal> \"\\\\370\\\\371\\\\372\\\\373\\\\374\\\\375\\\\376\\\\377\"..."
 }
 
 proc test_print_int_arrays {} {
@@ -624,7 +624,7 @@ proc test_artificial_arrays {} {
 
 proc test_print_char_arrays {} {
     global gdb_prompt
-    global hex
+    global hex decimal
 
     gdb_test_no_output "set print elements 24"
     gdb_test_no_output "set print address on"
@@ -632,17 +632,17 @@ proc test_print_char_arrays {} {
     gdb_test "p arrays" \
 	" = {array1 = \"abc\", array2 = \"d\", array3 = \"e\", array4 = \"fg\", array5 = \"hij\"}"
 
-    gdb_test "p parrays"		" = \\(struct some_arrays \\*\\) $hex"
+    gdb_test "p parrays"		" = \\(struct some_arrays \\*\\) $hex <arrays>"
     gdb_test "p parrays->array1"	" = \"abc\""
-    gdb_test "p &parrays->array1"	" = \\(unsigned char \\(\\*\\)\\\[4\\\]\\) $hex"
+    gdb_test "p &parrays->array1"	" = \\(unsigned char \\(\\*\\)\\\[4\\\]\\) $hex <arrays>"
     gdb_test "p parrays->array2"	" = \"d\""
-    gdb_test "p &parrays->array2"	" = \\(unsigned char \\(\\*\\)\\\[1\\\]\\) $hex"
+    gdb_test "p &parrays->array2"	" = \\(unsigned char \\(\\*\\)\\\[1\\\]\\) $hex <arrays\\+$decimal>"
     gdb_test "p parrays->array3"	" = \"e\""
-    gdb_test "p &parrays->array3"	" = \\(unsigned char \\(\\*\\)\\\[1\\\]\\) $hex"
+    gdb_test "p &parrays->array3"	" = \\(unsigned char \\(\\*\\)\\\[1\\\]\\) $hex <arrays\\+$decimal>"
     gdb_test "p parrays->array4"	" = \"fg\""
-    gdb_test "p &parrays->array4"	" = \\(unsigned char \\(\\*\\)\\\[2\\\]\\) $hex"
+    gdb_test "p &parrays->array4"	" = \\(unsigned char \\(\\*\\)\\\[2\\\]\\) $hex <arrays\\+$decimal>"
     gdb_test "p parrays->array5"	" = \"hij\""
-    gdb_test "p &parrays->array5"	" = \\(unsigned char \\(\\*\\)\\\[4\\\]\\) $hex"
+    gdb_test "p &parrays->array5"	" = \\(unsigned char \\(\\*\\)\\\[4\\\]\\) $hex <arrays\\+$decimal>"
 
     gdb_test_no_output "set print address off"
 }
@@ -773,6 +773,16 @@ proc test_printf_with_dfp {} {
     gdb_test "printf \"%DDf\\n\",1.2E6144dl" "1.200000000000000000000000000000000E\\+6144"
 }
 
+proc test_print_symbol {} {
+    gdb_test_no_output "set print symbol on"
+
+    gdb_test "print &three" " = .* <three>"
+    gdb_test "print parrays" " = .* <arrays>"
+
+    # In case somebody adds tests after this.
+    gdb_test_no_output "set print symbol off"
+}
+
 # Escape a left curly brace to prevent it from being interpreted as 
 # the beginning of a bound
 proc gdb_test_escape_braces { args } {
@@ -840,3 +850,4 @@ test_print_array_constants
 test_print_enums
 test_printf
 test_printf_with_dfp
+test_print_symbol

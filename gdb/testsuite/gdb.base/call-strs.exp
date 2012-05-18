@@ -56,6 +56,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set print address off"
+gdb_test_no_output "set print symbol off"
 gdb_test_no_output "set width 0"
 
 if ![runto_main] then {

@@ -8435,6 +8435,24 @@ does not show the symbol name and filename of the referent, even with
 the appropriate @code{set print} options turned on.
 @end quotation
 
+You can also enable @samp{/a}-like formatting all the time using
+@samp{set print symbol on}:
+
+@table @code
+@item set print symbol on
+Tell @value{GDBN} to print the symbol corresponding to an address, if
+one exists.
+
+@item set print symbol off
+Tell @value{GDBN} not to print the symbol corresponding to an
+address.  In this mode, @value{GDBN} will still print the symbol
+corresponding to pointers to functions.  This is the default.
+
+@item show print symbol
+Show whether @value{GDBN} will display the symbol corresponding to an
+address.
+@end table
+
 Other settings control how different kinds of objects are printed:
 
 @table @code

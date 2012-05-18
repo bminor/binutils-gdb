@@ -147,6 +147,12 @@
      resumes your program's execution, so it is like a printf that you
      can insert dynamically at runtime instead of at compiletime.
 
+  ** "set print symbol"
+     "show print symbol"
+     Controls whether GDB attempts to display the symbol, if any,
+     corresponding to addresses it prints.  This defaults to "on", but
+     you can set it to "off" to restore GDB's previous behavior.
+
 * New targets
 
 Renesas RL78			rl78-*-elf

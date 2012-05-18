@@ -1,5 +1,23 @@
 2012-05-18  Tom Tromey  <tromey@redhat.com>
 
+	PR exp/13907:
+	* valprint.h (struct value_print_options) <symbol_print>: New
+	field.
+	* valprint.c (user_print_options): Add default for symbol_print.
+	(show_symbol_print): New function.
+	(generic_val_print): Respect symbol_print.
+	(_initialize_valprint): Add "print symbol" setting.
+	* f-valprint.c (f_val_print): Respect symbol_print.
+	* c-valprint.c (c_val_print): Respect symbol_print.
+	* NEWS: Update.
+	* printcmd.c (print_address_symbolic): Return int.  Ignore some
+	zero-size symbols.
+	(print_address_demangle): Return int.
+	* defs.h: (print_address_symbolic): Return int.
+	* value.h (print_address_demangle): Return int.
+
+2012-05-18  Tom Tromey  <tromey@redhat.com>
+
 	* valprint.c (val_print_string): Don't print leading space.
 	* p-valprint.c (pascal_val_print) <TYPE_CODE_PTR>: Optionally
 	print space before string or vtbl.
