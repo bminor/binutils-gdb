@@ -1825,8 +1825,7 @@ insert_sprg (unsigned long insn,
 	     const char **errmsg)
 {
   if (value > 7
-      || (value > 3
-	  && (dialect & ALLOW8_SPRG) == 0))
+      || (value > 3 && (dialect & ALLOW8_SPRG) == 0))
     *errmsg = _("invalid sprg number");
 
   /* If this is mfsprg4..7 then use spr 260..263 which can be read in
@@ -1845,8 +1844,8 @@ extract_sprg (unsigned long insn,
   unsigned long val = (insn >> 16) & 0x1f;
 
   /* mfsprg can use 260..263 and 272..279.  mtsprg only uses spr 272..279
-     If not BOOKE or 405, then both use only 272..275.  */
-  if ((val - 0x10 > 3 && (dialect & (PPC_OPCODE_BOOKE | PPC_OPCODE_405)) == 0)
+     If not BOOKE, 405 or VLE, then both use only 272..275.  */
+  if ((val - 0x10 > 3 && (dialect & ALLOW8_SPRG) == 0)
       || (val - 0x10 > 7 && (insn & 0x100) != 0)
       || val <= 3
       || (val & 8) != 0)

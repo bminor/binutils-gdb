@@ -1,3 +1,7 @@
+2012-05-17  James Lemke  <jwlemke@codesourcery.com>
+
+	* ppc-opc.c (extract_sprg): Use ALLOW8_SPRG to include VLE.
+
 2012-05-17  Daniel Richard G.  <skunk@iskunk.org>
 	    Nick Clifton  <nickc@redhat.com>
 
