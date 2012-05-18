@@ -16,13 +16,14 @@
 set testfile "info-macros"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
+
 get_compiler_info ${binfile}
-if [test_compiler_info gcc*] {
-    lappend options additional_flags=-g3
-} else {
+if ![test_compiler_info gcc*] {
   untested ${testfile}.exp
   return -1
 }
+
+set options "debug additional_flags=-g3"
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} $options] } {
     untested ${testfile}.exp

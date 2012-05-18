@@ -1,5 +1,7 @@
 2012-05-17  Doug Evans  <dje@google.com>
 
+	* info-macros.exp: Pass "debug" to prepare_for_testing.
+
 	* Makefile.in (clean): Remove Fission .dwo and .dwp files.
 	* gdb.ada/Makefile.in (clean): Ditto.
 	* gdb.arch/Makefile.in (clean): Ditto.
