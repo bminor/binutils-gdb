@@ -1,3 +1,7 @@
+2012-05-18  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-evax.c: Include as.h first.
+
 2012-05-18  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* aclocal.m4: Regenerate.
