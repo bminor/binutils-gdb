@@ -1080,8 +1080,9 @@ mips_in_frame_stub (CORE_ADDR pc)
 static CORE_ADDR
 mips_read_pc (struct regcache *regcache)
 {
+  int regnum = gdbarch_pc_regnum (get_regcache_arch (regcache));
   ULONGEST pc;
-  int regnum = mips_regnum (get_regcache_arch (regcache))->pc;
+
   regcache_cooked_read_signed (regcache, regnum, &pc);
   if (is_mips16_addr (pc))
     pc = unmake_mips16_addr (pc);
@@ -1093,8 +1094,7 @@ mips_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   CORE_ADDR pc;
 
-  pc = frame_unwind_register_signed
-	 (next_frame, gdbarch_num_regs (gdbarch) + mips_regnum (gdbarch)->pc);
+  pc = frame_unwind_register_signed (next_frame, gdbarch_pc_regnum (gdbarch));
   if (is_mips16_addr (pc))
     pc = unmake_mips16_addr (pc);
   /* macro/2012-04-20: This hack skips over MIPS16 call thunks as
@@ -1144,7 +1144,8 @@ mips_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 static void
 mips_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  int regnum = mips_regnum (get_regcache_arch (regcache))->pc;
+  int regnum = gdbarch_pc_regnum (get_regcache_arch (regcache));
+
   if (mips_pc_is_mips16 (pc))
     regcache_cooked_write_unsigned (regcache, regnum, make_mips16_addr (pc));
   else
@@ -7106,8 +7107,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* The hook may have adjusted num_regs, fetch the final value and
      set pc_regnum and sp_regnum now that it has been fixed.  */
-  /* FIXME: cagney/2003-11-15: For MIPS, hasn't gdbarch_pc_regnum been
-     replaced by gdbarch_read_pc?  */
   num_regs = gdbarch_num_regs (gdbarch);
   set_gdbarch_pc_regnum (gdbarch, regnum->pc + num_regs);
   set_gdbarch_sp_regnum (gdbarch, MIPS_SP_REGNUM + num_regs);

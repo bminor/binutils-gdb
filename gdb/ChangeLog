@@ -1,3 +1,11 @@
+2012-05-18  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_read_pc): Use gdbarch_pc_regnum instead of
+	mips_regnum->pc.
+	(mips_unwind_pc, mips_write_pc): Likewise.
+	(mips_gdbarch_init): Remove a comment on gdbarch_pc_regnum and
+	gdbarch_read_pc.
+
 2012-05-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* procfs.c (procfs_find_new_threads, procfs_pid_to_str,
