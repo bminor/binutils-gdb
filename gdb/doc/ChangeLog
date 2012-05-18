@@ -1,3 +1,9 @@
+2011-05-18  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Architecture-Specific Protocol Details): Define
+	nodes for subsections.  Add @acronym mark-ups and adjust
+	formatting.
+
 2012-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Rename $ddir to $datadir.

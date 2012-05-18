@@ -36867,9 +36867,21 @@ This section describes how the remote protocol is applied to specific
 target architectures.  Also see @ref{Standard Target Features}, for
 details of XML target descriptions for each architecture.
 
-@subsection ARM
+@menu
+* ARM-Specific Protocol Details::
+* MIPS-Specific Protocol Details::
+@end menu
 
-@subsubsection Breakpoint Kinds
+@node ARM-Specific Protocol Details
+@subsection @acronym{ARM}-specific Protocol Details
+
+@menu
+* ARM Breakpoint Kinds::
+@end menu
+
+@node ARM Breakpoint Kinds
+@subsubsection @acronym{ARM} Breakpoint Kinds
+@cindex breakpoint kinds, @acronym{ARM}
 
 These breakpoint kinds are defined for the @samp{Z0} and @samp{Z1} packets.
 
@@ -36882,31 +36894,35 @@ These breakpoint kinds are defined for the @samp{Z0} and @samp{Z1} packets.
 32-bit Thumb mode (Thumb-2) breakpoint.
 
 @item 4
-32-bit ARM mode breakpoint.
+32-bit @acronym{ARM} mode breakpoint.
 
 @end table
 
-@subsection MIPS
+@node MIPS-Specific Protocol Details
+@subsection @acronym{MIPS}-specific Protocol Details
 
-@subsubsection Register Packet Format
+@menu
+* MIPS Register packet Format::
+@end menu
+
+@node MIPS Register packet Format
+@subsubsection @acronym{MIPS} Register Packet Format
 
 The following @code{g}/@code{G} packets have previously been defined.
 In the below, some thirty-two bit registers are transferred as
 sixty-four bits.  Those registers should be zero/sign extended (which?)
 to fill the space allocated.  Register bytes are transferred in target
 byte order.  The two nibbles within a register byte are transferred
-most-significant - least-significant.
+most-significant -- least-significant.
 
 @table @r
 
 @item MIPS32
-
 All registers are transferred as thirty-two bit quantities in the order:
 32 general-purpose; sr; lo; hi; bad; cause; pc; 32 floating-point
 registers; fsr; fir; fp.
 
 @item MIPS64
-
 All registers are transferred as sixty-four bit quantities (including
 thirty-two bit registers such as @code{sr}).  The ordering is the same
 as @code{MIPS32}.
