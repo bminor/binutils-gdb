@@ -74,6 +74,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
   struct type *char_type;
   LONGEST val;
   CORE_ADDR addr;
+  int want_space = 0;
 
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
@@ -176,6 +177,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
       if (options->addressprint && options->format != 's')
 	{
 	  fputs_filtered (paddress (gdbarch, addr), stream);
+	  want_space = 1;
 	}
 
       /* For a pointer to char or unsigned char, also print the string
@@ -188,6 +190,8 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  && (options->format == 0 || options->format == 's')
 	  && addr != 0)
 	{
+	  if (want_space)
+	    fputs_filtered (" ", stream);
 	  /* No wide string yet.  */
 	  i = val_print_string (elttype, NULL, addr, -1, stream, options);
 	}
@@ -203,6 +207,8 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  ULONGEST string_length;
 	  void *buffer;
 
+	  if (want_space)
+	    fputs_filtered (" ", stream);
 	  buffer = xmalloc (length_size);
 	  read_memory (addr + length_pos, buffer, length_size);
 	  string_length = extract_unsigned_integer (buffer, length_size,
@@ -223,9 +229,12 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  if ((msymbol != NULL)
 	      && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
 	    {
-	      fputs_filtered (" <", stream);
+	      if (want_space)
+		fputs_filtered (" ", stream);
+	      fputs_filtered ("<", stream);
 	      fputs_filtered (SYMBOL_PRINT_NAME (msymbol), stream);
 	      fputs_filtered (">", stream);
+	      want_space = 1;
 	    }
 	  if (vt_address && options->vtblprint)
 	    {
@@ -234,6 +243,9 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	      struct type *wtype;
 	      struct block *block = (struct block *) NULL;
 	      int is_this_fld;
+
+	      if (want_space)
+		fputs_filtered (" ", stream);
 
 	      if (msymbol != NULL)
 		wsym = lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol), block,

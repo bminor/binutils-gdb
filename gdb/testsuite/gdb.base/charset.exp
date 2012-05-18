@@ -604,7 +604,7 @@ gdb_test "print 'a' == 'a' || 'b' == 'b'" \
 
 proc string_display { var_name set_prefix x_size x_type} {
   gdb_test_no_output "set ${var_name} = ${set_prefix}\"Test String\\0with zeroes\"" "Assign ${var_name} with prefix ${set_prefix}"
-  gdb_test "x /2${x_size}s ${var_name}" ".* ${x_type}\"Test String\"\[\r\n\]+.* ${x_type}\"with zeroes\"" "Display String ${var_name} with x/${x_size}s"
+  gdb_test "x /2${x_size}s ${var_name}" ".*\t${x_type}\"Test String\"\[\r\n\]+.*\t${x_type}\"with zeroes\"" "Display String ${var_name} with x/${x_size}s"
 }
 
 if {$ucs2_ok} {

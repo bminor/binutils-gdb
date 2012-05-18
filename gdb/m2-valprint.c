@@ -195,6 +195,7 @@ print_unpacked_pointer (struct type *type,
 {
   struct gdbarch *gdbarch = get_type_arch (type);
   struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+  int want_space = 0;
 
   if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
     {
@@ -205,7 +206,10 @@ print_unpacked_pointer (struct type *type,
     }
 
   if (options->addressprint && options->format != 's')
-    fputs_filtered (paddress (gdbarch, address), stream);
+    {
+      fputs_filtered (paddress (gdbarch, address), stream);
+      want_space = 1;
+    }
 
   /* For a pointer to char or unsigned char, also print the string
      pointed to, unless pointer is null.  */
@@ -214,8 +218,12 @@ print_unpacked_pointer (struct type *type,
       && TYPE_CODE (elttype) == TYPE_CODE_INT
       && (options->format == 0 || options->format == 's')
       && addr != 0)
-    return val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
-			     stream, options);
+    {
+      if (want_space)
+	fputs_filtered (" ", stream);
+      return val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
+			       stream, options);
+    }
   
   return 0;
 }

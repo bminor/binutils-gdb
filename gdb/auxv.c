@@ -483,7 +483,7 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 
 	    get_user_print_options (&opts);
 	    if (opts.addressprint)
-	      fprintf_filtered (file, "%s", paddress (target_gdbarch, val));
+	      fprintf_filtered (file, "%s ", paddress (target_gdbarch, val));
 	    val_print_string (builtin_type (target_gdbarch)->builtin_char,
 			      NULL, val, -1, file, &opts);
 	    fprintf_filtered (file, "\n");

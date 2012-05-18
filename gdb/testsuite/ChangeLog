@@ -1,5 +1,9 @@
 2012-05-18  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/charset.exp (string_display): Update.
+
+2012-05-18  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.mi/mi2-var-display.exp: Update.
 	* gdb.mi/mi-var-display.exp: Update.
 	* gdb.mi/mi-var-child.exp: Update.

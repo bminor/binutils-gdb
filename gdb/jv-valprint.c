@@ -231,6 +231,8 @@ java_value_print (struct value *val, struct ui_file *stream,
       unsigned long count;
       struct value *mark;
 
+      fputs_filtered (" ", stream);
+
       mark = value_mark ();	/* Remember start of new values.  */
 
       data_val = value_struct_elt (&val, NULL, "data", NULL, NULL);

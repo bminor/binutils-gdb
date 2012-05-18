@@ -254,8 +254,12 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
       unresolved_elttype = TYPE_TARGET_TYPE (type);
       elttype = check_typedef (unresolved_elttype);
 	{
+	  int want_space;
+
 	  addr = unpack_pointer (type, valaddr + embedded_offset);
 	print_unpacked_pointer:
+
+	  want_space = 0;
 
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
@@ -265,7 +269,10 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	    }
 
 	  if (options->addressprint)
-	    fputs_filtered (paddress (gdbarch, addr), stream);
+	    {
+	      fputs_filtered (paddress (gdbarch, addr), stream);
+	      want_space = 1;
+	    }
 
 	  /* For a pointer to a textual type, also print the string
 	     pointed to, unless pointer is null.  */
@@ -274,6 +281,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 				      options->format)
 	      && addr != 0)
 	    {
+	      if (want_space)
+		fputs_filtered (" ", stream);
 	      i = val_print_string (unresolved_elttype, NULL,
 				    addr, -1,
 				    stream, options);
@@ -284,16 +293,20 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	      CORE_ADDR vt_address = unpack_pointer (type,
 						     valaddr
 						     + embedded_offset);
-
 	      struct minimal_symbol *msymbol =
 	      lookup_minimal_symbol_by_pc (vt_address);
+
 	      if ((msymbol != NULL)
 		  && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
 		{
+		  if (want_space)
+		    fputs_filtered (" ", stream);
 		  fputs_filtered (" <", stream);
 		  fputs_filtered (SYMBOL_PRINT_NAME (msymbol), stream);
 		  fputs_filtered (">", stream);
+		  want_space = 1;
 		}
+
 	      if (vt_address && options->vtblprint)
 		{
 		  struct value *vt_val;
@@ -301,6 +314,9 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 		  struct type *wtype;
 		  struct block *block = (struct block *) NULL;
 		  int is_this_fld;
+
+		  if (want_space)
+		    fputs_filtered (" ", stream);
 
 		  if (msymbol != NULL)
 		    wsym = lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol),

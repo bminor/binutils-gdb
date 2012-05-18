@@ -1,5 +1,20 @@
 2012-05-18  Tom Tromey  <tromey@redhat.com>
 
+	* valprint.c (val_print_string): Don't print leading space.
+	* p-valprint.c (pascal_val_print) <TYPE_CODE_PTR>: Optionally
+	print space before string or vtbl.
+	* m2-valprint.c (print_unpacked_pointer): Optionally print space
+	before string.
+	* jv-valprint.c (java_value_print): Print space before string.
+	* go-valprint.c (print_go_string): Print space before string.
+	* f-valprint.c (f_val_print) <TYPE_CODE_PTR>: Optionally print
+	space before string.
+	* c-valprint.c (c_val_print) <TYPE_CODE_PTR>: Optionally print
+	space before string or vtbl.
+	* auxv.c (fprint_target_auxv): Print space after address.
+
+2012-05-18  Tom Tromey  <tromey@redhat.com>
+
 	* printcmd.c (print_address_demangle): Remove special case for 0.
 
 2012-05-18  Tom Tromey  <tromey@redhat.com>

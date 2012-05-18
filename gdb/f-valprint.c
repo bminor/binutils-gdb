@@ -310,6 +310,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	}
       else
 	{
+	  int want_space = 0;
+
 	  addr = unpack_pointer (type, valaddr + embedded_offset);
 	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
 
@@ -321,7 +323,10 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    }
 
 	  if (options->addressprint && options->format != 's')
-	    fputs_filtered (paddress (gdbarch, addr), stream);
+	    {
+	      fputs_filtered (paddress (gdbarch, addr), stream);
+	      want_space = 1;
+	    }
 
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */
@@ -329,8 +334,12 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      && TYPE_CODE (elttype) == TYPE_CODE_INT
 	      && (options->format == 0 || options->format == 's')
 	      && addr != 0)
-	    i = val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
-				  stream, options);
+	    {
+	      if (want_space)
+		fputs_filtered (" ", stream);
+	      i = val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
+				    stream, options);
+	    }
 	  return;
 	}
       break;

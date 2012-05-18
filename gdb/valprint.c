@@ -2351,10 +2351,6 @@ val_print_string (struct type *elttype, const char *encoding,
      and then the error message.  */
   if (errcode == 0 || bytes_read > 0)
     {
-      if (options->addressprint)
-	{
-	  fputs_filtered (" ", stream);
-	}
       LA_PRINT_STRING (stream, elttype, buffer, bytes_read / width,
 		       encoding, force_ellipsis, options);
     }
@@ -2363,13 +2359,13 @@ val_print_string (struct type *elttype, const char *encoding,
     {
       if (errcode == EIO)
 	{
-	  fprintf_filtered (stream, " <Address ");
+	  fprintf_filtered (stream, "<Address ");
 	  fputs_filtered (paddress (gdbarch, addr), stream);
 	  fprintf_filtered (stream, " out of bounds>");
 	}
       else
 	{
-	  fprintf_filtered (stream, " <Error reading address ");
+	  fprintf_filtered (stream, "<Error reading address ");
 	  fputs_filtered (paddress (gdbarch, addr), stream);
 	  fprintf_filtered (stream, ": %s>", safe_strerror (errcode));
 	}

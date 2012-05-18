@@ -64,7 +64,10 @@ print_go_string (struct type *type, const gdb_byte *valaddr,
 
   /* TODO(dje): Print address of struct or actual string?  */
   if (options->addressprint)
-    fputs_filtered (paddress (gdbarch, addr), stream);
+    {
+      fputs_filtered (paddress (gdbarch, addr), stream);
+      fputs_filtered (" ", stream);
+    }
 
   if (length < 0)
     {
