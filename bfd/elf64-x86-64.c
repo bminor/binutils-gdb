@@ -4260,7 +4260,7 @@ static bfd_boolean
 elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 				  struct bfd_link_info *info,
 				  struct elf_link_hash_entry *h,
-				  Elf_Internal_Sym *sym)
+				  Elf_Internal_Sym *sym ATTRIBUTE_UNUSED)
 {
   struct elf_x86_64_link_hash_table *htab;
   const struct elf_x86_64_backend_data *const abed
@@ -4498,13 +4498,6 @@ do_glob_dat:
       rela.r_addend = 0;
       elf_append_rela (output_bfd, htab->srelbss, &rela);
     }
-
-  /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  SYM may
-     be NULL for local symbols.  */
-  if (sym != NULL
-      && (strcmp (h->root.root.string, "_DYNAMIC") == 0
-	  || h == htab->elf.hgot))
-    sym->st_shndx = SHN_ABS;
 
   return TRUE;
 }

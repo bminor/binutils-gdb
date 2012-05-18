@@ -1,3 +1,20 @@
+2012-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/tlsdesc-nacl.rd: Update for dynamic sym changes.
+	* ld-i386/tlsdesc.rd: Likewise.
+	* ld-i386/tlsgdesc-nacl.rd: Likewise.
+	* ld-i386/tlsgdesc.rd: Likewise.
+	* ld-i386/tlsnopic-nacl.rd: Likewise.
+	* ld-i386/tlsnopic.rd: Likewise.
+	* ld-i386/tlspic-nacl.rd: Likewise.
+	* ld-i386/tlspic.rd: Likewise.
+	* ld-x86-64/tlsdesc-nacl.rd: Likewise.
+	* ld-x86-64/tlsdesc.rd: Likewise.
+	* ld-x86-64/tlsgdesc-nacl.rd: Likewise.
+	* ld-x86-64/tlsgdesc.rd: Likewise.
+	* ld-x86-64/tlspic-nacl.rd: Likewise.
+	* ld-x86-64/tlspic.rd: Likewise.
+
 2012-05-18  Alan Modra  <amodra@gmail.com>
 
 	* ld-tic6x/mvk-reloc-local-r.d: Adjust for signed addend.

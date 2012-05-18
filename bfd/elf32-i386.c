@@ -4600,17 +4600,6 @@ do_glob_dat:
       bfd_elf32_swap_reloc_out (output_bfd, &rel, loc);
     }
 
-  /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  SYM may
-     be NULL for local symbols.
-
-     On VxWorks, the _GLOBAL_OFFSET_TABLE_ symbol is not absolute: it
-     is relative to the ".got" section.  */
-  if (sym != NULL
-      && (strcmp (h->root.root.string, "_DYNAMIC") == 0
-	  || (!abed->is_vxworks
-              && h == htab->elf.hgot)))
-    sym->st_shndx = SHN_ABS;
-
   return TRUE;
 }
 

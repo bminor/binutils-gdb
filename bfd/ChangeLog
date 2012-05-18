@@ -1,3 +1,9 @@
+2012-05-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Don't make
+	_DYNAMIC nor _GLOBAL_OFFSET_TABLE_ absolute.
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Likewise.
+
 2012-05-18  Roland McGrath  <mcgrathr@google.com>
 
 	* archive.c (_bfd_generic_read_ar_hdr_mag): Fix last change so as
