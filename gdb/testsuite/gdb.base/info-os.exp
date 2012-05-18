@@ -90,15 +90,62 @@ gdb_test_multiple "print port" $test {
     }
 }
 
+# Act like gdb_test but prevent: +ERROR: internal buffer is full.
+
+proc expect_multiline { command expect test } {
+    global gdb_prompt
+
+    # Do not duplicate FAILs from gdb_test_multiple.
+    set pass 0
+    set fail 0
+    gdb_test_multiple $command $test {
+	-re "^$expect *\r\n" {
+	    pass $test
+	    set pass 1
+	    exp_continue
+	}
+	-re "^$gdb_prompt $" {
+	    if !$pass {
+		set fail 1
+	    }
+	    # Exit the loop.
+	}
+	-re "\r\n" {
+	    # Drop the buffer.
+	    exp_continue
+	}
+    }
+    if $fail {
+	fail $test
+    }
+}
+
 # Test output of the 'info os' commands against the expected results.
-gdb_test "info os processes" ".*pid +user +command +cores.*$inferior_pid +\\S+ +\\S*info-os +\[0-9\]+.*" "get process list"
-gdb_test "info os procgroups" ".*pgid +leader command +pid +command line.*$inferior_pid +info-os +$inferior_pid +\\S*info-os.*" "get process groups"
-gdb_test "info os threads" ".*pid +command +tid +core.*$inferior_pid +info-os +\\d+ +\\d+.*" "get threads"
-gdb_test "info os files" ".*pid +command +file descriptor +name.*$inferior_pid +info-os +\\d+ +/dev/null.*" "get file descriptors"
-gdb_test "info os sockets" ".*local address +local port +remote address +remote port +state +user +family +protocol.*0\\.0\\.0\\.0 +$port +0\\.0\\.0\\.0 +0 +LISTEN +\\S+ +INET +STREAM.*" "get internet-domain sockets"
-gdb_test "info os shm" ".*key +shmid +permissions +size +creator command +last op\\. command +num attached +user +group +creator user +creator group +last shmat\\(\\) time +last shmdt\\(\\) time +last shmctl\\(\\) time.*3925 +$shmid +666 +4096 +info-os +.*" "get shared-memory regions"
-gdb_test "info os semaphores" ".*key +semid +permissions +num semaphores +user +group +creator user +creator group +last semop\\(\\) time +last semctl\\(\\) time.*7428 +$semid +666 +1 +.*" "get semaphores"
-gdb_test "info os msg" ".*key +msqid +permissions +num used bytes +num messages +last msgsnd\\(\\) command +last msgrcv\\(\\) command +user +group +creator user +creator group +last msgsnd\\(\\) time +last msgrcv\\(\\) time +last msgctl\\(\\) time.*5294 +$msqid +666 +.*" "get message queues"
+
+#                                     pid            user  command      cores
+expect_multiline "info os processes" "$inferior_pid +\\S+ +\\S*info-os +\[0-9,\]+" "get process list"
+
+#                                      pgid           leader   pid            command line
+expect_multiline "info os procgroups" "$inferior_pid +info-os +$inferior_pid +\\S*info-os" "get process groups"
+
+#                                   pid            command  tid   core
+expect_multiline "info os threads" "$inferior_pid +info-os +\\d+ +\\d+" "get threads"
+
+#                                 pid            command  fd    name
+expect_multiline "info os files" "$inferior_pid +info-os +\\d+ +/dev/null" "get file descriptors"
+
+#                                   local address  l-port remote addr r-port state  user family protocol
+expect_multiline "info os sockets" "0\\.0\\.0\\.0 +$port +0\\.0\\.0\\.0 +0 +LISTEN +\\S+ +INET +STREAM" "get internet-domain sockets"
+
+#                               key   shmid   perm size creator command last op  command  num attached  user  group  creator user  creator group  last shmat() time  last shmdt() time  last shmctl() time
+expect_multiline "info os shm" "3925 +$shmid +666 +4096 +info-os .*" "get shared-memory regions"
+
+#                                      key   semid   perm num semaphores  user  group  creator user  creator group  last semop() time  last semctl() time
+expect_multiline "info os semaphores" "7428 +$semid +666 +1 .*" "get semaphores"
+
+#                               key   msqid   perm  num used bytes  num messages  last msgsnd() command  last msgrcv() command  user  group  creator user  creator group  last msgsnd() time  last msgrcv() time  last msgctl() time
+expect_multiline "info os msg" "5294 +$msqid +666 .*" "get message queues"
+
 
 # The SysV IPC primitives linger on after the creating process is killed
 # unless they are destroyed explicitly, so allow the test program to tidy

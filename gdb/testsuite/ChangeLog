@@ -1,3 +1,12 @@
+2012-05-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix ERROR: internal buffer is full.
+	* gdb.base/info-os.exp (expect_multiline): New function.
+	(get process list, get process groups, get threads)
+	(get file descriptors, get internet-domain sockets)
+	(get shared-memory regions, get semaphores, get message queues): Use
+	it for these tests.
+
 2012-05-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.mi/mi-var-cmd.exp: Update.
