@@ -1141,7 +1141,9 @@ mips_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 	    get_frame_pc (this_frame));
 }
 
-static void
+/* Implement the "write_pc" gdbarch method.  */
+
+void
 mips_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   int regnum = gdbarch_pc_regnum (get_regcache_arch (regcache));

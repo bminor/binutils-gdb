@@ -1151,11 +1151,14 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));
 }
 
+/* Implement the "write_pc" gdbarch method.  */
+
 static void
 mips_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  regcache_cooked_write_unsigned (regcache, gdbarch_pc_regnum (gdbarch), pc);
+
+  mips_write_pc (regcache, pc);
 
   /* Clear the syscall restart flag.  */
   if (mips_linux_restart_reg_p (gdbarch))

@@ -1,5 +1,12 @@
 2012-05-18  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.h (mips_write_pc): New prototype.
+	* mips-tdep.c (mips_write_pc): Make external, add description.
+	* mips-linux-tdep.c (mips_linux_write_pc): Use mips_write_pc,
+	add description.
+
+2012-05-18  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c (mips_read_pc): Use gdbarch_pc_regnum instead of
 	mips_regnum->pc.
 	(mips_unwind_pc, mips_write_pc): Likewise.

@@ -159,6 +159,9 @@ extern int mips_pc_is_mips16 (bfd_vma memaddr);
 /* Return the currently configured (or set) saved register size.  */
 extern unsigned int mips_abi_regsize (struct gdbarch *gdbarch);
 
+/* Make PC the address of the next instruction to execute.  */
+extern void mips_write_pc (struct regcache *regcache, CORE_ADDR pc);
+
 /* Target descriptions which only indicate the size of general
    registers.  */
 extern struct target_desc *mips_tdesc_gp32;
