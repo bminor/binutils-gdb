@@ -1,5 +1,9 @@
 2012-05-18  Tom Tromey  <tromey@redhat.com>
 
+	* printcmd.c (print_address_demangle): Remove special case for 0.
+
+2012-05-18  Tom Tromey  <tromey@redhat.com>
+
 	* printcmd.c (print_address_demangle): Add 'opts' argument.
 	* p-valprint.c (pascal_val_print): Update.
 	* jv-valprint.c (java_val_print): Update.

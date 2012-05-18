@@ -771,11 +771,7 @@ print_address_demangle (const struct value_print_options *opts,
 			struct gdbarch *gdbarch, CORE_ADDR addr,
 			struct ui_file *stream, int do_demangle)
 {
-  if (addr == 0)
-    {
-      fprintf_filtered (stream, "0");
-    }
-  else if (opts->addressprint)
+  if (opts->addressprint)
     {
       fputs_filtered (paddress (gdbarch, addr), stream);
       print_address_symbolic (gdbarch, addr, stream, do_demangle, " ");

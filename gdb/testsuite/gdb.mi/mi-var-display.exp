@@ -286,7 +286,7 @@ mi_gdb_test "-var-set-format weird.func_ptr_struct hexadecimal" \
 	"set format variable weird.func_ptr_struct"
 
 mi_gdb_test "-var-set-format weird.func_ptr_ptr natural" \
-	"\\^done,format=\"natural\",value=\"0\"" \
+	"\\^done,format=\"natural\",value=\"0x0\"" \
 	"set format variable weird.func_ptr_ptr"
 
 mi_gdb_test "-var-set-format weird.u1 natural" \

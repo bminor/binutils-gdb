@@ -1,3 +1,11 @@
+2012-05-18  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.mi/mi2-var-display.exp: Update.
+	* gdb.mi/mi-var-display.exp: Update.
+	* gdb.mi/mi-var-child.exp: Update.
+	* gdb.cp/expand-psymtabs-cxx.exp: Update.
+	* gdb.cp/cp-relocate.exp (get_func_address): Update.
+
 2012-05-17  Doug Evans  <dje@google.com>
 
 	* info-macros.exp: Pass "debug" to prepare_for_testing.
