@@ -513,7 +513,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
       if (TYPE_CODE (target_type) == TYPE_CODE_FUNC)
 	{
 	  /* Try to print what function it points to.  */
-	  print_address_demangle (gdbarch, addr, stream, demangle);
+	  print_address_demangle (options, gdbarch, addr, stream, demangle);
 	  return;
 	}
 

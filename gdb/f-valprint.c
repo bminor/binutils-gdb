@@ -316,8 +316,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
 	      /* Try to print what function it points to.  */
-	      print_function_pointer_address (gdbarch, addr, stream,
-					      options->addressprint);
+	      print_function_pointer_address (options, gdbarch, addr, stream);
 	      return;
 	    }
 

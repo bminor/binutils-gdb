@@ -368,9 +368,9 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		      CORE_ADDR addr;
 		      
 		      addr = extract_typed_address (valaddr + i_offset, i_type);
-		      print_function_pointer_address (get_type_arch (type),
-						      addr, stream,
-						      options->addressprint);
+		      print_function_pointer_address (options,
+						      get_type_arch (type),
+						      addr, stream);
 		    }
 		}
 	      else

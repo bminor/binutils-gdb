@@ -1,5 +1,22 @@
 2012-05-18  Tom Tromey  <tromey@redhat.com>
 
+	* printcmd.c (print_address_demangle): Add 'opts' argument.
+	* p-valprint.c (pascal_val_print): Update.
+	* jv-valprint.c (java_val_print): Update.
+	* value.h: Update.
+	* valprint.c (generic_val_print): Update.
+	(print_function_pointer_address): Add 'options' argument.  Remove
+	'addressprint' argument.  Update.
+	* m2-valprint.c (print_unpacked_pointer): Update.
+	* gnu-v3-abi.c (print_one_vtable): Update.
+	(gnuv3_print_method_ptr): Update.
+	* f-valprint.c (f_val_print): Update.
+	* cp-valprint.c (cp_print_value_fields): Update.
+	* valprint.h (print_function_pointer_address): Update.
+	* c-valprint.c (c_val_print): Update.
+
+2012-05-18  Tom Tromey  <tromey@redhat.com>
+
 	* psymtab.c (find_pc_sect_symtab_from_partial): Return the symtab
 	directly corresponding to the found psymtab.
 	* dwarf2read.c (recursively_find_pc_sect_symtab): New function.

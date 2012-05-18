@@ -384,8 +384,7 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
 	      /* Try to print what function it points to.  */
-	      print_function_pointer_address (gdbarch, addr, stream,
-					      options->addressprint);
+	      print_function_pointer_address (options, gdbarch, addr, stream);
 	      return;
 	    }
 
@@ -515,7 +514,7 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
       type_print (type, "", stream, -1);
       fprintf_filtered (stream, "} ");
       /* Try to print what function it points to, and its address.  */
-      print_address_demangle (gdbarch, address, stream, demangle);
+      print_address_demangle (options, gdbarch, address, stream, demangle);
       break;
 
     case TYPE_CODE_BOOL:
@@ -1501,10 +1500,10 @@ print_char_chars (struct ui_file *stream, struct type *type,
    stream STREAM.  */
 
 void
-print_function_pointer_address (struct gdbarch *gdbarch,
+print_function_pointer_address (const struct value_print_options *options,
+				struct gdbarch *gdbarch,
 				CORE_ADDR address,
-				struct ui_file *stream,
-				int addressprint)
+				struct ui_file *stream)
 {
   CORE_ADDR func_addr
     = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
@@ -1512,13 +1511,13 @@ print_function_pointer_address (struct gdbarch *gdbarch,
 
   /* If the function pointer is represented by a description, print
      the address of the description.  */
-  if (addressprint && func_addr != address)
+  if (options->addressprint && func_addr != address)
     {
       fputs_filtered ("@", stream);
       fputs_filtered (paddress (gdbarch, address), stream);
       fputs_filtered (": ", stream);
     }
-  print_address_demangle (gdbarch, func_addr, stream, demangle);
+  print_address_demangle (options, gdbarch, func_addr, stream, demangle);
 }
 
 

@@ -248,8 +248,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
 
-	  print_function_pointer_address (gdbarch, addr, stream,
-					  options->addressprint);
+	  print_function_pointer_address (options, gdbarch, addr, stream);
 	  break;
 	}
       unresolved_elttype = TYPE_TARGET_TYPE (type);
@@ -261,8 +260,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {
 	      /* Try to print what function it points to.  */
-	      print_function_pointer_address (gdbarch, addr, stream,
-					      options->addressprint);
+	      print_function_pointer_address (options, gdbarch, addr, stream);
 	      return;
 	    }
 
@@ -354,8 +352,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + offset, field_type);
 
-	  print_function_pointer_address (gdbarch, addr, stream,
-					  options->addressprint);
+	  print_function_pointer_address (options, gdbarch, addr, stream);
 	}
       else
 	cp_print_value_fields_rtti (type, valaddr,

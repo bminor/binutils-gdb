@@ -767,17 +767,15 @@ pc_prefix (CORE_ADDR addr)
    or not.  */
 
 void
-print_address_demangle (struct gdbarch *gdbarch, CORE_ADDR addr,
+print_address_demangle (const struct value_print_options *opts,
+			struct gdbarch *gdbarch, CORE_ADDR addr,
 			struct ui_file *stream, int do_demangle)
 {
-  struct value_print_options opts;
-
-  get_user_print_options (&opts);
   if (addr == 0)
     {
       fprintf_filtered (stream, "0");
     }
-  else if (opts.addressprint)
+  else if (opts->addressprint)
     {
       fputs_filtered (paddress (gdbarch, addr), stream);
       print_address_symbolic (gdbarch, addr, stream, do_demangle, " ");

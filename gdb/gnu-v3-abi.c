@@ -620,7 +620,12 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
       print_longest (stream, 'd', 1, ptr_value);
     }
   else
-    print_address_demangle (gdbarch, ptr_value, stream, demangle);
+    {
+      struct value_print_options opts;
+
+      get_user_print_options (&opts);
+      print_address_demangle (&opts, gdbarch, ptr_value, stream, demangle);
+    }
 
   if (adjustment)
     {
@@ -890,8 +895,7 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
       if (ex.reason < 0)
 	printf_filtered (_("<error: %s>"), ex.message);
       else
-	print_function_pointer_address (gdbarch, addr, gdb_stdout,
-					opts->addressprint);
+	print_function_pointer_address (opts, gdbarch, addr, gdb_stdout);
       printf_filtered ("\n");
     }
 }
