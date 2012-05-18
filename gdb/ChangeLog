@@ -1,5 +1,9 @@
 2012-05-18  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (mips_reg3_to_reg): Optimize storage.
+
+2012-05-18  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* NEWS: Add microMIPS support and "set mips compression",
 	"show mips compression" commands.
 	* mips-tdep.h (mips_isa): New enum.

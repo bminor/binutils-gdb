@@ -781,7 +781,7 @@ mips_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
 }
 
 /* Table to translate 3-bit register field to actual register number.  */
-static int mips_reg3_to_reg[8] = { 16, 17, 2, 3, 4, 5, 6, 7 };
+static const signed char mips_reg3_to_reg[8] = { 16, 17, 2, 3, 4, 5, 6, 7 };
 
 /* Heuristic_proc_start may hunt through the text section for a long
    time across a 2400 baud serial line.  Allows the user to limit this
