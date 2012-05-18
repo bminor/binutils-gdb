@@ -1,5 +1,8 @@
 2012-05-18  Alan Modra  <amodra@gmail.com>
 
+	* ia64-opc.c: Remove #include "ansidecl.h".
+	* z8kgen.c: Include sysdep.h first.
+
 	* arc-dis.c: Include sysdep.h first, remove some redundant includes.
 	* bfin-dis.c: Likewise.
 	* i860-dis.c: Likewise.
