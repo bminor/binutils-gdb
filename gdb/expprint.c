@@ -136,8 +136,6 @@ print_subexp_standard (struct expression *exp, int *pos,
 
     case OP_VAR_ENTRY_VALUE:
       {
-	struct block *b;
-
 	(*pos) += 2;
 	fprintf_filtered (stream, "%s@entry",
 			  SYMBOL_PRINT_NAME (exp->elts[pc + 1].symbol));
@@ -974,7 +972,6 @@ dump_subexp_body_standard (struct expression *exp,
       break;
     case TYPE_INSTANCE:
       {
-	char *elem_name;
 	LONGEST len;
 
 	len = exp->elts[elt++].longconst;

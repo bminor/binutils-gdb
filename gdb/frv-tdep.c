@@ -136,7 +136,6 @@ new_variant (void)
 {
   struct gdbarch_tdep *var;
   int r;
-  char buf[20];
 
   var = xmalloc (sizeof (*var));
   memset (var, 0, sizeof (*var));
@@ -1099,8 +1098,6 @@ frv_frame_unwind_cache (struct frame_info *this_frame,
 			 void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  CORE_ADDR pc;
-  ULONGEST this_base;
   struct frv_unwind_cache *info;
 
   if ((*this_prologue_cache))

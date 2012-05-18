@@ -1537,7 +1537,6 @@ common_open (struct target_ops *ops, char *name, int from_tty,
 	     enum mips_monitor_type new_monitor,
 	     const char *new_monitor_prompt)
 {
-  char *ptype;
   char *serial_port_name;
   char *remote_name = 0;
   char *local_name = 0;
@@ -1828,7 +1827,6 @@ mips_wait (struct target_ops *ops,
   ULONGEST rpc, rfp, rsp;
   char pc_string[17], fp_string[17], sp_string[17], flags[20];
   int nfields;
-  int i;
 
   interrupt_count = 0;
   hit_watchpoint = 0;

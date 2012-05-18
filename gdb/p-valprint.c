@@ -72,7 +72,6 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
   unsigned eltlen;
   int length_pos, length_size, string_pos;
   struct type *char_type;
-  LONGEST val;
   CORE_ADDR addr;
   int want_space = 0;
 

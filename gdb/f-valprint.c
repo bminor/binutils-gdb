@@ -267,7 +267,6 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int i = 0;	/* Number of characters printed.  */
   struct type *elttype;
-  LONGEST val;
   CORE_ADDR addr;
   int index;
 

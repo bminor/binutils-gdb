@@ -847,7 +847,6 @@ read_known_tasks_list (struct ada_tasks_inferior_data *data)
 static void
 ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 {
-  const char *name;
   struct minimal_symbol *msym;
   struct symbol *sym;
 

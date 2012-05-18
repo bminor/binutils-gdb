@@ -216,7 +216,6 @@ delete_all_bookmarks (void)
 static void
 delete_bookmark_command (char *args, int from_tty)
 {
-  struct bookmark *b;
   int num;
   struct get_number_or_range_state state;
 

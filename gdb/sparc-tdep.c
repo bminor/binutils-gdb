@@ -602,7 +602,6 @@ static struct sparc_frame_cache *
 sparc_alloc_frame_cache (void)
 {
   struct sparc_frame_cache *cache;
-  int i;
 
   cache = FRAME_OBSTACK_ZALLOC (struct sparc_frame_cache);
 

@@ -1079,7 +1079,6 @@ convert_code_addr_to_desc_addr (CORE_ADDR code_addr, CORE_ADDR *desc_addr)
   struct obj_section *dot_fn_section;
   struct minimal_symbol *dot_fn;
   struct minimal_symbol *fn;
-  CORE_ADDR toc;
   /* Find the minimal symbol that corresponds to CODE_ADDR (should
      have a name of the form ".FN").  */
   dot_fn = lookup_minimal_symbol_by_pc (code_addr);

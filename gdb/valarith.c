@@ -1390,7 +1390,7 @@ static struct value *
 vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
 {
   struct value *val, *tmp, *mark;
-  struct type *type1, *type2, *eltype1, *eltype2, *result_type;
+  struct type *type1, *type2, *eltype1, *eltype2;
   int t1_is_vec, t2_is_vec, elsize, i;
   LONGEST low_bound1, high_bound1, low_bound2, high_bound2;
 

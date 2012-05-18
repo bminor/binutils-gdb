@@ -162,7 +162,6 @@ static PyObject *
 thpy_switch (PyObject *self, PyObject *args)
 {
   thread_object *thread_obj = (thread_object *) self;
-  struct cleanup *cleanup;
   volatile struct gdb_exception except;
 
   THPY_REQUIRE_VALID (thread_obj);

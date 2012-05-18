@@ -387,7 +387,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
                           struct mn10300_prologue *result)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  CORE_ADDR pc, next_pc;
+  CORE_ADDR pc;
   int rn;
   pv_t regs[MN10300_MAX_NUM_REGS];
   struct pv_area *stack;

@@ -221,7 +221,6 @@ score3_adjust_pc_and_fetch_inst (CORE_ADDR *pcptr, int *lenptr,
 
 #define EXTRACT_LEN 2
   CORE_ADDR adjust_pc = *pcptr & ~0x1;
-  int inst_len;
   gdb_byte buf[5][EXTRACT_LEN] =
     {
       {'\0', '\0'},

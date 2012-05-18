@@ -319,7 +319,6 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 static void
 bpfinishpy_out_of_scope (struct finish_breakpoint_object *bpfinish_obj)
 {
-  volatile struct gdb_exception except;
   breakpoint_object *bp_obj = (breakpoint_object *) bpfinish_obj;
   PyObject *py_obj = (PyObject *) bp_obj;
 

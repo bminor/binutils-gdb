@@ -61,7 +61,6 @@ parse_spufs_run (ptid_t ptid, int *fd, CORE_ADDR *addr)
   struct gdbarch_tdep *tdep;
   struct regcache *regcache;
   char buf[4];
-  CORE_ADDR pc;
   ULONGEST regval;
 
   /* If we're not on PPU, there's nothing to detect.  */

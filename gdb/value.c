@@ -841,7 +841,6 @@ value_actual_type (struct value *value, int resolve_simple_types,
 		   int *real_type_found)
 {
   struct value_print_options opts;
-  struct value *target;
   struct type *result;
 
   get_user_print_options (&opts);

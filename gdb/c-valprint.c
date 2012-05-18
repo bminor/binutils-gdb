@@ -145,7 +145,6 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
   struct type *elttype, *unresolved_elttype;
   struct type *unresolved_type = type;
   unsigned eltlen;
-  LONGEST val;
   CORE_ADDR addr;
 
   CHECK_TYPEDEF (type);

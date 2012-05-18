@@ -868,7 +868,6 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_GNU_implicit_pointer:
 	  {
-	    ULONGEST die;
 	    LONGEST len;
 
 	    if (ctx->ref_addr_size == -1)

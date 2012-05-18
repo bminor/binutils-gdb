@@ -1554,7 +1554,6 @@ yylex (void)
       if (name2.token == NAME)
 	{
 	  /* Ok, we have "name1 . name2".  */
-	  int token;
 	  char *copy;
 
 	  copy = copy_name (current.value.sval);

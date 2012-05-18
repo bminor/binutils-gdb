@@ -854,7 +854,6 @@ m68k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct m68k_frame_cache cache;
   CORE_ADDR pc;
-  int op;
 
   cache.locals = -1;
   pc = m68k_analyze_prologue (gdbarch, start_pc, (CORE_ADDR) -1, &cache);

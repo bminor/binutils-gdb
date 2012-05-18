@@ -169,7 +169,6 @@ hppanbsd_supply_gregset (const struct regset *regset,
 			 int regnum, const void *gregs, size_t len)
 {
   const gdb_byte *regs = gregs;
-  size_t offset;
   int i;
 
   gdb_assert (len >= HPPANBSD_SIZEOF_GREGS);

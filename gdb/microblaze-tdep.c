@@ -173,7 +173,6 @@ static struct microblaze_frame_cache *
 microblaze_alloc_frame_cache (void)
 {
   struct microblaze_frame_cache *cache;
-  int i;
 
   cache = FRAME_OBSTACK_ZALLOC (struct microblaze_frame_cache);
 
@@ -231,7 +230,7 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
   const char *name;
   CORE_ADDR func_addr, func_end, addr, stop, prologue_end_addr = 0;
   unsigned long insn;
-  int rn, rd, ra, rb, imm;
+  int rd, ra, rb, imm;
   enum microblaze_instr op;
   int flags = 0;
   int save_hidden_pointer_found = 0;
@@ -461,7 +460,7 @@ microblaze_frame_cache (struct frame_info *next_frame, void **this_cache)
 {
   struct microblaze_frame_cache *cache;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  CORE_ADDR func, pc, fp;
+  CORE_ADDR func;
   int rn;
 
   if (*this_cache)

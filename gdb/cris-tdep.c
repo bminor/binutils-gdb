@@ -322,8 +322,6 @@ cris_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct cris_unwind_cache *info;
-  CORE_ADDR pc;
-  CORE_ADDR sp;
   CORE_ADDR addr;
   char buf[4];
   int i;
@@ -711,9 +709,7 @@ cris_frame_unwind_cache (struct frame_info *this_frame,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  CORE_ADDR pc;
   struct cris_unwind_cache *info;
-  int i;
 
   if ((*this_prologue_cache))
     return (*this_prologue_cache);
@@ -823,12 +819,9 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      int struct_return, CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int stack_alloc;
   int stack_offset;
   int argreg;
   int argnum;
-
-  CORE_ADDR regval;
 
   /* The function's arguments and memory allocated by gdb for the arguments to
      point at reside in separate areas on the stack.
@@ -2189,9 +2182,6 @@ static unsigned long get_data_from_address (unsigned short *inst,
 static void
 bdap_prefix (unsigned short inst, inst_env_type *inst_env)
 {
-
-  long offset;
-
   /* It's invalid to be in a delay slot.  */
   if (inst_env->slot_needed || inst_env->prefix_found)
     {

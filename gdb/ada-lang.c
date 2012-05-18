@@ -5470,7 +5470,7 @@ advance_wild_match (const char **namep, const char *name0, int target0)
 static int
 wild_match (const char *name, const char *patn)
 {
-  const char *p, *n;
+  const char *p;
   const char *name0 = name;
 
   while (1)
@@ -10819,7 +10819,6 @@ static void
 ada_exception_support_info_sniffer (void)
 {
   struct ada_inferior_data *data = get_ada_inferior_data (current_inferior ());
-  struct symbol *sym;
 
   /* If the exception info is already known, then no need to recompute it.  */
   if (data->exception_info != NULL)

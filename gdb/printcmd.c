@@ -1613,7 +1613,6 @@ map_display_numbers (char *args,
 		     void *data)
 {
   struct get_number_or_range_state state;
-  struct display *b, *tmp;
   int num;
 
   if (args == NULL)
@@ -1656,9 +1655,6 @@ do_delete_display (struct display *d, void *data)
 static void
 undisplay_command (char *args, int from_tty)
 {
-  int num;
-  struct get_number_or_range_state state;
-
   if (args == NULL)
     {
       if (query (_("Delete all auto-display expressions? ")))

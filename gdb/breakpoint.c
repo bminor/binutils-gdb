@@ -752,7 +752,6 @@ static void
 set_condition_evaluation_mode (char *args, int from_tty,
 			       struct cmd_list_element *c)
 {
-  struct breakpoint *b;
   const char *old_mode, *new_mode;
 
   if ((condition_evaluation_mode_1 == condition_evaluation_target)
@@ -7460,7 +7459,6 @@ catch_load_or_unload (char *arg, int from_tty, int is_load,
   struct solib_catchpoint *c;
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
-  regex_t compiled;
   struct cleanup *cleanup;
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
@@ -7728,7 +7726,6 @@ print_it_catch_syscall (bpstat bs)
   ptid_t ptid;
   struct target_waitstatus last;
   struct syscall s;
-  char *syscall_id;
 
   get_last_target_status (&ptid, &last);
 
@@ -8957,8 +8954,6 @@ decode_static_tracepoint_spec (char **arg_p)
 {
   VEC(static_tracepoint_marker_p) *markers = NULL;
   struct symtabs_and_lines sals;
-  struct symtab_and_line sal;
-  struct symbol *sym;
   struct cleanup *old_chain;
   char *p = &(*arg_p)[3];
   char *endp;
@@ -9028,7 +9023,6 @@ create_breakpoint (struct gdbarch *gdbarch,
   struct linespec_result canonical;
   struct cleanup *old_chain;
   struct cleanup *bkpt_chain = NULL;
-  int i;
   int pending = 0;
   int task = 0;
   int prev_bkpt_count = breakpoint_count;
@@ -13340,7 +13334,6 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
   struct tracepoint *tp = (struct tracepoint *) b;
   struct static_tracepoint_marker marker;
   CORE_ADDR pc;
-  int i;
 
   pc = sal.pc;
   if (sal.line)

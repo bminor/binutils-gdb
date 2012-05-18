@@ -200,7 +200,6 @@ static void
 jit_reader_load_command (char *args, int from_tty)
 {
   char *so_name;
-  int len;
   struct cleanup *prev_cleanup;
 
   if (args == NULL)
@@ -280,7 +279,6 @@ get_jit_objfile_data (struct objfile *objf)
 static void
 add_objfile_entry (struct objfile *objfile, CORE_ADDR entry)
 {
-  CORE_ADDR *entry_addr_ptr;
   struct jit_objfile_data *objf_data;
 
   objf_data = get_jit_objfile_data (objfile);
@@ -781,7 +779,6 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
 {
   void *gdb_mem;
   int status;
-  struct jit_dbg_reader *i;
   jit_dbg_reader_data priv_data;
   struct gdb_reader_funcs *funcs;
   volatile struct gdb_exception e;
@@ -942,7 +939,6 @@ static struct objfile *
 jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
 {
   struct objfile *objf;
-  CORE_ADDR *objf_entry_addr;
 
   ALL_OBJFILES (objf)
     {
@@ -1102,7 +1098,6 @@ jit_frame_sniffer (const struct frame_unwind *self,
 {
   struct jit_inferior_data *inf_data;
   struct jit_unwind_private *priv_data;
-  struct jit_dbg_reader *iter;
   struct gdb_unwind_callbacks callbacks;
   struct gdb_reader_funcs *funcs;
 
@@ -1244,7 +1239,6 @@ jit_inferior_init (struct gdbarch *gdbarch)
   struct jit_code_entry cur_entry;
   struct jit_inferior_data *inf_data;
   CORE_ADDR cur_entry_addr;
-  struct jit_objfile_data *objf_data;
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog, "jit_inferior_init\n");

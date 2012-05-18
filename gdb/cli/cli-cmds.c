@@ -1425,7 +1425,6 @@ alias_command (char *args, int from_tty)
     }
   else
     {
-      int i;
       dyn_string_t alias_prefix_dyn_string, command_prefix_dyn_string;
       char *alias_prefix, *command_prefix;
       struct cmd_list_element *c_alias, *c_command;

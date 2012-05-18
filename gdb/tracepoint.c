@@ -4421,9 +4421,7 @@ tfile_fetch_registers (struct target_ops *ops,
 		       struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  char block_type;
-  int pos, offset, regn, regsize, pc_regno;
-  unsigned short mlen;
+  int offset, regn, regsize, pc_regno;
   char *regs;
 
   /* An uninitialized reg size says we're not going to be

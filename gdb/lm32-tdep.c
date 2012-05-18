@@ -188,7 +188,6 @@ static CORE_ADDR
 lm32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, limit_pc;
-  struct symtab_and_line sal;
   struct lm32_frame_cache frame_info;
   struct trad_frame_saved_reg saved_regs[SIM_LM32_NUM_REGS];
 
@@ -263,8 +262,6 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *arg_type = check_typedef (value_type (arg));
       gdb_byte *contents;
       int len;
-      int j;
-      int reg;
       ULONGEST val;
 
       /* Promote small integer types to int.  */
@@ -315,7 +312,6 @@ lm32_extract_return_value (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int offset;
   ULONGEST l;
   CORE_ADDR return_buffer;
 
@@ -422,17 +418,11 @@ lm32_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 static struct lm32_frame_cache *
 lm32_frame_cache (struct frame_info *this_frame, void **this_prologue_cache)
 {
-  CORE_ADDR prologue_pc;
   CORE_ADDR current_pc;
   ULONGEST prev_sp;
   ULONGEST this_base;
   struct lm32_frame_cache *info;
-  int prefixed;
-  unsigned long instruction;
-  int op;
-  int offsets[32];
   int i;
-  long immediate;
 
   if ((*this_prologue_cache))
     return (*this_prologue_cache);

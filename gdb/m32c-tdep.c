@@ -2587,7 +2587,7 @@ m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
 			    LONGEST *frame_offset)
 {
   const char *name;
-  CORE_ADDR func_addr, func_end, sal_end;
+  CORE_ADDR func_addr, func_end;
   struct m32c_prologue p;
 
   struct regcache *regcache = get_current_regcache ();

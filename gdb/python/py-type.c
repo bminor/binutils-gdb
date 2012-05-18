@@ -1072,7 +1072,6 @@ check_types_equal (struct type *type1, struct type *type2,
   if (TYPE_TARGET_TYPE (type1) != NULL)
     {
       struct type_equality_entry entry;
-      int added;
 
       if (TYPE_TARGET_TYPE (type2) == NULL)
 	return Py_NE;
@@ -1272,7 +1271,6 @@ typy_getitem (PyObject *self, PyObject *key)
   struct type *type = ((type_object *) self)->type;
   char *field;
   int i;
-  volatile struct gdb_exception except;
 
   field = python_string_to_host_string (key);
   if (field == NULL)
@@ -1334,7 +1332,6 @@ typy_has_key (PyObject *self, PyObject *args)
   struct type *type = ((type_object *) self)->type;
   const char *field;
   int i;
-  volatile struct gdb_exception except;
 
   if (!PyArg_ParseTuple (args, "s", &field))
     return NULL;
@@ -1431,7 +1428,6 @@ typy_iterator_iternext (PyObject *self)
 {
   typy_iterator_object *iter_obj = (typy_iterator_object *) self;
   struct type *type = iter_obj->source->type;
-  int i;
   PyObject *result;
   
   if (iter_obj->field < TYPE_NFIELDS (type))

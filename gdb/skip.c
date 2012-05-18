@@ -155,9 +155,6 @@ skip_function_command (char *arg, int from_tty)
       /* Decode arg.  We set funfirstline=1 so decode_line_1 will give us the
 	 first line of the function specified, if it can, and so that we'll
 	 reject variable names and the like.  */
-
-      int i;
-      int pending = 0;
       char *orig_arg = arg; /* decode_line_1 modifies the arg pointer.  */
       volatile struct gdb_exception decode_exception;
       struct symtabs_and_lines sals = { 0 };

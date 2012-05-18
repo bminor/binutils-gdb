@@ -84,7 +84,6 @@ amd64_darwin_sigcontext_addr (struct frame_info *this_frame)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR rbx;
-  CORE_ADDR si;
   gdb_byte buf[8];
 
   /* A pointer to the ucontext is passed as the fourth argument

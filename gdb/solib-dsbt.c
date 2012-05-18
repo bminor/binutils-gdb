@@ -232,7 +232,7 @@ decode_loadmap (gdb_byte *buf)
   struct int_elf32_dsbt_loadmap *int_ldmbuf;
 
   int version, seg, nsegs;
-  int ext_ldmbuf_size, int_ldmbuf_size;
+  int int_ldmbuf_size;
 
   ext_ldmbuf = (struct ext_elf32_dsbt_loadmap *) buf;
 
@@ -841,8 +841,7 @@ enable_break2 (void)
       unsigned int interp_sect_size;
       gdb_byte *buf;
       bfd *tmp_bfd = NULL;
-      int status;
-      CORE_ADDR addr, interp_loadmap_addr;
+      CORE_ADDR addr;
       gdb_byte addr_buf[TIC6X_PTR_SIZE];
       struct int_elf32_dsbt_loadmap *ldm;
       volatile struct gdb_exception ex;
@@ -1029,8 +1028,6 @@ dsbt_special_symbol_handling (void)
 static void
 dsbt_relocate_main_executable (void)
 {
-  int status;
-  CORE_ADDR exec_addr, interp_addr;
   struct int_elf32_dsbt_loadmap *ldm;
   struct cleanup *old_chain;
   struct section_offsets *new_offsets;

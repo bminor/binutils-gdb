@@ -1131,8 +1131,6 @@ get_register (struct frame_info *frame, int regnum, int format)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct ui_out *uiout = current_uiout;
-  CORE_ADDR addr;
-  enum lval_type lval;
   struct value *val;
 
   if (format == 'N')

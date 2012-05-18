@@ -1197,7 +1197,6 @@ i386_match_insn_block (CORE_ADDR pc, struct i386_insn *insn_patterns)
 {
   CORE_ADDR current_pc;
   int ix, i;
-  gdb_byte op;
   struct i386_insn *insn;
 
   insn = i386_match_insn (pc, insn_patterns);

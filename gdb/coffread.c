@@ -1306,7 +1306,6 @@ static const char *
 coff_getfilename (union internal_auxent *aux_entry)
 {
   static char buffer[BUFSIZ];
-  char *temp;
   const char *result;
 
   if (aux_entry->x_file.x_n.x_zeroes == 0)

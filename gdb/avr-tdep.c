@@ -742,7 +742,6 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 	0xcd, 0xb7,		/* in r28,__SP_L__ */
 	0xde, 0xb7		/* in r29,__SP_H__ */
       };
-      unsigned short insn1;
 
       if (vpc + sizeof (img) < len
 	  && memcmp (prologue + vpc, img, sizeof (img)) == 0)

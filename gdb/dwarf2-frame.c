@@ -892,7 +892,7 @@ dwarf2_compile_cfa_to_ax (struct agent_expr *expr, struct axs_value *loc,
   const int num_regs = gdbarch_num_regs (gdbarch)
 		       + gdbarch_num_pseudo_regs (gdbarch);
   struct dwarf2_fde *fde;
-  CORE_ADDR text_offset, cfa;
+  CORE_ADDR text_offset;
   struct dwarf2_frame_state fs;
   int addr_size;
 

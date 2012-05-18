@@ -246,7 +246,7 @@ mips_fill_fpregset (const struct regcache *regcache,
 		    mips_elf_fpregset_t *fpregsetp, int regno)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  char *from, *to;
+  char *to;
 
   if ((regno >= gdbarch_fp0_regnum (gdbarch))
       && (regno < gdbarch_fp0_regnum (gdbarch) + 32))
@@ -936,7 +936,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 			      CORE_ADDR func)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  int ireg, reg_position;
+  int ireg;
   CORE_ADDR frame_sp = get_frame_sp (this_frame);
   CORE_ADDR sigcontext_base;
   const struct mips_regnum *regs = mips_regnum (gdbarch);
@@ -1102,7 +1102,7 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 				 CORE_ADDR func)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  int ireg, reg_position;
+  int ireg;
   CORE_ADDR frame_sp = get_frame_sp (this_frame);
   CORE_ADDR sigcontext_base;
   const struct mips_regnum *regs = mips_regnum (gdbarch);

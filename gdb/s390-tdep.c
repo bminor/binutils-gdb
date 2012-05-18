@@ -1166,7 +1166,6 @@ s390_load (struct s390_prologue_data *data,
 	   
 {
   pv_t addr = s390_addr (data, d2, x2, b2);
-  pv_t offset;
 
   /* If it's a load from an in-line constant pool, then we can
      simulate that, under the assumption that the code isn't

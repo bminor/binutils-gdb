@@ -134,7 +134,6 @@ i386nto_register_area (struct gdbarch *gdbarch,
 		       int regno, int regset, unsigned *off)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int len;
 
   *off = 0;
   if (regset == NTO_REG_GENERAL)

@@ -2671,7 +2671,6 @@ find_method (struct linespec_state *self, VEC (symtab_p) *file_symtabs,
   VEC (typep) *superclass_vec;
   VEC (const_char_ptr) *result_names;
   struct collect_info info;
-  char *name_iter;
 
   /* Sort symbols so that symbols with the same program space are next
      to each other.  */
@@ -3386,8 +3385,6 @@ add_matching_symbols_to_info (const char *name,
 
   for (ix = 0; VEC_iterate (symtab_p, info->file_symtabs, ix, elt); ++ix)
     {
-      struct symbol *sym;
-
       if (elt == NULL)
 	{
 	  iterate_over_all_matching_symtabs (info->state, name, VAR_DOMAIN,

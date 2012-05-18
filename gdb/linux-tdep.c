@@ -402,7 +402,6 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
 	{
 	  struct cleanup *cleanup = make_cleanup (xfree, data);
 	  const char *p = data;
-	  ULONGEST val;
 
 	  printf_filtered (_("Process: %s\n"),
 			   pulongest (strtoulst (p, &p, 10)));

@@ -236,7 +236,6 @@ pretend_pc (struct frame_info *this_frame, struct tailcall_cache *cache)
 {
   int next_levels = existing_next_levels (this_frame, cache);
   struct call_site_chain *chain = cache->chain;
-  int caller_no;
 
   gdb_assert (chain != NULL);
 
@@ -367,10 +366,9 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
 {
   CORE_ADDR prev_pc = 0, prev_sp = 0;	/* GCC warning.  */
   int prev_sp_p = 0;
-  CORE_ADDR this_pc, pc;
+  CORE_ADDR this_pc;
   struct gdbarch *prev_gdbarch;
   struct call_site_chain *chain = NULL;
-  struct frame_info *fi;
   struct tailcall_cache *cache;
   volatile struct gdb_exception except;
 

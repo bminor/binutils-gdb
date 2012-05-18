@@ -181,8 +181,6 @@ get_ack (void)
 static int
 send_data (void *buf, int len)
 {
-  int ret;
-
   if (!sdi_desc)
     return -1;
 
@@ -707,7 +705,6 @@ m32r_wait (struct target_ops *ops,
   int ib_breakpoints;
   long i;
   unsigned char buf[13];
-  unsigned long val;
   int ret, c;
 
   if (remote_debug)
@@ -1225,7 +1222,6 @@ m32r_load (char *args, int from_tty)
   int nostart;
   struct timeval start_time, end_time;
   unsigned long data_count;	/* Number of bytes transferred to memory.  */
-  int ret;
   static RETSIGTYPE (*prev_sigint) ();
 
   /* for direct tcp connections, we can do a fast binary download.  */

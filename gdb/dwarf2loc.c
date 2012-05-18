@@ -651,7 +651,6 @@ static struct call_site_chain *
 call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 			CORE_ADDR callee_pc)
 {
-  struct func_type *func_specific;
   struct obstack addr_obstack;
   struct cleanup *back_to_retval, *back_to_workdata;
   struct call_site_chain *retval = NULL;
@@ -833,8 +832,6 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame, int dwarf_reg,
   struct frame_info *caller_frame = get_prev_frame (frame);
   struct call_site *call_site;
   int iparams;
-  struct value *val;
-  struct dwarf2_locexpr_baton *dwarf_block;
   /* Initialize it just to avoid a GCC false warning.  */
   struct call_site_parameter *parameter = NULL;
   CORE_ADDR target_addr;
@@ -2695,7 +2692,6 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  {
 	    const gdb_byte *datastart;
 	    size_t datalen;
-	    unsigned int before_stack_len;
 	    struct block *b;
 	    struct symbol *framefunc;
 	    LONGEST base_offset = 0;

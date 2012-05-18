@@ -1576,7 +1576,6 @@ extended_mips16_next_pc (struct frame_info *frame, CORE_ADDR pc,
     {
     case 2:			/* Branch */
       {
-	CORE_ADDR offset;
 	struct upk_mips16 upk;
 	unpack_mips16 (gdbarch, pc, extension, insn, itype, &upk);
 	pc += (upk.offset << 1) + 2;
@@ -4959,7 +4958,6 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
 		     int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  int offset;
   struct value_print_options opts;
   struct value *val;
 
@@ -5696,7 +5694,7 @@ mips_segment_boundary (CORE_ADDR bpaddr)
 static CORE_ADDR
 mips_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
 {
-  CORE_ADDR prev_addr, next_addr;
+  CORE_ADDR prev_addr;
   CORE_ADDR boundary;
   CORE_ADDR func_addr;
 
@@ -5750,7 +5748,6 @@ mips_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
     }
   else
     {
-      struct minimal_symbol *sym;
       CORE_ADDR addr, jmpaddr;
       int i;
 

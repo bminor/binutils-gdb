@@ -156,7 +156,6 @@ compare_filenames_for_search (const char *filename, const char *search_name,
 			      int search_len)
 {
   int len = strlen (filename);
-  int offset;
 
   if (len < search_len)
     return 0;
@@ -196,7 +195,6 @@ iterate_over_some_symtabs (const char *name,
 			   struct symtab *after_last)
 {
   struct symtab *s = NULL;
-  struct cleanup *cleanup;
   const char* base_name = lbasename (name);
   int name_len = strlen (name);
   int is_abs = IS_ABSOLUTE_PATH (name);
@@ -3333,7 +3331,6 @@ search_symbols (char *regexp, enum search_domain kind,
   struct symbol *sym;
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
-  char *val;
   int found_misc = 0;
   static const enum minimal_symbol_type types[]
     = {mst_data, mst_text, mst_abs};

@@ -849,7 +849,7 @@ spu_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   CORE_ADDR scan_pc, func_start, func_end, epilogue_start, epilogue_end;
   bfd_byte buf[4];
   unsigned int insn;
-  int rt, ra, rb, rc, immed;
+  int rt, ra, rb, immed;
 
   /* Find the search limits based on function boundaries and hard limit.
      We assume the epilogue can be up to 64 instructions long.  */
@@ -2032,7 +2032,7 @@ info_spu_event_command (char *args, int from_tty)
   gdb_byte buf[100];
   char annex[32];
   LONGEST len;
-  int rc, id;
+  int id;
 
   if (gdbarch_bfd_arch_info (get_frame_arch (frame))->arch != bfd_arch_spu)
     error (_("\"info spu\" is only supported on the SPU architecture."));
@@ -2089,7 +2089,7 @@ info_spu_signal_command (char *args, int from_tty)
   char annex[32];
   gdb_byte buf[100];
   LONGEST len;
-  int rc, id;
+  int id;
 
   if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
     error (_("\"info spu\" is only supported on the SPU architecture."));
@@ -2210,7 +2210,7 @@ info_spu_mailbox_command (char *args, int from_tty)
   char annex[32];
   gdb_byte buf[1024];
   LONGEST len;
-  int i, id;
+  int id;
 
   if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
     error (_("\"info spu\" is only supported on the SPU architecture."));
@@ -2358,7 +2358,7 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr, enum bfd_endian byte_order)
       ULONGEST mfc_cq_dw1;
       ULONGEST mfc_cq_dw2;
       int mfc_cmd_opcode, mfc_cmd_tag, rclass_id, tclass_id;
-      int lsa, size, list_lsa, list_size, mfc_lsa, mfc_size;
+      int list_lsa, list_size, mfc_lsa, mfc_size;
       ULONGEST mfc_ea;
       int list_valid_p, noop_valid_p, qw_valid_p, ea_valid_p, cmd_error_p;
 
@@ -2452,7 +2452,7 @@ info_spu_dma_command (char *args, int from_tty)
   char annex[32];
   gdb_byte buf[1024];
   LONGEST len;
-  int i, id;
+  int id;
 
   if (gdbarch_bfd_arch_info (get_frame_arch (frame))->arch != bfd_arch_spu)
     error (_("\"info spu\" is only supported on the SPU architecture."));
@@ -2531,7 +2531,7 @@ info_spu_proxydma_command (char *args, int from_tty)
   char annex[32];
   gdb_byte buf[1024];
   LONGEST len;
-  int i, id;
+  int id;
 
   if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
     error (_("\"info spu\" is only supported on the SPU architecture."));

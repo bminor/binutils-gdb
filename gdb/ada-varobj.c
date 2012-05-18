@@ -227,7 +227,6 @@ ada_varobj_get_array_number_of_children (struct value *parent_value,
 					 struct type *parent_type)
 {
   LONGEST lo, hi;
-  int len;
 
   if (!get_array_bounds (parent_type, &lo, &hi))
     {

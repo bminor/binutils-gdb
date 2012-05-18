@@ -214,7 +214,6 @@ darwin_current_sos (void)
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   int ptr_len = TYPE_LENGTH (ptr_type);
   unsigned int image_info_size;
-  CORE_ADDR lm;
   struct so_list *head = NULL;
   struct so_list *tail = NULL;
   int i;

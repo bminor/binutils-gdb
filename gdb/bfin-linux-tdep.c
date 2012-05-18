@@ -103,7 +103,6 @@ bfin_linux_sigframe_init (const struct tramp_frame *self,
   CORE_ADDR sp = get_frame_sp (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
   CORE_ADDR sigcontext = sp + SIGCONTEXT_OFFSET;
-  struct frame_id this_id;
   const int *reg_offset = bfin_linux_sigcontext_reg_offset;
   int i;
 

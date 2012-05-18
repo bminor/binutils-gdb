@@ -639,7 +639,6 @@ static struct insn_pattern powerpc32_plt_stub_so[] =
 static int
 powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 {
-  struct objfile *objfile;
   struct minimal_symbol *sym;
 
   /* Check whether PC is in the dynamic linker.  This also checks

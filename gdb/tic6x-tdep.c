@@ -301,7 +301,6 @@ tic6x_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 static CORE_ADDR
 tic6x_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
-  CORE_ADDR limit_pc;
   CORE_ADDR func_addr;
   struct tic6x_unwind_cache cache;
 
@@ -405,7 +404,6 @@ tic6x_frame_unwind_cache (struct frame_info *this_frame,
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR current_pc;
   struct tic6x_unwind_cache *cache;
-  int i;
 
   if (*this_prologue_cache)
     return *this_prologue_cache;
@@ -606,7 +604,6 @@ tic6x_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   unsigned long inst;
-  int offset;
   int register_number;
   int last = 0;
 

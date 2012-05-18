@@ -2171,7 +2171,6 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
     case OP_THIS:
       {
-	char *this_name;
 	struct symbol *sym, *func;
 	struct block *b;
 	const struct language_defn *lang;

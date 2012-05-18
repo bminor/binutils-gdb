@@ -556,7 +556,6 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
       for (i = 0; i < sals.nelts; ++i)
 	{
 	  PyObject *obj;
-	  char *str;
 
 	  obj = symtab_and_line_to_sal_object (sals.sals[i]);
 	  if (! obj)
@@ -694,7 +693,6 @@ static void
 gdbpy_run_events (struct serial *scb, void *context)
 {
   struct cleanup *cleanup;
-  int r;
 
   cleanup = ensure_python_env (get_current_arch (), current_language);
 

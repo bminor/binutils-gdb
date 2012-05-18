@@ -122,8 +122,7 @@ static void
 m32r_load (char *filename, int from_tty)
 {
   bfd *abfd;
-  asection *s;
-  unsigned int i, data_count = 0;
+  unsigned int data_count = 0;
   struct timeval start_time, end_time;
 
   if (filename == NULL || filename[0] == 0)
@@ -238,8 +237,12 @@ m32r_supply_register (struct regcache *regcache, char *regname,
       monitor_supply_register (regcache, regno, val);
       if (regno == PSW_REGNUM)
 	{
+#if (defined SM_REGNUM || defined BSM_REGNUM || defined IE_REGNUM \
+     || defined BIE_REGNUM || defined COND_REGNUM  || defined CBR_REGNUM \
+     || defined BPC_REGNUM || defined BCARRY_REGNUM)
 	  unsigned long psw = strtoul (val, NULL, 16);
 	  char *zero = "00000000", *one = "00000001";
+#endif
 
 #ifdef SM_REGNUM
 	  /* Stack mode bit */
@@ -533,7 +536,6 @@ m32r_upload_command (char *args, int from_tty)
 	  {
 	    bfd_size_type section_size = bfd_section_size (abfd, s);
 	    bfd_vma section_base = bfd_section_lma (abfd, s);
-	    unsigned int buffer;
 
 	    data_count += section_size;
 

@@ -793,7 +793,7 @@ evaluate_subexp_standard (struct type *expect_type,
   struct type *type;
   int nargs;
   struct value **argvec;
-  int upper, lower;
+  int lower;
   int code;
   int ix;
   long mem_offset;

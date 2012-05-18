@@ -665,7 +665,6 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
       && (regnum <= gdbarch_tdep (gdbarch)->a0_base + 15))
     {
       gdb_byte *buf = (gdb_byte *) alloca (MAX_REGISTER_SIZE);
-      unsigned int wb;
 
       regcache_raw_read (regcache,
 			 gdbarch_tdep (gdbarch)->wb_regnum, buf);
@@ -2816,7 +2815,6 @@ execute_code (struct gdbarch *gdbarch, CORE_ADDR current_pc, CORE_ADDR wb)
   void (*func) (struct gdbarch *, int, int, int, CORE_ADDR);
 
   int at, as, offset;
-  int num_operands;
 
   /* WindowUnderflow12 = true, when inside _WindowUnderflow12.  */ 
   int WindowUnderflow12 = (current_pc & 0x1ff) >= 0x140; 

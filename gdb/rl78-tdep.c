@@ -1021,7 +1021,6 @@ rl78_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct type *value_type = value_enclosing_type (args[i]);
       int len = TYPE_LENGTH (value_type);
       int container_len = (len + 1) & ~1;
-      int offset;
 
       sp -= container_len;
       write_memory (rl78_make_data_address (sp),

@@ -89,7 +89,7 @@ arm_symbian_init_abi (struct gdbarch_info info,
 static enum gdb_osabi
 arm_symbian_osabi_sniffer (bfd *abfd)
 {
-  Elf_Internal_Phdr *phdrs, **segments;
+  Elf_Internal_Phdr *phdrs;
   long phdrs_size;
   int num_phdrs, i;
 

@@ -537,7 +537,7 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
   CORE_ADDR pc, scan_limit;
   ULONGEST prev_sp;
   ULONGEST this_base;
-  unsigned long op, op2;
+  unsigned long op;
   int i;
   struct m32r_unwind_cache *info;
 
@@ -697,7 +697,6 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   gdb_byte *val;
   gdb_byte valbuf[MAX_REGISTER_SIZE];
   int len;
-  int odd_sized_struct;
 
   /* First force sp to a 4-byte alignment.  */
   sp = sp & ~3;

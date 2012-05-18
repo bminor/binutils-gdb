@@ -177,7 +177,7 @@ hppa64_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch,
   struct minimal_symbol *minsym;
   asection *sec;
   CORE_ADDR addr;
-  int insn, i;
+  int insn;
 
   minsym = lookup_minimal_symbol_by_pc (pc);
   if (! minsym)

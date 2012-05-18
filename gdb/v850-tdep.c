@@ -593,7 +593,6 @@ v850_analyze_prologue (struct gdbarch *gdbarch,
   CORE_ADDR prologue_end, current_pc;
   struct pifsr pifsrs[E_NUM_REGS + 1];
   struct pifsr *pifsr, *pifsr_tmp;
-  int fp_used;
   int ep_used;
   int reg;
   CORE_ADDR save_pc, save_end;
@@ -958,7 +957,6 @@ static struct v850_frame_cache *
 v850_alloc_frame_cache (struct frame_info *this_frame)
 {
   struct v850_frame_cache *cache;
-  int i;
 
   cache = FRAME_OBSTACK_ZALLOC (struct v850_frame_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);

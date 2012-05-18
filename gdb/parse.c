@@ -1298,7 +1298,6 @@ int
 parse_float (const char *p, int len, DOUBLEST *d, const char **suffix)
 {
   char *copy;
-  char *s;
   int n, num;
 
   copy = xmalloc (len + 1);

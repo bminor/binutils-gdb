@@ -1041,7 +1041,6 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
          It can be calculated as the bsp - sof (sizeof frame).  */
       ULONGEST bsp, vbsp;
       ULONGEST cfm;
-      CORE_ADDR reg;
       status = regcache_cooked_read_unsigned (regcache, IA64_BSP_REGNUM, &bsp);
       if (status != REG_VALID)
 	return status;
@@ -1060,7 +1059,6 @@ ia64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       ULONGEST pr;
       ULONGEST cfm;
       ULONGEST prN_val;
-      CORE_ADDR reg;
       status = regcache_cooked_read_unsigned (regcache, IA64_PR_REGNUM, &pr);
       if (status != REG_VALID)
 	return status;
@@ -1098,7 +1096,6 @@ ia64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       ULONGEST bsp;
       ULONGEST cfm;
-      CORE_ADDR reg;
       regcache_cooked_read_unsigned (regcache, IA64_BSP_REGNUM, &bsp);
       regcache_cooked_read_unsigned (regcache, IA64_CFM_REGNUM, &cfm);
 
@@ -1854,8 +1851,7 @@ ia64_frame_cache (struct frame_info *this_frame, void **this_cache)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct ia64_frame_cache *cache;
   char buf[8];
-  CORE_ADDR cfm, sof, sol, bsp, psr;
-  int i;
+  CORE_ADDR cfm, psr;
 
   if (*this_cache)
     return *this_cache;
@@ -2242,9 +2238,7 @@ ia64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct ia64_frame_cache *cache;
-  CORE_ADDR addr;
   char buf[8];
-  int i;
 
   if (*this_cache)
     return *this_cache;

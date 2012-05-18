@@ -180,7 +180,6 @@ inferior_to_inferior_object (struct inferior *inferior)
 PyObject *
 find_inferior_object (int pid)
 {
-  struct inflist_entry *p;
   struct inferior *inf = find_inferior_pid (pid);
 
   if (inf)
@@ -257,7 +256,6 @@ delete_thread_object (struct thread_info *tp, int ignore)
 {
   struct cleanup *cleanup;
   inferior_object *inf_obj;
-  thread_object *thread_obj;
   struct threadlist_entry **entry, *tmp;
   
   cleanup = ensure_python_env (python_gdbarch, python_language);

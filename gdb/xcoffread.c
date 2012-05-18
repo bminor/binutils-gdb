@@ -912,7 +912,6 @@ record_minimal_symbol (const char *name, CORE_ADDR address,
 		       int n_scnum,
 		       struct objfile *objfile)
 {
-  struct find_targ_sec_arg args;
   int secnum;
   asection *bfd_sect;
 

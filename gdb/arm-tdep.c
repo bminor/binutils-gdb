@@ -380,7 +380,6 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
 int
 arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
-  struct obj_section *sec;
   struct minimal_symbol *sym;
   char type;
   struct displaced_step_closure* dsc
@@ -1285,7 +1284,7 @@ static CORE_ADDR
 arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
-  unsigned int address, basereg;
+  unsigned int basereg;
   struct minimal_symbol *stack_chk_guard;
   int offset;
   int is_thumb = arm_pc_is_thumb (gdbarch, pc);
@@ -1377,7 +1376,6 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   unsigned long inst;
   CORE_ADDR skip_pc;
   CORE_ADDR func_addr, limit_pc;
-  struct symtab_and_line sal;
 
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
@@ -1536,7 +1534,6 @@ thumb_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR prev_pc,
 {
   CORE_ADDR prologue_start;
   CORE_ADDR prologue_end;
-  CORE_ADDR current_pc;
 
   if (find_pc_partial_function (block_addr, NULL, &prologue_start,
 				&prologue_end))
@@ -5132,7 +5129,7 @@ static gdb_byte *
 extend_buffer_earlier (gdb_byte *buf, CORE_ADDR endaddr,
 		       int old_len, int new_len)
 {
-  gdb_byte *new_buf, *middle;
+  gdb_byte *new_buf;
   int bytes_to_read = new_len - old_len;
 
   new_buf = xmalloc (new_len);
@@ -5165,7 +5162,7 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
   gdb_byte *buf;
   char map_type;
   CORE_ADDR boundary, func_start;
-  int buf_len, buf2_len;
+  int buf_len;
   enum bfd_endian order = gdbarch_byte_order_for_code (gdbarch);
   int i, any, last_it, last_it_count;
 
@@ -6865,7 +6862,7 @@ cleanup_block_load_pc (struct gdbarch *gdbarch,
 		       struct displaced_step_closure *dsc)
 {
   uint32_t status = displaced_read_reg (regs, dsc, ARM_PS_REGNUM);
-  int load_executed = condition_true (dsc->u.block.cond, status), i;
+  int load_executed = condition_true (dsc->u.block.cond, status);
   unsigned int mask = dsc->u.block.regmask, write_reg = ARM_PC_REGNUM;
   unsigned int regs_loaded = bitcount (mask);
   unsigned int num_to_shuffle = regs_loaded, clobbered;
@@ -8707,8 +8704,6 @@ static void
 arm_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 			       int *kindptr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   arm_breakpoint_from_pc (gdbarch, pcptr, kindptr);
 
   if (arm_pc_is_thumb (gdbarch, *pcptr) && *kindptr == 4)
@@ -9283,8 +9278,6 @@ static void
 arm_show_fallback_mode (struct ui_file *file, int from_tty,
 			struct cmd_list_element *c, const char *value)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch);
-
   fprintf_filtered (file,
 		    _("The current execution mode assumed "
 		      "(when symbols are unavailable) is \"%s\".\n"),
@@ -9574,7 +9567,6 @@ arm_neon_quad_write (struct gdbarch *gdbarch, struct regcache *regcache,
 		     int regnum, const gdb_byte *buf)
 {
   char name_buf[4];
-  gdb_byte reg_buf[8];
   int offset, double_regnum;
 
   sprintf (name_buf, "d%d", regnum << 1);

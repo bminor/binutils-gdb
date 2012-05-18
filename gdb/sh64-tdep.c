@@ -858,7 +858,6 @@ sh64_analyze_prologue (struct gdbarch *gdbarch,
 		       CORE_ADDR func_pc,
 		       CORE_ADDR current_pc)
 {
-  int reg_nr;
   int pc;
   int opc;
   int insn;
@@ -1070,7 +1069,6 @@ sh64_push_dummy_call (struct gdbarch *gdbarch,
   CORE_ADDR regval;
   char *val;
   char valbuf[8];
-  char valbuf_tmp[8];
   int len;
   int argreg_size;
   int fp_args[12];

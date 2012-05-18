@@ -543,7 +543,6 @@ hppa_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   unsigned long status;
   unsigned int inst;
   char buf[4];
-  int off;
 
   status = target_read_memory (pc, buf, 4);
   if (status != 0)
@@ -1698,7 +1697,6 @@ after_prologue (CORE_ADDR pc)
 {
   struct symtab_and_line sal;
   CORE_ADDR func_addr, func_end;
-  struct symbol *f;
 
   /* If we can not find the symbol in the partial symbol table, then
      there is no hope we can determine the function's start address
@@ -1738,10 +1736,7 @@ after_prologue (CORE_ADDR pc)
 static CORE_ADDR
 hppa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  unsigned long inst;
-  int offset;
   CORE_ADDR post_prologue_pc;
-  char buf[4];
 
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
@@ -1793,7 +1788,6 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct hppa_frame_cache *cache;
   long saved_gr_mask;
   long saved_fr_mask;
-  CORE_ADDR this_sp;
   long frame_size;
   struct unwind_table_entry *u;
   CORE_ADDR prologue_end;

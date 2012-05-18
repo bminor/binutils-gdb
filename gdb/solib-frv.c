@@ -975,8 +975,6 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
   CORE_ADDR got_value;
   struct int_elf32_fdpic_loadmap *ldm = 0;
   struct symbol *sym;
-  int status;
-  CORE_ADDR exec_loadmap_addr;
 
   /* Fetch the corresponding global pointer for the entry point.  */
   got_value = frv_fdpic_find_global_pointer (entry_point);
