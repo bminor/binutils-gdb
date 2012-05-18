@@ -245,7 +245,10 @@ s_proc (int end_p)
 	  /* Missing entry point, use function's name with the leading
 	     char prepended.  */
 	  if (leading_char)
-	    asprintf (&label, "%c%s", leading_char, name);
+	    {
+	      if (asprintf (&label, "%c%s", leading_char, name))
+		{ /* Avoid warning */ }
+	    }
 	  else
 	    label = name;
 	}
