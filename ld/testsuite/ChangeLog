@@ -1,3 +1,7 @@
+2012-05-18  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/init-mixed.c: Include config.h first.
+
 2012-05-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-arm/emit-relocs1-vxworks.d: Expect addend as signed.
