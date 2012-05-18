@@ -1,3 +1,8 @@
+2012-05-18  Roland McGrath  <mcgrathr@google.com>
+
+	* archive.c (_bfd_generic_read_ar_hdr_mag): Fix last change so as
+	not to clobber the ar_fmag field stored in ARED->arch_header.
+
 2012-05-18  Pedro Alves  <palves@redhat.com>
 
 	* mach-o.h: Don't include sysdep.h.
