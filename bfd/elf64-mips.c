@@ -2708,6 +2708,7 @@ mips_elf64_be_swap_reloc_out (bfd *abfd, const Elf_Internal_Rela *src,
 
   mirel.r_offset = src[0].r_offset;
   BFD_ASSERT(src[0].r_offset == src[1].r_offset);
+  BFD_ASSERT(src[0].r_offset == src[2].r_offset);
 
   mirel.r_type = ELF64_MIPS_R_TYPE (src[0].r_info);
   mirel.r_sym = ELF64_R_SYM (src[0].r_info);

@@ -1,3 +1,8 @@
+2012-05-19  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* elf64-mips.c (mips_elf64_be_swap_reloc_out): Also make sure
+	the third reloc offset is the same as the first.
+
 2012-05-19  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.h (has_vle_insns, is_ppc_vle): Delete.
