@@ -1,3 +1,8 @@
+2012-05-19  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/vle.ld: New.
+	* ld-powerpc/powerpc.exp (vle reloc tests): Link using vle.ld.
+
 2012-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/tlsdesc-nacl.rd: Update for dynamic sym changes.

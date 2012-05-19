@@ -1,3 +1,11 @@
+2012-05-19  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.h (has_vle_insns, is_ppc_vle): Delete.
+	(has_tls_reloc, has_tls_get_addr_call): Move back to..
+	* elf32-ppc.c: ..here.
+	(ppc_elf_section_flags, elf_backend_section_flags): Delete.
+	(ppc_elf_modify_segment_map): Use ELF sh_flags to detect VLE sections.
+
 2012-05-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Don't make

@@ -1,3 +1,8 @@
+2012-05-19  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c: Don't include elf32-ppc.h, do include elf/ppc.h.
+	(get_powerpc_dialect): Detect VLE sections from ELF sh_flags.
+
 2012-05-18  Alan Modra  <amodra@gmail.com>
 
 	* ia64-opc.c: Remove #include "ansidecl.h".

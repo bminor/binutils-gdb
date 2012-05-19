@@ -1,5 +1,5 @@
 # Expect script for ld-powerpc tests
-#   Copyright 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+#   Copyright 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
 #   Free Software Foundation
 #
 # This file is part of the GNU Binutils.
@@ -231,13 +231,13 @@ set ppceabitests {
     {"VLE multiple segments 5" "-T vle-multiseg-5.ld"
      "-mregnames -mvle" {vle-multiseg.s}
     {{readelf "-l" vle-multiseg-5.d}} "vle-multiseg-5"}
-    {"VLE relocations 1" ""
+    {"VLE relocations 1" "-T vle.ld"
      "-mvle" {vle-reloc-1.s vle-reloc-def-1.s}
     {{objdump "-Mvle -d" vle-reloc-1.d}} "vle-reloc-1"}
-    {"VLE relocations 2" ""
+    {"VLE relocations 2" "-T vle.ld"
      "-mvle" {vle-reloc-2.s vle-reloc-def-2.s}
     {{objdump "-Mvle -d" vle-reloc-2.d}} "vle-reloc-2"}
-    {"VLE relocations 3" ""
+    {"VLE relocations 3" "-T vle.ld"
      "-mvle" {vle-reloc-3.s vle-reloc-def-3.s}
     {{objdump "-Mvle -d" vle-reloc-3.d}} "vle-reloc-3"}
 }
