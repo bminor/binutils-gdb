@@ -1,3 +1,11 @@
+2012-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 14072
+	* gdb-if.c: Include config.h before system header files.
+	* load.c: Likewise.
+	* syscalls.c: Likewise.
+	* trace.c: Likewise.
+
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, config.in, configure: Regenerate.

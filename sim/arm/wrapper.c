@@ -21,6 +21,7 @@
    run.c and gdb (when the simulator is linked with gdb).
    All simulator interaction should go through this file.  */
 
+#include "config.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>

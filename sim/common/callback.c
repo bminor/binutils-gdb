@@ -24,6 +24,7 @@
 #ifdef HAVE_CONFIG_H
 #include "cconfig.h"
 #endif
+#include "config.h"
 #include "ansidecl.h"
 #include <stdarg.h>
 #include <stdio.h>

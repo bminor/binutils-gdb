@@ -1,3 +1,9 @@
+2012-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 14072
+	* compile.c: Include config.h before system header files.
+	* sim-main.h: Likewise.
+
 2012-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, config.in, configure: Regenerate.

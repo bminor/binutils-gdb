@@ -29,6 +29,7 @@ code on the hardware.
 #define TRACE (1)
 #endif
 
+#include "config.h"
 #include "bfd.h"
 #include "sim-main.h"
 #include "sim-utils.h"

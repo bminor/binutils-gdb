@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Based on the fr30 file, mixing in bits from the i960 and pruning of
    dead code.  */
 
+#include "config.h"
 #include "libiberty.h"
 #include "bfd.h"
 #include "elf-bfd.h"

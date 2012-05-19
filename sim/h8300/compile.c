@@ -17,6 +17,7 @@
  * AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "config.h"
 #include <signal.h>
 #ifdef HAVE_TIME_H
 #include <time.h>
