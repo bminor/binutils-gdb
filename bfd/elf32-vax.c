@@ -1692,8 +1692,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 		}
 
 	      if ((input_section->flags & SEC_CODE) != 0
-		  || (info->shared
-		      && ELF32_R_TYPE (outrel.r_info) != R_VAX_32
+		  || (ELF32_R_TYPE (outrel.r_info) != R_VAX_32
 		      && ELF32_R_TYPE (outrel.r_info) != R_VAX_RELATIVE
 		      && ELF32_R_TYPE (outrel.r_info) != R_VAX_COPY
 		      && ELF32_R_TYPE (outrel.r_info) != R_VAX_JMP_SLOT
