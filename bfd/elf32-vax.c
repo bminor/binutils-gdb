@@ -1691,14 +1691,13 @@ elf_vax_relocate_section (bfd *output_bfd,
 		    }
 		}
 
-	      if (!strcmp (bfd_get_section_name (input_bfd, input_section),
-			   ".text") != 0 ||
-		  (info->shared
-		   && ELF32_R_TYPE(outrel.r_info) != R_VAX_32
-		   && ELF32_R_TYPE(outrel.r_info) != R_VAX_RELATIVE
-		   && ELF32_R_TYPE(outrel.r_info) != R_VAX_COPY
-		   && ELF32_R_TYPE(outrel.r_info) != R_VAX_JMP_SLOT
-		   && ELF32_R_TYPE(outrel.r_info) != R_VAX_GLOB_DAT))
+	      if ((input_section->flags & SEC_CODE) != 0
+		  || (info->shared
+		      && ELF32_R_TYPE (outrel.r_info) != R_VAX_32
+		      && ELF32_R_TYPE (outrel.r_info) != R_VAX_RELATIVE
+		      && ELF32_R_TYPE (outrel.r_info) != R_VAX_COPY
+		      && ELF32_R_TYPE (outrel.r_info) != R_VAX_JMP_SLOT
+		      && ELF32_R_TYPE (outrel.r_info) != R_VAX_GLOB_DAT))
 		{
 		  if (h != NULL)
 		    (*_bfd_error_handler)

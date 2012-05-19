@@ -1,5 +1,11 @@
 2012-05-19  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf32-vax.c (elf_vax_relocate_section)
+	<R_VAX_8, R_VAX_16, R_VAX_32>: Use section flags rather than
+	its name as the check for text sections.
+
+2012-05-19  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf64-mips.c (mips_elf64_be_swap_reloc_out): Also make sure
 	the third reloc offset is the same as the first.
 
