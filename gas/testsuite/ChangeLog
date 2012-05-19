@@ -1,3 +1,9 @@
+2012-05-19  Alan Modra  <amodra@gmail.com>
+
+	* gas/tic6x/unwind-1.d: Update for readelf changes.
+	* gas/tic6x/unwind-2.d: Likewise.
+	* gas/tic6x/unwind-3.d: Likewise.
+
 2012-05-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/all/weakref1.d: Expect addend as signed.
