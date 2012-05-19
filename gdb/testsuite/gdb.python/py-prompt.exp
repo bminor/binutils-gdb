@@ -20,6 +20,10 @@ set testfile "py-prompt"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
+# We need to use TCL's exec to get the pid.
+if [is_remote target] then {
+    return 0
+}
 
 load_lib gdb-python.exp
 load_lib prompt.exp
