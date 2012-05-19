@@ -66,6 +66,7 @@ if { ![istarget hppa64*-hpux*] } {
 #
 # Only run the test on targets thats support creating shared libraries.
 if { [check_shared_lib_support] } then {
+  setup_xfail "tic6x-*-*"
   run_ld_link_tests {
       {"Build shared library for next test"
        "-shared" "" "note-3.s" {} "note-3.so" }

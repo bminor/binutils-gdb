@@ -1,5 +1,9 @@
 2012-05-19  Alan Modra  <amodra@gmail.com>
 
+	* ld-elf/elf.exp (note-3.so): xfail tic6x due to non-pic warnings.
+
+2012-05-19  Alan Modra  <amodra@gmail.com>
+
 	* ld-powerpc/vle.ld: New.
 	* ld-powerpc/powerpc.exp (vle reloc tests): Link using vle.ld.
 
