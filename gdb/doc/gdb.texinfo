@@ -4957,7 +4957,7 @@ called within the line.
 Also, the @code{step} command only enters a function if there is line
 number information for the function.  Otherwise it acts like the
 @code{next} command.  This avoids problems when using @code{cc -gl}
-on MIPS machines.  Previously, @code{step} entered subroutines if there
+on @acronym{MIPS} machines.  Previously, @code{step} entered subroutines if there
 was any debugging information about the routine.
 
 @item step @var{count}
@@ -6489,7 +6489,7 @@ switches between them.
 On the SPARC architecture, @code{frame} needs two addresses to
 select an arbitrary frame: a frame pointer and a stack pointer.
 
-On the MIPS and Alpha architecture, it needs two addresses: a stack
+On the @acronym{MIPS} and Alpha architecture, it needs two addresses: a stack
 pointer and a program counter.
 
 On the 29k architecture, it needs three addresses: a register stack
@@ -17090,7 +17090,7 @@ load programs into flash memory.
 @cindex choosing target byte order
 @cindex target byte order
 
-Some types of processors, such as the MIPS, PowerPC, and Renesas SH,
+Some types of processors, such as the @acronym{MIPS}, PowerPC, and Renesas SH,
 offer the ability to run either big-endian or little-endian byte
 orders.  Usually the executable or symbol will include a bit to
 designate the endian-ness, and you will not need to worry about
@@ -19757,11 +19757,11 @@ Show MicroBlaze-specific debugging level.
 @end table
 
 @node MIPS Embedded
-@subsection MIPS Embedded
+@subsection @acronym{MIPS} Embedded
 
-@cindex MIPS boards
-@value{GDBN} can use the MIPS remote debugging protocol to talk to a
-MIPS board attached to a serial line.  This is available when
+@cindex @acronym{MIPS} boards
+@value{GDBN} can use the @acronym{MIPS} remote debugging protocol to talk to a
+@acronym{MIPS} board attached to a serial line.  This is available when
 you configure @value{GDBN} with @samp{--target=mips-elf}.
 
 @need 1000
@@ -19819,7 +19819,7 @@ Array Tech LSI33K RAID controller board.
 
 
 @noindent
-@value{GDBN} also supports these special commands for MIPS targets:
+@value{GDBN} also supports these special commands for @acronym{MIPS} targets:
 
 @table @code
 @item set mipsfpu double
@@ -19829,9 +19829,9 @@ Array Tech LSI33K RAID controller board.
 @itemx show mipsfpu
 @kindex set mipsfpu
 @kindex show mipsfpu
-@cindex MIPS remote floating point
-@cindex floating point, MIPS remote
-If your target board does not support the MIPS floating point
+@cindex @acronym{MIPS} remote floating point
+@cindex floating point, @acronym{MIPS} remote
+If your target board does not support the @acronym{MIPS} floating point
 coprocessor, you should use the command @samp{set mipsfpu none} (if you
 need this, you may wish to put the command in your @value{GDBN} init
 file).  This tells @value{GDBN} how to find the return value of
@@ -19854,13 +19854,13 @@ As usual, you can inquire about the @code{mipsfpu} variable with
 @itemx set retransmit-timeout @var{seconds}
 @itemx show timeout
 @itemx show retransmit-timeout
-@cindex @code{timeout}, MIPS protocol
-@cindex @code{retransmit-timeout}, MIPS protocol
+@cindex @code{timeout}, @acronym{MIPS} protocol
+@cindex @code{retransmit-timeout}, @acronym{MIPS} protocol
 @kindex set timeout
 @kindex show timeout
 @kindex set retransmit-timeout
 @kindex show retransmit-timeout
-You can control the timeout used while waiting for a packet, in the MIPS
+You can control the timeout used while waiting for a packet, in the @acronym{MIPS}
 remote protocol, with the @code{set timeout @var{seconds}} command.  The
 default is 5 seconds.  Similarly, you can control the timeout used while
 waiting for an acknowledgment of a packet with the @code{set
@@ -19875,19 +19875,19 @@ forever because it has no way of knowing how long the program is going
 to run before stopping.
 
 @item set syn-garbage-limit @var{num}
-@kindex set syn-garbage-limit@r{, MIPS remote}
-@cindex synchronize with remote MIPS target
+@kindex set syn-garbage-limit@r{, @acronym{MIPS} remote}
+@cindex synchronize with remote @acronym{MIPS} target
 Limit the maximum number of characters @value{GDBN} should ignore when
 it tries to synchronize with the remote target.  The default is 10
 characters.  Setting the limit to -1 means there's no limit.
 
 @item show syn-garbage-limit
-@kindex show syn-garbage-limit@r{, MIPS remote}
+@kindex show syn-garbage-limit@r{, @acronym{MIPS} remote}
 Show the current limit on the number of characters to ignore when
 trying to synchronize with the remote system.
 
 @item set monitor-prompt @var{prompt}
-@kindex set monitor-prompt@r{, MIPS remote}
+@kindex set monitor-prompt@r{, @acronym{MIPS} remote}
 @cindex remote monitor prompt
 Tell @value{GDBN} to expect the specified @var{prompt} string from the
 remote monitor.  The default depends on the target:
@@ -19901,23 +19901,23 @@ remote monitor.  The default depends on the target:
 @end table
 
 @item show monitor-prompt
-@kindex show monitor-prompt@r{, MIPS remote}
+@kindex show monitor-prompt@r{, @acronym{MIPS} remote}
 Show the current strings @value{GDBN} expects as the prompt from the
 remote monitor.
 
 @item set monitor-warnings
-@kindex set monitor-warnings@r{, MIPS remote}
+@kindex set monitor-warnings@r{, @acronym{MIPS} remote}
 Enable or disable monitor warnings about hardware breakpoints.  This
 has effect only for the @code{lsi} target.  When on, @value{GDBN} will
 display warning messages whose codes are returned by the @code{lsi}
 PMON monitor for breakpoint commands.
 
 @item show monitor-warnings
-@kindex show monitor-warnings@r{, MIPS remote}
+@kindex show monitor-warnings@r{, @acronym{MIPS} remote}
 Show the current setting of printing monitor warnings.
 
 @item pmon @var{command}
-@kindex pmon@r{, MIPS remote}
+@kindex pmon@r{, @acronym{MIPS} remote}
 @cindex send PMON command
 This command allows sending an arbitrary @var{command} string to the
 monitor.  The monitor must be in debug mode for this to work.
@@ -20505,24 +20505,24 @@ from functions.
 See the following section.
 
 @node MIPS
-@subsection MIPS
+@subsection @acronym{MIPS}
 
 @cindex stack on Alpha
-@cindex stack on MIPS
+@cindex stack on @acronym{MIPS}
 @cindex Alpha stack
-@cindex MIPS stack
-Alpha- and MIPS-based computers use an unusual stack frame, which
+@cindex @acronym{MIPS} stack
+Alpha- and @acronym{MIPS}-based computers use an unusual stack frame, which
 sometimes requires @value{GDBN} to search backward in the object code to
 find the beginning of a function.
 
-@cindex response time, MIPS debugging
+@cindex response time, @acronym{MIPS} debugging
 To improve response time (especially for embedded applications, where
 @value{GDBN} may be restricted to a slow serial line for this search)
 you may want to limit the size of this search, using one of these
 commands:
 
 @table @code
-@cindex @code{heuristic-fence-post} (Alpha, MIPS)
+@cindex @code{heuristic-fence-post} (Alpha, @acronym{MIPS})
 @item set heuristic-fence-post @var{limit}
 Restrict @value{GDBN} to examining at most @var{limit} bytes in its
 search for the beginning of a function.  A value of @var{0} (the
@@ -20537,16 +20537,16 @@ Display the current limit.
 
 @noindent
 These commands are available @emph{only} when @value{GDBN} is configured
-for debugging programs on Alpha or MIPS processors.
+for debugging programs on Alpha or @acronym{MIPS} processors.
 
-Several MIPS-specific commands are available when debugging MIPS
+Several @acronym{MIPS}-specific commands are available when debugging @acronym{MIPS}
 programs:
 
 @table @code
 @item set mips abi @var{arg}
 @kindex set mips abi
-@cindex set ABI for MIPS
-Tell @value{GDBN} which MIPS ABI is used by the inferior.  Possible
+@cindex set ABI for @acronym{MIPS}
+Tell @value{GDBN} which @acronym{MIPS} ABI is used by the inferior.  Possible
 values of @var{arg} are:
 
 @table @samp
@@ -20563,7 +20563,7 @@ default).
 
 @item show mips abi
 @kindex show mips abi
-Show the MIPS ABI used by @value{GDBN} to debug the inferior.
+Show the @acronym{MIPS} ABI used by @value{GDBN} to debug the inferior.
 
 @item set mips compression @var{arg}
 @kindex set mips compression
@@ -20603,36 +20603,36 @@ Show the @acronym{MIPS} compressed @acronym{ISA} encoding used by
 
 @item set mips mask-address @var{arg}
 @kindex set mips mask-address
-@cindex MIPS addresses, masking
+@cindex @acronym{MIPS} addresses, masking
 This command determines whether the most-significant 32 bits of 64-bit
-MIPS addresses are masked off.  The argument @var{arg} can be
+@acronym{MIPS} addresses are masked off.  The argument @var{arg} can be
 @samp{on}, @samp{off}, or @samp{auto}.  The latter is the default
 setting, which lets @value{GDBN} determine the correct value.
 
 @item show mips mask-address
 @kindex show mips mask-address
-Show whether the upper 32 bits of MIPS addresses are masked off or
+Show whether the upper 32 bits of @acronym{MIPS} addresses are masked off or
 not.
 
 @item set remote-mips64-transfers-32bit-regs
 @kindex set remote-mips64-transfers-32bit-regs
-This command controls compatibility with 64-bit MIPS targets that
-transfer data in 32-bit quantities.  If you have an old MIPS 64 target
+This command controls compatibility with 64-bit @acronym{MIPS} targets that
+transfer data in 32-bit quantities.  If you have an old @acronym{MIPS} 64 target
 that transfers 32 bits for some registers, like @sc{sr} and @sc{fsr},
 and 64 bits for other registers, set this option to @samp{on}.
 
 @item show remote-mips64-transfers-32bit-regs
 @kindex show remote-mips64-transfers-32bit-regs
-Show the current setting of compatibility with older MIPS 64 targets.
+Show the current setting of compatibility with older @acronym{MIPS} 64 targets.
 
 @item set debug mips
 @kindex set debug mips
-This command turns on and off debugging messages for the MIPS-specific
+This command turns on and off debugging messages for the @acronym{MIPS}-specific
 target code in @value{GDBN}.
 
 @item show debug mips
 @kindex show debug mips
-Show the current setting of MIPS debugging messages.
+Show the current setting of @acronym{MIPS} debugging messages.
 @end table
 
 
@@ -36940,6 +36940,7 @@ These breakpoint kinds are defined for the @samp{Z0} and @samp{Z1} packets.
 
 @node MIPS Register packet Format
 @subsubsection @acronym{MIPS} Register Packet Format
+@cindex register packet format, @acronym{MIPS}
 
 The following @code{g}/@code{G} packets have previously been defined.
 In the below, some thirty-two bit registers are transferred as
@@ -39290,7 +39291,7 @@ The formal DTD for the traceframe info format is given below:
 One of the challenges of using @value{GDBN} to debug embedded systems
 is that there are so many minor variants of each processor
 architecture in use.  It is common practice for vendors to start with
-a standard processor core --- ARM, PowerPC, or MIPS, for example ---
+a standard processor core --- ARM, PowerPC, or @acronym{MIPS}, for example ---
 and then make changes to adapt it to a particular market niche.  Some
 architectures have hundreds of variants, available from dozens of
 vendors.  This leads to a number of problems:
@@ -39833,10 +39834,10 @@ The @samp{org.gnu.gdb.i386.linux} feature is optional.  It should
 describe a single register, @samp{orig_eax}.
 
 @node MIPS Features
-@subsection MIPS Features
-@cindex target descriptions, MIPS features
+@subsection @acronym{MIPS} Features
+@cindex target descriptions, @acronym{MIPS} features
 
-The @samp{org.gnu.gdb.mips.cpu} feature is required for MIPS targets.
+The @samp{org.gnu.gdb.mips.cpu} feature is required for @acronym{MIPS} targets.
 It should contain registers @samp{r0} through @samp{r31}, @samp{lo},
 @samp{hi}, and @samp{pc}.  They may be 32-bit or 64-bit depending
 on the target.
