@@ -4126,7 +4126,7 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_grok_prstatus	elf64_mips_grok_prstatus
 #define elf_backend_grok_psinfo		elf64_mips_grok_psinfo
 
-#define elf_backend_got_header_size	(4 * MIPS_RESERVED_GOTNO)
+#define elf_backend_got_header_size	(8 * MIPS_RESERVED_GOTNO)
 
 /* MIPS ELF64 can use a mixture of REL and RELA, but some Relocations
    work better/work only in RELA, so we default to this.  */

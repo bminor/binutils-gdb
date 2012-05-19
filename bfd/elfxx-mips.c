@@ -8665,7 +8665,8 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  /* On non-VxWorks targets, the first two entries in .got.plt
 	     are reserved.  */
 	  if (!htab->is_vxworks)
-	    htab->sgotplt->size += 2 * MIPS_ELF_GOT_SIZE (dynobj);
+	    htab->sgotplt->size
+	      += get_elf_backend_data (dynobj)->got_header_size;
 
 	  /* On VxWorks, also allocate room for the header's
 	     .rela.plt.unloaded entries.  */

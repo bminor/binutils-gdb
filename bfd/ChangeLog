@@ -1,5 +1,11 @@
 2012-05-19  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf64-mips.c (elf_backend_got_header_size): Correct definition.
+	* elfxx-mips.c (_bfd_mips_elf_adjust_dynamic_symbol): Use the ELF
+	backend's GOT header size instead of hardcoding it.
+
+2012-05-19  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf32-vax.c (elf_vax_relocate_section)
 	<R_VAX_8, R_VAX_16, R_VAX_32>: Don't check if info->shared again.
 
