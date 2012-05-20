@@ -3003,9 +3003,12 @@ recursively_find_pc_sect_symtab (struct symtab *symtab, CORE_ADDR pc)
       && blockvector_contains_pc (BLOCKVECTOR (symtab), pc))
     return symtab;
 
+  if (symtab->includes == NULL)
+    return NULL;
+
   for (i = 0; symtab->includes[i]; ++i)
     {
-      struct symtab *s;
+      struct symtab *s = symtab->includes[i];
 
       s = recursively_find_pc_sect_symtab (s, pc);
       if (s != NULL)

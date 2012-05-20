@@ -1,3 +1,8 @@
+2012-05-20  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (recursively_find_pc_sect_symtab): Initialize "s"
+	before use.  Check for symtab->includes == NULL before scanning it.
+
 2012-05-18  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_reg3_to_reg): Optimize storage.
