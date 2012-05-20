@@ -147,6 +147,30 @@ static char *auto_load_safe_path;
    counterpart.  */
 static VEC (char_ptr) *auto_load_safe_path_vec;
 
+/* Expand $datadir and $debugdir in STRING according to the rules of
+   substitute_path_component.  Return vector from dirnames_to_char_ptr_vec,
+   this vector must be freed by free_char_ptr_vec by the caller.  */
+
+static VEC (char_ptr) *
+auto_load_expand_dir_vars (const char *string)
+{
+  VEC (char_ptr) *dir_vec;
+  char *s;
+
+  s = xstrdup (string);
+  substitute_path_component (&s, "$datadir", gdb_datadir);
+  substitute_path_component (&s, "$debugdir", debug_file_directory);
+
+  if (debug_auto_load && strcmp (s, string) != 0)
+    fprintf_unfiltered (gdb_stdlog,
+			_("auto-load: Expanded $-variables to \"%s\".\n"), s);
+
+  dir_vec = dirnames_to_char_ptr_vec (s);
+  xfree(s);
+
+  return dir_vec;
+}
+
 /* Update auto_load_safe_path_vec from current AUTO_LOAD_SAFE_PATH.  */
 
 static void
@@ -163,7 +187,7 @@ auto_load_safe_path_vec_update (void)
 
   free_char_ptr_vec (auto_load_safe_path_vec);
 
-  auto_load_safe_path_vec = dirnames_to_char_ptr_vec (auto_load_safe_path);
+  auto_load_safe_path_vec = auto_load_expand_dir_vars (auto_load_safe_path);
   len = VEC_length (char_ptr, auto_load_safe_path_vec);
 
   /* Apply tilde_expand and gdb_realpath to each AUTO_LOAD_SAFE_PATH_VEC
@@ -171,16 +195,10 @@ auto_load_safe_path_vec_update (void)
   for (ix = 0; ix < len; ix++)
     {
       char *dir = VEC_index (char_ptr, auto_load_safe_path_vec, ix);
-      char *ddir_subst, *expanded, *real_path;
+      char *expanded = tilde_expand (dir);
+      char *real_path = gdb_realpath (expanded);
 
-      ddir_subst = xstrdup (dir);
-      substitute_path_component (&ddir_subst, "$datadir", gdb_datadir);
-      expanded = tilde_expand (ddir_subst);
-      xfree (ddir_subst);
-      real_path = gdb_realpath (expanded);
-
-      /* Ensure the current entry is at least a valid path (therefore
-	 $datadir-expanded and tilde-expanded).  */
+      /* Ensure the current entry is at least tilde_expand-ed.  */
       VEC_replace (char_ptr, auto_load_safe_path_vec, ix, expanded);
 
       if (debug_auto_load)
@@ -645,42 +663,6 @@ auto_load_objfile_script (struct objfile *objfile,
 
   if (!input)
     {
-      char *debugdir;
-      VEC (char_ptr) *debugdir_vec;
-      int ix;
-
-      debugdir_vec = dirnames_to_char_ptr_vec (debug_file_directory);
-      make_cleanup_free_char_ptr_vec (debugdir_vec);
-
-      if (debug_auto_load)
-	fprintf_unfiltered (gdb_stdlog,
-			    _("auto-load: Searching 'set debug-file-directory' "
-			      "path \"%s\".\n"),
-			    debug_file_directory);
-
-      for (ix = 0; VEC_iterate (char_ptr, debugdir_vec, ix, debugdir); ++ix)
-	{
-	  /* Also try the same file in the separate debug info directory.  */
-	  debugfile = xmalloc (strlen (debugdir) + strlen (filename) + 1);
-	  strcpy (debugfile, debugdir);
-
-	  /* FILENAME is absolute, so we don't need a "/" here.  */
-	  strcat (debugfile, filename);
-
-	  make_cleanup (xfree, debugfile);
-	  input = fopen (debugfile, "r");
-	  if (debug_auto_load)
-	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file "
-					      "\"%s\" %s.\n"),
-				debugfile,
-				input ? _("exists") : _("does not exist"));
-	  if (input != NULL)
-	    break;
-	}
-    }
-
-  if (!input)
-    {
       VEC (char_ptr) *vec;
       int ix;
       char *dir;
@@ -688,7 +670,7 @@ auto_load_objfile_script (struct objfile *objfile,
       /* Also try the same file in a subdirectory of gdb's data
 	 directory.  */
 
-      vec = dirnames_to_char_ptr_vec (auto_load_dir);
+      vec = auto_load_expand_dir_vars (auto_load_dir);
       make_cleanup_free_char_ptr_vec (vec);
 
       if (debug_auto_load)
@@ -698,10 +680,8 @@ auto_load_objfile_script (struct objfile *objfile,
 
       for (ix = 0; VEC_iterate (char_ptr, vec, ix, dir); ++ix)
 	{
-	  debugfile = xstrdup (dir);
-	  substitute_path_component (&debugfile, "$datadir", gdb_datadir);
-	  debugfile = xrealloc (debugfile, (strlen (debugfile)
-					    + strlen (filename) + 1));
+	  debugfile = xmalloc (strlen (dir) + strlen (filename) + 1);
+	  strcpy (debugfile, dir);
 
 	  /* FILENAME is absolute, so we don't need a "/" here.  */
 	  strcat (debugfile, filename);

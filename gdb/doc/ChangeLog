@@ -1,3 +1,13 @@
+2012-05-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Separate Debug Files): New anchor debug-file-directory.
+	Mention also --with-separate-debug-dir.
+	(Auto-loading): Prepend $debugdir in the sample output.
+	(Auto-loading safe path): Likewise.  Mention also $debugdir for the
+	auto-load safe-path variable.
+	(objfile-gdb.py file): Remove the extra debug-file-directory paragraph.
+	Mention also $debugdir for 'set auto-load scripts-directory'.
+
 2012-05-19  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Continuing and Stepping, Selection, Byte Order)

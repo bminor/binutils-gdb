@@ -1,3 +1,19 @@
+2012-05-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (--with-auto-load-dir): Prepend $debugdir to the default path.
+	Describe it.
+	* auto-load.c (auto_load_expand_dir_vars): New function.
+	(auto_load_safe_path_vec_update): Use it, remove the
+	substitute_path_component call thanks to it.
+	(auto_load_objfile_script): Remove the debug_file_directory processing.
+	Use auto_load_expand_dir_vars, remove the substitute_path_component
+	call thanks to it.
+	* configure: Regenerate.
+	* configure.ac (--with-auto-load-dir): Prepend $debugdir to the default
+	path.  Escape $ also for $debugdir.
+	(--with_auto_load_safe_path): Escape $ also for $debugdir.
+	* utils.c (substitute_path_component): Accept also DIRNAME_SEPARATOR.
+
 2012-05-20  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (recursively_find_pc_sect_symtab): Initialize "s"

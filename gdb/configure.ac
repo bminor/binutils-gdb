@@ -139,9 +139,9 @@ AS_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this pat
 AC_MSG_CHECKING([for default auto-load directory])
 AC_ARG_WITH(auto-load-dir,
 AS_HELP_STRING([--with-auto-load-dir=PATH],
-  [directories from which to load auto-loaded scripts @<:@$datadir/auto-load@:>@]),,
-  [with_auto_load_dir='$datadir/auto-load'])
-escape_dir=`echo $with_auto_load_dir | sed 's/[[$]]datadir\>/\\\\\\\\\\\\&/g'`
+  [directories from which to load auto-loaded scripts @<:@$debugdir:$datadir/auto-load@:>@]),,
+  [with_auto_load_dir='$debugdir:$datadir/auto-load'])
+escape_dir=`echo $with_auto_load_dir | sed 's/[[$]]\(datadir\|debugdir\)\>/\\\\\\\\\\\\&/g'`
 AC_DEFINE_DIR(AUTO_LOAD_DIR, escape_dir,
 	      [Directories from which to load auto-loaded scripts.])
 AC_MSG_RESULT([$with_auto_load_dir])
@@ -156,7 +156,7 @@ AS_HELP_STRING([--without-auto-load-safe-path],
      with_auto_load_safe_path="/"
      fi],
 [with_auto_load_safe_path="$with_auto_load_dir"])
-escape_dir=`echo $with_auto_load_safe_path | sed 's/[[$]]datadir\>/\\\\\\\\\\\\&/g'`
+escape_dir=`echo $with_auto_load_safe_path | sed 's/[[$]]\(datadir\|debugdir\)\>/\\\\\\\\\\\\&/g'`
 AC_DEFINE_DIR(AUTO_LOAD_SAFE_PATH, escape_dir,
 	      [Directories safe to hold auto-loaded files.])
 AC_MSG_RESULT([$with_auto_load_safe_path])

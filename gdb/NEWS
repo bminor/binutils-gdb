@@ -239,8 +239,10 @@ show dprintf-channel
 
 --with-auto-load-dir
   Configure default value for the 'set auto-load scripts-directory'
-  setting above.  It defaults to '$datadir/auto-load', $datadir
-  representing GDB's data directory (available via show data-directory).
+  setting above.  It defaults to '$debugdir:$datadir/auto-load',
+  $debugdir representing global debugging info directories (available
+  via 'show debug-file-directory') and $datadir representing GDB's data
+  directory (available via 'show data-directory').
 
 --with-auto-load-safe-path
   Configure default value for the 'set auto-load safe-path' setting

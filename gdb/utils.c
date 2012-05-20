@@ -3726,8 +3726,8 @@ dirnames_to_char_ptr_vec (const char *dirnames)
 
 /* Substitute all occurences of string FROM by string TO in *STRINGP.  *STRINGP
    must come from xrealloc-compatible allocator and it may be updated.  FROM
-   needs to be delimited by IS_DIR_SEPARATOR (or be located at the start or
-   end of *STRINGP.  */
+   needs to be delimited by IS_DIR_SEPARATOR or DIRNAME_SEPARATOR (or be
+   located at the start or end of *STRINGP.  */
 
 void
 substitute_path_component (char **stringp, const char *from, const char *to)
@@ -3742,8 +3742,10 @@ substitute_path_component (char **stringp, const char *from, const char *to)
       if (s == NULL)
 	break;
 
-      if ((s == string || IS_DIR_SEPARATOR (s[-1]))
-          && (s[from_len] == '\0' || IS_DIR_SEPARATOR (s[from_len])))
+      if ((s == string || IS_DIR_SEPARATOR (s[-1])
+	   || s[-1] == DIRNAME_SEPARATOR)
+          && (s[from_len] == '\0' || IS_DIR_SEPARATOR (s[from_len])
+	      || s[from_len] == DIRNAME_SEPARATOR))
 	{
 	  char *string_new;
 
