@@ -4378,23 +4378,20 @@ linux_store_registers (struct regcache *regcache, int regno)
 static int
 linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
-  register int i;
-  /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
-  /* Round ending address up; get number of longwords that makes.  */
-  register int count
-    = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
-      / sizeof (PTRACE_XFER_TYPE);
-  /* Allocate buffer of that many longwords.  */
-  register PTRACE_XFER_TYPE *buffer
-    = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
-  int fd;
-  char filename[64];
   int pid = lwpid_of (get_thread_lwp (current_inferior));
+  register PTRACE_XFER_TYPE *buffer;
+  register CORE_ADDR addr;
+  register int count;
+  char filename[64];
+  register int i;
+  int ret;
+  int fd;
 
   /* Try using /proc.  Don't bother for one word.  */
   if (len >= 3 * sizeof (long))
     {
+      int bytes;
+
       /* We could keep this file open and cache it - possibly one per
 	 thread.  That requires some juggling, but is even faster.  */
       sprintf (filename, "/proc/%d/mem", pid);
@@ -4407,38 +4404,56 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 	 32-bit platforms (for instance, SPARC debugging a SPARC64
 	 application).  */
 #ifdef HAVE_PREAD64
-      if (pread64 (fd, myaddr, len, memaddr) != len)
+      bytes = pread64 (fd, myaddr, len, memaddr);
 #else
-      if (lseek (fd, memaddr, SEEK_SET) == -1 || read (fd, myaddr, len) != len)
+      bytes = -1;
+      if (lseek (fd, memaddr, SEEK_SET) != -1)
+	bytes = read (fd, myaddr, len);
 #endif
-	{
-	  close (fd);
-	  goto no_proc;
-	}
 
       close (fd);
-      return 0;
+      if (bytes == len)
+	return 0;
+
+      /* Some data was read, we'll try to get the rest with ptrace.  */
+      if (bytes > 0)
+	{
+	  memaddr += bytes;
+	  myaddr += bytes;
+	  len -= bytes;
+	}
     }
 
  no_proc:
+  /* Round starting address down to longword boundary.  */
+  addr = memaddr & -(CORE_ADDR) sizeof (PTRACE_XFER_TYPE);
+  /* Round ending address up; get number of longwords that makes.  */
+  count = ((((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1)
+	   / sizeof (PTRACE_XFER_TYPE));
+  /* Allocate buffer of that many longwords.  */
+  buffer = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
+
   /* Read all the longwords */
+  errno = 0;
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
     {
-      errno = 0;
       /* Coerce the 3rd arg to a uintptr_t first to avoid potential gcc warning
 	 about coercing an 8 byte integer to a 4 byte pointer.  */
       buffer[i] = ptrace (PTRACE_PEEKTEXT, pid,
 			  (PTRACE_ARG3_TYPE) (uintptr_t) addr, 0);
       if (errno)
-	return errno;
+	break;
     }
+  ret = errno;
 
   /* Copy appropriate bytes out of the buffer.  */
+  i *= sizeof (PTRACE_XFER_TYPE);
+  i -= memaddr & (sizeof (PTRACE_XFER_TYPE) - 1);
   memcpy (myaddr,
 	  (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
-	  len);
+	  i < len ? i : len);
 
-  return 0;
+  return ret;
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR to inferior's

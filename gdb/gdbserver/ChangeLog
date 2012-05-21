@@ -1,3 +1,9 @@
+2012-05-21  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* linux-low.c (linux_store_registers): Don't re-retrieve data
+	with ptrace that has already been obtained from /proc.  Always
+	copy any data retrieved with ptrace to the buffer supplied.
+
 2012-05-11  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
