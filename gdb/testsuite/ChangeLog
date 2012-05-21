@@ -1,5 +1,11 @@
 2012-05-21  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.cp/inherit.exp (test_print_mi_members): Expect errors.
+	Remove kfails.
+	(test_print_mi_member_types): Likewise.
+
+2012-05-21  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/callfuncs.exp (do_function_calls): Update for 'set
 	print symbol' change.
 

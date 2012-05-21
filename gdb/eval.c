@@ -2047,8 +2047,8 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	case TYPE_CODE_MEMBERPTR:
 	  /* Now, convert these values to an address.  */
-	  arg1 = value_cast (lookup_pointer_type (TYPE_DOMAIN_TYPE (type)),
-			     arg1);
+	  arg1 = value_cast_pointers (lookup_pointer_type (TYPE_DOMAIN_TYPE (type)),
+				      arg1, 1);
 
 	  mem_offset = value_as_long (arg2);
 

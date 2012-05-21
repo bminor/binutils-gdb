@@ -669,7 +669,7 @@ extern struct type *value_rtti_indirect_type (struct value *, int *, int *,
 extern struct value *value_full_object (struct value *, struct type *, int,
 					int, int);
 
-extern struct value *value_cast_pointers (struct type *, struct value *);
+extern struct value *value_cast_pointers (struct type *, struct value *, int);
 
 extern struct value *value_cast (struct type *type, struct value *arg2);
 

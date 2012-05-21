@@ -430,8 +430,9 @@ gnuv3_baseclass_offset (struct type *type, int index,
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
   /* If it isn't a virtual base, this is easy.  The offset is in the
-     type definition.  */
-  if (!BASETYPE_VIA_VIRTUAL (type, index))
+     type definition.  Likewise for Java, which doesn't really have
+     virtual inheritance in the C++ sense.  */
+  if (!BASETYPE_VIA_VIRTUAL (type, index) || TYPE_CPLUS_REALLY_JAVA (type))
     return TYPE_BASECLASS_BITPOS (type, index) / 8;
 
   /* To access a virtual base, we need to use the vbase offset stored in

@@ -4139,7 +4139,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0)
         }
       else
 	return actual;
-      return value_cast_pointers (formal_type, result);
+      return value_cast_pointers (formal_type, result, 0);
     }
   else if (TYPE_CODE (actual_type) == TYPE_CODE_PTR)
     return ada_value_ind (actual);

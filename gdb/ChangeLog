@@ -1,5 +1,22 @@
 2012-05-21  Tom Tromey  <tromey@redhat.com>
 
+	PR c++/7173:
+	* gnu-v3-abi.c (gnuv3_baseclass_offset): Return early for Java
+	types.
+	* value.h (value_cast_pointers): Update.
+	* valops.c (value_cast_pointers): Add 'subclass_check' argument.
+	(value_cast): Update.
+	(update_search_result): New function.
+	(do_search_struct_field): New, from search_struct_field.  Check
+	for ambiguous results.
+	(search_struct_field): Rewrite.
+	* infcall.c (value_arg_coerce): Update.
+	* eval.c (evaluate_subexp_standard) <STRUCTOP_MEMBER>: Use
+	value_cast_pointers.
+	* ada-lang.c (ada_convert_actual): Update.
+
+2012-05-21  Tom Tromey  <tromey@redhat.com>
+
 	* macroexp.c (macro_stringify): Terminate the string.
 
 2012-05-20  Jan Kratochvil  <jan.kratochvil@redhat.com>

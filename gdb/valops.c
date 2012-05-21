@@ -301,10 +301,14 @@ value_cast_structs (struct type *type, struct value *v2)
 
 /* Cast one pointer or reference type to another.  Both TYPE and
    the type of ARG2 should be pointer types, or else both should be
-   reference types.  Returns the new pointer or reference.  */
+   reference types.  If SUBCLASS_CHECK is non-zero, this will force a
+   check to see whether TYPE is a superclass of ARG2's type.  If
+   SUBCLASS_CHECK is zero, then the subclass check is done only when
+   ARG2 is itself non-zero.  Returns the new pointer or reference.  */
 
 struct value *
-value_cast_pointers (struct type *type, struct value *arg2)
+value_cast_pointers (struct type *type, struct value *arg2,
+		     int subclass_check)
 {
   struct type *type1 = check_typedef (type);
   struct type *type2 = check_typedef (value_type (arg2));
@@ -313,7 +317,7 @@ value_cast_pointers (struct type *type, struct value *arg2)
 
   if (TYPE_CODE (t1) == TYPE_CODE_STRUCT
       && TYPE_CODE (t2) == TYPE_CODE_STRUCT
-      && !value_logical_not (arg2))
+      && (subclass_check || !value_logical_not (arg2)))
     {
       struct value *v2;
 
@@ -568,7 +572,7 @@ value_cast (struct type *type, struct value *arg2)
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (type2))
     {
       if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
-	return value_cast_pointers (type, arg2);
+	return value_cast_pointers (type, arg2, 0);
 
       arg2 = value_copy (arg2);
       deprecated_set_value_type (arg2, type);
@@ -1976,17 +1980,41 @@ typecmp (int staticp, int varargs, int nargs,
   return i + 1;
 }
 
-/* Helper function used by value_struct_elt to recurse through
-   baseclasses.  Look for a field NAME in ARG1.  Adjust the address of
-   ARG1 by OFFSET bytes, and search in it assuming it has (class) type
-   TYPE.  If found, return value, else return NULL.
+/* Helper class for do_search_struct_field that updates *RESULT_PTR
+   and *LAST_BOFFSET, and possibly throws an exception if the field
+   search has yielded ambiguous results.  */
 
-   If LOOKING_FOR_BASECLASS, then instead of looking for struct
-   fields, look for a baseclass named NAME.  */
+static void
+update_search_result (struct value **result_ptr, struct value *v,
+		      int *last_boffset, int boffset,
+		      const char *name, struct type *type)
+{
+  if (v != NULL)
+    {
+      if (*result_ptr != NULL
+	  /* The result is not ambiguous if all the classes that are
+	     found occupy the same space.  */
+	  && *last_boffset != boffset)
+	error (_("base class '%s' is ambiguous in type '%s'"),
+	       name, TYPE_SAFE_NAME (type));
+      *result_ptr = v;
+      *last_boffset = boffset;
+    }
+}
 
-static struct value *
-search_struct_field (const char *name, struct value *arg1, int offset,
-		     struct type *type, int looking_for_baseclass)
+/* A helper for search_struct_field.  This does all the work; most
+   arguments are as passed to search_struct_field.  The result is
+   stored in *RESULT_PTR, which must be initialized to NULL.
+   OUTERMOST_TYPE is the type of the initial type passed to
+   search_struct_field; this is used for error reporting when the
+   lookup is ambiguous.  */
+
+static void
+do_search_struct_field (const char *name, struct value *arg1, int offset,
+			struct type *type, int looking_for_baseclass,
+			struct value **result_ptr,
+			int *last_boffset,
+			struct type *outermost_type)
 {
   int i;
   int nbases;
@@ -2012,12 +2040,9 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 			 name);
 	      }
 	    else
-	      {
-		v = value_primitive_field (arg1, offset, i, type);
-		if (v == 0)
-		  error (_("there is no field named %s"), name);
-	      }
-	    return v;
+	      v = value_primitive_field (arg1, offset, i, type);
+	    *result_ptr = v;
+	    return;
 	  }
 
 	if (t_field_name
@@ -2042,7 +2067,7 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 		   represented as a struct, with a member for each
 		   <variant field>.  */
 
-		struct value *v;
+		struct value *v = NULL;
 		int new_offset = offset;
 
 		/* This is pretty gross.  In G++, the offset in an
@@ -2056,18 +2081,23 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 			&& TYPE_FIELD_BITPOS (field_type, 0) == 0))
 		  new_offset += TYPE_FIELD_BITPOS (type, i) / 8;
 
-		v = search_struct_field (name, arg1, new_offset, 
-					 field_type,
-					 looking_for_baseclass);
+		do_search_struct_field (name, arg1, new_offset, 
+					field_type,
+					looking_for_baseclass, &v,
+					last_boffset,
+					outermost_type);
 		if (v)
-		  return v;
+		  {
+		    *result_ptr = v;
+		    return;
+		  }
 	      }
 	  }
       }
 
   for (i = 0; i < nbases; i++)
     {
-      struct value *v;
+      struct value *v = NULL;
       struct type *basetype = check_typedef (TYPE_BASECLASS (type, i));
       /* If we are looking for baseclasses, this is what we get when
          we hit them.  But it could happen that the base part's member
@@ -2077,10 +2107,10 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 			     && (strcmp_iw (name, 
 					    TYPE_BASECLASS_NAME (type, 
 								 i)) == 0));
+      int boffset = value_embedded_offset (arg1) + offset;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{
-	  int boffset;
 	  struct value *v2;
 
 	  boffset = baseclass_offset (type, i,
@@ -2116,22 +2146,51 @@ search_struct_field (const char *name, struct value *arg1, int offset,
 	    }
 
 	  if (found_baseclass)
-	    return v2;
-	  v = search_struct_field (name, v2, 0,
-				   TYPE_BASECLASS (type, i),
-				   looking_for_baseclass);
+	    v = v2;
+	  else
+	    {
+	      do_search_struct_field (name, v2, 0,
+				      TYPE_BASECLASS (type, i),
+				      looking_for_baseclass,
+				      result_ptr, last_boffset,
+				      outermost_type);
+	    }
 	}
       else if (found_baseclass)
 	v = value_primitive_field (arg1, offset, i, type);
       else
-	v = search_struct_field (name, arg1,
-				 offset + TYPE_BASECLASS_BITPOS (type, 
-								 i) / 8,
-				 basetype, looking_for_baseclass);
-      if (v)
-	return v;
+	{
+	  do_search_struct_field (name, arg1,
+				  offset + TYPE_BASECLASS_BITPOS (type, 
+								  i) / 8,
+				  basetype, looking_for_baseclass,
+				  result_ptr, last_boffset,
+				  outermost_type);
+	}
+
+      update_search_result (result_ptr, v, last_boffset,
+			    boffset, name, outermost_type);
     }
-  return NULL;
+}
+
+/* Helper function used by value_struct_elt to recurse through
+   baseclasses.  Look for a field NAME in ARG1.  Adjust the address of
+   ARG1 by OFFSET bytes, and search in it assuming it has (class) type
+   TYPE.  If found, return value, else return NULL.
+
+   If LOOKING_FOR_BASECLASS, then instead of looking for struct
+   fields, look for a baseclass named NAME.  */
+
+static struct value *
+search_struct_field (const char *name, struct value *arg1, int offset,
+		     struct type *type, int looking_for_baseclass)
+{
+  struct value *result = NULL;
+  int boffset = 0;
+
+  do_search_struct_field (name, arg1, offset, type, looking_for_baseclass,
+			  &result, &boffset, type);
+  return result;
 }
 
 /* Helper function used by value_struct_elt to recurse through

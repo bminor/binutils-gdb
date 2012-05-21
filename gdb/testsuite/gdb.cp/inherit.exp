@@ -321,25 +321,11 @@ proc test_print_mi_members {} {
 
     # Print all members of g_D.
     #
-    # g_D.A::a and g_D.A::x are ambiguous member accesses, and gdb
-    # should detect these.  There are no ways to PASS these tests
-    # because I don't know what the gdb message will be.  -- chastain
-    # 2004-01-27.
-
-    set name "print g_D.A::a"
-    gdb_test_multiple "print g_D.A::a" $name {
-	-re "$vhn = (15|11)$nl$gdb_prompt $" {
-	    kfail "gdb/68" "print g_D.A::a"
-	}
-    }
-
-    set name "print g_D.A::x"
-    gdb_test_multiple "print g_D.A::x" $name {
-	-re "$vhn = (16|12)$nl$gdb_prompt $" {
-	    kfail "gdb/68" "print g_D.A::x"
-	}
-    }
-
+    # g_D.A::a and g_D.A::x are ambiguous member accesses.
+    gdb_test "print g_D.A::a" "base class 'A' is ambiguous in type 'D'"
+    gdb_test "print g_D.C::a" "$vhn = 15"
+    gdb_test "print g_D.B::a" "$vhn = 11"
+    gdb_test "print g_D.A::x" "base class 'A' is ambiguous in type 'D'"
     gdb_test "print g_D.B::b" "$vhn = 13"
     gdb_test "print g_D.B::x" "$vhn = 14"
     gdb_test "print g_D.C::c" "$vhn = 17"
@@ -350,20 +336,8 @@ proc test_print_mi_members {} {
     # Print all members of g_E.
     # g_E.A::a and g_E.A::x are ambiguous.
 
-    set name "print g_E.A::a"
-    gdb_test_multiple "print g_E.A::a" $name {
-	-re "$vhn = (21|25)$nl$gdb_prompt $" {
-	    kfail "gdb/68" "print g_E.A::a"
-	}
-    }
-
-    set name "print g_E.A::x"
-    gdb_test_multiple "print g_E.A::x" $name {
-	-re "$vhn = (26|22)$nl$gdb_prompt $" {
-	    kfail "gdb/68" "print g_E.A::x"
-	}
-    }
-
+    gdb_test "print g_E.A::a" "base class 'A' is ambiguous in type 'E'"
+    gdb_test "print g_E.A::x" "base class 'A' is ambiguous in type 'E'"
     gdb_test "print g_E.B::b" "$vhn = 23"
     gdb_test "print g_E.B::x" "$vhn = 24"
     gdb_test "print g_E.C::c" "$vhn = 27"
@@ -406,25 +380,10 @@ proc test_print_mi_member_types {} {
 
     # Print all members of g_D.
     #
-    # g_D.A::a and g_D.A::x are ambiguous member accesses, and gdb
-    # should detect these.  There are no ways to PASS these tests
-    # because I don't know what the gdb message will be.  -- chastain
-    # 2004-01-27.
+    # g_D.A::a and g_D.A::x are ambiguous member accesses.
 
-    set name "ptype g_D.A::a"
-    gdb_test_multiple "ptype g_D.A::a" $name {
-	-re "type = int$nl$gdb_prompt $" {
-	    kfail "gdb/68" "ptype g_D.A::a"
-	}
-    }
-
-    set name "ptype g_D.A::x"
-    gdb_test_multiple "ptype g_D.A::x" $name {
-	-re "type = int$nl$gdb_prompt $" {
-	    kfail "gdb/68" "ptype g_D.A::x"
-	}
-    }
-
+    gdb_test "ptype g_D.A::a" "base class 'A' is ambiguous in type 'D'"
+    gdb_test "ptype g_D.A::x" "base class 'A' is ambiguous in type 'D'"
     gdb_test "ptype g_D.B::b" "type = int"
     gdb_test "ptype g_D.B::x" "type = int"
     gdb_test "ptype g_D.C::c" "type = int"
@@ -435,20 +394,8 @@ proc test_print_mi_member_types {} {
     # Print all members of g_E.
     # g_E.A::a and g_E.A::x are ambiguous.
 
-    set name "ptype g_E.A::a"
-    gdb_test_multiple "ptype g_E.A::a" $name {
-	-re "type = int$nl$gdb_prompt $" {
-	    kfail "gdb/68" "ptype g_E.A::a"
-	}
-    }
-
-    set name "ptype g_E.A::x"
-    gdb_test_multiple "ptype g_E.A::x" $name {
-	-re "type = int$nl$gdb_prompt $" {
-	    kfail "gdb/68" "ptype g_E.A::x"
-	}
-    }
-
+    gdb_test "ptype g_E.A::a" "base class 'A' is ambiguous in type 'E'"
+    gdb_test "ptype g_E.A::x" "base class 'A' is ambiguous in type 'E'"
     gdb_test "ptype g_E.B::b" "type = int"
     gdb_test "ptype g_E.B::x" "type = int"
     gdb_test "ptype g_E.C::c" "type = int"
