@@ -1,3 +1,7 @@
+2012-05-21  Tom Tromey  <tromey@redhat.com>
+
+	* macroexp.c (macro_stringify): Terminate the string.
+
 2012-05-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (--with-auto-load-dir): Prepend $debugdir to the default path.

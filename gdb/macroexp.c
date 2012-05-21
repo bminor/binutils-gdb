@@ -704,6 +704,7 @@ macro_stringify (const char *str)
 
   init_buffer (&buffer, len);
   stringify (&buffer, str, len);
+  appendc (&buffer, '\0');
 
   return free_buffer_return_text (&buffer);
 }
