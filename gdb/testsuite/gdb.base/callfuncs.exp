@@ -257,7 +257,7 @@ proc do_function_calls {} {
 	    "call inferior func with struct - returns long double _Complex"
     }
 
-    gdb_test "p t_structs_a(struct_val1)" "= (.unsigned char .. )?\"foo\"" \
+    gdb_test "p t_structs_a(struct_val1)" "= (.unsigned char .. )?<buf.*> \"foo\"" \
     	"call inferior func with struct - returns char *"
 }
 
