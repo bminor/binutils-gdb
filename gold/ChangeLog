@@ -1,3 +1,8 @@
+2012-05-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/tls_test.cc: Include "config.h" first.
+	* testsuite/tls_test_c.c: Likewise.
+
 2012-05-17  Daniel Richard G.  <skunk@iskunk.org>
 	    Nick Clifton  <nickc@redhat.com>
 
