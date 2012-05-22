@@ -6393,6 +6393,66 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
    }
 #undef add_dynamic_entry
 
+  if (htab->glink_eh_frame != NULL
+      && htab->glink_eh_frame->contents != NULL)
+    {
+      unsigned char *p = htab->glink_eh_frame->contents;
+      bfd_vma val;
+
+      memcpy (p, glink_eh_frame_cie, sizeof (glink_eh_frame_cie));
+      /* CIE length (rewrite in case little-endian).  */
+      bfd_put_32 (htab->elf.dynobj, sizeof (glink_eh_frame_cie) - 4, p);
+      p += sizeof (glink_eh_frame_cie);
+      /* FDE length.  */
+      val = htab->glink_eh_frame->size - 4 - sizeof (glink_eh_frame_cie);
+      bfd_put_32 (htab->elf.dynobj, val, p);
+      p += 4;
+      /* CIE pointer.  */
+      val = p - htab->glink_eh_frame->contents;
+      bfd_put_32 (htab->elf.dynobj, val, p);
+      p += 4;
+      /* Offset to .glink.  Set later.  */
+      p += 4;
+      /* .glink size.  */
+      bfd_put_32 (htab->elf.dynobj, htab->glink->size, p);
+      p += 4;
+      /* Augmentation.  */
+      p += 1;
+
+      if (info->shared
+	  && htab->elf.dynamic_sections_created)
+	{
+	  bfd_vma adv = (htab->glink->size - GLINK_PLTRESOLVE + 8) >> 2;
+	  if (adv < 64)
+	    *p++ = DW_CFA_advance_loc + adv;
+	  else if (adv < 256)
+	    {
+	      *p++ = DW_CFA_advance_loc1;
+	      *p++ = adv;
+	    }
+	  else if (adv < 65536)
+	    {
+	      *p++ = DW_CFA_advance_loc2;
+	      bfd_put_16 (htab->elf.dynobj, adv, p);
+	      p += 2;
+	    }
+	  else
+	    {
+	      *p++ = DW_CFA_advance_loc4;
+	      bfd_put_32 (htab->elf.dynobj, adv, p);
+	      p += 4;
+	    }
+	  *p++ = DW_CFA_register;
+	  *p++ = 65;
+	  p++;
+	  *p++ = DW_CFA_advance_loc + 4;
+	  *p++ = DW_CFA_restore_extended;
+	  *p++ = 65;
+	}
+      BFD_ASSERT ((bfd_vma) ((p + 3 - htab->glink_eh_frame->contents) & -4)
+		  == htab->glink_eh_frame->size);
+    }
+
   return TRUE;
 }
 
@@ -9573,17 +9633,10 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
       unsigned char *p = htab->glink_eh_frame->contents;
       bfd_vma val;
 
-      memcpy (p, glink_eh_frame_cie, sizeof (glink_eh_frame_cie));
-      /* CIE length (rewrite in case little-endian).  */
-      bfd_put_32 (htab->elf.dynobj, sizeof (glink_eh_frame_cie) - 4, p);
       p += sizeof (glink_eh_frame_cie);
       /* FDE length.  */
-      val = htab->glink_eh_frame->size - 4 - sizeof (glink_eh_frame_cie);
-      bfd_put_32 (htab->elf.dynobj, val, p);
       p += 4;
       /* CIE pointer.  */
-      val = p - htab->glink_eh_frame->contents;
-      bfd_put_32 (htab->elf.dynobj, val, p);
       p += 4;
       /* Offset to .glink.  */
       val = (htab->glink->output_section->vma
@@ -9592,45 +9645,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      + htab->glink_eh_frame->output_offset);
       val -= p - htab->glink_eh_frame->contents;
       bfd_put_32 (htab->elf.dynobj, val, p);
-      p += 4;
-      /* .glink size.  */
-      bfd_put_32 (htab->elf.dynobj, htab->glink->size, p);
-      p += 4;
-      /* Augmentation.  */
-      p += 1;
-
-      if (info->shared
-	  && htab->elf.dynamic_sections_created)
-	{
-	  bfd_vma adv = (htab->glink->size - GLINK_PLTRESOLVE + 8) >> 2;
-	  if (adv < 64)
-	    *p++ = DW_CFA_advance_loc + adv;
-	  else if (adv < 256)
-	    {
-	      *p++ = DW_CFA_advance_loc1;
-	      *p++ = adv;
-	    }
-	  else if (adv < 65536)
-	    {
-	      *p++ = DW_CFA_advance_loc2;
-	      bfd_put_16 (htab->elf.dynobj, adv, p);
-	      p += 2;
-	    }
-	  else
-	    {
-	      *p++ = DW_CFA_advance_loc4;
-	      bfd_put_32 (htab->elf.dynobj, adv, p);
-	      p += 4;
-	    }
-	  *p++ = DW_CFA_register;
-	  *p++ = 65;
-	  p++;
-	  *p++ = DW_CFA_advance_loc + 4;
-	  *p++ = DW_CFA_restore_extended;
-	  *p++ = 65;
-	}
-      BFD_ASSERT ((bfd_vma) ((p + 3 - htab->glink_eh_frame->contents) & -4)
-		  == htab->glink_eh_frame->size);
 
       if (htab->glink_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME
 	  && !_bfd_elf_write_section_eh_frame (output_bfd, info,

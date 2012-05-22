@@ -12489,10 +12489,10 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
       if (!info->relocatable)
 	{
 	  eh = bfd_get_section_by_name (abfd, ".eh_frame");
-	  if (eh != NULL
-	      && (eh->size == 0
-		  || bfd_is_abs_section (eh->output_section)))
-	    eh = NULL;
+	  while (eh != NULL
+		 && (eh->size == 0
+		     || bfd_is_abs_section (eh->output_section)))
+	    eh = bfd_get_next_section_by_name (eh);
 	}
 
       stab = bfd_get_section_by_name (abfd, ".stab");

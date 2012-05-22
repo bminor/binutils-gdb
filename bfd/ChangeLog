@@ -1,3 +1,12 @@
+2012-05-22  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (bfd_elf_discard_info): Look for next .eh_frame if
+	first one is zero size or discarded.
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Set most of
+	glink_eh_frame contents here..
+	(ppc_elf_finish_dynamic_sections): ..rather than here.  Just set
+	offset to .glink.
+
 2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13909
