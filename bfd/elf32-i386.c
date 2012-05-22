@@ -1016,8 +1016,7 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 
   if (!info->no_ld_generated_unwind_info
       && htab->plt_eh_frame == NULL
-      && htab->elf.splt != NULL
-      && bfd_get_section_by_name (dynobj, ".eh_frame") != NULL)
+      && htab->elf.splt != NULL)
     {
       flagword flags = get_elf_backend_data (dynobj)->dynamic_sec_flags;
       htab->plt_eh_frame

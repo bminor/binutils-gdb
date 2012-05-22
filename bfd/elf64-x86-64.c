@@ -980,8 +980,7 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
 
   if (!info->no_ld_generated_unwind_info
       && htab->plt_eh_frame == NULL
-      && htab->elf.splt != NULL
-      && bfd_get_section_by_name (dynobj, ".eh_frame") != NULL)
+      && htab->elf.splt != NULL)
     {
       const struct elf_x86_64_backend_data *const abed
 	= get_elf_x86_64_backend_data (dynobj);

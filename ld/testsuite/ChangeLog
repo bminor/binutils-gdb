@@ -1,6 +1,16 @@
 2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/13909
+	* ld-i386/i386.exp: Revert the last change.
+	* ld-x86-64/x86-64.exp: Likewise.
+
+	* ld-i386/dummy.s: Removed.
+	* ld-i386/pr13909.d: Likewise.
+	* ld-x86-64/pr13909.d: Likewise.
+
+2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13909
 	* ld-i386/i386.exp: Run pr13909.
 	* ld-x86-64/x86-64.exp: Likewise.
 
