@@ -979,15 +979,17 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
     abort ();
 
   if (!info->no_ld_generated_unwind_info
-      && bfd_get_section_by_name (dynobj, ".eh_frame") == NULL
+      && htab->plt_eh_frame == NULL
       && htab->elf.splt != NULL)
     {
       const struct elf_x86_64_backend_data *const abed
 	= get_elf_x86_64_backend_data (dynobj);
       flagword flags = get_elf_backend_data (dynobj)->dynamic_sec_flags;
       htab->plt_eh_frame
-	= bfd_make_section_with_flags (dynobj, ".eh_frame",
-				       flags | SEC_READONLY);
+	= bfd_make_section_anyway_with_flags (dynobj, ".eh_frame",
+					      (flags
+					       | SEC_LINKER_CREATED
+					       | SEC_READONLY));
       if (htab->plt_eh_frame == NULL
 	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame, 3))
 	return FALSE;

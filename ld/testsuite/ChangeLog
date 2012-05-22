@@ -1,3 +1,20 @@
+2012-05-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14105
+	* ld-elf/eh4.d: Add PLT eh_frame.
+
+	* ld-i386/i386.exp: Run pr12570a and pr12570b.
+	* ld-x86-64/x86-64.exp: Likewise.
+
+	* ld-i386/pr12570a.d: New file.
+	* ld-i386/pr12570a.s: Likewise.
+	* ld-i386/pr12570b.s: Likewise.
+	* ld-i386/pr12570b.s: Likewise.
+	* ld-x86-64/pr12570a.d: Likewise.
+	* ld-x86-64/pr12570a.s: Likewise.
+	* ld-x86-64/pr12570b.d: Likewise.
+	* ld-x86-64/pr12570b.s: Likewise.
+
 2012-05-19  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/elf.exp (note-3.so): xfail tic6x due to non-pic warnings.

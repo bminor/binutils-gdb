@@ -29,6 +29,17 @@ Contents of the .eh_frame section:
   DW_CFA_set_loc: 00000417
   DW_CFA_def_cfa_offset: 80
 
-00000048 ZERO terminator
+00000048 00000024 0000004c FDE cie=00000000 pc=00000240..00000260
+  DW_CFA_def_cfa_offset: 16
+  DW_CFA_advance_loc: 6 to 00000246
+  DW_CFA_def_cfa_offset: 24
+  DW_CFA_advance_loc: 10 to 00000250
+  DW_CFA_def_cfa_expression \(DW_OP_breg7 \(rsp\): 8; DW_OP_breg16 \(rip\): 0; DW_OP_lit15; DW_OP_and; DW_OP_lit11; DW_OP_ge; DW_OP_lit3; DW_OP_shl; DW_OP_plus\)
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+
+00000070 ZERO terminator
 #pass
 
