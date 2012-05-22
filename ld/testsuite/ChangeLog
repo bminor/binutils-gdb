@@ -1,3 +1,9 @@
+2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/ilp32-11.s Add ".space 0x1000" before func.
+	(func): Make it global and hidden.
+	* ld-x86-64/ilp32-11.d: Updated.
+
 2012-05-22  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-elf/eh4.d: Revert last change.

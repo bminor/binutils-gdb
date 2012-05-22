@@ -4,6 +4,9 @@
 	.quad	func + 0x7fffffff
 
 	.text
+	.space	0x1000
 	.type	func, @function
+	.global	func
+	.hidden	func
 func:
 	ret
