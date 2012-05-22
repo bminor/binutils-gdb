@@ -369,60 +369,36 @@ dwarf_expr_eval (struct dwarf_expr_context *ctx, const gdb_byte *addr,
   gdb_assert (ctx->recursion_depth == old_recursion_depth);
 }
 
-/* Decode the unsigned LEB128 constant at BUF into the variable pointed to
-   by R, and return the new value of BUF.  Verify that it doesn't extend
-   past BUF_END.  R can be NULL, the constant is then only skipped.  */
+/* Helper to read a uleb128 value or throw an error.  */
 
 const gdb_byte *
-read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end, ULONGEST * r)
+safe_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
+		   unsigned long long *r)
 {
-  unsigned shift = 0;
-  ULONGEST result = 0;
-  gdb_byte byte;
-
-  while (1)
-    {
-      if (buf >= buf_end)
-	error (_("read_uleb128: Corrupted DWARF expression."));
-
-      byte = *buf++;
-      result |= ((ULONGEST) (byte & 0x7f)) << shift;
-      if ((byte & 0x80) == 0)
-	break;
-      shift += 7;
-    }
-  if (r)
-    *r = result;
+  buf = gdb_read_uleb128 (buf, buf_end, r);
+  if (buf == NULL)
+    error (_("DWARF expression error: ran off end of buffer reading uleb128 value"));
   return buf;
 }
 
-/* Decode the signed LEB128 constant at BUF into the variable pointed to
-   by R, and return the new value of BUF.  Verify that it doesn't extend
-   past BUF_END.  R can be NULL, the constant is then only skipped.  */
+/* Helper to read a sleb128 value or throw an error.  */
 
 const gdb_byte *
-read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end, LONGEST * r)
+safe_read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
+		   long long *r)
 {
-  unsigned shift = 0;
-  LONGEST result = 0;
-  gdb_byte byte;
+  buf = gdb_read_sleb128 (buf, buf_end, r);
+  if (buf == NULL)
+    error (_("DWARF expression error: ran off end of buffer reading sleb128 value"));
+  return buf;
+}
 
-  while (1)
-    {
-      if (buf >= buf_end)
-	error (_("read_sleb128: Corrupted DWARF expression."));
-
-      byte = *buf++;
-      result |= ((ULONGEST) (byte & 0x7f)) << shift;
-      shift += 7;
-      if ((byte & 0x80) == 0)
-	break;
-    }
-  if (shift < (sizeof (*r) * 8) && (byte & 0x40) != 0)
-    result |= -(((LONGEST) 1) << shift);
-
-  if (r)
-    *r = result;
+const gdb_byte *
+safe_skip_leb128 (const gdb_byte *buf, const gdb_byte *buf_end)
+{
+  buf = gdb_skip_leb128 (buf, buf_end);
+  if (buf == NULL)
+    error (_("DWARF expression error: ran off end of buffer reading leb128 value"));
   return buf;
 }
 
@@ -489,7 +465,7 @@ dwarf_get_base_type (struct dwarf_expr_context *ctx, cu_offset die, int size)
 int
 dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end)
 {
-  ULONGEST dwarf_reg;
+  unsigned long long dwarf_reg;
 
   if (buf_end <= buf)
     return -1;
@@ -503,13 +479,19 @@ dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end)
   if (*buf == DW_OP_GNU_regval_type)
     {
       buf++;
-      buf = read_uleb128 (buf, buf_end, &dwarf_reg);
-      buf = read_uleb128 (buf, buf_end, NULL);
+      buf = gdb_read_uleb128 (buf, buf_end, &dwarf_reg);
+      if (buf == NULL)
+	return -1;
+      buf = gdb_skip_leb128 (buf, buf_end);
+      if (buf == NULL)
+	return -1;
     }
   else if (*buf == DW_OP_regx)
     {
       buf++;
-      buf = read_uleb128 (buf, buf_end, &dwarf_reg);
+      buf = gdb_read_uleb128 (buf, buf_end, &dwarf_reg);
+      if (buf == NULL)
+	return -1;
     }
   else
     return -1;
@@ -527,31 +509,35 @@ int
 dwarf_block_to_dwarf_reg_deref (const gdb_byte *buf, const gdb_byte *buf_end,
 				CORE_ADDR *deref_size_return)
 {
-  ULONGEST dwarf_reg;
-  LONGEST offset;
+  unsigned long long dwarf_reg;
+  long long offset;
 
   if (buf_end <= buf)
     return -1;
+
   if (*buf >= DW_OP_breg0 && *buf <= DW_OP_breg31)
     {
       dwarf_reg = *buf - DW_OP_breg0;
       buf++;
+      if (buf >= buf_end)
+	return -1;
     }
   else if (*buf == DW_OP_bregx)
     {
       buf++;
-      buf = read_uleb128 (buf, buf_end, &dwarf_reg);
+      buf = gdb_read_uleb128 (buf, buf_end, &dwarf_reg);
+      if (buf == NULL)
+	return -1;
       if ((int) dwarf_reg != dwarf_reg)
        return -1;
     }
   else
     return -1;
 
-  buf = read_sleb128 (buf, buf_end, &offset);
-  if (offset != 0)
+  buf = gdb_read_sleb128 (buf, buf_end, &offset);
+  if (buf == NULL)
     return -1;
-
-  if (buf >= buf_end)
+  if (offset != 0)
     return -1;
 
   if (*buf == DW_OP_deref)
@@ -582,7 +568,7 @@ int
 dwarf_block_to_fb_offset (const gdb_byte *buf, const gdb_byte *buf_end,
 			  CORE_ADDR *fb_offset_return)
 {
-  LONGEST fb_offset;
+  long long fb_offset;
 
   if (buf_end <= buf)
     return 0;
@@ -591,7 +577,9 @@ dwarf_block_to_fb_offset (const gdb_byte *buf, const gdb_byte *buf_end,
     return 0;
   buf++;
 
-  buf = read_sleb128 (buf, buf_end, &fb_offset);
+  buf = gdb_read_sleb128 (buf, buf_end, &fb_offset);
+  if (buf == NULL)
+    return 0;
   *fb_offset_return = fb_offset;
   if (buf != buf_end || fb_offset != (LONGEST) *fb_offset_return)
     return 0;
@@ -607,8 +595,8 @@ int
 dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
 			  const gdb_byte *buf_end, CORE_ADDR *sp_offset_return)
 {
-  ULONGEST dwarf_reg;
-  LONGEST sp_offset;
+  unsigned long long dwarf_reg;
+  long long sp_offset;
 
   if (buf_end <= buf)
     return 0;
@@ -622,14 +610,18 @@ dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
       if (*buf != DW_OP_bregx)
        return 0;
       buf++;
-      buf = read_uleb128 (buf, buf_end, &dwarf_reg);
+      buf = gdb_read_uleb128 (buf, buf_end, &dwarf_reg);
+      if (buf == NULL)
+	return 0;
     }
 
   if (gdbarch_dwarf2_reg_to_regnum (gdbarch, dwarf_reg)
       != gdbarch_sp_regnum (gdbarch))
     return 0;
 
-  buf = read_sleb128 (buf, buf_end, &sp_offset);
+  buf = gdb_read_sleb128 (buf, buf_end, &sp_offset);
+  if (buf == NULL)
+    return 0;
   *sp_offset_return = sp_offset;
   if (buf != buf_end || sp_offset != (LONGEST) *sp_offset_return)
     return 0;
@@ -673,8 +665,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	 This is just an optimization, so it's always ok to punt
 	 and leave this as 0.  */
       int in_stack_memory = 0;
-      ULONGEST uoffset, reg;
-      LONGEST offset;
+      unsigned long long uoffset, reg;
+      long long offset;
       struct value *result_val = NULL;
 
       /* The DWARF expression might have a bug causing an infinite
@@ -733,7 +725,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  break;
 
 	case DW_OP_GNU_addr_index:
-	  op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	  result = (ctx->funcs->get_addr_index) (ctx->baton, uoffset);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
@@ -779,12 +771,12 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  op_ptr += 8;
 	  break;
 	case DW_OP_constu:
-	  op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	  result = uoffset;
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 	case DW_OP_consts:
-	  op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	  op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	  result = offset;
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
@@ -837,7 +829,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  break;
 
 	case DW_OP_regx:
-	  op_ptr = read_uleb128 (op_ptr, op_end, &reg);
+	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_regx");
 
 	  result = reg;
@@ -847,9 +839,9 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_implicit_value:
 	  {
-	    ULONGEST len;
+	    unsigned long long len;
 
-	    op_ptr = read_uleb128 (op_ptr, op_end, &len);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &len);
 	    if (op_ptr + len > op_end)
 	      error (_("DW_OP_implicit_value: too few bytes available."));
 	    ctx->len = len;
@@ -868,7 +860,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_GNU_implicit_pointer:
 	  {
-	    LONGEST len;
+	    long long len;
 
 	    if (ctx->ref_addr_size == -1)
 	      error (_("DWARF-2 expression error: DW_OP_GNU_implicit_pointer "
@@ -880,7 +872,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    op_ptr += ctx->ref_addr_size;
 
 	    /* The byte offset into the data.  */
-	    op_ptr = read_sleb128 (op_ptr, op_end, &len);
+	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &len);
 	    result = (ULONGEST) len;
 	    result_val = value_from_ulongest (address_type, result);
 
@@ -923,7 +915,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_breg30:
 	case DW_OP_breg31:
 	  {
-	    op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	    result = (ctx->funcs->read_reg) (ctx->baton, op - DW_OP_breg0);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
@@ -931,8 +923,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  break;
 	case DW_OP_bregx:
 	  {
-	    op_ptr = read_uleb128 (op_ptr, op_end, &reg);
-	    op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
+	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	    result = (ctx->funcs->read_reg) (ctx->baton, reg);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
@@ -944,7 +936,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    size_t datalen;
 	    unsigned int before_stack_len;
 
-	    op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	    /* Rather than create a whole new context, we simply
 	       record the stack length before execution, then reset it
 	       afterwards, effectively erasing whatever the recursive
@@ -1038,7 +1030,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      {
 		cu_offset type_die;
 
-		op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+		op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 		type_die.cu_off = uoffset;
 		type = dwarf_get_base_type (ctx, type_die, 0);
 	      }
@@ -1089,7 +1081,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      case DW_OP_plus_uconst:
 		dwarf_require_integral (value_type (result_val));
 		result = value_as_long (result_val);
-		op_ptr = read_uleb128 (op_ptr, op_end, &reg);
+		op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 		result += reg;
 		result_val = value_from_ulongest (address_type, result);
 		break;
@@ -1299,10 +1291,10 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
         case DW_OP_piece:
           {
-            ULONGEST size;
+            unsigned long long size;
 
             /* Record the piece.  */
-            op_ptr = read_uleb128 (op_ptr, op_end, &size);
+            op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
 	    add_piece (ctx, 8 * size, 0);
 
             /* Pop off the address/regnum, and reset the location
@@ -1316,11 +1308,11 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_bit_piece:
 	  {
-	    ULONGEST size, offset;
+	    unsigned long long size, offset;
 
             /* Record the piece.  */
-	    op_ptr = read_uleb128 (op_ptr, op_end, &size);
-	    op_ptr = read_uleb128 (op_ptr, op_end, &offset);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &offset);
 	    add_piece (ctx, size, offset);
 
             /* Pop off the address/regnum, and reset the location
@@ -1362,11 +1354,11 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	
 	case DW_OP_GNU_entry_value:
 	  {
-	    ULONGEST len;
+	    unsigned long long len;
 	    int dwarf_reg;
 	    CORE_ADDR deref_size;
 
-	    op_ptr = read_uleb128 (op_ptr, op_end, &len);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &len);
 	    if (op_ptr + len > op_end)
 	      error (_("DW_OP_GNU_entry_value: too few bytes available."));
 
@@ -1405,7 +1397,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    const gdb_byte *data;
 	    struct type *type;
 
-	    op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	    type_die.cu_off = uoffset;
 	    n = *op_ptr++;
 	    data = op_ptr;
@@ -1421,8 +1413,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    cu_offset type_die;
 	    struct type *type;
 
-	    op_ptr = read_uleb128 (op_ptr, op_end, &reg);
-	    op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	    type_die.cu_off = uoffset;
 
 	    type = dwarf_get_base_type (ctx, type_die, 0);
@@ -1439,7 +1431,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    cu_offset type_die;
 	    struct type *type;
 
-	    op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	    type_die.cu_off = uoffset;
 
 	    if (type_die.cu_off == 0)

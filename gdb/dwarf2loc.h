@@ -119,6 +119,10 @@ struct dwarf2_loclist_baton
   /* The compilation unit containing the symbol whose location
      we're computing.  */
   struct dwarf2_per_cu_data *per_cu;
+
+  /* Non-zero if the location list lives in .debug_loc.dwo.
+     The format of entries in this section are different.  */
+  unsigned char from_dwo;
 };
 
 extern const struct symbol_computed_ops dwarf2_locexpr_funcs;

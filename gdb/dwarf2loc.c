@@ -58,6 +58,121 @@ static struct value *dwarf2_evaluate_loc_desc_full (struct type *type,
 					      struct dwarf2_per_cu_data *per_cu,
 						    LONGEST byte_offset);
 
+/* Until these have formal names, we define these here.
+   ref: http://gcc.gnu.org/wiki/DebugFission
+   Each entry in .debug_loc.dwo begins with a byte that describes the entry,
+   and is then followed by data specific to that entry.  */
+
+enum debug_loc_kind
+{
+  /* Indicates the end of the list of entries.  */
+  DEBUG_LOC_END_OF_LIST = 0,
+
+  /* This is followed by an unsigned LEB128 number that is an index into
+     .debug_addr and specifies the base address for all following entries.  */
+  DEBUG_LOC_BASE_ADDRESS = 1,
+
+  /* This is followed by two unsigned LEB128 numbers that are indices into
+     .debug_addr and specify the beginning and ending addresses, and then
+     a normal location expression as in .debug_loc.  */
+  DEBUG_LOC_NORMAL = 2,
+
+  /* An internal value indicating there is insufficient data.  */
+  DEBUG_LOC_BUFFER_OVERFLOW = -1,
+
+  /* An internal value indicating an invalid kind of entry was found.  */
+  DEBUG_LOC_INVALID_ENTRY = -2
+};
+
+/* Decode the addresses in a non-dwo .debug_loc entry.
+   A pointer to the next byte to examine is returned in *NEW_PTR.
+   The encoded low,high addresses are return in *LOW,*HIGH.
+   The result indicates the kind of entry found.  */
+
+static enum debug_loc_kind
+decode_debug_loc_addresses (const gdb_byte *loc_ptr, const gdb_byte *buf_end,
+			    const gdb_byte **new_ptr,
+			    CORE_ADDR *low, CORE_ADDR *high,
+			    enum bfd_endian byte_order,
+			    unsigned int addr_size,
+			    int signed_addr_p)
+{
+  CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
+
+  if (buf_end - loc_ptr < 2 * addr_size)
+    return DEBUG_LOC_BUFFER_OVERFLOW;
+
+  if (signed_addr_p)
+    *low = extract_signed_integer (loc_ptr, addr_size, byte_order);
+  else
+    *low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+  loc_ptr += addr_size;
+
+  if (signed_addr_p)
+    *high = extract_signed_integer (loc_ptr, addr_size, byte_order);
+  else
+    *high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+  loc_ptr += addr_size;
+
+  *new_ptr = loc_ptr;
+
+  /* A base-address-selection entry.  */
+  if ((*low & base_mask) == base_mask)
+    return DEBUG_LOC_BASE_ADDRESS;
+
+  /* An end-of-list entry.  */
+  if (*low == 0 && *high == 0)
+    return DEBUG_LOC_END_OF_LIST;
+
+  return DEBUG_LOC_NORMAL;
+}
+
+/* Decode the addresses in .debug_loc.dwo entry.
+   A pointer to the next byte to examine is returned in *NEW_PTR.
+   The encoded low,high addresses are return in *LOW,*HIGH.
+   The result indicates the kind of entry found.  */
+
+static enum debug_loc_kind
+decode_debug_loc_dwo_addresses (struct dwarf2_per_cu_data *per_cu,
+				const gdb_byte *loc_ptr,
+				const gdb_byte *buf_end,
+				const gdb_byte **new_ptr,
+				CORE_ADDR *low, CORE_ADDR *high)
+{
+  unsigned long long low_index, high_index;
+
+  if (loc_ptr == buf_end)
+    return DEBUG_LOC_BUFFER_OVERFLOW;
+
+  switch (*loc_ptr++)
+    {
+    case DEBUG_LOC_END_OF_LIST:
+      *new_ptr = loc_ptr;
+      return DEBUG_LOC_END_OF_LIST;
+    case DEBUG_LOC_BASE_ADDRESS:
+      *low = 0;
+      loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &high_index);
+      if (loc_ptr == NULL)
+	return DEBUG_LOC_BUFFER_OVERFLOW;
+      *high = dwarf2_read_addr_index (per_cu, high_index);
+      *new_ptr = loc_ptr;
+      return DEBUG_LOC_BASE_ADDRESS;
+    case DEBUG_LOC_NORMAL:
+      loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &low_index);
+      if (loc_ptr == NULL)
+	return DEBUG_LOC_BUFFER_OVERFLOW;
+      *low = dwarf2_read_addr_index (per_cu, low_index);
+      loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &high_index);
+      if (loc_ptr == NULL)
+	return DEBUG_LOC_BUFFER_OVERFLOW;
+      *high = dwarf2_read_addr_index (per_cu, high_index);
+      *new_ptr = loc_ptr;
+      return DEBUG_LOC_NORMAL;
+    default:
+      return DEBUG_LOC_INVALID_ENTRY;
+    }
+}
+
 /* A function for dealing with location lists.  Given a
    symbol baton (BATON) and a pc value (PC), find the appropriate
    location expression, set *LOCEXPR_LENGTH, and return a pointer
@@ -70,52 +185,52 @@ const gdb_byte *
 dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 				 size_t *locexpr_length, CORE_ADDR pc)
 {
-  CORE_ADDR low, high;
-  const gdb_byte *loc_ptr, *buf_end;
-  int length;
   struct objfile *objfile = dwarf2_per_cu_objfile (baton->per_cu);
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = dwarf2_per_cu_addr_size (baton->per_cu);
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
-  CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Adjust base_address for relocatable objects.  */
   CORE_ADDR base_offset = dwarf2_per_cu_text_offset (baton->per_cu);
   CORE_ADDR base_address = baton->base_address + base_offset;
+  const gdb_byte *loc_ptr, *buf_end;
 
   loc_ptr = baton->data;
   buf_end = baton->data + baton->size;
 
   while (1)
     {
-      if (buf_end - loc_ptr < 2 * addr_size)
-	error (_("dwarf2_find_location_expression: "
-		 "Corrupted DWARF expression."));
+      CORE_ADDR low = 0, high = 0; /* init for gcc -Wall */
+      int length;
+      enum debug_loc_kind kind;
+      const gdb_byte *new_ptr = NULL; /* init for gcc -Wall */
 
-      if (signed_addr_p)
-	low = extract_signed_integer (loc_ptr, addr_size, byte_order);
+      if (baton->from_dwo)
+	kind = decode_debug_loc_dwo_addresses (baton->per_cu,
+					       loc_ptr, buf_end, &new_ptr,
+					       &low, &high);
       else
-	low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
-      loc_ptr += addr_size;
-
-      if (signed_addr_p)
-	high = extract_signed_integer (loc_ptr, addr_size, byte_order);
-      else
-	high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
-      loc_ptr += addr_size;
-
-      /* A base-address-selection entry.  */
-      if ((low & base_mask) == base_mask)
+	kind = decode_debug_loc_addresses (loc_ptr, buf_end, &new_ptr,
+					   &low, &high,
+					   byte_order, addr_size,
+					   signed_addr_p);
+      loc_ptr = new_ptr;
+      switch (kind)
 	{
-	  base_address = high + base_offset;
-	  continue;
-	}
-
-      /* An end-of-list entry.  */
-      if (low == 0 && high == 0)
-	{
+	case DEBUG_LOC_END_OF_LIST:
 	  *locexpr_length = 0;
 	  return NULL;
+	case DEBUG_LOC_BASE_ADDRESS:
+	  base_address = high + base_offset;
+	  continue;
+	case DEBUG_LOC_NORMAL:
+	  break;
+	case DEBUG_LOC_BUFFER_OVERFLOW:
+	case DEBUG_LOC_INVALID_ENTRY:
+	  error (_("dwarf2_find_location_expression: "
+		   "Corrupted DWARF expression."));
+	default:
+	  gdb_assert_not_reached ("bad debug_loc_kind");
 	}
 
       /* Otherwise, a location expression entry.  */
@@ -2451,8 +2566,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
   while (op_ptr < op_end)
     {
       enum dwarf_location_atom op = *op_ptr;
-      ULONGEST uoffset, reg;
-      LONGEST offset;
+      unsigned long long uoffset, reg;
+      long long offset;
       int i;
 
       offsets[op_ptr - base] = expr->len;
@@ -2556,11 +2671,11 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  op_ptr += 8;
 	  break;
 	case DW_OP_constu:
-	  op_ptr = read_uleb128 (op_ptr, op_end, &uoffset);
+	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	  ax_const_l (expr, uoffset);
 	  break;
 	case DW_OP_consts:
-	  op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	  op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	  ax_const_l (expr, offset);
 	  break;
 
@@ -2602,7 +2717,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  break;
 
 	case DW_OP_regx:
-	  op_ptr = read_uleb128 (op_ptr, op_end, &reg);
+	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_regx");
 	  loc->u.reg = translate_register (arch, reg);
 	  loc->kind = axs_lvalue_register;
@@ -2610,9 +2725,9 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 
 	case DW_OP_implicit_value:
 	  {
-	    ULONGEST len;
+	    unsigned long long len;
 
-	    op_ptr = read_uleb128 (op_ptr, op_end, &len);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &len);
 	    if (op_ptr + len > op_end)
 	      error (_("DW_OP_implicit_value: too few bytes available."));
 	    if (len > sizeof (ULONGEST))
@@ -2666,7 +2781,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	case DW_OP_breg29:
 	case DW_OP_breg30:
 	case DW_OP_breg31:
-	  op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	  op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	  i = translate_register (arch, op - DW_OP_breg0);
 	  ax_reg (expr, i);
 	  if (offset != 0)
@@ -2677,8 +2792,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  break;
 	case DW_OP_bregx:
 	  {
-	    op_ptr = read_uleb128 (op_ptr, op_end, &reg);
-	    op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
+	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	    i = translate_register (arch, reg);
 	    ax_reg (expr, i);
 	    if (offset != 0)
@@ -2709,7 +2824,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    dwarf_expr_frame_base_1 (framefunc, expr->scope,
 				     &datastart, &datalen);
 
-	    op_ptr = read_sleb128 (op_ptr, op_end, &offset);
+	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	    dwarf2_compile_expr_to_ax (expr, loc, arch, addr_size, datastart,
 				       datastart + datalen, per_cu);
 
@@ -2810,7 +2925,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  break;
 
 	case DW_OP_plus_uconst:
-	  op_ptr = read_uleb128 (op_ptr, op_end, &reg);
+	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	  /* It would be really weird to emit `DW_OP_plus_uconst 0',
 	     but we micro-optimize anyhow.  */
 	  if (reg != 0)
@@ -2960,20 +3075,20 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
         case DW_OP_piece:
 	case DW_OP_bit_piece:
 	  {
-	    ULONGEST size, offset;
+	    unsigned long long size, offset;
 
 	    if (op_ptr - 1 == previous_piece)
 	      error (_("Cannot translate empty pieces to agent expressions"));
 	    previous_piece = op_ptr - 1;
 
-            op_ptr = read_uleb128 (op_ptr, op_end, &size);
+            op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
 	    if (op == DW_OP_piece)
 	      {
 		size *= 8;
 		offset = 0;
 	      }
 	    else
-	      op_ptr = read_uleb128 (op_ptr, op_end, &offset);
+	      op_ptr = safe_read_uleb128 (op_ptr, op_end, &offset);
 
 	    if (bits_collected + size > 8 * sizeof (LONGEST))
 	      error (_("Expression pieces exceed word size"));
@@ -3133,7 +3248,8 @@ locexpr_regname (struct gdbarch *gdbarch, int dwarf_regnum)
 /* Nicely describe a single piece of a location, returning an updated
    position in the bytecode sequence.  This function cannot recognize
    all locations; if a location is not recognized, it simply returns
-   DATA.  */
+   DATA.  If there is an error during reading, e.g. we run off the end
+   of the buffer, an error is thrown.  */
 
 static const gdb_byte *
 locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
@@ -3151,9 +3267,9 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
     }
   else if (data[0] == DW_OP_regx)
     {
-      ULONGEST reg;
+      unsigned long long reg;
 
-      data = read_uleb128 (data + 1, end, &reg);
+      data = safe_read_uleb128 (data + 1, end, &reg);
       fprintf_filtered (stream, _("a variable in $%s"),
 			locexpr_regname (gdbarch, reg));
     }
@@ -3162,12 +3278,12 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       struct block *b;
       struct symbol *framefunc;
       int frame_reg = 0;
-      LONGEST frame_offset;
+      long long frame_offset;
       const gdb_byte *base_data, *new_data, *save_data = data;
       size_t base_size;
-      LONGEST base_offset = 0;
+      long long base_offset = 0;
 
-      new_data = read_sleb128 (data + 1, end, &frame_offset);
+      new_data = safe_read_sleb128 (data + 1, end, &frame_offset);
       if (!piece_end_p (new_data, end))
 	return data;
       data = new_data;
@@ -3191,8 +3307,8 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	  const gdb_byte *buf_end;
 	  
 	  frame_reg = base_data[0] - DW_OP_breg0;
-	  buf_end = read_sleb128 (base_data + 1,
-				  base_data + base_size, &base_offset);
+	  buf_end = safe_read_sleb128 (base_data + 1, base_data + base_size,
+				       &base_offset);
 	  if (buf_end != base_data + base_size)
 	    error (_("Unexpected opcode after "
 		     "DW_OP_breg%u for symbol \"%s\"."),
@@ -3219,9 +3335,9 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
   else if (data[0] >= DW_OP_breg0 && data[0] <= DW_OP_breg31
 	   && piece_end_p (data, end))
     {
-      LONGEST offset;
+      long long offset;
 
-      data = read_sleb128 (data + 1, end, &offset);
+      data = safe_read_sleb128 (data + 1, end, &offset);
 
       fprintf_filtered (stream,
 			_("a variable at offset %s from base reg $%s"),
@@ -3276,7 +3392,9 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 /* Disassemble an expression, stopping at the end of a piece or at the
    end of the expression.  Returns a pointer to the next unread byte
    in the input expression.  If ALL is nonzero, then this function
-   will keep going until it reaches the end of the expression.  */
+   will keep going until it reaches the end of the expression.
+   If there is an error during reading, e.g. we run off the end
+   of the buffer, an error is thrown.  */
 
 static const gdb_byte *
 disassemble_dwarf_expression (struct ui_file *stream,
@@ -3291,8 +3409,8 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	     || (data[0] != DW_OP_piece && data[0] != DW_OP_bit_piece)))
     {
       enum dwarf_location_atom op = *data++;
-      ULONGEST ul;
-      LONGEST l;
+      unsigned long long ul;
+      long long l;
       const char *name;
 
       name = get_DW_OP_name (op);
@@ -3353,11 +3471,11 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  fprintf_filtered (stream, " %s", plongest (l));
 	  break;
 	case DW_OP_constu:
-	  data = read_uleb128 (data, end, &ul);
+	  data = safe_read_uleb128 (data, end, &ul);
 	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
 	case DW_OP_consts:
-	  data = read_sleb128 (data, end, &l);
+	  data = safe_read_sleb128 (data, end, &l);
 	  fprintf_filtered (stream, " %s", plongest (l));
 	  break;
 
@@ -3398,13 +3516,13 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  break;
 
 	case DW_OP_regx:
-	  data = read_uleb128 (data, end, &ul);
+	  data = safe_read_uleb128 (data, end, &ul);
 	  fprintf_filtered (stream, " %s [$%s]", pulongest (ul),
 			    locexpr_regname (arch, (int) ul));
 	  break;
 
 	case DW_OP_implicit_value:
-	  data = read_uleb128 (data, end, &ul);
+	  data = safe_read_uleb128 (data, end, &ul);
 	  data += ul;
 	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
@@ -3441,14 +3559,14 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_breg29:
 	case DW_OP_breg30:
 	case DW_OP_breg31:
-	  data = read_sleb128 (data, end, &l);
+	  data = safe_read_sleb128 (data, end, &l);
 	  fprintf_filtered (stream, " %s [$%s]", plongest (l),
 			    locexpr_regname (arch, op - DW_OP_breg0));
 	  break;
 
 	case DW_OP_bregx:
-	  data = read_uleb128 (data, end, &ul);
-	  data = read_sleb128 (data, end, &l);
+	  data = safe_read_uleb128 (data, end, &ul);
+	  data = safe_read_sleb128 (data, end, &l);
 	  fprintf_filtered (stream, " register %s [$%s] offset %s",
 			    pulongest (ul),
 			    locexpr_regname (arch, (int) ul),
@@ -3456,7 +3574,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  break;
 
 	case DW_OP_fbreg:
-	  data = read_sleb128 (data, end, &l);
+	  data = safe_read_sleb128 (data, end, &l);
 	  fprintf_filtered (stream, " %s", plongest (l));
 	  break;
 
@@ -3468,7 +3586,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  break;
 
 	case DW_OP_plus_uconst:
-	  data = read_uleb128 (data, end, &ul);
+	  data = safe_read_uleb128 (data, end, &ul);
 	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
 
@@ -3506,16 +3624,16 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  break;
 
         case DW_OP_piece:
-	  data = read_uleb128 (data, end, &ul);
+	  data = safe_read_uleb128 (data, end, &ul);
 	  fprintf_filtered (stream, " %s (bytes)", pulongest (ul));
 	  break;
 
 	case DW_OP_bit_piece:
 	  {
-	    ULONGEST offset;
+	    unsigned long long offset;
 
-	    data = read_uleb128 (data, end, &ul);
-	    data = read_uleb128 (data, end, &offset);
+	    data = safe_read_uleb128 (data, end, &ul);
+	    data = safe_read_uleb128 (data, end, &offset);
 	    fprintf_filtered (stream, " size %s offset %s (bits)",
 			      pulongest (ul), pulongest (offset));
 	  }
@@ -3527,7 +3645,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 					   gdbarch_byte_order (arch));
 	    data += offset_size;
 
-	    data = read_sleb128 (data, end, &l);
+	    data = safe_read_sleb128 (data, end, &l);
 
 	    fprintf_filtered (stream, " DIE %s offset %s",
 			      phex_nz (ul, offset_size),
@@ -3541,7 +3659,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	    cu_offset offset;
 	    struct type *type;
 
-	    data = read_uleb128 (data, end, &ul);
+	    data = safe_read_uleb128 (data, end, &ul);
 	    offset.cu_off = ul;
 	    type = dwarf2_get_die_type (offset, per_cu);
 	    fprintf_filtered (stream, "<");
@@ -3556,7 +3674,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	    cu_offset type_die;
 	    struct type *type;
 
-	    data = read_uleb128 (data, end, &ul);
+	    data = safe_read_uleb128 (data, end, &ul);
 	    type_die.cu_off = ul;
 	    type = dwarf2_get_die_type (type_die, per_cu);
 	    fprintf_filtered (stream, "<");
@@ -3567,12 +3685,12 @@ disassemble_dwarf_expression (struct ui_file *stream,
 
 	case DW_OP_GNU_regval_type:
 	  {
-	    ULONGEST reg;
+	    unsigned long long reg;
 	    cu_offset type_die;
 	    struct type *type;
 
-	    data = read_uleb128 (data, end, &reg);
-	    data = read_uleb128 (data, end, &ul);
+	    data = safe_read_uleb128 (data, end, &reg);
+	    data = safe_read_uleb128 (data, end, &ul);
 	    type_die.cu_off = ul;
 
 	    type = dwarf2_get_die_type (type_die, per_cu);
@@ -3589,7 +3707,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  {
 	    cu_offset type_die;
 
-	    data = read_uleb128 (data, end, &ul);
+	    data = safe_read_uleb128 (data, end, &ul);
 	    type_die.cu_off = ul;
 
 	    if (type_die.cu_off == 0)
@@ -3607,7 +3725,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  break;
 
 	case DW_OP_GNU_entry_value:
-	  data = read_uleb128 (data, end, &ul);
+	  data = safe_read_uleb128 (data, end, &ul);
 	  fputc_filtered ('\n', stream);
 	  disassemble_dwarf_expression (stream, arch, addr_size, offset_size,
 					start, data, data + ul, indent + 2,
@@ -3676,9 +3794,9 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	    fprintf_filtered (stream, "   ");
 	  if (data[0] == DW_OP_piece)
 	    {
-	      ULONGEST bytes;
+	      unsigned long long bytes;
 
-	      data = read_uleb128 (data + 1, end, &bytes);
+	      data = safe_read_uleb128 (data + 1, end, &bytes);
 
 	      if (empty)
 		fprintf_filtered (stream, _("an empty %s-byte piece"),
@@ -3689,10 +3807,10 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	    }
 	  else if (data[0] == DW_OP_bit_piece)
 	    {
-	      ULONGEST bits, offset;
+	      unsigned long long bits, offset;
 
-	      data = read_uleb128 (data + 1, end, &bits);
-	      data = read_uleb128 (data, end, &offset);
+	      data = safe_read_uleb128 (data + 1, end, &bits);
+	      data = safe_read_uleb128 (data, end, &offset);
 
 	      if (empty)
 		fprintf_filtered (stream,
@@ -3832,19 +3950,18 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 			   struct ui_file *stream)
 {
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
-  CORE_ADDR low, high;
   const gdb_byte *loc_ptr, *buf_end;
-  int length, first = 1;
+  int first = 1;
   struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
   int offset_size = dwarf2_per_cu_offset_size (dlbaton->per_cu);
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
-  CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Adjust base_address for relocatable objects.  */
   CORE_ADDR base_offset = dwarf2_per_cu_text_offset (dlbaton->per_cu);
   CORE_ADDR base_address = dlbaton->base_address + base_offset;
+  int done = 0;
 
   loc_ptr = dlbaton->data;
   buf_end = dlbaton->data + dlbaton->size;
@@ -3852,36 +3969,42 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   fprintf_filtered (stream, _("multi-location:\n"));
 
   /* Iterate through locations until we run out.  */
-  while (1)
+  while (!done)
     {
-      if (buf_end - loc_ptr < 2 * addr_size)
-	error (_("Corrupted DWARF expression for symbol \"%s\"."),
-	       SYMBOL_PRINT_NAME (symbol));
+      CORE_ADDR low = 0, high = 0; /* init for gcc -Wall */
+      int length;
+      enum debug_loc_kind kind;
+      const gdb_byte *new_ptr = NULL; /* init for gcc -Wall */
 
-      if (signed_addr_p)
-	low = extract_signed_integer (loc_ptr, addr_size, byte_order);
+      if (dlbaton->from_dwo)
+	kind = decode_debug_loc_dwo_addresses (dlbaton->per_cu,
+					       loc_ptr, buf_end, &new_ptr,
+					       &low, &high);
       else
-	low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
-      loc_ptr += addr_size;
-
-      if (signed_addr_p)
-	high = extract_signed_integer (loc_ptr, addr_size, byte_order);
-      else
-	high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
-      loc_ptr += addr_size;
-
-      /* A base-address-selection entry.  */
-      if ((low & base_mask) == base_mask)
+	kind = decode_debug_loc_addresses (loc_ptr, buf_end, &new_ptr,
+					   &low, &high,
+					   byte_order, addr_size,
+					   signed_addr_p);
+      loc_ptr = new_ptr;
+      switch (kind)
 	{
+	case DEBUG_LOC_END_OF_LIST:
+	  done = 1;
+	  continue;
+	case DEBUG_LOC_BASE_ADDRESS:
 	  base_address = high + base_offset;
 	  fprintf_filtered (stream, _("  Base address %s"),
 			    paddress (gdbarch, base_address));
 	  continue;
+	case DEBUG_LOC_NORMAL:
+	  break;
+	case DEBUG_LOC_BUFFER_OVERFLOW:
+	case DEBUG_LOC_INVALID_ENTRY:
+	  error (_("Corrupted DWARF expression for symbol \"%s\"."),
+		 SYMBOL_PRINT_NAME (symbol));
+	default:
+	  gdb_assert_not_reached ("bad debug_loc_kind");
 	}
-
-      /* An end-of-list entry.  */
-      if (low == 0 && high == 0)
-	break;
 
       /* Otherwise, a location expression entry.  */
       low += base_address;

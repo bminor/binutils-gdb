@@ -1,3 +1,55 @@
+2012-05-22  Doug Evans  <dje@google.com>
+
+	* dwarf2-frame.c (struct dwarf2_cie): Make initial_instructions, end
+	"const gdb_byte *".
+	(struct dwarf2_fde): Make instructions, end "const gdb_byte *".
+	(execute_cfa_program): Update to match API of leb128 functions.
+	(read_1_byte, read_4_bytes, read_8_bytes): Make buf parameter
+	"const gdb_byte *".
+	(read_unsigned_leb128, read_signed_leb128): Delete.
+	(read_initial_length): Change type of buf argument to
+	"const gdb_byte *".
+	(read_encoded_value): Update to match API of leb128 functions.
+	(decode_frame_entry): Change result to "const gdb_byte *", and
+	similarly for "start" parameter.
+	(decode_frame_entry_1): Ditto.  Use new leb128 reader functions.
+	(dwarf2_build_frame_info): Change local frame_ptr to
+	"const gdb_byte *".
+	* dwarf2expr.c (safe_read_uleb128, safe_read_sleb128): Replaces
+	read_uleb128, read_sleb128.  All callers updated.
+	(safe_skip_leb128): New function.
+	(dwarf_block_to_dwarf_reg): Update to match API of leb128 functions.
+	Call gdb_read_uleb128, gdb_skip_leb128 instead of read_uleb128.
+	(dwarf_block_to_dwarf_reg_deref): Update to match API of leb128
+	functions.  Call gdb_read_uleb128, gdb_read_sleb128 instead of
+	read_uleb128, read_sleb128.
+	(dwarf_block_to_fb_offset, dwarf_block_to_sp_offset): Ditto.
+	(execute_stack_op): Update to match API of leb128 functions.
+	* dwarf2expr.h: #include "leb128.h".
+	(read_uleb128, read_sleb128): Delete.
+	(gdb_read_uleb128, gdb_read_sleb128, gdb_skip_leb128): New functions.
+	(safe_read_uleb128, safe_read_sleb128, safe_skip_leb128): Declare.
+	* dwarf2loc.c (debug_loc_kind): New enum.
+	(decode_debug_loc_addresses): New function.
+	(decode_debug_loc_dwo_addresses): New function.
+	(dwarf2_find_location_expression): Rewrite.
+	(dwarf2_compile_expr_to_ax): Update to match API of leb128 functions.
+	(locexpr_describe_location_piece): Ditto.
+	(disassemble_dwarf_expression): Ditto.
+	(locexpr_describe_location_1): Ditto.
+	(loclist_describe_location): Rewrite.
+	* dwarf2loc.h (dwarf2_loclist_baton): New member "from_dwo".
+	* dwarf2read.c (die_reader_specs): New member "buffer_end".
+	(dwarf2_section_buffer_overflow_complaint): Renamed from
+	dwarf2_macros_too_long_complaint.  All callers updated.
+	(skip_leb128): Delete.
+	(init_cu_die_reader): Initialize reader->buffer_end.
+	(skip_one_die): Replace call to skip_leb128 with safe_skip_leb128.
+	(skip_form_bytes): New arg buffer_end.  All callers updated.
+	Replace call to skip_leb128 with gdb_skip_leb128.
+	(skip_unknown_opcode): New arg mac_end.  All callers updated.
+	(fill_in_loclist_baton): Initialize baton->from_dwo.
+
 2012-05-22  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-linux-nat.c (mips_linux_read_description): Use a more

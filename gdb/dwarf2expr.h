@@ -23,6 +23,8 @@
 #if !defined (DWARF2EXPR_H)
 #define DWARF2EXPR_H
 
+#include "leb128.h"
+
 struct dwarf_expr_context;
 
 /* Offset relative to the start of its containing CU (compilation unit).  */
@@ -273,12 +275,6 @@ struct value *dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n);
 CORE_ADDR dwarf_expr_fetch_address (struct dwarf_expr_context *ctx, int n);
 int dwarf_expr_fetch_in_stack_memory (struct dwarf_expr_context *ctx, int n);
 
-
-const gdb_byte *read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
-			      ULONGEST * r);
-const gdb_byte *read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
-			      LONGEST * r);
-
 void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,
 				     const char *);
 
@@ -309,5 +305,51 @@ int dwarf_block_to_fb_offset (const gdb_byte *buf, const gdb_byte *buf_end,
 int dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
 			      const gdb_byte *buf_end,
 			      CORE_ADDR *sp_offset_return);
+
+/* Wrappers around the leb128 reader routines to simplify them for our
+   purposes.  */
+
+static inline const gdb_byte *
+gdb_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
+		  unsigned long long *r)
+{
+  size_t bytes_read = read_uleb128_to_ull (buf, buf_end, r);
+
+  if (bytes_read == 0)
+    return NULL;
+  return buf + bytes_read;
+}
+
+static inline const gdb_byte *
+gdb_read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
+		  long long *r)
+{
+  size_t bytes_read = read_sleb128_to_ll (buf, buf_end, r);
+
+  if (bytes_read == 0)
+    return NULL;
+  return buf + bytes_read;
+}
+
+static inline const gdb_byte *
+gdb_skip_leb128 (const gdb_byte *buf, const gdb_byte *buf_end)
+{
+  size_t bytes_read = skip_leb128 (buf, buf_end);
+
+  if (bytes_read == 0)
+    return NULL;
+  return buf + bytes_read;
+}
+
+extern const gdb_byte *safe_read_uleb128 (const gdb_byte *buf,
+					  const gdb_byte *buf_end,
+					  unsigned long long *r);
+
+extern const gdb_byte *safe_read_sleb128 (const gdb_byte *buf,
+					  const gdb_byte *buf_end,
+					  long long *r);
+
+extern const gdb_byte *safe_skip_leb128 (const gdb_byte *buf,
+					 const gdb_byte *buf_end);
 
 #endif /* dwarf2expr.h */
