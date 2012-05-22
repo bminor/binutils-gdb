@@ -1,5 +1,12 @@
 2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elf/eh1.d: Don't skip x86_64-*-linux-gnux32.
+	* ld-elf/eh2.d: Likewise.
+	* ld-elf/eh3.d: Likewise.
+	* ld-elf/eh4.d: Likewise.
+
+2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-x86-64/ilp32-11.s Add ".space 0x1000" before func.
 	(func): Make it global and hidden.
 	* ld-x86-64/ilp32-11.d: Updated.
