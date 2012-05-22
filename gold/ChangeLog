@@ -1,3 +1,8 @@
+2012-05-22  Cary Coutant  <ccoutant@google.com>
+
+	* symtab.cc (Symbol::should_add_dynsym_entry): Check for relocatable
+	object before exporting symbol.
+
 2012-05-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/tls_test.cc: Include "config.h" first.
