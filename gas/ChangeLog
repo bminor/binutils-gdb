@@ -1,3 +1,8 @@
+2012-05-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/tc-mips.c (mips_after_parse_args): Assert that arch_info
+	is non-NULL.
+
 2012-05-19  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-elf.c (obj_elf_section): Cater for TC_KEEP_OPERAND_SPACES
