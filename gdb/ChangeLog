@@ -1,3 +1,8 @@
+2012-05-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* common/buffer.c (buffer_grow): ARI fix: Remove unneeded
+	call to abort.
+
 2012-05-22  Pedro Alves  <palves@redhat.com>
 
 	* target.h (store_waitstatus): Move declaration ...
