@@ -206,6 +206,7 @@ run_dump_test "discarded1"
 run_dump_test "pr12718"
 run_dump_test "pr12921"
 run_dump_test "pr13947"
+setup_xfail "x86_64-*-nacl*"
 run_dump_test "pr12570a"
 run_dump_test "pr12570b"
 

@@ -3,7 +3,7 @@
 #as: --64
 #ld: -melf_x86_64 -shared -Ttext 0x400
 #readelf: -wf
-#notarget: x86_64-*-linux-gnux32
+#notarget: x86_64-*-linux-gnux32 x86_64-*-nacl*
 #target: x86_64-*-*
 
 Contents of the .eh_frame section:

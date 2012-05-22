@@ -1,5 +1,11 @@
 2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elf/eh4.d: Skip x86_64-*-nacl*.
+
+	* ld-x86-64/x86-64.exp: Xfail pr12570a for x86_64-*-nacl*.
+
+2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/13909
 	* ld-i386/i386.exp: Revert the last change.
 	* ld-x86-64/x86-64.exp: Likewise.
