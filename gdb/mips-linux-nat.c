@@ -447,7 +447,7 @@ mips_linux_read_description (struct target_ops *ops)
 	  have_dsp = 0;
 	  break;
 	default:
-	  perror_with_name (_("ptrace"));
+	  perror_with_name (_("Couldn't check DSP support"));
 	  break;
 	}
     }
