@@ -1,3 +1,20 @@
+2012-05-22  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* NEWS: Add MIPS/Linux DSP support.
+	* mips-linux-tdep.c: Document post-2.6.12 o32 sigcontext layout.
+	(SIGCONTEXT_DSPCTL): New macro.
+	(SIGCONTEXT_HI1, SIGCONTEXT_LO1): Likewise.
+	(SIGCONTEXT_HI2, SIGCONTEXT_LO2): Likewise.
+	(SIGCONTEXT_HI3, SIGCONTEXT_LO3): Likewise.
+	(N64_SIGCONTEXT_HI1, N64_SIGCONTEXT_HI2): Likewise.
+	(N64_SIGCONTEXT_HI3): Likewise.
+	(N64_SIGCONTEXT_LO1, N64_SIGCONTEXT_LO2): Likewise.
+	(N64_SIGCONTEXT_LO3): Likewise.
+	(N64_SIGCONTEXT_DSPCTL): Likewise.
+	(N64_SIGCONTEXT_FPCSR): Clarify definition.
+	(mips_linux_o32_sigframe_init): Handle DSP registers.
+	(mips_linux_n32n64_sigframe_init): Likewise.
+
 2012-05-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* common/buffer.c (buffer_grow): ARI fix: Remove unneeded

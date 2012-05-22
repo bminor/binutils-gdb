@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.4
 
+* GDB now supports access to MIPS DSP registers on Linux targets.
+
 * GDB now supports debugging microMIPS binaries.
 
 * The "info os" command on GNU/Linux can now display information on
