@@ -1,3 +1,10 @@
+2012-05-22  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-x86-64/pr12570a.d (name): Distinguish it from pr12570b.d case.
+	Loosen CFI-matching regexp so it matches x86_64-*-nacl* variant too.
+	* ld-x86-64/pr12570b.d: Likewise.
+	* ld-x86-64/x86-64.exp: Revert last change.
+
 2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/eh4.d: Skip x86_64-*-nacl*.
