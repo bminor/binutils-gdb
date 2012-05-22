@@ -30,6 +30,7 @@
 #include "inf-child.h"
 #include "gdb/fileio.h"
 #include "agent.h"
+#include "gdb_wait.h"
 
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>		/* for MAXPATHLEN */
@@ -37,6 +38,29 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+/* Helper function for child_wait and the derivatives of child_wait.
+   HOSTSTATUS is the waitstatus from wait() or the equivalent; store our
+   translation of that in OURSTATUS.  */
+void
+store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
+{
+  if (WIFEXITED (hoststatus))
+    {
+      ourstatus->kind = TARGET_WAITKIND_EXITED;
+      ourstatus->value.integer = WEXITSTATUS (hoststatus);
+    }
+  else if (!WIFSTOPPED (hoststatus))
+    {
+      ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
+      ourstatus->value.sig = target_signal_from_host (WTERMSIG (hoststatus));
+    }
+  else
+    {
+      ourstatus->kind = TARGET_WAITKIND_STOPPED;
+      ourstatus->value.sig = target_signal_from_host (WSTOPSIG (hoststatus));
+    }
+}
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */

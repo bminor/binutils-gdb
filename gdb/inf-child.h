@@ -25,4 +25,9 @@
 
 extern struct target_ops *inf_child_target (void);
 
+/* Functions for helping to write a native target.  */
+
+/* This is for native targets which use a unix/POSIX-style waitstatus.  */
+extern void store_waitstatus (struct target_waitstatus *, int);
+
 #endif

@@ -1,3 +1,14 @@
+2012-05-22  Pedro Alves  <palves@redhat.com>
+
+	* target.h (store_waitstatus): Move declaration ...
+	* inf-child.h (store_waitstatus): ... here.
+	* target.c: Move inclusion of gdb_wait.h, and ...
+	(store_waitstatus): ... this ...
+	* inf-child.c: ... here.
+	* linux-nat.c: Include inf-child.h.
+	* rs6000-nat.c: Include inf-child.h.
+	* spu-linux-nat.c: Include inf-child.h.
+
 2012-05-22  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* tracepoint.c (start_tracing): Add missing i18n markup.

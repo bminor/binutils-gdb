@@ -31,6 +31,7 @@
 #include "gdb-stabs.h"
 #include "regcache.h"
 #include "arch-utils.h"
+#include "inf-child.h"
 #include "inf-ptrace.h"
 #include "ppc-tdep.h"
 #include "rs6000-tdep.h"

@@ -1857,10 +1857,6 @@ extern int baud_rate;
 extern int remote_timeout;
 
 
-/* Functions for helping to write a native target.  */
-
-/* This is for native targets which use a unix/POSIX-style waitstatus.  */
-extern void store_waitstatus (struct target_waitstatus *, int);
 
 /* Set the show memory breakpoints mode to show, and installs a cleanup
    to restore it back to the current value.  */

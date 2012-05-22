@@ -23,6 +23,7 @@
 #include "gdb_string.h"
 #include "target.h"
 #include "inferior.h"
+#include "inf-child.h"
 #include "inf-ptrace.h"
 #include "regcache.h"
 #include "symfile.h"

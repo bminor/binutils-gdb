@@ -36,6 +36,7 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "regset.h"
+#include "inf-child.h"
 #include "inf-ptrace.h"
 #include "auxv.h"
 #include <sys/param.h>		/* for MAXPATHLEN */
