@@ -12522,8 +12522,8 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	  fini_reloc_cookie_rels (&cookie, stab);
 	}
 
-      if (eh != NULL
-	  && init_reloc_cookie_rels (&cookie, info, abfd, eh))
+      while (eh != NULL
+	     && init_reloc_cookie_rels (&cookie, info, abfd, eh))
 	{
 	  _bfd_elf_parse_eh_frame (abfd, info, eh, &cookie);
 	  if (_bfd_elf_discard_section_eh_frame (abfd, info, eh,
@@ -12531,6 +12531,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 						 &cookie))
 	    ret = TRUE;
 	  fini_reloc_cookie_rels (&cookie, eh);
+	  eh = bfd_get_next_section_by_name (eh);
 	}
 
       if (bed->elf_backend_discard_info != NULL
