@@ -78,6 +78,8 @@
 
 #ifdef __UCLIBC__
 #if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
+/* PTRACE_TEXT_ADDR and friends.  */
+#include <asm/ptrace.h>
 #define HAS_NOMMU
 #endif
 #endif
@@ -4796,6 +4798,9 @@ linux_stopped_data_address (void)
 }
 
 #if defined(__UCLIBC__) && defined(HAS_NOMMU)
+#if ! (defined(PT_TEXT_ADDR) \
+       || defined(PT_DATA_ADDR) \
+       || defined(PT_TEXT_END_ADDR))
 #if defined(__mcoldfire__)
 /* These should really be defined in the kernel's ptrace.h header.  */
 #define PT_TEXT_ADDR 49*4
@@ -4809,6 +4814,7 @@ linux_stopped_data_address (void)
 #define PT_TEXT_ADDR     (0x10000*4)
 #define PT_DATA_ADDR     (0x10004*4)
 #define PT_TEXT_END_ADDR (0x10008*4)
+#endif
 #endif
 
 /* Under uClinux, programs are loaded at non-zero offsets, which we need

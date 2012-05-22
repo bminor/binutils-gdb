@@ -1,3 +1,10 @@
+2012-05-22  Will Deacon  <will.deacon@arm.com>
+
+	* linux-low (__UCLIBC__ && !(__UCLIBC_HAS_MMU__ || __ARCH_HAS_MMU__)):
+	Include asm/ptrace.h.
+	(PT_TEXT_ADDR, PT_DATA_ADDR, PT_TEXT_END_ADDR): Define only if not
+	already defined.
+
 2012-05-21  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* linux-low.c (linux_store_registers): Don't re-retrieve data
