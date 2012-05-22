@@ -1805,7 +1805,7 @@ start_tracing (char *notes)
   ret = target_set_trace_notes (trace_user, notes, NULL);
 
   if (!ret && (trace_user || notes))
-    warning ("Target does not support trace user/notes, info ignored");
+    warning (_("Target does not support trace user/notes, info ignored"));
 
   /* Now insert traps and begin collecting data.  */
   target_trace_start ();
@@ -1891,7 +1891,7 @@ stop_tracing (char *note)
   ret = target_set_trace_notes (NULL, NULL, note);
 
   if (!ret && note)
-    warning ("Target does not support trace notes, note ignored");
+    warning (_("Target does not support trace notes, note ignored"));
 
   /* Should change in response to reply?  */
   current_trace_status ()->running = 0;
@@ -3201,7 +3201,7 @@ set_trace_user (char *args, int from_tty,
   ret = target_set_trace_notes (trace_user, NULL, NULL);
 
   if (!ret)
-    warning ("Target does not support trace notes, user ignored");
+    warning (_("Target does not support trace notes, user ignored"));
 }
 
 static void
@@ -3213,7 +3213,7 @@ set_trace_notes (char *args, int from_tty,
   ret = target_set_trace_notes (NULL, trace_notes, NULL);
 
   if (!ret)
-    warning ("Target does not support trace notes, note ignored");
+    warning (_("Target does not support trace notes, note ignored"));
 }
 
 static void
@@ -3225,7 +3225,7 @@ set_trace_stop_notes (char *args, int from_tty,
   ret = target_set_trace_notes (NULL, NULL, trace_stop_notes);
 
   if (!ret)
-    warning ("Target does not support trace notes, stop note ignored");
+    warning (_("Target does not support trace notes, stop note ignored"));
 }
 
 /* Convert the memory pointed to by mem into hex, placing result in buf.

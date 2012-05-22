@@ -1,3 +1,9 @@
+2012-05-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* tracepoint.c (start_tracing): Add missing i18n markup.
+	(stop_tracing, set_trace_user): Ditto.
+	(set_trace_notes, set_trace_stop_notes): Ditto.
+
 2012-05-21  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/7173:
