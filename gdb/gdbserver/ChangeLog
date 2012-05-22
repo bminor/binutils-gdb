@@ -1,3 +1,8 @@
+2012-05-22  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* linux-low.c (linux_store_registers): Avoid the copying sequence
+	when no data has been retrieved by ptrace.
+
 2012-05-22  Will Deacon  <will.deacon@arm.com>
 
 	* linux-low (__UCLIBC__ && !(__UCLIBC_HAS_MMU__ || __ARCH_HAS_MMU__)):

@@ -4449,11 +4449,14 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   ret = errno;
 
   /* Copy appropriate bytes out of the buffer.  */
-  i *= sizeof (PTRACE_XFER_TYPE);
-  i -= memaddr & (sizeof (PTRACE_XFER_TYPE) - 1);
-  memcpy (myaddr,
-	  (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
-	  i < len ? i : len);
+  if (i > 0)
+    {
+      i *= sizeof (PTRACE_XFER_TYPE);
+      i -= memaddr & (sizeof (PTRACE_XFER_TYPE) - 1);
+      memcpy (myaddr,
+	      (char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)),
+	      i < len ? i : len);
+    }
 
   return ret;
 }
