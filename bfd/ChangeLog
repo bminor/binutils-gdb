@@ -1,5 +1,12 @@
 2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/13909
+	* elf32-i386.c (elf_i386_create_dynamic_sections): Create PLT
+	eh_frame section if there is an input .eh_frame section.
+	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Likewise.
+
+2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/14105
 	* elf32-i386.c (elf_i386_create_dynamic_sections): Always
 	create PLT eh_frame section with SEC_LINKER_CREATED.

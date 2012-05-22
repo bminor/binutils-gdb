@@ -1,4 +1,14 @@
-2012-05-20  H.J. Lu  <hongjiu.lu@intel.com>
+2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13909
+	* ld-i386/i386.exp: Run pr13909.
+	* ld-x86-64/x86-64.exp: Likewise.
+
+	* ld-i386/dummy.s: New file.
+	* ld-i386/pr13909.d: Likewise.
+	* ld-x86-64/pr13909.d: Likewise.
+
+2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14105
 	* ld-elf/eh4.d: Add PLT eh_frame.
