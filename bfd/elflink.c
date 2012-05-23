@@ -12482,9 +12482,6 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 
       bed = get_elf_backend_data (abfd);
 
-      if ((abfd->flags & DYNAMIC) != 0)
-	continue;
-
       eh = NULL;
       if (!info->relocatable)
 	{
