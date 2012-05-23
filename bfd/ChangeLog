@@ -1,5 +1,10 @@
 2012-05-23  Alan Modra  <amodra@gmail.com>
 
+	* elf-eh-frame.c (_bfd_elf_maybe_strip_eh_frame_hdr): Handle
+        BFDs with multiple .eh_frame sections.
+
+2012-05-23  Alan Modra  <amodra@gmail.com>
+
 	PR ld/13909
 	* elflink.c (bfd_elf_discard_info): Don't ignore dynamic BFDs.
 
