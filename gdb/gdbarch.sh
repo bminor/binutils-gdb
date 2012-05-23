@@ -775,9 +775,6 @@ M:int:process_record_signal:struct regcache *regcache, enum target_signal signal
 # Signal translation: translate inferior's signal (host's) number into
 # GDB's representation.
 m:enum target_signal:target_signal_from_host:int signo:signo::default_target_signal_from_host::0
-# Signal translation: translate GDB's signal number into inferior's host
-# signal number.
-m:int:target_signal_to_host:enum target_signal ts:ts::default_target_signal_to_host::0
 
 # Extra signal info inspection.
 #

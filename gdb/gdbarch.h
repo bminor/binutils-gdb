@@ -946,13 +946,6 @@ typedef enum target_signal (gdbarch_target_signal_from_host_ftype) (struct gdbar
 extern enum target_signal gdbarch_target_signal_from_host (struct gdbarch *gdbarch, int signo);
 extern void set_gdbarch_target_signal_from_host (struct gdbarch *gdbarch, gdbarch_target_signal_from_host_ftype *target_signal_from_host);
 
-/* Signal translation: translate GDB's signal number into inferior's host
-   signal number. */
-
-typedef int (gdbarch_target_signal_to_host_ftype) (struct gdbarch *gdbarch, enum target_signal ts);
-extern int gdbarch_target_signal_to_host (struct gdbarch *gdbarch, enum target_signal ts);
-extern void set_gdbarch_target_signal_to_host (struct gdbarch *gdbarch, gdbarch_target_signal_to_host_ftype *target_signal_to_host);
-
 /* Extra signal info inspection.
   
    Return a type suitable to inspect extra signal information. */

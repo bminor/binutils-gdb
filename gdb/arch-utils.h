@@ -174,7 +174,5 @@ extern const char *default_auto_wide_charset (void);
 
 extern enum target_signal default_target_signal_from_host (struct gdbarch *,
 							   int);
-extern int default_target_signal_to_host (struct gdbarch *,
-					  enum target_signal);
 
 #endif

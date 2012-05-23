@@ -1,3 +1,10 @@
+2012-05-23  Pedro Alves  <palves@redhat.com>
+
+	* arch-utils.h (default_target_signal_to_host): Delete.
+	* arch-utils.c (default_target_signal_to_host): Delete.
+	* gdbarch.sh (target_signal_to_host): Remove.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 2012-05-22  Doug Evans  <dje@google.com>
 
 	* dwarf2-frame.c (struct dwarf2_cie): Make initial_instructions, end
