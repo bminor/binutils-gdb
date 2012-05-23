@@ -1143,23 +1143,16 @@ lookup_typename (const struct language_defn *language,
   struct type *tmp;
 
   sym = lookup_symbol (name, block, VAR_DOMAIN, 0);
-  if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
-    {
-      tmp = language_lookup_primitive_type_by_name (language, gdbarch, name);
-      if (tmp)
-	{
-	  return tmp;
-	}
-      else if (!tmp && noerr)
-	{
-	  return NULL;
-	}
-      else
-	{
-	  error (_("No type named %s."), name);
-	}
-    }
-  return (SYMBOL_TYPE (sym));
+  if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+    return SYMBOL_TYPE (sym);
+
+  tmp = language_lookup_primitive_type_by_name (language, gdbarch, name);
+  if (tmp)
+    return tmp;
+
+  if (noerr)
+    return NULL;
+  error (_("No type named %s."), name);
 }
 
 struct type *

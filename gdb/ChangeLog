@@ -1,3 +1,7 @@
+2012-05-23  Doug Evans  <dje@google.com>
+
+	* gdbtypes.c (lookup_typename): Simplify.
+
 2012-05-23  Pedro Alves  <palves@redhat.com>
 
 	* arch-utils.h (default_target_signal_to_host): Delete.
