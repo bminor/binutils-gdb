@@ -4573,8 +4573,8 @@ const Layout::Section_name_mapping Layout::section_name_mapping[] =
 {
   MAPPING_INIT(".text.", ".text"),
   MAPPING_INIT(".rodata.", ".rodata"),
-  MAPPING_INIT(".data.rel.ro.local", ".data.rel.ro.local"),
-  MAPPING_INIT(".data.rel.ro", ".data.rel.ro"),
+  MAPPING_INIT(".data.rel.ro.local.", ".data.rel.ro.local"),
+  MAPPING_INIT(".data.rel.ro.", ".data.rel.ro"),
   MAPPING_INIT(".data.", ".data"),
   MAPPING_INIT(".bss.", ".bss"),
   MAPPING_INIT(".tdata.", ".tdata"),

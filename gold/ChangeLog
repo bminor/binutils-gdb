@@ -1,3 +1,8 @@
+2012-05-23  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Layout::section_name_mapping): Match .data.rel.ro.*
+	more carefully.
+
 2012-05-22  Cary Coutant  <ccoutant@google.com>
 
 	* symtab.cc (Symbol::should_add_dynsym_entry): Check for relocatable
