@@ -1,3 +1,9 @@
+2012-05-23  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.trace/stap-trace.exp: If compile_stap_bin fails,
+	return -1 to suppress the rest of the tests.
+	(compile_stap_bin): Return boolean success value.
+
 2012-05-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/inherit.exp (test_print_mi_members): Expect errors.
