@@ -1,3 +1,13 @@
+2012-05-23  Cary Coutant  <ccoutant@google.com>
+
+	* scripttempl/armbpabi.sc: Match .data.rel.ro.* sections more
+	carefully.  Fix typo where .rela.data.rel.ro matches
+	.rel.data.rel.ro.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/elf.sc: Match .data.rel.ro.* sections more carefully.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+
 2012-05-17  Daniel Richard G.  <skunk@iskunk.org>
 	    Nick Clifton  <nickc@redhat.com>
 
