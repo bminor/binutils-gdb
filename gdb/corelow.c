@@ -440,13 +440,11 @@ core_open (char *filename, int from_tty)
   siggy = bfd_core_file_failing_signal (core_bfd);
   if (siggy > 0)
     {
-      /* NOTE: gdb_signal_from_host() converts a target signal
-	 value into gdb's internal signal value.  Unfortunately gdb's
-	 internal value is called ``gdb_signal'' and this function
-	 got the name ..._from_host().  */
+      /* If we don't have a CORE_GDBARCH to work with, assume a native
+	 core.  */
       enum gdb_signal sig = (core_gdbarch != NULL
-		       ? gdbarch_gdb_signal_from_host (core_gdbarch,
-						       siggy)
+		       ? gdbarch_gdb_signal_from_target (core_gdbarch,
+							 siggy)
 		       : gdb_signal_from_host (siggy));
 
       printf_filtered (_("Program terminated with signal %d, %s.\n"),

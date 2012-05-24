@@ -939,12 +939,15 @@ typedef int (gdbarch_process_record_signal_ftype) (struct gdbarch *gdbarch, stru
 extern int gdbarch_process_record_signal (struct gdbarch *gdbarch, struct regcache *regcache, enum gdb_signal signal);
 extern void set_gdbarch_process_record_signal (struct gdbarch *gdbarch, gdbarch_process_record_signal_ftype *process_record_signal);
 
-/* Signal translation: translate inferior's signal (host's) number into
-   GDB's representation. */
+/* Signal translation: translate inferior's signal (target's) number
+   into GDB's representation.  This is mainly used when cross-debugging
+   core files --- "Live" targets hide the translation behind the target
+   interface (target_wait, target_resume, etc.).  The default is to do
+   the translation using host signal numbers. */
 
-typedef enum gdb_signal (gdbarch_gdb_signal_from_host_ftype) (struct gdbarch *gdbarch, int signo);
-extern enum gdb_signal gdbarch_gdb_signal_from_host (struct gdbarch *gdbarch, int signo);
-extern void set_gdbarch_gdb_signal_from_host (struct gdbarch *gdbarch, gdbarch_gdb_signal_from_host_ftype *gdb_signal_from_host);
+typedef enum gdb_signal (gdbarch_gdb_signal_from_target_ftype) (struct gdbarch *gdbarch, int signo);
+extern enum gdb_signal gdbarch_gdb_signal_from_target (struct gdbarch *gdbarch, int signo);
+extern void set_gdbarch_gdb_signal_from_target (struct gdbarch *gdbarch, gdbarch_gdb_signal_from_target_ftype *gdb_signal_from_target);
 
 /* Extra signal info inspection.
   

@@ -2,6 +2,27 @@
 
 	PR gdb/7205
 
+	* arch-utils.c (default_gdb_signal_to_host): Rename to ...
+	(default_gdb_signal_to_target): ... this.  Add comment.
+	(default_gdb_signal_from_host): Rename to ...
+	(default_gdb_signal_from_target): ... this.  Add comment.
+	* arch-utils.h (default_gdb_signal_to_host): Rename to ...
+	(default_gdb_signal_to_target): ... this.
+	(default_gdb_signal_from_host): Rename to ...
+	(default_gdb_signal_from_target): ... this.
+	* corelow.c (core_open): Adjust to naming change.  Replace comment.
+	* gdbarch.sh (gdb_signal_from_host): Rename to ...
+	(gdb_signal_from_target): ... this.  Adjust to
+	default_gdb_signal_from_host naming change.  Extend comment.
+	(gdb_signal_to_host): Rename to ...
+	(gdb_signal_to_target): ... this.  Adjust to
+	default_gdb_signal_to_host naming change.
+	* gdbarch.h, gdbarch.c: Renegerate.
+
+2012-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/7205
+
         Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-05-24  Pedro Alves  <palves@redhat.com>

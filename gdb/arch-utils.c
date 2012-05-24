@@ -794,8 +794,11 @@ default_gen_return_address (struct gdbarch *gdbarch,
 }
 
 enum gdb_signal
-default_gdb_signal_from_host (struct gdbarch *gdbarch, int signo)
+default_gdb_signal_from_target (struct gdbarch *gdbarch, int signo)
 {
+  /* Lacking a better mapping, assume host signal numbers.  If
+     debugging a cross-core, most likely this translation will be
+     incorrect.  */
   return gdb_signal_from_host (signo);
 }
 
