@@ -1,3 +1,10 @@
+2012-05-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* psymtab.c (lookup_symbol_aux_psymtabs): New variable stab_best.  Use
+	it as a fallback for TYPE_IS_OPAQUE.
+	* symfile.h (struct quick_symbol_functions): Mention TYPE_OPAQUE
+	symbols for lookup_symbol.
+
 2012-05-24  John Steele Scott  <toojays@toojays.net>
 
 	PR symtab/13277: Resolving opaque structures in ICC generated binaries.

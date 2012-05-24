@@ -1,3 +1,8 @@
+2012-05-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-icc-opaque.S: Add debug_info_seg3 and
+	.debug_abbrev_seg3.
+
 2012-05-24  John Steele Scott  <toojays@toojays.net>
 
 	PR symtab/13277: Resolving opaque structures in ICC generated binaries.

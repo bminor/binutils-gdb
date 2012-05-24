@@ -510,6 +510,7 @@ lookup_symbol_aux_psymtabs (struct objfile *objfile,
 {
   struct partial_symtab *ps;
   const int psymtab_index = (block_index == GLOBAL_BLOCK ? 1 : 0);
+  struct symtab *stab_best = NULL;
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, ps)
   {
@@ -530,13 +531,18 @@ lookup_symbol_aux_psymtabs (struct objfile *objfile,
 	  }
 
 	if (sym && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
-	  return stab;
+	  {
+	    if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
+	      return stab;
+
+	    stab_best = stab;
+	  }
 
 	/* Keep looking through other psymtabs.  */
       }
   }
 
-  return NULL;
+  return stab_best;
 }
 
 /* Look in PST for a symbol in DOMAIN whose name matches NAME.  Search

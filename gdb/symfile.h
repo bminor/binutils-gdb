@@ -182,7 +182,9 @@ struct quick_symbol_functions
      indicates what sort of symbol to search for.
 
      Returns the newly-expanded symbol table in which the symbol is
-     defined, or NULL if no such symbol table exists.  */
+     defined, or NULL if no such symbol table exists.  If OBJFILE
+     contains !TYPE_OPAQUE symbol prefer its symtab.  If it contains
+     only TYPE_OPAQUE symbol(s), return at least that symtab.  */
   struct symtab *(*lookup_symbol) (struct objfile *objfile,
 				   int kind, const char *name,
 				   domain_enum domain);

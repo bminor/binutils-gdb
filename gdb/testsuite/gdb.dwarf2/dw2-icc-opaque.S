@@ -205,3 +205,54 @@ debug_info_seg2_end:
 	.byte 0x08	/* DW_FORM_string. */
 	.2byte 0x0000	/* End abbrev. */
 	.byte 0x00	/* End abbrev table. */
+
+
+	.file "opaque-pointer2.c"
+
+	.section .debug_info
+	.align 1
+debug_info_seg3:
+	.4byte debug_info_seg3_end - 1f	/* Length of compilation unit info. */
+1:
+	.2byte 0x0002			/* DWARF version number. */
+	.4byte .debug_abbrev_seg3	/* Points to abbrev section for this unit. */
+	.byte 0x04			/* Target address size. */
+
+	.byte 0x01			/* DIE 1: DW_TAG_compile_unit. */
+	.byte 0x01			/* DW_AT_language = DW_LANG_C89. */
+	.ascii "Intel(R) C Intel(R) 64 Compiler XE "	/* DW_AT_producer. */
+	.ascii "for applications running on Intel(R) 64, "
+	.ascii "Version 12.0.4.191 Build 20110427\n "
+	.asciz "Fixes SameLinkageName MemberPointers"
+
+	.byte 0x04			/* DIE 4: DW_TAG_structure_type. */
+	.byte 0x01			/* DW_AT_accessibility. */
+	.byte 0x00			/* DW_AT_byte_size. */
+	.asciz "opaque_struct_t"	/* DW_AT_name. */
+
+	.byte 0x00			/* End DIE 1. */
+debug_info_seg3_end:
+
+	.section .debug_abbrev
+.debug_abbrev_seg3:
+	.align 1
+	.byte 0x01	/* Abbrev 1. */
+	.byte 0x11	/* DW_TAG_compile_unit. */
+	.byte 0x01	/* DW_CHILDREN_yes. */
+	.byte 0x13	/* DW_AT_language. */
+	.byte 0x0b	/* DW_FORM_data1. */
+	.byte 0x25	/* DW_AT_producer. */
+	.byte 0x08	/* DW_AT_string. */
+	.2byte 0x0000	/* End abbrev. */
+
+	.byte 0x04	/* Abbrev 4. */
+	.byte 0x13	/* DW_TAG_structure_type. */
+	.byte 0x00	/* DW_CHILDREN_no. */
+	.byte 0x32	/* DW_AT_accessibility. */
+	.byte 0x0b	/* DW_FORM_data1. */
+	.byte 0x0b	/* DW_AT_byte_size. */
+	.byte 0x0b	/* DW_FORM_data1. */
+	.byte 0x03	/* DW_AT_name. */
+	.byte 0x08	/* DW_FORM_string. */
+	.2byte 0x0000	/* End abbrev. */
+	.byte 0x00	/* End abbrev table. */
