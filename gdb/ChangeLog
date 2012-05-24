@@ -1,5 +1,8 @@
 2012-05-23  Doug Evans  <dje@google.com>
 
+	* symtab.c (search_symbols): Pass NULL for file_matcher to
+	expand_symtabs_matching if there are no files to match.
+
 	* gdbtypes.c (lookup_typename): Simplify.
 
 2012-05-23  Pedro Alves  <palves@redhat.com>

@@ -3426,7 +3426,9 @@ search_symbols (char *regexp, enum search_domain kind,
   {
     if (objfile->sf)
       objfile->sf->qf->expand_symtabs_matching (objfile,
-						search_symbols_file_matches,
+						(nfiles == 0
+						 ? NULL
+						 : search_symbols_file_matches),
 						search_symbols_name_matches,
 						kind,
 						&datum);
