@@ -1,3 +1,10 @@
+2012-05-24  Alan Modra  <amodra@gmail.com>
+
+	PR ld/14158
+	* elf64-ppc.c (ppc64_elf_size_stubs): Round up glink_eh_frame
+	size to output section alignment.
+	(ppc64_elf_build_stubs): Likewise, and extend last FDE to cover.
+
 2012-05-23  Alan Modra  <amodra@gmail.com>
 
 	* elf-eh-frame.c (_bfd_elf_maybe_strip_eh_frame_hdr): Handle
