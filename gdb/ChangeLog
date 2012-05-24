@@ -1,3 +1,14 @@
+2012-05-24  John Steele Scott  <toojays@toojays.net>
+
+	PR symtab/13277: Resolving opaque structures in ICC generated binaries.
+	* dwarf2read.c (struct dwarf2_cu) <producer_is_icc>: New field.
+	(producer_is_gxx_lt_4_6): Move the checking and caching to...
+	(check_producer): ... this new function, which also checks for ICC
+	and caches the result.
+	(producer_is_icc): New function.
+	(read_structure_type): Don't set TYPE_STUB_SUPPORTED if the
+	producer was ICC.
+
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/7205
