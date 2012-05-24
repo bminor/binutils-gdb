@@ -1,5 +1,13 @@
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
+	* sim-signal.h (sim_signal_to_target): Rename to ...
+	(sim_signal_to_gdb_signal): ... this.
+	* sim-signal.c (sim_signal_to_target): Rename to ...
+	(sim_signal_to_gdb_signal): ... this.
+	* sim-reason.c (sim_stop_reason): Adjust to rename.
+
+2012-05-24  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/7205
 
         Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.

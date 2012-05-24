@@ -95,7 +95,7 @@ sim_signal_to_host (SIM_DESC sd, SIM_SIGNAL sig)
 }
 
 enum gdb_signal
-sim_signal_to_target (SIM_DESC sd, SIM_SIGNAL sig)
+sim_signal_to_gdb_signal (SIM_DESC sd, SIM_SIGNAL sig)
 {
   switch (sig)
     {

@@ -36,7 +36,7 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
       break;
     case sim_stopped :
     case sim_signalled :
-      *sigrc = sim_signal_to_target (sd, engine->sigrc);
+      *sigrc = sim_signal_to_gdb_signal (sd, engine->sigrc);
       break;
     default :
       abort ();
