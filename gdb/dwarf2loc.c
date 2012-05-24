@@ -139,7 +139,7 @@ decode_debug_loc_dwo_addresses (struct dwarf2_per_cu_data *per_cu,
 				const gdb_byte **new_ptr,
 				CORE_ADDR *low, CORE_ADDR *high)
 {
-  unsigned long long low_index, high_index;
+  uint64_t low_index, high_index;
 
   if (loc_ptr == buf_end)
     return DEBUG_LOC_BUFFER_OVERFLOW;
@@ -2566,8 +2566,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
   while (op_ptr < op_end)
     {
       enum dwarf_location_atom op = *op_ptr;
-      unsigned long long uoffset, reg;
-      long long offset;
+      uint64_t uoffset, reg;
+      int64_t offset;
       int i;
 
       offsets[op_ptr - base] = expr->len;
@@ -2725,7 +2725,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 
 	case DW_OP_implicit_value:
 	  {
-	    unsigned long long len;
+	    uint64_t len;
 
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &len);
 	    if (op_ptr + len > op_end)
@@ -3075,7 +3075,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
         case DW_OP_piece:
 	case DW_OP_bit_piece:
 	  {
-	    unsigned long long size, offset;
+	    uint64_t size, offset;
 
 	    if (op_ptr - 1 == previous_piece)
 	      error (_("Cannot translate empty pieces to agent expressions"));
@@ -3267,7 +3267,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
     }
   else if (data[0] == DW_OP_regx)
     {
-      unsigned long long reg;
+      uint64_t reg;
 
       data = safe_read_uleb128 (data + 1, end, &reg);
       fprintf_filtered (stream, _("a variable in $%s"),
@@ -3278,10 +3278,10 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       struct block *b;
       struct symbol *framefunc;
       int frame_reg = 0;
-      long long frame_offset;
+      int64_t frame_offset;
       const gdb_byte *base_data, *new_data, *save_data = data;
       size_t base_size;
-      long long base_offset = 0;
+      int64_t base_offset = 0;
 
       new_data = safe_read_sleb128 (data + 1, end, &frame_offset);
       if (!piece_end_p (new_data, end))
@@ -3335,7 +3335,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
   else if (data[0] >= DW_OP_breg0 && data[0] <= DW_OP_breg31
 	   && piece_end_p (data, end))
     {
-      long long offset;
+      int64_t offset;
 
       data = safe_read_sleb128 (data + 1, end, &offset);
 
@@ -3409,8 +3409,8 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	     || (data[0] != DW_OP_piece && data[0] != DW_OP_bit_piece)))
     {
       enum dwarf_location_atom op = *data++;
-      unsigned long long ul;
-      long long l;
+      uint64_t ul;
+      int64_t l;
       const char *name;
 
       name = get_DW_OP_name (op);
@@ -3630,7 +3630,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 
 	case DW_OP_bit_piece:
 	  {
-	    unsigned long long offset;
+	    uint64_t offset;
 
 	    data = safe_read_uleb128 (data, end, &ul);
 	    data = safe_read_uleb128 (data, end, &offset);
@@ -3685,7 +3685,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 
 	case DW_OP_GNU_regval_type:
 	  {
-	    unsigned long long reg;
+	    uint64_t reg;
 	    cu_offset type_die;
 	    struct type *type;
 
@@ -3794,7 +3794,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	    fprintf_filtered (stream, "   ");
 	  if (data[0] == DW_OP_piece)
 	    {
-	      unsigned long long bytes;
+	      uint64_t bytes;
 
 	      data = safe_read_uleb128 (data + 1, end, &bytes);
 
@@ -3807,7 +3807,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	    }
 	  else if (data[0] == DW_OP_bit_piece)
 	    {
-	      unsigned long long bits, offset;
+	      uint64_t bits, offset;
 
 	      data = safe_read_uleb128 (data + 1, end, &bits);
 	      data = safe_read_uleb128 (data, end, &offset);

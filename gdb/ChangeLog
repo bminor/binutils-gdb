@@ -1,3 +1,20 @@
+2012-05-23  Doug Evans  <dje@google.com>
+
+	* dwarf2-frame.c (execute_cfa_program): Update to handle long long ->
+	int64_t change to leb128 API.
+	(read_encoded_value, decode_frame_entry_1): Ditto.
+	* dwarf2expr.c (safe_read_uleb128, safe_read_sleb128): Ditto.
+	(dwarf_block_to_dwarf_reg, dwarf_block_to_dwarf_reg_deref): Ditto.
+	(dwarf_block_to_fb_offset, dwarf_block_to_sp_offset): Ditto.
+	(execute_stack_op): Ditto.
+	* dwarf2expr.h (gdb_read_uleb128, gdb_read_sleb128): Ditto.
+	(safe_read_uleb128, safe_read_sleb128): Ditto.
+	* dwarf2loc.c (decode_debug_loc_dwo_addresses): Ditto.
+	(dwarf2_compile_expr_to_ax): Ditto.
+	(locexpr_describe_location_piece): Ditto.
+	(disassemble_dwarf_expression): Ditto.
+	(locexpr_describe_location_1): Ditto.
+
 2012-05-23  Stan Shebs  <stan@codesourcery.com>
 	    Kwok Cheung Yeung  <kcy@codesourcery.com>
 

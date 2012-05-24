@@ -311,9 +311,9 @@ int dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
 
 static inline const gdb_byte *
 gdb_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
-		  unsigned long long *r)
+		  uint64_t *r)
 {
-  size_t bytes_read = read_uleb128_to_ull (buf, buf_end, r);
+  size_t bytes_read = read_uleb128_to_uint64 (buf, buf_end, r);
 
   if (bytes_read == 0)
     return NULL;
@@ -322,9 +322,9 @@ gdb_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
 
 static inline const gdb_byte *
 gdb_read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
-		  long long *r)
+		  int64_t *r)
 {
-  size_t bytes_read = read_sleb128_to_ll (buf, buf_end, r);
+  size_t bytes_read = read_sleb128_to_int64 (buf, buf_end, r);
 
   if (bytes_read == 0)
     return NULL;
@@ -343,11 +343,11 @@ gdb_skip_leb128 (const gdb_byte *buf, const gdb_byte *buf_end)
 
 extern const gdb_byte *safe_read_uleb128 (const gdb_byte *buf,
 					  const gdb_byte *buf_end,
-					  unsigned long long *r);
+					  uint64_t *r);
 
 extern const gdb_byte *safe_read_sleb128 (const gdb_byte *buf,
 					  const gdb_byte *buf_end,
-					  long long *r);
+					  int64_t *r);
 
 extern const gdb_byte *safe_skip_leb128 (const gdb_byte *buf,
 					 const gdb_byte *buf_end);

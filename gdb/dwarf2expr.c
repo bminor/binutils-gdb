@@ -373,7 +373,7 @@ dwarf_expr_eval (struct dwarf_expr_context *ctx, const gdb_byte *addr,
 
 const gdb_byte *
 safe_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
-		   unsigned long long *r)
+		   uint64_t *r)
 {
   buf = gdb_read_uleb128 (buf, buf_end, r);
   if (buf == NULL)
@@ -385,7 +385,7 @@ safe_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
 
 const gdb_byte *
 safe_read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
-		   long long *r)
+		   int64_t *r)
 {
   buf = gdb_read_sleb128 (buf, buf_end, r);
   if (buf == NULL)
@@ -465,7 +465,7 @@ dwarf_get_base_type (struct dwarf_expr_context *ctx, cu_offset die, int size)
 int
 dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end)
 {
-  unsigned long long dwarf_reg;
+  uint64_t dwarf_reg;
 
   if (buf_end <= buf)
     return -1;
@@ -509,8 +509,8 @@ int
 dwarf_block_to_dwarf_reg_deref (const gdb_byte *buf, const gdb_byte *buf_end,
 				CORE_ADDR *deref_size_return)
 {
-  unsigned long long dwarf_reg;
-  long long offset;
+  uint64_t dwarf_reg;
+  int64_t offset;
 
   if (buf_end <= buf)
     return -1;
@@ -568,7 +568,7 @@ int
 dwarf_block_to_fb_offset (const gdb_byte *buf, const gdb_byte *buf_end,
 			  CORE_ADDR *fb_offset_return)
 {
-  long long fb_offset;
+  int64_t fb_offset;
 
   if (buf_end <= buf)
     return 0;
@@ -595,8 +595,8 @@ int
 dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
 			  const gdb_byte *buf_end, CORE_ADDR *sp_offset_return)
 {
-  unsigned long long dwarf_reg;
-  long long sp_offset;
+  uint64_t dwarf_reg;
+  int64_t sp_offset;
 
   if (buf_end <= buf)
     return 0;
@@ -665,8 +665,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	 This is just an optimization, so it's always ok to punt
 	 and leave this as 0.  */
       int in_stack_memory = 0;
-      unsigned long long uoffset, reg;
-      long long offset;
+      uint64_t uoffset, reg;
+      int64_t offset;
       struct value *result_val = NULL;
 
       /* The DWARF expression might have a bug causing an infinite
@@ -839,7 +839,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_implicit_value:
 	  {
-	    unsigned long long len;
+	    uint64_t len;
 
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &len);
 	    if (op_ptr + len > op_end)
@@ -860,7 +860,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_GNU_implicit_pointer:
 	  {
-	    long long len;
+	    int64_t len;
 
 	    if (ctx->ref_addr_size == -1)
 	      error (_("DWARF-2 expression error: DW_OP_GNU_implicit_pointer "
@@ -1291,7 +1291,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
         case DW_OP_piece:
           {
-            unsigned long long size;
+            uint64_t size;
 
             /* Record the piece.  */
             op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
@@ -1308,7 +1308,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	case DW_OP_bit_piece:
 	  {
-	    unsigned long long size, offset;
+	    uint64_t size, offset;
 
             /* Record the piece.  */
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
@@ -1354,7 +1354,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	
 	case DW_OP_GNU_entry_value:
 	  {
-	    unsigned long long len;
+	    uint64_t len;
 	    int dwarf_reg;
 	    CORE_ADDR deref_size;
 

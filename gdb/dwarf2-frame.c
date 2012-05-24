@@ -416,8 +416,8 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
   while (insn_ptr < insn_end && fs->pc <= pc)
     {
       gdb_byte insn = *insn_ptr++;
-      unsigned long long utmp, reg;
-      long long offset;
+      uint64_t utmp, reg;
+      int64_t offset;
 
       if ((insn & 0xc0) == DW_CFA_advance_loc)
 	fs->pc += (insn & 0x3f) * fs->code_align;
@@ -1628,7 +1628,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
     {
     case DW_EH_PE_uleb128:
       {
-	unsigned long long value;
+	uint64_t value;
 	const gdb_byte *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
 
 	*bytes_read_ptr += safe_read_uleb128 (buf, end_buf, &value) - buf;
@@ -1645,7 +1645,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
       return (base + bfd_get_64 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_sleb128:
       {
-	long long value;
+	int64_t value;
 	const gdb_byte *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
 
 	*bytes_read_ptr += safe_read_sleb128 (buf, end_buf, &value) - buf;
@@ -1830,8 +1830,8 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
   int dwarf64_p;
   ULONGEST cie_id;
   ULONGEST cie_pointer;
-  long long sleb128;
-  unsigned long long uleb128;
+  int64_t sleb128;
+  uint64_t uleb128;
 
   buf = start;
   length = read_initial_length (unit->abfd, buf, &bytes_read);
@@ -1978,7 +1978,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
       cie->saw_z_augmentation = (*augmentation == 'z');
       if (cie->saw_z_augmentation)
 	{
-	  unsigned long long length;
+	  uint64_t length;
 
 	  buf = gdb_read_uleb128 (buf, end, &length);
 	  if (buf == NULL)
@@ -2095,7 +2095,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
 	 can skip the whole thing.  */
       if (fde->cie->saw_z_augmentation)
 	{
-	  unsigned long long length;
+	  uint64_t length;
 
 	  buf = gdb_read_uleb128 (buf, end, &length);
 	  if (buf == NULL)
