@@ -210,7 +210,7 @@ proceed_thread (struct thread_info *thread, int pid)
 
   switch_to_thread (thread->ptid);
   clear_proceed_status ();
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+  proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 0);
 }
 
 static int

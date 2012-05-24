@@ -905,7 +905,7 @@ sim_stop_reason (sd, reason, sigrc)
   if (stop_simulator)
     {
       *reason = sim_stopped;
-      *sigrc = TARGET_SIGNAL_INT;
+      *sigrc = GDB_SIGNAL_INT;
     }
   else if (state->EndCondition == 0)
     {
@@ -916,10 +916,10 @@ sim_stop_reason (sd, reason, sigrc)
     {
       *reason = sim_stopped;
       if (state->EndCondition == RDIError_BreakpointReached)
-	*sigrc = TARGET_SIGNAL_TRAP;
+	*sigrc = GDB_SIGNAL_TRAP;
       else if (   state->EndCondition == RDIError_DataAbort
 	       || state->EndCondition == RDIError_AddressException)
-	*sigrc = TARGET_SIGNAL_BUS;
+	*sigrc = GDB_SIGNAL_BUS;
       else
 	*sigrc = 0;
     }

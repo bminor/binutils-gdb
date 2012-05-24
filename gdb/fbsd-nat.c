@@ -142,7 +142,7 @@ fbsd_find_memory_regions (find_memory_region_ftype func, void *obfd)
 static int
 find_signalled_thread (struct thread_info *info, void *data)
 {
-  if (info->suspend.stop_signal != TARGET_SIGNAL_0
+  if (info->suspend.stop_signal != GDB_SIGNAL_0
       && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
     return 1;
 
@@ -158,7 +158,7 @@ find_stop_signal (void)
   if (info)
     return info->suspend.stop_signal;
   else
-    return TARGET_SIGNAL_0;
+    return GDB_SIGNAL_0;
 }
 
 /* Create appropriate note sections for a corefile, returning them in

@@ -710,12 +710,12 @@ handle_step (int rc)
   if (execution_error_get_last_error () != SIM_ERR_NONE)
     {
       reason = sim_stopped;
-      siggnal = TARGET_SIGNAL_SEGV;
+      siggnal = GDB_SIGNAL_SEGV;
     }
   if (RX_STEPPED (rc) || RX_HIT_BREAK (rc))
     {
       reason = sim_stopped;
-      siggnal = TARGET_SIGNAL_TRAP;
+      siggnal = GDB_SIGNAL_TRAP;
     }
   else if (RX_STOPPED (rc))
     {
@@ -766,7 +766,7 @@ sim_resume (SIM_DESC sd, int step, int sig_to_deliver)
 	    {
 	      stop = 0;
 	      reason = sim_stopped;
-	      siggnal = TARGET_SIGNAL_INT;
+	      siggnal = GDB_SIGNAL_INT;
 	      break;
 	    }
 
@@ -777,7 +777,7 @@ sim_resume (SIM_DESC sd, int step, int sig_to_deliver)
 	  if (execution_error_get_last_error () != SIM_ERR_NONE)
 	    {
 	      reason = sim_stopped;
-	      siggnal = TARGET_SIGNAL_SEGV;
+	      siggnal = GDB_SIGNAL_SEGV;
 	      break;
 	    }
 

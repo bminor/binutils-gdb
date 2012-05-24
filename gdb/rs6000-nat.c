@@ -551,7 +551,7 @@ rs6000_wait (struct target_ops *ops,
 
 	  /* Claim it exited with unknown signal.  */
 	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-	  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
+	  ourstatus->value.sig = GDB_SIGNAL_UNKNOWN;
 	  return inferior_ptid;
 	}
 

@@ -711,7 +711,7 @@ m32r_wait (struct target_ops *ops,
     fprintf_unfiltered (gdb_stdlog, "m32r_wait()\n");
 
   status->kind = TARGET_WAITKIND_EXITED;
-  status->value.sig = TARGET_SIGNAL_0;
+  status->value.sig = GDB_SIGNAL_0;
 
   interrupted = 0;
   prev_sigint = signal (SIGINT, gdb_cntrl_c);
@@ -730,7 +730,7 @@ m32r_wait (struct target_ops *ops,
       if (c == '-')		/* error */
 	{
 	  status->kind = TARGET_WAITKIND_STOPPED;
-	  status->value.sig = TARGET_SIGNAL_HUP;
+	  status->value.sig = GDB_SIGNAL_HUP;
 	  return inferior_ptid;
 	}
       else if (c == '+')	/* stopped */
@@ -746,9 +746,9 @@ m32r_wait (struct target_ops *ops,
 
   status->kind = TARGET_WAITKIND_STOPPED;
   if (interrupted)
-    status->value.sig = TARGET_SIGNAL_INT;
+    status->value.sig = GDB_SIGNAL_INT;
   else
-    status->value.sig = TARGET_SIGNAL_TRAP;
+    status->value.sig = GDB_SIGNAL_TRAP;
 
   interrupted = 0;
   signal (SIGINT, prev_sigint);
@@ -882,7 +882,7 @@ m32r_detach (struct target_ops *ops, char *args, int from_tty)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_detach(%d)\n", from_tty);
 
-  m32r_resume (ops, inferior_ptid, 0, TARGET_SIGNAL_0);
+  m32r_resume (ops, inferior_ptid, 0, GDB_SIGNAL_0);
 
   /* Calls m32r_close to do the real work.  */
   pop_target ();

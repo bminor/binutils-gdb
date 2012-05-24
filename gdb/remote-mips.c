@@ -1778,7 +1778,7 @@ mips_signal_from_protocol (int sig)
      for these signals is widely agreed upon.  */
   if (sig <= 0
       || sig > 31)
-    return TARGET_SIGNAL_UNKNOWN;
+    return GDB_SIGNAL_UNKNOWN;
 
   /* Don't want to use gdb_signal_from_host because we are converting
      from MIPS signal numbers, not host ones.  Our internal numbers
@@ -1837,7 +1837,7 @@ mips_wait (struct target_ops *ops,
   if (!mips_need_reply)
     {
       status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.sig = TARGET_SIGNAL_TRAP;
+      status->value.sig = GDB_SIGNAL_TRAP;
       return inferior_ptid;
     }
 

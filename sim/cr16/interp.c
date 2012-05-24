@@ -1417,18 +1417,18 @@ sim_stop_reason (sd, reason, sigrc)
 
     case SIG_CR16_BUS:
       *reason = sim_stopped;
-      *sigrc = TARGET_SIGNAL_BUS;
+      *sigrc = GDB_SIGNAL_BUS;
       break;
 //
 //    case SIG_CR16_IAD:
 //      *reason = sim_stopped;
-//      *sigrc = TARGET_SIGNAL_IAD;
+//      *sigrc = GDB_SIGNAL_IAD;
 //      break;
 
     default:                                /* some signal */
       *reason = sim_stopped;
       if (stop_simulator && !State.exception)
-        *sigrc = TARGET_SIGNAL_INT;
+        *sigrc = GDB_SIGNAL_INT;
       else
         *sigrc = State.exception;
       break;

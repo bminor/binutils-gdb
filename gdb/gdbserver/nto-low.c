@@ -532,14 +532,14 @@ nto_wait (ptid_t ptid,
     {
       TRACE ("SSTEP\n");
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+      ourstatus->value.sig = GDB_SIGNAL_TRAP;
     }
   /* Was it a breakpoint?  */
   else if (status.flags & trace_mask)
     {
       TRACE ("STOPPED\n");
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+      ourstatus->value.sig = GDB_SIGNAL_TRAP;
     }
   else if (status.flags & _DEBUG_FLAG_ISTOP)
     {
@@ -595,7 +595,7 @@ nto_wait (ptid_t ptid,
 	  TRACE ("REQUESTED\n");
 	  /* We are assuming a requested stop is due to a SIGINT.  */
 	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
-	  ourstatus->value.sig = TARGET_SIGNAL_INT;
+	  ourstatus->value.sig = GDB_SIGNAL_INT;
 	  nto_inferior.exit_signo = 0;
 	  break;
 	}

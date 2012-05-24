@@ -1010,7 +1010,7 @@ inf_ttrace_wait (struct target_ops *ops,
     case TTEVT_BPT_SSTEP:
       /* Make it look like a breakpoint.  */
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+      ourstatus->value.sig = GDB_SIGNAL_TRAP;
       break;
 #endif
 

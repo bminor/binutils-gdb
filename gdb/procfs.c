@@ -3786,7 +3786,7 @@ wait_again:
 		    else
 		      {
 			/* How to keep going without returning to wfi: */
-			target_resume (ptid, 0, TARGET_SIGNAL_0);
+			target_resume (ptid, 0, GDB_SIGNAL_0);
 			goto wait_again;
 		      }
 		  }
@@ -3812,7 +3812,7 @@ wait_again:
 		    /* This is an internal event and should be transparent
 		       to wfi, so resume the execution and wait again.	See
 		       comment in procfs_init_inferior() for more details.  */
-		    target_resume (ptid, 0, TARGET_SIGNAL_0);
+		    target_resume (ptid, 0, GDB_SIGNAL_0);
 		    goto wait_again;
 		  }
 #endif
@@ -4211,7 +4211,7 @@ procfs_resume (struct target_ops *ops,
 
   /* Convert signal to host numbering.  */
   if (signo == 0 ||
-      (signo == TARGET_SIGNAL_STOP && pi->ignore_next_sigstop))
+      (signo == GDB_SIGNAL_STOP && pi->ignore_next_sigstop))
     native_signo = 0;
   else
     native_signo = gdb_signal_to_host (signo);
@@ -5485,7 +5485,7 @@ procfs_corefile_thread_callback (procinfo *pi, procinfo *thread, void *data)
 static int
 find_signalled_thread (struct thread_info *info, void *data)
 {
-  if (info->suspend.stop_signal != TARGET_SIGNAL_0
+  if (info->suspend.stop_signal != GDB_SIGNAL_0
       && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
     return 1;
 
@@ -5501,7 +5501,7 @@ find_stop_signal (void)
   if (info)
     return info->suspend.stop_signal;
   else
-    return TARGET_SIGNAL_0;
+    return GDB_SIGNAL_0;
 }
 
 static char *

@@ -531,7 +531,7 @@ record_arch_list_add_end (void)
 			"Process record: add end to arch list.\n");
 
   rec = record_end_alloc ();
-  rec->u.end.sigval = TARGET_SIGNAL_0;
+  rec->u.end.sigval = GDB_SIGNAL_0;
   rec->u.end.insn_num = ++record_insn_count;
 
   record_arch_list_add (rec);
@@ -621,7 +621,7 @@ record_message (struct regcache *regcache, enum gdb_signal signal)
       record_list->u.end.sigval = signal;
     }
 
-  if (signal == TARGET_SIGNAL_0
+  if (signal == GDB_SIGNAL_0
       || !gdbarch_process_record_signal_p (gdbarch))
     ret = gdbarch_process_record (gdbarch,
 				  regcache,
@@ -1223,7 +1223,7 @@ record_wait_1 (struct target_ops *ops,
 
 	      /* Is this a SIGTRAP?  */
 	      if (status->kind == TARGET_WAITKIND_STOPPED
-		  && status->value.sig == TARGET_SIGNAL_TRAP)
+		  && status->value.sig == GDB_SIGNAL_TRAP)
 		{
 		  struct regcache *regcache;
 		  struct address_space *aspace;
@@ -1265,10 +1265,10 @@ record_wait_1 (struct target_ops *ops,
                       int step = 1;
 
 		      if (!record_message_wrapper_safe (regcache,
-                                                        TARGET_SIGNAL_0))
+                                                        GDB_SIGNAL_0))
   			{
                            status->kind = TARGET_WAITKIND_STOPPED;
-                           status->value.sig = TARGET_SIGNAL_0;
+                           status->value.sig = GDB_SIGNAL_0;
                            break;
   			}
 
@@ -1290,7 +1290,7 @@ record_wait_1 (struct target_ops *ops,
 					    "issuing one more step in the target beneath\n");
 		      record_beneath_to_resume (record_beneath_to_resume_ops,
 						ptid, step,
-						TARGET_SIGNAL_0);
+						GDB_SIGNAL_0);
 		      continue;
 		    }
 		}
@@ -1429,7 +1429,7 @@ record_wait_1 (struct target_ops *ops,
 		      continue_flag = 0;
 		    }
 		  /* Check target signal */
-		  if (record_list->u.end.sigval != TARGET_SIGNAL_0)
+		  if (record_list->u.end.sigval != GDB_SIGNAL_0)
 		    /* FIXME: better way to check */
 		    continue_flag = 0;
 		}
@@ -1453,12 +1453,12 @@ record_wait_1 (struct target_ops *ops,
 
 replay_out:
       if (record_get_sig)
-	status->value.sig = TARGET_SIGNAL_INT;
-      else if (record_list->u.end.sigval != TARGET_SIGNAL_0)
+	status->value.sig = GDB_SIGNAL_INT;
+      else if (record_list->u.end.sigval != GDB_SIGNAL_0)
 	/* FIXME: better way to check */
 	status->value.sig = record_list->u.end.sigval;
       else
-	status->value.sig = TARGET_SIGNAL_TRAP;
+	status->value.sig = GDB_SIGNAL_TRAP;
 
       discard_cleanups (old_cleanups);
     }

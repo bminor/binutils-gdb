@@ -732,7 +732,7 @@ procfs_wait (struct target_ops *ops,
   if (ptid_equal (inferior_ptid, null_ptid))
     {
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = TARGET_SIGNAL_0;
+      ourstatus->value.sig = GDB_SIGNAL_0;
       exit_signo = 0;
       return null_ptid;
     }
@@ -752,13 +752,13 @@ procfs_wait (struct target_ops *ops,
   if (status.flags & _DEBUG_FLAG_SSTEP)
     {
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+      ourstatus->value.sig = GDB_SIGNAL_TRAP;
     }
   /* Was it a breakpoint?  */
   else if (status.flags & _DEBUG_FLAG_TRACE)
     {
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = TARGET_SIGNAL_TRAP;
+      ourstatus->value.sig = GDB_SIGNAL_TRAP;
     }
   else if (status.flags & _DEBUG_FLAG_ISTOP)
     {
@@ -809,7 +809,7 @@ procfs_wait (struct target_ops *ops,
 	case _DEBUG_WHY_REQUESTED:
 	  /* We are assuming a requested stop is due to a SIGINT.  */
 	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
-	  ourstatus->value.sig = TARGET_SIGNAL_INT;
+	  ourstatus->value.sig = GDB_SIGNAL_INT;
 	  exit_signo = 0;
 	  break;
 	}

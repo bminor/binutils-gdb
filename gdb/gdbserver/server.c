@@ -71,8 +71,8 @@ int debug_threads;
 /* Enable debugging of h/w breakpoint/watchpoint support.  */
 int debug_hw_points;
 
-int pass_signals[TARGET_SIGNAL_LAST];
-int program_signals[TARGET_SIGNAL_LAST];
+int pass_signals[GDB_SIGNAL_LAST];
+int program_signals[GDB_SIGNAL_LAST];
 int program_signals_p;
 
 jmp_buf toplevel;
@@ -320,7 +320,7 @@ start_inferior (char **argv)
 	  current_inferior->last_resume_kind = resume_stop;
 	  current_inferior->last_status = last_status;
 	}
-      while (last_status.value.sig != TARGET_SIGNAL_TRAP);
+      while (last_status.value.sig != GDB_SIGNAL_TRAP);
 
       current_inferior->last_resume_kind = resume_stop;
       current_inferior->last_status = last_status;
@@ -370,8 +370,8 @@ attach_inferior (int pid)
 	 process using the "attach" command, but this is different; it's
 	 just using "target remote".  Pretend it's just starting up.  */
       if (last_status.kind == TARGET_WAITKIND_STOPPED
-	  && last_status.value.sig == TARGET_SIGNAL_STOP)
-	last_status.value.sig = TARGET_SIGNAL_TRAP;
+	  && last_status.value.sig == GDB_SIGNAL_STOP)
+	last_status.value.sig = GDB_SIGNAL_TRAP;
 
       current_inferior->last_resume_kind = resume_stop;
       current_inferior->last_status = last_status;
@@ -451,7 +451,7 @@ handle_general_set (char *own_buf)
 {
   if (strncmp ("QPassSignals:", own_buf, strlen ("QPassSignals:")) == 0)
     {
-      int numsigs = (int) TARGET_SIGNAL_LAST, i;
+      int numsigs = (int) GDB_SIGNAL_LAST, i;
       const char *p = own_buf + strlen ("QPassSignals:");
       CORE_ADDR cursig;
 
@@ -476,7 +476,7 @@ handle_general_set (char *own_buf)
 
   if (strncmp ("QProgramSignals:", own_buf, strlen ("QProgramSignals:")) == 0)
     {
-      int numsigs = (int) TARGET_SIGNAL_LAST, i;
+      int numsigs = (int) GDB_SIGNAL_LAST, i;
       const char *p = own_buf + strlen ("QProgramSignals:");
       CORE_ADDR cursig;
 
@@ -2158,7 +2158,7 @@ handle_v_kill (char *own_buf)
   if (pid != 0 && kill_inferior (pid) == 0)
     {
       last_status.kind = TARGET_WAITKIND_SIGNALLED;
-      last_status.value.sig = TARGET_SIGNAL_KILL;
+      last_status.value.sig = GDB_SIGNAL_KILL;
       last_ptid = pid_to_ptid (pid);
       discard_queued_stop_replies (pid);
       write_ok (own_buf);
@@ -2381,7 +2381,7 @@ gdb_wants_thread_stopped (struct inferior_list_entry *entry)
       /* Most threads are stopped implicitly (all-stop); tag that with
 	 signal 0.  */
       thread->last_status.kind = TARGET_WAITKIND_STOPPED;
-      thread->last_status.value.sig = TARGET_SIGNAL_0;
+      thread->last_status.value.sig = GDB_SIGNAL_0;
     }
 }
 
@@ -2436,7 +2436,7 @@ handle_status (char *own_buf)
 	  struct target_waitstatus status;
 
 	  status.kind = TARGET_WAITKIND_STOPPED;
-	  status.value.sig = TARGET_SIGNAL_TRAP;
+	  status.value.sig = GDB_SIGNAL_TRAP;
 	  prepare_resume_reply (own_buf,
 				all_threads.head->id, &status);
 	}
@@ -3308,7 +3308,7 @@ process_serial_event (void)
       if (extended_protocol)
 	{
 	  last_status.kind = TARGET_WAITKIND_EXITED;
-	  last_status.value.sig = TARGET_SIGNAL_KILL;
+	  last_status.value.sig = GDB_SIGNAL_KILL;
 	  return 0;
 	}
       else
@@ -3352,7 +3352,7 @@ process_serial_event (void)
 	  else
 	    {
 	      last_status.kind = TARGET_WAITKIND_EXITED;
-	      last_status.value.sig = TARGET_SIGNAL_KILL;
+	      last_status.value.sig = GDB_SIGNAL_KILL;
 	    }
 	  return 0;
 	}

@@ -9442,7 +9442,7 @@ breakpoint_hit_ranged_breakpoint (const struct bp_location *bl,
 				  const struct target_waitstatus *ws)
 {
   if (ws->kind != TARGET_WAITKIND_STOPPED
-      || ws->value.sig != TARGET_SIGNAL_TRAP)
+      || ws->value.sig != GDB_SIGNAL_TRAP)
     return 0;
 
   return breakpoint_address_match_range (bl->pspace->aspace, bl->address,
@@ -10891,7 +10891,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
 					   stack_frame_id, bp_until);
   make_cleanup_delete_breakpoint (breakpoint);
 
-  proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
+  proceed (-1, GDB_SIGNAL_DEFAULT, 0);
 
   /* If we are running asynchronously, and proceed call above has
      actually managed to start the target, arrange for breakpoints to
@@ -12456,7 +12456,7 @@ bkpt_breakpoint_hit (const struct bp_location *bl,
   struct breakpoint *b = bl->owner;
 
   if (ws->kind != TARGET_WAITKIND_STOPPED
-      || ws->value.sig != TARGET_SIGNAL_TRAP)
+      || ws->value.sig != GDB_SIGNAL_TRAP)
     return 0;
 
   if (!breakpoint_address_match (bl->pspace->aspace, bl->address,

@@ -1162,7 +1162,7 @@ monitor_wait (struct target_ops *ops,
 #endif
 
   status->kind = TARGET_WAITKIND_STOPPED;
-  status->value.sig = TARGET_SIGNAL_TRAP;
+  status->value.sig = GDB_SIGNAL_TRAP;
 
   discard_cleanups (old_chain);
 

@@ -1028,7 +1028,7 @@ aix_thread_wait (struct target_ops *ops,
 
   /* Check whether libpthdebug might be ready to be initialized.  */
   if (!pd_active && status->kind == TARGET_WAITKIND_STOPPED
-      && status->value.sig == TARGET_SIGNAL_TRAP)
+      && status->value.sig == GDB_SIGNAL_TRAP)
     {
       struct regcache *regcache = get_thread_regcache (ptid);
       struct gdbarch *gdbarch = get_regcache_arch (regcache);

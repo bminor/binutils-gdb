@@ -44,8 +44,8 @@ gdb_exit
 gdb_start
 
 # This will need to be updated as the exact list of signals changes,
-# but I want to test that TARGET_SIGNAL_0, TARGET_SIGNAL_DEFAULT, and
-# TARGET_SIGNAL_UNKNOWN are skipped.
+# but I want to test that GDB_SIGNAL_0, GDB_SIGNAL_DEFAULT, and
+# GDB_SIGNAL_UNKNOWN are skipped.
 
 proc test_handle_all_print {} {
     global timeout

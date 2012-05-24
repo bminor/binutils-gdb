@@ -388,13 +388,13 @@ sim_stop_reason(sd, reason, sigrc)
     switch (simstat) {
 	case CTRL_C:
 	*reason = sim_stopped;
-	*sigrc = TARGET_SIGNAL_INT;
+	*sigrc = GDB_SIGNAL_INT;
 	break;
     case OK:
     case TIME_OUT:
     case BPT_HIT:
 	*reason = sim_stopped;
-	*sigrc = TARGET_SIGNAL_TRAP;
+	*sigrc = GDB_SIGNAL_TRAP;
 	break;
     case ERROR:
 	*sigrc = 0;

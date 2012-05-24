@@ -154,12 +154,12 @@ ia64_hpux_wait (struct target_ops *ops, ptid_t ptid,
      process it, and then resume the execution as if the event did
      not happen.  */
   if (ourstatus->kind == TARGET_WAITKIND_STOPPED
-      && ourstatus->value.sig == TARGET_SIGNAL_TRAP
+      && ourstatus->value.sig == GDB_SIGNAL_TRAP
       && ia64_hpux_at_dld_breakpoint_p (new_ptid))
     {
       ia64_hpux_handle_dld_breakpoint (new_ptid);
 
-      target_resume (new_ptid, 0, TARGET_SIGNAL_0);
+      target_resume (new_ptid, 0, GDB_SIGNAL_0);
       ourstatus->kind = TARGET_WAITKIND_IGNORE;
     }
 

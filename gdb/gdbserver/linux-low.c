@@ -1062,7 +1062,7 @@ linux_kill (int pid)
 static int
 get_detach_signal (struct thread_info *thread)
 {
-  enum gdb_signal signo = TARGET_SIGNAL_0;
+  enum gdb_signal signo = GDB_SIGNAL_0;
   int status;
   struct lwp_info *lp = get_thread_lwp (thread);
 
@@ -1074,7 +1074,7 @@ get_detach_signal (struct thread_info *thread)
 	 cleanly, then it'll have stopped with SIGSTOP.  But we don't
 	 want to deliver that SIGSTOP.  */
       if (thread->last_status.kind != TARGET_WAITKIND_STOPPED
-	  || thread->last_status.value.sig == TARGET_SIGNAL_0)
+	  || thread->last_status.value.sig == GDB_SIGNAL_0)
 	return 0;
 
       /* Otherwise, we may need to deliver the signal we
@@ -1117,7 +1117,7 @@ get_detach_signal (struct thread_info *thread)
 	   /* If we have no way to know which signals GDB does not
 	      want to have passed to the program, assume
 	      SIGTRAP/SIGINT, which is GDB's default.  */
-	   && (signo == TARGET_SIGNAL_TRAP || signo == TARGET_SIGNAL_INT))
+	   && (signo == GDB_SIGNAL_TRAP || signo == GDB_SIGNAL_INT))
     {
       if (debug_threads)
 	fprintf (stderr,
@@ -2262,7 +2262,7 @@ linux_stabilize_threads (void)
 	  /* Lock it.  */
 	  lwp->suspended++;
 
-	  if (ourstatus.value.sig != TARGET_SIGNAL_0
+	  if (ourstatus.value.sig != GDB_SIGNAL_0
 	      || current_inferior->last_resume_kind == resume_stop)
 	    {
 	      wstat = W_STOPCODE (gdb_signal_to_host (ourstatus.value.sig));
@@ -2558,7 +2558,7 @@ Check if we're already there.\n",
 	      if (stabilizing_threads)
 		{
 		  ourstatus->kind = TARGET_WAITKIND_STOPPED;
-		  ourstatus->value.sig = TARGET_SIGNAL_0;
+		  ourstatus->value.sig = GDB_SIGNAL_0;
 		  return ptid_of (event_child);
 		}
 	    }
@@ -2731,7 +2731,7 @@ Check if we're already there.\n",
       /* A thread that has been requested to stop by GDB with vCont;t,
 	 and it stopped cleanly, so report as SIG0.  The use of
 	 SIGSTOP is an implementation detail.  */
-      ourstatus->value.sig = TARGET_SIGNAL_0;
+      ourstatus->value.sig = GDB_SIGNAL_0;
     }
   else if (current_inferior->last_resume_kind == resume_stop
 	   && WSTOPSIG (w) != SIGSTOP)

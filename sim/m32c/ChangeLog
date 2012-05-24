@@ -1,3 +1,9 @@
+2012-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/7205
+
+        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+
 2012-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 14072

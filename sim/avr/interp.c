@@ -870,7 +870,7 @@ sim_resume (SIM_DESC sd, int step, int signal)
   if (step)
     {
       cpu_exception = sim_stopped;
-      cpu_signal = TARGET_SIGNAL_TRAP;
+      cpu_signal = GDB_SIGNAL_TRAP;
     }
   else
     cpu_exception = sim_running;
@@ -1000,7 +1000,7 @@ sim_resume (SIM_DESC sd, int step, int signal)
 	case OP_break:
 	  /* Stop on this address.  */
 	  cpu_exception = sim_stopped;
-	  cpu_signal = TARGET_SIGNAL_TRAP;
+	  cpu_signal = GDB_SIGNAL_TRAP;
 	  pc = ipc;
 	  break;
 
@@ -1763,7 +1763,7 @@ int
 sim_stop (SIM_DESC sd)
 {
   cpu_exception = sim_stopped;
-  cpu_signal = TARGET_SIGNAL_INT;
+  cpu_signal = GDB_SIGNAL_INT;
   return 1;
 }
 

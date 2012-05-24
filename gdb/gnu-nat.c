@@ -1254,7 +1254,7 @@ inf_detach (struct inf *inf)
 	  if (inf->nomsg)
 	    inf_continue (inf);
 	  else
-	    inf_signal (inf, TARGET_SIGNAL_0);
+	    inf_signal (inf, GDB_SIGNAL_0);
 	}
 
       proc_restore_exc_port (task);
@@ -1574,7 +1574,7 @@ rewait:
 		     inf->pending_execs);
 	}
       else if (kind == TARGET_WAITKIND_STOPPED
-	       && w->status.value.sig == TARGET_SIGNAL_TRAP)
+	       && w->status.value.sig == GDB_SIGNAL_TRAP)
 	/* Ah hah!  A SIGTRAP from the inferior while starting up probably
 	   means we've succesfully completed an exec!  */
 	{
@@ -1694,7 +1694,7 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
       if (exception == EXC_BREAKPOINT)
 	/* GDB likes to get SIGTRAP for breakpoints.  */
 	{
-	  inf->wait.status.value.sig = TARGET_SIGNAL_TRAP;
+	  inf->wait.status.value.sig = GDB_SIGNAL_TRAP;
 	  mach_port_deallocate (mach_task_self (), reply_port);
 	}
       else
@@ -1750,7 +1750,7 @@ inf_task_died_status (struct inf *inf)
   warning (_("Pid %d died with unknown exit status, using SIGKILL."),
 	   inf->pid);
   inf->wait.status.kind = TARGET_WAITKIND_SIGNALLED;
-  inf->wait.status.value.sig = TARGET_SIGNAL_KILL;
+  inf->wait.status.value.sig = GDB_SIGNAL_KILL;
 }
 
 /* Notify server routines.  The only real one is dead name notification.  */
@@ -1918,7 +1918,7 @@ S_msg_sig_post_untraced_reply (mach_port_t reply, error_t err)
        server should like).  */
     {
       inf->wait.status.kind = TARGET_WAITKIND_STOPPED;
-      inf->wait.status.value.sig = TARGET_SIGNAL_0;
+      inf->wait.status.value.sig = GDB_SIGNAL_0;
     }
   else if (err)
     warning (_("Signal delivery failed: %s"), safe_strerror (err));
@@ -1986,9 +1986,9 @@ gnu_resume (struct target_ops *ops,
 
   inf_validate_procinfo (inf);
 
-  if (sig != TARGET_SIGNAL_0 || inf->stopped)
+  if (sig != GDB_SIGNAL_0 || inf->stopped)
     {
-      if (sig == TARGET_SIGNAL_0 && inf->nomsg)
+      if (sig == GDB_SIGNAL_0 && inf->nomsg)
 	inf_continue (inf);
       else
 	inf_signal (inf, sig);

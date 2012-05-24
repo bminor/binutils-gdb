@@ -922,8 +922,8 @@ extern void target_disconnect (char *, int);
 
 /* Resume execution of the target process PTID.  STEP says whether to
    single-step or to run free; SIGGNAL is the signal to be given to
-   the target, or TARGET_SIGNAL_0 for no signal.  The caller may not
-   pass TARGET_SIGNAL_DEFAULT.  */
+   the target, or GDB_SIGNAL_0 for no signal.  The caller may not
+   pass GDB_SIGNAL_DEFAULT.  */
 
 extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
 

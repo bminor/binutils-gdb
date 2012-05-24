@@ -481,7 +481,7 @@ retry:
      breakpoint events (Eg. new-thread events).  Handle those other types
      of events, and resume the execution if necessary.  */
   if (status->kind == TARGET_WAITKIND_STOPPED
-      && status->value.integer == TARGET_SIGNAL_TRAP)
+      && status->value.integer == GDB_SIGNAL_TRAP)
     {
       const int realsig = lynx_ptrace (PTRACE_GETTRACESIG, new_ptid, 0, 0, 0);
 

@@ -236,11 +236,11 @@ agent_run_command (int pid, const char *cmd, int len)
 
   resume_info.thread = ptid;
   resume_info.kind = resume_continue;
-  resume_info.sig = TARGET_SIGNAL_0;
+  resume_info.sig = GDB_SIGNAL_0;
   (*the_target->resume) (&resume_info, 1);
 }
 #else
- target_resume (ptid, 0, TARGET_SIGNAL_0);
+ target_resume (ptid, 0, GDB_SIGNAL_0);
 #endif
 
   fd = gdb_connect_sync_socket (pid);
@@ -283,7 +283,7 @@ agent_run_command (int pid, const char *cmd, int len)
 
 	resume_info.thread = ptid;
 	resume_info.kind = resume_stop;
-	resume_info.sig = TARGET_SIGNAL_0;
+	resume_info.sig = GDB_SIGNAL_0;
 	(*the_target->resume) (&resume_info, 1);
       }
 

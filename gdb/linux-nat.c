@@ -1706,7 +1706,7 @@ linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
 static int
 get_pending_status (struct lwp_info *lp, int *status)
 {
-  enum gdb_signal signo = TARGET_SIGNAL_0;
+  enum gdb_signal signo = GDB_SIGNAL_0;
 
   /* If we paused threads momentarily, we may have stored pending
      events in lp->status or lp->waitstatus (see stop_wait_callback),
@@ -1719,7 +1719,7 @@ get_pending_status (struct lwp_info *lp, int *status)
      stop_signal make sense as a real signal to pass to the inferior.
      Some catchpoint related events, like
      TARGET_WAITKIND_(V)FORK|EXEC|SYSCALL, have their stop_signal set
-     to TARGET_SIGNAL_SIGTRAP when the catchpoint triggers.  But,
+     to GDB_SIGNAL_SIGTRAP when the catchpoint triggers.  But,
      those traps are debug API (ptrace in our case) related and
      induced; the inferior wouldn't see them if it wasn't being
      traced.  Hence, we should never pass them to the inferior, even
@@ -1730,7 +1730,7 @@ get_pending_status (struct lwp_info *lp, int *status)
      this is really a corner case.  */
 
   if (lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
-    signo = TARGET_SIGNAL_0; /* a pending ptrace event, not a real signal.  */
+    signo = GDB_SIGNAL_0; /* a pending ptrace event, not a real signal.  */
   else if (lp->status)
     signo = gdb_signal_from_host (WSTOPSIG (lp->status));
   else if (non_stop && !is_executing (lp->ptid))
@@ -1756,7 +1756,7 @@ get_pending_status (struct lwp_info *lp, int *status)
 
   *status = 0;
 
-  if (signo == TARGET_SIGNAL_0)
+  if (signo == GDB_SIGNAL_0)
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -1926,7 +1926,7 @@ resume_lwp (struct lwp_info *lp, int step)
 	    linux_nat_prepare_to_resume (lp);
 	  linux_ops->to_resume (linux_ops,
 				pid_to_ptid (GET_LWP (lp->ptid)),
-				step, TARGET_SIGNAL_0);
+				step, GDB_SIGNAL_0);
 	  lp->stopped = 0;
 	  lp->step = step;
 	  memset (&lp->siginfo, 0, sizeof (lp->siginfo));
@@ -1985,7 +1985,7 @@ linux_nat_resume (struct target_ops *ops,
 			"LLR: Preparing to %s %s, %s, inferior_ptid %s\n",
 			step ? "step" : "resume",
 			target_pid_to_str (ptid),
-			(signo != TARGET_SIGNAL_0
+			(signo != GDB_SIGNAL_0
 			 ? strsignal (gdb_signal_to_host (signo)) : "0"),
 			target_pid_to_str (inferior_ptid));
 
@@ -2031,7 +2031,7 @@ linux_nat_resume (struct target_ops *ops,
 
 	  /* FIXME: What should we do if we are supposed to continue
 	     this thread with a signal?  */
-	  gdb_assert (signo == TARGET_SIGNAL_0);
+	  gdb_assert (signo == GDB_SIGNAL_0);
 	  signo = gdb_signal_from_host (WSTOPSIG (lp->status));
 	  lp->status = 0;
 	}
@@ -2041,7 +2041,7 @@ linux_nat_resume (struct target_ops *ops,
     {
       /* FIXME: What should we do if we are supposed to continue
 	 this thread with a signal?  */
-      gdb_assert (signo == TARGET_SIGNAL_0);
+      gdb_assert (signo == GDB_SIGNAL_0);
 
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -2079,7 +2079,7 @@ linux_nat_resume (struct target_ops *ops,
 			"LLR: %s %s, %s (resume event thread)\n",
 			step ? "PTRACE_SINGLESTEP" : "PTRACE_CONT",
 			target_pid_to_str (ptid),
-			(signo != TARGET_SIGNAL_0
+			(signo != GDB_SIGNAL_0
 			 ? strsignal (gdb_signal_to_host (signo)) : "0"));
 
   restore_child_signals_mask (&prev_mask);
@@ -2242,7 +2242,7 @@ linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
   if (linux_nat_prepare_to_resume != NULL)
     linux_nat_prepare_to_resume (lp);
   linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
-			lp->step, TARGET_SIGNAL_0);
+			lp->step, GDB_SIGNAL_0);
   return 1;
 }
 
@@ -2361,7 +2361,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 		 RT signal, it can only be queued once.  We need to be
 		 careful to not resume the LWP if we wanted it to
 		 stop.  In that case, we'll leave the SIGSTOP pending.
-		 It will later be reported as TARGET_SIGNAL_0.  */
+		 It will later be reported as GDB_SIGNAL_0.  */
 	      tp = find_thread_ptid (new_lp->ptid);
 	      if (tp != NULL && tp->stop_requested)
 		new_lp->last_resume_kind = resume_stop;
@@ -2431,7 +2431,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 		  if (linux_nat_prepare_to_resume != NULL)
 		    linux_nat_prepare_to_resume (new_lp);
 		  linux_ops->to_resume (linux_ops, pid_to_ptid (new_pid),
-					0, TARGET_SIGNAL_0);
+					0, GDB_SIGNAL_0);
 		  new_lp->stopped = 0;
 		}
 	    }
@@ -2442,7 +2442,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	  if (linux_nat_prepare_to_resume != NULL)
 	    linux_nat_prepare_to_resume (lp);
 	  linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
-				0, TARGET_SIGNAL_0);
+				0, GDB_SIGNAL_0);
 
 	  return 1;
 	}
@@ -3420,7 +3420,7 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
 	  if (linux_nat_prepare_to_resume != NULL)
 	    linux_nat_prepare_to_resume (lp);
 	  linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
-			    lp->step, TARGET_SIGNAL_0);
+			    lp->step, GDB_SIGNAL_0);
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"LLW: %s %s, 0, 0 (discard SIGSTOP)\n",
@@ -3453,7 +3453,7 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
       if (linux_nat_prepare_to_resume != NULL)
 	linux_nat_prepare_to_resume (lp);
       linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
-			    lp->step, TARGET_SIGNAL_0);
+			    lp->step, GDB_SIGNAL_0);
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LLW: %s %s, 0, 0 (discard SIGINT)\n",
@@ -3629,7 +3629,7 @@ retry:
       if (linux_nat_prepare_to_resume != NULL)
 	linux_nat_prepare_to_resume (lp);
       linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
-			    lp->step, TARGET_SIGNAL_0);
+			    lp->step, GDB_SIGNAL_0);
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LLW: %s %s, 0, 0 (expect SIGSTOP)\n",
@@ -3887,7 +3887,7 @@ retry:
 				lp->step ?
 				"PTRACE_SINGLESTEP" : "PTRACE_CONT",
 				target_pid_to_str (lp->ptid),
-				(signo != TARGET_SIGNAL_0
+				(signo != GDB_SIGNAL_0
 				 ? strsignal (gdb_signal_to_host (signo))
 				 : "0"));
 	  lp->stopped = 0;
@@ -3899,7 +3899,7 @@ retry:
 	  /* Only do the below in all-stop, as we currently use SIGINT
 	     to implement target_stop (see linux_nat_stop) in
 	     non-stop.  */
-	  if (signo == TARGET_SIGNAL_INT && signal_pass_state (signo) == 0)
+	  if (signo == GDB_SIGNAL_INT && signal_pass_state (signo) == 0)
 	    {
 	      /* If ^C/BREAK is typed at the tty/console, SIGINT gets
 		 forwarded to the entire process group, that is, all LWPs
@@ -3988,7 +3988,7 @@ retry:
       /* A thread that has been requested to stop by GDB with
 	 target_stop, and it stopped cleanly, so report as SIG0.  The
 	 use of SIGSTOP is an implementation detail.  */
-      ourstatus->value.sig = TARGET_SIGNAL_0;
+      ourstatus->value.sig = GDB_SIGNAL_0;
     }
 
   if (ourstatus->kind == TARGET_WAITKIND_EXITED
@@ -4038,7 +4038,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
       if (linux_nat_prepare_to_resume != NULL)
 	linux_nat_prepare_to_resume (lp);
       linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
-			    lp->step, TARGET_SIGNAL_0);
+			    lp->step, GDB_SIGNAL_0);
       lp->stopped = 0;
       memset (&lp->siginfo, 0, sizeof (lp->siginfo));
       lp->stopped_by_watchpoint = 0;
@@ -4777,7 +4777,7 @@ cleanup_target_stop (void *arg)
   gdb_assert (arg != NULL);
 
   /* Unpause all */
-  target_resume (*ptid, 0, TARGET_SIGNAL_0);
+  target_resume (*ptid, 0, GDB_SIGNAL_0);
 }
 
 static VEC(static_tracepoint_marker_p) *
@@ -5082,7 +5082,7 @@ linux_nat_async (void (*callback) (enum inferior_event_type event_type,
   return;
 }
 
-/* Stop an LWP, and push a TARGET_SIGNAL_0 stop status if no other
+/* Stop an LWP, and push a GDB_SIGNAL_0 stop status if no other
    event came out.  */
 
 static int

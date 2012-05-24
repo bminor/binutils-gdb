@@ -84,8 +84,8 @@ emit_stop_event (struct bpstats *bs, enum gdb_signal stop_signal)
     }
 
   /* Check if the signal is "Signal 0" or "Trace/breakpoint trap".  */
-  if (stop_signal != TARGET_SIGNAL_0
-      && stop_signal != TARGET_SIGNAL_TRAP)
+  if (stop_signal != GDB_SIGNAL_0
+      && stop_signal != GDB_SIGNAL_TRAP)
     {
       stop_event_obj =
 	  create_signal_event_object (stop_signal);

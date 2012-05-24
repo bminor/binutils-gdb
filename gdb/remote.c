@@ -4616,11 +4616,11 @@ append_resumption (char *p, char *endp,
 {
   struct remote_state *rs = get_remote_state ();
 
-  if (step && siggnal != TARGET_SIGNAL_0)
+  if (step && siggnal != GDB_SIGNAL_0)
     p += xsnprintf (p, endp - p, ";S%02x", siggnal);
   else if (step)
     p += xsnprintf (p, endp - p, ";s");
-  else if (siggnal != TARGET_SIGNAL_0)
+  else if (siggnal != GDB_SIGNAL_0)
     p += xsnprintf (p, endp - p, ";C%02x", siggnal);
   else
     p += xsnprintf (p, endp - p, ";c");
@@ -4690,14 +4690,14 @@ remote_vcont_resume (ptid_t ptid, int step, enum gdb_signal siggnal)
 	 process), with preference for INFERIOR_PTID.  This assumes
 	 inferior_ptid belongs to the set of all threads we are about
 	 to resume.  */
-      if (step || siggnal != TARGET_SIGNAL_0)
+      if (step || siggnal != GDB_SIGNAL_0)
 	{
 	  /* Step inferior_ptid, with or without signal.  */
 	  p = append_resumption (p, endp, inferior_ptid, step, siggnal);
 	}
 
       /* And continue others without a signal.  */
-      append_resumption (p, endp, ptid, /*step=*/ 0, TARGET_SIGNAL_0);
+      append_resumption (p, endp, ptid, /*step=*/ 0, GDB_SIGNAL_0);
     }
   else
     {
@@ -4723,7 +4723,7 @@ remote_vcont_resume (ptid_t ptid, int step, enum gdb_signal siggnal)
 
 /* Tell the remote machine to resume.  */
 
-static enum gdb_signal last_sent_signal = TARGET_SIGNAL_0;
+static enum gdb_signal last_sent_signal = GDB_SIGNAL_0;
 
 static int last_sent_step;
 
@@ -4754,7 +4754,7 @@ remote_resume (struct target_ops *ops,
   if (execution_direction == EXEC_REVERSE)
     {
       /* We don't pass signals to the target in reverse exec mode.  */
-      if (info_verbose && siggnal != TARGET_SIGNAL_0)
+      if (info_verbose && siggnal != GDB_SIGNAL_0)
 	warning (_(" - Can't pass signal %d to target in reverse: ignored."),
 		 siggnal);
 
@@ -4767,7 +4767,7 @@ remote_resume (struct target_ops *ops,
 
       strcpy (buf, step ? "bs" : "bc");
     }
-  else if (siggnal != TARGET_SIGNAL_0)
+  else if (siggnal != GDB_SIGNAL_0)
     {
       buf[0] = step ? 'S' : 'C';
       buf[1] = tohex (((int) siggnal >> 4) & 0xf);
@@ -5703,7 +5703,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	 not?  Not is more likely, so report a stop.  */
       warning (_("Remote failure reply: %s"), buf);
       status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.sig = TARGET_SIGNAL_0;
+      status->value.sig = GDB_SIGNAL_0;
       break;
     case 'F':		/* File-I/O request.  */
       remote_fileio_request (buf, rs->ctrlc_pending_p);
@@ -5729,7 +5729,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 
       break;
     case '\0':
-      if (last_sent_signal != TARGET_SIGNAL_0)
+      if (last_sent_signal != GDB_SIGNAL_0)
 	{
 	  /* Zero length reply means that we tried 'S' or 'C' and the
 	     remote system doesn't support it.  */
@@ -5737,7 +5737,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	  printf_filtered
 	    ("Can't send signals to this remote system.  %s not sent.\n",
 	     gdb_signal_to_name (last_sent_signal));
-	  last_sent_signal = TARGET_SIGNAL_0;
+	  last_sent_signal = GDB_SIGNAL_0;
 	  target_terminal_inferior ();
 
 	  strcpy ((char *) buf, last_sent_step ? "s" : "c");

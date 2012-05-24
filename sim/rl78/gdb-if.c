@@ -371,30 +371,30 @@ rl78_signal_to_target (int sig)
   switch (sig)
     {
     case 4:
-      return TARGET_SIGNAL_ILL;
+      return GDB_SIGNAL_ILL;
 
     case 5:
-      return TARGET_SIGNAL_TRAP;
+      return GDB_SIGNAL_TRAP;
 
     case 10:
-      return TARGET_SIGNAL_BUS;
+      return GDB_SIGNAL_BUS;
 
     case 11:
-      return TARGET_SIGNAL_SEGV;
+      return GDB_SIGNAL_SEGV;
 
     case 24:
-      return TARGET_SIGNAL_XCPU;
+      return GDB_SIGNAL_XCPU;
       break;
 
     case 2:
-      return TARGET_SIGNAL_INT;
+      return GDB_SIGNAL_INT;
 
     case 8:
-      return TARGET_SIGNAL_FPE;
+      return GDB_SIGNAL_FPE;
       break;
 
     case 6:
-      return TARGET_SIGNAL_ABRT;
+      return GDB_SIGNAL_ABRT;
     }
 
   return 0;
@@ -410,7 +410,7 @@ handle_step (int rc)
   if (RL78_STEPPED (rc) || RL78_HIT_BREAK (rc))
     {
       reason = sim_stopped;
-      siggnal = TARGET_SIGNAL_TRAP;
+      siggnal = GDB_SIGNAL_TRAP;
     }
   else if (RL78_STOPPED (rc))
     {
@@ -452,7 +452,7 @@ sim_resume (SIM_DESC sd, int step, int sig_to_deliver)
 	{
 	  stop = 0;
 	  reason = sim_stopped;
-	  siggnal = TARGET_SIGNAL_INT;
+	  siggnal = GDB_SIGNAL_INT;
 	  break;
 	}
 
@@ -460,7 +460,7 @@ sim_resume (SIM_DESC sd, int step, int sig_to_deliver)
           && (hw_breakpoints[pc >> 3] & (1 << (pc & 0x7))))
 	{
 	  reason = sim_stopped;
-	  siggnal = TARGET_SIGNAL_TRAP;
+	  siggnal = GDB_SIGNAL_TRAP;
 	  break;
 	}
       rc = setjmp (decode_jmp_buf);

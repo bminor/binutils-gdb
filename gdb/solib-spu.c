@@ -88,7 +88,7 @@ spu_skip_standalone_loader (void)
 
       inferior_thread ()->control.in_infcall = 1; /* Suppress MI messages.  */
 
-      target_resume (inferior_ptid, 1, TARGET_SIGNAL_0);
+      target_resume (inferior_ptid, 1, GDB_SIGNAL_0);
       target_wait (minus_one_ptid, &ws, 0);
       set_executing (minus_one_ptid, 0);
 

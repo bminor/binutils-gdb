@@ -1448,7 +1448,7 @@ thread_db_wait (struct target_ops *ops,
     thread_db_find_new_threads_1 (ptid);
 
   if (ourstatus->kind == TARGET_WAITKIND_STOPPED
-      && ourstatus->value.sig == TARGET_SIGNAL_TRAP)
+      && ourstatus->value.sig == GDB_SIGNAL_TRAP)
     /* Check for a thread event.  */
     check_event (ptid);
 

@@ -465,7 +465,7 @@ spu_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
   if (!server_waiting)
     {
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = TARGET_SIGNAL_0;
+      ourstatus->value.sig = GDB_SIGNAL_0;
       return ptid_build (ret, ret, 0);
     }
 

@@ -342,13 +342,13 @@ osf_solib_create_inferior_hook (int from_tty)
   tp = inferior_thread ();
   clear_proceed_status ();
   inf->control.stop_soon = STOP_QUIETLY;
-  tp->suspend.stop_signal = TARGET_SIGNAL_0;
+  tp->suspend.stop_signal = GDB_SIGNAL_0;
   do
     {
       target_resume (minus_one_ptid, 0, tp->suspend.stop_signal);
       wait_for_inferior ();
     }
-  while (tp->suspend.stop_signal != TARGET_SIGNAL_TRAP);
+  while (tp->suspend.stop_signal != GDB_SIGNAL_TRAP);
 
   /*  solib_add will call reinit_frame_cache.
      But we are stopped in the runtime loader and we do not have symbols

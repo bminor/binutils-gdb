@@ -801,7 +801,7 @@ darwin_resume (ptid_t ptid, int step, enum gdb_signal signal)
     (2, _("darwin_resume: pid=%d, tid=0x%x, step=%d, signal=%d\n"),
      ptid_get_pid (ptid), ptid_get_tid (ptid), step, signal);
 
-  if (signal == TARGET_SIGNAL_0)
+  if (signal == GDB_SIGNAL_0)
     nsignal = 0;
   else
     nsignal = gdb_signal_to_host (signal);
@@ -933,12 +933,12 @@ darwin_decode_message (mach_msg_header_t *hdr,
 	  break;
 	case EXC_BREAKPOINT:
 	  /* Many internal GDB routines expect breakpoints to be reported
-	     as TARGET_SIGNAL_TRAP, and will report TARGET_EXC_BREAKPOINT
+	     as GDB_SIGNAL_TRAP, and will report TARGET_EXC_BREAKPOINT
 	     as a spurious signal.  */
-	  status->value.sig = TARGET_SIGNAL_TRAP;
+	  status->value.sig = GDB_SIGNAL_TRAP;
 	  break;
 	default:
-	  status->value.sig = TARGET_SIGNAL_UNKNOWN;
+	  status->value.sig = GDB_SIGNAL_UNKNOWN;
 	  break;
 	}
 
@@ -1052,7 +1052,7 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
       darwin_inf_fake_stop = NULL;
 
       status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.sig = TARGET_SIGNAL_TRAP;
+      status->value.sig = GDB_SIGNAL_TRAP;
       thread = VEC_index (darwin_thread_t, inf->private->threads, 0);
       thread->msg_state = DARWIN_STOPPED;
       return ptid_build (inf->pid, 0, thread->gdb_port);
@@ -1263,7 +1263,7 @@ darwin_stop_inferior (struct inferior *inf)
     {
       ptid = darwin_wait (inferior_ptid, &wstatus);
       if (wstatus.kind == TARGET_WAITKIND_STOPPED
-	  && wstatus.value.sig == TARGET_SIGNAL_STOP)
+	  && wstatus.value.sig == GDB_SIGNAL_STOP)
 	break;
     }
 }

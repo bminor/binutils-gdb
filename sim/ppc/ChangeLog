@@ -1,3 +1,9 @@
+2012-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/7205
+
+        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+
 2012-03-14  Michael Haubenwallner  <michael.haubenwallner@salomon.at>
 
 	* emul_unix.c (st_pad1, st_pad2, st_pad3): Undefine.

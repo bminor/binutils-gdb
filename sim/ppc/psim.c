@@ -592,7 +592,7 @@ cntrl_c_simulation(void *data)
   psim_halt(system,
 	    psim_nr_cpus(system),
 	    was_continuing,
-	    TARGET_SIGNAL_INT);
+	    GDB_SIGNAL_INT);
 }
 
 INLINE_PSIM\
