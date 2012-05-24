@@ -182,11 +182,6 @@ extern void cp_add_using_directive (const char *dest,
 				    VEC (const_char_ptr) *excludes,
                                     struct obstack *obstack);
 
-extern void cp_initialize_namespace (void);
-
-extern void cp_finalize_namespace (struct block *static_block,
-				   struct obstack *obstack);
-
 extern void cp_set_block_scope (const struct symbol *symbol,
 				struct block *block,
 				struct obstack *obstack,
