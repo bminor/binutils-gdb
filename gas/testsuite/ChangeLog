@@ -1,3 +1,8 @@
+2012-05-25  Alan Modra  <amodra@gmail.com>
+
+	* gas/lns/lns-big-delta.s: Add nops.
+	* gas/lns/lns-big-delta.d: Update.
+
 2012-05-19  Alan Modra  <amodra@gmail.com>
 
 	* gas/tic6x/unwind-1.d: Update for readelf changes.
