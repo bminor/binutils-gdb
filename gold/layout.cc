@@ -4569,12 +4569,15 @@ Layout::set_dynamic_symbol_size(const Symbol_table* symtab)
 // based on the GNU linker default ELF linker script.
 
 #define MAPPING_INIT(f, t) { f, sizeof(f) - 1, t, sizeof(t) - 1 }
+#define MAPPING_INIT_EXACT(f, t) { f, 0, t, sizeof(t) - 1 }
 const Layout::Section_name_mapping Layout::section_name_mapping[] =
 {
   MAPPING_INIT(".text.", ".text"),
   MAPPING_INIT(".rodata.", ".rodata"),
   MAPPING_INIT(".data.rel.ro.local.", ".data.rel.ro.local"),
+  MAPPING_INIT_EXACT(".data.rel.ro.local", ".data.rel.ro.local"),
   MAPPING_INIT(".data.rel.ro.", ".data.rel.ro"),
+  MAPPING_INIT_EXACT(".data.rel.ro", ".data.rel.ro"),
   MAPPING_INIT(".data.", ".data"),
   MAPPING_INIT(".bss.", ".bss"),
   MAPPING_INIT(".tdata.", ".tdata"),
@@ -4613,6 +4616,7 @@ const Layout::Section_name_mapping Layout::section_name_mapping[] =
   MAPPING_INIT(".gnu.linkonce.armexidx.", ".ARM.exidx"),
 };
 #undef MAPPING_INIT
+#undef MAPPING_INIT_EXACT
 
 const int Layout::section_name_mapping_count =
   (sizeof(Layout::section_name_mapping)
@@ -4664,10 +4668,21 @@ Layout::output_section_name(const Relobj* relobj, const char* name,
   const Section_name_mapping* psnm = section_name_mapping;
   for (int i = 0; i < section_name_mapping_count; ++i, ++psnm)
     {
-      if (strncmp(name, psnm->from, psnm->fromlen) == 0)
+      if (psnm->fromlen > 0)
 	{
-	  *plen = psnm->tolen;
-	  return psnm->to;
+	  if (strncmp(name, psnm->from, psnm->fromlen) == 0)
+	    {
+	      *plen = psnm->tolen;
+	      return psnm->to;
+	    }
+	}
+      else
+	{
+	  if (strcmp(name, psnm->from) == 0)
+	    {
+	      *plen = psnm->tolen;
+	      return psnm->to;
+	    }
 	}
     }
 

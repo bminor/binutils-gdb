@@ -1,5 +1,11 @@
 2012-05-23  Cary Coutant  <ccoutant@google.com>
 
+	* layout.cc (Layout::section_name_mapping): Add rules to handle
+	exact match on .data.rel.ro.local or .data.rel.ro.
+	(Layout::output_section_name): Check for exact matches.
+
+2012-05-23  Cary Coutant  <ccoutant@google.com>
+
 	* layout.cc (Layout::section_name_mapping): Match .data.rel.ro.*
 	more carefully.
 
