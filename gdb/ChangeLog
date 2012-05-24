@@ -1,3 +1,10 @@
+2012-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR tui/14159
+
+	* tui/tui-hooks.c (tui_query_hook): Pre-compute the question
+	string, instead of reusing the va_list argument.
+
 2012-05-24  Tom Tromey  <tromey@redhat.com>
 
 	* cp-support.h (cp_finalize_namespace, cp_initialize_namespace):
