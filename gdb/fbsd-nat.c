@@ -149,7 +149,7 @@ find_signalled_thread (struct thread_info *info, void *data)
   return 0;
 }
 
-static enum target_signal
+static enum gdb_signal
 find_stop_signal (void)
 {
   struct thread_info *info =

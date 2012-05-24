@@ -1935,9 +1935,9 @@ handle_v_cont (char *own_buf)
 	    goto err;
 	  p = q;
 
-	  if (!target_signal_to_host_p (sig))
+	  if (!gdb_signal_to_host_p (sig))
 	    goto err;
-	  resume_info[i].sig = target_signal_to_host (sig);
+	  resume_info[i].sig = gdb_signal_to_host (sig);
 	}
       else
 	{
@@ -3213,8 +3213,8 @@ process_serial_event (void)
     case 'C':
       require_running (own_buf);
       convert_ascii_to_int (own_buf + 1, &sig, 1);
-      if (target_signal_to_host_p (sig))
-	signal = target_signal_to_host (sig);
+      if (gdb_signal_to_host_p (sig))
+	signal = gdb_signal_to_host (sig);
       else
 	signal = 0;
       myresume (own_buf, 0, signal);
@@ -3222,8 +3222,8 @@ process_serial_event (void)
     case 'S':
       require_running (own_buf);
       convert_ascii_to_int (own_buf + 1, &sig, 1);
-      if (target_signal_to_host_p (sig))
-	signal = target_signal_to_host (sig);
+      if (gdb_signal_to_host_p (sig))
+	signal = gdb_signal_to_host (sig);
       else
 	signal = 0;
       myresume (own_buf, 1, signal);
@@ -3476,7 +3476,7 @@ handle_target_event (int err, gdb_client_data client_data)
 
 	      resume_info.thread = last_ptid;
 	      resume_info.kind = resume_continue;
-	      resume_info.sig = target_signal_to_host (last_status.value.sig);
+	      resume_info.sig = gdb_signal_to_host (last_status.value.sig);
 	      (*the_target->resume) (&resume_info, 1);
 	    }
 	  else if (debug_threads)

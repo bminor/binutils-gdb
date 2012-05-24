@@ -1,5 +1,11 @@
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/7205
+
+	Replace target_signal with gdb_signal throughout.
+
+2012-05-24  Pedro Alves  <palves@redhat.com>
+
 	PR tui/14159
 
 	* tui/tui-hooks.c (tui_query_hook): Pre-compute the question

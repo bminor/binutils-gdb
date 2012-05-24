@@ -342,7 +342,7 @@ inf_ptrace_stop (ptid_t ptid)
 
 static void
 inf_ptrace_resume (struct target_ops *ops,
-		   ptid_t ptid, int step, enum target_signal signal)
+		   ptid_t ptid, int step, enum gdb_signal signal)
 {
   pid_t pid = ptid_get_pid (ptid);
   int request;
@@ -371,7 +371,7 @@ inf_ptrace_resume (struct target_ops *ops,
      where it was.  If GDB wanted it to start some other way, we have
      already written a new program counter value to the child.  */
   errno = 0;
-  ptrace (request, pid, (PTRACE_TYPE_ARG3)1, target_signal_to_host (signal));
+  ptrace (request, pid, (PTRACE_TYPE_ARG3)1, gdb_signal_to_host (signal));
   if (errno != 0)
     perror_with_name (("ptrace"));
 }

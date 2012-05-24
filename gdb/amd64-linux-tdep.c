@@ -1231,7 +1231,7 @@ amd64_linux_syscall_record (struct regcache *regcache)
 static int
 amd64_linux_record_signal (struct gdbarch *gdbarch,
                            struct regcache *regcache,
-                           enum target_signal signal)
+                           enum gdb_signal signal)
 {
   ULONGEST rsp;
 

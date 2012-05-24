@@ -450,7 +450,7 @@ m32r_close (int quitting)
 
 static void
 m32r_resume (struct target_ops *ops,
-	     ptid_t ptid, int step, enum target_signal sig)
+	     ptid_t ptid, int step, enum gdb_signal sig)
 {
   unsigned long pc_addr, bp_addr, ab_addr;
   int ib_breakpoints;

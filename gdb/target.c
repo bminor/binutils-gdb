@@ -2670,7 +2670,7 @@ target_thread_name (struct thread_info *info)
 }
 
 void
-target_resume (ptid_t ptid, int step, enum target_signal signal)
+target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
   struct target_ops *t;
 
@@ -2685,7 +2685,7 @@ target_resume (ptid_t ptid, int step, enum target_signal signal)
 	    fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n",
 				PIDGET (ptid),
 				step ? "step" : "continue",
-				target_signal_to_name (signal));
+				gdb_signal_to_name (signal));
 
 	  registers_changed_ptid (ptid);
 	  set_executing (ptid, 1);
@@ -2717,7 +2717,7 @@ target_pass_signals (int numsigs, unsigned char *pass_signals)
 	      for (i = 0; i < numsigs; i++)
 		if (pass_signals[i])
 		  fprintf_unfiltered (gdb_stdlog, " %s",
-				      target_signal_to_name (i));
+				      gdb_signal_to_name (i));
 
 	      fprintf_unfiltered (gdb_stdlog, " })\n");
 	    }
@@ -2747,7 +2747,7 @@ target_program_signals (int numsigs, unsigned char *program_signals)
 	      for (i = 0; i < numsigs; i++)
 		if (program_signals[i])
 		  fprintf_unfiltered (gdb_stdlog, " %s",
-				      target_signal_to_name (i));
+				      gdb_signal_to_name (i));
 
 	      fprintf_unfiltered (gdb_stdlog, " })\n");
 	    }
@@ -3852,10 +3852,10 @@ target_waitstatus_to_string (const struct target_waitstatus *ws)
 			 kind_str, ws->value.integer);
     case TARGET_WAITKIND_STOPPED:
       return xstrprintf ("%sstopped, signal = %s",
-			 kind_str, target_signal_to_name (ws->value.sig));
+			 kind_str, gdb_signal_to_name (ws->value.sig));
     case TARGET_WAITKIND_SIGNALLED:
       return xstrprintf ("%ssignalled, signal = %s",
-			 kind_str, target_signal_to_name (ws->value.sig));
+			 kind_str, gdb_signal_to_name (ws->value.sig));
     case TARGET_WAITKIND_LOADED:
       return xstrprintf ("%sloaded", kind_str);
     case TARGET_WAITKIND_FORKED:

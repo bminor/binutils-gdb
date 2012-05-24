@@ -4612,7 +4612,7 @@ remote_vcont_probe (struct remote_state *rs)
 
 static char *
 append_resumption (char *p, char *endp,
-		   ptid_t ptid, int step, enum target_signal siggnal)
+		   ptid_t ptid, int step, enum gdb_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -4655,7 +4655,7 @@ append_resumption (char *p, char *endp,
    moment.  */
 
 static int
-remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
+remote_vcont_resume (ptid_t ptid, int step, enum gdb_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
   char *p;
@@ -4723,13 +4723,13 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
 
 /* Tell the remote machine to resume.  */
 
-static enum target_signal last_sent_signal = TARGET_SIGNAL_0;
+static enum gdb_signal last_sent_signal = TARGET_SIGNAL_0;
 
 static int last_sent_step;
 
 static void
 remote_resume (struct target_ops *ops,
-	       ptid_t ptid, int step, enum target_signal siggnal)
+	       ptid_t ptid, int step, enum gdb_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
   char *buf;
@@ -5384,7 +5384,7 @@ Packet: '%s'\n"),
       else
 	{
 	  event->ws.kind = TARGET_WAITKIND_STOPPED;
-	  event->ws.value.sig = (enum target_signal)
+	  event->ws.value.sig = (enum gdb_signal)
 	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
 	}
       break;
@@ -5410,7 +5410,7 @@ Packet: '%s'\n"),
 	  {
 	    /* The remote process exited with a signal.  */
 	    event->ws.kind = TARGET_WAITKIND_SIGNALLED;
-	    event->ws.value.sig = (enum target_signal) value;
+	    event->ws.value.sig = (enum gdb_signal) value;
 	  }
 
 	/* If no process is specified, assume inferior_ptid.  */
@@ -5736,7 +5736,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	  target_terminal_ours_for_output ();
 	  printf_filtered
 	    ("Can't send signals to this remote system.  %s not sent.\n",
-	     target_signal_to_name (last_sent_signal));
+	     gdb_signal_to_name (last_sent_signal));
 	  last_sent_signal = TARGET_SIGNAL_0;
 	  target_terminal_inferior ();
 

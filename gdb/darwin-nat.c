@@ -91,9 +91,9 @@ extern boolean_t exc_server (mach_msg_header_t *in, mach_msg_header_t *out);
 static void darwin_stop (ptid_t);
 
 static void darwin_resume_to (struct target_ops *ops, ptid_t ptid, int step,
-                              enum target_signal signal);
+                              enum gdb_signal signal);
 static void darwin_resume (ptid_t ptid, int step,
-			   enum target_signal signal);
+			   enum gdb_signal signal);
 
 static ptid_t darwin_wait_to (struct target_ops *ops, ptid_t ptid,
                               struct target_waitstatus *status, int options);
@@ -787,7 +787,7 @@ darwin_suspend_inferior_threads (struct inferior *inf)
 }
 
 static void
-darwin_resume (ptid_t ptid, int step, enum target_signal signal)
+darwin_resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
   struct target_waitstatus status;
   int pid;
@@ -804,7 +804,7 @@ darwin_resume (ptid_t ptid, int step, enum target_signal signal)
   if (signal == TARGET_SIGNAL_0)
     nsignal = 0;
   else
-    nsignal = target_signal_to_host (signal);
+    nsignal = gdb_signal_to_host (signal);
 
   /* Don't try to single step all threads.  */
   if (step)
@@ -853,7 +853,7 @@ darwin_resume (ptid_t ptid, int step, enum target_signal signal)
 
 static void
 darwin_resume_to (struct target_ops *ops, ptid_t ptid, int step,
-                  enum target_signal signal)
+                  enum gdb_signal signal)
 {
   return darwin_resume (ptid, step, signal);
 }
@@ -913,10 +913,10 @@ darwin_decode_message (mach_msg_header_t *hdr,
 	  if (thread->event.ex_data[0] == EXC_SOFT_SIGNAL)
 	    {
 	      status->value.sig =
-		target_signal_from_host (thread->event.ex_data[1]);
+		gdb_signal_from_host (thread->event.ex_data[1]);
 	      inferior_debug (5, _("  (signal %d: %s)\n"),
 			      thread->event.ex_data[1],
-			      target_signal_to_name (status->value.sig));
+			      gdb_signal_to_name (status->value.sig));
 
 	      /* If the thread is stopped because it has received a signal
 		 that gdb has just sent, continue.  */

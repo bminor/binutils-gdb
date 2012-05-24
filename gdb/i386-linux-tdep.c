@@ -462,7 +462,7 @@ i386_linux_intx80_sysenter_syscall_record (struct regcache *regcache)
 static int
 i386_linux_record_signal (struct gdbarch *gdbarch,
                           struct regcache *regcache,
-                          enum target_signal signal)
+                          enum gdb_signal signal)
 {
   ULONGEST esp;
 

@@ -376,9 +376,9 @@ nto_initialize_signals (void)
 {
   /* We use SIG45 for pulses, or something, so nostop, noprint
      and pass them.  */
-  signal_stop_update (target_signal_from_name ("SIG45"), 0);
-  signal_print_update (target_signal_from_name ("SIG45"), 0);
-  signal_pass_update (target_signal_from_name ("SIG45"), 1);
+  signal_stop_update (gdb_signal_from_name ("SIG45"), 0);
+  signal_print_update (gdb_signal_from_name ("SIG45"), 0);
+  signal_pass_update (gdb_signal_from_name ("SIG45"), 1);
 
   /* By default we don't want to stop on these two, but we do want to pass.  */
 #if defined(SIGSELECT)

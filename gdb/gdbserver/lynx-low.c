@@ -450,7 +450,7 @@ retry:
   if (WIFSTOPPED (wstat))
     {
       status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.integer = target_signal_from_host (WSTOPSIG (wstat));
+      status->value.integer = gdb_signal_from_host (WSTOPSIG (wstat));
       lynx_debug ("process stopped with signal: %d",
                   status->value.integer);
     }
@@ -463,7 +463,7 @@ retry:
   else if (WIFSIGNALED (wstat))
     {
       status->kind = TARGET_WAITKIND_SIGNALLED;
-      status->value.integer = target_signal_from_host (WTERMSIG (wstat));
+      status->value.integer = gdb_signal_from_host (WTERMSIG (wstat));
       lynx_debug ("process terminated with code: %d",
                   status->value.integer);
     }
@@ -473,7 +473,7 @@ retry:
 	 in fact get here.  But if we do, handle the event the best
 	 we can.  */
       status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.integer = target_signal_from_host (0);
+      status->value.integer = gdb_signal_from_host (0);
       lynx_debug ("unknown event ????");
     }
 

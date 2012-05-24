@@ -64,7 +64,7 @@ static void signals_info (char *, int);
 
 static void handle_command (char *, int);
 
-static void sig_print_info (enum target_signal);
+static void sig_print_info (enum gdb_signal);
 
 static void sig_print_header (void);
 
@@ -90,11 +90,11 @@ static int prepare_to_proceed (int);
 
 static void print_exited_reason (int exitstatus);
 
-static void print_signal_exited_reason (enum target_signal siggnal);
+static void print_signal_exited_reason (enum gdb_signal siggnal);
 
 static void print_no_history_reason (void);
 
-static void print_signal_received_reason (enum target_signal siggnal);
+static void print_signal_received_reason (enum gdb_signal siggnal);
 
 static void print_end_stepping_range_reason (void);
 
@@ -1433,7 +1433,7 @@ displaced_step_restore (struct displaced_step_inferior_state *displaced,
 }
 
 static void
-displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
+displaced_step_fixup (ptid_t event_ptid, enum gdb_signal signal)
 {
   struct cleanup *old_cleanups;
   struct displaced_step_inferior_state *displaced
@@ -1705,7 +1705,7 @@ user_visible_resume_ptid (int step)
    STEP nonzero if we should step (zero to continue instead).
    SIG is the signal to give the inferior (zero for none).  */
 void
-resume (int step, enum target_signal sig)
+resume (int step, enum gdb_signal sig)
 {
   int should_resume = 1;
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
@@ -2110,7 +2110,7 @@ prepare_to_proceed (int step)
    You should call clear_proceed_status before calling proceed.  */
 
 void
-proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
+proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
 {
   struct regcache *regcache;
   struct gdbarch *gdbarch;
@@ -3916,7 +3916,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	     if (new_singlestep_pc != singlestep_pc)
 	       {
-		 enum target_signal stop_signal;
+		 enum gdb_signal stop_signal;
 
 		 if (debug_infrun)
 		   fprintf_unfiltered (gdb_stdlog, "infrun: unexpected thread,"
@@ -5806,7 +5806,7 @@ print_end_stepping_range_reason (void)
 /* The inferior was terminated by a signal, print why it stopped.  */
 
 static void
-print_signal_exited_reason (enum target_signal siggnal)
+print_signal_exited_reason (enum gdb_signal siggnal)
 {
   struct ui_out *uiout = current_uiout;
 
@@ -5817,12 +5817,12 @@ print_signal_exited_reason (enum target_signal siggnal)
   ui_out_text (uiout, "\nProgram terminated with signal ");
   annotate_signal_name ();
   ui_out_field_string (uiout, "signal-name",
-		       target_signal_to_name (siggnal));
+		       gdb_signal_to_name (siggnal));
   annotate_signal_name_end ();
   ui_out_text (uiout, ", ");
   annotate_signal_string ();
   ui_out_field_string (uiout, "signal-meaning",
-		       target_signal_to_string (siggnal));
+		       gdb_signal_to_string (siggnal));
   annotate_signal_string_end ();
   ui_out_text (uiout, ".\n");
   ui_out_text (uiout, "The program no longer exists.\n");
@@ -5870,7 +5870,7 @@ print_exited_reason (int exitstatus)
    tells us to print about it.  */
 
 static void
-print_signal_received_reason (enum target_signal siggnal)
+print_signal_received_reason (enum gdb_signal siggnal)
 {
   struct ui_out *uiout = current_uiout;
 
@@ -5894,12 +5894,12 @@ print_signal_received_reason (enum target_signal siggnal)
 	ui_out_field_string
 	  (uiout, "reason", async_reason_lookup (EXEC_ASYNC_SIGNAL_RECEIVED));
       ui_out_field_string (uiout, "signal-name",
-			   target_signal_to_name (siggnal));
+			   gdb_signal_to_name (siggnal));
       annotate_signal_name_end ();
       ui_out_text (uiout, ", ");
       annotate_signal_string ();
       ui_out_field_string (uiout, "signal-meaning",
-			   target_signal_to_string (siggnal));
+			   gdb_signal_to_string (siggnal));
       annotate_signal_string_end ();
     }
   ui_out_text (uiout, ".\n");
@@ -6258,9 +6258,9 @@ sig_print_header (void)
 }
 
 static void
-sig_print_info (enum target_signal oursig)
+sig_print_info (enum gdb_signal oursig)
 {
-  const char *name = target_signal_to_name (oursig);
+  const char *name = gdb_signal_to_name (oursig);
   int name_padding = 13 - strlen (name);
 
   if (name_padding <= 0)
@@ -6271,7 +6271,7 @@ sig_print_info (enum target_signal oursig)
   printf_filtered ("%s\t", signal_stop[oursig] ? "Yes" : "No");
   printf_filtered ("%s\t", signal_print[oursig] ? "Yes" : "No");
   printf_filtered ("%s\t\t", signal_program[oursig] ? "Yes" : "No");
-  printf_filtered ("%s\n", target_signal_to_string (oursig));
+  printf_filtered ("%s\n", gdb_signal_to_string (oursig));
 }
 
 /* Specify how various signals in the inferior should be handled.  */
@@ -6282,7 +6282,7 @@ handle_command (char *args, int from_tty)
   char **argv;
   int digits, wordlen;
   int sigfirst, signum, siglast;
-  enum target_signal oursig;
+  enum gdb_signal oursig;
   int allsigs;
   int nsigs;
   unsigned char *sigs;
@@ -6369,11 +6369,11 @@ handle_command (char *args, int from_tty)
 	     SIGHUP, SIGINT, SIGALRM, etc. will work right anyway.  */
 
 	  sigfirst = siglast = (int)
-	    target_signal_from_command (atoi (*argv));
+	    gdb_signal_from_command (atoi (*argv));
 	  if ((*argv)[digits] == '-')
 	    {
 	      siglast = (int)
-		target_signal_from_command (atoi ((*argv) + digits + 1));
+		gdb_signal_from_command (atoi ((*argv) + digits + 1));
 	    }
 	  if (sigfirst > siglast)
 	    {
@@ -6385,7 +6385,7 @@ handle_command (char *args, int from_tty)
 	}
       else
 	{
-	  oursig = target_signal_from_name (*argv);
+	  oursig = gdb_signal_from_name (*argv);
 	  if (oursig != TARGET_SIGNAL_UNKNOWN)
 	    {
 	      sigfirst = siglast = (int) oursig;
@@ -6402,7 +6402,7 @@ handle_command (char *args, int from_tty)
 
       for (signum = sigfirst; signum >= 0 && signum <= siglast; signum++)
 	{
-	  switch ((enum target_signal) signum)
+	  switch ((enum gdb_signal) signum)
 	    {
 	    case TARGET_SIGNAL_TRAP:
 	    case TARGET_SIGNAL_INT:
@@ -6410,7 +6410,7 @@ handle_command (char *args, int from_tty)
 		{
 		  if (query (_("%s is used by the debugger.\n\
 Are you sure you want to change it? "),
-			     target_signal_to_name ((enum target_signal) signum)))
+			     gdb_signal_to_name ((enum gdb_signal) signum)))
 		    {
 		      sigs[signum] = 1;
 		    }
@@ -6480,9 +6480,9 @@ xdb_handle_command (char *args, int from_tty)
       if (argBuf)
 	{
 	  int validFlag = 1;
-	  enum target_signal oursig;
+	  enum gdb_signal oursig;
 
-	  oursig = target_signal_from_name (argv[0]);
+	  oursig = gdb_signal_from_name (argv[0]);
 	  memset (argBuf, 0, bufLen);
 	  if (strcmp (argv[1], "Q") == 0)
 	    sprintf (argBuf, "%s %s", argv[0], "noprint");
@@ -6523,11 +6523,11 @@ xdb_handle_command (char *args, int from_tty)
   do_cleanups (old_chain);
 }
 
-enum target_signal
-target_signal_from_command (int num)
+enum gdb_signal
+gdb_signal_from_command (int num)
 {
   if (num >= 1 && num <= 15)
-    return (enum target_signal) num;
+    return (enum gdb_signal) num;
   error (_("Only signals 1-15 are valid as numeric signals.\n\
 Use \"info signals\" for a list of symbolic signals."));
 }
@@ -6540,19 +6540,19 @@ Use \"info signals\" for a list of symbolic signals."));
 static void
 signals_info (char *signum_exp, int from_tty)
 {
-  enum target_signal oursig;
+  enum gdb_signal oursig;
 
   sig_print_header ();
 
   if (signum_exp)
     {
       /* First see if this is a symbol name.  */
-      oursig = target_signal_from_name (signum_exp);
+      oursig = gdb_signal_from_name (signum_exp);
       if (oursig == TARGET_SIGNAL_UNKNOWN)
 	{
 	  /* No, try numeric.  */
 	  oursig =
-	    target_signal_from_command (parse_and_eval_long (signum_exp));
+	    gdb_signal_from_command (parse_and_eval_long (signum_exp));
 	}
       sig_print_info (oursig);
       return;
@@ -6562,7 +6562,7 @@ signals_info (char *signum_exp, int from_tty)
   /* These ugly casts brought to you by the native VAX compiler.  */
   for (oursig = TARGET_SIGNAL_FIRST;
        (int) oursig < (int) TARGET_SIGNAL_LAST;
-       oursig = (enum target_signal) ((int) oursig + 1))
+       oursig = (enum gdb_signal) ((int) oursig + 1))
     {
       QUIT;
 

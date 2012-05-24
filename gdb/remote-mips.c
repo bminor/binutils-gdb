@@ -1756,7 +1756,7 @@ mips_detach (struct target_ops *ops, char *args, int from_tty)
 
 static void
 mips_resume (struct target_ops *ops,
-	     ptid_t ptid, int step, enum target_signal siggnal)
+	     ptid_t ptid, int step, enum gdb_signal siggnal)
 {
   int err;
 
@@ -1770,7 +1770,7 @@ mips_resume (struct target_ops *ops,
 /* Return the signal corresponding to SIG, where SIG is the number which
    the MIPS protocol uses for the signal.  */
 
-static enum target_signal
+static enum gdb_signal
 mips_signal_from_protocol (int sig)
 {
   /* We allow a few more signals than the IDT board actually returns, on
@@ -1780,11 +1780,11 @@ mips_signal_from_protocol (int sig)
       || sig > 31)
     return TARGET_SIGNAL_UNKNOWN;
 
-  /* Don't want to use target_signal_from_host because we are converting
+  /* Don't want to use gdb_signal_from_host because we are converting
      from MIPS signal numbers, not host ones.  Our internal numbers
      match the MIPS numbers for the signals the board can return, which
      are: SIGINT, SIGSEGV, SIGBUS, SIGILL, SIGFPE, SIGTRAP.  */
-  return (enum target_signal) sig;
+  return (enum gdb_signal) sig;
 }
 
 /* Set the register designated by REGNO to the value designated by VALUE.  */

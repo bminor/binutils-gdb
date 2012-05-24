@@ -431,7 +431,7 @@ startup_inferior (int ntraps)
 
   while (1)
     {
-      enum target_signal resume_signal = TARGET_SIGNAL_0;
+      enum gdb_signal resume_signal = TARGET_SIGNAL_0;
       ptid_t event_ptid;
 
       struct target_waitstatus ws;
@@ -458,8 +458,8 @@ startup_inferior (int ntraps)
 	    target_terminal_ours ();
 	    target_mourn_inferior ();
 	    error (_("During startup program terminated with signal %s, %s."),
-		   target_signal_to_name (ws.value.sig),
-		   target_signal_to_string (ws.value.sig));
+		   gdb_signal_to_name (ws.value.sig),
+		   gdb_signal_to_string (ws.value.sig));
 	    return;
 
 	  case TARGET_WAITKIND_EXITED:

@@ -904,11 +904,11 @@ inf_ttrace_resume_callback (struct thread_info *info, void *arg)
 
 static void
 inf_ttrace_resume (struct target_ops *ops,
-		   ptid_t ptid, int step, enum target_signal signal)
+		   ptid_t ptid, int step, enum gdb_signal signal)
 {
   int resume_all;
   ttreq_t request = step ? TT_LWP_SINGLE : TT_LWP_CONTINUE;
-  int sig = target_signal_to_host (signal);
+  int sig = gdb_signal_to_host (signal);
   struct thread_info *info;
 
   /* A specific PTID means `step only this process id'.  */
@@ -1126,7 +1126,7 @@ inf_ttrace_wait (struct target_ops *ops,
     case TTEVT_SIGNAL:
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
       ourstatus->value.sig =
-	target_signal_from_host (tts.tts_u.tts_signal.tts_signo);
+	gdb_signal_from_host (tts.tts_u.tts_signal.tts_signo);
       break;
 
     case TTEVT_SYSCALL_ENTRY:

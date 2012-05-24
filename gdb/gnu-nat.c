@@ -107,7 +107,7 @@ void inf_resume (struct inf *inf);
 void inf_set_step_thread (struct inf *inf, struct proc *proc);
 void inf_detach (struct inf *inf);
 void inf_attach (struct inf *inf, int pid);
-void inf_signal (struct inf *inf, enum target_signal sig);
+void inf_signal (struct inf *inf, enum gdb_signal sig);
 void inf_continue (struct inf *inf);
 
 #define inf_debug(_inf, msg, args...) \
@@ -1321,12 +1321,12 @@ inf_restore_exc_ports (struct inf *inf)
    signal 0, will continue it.  INF is assumed to be in a paused state, and
    the resume_sc's of INF's threads may be affected.  */
 void
-inf_signal (struct inf *inf, enum target_signal sig)
+inf_signal (struct inf *inf, enum gdb_signal sig)
 {
   error_t err = 0;
-  int host_sig = target_signal_to_host (sig);
+  int host_sig = gdb_signal_to_host (sig);
 
-#define NAME target_signal_to_name (sig)
+#define NAME gdb_signal_to_name (sig)
 
   if (host_sig >= _NSIG)
     /* A mach exception.  Exceptions are encoded in the signal space by
@@ -1728,7 +1728,7 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 	     them after _NSIG; this assumes they're positive (and not
 	     extremely large)!  */
 	  inf->wait.status.value.sig =
-	    target_signal_from_host (_NSIG + exception);
+	    gdb_signal_from_host (_NSIG + exception);
 	}
     }
   else
@@ -1975,7 +1975,7 @@ port_msgs_queued (mach_port_t port)
 
 static void
 gnu_resume (struct target_ops *ops,
-	    ptid_t ptid, int step, enum target_signal sig)
+	    ptid_t ptid, int step, enum gdb_signal sig)
 {
   struct proc *step_thread = 0;
   int resume_all;
@@ -2000,7 +2000,7 @@ gnu_resume (struct target_ops *ops,
       proc_abort (inf->wait.thread, 1);
       warning (_("Aborting %s with unforwarded exception %s."),
 	       proc_string (inf->wait.thread),
-	       target_signal_to_name (inf->wait.status.value.sig));
+	       gdb_signal_to_name (inf->wait.status.value.sig));
     }
 
   if (port_msgs_queued (inf->event_port))

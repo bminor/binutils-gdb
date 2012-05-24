@@ -74,7 +74,7 @@ static int attaching = 0;
 static HANDLE current_process_handle = NULL;
 static DWORD current_process_id = 0;
 static DWORD main_thread_id = 0;
-static enum target_signal last_sig = TARGET_SIGNAL_0;
+static enum gdb_signal last_sig = TARGET_SIGNAL_0;
 
 /* The current debug event from WaitForDebugEvent.  */
 static DEBUG_EVENT current_event;
@@ -806,7 +806,7 @@ static void
 win32_resume (struct thread_resume *resume_info, size_t n)
 {
   DWORD tid;
-  enum target_signal sig;
+  enum gdb_signal sig;
   int step;
   win32_thread_info *th;
   DWORD continue_status = DBG_CONTINUE;

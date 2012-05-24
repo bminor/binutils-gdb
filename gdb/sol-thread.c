@@ -345,7 +345,7 @@ sol_thread_detach (struct target_ops *ops, char *args, int from_tty)
 
 static void
 sol_thread_resume (struct target_ops *ops,
-		   ptid_t ptid, int step, enum target_signal signo)
+		   ptid_t ptid, int step, enum gdb_signal signo)
 {
   struct cleanup *old_chain;
   struct target_ops *beneath = find_target_beneath (ops);

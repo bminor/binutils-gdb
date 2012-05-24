@@ -397,7 +397,7 @@ bsd_uthread_wait (struct target_ops *ops,
 
 static void
 bsd_uthread_resume (struct target_ops *ops,
-		    ptid_t ptid, int step, enum target_signal sig)
+		    ptid_t ptid, int step, enum gdb_signal sig)
 {
   /* Pass the request to the layer beneath.  */
   struct target_ops *beneath = find_target_beneath (ops);

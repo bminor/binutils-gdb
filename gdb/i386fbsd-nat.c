@@ -36,7 +36,7 @@
 
 static void
 i386fbsd_resume (struct target_ops *ops,
-		 ptid_t ptid, int step, enum target_signal signal)
+		 ptid_t ptid, int step, enum gdb_signal signal)
 {
   pid_t pid = ptid_get_pid (ptid);
   int request = PT_STEP;
@@ -75,7 +75,7 @@ i386fbsd_resume (struct target_ops *ops,
      was.  (If GDB wanted it to start some other way, we have already
      written a new PC value to the child.)  */
   if (ptrace (request, pid, (caddr_t) 1,
-	      target_signal_to_host (signal)) == -1)
+	      gdb_signal_to_host (signal)) == -1)
     perror_with_name (("ptrace"));
 }
 

@@ -46,6 +46,6 @@ typedef enum {
 } SIM_SIGNAL;
 
 int sim_signal_to_host (SIM_DESC sd, SIM_SIGNAL);
-enum target_signal sim_signal_to_target (SIM_DESC sd, SIM_SIGNAL);
+enum gdb_signal sim_signal_to_target (SIM_DESC sd, SIM_SIGNAL);
 
 #endif /* SIM_SIGNAL_H */

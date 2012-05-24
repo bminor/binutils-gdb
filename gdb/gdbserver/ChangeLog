@@ -1,3 +1,9 @@
+2012-05-24  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/7205
+
+	Replace target_signal with gdb_signal throughout.
+
 2012-05-22  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* linux-low.c (linux_store_registers): Avoid the copying sequence

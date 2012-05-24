@@ -22,7 +22,7 @@
 static PyTypeObject signal_event_object_type;
 
 PyObject *
-create_signal_event_object (enum target_signal stop_signal)
+create_signal_event_object (enum gdb_signal stop_signal)
 {
   const char *signal_name;
   PyObject *signal_event_obj =
@@ -31,7 +31,7 @@ create_signal_event_object (enum target_signal stop_signal)
   if (!signal_event_obj)
     goto fail;
 
-  signal_name = target_signal_to_name (stop_signal);
+  signal_name = gdb_signal_to_name (stop_signal);
 
   if (evpy_add_attribute (signal_event_obj,
                           "stop_signal",

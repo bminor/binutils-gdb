@@ -118,7 +118,7 @@ struct sim_inferior_data {
   ptid_t remote_sim_ptid;
 
   /* Signal with which to resume.  */
-  enum target_signal resume_siggnal;
+  enum gdb_signal resume_siggnal;
 
   /* Flag which indicates whether resume should step or not.  */
   int resume_step;
@@ -838,7 +838,7 @@ gdbsim_detach (struct target_ops *ops, char *args, int from_tty)
 
 struct resume_data
 {
-  enum target_signal siggnal;
+  enum gdb_signal siggnal;
   int step;
 };
 
@@ -867,7 +867,7 @@ gdbsim_resume_inferior (struct inferior *inf, void *arg)
 
 static void
 gdbsim_resume (struct target_ops *ops,
-	       ptid_t ptid, int step, enum target_signal siggnal)
+	       ptid_t ptid, int step, enum gdb_signal siggnal)
 {
   struct resume_data rd;
   struct sim_inferior_data *sim_data

@@ -1101,9 +1101,9 @@ check_thread_signals (void)
 	{
 	  if (sigismember (&mask, i))
 	    {
-	      if (signal_stop_update (target_signal_from_host (i), 0))
+	      if (signal_stop_update (gdb_signal_from_host (i), 0))
 		sigaddset (&thread_stop_set, i);
-	      if (signal_print_update (target_signal_from_host (i), 0))
+	      if (signal_print_update (gdb_signal_from_host (i), 0))
 		sigaddset (&thread_print_set, i);
 	      thread_signals = 1;
 	    }
@@ -1828,7 +1828,7 @@ thread_db_get_ada_task_ptid (long lwp, long thread)
 
 static void
 thread_db_resume (struct target_ops *ops,
-		  ptid_t ptid, int step, enum target_signal signo)
+		  ptid_t ptid, int step, enum gdb_signal signo)
 {
   struct target_ops *beneath = find_target_beneath (ops);
   struct thread_db_info *info;

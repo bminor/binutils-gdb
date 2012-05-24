@@ -767,7 +767,7 @@ procfs_wait (struct target_ops *ops,
 	case _DEBUG_WHY_SIGNALLED:
 	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
 	  ourstatus->value.sig =
-	    target_signal_from_host (status.info.si_signo);
+	    gdb_signal_from_host (status.info.si_signo);
 	  exit_signo = 0;
 	  break;
 	case _DEBUG_WHY_FAULTED:
@@ -780,7 +780,7 @@ procfs_wait (struct target_ops *ops,
 	  else
 	    {
 	      ourstatus->value.sig =
-		target_signal_from_host (status.info.si_signo);
+		gdb_signal_from_host (status.info.si_signo);
 	      exit_signo = ourstatus->value.sig;
 	    }
 	  break;
@@ -952,7 +952,7 @@ procfs_remove_hw_breakpoint (struct gdbarch *gdbarch,
 
 static void
 procfs_resume (struct target_ops *ops,
-	       ptid_t ptid, int step, enum target_signal signo)
+	       ptid_t ptid, int step, enum gdb_signal signo)
 {
   int signal_to_pass;
   procfs_status status;
@@ -982,12 +982,12 @@ procfs_resume (struct target_ops *ops,
 
   run.flags |= _DEBUG_RUN_ARM;
 
-  signal_to_pass = target_signal_to_host (signo);
+  signal_to_pass = gdb_signal_to_host (signo);
 
   if (signal_to_pass)
     {
       devctl (ctl_fd, DCMD_PROC_STATUS, &status, sizeof (status), 0);
-      signal_to_pass = target_signal_to_host (signo);
+      signal_to_pass = gdb_signal_to_host (signo);
       if (status.why & (_DEBUG_WHY_SIGNALLED | _DEBUG_WHY_FAULTED))
 	{
 	  if (signal_to_pass != status.info.si_signo)
@@ -1340,7 +1340,7 @@ procfs_pass_signals (int numsigs, unsigned char *pass_signals)
 
   for (signo = 1; signo < NSIG; signo++)
     {
-      int target_signo = target_signal_from_host (signo);
+      int target_signo = gdb_signal_from_host (signo);
       if (target_signo < numsigs && pass_signals[target_signo])
         sigdelset (&run.trace, signo);
     }

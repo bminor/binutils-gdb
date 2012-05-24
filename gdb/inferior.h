@@ -36,7 +36,7 @@ struct terminal_info;
 /* For bpstat.  */
 #include "breakpoint.h"
 
-/* For enum target_signal.  */
+/* For enum gdb_signal.  */
 #include "target.h"
 
 /* For struct frame_id.  */
@@ -102,7 +102,7 @@ extern int sync_execution;
 
 extern void clear_proceed_status (void);
 
-extern void proceed (CORE_ADDR, enum target_signal, int);
+extern void proceed (CORE_ADDR, enum gdb_signal, int);
 
 extern int sched_multi;
 
@@ -159,7 +159,7 @@ extern void reopen_exec_file (void);
 /* The `resume' routine should only be called in special circumstances.
    Normally, use `proceed', which handles a lot of bookkeeping.  */
 
-extern void resume (int, enum target_signal);
+extern void resume (int, enum gdb_signal);
 
 extern ptid_t user_visible_resume_ptid (int step);
 
@@ -640,6 +640,6 @@ extern void update_signals_program_target (void);
    and allow 1-15 which should match host signal numbers on most
    systems.  Use of symbolic signal names is strongly encouraged.  */
 
-enum target_signal target_signal_from_command (int num);
+enum gdb_signal gdb_signal_from_command (int num);
 
 #endif /* !defined (INFERIOR_H) */

@@ -67,7 +67,7 @@
 
 #include "gdb_wchar.h"
 
-/* For ``enum target_signal''.  */
+/* For ``enum gdb_signal''.  */
 #include "gdb/signals.h"
 
 /* Just in case they're not defined in stdio.h.  */

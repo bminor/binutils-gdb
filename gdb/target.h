@@ -164,7 +164,7 @@ struct target_waitstatus
     union
       {
 	int integer;
-	enum target_signal sig;
+	enum gdb_signal sig;
 	ptid_t related_pid;
 	char *execd_pathname;
 	int syscall_number;
@@ -419,7 +419,7 @@ struct target_ops
     void (*to_post_attach) (int);
     void (*to_detach) (struct target_ops *ops, char *, int);
     void (*to_disconnect) (struct target_ops *, char *, int);
-    void (*to_resume) (struct target_ops *, ptid_t, int, enum target_signal);
+    void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal);
     ptid_t (*to_wait) (struct target_ops *,
 		       ptid_t, struct target_waitstatus *, int);
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, int);
@@ -925,7 +925,7 @@ extern void target_disconnect (char *, int);
    the target, or TARGET_SIGNAL_0 for no signal.  The caller may not
    pass TARGET_SIGNAL_DEFAULT.  */
 
-extern void target_resume (ptid_t ptid, int step, enum target_signal signal);
+extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
 
 /* Wait for process pid to do something.  PTID = -1 to wait for any
    pid to do something.  Return pid of child, or -1 in case of error;
@@ -1254,7 +1254,7 @@ void target_mourn_inferior (void);
 /* Set list of signals to be handled in the target.
 
    PASS_SIGNALS is an array of size NSIG, indexed by target signal number
-   (enum target_signal).  For every signal whose entry in this array is
+   (enum gdb_signal).  For every signal whose entry in this array is
    non-zero, the target is allowed -but not required- to skip reporting
    arrival of the signal to the GDB core by returning from target_wait,
    and to pass the signal directly to the inferior instead.
@@ -1269,7 +1269,7 @@ extern void target_pass_signals (int nsig, unsigned char *pass_signals);
    directly maps to the "handle SIGNAL pass/nopass" setting.
 
    PROGRAM_SIGNALS is an array of size NSIG, indexed by target signal
-   number (enum target_signal).  For every signal whose entry in this
+   number (enum gdb_signal).  For every signal whose entry in this
    array is non-zero, the target is allowed to pass the signal to the
    inferior.  Signals not present in the array shall be silently
    discarded.  This does not influence whether to pass signals to the

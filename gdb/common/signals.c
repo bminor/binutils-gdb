@@ -47,7 +47,7 @@ struct gdbarch;
 #endif
 
 /* This table must match in order and size the signals in enum
-   target_signal.  */
+   gdb_signal.  */
 
 static const struct {
   const char *name;
@@ -62,7 +62,7 @@ static const struct {
 
 /* Return the string for a signal.  */
 const char *
-target_signal_to_string (enum target_signal sig)
+gdb_signal_to_string (enum gdb_signal sig)
 {
   if ((int) sig >= TARGET_SIGNAL_FIRST && (int) sig <= TARGET_SIGNAL_LAST)
     return signals[sig].string;
@@ -72,7 +72,7 @@ target_signal_to_string (enum target_signal sig)
 
 /* Return the name for a signal.  */
 const char *
-target_signal_to_name (enum target_signal sig)
+gdb_signal_to_name (enum gdb_signal sig)
 {
   if ((int) sig >= TARGET_SIGNAL_FIRST && (int) sig <= TARGET_SIGNAL_LAST
       && signals[sig].name != NULL)
@@ -84,10 +84,10 @@ target_signal_to_name (enum target_signal sig)
 }
 
 /* Given a name, return its signal.  */
-enum target_signal
-target_signal_from_name (const char *name)
+enum gdb_signal
+gdb_signal_from_name (const char *name)
 {
-  enum target_signal sig;
+  enum gdb_signal sig;
 
   /* It's possible we also should allow "SIGCLD" as well as "SIGCHLD"
      for TARGET_SIGNAL_SIGCHLD.  SIGIOT, on the other hand, is more
@@ -97,7 +97,7 @@ target_signal_from_name (const char *name)
   /* This ugly cast brought to you by the native VAX compiler.  */
   for (sig = TARGET_SIGNAL_HUP;
        sig < TARGET_SIGNAL_LAST;
-       sig = (enum target_signal) ((int) sig + 1))
+       sig = (enum gdb_signal) ((int) sig + 1))
     if (signals[sig].name != NULL
 	&& strcmp (name, signals[sig].name) == 0)
       return sig;
@@ -109,8 +109,8 @@ target_signal_from_name (const char *name)
    a file called native-utils.c or unixwaitstatus-utils.c or whatever.  */
 
 /* Convert host signal to our signals.  */
-enum target_signal
-target_signal_from_host (int hostsig)
+enum gdb_signal
+gdb_signal_from_host (int hostsig)
 {
   /* A switch statement would make sense but would require special kludges
      to deal with the cases where more than one signal has the same number.  */
@@ -339,15 +339,15 @@ target_signal_from_host (int hostsig)
     {
       /* This block of TARGET_SIGNAL_REALTIME value is in order.  */
       if (33 <= hostsig && hostsig <= 63)
-	return (enum target_signal)
+	return (enum gdb_signal)
 	  (hostsig - 33 + (int) TARGET_SIGNAL_REALTIME_33);
       else if (hostsig == 32)
 	return TARGET_SIGNAL_REALTIME_32;
       else if (64 <= hostsig && hostsig <= 127)
-	return (enum target_signal)
+	return (enum gdb_signal)
 	  (hostsig - 64 + (int) TARGET_SIGNAL_REALTIME_64);
       else
-	error (_("GDB bug: target.c (target_signal_from_host): "
+	error (_("GDB bug: target.c (gdb_signal_from_host): "
 	       "unrecognized real-time signal"));
     }
 #endif
@@ -355,13 +355,13 @@ target_signal_from_host (int hostsig)
   return TARGET_SIGNAL_UNKNOWN;
 }
 
-/* Convert a OURSIG (an enum target_signal) to the form used by the
+/* Convert a OURSIG (an enum gdb_signal) to the form used by the
    target operating system (refered to as the ``host'') or zero if the
    equivalent host signal is not available.  Set/clear OURSIG_OK
    accordingly. */
 
 static int
-do_target_signal_to_host (enum target_signal oursig,
+do_gdb_signal_to_host (enum gdb_signal oursig,
 			  int *oursig_ok)
 {
   int retsig;
@@ -626,24 +626,24 @@ do_target_signal_to_host (enum target_signal oursig,
 }
 
 int
-target_signal_to_host_p (enum target_signal oursig)
+gdb_signal_to_host_p (enum gdb_signal oursig)
 {
   int oursig_ok;
-  do_target_signal_to_host (oursig, &oursig_ok);
+  do_gdb_signal_to_host (oursig, &oursig_ok);
   return oursig_ok;
 }
 
 int
-target_signal_to_host (enum target_signal oursig)
+gdb_signal_to_host (enum gdb_signal oursig)
 {
   int oursig_ok;
-  int targ_signo = do_target_signal_to_host (oursig, &oursig_ok);
+  int targ_signo = do_gdb_signal_to_host (oursig, &oursig_ok);
   if (!oursig_ok)
     {
       /* The user might be trying to do "signal SIGSAK" where this system
          doesn't have SIGSAK.  */
       warning (_("Signal %s does not exist on this system."),
-	       target_signal_to_name (oursig));
+	       gdb_signal_to_name (oursig));
       return 0;
     }
   else

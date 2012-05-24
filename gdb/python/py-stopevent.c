@@ -42,7 +42,7 @@ create_stop_event_object (PyTypeObject *py_type)
    returns -1.  */
 
 int
-emit_stop_event (struct bpstats *bs, enum target_signal stop_signal)
+emit_stop_event (struct bpstats *bs, enum gdb_signal stop_signal)
 {
   PyObject *stop_event_obj = NULL; /* Appease GCC warning.  */
   PyObject *list = NULL;

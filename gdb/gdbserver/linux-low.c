@@ -1062,7 +1062,7 @@ linux_kill (int pid)
 static int
 get_detach_signal (struct thread_info *thread)
 {
-  enum target_signal signo = TARGET_SIGNAL_0;
+  enum gdb_signal signo = TARGET_SIGNAL_0;
   int status;
   struct lwp_info *lp = get_thread_lwp (thread);
 
@@ -1102,7 +1102,7 @@ get_detach_signal (struct thread_info *thread)
       return 0;
     }
 
-  signo = target_signal_from_host (WSTOPSIG (status));
+  signo = gdb_signal_from_host (WSTOPSIG (status));
 
   if (program_signals_p && !program_signals[signo])
     {
@@ -1110,7 +1110,7 @@ get_detach_signal (struct thread_info *thread)
 	fprintf (stderr,
 		 "GPS: lwp %s had signal %s, but it is in nopass state\n",
 		 target_pid_to_str (ptid_of (lp)),
-		 target_signal_to_string (signo));
+		 gdb_signal_to_string (signo));
       return 0;
     }
   else if (!program_signals_p
@@ -1124,7 +1124,7 @@ get_detach_signal (struct thread_info *thread)
 		 "GPS: lwp %s had signal %s, "
 		 "but we don't know if we should pass it.  Default to not.\n",
 		 target_pid_to_str (ptid_of (lp)),
-		 target_signal_to_string (signo));
+		 gdb_signal_to_string (signo));
       return 0;
     }
   else
@@ -1133,7 +1133,7 @@ get_detach_signal (struct thread_info *thread)
 	fprintf (stderr,
 		 "GPS: lwp %s has pending signal %s: delivering it.\n",
 		 target_pid_to_str (ptid_of (lp)),
-		 target_signal_to_string (signo));
+		 gdb_signal_to_string (signo));
 
       return WSTOPSIG (status);
     }
@@ -2265,7 +2265,7 @@ linux_stabilize_threads (void)
 	  if (ourstatus.value.sig != TARGET_SIGNAL_0
 	      || current_inferior->last_resume_kind == resume_stop)
 	    {
-	      wstat = W_STOPCODE (target_signal_to_host (ourstatus.value.sig));
+	      wstat = W_STOPCODE (gdb_signal_to_host (ourstatus.value.sig));
 	      enqueue_one_deferred_signal (lwp, &wstat);
 	    }
 	}
@@ -2386,7 +2386,7 @@ retry:
 	  else
 	    {
 	      ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-	      ourstatus->value.sig = target_signal_from_host (WTERMSIG (w));
+	      ourstatus->value.sig = gdb_signal_from_host (WTERMSIG (w));
 
 	      if (debug_threads)
 		fprintf (stderr,
@@ -2585,7 +2585,7 @@ Check if we're already there.\n",
 	       || WSTOPSIG (w) == __SIGRTMIN + 1))
 	  ||
 #endif
-	  (pass_signals[target_signal_from_host (WSTOPSIG (w))]
+	  (pass_signals[gdb_signal_from_host (WSTOPSIG (w))]
 	   && !(WSTOPSIG (w) == SIGSTOP
 		&& current_inferior->last_resume_kind == resume_stop))))
     {
@@ -2738,11 +2738,11 @@ Check if we're already there.\n",
     {
       /* A thread that has been requested to stop by GDB with vCont;t,
 	 but, it stopped for other reasons.  */
-      ourstatus->value.sig = target_signal_from_host (WSTOPSIG (w));
+      ourstatus->value.sig = gdb_signal_from_host (WSTOPSIG (w));
     }
   else
     {
-      ourstatus->value.sig = target_signal_from_host (WSTOPSIG (w));
+      ourstatus->value.sig = gdb_signal_from_host (WSTOPSIG (w));
     }
 
   gdb_assert (ptid_equal (step_over_bkpt, null_ptid));

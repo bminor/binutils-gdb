@@ -935,16 +935,16 @@ extern void set_gdbarch_process_record (struct gdbarch *gdbarch, gdbarch_process
 
 extern int gdbarch_process_record_signal_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_process_record_signal_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, enum target_signal signal);
-extern int gdbarch_process_record_signal (struct gdbarch *gdbarch, struct regcache *regcache, enum target_signal signal);
+typedef int (gdbarch_process_record_signal_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, enum gdb_signal signal);
+extern int gdbarch_process_record_signal (struct gdbarch *gdbarch, struct regcache *regcache, enum gdb_signal signal);
 extern void set_gdbarch_process_record_signal (struct gdbarch *gdbarch, gdbarch_process_record_signal_ftype *process_record_signal);
 
 /* Signal translation: translate inferior's signal (host's) number into
    GDB's representation. */
 
-typedef enum target_signal (gdbarch_target_signal_from_host_ftype) (struct gdbarch *gdbarch, int signo);
-extern enum target_signal gdbarch_target_signal_from_host (struct gdbarch *gdbarch, int signo);
-extern void set_gdbarch_target_signal_from_host (struct gdbarch *gdbarch, gdbarch_target_signal_from_host_ftype *target_signal_from_host);
+typedef enum gdb_signal (gdbarch_gdb_signal_from_host_ftype) (struct gdbarch *gdbarch, int signo);
+extern enum gdb_signal gdbarch_gdb_signal_from_host (struct gdbarch *gdbarch, int signo);
+extern void set_gdbarch_gdb_signal_from_host (struct gdbarch *gdbarch, gdbarch_gdb_signal_from_host_ftype *gdb_signal_from_host);
 
 /* Extra signal info inspection.
   

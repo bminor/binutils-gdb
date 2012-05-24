@@ -87,8 +87,8 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 	     "\nChild exited with status %d\n", ourstatus->value.integer);
   else if (ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
     fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
-	     target_signal_to_host (ourstatus->value.sig),
-	     target_signal_to_name (ourstatus->value.sig));
+	     gdb_signal_to_host (ourstatus->value.sig),
+	     gdb_signal_to_name (ourstatus->value.sig));
 
   if (connected_wait)
     server_waiting = 0;
@@ -157,11 +157,11 @@ target_waitstatus_to_string (const struct target_waitstatus *ws)
       break;
     case TARGET_WAITKIND_STOPPED:
       sprintf (buf, "%sstopped, signal = %s",
-	       kind_str, target_signal_to_name (ws->value.sig));
+	       kind_str, gdb_signal_to_name (ws->value.sig));
       break;
     case TARGET_WAITKIND_SIGNALLED:
       sprintf (buf, "%ssignalled, signal = %s",
-	       kind_str, target_signal_to_name (ws->value.sig));
+	       kind_str, gdb_signal_to_name (ws->value.sig));
       break;
     case TARGET_WAITKIND_LOADED:
       sprintf (buf, "%sloaded", kind_str);

@@ -176,7 +176,7 @@ static CORE_ADDR cygwin_get_dr (int i);
 static unsigned long cygwin_get_dr6 (void);
 static unsigned long cygwin_get_dr7 (void);
 
-static enum target_signal last_sig = TARGET_SIGNAL_0;
+static enum gdb_signal last_sig = TARGET_SIGNAL_0;
 /* Set if a signal was received from the debugged process.  */
 
 /* Thread information structure used to track information that is
@@ -253,7 +253,7 @@ static segment_register_p_ftype *segment_register_p;
 struct xlate_exception
   {
     int them;
-    enum target_signal us;
+    enum gdb_signal us;
   };
 
 static const struct xlate_exception
@@ -966,7 +966,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	 to treat this like a real signal.  */
       char *p;
       int sig = strtol (s + sizeof (_CYGWIN_SIGNAL_STRING) - 1, &p, 0);
-      int gotasig = target_signal_from_host (sig);
+      int gotasig = gdb_signal_from_host (sig);
       ourstatus->value.sig = gotasig;
       if (gotasig)
 	{
@@ -1311,7 +1311,7 @@ fake_create_process (void)
 
 static void
 windows_resume (struct target_ops *ops,
-		ptid_t ptid, int step, enum target_signal sig)
+		ptid_t ptid, int step, enum gdb_signal sig)
 {
   thread_info *th;
   DWORD continue_status = DBG_CONTINUE;

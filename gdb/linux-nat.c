@@ -1093,7 +1093,7 @@ linux_nat_pass_signals (int numsigs, unsigned char *pass_signals)
 
   for (signo = 1; signo < NSIG; signo++)
     {
-      int target_signo = target_signal_from_host (signo);
+      int target_signo = gdb_signal_from_host (signo);
       if (target_signo < numsigs && pass_signals[target_signo])
         sigaddset (&pass_mask, signo);
     }
@@ -1670,16 +1670,16 @@ linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
 	}
       else if (WIFSIGNALED (status))
 	{
-	  enum target_signal signo;
+	  enum gdb_signal signo;
 
 	  target_terminal_ours ();
 	  target_mourn_inferior ();
 
-	  signo = target_signal_from_host (WTERMSIG (status));
+	  signo = gdb_signal_from_host (WTERMSIG (status));
 	  error (_("Unable to attach: program terminated with signal "
 		   "%s, %s."),
-		 target_signal_to_name (signo),
-		 target_signal_to_string (signo));
+		 gdb_signal_to_name (signo),
+		 gdb_signal_to_string (signo));
 	}
 
       internal_error (__FILE__, __LINE__,
@@ -1706,7 +1706,7 @@ linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
 static int
 get_pending_status (struct lwp_info *lp, int *status)
 {
-  enum target_signal signo = TARGET_SIGNAL_0;
+  enum gdb_signal signo = TARGET_SIGNAL_0;
 
   /* If we paused threads momentarily, we may have stored pending
      events in lp->status or lp->waitstatus (see stop_wait_callback),
@@ -1732,7 +1732,7 @@ get_pending_status (struct lwp_info *lp, int *status)
   if (lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
     signo = TARGET_SIGNAL_0; /* a pending ptrace event, not a real signal.  */
   else if (lp->status)
-    signo = target_signal_from_host (WSTOPSIG (lp->status));
+    signo = gdb_signal_from_host (WSTOPSIG (lp->status));
   else if (non_stop && !is_executing (lp->ptid))
     {
       struct thread_info *tp = find_thread_ptid (lp->ptid);
@@ -1770,17 +1770,17 @@ get_pending_status (struct lwp_info *lp, int *status)
 			    "GPT: lwp %s had signal %s, "
 			    "but it is in no pass state\n",
 			    target_pid_to_str (lp->ptid),
-			    target_signal_to_string (signo));
+			    gdb_signal_to_string (signo));
     }
   else
     {
-      *status = W_STOPCODE (target_signal_to_host (signo));
+      *status = W_STOPCODE (gdb_signal_to_host (signo));
 
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "GPT: lwp %s has pending signal %s\n",
 			    target_pid_to_str (lp->ptid),
-			    target_signal_to_string (signo));
+			    gdb_signal_to_string (signo));
     }
 
   return 0;
@@ -1974,7 +1974,7 @@ resume_set_callback (struct lwp_info *lp, void *data)
 
 static void
 linux_nat_resume (struct target_ops *ops,
-		  ptid_t ptid, int step, enum target_signal signo)
+		  ptid_t ptid, int step, enum gdb_signal signo)
 {
   sigset_t prev_mask;
   struct lwp_info *lp;
@@ -1986,7 +1986,7 @@ linux_nat_resume (struct target_ops *ops,
 			step ? "step" : "resume",
 			target_pid_to_str (ptid),
 			(signo != TARGET_SIGNAL_0
-			 ? strsignal (target_signal_to_host (signo)) : "0"),
+			 ? strsignal (gdb_signal_to_host (signo)) : "0"),
 			target_pid_to_str (inferior_ptid));
 
   block_child_signals (&prev_mask);
@@ -2032,7 +2032,7 @@ linux_nat_resume (struct target_ops *ops,
 	  /* FIXME: What should we do if we are supposed to continue
 	     this thread with a signal?  */
 	  gdb_assert (signo == TARGET_SIGNAL_0);
-	  signo = target_signal_from_host (WSTOPSIG (lp->status));
+	  signo = gdb_signal_from_host (WSTOPSIG (lp->status));
 	  lp->status = 0;
 	}
     }
@@ -2080,7 +2080,7 @@ linux_nat_resume (struct target_ops *ops,
 			step ? "PTRACE_SINGLESTEP" : "PTRACE_CONT",
 			target_pid_to_str (ptid),
 			(signo != TARGET_SIGNAL_0
-			 ? strsignal (target_signal_to_host (signo)) : "0"));
+			 ? strsignal (gdb_signal_to_host (signo)) : "0"));
 
   restore_child_signals_mask (&prev_mask);
   if (target_can_async_p ())
@@ -3864,7 +3864,7 @@ retry:
 
   if (WIFSTOPPED (status))
     {
-      enum target_signal signo = target_signal_from_host (WSTOPSIG (status));
+      enum gdb_signal signo = gdb_signal_from_host (WSTOPSIG (status));
 
       /* When using hardware single-step, we need to report every signal.
 	 Otherwise, signals in pass_mask may be short-circuited.  */
@@ -3888,7 +3888,7 @@ retry:
 				"PTRACE_SINGLESTEP" : "PTRACE_CONT",
 				target_pid_to_str (lp->ptid),
 				(signo != TARGET_SIGNAL_0
-				 ? strsignal (target_signal_to_host (signo))
+				 ? strsignal (gdb_signal_to_host (signo))
 				 : "0"));
 	  lp->stopped = 0;
 	  goto retry;
@@ -4446,7 +4446,7 @@ static char *
 linux_nat_collect_thread_registers (const struct regcache *regcache,
 				    ptid_t ptid, bfd *obfd,
 				    char *note_data, int *note_size,
-				    enum target_signal stop_signal)
+				    enum gdb_signal stop_signal)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct regset *regset;
@@ -4466,7 +4466,7 @@ linux_nat_collect_thread_registers (const struct regcache *regcache,
 
   note_data = (char *) elfcore_write_prstatus
 			 (obfd, note_data, note_size, ptid_get_lwp (ptid),
-			  target_signal_to_host (stop_signal), &gregs);
+			  gdb_signal_to_host (stop_signal), &gregs);
 
   if (core_regset_p
       && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",

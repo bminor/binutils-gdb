@@ -81,7 +81,7 @@ static void
 python_on_normal_stop (struct bpstats *bs, int print_frame)
 {
   struct cleanup *cleanup;
-  enum target_signal stop_signal;
+  enum gdb_signal stop_signal;
 
   if (!find_thread_ptid (inferior_ptid))
       return;

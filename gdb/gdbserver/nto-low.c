@@ -550,7 +550,7 @@ nto_wait (ptid_t ptid,
 	  TRACE ("  SIGNALLED\n");
 	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
 	  ourstatus->value.sig =
-	    target_signal_from_host (status.info.si_signo);
+	    gdb_signal_from_host (status.info.si_signo);
 	  nto_inferior.exit_signo = ourstatus->value.sig;
 	  break;
 	case _DEBUG_WHY_FAULTED:
@@ -564,7 +564,7 @@ nto_wait (ptid_t ptid,
 	  else
 	    {
 	      ourstatus->value.sig =
-		target_signal_from_host (status.info.si_signo);
+		gdb_signal_from_host (status.info.si_signo);
 	      nto_inferior.exit_signo = ourstatus->value.sig;
 	    }
 	  break;

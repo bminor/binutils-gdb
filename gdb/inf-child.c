@@ -53,12 +53,12 @@ store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
   else if (!WIFSTOPPED (hoststatus))
     {
       ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-      ourstatus->value.sig = target_signal_from_host (WTERMSIG (hoststatus));
+      ourstatus->value.sig = gdb_signal_from_host (WTERMSIG (hoststatus));
     }
   else
     {
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = target_signal_from_host (WSTOPSIG (hoststatus));
+      ourstatus->value.sig = gdb_signal_from_host (WSTOPSIG (hoststatus));
     }
 }
 

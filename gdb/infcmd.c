@@ -1198,7 +1198,7 @@ go_command (char *line_no, int from_tty)
 static void
 signal_command (char *signum_exp, int from_tty)
 {
-  enum target_signal oursig;
+  enum gdb_signal oursig;
   int async_exec = 0;
 
   dont_repeat ();		/* Too dangerous.  */
@@ -1230,7 +1230,7 @@ signal_command (char *signum_exp, int from_tty)
   /* It would be even slicker to make signal names be valid expressions,
      (the type could be "enum $signal" or some such), then the user could
      assign them to convenience variables.  */
-  oursig = target_signal_from_name (signum_exp);
+  oursig = gdb_signal_from_name (signum_exp);
 
   if (oursig == TARGET_SIGNAL_UNKNOWN)
     {
@@ -1240,7 +1240,7 @@ signal_command (char *signum_exp, int from_tty)
       if (num == 0)
 	oursig = TARGET_SIGNAL_0;
       else
-	oursig = target_signal_from_command (num);
+	oursig = gdb_signal_from_command (num);
     }
 
   if (from_tty)
@@ -1249,7 +1249,7 @@ signal_command (char *signum_exp, int from_tty)
 	printf_filtered (_("Continuing with no signal.\n"));
       else
 	printf_filtered (_("Continuing with signal %s.\n"),
-			 target_signal_to_name (oursig));
+			 gdb_signal_to_name (oursig));
     }
 
   clear_proceed_status ();
@@ -1831,8 +1831,8 @@ program_info (char *args, int from_tty)
   else if (tp->suspend.stop_signal != TARGET_SIGNAL_0)
     {
       printf_filtered (_("It stopped with signal %s, %s.\n"),
-		       target_signal_to_name (tp->suspend.stop_signal),
-		       target_signal_to_string (tp->suspend.stop_signal));
+		       gdb_signal_to_name (tp->suspend.stop_signal),
+		       gdb_signal_to_string (tp->suspend.stop_signal));
     }
 
   if (!from_tty)

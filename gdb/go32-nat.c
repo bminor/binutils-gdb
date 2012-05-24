@@ -238,7 +238,7 @@ static void go32_attach (struct target_ops *ops, char *args, int from_tty);
 static void go32_detach (struct target_ops *ops, char *args, int from_tty);
 static void go32_resume (struct target_ops *ops,
 			 ptid_t ptid, int step,
-			 enum target_signal siggnal);
+			 enum gdb_signal siggnal);
 static void go32_fetch_registers (struct target_ops *ops,
 				  struct regcache *, int regno);
 static void store_register (const struct regcache *, int regno);
@@ -309,7 +309,7 @@ regno_mapping[] =
 static struct
   {
     int go32_sig;
-    enum target_signal gdb_sig;
+    enum gdb_signal gdb_sig;
   }
 sig_map[] =
 {
@@ -343,7 +343,7 @@ sig_map[] =
 };
 
 static struct {
-  enum target_signal gdb_sig;
+  enum gdb_signal gdb_sig;
   int djgpp_excepno;
 } excepn_map[] = {
   {TARGET_SIGNAL_0, -1},
@@ -391,7 +391,7 @@ static int resume_signal = -1;
 
 static void
 go32_resume (struct target_ops *ops,
-	     ptid_t ptid, int step, enum target_signal siggnal)
+	     ptid_t ptid, int step, enum gdb_signal siggnal)
 {
   int i;
 
@@ -408,7 +408,7 @@ go32_resume (struct target_ops *ops,
       }
     if (resume_signal == -1)
       printf_unfiltered ("Cannot deliver signal %s on this platform.\n",
-			 target_signal_to_name (siggnal));
+			 gdb_signal_to_name (siggnal));
   }
 }
 

@@ -123,7 +123,7 @@ struct thread_control_state
 struct thread_suspend_state
 {
   /* Last signal that the inferior received (why it stopped).  */
-  enum target_signal stop_signal;
+  enum gdb_signal stop_signal;
 };
 
 struct thread_info
