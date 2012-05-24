@@ -1,5 +1,8 @@
 2012-05-23  Doug Evans  <dje@google.com>
 
+	* symtab.c (search_symbols): Formatting fixes.
+	(print_symbol_info): Formatting fixes.
+
 	* dwarf2-frame.c (execute_cfa_program): Update to handle long long ->
 	int64_t change to leb128 API.
 	(read_encoded_value, decode_frame_entry_1): Ditto.

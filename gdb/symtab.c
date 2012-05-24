@@ -3454,10 +3454,10 @@ search_symbols (char *regexp, enum search_domain kind,
       {
         QUIT;
 
-	if (MSYMBOL_TYPE (msymbol) == ourtype ||
-	    MSYMBOL_TYPE (msymbol) == ourtype2 ||
-	    MSYMBOL_TYPE (msymbol) == ourtype3 ||
-	    MSYMBOL_TYPE (msymbol) == ourtype4)
+	if (MSYMBOL_TYPE (msymbol) == ourtype
+	    || MSYMBOL_TYPE (msymbol) == ourtype2
+	    || MSYMBOL_TYPE (msymbol) == ourtype3
+	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
 	    if (!datum.preg_p
 		|| regexec (&datum.preg, SYMBOL_NATURAL_NAME (msymbol), 0,
@@ -3486,69 +3486,69 @@ search_symbols (char *regexp, enum search_domain kind,
   ALL_PRIMARY_SYMTABS (objfile, s)
   {
     bv = BLOCKVECTOR (s);
-      for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
-	{
-	  struct symbol_search *prevtail = tail;
-	  int nfound = 0;
+    for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
+      {
+	struct symbol_search *prevtail = tail;
+	int nfound = 0;
 
-	  b = BLOCKVECTOR_BLOCK (bv, i);
-	  ALL_BLOCK_SYMBOLS (b, iter, sym)
-	    {
-	      struct symtab *real_symtab = SYMBOL_SYMTAB (sym);
+	b = BLOCKVECTOR_BLOCK (bv, i);
+	ALL_BLOCK_SYMBOLS (b, iter, sym)
+	  {
+	    struct symtab *real_symtab = SYMBOL_SYMTAB (sym);
 
-	      QUIT;
+	    QUIT;
 
-	      if (file_matches (real_symtab->filename, files, nfiles)
-		  && ((!datum.preg_p
-		       || regexec (&datum.preg, SYMBOL_NATURAL_NAME (sym), 0,
-				   NULL, 0) == 0)
-		      && ((kind == VARIABLES_DOMAIN
-			   && SYMBOL_CLASS (sym) != LOC_TYPEDEF
-			   && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
-			   && SYMBOL_CLASS (sym) != LOC_BLOCK
-			   /* LOC_CONST can be used for more than just enums,
-			      e.g., c++ static const members.
-			      We only want to skip enums here.  */
-			   && !(SYMBOL_CLASS (sym) == LOC_CONST
-				&& TYPE_CODE (SYMBOL_TYPE (sym))
-				== TYPE_CODE_ENUM))
-			  || (kind == FUNCTIONS_DOMAIN 
-			      && SYMBOL_CLASS (sym) == LOC_BLOCK)
-			  || (kind == TYPES_DOMAIN
-			      && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
-		{
-		  /* match */
-		  psr = (struct symbol_search *)
-		    xmalloc (sizeof (struct symbol_search));
-		  psr->block = i;
-		  psr->symtab = real_symtab;
-		  psr->symbol = sym;
-		  psr->msymbol = NULL;
-		  psr->next = NULL;
-		  if (tail == NULL)
-		    sr = psr;
-		  else
-		    tail->next = psr;
-		  tail = psr;
-		  nfound ++;
-		}
-	    }
-	  if (nfound > 0)
-	    {
-	      if (prevtail == NULL)
-		{
-		  struct symbol_search dummy;
+	    if (file_matches (real_symtab->filename, files, nfiles)
+		&& ((!datum.preg_p
+		     || regexec (&datum.preg, SYMBOL_NATURAL_NAME (sym), 0,
+				 NULL, 0) == 0)
+		    && ((kind == VARIABLES_DOMAIN
+			 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
+			 && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
+			 && SYMBOL_CLASS (sym) != LOC_BLOCK
+			 /* LOC_CONST can be used for more than just enums,
+			    e.g., c++ static const members.
+			    We only want to skip enums here.  */
+			 && !(SYMBOL_CLASS (sym) == LOC_CONST
+			      && TYPE_CODE (SYMBOL_TYPE (sym))
+			      == TYPE_CODE_ENUM))
+			|| (kind == FUNCTIONS_DOMAIN 
+			    && SYMBOL_CLASS (sym) == LOC_BLOCK)
+			|| (kind == TYPES_DOMAIN
+			    && SYMBOL_CLASS (sym) == LOC_TYPEDEF))))
+	      {
+		/* match */
+		psr = (struct symbol_search *)
+		  xmalloc (sizeof (struct symbol_search));
+		psr->block = i;
+		psr->symtab = real_symtab;
+		psr->symbol = sym;
+		psr->msymbol = NULL;
+		psr->next = NULL;
+		if (tail == NULL)
+		  sr = psr;
+		else
+		  tail->next = psr;
+		tail = psr;
+		nfound ++;
+	      }
+	  }
+	if (nfound > 0)
+	  {
+	    if (prevtail == NULL)
+	      {
+		struct symbol_search dummy;
 
-		  dummy.next = sr;
-		  tail = sort_search_symbols (&dummy, nfound);
-		  sr = dummy.next;
+		dummy.next = sr;
+		tail = sort_search_symbols (&dummy, nfound);
+		sr = dummy.next;
 
-		  make_cleanup_free_search_symbols (sr);
-		}
-	      else
-		tail = sort_search_symbols (prevtail, nfound);
-	    }
-	}
+		make_cleanup_free_search_symbols (sr);
+	      }
+	    else
+	      tail = sort_search_symbols (prevtail, nfound);
+	  }
+      }
   }
 
   /* If there are no eyes, avoid all contact.  I mean, if there are
@@ -3560,10 +3560,10 @@ search_symbols (char *regexp, enum search_domain kind,
       {
         QUIT;
 
-	if (MSYMBOL_TYPE (msymbol) == ourtype ||
-	    MSYMBOL_TYPE (msymbol) == ourtype2 ||
-	    MSYMBOL_TYPE (msymbol) == ourtype3 ||
-	    MSYMBOL_TYPE (msymbol) == ourtype4)
+	if (MSYMBOL_TYPE (msymbol) == ourtype
+	    || MSYMBOL_TYPE (msymbol) == ourtype2
+	    || MSYMBOL_TYPE (msymbol) == ourtype3
+	    || MSYMBOL_TYPE (msymbol) == ourtype4)
 	  {
 	    if (!datum.preg_p
 		|| regexec (&datum.preg, SYMBOL_NATURAL_NAME (msymbol), 0,
@@ -3630,9 +3630,9 @@ print_symbol_info (enum search_domain kind,
       && SYMBOL_DOMAIN (sym) != STRUCT_DOMAIN)
     typedef_print (SYMBOL_TYPE (sym), sym, gdb_stdout);
   /* variable, func, or typedef-that-is-c++-class.  */
-  else if (kind < TYPES_DOMAIN ||
-	   (kind == TYPES_DOMAIN &&
-	    SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN))
+  else if (kind < TYPES_DOMAIN
+	   || (kind == TYPES_DOMAIN
+	       && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN))
     {
       type_print (SYMBOL_TYPE (sym),
 		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
