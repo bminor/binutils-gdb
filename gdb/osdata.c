@@ -288,7 +288,7 @@ get_osdata_column (struct osdata_item *item, const char *name)
   return NULL;
 }
 
-static void
+void
 info_osdata_command (char *type, int from_tty)
 {
   struct ui_out *uiout = current_uiout;

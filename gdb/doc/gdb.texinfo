@@ -32611,6 +32611,62 @@ and only if there is a corresponding executable file.
                         @{id="2",target-id="Thread 0xb7e14b90",cores=[2]@}]@},...]
 @end smallexample
 
+@subheading The @code{-info-os} Command
+@findex -info-os
+
+@subsubheading Synopsis
+
+@smallexample
+-info-os [ @var{type} ]
+@end smallexample
+
+If no argument is supplied, the command returns a table of available
+operating-system-specific information types.  If one of these types is
+supplied as an argument @var{type}, then the command returns a table
+of data of that type.
+
+The types of information available depend on the target operating
+system.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info os}.
+
+@subsubheading Example
+
+When run on a @sc{gnu}/Linux system, the output will look something
+like this:
+
+@smallexample
+@value{GDBP}
+-info-os
+^done,OSDataTable=@{nr_rows="9",nr_cols="2",
+hdr=[@{width="10",alignment="-1",col_name="col0",colhdr="Type"@},
+     @{width="10",alignment="-1",col_name="col1",colhdr="Description"@}],
+body=[item=@{col0="processes",col1="Listing of all processes"@},
+      item=@{col0="procgroups",col1="Listing of all process groups"@},
+      item=@{col0="threads",col1="Listing of all threads"@},
+      item=@{col0="files",col1="Listing of all file descriptors"@},
+      item=@{col0="sockets",col1="Listing of all internet-domain sockets"@},
+      item=@{col0="shm",col1="Listing of all shared-memory regions"@},
+      item=@{col0="semaphores",col1="Listing of all semaphores"@},
+      item=@{col0="msg",col1="Listing of all message queues"@},
+      item=@{col0="modules",col1="Listing of all loaded kernel modules"@}]@}
+@value{GDBP}
+-info-os processes
+^done,OSDataTable=@{nr_rows="190",nr_cols="4",
+hdr=[@{width="10",alignment="-1",col_name="col0",colhdr="pid"@},
+     @{width="10",alignment="-1",col_name="col1",colhdr="user"@},
+     @{width="10",alignment="-1",col_name="col2",colhdr="command"@},
+     @{width="10",alignment="-1",col_name="col3",colhdr="cores"@}],
+body=[item=@{col0="1",col1="root",col2="/sbin/init",col3="0"@},
+      item=@{col0="2",col1="root",col2="[kthreadd]",col3="1"@},
+      item=@{col0="3",col1="root",col2="[ksoftirqd/0]",col3="0"@},
+      ...
+      item=@{col0="26446",col1="stan",col2="bash",col3="0"@},
+      item=@{col0="28152",col1="stan",col2="bash",col3="1"@}]@}
+(gdb)
+@end smallexample
 
 @subheading The @code{-add-inferior} Command
 @findex -add-inferior

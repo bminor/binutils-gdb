@@ -1,3 +1,15 @@
+2012-05-23  Stan Shebs  <stan@codesourcery.com>
+	    Kwok Cheung Yeung  <kcy@codesourcery.com>
+
+	* Makefile.in (SUBDIR_MI_OBS): Add mi-cmd-info.o.
+	(SUBDIR_MI_SRCS): Add mi-cmd-info.c.
+	(mi-cmd-info.o): New rule.
+	* osdata.h (info_osdata_command): New declaration.
+	* osdata.c (info_osdata_command): Change to non-static.
+	* mi/mi-cmds.h (mi_cmd_info_os): New declaration.
+	* mi/mi-cmds.c (mi_cmds): Add -info-os MI command.
+	* mi/mi-cmd-info.c: New file.
+
 2012-05-23  Doug Evans  <dje@google.com>
 
 	* symtab.c (search_symbols): Pass NULL for file_matcher to

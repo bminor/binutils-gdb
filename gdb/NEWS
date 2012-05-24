@@ -117,6 +117,10 @@
 * GDB can now support 'breakpoint always-inserted mode' in 'record'
   target.
 
+* MI changes
+
+  ** New command -info-os is the MI equivalent of "info os".
+
 * New commands
 
   ** "catch load" and "catch unload" can be used to stop when a shared

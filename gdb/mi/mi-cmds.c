@@ -89,6 +89,7 @@ struct mi_cmd mi_cmds[] =
   { "gdb-version", { "show version", 0 }, 0 },
   { "inferior-tty-set", { NULL, 0 }, mi_cmd_inferior_tty_set},
   { "inferior-tty-show", { NULL, 0 }, mi_cmd_inferior_tty_show},
+  { "info-os", { NULL, 0 }, mi_cmd_info_os},
   { "interpreter-exec", { NULL, 0 }, mi_cmd_interpreter_exec},
   { "list-features", { NULL, 0 }, mi_cmd_list_features},
   { "list-target-features", { NULL, 0 }, mi_cmd_list_target_features},
