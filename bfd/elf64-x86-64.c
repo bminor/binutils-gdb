@@ -982,12 +982,11 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
       && htab->plt_eh_frame == NULL
       && htab->elf.splt != NULL)
     {
-      flagword flags = get_elf_backend_data (dynobj)->dynamic_sec_flags;
+      flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+			| SEC_HAS_CONTENTS | SEC_IN_MEMORY
+			| SEC_LINKER_CREATED);
       htab->plt_eh_frame
-	= bfd_make_section_anyway_with_flags (dynobj, ".eh_frame",
-					      (flags
-					       | SEC_LINKER_CREATED
-					       | SEC_READONLY));
+	= bfd_make_section_anyway_with_flags (dynobj, ".eh_frame", flags);
       if (htab->plt_eh_frame == NULL
 	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame, 3))
 	return FALSE;
