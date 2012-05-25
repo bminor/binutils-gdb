@@ -1,3 +1,8 @@
+2012-05-25  Sriraman Tallam  <tmsriram@google.com>
+
+	* symtab.cc (Symbol_table::define_special_symbol):
+	Initialize *poldsym to prevent uninitialized variable errors.
+
 2012-05-23  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (Layout::section_name_mapping): Add rules to handle

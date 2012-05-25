@@ -1682,6 +1682,7 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 				    bool* resolve_oldsym)
 {
   *resolve_oldsym = false;
+  *poldsym = NULL;
 
   // If the caller didn't give us a version, see if we get one from
   // the version script.
