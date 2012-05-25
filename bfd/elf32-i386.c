@@ -1027,12 +1027,6 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
       if (htab->plt_eh_frame == NULL
 	  || !bfd_set_section_alignment (dynobj, htab->plt_eh_frame, 2))
 	return FALSE;
-
-      htab->plt_eh_frame->size = sizeof (elf_i386_eh_frame_plt);
-      htab->plt_eh_frame->contents
-	= bfd_alloc (dynobj, htab->plt_eh_frame->size);
-      memcpy (htab->plt_eh_frame->contents, elf_i386_eh_frame_plt,
-	      sizeof (elf_i386_eh_frame_plt));
     }
 
   return TRUE;
@@ -2726,7 +2720,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 				  FALSE, FALSE, FALSE);
 
       /* Don't allocate .got.plt section if there are no GOT nor PLT
-         entries and there is no refeence to _GLOBAL_OFFSET_TABLE_.  */
+         entries and there is no reference to _GLOBAL_OFFSET_TABLE_.  */
       if ((got == NULL
 	   || !got->ref_regular_nonweak)
 	  && (htab->elf.sgotplt->size
@@ -2742,6 +2736,14 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	htab->elf.sgotplt->size = 0;
     }
 
+
+  if (htab->plt_eh_frame != NULL
+      && htab->elf.splt != NULL
+      && htab->elf.splt->size != 0
+      && !bfd_is_abs_section (htab->elf.splt->output_section)
+      && _bfd_elf_eh_frame_present (info))
+    htab->plt_eh_frame->size = sizeof (elf_i386_eh_frame_plt);
+
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
   relocs = FALSE;
@@ -2753,11 +2755,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	continue;
 
       if (s == htab->elf.splt
-	  || s == htab->elf.sgot
-	  || s == htab->elf.sgotplt
-	  || s == htab->elf.iplt
-	  || s == htab->elf.igotplt
-	  || s == htab->sdynbss)
+	  || s == htab->elf.sgot)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
@@ -2767,6 +2765,14 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 
 	  if (htab->elf.hplt != NULL)
 	    strip_section = FALSE;
+	}
+      else if (s == htab->elf.sgotplt
+	       || s == htab->elf.iplt
+	       || s == htab->elf.igotplt
+	       || s == htab->plt_eh_frame
+	       || s == htab->sdynbss)
+	{
+	  /* Strip these too.  */
 	}
       else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rel"))
 	{
@@ -2815,11 +2821,13 @@ elf_i386_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
     }
 
   if (htab->plt_eh_frame != NULL
-      && htab->elf.splt != NULL
-      && htab->elf.splt->size != 0
-      && (htab->elf.splt->flags & SEC_EXCLUDE) == 0)
-    bfd_put_32 (dynobj, htab->elf.splt->size,
-		htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
+      && htab->plt_eh_frame->contents != NULL)
+    {
+      memcpy (htab->plt_eh_frame->contents, elf_i386_eh_frame_plt,
+	      sizeof (elf_i386_eh_frame_plt));
+      bfd_put_32 (dynobj, htab->elf.splt->size,
+		  htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
+    }
 
   if (htab->elf.dynamic_sections_created)
     {
@@ -4840,7 +4848,8 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
     }
 
   /* Adjust .eh_frame for .plt section.  */
-  if (htab->plt_eh_frame != NULL)
+  if (htab->plt_eh_frame != NULL
+      && htab->plt_eh_frame->contents != NULL)
     {
       if (htab->elf.splt != NULL
 	  && htab->elf.splt->size != 0

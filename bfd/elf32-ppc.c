@@ -6244,7 +6244,8 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (htab->glink != NULL
       && htab->glink->size != 0
       && htab->glink_eh_frame != NULL
-      && !bfd_is_abs_section (htab->glink_eh_frame->output_section))
+      && !bfd_is_abs_section (htab->glink_eh_frame->output_section)
+      && _bfd_elf_eh_frame_present (info))
     {
       s = htab->glink_eh_frame;
       s->size = sizeof (glink_eh_frame_cie) + 20;

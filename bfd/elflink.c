@@ -5584,17 +5584,9 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       && ! (*bed->elf_backend_always_size_sections) (output_bfd, info))
     return FALSE;
 
-  if (! _bfd_elf_maybe_strip_eh_frame_hdr (info))
-    return FALSE;
-
   dynobj = elf_hash_table (info)->dynobj;
 
-  /* If there were no dynamic objects in the link, there is nothing to
-     do here.  */
-  if (dynobj == NULL)
-    return TRUE;
-
-  if (elf_hash_table (info)->dynamic_sections_created)
+  if (dynobj != NULL && elf_hash_table (info)->dynamic_sections_created)
     {
       struct elf_info_failed eif;
       struct elf_link_hash_entry *h;
@@ -5897,11 +5889,15 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
   /* The backend must work out the sizes of all the other dynamic
      sections.  */
-  if (bed->elf_backend_size_dynamic_sections
+  if (dynobj != NULL
+      && bed->elf_backend_size_dynamic_sections != NULL
       && ! (*bed->elf_backend_size_dynamic_sections) (output_bfd, info))
     return FALSE;
 
-  if (elf_hash_table (info)->dynamic_sections_created)
+  if (! _bfd_elf_maybe_strip_eh_frame_hdr (info))
+    return FALSE;
+
+  if (dynobj != NULL && elf_hash_table (info)->dynamic_sections_created)
     {
       unsigned long section_sym_count;
       struct bfd_elf_version_tree *verdefs;
@@ -12002,12 +11998,14 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       struct elf_reloc_cookie cookie;
 
       sec = bfd_get_section_by_name (sub, ".eh_frame");
-      if (sec && init_reloc_cookie_for_section (&cookie, info, sec))
+      while (sec && init_reloc_cookie_for_section (&cookie, info, sec))
 	{
 	  _bfd_elf_parse_eh_frame (sub, info, sec, &cookie);
-	  if (elf_section_data (sec)->sec_info)
+	  if (elf_section_data (sec)->sec_info
+	      && (sec->flags & SEC_LINKER_CREATED) == 0)
 	    elf_eh_frame_section (sub) = sec;
 	  fini_reloc_cookie_for_section (&cookie, sec);
+	  sec = bfd_get_next_section_by_name (sec);
 	}
     }
   _bfd_elf_end_eh_frame_parsing (info);

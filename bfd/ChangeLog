@@ -1,3 +1,27 @@
+2012-05-25  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13909
+	* elf-eh-frame.c (_bfd_elf_eh_frame_present): New function.
+	(_bfd_elf_maybe_strip_eh_frame_hdr): Use it here.
+	* elf-bfd.h (_bfd_elf_eh_frame_present): Declare.
+	* elflink.c (bfd_elf_size_dynamic_sections): Let the backend
+	size dynamic sections before stripping eh_frame_hdr.
+	(bfd_elf_gc_sections): Handle multiple .eh_frame sections.
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Drop glink_eh_frame
+	if no other .eh_frame sections exist.
+	* elf64-ppc.c (ppc64_elf_size_stubs): Likewise.
+	* elf32-i386.c (elf_i386_create_dynamic_sections): Don't size
+	or alloc plt_eh_frame here..
+	(elf_i386_size_dynamic_sections): ..do it here instead.  Don't
+	specially keep sgotplt, iplt, tgotplt, sdynbss for symbols.
+	(elf_i386_finish_dynamic_sections): Check plt_eh_frame->contents
+	before writing plt offset.
+	* elf64-x86-64.c (elf_x86_64_create_dynamic_sections): Don't size
+	or alloc plt_eh_frame here..
+	(elf_x86_64_size_dynamic_sections): ..do it here instead.
+	(elf_x86_64_finish_dynamic_sections): Check plt_eh_frame->contents
+	before writing plt offset.
+
 2012-05-24  Alan Modra  <amodra@gmail.com>
 
 	PR ld/14158

@@ -11662,7 +11662,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
 
       if (htab->glink_eh_frame != NULL
 	  && !bfd_is_abs_section (htab->glink_eh_frame->output_section)
-	  && (htab->glink_eh_frame->flags & SEC_EXCLUDE) == 0)
+	  && htab->glink_eh_frame->output_section->size != 0)
 	{
 	  size_t size = 0, align;
 
