@@ -1142,10 +1142,11 @@ gld${EMULATION_NAME}_after_open (void)
 	  if (!warn_eh_frame)
 	    {
 	      s = bfd_get_section_by_name (abfd, ".eh_frame");
-	      warn_eh_frame
-		= (s
-		   && s->size > 8
-		   && !bfd_is_abs_section (s->output_section));
+	      while (s != NULL
+		     && (s->size <= 8
+			 || bfd_is_abs_section (s->output_section)))
+		s = bfd_get_next_section_by_name (s);
+	      warn_eh_frame = s != NULL;
 	    }
 	  if (elfbfd && warn_eh_frame)
 	    break;

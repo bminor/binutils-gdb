@@ -1,3 +1,9 @@
+2012-05-25  Alan Modra  <amodra@gmail.com>
+
+	PR ld/13909
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Handle
+	multiple .eh_frame sections attached to bfd.
+
 2012-05-23  Cary Coutant  <ccoutant@google.com>
 
 	* scripttempl/armbpabi.sc: Match .data.rel.ro.* sections more
