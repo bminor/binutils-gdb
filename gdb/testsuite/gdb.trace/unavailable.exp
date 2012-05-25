@@ -475,7 +475,7 @@ proc gdb_collect_globals_test { } { with_test_prefix "collect globals" {
 	"non collected const string is still printable"
 
     gdb_test "print g_string_p" \
-	" = $hex \"hello world\"" \
+	" = $hex <g_const_string> \"hello world\"" \
 	"printing constant string through collected pointer"
 
     gdb_test "print g_string_unavail" \

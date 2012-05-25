@@ -1,3 +1,8 @@
+2012-05-25  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Update
+	for 'set print symbol' change.
+
 2012-05-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-icc-opaque.S: Add debug_info_seg3 and
