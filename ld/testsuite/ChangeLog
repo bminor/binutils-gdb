@@ -1,3 +1,7 @@
+2012-05-26  Alan Modra  <amodra@gmail.com>
+
+	* ld-srec/srec.exp: Remove powerpc64 flag setting.
+
 2012-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/eh1.d: Don't skip x86_64-*-linux-gnux32.
