@@ -1216,15 +1216,15 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	    h = *sym_hash;
 	}
 
-      if ((h->root.u.undef.next || info->hash->undefs_tail == &h->root)
-	  && bfd_is_und_section (sec))
+      /* If the old symbol was undefined before, then it will still be
+	 on the undefs list.  If the new symbol is undefined or
+	 common, we can't make it bfd_link_hash_new here, because new
+	 undefined or common symbols will be added to the undefs list
+	 by _bfd_generic_link_add_one_symbol.  Symbols may not be
+	 added twice to the undefs list.  Also, if the new symbol is
+	 undefweak then we don't want to lose the strong undef.  */
+      if (h->root.u.undef.next || info->hash->undefs_tail == &h->root)
 	{
-	  /* If the new symbol is undefined and the old symbol was
-	     also undefined before, we need to make sure
-	     _bfd_generic_link_add_one_symbol doesn't mess
-	     up the linker hash table undefs list.  Since the old
-	     definition came from a dynamic object, it is still on the
-	     undefs list.  */
 	  h->root.type = bfd_link_hash_undefined;
 	  h->root.u.undef.abfd = abfd;
 	}
@@ -1234,11 +1234,18 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	  h->root.u.undef.abfd = NULL;
 	}
 
-      if (h->def_dynamic)
+      if (ELF_ST_VISIBILITY (sym->st_other) != STV_PROTECTED)
 	{
-	  h->def_dynamic = 0;
-	  h->ref_dynamic = 1;
+	  /* If the new symbol is hidden or internal, completely undo
+	     any dynamic link state.  */
+	  (*bed->elf_backend_hide_symbol) (info, h, TRUE);
+	  h->forced_local = 0;
+	  h->ref_dynamic = 0;
 	}
+      else
+	h->ref_dynamic = 1;
+      h->def_dynamic = 0;
+      h->dynamic_def = 0;
       /* FIXME: Should we check type and size for protected symbol?  */
       h->size = 0;
       h->type = 0;
