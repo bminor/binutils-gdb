@@ -1,3 +1,12 @@
+2012-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14170
+	* ld-elf/elf.exp: Add a test for PR ld/14170.
+
+	* ld-elf/pr14170a.s: New file.
+	* ld-elf/pr14170b.s: Likewise.
+	* ld-elf/pr14170b.s: Likewise.
+
 2012-05-26  Alan Modra  <amodra@gmail.com>
 
 	* ld-srec/srec.exp: Remove powerpc64 flag setting.
