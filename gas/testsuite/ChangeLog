@@ -1,3 +1,10 @@
+2012-05-28  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/syms.s: New test - checks the generation of multibyte
+	symbol names.
+	* gas/elf/syms.d: New file - expected readelf output.
+	* gas/elf/elf.exp: Add syms.
+
 2012-05-25  Alan Modra  <amodra@gmail.com>
 
 	* gas/lns/lns-big-delta.s: Add nops.

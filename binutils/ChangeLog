@@ -1,3 +1,9 @@
+2012-05-28  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_symbol): Display multibyte characters in symbol
+	names.
+	(process_section_headers): Use print_symbol.
+
 2012-05-18  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* aclocal.m4: Regenerate.

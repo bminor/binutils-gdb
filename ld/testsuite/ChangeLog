@@ -1,3 +1,8 @@
+2012-05-28  Nick Clifton  <nickc@redhat.com>
+
+	* ld-ifunc/ifunc-13a-i386.s: Fix use of .global directive.
+	* ld-ifunc/ifunc-15a-i385.s: Likewise.
+
 2012-05-28  Alan Modra  <amodra@gmail.com>
 
 	PR ld/14170

@@ -2485,10 +2485,10 @@ On most machines, you can also use @code{$} in symbol names; exceptions
 are noted in @ref{Machine Dependencies}.
 @end ifset
 No symbol may begin with a digit.  Case is significant.
-There is no length limit: all characters are significant.  Symbols are
-delimited by characters not in that set, or by the beginning of a file
-(since the source program must end with a newline, the end of a file is
-not a possible symbol delimiter).  @xref{Symbols}.
+There is no length limit: all characters are significant.  Multibyte characters
+are supported.  Symbols are delimited by characters not in that set, or by the
+beginning of a file (since the source program must end with a newline, the end
+of a file is not a possible symbol delimiter).  @xref{Symbols}.
 @cindex length of symbols
 
 @node Statements
@@ -3413,6 +3413,11 @@ on the H8/300), and underscores.
 
 Case of letters is significant: @code{foo} is a different symbol name
 than @code{Foo}.
+
+Multibyte characters are supported.  To generate a symbol name containing
+multibyte characters enclose it within double quotes and use escape codes. cf
+@xref{Strings}.  Generating a multibyte symbol name from a label is not
+currently supported.
 
 Each symbol has exactly one name.  Each name in an assembly language program
 refers to exactly one symbol.  You may use that symbol name any number of times

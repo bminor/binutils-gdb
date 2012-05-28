@@ -48,6 +48,7 @@
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
 #endif
+#include <wchar.h>
 
 #if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
@@ -383,93 +384,89 @@ print_vma (bfd_vma vma, print_mode mode)
   return 0;
 }
 
-/* Display a symbol on stdout.  Handles the display of non-printing characters.
+/* Display a symbol on stdout.  Handles the display of control characters and
+   multibye characters.
 
-   If DO_WIDE is not true then format the symbol to be at most WIDTH characters,
-   truncating as necessary.  If WIDTH is negative then format the string to be
-   exactly - WIDTH characters, truncating or padding as necessary.
+   Display at most abs(WIDTH) characters, truncating as necessary, unless do_wide is true.
+
+   If WIDTH is negative then ensure that the output is at least (- WIDTH) characters,
+   padding as necessary.
 
    Returns the number of emitted characters.  */
 
 static unsigned int
 print_symbol (int width, const char *symbol)
 {
-  const char *c;
   bfd_boolean extra_padding = FALSE;
-  unsigned int num_printed = 0;
+  int num_printed = 0;
+  mbstate_t state;
+  int width_remaining;
 
-  if (do_wide)
-    {
-      /* Set the width to a very large value.  This simplifies the
-	 code below.  */
-      width = INT_MAX;
-    }
-  else if (width < 0)
+  if (width < 0)
     {
       /* Keep the width positive.  This also helps.  */
       width = - width;
       extra_padding = TRUE;
-    }
+    }  
 
-  while (width)
+  if (do_wide)
+    /* Set the remaining width to a very large value.
+       This simplifies the code below.  */
+    width_remaining = INT_MAX;
+  else
+    width_remaining = width;
+
+  /* Initialise the multibyte conversion state.  */
+  memset (& state, 0, sizeof (state));
+
+  while (width_remaining)
     {
-      int len;
+      size_t  n;
+      wchar_t w;
+      const char c = *symbol++;
 
-      c = symbol;
-
-      /* Look for non-printing symbols inside the symbol's name.
-	 This test is triggered in particular by the names generated
-	 by the assembler for local labels.  */
-      while (ISPRINT (*c))
-	c++;
-
-      len = c - symbol;
-
-      if (len)
-	{
-	  if (len > width)
-	    len = width;
-
-	  printf ("%.*s", len, symbol);
-
-	  width -= len;
-	  num_printed += len;
-	}
-
-      if (*c == 0 || width == 0)
+      if (c == 0)
 	break;
 
-      /* Now display the non-printing character, if
-	 there is room left in which to dipslay it.  */
-      if ((unsigned char) *c < 32)
+      /* Do not print control characters directly as they can affect terminal
+	 settings.  Such characters usually appear in the names generated
+	 by the assembler for local labels.  */
+      if (ISCNTRL (c))
 	{
-	  if (width < 2)
+	  if (width_remaining < 2)
 	    break;
 
-	  printf ("^%c", *c + 0x40);
-
-	  width -= 2;
+	  printf ("^%c", c + 0x40);
+	  width_remaining -= 2;
 	  num_printed += 2;
+	}
+      else if (ISPRINT (c))
+	{
+	  putchar (c);
+	  width_remaining --;
+	  num_printed ++;
 	}
       else
 	{
-	  if (width < 6)
-	    break;
+	  /* Let printf do the hard work of displaying multibyte characters.  */
+	  printf ("%.1s", symbol - 1);
+	  width_remaining --;
+	  num_printed ++;
 
-	  printf ("<0x%.2x>", (unsigned char) *c);
-
-	  width -= 6;
-	  num_printed += 6;
+	  /* Try to find out how many bytes made up the character that was
+	     just printed.  Advance the symbol pointer past the bytes that
+	     were displayed.  */
+	  n = mbrtowc (& w, symbol - 1, MB_CUR_MAX, & state);
+	  if (n != (size_t) -1 && n != (size_t) -2 && n > 0)
+	    symbol += (n - 1);
 	}
-
-      symbol = c + 1;
     }
 
-  if (extra_padding && width > 0)
+  if (extra_padding && num_printed < width)
     {
       /* Fill in the remaining spaces.  */
-      printf ("%-*s", width, " ");
-      num_printed += 2;
+      printf ("%-*s", width - num_printed, " ");
+      num_printed = width;
     }
 
   return num_printed;
@@ -4737,21 +4734,21 @@ process_section_headers (FILE * file)
        i < elf_header.e_shnum;
        i++, section++)
     {
+      printf ("  [%2u] ", i);
       if (do_section_details)
 	{
-	  printf ("  [%2u] %s\n",
-		  i,
-		  SECTION_NAME (section));
+	  print_symbol (INT_MAX, SECTION_NAME (section));
+	  putchar ('\n');
 	  if (is_32bit_elf || do_wide)
 	    printf ("       %-15.15s ",
 		    get_section_type_name (section->sh_type));
 	}
       else
-	printf ((do_wide ? "  [%2u] %-17s %-15s "
-			 : "  [%2u] %-17.17s %-15.15s "),
-		i,
-		SECTION_NAME (section),
-		get_section_type_name (section->sh_type));
+	{
+	  print_symbol (-17, SECTION_NAME (section));
+	  printf (" %-15.15s ",
+		  get_section_type_name (section->sh_type));
+	}
 
       if (is_32bit_elf)
 	{

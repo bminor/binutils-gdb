@@ -1,6 +1,6 @@
 	.text
         .type foo, @function
-	.global
+	.global foo
 foo:
 	movl ifunc@GOT(%ebx), %eax
         ret

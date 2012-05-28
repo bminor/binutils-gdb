@@ -1,3 +1,12 @@
+2012-05-28  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (read_symbol_name): New function.  Reads a symbol names.
+	Allows escape codes in names.
+	(s_comm_internal): Use read_symbol_name.
+	(s_globl, s_lsym, s_set, s_weakref): Likewise.
+	* doc/as.texinfo: Document support for multibyte characters in
+	symbol names.
+
 2012-05-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/tc-mips.c (mips_after_parse_args): Assert that arch_info

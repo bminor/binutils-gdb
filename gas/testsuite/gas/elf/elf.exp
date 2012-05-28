@@ -184,6 +184,8 @@ if { [is_elf_format] } then {
     run_dump_test "bad-size"
     run_dump_test "bad-group"
 
+    run_dump_test "syms"
+    
 load_lib gas-dg.exp
 dg-init
 dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/err-*.s $srcdir/$subdir/warn-*.s]] "" ""
