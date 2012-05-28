@@ -57,6 +57,20 @@ if { ![istarget hppa64*-hpux*] } {
 	    "" ""
 	    {symbol3w.s} {} "symbol3w.a"}
     }
+
+    if { [check_shared_lib_support] } then {
+	run_ld_link_tests {
+	    {"Build pr14170a.o" "" "" "pr14170a.s" {} "pr14170.a" }
+	}
+	setup_xfail "tic6x-*-*"
+	run_ld_link_tests {
+	    {"Build shared library for pr14170"
+		"-shared" "" "pr14170b.s" {} "pr14170.so" }
+	    {"PR ld/14170"
+		"tmpdir/pr14170a.o tmpdir/pr14170.so" "" "pr14170c.s"
+		{ } "pr14170" }
+	}
+    }
 }
 
 # Run a test to check linking a shared library with a broken linker
@@ -66,23 +80,15 @@ if { ![istarget hppa64*-hpux*] } {
 #
 # Only run the test on targets thats support creating shared libraries.
 if { [check_shared_lib_support] } then {
-  run_ld_link_tests {
-      {"Build pr14170a.o" "" "" "pr14170a.s" {} "pr14170.a" }
-      {"Build shared library for pr14170"
-       "-shared" "" "pr14170b.s" {} "pr14170.so" }
-      {"PR ld/14170"
-        "tmpdir/pr14170a.o tmpdir/pr14170.so" "" "pr14170c.s"
-	  { } "a.out" }
-  }
-  setup_xfail "tic6x-*-*"
-  run_ld_link_tests {
-      {"Build shared library for next test"
-       "-shared" "" "note-3.s" {} "note-3.so" }
-      {"Link using broken linker script"
-        "--script note-3.t tmpdir/note-3.so" "" ""
-	  { { ld "note-3.l" } }
-	  "a.out" }
-  }
+    setup_xfail "tic6x-*-*"
+    run_ld_link_tests {
+	{"Build shared library for next test"
+	    "-shared" "" "note-3.s" {} "note-3.so" }
+	{"Link using broken linker script"
+	    "--script note-3.t tmpdir/note-3.so" "" ""
+	    { { ld "note-3.l" } }
+	    "a.out" }
+    }
 }
 
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]

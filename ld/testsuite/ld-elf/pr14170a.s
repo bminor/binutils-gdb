@@ -7,5 +7,7 @@ _start:
 __start:
 	.global main	/* Used by HPPA targets.  */
 main:
+
+	.data
 	.dc.a foo
 	.dc.a bar

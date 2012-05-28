@@ -1,3 +1,10 @@
+2012-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR ld/14170
+	* ld-elf/pr14170a.s: Put foo, bar address in .data.
+	* ld-elf/elf.exp: Don't run pr14170 test on hppa64-hpux.  Ignore
+	tic6x warnings.
+
 2012-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14170
@@ -5,7 +12,7 @@
 
 	* ld-elf/pr14170a.s: New file.
 	* ld-elf/pr14170b.s: Likewise.
-	* ld-elf/pr14170b.s: Likewise.
+	* ld-elf/pr14170c.s: Likewise.
 
 2012-05-26  Alan Modra  <amodra@gmail.com>
 
