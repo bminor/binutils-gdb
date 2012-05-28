@@ -1,3 +1,8 @@
+2012-05-28  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (wait_for_inferior): Move ecss and ecs locals to the
+	block that uses them.  Clear ecss before handling each event.
+
 2012-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* solib-svr4.c (svr4_current_sos): New comment on

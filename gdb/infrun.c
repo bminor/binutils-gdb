@@ -2694,8 +2694,6 @@ void
 wait_for_inferior (void)
 {
   struct cleanup *old_cleanups;
-  struct execution_control_state ecss;
-  struct execution_control_state *ecs;
 
   if (debug_infrun)
     fprintf_unfiltered
@@ -2704,12 +2702,13 @@ wait_for_inferior (void)
   old_cleanups =
     make_cleanup (delete_step_thread_step_resume_breakpoint_cleanup, NULL);
 
-  ecs = &ecss;
-  memset (ecs, 0, sizeof (*ecs));
-
   while (1)
     {
+      struct execution_control_state ecss;
+      struct execution_control_state *ecs = &ecss;
       struct cleanup *old_chain;
+
+      memset (ecs, 0, sizeof (*ecs));
 
       overlay_cache_invalid = 1;
 
