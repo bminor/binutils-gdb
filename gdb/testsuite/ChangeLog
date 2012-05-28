@@ -1,3 +1,9 @@
+2012-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.server/solib-list-lib.c: New file.
+	* gdb.server/solib-list-main.c: New file.
+	* gdb.server/solib-list.exp: New file.
+
 2012-05-25  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.trace/unavailable.exp (gdb_collect_globals_test): Update

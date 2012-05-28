@@ -1,3 +1,8 @@
+2012-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* solib-svr4.c (svr4_current_sos): New comment on
+	svr4_current_sos_via_xfer_libraries fall back.
+
 2012-05-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* psymtab.c (lookup_symbol_aux_psymtabs): New variable stab_best.  Use

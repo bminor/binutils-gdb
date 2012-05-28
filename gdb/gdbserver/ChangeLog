@@ -1,3 +1,7 @@
+2012-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-low.c (linux_qxfer_libraries_svr4): Return -1 if R_DEBUG is -1.
+
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/7205

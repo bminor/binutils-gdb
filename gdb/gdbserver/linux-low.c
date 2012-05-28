@@ -5651,7 +5651,13 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
   if (priv->r_debug == 0)
     priv->r_debug = get_r_debug (pid, is_elf64);
 
-  if (priv->r_debug == (CORE_ADDR) -1 || priv->r_debug == 0)
+  /* We failed to find DT_DEBUG.  Such situation will not change for this
+     inferior - do not retry it.  Report it to GDB as E01, see for the reasons
+     at the GDB solib-svr4.c side.  */
+  if (priv->r_debug == (CORE_ADDR) -1)
+    return -1;
+
+  if (priv->r_debug == 0)
     {
       document = xstrdup ("<library-list-svr4 version=\"1.0\"/>\n");
     }
