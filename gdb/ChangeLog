@@ -1,3 +1,19 @@
+2012-05-29  Tristan Gingold  <gingold@adacore.com>
+
+	* solib-darwin.c (dyld_all_image_addr, dyld_all_image): Move into...
+	(struct darwin_info): ... New struct.
+	(solib_darwin_pspace_data): New variable.
+	(darwin_pspace_data_cleanup): New function.
+	(get_darwin_info): Likewise.
+	(darwin_dyld_version_ok, darwin_load_image_infos)
+	(darwin_solib_get_all_image_info_addr_at_init)
+	(darwin_solib_read_all_image_info_addr): Add info argument.
+	Adjust code.
+	(darwin_current_sos): Use per pspace structure.
+	(darwin_solib_create_inferior_hook): Likewise.
+	(darwin_clear_solib): Likewise.
+	(_initialize_darwin_solib): Initialize solib_darwin_pspace_data.
+
 2012-05-28  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (wait_for_inferior): Move ecss and ecs locals to the

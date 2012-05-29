@@ -71,25 +71,59 @@ struct gdb_dyld_all_image_infos
 #define DYLD_VERSION_MIN 1
 #define DYLD_VERSION_MAX 12
 
-/* Address of structure dyld_all_image_infos in inferior.  */
-static CORE_ADDR dyld_all_image_addr;
+/* Per PSPACE specific data.  */
+struct darwin_info
+{
+  /* Address of structure dyld_all_image_infos in inferior.  */
+  CORE_ADDR all_image_addr;
 
-/* Gdb copy of dyld_all_info_infos.  */
-static struct gdb_dyld_all_image_infos dyld_all_image;
+  /* Gdb copy of dyld_all_info_infos.  */
+  struct gdb_dyld_all_image_infos all_image;
+};
+
+/* Per-program-space data key.  */
+static const struct program_space_data *solib_darwin_pspace_data;
+
+static void
+darwin_pspace_data_cleanup (struct program_space *pspace, void *arg)
+{
+  struct darwin_info *info;
+
+  info = program_space_data (pspace, solib_darwin_pspace_data);
+  xfree (info);
+}
+
+/* Get the current darwin data.  If none is found yet, add it now.  This
+   function always returns a valid object.  */
+
+static struct darwin_info *
+get_darwin_info (void)
+{
+  struct darwin_info *info;
+
+  info = program_space_data (current_program_space, solib_darwin_pspace_data);
+  if (info != NULL)
+    return info;
+
+  info = XZALLOC (struct darwin_info);
+  set_program_space_data (current_program_space,
+			  solib_darwin_pspace_data, info);
+  return info;
+}
 
 /* Return non-zero if the version in dyld_all_image is known.  */
 
 static int
-darwin_dyld_version_ok (void)
+darwin_dyld_version_ok (const struct darwin_info *info)
 {
-  return dyld_all_image.version >= DYLD_VERSION_MIN
-    && dyld_all_image.version <= DYLD_VERSION_MAX;
+  return info->all_image.version >= DYLD_VERSION_MIN
+    && info->all_image.version <= DYLD_VERSION_MAX;
 }
 
 /* Read dyld_all_image from inferior.  */
 
 static void
-darwin_load_image_infos (void)
+darwin_load_image_infos (struct darwin_info *info)
 {
   gdb_byte buf[24];
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
@@ -97,27 +131,27 @@ darwin_load_image_infos (void)
   int len;
 
   /* If the structure address is not known, don't continue.  */
-  if (dyld_all_image_addr == 0)
+  if (info->all_image_addr == 0)
     return;
 
   /* The structure has 4 fields: version (4 bytes), count (4 bytes),
      info (pointer) and notifier (pointer).  */
   len = 4 + 4 + 2 * ptr_type->length;
   gdb_assert (len <= sizeof (buf));
-  memset (&dyld_all_image, 0, sizeof (dyld_all_image));
+  memset (&info->all_image, 0, sizeof (info->all_image));
 
   /* Read structure raw bytes from target.  */
-  if (target_read_memory (dyld_all_image_addr, buf, len))
+  if (target_read_memory (info->all_image_addr, buf, len))
     return;
 
   /* Extract the fields.  */
-  dyld_all_image.version = extract_unsigned_integer (buf, 4, byte_order);
-  if (!darwin_dyld_version_ok ())
+  info->all_image.version = extract_unsigned_integer (buf, 4, byte_order);
+  if (!darwin_dyld_version_ok (info))
     return;
 
-  dyld_all_image.count = extract_unsigned_integer (buf + 4, 4, byte_order);
-  dyld_all_image.info = extract_typed_address (buf + 8, ptr_type);
-  dyld_all_image.notifier = extract_typed_address
+  info->all_image.count = extract_unsigned_integer (buf + 4, 4, byte_order);
+  info->all_image.info = extract_typed_address (buf + 8, ptr_type);
+  info->all_image.notifier = extract_typed_address
     (buf + 8 + ptr_type->length, ptr_type);
 }
 
@@ -217,11 +251,12 @@ darwin_current_sos (void)
   struct so_list *head = NULL;
   struct so_list *tail = NULL;
   int i;
+  struct darwin_info *info = get_darwin_info ();
 
   /* Be sure image infos are loaded.  */
-  darwin_load_image_infos ();
+  darwin_load_image_infos (info);
 
-  if (!darwin_dyld_version_ok ())
+  if (!darwin_dyld_version_ok (info))
     return NULL;
 
   image_info_size = ptr_len * 3;
@@ -230,9 +265,9 @@ darwin_current_sos (void)
      The first entry was rumored to be the executable itself, but this is not
      true when a large number of shared libraries are used (table expanded ?).
      We now check all entries, but discard executable images.  */
-  for (i = 0; i < dyld_all_image.count; i++)
+  for (i = 0; i < info->all_image.count; i++)
     {
-      CORE_ADDR info = dyld_all_image.info + i * image_info_size;
+      CORE_ADDR iinfo = info->all_image.info + i * image_info_size;
       char buf[image_info_size];
       CORE_ADDR load_addr;
       CORE_ADDR path_addr;
@@ -245,7 +280,7 @@ darwin_current_sos (void)
       struct cleanup *old_chain;
 
       /* Read image info from inferior.  */
-      if (target_read_memory (info, buf, image_info_size))
+      if (target_read_memory (iinfo, buf, image_info_size))
 	break;
 
       load_addr = extract_typed_address (buf, ptr_type);
@@ -316,7 +351,7 @@ darwin_special_symbol_handling (void)
    current PC is at the entry of the dynamic linker.  */
 
 static void
-darwin_solib_get_all_image_info_addr_at_init (void)
+darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
 {
   gdb_byte *interp_name;
   CORE_ADDR load_addr = 0;
@@ -357,22 +392,22 @@ darwin_solib_get_all_image_info_addr_at_init (void)
                - bfd_get_start_address (dyld_bfd));
 
   /* Now try to set a breakpoint in the dynamic linker.  */
-  dyld_all_image_addr =
+  info->all_image_addr =
     lookup_symbol_from_bfd (dyld_bfd, "_dyld_all_image_infos");
 
   bfd_close (dyld_bfd);
 
-  if (dyld_all_image_addr == 0)
+  if (info->all_image_addr == 0)
     return;
 
-  dyld_all_image_addr += load_addr;
+  info->all_image_addr += load_addr;
 }
 
 /* Extract dyld_all_image_addr reading it from 
    TARGET_OBJECT_DARWIN_DYLD_INFO.  */
 
 static void
-darwin_solib_read_all_image_info_addr (void)
+darwin_solib_read_all_image_info_addr (struct darwin_info *info)
 {
   gdb_byte buf[8 + 8 + 4];
   LONGEST len;
@@ -383,7 +418,7 @@ darwin_solib_read_all_image_info_addr (void)
   if (len != sizeof (buf))
     return;
 
-  dyld_all_image_addr = extract_unsigned_integer (buf, 8, byte_order);
+  info->all_image_addr = extract_unsigned_integer (buf, 8, byte_order);
 }
 
 /* Shared library startup support.  See documentation in solib-svr4.c.  */
@@ -391,27 +426,31 @@ darwin_solib_read_all_image_info_addr (void)
 static void
 darwin_solib_create_inferior_hook (int from_tty)
 {
-  dyld_all_image_addr = 0;
+  struct darwin_info *info = get_darwin_info ();
 
-  darwin_solib_read_all_image_info_addr ();
+  info->all_image_addr = 0;
 
-  if (dyld_all_image_addr == 0)
-    darwin_solib_get_all_image_info_addr_at_init ();
+  darwin_solib_read_all_image_info_addr (info);
 
-  if (dyld_all_image_addr == 0)
+  if (info->all_image_addr == 0)
+    darwin_solib_get_all_image_info_addr_at_init (info);
+
+  if (info->all_image_addr == 0)
     return;
 
-  darwin_load_image_infos ();
+  darwin_load_image_infos (info);
 
-  if (darwin_dyld_version_ok ())
-    create_solib_event_breakpoint (target_gdbarch, dyld_all_image.notifier);
+  if (darwin_dyld_version_ok (info))
+    create_solib_event_breakpoint (target_gdbarch, info->all_image.notifier);
 }
 
 static void
 darwin_clear_solib (void)
 {
-  dyld_all_image_addr = 0;
-  dyld_all_image.version = 0;
+  struct darwin_info *info = get_darwin_info ();
+
+  info->all_image_addr = 0;
+  info->all_image.version = 0;
 }
 
 static void
@@ -492,6 +531,9 @@ extern initialize_file_ftype _initialize_darwin_solib;
 void
 _initialize_darwin_solib (void)
 {
+  solib_darwin_pspace_data
+    = register_program_space_data_with_cleanup (darwin_pspace_data_cleanup);
+
   darwin_so_ops.relocate_section_addresses = darwin_relocate_section_addresses;
   darwin_so_ops.free_so = darwin_free_so;
   darwin_so_ops.clear_solib = darwin_clear_solib;
