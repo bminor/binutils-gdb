@@ -4598,7 +4598,7 @@ cleanup_undefined_types_1 (void)
    this unit.  */
 
 void
-cleanup_undefined_types (struct objfile *objfile)
+cleanup_undefined_stabs_types (struct objfile *objfile)
 {
   cleanup_undefined_types_1 ();
   cleanup_undefined_types_noname (objfile);

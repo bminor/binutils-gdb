@@ -1,3 +1,10 @@
+2012-05-29  Doug Evans  <dje@google.com>
+
+	* stabsread.h (cleanup_undefined_stabs_types): Renamed from
+	cleanup_undefined_types.
+	* stabsread.c (cleanup_undefined_stabs_types): Ditto.
+	All callers updated.
+
 2012-05-29  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.c (symfile_bfd_open): Don't close desc if bfd_fopen

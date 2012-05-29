@@ -129,7 +129,7 @@ EXTERN int n_this_object_header_files;
 
 EXTERN int n_allocated_this_object_header_files;
 
-extern void cleanup_undefined_types (struct objfile *);
+extern void cleanup_undefined_stabs_types (struct objfile *);
 
 extern long read_number (char **, int);
 

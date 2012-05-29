@@ -49,7 +49,7 @@
 #include "buildsym.h"		/* Our own declarations.  */
 #undef	EXTERN
 
-/* For cleanup_undefined_types and finish_global_stabs (somewhat
+/* For cleanup_undefined_stabs_types and finish_global_stabs (somewhat
    questionable--see comment where we call them).  */
 
 #include "stabsread.h"
@@ -1001,13 +1001,13 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
      (this needs to be done before the finish_blocks so that
      file_symbols is still good).
 
-     Both cleanup_undefined_types and finish_global_stabs are stabs
+     Both cleanup_undefined_stabs_types and finish_global_stabs are stabs
      specific, but harmless for other symbol readers, since on gdb
      startup or when finished reading stabs, the state is set so these
      are no-ops.  FIXME: Is this handled right in case of QUIT?  Can
      we make this cleaner?  */
 
-  cleanup_undefined_types (objfile);
+  cleanup_undefined_stabs_types (objfile);
   finish_global_stabs (objfile);
 
   if (pending_blocks == NULL
