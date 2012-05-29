@@ -380,8 +380,6 @@ solib_bfd_fopen (char *pathname, int fd)
 
       if (abfd)
 	bfd_set_cacheable (abfd, 1);
-      else if (fd != -1)
-	close (fd);
     }
 
   if (!abfd)

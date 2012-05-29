@@ -6957,7 +6957,6 @@ try_open_dwo_file (const char *file_name)
   sym_bfd = bfd_fopen (absolute_name, gnutarget, FOPEN_RB, desc);
   if (!sym_bfd)
     {
-      close (desc);
       xfree (absolute_name);
       return NULL;
     }

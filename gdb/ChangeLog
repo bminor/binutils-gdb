@@ -1,3 +1,13 @@
+2012-05-29  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (symfile_bfd_open): Don't close desc if bfd_fopen
+	fails.
+	* solib.c (solib_bfd_fopen): Don't close fd if bfd_fopen fails.
+	* exec.c (exec_file_attach): Don't close scratch_chan if bfd_fopen
+	fails.
+	* dwarf2read.c (try_open_dwo_file): Don't close fd if bfd_fopen
+	fails.
+
 2012-05-29  Tristan Gingold  <gingold@adacore.com>
 
 	* solib-darwin.c (dyld_all_image_addr, dyld_all_image): Move into...
