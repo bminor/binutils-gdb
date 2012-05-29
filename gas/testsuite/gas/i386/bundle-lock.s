@@ -90,4 +90,14 @@ sequence_\size\()_offset_\offset\():
 	test_offsets 32
 
 .p2align 5
+	# Nested .bundle_lock.
+	.bundle_lock
+	clc
+	.bundle_lock
+	cld
+	.bundle_unlock
+	clc
+	.bundle_unlock
+
+.p2align 5
 	hlt

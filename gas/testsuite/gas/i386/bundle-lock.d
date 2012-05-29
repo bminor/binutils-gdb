@@ -3052,5 +3052,9 @@ Disassembly of section \.text:
 #...
  *bde0:\s+(f4\s+hlt|f8\s+clc)\s*
 #...
- *be00:\s+f4\s+hlt\s*
+ *be00:\s+f8\s+clc\s*
+ *be01:\s+fc\s+cld\s*
+ *be02:\s+f8\s+clc\s*
+#...
+ *be20:\s+f4\s+hlt\s*
 #pass

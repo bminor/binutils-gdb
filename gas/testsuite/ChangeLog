@@ -1,3 +1,10 @@
+2012-05-29  Roland McGrath  <mcgrathr@google.com>
+
+	* gas/i386/bundle-bad.s: Remove nested .bundle_lock case.
+	* gas/i386/bundle-bad.l: Remove expected error line.
+	* gas/i386/bundle-lock.s: Add nested .bundle_lock case.
+	* gas/i386/bundle-lock.d: Update expectations.
+
 2012-05-28  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/syms.s: New test - checks the generation of multibyte

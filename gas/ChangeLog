@@ -1,3 +1,10 @@
+2012-05-29  Roland McGrath  <mcgrathr@google.com>
+
+	* read.c [HANDLE_BUNDLE] (bundle_lock_depth): New variable.
+	(read_a_source_file) [HANDLE_BUNDLE]: Reset it.
+	[HANDLE_BUNDLE] (s_bundle_lock, s_bundle_unlock): Allow nested
+	pairs.
+
 2012-05-28  Nick Clifton  <nickc@redhat.com>
 
 	* read.c (read_symbol_name): New function.  Reads a symbol names.

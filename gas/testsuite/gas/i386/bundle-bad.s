@@ -35,13 +35,6 @@
 	hlt
 	.bundle_unlock
 
-	# Nested .bundle_lock.
-	.bundle_lock
-	clc
-	.bundle_lock
-	cld
-	.bundle_unlock
-
 	# End of input with dangling .bundle_lock.
 	.bundle_lock
 	hlt

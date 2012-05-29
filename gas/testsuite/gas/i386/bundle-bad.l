@@ -7,5 +7,4 @@
 [^:]*:26:.*cannot change section or subsection inside \.bundle_lock
 [^:]*:31:.*cannot change \.bundle_align_mode inside \.bundle_lock
 [^:]*:36:.*\.bundle_unlock without preceding \.bundle_lock
-[^:]*:41:.*second \.bundle_lock without \.bundle_unlock
-[^:]*:46:.*\.bundle_lock with no matching \.bundle_unlock
+[^:]*:39:.*\.bundle_lock with no matching \.bundle_unlock

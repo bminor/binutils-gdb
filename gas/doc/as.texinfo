@@ -4351,9 +4351,12 @@ first instruction of the sequence so that the whole sequence starts on an
 aligned bundle boundary.  It's an error if the sequence is longer than the
 bundle size.
 
-Bundle-locked sequences do not nest.  It's an error if two
-@code{.bundle_lock} directives appear without an intervening
-@code{.bundle_unlock} directive.
+For convenience when using @code{.bundle_lock} and @code{.bundle_unlock}
+inside assembler macros (@pxref{Macro}), bundle-locked sequences may be
+nested.  That is, a second @code{.bundle_lock} directive before the next
+@code{.bundle_unlock} directive has no effect except that it must be
+matched by another closing @code{.bundle_unlock} so that there is the
+same number of @code{.bundle_lock} and @code{.bundle_unlock} directives.
 
 @node Byte
 @section @code{.byte @var{expressions}}

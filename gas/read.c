@@ -233,6 +233,10 @@ static unsigned int bundle_align_p2;
    we are expecting to see .bundle_unlock.  */
 static fragS *bundle_lock_frag;
 static frchainS *bundle_lock_frchain;
+
+/* This is incremented by .bundle_lock and decremented by .bundle_unlock,
+   to allow nesting.  */
+static unsigned int bundle_lock_depth;
 #endif
 
 static void do_s_func (int end_p, const char *default_prefix);
@@ -1288,6 +1292,7 @@ read_a_source_file (char *name)
 		    _(".bundle_lock with no matching .bundle_unlock"));
       bundle_lock_frag = NULL;
       bundle_lock_frchain = NULL;
+      bundle_lock_depth = 0;
     }
 #endif
 
@@ -6096,14 +6101,12 @@ s_bundle_lock (int arg ATTRIBUTE_UNUSED)
       return;
     }
 
-  if (bundle_lock_frag != NULL)
+  if (bundle_lock_depth == 0)
     {
-      as_bad (_("second .bundle_lock without .bundle_unlock"));
-      return;
+      bundle_lock_frchain = frchain_now;
+      bundle_lock_frag = start_bundle ();
     }
-
-  bundle_lock_frchain = frchain_now;
-  bundle_lock_frag = start_bundle ();
+  ++bundle_lock_depth;
 }
 
 void
@@ -6120,6 +6123,10 @@ s_bundle_unlock (int arg ATTRIBUTE_UNUSED)
     }
 
   gas_assert (bundle_align_p2 > 0);
+
+  gas_assert (bundle_lock_depth > 0);
+  if (--bundle_lock_depth > 0)
+    return;
 
   size = pending_bundle_size (bundle_lock_frag);
 
