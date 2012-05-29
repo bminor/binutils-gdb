@@ -907,7 +907,7 @@ watch_main_source_file_lossage (void)
     }
 }
 
-/* Helper function for qsort.  Parametes are `struct block *' pointers,
+/* Helper function for qsort.  Parameters are `struct block *' pointers,
    function sorts them in descending order by their BLOCK_START.  */
 
 static int
@@ -1126,7 +1126,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
             {
               /* Since we are ignoring that subfile, we also need
                  to unlink the associated empty symtab that we created.
-                 Otherwise, we can into trouble because various parts
+                 Otherwise, we can run into trouble because various parts
                  such as the block-vector are uninitialized whereas
                  the rest of the code assumes that they are.
                  
@@ -1196,7 +1196,8 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	      SYMBOL_SYMTAB (BLOCK_FUNCTION (block)) = symtab;
 
 	  /* Note that we only want to fix up symbols from the local
-	     blocks, not blocks coming from included symtabs.  */
+	     blocks, not blocks coming from included symtabs.  That is why
+	     we use ALL_DICT_SYMBOLS here and not ALL_BLOCK_SYMBOLS.  */
 	  ALL_DICT_SYMBOLS (BLOCK_DICT (block), iter, sym)
 	    if (SYMBOL_SYMTAB (sym) == NULL)
 	      SYMBOL_SYMTAB (sym) = symtab;

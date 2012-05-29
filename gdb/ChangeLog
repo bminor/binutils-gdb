@@ -1,5 +1,8 @@
 2012-05-29  Doug Evans  <dje@google.com>
 
+	* buildsym.c (block_compar): Fix comment.
+	(end_symtab): Fix and clarify some comments.
+
 	* stabsread.h (cleanup_undefined_stabs_types): Renamed from
 	cleanup_undefined_types.
 	* stabsread.c (cleanup_undefined_stabs_types): Ditto.
