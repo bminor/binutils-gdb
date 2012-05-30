@@ -163,8 +163,8 @@ typedef struct lang_output_section_statement_struct
   unsigned int all_input_readonly : 1;
   /* If this section should be ignored.  */
   unsigned int ignored : 1; 
-  /* If there is a symbol relative to this section.  */
-  unsigned int section_relative_symbol : 1; 
+  /* If this section should update "dot".  Prevents section being ignored.  */
+  unsigned int update_dot : 1; 
 } lang_output_section_statement_type;
 
 typedef struct

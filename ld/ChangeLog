@@ -1,3 +1,11 @@
+2012-05-30  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.h (lang_output_section_statement_type): Rename
+	"section_relative_symbol" field to "update_dot".
+	* ldlang.c: Update all uses.
+	(strip_excluded_output_sections): Don't test update_dot_tree here..
+	(lang_leave_overlay): ..set update_dot here.
+
 2012-05-26  Alan Modra  <amodra@gmail.com>
 
 	* ldlex.h (enum option_values): Move from..

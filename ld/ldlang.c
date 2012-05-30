@@ -3889,8 +3889,7 @@ strip_excluded_output_sections (void)
 	{
 	  /* We don't set bfd_section to NULL since bfd_section of the
 	     removed output section statement may still be used.  */
-	  if (!os->section_relative_symbol
-	      && !os->update_dot_tree)
+	  if (!os->update_dot)
 	    os->ignored = TRUE;
 	  output_section->flags |= SEC_EXCLUDE;
 	  bfd_section_list_remove (link_info.output_bfd, output_section);
@@ -5253,7 +5252,7 @@ lang_size_sections_1
 		 || tree->type.node_class == etree_assign)
 		&& (tree->assign.dst [0] != '.'
 		    || tree->assign.dst [1] != '\0'))
-	      output_section_statement->section_relative_symbol = 1;
+	      output_section_statement->update_dot = 1;
 
 	    if (!output_section_statement->ignored)
 	      {
@@ -7390,8 +7389,11 @@ lang_leave_overlay (etree_type *lma_expr,
   /* After setting the size of the last section, set '.' to end of the
      overlay region.  */
   if (overlay_list != NULL)
-    overlay_list->os->update_dot_tree
-      = exp_assign (".", exp_binop ('+', overlay_vma, overlay_max));
+    {
+      overlay_list->os->update_dot = 1;
+      overlay_list->os->update_dot_tree
+	= exp_assign (".", exp_binop ('+', overlay_vma, overlay_max));
+    }
 
   l = overlay_list;
   while (l != NULL)
