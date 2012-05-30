@@ -1,3 +1,7 @@
+2012-05-30  Thiago Jung Bauermann  <thiago.bauermann@linaro.org>
+
+	* source.c (openp): Expand tilde in path entries.
+
 2012-05-29  Doug Evans  <dje@google.com>
 
 	* buildsym.c (block_compar): Fix comment.

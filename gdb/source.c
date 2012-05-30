@@ -769,6 +769,25 @@ openp (const char *path, int opts, const char *string,
 	    }
 	  strcpy (filename, current_directory);
 	}
+      else if (strchr(dir, '~'))
+	{
+	 /* See whether we need to expand the tilde.  */
+	  int newlen;
+	  char *tilde_expanded;
+
+	  tilde_expanded  = tilde_expand (dir);
+
+	  /* First, realloc the filename buffer if too short.  */
+	  len = strlen (tilde_expanded);
+	  newlen = len + strlen (string) + 2;
+	  if (newlen > alloclen)
+	    {
+	      alloclen = newlen;
+	      filename = alloca (alloclen);
+	    }
+	  strcpy (filename, tilde_expanded);
+	  xfree (tilde_expanded);
+	}
       else
 	{
 	  /* Normal file name in path -- just use it.  */
