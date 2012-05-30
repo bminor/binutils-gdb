@@ -1,5 +1,12 @@
 2012-05-30  Jeff Kenton  <jkenton@tilera.com>
 
+	* configure.host (gdb_host_cpu): Handle tilegx*.
+	(gdb_host): Handle tilegx-*-linux*.
+	* tilegx-linux-nat.c: New file.
+	* config/tilegx/linux.mh: New file.
+
+2012-05-30  Jeff Kenton  <jkenton@tilera.com>
+
 	* Makefile.in (ALL_TARGET_OBJS): Add tilegx-tdep.o and
 	tilegx-linux-tdep.o.
 	(ALLDEPFILES): Add tilegx-linux-nat.c, tilegx-tdep.c and
