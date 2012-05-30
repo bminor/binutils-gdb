@@ -1,3 +1,8 @@
+2012-05-30  Thiago Jung Bauermann  <thiago.bauermann@linaro.org>
+
+	* linux-low.c (get_r_debug): Disable code using DT_MIPS_RLD_MAP
+	if the platform doesn't know about it.
+
 2012-05-30  Jeff Kenton  <jkenton@tilera.com>
 
 	* Makefile.in (SFILES): Add linux-tile-low.c.

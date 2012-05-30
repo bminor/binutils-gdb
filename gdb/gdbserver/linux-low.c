@@ -5492,6 +5492,7 @@ get_r_debug (const int pid, const int is_elf64)
       if (is_elf64)
 	{
 	  Elf64_Dyn *const dyn = (Elf64_Dyn *) buf;
+#ifdef DT_MIPS_RLD_MAP
 	  union
 	    {
 	      Elf64_Xword map;
@@ -5507,6 +5508,7 @@ get_r_debug (const int pid, const int is_elf64)
 	      else
 		break;
 	    }
+#endif	/* DT_MIPS_RLD_MAP */
 
 	  if (dyn->d_tag == DT_DEBUG && map == -1)
 	    map = dyn->d_un.d_val;
@@ -5517,6 +5519,7 @@ get_r_debug (const int pid, const int is_elf64)
       else
 	{
 	  Elf32_Dyn *const dyn = (Elf32_Dyn *) buf;
+#ifdef DT_MIPS_RLD_MAP
 	  union
 	    {
 	      Elf32_Word map;
@@ -5532,6 +5535,7 @@ get_r_debug (const int pid, const int is_elf64)
 	      else
 		break;
 	    }
+#endif	/* DT_MIPS_RLD_MAP */
 
 	  if (dyn->d_tag == DT_DEBUG && map == -1)
 	    map = dyn->d_un.d_val;
