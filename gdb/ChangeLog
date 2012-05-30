@@ -1,3 +1,15 @@
+2012-05-30  Jeff Kenton  <jkenton@tilera.com>
+
+	* Makefile.in (ALL_TARGET_OBJS): Add tilegx-tdep.o and
+	tilegx-linux-tdep.o.
+	(ALLDEPFILES): Add tilegx-linux-nat.c, tilegx-tdep.c and
+	tilegx-linux-tdep.c.
+	* configure.tgt: Handle tilegx-*-linux*.
+	* tilegx-tdep.h: New file.
+	* tilegx-tdep.c: New file.
+	* tilegx-linux-tdep.c: New file.
+	* regformats/reg-tilegx.dat: New file.
+
 2012-05-30  Edjunior Machado  <emachado@linux.vnet.ibm.com>
 
 	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): fix
