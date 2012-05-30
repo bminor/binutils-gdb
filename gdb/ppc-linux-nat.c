@@ -1461,7 +1461,7 @@ ppc_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
   if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
       || type == bp_access_watchpoint || type == bp_watchpoint)
     {
-      if (cnt > total_hw_wp)
+      if (cnt + ot > total_hw_wp)
 	return -1;
     }
   else if (type == bp_hardware_breakpoint)

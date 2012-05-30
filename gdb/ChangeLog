@@ -1,3 +1,8 @@
+2012-05-30  Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): fix
+	accounting of hw watchpoints on ppc.
+
 2012-05-30  Thiago Jung Bauermann  <thiago.bauermann@linaro.org>
 
 	* source.c (openp): Expand tilde in path entries.
