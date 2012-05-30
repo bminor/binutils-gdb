@@ -133,6 +133,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/linux-sh-low.c $(srcdir)/linux-sparc-low.c \
 	$(srcdir)/linux-x86-low.c \
 	$(srcdir)/linux-xtensa-low.c \
+	$(srcdir)/linux-tile-low.c \
 	$(srcdir)/win32-arm-low.c $(srcdir)/win32-i386-low.c \
 	$(srcdir)/win32-low.c $(srcdir)/wincecompat.c \
 	$(srcdir)/hostio.c $(srcdir)/hostio-errno.c \
@@ -549,6 +550,7 @@ linux-tic6x-low.o: linux-tic6x-low.c $(linux_low_h) $(server_h)
 linux-x86-low.o: linux-x86-low.c $(linux_low_h) $(server_h) \
 	$(gdb_proc_service_h) $(i386_low_h) $(agent_h)
 linux-xtensa-low.o: linux-xtensa-low.c xtensa-xtregs.c $(linux_low_h) $(server_h)
+linux-tile-low.o: linux-tile-low.c $(linux_low_h) $(server_h)
 
 lynx-low.o: lynx-low.c $(server_h) $(target_h) $(lynx_low_h)
 lynx-ppc-low.o: lynx-ppc-low.c $(server_h) $(lynx_low_h)
@@ -752,4 +754,7 @@ x32-avx-linux.c : $(srcdir)/../regformats/i386/x32-avx-linux.dat $(regdat_sh)
 reg-xtensa.o : reg-xtensa.c $(regdef_h)
 reg-xtensa.c : $(srcdir)/../regformats/reg-xtensa.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-xtensa.dat reg-xtensa.c
+reg-tilegx.o : reg-tilegx.c $(regdef_h)
+reg-tilegx.c : $(srcdir)/../regformats/reg-tilegx.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-tilegx.dat reg-tilegx.c
 # This is the end of "Makefile.in".

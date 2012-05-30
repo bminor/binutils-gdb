@@ -311,6 +311,12 @@ case "${target}" in
 			srv_tgtobj="${srv_tgtobj} linux-ptrace.o"
 			srv_linux_regsets=yes
 			;;
+  tilegx-*-linux*)	srv_regobj=reg-tilegx.o
+			srv_tgtobj="linux-low.o linux-tile-low.o linux-osdata.o linux-procfs.o"
+			srv_tgtobj="${srv_tgtobj} linux-ptrace.o"
+			srv_linux_regsets=yes
+			srv_linux_thread_db=yes
+			;;
   *)			echo "Error: target not supported by gdbserver."
 			exit 1
 			;;

@@ -1,3 +1,10 @@
+2012-05-30  Jeff Kenton  <jkenton@tilera.com>
+
+	* Makefile.in (SFILES): Add linux-tile-low.c.
+	(linux-tile-low.o, reg-tilegx.o, reg-tilegx.c): New rules.
+	* configure.srv: Handle tilegx-*-linux*.
+	* linux-tile-low.c: New file.
+
 2012-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-low.c (linux_qxfer_libraries_svr4): Return -1 if R_DEBUG is -1.
