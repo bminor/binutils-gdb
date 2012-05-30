@@ -1,3 +1,8 @@
+2012-05-30  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_section_headers): Correct bug in previous
+	delta - display full section type in wide mode.
+
 2012-05-28  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (print_symbol): Display multibyte characters in symbol

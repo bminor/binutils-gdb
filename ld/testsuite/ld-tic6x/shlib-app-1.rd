@@ -16,7 +16,7 @@ Section Headers:
   \[11\] \.got              PROGBITS        100000a0 0020a0 000020 00  WA  0   0  4
   \[12\] \.neardata         PROGBITS        100000c0 0020c0 00000c 00  WA  0   0  4
   \[13\] \.bss              NOBITS          100000cc 0020cc 000004 00  WA  0   0  4
-  \[14\] \.c6xabi\.attributes C6000_ATTRIBUTE 00000000 0020cc 000019 00      0   0  1
+  \[14\] \.c6xabi\.attributes C6000_ATTRIBUTES 00000000 0020cc 000019 00      0   0  1
   \[15\] \.shstrtab         STRTAB          00000000 0020e5 000080 00      0   0  1
   \[16\] \.symtab           SYMTAB          00000000 002438 0001a0 10     17  20  4
   \[17\] \.strtab           STRTAB          00000000 0025d8 000055 00      0   0  1

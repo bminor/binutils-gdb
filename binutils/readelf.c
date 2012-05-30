@@ -4738,18 +4738,16 @@ process_section_headers (FILE * file)
       if (do_section_details)
 	{
 	  print_symbol (INT_MAX, SECTION_NAME (section));
-	  putchar ('\n');
-	  if (is_32bit_elf || do_wide)
-	    printf ("       %-15.15s ",
-		    get_section_type_name (section->sh_type));
+	  printf ("\n      ");
 	}
       else
 	{
 	  print_symbol (-17, SECTION_NAME (section));
-	  printf (" %-15.15s ",
-		  get_section_type_name (section->sh_type));
 	}
-
+      
+      printf (do_wide ? " %-15s " : " %-15.15s ",
+	      get_section_type_name (section->sh_type));
+      
       if (is_32bit_elf)
 	{
 	  const char * link_too_big = NULL;

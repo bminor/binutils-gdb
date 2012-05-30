@@ -1,3 +1,19 @@
+2012-05-30  Nick Clifton  <nickc@redhat.com>
+
+	* ld-tic6x/shlib-1b.rd: Revert previous delta.
+	* ld-tic6x/shlib-1rb.rd: Likewise.
+	* ld-tic6x/shlib-1.rd: Likewise.
+	* ld-tic6x/shlib-1r.rd: Likewise.
+	* ld-tic6x/shlib-app-1b.rd: Likewise.
+	* ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* ld-tic6x/shlib-app-1.rd: Likewise.
+	* ld-tic6x/shlib-app-1r.rd: Likewise.
+	* ld-tic6x/shlib-noindex.rd: Likewise.
+	* ld-tic6x/static-app-1b.rd: Likewise.
+	* ld-tic6x/static-app-1rb.rd: Likewise.
+	* ld-tic6x/static-app-1.rd: Likewise.
+	* ld-tic6x/static-app-1r.rd: Likewise.
+
 2012-05-29  Nick Clifton  <nickc@redhat.com>
 
 	* ld-tic6x/shlib-1b.rd: Update expected readelf output.
