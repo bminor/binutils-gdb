@@ -4256,7 +4256,8 @@ static struct symbol *
 standard_lookup (const char *name, const struct block *block,
                  domain_enum domain)
 {
-  struct symbol *sym;
+  /* Initialize it just to avoid a GCC false warning.  */
+  struct symbol *sym = NULL;
 
   if (lookup_cached_symbol (name, domain, &sym, NULL))
     return sym;

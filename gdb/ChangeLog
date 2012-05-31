@@ -1,3 +1,8 @@
+2012-05-31  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ada-lang.c (standard_lookup): Prevent uninitialized variable
+	warning.
+
 2012-05-30  Jeff Kenton  <jkenton@tilera.com>
 
 	* configure.host (gdb_host_cpu): Handle tilegx*.
