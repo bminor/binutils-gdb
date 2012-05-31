@@ -8,8 +8,8 @@
 
 2012-05-26  Alan Modra  <amodra@gmail.com>
 
-	* ldlex.h (enum option_values): Move from..
-	* lexsup.c: ..here.
+	* lexsup.c (enum option_values): Move from..
+	* ldlex.h: ..here.
 	* emultempl/ppc32elf.em: Include ldlex.h.
 	(PARSE_AND_LIST_ARGS_CASES): Disable optimisations when
 	--traditional-format.
