@@ -1,3 +1,14 @@
+2012-05-31  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (decode_objc): Add cleanup to free
+	INFO.FILE_SYMTABS.
+	(find_linespec_symbols): Add cleanup to free CLASSES.
+	* symfile.c (find_separate_debug_file_by_debuglink): Add
+	cleanup to free DEBUGLINK.
+	* ui-out.c (clear_header_list): No need to check if
+	HEADER_NEXT.COLHDR is NULL.
+	Free HEADER_NEXT.COL_NAME.
+
 2012-05-31  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ada-lang.c (standard_lookup): Prevent uninitialized variable

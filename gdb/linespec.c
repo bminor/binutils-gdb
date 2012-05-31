@@ -2409,6 +2409,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, char **argptr)
   info.state = self;
   info.file_symtabs = NULL;
   VEC_safe_push (symtab_p, info.file_symtabs, NULL);
+  make_cleanup (VEC_cleanup (symtab_p), &info.file_symtabs);
   info.result.symbols = NULL;
   info.result.minimal_symbols = NULL;
   values.nelts = 0;
@@ -2949,6 +2950,7 @@ find_linespec_symbols (struct linespec_state *state,
 
   /* Find a list of classes named KLASS.  */
   classes = lookup_prefix_sym (state, file_symtabs, klass);
+  make_cleanup (VEC_cleanup (symbolp), &classes);
   if (!VEC_empty (symbolp, classes))
     {
       /* Now locate a list of suitable methods named METHOD.  */

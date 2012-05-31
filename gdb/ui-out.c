@@ -968,8 +968,8 @@ clear_header_list (struct ui_out *uiout)
     {
       uiout->table.header_next = uiout->table.header_first;
       uiout->table.header_first = uiout->table.header_first->next;
-      if (uiout->table.header_next->colhdr != NULL)
-	xfree (uiout->table.header_next->colhdr);
+      xfree (uiout->table.header_next->colhdr);
+      xfree (uiout->table.header_next->col_name);
       xfree (uiout->table.header_next);
     }
   gdb_assert (uiout->table.header_first == NULL);

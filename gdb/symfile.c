@@ -1553,8 +1553,9 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
       return NULL;
     }
 
+  cleanups = make_cleanup (xfree, debuglink);
   dir = xstrdup (objfile->name);
-  cleanups = make_cleanup (xfree, dir);
+  make_cleanup (xfree, dir);
   terminate_after_last_dir_separator (dir);
   canon_dir = lrealpath (dir);
 
