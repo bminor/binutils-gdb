@@ -49,7 +49,9 @@ const char FLT_CHARS[] = "dD";
 /* This macro has no side-effects.  */
 #define ENCODE_RELAX(what,length) (((what) << 2) + (length))
 
-/* what this is */
+/* Each unique opcode name has a handle.  That handle may
+   contain pointers to opcodes with the same name but
+   different address modes.  */
 struct xgate_opcode_handle
 {
   int number_of_modes;
@@ -283,16 +285,16 @@ md_begin (void)
   struct xgate_opcode_handle *op_handles = 0;
   char *prev_op_name = 0;
   int handle_enum = 0;
-  unsigned int number_of_handle_rows = 0;
+  int number_of_op_handles = 0;
   int i, j = 0;
 
   /* Create a local copy of our opcode table
      including an extra line for NULL termination.  */
   xgate_op_table = (struct xgate_opcode *)
-    xmalloc ((xgate_num_opcodes + 1) * sizeof (struct xgate_opcode));
+    xmalloc ((xgate_num_opcodes) * sizeof (struct xgate_opcode));
 
   memset (xgate_op_table, 0,
-	  sizeof(struct xgate_opcode) * (xgate_num_opcodes + 1));
+	  sizeof(struct xgate_opcode) * (xgate_num_opcodes));
 
   for (xgate_opcode_ptr = (struct xgate_opcode*) xgate_opcodes, i = 0;
       i < xgate_num_opcodes; i++)
@@ -303,48 +305,42 @@ md_begin (void)
 
   /* Calculate number of handles since this will be
      smaller than the raw number of opcodes in the table.  */
-  for (xgate_opcode_ptr = xgate_op_table; xgate_opcode_ptr->name;
-      xgate_opcode_ptr++)
+  prev_op_name = "";
+  for (xgate_opcode_ptr = xgate_op_table, i = 0;  i < xgate_num_opcodes;
+      xgate_opcode_ptr++, i++)
     {
-      if (prev_op_name != 0)
-        {
-          if (strcmp (prev_op_name, xgate_opcode_ptr->name))
-	    number_of_handle_rows++;
-        }
+      if (strcmp (prev_op_name, xgate_opcode_ptr->name))
+        number_of_op_handles++;
       prev_op_name = xgate_opcode_ptr->name;
     }
 
   op_handles = (struct xgate_opcode_handle *)
-    xmalloc (sizeof(struct xgate_opcode_handle) * (number_of_handle_rows + 1));
+    xmalloc (sizeof(struct xgate_opcode_handle) * (number_of_op_handles));
 
-  /* Insert opcode names into hash table, aliasing duplicates.  */
+  /* Insert unique opcode names into hash table, aliasing duplicates.  */
   xgate_hash = hash_new ();
 
+  prev_op_name = "";
   for (xgate_opcode_ptr = xgate_op_table, i = 0, j = 0; i < xgate_num_opcodes;
-       i++, xgate_opcode_ptr++)
+      i++, xgate_opcode_ptr++)
     {
-      if (strcmp (prev_op_name, xgate_opcode_ptr->name) || i == 0)
-        {
-          handle_enum = 0;
-          if (i)
-	    j++;
-
-          op_handles[j].name = xgate_opcode_ptr->name;
-          op_handles[j].opc0[0] = xgate_opcode_ptr;
-        }
-      else
+      if (!strcmp (prev_op_name, xgate_opcode_ptr->name))
         {
           handle_enum++;
           op_handles[j].opc0[handle_enum] = xgate_opcode_ptr;
         }
+      else
+        {
+          handle_enum = 0;
+          if (i)
+            j++;
+          op_handles[j].name = xgate_opcode_ptr->name;
+          op_handles[j].opc0[0] = xgate_opcode_ptr;
+          hash_insert (xgate_hash, (char *) op_handles[j].name,
+              (char *) &(op_handles[j]));
+        }
       op_handles[j].number_of_modes = handle_enum;
       prev_op_name = op_handles[j].name;
-    }
-
-  for (i = 1; i < (int)number_of_handle_rows; i++)
-    {
-      hash_insert (xgate_hash, op_handles->name, (char *) op_handles);
-      op_handles++;
     }
 
   if (flag_print_opcodes == 1)
