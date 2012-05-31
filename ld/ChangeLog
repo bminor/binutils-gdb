@@ -1,3 +1,8 @@
+2012-05-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc-13a-x86-64.s: Add missing "foo" after ".global".
+	* ld-ifunc/ifunc-15-x86-64.s: Likewise.
+
 2012-05-30  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.h (lang_output_section_statement_type): Rename
