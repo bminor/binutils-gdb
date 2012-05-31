@@ -1,3 +1,9 @@
+2012-05-31  Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (have_ptrace_booke_interface): Disable ptrace
+	BookE interface for PowerPC server processors if not available
+	in the Linux Kernel.
+
 2012-05-31  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (decode_objc): Add cleanup to free
