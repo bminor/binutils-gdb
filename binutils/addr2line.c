@@ -196,8 +196,6 @@ find_offset_in_section (bfd *abfd, asection *section)
 static void
 translate_addresses (bfd *abfd, asection *section)
 {
-  const struct elf_backend_data * bed;
-
   int read_stdin = (naddr == 0);
 
   for (;;)
@@ -218,11 +216,15 @@ translate_addresses (bfd *abfd, asection *section)
 	  pc = bfd_scan_vma (*addr++, NULL, 16);
 	}
 
-      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
-	  && (bed = get_elf_backend_data (abfd)) != NULL
-	  && bed->sign_extend_vma
-	  && (pc & (bfd_vma) 1 << (bed->s->arch_size - 1)))
-	pc |= ((bfd_vma) -1) << bed->s->arch_size;
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	{
+	  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+	  bfd_vma sign = (bfd_vma) 1 << (bed->s->arch_size - 1);
+
+	  pc &= (sign << 1) - 1;
+	  if (bed->sign_extend_vma)
+	    pc = (pc ^ sign) - sign;
+	}
 
       if (with_addresses)
         {
@@ -290,7 +292,11 @@ translate_addresses (bfd *abfd, asection *section)
                     filename = h + 1;
                 }
 
-              printf ("%s:%u\n", filename ? filename : "??", line);
+              printf ("%s:", filename ? filename : "??");
+	      if (line != 0)
+		printf ("%u\n", line);
+	      else
+		printf ("?\n");
               if (!unwind_inlines)
                 found = FALSE;
               else

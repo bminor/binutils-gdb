@@ -1,3 +1,8 @@
+2012-06-01  Alan Modra  <amodra@gmail.com>
+
+	* addr2line.c (translate_addresses): Truncate input addresses to
+	arch_size bits.  Avoid undefined shift.  Print '?' for zero line.
+
 2012-05-30  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (process_section_headers): Correct bug in previous
