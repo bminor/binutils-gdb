@@ -5533,46 +5533,43 @@ opd_entry_value (asection *opd_sec,
      at a final linked executable with addr2line or somesuch.  */
   if (opd_sec->reloc_count == 0)
     {
-      /* PR 13897: Cache the loaded section to speed up the search.  */
-      static asection * buf_sec = NULL;
-      static char       buf[8];
-      static bfd_vma    buf_val = 0;
-      static asection * buf_likely = NULL;
-      
-      if (buf_sec == opd_sec)
+      static asection *last_opd_sec, *last_code_sec;
+      static bfd_vma last_opd_off, last_entry_vma;
+      static bfd_boolean sec_search_done;
+
+      if (last_opd_sec != opd_sec
+	  || last_opd_off != offset
+	  || (code_sec != NULL && !sec_search_done))
 	{
+	  char buf[8];
+
+	  if (!bfd_get_section_contents (opd_bfd, opd_sec, buf, offset, 8))
+	    return (bfd_vma) -1;
+
+	  last_opd_sec = opd_sec;
+	  last_opd_off = offset;
+	  last_entry_vma = bfd_get_64 (opd_bfd, buf);
+	  sec_search_done = FALSE;
 	  if (code_sec != NULL)
-	    * code_sec = buf_likely;
-	  if (code_off != NULL && buf_likely != NULL)
-	    * code_off = buf_val - buf_likely->vma;
-	  return buf_val;
-	}
-   
-      if (!bfd_get_section_contents (opd_bfd, opd_sec, buf, offset, 8))
-	return (bfd_vma) -1;
-      buf_sec = opd_sec;
-
-      buf_val = bfd_get_64 (opd_bfd, buf);
-      if (code_sec != NULL)
-	{
-	  asection *sec;
-
-	  buf_likely = NULL;
-	  for (sec = opd_bfd->sections; sec != NULL; sec = sec->next)
-	    if (sec->vma <= buf_val
-		&& (sec->flags & SEC_LOAD) != 0
-		&& (sec->flags & SEC_ALLOC) != 0)
-	      buf_likely = sec;
-	  if (buf_likely != NULL)
 	    {
-	      *code_sec = buf_likely;
-	      if (code_off != NULL)
-		*code_off = buf_val - buf_likely->vma;
+	      asection *sec;
+
+	      sec_search_done = TRUE;
+	      last_code_sec = NULL;
+	      for (sec = opd_bfd->sections; sec != NULL; sec = sec->next)
+		if (sec->vma <= last_entry_vma
+		    && (sec->flags & SEC_LOAD) != 0
+		    && (sec->flags & SEC_ALLOC) != 0)
+		  last_code_sec = sec;
 	    }
 	}
-      else
-	buf_likely = NULL;
-      return buf_val;
+      if (code_sec != NULL && last_code_sec != NULL)
+	{
+	  *code_sec = last_code_sec;
+	  if (code_off != NULL)
+	    *code_off = last_entry_vma - last_code_sec->vma;
+	}
+      return last_entry_vma;
     }
 
   BFD_ASSERT (is_ppc64_elf (opd_bfd));

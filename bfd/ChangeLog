@@ -1,3 +1,8 @@
+2012-06-01  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/13897
+	* elf64-ppc.c (opd_entry_value): Rewrite cache code.
+
 2012-05-29  Tom Tromey  <tromey@redhat.com>
 
 	* opncls.c (bfd_fopen): Always close fd on failure.
