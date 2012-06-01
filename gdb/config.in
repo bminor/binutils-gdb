@@ -201,6 +201,9 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
+/* Define to 1 if you have the `mcheck' library (-lmcheck). */
+#undef HAVE_LIBMCHECK
+
 /* Define if Python 2.4 is being used. */
 #undef HAVE_LIBPYTHON2_4
 

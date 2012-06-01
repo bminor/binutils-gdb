@@ -1,3 +1,11 @@
+2012-06-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.ac (development): Define new variable.
+	Call AC_CHECK_LIB for mcheck if $development.
+	(ERROR_ON_WARNING): Enable it by default only if $development.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2012-06-01  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* target.c (target_read_memory): Make LEN argument as size_t.
