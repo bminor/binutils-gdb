@@ -1,3 +1,7 @@
+2012-05-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* tilegx-linux-tdep.c (tilegx_l): Use ULL for 64-bit values.
+
 2012-05-31  Edjunior Machado  <emachado@linux.vnet.ibm.com>
 
 	* ppc-linux-nat.c (have_ptrace_booke_interface): Disable ptrace
