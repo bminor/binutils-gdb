@@ -1,3 +1,15 @@
+2012-06-01  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* bfd-in.h (bfd_elf_bfd_from_remote_memory): Make LEN argument
+	of target_read_memory as size_t.
+	* bfd-in2.h: Regenerate.
+	* elf-bfd.h (elf_backend_bfd_from_remote_memory): Make LEN
+	argument of target_read_memory as size_t.
+	(_bfd_elf32_bfd_from_remote_memory): Likewise.
+	(_bfd_elf64_bfd_from_remote_memory): Likewise.
+	* elf.c (bfd_elf_bfd_from_remote_memory): Likewise.
+	* elfcode.h (NAME(_bfd_elf,bfd_from_remote_memory)): Likewise.
+
 2012-06-01  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/13897

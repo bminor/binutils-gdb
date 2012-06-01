@@ -1756,7 +1756,7 @@ target_xfer_partial (struct target_ops *ops,
    it makes no progress, and then return how much was transferred).  */
 
 int
-target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, size_t len)
 {
   /* Dispatch to the topmost target, not the flattened current_target.
      Memory accesses check target->to_has_(all_)memory, and the

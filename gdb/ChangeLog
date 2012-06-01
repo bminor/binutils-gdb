@@ -1,4 +1,9 @@
-2012-05-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2012-06-01  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* target.c (target_read_memory): Make LEN argument as size_t.
+	* target.h (target_read_memory): Likewise.
+
+2012-06-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* tilegx-linux-tdep.c (tilegx_l): Use ULL for 64-bit values.
 
