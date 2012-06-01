@@ -1,3 +1,8 @@
+2012-06-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix gcc -flto compilation warning.
+	* server.c (main): Make variable multi_mode and attach volatile.
+
 2012-05-30  Thiago Jung Bauermann  <thiago.bauermann@linaro.org>
 
 	* linux-low.c (get_r_debug): Disable code using DT_MIPS_RLD_MAP

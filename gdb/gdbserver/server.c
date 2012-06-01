@@ -2604,8 +2604,8 @@ main (int argc, char *argv[])
   int pid;
   char *arg_end, *port;
   char **next_arg = &argv[1];
-  int multi_mode = 0;
-  int attach = 0;
+  volatile int multi_mode = 0;
+  volatile int attach = 0;
   int was_running;
 
   while (*next_arg != NULL && **next_arg == '-')
