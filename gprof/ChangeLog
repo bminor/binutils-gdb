@@ -1,3 +1,8 @@
+2012-06-02  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* Makefile.am (TEXINFO_TEX): Remove $(top_srcdir) prefix.
+	* Makefile.in: Regenerate.
+
 2012-03-06  Tristan Gingold  <gingold@adacore.com>
 
 	* corefile.c (core_create_function_syms): Do not call bsearch if

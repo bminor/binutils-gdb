@@ -119,7 +119,7 @@ LTYACCCOMPILE = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(libldtestplug_la_SOURCES) $(ld_new_SOURCES) \
 	$(EXTRA_ld_new_SOURCES)
 INFO_DEPS = ld.info
-am__TEXINFO_TEX_DIR = $(srcdir)/$(top_srcdir)/../texinfo
+am__TEXINFO_TEX_DIR = $(srcdir)/../texinfo
 DVIS = ld.dvi
 PDFS = ld.pdf
 PSS = ld.ps
@@ -344,7 +344,7 @@ top_srcdir = @top_srcdir@
 use_sysroot = @use_sysroot@
 AUTOMAKE_OPTIONS = dejagnu no-texinfo.tex no-dist foreign
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
-TEXINFO_TEX = $(top_srcdir)/../texinfo/texinfo.tex
+TEXINFO_TEX = ../texinfo/texinfo.tex
 SUBDIRS = po
 tooldir = $(exec_prefix)/$(target_alias)
 

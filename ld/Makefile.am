@@ -2,7 +2,7 @@
 
 AUTOMAKE_OPTIONS = dejagnu no-texinfo.tex no-dist foreign
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
-TEXINFO_TEX = $(top_srcdir)/../texinfo/texinfo.tex
+TEXINFO_TEX = ../texinfo/texinfo.tex
 
 SUBDIRS = po
 

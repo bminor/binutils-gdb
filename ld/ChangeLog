@@ -1,3 +1,8 @@
+2012-06-02  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* Makefile.am (TEXINFO_TEX): Remove $(top_srcdir) prefix.
+	* Makefile.in: Regenerate.
+
 2012-05-30  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.h (lang_output_section_statement_type): Rename
