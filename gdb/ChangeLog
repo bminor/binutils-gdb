@@ -1,3 +1,8 @@
+2012-06-02  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* symtab.c (symbol_demangled_name): New variable `dem_name'.  Use
+	it to optimize resolution of demangled name.
+
 2012-06-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure.ac (development): Define new variable.

@@ -850,6 +850,8 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
 const char *
 symbol_demangled_name (const struct general_symbol_info *gsymbol)
 {
+  const char *dem_name = NULL;
+
   switch (gsymbol->language)
     {
     case language_cplus:
@@ -858,19 +860,17 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
     case language_java:
     case language_objc:
     case language_fortran:
-      if (symbol_get_demangled_name (gsymbol) != NULL)
-	return symbol_get_demangled_name (gsymbol);
+      dem_name = symbol_get_demangled_name (gsymbol);
       break;
     case language_ada:
-      if (symbol_get_demangled_name (gsymbol) != NULL)
-	return symbol_get_demangled_name (gsymbol);
-      else
-	return ada_decode_symbol (gsymbol);
+      dem_name = symbol_get_demangled_name (gsymbol);
+      if (dem_name == NULL)
+	dem_name = ada_decode_symbol (gsymbol);
       break;
     default:
       break;
     }
-  return NULL;
+  return dem_name;
 }
 
 /* Return the search name of a symbol---generally the demangled or
