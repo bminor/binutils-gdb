@@ -95,16 +95,16 @@ proc test_eliminated_var { var } {
 gdb_exit
 gdb_start
 
-gdb_test "add-symbol-file ${binfile1} 0x100000" \
+gdb_test "symbol-file ${binfile1}" \
 	"Reading symbols from .*${testfile1}\\.\\.\\.done\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
-	"add-symbol-file ${testfile1} 0x100000" \
-	"add symbol table from file \".*${testfile1}\" at\[ \t\r\n\]+\.text_addr = 0x100000\[\r\n\]+\\(y or n\\) " \
-	"y"
+	"symbol-file ${testfile1}"
 
-test_eliminated_var my_global_symbol
-test_eliminated_var my_static_symbol
-test_eliminated_var my_global_func
-not_null_var_address main
+with_test_prefix "single psymtabs" {
+    test_eliminated_var my_global_symbol
+    test_eliminated_var my_static_symbol
+    test_eliminated_var my_global_func
+    not_null_var_address main
+}
 
 # Same thing for symtabs
 
@@ -115,10 +115,12 @@ set GDBFLAGS "$GDBFLAGS --readnow $binfile1"
 gdb_start
 set GDBFLAGS $saved_gdbflags
 
-test_eliminated_var my_global_symbol
-test_eliminated_var my_static_symbol
-test_eliminated_var my_global_func
-not_null_var_address main
+with_test_prefix "single symtabs" {
+    test_eliminated_var my_global_symbol
+    test_eliminated_var my_static_symbol
+    test_eliminated_var my_global_func
+    not_null_var_address main
+}
 
 # binfile2 contains the symbols that have been eliminated in binfile1. Check
 # the eliminated symbols does not hide these valid ones.
@@ -138,10 +140,12 @@ gdb_test "add-symbol-file ${binfile2} 0x200000" \
 	"add symbol table from file \".*${testfile2}\" at\[ \t\r\n\]+\.text_addr = 0x200000\[\r\n\]+\\(y or n\\) " \
 	"y"
 
-not_null_var_address my_global_symbol
-not_null_var_address my_static_symbol
-not_null_var_address my_global_func
-not_null_var_address main
+with_test_prefix "order1" {
+    not_null_var_address my_global_symbol
+    not_null_var_address my_static_symbol
+    not_null_var_address my_global_func
+    not_null_var_address main
+}
 
 # Same thing, but loading binfile2 before binfile1.
 
@@ -160,9 +164,9 @@ gdb_test "add-symbol-file ${binfile1} 0x100000" \
 	"add symbol table from file \".*${testfile1}\" at\[ \t\r\n\]+\.text_addr = 0x100000\[\r\n\]+\\(y or n\\) " \
 	"y"
 
-not_null_var_address my_global_symbol
-not_null_var_address my_static_symbol
-not_null_var_address my_global_func
-not_null_var_address main
-
-
+with_test_prefix "order2" {
+    not_null_var_address my_global_symbol
+    not_null_var_address my_static_symbol
+    not_null_var_address my_global_func
+    not_null_var_address main
+}

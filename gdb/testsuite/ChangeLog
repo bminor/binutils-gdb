@@ -1,3 +1,16 @@
+2012-06-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/code_elim.exp (add-symbol-file ${testfile1} 0x100000):
+	Simplify it to ...
+	(symbol-file ${testfile1}): ... here.
+	(test eliminated var my_global_symbol)
+	(test eliminated var my_static_symbol)
+	(test eliminated var my_global_func, get address of main): Wrap them to
+	'single psymtabs' and 'single symtabs'
+	(get address of my_global_symbol, get address of my_static_symbol)
+	(get address of my_global_func, get address of main): Wrap them to
+	'order1' and 'order2'.
+
 2012-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.server/solib-list-lib.c: New file.
