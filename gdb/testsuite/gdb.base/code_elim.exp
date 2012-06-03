@@ -128,19 +128,19 @@ with_test_prefix "single symtabs" {
 gdb_exit
 gdb_start
 
-gdb_test "add-symbol-file ${binfile1} 0x100000" \
-	"Reading symbols from .*${testfile1}\\.\\.\\.done\\." \
-	"add-symbol-file ${testfile1} 0x100000" \
-	"add symbol table from file \".*${testfile1}\" at\[ \t\r\n\]+\.text_addr = 0x100000\[\r\n\]+\\(y or n\\) " \
-	"y"
-
-gdb_test "add-symbol-file ${binfile2} 0x200000" \
-	"Reading symbols from .*${testfile2}\\.\\.\\.done\\." \
-	"add-symbol-file ${testfile2} 0x200000" \
-	"add symbol table from file \".*${testfile2}\" at\[ \t\r\n\]+\.text_addr = 0x200000\[\r\n\]+\\(y or n\\) " \
-	"y"
-
 with_test_prefix "order1" {
+    gdb_test "add-symbol-file ${binfile1} 0x100000 -s .bss 0x120000" \
+	    "Reading symbols from .*${testfile1}\\.\\.\\.done\\." \
+	    "add-symbol-file ${testfile1} 0x100000" \
+	    "add symbol table from file \".*${testfile1}\" at.*\\(y or n\\) " \
+	    "y"
+
+    gdb_test "add-symbol-file ${binfile2} 0x200000 -s .data 0x210000 -s .bss 0x220000" \
+	    "Reading symbols from .*${testfile2}\\.\\.\\.done\\." \
+	    "add-symbol-file ${testfile2} 0x200000" \
+	    "add symbol table from file \".*${testfile2}\" at.*\\(y or n\\) " \
+	    "y"
+
     not_null_var_address my_global_symbol
     not_null_var_address my_static_symbol
     not_null_var_address my_global_func
@@ -152,19 +152,19 @@ with_test_prefix "order1" {
 gdb_exit
 gdb_start
 
-gdb_test "add-symbol-file ${binfile2} 0x200000" \
-	"Reading symbols from .*${testfile2}\\.\\.\\.done\\." \
-	"add-symbol-file ${testfile2} 0x200000" \
-	"add symbol table from file \".*${testfile2}\" at\[ \t\r\n\]+\.text_addr = 0x200000\[\r\n\]+\\(y or n\\) " \
-	"y"
-
-gdb_test "add-symbol-file ${binfile1} 0x100000" \
-	"Reading symbols from .*${testfile1}\\.\\.\\.done\\." \
-	"add-symbol-file ${testfile1} 0x100000" \
-	"add symbol table from file \".*${testfile1}\" at\[ \t\r\n\]+\.text_addr = 0x100000\[\r\n\]+\\(y or n\\) " \
-	"y"
-
 with_test_prefix "order2" {
+    gdb_test "add-symbol-file ${binfile2} 0x200000 -s .data 0x210000 -s .bss 0x220000" \
+	    "Reading symbols from .*${testfile2}\\.\\.\\.done\\." \
+	    "add-symbol-file ${testfile2} 0x200000" \
+	    "add symbol table from file \".*${testfile2}\" at.*\\(y or n\\) " \
+	    "y"
+
+    gdb_test "add-symbol-file ${binfile1} 0x100000 -s .bss 0x120000" \
+	    "Reading symbols from .*${testfile1}\\.\\.\\.done\\." \
+	    "add-symbol-file ${testfile1} 0x100000" \
+	    "add symbol table from file \".*${testfile1}\" at.*\\(y or n\\) " \
+	    "y"
+
     not_null_var_address my_global_symbol
     not_null_var_address my_static_symbol
     not_null_var_address my_global_func

@@ -11,6 +11,16 @@
 	(get address of my_global_func, get address of main): Wrap them to
 	'order1' and 'order2'.
 
+	* gdb.base/code_elim.exp
+	(add-symbol-file ${testfile1} 0x100000)
+	(add-symbol-file ${testfile2} 0x200000): Wrap them to 'order1' and
+	'order2'.
+	(order1: add-symbol-file ${testfile1} 0x100000)
+	(order1: add-symbol-file ${testfile2} 0x200000)
+	(order2: add-symbol-file ${testfile2} 0x200000)
+	(order2: add-symbol-file ${testfile1} 0x100000): Add -s .data and -s
+	.bss as appropriate.
+
 2012-05-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.server/solib-list-lib.c: New file.
