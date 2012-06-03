@@ -1,3 +1,16 @@
+2012-06-03  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/13897
+	* elf.c (elf_find_function): Cache last function sym info.
+	(_bfd_elf_maybe_function_sym): Return function size, pass in
+	section of interest.
+	* elf-bfd.h (struct elf_backend_data <maybe_function_sym>): Likewise.
+	(_bfd_elf_maybe_function_sym): Likewise.
+	* elf64-ppc.c (ppc64_elf_maybe_function_sym): Likewise.
+	(opd_entry_value): Add in_code_sec param.  Revert caching code.
+	Return -1 if in_code_sec and function found in wrong section.
+	Update all calls.
+
 2012-06-01  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* bfd-in.h (bfd_elf_bfd_from_remote_memory): Make LEN argument

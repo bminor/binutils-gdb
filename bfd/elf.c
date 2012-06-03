@@ -7407,59 +7407,74 @@ elf_find_function (bfd *abfd,
 		   const char **filename_ptr,
 		   const char **functionname_ptr)
 {
-  const char *filename;
-  asymbol *func, *file;
-  bfd_vma low_func;
-  asymbol **p;
-  /* ??? Given multiple file symbols, it is impossible to reliably
-     choose the right file name for global symbols.  File symbols are
-     local symbols, and thus all file symbols must sort before any
-     global symbols.  The ELF spec may be interpreted to say that a
-     file symbol must sort before other local symbols, but currently
-     ld -r doesn't do this.  So, for ld -r output, it is possible to
-     make a better choice of file name for local symbols by ignoring
-     file symbols appearing after a given local symbol.  */
-  enum { nothing_seen, symbol_seen, file_after_symbol_seen } state;
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  static asection *last_section;
+  static asymbol *func;
+  static const char *filename;
+  static bfd_size_type func_size;
 
   if (symbols == NULL)
     return FALSE;
 
-  filename = NULL;
-  func = NULL;
-  file = NULL;
-  low_func = 0;
-  state = nothing_seen;
-
-  for (p = symbols; *p != NULL; p++)
+  if (last_section != section
+      || func == NULL
+      || offset < func->value
+      || offset >= func->value + func_size)
     {
-      asymbol *sym = *p;
-      asection *code_sec;
-      bfd_vma code_off;
+      asymbol *file;
+      bfd_vma low_func;
+      asymbol **p;
+      /* ??? Given multiple file symbols, it is impossible to reliably
+	 choose the right file name for global symbols.  File symbols are
+	 local symbols, and thus all file symbols must sort before any
+	 global symbols.  The ELF spec may be interpreted to say that a
+	 file symbol must sort before other local symbols, but currently
+	 ld -r doesn't do this.  So, for ld -r output, it is possible to
+	 make a better choice of file name for local symbols by ignoring
+	 file symbols appearing after a given local symbol.  */
+      enum { nothing_seen, symbol_seen, file_after_symbol_seen } state;
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-      if ((sym->flags & BSF_FILE) != 0)
-	{
-	  file = sym;
-	  if (state == symbol_seen)
-	    state = file_after_symbol_seen;
-	  continue;
-	}
+      filename = NULL;
+      func = NULL;
+      file = NULL;
+      low_func = 0;
+      state = nothing_seen;
+      func_size = 0;
+      last_section = section;
 
-      if (bed->maybe_function_sym (sym, &code_sec, &code_off)
-	  && code_sec == section
-	  && code_off >= low_func
-	  && code_off <= offset)
+      for (p = symbols; *p != NULL; p++)
 	{
-	  func = sym;
-	  low_func = code_off;
-	  filename = NULL;
-	  if (file != NULL
-	      && ((sym->flags & BSF_LOCAL) != 0
-		  || state != file_after_symbol_seen))
-	    filename = bfd_asymbol_name (file);
+	  asymbol *sym = *p;
+	  bfd_vma code_off;
+	  bfd_size_type size;
+
+	  if ((sym->flags & BSF_FILE) != 0)
+	    {
+	      file = sym;
+	      if (state == symbol_seen)
+		state = file_after_symbol_seen;
+	      continue;
+	    }
+
+	  size = bed->maybe_function_sym (sym, section, &code_off);
+	  if (size != 0
+	      && code_off <= offset
+	      && (code_off > low_func
+		  || (code_off == low_func
+		      && size > func_size)))
+	    {
+	      func = sym;
+	      func_size = size;
+	      low_func = code_off;
+	      filename = NULL;
+	      if (file != NULL
+		  && ((sym->flags & BSF_LOCAL) != 0
+		      || state != file_after_symbol_seen))
+		filename = bfd_asymbol_name (file);
+	    }
+	  if (state == nothing_seen)
+	    state = symbol_seen;
 	}
-      if (state == nothing_seen)
-	state = symbol_seen;
     }
 
   if (func == NULL)
@@ -9714,18 +9729,26 @@ _bfd_elf_is_function_type (unsigned int type)
 	  || type == STT_GNU_IFUNC);
 }
 
-/* Return TRUE iff the ELF symbol SYM might be a function.  Set *CODE_SEC
-   and *CODE_OFF to the function's entry point.  */
+/* If the ELF symbol SYM might be a function in SEC, return the
+   function size and set *CODE_OFF to the function's entry point,
+   otherwise return zero.  */
 
-bfd_boolean
-_bfd_elf_maybe_function_sym (const asymbol *sym,
-			     asection **code_sec, bfd_vma *code_off)
+bfd_size_type
+_bfd_elf_maybe_function_sym (const asymbol *sym, asection *sec,
+			     bfd_vma *code_off)
 {
-  if ((sym->flags & (BSF_SECTION_SYM | BSF_FILE | BSF_OBJECT
-		     | BSF_THREAD_LOCAL | BSF_RELC | BSF_SRELC)) != 0)
-    return FALSE;
+  bfd_size_type size;
 
-  *code_sec = sym->section;
+  if ((sym->flags & (BSF_SECTION_SYM | BSF_FILE | BSF_OBJECT
+		     | BSF_THREAD_LOCAL | BSF_RELC | BSF_SRELC)) != 0
+      || sym->section != sec)
+    return 0;
+
   *code_off = sym->value;
-  return TRUE;
+  size = 0;
+  if (!(sym->flags & BSF_SYNTHETIC))
+    size = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
+  if (size == 0)
+    size = 1;
+  return size;
 }

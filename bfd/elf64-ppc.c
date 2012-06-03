@@ -55,7 +55,7 @@ static bfd_reloc_status_type ppc64_elf_toc64_reloc
 static bfd_reloc_status_type ppc64_elf_unhandled_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_vma opd_entry_value
-  (asection *, bfd_vma, asection **, bfd_vma *);
+  (asection *, bfd_vma, asection **, bfd_vma *, bfd_boolean);
 
 #define TARGET_LITTLE_SYM	bfd_elf64_powerpcle_vec
 #define TARGET_LITTLE_NAME	"elf64-powerpcle"
@@ -2347,7 +2347,7 @@ ppc64_elf_branch_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
     {
       bfd_vma dest = opd_entry_value (symbol->section,
 				      symbol->value + reloc_entry->addend,
-				      NULL, NULL);
+				      NULL, NULL, FALSE);
       if (dest != (bfd_vma) -1)
 	reloc_entry->addend = dest - (symbol->value
 				      + symbol->section->output_section->vma
@@ -5522,7 +5522,8 @@ static bfd_vma
 opd_entry_value (asection *opd_sec,
 		 bfd_vma offset,
 		 asection **code_sec,
-		 bfd_vma *code_off)
+		 bfd_vma *code_off,
+		 bfd_boolean in_code_sec)
 {
   bfd *opd_bfd = opd_sec->owner;
   Elf_Internal_Rela *relocs;
@@ -5533,43 +5534,39 @@ opd_entry_value (asection *opd_sec,
      at a final linked executable with addr2line or somesuch.  */
   if (opd_sec->reloc_count == 0)
     {
-      static asection *last_opd_sec, *last_code_sec;
-      static bfd_vma last_opd_off, last_entry_vma;
-      static bfd_boolean sec_search_done;
+      char buf[8];
 
-      if (last_opd_sec != opd_sec
-	  || last_opd_off != offset
-	  || (code_sec != NULL && !sec_search_done))
+      if (!bfd_get_section_contents (opd_bfd, opd_sec, buf, offset, 8))
+	return (bfd_vma) -1;
+
+      val = bfd_get_64 (opd_bfd, buf);
+      if (code_sec != NULL)
 	{
-	  char buf[8];
+	  asection *sec, *likely = NULL;
 
-	  if (!bfd_get_section_contents (opd_bfd, opd_sec, buf, offset, 8))
-	    return (bfd_vma) -1;
-
-	  last_opd_sec = opd_sec;
-	  last_opd_off = offset;
-	  last_entry_vma = bfd_get_64 (opd_bfd, buf);
-	  sec_search_done = FALSE;
-	  if (code_sec != NULL)
+	  if (in_code_sec)
 	    {
-	      asection *sec;
-
-	      sec_search_done = TRUE;
-	      last_code_sec = NULL;
-	      for (sec = opd_bfd->sections; sec != NULL; sec = sec->next)
-		if (sec->vma <= last_entry_vma
-		    && (sec->flags & SEC_LOAD) != 0
-		    && (sec->flags & SEC_ALLOC) != 0)
-		  last_code_sec = sec;
+	      sec = *code_sec;
+	      if (sec->vma <= val
+		  && val < sec->vma + sec->size)
+		likely = sec;
+	      else
+		val = -1;
+	    }
+	  else
+	    for (sec = opd_bfd->sections; sec != NULL; sec = sec->next)
+	      if (sec->vma <= val
+		  && (sec->flags & SEC_LOAD) != 0
+		  && (sec->flags & SEC_ALLOC) != 0)
+		likely = sec;
+	  if (likely != NULL)
+	    {
+	      *code_sec = likely;
+	      if (code_off != NULL)
+		*code_off = val - likely->vma;
 	    }
 	}
-      if (code_sec != NULL && last_code_sec != NULL)
-	{
-	  *code_sec = last_code_sec;
-	  if (code_off != NULL)
-	    *code_off = last_entry_vma - last_code_sec->vma;
-	}
-      return last_entry_vma;
+      return val;
     }
 
   BFD_ASSERT (is_ppc64_elf (opd_bfd));
@@ -5640,7 +5637,12 @@ opd_entry_value (asection *opd_sec,
 	      if (code_off != NULL)
 		*code_off = val;
 	      if (code_sec != NULL)
-		*code_sec = sec;
+		{
+		  if (in_code_sec && *code_sec != sec)
+		    return -1;
+		  else
+		    *code_sec = sec;
+		}
 	      if (sec != NULL && sec->output_section != NULL)
 		val += sec->output_section->vma + sec->output_offset;
 	    }
@@ -5651,20 +5653,53 @@ opd_entry_value (asection *opd_sec,
   return val;
 }
 
-/* Return TRUE iff the ELF symbol SYM might be a function.  Set *CODE_SEC
-   and *CODE_OFF to the function's entry point.  */
+/* If the ELF symbol SYM might be a function in SEC, return the
+   function size and set *CODE_OFF to the function's entry point,
+   otherwise return zero.  */
 
-static bfd_boolean
-ppc64_elf_maybe_function_sym (const asymbol *sym,
-			      asection **code_sec, bfd_vma *code_off)
+static bfd_size_type
+ppc64_elf_maybe_function_sym (const asymbol *sym, asection *sec,
+			      bfd_vma *code_off)
 {
-  if (_bfd_elf_maybe_function_sym (sym, code_sec, code_off))
+  bfd_size_type size;
+
+  if ((sym->flags & (BSF_SECTION_SYM | BSF_FILE | BSF_OBJECT
+		     | BSF_THREAD_LOCAL | BSF_RELC | BSF_SRELC)) != 0)
+    return 0;
+
+  size = 0;
+  if (!(sym->flags & BSF_SYNTHETIC))
+    size = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
+
+  if (strcmp (sym->section->name, ".opd") == 0)
     {
-      if (strcmp (sym->section->name, ".opd") == 0)
-	opd_entry_value (sym->section, sym->value, code_sec, code_off);
-      return TRUE;
+      if (opd_entry_value (sym->section, sym->value,
+			   &sec, code_off, TRUE) == (bfd_vma) -1)
+	return 0;
+      /* An old ABI binary with dot-syms has a size of 24 on the .opd
+	 symbol.  This size has nothing to do with the code size of the
+	 function, which is what we're supposed to return, but the
+	 code size isn't available without looking up the dot-sym.
+	 However, doing that would be a waste of time particularly
+	 since elf_find_function will look at the dot-sym anyway.
+	 Now, elf_find_function will keep the largest size of any
+	 function sym found at the code address of interest, so return
+	 1 here to avoid it incorrectly caching a larger function size
+	 for a small function.  This does mean we return the wrong
+	 size for a new-ABI function of size 24, but all that does is
+	 disable caching for such functions.  */
+      if (size == 24)
+	size = 1;
     }
-  return FALSE;
+  else
+    {
+      if (sym->section != sec)
+	return 0;
+      *code_off = sym->value;
+    }
+  if (size == 0)
+    size = 1;
+  return size;
 }
 
 /* Return true if symbol is defined in a regular object file.  */
@@ -5744,7 +5779,7 @@ ppc64_elf_gc_keep (struct bfd_link_info *info)
       else if (get_opd_info (eh->elf.root.u.def.section) != NULL
 	       && opd_entry_value (eh->elf.root.u.def.section,
 				   eh->elf.root.u.def.value,
-				   &sec, NULL) != (bfd_vma) -1)
+				   &sec, NULL, FALSE) != (bfd_vma) -1)
 	sec->flags |= SEC_KEEP;
 
       sec = eh->elf.root.u.def.section;
@@ -5795,7 +5830,7 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
       else if (get_opd_info (eh->elf.root.u.def.section) != NULL
 	       && opd_entry_value (eh->elf.root.u.def.section,
 				   eh->elf.root.u.def.value,
-				   &code_sec, NULL) != (bfd_vma) -1)
+				   &code_sec, NULL, FALSE) != (bfd_vma) -1)
 	code_sec->flags |= SEC_KEEP;
     }
 
@@ -5855,7 +5890,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	      else if (get_opd_info (eh->elf.root.u.def.section) != NULL
 		       && opd_entry_value (eh->elf.root.u.def.section,
 					   eh->elf.root.u.def.value,
-					   &rsec, NULL) != (bfd_vma) -1)
+					   &rsec, NULL, FALSE) != (bfd_vma) -1)
 		eh->elf.root.u.def.section->gc_mark = 1;
 	      else
 		rsec = h->root.u.def.section;
@@ -6324,7 +6359,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
       && opd_entry_value (fdh->elf.root.u.def.section,
 			  fdh->elf.root.u.def.value,
 			  &fh->elf.root.u.def.section,
-			  &fh->elf.root.u.def.value) != (bfd_vma) -1)
+			  &fh->elf.root.u.def.value, FALSE) != (bfd_vma) -1)
     {
       fh->elf.root.type = fdh->elf.root.type;
       fh->elf.forced_local = 1;
@@ -10915,7 +10950,8 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
 		  sym_value += adjust;
 		}
 
-	      dest = opd_entry_value (sym_sec, sym_value, &sym_sec, NULL);
+	      dest = opd_entry_value (sym_sec, sym_value,
+				      &sym_sec, NULL, FALSE);
 	      if (dest == (bfd_vma) -1)
 		continue;
 	    }
@@ -11490,7 +11526,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
 			  sym_value += adjust;
 			}
 		      dest = opd_entry_value (sym_sec, sym_value,
-					      &code_sec, &code_value);
+					      &code_sec, &code_value, FALSE);
 		      if (dest != (bfd_vma) -1)
 			{
 			  destination = dest;
@@ -12904,7 +12940,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      bfd_vma off = (relocation + addend
 			     - sec->output_section->vma
 			     - sec->output_offset);
-	      bfd_vma dest = opd_entry_value (sec, off, NULL, NULL);
+	      bfd_vma dest = opd_entry_value (sec, off, NULL, NULL, FALSE);
 	      if (dest != (bfd_vma) -1)
 		{
 		  relocation = dest;
