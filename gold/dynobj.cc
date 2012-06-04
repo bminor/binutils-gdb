@@ -823,7 +823,7 @@ Sized_dynobj<size, big_endian>::do_get_global_symbol_counts(
 	&& (*p)->source() == Symbol::FROM_OBJECT
 	&& (*p)->object() == this
 	&& (*p)->is_defined()
-	&& (*p)->dynsym_index() != -1U)
+	&& (*p)->has_dynsym_index())
       ++count;
   *used = count;
 }
