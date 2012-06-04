@@ -940,10 +940,13 @@ extern int gdbarch_process_record_signal (struct gdbarch *gdbarch, struct regcac
 extern void set_gdbarch_process_record_signal (struct gdbarch *gdbarch, gdbarch_process_record_signal_ftype *process_record_signal);
 
 /* Signal translation: translate inferior's signal (target's) number
-   into GDB's representation.  This is mainly used when cross-debugging
-   core files --- "Live" targets hide the translation behind the target
-   interface (target_wait, target_resume, etc.).  The default is to do
-   the translation using host signal numbers. */
+   into GDB's representation.  The implementation of this method must
+   be host independent.  IOW, don't rely on symbols of the NAT_FILE
+   header (the nm-*.h files), the host <signal.h> header, or similar
+   headers.  This is mainly used when cross-debugging core files ---
+   "Live" targets hide the translation behind the target interface
+   (target_wait, target_resume, etc.).  The default is to do the
+   translation using host signal numbers. */
 
 typedef enum gdb_signal (gdbarch_gdb_signal_from_target_ftype) (struct gdbarch *gdbarch, int signo);
 extern enum gdb_signal gdbarch_gdb_signal_from_target (struct gdbarch *gdbarch, int signo);

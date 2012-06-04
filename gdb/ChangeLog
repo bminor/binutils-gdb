@@ -1,3 +1,9 @@
+2012-06-04  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch.sh (gdb_signal_from_target): Mention that the
+	implementation of the method must be host independent.
+	* gdbarch.h: Regenerate.
+
 2012-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile-mem.c: 3 new gdb_static_assert for target_read_memory_bfd

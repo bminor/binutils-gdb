@@ -773,10 +773,13 @@ M:int:process_record:struct regcache *regcache, CORE_ADDR addr:regcache, addr
 M:int:process_record_signal:struct regcache *regcache, enum gdb_signal signal:regcache, signal
 
 # Signal translation: translate inferior's signal (target's) number
-# into GDB's representation.  This is mainly used when cross-debugging
-# core files --- "Live" targets hide the translation behind the target
-# interface (target_wait, target_resume, etc.).  The default is to do
-# the translation using host signal numbers.
+# into GDB's representation.  The implementation of this method must
+# be host independent.  IOW, don't rely on symbols of the NAT_FILE
+# header (the nm-*.h files), the host <signal.h> header, or similar
+# headers.  This is mainly used when cross-debugging core files ---
+# "Live" targets hide the translation behind the target interface
+# (target_wait, target_resume, etc.).  The default is to do the
+# translation using host signal numbers.
 m:enum gdb_signal:gdb_signal_from_target:int signo:signo::default_gdb_signal_from_target::0
 
 # Extra signal info inspection.
