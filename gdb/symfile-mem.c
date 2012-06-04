@@ -55,6 +55,25 @@
 #include "auxv.h"
 #include "elf/common.h"
 
+/* Verify parameters of target_read_memory_bfd and target_read_memory are
+   compatible.  */
+
+gdb_static_assert (sizeof (CORE_ADDR) == sizeof (bfd_vma));
+gdb_static_assert (sizeof (gdb_byte) == sizeof (bfd_byte));
+gdb_static_assert (sizeof (size_t) <= sizeof (bfd_size_type));
+
+/* Provide bfd/ compatible prototype for target_read_memory.  Casting would not
+   be enough as LEN width may differ.  */
+
+static int
+target_read_memory_bfd (bfd_vma memaddr, bfd_byte *myaddr, bfd_size_type len)
+{
+  /* MYADDR must be already allocated for the LEN size so it has to fit in
+     size_t.  */
+  gdb_assert ((size_t) len == len);
+
+  return target_read_memory (memaddr, myaddr, len);
+}
 
 /* Read inferior memory at ADDR to find the header of a loaded object file
    and read its in-core symbols out of inferior memory.  TEMPL is a bfd
@@ -77,7 +96,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
     error (_("add-symbol-file-from-memory not supported for this target"));
 
   nbfd = bfd_elf_bfd_from_remote_memory (templ, addr, &loadbase,
-					 target_read_memory);
+					 target_read_memory_bfd);
   if (nbfd == NULL)
     error (_("Failed to read a valid object file image from memory."));
 

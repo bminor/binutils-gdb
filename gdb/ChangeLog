@@ -1,3 +1,10 @@
+2012-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile-mem.c: 3 new gdb_static_assert for target_read_memory_bfd
+	parameters.
+	(target_read_memory_bfd): New function.
+	(symbol_file_add_from_memory): Use it.
+
 2012-06-03  Doug Evans  <dje@google.com>
 
 	* symtab.c (lookup_global_symbol_from_objfile): Only scan blockvector
