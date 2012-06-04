@@ -1478,17 +1478,17 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
        objfile = objfile_separate_debug_iterate (main_objfile, objfile))
     {
       /* Go through symtabs.  */
-      ALL_OBJFILE_SYMTABS (objfile, s)
-        {
-          bv = BLOCKVECTOR (s);
-          block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-          sym = lookup_block_symbol (block, name, domain);
-          if (sym)
-            {
-              block_found = block;
-              return fixup_symbol_section (sym, (struct objfile *)objfile);
-            }
-        }
+      ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
+	{
+	  bv = BLOCKVECTOR (s);
+	  block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	  sym = lookup_block_symbol (block, name, domain);
+	  if (sym)
+	    {
+	      block_found = block;
+	      return fixup_symbol_section (sym, (struct objfile *)objfile);
+	    }
+	}
 
       sym = lookup_symbol_aux_quick ((struct objfile *) objfile, GLOBAL_BLOCK,
 				     name, domain);
@@ -1860,7 +1860,7 @@ basic_lookup_transparent_type (const char *name)
       objfile->sf->qf->pre_expand_symtabs_matching (objfile, STATIC_BLOCK,
 						    name, STRUCT_DOMAIN);
 
-    ALL_OBJFILE_SYMTABS (objfile, s)
+    ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
       {
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);

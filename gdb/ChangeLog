@@ -1,5 +1,9 @@
 2012-06-03  Doug Evans  <dje@google.com>
 
+	* symtab.c (lookup_global_symbol_from_objfile): Only scan blockvector
+	of primary symtab.
+	(basic_lookup_transparent_type): Ditto.
+
 	* objfiles.h (ALL_OBJFILE_PRIMARY_SYMTABS): New macro.
 	(ALL_PRIMARY_SYMTABS): Use it.
 	(ALL_PSPACE_PRIMARY_SYMTABS): Ditto.
