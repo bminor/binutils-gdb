@@ -987,27 +987,24 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
 						  ALL_DOMAIN,
 						  &matcher_data);
 
-      ALL_OBJFILE_SYMTABS (objfile, symtab)
+      ALL_OBJFILE_PRIMARY_SYMTABS (objfile, symtab)
 	{
-	  if (symtab->primary)
+	  struct block *block;
+
+	  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
+	  LA_ITERATE_OVER_SYMBOLS (block, name, domain, callback, data);
+
+	  if (include_inline)
 	    {
-	      struct block *block;
+	      struct symbol_and_data_callback cad = { callback, data };
+	      int i;
 
-	      block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
-	      LA_ITERATE_OVER_SYMBOLS (block, name, domain, callback, data);
-
-	      if (include_inline)
+	      for (i = FIRST_LOCAL_BLOCK;
+		   i < BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (symtab)); i++)
 		{
-		  struct symbol_and_data_callback cad = { callback, data };
-		  int i;
-
-		  for (i = FIRST_LOCAL_BLOCK;
-		       i < BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (symtab)); i++)
-		    {
-		      block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), i);
-		      LA_ITERATE_OVER_SYMBOLS (block, name, domain,
-					       iterate_inline_only, &cad);
-		    }
+		  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), i);
+		  LA_ITERATE_OVER_SYMBOLS (block, name, domain,
+					   iterate_inline_only, &cad);
 		}
 	    }
 	}

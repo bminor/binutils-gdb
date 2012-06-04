@@ -1,3 +1,13 @@
+2012-06-03  Doug Evans  <dje@google.com>
+
+	* objfiles.h (ALL_OBJFILE_PRIMARY_SYMTABS): New macro.
+	(ALL_PRIMARY_SYMTABS): Use it.
+	(ALL_PSPACE_PRIMARY_SYMTABS): Ditto.
+	* dwarf2read.c (dw2_find_symbol_file): Ditto.
+	* linespec.c (iterate_over_all_matching_symtabs): Ditto.
+	* symtab.c (lookup_symbol_aux_objfile): Ditto.
+	(basic_lookup_transparent_type): Ditto.
+
 2012-06-02  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* symtab.c (symbol_demangled_name): New variable `dem_name'.  Use

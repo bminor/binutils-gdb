@@ -2842,16 +2842,15 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
     {
       struct symtab *s;
 
-      ALL_OBJFILE_SYMTABS (objfile, s)
-	if (s->primary)
-	  {
-	    struct blockvector *bv = BLOCKVECTOR (s);
-	    const struct block *block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	    struct symbol *sym = lookup_block_symbol (block, name, VAR_DOMAIN);
+      ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
+	{
+	  struct blockvector *bv = BLOCKVECTOR (s);
+	  const struct block *block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	  struct symbol *sym = lookup_block_symbol (block, name, VAR_DOMAIN);
 
-	    if (sym)
-	      return sym->symtab->filename;
-	  }
+	  if (sym)
+	    return sym->symtab->filename;
+	}
       return NULL;
     }
 
