@@ -1,5 +1,16 @@
 2012-06-04  Pedro Alves  <palves@redhat.com>
 
+	* arch-utils.c (default_gdb_signal_from_target): Delete.
+	* arch-utils.h (default_gdb_signal_from_target): Delete.
+	* corelow.c (core_open) <signal mapping>: Extended comment.  Check
+	gdbarch_gdb_signal_from_target_p.
+	* gdbarch.sh (gdb_signal_from_target): Make it an M method (with
+	predicate).
+	* gdbarch.h: Regenerate.
+	* gdbarch.c: Regenerate.
+
+2012-06-04  Pedro Alves  <palves@redhat.com>
+
 	* gdbarch.sh (gdb_signal_from_target): Mention that the
 	implementation of the method must be host independent.
 	* gdbarch.h: Regenerate.

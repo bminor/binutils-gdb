@@ -441,11 +441,16 @@ core_open (char *filename, int from_tty)
   if (siggy > 0)
     {
       /* If we don't have a CORE_GDBARCH to work with, assume a native
-	 core.  */
+	 core (map gdb_signal from host signals).  If we do have
+	 CORE_GDBARCH to work with, but no gdb_signal_from_target
+	 implementation for that gdbarch, as a fallback measure,
+	 assume the host signal mapping.  It'll be correct for native
+	 cores, but most likely incorrect for cross-cores.  */
       enum gdb_signal sig = (core_gdbarch != NULL
-		       ? gdbarch_gdb_signal_from_target (core_gdbarch,
-							 siggy)
-		       : gdb_signal_from_host (siggy));
+			     && gdbarch_gdb_signal_from_target_p (core_gdbarch)
+			     ? gdbarch_gdb_signal_from_target (core_gdbarch,
+							       siggy)
+			     : gdb_signal_from_host (siggy));
 
       printf_filtered (_("Program terminated with signal %d, %s.\n"),
 		       siggy, gdb_signal_to_string (sig));

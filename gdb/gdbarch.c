@@ -427,7 +427,7 @@ struct gdbarch startup_gdbarch =
   0,  /* sofun_address_maybe_missing */
   0,  /* process_record */
   0,  /* process_record_signal */
-  default_gdb_signal_from_target,  /* gdb_signal_from_target */
+  0,  /* gdb_signal_from_target */
   0,  /* get_siginfo_type */
   0,  /* record_special_symbol */
   0,  /* get_syscall_number */
@@ -536,7 +536,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->displaced_step_free_closure = NULL;
   gdbarch->displaced_step_location = NULL;
   gdbarch->relocate_instruction = NULL;
-  gdbarch->gdb_signal_from_target = default_gdb_signal_from_target;
   gdbarch->has_shared_address_space = default_has_shared_address_space;
   gdbarch->fast_tracepoint_valid_at = default_fast_tracepoint_valid_at;
   gdbarch->auto_charset = default_auto_charset;
@@ -727,7 +726,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of sofun_address_maybe_missing, invalid_p == 0 */
   /* Skip verify of process_record, has predicate.  */
   /* Skip verify of process_record_signal, has predicate.  */
-  /* Skip verify of gdb_signal_from_target, invalid_p == 0 */
+  /* Skip verify of gdb_signal_from_target, has predicate.  */
   /* Skip verify of get_siginfo_type, has predicate.  */
   /* Skip verify of record_special_symbol, has predicate.  */
   /* Skip verify of get_syscall_number, has predicate.  */
@@ -995,6 +994,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: gcore_bfd_target = %s\n",
                       pstring (gdbarch->gcore_bfd_target));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_gdb_signal_from_target_p() = %d\n",
+                      gdbarch_gdb_signal_from_target_p (gdbarch));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdb_signal_from_target = <%s>\n",
                       host_address_to_string (gdbarch->gdb_signal_from_target));
@@ -3785,6 +3787,13 @@ set_gdbarch_process_record_signal (struct gdbarch *gdbarch,
                                    gdbarch_process_record_signal_ftype process_record_signal)
 {
   gdbarch->process_record_signal = process_record_signal;
+}
+
+int
+gdbarch_gdb_signal_from_target_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->gdb_signal_from_target != NULL;
 }
 
 enum gdb_signal

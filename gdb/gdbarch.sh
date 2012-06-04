@@ -778,9 +778,8 @@ M:int:process_record_signal:struct regcache *regcache, enum gdb_signal signal:re
 # header (the nm-*.h files), the host <signal.h> header, or similar
 # headers.  This is mainly used when cross-debugging core files ---
 # "Live" targets hide the translation behind the target interface
-# (target_wait, target_resume, etc.).  The default is to do the
-# translation using host signal numbers.
-m:enum gdb_signal:gdb_signal_from_target:int signo:signo::default_gdb_signal_from_target::0
+# (target_wait, target_resume, etc.).
+M:enum gdb_signal:gdb_signal_from_target:int signo:signo
 
 # Extra signal info inspection.
 #
