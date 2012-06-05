@@ -496,10 +496,13 @@ make_blockvector (struct objfile *objfile)
       = addrmap_create_fixed (pending_addrmap, &objfile->objfile_obstack);
   else
     BLOCKVECTOR_MAP (blockvector) = 0;
-        
+
   /* Some compilers output blocks in the wrong order, but we depend on
      their being in the right order so we can binary search.  Check the
-     order and moan about it.  */
+     order and moan about it.
+     Note: Remember that the first two blocks are the global and static
+     blocks.  We could special case that fact and begin checking at block 2.
+     To avoid making that assumption we do not.  */
   if (BLOCKVECTOR_NBLOCKS (blockvector) > 1)
     {
       for (i = 1; i < BLOCKVECTOR_NBLOCKS (blockvector); i++)

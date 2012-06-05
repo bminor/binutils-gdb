@@ -1,3 +1,7 @@
+2012-06-04  Doug Evans  <dje@google.com>
+
+	* buildsym.c (make_blockvector): Add comment.
+
 2012-06-04  Pedro Alves  <palves@redhat.com>
 
 	* arch-utils.c (default_gdb_signal_from_target): Delete.
