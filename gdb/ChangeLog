@@ -1,5 +1,16 @@
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* windows-tdep.h (windows_iterate_over_objfiles_in_search_order):
+	Add declaration.
+	* windows-tdep.c: #include "objfiles.h".
+	(windows_iterate_over_objfiles_in_search_order): New function.
+	* amd64-windows-tdep.c (amd64_windows_init_abi): Set
+	iterate_over_objfiles_in_search_order gdbarch method to
+	windows_iterate_over_objfiles_in_search_order.
+	* i386-cygwin-tdep.c (i386_cygwin_init_abi): Likewise.
+
+2012-06-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbarch.sh: Add generation of
 	"iterate_over_objfiles_in_search_order_cb_ftype" typedef in
 	gdbarch.h.  Add include of "objfiles.h" in gdbarch.c.

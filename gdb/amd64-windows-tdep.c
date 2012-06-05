@@ -23,6 +23,7 @@
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "windows-tdep.h"
 
 /* The registers used to pass integer arguments during a function call.  */
 static int amd64_windows_dummy_call_integer_regs[] =
@@ -173,6 +174,9 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->integer_param_regs_saved_in_caller_frame = 1;
   set_gdbarch_return_value (gdbarch, amd64_windows_return_value);
   set_gdbarch_skip_main_prologue (gdbarch, amd64_skip_main_prologue);
+
+  set_gdbarch_iterate_over_objfiles_in_search_order
+    (gdbarch, windows_iterate_over_objfiles_in_search_order);
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
 }
