@@ -1,5 +1,10 @@
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* copyright.py (update_files, main): Fix path to update-copyright
+	script.
+
+2012-06-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py (MULTIPLE_COPYRIGHT_HEADERS): New constant.
 	(main): Add MULTIPLE_COPYRIGHT_HEADERS to the list of files
 	for which a reminder to update by hand is printed.

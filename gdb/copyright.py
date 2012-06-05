@@ -79,7 +79,9 @@ def update_files(update_list):
     os.environ['UPDATE_COPYRIGHT_USE_INTERVALS'] = '2'
 
     # Perform the update, and save the output in a string.
-    update_cmd = ['bash', 'gdb/gnulib/extra/update-copyright'] + update_list
+    update_cmd = ['bash', 'gdb/gnulib/import/extra/update-copyright']
+    update_cmd += update_list
+
     p = subprocess.Popen(update_cmd, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
     update_out = p.communicate()[0]
@@ -139,7 +141,7 @@ def may_have_copyright_notice(filename):
 
 def main ():
     """The main subprogram."""
-    if not os.path.isfile("gnulib/extra/update-copyright"):
+    if not os.path.isfile("gnulib/import/extra/update-copyright"):
         print "Error: This script must be called from the gdb directory."
     root_dir = os.path.dirname(os.getcwd())
     os.chdir(root_dir)
