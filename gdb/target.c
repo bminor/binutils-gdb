@@ -1772,7 +1772,7 @@ target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
    the target's stack.  This may trigger different cache behavior.  */
 
 int
-target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 {
   /* Dispatch to the topmost target, not the flattened current_target.
      Memory accesses check target->to_has_(all_)memory, and the
@@ -1791,7 +1791,7 @@ target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
    Callers that can deal with partial writes should call target_write.  */
 
 int
-target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
+target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 {
   /* Dispatch to the topmost target, not the flattened current_target.
      Memory accesses check target->to_has_(all_)memory, and the
@@ -1810,7 +1810,7 @@ target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
    should call target_write.  */
 
 int
-target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
+target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 {
   /* Dispatch to the topmost target, not the flattened current_target.
      Memory accesses check target->to_has_(all_)memory, and the

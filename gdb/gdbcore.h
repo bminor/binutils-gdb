@@ -45,11 +45,11 @@ extern void memory_error (int status, CORE_ADDR memaddr);
 
 /* Like target_read_memory, but report an error if can't read.  */
 
-extern void read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
+extern void read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len);
 
 /* Like target_read_stack, but report an error if can't read.  */
 
-extern void read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
+extern void read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len);
 
 /* Read an integer from debugged memory, given address and number of
    bytes.  */
@@ -83,7 +83,8 @@ CORE_ADDR read_memory_typed_address (CORE_ADDR addr, struct type *type);
    byteswapping, alignment, different sizes for host vs. target types,
    etc.  */
 
-extern void write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len);
+extern void write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
+			  ssize_t len);
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
 extern void write_memory_unsigned_integer (CORE_ADDR addr, int len,

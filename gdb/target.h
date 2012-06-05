@@ -999,13 +999,13 @@ extern int target_read_string (CORE_ADDR, char **, int, int *);
 extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr,
 			       ssize_t len);
 
-extern int target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
+extern int target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len);
 
 extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
-				int len);
+				ssize_t len);
 
 extern int target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
-				    int len);
+				    ssize_t len);
 
 /* Fetches the target's memory map.  If one is found it is sorted
    and returned, after some consistency checking.  Otherwise, NULL

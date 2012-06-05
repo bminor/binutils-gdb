@@ -1,3 +1,14 @@
+2012-06-05  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* corefile.c (read_memory, read_stack, write_memory): Accept LEN
+	argument as ssize_t.
+	* gdbcore.h (read_memory, read_stack, write_memory): Likewise.
+	* remote.c (remote_write_bytes_aux, remote_write_bytes): Likewise.
+	* target.c (target_read_stack, target_write_memory)
+	(target_write_raw_memory): Likewise.
+	* target.h (target_read_stack, target_write_memory)
+	(target_write_raw_memory): Likewise.
+
 2012-06-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile-mem.c: Change gdb_static_assert to ssize_t.

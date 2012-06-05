@@ -6450,7 +6450,7 @@ check_binary_download (CORE_ADDR addr)
 
 static int
 remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
-			const gdb_byte *myaddr, int len,
+			const gdb_byte *myaddr, ssize_t len,
 			char packet_format, int use_length)
 {
   struct remote_state *rs = get_remote_state ();
@@ -6611,7 +6611,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
    error.  Only transfer a single packet.  */
 
 static int
-remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
+remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 {
   char *packet_format = 0;
 
