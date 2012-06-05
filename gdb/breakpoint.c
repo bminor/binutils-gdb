@@ -10815,10 +10815,10 @@ until_break_command (char *arg, int from_tty, int anywhere)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
-  struct frame_info *frame = get_selected_frame (NULL);
-  struct gdbarch *frame_gdbarch = get_frame_arch (frame);
-  struct frame_id stack_frame_id = get_stack_frame_id (frame);
-  struct frame_id caller_frame_id = frame_unwind_caller_id (frame);
+  struct frame_info *frame;
+  struct gdbarch *frame_gdbarch;
+  struct frame_id stack_frame_id;
+  struct frame_id caller_frame_id;
   struct breakpoint *breakpoint;
   struct breakpoint *breakpoint2 = NULL;
   struct cleanup *old_chain;
@@ -10854,8 +10854,15 @@ until_break_command (char *arg, int from_tty, int anywhere)
 
   old_chain = make_cleanup (null_cleanup, NULL);
 
-  /* Installing a breakpoint invalidates the frame chain (as it may
-     need to switch threads), so do any frame handling first.  */
+  /* Note linespec handling above invalidates the frame chain.
+     Installing a breakpoint also invalidates the frame chain (as it
+     may need to switch threads), so do any frame handling before
+     that.  */
+
+  frame = get_selected_frame (NULL);
+  frame_gdbarch = get_frame_arch (frame);
+  stack_frame_id = get_stack_frame_id (frame);
+  caller_frame_id = frame_unwind_caller_id (frame);
 
   /* Keep within the current frame, or in frames called by the current
      one.  */

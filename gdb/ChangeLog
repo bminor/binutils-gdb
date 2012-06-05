@@ -1,3 +1,10 @@
+2012-06-05  Pedro Alves  <palves@redhat.com>
+
+	PR backtrace/13866
+
+	* breakpoint.c (until_break_command): Only fetch the selected
+	frame after decode_line_1.
+
 2012-06-05  Joakim Tjernlund  <Joakim.Tjernlund@transmode.se>
 
 	* solib-svr4.c (enable_break): Don't fallback to setting the solib
