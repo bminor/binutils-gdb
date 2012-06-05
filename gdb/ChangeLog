@@ -1,5 +1,9 @@
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* copyright.py (EXCLUDE_LIST): Add 'gdb/CONTRIBUTE' to list.
+
+2012-06-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* config/djgpp/djcheck.sh: Add copyright header.
 
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>

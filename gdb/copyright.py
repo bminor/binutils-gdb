@@ -171,6 +171,7 @@ def main ():
 #
 # Filenames are relative to the root directory.
 EXCLUDE_LIST = (
+    'gdb/CONTRIBUTE',
     'gdb/gdbarch.c', 'gdb/gdbarch.h',
     'gdb/gnulib'
 )
