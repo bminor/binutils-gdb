@@ -8940,7 +8940,7 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
       else if (rest)
 	{
 	  *rest = savestring (tok, strlen (tok));
-	  tok += toklen;
+	  return;
 	}
       else
 	error (_("Junk at end of arguments."));

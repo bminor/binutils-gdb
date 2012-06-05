@@ -1,5 +1,10 @@
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* breakpoint.c (find_condition_and_thread): Stop parsing
+	as soon as the first invalid keyword is found.
+
+2012-06-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py (EXCLUDE_LIST): Add 'gdb/CONTRIBUTE' to list.
 
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>

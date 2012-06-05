@@ -1,3 +1,7 @@
+2012-06-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/bad-task-bp-keyword: New testcase.
+
 2012-06-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/code_elim.exp (add-symbol-file ${testfile1} 0x100000):
