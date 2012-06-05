@@ -997,7 +997,7 @@ extern void target_dcache_invalidate (void);
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
 extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr,
-			       size_t len);
+			       ssize_t len);
 
 extern int target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
 

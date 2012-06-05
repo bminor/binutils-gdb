@@ -1,3 +1,10 @@
+2012-06-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile-mem.c: Change gdb_static_assert to ssize_t.
+	(target_read_memory_bfd): Cast gdb_assert LEN to ssize_t.
+	* target.c (target_read_memory): Change LEN to ssize_t.
+	* target.h (target_read_memory): Change LEN to ssize_t.
+
 2012-06-05  Pedro Alves  <palves@redhat.com>
 
 	PR backtrace/13866

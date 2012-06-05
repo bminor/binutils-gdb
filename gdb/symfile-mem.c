@@ -60,7 +60,7 @@
 
 gdb_static_assert (sizeof (CORE_ADDR) == sizeof (bfd_vma));
 gdb_static_assert (sizeof (gdb_byte) == sizeof (bfd_byte));
-gdb_static_assert (sizeof (size_t) <= sizeof (bfd_size_type));
+gdb_static_assert (sizeof (ssize_t) <= sizeof (bfd_size_type));
 
 /* Provide bfd/ compatible prototype for target_read_memory.  Casting would not
    be enough as LEN width may differ.  */
@@ -69,8 +69,8 @@ static int
 target_read_memory_bfd (bfd_vma memaddr, bfd_byte *myaddr, bfd_size_type len)
 {
   /* MYADDR must be already allocated for the LEN size so it has to fit in
-     size_t.  */
-  gdb_assert ((size_t) len == len);
+     ssize_t.  */
+  gdb_assert ((ssize_t) len == len);
 
   return target_read_memory (memaddr, myaddr, len);
 }
