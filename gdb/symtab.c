@@ -1498,10 +1498,42 @@ lookup_global_symbol_from_objfile (const struct objfile *main_objfile,
   return NULL;
 }
 
-/* Check to see if the symbol is defined in one of the symtabs.
-   BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
+/* Check to see if the symbol is defined in one of the OBJFILE's
+   symtabs.  BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
    depending on whether or not we want to search global symbols or
    static symbols.  */
+
+static struct symbol *
+lookup_symbol_aux_objfile (struct objfile *objfile, int block_index,
+			   const char *name, const domain_enum domain)
+{
+  struct symbol *sym = NULL;
+  struct blockvector *bv;
+  const struct block *block;
+  struct symtab *s;
+
+  if (objfile->sf)
+    objfile->sf->qf->pre_expand_symtabs_matching (objfile, block_index,
+						  name, domain);
+
+  ALL_OBJFILE_SYMTABS (objfile, s)
+    if (s->primary)
+      {
+	bv = BLOCKVECTOR (s);
+	block = BLOCKVECTOR_BLOCK (bv, block_index);
+	sym = lookup_block_symbol (block, name, domain);
+	if (sym)
+	  {
+	    block_found = block;
+	    return fixup_symbol_section (sym, objfile);
+	  }
+      }
+
+  return NULL;
+}
+
+/* Same as lookup_symbol_aux_objfile, except that it searches all
+   objfiles.  Return the first match found.  */
 
 static struct symbol *
 lookup_symbol_aux_symtabs (int block_index, const char *name,
@@ -1509,29 +1541,12 @@ lookup_symbol_aux_symtabs (int block_index, const char *name,
 {
   struct symbol *sym;
   struct objfile *objfile;
-  struct blockvector *bv;
-  const struct block *block;
-  struct symtab *s;
 
   ALL_OBJFILES (objfile)
   {
-    if (objfile->sf)
-      objfile->sf->qf->pre_expand_symtabs_matching (objfile,
-						    block_index,
-						    name, domain);
-
-    ALL_OBJFILE_SYMTABS (objfile, s)
-      if (s->primary)
-	{
-	  bv = BLOCKVECTOR (s);
-	  block = BLOCKVECTOR_BLOCK (bv, block_index);
-	  sym = lookup_block_symbol (block, name, domain);
-	  if (sym)
-	    {
-	      block_found = block;
-	      return fixup_symbol_section (sym, objfile);
-	    }
-	}
+    sym = lookup_symbol_aux_objfile (objfile, block_index, name, domain);
+    if (sym)
+      return sym;
   }
 
   return NULL;
@@ -1648,6 +1663,46 @@ lookup_symbol_static (const char *name,
     return NULL;
 }
 
+/* Private data to be used with lookup_symbol_global_iterator_cb.  */
+
+struct global_sym_lookup_data
+{
+  /* The name of the symbol we are searching for.  */
+  const char *name;
+
+  /* The domain to use for our search.  */
+  domain_enum domain;
+
+  /* The field where the callback should store the symbol if found.
+     It should be initialized to NULL before the search is started.  */
+  struct symbol *result;
+};
+
+/* A callback function for gdbarch_iterate_over_objfiles_in_search_order.
+   It searches by name for a symbol in the GLOBAL_BLOCK of the given
+   OBJFILE.  The arguments for the search are passed via CB_DATA,
+   which in reality is a pointer to struct global_sym_lookup_data.  */
+
+static int
+lookup_symbol_global_iterator_cb (struct objfile *objfile,
+				  void *cb_data)
+{
+  struct global_sym_lookup_data *data =
+    (struct global_sym_lookup_data *) cb_data;
+
+  gdb_assert (data->result == NULL);
+
+  data->result = lookup_symbol_aux_objfile (objfile, GLOBAL_BLOCK,
+					    data->name, data->domain);
+  if (data->result == NULL)
+    data->result = lookup_symbol_aux_quick (objfile, GLOBAL_BLOCK,
+					    data->name, data->domain);
+
+  /* If we found a match, tell the iterator to stop.  Otherwise,
+     keep going.  */
+  return (data->result != NULL);
+}
+
 /* Lookup a symbol in all files' global blocks (searching psymtabs if
    necessary).  */
 
@@ -1658,6 +1713,7 @@ lookup_symbol_global (const char *name,
 {
   struct symbol *sym = NULL;
   struct objfile *objfile = NULL;
+  struct global_sym_lookup_data lookup_data;
 
   /* Call library-specific lookup procedure.  */
   objfile = lookup_objfile_from_block (block);
@@ -1666,18 +1722,14 @@ lookup_symbol_global (const char *name,
   if (sym != NULL)
     return sym;
 
-  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, domain);
-  if (sym != NULL)
-    return sym;
+  memset (&lookup_data, 0, sizeof (lookup_data));
+  lookup_data.name = name;
+  lookup_data.domain = domain;
+  gdbarch_iterate_over_objfiles_in_search_order
+    (objfile != NULL ? get_objfile_arch (objfile) : target_gdbarch,
+     lookup_symbol_global_iterator_cb, &lookup_data, objfile);
 
-  ALL_OBJFILES (objfile)
-  {
-    sym = lookup_symbol_aux_quick (objfile, GLOBAL_BLOCK, name, domain);
-    if (sym)
-      return sym;
-  }
-
-  return NULL;
+  return lookup_data.result;
 }
 
 int

@@ -1,5 +1,31 @@
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbarch.sh: Add generation of
+	"iterate_over_objfiles_in_search_order_cb_ftype" typedef in
+	gdbarch.h.  Add include of "objfiles.h" in gdbarch.c.
+	(iterate_over_objfiles_in_search_order): New gdbarch method.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* objfiles.h (default_iterate_over_objfiles_in_search_order):
+	Add declaration.
+	* objfiles.c (default_iterate_over_objfiles_in_search_order):
+	New function.
+	* symtab.c (lookup_symbol_aux_objfile): New function, extracted
+	out of lookup_symbol_aux_symtabs.
+	(lookup_symbol_aux_symtabs): Replace extracted-out code by
+	call to lookup_symbol_aux_objfile.
+	(struct global_sym_lookup_data): New type.
+	(lookup_symbol_global_iterator_cb): New function.
+	(lookup_symbol_global): Search for symbol using
+	gdbarch_iterate_over_objfiles_in_search_order and
+	lookup_symbol_global_iterator_cb.
+	* findvar.c (struct minsym_lookup_data): New type.
+	(minsym_lookup_iterator_cb): New function.
+	(default_read_var_value) [case LOC_UNRESOLVED]: Resolve the
+	symbol's address via gdbarch_iterate_over_objfiles_in_search_order
+	and minsym_lookup_iterator_cb.
+
+2012-06-05  Joel Brobecker  <brobecker@adacore.com>
+
 	Revert the following patch:
 	* findvar.c (default_read_var_value): For LOC_UNRESOLVED symbols,
 	try locating the symbol in the symbol's own objfile first, before

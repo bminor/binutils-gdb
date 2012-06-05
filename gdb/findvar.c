@@ -406,6 +406,37 @@ symbol_read_needs_frame (struct symbol *sym)
   return 1;
 }
 
+/* Private data to be used with minsym_lookup_iterator_cb.  */
+
+struct minsym_lookup_data
+{
+  /* The name of the minimal symbol we are searching for.  */
+  const char *name;
+
+  /* The field where the callback should store the minimal symbol
+     if found.  It should be initialized to NULL before the search
+     is started.  */
+  struct minimal_symbol *result;
+};
+
+/* A callback function for gdbarch_iterate_over_objfiles_in_search_order.
+   It searches by name for a minimal symbol within the given OBJFILE.
+   The arguments are passed via CB_DATA, which in reality is a pointer
+   to struct minsym_lookup_data.  */
+
+static int
+minsym_lookup_iterator_cb (struct objfile *objfile, void *cb_data)
+{
+  struct minsym_lookup_data *data = (struct minsym_lookup_data *) cb_data;
+
+  gdb_assert (data->result == NULL);
+
+  data->result = lookup_minimal_symbol (data->name, NULL, objfile);
+
+  /* The iterator should stop iff a match was found.  */
+  return (data->result != NULL);
+}
+
 /* A default implementation for the "la_read_var_value" hook in
    the language vector which should work in most situations.  */
 
@@ -559,10 +590,19 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 
     case LOC_UNRESOLVED:
       {
+	struct minsym_lookup_data lookup_data;
 	struct minimal_symbol *msym;
 	struct obj_section *obj_section;
 
-	msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (var), NULL, NULL);
+	memset (&lookup_data, 0, sizeof (lookup_data));
+	lookup_data.name = SYMBOL_LINKAGE_NAME (var);
+
+	gdbarch_iterate_over_objfiles_in_search_order
+	  (get_objfile_arch (SYMBOL_SYMTAB (var)->objfile),
+	   minsym_lookup_iterator_cb, &lookup_data,
+	   SYMBOL_SYMTAB (var)->objfile);
+	msym = lookup_data.result;
+
 	if (msym == NULL)
 	  error (_("No global symbol \"%s\"."), SYMBOL_LINKAGE_NAME (var));
 	if (overlay_debugging)

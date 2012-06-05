@@ -49,6 +49,7 @@
 #include "gdb_obstack.h"
 #include "observer.h"
 #include "regcache.h"
+#include "objfiles.h"
 
 /* Static function declarations */
 
@@ -284,6 +285,7 @@ struct gdbarch
   int has_dos_based_file_system;
   gdbarch_gen_return_address_ftype *gen_return_address;
   gdbarch_info_proc_ftype *info_proc;
+  gdbarch_iterate_over_objfiles_in_search_order_ftype *iterate_over_objfiles_in_search_order;
 };
 
 
@@ -451,6 +453,7 @@ struct gdbarch startup_gdbarch =
   0,  /* has_dos_based_file_system */
   default_gen_return_address,  /* gen_return_address */
   0,  /* info_proc */
+  default_iterate_over_objfiles_in_search_order,  /* iterate_over_objfiles_in_search_order */
   /* startup_gdbarch() */
 };
 
@@ -541,6 +544,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->auto_charset = default_auto_charset;
   gdbarch->auto_wide_charset = default_auto_wide_charset;
   gdbarch->gen_return_address = default_gen_return_address;
+  gdbarch->iterate_over_objfiles_in_search_order = default_iterate_over_objfiles_in_search_order;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -749,6 +753,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of has_dos_based_file_system, invalid_p == 0 */
   /* Skip verify of gen_return_address, invalid_p == 0 */
   /* Skip verify of info_proc, has predicate.  */
+  /* Skip verify of iterate_over_objfiles_in_search_order, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -1066,6 +1071,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: integer_to_address = <%s>\n",
                       host_address_to_string (gdbarch->integer_to_address));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: iterate_over_objfiles_in_search_order = <%s>\n",
+                      host_address_to_string (gdbarch->iterate_over_objfiles_in_search_order));
   fprintf_unfiltered (file,
                       "gdbarch_dump: long_bit = %s\n",
                       plongest (gdbarch->long_bit));
@@ -4243,6 +4251,23 @@ set_gdbarch_info_proc (struct gdbarch *gdbarch,
                        gdbarch_info_proc_ftype info_proc)
 {
   gdbarch->info_proc = info_proc;
+}
+
+void
+gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype *cb, void *cb_data, struct objfile *current_objfile)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->iterate_over_objfiles_in_search_order != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_iterate_over_objfiles_in_search_order called\n");
+  gdbarch->iterate_over_objfiles_in_search_order (gdbarch, cb, cb_data, current_objfile);
+}
+
+void
+set_gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *gdbarch,
+                                                   gdbarch_iterate_over_objfiles_in_search_order_ftype iterate_over_objfiles_in_search_order)
+{
+  gdbarch->iterate_over_objfiles_in_search_order = iterate_over_objfiles_in_search_order;
 }
 
 
