@@ -1,3 +1,8 @@
+2012-06-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* ia64vms-stub.c: Adjust copyright header to follow convention
+	expected by gnulib's update-copyright script.
+
 2012-03-08  Tristan Gingold  <gingold@adacore.com>
 
 	* sparc-stub.c: Move from ..
