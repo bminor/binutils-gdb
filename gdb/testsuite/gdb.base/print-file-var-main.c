@@ -20,10 +20,15 @@ extern int get_version_2 (void);
 int
 main (void)
 {
-  if (get_version_1 () != 104)
+  int v1 = get_version_1 ();
+  int v2 = get_version_2 ();
+
+  if (v1 != 104)  /* STOP */
     return 1;
-  if (get_version_2 () != 104)
+  /* The value returned by get_version_2 depends on the target system.  */
+  if (v2 != 104 || v2 != 203)
     return 2;
+
   return 0;
 }
 

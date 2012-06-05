@@ -48,8 +48,39 @@ if ![runto_main] {
     return -1
 }
 
-gdb_test "print 'print-file-var-lib1.c'::this_version_id" \
-         " = 104"
+# Try printing "this_version_num" qualified with the name of the file
+# where the variables are defined.  There are two global variables
+# with that name, and some systems such as GNU/Linux merge them
+# into one single entity, while some other systems such as Windows
+# keep them separate.  In the first situation, we have to verify
+# that GDB does not randomly select the wrong instance, even when
+# a specific filename is used to qualified the lookup.  And in the
+# second case, we have to verify that GDB does select the instance
+# defined in the given filename.
+#
+# To avoid adding target-specific code in this testcase, the program
+# sets two local variable named 'v1' and 'v2' with the value of
+# our global variables.  This allows us to compare the value that
+# GDB returns for each query against the actual value seen by
+# the program itself.
 
-gdb_test "print 'print-file-var-lib2.c'::this_version_id" \
-         " = 203"
+# Get past the initialization of variables 'v1' and 'v2'.
+
+set bp_location \
+    [gdb_get_line_number "STOP" "${executable}.c"]
+gdb_test "break $executable.c:$bp_location" \
+         "Breakpoint \[0-9\]+ at 0x\[0-9a-fA-F\]+: .*" \
+         "breapoint past v1 & v2 initialization"
+
+gdb_test "continue" \
+         "Breakpoint \[0-9\]+, main \\(\\) at.*" \
+         "continue to STOP marker"
+
+# Now check the value of this_version_id in both print-file-var-lib1.c
+# and print-file-var-lib2.c.
+
+gdb_test "print 'print-file-var-lib1.c'::this_version_id == v1" \
+         " = 1"
+
+gdb_test "print 'print-file-var-lib2.c'::this_version_id == v2" \
+         " = 1"

@@ -1,5 +1,20 @@
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.base/ctxobj-f.c (GET_VERSION): Introduce local variable
+	and add comment.
+	* gdb.base/ctxobj-m.c (main): Rewrite, and add comment.
+	* gdb.base/ctxobj.exp: Insert breakpoint in ctxobj-f.c using
+	"STOP" marker.  Adjust testing strategy to make it work on
+	all targets.
+
+	* gdb.base/print-file-var-main.c (main): Rewrite using local
+	variables and adjust get_version_2's return value check.
+	Add small comment.
+	* gdb.base/print-file-var.exp: Insert breakpoint using "STOP"
+	marker.  Adjust testing strategy to make it work on all targets.
+
+2012-06-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/bad-task-bp-keyword: New testcase.
 
 2012-06-03  Jan Kratochvil  <jan.kratochvil@redhat.com>

@@ -23,5 +23,10 @@ extern int this_version_num;
 int
 GET_VERSION (void)
 {
-  return this_version_num;
+  int v = this_version_num;
+
+  if (v > 999)
+    v = 999;
+
+  return v;  /* STOP */
 }
