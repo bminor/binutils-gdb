@@ -1,3 +1,9 @@
+2012-06-05  Joakim Tjernlund  <Joakim.Tjernlund@transmode.se>
+
+	* solib-svr4.c (enable_break): Don't fallback to setting the solib
+	event breakpoint at _start, __start or main if a program
+	interpreter is not found.
+
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* windows-tdep.h (windows_iterate_over_objfiles_in_search_order):

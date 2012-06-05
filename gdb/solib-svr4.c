@@ -1707,7 +1707,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	}
     }
 
-  if (!current_inferior ()->attach_flag)
+  if (interp_name != NULL && !current_inferior ()->attach_flag)
     {
       for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
