@@ -1,3 +1,8 @@
+2012-06-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/freebpcmd.exp (set lines): Check valid range of I.
+	(run program with breakpoint commands): XFAIl if it is not.
+
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/ctxobj-f.c (GET_VERSION): Introduce local variable
