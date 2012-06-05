@@ -1,5 +1,20 @@
 2012-06-05  Joel Brobecker  <brobecker@adacore.com>
 
+	Revert the following patch:
+	* findvar.c (default_read_var_value): For LOC_UNRESOLVED symbols,
+	try locating the symbol in the symbol's own objfile first, before
+	extending the search to all objfiles.
+	* symtab.c (lookup_symbol_aux_objfile): New function, extracted
+	out of lookup_symbol_aux_symtabs.
+	(lookup_symbol_aux_symtabs): Add new parameter "exclude_objfile".
+	Replace extracted-out code by call to lookup_symbol_aux_objfile.
+	Do not search EXCLUDE_OBJFILE.
+	(lookup_static_symbol_aux): Update call to lookup_symbol_aux_symtabs.
+	(lookup_symbol_global): Search for matches in the block's objfile
+	first, before searching all other objfiles.
+
+2012-06-05  Joel Brobecker  <brobecker@adacore.com>
+
 	* breakpoint.c (find_condition_and_thread): Stop parsing
 	as soon as the first invalid keyword is found.
 

@@ -562,15 +562,7 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	struct minimal_symbol *msym;
 	struct obj_section *obj_section;
 
-	/* First, try locating the associated minimal symbol within
-	   the same objfile.  This prevents us from selecting another
-	   symbol with the same name but located in a different objfile.  */
-	msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (var), NULL,
-				      SYMBOL_SYMTAB (var)->objfile);
-	/* If the lookup failed, try expanding the search to all
-	   objfiles.  */
-	if (msym == NULL)
-	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (var), NULL, NULL);
+	msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (var), NULL, NULL);
 	if (msym == NULL)
 	  error (_("No global symbol \"%s\"."), SYMBOL_LINKAGE_NAME (var));
 	if (overlay_debugging)
