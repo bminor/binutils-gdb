@@ -152,7 +152,7 @@ def main ():
         print
         print "\033[31mREMINDER: The following files must be updated by hand." \
               "\033[0m"
-        for filename in BY_HAND:
+        for filename in BY_HAND + MULTIPLE_COPYRIGHT_HEADERS:
             print "  ", filename
 
 ############################################################################
@@ -191,6 +191,14 @@ BY_HAND = (
     # These files are sensitive to line numbering.
     "gdb/testsuite/gdb.base/step-line.inp",
     "gdb/testsuite/gdb.base/step-line.c",
+)
+
+# Files containing multiple copyright headers.  This script is only
+# fixing the first one it finds, so we need to finish the update
+# by hand.
+MULTIPLE_COPYRIGHT_HEADERS = (
+    "gdb/doc/gdb.texinfo",
+    "gdb/doc/refcard.tex",
 )
 
 # The list of file which have a copyright, but not head by the FSF.
