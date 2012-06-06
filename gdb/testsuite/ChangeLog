@@ -1,3 +1,8 @@
+2012-06-06  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/info-proc.exp: Return if target doesn't support
+	'info proc'.
+
 2012-06-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/freebpcmd.exp (set lines): Check valid range of I.

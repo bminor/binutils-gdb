@@ -47,24 +47,23 @@ gdb_load ${binfile}
 
 gdb_test "help info proc" "Show /proc process information about .*"
 
-gdb_test "info proc" "No current process.*" "info proc without a process"
+gdb_test_multiple "info proc" "info proc without a process" {
+    -re "No current process.*$gdb_prompt $" {
+	pass "info proc without a process"
+    }
+    -re "Not supported on this target.*$gdb_prompt $" {
+	# info proc command not supported -- nothing to test here.
+	unsupported "gdb does not support info proc on this target"
+	return -1;
+    }
+}
 
 if { ! [ runto_main ] } then {
     untested info-proc.exp
     return -1
 }
 
-# Does this gdb support info proc?
-gdb_test_multiple "info proc" "info proc" {
-    -re "Not supported on this target.*$gdb_prompt $" {
-	# info proc command not supported -- nothing to test here.
-	unsupported "gdb does not support info proc on this target"
-	return -1;
-    }
-    -re "process ${decimal}.*$gdb_prompt $" {
-	pass "info proc with process"
-    }
-}
+gdb_test "info proc" "process ${decimal}.*" "info proc with process"
 
 gdb_test "info proc mapping" \
 	".*Mapped address spaces:.*${hex}${ws}${hex}${ws}${hex}${ws}${hex}.*" \
