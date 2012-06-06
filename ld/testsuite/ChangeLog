@@ -1,3 +1,10 @@
+2012-06-06  Alan Modra  <amodra@gmail.com>
+
+	* ld-mmix/bpo-9.d: Update.
+	* ld-mmix/bpo-10.d: Update.
+	* ld-mmix/bpo-11.d: Update.
+	* ld-mmix/sec-7m.d: Update.
+
 2012-05-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ifunc/ifunc-13a-x86-64.s: Add missing "foo" after ".global".
