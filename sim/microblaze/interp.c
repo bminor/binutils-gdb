@@ -18,12 +18,12 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+#include "config.h"
 #include <signal.h>
 #include "sysdep.h"
 #include <sys/times.h>
 #include <sys/param.h>
 #include <netinet/in.h>	/* for byte ordering macros */
-#include "config.h"
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "libiberty.h"
