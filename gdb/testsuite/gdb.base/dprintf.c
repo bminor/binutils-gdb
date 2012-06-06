@@ -33,8 +33,8 @@ main (int argc, char *argv[])
   int loc = 1234;
 
   /* Ensure these functions are available.  */
-  printf ("kickoff\n");
-  fprintf (stderr, "also to stderr\n");
+  printf ("kickoff %d\n", loc);
+  fprintf (stderr, "also to stderr %d\n", loc);
 
   foo (loc++);
   foo (loc++);
@@ -42,3 +42,17 @@ main (int argc, char *argv[])
   return g;
 }
 
+#include <stdlib.h>
+/* Make sure function 'malloc' is linked into program.  One some bare-metal
+   port, if we don't use 'malloc', it will not be linked in program.  'malloc'
+   is needed, otherwise we'll see such error message
+
+   evaluation of this expression requires the program to have a function
+   "malloc".  */
+void
+bar (void)
+{
+  void *p = malloc (16);
+
+  free (p);
+}

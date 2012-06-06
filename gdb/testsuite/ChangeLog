@@ -1,5 +1,12 @@
 2012-06-06  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.base/dprintf.c (main): Add extra parameter when calling
+	printf and fprintf.
+	(bar): New function.  It is a dead function, but to ensure
+	'malloc' is linked explicitly.
+
+2012-06-06  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.base/info-proc.exp: Return if target doesn't support
 	'info proc'.
 
