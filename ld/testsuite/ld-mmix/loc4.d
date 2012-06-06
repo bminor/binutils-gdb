@@ -11,7 +11,9 @@
 SYMBOL TABLE:
 0+1000 l    d  \.text	0+ (|\.text)
 2000000000000000 l    d  \.data	0+ (|\.data)
+0+ l    df \*ABS\*	0+ .*
 2000000000000000 l       \.data	0+ xx
+0+ l    df \*ABS\*	0+ .*
 0+1004 g     F \.text	0+ Main
 2000000000000000 g       \*ABS\*	0+ __\.MMIX\.start\.\.data
 0+1004 g       \.text	0+ _start

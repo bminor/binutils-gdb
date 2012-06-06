@@ -7403,6 +7403,8 @@ struct elf_final_link_info
   size_t symbuf_size;
   /* And same for symshndxbuf.  */
   size_t shndxbuf_size;
+  /* Number of STT_FILE syms seen.  */
+  size_t filesym_count;
 };
 
 /* This struct is used to pass information to elf_link_output_extsym.  */
@@ -7411,6 +7413,8 @@ struct elf_outext_info
 {
   bfd_boolean failed;
   bfd_boolean localsyms;
+  bfd_boolean need_second_pass;
+  bfd_boolean second_pass;
   struct elf_final_link_info *flinfo;
 };
 
@@ -8605,6 +8609,11 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
     {
       if (!h->forced_local)
 	return TRUE;
+      if (eoinfo->second_pass
+	  && !((h->root.type == bfd_link_hash_defined
+		|| h->root.type == bfd_link_hash_defweak)
+	       && h->root.u.def.section->output_section != NULL))
+	return TRUE;
     }
   else
     {
@@ -8759,6 +8768,19 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	input_sec = h->root.u.def.section;
 	if (input_sec->output_section != NULL)
 	  {
+	    if (eoinfo->localsyms && flinfo->filesym_count == 1)
+	      {
+		bfd_boolean second_pass_sym
+		  = (input_sec->owner == flinfo->output_bfd
+		     || input_sec->owner == NULL
+		     || (input_sec->flags & SEC_LINKER_CREATED) != 0
+		     || (input_sec->owner->flags & BFD_LINKER_CREATED) != 0);
+
+		eoinfo->need_second_pass |= second_pass_sym;
+		if (eoinfo->second_pass != second_pass_sym)
+		  return TRUE;
+	      }
+
 	    sym.st_shndx =
 	      _bfd_elf_section_from_bfd_section (flinfo->output_bfd,
 						 input_sec->output_section);
@@ -9111,6 +9133,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
   bfd_size_type address_size;
   bfd_vma r_type_mask;
   int r_sym_shift;
+  bfd_boolean have_file_sym = FALSE;
 
   output_bfd = flinfo->output_bfd;
   bed = get_elf_backend_data (output_bfd);
@@ -9245,6 +9268,29 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	       || flinfo->info->discard == discard_l)
 	      && bfd_is_local_label_name (input_bfd, name)))
 	continue;
+
+      if (ELF_ST_TYPE (isym->st_info) == STT_FILE)
+	{
+	  have_file_sym = TRUE;
+	  flinfo->filesym_count += 1;
+	}
+      if (!have_file_sym)
+	{
+	  /* In the absence of debug info, bfd_find_nearest_line uses
+	     FILE symbols to determine the source file for local
+	     function symbols.  Provide a FILE symbol here if input
+	     files lack such, so that their symbols won't be
+	     associated with a previous input file.  It's not the
+	     source file, but the best we can do.  */
+	  have_file_sym = TRUE;
+	  flinfo->filesym_count += 1;
+	  memset (&osym, 0, sizeof (osym));
+	  osym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
+	  osym.st_shndx = SHN_ABS;
+	  if (!elf_link_output_sym (flinfo, input_bfd->filename, &osym,
+				    bfd_abs_section_ptr, NULL))
+	    return FALSE;
+	}
 
       osym = *isym;
 
@@ -10318,6 +10364,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   flinfo.symshndxbuf = NULL;
   flinfo.symbuf_count = 0;
   flinfo.shndxbuf_size = 0;
+  flinfo.filesym_count = 0;
 
   /* The object attributes have been merged.  Remove the input
      sections from the link, and set the contents of the output
@@ -10792,6 +10839,17 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  }
     }
 
+  /* Output a FILE symbol so that following locals are not associated
+     with the wrong input file.  */
+  memset (&elfsym, 0, sizeof (elfsym));
+  elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
+  elfsym.st_shndx = SHN_ABS;
+
+  if (flinfo.filesym_count > 1
+      && !elf_link_output_sym (&flinfo, NULL, &elfsym,
+			       bfd_und_section_ptr, NULL))
+    return FALSE;
+
   /* Output any global symbols that got converted to local in a
      version script or due to symbol visibility.  We do this in a
      separate step since ELF requires all local symbols to appear
@@ -10801,9 +10859,24 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   eoinfo.failed = FALSE;
   eoinfo.flinfo = &flinfo;
   eoinfo.localsyms = TRUE;
+  eoinfo.need_second_pass = FALSE;
+  eoinfo.second_pass = FALSE;
   bfd_hash_traverse (&info->hash->table, elf_link_output_extsym, &eoinfo);
   if (eoinfo.failed)
     return FALSE;
+
+  if (flinfo.filesym_count == 1
+      && !elf_link_output_sym (&flinfo, NULL, &elfsym,
+			       bfd_und_section_ptr, NULL))
+    return FALSE;
+
+  if (eoinfo.need_second_pass)
+    {
+      eoinfo.second_pass = TRUE;
+      bfd_hash_traverse (&info->hash->table, elf_link_output_extsym, &eoinfo);
+      if (eoinfo.failed)
+	return FALSE;
+    }
 
   /* If backend needs to output some local symbols not present in the hash
      table, do it now.  */

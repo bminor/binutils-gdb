@@ -22,7 +22,9 @@ SYMBOL TABLE:
 0+80074 l    d  .text	0+ .text
 0+82080 l    d  .got	0+ .got
 0+82090 l    d  .data	0+ .data
+0+ l    df \*ABS\*	0+ .*
 0+82090 l     O .data	0+4 gc76var
+0+ l    df \*ABS\*	0+ .*
 0+82094 l       \*ABS\*	0+ __bss_start
 0+82094 l       \*ABS\*	0+ _edata
 0+82080 l     O .got	0+ _GLOBAL_OFFSET_TABLE_

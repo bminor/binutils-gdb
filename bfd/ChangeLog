@@ -1,3 +1,14 @@
+2012-06-06  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (elf_link_input_bfd): Provide a file symbol for
+	each input file with local syms, if the input lacks such.
+	(bfd_elf_final_link): Add a file symbol to mark end of locals
+	for which we can associate with input files.
+	(struct elf_final_link_info): Add filesym_count field.
+	(struct elf_outext_info): Add need_second_pass and second_pass.
+	(elf_link_output_extsym): Detect symbols defined in the output
+	file, emit them on second pass over locals.
+
 2012-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* bfd-in.h (bfd_elf_bfd_from_remote_memory): Make LEN argument

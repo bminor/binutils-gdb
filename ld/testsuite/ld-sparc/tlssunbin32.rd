@@ -71,6 +71,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* SECTION +LOCAL +DEFAULT +8 *
 .* SECTION +LOCAL +DEFAULT +9 *
 .* SECTION +LOCAL +DEFAULT +10 *
+.* FILE +LOCAL +DEFAULT +ABS .*
 .* TLS +LOCAL +DEFAULT +7 sl1
 .* TLS +LOCAL +DEFAULT +7 sl2
 .* TLS +LOCAL +DEFAULT +7 sl3
@@ -79,6 +80,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +7 sl6
 .* TLS +LOCAL +DEFAULT +7 sl7
 .* TLS +LOCAL +DEFAULT +7 sl8
+.* FILE +LOCAL +DEFAULT +ABS .*
 .* TLS +LOCAL +DEFAULT +8 bl1
 .* TLS +LOCAL +DEFAULT +8 bl2
 .* TLS +LOCAL +DEFAULT +8 bl3
@@ -87,6 +89,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +8 bl6
 .* TLS +LOCAL +DEFAULT +8 bl7
 .* TLS +LOCAL +DEFAULT +8 bl8
+.* FILE +LOCAL +DEFAULT +ABS .*
 .* OBJECT +LOCAL +DEFAULT +9 _DYNAMIC
 .* OBJECT +LOCAL +DEFAULT +10 _PROCEDURE_LINKAGE_TABLE_
 .* OBJECT +LOCAL +DEFAULT +10 _GLOBAL_OFFSET_TABLE_

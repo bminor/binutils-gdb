@@ -17,8 +17,8 @@ Section Headers:
   \[12\] \.bss              NOBITS          100000c4 0020c4 000004 00  WA  0   0  4
   \[13\] \.c6xabi\.attributes C6000_ATTRIBUTES 00000000 0020c4 000019 00      0   0  1
   \[14\] \.shstrtab         STRTAB          00000000 0020dd 00007b 00      0   0  1
-  \[15\] \.symtab           SYMTAB          00000000 002400 000160 10     16  18  4
-  \[16\] \.strtab           STRTAB          00000000 002560 00004d 00      0   0  1
+  \[15\] \.symtab           SYMTAB          00000000 [0-9a-f]+ [0-9a-f]+ 10     16  [0-9]+  4
+  \[16\] \.strtab           STRTAB          00000000 [0-9a-f]+ [0-9a-f]+ 00      0   0  1
 Key to Flags:
   W \(write\), A \(alloc\), X \(execute\), M \(merge\), S \(strings\)
   I \(info\), L \(link order\), G \(group\), T \(TLS\), E \(exclude\), x \(unknown\)
@@ -89,27 +89,29 @@ Symbol table '\.dynsym' contains 10 entries:
      8: 00000000     0 FUNC    GLOBAL DEFAULT  UND sub0
      9: 100000c4     4 OBJECT  GLOBAL DEFAULT   12 a
 
-Symbol table '\.symtab' contains 22 entries:
+Symbol table '\.symtab' contains [0-9]+ entries:
    Num:    Value  Size Type    Bind   Vis      Ndx Name
-     0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
-     1: 00008000     0 SECTION LOCAL  DEFAULT    1 
-     2: 0000803c     0 SECTION LOCAL  DEFAULT    2 
-     3: 000080dc     0 SECTION LOCAL  DEFAULT    3 
-     4: 0000810c     0 SECTION LOCAL  DEFAULT    4 
-     5: 00008124     0 SECTION LOCAL  DEFAULT    5 
-     6: 00008130     0 SECTION LOCAL  DEFAULT    6 
-     7: 10000000     0 SECTION LOCAL  DEFAULT    7 
-     8: 10000020     0 SECTION LOCAL  DEFAULT    8 
-     9: 10000060     0 SECTION LOCAL  DEFAULT    9 
-    10: 100000a0     0 SECTION LOCAL  DEFAULT   10 
-    11: 100000c0     0 SECTION LOCAL  DEFAULT   11 
-    12: 100000c4     0 SECTION LOCAL  DEFAULT   12 
-    13: 00000000     0 SECTION LOCAL  DEFAULT   13 
-    14: 10000060     0 NOTYPE  LOCAL  DEFAULT    9 fish
-    15: 00008130     0 OBJECT  LOCAL  DEFAULT    6 _DYNAMIC
-    16: 100000ac     0 OBJECT  LOCAL  DEFAULT   10 _GLOBAL_OFFSET_TABLE_
-    17: 100000a0     0 NOTYPE  LOCAL  DEFAULT  ABS __c6xabi_DSBT_BASE
-    18: 100000c0     4 OBJECT  GLOBAL DEFAULT   11 b
-    19: 00020000     0 OBJECT  GLOBAL DEFAULT  ABS __stacksize
-    20: 00000000     0 FUNC    GLOBAL DEFAULT  UND sub0
-    21: 100000c4     4 OBJECT  GLOBAL DEFAULT   12 a
+.* 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+.* 00008000     0 SECTION LOCAL  DEFAULT    1 
+.* 0000803c     0 SECTION LOCAL  DEFAULT    2 
+.* 000080dc     0 SECTION LOCAL  DEFAULT    3 
+.* 0000810c     0 SECTION LOCAL  DEFAULT    4 
+.* 00008124     0 SECTION LOCAL  DEFAULT    5 
+.* 00008130     0 SECTION LOCAL  DEFAULT    6 
+.* 10000000     0 SECTION LOCAL  DEFAULT    7 
+.* 10000020     0 SECTION LOCAL  DEFAULT    8 
+.* 10000060     0 SECTION LOCAL  DEFAULT    9 
+.* 100000a0     0 SECTION LOCAL  DEFAULT   10 
+.* 100000c0     0 SECTION LOCAL  DEFAULT   11 
+.* 100000c4     0 SECTION LOCAL  DEFAULT   12 
+.* 00000000     0 SECTION LOCAL  DEFAULT   13 
+.* 00000000     0 FILE    LOCAL  DEFAULT  ABS .*
+.* 10000060     0 NOTYPE  LOCAL  DEFAULT    9 fish
+.* 00000000     0 FILE    LOCAL  DEFAULT  ABS .*
+.* 00008130     0 OBJECT  LOCAL  DEFAULT    6 _DYNAMIC
+.* 100000ac     0 OBJECT  LOCAL  DEFAULT   10 _GLOBAL_OFFSET_TABLE_
+.* 100000a0     0 NOTYPE  LOCAL  DEFAULT  ABS __c6xabi_DSBT_BASE
+.* 100000c0     4 OBJECT  GLOBAL DEFAULT   11 b
+.* 00020000     0 OBJECT  GLOBAL DEFAULT  ABS __stacksize
+.* 00000000     0 FUNC    GLOBAL DEFAULT  UND sub0
+.* 100000c4     4 OBJECT  GLOBAL DEFAULT   12 a

@@ -31,7 +31,9 @@ SYMBOL TABLE:
 0+10c8 l    d  \.data	0+ (|\.data)
 0+80000 l    d  \.stack	0+ (|\.stack)
 0+ l    d  \.cranges	0+ (|\.cranges)
+0+ l    df \*ABS\*	0+ .*
 0+1020 l       \.text	0+ locallabel
+0+ l    df \*ABS\*	0+ .*
 0+1040 g       \.rodata	0+ compactlabel4
 0+101c g       \.text	0+ 0x04 medialabel2
 0+1038 g       \.rodata	0+ medialabel3

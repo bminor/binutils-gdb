@@ -10,7 +10,7 @@ Section Headers:
  +\[ 0\] +NULL +0+ +0+ +0+ +0+ +0 +0 +0
  +\[ 1\] +.text +PROGBITS +[0-9a-f]+ +[0-9a-f]+ +000006 00 +AX +0 +0 +4
  +\[ 2\] +.shstrtab +STRTAB +0+ +[0-9a-f]+ +[0-9a-f]+ +0+ +0 +0 +1
- +\[ 3\] +.symtab +SYMTAB +0+ +[0-9a-f]+ +[0-9a-f]+ 18 +4 +2 +8
+ +\[ 3\] +.symtab +SYMTAB +0+ +[0-9a-f]+ +[0-9a-f]+ 18 +4 +[0-9] +8
  +\[ 4\] +.strtab +STRTAB +0+ +[0-9a-f]+ +[0-9a-f]+ 00 +0 +0 +1
 Key to Flags:
   W \(write\), A \(alloc\), X \(execute\), M \(merge\), S \(strings\), l \(large\)

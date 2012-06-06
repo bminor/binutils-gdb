@@ -1,5 +1,51 @@
 2012-06-06  Alan Modra  <amodra@gmail.com>
 
+	* ld-alpha/tlsbin.rd, * ld-alpha/tlsbinr.rd, * ld-alpha/tlspic.rd,
+	* ld-arm/script-type.sym, * ld-cris/hiddef1.d, * ld-cris/tls-e-20a.d,
+	* ld-cris/tls-e-tpoffcomm1.d, * ld-cris/tls-gc-76.d,
+	* ld-cris/tls-local-64.d, * ld-i386/pr12718.d, * ld-i386/pr12921.d,
+	* ld-i386/tlsbin.rd, * ld-i386/tlsbindesc.rd, * ld-i386/tlsdesc.rd,
+	* ld-i386/tlsnopic.rd, * ld-i386/tlspic.rd, * ld-ia64/tlsbin.rd,
+	* ld-ia64/tlspic.rd, * ld-mips-elf/reloc-merge-lo16.d,
+	* ld-mmix/bpo-1.d, * ld-mmix/bpo-10.d, * ld-mmix/bpo-11.d,
+	* ld-mmix/bpo-14.d, * ld-mmix/bpo-16.d, * ld-mmix/bpo-17.d,
+	* ld-mmix/bpo-18.d, * ld-mmix/bpo-2.d, * ld-mmix/bpo-22.d,
+	* ld-mmix/bpo-3.d, * ld-mmix/bpo-4.d, * ld-mmix/bpo-5.d,
+	* ld-mmix/bpo-9.d, * ld-mmix/greg-1.d, * ld-mmix/greg-19.d,
+	* ld-mmix/greg-2.d, * ld-mmix/greg-3.d, * ld-mmix/greg-4.d,
+	* ld-mmix/greg-5.d, * ld-mmix/greg-5s.d, * ld-mmix/greg-6.d,
+	* ld-mmix/greg-7.d, * ld-mmix/loc4.d, * ld-mmix/local1.d,
+	* ld-mmix/local3.d, * ld-mmix/local5.d, * ld-mmix/local7.d,
+	* ld-mmix/loct-1.d, * ld-mn10300/i135409-1.d, * ld-powerpc/tlsexe.r,
+	* ld-powerpc/tlsexe32.r, * ld-powerpc/tlsexetoc.r,
+	* ld-powerpc/tlsso.r, * ld-powerpc/tlsso32.r, * ld-powerpc/tlstocso.r,
+	* ld-powerpc/vxworks-relax-2.rd, * ld-s390/tlsbin.rd,
+	* ld-s390/tlspic.rd, * ld-s390/tlspic_64.rd, * ld-sh/sub2l-1.d,
+	* ld-sh/weak1.d, * ld-sh/sh64/abi32.xd, * ld-sh/sh64/abi64.xd,
+	* ld-sh/sh64/cmpct1.xd, * ld-sh/sh64/crange1.rd,
+	* ld-sh/sh64/crange2.rd, * ld-sh/sh64/crange3-cmpct.rd,
+	* ld-sh/sh64/crange3-media.rd, * ld-sh/sh64/crange3.rd,
+	* ld-sh/sh64/crangerel1.rd, * ld-sh/sh64/crangerel2.rd,
+	* ld-sh/sh64/mix1.xd, * ld-sh/sh64/mix2.xd, * ld-sh/sh64/shdl32.xd,
+	* ld-sh/sh64/shdl64.xd, * ld-sparc/gotop32.rd,
+	* ld-sparc/gotop64.rd, * ld-sparc/tlssunbin32.rd,
+	* ld-sparc/tlssunbin64.rd, * ld-sparc/tlssunnopic32.rd,
+	* ld-sparc/tlssunnopic64.rd, * ld-sparc/tlssunpic32.rd,
+	* ld-sparc/tlssunpic64.rd, * ld-tic6x/shlib-1.rd,
+	* ld-tic6x/shlib-1b.rd, * ld-tic6x/shlib-1r.rd, * ld-tic6x/shlib-1rb.rd,
+	* ld-tic6x/shlib-app-1.rd, * ld-tic6x/shlib-app-1b.rd,
+	* ld-tic6x/shlib-app-1r.rd, * ld-tic6x/shlib-app-1rb.rd,
+	* ld-tic6x/shlib-noindex.rd, * ld-tic6x/static-app-1.rd,
+	* ld-tic6x/static-app-1b.rd, * ld-tic6x/static-app-1r.rd,
+	* ld-tic6x/static-app-1rb.rd, * ld-x86-64/ilp32-4-nacl.d,
+	* ld-x86-64/ilp32-4.d, * ld-x86-64/pr12718.d, * ld-x86-64/pr12921.d,
+	* ld-x86-64/split-by-file-nacl.rd, * ld-x86-64/split-by-file.rd,
+	* ld-x86-64/tlsbin.rd, * ld-x86-64/tlsbindesc.rd,
+	* ld-x86-64/tlsdesc.rd, * ld-x86-64/tlspic.rd: Update to suit
+	added STT_FILE symbols.
+
+2012-06-06  Alan Modra  <amodra@gmail.com>
+
 	* ld-mmix/bpo-9.d: Update.
 	* ld-mmix/bpo-10.d: Update.
 	* ld-mmix/bpo-11.d: Update.

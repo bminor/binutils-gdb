@@ -100,6 +100,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* SECTION +LOCAL +DEFAULT +9 
 .* SECTION +LOCAL +DEFAULT +10 
 .* SECTION +LOCAL +DEFAULT +11 
+.* FILE +LOCAL +DEFAULT +ABS .*
 .* TLS +LOCAL +DEFAULT +7 gd4
 .* TLS +LOCAL +DEFAULT +7 ld4
 .* TLS +LOCAL +DEFAULT +7 ld5
@@ -107,10 +108,11 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +7 ie4
 .* TLS +LOCAL +DEFAULT +7 le4
 .* TLS +LOCAL +DEFAULT +7 le5
+.* NOTYPE +LOCAL +DEFAULT +UND \.__tls_get_addr
+.* FILE +LOCAL +DEFAULT +ABS .*
 .* OBJECT +LOCAL +DEFAULT +9 _DYNAMIC
 .* NOTYPE +LOCAL +DEFAULT +6 00000010\.plt_call\.__tls_get_addr\+0
 .* NOTYPE +LOCAL +DEFAULT +6 __glink_PLTresolve
-.* NOTYPE +LOCAL +DEFAULT +UND \.__tls_get_addr
 .* TLS +GLOBAL +DEFAULT +UND gd
 .* TLS +GLOBAL +DEFAULT +8 le0
 .* NOTYPE +GLOBAL +DEFAULT +UND __tls_get_addr

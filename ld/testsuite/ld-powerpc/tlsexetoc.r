@@ -85,6 +85,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* SECTION +LOCAL +DEFAULT +10 
 .* SECTION +LOCAL +DEFAULT +11 
 .* SECTION +LOCAL +DEFAULT +12 
+.* FILE +LOCAL +DEFAULT +ABS .*
 .* TLS +LOCAL +DEFAULT +8 gd4
 .* TLS +LOCAL +DEFAULT +8 ld4
 .* TLS +LOCAL +DEFAULT +8 ld5
@@ -93,10 +94,11 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +8 le4
 .* TLS +LOCAL +DEFAULT +8 le5
 .* NOTYPE +LOCAL +DEFAULT +11 \.Lie0
+.* (FUNC|NOTYPE) +LOCAL +DEFAULT +UND \.__tls_get_addr(|_opt)
+.* FILE +LOCAL +DEFAULT +ABS .*
 .* OBJECT +LOCAL +DEFAULT +10 _DYNAMIC
-.* (NOTYPE +LOCAL +DEFAULT +7 00000010\.plt_call\.__tls_get_addr(|_opt)\+0|(FUNC|NOTYPE) +LOCAL +DEFAULT +UND \.__tls_get_addr(|_opt))
-.* (NOTYPE +LOCAL +DEFAULT +7 __glink_PLTresolve|NOTYPE +LOCAL +DEFAULT +7 00000010\.plt_call\.__tls_get_addr(|_opt)\+0)
-.* ((FUNC|NOTYPE) +LOCAL +DEFAULT +UND \.__tls_get_addr(|_opt)|NOTYPE +LOCAL +DEFAULT +7 __glink_PLTresolve)
+.* NOTYPE +LOCAL +DEFAULT +7 00000010\.plt_call\.__tls_get_addr(|_opt)\+0
+.* NOTYPE +LOCAL +DEFAULT +7 __glink_PLTresolve
 .* TLS +GLOBAL +DEFAULT +UND gd
 .* TLS +GLOBAL +DEFAULT +9 le0
 .* TLS +GLOBAL +DEFAULT +9 ld0
