@@ -1,3 +1,8 @@
+2012-06-05  Jing Yu  <jingyu@google.com>
+
+	* gold.h (textdomain): Add do {} to empty while(0).
+	(bindtextdomain): Likewise.
+
 2012-06-04  Cary Coutant  <ccoutant@google.com>
 
 	* dynobj.cc (Sized_dynobj::do_get_global_symbol_counts): Call
