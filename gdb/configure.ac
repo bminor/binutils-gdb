@@ -18,15 +18,15 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Provide more thorough testing by -lmcheck.
-dnl Set it to 'true' for development snapshots, 'false' for releases or
-dnl pre-releases.
-development=true
-
 AC_PREREQ(2.59)dnl
 AC_INIT(main.c)
 AC_CONFIG_HEADER(config.h:config.in)
 AM_MAINTAINER_MODE
+
+# Provide more thorough testing by -lmcheck.
+# Set it to 'true' for development snapshots, 'false' for releases or
+# pre-releases.
+development=true
 
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS

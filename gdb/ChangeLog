@@ -1,3 +1,8 @@
+2012-06-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.ac: Move development=true below AC_INIT.
+	* configure: Regenerate.
+
 2012-06-05  Stan Shebs  <stan@codesourcery.com>
 
 	* mi/mi-interp.c (mi_interpreter_init): Set raw_stdout from

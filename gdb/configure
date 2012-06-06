@@ -2683,6 +2683,11 @@ fi
 
 
 
+# Provide more thorough testing by -lmcheck.
+# Set it to 'true' for development snapshots, 'false' for releases or
+# pre-releases.
+development=true
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
