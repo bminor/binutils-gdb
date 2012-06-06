@@ -1,5 +1,10 @@
 2012-06-06  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (handle_inferior_event) <deferred_step_ptid>: Use
+	context_switch and remove stale comment.
+
+2012-06-06  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (struct execution_control_state): Remove
 	`new_thread_event' field.
 	(handle_inferior_event): Simplify new threads handling; don't

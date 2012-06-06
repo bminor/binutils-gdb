@@ -3813,9 +3813,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	  ecs->event_thread->control.trap_expected = 0;
 
-	  /* Note: We do not call context_switch at this point, as the
-	     context is already set up for stepping the original thread.  */
-	  switch_to_thread (deferred_step_ptid);
+	  context_switch (deferred_step_ptid);
 	  deferred_step_ptid = null_ptid;
 	  /* Suppress spurious "Switching to ..." message.  */
 	  previous_inferior_ptid = inferior_ptid;
