@@ -1,3 +1,7 @@
+2012-06-06  Yao Qi  <yao@codesourcery.com>
+
+	* ax.c (gdb_eval_agent_expr): Print `top' in hex.
+
 2012-06-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix gcc -flto compilation warning.

@@ -1186,6 +1186,6 @@ gdb_eval_agent_expr (struct regcache *regcache,
 	}
 
       ax_debug ("Op %s -> sp=%d, top=0x%s",
-		gdb_agent_op_name (op), sp, pulongest (top));
+		gdb_agent_op_name (op), sp, phex_nz (top, 0));
     }
 }
