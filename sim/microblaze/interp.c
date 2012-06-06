@@ -23,6 +23,7 @@
 #include <sys/times.h>
 #include <sys/param.h>
 #include <netinet/in.h>	/* for byte ordering macros */
+#include "config.h"
 #include "bfd.h"
 #include "gdb/callback.h"
 #include "libiberty.h"
