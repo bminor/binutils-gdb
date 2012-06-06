@@ -3511,10 +3511,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       }
 
       if (!ptid_equal (ecs->ptid, inferior_ptid))
-	{
-	  context_switch (ecs->ptid);
-	  reinit_frame_cache ();
-	}
+	context_switch (ecs->ptid);
 
       /* Immediately detach breakpoints from the child before there's
 	 any chance of letting the user delete breakpoints from the
@@ -3631,10 +3628,7 @@ handle_inferior_event (struct execution_control_state *ecs)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_EXECD\n");
 
       if (!ptid_equal (ecs->ptid, inferior_ptid))
-	{
-	  context_switch (ecs->ptid);
-	  reinit_frame_cache ();
-	}
+	context_switch (ecs->ptid);
 
       singlestep_breakpoints_inserted_p = 0;
       cancel_single_step_breakpoints ();
