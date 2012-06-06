@@ -1,5 +1,9 @@
 2012-06-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (mips_convert_register_p): Correct coding style.
+
+2012-06-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c (mips_pseudo_register_type): Use
 	mips_float_register_p.
 

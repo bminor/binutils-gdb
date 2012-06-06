@@ -845,8 +845,8 @@ static int
 mips_convert_register_p (struct gdbarch *gdbarch,
 			 int regnum, struct type *type)
 {
-  return mips_convert_register_float_case_p (gdbarch, regnum, type)
-      || mips_convert_register_gpreg_case_p (gdbarch, regnum, type);
+  return (mips_convert_register_float_case_p (gdbarch, regnum, type)
+	  || mips_convert_register_gpreg_case_p (gdbarch, regnum, type));
 }
 
 static int
