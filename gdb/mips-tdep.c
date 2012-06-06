@@ -1015,8 +1015,7 @@ mips_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (TYPE_LENGTH (rawtype) == 0)
     return rawtype;
 
-  if (rawnum >= mips_regnum (gdbarch)->fp0
-      && rawnum < mips_regnum (gdbarch)->fp0 + 32)
+  if (mips_float_register_p (gdbarch, rawnum))
     /* Present the floating point registers however the hardware did;
        do not try to convert between FPU layouts.  */
     return rawtype;

@@ -1,3 +1,8 @@
+2012-06-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_pseudo_register_type): Use
+	mips_float_register_p.
+
 2012-06-06  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (handle_inferior_event): Remove calls to
