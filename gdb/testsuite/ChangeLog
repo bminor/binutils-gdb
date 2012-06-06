@@ -1,3 +1,8 @@
+2012-06-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/clone-new-thread-event.c: New file.
+	* gdb.threads/clone-new-thread-event.exp: New file.
+
 2012-06-06  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/dprintf.c (main): Add extra parameter when calling

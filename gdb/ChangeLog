@@ -1,3 +1,10 @@
+2012-06-06  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (struct execution_control_state): Remove
+	`new_thread_event' field.
+	(handle_inferior_event): Simplify new threads handling; don't
+	resume the inferior if we find a new thread.
+
 2012-06-06  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* NEWS: Document the deprecation of SH's 'regs' command.

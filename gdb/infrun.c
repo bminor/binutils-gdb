@@ -2393,7 +2393,6 @@ struct execution_control_state
   CORE_ADDR stop_func_start;
   CORE_ADDR stop_func_end;
   const char *stop_func_name;
-  int new_thread_event;
   int wait_some_more;
 };
 
@@ -3229,17 +3228,15 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
     }
 
-  /* If it's a new process, add it to the thread database.  */
-
-  ecs->new_thread_event = (!ptid_equal (ecs->ptid, inferior_ptid)
-			   && !ptid_equal (ecs->ptid, minus_one_ptid)
-			   && !in_thread_list (ecs->ptid));
-
   if (ecs->ws.kind != TARGET_WAITKIND_EXITED
-      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED && ecs->new_thread_event)
-    add_thread (ecs->ptid);
-
-  ecs->event_thread = find_thread_ptid (ecs->ptid);
+      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
+      && !ptid_equal (ecs->ptid, minus_one_ptid))
+    {
+      ecs->event_thread = find_thread_ptid (ecs->ptid);
+      /* If it's a new thread, add it to the thread database.  */
+      if (ecs->event_thread == NULL)
+	ecs->event_thread = add_thread (ecs->ptid);
+    }
 
   /* Dependent on valid ECS->EVENT_THREAD.  */
   adjust_pc_after_break (ecs);
@@ -3710,30 +3707,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
       print_no_history_reason ();
       stop_stepping (ecs);
-      return;
-    }
-
-  if (ecs->new_thread_event)
-    {
-      if (non_stop)
-	/* Non-stop assumes that the target handles adding new threads
-	   to the thread list.  */
-	internal_error (__FILE__, __LINE__,
-			"targets should add new threads to the thread "
-			"list themselves in non-stop mode.");
-
-      /* We may want to consider not doing a resume here in order to
-	 give the user a chance to play with the new thread.  It might
-	 be good to make that a user-settable option.  */
-
-      /* At this point, all threads are stopped (happens automatically
-	 in either the OS or the native code).  Therefore we need to
-	 continue all threads in order to make progress.  */
-
-      if (!ptid_equal (ecs->ptid, inferior_ptid))
-	context_switch (ecs->ptid);
-      target_resume (RESUME_ALL, 0, GDB_SIGNAL_0);
-      prepare_to_wait (ecs);
       return;
     }
 
