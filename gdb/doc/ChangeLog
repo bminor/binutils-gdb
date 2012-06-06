@@ -1,3 +1,7 @@
+2012-06-06  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* gdb.texinfo: Document the deprecation of SH's 'regs' command.
+
 2012-06-06  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo: Update copyright year.

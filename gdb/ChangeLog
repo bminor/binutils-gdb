@@ -1,3 +1,19 @@
+2012-06-06  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* NEWS: Document the deprecation of SH's 'regs' command.
+	* inferior.h (all_registers_info): Add function declaration.
+	* sh-tdep.c (sh_show_regs): Remove variable.
+	(sh_generic_show_regs, sh3_show_regs, sh2e_show_regs, sh2a_show_regs)
+	(sh2a_nofpu_show_regs, sh3e_show_regs, sh3_dsp_show_regs)
+	(sh4_show_regs, sh4_nofpu_show_regs, sh_dsp_show_regs)
+	(sh_show_regs_command): Remove functions.
+	(sh_gdbarch_init): Don't set sh_show_regs.
+	(_initialize_sh_tdep): Make the 'regs' command an deprecated alias to
+	'info all-registers'.
+	* sh64-tdep.c (sh64_show_media_regs, sh64_show_compact_regs)
+	(sh64_show_regs): Remove functions.
+	* sh64-tdep.h (sh64_show_regs): Remove function declaration.
+
 2012-06-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure.ac: Move development=true below AC_INIT.

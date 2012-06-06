@@ -20,6 +20,5 @@
 #define SH64_TDEP_H
 
 extern gdbarch_init_ftype sh64_gdbarch_init;
-extern void sh64_show_regs (struct frame_info *frame);
 
 #endif /* SH64_TDEP_H */

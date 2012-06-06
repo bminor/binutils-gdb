@@ -246,6 +246,8 @@ extern void set_inferior_args (char *);
 
 extern void set_inferior_args_vector (int, char **);
 
+extern void all_registers_info (char *, int);
+
 extern void registers_info (char *, int);
 
 extern void nexti_command (char *, int);

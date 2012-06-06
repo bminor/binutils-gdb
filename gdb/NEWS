@@ -161,6 +161,11 @@
      corresponding to addresses it prints.  This defaults to "on", but
      you can set it to "off" to restore GDB's previous behavior.
 
+* Deprecated commands
+
+  ** For the Renesas Super-H architecture, the "regs" command has been
+     deprecated, and "info all-registers" should be used instead.
+
 * New targets
 
 Renesas RL78			rl78-*-elf

@@ -20444,6 +20444,9 @@ commands:
 @table @code
 @item regs
 @kindex regs@r{, Super-H}
+This command is deprecated, and @code{info all-registers} should be
+used instead.
+
 Show the values of all Super-H registers.
 
 @item set sh calling-convention @var{convention}
