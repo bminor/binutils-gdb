@@ -1004,7 +1004,6 @@ static struct type *
 mips_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
   const int num_regs = gdbarch_num_regs (gdbarch);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int rawnum = regnum % num_regs;
   struct type *rawtype;
 
@@ -4232,7 +4231,6 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argnum;
   int len = 0;
   int stack_offset = 0;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = find_function_addr (function, NULL);
   int regsize = mips_abi_regsize (gdbarch);
@@ -4640,7 +4638,6 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argnum;
   int len = 0;
   int stack_offset = 0;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = find_function_addr (function, NULL);
 
@@ -5097,7 +5094,6 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argnum;
   int len = 0;
   int stack_offset = 0;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = find_function_addr (function, NULL);
 
@@ -5627,7 +5623,6 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argnum;
   int len = 0;
   int stack_offset = 0;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR func_addr = find_function_addr (function, NULL);
 

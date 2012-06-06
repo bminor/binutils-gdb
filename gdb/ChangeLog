@@ -1,5 +1,14 @@
 2012-06-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (mips_pseudo_register_type): Remove tdep local
+	variable.
+	(mips_eabi_push_dummy_call): Likewise.
+	(mips_n32n64_push_dummy_call): Likewise.
+	(mips_o32_push_dummy_call): Likewise.
+	(mips_o64_push_dummy_call): Likewise.
+
+2012-06-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c (mips_convert_register_p): Correct coding style.
 
 2012-06-06  Maciej W. Rozycki  <macro@codesourcery.com>
