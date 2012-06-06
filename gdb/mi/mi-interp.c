@@ -81,13 +81,12 @@ mi_interpreter_init (struct interp *interp, int top_level)
   const char *name;
   int mi_version;
 
-  /* HACK: We need to force stdout/stderr to point at the console.
-     This avoids any potential side effects caused by legacy code that
-     is still using the TUI / fputs_unfiltered_hook.  So we set up
-     output channels for this now, and swap them in when we are
-     run.  */
+  /* Assign the output channel created at startup to its own global,
+     so that we can create a console channel that encapsulates and
+     prefixes all gdb_output-type bits coming from the rest of the
+     debugger.  */
 
-  raw_stdout = stdio_fileopen (stdout);
+  raw_stdout = gdb_stdout;
 
   /* Create MI console channels, each with a different prefix so they
      can be distinguished.  */
