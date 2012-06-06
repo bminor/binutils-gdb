@@ -889,6 +889,10 @@ class General_options
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
                 N_("Set GNU linker emulation; obsolete"), N_("EMULATION"));
 
+  DEFINE_bool(mmap_output_file, options::TWO_DASHES, '\0', true,
+              N_("Map the output file for writing (default)."),
+              N_("Do not map the output file for writing."));
+
   DEFINE_bool(print_map, options::TWO_DASHES, 'M', false,
 	      N_("Write map file on standard output"), NULL);
   DEFINE_string(Map, options::ONE_DASH, '\0', NULL, N_("Write map file"),
@@ -938,6 +942,11 @@ class General_options
   DEFINE_special(plugin_opt, options::TWO_DASHES, '\0',
                  N_("Pass an option to the plugin"), N_("OPTION"));
 #endif
+
+  DEFINE_bool(posix_fallocate, options::TWO_DASHES, '\0', true,
+              N_("Use posix_fallocate to reserve space in the output file"
+		 " (default)."),
+              N_("Use fallocate or ftruncate to reserve space."));
 
   DEFINE_bool(preread_archive_symbols, options::TWO_DASHES, '\0', false,
               N_("Preread archive symbols when multi-threaded"), NULL);

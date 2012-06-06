@@ -79,6 +79,9 @@
 /* Define to 1 if you have the <ext/hash_set> header file. */
 #undef HAVE_EXT_HASH_SET
 
+/* Define to 1 if you have the `fallocate' function. */
+#undef HAVE_FALLOCATE
+
 /* Define to 1 if you have the `ffsll' function. */
 #undef HAVE_FFSLL
 

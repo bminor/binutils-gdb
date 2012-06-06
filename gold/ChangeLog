@@ -1,3 +1,16 @@
+2012-06-06  Cary Coutant  <ccoutant@google.com>
+
+	* configure.ac: Add check for fallocate.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+	* options.h (class General_options): Add --mmap-output-file and
+	--posix-fallocate options.
+	* output.cc: (posix_fallocate): Remove; replace with...
+	(gold_fallocate): New function.
+	(Output_file::map_no_anonymous): Call gold_fallocate.
+	(Output_file::map): Check --mmap-output-file option.
+
 2012-06-05  Jing Yu  <jingyu@google.com>
 
 	* gold.h (textdomain): Add do {} to empty while(0).
