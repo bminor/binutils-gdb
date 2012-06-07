@@ -1,3 +1,7 @@
+2012-06-07  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* binutils-all/i386/i386.exp: Don't skip for x86_64-*-linux*.
+
 2012-05-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/hppa/objdump.exp: Expect addend as signed.

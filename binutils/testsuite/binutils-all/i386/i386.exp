@@ -18,6 +18,7 @@
 if {!([istarget "i*86-*-linux*"]
       || [istarget "i*86-*-gnu*"]
       || [istarget "i*86-*-nacl*"]
+      || [istarget "x86_64-*-linux*"]
       || [istarget "x86_64-*-nacl*"])
     || ![is_elf_format]
     || [is_remote host]} then {
