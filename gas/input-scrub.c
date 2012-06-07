@@ -1,6 +1,6 @@
 /* input_scrub.c - Break up input buffers into whole numbers of lines.
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   2000, 2001, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2000, 2001, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -75,7 +75,7 @@ static char save_source[AFTER_SIZE];
 static unsigned int buffer_length;
 
 /* The index into an sb structure we are reading from.  -1 if none.  */
-static int sb_index = -1;
+static size_t sb_index = -1;
 
 /* If we are reading from an sb structure, this is it.  */
 static sb from_sb;
@@ -111,12 +111,12 @@ struct input_save {
   char *              partial_where;
   int                 partial_size;
   char                save_source[AFTER_SIZE];
-  unsigned int        buffer_length;
+  size_t              buffer_length;
   char *              physical_input_file;
   char *              logical_input_file;
   unsigned int        physical_input_line;
   int                 logical_input_line;
-  int                 sb_index;
+  size_t              sb_index;
   sb                  from_sb;
   int                 from_sb_is_expansion; /* Should we do a conditional check?  */
   struct input_save * next_saved_file;	/* Chain of input_saves.  */
@@ -312,13 +312,12 @@ input_scrub_next_buffer (char **bufp)
 {
   register char *limit;		/*->just after last char of buffer.  */
 
-  if (sb_index >= 0)
+  if (sb_index != (size_t) -1)
     {
       if (sb_index >= from_sb.len)
 	{
 	  sb_kill (&from_sb);
-	  if (from_sb_is_expansion
-	      )
+	  if (from_sb_is_expansion)
 	    {
 	      cond_finish_check (macro_nest);
 #ifdef md_macro_end
@@ -428,7 +427,7 @@ seen_at_least_1_file (void)
 void
 bump_line_counters (void)
 {
-  if (sb_index < 0)
+  if (sb_index == (size_t) -1)
     {
       ++physical_input_line;
       if (logical_input_line >= 0)

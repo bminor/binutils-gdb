@@ -1,6 +1,6 @@
 /* This is the Assembler Pre-Processor
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010
+   1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2012
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -214,7 +214,7 @@ static char *out_string;
 static char out_buf[20];
 static int add_newlines;
 static char *saved_input;
-static int saved_input_len;
+static size_t saved_input_len;
 static char input_buffer[32 * 1024];
 static const char *mri_state;
 static char mri_last_ch;
@@ -232,7 +232,7 @@ struct app_save
   char         out_buf[sizeof (out_buf)];
   int          add_newlines;
   char *       saved_input;
-  int          saved_input_len;
+  size_t       saved_input_len;
 #ifdef TC_M68K
   int          scrub_m68k_mri;
 #endif
@@ -295,7 +295,7 @@ app_pop (char *arg)
     saved_input = NULL;
   else
     {
-      gas_assert (saved->saved_input_len <= (int) (sizeof input_buffer));
+      gas_assert (saved->saved_input_len <= sizeof (input_buffer));
       memcpy (input_buffer, saved->saved_input, saved->saved_input_len);
       saved_input = input_buffer;
       saved_input_len = saved->saved_input_len;
@@ -351,14 +351,14 @@ process_escape (int ch)
    machine, and saves its state so that it may return at any point.
    This is the way the old code used to work.  */
 
-int
-do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
+size_t
+do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 {
   char *to = tostart;
   char *toend = tostart + tolen;
   char *from;
   char *fromend;
-  int fromlen;
+  size_t fromlen;
   register int ch, ch2 = 0;
   /* Character that started the string we're working on.  */
   static char quotechar;
@@ -548,7 +548,7 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	     GET and PUT macros.  */
 	  {
 	    char *s;
-	    int len;
+	    ptrdiff_t len;
 
 	    for (s = from; s < fromend; s++)
 	      {
@@ -1366,7 +1366,7 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	      )
 	    {
 	      char *s;
-	      int len;
+	      ptrdiff_t len;
 
 	      for (s = from; s < fromend; s++)
 		{

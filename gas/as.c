@@ -1002,8 +1002,8 @@ close_output_file (void)
 
 /* The interface between the macro code and gas expression handling.  */
 
-static int
-macro_expr (const char *emsg, int idx, sb *in, int *val)
+static size_t
+macro_expr (const char *emsg, size_t idx, sb *in, offsetT *val)
 {
   char *hold;
   expressionS ex;
@@ -1019,7 +1019,7 @@ macro_expr (const char *emsg, int idx, sb *in, int *val)
   if (ex.X_op != O_constant)
     as_bad ("%s", emsg);
 
-  *val = (int) ex.X_add_number;
+  *val = ex.X_add_number;
 
   return idx;
 }

@@ -1,3 +1,28 @@
+2012-06-07  Alan Modra  <amodra@gmail.com>
+
+	PR gas/14201
+	* sb.h (sb_max_power_two): Delete.
+	(struct sb): Delete "item" and "pot".  Make "len" a size_t.  Add "max".
+	(sb_element): Delete.
+	(sb_add_char, sb_add_buffer, sb_skip_comma, sb_skip_write): Update
+	prototypes.
+	* sb.c (string_count, free_list): Delete.
+	(sb_build, sb_kill, sb_check): Rewrite.
+	(scrub_from_sb, sb_add_char, sb_add_string, sb_add_buffer,
+	sb_skip_white, sb_skip_comma): Replace assorted int params,
+	vars and return types with size_t.
+	* input-scrub.c: Likewise.
+	* macro.c: Likewise.
+	* macro.h: Likewise.
+	* as.c: Likewise.
+	* as.h: Likewise.
+	* input-file.h: Likewise.
+	* input-file.c: Likewise.
+	* read.c: Likewise.
+	* app.c: ..or ptrdiff_t.
+	* input-file.c (input_file_get): Use ferror.
+	(input_file_give_next_buffer): Use input_file_get.
+
 2012-05-29  Roland McGrath  <mcgrathr@google.com>
 
 	* read.c [HANDLE_BUNDLE] (bundle_lock_depth): New variable.

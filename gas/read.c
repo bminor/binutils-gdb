@@ -251,7 +251,7 @@ static void s_reloc (int);
 static int hex_float (int, char *);
 static segT get_known_segmented_expression (expressionS * expP);
 static void pobegin (void);
-static int get_non_macro_line_sb (sb *);
+static size_t get_non_macro_line_sb (sb *);
 static void generate_file_debug (void);
 static char *_find_end_of_line (char *, int, int, int);
 
@@ -579,10 +579,10 @@ pobegin (void)
 static char *scrub_string;
 static char *scrub_string_end;
 
-static int
-scrub_from_string (char *buf, int buflen)
+static size_t
+scrub_from_string (char *buf, size_t buflen)
 {
-  int copy;
+  size_t copy;
 
   copy = scrub_string_end - scrub_string;
   if (copy > buflen)
@@ -1235,8 +1235,8 @@ read_a_source_file (char *name)
 	      new_tmp = new_buf;
 	      for (;;)
 		{
-		  int space;
-		  int size;
+		  size_t space;
+		  size_t size;
 
 		  space = (new_buf + new_length) - new_tmp;
 		  size = do_scrub_chars (scrub_from_string, new_tmp, space);
@@ -2748,13 +2748,13 @@ get_line_sb (sb *line, int in_macro)
   return *input_line_pointer++;
 }
 
-static int
+static size_t
 get_non_macro_line_sb (sb *line)
 {
   return get_line_sb (line, 0);
 }
 
-static int
+static size_t
 get_macro_line_sb (sb *line)
 {
   return get_line_sb (line, 1);
