@@ -412,7 +412,15 @@ struct dwarf2_cu
   /* To be copied to symtab->call_site_htab.  */
   htab_t call_site_htab;
 
-  /* Non-NULL if this CU came from a DWO file.  */
+  /* Non-NULL if this CU came from a DWO file.
+     There is an invariant here that is important to remember:
+     Except for attributes copied from the top level DIE in the "main"
+     (or "stub") file in preparation for reading the DWO file
+     (e.g., DW_AT_GNU_addr_base), we KISS: there is only *one* CU.
+     Either there isn't a DWO file (in which case this is NULL and the point
+     is moot), or there is and either we're not going to read it (in which
+     case this is NULL) or there is and we are reading it (in which case this
+     is non-NULL).  */
   struct dwo_unit *dwo_unit;
 
   /* The DW_AT_addr_base attribute if present, zero otherwise

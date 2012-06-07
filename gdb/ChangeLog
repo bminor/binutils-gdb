@@ -1,3 +1,7 @@
+2012-06-07  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_cu): Add comment.
+
 2012-06-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_pseudo_register_type): Remove tdep local
