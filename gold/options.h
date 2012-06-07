@@ -1011,7 +1011,7 @@ class General_options
               N_("Emit only debug line number information"), NULL);
   DEFINE_bool(strip_debug_gdb, options::TWO_DASHES, '\0', false,
               N_("Strip debug symbols that are unused by gdb "
-                 "(at least versions <= 6.7)"), NULL);
+                 "(at least versions <= 7.4)"), NULL);
   DEFINE_bool(strip_lto_sections, options::TWO_DASHES, '\0', true,
               N_("Strip LTO intermediate code sections"), NULL);
 

@@ -453,60 +453,98 @@ Layout::Hash_key::operator()(const Layout::Key& k) const
  return k.first + k.second.first + k.second.second;
 }
 
-// Returns whether the given section is in the list of
-// debug-sections-used-by-some-version-of-gdb.  Currently,
-// we've checked versions of gdb up to and including 7.4.
+// These are the debug sections that are actually used by gdb.
+// Currently, we've checked versions of gdb up to and including 7.4.
+// We only check the part of the name that follows ".debug_" or
+// ".zdebug_".
 
 static const char* gdb_sections[] =
-{ ".debug_abbrev",
-  ".debug_addr",         // Fission extension
-  // ".debug_aranges",   // not used by gdb as of 7.4
-  ".debug_frame",
-  ".debug_info",
-  ".debug_types",
-  ".debug_line",
-  ".debug_loc",
-  ".debug_macinfo",
-  // ".debug_pubnames",  // not used by gdb as of 7.4
-  // ".debug_pubtypes",  // not used by gdb as of 7.4
-  ".debug_ranges",
-  ".debug_str",
+{
+  "abbrev",
+  "addr",         // Fission extension
+  // "aranges",   // not used by gdb as of 7.4
+  "frame",
+  "info",
+  "types",
+  "line",
+  "loc",
+  "macinfo",
+  "macro",
+  // "pubnames",  // not used by gdb as of 7.4
+  // "pubtypes",  // not used by gdb as of 7.4
+  "ranges",
+  "str",
 };
+
+// This is the minimum set of sections needed for line numbers.
 
 static const char* lines_only_debug_sections[] =
-{ ".debug_abbrev",
-  // ".debug_addr",      // Fission extension
-  // ".debug_aranges",   // not used by gdb as of 7.4
-  // ".debug_frame",
-  ".debug_info",
-  // ".debug_types",
-  ".debug_line",
-  // ".debug_loc",
-  // ".debug_macinfo",
-  // ".debug_pubnames",  // not used by gdb as of 7.4
-  // ".debug_pubtypes",  // not used by gdb as of 7.4
-  // ".debug_ranges",
-  ".debug_str",
+{
+  "abbrev",
+  // "addr",      // Fission extension
+  // "aranges",   // not used by gdb as of 7.4
+  // "frame",
+  "info",
+  // "types",
+  "line",
+  // "loc",
+  // "macinfo",
+  // "macro",
+  // "pubnames",  // not used by gdb as of 7.4
+  // "pubtypes",  // not used by gdb as of 7.4
+  // "ranges",
+  "str",
 };
 
+// These sections are the DWARF fast-lookup tables, and are not needed
+// when building a .gdb_index section.
+
+static const char* gdb_fast_lookup_sections[] =
+{
+  "aranges",
+  "pubnames",
+  "pubtypes",
+};
+
+// Returns whether the given debug section is in the list of
+// debug-sections-used-by-some-version-of-gdb.  SUFFIX is the
+// portion of the name following ".debug_" or ".zdebug_".
+
 static inline bool
-is_gdb_debug_section(const char* str)
+is_gdb_debug_section(const char* suffix)
 {
   // We can do this faster: binary search or a hashtable.  But why bother?
   for (size_t i = 0; i < sizeof(gdb_sections)/sizeof(*gdb_sections); ++i)
-    if (strcmp(str, gdb_sections[i]) == 0)
+    if (strcmp(suffix, gdb_sections[i]) == 0)
       return true;
   return false;
 }
 
+// Returns whether the given section is needed for lines-only debugging.
+
 static inline bool
-is_lines_only_debug_section(const char* str)
+is_lines_only_debug_section(const char* suffix)
 {
   // We can do this faster: binary search or a hashtable.  But why bother?
   for (size_t i = 0;
        i < sizeof(lines_only_debug_sections)/sizeof(*lines_only_debug_sections);
        ++i)
-    if (strcmp(str, lines_only_debug_sections[i]) == 0)
+    if (strcmp(suffix, lines_only_debug_sections[i]) == 0)
+      return true;
+  return false;
+}
+
+// Returns whether the given section is a fast-lookup section that
+// will not be needed when building a .gdb_index section.
+
+static inline bool
+is_gdb_fast_lookup_section(const char* suffix)
+{
+  // We can do this faster: binary search or a hashtable.  But why bother?
+  for (size_t i = 0;
+       i < sizeof(gdb_fast_lookup_sections)/sizeof(*gdb_fast_lookup_sections);
+       ++i)
+    if (strcmp(suffix, gdb_fast_lookup_sections[i]) == 0)
       return true;
   return false;
 }
@@ -583,16 +621,34 @@ Layout::include_section(Sized_relobj_file<size, big_endian>*, const char* name,
 	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
 	{
 	  // Debugging sections can only be recognized by name.
-	  if (is_prefix_of(".debug", name)
-	      && !is_lines_only_debug_section(name))
+	  if (is_prefix_of(".debug_", name)
+	      && !is_lines_only_debug_section(name + 7))
+	    return false;
+	  if (is_prefix_of(".zdebug_", name)
+	      && !is_lines_only_debug_section(name + 8))
 	    return false;
 	}
       if (parameters->options().strip_debug_gdb()
 	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
 	{
 	  // Debugging sections can only be recognized by name.
-	  if (is_prefix_of(".debug", name)
-	      && !is_gdb_debug_section(name))
+	  if (is_prefix_of(".debug_", name)
+	      && !is_gdb_debug_section(name + 7))
+	    return false;
+	  if (is_prefix_of(".zdebug_", name)
+	      && !is_gdb_debug_section(name + 8))
+	    return false;
+	}
+      if (parameters->options().gdb_index()
+	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
+	{
+	  // When building .gdb_index, we can strip .debug_pubnames,
+	  // .debug_pubtypes, and .debug_aranges sections.
+	  if (is_prefix_of(".debug_", name)
+	      && is_gdb_fast_lookup_section(name + 7))
+	    return false;
+	  if (is_prefix_of(".zdebug_", name)
+	      && is_gdb_fast_lookup_section(name + 8))
 	    return false;
 	}
       if (parameters->options().strip_lto_sections()

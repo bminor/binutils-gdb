@@ -1,5 +1,19 @@
 2012-06-06  Cary Coutant  <ccoutant@google.com>
 
+	* layout.cc (gdb_sections): Remove ".debug_" prefixes,
+	add .debug_macro.
+	(lines_only_debug_sections): Likewise.
+	(gdb_fast_lookup_sections): New static array.
+	(is_gdb_debug_section): Rename formal parameter.
+	(is_lines_only_debug_section): Likewise.
+	(is_gdb_fast_lookup_section): New function.
+	(Layout::include_section): Check for ".zdebug_" prefix; pass
+	section name suffix to is_gdb_debug_section, et al.; check for
+	fast-lookup sections when building .gdb_index.
+	* options.h (--strip-debug-gdb): Update GDB version number.
+
+2012-06-06  Cary Coutant  <ccoutant@google.com>
+
 	* configure.ac: Add check for fallocate.
 	* configure: Regenerate.
 	* config.in: Regenerate.
