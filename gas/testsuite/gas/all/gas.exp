@@ -400,7 +400,6 @@ gas_test_error "weakref3.s" "" "a: would close weakref loop: a => b => c => d =>
 gas_test_error "weakref4.s" "" "is already defined"
 
 run_dump_test string
-run_dump_test rept
 
 load_lib gas-dg.exp
 dg-init
