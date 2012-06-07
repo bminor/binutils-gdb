@@ -161,7 +161,10 @@ SECTIONS
   .data	${RELOCATING-0} : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text))}
   {
     ${RELOCATING+ PROVIDE (__data_start = .) ; }
-    *(.data)
+    /* --gc-sections will delete empty .data. This leads to wrong start
+       addresses for subsequent sections because -Tdata= from the command
+       line will have no effect, see PR13697.  Thus, keep .data  */
+    KEEP (*(.data))    
     *(.data*)
     *(.rodata)  /* We need to include .rodata here if gcc is used */
     *(.rodata*) /* with -fdata-sections.  */

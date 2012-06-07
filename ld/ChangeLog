@@ -1,3 +1,8 @@
+2012-06-07  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR 13697
+	* scripttempl/avr.sc (.data): Keep it.
+
 2012-06-02  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* Makefile.am (TEXINFO_TEX): Remove $(top_srcdir) prefix.
