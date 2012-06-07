@@ -1,3 +1,7 @@
+2012-06-07  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/strace.exp: Shorten some too-long lines.
+
 2012-06-06  Pedro Alves  <palves@redhat.com>
 
 	* gdb.threads/clone-new-thread-event.c: New file.

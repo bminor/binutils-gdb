@@ -31,7 +31,8 @@ if [get_compiler_info ${binfile}] {
     return -1
 }
 
-set additional_flags [list quiet debug shlib=$libipa shlib_load "additional_flags=-lust -lurcu-bp" ]
+set additional_flags [list quiet debug shlib=$libipa shlib_load \
+			  "additional_flags=-lust -lurcu-bp" ]
 
 if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $additional_flags] != ""} {
     untested "UST library or headers are not installed"
@@ -78,7 +79,8 @@ proc strace_probe_marker { } { with_test_prefix "probe_marker" {
     gdb_test "strace -m ust/bar" "Static tracepoint \[0-9\]+ at ${hex}: file.*"
     gdb_test "strace -m ust/bar2" "Static tracepoint \[0-9\]+ at ${hex}: file.*"
     # Two trace markers should be enabled.
-    gdb_test "info static-tracepoint-markers" "ust/bar\[\t \]+y\[\t \]+$hex .*ust/bar2\[\t \]+y\[\t \]+$hex.*"
+    gdb_test "info static-tracepoint-markers" \
+	"ust/bar\[\t \]+y\[\t \]+$hex .*ust/bar2\[\t \]+y\[\t \]+$hex.*"
 
     gdb_test "break end" "Breakpoint \[0-9\]+ at.*"
 
@@ -91,7 +93,8 @@ proc strace_probe_marker { } { with_test_prefix "probe_marker" {
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
 }}
 
-proc strace_trace_on_same_addr { type } { with_test_prefix "trace_same_addr $type" {
+proc strace_trace_on_same_addr { type } {
+with_test_prefix "trace_same_addr $type" {
     global executable
     global expect_out
     global gdb_prompt
@@ -137,8 +140,8 @@ proc strace_trace_on_same_addr { type } { with_test_prefix "trace_same_addr $typ
 	}
 	-re ".*\r\n$gdb_prompt $" {
 	    if [string equal $type "ftrace"] {
-		# The instruction may be not long enough to set a fast tracepoint.
-		# Skip the rest of this test.
+		# The instruction may be not long enough to set a fast
+		# tracepoint.  Skip the rest of this test.
 		return -1;
 	    } else {
 		fail $test
@@ -152,8 +155,8 @@ proc strace_trace_on_same_addr { type } { with_test_prefix "trace_same_addr $typ
 	}
 	-re ".*\r\n$gdb_prompt $" {
 	    if [string equal $type "ftrace"] {
-		# The instruction may be not long enough to set a fast tracepoint.
-		# Skip the rest of this test.
+		# The instruction may be not long enough to set a fast
+		# tracepoint.  Skip the rest of this test.
 		return -1;
 	    } else {
 		fail $test
@@ -164,13 +167,17 @@ proc strace_trace_on_same_addr { type } { with_test_prefix "trace_same_addr $typ
     gdb_test "break end" "Breakpoint \[0-9\]+ at.*"
 
     if [string equal $type "break"] {
-	gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" "continue to bar"
-	gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" "continue to bar2"
-	gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" "continue to end"
+	gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" \
+	    "continue to bar"
+	gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" \
+	    "continue to bar2"
+	gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" \
+	    "continue to end"
     } else {
 
 	gdb_test_no_output "tstart"
-	gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" "continue to end"
+	gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" \
+	    "continue to end"
 	gdb_test_no_output "tstop"
 
 	gdb_test "tfind" "Found trace frame 0, tracepoint .*" "tfind frame 0"
@@ -221,7 +228,8 @@ proc strace_trace_on_diff_addr { } { with_test_prefix "trace_diff_addr" {
 
 
     # Set common tracepoint.
-    gdb_test "trace *${marker_bar2_addr}" "Tracepoint \[0-9\]+ at ${hex}: file.*"
+    gdb_test "trace *${marker_bar2_addr}" \
+	"Tracepoint \[0-9\]+ at ${hex}: file.*"
 
     gdb_test "break end" "Breakpoint \[0-9\]+ at.*"
 
