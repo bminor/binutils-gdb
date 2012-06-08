@@ -1,3 +1,11 @@
+2012-06-08  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf.c (read_and_display_attr_value): Handle
+	DW_FORM_GNU_ref_alt and DW_FORM_GNU_strp_alt.
+	(display_debug_macro): Handle DW_MACRO_GNU_define_indirect_alt,
+	DW_MACRO_GNU_undef_indirect_alt and
+	DW_MACRO_GNU_transparent_include_alt.
+
 2012-06-01  Alan Modra  <amodra@gmail.com>
 
 	* addr2line.c (translate_addresses): Truncate input addresses to

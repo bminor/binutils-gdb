@@ -1284,6 +1284,8 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_FORM_strp:
     case DW_FORM_sec_offset:
+    case DW_FORM_GNU_ref_alt:
+    case DW_FORM_GNU_strp_alt:
       uvalue = byte_get (data, offset_size);
       data += offset_size;
       break;
@@ -1347,6 +1349,11 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_FORM_ref_addr:
       if (!do_loc)
 	printf (" <0x%s>", dwarf_vmatoa ("x",uvalue));
+      break;
+
+    case DW_FORM_GNU_ref_alt:
+      if (!do_loc)
+	printf (" <alt 0x%s>", dwarf_vmatoa ("x",uvalue));
       break;
 
     case DW_FORM_ref1:
@@ -1456,6 +1463,12 @@ read_and_display_attr_value (unsigned long attribute,
                   dwarf_vmatoa ("x", uvalue),
                   fetch_indexed_string (uvalue, offset_size, dwo));
         }
+      break;
+
+    case DW_FORM_GNU_strp_alt:
+      if (!do_loc)
+	printf (_(" (alt indirect string, offset: 0x%s)"),
+		dwarf_vmatoa ("x", uvalue));
       break;
 
     case DW_FORM_indirect:
@@ -1796,7 +1809,8 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_AT_import:
       {
-        if (form == DW_FORM_ref_sig8)
+	if (form == DW_FORM_ref_sig8
+	    || form == DW_FORM_GNU_ref_alt)
           break;
 
 	if (form == DW_FORM_ref1
@@ -3626,6 +3640,31 @@ display_debug_macro (struct dwarf_section *section,
 	      offset = byte_get (curr, offset_size);
 	      curr += offset_size;
 	      printf (_(" DW_MACRO_GNU_transparent_include - offset : 0x%lx\n"),
+		      (unsigned long) offset);
+	      break;
+
+	    case DW_MACRO_GNU_define_indirect_alt:
+	      lineno = read_leb128 (curr, &bytes_read, 0);
+	      curr += bytes_read;
+	      offset = byte_get (curr, offset_size);
+	      curr += offset_size;
+	      printf (_(" DW_MACRO_GNU_define_indirect_alt - lineno : %d macro offset : 0x%lx\n"),
+		      lineno, (unsigned long) offset);
+	      break;
+
+	    case DW_MACRO_GNU_undef_indirect_alt:
+	      lineno = read_leb128 (curr, &bytes_read, 0);
+	      curr += bytes_read;
+	      offset = byte_get (curr, offset_size);
+	      curr += offset_size;
+	      printf (_(" DW_MACRO_GNU_undef_indirect_alt - lineno : %d macro offset : 0x%lx\n"),
+		      lineno, (unsigned long) offset);
+	      break;
+
+	    case DW_MACRO_GNU_transparent_include_alt:
+	      offset = byte_get (curr, offset_size);
+	      curr += offset_size;
+	      printf (_(" DW_MACRO_GNU_transparent_include_alt - offset : 0x%lx\n"),
 		      (unsigned long) offset);
 	      break;
 
