@@ -1,3 +1,11 @@
+2012-06-08  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (In-Process Agent): Add 'In-Process Agent
+	Protocol'.
+	(In-Process Agent Protocol, IPA Protocol Objects)
+	(IPA Protocol Commands): New nodes.
+	(Tracepoint Packets): Add anchors.
+
 2012-06-06  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* gdb.texinfo: Document the deprecation of SH's 'regs' command.

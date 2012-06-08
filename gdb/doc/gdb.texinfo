@@ -33451,6 +33451,158 @@ Display the current setting of execution of debugging operations by
 the in-process agent.
 @end table
 
+@menu
+* In-Process Agent Protocol::
+@end menu
+
+@node In-Process Agent Protocol
+@section In-Process Agent Protocol
+@cindex in-process agent protocol
+
+The in-process agent is able to communicate with both @value{GDBN} and
+GDBserver (@pxref{In-Process Agent}).  This section documents the protocol
+used for communications between @value{GDBN} or GDBserver and the IPA.
+In general, @value{GDBN} or GDBserver sends commands
+(@pxref{IPA Protocol Commands}) and data to in-process agent, and then
+in-process agent replies back with the return result of the command, or
+some other information.  The data sent to in-process agent is composed
+of primitive data types, such as 4-byte or 8-byte type, and composite
+types, which are called objects (@pxref{IPA Protocol Objects}).
+
+@menu
+* IPA Protocol Objects::
+* IPA Protocol Commands::
+@end menu
+
+@node IPA Protocol Objects
+@subsection IPA Protocol Objects
+@cindex ipa protocol objects
+
+The commands sent to and results received from agent may contain some
+complex data types called @dfn{objects}.
+
+The in-process agent is running on the same machine with @value{GDBN}
+or GDBserver, so it doesn't have to handle as much differences between
+two ends as remote protocol (@pxref{Remote Protocol}) tries to handle.
+However, there are still some differences of two ends in two processes:
+
+@enumerate
+@item
+word size.  On some 64-bit machines, @value{GDBN} or GDBserver can be
+compiled as a 64-bit executable, while in-process agent is a 32-bit one.
+@item
+ABI.  Some machines may have multiple types of ABI, @value{GDBN} or
+GDBserver is compiled with one, and in-process agent is compiled with
+the other one.
+@end enumerate
+
+Here are the IPA Protocol Objects:
+
+@enumerate
+@item
+agent expression object.  It represents an agent expression
+(@pxref{Agent Expressions}).
+@anchor{agent expression object}
+@item
+tracepoint action object.  It represents a tracepoint action
+(@pxref{Tracepoint Actions,,Tracepoint Action Lists}) to collect registers,
+memory, static trace data and to evaluate expression.
+@anchor{tracepoint action object}
+@item
+tracepoint object.  It represents a tracepoint (@pxref{Tracepoints}).
+@anchor{tracepoint object}
+
+@end enumerate
+
+The following table describes important attributes of each IPA protocol
+object:
+
+@multitable @columnfractions .30 .20 .50
+@headitem Name @tab Size @tab Description
+@item @emph{agent expression object} @tab @tab
+@item length @tab 4 @tab length of bytes code
+@item byte code @tab @var{length} @tab contents of byte code
+@item @emph{tracepoint action for collecting memory} @tab @tab
+@item 'M' @tab 1 @tab type of tracepoint action
+@item addr @tab 8 @tab if @var{basereg} is @samp{-1}, @var{addr} is the
+address of the lowest byte to collect, otherwise @var{addr} is the offset
+of @var{basereg} for memory collecting.
+@item len @tab 8 @tab length of memory for collecting
+@item basereg @tab 4 @tab the register number containing the starting
+memory address for collecting.
+@item @emph{tracepoint action for collecting registers} @tab @tab
+@item 'R' @tab 1 @tab type of tracepoint action
+@item @emph{tracepoint action for collecting static trace data} @tab @tab
+@item 'L' @tab 1 @tab type of tracepoint action
+@item @emph{tracepoint action for expression evaluation} @tab @tab
+@item 'X' @tab 1 @tab type of tracepoint action
+@item agent expression @tab length of @tab @ref{agent expression object}
+@item @emph{tracepoint object} @tab @tab
+@item number @tab 4 @tab number of tracepoint
+@item address @tab 8 @tab address of tracepoint inserted on
+@item type @tab 4 @tab type of tracepoint
+@item enabled @tab 1 @tab enable or disable of tracepoint
+@item step_count @tab 8 @tab step
+@item pass_count @tab 8 @tab pass
+@item numactions @tab 4 @tab number of tracepoint actions
+@item hit count @tab 8 @tab hit count
+@item trace frame usage @tab 8 @tab trace frame usage
+@item compiled_cond @tab 8 @tab compiled condition
+@item orig_size @tab 8 @tab orig size
+@item condition @tab 4 if condition is NULL otherwise length of
+@ref{agent expression object}
+@tab zero if condition is NULL, otherwise is
+@ref{agent expression object}
+@item actions @tab variable
+@tab numactions number of @ref{tracepoint action object}
+@end multitable
+
+@node IPA Protocol Commands
+@subsection IPA Protocol Commands
+@cindex ipa protocol commands
+
+The spaces in each command are delimiters to ease reading this commands
+specification.  They don't exist in real commands.
+
+@table @samp
+
+@item FastTrace:@var{tracepoint_object} @var{gdb_jump_pad_head}
+Installs a new fast tracepoint described by @var{tracepoint_object}
+(@pxref{tracepoint object}).  @var{gdb_jump_pad_head}, 8-byte long, is the
+head of @dfn{jumppad}, which is used to jump to data collection routine
+in IPA finally.
+
+Replies:
+@table @samp
+@item OK @var{target_address} @var{gdb_jump_pad_head} @var{fjump_size} @var{fjump}
+@var{target_address} is address of tracepoint in the inferior.
+@var{gdb_jump_pad_head} is updated head of jumppad.  Both of
+@var{target_address} and @var{gdb_jump_pad_head} are 8-byte long.
+@var{fjump} contains a sequence of instructions jump to jumppad entry.
+@var{fjump_size}, 4-byte long, is the size of @var{fjump}.
+@item E @var{NN}
+for an error
+
+@end table
+
+@item qTfSTM
+@xref{qTfSTM}.
+@item qTsSTM
+@xref{qTsSTM}.
+@item qTSTMat
+@xref{qTSTMat}.
+@item probe_marker_at:@var{address}
+Asks in-process agent to probe the marker at @var{address}.
+
+Replies:
+@table @samp
+@item E @var{NN}
+for an error
+@end table
+@item unprobe_marker_at:@var{address}
+Asks in-process agent to unprobe the marker at @var{address}.
+@end table
+
 @node GDB Bugs
 @chapter Reporting Bugs in @value{GDBN}
 @cindex bugs in @value{GDBN}
@@ -37434,6 +37586,8 @@ trace state variables.
 
 @item qTfSTM
 @itemx qTsSTM
+@anchor{qTfSTM}
+@anchor{qTsSTM}
 These packets request data about static tracepoint markers that exist
 in the target program.  @value{GDBN} sends @code{qTfSTM} to get the
 first piece of data, and multiple @code{qTsSTM} to get additional
@@ -37464,6 +37618,7 @@ query), until the target responds with @samp{l} (lower-case ell, for
 @dfn{last}).
 
 @item qTSTMat:@var{address}
+@anchor{qTSTMat}
 This packets requests data about static tracepoint markers in the
 target program at @var{address}.  Replies to this packet follow the
 syntax of the @samp{qTfSTM} and @code{qTsSTM} packets that list static
