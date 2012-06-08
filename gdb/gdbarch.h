@@ -457,6 +457,16 @@ typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarc
 extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf);
 extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
 
+/* Return true if the return value of function is stored in the first hidden
+   parameter.  In theory, this feature should be language-dependent, specified
+   by language and its ABI, such as C++.  Unfortunately, compiler may
+   implement it to a target-dependent feature.  So that we need such hook here
+   to be aware of this in GDB. */
+
+typedef int (gdbarch_return_in_first_hidden_param_p_ftype) (struct gdbarch *gdbarch, struct type *type);
+extern int gdbarch_return_in_first_hidden_param_p (struct gdbarch *gdbarch, struct type *type);
+extern void set_gdbarch_return_in_first_hidden_param_p (struct gdbarch *gdbarch, gdbarch_return_in_first_hidden_param_p_ftype *return_in_first_hidden_param_p);
+
 typedef CORE_ADDR (gdbarch_skip_prologue_ftype) (struct gdbarch *gdbarch, CORE_ADDR ip);
 extern CORE_ADDR gdbarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip);
 extern void set_gdbarch_skip_prologue (struct gdbarch *gdbarch, gdbarch_skip_prologue_ftype *skip_prologue);

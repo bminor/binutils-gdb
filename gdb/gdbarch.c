@@ -200,6 +200,7 @@ struct gdbarch
   gdbarch_address_to_pointer_ftype *address_to_pointer;
   gdbarch_integer_to_address_ftype *integer_to_address;
   gdbarch_return_value_ftype *return_value;
+  gdbarch_return_in_first_hidden_param_p_ftype *return_in_first_hidden_param_p;
   gdbarch_skip_prologue_ftype *skip_prologue;
   gdbarch_skip_main_prologue_ftype *skip_main_prologue;
   gdbarch_inner_than_ftype *inner_than;
@@ -368,6 +369,7 @@ struct gdbarch startup_gdbarch =
   unsigned_address_to_pointer,  /* address_to_pointer */
   0,  /* integer_to_address */
   0,  /* return_value */
+  default_return_in_first_hidden_param_p,  /* return_in_first_hidden_param_p */
   0,  /* skip_prologue */
   0,  /* skip_main_prologue */
   0,  /* inner_than */
@@ -519,6 +521,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->value_from_register = default_value_from_register;
   gdbarch->pointer_to_address = unsigned_pointer_to_address;
   gdbarch->address_to_pointer = unsigned_address_to_pointer;
+  gdbarch->return_in_first_hidden_param_p = default_return_in_first_hidden_param_p;
   gdbarch->remote_breakpoint_from_pc = default_remote_breakpoint_from_pc;
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
@@ -665,6 +668,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate.  */
   /* Skip verify of return_value, has predicate.  */
+  /* Skip verify of return_in_first_hidden_param_p, invalid_p == 0 */
   if (gdbarch->skip_prologue == 0)
     fprintf_unfiltered (log, "\n\tskip_prologue");
   /* Skip verify of skip_main_prologue, has predicate.  */
@@ -1242,6 +1246,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: remote_register_number = <%s>\n",
                       host_address_to_string (gdbarch->remote_register_number));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: return_in_first_hidden_param_p = <%s>\n",
+                      host_address_to_string (gdbarch->return_in_first_hidden_param_p));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_return_value_p() = %d\n",
                       gdbarch_return_value_p (gdbarch));
@@ -2553,6 +2560,23 @@ set_gdbarch_return_value (struct gdbarch *gdbarch,
                           gdbarch_return_value_ftype return_value)
 {
   gdbarch->return_value = return_value;
+}
+
+int
+gdbarch_return_in_first_hidden_param_p (struct gdbarch *gdbarch, struct type *type)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->return_in_first_hidden_param_p != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_return_in_first_hidden_param_p called\n");
+  return gdbarch->return_in_first_hidden_param_p (gdbarch, type);
+}
+
+void
+set_gdbarch_return_in_first_hidden_param_p (struct gdbarch *gdbarch,
+                                            gdbarch_return_in_first_hidden_param_p_ftype return_in_first_hidden_param_p)
+{
+  gdbarch->return_in_first_hidden_param_p = return_in_first_hidden_param_p;
 }
 
 CORE_ADDR

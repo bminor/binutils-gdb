@@ -2209,6 +2209,17 @@ sh_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name,
 
   return NULL;
 }
+
+/* This is the implementation of gdbarch method
+   return_in_first_hidden_param_p.  */
+
+static int
+sh_return_in_first_hidden_param_p (struct gdbarch *gdbarch,
+				     struct type *type)
+{
+  return 0;
+}
+
 
 
 static struct gdbarch *
@@ -2260,6 +2271,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
+  set_gdbarch_return_in_first_hidden_param_p (gdbarch,
+					      sh_return_in_first_hidden_param_p);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 

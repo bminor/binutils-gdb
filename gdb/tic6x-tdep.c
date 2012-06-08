@@ -822,6 +822,19 @@ tic6x_return_value (struct gdbarch *gdbarch, struct value *function,
 		    struct type *type, struct regcache *regcache,
 		    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
+  /* In C++, when function returns an object, even its size is small
+     enough, it stii has to be passed via reference, pointed by register
+     A3.  */
+  if (current_language->la_language == language_cplus)
+    {
+      if (type != NULL)
+	{
+	  CHECK_TYPEDEF (type);
+	  if (language_pass_by_reference (type))
+	    return RETURN_VALUE_STRUCT_CONVENTION;
+	}
+    }
+
   if (TYPE_LENGTH (type) > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
@@ -912,32 +925,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* The first arg passed on stack.  Mostly the first 10 args are passed by
      registers.  */
   int first_arg_on_stack = 10;
-  /* If this inf-call is a cpp method call, and return value is passed by
-     reference, this flag is set to 1, otherwise set to 0.  We need this flag
-     because computation of the return location in
-     infcall.c:call_function_by_hand is wrong for C6000 ELF ABI.  In
-     call_function_by_hand, the language is considered first, and then
-     target ABI is considered.  If language_pass_by_reference returns true,
-     the return location is passed as the first parameter to the function,
-     which is conflict with C6000 ELF ABI.  If this flag is true, we should
-     adjust args and return locations accordingly to comply with C6000 ELF
-     ABI.  */
-  int cplus_return_struct_by_reference = 0;
 
-  if (current_language->la_language == language_cplus)
-    {
-      struct type *values_type;
-
-      find_function_addr (function, &values_type);
-
-      if (values_type)
-	{
-	  CHECK_TYPEDEF (values_type);
-	  if (language_pass_by_reference (values_type))
-	    cplus_return_struct_by_reference = 1;
-	}
-
-    }
   /* Set the return address register to point to the entry point of
      the program, where a breakpoint lies in wait.  */
   regcache_cooked_write_unsigned (regcache, TIC6X_RA_REGNUM, bp_addr);
@@ -946,12 +934,6 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      for the returned value.  The callee returns the object by copying it to
      the address in A3.  */
   if (struct_return)
-    regcache_cooked_write_unsigned (regcache, 3, struct_addr);
-  else if (cplus_return_struct_by_reference)
-    /* When cplus_return_struct_by_reference is 1, means local variable
-       lang_struct_return in call_function_by_hand is 1, so struct is
-       returned by reference, even STRUCT_RETURN is 0.  Note that STRUCT_ADDR
-       is still valid in this case.  */
     regcache_cooked_write_unsigned (regcache, 3, struct_addr);
 
   /* Determine the type of this function.  */
@@ -967,10 +949,8 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (TYPE_VARARGS (func_type))
     first_arg_on_stack = TYPE_NFIELDS (func_type) - 1;
 
-  /* Now make space on the stack for the args.  If
-     cplus_return_struct_by_reference is 1, means GDB pass an extra parameter
-     in ARGS, which is useless here, skip it.  */
-  for (argnum = cplus_return_struct_by_reference; argnum < nargs; argnum++)
+  /* Now make space on the stack for the args.  */
+  for (argnum = 0; argnum < nargs; argnum++)
     {
       int len = align_up (TYPE_LENGTH (value_type (args[argnum])), 4);
       if (argnum >= 10 - argreg)
@@ -986,7 +966,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Now load as many as possible of the first arguments into
      registers, and push the rest onto the stack.  Loop through args
      from first to last.  */
-  for (argnum = cplus_return_struct_by_reference; argnum < nargs; argnum++)
+  for (argnum = 0; argnum < nargs; argnum++)
     {
       const gdb_byte *val;
       struct value *arg = args[argnum];
@@ -1207,6 +1187,16 @@ tic6x_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   return 1;
 }
 
+/* This is the implementation of gdbarch method
+   return_in_first_hidden_param_p.  */
+
+static int
+tic6x_return_in_first_hidden_param_p (struct gdbarch *gdbarch,
+				      struct type *type)
+{
+  return 0;
+}
+
 static struct gdbarch *
 tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -1364,6 +1354,9 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_longjmp_target (gdbarch, tic6x_get_longjmp_target);
 
   set_gdbarch_in_function_epilogue_p (gdbarch, tic6x_in_function_epilogue_p);
+
+  set_gdbarch_return_in_first_hidden_param_p (gdbarch,
+					      tic6x_return_in_first_hidden_param_p);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

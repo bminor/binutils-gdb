@@ -1,3 +1,24 @@
+2012-06-08  Yao Qi  <yao@codesourcery.com>
+            Chung-Lin Tang <cltang@codesourcery.com>
+
+	* arch-utils.c (default_return_in_first_hidden_param_p): New.
+	* arch-utils.h: Declare.
+	* gdbarch.sh: Add return_in_first_hidden_param_p.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* infcall.c (call_function_by_hand): Call
+	gdbarch_return_in_first_hidden_param_p instead of
+	language_pass_by_reference.
+
+	* m68k-tdep.c (m68k_return_in_first_hidden_param_p): New.
+	(m68k_gdbarch_init): Install m68k_return_in_first_hidden_param_p.
+	* sh-tdep.c (sh_return_in_first_hidden_param_p): New.
+	(sh_gdbarch_init): Install sh_return_in_first_hidden_param_p.
+	* tic6x-tdep.c (tic6x_push_dummy_call): Remove local variable
+	`cplus_return_struct_by_reference'.
+	(tic6x_return_value): Handle language cplusplus.
+	(tic6x_return_in_first_hidden_param_p): New.
+	(tic6x_gdbarch_init): Install tic6x_return_in_first_hidden_param_p.
+
 2012-06-07  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_cu): Add comment.

@@ -31,6 +31,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 #include "objfiles.h"
+#include "language.h"
 
 #include "version.h"
 
@@ -791,6 +792,16 @@ default_gen_return_address (struct gdbarch *gdbarch,
 			    CORE_ADDR scope)
 {
   error (_("This architecture has no method to collect a return address."));
+}
+
+int
+default_return_in_first_hidden_param_p (struct gdbarch *gdbarch,
+					struct type *type)
+{
+  /* Usually, the return value's address is stored the in the "first hidden"
+     parameter if the return value should be passed by reference, as
+     specified in ABI.  */
+  return language_pass_by_reference (type);
 }
 
 /* */

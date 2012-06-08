@@ -1050,6 +1050,16 @@ m68k_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 }
 
 
+/* This is the implementation of gdbarch method
+   return_in_first_hidden_param_p.  */
+
+static int
+m68k_return_in_first_hidden_param_p (struct gdbarch *gdbarch,
+				     struct type *type)
+{
+  return 0;
+}
+
 /* System V Release 4 (SVR4).  */
 
 void
@@ -1235,6 +1245,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Function call & return.  */
   set_gdbarch_push_dummy_call (gdbarch, m68k_push_dummy_call);
   set_gdbarch_return_value (gdbarch, m68k_return_value);
+  set_gdbarch_return_in_first_hidden_param_p (gdbarch,
+					      m68k_return_in_first_hidden_param_p);
 
 
   /* Disassembler.  */

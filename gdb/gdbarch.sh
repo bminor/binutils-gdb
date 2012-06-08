@@ -515,6 +515,13 @@ M:CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 # for instance).
 M:enum return_value_convention:return_value:struct value *function, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:function, valtype, regcache, readbuf, writebuf
 
+# Return true if the return value of function is stored in the first hidden
+# parameter.  In theory, this feature should be language-dependent, specified
+# by language and its ABI, such as C++.  Unfortunately, compiler may
+# implement it to a target-dependent feature.  So that we need such hook here
+# to be aware of this in GDB.
+m:int:return_in_first_hidden_param_p:struct type *type:type::default_return_in_first_hidden_param_p::0
+
 m:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 M:CORE_ADDR:skip_main_prologue:CORE_ADDR ip:ip
 f:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
