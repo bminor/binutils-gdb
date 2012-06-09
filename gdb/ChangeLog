@@ -1,3 +1,7 @@
+2012-06-09  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* valarith.c (binop_types_user_defined_p): Fix a typo.
+
 2012-06-08  Yao Qi  <yao@codesourcery.com>
             Chung-Lin Tang <cltang@codesourcery.com>
 

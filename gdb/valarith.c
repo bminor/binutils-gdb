@@ -279,7 +279,7 @@ binop_types_user_defined_p (enum exp_opcode op,
   if (TYPE_CODE (type1) == TYPE_CODE_REF)
     type1 = check_typedef (TYPE_TARGET_TYPE (type1));
 
-  type2 = check_typedef (type1);
+  type2 = check_typedef (type2);
   if (TYPE_CODE (type2) == TYPE_CODE_REF)
     type2 = check_typedef (TYPE_TARGET_TYPE (type2));
 
