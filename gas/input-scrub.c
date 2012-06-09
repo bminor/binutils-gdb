@@ -264,6 +264,8 @@ input_scrub_include_file (char *filename, char *position)
 void
 input_scrub_include_sb (sb *from, char *position, int is_expansion)
 {
+  int newline;
+
   if (macro_nest > max_macro_nest)
     as_fatal (_("macros nested too deeply"));
   ++macro_nest;
@@ -277,9 +279,11 @@ input_scrub_include_sb (sb *from, char *position, int is_expansion)
 
   next_saved_file = input_scrub_push (position);
 
-  sb_new (&from_sb);
+  /* Allocate sufficient space: from->len + optional newline.  */
+  newline = from->len >= 1 && from->ptr[0] != '\n';
+  sb_build (&from_sb, from->len + newline);
   from_sb_is_expansion = is_expansion;
-  if (from->len >= 1 && from->ptr[0] != '\n')
+  if (newline)
     {
       /* Add the sentinel required by read.c.  */
       sb_add_char (&from_sb, '\n');
@@ -288,8 +292,7 @@ input_scrub_include_sb (sb *from, char *position, int is_expansion)
 
   /* Make sure the parser looks at defined contents when it scans for
      e.g. end-of-line at the end of a macro.  */
-  sb_add_char (&from_sb, 0);
-  from_sb.len--;
+  sb_terminate (&from_sb);
 
   sb_index = 1;
 

@@ -57,7 +57,7 @@ static void sb_check (sb *, size_t);
 
 /* Initializes an sb.  */
 
-static void
+void
 sb_build (sb *ptr, size_t size)
 {
   ptr->ptr = xmalloc (size + 1);

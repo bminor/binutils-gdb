@@ -53,6 +53,7 @@ typedef struct sb
 sb;
 
 extern void sb_new (sb *);
+extern void sb_build (sb *, size_t);
 extern void sb_kill (sb *);
 extern void sb_add_sb (sb *, sb *);
 extern void sb_scrub_and_add_sb (sb *, sb *);

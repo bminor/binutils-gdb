@@ -1181,7 +1181,6 @@ read_a_source_file (char *name)
 	      bump_line_counters ();
 	      s += 4;
 
-	      sb_new (&sbuf);
 	      ends = strstr (s, "#NO_APP\n");
 
 	      if (!ends)
@@ -1262,7 +1261,9 @@ read_a_source_file (char *name)
 		 actual macro expansion (possibly nested) and other
 		 input expansion work.  Beware that in messages, line
 		 numbers and possibly file names will be incorrect.  */
-	      sb_add_string (&sbuf, new_buf);
+	      new_length = strlen (new_buf);
+	      sb_build (&sbuf, new_length);
+	      sb_add_buffer (&sbuf, new_buf, new_length);
 	      input_scrub_include_sb (&sbuf, input_line_pointer, 0);
 	      sb_kill (&sbuf);
 	      buffer_limit = input_scrub_next_buffer (&input_line_pointer);
@@ -2437,8 +2438,8 @@ s_irp (int irpc)
 
   as_where (&file, &line);
 
-  sb_new (&s);
   eol = find_end_of_line (input_line_pointer, 0);
+  sb_build (&s, eol - input_line_pointer);
   sb_add_buffer (&s, input_line_pointer, eol - input_line_pointer);
   input_line_pointer = eol;
 
@@ -2773,17 +2774,20 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
 
   as_where (&file, &line);
 
-  sb_new (&s);
   eol = find_end_of_line (input_line_pointer, 0);
+  sb_build (&s, eol - input_line_pointer);
   sb_add_buffer (&s, input_line_pointer, eol - input_line_pointer);
   input_line_pointer = eol;
 
   if (line_label != NULL)
     {
       sb label;
+      size_t len;
 
-      sb_new (&label);
-      sb_add_string (&label, S_GET_NAME (line_label));
+      name = S_GET_NAME (line_label);
+      len = strlen (name);
+      sb_build (&label, len);
+      sb_add_buffer (&label, name, len);
       err = define_macro (0, &s, &label, get_macro_line_sb, file, line, &name);
       sb_kill (&label);
     }
@@ -3207,7 +3211,7 @@ do_repeat (int count, const char *start, const char *end)
       return;
     }
 
-  sb_new (&many);
+  sb_build (&many, count * one.len);
   while (count-- > 0)
     sb_add_sb (&many, &one);
 
@@ -3247,7 +3251,7 @@ do_repeat_with_expander (int count,
 	  char * sub;
 	  sb processed;
 
-	  sb_new (& processed);
+	  sb_build (& processed, one.len);
 	  sb_add_sb (& processed, & one);
 	  sub = strstr (processed.ptr, expander);
 	  len = sprintf (sub, "%d", count);
@@ -6167,8 +6171,9 @@ void
 input_scrub_insert_line (const char *line)
 {
   sb newline;
-  sb_new (&newline);
-  sb_add_string (&newline, line);
+  size_t len = strlen (line);
+  sb_build (&newline, len);
+  sb_add_buffer (&newline, line, len);
   input_scrub_include_sb (&newline, input_line_pointer, 0);
   sb_kill (&newline);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);

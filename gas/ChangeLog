@@ -1,3 +1,18 @@
+2012-06-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* input-scrub.c (input_scrub_include_sb): Use sb_build to
+	allocate sufficient space for from_sb.  Use sb_terminate to
+	terminate string.
+	* read.c (read_a_source_file): Use sb_build to allocate
+	sufficient space and replace sb_add_string with sb_add_buffer.
+	(s_macro): Likewise.
+	(input_scrub_insert_line): Likewise.
+	(s_irp): Use sb_build to allocate sufficient space.
+	(do_repeat): Use sb_build to allocate sufficient space
+	for many.
+	* sb.c (sb_build): Remove static.
+	* sb.h (sb_build): New prototype.
+
 2012-06-09  Alan Modra  <amodra@gmail.com>
 
 	* sb.c: Include limits.h.
