@@ -25,6 +25,13 @@
 #include "as.h"
 #include "sb.h"
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 /* These routines are about manipulating strings.
 
    They are managed in things called `sb's which is an abbreviation
@@ -39,7 +46,13 @@
    use foo->ptr[*];
    sb_kill (&foo);  */
 
-static size_t dsize = 32;
+/* Buffers start at INIT_ALLOC size, and roughly double each time we
+   go over the current allocation.  MALLOC_OVERHEAD is a guess at the
+   system malloc overhead.  We aim to not waste any memory in the
+   underlying page/chunk allocated by the system malloc.  */
+#define MALLOC_OVERHEAD (2 * sizeof (size_t))
+#define INIT_ALLOC (64 - MALLOC_OVERHEAD - 1)
+
 static void sb_check (sb *, size_t);
 
 /* Initializes an sb.  */
@@ -55,7 +68,7 @@ sb_build (sb *ptr, size_t size)
 void
 sb_new (sb *ptr)
 {
-  sb_build (ptr, dsize);
+  sb_build (ptr, INIT_ALLOC);
 }
 
 /* Deallocate the sb at ptr.  */
@@ -114,16 +127,23 @@ sb_scrub_and_add_sb (sb *ptr, sb *s)
 static void
 sb_check (sb *ptr, size_t len)
 {
-  size_t max = ptr->max;
+  size_t want = ptr->len + len;
 
-  while (ptr->len + len >= max)
+  if (want > ptr->max)
     {
-      max <<= 1;
-      if (max == 0)
+      size_t max;
+
+      want += MALLOC_OVERHEAD + 1;
+      if ((ssize_t) want < 0)
 	as_fatal ("string buffer overflow");
-    }
-  if (max != ptr->max)
-    {
+#if GCC_VERSION >= 3004
+      max = (size_t) 1 << (CHAR_BIT * sizeof (want) - __builtin_clzl (want));
+#else
+      max = 128;
+      while (want > max)
+	max <<= 1;
+#endif
+      max -= MALLOC_OVERHEAD + 1;
       ptr->max = max;
       ptr->ptr = xrealloc (ptr->ptr, max + 1);
     }
@@ -167,13 +187,12 @@ sb_add_buffer (sb *ptr, const char *s, size_t len)
   ptr->len += len;
 }
 
-/* Like sb_name, but don't include the null byte in the string.  */
+/* Write terminating NUL and return string.  */
 
 char *
 sb_terminate (sb *in)
 {
-  sb_add_char (in, 0);
-  --in->len;
+  in->ptr[in->len] = 0;
   return in->ptr;
 }
 

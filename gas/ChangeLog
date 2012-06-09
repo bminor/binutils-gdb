@@ -1,3 +1,12 @@
+2012-06-09  Alan Modra  <amodra@gmail.com>
+
+	* sb.c: Include limits.h.
+	(dsize): Delete.
+	(MALLOC_OVERHEAD, INIT_ALLOC): Define.
+	(sb_new): Use INIT_ALLOC.
+	(sb_check): Modify allocation strategy using MALLOC_OVERHEAD.
+	(sb_terminate): Don't use sb_add_char.
+
 2012-06-07  Alan Modra  <amodra@gmail.com>
 
 	PR gas/14201
