@@ -4197,11 +4197,18 @@ mips_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 		      CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
 		      struct regcache *regcache)
 {
-  CORE_ADDR nop_addr;
   static gdb_byte nop_insn[] = { 0, 0, 0, 0 };
+  CORE_ADDR nop_addr;
+  CORE_ADDR bp_slot;
 
   /* Reserve enough room on the stack for our breakpoint instruction.  */
-  *bp_addr = sp - sizeof (nop_insn);
+  bp_slot = sp - sizeof (nop_insn);
+
+  /* Return to microMIPS mode if calling microMIPS code to avoid
+     triggering an address error exception on processors that only
+     support microMIPS execution.  */
+  *bp_addr = (mips_pc_is_micromips (gdbarch, funaddr)
+	      ? make_compact_addr (bp_slot) : bp_slot);
 
   /* The breakpoint layer automatically adjusts the address of
      breakpoints inserted in a branch delay slot.  With enough
@@ -4210,7 +4217,7 @@ mips_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
      trigger the adjustement, and break the function call entirely.
      So, we reserve those 4 bytes and write a nop instruction
      to prevent that from happening.  */
-  nop_addr = *bp_addr - sizeof (nop_insn);
+  nop_addr = bp_slot - sizeof (nop_insn);
   write_memory (nop_addr, nop_insn, sizeof (nop_insn));
   sp = mips_frame_align (gdbarch, nop_addr);
 
