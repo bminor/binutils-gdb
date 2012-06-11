@@ -1,5 +1,20 @@
 2012-06-11  Pedro Alves  <palves@redhat.com>
 
+	* ser-base.c (run_async_handler_and_reschedule): New.
+	(fd_event, push_event): Use it.
+	* serial.c (serial_open, serial_fdopen_ops): Set the initial
+	reference count to 1.
+	(do_serial_close): Set the bufp field to NULL.  Use serial_unref
+	instead of xfree.
+	(serial_is_open, serial_ref, serial_unref): New.
+	* serial.h (serial_open): Adjust comment.
+	(serial_is_open): Declare.
+	(serial_close): Adjust comment.
+	(serial_ref, serial_unref) Declare.
+	(struct serial): New field 'refcnt'.
+
+2012-06-11  Pedro Alves  <palves@redhat.com>
+
 	Remove #if 0'd "connect" command, and unnecessary associated
 	refcounting and serial reuse bits.
 

@@ -37,12 +37,17 @@ typedef void *serial_ttystate;
 struct serial;
 
 /* Try to open NAME.  Returns a new `struct serial *' on success, NULL
-   on failure.  Note that some open calls can block and, if possible, 
-   should be  written to be non-blocking, with calls to ui_look_hook 
-   so they can be cancelled.  An async interface for open could be
-   added to GDB if necessary.  */
+   on failure.  The new serial object has a reference count of 1.
+   Note that some open calls can block and, if possible, should be
+   written to be non-blocking, with calls to ui_look_hook so they can
+   be cancelled.  An async interface for open could be added to GDB if
+   necessary.  */
 
 extern struct serial *serial_open (const char *name);
+
+/* Returns true if SCB is open.  */
+
+extern int serial_is_open (struct serial *scb);
 
 /* Find an already opened serial stream using a file handle.  */
 
@@ -52,9 +57,17 @@ extern struct serial *serial_for_fd (int fd);
 
 extern struct serial *serial_fdopen (const int fd);
 
-/* Push out all buffers, close the device and destroy SCB.  */
+/* Push out all buffers, close the device and unref SCB.  */
 
 extern void serial_close (struct serial *scb);
+
+/* Increment reference count of SCB.  */
+
+extern void serial_ref (struct serial *scb);
+
+/* Decrement reference count of SCB.  */
+
+extern void serial_unref (struct serial *scb);
 
 /* Create a pipe, and put the read end in files[0], and the write end
    in filde[1].  Returns 0 for success, negative value for error (in
@@ -213,6 +226,10 @@ extern int serial_debug_p (struct serial *scb);
 
 struct serial
   {
+    /* serial objects are ref counted (but not the underlying
+       connection, just the object's lifetime in memory).  */
+    int refcnt;
+
     int fd;			/* File descriptor */
     /* File descriptor for a separate error stream that should be
        immediately forwarded to gdb_stderr.  This may be -1.

@@ -196,6 +196,7 @@ serial_open (const char *name)
   scb->bufcnt = 0;
   scb->bufp = scb->buf;
   scb->error_fd = -1;
+  scb->refcnt = 1;
 
   /* `...->open (...)' would get expanded by the open(2) syscall macro.  */
   if ((*scb->ops->open) (scb, open_name))
@@ -245,6 +246,7 @@ serial_fdopen_ops (const int fd, struct serial_ops *ops)
   scb->bufcnt = 0;
   scb->bufp = scb->buf;
   scb->error_fd = -1;
+  scb->refcnt = 1;
 
   scb->name = NULL;
   scb->debug_p = 0;
@@ -291,7 +293,10 @@ do_serial_close (struct serial *scb, int really_close)
   if (scb->name)
     xfree (scb->name);
 
-  xfree (scb);
+  /* For serial_is_open.  */
+  scb->bufp = NULL;
+
+  serial_unref (scb);
 }
 
 void
@@ -304,6 +309,26 @@ void
 serial_un_fdopen (struct serial *scb)
 {
   do_serial_close (scb, 0);
+}
+
+int
+serial_is_open (struct serial *scb)
+{
+  return scb->bufp != NULL;
+}
+
+void
+serial_ref (struct serial *scb)
+{
+  scb->refcnt++;
+}
+
+void
+serial_unref (struct serial *scb)
+{
+  --scb->refcnt;
+  if (scb->refcnt == 0)
+    xfree (scb);
 }
 
 int

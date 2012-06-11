@@ -123,6 +123,29 @@ reschedule (struct serial *scb)
     }
 }
 
+/* Run the SCB's async handle, and reschedule, if the handler doesn't
+   close SCB.  */
+
+static void
+run_async_handler_and_reschedule (struct serial *scb)
+{
+  int is_open;
+
+  /* Take a reference, so a serial_close call within the handler
+     doesn't make SCB a dangling pointer.  */
+  serial_ref (scb);
+
+  /* Run the handler.  */
+  scb->async_handler (scb, scb->async_context);
+
+  is_open = serial_is_open (scb);
+  serial_unref (scb);
+
+  /* Get ready for more, if not already closed.  */
+  if (is_open)
+    reschedule (scb);
+}
+
 /* FD_EVENT: This is scheduled when the input FIFO is empty (and there
    is no pending error).  As soon as data arrives, it is read into the
    input FIFO and the client notified.  The client should then drain
@@ -158,8 +181,7 @@ fd_event (int error, void *context)
 	  scb->bufcnt = SERIAL_ERROR;
 	}
     }
-  scb->async_handler (scb, scb->async_context);
-  reschedule (scb);
+  run_async_handler_and_reschedule (scb);
 }
 
 /* PUSH_EVENT: The input FIFO is non-empty (or there is a pending
@@ -173,9 +195,7 @@ push_event (void *context)
   struct serial *scb = context;
 
   scb->async_state = NOTHING_SCHEDULED; /* Timers are one-off */
-  scb->async_handler (scb, scb->async_context);
-  /* re-schedule */
-  reschedule (scb);
+  run_async_handler_and_reschedule (scb);
 }
 
 /* Wait for input on scb, with timeout seconds.  Returns 0 on success,
