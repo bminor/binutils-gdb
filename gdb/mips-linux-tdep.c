@@ -40,6 +40,7 @@
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
 #include "xml-syscall.h"
+#include "gdb_signals.h"
 
 static struct target_so_ops mips_svr4_so_ops;
 
@@ -1330,6 +1331,96 @@ mips_linux_get_syscall_number (struct gdbarch *gdbarch,
   return ret;
 }
 
+/* Translate signals based on MIPS signal values.  
+   Adapted from gdb/common/signals.c.  */
+
+static enum gdb_signal
+mips_gdb_signal_from_target (struct gdbarch *gdbarch, int signo)
+{
+  switch (signo) 
+    {
+    case 0:
+      return GDB_SIGNAL_0;
+    case MIPS_SIGHUP:
+      return GDB_SIGNAL_HUP;
+    case MIPS_SIGINT:
+      return GDB_SIGNAL_INT;
+    case MIPS_SIGQUIT:
+      return GDB_SIGNAL_QUIT;
+    case MIPS_SIGILL:
+      return GDB_SIGNAL_ILL;
+    case MIPS_SIGTRAP:
+      return GDB_SIGNAL_TRAP;
+    case MIPS_SIGABRT:
+      return GDB_SIGNAL_ABRT;
+    case MIPS_SIGEMT:
+      return GDB_SIGNAL_EMT;
+    case MIPS_SIGFPE:
+      return GDB_SIGNAL_FPE;
+    case MIPS_SIGKILL:
+      return GDB_SIGNAL_KILL;
+    case MIPS_SIGBUS:
+      return GDB_SIGNAL_BUS;
+    case MIPS_SIGSEGV:
+      return GDB_SIGNAL_SEGV;
+    case MIPS_SIGSYS:
+      return GDB_SIGNAL_SYS;
+    case MIPS_SIGPIPE:
+      return GDB_SIGNAL_PIPE;
+    case MIPS_SIGALRM:
+      return GDB_SIGNAL_ALRM;
+    case MIPS_SIGTERM:
+      return GDB_SIGNAL_TERM;
+    case MIPS_SIGUSR1:
+      return GDB_SIGNAL_USR1;
+    case MIPS_SIGUSR2:
+      return GDB_SIGNAL_USR2;
+    case MIPS_SIGCHLD:
+      return GDB_SIGNAL_CHLD;
+    case MIPS_SIGPWR:
+      return GDB_SIGNAL_PWR;
+    case MIPS_SIGWINCH:
+      return GDB_SIGNAL_WINCH;
+    case MIPS_SIGURG:
+      return GDB_SIGNAL_URG;
+    case MIPS_SIGPOLL:
+      return GDB_SIGNAL_POLL;
+    case MIPS_SIGSTOP:
+      return GDB_SIGNAL_STOP;
+    case MIPS_SIGTSTP:
+      return GDB_SIGNAL_TSTP;
+    case MIPS_SIGCONT:
+      return GDB_SIGNAL_CONT;
+    case MIPS_SIGTTIN:
+      return GDB_SIGNAL_TTIN;
+    case MIPS_SIGTTOU:
+      return GDB_SIGNAL_TTOU;
+    case MIPS_SIGVTALRM:
+      return GDB_SIGNAL_VTALRM;
+    case MIPS_SIGPROF:
+      return GDB_SIGNAL_PROF;
+    case MIPS_SIGXCPU:
+      return GDB_SIGNAL_XCPU;
+    case MIPS_SIGXFSZ:
+      return GDB_SIGNAL_XFSZ;
+  }
+
+  if (signo >= MIPS_SIGRTMIN && signo <= MIPS_SIGRTMAX)
+    {
+      /* GDB_SIGNAL_REALTIME values are not contiguous, map parts of
+         the MIPS block to the respective GDB_SIGNAL_REALTIME blocks.  */
+      signo -= MIPS_SIGRTMIN;
+      if (signo == 0)
+	return GDB_SIGNAL_REALTIME_32;
+      else if (signo < 32)
+	return ((enum gdb_signal) (signo - 1 + (int) GDB_SIGNAL_REALTIME_33));
+      else
+	return ((enum gdb_signal) (signo - 32 + (int) GDB_SIGNAL_REALTIME_64));
+    }
+
+  return GDB_SIGNAL_UNKNOWN;
+}
+
 /* Initialize one of the GNU/Linux OS ABIs.  */
 
 static void
@@ -1413,6 +1504,9 @@ mips_linux_init_abi (struct gdbarch_info info,
 
   set_gdbarch_regset_from_core_section (gdbarch,
 					mips_linux_regset_from_core_section);
+
+  set_gdbarch_gdb_signal_from_target (gdbarch,
+				      mips_gdb_signal_from_target);
 
   tdep->syscall_next_pc = mips_linux_syscall_next_pc;
 

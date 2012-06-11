@@ -1,3 +1,8 @@
+2012-06-11  Michael Eager  <eager@eagercon.com>
+
+	* mips-linux-tdep.c (mips_gdb_signal_from_target): New
+	* mips-linux-tdep.h (mips_signals): New
+
 2012-06-11  Tom Tromey  <tromey@redhat.com>
 
 	* infrun.c (handle_inferior_event)
