@@ -330,12 +330,6 @@ do_serial_close (struct serial *scb, int really_close)
       serial_logfp = NULL;
     }
 
-/* This is bogus.  It's not our fault if you pass us a bad scb...!  Rob, you
-   should fix your code instead.  */
-
-  if (!scb)
-    return;
-
   scb->refcnt--;
   if (scb->refcnt > 0)
     return;
