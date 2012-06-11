@@ -33,7 +33,7 @@ call_longjmp (jmp_buf *buf)
 void
 hidden_longjmp (void)
 {
-  if (setjmp (env) == 0) /* longjmp caught */
+  if (setjmp (env) == 0)
     {
       call_longjmp (&env);
     }
@@ -74,6 +74,8 @@ main ()
 
   /* Pattern 3 - setjmp/longjmp inside stepped-over function.  */
   hidden_longjmp (); /* patt3 */
+
+  i = 77; /* longjmp caught */
 
   i = 3; /* patt_end3.  */
 

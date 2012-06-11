@@ -1,3 +1,13 @@
+2012-06-11  Tom Tromey  <tromey@redhat.com>
+
+	* infrun.c (handle_inferior_event)
+	<BPSTAT_WHAT_SET_LONGJMP_RESUME>: Don't delete the step-resume
+	breakpoint.
+	<BPSTAT_WHAT_CLEAR_LONGJMP_RESUME>: Remove longjmp logic; use
+	exception logic in all cases.  Update comments.
+	(insert_longjmp_resume_breakpoint): Set the exception resume
+	breakpoint.
+
 2012-06-11  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_push_dummy_code): Handle microMIPS code.

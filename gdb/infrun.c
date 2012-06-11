@@ -4423,10 +4423,6 @@ process_event_stop_test:
 		return;
 	      }
 
-	    /* We're going to replace the current step-resume breakpoint
-	       with a longjmp-resume breakpoint.  */
-	    delete_step_resume_breakpoint (ecs->event_thread);
-
 	    /* Insert a breakpoint at resume address.  */
 	    insert_longjmp_resume_breakpoint (gdbarch, jmp_buf_pc);
 	  }
@@ -4436,62 +4432,59 @@ process_event_stop_test:
 	return;
 
       case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME:
-        if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog,
-			      "infrun: BPSTAT_WHAT_CLEAR_LONGJMP_RESUME\n");
+	{
+	  struct frame_info *init_frame;
 
-	if (what.is_longjmp)
-	  {
-	    gdb_assert (ecs->event_thread->control.step_resume_breakpoint
-			!= NULL);
-	    delete_step_resume_breakpoint (ecs->event_thread);
-	  }
-	else
-	  {
-	    /* There are several cases to consider.
+	  /* There are several cases to consider.
 
-	       1. The initiating frame no longer exists.  In this case
-	       we must stop, because the exception has gone too far.
+	     1. The initiating frame no longer exists.  In this case
+	     we must stop, because the exception or longjmp has gone
+	     too far.
 
-	       2. The initiating frame exists, and is the same as the
-	       current frame.  We stop, because the exception has been
-	       caught.
+	     2. The initiating frame exists, and is the same as the
+	     current frame.  We stop, because the exception or longjmp
+	     has been caught.
 
-	       3. The initiating frame exists and is different from
-	       the current frame.  This means the exception has been
-	       caught beneath the initiating frame, so keep going.  */
-	    struct frame_info *init_frame
-	      = frame_find_by_id (ecs->event_thread->initiating_frame);
+	     3. The initiating frame exists and is different from the
+	     current frame.  This means the exception or longjmp has
+	     been caught beneath the initiating frame, so keep
+	     going.  */
 
-	    gdb_assert (ecs->event_thread->control.exception_resume_breakpoint
-			!= NULL);
-	    delete_exception_resume_breakpoint (ecs->event_thread);
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: BPSTAT_WHAT_CLEAR_LONGJMP_RESUME\n");
 
-	    if (init_frame)
-	      {
-		struct frame_id current_id
-		  = get_frame_id (get_current_frame ());
-		if (frame_id_eq (current_id,
-				 ecs->event_thread->initiating_frame))
-		  {
-		    /* Case 2.  Fall through.  */
-		  }
-		else
-		  {
-		    /* Case 3.  */
-		    keep_going (ecs);
-		    return;
-		  }
-	      }
+	  init_frame = frame_find_by_id (ecs->event_thread->initiating_frame);
 
-	    /* For Cases 1 and 2, remove the step-resume breakpoint,
-	       if it exists.  */
-	    delete_step_resume_breakpoint (ecs->event_thread);
-	  }
+	  gdb_assert (ecs->event_thread->control.exception_resume_breakpoint
+		      != NULL);
+	  delete_exception_resume_breakpoint (ecs->event_thread);
 
-	ecs->event_thread->control.stop_step = 1;
-	print_end_stepping_range_reason ();
-	stop_stepping (ecs);
+	  if (init_frame)
+	    {
+	      struct frame_id current_id
+		= get_frame_id (get_current_frame ());
+	      if (frame_id_eq (current_id,
+			       ecs->event_thread->initiating_frame))
+		{
+		  /* Case 2.  Fall through.  */
+		}
+	      else
+		{
+		  /* Case 3.  */
+		  keep_going (ecs);
+		  return;
+		}
+	    }
+
+	  /* For Cases 1 and 2, remove the step-resume breakpoint,
+	     if it exists.  */
+	  delete_step_resume_breakpoint (ecs->event_thread);
+
+	  ecs->event_thread->control.stop_step = 1;
+	  print_end_stepping_range_reason ();
+	  stop_stepping (ecs);
+	}
 	return;
 
       case BPSTAT_WHAT_SINGLE:
@@ -5461,17 +5454,17 @@ insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
 static void
 insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  /* There should never be more than one step-resume or longjmp-resume
-     breakpoint per thread, so we should never be setting a new
+  /* There should never be more than one longjmp-resume breakpoint per
+     thread, so we should never be setting a new
      longjmp_resume_breakpoint when one is already active.  */
-  gdb_assert (inferior_thread ()->control.step_resume_breakpoint == NULL);
+  gdb_assert (inferior_thread ()->control.exception_resume_breakpoint == NULL);
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
 			"infrun: inserting longjmp-resume breakpoint at %s\n",
 			paddress (gdbarch, pc));
 
-  inferior_thread ()->control.step_resume_breakpoint =
+  inferior_thread ()->control.exception_resume_breakpoint =
     set_momentary_breakpoint_at_pc (gdbarch, pc, bp_longjmp_resume);
 }
 
