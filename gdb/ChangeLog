@@ -1,5 +1,18 @@
 2012-06-11  Pedro Alves  <palves@redhat.com>
 
+	Remove #if 0'd "connect" command, and unnecessary associated
+	refcounting and serial reuse bits.
+
+	* serial.h (struct serial): Remove fields 'next' and 'refcnt'.
+	* serial.c (last_serial_opened): Delete.
+	(scb_base): Delete.
+	(serial_open): Adjust.
+	(serial_for_fd): Delete.
+	(serial_fdopen_ops, do_serial_close): Adjust.
+	(serial_fdopen_ops): Adjust.
+
+2012-06-11  Pedro Alves  <palves@redhat.com>
+
 	* serial.c (do_serial_close): Remove early return when SCB is
 	null.
 
