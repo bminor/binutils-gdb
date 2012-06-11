@@ -1,3 +1,7 @@
+2012-06-11  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dw2_get_file_names_reader): Ignore partial units.
+
 2012-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix regression by the "ambiguous linespec" series.

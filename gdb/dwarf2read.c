@@ -2449,6 +2449,14 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   struct quick_file_names *qfn;
   unsigned int line_offset;
 
+  /* Our callers never want to match partial units -- instead they
+     will match the enclosing full CU.  */
+  if (comp_unit_die->tag == DW_TAG_partial_unit)
+    {
+      this_cu->v.quick->no_file_data = 1;
+      return;
+    }
+
   lh = NULL;
   slot = NULL;
   line_offset = 0;
