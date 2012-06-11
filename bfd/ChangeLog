@@ -1,5 +1,9 @@
 2012-06-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (assign_file_positions_for_non_load_sections): Reindent.
+
+2012-06-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf.c (_bfd_elf_map_sections_to_segments): Reindent.
 
 2012-06-06  Alan Modra  <amodra@gmail.com>
