@@ -1,3 +1,8 @@
+2012-06-11  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dw2_get_primary_filename_reader): New function.
+	(dw2_find_symbol_file): Use it.
+
 2012-06-11  Michael Eager  <eager@eagercon.com>
 
 	* mips-linux-tdep.c (mips_gdb_signal_from_target): New

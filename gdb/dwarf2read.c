@@ -2836,12 +2836,34 @@ dw2_expand_symtabs_with_filename (struct objfile *objfile,
     }
 }
 
+/* A helper function for dw2_find_symbol_file that finds the primary
+   file name for a given CU.  This is a die_reader_func.  */
+
+static void
+dw2_get_primary_filename_reader (const struct die_reader_specs *reader,
+				 gdb_byte *info_ptr,
+				 struct die_info *comp_unit_die,
+				 int has_children,
+				 void *data)
+{
+  const char **result_ptr = data;
+  struct dwarf2_cu *cu = reader->cu;
+  struct attribute *attr;
+
+  attr = dwarf2_attr (comp_unit_die, DW_AT_name, cu);
+  if (attr == NULL)
+    *result_ptr = NULL;
+  else
+    *result_ptr = DW_STRING (attr);
+}
+
 static const char *
 dw2_find_symbol_file (struct objfile *objfile, const char *name)
 {
   struct dwarf2_per_cu_data *per_cu;
   offset_type *vec;
   struct quick_file_names *file_data;
+  const char *filename;
 
   dw2_setup (objfile);
 
@@ -2873,12 +2895,17 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
   /* vec[0] is the length, which must always be >0.  */
   per_cu = dw2_get_cu (MAYBE_SWAP (vec[1]));
 
-  file_data = dw2_get_file_names (objfile, per_cu);
-  if (file_data == NULL
-      || file_data->num_file_names == 0)
-    return NULL;
+  if (per_cu->v.quick->symtab != NULL)
+    return per_cu->v.quick->symtab->filename;
 
-  return file_data->file_names[file_data->num_file_names - 1];
+  if (per_cu->is_debug_types)
+    init_cutu_and_read_dies (per_cu, 0, 0, dw2_get_primary_filename_reader,
+			     &filename);
+  else
+    init_cutu_and_read_dies_simple (per_cu, dw2_get_primary_filename_reader,
+				    &filename);
+
+  return filename;
 }
 
 static void
