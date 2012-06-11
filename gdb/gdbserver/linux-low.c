@@ -817,7 +817,7 @@ linux_attach_lwp (unsigned long lwpid)
 /* Attach to PID.  If PID is the tgid, attach to it and all
    of its threads.  */
 
-int
+static int
 linux_attach (unsigned long pid)
 {
   /* Attach to PID.  We will check for other threads

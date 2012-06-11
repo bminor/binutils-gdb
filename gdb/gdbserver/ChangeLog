@@ -1,3 +1,7 @@
+2012-06-11  Yao Qi  <yao@codesourcery.com>
+
+	* linux-low.c (linux_attach): Add 'static'.
+
 2012-06-06  Yao Qi  <yao@codesourcery.com>
 
 	* ax.c (gdb_eval_agent_expr): Print `top' in hex.
