@@ -1,3 +1,15 @@
+2012-06-11  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ppc-opc.c (lvsl, lvebx, isellt, icbt, ldepx, lwepx, lvsr, lvehx)
+	(iselgt, lvewx, iseleq, isel, dcbst, dcbstep, dcbfl, dcbf, lbepx)
+	(lvx, dcbfep, dcbtstls, stvebx, dcbtstlse, stdepx, stwepx, dcbtls)
+	(stvehx, dcbtlse, stvewx, stbepx, icblc, stvx, dcbtstt, dcbtst)
+	(dcbtst, dcbtstep, dcbtt, dcbt, dcbt, lhepx, eciwx, dcbtep)
+	(dcread, lxvdsx, lvxl, dcblc, sthepx, ecowx, dcbi, dcread, icbtls)
+	(stvxl, lxsdx, lfdepx, stxsdx, stfdepx, dcba, dcbal, lxvw4x)
+	(tlbivax, lfdpx, lxvd2x, tlbsrx., stxvw4x, tlbsx, tlbsx., stfdpx)
+	(stfqx, stxvd2x, icbi, icbiep, icread, dcbzep): Change RA to RA0.
+
 2012-05-19  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c: Don't include elf32-ppc.h, do include elf/ppc.h.

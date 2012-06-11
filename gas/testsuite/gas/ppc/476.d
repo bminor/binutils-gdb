@@ -90,11 +90,11 @@ Disassembly of section \.text:
  140:	7c 06 3b ac 	dcbi    r6,r7
  144:	7c 85 33 0c 	dcblc   4,r5,r6
  148:	7c 06 38 6c 	dcbst   r6,r7
- 14c:	7c c0 2a 2c 	dcbt    r0,r5,6
+ 14c:	7c c0 2a 2c 	dcbt    0,r5,6
  150:	7c 05 32 2c 	dcbt    r5,r6
  154:	7c c8 2a 2c 	dcbt    r8,r5,6
  158:	7c e8 49 4c 	dcbtls  7,r8,r9
- 15c:	7c e0 31 ec 	dcbtst  r0,r6,7
+ 15c:	7c e0 31 ec 	dcbtst  0,r6,7
  160:	7c 06 39 ec 	dcbtst  r6,r7
  164:	7c e9 31 ec 	dcbtst  r9,r6,7
  168:	7d 4b 61 0c 	dcbtstls 10,r11,r12

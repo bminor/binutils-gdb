@@ -1,3 +1,8 @@
+2012-06-11  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* gas/ppc/e500mc.d: Update.
+	* gas/ppc/476.d: Update.
+
 2012-06-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/all/gas.exp: Don't run rept.

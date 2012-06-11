@@ -43,7 +43,7 @@ Disassembly of section \.text:
   84:	7d 2a 5d 86 	stwdx   r9,r10,r11
   88:	7f be ff 46 	stfddx  f29,r30,r31
   8c:	7e b6 bd c6 	stddx   r21,r22,r23
-  90:	7c 20 0d ec 	dcbal   r0,r1
+  90:	7c 20 0d ec 	dcbal   0,r1
   94:	7c 26 3f ec 	dcbzl   r6,r7
   98:	7c 1f 00 7e 	dcbstep r31,r0
   9c:	7c 01 10 fe 	dcbfep  r1,r2
