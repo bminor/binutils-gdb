@@ -4163,7 +4163,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		      && (vaddr + filesz) >= info->relro_end)
 		    break;
 		}
-	      }
+	    }
 
 	  /* Make a PT_GNU_RELRO segment only when it isn't empty.  */
 	  if (m != NULL)
