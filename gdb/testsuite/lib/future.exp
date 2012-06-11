@@ -514,7 +514,7 @@ if {[info procs find_gfortran] == ""} {
 if {[info procs find_go_linker] == ""} {
     rename gdb_find_go find_go
     rename gdb_find_go_linker find_go_linker
-    # No need to set use_gdb_compile.
+    set use_gdb_compile 1
 }
 
 if {$use_gdb_compile} {

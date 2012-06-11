@@ -1,3 +1,8 @@
+2012-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/future.exp: Set $use_gdb_compile even if only find_go_linker is
+	missing.
+
 2012-06-11  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/longjmp.c (hidden_longjmp): Move expected catch
