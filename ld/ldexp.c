@@ -681,7 +681,7 @@ fold_name (etree_type *tree)
 		       tree, tree->name.name);
 	      new_number (0);
 	    }
-	  else if (os->processed_vma)
+	  else if (os->bfd_section != NULL)
 	    {
 	      bfd_vma val;
 
@@ -693,6 +693,8 @@ fold_name (etree_type *tree)
 	      
 	      new_number (val);
 	    }
+	  else
+	    new_number (0);
 	}
       break;
 

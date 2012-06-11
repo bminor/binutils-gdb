@@ -1,3 +1,14 @@
+2012-06-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14215
+	* ld-i386/i386.exp: Run pr14215.
+	* ld-x86-64/x86-64.exp: Likewise.
+
+	* ld-i386/pr14215.d: New file.
+	* ld-i386/pr14215.s: Likewise.
+	* ld-x86-64/pr14215.d: Likewise.
+	* ld-x86-64/pr14215.s: Likewise.
+
 2012-06-06  Alan Modra  <amodra@gmail.com>
 
 	* ld-alpha/tlsbin.rd, * ld-alpha/tlsbinr.rd, * ld-alpha/tlspic.rd,

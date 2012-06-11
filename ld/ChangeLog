@@ -1,3 +1,19 @@
+2012-06-11  Alan Modra  <amodra@gmail.com>
+
+	PR ld/14215
+	* ldexp.c (fold_name <SIZEOF, ALIGNOF>): Allow forward section
+	references.
+	* emulparams/elf32_x86_64.sh (SEPARATE_GOTPLT): Depend on size of
+	.got.plt.
+	* emulparams/elf32mb_linux.sh (SEPARATE_GOTPLT): Likewise.
+	* emulparams/elf32tilegx.sh (SEPARATE_GOTPLT): Likewise.
+	* emulparams/elf32tilepro.sh (SEPARATE_GOTPLT): Likewise.
+	* emulparams/elf64tilegx.sh (SEPARATE_GOTPLT): Likewise.
+	* emulparams/elf_i386.sh (SEPARATE_GOTPLT): Likewise.
+	* emulparams/elf_k1om.sh (SEPARATE_GOTPLT): Likewise.
+	* emulparams/elf_l1om.sh (SEPARATE_GOTPLT): Likewise.
+	* emulparams/elf_x86_64.sh (SEPARATE_GOTPLT): Likewise.
+
 2012-06-07  Georg-Johann Lay  <avr@gjlay.de>
 
 	PR 13697

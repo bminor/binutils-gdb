@@ -17,7 +17,7 @@ GENERATE_SHLIB_SCRIPT=yes
 GENERATE_COMBRELOC_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes
 NO_SMALL_DATA=yes
-SEPARATE_GOTPLT=8
+SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 8 ? 8 : 0"
 OTHER_SECTIONS="
   /* TILEPRO architecture interrupt vector areas */
   .intrpt0 0xfc000000 : { KEEP(*(.intrpt0)) }

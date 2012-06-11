@@ -13,7 +13,7 @@ GENERATE_SHLIB_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes
 NO_SMALL_DATA=yes
 LARGE_SECTIONS=yes
-SEPARATE_GOTPLT=24
+SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 24 ? 24 : 0"
 IREL_IN_PLT=
 
 if [ "x${host}" = "x${target}" ]; then

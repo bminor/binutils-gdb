@@ -17,7 +17,7 @@ GENERATE_SHLIB_SCRIPT=yes
 GENERATE_COMBRELOC_SCRIPT=yes
 GENERATE_PIE_SCRIPT=yes
 NO_SMALL_DATA=yes
-SEPARATE_GOTPLT=16
+SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 16 ? 16 : 0"
 OTHER_SECTIONS="
   /* TILE architecture interrupt vector areas */
   .intrpt0 0xfffffffffc000000 : { KEEP(*(.intrpt0)) }
