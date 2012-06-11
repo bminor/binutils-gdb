@@ -1,3 +1,9 @@
+2012-06-11  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR 13503
+	* config/tc-avr.c (exp_mod): Fix typo introduced in 1.82
+	from 2012-05-16.
+
 2012-06-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* input-scrub.c (input_scrub_include_sb): Use sb_build to
