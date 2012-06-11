@@ -8802,19 +8802,26 @@ parse_breakpoint_sals (char **address,
     }
   else
     {
+      struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+
       /* Force almost all breakpoints to be in terms of the
          current_source_symtab (which is decode_line_1's default).
          This should produce the results we want almost all of the
-         time while leaving default_breakpoint_* alone.  */
-      if (last_displayed_sal_is_valid ())
+         time while leaving default_breakpoint_* alone.
+
+	 ObjC: However, don't match an Objective-C method name which
+	 may have a '+' or '-' succeeded by a '['.  */
+      if (last_displayed_sal_is_valid ()
+	  && (!cursal.symtab
+	      || ((strchr ("+-", (*address)[0]) != NULL)
+		  && ((*address)[1] != '['))))
 	decode_line_full (address, DECODE_LINE_FUNFIRSTLINE,
 			  get_last_displayed_symtab (),
 			  get_last_displayed_line (),
 			  canonical, NULL, NULL);
       else
 	decode_line_full (address, DECODE_LINE_FUNFIRSTLINE,
-			  (struct symtab *) NULL, 0,
-			  canonical, NULL, NULL);
+			  cursal.symtab, cursal.line, canonical, NULL, NULL);
     }
 }
 

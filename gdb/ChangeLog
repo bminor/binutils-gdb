@@ -1,3 +1,10 @@
+2012-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix regression by the "ambiguous linespec" series.
+	* breakpoint.c (parse_breakpoint_sals): New variable cursal.  Use
+	get_last_displayed_symtab and get_last_displayed_line and depending
+	on CURSAL.
+
 2012-06-11  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dw2_get_primary_filename_reader): New function.

@@ -371,6 +371,13 @@ gdb_expect {
     }
 }
 
+# Test the 'list' commands sets current file for the 'break LINENO' command.
+set bp_marker1 [gdb_get_line_number "set breakpoint 16 here" ${srcfile1}]
+gdb_test "list marker1" ".*"
+gdb_test "break $bp_marker1" "Breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*${srcfile1}, line ${bp_marker1}\\." \
+         "break lineno"
+gdb_test_no_output {delete $bpnum}
+
 #
 # run until the breakpoint at a line number
 #

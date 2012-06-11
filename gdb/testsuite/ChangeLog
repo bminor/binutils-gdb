@@ -1,5 +1,11 @@
 2012-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix regression by the "ambiguous linespec" series.
+	* gdb.base/break.exp (list marker1, break lineno, delete $bpnum): New
+	tests.
+
+2012-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* lib/future.exp: Set $use_gdb_compile even if only find_go_linker is
 	missing.
 
