@@ -4931,6 +4931,11 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		      && lp->p_vaddr + lp->p_filesz >= link_info->relro_end)
 		    break;
 		}
+
+	      /* PR ld/14207.  If the RELRO segment doesn't fit in the
+		 LOAD segment, it should be removed.  */
+	      if (lp == (phdrs + count))
+		abort ();
 	    }
 	  else
 	    {

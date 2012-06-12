@@ -1,3 +1,11 @@
+2012-06-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14207
+	* ld-x86-64/x86-64.exp: Run pr14207.
+
+	* ld-x86-64/pr14207.d: New file.
+	* ld-x86-64/pr14207.s: Likewise.
+
 2012-06-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14215

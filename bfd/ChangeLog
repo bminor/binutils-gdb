@@ -1,3 +1,9 @@
+2012-06-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR bfd/14207
+	* elf.c (assign_file_positions_for_non_load_sections): Abort if
+	PT_GNU_RELRO segment doesn't fit in PT_LOAD segment.
+
 2012-06-12  Alan Modra  <amodra@gmail.com>
 
 	PR ld/14207
