@@ -1,3 +1,10 @@
+2012-06-12  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (linux_set_resume_request): Simplify predicate.  Add
+	comment.
+	* server.c (handle_v_cont): Extend comment.
+
 2012-06-11  Yao Qi  <yao@codesourcery.com>
 
 	* linux-low.c (linux_attach): Add 'static'.

@@ -1974,8 +1974,8 @@ handle_v_cont (char *own_buf)
 
   /* `cont_thread' is still used in occasional places in the backend,
      to implement single-thread scheduler-locking.  Doesn't make sense
-     to set it if we see a stop request, or any form of wildcard
-     vCont.  */
+     to set it if we see a stop request, or a wildcard action (one
+     with '-1' (all threads), or 'pPID.-1' (all threads of PID)).  */
   if (n == 1
       && !(ptid_equal (resume_info[0].thread, minus_one_ptid)
 	   || ptid_get_lwp (resume_info[0].thread) == -1)

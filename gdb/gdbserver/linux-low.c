@@ -3339,10 +3339,11 @@ linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
       ptid_t ptid = r->resume[ndx].thread;
       if (ptid_equal (ptid, minus_one_ptid)
 	  || ptid_equal (ptid, entry->id)
-	  || (ptid_is_pid (ptid)
-	      && (ptid_get_pid (ptid) == pid_of (lwp)))
-	  || (ptid_get_lwp (ptid) == -1
-	      && (ptid_get_pid (ptid) == pid_of (lwp))))
+	  /* Handle both 'pPID' and 'pPID.-1' as meaning 'all threads
+	     of PID'.  */
+	  || (ptid_get_pid (ptid) == pid_of (lwp)
+	      && (ptid_is_pid (ptid)
+		  || ptid_get_lwp (ptid) == -1)))
 	{
 	  if (r->resume[ndx].kind == resume_stop
 	      && thread->last_resume_kind == resume_stop)
