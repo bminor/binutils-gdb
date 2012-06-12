@@ -1,3 +1,10 @@
+2012-06-12  Alan Modra  <amodra@gmail.com>
+
+	PR ld/14207
+	* elf.c (_bfd_elf_map_sections_to_segments): Disregard bss type
+	sections at end of PT_LOAD segment when searching for segment
+	that contains end of relro extent.
+
 2012-06-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (assign_file_positions_for_non_load_sections): Reindent.

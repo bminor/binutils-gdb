@@ -4152,15 +4152,22 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	{
 	  for (m = mfirst; m != NULL; m = m->next)
 	    {
-	      if (m->p_type == PT_LOAD)
+	      if (m->p_type == PT_LOAD
+		  && m->count != 0
+		  && m->sections[0]->vma >= info->relro_start
+		  && m->sections[0]->vma < info->relro_end)
 		{
-		  asection *last = m->sections[m->count - 1];
-		  bfd_vma vaddr = m->sections[0]->vma;
-		  bfd_vma filesz = last->vma - vaddr + last->size;
+		  i = m->count;
+		  while (--i != (unsigned) -1)
+		    if ((m->sections[i]->flags & (SEC_LOAD | SEC_HAS_CONTENTS))
+			== (SEC_LOAD | SEC_HAS_CONTENTS))
+		      break;
 
-		  if (vaddr < info->relro_end
-		      && vaddr >= info->relro_start
-		      && (vaddr + filesz) >= info->relro_end)
+		  if (i == (unsigned) -1)
+		    continue;
+
+		  if (m->sections[i]->vma + m->sections[i]->size
+		      >= info->relro_end)
 		    break;
 		}
 	    }
