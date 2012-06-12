@@ -1,3 +1,18 @@
+2012-06-12  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (infrun_thread_stop_requested_callback): Don't switch
+	threads here.
+	(prepare_for_detach): No longer context switch here in non-stop
+	mode.
+	(fetch_inferior_event): Ditto.
+	(handle_inferior_event) <STOP_QUIETLY || NO_STOP_QUIETLY>: Switch
+	to the event thread before removing breakpoints.  Switch to the
+	event thread before inserting breakpoints and resuming.
+	(handle_inferior_event) <TARGET_WAITKIND_SPURIOUS>: Switch to the
+	event thread before resuming.
+	(handle_inferior_event) <stepping_past_singlestep_breakpoint>:
+	Switch to the event thread before removing breakpoints.
+
 2012-06-12  Eli Zaretskii  <eliz@gnu.org>
 
 	* infcmd.c (construct_inferior_arguments) [__MINGW32__]: Quote

@@ -2437,8 +2437,6 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
 
       old_chain = make_cleanup_restore_current_thread ();
 
-      switch_to_thread (info->ptid);
-
       /* Go through handle_inferior_event/normal_stop, so we always
 	 have consistent output as if the stop event had been
 	 reported.  */
@@ -2655,14 +2653,6 @@ prepare_for_detach (void)
       old_chain_2 = make_cleanup (finish_thread_state_cleanup,
 				  &minus_one_ptid);
 
-      /* In non-stop mode, each thread is handled individually.
-	 Switch early, so the global state is set correctly for this
-	 thread.  */
-      if (non_stop
-	  && ecs->ws.kind != TARGET_WAITKIND_EXITED
-	  && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED)
-	context_switch (ecs->ptid);
-
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
 
@@ -2788,16 +2778,6 @@ fetch_inferior_event (void *client_data)
 
   if (debug_infrun)
     print_target_wait_results (waiton_ptid, ecs->ptid, &ecs->ws);
-
-  if (non_stop
-      && ecs->ws.kind != TARGET_WAITKIND_IGNORE
-      && ecs->ws.kind != TARGET_WAITKIND_NO_RESUMED
-      && ecs->ws.kind != TARGET_WAITKIND_EXITED
-      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED)
-    /* In non-stop mode, each thread is handled individually.  Switch
-       early, so the global state is set correctly for this
-       thread.  */
-    context_switch (ecs->ptid);
 
   /* If an error happens while handling the event, propagate GDB's
      knowledge of the executing state to the frontend/user running
@@ -3380,6 +3360,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	 we're attaching or setting up a remote connection.  */
       if (stop_soon == STOP_QUIETLY || stop_soon == NO_STOP_QUIETLY)
 	{
+	  if (!ptid_equal (ecs->ptid, inferior_ptid))
+	    context_switch (ecs->ptid);
+
 	  /* Loading of shared libraries might have changed breakpoint
 	     addresses.  Make sure new breakpoints are inserted.  */
 	  if (stop_soon == NO_STOP_QUIETLY
@@ -3395,6 +3378,9 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_SPURIOUS:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_SPURIOUS\n");
+      if (!ptid_equal (ecs->ptid, inferior_ptid)
+	  && !ptid_equal (ecs->ptid, minus_one_ptid))
+	context_switch (ecs->ptid);
       resume (0, GDB_SIGNAL_0);
       prepare_to_wait (ecs);
       return;
@@ -3769,6 +3755,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 				"infrun: stepping_past_"
 				"singlestep_breakpoint\n");
 	  /* Pull the single step breakpoints out of the target.  */
+	  if (!ptid_equal (ecs->ptid, inferior_ptid))
+	    context_switch (ecs->ptid);
 	  remove_single_step_breakpoints ();
 	  singlestep_breakpoints_inserted_p = 0;
 
@@ -3801,6 +3789,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  /* Pull the single step breakpoints out of the target.  */
 	  if (singlestep_breakpoints_inserted_p)
 	    {
+	      if (!ptid_equal (ecs->ptid, inferior_ptid))
+		context_switch (ecs->ptid);
 	      remove_single_step_breakpoints ();
 	      singlestep_breakpoints_inserted_p = 0;
 	    }
