@@ -184,6 +184,8 @@ Plugin::load()
     tv[i].tv_u.tv_val = LDPO_REL;
   else if (parameters->options().shared())
     tv[i].tv_u.tv_val = LDPO_DYN;
+  else if (parameters->options().pie())
+    tv[i].tv_u.tv_val = LDPO_PIE;
   else
     tv[i].tv_u.tv_val = LDPO_EXEC;
 
