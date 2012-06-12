@@ -275,10 +275,18 @@ construct_inferior_arguments (int argc, char **argv)
 
   if (STARTUP_WITH_SHELL)
     {
+#ifdef __MINGW32__
+      /* This holds all the characters considered special to the
+	 Windows shells.  */
+      char *special = "\"!&*|[]{}<>?`~^=;, \t\n";
+      const char quote = '"';
+#else
       /* This holds all the characters considered special to the
 	 typical Unix shells.  We include `^' because the SunOS
 	 /bin/sh treats it as a synonym for `|'.  */
-      char *special = "\"!#$&*()\\|[]{}<>?'\"`~^; \t\n";
+      char *special = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
+      const char quote = '\'';
+#endif
       int i;
       int length = 0;
       char *out, *cp;
@@ -298,11 +306,20 @@ construct_inferior_arguments (int argc, char **argv)
 	  /* Need to handle empty arguments specially.  */
 	  if (argv[i][0] == '\0')
 	    {
-	      *out++ = '\'';
-	      *out++ = '\'';
+	      *out++ = quote;
+	      *out++ = quote;
 	    }
 	  else
 	    {
+#ifdef __MINGW32__
+	      int quoted = 0;
+
+	      if (strpbrk (argv[i], special))
+		{
+		  quoted = 1;
+		  *out++ = quote;
+		}
+#endif
 	      for (cp = argv[i]; *cp; ++cp)
 		{
 		  if (*cp == '\n')
@@ -310,17 +327,25 @@ construct_inferior_arguments (int argc, char **argv)
 		      /* A newline cannot be quoted with a backslash (it
 			 just disappears), only by putting it inside
 			 quotes.  */
-		      *out++ = '\'';
+		      *out++ = quote;
 		      *out++ = '\n';
-		      *out++ = '\'';
+		      *out++ = quote;
 		    }
 		  else
 		    {
+#ifdef __MINGW32__
+		      if (*cp == quote)
+#else
 		      if (strchr (special, *cp) != NULL)
+#endif
 			*out++ = '\\';
 		      *out++ = *cp;
 		    }
 		}
+#ifdef __MINGW32__
+	      if (quoted)
+		*out++ = quote;
+#endif
 	    }
 	}
       *out = '\0';

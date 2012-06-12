@@ -1,3 +1,12 @@
+2012-06-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* infcmd.c (construct_inferior_arguments) [__MINGW32__]: Quote
+	special characters correctly for the Windows shells.  See
+	http://sourceware.org/ml/gdb/2012-06/msg00047.html for the bug
+	report.
+	[!__MINGW32__]: Remove extra double quote character from special
+	characters.
+
 2012-06-11  Stan Shebs  <stan@codesourcery.com>
 
 	* ui-out.h: Remove #if 0 declarations.
