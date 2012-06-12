@@ -644,61 +644,6 @@ ui_out_get_verblvl (struct ui_out *uiout)
   return 0;
 }
 
-#if 0
-void
-ui_out_result_begin (struct ui_out *uiout, char *class)
-{
-}
-
-void
-ui_out_result_end (struct ui_out *uiout)
-{
-}
-
-void
-ui_out_info_begin (struct ui_out *uiout, char *class)
-{
-}
-
-void
-ui_out_info_end (struct ui_out *uiout)
-{
-}
-
-void
-ui_out_notify_begin (struct ui_out *uiout, char *class)
-{
-}
-
-void
-ui_out_notify_end (struct ui_out *uiout)
-{
-}
-
-void
-ui_out_error_begin (struct ui_out *uiout, char *class)
-{
-}
-
-void
-ui_out_error_end (struct ui_out *uiout)
-{
-}
-#endif
-
-#if 0
-void
-gdb_error (ui_out * uiout, int severity, char *format,...)
-{
-  va_list args;
-}
-
-void
-gdb_query (struct ui_out *uiout, int qflags, char *qprompt)
-{
-}
-#endif
-
 int
 ui_out_is_mi_like_p (struct ui_out *uiout)
 {

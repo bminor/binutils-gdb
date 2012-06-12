@@ -1,3 +1,8 @@
+2012-06-11  Stan Shebs  <stan@codesourcery.com>
+
+	* ui-out.h: Remove #if 0 declarations.
+	* ui-out.c: Remove #if 0 functions.
+
 2012-06-11  Pedro Alves  <palves@redhat.com>
 
 	* ser-base.c (run_async_handler_and_reschedule): New.

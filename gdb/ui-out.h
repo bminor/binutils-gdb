@@ -142,30 +142,6 @@ extern int ui_out_test_flags (struct ui_out *uiout, int mask);
 extern int ui_out_query_field (struct ui_out *uiout, int colno,
 			       int *width, int *alignment, char **col_name);
 
-#if 0
-extern void ui_out_result_begin (struct ui_out *uiout, char *class);
-
-extern void ui_out_result_end (struct ui_out *uiout);
-
-extern void ui_out_info_begin (struct ui_out *uiout, char *class);
-
-extern void ui_out_info_end (struct ui_out *uiout);
-
-extern void ui_out_notify_begin (struct ui_out *uiout, char *class);
-
-extern void ui_out_notify_end (struct ui_out *uiout);
-
-extern void ui_out_error_begin (struct ui_out *uiout, char *class);
-
-extern void ui_out_error_end (struct ui_out *uiout);
-#endif
-
-#if 0
-extern void gdb_error (struct ui_out *uiout, int severity, char *format, ...);
-
-extern void gdb_query (struct ui_out *uiout, int qflags, char *qprompt);
-#endif
-
 /* HACK: Code in GDB is currently checking to see the type of ui_out
    builder when determining which output to produce.  This function is
    a hack to encapsulate that test.  Once GDB manages to separate the
