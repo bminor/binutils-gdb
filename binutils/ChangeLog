@@ -1,3 +1,9 @@
+2012-06-12  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf-mode.el: Add final comment.  Bump version.
+	(dwarf-insert-substructure-button): Use string-to-number.
+	(dwarf-browse): Fix autoload cookie.
+
 2012-06-08  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf.c (read_and_display_attr_value): Handle
