@@ -35,7 +35,7 @@ struct cmdpy_completer
   /* Python symbol name.  */
   char *name;
   /* Completion function.  */
-  char **(*completer) (struct cmd_list_element *, char *, char *);
+  completer_ftype *completer;
 };
 
 static struct cmdpy_completer completers[] =

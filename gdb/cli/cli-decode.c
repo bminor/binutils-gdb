@@ -119,9 +119,7 @@ cmd_type (struct cmd_list_element *cmd)
 }
 
 void
-set_cmd_completer (struct cmd_list_element *cmd,
-		   char **(*completer) (struct cmd_list_element *self,
-					char *text, char *word))
+set_cmd_completer (struct cmd_list_element *cmd, completer_ftype *completer)
 {
   cmd->completer = completer; /* Ok.  */
 }

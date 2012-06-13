@@ -1,3 +1,16 @@
+2012-06-13  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (add_catch_command): Use completer_ftype.
+	* breakpoint.h: Include command.h.
+	(add_catch_command): Use completer_ftype.
+	* cli/cli-decode.c (set_cmd_completer): Use completer_ftype.
+	* cli/cli-decode.h (struct cmd_list_element) <completer>:
+	Use completer_ftype.
+	* command.h (completer_ftype): New typedef.
+	(set_cmd_completer): Use it.
+	* python/py-cmd.c (struct cmdpy_completer) <completer>: Use
+	completer_ftype.
+
 2012-06-13  Pedro Alves  <palves@redhat.com>
 
 	Partial revert of previous change.

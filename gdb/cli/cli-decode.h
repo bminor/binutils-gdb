@@ -168,8 +168,7 @@ struct cmd_list_element
        For example, suppose TEXT is "foo" and we want to complete to
        "foobar".  If WORD is "oo", return "oobar"; if WORD is
        "baz/foo", return "baz/foobar".  */
-    char **(*completer) (struct cmd_list_element *cmd, 
-			 char *text, char *word);
+    completer_ftype *completer;
 
     /* Destruction routine for this command.  If non-NULL, this is
        called when this command instance is destroyed.  This may be

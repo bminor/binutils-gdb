@@ -23,6 +23,7 @@
 #include "value.h"
 #include "vec.h"
 #include "ax.h"
+#include "command.h"
 
 struct value;
 struct block;
@@ -1187,8 +1188,7 @@ extern void
   add_catch_command (char *name, char *docstring,
 		     void (*sfunc) (char *args, int from_tty,
 				    struct cmd_list_element *command),
-		     char **(*completer) (struct cmd_list_element *cmd,
-					  char *text, char *word),
+		     completer_ftype *completer,
 		     void *user_data_catch,
 		     void *user_data_tcatch);
 
