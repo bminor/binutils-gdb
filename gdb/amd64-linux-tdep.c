@@ -1288,40 +1288,11 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
 }
 
 static void
-amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  const struct target_desc *tdesc = info.target_desc;
-  struct tdesc_arch_data *tdesc_data = (void *) info.tdep_info;
-  const struct tdesc_feature *feature;
-  int valid_p;
-
-  gdb_assert (tdesc_data);
 
   linux_init_abi (info, gdbarch);
-
-  tdep->gregset_reg_offset = amd64_linux_gregset_reg_offset;
-  tdep->gregset_num_regs = ARRAY_SIZE (amd64_linux_gregset_reg_offset);
-  tdep->sizeof_gregset = 27 * 8;
-
-  amd64_init_abi (info, gdbarch);
-
-  /* Reserve a number for orig_rax.  */
-  set_gdbarch_num_regs (gdbarch, AMD64_LINUX_NUM_REGS);
-
-  if (! tdesc_has_registers (tdesc))
-    tdesc = tdesc_amd64_linux;
-  tdep->tdesc = tdesc;
-
-  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.linux");
-  if (feature == NULL)
-    return;
-
-  valid_p = tdesc_numbered_register (feature, tdesc_data,
-				     AMD64_LINUX_ORIG_RAX_REGNUM,
-				     "orig_rax");
-  if (!valid_p)
-    return;
 
   tdep->sigtramp_p = amd64_linux_sigtramp_p;
   tdep->sigcontext_addr = amd64_linux_sigcontext_addr;
@@ -1329,10 +1300,6 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = ARRAY_SIZE (amd64_linux_sc_reg_offset);
 
   tdep->xsave_xcr0_offset = I386_LINUX_XSAVE_XCR0_OFFSET;
-
-  /* GNU/Linux uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_lp64_fetch_link_map_offsets);
 
   /* Add the %orig_rax register used for syscall restarting.  */
   set_gdbarch_write_pc (gdbarch, amd64_linux_write_pc);
@@ -1543,6 +1510,88 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->i386_syscall_record = amd64_linux_syscall_record;
 }
+
+static void
+amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const struct target_desc *tdesc = info.target_desc;
+  struct tdesc_arch_data *tdesc_data = (void *) info.tdep_info;
+  const struct tdesc_feature *feature;
+  int valid_p;
+
+  gdb_assert (tdesc_data);
+
+  tdep->gregset_reg_offset = amd64_linux_gregset_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (amd64_linux_gregset_reg_offset);
+  tdep->sizeof_gregset = 27 * 8;
+
+  amd64_init_abi (info, gdbarch);
+
+  /* Reserve a number for orig_rax.  */
+  set_gdbarch_num_regs (gdbarch, AMD64_LINUX_NUM_REGS);
+
+  if (! tdesc_has_registers (tdesc))
+    tdesc = tdesc_amd64_linux;
+  tdep->tdesc = tdesc;
+
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.linux");
+  if (feature == NULL)
+    return;
+
+  valid_p = tdesc_numbered_register (feature, tdesc_data,
+				     AMD64_LINUX_ORIG_RAX_REGNUM,
+				     "orig_rax");
+  if (!valid_p)
+    return;
+
+  amd64_linux_init_abi_common (info, gdbarch);
+
+  /* GNU/Linux uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_lp64_fetch_link_map_offsets);
+}
+
+static void
+amd64_x32_linux_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const struct target_desc *tdesc = info.target_desc;
+  struct tdesc_arch_data *tdesc_data = (void *) info.tdep_info;
+  const struct tdesc_feature *feature;
+  int valid_p;
+
+  gdb_assert (tdesc_data);
+
+  tdep->gregset_reg_offset = amd64_linux_gregset_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (amd64_linux_gregset_reg_offset);
+  tdep->sizeof_gregset = 27 * 8;
+
+  amd64_x32_init_abi (info, gdbarch);
+
+  /* Reserve a number for orig_rax.  */
+  set_gdbarch_num_regs (gdbarch, AMD64_LINUX_NUM_REGS);
+
+  if (! tdesc_has_registers (tdesc))
+    tdesc = tdesc_x32_linux;
+  tdep->tdesc = tdesc;
+
+  feature = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.linux");
+  if (feature == NULL)
+    return;
+
+  valid_p = tdesc_numbered_register (feature, tdesc_data,
+				     AMD64_LINUX_ORIG_RAX_REGNUM,
+				     "orig_rax");
+  if (!valid_p)
+    return;
+
+  amd64_linux_init_abi_common (info, gdbarch);
+
+  /* GNU/Linux uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+}
 
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
@@ -1553,6 +1602,8 @@ _initialize_amd64_linux_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_LINUX, amd64_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x64_32,
+			  GDB_OSABI_LINUX, amd64_x32_linux_init_abi);
 
   /* Initialize the Linux target description.  */
   initialize_tdesc_amd64_linux ();

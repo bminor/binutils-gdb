@@ -1,6 +1,14 @@
 2012-06-13  Mark Kettenis  <kettenis@gnu.org>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): New function.
+	Move bits common to both the classic LP64 and the new x32 ILP32
+	ABI here.
+	(amd64_linux_init_abi): Call amd64_linux_init_abi_common.
+	(amd64_x32_linux_init_abi): New function.
+	(_initialize_amd64_linux_tdep): Register osabi for bfd_mach_x64_32
+	subtype.
+
 	* i386-tdep.h (i386_pseudo_register_name): New prototype.
 	* i386-tdep.c (i386_pseudo_register_name): Make public.
 	* amd64-tdep.h (amd64_x32_init_abi): New prototype.
