@@ -270,6 +270,7 @@ sim_create_inferior (sd, abfd, argv, env)
       ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop | ARM_v6_Prop);
       break;
 
+    case bfd_mach_arm_iWMMXt2:
     case bfd_mach_arm_iWMMXt:
       {
 	extern int SWI_vector_installed;
