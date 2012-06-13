@@ -11201,8 +11201,14 @@ do_t_mrs (void)
       int flags = inst.operands[1].imm & (PSR_c|PSR_x|PSR_s|PSR_f|SPSR_BIT);
 
       if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_m))
-	constraint (flags != 0, _("selected processor does not support "
-        	    "requested special purpose register"));
+	{
+	  /* PR gas/12698:  The constraint is only applied for m_profile.
+	     If the user has specified -march=all, we want to ignore it as
+	     we are building for any CPU type, including non-m variants.  */
+	  bfd_boolean m_profile = selected_cpu.core != arm_arch_any.core;
+	  constraint ((flags != 0) && m_profile, _("selected processor does "
+						   "not support requested special purpose register"));
+	}
       else
 	/* mrs only accepts APSR/CPSR/SPSR/CPSR_all/SPSR_all (for non-M profile
 	   devices).  */
@@ -11236,12 +11242,16 @@ do_t_msr (void)
     {
       int bits = inst.operands[0].imm & (PSR_c|PSR_x|PSR_s|PSR_f|SPSR_BIT);
 
-      constraint ((ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6_dsp)
-		   && (bits & ~(PSR_s | PSR_f)) != 0)
-		  || (!ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6_dsp)
-		      && bits != PSR_f),
-		  _("selected processor does not support requested special "
-		    "purpose register"));
+      /* PR gas/12698:  The constraint is only applied for m_profile.
+         If the user has specified -march=all, we want to ignore it as
+         we are building for any CPU type, including non-m variants.  */
+      bfd_boolean m_profile = selected_cpu.core != arm_arch_any.core;
+      constraint (((ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6_dsp)
+           && (bits & ~(PSR_s | PSR_f)) != 0)
+          || (!ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6_dsp)
+              && bits != PSR_f)) && m_profile,
+          _("selected processor does not support requested special "
+            "purpose register"));
     }
   else
      constraint ((flags & 0xff) != 0, _("selected processor does not support "

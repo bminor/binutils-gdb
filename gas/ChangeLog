@@ -1,3 +1,10 @@
+2012-06-13  Zhenqiang Chen  <zhenqiang.chen@linaro.org>
+
+	PR gas/12698
+	* config/tc-arm.c (do_t_mrs): Do not require an m-profile
+	architecure when assembling for all archiectures.
+	(do_t_msr): Likewise.
+
 2012-06-11  Georg-Johann Lay  <avr@gjlay.de>
 
 	PR 13503
