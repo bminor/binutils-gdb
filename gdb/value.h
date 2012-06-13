@@ -765,6 +765,8 @@ extern struct internalvar *lookup_only_internalvar (const char *name);
 
 extern struct internalvar *create_internalvar (const char *name);
 
+extern VEC (char_ptr) *complete_internalvar (const char *name);
+
 /* An internalvar can be dynamically computed by supplying a vector of
    function pointers to perform various operations.  */
 

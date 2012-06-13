@@ -947,6 +947,62 @@ set_breakpoint_condition (struct breakpoint *b, char *exp,
   observer_notify_breakpoint_modified (b);
 }
 
+/* Completion for the "condition" command.  */
+
+static VEC (char_ptr) *
+condition_completer (struct cmd_list_element *cmd, char *text, char *word)
+{
+  char *space;
+
+  text = skip_spaces (text);
+  space = skip_to_space (text);
+  if (*space == '\0')
+    {
+      int len;
+      struct breakpoint *b;
+      VEC (char_ptr) *result = NULL;
+
+      if (text[0] == '$')
+	{
+	  /* We don't support completion of history indices.  */
+	  if (isdigit (text[1]))
+	    return NULL;
+	  return complete_internalvar (&text[1]);
+	}
+
+      /* We're completing the breakpoint number.  */
+      len = strlen (text);
+
+      ALL_BREAKPOINTS (b)
+      {
+	int single = b->loc->next == NULL;
+	struct bp_location *loc;
+	int count = 1;
+
+	for (loc = b->loc; loc; loc = loc->next)
+	  {
+	    char location[50];
+
+	    if (single)
+	      sprintf (location, "%d", b->number);
+	    else
+	      sprintf (location, "%d.%d", b->number, count);
+
+	    if (strncmp (location, text, len) == 0)
+	      VEC_safe_push (char_ptr, result, xstrdup (location));
+
+	    ++count;
+	  }
+      }
+
+      return result;
+    }
+
+  /* We're completing the expression part.  */
+  text = skip_spaces (space);
+  return expression_completer (cmd, text, word);
+}
+
 /* condition N EXP -- set break condition of breakpoint N to EXP.  */
 
 static void
@@ -15528,10 +15584,11 @@ Type a line containing \"end\" to indicate the end of them.\n\
 Give \"silent\" as the first line to make the breakpoint silent;\n\
 then no output is printed when it is hit, except what the commands print."));
 
-  add_com ("condition", class_breakpoint, condition_command, _("\
+  c = add_com ("condition", class_breakpoint, condition_command, _("\
 Specify breakpoint number N to break only if COND is true.\n\
 Usage is `condition N COND', where N is an integer and COND is an\n\
 expression to be evaluated whenever breakpoint N is reached."));
+  set_cmd_completer (c, condition_completer);
 
   c = add_com ("tbreak", class_breakpoint, tbreak_command, _("\
 Set a temporary breakpoint.\n\

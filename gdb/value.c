@@ -1714,6 +1714,29 @@ lookup_only_internalvar (const char *name)
   return NULL;
 }
 
+/* Complete NAME by comparing it to the names of internal variables.
+   Returns a vector of newly allocated strings, or NULL if no matches
+   were found.  */
+
+VEC (char_ptr) *
+complete_internalvar (const char *name)
+{
+  VEC (char_ptr) *result = NULL;
+  struct internalvar *var;
+  int len;
+
+  len = strlen (name);
+
+  for (var = internalvars; var; var = var->next)
+    if (strncmp (var->name, name, len) == 0)
+      {
+	char *r = xstrdup (var->name);
+
+	VEC_safe_push (char_ptr, result, r);
+      }
+
+  return result;
+}
 
 /* Create an internal variable with name NAME and with a void value.
    NAME should not normally include a dollar sign.  */

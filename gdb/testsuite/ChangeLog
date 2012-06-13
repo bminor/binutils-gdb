@@ -1,3 +1,7 @@
+2012-06-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/condbreak.exp: Add tests for "condition" completion.
+
 2012-06-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix regression by the "ambiguous linespec" series.

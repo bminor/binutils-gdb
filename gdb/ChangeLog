@@ -1,5 +1,12 @@
 2012-06-13  Tom Tromey  <tromey@redhat.com>
 
+	* breakpoint.c (condition_completer): New function.
+	(_initialize_breakpoint): Use it.
+	* value.c (complete_internalvar): New function.
+	* value.h (complete_internalvar): Declare.
+
+2012-06-13  Tom Tromey  <tromey@redhat.com>
+
 	* ada-lang.c (ada_make_symbol_completion_list): Return a VEC.
 	* breakpoint.c (catch_syscall_completer): Return a VEC.
 	* cli/cli-cmds.c (complete_command): Update.
