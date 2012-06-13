@@ -1,3 +1,8 @@
+2012-06-13  Kaushik Srenevasan  <kaushik@twitter.com>
+
+	* jit.c (finalize_symtab): Set function's return type to 'void' by
+	default.
+
 2012-06-13  Mark Kettenis  <kettenis@gnu.org>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

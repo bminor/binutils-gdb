@@ -660,6 +660,10 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       struct block *new_block = allocate_block (&objfile->objfile_obstack);
       struct symbol *block_name = obstack_alloc (&objfile->objfile_obstack,
                                                  sizeof (struct symbol));
+      struct type *block_type = arch_type (get_objfile_arch (objfile),
+					   TYPE_CODE_VOID,
+					   1,
+					   "void");
 
       BLOCK_DICT (new_block) = dict_create_linear (&objfile->objfile_obstack,
                                                    NULL);
@@ -672,6 +676,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       SYMBOL_DOMAIN (block_name) = VAR_DOMAIN;
       SYMBOL_CLASS (block_name) = LOC_BLOCK;
       SYMBOL_SYMTAB (block_name) = symtab;
+      SYMBOL_TYPE (block_name) = lookup_function_type (block_type);
       SYMBOL_BLOCK_VALUE (block_name) = new_block;
 
       block_name->ginfo.name = obsavestring (gdb_block_iter->name,
