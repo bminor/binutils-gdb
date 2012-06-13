@@ -10956,6 +10956,43 @@ elf32_arm_final_link (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Return a best guess for the machine number based on the attributes.  */
+
+static unsigned int
+bfd_arm_get_mach_from_attributes (bfd * abfd)
+{
+  int arch = bfd_elf_get_obj_attr_int (abfd, OBJ_ATTR_PROC, Tag_CPU_arch);
+
+  switch (arch)
+    {
+    case TAG_CPU_ARCH_V4: return bfd_mach_arm_4;
+    case TAG_CPU_ARCH_V4T: return bfd_mach_arm_4T;
+    case TAG_CPU_ARCH_V5T: return bfd_mach_arm_5T;
+
+    case TAG_CPU_ARCH_V5TE:
+      {
+	char * name;
+
+	BFD_ASSERT (Tag_CPU_name < NUM_KNOWN_OBJ_ATTRIBUTES);
+	name = elf_known_obj_attributes (abfd) [OBJ_ATTR_PROC][Tag_CPU_name].s;
+
+	if (name)
+	  {
+	    if (strcmp (name, "IWMMXT2") == 0)
+	      return bfd_mach_arm_iWMMXt2;
+
+	    if (strcmp (name, "IWMMXT") == 0)
+	      return bfd_mach_arm_iWMMXt;	
+	  }
+
+	return bfd_mach_arm_5TE;
+      }
+
+    default:
+      return bfd_mach_arm_unknown;
+    }
+}
+
 /* Set the right machine number.  */
 
 static bfd_boolean
@@ -10965,15 +11002,15 @@ elf32_arm_object_p (bfd *abfd)
 
   mach = bfd_arm_get_mach_from_notes (abfd, ARM_NOTE_SECTION);
 
-  if (mach != bfd_mach_arm_unknown)
-    bfd_default_set_arch_mach (abfd, bfd_arch_arm, mach);
+  if (mach == bfd_mach_arm_unknown)
+    {
+      if (elf_elfheader (abfd)->e_flags & EF_ARM_MAVERICK_FLOAT)
+	mach = bfd_mach_arm_ep9312;
+      else
+	mach = bfd_arm_get_mach_from_attributes (abfd);
+    }
 
-  else if (elf_elfheader (abfd)->e_flags & EF_ARM_MAVERICK_FLOAT)
-    bfd_default_set_arch_mach (abfd, bfd_arch_arm, bfd_mach_arm_ep9312);
-
-  else
-    bfd_default_set_arch_mach (abfd, bfd_arch_arm, mach);
-
+  bfd_default_set_arch_mach (abfd, bfd_arch_arm, mach);
   return TRUE;
 }
 
