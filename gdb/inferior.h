@@ -397,9 +397,11 @@ struct inferior_control_state
 
    Inferior thread counterpart is `struct thread_suspend_state'.  */
 
+#if 0 /* Currently unused and empty structures are not valid C.  */
 struct inferior_suspend_state
 {
 };
+#endif
 
 /* GDB represents the state of each program execution with an object
    called an inferior.  An inferior typically corresponds to a process
@@ -431,7 +433,9 @@ struct inferior
 
   /* State of inferior process to restore after GDB is done with an inferior
      call.  See `struct inferior_suspend_state'.  */
+#if 0 /* Currently unused and empty structures are not valid C.  */
   struct inferior_suspend_state suspend;
+#endif
 
   /* True if this was an auto-created inferior, e.g. created from
      following a fork; false, if this inferior was manually added by

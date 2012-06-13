@@ -1,5 +1,15 @@
 2012-06-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR build/14003
+	* inferior.h (struct inferior_suspend_state): Comment out.
+	(struct inferior): Comment out the field suspend.
+	* infrun.c (struct infcall_suspend_state): Comment out the field
+	inferior_suspend.
+	(save_infcall_suspend_state, restore_infcall_suspend_state): Comment
+	out its assignment.
+
+2012-06-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR c++/14177 - Fix parsing TYPENAME:: in parentheses.
 	* c-exp.y (classify_inner_name): Remove caller assumptions in the
 	function comment.  Return ERROR for unresolved cases.  Implement
