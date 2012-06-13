@@ -1,3 +1,13 @@
+2012-06-13  Pedro Alves  <palves@redhat.com>
+
+	Partial revert of previous change.
+
+	* serial.c (scb_base): New global.
+	(serial_for_fd): New.
+	(serial_open, serial_fdopen_ops): Link new serial in open serials
+	chain.
+	(do_serial_close): Unlink serial from the open serials chain.
+
 2012-06-12  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (infrun_thread_stop_requested_callback): Don't switch

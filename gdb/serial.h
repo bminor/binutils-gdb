@@ -249,6 +249,7 @@ struct serial
 				   still need to wait for this many
 				   more seconds.  */
     char *name;			/* The name of the device or host */
+    struct serial *next;	/* Pointer to the next `struct serial *' */
     int debug_p;		/* Trace this serial devices operation.  */
     int async_state;		/* Async internal state.  */
     void *async_context;	/* Async event thread's context */

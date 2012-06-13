@@ -33,6 +33,10 @@ static int global_serial_debug_p;
 
 static struct serial_ops *serial_ops_list = NULL;
 
+/* Pointer to list of scb's.  */
+
+static struct serial *scb_base;
+
 /* Non-NULL gives filename which contains a recording of the remote session,
    suitable for playback by gdbserver.  */
 
@@ -157,6 +161,21 @@ serial_add_interface (struct serial_ops *optable)
   serial_ops_list = optable;
 }
 
+/* Return the open serial device for FD, if found, or NULL if FD is
+   not already opened.  */
+
+struct serial *
+serial_for_fd (int fd)
+{
+  struct serial *scb;
+
+  for (scb = scb_base; scb; scb = scb->next)
+    if (scb->fd == fd)
+      return scb;
+
+  return NULL;
+}
+
 /* Open up a device or a network socket, depending upon the syntax of NAME.  */
 
 struct serial *
@@ -206,10 +225,12 @@ serial_open (const char *name)
     }
 
   scb->name = xstrdup (name);
+  scb->next = scb_base;
   scb->debug_p = 0;
   scb->async_state = 0;
   scb->async_handler = NULL;
   scb->async_context = NULL;
+  scb_base = scb;
 
   if (serial_logfile != NULL)
     {
@@ -249,10 +270,12 @@ serial_fdopen_ops (const int fd, struct serial_ops *ops)
   scb->refcnt = 1;
 
   scb->name = NULL;
+  scb->next = scb_base;
   scb->debug_p = 0;
   scb->async_state = 0;
   scb->async_handler = NULL;
   scb->async_context = NULL;
+  scb_base = scb;
 
   if ((ops->fdopen) != NULL)
     (*ops->fdopen) (scb, fd);
@@ -295,6 +318,18 @@ do_serial_close (struct serial *scb, int really_close)
 
   /* For serial_is_open.  */
   scb->bufp = NULL;
+
+  if (scb_base == scb)
+    scb_base = scb_base->next;
+  else
+    for (tmp_scb = scb_base; tmp_scb; tmp_scb = tmp_scb->next)
+      {
+	if (tmp_scb->next != scb)
+	  continue;
+
+	tmp_scb->next = tmp_scb->next->next;
+	break;
+      }
 
   serial_unref (scb);
 }
