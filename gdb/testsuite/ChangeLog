@@ -1,3 +1,9 @@
+2012-06-13  Keith Seitz  <keiths@redhat.com>
+
+	PR breakpoints/13798 and mi/11541
+	* gdb.linespec/ls-errs.exp: Add a few more tests for
+	filenames with spaces and colons.
+
 2012-06-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR c++/14177 - Fix parsing TYPENAME:: in parentheses.

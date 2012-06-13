@@ -116,7 +116,9 @@ foreach x [list "this_file_doesn't_exist.c" \
 	       "\"this \"file\" has quotes.c\"" \
 	       "'this \"file\" has quotes.c'" \
 	       "'this 'file' has quotes.c'" \
-	       "\"this 'file' has quotes.c\""] {
+	       "\"this 'file' has quotes.c\"" \
+	       "\"spaces: and :colons.c\"" \
+	       "'more: :spaces: :and  colons::.c'"] {
     # Remove any quoting from FILENAME for the error message.
     add the_tests "$x:3" invalid_file [string trim $x \"']
 }
