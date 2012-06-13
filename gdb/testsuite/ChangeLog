@@ -1,3 +1,10 @@
+2012-06-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR tdep/14222
+	* gdb.arch/i386-sse-stack-align.S: New file.
+	* gdb.arch/i386-sse-stack-align.c: New file.
+	* gdb.arch/i386-sse-stack-align.exp: New file.
+
 2012-06-13  Keith Seitz  <keiths@redhat.com>
 
 	PR breakpoints/13798 and mi/11541
