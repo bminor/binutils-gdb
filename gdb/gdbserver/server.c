@@ -322,8 +322,6 @@ start_inferior (char **argv)
 	}
       while (last_status.value.sig != GDB_SIGNAL_TRAP);
 
-      current_inferior->last_resume_kind = resume_stop;
-      current_inferior->last_status = last_status;
       return signal_pid;
     }
 
