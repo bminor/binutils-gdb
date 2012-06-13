@@ -1,3 +1,13 @@
+2012-06-13  Mark Kettenis  <kettenis@gnu.org>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-tdep.h (i386_pseudo_register_name): New prototype.
+	* i386-tdep.c (i386_pseudo_register_name): Make public.
+	* amd64-tdep.h (amd64_x32_init_abi): New prototype.
+	* amd64-tdep.c (amd64_dword_names): Add "eip".
+	(amd64_x32_pseudo_register_type): New function
+	(amd64_x32_init_abi): New function.
+
 2012-06-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR build/14003

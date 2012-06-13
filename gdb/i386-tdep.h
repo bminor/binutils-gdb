@@ -309,6 +309,8 @@ extern int i386_ymm_regnum_p (struct gdbarch *gdbarch, int regnum);
 
 extern const char *i386_pseudo_register_name (struct gdbarch *gdbarch,
 					      int regnum);
+extern struct type *i386_pseudo_register_type (struct gdbarch *gdbarch,
+					       int regnum);
 
 extern void i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 						  struct regcache *regcache,

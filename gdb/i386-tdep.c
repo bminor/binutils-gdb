@@ -2780,7 +2780,7 @@ i386_mmx_type (struct gdbarch *gdbarch)
 /* Return the GDB type object for the "standard" data type of data in
    register REGNUM.  */
 
-static struct type *
+struct type *
 i386_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (i386_mmx_regnum_p (gdbarch, regnum))
