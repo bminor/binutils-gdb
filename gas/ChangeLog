@@ -1,3 +1,9 @@
+2012-06-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (x86_address_bytes): New.
+	* config/tc-i386.h (TC_ADDRESS_BYTES): Likewise.
+	(x86_address_bytes): Likewise.
+
 2012-06-13  Zhenqiang Chen  <zhenqiang.chen@linaro.org>
 
 	PR gas/12698

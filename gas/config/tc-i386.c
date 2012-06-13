@@ -6619,6 +6619,17 @@ x86_cons_fix_new (fragS *frag, unsigned int off, unsigned int len,
   fix_new_exp (frag, off, len, exp, 0, r);
 }
 
+/* Export the ABI address size for use by TC_ADDRESS_BYTES for the
+   purpose of the `.dc.a' internal pseudo-op.  */
+
+int
+x86_address_bytes (void)
+{
+  if ((stdoutput->arch_info->mach & bfd_mach_x64_32))
+    return 4;
+  return stdoutput->arch_info->bits_per_address / 8;
+}
+
 #if !(defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (OBJ_MACH_O)) \
     || defined (LEX_AT)
 # define lex_got(reloc, adjust, types) NULL
