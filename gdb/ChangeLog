@@ -1,3 +1,15 @@
+2012-06-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR c++/14177 - Fix parsing TYPENAME:: in parentheses.
+	* c-exp.y (classify_inner_name): Remove caller assumptions in the
+	function comment.  Return ERROR for unresolved cases.  Implement
+	returning proper NAME.
+	(yylex): Accept also NAME from classify_inner_name.
+	* cp-namespace.c (cp_lookup_nested_type): Rename to ...
+	(cp_lookup_nested_symbol): ... here.  Return any found symbol, not just
+	LOC_TYPEDEF type.
+	* cp-support.h (cp_lookup_nested_type): Update its declaration.
+
 2012-06-13  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (condition_completer): New function.

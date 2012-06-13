@@ -213,9 +213,9 @@ extern struct symbol *cp_lookup_symbol_imports_or_template
       const struct block *block,
       const domain_enum domain);
 
-extern struct type *cp_lookup_nested_type (struct type *parent_type,
-					   const char *nested_name,
-					   const struct block *block);
+extern struct symbol *cp_lookup_nested_symbol (struct type *parent_type,
+					       const char *nested_name,
+					       const struct block *block);
 
 struct type *cp_lookup_transparent_type (const char *name);
 

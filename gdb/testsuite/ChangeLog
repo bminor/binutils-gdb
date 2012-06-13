@@ -1,3 +1,14 @@
+2012-06-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR c++/14177 - Fix parsing TYPENAME:: in parentheses.
+	* gdb.cp/cpexprs.cc (class CV, CV::i, ATTRIBUTE_USED, CV_f): New.
+	(test_function): Call CV_f.
+	* gdb.cp/cpexprs.exp (p 'CV::m(int)', p CV::m(int))
+	(p 'CV::m(int) const', p CV::m(int) const, p 'CV::m(int) volatile')
+	(p CV::m(int) volatile, p 'CV::m(int) const volatile')
+	(p CV::m(int) const volatile, p CV_f(int), p CV_f(CV::t))
+	(p CV_f(CV::i)): New tests.
+
 2012-06-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/condbreak.exp: Add tests for "condition" completion.

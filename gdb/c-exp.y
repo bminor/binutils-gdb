@@ -2505,9 +2505,8 @@ classify_name (struct block *block)
 
 /* Like classify_name, but used by the inner loop of the lexer, when a
    name might have already been seen.  FIRST_NAME is true if the token
-   in `yylval' is the first component of a name, false otherwise.  If
-   this function returns NAME, it might not have updated `yylval'.
-   This is ok because the caller only cares about TYPENAME.  */
+   in `yylval' is the first component of a name, false otherwise.  */
+
 static int
 classify_inner_name (struct block *block, int first_name)
 {
@@ -2521,18 +2520,28 @@ classify_inner_name (struct block *block, int first_name)
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
       && TYPE_CODE (type) != TYPE_CODE_UNION
       && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
-    /* We know the caller won't expect us to update yylval.  */
-    return NAME;
+    return ERROR;
 
   copy = copy_name (yylval.tsym.stoken);
-  new_type = cp_lookup_nested_type (yylval.tsym.type, copy, block);
+  yylval.ssym.sym = cp_lookup_nested_symbol (yylval.tsym.type, copy, block);
+  if (yylval.ssym.sym == NULL)
+    return ERROR;
 
-  if (new_type == NULL)
-    /* We know the caller won't expect us to update yylval.  */
-    return NAME;
+  switch (SYMBOL_CLASS (yylval.ssym.sym))
+    {
+    case LOC_BLOCK:
+    case LOC_LABEL:
+      return ERROR;
 
-  yylval.tsym.type = new_type;
-  return TYPENAME;
+    case LOC_TYPEDEF:
+      yylval.tsym.type = SYMBOL_TYPE (yylval.ssym.sym);;
+      return TYPENAME;
+
+    default:
+      yylval.ssym.is_a_field_of_this = 0;
+      return NAME;
+    }
+  internal_error (__FILE__, __LINE__, _("not reached"));
 }
 
 /* The outer level of a two-level lexer.  This calls the inner lexer
@@ -2592,7 +2601,7 @@ yylex (void)
 						first_iter);
 	  /* We keep going until we either run out of names, or until
 	     we have a qualified name which is not a type.  */
-	  if (classification != TYPENAME)
+	  if (classification != TYPENAME && classification != NAME)
 	    {
 	      /* Push the final component and leave the loop.  */
 	      VEC_safe_push (token_and_value, token_fifo, &next);

@@ -660,14 +660,14 @@ lookup_symbol_file (const char *name,
   return sym;
 }
 
-/* Look up a type named NESTED_NAME that is nested inside the C++
+/* Look up a symbol named NESTED_NAME that is nested inside the C++
    class or namespace given by PARENT_TYPE, from within the context
    given by BLOCK.  Return NULL if there is no such nested type.  */
 
-struct type *
-cp_lookup_nested_type (struct type *parent_type,
-		       const char *nested_name,
-		       const struct block *block)
+struct symbol *
+cp_lookup_nested_symbol (struct type *parent_type,
+			 const char *nested_name,
+			 const struct block *block)
 {
   /* type_name_no_tag_required provides better error reporting using the
      original type.  */
@@ -694,8 +694,8 @@ cp_lookup_nested_type (struct type *parent_type,
 					   block, VAR_DOMAIN);
 	char *concatenated_name;
 
-	if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-	  return SYMBOL_TYPE (sym);
+	if (sym != NULL)
+	  return sym;
 
 	/* Now search all static file-level symbols.  Not strictly
 	   correct, but more useful than an error.  We do not try to
@@ -707,16 +707,15 @@ cp_lookup_nested_type (struct type *parent_type,
 				    + strlen (nested_name) + 1);
 	sprintf (concatenated_name, "%s::%s",
 		 parent_name, nested_name);
-	sym = lookup_static_symbol_aux (concatenated_name,
-					VAR_DOMAIN);
-	if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-	  return SYMBOL_TYPE (sym);
+	sym = lookup_static_symbol_aux (concatenated_name, VAR_DOMAIN);
+	if (sym != NULL)
+	  return sym;
 
 	return NULL;
       }
     default:
       internal_error (__FILE__, __LINE__,
-		      _("cp_lookup_nested_type called "
+		      _("cp_lookup_nested_symbol called "
 			"on a non-aggregate type."));
     }
 }
