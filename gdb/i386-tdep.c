@@ -2351,7 +2351,6 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (write_pass = 0; write_pass < 2; write_pass++)
     {
       int args_space_used = 0;
-      int have_16_byte_aligned_arg = 0;
 
       if (struct_return)
 	{
@@ -2389,19 +2388,20 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  else
 	    {
 	      if (i386_16_byte_align_p (value_enclosing_type (args[i])))
-		{
-		  args_space = align_up (args_space, 16);
-		  have_16_byte_aligned_arg = 1;
-		}
+		args_space = align_up (args_space, 16);
 	      args_space += align_up (len, 4);
 	    }
 	}
 
       if (!write_pass)
 	{
-	  if (have_16_byte_aligned_arg)
-	    args_space = align_up (args_space, 16);
 	  sp -= args_space;
+
+	  /* The original System V ABI only requires word alignment,
+	     but modern incarnations need 16-byte alignment in order
+	     to support SSE.  Since wasting a few bytes here isn't
+	     harmful we unconditionally enforce 16-byte alignment.  */
+	  sp &= ~0xf;
 	}
     }
 

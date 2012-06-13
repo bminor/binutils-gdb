@@ -1,3 +1,10 @@
+2012-06-13  Mark Kettenis  <kettenis@gnu.org>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR tdep/14222
+	* i386-tdep.c (i386_push_dummy_call): Unconditionally align the
+	stack on a 16-byte boundary.
+
 2012-06-13  Kaushik Srenevasan  <kaushik@twitter.com>
 
 	* jit.c (finalize_symtab): Set function's return type to 'void' by
