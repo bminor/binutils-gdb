@@ -1,3 +1,32 @@
+2012-06-13  Nick Clifton  <nickc@redhat.com>
+
+	* ld-arm/arm-app-abs32.d; Update expected disassembly in line with
+	improved architecture detection.
+	* ld-arm/arm-app.d: Likewise.
+	* ld-arm/arm-lib-plt32.d: Likewise.
+	* ld-arm/arm-lib.d: Likewise.
+	* ld-arm/arm-static-app.d: Likewise.
+	* ld-arm/armthumb-lib.d: Likewise.
+	* ld-arm/farcall-mixed-app-v5.d: Likewise.
+	* ld-arm/farcall-mixed-app.d: Likewise.
+	* ld-arm/farcall-mixed-lib-v4t.d: Likewise.
+	* ld-arm/farcall-mixed-lib.d: Likewise.
+	* ld-arm/mixed-app-v5.d: Likewise.
+	* ld-arm/mixed-app.d: Likewise.
+	* ld-arm/mixed-lib.d: Likewise.
+	* ld-arm/tls-app.d: Likewise.
+	* ld-arm/tls-descrelax-be32.d: Likewise.
+	* ld-arm/tls-descrelax.d: Likewise.
+	* ld-arm/tls-descseq.d: Likewise.
+	* ld-arm/tls-gdesc-got.d: Likewise.
+	* ld-arm/tls-gdesc.d: Likewise.
+	* ld-arm/tls-gdierelax.d: Likewise.
+	* ld-arm/tls-gdierelax2.d: Likewise.
+	* ld-arm/tls-gdlerelax.d: Likewise.
+	* ld-arm/tls-lib-loc.d: Likewise.
+	* ld-arm/tls-lib.d: Likewise.
+	* ld-arm/tls-thumb1.d: Likewise.
+
 2012-06-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14207

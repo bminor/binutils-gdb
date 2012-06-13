@@ -1,6 +1,6 @@
 
 tmpdir/tls-app-rel-ie2:     file format elf32-.*arm.*
-architecture: arm, flags 0x[0-9a-f]+:
+architecture: armv5t, flags 0x[0-9a-f]+:
 HAS_SYMS, DYNAMIC, D_PAGED
 start address 0x[0-9a-f]+
 
