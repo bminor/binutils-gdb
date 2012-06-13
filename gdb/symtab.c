@@ -3881,17 +3881,14 @@ compare_symbol_name (const char *name, const char *sym_text, int sym_text_len)
 /* Free any memory associated with a completion list.  */
 
 static void
-free_completion_list (char ***list_ptr)
+free_completion_list (VEC (char_ptr) **list_ptr)
 {
-  int i = 0;
-  char **list = *list_ptr;
+  int i;
+  char *p;
 
-  while (list[i] != NULL)
-    {
-      xfree (list[i]);
-      i++;
-    }
-  xfree (list);
+  for (i = 0; VEC_iterate (char_ptr, *list_ptr, i, p); ++i)
+    xfree (p);
+  VEC_free (char_ptr, *list_ptr);
 }
 
 /* Callback for make_cleanup.  */
@@ -3904,9 +3901,7 @@ do_free_completion_list (void *list)
 
 /* Helper routine for make_symbol_completion_list.  */
 
-static int return_val_size;
-static int return_val_index;
-static char **return_val;
+static VEC (char_ptr) *return_val;
 
 #define COMPLETION_LIST_ADD_SYMBOL(symbol, sym_text, len, text, word) \
       completion_list_add_name \
@@ -3953,13 +3948,7 @@ completion_list_add_name (const char *symname,
 	strcat (new, symname);
       }
 
-    if (return_val_index + 3 > return_val_size)
-      {
-	newsize = (return_val_size *= 2) * sizeof (char *);
-	return_val = (char **) xrealloc ((char *) return_val, newsize);
-      }
-    return_val[return_val_index++] = new;
-    return_val[return_val_index] = NULL;
+    VEC_safe_push (char_ptr, return_val, new);
   }
 }
 
@@ -4123,7 +4112,7 @@ expand_partial_symbol_name (const char *name, void *user_data)
   return compare_symbol_name (name, datum->sym_text, datum->sym_text_len);
 }
 
-char **
+VEC (char_ptr) *
 default_make_symbol_completion_list_break_on (char *text, char *word,
 					      const char *break_on)
 {
@@ -4178,9 +4167,7 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
       /* A double-quoted string is never a symbol, nor does it make sense
          to complete it any other way.  */
       {
-	return_val = (char **) xmalloc (sizeof (char *));
-	return_val[0] = NULL;
-	return return_val;
+	return NULL;
       }
     else
       {
@@ -4216,10 +4203,7 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
     }
   gdb_assert (sym_text[sym_text_len] == '\0' || sym_text[sym_text_len] == '(');
 
-  return_val_size = 100;
-  return_val_index = 0;
-  return_val = (char **) xmalloc ((return_val_size + 1) * sizeof (char *));
-  return_val[0] = NULL;
+  return_val = NULL;
   back_to = make_cleanup (do_free_completion_list, &return_val);
 
   datum.sym_text = sym_text;
@@ -4334,17 +4318,17 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
   return (return_val);
 }
 
-char **
+VEC (char_ptr) *
 default_make_symbol_completion_list (char *text, char *word)
 {
   return default_make_symbol_completion_list_break_on (text, word, "");
 }
 
-/* Return a NULL terminated array of all symbols (regardless of class)
-   which begin by matching TEXT.  If the answer is no symbols, then
-   the return value is an array which contains only a NULL pointer.  */
+/* Return a vector of all symbols (regardless of class) which begin by
+   matching TEXT.  If the answer is no symbols, then the return value
+   is NULL.  */
 
-char **
+VEC (char_ptr) *
 make_symbol_completion_list (char *text, char *word)
 {
   return current_language->la_make_symbol_completion_list (text, word);
@@ -4353,7 +4337,7 @@ make_symbol_completion_list (char *text, char *word)
 /* Like make_symbol_completion_list, but suitable for use as a
    completion function.  */
 
-char **
+VEC (char_ptr) *
 make_symbol_completion_list_fn (struct cmd_list_element *ignore,
 				char *text, char *word)
 {
@@ -4363,7 +4347,7 @@ make_symbol_completion_list_fn (struct cmd_list_element *ignore,
 /* Like make_symbol_completion_list, but returns a list of symbols
    defined in a source file FILE.  */
 
-char **
+VEC (char_ptr) *
 make_file_symbol_completion_list (char *text, char *word, char *srcfile)
 {
   struct symbol *sym;
@@ -4409,9 +4393,7 @@ make_file_symbol_completion_list (char *text, char *word, char *srcfile)
       /* A double-quoted string is never a symbol, nor does it make sense
          to complete it any other way.  */
       {
-	return_val = (char **) xmalloc (sizeof (char *));
-	return_val[0] = NULL;
-	return return_val;
+	return NULL;
       }
     else
       {
@@ -4422,10 +4404,7 @@ make_file_symbol_completion_list (char *text, char *word, char *srcfile)
 
   sym_text_len = strlen (sym_text);
 
-  return_val_size = 10;
-  return_val_index = 0;
-  return_val = (char **) xmalloc ((return_val_size + 1) * sizeof (char *));
-  return_val[0] = NULL;
+  return_val = NULL;
 
   /* Find the symtab for SRCFILE (this loads it if it was not yet read
      in).  */
@@ -4468,17 +4447,10 @@ make_file_symbol_completion_list (char *text, char *word, char *srcfile)
 
 static void
 add_filename_to_list (const char *fname, char *text, char *word,
-		      char ***list, int *list_used, int *list_alloced)
+		      VEC (char_ptr) **list)
 {
   char *new;
   size_t fnlen = strlen (fname);
-
-  if (*list_used + 1 >= *list_alloced)
-    {
-      *list_alloced *= 2;
-      *list = (char **) xrealloc ((char *) *list,
-				  *list_alloced * sizeof (char *));
-    }
 
   if (word == text)
     {
@@ -4500,8 +4472,7 @@ add_filename_to_list (const char *fname, char *text, char *word,
       new[text - word] = '\0';
       strcat (new, fname);
     }
-  (*list)[*list_used] = new;
-  (*list)[++*list_used] = NULL;
+  VEC_safe_push (char_ptr, *list, new);
 }
 
 static int
@@ -4529,9 +4500,7 @@ struct add_partial_filename_data
   char *text;
   char *word;
   int text_len;
-  char ***list;
-  int *list_used;
-  int *list_alloced;
+  VEC (char_ptr) **list;
 };
 
 /* A callback for map_partial_symbol_filenames.  */
@@ -4549,8 +4518,7 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
     {
       /* This file matches for a completion; add it to the
 	 current list of matches.  */
-      add_filename_to_list (filename, data->text, data->word,
-			    data->list, data->list_used, data->list_alloced);
+      add_filename_to_list (filename, data->text, data->word, data->list);
     }
   else
     {
@@ -4559,31 +4527,26 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
       if (base_name != filename
 	  && !filename_seen (base_name, 1, data->first)
 	  && filename_ncmp (base_name, data->text, data->text_len) == 0)
-	add_filename_to_list (base_name, data->text, data->word,
-			      data->list, data->list_used, data->list_alloced);
+	add_filename_to_list (base_name, data->text, data->word, data->list);
     }
 }
 
-/* Return a NULL terminated array of all source files whose names
-   begin with matching TEXT.  The file names are looked up in the
-   symbol tables of this program.  If the answer is no matchess, then
-   the return value is an array which contains only a NULL pointer.  */
+/* Return a vector of all source files whose names begin with matching
+   TEXT.  The file names are looked up in the symbol tables of this
+   program.  If the answer is no matchess, then the return value is
+   NULL.  */
 
-char **
+VEC (char_ptr) *
 make_source_files_completion_list (char *text, char *word)
 {
   struct symtab *s;
   struct objfile *objfile;
   int first = 1;
-  int list_alloced = 1;
-  int list_used = 0;
   size_t text_len = strlen (text);
-  char **list = (char **) xmalloc (list_alloced * sizeof (char *));
+  VEC (char_ptr) *list = NULL;
   const char *base_name;
   struct add_partial_filename_data datum;
   struct cleanup *back_to;
-
-  list[0] = NULL;
 
   if (!have_full_symbols () && !have_partial_symbols ())
     return list;
@@ -4599,8 +4562,7 @@ make_source_files_completion_list (char *text, char *word)
 	{
 	  /* This file matches for a completion; add it to the current
 	     list of matches.  */
-	  add_filename_to_list (s->filename, text, word,
-				&list, &list_used, &list_alloced);
+	  add_filename_to_list (s->filename, text, word, &list);
 	}
       else
 	{
@@ -4612,8 +4574,7 @@ make_source_files_completion_list (char *text, char *word)
 	  if (base_name != s->filename
 	      && !filename_seen (base_name, 1, &first)
 	      && filename_ncmp (base_name, text, text_len) == 0)
-	    add_filename_to_list (base_name, text, word,
-				  &list, &list_used, &list_alloced);
+	    add_filename_to_list (base_name, text, word, &list);
 	}
     }
 
@@ -4622,8 +4583,6 @@ make_source_files_completion_list (char *text, char *word)
   datum.word = word;
   datum.text_len = text_len;
   datum.list = &list;
-  datum.list_used = &list_used;
-  datum.list_alloced = &list_alloced;
   map_partial_symbol_filenames (maybe_add_partial_symtab_filename, &datum,
 				0 /*need_fullname*/);
   discard_cleanups (back_to);

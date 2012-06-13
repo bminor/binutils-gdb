@@ -5797,11 +5797,10 @@ ada_expand_partial_symbol_name (const char *name, void *user_data)
                                   data->wild_match, data->encoded) != NULL;
 }
 
-/* Return a list of possible symbol names completing TEXT0.  The list
-   is NULL terminated.  WORD is the entire command on which completion
-   is made.  */
+/* Return a list of possible symbol names completing TEXT0.  WORD is
+   the entire command on which completion is made.  */
 
-static char **
+static VEC (char_ptr) *
 ada_make_symbol_completion_list (char *text0, char *word)
 {
   char *text;
@@ -5914,24 +5913,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
     }
   }
 
-  /* Append the closing NULL entry.  */
-  VEC_safe_push (char_ptr, completions, NULL);
-
-  /* Make a copy of the COMPLETIONS VEC before we free it, and then
-     return the copy.  It's unfortunate that we have to make a copy
-     of an array that we're about to destroy, but there is nothing much
-     we can do about it.  Fortunately, it's typically not a very large
-     array.  */
-  {
-    const size_t completions_size = 
-      VEC_length (char_ptr, completions) * sizeof (char *);
-    char **result = xmalloc (completions_size);
-    
-    memcpy (result, VEC_address (char_ptr, completions), completions_size);
-
-    VEC_free (char_ptr, completions);
-    return result;
-  }
+  return completions;
 }
 
                                 /* Field Access */

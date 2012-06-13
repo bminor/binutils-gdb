@@ -1637,26 +1637,20 @@ lookup_cmd_composition (char *text,
    "foo" and we want to complete to "foobar".  If WORD is "oo", return
    "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
 
-char **
+VEC (char_ptr) *
 complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
 {
   struct cmd_list_element *ptr;
-  char **matchlist;
-  int sizeof_matchlist;
-  int matches;
+  VEC (char_ptr) *matchlist = NULL;
   int textlen = strlen (text);
   int pass;
   int saw_deprecated_match = 0;
-
-  sizeof_matchlist = 10;
-  matchlist = (char **) xmalloc (sizeof_matchlist * sizeof (char *));
-  matches = 0;
 
   /* We do one or two passes.  In the first pass, we skip deprecated
      commands.  If we see no matching commands in the first pass, and
      if we did happen to see a matching deprecated command, we do
      another loop to collect those.  */
-  for (pass = 0; matches == 0 && pass < 2; ++pass)
+  for (pass = 0; matchlist == 0 && pass < 2; ++pass)
     {
       for (ptr = list; ptr; ptr = ptr->next)
 	if (!strncmp (ptr->name, text, textlen)
@@ -1664,6 +1658,8 @@ complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
 	    && (ptr->func
 		|| ptr->prefixlist))
 	  {
+	    char *match;
+
 	    if (pass == 0)
 	      {
 		if ((ptr->flags & CMD_DEPRECATED) != 0)
@@ -1673,48 +1669,27 @@ complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
 		  }
 	      }
 
-	    if (matches == sizeof_matchlist)
-	      {
-		sizeof_matchlist *= 2;
-		matchlist = (char **) xrealloc ((char *) matchlist,
-						(sizeof_matchlist
-						 * sizeof (char *)));
-	      }
-
-	    matchlist[matches] = (char *)
-	      xmalloc (strlen (word) + strlen (ptr->name) + 1);
+	    match = (char *) xmalloc (strlen (word) + strlen (ptr->name) + 1);
 	    if (word == text)
-	      strcpy (matchlist[matches], ptr->name);
+	      strcpy (match, ptr->name);
 	    else if (word > text)
 	      {
 		/* Return some portion of ptr->name.  */
-		strcpy (matchlist[matches], ptr->name + (word - text));
+		strcpy (match, ptr->name + (word - text));
 	      }
 	    else
 	      {
 		/* Return some of text plus ptr->name.  */
-		strncpy (matchlist[matches], word, text - word);
-		matchlist[matches][text - word] = '\0';
-		strcat (matchlist[matches], ptr->name);
+		strncpy (match, word, text - word);
+		match[text - word] = '\0';
+		strcat (match, ptr->name);
 	      }
-	    ++matches;
+	    VEC_safe_push (char_ptr, matchlist, match);
 	  }
       /* If we saw no matching deprecated commands in the first pass,
 	 just bail out.  */
       if (!saw_deprecated_match)
 	break;
-    }
-
-  if (matches == 0)
-    {
-      xfree (matchlist);
-      matchlist = 0;
-    }
-  else
-    {
-      matchlist = (char **) xrealloc ((char *) matchlist, ((matches + 1)
-							* sizeof (char *)));
-      matchlist[matches] = (char *) 0;
     }
 
   return matchlist;
@@ -1730,63 +1705,38 @@ complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
    and we want to complete to "foobar".  If WORD is "oo", return
    "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
 
-char **
+VEC (char_ptr) *
 complete_on_enum (const char *const *enumlist,
 		  char *text,
 		  char *word)
 {
-  char **matchlist;
-  int sizeof_matchlist;
-  int matches;
+  VEC (char_ptr) *matchlist = NULL;
   int textlen = strlen (text);
   int i;
   const char *name;
 
-  sizeof_matchlist = 10;
-  matchlist = (char **) xmalloc (sizeof_matchlist * sizeof (char *));
-  matches = 0;
-
   for (i = 0; (name = enumlist[i]) != NULL; i++)
     if (strncmp (name, text, textlen) == 0)
       {
-	if (matches == sizeof_matchlist)
-	  {
-	    sizeof_matchlist *= 2;
-	    matchlist = (char **) xrealloc ((char *) matchlist,
-					    (sizeof_matchlist
-					     * sizeof (char *)));
-	  }
+	char *match;
 
-	matchlist[matches] = (char *)
-	  xmalloc (strlen (word) + strlen (name) + 1);
+	match = (char *) xmalloc (strlen (word) + strlen (name) + 1);
 	if (word == text)
-	  strcpy (matchlist[matches], name);
+	  strcpy (match, name);
 	else if (word > text)
 	  {
 	    /* Return some portion of name.  */
-	    strcpy (matchlist[matches], name + (word - text));
+	    strcpy (match, name + (word - text));
 	  }
 	else
 	  {
 	    /* Return some of text plus name.  */
-	    strncpy (matchlist[matches], word, text - word);
-	    matchlist[matches][text - word] = '\0';
-	    strcat (matchlist[matches], name);
+	    strncpy (match, word, text - word);
+	    match[text - word] = '\0';
+	    strcat (match, name);
 	  }
-	++matches;
+	VEC_safe_push (char_ptr, matchlist, match);
       }
-
-  if (matches == 0)
-    {
-      xfree (matchlist);
-      matchlist = 0;
-    }
-  else
-    {
-      matchlist = (char **) xrealloc ((char *) matchlist, ((matches + 1)
-							   * sizeof (char *)));
-      matchlist[matches] = (char *) 0;
-    }
 
   return matchlist;
 }

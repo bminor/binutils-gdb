@@ -19,6 +19,8 @@
 #if !defined (COMMAND_H)
 #define COMMAND_H 1
 
+#include "gdb_vecs.h"
+
 /* This file defines the public interface for any code wanting to
    create commands.  */
 
@@ -149,7 +151,8 @@ typedef void cmd_sfunc_ftype (char *args, int from_tty,
 extern void set_cmd_sfunc (struct cmd_list_element *cmd,
 			   cmd_sfunc_ftype *sfunc);
 
-typedef char **completer_ftype (struct cmd_list_element *, char *, char *);
+typedef VEC (char_ptr) *completer_ftype (struct cmd_list_element *,
+					 char *, char *);
 
 extern void set_cmd_completer (struct cmd_list_element *, completer_ftype *);
 
@@ -208,11 +211,11 @@ extern struct cmd_list_element *add_info (char *,
 
 extern struct cmd_list_element *add_info_alias (char *, char *, int);
 
-extern char **complete_on_cmdlist (struct cmd_list_element *,
-				   char *, char *);
+extern VEC (char_ptr) *complete_on_cmdlist (struct cmd_list_element *,
+					    char *, char *);
 
-extern char **complete_on_enum (const char *const *enumlist,
-				char *, char *);
+extern VEC (char_ptr) *complete_on_enum (const char *const *enumlist,
+					 char *, char *);
 
 /* Functions that implement commands about CLI commands.  */
 

@@ -22,6 +22,7 @@
 #define SYMTAB_H 1
 
 #include "vec.h"
+#include "gdb_vecs.h"
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -1150,16 +1151,17 @@ extern void forget_cached_source_info (void);
 
 extern void select_source_symtab (struct symtab *);
 
-extern char **default_make_symbol_completion_list_break_on
+extern VEC (char_ptr) *default_make_symbol_completion_list_break_on
   (char *text, char *word, const char *break_on);
-extern char **default_make_symbol_completion_list (char *, char *);
-extern char **make_symbol_completion_list (char *, char *);
-extern char **make_symbol_completion_list_fn (struct cmd_list_element *,
-					      char *, char *);
+extern VEC (char_ptr) *default_make_symbol_completion_list (char *, char *);
+extern VEC (char_ptr) *make_symbol_completion_list (char *, char *);
+extern VEC (char_ptr) *make_symbol_completion_list_fn (struct cmd_list_element *,
+						       char *, char *);
 
-extern char **make_file_symbol_completion_list (char *, char *, char *);
+extern VEC (char_ptr) *make_file_symbol_completion_list (char *,
+							 char *, char *);
 
-extern char **make_source_files_completion_list (char *, char *);
+extern VEC (char_ptr) *make_source_files_completion_list (char *, char *);
 
 /* symtab.c */
 

@@ -254,7 +254,8 @@ static void
 complete_command (char *arg, int from_tty)
 {
   int argpoint;
-  char **completions, *point, *arg_prefix;
+  char *point, *arg_prefix;
+  VEC (char_ptr) *completions;
 
   dont_repeat ();
 
@@ -282,33 +283,30 @@ complete_command (char *arg, int from_tty)
 
   if (completions)
     {
-      int item, size;
+      int ix, size = VEC_length (char_ptr, completions);
+      char *item, *prev = NULL;
 
-      for (size = 0; completions[size]; ++size)
-	;
-      qsort (completions, size, sizeof (char *), compare_strings);
+      qsort (VEC_address (char_ptr, completions), size,
+	     sizeof (char *), compare_strings);
 
       /* We do extra processing here since we only want to print each
 	 unique item once.  */
-      item = 0;
-      while (item < size)
+      for (ix = 0; VEC_iterate (char_ptr, completions, ix, item); ++ix)
 	{
 	  int next_item;
 
-	  printf_unfiltered ("%s%s\n", arg_prefix, completions[item]);
-	  next_item = item + 1;
-	  while (next_item < size
-		 && ! strcmp (completions[item], completions[next_item]))
+	  if (prev == NULL || strcmp (item, prev) != 0)
 	    {
-	      xfree (completions[next_item]);
-	      ++next_item;
+	      printf_unfiltered ("%s%s\n", arg_prefix, item);
+	      xfree (prev);
+	      prev = item;
 	    }
-
-	  xfree (completions[item]);
-	  item = next_item;
+	  else
+	    xfree (item);
 	}
 
-      xfree (completions);
+      xfree (prev);
+      VEC_free (char_ptr, completions);
     }
 }
 

@@ -306,10 +306,10 @@ struct language_defn
     /* The list of characters forming word boundaries.  */
     char *(*la_word_break_characters) (void);
 
-    /* Should return a NULL terminated array of all symbols which
-       are possible completions for TEXT.  WORD is the entire command
-       on which the completion is being made.  */
-    char **(*la_make_symbol_completion_list) (char *text, char *word);
+    /* Should return a vector of all symbols which are possible
+       completions for TEXT.  WORD is the entire command on which the
+       completion is being made.  */
+    VEC (char_ptr) *(*la_make_symbol_completion_list) (char *text, char *word);
 
     /* The per-architecture (OS/ABI) language information.  */
     void (*la_language_arch_info) (struct gdbarch *,

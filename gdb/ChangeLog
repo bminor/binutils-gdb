@@ -1,5 +1,50 @@
 2012-06-13  Tom Tromey  <tromey@redhat.com>
 
+	* ada-lang.c (ada_make_symbol_completion_list): Return a VEC.
+	* breakpoint.c (catch_syscall_completer): Return a VEC.
+	* cli/cli-cmds.c (complete_command): Update.
+	* cli/cli-decode.c (complete_on_cmdlist): Return a VEC.
+	(complete_on_enum): Likewise.
+	* command.h: Include gdb_vecs.h.
+	(completer_ftype): Change return type.
+	(complete_on_cmdlist, complete_on_enum): Likewise.
+	* completer.c (noop_completer, filename_completer)
+	(location_completer): Return a VEC.
+	(add_struct_fields): Remove 'nextp' argument.  Change 'output'
+	to a VEC.
+	(expression_completer, complete_line_internal, complete_line)
+	(command_completer): Return a VEC.
+	(gdb_completion_word_break_characters, line_completion_function):
+	Update.
+	* completer.h: Include gdb_vecs.h.
+	(complete_line, noop_completer, filename_completer)
+	(expression_completer, location_completer, command_completer):
+	Update.
+	* f-lang.c (f_word_break_characters): Return a VEC.
+	* interps.c (interpreter_completer): Return a VEC.
+	* language.h (struct language_defn)
+	<la_make_symbol_completion_list>: Return a VEC.
+	* python/py-cmd.c (cmdpy_completer): Return a VEC.
+	* symtab.c (free_completion_list): Take a VEC.
+	(return_val_size, return_val_index): Remove.
+	(return_val): Now a VEC.
+	(completion_list_add_name): Update.
+	(default_make_symbol_completion_list_break_on)
+	(default_make_symbol_completion_list, make_symbol_completion_list)
+	(make_symbol_completion_list_fn, make_file_symbol_completion_list):
+	Return a VEC.
+	(add_filename_to_list): Update.
+	(struct add_partial_filename_data) <list_used, list_alloced>: Remove.
+	<list>: Now a VEC.
+	(maybe_add_partial_symtab_filename): Update.
+	(make_source_files_completion_list): Return a VEC.
+	* symtab.h (default_make_symbol_completion_list_break_on)
+	(default_make_symbol_completion_list, make_symbol_completion_list)
+	(make_symbol_completion_list_fn, make_file_symbol_completion_list)
+	(make_source_files_completion_list): Update.
+
+2012-06-13  Tom Tromey  <tromey@redhat.com>
+
 	* breakpoint.c (add_catch_command): Use completer_ftype.
 	* breakpoint.h: Include command.h.
 	(add_catch_command): Use completer_ftype.

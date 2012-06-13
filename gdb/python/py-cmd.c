@@ -206,12 +206,12 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 
 /* Called by gdb for command completion.  */
 
-static char **
+static VEC (char_ptr) *
 cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
 {
   cmdpy_object *obj = (cmdpy_object *) get_cmd_context (command);
   PyObject *textobj, *wordobj, *resultobj = NULL;
-  char **result = NULL;
+  VEC (char_ptr) *result = NULL;
   struct cleanup *cleanup;
 
   cleanup = ensure_python_env (get_current_arch (), current_language);
@@ -253,10 +253,10 @@ cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
       if (len < 0)
 	goto done;
 
-      result = (char **) xmalloc ((len + 1) * sizeof (char *));
       for (i = out = 0; i < len; ++i)
 	{
 	  PyObject *elt = PySequence_GetItem (resultobj, i);
+	  char *item;
 
 	  if (elt == NULL || ! gdbpy_is_string (elt))
 	    {
@@ -264,16 +264,15 @@ cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
 	      PyErr_Clear ();
 	      continue;
 	    }
-	  result[out] = python_string_to_host_string (elt);
-	  if (result[out] == NULL)
+	  item = python_string_to_host_string (elt);
+	  if (item == NULL)
 	    {
 	      /* Skip problem elements.  */
 	      PyErr_Clear ();
 	      continue;
 	    }
-	  ++out;
+	  VEC_safe_push (char_ptr, result, item);
 	}
-      result[out] = NULL;
     }
   else if (PyInt_Check (resultobj))
     {

@@ -73,8 +73,6 @@ struct interp
 
 /* Functions local to this file.  */
 static void initialize_interps (void);
-static char **interpreter_completer (struct cmd_list_element *cmd,
-				     char *text, char *word);
 
 /* The magic initialization routine for this module.  */
 
@@ -445,52 +443,37 @@ interpreter_exec_cmd (char *args, int from_tty)
 }
 
 /* List the possible interpreters which could complete the given text.  */
-static char **
+static VEC (char_ptr) *
 interpreter_completer (struct cmd_list_element *ignore, char *text, char *word)
 {
-  int alloced = 0;
   int textlen;
-  int num_matches;
-  char **matches;
+  VEC (char_ptr) *matches = NULL;
   struct interp *interp;
 
-  /* We expect only a very limited number of interpreters, so just
-     allocate room for all of them plus one for the last that must be NULL
-     to correctly end the list.  */
-  for (interp = interp_list; interp != NULL; interp = interp->next)
-    ++alloced;
-  matches = (char **) xcalloc (alloced + 1, sizeof (char *));
-
-  num_matches = 0;
   textlen = strlen (text);
   for (interp = interp_list; interp != NULL; interp = interp->next)
     {
       if (strncmp (interp->name, text, textlen) == 0)
 	{
-	  matches[num_matches] =
-	    (char *) xmalloc (strlen (word) + strlen (interp->name) + 1);
+	  char *match;
+
+	  match = (char *) xmalloc (strlen (word) + strlen (interp->name) + 1);
 	  if (word == text)
-	    strcpy (matches[num_matches], interp->name);
+	    strcpy (match, interp->name);
 	  else if (word > text)
 	    {
 	      /* Return some portion of interp->name.  */
-	      strcpy (matches[num_matches], interp->name + (word - text));
+	      strcpy (match, interp->name + (word - text));
 	    }
 	  else
 	    {
 	      /* Return some of text plus interp->name.  */
-	      strncpy (matches[num_matches], word, text - word);
-	      matches[num_matches][text - word] = '\0';
-	      strcat (matches[num_matches], interp->name);
+	      strncpy (match, word, text - word);
+	      match[text - word] = '\0';
+	      strcat (match, interp->name);
 	    }
-	  ++num_matches;
+	  VEC_safe_push (char_ptr, matches, match);
 	}
-    }
-
-  if (num_matches == 0)
-    {
-      xfree (matches);
-      matches = NULL;
     }
 
   return matches;

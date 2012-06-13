@@ -14578,12 +14578,12 @@ catching_syscall_number (int syscall_number)
 }
 
 /* Complete syscall names.  Used by "catch syscall".  */
-static char **
+static VEC (char_ptr) *
 catch_syscall_completer (struct cmd_list_element *cmd,
                          char *text, char *word)
 {
   const char **list = get_syscall_names ();
-  char **retlist
+  VEC (char_ptr) *retlist
     = (list == NULL) ? NULL : complete_on_enum (list, text, word);
 
   xfree (list);
