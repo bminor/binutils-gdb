@@ -1,5 +1,10 @@
 2012-06-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* inf-ttrace.c (_initialize_hppa_hpux_nat): Rename into
+	_initialize_inf_ttrace.
+
+2012-06-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* ia64-hpux-nat.c (_initialize_ia64_hpux_nat): Renames
 	_initialize_hppa_hpux_nat.
 

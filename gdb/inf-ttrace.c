@@ -1324,7 +1324,7 @@ inf_ttrace_target (void)
 
 
 /* Prevent warning from -Wmissing-prototypes.  */
-void _initialize_hppa_hpux_nat (void);
+void _initialize_inf_ttrace (void);
 
 void
 _initialize_inf_ttrace (void)
