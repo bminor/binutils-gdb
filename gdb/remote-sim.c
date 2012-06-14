@@ -1198,16 +1198,28 @@ simulator_command (char *args, int from_tty)
   registers_changed ();
 }
 
-static char **
+static VEC (char_ptr) *
 sim_command_completer (struct cmd_list_element *ignore, char *text, char *word)
 {
   struct sim_inferior_data *sim_data;
+  char **tmp;
+  int i;
+  VEC (char_ptr) *result;
 
   sim_data = inferior_data (current_inferior (), sim_inferior_data_key);
   if (sim_data == NULL || sim_data->gdbsim_desc == NULL)
     return NULL;
 
-  return sim_complete_command (sim_data->gdbsim_desc, text, word);
+  tmp = sim_complete_command (sim_data->gdbsim_desc, text, word);
+  if (tmp == NULL)
+    return NULL;
+
+  /* Transform the array into a VEC, and then free the array.  */
+  for (i = 0; tmp[i] != NULL; i++)
+    VEC_safe_push (char_ptr, result, tmp[i]);
+  xfree (tmp);
+
+  return result;
 }
 
 /* Check to see if a thread is still alive.  */
