@@ -1,3 +1,7 @@
+2012-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (set_tv_header): Handle link_info.pie.
+
 2012-06-11  Alan Modra  <amodra@gmail.com>
 
 	PR ld/14215
