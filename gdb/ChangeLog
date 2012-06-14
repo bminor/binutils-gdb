@@ -1,3 +1,13 @@
+2012-06-14  Doug Evans  <dje@google.com>
+
+	* dwarf2loc.c (debug_loc_kind): Add DEBUG_LOC_START_LENGTH.
+	(DEBUG_LOC_START_END): Renamed from DEBUG_LOC_NORMAL.
+	All uses updated.
+	(decode_debug_loc_dwo_addresses): New arg "byte_order".  All callers
+	updated.  Handle DEBUG_LOC_START_LENGTH.
+	(dwarf2_find_location_expression): Handle DEBUG_LOC_START_LENGTH.
+	(loclist_describe_location): Ditto.
+
 2012-06-14  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	PR backtrace/13866

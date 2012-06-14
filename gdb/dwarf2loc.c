@@ -75,7 +75,13 @@ enum debug_loc_kind
   /* This is followed by two unsigned LEB128 numbers that are indices into
      .debug_addr and specify the beginning and ending addresses, and then
      a normal location expression as in .debug_loc.  */
-  DEBUG_LOC_NORMAL = 2,
+  DEBUG_LOC_START_END = 2,
+
+  /* This is followed by an unsigned LEB128 number that is an index into
+     .debug_addr and specifies the beginning address, and a 4 byte unsigned
+     number that specifies the length, and then a normal location expression
+     as in .debug_loc.  */
+  DEBUG_LOC_START_LENGTH = 3,
 
   /* An internal value indicating there is insufficient data.  */
   DEBUG_LOC_BUFFER_OVERFLOW = -1,
@@ -124,7 +130,7 @@ decode_debug_loc_addresses (const gdb_byte *loc_ptr, const gdb_byte *buf_end,
   if (*low == 0 && *high == 0)
     return DEBUG_LOC_END_OF_LIST;
 
-  return DEBUG_LOC_NORMAL;
+  return DEBUG_LOC_START_END;
 }
 
 /* Decode the addresses in .debug_loc.dwo entry.
@@ -137,7 +143,8 @@ decode_debug_loc_dwo_addresses (struct dwarf2_per_cu_data *per_cu,
 				const gdb_byte *loc_ptr,
 				const gdb_byte *buf_end,
 				const gdb_byte **new_ptr,
-				CORE_ADDR *low, CORE_ADDR *high)
+				CORE_ADDR *low, CORE_ADDR *high,
+				enum bfd_endian byte_order)
 {
   uint64_t low_index, high_index;
 
@@ -157,7 +164,7 @@ decode_debug_loc_dwo_addresses (struct dwarf2_per_cu_data *per_cu,
       *high = dwarf2_read_addr_index (per_cu, high_index);
       *new_ptr = loc_ptr;
       return DEBUG_LOC_BASE_ADDRESS;
-    case DEBUG_LOC_NORMAL:
+    case DEBUG_LOC_START_END:
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &low_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
@@ -167,7 +174,18 @@ decode_debug_loc_dwo_addresses (struct dwarf2_per_cu_data *per_cu,
 	return DEBUG_LOC_BUFFER_OVERFLOW;
       *high = dwarf2_read_addr_index (per_cu, high_index);
       *new_ptr = loc_ptr;
-      return DEBUG_LOC_NORMAL;
+      return DEBUG_LOC_START_END;
+    case DEBUG_LOC_START_LENGTH:
+      loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &low_index);
+      if (loc_ptr == NULL)
+	return DEBUG_LOC_BUFFER_OVERFLOW;
+      *low = dwarf2_read_addr_index (per_cu, low_index);
+      if (loc_ptr + 4 > buf_end)
+	return DEBUG_LOC_BUFFER_OVERFLOW;
+      *high = *low;
+      *high += extract_unsigned_integer (loc_ptr, 4, byte_order);
+      *new_ptr = loc_ptr + 4;
+      return DEBUG_LOC_START_LENGTH;
     default:
       return DEBUG_LOC_INVALID_ENTRY;
     }
@@ -208,7 +226,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
       if (baton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (baton->per_cu,
 					       loc_ptr, buf_end, &new_ptr,
-					       &low, &high);
+					       &low, &high, byte_order);
       else
 	kind = decode_debug_loc_addresses (loc_ptr, buf_end, &new_ptr,
 					   &low, &high,
@@ -223,7 +241,8 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	case DEBUG_LOC_BASE_ADDRESS:
 	  base_address = high + base_offset;
 	  continue;
-	case DEBUG_LOC_NORMAL:
+	case DEBUG_LOC_START_END:
+	case DEBUG_LOC_START_LENGTH:
 	  break;
 	case DEBUG_LOC_BUFFER_OVERFLOW:
 	case DEBUG_LOC_INVALID_ENTRY:
@@ -3979,7 +3998,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
       if (dlbaton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (dlbaton->per_cu,
 					       loc_ptr, buf_end, &new_ptr,
-					       &low, &high);
+					       &low, &high, byte_order);
       else
 	kind = decode_debug_loc_addresses (loc_ptr, buf_end, &new_ptr,
 					   &low, &high,
@@ -3996,7 +4015,8 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	  fprintf_filtered (stream, _("  Base address %s"),
 			    paddress (gdbarch, base_address));
 	  continue;
-	case DEBUG_LOC_NORMAL:
+	case DEBUG_LOC_START_END:
+	case DEBUG_LOC_START_LENGTH:
 	  break;
 	case DEBUG_LOC_BUFFER_OVERFLOW:
 	case DEBUG_LOC_INVALID_ENTRY:
