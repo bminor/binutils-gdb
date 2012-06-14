@@ -4074,7 +4074,14 @@ handle_inferior_event (struct execution_control_state *ecs)
                && pc_at_non_inline_function (aspace,
                                              ecs->event_thread->prev_pc,
 					     &ecs->ws)))
-	skip_inline_frames (ecs->ptid);
+	{
+	  skip_inline_frames (ecs->ptid);
+
+	  /* Re-fetch current thread's frame in case that invalidated
+	     the frame cache.  */
+	  frame = get_current_frame ();
+	  gdbarch = get_frame_arch (frame);
+	}
     }
 
   if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP

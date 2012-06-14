@@ -1,3 +1,9 @@
+2012-06-14  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	PR backtrace/13866
+	* infrun.c (handle_inferior_event): Re-fetch frame and gdbarch
+	after hiding inline functions.
+
 2012-06-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* inf-ttrace.c (_initialize_hppa_hpux_nat): Rename into
