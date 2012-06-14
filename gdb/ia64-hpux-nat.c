@@ -679,10 +679,10 @@ ia64_hpux_mourn_inferior (struct target_ops *ops)
 }
 
 /* Prevent warning from -Wmissing-prototypes.  */
-void _initialize_hppa_hpux_nat (void);
+void _initialize_ia64_hpux_nat (void);
 
 void
-_initialize_hppa_hpux_nat (void)
+_initialize_ia64_hpux_nat (void)
 {
   struct target_ops *t;
 
