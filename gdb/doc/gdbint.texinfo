@@ -34,7 +34,7 @@ This file documents the internals of the GNU debugger @value{GDBN}.
 
 @titlepage
 @title @value{GDBN} Internals
-@subtitle{A guide to the internals of the GNU debugger}
+@subtitle A guide to the internals of the GNU debugger
 @author John Gilmore
 @author Cygnus Solutions
 @author Second Edition:

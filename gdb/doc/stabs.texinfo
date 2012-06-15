@@ -73,8 +73,8 @@ This document describes the stabs debugging format.
 * Questions::			Questions and anomalies
 * Stab Sections::		In some object file formats, stabs are
                                 in sections.
-* Symbol Types Index::          Index of symbolic stab symbol type names.
 * GNU Free Documentation License::  The license for this documentation
+* Symbol Types Index::          Index of symbolic stab symbol type names.
 @end menu
 @end ifnottex
 

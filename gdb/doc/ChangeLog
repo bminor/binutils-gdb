@@ -1,3 +1,22 @@
+2012-06-15  Patrice Dumas  <pertusus@free.fr>  (tiny change)
+
+	* gdb.texinfo (Summary): Add a link to "Free Documentation".
+	(Free Documentation): Add @node line.
+	(Continuing and Stepping) <advance location>: Use @item instead of
+	@itemx.
+	(Reverse Execution) <set exec-direction reverse>: Use @item instead of
+	@itemx.
+	(Embedded Processors): Put the link to "PA" to its correct place,
+	according to document structure.
+	(Python API): Put the link to "Lazy Strings In Python" to its
+	correct place.
+	(Index): Use @@ in @tex block to get a literal @.
+
+	* gdbint.texinfo: Fix the @subtitle line.
+
+	* stabs.texinfo (Top): Put the link to "Symbol Types Index" to its
+	correct place.
+
 2012-06-08  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (In-Process Agent): Add 'In-Process Agent
