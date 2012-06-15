@@ -1,3 +1,7 @@
+2012-06-15  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Correct indentation.
+
 2012-06-14  Doug Evans  <dje@google.com>
 
 	* dwarf2loc.c (debug_loc_kind): Add DEBUG_LOC_START_LENGTH.
