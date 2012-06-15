@@ -20,6 +20,7 @@
  * 
  */
 
+#include "config.h"
 #include "ansidecl.h"
 #include "gdb/callback.h"
 #include "gdb/remote-sim.h"

@@ -1,5 +1,9 @@
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* sys.h: Include "config.h".
+
+2012-06-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* config.in, configure: Regenerate.
 
 2012-05-24  Pedro Alves  <palves@redhat.com>
