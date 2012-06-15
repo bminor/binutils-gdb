@@ -2906,12 +2906,8 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
   if (per_cu->v.quick->symtab != NULL)
     return per_cu->v.quick->symtab->filename;
 
-  if (per_cu->is_debug_types)
-    init_cutu_and_read_dies (per_cu, 0, 0, dw2_get_primary_filename_reader,
-			     &filename);
-  else
-    init_cutu_and_read_dies_simple (per_cu, dw2_get_primary_filename_reader,
-				    &filename);
+  init_cutu_and_read_dies (per_cu, 0, 0, dw2_get_primary_filename_reader,
+			   &filename);
 
   return filename;
 }

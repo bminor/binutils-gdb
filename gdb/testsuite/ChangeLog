@@ -1,3 +1,7 @@
+2012-06-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/namespace.exp: Add "show lang" test.
+
 2012-06-15  Iain Sandoe <iain@codesourcery.com>
 
 	* gdb.base/list.exp (test_listsize): Remove $use_gdb_stub special

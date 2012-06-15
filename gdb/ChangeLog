@@ -1,3 +1,8 @@
+2012-06-15  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dw2_find_symbol_file): Unconditionally use
+	init_cutu_and_read_dies.
+
 2012-06-15  Iain Sandoe <iain@codesourcery.com>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.
