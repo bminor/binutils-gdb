@@ -1,3 +1,7 @@
+2012-06-15  Iain Sandoe <iain@codesourcery.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2012-06-15  Tom Tromey  <tromey@redhat.com>
 
 	* valops.c (value_find_oload_method_list): Now static.
