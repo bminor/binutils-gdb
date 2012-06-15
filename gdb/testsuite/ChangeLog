@@ -1,3 +1,8 @@
+2012-06-15  Iain Sandoe <iain@codesourcery.com>
+
+	* gdb.base/list.exp (test_listsize): Remove $use_gdb_stub special
+	case. (top level): Use gdb_file_cmd instead of gdb_load.
+
 2012-06-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR tdep/14222

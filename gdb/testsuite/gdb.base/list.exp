@@ -77,7 +77,7 @@ proc set_listsize { arg } {
 #
 
 proc test_listsize {} {
-    global gdb_prompt use_gdb_stub
+    global gdb_prompt
     global hp_cc_compiler
     global hp_aCC_compiler
 
@@ -86,16 +86,8 @@ proc test_listsize {} {
     gdb_test "show listsize" "Number of source lines gdb will list by default is 10.*" "show default list size"
     
     # Show the default lines
-    # Note that remote targets that have debugging info for _start available will
-    # list the lines there instead of main, so we skip this test for remote targets.
-    # The second case is for optimized code, it is still correct.
-    
-    if $use_gdb_stub {
-	runto_main;
-	unsupported "list default lines around main";
-    } else {
-	gdb_test "list" "(1\[ \t\]+#include \"list0.h\".*7\[ \t\]+x = 0;\r\n.*10\[ \t\]+foo .x\[+)\]+;)" "list default lines around main"
-    }
+
+    gdb_test "list" "(1\[ \t\]+#include \"list0.h\".*7\[ \t\]+x = 0;\r\n.*10\[ \t\]+foo .x\[+)\]+;)" "list default lines around main"
 
     # Ensure we can limit printouts to one line
 
@@ -518,7 +510,7 @@ proc test_forward_search {} {
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+gdb_file_cmd ${binfile}
 
 gdb_test_no_output "set width 0"
 
