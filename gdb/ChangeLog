@@ -1,5 +1,10 @@
 2012-06-15  Tom Tromey  <tromey@redhat.com>
 
+	* valops.c (value_find_oload_method_list): Now static.
+	* value.h (value_find_oload_method_list): Don't declare.
+
+2012-06-15  Tom Tromey  <tromey@redhat.com>
+
 	* valops.c (find_overload_match): Use value_ind.
 
 2012-06-15  Maciej W. Rozycki  <macro@codesourcery.com>

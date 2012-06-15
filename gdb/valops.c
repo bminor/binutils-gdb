@@ -2512,7 +2512,7 @@ find_method_list (struct value **argp, const char *method,
       method.
    BOFFSET is the offset of the base subobject which defines the method.  */
 
-struct fn_field *
+static struct fn_field *
 value_find_oload_method_list (struct value **argp, const char *method,
 			      int offset, int *num_fns, 
 			      struct type **basetype, int *boffset)
