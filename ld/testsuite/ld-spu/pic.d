@@ -55,7 +55,7 @@ Disassembly of section \.text:
 			58: SPU_ADDR18	glob
   5c:	18 1f 84 06 	a	\$6,\$8,\$126
 			5c: SPU_ADD_PIC	glob
-  60:	42 00 90 09 	ila	\$9,120 <__bss_start>
+  60:	42 00 90 09 	ila	\$9,120 .*
 			60: SPU_ADDR18	_end
   64:	18 1f 84 89 	a	\$9,\$9,\$126
 			64: SPU_ADD_PIC	_end

@@ -31,12 +31,12 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .*: 00001048 +0 +NOTYPE +LOCAL +DEFAULT +2 sec4
 .* FILE +LOCAL +DEFAULT +ABS .*
 .*: 000010e0 +0 +NOTYPE +GLOBAL +DEFAULT +.* ___dtors
-.*: 000010e0 +0 +NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
+.*: 000010e0 +0 +NOTYPE +GLOBAL +DEFAULT +2 __bss_start
 .*: 000010e0 +0 +NOTYPE +GLOBAL +DEFAULT +.* ___ctors_end
 .*: 00001004 +0 +NOTYPE +GLOBAL +DEFAULT +2 diversion2
 .*: 000010e0 +0 +NOTYPE +GLOBAL +DEFAULT +.* ___ctors
-.*: 000010e0 +0 +NOTYPE +GLOBAL +DEFAULT +ABS _edata
-.*: 000010e0 +0 +NOTYPE +GLOBAL +DEFAULT +ABS _end
+.*: 000010e0 +0 +NOTYPE +GLOBAL +DEFAULT +2 _edata
+.*: 000010e0 +0 +NOTYPE +GLOBAL +DEFAULT +2 _end
 .*: 00001000 +0 +NOTYPE +GLOBAL +DEFAULT +\[<other>: 4\] +1 start
 .*: 00080000 +0 +NOTYPE +GLOBAL +DEFAULT +3 _stack
 .*: 000010e0 +0 +NOTYPE +GLOBAL +DEFAULT +.* ___dtors_end

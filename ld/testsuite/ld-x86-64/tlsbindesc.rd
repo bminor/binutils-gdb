@@ -64,11 +64,11 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
  +[0-9]+: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND *
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG5
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG2
- +[0-9]+: 0+[0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
+ +[0-9]+: 0+[0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +11 __bss_start
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG6
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG1
- +[0-9]+: 0+[0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +ABS _edata
- +[0-9]+: 0+[0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +ABS _end
+ +[0-9]+: 0+[0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +11 _edata
+ +[0-9]+: 0+[0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +11 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
@@ -124,7 +124,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 0+4c +0 +TLS +GLOBAL +HIDDEN +7 sh4
  +[0-9]+: 0+78 +0 +TLS +GLOBAL +DEFAULT +8 bg7
  +[0-9]+: 0+50 +0 +TLS +GLOBAL +HIDDEN +7 sh5
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
+ +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +11 __bss_start
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +UND sG6
  +[0-9]+: 0+401000 +0 +FUNC +GLOBAL +DEFAULT +6 fn2
  +[0-9]+: 0+4 +0 +TLS +GLOBAL +DEFAULT +7 sg2
@@ -132,8 +132,8 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 0+40 +0 +TLS +GLOBAL +HIDDEN +7 sh1
  +[0-9]+: 0+14 +0 +TLS +GLOBAL +DEFAULT +7 sg6
  +[0-9]+: 0+18 +0 +TLS +GLOBAL +DEFAULT +7 sg7
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +ABS _edata
- +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +ABS _end
+ +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +11 _edata
+ +[0-9]+: [0-9a-f]+ +0 +NOTYPE +GLOBAL +DEFAULT +11 _end
  +[0-9]+: 0+44 +0 +TLS +GLOBAL +HIDDEN +7 sh2
  +[0-9]+: 0+54 +0 +TLS +GLOBAL +HIDDEN +7 sh6
  +[0-9]+: 0+64 +0 +TLS +GLOBAL +DEFAULT +8 bg2

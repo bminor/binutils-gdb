@@ -59,10 +59,10 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* SECTION +LOCAL +DEFAULT +8 *
 .* FUNC +GLOBAL +DEFAULT +5 fn3
 .* TLS +GLOBAL +DEFAULT +UND sg1
-.* NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
+.* NOTYPE +GLOBAL +DEFAULT +8 __bss_start
 .* TLS +GLOBAL +DEFAULT +UND sg2
-.* NOTYPE +GLOBAL +DEFAULT +ABS _edata
-.* NOTYPE +GLOBAL +DEFAULT +ABS _end
+.* NOTYPE +GLOBAL +DEFAULT +8 _edata
+.* NOTYPE +GLOBAL +DEFAULT +8 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
@@ -91,7 +91,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* OBJECT +LOCAL +DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
 .* FUNC +GLOBAL +DEFAULT +5 fn3
 .* TLS +GLOBAL +DEFAULT +UND sg1
-.* NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
+.* NOTYPE +GLOBAL +DEFAULT +8 __bss_start
 .* TLS +GLOBAL +DEFAULT +UND sg2
-.* NOTYPE +GLOBAL +DEFAULT +ABS _edata
-.* NOTYPE +GLOBAL +DEFAULT +ABS _end
+.* NOTYPE +GLOBAL +DEFAULT +8 _edata
+.* NOTYPE +GLOBAL +DEFAULT +8 _end

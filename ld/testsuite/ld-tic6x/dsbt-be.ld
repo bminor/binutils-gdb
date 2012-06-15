@@ -56,7 +56,7 @@ SECTIONS
   .rela.plt       : { *(.rela.plt) }
   .plt            : { *(.plt) }
   .text : { *(.text*) }
-  PROVIDE_HIDDEN (__c6xabi_DSBT_BASE = .);
+  . = .; PROVIDE_HIDDEN (__c6xabi_DSBT_BASE = .);
   .got   : { *(.dsbt) *(.got.plt) *(.igot.plt) *(.got) *(.igot) }
   .neardata : { *(.neardata .neardata.* .gnu.linkonce.s.*) }
   .rodata   : { *(.rodata .rodata.*) }

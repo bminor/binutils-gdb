@@ -51,7 +51,7 @@ Disassembly of section \.text:
 
 Disassembly of section \.branch_lt:
 
-0*157f00e8 <\.branch_lt>:
+0*157f00e8 .*:
 [0-9a-f	 ]*:	00 00 00 00 .*
 [0-9a-f	 ]*: R_PPC64_RELATIVE	\*ABS\*\+0x13bf00e0
 [0-9a-f	 ]*:	13 bf 00 e0 .*

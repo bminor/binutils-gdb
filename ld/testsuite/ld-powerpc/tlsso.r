@@ -80,9 +80,9 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL +DEFAULT +6 _start
 .* TLS +GLOBAL +DEFAULT +8 ld2
 .* TLS +GLOBAL +DEFAULT +8 ld1
-.* NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
-.* NOTYPE +GLOBAL +DEFAULT +ABS _edata
-.* NOTYPE +GLOBAL +DEFAULT +ABS _end
+.* NOTYPE +GLOBAL +DEFAULT +11 __bss_start
+.* NOTYPE +GLOBAL +DEFAULT +10 _edata
+.* NOTYPE +GLOBAL +DEFAULT +11 _end
 .* TLS +GLOBAL +DEFAULT +8 gd0
 .* TLS +GLOBAL +DEFAULT +8 ie0
 
@@ -122,8 +122,8 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* NOTYPE +GLOBAL +DEFAULT +6 _start
 .* TLS +GLOBAL +DEFAULT +8 ld2
 .* TLS +GLOBAL +DEFAULT +8 ld1
-.* NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
-.* NOTYPE +GLOBAL +DEFAULT +ABS _edata
-.* NOTYPE +GLOBAL +DEFAULT +ABS _end
+.* NOTYPE +GLOBAL +DEFAULT +11 __bss_start
+.* NOTYPE +GLOBAL +DEFAULT +10 _edata
+.* NOTYPE +GLOBAL +DEFAULT +11 _end
 .* TLS +GLOBAL +DEFAULT +8 gd0
 .* TLS +GLOBAL +DEFAULT +8 ie0

@@ -17,9 +17,9 @@ SYMBOL TABLE:
 0+ l    df \*ABS\*	0+ .*
 0+ l       \.init	0+ _start
 0+ l    df \*ABS\*	0+ .*
-2000000000000000 l       \*ABS\*	0+ __bss_start
-2000000000000000 l       \*ABS\*	0+ _edata
-2000000000000000 l       \*ABS\*	0+ _end
+2000000000000000 l       \.text	0+ __bss_start
+2000000000000000 l       \.text	0+ _edata
+2000000000000000 l       \.text	0+ _end
 0+10 l       \.text	0+ _start\.
 0+14 g       \.text	0+ x
 0+10 g       \.text	0+ x2
