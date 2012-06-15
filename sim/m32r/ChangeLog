@@ -1,3 +1,7 @@
+2012-06-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* config.in, configure: Regenerate.
+
 2012-03-25  Mike Frysinger  <vapier@gentoo.org>
 
 	* traps-linux.c (sim_core_trans_addr): Delete prototype.

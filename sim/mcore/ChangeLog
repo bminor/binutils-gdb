@@ -1,3 +1,7 @@
+2012-06-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* config.in, configure: Regenerate.
+
 2012-05-20  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR 14072

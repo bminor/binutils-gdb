@@ -624,6 +624,7 @@ MAKE
 CCDEPMODE
 DEPDIR
 am__leading_dot
+PACKAGE
 RANLIB
 AR
 HDEFINES
@@ -4069,6 +4070,17 @@ esac
 else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
+
+
+# Some of the common include files depend on bfd.h, and bfd.h checks
+# that config.h is included first by testing that the PACKAGE macro
+# is defined.
+PACKAGE=sim
+
+cat >>confdefs.h <<_ACEOF
+#define PACKAGE "$PACKAGE"
+_ACEOF
+
 
 
 # Dependency checking.

@@ -1,3 +1,7 @@
+2012-06-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure: Regenerate.
+
 2012-06-06  Michael Eager  <eager@eagercon.com>
 
 	* microblaze/interp.c (config.h): Add #include.

@@ -3768,17 +3768,17 @@ subdirs="$subdirs arm"
 
        sim_testsuite=yes
        ;;
-   rx-*-*)
-
-  sim_arch=rx
-  subdirs="$subdirs rx"
-
-
-       ;;
    rl78-*-*)
 
   sim_arch=rl78
   subdirs="$subdirs rl78"
+
+
+       ;;
+   rx-*-*)
+
+  sim_arch=rx
+  subdirs="$subdirs rx"
 
 
        ;;

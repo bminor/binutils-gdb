@@ -47,6 +47,13 @@ AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
 
+# Some of the common include files depend on bfd.h, and bfd.h checks
+# that config.h is included first by testing that the PACKAGE macro
+# is defined.
+PACKAGE=sim
+AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE", [Name of this package. ])
+AC_SUBST(PACKAGE)
+
 # Dependency checking.
 ZW_CREATE_DEPDIR
 ZW_PROG_COMPILER_DEPENDENCIES([CC])

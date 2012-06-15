@@ -82,6 +82,9 @@
 /* Define to 1 if you have the `__setfpucw' function. */
 #undef HAVE___SETFPUCW
 
+/* Name of this package. */
+#undef PACKAGE
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 

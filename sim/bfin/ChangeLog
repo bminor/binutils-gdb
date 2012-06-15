@@ -1,3 +1,7 @@
+2012-06-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* config.in, configure: Regenerate.
+
 2012-04-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (SIM_AC_OPTION_HARDWARE): Add bfin_pint.

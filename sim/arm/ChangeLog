@@ -1,3 +1,7 @@
+2012-06-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* config.in, configure: Regenerate.
+
 2012-06-13  Nick Clifton  <nickc@redhat.com>
 
 	* wrapper.c (sim_create_inferior): Treat WMMX2 binaries as iWMMXt

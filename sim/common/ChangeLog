@@ -1,3 +1,8 @@
+2012-06-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* acinclude.m4 (SIM_AC_COMMON): Define PACKAGE.
+	* config.in, configure: Regenerate.
+
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
 	* sim-signal.h (sim_signal_to_target): Rename to ...

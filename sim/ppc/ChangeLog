@@ -1,3 +1,7 @@
+2012-06-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure: Regenerate.
+
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/7205
