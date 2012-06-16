@@ -1,3 +1,9 @@
+2012-06-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-linux-nat.c (AMD64_LINUX_X32_DS): New.
+	(amd64_linux_read_description): Check DS segment register for
+	x32 process.
+
 2012-06-15  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dw2_find_symbol_file): Unconditionally use
