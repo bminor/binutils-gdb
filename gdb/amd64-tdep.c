@@ -1861,6 +1861,188 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
   return min (pc + offset + 2, current_pc);
 }
 
+/* Similar to amd64_analyze_stack_align for x32.  */
+
+static CORE_ADDR
+amd64_x32_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
+			       struct amd64_frame_cache *cache) 
+{
+  /* There are 2 code sequences to re-align stack before the frame
+     gets set up:
+
+	1. Use a caller-saved saved register:
+
+		leaq  8(%rsp), %reg
+		andq  $-XXX, %rsp
+		pushq -8(%reg)
+
+	   or
+
+		[addr32] leal  8(%rsp), %reg
+		andl  $-XXX, %esp
+		[addr32] pushq -8(%reg)
+
+	2. Use a callee-saved saved register:
+
+		pushq %reg
+		leaq  16(%rsp), %reg
+		andq  $-XXX, %rsp
+		pushq -8(%reg)
+
+	   or
+
+		pushq %reg
+		[addr32] leal  16(%rsp), %reg
+		andl  $-XXX, %esp
+		[addr32] pushq -8(%reg)
+
+     "andq $-XXX, %rsp" can be either 4 bytes or 7 bytes:
+     
+     	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
+     	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
+
+     "andl $-XXX, %esp" can be either 3 bytes or 6 bytes:
+     
+     	0x83 0xe4 0xf0			andl $-16, %esp
+     	0x81 0xe4 0x00 0xff 0xff 0xff	andl $-256, %esp
+   */
+
+  gdb_byte buf[19];
+  int reg, r;
+  int offset, offset_and;
+
+  if (target_read_memory (pc, buf, sizeof buf))
+    return pc;
+
+  /* Skip optional addr32 prefix.  */
+  offset = buf[0] == 0x67 ? 1 : 0;
+
+  /* Check caller-saved saved register.  The first instruction has
+     to be "leaq 8(%rsp), %reg" or "leal 8(%rsp), %reg".  */
+  if (((buf[offset] & 0xfb) == 0x48 || (buf[offset] & 0xfb) == 0x40)
+      && buf[offset + 1] == 0x8d
+      && buf[offset + 3] == 0x24
+      && buf[offset + 4] == 0x8)
+    {
+      /* MOD must be binary 10 and R/M must be binary 100.  */
+      if ((buf[offset + 2] & 0xc7) != 0x44)
+	return pc;
+
+      /* REG has register number.  */
+      reg = (buf[offset + 2] >> 3) & 7;
+
+      /* Check the REX.R bit.  */
+      if ((buf[offset] & 0x4) != 0)
+	reg += 8;
+
+      offset += 5;
+    }
+  else
+    {
+      /* Check callee-saved saved register.  The first instruction
+	 has to be "pushq %reg".  */
+      reg = 0;
+      if ((buf[offset] & 0xf6) == 0x40
+	  && (buf[offset + 1] & 0xf8) == 0x50)
+	{
+	  /* Check the REX.B bit.  */
+	  if ((buf[offset] & 1) != 0)
+	    reg = 8;
+
+	  offset += 1;
+	}
+      else if ((buf[offset] & 0xf8) != 0x50)
+	return pc;
+
+      /* Get register.  */
+      reg += buf[offset] & 0x7;
+
+      offset++;
+
+      /* Skip optional addr32 prefix.  */
+      if (buf[offset] == 0x67)
+	offset++;
+
+      /* The next instruction has to be "leaq 16(%rsp), %reg" or
+	 "leal 16(%rsp), %reg".  */
+      if (((buf[offset] & 0xfb) != 0x48 && (buf[offset] & 0xfb) != 0x40)
+	  || buf[offset + 1] != 0x8d
+	  || buf[offset + 3] != 0x24
+	  || buf[offset + 4] != 0x10)
+	return pc;
+
+      /* MOD must be binary 10 and R/M must be binary 100.  */
+      if ((buf[offset + 2] & 0xc7) != 0x44)
+	return pc;
+      
+      /* REG has register number.  */
+      r = (buf[offset + 2] >> 3) & 7;
+
+      /* Check the REX.R bit.  */
+      if ((buf[offset] & 0x4) != 0)
+	r += 8;
+
+      /* Registers in pushq and leaq have to be the same.  */
+      if (reg != r)
+	return pc;
+
+      offset += 5;
+    }
+
+  /* Rigister can't be %rsp nor %rbp.  */
+  if (reg == 4 || reg == 5)
+    return pc;
+
+  /* The next instruction may be "andq $-XXX, %rsp" or
+     "andl $-XXX, %esp".  */
+  if (buf[offset] != 0x48)
+    offset--;
+
+  if (buf[offset + 2] != 0xe4
+      || (buf[offset + 1] != 0x81 && buf[offset + 1] != 0x83))
+    return pc;
+
+  offset_and = offset;
+  offset += buf[offset + 1] == 0x81 ? 7 : 4;
+
+  /* Skip optional addr32 prefix.  */
+  if (buf[offset] == 0x67)
+    offset++;
+
+  /* The next instruction has to be "pushq -8(%reg)".  */
+  r = 0;
+  if (buf[offset] == 0xff)
+    offset++;
+  else if ((buf[offset] & 0xf6) == 0x40
+	   && buf[offset + 1] == 0xff)
+    {
+      /* Check the REX.B bit.  */
+      if ((buf[offset] & 0x1) != 0)
+	r = 8;
+      offset += 2;
+    }
+  else
+    return pc;
+
+  /* 8bit -8 is 0xf8.  REG must be binary 110 and MOD must be binary
+     01.  */
+  if (buf[offset + 1] != 0xf8
+      || (buf[offset] & 0xf8) != 0x70)
+    return pc;
+
+  /* R/M has register.  */
+  r += buf[offset] & 7;
+
+  /* Registers in leaq and pushq have to be the same.  */
+  if (reg != r)
+    return pc;
+
+  if (current_pc > pc + offset_and)
+    cache->saved_sp_reg = amd64_arch_reg_to_regnum (reg);
+
+  return min (pc + offset + 2, current_pc);
+}
+
 /* Do a limited analysis of the prologue at PC and update CACHE
    accordingly.  Bail out early if CURRENT_PC is reached.  Return the
    address where the analysis stopped.
@@ -1898,7 +2080,10 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
   if (current_pc <= pc)
     return current_pc;
 
-  pc = amd64_analyze_stack_align (pc, current_pc, cache);
+  if (gdbarch_ptr_bit (gdbarch) == 32)
+    pc = amd64_x32_analyze_stack_align (pc, current_pc, cache);
+  else
+    pc = amd64_analyze_stack_align (pc, current_pc, cache);
 
   op = read_memory_unsigned_integer (pc, 1, byte_order);
 
