@@ -1,3 +1,7 @@
+2012-06-15  Hui Zhu  <hui_zhu@mentor.com>
+
+	* tracepoint.c (tfile_xfer_partial): Add a lseek.
+
 2012-06-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* amd64-linux-nat.c (ps_get_thread_area): Check bits_per_word
