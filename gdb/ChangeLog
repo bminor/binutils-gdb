@@ -1,5 +1,17 @@
 2012-06-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* amd64-linux-nat.c (ps_get_thread_area): Check bits_per_word
+	instead of gdbarch_ptr_bit.
+	* amd64-nat.c (amd64_native_gregset_reg_offset): Likewise.
+	(amd64_supply_native_gregset): Likewise.
+	(amd64_collect_native_gregset): Likewise.
+	* amd64-tdep.c (amd64_supply_fxsave): Likewise.
+	(amd64_supply_xsave): Likewise.
+	(amd64_collect_fxsave): Likewise.
+	(amd64_collect_xsave): Likewise.
+
+2012-06-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* amd64-linux-nat.c (AMD64_LINUX_X32_DS): New.
 	(amd64_linux_read_description): Check DS segment register for
 	x32 process.

@@ -2802,7 +2802,8 @@ amd64_supply_fxsave (struct regcache *regcache, int regnum,
 
   i387_supply_fxsave (regcache, regnum, fxsave);
 
-  if (fxsave && gdbarch_ptr_bit (gdbarch) == 64)
+  if (fxsave
+      && gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 64)
     {
       const gdb_byte *regs = fxsave;
 
@@ -2824,7 +2825,8 @@ amd64_supply_xsave (struct regcache *regcache, int regnum,
 
   i387_supply_xsave (regcache, regnum, xsave);
 
-  if (xsave && gdbarch_ptr_bit (gdbarch) == 64)
+  if (xsave
+      && gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 64)
     {
       const gdb_byte *regs = xsave;
 
@@ -2852,7 +2854,7 @@ amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 
   i387_collect_fxsave (regcache, regnum, fxsave);
 
-  if (gdbarch_ptr_bit (gdbarch) == 64)
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 64)
     {
       if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
 	regcache_raw_collect (regcache, I387_FISEG_REGNUM (tdep), regs + 12);
@@ -2873,7 +2875,7 @@ amd64_collect_xsave (const struct regcache *regcache, int regnum,
 
   i387_collect_xsave (regcache, regnum, xsave, gcore);
 
-  if (gdbarch_ptr_bit (gdbarch) == 64)
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 64)
     {
       if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
 	regcache_raw_collect (regcache, I387_FISEG_REGNUM (tdep),
