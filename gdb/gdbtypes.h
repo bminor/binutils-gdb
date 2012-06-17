@@ -23,6 +23,7 @@
 #define GDBTYPES_H 1
 
 #include "hashtab.h"
+#include "dwarf2expr.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -915,6 +916,17 @@ struct func_type
     struct call_site *tail_call_list;
   };
 
+/* struct call_site_parameter can be referenced in callees by several ways.  */
+
+enum call_site_parameter_kind
+{
+  /* Use field call_site_parameter.u.dwarf_reg.  */
+  CALL_SITE_PARAMETER_DWARF_REG,
+
+  /* Use field call_site_parameter.u.fb_offset.  */
+  CALL_SITE_PARAMETER_FB_OFFSET
+};
+
 /* A place where a function gets called from, represented by
    DW_TAG_GNU_call_site.  It can be looked up from symtab->call_site_htab.  */
 
@@ -948,15 +960,19 @@ struct call_site
     /* Describe DW_TAG_GNU_call_site's DW_TAG_formal_parameter.  */
     struct call_site_parameter
       {
-	/* DW_TAG_formal_parameter's DW_AT_location's DW_OP_regX as DWARF
-	   register number, for register passed parameters.  If -1 then use
-	   fb_offset.  */
-	int dwarf_reg;
+	ENUM_BITFIELD (call_site_parameter_kind) kind : 2;
 
-	/* Offset from the callee's frame base, for stack passed parameters.
-	   This equals offset from the caller's stack pointer.  Valid only if
-	   DWARF_REGNUM is -1.  */
-	CORE_ADDR fb_offset;
+	union call_site_parameter_u
+	  {
+	    /* DW_TAG_formal_parameter's DW_AT_location's DW_OP_regX as DWARF
+	       register number, for register passed parameters.  */
+	    int dwarf_reg;
+
+	    /* Offset from the callee's frame base, for stack passed parameters.
+	       This equals offset from the caller's stack pointer.  */
+	    CORE_ADDR fb_offset;
+	  }
+	u;
 
 	/* DW_TAG_formal_parameter's DW_AT_GNU_call_site_value.  It is never
 	   NULL.  */

@@ -1,3 +1,31 @@
+2012-06-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup: Generalize call_site.parameter key.
+	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_entry_value>: Remove
+	variable dwarf_reg.  New variable kind_u.  Update parameters to
+	push_dwarf_reg_entry_value.
+	(ctx_no_push_dwarf_reg_entry_value): Update parameters.
+	* dwarf2expr.h (enum call_site_parameter_kind)
+	(union call_site_parameter_u): Forward declarations.
+	(struct dwarf_expr_context_funcs): Update parameters and their
+	description for push_dwarf_reg_entry_value.
+	(ctx_no_push_dwarf_reg_entry_value): Update parameters.
+	* dwarf2loc.c (call_site_parameter_matches): New function.
+	(dwarf_expr_reg_to_entry_parameter): Update parameters and their
+	description.  Use call_site_parameter_matches.
+	(dwarf_expr_push_dwarf_reg_entry_value, value_of_dwarf_reg_entry):
+	Update parameters and their description.
+	(value_of_dwarf_block_entry): Remove variables dwarf_reg and fb_offset.
+	New variable kind_u.  Adjust the caller for updated parameters.
+	(needs_dwarf_reg_entry_value): Update parameters.
+	* dwarf2read.c (read_call_site_scope): New variable loc.  Use it
+	instead of attr.  Update for the changed fields of struct
+	call_site_parameter.
+	* gdbtypes.h: Include dwarf2expr.h.
+	(enum call_site_parameter_kind): New.
+	(struct call_site.parameter): New field kind.  Wrap dwarf_reg and
+	fb_offset into new union u.
+
 2012-06-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* amd64-tdep.c (amd64_x32_analyze_stack_align): New function.

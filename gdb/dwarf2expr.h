@@ -26,6 +26,8 @@
 #include "leb128.h"
 
 struct dwarf_expr_context;
+enum call_site_parameter_kind;
+union call_site_parameter_u;
 
 /* Offset relative to the start of its containing CU (compilation unit).  */
 typedef struct
@@ -77,14 +79,12 @@ struct dwarf_expr_context_funcs
   struct type *(*get_base_type) (struct dwarf_expr_context *ctx, cu_offset die);
 
   /* Push on DWARF stack an entry evaluated for DW_TAG_GNU_call_site's
-     DWARF_REG/FB_OFFSET at the caller of specified BATON.  If DWARF register
-     number DWARF_REG specifying the push_dwarf_reg_entry_value parameter is
-     not -1 FB_OFFSET is ignored.  Otherwise FB_OFFSET specifies stack
-     parameter offset against caller's stack pointer (which equals the callee's
-     frame base).  If DEREF_SIZE is not -1 then use
-     DW_AT_GNU_call_site_data_value instead of DW_AT_GNU_call_site_value.  */
+     parameter matching KIND and KIND_U at the caller of specified BATON.
+     If DEREF_SIZE is not -1 then use DW_AT_GNU_call_site_data_value instead of
+     DW_AT_GNU_call_site_value.  */
   void (*push_dwarf_reg_entry_value) (struct dwarf_expr_context *ctx,
-				      int dwarf_reg, CORE_ADDR fb_offset,
+				      enum call_site_parameter_kind kind,
+				      union call_site_parameter_u kind_u,
 				      int deref_size);
 
   /* Return the address indexed by DW_OP_GNU_addr_index.
@@ -289,7 +289,8 @@ void ctx_no_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset);
 struct type *ctx_no_get_base_type (struct dwarf_expr_context *ctx,
 				   cu_offset die);
 void ctx_no_push_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
-					int dwarf_reg, CORE_ADDR fb_offset,
+					enum call_site_parameter_kind kind,
+					union call_site_parameter_u kind_u,
 					int deref_size);
 CORE_ADDR ctx_no_get_addr_index (void *baton, unsigned int index);
 
