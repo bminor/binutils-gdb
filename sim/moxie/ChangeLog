@@ -1,3 +1,7 @@
+2012-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include config.h first.  Also include fcntl.h directly.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* config.in, configure: Regenerate.
