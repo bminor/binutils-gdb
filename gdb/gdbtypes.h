@@ -924,7 +924,10 @@ enum call_site_parameter_kind
   CALL_SITE_PARAMETER_DWARF_REG,
 
   /* Use field call_site_parameter.u.fb_offset.  */
-  CALL_SITE_PARAMETER_FB_OFFSET
+  CALL_SITE_PARAMETER_FB_OFFSET,
+
+  /* Use field call_site_parameter.u.param_offset.  */
+  CALL_SITE_PARAMETER_PARAM_OFFSET
 };
 
 /* A place where a function gets called from, represented by
@@ -971,6 +974,11 @@ struct call_site
 	    /* Offset from the callee's frame base, for stack passed parameters.
 	       This equals offset from the caller's stack pointer.  */
 	    CORE_ADDR fb_offset;
+
+	    /* Offset relative to the start of this PER_CU to
+	       DW_TAG_formal_parameter which is referenced by both caller and
+	       the callee.  */
+	    cu_offset param_offset;
 	  }
 	u;
 

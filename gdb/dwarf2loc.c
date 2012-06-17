@@ -962,6 +962,8 @@ call_site_parameter_matches (struct call_site_parameter *parameter,
 	return kind_u.dwarf_reg == parameter->u.dwarf_reg;
       case CALL_SITE_PARAMETER_FB_OFFSET:
 	return kind_u.fb_offset == parameter->u.fb_offset;
+      case CALL_SITE_PARAMETER_PARAM_OFFSET:
+	return kind_u.param_offset.cu_off == parameter->u.param_offset.cu_off;
       }
   return 0;
 }
@@ -2397,6 +2399,9 @@ needs_dwarf_reg_entry_value (struct dwarf_expr_context *ctx,
   struct needs_frame_baton *nf_baton = ctx->baton;
 
   nf_baton->needs_frame = 1;
+
+  /* The expression may require some stub values on DWARF stack.  */
+  dwarf_expr_push_address (ctx, 0, 0);
 }
 
 /* DW_OP_GNU_addr_index doesn't require a frame.  */

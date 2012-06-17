@@ -1,3 +1,9 @@
+2012-06-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/amd64-entry-value-param.S: New file.
+	* gdb.arch/amd64-entry-value-param.c: New file.
+	* gdb.arch/amd64-entry-value-param.exp: New file.
+
 2012-06-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/namespace.exp: Add "show lang" test.

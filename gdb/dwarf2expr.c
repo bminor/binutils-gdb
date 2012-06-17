@@ -1392,6 +1392,20 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		     "or for DW_OP_breg*(0)+DW_OP_deref*"));
 	  }
 
+	case DW_OP_GNU_parameter_ref:
+	  {
+	    union call_site_parameter_u kind_u;
+
+	    kind_u.param_offset.cu_off = extract_unsigned_integer (op_ptr, 4,
+								   byte_order);
+	    op_ptr += 4;
+	    ctx->funcs->push_dwarf_reg_entry_value (ctx,
+					       CALL_SITE_PARAMETER_PARAM_OFFSET,
+						    kind_u,
+						    -1 /* deref_size */);
+	  }
+	  goto no_push;
+
 	case DW_OP_GNU_const_type:
 	  {
 	    cu_offset type_die;

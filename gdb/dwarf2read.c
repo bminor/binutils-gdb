@@ -7812,7 +7812,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
        child_die = sibling_die (child_die))
     {
       struct call_site_parameter *parameter;
-      struct attribute *loc;
+      struct attribute *loc, *origin;
 
       if (child_die->tag != DW_TAG_GNU_call_site_parameter)
 	{
@@ -7823,11 +7823,23 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       gdb_assert (call_site->parameter_count < nparams);
       parameter = &call_site->parameter[call_site->parameter_count];
 
-      /* DW_AT_location specifies the register number.  Value of the data
-	 assumed for the register is contained in DW_AT_GNU_call_site_value.  */
+      /* DW_AT_location specifies the register number or DW_AT_abstract_origin
+	 specifies DW_TAG_formal_parameter.  Value of the data assumed for the
+	 register is contained in DW_AT_GNU_call_site_value.  */
 
       loc = dwarf2_attr (child_die, DW_AT_location, cu);
-      if (loc == NULL || !attr_form_is_block (loc))
+      origin = dwarf2_attr (child_die, DW_AT_abstract_origin, cu);
+      if (loc == NULL && origin != NULL && is_ref_attr (origin))
+	{
+	  sect_offset offset;
+
+	  parameter->kind = CALL_SITE_PARAMETER_PARAM_OFFSET;
+	  offset = dwarf2_get_ref_die_offset (origin);
+	  gdb_assert (offset.sect_off >= cu->header.offset.sect_off);
+	  parameter->u.param_offset.cu_off = (offset.sect_off
+	                                      - cu->header.offset.sect_off);
+	}
+      else if (loc == NULL || origin != NULL || !attr_form_is_block (loc))
 	{
 	  complaint (&symfile_complaints,
 		     _("No DW_FORM_block* DW_AT_location for "

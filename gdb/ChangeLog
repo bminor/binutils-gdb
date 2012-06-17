@@ -1,5 +1,17 @@
 2012-06-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2expr.c (execute_stack_op): Support DW_OP_GNU_parameter_ref.
+	* dwarf2loc.c (call_site_parameter_matches): Support
+	CALL_SITE_PARAMETER_PARAM_OFFSET.
+	(needs_dwarf_reg_entry_value): Push stub value.
+	* dwarf2read.c (read_call_site_scope): New variable origin.  Support
+	CALL_SITE_PARAMETER_PARAM_OFFSET and its DW_AT_abstract_origin.
+	* gdbtypes.h (enum call_site_parameter_kind): New item
+	CALL_SITE_PARAMETER_PARAM_OFFSET.
+	(struct call_site.parameter.u): New field param_offset.
+
+2012-06-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup: Generalize call_site.parameter key.
 	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_entry_value>: Remove
 	variable dwarf_reg.  New variable kind_u.  Update parameters to
