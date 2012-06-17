@@ -1877,7 +1877,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      return FALSE;
 	    }
 
-	  if (!info->shared && (h == NULL || h->def_regular))
+	  if (!info->shared
+	      && (h == NULL || h->def_regular || ELF_COMMON_DEF_P (h)))
 	    {
 	      /* Known contents of the GOT.  */
 	      bfd_vma off;
