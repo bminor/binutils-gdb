@@ -4,6 +4,8 @@
 	* ld-cris/tls-dso-tpoffgotcomm1.d,
 	ld-cris/tls-dso-tpoffgotcomm1.s: Ditto.
 
+	* ld-cris/tls-e-tpoffgotcomm1.d: New test.
+
 2012-06-16  Alan Modra  <amodra@gmail.com>
 
 	* ld-alpha/emptygot.nm, * ld-alpha/tlsbin.rd, * ld-alpha/tlsbinr.rd,
