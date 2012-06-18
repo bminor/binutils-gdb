@@ -1,3 +1,9 @@
+2012-06-18  Iain Sandoe  <iain@codesourcery.com>
+
+	* configure.in: Check DECLS for free, getenv, malloc, realloc,
+	* configure: Regenerate.
+	* config.in: Likewise.
+
 2012-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (x86_address_bytes): New.

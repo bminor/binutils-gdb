@@ -663,11 +663,8 @@ AC_C_INLINE
 
 # VMS doesn't have unlink.
 AC_CHECK_FUNCS(unlink remove, break)
+AC_CHECK_FUNCS(free getenv malloc realloc sbrk setlocale stpcpy strstr)
 
-# Some systems don't have sbrk().
-AC_CHECK_FUNCS(sbrk)
-
-AC_CHECK_FUNCS(setlocale)
 AM_LC_MESSAGES
 
 # do we need the math library?
