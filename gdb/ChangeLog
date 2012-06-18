@@ -1,3 +1,17 @@
+2012-06-18  Mark Kettenis  <kettenis@gnu.org>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Switch i386 and derived targets to ON_STACK.
+	* amd64-dicos-tdep.c (amd64_dicos_push_dummy_code): Remove.
+	(amd64_dicos_init_abi): Remove its installment.
+	* dicos-tdep.c (dicos_init_abi): Remove the
+	set_gdbarch_call_dummy_location call.  Update the comment here.
+	* i386-dicos-tdep.c (i386_dicos_push_dummy_code): Remove.
+	(i386_dicos_init_abi): Remove its installment.
+	* i386-tdep.c (i386_push_dummy_code): New function.
+	(i386_gdbarch_init): Call set_gdbarch_call_dummy_location, install
+	i386_push_dummy_code.
+
 2012-06-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Remove stale dummy frames.
