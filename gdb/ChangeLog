@@ -1,3 +1,8 @@
+2012-06-18  Greta Yorsh  <Greta.Yorsh@arm.com>
+
+	* remote-sim.c (sim_command_completer): Initialize
+	variable 'result'.
+
 2012-06-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2expr.c (execute_stack_op): Support DW_OP_GNU_parameter_ref.

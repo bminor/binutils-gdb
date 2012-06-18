@@ -1204,7 +1204,7 @@ sim_command_completer (struct cmd_list_element *ignore, char *text, char *word)
   struct sim_inferior_data *sim_data;
   char **tmp;
   int i;
-  VEC (char_ptr) *result;
+  VEC (char_ptr) *result = NULL;
 
   sim_data = inferior_data (current_inferior (), sim_inferior_data_key);
   if (sim_data == NULL || sim_data->gdbsim_desc == NULL)
