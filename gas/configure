@@ -13478,7 +13478,7 @@ _ACEOF
 fi
 done
 
-for ac_func in free getenv malloc realloc sbrk setlocale stpcpy strstr
+for ac_func in sbrk setlocale
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -14029,6 +14029,36 @@ $as_echo "#define NEED_DECLARATION_STRSTR 1" >>confdefs.h
 fi
 
 
+ac_fn_c_check_decl "$LINENO" "free" "ac_cv_have_decl_free" "$ac_includes_default"
+if test "x$ac_cv_have_decl_free" = x""yes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_FREE $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "getenv" "ac_cv_have_decl_getenv" "$ac_includes_default"
+if test "x$ac_cv_have_decl_getenv" = x""yes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_GETENV $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "malloc" "ac_cv_have_decl_malloc" "$ac_includes_default"
+if test "x$ac_cv_have_decl_malloc" = x""yes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_MALLOC $ac_have_decl
+_ACEOF
 ac_fn_c_check_decl "$LINENO" "mempcpy" "ac_cv_have_decl_mempcpy" "$ac_includes_default"
 if test "x$ac_cv_have_decl_mempcpy" = x""yes; then :
   ac_have_decl=1
@@ -14039,7 +14069,36 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_MEMPCPY $ac_have_decl
 _ACEOF
+ac_fn_c_check_decl "$LINENO" "realloc" "ac_cv_have_decl_realloc" "$ac_includes_default"
+if test "x$ac_cv_have_decl_realloc" = x""yes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
 
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_REALLOC $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "stpcpy" "ac_cv_have_decl_stpcpy" "$ac_includes_default"
+if test "x$ac_cv_have_decl_stpcpy" = x""yes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STPCPY $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "strstr" "ac_cv_have_decl_strstr" "$ac_includes_default"
+if test "x$ac_cv_have_decl_strstr" = x""yes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRSTR $ac_have_decl
+_ACEOF
 ac_fn_c_check_decl "$LINENO" "vsnprintf" "ac_cv_have_decl_vsnprintf" "$ac_includes_default"
 if test "x$ac_cv_have_decl_vsnprintf" = x""yes; then :
   ac_have_decl=1
