@@ -1,3 +1,7 @@
+2012-06-18  John Szakmeister  <john@szakmeister.net>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Correct return value.
+
 2012-06-17  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_relocate_section): <R_CRIS_32_IE>

@@ -9664,7 +9664,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    (_("%B(%A+0x%lx): R_ARM_TLS_LE32 relocation not permitted in shared object"),
 	     input_bfd, input_section,
 	     (long) rel->r_offset, howto->name);
-	  return (bfd_reloc_status_type) FALSE;
+	  return bfd_reloc_notsupported;
 	}
       else
 	value = tpoff (info, value);
