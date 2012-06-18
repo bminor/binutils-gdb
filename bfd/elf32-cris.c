@@ -2719,16 +2719,64 @@ cris_elf_gc_sweep_hook (bfd *abfd,
 /* The elf_backend_plt_sym_val hook function.  */
 
 static bfd_vma
-cris_elf_plt_sym_val (bfd_vma i, const asection *plt,
-		      const arelent *rel ATTRIBUTE_UNUSED)
+cris_elf_plt_sym_val (bfd_vma i ATTRIBUTE_UNUSED, const asection *plt,
+		      const arelent *rel)
 {
   bfd_size_type plt_entry_size;
+  bfd_size_type pltoffs;
+  bfd *abfd = plt->owner;
 
+  /* Same for CRIS and CRIS v32; see elf_cris_(|pic_)plt_entry(|_v32)[].  */
+  bfd_size_type plt_entry_got_offset = 2;
+  bfd_size_type plt_sec_size;
+  bfd_size_type got_vma_for_dyn;
+  asection *got;
+
+  /* FIXME: the .got section should be readily available also when
+     we're not linking.  */
+  if ((got = bfd_get_section_by_name (abfd, ".got")) == NULL)
+    return (bfd_vma) -1;
+
+  plt_sec_size =  bfd_section_size (plt->owner, plt);
   plt_entry_size
-    = (bfd_get_mach (plt->owner) == bfd_mach_cris_v32
+    = (bfd_get_mach (abfd) == bfd_mach_cris_v32
        ? PLT_ENTRY_SIZE_V32 : PLT_ENTRY_SIZE);
 
-  return plt->vma + (i + 1) * plt_entry_size;
+  /* Data in PLT is GOT-relative for DYN, but absolute for EXE.  */
+  got_vma_for_dyn = (abfd->flags & EXEC_P) ? 0 : got->vma;
+
+  /* Because we can have merged GOT entries; a single .got entry for
+     both GOT and the PLT part of the GOT (.got.plt), the index of the
+     reloc in .rela.plt is not the same as the index in the PLT.
+     Instead, we have to hunt down the GOT offset in the PLT that
+     corresponds to that of this reloc.  Unfortunately, we will only
+     be called for the .rela.plt relocs, so we'll miss synthetic
+     symbols for .plt entries with merged GOT entries.  (FIXME:
+     fixable by providing our own bfd_elf32_get_synthetic_symtab.
+     Doesn't seem worthwile at time of this writing.)  FIXME: we've
+     gone from O(1) to O(N) (N number of PLT entries) for finding each
+     PLT address.  Shouldn't matter in practice though.  */
+
+  for (pltoffs = plt_entry_size;
+       pltoffs < plt_sec_size;
+       pltoffs += plt_entry_size)
+    {
+      bfd_size_type got_offset;
+      bfd_byte gotoffs_raw[4];
+      
+      if (!bfd_get_section_contents (abfd, (asection *) plt, gotoffs_raw,
+				     pltoffs + plt_entry_got_offset,
+				     sizeof (gotoffs_raw)))
+	return (bfd_vma) -1;
+
+      got_offset = bfd_get_32 (abfd, gotoffs_raw);
+      if (got_offset + got_vma_for_dyn == rel->address)
+	return plt->vma + pltoffs;
+    }
+
+  /* While it's tempting to BFD_ASSERT that we shouldn't get here,
+     that'd not be graceful behavior for invalid input.  */
+  return (bfd_vma) -1;
 }
 
 /* Make sure we emit a GOT entry if the symbol was supposed to have a PLT
