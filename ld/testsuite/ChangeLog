@@ -1,3 +1,8 @@
+2012-06-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/dso-pltdis1.d, ld-cris/dso-pltdis2.d, dsofng.s
+	dsofn4g.s: New tests.
+
 2012-06-17  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/tls-e-tpiecomm1.d, ld-cris/tls-e-tpiecomm1.s: New test.
