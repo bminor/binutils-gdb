@@ -101,6 +101,18 @@ gdb_test "frame $frame_number" ".*"
 gdb_test_no_output "set confirm off"
 gdb_test "return" ""
 
+# Verify there are no remains of the dummy frame.
+gdb_test_no_output "maintenance print dummy-frames"
+set test "maintenance info breakpoints"
+gdb_test_multiple $test $test {
+    -re " call dummy .*\r\n$gdb_prompt $" {
+	fail $test
+    }
+    -re "\r\n$gdb_prompt $" {
+	pass $test
+    }
+}
+
 # Resume execution, the program should continue without any signal.
 
 gdb_test "break stop_two" "Breakpoint \[0-9\]* at .*"

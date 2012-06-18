@@ -744,7 +744,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
      inferior.  That way it breaks when it returns.  */
 
   {
-    struct breakpoint *bpt;
+    struct breakpoint *bpt, *longjmp_b;
     struct symtab_and_line sal;
 
     init_sal (&sal);		/* initialize to zeroes */
@@ -760,6 +760,17 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     frame = NULL;
 
     bpt->disposition = disp_del;
+    gdb_assert (bpt->related_breakpoint == bpt);
+
+    longjmp_b = set_longjmp_breakpoint_for_call_dummy ();
+    if (longjmp_b)
+      {
+	/* Link BPT into the chain of LONGJMP_B.  */
+	bpt->related_breakpoint = longjmp_b;
+	while (longjmp_b->related_breakpoint != bpt->related_breakpoint)
+	  longjmp_b = longjmp_b->related_breakpoint;
+	longjmp_b->related_breakpoint = bpt;
+      }
   }
 
   /* Create a breakpoint in std::terminate.

@@ -29,6 +29,7 @@
 #include "gdbcmd.h"
 #include "gdb_string.h"
 #include "observer.h"
+#include "gdbthread.h"
 
 /* Dummy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
@@ -108,19 +109,44 @@ remove_dummy_frame (struct dummy_frame **dummy_ptr)
   xfree (dummy);
 }
 
+/* Delete any breakpoint B which is a momentary breakpoint for return from
+   inferior call matching DUMMY_VOIDP.  */
+
+static int
+pop_dummy_frame_bpt (struct breakpoint *b, void *dummy_voidp)
+{
+  struct dummy_frame *dummy = dummy_voidp;
+
+  if (b->thread == pid_to_thread_id (inferior_ptid)
+      && b->disposition == disp_del && frame_id_eq (b->frame_id, dummy->id))
+    {
+      while (b->related_breakpoint != b)
+	delete_breakpoint (b->related_breakpoint);
+
+      delete_breakpoint (b);
+
+      /* Stop the traversal.  */
+      return 1;
+    }
+
+  /* Continue the traversal.  */
+  return 0;
+}
+
 /* Pop *DUMMY_PTR, restoring program state to that before the
    frame was created.  */
 
 static void
 pop_dummy_frame (struct dummy_frame **dummy_ptr)
 {
-  struct dummy_frame *dummy;
+  struct dummy_frame *dummy = *dummy_ptr;
 
-  restore_infcall_suspend_state ((*dummy_ptr)->caller_state);
+  restore_infcall_suspend_state (dummy->caller_state);
+
+  iterate_over_breakpoints (pop_dummy_frame_bpt, dummy);
 
   /* restore_infcall_control_state frees inf_state,
      all that remains is to pop *dummy_ptr.  */
-  dummy = *dummy_ptr;
   *dummy_ptr = dummy->next;
   xfree (dummy);
 
@@ -166,9 +192,22 @@ dummy_frame_pop (struct frame_id dummy_id)
   pop_dummy_frame (dp);
 }
 
-/* There may be stale dummy frames, perhaps left over from when a longjump took
-   us out of a function that was called by the debugger.  Clean them up at
-   least once whenever we start a new inferior.  */
+/* Drop dummy frame DUMMY_ID.  Do nothing if it is not found.  Do not restore
+   its state into inferior, just free its memory.  */
+
+void
+dummy_frame_discard (struct frame_id dummy_id)
+{
+  struct dummy_frame **dp;
+
+  dp = lookup_dummy_frame (dummy_id);
+  if (dp)
+    remove_dummy_frame (dp);
+}
+
+/* There may be stale dummy frames, perhaps left over from when an uncaught
+   longjmp took us out of a function that was called by the debugger.  Clean
+   them up at least once whenever we start a new inferior.  */
 
 static void
 cleanup_dummy_frames (struct target_ops *target, int from_tty)

@@ -68,6 +68,7 @@
 #include "skip.h"
 #include "gdb_regex.h"
 #include "ax-gdb.h"
+#include "dummy-frame.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -286,6 +287,9 @@ static struct breakpoint_ops internal_breakpoint_ops;
 
 /* Momentary breakpoints class type.  */
 static struct breakpoint_ops momentary_breakpoint_ops;
+
+/* Momentary breakpoints for bp_longjmp and bp_exception class type.  */
+static struct breakpoint_ops longjmp_breakpoint_ops;
 
 /* The breakpoint_ops structure to be used in regular user created
    breakpoints.  */
@@ -3204,6 +3208,7 @@ update_breakpoints_after_exec (void)
     /* Longjmp and longjmp-resume breakpoints are also meaningless
        after an exec.  */
     if (b->type == bp_longjmp || b->type == bp_longjmp_resume
+	|| b->type == bp_longjmp_call_dummy
 	|| b->type == bp_exception || b->type == bp_exception_resume)
       {
 	delete_breakpoint (b);
@@ -3495,6 +3500,7 @@ breakpoint_init_inferior (enum inf_context context)
     switch (b->type)
       {
       case bp_call_dummy:
+      case bp_longjmp_call_dummy:
 
 	/* If the call dummy breakpoint is at the entry point it will
 	   cause problems when the inferior is rerun, so we better get
@@ -5154,9 +5160,10 @@ bpstat_what (bpstat bs_head)
 	    }
 	  break;
 	case bp_longjmp:
+	case bp_longjmp_call_dummy:
 	case bp_exception:
 	  this_action = BPSTAT_WHAT_SET_LONGJMP_RESUME;
-	  retval.is_longjmp = bptype == bp_longjmp;
+	  retval.is_longjmp = bptype != bp_exception;
 	  break;
 	case bp_longjmp_resume:
 	case bp_exception_resume:
@@ -5489,6 +5496,7 @@ bptype_string (enum bptype type)
     {bp_access_watchpoint, "acc watchpoint"},
     {bp_longjmp, "longjmp"},
     {bp_longjmp_resume, "longjmp resume"},
+    {bp_longjmp_call_dummy, "longjmp for call dummy"},
     {bp_exception, "exception"},
     {bp_exception_resume, "exception resume"},
     {bp_step_resume, "step resume"},
@@ -5631,6 +5639,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       case bp_finish:
       case bp_longjmp:
       case bp_longjmp_resume:
+      case bp_longjmp_call_dummy:
       case bp_exception:
       case bp_exception_resume:
       case bp_step_resume:
@@ -6494,6 +6503,7 @@ init_bp_location (struct bp_location *loc, const struct bp_location_ops *ops,
     case bp_finish:
     case bp_longjmp:
     case bp_longjmp_resume:
+    case bp_longjmp_call_dummy:
     case bp_exception:
     case bp_exception_resume:
     case bp_step_resume:
@@ -6797,8 +6807,10 @@ set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 	enum bptype type = b->type == bp_longjmp_master ? bp_longjmp : bp_exception;
 	struct breakpoint *clone;
 
+	/* longjmp_breakpoint_ops ensures INITIATING_FRAME is cleared again
+	   after their removal.  */
 	clone = momentary_breakpoint_from_master (b, type,
-						  &momentary_breakpoint_ops);
+						  &longjmp_breakpoint_ops);
 	clone->thread = thread;
       }
 
@@ -6829,6 +6841,75 @@ delete_longjmp_breakpoint_at_next_stop (int thread)
       {
 	if (b->thread == thread)
 	  b->disposition = disp_del_at_next_stop;
+      }
+}
+
+/* Place breakpoints of type bp_longjmp_call_dummy to catch longjmp for
+   INFERIOR_PTID thread.  Chain them all by RELATED_BREAKPOINT and return
+   pointer to any of them.  Return NULL if this system cannot place longjmp
+   breakpoints.  */
+
+struct breakpoint *
+set_longjmp_breakpoint_for_call_dummy (void)
+{
+  struct breakpoint *b, *retval = NULL;
+
+  ALL_BREAKPOINTS (b)
+    if (b->pspace == current_program_space && b->type == bp_longjmp_master)
+      {
+	struct breakpoint *new_b;
+
+	new_b = momentary_breakpoint_from_master (b, bp_longjmp_call_dummy,
+						  &momentary_breakpoint_ops);
+	new_b->thread = pid_to_thread_id (inferior_ptid);
+
+	/* Link NEW_B into the chain of RETVAL breakpoints.  */
+
+	gdb_assert (new_b->related_breakpoint == new_b);
+	if (retval == NULL)
+	  retval = new_b;
+	new_b->related_breakpoint = retval;
+	while (retval->related_breakpoint != new_b->related_breakpoint)
+	  retval = retval->related_breakpoint;
+	retval->related_breakpoint = new_b;
+      }
+
+  return retval;
+}
+
+/* Verify all existing dummy frames and their associated breakpoints for
+   THREAD.  Remove those which can no longer be found in the current frame
+   stack.
+
+   You should call this function only at places where it is safe to currently
+   unwind the whole stack.  Failed stack unwind would discard live dummy
+   frames.  */
+
+void
+check_longjmp_breakpoint_for_call_dummy (int thread)
+{
+  struct breakpoint *b, *b_tmp;
+
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+    if (b->type == bp_longjmp_call_dummy && b->thread == thread)
+      {
+	struct breakpoint *dummy_b = b->related_breakpoint;
+
+	while (dummy_b != b && dummy_b->type != bp_call_dummy)
+	  dummy_b = dummy_b->related_breakpoint;
+	if (dummy_b->type != bp_call_dummy
+	    || frame_find_by_id (dummy_b->frame_id) != NULL)
+	  continue;
+	
+	dummy_frame_discard (dummy_b->frame_id);
+
+	while (b->related_breakpoint != b)
+	  {
+	    if (b_tmp == b->related_breakpoint)
+	      b_tmp = b->related_breakpoint->next;
+	    delete_breakpoint (b->related_breakpoint);
+	  }
+	delete_breakpoint (b);
       }
 }
 
@@ -12821,6 +12902,22 @@ momentary_bkpt_print_mention (struct breakpoint *b)
   /* Nothing to mention.  These breakpoints are internal.  */
 }
 
+/* Ensure INITIATING_FRAME is cleared when no such breakpoint exists.
+
+   It gets cleared already on the removal of the first one of such placed
+   breakpoints.  This is OK as they get all removed altogether.  */
+
+static void
+longjmp_bkpt_dtor (struct breakpoint *self)
+{
+  struct thread_info *tp = find_thread_id (self->thread);
+
+  if (tp)
+    tp->initiating_frame = null_frame_id;
+
+  momentary_breakpoint_ops.dtor (self);
+}
+
 /* Specific methods for probe breakpoints.  */
 
 static int
@@ -15408,6 +15505,11 @@ initialize_breakpoint_ops (void)
   ops->check_status = momentary_bkpt_check_status;
   ops->print_it = momentary_bkpt_print_it;
   ops->print_mention = momentary_bkpt_print_mention;
+
+  /* Momentary breakpoints for bp_longjmp and bp_exception.  */
+  ops = &longjmp_breakpoint_ops;
+  *ops = momentary_breakpoint_ops;
+  ops->dtor = longjmp_bkpt_dtor;
 
   /* Probe breakpoints.  */
   ops = &bkpt_probe_breakpoint_ops;

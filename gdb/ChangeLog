@@ -1,3 +1,34 @@
+2012-06-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove stale dummy frames.
+	* breakpoint.c: Include dummy-frame.h.
+	(longjmp_breakpoint_ops): New variable.
+	(update_breakpoints_after_exec, breakpoint_init_inferior): Delete also
+	bp_longjmp_call_dummy.
+	(bpstat_what, bptype_string, print_one_breakpoint_location)
+	(init_bp_location): Support bp_longjmp_call_dummy.
+	(set_longjmp_breakpoint): Use longjmp_breakpoint_ops.  Comment why.
+	(set_longjmp_breakpoint_for_call_dummy)
+	(check_longjmp_breakpoint_for_call_dummy, longjmp_bkpt_dtor): New
+	functions.
+	(initialize_breakpoint_ops): Initialize longjmp_breakpoint_ops.
+	* breakpoint.h (enum bptype): New item bp_longjmp_call_dummy.  Delete
+	FIXME comment and extend the other comment for bp_call_dummy.
+	(set_longjmp_breakpoint_for_call_dummy)
+	(check_longjmp_breakpoint_for_call_dummy): New declarations.
+	* dummy-frame.c: Include gdbthread.h.
+	(pop_dummy_frame_bpt): New function.
+	(pop_dummy_frame): Call pop_dummy_frame_bpt.
+	(dummy_frame_discard): New function.
+	(cleanup_dummy_frames): Update the comment about longjmps.
+	* dummy-frame.h (dummy_frame_discard): New declaration.
+	* gdbthread.h (struct thread_info): Extend initiating_frame comment.
+	* infcall.c (call_function_by_hand): New variable longjmp_b.  Call
+	set_longjmp_breakpoint_for_call_dummy.  Chain its breakpoints with BPT.
+	* infrun.c (handle_inferior_event) <BPSTAT_WHAT_CLEAR_LONGJMP_RESUME>:
+	Add case 4 comment.  Call check_longjmp_breakpoint_for_call_dummy and
+	keep_going if IS_LONGJMP and there is no other reason to stop.
+
 2012-06-18  Greta Yorsh  <Greta.Yorsh@arm.com>
 
 	* remote-sim.c (sim_command_completer): Initialize

@@ -52,6 +52,8 @@ extern void dummy_frame_push (struct infcall_suspend_state *caller_state,
 
 extern void dummy_frame_pop (struct frame_id dummy_id);
 
+extern void dummy_frame_discard (struct frame_id dummy_id);
+
 /* If the PC falls in a dummy frame, return a dummy frame
    unwinder.  */
 

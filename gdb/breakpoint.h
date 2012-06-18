@@ -65,6 +65,12 @@ enum bptype
     bp_longjmp,			/* secret breakpoint to find longjmp() */
     bp_longjmp_resume,		/* secret breakpoint to escape longjmp() */
 
+    /* Breakpoint placed to the same location(s) like bp_longjmp but used to
+       protect against stale DUMMY_FRAME.  Multiple bp_longjmp_call_dummy and
+       one bp_call_dummy are chained together by related_breakpoint for each
+       DUMMY_FRAME.  */
+    bp_longjmp_call_dummy,
+
     /* An internal breakpoint that is installed on the unwinder's
        debug hook.  */
     bp_exception,
@@ -94,14 +100,8 @@ enum bptype
        3) It can never be disabled.  */
     bp_watchpoint_scope,
 
-    /* The breakpoint at the end of a call dummy.  */
-    /* FIXME: What if the function we are calling longjmp()s out of
-       the call, or the user gets out with the "return" command?  We
-       currently have no way of cleaning up the breakpoint in these
-       (obscure) situations.  (Probably can solve this by noticing
-       longjmp, "return", etc., it's similar to noticing when a
-       watchpoint on a local variable goes out of scope (with hardware
-       support for watchpoints)).  */
+    /* The breakpoint at the end of a call dummy.  See bp_longjmp_call_dummy it
+       is chained with by related_breakpoint.  */
     bp_call_dummy,
 
     /* A breakpoint set on std::terminate, that is used to catch
@@ -1286,6 +1286,9 @@ extern void delete_longjmp_breakpoint (int thread);
 
 /* Mark all longjmp breakpoints from THREAD for later deletion.  */
 extern void delete_longjmp_breakpoint_at_next_stop (int thread);
+
+extern struct breakpoint *set_longjmp_breakpoint_for_call_dummy (void);
+extern void check_longjmp_breakpoint_for_call_dummy (int thread);
 
 extern void enable_overlay_breakpoints (void);
 extern void disable_overlay_breakpoints (void);
