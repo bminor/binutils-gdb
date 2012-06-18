@@ -1,3 +1,8 @@
+2012-06-18  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (operator): Remove trailing space after "delete" and
+	"delete[]".
+
 2012-06-18  Mark Kettenis  <kettenis@gnu.org>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
