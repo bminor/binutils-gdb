@@ -1,3 +1,8 @@
+2012-06-18  Doug Evans  <dje@google.com>
+
+	* block.c (find_block_in_blockvector): Make explicit the fact that we
+	ignore GLOBAL_BLOCK.
+
 2012-06-18  Tom Tromey  <tromey@redhat.com>
 
 	* c-exp.y (operator): Remove trailing space after "delete" and

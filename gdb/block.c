@@ -118,8 +118,13 @@ find_block_in_blockvector (struct blockvector *bl, CORE_ADDR pc)
     return addrmap_find (BLOCKVECTOR_MAP (bl), pc);
 
   /* Otherwise, use binary search to find the last block that starts
-     before PC.  */
-  bot = 0;
+     before PC.
+     Note: GLOBAL_BLOCK is block 0, STATIC_BLOCK is block 1.
+     They both have the same START,END values.
+     Historically this code would choose STATIC_BLOCK over GLOBAL_BLOCK but the
+     fact that this choice was made was subtle, now we make it explicit.  */
+  gdb_assert (BLOCKVECTOR_NBLOCKS (bl) >= 2);
+  bot = STATIC_BLOCK;
   top = BLOCKVECTOR_NBLOCKS (bl);
 
   while (top - bot > 1)
@@ -134,7 +139,7 @@ find_block_in_blockvector (struct blockvector *bl, CORE_ADDR pc)
 
   /* Now search backward for a block that ends after PC.  */
 
-  while (bot >= 0)
+  while (bot >= STATIC_BLOCK)
     {
       b = BLOCKVECTOR_BLOCK (bl, bot);
       if (BLOCK_END (b) > pc)
