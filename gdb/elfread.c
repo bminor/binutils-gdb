@@ -594,6 +594,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 		  if (mtramp)
 		    {
 		      MSYMBOL_SIZE (mtramp) = MSYMBOL_SIZE (msym);
+		      mtramp->created_by_gdb = 1;
 		      mtramp->filename = filesymname;
 		      gdbarch_elf_make_msymbol_special (gdbarch, sym, mtramp);
 		    }

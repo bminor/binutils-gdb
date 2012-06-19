@@ -1552,6 +1552,48 @@ lookup_symbol_aux_symtabs (int block_index, const char *name,
   return NULL;
 }
 
+/* Wrapper around lookup_symbol_aux_objfile for search_symbols.
+   Look up LINKAGE_NAME in DOMAIN in the global and static blocks of OBJFILE
+   and all related objfiles.  */
+
+static struct symbol *
+lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
+					    const char *linkage_name,
+					    domain_enum domain)
+{
+  enum language lang = current_language->la_language;
+  const char *modified_name;
+  struct cleanup *cleanup = demangle_for_lookup (linkage_name, lang,
+						 &modified_name);
+  struct objfile *main_objfile, *cur_objfile;
+
+  if (objfile->separate_debug_objfile_backlink)
+    main_objfile = objfile->separate_debug_objfile_backlink;
+  else
+    main_objfile = objfile;
+
+  for (cur_objfile = main_objfile;
+       cur_objfile;
+       cur_objfile = objfile_separate_debug_iterate (main_objfile, cur_objfile))
+    {
+      struct symbol *sym;
+
+      sym = lookup_symbol_aux_objfile (cur_objfile, GLOBAL_BLOCK,
+				       modified_name, domain);
+      if (sym == NULL)
+	sym = lookup_symbol_aux_objfile (cur_objfile, STATIC_BLOCK,
+					 modified_name, domain);
+      if (sym != NULL)
+	{
+	  do_cleanups (cleanup);
+	  return sym;
+	}
+    }
+
+  do_cleanups (cleanup);
+  return NULL;
+}
+
 /* A helper function for lookup_symbol_aux that interfaces with the
    "quick" symbol table functions.  */
 
@@ -3450,16 +3492,23 @@ search_symbols (char *regexp, enum search_domain kind,
      The symbol will then be found during the scan of symtabs below.
 
      For functions, find_pc_symtab should succeed if we have debug info
-     for the function, for variables we have to call lookup_symbol
-     to determine if the variable has debug info.
+     for the function, for variables we have to call
+     lookup_symbol_in_objfile_from_linkage_name to determine if the variable
+     has debug info.
      If the lookup fails, set found_misc so that we will rescan to print
-     any matching symbols without debug info.  */
+     any matching symbols without debug info.
+     We only search the objfile the msymbol came from, we no longer search
+     all objfiles.  In large programs (1000s of shared libs) searching all
+     objfiles is not worth the pain.  */
 
   if (nfiles == 0 && (kind == VARIABLES_DOMAIN || kind == FUNCTIONS_DOMAIN))
     {
       ALL_MSYMBOLS (objfile, msymbol)
       {
         QUIT;
+
+	if (msymbol->created_by_gdb)
+	  continue;
 
 	if (MSYMBOL_TYPE (msymbol) == ourtype
 	    || MSYMBOL_TYPE (msymbol) == ourtype2
@@ -3470,21 +3519,15 @@ search_symbols (char *regexp, enum search_domain kind,
 		|| regexec (&datum.preg, SYMBOL_NATURAL_NAME (msymbol), 0,
 			    NULL, 0) == 0)
 	      {
-		if (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)))
-		  {
-		    /* FIXME: carlton/2003-02-04: Given that the
-		       semantics of lookup_symbol keeps on changing
-		       slightly, it would be a nice idea if we had a
-		       function lookup_symbol_minsym that found the
-		       symbol associated to a given minimal symbol (if
-		       any).  */
-		    if (kind == FUNCTIONS_DOMAIN
-			|| lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol),
-					  (struct block *) NULL,
-					  VAR_DOMAIN, 0)
-			== NULL)
-		      found_misc = 1;
-		  }
+		/* Note: An important side-effect of these lookup functions
+		   is to expand the symbol table if msymbol is found, for the
+		   benefit of the next loop on ALL_PRIMARY_SYMTABS.  */
+		if (kind == FUNCTIONS_DOMAIN
+		    ? find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)) == NULL
+		    : (lookup_symbol_in_objfile_from_linkage_name
+		       (objfile, SYMBOL_LINKAGE_NAME (msymbol), VAR_DOMAIN)
+		       == NULL))
+		  found_misc = 1;
 	      }
 	  }
       }
@@ -3561,11 +3604,14 @@ search_symbols (char *regexp, enum search_domain kind,
   /* If there are no eyes, avoid all contact.  I mean, if there are
      no debug symbols, then print directly from the msymbol_vector.  */
 
-  if (found_misc || kind != FUNCTIONS_DOMAIN)
+  if (found_misc || (nfiles == 0 && kind != FUNCTIONS_DOMAIN))
     {
       ALL_MSYMBOLS (objfile, msymbol)
       {
         QUIT;
+
+	if (msymbol->created_by_gdb)
+	  continue;
 
 	if (MSYMBOL_TYPE (msymbol) == ourtype
 	    || MSYMBOL_TYPE (msymbol) == ourtype2
@@ -3576,14 +3622,14 @@ search_symbols (char *regexp, enum search_domain kind,
 		|| regexec (&datum.preg, SYMBOL_NATURAL_NAME (msymbol), 0,
 			    NULL, 0) == 0)
 	      {
-		/* Functions:  Look up by address.  */
-		if (kind != FUNCTIONS_DOMAIN ||
-		    (0 == find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol))))
+		/* For functions we can do a quick check of whether the
+		   symbol might be found via find_pc_symtab.  */
+		if (kind != FUNCTIONS_DOMAIN
+		    || find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol)) == NULL)
 		  {
-		    /* Variables/Absolutes:  Look up by name.  */
-		    if (lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol),
-				       (struct block *) NULL, VAR_DOMAIN, 0)
-			 == NULL)
+		    if (lookup_symbol_in_objfile_from_linkage_name
+			(objfile, SYMBOL_LINKAGE_NAME (msymbol), VAR_DOMAIN)
+			== NULL)
 		      {
 			/* match */
 			psr = (struct symbol_search *)

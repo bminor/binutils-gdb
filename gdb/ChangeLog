@@ -1,5 +1,12 @@
 2012-06-18  Doug Evans  <dje@google.com>
 
+	* symtab.h (minimal_symbol): New member created_by_gdb.
+	* elfread.c (elf_symtab_read): Set created_by_gdb for @plt minsym
+	created by gdb.
+	* symtab.c (lookup_symbol_in_objfile_from_linkage_name): New function.
+	(search_symbols): Call it instead of lookup_symbol.
+	Skip symbols created by gdb.  Only scan minsyms if nfiles == 0.
+
 	* dwarf2expr.c (execute_stack_op): Handle DW_OP_GNU_const_index.
 	Adjust address for DW_OP_GNU_addr_index.
 	* dwarf2expr.h (dwarf_expr_context): Update comment.

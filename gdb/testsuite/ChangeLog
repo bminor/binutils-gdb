@@ -1,3 +1,9 @@
+2012-06-18  Doug Evans  <dje@google.com>
+
+	* gdb.base/info-fun.exp: New file.
+	* gdb.base/info-fun.c: New file.
+	* gdb.base/info-fun-solib.c: New file.
+
 2012-06-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Remove stale dummy frames.

@@ -340,6 +340,10 @@ struct minimal_symbol
 
   ENUM_BITFIELD(minimal_symbol_type) type : 8;
 
+  /* Non-zero if this symbol was created by gdb.
+     Such symbols do not appear in the output of "info var|fun".  */
+  unsigned int created_by_gdb : 1;
+
   /* Two flag bits provided for the use of the target.  */
   unsigned int target_flag_1 : 1;
   unsigned int target_flag_2 : 1;
