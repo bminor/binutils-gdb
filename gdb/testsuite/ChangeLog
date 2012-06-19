@@ -1,3 +1,8 @@
+2012-06-19  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/m-static.cc (keepalive): New function.
+	(gnu_obj_1::method): Use it.
+
 2012-06-18  Doug Evans  <dje@google.com>
 
 	* gdb.base/info-fun.exp: New file.

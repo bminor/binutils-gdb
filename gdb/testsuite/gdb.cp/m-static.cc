@@ -2,6 +2,8 @@
 
 enum region { oriental, egyptian, greek, etruscan, roman };
 
+void keepalive(bool *var) { }
+
 // Test one.
 class gnu_obj_1
 {
@@ -19,6 +21,7 @@ public:
   long method ()
   {
     static bool svar = true;
+    keepalive (&svar);
     return key2;
   }
 };
