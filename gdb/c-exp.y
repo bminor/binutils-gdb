@@ -172,9 +172,10 @@ static struct stoken operator_stoken (const char *);
 /* %type <bval> block */
 
 /* Fancy type parsing.  */
-%type <voidval> func_mod direct_abs_decl abs_decl
+%type <voidval> func_mod direct_abs_decl abs_decl ptr_operator
 %type <tval> ptype
 %type <lval> array_mod
+%type <tval> conversion_type_id
 
 %token <typed_val_int> INT
 %token <typed_val_float> FLOAT
@@ -931,9 +932,7 @@ variable:	name_not_typename
 	;
 
 space_identifier : '@' NAME
-		{ push_type_address_space (copy_name ($2.stoken));
-		  push_type (tp_space_identifier);
-		}
+		{ insert_type_address_space (copy_name ($2.stoken)); }
 	;
 
 const_or_volatile: const_or_volatile_noopt
@@ -952,14 +951,23 @@ const_or_volatile_or_space_identifier:
 	|
 	;
 
-abs_decl:	'*'
-			{ push_type (tp_pointer); $$ = 0; }
-	|	'*' abs_decl
-			{ push_type (tp_pointer); $$ = $2; }
+ptr_operator:
+		ptr_operator '*'
+			{ insert_type (tp_pointer); }
+		const_or_volatile_or_space_identifier
+			{ $$ = 0; }
+	|	'*' 
+			{ insert_type (tp_pointer); }
+		const_or_volatile_or_space_identifier
+			{ $$ = 0; }
 	|	'&'
-			{ push_type (tp_reference); $$ = 0; }
-	|	'&' abs_decl
-			{ push_type (tp_reference); $$ = $2; }
+			{ insert_type (tp_reference); $$ = 0; }
+	|	'&' ptr_operator
+			{ insert_type (tp_reference); $$ = 0; }
+	;
+
+abs_decl:	ptr_operator direct_abs_decl
+	|	ptr_operator
 	|	direct_abs_decl
 	;
 
@@ -1203,8 +1211,16 @@ nonempty_typelist
 	;
 
 ptype	:	typebase
-	|	ptype const_or_volatile_or_space_identifier abs_decl const_or_volatile_or_space_identifier
+	|	ptype abs_decl
 		{ $$ = follow_types ($1); }
+	;
+
+conversion_type_id: typebase conversion_declarator
+		{ $$ = follow_types ($1); }
+	;
+
+conversion_declarator:  /* Nothing.  */
+	| ptr_operator conversion_declarator
 	;
 
 const_and_volatile: 	CONST_KEYWORD VOLATILE_KEYWORD
@@ -1212,13 +1228,13 @@ const_and_volatile: 	CONST_KEYWORD VOLATILE_KEYWORD
 	;
 
 const_or_volatile_noopt:  	const_and_volatile 
-			{ push_type (tp_const);
-			  push_type (tp_volatile); 
+			{ insert_type (tp_const);
+			  insert_type (tp_volatile); 
 			}
 	| 		CONST_KEYWORD
-			{ push_type (tp_const); }
+			{ insert_type (tp_const); }
 	| 		VOLATILE_KEYWORD
-			{ push_type (tp_volatile); }
+			{ insert_type (tp_volatile); }
 	;
 
 operator:	OPERATOR NEW
@@ -1325,7 +1341,7 @@ operator:	OPERATOR NEW
 			{ $$ = operator_stoken ("()"); }
 	|	OPERATOR '[' ']'
 			{ $$ = operator_stoken ("[]"); }
-	|	OPERATOR ptype
+	|	OPERATOR conversion_type_id
 			{ char *name;
 			  long length;
 			  struct ui_file *buf = mem_fileopen ();

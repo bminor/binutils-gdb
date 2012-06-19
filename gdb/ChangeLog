@@ -1,3 +1,20 @@
+2012-06-19  Tom Tromey  <tromey@redhat.com>
+
+	PR exp/9514:
+	* parser-defs.h (insert_type, insert_type_address_space): Declare.
+	(push_type_address_space): Remove.
+	* parse.c (insert_into_type_stack): New function.
+	(insert_type): Likewise.
+	(insert_type_address_space): Rename from push_type_address_space.
+	Insert tp_space_identifier.
+	* c-exp.y (ptr_operator): New production.
+	(abs_decl): Use ptr_operator.
+	(space_identifier): Call insert_type_address_space.
+	(ptype): Don't use const_or_volatile_or_space_identifier.
+	(const_or_volatile_noopt): Call insert_type.
+	(conversion_type_id, conversion_declarator): New productions.
+	(operator): Use conversion_type_id.
+
 2012-06-18  Doug Evans  <dje@google.com>
 
 	* symtab.h (minimal_symbol): New member created_by_gdb.

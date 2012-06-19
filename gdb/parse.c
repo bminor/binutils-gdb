@@ -1367,6 +1367,49 @@ check_type_stack_depth (void)
     }
 }
 
+/* A helper function for insert_type and insert_type_address_space.
+   This does work of expanding the type stack and inserting the new
+   element, ELEMENT, into the stack at location SLOT.  */
+
+static void
+insert_into_type_stack (int slot, union type_stack_elt element)
+{
+  check_type_stack_depth ();
+
+  if (slot < type_stack_depth)
+    memmove (&type_stack[slot + 1], &type_stack[slot],
+	     (type_stack_depth - slot) * sizeof (union type_stack_elt));
+  type_stack[slot] = element;
+  ++type_stack_depth;
+}
+
+/* Insert a new type, TP, at the bottom of the type stack.  If TP is
+   tp_pointer or tp_reference, it is inserted at the bottom.  If TP is
+   a qualifier, it is inserted at slot 1 (just above a previous
+   tp_pointer) if there is anything on the stack, or simply pushed if
+   the stack is empty.  Other values for TP are invalid.  */
+
+void
+insert_type (enum type_pieces tp)
+{
+  union type_stack_elt element;
+  int slot;
+
+  gdb_assert (tp == tp_pointer || tp == tp_reference
+	      || tp == tp_const || tp == tp_volatile);
+
+  /* If there is anything on the stack (we know it will be a
+     tp_pointer), insert the qualifier above it.  Otherwise, simply
+     push this on the top of the stack.  */
+  if (type_stack_depth && (tp == tp_const || tp == tp_volatile))
+    slot = 1;
+  else
+    slot = 0;
+
+  element.piece = tp;
+  insert_into_type_stack (slot, element);
+}
+
 void
 push_type (enum type_pieces tp)
 {
@@ -1381,10 +1424,32 @@ push_type_int (int n)
   type_stack[type_stack_depth++].int_val = n;
 }
 
+/* Insert a tp_space_identifier and the corresponding address space
+   value into the stack.  STRING is the name of an address space, as
+   recognized by address_space_name_to_int.  If the stack is empty,
+   the new elements are simply pushed.  If the stack is not empty,
+   this function assumes that the first item on the stack is a
+   tp_pointer, and the new values are inserted above the first
+   item.  */
+
 void
-push_type_address_space (char *string)
+insert_type_address_space (char *string)
 {
-  push_type_int (address_space_name_to_int (parse_gdbarch, string));
+  union type_stack_elt element;
+  int slot;
+
+  /* If there is anything on the stack (we know it will be a
+     tp_pointer), insert the address space qualifier above it.
+     Otherwise, simply push this on the top of the stack.  */
+  if (type_stack_depth)
+    slot = 1;
+  else
+    slot = 0;
+
+  element.piece = tp_space_identifier;
+  insert_into_type_stack (slot, element);
+  element.int_val = address_space_name_to_int (parse_gdbarch, string);
+  insert_into_type_stack (slot, element);
 }
 
 enum type_pieces

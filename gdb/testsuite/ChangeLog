@@ -1,5 +1,9 @@
 2012-06-19  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/whatis.exp: Add tests.
+
+2012-06-19  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.cp/m-static.cc (keepalive): New function.
 	(gnu_obj_1::method): Use it.
 

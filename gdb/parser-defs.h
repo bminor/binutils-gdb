@@ -192,11 +192,13 @@ extern int end_arglist (void);
 
 extern char *copy_name (struct stoken);
 
+extern void insert_type (enum type_pieces);
+
 extern void push_type (enum type_pieces);
 
 extern void push_type_int (int);
 
-extern void push_type_address_space (char *);
+extern void insert_type_address_space (char *);
 
 extern enum type_pieces pop_type (void);
 
