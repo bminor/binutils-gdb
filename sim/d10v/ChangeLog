@@ -1,3 +1,9 @@
+2012-06-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* interp.c: #include "config.h" instead of "sysdep.h".
+	Add conditional include of string.h or strings.h, as well as
+	conditional include of stdlib.h.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* config.in, configure: Regenerate.
