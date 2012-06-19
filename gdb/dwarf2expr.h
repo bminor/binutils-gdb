@@ -158,7 +158,7 @@ struct dwarf_expr_context
      context and operations depending on DW_FORM_ref_addr are not allowed.  */
   int ref_addr_size;
 
-  /* Offset used to relocate DW_OP_addr argument.  */
+  /* Offset used to relocate DW_OP_addr and DW_OP_GNU_addr_index arguments.  */
   CORE_ADDR offset;
 
   /* An opaque argument provided by the caller, which will be passed

@@ -1,5 +1,15 @@
 2012-06-18  Doug Evans  <dje@google.com>
 
+	* dwarf2expr.c (execute_stack_op): Handle DW_OP_GNU_const_index.
+	Adjust address for DW_OP_GNU_addr_index.
+	* dwarf2expr.h (dwarf_expr_context): Update comment.
+	* dwarf2loc.c (locexpr_describe_location_piece): New arg per_cu,
+	all callers updated.  Handle TLS vars described with
+	DW_OP_GNU_const_index.
+	(disassemble_dwarf_expression): Handle DW_OP_GNU_addr_index
+	and DW_OP_GNU_const_index.
+	* dwarf2read.c (decode_locdesc): Handle DW_OP_GNU_addr_index.
+
 	* block.c (find_block_in_blockvector): Make explicit the fact that we
 	ignore GLOBAL_BLOCK.
 

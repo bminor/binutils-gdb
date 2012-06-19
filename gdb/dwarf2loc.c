@@ -3293,10 +3293,12 @@ locexpr_regname (struct gdbarch *gdbarch, int dwarf_regnum)
 static const gdb_byte *
 locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 				 CORE_ADDR addr, struct objfile *objfile,
+				 struct dwarf2_per_cu_data *per_cu,
 				 const gdb_byte *data, const gdb_byte *end,
 				 unsigned int addr_size)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  size_t leb128_size;
 
   if (data[0] >= DW_OP_reg0 && data[0] <= DW_OP_reg31)
     {
@@ -3416,6 +3418,29 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
       data += 1 + addr_size + 1;
     }
+
+  /* With -gsplit-dwarf a TLS variable can also look like this:
+     DW_AT_location    : 3 byte block: fc 4 e0
+                        (DW_OP_GNU_const_index: 4;
+			 DW_OP_GNU_push_tls_address)  */
+  else if (data + 3 <= end
+	   && data + 1 + (leb128_size = skip_leb128 (data + 1, end)) < end
+	   && data[0] == DW_OP_GNU_const_index
+	   && leb128_size > 0
+	   && data[1 + leb128_size] == DW_OP_GNU_push_tls_address
+	   && piece_end_p (data + 2 + leb128_size, end))
+    {
+      ULONGEST offset;
+
+      data = safe_read_uleb128 (data + 1, end, &offset);
+      offset = dwarf2_read_addr_index (per_cu, offset);
+      fprintf_filtered (stream, 
+			_("a thread-local variable at offset 0x%s "
+			  "in the thread-local storage for `%s'"),
+			phex_nz (offset, addr_size), objfile->name);
+      ++data;
+    }
+
   else if (data[0] >= DW_OP_lit0
 	   && data[0] <= DW_OP_lit31
 	   && data + 1 < end
@@ -3771,6 +3796,17 @@ disassemble_dwarf_expression (struct ui_file *stream,
 					all, per_cu);
 	  data += ul;
 	  continue;
+
+	case DW_OP_GNU_addr_index:
+	  data = safe_read_uleb128 (data, end, &ul);
+	  ul = dwarf2_read_addr_index (per_cu, ul);
+	  fprintf_filtered (stream, " 0x%s", phex_nz (ul, addr_size));
+	  break;
+	case DW_OP_GNU_const_index:
+	  data = safe_read_uleb128 (data, end, &ul);
+	  ul = dwarf2_read_addr_index (per_cu, ul);
+	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  break;
 	}
 
       fprintf_filtered (stream, "\n");
@@ -3805,7 +3841,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
       if (!dwarf2_always_disassemble)
 	{
 	  data = locexpr_describe_location_piece (symbol, stream,
-						  addr, objfile,
+						  addr, objfile, per_cu,
 						  data, end, addr_size);
 	  /* If we printed anything, or if we have an empty piece,
 	     then don't disassemble.  */

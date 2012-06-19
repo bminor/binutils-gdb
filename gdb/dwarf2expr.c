@@ -727,6 +727,12 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_GNU_addr_index:
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	  result = (ctx->funcs->get_addr_index) (ctx->baton, uoffset);
+	  result += ctx->offset;
+	  result_val = value_from_ulongest (address_type, result);
+	  break;
+	case DW_OP_GNU_const_index:
+	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
+	  result = (ctx->funcs->get_addr_index) (ctx->baton, uoffset);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 

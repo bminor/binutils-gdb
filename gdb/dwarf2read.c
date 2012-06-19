@@ -15512,6 +15512,7 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	  break;
 
 	case DW_OP_GNU_addr_index:
+	case DW_OP_GNU_const_index:
 	  stack[++stacki] = read_addr_index_from_leb128 (cu, &data[i],
 							 &bytes_read);
 	  i += bytes_read;
