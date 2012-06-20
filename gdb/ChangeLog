@@ -1,3 +1,8 @@
+2012-06-20  Yao Qi  <yao@codesourcery.com>
+
+	* python/py-inferior.c: Update comments of infpy_read_memory
+	and infpy_write_memory.
+
 2012-06-19  Tom Tromey  <tromey@redhat.com>
 
 	PR exp/9514:

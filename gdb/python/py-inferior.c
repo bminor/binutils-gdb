@@ -392,7 +392,7 @@ gdbpy_inferiors (PyObject *unused, PyObject *unused2)
 
 /* Membuf and memory manipulation.  */
 
-/* Implementation of gdb.read_memory (address, length).
+/* Implementation of Inferior.read_memory (address, length).
    Returns a Python buffer object with LENGTH bytes of the inferior's
    memory at ADDRESS.  Both arguments are integers.  Returns NULL on error,
    with a python exception set.  */
@@ -455,7 +455,7 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
   return result;
 }
 
-/* Implementation of gdb.write_memory (address, buffer [, length]).
+/* Implementation of Inferior.write_memory (address, buffer [, length]).
    Writes the contents of BUFFER (a Python object supporting the read
    buffer protocol) at ADDRESS in the inferior's memory.  Write LENGTH
    bytes from BUFFER, or its entire contents if the argument is not
