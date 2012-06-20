@@ -28020,7 +28020,7 @@ N.A.
 @smallexample
  -break-insert [ -t ] [ -h ] [ -f ] [ -d ] [ -a ]
     [ -c @var{condition} ] [ -i @var{ignore-count} ]
-    [ -p @var{thread} ] [ @var{location} ]
+    [ -p @var{thread-id} ] [ @var{location} ]
 @end smallexample
 
 @noindent
@@ -28043,10 +28043,6 @@ The possible optional parameters of this command are:
 Insert a temporary breakpoint.
 @item -h
 Insert a hardware breakpoint.
-@item -c @var{condition}
-Make the breakpoint conditional on @var{condition}.
-@item -i @var{ignore-count}
-Initialize the @var{ignore-count}.
 @item -f
 If @var{location} cannot be parsed (for example if it
 refers to unknown files or functions), create a pending
@@ -28058,6 +28054,12 @@ Create a disabled breakpoint.
 @item -a
 Create a tracepoint.  @xref{Tracepoints}.  When this parameter
 is used together with @samp{-h}, a fast tracepoint is created.
+@item -c @var{condition}
+Make the breakpoint conditional on @var{condition}.
+@item -i @var{ignore-count}
+Initialize the @var{ignore-count}.
+@item -p @var{thread-id}
+Restrict the breakpoint to the specified @var{thread-id}.
 @end table
 
 @subsubheading Result
