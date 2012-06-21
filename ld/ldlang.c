@@ -1790,17 +1790,12 @@ lang_insert_orphan (asection *s,
       if (*ps == '\0')
 	{
 	  char *symname;
-	  etree_type *e_align;
 
 	  symname = (char *) xmalloc (ps - secname + sizeof "__start_" + 1);
 	  symname[0] = bfd_get_symbol_leading_char (link_info.output_bfd);
 	  sprintf (symname + (symname[0] != 0), "__start_%s", secname);
-	  e_align = exp_unop (ALIGN_K,
-			      exp_intop ((bfd_vma) 1 << s->alignment_power));
-	  lang_add_assignment (exp_assign (".", e_align));
 	  lang_add_assignment (exp_provide (symname,
-					    exp_unop (ABSOLUTE,
-						      exp_nameop (NAME, ".")),
+					    exp_nameop (NAME, "."),
 					    FALSE));
 	}
     }

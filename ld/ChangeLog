@@ -1,3 +1,8 @@
+2012-06-21  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_insert_orphan): Don't make __start_<sec> symbol
+	absolute, and remove unnecessary alignment.
+
 2012-06-16  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.h (lang_output_section_statement_type): Add after_end field.

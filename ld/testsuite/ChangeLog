@@ -1,3 +1,7 @@
+2012-06-21  Alan Modra  <amodra@gmail.com>
+
+	* ld-gc/start.d: Update.
+
 2012-06-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/dso-pltdis1.d, ld-cris/dso-pltdis2.d, dsofng.s
