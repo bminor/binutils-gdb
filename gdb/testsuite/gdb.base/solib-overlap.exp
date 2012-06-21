@@ -36,7 +36,7 @@ if [is_remote target] {
     return 0
 }
 
-if [get_compiler_info binfile-unused] {
+if [get_compiler_info] {
     return -1;
 }
 

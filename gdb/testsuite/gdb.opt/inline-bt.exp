@@ -34,7 +34,7 @@ gdb_load ${binfile}
 
 runto_main
 
-get_compiler_info $binfile
+get_compiler_info
 get_debug_format
 if { [skip_inline_frame_tests] } {
     untested inline-bt.exp

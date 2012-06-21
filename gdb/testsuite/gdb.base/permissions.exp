@@ -27,7 +27,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
     }
 
-if [get_compiler_info $binfile] {
+if [get_compiler_info] {
     return -1
 }
 

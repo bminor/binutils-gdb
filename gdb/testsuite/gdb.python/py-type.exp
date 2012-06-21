@@ -22,7 +22,7 @@ set testfile "py-type"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-if [get_compiler_info not-used c++] {
+if [get_compiler_info c++] {
     return -1;
 }
 

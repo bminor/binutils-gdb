@@ -28,7 +28,7 @@ set testfile "i386-word"
 set srcfile i386-pseudo.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

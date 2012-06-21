@@ -447,7 +447,7 @@ proc thread_test {} {
     set binfile ${objdir}/${subdir}/${testfile}-watch_thread_num
     set gdb_prompt $old_gdb_prompt
 
-    if { ![get_compiler_info ${binfile}] && [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] == "" } {
+    if { ![get_compiler_info] && [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] == "" } {
 
 	gdb_exit
 	gdb_start

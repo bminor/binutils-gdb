@@ -33,7 +33,7 @@ set execsrc "${srcdir}/${subdir}/${srcfile}"
 remote_exec build "rm -f ${binfile}"
 
 # get the value of gcc_compiled
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

@@ -28,7 +28,7 @@ set testfile "bs15503"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

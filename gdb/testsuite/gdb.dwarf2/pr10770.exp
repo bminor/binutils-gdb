@@ -23,7 +23,7 @@ if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}]} {
 }
 
 # This test can only be run on targets which use GCC.
-get_compiler_info ${testfile}
+get_compiler_info
 if {![test_compiler_info "gcc-*"]} {
     return 0
 }

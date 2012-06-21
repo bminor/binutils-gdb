@@ -29,7 +29,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 set srcfile ${testfile}.c
 
 set compile_flags {debug nowarnings quiet}
-if [get_compiler_info $binfile] {
+if [get_compiler_info] {
     warning "get_compiler failed"
     return -1
 }

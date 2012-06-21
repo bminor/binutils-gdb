@@ -35,7 +35,7 @@ set executable ${testfile}
 set objfile ${objdir}/${subdir}/${executable}.o
 set binfile ${objdir}/${subdir}/${executable}
 
-if { [get_compiler_info unused]
+if { [get_compiler_info]
      || [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfile}" "${binlibfile}" [list debug ldflags=-Wl,-soname,${binlibfile}]] != ""
      || [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug}] != ""
      || [gdb_compile "${objfile} ${binlibfile}" "${binfile}" executable {}] != "" } {

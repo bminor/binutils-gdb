@@ -31,7 +31,7 @@ set testfile "altivec-abi"
 set binfile ${objdir}/${subdir}/${testfile}
 set srcfile ${testfile}.c
 
-if [get_compiler_info $binfile] {
+if [get_compiler_info] {
     warning "get_compiler failed"
     return -1
 }

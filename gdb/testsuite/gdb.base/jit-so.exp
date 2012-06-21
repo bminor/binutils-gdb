@@ -21,7 +21,7 @@ if {[skip_shlib_tests]} {
     return -1
 }
 
-if {[get_compiler_info not-used]} {
+if {[get_compiler_info]} {
     warning "Could not get compiler info"
     untested jit-so.exp
     return 1

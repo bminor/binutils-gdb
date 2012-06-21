@@ -28,7 +28,7 @@ set libsrc   ${libfile}.c
 set library  ${objdir}/${subdir}/${libfile}.sl
 set binfile  ${objdir}/${subdir}/${testfile}
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

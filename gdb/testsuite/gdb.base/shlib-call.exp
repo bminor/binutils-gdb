@@ -46,7 +46,7 @@ set binfile  ${objdir}/${subdir}/${testfile}
 set lib_opts "debug"
 set exec_opts [list debug shlib=${lib1} shlib=${lib2}]
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

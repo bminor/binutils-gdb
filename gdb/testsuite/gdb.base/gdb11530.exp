@@ -24,7 +24,7 @@ set binfile ${testfile}${EXEEXT}
 # Unnamed union is a GNU extension, thus we restrict the test
 # to gcc compiler.
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1;
 }
 

@@ -36,7 +36,7 @@ set binfile_1 ${objdir}/${subdir}/${testfile}_1.o
 set binfile_2 ${objdir}/${subdir}/${testfile}_2.o
 
 # What compiler are we using?
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

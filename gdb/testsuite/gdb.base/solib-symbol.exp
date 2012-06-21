@@ -30,7 +30,7 @@ set srcfile ${srcdir}/${subdir}/${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 set bin_flags [list debug shlib=${binfile_lib}]
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

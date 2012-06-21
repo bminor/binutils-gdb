@@ -181,7 +181,7 @@ if { [skip_cplus_tests] } { continue }
 set testfile "psmang"
 set binfile ${objdir}/${subdir}/${testfile}
 
-if [get_compiler_info ${binfile} "c++"] {
+if [get_compiler_info "c++"] {
     return -1;
 }
 

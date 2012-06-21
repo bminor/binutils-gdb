@@ -30,7 +30,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 set exec_opts [list debug shlib=$lib_sl]
 set pyfile ${srcdir}/${subdir}/${testfile}.py
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

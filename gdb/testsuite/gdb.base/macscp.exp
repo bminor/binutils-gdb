@@ -22,7 +22,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 
 set options { debug additional_flags=-DFROM_COMMANDLINE=ARG}
 
-get_compiler_info ${binfile}
+get_compiler_info
 if [test_compiler_info gcc*] {
     lappend options additional_flags=-g3
 }

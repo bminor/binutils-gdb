@@ -48,7 +48,7 @@ set lib_o ${objdir}/${subdir}/${libfile}.o
 set lib_opts {}
 set exec_opts [list debug shlib=$lib_so]
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

@@ -30,7 +30,7 @@ set binfile_lib ${objdir}/${subdir}/${test}.so
 set srcfile "${test}-main.c"
 set srcfile_lib "${test}-lib.c"
 
-if [get_compiler_info ${binfile_lib}] {
+if [get_compiler_info] {
     return -1
 }
 

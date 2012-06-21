@@ -31,7 +31,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 
 # What compiler are we using?
 #
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

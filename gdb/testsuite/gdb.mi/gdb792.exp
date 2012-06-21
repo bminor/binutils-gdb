@@ -31,7 +31,7 @@ set testfile gdb792
 set srcfile "$testfile.cc"
 set binfile $objdir/$subdir/$testfile
 
-if [get_compiler_info ${binfile} "c++"] {
+if [get_compiler_info "c++"] {
     return -1;
 }
 

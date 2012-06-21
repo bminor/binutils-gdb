@@ -17,7 +17,7 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-if [get_compiler_info not-used] {
+if [get_compiler_info] {
     return -1
 }
 

@@ -26,7 +26,7 @@ set binfile_lib ${objdir}/${subdir}/${libfile}.so
 remote_exec build "rm -f ${binfile}"
 
 # get the value of gcc_compiled
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

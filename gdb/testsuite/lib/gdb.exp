@@ -1827,7 +1827,7 @@ proc skip_altivec_tests {} {
 
     # Make sure we have a compiler that understands altivec.
     set compile_flags {debug nowarnings}
-    if [get_compiler_info not-used] {
+    if [get_compiler_info] {
        warning "Could not get compiler info"
        return 1
     }
@@ -1916,7 +1916,7 @@ proc skip_vsx_tests {} {
 
     # Make sure we have a compiler that understands altivec.
     set compile_flags {debug nowarnings quiet}
-    if [get_compiler_info not-used] {
+    if [get_compiler_info] {
        warning "Could not get compiler info"
        return 1
     }
@@ -2100,10 +2100,7 @@ set hp_aCC_compiler		0
 
 # Figure out what compiler I am using.
 #
-# BINFILE is a "compiler information" output file.  This implementation
-# does not use BINFILE.
-#
-# ARGS can be empty or "C++".  If empty, "C" is assumed.
+# ARG can be empty or "C++".  If empty, "C" is assumed.
 #
 # There are several ways to do this, with various problems.
 #
@@ -2152,7 +2149,7 @@ set hp_aCC_compiler		0
 #
 # -- chastain 2004-01-06
 
-proc get_compiler_info {binfile args} {
+proc get_compiler_info {{arg ""}} {
     # For compiler.c and compiler.cc
     global srcdir
 
@@ -2170,7 +2167,7 @@ proc get_compiler_info {binfile args} {
 
     # Choose which file to preprocess.
     set ifile "${srcdir}/lib/compiler.c"
-    if { [llength $args] > 0 && [lindex $args 0] == "c++" } {
+    if { $arg == "c++" } {
 	set ifile "${srcdir}/lib/compiler.cc"
     }
 
@@ -2181,12 +2178,12 @@ proc get_compiler_info {binfile args} {
 	# We have to use -E and -o together, despite the comments
 	# above, because of how DejaGnu handles remote host testing.
 	set ppout "$outdir/compiler.i"
-	gdb_compile "${ifile}" "$ppout" preprocess [list "$args" quiet]
+	gdb_compile "${ifile}" "$ppout" preprocess [list "$arg" quiet]
 	set file [open $ppout r]
 	set cppout [read $file]
 	close $file
     } else {
-	set cppout [ gdb_compile "${ifile}" "" preprocess [list "$args" quiet] ]
+	set cppout [ gdb_compile "${ifile}" "" preprocess [list "$arg" quiet] ]
     }
     log_file -a "$outdir/$tool.log" 
 
@@ -3690,7 +3687,7 @@ proc build_executable { testname executable {sources ""} {options {debug}} } {
     if { [lsearch -exact $options "c++"] >= 0 } {
 	set info_options "c++"
     }
-    if [get_compiler_info ${binfile} ${info_options}] {
+    if [get_compiler_info ${info_options}] {
         return -1
     }
     return 0

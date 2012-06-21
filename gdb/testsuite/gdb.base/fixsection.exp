@@ -29,7 +29,7 @@ set lib_sl ${objdir}/${subdir}/${libfile}.sl
 set lib_opts [list debug nowarnings]
 set exec_opts [list debug nowarnings shlib=$lib_sl]
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

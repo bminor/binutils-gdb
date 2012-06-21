@@ -684,7 +684,7 @@ if  {[gdb_compile [file join $srcdir $subdir $srcfile] $binfile \
     return -1
 }
 
-if {[get_compiler_info $binfile "c++"]} {
+if {[get_compiler_info "c++"]} {
     return -1
 }
 

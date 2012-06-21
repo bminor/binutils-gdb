@@ -60,7 +60,7 @@ if { [gdb_compile "$objdir/$subdir/$objfile $objdir/$subdir/$objfile1 $objdir/$s
      return -1
 }
 
-if [get_compiler_info ${binfile} "c++"] {
+if [get_compiler_info "c++"] {
     return -1;
 }
 

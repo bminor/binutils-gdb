@@ -28,7 +28,7 @@ set testfile weird
 set srcfile ${objdir}/${subdir}/weird.s
 set binfile ${objdir}/${subdir}/weirdx.o
 
-if { [ get_compiler_info "$binfile" ] } {
+if { [ get_compiler_info ] } {
     return -1
 }
 

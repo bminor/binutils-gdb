@@ -39,7 +39,7 @@ set binfile $objdir/$subdir/$testfile
 set lib1_sl $objdir/$subdir/$libfile1.sl
 set lib2_sl $objdir/$subdir/$libfile2.sl
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

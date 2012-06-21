@@ -38,7 +38,7 @@ set lib_syms [shlib_symbol_file ${libname}]
 
 remote_exec build "rm -f ${binfile}"
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

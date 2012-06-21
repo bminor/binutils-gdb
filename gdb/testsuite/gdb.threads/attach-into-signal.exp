@@ -46,7 +46,7 @@ proc corefunc { threadtype executable } {
 	set binfile ${objdir}/${subdir}/${executable}
 	set escapedbinfile [string_to_regexp ${objdir}/${subdir}/${executable}]
 
-	if [get_compiler_info ${binfile}] {
+	if [get_compiler_info] {
 	    return -1
 	}
 

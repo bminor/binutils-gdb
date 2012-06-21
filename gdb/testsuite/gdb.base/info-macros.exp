@@ -17,7 +17,7 @@ set testfile "info-macros"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-get_compiler_info ${binfile}
+get_compiler_info
 if ![test_compiler_info gcc*] {
   untested ${testfile}.exp
   return -1

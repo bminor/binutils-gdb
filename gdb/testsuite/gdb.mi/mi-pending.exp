@@ -34,7 +34,7 @@ set lib_sl  $objdir/$subdir/$libfile.sl
 set lib_opts  debug
 set exec_opts [list debug shlib=$lib_sl]
 
-if [get_compiler_info ${binfile}] {
+if [get_compiler_info] {
     return -1
 }
 

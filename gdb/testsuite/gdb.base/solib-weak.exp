@@ -30,7 +30,7 @@ if {([istarget arm*-*-symbianelf*]
 }
 
 # This test uses GCC-specific syntax.
-if [get_compiler_info not-used] {
+if [get_compiler_info] {
     return -1
 }
 
