@@ -1,3 +1,9 @@
+2012-06-22  Roland McGrath  <mcgrathr@google.com>
+
+	* config/tc-i386.c (parse_insn): Don't complain about REP prefix
+	when the template has opcode_modifier.repprefixok set.
+	* NEWS: Mention the change.
+
 2012-06-18  Iain Sandoe  <iain@codesourcery.com>
 
 	* configure.in: Check DECLS for free, getenv, malloc, realloc,

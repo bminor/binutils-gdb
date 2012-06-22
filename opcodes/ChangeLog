@@ -1,3 +1,12 @@
+2012-06-22  Roland McGrath  <mcgrathr@google.com>
+
+	* i386-opc.h (RepPrefixOk): New enum constant.
+	(i386_opcode_modifier): New bitfield 'repprefixok'.
+	* i386-gen.c (opcode_modifiers): Add RepPrefixOk.
+	* i386-opc.tbl: Add RepPrefixOk to bsf, bsr, and to all
+	instructions that have IsString.
+	* i386-tbl.h: Regenerate.
+
 2012-06-11  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ppc-opc.c (lvsl, lvebx, isellt, icbt, ldepx, lwepx, lvsr, lvehx)

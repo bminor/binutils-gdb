@@ -1,3 +1,9 @@
+2012-06-22  Roland McGrath  <mcgrathr@google.com>
+
+	* gas/i386/rep-bsf.d: New file.
+	* gas/i386/rep-bsf.s: New file.
+	* gas/i386/i386.exp: Add the new test.
+
 2012-06-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/ilp32/x86-64-dc_a.d: New.

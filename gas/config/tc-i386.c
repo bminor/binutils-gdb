@@ -3528,13 +3528,13 @@ skip:
       as_warn (_("use .code16 to ensure correct addressing mode"));
     }
 
-  /* Check for rep/repne without a string instruction.  */
+  /* Check for rep/repne without a string (or other allowed) instruction.  */
   if (expecting_string_instruction)
     {
       static templates override;
 
       for (t = current_templates->start; t < current_templates->end; ++t)
-	if (t->opcode_modifier.isstring)
+	if (t->opcode_modifier.repprefixok)
 	  break;
       if (t >= current_templates->end)
 	{
@@ -3543,7 +3543,7 @@ skip:
 	  return NULL;
 	}
       for (override.start = t; t < current_templates->end; ++t)
-	if (!t->opcode_modifier.isstring)
+	if (!t->opcode_modifier.repprefixok)
 	  break;
       override.end = t;
       current_templates = &override;

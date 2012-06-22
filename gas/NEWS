@@ -13,6 +13,8 @@
 
 * Add support for the Adapteva EPIPHANY architecture.
 
+* For x86, allow 'rep bsf' or 'rep bsr' syntax.
+
 Changes in 2.22:
 
 * Add support for the Tilera TILEPro and TILE-Gx architectures.
