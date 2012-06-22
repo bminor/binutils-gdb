@@ -15,9 +15,7 @@
 
 # This file was written by Adam Fedor (fedor@gnu.org)
 
-set testfile "basicclass"
-set srcfile ${testfile}.m
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .m
 
 #
 # Objective-C program compilation isn't standard. We need to figure out
@@ -73,7 +71,6 @@ proc deduce_language_of_main {} {
 
 proc do_objc_tests {} {
     global subdir
-    global objdir
     global srcdir
     global binfile
     global gdb_prompt

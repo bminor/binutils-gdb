@@ -1,5 +1,14 @@
 2012-06-22  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.objc/basicclass.exp: Use standard_testfile.
+	(do_objc_tests): Don't declare objdir.
+	* gdb.objc/nondebug.exp: Use standard_testfile.
+	(do_objc_tests): Don't declare objdir.
+	* gdb.objc/objcdecode.exp: Use standard_testfile.
+	(do_objc_tests): Don't declare objdir.
+
+2012-06-22  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.java/jmain.exp: Use standard_testfile.
 	* gdb.java/jmisc.exp: Use standard_testfile.
 	* gdb.java/jnpe.exp: Use standard_testfile.
