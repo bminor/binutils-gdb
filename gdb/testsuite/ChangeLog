@@ -1,5 +1,12 @@
 2012-06-22  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.java/jmain.exp: Use standard_testfile.
+	* gdb.java/jmisc.exp: Use standard_testfile.
+	* gdb.java/jnpe.exp: Use standard_testfile.
+	* gdb.java/jprint.exp: Use standard_testfile.
+
+2012-06-22  Tom Tromey  <tromey@redhat.com>
+
 	* lib/gdb.exp (default_gdb_init): Set gdb_test_file_name.
 	(standard_output_file, standard_testfile): New procs.
 	(build_executable, clean_restart): Use standard_output_file.
