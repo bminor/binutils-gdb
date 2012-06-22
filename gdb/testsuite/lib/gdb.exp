@@ -3024,11 +3024,14 @@ proc gdb_continue { function } {
 proc default_gdb_init { args } {
     global gdb_wrapper_initialized
     global gdb_wrapper_target
+    global gdb_test_file_name
     global cleanfiles
     
     set cleanfiles {}
 
     gdb_clear_suppressed;
+
+    set gdb_test_file_name [file rootname [file tail [lindex $args 0]]]
 
     # Make sure that the wrapper is rebuilt
     # with the appropriate multilib option.
@@ -3060,6 +3063,70 @@ proc default_gdb_init { args } {
     global use_gdb_stub
     if [info exists use_gdb_stub] {
 	unset use_gdb_stub
+    }
+}
+
+# Turn BASENAME into a full file name in the standard output
+# directory.
+
+proc standard_output_file {basename} {
+    global objdir subdir
+
+    return $objdir/$subdir/$basename
+}
+
+# Set 'testfile', 'srcfile', and 'binfile'.
+#
+# ARGS is a list of source file specifications.
+# Without any arguments, the .exp file's base name is used to
+# compute the source file name.  The ".c" extension is added in this case.
+# If ARGS is not empty, each entry is a source file specification.
+# If the specification starts with a ".", it is treated as a suffix
+# to append to the .exp file's base name.
+# If the specification is the empty string, it is treated as if it
+# were ".c".
+# Otherwise it is a file name.
+# The first file in the list is used to set the 'srcfile' global.
+# Each subsequent name is used to set 'srcfile2', 'srcfile3', etc.
+#
+# Most tests should call this without arguments.
+#
+# If a completely different binary file name is needed, then it
+# should be handled in the .exp file with a suitable comment.
+
+proc standard_testfile {args} {
+    global gdb_test_file_name
+    global objdir subdir
+
+    # Outputs.
+    global testfile binfile
+
+    set testfile $gdb_test_file_name
+    set binfile [standard_output_file ${testfile}]
+
+    if {[llength $args] == 0} {
+	set args .c
+    }
+
+    set suffix ""
+    foreach arg $args {
+	set varname srcfile$suffix
+	global $varname
+
+	# Handle an extension.
+	if {$arg == ""} {
+	    set arg $testfile.c
+	} elseif {[string range $arg 0 0] == "."} {
+	    set arg $testfile$arg
+	}
+
+	set $varname $arg
+
+	if {$suffix == ""} {
+	    set suffix 2
+	} else {
+	    incr suffix
+	}
     }
 }
 
@@ -3666,7 +3733,7 @@ proc build_executable { testname executable {sources ""} {options {debug}} } {
         set sources ${executable}.c
     }
 
-    set binfile ${objdir}/${subdir}/${executable}
+    set binfile [standard_output_file $executable]
 
     set objects {}
     for {set i 0} "\$i<[llength $sources]" {incr i} {
@@ -3694,12 +3761,12 @@ proc build_executable { testname executable {sources ""} {options {debug}} } {
 }
 
 # Starts fresh GDB binary and loads EXECUTABLE into GDB. EXECUTABLE is
-# the name of binary in ${objdir}/${subdir}.
+# the basename of the binary.
 proc clean_restart { executable } {
     global srcdir
     global objdir
     global subdir
-    set binfile ${objdir}/${subdir}/${executable}
+    set binfile [standard_output_file ${executable}]
 
     gdb_exit
     gdb_start
