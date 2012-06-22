@@ -1,3 +1,8 @@
+2012-06-22  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* elf32-m68k.c (elf_m68k_finish_dynamic_symbol): Don't make
+	_GLOBAL_OFFSET_TABLE_ and _DYNAMIC absolute.
+
 2012-06-22  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Don't emit out-of-line
