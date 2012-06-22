@@ -1,3 +1,7 @@
+2012-06-22  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo: Add missing cindex for some packets.
+
 2012-06-20  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.texinfo (GDB/MI Breakpoint Commands): Re-order options

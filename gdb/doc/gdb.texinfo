@@ -37214,6 +37214,7 @@ tracepoints (@pxref{Tracepoints}).
 @table @samp
 
 @item QTDP:@var{n}:@var{addr}:@var{ena}:@var{step}:@var{pass}[:F@var{flen}][:X@var{len},@var{bytes}]@r{[}-@r{]}
+@cindex @samp{QTDP} packet
 Create a new tracepoint, number @var{n}, at @var{addr}.  If @var{ena}
 is @samp{E}, then the tracepoint is enabled; if it is @samp{D}, then
 the tracepoint is disabled.  @var{step} is the tracepoint's step
@@ -37348,6 +37349,7 @@ target should simply create the trace state variables as they are
 mentioned in expressions.
 
 @item QTFrame:@var{n}
+@cindex @samp{QTFrame} packet
 Select the @var{n}'th tracepoint frame from the buffer, and use the
 register and memory contents recorded there to answer subsequent
 request packets from @value{GDBN}.
@@ -37390,6 +37392,7 @@ Like @samp{QTFrame:range:@var{start}:@var{end}}, but select the first
 frame @emph{outside} the given range of addresses (exclusive).
 
 @item qTMinFTPILen
+@cindex @samp{qTMinFTPILen} packet
 This packet requests the minimum length of instruction at which a fast
 tracepoint (@pxref{Set Tracepoints}) may be placed.  For instance, on
 the 32-bit x86 architecture, it is possible to use a 4-byte jump, but
@@ -37414,30 +37417,36 @@ An empty reply indicates that the request is not supported by the stub.
 @end table
 
 @item QTStart
+@cindex @samp{QTStart} packet
 Begin the tracepoint experiment.  Begin collecting data from
 tracepoint hits in the trace frame buffer.  This packet supports the
 @samp{qRelocInsn} reply (@pxref{Tracepoint Packets,,Relocate
 instruction reply packet}).
 
 @item QTStop
+@cindex @samp{QTStop} packet
 End the tracepoint experiment.  Stop collecting trace frames.
 
 @item QTEnable:@var{n}:@var{addr}
 @anchor{QTEnable}
+@cindex @samp{QTEnable} packet
 Enable tracepoint @var{n} at address @var{addr} in a started tracepoint
 experiment.  If the tracepoint was previously disabled, then collection
 of data from it will resume.
 
 @item QTDisable:@var{n}:@var{addr}
 @anchor{QTDisable}
+@cindex @samp{QTDisable} packet
 Disable tracepoint @var{n} at address @var{addr} in a started tracepoint
 experiment.  No more data will be collected from the tracepoint unless
 @samp{QTEnable:@var{n}:@var{addr}} is subsequently issued.
 
 @item QTinit
+@cindex @samp{QTinit} packet
 Clear the table of tracepoints, and empty the trace frame buffer.
 
 @item QTro:@var{start1},@var{end1}:@var{start2},@var{end2}:@dots{}
+@cindex @samp{QTro} packet
 Establish the given ranges of memory as ``transparent''.  The stub
 will answer requests for these ranges from memory's current contents,
 if they were not collected as part of the tracepoint hit.
@@ -37448,12 +37457,14 @@ still have the same contents they did when the tracepoint was hit, so
 there's no reason for the stub to refuse to provide their contents.
 
 @item QTDisconnected:@var{value}
+@cindex @samp{QTDisconnected} packet
 Set the choice to what to do with the tracing run when @value{GDBN}
 disconnects from the target.  A @var{value} of 1 directs the target to
 continue the tracing run, while 0 tells the target to stop tracing if
 @value{GDBN} is no longer in the picture.
 
 @item qTStatus
+@cindex @samp{qTStatus} packet
 Ask the stub if there is a trace experiment running right now.
 
 The reply has the form:
@@ -37573,7 +37584,9 @@ was not collected.
 @end table
 
 @item qTfP
+@cindex @samp{qTfP} packet
 @itemx qTsP
+@cindex @samp{qTsP} packet
 These packets request data about tracepoints that are being used by
 the target.  @value{GDBN} sends @code{qTfP} to get the first piece
 of data, and multiple @code{qTsP} to get additional pieces.  Replies
@@ -37581,7 +37594,9 @@ to these packets generally take the form of the @code{QTDP} packets
 that define tracepoints. (FIXME add detailed syntax)
 
 @item qTfV
+@cindex @samp{qTfV} packet
 @itemx qTsV
+@cindex @samp{qTsV} packet
 These packets request data about trace state variables that are on the
 target.  @value{GDBN} sends @code{qTfV} to get the first vari of data,
 and multiple @code{qTsV} to get additional variables.  Replies to
@@ -37592,6 +37607,8 @@ trace state variables.
 @itemx qTsSTM
 @anchor{qTfSTM}
 @anchor{qTsSTM}
+@cindex @samp{qTfSTM} packet
+@cindex @samp{qTsSTM} packet
 These packets request data about static tracepoint markers that exist
 in the target program.  @value{GDBN} sends @code{qTfSTM} to get the
 first piece of data, and multiple @code{qTsSTM} to get additional
@@ -37623,18 +37640,21 @@ query), until the target responds with @samp{l} (lower-case ell, for
 
 @item qTSTMat:@var{address}
 @anchor{qTSTMat}
+@cindex @samp{qTSTMat} packet
 This packets requests data about static tracepoint markers in the
 target program at @var{address}.  Replies to this packet follow the
 syntax of the @samp{qTfSTM} and @code{qTsSTM} packets that list static
 tracepoint markers.
 
 @item QTSave:@var{filename}
+@cindex @samp{QTSave} packet
 This packet directs the target to save trace data to the file name
 @var{filename} in the target's filesystem.  @var{filename} is encoded
 as a hex string; the interpretation of the file name (relative vs
 absolute, wild cards, etc) is up to the target.
 
 @item qTBuffer:@var{offset},@var{len}
+@cindex @samp{qTBuffer} packet
 Return up to @var{len} bytes of the current contents of trace buffer,
 starting at @var{offset}.  The trace buffer is treated as if it were
 a contiguous collection of traceframes, as per the trace file format.
@@ -37648,6 +37668,7 @@ This packet directs the target to use a circular trace buffer if
 @var{value} is 1, or a linear buffer if the value is 0.
 
 @item QTNotes:@r{[}@var{type}:@var{text}@r{]}@r{[};@var{type}:@var{text}@r{]}@dots{}
+@cindex @samp{QTNotes} packet
 This packet adds optional textual notes to the trace run.  Allowable
 types include @code{user}, @code{notes}, and @code{tstop}, the
 @var{text} fields are arbitrary strings, hex-encoded.
