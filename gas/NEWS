@@ -13,7 +13,7 @@
 
 * Add support for the Adapteva EPIPHANY architecture.
 
-* For x86, allow 'rep bsf' or 'rep bsr' syntax.
+* For x86, allow 'rep bsf', 'rep bsr', and 'rep ret' syntax.
 
 Changes in 2.22:
 

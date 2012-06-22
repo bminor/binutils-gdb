@@ -1,5 +1,7 @@
 2012-06-22  Roland McGrath  <mcgrathr@google.com>
 
+	* NEWS: Mention 'rep ret' too.
+
 	* config/tc-i386.c (parse_insn): Don't complain about REP prefix
 	when the template has opcode_modifier.repprefixok set.
 	* NEWS: Mention the change.

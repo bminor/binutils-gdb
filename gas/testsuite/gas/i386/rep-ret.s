@@ -1,0 +1,2 @@
+	.text
+foo:	rep ret
