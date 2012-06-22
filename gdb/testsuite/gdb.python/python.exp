@@ -18,14 +18,10 @@
 
 load_lib gdb-python.exp
 
-set testfile "python"
-set srcfile  ${testfile}.c
-set srcfile1  ${testfile}-1.c
-set binfile  ${objdir}/${subdir}/${testfile}
+standard_testfile python.c python-1.c
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile1}" \
-	  ${binfile} executable {debug}] != "" } {
-    untested "Could not compile $binfile."
+if {[build_executable $testfile.exp $testfile \
+	 [list $srcfile $srcfile2] debug] == -1} {
     return -1
 }
 

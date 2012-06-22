@@ -21,12 +21,11 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-set testfile "py-shared"
-set srcfile  ${testfile}.c
+standard_testfile
+
 set libfile  "py-shared-sl"
 set libsrc   ${libfile}.c
-set library  ${objdir}/${subdir}/${libfile}.sl
-set binfile  ${objdir}/${subdir}/${testfile}
+set library  [standard_output_file ${libfile}.sl]
 
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${libsrc} ${library} "debug"] != "" } {
     untested "Could not compile shared library."
@@ -41,10 +40,7 @@ if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${binfile} executable $exec_opt
 }
 
 # Start with a fresh gdb.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $testfile
 gdb_load_shlibs ${library}
 
 # Skip all tests if Python scripting is not enabled.

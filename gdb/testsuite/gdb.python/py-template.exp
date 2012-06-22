@@ -18,9 +18,7 @@
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "py-template"
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .cc
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
 	  {debug c++}] != "" } {
     untested "Couldn't compile ${srcfile}"

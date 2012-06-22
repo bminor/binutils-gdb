@@ -25,12 +25,10 @@ load_lib gdb-python.exp
 
 set libfile "py-events-shlib"
 set libsrc  $srcdir/$subdir/$libfile.c
-set lib_sl  $objdir/$subdir/$libfile-nodebug.so
+set lib_sl  [standard_output_file $libfile-nodebug.so]
 set lib_opts ""
 
-set testfile "py-finish-breakpoint"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 set exec_opts [list debug shlib=$lib_sl]
 
 if [get_compiler_info] {

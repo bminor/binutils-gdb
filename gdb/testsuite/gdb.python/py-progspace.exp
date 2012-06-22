@@ -16,11 +16,9 @@
 # This file is part of the GDB testsuite.  It tests the program space
 # support in Python.
 
-set testfile "py-progspace"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "Couldn't compile ${srcfile}"
+standard_testfile
+
+if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     return -1
 }
 

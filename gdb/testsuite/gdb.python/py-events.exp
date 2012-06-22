@@ -21,12 +21,10 @@ load_lib gdb-python.exp
 
 set libfile "py-events-shlib"
 set libsrc  $srcdir/$subdir/$libfile.c
-set lib_sl  $objdir/$subdir/$libfile.so
+set lib_sl  [standard_output_file $libfile.so]
 set lib_opts  debug
 
-set testfile "py-events"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 set exec_opts [list debug shlib=$lib_sl]
 set pyfile ${srcdir}/${subdir}/${testfile}.py
 

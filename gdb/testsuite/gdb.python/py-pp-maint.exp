@@ -23,24 +23,14 @@ if [is_remote host] {
 
 load_lib gdb-python.exp
 
-set testfile "py-pp-maint"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
-# Start with a fresh gdb.
-gdb_exit
-gdb_start
-
-# Skip all tests if Python scripting is not enabled.
-if { [skip_python_tests] } { continue }
-
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "debug"] != "" } {
-    untested "Couldn't compile ${srcfile}"
+if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
     return -1
 }
 
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+# Skip all tests if Python scripting is not enabled.
+if { [skip_python_tests] } { continue }
 
 if ![runto_main ] then {
     fail "Can't run to main"

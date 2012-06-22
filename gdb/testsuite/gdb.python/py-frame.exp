@@ -18,8 +18,8 @@
 
 load_lib gdb-python.exp
 
-set testfile "py-frame"
-set srcfile ${testfile}.c
+standard_testfile
+
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
     return -1
 }

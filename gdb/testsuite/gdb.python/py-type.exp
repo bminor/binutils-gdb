@@ -18,9 +18,7 @@
 
 load_lib gdb-python.exp
 
-set testfile "py-type"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 if [get_compiler_info c++] {
     return -1;

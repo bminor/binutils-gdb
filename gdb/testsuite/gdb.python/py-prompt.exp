@@ -16,9 +16,7 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # for defining the prompt in Python.
 
-set testfile "py-prompt"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 # We need to use TCL's exec to get the pid.
 if [is_remote target] then {
@@ -38,8 +36,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 if { [skip_python_tests] } { continue }
 gdb_exit
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested py-prompt.exp
+if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     return -1
 }
 
