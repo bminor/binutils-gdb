@@ -1,3 +1,8 @@
+2012-06-22  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-elf/ehdr_start.s: New file.
+	* ld-elf/ehdr_start.d: New file.
+
 2012-06-21  Alan Modra  <amodra@gmail.com>
 
 	* ld-gc/start.d: Update.

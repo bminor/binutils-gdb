@@ -1,3 +1,9 @@
+2012-06-22  Roland McGrath  <mcgrathr@google.com>
+
+	* elf.c (assign_file_positions_for_non_load_sections): Define
+	__ehdr_start symbol if it's referenced and there's a PT_LOAD
+	segment that covers both the file and program headers.
+
 2012-06-22  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* elf32-m68k.c (elf_m68k_finish_dynamic_symbol): Don't make

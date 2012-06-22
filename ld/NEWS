@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add a linker-provided symbol when producing ELF output, '__ehdr_start'
+  to point to the ELF file header (and nearby program headers) in the
+  program's memory image.
+
 * Add support for S12X processor.
 
 * Add support for the VLE extension to the PowerPC architecture.
@@ -103,7 +107,7 @@ Changes in 2.20:
 
 * Add support for Lattice Mico32 (lm32) architecture.
 
-* Add CR16 ELF --embedded-relocs (used to embedded relocations into binaries 
+* Add CR16 ELF --embedded-relocs (used to embedded relocations into binaries
   for Embedded-PIC code) option.
 
 * Add to the PE/PE+ targets the support of two different kinds of

@@ -4826,6 +4826,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
   Elf_Internal_Phdr *phdrs;
   Elf_Internal_Phdr *p;
   struct elf_segment_map *m;
+  struct elf_segment_map *hdrs_segment;
   bfd_vma filehdr_vaddr, filehdr_paddr;
   bfd_vma phdrs_vaddr, phdrs_paddr;
   file_ptr off;
@@ -4883,6 +4884,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
   filehdr_paddr = 0;
   phdrs_vaddr = bed->maxpagesize + bed->s->sizeof_ehdr;
   phdrs_paddr = 0;
+  hdrs_segment = NULL;
   phdrs = elf_tdata (abfd)->phdr;
   for (m = elf_tdata (abfd)->segment_map, p = phdrs;
        m != NULL;
@@ -4903,9 +4905,56 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	  phdrs_paddr = p->p_paddr;
 	  if (m->includes_filehdr)
 	    {
+	      hdrs_segment = m;
 	      phdrs_vaddr += bed->s->sizeof_ehdr;
 	      phdrs_paddr += bed->s->sizeof_ehdr;
 	    }
+	}
+    }
+
+  if (hdrs_segment != NULL && link_info != NULL)
+    {
+      /* There is a segment that contains both the file headers and the
+	 program headers, so provide a symbol __ehdr_start pointing there.
+	 A program can use this to examine itself robustly.  */
+
+      struct elf_link_hash_entry *hash
+	= elf_link_hash_lookup (elf_hash_table (link_info), "__ehdr_start",
+				FALSE, FALSE, TRUE);
+      /* If the symbol was referenced and not defined, define it.  */
+      if (hash != NULL
+	  && (hash->root.type == bfd_link_hash_new
+	      || hash->root.type == bfd_link_hash_undefined
+	      || hash->root.type == bfd_link_hash_undefweak
+	      || hash->root.type == bfd_link_hash_common))
+	{
+	  asection *s = NULL;
+	  if (hdrs_segment->count != 0)
+	    /* The segment contains sections, so use the first one.  */
+	    s = hdrs_segment->sections[0];
+	  else
+	    /* Use the first (i.e. lowest-addressed) section in any segment.  */
+	    for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+	      if (m->count != 0)
+		{
+		  s = m->sections[0];
+		  break;
+		}
+
+	  if (s != NULL)
+	    {
+	      hash->root.u.def.value = filehdr_vaddr - s->vma;
+	      hash->root.u.def.section = s;
+	    }
+	  else
+	    {
+	      hash->root.u.def.value = filehdr_vaddr;
+	      hash->root.u.def.section = bfd_abs_section_ptr;
+	    }
+
+	  hash->root.type = bfd_link_hash_defined;
+	  hash->def_regular = 1;
+	  hash->non_elf = 0;
 	}
     }
 

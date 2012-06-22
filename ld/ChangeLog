@@ -1,3 +1,7 @@
+2012-06-22  Roland McGrath  <mcgrathr@google.com>
+
+	* NEWS: Mention __ehdr_start.
+
 2012-06-21  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_insert_orphan): Don't make __start_<sec> symbol
