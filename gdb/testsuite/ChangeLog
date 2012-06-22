@@ -1,3 +1,8 @@
+2012-06-22  Yao Qi  <yao@codesourcery.com>
+
+	* boards/native-gdbserver.exp: New proc ${board}_exec.
+	* boards/native-stdio-gdbserver.exp: Likewise.
+
 2012-06-21  Tom Tromey  <tromey@redhat.com>
 
 	* lib/gdb.exp (skip_altivec_tests, skip_vsx_tests)

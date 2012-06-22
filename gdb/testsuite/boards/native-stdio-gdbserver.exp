@@ -126,6 +126,18 @@ proc ${board}_spawn { board cmd } {
     return $result
 }
 
+proc ${board}_exec { hostname program args } {
+    global board_info
+
+    set baseboard [lindex [split $hostname "/"] 0]
+
+    set board_info($baseboard,isremote) 0
+    set result [remote_exec $hostname $program $args]
+    set board_info($baseboard,isremote) 1
+
+    return $result
+}
+
 proc ${board}_download { board host dest } {
     return $host
 }
