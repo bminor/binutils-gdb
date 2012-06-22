@@ -1,3 +1,7 @@
+2012-06-22  Roland McGrath  <mcgrathr@google.com>
+
+	* layout.cc (finalize): Define __ehdr_start symbol if applicable.
+
 2012-06-12  Rafael Ávila de Espíndola <respindola@mozilla.com>
 
 	* plugin.cc (Plugin::load): Handle position independent executables.

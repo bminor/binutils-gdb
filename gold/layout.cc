@@ -2509,6 +2509,16 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   while (target->may_relax()
 	 && target->relax(pass, input_objects, symtab, this, task));
 
+  // If there is a load segment that contains the file and program headers,
+  // provide a symbol __ehdr_start pointing there.
+  // A program can use this to examine itself robustly.
+  if (load_seg != NULL)
+    symtab->define_in_output_segment("__ehdr_start", NULL,
+				     Symbol_table::PREDEFINED, load_seg, 0, 0,
+				     elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
+				     elfcpp::STV_DEFAULT, 0,
+				     Symbol::SEGMENT_START, true);
+
   // Set the file offsets of all the non-data sections we've seen so
   // far which don't have to wait for the input sections.  We need
   // this in order to finalize local symbols in non-allocated
