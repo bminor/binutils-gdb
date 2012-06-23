@@ -62,6 +62,7 @@
 #include "go-lang.h"
 #include "valprint.h"
 #include "gdbcore.h" /* for gnutarget */
+#include "gdb/gdb-index.h"
 #include <ctype.h>
 
 #include <fcntl.h>
@@ -121,6 +122,28 @@ DEF_VEC_O (dwarf2_section_info_def);
 typedef uint32_t offset_type;
 
 DEF_VEC_I (offset_type);
+
+/* Ensure only legit values are used.  */
+#define DW2_GDB_INDEX_SYMBOL_STATIC_SET_VALUE(cu_index, value) \
+  do { \
+    gdb_assert ((unsigned int) (value) <= 1); \
+    GDB_INDEX_SYMBOL_STATIC_SET_VALUE((cu_index), (value)); \
+  } while (0)
+
+/* Ensure only legit values are used.  */
+#define DW2_GDB_INDEX_SYMBOL_KIND_SET_VALUE(cu_index, value) \
+  do { \
+    gdb_assert ((value) >= GDB_INDEX_SYMBOL_KIND_TYPE \
+                && (value) <= GDB_INDEX_SYMBOL_KIND_OTHER); \
+    GDB_INDEX_SYMBOL_KIND_SET_VALUE((cu_index), (value)); \
+  } while (0)
+
+/* Ensure we don't use more than the alloted nuber of bits for the CU.  */
+#define DW2_GDB_INDEX_CU_SET_VALUE(cu_index, value) \
+  do { \
+    gdb_assert (((value) & ~GDB_INDEX_CU_MASK) == 0); \
+    GDB_INDEX_CU_SET_VALUE((cu_index), (value)); \
+  } while (0)
 
 /* A description of the mapped index.  The file format is described in
    a comment by the code that writes the index.  */
@@ -2350,7 +2373,7 @@ dwarf2_read_index (struct objfile *objfile)
     }
   /* Indexes with higher version than the one supported by GDB may be no
      longer backward compatible.  */
-  if (version > 6)
+  if (version > 7)
     return 0;
 
   map = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct mapped_index);
@@ -2716,26 +2739,70 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 }
 
 /* A helper function that expands all symtabs that hold an object
-   named NAME.  */
+   named NAME.  If WANT_SPECIFIC_BLOCK is non-zero, only look for
+   symbols in block BLOCK_KIND.  */
 
 static void
-dw2_do_expand_symtabs_matching (struct objfile *objfile, const char *name)
+dw2_do_expand_symtabs_matching (struct objfile *objfile,
+				int want_specific_block,
+				enum block_enum block_kind,
+				const char *name, domain_enum domain)
 {
+  struct mapped_index *index;
+
   dw2_setup (objfile);
 
+  index = dwarf2_per_objfile->index_table;
+
   /* index_table is NULL if OBJF_READNOW.  */
-  if (dwarf2_per_objfile->index_table)
+  if (index)
     {
       offset_type *vec;
 
-      if (find_slot_in_mapped_hash (dwarf2_per_objfile->index_table,
-				    name, &vec))
+      if (find_slot_in_mapped_hash (index, name, &vec))
 	{
 	  offset_type i, len = MAYBE_SWAP (*vec);
 	  for (i = 0; i < len; ++i)
 	    {
-	      offset_type cu_index = MAYBE_SWAP (vec[i + 1]);
+	      offset_type cu_index_and_attrs = MAYBE_SWAP (vec[i + 1]);
+	      offset_type cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
 	      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (cu_index);
+	      int want_static = block_kind != GLOBAL_BLOCK;
+	      /* This value is only valid for index versions >= 7.  */
+	      int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
+	      gdb_index_symbol_kind symbol_kind =
+		GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
+
+	      if (want_specific_block
+		  && index->version >= 7
+		  && want_static != is_static)
+		continue;
+
+	      /* Only check the symbol's kind if it has one.
+		 Indices prior to version 7 don't record it.  */
+	      if (index->version >= 7)
+		{
+		  switch (domain)
+		    {
+		    case VAR_DOMAIN:
+		      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_VARIABLE
+			  && symbol_kind != GDB_INDEX_SYMBOL_KIND_FUNCTION
+			  /* Some types are also in VAR_DOMAIN.  */
+			  && symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
+			continue;
+		      break;
+		    case STRUCT_DOMAIN:
+		      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
+			continue;
+		      break;
+		    case LABEL_DOMAIN:
+		      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_OTHER)
+			continue;
+		      break;
+		    default:
+		      break;
+		    }
+		}
 
 	      dw2_instantiate_symtab (per_cu);
 	    }
@@ -2748,7 +2815,7 @@ dw2_pre_expand_symtabs_matching (struct objfile *objfile,
 				 enum block_enum block_kind, const char *name,
 				 domain_enum domain)
 {
-  dw2_do_expand_symtabs_matching (objfile, name);
+  dw2_do_expand_symtabs_matching (objfile, 1, block_kind, name, domain);
 }
 
 static void
@@ -2786,7 +2853,9 @@ static void
 dw2_expand_symtabs_for_function (struct objfile *objfile,
 				 const char *func_name)
 {
-  dw2_do_expand_symtabs_matching (objfile, func_name);
+  /* Note: It doesn't matter what we pass for block_kind here.  */
+  dw2_do_expand_symtabs_matching (objfile, 0, GLOBAL_BLOCK, func_name,
+				  VAR_DOMAIN);
 }
 
 static void
@@ -2901,7 +2970,7 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
      should be rewritten so that it doesn't require a custom hook.  It
      could just use the ordinary symbol tables.  */
   /* vec[0] is the length, which must always be >0.  */
-  per_cu = dw2_get_cu (MAYBE_SWAP (vec[1]));
+  per_cu = dw2_get_cu (GDB_INDEX_CU_VALUE (MAYBE_SWAP (vec[1])));
 
   if (per_cu->v.quick->symtab != NULL)
     return per_cu->v.quick->symtab->filename;
@@ -3025,8 +3094,40 @@ dw2_expand_symtabs_matching
       for (vec_idx = 0; vec_idx < vec_len; ++vec_idx)
 	{
 	  struct dwarf2_per_cu_data *per_cu;
+	  offset_type cu_index_and_attrs = MAYBE_SWAP (vec[vec_idx + 1]);
+	  gdb_index_symbol_kind symbol_kind =
+	    GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
+	  int cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
 
-	  per_cu = dw2_get_cu (MAYBE_SWAP (vec[vec_idx + 1]));
+	  /* Don't crash on bad data.  */
+	  if (cu_index >= (dwarf2_per_objfile->n_comp_units
+			   + dwarf2_per_objfile->n_comp_units))
+	    continue;
+
+	  /* Only check the symbol's kind if it has one.
+	     Indices prior to version 7 don't record it.  */
+	  if (index->version >= 7)
+	    {
+	      switch (kind)
+		{
+		case VARIABLES_DOMAIN:
+		  if (symbol_kind != GDB_INDEX_SYMBOL_KIND_VARIABLE)
+		    continue;
+		  break;
+		case FUNCTIONS_DOMAIN:
+		  if (symbol_kind != GDB_INDEX_SYMBOL_KIND_FUNCTION)
+		    continue;
+		  break;
+		case TYPES_DOMAIN:
+		  if (symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
+		    continue;
+		  break;
+		default:
+		  break;
+		}
+	    }
+
+	  per_cu = dw2_get_cu (cu_index);
 	  if (file_matcher == NULL || per_cu->v.quick->mark)
 	    dw2_instantiate_symtab (per_cu);
 	}
@@ -17417,14 +17518,17 @@ hash_expand (struct mapped_symtab *symtab)
   xfree (old_entries);
 }
 
-/* Add an entry to SYMTAB.  NAME is the name of the symbol.  CU_INDEX
-   is the index of the CU in which the symbol appears.  */
+/* Add an entry to SYMTAB.  NAME is the name of the symbol.
+   CU_INDEX is the index of the CU in which the symbol appears.
+   IS_STATIC is one if the symbol is static, otherwise zero (global).  */
 
 static void
 add_index_entry (struct mapped_symtab *symtab, const char *name,
+		 int is_static, gdb_index_symbol_kind kind,
 		 offset_type cu_index)
 {
   struct symtab_index_entry **slot;
+  offset_type cu_index_and_attrs;
 
   ++symtab->n_elements;
   if (4 * symtab->n_elements / 3 >= symtab->size)
@@ -17435,13 +17539,76 @@ add_index_entry (struct mapped_symtab *symtab, const char *name,
     {
       *slot = XNEW (struct symtab_index_entry);
       (*slot)->name = name;
+      /* index_offset is set later.  */
       (*slot)->cu_indices = NULL;
     }
-  /* Don't push an index twice.  Due to how we add entries we only
-     have to check the last one.  */ 
-  if (VEC_empty (offset_type, (*slot)->cu_indices)
-      || VEC_last (offset_type, (*slot)->cu_indices) != cu_index)
-    VEC_safe_push (offset_type, (*slot)->cu_indices, cu_index);
+
+  cu_index_and_attrs = 0;
+  DW2_GDB_INDEX_CU_SET_VALUE (cu_index_and_attrs, cu_index);
+  DW2_GDB_INDEX_SYMBOL_STATIC_SET_VALUE (cu_index_and_attrs, is_static);
+  DW2_GDB_INDEX_SYMBOL_KIND_SET_VALUE (cu_index_and_attrs, kind);
+
+  /* We don't want to record an index value twice as we want to avoid the
+     duplication.
+     We process all global symbols and then all static symbols
+     (which would allow us to avoid the duplication by only having to check
+     the last entry pushed), but a symbol could have multiple kinds in one CU.
+     To keep things simple we don't worry about the duplication here and
+     sort and uniqufy the list after we've processed all symbols.  */
+  VEC_safe_push (offset_type, (*slot)->cu_indices, cu_index_and_attrs);
+}
+
+/* qsort helper routine for uniquify_cu_indices.  */
+
+static int
+offset_type_compare (const void *ap, const void *bp)
+{
+  offset_type a = *(offset_type *) ap;
+  offset_type b = *(offset_type *) bp;
+
+  return (a > b) - (b > a);
+}
+
+/* Sort and remove duplicates of all symbols' cu_indices lists.  */
+
+static void
+uniquify_cu_indices (struct mapped_symtab *symtab)
+{
+  int i;
+
+  for (i = 0; i < symtab->size; ++i)
+    {
+      struct symtab_index_entry *entry = symtab->data[i];
+
+      if (entry
+	  && entry->cu_indices != NULL)
+	{
+	  unsigned int next_to_insert, next_to_check;
+	  offset_type last_value;
+
+	  qsort (VEC_address (offset_type, entry->cu_indices),
+		 VEC_length (offset_type, entry->cu_indices),
+		 sizeof (offset_type), offset_type_compare);
+
+	  last_value = VEC_index (offset_type, entry->cu_indices, 0);
+	  next_to_insert = 1;
+	  for (next_to_check = 1;
+	       next_to_check < VEC_length (offset_type, entry->cu_indices);
+	       ++next_to_check)
+	    {
+	      if (VEC_index (offset_type, entry->cu_indices, next_to_check)
+		  != last_value)
+		{
+		  last_value = VEC_index (offset_type, entry->cu_indices,
+					  next_to_check);
+		  VEC_replace (offset_type, entry->cu_indices, next_to_insert,
+			       last_value);
+		  ++next_to_insert;
+		}
+	    }
+	  VEC_truncate (offset_type, entry->cu_indices, next_to_insert);
+	}
+    }
 }
 
 /* Add a vector of indices to the constant pool.  */
@@ -17655,6 +17822,44 @@ write_address_map (struct objfile *objfile, struct obstack *obstack,
 		       addrmap_index_data.previous_cu_index);
 }
 
+/* Return the symbol kind of PSYM.  */
+
+static gdb_index_symbol_kind
+symbol_kind (struct partial_symbol *psym)
+{
+  domain_enum domain = PSYMBOL_DOMAIN (psym);
+  enum address_class aclass = PSYMBOL_CLASS (psym);
+
+  switch (domain)
+    {
+    case VAR_DOMAIN:
+      switch (aclass)
+	{
+	case LOC_BLOCK:
+	  return GDB_INDEX_SYMBOL_KIND_FUNCTION;
+	case LOC_TYPEDEF:
+	  return GDB_INDEX_SYMBOL_KIND_TYPE;
+	case LOC_COMPUTED:
+	case LOC_CONST_BYTES:
+	case LOC_OPTIMIZED_OUT:
+	case LOC_STATIC:
+	  return GDB_INDEX_SYMBOL_KIND_VARIABLE;
+	case LOC_CONST:
+	  /* Note: It's currently impossible to recognize psyms as enum values
+	     short of reading the type info.  For now punt.  */
+	  return GDB_INDEX_SYMBOL_KIND_VARIABLE;
+	default:
+	  /* There are other LOC_FOO values that one might want to classify
+	     as variables, but dwarf2read.c doesn't currently use them.  */
+	  return GDB_INDEX_SYMBOL_KIND_OTHER;
+	}
+    case STRUCT_DOMAIN:
+      return GDB_INDEX_SYMBOL_KIND_TYPE;
+    default:
+      return GDB_INDEX_SYMBOL_KIND_OTHER;
+    }
+}
+
 /* Add a list of partial symbols to SYMTAB.  */
 
 static void
@@ -17667,29 +17872,21 @@ write_psymbols (struct mapped_symtab *symtab,
 {
   for (; count-- > 0; ++psymp)
     {
-      void **slot, *lookup;
+      struct partial_symbol *psym = *psymp;
+      void **slot;
 
-      if (SYMBOL_LANGUAGE (*psymp) == language_ada)
+      if (SYMBOL_LANGUAGE (psym) == language_ada)
 	error (_("Ada is not currently supported by the index"));
 
-      /* We only want to add a given psymbol once.  However, we also
-	 want to account for whether it is global or static.  So, we
-	 may add it twice, using slightly different values.  */
-      if (is_static)
-	{
-	  uintptr_t val = 1 | (uintptr_t) *psymp;
-
-	  lookup = (void *) val;
-	}
-      else
-	lookup = *psymp;
-
       /* Only add a given psymbol once.  */
-      slot = htab_find_slot (psyms_seen, lookup, INSERT);
+      slot = htab_find_slot (psyms_seen, psym, INSERT);
       if (!*slot)
 	{
-	  *slot = lookup;
-	  add_index_entry (symtab, SYMBOL_SEARCH_NAME (*psymp), cu_index);
+	  gdb_index_symbol_kind kind = symbol_kind (psym);
+
+	  *slot = psym;
+	  add_index_entry (symtab, SYMBOL_SEARCH_NAME (psym),
+			   is_static, kind, cu_index);
 	}
     }
 }
@@ -17912,6 +18109,10 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 			      write_one_signatured_type, &sig_data);
     }
 
+  /* Now that we've processed all symbols we can shrink their cu_indices
+     lists.  */
+  uniquify_cu_indices (symtab);
+
   obstack_init (&constant_pool);
   make_cleanup_obstack_free (&constant_pool);
   obstack_init (&symtab_obstack);
@@ -17924,7 +18125,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   total_len = size_of_contents;
 
   /* The version number.  */
-  val = MAYBE_SWAP (6);
+  val = MAYBE_SWAP (7);
   obstack_grow (&contents, &val, sizeof (val));
 
   /* The offset of the CU list from the start of the file.  */

@@ -40378,7 +40378,7 @@ index version:
 @item Version 4
 The formula is @code{r = r * 67 + c - 113}.
 
-@item Versions 5 and 6
+@item Versions 5 to 7
 The formula is @code{r = r * 67 + tolower (c) - 113}.
 @end table
 
@@ -40402,12 +40402,102 @@ strings.
 
 A CU vector in the constant pool is a sequence of @code{offset_type}
 values.  The first value is the number of CU indices in the vector.
-Each subsequent value is the index of a CU in the CU list.  This
-element in the hash table is used to indicate which CUs define the
-symbol.
+Each subsequent value is the index and symbol attributes of a CU in
+the CU list.  This element in the hash table is used to indicate which
+CUs define the symbol and how the symbol is used.
+See below for the format of each CU index+attributes entry.
 
 A string in the constant pool is zero-terminated.
 @end enumerate
+
+Attributes were added to CU index values in @code{.gdb_index} version 7.
+If a symbol has multiple uses within a CU then there is one
+CU index+attributes value for each use.
+
+The format of each CU index+attributes entry is as follows
+(bit 0 = LSB):
+
+@table @asis
+
+@item Bits 0-23
+This is the index of the CU in the CU list.
+@item Bits 24-27
+These bits are reserved for future purposes and must be zero.
+@item Bits 28-30
+The kind of the symbol in the CU.
+
+@table @asis
+@item 0
+This value is reserved and should not be used.
+By reserving zero the full @code{offset_type} value is backwards compatible
+with previous versions of the index.
+@item 1
+The symbol is a type.
+@item 2
+The symbol is a variable or an enum value.
+@item 3
+The symbol is a function.
+@item 4
+Any other kind of symbol.
+@item 5,6,7
+These values are reserved.
+@end table
+
+@item Bit 31
+This bit is zero if the value is global and one if it is static.
+
+The determination of whether a symbol is global or static is complicated.
+The authorative reference is the file @file{dwarf2read.c} in
+@value{GDBN} sources.
+
+@end table
+
+This pseudo-code describes the computation of a symbol's kind and
+global/static attributes in the index.
+
+@smallexample
+is_external = get_attribute (die, DW_AT_external);
+language = get_attribute (cu_die, DW_AT_language);
+switch (die->tag)
+  @{
+  case DW_TAG_typedef:
+  case DW_TAG_base_type:
+  case DW_TAG_subrange_type:
+    kind = TYPE;
+    is_static = 1;
+    break;
+  case DW_TAG_enumerator:
+    kind = VARIABLE;
+    is_static = (language != CPLUS && language != JAVA);
+    break;
+  case DW_TAG_subprogram:
+    kind = FUNCTION;
+    is_static = ! (is_external || language == ADA);
+    break;
+  case DW_TAG_constant:
+    kind = VARIABLE;
+    is_static = ! is_external;
+    break;
+  case DW_TAG_variable:
+    kind = VARIABLE;
+    is_static = ! is_external;
+    break;
+  case DW_TAG_namespace:
+    kind = TYPE;
+    is_static = 0;
+    break;
+  case DW_TAG_class_type:
+  case DW_TAG_interface_type:
+  case DW_TAG_structure_type:
+  case DW_TAG_union_type:
+  case DW_TAG_enumeration_type:
+    kind = TYPE;
+    is_static = (language != CPLUS && language != JAVA);
+    break;
+  default:
+    assert (0);
+  @}
+@end smallexample
 
 @include gpl.texi
 

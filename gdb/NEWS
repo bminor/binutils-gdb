@@ -112,6 +112,12 @@
   the ability to set breakpoints on inlined functions will be lost
   in symbol files with older .gdb_index sections.
 
+  The .gdb_index section has also been updated to record more information
+  about each symbol.  This speeds up the "info variables", "info functions"
+  and "info types" commands when used with programs having the .gdb_index
+  section, as well as speeding up debugging with shared libraries using
+  the .gdb_index section.
+
 * Ada support for GDB/MI Variable Objects has been added.
 
 * GDB can now support 'breakpoint always-inserted mode' in 'record'

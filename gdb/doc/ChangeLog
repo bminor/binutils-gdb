@@ -1,3 +1,7 @@
+2012-06-23  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Index Section Format): Document version 7 format.
+
 2012-06-22  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo: Add missing cindex for some packets.

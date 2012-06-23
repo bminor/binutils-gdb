@@ -1,3 +1,22 @@
+2012-06-23  Doug Evans  <dje@google.com>
+
+	PR 14125
+	* NEWS: Document additions to .gdb_index.
+	* dwarf2read.c: #include "gdb/gdb-index.h".
+	(DW2_GDB_INDEX_SYMBOL_STATIC_SET_VALUE): New macro.
+	(DW2_GDB_INDEX_SYMBOL_KIND_SET_VALUE): New macro.
+	(DW2_GDB_INDEX_CU_SET_VALUE): New macro.
+	(dwarf2_read_index): Recognize version 7.
+	(dw2_do_expand_symtabs_matching): New args want_specific_block,
+	block_kind, domain): All callers updated.
+	(dw2_find_symbol_file): Handle new index CU values.
+	(dw2_expand_symtabs_matching): Match symbol kind if requested.
+	(add_index_entry): New args is_static, kind.  All callers updated.
+	(offset_type_compare, uniquify_cu_indices): New functions
+	(symbol_kind): New function.
+	(write_psymtabs_to_index): Remove duplicate CU values.
+	(write_psymtabs_to_index): Write .gdb_index version 7.
+
 2012-06-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac (build_warnings): Add -Wdeclaration-after-statement.
