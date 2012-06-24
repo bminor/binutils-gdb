@@ -1,3 +1,8 @@
+2012-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt: Enable elf_k1om for x86_64-*-linux-gnux32.
+	Remove x32 in tdir_i386linux and tdir_elf_i386.
+
 2012-06-22  Roland McGrath  <mcgrathr@google.com>
 
 	* NEWS: Mention __ehdr_start.
