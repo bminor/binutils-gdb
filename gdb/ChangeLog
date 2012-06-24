@@ -1,3 +1,7 @@
+2012-06-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* cc-with-index.sh: Use also -ex "set auto-load no".
+
 2012-06-23  Doug Evans  <dje@google.com>
 
 	PR 14125

@@ -107,7 +107,7 @@ then
     exit 1
 fi
 
-$GDB --batch-silent -nx -ex "file $output_file" -ex "save gdb-index $output_dir"
+$GDB --batch-silent -nx -ex "set auto-load no" -ex "file $output_file" -ex "save gdb-index $output_dir"
 rc=$?
 [ $rc != 0 ] && exit $rc
 
