@@ -20,7 +20,7 @@ load_lib gdb-python.exp
 
 standard_testfile .cc
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
     return -1
 }
 
