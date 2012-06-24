@@ -6099,12 +6099,12 @@ $as_echo_n "checking for MAP_ANONYMOUS... " >&6; }
 
 #include <sys/mman.h>
 #ifdef MAP_ANONYMOUS
-    I cant identify this map
+    I cannot identify this map
 #endif
 
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "I cant identify this map" >/dev/null 2>&1; then :
+  $EGREP "I cannot identify this map" >/dev/null 2>&1; then :
   gl_have_mmap_anonymous=yes
 fi
 rm -f conftest*
@@ -6115,12 +6115,12 @@ rm -f conftest*
 
 #include <sys/mman.h>
 #ifdef MAP_ANON
-    I cant identify this map
+    I cannot identify this map
 #endif
 
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "I cant identify this map" >/dev/null 2>&1; then :
+  $EGREP "I cannot identify this map" >/dev/null 2>&1; then :
 
 $as_echo "#define MAP_ANONYMOUS MAP_ANON" >>confdefs.h
 
@@ -6315,7 +6315,7 @@ else
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "Lucky user" >/dev/null 2>&1; then :
-  gl_cv_func_memmem_works_always=yes
+  gl_cv_func_memmem_works_always="guessing yes"
 else
   gl_cv_func_memmem_works_always="guessing no"
 fi
@@ -6363,9 +6363,12 @@ fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_memmem_works_always" >&5
 $as_echo "$gl_cv_func_memmem_works_always" >&6; }
-    if test "$gl_cv_func_memmem_works_always" != yes; then
-      REPLACE_MEMMEM=1
-    fi
+    case "$gl_cv_func_memmem_works_always" in
+      *yes) ;;
+      *)
+        REPLACE_MEMMEM=1
+        ;;
+    esac
   fi
   :
 
@@ -6912,7 +6915,7 @@ else
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "Lucky user" >/dev/null 2>&1; then :
-  gl_cv_func_memmem_works_fast=yes
+  gl_cv_func_memmem_works_fast="guessing yes"
 else
   gl_cv_func_memmem_works_fast="guessing no"
 fi
@@ -6970,9 +6973,12 @@ fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_memmem_works_fast" >&5
 $as_echo "$gl_cv_func_memmem_works_fast" >&6; }
-    if test "$gl_cv_func_memmem_works_fast" != yes; then
-      REPLACE_MEMMEM=1
-    fi
+    case "$gl_cv_func_memmem_works_fast" in
+      *yes) ;;
+      *)
+        REPLACE_MEMMEM=1
+        ;;
+    esac
   fi
 
 if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
@@ -7046,7 +7052,7 @@ else
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "Lucky user" >/dev/null 2>&1; then :
-  gl_cv_func_memmem_works_always=yes
+  gl_cv_func_memmem_works_always="guessing yes"
 else
   gl_cv_func_memmem_works_always="guessing no"
 fi
@@ -7094,9 +7100,12 @@ fi
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_memmem_works_always" >&5
 $as_echo "$gl_cv_func_memmem_works_always" >&6; }
-    if test "$gl_cv_func_memmem_works_always" != yes; then
-      REPLACE_MEMMEM=1
-    fi
+    case "$gl_cv_func_memmem_works_always" in
+      *yes) ;;
+      *)
+        REPLACE_MEMMEM=1
+        ;;
+    esac
   fi
   :
 

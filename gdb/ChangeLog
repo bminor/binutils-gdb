@@ -1,3 +1,15 @@
+2012-06-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Update gnulib to GIT commit a39f53ccb70a613e647e1019fb4c63645220267e.
+	* gnulib/config.in: Regenerate.
+	* gnulib/configure: Likewise.
+	* gnulib/import/m4/extensions.m4: Update it.
+	* gnulib/import/m4/gnulib-common.m4: Likewise.
+	* gnulib/import/m4/memmem.m4: Likewise.
+	* gnulib/import/m4/mmap-anon.m4: Likewise.
+	* gnulib/import/m4/multiarch.m4: Likewise.
+	* gnulib/import/stdint.in.h: Likewise.
+
 2012-06-24  Yao Qi  <yao@codesourcery.com>
 
 	* corefile.c (write_memory_with_notification): New.

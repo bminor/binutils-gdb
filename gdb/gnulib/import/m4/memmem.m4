@@ -1,4 +1,4 @@
-# memmem.m4 serial 23
+# memmem.m4 serial 24
 dnl Copyright (C) 2002-2004, 2007-2012 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
@@ -67,13 +67,16 @@ AC_DEFUN([gl_FUNC_MEMMEM_SIMPLE],
   Lucky user
 #endif
            ],
-           [gl_cv_func_memmem_works_always=yes],
+           [gl_cv_func_memmem_works_always="guessing yes"],
            [gl_cv_func_memmem_works_always="guessing no"])
         ])
       ])
-    if test "$gl_cv_func_memmem_works_always" != yes; then
-      REPLACE_MEMMEM=1
-    fi
+    case "$gl_cv_func_memmem_works_always" in
+      *yes) ;;
+      *)
+        REPLACE_MEMMEM=1
+        ;;
+    esac
   fi
   gl_PREREQ_MEMMEM
 ]) # gl_FUNC_MEMMEM_SIMPLE
@@ -131,13 +134,16 @@ static void quit (int sig) { exit (sig + 128); }
  #endif
 #endif
            ],
-           [gl_cv_func_memmem_works_fast=yes],
+           [gl_cv_func_memmem_works_fast="guessing yes"],
            [gl_cv_func_memmem_works_fast="guessing no"])
         ])
       ])
-    if test "$gl_cv_func_memmem_works_fast" != yes; then
-      REPLACE_MEMMEM=1
-    fi
+    case "$gl_cv_func_memmem_works_fast" in
+      *yes) ;;
+      *)
+        REPLACE_MEMMEM=1
+        ;;
+    esac
   fi
 ]) # gl_FUNC_MEMMEM
 
