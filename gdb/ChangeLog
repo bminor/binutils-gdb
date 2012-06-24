@@ -1,3 +1,13 @@
+2012-06-24  Yao Qi  <yao@codesourcery.com>
+
+	* corefile.c (write_memory_with_notification): New.
+	* gdbcore.h: Declare write_memory_with_notification.
+	* ada-lang.c (ada_value_assign): Replace 'write_memory' and
+	'observer_notify_memory_changed' with 'write_memory_with_notification'.
+	* valops.c (value_assign): Likewise.
+	* python/py-inferior.c (infpy_write_memory): Call
+	'write_memory_with_notification'.
+
 2012-06-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* cc-with-index.sh: Use also -ex "set auto-load no".

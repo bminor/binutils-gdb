@@ -2534,8 +2534,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       else
         move_bits (buffer, value_bitpos (toval),
 		   value_contents (fromval), 0, bits, 0);
-      write_memory (to_addr, buffer, len);
-      observer_notify_memory_changed (to_addr, len, buffer);
+      write_memory_with_notification (to_addr, buffer, len);
 
       val = value_copy (toval);
       memcpy (value_contents_raw (val), value_contents (fromval),

@@ -34,6 +34,7 @@
 #include "gdb_stat.h"
 #include "completer.h"
 #include "exceptions.h"
+#include "observer.h"
 
 /* Local function declarations.  */
 
@@ -359,6 +360,16 @@ write_memory (CORE_ADDR memaddr,
   status = target_write_memory (memaddr, myaddr, len);
   if (status != 0)
     memory_error (status, memaddr);
+}
+
+/* Same as write_memory, but notify 'memory_changed' observers.  */
+
+void
+write_memory_with_notification (CORE_ADDR memaddr, const bfd_byte *myaddr,
+				ssize_t len)
+{
+  write_memory (memaddr, myaddr, len);
+  observer_notify_memory_changed (memaddr, len, myaddr);
 }
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte unsigned

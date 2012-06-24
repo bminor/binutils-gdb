@@ -493,7 +493,7 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 	  error = 1;
 	  break;
 	}
-      write_memory (addr, buffer, length);
+      write_memory_with_notification (addr, buffer, length);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 

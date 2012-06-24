@@ -1299,9 +1299,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    dest_buffer = value_contents (fromval);
 	  }
 
-	write_memory (changed_addr, dest_buffer, changed_len);
-	observer_notify_memory_changed (changed_addr, changed_len,
-					dest_buffer);
+	write_memory_with_notification (changed_addr, dest_buffer, changed_len);
       }
       break;
 
