@@ -28088,7 +28088,7 @@ Note: this format is open to change.
 @subsubheading @value{GDBN} Command
 
 The corresponding @value{GDBN} commands are @samp{break}, @samp{tbreak},
-@samp{hbreak}, @samp{thbreak}, and @samp{rbreak}.
+@samp{hbreak}, and @samp{thbreak}. @c and @samp{rbreak}.
 
 @subsubheading Example
 
@@ -28117,11 +28117,11 @@ bkpt=@{number="2",type="breakpoint",disp="del",enabled="y",
 addr="0x00010774",func="foo",file="recursive2.c",
 fullname="/home/foo/recursive2.c",line="11",times="0"@}]@}
 (gdb)
--break-insert -r foo.*
-~int foo(int, int);
-^done,bkpt=@{number="3",addr="0x00010774",file="recursive2.c,
-"fullname="/home/foo/recursive2.c",line="11",times="0"@}
-(gdb)
+@c -break-insert -r foo.*
+@c ~int foo(int, int);
+@c ^done,bkpt=@{number="3",addr="0x00010774",file="recursive2.c,
+@c "fullname="/home/foo/recursive2.c",line="11",times="0"@}
+@c (gdb)
 @end smallexample
 
 @subheading The @code{-break-list} Command

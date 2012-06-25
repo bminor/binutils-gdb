@@ -1,3 +1,9 @@
+2012-06-25  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.texinfo (GDB/MI Breakpoint Commands): Remove "-r" option
+	from example.  Remove "rbreak" from list of corresponding
+	gdb commands.
+
 2012-06-23  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Index Section Format): Document version 7 format.
