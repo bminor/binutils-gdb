@@ -1,5 +1,12 @@
 2012-06-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.pascal/integers.exp: Use standard_testfile, clean_restart.
+	* gdb.pascal/hello.exp: Use standard_testfile, clean_restart.
+	* gdb.pascal/gdb11492.exp: Use standard_testfile, clean_restart.
+	* gdb.pascal/floats.exp: Use standard_testfile, clean_restart.
+
+2012-06-25  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.linespec/ls-errs.exp: Use standard_testfile.
 	* gdb.linespec/ls-dollar.exp: Use standard_testfile.
 	* gdb.linespec/linespec.exp: Use standard_testfile.
