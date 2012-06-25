@@ -15,10 +15,8 @@
 
 # Tests for linespec error conditions
 
-set base ls-errs
-set srcfile "$base.c"
-set testfile "$base.exp"
-set exefile $base
+standard_testfile
+set exefile $testfile
 
 if {[prepare_for_testing $testfile $exefile $srcfile \
 	 {debug nowarnings}]} {

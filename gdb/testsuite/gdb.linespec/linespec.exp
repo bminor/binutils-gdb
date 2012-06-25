@@ -15,10 +15,9 @@
 
 # Tests of ambiguous linespecs.
 
-set testfile linespec
+standard_testfile lspec.cc
 
-set exefile lspec
-set binfile ${objdir}/${subdir}/${exefile}
+set exefile $testfile
 
 set baseone base/one/thefile.cc
 set basetwo base/two/thefile.cc
@@ -29,7 +28,7 @@ if {[skip_cplus_tests]} {
 }
 
 if {[prepare_for_testing ${testfile}.exp $exefile \
-	 [list lspec.cc $baseone $basetwo] \
+	 [list $srcfile $baseone $basetwo] \
 	 {debug nowarnings c++}]} {
     return -1
 }

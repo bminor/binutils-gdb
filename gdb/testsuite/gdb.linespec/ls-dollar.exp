@@ -15,10 +15,8 @@
 
 # Tests for dollar signs in linespecs
 
-set base "ls-dollar"
-set srcfile "$base.cc"
-set testfile "$base.exp"
-set exefile $base
+standard_testfile .cc
+set exefile $testfile
 
 if {[skip_cplus_tests]} {
     unsupported "skipping C++ tests"

@@ -1,5 +1,11 @@
 2012-06-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.linespec/ls-errs.exp: Use standard_testfile.
+	* gdb.linespec/ls-dollar.exp: Use standard_testfile.
+	* gdb.linespec/linespec.exp: Use standard_testfile.
+
+2012-06-25  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.modula2/unbounded-array.exp: Use standard_testfile,
 	prepare_for_testing.
 
