@@ -18,9 +18,7 @@
 # Test displaying call clobbered registers in optimized binaries.
 # GDB should not show incorrect values.
 
-set testfile clobbered-registers-O2
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 # What compiler are we using?
 #
@@ -28,18 +26,10 @@ if [get_compiler_info] {
     return -1
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [concat debug optimize=-O2 nowarnings]] != "" } {
-     untested clobbered-registers-O2.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile $srcfile \
+	 {debug optimize=-O2 nowarnings}]} {
+    return -1
 }
-
-# use this to debug:
-#log_user 1
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 if { ![runto start_sequence] } then {
    fail "run to start_sequence"

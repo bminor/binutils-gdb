@@ -17,10 +17,9 @@
 # mirrors this testcase, and should be updated if this testcase is
 # changed.
 
-set basename "inline-break"
-set testfile $basename
+standard_testfile
 
-if { [prepare_for_testing $testfile.exp $testfile $testfile.c \
+if { [prepare_for_testing $testfile.exp $testfile $srcfile \
           {debug optimize=-O2 additional_flags=-Winline}] } {
     return -1
 }
@@ -30,7 +29,7 @@ if { [prepare_for_testing $testfile.exp $testfile $testfile.c \
 # The result should be a single-location breakpoint.
 #
 gdb_test "break func1" \
-    "Breakpoint.*at.* file .*$basename\\.c, line.*"
+    "Breakpoint.*at.* file .*$srcfile, line.*"
 
 #
 # func2 is a non-static inlined function that is called once.
@@ -46,7 +45,7 @@ gdb_test "break func2" \
 # a single-location breakpoint.
 #
 gdb_test "break func3b" \
-    "Breakpoint.*at.* file .*$basename\\.c, line.*"
+    "Breakpoint.*at.* file .*$srcfile, line.*"
 
 #
 # func4b is a static inlined function that is called once from

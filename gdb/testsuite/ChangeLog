@@ -1,5 +1,18 @@
 2012-06-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.opt/clobbered-registers-O2.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.opt/inline-break.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.opt/inline-bt.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.opt/inline-cmds.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.opt/inline-locals.exp: Use standard_testfile,
+	prepare_for_testing.
+
+2012-06-25  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.asm/asm-source.exp: Use standard_output_file,
 	standard_testfile.  Construct .o files in proper subdir.
 
