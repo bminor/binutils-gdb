@@ -3067,12 +3067,13 @@ proc default_gdb_init { args } {
 }
 
 # Turn BASENAME into a full file name in the standard output
-# directory.
+# directory.  It is ok if BASENAME is the empty string; in this case
+# the directory is returned.
 
 proc standard_output_file {basename} {
     global objdir subdir
 
-    return $objdir/$subdir/$basename
+    return [file join $objdir $subdir $basename]
 }
 
 # Set 'testfile', 'srcfile', and 'binfile'.

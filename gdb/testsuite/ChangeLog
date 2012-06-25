@@ -1,3 +1,16 @@
+2012-06-25  Tom Tromey  <tromey@redhat.com>
+
+	* lib/gdb.exp (standard_output_file): Use "file join".
+	* gdb.go/chan.exp: Use standard_testfile.
+	* gdb.go/handcall.exp: Use standard_testfile.
+	* gdb.go/hello.exp: Use standard_testfile.
+	* gdb.integers/chan.exp: Use standard_testfile.
+	* gdb.go/methods.exp: Use standard_testfile.
+	* gdb.go/package.exp: Use standard_testfile.
+	* gdb.go/strings.exp: Use standard_testfile.
+	* gdb.go/types.exp: Use standard_testfile.
+	* gdb.go/unsafe.exp: Use standard_testfile.
+
 2012-06-25  Greta Yorsh  <greta.yorsh@arm.com>
 
 	* gdb.arch/arm-disp-step.S: Fix use of .global directives.

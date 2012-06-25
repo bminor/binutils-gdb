@@ -21,8 +21,7 @@ load_lib "go.exp"
 
 if { [skip_go_tests] } { continue }
 
-set testfile "unsafe"
-set srcfile ${testfile}.go
+standard_testfile .go
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug go}] } {
     return -1
