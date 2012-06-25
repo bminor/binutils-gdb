@@ -1,3 +1,8 @@
+2012-06-25  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-elf/ehdr_start.d (ld): Add explicit -e _start.
+	(notarget): Add arm*-*-eabi* cris-*-*.
+
 2012-06-22  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-elf/ehdr_start.s: New file.
