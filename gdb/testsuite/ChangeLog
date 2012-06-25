@@ -1,3 +1,7 @@
+2012-06-25  Greta Yorsh  <greta.yorsh@arm.com>
+
+	* gdb.arch/arm-disp-step.S: Fix use of .global directives.
+
 2012-06-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix regression by the previous commit.

@@ -110,7 +110,7 @@ test_ret:
 	.type test_branch, %function
 test_branch:
 	b	L_branch
-	.global
+	.global L_branch
 L_branch:
 	bx lr
 	.size test_branch, .-test_branch
@@ -124,7 +124,7 @@ L_branch:
 test_ldr_pc:
 	ldr	r1, [pc, #0]
 
-	.global
+	.global test_ldr_pc_ret
 test_ldr_pc_ret:
 	bx lr
 	.size test_ldr_pc, .-test_ldr_pc
@@ -137,10 +137,10 @@ test_ldm_stm_pc:
 	ldmia	sp!, {r0, r1}
 	ldr	r0, .L1
 	stmdb	sp!, {r0}
-	.global
+	.global test_ldm_pc
 test_ldm_pc:
 	ldmia	sp!, {pc}
-	.global
+	.global test_ldm_stm_pc_ret
 test_ldm_stm_pc_ret:
 	bx lr
 	.align	2
