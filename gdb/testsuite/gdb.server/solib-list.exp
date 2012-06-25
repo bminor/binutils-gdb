@@ -27,13 +27,11 @@ if {[skip_gdbserver_tests] || [skip_shlib_tests]} {
     return
 }
 
-set testfile "solib-list"
+standard_testfile solib-list-main.c
 set srclibfile ${testfile}-lib.c
-set srcfile ${testfile}-main.c
-set binlibfile ${objdir}/${subdir}/${testfile}.so
+set binlibfile [standard_output_file ${testfile}.so]
 set executable ${testfile}
-set objfile ${objdir}/${subdir}/${executable}.o
-set binfile ${objdir}/${subdir}/${executable}
+set objfile ${binfile}.o
 
 if { [get_compiler_info]
      || [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfile}" "${binlibfile}" [list debug ldflags=-Wl,-soname,${binlibfile}]] != ""

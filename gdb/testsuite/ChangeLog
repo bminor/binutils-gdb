@@ -1,5 +1,21 @@
 2012-06-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.server/ext-attach.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.server/ext-run.exp: Use standard_testfile,
+	build_executable.
+	* gdb.server/file-transfer.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.server/server-exec-info.exp: Use standard_testfile.
+	* gdb.server/server-mon.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.server/server-run.exp: Use standard_testfile,
+	build_executable.
+	* gdb.server/solib-list.exp: Use standard_testfile,
+	standard_output_file.
+
+2012-06-25  Tom Tromey  <tromey@redhat.com>
+
 	* lib/gdb.exp (standard_output_file): Use "file join".
 	* gdb.go/chan.exp: Use standard_testfile.
 	* gdb.go/handcall.exp: Use standard_testfile.

@@ -19,15 +19,13 @@
 
 load_lib gdbserver-support.exp
 
-set testfile "server"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/server-run
+standard_testfile server.c
 
 if { [skip_gdbserver_tests] } {
     return 0
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     return -1
 }
 

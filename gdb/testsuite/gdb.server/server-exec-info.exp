@@ -15,9 +15,7 @@
 
 load_lib gdbserver-support.exp
 
-set testfile "no-execfile-info"
-set srcfile "server.c"
-#if { [build_executable ${testfile}.exp ${testfile} ${srcfile}] == -1} {
+standard_testfile server.c
 if [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] {
     return -1
 }

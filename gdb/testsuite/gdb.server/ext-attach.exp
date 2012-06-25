@@ -19,9 +19,7 @@
 
 load_lib gdbserver-support.exp
 
-set testfile "ext-attach"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 if { [skip_gdbserver_tests] } {
     return 0
@@ -32,15 +30,9 @@ if [is_remote target] then {
     return 0
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested ext-attach.exp
+if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
     return -1
 }
-
-gdb_exit
-gdb_start
-gdb_load $binfile
-gdb_reinitialize_dir $srcdir/$subdir
 
 # Make sure we're disconnected, in case we're testing with an
 # extended-remote board, therefore already connected.
