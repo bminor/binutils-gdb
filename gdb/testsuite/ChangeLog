@@ -1,3 +1,20 @@
+2012-06-25  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.fortran/subarray.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.fortran/multi-dim.exp: Use standard_testfile.
+	* gdb.fortran/module.exp: Use standard_testfile.
+	* gdb.fortran/logical.exp: Use standard_testfile.
+	* gdb.fortran/library-module.exp: Use standard_testfile,
+	standard_output_file.
+	* gdb.fortran/derived-type.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.fortran/complex.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.fortran/charset.exp: Use standard_testfile.
+	* gdb.fortran/array-element.exp: Use standard_testfile,
+	prepare_for_testing.
+
 2012-06-25  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.mi/mi-break.exp (test_rbreak_creation_and_listing):

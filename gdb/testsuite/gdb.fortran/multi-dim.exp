@@ -18,8 +18,8 @@
 
 if { [skip_fortran_tests] } { return -1 }
 
-set testfile "multi-dim"
-set srcfile ${testfile}.f90
+standard_testfile .f90
+
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug f90}] } {
     return -1
 }

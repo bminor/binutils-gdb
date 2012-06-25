@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set testfile "module"
-set srcfile ${testfile}.f90
+standard_testfile .f90
 
 if { [prepare_for_testing $testfile.exp $testfile $srcfile {debug f90}] } {
     return -1

@@ -20,12 +20,9 @@
 
 if { [skip_fortran_tests] } { return -1 }
 
-set testfile "subarray"
-set srcfile ${testfile}.f
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .f
 
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
-	executable {debug f90}] != ""} {
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug f90}]} {
     return -1
 }
 

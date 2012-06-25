@@ -16,11 +16,9 @@
 
 # This file was written by Jan Kratochvil <jan.kratochvil@redhat.com>.
 
-set test "logical"
-set srcfile ${test}.f90
+standard_testfile .f90
 
-if { [prepare_for_testing "${test}.exp" "${test}" "${srcfile}" {debug f90 quiet}] } {
-    untested "Could not compile ${srcfile}."
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug f90 quiet}]} {
     return -1
 }
 
