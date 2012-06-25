@@ -862,26 +862,31 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
   const char *arg;
   static char *keywords[] = {"text", "stream", NULL };
   int stream_type = 0;
+  volatile struct gdb_exception except;
   
   if (! PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &arg,
 				     &stream_type))
     return NULL;
 
-  switch (stream_type)
+  TRY_CATCH (except, RETURN_MASK_ALL)
     {
-    case 1:
-      {
-	fprintf_filtered (gdb_stderr, "%s", arg);
-	break;
-      }
-    case 2:
-      {
-	fprintf_filtered (gdb_stdlog, "%s", arg);
-	break;
-      }
-    default:
-      fprintf_filtered (gdb_stdout, "%s", arg);
+      switch (stream_type)
+        {
+        case 1:
+          {
+	    fprintf_filtered (gdb_stderr, "%s", arg);
+	    break;
+          }
+        case 2:
+          {
+	    fprintf_filtered (gdb_stdlog, "%s", arg);
+	    break;
+          }
+        default:
+          fprintf_filtered (gdb_stdout, "%s", arg);
+        }
     }
+  GDB_PY_HANDLE_EXCEPTION (except);
      
   Py_RETURN_NONE;
 }
