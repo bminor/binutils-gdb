@@ -121,27 +121,27 @@ proc test_rbreak_creation_and_listing {} {
     # -break-insert -r .*llee
     # -break-list
 
-    setup_xfail "*-*-*"
+    setup_kfail "*-*-*" mi/14270
     mi_gdb_test "122-break-insert -r main" \
              "122\\^done,bkpt=\{number=\"5\",addr=\"$hex\",file=\".*basics.c\",line=\"$line_main_body\"\}" \
              "break-insert -r operation"
 
-    setup_xfail "*-*-*"
+    setup_kfail "*-*-*" mi/14270
     mi_gdb_test "133-break-insert -r callee2" \
              "133\\^done,bkpt=\{number=\"6\",addr=\"$hex\",file=\".*basics.c\",line=\"$line_callee2_body\"\}" \
              "insert breakpoint with regexp callee2"
 
-    setup_xfail "*-*-*"
+    setup_kfail "*-*-*" mi/14270
     mi_gdb_test "144-break-insert -r callee" \
 	    "144\\^done,bkpt=\{number=\"7\",addr=\"$hex\",file=\".*basics.c\",line=\"$line_callee1_body\"\},bkpt=\{number=\"8\",addr=\"$hex\",file=\".*basics.c\",line=\"$line_callee2_body\"\},bkpt=\{number=\"9\",addr=\"$hex\",file=\".*basics.c\",line=\"$line_callee3_body\"\},bkpt=\{number=\"10\",addr=\"$hex\",file=\".*basics.c\",line=\"$line_callee4_body\"\}" \
              "insert breakpoint with regexp callee"
 
-    setup_xfail "*-*-*"
+    setup_kfail "*-*-*" mi/14270
     mi_gdb_test "155-break-insert -r \.\*llee" \
 	    "155\\^done,bkpt=\{number=\"11\",addr=\"$hex\",file=\".*basics.c\",line=\"$line_callee1_body\"\},bkpt=\{number=\"12\",addr=\"$hex\",file=\".*basics.c\",line=\"$line_callee2_body\"\},bkpt=\{number=\"13\",addr=\"$hex\",file=\".*basics.c\",line=\"$line_callee3_body\"\},bkpt=\{number=\"14\",addr=\"$hex\",file=\".*basics.c\",line=\"$line_callee4_body\"\}" \
              "insert breakpoint with regexp .*llee"
 
-    setup_xfail "*-*-*"
+    setup_kfail "*-*-*" mi/14270
     mi_gdb_test "166-break-list" \
 	    "1\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"5\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"$line_main_body\",times=\"0\"\},.*\}\\\]\}" \
                 "list of breakpoints"

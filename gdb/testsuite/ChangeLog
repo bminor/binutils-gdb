@@ -1,3 +1,8 @@
+2012-06-25  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.mi/mi-break.exp (test_rbreak_creation_and_listing):
+	Change rbreak-related tests to KFAIL and add bugzilla numbers.
+
 2012-06-25  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.pascal/integers.exp: Use standard_testfile, clean_restart.
