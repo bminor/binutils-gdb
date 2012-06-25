@@ -1,5 +1,13 @@
 2012-06-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.multi/watchpoint-multi.exp: Use standard_testfile.
+	* gdb.multi/bkpt-multi-exec.exp: Use standard_output_file.  Use
+	build_executable, not prepare_for_testing.
+	* gdb.multi/base.exp: Use standard_output_file.  Use
+	build_executable,  not prepare_for_testing.
+
+2012-06-25  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.fortran/subarray.exp: Use standard_testfile,
 	prepare_for_testing.
 	* gdb.fortran/multi-dim.exp: Use standard_testfile.

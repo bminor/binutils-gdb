@@ -27,17 +27,17 @@ set testfile "bkpt-multi-exec"
 
 set exec1 "bkpt-multi-exec"
 set srcfile1 ${exec1}.c
-set binfile1 ${objdir}/${subdir}/${exec1}
+set binfile1 [standard_output_file ${exec1}]
 
 set exec2 "crashme"
 set srcfile2 ${exec2}.c
-set binfile2 ${objdir}/${subdir}/${exec2}
+set binfile2 [standard_output_file ${exec2}]
 
-if { [prepare_for_testing ${testfile}.exp ${exec1} "${srcfile1}" {debug nowarnings}] } {
+if { [build_executable ${testfile}.exp ${exec1} "${srcfile1}" {debug nowarnings}] == -1 } {
     return -1
 }
 
-if { [prepare_for_testing ${testfile}.exp ${exec2} "${srcfile2}" {debug nowarnings}] } {
+if { [build_executable ${testfile}.exp ${exec2} "${srcfile2}" {debug nowarnings}] == -1 } {
     return -1
 }
 
