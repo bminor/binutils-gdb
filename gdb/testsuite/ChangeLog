@@ -1,5 +1,10 @@
 2012-06-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.asm/asm-source.exp: Use standard_output_file,
+	standard_testfile.  Construct .o files in proper subdir.
+
+2012-06-25  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.server/ext-attach.exp: Use standard_testfile,
 	prepare_for_testing.
 	* gdb.server/ext-run.exp: Use standard_testfile,
