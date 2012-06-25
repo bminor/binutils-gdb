@@ -1,3 +1,9 @@
+2012-06-25  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (load_symbols): Close file and set flags.loaded
+	after parsing script file.
+	(open_input_bfds): Don't segv on closed script.
+
 2012-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt: Enable elf_k1om for x86_64-*-linux-gnux32.

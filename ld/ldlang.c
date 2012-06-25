@@ -2668,6 +2668,7 @@ load_symbols (lang_input_statement_type *entry,
     {
       bfd_error_type err;
       struct lang_input_statement_flags save_flags;
+      extern FILE *yyin;
 
       err = bfd_get_error ();
 
@@ -2715,6 +2716,9 @@ load_symbols (lang_input_statement_type *entry,
       save_flags.missing_file |= input_flags.missing_file;
       input_flags = save_flags;
       pop_stat_ptr ();
+      fclose (yyin);
+      yyin = NULL;
+      entry->flags.loaded = TRUE;
 
       return TRUE;
     }
@@ -3224,6 +3228,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 #endif
 		  && !s->input_statement.flags.whole_archive
 		  && s->input_statement.flags.loaded
+		  && s->input_statement.the_bfd != NULL
 		  && bfd_check_format (s->input_statement.the_bfd,
 				       bfd_archive))
 		s->input_statement.flags.loaded = FALSE;
@@ -3233,6 +3238,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 		       && plugin_insert == NULL
 		       && s->input_statement.flags.loaded
 		       && s->input_statement.flags.add_DT_NEEDED_for_regular
+		       && s->input_statement.the_bfd != NULL
 		       && ((s->input_statement.the_bfd->flags) & DYNAMIC) != 0
 		       && plugin_should_reload (s->input_statement.the_bfd))
 		{
