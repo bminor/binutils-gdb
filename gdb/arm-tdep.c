@@ -3217,6 +3217,9 @@ arm_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       else if ((insn & 0x0fff0000) == 0x08bd0000)
 	/* POP (LDMIA).  */
 	found_stack_adjust = 1;
+      else if ((insn & 0x0fff0000) == 0x049d0000)
+	/* POP of a single register.  */
+	found_stack_adjust = 1;
     }
 
   if (found_stack_adjust)
