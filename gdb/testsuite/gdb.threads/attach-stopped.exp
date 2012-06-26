@@ -23,10 +23,8 @@ if { ![isnative] || [is_remote host] || [target_info exists use_gdb_stub]
     continue
 }
 
-set testfile "attach-stopped"
-set srcfile  ${testfile}.c
-set binfile  ${objdir}/${subdir}/${testfile}
-set escapedbinfile  [string_to_regexp ${objdir}/${subdir}/${testfile}]
+standard_testfile
+set escapedbinfile  [string_to_regexp $binfile]
 
 #execute_anywhere "rm -f ${binfile}"
 remote_exec build "rm -f ${binfile}"

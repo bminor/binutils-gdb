@@ -13,13 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set testfile tls-var
-set srcfile ${testfile}.c
+standard_testfile
 set srcmainfile ${testfile}-main.c
-set objfile ${objdir}/${subdir}/${testfile}.o
-set objmainfile ${objdir}/${subdir}/${testfile}-main.o
+set objfile [standard_output_file ${testfile}.o]
+set objmainfile [standard_output_file ${testfile}-main.o]
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
 
 if { [gdb_compile ${srcdir}/${subdir}/${srcfile} ${objfile} object {debug}] != ""
      || [gdb_compile ${srcdir}/${subdir}/${srcmainfile} ${objmainfile} object {}] != ""

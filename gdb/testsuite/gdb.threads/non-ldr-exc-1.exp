@@ -21,10 +21,8 @@ if { [is_remote target] } then {
     continue
 }
 
-set testfile "non-ldr-exc-1"
-set srcfile ${testfile}.c
+standard_testfile
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
 
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     return -1

@@ -16,12 +16,10 @@
 # tls-shared.exp -- Expect script to test thread local storage in gdb, with
 # shared libraries.
 
-set testfile tls-main
+standard_testfile tls-main.c
 set libfile tls-shared
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
 set srcfile_lib ${libfile}.c
-set binfile_lib ${objdir}/${subdir}/${libfile}.so
+set binfile_lib [standard_output_file ${libfile}.so]
 
 remote_exec build "rm -f ${binfile}"
 
@@ -37,10 +35,7 @@ if { [gdb_compile_shlib_pthreads ${srcdir}/${subdir}/${srcfile_lib} ${binfile_li
 }
 
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${binfile}
 gdb_load_shlibs ${binfile_lib}
 
 if ![runto_main] then {
@@ -53,7 +48,7 @@ gdb_test "print i_tls" "2" "print thread local storage variable"
 gdb_test "ptype i_tls" "int" "ptype of thread local storage variable"
 
 gdb_test "info address i_tls" \
-	"Symbol \\\"i_tls\\\" is a thread-local variable at offset 0x0 in the thread-local storage for .*tls-main.." \
+	"Symbol \\\"i_tls\\\" is a thread-local variable at offset 0x0 in the thread-local storage for .*tls-shared.." \
 	"print storage info for thread local storage variable"
 
 set line_number [gdb_get_line_number "break here to check result"]

@@ -20,14 +20,12 @@
 # This test covers the various forms of "set scheduler-locking".
 
 
-set testfile "schedlock"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 # The number of threads, including the main thread.
 set NUM 2
 
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug] != "" } {
     return -1
 }
 

@@ -23,19 +23,14 @@ if {[skip_hw_watchpoint_multi_tests]} {
     return 0
 }
 
-set testfile "local-watch-wrong-thread"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 if {[gdb_compile_pthreads \
 	 "${srcdir}/${subdir}/${srcfile}" \
 	 "${binfile}" executable {debug} ] != "" } {
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${binfile}
 
 gdb_test_no_output "set can-use-hw-watchpoints 1" ""
 

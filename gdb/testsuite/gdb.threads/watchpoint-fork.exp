@@ -23,7 +23,7 @@ if [is_remote target] {
 }
 
 proc test {type symbol} { with_test_prefix "$type" {
-    global testfile objdir subdir srcdir gdb_prompt
+    global testfile subdir srcdir gdb_prompt
 
     set srcfile_type ${srcdir}/${subdir}/${testfile}-${type}.c
 
@@ -31,11 +31,13 @@ proc test {type symbol} { with_test_prefix "$type" {
 
     with_test_prefix "singlethreaded" {
 	set executable ${testfile}-${type}-st
-	set srcfile_main ${srcdir}/${subdir}/${testfile}-st.c
-	if { [gdb_compile "${srcfile_main} ${srcfile_type}" ${objdir}/${subdir}/${executable} executable [list debug additional_flags=-D$symbol]] != "" } {
-	    untested ${testfile}.exp
-	    return
+	set srcfile_main ${testfile}-st.c
+	if {[build_executable $testfile.exp $executable \
+		 [list $srcfile_main ${testfile}-${type}.c] \
+		 [list debug additional_flags=-D$symbol]] == -1} {
+	    return -1
 	}
+
 	clean_restart $executable
 
 	if [target_info exists gdb,no_hardware_watchpoints] {
@@ -90,7 +92,7 @@ proc test {type symbol} { with_test_prefix "$type" {
     with_test_prefix "multithreaded" {
 	set executable ${testfile}-${type}-mt
 	set srcfile_main ${srcdir}/${subdir}/${testfile}-mt.c
-	if { [gdb_compile_pthreads "${srcfile_main} ${srcfile_type}" ${objdir}/${subdir}/${executable} executable [list debug "additional_flags=-D$symbol -DTHREAD"]] != "" } {
+	if { [gdb_compile_pthreads "${srcfile_main} ${srcfile_type}" [standard_output_file ${executable}] executable [list debug "additional_flags=-D$symbol -DTHREAD"]] != "" } {
 	    untested ${testfile}.exp
 	    return
 	}

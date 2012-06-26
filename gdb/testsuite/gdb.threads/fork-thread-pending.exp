@@ -25,19 +25,14 @@ if { ! [istarget "*-*-linux*"] } {
     return 0
 }
 
-set testfile fork-thread-pending
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart ${binfile}
 
-gdb_load ${binfile}
 if ![runto_main] then {
    fail "Can't run to main"
    return 0

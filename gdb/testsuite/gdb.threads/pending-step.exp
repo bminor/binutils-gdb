@@ -48,20 +48,13 @@
 #    continued in step 5).  Neither does this SIGTRAP correspond to a
 #    breakpoint hit.  GDB reports to the user a spurious SIGTRAP.
 
-set testfile "pending-step"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug] != "" } {
     return -1
 }
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${binfile}
 
 if ![runto_main] then {
     fail "Can't run to main"

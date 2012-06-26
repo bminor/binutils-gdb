@@ -16,10 +16,8 @@
 # Exit of a thread when there are other threads in the inferior should
 # not hang GDB.
 
-set testfile "no-unwaited-for-left"
-set srcfile ${testfile}.c
+standard_testfile
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
 
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     return -1

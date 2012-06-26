@@ -22,29 +22,21 @@ if { ![isnative] || [is_remote host] || [target_info exists use_gdb_stub]
     continue
 }
 
-set testfile "attach-into-signal"
-set srcfile  ${testfile}.c
+standard_testfile
 set executable_nothr ${testfile}-nothr
 set executable_thr ${testfile}-thr
-
-remote_exec build "rm -f ${objdir}/${subdir}/${executable_nothr}"
-remote_exec build "rm -f ${objdir}/${subdir}/${executable_thr}"
-# For debugging this test
-#
-#log_user 1
 
 proc corefunc { threadtype executable } {
     global srcfile
     global srcdir
-    global objdir
     global subdir
     global gdb_prompt
 
     with_test_prefix "$threadtype" {
 	clean_restart ${executable}
 
-	set binfile ${objdir}/${subdir}/${executable}
-	set escapedbinfile [string_to_regexp ${objdir}/${subdir}/${executable}]
+	set binfile [standard_output_file $executable]
+	set escapedbinfile [string_to_regexp ${binfile}]
 
 	if [get_compiler_info] {
 	    return -1
@@ -183,7 +175,7 @@ corefunc nonthreaded ${executable_nothr}
 
 # build the test case also with threads
 #
-if  { [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${objdir}/${subdir}/${executable_thr}" executable {debug additional_flags=-DUSE_THREADS}] != "" } {
+if  { [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" [standard_output_file ${executable_thr}] executable {debug additional_flags=-DUSE_THREADS}] != "" } {
     untested "attach-into-signal.exp (threaded)"
     return -1
 }

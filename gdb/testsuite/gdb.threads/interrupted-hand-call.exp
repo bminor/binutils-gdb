@@ -19,11 +19,9 @@
 
 set NR_THREADS 4
 
-set testfile "interrupted-hand-call"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "incdir=${objdir}" "additional_flags=-DNR_THREADS=$NR_THREADS"]] != "" } {
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "additional_flags=-DNR_THREADS=$NR_THREADS"]] != "" } {
     return -1
 }
 
@@ -35,10 +33,7 @@ if [target_info exists gdb,cannot_call_functions] {
     continue
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${binfile}
 
 if { ![runto_main] } {
     fail "Can't run to main"

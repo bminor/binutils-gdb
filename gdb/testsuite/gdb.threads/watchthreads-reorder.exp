@@ -31,9 +31,7 @@ if {[skip_hw_watchpoint_access_tests]
     return 0
 }
 
-set testfile "watchthreads-reorder"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" ${binfile} executable [list debug additional_flags=-lrt]] != "" } {
     return -1
 }

@@ -20,9 +20,7 @@
 # breakpoint has been already deleted.  moribund locations are not active in
 # the default all-stop mode.
 
-set testfile "ia64-sigill"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" ${binfile} executable [list debug additional_flags=-lrt]] != "" } {
     return -1
 }

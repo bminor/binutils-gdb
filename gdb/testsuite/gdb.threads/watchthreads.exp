@@ -28,10 +28,8 @@ proc target_no_stopped_data { } {
     return [istarget s390*-*-*]
 }
 
-set testfile "watchthreads"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
+standard_testfile
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug] != "" } {
     return -1
 }
 

@@ -21,26 +21,19 @@
 # handling for thread exit.
 
 
-set testfile "print-threads"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 # regexp for "horizontal" text (i.e. doesn't include newline or
 # carriage return)
 set horiz "\[^\n\r\]*"
 
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "incdir=${objdir}"]] != "" } {
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug] != "" } {
     return -1
 }
 
 # Now we can proceed with the real testing.
 
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${binfile}
 
 gdb_test_no_output "set print sevenbit-strings"
 #gdb_test_no_output "set print address off"
