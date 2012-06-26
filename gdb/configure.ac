@@ -1274,6 +1274,12 @@ fi
 AC_CHECK_MEMBERS([struct reg.r_fs, struct reg.r_gs], [], [],
                  [#include <machine/reg.h>])
 
+# See if <sys/user.h> supports the %fs_base and %gs_bas amd64 segment registers.
+# Older amd64 Linux's don't have the fs_base and gs_base members of
+# `struct user_regs_struct'.
+AC_CHECK_MEMBERS([struct user_regs_struct.fs_base, struct user_regs_struct.gs_base],
+		 [], [], [#include <sys/user.h>])
+
 # See if <sys/ptrace.h> provides the PTRACE_GETREGS request.
 AC_MSG_CHECKING(for PTRACE_GETREGS)
 AC_CACHE_VAL(gdb_cv_have_ptrace_getregs,

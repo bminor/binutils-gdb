@@ -447,6 +447,12 @@
 /* Define to 1 if `struct thread' is a member of `td_pcb'. */
 #undef HAVE_STRUCT_THREAD_TD_PCB
 
+/* Define to 1 if `struct user_regs_struct' is a member of `fs_base'. */
+#undef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+
+/* Define to 1 if `struct user_regs_struct' is a member of `gs_base'. */
+#undef HAVE_STRUCT_USER_REGS_STRUCT_GS_BASE
+
 /* Define to 1 if you have the `syscall' function. */
 #undef HAVE_SYSCALL
 

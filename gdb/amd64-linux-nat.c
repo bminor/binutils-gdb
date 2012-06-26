@@ -34,6 +34,7 @@
 #include <sys/debugreg.h>
 #include <sys/syscall.h>
 #include <sys/procfs.h>
+#include <sys/user.h>
 #include <asm/prctl.h>
 /* FIXME ezannoni-2003-07-09: we need <sys/reg.h> to be included after
    <asm/ptrace.h> because the latter redefines FS and GS for no apparent
@@ -479,10 +480,39 @@ ps_get_thread_area (const struct ps_prochandle *ph,
       switch (idx)
 	{
 	case FS:
+#ifdef HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE
+	    {
+	      /* PTRACE_ARCH_PRCTL is obsolete since 2.6.25, where the
+		 fs_base and gs_base fields of user_regs_struct can be
+		 used directly.  */
+	      unsigned long fs;
+	      errno = 0;
+	      fs = ptrace (PTRACE_PEEKUSER, lwpid,
+			   offsetof (struct user_regs_struct, fs_base), 0);
+	      if (errno == 0)
+		{
+		  *base = (void *) fs;
+		  return PS_OK;
+		}
+	    }
+#endif
 	  if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_FS) == 0)
 	    return PS_OK;
 	  break;
 	case GS:
+#ifdef HAVE_STRUCT_USER_REGS_STRUCT_GS_BASE
+	    {
+	      unsigned long gs;
+	      errno = 0;
+	      gs = ptrace (PTRACE_PEEKUSER, lwpid,
+			   offsetof (struct user_regs_struct, gs_base), 0);
+	      if (errno == 0)
+		{
+		  *base = (void *) gs;
+		  return PS_OK;
+		}
+	    }
+#endif
 	  if (ptrace (PTRACE_ARCH_PRCTL, lwpid, base, ARCH_GET_GS) == 0)
 	    return PS_OK;
 	  break;

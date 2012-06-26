@@ -10612,6 +10612,31 @@ _ACEOF
 fi
 
 
+# See if <sys/user.h> supports the %fs_base and %gs_bas amd64 segment registers.
+# Older amd64 Linux's don't have the fs_base and gs_base members of
+# `struct user_regs_struct'.
+ac_fn_c_check_member "$LINENO" "struct user_regs_struct" "fs_base" "ac_cv_member_struct_user_regs_struct_fs_base" "#include <sys/user.h>
+"
+if test "x$ac_cv_member_struct_user_regs_struct_fs_base" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE 1
+_ACEOF
+
+
+fi
+ac_fn_c_check_member "$LINENO" "struct user_regs_struct" "gs_base" "ac_cv_member_struct_user_regs_struct_gs_base" "#include <sys/user.h>
+"
+if test "x$ac_cv_member_struct_user_regs_struct_gs_base" = x""yes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_USER_REGS_STRUCT_GS_BASE 1
+_ACEOF
+
+
+fi
+
+
 # See if <sys/ptrace.h> provides the PTRACE_GETREGS request.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PTRACE_GETREGS" >&5
 $as_echo_n "checking for PTRACE_GETREGS... " >&6; }

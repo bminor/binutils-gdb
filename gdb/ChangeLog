@@ -1,3 +1,16 @@
+2012-06-26  Roland McGrath  <roland@hack.frob.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-linux-nat.c: Include <sys/user.h>.
+	(ps_get_thread_area): Use PTRACE_PEEKUSER to get fs_base/gs_base
+	if HAVE_STRUCT_USER_REGS_STRUCT_FS_BASE or
+	HAVE_STRUCT_USER_REGS_STRUCT_GS_BASE is defined.
+
+	* configure.ac: Check if the fs_base and gs_base members of
+	`struct user_regs_struct' exist.
+	* config.in: Regenerated.
+	* configure: Likewise.
+
 2012-06-25  Michael Eager  <eager@eagercon.com>
 
 	PR python/14291
