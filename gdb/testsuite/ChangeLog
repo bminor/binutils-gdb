@@ -1,5 +1,11 @@
 2012-06-26  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.threads/step.c: Remove.
+	* gdb.threads/step.exp: Remove.
+	* gdb.threads/step2.exp: Remove.
+
+2012-06-26  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.threads/watchpoint-fork.exp (test): Use
 	standard_output_file.  Don't declare objdir.
 	* gdb.threads/attach-into-signal.exp: Use standard_testfile,
