@@ -1250,6 +1250,8 @@ void fixup_section (struct general_symbol_info *ginfo,
 
 struct objfile *lookup_objfile_from_block (const struct block *block);
 
+extern int symtab_create_debug;
+
 extern int basenames_may_differ;
 
 int compare_filenames_for_search (const char *filename,

@@ -1167,6 +1167,13 @@ install_minimal_symbols (struct objfile *objfile)
 
   if (msym_count > 0)
     {
+      if (symtab_create_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "Installing %d minimal symbols of objfile %s.\n",
+			      msym_count, objfile->name);
+	}
+
       /* Allocate enough space in the obstack, into which we will gather the
          bunches of new and existing minimal symbols, sort them, and then
          compact out the duplicate entries.  Once we have a final table,

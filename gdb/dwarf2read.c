@@ -82,6 +82,10 @@
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
 
+/* When non-zero, print basic high level tracing messages.
+   This is in contrast to the low level DIE reading of dwarf2_die_debug.  */
+static int dwarf2_read_debug = 0;
+
 /* When non-zero, dump DIEs after they are read in.  */
 static int dwarf2_die_debug = 0;
 
@@ -4450,6 +4454,12 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile)
   struct obstack temp_obstack;
   int i;
 
+  if (dwarf2_read_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "Building psymtabs of objfile %s ...\n",
+			  objfile->name);
+    }
+
   dwarf2_per_objfile->reading_partial_symbols = 1;
 
   dwarf2_read_section (objfile, &dwarf2_per_objfile->info);
@@ -4483,6 +4493,10 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile)
   discard_cleanups (addrmap_cleanup);
 
   do_cleanups (back_to);
+
+  if (dwarf2_read_debug)
+    fprintf_unfiltered (gdb_stdlog, "Done building psymtabs of %s\n",
+			objfile->name);
 }
 
 /* die_reader_func for load_partial_comp_unit.  */
@@ -5387,6 +5401,13 @@ process_queue (void)
 {
   struct dwarf2_queue_item *item, *next_item;
 
+  if (dwarf2_read_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Expanding one or more symtabs of objfile %s ...\n",
+			  dwarf2_per_objfile->objfile->name);
+    }
+
   /* The queue starts out with one item, but following a DIE reference
      may load a new CU, adding it to the end of the queue.  */
   for (item = dwarf2_queue; item != NULL; dwarf2_queue = item = next_item)
@@ -5402,6 +5423,12 @@ process_queue (void)
     }
 
   dwarf2_queue_tail = NULL;
+
+  if (dwarf2_read_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "Done expanding symtabs of %s.\n",
+			  dwarf2_per_objfile->objfile->name);
+    }
 }
 
 /* Free all allocated queue entries.  This function only releases anything if
@@ -5791,6 +5818,14 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   struct cleanup *back_to, *delayed_list_cleanup;
   CORE_ADDR baseaddr;
 
+  if (dwarf2_read_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Expanding symtab of %s at offset 0x%x\n",
+			  per_cu->is_debug_types ? "TU" : "CU",
+			  per_cu->offset.sect_off);
+    }
+
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
   buildsym_init ();
@@ -5866,6 +5901,14 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   VEC_safe_push (dwarf2_per_cu_ptr, dwarf2_per_objfile->just_read_cus, per_cu);
 
   do_cleanups (back_to);
+
+  if (dwarf2_read_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Done expanding symtab of %s at offset 0x%x\n",
+			  per_cu->is_debug_types ? "TU" : "CU",
+			  per_cu->offset.sect_off);
+    }
 }
 
 /* Process an imported unit DIE.  */
@@ -18277,6 +18320,15 @@ conversational style, when possible."),
 			   show_dwarf2_always_disassemble,
 			   &set_dwarf2_cmdlist,
 			   &show_dwarf2_cmdlist);
+
+  add_setshow_boolean_cmd ("dwarf2-read", no_class, &dwarf2_read_debug, _("\
+Set debugging of the dwarf2 reader."), _("\
+Show debugging of the dwarf2 reader."), _("\
+When enabled, debugging messages are printed during dwarf2 reading\n\
+and symtab expansion."),
+			    NULL,
+			    NULL,
+			    &setdebuglist, &showdebuglist);
 
   add_setshow_zinteger_cmd ("dwarf2-die", no_class, &dwarf2_die_debug, _("\
 Set debugging of the dwarf2 DIE reader."), _("\

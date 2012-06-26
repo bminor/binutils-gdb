@@ -1,5 +1,20 @@
 2012-06-26  Doug Evans  <dje@google.com>
 
+	* NEWS: Mention new options "set debug dwarf2-read" and
+	"set debug symtab-create".
+	* dwarf2read.c (dwarf2_read_debug): New static global.
+	(dwarf2_build_psymtabs_hard): Add debugging printfs.
+	(process_queue): Ditto.
+	(process_full_comp_unit): Ditto.
+	(_initialize_dwarf2_read): Add new option "set debug dwarf2-read".
+	* elfread.c (elf_symfile_read): Add debugging printf.
+	* minsyms.c (install_minimal_symbols): Ditto.
+	* psymtab.c (allocate_psymtab): Ditto.
+	* symfile.c (allocate_symtab): Ditto.
+	* symtab.c (symtab_create_debug): New global.
+	(_initialize_symtab): Add new option "set debug symtab-create".
+	* symtab.h (symtab_create_debug): Declare.
+
 	* dwarf2read.c (lookup_dwo_comp_unit): Enhance comment.
 	(lookup_dwo_type_unit): Ditto.
 

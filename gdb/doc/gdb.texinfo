@@ -21741,6 +21741,12 @@ The value is the number of nesting levels to print.
 A value of zero turns off the display.
 @item show debug dwarf2-die
 Show the current state of DWARF2 DIE debugging.
+@item set debug dwarf2-read
+@cindex DWARF2 Reading
+Turns on or off display of debugging messages related to reading
+DWARF debug info.  The default is off.
+@item show debug dwarf2-read
+Show the current state of DWARF2 reader debugging.
 @item set debug displaced
 @cindex displaced stepping debugging info
 Turns on or off display of @value{GDBN} debugging info for the
@@ -21838,6 +21844,12 @@ Turns on or off debugging messages for FR-V shared-library code.
 @item show debug solib-frv
 Display the current state of FR-V shared-library code debugging
 messages.
+@item set debug symtab-create
+@cindex symbol table creation
+Turns on or off display of debugging messages related to symbol table creation.
+The default is off.
+@item show debug symtab-create
+Show the current state of symbol table creation debugging.
 @item set debug target
 @cindex target debugging info
 Turns on or off display of @value{GDBN} target debugging info. This info

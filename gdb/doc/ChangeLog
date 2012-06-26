@@ -1,3 +1,8 @@
+2012-06-26  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Debugging Output): Document debug options dwarf2-read
+	and symtab-create.
+
 2012-06-25  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.texinfo (GDB/MI Breakpoint Commands): Remove "-r" option

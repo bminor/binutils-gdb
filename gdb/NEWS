@@ -468,6 +468,16 @@ tstop [NOTES]
 
 * New options
 
+set debug dwarf2-read
+show debug dwarf2-read
+  Turns on or off display of debugging messages related to reading
+  DWARF debug info.  The default is off.
+
+set debug symtab-create
+show debug symtab-create
+  Turns on or off display of debugging messages related to symbol table
+  creation.  The default is off.
+
 set extended-prompt
 show extended-prompt
   Set the GDB prompt, and allow escape sequences to be inserted to

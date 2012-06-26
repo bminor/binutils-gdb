@@ -109,6 +109,9 @@ void _initialize_symtab (void);
 
 /* */
 
+/* When non-zero, print debugging messages related to symtab creation.  */
+int symtab_create_debug = 0;
+
 /* Non-zero if a file may be known by two different basenames.
    This is the uncommon case, and significantly slows down gdb.
    Default set to "off" to not slow down the common case.  */
@@ -5013,6 +5016,14 @@ If not set (the default), all source files are assumed to have just\n\
 one base name, and gdb will do file name comparisons more efficiently."),
 			   NULL, NULL,
 			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("symtab-create", no_class, &symtab_create_debug,
+			   _("Set debugging of symbol table creation."),
+			   _("Show debugging of symbol table creation."), _("\
+When enabled, debugging messages are printed when building symbol tables."),
+			    NULL,
+			    NULL,
+			    &setdebuglist, &showdebuglist);
 
   observer_attach_executable_changed (symtab_observer_executable_changed);
 }

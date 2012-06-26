@@ -1251,6 +1251,13 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   asymbol **symbol_table = NULL, **dyn_symbol_table = NULL;
   asymbol *synthsyms;
 
+  if (symtab_create_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Reading minimal symbols of objfile %s ...\n",
+			  objfile->name);
+    }
+
   init_minimal_symbol_collection ();
   back_to = make_cleanup_discard_minimal_symbols ();
 
@@ -1443,6 +1450,9 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 	  xfree (debugfile);
 	}
     }
+
+  if (symtab_create_debug)
+    fprintf_unfiltered (gdb_stdlog, "Done reading minimal symbols.\n");
 }
 
 /* Callback to lazily read psymtabs.  */

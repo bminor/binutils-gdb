@@ -1731,6 +1731,26 @@ allocate_psymtab (const char *filename, struct objfile *objfile)
   psymtab->next = objfile->psymtabs;
   objfile->psymtabs = psymtab;
 
+  if (symtab_create_debug)
+    {
+      /* Be a bit clever with debugging messages, and don't print objfile
+	 every time, only when it changes.  */
+      static char *last_objfile_name = NULL;
+
+      if (last_objfile_name == NULL
+	  || strcmp (last_objfile_name, objfile->name) != 0)
+	{
+	  xfree (last_objfile_name);
+	  last_objfile_name = xstrdup (objfile->name);
+	  fprintf_unfiltered (gdb_stdlog,
+			      "Creating one or more psymtabs for objfile %s ...\n",
+			      last_objfile_name);
+	}
+      fprintf_unfiltered (gdb_stdlog,
+			  "Created psymtab 0x%lx for module %s.\n",
+			  (long) psymtab, filename);
+    }
+
   return (psymtab);
 }
 
