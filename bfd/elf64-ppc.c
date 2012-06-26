@@ -10554,7 +10554,9 @@ ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
   if (!htab->second_toc_pass)
     {
       /* Keep track of the first .toc or .got section for this input bfd.  */
-      if (htab->toc_bfd != isec->owner)
+      bfd_boolean new_bfd = htab->toc_bfd != isec->owner;
+
+      if (new_bfd)
 	{
 	  htab->toc_bfd = isec->owner;
 	  htab->toc_first_sec = isec;
@@ -10582,7 +10584,8 @@ ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
 
       /* Die if someone uses a linker script that doesn't keep input
 	 file .toc and .got together.  */
-      if (elf_gp (isec->owner) != 0
+      if (new_bfd
+	  && elf_gp (isec->owner) != 0
 	  && elf_gp (isec->owner) != off)
 	return FALSE;
 

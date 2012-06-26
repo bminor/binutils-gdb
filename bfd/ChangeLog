@@ -1,3 +1,9 @@
+2012-06-26  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_next_toc_section): Don't error if input
+	file has multiple .got/.toc sections and all don't fit in
+	current toc group.
+
 2012-06-22  Roland McGrath  <mcgrathr@google.com>
 
 	* elf.c (assign_file_positions_for_non_load_sections): Define
