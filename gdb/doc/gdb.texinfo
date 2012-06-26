@@ -25272,8 +25272,8 @@ This attribute is not writable.
 @end defvar
 
 @defvar Symtab_and_line.pc
-Indicates the current program counter address.  This attribute is not
-writable.
+Indicates the start of the address range occupied by code for the
+current source line.  This attribute is not writable.
 @end defvar
 
 @defvar Symtab_and_line.line

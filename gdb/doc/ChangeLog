@@ -1,3 +1,8 @@
+2012-06-26  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.texinfo (Symbol Tables In Python): Correct the description
+	of the 'pc' attribute of gdb.Symtab_and_line.
+
 2012-06-26  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Debugging Output): Document debug options dwarf2-read
