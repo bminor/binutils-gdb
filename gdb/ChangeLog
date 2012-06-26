@@ -1,5 +1,11 @@
 2012-06-26  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwo_section_names): Add macinfo_dwo, macro_dwo.
+	(dwo_sections): Add macinfo, macro.
+	(dwarf2_locate_dwo_sections): Watch for macro sections.
+	(dwarf_decode_macros): Remove args lh, abfd, section, section_name.
+	All callers updated.  Handle DWO files.
+
 	* NEWS: Mention new options "set debug dwarf2-read" and
 	"set debug symtab-create".
 	* dwarf2read.c (dwarf2_read_debug): New static global.

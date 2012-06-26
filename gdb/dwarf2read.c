@@ -289,6 +289,8 @@ static const struct dwo_section_names
   struct dwarf2_section_names info_dwo;
   struct dwarf2_section_names line_dwo;
   struct dwarf2_section_names loc_dwo;
+  struct dwarf2_section_names macinfo_dwo;
+  struct dwarf2_section_names macro_dwo;
   struct dwarf2_section_names str_dwo;
   struct dwarf2_section_names str_offsets_dwo;
   struct dwarf2_section_names types_dwo;
@@ -299,6 +301,8 @@ dwo_section_names =
   { ".debug_info.dwo", ".zdebug_info.dwo" },
   { ".debug_line.dwo", ".zdebug_line.dwo" },
   { ".debug_loc.dwo", ".zdebug_loc.dwo" },
+  { ".debug_macinfo.dwo", ".zdebug_macinfo.dwo" },
+  { ".debug_macro.dwo", ".zdebug_macro.dwo" },
   { ".debug_str.dwo", ".zdebug_str.dwo" },
   { ".debug_str_offsets.dwo", ".zdebug_str_offsets.dwo" },
   { ".debug_types.dwo", ".zdebug_types.dwo" },
@@ -569,6 +573,8 @@ struct dwo_sections
   struct dwarf2_section_info info;
   struct dwarf2_section_info line;
   struct dwarf2_section_info loc;
+  struct dwarf2_section_info macinfo;
+  struct dwarf2_section_info macro;
   struct dwarf2_section_info str;
   struct dwarf2_section_info str_offsets;
   VEC (dwarf2_section_info_def) *types;
@@ -1368,10 +1374,8 @@ static struct abbrev_info *dwarf_alloc_abbrev (struct dwarf2_cu *);
 
 static struct die_info *dwarf_alloc_die (struct dwarf2_cu *, int);
 
-static void dwarf_decode_macros (struct line_header *, unsigned int,
-                                 char *, bfd *, struct dwarf2_cu *,
-				 struct dwarf2_section_info *,
-				 int, const char *);
+static void dwarf_decode_macros (struct dwarf2_cu *, unsigned int,
+				 char *, int);
 
 static int attr_form_is_block (struct attribute *);
 
@@ -6772,10 +6776,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 	complaint (&symfile_complaints,
 		   _("CU refers to both DW_AT_GNU_macros and DW_AT_macro_info"));
 
-      dwarf_decode_macros (cu->line_header, DW_UNSND (attr),
-			   comp_dir, abfd, cu,
-			   &dwarf2_per_objfile->macro, 1,
-			   ".debug_macro");
+      dwarf_decode_macros (cu, DW_UNSND (attr), comp_dir, 1);
     }
   else
     {
@@ -6784,10 +6785,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  unsigned int macro_offset = DW_UNSND (attr);
 
-	  dwarf_decode_macros (cu->line_header, macro_offset,
-			       comp_dir, abfd, cu,
-			       &dwarf2_per_objfile->macinfo, 0,
-			       ".debug_macinfo");
+	  dwarf_decode_macros (cu, macro_offset, comp_dir, 0);
 	}
     }
 
@@ -6973,6 +6971,16 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_file_ptr)
     {
       dwo_file->sections.loc.asection = sectp;
       dwo_file->sections.loc.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &names->macinfo_dwo))
+    {
+      dwo_file->sections.macinfo.asection = sectp;
+      dwo_file->sections.macinfo.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &names->macro_dwo))
+    {
+      dwo_file->sections.macro.asection = sectp;
+      dwo_file->sections.macro.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->str_dwo))
     {
@@ -16423,13 +16431,12 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
 }
 
 static void
-dwarf_decode_macros (struct line_header *lh, unsigned int offset,
-                     char *comp_dir, bfd *abfd,
-                     struct dwarf2_cu *cu,
-		     struct dwarf2_section_info *section,
-		     int section_is_gnu, const char *section_name)
+dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
+                     char *comp_dir, int section_is_gnu)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct line_header *lh = cu->line_header;
+  bfd *abfd;
   gdb_byte *mac_ptr, *mac_end;
   struct macro_source_file *current_file = 0;
   enum dwarf_macro_record_type macinfo_type;
@@ -16438,6 +16445,35 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
   struct cleanup *cleanup;
   htab_t include_hash;
   void **slot;
+  struct dwarf2_section_info *section;
+  const char *section_name;
+
+  if (cu->dwo_unit != NULL)
+    {
+      if (section_is_gnu)
+	{
+	  section = &cu->dwo_unit->dwo_file->sections.macro;
+	  section_name = ".debug_macro.dwo";
+	}
+      else
+	{
+	  section = &cu->dwo_unit->dwo_file->sections.macinfo;
+	  section_name = ".debug_macinfo.dwo";
+	}
+    }
+  else
+    {
+      if (section_is_gnu)
+	{
+	  section = &dwarf2_per_objfile->macro;
+	  section_name = ".debug_macro";
+	}
+      else
+	{
+	  section = &dwarf2_per_objfile->macinfo;
+	  section_name = ".debug_macinfo";
+	}
+    }
 
   dwarf2_read_section (objfile, section);
   if (section->buffer == NULL)
@@ -16445,6 +16481,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
       complaint (&symfile_complaints, _("missing %s section"), section_name);
       return;
     }
+  abfd = section->asection->owner;
 
   /* First pass: Find the name of the base filename.
      This filename is needed in order to process all macros whose definition
