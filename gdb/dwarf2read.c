@@ -7216,7 +7216,7 @@ lookup_dwo_file (char *dwo_name, const char *comp_dir)
    If non-NULL, comp_dir is the DW_AT_comp_dir attribute.
    SIGNATURE is the "dwo_id" of the CU (for consistency we use the same
    nomenclature as TUs).
-   The result is the DWO CU or NULL if we didn't find it
+   The result is a pointer to the dwo_unit object or NULL if we didn't find it
    (dwo_id mismatch or couldn't find the DWO file).  */
 
 static struct dwo_unit *
@@ -7255,7 +7255,7 @@ lookup_dwo_comp_unit (struct dwarf2_per_cu_data *this_cu,
 
 /* Lookup the DWO TU referenced from THIS_TU in DWO file DWO_NAME.
    If non-NULL, comp_dir is the DW_AT_comp_dir attribute.
-   The result is the DWO CU or NULL if we didn't find it
+   The result is a pointer to the dwo_unit object or NULL if we didn't find it
    (dwo_id mismatch or couldn't find the DWO file).  */
 
 static struct dwo_unit *

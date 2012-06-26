@@ -1,3 +1,8 @@
+2012-06-26  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (lookup_dwo_comp_unit): Enhance comment.
+	(lookup_dwo_type_unit): Ditto.
+
 2012-06-26  Roland McGrath  <roland@hack.frob.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
