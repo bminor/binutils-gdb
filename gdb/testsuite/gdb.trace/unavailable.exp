@@ -15,14 +15,11 @@
 
 load_lib "trace-support.exp"
 
-set testfile "unavailable"
-set srcfile ${testfile}.cc
+standard_testfile unavailable.cc
 set executable $testfile
-set binfile $objdir/$subdir/$executable
 
-if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
-	executable {debug nowarnings c++}] != "" } {
-    untested unavailable.exp
+if {[prepare_for_testing $testfile.exp $testfile $srcfile \
+	 {debug nowarnings c++}]} {
     return -1
 }
 
@@ -588,7 +585,6 @@ proc gdb_trace_collection_test {} {
     gdb_collect_locals_test statlocal_test_func "static locals"
 }
 
-clean_restart $executable
 runto_main
 
 if { ![gdb_target_supports_trace] } then {

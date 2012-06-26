@@ -18,9 +18,7 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-set testfile "strace"
-set srcfile $testfile.c
-set binfile $objdir/$subdir/$testfile
+standard_testfile
 set executable $testfile
 
 set libipa [get_in_proc_agent]

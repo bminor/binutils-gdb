@@ -15,10 +15,8 @@
 
 load_lib "trace-support.exp"
 
-set testfile "stap-trace"
-set srcfile ${testfile}.c
+standard_testfile
 set executable ""
-set binfile_dir $objdir/$subdir
 
 set ws "\[\r\n\t \]+"
 set cr "\[\r\n\]+"
@@ -31,7 +29,6 @@ if { ![istarget "x86_64-*"] && ![istarget "i?86-*"] } {
 
 proc compile_stap_bin {exec_name {arg ""}} {
     global srcfile
-    global binfile_dir
     global srcdir
     global subdir
     global executable
@@ -43,8 +40,8 @@ proc compile_stap_bin {exec_name {arg ""}} {
     set executable ${exec_name}
 
     if { [gdb_compile "$srcdir/$subdir/$srcfile" \
-	    "$binfile_dir/$exec_name" \
-	    executable [concat $arg debug nowarnings]] != "" } {
+	      [standard_output_file $exec_name] \
+	      executable [concat $arg debug nowarnings]] != "" } {
 	untested "Could not compile ${srcfile}"
 	return 0
     }

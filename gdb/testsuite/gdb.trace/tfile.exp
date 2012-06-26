@@ -30,9 +30,7 @@ if [target_info exists gdb,nofileio] {
 
 gdb_exit
 gdb_start
-set testfile "tfile"
-set srcfile ${testfile}.c
-set binfile $objdir/$subdir/$testfile
+standard_testfile
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable {debug nowarnings}] != "" } {
     untested ${testfile}.exp

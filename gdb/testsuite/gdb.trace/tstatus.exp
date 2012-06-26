@@ -14,10 +14,8 @@
 
 load_lib "trace-support.exp"
 
-set testfile "actions"
+standard_testfile actions.c
 set executable $testfile
-set srcfile $testfile.c
-set binfile $objdir/$subdir/$testfile
 set expfile tstatus.exp
 
 if [prepare_for_testing $expfile $executable $srcfile \

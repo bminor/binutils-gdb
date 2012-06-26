@@ -20,9 +20,7 @@ load_lib "trace-support.exp";
 
 gdb_exit
 gdb_start
-set testfile "actions"
-set srcfile ${testfile}.c
-set binfile $objdir/$subdir/passcount
+standard_testfile actions.c
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable {debug nowarnings}] != "" } {
     untested passcount.exp

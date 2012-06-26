@@ -16,14 +16,10 @@
 load_lib "trace-support.exp"
 
 
-set testfile "collection"
-set srcfile ${testfile}.c
+standard_testfile
 set executable $testfile
-set binfile $objdir/$subdir/$executable
 
-if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
-	executable {debug nowarnings}] != "" } {
-    untested collection.exp
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug nowarnings}]} {
     return -1
 }
 
@@ -776,7 +772,6 @@ proc gdb_trace_collection_test {} {
 
 }
 
-clean_restart $executable
 runto_main
 
 if { ![gdb_target_supports_trace] } then {

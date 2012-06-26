@@ -1,5 +1,40 @@
 2012-06-26  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.trace/actions.exp: Use standard_testfile.
+	* gdb.trace/ax.exp: Use standard_testfile.
+	* gdb.trace/backtrace.exp: Use standard_testfile.
+	* gdb.trace/change-loc.exp: Use standard_testfile.
+	* gdb.trace/circ.exp: Use standard_testfile, prepare_for_testing.
+	* gdb.trace/collection.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.trace/deltrace.exp: Use standard_testfile.
+	* gdb.trace/disconnected-tracing.exp: Use standard_testfile.
+	* gdb.trace/ftrace.exp: Use standard_testfile.
+	* gdb.trace/infotrace.exp: Use standard_testfile.
+	* gdb.trace/packetlen.exp: Use standard_testfile.
+	* gdb.trace/passc-dyn.exp: Use standard_testfile.
+	* gdb.trace/passcount.exp: Use standard_testfile.
+	* gdb.trace/pending.exp: Use standard_testfile.
+	* gdb.trace/report.exp: Use standard_testfile.
+	* gdb.trace/save-trace.exp: Use standard_testfile.
+	* gdb.trace/stap-trace.exp: Use standard_testfile.
+	* gdb.trace/status-stop.exp: Use standard_testfile.
+	* gdb.trace/strace.exp: Use standard_testfile.
+	* gdb.trace/tfile.exp: Use standard_testfile.
+	* gdb.trace/tfind.exp: Use standard_testfile.
+	* gdb.trace/trace-break.exp: Use standard_testfile.
+	* gdb.trace/trace-mt.exp: Use standard_testfile.
+	* gdb.trace/tracecmd.exp: Use standard_testfile.
+	* gdb.trace/tspeed.exp: Use standard_testfile.
+	* gdb.trace/tstatus.exp: Use standard_testfile.
+	* gdb.trace/tsv.exp: Use standard_testfile.
+	* gdb.trace/unavailable.exp: Use standard_testfile,
+	prepare_for_testing.
+	* gdb.trace/while-dyn.exp: Use standard_testfile.
+	* gdb.trace/while-stepping.exp: Use standard_testfile.
+
+2012-06-26  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.reverse/break-precsave.exp: Use standard_testfile.
 	* gdb.reverse/break-reverse.exp: Use standard_testfile.
 	* gdb.reverse/consecutive-precsave.exp: Use standard_testfile.

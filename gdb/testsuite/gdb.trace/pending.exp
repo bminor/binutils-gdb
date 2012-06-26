@@ -18,16 +18,14 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-set testfile "pending"
+standard_testfile
 set libfile1 "pendshr1"
 set libfile2 "pendshr2"
 set executable $testfile
-set srcfile $testfile.c
 set libsrc1  $srcdir/$subdir/$libfile1.c
 set libsrc2  $srcdir/$subdir/$libfile2.c
-set binfile $objdir/$subdir/$testfile
-set lib_sl1  $objdir/$subdir/$libfile1.sl
-set lib_sl2  $objdir/$subdir/$libfile2.sl
+set lib_sl1  [standard_output_file $libfile1.sl]
+set lib_sl2  [standard_output_file $libfile2.sl]
 
 set lib_opts [gdb_target_symbol_prefix_flags]
 
