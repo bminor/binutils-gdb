@@ -1,3 +1,10 @@
+2012-06-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.stabs/weird.exp: Remove directory-checking code.  Use
+	standard_output_file.
+	* gdb.stabs/exclfwd.exp: Use standard_testfile,
+	prepare_for_testing.  Remove directory-checking code.
+
 2012-06-25  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.multi/watchpoint-multi.exp: Use standard_testfile.

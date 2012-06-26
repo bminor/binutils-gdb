@@ -17,16 +17,10 @@
 # Test that GDB properly ignores invalid stabs.
 # Also test that GDB can debug a .o file, and that it doesn't mind
 # a file that's more minimal than what a compiler normally puts out.
-# If the test directory was not created by configure then skip
-# this test.
-if ![file isdirectory ${objdir}/${subdir}] then {
-    return 0
-}
-
 
 set testfile weird
-set srcfile ${objdir}/${subdir}/weird.s
-set binfile ${objdir}/${subdir}/weirdx.o
+set srcfile [standard_output_file weird.s]
+set binfile [standard_output_file weirdx.o]
 
 if { [ get_compiler_info ] } {
     return -1
