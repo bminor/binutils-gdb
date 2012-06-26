@@ -21,8 +21,7 @@ if ![supports_process_record] {
     return
 }
 
-set testfile "consecutive-reverse"
-set srcfile ${testfile}.c
+standard_testfile consecutive-reverse.c
 
 if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
     return -1

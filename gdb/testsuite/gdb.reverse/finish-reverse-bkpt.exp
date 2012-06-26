@@ -23,8 +23,7 @@ if ![supports_reverse] {
     return
 }
 
-set testfile "finish-reverse-bkpt"
-set srcfile finish-reverse.c
+standard_testfile finish-reverse.c
 
 if { [prepare_for_testing $testfile.exp "$testfile" $srcfile] } {
     return -1

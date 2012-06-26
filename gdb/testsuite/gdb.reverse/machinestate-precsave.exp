@@ -40,11 +40,10 @@ if ![supports_process_record] {
     return
 }
 
-set testfile "machinestate"
-set srcfile  ${testfile}.c
-set srcfile1 ms1.c
+standard_testfile machinestate.c ms1.c
 
-if { [prepare_for_testing $testfile.exp $testfile {machinestate.c ms1.c} ] } {
+if { [prepare_for_testing $testfile.exp $testfile \
+	  [list $srcfile $srcfile2]] } {
     return -1
 }
 

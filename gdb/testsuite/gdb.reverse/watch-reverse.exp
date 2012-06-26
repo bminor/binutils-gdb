@@ -22,9 +22,7 @@ if ![supports_reverse] {
     return
 }
 
-set testfile "watch-reverse"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
     return -1

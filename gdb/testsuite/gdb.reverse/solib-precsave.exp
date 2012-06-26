@@ -21,12 +21,10 @@ if ![supports_process_record] {
     return
 }
 
-set testfile "solib-reverse"
-set srcfile  ${testfile}.c
+standard_testfile solib-reverse.c
 set libfile  "shr2"
 set libsrc   ${libfile}.c
-set library  ${objdir}/${subdir}/${libfile}.sl
-set binfile  ${objdir}/${subdir}/${testfile}
+set library  [standard_output_file ${libfile}.sl]
 
 if [get_compiler_info] {
     return -1

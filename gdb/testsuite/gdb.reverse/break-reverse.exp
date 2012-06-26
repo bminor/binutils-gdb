@@ -20,8 +20,7 @@ if ![supports_reverse] {
     return
 }
 
-set testfile "break-reverse"
-set srcfile  ${testfile}.c
+standard_testfile
 
 if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
     return -1

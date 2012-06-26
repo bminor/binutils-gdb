@@ -22,9 +22,7 @@ if ![supports_process_record] {
     return
 }
 
-set testfile "watch-reverse"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile watch-reverse.c
 
 if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
     return -1

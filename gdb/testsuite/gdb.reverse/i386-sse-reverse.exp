@@ -29,15 +29,13 @@ if ![istarget "*86*-*linux*"] then {
     return
 }
 
-set testfile "i386-sse-reverse"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 # some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
-    untested i386-sse-reverse
+if {[prepare_for_testing $testfile.exp $testfile $srcfile \
+	 [list debug $additional_flags]]} {
     return -1
 }
 
@@ -46,12 +44,6 @@ set end_sse_test         [gdb_get_line_number " end sse_test "]
 set end_ssse3_test       [gdb_get_line_number " end ssse3_test "]
 set end_sse4_test         [gdb_get_line_number " end sse4_test "]
 
-# Get things started.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 runto main
 
 if [supports_process_record] {

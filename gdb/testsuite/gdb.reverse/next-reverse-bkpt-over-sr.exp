@@ -27,8 +27,7 @@ if ![supports_reverse] {
     return
 }
 
-set testfile "next-reverse-bkpt-over-sr"
-set srcfile  step-reverse.c
+standard_testfile step-reverse.c
 
 if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
     return -1

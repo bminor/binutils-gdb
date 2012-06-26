@@ -21,24 +21,16 @@ if ![istarget "i?86-*linux*"] then {
     return
 }
 
-set testfile "i387-env-reverse"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 # some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
-    untested ${testfile}.exp
+if {[prepare_for_testing $testfile.exp $testfile $srcfile \
+	 [list debug $additional_flags]]} {
     return -1
 }
 
-# Get things started.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 runto main
 
 # Record to end of main
