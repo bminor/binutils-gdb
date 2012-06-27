@@ -19,8 +19,10 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-set testfile dw2-param-error
-if { [prepare_for_testing ${testfile}.exp "${testfile}" "${testfile}-main.c ${testfile}.S" {nodebug}] } {
+standard_testfile .S dw2-param-error-main.c
+
+if { [prepare_for_testing ${testfile}.exp "${testfile}" \
+	  [list $srcfile2 $srcfile] {nodebug}] } {
     return -1
 }
 

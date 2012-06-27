@@ -19,13 +19,12 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-set testfile dw2-inline-param
-set binfile ${objdir}/${subdir}/${testfile}
-if { [build_executable ${testfile}.exp "${testfile}" [list ${testfile}-main.c ${testfile}.S] {nodebug}] } {
+standard_testfile .S dw2-inline-param-main.c
+
+if { [prepare_for_testing ${testfile}.exp "${testfile}" \
+	  [list $srcfile2 $srcfile] {nodebug}] } {
     return -1
 }
-
-clean_restart ${testfile}
 
 set break_at ""
 set test "info addr break_at"

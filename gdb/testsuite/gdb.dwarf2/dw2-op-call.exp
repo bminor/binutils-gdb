@@ -21,8 +21,10 @@ if {![dwarf2_support]} {
     return 0   
 }
 
-set testfile "dw2-op-call"
-if { [prepare_for_testing ${testfile}.exp ${testfile} [list ${testfile}.S main.c] {nodebug}] } {
+standard_testfile .S main.c
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} \
+	  [list $srcfile $srcfile2] {nodebug}] } {
     return -1
 }
 

@@ -19,8 +19,7 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-set testfile "implptr-64bit"
-set srcfile ${testfile}.S
+standard_testfile .S
 set mainfile main.c
 
 proc test { dwarf_version offset_size addr_size ref_addr_size } {

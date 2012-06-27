@@ -15,8 +15,7 @@
 
 # Test DW_OP_call_frame_cfa.
 
-set testfile "pr10770"
-set srcfile ${testfile}.c
+standard_testfile
 
 if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}]} {
     return 0

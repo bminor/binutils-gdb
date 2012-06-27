@@ -19,15 +19,14 @@ if {![dwarf2_support]} {
     return 0   
 }
 
-set testfile "dw2-op-stack-value"
-set srcfile ${testfile}.S
-set executable ${testfile}.x
+standard_testfile .S
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objdir}/${subdir}/${executable}" object {nodebug}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" $binfile \
+	   object {nodebug}] != "" } {
     return -1
 }
 
-clean_restart $executable
+clean_restart $testfile
 
 gdb_test "p/x stack2" " = 0x1"
 gdb_test "p/x stack8" " = 0x1"

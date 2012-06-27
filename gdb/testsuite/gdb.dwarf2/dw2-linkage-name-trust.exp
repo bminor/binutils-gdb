@@ -25,9 +25,8 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-set testfile "dw2-linkage-name-trust"
+standard_testfile
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
 if { [gdb_compile ${srcdir}/${subdir}/${testfile}-main.cc "${objdir}/${subdir}/${testfile}-main.o" object {c++ debug}] != ""
      || [gdb_compile "${srcdir}/${subdir}/${testfile}.S" "${objdir}/${subdir}/${testfile}.o" object {}] != ""
      || [gdb_compile "${objdir}/${subdir}/${testfile}-main.o ${objdir}/${subdir}/${testfile}.o" "${binfile}" executable {c++}] != "" } {

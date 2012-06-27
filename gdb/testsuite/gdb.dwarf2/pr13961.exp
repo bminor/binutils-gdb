@@ -22,11 +22,9 @@ if {![dwarf2_support]} {
     return 0
 }
 
-set testfile "pr13961"
-set srcfile ${testfile}.S
-set binfile ${testfile}.x
+standard_testfile .S
 
-if { [prepare_for_testing ${testfile}.exp ${binfile} ${srcfile}] == -1 } {
+if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] == -1 } {
     return -1
 }
 

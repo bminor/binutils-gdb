@@ -15,16 +15,15 @@
 
 # Test dwarf4 signatured types.
 
-set test "dw4-sig-types"
-set executable ${test}.x
+standard_testfile .cc dw4-sig-types-b.cc
 
 # This test is intended for targets which support DWARF-4.
 # Since we pass an explicit -gdwarf-4 to the compiler, we let
 # that be the test of whether the target supports it.
 
-if { [prepare_for_testing "${test}.exp" "${executable}" \
-	{dw4-sig-types.cc dw4-sig-types-b.cc} \
-	{debug c++ additional_flags=-gdwarf-4}] } {
+if { [prepare_for_testing "${test}.exp" "${testfile}" \
+	  [list $srcfile $srcfile2] \
+	  {debug c++ additional_flags=-gdwarf-4}] } {
     return -1
 }
 

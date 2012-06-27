@@ -29,9 +29,10 @@ if {![istarget "x86_64-*-*"] || ![is_lp64_target]} {
 }
 
 set basename "inline-break"
-set testfile "dw2-$basename"
 
-if { [prepare_for_testing $testfile.exp $testfile $testfile.S {nodebug}] } {
+standard_testfile .S
+
+if { [prepare_for_testing $testfile.exp $testfile $srcfile {nodebug}] } {
     return -1
 }
 

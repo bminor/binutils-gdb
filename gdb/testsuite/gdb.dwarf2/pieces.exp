@@ -24,12 +24,10 @@ if {![is_x86_like_target]} {
     return 0  
 }
 
-set testfile "pieces"
-set srcfile ${testfile}.S
+standard_testfile .S
 set csrcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}.x
 
-if {[prepare_for_testing ${testfile}.exp ${testfile}.x $srcfile]} {
+if {[prepare_for_testing ${testfile}.exp ${testfile} $srcfile]} {
     return -1
 }
 

@@ -21,10 +21,8 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-set testfile "dw2-intercu"
+standard_testfile .S
 set dwarf_srcfile "file1.txt"
-set srcfile ${testfile}.S
-set binfile ${objdir}/${subdir}/${testfile}.x
 
 if  { [gdb_compile "${srcdir}/${subdir}/main.c" "main.o" object {debug}] != "" } {
     return -1

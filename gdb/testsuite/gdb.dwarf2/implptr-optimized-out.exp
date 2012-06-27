@@ -19,11 +19,9 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-set testfile "implptr-optimized-out"
-set srcfile ${testfile}.S
+standard_testfile .S
 set mainfile main.c
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
 
 if [prepare_for_testing ${testfile}.exp $executable "${srcfile} ${mainfile}" {}] {
     return -1

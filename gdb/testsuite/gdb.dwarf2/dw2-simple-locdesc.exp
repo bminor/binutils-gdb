@@ -19,16 +19,13 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-set testfile "dw2-simple-locdesc"
-set srcfile ${testfile}.S
-set executable ${testfile}.x
-set binfile ${objdir}/${subdir}/${executable}
+standard_testfile .S
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {}] != "" } {
     return -1
 }
 
-clean_restart $executable
+clean_restart $testfile
 
 # Re: [patch 2/2] Fix decode_locdesc for gcc-4.7.x optimized DWARF
 # http://sourceware.org/ml/gdb-patches/2011-07/msg00766.html

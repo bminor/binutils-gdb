@@ -19,12 +19,13 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-set testfile "dw2-objfile-overlap"
+standard_testfile
+
 set srcfile_outer ${testfile}-outer.S
 set srcfile_inner ${testfile}-inner.S
 set executable_outer ${testfile}-outer.x
-set binfile_outer ${objdir}/${subdir}/${executable_outer}
-set binfile_inner ${objdir}/${subdir}/${testfile}-inner.x
+set binfile_outer ${binfile}-outer.x
+set binfile_inner ${binfile}-inner.x
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile_outer}" "${binfile_outer}" \
       object {}] != ""

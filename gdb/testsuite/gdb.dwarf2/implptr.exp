@@ -21,10 +21,8 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-set testfile "implptr"
-set srcfile ${testfile}.S
+standard_testfile .S
 set csrcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}.x
 set opts {}
 
 if [info exists COMPILE] {
@@ -36,7 +34,7 @@ if [info exists COMPILE] {
     return 0  
 }
 
-if {[prepare_for_testing ${testfile}.exp ${testfile}.x $srcfile $opts]} {
+if {[prepare_for_testing ${testfile}.exp ${testfile} $srcfile $opts]} {
     return -1
 }
 

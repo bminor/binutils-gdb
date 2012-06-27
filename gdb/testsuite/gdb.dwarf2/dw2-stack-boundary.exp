@@ -19,10 +19,7 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-set testfile "dw2-stack-boundary"
-set srcfile ${testfile}.S
-set executable ${testfile}.x
-set binfile ${objdir}/${subdir}/${executable}
+standard_testfile .S
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {}] != "" } {
     return -1

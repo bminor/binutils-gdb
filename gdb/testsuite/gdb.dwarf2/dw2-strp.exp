@@ -22,9 +22,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-set testfile "dw2-strp"
-set srcfile ${testfile}.S
-set binfile ${objdir}/${subdir}/${testfile}.x
+standard_testfile .S
 
 if  { [gdb_compile "${srcdir}/${subdir}/main.c" "main.o" object {debug}] != "" } {
     return -1
