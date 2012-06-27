@@ -125,7 +125,7 @@ parse_and_eval (char *exp)
 struct value *
 parse_to_comma_and_eval (char **expp)
 {
-  struct expression *expr = parse_exp_1 (expp, (struct block *) 0, 1);
+  struct expression *expr = parse_exp_1 (expp, 0, (struct block *) 0, 1);
   struct value *val;
   struct cleanup *old_chain =
     make_cleanup (free_current_contents, &expr);

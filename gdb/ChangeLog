@@ -1,3 +1,26 @@
+2012-06-27  Tom Tromey  <tromey@redhat.com>
+
+	PR macros/7961:
+	* varobj.c (varobj_create): Update.
+	(varobj_set_value): Update.
+	* tracepoint.c (validate_actionline): Update.
+	(encode_actions_1): Update.
+	* parse.c (parse_exp_1): Add 'pc' argument.
+	(parse_exp_in_context): Add 'pc' argument.  Change how
+	expression_context_pc is set.
+	(parse_expression): Update.
+	(parse_field_expression): Update.
+	* expression.h (parse_exp_1): Update.
+	* eval.c (parse_to_comma_and_eval): Update.
+	* breakpoint.c (set_breakpoint_condition): Update.
+	(update_watchpoint): Update.
+	(init_breakpoint_sal): Update
+	(find_condition_and_thread): Update.
+	(watch_command_1): Update.
+	(update_breakpoint_locations): Update.
+	* ada-lang.c (ada_read_renaming_var_value): Update.
+	(create_excep_cond_exprs): Update.
+
 2012-06-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (per_cu_header_read_in): Simplify, and handle

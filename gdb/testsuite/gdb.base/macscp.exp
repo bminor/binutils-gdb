@@ -440,6 +440,17 @@ gdb_test "break [gdb_get_line_number "set breakpoint here"]" \
     "Breakpoint.*at.* file .*, line.*" \
     "breakpoint macscp_expr"
 
+gdb_test "cond \$bpnum foo == MACRO_TO_EXPAND" \
+  "No symbol \"MACRO_TO_EXPAND\" in current context\." \
+  "macro MACRO_TO_EXPAND not in scope at breakpoint"
+
+# Note that we choose the condition so that this breakpoint never
+# stops.
+set l2 [gdb_get_line_number "set second breakpoint here"]
+gdb_test "break $l2  if foo != MACRO_TO_EXPAND" \
+  "Breakpoint.*at.*" \
+  "breakpoint macscp_expr using MACRO_TO_EXPAND"
+
 gdb_test "continue" "foo = 0;.*" "continue to macsp_expr"
 
 gdb_test "print address.addr" \
@@ -450,7 +461,7 @@ gdb_test "print MACRO_TO_EXPAND" \
     "No symbol \"MACRO_TO_EXPAND\" in current context\." \
     "print expression with macro before define."
 
-gdb_test "next" "foo = 1;" "next to definition 1"
+gdb_test "next" "foo = 1;.*here.*/" "next to definition 1"
 
 gdb_test "print MACRO_TO_EXPAND" \
     " = 0" \

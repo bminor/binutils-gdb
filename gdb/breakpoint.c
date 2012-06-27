@@ -926,7 +926,7 @@ set_breakpoint_condition (struct breakpoint *b, char *exp,
 
 	  innermost_block = NULL;
 	  arg = exp;
-	  w->cond_exp = parse_exp_1 (&arg, 0, 0);
+	  w->cond_exp = parse_exp_1 (&arg, 0, 0, 0);
 	  if (*arg)
 	    error (_("Junk at end of expression"));
 	  w->cond_exp_valid_block = innermost_block;
@@ -939,7 +939,8 @@ set_breakpoint_condition (struct breakpoint *b, char *exp,
 	    {
 	      arg = exp;
 	      loc->cond =
-		parse_exp_1 (&arg, block_for_pc (loc->address), 0);
+		parse_exp_1 (&arg, loc->address,
+			     block_for_pc (loc->address), 0);
 	      if (*arg)
 		error (_("Junk at end of expression"));
 	    }
@@ -1731,7 +1732,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	  b->exp = NULL;
 	}
       s = b->exp_string_reparse ? b->exp_string_reparse : b->exp_string;
-      b->exp = parse_exp_1 (&s, b->exp_valid_block, 0);
+      b->exp = parse_exp_1 (&s, 0, b->exp_valid_block, 0);
       /* If the meaning of expression itself changed, the old value is
 	 no longer relevant.  We don't want to report a watchpoint hit
 	 to the user when the old value and the new value may actually
@@ -1752,7 +1753,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	    }
 
 	  s = b->base.cond_string;
-	  b->cond_exp = parse_exp_1 (&s, b->cond_exp_valid_block, 0);
+	  b->cond_exp = parse_exp_1 (&s, 0, b->cond_exp_valid_block, 0);
 	}
     }
 
@@ -8765,7 +8766,8 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
       if (b->cond_string)
 	{
 	  char *arg = b->cond_string;
-	  loc->cond = parse_exp_1 (&arg, block_for_pc (loc->address), 0);
+	  loc->cond = parse_exp_1 (&arg, loc->address,
+				   block_for_pc (loc->address), 0);
 	  if (*arg)
               error (_("Garbage '%s' follows condition"), arg);
 	}
@@ -9052,7 +9054,7 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
 	  struct expression *expr;
 
 	  tok = cond_start = end_tok + 1;
-	  expr = parse_exp_1 (&tok, block_for_pc (pc), 0);
+	  expr = parse_exp_1 (&tok, pc, block_for_pc (pc), 0);
 	  xfree (expr);
 	  cond_end = tok;
 	  *cond_string = savestring (cond_start, cond_end - cond_start);
@@ -10572,7 +10574,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
   /* Parse the rest of the arguments.  */
   innermost_block = NULL;
   exp_start = arg;
-  exp = parse_exp_1 (&arg, 0, 0);
+  exp = parse_exp_1 (&arg, 0, 0, 0);
   exp_end = arg;
   /* Remove trailing whitespace from the expression before saving it.
      This makes the eventual display of the expression string a bit
@@ -10627,7 +10629,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
 
       innermost_block = NULL;
       tok = cond_start = end_tok + 1;
-      cond = parse_exp_1 (&tok, 0, 0);
+      cond = parse_exp_1 (&tok, 0, 0, 0);
 
       /* The watchpoint expression may not be local, but the condition
 	 may still be.  E.g.: `watch global if local > 0'.  */
@@ -13677,7 +13679,8 @@ update_breakpoint_locations (struct breakpoint *b,
 	  s = b->cond_string;
 	  TRY_CATCH (e, RETURN_MASK_ERROR)
 	    {
-	      new_loc->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 
+	      new_loc->cond = parse_exp_1 (&s, sals.sals[i].pc,
+					   block_for_pc (sals.sals[i].pc), 
 					   0);
 	    }
 	  if (e.reason < 0)

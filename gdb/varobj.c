@@ -624,6 +624,7 @@ varobj_create (char *objname,
       enum varobj_languages lang;
       struct value *value = NULL;
       volatile struct gdb_exception except;
+      CORE_ADDR pc;
 
       /* Parse and evaluate the expression, filling in as much of the
          variable's data as possible.  */
@@ -650,9 +651,13 @@ varobj_create (char *objname,
       if (type == USE_SELECTED_FRAME)
 	var->root->floating = 1;
 
+      pc = 0;
       block = NULL;
       if (fi != NULL)
-	block = get_frame_block (fi, 0);
+	{
+	  block = get_frame_block (fi, 0);
+	  pc = get_frame_pc (fi);
+	}
 
       p = expression;
       innermost_block = NULL;
@@ -660,7 +665,7 @@ varobj_create (char *objname,
          return a sensible error.  */
       TRY_CATCH (except, RETURN_MASK_ERROR)
 	{
-	  var->root->exp = parse_exp_1 (&p, block, 0);
+	  var->root->exp = parse_exp_1 (&p, pc, block, 0);
 	}
 
       if (except.reason < 0)
@@ -1471,7 +1476,7 @@ varobj_set_value (struct varobj *var, char *expression)
   gdb_assert (varobj_editable_p (var));
 
   input_radix = 10;		/* ALWAYS reset to decimal temporarily.  */
-  exp = parse_exp_1 (&s, 0, 0);
+  exp = parse_exp_1 (&s, 0, 0, 0);
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
       value = evaluate_expression (exp);

@@ -1,5 +1,10 @@
 2012-06-27  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/macscp1.c (macscp_expr): Add breakpoint comment.
+	* gdb.base/macscp.exp (maybe_kfail): Add test for macro scope.
+
+2012-06-27  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/pr10770.exp: Use standard_testfile.
 	* gdb.dwarf2/dw2-var-zero-addr.exp: Use standard_testfile.
 	* gdb.dwarf2/dw2-param-error.exp: Use standard_testfile.

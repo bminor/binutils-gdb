@@ -4060,7 +4060,7 @@ ada_read_renaming_var_value (struct symbol *renaming_sym,
 
   sym_name = xstrdup (SYMBOL_LINKAGE_NAME (renaming_sym));
   old_chain = make_cleanup (xfree, sym_name);
-  expr = parse_exp_1 (&sym_name, block, 0);
+  expr = parse_exp_1 (&sym_name, 0, block, 0);
   make_cleanup (free_current_contents, &expr);
   value = evaluate_expression (expr);
 
@@ -11140,7 +11140,8 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 	  s = cond_string;
 	  TRY_CATCH (e, RETURN_MASK_ERROR)
 	    {
-	      exp = parse_exp_1 (&s, block_for_pc (bl->address), 0);
+	      exp = parse_exp_1 (&s, bl->address,
+				 block_for_pc (bl->address), 0);
 	    }
 	  if (e.reason < 0)
 	    warning (_("failed to reevaluate internal exception condition "

@@ -100,7 +100,8 @@ extern struct expression *parse_expression (char *);
 
 extern struct type *parse_field_expression (char *, char **);
 
-extern struct expression *parse_exp_1 (char **, struct block *, int);
+extern struct expression *parse_exp_1 (char **, CORE_ADDR pc, struct block *,
+				       int);
 
 /* For use by parsers; set if we want to parse an expression and
    attempt to complete a field name.  */

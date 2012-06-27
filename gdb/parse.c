@@ -116,7 +116,8 @@ static void free_funcalls (void *ignore);
 static int prefixify_subexp (struct expression *, struct expression *, int,
 			     int);
 
-static struct expression *parse_exp_in_context (char **, struct block *, int, 
+static struct expression *parse_exp_in_context (char **, CORE_ADDR,
+						struct block *, int, 
 						int, int *);
 
 void _initialize_parse (void);
@@ -1097,9 +1098,9 @@ prefixify_subexp (struct expression *inexpr,
    If COMMA is nonzero, stop if a comma is reached.  */
 
 struct expression *
-parse_exp_1 (char **stringptr, struct block *block, int comma)
+parse_exp_1 (char **stringptr, CORE_ADDR pc, struct block *block, int comma)
 {
-  return parse_exp_in_context (stringptr, block, comma, 0, NULL);
+  return parse_exp_in_context (stringptr, pc, block, comma, 0, NULL);
 }
 
 /* As for parse_exp_1, except that if VOID_CONTEXT_P, then
@@ -1110,8 +1111,8 @@ parse_exp_1 (char **stringptr, struct block *block, int comma)
    is left untouched.  */
 
 static struct expression *
-parse_exp_in_context (char **stringptr, struct block *block, int comma, 
-		      int void_context_p, int *out_subexp)
+parse_exp_in_context (char **stringptr, CORE_ADDR pc, struct block *block,
+		      int comma, int void_context_p, int *out_subexp)
 {
   volatile struct gdb_exception except;
   struct cleanup *old_chain;
@@ -1138,8 +1139,10 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
   /* If no context specified, try using the current frame, if any.  */
   if (!expression_context_block)
     expression_context_block = get_selected_block (&expression_context_pc);
-  else
+  else if (pc == 0)
     expression_context_pc = BLOCK_START (expression_context_block);
+  else
+    expression_context_pc = pc;
 
   /* Fall back to using the current source static context, if any.  */
 
@@ -1227,7 +1230,7 @@ parse_expression (char *string)
 {
   struct expression *exp;
 
-  exp = parse_exp_1 (&string, 0, 0);
+  exp = parse_exp_1 (&string, 0, 0, 0);
   if (*string)
     error (_("Junk after end of expression."));
   return exp;
@@ -1252,7 +1255,7 @@ parse_field_expression (char *string, char **name)
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
       in_parse_field = 1;
-      exp = parse_exp_in_context (&string, 0, 0, 0, &subexp);
+      exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp);
     }
   in_parse_field = 0;
   if (except.reason < 0 || ! exp)
