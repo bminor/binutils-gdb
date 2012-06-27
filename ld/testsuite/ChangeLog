@@ -1,3 +1,8 @@
+2012-06-27  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/ehdr_start.s: Use data rather than rodata.
+	* ld-elf/ehdr_start.d: Run on linux and gnu targets only.
+
 2012-06-25  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-elf/ehdr_start.d (ld): Add explicit -e _start.
