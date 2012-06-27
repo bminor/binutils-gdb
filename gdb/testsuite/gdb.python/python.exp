@@ -112,7 +112,7 @@ gdb_test_multiple "python print \"\\n\" * $lines" $test {
 	pass $test
     }
 }
-gdb_test "q" "Quit" "verify pagination beforehand: q"
+gdb_test "q" "Quit.*Error while executing Python.*" "verify pagination beforehand: q"
 
 gdb_test "python if gdb.execute('python print \"\\\\n\" * $lines', to_string=True) == \"\\n\" * [expr $lines + 1]: print \"yes\"" "yes" "gdb.execute does not page"
 
@@ -128,7 +128,7 @@ gdb_test_multiple "python print \"\\n\" * $lines" $test {
 	pass $test
     }
 }
-gdb_test "q" "Quit" "verify pagination afterwards: q"
+gdb_test "q" "Quit.*Error while executing Python.*" "verify pagination afterwards: q"
 
 gdb_test_no_output "set height 0"
 

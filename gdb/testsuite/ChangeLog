@@ -1,3 +1,7 @@
+2012-06-27  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/python.exp: Fix regexps in pagination tests.
+
 2012-06-26  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* gdb.python/py-symtab.exp: Add tests to test the new attribute
