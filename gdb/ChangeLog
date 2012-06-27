@@ -1,3 +1,12 @@
+2012-06-26  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (read_and_check_comp_unit_head): Delete unnecessary
+	prototype.
+	(error_check_comp_unit_head): New arg abbrev_section.  All callers
+	updated.
+	(read_and_check_comp_unit_head): Ditto.
+	(read_and_check_type_unit_head): Ditto.
+
 2012-06-26  Siva Chandra Reddy  <sivachandra@google.com>
 
 	New attribute 'last' for gdb.Symtab_and_line.

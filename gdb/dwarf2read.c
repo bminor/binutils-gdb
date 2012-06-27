@@ -1462,11 +1462,6 @@ static void find_file_and_directory (struct die_info *die,
 static char *file_full_name (int file, struct line_header *lh,
 			     const char *comp_dir);
 
-static gdb_byte *read_and_check_comp_unit_head
-  (struct comp_unit_head *header,
-   struct dwarf2_section_info *section, gdb_byte *info_ptr,
-   int is_debug_types_section);
-
 static void init_cutu_and_read_dies
   (struct dwarf2_per_cu_data *this_cu, int use_existing_cu, int keep,
    die_reader_func_ftype *die_reader_func, void *data);
@@ -3395,7 +3390,8 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
 
 static void
 error_check_comp_unit_head (struct comp_unit_head *header,
-			    struct dwarf2_section_info *section)
+			    struct dwarf2_section_info *section,
+			    struct dwarf2_section_info *abbrev_section)
 {
   bfd *abfd = section->asection->owner;
   const char *filename = bfd_get_filename (abfd);
@@ -3431,6 +3427,7 @@ error_check_comp_unit_head (struct comp_unit_head *header,
 static gdb_byte *
 read_and_check_comp_unit_head (struct comp_unit_head *header,
 			       struct dwarf2_section_info *section,
+			       struct dwarf2_section_info *abbrev_section,
 			       gdb_byte *info_ptr,
 			       int is_debug_types_section)
 {
@@ -3448,7 +3445,7 @@ read_and_check_comp_unit_head (struct comp_unit_head *header,
 
   header->first_die_offset.cu_off = info_ptr - beg_of_comp_unit;
 
-  error_check_comp_unit_head (header, section);
+  error_check_comp_unit_head (header, section, abbrev_section);
 
   return info_ptr;
 }
@@ -3459,6 +3456,7 @@ read_and_check_comp_unit_head (struct comp_unit_head *header,
 static gdb_byte *
 read_and_check_type_unit_head (struct comp_unit_head *header,
 			       struct dwarf2_section_info *section,
+			       struct dwarf2_section_info *abbrev_section,
 			       gdb_byte *info_ptr,
 			       ULONGEST *signature,
 			       cu_offset *type_offset_in_tu)
@@ -3482,7 +3480,7 @@ read_and_check_type_unit_head (struct comp_unit_head *header,
 
   header->first_die_offset.cu_off = info_ptr - beg_of_comp_unit;
 
-  error_check_comp_unit_head (header, section);
+  error_check_comp_unit_head (header, section, abbrev_section);
 
   return info_ptr;
 }
@@ -3603,9 +3601,14 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
   htab_t types_htab = NULL;
   int ix;
   struct dwarf2_section_info *section;
+  struct dwarf2_section_info *abbrev_section;
 
   if (VEC_empty (dwarf2_section_info_def, types))
     return NULL;
+
+  abbrev_section = (dwo_file != NULL
+		    ? &dwo_file->sections.abbrev
+		    : &dwarf2_per_objfile->abbrev);
 
   for (ix = 0;
        VEC_iterate (dwarf2_section_info_def, types, ix, section);
@@ -3658,7 +3661,8 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 	  /* We need to read the type's signature in order to build the hash
 	     table, but we don't need anything else just yet.  */
 
-	  ptr = read_and_check_type_unit_head (&header, section, ptr,
+	  ptr = read_and_check_type_unit_head (&header, section,
+					       abbrev_section, ptr,
 					       &signature, &type_offset_in_tu);
 
 	  length = header.initial_length_size + header.length;
@@ -3870,6 +3874,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   struct attribute *attr;
   struct cleanup *cleanups, *free_cu_cleanup = NULL;
   struct signatured_type *sig_type = NULL;
+  struct dwarf2_section_info *abbrev_section;
 
   if (use_existing_cu)
     gdb_assert (keep);
@@ -3880,6 +3885,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   dwarf2_read_section (objfile, section);
 
   begin_info_ptr = info_ptr = section->buffer + this_cu->offset.sect_off;
+  abbrev_section = &dwarf2_per_objfile->abbrev;
 
   if (use_existing_cu && this_cu->cu != NULL)
     {
@@ -3901,8 +3907,8 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 	{
 	  ULONGEST signature;
 
-	  info_ptr = read_and_check_type_unit_head (&cu->header,
-						    section, info_ptr,
+	  info_ptr = read_and_check_type_unit_head (&cu->header, section,
+						    abbrev_section, info_ptr,
 						    &signature, NULL);
 
 	  /* There's no way to get from PER_CU to its containing
@@ -3924,8 +3930,9 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 	}
       else
 	{
-	  info_ptr = read_and_check_comp_unit_head (&cu->header,
-						    section, info_ptr, 0);
+	  info_ptr = read_and_check_comp_unit_head (&cu->header, section,
+						    abbrev_section,
+						    info_ptr, 0);
 
 	  gdb_assert (this_cu->offset.sect_off == cu->header.offset.sect_off);
 	  gdb_assert (this_cu->length
@@ -3944,7 +3951,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   /* Read the abbrevs for this compilation unit into a table.  */
   if (cu->dwarf2_abbrevs == NULL)
     {
-      dwarf2_read_abbrevs (cu, &dwarf2_per_objfile->abbrev);
+      dwarf2_read_abbrevs (cu, abbrev_section);
       make_cleanup (dwarf2_free_abbrev_table, cu);
     }
 
@@ -3964,6 +3971,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
       ULONGEST signature; /* Or dwo_id.  */
       struct attribute *stmt_list, *low_pc, *high_pc, *ranges;
       int i,num_extra_attrs;
+      struct dwarf2_section_info *dwo_abbrev_section;
 
       if (has_children)
 	error (_("Dwarf Error: compilation unit with DW_AT_GNU_dwo_name"
@@ -4035,14 +4043,16 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
       cu->dwo_unit = dwo_unit;
       section = dwo_unit->info_or_types_section;
       begin_info_ptr = info_ptr = section->buffer + dwo_unit->offset.sect_off;
+      dwo_abbrev_section = &dwo_unit->dwo_file->sections.abbrev;
       init_cu_die_reader (&reader, cu, section, dwo_unit->dwo_file);
 
       if (this_cu->is_debug_types)
 	{
 	  ULONGEST signature;
 
-	  info_ptr = read_and_check_type_unit_head (&cu->header,
-						    section, info_ptr,
+	  info_ptr = read_and_check_type_unit_head (&cu->header, section,
+						    dwo_abbrev_section,
+						    info_ptr,
 						    &signature, NULL);
 	  gdb_assert (sig_type->signature == signature);
 	  gdb_assert (dwo_unit->offset.sect_off == cu->header.offset.sect_off);
@@ -4056,8 +4066,9 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 	}
       else
 	{
-	  info_ptr = read_and_check_comp_unit_head (&cu->header,
-						    section, info_ptr, 0);
+	  info_ptr = read_and_check_comp_unit_head (&cu->header, section,
+						    dwo_abbrev_section,
+						    info_ptr, 0);
 	  gdb_assert (dwo_unit->offset.sect_off == cu->header.offset.sect_off);
 	  gdb_assert (dwo_unit->length
 		      == cu->header.length + cu->header.initial_length_size);
@@ -4065,7 +4076,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 
       /* Discard the original CU's abbrev table, and read the DWO's.  */
       dwarf2_free_abbrev_table (cu);
-      dwarf2_read_abbrevs (cu, &dwo_unit->dwo_file->sections.abbrev);
+      dwarf2_read_abbrevs (cu, dwo_abbrev_section);
 
       /* Read in the die, but leave space to copy over the attributes
 	 from the stub.  This has the benefit of simplifying the rest of
@@ -4167,7 +4178,8 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
   cleanups = make_cleanup (free_stack_comp_unit, &cu);
 
   begin_info_ptr = info_ptr = section->buffer + this_cu->offset.sect_off;
-  info_ptr = read_and_check_comp_unit_head (&cu.header, section, info_ptr,
+  info_ptr = read_and_check_comp_unit_head (&cu.header, section,
+					    abbrev_section, info_ptr,
 					    this_cu->is_debug_types);
 
   this_cu->length = cu.header.length + cu.header.initial_length_size;
