@@ -60,6 +60,9 @@
   ** New function gdb.find_pc_line which returns the gdb.Symtab_and_line
      object associated with a PC value.
 
+  ** gdb.Symtab_and_line has new attribute 'last' which holds the end
+     of the address range occupied by code for the current source line.
+
 * Go language support.
   GDB now supports debugging programs written in the Go programming
   language.

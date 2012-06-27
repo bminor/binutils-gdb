@@ -40,8 +40,8 @@ int qq = 72;			/* line of qq */
 int func (int arg)
 {
   int i = 2;
-  i = i * arg;
-  return arg; /* Block break here.  */
+  i = i * arg; /* Block break here.  */
+  return arg;
 }
 
 struct simple_struct

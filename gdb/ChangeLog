@@ -1,3 +1,12 @@
+2012-06-26  Siva Chandra Reddy  <sivachandra@google.com>
+
+	New attribute 'last' for gdb.Symtab_and_line.
+	* NEWS (Python Scripting): Add entry about the new attribute.
+	* python/py-symtab.c (salpy_get_last): New function which
+	implements the get method for the 'last' attribute of
+	gdb.Symtab_and_line.
+	(sal_object_getset): Add entry for the 'last' attribute.
+
 2012-06-26  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwo_section_names): Add macinfo_dwo, macro_dwo.

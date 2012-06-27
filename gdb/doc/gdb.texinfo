@@ -25276,6 +25276,11 @@ Indicates the start of the address range occupied by code for the
 current source line.  This attribute is not writable.
 @end defvar
 
+@defvar Symtab_and_line.last
+Indicates the end of the address range occupied by code for the current
+source line.  This attribute is not writable.
+@end defvar
+
 @defvar Symtab_and_line.line
 Indicates the current line number for this object.  This
 attribute is not writable.
