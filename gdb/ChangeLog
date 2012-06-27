@@ -1,3 +1,8 @@
+2012-06-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (per_cu_header_read_in): Simplify, and handle
+	type units.
+
 2012-06-26  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_and_check_comp_unit_head): Delete unnecessary

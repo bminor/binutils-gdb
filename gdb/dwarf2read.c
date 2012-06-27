@@ -16808,19 +16808,15 @@ static const struct comp_unit_head *
 per_cu_header_read_in (struct comp_unit_head *cu_headerp,
 		       struct dwarf2_per_cu_data *per_cu)
 {
-  struct objfile *objfile;
-  struct dwarf2_per_objfile *per_objfile;
   gdb_byte *info_ptr;
 
   if (per_cu->cu)
     return &per_cu->cu->header;
 
-  objfile = per_cu->objfile;
-  per_objfile = objfile_data (objfile, dwarf2_objfile_data_key);
-  info_ptr = per_objfile->info.buffer + per_cu->offset.sect_off;
+  info_ptr = per_cu->info_or_types_section->buffer + per_cu->offset.sect_off;
 
   memset (cu_headerp, 0, sizeof (*cu_headerp));
-  read_comp_unit_head (cu_headerp, info_ptr, objfile->obfd);
+  read_comp_unit_head (cu_headerp, info_ptr, per_cu->objfile->obfd);
 
   return cu_headerp;
 }
