@@ -25,10 +25,12 @@
 
 #include "xml-utils.h"
 #include "buffer.h"
+#include "inttypes.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 
 void
 buffer_grow (struct buffer *buffer, const char *data, size_t size)
@@ -139,16 +141,20 @@ buffer_xml_printf (struct buffer *buffer, const char *format, ...)
 		  switch (*f)
 		    {
 		    case 'd':
-		      sprintf (str, "%lld", va_arg (ap, long long));
+		      sprintf (str, "%" PRId64,
+			       (int64_t) va_arg (ap, long long));
 		      break;
 		    case 'u':
-		      sprintf (str, "%llu", va_arg (ap, unsigned long long));
+		      sprintf (str, "%" PRIu64,
+			       (uint64_t) va_arg (ap, unsigned long long));
 		      break;
 		    case 'x':
-		      sprintf (str, "%llx", va_arg (ap, unsigned long long));
+		      sprintf (str, "%" PRIx64,
+			       (uint64_t) va_arg (ap, unsigned long long));
 		      break;
 		    case 'o':
-		      sprintf (str, "%llo", va_arg (ap, unsigned long long));
+		      sprintf (str, "%" PRIo64,
+			       (uint64_t) va_arg (ap, unsigned long long));
 		      break;
 		    default:
 		      str = 0;

@@ -1,4 +1,9 @@
 2012-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* common/buffer.c: Include inttypes.h and stdint.h.
+	(buffer_xml_printf): Use PRId64, PRIu64, PRIx64 and PRIo64.
+
+2012-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* gdbthread.h (ALL_THREADS): New macro.
