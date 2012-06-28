@@ -1,3 +1,7 @@
+2012-06-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (update_wild_statements): Remove redundant statement.
+
 2012-06-25  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (load_symbols): Close file and set flags.loaded

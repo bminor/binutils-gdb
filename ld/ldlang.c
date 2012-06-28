@@ -3494,7 +3494,6 @@ update_wild_statements (lang_statement_union_type *s)
 	      break;
 
 	    case lang_wild_statement_enum:
-	      sec = s->wild_statement.section_list;
 	      for (sec = s->wild_statement.section_list; sec != NULL;
 		   sec = sec->next)
 		{
