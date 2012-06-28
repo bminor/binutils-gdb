@@ -54,7 +54,7 @@ void _initialize_thread (void);
 
 /* Prototypes for local functions.  */
 
-static struct thread_info *thread_list = NULL;
+struct thread_info *thread_list = NULL;
 static int highest_thread_num;
 
 static void thread_command (char *tidstr, int from_tty);

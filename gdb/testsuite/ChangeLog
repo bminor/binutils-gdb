@@ -1,3 +1,11 @@
+2012-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/siginfo-threads.exp: New file.
+	* gdb.threads/siginfo-threads.c: New file.
+	* gdb.threads/sigstep-threads.exp: New file.
+	* gdb.threads/sigstep-threads.c: New file.
+
 2012-06-28  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.go/package.exp: Partially revert earlier patch; use

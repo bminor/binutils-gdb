@@ -301,6 +301,11 @@ void thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid);
 typedef int (*thread_callback_func) (struct thread_info *, void *);
 extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 
+/* Traverse all threads.  */
+
+#define ALL_THREADS(T)				\
+  for (T = thread_list; T; T = T->next)
+
 extern int thread_count (void);
 
 /* Switch from one thread to another.  */
@@ -390,5 +395,7 @@ extern struct cleanup *make_cleanup_restore_current_thread (void);
 extern struct thread_info* inferior_thread (void);
 
 extern void update_thread_list (void);
+
+extern struct thread_info *thread_list;
 
 #endif /* GDBTHREAD_H */

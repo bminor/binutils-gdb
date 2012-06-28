@@ -1,3 +1,23 @@
+2012-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (ALL_THREADS): New macro.
+	(thread_list): Declare.
+	* infrun.c (handle_inferior_event) <spurious signal>: Don't keep
+	going, but instead fall through to the stepping handling.
+	* linux-nat.c (resume_lwp): New parameter 'signo'.  Resume with
+	the passed in signal.  Adjust debug output.
+	(resume_callback): Rename to ...
+	(linux_nat_resume_callback): ... this.  Pass the thread's last
+	stop signal, if in "pass" state.
+	(linux_nat_resume): Adjust to rename.
+	(stop_wait_callback): New assertion.  Don't respawn signals;
+	instead let the LWP remain with SIGNALLED set.
+	(linux_nat_wait_1): Remove flushing of pending SIGSTOPs.
+	* remote.c (append_pending_thread_resumptions): New.
+	(remote_vcont_resume): Call it.
+	* target.h (target_resume): Extend comment.
+
 2012-06-28  Iain Sandoe  <iain@codesourcery.com>
 
 	* auxv.c (fprint_target_auxv): Handle extended cache data tags.
