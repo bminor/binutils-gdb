@@ -23,10 +23,17 @@ if { [skip_go_tests] } { continue }
 
 standard_testfile package1.go package2.go
 
-if {[prepare_for_testing $testfile.exp $testfile [list $srcfile $srcfile2] \
-	 [list debug go libdir=[standard_output_file {}]]]} {
+if  { [gdb_compile "${srcdir}/${subdir}/${testfile}2.go" "${binfile}2.o" object {debug go}] != "" } {
+    untested $testfile
     return -1
 }
+ 
+if  { [gdb_compile "${srcdir}/${subdir}/${testfile}1.go ${binfile}2.o" "${binfile}" executable "debug go libdir=[standard_output_file {}]"] != "" } {
+    untested $testfile
+    return -1
+}
+
+clean_restart $testfile
 
 if { [go_runto_main] < 0 } {
     untested methods

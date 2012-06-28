@@ -1,3 +1,8 @@
+2012-06-28  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.go/package.exp: Partially revert earlier patch; use
+	gdb_compile again.  Use standard_output_file.
+
 2012-06-27  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/fission-base.c: New file.
