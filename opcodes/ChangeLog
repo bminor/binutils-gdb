@@ -1,3 +1,7 @@
+2012-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2012-06-22  Roland McGrath  <mcgrathr@google.com>
 
 	* i386-opc.tbl: Add RepPrefixOk to ret.

@@ -1,3 +1,9 @@
+2012-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* po/uk.po: New Ukranian translation.
+	* configure.in (ALL_LINGUAS): Add uk.
+	* configure: Regenerate.
+
 2012-06-26  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_next_toc_section): Don't error if input
