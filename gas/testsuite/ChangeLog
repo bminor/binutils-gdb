@@ -1,5 +1,13 @@
 2012-06-28  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/14260
+	* gas/arm/ldr-t-bad.s: Add test of bogus use of literal pool
+	addressing.
+	* gas/arm/ldr-t-bad.l: Update expected assembler error message
+	output.
+
+2012-06-28  Nick Clifton  <nickc@redhat.com>
+
 	* gas/lns/lns.exp: Use alternate lns-common test for targets
 	enabling linker relaxation.
 	* gas/lns/lns-big-delta.d: Allow for output from architectures

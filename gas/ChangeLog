@@ -1,5 +1,11 @@
 2012-06-28  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/14260
+	* config/tc-arm.c (encode_arm_addr_mode_common): Generate an error
+	message if literal pool addressing is used.
+
+2012-06-28  Nick Clifton  <nickc@redhat.com>
+
 	* dwarf2dbg.c (DWARF2_USE_FIXED_ADVANCE_PC): Enable when using
 	linker relaxation.
 	(dwarf2_gen_line_info): Generate real, local, labels for line

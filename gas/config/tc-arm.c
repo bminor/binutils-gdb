@@ -7042,7 +7042,11 @@ encode_arm_shifter_operand (int i)
 static void
 encode_arm_addr_mode_common (int i, bfd_boolean is_t)
 {
-  gas_assert (inst.operands[i].isreg);
+  /* PR 14260:
+     Generate an error if the operand is not a register.  */
+  constraint (!inst.operands[i].isreg,
+	      _("Instruction does not support =N addresses"));
+
   inst.instruction |= inst.operands[i].reg << 16;
 
   if (inst.operands[i].preind)
@@ -21269,8 +21273,8 @@ md_apply_fix (fixS *	fixP,
     thumb_bl_common:
 
 #ifdef OBJ_ELF
-       if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4 &&
-	   fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
+       if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4
+	   && fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
 	 fixP->fx_r_type = BFD_RELOC_THUMB_PCREL_BRANCH23;
 #endif
 
@@ -21281,15 +21285,15 @@ md_apply_fix (fixS *	fixP,
 	   1 of the base address.  */
 	value = (value + 1) & ~ 1;
 
-       if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
-	 {
-	   if (!(ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2)))
-	     as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
-	   else if ((value & ~0x1ffffff)
-		    && ((value & ~0x1ffffff) != ~0x1ffffff))
-	     as_bad_where (fixP->fx_file, fixP->fx_line,
-			   _("Thumb2 branch out of range"));
-	 }
+      if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
+	{
+	  if (!(ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2)))
+	    as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
+	  else if ((value & ~0x1ffffff)
+		   && ((value & ~0x1ffffff) != ~0x1ffffff))
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("Thumb2 branch out of range"));
+	}
 
       if (fixP->fx_done || !seg->use_rela_p)
 	encode_thumb2_b_bl_offset (buf, value);

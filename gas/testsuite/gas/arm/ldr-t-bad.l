@@ -13,4 +13,4 @@
 [^:]*:56: Error: r15 not allowed here -- `str r15,\[r1,r2\]'
 [^:]*:57: Error: r13 not allowed here -- `str r1,\[r2,r13\]'
 [^:]*:58: Error: r15 not allowed here -- `str r1,\[r2,r15\]'
-
+[^:]*:61: Error: Instruction does not support =N addresses -- `ldrt r0,=0x0'
