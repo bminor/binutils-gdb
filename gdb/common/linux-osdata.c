@@ -1543,26 +1543,27 @@ linux_xfer_osdata_modules (gdb_byte *readbuf,
 
 struct osdata_type {
   char *type;
+  char *title;
   char *description;
   LONGEST (*getter) (gdb_byte *readbuf, ULONGEST offset, LONGEST len);
 } osdata_table[] = {
-  { "processes", "Listing of all processes",
+  { "processes", "Processes", "Listing of all processes",
     linux_xfer_osdata_processes },
-  { "procgroups", "Listing of all process groups",
+  { "procgroups", "Process groups", "Listing of all process groups",
     linux_xfer_osdata_processgroups },
-  { "threads", "Listing of all threads",
+  { "threads", "Threads", "Listing of all threads",
     linux_xfer_osdata_threads },
-  { "files", "Listing of all file descriptors",
+  { "files", "File descriptors", "Listing of all file descriptors",
     linux_xfer_osdata_fds },
-  { "sockets", "Listing of all internet-domain sockets",
+  { "sockets", "Sockets", "Listing of all internet-domain sockets",
     linux_xfer_osdata_isockets },
-  { "shm", "Listing of all shared-memory regions",
+  { "shm", "Shared-memory regions", "Listing of all shared-memory regions",
     linux_xfer_osdata_shm },
-  { "semaphores", "Listing of all semaphores",
+  { "semaphores", "Semaphores", "Listing of all semaphores",
     linux_xfer_osdata_sem },
-  { "msg", "Listing of all message queues",
+  { "msg", "Message queues", "Listing of all message queues",
     linux_xfer_osdata_msg },
-  { "modules", "Listing of all loaded kernel modules",
+  { "modules", "Kernel modules", "Listing of all loaded kernel modules",
     linux_xfer_osdata_modules },
   { NULL, NULL, NULL }
 };
@@ -1594,9 +1595,11 @@ linux_common_xfer_osdata (const char *annex, gdb_byte *readbuf,
 			       "<item>"
 			       "<column name=\"Type\">%s</column>"
 			       "<column name=\"Description\">%s</column>"
+			       "<column name=\"Title\">%s</column>"
 			       "</item>",
 			       osdata_table[i].type,
-			       osdata_table[i].description);
+			       osdata_table[i].description,
+			       osdata_table[i].title);
 
 	  buffer_grow_str0 (&buffer, "</osdata>\n");
 	  buf = buffer_finish (&buffer);

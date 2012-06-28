@@ -1,5 +1,13 @@
 2012-06-28  Stan Shebs  <stan@codesourcery.com>
 
+	* osdata.c (info_osdata_command): Filter out "Title" columns
+	from non-MI uses.
+	* common/linux-osdata.c (struct osdata_type): Add title field.
+	(osdata_table): Add titles to each entry.
+	(linux_command_xfer_osdata): Add a column for title data.
+
+2012-06-28  Stan Shebs  <stan@codesourcery.com>
+
 	Make logging work for MI.
 	* NEWS: Mention it.
 	* interps.h (interp_set_logging_ftype): New typedef.

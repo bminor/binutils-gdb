@@ -297,6 +297,7 @@ info_osdata_command (char *type, int from_tty)
   struct cleanup *old_chain;
   int ncols = 0;
   int nrows;
+  int col_to_skip = -1;
 
   osdata = get_osdata (type);
   old_chain = make_cleanup_osdata_free (osdata);
@@ -311,6 +312,28 @@ info_osdata_command (char *type, int from_tty)
       last = VEC_last (osdata_item_s, osdata->items);
       if (last->columns)
         ncols = VEC_length (osdata_column_s, last->columns);
+
+      /* As a special case, scan the listing of available data types
+	 for a column named "Title", and only include it with MI
+	 output; this column's normal use is for titles for interface
+	 elements like menus, and it clutters up CLI output.  */
+      if (!type && !ui_out_is_mi_like_p (uiout))
+	{
+	  struct osdata_column *col;
+	  int ix;
+
+	  for (ix = 0;
+	       VEC_iterate (osdata_column_s, last->columns, ix, col);
+	       ix++)
+	    {
+	      if (strcmp (col->name, "Title") == 0)
+		col_to_skip = ix;
+	    }
+	  /* Be sure to reduce the total column count, otherwise
+	     internal errors ensue.  */
+	  if (col_to_skip >= 0)
+	    --ncols;
+	}
     }
 
   make_cleanup_ui_out_table_begin_end (uiout, ncols, nrows,
@@ -335,7 +358,10 @@ info_osdata_command (char *type, int from_tty)
           ix++)
 	{
 	  char col_name[32];
-	  
+
+	  if (ix == col_to_skip)
+	    continue;
+
 	  snprintf (col_name, 32, "col%d", ix);
 	  ui_out_table_header (uiout, 10, ui_left,
 			       col_name, col->name);
@@ -366,7 +392,10 @@ info_osdata_command (char *type, int from_tty)
               ix_cols++)
 	   {
 	     char col_name[32];
-	     
+
+	     if (ix_cols == col_to_skip)
+	       continue;
+
 	     snprintf (col_name, 32, "col%d", ix_cols);
 	     ui_out_field_string (uiout, col_name, col->value);
 	   }
