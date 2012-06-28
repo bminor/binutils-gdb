@@ -1,3 +1,19 @@
+2012-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2dbg.c (DWARF2_USE_FIXED_ADVANCE_PC): Enable when using
+	linker relaxation.
+	(dwarf2_gen_line_info): Generate real, local, labels for line
+	numbers.
+	(dwarf2dbg_convert_frag): Do not finalize the computation of the
+	frag's symbol value when linker relaxation is enabled.
+	(ADDR_DELTA_LIMIT): Define.
+	(size_fixed_inc_line_addr): Use ADDR_DELTA_LIMIT.
+	(emit_fixed_inc_line_addr): Likewise.
+	* write.c (fixup_segment): If the subtraction of two symbols
+	cannot be resolved but is valid, then prevent bogus range warnings
+	by pre-biasing add_number.
+	* config/tc-h8300.h (DWARF2_USE_FIXED_ADVANCE_PC): Define to 0.
+
 2012-06-22  Roland McGrath  <mcgrathr@google.com>
 
 	* NEWS: Mention 'rep ret' too.

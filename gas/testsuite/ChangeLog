@@ -1,3 +1,10 @@
+2012-06-28  Nick Clifton  <nickc@redhat.com>
+
+	* gas/lns/lns.exp: Use alternate lns-common test for targets
+	enabling linker relaxation.
+	* gas/lns/lns-big-delta.d: Allow for output from architectures
+	with 32-bit addresses.
+
 2012-06-27  Alan Modra  <amodra@gmail.com>
 
 	* gas/i386/rep-ret.s: Zero pad section.

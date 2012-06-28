@@ -1004,7 +1004,12 @@ fixup_segment (fixS *fixP, segT this_segment)
 	      fixP->fx_subsy = NULL;
 	      fixP->fx_pcrel = 1;
 	    }
-	  else if (!TC_VALIDATE_FIX_SUB (fixP, add_symbol_segment))
+	  else if (TC_VALIDATE_FIX_SUB (fixP, add_symbol_segment))
+	    /* If the fix is valid, subtract fx_subsy here.  The addition of
+	       fx_addsy will be performed below.  Doing this prevents bogus
+	       warnings from the range check below.  */
+	      add_number -= S_GET_VALUE (fixP->fx_subsy);
+	  else
 	    {
 	      if (!md_register_arithmetic
 		  && (add_symbol_segment == reg_section
