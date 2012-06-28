@@ -1,3 +1,8 @@
+2012-06-28  Roland McGrath  <mcgrathr@google.com>
+
+	* elf32-arm.c (elf32_arm_populate_plt_entry): Use int32_t for
+	displacement calculation in nacl_p case.
+
 2012-06-28  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: New Ukranian translation.

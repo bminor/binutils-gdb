@@ -23,6 +23,7 @@
 #include <limits.h>
 
 #include "bfd.h"
+#include "bfd_stdint.h"
 #include "libiberty.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
@@ -7629,7 +7630,7 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	{
 	  /* Calculate the displacement between the PLT slot and the
 	     common tail that's part of the special initial PLT slot.  */
-	  bfd_vma tail_displacement
+	  int32_t tail_displacement
 	    = ((splt->output_section->vma + splt->output_offset
 		+ ARM_NACL_PLT_TAIL_OFFSET)
 	       - (plt_address + htab->plt_entry_size + 4));
@@ -7642,7 +7643,8 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	  /* Calculate the displacement between the PLT slot and the entry
 	     in the GOT.  The offset accounts for the value produced by
 	     adding to pc in the penultimate instruction of the PLT stub.  */
-	  got_displacement = got_address - (plt_address + htab->plt_entry_size);
+	  got_displacement = (got_address
+                              - (plt_address + htab->plt_entry_size));
 
 	  /* NaCl does not support interworking at all.  */
 	  BFD_ASSERT (!elf32_arm_plt_needs_thumb_stub_p (info, arm_plt));
@@ -10982,7 +10984,7 @@ bfd_arm_get_mach_from_attributes (bfd * abfd)
 	      return bfd_mach_arm_iWMMXt2;
 
 	    if (strcmp (name, "IWMMXT") == 0)
-	      return bfd_mach_arm_iWMMXt;	
+	      return bfd_mach_arm_iWMMXt;
 	  }
 
 	return bfd_mach_arm_5TE;
