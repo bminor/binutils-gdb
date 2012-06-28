@@ -268,6 +268,9 @@ set armelftests_common {
     {"abs call" "-T arm.ld" "" {abs-call-1.s}
      {{objdump -d abs-call-1.d}}
      "abs-call-1"}
+    {"Simple non-PIC shared library (no PLT check)" "-shared" "" {arm-lib.s}
+     {{objdump -Rw arm-lib.r}}
+     "arm-lib.so"}
 }
 
 set armelftests_nonacl {
@@ -758,5 +761,7 @@ run_dump_test "attr-merge-vfp-6"
 run_dump_test "attr-merge-vfp-6r"
 run_dump_test "attr-merge-incompatible"
 run_dump_test "unresolved-1"
-run_dump_test "unresolved-1-dyn"
+if { ![istarget "arm*-*-nacl*"] } {
+    run_dump_test "unresolved-1-dyn"
+}
 run_dump_test "gc-hidden-1"
