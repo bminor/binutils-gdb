@@ -135,4 +135,21 @@ mi_console_file_flush (struct ui_file *file)
 
   ui_file_put (mi_console->buffer, mi_console_raw_packet, mi_console);
   ui_file_rewind (mi_console->buffer);
+
+}
+
+/* Change the underlying stream of the console directly; this is
+   useful as a minimum-impact way to reflect external changes like
+   logging enable/disable.  */
+
+void
+mi_console_set_raw (struct ui_file *file, struct ui_file *raw)
+{
+  struct mi_console_file *mi_console = ui_file_data (file);
+
+  if (mi_console->magic != &mi_console_file_magic)
+    internal_error (__FILE__, __LINE__,
+		    _("mi_console_file_set_raw: bad magic number"));
+
+  mi_console->raw = raw;
 }

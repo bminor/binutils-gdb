@@ -251,6 +251,19 @@ interp_ui_out (struct interp *interp)
   return current_interpreter->procs->ui_out_proc (current_interpreter);
 }
 
+int
+current_interp_set_logging (int start_log, struct ui_file *out,
+			    struct ui_file *logfile)
+{
+  if (current_interpreter == NULL
+      || current_interpreter->procs->set_logging_proc == NULL)
+    return 0;
+
+  return current_interpreter->procs->set_logging_proc (current_interpreter,
+						       start_log, out,
+						       logfile);
+}
+
 /* Temporarily overrides the current interpreter.  */
 struct interp *
 interp_set_temp (const char *name)

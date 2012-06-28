@@ -130,6 +130,8 @@
 
   ** New command -info-os is the MI equivalent of "info os".
 
+  ** Output logs ("set logging" and related) now include MI output.
+
 * New commands
 
   ** "catch load" and "catch unload" can be used to stop when a shared

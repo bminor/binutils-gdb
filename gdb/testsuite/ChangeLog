@@ -1,3 +1,7 @@
+2012-06-28  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.mi/mi-logging.exp: New file.
+
 2012-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
