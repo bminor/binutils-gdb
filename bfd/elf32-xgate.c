@@ -529,12 +529,15 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
 bfd_boolean
 elf32_xgate_add_symbol_hook (bfd *abfd ATTRIBUTE_UNUSED,
 			     struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			     Elf_Internal_Sym *sym ATTRIBUTE_UNUSED,
+			     Elf_Internal_Sym *sym,
 			     const char **namep ATTRIBUTE_UNUSED,
 			     flagword *flagsp ATTRIBUTE_UNUSED,
 			     asection **secp ATTRIBUTE_UNUSED,
 			     bfd_vma *valp ATTRIBUTE_UNUSED)
 {
+  /* For some reason the st_target_internal value is not retained
+     after xgate_frob_symbol is called, hence this temp hack.  */
+  sym->st_target_internal = 1;
   return TRUE;
 }
 

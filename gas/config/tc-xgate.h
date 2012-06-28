@@ -105,6 +105,10 @@ extern int tc_xgate_fix_adjustable (struct fix *);
 #define elf_tc_final_processing	xgate_elf_final_processing
 extern void xgate_elf_final_processing (void);
 
+/* Mark the symbol as being from XGATE.  */
+#define tc_frob_symbol(sym, punt) punt = xgate_frob_symbol (sym)
+extern int xgate_frob_symbol (symbolS *);
+
 #if 0
 #define tc_print_statistics(FILE) xgate_print_statistics (FILE)
 extern void xgate_print_statistics (FILE *);

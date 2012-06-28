@@ -1410,3 +1410,24 @@ xgate_find_match (struct xgate_opcode_handle *opcode_handle,
 
   return NULL;
 }
+
+/* Because we are dealing with two different core that view the system
+   memory with different offsets, we must differentiate what core a
+   symbol belongs to, in order for the linker to cross-link.  */
+
+int
+xgate_frob_symbol (symbolS *sym)
+{
+  asymbol *bfdsym;
+  elf_symbol_type *elfsym;
+
+  bfdsym = symbol_get_bfdsym (sym);
+  elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+
+  gas_assert(elfsym);
+
+  /* Mark the symbol as being *from XGATE  */
+  elfsym->internal_elf_sym.st_target_internal = 1;
+
+  return 0;
+}
