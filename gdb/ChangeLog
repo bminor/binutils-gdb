@@ -1,5 +1,8 @@
 2012-06-28  Doug Evans  <dje@google.com>
 
+	* symtab.c (lookup_symbol_aux_objfile): Use
+	ALL_OBJFILE_PRIMARY_SYMTABS.
+
 	* gdbtypes.c (lookup_typename): Rename local variable "tmp" to "type".
 
 2012-06-28  Jan Kratochvil  <jan.kratochvil@redhat.com>

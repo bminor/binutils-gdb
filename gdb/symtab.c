@@ -1519,18 +1519,17 @@ lookup_symbol_aux_objfile (struct objfile *objfile, int block_index,
     objfile->sf->qf->pre_expand_symtabs_matching (objfile, block_index,
 						  name, domain);
 
-  ALL_OBJFILE_SYMTABS (objfile, s)
-    if (s->primary)
-      {
-	bv = BLOCKVECTOR (s);
-	block = BLOCKVECTOR_BLOCK (bv, block_index);
-	sym = lookup_block_symbol (block, name, domain);
-	if (sym)
-	  {
-	    block_found = block;
-	    return fixup_symbol_section (sym, objfile);
-	  }
-      }
+  ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
+    {
+      bv = BLOCKVECTOR (s);
+      block = BLOCKVECTOR_BLOCK (bv, block_index);
+      sym = lookup_block_symbol (block, name, domain);
+      if (sym)
+	{
+	  block_found = block;
+	  return fixup_symbol_section (sym, objfile);
+	}
+    }
 
   return NULL;
 }
