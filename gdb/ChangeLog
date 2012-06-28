@@ -1,3 +1,7 @@
+2012-06-28  Iain Sandoe  <iain@codesourcery.com>
+
+	* auxv.c (fprint_target_auxv): Handle extended cache data tags.
+
 2012-06-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_cu): Add ranges_base.

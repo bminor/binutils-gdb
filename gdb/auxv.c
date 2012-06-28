@@ -445,6 +445,10 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 	  TAG (AT_SECURE, _("Boolean, was exec setuid-like?"), dec);
 	  TAG (AT_SYSINFO, _("Special system info/entry points"), hex);
 	  TAG (AT_SYSINFO_EHDR, _("System-supplied DSO's ELF header"), hex);
+	  TAG (AT_L1I_CACHESHAPE, _("L1 Instruction cache information"), hex);
+	  TAG (AT_L1D_CACHESHAPE, _("L1 Data cache information"), hex);
+	  TAG (AT_L2_CACHESHAPE, _("L2 cache information"), hex);
+	  TAG (AT_L3_CACHESHAPE, _("L3 cache information"), hex);
 	  TAG (AT_SUN_UID, _("Effective user ID"), dec);
 	  TAG (AT_SUN_RUID, _("Real user ID"), dec);
 	  TAG (AT_SUN_GID, _("Effective group ID"), dec);
