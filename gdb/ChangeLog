@@ -1,3 +1,11 @@
+2012-06-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_cu): Add ranges_base.
+	Delete have_addr_base, unused.  All uses updated.
+	(init_cutu_and_read_dies): Process DW_AT_GNU_ranges_base.
+	(dwarf2_get_pc_bounds): Add ranges_base.
+	(dwarf2_record_block_ranges): Ditto.
+
 2012-06-27  Tom Tromey  <tromey@redhat.com>
 
 	PR macros/7961:

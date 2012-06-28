@@ -1,3 +1,9 @@
+2012-06-27  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/fission-base.c: New file.
+	* gdb.dwarf2/fission-base.S: New file.
+	* gdb.dwarf2/fission-base.exp: New file.
+
 2012-06-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/callframecfa.exp: Replace $testname by $testfile.

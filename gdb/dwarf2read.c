@@ -459,6 +459,13 @@ struct dwarf2_cu
      Note this value comes from the stub CU/TU's DIE.  */
   ULONGEST addr_base;
 
+  /* The DW_AT_ranges_base attribute if present, zero otherwise
+     (zero is a valid value though).
+     Note this value comes from the stub CU/TU's DIE.
+     Also note that the value is zero in the non-DWO case so this value can
+     be used without needing to know whether DWO files are in use or not.  */
+  ULONGEST ranges_base;
+
   /* Mark used when releasing cached dies.  */
   unsigned int mark : 1;
 
@@ -475,10 +482,6 @@ struct dwarf2_cu
   unsigned int checked_producer : 1;
   unsigned int producer_is_gxx_lt_4_6 : 1;
   unsigned int producer_is_icc : 1;
-
-  /* Non-zero if DW_AT_addr_base was found.
-     Used when processing DWO files.  */
-  unsigned int have_addr_base : 1;
 };
 
 /* Persistent data held for a compilation unit, even when not
@@ -3996,13 +3999,16 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
       /* There should be a DW_AT_addr_base attribute here (if needed).
 	 We need the value before we can process DW_FORM_GNU_addr_index.  */
       cu->addr_base = 0;
-      cu->have_addr_base = 0;
       attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_addr_base, cu);
       if (attr)
-	{
-	  cu->addr_base = DW_UNSND (attr);
-	  cu->have_addr_base = 1;
-	}
+	cu->addr_base = DW_UNSND (attr);
+
+      /* There should be a DW_AT_ranges_base attribute here (if needed).
+	 We need the value before we can process DW_AT_ranges.  */
+      cu->ranges_base = 0;
+      attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_ranges_base, cu);
+      if (attr)
+	cu->ranges_base = DW_UNSND (attr);
 
       if (this_cu->is_debug_types)
 	{
@@ -8249,9 +8255,11 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
       attr = dwarf2_attr (die, DW_AT_ranges, cu);
       if (attr != NULL)
 	{
+	  unsigned int ranges_offset = DW_UNSND (attr) + cu->ranges_base;
+
 	  /* Value of the DW_AT_ranges attribute is the offset in the
 	     .debug_ranges section.  */
-	  if (!dwarf2_ranges_read (DW_UNSND (attr), &low, &high, cu, pst))
+	  if (!dwarf2_ranges_read (ranges_offset, &low, &high, cu, pst))
 	    return 0;
 	  /* Found discontinuous range of addresses.  */
 	  ret = -1;
@@ -8411,7 +8419,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 
       /* The value of the DW_AT_ranges attribute is the offset of the
          address range list in the .debug_ranges section.  */
-      unsigned long offset = DW_UNSND (attr);
+      unsigned long offset = DW_UNSND (attr) + cu->ranges_base;
       gdb_byte *buffer = dwarf2_per_objfile->ranges.buffer + offset;
 
       /* For some target architectures, but not others, the
