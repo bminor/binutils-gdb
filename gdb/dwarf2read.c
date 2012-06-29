@@ -3359,14 +3359,21 @@ dwarf2_build_psymtabs (struct objfile *objfile)
   dwarf2_build_psymtabs_hard (objfile);
 }
 
+/* Return the total length of the CU described by HEADER.  */
+
+static unsigned int
+get_cu_length (const struct comp_unit_head *header)
+{
+  return header->initial_length_size + header->length;
+}
+
 /* Return TRUE if OFFSET is within CU_HEADER.  */
 
 static inline int
 offset_in_cu_p (const struct comp_unit_head *cu_header, sect_offset offset)
 {
   sect_offset bottom = { cu_header->offset.sect_off };
-  sect_offset top = { (cu_header->offset.sect_off + cu_header->length
-		       + cu_header->initial_length_size) };
+  sect_offset top = { cu_header->offset.sect_off + get_cu_length (cu_header) };
 
   return (offset.sect_off >= bottom.sect_off && offset.sect_off < top.sect_off);
 }
@@ -3460,8 +3467,7 @@ error_check_comp_unit_head (struct comp_unit_head *header,
 
   /* Cast to unsigned long to use 64-bit arithmetic when possible to
      avoid potential 32-bit overflow.  */
-  if (((unsigned long) header->offset.sect_off
-       + header->length + header->initial_length_size)
+  if (((unsigned long) header->offset.sect_off + get_cu_length (header))
       > section->size)
     error (_("Dwarf Error: bad length (0x%lx) in compilation unit header "
 	   "(offset 0x%lx + 0) [in module %s]"),
@@ -3714,13 +3720,13 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 					       abbrev_section, ptr,
 					       &signature, &type_offset_in_tu);
 
-	  length = header.initial_length_size + header.length;
+	  length = get_cu_length (&header);
 
 	  /* Skip dummy type units.  */
 	  if (ptr >= info_ptr + length
 	      || peek_abbrev_code (abfd, ptr) == 0)
 	    {
-	      info_ptr += header.initial_length_size + header.length;
+	      info_ptr += length;
 	      continue;
 	    }
 
@@ -3940,7 +3946,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 	  gdb_assert (this_cu->offset.sect_off == cu->header.offset.sect_off);
 
 	  /* LENGTH has not been set yet for type units.  */
-	  this_cu->length = cu->header.length + cu->header.initial_length_size;
+	  this_cu->length = get_cu_length (&cu->header);
 
 	  /* Establish the type offset that can be used to lookup the type.  */
 	  sig_type->type_offset_in_section.sect_off =
@@ -3953,8 +3959,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 						    info_ptr, 0);
 
 	  gdb_assert (this_cu->offset.sect_off == cu->header.offset.sect_off);
-	  gdb_assert (this_cu->length
-		      == cu->header.length + cu->header.initial_length_size);
+	  gdb_assert (this_cu->length == get_cu_length (&cu->header));
 	}
     }
 
@@ -4079,8 +4084,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 						    &signature, NULL);
 	  gdb_assert (sig_type->signature == signature);
 	  gdb_assert (dwo_unit->offset.sect_off == cu->header.offset.sect_off);
-	  gdb_assert (dwo_unit->length
-		      == cu->header.length + cu->header.initial_length_size);
+	  gdb_assert (dwo_unit->length == get_cu_length (&cu->header));
 
 	  /* Establish the type offset that can be used to lookup the type.
 	     For DWO files, we don't know it until now.  */
@@ -4093,8 +4097,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 						    dwo_abbrev_section,
 						    info_ptr, 0);
 	  gdb_assert (dwo_unit->offset.sect_off == cu->header.offset.sect_off);
-	  gdb_assert (dwo_unit->length
-		      == cu->header.length + cu->header.initial_length_size);
+	  gdb_assert (dwo_unit->length == get_cu_length (&cu->header));
 	}
 
       /* Discard the original CU's abbrev table, and read the DWO's.  */
@@ -4205,7 +4208,7 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
 					    abbrev_section, info_ptr,
 					    this_cu->is_debug_types);
 
-  this_cu->length = cu.header.length + cu.header.initial_length_size;
+  this_cu->length = get_cu_length (&cu.header);
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + this_cu->length

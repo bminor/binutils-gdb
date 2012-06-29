@@ -1,5 +1,11 @@
 2012-06-28  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (get_cu_length): New function.
+	(offset_in_cu_p, error_check_comp_unit_head): Call it.
+	(create_debug_types_hash_table): Ditto.
+	(init_cutu_and_read_dies): Ditto.
+	(init_cutu_and_read_dies_no_follow): Ditto.
+
 	* dwarf2read.c (dwarf2_find_base_address): Move definition.
 
 	* dwarf2read.c (ABBREV_HASH_SIZE): Remove enclosing #ifndef/#endif.
