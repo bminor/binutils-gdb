@@ -1,3 +1,9 @@
+2012-06-29  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/14189
+	* elf32-arm.c (elf32_arm_check_relocs): Do not increment refcount
+	for locally bound symbols.
+
 2012-06-29  Alan Modra  <amodra@gmail.com>
 
 	* section.c (bfd_get_linker_section): New function.
