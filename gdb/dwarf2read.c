@@ -11142,7 +11142,6 @@ abbrev_table_free (struct abbrev_table *abbrev_table)
 static void
 dwarf2_read_abbrevs (struct dwarf2_cu *cu,
 		     struct dwarf2_section_info *abbrev_section)
-
 {
   cu->abbrev_table =
     abbrev_table_read_table (abbrev_section, cu->header.abbrev_offset);
