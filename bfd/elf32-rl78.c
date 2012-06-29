@@ -425,7 +425,7 @@ rl78_elf_relocate_section
   dynobj = elf_hash_table (info)->dynobj;
   splt = NULL;
   if (dynobj != NULL)
-    splt = bfd_get_section_by_name (dynobj, ".plt");
+    splt = bfd_get_linker_section (dynobj, ".plt");
 
   for (rel = relocs; rel < relend; rel ++)
     {
@@ -1208,13 +1208,14 @@ rl78_elf_check_relocs
 	    elf_hash_table (info)->dynobj = dynobj = abfd;
 	  if (splt == NULL)
 	    {
-	      splt = bfd_get_section_by_name (dynobj, ".plt");
+	      splt = bfd_get_linker_section (dynobj, ".plt");
 	      if (splt == NULL)
 		{
 		  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
 				    | SEC_IN_MEMORY | SEC_LINKER_CREATED
 				    | SEC_READONLY | SEC_CODE);
-		  splt = bfd_make_section_with_flags (dynobj, ".plt", flags);
+		  splt = bfd_make_section_anyway_with_flags (dynobj, ".plt",
+							     flags);
 		  if (splt == NULL
 		      || ! bfd_set_section_alignment (dynobj, splt, 1))
 		    return FALSE;
@@ -1272,7 +1273,7 @@ rl78_elf_finish_dynamic_sections (bfd *abfd ATTRIBUTE_UNUSED,
   if (info->relax_trip > 0)
     {
       if ((dynobj = elf_hash_table (info)->dynobj) != NULL
-	  && (splt = bfd_get_section_by_name (dynobj, ".plt")) != NULL)
+	  && (splt = bfd_get_linker_section (dynobj, ".plt")) != NULL)
 	{
 	  bfd_byte *contents = splt->contents;
 	  unsigned int i, size = splt->size;
@@ -1301,7 +1302,7 @@ rl78_elf_always_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (dynobj == NULL)
     return TRUE;
 
-  splt = bfd_get_section_by_name (dynobj, ".plt");
+  splt = bfd_get_linker_section (dynobj, ".plt");
   BFD_ASSERT (splt != NULL);
 
   splt->contents = (bfd_byte *) bfd_zalloc (dynobj, splt->size);

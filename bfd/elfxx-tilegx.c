@@ -1424,23 +1424,23 @@ tilegx_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   /* This function may be called more than once.  */
-  s = bfd_get_section_by_name (abfd, ".got");
-  if (s != NULL && (s->flags & SEC_LINKER_CREATED) != 0)
+  s = bfd_get_linker_section (abfd, ".got");
+  if (s != NULL)
     return TRUE;
 
   flags = bed->dynamic_sec_flags;
 
-  s = bfd_make_section_with_flags (abfd,
-				   (bed->rela_plts_and_copies_p
-				    ? ".rela.got" : ".rel.got"),
-				   (bed->dynamic_sec_flags
-				    | SEC_READONLY));
+  s = bfd_make_section_anyway_with_flags (abfd,
+					  (bed->rela_plts_and_copies_p
+					   ? ".rela.got" : ".rel.got"),
+					  (bed->dynamic_sec_flags
+					   | SEC_READONLY));
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
   htab->srelgot = s;
 
-  s = s_got = bfd_make_section_with_flags (abfd, ".got", flags);
+  s = s_got = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
@@ -1451,7 +1451,7 @@ tilegx_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 
   if (bed->want_got_plt)
     {
-      s = bfd_make_section_with_flags (abfd, ".got.plt", flags);
+      s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
       if (s == NULL
 	  || !bfd_set_section_alignment (abfd, s,
 					 bed->s->log_file_align))
@@ -1497,9 +1497,9 @@ tilegx_elf_create_dynamic_sections (bfd *dynobj,
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab->sdynbss = bfd_get_section_by_name (dynobj, ".dynbss");
+  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!info->shared)
-    htab->srelbss = bfd_get_section_by_name (dynobj, ".rela.bss");
+    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
 
   if (!htab->elf.splt || !htab->elf.srelplt || !htab->sdynbss
       || (!info->shared && !htab->srelbss))
@@ -2655,7 +2655,7 @@ tilegx_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".interp");
+	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
 	  s->size = strlen (htab->dynamic_interpreter) + 1;
 	  s->contents = (unsigned char *) htab->dynamic_interpreter;
@@ -4116,8 +4116,7 @@ tilegx_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* This symbols needs a copy reloc.  Set it up.  */
       BFD_ASSERT (h->dynindx != -1);
 
-      s = bfd_get_section_by_name (h->root.u.def.section->owner,
-				   ".rela.bss");
+      s = htab->srelbss;
       BFD_ASSERT (s != NULL);
 
       rela.r_offset = (h->root.u.def.value
@@ -4196,14 +4195,14 @@ tilegx_elf_finish_dynamic_sections (bfd *output_bfd,
   BFD_ASSERT (htab != NULL);
   dynobj = htab->elf.dynobj;
 
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       asection *splt;
       bfd_boolean ret;
 
-      splt = bfd_get_section_by_name (dynobj, ".plt");
+      splt = htab->elf.splt;
       BFD_ASSERT (splt != NULL && sdyn != NULL);
 
       ret = tilegx_finish_dyn (output_bfd, info, dynobj, sdyn, splt);

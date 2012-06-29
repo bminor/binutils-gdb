@@ -217,8 +217,8 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   asection *s;
 
   /* This function may be called more than once.  */
-  s = bfd_get_section_by_name (dynobj, ".got");
-  if (s != NULL && (s->flags & SEC_LINKER_CREATED) != 0)
+  s = bfd_get_linker_section (dynobj, ".got");
+  if (s != NULL)
     return TRUE;
 
   htab = lm32_elf_hash_table (info);
@@ -228,9 +228,9 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   if (! _bfd_elf_create_got_section (dynobj, info))
     return FALSE;
 
-  htab->sgot = bfd_get_section_by_name (dynobj, ".got");
-  htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
-  htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+  htab->sgot = bfd_get_linker_section (dynobj, ".got");
+  htab->sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
+  htab->srelgot = bfd_get_linker_section (dynobj, ".rela.got");
   if (! htab->sgot || ! htab->sgotplt || ! htab->srelgot)
     abort ();
 
@@ -250,16 +250,18 @@ create_rofixup_section (bfd *dynobj, struct bfd_link_info *info)
     return FALSE;
 
   /* Fixup section for R_LM32_32 relocs.  */
-  lm32fdpic_fixup32_section (info) = bfd_make_section_with_flags (dynobj,
-                                                                   ".rofixup",
-				                                   (SEC_ALLOC
-                                                                   | SEC_LOAD
-                                                                   | SEC_HAS_CONTENTS
-                                                                   | SEC_IN_MEMORY
-	                                                           | SEC_LINKER_CREATED
-                                                                   | SEC_READONLY));
+  lm32fdpic_fixup32_section (info)
+    = bfd_make_section_anyway_with_flags (dynobj,
+					  ".rofixup",
+					  (SEC_ALLOC
+					   | SEC_LOAD
+					   | SEC_HAS_CONTENTS
+					   | SEC_IN_MEMORY
+					   | SEC_LINKER_CREATED
+					   | SEC_READONLY));
   if (lm32fdpic_fixup32_section (info) == NULL
-      || ! bfd_set_section_alignment (dynobj, lm32fdpic_fixup32_section (info), 2))
+      || ! bfd_set_section_alignment (dynobj,
+				      lm32fdpic_fixup32_section (info), 2))
     return FALSE;
 
   return TRUE;
@@ -1031,7 +1033,8 @@ lm32_elf_relocate_section (bfd *output_bfd,
 
                           /* We need to generate a R_LM32_RELATIVE reloc
                              for the dynamic linker.  */
-                          srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+                          srelgot = bfd_get_linker_section (dynobj,
+							    ".rela.got");
                           BFD_ASSERT (srelgot != NULL);
 
                           outrel.r_offset = (sgot->output_section->vma
@@ -1346,7 +1349,7 @@ lm32_elf_check_relocs (bfd *abfd,
               /* Create .rofixup section */
               if (htab->sfixup32 == NULL)
                 {
-                  if (! create_rofixup_section (abfd, info))
+                  if (! create_rofixup_section (dynobj, info))
                     return FALSE;
                 }
               break;
@@ -1356,7 +1359,9 @@ lm32_elf_check_relocs (bfd *abfd,
               /* Create .rofixup section.  */
               if (htab->sfixup32 == NULL)
                 {
-                  if (! create_rofixup_section (abfd, info))
+		  if (dynobj == NULL)
+		    htab->root.dynobj = dynobj = abfd;
+                  if (! create_rofixup_section (dynobj, info))
                     return FALSE;
                 }
               break;
@@ -1427,7 +1432,7 @@ lm32_elf_finish_dynamic_sections (bfd *output_bfd,
   dynobj = htab->root.dynobj;
 
   sgot = htab->sgotplt;
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (htab->root.dynamic_sections_created)
     {
@@ -1725,8 +1730,7 @@ lm32_elf_finish_dynamic_symbol (bfd *output_bfd,
                   && (h->root.type == bfd_link_hash_defined
                       || h->root.type == bfd_link_hash_defweak));
 
-      s = bfd_get_section_by_name (h->root.u.def.section->owner,
-                                   ".rela.bss");
+      s = bfd_get_linker_section (htab->root.dynobj, ".rela.bss");
       BFD_ASSERT (s != NULL);
 
       rela.r_offset = (h->root.u.def.value
@@ -2139,7 +2143,7 @@ lm32_elf_size_dynamic_sections (bfd *output_bfd,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".interp");
+	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
@@ -2483,7 +2487,7 @@ lm32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 
-  s = bfd_make_section_with_flags (abfd, ".plt", pltflags);
+  s = bfd_make_section_anyway_with_flags (abfd, ".plt", pltflags);
   htab->splt = s;
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
@@ -2511,9 +2515,10 @@ lm32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
         return FALSE;
     }
 
-  s = bfd_make_section_with_flags (abfd,
-				   bed->default_use_rela_p ? ".rela.plt" : ".rel.plt",
-				   flags | SEC_READONLY);
+  s = bfd_make_section_anyway_with_flags (abfd,
+					  bed->default_use_rela_p
+					  ? ".rela.plt" : ".rel.plt",
+					  flags | SEC_READONLY);
   htab->srelplt = s;
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, ptralign))
@@ -2531,8 +2536,8 @@ lm32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
          image and use a R_*_COPY reloc to tell the dynamic linker to
          initialize them at run time.  The linker script puts the .dynbss
          section into the .bss section of the final image.  */
-      s = bfd_make_section_with_flags (abfd, ".dynbss",
-				       SEC_ALLOC | SEC_LINKER_CREATED);
+      s = bfd_make_section_anyway_with_flags (abfd, ".dynbss",
+					      SEC_ALLOC | SEC_LINKER_CREATED);
       htab->sdynbss = s;
       if (s == NULL)
         return FALSE;
@@ -2549,10 +2554,10 @@ lm32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
          copy relocs.  */
       if (! info->shared)
         {
-          s = bfd_make_section_with_flags (abfd,
-					   (bed->default_use_rela_p
-					    ? ".rela.bss" : ".rel.bss"),
-					   flags | SEC_READONLY);
+          s = bfd_make_section_anyway_with_flags (abfd,
+						  (bed->default_use_rela_p
+						   ? ".rela.bss" : ".rel.bss"),
+						  flags | SEC_READONLY);
           htab->srelbss = s;
           if (s == NULL
               || ! bfd_set_section_alignment (abfd, s, ptralign))

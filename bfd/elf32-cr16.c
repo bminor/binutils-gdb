@@ -585,7 +585,7 @@ _bfd_cr16_elf_create_got_section (bfd * abfd, struct bfd_link_info * info)
   int ptralign;
 
   /* This function may be called more than once.  */
-  if (bfd_get_section_by_name (abfd, ".got") != NULL)
+  if (bfd_get_linker_section (abfd, ".got") != NULL)
     return TRUE;
 
   switch (bed->s->arch_size)
@@ -606,14 +606,14 @@ _bfd_cr16_elf_create_got_section (bfd * abfd, struct bfd_link_info * info)
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
            | SEC_LINKER_CREATED);
 
-  s = bfd_make_section_with_flags (abfd, ".got", flags);
+  s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
 
   if (bed->want_got_plt)
     {
-      s = bfd_make_section_with_flags (abfd, ".got.plt", flags);
+      s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
       if (s == NULL
           || ! bfd_set_section_alignment (abfd, s, ptralign))
         return FALSE;
@@ -752,24 +752,22 @@ cr16_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
           if (sgot == NULL)
             {
-              sgot = bfd_get_section_by_name (dynobj, ".got");
+              sgot = bfd_get_linker_section (dynobj, ".got");
               BFD_ASSERT (sgot != NULL);
             }
 
           if (srelgot == NULL
               && (h != NULL || info->executable))
             {
-              srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+              srelgot = bfd_get_linker_section (dynobj, ".rela.got");
               if (srelgot == NULL)
-                {
-                  srelgot = bfd_make_section_with_flags (dynobj,
-                                                         ".rela.got",
-                                                         (SEC_ALLOC
-                                                          | SEC_LOAD
-                                                          | SEC_HAS_CONTENTS
-                                                          | SEC_IN_MEMORY
-                                                          | SEC_LINKER_CREATED
-                                                          | SEC_READONLY));
+                { 
+		  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+				    | SEC_IN_MEMORY | SEC_LINKER_CREATED
+				    | SEC_READONLY);
+		  srelgot = bfd_make_section_anyway_with_flags (dynobj,
+								".rela.got",
+								flags);
                   if (srelgot == NULL
                       || ! bfd_set_section_alignment (dynobj, srelgot, 2))
                     goto fail;
@@ -1047,7 +1045,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
           }
         else if (r_type == R_CR16_GOT_REGREL20) 
           {
-            asection * sgot = bfd_get_section_by_name (dynobj, ".got");
+            asection * sgot = bfd_get_linker_section (dynobj, ".got");
 
             if (h != NULL)
               {
@@ -1096,7 +1094,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
         else if (r_type == R_CR16_GOTC_REGREL20)
           {
              asection * sgot;
-             sgot = bfd_get_section_by_name (dynobj, ".got");
+             sgot = bfd_get_linker_section (dynobj, ".got");
 
              if (h != NULL)
                {
@@ -2278,10 +2276,10 @@ _bfd_cr16_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
            | SEC_LINKER_CREATED);
 
-  s = bfd_make_section_with_flags (abfd,
-                                   (bed->default_use_rela_p
-                                    ? ".rela.plt" : ".rel.plt"),
-                                   flags | SEC_READONLY);
+  s = bfd_make_section_anyway_with_flags (abfd,
+					  (bed->default_use_rela_p
+					   ? ".rela.plt" : ".rel.plt"),
+					  flags | SEC_READONLY);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
@@ -2297,8 +2295,8 @@ _bfd_cr16_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
          image and use a R_*_COPY reloc to tell the dynamic linker to
          initialize them at run time.  The linker script puts the .dynbss
          section into the .bss section of the final image.  */
-      s = bfd_make_section_with_flags (abfd, ".dynbss",
-                                       SEC_ALLOC | SEC_LINKER_CREATED);
+      s = bfd_make_section_anyway_with_flags (abfd, ".dynbss",
+					      SEC_ALLOC | SEC_LINKER_CREATED);
       if (s == NULL)
         return FALSE;
 
@@ -2315,10 +2313,10 @@ _bfd_cr16_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
          copy relocs.  */
       if (! info->executable)
         {
-          s = bfd_make_section_with_flags (abfd,
-                                           (bed->default_use_rela_p
-                                            ? ".rela.bss" : ".rel.bss"),
-                                           flags | SEC_READONLY);
+          s = bfd_make_section_anyway_with_flags (abfd,
+						  (bed->default_use_rela_p
+						   ? ".rela.bss" : ".rel.bss"),
+						  flags | SEC_READONLY);
           if (s == NULL
               || ! bfd_set_section_alignment (abfd, s, ptralign))
             return FALSE;
@@ -2380,13 +2378,13 @@ _bfd_cr16_elf_adjust_dynamic_symbol (struct bfd_link_info * info,
       /* We also need to make an entry in the .got.plt section, which
          will be placed in the .got section by the linker script.  */
 
-      s = bfd_get_section_by_name (dynobj, ".got.plt");
+      s = bfd_get_linker_section (dynobj, ".got.plt");
       BFD_ASSERT (s != NULL);
       s->size += 4;
 
       /* We also need to make an entry in the .rela.plt section.  */
 
-      s = bfd_get_section_by_name (dynobj, ".rela.plt");
+      s = bfd_get_linker_section (dynobj, ".rela.plt");
       BFD_ASSERT (s != NULL);
       s->size += sizeof (Elf32_External_Rela);
 
@@ -2430,7 +2428,7 @@ _bfd_cr16_elf_adjust_dynamic_symbol (struct bfd_link_info * info,
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
 
-  s = bfd_get_section_by_name (dynobj, ".dynbss");
+  s = bfd_get_linker_section (dynobj, ".dynbss");
   BFD_ASSERT (s != NULL);
 
   /* We must generate a R_CR16_COPY reloc to tell the dynamic linker to
@@ -2441,7 +2439,7 @@ _bfd_cr16_elf_adjust_dynamic_symbol (struct bfd_link_info * info,
     {
       asection * srel;
 
-      srel = bfd_get_section_by_name (dynobj, ".rela.bss");
+      srel = bfd_get_linker_section (dynobj, ".rela.bss");
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
@@ -2471,7 +2469,7 @@ _bfd_cr16_elf_size_dynamic_sections (bfd * output_bfd,
       if (info->executable)
         {
 #if 0
-          s = bfd_get_section_by_name (dynobj, ".interp");
+          s = bfd_get_linker_section (dynobj, ".interp");
           BFD_ASSERT (s != NULL);
           s->size = sizeof ELF_DYNAMIC_INTERPRETER;
           s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
@@ -2485,7 +2483,7 @@ _bfd_cr16_elf_size_dynamic_sections (bfd * output_bfd,
          not actually use these entries.  Reset the size of .rela.got,
          which will cause it to get stripped from the output file
          below.  */
-      s = bfd_get_section_by_name (dynobj, ".rela.got");
+      s = bfd_get_linker_section (dynobj, ".rela.got");
       if (s != NULL)
         s->size = 0;
     }
@@ -2640,8 +2638,8 @@ _bfd_cr16_elf_finish_dynamic_symbol (bfd * output_bfd,
 
       /* This symbol has an entry in the global offset table.  Set it up.  */
 
-      sgot = bfd_get_section_by_name (dynobj, ".got");
-      srel = bfd_get_section_by_name (dynobj, ".rela.got");
+      sgot = bfd_get_linker_section (dynobj, ".got");
+      srel = bfd_get_linker_section (dynobj, ".rela.got");
       BFD_ASSERT (sgot != NULL && srel != NULL);
 
       rel.r_offset = (sgot->output_section->vma
@@ -2685,8 +2683,7 @@ _bfd_cr16_elf_finish_dynamic_symbol (bfd * output_bfd,
                   && (h->root.type == bfd_link_hash_defined
                       || h->root.type == bfd_link_hash_defweak));
 
-      s = bfd_get_section_by_name (h->root.u.def.section->owner,
-                                   ".rela.bss");
+      s = bfd_get_linker_section (dynobj, ".rela.bss");
       BFD_ASSERT (s != NULL);
 
       rel.r_offset = (h->root.u.def.value
@@ -2720,9 +2717,9 @@ _bfd_cr16_elf_finish_dynamic_sections (bfd * output_bfd,
 
   dynobj = elf_hash_table (info)->dynobj;
 
-  sgot = bfd_get_section_by_name (dynobj, ".got.plt");
+  sgot = bfd_get_linker_section (dynobj, ".got.plt");
   BFD_ASSERT (sgot != NULL);
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {

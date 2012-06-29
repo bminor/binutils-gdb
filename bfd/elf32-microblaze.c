@@ -1875,13 +1875,13 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   if (htab == NULL)
     return FALSE;
 
-  htab->sgot = bfd_get_section_by_name (dynobj, ".got");
-  htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+  htab->sgot = bfd_get_linker_section (dynobj, ".got");
+  htab->sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
   if (!htab->sgot || !htab->sgotplt)
     return FALSE;
 
-  if (!(htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got")))
-    htab->srelgot = bfd_make_section (dynobj, ".rela.got");
+  if ((htab->srelgot = bfd_get_linker_section (dynobj, ".rela.got")) == NULL)
+    htab->srelgot = bfd_make_section_anyway (dynobj, ".rela.got");
   if (htab->srelgot == NULL
       || ! bfd_set_section_flags (dynobj, htab->srelgot, SEC_ALLOC
                                   | SEC_LOAD
@@ -2080,18 +2080,19 @@ microblaze_elf_check_relocs (bfd * abfd,
 		      htab->elf.dynobj = abfd;
 		    dynobj = htab->elf.dynobj;
 
-		    sreloc = bfd_get_section_by_name (dynobj, name);
+		    sreloc = bfd_get_linker_section (dynobj, name);
 		    if (sreloc == NULL)
 		      {
 			flagword flags;
 
-			sreloc = bfd_make_section (dynobj, name);
 			flags = (SEC_HAS_CONTENTS | SEC_READONLY
 				 | SEC_IN_MEMORY | SEC_LINKER_CREATED);
 			if ((sec->flags & SEC_ALLOC) != 0)
 			  flags |= SEC_ALLOC | SEC_LOAD;
+			sreloc = bfd_make_section_anyway_with_flags (dynobj,
+								     name,
+								     flags);
 			if (sreloc == NULL
-			    || ! bfd_set_section_flags (dynobj, sreloc, flags)
 			    || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			  return FALSE;
 		      }
@@ -2167,11 +2168,11 @@ microblaze_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab->splt = bfd_get_section_by_name (dynobj, ".plt");
-  htab->srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
-  htab->sdynbss = bfd_get_section_by_name (dynobj, ".dynbss");
+  htab->splt = bfd_get_linker_section (dynobj, ".plt");
+  htab->srelplt = bfd_get_linker_section (dynobj, ".rela.plt");
+  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!info->shared)
-    htab->srelbss = bfd_get_section_by_name (dynobj, ".rela.bss");
+    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
 
   if (!htab->splt || !htab->srelplt || !htab->sdynbss
       || (!info->shared && !htab->srelbss))
@@ -2868,8 +2869,7 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       BFD_ASSERT (h->dynindx != -1);
 
-      s = bfd_get_section_by_name (h->root.u.def.section->owner,
-                                   ".rela.bss");
+      s = bfd_get_linker_section (htab->elf.dynobj, ".rela.bss");
       BFD_ASSERT (s != NULL);
 
       rela.r_offset = (h->root.u.def.value
@@ -2907,14 +2907,14 @@ microblaze_elf_finish_dynamic_sections (bfd *output_bfd,
 
   dynobj = htab->elf.dynobj;
 
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (htab->elf.dynamic_sections_created)
     {
       asection *splt;
       Elf32_External_Dyn *dyncon, *dynconend;
 
-      splt = bfd_get_section_by_name (dynobj, ".plt");
+      splt = bfd_get_linker_section (dynobj, ".plt");
       BFD_ASSERT (splt != NULL && sdyn != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
@@ -2969,7 +2969,7 @@ microblaze_elf_finish_dynamic_sections (bfd *output_bfd,
 
   /* Set the first entry in the global offset table to the address of
      the dynamic section.  */
-  sgot = bfd_get_section_by_name (dynobj, ".got.plt");
+  sgot = bfd_get_linker_section (dynobj, ".got.plt");
   if (sgot && sgot->size > 0)
     {
       if (sdyn == NULL)
@@ -3005,7 +3005,7 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
     {
       /* Common symbols less than or equal to -G nn bytes are automatically
 	 put into .sbss.  */
-      *secp = bfd_make_section_anyway (abfd, ".sbss");
+      *secp = bfd_make_section_old_way (abfd, ".sbss");
       if (*secp == NULL
           || ! bfd_set_section_flags (abfd, *secp, SEC_IS_COMMON))
         return FALSE;

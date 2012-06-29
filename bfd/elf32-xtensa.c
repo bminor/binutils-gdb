@@ -1414,11 +1414,11 @@ elf_xtensa_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   /* First do all the standard stuff.  */
   if (! _bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
-  htab->splt = bfd_get_section_by_name (dynobj, ".plt");
-  htab->srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
-  htab->sgot = bfd_get_section_by_name (dynobj, ".got");
-  htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
-  htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+  htab->splt = bfd_get_linker_section (dynobj, ".plt");
+  htab->srelplt = bfd_get_linker_section (dynobj, ".rela.plt");
+  htab->sgot = bfd_get_linker_section (dynobj, ".got");
+  htab->sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
+  htab->srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 
   /* Create any extra PLT sections in case check_relocs has already
      been called on all the non-dynamic input files.  */
@@ -1435,14 +1435,15 @@ elf_xtensa_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
     return FALSE;
 
   /* Create ".got.loc" (literal tables for use by dynamic linker).  */
-  htab->sgotloc = bfd_make_section_with_flags (dynobj, ".got.loc", flags);
+  htab->sgotloc = bfd_make_section_anyway_with_flags (dynobj, ".got.loc",
+						      flags);
   if (htab->sgotloc == NULL
       || ! bfd_set_section_alignment (dynobj, htab->sgotloc, 2))
     return FALSE;
 
   /* Create ".xt.lit.plt" (literal table for ".got.plt*").  */
-  htab->spltlittbl = bfd_make_section_with_flags (dynobj, ".xt.lit.plt",
-						  noalloc_flags);
+  htab->spltlittbl = bfd_make_section_anyway_with_flags (dynobj, ".xt.lit.plt",
+							 noalloc_flags);
   if (htab->spltlittbl == NULL
       || ! bfd_set_section_alignment (dynobj, htab->spltlittbl, 2))
     return FALSE;
@@ -1474,14 +1475,14 @@ add_extra_plt_sections (struct bfd_link_info *info, int count)
 
       sname = (char *) bfd_malloc (10);
       sprintf (sname, ".plt.%u", chunk);
-      s = bfd_make_section_with_flags (dynobj, sname, flags | SEC_CODE);
+      s = bfd_make_section_anyway_with_flags (dynobj, sname, flags | SEC_CODE);
       if (s == NULL
 	  || ! bfd_set_section_alignment (dynobj, s, 2))
 	return FALSE;
 
       sname = (char *) bfd_malloc (14);
       sprintf (sname, ".got.plt.%u", chunk);
-      s = bfd_make_section_with_flags (dynobj, sname, flags);
+      s = bfd_make_section_anyway_with_flags (dynobj, sname, flags);
       if (s == NULL
 	  || ! bfd_set_section_alignment (dynobj, s, 2))
 	return FALSE;
@@ -1636,7 +1637,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".interp");
+	  s = bfd_get_linker_section (dynobj, ".interp");
 	  if (s == NULL)
 	    abort ();
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
@@ -3275,7 +3276,7 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
     return FALSE;
 
   dynobj = elf_hash_table (info)->dynobj;
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
   BFD_ASSERT (sdyn != NULL);
 
   /* Set the first entry in the global offset table to the address of
@@ -10275,7 +10276,7 @@ elf_xtensa_get_plt_section (struct bfd_link_info *info, int chunk)
 
   dynobj = elf_hash_table (info)->dynobj;
   sprintf (plt_name, ".plt.%u", chunk);
-  return bfd_get_section_by_name (dynobj, plt_name);
+  return bfd_get_linker_section (dynobj, plt_name);
 }
 
 
@@ -10296,7 +10297,7 @@ elf_xtensa_get_gotplt_section (struct bfd_link_info *info, int chunk)
 
   dynobj = elf_hash_table (info)->dynobj;
   sprintf (got_name, ".got.plt.%u", chunk);
-  return bfd_get_section_by_name (dynobj, got_name);
+  return bfd_get_linker_section (dynobj, got_name);
 }
 
 
@@ -10675,7 +10676,7 @@ xtensa_callback_required_dependence (bfd *abfd,
 
       /* Find the corresponding ".got.plt*" section.  */
       if (sec->name[4] == '\0')
-	sgotplt = bfd_get_section_by_name (sec->owner, ".got.plt");
+	sgotplt = bfd_get_linker_section (sec->owner, ".got.plt");
       else
 	{
 	  char got_name[14];
@@ -10685,7 +10686,7 @@ xtensa_callback_required_dependence (bfd *abfd,
 	  chunk = strtol (&sec->name[5], NULL, 10);
 
 	  sprintf (got_name, ".got.plt.%u", chunk);
-	  sgotplt = bfd_get_section_by_name (sec->owner, got_name);
+	  sgotplt = bfd_get_linker_section (sec->owner, got_name);
 	}
       BFD_ASSERT (sgotplt);
 

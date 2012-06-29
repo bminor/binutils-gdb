@@ -1005,14 +1005,14 @@ elf32_hppa_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (! _bfd_elf_create_dynamic_sections (abfd, info))
     return FALSE;
 
-  htab->splt = bfd_get_section_by_name (abfd, ".plt");
-  htab->srelplt = bfd_get_section_by_name (abfd, ".rela.plt");
+  htab->splt = bfd_get_linker_section (abfd, ".plt");
+  htab->srelplt = bfd_get_linker_section (abfd, ".rela.plt");
 
-  htab->sgot = bfd_get_section_by_name (abfd, ".got");
-  htab->srelgot = bfd_get_section_by_name (abfd, ".rela.got");
+  htab->sgot = bfd_get_linker_section (abfd, ".got");
+  htab->srelgot = bfd_get_linker_section (abfd, ".rela.got");
 
-  htab->sdynbss = bfd_get_section_by_name (abfd, ".dynbss");
-  htab->srelbss = bfd_get_section_by_name (abfd, ".rela.bss");
+  htab->sdynbss = bfd_get_linker_section (abfd, ".dynbss");
+  htab->srelbss = bfd_get_linker_section (abfd, ".rela.bss");
 
   /* hppa-linux needs _GLOBAL_OFFSET_TABLE_ to be visible from the main
      application, because __canonicalize_funcptr_for_compare needs it.  */
@@ -2225,7 +2225,7 @@ elf32_hppa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  sec = bfd_get_section_by_name (dynobj, ".interp");
+	  sec = bfd_get_linker_section (dynobj, ".interp");
 	  if (sec == NULL)
 	    abort ();
 	  sec->size = sizeof ELF_DYNAMIC_INTERPRETER;
@@ -4506,7 +4506,7 @@ elf32_hppa_finish_dynamic_sections (bfd *output_bfd,
   if (sgot != NULL && bfd_is_abs_section (sgot->output_section))
     return FALSE;
 
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (htab->etab.dynamic_sections_created)
     {

@@ -1,5 +1,56 @@
 2012-06-29  Alan Modra  <amodra@gmail.com>
 
+	* section.c (bfd_get_linker_section): New function.
+	* elf32-arm.c: When retrieving SEC_LINKER_CREATED sections, use
+	the above throughout rather than bfd_get_section_by_name.  Use
+	bfd_make_section_anyway rather than bfd_make_section when creating
+	them.
+	* elf32-bfin.c: Likewise.
+	* elf32-cr16.c: Likewise.
+	* elf32-cris.c: Likewise.
+	* elf32-frv.c: Likewise.
+	* elf32-hppa.c: Likewise.
+	* elf32-i370.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-lm32.c: Likewise.
+	* elf32-m32c.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-rl78.c: Likewise.
+	* elf32-s390.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-tic6x.c: Likewise.
+	* elf32-tilepro.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf32-xstormy16.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-s390.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-tilegx.c: Likewise.
+	* elflink.c: Likewise.
+	* elf-vxworks.c: Likewise.
+	* elf-m10300.c: Likewise.  Also make use of htab plt, got and
+	gotplt shortcuts.
+	* bfd-in2.h: Regenerate.
+	* elf32-lm32.c (lm32_elf_check_relocs): Use the correct bfd when
+	calling create_rofixup_section.
+	* elflink.c (bfd_elf_final_link): Simplify test for .dynstr.
+
+2012-06-29  Alan Modra  <amodra@gmail.com>
+
 	* elf32-sh.c (sh_elf_create_dynamic_sections): Don't create .rela
 	section for bss type sections, except for .rela.bss.
 	* elf-m10300.c (_bfd_mn10300_elf_create_dynamic_sections): Likewise.

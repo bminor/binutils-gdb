@@ -2860,16 +2860,16 @@ mips_elf_rel_dyn_section (struct bfd_link_info *info, bfd_boolean create_p)
 
   dname = MIPS_ELF_REL_DYN_NAME (info);
   dynobj = elf_hash_table (info)->dynobj;
-  sreloc = bfd_get_section_by_name (dynobj, dname);
+  sreloc = bfd_get_linker_section (dynobj, dname);
   if (sreloc == NULL && create_p)
     {
-      sreloc = bfd_make_section_with_flags (dynobj, dname,
-					    (SEC_ALLOC
-					     | SEC_LOAD
-					     | SEC_HAS_CONTENTS
-					     | SEC_IN_MEMORY
-					     | SEC_LINKER_CREATED
-					     | SEC_READONLY));
+      sreloc = bfd_make_section_anyway_with_flags (dynobj, dname,
+						   (SEC_ALLOC
+						    | SEC_LOAD
+						    | SEC_HAS_CONTENTS
+						    | SEC_IN_MEMORY
+						    | SEC_LINKER_CREATED
+						    | SEC_READONLY));
       if (sreloc == NULL
 	  || ! bfd_set_section_alignment (dynobj, sreloc,
 					  MIPS_ELF_LOG_FILE_ALIGN (dynobj)))
@@ -4832,12 +4832,12 @@ mips_elf_create_compact_rel_section
   flagword flags;
   register asection *s;
 
-  if (bfd_get_section_by_name (abfd, ".compact_rel") == NULL)
+  if (bfd_get_linker_section (abfd, ".compact_rel") == NULL)
     {
       flags = (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED
 	       | SEC_READONLY);
 
-      s = bfd_make_section_with_flags (abfd, ".compact_rel", flags);
+      s = bfd_make_section_anyway_with_flags (abfd, ".compact_rel", flags);
       if (s == NULL
 	  || ! bfd_set_section_alignment (abfd, s,
 					  MIPS_ELF_LOG_FILE_ALIGN (abfd)))
@@ -6178,7 +6178,7 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
   /* On IRIX5, make an entry of compact relocation info.  */
   if (IRIX_COMPAT (output_bfd) == ict_irix5)
     {
-      asection *scpt = bfd_get_section_by_name (dynobj, ".compact_rel");
+      asection *scpt = bfd_get_linker_section (dynobj, ".compact_rel");
       bfd_byte *cr;
 
       if (scpt)
@@ -7220,7 +7220,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
      EABI doesn't.  */
   if (!htab->is_vxworks)
     {
-      s = bfd_get_section_by_name (abfd, ".dynamic");
+      s = bfd_get_linker_section (abfd, ".dynamic");
       if (s != NULL)
 	{
 	  if (! bfd_set_section_flags (abfd, s, flags))
@@ -7236,9 +7236,9 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   /* Create .stub section.  */
-  s = bfd_make_section_with_flags (abfd,
-				   MIPS_ELF_STUB_SECTION_NAME (abfd),
-				   flags | SEC_CODE);
+  s = bfd_make_section_anyway_with_flags (abfd,
+					  MIPS_ELF_STUB_SECTION_NAME (abfd),
+					  flags | SEC_CODE);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s,
 				      MIPS_ELF_LOG_FILE_ALIGN (abfd)))
@@ -7247,10 +7247,10 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   if ((IRIX_COMPAT (abfd) == ict_irix5 || IRIX_COMPAT (abfd) == ict_none)
       && !info->shared
-      && bfd_get_section_by_name (abfd, ".rld_map") == NULL)
+      && bfd_get_linker_section (abfd, ".rld_map") == NULL)
     {
-      s = bfd_make_section_with_flags (abfd, ".rld_map",
-				       flags &~ (flagword) SEC_READONLY);
+      s = bfd_make_section_anyway_with_flags (abfd, ".rld_map",
+					      flags &~ (flagword) SEC_READONLY);
       if (s == NULL
 	  || ! bfd_set_section_alignment (abfd, s,
 					  MIPS_ELF_LOG_FILE_ALIGN (abfd)))
@@ -7288,19 +7288,20 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	}
 
       /* Change alignments of some sections.  */
-      s = bfd_get_section_by_name (abfd, ".hash");
+      s = bfd_get_linker_section (abfd, ".hash");
       if (s != NULL)
 	bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd));
-      s = bfd_get_section_by_name (abfd, ".dynsym");
+      s = bfd_get_linker_section (abfd, ".dynsym");
       if (s != NULL)
 	bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd));
-      s = bfd_get_section_by_name (abfd, ".dynstr");
+      s = bfd_get_linker_section (abfd, ".dynstr");
       if (s != NULL)
 	bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd));
+      /* ??? */
       s = bfd_get_section_by_name (abfd, ".reginfo");
       if (s != NULL)
 	bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd));
-      s = bfd_get_section_by_name (abfd, ".dynamic");
+      s = bfd_get_linker_section (abfd, ".dynamic");
       if (s != NULL)
 	bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd));
     }
@@ -7330,7 +7331,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	     and is filled in by the rtld to contain a pointer to
 	     the _r_debug structure. Its symbol value will be set in
 	     _bfd_mips_elf_finish_dynamic_symbol.  */
-	  s = bfd_get_section_by_name (abfd, ".rld_map");
+	  s = bfd_get_linker_section (abfd, ".rld_map");
 	  BFD_ASSERT (s != NULL);
 
 	  name = SGI_COMPAT (abfd) ? "__rld_map" : "__RLD_MAP";
@@ -7357,15 +7358,15 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   /* Cache the sections created above.  */
-  htab->splt = bfd_get_section_by_name (abfd, ".plt");
-  htab->sdynbss = bfd_get_section_by_name (abfd, ".dynbss");
+  htab->splt = bfd_get_linker_section (abfd, ".plt");
+  htab->sdynbss = bfd_get_linker_section (abfd, ".dynbss");
   if (htab->is_vxworks)
     {
-      htab->srelbss = bfd_get_section_by_name (abfd, ".rela.bss");
-      htab->srelplt = bfd_get_section_by_name (abfd, ".rela.plt");
+      htab->srelbss = bfd_get_linker_section (abfd, ".rela.bss");
+      htab->srelplt = bfd_get_linker_section (abfd, ".rela.plt");
     }
   else
-    htab->srelplt = bfd_get_section_by_name (abfd, ".rel.plt");
+    htab->srelplt = bfd_get_linker_section (abfd, ".rel.plt");
   if (!htab->sdynbss
       || (htab->is_vxworks && !htab->srelbss && !info->shared)
       || !htab->srelplt
@@ -9027,7 +9028,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".interp");
+	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
 	  s->size
 	    = strlen (ELF_DYNAMIC_INTERPRETER (output_bfd)) + 1;
@@ -10510,7 +10511,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 
   dynobj = elf_hash_table (info)->dynobj;
 
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   sgot = htab->sgot;
   gg = htab->got_info;
@@ -10856,7 +10857,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
     if (SGI_COMPAT (output_bfd))
       {
 	/* Write .compact_rel section out.  */
-	s = bfd_get_section_by_name (dynobj, ".compact_rel");
+	s = bfd_get_linker_section (dynobj, ".compact_rel");
 	if (s != NULL)
 	  {
 	    cpt.id1 = 1;

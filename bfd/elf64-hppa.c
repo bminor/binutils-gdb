@@ -416,16 +416,16 @@ get_reloc_section (bfd *abfd,
   if (!dynobj)
     hppa_info->root.dynobj = dynobj = abfd;
 
-  srel = bfd_get_section_by_name (dynobj, srel_name);
+  srel = bfd_get_linker_section (dynobj, srel_name);
   if (srel == NULL)
     {
-      srel = bfd_make_section_with_flags (dynobj, srel_name,
-					  (SEC_ALLOC
-					   | SEC_LOAD
-					   | SEC_HAS_CONTENTS
-					   | SEC_IN_MEMORY
-					   | SEC_LINKER_CREATED
-					   | SEC_READONLY));
+      srel = bfd_make_section_anyway_with_flags (dynobj, srel_name,
+						 (SEC_ALLOC
+						  | SEC_LOAD
+						  | SEC_HAS_CONTENTS
+						  | SEC_IN_MEMORY
+						  | SEC_LINKER_CREATED
+						  | SEC_READONLY));
       if (srel == NULL
 	  || !bfd_set_section_alignment (dynobj, srel, 3))
 	return FALSE;
@@ -1157,12 +1157,12 @@ get_opd (bfd *abfd,
       if (!dynobj)
 	hppa_info->root.dynobj = dynobj = abfd;
 
-      opd = bfd_make_section_with_flags (dynobj, ".opd",
-					 (SEC_ALLOC
-					  | SEC_LOAD
-					  | SEC_HAS_CONTENTS
-					  | SEC_IN_MEMORY
-					  | SEC_LINKER_CREATED));
+      opd = bfd_make_section_anyway_with_flags (dynobj, ".opd",
+						(SEC_ALLOC
+						 | SEC_LOAD
+						 | SEC_HAS_CONTENTS
+						 | SEC_IN_MEMORY
+						 | SEC_LINKER_CREATED));
       if (!opd
 	  || !bfd_set_section_alignment (abfd, opd, 3))
 	{
@@ -1193,12 +1193,12 @@ get_plt (bfd *abfd,
       if (!dynobj)
 	hppa_info->root.dynobj = dynobj = abfd;
 
-      plt = bfd_make_section_with_flags (dynobj, ".plt",
-					 (SEC_ALLOC
-					  | SEC_LOAD
-					  | SEC_HAS_CONTENTS
-					  | SEC_IN_MEMORY
-					  | SEC_LINKER_CREATED));
+      plt = bfd_make_section_anyway_with_flags (dynobj, ".plt",
+						(SEC_ALLOC
+						 | SEC_LOAD
+						 | SEC_HAS_CONTENTS
+						 | SEC_IN_MEMORY
+						 | SEC_LINKER_CREATED));
       if (!plt
 	  || !bfd_set_section_alignment (abfd, plt, 3))
 	{
@@ -1229,12 +1229,12 @@ get_dlt (bfd *abfd,
       if (!dynobj)
 	hppa_info->root.dynobj = dynobj = abfd;
 
-      dlt = bfd_make_section_with_flags (dynobj, ".dlt",
-					 (SEC_ALLOC
-					  | SEC_LOAD
-					  | SEC_HAS_CONTENTS
-					  | SEC_IN_MEMORY
-					  | SEC_LINKER_CREATED));
+      dlt = bfd_make_section_anyway_with_flags (dynobj, ".dlt",
+						(SEC_ALLOC
+						 | SEC_LOAD
+						 | SEC_HAS_CONTENTS
+						 | SEC_IN_MEMORY
+						 | SEC_LINKER_CREATED));
       if (!dlt
 	  || !bfd_set_section_alignment (abfd, dlt, 3))
 	{
@@ -1265,12 +1265,12 @@ get_stub (bfd *abfd,
       if (!dynobj)
 	hppa_info->root.dynobj = dynobj = abfd;
 
-      stub = bfd_make_section_with_flags (dynobj, ".stub",
-					  (SEC_ALLOC | SEC_LOAD
-					   | SEC_HAS_CONTENTS
-					   | SEC_IN_MEMORY
-					   | SEC_READONLY
-					   | SEC_LINKER_CREATED));
+      stub = bfd_make_section_anyway_with_flags (dynobj, ".stub",
+						 (SEC_ALLOC | SEC_LOAD
+						  | SEC_HAS_CONTENTS
+						  | SEC_IN_MEMORY
+						  | SEC_READONLY
+						  | SEC_LINKER_CREATED));
       if (!stub
 	  || !bfd_set_section_alignment (abfd, stub, 3))
 	{
@@ -1345,45 +1345,45 @@ elf64_hppa_create_dynamic_sections (bfd *abfd,
   if (! get_opd (abfd, info, hppa_info))
     return FALSE;
 
-  s = bfd_make_section_with_flags (abfd, ".rela.dlt",
-				   (SEC_ALLOC | SEC_LOAD
-				    | SEC_HAS_CONTENTS
-				    | SEC_IN_MEMORY
-				    | SEC_READONLY
-				    | SEC_LINKER_CREATED));
+  s = bfd_make_section_anyway_with_flags (abfd, ".rela.dlt",
+					  (SEC_ALLOC | SEC_LOAD
+					   | SEC_HAS_CONTENTS
+					   | SEC_IN_MEMORY
+					   | SEC_READONLY
+					   | SEC_LINKER_CREATED));
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, 3))
     return FALSE;
   hppa_info->dlt_rel_sec = s;
 
-  s = bfd_make_section_with_flags (abfd, ".rela.plt",
-				   (SEC_ALLOC | SEC_LOAD
-				    | SEC_HAS_CONTENTS
-				    | SEC_IN_MEMORY
-				    | SEC_READONLY
-				    | SEC_LINKER_CREATED));
+  s = bfd_make_section_anyway_with_flags (abfd, ".rela.plt",
+					  (SEC_ALLOC | SEC_LOAD
+					   | SEC_HAS_CONTENTS
+					   | SEC_IN_MEMORY
+					   | SEC_READONLY
+					   | SEC_LINKER_CREATED));
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, 3))
     return FALSE;
   hppa_info->plt_rel_sec = s;
 
-  s = bfd_make_section_with_flags (abfd, ".rela.data",
-				   (SEC_ALLOC | SEC_LOAD
-				    | SEC_HAS_CONTENTS
-				    | SEC_IN_MEMORY
-				    | SEC_READONLY
-				    | SEC_LINKER_CREATED));
+  s = bfd_make_section_anyway_with_flags (abfd, ".rela.data",
+					  (SEC_ALLOC | SEC_LOAD
+					   | SEC_HAS_CONTENTS
+					   | SEC_IN_MEMORY
+					   | SEC_READONLY
+					   | SEC_LINKER_CREATED));
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, 3))
     return FALSE;
   hppa_info->other_rel_sec = s;
 
-  s = bfd_make_section_with_flags (abfd, ".rela.opd",
-				   (SEC_ALLOC | SEC_LOAD
-				    | SEC_HAS_CONTENTS
-				    | SEC_IN_MEMORY
-				    | SEC_READONLY
-				    | SEC_LINKER_CREATED));
+  s = bfd_make_section_anyway_with_flags (abfd, ".rela.opd",
+					  (SEC_ALLOC | SEC_LOAD
+					   | SEC_HAS_CONTENTS
+					   | SEC_IN_MEMORY
+					   | SEC_READONLY
+					   | SEC_LINKER_CREATED));
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, 3))
     return FALSE;
@@ -1562,7 +1562,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  sec = bfd_get_section_by_name (dynobj, ".interp");
+	  sec = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (sec != NULL);
 	  sec->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  sec->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
@@ -1575,7 +1575,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	 not actually use these entries.  Reset the size of .rela.dlt,
 	 which will cause it to get stripped from the output file
 	 below.  */
-      sec = bfd_get_section_by_name (dynobj, ".rela.dlt");
+      sec = bfd_get_linker_section (dynobj, ".rela.dlt");
       if (sec != NULL)
 	sec->size = 0;
     }
@@ -2492,7 +2492,7 @@ elf64_hppa_finish_dynamic_sections (bfd *output_bfd,
 			  elf64_hppa_finalize_dlt,
 			  info);
 
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {

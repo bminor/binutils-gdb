@@ -2103,7 +2103,7 @@ elf64_alpha_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       h->needs_plt = TRUE;
 
-      s = bfd_get_section_by_name(dynobj, ".plt");
+      s = bfd_get_linker_section (dynobj, ".plt");
       if (!s && !elf64_alpha_create_dynamic_sections (dynobj, info))
 	return FALSE;
 
@@ -2589,7 +2589,7 @@ elf64_alpha_size_plt_section (struct bfd_link_info *info)
     return;
 
   dynobj = elf_hash_table(info)->dynobj;
-  splt = bfd_get_section_by_name (dynobj, ".plt");
+  splt = bfd_get_linker_section (dynobj, ".plt");
   if (splt == NULL)
     return;
 
@@ -2599,7 +2599,7 @@ elf64_alpha_size_plt_section (struct bfd_link_info *info)
 				elf64_alpha_size_plt_section_1, splt);
 
   /* Every plt entry requires a JMP_SLOT relocation.  */
-  spltrel = bfd_get_section_by_name (dynobj, ".rela.plt");
+  spltrel = bfd_get_linker_section (dynobj, ".rela.plt");
   entries = 0;
   if (splt->size)
     {
@@ -2615,7 +2615,7 @@ elf64_alpha_size_plt_section (struct bfd_link_info *info)
      entire contents of the .got.plt section.  */
   if (elf64_alpha_use_secureplt)
     {
-      sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+      sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
       sgotplt->size = entries ? 16 : 0;
     }
 }
@@ -2774,7 +2774,7 @@ elf64_alpha_size_rela_got_1 (struct alpha_elf_link_hash_entry *h,
   if (entries > 0)
     {
       bfd *dynobj = elf_hash_table(info)->dynobj;
-      asection *srel = bfd_get_section_by_name (dynobj, ".rela.got");
+      asection *srel = bfd_get_linker_section (dynobj, ".rela.got");
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf64_External_Rela) * entries;
     }
@@ -2824,7 +2824,7 @@ elf64_alpha_size_rela_got_section (struct bfd_link_info *info)
     }
 
   dynobj = elf_hash_table(info)->dynobj;
-  srel = bfd_get_section_by_name (dynobj, ".rela.got");
+  srel = bfd_get_linker_section (dynobj, ".rela.got");
   if (!srel)
     {
       BFD_ASSERT (entries == 0);
@@ -2860,7 +2860,7 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".interp");
+	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
@@ -4155,7 +4155,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj)
-    srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+    srelgot = bfd_get_linker_section (dynobj, ".rela.got");
   else
     srelgot = NULL;
 
@@ -4166,7 +4166,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      (input_bfd, elf_elfheader(input_bfd)->e_shstrndx,
 		       _bfd_elf_single_rel_hdr (input_section)->sh_name));
       BFD_ASSERT(section_name != NULL);
-      srel = bfd_get_section_by_name (dynobj, section_name);
+      srel = bfd_get_linker_section (dynobj, section_name);
     }
   else
     srel = NULL;
@@ -4782,9 +4782,9 @@ elf64_alpha_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 
       BFD_ASSERT (h->dynindx != -1);
 
-      splt = bfd_get_section_by_name (dynobj, ".plt");
+      splt = bfd_get_linker_section (dynobj, ".plt");
       BFD_ASSERT (splt != NULL);
-      srel = bfd_get_section_by_name (dynobj, ".rela.plt");
+      srel = bfd_get_linker_section (dynobj, ".rela.plt");
       BFD_ASSERT (srel != NULL);
 
       for (gotent = ah->got_entries; gotent ; gotent = gotent->next)
@@ -4854,7 +4854,7 @@ elf64_alpha_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
       asection *srel;
       struct alpha_elf_got_entry *gotent;
 
-      srel = bfd_get_section_by_name (dynobj, ".rela.got");
+      srel = bfd_get_linker_section (dynobj, ".rela.got");
       BFD_ASSERT (srel != NULL);
 
       for (gotent = ((struct alpha_elf_link_hash_entry *) h)->got_entries;
@@ -4919,7 +4919,7 @@ elf64_alpha_finish_dynamic_sections (bfd *output_bfd,
   asection *sdyn;
 
   dynobj = elf_hash_table (info)->dynobj;
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -4927,8 +4927,8 @@ elf64_alpha_finish_dynamic_sections (bfd *output_bfd,
       Elf64_External_Dyn *dyncon, *dynconend;
       bfd_vma plt_vma, gotplt_vma;
 
-      splt = bfd_get_section_by_name (dynobj, ".plt");
-      srelaplt = bfd_get_section_by_name (output_bfd, ".rela.plt");
+      splt = bfd_get_linker_section (dynobj, ".plt");
+      srelaplt = bfd_get_linker_section (output_bfd, ".rela.plt");
       BFD_ASSERT (splt != NULL && sdyn != NULL);
 
       plt_vma = splt->output_section->vma + splt->output_offset;
@@ -4936,7 +4936,7 @@ elf64_alpha_finish_dynamic_sections (bfd *output_bfd,
       gotplt_vma = 0;
       if (elf64_alpha_use_secureplt)
 	{
-	  sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+	  sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
 	  BFD_ASSERT (sgotplt != NULL);
 	  if (sgotplt->size > 0)
 	    gotplt_vma = sgotplt->output_section->vma + sgotplt->output_offset;

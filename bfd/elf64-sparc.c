@@ -1,6 +1,6 @@
 /* SPARC-specific support for 64-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -563,7 +563,7 @@ elf64_sparc_output_arch_syms (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (elf_hash_table (info)->dynlocal)
     {
       bfd * dynobj = elf_hash_table (info)->dynobj;
-      asection *dynsymsec = bfd_get_section_by_name (dynobj, ".dynsym");
+      asection *dynsymsec = bfd_get_linker_section (dynobj, ".dynsym");
       struct elf_link_local_dynamic_entry *e;
 
       for (e = elf_hash_table (info)->dynlocal; e ; e = e->next)

@@ -3209,13 +3209,13 @@ ppc_elf_create_got (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   htab = ppc_elf_hash_table (info);
-  htab->got = s = bfd_get_section_by_name (abfd, ".got");
+  htab->got = s = bfd_get_linker_section (abfd, ".got");
   if (s == NULL)
     abort ();
 
   if (htab->is_vxworks)
     {
-      htab->sgotplt = bfd_get_section_by_name (abfd, ".got.plt");
+      htab->sgotplt = bfd_get_linker_section (abfd, ".got.plt");
       if (!htab->sgotplt)
 	abort ();
     }
@@ -3229,7 +3229,7 @@ ppc_elf_create_got (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
-  htab->relgot = bfd_get_section_by_name (abfd, ".rela.got");
+  htab->relgot = bfd_get_linker_section (abfd, ".rela.got");
   if (!htab->relgot)
     abort ();
 
@@ -3303,7 +3303,7 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       && !ppc_elf_create_glink (abfd, info))
     return FALSE;
 
-  htab->dynbss = bfd_get_section_by_name (abfd, ".dynbss");
+  htab->dynbss = bfd_get_linker_section (abfd, ".dynbss");
   s = bfd_make_section_anyway_with_flags (abfd, ".dynsbss",
 					  SEC_ALLOC | SEC_LINKER_CREATED);
   htab->dynsbss = s;
@@ -3312,7 +3312,7 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   if (! info->shared)
     {
-      htab->relbss = bfd_get_section_by_name (abfd, ".rela.bss");
+      htab->relbss = bfd_get_linker_section (abfd, ".rela.bss");
       flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_HAS_CONTENTS
 	       | SEC_IN_MEMORY | SEC_LINKER_CREATED);
       s = bfd_make_section_anyway_with_flags (abfd, ".rela.sbss", flags);
@@ -3326,8 +3326,8 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       && !elf_vxworks_create_dynamic_sections (abfd, info, &htab->srelplt2))
     return FALSE;
 
-  htab->relplt = bfd_get_section_by_name (abfd, ".rela.plt");
-  htab->plt = s = bfd_get_section_by_name (abfd, ".plt");
+  htab->relplt = bfd_get_linker_section (abfd, ".rela.plt");
+  htab->plt = s = bfd_get_linker_section (abfd, ".plt");
   if (s == NULL)
     abort ();
 
@@ -6004,7 +6004,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  s = bfd_get_section_by_name (htab->elf.dynobj, ".interp");
+	  s = bfd_get_linker_section (htab->elf.dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
@@ -9240,9 +9240,9 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
   htab = ppc_elf_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
   if (htab->is_vxworks)
-    splt = bfd_get_section_by_name (dynobj, ".plt");
+    splt = bfd_get_linker_section (dynobj, ".plt");
   else
     splt = NULL;
 

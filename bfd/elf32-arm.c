@@ -3256,8 +3256,8 @@ create_ifunc_sections (struct bfd_link_info *info)
 
   if (htab->root.iplt == NULL)
     {
-      s = bfd_make_section_with_flags (dynobj, ".iplt",
-				       flags | SEC_READONLY | SEC_CODE);
+      s = bfd_make_section_anyway_with_flags (dynobj, ".iplt",
+					      flags | SEC_READONLY | SEC_CODE);
       if (s == NULL
 	  || !bfd_set_section_alignment (dynobj, s, bed->plt_alignment))
 	return FALSE;
@@ -3266,8 +3266,9 @@ create_ifunc_sections (struct bfd_link_info *info)
 
   if (htab->root.irelplt == NULL)
     {
-      s = bfd_make_section_with_flags (dynobj, RELOC_SECTION (htab, ".iplt"),
-				       flags | SEC_READONLY);
+      s = bfd_make_section_anyway_with_flags (dynobj,
+					      RELOC_SECTION (htab, ".iplt"),
+					      flags | SEC_READONLY);
       if (s == NULL
 	  || !bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
 	return FALSE;
@@ -3276,7 +3277,7 @@ create_ifunc_sections (struct bfd_link_info *info)
 
   if (htab->root.igotplt == NULL)
     {
-      s = bfd_make_section_with_flags (dynobj, ".igot.plt", flags);
+      s = bfd_make_section_anyway_with_flags (dynobj, ".igot.plt", flags);
       if (s == NULL
 	  || !bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
 	return FALSE;
@@ -3304,10 +3305,10 @@ elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab->sdynbss = bfd_get_section_by_name (dynobj, ".dynbss");
+  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!info->shared)
-    htab->srelbss = bfd_get_section_by_name (dynobj,
-					     RELOC_SECTION (htab, ".bss"));
+    htab->srelbss = bfd_get_linker_section (dynobj,
+					    RELOC_SECTION (htab, ".bss"));
 
   if (htab->vxworks_p)
     {
@@ -5654,7 +5655,7 @@ arm_allocate_glue_section_space (bfd * abfd, bfd_size_type size, const char * na
       /* Do not include empty glue sections in the output.  */
       if (abfd != NULL)
 	{
-	  s = bfd_get_section_by_name (abfd, name);
+	  s = bfd_get_linker_section (abfd, name);
 	  if (s != NULL)
 	    s->flags |= SEC_EXCLUDE;
 	}
@@ -5663,7 +5664,7 @@ arm_allocate_glue_section_space (bfd * abfd, bfd_size_type size, const char * na
 
   BFD_ASSERT (abfd != NULL);
 
-  s = bfd_get_section_by_name (abfd, name);
+  s = bfd_get_linker_section (abfd, name);
   BFD_ASSERT (s != NULL);
 
   contents = (bfd_byte *) bfd_alloc (abfd, size);
@@ -5719,7 +5720,7 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
   BFD_ASSERT (globals != NULL);
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
-  s = bfd_get_section_by_name
+  s = bfd_get_linker_section
     (globals->bfd_of_glue_owner, ARM2THUMB_GLUE_SECTION_NAME);
 
   BFD_ASSERT (s != NULL);
@@ -5795,7 +5796,7 @@ record_arm_bx_glue (struct bfd_link_info * link_info, int reg)
   if (globals->bx_glue_offset[reg])
     return;
 
-  s = bfd_get_section_by_name
+  s = bfd_get_linker_section
     (globals->bfd_of_glue_owner, ARM_BX_GLUE_SECTION_NAME);
 
   BFD_ASSERT (s != NULL);
@@ -5886,7 +5887,7 @@ record_vfp11_erratum_veneer (struct bfd_link_info *link_info,
   BFD_ASSERT (hash_table != NULL);
   BFD_ASSERT (hash_table->bfd_of_glue_owner != NULL);
 
-  s = bfd_get_section_by_name
+  s = bfd_get_linker_section
     (hash_table->bfd_of_glue_owner, VFP11_ERRATUM_VENEER_SECTION_NAME);
 
   sec_data = elf32_arm_section_data (s);
@@ -5993,12 +5994,12 @@ arm_make_glue_section (bfd * abfd, const char * name)
 {
   asection * sec;
 
-  sec = bfd_get_section_by_name (abfd, name);
+  sec = bfd_get_linker_section (abfd, name);
   if (sec != NULL)
     /* Already made.  */
     return TRUE;
 
-  sec = bfd_make_section_with_flags (abfd, name, ARM_GLUE_SECTION_FLAGS);
+  sec = bfd_make_section_anyway_with_flags (abfd, name, ARM_GLUE_SECTION_FLAGS);
 
   if (sec == NULL
       || !bfd_set_section_alignment (abfd, sec, 2))
@@ -7018,8 +7019,8 @@ elf32_thumb_to_arm_stub (struct bfd_link_info * info,
 
   my_offset = myh->root.u.def.value;
 
-  s = bfd_get_section_by_name (globals->bfd_of_glue_owner,
-			       THUMB2ARM_GLUE_SECTION_NAME);
+  s = bfd_get_linker_section (globals->bfd_of_glue_owner,
+			      THUMB2ARM_GLUE_SECTION_NAME);
 
   BFD_ASSERT (s != NULL);
   BFD_ASSERT (s->contents != NULL);
@@ -7208,8 +7209,8 @@ elf32_arm_to_thumb_stub (struct bfd_link_info * info,
   BFD_ASSERT (globals != NULL);
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
-  s = bfd_get_section_by_name (globals->bfd_of_glue_owner,
-			       ARM2THUMB_GLUE_SECTION_NAME);
+  s = bfd_get_linker_section (globals->bfd_of_glue_owner,
+			      ARM2THUMB_GLUE_SECTION_NAME);
   BFD_ASSERT (s != NULL);
   BFD_ASSERT (s->contents != NULL);
   BFD_ASSERT (s->output_section != NULL);
@@ -7262,8 +7263,8 @@ elf32_arm_to_thumb_export_stub (struct elf_link_hash_entry *h, void * inf)
   BFD_ASSERT (globals != NULL);
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
-  s = bfd_get_section_by_name (globals->bfd_of_glue_owner,
-			       ARM2THUMB_GLUE_SECTION_NAME);
+  s = bfd_get_linker_section (globals->bfd_of_glue_owner,
+			      ARM2THUMB_GLUE_SECTION_NAME);
   BFD_ASSERT (s != NULL);
   BFD_ASSERT (s->contents != NULL);
   BFD_ASSERT (s->output_section != NULL);
@@ -7297,8 +7298,8 @@ elf32_arm_bx_glue (struct bfd_link_info * info, int reg)
   BFD_ASSERT (globals != NULL);
   BFD_ASSERT (globals->bfd_of_glue_owner != NULL);
 
-  s = bfd_get_section_by_name (globals->bfd_of_glue_owner,
-			       ARM_BX_GLUE_SECTION_NAME);
+  s = bfd_get_linker_section (globals->bfd_of_glue_owner,
+			      ARM_BX_GLUE_SECTION_NAME);
   BFD_ASSERT (s != NULL);
   BFD_ASSERT (s->contents != NULL);
   BFD_ASSERT (s->output_section != NULL);
@@ -10885,7 +10886,7 @@ elf32_arm_output_glue_section (struct bfd_link_info *info, bfd *obfd,
 {
   asection *sec, *osec;
 
-  sec = bfd_get_section_by_name (ibfd, name);
+  sec = bfd_get_linker_section (ibfd, name);
   if (sec == NULL || (sec->flags & SEC_EXCLUDE) != 0)
     return TRUE;
 
@@ -13038,7 +13039,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
      determine the address it must put in the global offset table, so
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
-  s = bfd_get_section_by_name (dynobj, ".dynbss");
+  s = bfd_get_linker_section (dynobj, ".dynbss");
   BFD_ASSERT (s != NULL);
 
   /* We must generate a R_ARM_COPY reloc to tell the dynamic linker to
@@ -13049,7 +13050,7 @@ elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
     {
       asection *srel;
 
-      srel = bfd_get_section_by_name (dynobj, RELOC_SECTION (globals, ".bss"));
+      srel = bfd_get_linker_section (dynobj, RELOC_SECTION (globals, ".bss"));
       elf32_arm_allocate_dynrelocs (info, srel, 1);
       h->needs_copy = 1;
     }
@@ -13491,7 +13492,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".interp");
+	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
@@ -14023,7 +14024,7 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
      Catch this here so that we do not seg-fault later on.  */
   if (sgot != NULL && bfd_is_abs_section (sgot->output_section))
     return FALSE;
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -14808,8 +14809,8 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
   /* ARM->Thumb glue.  */
   if (htab->arm_glue_size > 0)
     {
-      osi.sec = bfd_get_section_by_name (htab->bfd_of_glue_owner,
-					 ARM2THUMB_GLUE_SECTION_NAME);
+      osi.sec = bfd_get_linker_section (htab->bfd_of_glue_owner,
+					ARM2THUMB_GLUE_SECTION_NAME);
 
       osi.sec_shndx = _bfd_elf_section_from_bfd_section
 	  (output_bfd, osi.sec->output_section);
@@ -14831,8 +14832,8 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
   /* Thumb->ARM glue.  */
   if (htab->thumb_glue_size > 0)
     {
-      osi.sec = bfd_get_section_by_name (htab->bfd_of_glue_owner,
-					 THUMB2ARM_GLUE_SECTION_NAME);
+      osi.sec = bfd_get_linker_section (htab->bfd_of_glue_owner,
+					THUMB2ARM_GLUE_SECTION_NAME);
 
       osi.sec_shndx = _bfd_elf_section_from_bfd_section
 	  (output_bfd, osi.sec->output_section);
@@ -14848,8 +14849,8 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
   /* ARMv4 BX veneers.  */
   if (htab->bx_glue_size > 0)
     {
-      osi.sec = bfd_get_section_by_name (htab->bfd_of_glue_owner,
-					 ARM_BX_GLUE_SECTION_NAME);
+      osi.sec = bfd_get_linker_section (htab->bfd_of_glue_owner,
+					ARM_BX_GLUE_SECTION_NAME);
 
       osi.sec_shndx = _bfd_elf_section_from_bfd_section
 	  (output_bfd, osi.sec->output_section);

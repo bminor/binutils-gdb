@@ -898,6 +898,28 @@ bfd_get_next_section_by_name (asection *sec)
 
 /*
 FUNCTION
+	bfd_get_linker_section
+
+SYNOPSIS
+	asection *bfd_get_linker_section (bfd *abfd, const char *name);
+
+DESCRIPTION
+	Return the linker created section attached to @var{abfd}
+	named @var{name}.  Return NULL if no such section exists.
+*/
+
+asection *
+bfd_get_linker_section (bfd *abfd, const char *name)
+{
+  asection *sec = bfd_get_section_by_name (abfd, name);
+
+  while (sec != NULL && (sec->flags & SEC_LINKER_CREATED) == 0)
+    sec = bfd_get_next_section_by_name (sec);
+  return sec;
+}
+
+/*
+FUNCTION
 	bfd_get_section_by_name_if
 
 SYNOPSIS

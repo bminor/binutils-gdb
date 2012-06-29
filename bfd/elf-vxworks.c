@@ -91,12 +91,13 @@ elf_vxworks_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info,
 
   if (!info->shared)
     {
-      s = bfd_make_section_with_flags (dynobj,
-				       bed->default_use_rela_p
-				       ? ".rela.plt.unloaded"
-				       : ".rel.plt.unloaded",
-				       SEC_HAS_CONTENTS | SEC_IN_MEMORY
-				       | SEC_READONLY | SEC_LINKER_CREATED);
+      s = bfd_make_section_anyway_with_flags (dynobj,
+					      bed->default_use_rela_p
+					      ? ".rela.plt.unloaded"
+					      : ".rel.plt.unloaded",
+					      SEC_HAS_CONTENTS | SEC_IN_MEMORY
+					      | SEC_READONLY
+					      | SEC_LINKER_CREATED);
       if (s == NULL
 	  || !bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
 	return FALSE;

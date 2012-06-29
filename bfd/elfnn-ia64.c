@@ -1552,12 +1552,12 @@ elfNN_ia64_create_dynamic_sections (bfd *abfd,
   if (!get_pltoff (abfd, info, ia64_info))
     return FALSE;
 
-  s = bfd_make_section_with_flags (abfd, ".rela.IA_64.pltoff",
-				   (SEC_ALLOC | SEC_LOAD
-				    | SEC_HAS_CONTENTS
-				    | SEC_IN_MEMORY
-				    | SEC_LINKER_CREATED
-				    | SEC_READONLY));
+  s = bfd_make_section_anyway_with_flags (abfd, ".rela.IA_64.pltoff",
+					  (SEC_ALLOC | SEC_LOAD
+					   | SEC_HAS_CONTENTS
+					   | SEC_IN_MEMORY
+					   | SEC_LINKER_CREATED
+					   | SEC_READONLY));
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, LOG_SECTION_ALIGN))
     return FALSE;
@@ -1986,13 +1986,14 @@ get_fptr (bfd *abfd, struct bfd_link_info *info,
       if (!dynobj)
 	ia64_info->root.dynobj = dynobj = abfd;
 
-      fptr = bfd_make_section_with_flags (dynobj, ".opd",
-					  (SEC_ALLOC
-					   | SEC_LOAD
-					   | SEC_HAS_CONTENTS
-					   | SEC_IN_MEMORY
-					   | (info->pie ? 0 : SEC_READONLY)
-					   | SEC_LINKER_CREATED));
+      fptr = bfd_make_section_anyway_with_flags (dynobj, ".opd",
+						 (SEC_ALLOC
+						  | SEC_LOAD
+						  | SEC_HAS_CONTENTS
+						  | SEC_IN_MEMORY
+						  | (info->pie ? 0
+						     : SEC_READONLY)
+						  | SEC_LINKER_CREATED));
       if (!fptr
 	  || !bfd_set_section_alignment (abfd, fptr, 4))
 	{
@@ -2005,12 +2006,12 @@ get_fptr (bfd *abfd, struct bfd_link_info *info,
       if (info->pie)
 	{
 	  asection *fptr_rel;
-	  fptr_rel = bfd_make_section_with_flags (dynobj, ".rela.opd",
-						  (SEC_ALLOC | SEC_LOAD
-						   | SEC_HAS_CONTENTS
-						   | SEC_IN_MEMORY
-						   | SEC_LINKER_CREATED
-						   | SEC_READONLY));
+	  fptr_rel = bfd_make_section_anyway_with_flags (dynobj, ".rela.opd",
+							 (SEC_ALLOC | SEC_LOAD
+							  | SEC_HAS_CONTENTS
+							  | SEC_IN_MEMORY
+							  | SEC_LINKER_CREATED
+							  | SEC_READONLY));
 	  if (fptr_rel == NULL
 	      || !bfd_set_section_alignment (abfd, fptr_rel,
 					     LOG_SECTION_ALIGN))
@@ -2040,14 +2041,14 @@ get_pltoff (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED,
       if (!dynobj)
 	ia64_info->root.dynobj = dynobj = abfd;
 
-      pltoff = bfd_make_section_with_flags (dynobj,
-					    ELF_STRING_ia64_pltoff,
-					    (SEC_ALLOC
-					     | SEC_LOAD
-					     | SEC_HAS_CONTENTS
-					     | SEC_IN_MEMORY
-					     | SEC_SMALL_DATA
-					     | SEC_LINKER_CREATED));
+      pltoff = bfd_make_section_anyway_with_flags (dynobj,
+						   ELF_STRING_ia64_pltoff,
+						   (SEC_ALLOC
+						    | SEC_LOAD
+						    | SEC_HAS_CONTENTS
+						    | SEC_IN_MEMORY
+						    | SEC_SMALL_DATA
+						    | SEC_LINKER_CREATED));
       if (!pltoff
 	  || !bfd_set_section_alignment (abfd, pltoff, 4))
 	{
@@ -2080,15 +2081,15 @@ get_reloc_section (bfd *abfd,
   if (!dynobj)
     ia64_info->root.dynobj = dynobj = abfd;
 
-  srel = bfd_get_section_by_name (dynobj, srel_name);
+  srel = bfd_get_linker_section (dynobj, srel_name);
   if (srel == NULL && create)
     {
-      srel = bfd_make_section_with_flags (dynobj, srel_name,
-					  (SEC_ALLOC | SEC_LOAD
-					   | SEC_HAS_CONTENTS
-					   | SEC_IN_MEMORY
-					   | SEC_LINKER_CREATED
-					   | SEC_READONLY));
+      srel = bfd_make_section_anyway_with_flags (dynobj, srel_name,
+						 (SEC_ALLOC | SEC_LOAD
+						  | SEC_HAS_CONTENTS
+						  | SEC_IN_MEMORY
+						  | SEC_LINKER_CREATED
+						  | SEC_READONLY));
       if (srel == NULL
 	  || !bfd_set_section_alignment (dynobj, srel,
 					 LOG_SECTION_ALIGN))
@@ -2988,7 +2989,7 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (ia64_info->root.dynamic_sections_created
       && info->executable)
     {
-      sec = bfd_get_section_by_name (dynobj, ".interp");
+      sec = bfd_get_linker_section (dynobj, ".interp");
       BFD_ASSERT (sec != NULL);
       sec->contents = (bfd_byte *) ELF_DYNAMIC_INTERPRETER;
       sec->size = strlen (ELF_DYNAMIC_INTERPRETER) + 1;
@@ -3045,7 +3046,7 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       /* If we've got a .plt, we need some extra memory for the dynamic
 	 linker.  We stuff these in .got.plt.  */
-      sec = bfd_get_section_by_name (dynobj, ".got.plt");
+      sec = bfd_get_linker_section (dynobj, ".got.plt");
       sec->size = 8 * PLT_RESERVED_WORDS;
     }
 
@@ -4612,8 +4613,8 @@ elfNN_ia64_finish_dynamic_sections (bfd *abfd,
       asection *sdyn, *sgotplt;
       bfd_vma gp_val;
 
-      sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
-      sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+      sdyn = bfd_get_linker_section (dynobj, ".dynamic");
+      sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
       BFD_ASSERT (sdyn != NULL);
       dyncon = (ElfNN_External_Dyn *) sdyn->contents;
       dynconend = (ElfNN_External_Dyn *) (sdyn->contents + sdyn->size);

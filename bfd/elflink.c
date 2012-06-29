@@ -104,8 +104,8 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   /* This function may be called more than once.  */
-  s = bfd_get_section_by_name (abfd, ".got");
-  if (s != NULL && (s->flags & SEC_LINKER_CREATED) != 0)
+  s = bfd_get_linker_section (abfd, ".got");
+  if (s != NULL)
     return TRUE;
 
   flags = bed->dynamic_sec_flags;
@@ -779,8 +779,7 @@ _bfd_elf_link_omit_section_dynsym (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  asection *ip;
 
 	  if (htab->dynobj != NULL
-	      && (ip = bfd_get_section_by_name (htab->dynobj, p->name)) != NULL
-	      && (ip->flags & SEC_LINKER_CREATED)
+	      && (ip = bfd_get_linker_section (htab->dynobj, p->name)) != NULL
 	      && ip->output_section == p)
 	    return TRUE;
 	}
@@ -3036,7 +3035,7 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
     return FALSE;
 
   bed = get_elf_backend_data (hash_table->dynobj);
-  s = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
+  s = bfd_get_linker_section (hash_table->dynobj, ".dynamic");
   BFD_ASSERT (s != NULL);
 
   newsize = s->size + bed->s->sizeof_dyn;
@@ -3084,7 +3083,7 @@ elf_add_dt_needed_tag (bfd *abfd,
       bfd_byte *extdyn;
 
       bed = get_elf_backend_data (hash_table->dynobj);
-      sdyn = bfd_get_section_by_name (hash_table->dynobj, ".dynamic");
+      sdyn = bfd_get_linker_section (hash_table->dynobj, ".dynamic");
       if (sdyn != NULL)
 	for (extdyn = sdyn->contents;
 	     extdyn < sdyn->contents + sdyn->size;
@@ -3181,7 +3180,7 @@ elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
   size = _bfd_elf_strtab_size (dynstr);
 
   bed = get_elf_backend_data (dynobj);
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
   BFD_ASSERT (sdyn != NULL);
 
   /* Update all .dynamic entries referencing .dynstr strings.  */
@@ -3230,7 +3229,7 @@ elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
       Elf_Internal_Verdef def;
       Elf_Internal_Verdaux defaux;
 
-      s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
+      s = bfd_get_linker_section (dynobj, ".gnu.version_d");
       p = s->contents;
       do
 	{
@@ -3262,7 +3261,7 @@ elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
       Elf_Internal_Verneed need;
       Elf_Internal_Vernaux needaux;
 
-      s = bfd_get_section_by_name (dynobj, ".gnu.version_r");
+      s = bfd_get_linker_section (dynobj, ".gnu.version_r");
       p = s->contents;
       do
 	{
@@ -5603,7 +5602,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       asection *s;
       bfd_boolean all_defined;
 
-      *sinterpptr = bfd_get_section_by_name (dynobj, ".interp");
+      *sinterpptr = bfd_get_linker_section (dynobj, ".interp");
       BFD_ASSERT (*sinterpptr != NULL || !info->executable);
 
       if (soname != NULL)
@@ -5871,7 +5870,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	    return FALSE;
 	}
 
-      dynstr = bfd_get_section_by_name (dynobj, ".dynstr");
+      dynstr = bfd_get_linker_section (dynobj, ".dynstr");
       /* If .dynstr is excluded from the link, we don't want any of
 	 these tags.  Strictly, we should be checking each section
 	 individually;  This quick check covers for the case where
@@ -5911,7 +5910,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
       asection *s;
 
       /* Set up the version definition section.  */
-      s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
+      s = bfd_get_linker_section (dynobj, ".gnu.version_d");
       BFD_ASSERT (s != NULL);
 
       /* We may have created additional version definitions if we are
@@ -6174,7 +6173,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 
       /* Work out the size of the version reference section.  */
 
-      s = bfd_get_section_by_name (dynobj, ".gnu.version_r");
+      s = bfd_get_linker_section (dynobj, ".gnu.version_r");
       BFD_ASSERT (s != NULL);
       {
 	struct elf_find_verdep_info sinfo;
@@ -6286,7 +6285,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  || _bfd_elf_link_renumber_dynsyms (output_bfd, info,
 					     &section_sym_count) == 0)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".gnu.version");
+	  s = bfd_get_linker_section (dynobj, ".gnu.version");
 	  s->flags |= SEC_EXCLUDE;
 	}
     }
@@ -6370,7 +6369,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 						    &section_sym_count);
 
       /* Work out the size of the symbol version section.  */
-      s = bfd_get_section_by_name (dynobj, ".gnu.version");
+      s = bfd_get_linker_section (dynobj, ".gnu.version");
       BFD_ASSERT (s != NULL);
       if (dynsymcount != 0
 	  && (s->flags & SEC_EXCLUDE) == 0)
@@ -6390,7 +6389,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	 the final symbol table, because until then we do not know the
 	 correct value to give the symbols.  We built the .dynstr
 	 section as we went along in elf_link_add_object_symbols.  */
-      s = bfd_get_section_by_name (dynobj, ".dynsym");
+      s = bfd_get_linker_section (dynobj, ".dynsym");
       BFD_ASSERT (s != NULL);
       s->size = dynsymcount * bed->s->sizeof_sym;
 
@@ -6448,7 +6447,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 
 	  elf_hash_table (info)->bucketcount = bucketcount;
 
-	  s = bfd_get_section_by_name (dynobj, ".hash");
+	  s = bfd_get_linker_section (dynobj, ".hash");
 	  BFD_ASSERT (s != NULL);
 	  hash_entry_size = elf_section_data (s)->this_hdr.sh_entsize;
 	  s->size = ((2 + bucketcount + dynsymcount) * hash_entry_size);
@@ -6502,7 +6501,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	      return FALSE;
 	    }
 
-	  s = bfd_get_section_by_name (dynobj, ".gnu.hash");
+	  s = bfd_get_linker_section (dynobj, ".gnu.hash");
 	  BFD_ASSERT (s != NULL);
 
 	  if (cinfo.nsyms == 0)
@@ -6630,7 +6629,7 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	    }
 	}
 
-      s = bfd_get_section_by_name (dynobj, ".dynstr");
+      s = bfd_get_linker_section (dynobj, ".dynstr");
       BFD_ASSERT (s != NULL);
 
       elf_finalize_dynstr (output_bfd, info);
@@ -10345,10 +10344,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     }
   else
     {
-      flinfo.dynsym_sec = bfd_get_section_by_name (dynobj, ".dynsym");
-      flinfo.hash_sec = bfd_get_section_by_name (dynobj, ".hash");
+      flinfo.dynsym_sec = bfd_get_linker_section (dynobj, ".dynsym");
+      flinfo.hash_sec = bfd_get_linker_section (dynobj, ".hash");
       /* Note that dynsym_sec can be NULL (on VMS).  */
-      flinfo.symver_sec = bfd_get_section_by_name (dynobj, ".gnu.version");
+      flinfo.symver_sec = bfd_get_linker_section (dynobj, ".gnu.version");
       /* Note that it is OK if symver_sec is NULL.  */
     }
 
@@ -11077,7 +11076,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       bfd_byte *dyncon, *dynconend;
 
       /* Fix up .dynamic entries.  */
-      o = bfd_get_section_by_name (dynobj, ".dynamic");
+      o = bfd_get_linker_section (dynobj, ".dynamic");
       BFD_ASSERT (o != NULL);
 
       dyncon = o->contents;
@@ -11253,7 +11252,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       /* Check for DT_TEXTREL (late, in case the backend removes it).  */
       if (((info->warn_shared_textrel && info->shared)
 	   || info->error_textrel)
-	  && (o = bfd_get_section_by_name (dynobj, ".dynamic")) != NULL)
+	  && (o = bfd_get_linker_section (dynobj, ".dynamic")) != NULL)
 	{
 	  bfd_byte *dyncon, *dynconend;
 
@@ -11294,9 +11293,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    continue;
 	  if (elf_hash_table (info)->eh_info.hdr_sec == o)
 	    continue;
-	  if ((elf_section_data (o->output_section)->this_hdr.sh_type
-	       != SHT_STRTAB)
-	      && (strcmp (bfd_get_section_name (abfd, o), ".dynstr") != 0))
+	  if (strcmp (o->name, ".dynstr") != 0)
 	    {
 	      /* FIXME: octets_per_byte.  */
 	      if (! bfd_set_section_contents (abfd, o->output_section,
@@ -12842,7 +12839,7 @@ _bfd_elf_get_dynamic_reloc_section (bfd *       abfd,
 
       if (name != NULL)
 	{
-	  reloc_sec = bfd_get_section_by_name (abfd, name);
+	  reloc_sec = bfd_get_linker_section (abfd, name);
 
 	  if (reloc_sec != NULL)
 	    elf_section_data (sec)->sreloc = reloc_sec;
@@ -12878,17 +12875,16 @@ _bfd_elf_make_dynamic_reloc_section (asection *         sec,
       if (name == NULL)
 	return NULL;
 
-      reloc_sec = bfd_get_section_by_name (dynobj, name);
+      reloc_sec = bfd_get_linker_section (dynobj, name);
 
       if (reloc_sec == NULL)
 	{
-	  flagword flags;
-
-	  flags = (SEC_HAS_CONTENTS | SEC_READONLY | SEC_IN_MEMORY | SEC_LINKER_CREATED);
+	  flagword flags = (SEC_HAS_CONTENTS | SEC_READONLY
+			    | SEC_IN_MEMORY | SEC_LINKER_CREATED);
 	  if ((sec->flags & SEC_ALLOC) != 0)
 	    flags |= SEC_ALLOC | SEC_LOAD;
 
-	  reloc_sec = bfd_make_section_with_flags (dynobj, name, flags);
+	  reloc_sec = bfd_make_section_anyway_with_flags (dynobj, name, flags);
 	  if (reloc_sec != NULL)
 	    {
 	      if (! bfd_set_section_alignment (dynobj, reloc_sec, alignment))

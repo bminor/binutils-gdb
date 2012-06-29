@@ -4234,8 +4234,8 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
   int offset;
 
   /* This function may be called more than once.  */
-  s = bfd_get_section_by_name (abfd, ".got");
-  if (s != NULL && (s->flags & SEC_LINKER_CREATED) != 0)
+  s = bfd_get_linker_section (abfd, ".got");
+  if (s != NULL)
     return TRUE;
 
   /* Machine specific: although pointers are 32-bits wide, we want the
@@ -4248,14 +4248,14 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
 	   | SEC_LINKER_CREATED);
   pltflags = flags;
 
-  s = bfd_make_section_with_flags (abfd, ".got", flags);
+  s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
   if (s == NULL
       || !bfd_set_section_alignment (abfd, s, ptralign))
     return FALSE;
 
   if (bed->want_got_plt)
     {
-      s = bfd_make_section_with_flags (abfd, ".got.plt", flags);
+      s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
       if (s == NULL
 	  || !bfd_set_section_alignment (abfd, s, ptralign))
 	return FALSE;
@@ -4293,8 +4293,8 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
       if (! frvfdpic_relocs_info (info))
 	return FALSE;
 
-      s = bfd_make_section_with_flags (abfd, ".rel.got",
-				       (flags | SEC_READONLY));
+      s = bfd_make_section_anyway_with_flags (abfd, ".rel.got",
+					      (flags | SEC_READONLY));
       if (s == NULL
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return FALSE;
@@ -4302,8 +4302,8 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
       frvfdpic_gotrel_section (info) = s;
 
       /* Machine-specific.  */
-      s = bfd_make_section_with_flags (abfd, ".rofixup",
-				       (flags | SEC_READONLY));
+      s = bfd_make_section_anyway_with_flags (abfd, ".rofixup",
+					      (flags | SEC_READONLY));
       if (s == NULL
 	  || ! bfd_set_section_alignment (abfd, s, 2))
 	return FALSE;
@@ -4351,7 +4351,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
   if (bed->plt_readonly)
     pltflags |= SEC_READONLY;
 
-  s = bfd_make_section_with_flags (abfd, ".plt", pltflags);
+  s = bfd_make_section_anyway_with_flags (abfd, ".plt", pltflags);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->plt_alignment))
     return FALSE;
@@ -4370,8 +4370,8 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* FRV-specific: we want rel relocations for the plt.  */
-  s = bfd_make_section_with_flags (abfd, ".rel.plt",
-				   flags | SEC_READONLY);
+  s = bfd_make_section_anyway_with_flags (abfd, ".rel.plt",
+					  flags | SEC_READONLY);
   if (s == NULL
       || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
     return FALSE;
@@ -4418,8 +4418,8 @@ elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 image and use a R_*_COPY reloc to tell the dynamic linker to
 	 initialize them at run time.  The linker script puts the .dynbss
 	 section into the .bss section of the final image.  */
-      s = bfd_make_section_with_flags (abfd, ".dynbss",
-				       SEC_ALLOC | SEC_LINKER_CREATED);
+      s = bfd_make_section_anyway_with_flags (abfd, ".dynbss",
+					      SEC_ALLOC | SEC_LINKER_CREATED);
       if (s == NULL)
 	return FALSE;
 
@@ -4436,10 +4436,10 @@ elf32_frvfdpic_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
      copy relocs.  */
       if (! info->shared)
 	{
-	  s = bfd_make_section_with_flags (abfd,
-					   (bed->default_use_rela_p
-					    ? ".rela.bss" : ".rel.bss"),
-					   flags | SEC_READONLY);
+	  s = bfd_make_section_anyway_with_flags (abfd,
+						  (bed->default_use_rela_p
+						   ? ".rela.bss" : ".rel.bss"),
+						  flags | SEC_READONLY);
 	  if (s == NULL
 	      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
 	    return FALSE;
@@ -5504,7 +5504,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".interp");
+	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (bfd_byte *) ELF_DYNAMIC_INTERPRETER;
@@ -5913,7 +5913,7 @@ elf32_frvfdpic_finish_dynamic_sections (bfd *output_bfd,
       Elf32_External_Dyn * dyncon;
       Elf32_External_Dyn * dynconend;
 
-      sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+      sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
       BFD_ASSERT (sdyn != NULL);
 

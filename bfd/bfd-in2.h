@@ -1707,6 +1707,8 @@ asection *bfd_get_section_by_name (bfd *abfd, const char *name);
 
 asection *bfd_get_next_section_by_name (asection *sec);
 
+asection *bfd_get_linker_section (bfd *abfd, const char *name);
+
 asection *bfd_get_section_by_name_if
    (bfd *abfd,
     const char *name,

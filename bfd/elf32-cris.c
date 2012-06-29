@@ -1065,8 +1065,8 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (dynobj != NULL)
     {
-      splt = bfd_get_section_by_name (dynobj, ".plt");
-      sgot = bfd_get_section_by_name (dynobj, ".got");
+      splt = bfd_get_linker_section (dynobj, ".plt");
+      sgot = bfd_get_linker_section (dynobj, ".got");
     }
 
   for (rel = relocs; rel < relend; rel ++)
@@ -1204,7 +1204,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      && ((struct elf_cris_link_hash_entry *) h)->gotplt_offset != 0)
 	    {
 	      asection *sgotplt
-		= bfd_get_section_by_name (dynobj, ".got.plt");
+		= bfd_get_linker_section (dynobj, ".got.plt");
 	      bfd_vma got_offset;
 
 	      BFD_ASSERT (h->dynindx != -1);
@@ -1336,7 +1336,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 			if (srelgot == NULL)
 			  srelgot
-			    = bfd_get_section_by_name (dynobj, ".rela.got");
+			    = bfd_get_linker_section (dynobj, ".rela.got");
 			BFD_ASSERT (srelgot != NULL);
 
 			outrel.r_offset = (sgot->output_section->vma
@@ -1652,7 +1652,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (htab->dtpmod_refcount > 0
 	      && (input_section->flags & SEC_ALLOC) != 0)
 	    {
-	      asection *sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+	      asection *sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
 	      BFD_ASSERT (sgotplt != NULL);
 
 	      if (info->shared)
@@ -1661,7 +1661,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  bfd_byte *loc;
 
 		  if (srelgot == NULL)
-		    srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+		    srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 		  BFD_ASSERT (srelgot != NULL);
 		  loc = srelgot->contents;
 		  loc += srelgot->reloc_count++ * sizeof (Elf32_External_Rela);
@@ -1805,7 +1805,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  bfd_put_32 (output_bfd, 0, sgot->contents + off + 4);
 
 		  if (srelgot == NULL)
-		    srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+		    srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 		  BFD_ASSERT (srelgot != NULL);
 
 		  if (h != NULL && h->dynindx != -1)
@@ -1937,7 +1937,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		    local_got_offsets[r_symndx] |= 1;
 
 		  if (srelgot == NULL)
-		    srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+		    srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 		  BFD_ASSERT (srelgot != NULL);
 
 		  if (h != NULL && h->dynindx != -1)
@@ -2193,9 +2193,9 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
 
       BFD_ASSERT (h->dynindx != -1);
 
-      splt = bfd_get_section_by_name (dynobj, ".plt");
-      sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
-      srela = bfd_get_section_by_name (dynobj, ".rela.plt");
+      splt = bfd_get_linker_section (dynobj, ".plt");
+      sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
+      srela = bfd_get_linker_section (dynobj, ".rela.plt");
       BFD_ASSERT (splt != NULL && sgotplt != NULL
 		  && (! has_gotplt || srela != NULL));
 
@@ -2292,8 +2292,8 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
 
       /* This symbol has an entry in the global offset table.  Set it up.  */
 
-      sgot = bfd_get_section_by_name (dynobj, ".got");
-      srela = bfd_get_section_by_name (dynobj, ".rela.got");
+      sgot = bfd_get_linker_section (dynobj, ".got");
+      srela = bfd_get_linker_section (dynobj, ".rela.got");
       BFD_ASSERT (sgot != NULL && srela != NULL);
 
       rela.r_offset = (sgot->output_section->vma
@@ -2338,8 +2338,7 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
 		  && (h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak));
 
-      s = bfd_get_section_by_name (h->root.u.def.section->owner,
-				   ".rela.bss");
+      s = bfd_get_linker_section (dynobj, ".rela.bss");
       BFD_ASSERT (s != NULL);
 
       rela.r_offset = (h->root.u.def.value
@@ -2374,16 +2373,16 @@ elf_cris_finish_dynamic_sections (output_bfd, info)
 
   dynobj = elf_hash_table (info)->dynobj;
 
-  sgot = bfd_get_section_by_name (dynobj, ".got.plt");
+  sgot = bfd_get_linker_section (dynobj, ".got.plt");
   BFD_ASSERT (sgot != NULL);
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       asection *splt;
       Elf32_External_Dyn *dyncon, *dynconend;
 
-      splt = bfd_get_section_by_name (dynobj, ".plt");
+      splt = bfd_get_linker_section (dynobj, ".plt");
       BFD_ASSERT (splt != NULL && sdyn != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
@@ -2561,8 +2560,8 @@ cris_elf_gc_sweep_hook (bfd *abfd,
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
 
-  sgot = bfd_get_section_by_name (dynobj, ".got");
-  srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+  sgot = bfd_get_linker_section (dynobj, ".got");
+  srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
@@ -2819,8 +2818,8 @@ elf_cris_adjust_gotplt_to_got (h, p)
       asection *srelgot;
 
       BFD_ASSERT (dynobj != NULL);
-      sgot = bfd_get_section_by_name (dynobj, ".got");
-      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+      sgot = bfd_get_linker_section (dynobj, ".got");
+      srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 
       /* Put accurate refcounts there.  */
       h->root.got.refcount += h->gotplt_refcount;
@@ -2998,7 +2997,7 @@ elf_cris_adjust_dynamic_symbol (struct bfd_link_info *info,
 	    return FALSE;
 	}
 
-      s = bfd_get_section_by_name (dynobj, ".plt");
+      s = bfd_get_linker_section (dynobj, ".plt");
       BFD_ASSERT (s != NULL);
 
       /* If this is the first .plt entry, make room for the special
@@ -3057,13 +3056,13 @@ elf_cris_adjust_dynamic_symbol (struct bfd_link_info *info,
 	= htab->next_gotplt_entry;
       htab->next_gotplt_entry += 4;
 
-      s = bfd_get_section_by_name (dynobj, ".got.plt");
+      s = bfd_get_linker_section (dynobj, ".got.plt");
       BFD_ASSERT (s != NULL);
       s->size += 4;
 
       /* We also need to make an entry in the .rela.plt section.  */
 
-      s = bfd_get_section_by_name (dynobj, ".rela.plt");
+      s = bfd_get_linker_section (dynobj, ".rela.plt");
       BFD_ASSERT (s != NULL);
       s->size += sizeof (Elf32_External_Rela);
 
@@ -3111,7 +3110,7 @@ elf_cris_adjust_dynamic_symbol (struct bfd_link_info *info,
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
 
-  s = bfd_get_section_by_name (dynobj, ".dynbss");
+  s = bfd_get_linker_section (dynobj, ".dynbss");
   BFD_ASSERT (s != NULL);
 
   /* We must generate a R_CRIS_COPY reloc to tell the dynamic linker to
@@ -3122,7 +3121,7 @@ elf_cris_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       asection *srel;
 
-      srel = bfd_get_section_by_name (dynobj, ".rela.bss");
+      srel = bfd_get_linker_section (dynobj, ".rela.bss");
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
@@ -3313,7 +3312,7 @@ cris_elf_check_relocs (bfd *abfd,
 	    }
 
 	  if (sgot == NULL)
-	    sgot = bfd_get_section_by_name (dynobj, ".got");
+	    sgot = bfd_get_linker_section (dynobj, ".got");
 
 	  if (local_got_refcounts == NULL)
 	    {
@@ -3373,17 +3372,15 @@ cris_elf_check_relocs (bfd *abfd,
 	  if (srelgot == NULL
 	      && (h != NULL || info->shared))
 	    {
-	      srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+	      srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 	      if (srelgot == NULL)
 		{
-		  srelgot = bfd_make_section_with_flags (dynobj,
-							 ".rela.got",
-							 (SEC_ALLOC
-							  | SEC_LOAD
-							  | SEC_HAS_CONTENTS
-							  | SEC_IN_MEMORY
-							  | SEC_LINKER_CREATED
-							  | SEC_READONLY));
+		  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+				    | SEC_IN_MEMORY | SEC_LINKER_CREATED
+				    | SEC_READONLY);
+		  srelgot = bfd_make_section_anyway_with_flags (dynobj,
+								".rela.got",
+								flags);
 		  if (srelgot == NULL
 		      || !bfd_set_section_alignment (dynobj, srelgot, 2))
 		    return FALSE;
@@ -3829,7 +3826,7 @@ elf_cris_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".interp");
+	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
@@ -3846,7 +3843,7 @@ elf_cris_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 not actually use these entries.  Reset the size of .rela.got,
 	 which will cause it to get stripped from the output file
 	 below.  */
-      s = bfd_get_section_by_name (dynobj, ".rela.got");
+      s = bfd_get_linker_section (dynobj, ".rela.got");
       if (s != NULL)
 	s->size = 0;
     }
@@ -4086,7 +4083,7 @@ elf_cris_discard_excess_program_dynamics (h, inf)
 
 	  BFD_ASSERT (dynobj != NULL);
 
-	  srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+	  srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 
 	  BFD_ASSERT (srelgot != NULL);
 

@@ -759,9 +759,9 @@ create_got_section (bfd *dynobj,
   if (htab == NULL)
     return FALSE;
 
-  htab->elf.sgot = bfd_get_section_by_name (dynobj, ".got");
-  htab->elf.sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
-  htab->elf.srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
+  htab->elf.sgot = bfd_get_linker_section (dynobj, ".got");
+  htab->elf.sgotplt = bfd_get_linker_section (dynobj, ".got.plt");
+  htab->elf.srelgot = bfd_get_linker_section (dynobj, ".rela.got");
   if (!htab->elf.sgot || !htab->elf.sgotplt || !htab->elf.srelgot)
     abort ();
   return TRUE;
@@ -787,11 +787,11 @@ elf_s390_create_dynamic_sections (bfd *dynobj,
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab->elf.splt = bfd_get_section_by_name (dynobj, ".plt");
-  htab->elf.srelplt = bfd_get_section_by_name (dynobj, ".rela.plt");
-  htab->sdynbss = bfd_get_section_by_name (dynobj, ".dynbss");
+  htab->elf.splt = bfd_get_linker_section (dynobj, ".plt");
+  htab->elf.srelplt = bfd_get_linker_section (dynobj, ".rela.plt");
+  htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!info->shared)
-    htab->srelbss = bfd_get_section_by_name (dynobj, ".rela.bss");
+    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
 
   if (!htab->elf.splt || !htab->elf.srelplt || !htab->sdynbss
       || (!info->shared && !htab->srelbss))
@@ -1918,7 +1918,7 @@ elf_s390_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* Set the contents of the .interp section to the interpreter.  */
       if (info->executable)
 	{
-	  s = bfd_get_section_by_name (dynobj, ".interp");
+	  s = bfd_get_linker_section (dynobj, ".interp");
 	  if (s == NULL)
 	    abort ();
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
@@ -3211,7 +3211,7 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
     return FALSE;
 
   dynobj = htab->elf.dynobj;
-  sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
+  sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (htab->elf.dynamic_sections_created)
     {
