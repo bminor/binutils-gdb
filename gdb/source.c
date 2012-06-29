@@ -243,7 +243,8 @@ select_source_symtab (struct symtab *s)
      if one exists.  */
   if (lookup_symbol (main_name (), 0, VAR_DOMAIN, 0))
     {
-      sals = decode_line_spec (main_name (), DECODE_LINE_FUNFIRSTLINE);
+      sals = decode_line_with_current_source (main_name (),
+					      DECODE_LINE_FUNFIRSTLINE);
       sal = sals.sals[0];
       xfree (sals.sals);
       current_source_pspace = sal.pspace;
@@ -1405,7 +1406,7 @@ line_info (char *arg, int from_tty)
     }
   else
     {
-      sals = decode_line_spec_1 (arg, DECODE_LINE_LIST_MODE);
+      sals = decode_line_with_last_displayed (arg, DECODE_LINE_LIST_MODE);
 
       dont_repeat ();
     }

@@ -2494,7 +2494,7 @@ trace_find_line_command (char *args, int from_tty)
     }
   else
     {
-      sals = decode_line_spec (args, DECODE_LINE_FUNFIRSTLINE);
+      sals = decode_line_with_current_source (args, DECODE_LINE_FUNFIRSTLINE);
       sal = sals.sals[0];
     }
   

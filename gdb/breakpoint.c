@@ -11532,8 +11532,9 @@ clear_command (char *arg, int from_tty)
 
   if (arg)
     {
-      sals = decode_line_spec (arg, (DECODE_LINE_FUNFIRSTLINE
-				     | DECODE_LINE_LIST_MODE));
+      sals = decode_line_with_current_source (arg,
+					      (DECODE_LINE_FUNFIRSTLINE
+					       | DECODE_LINE_LIST_MODE));
       default_match = 0;
     }
   else
@@ -14492,27 +14493,6 @@ invalidate_bp_value_on_memory_change (CORE_ADDR addr, int len,
 		}
 	  }
       }
-}
-
-/* Use the last displayed codepoint's values, or nothing
-   if they aren't valid.  */
-
-struct symtabs_and_lines
-decode_line_spec_1 (char *string, int flags)
-{
-  struct symtabs_and_lines sals;
-
-  if (string == 0)
-    error (_("Empty line specification."));
-  if (last_displayed_sal_is_valid ())
-    sals = decode_line_1 (&string, flags,
-			  get_last_displayed_symtab (),
-			  get_last_displayed_line ());
-  else
-    sals = decode_line_1 (&string, flags, (struct symtab *) NULL, 0);
-  if (*string)
-    error (_("Junk at end of line specification: %s"), string);
-  return sals;
 }
 
 /* Create and insert a raw software breakpoint at PC.  Return an

@@ -2373,7 +2373,7 @@ func_command (char *arg, int from_tty)
     return;
 
   frame = parse_frame_specification ("0");
-  sals = decode_line_spec (arg, DECODE_LINE_FUNFIRSTLINE);
+  sals = decode_line_with_current_source (arg, DECODE_LINE_FUNFIRSTLINE);
   cleanups = make_cleanup (xfree, sals.sals);
   func_bounds = (struct function_bounds *) xmalloc (
 			      sizeof (struct function_bounds) * sals.nelts);

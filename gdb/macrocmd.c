@@ -26,6 +26,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "gdb_string.h"
+#include "linespec.h"
 
 
 /* The `macro' prefix command.  */
@@ -282,7 +283,8 @@ info_macros_command (char *args, int from_tty)
     ms = default_macro_scope ();
   else
     {
-      struct symtabs_and_lines sals = decode_line_spec (args, 0);
+      struct symtabs_and_lines sals =
+	decode_line_with_current_source (args, 0);
 
       if (sals.nelts)
         ms = sal_macro_scope (sals.sals[0]);

@@ -43,6 +43,7 @@
 #include "cli/cli-utils.h"
 #include "filenames.h"
 #include "ada-lang.h"
+#include "stack.h"
 
 typedef struct symtab *symtab_p;
 DEF_VEC_P (symtab_p);
@@ -2325,6 +2326,8 @@ decode_line_full (char **argptr, int flags,
   do_cleanups (cleanups);
 }
 
+/* See linespec.h.  */
+
 struct symtabs_and_lines
 decode_line_1 (char **argptr, int flags,
 	       struct symtab *default_symtab,
@@ -2343,6 +2346,51 @@ decode_line_1 (char **argptr, int flags,
 
   do_cleanups (cleanups);
   return result;
+}
+
+/* See linespec.h.  */
+
+struct symtabs_and_lines
+decode_line_with_current_source (char *string, int flags)
+{
+  struct symtabs_and_lines sals;
+  struct symtab_and_line cursal;
+
+  if (string == 0)
+    error (_("Empty line specification."));
+
+  /* We use whatever is set as the current source line.  We do not try
+     and get a default source symtab+line or it will recursively call us!  */
+  cursal = get_current_source_symtab_and_line ();
+
+  sals = decode_line_1 (&string, flags,
+			cursal.symtab, cursal.line);
+
+  if (*string)
+    error (_("Junk at end of line specification: %s"), string);
+  return sals;
+}
+
+/* See linespec.h.  */
+
+struct symtabs_and_lines
+decode_line_with_last_displayed (char *string, int flags)
+{
+  struct symtabs_and_lines sals;
+
+  if (string == 0)
+    error (_("Empty line specification."));
+
+  if (last_displayed_sal_is_valid ())
+    sals = decode_line_1 (&string, flags,
+			  get_last_displayed_symtab (),
+			  get_last_displayed_line ());
+  else
+    sals = decode_line_1 (&string, flags, (struct symtab *) NULL, 0);
+
+  if (*string)
+    error (_("Junk at end of line specification: %s"), string);
+  return sals;
 }
 
 

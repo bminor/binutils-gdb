@@ -1,3 +1,17 @@
+2012-06-29  Doug Evans  <dje@google.com>
+
+	* linespec.c: #include "stack.h".
+	(decode_line_with_current_source): Moved here from symtab.c and
+	renamed from decode_line_spec.  All callers updated.
+	(decode_line_with_last_displayed): Moved here from breakpoint.c and
+	renamed from decode_line_spec_1.  All callers updated.
+	* linespec.h (decode_line_with_current_source): Move declaration here
+	from symtab.h and renamed from decode_line_spec.
+	(decode_line_with_last_displayed): Move declaration here from symtab.h
+	and renamed from decode_line_spec_1.
+	* macrocmd.c: #include "linespec.h".
+	* symtab.c: Remove #include "linespec.h".
+
 2012-06-28  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (get_cu_length): New function.
