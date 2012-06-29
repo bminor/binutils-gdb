@@ -20,6 +20,7 @@ if {
     if {    [istarget xtensa*-*-*]
 	 || [istarget am3*-*-*]
 	 || [istarget cr16-*-*]
+	 || [istarget crx-*-*]
 	 || [istarget mn10*-*-*] } {
       run_dump_test "lns-common-1-alt"
       run_dump_test "lns-big-delta"
