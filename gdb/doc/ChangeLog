@@ -1,3 +1,7 @@
+2012-06-29  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Index Section Format): Update for version 7.
+
 2012-06-28  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Miscellaneous GDB/MI Commands): Update -info-os

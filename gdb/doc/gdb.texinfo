@@ -40332,10 +40332,11 @@ unless otherwise noted:
 
 @enumerate
 @item
-The version number, currently 6.  Versions 1, 2 and 3 are obsolete.
+The version number, currently 7.  Versions 1, 2 and 3 are obsolete.
 Version 4 uses a different hashing function from versions 5 and 6.
-Version 6 includes symbols for inlined functions, whereas versions
-4 and 5 do not.  @value{GDBN} will only read version 4 and 5 indices
+Version 6 includes symbols for inlined functions, whereas versions 4
+and 5 do not.  Version 7 adds attributes to the CU indices in the
+symbol table.  @value{GDBN} will only read version 4, 5, or 6 indices
 if the @code{--use-deprecated-index-sections} option is used.
 
 @item
