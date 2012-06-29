@@ -4843,32 +4843,6 @@ _bfd_mn10300_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (! _bfd_mn10300_elf_create_got_section (abfd, info))
     return FALSE;
 
-  {
-    const char * secname;
-    char *       relname;
-    flagword     secflags;
-    asection *   sec;
-
-    for (sec = abfd->sections; sec; sec = sec->next)
-      {
-	secflags = bfd_get_section_flags (abfd, sec);
-	if ((secflags & (SEC_DATA | SEC_LINKER_CREATED))
-	    || ((secflags & SEC_HAS_CONTENTS) != SEC_HAS_CONTENTS))
-	  continue;
-
-	secname = bfd_get_section_name (abfd, sec);
-	relname = bfd_malloc (strlen (secname) + 6);
-	strcpy (relname, ".rela");
-	strcat (relname, secname);
-
-	s = bfd_make_section_with_flags (abfd, relname,
-					 flags | SEC_READONLY);
-	if (s == NULL
-	    || ! bfd_set_section_alignment (abfd, s, ptralign))
-	  return FALSE;
-      }
-  }
-
   if (bed->want_dynbss)
     {
       /* The .dynbss section is a place to put symbols which are defined

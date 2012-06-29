@@ -1,3 +1,13 @@
+2012-06-29  Alan Modra  <amodra@gmail.com>
+
+	* elf32-sh.c (sh_elf_create_dynamic_sections): Don't create .rela
+	section for bss type sections, except for .rela.bss.
+	* elf-m10300.c (_bfd_mn10300_elf_create_dynamic_sections): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_create_dynamic_sections): Likewise.
+	* elf32-lm32.c (lm32_elf_create_dynamic_sections): Likewise.
+	* elf32-m32r.c (m32r_elf_create_dynamic_sections): Likewise.
+	* elf64-sh64.c (sh64_elf64_create_dynamic_sections): Likewise.
+
 2012-06-28  Roland McGrath  <mcgrathr@google.com>
 
 	* elf32-arm.c (elf32_arm_populate_plt_entry): Use int32_t for
