@@ -1,5 +1,7 @@
 2012-06-28  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf2_find_base_address): Move definition.
+
 	* dwarf2read.c (ABBREV_HASH_SIZE): Remove enclosing #ifndef/#endif.
 	(struct abbrev_table): Define.
 	(dwarf2_cu): Replace members dwarf2_abbrevs, abbrev_obstack with

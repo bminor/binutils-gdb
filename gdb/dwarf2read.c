@@ -3371,6 +3371,37 @@ offset_in_cu_p (const struct comp_unit_head *cu_header, sect_offset offset)
   return (offset.sect_off >= bottom.sect_off && offset.sect_off < top.sect_off);
 }
 
+/* Find the base address of the compilation unit for range lists and
+   location lists.  It will normally be specified by DW_AT_low_pc.
+   In DWARF-3 draft 4, the base address could be overridden by
+   DW_AT_entry_pc.  It's been removed, but GCC still uses this for
+   compilation units with discontinuous ranges.  */
+
+static void
+dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct attribute *attr;
+
+  cu->base_known = 0;
+  cu->base_address = 0;
+
+  attr = dwarf2_attr (die, DW_AT_entry_pc, cu);
+  if (attr)
+    {
+      cu->base_address = DW_ADDR (attr);
+      cu->base_known = 1;
+    }
+  else
+    {
+      attr = dwarf2_attr (die, DW_AT_low_pc, cu);
+      if (attr)
+	{
+	  cu->base_address = DW_ADDR (attr);
+	  cu->base_known = 1;
+	}
+    }
+}
+
 /* Read in the comp unit header information from the debug_info at info_ptr.
    NOTE: This leaves members offset, first_die_offset to be filled in
    by the caller.  */
@@ -3830,37 +3861,6 @@ init_cu_die_reader (struct die_reader_specs *reader,
   reader->die_section = section;
   reader->buffer = section->buffer;
   reader->buffer_end = section->buffer + section->size;
-}
-
-/* Find the base address of the compilation unit for range lists and
-   location lists.  It will normally be specified by DW_AT_low_pc.
-   In DWARF-3 draft 4, the base address could be overridden by
-   DW_AT_entry_pc.  It's been removed, but GCC still uses this for
-   compilation units with discontinuous ranges.  */
-
-static void
-dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
-{
-  struct attribute *attr;
-
-  cu->base_known = 0;
-  cu->base_address = 0;
-
-  attr = dwarf2_attr (die, DW_AT_entry_pc, cu);
-  if (attr)
-    {
-      cu->base_address = DW_ADDR (attr);
-      cu->base_known = 1;
-    }
-  else
-    {
-      attr = dwarf2_attr (die, DW_AT_low_pc, cu);
-      if (attr)
-	{
-	  cu->base_address = DW_ADDR (attr);
-	  cu->base_known = 1;
-	}
-    }
 }
 
 /* Initialize a CU (or TU) and read its DIEs.
