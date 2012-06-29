@@ -1,3 +1,8 @@
+2012-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* archive.c (_bfd_compute_and_write_armap): Simplify global
+	symbol handling.
+
 2012-06-29  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/14189

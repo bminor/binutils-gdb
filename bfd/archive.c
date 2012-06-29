@@ -2314,10 +2314,10 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 		  flagword flags = (syms[src_count])->flags;
 		  asection *sec = syms[src_count]->section;
 
-		  if ((flags & BSF_GLOBAL
-		       || flags & BSF_WEAK
-		       || flags & BSF_INDIRECT
-		       || flags & BSF_GNU_UNIQUE
+		  if (((flags & (BSF_GLOBAL
+				 | BSF_WEAK
+				 | BSF_INDIRECT
+				 | BSF_GNU_UNIQUE)) != 0
 		       || bfd_is_com_section (sec))
 		      && ! bfd_is_und_section (sec))
 		    {
