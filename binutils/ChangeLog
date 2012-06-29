@@ -1,3 +1,7 @@
+2012-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* nm.c (filter_symbols): Simplify global symbol handling.
+
 2012-06-29  Francois Gouget  <fgouget@codeweavers.com>
 
 	PR binutils/14302
