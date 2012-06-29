@@ -62,6 +62,8 @@ SECTIONS
     *(debug_loc)
     \$dwarf2.debug_macinfo = .;
     *(debug_macinfo)
+    \$dwarf2.debug_macro = .;
+    *(debug_macro)
     \$dwarf2.debug_pubnames = .;
     *(debug_pubnames)
     \$dwarf2.debug_str = .;

@@ -122,6 +122,9 @@ SECTIONS
   .debug_pubtypes 0 : { *(.debug_pubtypes) }
   .debug_ranges   0 : { *(.debug_ranges) }
 
+  /* DWARF Extension.  */
+  .debug_macro    0 : { *(.debug_macro) } 
+  
   .note : { *(.vms.note) }
 
   /DISCARD/ : { *(.note) }

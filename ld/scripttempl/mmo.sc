@@ -80,6 +80,13 @@ SECTIONS
   .debug_macinfo  0 : { *(.debug_macinfo) }
   .debug_ranges   0 : { *(.debug_ranges) }
 
+  /* DWARF 3 */
+  .debug_pubtypes 0 : { *(.debug_pubtypes) }
+  .debug_ranges   0 : { *(.debug_ranges) }
+
+  /* DWARF Extension.  */
+  .debug_macro    0 : { *(.debug_macro) } 
+
   .data ${RELOCATING+ ${DATA_ADDR}}:
   {
     ${RELOCATING+ PROVIDE(__Sdata = .);}

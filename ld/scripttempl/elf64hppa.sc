@@ -564,6 +564,9 @@ cat <<EOF
   .debug_pubtypes 0 : { *(.debug_pubtypes) }
   .debug_ranges   0 : { *(.debug_ranges) }
 
+  /* DWARF Extension.  */
+  .debug_macro    0 : { *(.debug_macro) } 
+  
   ${TINY_DATA_SECTION}
   ${TINY_BSS_SECTION}
 

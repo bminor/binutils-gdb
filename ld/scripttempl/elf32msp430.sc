@@ -239,6 +239,13 @@ SECTIONS
   .debug_loc      0 : { *(.debug_loc) }
   .debug_macinfo  0 : { *(.debug_macinfo) }
 
+  /* DWARF 3 */
+  .debug_pubtypes 0 : { *(.debug_pubtypes) }
+  .debug_ranges   0 : { *(.debug_ranges) }
+
+  /* DWARF Extension.  */
+  .debug_macro    0 : { *(.debug_macro) } 
+
   PROVIDE (__stack = ${STACK}) ;
   PROVIDE (__data_start_rom = _etext) ;
   PROVIDE (__data_end_rom   = _etext + SIZEOF (.data)) ;
