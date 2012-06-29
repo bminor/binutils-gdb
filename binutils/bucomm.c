@@ -427,16 +427,18 @@ print_arelt_descr (FILE *file, bfd *abfd, bfd_boolean verbose)
 	  char timebuf[40];
 	  time_t when = buf.st_mtime;
 	  const char *ctime_result = (const char *) ctime (&when);
+	  bfd_size_type size;
 
 	  /* POSIX format:  skip weekday and seconds from ctime output.  */
 	  sprintf (timebuf, "%.12s %.4s", ctime_result + 4, ctime_result + 20);
 
 	  mode_string (buf.st_mode, modebuf);
 	  modebuf[10] = '\0';
+	  size = buf.st_size;
 	  /* POSIX 1003.2/D11 says to skip first character (entry type).  */
-	  fprintf (file, "%s %ld/%ld %6ld %s ", modebuf + 1,
+	  fprintf (file, "%s %ld/%ld %6" BFD_VMA_FMT "u %s ", modebuf + 1,
 		   (long) buf.st_uid, (long) buf.st_gid,
-		   (long) buf.st_size, timebuf);
+		   size, timebuf);
 	}
     }
 

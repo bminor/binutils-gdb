@@ -937,10 +937,11 @@ open_inarch (const char *archive_filename, const char *file)
 static void
 print_contents (bfd *abfd)
 {
-  size_t ncopied = 0;
+  bfd_size_type ncopied = 0;
+  bfd_size_type size;
   char *cbuf = (char *) xmalloc (BUFSIZE);
   struct stat buf;
-  size_t size;
+
   if (bfd_stat_arch_elt (abfd, &buf) != 0)
     /* xgettext:c-format */
     fatal (_("internal stat error on %s"), bfd_get_filename (abfd));
@@ -953,22 +954,22 @@ print_contents (bfd *abfd)
   size = buf.st_size;
   while (ncopied < size)
     {
+      bfd_size_type nread;
+      bfd_size_type tocopy = size - ncopied;
 
-      size_t nread;
-      size_t tocopy = size - ncopied;
       if (tocopy > BUFSIZE)
 	tocopy = BUFSIZE;
 
-      nread = bfd_bread (cbuf, (bfd_size_type) tocopy, abfd);
+      nread = bfd_bread (cbuf, tocopy, abfd);
       if (nread != tocopy)
 	/* xgettext:c-format */
 	fatal (_("%s is not a valid archive"),
 	       bfd_get_filename (bfd_my_archive (abfd)));
 
-      /* fwrite in mingw32 may return int instead of size_t. Cast the
-	 return value to size_t to avoid comparison between signed and
+      /* fwrite in mingw32 may return int instead of bfd_size_type. Cast the
+	 return value to bfd_size_type to avoid comparison between signed and
 	 unsigned values.  */
-      if ((size_t) fwrite (cbuf, 1, nread, stdout) != nread)
+      if ((bfd_size_type) fwrite (cbuf, 1, nread, stdout) != nread)
 	fatal ("stdout: %s", strerror (errno));
       ncopied += tocopy;
     }
@@ -990,9 +991,9 @@ extract_file (bfd *abfd)
 {
   FILE *ostream;
   char *cbuf = (char *) xmalloc (BUFSIZE);
-  size_t nread, tocopy;
-  size_t ncopied = 0;
-  size_t size;
+  bfd_size_type nread, tocopy;
+  bfd_size_type ncopied = 0;
+  bfd_size_type size;
   struct stat buf;
 
   if (bfd_stat_arch_elt (abfd, &buf) != 0)
@@ -1027,7 +1028,7 @@ extract_file (bfd *abfd)
 	if (tocopy > BUFSIZE)
 	  tocopy = BUFSIZE;
 
-	nread = bfd_bread (cbuf, (bfd_size_type) tocopy, abfd);
+	nread = bfd_bread (cbuf, tocopy, abfd);
 	if (nread != tocopy)
 	  /* xgettext:c-format */
 	  fatal (_("%s is not a valid archive"),
@@ -1049,10 +1050,10 @@ extract_file (bfd *abfd)
 	    output_file = ostream;
 	  }
 
-	/* fwrite in mingw32 may return int instead of size_t. Cast
-	   the return value to size_t to avoid comparison between
+	/* fwrite in mingw32 may return int instead of bfd_size_type. Cast
+	   the return value to bfd_size_type to avoid comparison between
 	   signed and unsigned values.  */
-	if ((size_t) fwrite (cbuf, 1, nread, ostream) != nread)
+	if ((bfd_size_type) fwrite (cbuf, 1, nread, ostream) != nread)
 	  fatal ("%s: %s", output_filename, strerror (errno));
 	ncopied += tocopy;
       }

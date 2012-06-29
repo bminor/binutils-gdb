@@ -1,3 +1,12 @@
+2012-06-29  Francois Gouget  <fgouget@codeweavers.com>
+
+	PR binutils/14302
+	* bucomm.c (print_arelt_descr): Correctly report the archive size
+	field (for 'ar tv').
+	* ar.c (print_contents): Use correct types for archive element
+	sizes (for 'ar p').
+	(extract_file): Likewise (for 'ar x').
+
 2012-06-29  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (is_16bit_abs_reloc): Handle mn10200 reloc.
