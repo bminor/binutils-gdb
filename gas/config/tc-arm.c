@@ -6202,7 +6202,7 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
   unsigned const int *upat = pattern;
   char *backtrack_pos = 0;
   const char *backtrack_error = 0;
-  int i, val, backtrack_index = 0;
+  int i, val = 0, backtrack_index = 0;
   enum arm_reg_type rtype;
   parse_operand_result result;
   unsigned int op_parse_code;
