@@ -1,3 +1,8 @@
+2012-06-30  Alan Modra  <amodra@gmail.com>
+
+	PR gas/14315
+	* config/obj-elf.c (obj_elf_weak): Don't set local.
+
 2012-06-30  Johan Olmutz Nielsen  <jnielsen@ddci.com>
 
 	* frags.h (frag_offset_fixed_p): Update prototype.

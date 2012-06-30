@@ -447,7 +447,6 @@ obj_elf_weak (int ignore ATTRIBUTE_UNUSED)
       symbolP = get_sym_from_input_line_and_check ();
       c = *input_line_pointer;
       S_SET_WEAK (symbolP);
-      symbol_get_obj (symbolP)->local = 1;
       if (c == ',')
 	{
 	  input_line_pointer++;
