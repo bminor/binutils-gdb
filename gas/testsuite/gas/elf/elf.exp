@@ -186,6 +186,9 @@ if { [is_elf_format] } then {
 
     run_dump_test "syms"
     
+    run_dump_test "common1"
+    run_dump_test "common2"
+
 load_lib gas-dg.exp
 dg-init
 dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/err-*.s $srcdir/$subdir/warn-*.s]] "" ""

@@ -1,3 +1,15 @@
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/14315
+	* gas/elf/common1.d: New file.
+	* gas/elf/common1.l: Likewise.
+	* gas/elf/common1.s: Likewise.
+	* gas/elf/common2.d: Likewise.
+	* gas/elf/common2.l: Likewise.
+	* gas/elf/common2.s: Likewise.
+
+	* gas/elf/elf.exp: Run common1 and common2.
+
 2012-06-29  Alan Modra  <amodra@gmail.com>
 
 	* gas/lns/lns.exp (lns-common-1): Add crx to alt target list.
