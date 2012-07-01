@@ -544,6 +544,11 @@ struct dwarf2_per_cu_data
 
 struct signatured_type
 {
+  /* The "per_cu" object of this type.
+     N.B.: This is the first member so that it's easy to convert pointers
+     between them.  */
+  struct dwarf2_per_cu_data per_cu;
+
   /* The type's signature.  */
   ULONGEST signature;
 
@@ -557,9 +562,6 @@ struct signatured_type
      The value is zero until the actual value is known.
      Zero is otherwise not a valid section offset.  */
   sect_offset type_offset_in_section;
-
-  /* The CU(/TU) of this type.  */
-  struct dwarf2_per_cu_data per_cu;
 };
 
 /* These sections are what may appear in a "dwo" file.  */
@@ -3851,6 +3853,8 @@ lookup_signatured_type (ULONGEST sig)
   entry = htab_find (dwarf2_per_objfile->signatured_types, &find_entry);
   return entry;
 }
+
+/* Low level DIE reading support.  */
 
 /* Initialize a die_reader_specs struct from a dwarf2_cu struct.  */
 
@@ -3899,6 +3903,10 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   struct cleanup *cleanups, *free_cu_cleanup = NULL;
   struct signatured_type *sig_type = NULL;
   struct dwarf2_section_info *abbrev_section;
+  /* Non-zero if CU currently points to a DWO file and we need to
+     reread it.  When this happens we need to reread the skeleton die
+     before we can reread the DWO file.  */
+  int rereading_dwo_cu = 0;
 
   if (use_existing_cu)
     gdb_assert (keep);
@@ -3914,7 +3922,15 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   if (use_existing_cu && this_cu->cu != NULL)
     {
       cu = this_cu->cu;
-      info_ptr += cu->header.first_die_offset.cu_off;
+
+      /* If this CU is from a DWO file we need to start over, we need to
+	 refetch the attributes from the skeleton CU.
+	 This could be optimized by retrieving those attributes from when we
+	 were here the first time: the previous comp_unit_die was stored in
+	 comp_unit_obstack.  But there's no data yet that we need this
+	 optimization.  */
+      if (cu->dwo_unit != NULL)
+	rereading_dwo_cu = 1;
     }
   else
     {
@@ -3926,26 +3942,35 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 
       /* If an error occurs while loading, release our storage.  */
       free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
+    }
 
+  if (cu->header.first_die_offset.cu_off != 0 && ! rereading_dwo_cu)
+    {
+      /* We already have the header, there's no need to read it in again.  */
+      info_ptr += cu->header.first_die_offset.cu_off;
+    }
+  else
+    {
       if (this_cu->is_debug_types)
 	{
 	  ULONGEST signature;
+	  cu_offset type_offset_in_tu;
 
 	  info_ptr = read_and_check_type_unit_head (&cu->header, section,
 						    abbrev_section, info_ptr,
-						    &signature, NULL);
+						    &signature,
+						    &type_offset_in_tu);
 
-	  /* There's no way to get from PER_CU to its containing
-	     struct signatured_type.
-	     But we have the signature so we can use that.  */
-	  sig_type = lookup_signatured_type (signature);
-	  /* We've already scanned all the signatured types,
-	     this must succeed.  */
-	  gdb_assert (sig_type != NULL);
-	  gdb_assert (&sig_type->per_cu == this_cu);
+	  /* Since per_cu is the first member of struct signatured_type,
+	     we can go from a pointer to one to a pointer to the other.  */
+	  sig_type = (struct signatured_type *) this_cu;
+	  gdb_assert (sig_type->signature == signature);
+	  gdb_assert (sig_type->type_offset_in_tu.cu_off
+		      == type_offset_in_tu.cu_off);
 	  gdb_assert (this_cu->offset.sect_off == cu->header.offset.sect_off);
 
-	  /* LENGTH has not been set yet for type units.  */
+	  /* LENGTH has not been set yet for type units if we're
+	     using .gdb_index.  */
 	  this_cu->length = get_cu_length (&cu->header);
 
 	  /* Establish the type offset that can be used to lookup the type.  */
@@ -3973,11 +3998,18 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 
   /* If we don't have them yet, read the abbrevs for this compilation unit.
      And if we need to read them now, make sure they're freed when we're
-     done.  */
+     done.  Note that it's important that if the CU had an abbrev table
+     on entry we don't free it when we're done: Somewhere up the call stack
+     it may be in use.  */
   if (cu->abbrev_table == NULL)
     {
       dwarf2_read_abbrevs (cu, abbrev_section);
       make_cleanup (dwarf2_free_abbrev_table, cu);
+    }
+  else if (rereading_dwo_cu)
+    {
+      dwarf2_free_abbrev_table (cu);
+      dwarf2_read_abbrevs (cu, abbrev_section);
     }
 
   /* Read the top level CU/TU die.  */
@@ -3991,10 +4023,10 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   if (attr)
     {
       char *dwo_name = DW_STRING (attr);
-      const char *comp_dir;
+      const char *comp_dir_string;
       struct dwo_unit *dwo_unit;
       ULONGEST signature; /* Or dwo_id.  */
-      struct attribute *stmt_list, *low_pc, *high_pc, *ranges;
+      struct attribute *comp_dir, *stmt_list, *low_pc, *high_pc, *ranges;
       int i,num_extra_attrs;
       struct dwarf2_section_info *dwo_abbrev_section;
 
@@ -4008,15 +4040,16 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 	 However, the attribute is found in the stub which we won't have later.
 	 In order to not impose this complication on the rest of the code,
 	 we read them here and copy them to the DWO CU/TU die.  */
-      stmt_list = low_pc = high_pc = ranges = NULL;
 
       /* For TUs in DWO files, the DW_AT_stmt_list attribute lives in the
 	 DWO file.  */
+      stmt_list = NULL;
       if (! this_cu->is_debug_types)
 	stmt_list = dwarf2_attr (comp_unit_die, DW_AT_stmt_list, cu);
       low_pc = dwarf2_attr (comp_unit_die, DW_AT_low_pc, cu);
       high_pc = dwarf2_attr (comp_unit_die, DW_AT_high_pc, cu);
       ranges = dwarf2_attr (comp_unit_die, DW_AT_ranges, cu);
+      comp_dir = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, cu);
 
       /* There should be a DW_AT_addr_base attribute here (if needed).
 	 We need the value before we can process DW_FORM_GNU_addr_index.  */
@@ -4047,15 +4080,14 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 	}
 
       /* We may need the comp_dir in order to find the DWO file.  */
-      comp_dir = NULL;
-      attr = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, cu);
-      if (attr)
-	comp_dir = DW_STRING (attr);
+      comp_dir_string = NULL;
+      if (comp_dir)
+	comp_dir_string = DW_STRING (comp_dir);
 
       if (this_cu->is_debug_types)
-	dwo_unit = lookup_dwo_type_unit (sig_type, dwo_name, comp_dir);
+	dwo_unit = lookup_dwo_type_unit (sig_type, dwo_name, comp_dir_string);
       else
-	dwo_unit = lookup_dwo_comp_unit (this_cu, dwo_name, comp_dir,
+	dwo_unit = lookup_dwo_comp_unit (this_cu, dwo_name, comp_dir_string,
 					 signature);
 
       if (dwo_unit == NULL)
@@ -4110,7 +4142,8 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
       num_extra_attrs = ((stmt_list != NULL)
 			 + (low_pc != NULL)
 			 + (high_pc != NULL)
-			 + (ranges != NULL));
+			 + (ranges != NULL)
+			 + (comp_dir != NULL));
       info_ptr = read_full_die_1 (&reader, &comp_unit_die, info_ptr,
 				  &has_children, num_extra_attrs);
 
@@ -4124,6 +4157,8 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 	comp_unit_die->attrs[i++] = *high_pc;
       if (ranges != NULL)
 	comp_unit_die->attrs[i++] = *ranges;
+      if (comp_dir != NULL)
+	comp_unit_die->attrs[i++] = *comp_dir;
       comp_unit_die->num_attrs += num_extra_attrs;
 
       /* Skip dummy compilation units.  */

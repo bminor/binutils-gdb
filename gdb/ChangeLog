@@ -1,3 +1,9 @@
+2012-06-30  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (signatured_type): Make "per_cu" member first.
+	(init_cutu_and_read_dies): Handle rereading a DWO CU while it's
+	currently being read.  Propagate DW_AT_comp_dir to DWO DIE.
+
 2012-06-29  Doug Evans  <dje@google.com>
 
 	* linespec.c: #include "stack.h".
