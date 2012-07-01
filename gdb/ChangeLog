@@ -1,3 +1,20 @@
+2012-07-01  Yao Qi  <yao@codesourcery.com>
+
+	* breakpoint.c: Removed always_inserted_auto, always_inserted_on,
+	always_inserted_off, and always_inserted_enums.
+	Change always_inserted_mode's type to 'enum auto_boolean'.
+	(show_always_inserted_mode, breakpoint_always_inserted_mode): Update
+	callers.
+	(_initialize_breakpoint): Call add_setshow_auto_boolean_cmd instead
+	of add_setshow_enum_cmd.
+	* infrun.c: Remove can_use_displaced_stepping_auto,
+	can_use_displaced_stepping_on, can_use_displaced_stepping_off, and
+	can_use_displaced_stepping_enum.
+	Change can_use_displaced_stepping's type to 'enum auto_boolean'.
+	(show_can_use_displaced_stepping, use_displaced_stepping): Update callers.
+	(_initialize_infrun): Call add_setshow_auto_boolean_cmd instead of
+	add_setshow_enum_cmd.
+
 2012-06-30  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (signatured_type): Make "per_cu" member first.

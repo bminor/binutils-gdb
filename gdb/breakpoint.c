@@ -387,21 +387,13 @@ show_automatic_hardware_breakpoints (struct ui_file *file, int from_tty,
    will remove breakpoints upon stop.  If auto, GDB will behave as ON
    if in non-stop mode, and as OFF if all-stop mode.*/
 
-static const char always_inserted_auto[] = "auto";
-static const char always_inserted_on[] = "on";
-static const char always_inserted_off[] = "off";
-static const char *const always_inserted_enums[] = {
-  always_inserted_auto,
-  always_inserted_off,
-  always_inserted_on,
-  NULL
-};
-static const char *always_inserted_mode = always_inserted_auto;
+static enum auto_boolean always_inserted_mode = AUTO_BOOLEAN_AUTO;
+
 static void
 show_always_inserted_mode (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  if (always_inserted_mode == always_inserted_auto)
+  if (always_inserted_mode == AUTO_BOOLEAN_AUTO)
     fprintf_filtered (file,
 		      _("Always inserted breakpoint "
 			"mode is %s (currently %s).\n"),
@@ -415,8 +407,8 @@ show_always_inserted_mode (struct ui_file *file, int from_tty,
 int
 breakpoints_always_inserted_mode (void)
 {
-  return (always_inserted_mode == always_inserted_on
-	  || (always_inserted_mode == always_inserted_auto && non_stop));
+  return (always_inserted_mode == AUTO_BOOLEAN_TRUE
+	  || (always_inserted_mode == AUTO_BOOLEAN_AUTO && non_stop));
 }
 
 static const char condition_evaluation_both[] = "host or target";
@@ -16161,8 +16153,8 @@ a warning will be emitted for such breakpoints."),
 			   &breakpoint_set_cmdlist,
 			   &breakpoint_show_cmdlist);
 
-  add_setshow_enum_cmd ("always-inserted", class_support,
-			always_inserted_enums, &always_inserted_mode, _("\
+  add_setshow_auto_boolean_cmd ("always-inserted", class_support,
+				&always_inserted_mode, _("\
 Set mode for inserting breakpoints."), _("\
 Show mode for inserting breakpoints."), _("\
 When this mode is off, breakpoints are inserted in inferior when it is\n\
@@ -16173,10 +16165,10 @@ the behaviour depends on the non-stop setting (see help set non-stop).\n\
 In this case, if gdb is controlling the inferior in non-stop mode, gdb\n\
 behaves as if always-inserted mode is on; if gdb is controlling the\n\
 inferior in all-stop mode, gdb behaves as if always-inserted mode is off."),
-			   NULL,
-			   &show_always_inserted_mode,
-			   &breakpoint_set_cmdlist,
-			   &breakpoint_show_cmdlist);
+				NULL,
+				&show_always_inserted_mode,
+				&breakpoint_set_cmdlist,
+				&breakpoint_show_cmdlist);
 
   add_setshow_enum_cmd ("condition-evaluation", class_breakpoint,
 			condition_evaluation_enums,

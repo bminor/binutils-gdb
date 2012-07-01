@@ -1185,19 +1185,6 @@ infrun_inferior_exit (struct inferior *inf)
   remove_displaced_stepping_state (inf->pid);
 }
 
-/* Enum strings for "set|show displaced-stepping".  */
-
-static const char can_use_displaced_stepping_auto[] = "auto";
-static const char can_use_displaced_stepping_on[] = "on";
-static const char can_use_displaced_stepping_off[] = "off";
-static const char *const can_use_displaced_stepping_enum[] =
-{
-  can_use_displaced_stepping_auto,
-  can_use_displaced_stepping_on,
-  can_use_displaced_stepping_off,
-  NULL,
-};
-
 /* If ON, and the architecture supports it, GDB will use displaced
    stepping to step over breakpoints.  If OFF, or if the architecture
    doesn't support it, GDB will instead use the traditional
@@ -1206,15 +1193,14 @@ static const char *const can_use_displaced_stepping_enum[] =
    which of all-stop or non-stop mode is active --- displaced stepping
    in non-stop mode; hold-and-step in all-stop mode.  */
 
-static const char *can_use_displaced_stepping =
-  can_use_displaced_stepping_auto;
+static enum auto_boolean can_use_displaced_stepping = AUTO_BOOLEAN_AUTO;
 
 static void
 show_can_use_displaced_stepping (struct ui_file *file, int from_tty,
 				 struct cmd_list_element *c,
 				 const char *value)
 {
-  if (can_use_displaced_stepping == can_use_displaced_stepping_auto)
+  if (can_use_displaced_stepping == AUTO_BOOLEAN_AUTO)
     fprintf_filtered (file,
 		      _("Debugger's willingness to use displaced stepping "
 			"to step over breakpoints is %s (currently %s).\n"),
@@ -1231,9 +1217,8 @@ show_can_use_displaced_stepping (struct ui_file *file, int from_tty,
 static int
 use_displaced_stepping (struct gdbarch *gdbarch)
 {
-  return (((can_use_displaced_stepping == can_use_displaced_stepping_auto
-	    && non_stop)
-	   || can_use_displaced_stepping == can_use_displaced_stepping_on)
+  return (((can_use_displaced_stepping == AUTO_BOOLEAN_AUTO && non_stop)
+	   || can_use_displaced_stepping == AUTO_BOOLEAN_TRUE)
 	  && gdbarch_displaced_step_copy_insn_p (gdbarch)
 	  && !RECORD_IS_USED);
 }
@@ -7296,9 +7281,8 @@ function is skipped and the step command stops at a different source line."),
 			   show_step_stop_if_no_debug,
 			   &setlist, &showlist);
 
-  add_setshow_enum_cmd ("displaced-stepping", class_run,
-			can_use_displaced_stepping_enum,
-			&can_use_displaced_stepping, _("\
+  add_setshow_auto_boolean_cmd ("displaced-stepping", class_run,
+				&can_use_displaced_stepping, _("\
 Set debugger's willingness to use displaced stepping."), _("\
 Show debugger's willingness to use displaced stepping."), _("\
 If on, gdb will use displaced stepping to step over breakpoints if it is\n\
@@ -7307,9 +7291,9 @@ stepping to step over breakpoints, even if such is supported by the target\n\
 architecture.  If auto (which is the default), gdb will use displaced stepping\n\
 if the target architecture supports it and non-stop mode is active, but will not\n\
 use it in all-stop mode (see help set non-stop)."),
-			NULL,
-			show_can_use_displaced_stepping,
-			&setlist, &showlist);
+				NULL,
+				show_can_use_displaced_stepping,
+				&setlist, &showlist);
 
   add_setshow_enum_cmd ("exec-direction", class_run, exec_direction_names,
 			&exec_direction, _("Set direction of execution.\n\
