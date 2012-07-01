@@ -1038,7 +1038,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	  if (!bfd_init_section_compress_status (abfd, newsect))
 	    {
 	      (*_bfd_error_handler)
-		(_("%B: unable to initialize commpress status for section %s"),
+		(_("%B: unable to initialize compress status for section %s"),
 		 abfd, name);
 	      return FALSE;
 	    }
@@ -1058,7 +1058,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	  if (!bfd_init_section_decompress_status (abfd, newsect))
 	    {
 	      (*_bfd_error_handler)
-		(_("%B: unable to initialize decommpress status for section %s"),
+		(_("%B: unable to initialize decompress status for section %s"),
 		 abfd, name);
 	      return FALSE;
 	    }

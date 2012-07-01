@@ -1,3 +1,8 @@
+2012-07-01  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Fix typo in error
+	message.
+
 2012-06-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_relocate_section): Return FALSE
