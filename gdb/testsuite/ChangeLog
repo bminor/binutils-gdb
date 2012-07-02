@@ -4,6 +4,8 @@
 	Change CU pointer size to 4 bytes, adjust .8byte to .4byte.  Remove
 	.note.GNU-stack.
 
+	* gdb.dwarf2/fission-reread.S: Change # comments to /* */ comments.
+
 2012-07-02  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/help.exp (help b, help br, help bre, help brea, help
