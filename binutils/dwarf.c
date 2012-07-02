@@ -28,6 +28,7 @@
 #include "elf/common.h"
 #include "dwarf2.h"
 #include "dwarf.h"
+#include "gdb/gdb-index.h"
 
 static const char *regname (unsigned int regno, int row);
 
@@ -5676,23 +5677,19 @@ display_gdb_index (struct dwarf_section *section,
 
   /* Prior versions are obsolete, and future versions may not be
      backwards compatible.  */
-  switch (version)
+  if (version < 3 || version > 7)
     {
-    case 3:
-      warn (_("The address table data in version 3 may be wrong.\n"));
-      break;
-    case 4:
-      warn (_("Version 4 does not support case insensitive lookups.\n"));
-      break;
-    case 5:
-      warn (_("Version 5 does not include inlined functions.\n"));
-      break;
-    case 6:
-      break;
-    default:
       warn (_("Unsupported version %lu.\n"), (unsigned long) version);
       return 0;
     }
+  if (version < 4)
+    warn (_("The address table data in version 3 may be wrong.\n"));
+  if (version < 5)
+    warn (_("Version 4 does not support case insensitive lookups.\n"));
+  if (version < 6)
+    warn (_("Version 5 does not include inlined functions.\n"));
+  if (version < 7)
+      warn (_("Version 6 does not include symbol attributes.\n"));
 
   cu_list_offset = byte_get_little_endian (start + 4, 4);
   tu_list_offset = byte_get_little_endian (start + 8, 4);
@@ -5772,16 +5769,48 @@ display_gdb_index (struct dwarf_section *section,
 
 	  printf ("[%3u] %s:", i, constant_pool + name_offset);
 	  num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
+	  if (num_cus > 1)
+	    printf ("\n");
 	  for (j = 0; j < num_cus; ++j)
 	    {
+	      gdb_index_symbol_kind kind;
+
 	      cu = byte_get_little_endian (constant_pool + cu_vector_offset + 4 + j * 4, 4);
+	      kind = GDB_INDEX_SYMBOL_KIND_VALUE (cu);
+	      cu = GDB_INDEX_CU_VALUE (cu);
 	      /* Convert to TU number if it's for a type unit.  */
 	      if (cu >= cu_list_elements / 2)
-		printf (" T%lu", (unsigned long) (cu - cu_list_elements / 2));
+		printf ("%cT%lu", num_cus > 1 ? '\t' : ' ',
+			(unsigned long) (cu - cu_list_elements / 2));
 	      else
-		printf (" %lu", (unsigned long) cu);
+		printf ("%c%lu", num_cus > 1 ? '\t' : ' ', (unsigned long) cu);
+
+	      switch (kind)
+		{
+		case GDB_INDEX_SYMBOL_KIND_NONE:
+		  printf (_(" [no symbol information]"));
+		  break;
+		case GDB_INDEX_SYMBOL_KIND_TYPE:
+		  printf (_(" [type]"));
+		  break;
+		case GDB_INDEX_SYMBOL_KIND_VARIABLE:
+		  printf (_(" [variable]"));
+		  break;
+		case GDB_INDEX_SYMBOL_KIND_FUNCTION:
+		  printf (_(" [function]"));
+		  break;
+		case GDB_INDEX_SYMBOL_KIND_OTHER:
+		  printf (_(" [other]"));
+		  break;
+		default:
+		  printf (_(" [unknown: %d]"), kind);
+		  break;
+		}
+	      if (num_cus > 1)
+		printf ("\n");
 	    }
-	  printf ("\n");
+	  if (num_cus <= 1)
+	    printf ("\n");
 	}
     }
 
