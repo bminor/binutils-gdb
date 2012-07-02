@@ -22,6 +22,7 @@
 #include "server.h"
 #include "regcache.h"
 #include "ax.h"
+#include <stdint.h>
 
 const unsigned char *breakpoint_data;
 int breakpoint_len;
@@ -929,8 +930,8 @@ gdb_no_commands_at_breakpoint (CORE_ADDR where)
     return 0;
 
   if (debug_threads)
-    fprintf (stderr, "at 0x%s, bp command_list is 0x%x\n",
-	     paddress (where), (int) bp->command_list);
+    fprintf (stderr, "at 0x%s, bp command_list is 0x%lx\n",
+	     paddress (where), (long) (uintptr_t) bp->command_list);
   return (bp->command_list == NULL);
 }
 
