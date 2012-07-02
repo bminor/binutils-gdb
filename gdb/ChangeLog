@@ -1,5 +1,9 @@
 2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linux-thread-db.c (thread_db_new_objfile): Fix comment typos.
+
+2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* config.in: Regenerate.
 	* configure: Regenerate.
 	* configure.ac: Remove check for gnu/libc-version.h.
@@ -16,6 +20,7 @@
 	inferior_has_bug, describe it in the comments.
 	(try_thread_db_load_1): Move call to thread_db_find_new_threads_silently
 	earlier.  Abort the initialization if it returned non-zero.
+	(thread_db_new_objfile): Exclude debug files.
 	(thread_db_find_new_threads_2): Preinitialize ERR.  Check errors also
 	if UNTIL_NO_NEW,
 

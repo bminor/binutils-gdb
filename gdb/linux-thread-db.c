@@ -1186,7 +1186,7 @@ thread_db_new_objfile (struct objfile *objfile)
 
   if (objfile != NULL
       /* libpthread with separate debug info has its debug info file already
-	 loaded (and notified without successfult thread_db initialization))
+	 loaded (and notified without successful thread_db initialization)
 	 the time observer_notify_new_objfile is called for the library itself.
 	 Static executables have their separate debug info loaded already
 	 before the inferior has started.  */
