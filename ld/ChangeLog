@@ -1,3 +1,7 @@
+2012-07-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Replace __end_SECNAME with __stop_SECNAME.
+
 2012-06-29  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/alphavms.sc: Add .debug_macro section.
