@@ -1,3 +1,17 @@
+2012-07-02  Roland McGrath  <mcgrathr@google.com>
+
+	* ld/testsuite/ld-i386/tlsbin-nacl.rd: Update for symbol table changes.
+	* ld/testsuite/ld-i386/tlsbindesc-nacl.rd: Likewise.
+	* ld/testsuite/ld-i386/tlsdesc-nacl.rd: Likewise.
+	* ld/testsuite/ld-i386/tlsgdesc-nacl.rd: Likewise.
+	* ld/testsuite/ld-i386/tlsnopic-nacl.rd: Likewise.
+	* ld/testsuite/ld-i386/tlspic-nacl.rd: Likewise.
+	* ld/testsuite/ld-x86-64/tlsbin-nacl.rd: Likewise.
+	* ld/testsuite/ld-x86-64/tlsbindesc-nacl.rd: Likewise.
+	* ld/testsuite/ld-x86-64/tlsdesc-nacl.rd: Likewise.
+	* ld/testsuite/ld-x86-64/tlsgdesc-nacl.rd: Likewise.
+	* ld/testsuite/ld-x86-64/tlspic-nacl.rd: Likewise.
+
 2012-07-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/data2.c: New file.

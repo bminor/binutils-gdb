@@ -73,11 +73,11 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
 .* TLS +GLOBAL +DEFAULT +UND sG5
 .* TLS +GLOBAL +DEFAULT +UND sG2
 .* FUNC +GLOBAL +DEFAULT +UND __tls_get_addr
-.* NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
+.* NOTYPE +GLOBAL +DEFAULT +13 __bss_start
 .* TLS +GLOBAL +DEFAULT +UND sG6
 .* TLS +GLOBAL +DEFAULT +UND sG1
-.* NOTYPE +GLOBAL +DEFAULT +ABS _edata
-.* NOTYPE +GLOBAL +DEFAULT +ABS _end
+.* NOTYPE +GLOBAL +DEFAULT +13 _edata
+.* NOTYPE +GLOBAL +DEFAULT +13 _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
@@ -95,6 +95,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* SECTION +LOCAL +DEFAULT +11 *
 .* SECTION +LOCAL +DEFAULT +12 *
 .* SECTION +LOCAL +DEFAULT +13 *
+.* FILE +LOCAL +DEFAULT +ABS .*
 .* TLS +LOCAL +DEFAULT +9 sl1
 .* TLS +LOCAL +DEFAULT +9 sl2
 .* TLS +LOCAL +DEFAULT +9 sl3
@@ -103,6 +104,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +9 sl6
 .* TLS +LOCAL +DEFAULT +9 sl7
 .* TLS +LOCAL +DEFAULT +9 sl8
+.* FILE +LOCAL +DEFAULT +ABS .*
 .* TLS +LOCAL +DEFAULT +10 bl1
 .* TLS +LOCAL +DEFAULT +10 bl2
 .* TLS +LOCAL +DEFAULT +10 bl3
@@ -111,6 +113,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +10 bl6
 .* TLS +LOCAL +DEFAULT +10 bl7
 .* TLS +LOCAL +DEFAULT +10 bl8
+.* FILE +LOCAL +DEFAULT +ABS .*
 .* OBJECT +LOCAL +DEFAULT +11 _DYNAMIC
 .* OBJECT +LOCAL +DEFAULT +13 _GLOBAL_OFFSET_TABLE_
 .* TLS +GLOBAL +DEFAULT +9 sg8
@@ -132,7 +135,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +GLOBAL +HIDDEN +9 sh4
 .* TLS +GLOBAL +DEFAULT +10 bg7
 .* TLS +GLOBAL +HIDDEN +9 sh5
-.* NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
+.* NOTYPE +GLOBAL +DEFAULT +13 __bss_start
 .* TLS +GLOBAL +DEFAULT +UND sG6
 .* FUNC +GLOBAL +DEFAULT +2 fn2
 .* TLS +GLOBAL +DEFAULT +9 sg2
@@ -140,8 +143,8 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +GLOBAL +HIDDEN +9 sh1
 .* TLS +GLOBAL +DEFAULT +9 sg6
 .* TLS +GLOBAL +DEFAULT +9 sg7
-.* NOTYPE +GLOBAL +DEFAULT +ABS _edata
-.* NOTYPE +GLOBAL +DEFAULT +ABS _end
+.* NOTYPE +GLOBAL +DEFAULT +13 _edata
+.* NOTYPE +GLOBAL +DEFAULT +13 _end
 .* TLS +GLOBAL +HIDDEN +9 sh2
 .* TLS +GLOBAL +HIDDEN +9 sh6
 .* TLS +GLOBAL +DEFAULT +10 bg2
