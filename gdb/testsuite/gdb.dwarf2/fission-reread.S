@@ -61,12 +61,12 @@ main:
 	.size	main, .-main
 .Letext0:
 
-	.section	.debug_types.dwo,"G",@progbits,wt.198b7eaccef12290,comdat
+	.section	.debug_types.dwo
 .Ltu_start_dwo:
 	.4byte	.Ltu_end_dwo - .Ltu_start_dwo - 4	# Length of Compilation Unit Info
 	.2byte	0x4	# DWARF version number
 	.4byte	.Ldebug_abbrev0	# Offset Into Abbrev. Section
-	.byte	0x8	# Pointer Size (in bytes)
+	.byte	0x4	# Pointer Size (in bytes)
 	.byte	0x19	# Type Signature
 	.byte	0x8b
 	.byte	0x7e
@@ -117,12 +117,12 @@ main:
 	.byte	0	# end of children of DIE 0x17
 .Ltu_end_dwo:
 
-	.section	.debug_types,"G",@progbits,wt.198b7eaccef12290,comdat
+	.section	.debug_types
 .Ltu_start:
 	.4byte	.Ltu_end - .Ltu_start - 4	# Length of Type Unit Info
 	.2byte	0x4	# DWARF version number
 	.4byte	.Lskeleton_debug_abbrev0	# Offset Into Abbrev. Section
-	.byte	0x8	# Pointer Size (in bytes)
+	.byte	0x4	# Pointer Size (in bytes)
 	.byte	0x19	# Type Signature
 	.byte	0x8b
 	.byte	0x7e
@@ -142,12 +142,12 @@ main:
 	.4byte	.Ldebug_addr0	# DW_AT_GNU_addr_base
 .Ltu_end:
 
-	.section	.debug_info.dwo,"",@progbits
+	.section	.debug_info.dwo
 .Lcu_start_dwo:
 	.4byte	.Lcu_end_dwo - .Lcu_start_dwo - 4	# Length of Compilation Unit Info
 	.2byte	0x4	# DWARF version number
 	.4byte	.Ldebug_abbrev0	# Offset Into Abbrev. Section
-	.byte	0x8	# Pointer Size (in bytes)
+	.byte	0x4	# Pointer Size (in bytes)
 	.uleb128 0x5	# (DIE (0xb) DW_TAG_compile_unit)
 	.ascii "GNU C++ 4.6.x-fission\0"	# DW_AT_producer
 	.byte	0x4	# DW_AT_language
@@ -173,7 +173,7 @@ main:
 	.byte	0xa	# DW_AT_decl_line
 	.4byte	.Lcu_int	# DW_AT_type
 	.uleb128 0	# DW_AT_low_pc
-	.8byte	.LFE0-.LFB0	# DW_AT_high_pc
+	.4byte	.LFE0-.LFB0	# DW_AT_high_pc
 	.uleb128 0x1	# DW_AT_frame_base
 	.byte	0x9c	# DW_OP_call_frame_cfa
 	.uleb128 0x7	# (DIE (0x9d) DW_TAG_variable)
@@ -195,16 +195,16 @@ main:
 	.byte	0	# end of children of DIE 0xb
 .Lcu_end_dwo:
 
-	.section	.debug_info,"",@progbits
+	.section	.debug_info
 .Lskeleton_debug_info0:
 .Lcu_start:
 	.4byte	.Lcu_end - .Lcu_start - 4	# Length of Compilation Unit Info
 	.2byte	0x4	# DWARF version number
 	.4byte	.Lskeleton_debug_abbrev0	# Offset Into Abbrev. Section
-	.byte	0x8	# Pointer Size (in bytes)
+	.byte	0x4	# Pointer Size (in bytes)
 	.uleb128 0x1	# (DIE (0) DW_TAG_compile_unit)
-	.8byte	.Ltext0	# DW_AT_low_pc
-	.8byte	.Letext0-.Ltext0	# DW_AT_high_pc
+	.4byte	.Ltext0	# DW_AT_low_pc
+	.4byte	.Letext0-.Ltext0	# DW_AT_high_pc
 	.4byte	.Ldebug_line0	# DW_AT_stmt_list
 	.ascii "/tmp/src/gdb/testsuite/gdb.dwarf2\0"	# DW_AT_comp_dir
 	# Normally dwo_name would be "fission-reread.dwo".
@@ -223,7 +223,7 @@ main:
 	.byte	0
 .Lcu_end:
 
-	.section	.debug_abbrev,"",@progbits
+	.section	.debug_abbrev
 .Lskeleton_debug_abbrev0:
 	.uleb128 0x1	# (abbrev code)
 	.uleb128 0x11	# (TAG: DW_TAG_compile_unit)
@@ -264,7 +264,7 @@ main:
 	.byte	0
 	.byte	0
 	.byte	0	# end of skeleton .debug_abbrev
-	.section	.debug_abbrev.dwo,"",@progbits
+	.section	.debug_abbrev.dwo
 .Ldebug_abbrev0:
 	.uleb128 0x1	# (abbrev code)
 	.uleb128 0x41	# (TAG: DW_TAG_type_unit)
@@ -385,7 +385,7 @@ main:
 	/* End of manual insertion.  */
 
 	.byte	0
-	.section	.debug_pubnames,"",@progbits
+	.section	.debug_pubnames
 .Ldebug_pubnames0:
 	.4byte	0x1f	# Length of Public Names Info
 	.2byte	0x2	# DWARF Version
@@ -396,7 +396,7 @@ main:
 	.4byte	0x9d	# DIE offset
 	.ascii "baz\0"	# external name
 	.4byte	0
-	.section	.debug_pubtypes,"",@progbits
+	.section	.debug_pubtypes
 .Ldebug_pubtypes0:
 	.4byte	0x1e	# Length of Public Type Names Info
 	.2byte	0x2	# DWARF Version
@@ -407,7 +407,7 @@ main:
 	.4byte	0x25	# DIE offset
 	.ascii "foo\0"	# external name
 	.4byte	0
-	.section	.debug_aranges,"",@progbits
+	.section	.debug_aranges
 	.4byte	0x2c	# Length of Address Ranges Info
 	.2byte	0x2	# DWARF Version
 	.4byte	.Lskeleton_debug_info0	# Offset of Compilation Unit Info
@@ -415,13 +415,13 @@ main:
 	.byte	0	# Size of Segment Descriptor
 	.2byte	0	# Pad to 16 byte boundary
 	.2byte	0
-	.8byte	.Ltext0	# Address
-	.8byte	.Letext0-.Ltext0	# Length
-	.8byte	0
-	.8byte	0
-	.section	.debug_line,"",@progbits
+	.4byte	.Ltext0	# Address
+	.4byte	.Letext0-.Ltext0	# Length
+	.4byte	0
+	.4byte	0
+	.section	.debug_line
 .Ldebug_line0:
-	.section	.debug_line.dwo,"",@progbits
+	.section	.debug_line.dwo
 .Lskeleton_debug_line0:
 	.4byte	.LELT0-.LSLT0	# Length of Source Line Info
 .LSLT0:
@@ -451,9 +451,7 @@ main:
 	.byte	0	# End file name table
 .LELTP0:
 .LELT0:
-	.section	.debug_addr,"",@progbits
+	.section	.debug_addr
 .Ldebug_addr0:
-	.8byte	.LFB0	# DW_AT_low_pc
-	.8byte	baz	# DW_AT_location
-
-	.section	.note.GNU-stack,"",@progbits
+	.4byte	.LFB0	# DW_AT_low_pc
+	.4byte	baz	# DW_AT_location
