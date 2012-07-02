@@ -835,20 +835,6 @@ captured_main (void *data)
   quit_pre_print = error_pre_print;
   warning_pre_print = _("\nwarning: ");
 
-  /* Process '-ix' and '-iex' options early.  */
-  for (i = 0; VEC_iterate (cmdarg_s, cmdarg_vec, i, cmdarg_p); i++)
-    switch (cmdarg_p->type)
-    {
-      case CMDARG_INIT_FILE:
-        catch_command_errors (source_script, cmdarg_p->string,
-			      !batch_flag, RETURN_MASK_ALL);
-	break;
-      case CMDARG_INIT_COMMAND:
-        catch_command_errors (execute_command, cmdarg_p->string,
-			      !batch_flag, RETURN_MASK_ALL);
-	break;
-    }
-
   /* Read and execute the system-wide gdbinit file, if it exists.
      This is done *before* all the command line arguments are
      processed; it sets global parameters, which are independent of
@@ -863,6 +849,20 @@ captured_main (void *data)
 
   if (home_gdbinit && !inhibit_gdbinit)
     catch_command_errors (source_script, home_gdbinit, 0, RETURN_MASK_ALL);
+
+  /* Process '-ix' and '-iex' options early.  */
+  for (i = 0; VEC_iterate (cmdarg_s, cmdarg_vec, i, cmdarg_p); i++)
+    switch (cmdarg_p->type)
+    {
+      case CMDARG_INIT_FILE:
+        catch_command_errors (source_script, cmdarg_p->string,
+			      !batch_flag, RETURN_MASK_ALL);
+	break;
+      case CMDARG_INIT_COMMAND:
+        catch_command_errors (execute_command, cmdarg_p->string,
+			      !batch_flag, RETURN_MASK_ALL);
+	break;
+    }
 
   /* Now perform all the actions indicated by the arguments.  */
   if (cdarg != NULL)

@@ -1,5 +1,11 @@
 2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Execute -ix and -iex only after system and user gdbinit files.
+	* main.c (captured_main): Move CMDARG_INIT_FILE and CMDARG_INIT_COMMAND
+	processing down after gdbinit files.
+
+2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Add fnmatch-gnu module.
 	* gnulib/Makefile.in (aclocal_m4_deps): Add new files and remove one.
 	* gnulib/configure.ac (AC_INIT): Use now import/memmem.c.

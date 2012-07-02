@@ -997,16 +997,16 @@ also be interleaved with @samp{-command} as required.
 @itemx -ix @var{file}
 @cindex @code{--init-command}
 @cindex @code{-ix}
-Execute commands from file @var{file} before loading gdbinit files or the
-inferior.
+Execute commands from file @var{file} before loading the inferior (but
+after loading gdbinit files).
 @xref{Startup}.
 
 @item -init-eval-command @var{command}
 @itemx -iex @var{command}
 @cindex @code{--init-eval-command}
 @cindex @code{-iex}
-Execute a single @value{GDBN} command before loading gdbinit files or the
-inferior.
+Execute a single @value{GDBN} command before loading the inferior (but
+after loading gdbinit files).
 @xref{Startup}.
 
 @item -directory @var{directory}
@@ -1261,14 +1261,6 @@ Here's the description of what @value{GDBN} does during session startup:
 Sets up the command interpreter as specified by the command line
 (@pxref{Mode Options, interpreter}).
 
-@anchor{Option -init-eval-command}
-@item
-Executes commands and command files specified by the @samp{-iex} and
-@samp{-ix} options in their specified order.  Usually you should use the
-@samp{-ex} and @samp{-x} options instead, but this way you can apply
-settings before @value{GDBN} init files get executed and before inferior
-gets loaded.
-
 @item
 @cindex init file
 Reads the system-wide @dfn{init file} (if @option{--with-system-gdbinit} was
@@ -1282,6 +1274,14 @@ Reads the init file (if any) in your home directory@footnote{On
 DOS/Windows systems, the home directory is the one pointed to by the
 @code{HOME} environment variable.} and executes all the commands in
 that file.
+
+@anchor{Option -init-eval-command}
+@item
+Executes commands and command files specified by the @samp{-iex} and
+@samp{-ix} options in their specified order.  Usually you should use the
+@samp{-ex} and @samp{-x} options instead, but this way you can apply
+settings before @value{GDBN} init files get executed and before inferior
+gets loaded.
 
 @item
 Processes command line options and operands.

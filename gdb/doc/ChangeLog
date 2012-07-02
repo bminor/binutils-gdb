@@ -1,5 +1,11 @@
 2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.texinfo (File Options): Change -ix and -iex commands that apply
+	only after gdbinit files.
+	(Startup): Move -iex and -iex commands down after gdbinit files.
+
+2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.texinfo (Auto-loading safe path): Note the shell wildcard
 	possibility.
 
