@@ -1,3 +1,19 @@
+2012-07-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Don't run rep-bsf nor rep-ret.
+
+	* gas/i386/rep-bsf.d: Removed.
+	* gas/i386/rep-bsf.s: Likewise.
+	* gas/i386/rep-ret.d: Likewise.
+	* gas/i386/rep-ret.s: Likewise.
+
+	* gas/i386/rep-suffix.d: Updated.
+	* gas/i386/x86-64-rep-suffix.d: Likewise.
+	* gas/i386/ilp32/x86-64-rep-suffix.d: Likewise.
+
+	* gas/i386/rep-suffix.s: Add tests for bsf, bsr and ret.
+	* i386/x86-64-rep-suffix.s: Likewise.
+
 2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/14315

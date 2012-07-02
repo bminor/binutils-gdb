@@ -7,3 +7,8 @@ _start:
 	rep stosw
 	rep lodsl
 	rep stosl
+
+	rep bsf %ecx, %eax
+	rep bsr %ecx, %eax
+
+	rep ret

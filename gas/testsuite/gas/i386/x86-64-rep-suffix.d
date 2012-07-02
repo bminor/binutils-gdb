@@ -14,4 +14,7 @@ Disassembly of section .text:
    c:	f3 ab[ 	]+rep stosl %eax,%es:\(%rdi\)
    e:	f3 48 ad[ 	]+rep lodsq %ds:\(%rsi\),%rax
   11:	f3 48 ab[ 	]+rep stosq %rax,%es:\(%rdi\)
+  14:	f3 0f bc c1[	 ]+tzcntl %ecx,%eax
+  18:	f3 0f bd c1[	 ]+lzcntl %ecx,%eax
+  1c:	f3 c3[	 ]+repz retq 
 #pass
