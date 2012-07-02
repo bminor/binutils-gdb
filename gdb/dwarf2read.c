@@ -5496,6 +5496,48 @@ queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
   dwarf2_queue_tail = item;
 }
 
+/* THIS_CU has a reference to PER_CU.  If necessary, load the new compilation
+   unit and add it to our queue.
+   The result is non-zero if PER_CU was queued, otherwise the result is zero
+   meaning either PER_CU is already queued or it is already loaded.  */
+
+static int
+maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
+		       struct dwarf2_per_cu_data *per_cu,
+		       enum language pretend_language)
+{
+  /* We may arrive here during partial symbol reading, if we need full
+     DIEs to process an unusual case (e.g. template arguments).  Do
+     not queue PER_CU, just tell our caller to load its DIEs.  */
+  if (dwarf2_per_objfile->reading_partial_symbols)
+    {
+      if (per_cu->cu == NULL || per_cu->cu->dies == NULL)
+	return 1;
+      return 0;
+    }
+
+  /* Mark the dependence relation so that we don't flush PER_CU
+     too early.  */
+  dwarf2_add_dependence (this_cu, per_cu);
+
+  /* If it's already on the queue, we have nothing to do.  */
+  if (per_cu->queued)
+    return 0;
+
+  /* If the compilation unit is already loaded, just mark it as
+     used.  */
+  if (per_cu->cu != NULL)
+    {
+      per_cu->cu->last_used = 0;
+      return 0;
+    }
+
+  /* Add it to the queue.  */
+  queue_comp_unit (per_cu, pretend_language);
+
+  return 1;
+}
+
 /* Process the queue.  */
 
 static void
@@ -15222,48 +15264,6 @@ dwarf2_get_attr_constant_value (struct attribute *attr, int default_value)
                  dwarf_form_name (attr->form));
       return default_value;
     }
-}
-
-/* THIS_CU has a reference to PER_CU.  If necessary, load the new compilation
-   unit and add it to our queue.
-   The result is non-zero if PER_CU was queued, otherwise the result is zero
-   meaning either PER_CU is already queued or it is already loaded.  */
-
-static int
-maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
-		       struct dwarf2_per_cu_data *per_cu,
-		       enum language pretend_language)
-{
-  /* We may arrive here during partial symbol reading, if we need full
-     DIEs to process an unusual case (e.g. template arguments).  Do
-     not queue PER_CU, just tell our caller to load its DIEs.  */
-  if (dwarf2_per_objfile->reading_partial_symbols)
-    {
-      if (per_cu->cu == NULL || per_cu->cu->dies == NULL)
-	return 1;
-      return 0;
-    }
-
-  /* Mark the dependence relation so that we don't flush PER_CU
-     too early.  */
-  dwarf2_add_dependence (this_cu, per_cu);
-
-  /* If it's already on the queue, we have nothing to do.  */
-  if (per_cu->queued)
-    return 0;
-
-  /* If the compilation unit is already loaded, just mark it as
-     used.  */
-  if (per_cu->cu != NULL)
-    {
-      per_cu->cu->last_used = 0;
-      return 0;
-    }
-
-  /* Add it to the queue.  */
-  queue_comp_unit (per_cu, pretend_language);
-
-  return 1;
 }
 
 /* Follow reference or signature attribute ATTR of SRC_DIE.

@@ -1,5 +1,8 @@
 2012-07-02  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (maybe_queue_comp_unit): Move definition next to others
+	related to queue management.
+
 	* dwarf2read.c (create_debug_types_hash_table): Use "debug dwarf2-read"
 	instead of "debug dwarf2-die" in debugging printfs.
 	(create_debug_info_hash_table_reader): Ditto.
