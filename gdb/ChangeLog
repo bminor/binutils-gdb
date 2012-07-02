@@ -1,5 +1,59 @@
 2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Add fnmatch-gnu module.
+	* gnulib/Makefile.in (aclocal_m4_deps): Add new files and remove one.
+	* gnulib/configure.ac (AC_INIT): Use now import/memmem.c.
+	* gnulib/aclocal.m4: Regenerate.
+	* gnulib/config.in: Regenerate.
+	* gnulib/configure: Regenerate.
+	* gnulib/import/dummy.c: Remove.
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Likewise.
+	* gnulib/import/m4/gnulib-cache.m4: Likewise.
+	* gnulib/import/m4/gnulib-comp.m4: Likewise.
+	* gnulib/import/alloca.c: New file.
+	* gnulib/import/alloca.in.h: Likewise.
+	* gnulib/import/config.charset: Likewise.
+	* gnulib/import/fnmatch.c: Likewise.
+	* gnulib/import/fnmatch.in.h: Likewise.
+	* gnulib/import/fnmatch_loop.c: Likewise.
+	* gnulib/import/localcharset.c: Likewise.
+	* gnulib/import/localcharset.h: Likewise.
+	* gnulib/import/m4/alloca.m4: Likewise.
+	* gnulib/import/m4/codeset.m4: Likewise.
+	* gnulib/import/m4/configmake.m4: Likewise.
+	* gnulib/import/m4/fcntl-o.m4: Likewise.
+	* gnulib/import/m4/fnmatch.m4: Likewise.
+	* gnulib/import/m4/glibc21.m4: Likewise.
+	* gnulib/import/m4/localcharset.m4: Likewise.
+	* gnulib/import/m4/locale-fr.m4: Likewise.
+	* gnulib/import/m4/locale-ja.m4: Likewise.
+	* gnulib/import/m4/locale-zh.m4: Likewise.
+	* gnulib/import/m4/mbrtowc.m4: Likewise.
+	* gnulib/import/m4/mbsinit.m4: Likewise.
+	* gnulib/import/m4/mbsrtowcs.m4: Likewise.
+	* gnulib/import/m4/mbstate_t.m4: Likewise.
+	* gnulib/import/m4/stdbool.m4: Likewise.
+	* gnulib/import/m4/wchar_h.m4: Likewise.
+	* gnulib/import/m4/wctype_h.m4: Likewise.
+	* gnulib/import/m4/wint_t.m4: Likewise.
+	* gnulib/import/mbrtowc.c: Likewise.
+	* gnulib/import/mbsinit.c: Likewise.
+	* gnulib/import/mbsrtowcs-impl.h: Likewise.
+	* gnulib/import/mbsrtowcs-state.c: Likewise.
+	* gnulib/import/mbsrtowcs.c: Likewise.
+	* gnulib/import/ref-add.sin: Likewise.
+	* gnulib/import/ref-del.sin: Likewise.
+	* gnulib/import/stdbool.in.h: Likewise.
+	* gnulib/import/streq.h: Likewise.
+	* gnulib/import/strnlen1.c: Likewise.
+	* gnulib/import/strnlen1.h: Likewise.
+	* gnulib/import/verify.h: Likewise.
+	* gnulib/import/wchar.in.h: Likewise.
+	* gnulib/import/wctype.in.h: Likewise.
+
+2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support shell wildcards for 'set auto-load safe-path'.
 	* auto-load.c: Include fnmatch.h.
 	(filename_is_in_dir): Rename to ...

@@ -19,7 +19,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.64)dnl
-AC_INIT(import/dummy.c)
+AC_INIT(import/memmem.c)
 AC_CONFIG_HEADER(config.h:config.in)
 AM_MAINTAINER_MODE
 
