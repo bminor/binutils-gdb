@@ -388,6 +388,9 @@ extern void substitute_path_component (char **stringp, const char *from,
 extern pid_t wait_to_die_with_timeout (pid_t pid, int *status, int timeout);
 #endif
 
+extern int gdb_filename_fnmatch (const char *pattern, const char *string,
+				 int flags);
+
 
 /* Annotation stuff.  */
 

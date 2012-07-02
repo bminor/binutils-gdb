@@ -36,6 +36,7 @@
 #include "readline/tilde.h"
 #include "completer.h"
 #include "observer.h"
+#include "fnmatch.h"
 
 /* The suffix of per-objfile scripts to auto-load as non-Python command files.
    E.g. When the program loads libfoo.so, look for libfoo-gdb.gdb.  */
@@ -297,27 +298,85 @@ Use 'set auto-load safe-path /' for disabling the auto-load safe-path security.\
   auto_load_safe_path_vec_update ();
 }
 
-/* Return 1 if FILENAME is equal to DIR or if FILENAME belongs to the
-   subdirectory DIR.  Return 0 otherwise.  gdb_realpath normalization is never
-   done here.  */
+/* Implementation for filename_is_in_pattern overwriting the caller's FILENAME
+   and PATTERN.  */
 
-static ATTRIBUTE_PURE int
-filename_is_in_dir (const char *filename, const char *dir)
+static int
+filename_is_in_pattern_1 (char *filename, char *pattern)
 {
-  size_t dir_len = strlen (dir);
+  size_t pattern_len = strlen (pattern);
+  size_t filename_len = strlen (filename);
 
-  while (dir_len && IS_DIR_SEPARATOR (dir[dir_len - 1]))
-    dir_len--;
+  if (debug_auto_load)
+    fprintf_unfiltered (gdb_stdlog, _("auto-load: Matching file \"%s\" "
+				      "to pattern \"%s\"\n"),
+			filename, pattern);
+
+  /* Trim trailing slashes ("/") from PATTERN.  Even for "d:\" paths as
+     trailing slashes are trimmed also from FILENAME it still matches
+     correctly.  */
+  while (pattern_len && IS_DIR_SEPARATOR (pattern[pattern_len - 1]))
+    pattern_len--;
+  pattern[pattern_len] = '\0';
 
   /* Ensure auto_load_safe_path "/" matches any FILENAME.  On MS-Windows
      platform FILENAME even after gdb_realpath does not have to start with
      IS_DIR_SEPARATOR character, such as the 'C:\x.exe' filename.  */
-  if (dir_len == 0)
-    return 1;
+  if (pattern_len == 0)
+    {
+      if (debug_auto_load)
+	fprintf_unfiltered (gdb_stdlog,
+			    _("auto-load: Matched - empty pattern\n"));
+      return 1;
+    }
 
-  return (filename_ncmp (dir, filename, dir_len) == 0
-	  && (IS_DIR_SEPARATOR (filename[dir_len])
-	      || filename[dir_len] == '\0'));
+  for (;;)
+    {
+      /* Trim trailing slashes ("/").  PATTERN also has slashes trimmed the
+         same way so they will match.  */
+      while (filename_len && IS_DIR_SEPARATOR (filename[filename_len - 1]))
+	filename_len--;
+      filename[filename_len] = '\0';
+      if (filename_len == 0)
+	{
+	  if (debug_auto_load)
+	    fprintf_unfiltered (gdb_stdlog,
+				_("auto-load: Not matched - pattern \"%s\".\n"),
+				pattern);
+	  return 0;
+	}
+
+      if (gdb_filename_fnmatch (pattern, filename, FNM_FILE_NAME | FNM_NOESCAPE)
+	  == 0)
+	{
+	  if (debug_auto_load)
+	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Matched - file "
+					      "\"%s\" to pattern \"%s\".\n"),
+				filename, pattern);
+	  return 1;
+	}
+
+      /* Trim trailing FILENAME component.  */
+      while (filename_len > 0 && !IS_DIR_SEPARATOR (filename[filename_len - 1]))
+	filename_len--;
+    }
+}
+
+/* Return 1 if FILENAME matches PATTERN or if FILENAME resides in
+   a subdirectory of a directory that matches PATTERN.  Return 0 otherwise.
+   gdb_realpath normalization is never done here.  */
+
+static ATTRIBUTE_PURE int
+filename_is_in_pattern (const char *filename, const char *pattern)
+{
+  char *filename_copy, *pattern_copy;
+
+  filename_copy = alloca (strlen (filename) + 1);
+  strcpy (filename_copy, filename);
+  pattern_copy = alloca (strlen (pattern) + 1);
+  strcpy (pattern_copy, pattern);
+
+  return filename_is_in_pattern_1 (filename_copy, pattern_copy);
 }
 
 /* Return 1 if FILENAME belongs to one of directory components of
@@ -330,14 +389,15 @@ static int
 filename_is_in_auto_load_safe_path_vec (const char *filename,
 					char **filename_realp)
 {
-  char *dir;
+  char *pattern;
   int ix;
 
-  for (ix = 0; VEC_iterate (char_ptr, auto_load_safe_path_vec, ix, dir); ++ix)
-    if (*filename_realp == NULL && filename_is_in_dir (filename, dir))
+  for (ix = 0; VEC_iterate (char_ptr, auto_load_safe_path_vec, ix, pattern);
+       ++ix)
+    if (*filename_realp == NULL && filename_is_in_pattern (filename, pattern))
       break;
   
-  if (dir == NULL)
+  if (pattern == NULL)
     {
       if (*filename_realp == NULL)
 	{
@@ -350,18 +410,18 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
 	}
 
       if (strcmp (*filename_realp, filename) != 0)
-	for (ix = 0; VEC_iterate (char_ptr, auto_load_safe_path_vec, ix, dir);
-	     ++ix)
-	  if (filename_is_in_dir (*filename_realp, dir))
+	for (ix = 0;
+	     VEC_iterate (char_ptr, auto_load_safe_path_vec, ix, pattern); ++ix)
+	  if (filename_is_in_pattern (*filename_realp, pattern))
 	    break;
     }
 
-  if (dir != NULL)
+  if (pattern != NULL)
     {
       if (debug_auto_load)
 	fprintf_unfiltered (gdb_stdlog, _("auto-load: File \"%s\" matches "
 					  "directory \"%s\".\n"),
-			    filename, dir);
+			    filename, pattern);
       return 1;
     }
 
@@ -1135,7 +1195,8 @@ be located in one of the directories listed by this option.  Warning will be\n\
 printed and file will not be used otherwise.\n\
 Setting this parameter to an empty list resets it to its default value.\n\
 Setting this parameter to '/' (without the quotes) allows any file\n\
-for the 'set auto-load ...' options.\n\
+for the 'set auto-load ...' options.  Each directory can be also shell\n\
+wildcard pattern; '*' does not match directory separator.\n\
 This option is ignored for the kinds of files having 'set auto-load ... off'.\n\
 This options has security implications for untrusted inferiors."),
 				     set_auto_load_safe_path,

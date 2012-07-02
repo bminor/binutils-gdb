@@ -1,3 +1,19 @@
+2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Support shell wildcards for 'set auto-load safe-path'.
+	* auto-load.c: Include fnmatch.h.
+	(filename_is_in_dir): Rename to ...
+	(filename_is_in_pattern_1, filename_is_in_pattern): ... here and split
+	it.  Update function comment.  Rename dir_len to pattern_len.  New
+	variables filename_len, pattern and filename.  Add more DEBUG_AUTO_LOAD
+	messages.  Use gdb_filename_fnmatch.
+	(filename_is_in_auto_load_safe_path_vec): Rename variable dir to
+	pattern.
+	(_initialize_auto_load): Extend the "set auto-load safe-path" help text.
+	* defs.h (gdb_filename_fnmatch): New declaration.
+	* utils.c: Include fnmatch.h.
+	(gdb_filename_fnmatch): New function.
+
 2012-07-02  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* breakpoint.c (BREAK_ARGS_HELP): Include help message for the new

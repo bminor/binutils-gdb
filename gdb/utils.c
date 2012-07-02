@@ -26,6 +26,7 @@
 #include "event-top.h"
 #include "exceptions.h"
 #include "gdbthread.h"
+#include "fnmatch.h"
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif /* HAVE_SYS_RESOURCE_H */
@@ -3839,6 +3840,49 @@ wait_to_die_with_timeout (pid_t pid, int *status, int timeout)
 }
 
 #endif /* HAVE_WAITPID */
+
+/* Provide fnmatch compatible function for FNM_FILE_NAME matching of host files.
+   Both FNM_FILE_NAME and FNM_NOESCAPE must be set in FLAGS.
+
+   It handles correctly HAVE_DOS_BASED_FILE_SYSTEM and
+   HAVE_CASE_INSENSITIVE_FILE_SYSTEM.  */
+
+int
+gdb_filename_fnmatch (const char *pattern, const char *string, int flags)
+{
+  gdb_assert ((flags & FNM_FILE_NAME) != 0);
+
+  /* It is unclear how '\' escaping vs. directory separator should coexist.  */
+  gdb_assert ((flags & FNM_NOESCAPE) != 0);
+
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  {
+    char *pattern_slash, *string_slash;
+
+    /* Replace '\' by '/' in both strings.  */
+
+    pattern_slash = alloca (strlen (pattern) + 1);
+    strcpy (pattern_slash, pattern);
+    pattern = pattern_slash;
+    for (; *pattern_slash != 0; pattern_slash++)
+      if (IS_DIR_SEPARATOR (*pattern_slash))
+	*pattern_slash = '/';
+
+    string_slash = alloca (strlen (string) + 1);
+    strcpy (string_slash, string);
+    string = string_slash;
+    for (; *string_slash != 0; string_slash++)
+      if (IS_DIR_SEPARATOR (*string_slash))
+	*string_slash = '/';
+  }
+#endif /* HAVE_DOS_BASED_FILE_SYSTEM */
+
+#ifdef HAVE_CASE_INSENSITIVE_FILE_SYSTEM
+  flags |= FNM_CASEFOLD;
+#endif /* HAVE_CASE_INSENSITIVE_FILE_SYSTEM */
+
+  return fnmatch (pattern, string, flags);
+}
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_utils;

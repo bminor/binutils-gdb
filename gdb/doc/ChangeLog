@@ -1,3 +1,8 @@
+2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Auto-loading safe path): Note the shell wildcard
+	possibility.
+
 2012-06-29  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Index Section Format): Update for version 7.

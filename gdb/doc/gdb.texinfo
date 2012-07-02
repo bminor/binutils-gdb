@@ -21451,6 +21451,7 @@ As the files of inferior can come from untrusted source (such as submitted by
 an application user) @value{GDBN} does not always load any files automatically.
 @value{GDBN} provides the @samp{set auto-load safe-path} setting to list
 directories trusted for loading files not explicitly requested by user.
+Each directory can also be a shell wildcard pattern.
 
 If the path is not set properly you will see a warning and the file will not
 get loaded:
@@ -21474,6 +21475,9 @@ The list of trusted directories is controlled by the following commands:
 @item set auto-load safe-path @r{[}@var{directories}@r{]}
 Set the list of directories (and their subdirectories) trusted for automatic
 loading and execution of scripts.  You can also enter a specific trusted file.
+Each directory can also be a shell wildcard pattern; wildcards do not match
+directory separator - see @code{FNM_PATHNAME} for system function @code{fnmatch}
+(@pxref{Wildcard Matching, fnmatch, , libc, GNU C Library Reference Manual}).
 If you omit @var{directories}, @samp{auto-load safe-path} will be reset to
 its default value as specified during @value{GDBN} compilation.
 
