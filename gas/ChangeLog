@@ -1,3 +1,10 @@
+2012-07-02  Nick Clifton  <nickc@redhat.com>
+
+	* write.c (fixup_segment): Only perform the subtraction of an
+	fx_subsy symbol if MD_APPLY_SYM_VALUE allows it and the symbol is
+	properly defined.
+	* config/tc-msp430.h (MD_APPLY_SYM_VALUE): Define.
+
 2012-06-30  Alan Modra  <amodra@gmail.com>
 
 	PR gas/14315

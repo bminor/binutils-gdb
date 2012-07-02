@@ -1004,12 +1004,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 	      fixP->fx_subsy = NULL;
 	      fixP->fx_pcrel = 1;
 	    }
-	  else if (TC_VALIDATE_FIX_SUB (fixP, add_symbol_segment))
-	    /* If the fix is valid, subtract fx_subsy here.  The addition of
-	       fx_addsy will be performed below.  Doing this prevents bogus
-	       warnings from the range check below.  */
-	      add_number -= S_GET_VALUE (fixP->fx_subsy);
-	  else
+	  else if (!TC_VALIDATE_FIX_SUB (fixP, add_symbol_segment))
 	    {
 	      if (!md_register_arithmetic
 		  && (add_symbol_segment == reg_section
@@ -1024,6 +1019,10 @@ fixup_segment (fixS *fixP, segT this_segment)
 			      S_GET_NAME (fixP->fx_subsy),
 			      segment_name (sub_symbol_segment));
 	    }
+	  else if (sub_symbol_segment != undefined_section
+		   && ! bfd_is_com_section (sub_symbol_segment)
+		   && MD_APPLY_SYM_VALUE (fixP))
+	    add_number -= S_GET_VALUE (fixP->fx_subsy);
 	}
 
       if (fixP->fx_addsy)
