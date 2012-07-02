@@ -1,3 +1,9 @@
+2012-07-02  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/help.exp (help b, help br, help bre, help brea, help
+	break): Include help message for the new `-probe' and `-probe-stap'
+	options.
+
 2012-07-02  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.base/dprintf.exp: Add agent style tests.
