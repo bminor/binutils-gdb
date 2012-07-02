@@ -12,3 +12,5 @@ _start:
 	rep bsr %ecx, %eax
 
 	rep ret
+
+	rep nop
