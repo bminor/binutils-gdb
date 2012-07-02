@@ -46,10 +46,6 @@
 #include <signal.h>
 #include <ctype.h>
 
-#ifdef HAVE_GNU_LIBC_VERSION_H
-#include <gnu/libc-version.h>
-#endif
-
 /* GNU/Linux libthread_db support.
 
    libthread_db is a library, provided along with libpthread.so, which
@@ -612,10 +608,6 @@ enable_thread_event_reporting (void)
 {
   td_thr_events_t events;
   td_err_e err;
-#ifdef HAVE_GNU_LIBC_VERSION_H
-  const char *libc_version;
-  int libc_major, libc_minor;
-#endif
   struct thread_db_info *info;
 
   info = get_thread_db_info (GET_PID (inferior_ptid));
@@ -632,14 +624,13 @@ enable_thread_event_reporting (void)
   td_event_emptyset (&events);
   td_event_addset (&events, TD_CREATE);
 
-#ifdef HAVE_GNU_LIBC_VERSION_H
-  /* The event reporting facility is broken for TD_DEATH events in
-     glibc 2.1.3, so don't enable it if we have glibc but a lower
-     version.  */
-  libc_version = gnu_get_libc_version ();
-  if (sscanf (libc_version, "%d.%d", &libc_major, &libc_minor) == 2
-      && (libc_major > 2 || (libc_major == 2 && libc_minor > 1)))
-#endif
+  /* There is a bug fixed between linuxthreads 2.1.3 and 2.2 by
+       commit 2e4581e4fba917f1779cd0a010a45698586c190a
+       * manager.c (pthread_exited): Correctly report event as TD_REAP
+       instead of TD_DEATH.  Fix comments.
+     where event reporting facility is broken for TD_DEATH events,
+     so don't enable it if we have glibc but a lower version.  */
+  if (!inferior_has_bug ("__linuxthreads_version", 2, 2))
     td_event_addset (&events, TD_DEATH);
 
   err = info->td_ta_set_event_p (info->thread_agent, &events);

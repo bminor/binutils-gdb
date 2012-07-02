@@ -1,5 +1,16 @@
 2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Remove check for gnu/libc-version.h.
+	* linux-thread-db.c <HAVE_GNU_LIBC_VERSION_H>: Remove include of
+	gnu/libc-version.h.
+	(enable_thread_event_reporting) <HAVE_GNU_LIBC_VERSION_H>: Remove
+	variables libc_version, libc_major and libc_minor.  Replace sscanf by
+	inferior_has_bug.  Extend the comment.
+
+2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* linux-thread-db.c (inferior_has_bug): New function.
 	(thread_db_find_new_threads_silently): Return boolean as checked by
 	inferior_has_bug, describe it in the comments.

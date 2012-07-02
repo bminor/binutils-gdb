@@ -1022,7 +1022,7 @@ AC_HEADER_STDC
 # FIXME: kettenis/20030102: In most cases we include these (ctype.h, time.h)
 # unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
-                  thread_db.h gnu/libc-version.h signal.h stddef.h \
+                  thread_db.h signal.h stddef.h \
 		  stdlib.h string.h memory.h strings.h sys/fault.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \

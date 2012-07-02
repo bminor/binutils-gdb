@@ -168,9 +168,6 @@
 /* Define to 1 if you have the `getuid' function. */
 #undef HAVE_GETUID
 
-/* Define to 1 if you have the <gnu/libc-version.h> header file. */
-#undef HAVE_GNU_LIBC_VERSION_H
-
 /* Define if <sys/procfs.h> has gregset_t. */
 #undef HAVE_GREGSET_T
 
