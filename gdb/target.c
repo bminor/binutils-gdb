@@ -703,6 +703,7 @@ update_current_target (void)
       INHERIT (to_can_use_agent, t);
       INHERIT (to_magic, t);
       INHERIT (to_supports_evaluation_of_breakpoint_conditions, t);
+      INHERIT (to_can_run_breakpoint_commands, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
       /* Do not inherit to_flash_done.  */
@@ -930,6 +931,9 @@ update_current_target (void)
 	    (struct traceframe_info * (*) (void))
 	    tcomplain);
   de_fault (to_supports_evaluation_of_breakpoint_conditions,
+	    (int (*) (void))
+	    return_zero);
+  de_fault (to_can_run_breakpoint_commands,
 	    (int (*) (void))
 	    return_zero);
   de_fault (to_use_agent,

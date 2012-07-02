@@ -219,6 +219,9 @@ extern void ax_reg_mask (struct agent_expr *ax, int reg);
 
 /* Assemble code to operate on a trace state variable.  */
 extern void ax_tsv (struct agent_expr *expr, enum agent_op op, int num);
+
+/* Append a string to the bytecode stream.  */
+extern void ax_string (struct agent_expr *x, char *str, int slen);
 
 
 /* Functions for printing out expressions, and otherwise debugging

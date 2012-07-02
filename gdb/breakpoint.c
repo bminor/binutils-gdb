@@ -70,6 +70,8 @@
 #include "ax-gdb.h"
 #include "dummy-frame.h"
 
+#include "format.h"
+
 /* readline include files */
 #include "readline/readline.h"
 #include "readline/history.h"
@@ -300,6 +302,45 @@ static struct breakpoint_ops bkpt_probe_breakpoint_ops;
 
 /* Dynamic printf class type.  */
 static struct breakpoint_ops dprintf_breakpoint_ops;
+
+/* The style in which to perform a dynamic printf.  This is a user
+   option because different output options have different tradeoffs;
+   if GDB does the printing, there is better error handling if there
+   is a problem with any of the arguments, but using an inferior
+   function lets you have special-purpose printers and sending of
+   output to the same place as compiled-in print functions.  */
+
+static const char dprintf_style_gdb[] = "gdb";
+static const char dprintf_style_call[] = "call";
+static const char dprintf_style_agent[] = "agent";
+static const char *const dprintf_style_enums[] = {
+  dprintf_style_gdb,
+  dprintf_style_call,
+  dprintf_style_agent,
+  NULL
+};
+static const char *dprintf_style = dprintf_style_gdb;
+
+/* The function to use for dynamic printf if the preferred style is to
+   call into the inferior.  The value is simply a string that is
+   copied into the command, so it can be anything that GDB can
+   evaluate to a callable address, not necessarily a function name.  */
+
+static char *dprintf_function = "";
+
+/* The channel to use for dynamic printf if the preferred style is to
+   call into the inferior; if a nonempty string, it will be passed to
+   the call as the first argument, with the format string as the
+   second.  As with the dprintf function, this can be anything that
+   GDB knows how to evaluate, so in addition to common choices like
+   "stderr", this could be an app-specific expression like
+   "mystreams[curlogger]".  */
+
+static char *dprintf_channel = "";
+
+/* True if dprintf commands should continue to operate even if GDB
+   has disconnected.  */
+static int disconnected_dprintf = 1;
 
 /* A reference-counted struct command_line.  This lets multiple
    breakpoints share a single command list.  */
@@ -2132,6 +2173,196 @@ build_target_condition_list (struct bp_location *bl)
   return;
 }
 
+/* Parses a command described by string CMD into an agent expression
+   bytecode suitable for evaluation by the bytecode interpreter.
+   Return NULL if there was any error during parsing.  */
+
+static struct agent_expr *
+parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
+{
+  struct cleanup *old_cleanups = 0;
+  struct expression *expr, **argvec;
+  struct agent_expr *aexpr = NULL;
+  struct cleanup *old_chain = NULL;
+  volatile struct gdb_exception ex;
+  char *cmdrest;
+  char *format_start, *format_end;
+  struct format_piece *fpieces;
+  int nargs;
+  struct gdbarch *gdbarch = get_current_arch ();
+
+  if (!cmd)
+    return NULL;
+
+  cmdrest = cmd;
+
+  if (*cmdrest == ',')
+    ++cmdrest;
+  cmdrest = skip_spaces (cmdrest);
+
+  if (*cmdrest++ != '"')
+    error (_("No format string following the location"));
+
+  format_start = cmdrest;
+
+  fpieces = parse_format_string (&cmdrest);
+
+  old_cleanups = make_cleanup (free_format_pieces_cleanup, &fpieces);
+
+  format_end = cmdrest;
+
+  if (*cmdrest++ != '"')
+    error (_("Bad format string, non-terminated '\"'."));
+  
+  cmdrest = skip_spaces (cmdrest);
+
+  if (!(*cmdrest == ',' || *cmdrest == '\0'))
+    error (_("Invalid argument syntax"));
+
+  if (*cmdrest == ',')
+    cmdrest++;
+  cmdrest = skip_spaces (cmdrest);
+
+  /* For each argument, make an expression.  */
+
+  argvec = (struct expression **) alloca (strlen (cmd)
+					 * sizeof (struct expression *));
+
+  nargs = 0;
+  while (*cmdrest != '\0')
+    {
+      char *cmd1;
+
+      cmd1 = cmdrest;
+      expr = parse_exp_1 (&cmd1, scope, block_for_pc (scope), 1);
+      argvec[nargs++] = expr;
+      cmdrest = cmd1;
+      if (*cmdrest == ',')
+	++cmdrest;
+    }
+
+  /* We don't want to stop processing, so catch any errors
+     that may show up.  */
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      aexpr = gen_printf (scope, gdbarch, 0, 0,
+			  format_start, format_end - format_start,
+			  fpieces, nargs, argvec);
+    }
+
+  if (ex.reason < 0)
+    {
+      /* If we got here, it means the command could not be parsed to a valid
+	 bytecode expression and thus can't be evaluated on the target's side.
+	 It's no use iterating through the other commands.  */
+      return NULL;
+    }
+
+  do_cleanups (old_cleanups);
+
+  /* We have a valid agent expression, return it.  */
+  return aexpr;
+}
+
+/* Based on location BL, create a list of breakpoint commands to be
+   passed on to the target.  If we have duplicated locations with
+   different commands, we will add any such to the list.  */
+
+static void
+build_target_command_list (struct bp_location *bl)
+{
+  struct bp_location **locp = NULL, **loc2p;
+  int null_command_or_parse_error = 0;
+  int modified = bl->needs_update;
+  struct bp_location *loc;
+
+  /* For now, limit to agent-style dprintf breakpoints.  */
+  if (bl->owner->type != bp_dprintf
+      || strcmp (dprintf_style, dprintf_style_agent) != 0)
+    return;
+
+  if (!target_can_run_breakpoint_commands ())
+    return;
+
+  /* Do a first pass to check for locations with no assigned
+     conditions or conditions that fail to parse to a valid agent expression
+     bytecode.  If any of these happen, then it's no use to send conditions
+     to the target since this location will always trigger and generate a
+     response back to GDB.  */
+  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
+    {
+      loc = (*loc2p);
+      if (is_breakpoint (loc->owner) && loc->pspace->num == bl->pspace->num)
+	{
+	  if (modified)
+	    {
+	      struct agent_expr *aexpr;
+
+	      /* Re-parse the commands since something changed.  In that
+		 case we already freed the command bytecodes (see
+		 force_breakpoint_reinsertion).  We just
+		 need to parse the command to bytecodes again.  */
+	      aexpr = parse_cmd_to_aexpr (bl->address,
+					  loc->owner->extra_string);
+	      loc->cmd_bytecode = aexpr;
+
+	      if (!aexpr)
+		continue;
+	    }
+
+	  /* If we have a NULL bytecode expression, it means something
+	     went wrong or we have a null command expression.  */
+	  if (!loc->cmd_bytecode)
+	    {
+	      null_command_or_parse_error = 1;
+	      break;
+	    }
+	}
+    }
+
+  /* If anything failed, then we're not doing target-side commands,
+     and so clean up.  */
+  if (null_command_or_parse_error)
+    {
+      ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
+	{
+	  loc = (*loc2p);
+	  if (is_breakpoint (loc->owner)
+	      && loc->pspace->num == bl->pspace->num)
+	    {
+	      /* Only go as far as the first NULL bytecode is
+		 located.  */
+	      if (!loc->cond_bytecode)
+		return;
+
+	      free_agent_expr (loc->cond_bytecode);
+	      loc->cond_bytecode = NULL;
+	    }
+	}
+    }
+
+  /* No NULL commands or failed bytecode generation.  Build a command list
+     for this location's address.  */
+  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
+    {
+      loc = (*loc2p);
+      if (loc->owner->extra_string
+	  && is_breakpoint (loc->owner)
+	  && loc->pspace->num == bl->pspace->num
+	  && loc->owner->enable_state == bp_enabled
+	  && loc->enabled)
+	/* Add the command to the vector.  This will be used later
+	   to send the commands to the target.  */
+	VEC_safe_push (agent_expr_p, bl->target_info.tcommands,
+		       loc->cmd_bytecode);
+    }
+
+  bl->target_info.persist = 0;
+  /* Maybe flag this location as persistent.  */
+  if (bl->owner->type == bp_dprintf && disconnected_dprintf)
+    bl->target_info.persist = 1;
+}
+
 /* Insert a low-level "breakpoint" of some type.  BL is the breakpoint
    location.  Any error messages are printed to TMP_ERROR_STREAM; and
    DISABLED_BREAKS, and HW_BREAKPOINT_ERROR are used to report problems.
@@ -2172,7 +2403,8 @@ insert_bp_location (struct bp_location *bl,
   if (is_breakpoint (bl->owner))
     {
       build_target_condition_list (bl);
-      /* Reset the condition modification marker.  */
+      build_target_command_list (bl);
+      /* Reset the modification marker.  */
       bl->needs_update = 0;
     }
 
@@ -2689,6 +2921,9 @@ remove_breakpoints_pid (int pid)
   ALL_BP_LOCATIONS (bl, blp_tmp)
   {
     if (bl->pspace != inf->pspace)
+      continue;
+
+    if (bl->owner->type == bp_dprintf)
       continue;
 
     if (bl->inserted)
@@ -5827,6 +6062,15 @@ print_one_breakpoint_location (struct breakpoint *b,
 	}
     }
   
+  if (!part_of_multiple && b->extra_string
+      && b->type == bp_dprintf && !b->commands)
+    {
+      annotate_field (7);
+      ui_out_text (uiout, "\t(agent printf) ");
+      ui_out_field_string (uiout, "printf", b->extra_string);
+      ui_out_text (uiout, "\n");
+    }
+
   l = b->commands ? b->commands->commands : NULL;
   if (!part_of_multiple && l)
     {
@@ -8525,40 +8769,6 @@ bp_loc_is_permanent (struct bp_location *loc)
   return retval;
 }
 
-/* The style in which to perform a dynamic printf.  This is a user
-   option because different output options have different tradeoffs;
-   if GDB does the printing, there is better error handling if there
-   is a problem with any of the arguments, but using an inferior
-   function lets you have special-purpose printers and sending of
-   output to the same place as compiled-in print functions.  (Future
-   styles may include the ability to do a target-side printf.)  */
-
-static const char dprintf_style_gdb[] = "gdb";
-static const char dprintf_style_call[] = "call";
-static const char *const dprintf_style_enums[] = {
-  dprintf_style_gdb,
-  dprintf_style_call,
-  NULL
-};
-static const char *dprintf_style = dprintf_style_gdb;
-
-/* The function to use for dynamic printf if the preferred style is to
-   call into the inferior.  The value is simply a string that is
-   copied into the command, so it can be anything that GDB can
-   evaluate to a callable address, not necessarily a function name.  */
-
-static char *dprintf_function = "";
-
-/* The channel to use for dynamic printf if the preferred style is to
-   call into the inferior; if a nonempty string, it will be passed to
-   the call as the first argument, with the format string as the
-   second.  As with the dprintf function, this can be anything that
-   GDB knows how to evaluate, so in addition to common choices like
-   "stderr", this could be an app-specific expression like
-   "mystreams[curlogger]".  */
-
-static char *dprintf_channel = "";
-
 /* Build a command list for the dprintf corresponding to the current
    settings of the dprintf style options.  */
 
@@ -8582,9 +8792,9 @@ update_dprintf_command_list (struct breakpoint *b)
   if (*dprintf_args != '"')
     error (_("Bad format string, missing '\"'."));
 
-  if (strcmp (dprintf_style, "gdb") == 0)
+  if (strcmp (dprintf_style, dprintf_style_gdb) == 0)
     printf_line = xstrprintf ("printf %s", dprintf_args);
-  else if (strcmp (dprintf_style, "call") == 0)
+  else if (strcmp (dprintf_style, dprintf_style_call) == 0)
     {
       if (!dprintf_function)
 	error (_("No function supplied for dprintf call"));
@@ -8599,6 +8809,16 @@ update_dprintf_command_list (struct breakpoint *b)
 				  dprintf_function,
 				  dprintf_args);
     }
+  else if (strcmp (dprintf_style, dprintf_style_agent) == 0)
+    {
+      if (target_can_run_breakpoint_commands ())
+	printf_line = xstrprintf ("agent-printf %s", dprintf_args);
+      else
+	{
+	  warning (_("Target cannot run dprintf commands, falling back to GDB printf"));
+	  printf_line = xstrprintf ("printf %s", dprintf_args);
+	}
+    }
   else
     internal_error (__FILE__, __LINE__,
 		    _("Invalid dprintf style."));
@@ -8608,12 +8828,15 @@ update_dprintf_command_list (struct breakpoint *b)
     {
       struct command_line *printf_cmd_line, *cont_cmd_line = NULL;
 
-      cont_cmd_line = xmalloc (sizeof (struct command_line));
-      cont_cmd_line->control_type = simple_control;
-      cont_cmd_line->body_count = 0;
-      cont_cmd_line->body_list = NULL;
-      cont_cmd_line->next = NULL;
-      cont_cmd_line->line = xstrdup ("continue");
+      if (strcmp (dprintf_style, dprintf_style_agent) != 0)
+	{
+	  cont_cmd_line = xmalloc (sizeof (struct command_line));
+	  cont_cmd_line->control_type = simple_control;
+	  cont_cmd_line->body_count = 0;
+	  cont_cmd_line->body_list = NULL;
+	  cont_cmd_line->next = NULL;
+	  cont_cmd_line->line = xstrdup ("continue");
+	}
 
       printf_cmd_line = xmalloc (sizeof (struct command_line));
       printf_cmd_line->control_type = simple_control;
@@ -9568,6 +9791,12 @@ dprintf_command (char *arg, int from_tty)
 		     1 /* enabled */,
 		     0 /* internal */,
 		     0);
+}
+
+static void
+agent_printf_command (char *arg, int from_tty)
+{
+  error (_("May only run agent-printf on the target"));
 }
 
 /* Implement the "breakpoint_hit" breakpoint_ops method for
@@ -16243,6 +16472,20 @@ Set the channel to use for dynamic printf"), _("\
 Show the channel to use for dynamic printf"), NULL,
 			  update_dprintf_commands, NULL,
 			  &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("disconnected-dprintf", no_class,
+			   &disconnected_dprintf, _("\
+Set whether dprintf continues after GDB disconnects."), _("\
+Show whether dprintf continues after GDB disconnects."), _("\
+Use this to let dprintf commands continue to hit and produce output\n\
+even if GDB disconnects or detaches from the target."),
+			   NULL,
+			   NULL,
+			   &setlist, &showlist);
+
+  add_com ("agent-printf", class_vars, agent_printf_command, _("\
+agent-printf \"printf format string\", arg1, arg2, arg3, ..., argn\n\
+(target agent only) This is useful for formatted output in user-defined commands."));
 
   automatic_hardware_breakpoints = 1;
 

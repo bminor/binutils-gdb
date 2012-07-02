@@ -1,3 +1,52 @@
+2012-07-02  Stan Shebs  <stan@codesourcery.com>
+
+	Add target-side support for dynamic printf.
+	* NEWS: Mention the additional style.
+	* breakpoint.h (struct bp_target_info): New fields tcommands, persist.
+	(struct bp_location): New field cmd_bytecode.
+	* breakpoint.c: Include format.h.
+	(disconnected_dprintf): New global.
+	(parse_cmd_to_aexpr): New function.
+	(build_target_command_list): New function.
+	(insert_bp_location): Call it.
+	(remove_breakpoints_pid): Skip dprintf breakpoints.
+	(print_one_breakpoint_location): Ditto.
+	(dprintf_style_agent): New global.
+	(dprintf_style_enums): Add dprintf_style_agent.
+	(update_dprintf_command_list): Add agent case.
+	(agent_printf_command): New function.
+	(_initialize_breakpoint): Add new commands.
+	* common/ax.def (printf): New bytecode.
+	* ax.h (ax_string): Declare.
+	* ax-gdb.h (gen_printf): Declare.
+	* ax-gdb.c: Include cli-utils.h, format.h.
+	(gen_printf): New function.
+	(maint_agent_print_command): New function.
+	(_initialize_ax_gdb): Add maint agent-printf command.
+	* ax-general.c (ax_string): New function.
+	(ax_print): Add printf disassembly.
+	* Makefile.in (SFILES): Add format.c
+	(COMMON_OBS): Add format.o.
+	* common/format.h: New file.
+	* common/format.c: New file.
+	* printcmd.c: Include format.h.
+	(ui_printf): Call parse_format_string.
+	* remote.c (remote_state): New field breakpoint_commands.
+	(PACKET_BreakpointCommands): New enum.
+	(remote_breakpoint_commands_feature): New function.
+	(remote_protocol_features): Add new BreakpointCommands entry.
+	(remote_can_run_breakpoint_commands): New function.
+	(remote_add_target_side_commands): New function.
+	(remote_insert_breakpoint): Call it.
+	(remote_insert_hw_breakpoint): Ditto.
+	(_initialize_remote): Add new packet configuration for
+	target-side breakpoint commands.
+	* target.h (struct target_ops): New field
+	to_can_run_breakpoint_commands.
+	(target_can_run_breakpoint_commands): New macro.
+	* target.c (update_current_target): Handle
+	to_can_run_breakpoint_commands.
+
 2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Execute -ix and -iex only after system and user gdbinit files.

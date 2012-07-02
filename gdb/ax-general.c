@@ -330,6 +330,30 @@ ax_tsv (struct agent_expr *x, enum agent_op op, int num)
   x->buf[x->len + 2] = (num) & 0xff;
   x->len += 3;
 }
+
+/* Append a string to the expression.  Note that the string is going
+   into the bytecodes directly, not on the stack.  As a precaution,
+   include both length as prefix, and terminate with a NUL.  (The NUL
+   is counted in the length.)  */
+
+void
+ax_string (struct agent_expr *x, char *str, int slen)
+{
+  int i;
+
+  /* Make sure the string length is reasonable.  */
+  if (slen < 0 || slen > 0xffff)
+    internal_error (__FILE__, __LINE__, 
+		    _("ax-general.c (ax_string): string "
+		      "length is %d, out of allowed range"), slen);
+
+  grow_expr (x, 2 + slen + 1);
+  x->buf[x->len++] = ((slen + 1) >> 8) & 0xff;
+  x->buf[x->len++] = (slen + 1) & 0xff;
+  for (i = 0; i < slen; ++i)
+    x->buf[x->len++] = str[i];
+  x->buf[x->len++] = '\0';
+}
 
 
 
@@ -390,6 +414,19 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 
 	  print_longest (f, 'd', 0,
 			 read_const (x, i + 1, aop_map[op].op_size));
+	}
+      /* Handle the complicated printf arguments specially.  */
+      else if (op == aop_printf)
+	{
+	  int slen, nargs;
+
+	  i++;
+	  nargs = x->buf[i++];
+	  slen = x->buf[i++];
+	  slen = slen * 256 + x->buf[i++];
+	  fprintf_filtered (f, _(" \"%s\", %d args"),
+			    &(x->buf[i]), nargs);
+	  i += slen - 1;
 	}
       fprintf_filtered (f, "\n");
       i += 1 + aop_map[op].op_size;

@@ -1,3 +1,31 @@
+2012-07-02  Stan Shebs  <stan@codesourcery.com>
+
+	* Makefile.in (WARN_CFLAGS_NO_FORMAT): Define.
+	(ax.o): Add it to build rule.
+	(ax-ipa.o): Ditto.
+	(OBS): Add format.o.
+	(IPA_OBS): Add format.o.
+	* server.c (handle_query): Claim support for breakpoint commands.
+	(process_point_options): Add command case.
+	(process_serial_event): Leave running if there are printfs in
+	effect.
+	* mem-break.h (any_persistent_commands): Declare.
+	(add_breakpoint_commands): Declare.
+	(gdb_no_commands_at_breakpoint): Declare.
+	(run_breakpoint_commands): Declare.
+	* mem-break.c (struct point_command_list): New struct.
+	(struct breakpoint): New field command_list.
+	(any_persistent_commands): New function.
+	(add_commands_to_breakpoint): New function.
+	(add_breakpoint_commands): New function.
+	(gdb_no_commands_at_breakpoint): New function.
+	(run_breakpoint_commands): New function.
+	* linux-low.c (linux_wait_1): Test for and run breakpoint commands
+	locally.
+	* ax.c: Include format.h.
+	(ax_printf): New function.
+	(gdb_eval_agent_expr): Add printf opcode.
+
 2012-06-13  Yao Qi  <yao@codesourcery.com>
 
 	* server.c (start_inferior): Remove duplicated writes to fields

@@ -1685,8 +1685,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  strcat (own_buf, ";tracenz+");
 	}
 
-      /* Support target-side breakpoint conditions.  */
+      /* Support target-side breakpoint conditions and commands.  */
       strcat (own_buf, ";ConditionalBreakpoints+");
+      strcat (own_buf, ";BreakpointCommands+");
 
       if (target_supports_agent ())
 	strcat (own_buf, ";QAgent+");
@@ -2907,6 +2908,7 @@ static void
 process_point_options (CORE_ADDR point_addr, char **packet)
 {
   char *dataptr = *packet;
+  int persist;
 
   /* Check if data has the correct format.  */
   if (*dataptr != ';')
@@ -2916,22 +2918,33 @@ process_point_options (CORE_ADDR point_addr, char **packet)
 
   while (*dataptr)
     {
-      switch (*dataptr)
+      if (*dataptr == ';')
+	++dataptr;
+
+      if (*dataptr == 'X')
 	{
-	  case 'X':
-	    /* Conditional expression.  */
-	    if (remote_debug)
-	      fprintf (stderr, "Found breakpoint condition.\n");
-	    add_breakpoint_condition (point_addr, &dataptr);
-	    break;
-	  default:
-	    /* Unrecognized token, just skip it.  */
-	    fprintf (stderr, "Unknown token %c, ignoring.\n",
-		     *dataptr);
+	  /* Conditional expression.  */
+	  fprintf (stderr, "Found breakpoint condition.\n");
+	  add_breakpoint_condition (point_addr, &dataptr);
+	}
+      else if (strncmp (dataptr, "cmds:", strlen ("cmds:")) == 0)
+	{
+	  dataptr += strlen ("cmds:");
+	  if (debug_threads)
+	    fprintf (stderr, "Found breakpoint commands %s.\n", dataptr);
+	  persist = (*dataptr == '1');
+	  dataptr += 2;
+	  add_breakpoint_commands (point_addr, &dataptr, persist);
+	}
+      else
+	{
+	  /* Unrecognized token, just skip it.  */
+	  fprintf (stderr, "Unknown token %c, ignoring.\n",
+		   *dataptr);
 	}
 
       /* Skip tokens until we find one that we recognize.  */
-      while (*dataptr && *dataptr != 'X' && *dataptr != ';')
+      while (*dataptr && *dataptr != ';')
 	dataptr++;
     }
   *packet = dataptr;
@@ -2997,7 +3010,7 @@ process_serial_event (void)
 	pid =
 	  ptid_get_pid (((struct inferior_list_entry *) current_inferior)->id);
 
-      if (tracing && disconnected_tracing)
+      if ((tracing && disconnected_tracing) || any_persistent_commands ())
 	{
 	  struct thread_resume resume_info;
 	  struct process_info *process = find_process_pid (pid);
@@ -3008,9 +3021,15 @@ process_serial_event (void)
 	      break;
 	    }
 
-	  fprintf (stderr,
-		   "Disconnected tracing in effect, "
-		   "leaving gdbserver attached to the process\n");
+	  if (tracing && disconnected_tracing)
+	    fprintf (stderr,
+		     "Disconnected tracing in effect, "
+		     "leaving gdbserver attached to the process\n");
+
+	  if (any_persistent_commands ())
+	    fprintf (stderr,
+		     "Persistent commands are present, "
+		     "leaving gdbserver attached to the process\n");
 
 	  /* Make sure we're in non-stop/async mode, so we we can both
 	     wait for an async socket accept, and handle async target

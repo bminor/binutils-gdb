@@ -52,10 +52,18 @@ void clear_gdb_breakpoint_conditions (CORE_ADDR addr);
 
 int add_breakpoint_condition (CORE_ADDR addr, char **condition);
 
+int add_breakpoint_commands (CORE_ADDR addr, char **commands, int persist);
+
+int any_persistent_commands (void);
+
 /* Evaluation condition (if any) at breakpoint BP.  Return 1 if
    true and 0 otherwise.  */
 
 int gdb_condition_true_at_breakpoint (CORE_ADDR where);
+
+int gdb_no_commands_at_breakpoint (CORE_ADDR where);
+
+void run_breakpoint_commands (CORE_ADDR where);
 
 /* Returns TRUE if there's a GDB breakpoint set at ADDR.  */
 

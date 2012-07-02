@@ -272,6 +272,14 @@ struct bp_target_info
   /* Vector of conditions the target should evaluate if it supports target-side
      breakpoint conditions.  */
   VEC(agent_expr_p) *conditions;
+
+  /* Vector of commands the target should evaluate if it supports
+     target-side breakpoint commands.  */
+  VEC(agent_expr_p) *tcommands;
+
+  /* Flag that is true if the breakpoint should be left in place even
+     when GDB is not connected.  */
+  int persist;
 };
 
 /* GDB maintains two types of information about each breakpoint (or
@@ -358,8 +366,11 @@ struct bp_location
 
   enum condition_status condition_changed;
 
-  /* Signals that breakpoint conditions need to be re-synched with the
-     target.  This has no use other than target-side breakpoints.  */
+  struct agent_expr *cmd_bytecode;
+
+  /* Signals that breakpoint conditions and/or commands need to be
+     re-synched with the target.  This has no use other than
+     target-side breakpoints.  */
   char needs_update;
 
   /* This location's address is in an unloaded solib, and so this

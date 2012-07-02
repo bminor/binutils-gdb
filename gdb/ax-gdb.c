@@ -41,9 +41,12 @@
 #include "tracepoint.h"
 #include "cp-support.h"
 #include "arch-utils.h"
+#include "cli/cli-utils.h"
 
 #include "valprint.h"
 #include "c-lang.h"
+
+#include "format.h"
 
 /* To make sense of this file, you should read doc/agentexpr.texi.
    Then look at the types and enums in ax-gdb.h.  For the code itself,
@@ -2503,6 +2506,59 @@ gen_trace_for_return_address (CORE_ADDR scope, struct gdbarch *gdbarch)
   return ax;
 }
 
+/* Given a collection of printf-style arguments, generate code to
+   evaluate the arguments and pass everything to a special
+   bytecode.  */
+
+struct agent_expr *
+gen_printf (CORE_ADDR scope, struct gdbarch *gdbarch,
+	    CORE_ADDR function, LONGEST channel,
+	    char *format, int fmtlen,
+	    struct format_piece *frags,
+	    int nargs, struct expression **exprs)
+{
+  struct expression *expr;
+  struct cleanup *old_chain = 0;
+  struct agent_expr *ax = new_agent_expr (gdbarch, scope);
+  union exp_element *pc;
+  struct axs_value value;
+  int i, tem, bot, fr, flen;
+  char *fmt;
+
+  old_chain = make_cleanup_free_agent_expr (ax);
+
+  /* Evaluate and push the args on the stack in reverse order,
+     for simplicity of collecting them on the target side.  */
+  for (tem = nargs - 1; tem >= 0; --tem)
+    {
+      pc = exprs[tem]->elts;
+      /* We're computing values, not doing side effects.  */
+      trace_kludge = 0;
+      value.optimized_out = 0;
+      gen_expr (exprs[tem], &pc, ax, &value);
+      require_rvalue (ax, &value);
+    }
+
+  /* Push function and channel.  */
+  ax_const_l (ax, channel);
+  ax_const_l (ax, function);
+
+  /* Issue the printf bytecode proper.  */
+  ax_simple (ax, aop_printf);
+  ax_simple (ax, nargs);
+  ax_string (ax, format, fmtlen);
+
+  /* And terminate.  */
+  ax_simple (ax, aop_end);
+
+  /* We have successfully built the agent expr, so cancel the cleanup
+     request.  If we add more cleanups that we always want done, this
+     will have to get more complicated.  */
+  discard_cleanups (old_chain);
+
+  return ax;
+}
+
 static void
 agent_command (char *exp, int from_tty)
 {
@@ -2586,6 +2642,88 @@ agent_eval_command (char *exp, int from_tty)
   do_cleanups (old_chain);
   dont_repeat ();
 }
+/* Parse the given expression, compile it into an agent expression
+   that does a printf, and display the resulting expression.  */
+
+static void
+maint_agent_printf_command (char *exp, int from_tty)
+{
+  struct cleanup *old_chain = 0;
+  struct expression *expr;
+  struct expression *argvec[100];
+  struct agent_expr *agent;
+  struct frame_info *fi = get_current_frame ();	/* need current scope */
+  char *cmdrest;
+  char *format_start, *format_end;
+  struct format_piece *fpieces;
+  int nargs;
+
+  /* We don't deal with overlay debugging at the moment.  We need to
+     think more carefully about this.  If you copy this code into
+     another command, change the error message; the user shouldn't
+     have to know anything about agent expressions.  */
+  if (overlay_debugging)
+    error (_("GDB can't do agent expression translation with overlays."));
+
+  if (exp == 0)
+    error_no_arg (_("expression to translate"));
+
+  cmdrest = exp;
+
+  cmdrest = skip_spaces (cmdrest);
+
+  if (*cmdrest++ != '"')
+    error (_("Must start with a format string."));
+
+  format_start = cmdrest;
+
+  fpieces = parse_format_string (&cmdrest);
+
+  old_chain = make_cleanup (free_format_pieces_cleanup, &fpieces);
+
+  format_end = cmdrest;
+
+  if (*cmdrest++ != '"')
+    error (_("Bad format string, non-terminated '\"'."));
+  
+  cmdrest = skip_spaces (cmdrest);
+
+  if (*cmdrest != ',' && *cmdrest != 0)
+    error (_("Invalid argument syntax"));
+
+  if (*cmdrest == ',')
+    cmdrest++;
+  cmdrest = skip_spaces (cmdrest);
+
+  nargs = 0;
+  while (*cmdrest != '\0')
+    {
+      char *cmd1;
+
+      cmd1 = cmdrest;
+      expr = parse_exp_1 (&cmd1, 0, (struct block *) 0, 1);
+      argvec[nargs] = expr;
+      ++nargs;
+      cmdrest = cmd1;
+      if (*cmdrest == ',')
+	++cmdrest;
+      /* else complain? */
+    }
+
+
+  agent = gen_printf (get_frame_pc (fi), get_current_arch (), 0, 0,
+		      format_start, format_end - format_start,
+		      fpieces, nargs, argvec);
+  make_cleanup_free_agent_expr (agent);
+  ax_reqs (agent);
+  ax_print (gdb_stdout, agent);
+
+  /* It would be nice to call ax_reqs here to gather some general info
+     about the expression, and then print out the result.  */
+
+  do_cleanups (old_chain);
+  dont_repeat ();
+}
 
 
 /* Initialization code.  */
@@ -2602,5 +2740,10 @@ _initialize_ax_gdb (void)
   add_cmd ("agent-eval", class_maintenance, agent_eval_command,
 	   _("Translate an expression into remote "
 	     "agent bytecode for evaluation."),
+	   &maintenancelist);
+
+  add_cmd ("agent-printf", class_maintenance, maint_agent_printf_command,
+	   _("Translate an expression into remote "
+	     "agent bytecode for evaluation and display the bytecodes."),
 	   &maintenancelist);
 }

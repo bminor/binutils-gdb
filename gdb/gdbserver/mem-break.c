@@ -97,6 +97,20 @@ struct point_cond_list
   struct point_cond_list *next;
 };
 
+struct point_command_list
+{
+  /* Pointer to the agent expression that is the breakpoint's
+     commands.  */
+  struct agent_expr *cmd;
+
+  /* Flag that is true if this command should run even while GDB is
+     disconnected.  */
+  int persistence;
+
+  /* Pointer to the next command.  */
+  struct point_command_list *next;
+};
+
 /* A high level (in gdbserver's perspective) breakpoint.  */
 struct breakpoint
 {
@@ -111,6 +125,9 @@ struct breakpoint
      target's side.  */
   struct point_cond_list *cond_list;
 
+  /* Point to the list of commands to run when this is hit.  */
+  struct point_command_list *command_list;
+
   /* Link to this breakpoint's raw breakpoint.  This is always
      non-NULL.  */
   struct raw_breakpoint *raw;
@@ -120,6 +137,23 @@ struct breakpoint
      it will be left inserted.  */
   int (*handler) (CORE_ADDR);
 };
+
+int
+any_persistent_commands ()
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp;
+  struct point_command_list *cl;
+
+  for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
+    {
+      for (cl = bp->command_list; cl != NULL; cl = cl->next)
+	if (cl->persistence)
+	  return 1;
+    }
+
+  return 0;
+}
 
 static struct raw_breakpoint *
 find_raw_breakpoint_at (CORE_ADDR where)
@@ -833,6 +867,97 @@ gdb_condition_true_at_breakpoint (CORE_ADDR where)
     return 1;
 
   return (value != 0);
+}
+
+/* Add commands COMMANDS to GDBserver's breakpoint BP.  */
+
+void
+add_commands_to_breakpoint (struct breakpoint *bp,
+			    struct agent_expr *commands, int persist)
+{
+  struct point_command_list *new_cmd;
+
+  /* Create new command.  */
+  new_cmd = xcalloc (1, sizeof (*new_cmd));
+  new_cmd->cmd = commands;
+  new_cmd->persistence = persist;
+
+  /* Add commands to the list.  */
+  new_cmd->next = bp->command_list;
+  bp->command_list = new_cmd;
+}
+
+/* Add a target-side command COMMAND to the breakpoint at ADDR.  */
+
+int
+add_breakpoint_commands (CORE_ADDR addr, char **command, int persist)
+{
+  struct breakpoint *bp = find_gdb_breakpoint_at (addr);
+  char *actparm = *command;
+  struct agent_expr *cmd;
+
+  if (bp == NULL)
+    return 1;
+
+  if (command == NULL)
+    return 1;
+
+  cmd = gdb_parse_agent_expr (&actparm);
+
+  if (cmd == NULL)
+    {
+      fprintf (stderr, "Command evaluation failed. "
+	       "Disabling.\n");
+      return 0;
+    }
+
+  add_commands_to_breakpoint (bp, cmd, persist);
+
+  *command = actparm;
+
+  return 0;
+}
+
+/* Return true if there are no commands to run at this location,
+   which likely means we want to report back to GDB.  */
+int
+gdb_no_commands_at_breakpoint (CORE_ADDR where)
+{
+  struct breakpoint *bp = find_gdb_breakpoint_at (where);
+
+  if (bp == NULL)
+    return 0;
+
+  if (debug_threads)
+    fprintf (stderr, "at 0x%s, bp command_list is 0x%x\n",
+	     paddress (where), (int) bp->command_list);
+  return (bp->command_list == NULL);
+}
+
+void
+run_breakpoint_commands (CORE_ADDR where)
+{
+  /* Fetch registers for the current inferior.  */
+  struct breakpoint *bp = find_gdb_breakpoint_at (where);
+  ULONGEST value = 0;
+  struct point_command_list *cl;
+  int err = 0;
+
+  struct regcache *regcache = get_thread_regcache (current_inferior, 1);
+
+  if (bp == NULL)
+    return;
+
+  for (cl = bp->command_list;
+       cl && !value && !err; cl = cl->next)
+    {
+      /* Run the command.  */
+      err = gdb_eval_agent_expr (regcache, NULL, cl->cmd, &value);
+
+      /* If one command has a problem, stop digging the hole deeper.  */
+      if (err)
+	break;
+    }
 }
 
 /* Return 1 if there is a breakpoint inserted in address WHERE

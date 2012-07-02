@@ -745,7 +745,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	annotate.c common/signals.c copying.c dfp.c gdb.c inf-child.c \
 	regset.c sol-thread.c windows-termcap.c \
 	common/common-utils.c common/xml-utils.c \
-	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c
+	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
+	common/format.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -827,6 +828,7 @@ gnulib/import/extra/snippet/arg-nonnull.h gnulib/import/extra/snippet/c++defs.h 
 gnulib/import/extra/snippet/warn-on-use.h \
 gnulib/import/stddef.in.h gnulib/import/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
+common/format.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h
 
 # Header files that already have srcdir in them, or which are in objdir.
@@ -916,7 +918,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
 	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
 	jit.o progspace.o skip.o probe.o \
-	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o
+	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
+	format.o
 
 TSOBS = inflow.o
 
@@ -1914,6 +1917,10 @@ ptid.o: ${srcdir}/common/ptid.c
 
 buffer.o: ${srcdir}/common/buffer.c
 	$(COMPILE) $(srcdir)/common/buffer.c
+	$(POSTCOMPILE)
+
+format.o: ${srcdir}/common/format.c
+	$(COMPILE) $(srcdir)/common/format.c
 	$(POSTCOMPILE)
 
 linux-osdata.o: ${srcdir}/common/linux-osdata.c

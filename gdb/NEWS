@@ -244,11 +244,12 @@ set debug auto-load on|off
 show debug auto-load
   Control display of debugging info for auto-loading the files above.
 
-set dprintf-style gdb|call
+set dprintf-style gdb|call|agent
 show dprintf-style
-  Control the way in which a dynamic printf is performed; "gdb" requests
-  a GDB printf command, while "call" causes dprintf to call a function
-  in the inferior.
+  Control the way in which a dynamic printf is performed; "gdb"
+  requests a GDB printf command, while "call" causes dprintf to call a
+  function in the inferior.  "agent" requests that the target agent
+  (such as GDBserver) do the printing.
 
 set dprintf-function <expr>
 show dprintf-function
@@ -256,6 +257,11 @@ set dprintf-channel <expr>
 show dprintf-channel
   Set the function and optional first argument to the call when using
   the "call" style of dynamic printf.
+
+set disconnected-dprintf on|off
+show disconnected-dprintf
+  Control whether agent-style dynamic printfs continue to be in effect
+  after GDB disconnects.
 
 * New configure options
 

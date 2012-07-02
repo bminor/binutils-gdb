@@ -672,6 +672,10 @@ struct target_ops
        end?  */
     int (*to_supports_evaluation_of_breakpoint_conditions) (void);
 
+    /* Does this target support evaluation of breakpoint commands on its
+       end?  */
+    int (*to_can_run_breakpoint_commands) (void);
+
     /* Determine current architecture of thread PTID.
 
        The target is supposed to determine the architecture of the code where
@@ -996,6 +1000,12 @@ int target_supports_disable_randomization (void);
 
 #define target_supports_evaluation_of_breakpoint_conditions() \
   (*current_target.to_supports_evaluation_of_breakpoint_conditions) ()
+
+/* Returns true if this target can handle breakpoint commands
+   on its end.  */
+
+#define target_can_run_breakpoint_commands() \
+  (*current_target.to_can_run_breakpoint_commands) ()
 
 /* Invalidate all target dcaches.  */
 extern void target_dcache_invalidate (void);

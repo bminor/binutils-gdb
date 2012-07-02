@@ -100,6 +100,9 @@ GLOBAL_CFLAGS = ${MT_CFLAGS} ${MH_CFLAGS}
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
 
+WARN_CFLAGS_NO_FORMAT = `echo " $(WARN_CFLAGS) " \
+		   | sed "s/ -Wformat-nonliteral / -Wno-format-nonliteral /g"`
+
 # CFLAGS is specifically reserved for setting from the command line
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = @CFLAGS@
@@ -152,7 +155,7 @@ TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o vec.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
-	xml-utils.o common-utils.o ptid.o buffer.o \
+	xml-utils.o common-utils.o ptid.o buffer.o format.o \
 	dll.o \
 	$(XML_BUILTIN) \
 	$(DEPFILES) $(LIBOBJS)
@@ -273,7 +276,7 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS)
 
-IPA_OBJS=ax-ipa.o tracepoint-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o ${IPA_DEPFILES}
+IPA_OBJS=ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o ${IPA_DEPFILES}
 
 IPA_LIB=libinproctrace.so
 
@@ -447,11 +450,13 @@ IPAGENT_CFLAGS = $(CPPFLAGS) $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
 
 # In-process agent object rules
 ax-ipa.o: ax.c $(server_h) $(ax_h) $(srcdir)/../common/ax.def
-	$(CC) -c $(IPAGENT_CFLAGS) $< -o ax-ipa.o
+	$(CC) -c $(IPAGENT_CFLAGS) $(WARN_CFLAGS_NO_FORMAT) $< -o ax-ipa.o
 tracepoint-ipa.o: tracepoint.c $(server_h) ${ax_h}
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o tracepoint-ipa.o
 utils-ipa.o: utils.c $(server_h)
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o utils-ipa.o
+format-ipa.o: ../common/format.c $(server_h) ${ax_h}
+	$(CC) -c $(IPAGENT_CFLAGS) $< -o format-ipa.o
 common-utils-ipa.o: ../common/common-utils.c $(server_h)
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o common-utils-ipa.o
 remote-utils-ipa.o: remote-utils.c $(server_h)
@@ -468,6 +473,7 @@ amd64-linux-ipa.o : amd64-linux.c $(regdef_h)
 	$(CC) -c $(IPAGENT_CFLAGS) $< -o amd64-linux-ipa.o
 
 ax.o: ax.c $(server_h) $(ax_h) $(srcdir)/../common/ax.def
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $(WARN_CFLAGS_NO_FORMAT) $<
 event-loop.o: event-loop.c $(server_h)
 hostio.o: hostio.c $(server_h)
 hostio-errno.o: hostio-errno.c $(server_h)
@@ -510,6 +516,9 @@ ptid.o: ../common/ptid.c $(ptid_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 buffer.o: ../common/buffer.c $(server_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
+format.o: ../common/format.c $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 agent.o: ../common/agent.c $(server_h) $(agent_h)

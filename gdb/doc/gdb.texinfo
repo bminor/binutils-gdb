@@ -4649,6 +4649,14 @@ program's @code{printf} function.  This has the advantage that the
 characters go to the program's output device, so they can recorded in
 redirects to files and so forth.
 
+If you are doing remote debugging with a stub or agent, you can also
+ask to have the printf handled by the remote agent.  In addition to
+ensuring that the output goes to the remote program's device along
+with any other output the program might produce, you can also ask that
+the dprintf remain active even after disconnecting from the remote
+target.  Using the stub/agent is also more efficient, as it can do
+everything without needing to communicate with @value{GDBN}.
+
 @table @code
 @kindex dprintf
 @item dprintf @var{location},@var{template},@var{expression}[,@var{expression}@dots{}]
@@ -4671,6 +4679,12 @@ Handle the output using the @value{GDBN} @code{printf} command.
 @kindex dprintf-style call
 Handle the output by calling a function in your program (normally
 @code{printf}).
+
+@item agent
+@kindex dprintf-style agent
+Have the remote debugging agent (such as @code{gdbserver}) handle
+the output itself.  This style is only available for agents that
+support running commands on the target.
 
 @item set dprintf-function @var{function}
 Set the function to call if the dprintf style is @code{call}.  By
@@ -4705,6 +4719,17 @@ Dprintf 1 at 0x123456: file main.c, line 25.
 Note that the @code{info break} displays the dynamic printf commands
 as normal breakpoint commands; you can thus easily see the effect of
 the variable settings.
+
+@item set disconnected-dprintf on
+@itemx set disconnected-dprintf off
+@kindex set disconnected-dprintf
+Choose whether @code{dprintf} commands should continue to run if
+@value{GDBN} has disconnected from the target.  This only applies
+if the @code{dprintf-style} is @code{agent}.
+
+@item show disconnected-dprintf off
+@kindex show disconnected-dprintf
+Show the current choice for disconnected @code{dprintf}.
 
 @end table
 
@@ -34447,6 +34472,13 @@ of the addresses of @code{globa} and @code{globb}, while discarding
 the result of the addition, while an evaluation expression will do the
 addition and return the sum.
 
+@kindex maint agent-printf
+@item maint agent-printf @var{format},@var{expr},...
+Translate the given format string and list of argument expressions
+into remote agent bytecodes and display them as a disassembled list.
+This command is useful for debugging the agent version of dynamic
+printf (@pxref{Dynamic Printf}.
+
 @kindex maint info breakpoints
 @item @anchor{maint info breakpoints}maint info breakpoints
 Using the same format as @samp{info breakpoints}, display both the
@@ -35681,7 +35713,7 @@ avoid potential problems with duplicate packets, the operations should
 be implemented in an idempotent way.}
 
 @item z0,@var{addr},@var{kind}
-@itemx Z0,@var{addr},@var{kind}@r{[};@var{cond_list}@dots{}@r{]}
+@itemx Z0,@var{addr},@var{kind}@r{[};@var{cond_list}@dots{}@r{]}@r{[};cmds:@var{persist},@var{cmd_list}@dots{}@r{]}
 @cindex @samp{z0} packet
 @cindex @samp{Z0} packet
 Insert (@samp{Z0}) or remove (@samp{z0}) a memory breakpoint at address
@@ -35700,6 +35732,22 @@ the breakpoint trigger should be reported back to @var{GDBN}.
 
 The @var{cond_list} parameter is comprised of a series of expressions,
 concatenated without separators. Each expression has the following form:
+
+@table @samp
+
+@item X @var{len},@var{expr}
+@var{len} is the length of the bytecode expression and @var{expr} is the
+actual conditional expression in bytecode form.
+
+@end table
+
+The optional @var{cmd_list} parameter introduces commands that may be
+run on the target, rather than being reported back to @value{GDBN}.
+The parameter starts with a numeric flag @var{persist}; if the flag is
+nonzero, then the breakpoint may remain active and the commands
+continue to be run even when @value{GDBN} disconnects from the target.
+Following this flag is a series of expressions concatenated with no
+separators.  Each expression has the following form:
 
 @table @samp
 
@@ -36642,6 +36690,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{BreakpointCommands}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -36790,6 +36843,11 @@ to be enabled and disabled while a trace experiment is running.
 @cindex string tracing, in remote protocol
 The remote stub supports the @samp{tracenz} bytecode for collecting strings.
 See @ref{Bytecode Descriptions} for details about the bytecode.
+
+@item BreakpointCommands
+@cindex breakpoint commands, in remote protocol
+The remote stub supports running a breakpoint's command list itself,
+rather than reporting the hit to @value{GDBN}.
 
 @end table
 

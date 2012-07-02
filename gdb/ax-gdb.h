@@ -115,6 +115,12 @@ extern void gen_expr (struct expression *exp, union exp_element **pc,
 
 extern void require_rvalue (struct agent_expr *ax, struct axs_value *value);
 
+struct format_piece;
+extern struct agent_expr *gen_printf (CORE_ADDR, struct gdbarch *,
+				      CORE_ADDR, LONGEST, char *, int,
+				      struct format_piece *,
+				      int, struct expression **);
+
 extern int trace_kludge;
 extern int trace_string_kludge;
 

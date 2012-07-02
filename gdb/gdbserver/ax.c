@@ -18,6 +18,7 @@
 
 #include "server.h"
 #include "ax.h"
+#include "format.h"
 
 static void ax_vdebug (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
@@ -789,6 +790,123 @@ compile_bytecodes (struct agent_expr *aexpr)
 
 #endif
 
+/* Make printf-type calls using arguments supplied from the host.  We
+   need to parse the format string ourselves, and call the formatting
+   function with one argument at a time, partly because there is no
+   safe portable way to construct a varargs call, and partly to serve
+   as a security barrier against bad format strings that might get
+   in.  */
+
+static void
+ax_printf (CORE_ADDR fn, CORE_ADDR chan, char *format,
+	   int nargs, ULONGEST *args)
+{
+  char *f = format;
+  struct format_piece *fpieces;
+  int i, fp;
+  char *current_substring;
+  int nargs_wanted;
+
+  ax_debug ("Printf of \"%s\" with %d args", format, nargs);
+
+  fpieces = parse_format_string (&f);
+
+  nargs_wanted = 0;
+  for (fp = 0; fpieces[fp].string != NULL; fp++)
+    if (fpieces[fp].argclass != literal_piece)
+      ++nargs_wanted;
+
+  if (nargs != nargs_wanted)
+    error (_("Wrong number of arguments for specified format-string"));
+
+  i = 0;
+  for (fp = 0; fpieces[fp].string != NULL; fp++)
+    {
+      current_substring = fpieces[fp].string;
+      ax_debug ("current substring is '%s', class is %d",
+		current_substring, fpieces[fp].argclass);
+      switch (fpieces[fp].argclass)
+	{
+	case string_arg:
+	  {
+	    gdb_byte *str;
+	    CORE_ADDR tem;
+	    int j;
+
+	    tem = args[i];
+
+	    /* This is a %s argument.  Find the length of the string.  */
+	    for (j = 0;; j++)
+	      {
+		gdb_byte c;
+
+		read_inferior_memory (tem + j, &c, 1);
+		if (c == 0)
+		  break;
+	      }
+
+	      /* Copy the string contents into a string inside GDB.  */
+	      str = (gdb_byte *) alloca (j + 1);
+	      if (j != 0)
+		read_inferior_memory (tem, str, j);
+	      str[j] = 0;
+
+              printf (current_substring, (char *) str);
+	    }
+	    break;
+
+	  case long_long_arg:
+#if defined (CC_HAS_LONG_LONG) && defined (PRINTF_HAS_LONG_LONG)
+	    {
+	      long long val = args[i];
+
+              printf (current_substring, val);
+	      break;
+	    }
+#else
+	    error (_("long long not supported in agent printf"));
+#endif
+	case int_arg:
+	  {
+	    int val = args[i];
+
+	    printf (current_substring, val);
+	    break;
+	  }
+
+	case long_arg:
+	  {
+	    long val = args[i];
+
+	    printf (current_substring, val);
+	    break;
+	  }
+
+	case literal_piece:
+	  /* Print a portion of the format string that has no
+	     directives.  Note that this will not include any
+	     ordinary %-specs, but it might include "%%".  That is
+	     why we use printf_filtered and not puts_filtered here.
+	     Also, we pass a dummy argument because some platforms
+	     have modified GCC to include -Wformat-security by
+	     default, which will warn here if there is no
+	     argument.  */
+	  printf (current_substring, 0);
+	  break;
+
+	default:
+	  error (_("Format directive in '%s' not supported in agent printf"),
+		 current_substring);
+	}
+
+      /* Maybe advance to the next argument.  */
+      if (fpieces[fp].argclass != literal_piece)
+	++i;
+    }
+
+  free_format_pieces (fpieces);
+}
+
 /* The agent expression evaluator, as specified by the GDB docs. It
    returns 0 if everything went OK, and a nonzero error code
    otherwise.  */
@@ -1150,6 +1268,43 @@ gdb_eval_agent_expr (struct regcache *regcache,
 				 (ULONGEST) top);
 	  if (--sp >= 0)
 	    top = stack[sp];
+	  break;
+
+	case gdb_agent_op_printf:
+	  {
+	    int nargs, slen, i;
+	    CORE_ADDR fn = 0, chan = 0;
+	    /* Can't have more args than the entire size of the stack.  */
+	    ULONGEST args[STACK_MAX];
+	    char *format;
+
+	    nargs = aexpr->bytes[pc++];
+	    slen = aexpr->bytes[pc++];
+	    slen = (slen << 8) + aexpr->bytes[pc++];
+	    format = (char *) &(aexpr->bytes[pc]);
+	    pc += slen;
+	    /* Pop function and channel.  */
+	    fn = top;
+	    if (--sp >= 0)
+	      top = stack[sp];
+	    chan = top;
+	    if (--sp >= 0)
+	      top = stack[sp];
+	    /* Pop arguments into a dedicated array.  */
+	    for (i = 0; i < nargs; ++i)
+	      {
+		args[i] = top;
+		if (--sp >= 0)
+		  top = stack[sp];
+	      }
+
+	    /* A bad format string means something is very wrong; give
+	       up immediately.  */
+	    if (format[slen - 1] != '\0')
+	      error (_("Unterminated format string in printf bytecode"));
+
+	    ax_printf (fn, chan, format, nargs, args);
+	  }
 	  break;
 
 	  /* GDB never (currently) generates any of these ops.  */
