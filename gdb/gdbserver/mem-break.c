@@ -930,8 +930,9 @@ gdb_no_commands_at_breakpoint (CORE_ADDR where)
     return 0;
 
   if (debug_threads)
-    fprintf (stderr, "at 0x%s, bp command_list is 0x%lx\n",
-	     paddress (where), (long) (uintptr_t) bp->command_list);
+    fprintf (stderr, "at 0x%s, bp command_list is 0x%s\n",
+	     paddress (where),
+	     phex_nz ((uintptr_t) bp->command_list, 0));
   return (bp->command_list == NULL);
 }
 
