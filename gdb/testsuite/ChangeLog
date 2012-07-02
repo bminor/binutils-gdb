@@ -1,3 +1,14 @@
+2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/stale-infcall.c (infcall): New label test-next.
+	(main): New labels test-pass and test-fail.
+	* gdb.base/stale-infcall.exp: Continue to test-next.  Put breakpoint
+	$test_fail_bpnum to test-fail.
+	(test system longjmp tracking support): New test.
+	Delete $test_fail_bpnum.
+	* lib/gdb.exp (gdb_continue_to_breakpoint): Accept also Temporary
+	breakpoint.
+
 2012-06-30  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/fission-reread.S: New file.

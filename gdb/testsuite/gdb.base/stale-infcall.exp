@@ -23,6 +23,24 @@ if ![runto_main] {
     return -1
 }
 
+gdb_breakpoint [gdb_get_line_number "test-next"] temporary
+gdb_continue_to_breakpoint "test-next" ".* test-next .*"
+gdb_breakpoint [gdb_get_line_number "test-fail"]
+gdb_test_no_output {set $test_fail_bpnum=$bpnum}
+
+set test "test system longjmp tracking support"
+gdb_test_multiple "next" $test {
+    -re " test-pass .*\r\n$gdb_prompt $" {
+	pass $test
+    }
+    -re " test-fail .*\r\n$gdb_prompt $" {
+	xfail $test
+	untested "System lacks support for tracking longjmps"
+	return -1
+    }
+}
+gdb_test_no_output {delete $test_fail_bpnum}
+
 gdb_breakpoint [gdb_get_line_number "break-run1"]
 gdb_breakpoint [gdb_get_line_number "break-run2"]
 gdb_breakpoint [gdb_get_line_number "break-exit"]

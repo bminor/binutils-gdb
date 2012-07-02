@@ -26,7 +26,7 @@ static jmp_buf jmp;
 void
 infcall (void)
 {
-  longjmp (jmp, 1);
+  longjmp (jmp, 1); /* test-next */
 }
 
 static void
@@ -54,7 +54,10 @@ run2 (void)
 int
 main ()
 {
-  if (setjmp (jmp) == 0)
+  if (setjmp (jmp) == 0) /* test-pass */
+    infcall ();
+
+  if (setjmp (jmp) == 0) /* test-fail */
     run1 ();
   else
     run2 ();

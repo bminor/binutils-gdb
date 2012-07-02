@@ -469,7 +469,7 @@ proc gdb_continue_to_breakpoint {name {location_pattern .*}} {
 
     send_gdb "continue\n"
     gdb_expect {
-	-re "Breakpoint .* (at|in) $location_pattern\r\n$gdb_prompt $" {
+	-re "(?:Breakpoint|Temporary breakpoint) .* (at|in) $location_pattern\r\n$gdb_prompt $" {
 	    pass $full_name
 	}
 	-re ".*$gdb_prompt $" {
