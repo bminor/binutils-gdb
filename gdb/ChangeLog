@@ -1,3 +1,8 @@
+2012-07-02  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* breakpoint.c (BREAK_ARGS_HELP): Include help message for the new
+	`-probe' and `-probe-stap' options.
+
 2012-07-01  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c: Removed always_inserted_auto, always_inserted_on,
