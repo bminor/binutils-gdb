@@ -3667,6 +3667,11 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 		    ? &dwo_file->sections.abbrev
 		    : &dwarf2_per_objfile->abbrev);
 
+  if (dwarf2_read_debug)
+    fprintf_unfiltered (gdb_stdlog, "Reading .debug_types%s for %s:\n",
+			dwo_file ? ".dwo" : "",
+			bfd_get_filename (abbrev_section->asection->owner));
+
   for (ix = 0;
        VEC_iterate (dwarf2_section_info_def, types, ix, section);
        ++ix)
@@ -3691,10 +3696,6 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 	  else
 	    types_htab = allocate_signatured_type_table (objfile);
 	}
-
-      if (dwarf2_die_debug)
-	fprintf_unfiltered (gdb_stdlog, "Reading signatured types for %s:\n",
-			    bfd_get_filename (abfd));
 
       /* We don't use init_cutu_and_read_dies_simple, or some such, here
 	 because we don't need to read any dies: the signature is in the
@@ -3789,7 +3790,7 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 	    }
 	  *slot = dwo_file ? (void *) dwo_tu : (void *) sig_type;
 
-	  if (dwarf2_die_debug)
+	  if (dwarf2_read_debug)
 	    fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, signature 0x%s\n",
 				offset.sect_off,
 				phex (signature, sizeof (signature)));
@@ -3907,6 +3908,11 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
      reread it.  When this happens we need to reread the skeleton die
      before we can reread the DWO file.  */
   int rereading_dwo_cu = 0;
+
+  if (dwarf2_die_debug)
+    fprintf_unfiltered (gdb_stdlog, "Reading %s unit at offset 0x%x\n",
+			this_cu->is_debug_types ? "type" : "comp",
+			this_cu->offset.sect_off);
 
   if (use_existing_cu)
     gdb_assert (keep);
@@ -4229,6 +4235,11 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
   struct die_info *comp_unit_die;
   int has_children;
 
+  if (dwarf2_die_debug)
+    fprintf_unfiltered (gdb_stdlog, "Reading %s unit at offset 0x%x\n",
+			this_cu->is_debug_types ? "type" : "comp",
+			this_cu->offset.sect_off);
+
   gdb_assert (this_cu->cu == NULL);
 
   /* This is cheap if the section is already read in.  */
@@ -4421,6 +4432,20 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
       /* Get the list of files included in the current compilation unit,
 	 and build a psymtab for each of them.  */
       dwarf2_build_include_psymtabs (cu, comp_unit_die, pst);
+    }
+
+  if (dwarf2_read_debug)
+    {
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
+      fprintf_unfiltered (gdb_stdlog,
+			  "Psymtab for %s unit @0x%x: 0x%s - 0x%s"
+			  ", %d global, %d static syms\n",
+			  per_cu->is_debug_types ? "type" : "comp",
+			  per_cu->offset.sect_off,
+			  paddress (gdbarch, pst->textlow),
+			  paddress (gdbarch, pst->texthigh),
+			  pst->n_global_syms, pst->n_static_syms);
     }
 }
 
@@ -7137,7 +7162,7 @@ create_debug_info_hash_table_reader (const struct die_reader_specs *reader,
   else
     *slot = dwo_unit;
 
-  if (dwarf2_die_debug)
+  if (dwarf2_read_debug)
     fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, dwo_id 0x%s\n",
 			offset.sect_off,
 			phex (dwo_unit->signature,
@@ -7166,7 +7191,7 @@ create_debug_info_hash_table (struct dwo_file *dwo_file)
      not present, in which case section->asection will be NULL.  */
   abfd = section->asection->owner;
 
-  if (dwarf2_die_debug)
+  if (dwarf2_read_debug)
     fprintf_unfiltered (gdb_stdlog, "Reading .debug_info.dwo for %s:\n",
 			bfd_get_filename (abfd));
 
@@ -7287,7 +7312,7 @@ init_dwo_file (const char *dwo_name, const char *comp_dir)
   bfd *abfd;
   struct cleanup *cleanups;
 
-  if (dwarf2_die_debug)
+  if (dwarf2_read_debug)
     fprintf_unfiltered (gdb_stdlog, "Reading DWO file %s:\n", dwo_name);
 
   abfd = open_dwo_file (dwo_name, comp_dir);

@@ -1,3 +1,14 @@
+2012-07-02  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (create_debug_types_hash_table): Use "debug dwarf2-read"
+	instead of "debug dwarf2-die" in debugging printfs.
+	(create_debug_info_hash_table_reader): Ditto.
+	(create_debug_info_hash_table): Ditto.
+	(init_dwo_file): Ditto.
+	(init_cutu_and_read_dies): Add debugging printf.
+	(init_cutu_and_read_dies_no_follow): Ditto.
+	(process_psymtab_comp_unit_reader): Ditto.
+
 2012-07-02  Stan Shebs  <stan@codesourcery.com>
 
 	Add target-side support for dynamic printf.
