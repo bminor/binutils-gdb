@@ -1,3 +1,16 @@
+2012-07-02  Alan Modra  <amodra@gmail.com>
+
+	* elf32-m32c.c (m32c_elf_check_relocs): Use bfd_make_section
+	"anyway" variant when creating .plt.
+	(m32c_elf_relax_plt_section): Remove redundant test and unused param.
+	(m32c_elf_relax_section): Test SEC_LINKER_CREATED before calling
+	m32c_elf_relax_plt_section.
+	* elfxx-mips.c (mips_elf_create_got_section): Use make anyway variant
+	when creating .got and .got.plt.
+	(_bfd_mips_elf_final_link): Likewise for .rtproc, and use
+	bfd_get_linker_section.
+	* sunos.c: Similarly throughout.
+
 2012-07-01  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Fix typo in error

@@ -639,7 +639,8 @@ m32c_elf_check_relocs
 		  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
 				    | SEC_IN_MEMORY | SEC_LINKER_CREATED
 				    | SEC_READONLY | SEC_CODE);
-		  splt = bfd_make_section_with_flags (dynobj, ".plt", flags);
+		  splt = bfd_make_section_anyway_with_flags (dynobj, ".plt",
+							     flags);
 		  if (splt == NULL
 		      || ! bfd_set_section_alignment (dynobj, splt, 1))
 		    return FALSE;
@@ -1031,8 +1032,7 @@ m32c_relax_plt_realloc (struct elf_link_hash_entry *h,
 }
 
 static bfd_boolean
-m32c_elf_relax_plt_section (bfd *dynobj,
-                            asection *splt,
+m32c_elf_relax_plt_section (asection *splt,
                             struct bfd_link_info *info,
                             bfd_boolean *again)
 {
@@ -1043,11 +1043,6 @@ m32c_elf_relax_plt_section (bfd *dynobj,
   *again = FALSE;
 
   if (info->relocatable)
-    return TRUE;
-
-  /* We only relax the .plt section at the moment.  */
-  if (dynobj != elf_hash_table (info)->dynobj
-      || strcmp (splt->name, ".plt") != 0)
     return TRUE;
 
   /* Quick check for an empty plt.  */
@@ -1337,8 +1332,9 @@ m32c_elf_relax_section
   int machine;
 
   if (abfd == elf_hash_table (link_info)->dynobj
+      && (sec->flags & SEC_LINKER_CREATED) != 0
       && strcmp (sec->name, ".plt") == 0)
-    return m32c_elf_relax_plt_section (abfd, sec, link_info, again);
+    return m32c_elf_relax_plt_section (sec, link_info, again);
 
   /* Assume nothing changes.  */
   *again = FALSE;
