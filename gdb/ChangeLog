@@ -1,3 +1,13 @@
+2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-thread-db.c (inferior_has_bug): New function.
+	(thread_db_find_new_threads_silently): Return boolean as checked by
+	inferior_has_bug, describe it in the comments.
+	(try_thread_db_load_1): Move call to thread_db_find_new_threads_silently
+	earlier.  Abort the initialization if it returned non-zero.
+	(thread_db_find_new_threads_2): Preinitialize ERR.  Check errors also
+	if UNTIL_NO_NEW,
+
 2012-07-02  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (maybe_queue_comp_unit): Move definition next to others

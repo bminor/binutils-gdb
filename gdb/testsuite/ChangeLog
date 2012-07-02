@@ -1,5 +1,10 @@
 2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.threads/gcore-thread.exp: Remove variable libthread_db_seen.
+	Wrap the test into loop for corefile and core0file.
+
+2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.dwarf2/fission-reread.S: Remove .section attributes.
 	Change CU pointer size to 4 bytes, adjust .8byte to .4byte.  Remove
 	.note.GNU-stack.

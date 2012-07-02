@@ -141,11 +141,9 @@ proc load_core { corefile } {
     global gdb_prompt
     global libthread_db_seen
 
-    set libthread_db_seen 0
     gdb_test_multiple "core $corefile" \
 	"re-load generated corefile" {
 	    -re "\\\[Thread debugging using \[^ \r\n\]* enabled\\\]\r\n" {
-		set libthread_db_seen 1
 		exp_continue
 	    }
 	    -re " is not a core dump:.*\r\n$gdb_prompt $" {
@@ -168,39 +166,27 @@ proc load_core { corefile } {
     return 1
 }
 
-if ![load_core $corefile] {
-    return
-}
-
-# FIXME: now what can we test about the thread state?
-# We do not know for certain that there should be at least 
-# three threads, because who knows what kind of many-to-one
-# mapping various OS's may do?  Let's assume that there must
-# be at least two threads:
-
-gdb_test "info threads" ".*${nl}  2 ${horiz}${nl}\\* 1 .*" \
-	"corefile contains at least two threads"
-
-# One thread in the corefile should be in the "thread2" function.
-
-gdb_test "info threads" ".* thread2 .*" \
-	"a corefile thread is executing thread2"
-
-# The thread2 thread should be marked as the current thread.
-
-gdb_test "info threads" ".*${nl}\\* ${horiz} thread2 .*" \
-	"thread2 is current thread in corefile"
-
-
-# Test the uninitialized thread list.
-
-if {"$core0file" != "" && [load_core $core0file]} {
-    set test "zeroed-threads cannot be listed"
-
-    if {!$libthread_db_seen} {
-	verbose -log "No libthread_db loaded - -Wl,-z,relro compilation?"
-	xfail $test
-    } else {
-	gdb_test "info threads" "Cannot find new threads: .*" $test
+foreach name { corefile core0file } { with_test_prefix $name {
+    if ![load_core [subst $$name]] {
+	continue
     }
-}
+
+    # FIXME: now what can we test about the thread state?
+    # We do not know for certain that there should be at least 
+    # three threads, because who knows what kind of many-to-one
+    # mapping various OS's may do?  Let's assume that there must
+    # be at least two threads:
+
+    gdb_test "info threads" ".*${nl}  2 ${horiz}${nl}\\* 1 .*" \
+	    "corefile contains at least two threads"
+
+    # One thread in the corefile should be in the "thread2" function.
+
+    gdb_test "info threads" ".* thread2 .*" \
+	    "a corefile thread is executing thread2"
+
+    # The thread2 thread should be marked as the current thread.
+
+    gdb_test "info threads" ".*${nl}\\* ${horiz} thread2 .*" \
+	    "thread2 is current thread in corefile"
+}}
