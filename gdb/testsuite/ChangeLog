@@ -1,3 +1,10 @@
+2012-07-03  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.base/info-os.c (main): Retry resource acquisition until an
+	available one is found.
+	* gdb.base/info-os.exp: Collect resource keys from the program
+	and use them in matching.
+
 2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/gcore-thread.exp: Remove variable libthread_db_seen.

@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2011 Free Software Foundation, Inc.
+   Copyright 2011, 2012 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ int
 main (void)
 {
   const int flags = IPC_CREAT | 0666;
+  key_t shmkey = 3925, semkey = 7428, msgkey = 5294;
   int shmid, semid, msqid;
   FILE *fd;
   pthread_t thread;
@@ -43,22 +44,53 @@ main (void)
   int sock;
   unsigned short port;
   socklen_t size;
-  int status;
+  int status, try, retries = 1000;
 
-  if ((shmid = shmget (3925, 4096, flags | IPC_EXCL)) < 0)
+  for (try = 0; try < retries; ++try)
     {
-      /* Attempt to delete the existing shared-memory region, then
-	 recreate it.  */
-      shmctl (shmget (3925, 4096, flags), IPC_RMID, NULL);
-      if ((shmid = shmget (3925, 4096, flags | IPC_EXCL)) < 0)
-	{
-	  printf ("Cannot create shared-memory region.\n");
-	  return 1;
-	}	  
+      shmid = shmget (shmkey, 4096, flags | IPC_EXCL);
+      if (shmid >= 0)
+	break;
+
+      ++shmkey;
     }
 
-  semid = semget (7428, 1, flags);
-  msqid = msgget (5294, flags);
+  if (shmid < 0)
+    {
+      printf ("Cannot create shared-memory region after %d tries.\n", retries);
+      return 1;
+    }
+
+  for (try = 0; try < retries; ++try)
+    {
+      semid = semget (semkey, 1, flags | IPC_EXCL);
+      if (semid >= 0)
+	break;
+
+      ++semkey;
+    }
+
+  if (semid < 0)
+    {
+      printf ("Cannot create semaphore after %d tries.\n", retries);
+      return 1;
+    }
+
+  for (try = 0; try < retries; ++try)
+    {
+      msqid = msgget (msgkey, flags | IPC_EXCL);
+      if (msqid >= 0)
+	break;
+
+      ++msgkey;
+    }
+
+  if (msqid < 0)
+    {
+      printf ("Cannot create message queue after %d tries.\n", retries);
+      return 1;
+    }
+
   fd = fopen ("/dev/null", "r");
 
   /* Lock the mutex to prevent the new thread from finishing immediately.  */
