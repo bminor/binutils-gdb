@@ -1,3 +1,8 @@
+2012-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_archive): Display member indicies when
+	dumping index.
+
 2012-07-02  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf.c: Include gdb-index.h.

@@ -2405,6 +2405,9 @@ bsd_write_armap (bfd *arch,
   unsigned int count;
   struct ar_hdr hdr;
   long uid, gid;
+  file_ptr max_first_real = 1;
+
+  max_first_real <<= 31;
 
   firstreal = mapsize + elength + sizeof (struct ar_hdr) + SARMAG;
 
@@ -2463,6 +2466,15 @@ bsd_write_armap (bfd *arch,
 	  while (current != map[count].u.abfd);
 	}
 
+      /* The archive file format only has 4 bytes to store the offset
+	 of the member.  Check to make sure that firstreal has not grown
+	 too big.  */
+      if (firstreal >= max_first_real)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return FALSE;
+	}
+      
       last_elt = current;
       H_PUT_32 (arch, map[count].namidx, buf);
       H_PUT_32 (arch, firstreal, buf + BSD_SYMDEF_OFFSET_SIZE);
@@ -2574,7 +2586,7 @@ coff_write_armap (bfd *arch,
   unsigned int ranlibsize = (symbol_count * 4) + 4;
   unsigned int stringsize = stridx;
   unsigned int mapsize = stringsize + ranlibsize;
-  unsigned int archive_member_file_ptr;
+  file_ptr archive_member_file_ptr;
   bfd *current = arch->archive_head;
   unsigned int count;
   struct ar_hdr hdr;
@@ -2625,7 +2637,15 @@ coff_write_armap (bfd *arch,
 
       while (count < symbol_count && map[count].u.abfd == current)
 	{
-	  if (!bfd_write_bigendian_4byte_int (arch, archive_member_file_ptr))
+	  unsigned int offset = (unsigned int) archive_member_file_ptr;
+
+	  /* Catch an attempt to grow an archive past its 4Gb limit.  */
+	  if (archive_member_file_ptr != (file_ptr) offset)
+	    {
+	      bfd_set_error (bfd_error_file_truncated);
+	      return FALSE;
+	    }
+	  if (!bfd_write_bigendian_4byte_int (arch, offset))
 	    return FALSE;
 	  count++;
 	}

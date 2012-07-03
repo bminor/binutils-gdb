@@ -13459,7 +13459,8 @@ process_archive (char * file_name, FILE * file, bfd_boolean is_thin_archive)
 
                       if (qualified_name != NULL)
                         {
-		          printf (_("Binary %s contains:\n"), qualified_name);
+		          printf (_("Binary %s at offset 0x%lx contains:\n"),
+				  qualified_name, arch.index_array[i]);
 		          free (qualified_name);
 		        }
 		    }

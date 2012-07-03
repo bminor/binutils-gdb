@@ -1,3 +1,9 @@
+2012-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* archive.c (bsd_write_armap): Catch attempts to create an archive
+	with indicies bigger than 4Gb.
+	(coff_write_armap): Likewise.
+
 2012-07-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14319
