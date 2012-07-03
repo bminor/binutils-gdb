@@ -1,3 +1,14 @@
+2012-07-03  Alan Modra  <amodra@gmail.com>
+
+	PR ld/14207
+	* elf.c (assign_file_positions_for_load_sections): Remove assertions
+	that only PT_LOAD headers include file header and section headers.
+	(assign_file_positions_for_non_load_sections): Similarly don't
+	assert PT_GNU_RELRO header does not include file and section headers.
+	Compare first section vma rather than PT_LOAD p_vaddr against
+	relro_start when looking for PT_LOAD covering PT_GNU_RELRO.  Replace
+	abort with assertion.
+
 2012-07-02  Alan Modra  <amodra@gmail.com>
 
 	* elf32-m32c.c (m32c_elf_check_relocs): Use bfd_make_section
