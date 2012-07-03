@@ -1,3 +1,15 @@
+2012-07-03  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo: Separate the index into 2 indices, cp and fn, to
+	avoid file-name clashes between Index.html and index.html on
+	case-insensitive filesystems.  See the discussion starting in
+	http://sourceware.org/ml/gdb-patches/2012-06/msg00457.html for the
+	details of the problem.
+	(Top): Update the master menu for the above.
+	(Concept Index, Command and Variable Index): New nodes, instead of
+	the old "Index" node that was deleted.  All cross-references
+	updated.
+
 2012-07-02  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Dynamic Printf): Mention agent style and

@@ -18,13 +18,17 @@
 @end iftex
 
 @finalout
-@syncodeindex ky cp
-@syncodeindex tp cp
+@c To avoid file-name clashes between index.html and Index.html, when
+@c the manual is produced on a Posix host and then moved to a
+@c case-insensitive filesystem (e.g., MS-Windows), we separate the
+@c indices into two: Concept Index and all the rest.
+@syncodeindex ky fn
+@syncodeindex tp fn
 
 @c readline appendices use @vindex, @findex and @ftable,
 @c annotate.texi and gdbmi use @findex.
-@syncodeindex vr cp
-@syncodeindex fn cp
+@syncodeindex vr fn
+@syncodeindex fn fn
 
 @c !!set GDB manual's edition---not the same as GDB version!
 @c This is updated by GNU Press.
@@ -182,7 +186,9 @@ software in general.  We will miss him.
 * Copying::			GNU General Public License says
                                 how you can copy and share GDB
 * GNU Free Documentation License::  The license for this documentation
-* Index::                       Index
+* Concept Index::               Index of @value{GDBN} concepts
+* Command and Variable Index::  Index of @value{GDBN} commands, variables,
+                                  functions, and Python data types
 @end menu
 
 @end ifnottex
@@ -1780,8 +1786,9 @@ In addition to @code{help}, you can use the @value{GDBN} commands @code{info}
 and @code{show} to inquire about the state of your program, or the state
 of @value{GDBN} itself.  Each command supports many topics of inquiry; this
 manual introduces each of them in the appropriate context.  The listings
-under @code{info} and under @code{show} in the Index point to
-all the sub-commands.  @xref{Index}.
+under @code{info} and under @code{show} in the Command, Variable, and
+Function Index point to all the sub-commands.  @xref{Command and Variable
+Index}.
 
 @c @group
 @table @code
@@ -40601,10 +40608,15 @@ switch (die->tag)
 @appendix GNU Free Documentation License
 @include fdl.texi
 
-@node Index
-@unnumbered Index
+@node Concept Index
+@unnumbered Concept Index
 
 @printindex cp
+
+@node Command and Variable Index
+@unnumbered Command, Variable, and Function Index
+
+@printindex fn
 
 @tex
 % I think something like @@colophon should be in texinfo.  In the
