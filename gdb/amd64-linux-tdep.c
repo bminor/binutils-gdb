@@ -107,7 +107,7 @@ int amd64_linux_gregset_reg_offset[] =
 #define LINUX_SIGTRAMP_INSN1	0x0f	/* syscall */
 #define LINUX_SIGTRAMP_OFFSET1	7
 
-static const gdb_byte linux_sigtramp_code[] =
+static const gdb_byte amd64_linux_sigtramp_code[] =
 {
   /* mov $__NR_rt_sigreturn, %rax */
   LINUX_SIGTRAMP_INSN0, 0xc7, 0xc0, 0x0f, 0x00, 0x00, 0x00,
@@ -115,7 +115,15 @@ static const gdb_byte linux_sigtramp_code[] =
   LINUX_SIGTRAMP_INSN1, 0x05
 };
 
-#define LINUX_SIGTRAMP_LEN (sizeof linux_sigtramp_code)
+static const gdb_byte amd64_x32_linux_sigtramp_code[] =
+{
+  /* mov $__NR_rt_sigreturn, %rax.  */
+  LINUX_SIGTRAMP_INSN0, 0xc7, 0xc0, 0x01, 0x02, 0x00, 0x40,
+  /* syscall */
+  LINUX_SIGTRAMP_INSN1, 0x05
+};
+
+#define LINUX_SIGTRAMP_LEN (sizeof amd64_linux_sigtramp_code)
 
 /* If PC is in a sigtramp routine, return the address of the start of
    the routine.  Otherwise, return 0.  */
@@ -123,6 +131,8 @@ static const gdb_byte linux_sigtramp_code[] =
 static CORE_ADDR
 amd64_linux_sigtramp_start (struct frame_info *this_frame)
 {
+  struct gdbarch *gdbarch;
+  const gdb_byte *sigtramp_code;
   CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[LINUX_SIGTRAMP_LEN];
 
@@ -146,7 +156,12 @@ amd64_linux_sigtramp_start (struct frame_info *this_frame)
 	return 0;
     }
 
-  if (memcmp (buf, linux_sigtramp_code, LINUX_SIGTRAMP_LEN) != 0)
+  gdbarch = get_frame_arch (this_frame);
+  if (gdbarch_ptr_bit (gdbarch) == 32)
+    sigtramp_code = amd64_x32_linux_sigtramp_code;
+  else
+    sigtramp_code = amd64_linux_sigtramp_code;
+  if (memcmp (buf, sigtramp_code, LINUX_SIGTRAMP_LEN) != 0)
     return 0;
 
   return pc;

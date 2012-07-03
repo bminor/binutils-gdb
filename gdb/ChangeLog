@@ -1,3 +1,11 @@
+2012-07-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-linux-tdep.c (linux_sigtramp_code): Renamed to ...
+	(amd64_linux_sigtramp_code): This.
+	(amd64_x32_linux_sigtramp_code): New.
+	(LINUX_SIGTRAMP_LEN): Updated.
+	(amd64_linux_sigtramp_start): Check x32 sigtramp.
+
 2012-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-thread-db.c (thread_db_new_objfile): Fix comment typos.
