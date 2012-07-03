@@ -1,3 +1,10 @@
+2012-07-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14319
+	* binutils-all/compress.exp: Test compress empty debug sections.
+
+	* binutils-all/dw2-empty.S: New file.
+
 2012-06-07  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* binutils-all/i386/i386.exp: Don't skip for x86_64-*-linux*.

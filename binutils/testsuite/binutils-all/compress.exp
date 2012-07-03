@@ -133,3 +133,32 @@ if ![string match "" $got] then {
 	pass "$testname"
     }
 }
+
+set testfile tmpdir/dw2-emty.o
+
+if { ![binutils_assemble_flags $srcdir/$subdir/dw2-empty.S $testfile --nocompress-debug-sections] } then {
+    unsupported "compressed debug sections"
+    return
+}
+
+set testname "objcopy compress empty debug sections"
+set got [binutils_run $OBJCOPY "--compress-debug-sections $testfile ${copyfile}.o"]
+if ![string match "" $got] then {
+    fail "objcopy ($testname)"
+} else {
+    send_log "cmp $testfile ${copyfile}.o\n"
+    verbose "cmp $testfile ${copyfile}.o"
+    set src1 ${testfile}
+    set src2 ${copyfile}.o
+    set status [remote_exec build cmp "${src1} ${src2}"]
+    set exec_output [lindex $status 1]
+    set exec_output [prune_warnings $exec_output]
+
+    if [string match "" $exec_output] then {
+	pass "objcopy ($testname)"
+    } else {
+	send_log "$exec_output\n"
+	verbose "$exec_output" 1
+	fail "objcopy ($testname)"
+    }
+}
