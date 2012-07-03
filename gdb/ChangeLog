@@ -1,3 +1,13 @@
+2012-07-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix 'warning: parameter has incomplete type' with gcc-3.4.6.
+	* dwarf2expr.h: Include gdbtypes.h.
+	(enum call_site_parameter_kind, union call_site_parameter_u): Remove
+	these forward declarations.
+	(cu_offset, sect_offset): Move these ...
+	* gdbtypes.h: Remove include dwarf2expr.h.
+	(cu_offset, sect_offset): ... here.
+
 2012-07-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* amd64-linux-tdep.c (linux_sigtramp_code): Renamed to ...

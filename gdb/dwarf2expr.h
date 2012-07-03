@@ -24,22 +24,9 @@
 #define DWARF2EXPR_H
 
 #include "leb128.h"
+#include "gdbtypes.h"
 
 struct dwarf_expr_context;
-enum call_site_parameter_kind;
-union call_site_parameter_u;
-
-/* Offset relative to the start of its containing CU (compilation unit).  */
-typedef struct
-{
-  unsigned int cu_off;
-} cu_offset;
-
-/* Offset relative to the start of its .debug_info or .debug_types section.  */
-typedef struct
-{
-  unsigned int sect_off;
-} sect_offset;
 
 /* Virtual method table for struct dwarf_expr_context below.  */
 
