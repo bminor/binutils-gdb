@@ -88,7 +88,7 @@ if ![target_info exists gdb,noinferiorio] {
 set target_can_dprintf 1
 set msg "Set dprintf style to agent"
 gdb_test_multiple "set dprintf-style agent" $msg {
-    -re "warning: Target cannot run dprintf commands.*" {
+    -re "warning: Target cannot run dprintf commands.*\r\n$gdb_prompt $" {
 	set target_can_dprintf 0
 	pass "$msg - cannot do"
     }

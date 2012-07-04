@@ -1,3 +1,9 @@
+2012-07-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR 12649
+	* gdb.base/dprintf.exp (Set dprintf style to agent): Add missing
+	gdb_test_multiple $gdb_prompt terminator.
+
 2012-07-04  Pedro Alves  <palves@redhat.com>
 
 	* gdb.mi/mi-reverse.exp: Use supports_reverse and
