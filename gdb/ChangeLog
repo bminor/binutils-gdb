@@ -1,5 +1,9 @@
 2012-07-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* NEWS: Mention x32 ABI support.
+
+2012-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* amd64-tdep.c (amd64_x32_init_abi): Set sp_regnum_from_eax to
 	AMD64_RSP_REGNUM and pc_regnum_from_eax to AMD64_RIP_REGNUM.
 

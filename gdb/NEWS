@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.4
 
+* GDB now supports x32 ABI.  Visit <http://sites.google.com/site/x32abi/>
+  for more x32 ABI info.
+
 * GDB now supports access to MIPS DSP registers on Linux targets.
 
 * GDB now supports debugging microMIPS binaries.
