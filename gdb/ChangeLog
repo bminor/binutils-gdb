@@ -1,3 +1,16 @@
+2012-07-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-tdep.c (amd64_x32_init_abi): Set sp_regnum_from_eax to
+	AMD64_RSP_REGNUM and pc_regnum_from_eax to AMD64_RIP_REGNUM.
+
+	* i386-tdep.c (i386_gdbarch_init): Initialize sp_regnum_from_eax
+	and pc_regnum_from_eax to -1.  Update SP regnum from
+	sp_regnum_from_eax and PC regnum from pc_regnum_from_eax if
+	needed.
+
+	* i386-tdep.h (gdbarch_tdep): Add sp_regnum_from_eax and
+	pc_regnum_from_eax.
+
 2012-07-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix 'warning: parameter has incomplete type' with gcc-3.4.6.
