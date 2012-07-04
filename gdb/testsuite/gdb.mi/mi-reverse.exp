@@ -27,7 +27,7 @@
 # but to verify the correct output response to MI operations.
 #
 
-if ![target_info exists gdb,can_reverse] {
+if ![supports_reverse] {
     return
 }
 
@@ -49,7 +49,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 mi_run_to_main
 
-if [target_info exists gdb,use_precord] {
+if [supports_process_record] {
     # Activate process record/replay
     if [mi_gdb_test "-interpreter-exec console record" \
 	{\^done} "Turn on process record"] {

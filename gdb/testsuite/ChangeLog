@@ -1,5 +1,10 @@
 2012-07-04  Pedro Alves  <palves@redhat.com>
 
+	* gdb.mi/mi-reverse.exp: Use supports_reverse and
+	supports_process_record.
+
+2012-07-04  Pedro Alves  <palves@redhat.com>
+
 	* gdb.ada/packed_tagged/comp_bug.adb: Convert to unix text line
 	endings.
 	* gdb.mi/mi-reverse.exp: Convert to unix text line endings.
