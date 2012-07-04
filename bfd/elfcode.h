@@ -633,8 +633,9 @@ elf_object_p (bfd *abfd)
       if (i_ehdrp->e_shnum == SHN_UNDEF)
 	{
 	  i_ehdrp->e_shnum = i_shdr.sh_size;
-	  if (i_ehdrp->e_shnum != i_shdr.sh_size
-	      || i_ehdrp->e_shnum == 0)
+	  if (i_ehdrp->e_shnum >= SHN_LORESERVE
+	      || i_ehdrp->e_shnum != i_shdr.sh_size
+	      || i_ehdrp->e_shnum  == 0)
 	    goto got_wrong_format_error;
 	}
 

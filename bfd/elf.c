@@ -3014,6 +3014,13 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
       _bfd_elf_strtab_addref (elf_shstrtab (abfd), t->strtab_hdr.sh_name);
     }
 
+  if (section_number >= SHN_LORESERVE)
+    {
+      _bfd_error_handler (_("%B: too many sections: %u"),
+			  abfd, section_number);
+      return FALSE;
+    }
+
   _bfd_elf_strtab_finalize (elf_shstrtab (abfd));
   t->shstrtab_hdr.sh_size = _bfd_elf_strtab_size (elf_shstrtab (abfd));
 

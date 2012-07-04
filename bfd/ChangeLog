@@ -1,3 +1,9 @@
+2012-07-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (assign_section_numbers): Check if number of sections
+	>= SHN_LORESERVE.
+	* elfcode.h (elf_object_p): Likewise.
+
 2012-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* archive.c (bsd_write_armap): Catch attempts to create an archive
