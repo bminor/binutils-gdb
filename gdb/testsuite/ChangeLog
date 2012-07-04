@@ -1,3 +1,9 @@
+2012-07-04  Pedro Alves  <palves@redhat.com>
+
+	* gdb.ada/packed_tagged/comp_bug.adb: Convert to unix text line
+	endings.
+	* gdb.mi/mi-reverse.exp: Convert to unix text line endings.
+
 2012-07-03  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.base/info-os.c (main): Retry resource acquisition until an
