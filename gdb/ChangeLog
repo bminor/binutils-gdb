@@ -1,5 +1,16 @@
 2012-07-05  Hui Zhu  <hui_zhu@mentor.com>
 
+	* ax-gdb.c (cli/cli-utils.h): New include.
+	(linespec.h): Ditto.
+	(agent_eval_command_one): New function.
+	(agent_command_1): Ditto.
+	(agent_command): Call function agent_command_1.
+	(agent_eval_command): Ditto.
+	(_initialize_ax_gdb): Change help for "maint agent"
+	and "maint agent-eval".
+
+2012-07-05  Hui Zhu  <hui_zhu@mentor.com>
+
 	* breakpoint.c (check_for_argument): Move to file cli/cli-utils.c.
 	* cli/cli-utils.c (check_for_argument): New function.
 	* cli/cli-utils.h (check_for_argument): Ditto.

@@ -42,6 +42,7 @@
 #include "cp-support.h"
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
+#include "linespec.h"
 
 #include "valprint.h"
 #include "c-lang.h"
@@ -2560,40 +2561,32 @@ gen_printf (CORE_ADDR scope, struct gdbarch *gdbarch,
 }
 
 static void
-agent_command (char *exp, int from_tty)
+agent_eval_command_one (char *exp, int eval, CORE_ADDR pc)
 {
   struct cleanup *old_chain = 0;
   struct expression *expr;
   struct agent_expr *agent;
-  struct frame_info *fi = get_current_frame ();	/* need current scope */
 
-  /* We don't deal with overlay debugging at the moment.  We need to
-     think more carefully about this.  If you copy this code into
-     another command, change the error message; the user shouldn't
-     have to know anything about agent expressions.  */
-  if (overlay_debugging)
-    error (_("GDB can't do agent expression translation with overlays."));
-
-  if (exp == 0)
-    error_no_arg (_("expression to translate"));
-
-  trace_string_kludge = 0;
-  if (*exp == '/')
-    exp = decode_agent_options (exp);
-
-  /* Recognize the return address collection directive specially.  Note
-     that it is not really an expression of any sort.  */
-  if (strcmp (exp, "$_ret") == 0)
+  if (!eval)
     {
-      agent = gen_trace_for_return_address (get_frame_pc (fi),
-					    get_current_arch ());
+      trace_string_kludge = 0;
+      if (*exp == '/')
+        exp = decode_agent_options (exp);
+    }
+
+  if (!eval && strcmp (exp, "$_ret") == 0)
+    {
+      agent = gen_trace_for_return_address (pc, get_current_arch ());
       old_chain = make_cleanup_free_agent_expr (agent);
     }
   else
     {
-      expr = parse_expression (exp);
+      expr = parse_exp_1 (&exp, pc, block_for_pc (pc), 0);
       old_chain = make_cleanup (free_current_contents, &expr);
-      agent = gen_trace_for_expr (get_frame_pc (fi), expr);
+      if (eval)
+	agent = gen_eval_for_expr (pc, expr);
+      else
+	agent = gen_trace_for_expr (pc, expr);
       make_cleanup_free_agent_expr (agent);
     }
 
@@ -2607,18 +2600,9 @@ agent_command (char *exp, int from_tty)
   dont_repeat ();
 }
 
-/* Parse the given expression, compile it into an agent expression
-   that does direct evaluation, and display the resulting
-   expression.  */
-
 static void
-agent_eval_command (char *exp, int from_tty)
+agent_command_1 (char *exp, int eval)
 {
-  struct cleanup *old_chain = 0;
-  struct expression *expr;
-  struct agent_expr *agent;
-  struct frame_info *fi = get_current_frame ();	/* need current scope */
-
   /* We don't deal with overlay debugging at the moment.  We need to
      think more carefully about this.  If you copy this code into
      another command, change the error message; the user shouldn't
@@ -2629,19 +2613,56 @@ agent_eval_command (char *exp, int from_tty)
   if (exp == 0)
     error_no_arg (_("expression to translate"));
 
-  expr = parse_expression (exp);
-  old_chain = make_cleanup (free_current_contents, &expr);
-  agent = gen_eval_for_expr (get_frame_pc (fi), expr);
-  make_cleanup_free_agent_expr (agent);
-  ax_reqs (agent);
-  ax_print (gdb_stdout, agent);
+  if (check_for_argument (&exp, "-at", sizeof ("-at") - 1))
+    {
+      struct linespec_result canonical;
+      int ix;
+      struct linespec_sals *iter;
+      struct cleanup *old_chain;
 
-  /* It would be nice to call ax_reqs here to gather some general info
-     about the expression, and then print out the result.  */
+      exp = skip_spaces (exp);
+      init_linespec_result (&canonical);
+      decode_line_full (&exp, DECODE_LINE_FUNFIRSTLINE,
+			(struct symtab *) NULL, 0, &canonical,
+			NULL, NULL);
+      old_chain = make_cleanup_destroy_linespec_result (&canonical);
+      exp = skip_spaces (exp);
+      if (exp[0] == ',')
+        {
+	  exp++;
+	  exp = skip_spaces (exp);
+	}
+      for (ix = 0; VEC_iterate (linespec_sals, canonical.sals, ix, iter); ++ix)
+        {
+	  int i;
 
-  do_cleanups (old_chain);
+	  for (i = 0; i < iter->sals.nelts; i++)
+	    agent_eval_command_one (exp, eval, iter->sals.sals[i].pc);
+        }
+      do_cleanups (old_chain);
+    }
+  else
+    agent_eval_command_one (exp, eval, get_frame_pc (get_current_frame ()));
+
   dont_repeat ();
 }
+
+static void
+agent_command (char *exp, int from_tty)
+{
+  agent_command_1 (exp, 0);
+}
+
+/* Parse the given expression, compile it into an agent expression
+   that does direct evaluation, and display the resulting
+   expression.  */
+
+static void
+agent_eval_command (char *exp, int from_tty)
+{
+  agent_command_1 (exp, 1);
+}
+
 /* Parse the given expression, compile it into an agent expression
    that does a printf, and display the resulting expression.  */
 
@@ -2733,13 +2754,19 @@ void
 _initialize_ax_gdb (void)
 {
   add_cmd ("agent", class_maintenance, agent_command,
-	   _("Translate an expression into "
-	     "remote agent bytecode for tracing."),
+	   _("\
+Translate an expression into remote agent bytecode for tracing.\n\
+Usage: maint agent [-at location,] EXPRESSION\n\
+If -at is given, generate remote agent bytecode for this location.\n\
+If not, generate remote agent bytecode for current frame pc address."),
 	   &maintenancelist);
 
   add_cmd ("agent-eval", class_maintenance, agent_eval_command,
-	   _("Translate an expression into remote "
-	     "agent bytecode for evaluation."),
+	   _("\
+Translate an expression into remote agent bytecode for evaluation.\n\
+Usage: maint agent-eval [-at location,] EXPRESSION\n\
+If -at is given, generate remote agent bytecode for this location.\n\
+If not, generate remote agent bytecode for current frame pc address."),
 	   &maintenancelist);
 
   add_cmd ("agent-printf", class_maintenance, maint_agent_printf_command,
