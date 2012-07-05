@@ -74,7 +74,6 @@
 #define OP_INH		XGATE_OP_INH
 #define OP_TRI		XGATE_OP_TRI
 #define OP_DYA		XGATE_OP_DYA
-#define OP_DM   	XGATE_OP_DYA_MON
 #define OP_IMM3		XGATE_OP_IMM3
 #define OP_IMM4		XGATE_OP_IMM4
 #define OP_IMM8		XGATE_OP_IMM8
@@ -87,6 +86,7 @@
 #define OP_IDO5		XGATE_OP_IDO5
 #define OP_REL9		XGATE_OP_REL9
 #define OP_REL10    	XGATE_OP_REL10
+#define OP_DM          XGATE_OP_DYA_MON
 /* macro operand modes */
 #define OP_mADD         XGATE_OP_IMM16mADD
 #define OP_mAND         XGATE_OP_IMM16mAND
@@ -190,7 +190,8 @@ const struct xgate_opcode xgate_opcodes[] = {
     {   "blo",  OP_REL9, "0010001iiiiiiiii",   XG_IP,  2, 0x2200, 0, 0, CHG_NONE, ALL},
     {   "cmp",  OP_mCPC, "----------------",   XG_R_I, 4,      0, 0, 0, CHG_NONE, ALL},
     {   "cmp",   OP_DYA, "00011sssrrrrrr00",   XG_R_R, 2, 0x1800, 0, 0, CHG_NZVC, ALL},
-    {   "com",  OP_DM, "00010rrrsssrrr11",     XG_R_R, 2, 0x1003, 0, 0,  CHG_NZV, ALL},
+    {   "com",   OP_DM,  "00010rrrsssrrr11",   XG_R,   2, 0x1003, 0, 0, CHG_NZVC, ALL},
+    {   "com",   OP_DYA, "00010rrrsssrrr11",   XG_R_R, 2, 0x1003, 0, 0,  CHG_NZV, ALL},
     {   "cpc",   OP_DYA, "00011sssrrrrrr01",   XG_R_R, 2, 0x1801, 0, 0, CHG_NZVC, ALL},
     {   "ldd",  OP_mLDW, "----------------",   XG_R_I, 4,      0, 0, 0, CHG_NONE, ALL},
     {   "ldw",  OP_mLDW, "----------------",   XG_R_I, 4,      0, 0, 0, CHG_NONE, ALL},

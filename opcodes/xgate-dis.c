@@ -177,16 +177,7 @@ print_insn (bfd_vma memaddr, struct disassemble_info* info)
               }
             break;
           case XG_R_R:
-            if (!strcmp (decodePTR->opcodePTR->constraints, XGATE_OP_DYA_MON))
-              {
-                operandOne = ripBits (&operMaskReg, 3, decodePTR->opcodePTR,
-                    raw_code);
-                operandTwo = ripBits (&operMaskReg, 3, decodePTR->opcodePTR,
-                    raw_code);
-                (*info->fprintf_func)(info->stream, " R%x, R%x", operandOne,
-                    operandTwo);
-              }
-            else if (!strcmp (decodePTR->opcodePTR->constraints, XGATE_OP_DYA))
+            if (!strcmp (decodePTR->opcodePTR->constraints, XGATE_OP_DYA))
               {
                 operandOne = ripBits (&operMaskReg, 3, opcodePTR, raw_code);
                 operandTwo = ripBits (&operMaskReg, 3, opcodePTR, raw_code);
