@@ -11085,23 +11085,6 @@ watch_command_wrapper (char *arg, int from_tty, int internal)
   watch_command_1 (arg, hw_write, from_tty, 0, internal);
 }
 
-/* A helper function that looks for an argument at the start of a
-   string.  The argument must also either be at the end of the string,
-   or be followed by whitespace.  Returns 1 if it finds the argument,
-   0 otherwise.  If the argument is found, it updates *STR.  */
-
-static int
-check_for_argument (char **str, char *arg, int arg_len)
-{
-  if (strncmp (*str, arg, arg_len) == 0
-      && ((*str)[arg_len] == '\0' || isspace ((*str)[arg_len])))
-    {
-      *str += arg_len;
-      return 1;
-    }
-  return 0;
-}
-
 /* A helper function that looks for the "-location" argument and then
    calls watch_command_1.  */
 

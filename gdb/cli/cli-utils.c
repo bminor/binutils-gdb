@@ -286,3 +286,17 @@ extract_arg (char **arg)
 
   return copy;
 }
+
+/* See documentation in cli-utils.h.  */
+
+int
+check_for_argument (char **str, char *arg, int arg_len)
+{
+  if (strncmp (*str, arg, arg_len) == 0
+      && ((*str)[arg_len] == '\0' || isspace ((*str)[arg_len])))
+    {
+      *str += arg_len;
+      return 1;
+    }
+  return 0;
+}
