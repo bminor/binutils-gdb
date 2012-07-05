@@ -1,6 +1,6 @@
 /* Print mips instructions for GDB, the GNU debugger, or for objdump.
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2012
    Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
@@ -1352,7 +1352,6 @@ print_insn_args (const char *d,
 
 	case 'B':
 	  (*info->fprintf_func) (info->stream, "0x%lx",
-
 				 (l >> OP_SH_CODE20) & OP_MASK_CODE20);
 	  break;
 

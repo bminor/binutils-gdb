@@ -1,3 +1,7 @@
+2012-07-05  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* mips-dis: Remove gratuitous newline.
+
 2012-07-02  Roland McGrath  <mcgrathr@google.com>
 
 	* i386-opc.tbl: Add RepPrefixOk to nop.
