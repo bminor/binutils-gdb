@@ -1,3 +1,8 @@
+2012-07-05  Hui Zhu  <hui_zhu@mentor.com>
+
+	* gdb.texinfo (Maintenance Commands): Change help for "maint agent"
+	and "maint agent-eval".
+
 2012-07-03  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo: Separate the index into 2 indices, cp and fn, to

@@ -34466,8 +34466,8 @@ messages, see @ref{Debugging Output}.)
 @table @code
 @kindex maint agent
 @kindex maint agent-eval
-@item maint agent @var{expression}
-@itemx maint agent-eval @var{expression}
+@item maint agent @r{[}-at @var{location}@r{,}@r{]} @var{expression}
+@itemx maint agent-eval @r{[}-at @var{location}@r{,}@r{]} @var{expression}
 Translate the given @var{expression} into remote agent bytecodes.
 This command is useful for debugging the Agent Expression mechanism
 (@pxref{Agent Expressions}).  The @samp{agent} version produces an
@@ -34478,6 +34478,8 @@ globb} will include bytecodes to record four bytes of memory at each
 of the addresses of @code{globa} and @code{globb}, while discarding
 the result of the addition, while an evaluation expression will do the
 addition and return the sum.
+If @code{-at} is given, generate remote agent bytecode for @var{location}.
+If not, generate remote agent bytecode for current frame PC address.
 
 @kindex maint agent-printf
 @item maint agent-printf @var{format},@var{expr},...
