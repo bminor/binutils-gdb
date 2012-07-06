@@ -1,5 +1,20 @@
 2012-07-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup for the next patch.
+	* arm-linux-nat.c (arm_linux_stopped_data_address): Change variable
+	siginfo_p to siginfo, update its users incl. the linux_nat_get_siginfo
+	call for it.
+	* ia64-linux-nat.c (ia64_linux_stopped_data_address): Likewise.
+	(ia64_linux_stopped_data_address):
+	* linux-nat.c (linux_nat_get_siginfo): Add parameter siginfo, change
+	the return value.
+	* linux-nat.h (linux_nat_get_siginfo): Likewise.
+	* ppc-linux-nat.c (ppc_linux_stopped_data_address): Change variable
+	siginfo_p to siginfo, update its users incl. the linux_nat_get_siginfo
+	call for it.
+
+2012-07-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR 14321
 	* findcmd.c (parse_find_args): New variable pattern_buf_size_need.
 	Increase buffer sizes to 2x we need, not just 2x of the previous size.

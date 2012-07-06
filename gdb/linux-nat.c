@@ -5187,15 +5187,18 @@ linux_nat_set_prepare_to_resume (struct target_ops *t,
   linux_nat_prepare_to_resume = prepare_to_resume;
 }
 
-/* Return the saved siginfo associated with PTID.  */
-siginfo_t *
-linux_nat_get_siginfo (ptid_t ptid)
+/* See linux-nat.h.  */
+
+int
+linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
 {
   struct lwp_info *lp = find_lwp_pid (ptid);
 
   gdb_assert (lp != NULL);
 
-  return &lp->siginfo;
+  *siginfo = lp->siginfo;
+
+  return 1;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

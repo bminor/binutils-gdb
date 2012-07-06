@@ -2221,12 +2221,13 @@ ppc_linux_thread_exit (struct thread_info *tp, int silent)
 static int
 ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 {
-  siginfo_t *siginfo_p;
+  siginfo_t siginfo;
 
-  siginfo_p = linux_nat_get_siginfo (inferior_ptid);
+  if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
+    return 0;
 
-  if (siginfo_p->si_signo != SIGTRAP
-      || (siginfo_p->si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
+  if (siginfo.si_signo != SIGTRAP
+      || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return 0;
 
   if (have_ptrace_booke_interface ())
@@ -2235,7 +2236,7 @@ ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
       struct thread_points *t;
       struct hw_break_tuple *hw_breaks;
       /* The index (or slot) of the *point is passed in the si_errno field.  */
-      int slot = siginfo_p->si_errno;
+      int slot = siginfo.si_errno;
 
       t = booke_find_thread_points_by_tid (TIDGET (inferior_ptid), 0);
 
@@ -2252,7 +2253,7 @@ ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 	}
     }
 
-  *addr_p = (CORE_ADDR) (uintptr_t) siginfo_p->si_addr;
+  *addr_p = (CORE_ADDR) (uintptr_t) siginfo.si_addr;
   return 1;
 }
 

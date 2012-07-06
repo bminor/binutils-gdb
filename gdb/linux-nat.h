@@ -197,8 +197,10 @@ void linux_nat_set_prepare_to_resume (struct target_ops *,
    to another.  */
 void linux_nat_switch_fork (ptid_t new_ptid);
 
-/* Return the saved siginfo associated with PTID.  */
-siginfo_t *linux_nat_get_siginfo (ptid_t ptid);
+/* Store the saved siginfo associated with PTID in *SIGINFO.
+   Return 1 if it was retrieved successfully, 0 otherwise (*SIGINFO is
+   uninitialized in such case).  */
+int linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo);
 
 /* Set alternative SIGTRAP-like events recognizer.  */
 void linux_nat_set_status_is_event (struct target_ops *t,

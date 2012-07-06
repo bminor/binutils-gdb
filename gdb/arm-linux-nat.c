@@ -1137,24 +1137,29 @@ arm_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
 static int
 arm_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 {
-  siginfo_t *siginfo_p = linux_nat_get_siginfo (inferior_ptid);
-  int slot = siginfo_p->si_errno;
+  siginfo_t siginfo;
+  int slot;
+
+  if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
+    return 0;
 
   /* This must be a hardware breakpoint.  */
-  if (siginfo_p->si_signo != SIGTRAP
-      || (siginfo_p->si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
+  if (siginfo.si_signo != SIGTRAP
+      || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return 0;
 
   /* We must be able to set hardware watchpoints.  */
   if (arm_linux_get_hw_watchpoint_count () == 0)
     return 0;
 
+  slot = siginfo.si_errno;
+
   /* If we are in a positive slot then we're looking at a breakpoint and not
      a watchpoint.  */
   if (slot >= 0)
     return 0;
 
-  *addr_p = (CORE_ADDR) (uintptr_t) siginfo_p->si_addr;
+  *addr_p = (CORE_ADDR) (uintptr_t) siginfo.si_addr;
   return 1;
 }
 

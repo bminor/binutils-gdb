@@ -649,13 +649,14 @@ static int
 ia64_linux_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 {
   CORE_ADDR psr;
-  siginfo_t *siginfo_p;
+  siginfo_t siginfo;
   struct regcache *regcache = get_current_regcache ();
 
-  siginfo_p = linux_nat_get_siginfo (inferior_ptid);
+  if (!linux_nat_get_siginfo (inferior_ptid, &siginfo))
+    return 0;
 
-  if (siginfo_p->si_signo != SIGTRAP
-      || (siginfo_p->si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
+  if (siginfo.si_signo != SIGTRAP
+      || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return 0;
 
   regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr);
@@ -663,7 +664,7 @@ ia64_linux_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
                            for the next instruction.  */
   regcache_cooked_write_unsigned (regcache, IA64_PSR_REGNUM, psr);
 
-  *addr_p = (CORE_ADDR)siginfo_p->si_addr;
+  *addr_p = (CORE_ADDR) siginfo.si_addr;
   return 1;
 }
 
