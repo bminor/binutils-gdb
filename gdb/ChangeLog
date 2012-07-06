@@ -1,4 +1,8 @@
 2012-07-06  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* c-lang.c (c_printstr): Remove ununsed variable WIDTH.
+
+2012-07-06  Siddhesh Poyarekar  <siddhesh@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* cp-valprint.c (cp_print_value): Replace potentially unsafe
