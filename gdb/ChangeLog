@@ -1,5 +1,15 @@
 2012-07-06  Tom Tromey  <tromey@redhat.com>
 
+	* c-exp.y (DOTDOTDOT): New token.
+	(func_mod, exp): Use parameter_typelist.
+	(parameter_typelist): New production.
+	(tokentab3): Add "..." token.
+	* eval.c (make_params): Handle varargs.
+	* gdbtypes.c (lookup_function_type_with_arguments): Handle
+	varargs.
+
+2012-07-06  Tom Tromey  <tromey@redhat.com>
+
 	PR exp/9608:
 	* c-exp.y (%union) <tvec>: Change type.
 	(func_mod): Now uses <tvec> type.

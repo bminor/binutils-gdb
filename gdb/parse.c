@@ -1555,7 +1555,8 @@ type_stack_cleanup (void *arg)
 }
 
 /* Push a function type with arguments onto the global type stack.
-   LIST holds the argument types.  */
+   LIST holds the argument types.  If the final item in LIST is NULL,
+   then the function will be varargs.  */
 
 void
 push_typelist (VEC (type_ptr) *list)

@@ -170,7 +170,7 @@ static struct stoken operator_stoken (const char *);
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly
 %type <lval> rcurly
 %type <tval> type typebase
-%type <tvec> nonempty_typelist func_mod
+%type <tvec> nonempty_typelist func_mod parameter_typelist
 /* %type <bval> block */
 
 /* Fancy type parsing.  */
@@ -253,6 +253,8 @@ static struct stoken operator_stoken (const char *);
 %token <bval> FILENAME
 %type <bval> block
 %left COLONCOLON
+
+%token DOTDOTDOT
 
 
 %%
@@ -440,7 +442,7 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 			{ arglist_len++; }
 	;
 
-exp     :       exp '(' nonempty_typelist ')' const_or_volatile
+exp     :       exp '(' parameter_typelist ')' const_or_volatile
 			{ int i;
 			  VEC (type_ptr) *type_list = $3;
 			  struct type *type_elt;
@@ -1025,7 +1027,7 @@ array_mod:	'[' ']'
 
 func_mod:	'(' ')'
 			{ $$ = NULL; }
-	|	'(' nonempty_typelist ')'
+	|	'(' parameter_typelist ')'
 			{ $$ = $2; }
 	;
 
@@ -1221,6 +1223,15 @@ typename:	TYPENAME
 						    parse_gdbarch,
 						    "short");
 		}
+	;
+
+parameter_typelist:
+		nonempty_typelist
+	|	nonempty_typelist ',' DOTDOTDOT
+			{
+			  VEC_safe_push (type_ptr, $1, NULL);
+			  $$ = $1;
+			}
 	;
 
 nonempty_typelist
@@ -1942,7 +1953,8 @@ static const struct token tokentab3[] =
   {
     {">>=", ASSIGN_MODIFY, BINOP_RSH, 0},
     {"<<=", ASSIGN_MODIFY, BINOP_LSH, 0},
-    {"->*", ARROW_STAR, BINOP_END, 1}
+    {"->*", ARROW_STAR, BINOP_END, 1},
+    {"...", DOTDOTDOT, BINOP_END, 0}
   };
 
 static const struct token tokentab2[] =

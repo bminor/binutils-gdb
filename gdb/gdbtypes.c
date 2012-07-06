@@ -463,7 +463,8 @@ lookup_function_type (struct type *type)
 }
 
 /* Given a type TYPE and argument types, return the appropriate
-   function type.  */
+   function type.  If the final type in PARAM_TYPES is NULL, make a
+   varargs function.  */
 
 struct type *
 lookup_function_type_with_arguments (struct type *type,
@@ -472,6 +473,12 @@ lookup_function_type_with_arguments (struct type *type,
 {
   struct type *fn = make_function_type (type, (struct type **) 0);
   int i;
+
+  if (nparams > 0 && param_types[nparams - 1] == NULL)
+    {
+      --nparams;
+      TYPE_VARARGS (fn) = 1;
+    }
 
   TYPE_NFIELDS (fn) = nparams;
   TYPE_FIELDS (fn) = TYPE_ZALLOC (fn, nparams * sizeof (struct field));
