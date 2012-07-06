@@ -1,3 +1,7 @@
+2012-07-06  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2012-07-05  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dw2_expand_symtabs_matching): Fix typo.
