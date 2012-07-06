@@ -1,4 +1,10 @@
 2012-07-06  Siddhesh Poyarekar  <siddhesh@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* cp-valprint.c (cp_print_value): Replace potentially unsafe
+	alloca with xmalloc/xfree.
+
+2012-07-06  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.
 
