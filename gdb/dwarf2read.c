@@ -3124,7 +3124,7 @@ dw2_expand_symtabs_matching
 
 	  /* Don't crash on bad data.  */
 	  if (cu_index >= (dwarf2_per_objfile->n_comp_units
-			   + dwarf2_per_objfile->n_comp_units))
+			   + dwarf2_per_objfile->n_type_units))
 	    continue;
 
 	  /* Only check the symbol's kind if it has one.
