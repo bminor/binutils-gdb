@@ -462,6 +462,25 @@ lookup_function_type (struct type *type)
   return make_function_type (type, (struct type **) 0);
 }
 
+/* Given a type TYPE and argument types, return the appropriate
+   function type.  */
+
+struct type *
+lookup_function_type_with_arguments (struct type *type,
+				     int nparams,
+				     struct type **param_types)
+{
+  struct type *fn = make_function_type (type, (struct type **) 0);
+  int i;
+
+  TYPE_NFIELDS (fn) = nparams;
+  TYPE_FIELDS (fn) = TYPE_ZALLOC (fn, nparams * sizeof (struct field));
+  for (i = 0; i < nparams; ++i)
+    TYPE_FIELD_TYPE (fn, i) = param_types[i];
+
+  return fn;
+}
+
 /* Identify address space identifier by name --
    return the integer flag defined in gdbtypes.h.  */
 extern int

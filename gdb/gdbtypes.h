@@ -1520,6 +1520,10 @@ extern struct type *make_function_type (struct type *, struct type **);
 
 extern struct type *lookup_function_type (struct type *);
 
+extern struct type *lookup_function_type_with_arguments (struct type *,
+							 int,
+							 struct type **);
+
 extern struct type *create_range_type (struct type *, struct type *, LONGEST,
 				       LONGEST);
 

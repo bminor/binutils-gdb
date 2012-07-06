@@ -155,7 +155,7 @@ void yyerror (char *);
     struct internalvar *ivar;
 
     struct stoken_vector svec;
-    struct type **tvec;
+    VEC (type_ptr) *tvec;
     int *ivec;
 
     struct type_stack *type_stack;
@@ -170,7 +170,7 @@ static struct stoken operator_stoken (const char *);
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly
 %type <lval> rcurly
 %type <tval> type typebase
-%type <tvec> nonempty_typelist
+%type <tvec> nonempty_typelist func_mod
 /* %type <bval> block */
 
 /* Fancy type parsing.  */
@@ -442,13 +442,19 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 
 exp     :       exp '(' nonempty_typelist ')' const_or_volatile
 			{ int i;
+			  VEC (type_ptr) *type_list = $3;
+			  struct type *type_elt;
+			  LONGEST len = VEC_length (type_ptr, type_list);
+
 			  write_exp_elt_opcode (TYPE_INSTANCE);
-			  write_exp_elt_longcst ((LONGEST) $<ivec>3[0]);
-			  for (i = 0; i < $<ivec>3[0]; ++i)
-			    write_exp_elt_type ($<tvec>3[i + 1]);
-			  write_exp_elt_longcst((LONGEST) $<ivec>3[0]);
+			  write_exp_elt_longcst (len);
+			  for (i = 0;
+			       VEC_iterate (type_ptr, type_list, i, type_elt);
+			       ++i)
+			    write_exp_elt_type (type_elt);
+			  write_exp_elt_longcst(len);
 			  write_exp_elt_opcode (TYPE_INSTANCE);
-			  free ($3);
+			  VEC_free (type_ptr, type_list);
 			}
 	;
 
@@ -1001,12 +1007,12 @@ direct_abs_decl: '(' abs_decl ')'
 	| 	direct_abs_decl func_mod
 			{
 			  push_type_stack ($1);
-			  push_type (tp_function);
+			  push_typelist ($2);
 			  $$ = get_type_stack ();
 			}
 	|	func_mod
 			{
-			  push_type (tp_function);
+			  push_typelist ($1);
 			  $$ = get_type_stack ();
 			}
 	;
@@ -1018,8 +1024,9 @@ array_mod:	'[' ']'
 	;
 
 func_mod:	'(' ')'
+			{ $$ = NULL; }
 	|	'(' nonempty_typelist ')'
-			{ free ($2); }
+			{ $$ = $2; }
 	;
 
 /* We used to try to recognize pointer to member types here, but
@@ -1218,14 +1225,15 @@ typename:	TYPENAME
 
 nonempty_typelist
 	:	type
-		{ $$ = (struct type **) malloc (sizeof (struct type *) * 2);
-		  $<ivec>$[0] = 1;	/* Number of types in vector */
-		  $$[1] = $1;
+		{
+		  VEC (type_ptr) *typelist = NULL;
+		  VEC_safe_push (type_ptr, typelist, $1);
+		  $$ = typelist;
 		}
 	|	nonempty_typelist ',' type
-		{ int len = sizeof (struct type *) * (++($<ivec>1[0]) + 1);
-		  $$ = (struct type **) realloc ((char *) $1, len);
-		  $$[$<ivec>$[0]] = $3;
+		{
+		  VEC_safe_push (type_ptr, $1, $3);
+		  $$ = $1;
 		}
 	;
 

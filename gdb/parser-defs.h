@@ -25,6 +25,7 @@
 #define PARSER_DEFS_H 1
 
 #include "doublest.h"
+#include "vec.h"
 
 struct block;
 
@@ -107,6 +108,8 @@ struct objc_class_str
     int class;
   };
 
+typedef struct type *type_ptr;
+DEF_VEC_P (type_ptr);
 
 /* For parsing of complicated types.
    An array should be preceded in the list by the size of the array.  */
@@ -116,7 +119,8 @@ enum type_pieces
     tp_pointer, 
     tp_reference, 
     tp_array, 
-    tp_function, 
+    tp_function,
+    tp_function_with_arguments,
     tp_const, 
     tp_volatile, 
     tp_space_identifier,
@@ -128,6 +132,7 @@ union type_stack_elt
     enum type_pieces piece;
     int int_val;
     struct type_stack *stack_val;
+    VEC (type_ptr) *typelist_val;
   };
 
 /* The type stack is an instance of this structure.  */
@@ -224,6 +229,8 @@ extern struct type_stack *append_type_stack (struct type_stack *to,
 extern void push_type_stack (struct type_stack *stack);
 
 extern void type_stack_cleanup (void *arg);
+
+extern void push_typelist (VEC (type_ptr) *typelist);
 
 extern int length_of_subexp (struct expression *, int);
 

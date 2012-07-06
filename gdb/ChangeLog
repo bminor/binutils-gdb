@@ -1,5 +1,24 @@
 2012-07-06  Tom Tromey  <tromey@redhat.com>
 
+	PR exp/9608:
+	* c-exp.y (%union) <tvec>: Change type.
+	(func_mod): Now uses <tvec> type.
+	(exp): Update for tvec change.
+	(direct_abs_decl): Push the typelist.
+	(func_mod): Return a typelist.
+	(nonempty_typelist): Update for tvec change.
+	* gdbtypes.c (lookup_function_type_with_arguments): New function.
+	* gdbtypes.h (lookup_function_type_with_arguments): Declare.
+	* parse.c (pop_type_list): New function.
+	(push_typelist): New function.
+	(follow_types): Handle tp_function_with_arguments.
+	* parser-defs.h (type_ptr): New typedef.  Define a VEC.
+	(enum type_pieces) <tp_function_with_arguments>: New constant.
+	(union type_stack_elt) <typelist_val>: New field.
+	(push_typelist): Declare.
+
+2012-07-06  Tom Tromey  <tromey@redhat.com>
+
 	* c-exp.y (%union) <type_stack>: New field.
 	(abs_decl, direct_abs_decl): Use <type_stack> type.  Update.
 	(ptr_operator_ts): New production.

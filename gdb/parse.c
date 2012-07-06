@@ -1483,6 +1483,15 @@ pop_type_int (void)
   return 0;
 }
 
+/* Pop a type list element from the global type stack.  */
+
+static VEC (type_ptr) *
+pop_typelist (void)
+{
+  gdb_assert (type_stack.depth);
+  return type_stack.elements[--type_stack.depth].typelist_val;
+}
+
 /* Pop a type_stack element from the global type stack.  */
 
 static struct type_stack *
@@ -1543,6 +1552,17 @@ type_stack_cleanup (void *arg)
 
   xfree (stack->elements);
   xfree (stack);
+}
+
+/* Push a function type with arguments onto the global type stack.
+   LIST holds the argument types.  */
+
+void
+push_typelist (VEC (type_ptr) *list)
+{
+  check_type_stack_depth ();
+  type_stack.elements[type_stack.depth++].typelist_val = list;
+  push_type (tp_function_with_arguments);
 }
 
 /* Pop the type stack and return the type which corresponds to FOLLOW_TYPE
@@ -1630,6 +1650,19 @@ follow_types (struct type *follow_type)
 	/* FIXME-type-allocation: need a way to free this type when we are
 	   done with it.  */
 	follow_type = lookup_function_type (follow_type);
+	break;
+
+      case tp_function_with_arguments:
+	{
+	  VEC (type_ptr) *args = pop_typelist ();
+
+	  follow_type
+	    = lookup_function_type_with_arguments (follow_type,
+						   VEC_length (type_ptr, args),
+						   VEC_address (type_ptr,
+								args));
+	  VEC_free (type_ptr, args);
+	}
 	break;
 
       case tp_type_stack:

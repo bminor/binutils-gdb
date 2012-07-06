@@ -491,3 +491,7 @@ gdb_test "whatis int *(**)()" \
 gdb_test "whatis char (*(*)())\[23\]" \
     "type = char \\(\\*\\(\\*\\)\\(\\)\\)\\\[23\\\]" \
     "whatis applied to pointer to function returning pointer to array"
+
+gdb_test "whatis int (*)(int, int)" \
+    "type = int \\(\\*\\)\\(int, int\\)" \
+    "whatis applied to pointer to function taking int,int and returning int"
