@@ -172,7 +172,6 @@ static struct stoken operator_stoken (const char *);
 /* %type <bval> block */
 
 /* Fancy type parsing.  */
-%type <voidval> func_mod direct_abs_decl abs_decl ptr_operator
 %type <tval> ptype
 %type <lval> array_mod
 %type <tval> conversion_type_id
@@ -955,15 +954,13 @@ ptr_operator:
 		ptr_operator '*'
 			{ insert_type (tp_pointer); }
 		const_or_volatile_or_space_identifier
-			{ $$ = 0; }
 	|	'*' 
 			{ insert_type (tp_pointer); }
 		const_or_volatile_or_space_identifier
-			{ $$ = 0; }
 	|	'&'
-			{ insert_type (tp_reference); $$ = 0; }
+			{ insert_type (tp_reference); }
 	|	'&' ptr_operator
-			{ insert_type (tp_reference); $$ = 0; }
+			{ insert_type (tp_reference); }
 	;
 
 abs_decl:	ptr_operator direct_abs_decl
@@ -972,7 +969,6 @@ abs_decl:	ptr_operator direct_abs_decl
 	;
 
 direct_abs_decl: '(' abs_decl ')'
-			{ $$ = $2; }
 	|	direct_abs_decl array_mod
 			{
 			  push_type_int ($2);
@@ -982,7 +978,6 @@ direct_abs_decl: '(' abs_decl ')'
 			{
 			  push_type_int ($1);
 			  push_type (tp_array);
-			  $$ = 0;
 			}
 
 	| 	direct_abs_decl func_mod
@@ -998,9 +993,8 @@ array_mod:	'[' ']'
 	;
 
 func_mod:	'(' ')'
-			{ $$ = 0; }
 	|	'(' nonempty_typelist ')'
-			{ free ($2); $$ = 0; }
+			{ free ($2); }
 	;
 
 /* We used to try to recognize pointer to member types here, but

@@ -1,3 +1,8 @@
+2012-07-06  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (func_mod, direct_abs_decl, abs_decl, ptr_operator):
+	Remove %type.
+
 2012-07-06  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* c-lang.c (c_printstr): Remove ununsed variable WIDTH.
