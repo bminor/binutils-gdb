@@ -1,5 +1,23 @@
 2012-07-06  Tom Tromey  <tromey@redhat.com>
 
+	* c-exp.y (%union) <type_stack>: New field.
+	(abs_decl, direct_abs_decl): Use <type_stack> type.  Update.
+	(ptr_operator_ts): New production.
+	(ptype): Update.
+	* parse.c (type_stack_reserve): New function.
+	(check_type_stack_depth): Use it.
+	(pop_type_stack, append_type_stack, push_type_stack)
+	(get_type_stack, type_stack_cleanup): New functions.
+	(follow_types): Handle tp_type_stack.
+	(_initialize_parse): Simplify initialization.
+	* parser-defs.h (enum type_pieces) <tp_type_stack>: New
+	constant.
+	(union type_stack_elt) <stack_val>: New field.
+	(get_type_stack, append_type_stack, push_type_stack)
+	(type_stack_cleanup): Declare.
+
+2012-07-06  Tom Tromey  <tromey@redhat.com>
+
 	* parser-defs.h (type_stack, type_stack_size, type_stack_depth):
 	Remove.
 	(struct type_stack): New.

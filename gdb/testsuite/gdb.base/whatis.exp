@@ -479,3 +479,15 @@ gdb_test "whatis void (** const)()" \
 gdb_test "whatis void (* const *)()" \
   "type = void \\(\\* const \\*\\)\\(\\)" \
   "whatis applied to pointer to const pointer to function"
+
+gdb_test "whatis int *(*)()" \
+    "type = int \\*\\(\\*\\)\\(\\)" \
+    "whatis applied to pointer to function returning pointer to int"
+
+gdb_test "whatis int *(**)()" \
+    "type = int \\*\\(\\*\\*\\)\\(\\)" \
+    "whatis applied to pointer to pointer to function returning pointer to int"
+
+gdb_test "whatis char (*(*)())\[23\]" \
+    "type = char \\(\\*\\(\\*\\)\\(\\)\\)\\\[23\\\]" \
+    "whatis applied to pointer to function returning pointer to array"

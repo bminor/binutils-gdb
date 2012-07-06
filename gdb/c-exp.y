@@ -157,6 +157,8 @@ void yyerror (char *);
     struct stoken_vector svec;
     struct type **tvec;
     int *ivec;
+
+    struct type_stack *type_stack;
   }
 
 %{
@@ -175,6 +177,8 @@ static struct stoken operator_stoken (const char *);
 %type <tval> ptype
 %type <lval> array_mod
 %type <tval> conversion_type_id
+
+%type <type_stack> ptr_operator_ts abs_decl direct_abs_decl
 
 %token <typed_val_int> INT
 %token <typed_val_float> FLOAT
@@ -963,27 +967,48 @@ ptr_operator:
 			{ insert_type (tp_reference); }
 	;
 
-abs_decl:	ptr_operator direct_abs_decl
-	|	ptr_operator
+ptr_operator_ts: ptr_operator
+			{
+			  $$ = get_type_stack ();
+			  /* This cleanup is eventually run by
+			     c_parse.  */
+			  make_cleanup (type_stack_cleanup, $$);
+			}
+	;
+
+abs_decl:	ptr_operator_ts direct_abs_decl
+			{ $$ = append_type_stack ($2, $1); }
+	|	ptr_operator_ts 
 	|	direct_abs_decl
 	;
 
 direct_abs_decl: '(' abs_decl ')'
+			{ $$ = $2; }
 	|	direct_abs_decl array_mod
 			{
+			  push_type_stack ($1);
 			  push_type_int ($2);
 			  push_type (tp_array);
+			  $$ = get_type_stack ();
 			}
 	|	array_mod
 			{
 			  push_type_int ($1);
 			  push_type (tp_array);
+			  $$ = get_type_stack ();
 			}
 
 	| 	direct_abs_decl func_mod
-			{ push_type (tp_function); }
+			{
+			  push_type_stack ($1);
+			  push_type (tp_function);
+			  $$ = get_type_stack ();
+			}
 	|	func_mod
-			{ push_type (tp_function); }
+			{
+			  push_type (tp_function);
+			  $$ = get_type_stack ();
+			}
 	;
 
 array_mod:	'[' ']'
@@ -1206,7 +1231,10 @@ nonempty_typelist
 
 ptype	:	typebase
 	|	ptype abs_decl
-		{ $$ = follow_types ($1); }
+		{
+		  push_type_stack ($2);
+		  $$ = follow_types ($1);
+		}
 	;
 
 conversion_type_id: typebase conversion_declarator

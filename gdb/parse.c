@@ -1358,16 +1358,27 @@ parse_c_float (struct gdbarch *gdbarch, const char *p, int len,
 /* Stuff for maintaining a stack of types.  Currently just used by C, but
    probably useful for any language which declares its types "backwards".  */
 
+/* Ensure that there are HOWMUCH open slots on the type stack STACK.  */
+
+static void
+type_stack_reserve (struct type_stack *stack, int howmuch)
+{
+  if (stack->depth + howmuch >= stack->size)
+    {
+      stack->size *= 2;
+      if (stack->size < howmuch)
+	stack->size = howmuch;
+      stack->elements = xrealloc (stack->elements,
+				  stack->size * sizeof (union type_stack_elt));
+    }
+}
+
+/* Ensure that there is a single open slot in the global type stack.  */
+
 static void
 check_type_stack_depth (void)
 {
-  if (type_stack.depth == type_stack.size)
-    {
-      type_stack.size *= 2;
-      type_stack.elements
-	= xrealloc (type_stack.elements,
-		    type_stack.size * sizeof (union type_stack_elt));
-    }
+  type_stack_reserve (&type_stack, 1);
 }
 
 /* A helper function for insert_type and insert_type_address_space.
@@ -1472,6 +1483,68 @@ pop_type_int (void)
   return 0;
 }
 
+/* Pop a type_stack element from the global type stack.  */
+
+static struct type_stack *
+pop_type_stack (void)
+{
+  gdb_assert (type_stack.depth);
+  return type_stack.elements[--type_stack.depth].stack_val;
+}
+
+/* Append the elements of the type stack FROM to the type stack TO.
+   Always returns TO.  */
+
+struct type_stack *
+append_type_stack (struct type_stack *to, struct type_stack *from)
+{
+  type_stack_reserve (to, from->depth);
+
+  memcpy (&to->elements[to->depth], &from->elements[0],
+	  from->depth * sizeof (union type_stack_elt));
+  to->depth += from->depth;
+
+  return to;
+}
+
+/* Push the type stack STACK as an element on the global type stack.  */
+
+void
+push_type_stack (struct type_stack *stack)
+{
+  check_type_stack_depth ();
+  type_stack.elements[type_stack.depth++].stack_val = stack;
+  push_type (tp_type_stack);
+}
+
+/* Copy the global type stack into a newly allocated type stack and
+   return it.  The global stack is cleared.  The returned type stack
+   must be freed with type_stack_cleanup.  */
+
+struct type_stack *
+get_type_stack (void)
+{
+  struct type_stack *result = XNEW (struct type_stack);
+
+  *result = type_stack;
+  type_stack.depth = 0;
+  type_stack.size = 0;
+  type_stack.elements = NULL;
+
+  return result;
+}
+
+/* A cleanup function that destroys a single type stack.  */
+
+void
+type_stack_cleanup (void *arg)
+{
+  struct type_stack *stack = arg;
+
+  xfree (stack->elements);
+  xfree (stack);
+}
+
 /* Pop the type stack and return the type which corresponds to FOLLOW_TYPE
    as modified by all the stuff on the stack.  */
 struct type *
@@ -1558,6 +1631,23 @@ follow_types (struct type *follow_type)
 	   done with it.  */
 	follow_type = lookup_function_type (follow_type);
 	break;
+
+      case tp_type_stack:
+	{
+	  struct type_stack *stack = pop_type_stack ();
+	  /* Sort of ugly, but not really much worse than the
+	     alternatives.  */
+	  struct type_stack save = type_stack;
+
+	  type_stack = *stack;
+	  follow_type = follow_types (follow_type);
+	  gdb_assert (type_stack.depth == 0);
+
+	  type_stack = save;
+	}
+	break;
+      default:
+	gdb_assert_not_reached ("unrecognized tp_ value in follow_types");
       }
   return follow_type;
 }
@@ -1725,10 +1815,9 @@ exp_uses_objfile (struct expression *exp, struct objfile *objfile)
 void
 _initialize_parse (void)
 {
-  type_stack.size = 80;
+  type_stack.size = 0;
   type_stack.depth = 0;
-  type_stack.elements = xmalloc (type_stack.size
-				 * sizeof (union type_stack_elt));
+  type_stack.elements = NULL;
 
   add_setshow_zinteger_cmd ("expression", class_maintenance,
 			    &expressiondebug,

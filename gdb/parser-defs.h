@@ -119,13 +119,15 @@ enum type_pieces
     tp_function, 
     tp_const, 
     tp_volatile, 
-    tp_space_identifier
+    tp_space_identifier,
+    tp_type_stack
   };
 /* The stack can contain either an enum type_pieces or an int.  */
 union type_stack_elt
   {
     enum type_pieces piece;
     int int_val;
+    struct type_stack *stack_val;
   };
 
 /* The type stack is an instance of this structure.  */
@@ -213,6 +215,15 @@ extern void insert_type_address_space (char *);
 extern enum type_pieces pop_type (void);
 
 extern int pop_type_int (void);
+
+extern struct type_stack *get_type_stack (void);
+
+extern struct type_stack *append_type_stack (struct type_stack *to,
+					     struct type_stack *from);
+
+extern void push_type_stack (struct type_stack *stack);
+
+extern void type_stack_cleanup (void *arg);
 
 extern int length_of_subexp (struct expression *, int);
 
