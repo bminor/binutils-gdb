@@ -182,3 +182,6 @@ if [isnative] {
     "${hex_number}${one_pattern_found}" \
     "find pattern straddling chunk boundary"
 }
+
+# Check GDB buffer overflow.
+gdb_test "find int64_search_buf, +64/8*100, int64_search_buf" " <int64_search_buf>\r\n1 pattern found\\."

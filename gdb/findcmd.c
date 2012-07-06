@@ -170,6 +170,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
     {
       LONGEST x;
       int val_bytes;
+      ULONGEST pattern_buf_size_need;
 
       while (isspace (*s))
 	++s;
@@ -179,12 +180,13 @@ parse_find_args (char *args, ULONGEST *max_countp,
 
       /* Keep it simple and assume size == 'g' when watching for when we
 	 need to grow the pattern buf.  */
-      if ((pattern_buf_end - pattern_buf + max (val_bytes, sizeof (int64_t)))
-	  > pattern_buf_size)
+      pattern_buf_size_need = (pattern_buf_end - pattern_buf
+			       + max (val_bytes, sizeof (int64_t)));
+      if (pattern_buf_size_need > pattern_buf_size)
 	{
 	  size_t current_offset = pattern_buf_end - pattern_buf;
 
-	  pattern_buf_size *= 2;
+	  pattern_buf_size = pattern_buf_size_need * 2;
 	  pattern_buf = xrealloc (pattern_buf, pattern_buf_size);
 	  pattern_buf_end = pattern_buf + current_offset;
 	}

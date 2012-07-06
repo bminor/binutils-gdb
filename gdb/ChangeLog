@@ -1,3 +1,9 @@
+2012-07-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR 14321
+	* findcmd.c (parse_find_args): New variable pattern_buf_size_need.
+	Increase buffer sizes to 2x we need, not just 2x of the previous size.
+
 2012-07-06  Tom Tromey  <tromey@redhat.com>
 
 	* c-exp.y (DOTDOTDOT): New token.
