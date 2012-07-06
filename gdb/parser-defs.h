@@ -127,8 +127,18 @@ union type_stack_elt
     enum type_pieces piece;
     int int_val;
   };
-extern union type_stack_elt *type_stack;
-extern int type_stack_depth, type_stack_size;
+
+/* The type stack is an instance of this structure.  */
+
+struct type_stack
+{
+  /* Elements on the stack.  */
+  union type_stack_elt *elements;
+  /* Current stack depth.  */
+  int depth;
+  /* Allocated size of stack.  */
+  int size;
+};
 
 /* Helper function to initialize the expout, expout_size, expout_ptr
    trio before it is used to store expression elements created during

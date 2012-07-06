@@ -75,8 +75,7 @@ struct block *expression_context_block;
 CORE_ADDR expression_context_pc;
 struct block *innermost_block;
 int arglist_len;
-union type_stack_elt *type_stack;
-int type_stack_depth, type_stack_size;
+static struct type_stack type_stack;
 char *lexptr;
 char *prev_lexptr;
 int paren_depth;
@@ -1123,7 +1122,7 @@ parse_exp_in_context (char **stringptr, CORE_ADDR pc, struct block *block,
   prev_lexptr = NULL;
 
   paren_depth = 0;
-  type_stack_depth = 0;
+  type_stack.depth = 0;
   expout_last_struct = -1;
 
   comma_terminates = comma;
@@ -1362,11 +1361,12 @@ parse_c_float (struct gdbarch *gdbarch, const char *p, int len,
 static void
 check_type_stack_depth (void)
 {
-  if (type_stack_depth == type_stack_size)
+  if (type_stack.depth == type_stack.size)
     {
-      type_stack_size *= 2;
-      type_stack = (union type_stack_elt *)
-	xrealloc ((char *) type_stack, type_stack_size * sizeof (*type_stack));
+      type_stack.size *= 2;
+      type_stack.elements
+	= xrealloc (type_stack.elements,
+		    type_stack.size * sizeof (union type_stack_elt));
     }
 }
 
@@ -1379,11 +1379,11 @@ insert_into_type_stack (int slot, union type_stack_elt element)
 {
   check_type_stack_depth ();
 
-  if (slot < type_stack_depth)
-    memmove (&type_stack[slot + 1], &type_stack[slot],
-	     (type_stack_depth - slot) * sizeof (union type_stack_elt));
-  type_stack[slot] = element;
-  ++type_stack_depth;
+  if (slot < type_stack.depth)
+    memmove (&type_stack.elements[slot + 1], &type_stack.elements[slot],
+	     (type_stack.depth - slot) * sizeof (union type_stack_elt));
+  type_stack.elements[slot] = element;
+  ++type_stack.depth;
 }
 
 /* Insert a new type, TP, at the bottom of the type stack.  If TP is
@@ -1404,7 +1404,7 @@ insert_type (enum type_pieces tp)
   /* If there is anything on the stack (we know it will be a
      tp_pointer), insert the qualifier above it.  Otherwise, simply
      push this on the top of the stack.  */
-  if (type_stack_depth && (tp == tp_const || tp == tp_volatile))
+  if (type_stack.depth && (tp == tp_const || tp == tp_volatile))
     slot = 1;
   else
     slot = 0;
@@ -1417,14 +1417,14 @@ void
 push_type (enum type_pieces tp)
 {
   check_type_stack_depth ();
-  type_stack[type_stack_depth++].piece = tp;
+  type_stack.elements[type_stack.depth++].piece = tp;
 }
 
 void
 push_type_int (int n)
 {
   check_type_stack_depth ();
-  type_stack[type_stack_depth++].int_val = n;
+  type_stack.elements[type_stack.depth++].int_val = n;
 }
 
 /* Insert a tp_space_identifier and the corresponding address space
@@ -1444,7 +1444,7 @@ insert_type_address_space (char *string)
   /* If there is anything on the stack (we know it will be a
      tp_pointer), insert the address space qualifier above it.
      Otherwise, simply push this on the top of the stack.  */
-  if (type_stack_depth)
+  if (type_stack.depth)
     slot = 1;
   else
     slot = 0;
@@ -1458,16 +1458,16 @@ insert_type_address_space (char *string)
 enum type_pieces
 pop_type (void)
 {
-  if (type_stack_depth)
-    return type_stack[--type_stack_depth].piece;
+  if (type_stack.depth)
+    return type_stack.elements[--type_stack.depth].piece;
   return tp_end;
 }
 
 int
 pop_type_int (void)
 {
-  if (type_stack_depth)
-    return type_stack[--type_stack_depth].int_val;
+  if (type_stack.depth)
+    return type_stack.elements[--type_stack.depth].int_val;
   /* "Can't happen".  */
   return 0;
 }
@@ -1725,10 +1725,10 @@ exp_uses_objfile (struct expression *exp, struct objfile *objfile)
 void
 _initialize_parse (void)
 {
-  type_stack_size = 80;
-  type_stack_depth = 0;
-  type_stack = (union type_stack_elt *)
-    xmalloc (type_stack_size * sizeof (*type_stack));
+  type_stack.size = 80;
+  type_stack.depth = 0;
+  type_stack.elements = xmalloc (type_stack.size
+				 * sizeof (union type_stack_elt));
 
   add_setshow_zinteger_cmd ("expression", class_maintenance,
 			    &expressiondebug,

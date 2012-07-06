@@ -1,5 +1,18 @@
 2012-07-06  Tom Tromey  <tromey@redhat.com>
 
+	* parser-defs.h (type_stack, type_stack_size, type_stack_depth):
+	Remove.
+	(struct type_stack): New.
+	* parse.c (type_stack, type_stack_size, type_stack_depth):
+	Remove.
+	(type_stack): New global.
+	(parse_exp_in_context, check_type_stack_depth)
+	(insert_into_type_stack, insert_type, push_type, push_type_int)
+	(insert_type_address_space, pop_type, pop_type_int)
+	(_initialize_parse): Update.
+
+2012-07-06  Tom Tromey  <tromey@redhat.com>
+
 	* c-exp.y (func_mod, direct_abs_decl, abs_decl, ptr_operator):
 	Remove %type.
 
