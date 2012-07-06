@@ -76,10 +76,6 @@ struct lwp_info
   /* Non-zero if we were stepping this LWP.  */
   int step;
 
-  /* Non-zero si_signo if this LWP stopped with a trap.  si_addr may
-     be the address of a hardware watchpoint.  */
-  siginfo_t siginfo;
-
   /* STOPPED_BY_WATCHPOINT is non-zero if this LWP stopped with a data
      watchpoint trap.  */
   int stopped_by_watchpoint;

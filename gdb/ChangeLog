@@ -1,5 +1,16 @@
 2012-07-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linux-nat.c (resume_lwp, linux_nat_resume): Remove LP->SIGINFO
+	clearing.
+	(save_siginfo): Remove.
+	(stop_wait_callback, linux_nat_filter_event): Remove the save_siginfo
+	call.
+	(resume_stopped_resumed_lwps): Remove LP->SIGINFO clearing.
+	(linux_nat_get_siginfo): Use PTRACE_GETSIGINFO.
+	* linux-nat.h (struct lwp_info): Remove field siginfo.
+
+2012-07-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup for the next patch.
 	* arm-linux-nat.c (arm_linux_stopped_data_address): Change variable
 	siginfo_p to siginfo, update its users incl. the linux_nat_get_siginfo

@@ -1933,7 +1933,6 @@ resume_lwp (struct lwp_info *lp, int step, enum gdb_signal signo)
 				step, signo);
 	  lp->stopped = 0;
 	  lp->step = step;
-	  memset (&lp->siginfo, 0, sizeof (lp->siginfo));
 	  lp->stopped_by_watchpoint = 0;
 	}
       else
@@ -2092,7 +2091,6 @@ linux_nat_resume (struct target_ops *ops,
   if (linux_nat_prepare_to_resume != NULL)
     linux_nat_prepare_to_resume (lp);
   linux_ops->to_resume (linux_ops, ptid, step, signo);
-  memset (&lp->siginfo, 0, sizeof (lp->siginfo));
   lp->stopped_by_watchpoint = 0;
 
   if (debug_linux_nat)
@@ -2646,22 +2644,6 @@ wait_lwp (struct lwp_info *lp)
   return status;
 }
 
-/* Save the most recent siginfo for LP.  This is currently only called
-   for SIGTRAP; some ports use the si_addr field for
-   target_stopped_data_address.  In the future, it may also be used to
-   restore the siginfo of requeued signals.  */
-
-static void
-save_siginfo (struct lwp_info *lp)
-{
-  errno = 0;
-  ptrace (PTRACE_GETSIGINFO, GET_LWP (lp->ptid),
-	  (PTRACE_TYPE_ARG3) 0, &lp->siginfo);
-
-  if (errno != 0)
-    memset (&lp->siginfo, 0, sizeof (lp->siginfo));
-}
-
 /* Send a SIGSTOP to LP.  */
 
 static int
@@ -2903,9 +2885,6 @@ stop_wait_callback (struct lwp_info *lp, void *data)
       if (WSTOPSIG (status) != SIGSTOP)
 	{
 	  /* The thread was stopped with a signal other than SIGSTOP.  */
-
-	  /* Save the trap's siginfo in case we need it later.  */
-	  save_siginfo (lp);
 
 	  save_sigtrap (lp);
 
@@ -3284,12 +3263,7 @@ linux_nat_filter_event (int lwpid, int status, int *new_pending_p)
     }
 
   if (linux_nat_status_is_event (status))
-    {
-      /* Save the trap's siginfo in case we need it later.  */
-      save_siginfo (lp);
-
-      save_sigtrap (lp);
-    }
+    save_sigtrap (lp);
 
   /* Check if the thread has exited.  */
   if ((WIFEXITED (status) || WIFSIGNALED (status))
@@ -3942,7 +3916,6 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
       linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
 			    lp->step, GDB_SIGNAL_0);
       lp->stopped = 0;
-      memset (&lp->siginfo, 0, sizeof (lp->siginfo));
       lp->stopped_by_watchpoint = 0;
     }
 
@@ -5192,12 +5165,19 @@ linux_nat_set_prepare_to_resume (struct target_ops *t,
 int
 linux_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
 {
-  struct lwp_info *lp = find_lwp_pid (ptid);
+  int pid;
 
-  gdb_assert (lp != NULL);
+  pid = GET_LWP (ptid);
+  if (pid == 0)
+    pid = GET_PID (ptid);
 
-  *siginfo = lp->siginfo;
-
+  errno = 0;
+  ptrace (PTRACE_GETSIGINFO, pid, (PTRACE_TYPE_ARG3) 0, siginfo);
+  if (errno != 0)
+    {
+      memset (siginfo, 0, sizeof (*siginfo));
+      return 0;
+    }
   return 1;
 }
 
