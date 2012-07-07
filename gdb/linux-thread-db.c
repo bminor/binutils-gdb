@@ -700,9 +700,10 @@ thread_db_find_new_threads_silently (ptid_t ptid)
 	 If the nptl bug is present in the inferior return 0 to silently ignore
 	 such errors, and let gdb enumerate threads again later.  In such case
 	 GDB cannot properly display LWPs if the inferior thread list is
-	 corrupted.  */
+	 corrupted.  For core files it does not apply, no 'later enumeration'
+	 is possible.  */
 
-      if (!inferior_has_bug ("nptl_version", 2, 7))
+      if (!target_has_execution || !inferior_has_bug ("nptl_version", 2, 7))
 	{
 	  exception_fprintf (gdb_stderr, except,
 			     _("Warning: couldn't activate thread debugging "

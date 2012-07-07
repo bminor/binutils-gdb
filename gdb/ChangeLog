@@ -1,3 +1,8 @@
+2012-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-thread-db.c (thread_db_find_new_threads_silently): Do not apply
+	nptl <2.7 bug workaround for core files.
+
 2012-07-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-nat.c (resume_lwp, linux_nat_resume): Remove LP->SIGINFO
