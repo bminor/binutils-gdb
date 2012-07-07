@@ -33,7 +33,7 @@ gdb_test_multiple "next" $test {
     -re " test-pass .*\r\n$gdb_prompt $" {
 	pass $test
     }
-    -re " test-fail .*\r\n$gdb_prompt $" {
+    -re "( test-fail .*|\r\nCannot insert breakpoint 0\\.\r\n.*)\r\n$gdb_prompt $" {
 	xfail $test
 	untested "System lacks support for tracking longjmps"
 	return -1

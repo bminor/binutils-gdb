@@ -1,3 +1,9 @@
+2012-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix XFAIL compatibility with old i386 systems.
+	* gdb.base/stale-infcall.exp (test system longjmp tracking support):
+	Check also 'Cannot insert breakpoint 0'.
+
 2012-07-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR 14321
