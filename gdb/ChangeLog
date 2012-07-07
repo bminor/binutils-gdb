@@ -1,5 +1,17 @@
 2012-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* common/linux-ptrace.c: Include gdb_assert.h.
+	<__i386__> (linux_ptrace_test_ret_to_nx_instr): New declaration.
+	<__i386__>: Include sys/reg.h, sys/mman.h, signal.h, sys/wait.h and
+	stdint.h.
+	(linux_ptrace_test_ret_to_nx, linux_ptrace_init_warnings): New
+	functions.
+	* common/linux-ptrace.h (linux_ptrace_init_warnings): New declarations.
+	* linux-nat.c (linux_child_post_attach)
+	(linux_child_post_startup_inferior): Call linux_ptrace_init_warnings.
+
+2012-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* linux-thread-db.c (thread_db_find_new_threads_silently): Do not apply
 	nptl <2.7 bug workaround for core files.
 

@@ -583,6 +583,7 @@ linux_child_post_attach (int pid)
 {
   linux_enable_event_reporting (pid_to_ptid (pid));
   linux_enable_tracesysgood (pid_to_ptid (pid));
+  linux_ptrace_init_warnings ();
 }
 
 static void
@@ -590,6 +591,7 @@ linux_child_post_startup_inferior (ptid_t ptid)
 {
   linux_enable_event_reporting (ptid);
   linux_enable_tracesysgood (ptid);
+  linux_ptrace_init_warnings ();
 }
 
 /* Return the number of known LWPs in the tgid given by PID.  */

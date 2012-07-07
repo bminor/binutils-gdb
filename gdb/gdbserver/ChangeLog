@@ -1,3 +1,8 @@
+2012-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbserver/linux-low.c (initialize_low): Call
+	linux_ptrace_init_warnings.
+
 2012-07-02  Doug Evans  <dje@google.com>
 
 	* mem-break.c (gdb_no_commands_at_breakpoint): Fix cast from

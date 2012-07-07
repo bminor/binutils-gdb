@@ -5878,6 +5878,7 @@ initialize_low (void)
 		       the_low_target.breakpoint_len);
   linux_init_signals ();
   linux_test_for_tracefork ();
+  linux_ptrace_init_warnings ();
 #ifdef HAVE_LINUX_REGSETS
   for (num_regsets = 0; target_regsets[num_regsets].size >= 0; num_regsets++)
     ;
