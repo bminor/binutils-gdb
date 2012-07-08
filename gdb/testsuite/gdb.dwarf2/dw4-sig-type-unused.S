@@ -58,7 +58,7 @@ types_start:
 	.section	.debug_abbrev
 .Ldebug_abbrev0:
 	.uleb128 0x1	/* (abbrev code) */
-	.uleb128 0x11	/* (TAG: DW_TAG_type_unit) */
+	.uleb128 0x41	/* (TAG: DW_TAG_type_unit) */
 	.byte	0x1	/* DW_children_yes */
 	.uleb128 0x13	/* (DW_AT_language) */
 	.uleb128 0xb	/* (DW_FORM_data1) */

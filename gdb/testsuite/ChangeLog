@@ -1,3 +1,7 @@
+2012-07-08  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw4-sig-type-unused.S: Fix typo.
+
 2012-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix XFAIL compatibility with old i386 systems.
