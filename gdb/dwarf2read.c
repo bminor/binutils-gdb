@@ -212,7 +212,7 @@ struct dwarf2_per_objfile
   int n_type_units;
 
   /* The .debug_types-related CUs (TUs).  */
-  struct dwarf2_per_cu_data **all_type_units;
+  struct signatured_type **all_type_units;
 
   /* A chain of compilation units that are currently read in, so that
      they can be freed later.  */
@@ -2072,7 +2072,7 @@ dw2_get_cu (int index)
   if (index >= dwarf2_per_objfile->n_comp_units)
     {
       index -= dwarf2_per_objfile->n_comp_units;
-      return dwarf2_per_objfile->all_type_units[index];
+      return &dwarf2_per_objfile->all_type_units[index]->per_cu;
     }
   return dwarf2_per_objfile->all_comp_units[index];
 }
@@ -2155,7 +2155,7 @@ create_signatured_type_table_from_index (struct objfile *objfile,
   dwarf2_per_objfile->all_type_units
     = obstack_alloc (&objfile->objfile_obstack,
 		     dwarf2_per_objfile->n_type_units
-		     * sizeof (struct dwarf2_per_cu_data *));
+		     * sizeof (struct signatured_type *));
 
   sig_types_hash = allocate_signatured_type_table (objfile);
 
@@ -2186,7 +2186,7 @@ create_signatured_type_table_from_index (struct objfile *objfile,
       slot = htab_find_slot (sig_types_hash, sig_type, INSERT);
       *slot = sig_type;
 
-      dwarf2_per_objfile->all_type_units[i / 3] = &sig_type->per_cu;
+      dwarf2_per_objfile->all_type_units[i / 3] = sig_type;
     }
 
   dwarf2_per_objfile->signatured_types = sig_types_hash;
@@ -3636,9 +3636,9 @@ static int
 add_signatured_type_cu_to_table (void **slot, void *datum)
 {
   struct signatured_type *sigt = *slot;
-  struct dwarf2_per_cu_data ***datap = datum;
+  struct signatured_type ***datap = datum;
 
-  **datap = &sigt->per_cu;
+  **datap = sigt;
   ++*datap;
 
   return 1;
@@ -3810,7 +3810,7 @@ static int
 create_all_type_units (struct objfile *objfile)
 {
   htab_t types_htab;
-  struct dwarf2_per_cu_data **iter;
+  struct signatured_type **iter;
 
   types_htab = create_debug_types_hash_table (NULL, dwarf2_per_objfile->types);
   if (types_htab == NULL)
@@ -3825,7 +3825,7 @@ create_all_type_units (struct objfile *objfile)
   dwarf2_per_objfile->all_type_units
     = obstack_alloc (&objfile->objfile_obstack,
 		     dwarf2_per_objfile->n_type_units
-		     * sizeof (struct dwarf2_per_cu_data *));
+		     * sizeof (struct signatured_type *));
   iter = &dwarf2_per_objfile->all_type_units[0];
   htab_traverse_noresize (types_htab, add_signatured_type_cu_to_table, &iter);
   gdb_assert (iter - &dwarf2_per_objfile->all_type_units[0]
