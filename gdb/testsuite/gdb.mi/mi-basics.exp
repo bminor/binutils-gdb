@@ -39,7 +39,7 @@ set binfile ${objdir}/${subdir}/mi-basics
 set escapedobjdir [string_to_regexp ${objdir}]
 set envirodir [string_to_regexp ${objdir}/${subdir}]
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested mi-basics.exp
      return -1
 }

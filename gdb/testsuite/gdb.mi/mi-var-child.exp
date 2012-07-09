@@ -31,7 +31,7 @@ if [mi_gdb_start] {
 set testfile "mi-var-child"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     untested mi-var-child.exp
     return -1
 }

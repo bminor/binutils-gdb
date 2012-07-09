@@ -27,7 +27,7 @@ set MIFLAGS "-i=mi"
 set testfile "mi-syn-frame"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested mi-syn-frame.exp
      return -1
 }
