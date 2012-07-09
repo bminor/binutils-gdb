@@ -1179,8 +1179,7 @@ static struct attribute *dwarf2_attr (struct die_info *, unsigned int,
 				      struct dwarf2_cu *);
 
 static struct attribute *dwarf2_attr_no_follow (struct die_info *,
-						unsigned int,
-						struct dwarf2_cu *);
+						unsigned int);
 
 static int dwarf2_flag_true_p (struct die_info *die, unsigned name,
                                struct dwarf2_cu *cu);
@@ -9401,7 +9400,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   /* If the definition of this type lives in .debug_types, read that type.
      Don't follow DW_AT_specification though, that will take us back up
      the chain and we want to go down.  */
-  attr = dwarf2_attr_no_follow (die, DW_AT_signature, cu);
+  attr = dwarf2_attr_no_follow (die, DW_AT_signature);
   if (attr)
     {
       struct dwarf2_cu *type_cu = cu;
@@ -9728,7 +9727,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   /* If the definition of this type lives in .debug_types, read that type.
      Don't follow DW_AT_specification though, that will take us back up
      the chain and we want to go down.  */
-  attr = dwarf2_attr_no_follow (die, DW_AT_signature, cu);
+  attr = dwarf2_attr_no_follow (die, DW_AT_signature);
   if (attr)
     {
       struct dwarf2_cu *type_cu = cu;
@@ -12807,8 +12806,7 @@ dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
    back up the chain, and we want to go down.  */
 
 static struct attribute *
-dwarf2_attr_no_follow (struct die_info *die, unsigned int name,
-		       struct dwarf2_cu *cu)
+dwarf2_attr_no_follow (struct die_info *die, unsigned int name)
 {
   unsigned int i;
 

@@ -1,3 +1,8 @@
+2012-07-09  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_attr_no_follow): Delete unused arg "cu".
+	All callers updated.
+
 2012-07-09  Tom Tromey  <tromey@redhat.com>
 
 	* c-exp.y (check_parameter_typelist): New function.
