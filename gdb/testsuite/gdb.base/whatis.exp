@@ -499,3 +499,11 @@ gdb_test "whatis int (*)(int, int)" \
 gdb_test "whatis int (*)(const int *, ...)" \
     "type = int \\(\\*\\)\\(const int \\*, \\.\\.\\.\\)" \
     "whatis applied to pointer to function taking const int ptr and varargs and returning int"
+
+gdb_test "whatis int (*)(void, int, int)" \
+    "parameter types following 'void'" \
+    "whatis applied to function with types trailing 'void'"
+
+gdb_test "whatis int (*)(int, void, int)" \
+    "'void' invalid as parameter type" \
+    "whatis applied to function with 'void' parameter type"

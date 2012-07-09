@@ -165,6 +165,7 @@ void yyerror (char *);
 /* YYSTYPE gets defined by %union */
 static int parse_number (char *, int, int, YYSTYPE *);
 static struct stoken operator_stoken (const char *);
+static void check_parameter_typelist (VEC (type_ptr) *);
 %}
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly
@@ -1227,9 +1228,11 @@ typename:	TYPENAME
 
 parameter_typelist:
 		nonempty_typelist
+			{ check_parameter_typelist ($1); }
 	|	nonempty_typelist ',' DOTDOTDOT
 			{
 			  VEC_safe_push (type_ptr, $1, NULL);
+			  check_parameter_typelist ($1);
 			  $$ = $1;
 			}
 	;
@@ -1443,6 +1446,37 @@ operator_stoken (const char *op)
   make_cleanup (free, st.ptr);
   return st;
 };
+
+/* Validate a parameter typelist.  */
+
+static void
+check_parameter_typelist (VEC (type_ptr) *params)
+{
+  struct type *type;
+  int ix;
+
+  for (ix = 0; VEC_iterate (type_ptr, params, ix, type); ++ix)
+    {
+      if (type != NULL && TYPE_CODE (check_typedef (type)) == TYPE_CODE_VOID)
+	{
+	  if (ix == 0)
+	    {
+	      if (VEC_length (type_ptr, params) == 1)
+		{
+		  /* Ok.  */
+		  break;
+		}
+	      VEC_free (type_ptr, params);
+	      error (_("parameter types following 'void'"));
+	    }
+	  else
+	    {
+	      VEC_free (type_ptr, params);
+	      error (_("'void' invalid as parameter type"));
+	    }
+	}
+    }
+}
 
 /* Take care of parsing a number (anything that starts with a digit).
    Set yylval and return the token type; update lexptr.

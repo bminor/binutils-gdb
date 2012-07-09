@@ -1,3 +1,11 @@
+2012-07-09  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (check_parameter_typelist): New function.
+	(parameter_typelist): Call it.
+	* eval.c (make_params): Handle '(void)' case.
+	* gdbtypes.c (lookup_function_type_with_arguments): Handle
+	'(void)' case.
+
 2012-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* common/linux-ptrace.c: Include gdb_assert.h.

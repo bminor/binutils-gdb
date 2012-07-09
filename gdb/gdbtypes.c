@@ -474,10 +474,21 @@ lookup_function_type_with_arguments (struct type *type,
   struct type *fn = make_function_type (type, (struct type **) 0);
   int i;
 
-  if (nparams > 0 && param_types[nparams - 1] == NULL)
+  if (nparams > 0)
     {
-      --nparams;
-      TYPE_VARARGS (fn) = 1;
+      if (param_types[nparams - 1] == NULL)
+	{
+	  --nparams;
+	  TYPE_VARARGS (fn) = 1;
+	}
+      else if (TYPE_CODE (check_typedef (param_types[nparams - 1]))
+	       == TYPE_CODE_VOID)
+	{
+	  --nparams;
+	  /* Caller should have ensured this.  */
+	  gdb_assert (nparams == 0);
+	  TYPE_PROTOTYPED (fn) = 1;
+	}
     }
 
   TYPE_NFIELDS (fn) = nparams;

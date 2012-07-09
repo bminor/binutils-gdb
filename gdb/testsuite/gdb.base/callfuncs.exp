@@ -539,3 +539,6 @@ if {![target_info exists gdb,nosignals] && ![istarget "*-*-uclinux*"]} {
 # handling vs. local labels `.L'... as `Lcallfunc' starts with `L'.
 
 gdb_test "print callfunc (Lcallfunc, 5)" " = 12"
+
+# Regression test for function pointer cast.
+gdb_test "print *((int *(*) (void)) voidfunc)()" " = 23"

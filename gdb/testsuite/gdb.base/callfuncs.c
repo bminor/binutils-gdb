@@ -641,6 +641,13 @@ struct struct_with_fnptr function_struct = { doubleit };
 
 struct struct_with_fnptr *function_struct_ptr = &function_struct;
 
+int *
+voidfunc (void)
+{
+  static int twentythree = 23;
+  return &twentythree;
+}
+
 /* Gotta have a main to be able to generate a linked, runnable
    executable, and also provide a useful place to set a breakpoint. */
 
