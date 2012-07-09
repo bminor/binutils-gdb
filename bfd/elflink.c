@@ -3145,7 +3145,7 @@ on_needed_list (const char *soname, struct bfd_link_needed_list *needed)
   return FALSE;
 }
 
-/* Sort symbol by value and section.  */
+/* Sort symbol by value, section, and size.  */
 static int
 elf_sort_symbol (const void *arg1, const void *arg2)
 {
@@ -3164,7 +3164,8 @@ elf_sort_symbol (const void *arg1, const void *arg2)
       if (sdiff != 0)
 	return sdiff > 0 ? 1 : -1;
     }
-  return 0;
+  vdiff = h1->size - h2->size;
+  return vdiff == 0 ? 0 : vdiff > 0 ? 1 : -1;
 }
 
 /* This function is used to adjust offsets into .dynstr for
@@ -4726,7 +4727,6 @@ error_free_dyn:
 	  struct elf_link_hash_entry *hlook;
 	  asection *slook;
 	  bfd_vma vlook;
-	  long ilook;
 	  size_t i, j, idx;
 
 	  hlook = weaks;
@@ -4740,14 +4740,13 @@ error_free_dyn:
 	  slook = hlook->root.u.def.section;
 	  vlook = hlook->root.u.def.value;
 
-	  ilook = -1;
 	  i = 0;
 	  j = sym_count;
-	  while (i < j)
+	  while (i != j)
 	    {
 	      bfd_signed_vma vdiff;
 	      idx = (i + j) / 2;
-	      h = sorted_sym_hash [idx];
+	      h = sorted_sym_hash[idx];
 	      vdiff = vlook - h->root.u.def.value;
 	      if (vdiff < 0)
 		j = idx;
@@ -4761,24 +4760,36 @@ error_free_dyn:
 		  else if (sdiff > 0)
 		    i = idx + 1;
 		  else
-		    {
-		      ilook = idx;
-		      break;
-		    }
+		    break;
 		}
 	    }
 
 	  /* We didn't find a value/section match.  */
-	  if (ilook == -1)
+	  if (i == j)
 	    continue;
 
-	  for (i = ilook; i < sym_count; i++)
+	  /* With multiple aliases, or when the weak symbol is already
+	     strongly defined, we have multiple matching symbols and
+	     the binary search above may land on any of them.  Step
+	     one past the matching symbol(s).  */
+	  while (++idx != j)
 	    {
-	      h = sorted_sym_hash [i];
+	      h = sorted_sym_hash[idx];
+	      if (h->root.u.def.section != slook
+		  || h->root.u.def.value != vlook)
+		break;
+	    }
+
+	  /* Now look back over the aliases.  Since we sorted by size
+	     as well as value and section, we'll choose the one with
+	     the largest size.  */
+	  while (idx-- != i)
+	    {
+	      h = sorted_sym_hash[idx];
 
 	      /* Stop if value or section doesn't match.  */
-	      if (h->root.u.def.value != vlook
-		  || h->root.u.def.section != slook)
+	      if (h->root.u.def.section != slook
+		  || h->root.u.def.value != vlook)
 		break;
 	      else if (h != hlook)
 		{

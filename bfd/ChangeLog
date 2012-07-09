@@ -1,3 +1,10 @@
+2012-07-09  Alan Modra  <amodra@gmail.com>
+
+	PR ld/14323
+	* elflink.c (elf_sort_symbol): Sort by size too.
+	(elf_link_add_object_symbols <weakdefs>): Simplify binary search.
+	Do not depend on ordering of symbol aliases.  Match largest size.
+
 2012-07-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf.c (assign_section_numbers): Check if number of sections
