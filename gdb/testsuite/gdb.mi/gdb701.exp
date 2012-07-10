@@ -25,9 +25,8 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile gdb701
-set srcfile "$testfile.c"
-set binfile $objdir/$subdir/$testfile
+standard_testfile
+
 if {[gdb_compile $srcdir/$subdir/$srcfile $binfile executable debug] != ""} {
   untested gdb701.exp
   return -1

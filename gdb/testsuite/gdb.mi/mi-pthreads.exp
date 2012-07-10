@@ -61,11 +61,9 @@ proc check_mi_thread_command_set {} {
 #
 # Start here
 #
-set testfile "pthreads"
-set srcfile "$testfile.c"
-set binfile "$objdir/$subdir/mi-$testfile"
+standard_testfile pthreads.c
 
-set options [list debug incdir=$objdir]
+set options [list debug]
 if {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $options] != "" } {
     return -1
 }

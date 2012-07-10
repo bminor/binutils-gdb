@@ -23,13 +23,10 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile mi-var-rtti
-set srcfile "$testfile.cc"
-set executable ${testfile}
-set binfile $objdir/$subdir/$testfile
+standard_testfile .cc
 set opts {debug c++}
 
-if [build_executable $testfile.exp $executable $srcfile $opts] {
+if [build_executable $testfile.exp $testfile $srcfile $opts] {
     return -1;
 }
 

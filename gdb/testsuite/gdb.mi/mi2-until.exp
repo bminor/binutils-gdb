@@ -31,9 +31,8 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile "until"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile until.c
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested mi2-until.exp
      return -1

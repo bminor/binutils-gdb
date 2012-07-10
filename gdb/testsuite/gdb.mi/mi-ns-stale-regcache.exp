@@ -41,11 +41,9 @@ proc mi_nonstop_resume { command test } {
 #
 # Start here
 #
-set testfile "ns-stale-regcache"
-set srcfile "$testfile.c"
-set binfile "$objdir/$subdir/mi-$testfile"
+standard_testfile ns-stale-regcache.c
 
-set options [list debug incdir=$objdir]
+set options [list debug]
 if {[gdb_compile "$srcdir/$subdir/$srcfile" \
 	 $binfile executable $options] != "" } {
     return -1

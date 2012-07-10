@@ -26,14 +26,14 @@ if [mi_gdb_start] {
     continue
 }
 
+standard_testfile solib-main.c solib-lib.c
+
 set libname "solib-lib"
-set srcfile_lib ${srcdir}/${subdir}/${libname}.c
-set binfile_lib ${objdir}/${subdir}/${libname}.so
+set srcfile_lib ${srcdir}/${subdir}/$srcfile2
+set binfile_lib [standard_output_file ${libname}.so]
 set lib_flags [list debug]
 
-set testfile "solib-main"
-set srcfile ${srcdir}/${subdir}/${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set srcfile_main ${srcdir}/${subdir}/$srcfile
 set bin_flags [list debug shlib=${binfile_lib}]
 
 if [get_compiler_info] {
@@ -41,7 +41,7 @@ if [get_compiler_info] {
 }
 
 if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $lib_flags] != ""
-     || [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
+     || [gdb_compile ${srcfile_main} ${binfile} executable $bin_flags] != "" } {
   untested "Could not compile $binfile_lib or $binfile."
   return -1
 }

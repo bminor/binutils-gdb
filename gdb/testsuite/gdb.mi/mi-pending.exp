@@ -24,12 +24,8 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-set testfile "mi-pending"
-set libfile "mi-pendshr"
-set srcfile $testfile.c
-set libsrc  $srcdir/$subdir/$libfile.c
-set binfile $objdir/$subdir/$testfile
-set lib_sl  $objdir/$subdir/$libfile.sl
+standard_testfile mi-pending.c mi-pendshr.c
+set lib_sl [standard_output_file mi-pendshr.sl]
 
 set lib_opts  debug
 set exec_opts [list debug shlib=$lib_sl]
@@ -38,7 +34,7 @@ if [get_compiler_info] {
     return -1
 }
 
-if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
+if { [gdb_compile_shlib $srcdir/$subdir/$srcfile2 $lib_sl $lib_opts] != ""
      || [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != ""} {
     untested "Could not compile either $libsrc or $srcdir/$subdir/$srcfile."
     return -1

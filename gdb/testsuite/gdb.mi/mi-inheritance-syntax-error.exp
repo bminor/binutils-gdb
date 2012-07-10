@@ -23,9 +23,7 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile mi-inheritance-syntax-error
-set srcfile "$testfile.cc"
-set binfile $objdir/$subdir/$testfile
+standard_testfile .cc
 
 if [get_compiler_info "c++"] {
     return -1;

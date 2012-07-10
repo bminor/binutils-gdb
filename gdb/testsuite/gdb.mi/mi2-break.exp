@@ -33,9 +33,8 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile "basics"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/mi2-break
+standard_testfile basics.c
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested mi2-break.exp
      return -1

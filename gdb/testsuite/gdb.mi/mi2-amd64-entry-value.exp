@@ -21,8 +21,7 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile mi2-amd64-entry-value
-set srcfile ${testfile}.s
+standard_testfile .s
 set opts {}
 
 if [info exists COMPILE] {
@@ -35,7 +34,6 @@ if [info exists COMPILE] {
 }
 
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
 
 if [build_executable ${testfile}.exp ${executable} ${srcfile} $opts] {
     return -1

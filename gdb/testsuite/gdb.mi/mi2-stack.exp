@@ -30,9 +30,8 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile "mi-stack"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile mi-stack.c
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested mi2-stack.exp
      return -1

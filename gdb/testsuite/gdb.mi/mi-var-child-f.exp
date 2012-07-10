@@ -25,9 +25,8 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile "array"
-set srcfile ${testfile}.f
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile array.f
+
 if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	 executable {debug f77}] != ""} {
     return -1

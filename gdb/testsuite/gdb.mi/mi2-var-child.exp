@@ -27,9 +27,8 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile "var-cmd"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/mi2-var-child
+standard_testfile var-cmd.c
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     untested mi2-var-child.exp
     return -1

@@ -42,9 +42,7 @@ proc mi_nonstop_resume { command test } {
 #
 # Start here
 #
-set testfile "watch-nonstop"
-set srcfile "$testfile.c"
-set binfile "$objdir/$subdir/mi-$testfile"
+standard_testfile watch-nonstop.c
 
 if {[gdb_compile "$srcdir/$subdir/$srcfile" $binfile executable {debug}] != "" } {
     return -1

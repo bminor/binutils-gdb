@@ -24,9 +24,8 @@ if { [skip_gdbserver_tests] } {
     return 0
 }
 
-set testfile "basics"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/mi-file-transfer
+standard_testfile basics.c
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     untested mi-file-transfer.exp
     return -1

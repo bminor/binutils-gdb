@@ -39,9 +39,8 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile mi-reverse
-set srcfile basics.c
-set binfile ${objdir}/${subdir}/mi2-reverse
+standard_testfile basics.c
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested ${testfile}.exp
      return -1

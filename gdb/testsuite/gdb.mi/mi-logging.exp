@@ -21,13 +21,10 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile basics
-set srcfile "$testfile.c"
-set executable ${testfile}
-set binfile $objdir/$subdir/$testfile
+standard_testfile basics.c
 set opts {debug}
 
-if [build_executable $testfile.exp $executable $srcfile $opts] {
+if [build_executable $testfile.exp $testfile $srcfile $opts] {
     untested mi-logging.exp
     return -1;
 }

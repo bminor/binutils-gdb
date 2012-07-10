@@ -1,5 +1,79 @@
 2012-07-10  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.mi/dw2-ref-missing-frame.exp: Use standard_testfile,
+	standard_output_file.
+	* gdb.mi/gdb2549.exp: Use standard_testfile.
+	* gdb.mi/gdb669.exp: Use standard_testfile.
+	* gdb.mi/gdb701.exp: Use standard_testfile.
+	* gdb.mi/gdb792.exp: Use standard_testfile.
+	* gdb.mi/mi-async.exp: Use standard_testfile.
+	* gdb.mi/mi-basics.exp: Use standard_testfile.
+	* gdb.mi/mi-break.exp: Use standard_testfile.
+	* gdb.mi/mi-cli.exp: Use standard_testfile.
+	* gdb.mi/mi-console.exp: Use standard_testfile.
+	* gdb.mi/mi-disassemble.exp: Use standard_testfile.
+	* gdb.mi/mi-eval.exp: Use standard_testfile.
+	* gdb.mi/mi-file-transfer.exp: Use standard_testfile.
+	* gdb.mi/mi-file.exp: Use standard_testfile.
+	* gdb.mi/mi-inheritance-syntax-error.exp: Use standard_testfile.
+	* gdb.mi/mi-logging.exp: Use standard_testfile.
+	* gdb.mi/mi-nonstop-exit.exp: Use standard_testfile.
+	* gdb.mi/mi-nonstop.exp: Use standard_testfile.
+	* gdb.mi/mi-ns-stale-regcache.exp: Use standard_testfile.
+	* gdb.mi/mi-nsintrall.exp: Use standard_testfile.
+	* gdb.mi/mi-nsmoribund.exp: Use standard_testfile.
+	* gdb.mi/mi-nsthrexec.exp: Use standard_testfile.
+	* gdb.mi/mi-pending.exp: Use standard_testfile,
+	standard_output_file.
+	* gdb.mi/mi-pthreads.exp: Use standard_testfile.
+	* gdb.mi/mi-read-memory.exp: Use standard_testfile.
+	* gdb.mi/mi-regs.exp: Use standard_testfile.
+	* gdb.mi/mi-return.exp: Use standard_testfile.
+	* gdb.mi/mi-reverse.exp: Use standard_testfile.
+	* gdb.mi/mi-simplerun.exp: Use standard_testfile.
+	* gdb.mi/mi-solib.exp: Use standard_testfile,
+	standard_output_file.
+	* gdb.mi/mi-stack.exp: Use standard_testfile.
+	* gdb.mi/mi-stepi.exp: Use standard_testfile.
+	* gdb.mi/mi-stepn.exp: Use standard_testfile.
+	* gdb.mi/mi-syn-frame.exp: Use standard_testfile.
+	* gdb.mi/mi-until.exp: Use standard_testfile.
+	* gdb.mi/mi-var-block.exp: Use standard_testfile.
+	* gdb.mi/mi-var-child-f.exp: Use standard_testfile.
+	* gdb.mi/mi-var-child.exp: Use standard_testfile.
+	* gdb.mi/mi-var-cmd.exp: Use standard_testfile.
+	* gdb.mi/mi-var-cp.exp: Use standard_testfile.
+	* gdb.mi/mi-var-display.exp: Use standard_testfile.
+	* gdb.mi/mi-var-invalidate.exp: Use standard_testfile,
+	standard_output_file.
+	* gdb.mi/mi-var-rtti.exp: Use standard_testfile.
+	* gdb.mi/mi-watch-nonstop.exp: Use standard_testfile.
+	* gdb.mi/mi-watch.exp: Use standard_testfile.
+	* gdb.mi/mi2-amd64-entry-value.exp: Use standard_testfile.
+	* gdb.mi/mi2-basics.exp: Use standard_testfile.
+	* gdb.mi/mi2-break.exp: Use standard_testfile.
+	* gdb.mi/mi2-cli.exp: Use standard_testfile.
+	* gdb.mi/mi2-console.exp: Use standard_testfile.
+	* gdb.mi/mi2-disassemble.exp: Use standard_testfile.
+	* gdb.mi/mi2-eval.exp: Use standard_testfile.
+	* gdb.mi/mi2-file.exp: Use standard_testfile.
+	* gdb.mi/mi2-pthreads.exp: Use standard_testfile.
+	* gdb.mi/mi2-read-memory.exp: Use standard_testfile.
+	* gdb.mi/mi2-regs.exp: Use standard_testfile.
+	* gdb.mi/mi2-return.exp: Use standard_testfile.
+	* gdb.mi/mi2-simplerun.exp: Use standard_testfile.
+	* gdb.mi/mi2-stack.exp: Use standard_testfile.
+	* gdb.mi/mi2-stepi.exp: Use standard_testfile.
+	* gdb.mi/mi2-syn-frame.exp: Use standard_testfile.
+	* gdb.mi/mi2-until.exp: Use standard_testfile.
+	* gdb.mi/mi2-var-block.exp: Use standard_testfile.
+	* gdb.mi/mi2-var-child.exp: Use standard_testfile.
+	* gdb.mi/mi2-var-cmd.exp: Use standard_testfile.
+	* gdb.mi/mi2-var-display.exp: Use standard_testfile.
+	* gdb.mi/mi2-watch.exp: Use standard_testfile.
+
+2012-07-10  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.cp/abstract-origin.exp: Use standard_testfile.
 	* gdb.cp/ambiguous.exp: Use standard_testfile,
 	prepare_for_testing.

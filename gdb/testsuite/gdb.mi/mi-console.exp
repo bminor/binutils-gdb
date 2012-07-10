@@ -36,9 +36,8 @@ if [mi_gdb_start separate-inferior-tty] {
     continue
 }
 
-set testfile "mi-console"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested mi-console.exp
      return -1
