@@ -3098,6 +3098,7 @@ proc standard_output_file {basename} {
 proc standard_testfile {args} {
     global gdb_test_file_name
     global objdir subdir
+    global gdb_test_file_last_vars
 
     # Outputs.
     global testfile binfile
@@ -3108,6 +3109,17 @@ proc standard_testfile {args} {
     if {[llength $args] == 0} {
 	set args .c
     }
+
+    # Unset our previous output variables.
+    # This can help catch hidden bugs.
+    if {[info exists gdb_test_file_last_vars]} {
+	foreach varname $gdb_test_file_last_vars {
+	    global $varname
+	    catch {unset $varname}
+	}
+    }
+    # 'executable' is often set by tests.
+    set gdb_test_file_last_vars {executable}
 
     set suffix ""
     foreach arg $args {
@@ -3122,6 +3134,7 @@ proc standard_testfile {args} {
 	}
 
 	set $varname $arg
+	lappend gdb_test_file_last_vars $varname
 
 	if {$suffix == ""} {
 	    set suffix 2

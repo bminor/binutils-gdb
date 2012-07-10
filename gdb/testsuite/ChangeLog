@@ -1,3 +1,8 @@
+2012-07-10  Tom Tromey  <tromey@redhat.com>
+
+	* lib/gdb.exp (standard_testfile): Unset output variables from
+	earlier invocations.
+
 2012-07-10  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/gdb2549.exp: Remove -DFAKEARGV from compilation flags.
