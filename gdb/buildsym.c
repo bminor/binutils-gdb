@@ -572,7 +572,7 @@ start_subfile (const char *name, const char *dirname)
   current_subfile = subfile;
 
   /* Save its name and compilation directory name.  */
-  subfile->name = (name == NULL) ? NULL : xstrdup (name);
+  subfile->name = xstrdup (name);
   subfile->dirname = (dirname == NULL) ? NULL : xstrdup (dirname);
 
   /* Initialize line-number recording for this subfile.  */

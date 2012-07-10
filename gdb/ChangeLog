@@ -1,5 +1,8 @@
 2012-07-09  Doug Evans  <dje@google.com>
 
+	* buildsym.c (start_subfile): Remove unnecessary check for
+	name == NULL.
+
 	* psymtab.c (allocate_psymtab): Use host_address_to_string.
 
 	* dwarf2read.c (load_full_type_unit): Simplify.
