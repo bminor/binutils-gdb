@@ -31,12 +31,9 @@ set timeout 15
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "ovldbreak"
-set srcfile $testfile.cc
-set binfile $objdir/$subdir/$testfile
+standard_testfile .cc
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
-    untested ovldbreak.exp
     return -1
 }
 

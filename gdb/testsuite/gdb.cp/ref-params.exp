@@ -22,27 +22,19 @@
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "ref-params"
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .cc
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     untested ref-params.exp
-     return -1
+if {[build_executable $testfile.exp $testfile $srcfile {debug c++}] == 1} {
+    return -1
 }
 
 gdb_exit
 
 proc gdb_start_again { text } {
-    global srcdir
-    global subdir
     global binfile
     global srcfile
 
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${binfile}
+    clean_restart $binfile
 
     runto ${srcfile}:[gdb_get_line_number $text]
 }

@@ -16,10 +16,8 @@
 #
 # This file is part of the gdb testsuite.
 
-set testfile expand-psymtabs-cxx
-set srcfile ${testfile}.cc
-set executable ${testfile}.x
-set binfile ${objdir}/${subdir}/${executable}
+standard_testfile .cc
+set executable ${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug c++} ] != "" } {
      untested ${testfile}.exp

@@ -13,30 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set testfile namespace-enum
-set srcfile0 ${testfile}.cc
-set objfile0 ${testfile}.o
-set srcfile1 ${testfile}-main.cc
-set objfile1 ${testfile}-main.o
-set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
+standard_testfile .cc namespace-enum-main.cc
 
-if  { [gdb_compile "$srcdir/$subdir/$srcfile0" "$objdir/$subdir/$objfile0" object {debug c++}] != "" } {
-     untested namespace-enum.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile \
+	 [list $srcfile $srcfile2] {debug c++}]} {
+    return -1
 }
 
-if  { [gdb_compile "$srcdir/$subdir/$srcfile1" "$objdir/$subdir/$objfile1" object {debug c++}] != "" } {
-     untested namespace-enum.exp
-     return -1
-}
-
-if  { [gdb_compile "$objdir/$subdir/$objfile0 $objdir/$subdir/$objfile1" "${binfile}" executable {debug c++}] != "" } {
-     untested namespace-enum.exp
-     return -1
-}
-
-clean_restart ${executable}
 gdb_test "print foo::B::B_B" "`foo::B' is not defined as an aggregate type."
 gdb_test "print foo::B_B" "foo::B_B"
 gdb_test "print A_A" "A_A"

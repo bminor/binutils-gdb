@@ -27,23 +27,15 @@ if { [skip_cplus_tests] } { continue }
 # test running programs
 #
 
-set testfile "gdb1355"
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     untested gdb1355.exp
-     return -1
-}
+standard_testfile .cc
 
 if [get_compiler_info "c++"] {
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+    return -1
+}
 
 if ![runto_main] then {
     perror "couldn't run to main"

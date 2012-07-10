@@ -29,24 +29,15 @@ set nl "\[\r\n\]+"
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "local"
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     untested local.exp
-     return -1
-}
+standard_testfile .cc
 
 if [get_compiler_info "c++"] {
   return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+    return -1
+}
 
 #
 # set it up at a breakpoint so we can play with the variable values

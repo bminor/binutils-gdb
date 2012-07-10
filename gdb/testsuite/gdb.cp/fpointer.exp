@@ -16,8 +16,8 @@
 # This tests for evaluation of functions in the form of
 # complex expressions.
 
-set testfile fpointer
-set srcfile ${testfile}.cc
+standard_testfile .cc
+
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++}] } {
      return -1
 }

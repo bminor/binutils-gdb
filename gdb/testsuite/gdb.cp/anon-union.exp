@@ -26,21 +26,11 @@
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "anon-union"
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .cc
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     perror "Testcase compile failed" 0
-     continue
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+    return -1
 }
-
-# Start with a fresh gdb
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"

@@ -16,27 +16,12 @@
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile hang
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile hang1.cc hang2.cc hang3.cc
 
-foreach file {hang1 hang2 hang3} {
-    if {[gdb_compile "${srcdir}/${subdir}/${file}.cc" "${file}.o" object {c++ debug}] != ""} {
-        untested hang.exp
-        return -1
-    }
+if {[prepare_for_testing $testfile.exp $testfile \
+	 [list $srcfile $srcfile2 $srcfile3] {debug c++}]} {
+    return -1
 }
-
-if {[gdb_compile "hang1.o hang2.o hang3.o" ${binfile} executable {c++ debug}] != "" } {
-     untested hang.exp
-     return -1
-}
-
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-
 
 # As of May 1, 2002, GDB hangs trying to read the debug info for the
 # `hang2.o' compilation unit from the executable `hang', when compiled

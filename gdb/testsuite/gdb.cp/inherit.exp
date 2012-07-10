@@ -25,13 +25,10 @@ if { [skip_cplus_tests] } { continue }
 
 load_lib "cp-support.exp"
 
-set testfile "inherit"
-set srcfile misc.cc
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile misc.cc
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     untested inherit.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+    return -1
 }
 
 # Single inheritance, print type definitions.
@@ -658,19 +655,6 @@ proc test_print_mvi_classes { } {
 }
 
 proc do_tests { } {
-    global subdir
-    global objdir
-    global srcdir
-    global binfile
-
-
-    # Start with a fresh gdb.
-
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load $binfile
-
     gdb_test_no_output "set width 0"
 
     if { ![runto_main] } then {

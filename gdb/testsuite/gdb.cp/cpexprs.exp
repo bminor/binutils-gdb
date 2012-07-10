@@ -674,24 +674,15 @@ if { [istarget "spu*-*-*"] } {
 # test running programs
 #
 
-set testfile "cpexprs"
-set srcfile "${testfile}.cc"
-set binfile [file join $objdir $subdir $testfile]
-
-if  {[gdb_compile [file join $srcdir $subdir $srcfile] $binfile \
-	  executable {debug c++}] != "" } {
-    untested "$testfile.exp"
-    return -1
-}
+standard_testfile .cc
 
 if {[get_compiler_info "c++"]} {
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir [file join $srcdir $subdir]
-gdb_load $binfile
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+    return -1
+}
 
 if {![runto_main]} {
     perror "couldn't run to breakpoint"

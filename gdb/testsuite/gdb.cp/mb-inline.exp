@@ -20,38 +20,17 @@
 
 if { [skip_cplus_tests] } { continue }
 
-
-set testfile "mb-inline"
+standard_testfile mb-inline1.cc mb-inline2.cc
 set hdrfile "${testfile}.h"
-set srcfile1 "${testfile}1.cc"
-set objfile1 "${testfile}1.o"
-set srcfile2 "${testfile}2.cc"
-set objfile2 "${testfile}2.o"
-set binfile  "${objdir}/${subdir}/${testfile}"
-
-if  { [gdb_compile "$srcdir/$subdir/$srcfile1" "$objdir/$subdir/$objfile1" object {debug c++}] != "" } {
-     untested mb-inline.exp
-     return -1
-}
-
-if  { [gdb_compile "$srcdir/$subdir/$srcfile2" "$objdir/$subdir/$objfile2" object {debug c++}] != "" } {
-     untested mb-inline.exp
-     return -1
-}
-
-if  { [gdb_compile "$objdir/$subdir/$objfile1 $objdir/$subdir/$objfile2" "${binfile}" executable {debug c++}] != "" } {
-     untested mb-inline.exp
-     return -1
-}
 
 if [get_compiler_info "c++"] {
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+if {[prepare_for_testing $testfile.exp $testfile \
+	 [list $srcfile $srcfile2] {debug c++}]} {
+    return -1
+}
 
 set bp_location [gdb_get_line_number "set breakpoint here" $hdrfile]
 

@@ -15,17 +15,14 @@
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile static-print-quit
-set srcfile ${testfile}.cc
-set executable $testfile.o
-set objfile ${objdir}/${subdir}/${executable}
+standard_testfile .cc
 
-if { [gdb_compile $srcdir/$subdir/$srcfile $objfile object {debug c++}] != ""} {
+if { [gdb_compile $srcdir/$subdir/$srcfile $binfile.o object {debug c++}] != ""} {
     untested ${testfile}.exp
     return -1
 }
 
-clean_restart $executable
+clean_restart $testfile.o
 
 gdb_test_no_output "set width 80"
 gdb_test_no_output "set height 2"

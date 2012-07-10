@@ -22,12 +22,10 @@
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "annota3"
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .cc
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++ nowarnings}] != "" } {
-    untested annota3.exp
+if {[prepare_for_testing $testfile.exp $testfile $srcfile \
+	 {debug c++ nowarnings}]} {
     return -1
 }
 
@@ -39,12 +37,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 if [is_remote target] then {
     return 0
 }
-
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 #
 # line number where we need to stop in main

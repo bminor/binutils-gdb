@@ -17,8 +17,8 @@
 
 if {[skip_cplus_tests]} { continue }
 
-set testfile cplabel
-set srcfile "$testfile.cc"
+standard_testfile .cc
+
 if {[prepare_for_testing "$testfile.exp" $testfile $srcfile {c++ debug}]} {
     return -1
 }

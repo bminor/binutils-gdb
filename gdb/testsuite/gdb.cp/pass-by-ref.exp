@@ -18,19 +18,11 @@
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "pass-by-ref"
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
-	  executable {debug c++}] != "" } {
-    untested pass-by-ref.exp
+standard_testfile .cc
+
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
     return -1
 }
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 if ![runto_main] then {
     return -1

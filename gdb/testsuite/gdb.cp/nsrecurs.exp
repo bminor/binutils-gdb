@@ -14,26 +14,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-set testfile nsrecurs
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" \
-      "${binfile}" executable {debug c++}] != "" } {
-    untested "Couldn't compile test program"
-    return -1
-}
+standard_testfile .cc
 
 if [get_compiler_info] {
     return -1
 }
 
-
-# Get things started.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+    return -1
+}
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint main"

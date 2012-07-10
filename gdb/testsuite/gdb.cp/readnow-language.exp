@@ -13,16 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set testfile readnow-language
-set srcfile ${testfile}.cc
-set executable ${testfile}
-if {[build_executable ${testfile}.exp $executable ${testfile}.cc {c++ debug}] == -1} {
+standard_testfile .cc
+
+if {[build_executable ${testfile}.exp $testfile ${testfile}.cc {c++ debug}] == -1} {
     return -1
 }
 
 set old_gdbflags $GDBFLAGS
 set GDBFLAGS "$GDBFLAGS -readnow"
-clean_restart $executable
+clean_restart $testfile
 set GDBFLAGS $old_gdbflags
 
 gdb_test "show language" {The current source language is "auto; currently c\+\+"\.}

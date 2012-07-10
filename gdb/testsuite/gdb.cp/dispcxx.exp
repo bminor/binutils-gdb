@@ -15,9 +15,7 @@
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile dispcxx
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .cc
 
 if [get_compiler_info "c++"] {
     untested dispcxx.exp

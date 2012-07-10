@@ -18,9 +18,9 @@ if { [istarget "spu*-*-*"] } {
         return 0
 }
 
-set testfile pr9167
-set srcfile ${testfile}.cc
-if [prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}] {
+standard_testfile .cc
+
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
     return -1
 }
 

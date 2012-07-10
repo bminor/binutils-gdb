@@ -24,50 +24,16 @@
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "cttiadd"
-set srcfile  "${testfile}.cc"
-set srcfile1 "${testfile}1.cc"
-set srcfile2 "${testfile}2.cc"
-set srcfile3 "${testfile}3.cc"
-set objfile  "${testfile}.o"
-set objfile1 "${testfile}1.o"
-set objfile2 "${testfile}2.o"
-set objfile3 "${testfile}3.o"
-set binfile  "${objdir}/${subdir}/${testfile}"
-
-if { [gdb_compile "$srcdir/$subdir/$srcfile" "$objdir/$subdir/$objfile" object {debug c++}] != "" } {
-     untested ctti.exp
-     return -1
-}
-
-if { [gdb_compile "$srcdir/$subdir/$srcfile1" "$objdir/$subdir/$objfile1" object {debug c++}] != "" } {
-     untested ctti.exp
-     return -1
-}
-
-if { [gdb_compile "$srcdir/$subdir/$srcfile2" "$objdir/$subdir/$objfile2" object {debug c++}] != "" } {
-     untested ctti.exp
-     return -1
-}
-
-if { [gdb_compile "$srcdir/$subdir/$srcfile3" "$objdir/$subdir/$objfile3" object {debug c++}] != "" } {
-     untested ctti.exp
-     return -1
-}
-
-if { [gdb_compile "$objdir/$subdir/$objfile $objdir/$subdir/$objfile1 $objdir/$subdir/$objfile2 $objdir/$subdir/$objfile3" "${binfile}" executable {debug c++}] != "" } {
-     untested ctti.exp
-     return -1
-}
+standard_testfile cttiadd.cc cttiadd1.cc cttiadd2.cc cttiadd3.cc
 
 if [get_compiler_info "c++"] {
     return -1;
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+if {[prepare_for_testing $testfile.exp $testfile \
+	 [list $srcfile $srcfile2 $srcfile3 $srcfile4] {debug c++}]} {
+    return -1
+}
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"

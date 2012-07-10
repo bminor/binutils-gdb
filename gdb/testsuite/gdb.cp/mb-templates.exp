@@ -24,21 +24,15 @@ if { [istarget "spu*-*-*"] } {
 }
 
 
-set testfile "mb-templates"
-set srcfile ${testfile}.cc
-set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
+standard_testfile .cc
 
 if [get_compiler_info "c++"] {
     return -1
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     untested mb-templates.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+    return -1
 }
-
-clean_restart ${executable}
 
 set bp_location [gdb_get_line_number "set breakpoint here"]
 

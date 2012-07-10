@@ -21,17 +21,13 @@ if [get_compiler_info] {
     return -1
 }
 
-set testfile "infcall-dlopen"
-set srcmainfile ${testfile}.cc
-set srclibfile ${testfile}-lib.cc
-set executable ${testfile}
-set libfile ${objdir}/${subdir}/${executable}.so
-set binfile ${objdir}/${subdir}/${executable}
-set lib_dlopen [shlib_target_file ${executable}.so]
+standard_testfile .cc infcall-dlopen-lib.cc
+set libfile [standard_output_file ${testfile}.so]
+set lib_dlopen [shlib_target_file ${testfile}.so]
 
 # Use completely arbitrary file for $libfile source.
-if { [gdb_compile_shlib ${srcdir}/${subdir}/${srclibfile} ${libfile} {debug c++}] != ""
-     || [prepare_for_testing ${testfile}.exp ${executable} ${srcmainfile} {debug c++ shlib_load}] } {
+if { [gdb_compile_shlib ${srcdir}/${subdir}/${srcfile2} ${libfile} {debug c++}] != ""
+     || [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++ shlib_load}] } {
     return -1
 }
 

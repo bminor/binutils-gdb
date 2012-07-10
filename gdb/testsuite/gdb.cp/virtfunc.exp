@@ -23,13 +23,10 @@ if { [skip_cplus_tests] } { continue }
 
 load_lib "cp-support.exp"
 
-set testfile "virtfunc"
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .cc
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {c++ debug}] != "" } {
-     untested virtfunc.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+    return -1
 }
 
 proc test_ptype_of_classes {} {
@@ -275,15 +272,6 @@ proc test_info_vtbl {} {
 }
 
 proc do_tests {} {
-    global srcdir subdir binfile
-    global gdb_prompt
-
-
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load $binfile
-
     gdb_test_no_output "set language c++" ""
     gdb_test_no_output "set width 0" ""
 

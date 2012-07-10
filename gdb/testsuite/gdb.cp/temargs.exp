@@ -21,8 +21,7 @@ if {[skip_cplus_tests]} {
     continue
 }
 
-set testfile "temargs"
-set srcfile "${testfile}.cc"
+standard_testfile .cc
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
     return -1

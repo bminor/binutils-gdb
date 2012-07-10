@@ -22,13 +22,10 @@ if { [skip_cplus_tests] } { continue }
 
 load_lib "cp-support.exp"
 
-set testfile "classes"
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .cc
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
-     untested classes.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+    return -1
 }
 
 # Test ptype of class objects.
@@ -541,20 +538,9 @@ proc test_static_members {} {
 }
 
 proc do_tests {} {
-    global subdir
-    global objdir
-    global srcdir
-    global binfile
     global gdb_prompt
     global nl
 
-
-    # Start with a fresh gdb.
-
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load $binfile
 
     gdb_test_no_output "set language c++" ""
     gdb_test_no_output "set width 0" ""

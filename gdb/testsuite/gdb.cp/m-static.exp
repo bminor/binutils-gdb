@@ -25,36 +25,16 @@ if { [skip_cplus_tests] } { continue }
 # test running programs
 #
 
-set testfile "m-static"
-set srcfile  "${testfile}.cc"
-set srcfile1 "${testfile}1.cc"
-set objfile  "${testfile}.o"
-set objfile1 "${testfile}1.o"
-set binfile  "${objdir}/${subdir}/${testfile}"
-
-if  { [gdb_compile "$srcdir/$subdir/$srcfile" "$objdir/$subdir/$objfile" object {debug c++}] != "" } {
-     untested m-static.exp
-     return -1
-}
-
-if  { [gdb_compile "$srcdir/$subdir/$srcfile1" "$objdir/$subdir/$objfile1" object {debug c++}] != "" } {
-     untested m-static.exp
-     return -1
-}
-
-if { [gdb_compile "$objdir/$subdir/$objfile $objdir/$subdir/$objfile1" "${binfile}" executable {debug c++}] != "" } {
-     untested m-static.exp
-     return -1
-}
+standard_testfile .cc m-static1.cc
 
 if [get_compiler_info] {
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+if {[prepare_for_testing $testfile.exp $testfile \
+	 [list $srcfile $srcfile2] {debug c++}]} {
+    return -1
+}
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"

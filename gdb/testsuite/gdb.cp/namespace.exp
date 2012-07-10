@@ -28,12 +28,7 @@
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "namespace"
-set srcfile ${testfile}.cc
-set objfile ${objdir}/${subdir}/${testfile}.o
-set srcfile1 ${testfile}1.cc
-set objfile1 ${objdir}/${subdir}/${testfile}1.o
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .cc namespace1.cc
 
 if [get_compiler_info c++] {
     return -1;
@@ -46,25 +41,10 @@ if {[test_compiler_info {gcc-[0-3]-*}]
     set xfail_class_types 1
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug c++}] != "" } {
-     untested namespace.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile \
+	 [list $srcfile $srcfile2] {debug c++}]} {
+    return -1
 }
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${objfile1}" object {debug c++}] != "" } {
-     untested namespace.exp
-     return -1
-}
-
-if  { [gdb_compile "${objfile} ${objfile1}" "${binfile}" executable {debug c++}] != "" } {
-     untested namespace.exp
-     return -1
-}
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 gdb_test "show lang" "auto; currently c\\+\\+.*"
 
@@ -142,7 +122,7 @@ gdb_test "break AAA::xyzq" \
 # Break on a function in the global namespace.
 
 gdb_test "break ::ensureOtherRefs" \
-    "Breakpoint.*at $hex: file.*$srcfile1, line $decimal\\."
+    "Breakpoint.*at $hex: file.*$srcfile2, line $decimal\\."
 
 # Call a function in a nested namespace
 

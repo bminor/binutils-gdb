@@ -15,9 +15,8 @@
 
 # Test loading symbols from unrelocated C++ object files.
 
-set testfile cp-relocate
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}.o
+standard_testfile .cc
+append binfile .o
 
 if { [skip_cplus_tests] } { continue }
 

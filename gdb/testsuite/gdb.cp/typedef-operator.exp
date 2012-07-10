@@ -17,8 +17,9 @@
 
 if {[skip_cplus_tests]} { continue }
 
-set testfile "typedef-operator"
-if [prepare_for_testing $testfile $testfile $testfile.cc {c++ debug}] {
+standard_testfile .cc
+
+if {[prepare_for_testing $testfile $testfile $srcfile {c++ debug}]} {
     return -1
 }
 
