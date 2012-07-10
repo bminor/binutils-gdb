@@ -82,7 +82,9 @@ struct partial_symtab
 
   struct partial_symtab *next;
 
-  /* Name of the source file which this partial_symtab defines.  */
+  /* Name of the source file which this partial_symtab defines,
+     or if the psymtab is anonymous then a descriptive name for
+     debugging purposes, or "".  It must not be NULL.  */
 
   const char *filename;
 
@@ -181,6 +183,10 @@ struct partial_symtab
      info in PSYMTABS_ADDRMAP.  */
 
   unsigned char psymtabs_addrmap_supported;
+
+  /* True if the name of this partial symtab is not a source file name.  */
+
+  unsigned char anonymous;
 
   /* A flag that is temporarily used when searching psymtabs.  */
 

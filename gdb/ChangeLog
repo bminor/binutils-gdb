@@ -1,5 +1,12 @@
 2012-07-10  Doug Evans  <dje@google.com>
 
+	* psympriv.h (struct partial_symtab): New member "anonymous".
+	* psymtab.c (partial_map_symtabs_matching_filename): Ignore
+	anonymous psymtabs.
+	(read_psymtabs_with_filename): Ditto.
+	(map_symbol_filenames_psymtab, psymtab_to_fullname): Ditto.
+	(expand_symtabs_matching_via_partial): Ditto.
+	(dump_psymtab): Update.
 	* dictionary.c (dict_add_pending): New function.
 	* dictionary.h (dict_add_pending): Declare.
 

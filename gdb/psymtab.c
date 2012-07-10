@@ -174,6 +174,10 @@ partial_map_symtabs_matching_filename (struct objfile *objfile,
     if (pst->user != NULL)
       continue;
 
+    /* Anonymous psymtabs don't have a file name.  */
+    if (pst->anonymous)
+      continue;
+
     if (FILENAME_CMP (name, pst->filename) == 0
 	|| (!is_abs && compare_filenames_for_search (pst->filename,
 						     name, name_len)))
@@ -973,8 +977,16 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   int i;
 
-  fprintf_filtered (outfile, "\nPartial symtab for source file %s ",
-		    psymtab->filename);
+  if (psymtab->anonymous)
+    {
+      fprintf_filtered (outfile, "\nAnonymous partial symtab (%s) ",
+			psymtab->filename);
+    }
+  else
+    {
+      fprintf_filtered (outfile, "\nPartial symtab for source file %s ",
+			psymtab->filename);
+    }
   fprintf_filtered (outfile, "(object ");
   gdb_print_host_address (psymtab, outfile);
   fprintf_filtered (outfile, ")\n\n");
@@ -1124,6 +1136,10 @@ read_psymtabs_with_filename (struct objfile *objfile, const char *filename)
 
   ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, p)
     {
+      /* Anonymous psymtabs don't have a name of a source file.  */
+      if (p->anonymous)
+	continue;
+
       if (filename_cmp (filename, p->filename) == 0)
 	psymtab_to_symtab (p);
     }
@@ -1141,6 +1157,10 @@ map_symbol_filenames_psymtab (struct objfile *objfile,
       const char *fullname;
 
       if (ps->readin)
+	continue;
+
+      /* Anonymous psymtabs don't have a file name.  */
+      if (ps->anonymous)
 	continue;
 
       QUIT;
@@ -1166,6 +1186,8 @@ psymtab_to_fullname (struct partial_symtab *ps)
   int r;
 
   if (!ps)
+    return NULL;
+  if (ps->anonymous)
     return NULL;
 
   /* Use cached copy if we have it.
@@ -1377,8 +1399,13 @@ expand_symtabs_matching_via_partial
       if (ps->user != NULL)
 	continue;
 
-      if (file_matcher && ! (*file_matcher) (ps->filename, data))
-	continue;
+      if (file_matcher)
+	{
+	  if (ps->anonymous)
+	    continue;
+	  if (! (*file_matcher) (ps->filename, data))
+	    continue;
+	}
 
       if (recursively_search_psymtabs (ps, objfile, kind, name_matcher, data))
 	psymtab_to_symtab (ps);
