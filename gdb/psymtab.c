@@ -1747,8 +1747,8 @@ allocate_psymtab (const char *filename, struct objfile *objfile)
 			      last_objfile_name);
 	}
       fprintf_unfiltered (gdb_stdlog,
-			  "Created psymtab 0x%lx for module %s.\n",
-			  (long) psymtab, filename);
+			  "Created psymtab %s for module %s.\n",
+			  host_address_to_string (psymtab), filename);
     }
 
   return (psymtab);
