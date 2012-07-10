@@ -4038,6 +4038,10 @@ treated as nested sorting command.
 If the section sorting command in linker script is nested, the
 command line option will be ignored.
 
+@cindex SORT_NONE
+@code{SORT_NONE} disables section sorting by ignoring the command line
+section sorting option.
+
 If you ever get confused about where input sections are going, use the
 @samp{-M} linker option to generate a map file.  The map file shows
 precisely how input sections are mapped to output sections.

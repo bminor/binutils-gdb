@@ -129,7 +129,7 @@ static int error_index;
 %token <token> ALIGN_K BLOCK BIND QUAD SQUAD LONG SHORT BYTE
 %token SECTIONS PHDRS INSERT_K AFTER BEFORE
 %token DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
-%token SORT_BY_NAME SORT_BY_ALIGNMENT
+%token SORT_BY_NAME SORT_BY_ALIGNMENT SORT_NONE
 %token SORT_BY_INIT_PRIORITY
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
@@ -464,6 +464,13 @@ wildcard_spec:
 			{
 			  $$.name = $3;
 			  $$.sorted = by_alignment;
+			  $$.exclude_name_list = NULL;
+			  $$.section_flag_list = NULL;
+			}
+	|	SORT_NONE '(' wildcard_name ')'
+			{
+			  $$.name = $3;
+			  $$.sorted = by_none;
 			  $$.exclude_name_list = NULL;
 			  $$.section_flag_list = NULL;
 			}

@@ -1,3 +1,19 @@
+2012-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14156
+	* NEWS: Mention SORT_NONE.
+
+	* ld.h (sort_type): Add by_none.
+
+	* ld.texinfo: Document SORT_NONE.
+
+	* ldgram.y: Handle SORT_NONE.
+
+	* ldlang.c (update_wild_statements): Handle by_none.  Don't
+	sort .init/.fini sections.
+
+	* ldlex.l: Add SORT_NONE.
+
 2012-07-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Replace __end_SECNAME with __stop_SECNAME.

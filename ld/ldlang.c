@@ -3510,6 +3510,8 @@ update_wild_statements (lang_statement_union_type *s)
 		      if (sort_section == by_name)
 			sec->spec.sorted = by_alignment_name;
 		      break;
+		    case by_none:
+		      sec->spec.sorted = none;
 		    default:
 		      break;
 		    }
@@ -3521,8 +3523,11 @@ update_wild_statements (lang_statement_union_type *s)
 	      break;
 
 	    case lang_output_section_statement_enum:
-	      update_wild_statements
-		(s->output_section_statement.children.head);
+	      /* Don't sort .init/.fini sections.  */
+	      if (strcmp (s->output_section_statement.name, ".init") != 0
+		  && strcmp (s->output_section_statement.name, ".fini") != 0)
+		update_wild_statements
+		  (s->output_section_statement.children.head);
 	      break;
 
 	    case lang_group_statement_enum:

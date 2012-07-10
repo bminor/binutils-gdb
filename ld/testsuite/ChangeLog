@@ -1,3 +1,26 @@
+2012-07-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14156
+	* ld-elf/fini0.s: New file.
+	* ld-elf/fini1.s: Likewise.
+	* ld-elf/fini2.s: Likewise.
+	* ld-elf/fini3.s: Likewise.
+	* ld-elf/finin.s: Likewise.
+	* ld-elf/foo0.s: Likewise.
+	* ld-elf/foo1.s: Likewise.
+	* ld-elf/foo2.s: Likewise.
+	* ld-elf/foo3.s: Likewise.
+	* ld-elf/foon.s: Likewise.
+	* ld-elf/init0.s: Likewise.
+	* ld-elf/init1.s: Likewise.
+	* ld-elf/init2.s: Likewise.
+	* ld-elf/init3.s: Likewise.
+	* ld-elf/initn.s: Likewise.
+	* ld-elf/pr14156a.d: Likewise.
+	* ld-elf/pr14156b.d: Likewise.
+	* ld-elf/pr14156c.d: Likewise.
+	* ld-elf/pr14156c.t: Likewise.
+
 2012-07-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14323
