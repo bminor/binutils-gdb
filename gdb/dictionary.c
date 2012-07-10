@@ -498,6 +498,22 @@ dict_add_symbol (struct dictionary *dict, struct symbol *sym)
   (DICT_VECTOR (dict))->add_symbol (dict, sym);
 }
 
+/* Utility to add a list of symbols to a dictionary.
+   DICT must be an expandable dictionary.  */
+
+void
+dict_add_pending (struct dictionary *dict, const struct pending *symbol_list)
+{
+  const struct pending *list;
+  int i;
+
+  for (list = symbol_list; list != NULL; list = list->next)
+    {
+      for (i = 0; i < list->nsyms; ++i)
+	dict_add_symbol (dict, list->symbol[i]);
+    }
+}
+
 /* Initialize ITERATOR to point at the first symbol in DICT, and
    return that first symbol, or NULL if DICT is empty.  */
 

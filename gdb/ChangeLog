@@ -1,3 +1,8 @@
+2012-07-10  Doug Evans  <dje@google.com>
+
+	* dictionary.c (dict_add_pending): New function.
+	* dictionary.h (dict_add_pending): Declare.
+
 2012-07-09  Doug Evans  <dje@google.com>
 
 	* buildsym.c (start_subfile): Remove unnecessary check for

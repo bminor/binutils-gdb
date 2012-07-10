@@ -85,6 +85,11 @@ extern void dict_free (struct dictionary *dict);
 
 extern void dict_add_symbol (struct dictionary *dict, struct symbol *sym);
 
+/* Utility to add a list of symbols to a dictionary.  */
+
+extern void dict_add_pending (struct dictionary *dict,
+			      const struct pending *symbol_list);
+
 /* Is the dictionary empty?  */
 
 extern int dict_empty (struct dictionary *dict);
