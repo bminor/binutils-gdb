@@ -80,6 +80,22 @@
 
 #define reserve_unordered_map(map, n) ((map)->rehash(n))
 
+#ifndef HAVE_TR1_HASH_OFF_T
+// The library does not support hashes of off_t values.  Add support
+// here.  This is likely to be specific to libstdc++.  This issue
+// arises with GCC 4.1.x when compiling in 32-bit mode with a 64-bit
+// off_t type.
+namespace std { namespace tr1 {
+template<>
+struct hash<off_t> : public std::unary_function<off_t, std::size_t>
+{
+  std::size_t
+  operator()(off_t val) const
+  { return static_cast<std::size_t>(val); }
+};
+} } // Close namespaces.
+#endif // !defined(HAVE_TR1_HASH_OFF_T)
+
 #elif defined(HAVE_EXT_HASH_MAP) && defined(HAVE_EXT_HASH_SET)
 
 #include <ext/hash_map>

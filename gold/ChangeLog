@@ -1,3 +1,13 @@
+2012-07-10  Dodji Seketeli  <dodji@redhat.com>
+	    Ian Lance Taylor  <iant@google.com>
+
+	PR gold/14309
+	* configure.ac: Test whether std::tr1::hash<off_t> works.
+	* gold.h: Add a specialization for std::tr1::hash<off_t> if
+	needed.
+	* output.h (class Output_fill): Add virtual destructor.
+	* configure, config.in: Rebuild.
+
 2012-06-22  Roland McGrath  <mcgrathr@google.com>
 
 	* layout.cc (finalize): Define __ehdr_start symbol if applicable.

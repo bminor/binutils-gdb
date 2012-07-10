@@ -7266,6 +7266,39 @@ $as_echo "#define HAVE_TR1_UNORDERED_MAP_REHASH 1" >>confdefs.h
 
 fi
 
+# Use of tr1/unordered_map with off_t as a key is not supported on GCC
+# 4.1.xx when compiling in 32-bit mode with a 64-bit off_t type.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether std::tr1::hash<off_t> is defined" >&5
+$as_echo_n "checking whether std::tr1::hash<off_t> is defined... " >&6; }
+if test "${gold_cv_hash_off_t+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  CXXFLAGS_hold=$CXXFLAGS
+CXXFLAGS="$CXXFLAGS $LFS_CFLAGS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <sys/types.h>
+#include <tr1/unordered_map>
+std::tr1::hash<off_t> h;
+
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  gold_cv_hash_off_t=yes
+else
+  gold_cv_hash_off_t=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+CXXFLAGS=$CFLAGS_hold
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gold_cv_hash_off_t" >&5
+$as_echo "$gold_cv_hash_off_t" >&6; }
+if test "$gold_cv_hash_off_t" = "yes"; then
+
+$as_echo "#define HAVE_TR1_HASH_OFF_T 1" >>confdefs.h
+
+fi
+
 # gcc 4.3.0 doesn't recognize the printf attribute on a template
 # function.  Check for that.  This is gcc bug 35546.  This test can
 # probably be removed after the bug has been fixed for a while.

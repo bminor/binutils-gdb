@@ -2819,6 +2819,10 @@ class Output_fill
     : is_big_endian_(parameters->target().is_big_endian())
   { }
 
+  virtual
+  ~Output_fill()
+  { }
+
   // Return the smallest size chunk of free space that can be
   // filled with a dummy compilation unit.
   size_t

@@ -169,6 +169,9 @@
 /* Define to 1 if you have the `times' function. */
 #undef HAVE_TIMES
 
+/* Define if std::tr1::hash<off_t> is usable */
+#undef HAVE_TR1_HASH_OFF_T
+
 /* Define to 1 if you have the <tr1/unordered_map> header file. */
 #undef HAVE_TR1_UNORDERED_MAP
 

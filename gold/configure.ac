@@ -515,6 +515,25 @@ if test "$gold_cv_unordered_map_rehash" = "yes"; then
 	    [Define if ::std::tr1::unordered_map::rehash is usable])
 fi
 
+# Use of tr1/unordered_map with off_t as a key is not supported on GCC
+# 4.1.xx when compiling in 32-bit mode with a 64-bit off_t type.
+AC_CACHE_CHECK([whether std::tr1::hash<off_t> is defined],
+[gold_cv_hash_off_t],
+[CXXFLAGS_hold=$CXXFLAGS
+CXXFLAGS="$CXXFLAGS $LFS_CFLAGS"
+AC_COMPILE_IFELSE([
+#include <sys/types.h>
+#include <tr1/unordered_map>
+std::tr1::hash<off_t> h;
+],
+[gold_cv_hash_off_t=yes],
+[gold_cv_hash_off_t=no])
+CXXFLAGS=$CFLAGS_hold])
+if test "$gold_cv_hash_off_t" = "yes"; then
+   AC_DEFINE(HAVE_TR1_HASH_OFF_T, 1,
+	     [Define if std::tr1::hash<off_t> is usable])
+fi
+
 # gcc 4.3.0 doesn't recognize the printf attribute on a template
 # function.  Check for that.  This is gcc bug 35546.  This test can
 # probably be removed after the bug has been fixed for a while.
