@@ -1,5 +1,59 @@
 2012-07-10  Doug Evans  <dje@google.com>
 
+	PR gdb/13498
+	* dwarf2read.c (dwarf2_per_objfile): New members n_type_unit_groups,
+	all_type_unit_groups, type_unit_groups, tu_stats.
+	(dwarf2_per_cu_data): Move "imported_symtabs" into new union "s".
+	All uses updated.  Add type_unit_group to union "s".
+	(type_unit_group): New struct.
+	(IS_TYPE_UNIT_GROUP): New macro.
+	(abbrev_table): Delete unused member "section".
+	(dw2_do_instantiate_symtab): Early exit if type_unit_group.
+	(dw2_get_cu): Assert not used with type_unit_group.
+	(dw2_get_primary_cu): New function.
+	(dw2_build_type_unit_groups_reader): New function.
+	(dw2_build_type_unit_groups): New function.
+	(dw2_get_file_names): Assert not called on type units.
+	(dw2_map_symtabs_matching_filename): Call dw2_build_type_unit_groups.
+	Redo loop to iterate over type unit groups instead of type units.
+	(dw2_expand_symtabs_matching, dw2_map_symbol_filenames): Ditto.
+	(read_abbrev_offset): New function.
+	(init_cutu_and_read_dies): New arg "abbrev_table".  All callers
+	updated.
+	(create_partial_symtab): New function.
+	(process_psymtab_comp_unit_reader): Assert not used with type units.
+	Call create_partial_symtab.
+	(process_psymtab_type_unit): Delete.
+	(hash_type_unit_group, eq_type_unit_group): New functions.
+	(allocate_type_unit_groups_table): New function.
+	(NO_STMT_LIST_TYPE_UNIT_PSYMTAB): New macro.
+	(NO_STMT_LIST_TYPE_UNIT_PSYMTAB_SIZE): New macro.
+	(create_type_unit_group, get_type_unit_group): New functions.
+	(tu_abbrev_offset): New struct.
+	(sort_tu_by_abbrev_offset): New function.
+	(add_type_unit_group_to_table): New function.
+	(build_type_unit_groups): New function.
+	(build_type_psymtabs_reader): New function.
+	(build_type_psymtab_dependencies): New function.
+	(build_type_psymtabs): Rewrite.
+	(scan_partial_symbols): Flag an error if a DW_TAG_imported_unit
+	is seen in a type unit.
+	(process_queue): Move symtab expansion debugging printfs here.
+	Call process_full_type_unit for type units.
+	(compute_symtab_includes): Assert not called for type units.
+	(process_cu_includes): Don't call compute_symtab_includes for
+	type units.
+	(process_full_type_unit): New function.
+	(process_imported_unit_die): Flag an error if called for type units.
+	(handle_DW_AT_stmt_list): Delete arg "want_line_info".  All callers
+	updated.  Assert not called for type units.
+	(read_file_scope): Call dwarf2_start_symtab.
+	(setup_type_unit_groups): New function.
+	(read_type_unit_scope): Rewrite.
+	(abbrev_table_read_table): Initialize abbrev_table->offset.
+	(abbrev_table_free_cleanup): New function.
+	(dwarf2_start_symtab): New function.
+	(load_full_type_unit): Assert not called for type unit groups.
 	* buildsym.c (finish_block_internal): New arg "expandable".
 	All callers updated.
 	(start_symtab): Move most contents to ...
