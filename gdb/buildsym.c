@@ -219,7 +219,7 @@ finish_block_internal (struct symbol *symbol, struct pending **listhead,
 		       struct pending_block *old_blocks,
 		       CORE_ADDR start, CORE_ADDR end,
 		       struct objfile *objfile,
-		       int is_global)
+		       int is_global, int expandable)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct pending *next, *next1;
@@ -238,8 +238,16 @@ finish_block_internal (struct symbol *symbol, struct pending **listhead,
     }
   else
     {
-      BLOCK_DICT (block) = dict_create_hashed (&objfile->objfile_obstack,
-					       *listhead);
+      if (expandable)
+	{
+	  BLOCK_DICT (block) = dict_create_hashed_expandable ();
+	  dict_add_pending (BLOCK_DICT (block), *listhead);
+	}
+      else
+	{
+	  BLOCK_DICT (block) =
+	    dict_create_hashed (&objfile->objfile_obstack, *listhead);
+	}
     }
 
   BLOCK_START (block) = start;
@@ -394,7 +402,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      struct objfile *objfile)
 {
   return finish_block_internal (symbol, listhead, old_blocks,
-				start, end, objfile, 0);
+				start, end, objfile, 0, 0);
 }
 
 /* Record BLOCK on the list of all blocks in the file.  Put it after
@@ -805,7 +813,20 @@ compare_line_numbers (const void *ln1p, const void *ln2p)
 void
 start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
 {
+  restart_symtab (start_addr);
   last_source_file = name;
+  start_subfile (name, dirname);
+}
+
+/* Restart compilation for a symtab.
+   This is used when a symtab is built from multiple sources.
+   The symtab is first built with start_symtab and then for each additional
+   piece call restart_symtab.  */
+
+void
+restart_symtab (CORE_ADDR start_addr)
+{
+  last_source_file = NULL;
   last_source_start_addr = start_addr;
   file_symbols = NULL;
   global_symbols = NULL;
@@ -827,10 +848,8 @@ start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
 
   /* Initialize the list of sub source files with one entry for this
      file (the top-level source file).  */
-
   subfiles = NULL;
   current_subfile = NULL;
-  start_subfile (name, dirname);
 }
 
 /* Subroutine of end_symtab to simplify it.  Look for a subfile that
@@ -923,6 +942,21 @@ block_compar (const void *ap, const void *bp)
 	  - (BLOCK_START (b) < BLOCK_START (a)));
 }
 
+/* Reset globals used to build symtabs.  */
+
+static void
+reset_symtab_globals (void)
+{
+  last_source_file = NULL;
+  current_subfile = NULL;
+  pending_macros = NULL;
+  if (pending_addrmap)
+    {
+      obstack_free (&pending_addrmap_obstack, NULL);
+      pending_addrmap = NULL;
+    }
+}
+
 /* Finish the symbol definitions for one main source file, close off
    all the lexical contexts for that file (creating struct block's for
    them), then make the struct symtab for that file and put it in the
@@ -932,6 +966,9 @@ block_compar (const void *ap, const void *bp)
    the section number (in objfile->section_offsets) of the blockvector
    and linetable.
 
+   If EXPANDABLE is non-zero the dictionaries for the global and static
+   blocks are made expandable.
+
    Note that it is possible for end_symtab() to return NULL.  In
    particular, for the DWARF case at least, it will return NULL when
    it finds a compilation unit that has exactly one DIE, a
@@ -940,8 +977,9 @@ block_compar (const void *ap, const void *bp)
    is probably not the correct thing to do, because then gdb will
    never know about this empty file (FIXME).  */
 
-struct symtab *
-end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
+static struct symtab *
+end_symtab_1 (CORE_ADDR end_addr, struct objfile *objfile, int section,
+	      int expandable)
 {
   struct symtab *symtab = NULL;
   struct blockvector *blockvector;
@@ -974,6 +1012,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 
   /* Reordered executables may have out of order pending blocks; if
      OBJF_REORDERED is true, then sort the pending blocks.  */
+
   if ((objfile->flags & OBJF_REORDERED) && pending_blocks)
     {
       unsigned count = 0;
@@ -1027,10 +1066,10 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
     {
       /* Define the STATIC_BLOCK & GLOBAL_BLOCK, and build the
          blockvector.  */
-      finish_block (0, &file_symbols, 0, last_source_start_addr,
-		    end_addr, objfile);
+      finish_block_internal (0, &file_symbols, 0, last_source_start_addr,
+			     end_addr, objfile, 0, expandable);
       finish_block_internal (0, &global_symbols, 0, last_source_start_addr,
-			     end_addr, objfile, 1);
+			     end_addr, objfile, 1, expandable);
       blockvector = make_blockvector (objfile);
     }
 
@@ -1207,16 +1246,94 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	}
     }
 
-  last_source_file = NULL;
-  current_subfile = NULL;
-  pending_macros = NULL;
-  if (pending_addrmap)
-    {
-      obstack_free (&pending_addrmap_obstack, NULL);
-      pending_addrmap = NULL;
-    }
+  reset_symtab_globals ();
 
   return symtab;
+}
+
+/* See end_symtab_1 for details.  */
+
+struct symtab *
+end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
+{
+  return end_symtab_1 (end_addr, objfile, section, 0);
+}
+
+/* See end_symtab_1 for details.  */
+
+struct symtab *
+end_expandable_symtab (CORE_ADDR end_addr, struct objfile *objfile,
+		       int section)
+{
+  return end_symtab_1 (end_addr, objfile, section, 1);
+}
+
+/* Subroutine of augment_type_symtab to simplify it.
+   Attach SYMTAB to all symbols in PENDING_LIST that don't have one.  */
+
+static void
+set_missing_symtab (struct pending *pending_list, struct symtab *symtab)
+{
+  struct pending *pending;
+  int i;
+
+  for (pending = pending_list; pending != NULL; pending = pending->next)
+    {
+      for (i = 0; i < pending->nsyms; ++i)
+	{
+	  if (SYMBOL_SYMTAB (pending->symbol[i]) == NULL)
+	    SYMBOL_SYMTAB (pending->symbol[i]) = symtab;
+	}
+    }
+}
+
+/* Same as end_symtab, but for the case where we're adding more symbols
+   to an existing symtab that is known to contain only type information.
+   This is the case for DWARF4 Type Units.  */
+
+void
+augment_type_symtab (struct objfile *objfile, struct symtab *primary_symtab)
+{
+  struct blockvector *blockvector = primary_symtab->blockvector;
+  int i;
+
+  if (context_stack_depth > 0)
+    {
+      complaint (&symfile_complaints,
+		 _("Context stack not empty in augment_type_symtab"));
+      context_stack_depth = 0;
+    }
+  if (pending_blocks != NULL)
+    complaint (&symfile_complaints, _("Blocks in a type symtab"));
+  if (pending_macros != NULL)
+    complaint (&symfile_complaints, _("Macro in a type symtab"));
+  if (have_line_numbers)
+    complaint (&symfile_complaints,
+	       _("Line numbers recorded in a type symtab"));
+
+  if (file_symbols != NULL)
+    {
+      struct block *block = BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK);
+
+      /* First mark any symbols without a specified symtab as belonging
+	 to the primary symtab.  */
+      set_missing_symtab (file_symbols, primary_symtab);
+
+      dict_add_pending (BLOCK_DICT (block), file_symbols);
+    }
+
+  if (global_symbols != NULL)
+    {
+      struct block *block = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
+
+      /* First mark any symbols without a specified symtab as belonging
+	 to the primary symtab.  */
+      set_missing_symtab (global_symbols, primary_symtab);
+
+      dict_add_pending (BLOCK_DICT (block), global_symbols);
+    }
+
+  reset_symtab_globals ();
 }
 
 /* Push a context block.  Args are an identifying nesting level

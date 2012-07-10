@@ -261,6 +261,13 @@ extern char *pop_subfile (void);
 extern struct symtab *end_symtab (CORE_ADDR end_addr,
 				  struct objfile *objfile, int section);
 
+extern struct symtab *end_expandable_symtab (CORE_ADDR end_addr,
+					     struct objfile *objfile,
+					     int section);
+
+extern void augment_type_symtab (struct objfile *objfile,
+				 struct symtab *primary_symtab);
+
 /* Defined in stabsread.c.  */
 
 extern void scan_file_globals (struct objfile *objfile);
@@ -276,6 +283,8 @@ extern struct context_stack *pop_context (void);
 extern void record_line (struct subfile *subfile, int line, CORE_ADDR pc);
 
 extern void start_symtab (char *name, char *dirname, CORE_ADDR start_addr);
+
+extern void restart_symtab (CORE_ADDR start_addr);
 
 extern int hashname (const char *name);
 

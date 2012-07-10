@@ -1,5 +1,16 @@
 2012-07-10  Doug Evans  <dje@google.com>
 
+	* buildsym.c (finish_block_internal): New arg "expandable".
+	All callers updated.
+	(start_symtab): Move most contents to ...
+	(restart_symtab): ... here.  New function.
+	(reset_symtab_globals): New function.
+	(end_symtab_1): Renamed from end_symtab.  New arg "expandable".
+	Call reset_symtab_globals.
+	(end_symtab, end_expandable_symtab): New functions.
+	(set_missing_symtab, augment_type_symtab): New functions.
+	* buildsym.h (end_expandable_symtab): Declare.
+	(augment_type_symtab, restart_symtab): Declare.
 	* psympriv.h (struct partial_symtab): New member "anonymous".
 	* psymtab.c (partial_map_symtabs_matching_filename): Ignore
 	anonymous psymtabs.
