@@ -15513,27 +15513,18 @@ lookup_signatured_type_at_offset (struct objfile *objfile,
 static void
 load_full_type_unit (struct dwarf2_per_cu_data *per_cu)
 {
-  struct objfile *objfile = per_cu->objfile;
-  struct dwarf2_section_info *sect = per_cu->info_or_types_section;
-  sect_offset offset = per_cu->offset;
   struct signatured_type *sig_type;
 
-  dwarf2_read_section (objfile, sect);
+  /* We have the per_cu, but we need the signatured_type.
+     Fortunately this is an easy translation.  */
+  gdb_assert (per_cu->is_debug_types);
+  sig_type = (struct signatured_type *) per_cu;
 
-  /* We have the section offset, but we need the signature to do the
-     hash table lookup.  */
-  /* FIXME: This is sorta unnecessary, read_signatured_type only uses
-     the signature to assert we found the right one.
-     Ok, but it's a lot of work.  We should simplify things so any needed
-     assert doesn't require all this clumsiness.  */
-  sig_type = lookup_signatured_type_at_offset (objfile, sect, offset);
-
-  gdb_assert (&sig_type->per_cu == per_cu);
-  gdb_assert (sig_type->per_cu.cu == NULL);
+  gdb_assert (per_cu->cu == NULL);
 
   read_signatured_type (sig_type);
 
-  gdb_assert (sig_type->per_cu.cu != NULL);
+  gdb_assert (per_cu->cu != NULL);
 }
 
 /* die_reader_func for read_signatured_type.

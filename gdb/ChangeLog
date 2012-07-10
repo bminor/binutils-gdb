@@ -1,5 +1,7 @@
 2012-07-09  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (load_full_type_unit): Simplify.
+
 	* dwarf2read.c (dwarf2_per_objfile): Change type of all_type_units
 	to struct signatured_type **.  All uses updated.
 
