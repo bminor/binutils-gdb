@@ -21,6 +21,7 @@ if ![supports_reverse] {
 }
 
 standard_testfile finish-reverse.c
+set precsave [standard_output_file finish.precsave]
 
 if { [prepare_for_testing $testfile.exp "$testfile" $srcfile] } {
     return -1
@@ -42,14 +43,14 @@ gdb_test "break $breakloc" \
 
 gdb_test "continue" "Breakpoint .* end of main .*" "run to end of main"
 
-gdb_test "record save finish.precsave" \
-    "Saved core file finish.precsave with execution log\."  \
+gdb_test "record save $precsave" \
+    "Saved core file $precsave with execution log\."  \
     "save process recfile"
 
 gdb_test "kill" "" "Kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
 
-gdb_test "record restore finish.precsave" \
+gdb_test "record restore $precsave" \
     "Program terminated with signal .*" \
     "reload precord save file"
 

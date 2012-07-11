@@ -41,6 +41,7 @@ if ![supports_process_record] {
 }
 
 standard_testfile machinestate.c ms1.c
+set precsave [standard_output_file machinestate.precsave]
 
 if { [prepare_for_testing $testfile.exp $testfile \
 	  [list $srcfile $srcfile2]] } {
@@ -67,14 +68,14 @@ gdb_test "break $endmain" \
 
 gdb_test "continue" "Breakpoint .* end main .*" "run to end of main"
 
-gdb_test "record save machinestate.precsave" \
-    "Saved core file machinestate.precsave with execution log\."  \
+gdb_test "record save $precsave" \
+    "Saved core file $precsave with execution log\."  \
     "save process recfile"
 
 gdb_test "kill" "" "Kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
 
-gdb_test "record restore machinestate.precsave" \
+gdb_test "record restore $precsave" \
     "Program terminated with signal .*" \
     "reload prec save file"
 

@@ -28,6 +28,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
 standard_testfile sigall-reverse.c
+set precsave [standard_output_file sigall.precsave]
 
 if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     return -1
@@ -183,14 +184,14 @@ gdb_test "handle all nostop noprint"
 
 gdb_test "continue" "Breakpoint .* end of main .*" "run to end of main"
 
-gdb_test "record save sigall.precsave" \
-    "Saved core file sigall.precsave with execution log\."  \
+gdb_test "record save $precsave" \
+    "Saved core file $precsave with execution log\."  \
     "save process recfile"
 
 gdb_test "kill" "" "Kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
 
-gdb_test "record restore sigall.precsave" \
+gdb_test "record restore $precsave" \
     "Program terminated with signal .*" \
     "reload precord save file"
 

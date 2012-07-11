@@ -22,6 +22,7 @@ if ![supports_process_record] {
 }
 
 standard_testfile until-reverse.c ur1.c
+set precsave [standard_output_file until.precsave]
 
 if { [prepare_for_testing $testfile.exp $testfile \
 	  [list $srcfile $srcfile2]] } {
@@ -53,15 +54,15 @@ set timeout [expr $oldtimeout + 120]
 gdb_test "continue" "Breakpoint .* set breakpoint 10a here .*" "run to end of main"
 
 # So can this, against gdbserver, for example.
-gdb_test "record save until.precsave" \
-    "Saved core file until.precsave with execution log\."  \
+gdb_test "record save $precsave" \
+    "Saved core file $precsave with execution log\."  \
     "save process recfile"
 set timeout $oldtimeout
 
 gdb_test "kill" "" "Kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
 
-gdb_test "record restore until.precsave" \
+gdb_test "record restore $precsave" \
     "Program terminated with signal .*" \
     "reload core file"
 

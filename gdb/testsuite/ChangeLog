@@ -1,3 +1,16 @@
+2012-07-11  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.reverse/break-precsave.exp: Use standard_output_file.
+	* gdb.reverse/consecutive-precsave.exp: Use standard_output_file.
+	* gdb.reverse/finish-precsave.exp: Use standard_output_file.
+	* gdb.reverse/i386-precsave.exp: Use standard_output_file.
+	* gdb.reverse/machinestate-precsave.exp: Use standard_output_file.
+	* gdb.reverse/sigall-precsave.exp: Use standard_output_file.
+	* gdb.reverse/solib-precsave.exp: Use standard_output_file.
+	* gdb.reverse/step-precsave.exp: Use standard_output_file.
+	* gdb.reverse/until-precsave.exp: Use standard_output_file.
+	* gdb.reverse/watch-precsave.exp: Use standard_output_file.
+
 2012-07-10  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.mi/dw2-ref-missing-frame.exp: Use standard_testfile,

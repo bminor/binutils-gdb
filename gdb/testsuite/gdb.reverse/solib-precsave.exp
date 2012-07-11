@@ -22,6 +22,7 @@ if ![supports_process_record] {
 }
 
 standard_testfile solib-reverse.c
+set precsave [standard_output_file solib.precsave]
 set libfile  "shr2"
 set libsrc   ${libfile}.c
 set library  [standard_output_file ${libfile}.sl]
@@ -74,14 +75,14 @@ gdb_test "break $end_of_main" \
 
 gdb_test "continue" "Breakpoint .* end of main .*" "run to end of main"
 
-gdb_test "record save solib.precsave" \
-    "Saved core file solib.precsave with execution log\."  \
+gdb_test "record save $precsave" \
+    "Saved core file $precsave with execution log\."  \
     "save process recfile"
 
 gdb_test "kill" "" "Kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
 
-gdb_test "record restore solib.precsave" \
+gdb_test "record restore $precsave" \
     "Program terminated with signal .*" \
     "reload core file"
 

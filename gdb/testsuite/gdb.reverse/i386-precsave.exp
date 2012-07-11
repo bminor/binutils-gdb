@@ -31,6 +31,7 @@ if ![istarget "i?86-*linux*"] then {
 }
 
 standard_testfile i386-reverse.c
+set precsave [standard_output_file i386.precsave]
 
 # some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]
@@ -59,14 +60,14 @@ gdb_test "break $end_of_main" \
 
 gdb_test "continue" "Breakpoint .* end of main .*" "run to end of main"
 
-gdb_test "record save i386.precsave" \
-    "Saved core file i386.precsave with execution log\."  \
+gdb_test "record save $precsave" \
+    "Saved core file $precsave with execution log\."  \
     "save process recfile"
 
 gdb_test "kill" "" "Kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
 
-gdb_test "record restore i386.precsave" \
+gdb_test "record restore $precsave" \
     "Program terminated with signal .*" \
     "reload precord save file"
 
