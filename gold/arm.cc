@@ -3253,7 +3253,6 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	const Symbol_value<32>* psymval)
   {
     typedef typename elfcpp::Swap_unaligned<16, big_endian>::Valtype Valtype;
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
     Valtype val = elfcpp::Swap_unaligned<16, big_endian>::readval(view);
     int32_t addend = Bits<16>::sign_extend32(val);
     Arm_address x = psymval->value(object, addend);
@@ -5208,8 +5207,6 @@ Arm_exidx_cantunwind::do_fixed_endian_write(Output_file* of)
   off_t offset = this->offset();
   const section_size_type oview_size = 8;
   unsigned char* const oview = of->get_output_view(offset, oview_size);
-
-  typedef typename elfcpp::Swap_unaligned<32, big_endian>::Valtype Valtype;
 
   Output_section* os = this->relobj_->output_section(this->shndx_);
   gold_assert(os != NULL);
@@ -10990,8 +10987,6 @@ Target_arm<big_endian>::scan_reloc_for_stub(
     elfcpp::Elf_types<32>::Elf_Swxword addend,
     Arm_address address)
 {
-  typedef typename Target_arm<big_endian>::Relocate Relocate;
-
   const Arm_relobj<big_endian>* arm_relobj =
     Arm_relobj<big_endian>::as_arm_relobj(relinfo->object);
 

@@ -2728,8 +2728,6 @@ Sized_incr_dynobj<size, big_endian>::do_add_symbols(
   elfcpp::Sym<size, big_endian> sym(symbuf);
   elfcpp::Sym_write<size, big_endian> osym(symbuf);
 
-  typedef typename elfcpp::Elf_types<size>::Elf_WXword Elf_size_type;
-
   unsigned int nsyms = this->input_reader_.get_global_symbol_count();
   this->symbols_.resize(nsyms);
 

@@ -1,3 +1,14 @@
+2012-07-11  Ian Lance Taylor  <iant@google.com>
+
+	* arm.cc (Arm_relocate_functions::abs16): Remove unused typedef.
+	(Arm_exidx_cantunwind::do_fixed_endian_write): Likewise.
+	(Target_arm::scan_reloc_for_stub): Likewise.
+	* common.cc (Symbol_table::do_allocate_commons_list): Likewise.
+	* dwarf_reader.cc (Dwarf_die::skip_attributes): Likewise.
+	* ehframe.cc (Eh_frame::do_add_ehframe_input_section): Likewise.
+	* incremental.cc (Sized_incr_dynobj::do_add_symbols): Likewise.
+	* powerpc.cc (Target_powerpc::relocate_tls): Likewise.
+
 2012-07-10  Dodji Seketeli  <dodji@redhat.com>
 	    Ian Lance Taylor  <iant@google.com>
 

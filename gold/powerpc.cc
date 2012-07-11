@@ -1971,7 +1971,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate_tls(
 			section_size_type)
 {
   Output_segment* tls_segment = relinfo->layout->tls_segment();
-  typedef Powerpc_relocate_functions<size, big_endian> Reloc;
   const Sized_relobj_file<size, big_endian>* object = relinfo->object;
 
   const elfcpp::Elf_Xword addend = rela.get_r_addend();

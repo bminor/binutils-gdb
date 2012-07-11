@@ -1,6 +1,6 @@
 // ehframe.cc -- handle exception frame sections for gold
 
-// Copyright 2006, 2007, 2008, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2010, 2011, 2012 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -631,7 +631,6 @@ Eh_frame::do_add_ehframe_input_section(
     section_size_type contents_len,
     New_cies* new_cies)
 {
-  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   Track_relocs<size, big_endian> relocs;
 
   const unsigned char* p = pcontents;

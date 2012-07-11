@@ -821,8 +821,6 @@ Dwarf_die::read_attributes()
 off_t
 Dwarf_die::skip_attributes()
 {
-  typedef Dwarf_abbrev_table::Attribute Attribute;
-
   gold_assert(this->abbrev_code_ != NULL);
 
   const unsigned char* pdie =

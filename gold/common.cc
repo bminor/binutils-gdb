@@ -1,6 +1,7 @@
 // common.cc -- handle common symbols for gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -222,9 +223,6 @@ Symbol_table::do_allocate_commons_list(
     Mapfile* mapfile,
     Sort_commons_order sort_order)
 {
-  typedef typename Sized_symbol<size>::Value_type Value_type;
-  typedef typename Sized_symbol<size>::Size_type Size_type;
-
   // We've kept a list of all the common symbols.  But the symbol may
   // have been resolved to a defined symbol by now.  And it may be a
   // forwarder.  First remove all non-common symbols.
