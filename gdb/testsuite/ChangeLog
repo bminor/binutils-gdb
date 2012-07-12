@@ -1,5 +1,11 @@
 2012-07-12  Tom Tromey  <tromey@redhat.com>
 
+	* lib/gdb.exp (standard_testfile): Don't declare objdir.
+	(clean_restart): Likewise.
+	(core_find): Use standard_output_file.
+
+2012-07-12  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/dup-psym.exp: Use prepare_for_testing_full.
 	* gdb.dwarf2/dw2-anonymous-func.exp: Use
 	prepare_for_testing_full.
