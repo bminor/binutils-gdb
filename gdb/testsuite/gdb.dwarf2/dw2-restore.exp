@@ -21,15 +21,10 @@ if {![istarget x86_64-*] || ![is_lp64_target]} {
 }
 standard_testfile .S
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
-       [list {additional_flags=-nostdlib}]] != "" } {
+if {[prepare_for_testing $testfile.exp $testfile [list $srcfile] \
+	 [list {additional_flags=-nostdlib}]]} {
     return -1
 }
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 if ![runto foo] {
     return 0

@@ -21,19 +21,10 @@ if {![dwarf2_support]} {
 
 standard_testfile .S
 
-if  { [gdb_compile "${srcdir}/${subdir}/main.c" "main.o" object {debug}] != "" } {
+if {[prepare_for_testing_full $testfile.exp \
+	 [list $testfile debug main.c debug $srcfile nodebug]]} {
     return -1
 }
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${testfile}.o" object {nodebug}] != "" } {
-    return -1
-}
-
-if  { [gdb_compile "${testfile}.o main.o" "${binfile}" executable {debug}] != "" } {
-    return -1
-}
-
-clean_restart ${testfile}
 
 gdb_test "print twelve" "= 12"
 

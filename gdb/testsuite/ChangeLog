@@ -1,5 +1,25 @@
 2012-07-12  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/dup-psym.exp: Use prepare_for_testing_full.
+	* gdb.dwarf2/dw2-anonymous-func.exp: Use
+	prepare_for_testing_full.
+	* gdb.dwarf2/dw2-basic.exp: Use prepare_for_testing_full.
+	* gdb.dwarf2/dw2-compressed.exp: Use prepare_for_testing_full.
+	* gdb.dwarf2/dw2-const.exp: Use prepare_for_testing_full.
+	* gdb.dwarf2/dw2-cu-size.exp: Use prepare_for_testing_full.
+	* gdb.dwarf2/dw2-intercu.exp: Use prepare_for_testing_full.
+	* gdb.dwarf2/dw2-intermix.exp: Use prepare_for_testing_full.
+	* gdb.dwarf2/dw2-linkage-name-trust.exp: Use
+	prepare_for_testing_full.
+	* gdb.dwarf2/dw2-producer.exp: Use prepare_for_testing_full.
+	* gdb.dwarf2/dw2-ref-missing-frame.exp: Use
+	prepare_for_testing_full.
+	* gdb.dwarf2/dw2-restore.exp: Use prepare_for_testing_full.
+	* gdb.dwarf2/dw2-strp.exp: Use prepare_for_testing_full.
+	* gdb.dwarf2/mac-fileno.exp: Use prepare_for_testing_full.
+
+2012-07-12  Tom Tromey  <tromey@redhat.com>
+
 	* lib/gdb.exp (build_executable_from_specs): New proc, from
 	build_executable.
 	(build_executable): Use it.

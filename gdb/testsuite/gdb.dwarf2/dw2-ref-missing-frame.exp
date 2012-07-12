@@ -20,21 +20,15 @@ if {![dwarf2_support]} {
 }
 
 standard_testfile .S
-set objsfile [standard_output_file ${testfile}.o]
 set srcfuncfile ${testfile}-func.c
-set objfuncfile [standard_output_file ${testfile}-func.o]
 set srcmainfile ${testfile}-main.c
-set objmainfile [standard_output_file ${testfile}-main.o]
 set executable ${testfile}
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" $objsfile object {}] != ""
-     || [gdb_compile "${srcdir}/${subdir}/${srcfuncfile}" $objfuncfile object {}] != ""
-     || [gdb_compile "${srcdir}/${subdir}/${srcmainfile}" $objmainfile object {debug}] != ""
-     || [gdb_compile "$objsfile $objfuncfile $objmainfile" $binfile executable {}] != "" } {
+if {[prepare_for_testing_full $testfile.exp \
+	 [list $testfile {} $srcfile {} $srcfuncfile {} \
+	      $srcmainfile debug]]} {
     return -1
 }
-
-clean_restart $executable
 
 # First try referencing DW_AT_frame_base which is not defined.
 if [runto func_nofb] {

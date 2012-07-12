@@ -24,22 +24,10 @@ if {![dwarf2_support]} {
 standard_testfile .S
 set dwarf_srcfile "file1.txt"
 
-if  { [gdb_compile "${srcdir}/${subdir}/main.c" "main.o" object {debug}] != "" } {
+if {[prepare_for_testing_full $testfile.exp \
+	 [list $testfile debug main.c debug $srcfile nodebug]]} {
     return -1
 }
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${testfile}.o" object {nodebug}] != "" } {
-    return -1
-}
-
-if  { [gdb_compile "${testfile}.o main.o" "${binfile}" executable {debug}] != "" } {
-    return -1
-}
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 set remote_dwarf_srcfile [remote_download host ${srcdir}/${subdir}/${dwarf_srcfile}]
 

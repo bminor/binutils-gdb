@@ -23,22 +23,10 @@ if {![dwarf2_support]} {
 
 standard_testfile .S
 
-if  { [gdb_compile "${srcdir}/${subdir}/main.c" "main.o" object {debug}] != "" } {
+if {[prepare_for_testing_full $testfile.exp \
+	 [list $testfile {debug} main.c debug $srcfile nodebug]]} {
     return -1
 }
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${testfile}.o" object {nodebug}] != "" } {
-    return -1
-}
-
-if  { [gdb_compile "${testfile}.o main.o" "${binfile}" executable {debug}] != "" } {
-    return -1
-}
-
-gdb_exit
-gdb_start
-# Note that we do not change the sources search path,
-gdb_load ${binfile}
 
 set test "info sources should contain only one reference to file1.txt"
 gdb_test_multiple "info sources" "$test" {

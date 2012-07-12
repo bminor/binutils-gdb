@@ -25,15 +25,14 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-standard_testfile
+standard_testfile .S
 set executable ${testfile}
-if { [gdb_compile ${srcdir}/${subdir}/${testfile}-main.cc "${objdir}/${subdir}/${testfile}-main.o" object {c++ debug}] != ""
-     || [gdb_compile "${srcdir}/${subdir}/${testfile}.S" "${objdir}/${subdir}/${testfile}.o" object {}] != ""
-     || [gdb_compile "${objdir}/${subdir}/${testfile}-main.o ${objdir}/${subdir}/${testfile}.o" "${binfile}" executable {c++}] != "" } {
+
+if {[prepare_for_testing_full $testfile.exp \
+	 [list $testfile c++ $testfile-main.cc {c++ debug} \
+	      $srcfile {}]]} {
     return -1
 }
-
-clean_restart $executable
 
 if ![runto_main] then {
     return -1
