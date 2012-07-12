@@ -28,9 +28,7 @@ This file documents the internals of the GNU debugger @value{GDBN}.
 @insertcopying
 @end ifnottex
 
-
-@syncodeindex fn cp
-@syncodeindex vr cp
+@syncodeindex vr fn
 
 @titlepage
 @title @value{GDBN} Internals
@@ -93,7 +91,8 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 
 * GDB Observers::  @value{GDBN} Currently available observers
 * GNU Free Documentation License::  The license for this documentation
-* Index::
+* Concept Index::
+* Function and Variable Index::
 @end menu
 
 @node Summary
@@ -8132,9 +8131,14 @@ in the directory the script was called from.
 @appendix GNU Free Documentation License
 @include fdl.texi
 
-@node Index
-@unnumbered Index
+@node Concept Index
+@unnumbered Concept Index
 
 @printindex cp
+
+@node Function and Variable Index
+@unnumbered Function and Variable Index
+
+@printindex fn
 
 @bye

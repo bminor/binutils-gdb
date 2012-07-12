@@ -1,3 +1,16 @@
+2012-07-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdbint.texinfo: Remove @syncodeindex directives that put all the
+	indices into a single node "Index".  Instead, join function and
+	variable indices into a single index, separate from the concept
+	index.  Requested in
+	http://sourceware.org/ml/gdb-patches/2012-07/msg00146.html.
+	(Top): Update the top-level menu: instead of one "Index" there are
+	now separate entries "Concept Index" and "Function and Variable
+	Index".
+	(Concept Index, Function and Variable Index): New nodes.
+	(Index): Node deleted.
+
 2012-07-05  Hui Zhu  <hui_zhu@mentor.com>
 
 	* gdb.texinfo (Maintenance Commands): Change help for "maint agent"
