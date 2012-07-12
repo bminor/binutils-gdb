@@ -1,3 +1,7 @@
+2012-07-12  Doug Evans  <dje@google.com>
+
+	* psymtab.c (map_symbol_filenames_psymtab): Skip shared psymtabs.
+
 2012-07-10  Doug Evans  <dje@google.com>
 
 	PR gdb/13498

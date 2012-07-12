@@ -1159,6 +1159,11 @@ map_symbol_filenames_psymtab (struct objfile *objfile,
       if (ps->readin)
 	continue;
 
+      /* We can skip shared psymtabs here, because any file name will be
+	 attached to the unshared psymtab.  */
+      if (ps->user != NULL)
+	continue;
+
       /* Anonymous psymtabs don't have a file name.  */
       if (ps->anonymous)
 	continue;
