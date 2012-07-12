@@ -3734,29 +3734,31 @@ proc test_prefix_command_help { command_list expected_initial_lines args } {
     }
 }
 
-# Build executable named EXECUTABLE, from SOURCES.  If SOURCES are not
-# provided, uses $EXECUTABLE.c.  The TESTNAME paramer is the name of test
-# to pass to untested, if something is wrong.  OPTIONS are passed
-# to gdb_compile directly.
-proc build_executable { testname executable {sources ""} {options {debug}} } {
-
-    global objdir
+# Build executable named EXECUTABLE from specifications that allow
+# different options to be passed to different sub-compilations.
+# TESTNAME is the name of the test; this is passed to 'untested' if
+# something fails.
+# OPTIONS is passed to the final link, using gdb_compile.
+# ARGS is a flat list of source specifications, of the form:
+#    { SOURCE1 OPTIONS1 [ SOURCE2 OPTIONS2 ]... }
+# Each SOURCE is compiled to an object file using its OPTIONS,
+# using gdb_compile.
+# Returns 0 on success, -1 on failure.
+proc build_executable_from_specs {testname executable options args} {
     global subdir
     global srcdir
-    if {[llength $sources]==0} {
-        set sources ${executable}.c
-    }
 
     set binfile [standard_output_file $executable]
 
     set objects {}
-    for {set i 0} "\$i<[llength $sources]" {incr i} {
-        set s [lindex $sources $i]
-        if  { [gdb_compile "${srcdir}/${subdir}/${s}" "${binfile}${i}.o" object $options] != "" } {
+    set i 0
+    foreach {s local_options} $args {
+        if  { [gdb_compile "${srcdir}/${subdir}/${s}" "${binfile}${i}.o" object $local_options] != "" } {
             untested $testname
             return -1
         }
         lappend objects "${binfile}${i}.o"
+	incr i
     }
     
     if  { [gdb_compile $objects "${binfile}" executable $options] != "" } {
@@ -3774,6 +3776,23 @@ proc build_executable { testname executable {sources ""} {options {debug}} } {
     return 0
 }
 
+# Build executable named EXECUTABLE, from SOURCES.  If SOURCES are not
+# provided, uses $EXECUTABLE.c.  The TESTNAME paramer is the name of test
+# to pass to untested, if something is wrong.  OPTIONS are passed
+# to gdb_compile directly.
+proc build_executable { testname executable {sources ""} {options {debug}} } {
+    if {[llength $sources]==0} {
+        set sources ${executable}.c
+    }
+
+    set arglist [list $testname $executable $options]
+    foreach source $sources {
+	lappend arglist $source $options
+    }
+
+    return [eval build_executable_from_specs $arglist]
+}
+
 # Starts fresh GDB binary and loads EXECUTABLE into GDB. EXECUTABLE is
 # the basename of the binary.
 proc clean_restart { executable } {
@@ -3786,6 +3805,25 @@ proc clean_restart { executable } {
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load ${binfile}
+}
+
+# Prepares for testing by calling build_executable_full, then
+# clean_restart.
+# TESTNAME is the name of the test.
+# Each element in ARGS is a list of the form
+#    { EXECUTABLE OPTIONS SOURCE_SPEC... }
+# These are passed to build_executable_from_specs, which see.
+# The last EXECUTABLE is passed to clean_restart.
+# Returns 0 on success, non-zero on failure.
+proc prepare_for_testing_full {testname args} {
+    foreach spec $args {
+	if {[eval build_executable_from_specs [list $testname] $spec] == -1} {
+	    return -1
+	}
+	set executable [lindex $spec 0]
+    }
+    clean_restart $executable
+    return 0
 }
 
 # Prepares for testing, by calling build_executable, and then clean_restart.

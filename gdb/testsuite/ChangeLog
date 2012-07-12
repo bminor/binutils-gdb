@@ -1,3 +1,10 @@
+2012-07-12  Tom Tromey  <tromey@redhat.com>
+
+	* lib/gdb.exp (build_executable_from_specs): New proc, from
+	build_executable.
+	(build_executable): Use it.
+	(prepare_for_testing_full): New proc.
+
 2012-07-11  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.reverse/break-precsave.exp: Use standard_output_file.
