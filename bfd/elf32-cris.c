@@ -29,73 +29,13 @@
 #include "elf/cris.h"
 #include <limits.h>
 
+bfd_reloc_status_type
+cris_elf_pcrel_reloc (bfd *, arelent *, asymbol *, void *,
+		      asection *, bfd *, char **);
+static bfd_boolean
+cris_elf_set_mach_from_flags (bfd *, unsigned long);
+
 /* Forward declarations.  */
-static reloc_howto_type * cris_reloc_type_lookup
-  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
-
-static void cris_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
-
-static bfd_reloc_status_type cris_elf_pcrel_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-
-static bfd_boolean cris_elf_grok_prstatus
-  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
-
-static bfd_boolean cris_elf_grok_psinfo
-  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
-
-static bfd_boolean cris_elf_relocate_section
-  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
-
-static bfd_reloc_status_type cris_final_link_relocate
-  PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, bfd_vma));
-
-static bfd_boolean cris_elf_object_p PARAMS ((bfd *));
-
-static void cris_elf_final_write_processing PARAMS ((bfd *, bfd_boolean));
-
-static bfd_boolean cris_elf_set_mach_from_flags
-  PARAMS ((bfd *, unsigned long int));
-
-static bfd_boolean cris_elf_print_private_bfd_data PARAMS ((bfd *, PTR));
-
-static bfd_boolean cris_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
-static bfd_boolean cris_elf_copy_private_bfd_data PARAMS ((bfd *, bfd *));
-
-struct elf_cris_link_hash_entry;
-static bfd_boolean elf_cris_discard_excess_dso_dynamics
-  PARAMS ((struct elf_cris_link_hash_entry *, PTR));
-static bfd_boolean elf_cris_discard_excess_program_dynamics
-  PARAMS ((struct elf_cris_link_hash_entry *, PTR));
-static bfd_boolean elf_cris_adjust_gotplt_to_got
-  PARAMS ((struct elf_cris_link_hash_entry *, PTR));
-static bfd_boolean elf_cris_try_fold_plt_to_got
-  PARAMS ((struct elf_cris_link_hash_entry *, PTR));
-static struct bfd_hash_entry *elf_cris_link_hash_newfunc
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-static struct bfd_link_hash_table *elf_cris_link_hash_table_create
-  PARAMS ((bfd *));
-static bfd_boolean elf_cris_adjust_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static bfd_boolean cris_elf_check_relocs
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
-
-static bfd_boolean elf_cris_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_boolean elf_cris_finish_dynamic_symbol
-  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
-	   Elf_Internal_Sym *));
-static bfd_boolean elf_cris_finish_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-static void elf_cris_hide_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean));
-static enum elf_reloc_type_class elf_cris_reloc_type_class
-  PARAMS ((const Elf_Internal_Rela *));
-
 static reloc_howto_type cris_elf_howto_table [] =
 {
   /* This reloc does nothing.  */
@@ -485,9 +425,8 @@ static const struct cris_reloc_map cris_reloc_map [] =
 };
 
 static reloc_howto_type *
-cris_reloc_type_lookup (abfd, code)
-     bfd * abfd ATTRIBUTE_UNUSED;
-     bfd_reloc_code_real_type code;
+cris_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
+			bfd_reloc_code_real_type code)
 {
   unsigned int i;
 
@@ -516,10 +455,9 @@ cris_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 /* Set the howto pointer for an CRIS ELF reloc.  */
 
 static void
-cris_info_to_howto_rela (abfd, cache_ptr, dst)
-     bfd * abfd ATTRIBUTE_UNUSED;
-     arelent * cache_ptr;
-     Elf_Internal_Rela * dst;
+cris_info_to_howto_rela (bfd * abfd ATTRIBUTE_UNUSED,
+			 arelent * cache_ptr,
+			 Elf_Internal_Rela * dst)
 {
   enum elf_cris_reloc_type r_type;
 
@@ -529,15 +467,13 @@ cris_info_to_howto_rela (abfd, cache_ptr, dst)
 }
 
 bfd_reloc_status_type
-cris_elf_pcrel_reloc (abfd, reloc_entry, symbol, data, input_section,
-		      output_bfd, error_message)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     arelent *reloc_entry;
-     asymbol *symbol;
-     PTR data ATTRIBUTE_UNUSED;
-     asection *input_section;
-     bfd *output_bfd;
-     char **error_message ATTRIBUTE_UNUSED;
+cris_elf_pcrel_reloc (bfd *abfd ATTRIBUTE_UNUSED,
+		      arelent *reloc_entry,
+		      asymbol *symbol,
+		      void * data ATTRIBUTE_UNUSED,
+		      asection *input_section,
+		      bfd *output_bfd,
+		      char **error_message ATTRIBUTE_UNUSED)
 {
   /* By default (using only bfd_elf_generic_reloc when linking to
      non-ELF formats) PC-relative relocs are relative to the beginning
@@ -562,9 +498,7 @@ cris_elf_pcrel_reloc (abfd, reloc_entry, symbol, data, input_section,
    changes, while still keeping Linux/CRIS and Linux/CRISv32 code apart.  */
 
 static bfd_boolean
-cris_elf_grok_prstatus (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
+cris_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 {
   int offset;
   size_t size;
@@ -614,9 +548,7 @@ cris_elf_grok_prstatus (abfd, note)
 }
 
 static bfd_boolean
-cris_elf_grok_psinfo (abfd, note)
-     bfd *abfd;
-     Elf_Internal_Note *note;
+cris_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   if (bfd_get_mach (abfd) == bfd_mach_cris_v32)
     switch (note->descsz)
@@ -848,6 +780,13 @@ struct elf_cris_link_hash_entry
   bfd_signed_vma dtp_refcount;
 };
 
+static bfd_boolean
+elf_cris_discard_excess_dso_dynamics (struct elf_cris_link_hash_entry *,
+				      void * );
+static bfd_boolean
+elf_cris_discard_excess_program_dynamics (struct elf_cris_link_hash_entry *,
+					  void *);
+
 /* The local_got_refcounts and local_got_offsets are a multiple of
    LSNUM in size, namely LGOT_ALLOC_NELTS_FOR(LSNUM) (plus one for the
    refcount for GOT itself, see code), with the summary / group offset
@@ -972,14 +911,12 @@ elf_cris_link_hash_table_create (bfd *abfd)
    routines, with a few tweaks.  */
 
 static bfd_reloc_status_type
-cris_final_link_relocate (howto, input_bfd, input_section, contents, rel,
-			  relocation)
-     reloc_howto_type *  howto;
-     bfd *               input_bfd;
-     asection *          input_section;
-     bfd_byte *          contents;
-     Elf_Internal_Rela * rel;
-     bfd_vma             relocation;
+cris_final_link_relocate (reloc_howto_type *  howto,
+			  bfd *               input_bfd,
+			  asection *          input_section,
+			  bfd_byte *          contents,
+			  Elf_Internal_Rela * rel,
+			  bfd_vma             relocation)
 {
   bfd_reloc_status_type r;
   enum elf_cris_reloc_type r_type = ELF32_R_TYPE (rel->r_info);
@@ -2363,9 +2300,8 @@ elf_cris_finish_dynamic_symbol (bfd *output_bfd,
    computed.  */
 
 static bfd_boolean
-elf_cris_finish_dynamic_sections (output_bfd, info)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
+elf_cris_finish_dynamic_sections (bfd *output_bfd,
+				  struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *sgot;
@@ -2786,9 +2722,7 @@ cris_elf_plt_sym_val (bfd_vma i ATTRIBUTE_UNUSED, const asection *plt,
    created (we're only linking static objects).  */
 
 static bfd_boolean
-elf_cris_adjust_gotplt_to_got (h, p)
-     struct elf_cris_link_hash_entry *h;
-     PTR p;
+elf_cris_adjust_gotplt_to_got (struct elf_cris_link_hash_entry *h, void * p)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) p;
 
@@ -2866,9 +2800,7 @@ elf_cris_adjust_gotplt_to_got (h, p)
    elf_cris_hide_symbol.  */
 
 static bfd_boolean
-elf_cris_try_fold_plt_to_got (h, p)
-     struct elf_cris_link_hash_entry *h;
-     PTR p;
+elf_cris_try_fold_plt_to_got (struct elf_cris_link_hash_entry *h, void * p)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) p;
 
@@ -2900,10 +2832,9 @@ elf_cris_try_fold_plt_to_got (h, p)
    entry.  */
 
 static void
-elf_cris_hide_symbol (info, h, force_local)
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
-     bfd_boolean force_local;
+elf_cris_hide_symbol (struct bfd_link_info *info,
+		      struct elf_link_hash_entry *h,
+		      bfd_boolean force_local)
 {
   elf_cris_adjust_gotplt_to_got ((struct elf_cris_link_hash_entry *) h, info);
 
@@ -4002,9 +3933,8 @@ elf_cris_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
    relocate_section routine.  */
 
 static bfd_boolean
-elf_cris_discard_excess_dso_dynamics (h, inf)
-     struct elf_cris_link_hash_entry *h;
-     PTR inf;
+elf_cris_discard_excess_dso_dynamics (struct elf_cris_link_hash_entry *h,
+				      void * inf)
 {
   struct elf_cris_pcrel_relocs_copied *s;
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
@@ -4058,9 +3988,8 @@ elf_cris_discard_excess_dso_dynamics (h, inf)
    in the .got, but which we found we do not have to resolve at run-time.  */
 
 static bfd_boolean
-elf_cris_discard_excess_program_dynamics (h, inf)
-     struct elf_cris_link_hash_entry *h;
-     PTR inf;
+elf_cris_discard_excess_program_dynamics (struct elf_cris_link_hash_entry *h,
+					  void * inf)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
 
@@ -4113,8 +4042,7 @@ elf_cris_discard_excess_program_dynamics (h, inf)
    underscores on symbols.  */
 
 static bfd_boolean
-cris_elf_object_p (abfd)
-     bfd *abfd;
+cris_elf_object_p (bfd *abfd)
 {
   if (! cris_elf_set_mach_from_flags (abfd, elf_elfheader (abfd)->e_flags))
     return FALSE;
@@ -4129,9 +4057,8 @@ cris_elf_object_p (abfd)
    flags from mach type.  */
 
 static void
-cris_elf_final_write_processing (abfd, linker)
-     bfd *abfd;
-     bfd_boolean linker ATTRIBUTE_UNUSED;
+cris_elf_final_write_processing (bfd *abfd,
+				 bfd_boolean linker ATTRIBUTE_UNUSED)
 {
   unsigned long e_flags = elf_elfheader (abfd)->e_flags;
 
@@ -4164,9 +4091,8 @@ cris_elf_final_write_processing (abfd, linker)
 /* Set the mach type from e_flags value.  */
 
 static bfd_boolean
-cris_elf_set_mach_from_flags (abfd, flags)
-     bfd *abfd;
-     unsigned long flags;
+cris_elf_set_mach_from_flags (bfd *abfd,
+			      unsigned long flags)
 {
   switch (flags & EF_CRIS_VARIANT_MASK)
     {
@@ -4196,9 +4122,7 @@ cris_elf_set_mach_from_flags (abfd, flags)
 /* Display the flags field.  */
 
 static bfd_boolean
-cris_elf_print_private_bfd_data (abfd, ptr)
-     bfd *abfd;
-     PTR ptr;
+cris_elf_print_private_bfd_data (bfd *abfd, void * ptr)
 {
   FILE *file = (FILE *) ptr;
 
@@ -4224,9 +4148,7 @@ cris_elf_print_private_bfd_data (abfd, ptr)
 /* Don't mix files with and without a leading underscore.  */
 
 static bfd_boolean
-cris_elf_merge_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
+cris_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   int imach, omach;
 
@@ -4303,9 +4225,7 @@ cris_elf_merge_private_bfd_data (ibfd, obfd)
 /* Do side-effects of e_flags copying to obfd.  */
 
 static bfd_boolean
-cris_elf_copy_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
+cris_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   /* Call the base function.  */
   if (!_bfd_elf_copy_private_bfd_data (ibfd, obfd))
@@ -4324,8 +4244,7 @@ cris_elf_copy_private_bfd_data (ibfd, obfd)
 }
 
 static enum elf_reloc_type_class
-elf_cris_reloc_type_class (rela)
-     const Elf_Internal_Rela *rela;
+elf_cris_reloc_type_class (const Elf_Internal_Rela *rela)
 {
   enum elf_cris_reloc_type r_type = ELF32_R_TYPE (rela->r_info);
   switch (r_type)

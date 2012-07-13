@@ -1,6 +1,6 @@
 /* BFD back-end for Irix core files.
    Copyright 1993, 1994, 1996, 1999, 2001, 2002, 2004, 2005, 2006, 2007,
-   2010, 2011 Free Software Foundation, Inc.
+   2010, 2011, 2012  Free Software Foundation, Inc.
    Written by Stu Grossman, Cygnus Support.
    Converted to back-end form by Ian Lance Taylor, Cygnus Support
 
@@ -62,7 +62,7 @@ do_sections64 (bfd *abfd, struct coreout *coreout)
 
   for (i = 0; i < coreout->c_nvmap; i++)
     {
-      val = bfd_bread ((PTR) &vmap, (bfd_size_type) sizeof vmap, abfd);
+      val = bfd_bread (&vmap, (bfd_size_type) sizeof vmap, abfd);
       if (val != sizeof vmap)
 	break;
 
@@ -110,7 +110,7 @@ do_sections (bfd *abfd, struct coreout *coreout)
 
   for (i = 0; i < coreout->c_nvmap; i++)
     {
-      val = bfd_bread ((PTR) &vmap, (bfd_size_type) sizeof vmap, abfd);
+      val = bfd_bread (&vmap, (bfd_size_type) sizeof vmap, abfd);
       if (val != sizeof vmap)
 	break;
 
@@ -175,7 +175,7 @@ irix_core_core_file_p (bfd *abfd)
   struct idesc *idg, *idf, *ids;
   bfd_size_type amt;
 
-  val = bfd_bread ((PTR) &coreout, (bfd_size_type) sizeof coreout, abfd);
+  val = bfd_bread (&coreout, (bfd_size_type) sizeof coreout, abfd);
   if (val != sizeof coreout)
     {
       if (bfd_get_error () != bfd_error_system_call)
@@ -328,7 +328,7 @@ const bfd_target irix_core_vec =
 
     NULL,
 
-    (PTR) 0			/* backend_data */
+    NULL			/* backend_data */
   };
 
 #endif /* IRIX_CORE */

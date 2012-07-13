@@ -53,7 +53,7 @@ static bfd_vma elf_vax_plt_sym_val (bfd_vma, const asection *,
 
 static bfd_boolean elf32_vax_set_private_flags (bfd *, flagword);
 static bfd_boolean elf32_vax_merge_private_bfd_data (bfd *, bfd *);
-static bfd_boolean elf32_vax_print_private_bfd_data (bfd *, PTR);
+static bfd_boolean elf32_vax_print_private_bfd_data (bfd *, void *);
 
 static reloc_howto_type howto_table[] = {
   HOWTO (R_VAX_NONE,		/* type */
@@ -423,7 +423,7 @@ static bfd_boolean elf_vax_instantiate_got_entries (struct elf_link_hash_entry *
 #define elf_vax_link_hash_traverse(table, func, info)			\
   (elf_link_hash_traverse						\
    ((table),								\
-    (bfd_boolean (*) (struct elf_link_hash_entry *, PTR)) (func),	\
+    (bfd_boolean (*) (struct elf_link_hash_entry *, void *)) (func),	\
     (info)))
 
 /* Create an entry in an VAX ELF linker hash table.  */
@@ -514,7 +514,7 @@ elf32_vax_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 /* Display the flags field */
 static bfd_boolean
-elf32_vax_print_private_bfd_data (bfd *abfd, PTR ptr)
+elf32_vax_print_private_bfd_data (bfd *abfd, void * ptr)
 {
   FILE *file = (FILE *) ptr;
 
@@ -1122,7 +1122,7 @@ elf_vax_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
      instantiate (allocate space for them).  */
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_vax_instantiate_got_entries,
-			  (PTR) info);
+			  info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -1261,7 +1261,7 @@ elf_vax_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 
 static bfd_boolean
 elf_vax_discard_copies (struct elf_vax_link_hash_entry *h,
-			PTR ignore ATTRIBUTE_UNUSED)
+			void * ignore ATTRIBUTE_UNUSED)
 {
   struct elf_vax_pcrel_relocs_copied *s;
 
@@ -1283,7 +1283,7 @@ elf_vax_discard_copies (struct elf_vax_link_hash_entry *h,
    will be reserved for the symbol.  */
 
 static bfd_boolean
-elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, PTR infoptr)
+elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, void * infoptr)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) infoptr;
   bfd *dynobj;

@@ -1,5 +1,6 @@
 /* bfd back-end for TMS320C[34]x support
-   Copyright 1996, 1997, 2002, 2003, 2005, 2007 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 2002, 2003, 2005, 2007, 2012
+   Free Software Foundation, Inc.
 
    Contributed by Michael Hayes (m.hayes@elec.canterbury.ac.nz)
 
@@ -24,14 +25,9 @@
 #include "bfd.h"
 #include "libbfd.h"
 
-static bfd_boolean tic4x_scan
-    PARAMS ((const struct bfd_arch_info *, const char * ));
-
-
 static bfd_boolean
-tic4x_scan (info, string)
-     const struct bfd_arch_info *info;
-     const char *string;
+tic4x_scan (const struct bfd_arch_info *info,
+	    const char *string)
 {
   /* Allow strings of form [ti][Cc][34][0-9], let's not be too picky
      about strange numbered machines in C3x or C4x series.  */

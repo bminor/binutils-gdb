@@ -50,7 +50,7 @@ static void m68hc11_elf_set_symbol (bfd* abfd, struct bfd_link_info *info,
 static bfd_boolean m68hc11_elf_export_one_stub
   (struct bfd_hash_entry *gen_entry, void *in_arg);
 
-static void scan_sections_for_abi (bfd*, asection*, PTR);
+static void scan_sections_for_abi (bfd*, asection*, void *);
 
 struct m68hc11_scan_param
 {

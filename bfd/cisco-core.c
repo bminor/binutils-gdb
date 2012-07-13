@@ -1,6 +1,6 @@
 /* BFD back-end for CISCO crash dumps.
    Copyright 1994, 1997, 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007,
-   2010, 2011
+   2010, 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -38,7 +38,8 @@
 # define SIGBUS 10
 #endif
 
-int crash_info_locs[] = {
+int crash_info_locs[] =
+{
   0x0250,	/* mips, ppc, x86, i960 */
   0x0400,	/* m68k, mips, x86, i960 */
   0x0FFC,	/* m68k, mips, ppc, x86, i960 */
@@ -50,13 +51,15 @@ int crash_info_locs[] = {
 #define CRASH_MAGIC	0xdead1234
 #define MASK_ADDR(x)	((x) & 0x0fffffff)	/* Mask crash info address */
 
-typedef enum {
-    CRASH_REASON_NOTCRASHED = 0,
-    CRASH_REASON_EXCEPTION = 1,
-    CRASH_REASON_CORRUPT = 2,
+typedef enum
+{
+  CRASH_REASON_NOTCRASHED = 0,
+  CRASH_REASON_EXCEPTION = 1,
+  CRASH_REASON_CORRUPT = 2,
 } crashreason;
 
-typedef struct {
+typedef struct
+{
   char magic[4];		/* Magic number */
   char version[4];		/* Version number */
   char reason[4];		/* Crash reason */
@@ -73,10 +76,6 @@ struct cisco_core_struct
   int sig;
 };
 
-static const bfd_target *cisco_core_file_validate PARAMS ((bfd *, int));
-static const bfd_target *cisco_core_file_p PARAMS ((bfd *));
-char *cisco_core_file_failing_command PARAMS ((bfd *));
-int cisco_core_file_failing_signal PARAMS ((bfd *));
 #define cisco_core_file_matches_executable_p generic_core_file_matches_executable_p
 #define cisco_core_file_pid _bfd_nocore_core_file_pid
 
@@ -84,9 +83,7 @@ int cisco_core_file_failing_signal PARAMS ((bfd *));
    CRASH_INFO_LOC.  */
 
 static const bfd_target *
-cisco_core_file_validate (abfd, crash_info_loc)
-     bfd *abfd;
-     int crash_info_loc;
+cisco_core_file_validate (bfd *abfd, int crash_info_loc)
 {
   char buf[4];
   unsigned int crashinfo_offset;
@@ -292,8 +289,7 @@ cisco_core_file_validate (abfd, crash_info_loc)
 }
 
 static const bfd_target *
-cisco_core_file_p (abfd)
-     bfd *abfd;
+cisco_core_file_p (bfd *abfd)
 {
   int *crash_info_locp;
   const bfd_target *target = NULL;
@@ -308,15 +304,13 @@ cisco_core_file_p (abfd)
 }
 
 char *
-cisco_core_file_failing_command (abfd)
-     bfd *abfd ATTRIBUTE_UNUSED;
+cisco_core_file_failing_command (bfd *abfd ATTRIBUTE_UNUSED)
 {
   return NULL;
 }
 
 int
-cisco_core_file_failing_signal (abfd)
-     bfd *abfd ATTRIBUTE_UNUSED;
+cisco_core_file_failing_signal (bfd *abfd ATTRIBUTE_UNUSED)
 {
   return abfd->tdata.cisco_core_data->sig;
 }
@@ -324,7 +318,7 @@ cisco_core_file_failing_signal (abfd)
 extern const bfd_target cisco_core_little_vec;
 
 const bfd_target cisco_core_big_vec =
-  {
+{
     "cisco-ios-core-big",
     bfd_target_unknown_flavour,
     BFD_ENDIAN_BIG,		/* target byte order */
@@ -371,11 +365,11 @@ const bfd_target cisco_core_big_vec =
 
     & cisco_core_little_vec,
 
-    (PTR) 0			/* backend_data */
+    NULL	/* backend_data */
 };
 
 const bfd_target cisco_core_little_vec =
-  {
+{
     "cisco-ios-core-little",
     bfd_target_unknown_flavour,
     BFD_ENDIAN_LITTLE,		/* target byte order */
@@ -422,5 +416,5 @@ const bfd_target cisco_core_little_vec =
 
     &cisco_core_big_vec,
 
-    (PTR) 0			/* backend_data */
+    NULL			/* backend_data */
 };

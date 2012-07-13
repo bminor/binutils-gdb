@@ -1162,7 +1162,7 @@ _bfd_coff_final_link (bfd *abfd,
 	      
 	      memset (&incount, 0, sizeof (incount));
 	      incount.r_vaddr = o->reloc_count + 1;
-	      bfd_coff_swap_reloc_out (abfd, (PTR) &incount, (PTR) excount);
+	      bfd_coff_swap_reloc_out (abfd, &incount, excount);
 	      if (bfd_bwrite (excount, relsz, abfd) != relsz)
 		/* We'll leak, but it's an error anyway. */
 		goto error_return;

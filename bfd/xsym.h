@@ -550,7 +550,7 @@ typedef struct bfd_sym_data_struct bfd_sym_data_struct;
 extern bfd_boolean bfd_sym_mkobject
   (bfd *);
 extern void bfd_sym_print_symbol
-  (bfd *, PTR, asymbol *, bfd_print_symbol_type);
+  (bfd *, void *, asymbol *, bfd_print_symbol_type);
 extern bfd_boolean bfd_sym_valid
   (bfd *);
 extern unsigned char * bfd_sym_read_name_table

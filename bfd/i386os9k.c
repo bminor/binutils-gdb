@@ -1,6 +1,6 @@
 /* BFD back-end for os9000 i386 binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2001, 2002,
-   2004, 2005, 2006, 2007, 2009, 2011 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2009, 2011, 2012  Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -120,7 +120,7 @@ os9k_object_p (bfd *abfd)
   struct internal_exec anexec;
   mh_com exec_bytes;
 
-  if (bfd_bread ((PTR) &exec_bytes, (bfd_size_type) MHCOM_BYTES_SIZE, abfd)
+  if (bfd_bread (&exec_bytes, (bfd_size_type) MHCOM_BYTES_SIZE, abfd)
       != MHCOM_BYTES_SIZE)
     {
       if (bfd_get_error () != bfd_error_system_call)
@@ -221,5 +221,5 @@ const bfd_target i386os9k_vec =
 
     NULL,
 
-    (PTR) 0,
+    NULL,
   };

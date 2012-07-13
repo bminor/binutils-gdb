@@ -26,13 +26,9 @@
 
 /* The common PowerPC architecture is compatible with the RS/6000.  */
 
-static const bfd_arch_info_type *powerpc_compatible
-  PARAMS ((const bfd_arch_info_type *, const bfd_arch_info_type *));
-
 static const bfd_arch_info_type *
-powerpc_compatible (a,b)
-     const bfd_arch_info_type *a;
-     const bfd_arch_info_type *b;
+powerpc_compatible (const bfd_arch_info_type *a,
+		    const bfd_arch_info_type *b)
 {
   BFD_ASSERT (a->arch == bfd_arch_powerpc);
   switch (b->arch)

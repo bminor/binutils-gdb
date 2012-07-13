@@ -1,6 +1,6 @@
 /* BFD back-end for IBM RS/6000 "XCOFF" files.
    Copyright 1990-1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010, 2011
+   2008, 2009, 2010, 2011, 2012
    Free Software Foundation, Inc.
    Written by Metin G. Ozisik, Mimi Phuong-Thao Vo, and John Gilmore.
    Archive support from Damon A. Permezel.
@@ -40,20 +40,20 @@ extern reloc_howto_type *_bfd_xcoff_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
 extern bfd_boolean _bfd_xcoff_slurp_armap (bfd *);
 extern const bfd_target *_bfd_xcoff_archive_p (bfd *);
-extern PTR _bfd_xcoff_read_ar_hdr (bfd *);
+extern void * _bfd_xcoff_read_ar_hdr (bfd *);
 extern bfd *_bfd_xcoff_openr_next_archived_file (bfd *, bfd *);
 extern int _bfd_xcoff_stat_arch_elt (bfd *, struct stat *);
 extern bfd_boolean _bfd_xcoff_write_armap
   (bfd *, unsigned int, struct orl *, unsigned int, int);
 extern bfd_boolean _bfd_xcoff_write_archive_contents (bfd *);
 extern int _bfd_xcoff_sizeof_headers (bfd *, struct bfd_link_info *);
-extern void _bfd_xcoff_swap_sym_in (bfd *, PTR, PTR);
-extern unsigned int _bfd_xcoff_swap_sym_out (bfd *, PTR, PTR);
-extern void _bfd_xcoff_swap_aux_in (bfd *, PTR, int, int, int, int, PTR);
+extern void _bfd_xcoff_swap_sym_in (bfd *, void *, void *);
+extern unsigned int _bfd_xcoff_swap_sym_out (bfd *, void *, void *);
+extern void _bfd_xcoff_swap_aux_in (bfd *, void *, int, int, int, int, void *);
 extern unsigned int _bfd_xcoff_swap_aux_out
-  (bfd *, PTR, int, int, int, int, PTR);
-static void xcoff_swap_reloc_in (bfd *, PTR, PTR);
-static unsigned int xcoff_swap_reloc_out (bfd *, PTR, PTR);
+  (bfd *, void *, int, int, int, int, void *);
+static void xcoff_swap_reloc_in (bfd *, void *, void *);
+static unsigned int xcoff_swap_reloc_out (bfd *, void *, void *);
 
 /* Forward declare xcoff_rtype2howto for coffcode.h macro.  */
 void xcoff_rtype2howto (arelent *, struct internal_reloc *);
@@ -129,12 +129,12 @@ static bfd_boolean xcoff_write_armap_big
   (bfd *, unsigned int, struct orl *, unsigned int, int);
 static bfd_boolean xcoff_write_archive_contents_old (bfd *);
 static bfd_boolean xcoff_write_archive_contents_big (bfd *);
-static void xcoff_swap_ldhdr_in (bfd *, const PTR, struct internal_ldhdr *);
-static void xcoff_swap_ldhdr_out (bfd *, const struct internal_ldhdr *, PTR);
-static void xcoff_swap_ldsym_in (bfd *, const PTR, struct internal_ldsym *);
-static void xcoff_swap_ldsym_out (bfd *, const struct internal_ldsym *, PTR);
-static void xcoff_swap_ldrel_in (bfd *, const PTR, struct internal_ldrel *);
-static void xcoff_swap_ldrel_out (bfd *, const struct internal_ldrel *, PTR);
+static void xcoff_swap_ldhdr_in (bfd *, const void *, struct internal_ldhdr *);
+static void xcoff_swap_ldhdr_out (bfd *, const struct internal_ldhdr *, void *);
+static void xcoff_swap_ldsym_in (bfd *, const void *, struct internal_ldsym *);
+static void xcoff_swap_ldsym_out (bfd *, const struct internal_ldsym *, void *);
+static void xcoff_swap_ldrel_in (bfd *, const void *, struct internal_ldrel *);
+static void xcoff_swap_ldrel_out (bfd *, const struct internal_ldrel *, void *);
 static bfd_boolean xcoff_ppc_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    struct internal_reloc *, struct internal_syment *, asection **);
@@ -451,7 +451,7 @@ xcoff_find_nearest_line (bfd *abfd,
 
 
 void
-_bfd_xcoff_swap_sym_in (bfd *abfd, PTR ext1, PTR in1)
+_bfd_xcoff_swap_sym_in (bfd *abfd, void * ext1, void * in1)
 {
   SYMENT *ext = (SYMENT *)ext1;
   struct internal_syment * in = (struct internal_syment *)in1;
@@ -474,7 +474,7 @@ _bfd_xcoff_swap_sym_in (bfd *abfd, PTR ext1, PTR in1)
 }
 
 unsigned int
-_bfd_xcoff_swap_sym_out (bfd *abfd, PTR inp, PTR extp)
+_bfd_xcoff_swap_sym_out (bfd *abfd, void * inp, void * extp)
 {
   struct internal_syment *in = (struct internal_syment *)inp;
   SYMENT *ext =(SYMENT *)extp;
@@ -498,8 +498,8 @@ _bfd_xcoff_swap_sym_out (bfd *abfd, PTR inp, PTR extp)
 }
 
 void
-_bfd_xcoff_swap_aux_in (bfd *abfd, PTR ext1, int type, int in_class,
-                        int indx, int numaux, PTR in1)
+_bfd_xcoff_swap_aux_in (bfd *abfd, void * ext1, int type, int in_class,
+                        int indx, int numaux, void * in1)
 {
   AUXENT * ext = (AUXENT *)ext1;
   union internal_auxent *in = (union internal_auxent *)in1;
@@ -608,15 +608,15 @@ _bfd_xcoff_swap_aux_in (bfd *abfd, PTR ext1, int type, int in_class,
 }
 
 unsigned int
-_bfd_xcoff_swap_aux_out (bfd *abfd, PTR inp, int type, int in_class,
+_bfd_xcoff_swap_aux_out (bfd *abfd, void * inp, int type, int in_class,
                          int indx ATTRIBUTE_UNUSED,
                          int numaux ATTRIBUTE_UNUSED,
-                         PTR extp)
+                         void * extp)
 {
   union internal_auxent *in = (union internal_auxent *)inp;
   AUXENT *ext = (AUXENT *)extp;
 
-  memset ((PTR)ext, 0, bfd_coff_auxesz (abfd));
+  memset (ext, 0, bfd_coff_auxesz (abfd));
   switch (in_class)
     {
     case C_FILE:
@@ -1263,7 +1263,7 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	return FALSE;
 
       /* The symbol table starts with a normal archive header.  */
-      if (bfd_bread ((PTR) &hdr, (bfd_size_type) SIZEOF_AR_HDR, abfd)
+      if (bfd_bread (&hdr, (bfd_size_type) SIZEOF_AR_HDR, abfd)
 	  != SIZEOF_AR_HDR)
 	return FALSE;
 
@@ -1279,7 +1279,7 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
       contents = (bfd_byte *) bfd_alloc (abfd, sz);
       if (contents == NULL)
 	return FALSE;
-      if (bfd_bread ((PTR) contents, sz, abfd) != sz)
+      if (bfd_bread (contents, sz, abfd) != sz)
 	return FALSE;
 
       /* The symbol table starts with a four byte count.  */
@@ -1318,7 +1318,7 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	return FALSE;
 
       /* The symbol table starts with a normal archive header.  */
-      if (bfd_bread ((PTR) &hdr, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
+      if (bfd_bread (&hdr, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
 	  != SIZEOF_AR_HDR_BIG)
 	return FALSE;
 
@@ -1337,7 +1337,7 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
       contents = (bfd_byte *) bfd_alloc (abfd, sz);
       if (contents == NULL)
 	return FALSE;
-      if (bfd_bread ((PTR) contents, sz, abfd) != sz)
+      if (bfd_bread (contents, sz, abfd) != sz)
 	return FALSE;
 
       /* The symbol table starts with an eight byte count.  */
@@ -1390,7 +1390,7 @@ _bfd_xcoff_archive_p (bfd *abfd)
   char magic[SXCOFFARMAG];
   bfd_size_type amt = SXCOFFARMAG;
 
-  if (bfd_bread ((PTR) magic, amt, abfd) != amt)
+  if (bfd_bread (magic, amt, abfd) != amt)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -1429,7 +1429,7 @@ _bfd_xcoff_archive_p (bfd *abfd)
 
       /* Now read the rest of the file header.  */
       amt = SIZEOF_AR_FILE_HDR - SXCOFFARMAG;
-      if (bfd_bread ((PTR) &hdr.memoff, amt, abfd) != amt)
+      if (bfd_bread (&hdr.memoff, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
@@ -1456,7 +1456,7 @@ _bfd_xcoff_archive_p (bfd *abfd)
 
       /* Now read the rest of the file header.  */
       amt = SIZEOF_AR_FILE_HDR_BIG - SXCOFFARMAG;
-      if (bfd_bread ((PTR) &hdr.memoff, amt, abfd) != amt)
+      if (bfd_bread (&hdr.memoff, amt, abfd) != amt)
 	{
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_wrong_format);
@@ -1489,7 +1489,7 @@ _bfd_xcoff_archive_p (bfd *abfd)
 
 /* Read the archive header in an XCOFF archive.  */
 
-PTR
+void *
 _bfd_xcoff_read_ar_hdr (bfd *abfd)
 {
   bfd_size_type namlen;
@@ -1505,7 +1505,7 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
       struct xcoff_ar_hdr hdr;
       struct xcoff_ar_hdr *hdrp;
 
-      if (bfd_bread ((PTR) &hdr, (bfd_size_type) SIZEOF_AR_HDR, abfd)
+      if (bfd_bread (&hdr, (bfd_size_type) SIZEOF_AR_HDR, abfd)
 	  != SIZEOF_AR_HDR)
 	{
 	  free (ret);
@@ -1537,7 +1537,7 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
       struct xcoff_ar_hdr_big hdr;
       struct xcoff_ar_hdr_big *hdrp;
 
-      if (bfd_bread ((PTR) &hdr, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
+      if (bfd_bread (&hdr, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
 	  != SIZEOF_AR_HDR_BIG)
 	{
 	  free (ret);
@@ -1572,7 +1572,7 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
   if (bfd_seek (abfd, (file_ptr) ((namlen & 1) + SXCOFFARFMAG), SEEK_CUR) != 0)
     return NULL;
 
-  return (PTR) ret;
+  return ret;
 }
 
 /* Open the next element in an XCOFF archive.  */
@@ -1713,7 +1713,7 @@ xcoff_write_armap_old (bfd *abfd, unsigned int elength ATTRIBUTE_UNUSED,
     if (*p == '\0')
       *p = ' ';
 
-  if (bfd_bwrite ((PTR) &hdr, (bfd_size_type) SIZEOF_AR_HDR, abfd)
+  if (bfd_bwrite (&hdr, (bfd_size_type) SIZEOF_AR_HDR, abfd)
       != SIZEOF_AR_HDR
       || (bfd_bwrite (XCOFFARFMAG, (bfd_size_type) SXCOFFARFMAG, abfd)
 	  != SXCOFFARFMAG))
@@ -2230,20 +2230,20 @@ xcoff_write_archive_contents_old (bfd *abfd)
     if (*p == '\0')
       *p = ' ';
 
-  if ((bfd_bwrite ((PTR) &ahdr, (bfd_size_type) SIZEOF_AR_HDR, abfd)
+  if ((bfd_bwrite (&ahdr, (bfd_size_type) SIZEOF_AR_HDR, abfd)
        != SIZEOF_AR_HDR)
-      || (bfd_bwrite ((PTR) XCOFFARFMAG, (bfd_size_type) SXCOFFARFMAG, abfd)
+      || (bfd_bwrite (XCOFFARFMAG, (bfd_size_type) SXCOFFARFMAG, abfd)
 	  != SXCOFFARFMAG))
     return FALSE;
 
   sprintf (decbuf, "%-12ld", (long) count);
-  if (bfd_bwrite ((PTR) decbuf, (bfd_size_type) XCOFFARMAG_ELEMENT_SIZE, abfd)
+  if (bfd_bwrite (decbuf, (bfd_size_type) XCOFFARMAG_ELEMENT_SIZE, abfd)
       != XCOFFARMAG_ELEMENT_SIZE)
     return FALSE;
   for (i = 0; i < (size_t) count; i++)
     {
       sprintf (decbuf, "%-12ld", (long) offsets[i]);
-      if (bfd_bwrite ((PTR) decbuf, (bfd_size_type) XCOFFARMAG_ELEMENT_SIZE,
+      if (bfd_bwrite (decbuf, (bfd_size_type) XCOFFARMAG_ELEMENT_SIZE,
 		      abfd) != XCOFFARMAG_ELEMENT_SIZE)
 	return FALSE;
     }
@@ -2254,7 +2254,7 @@ xcoff_write_archive_contents_old (bfd *abfd)
 
       name = normalize_filename (sub);
       namlen = strlen (name);
-      if (bfd_bwrite ((PTR) name, namlen + 1, abfd) != namlen + 1)
+      if (bfd_bwrite (name, namlen + 1, abfd) != namlen + 1)
 	return FALSE;
     }
 
@@ -2268,7 +2268,7 @@ xcoff_write_archive_contents_old (bfd *abfd)
     {
       BFD_ASSERT (nextoff == bfd_tell (abfd));
       sprintf (fhdr.symoff, "%ld", (long) nextoff);
-      bfd_ardata (abfd)->tdata = (PTR) &fhdr;
+      bfd_ardata (abfd)->tdata = &fhdr;
       if (! _bfd_compute_and_write_armap (abfd, 0))
 	return FALSE;
     }
@@ -2281,7 +2281,7 @@ xcoff_write_archive_contents_old (bfd *abfd)
       *p = ' ';
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || (bfd_bwrite ((PTR) &fhdr, (bfd_size_type) SIZEOF_AR_FILE_HDR, abfd)
+      || (bfd_bwrite (&fhdr, (bfd_size_type) SIZEOF_AR_FILE_HDR, abfd)
 	  != SIZEOF_AR_FILE_HDR))
     return FALSE;
 
@@ -2509,7 +2509,7 @@ xcoff_write_archive_contents_big (bfd *abfd)
       /* Save nextoff in fhdr.symoff so the armap routine can use it.  */
       PRINT20 (fhdr.symoff, nextoff);
 
-      bfd_ardata (abfd)->tdata = (PTR) &fhdr;
+      bfd_ardata (abfd)->tdata = &fhdr;
       if (! _bfd_compute_and_write_armap (abfd, 0))
 	return FALSE;
     }
@@ -2517,7 +2517,7 @@ xcoff_write_archive_contents_big (bfd *abfd)
   /* Write out the archive file header.  */
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || (bfd_bwrite ((PTR) &fhdr, (bfd_size_type) SIZEOF_AR_FILE_HDR_BIG,
+      || (bfd_bwrite (&fhdr, (bfd_size_type) SIZEOF_AR_FILE_HDR_BIG,
 		      abfd) != SIZEOF_AR_FILE_HDR_BIG))
     return FALSE;
 
@@ -2559,7 +2559,7 @@ _bfd_xcoff_sizeof_headers (bfd *abfd,
 /* Swap in the ldhdr structure.  */
 
 static void
-xcoff_swap_ldhdr_in (bfd *abfd, const PTR s, struct internal_ldhdr *dst)
+xcoff_swap_ldhdr_in (bfd *abfd, const void * s, struct internal_ldhdr *dst)
 {
   const struct external_ldhdr *src = (const struct external_ldhdr *) s;
 
@@ -2576,7 +2576,7 @@ xcoff_swap_ldhdr_in (bfd *abfd, const PTR s, struct internal_ldhdr *dst)
 /* Swap out the ldhdr structure.  */
 
 static void
-xcoff_swap_ldhdr_out (bfd *abfd, const struct internal_ldhdr *src, PTR d)
+xcoff_swap_ldhdr_out (bfd *abfd, const struct internal_ldhdr *src, void * d)
 {
   struct external_ldhdr *dst = (struct external_ldhdr *) d;
 
@@ -2593,7 +2593,7 @@ xcoff_swap_ldhdr_out (bfd *abfd, const struct internal_ldhdr *src, PTR d)
 /* Swap in the ldsym structure.  */
 
 static void
-xcoff_swap_ldsym_in (bfd *abfd, const PTR s, struct internal_ldsym *dst)
+xcoff_swap_ldsym_in (bfd *abfd, const void * s, struct internal_ldsym *dst)
 {
   const struct external_ldsym *src = (const struct external_ldsym *) s;
 
@@ -2614,7 +2614,7 @@ xcoff_swap_ldsym_in (bfd *abfd, const PTR s, struct internal_ldsym *dst)
 /* Swap out the ldsym structure.  */
 
 static void
-xcoff_swap_ldsym_out (bfd *abfd, const struct internal_ldsym *src, PTR d)
+xcoff_swap_ldsym_out (bfd *abfd, const struct internal_ldsym *src, void * d)
 {
   struct external_ldsym *dst = (struct external_ldsym *) d;
 
@@ -2635,7 +2635,7 @@ xcoff_swap_ldsym_out (bfd *abfd, const struct internal_ldsym *src, PTR d)
 }
 
 static void
-xcoff_swap_reloc_in (bfd *abfd, PTR s, PTR d)
+xcoff_swap_reloc_in (bfd *abfd, void * s, void * d)
 {
   struct external_reloc *src = (struct external_reloc *) s;
   struct internal_reloc *dst = (struct internal_reloc *) d;
@@ -2649,7 +2649,7 @@ xcoff_swap_reloc_in (bfd *abfd, PTR s, PTR d)
 }
 
 static unsigned int
-xcoff_swap_reloc_out (bfd *abfd, PTR s, PTR d)
+xcoff_swap_reloc_out (bfd *abfd, void * s, void * d)
 {
   struct internal_reloc *src = (struct internal_reloc *) s;
   struct external_reloc *dst = (struct external_reloc *) d;
@@ -2665,7 +2665,7 @@ xcoff_swap_reloc_out (bfd *abfd, PTR s, PTR d)
 /* Swap in the ldrel structure.  */
 
 static void
-xcoff_swap_ldrel_in (bfd *abfd, const PTR s, struct internal_ldrel *dst)
+xcoff_swap_ldrel_in (bfd *abfd, const void * s, struct internal_ldrel *dst)
 {
   const struct external_ldrel *src = (const struct external_ldrel *) s;
 
@@ -2678,7 +2678,7 @@ xcoff_swap_ldrel_in (bfd *abfd, const PTR s, struct internal_ldrel *dst)
 /* Swap out the ldrel structure.  */
 
 static void
-xcoff_swap_ldrel_out (bfd *abfd, const struct internal_ldrel *src, PTR d)
+xcoff_swap_ldrel_out (bfd *abfd, const struct internal_ldrel *src, void * d)
 {
   struct external_ldrel *dst = (struct external_ldrel *) d;
 
@@ -4163,7 +4163,7 @@ const bfd_target rs6000coff_vec =
     /* Opposite endian version, none exists */
     NULL,
 
-    (void *) &bfd_xcoff_backend_data,
+    & bfd_xcoff_backend_data,
   };
 
 /* xcoff-powermac target
@@ -4418,5 +4418,5 @@ const bfd_target pmac_xcoff_vec =
     /* Opposite endian version, none exists */
     NULL,
 
-    (void *) &bfd_pmac_xcoff_backend_data,
+    & bfd_pmac_xcoff_backend_data,
   };

@@ -563,15 +563,15 @@ bfd_open_file (bfd *abfd)
     {
     case read_direction:
     case no_direction:
-      abfd->iostream = (PTR) real_fopen (abfd->filename, FOPEN_RB);
+      abfd->iostream = real_fopen (abfd->filename, FOPEN_RB);
       break;
     case both_direction:
     case write_direction:
       if (abfd->opened_once)
 	{
-	  abfd->iostream = (PTR) real_fopen (abfd->filename, FOPEN_RUB);
+	  abfd->iostream = real_fopen (abfd->filename, FOPEN_RUB);
 	  if (abfd->iostream == NULL)
-	    abfd->iostream = (PTR) real_fopen (abfd->filename, FOPEN_WUB);
+	    abfd->iostream = real_fopen (abfd->filename, FOPEN_WUB);
 	}
       else
 	{
@@ -601,7 +601,7 @@ bfd_open_file (bfd *abfd)
 	  if (stat (abfd->filename, &s) == 0 && s.st_size != 0)
 	    unlink_if_ordinary (abfd->filename);
 #endif
-	  abfd->iostream = (PTR) real_fopen (abfd->filename, FOPEN_WUB);
+	  abfd->iostream = real_fopen (abfd->filename, FOPEN_WUB);
 	  abfd->opened_once = TRUE;
 	}
       break;

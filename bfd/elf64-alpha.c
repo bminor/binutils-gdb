@@ -211,7 +211,7 @@ struct alpha_elf_link_hash_table
 #define alpha_elf_link_hash_traverse(table, func, info)			\
   (elf_link_hash_traverse						\
    (&(table)->root,							\
-    (bfd_boolean (*) (struct elf_link_hash_entry *, PTR)) (func),	\
+    (bfd_boolean (*) (struct elf_link_hash_entry *, void *)) (func),	\
     (info)))
 
 /* Get the Alpha ELF linker hash table from a link_info structure.  */
@@ -357,7 +357,7 @@ elf64_alpha_object_p (bfd *abfd)
 static bfd_reloc_status_type
 elf64_alpha_reloc_nil (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc,
 		       asymbol *sym ATTRIBUTE_UNUSED,
-		       PTR data ATTRIBUTE_UNUSED, asection *sec,
+		       void * data ATTRIBUTE_UNUSED, asection *sec,
 		       bfd *output_bfd, char **error_message ATTRIBUTE_UNUSED)
 {
   if (output_bfd)
@@ -370,7 +370,7 @@ elf64_alpha_reloc_nil (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc,
 static bfd_reloc_status_type
 elf64_alpha_reloc_bad (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc,
 		       asymbol *sym ATTRIBUTE_UNUSED,
-		       PTR data ATTRIBUTE_UNUSED, asection *sec,
+		       void * data ATTRIBUTE_UNUSED, asection *sec,
 		       bfd *output_bfd, char **error_message ATTRIBUTE_UNUSED)
 {
   if (output_bfd)
@@ -422,7 +422,7 @@ elf64_alpha_do_reloc_gpdisp (bfd *abfd, bfd_vma gpdisp, bfd_byte *p_ldah,
 
 static bfd_reloc_status_type
 elf64_alpha_reloc_gpdisp (bfd *abfd, arelent *reloc_entry,
-			  asymbol *sym ATTRIBUTE_UNUSED, PTR data,
+			  asymbol *sym ATTRIBUTE_UNUSED, void * data,
 			  asection *input_section, bfd *output_bfd,
 			  char **err_msg)
 {
@@ -1377,17 +1377,17 @@ elf64_alpha_read_ecoff_info (bfd *abfd, asection *section,
     }
 
   READ (line, cbLineOffset, cbLine, sizeof (unsigned char), unsigned char *);
-  READ (external_dnr, cbDnOffset, idnMax, swap->external_dnr_size, PTR);
-  READ (external_pdr, cbPdOffset, ipdMax, swap->external_pdr_size, PTR);
-  READ (external_sym, cbSymOffset, isymMax, swap->external_sym_size, PTR);
-  READ (external_opt, cbOptOffset, ioptMax, swap->external_opt_size, PTR);
+  READ (external_dnr, cbDnOffset, idnMax, swap->external_dnr_size, void *);
+  READ (external_pdr, cbPdOffset, ipdMax, swap->external_pdr_size, void *);
+  READ (external_sym, cbSymOffset, isymMax, swap->external_sym_size, void *);
+  READ (external_opt, cbOptOffset, ioptMax, swap->external_opt_size, void *);
   READ (external_aux, cbAuxOffset, iauxMax, sizeof (union aux_ext),
 	union aux_ext *);
   READ (ss, cbSsOffset, issMax, sizeof (char), char *);
   READ (ssext, cbSsExtOffset, issExtMax, sizeof (char), char *);
-  READ (external_fdr, cbFdOffset, ifdMax, swap->external_fdr_size, PTR);
-  READ (external_rfd, cbRfdOffset, crfd, swap->external_rfd_size, PTR);
-  READ (external_ext, cbExtOffset, iextMax, swap->external_ext_size, PTR);
+  READ (external_fdr, cbFdOffset, ifdMax, swap->external_fdr_size, void *);
+  READ (external_rfd, cbRfdOffset, crfd, swap->external_rfd_size, void *);
+  READ (external_ext, cbExtOffset, iextMax, swap->external_ext_size, void *);
 #undef READ
 
   debug->fdr = NULL;
@@ -1507,7 +1507,7 @@ elf64_alpha_find_nearest_line (bfd *abfd, asection *section, asymbol **symbols,
 	  fraw_end = (fraw_src
 		      + fi->d.symbolic_header.ifdMax * external_fdr_size);
 	  for (; fraw_src < fraw_end; fraw_src += external_fdr_size, fdr_ptr++)
-	    (*swap->swap_fdr_in) (abfd, (PTR) fraw_src, fdr_ptr);
+	    (*swap->swap_fdr_in) (abfd, fraw_src, fdr_ptr);
 
 	  elf_tdata (abfd)->find_line_info = fi;
 
@@ -1549,7 +1549,7 @@ struct extsym_info
 };
 
 static bfd_boolean
-elf64_alpha_output_extsym (struct alpha_elf_link_hash_entry *h, PTR data)
+elf64_alpha_output_extsym (struct alpha_elf_link_hash_entry *h, void * data)
 {
   struct extsym_info *einfo = (struct extsym_info *) data;
   bfd_boolean strip;
@@ -2392,7 +2392,7 @@ elf64_alpha_merge_gots (bfd *a, bfd *b)
 
 static bfd_boolean
 elf64_alpha_calc_got_offsets_for_symbol (struct alpha_elf_link_hash_entry *h,
-					 PTR arg ATTRIBUTE_UNUSED)
+					 void * arg ATTRIBUTE_UNUSED)
 {
   struct alpha_elf_got_entry *gotent;
 
@@ -2544,7 +2544,8 @@ elf64_alpha_size_got_sections (struct bfd_link_info *info)
 }
 
 static bfd_boolean
-elf64_alpha_size_plt_section_1 (struct alpha_elf_link_hash_entry *h, PTR data)
+elf64_alpha_size_plt_section_1 (struct alpha_elf_link_hash_entry *h,
+				void * data)
 {
   asection *splt = (asection *) data;
   struct alpha_elf_got_entry *gotent;
@@ -3170,7 +3171,7 @@ elf64_alpha_relax_opt_call (struct alpha_relax_info *info, bfd_vma symval)
       else
 	{
 	  tsec_relocs = (_bfd_elf_link_read_relocs
-		         (info->abfd, info->tsec, (PTR) NULL,
+		         (info->abfd, info->tsec, NULL,
 			 (Elf_Internal_Rela *) NULL,
 			 info->link_info->keep_memory));
 	  if (tsec_relocs == NULL)
@@ -3755,7 +3756,7 @@ elf64_alpha_relax_section (bfd *abfd, asection *sec,
 
   /* Load the relocations for this section.  */
   internal_relocs = (_bfd_elf_link_read_relocs
-		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+		     (abfd, sec, NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
     return FALSE;
@@ -5103,7 +5104,7 @@ elf64_alpha_final_link (bfd *abfd, struct bfd_link_info *info)
 	  debug.external_ext = debug.external_ext_end = NULL;
 
 	  mdebug_handle = bfd_ecoff_debug_init (abfd, &debug, swap, info);
-	  if (mdebug_handle == (PTR) NULL)
+	  if (mdebug_handle == NULL)
 	    return FALSE;
 
 	  if (1)
@@ -5207,7 +5208,7 @@ elf64_alpha_final_link (bfd *abfd, struct bfd_link_info *info)
 		  const char *name;
 		  struct alpha_elf_link_hash_entry *h;
 
-		  (*input_swap->swap_ext_in) (input_bfd, (PTR) eraw_src, &ext);
+		  (*input_swap->swap_ext_in) (input_bfd, eraw_src, &ext);
 		  if (ext.asym.sc == scNil
 		      || ext.asym.sc == scUndefined
 		      || ext.asym.sc == scSUndefined)
@@ -5254,7 +5255,7 @@ elf64_alpha_final_link (bfd *abfd, struct bfd_link_info *info)
 	  einfo.failed = FALSE;
 	  elf_link_hash_traverse (elf_hash_table (info),
 				  elf64_alpha_output_extsym,
-				  (PTR) &einfo);
+				  &einfo);
 	  if (einfo.failed)
 	    return FALSE;
 

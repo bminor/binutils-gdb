@@ -1,6 +1,6 @@
 /* BFD back end for SCO5 core files (U-area and raw sections)
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2010, 2011
+   2010, 2011, 2012
    Free Software Foundation, Inc.
    Written by Jouke Numan <jnuman@hiscom.nl>
 
@@ -45,24 +45,16 @@ struct sco5_core_struct
 
 /* forward declarations */
 
-static asection *make_bfd_asection
-  PARAMS ((bfd *, const char *, flagword, bfd_size_type, bfd_vma, file_ptr));
-static struct user *read_uarea PARAMS ((bfd *, int));
-const bfd_target *sco5_core_file_p PARAMS ((bfd *abfd));
-char *sco5_core_file_failing_command PARAMS ((bfd *abfd));
-int sco5_core_file_failing_signal PARAMS ((bfd *abfd));
 #define sco5_core_file_matches_executable_p generic_core_file_matches_executable_p
 #define sco5_core_file_pid _bfd_nocore_core_file_pid
-static void swap_abort PARAMS ((void));
 
 static asection *
-make_bfd_asection (abfd, name, flags, size, vma, filepos)
-     bfd *abfd;
-     const char *name;
-     flagword flags;
-     bfd_size_type size;
-     bfd_vma vma;
-     file_ptr filepos;
+make_bfd_asection (bfd *abfd,
+		   const char *name,
+		   flagword flags,
+		   bfd_size_type size,
+		   bfd_vma vma,
+		   file_ptr filepos)
 {
   asection *asect;
 
@@ -78,10 +70,7 @@ make_bfd_asection (abfd, name, flags, size, vma, filepos)
 }
 
 static struct user *
-read_uarea(abfd, filepos)
-     bfd *abfd;
-     int filepos;
-
+read_uarea (bfd *abfd, int filepos)
 {
   struct sco5_core_struct *rawptr;
   bfd_size_type amt = sizeof (struct sco5_core_struct);
@@ -115,8 +104,7 @@ read_uarea(abfd, filepos)
 }
 
 const bfd_target *
-sco5_core_file_p (abfd)
-     bfd *abfd;
+sco5_core_file_p (bfd *abfd)
 {
   int coffset_siz, val, nsecs, cheadoffs;
   int coresize;
@@ -327,8 +315,7 @@ sco5_core_file_p (abfd)
 }
 
 char *
-sco5_core_file_failing_command (abfd)
-     bfd *abfd;
+sco5_core_file_failing_command (bfd *abfd)
 {
   char *com = abfd->tdata.sco5_core_data->u.u_comm;
   if (*com)
@@ -338,8 +325,7 @@ sco5_core_file_failing_command (abfd)
 }
 
 int
-sco5_core_file_failing_signal (ignore_abfd)
-     bfd *ignore_abfd;
+sco5_core_file_failing_signal (bfd *ignore_abfd)
 {
   return ((ignore_abfd->tdata.sco5_core_data->u.u_sysabort != 0)
 	  ? ignore_abfd->tdata.sco5_core_data->u.u_sysabort
@@ -348,7 +334,7 @@ sco5_core_file_failing_signal (ignore_abfd)
 
 /* If somebody calls any byte-swapping routines, shoot them.  */
 static void
-swap_abort ()
+swap_abort (void)
 {
   abort (); /* This way doesn't require any declaration for ANSI to fuck up */
 }
@@ -408,5 +394,5 @@ const bfd_target sco5_core_vec =
 
     NULL,
 
-    (PTR) 0			/* backend_data */
+    NULL			/* backend_data */
   };

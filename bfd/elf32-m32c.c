@@ -830,7 +830,7 @@ m32c_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 
 static bfd_boolean
-m32c_elf_print_private_bfd_data (bfd *abfd, PTR ptr)
+m32c_elf_print_private_bfd_data (bfd *abfd, void *ptr)
 {
   FILE *file = (FILE *) ptr;
   flagword flags;
@@ -985,8 +985,7 @@ struct relax_plt_data
 };
 
 static bfd_boolean
-m32c_relax_plt_check (struct elf_link_hash_entry *h,
-                      PTR xdata)
+m32c_relax_plt_check (struct elf_link_hash_entry *h, void * xdata)
 {
   struct relax_plt_data *data = (struct relax_plt_data *) xdata;
 
@@ -1017,8 +1016,7 @@ m32c_relax_plt_check (struct elf_link_hash_entry *h,
    previously had a plt entry, give it a new entry offset.  */
 
 static bfd_boolean
-m32c_relax_plt_realloc (struct elf_link_hash_entry *h,
-                        PTR xdata)
+m32c_relax_plt_realloc (struct elf_link_hash_entry *h, void * xdata)
 {
   bfd_vma *entry = (bfd_vma *) xdata;
 
@@ -1382,14 +1380,14 @@ m32c_elf_relax_section
       if (shndx_buf == NULL)
 	goto error_return;
       if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread ((PTR) shndx_buf, amt, abfd) != amt)
+	  || bfd_bread (shndx_buf, amt, abfd) != amt)
 	goto error_return;
       shndx_hdr->contents = (bfd_byte *) shndx_buf;
     }
 
   /* Get a copy of the native relocations.  */
   internal_relocs = (_bfd_elf_link_read_relocs
-		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+		     (abfd, sec, NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
     goto error_return;

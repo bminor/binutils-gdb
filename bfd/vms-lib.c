@@ -2346,5 +2346,5 @@ const bfd_target vms_lib_txt_vec =
 
   NULL,
 
-  (PTR) 0
+  NULL
 };

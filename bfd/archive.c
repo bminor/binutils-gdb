@@ -147,7 +147,8 @@ extern int errno;
    it's generally short enough to search linearly.
    Note that the pointers here point to the front of the ar_hdr, not
    to the front of the contents!  */
-struct ar_cache {
+struct ar_cache
+{
   file_ptr ptr;
   bfd *arbfd;
 };
@@ -168,6 +169,7 @@ _bfd_ar_spacepad (char *p, size_t n, const char *fmt, long val)
 {
   static char buf[20];
   size_t len;
+
   snprintf (buf, sizeof (buf), fmt, val);
   len = strlen (buf);
   if (len < n)
@@ -296,6 +298,7 @@ _bfd_look_for_bfd_in_cache (bfd *arch_bfd, file_ptr filepos)
 {
   htab_t hash_table = bfd_ardata (arch_bfd)->cache;
   struct ar_cache m;
+
   m.ptr = filepos;
 
   if (hash_table)
@@ -311,7 +314,7 @@ _bfd_look_for_bfd_in_cache (bfd *arch_bfd, file_ptr filepos)
 }
 
 static hashval_t
-hash_file_ptr (const PTR p)
+hash_file_ptr (const void * p)
 {
   return (hashval_t) (((struct ar_cache *) p)->ptr);
 }
@@ -319,7 +322,7 @@ hash_file_ptr (const PTR p)
 /* Returns non-zero if P1 and P2 are equal.  */
 
 static int
-eq_file_ptr (const PTR p1, const PTR p2)
+eq_file_ptr (const void * p1, const void * p2)
 {
   struct ar_cache *arc1 = (struct ar_cache *) p1;
   struct ar_cache *arc2 = (struct ar_cache *) p2;

@@ -34,7 +34,7 @@ bfin_pltpc_reloc (
      bfd *abfd ATTRIBUTE_UNUSED,
      arelent *reloc_entry ATTRIBUTE_UNUSED,
      asymbol *symbol ATTRIBUTE_UNUSED,
-     PTR data ATTRIBUTE_UNUSED,
+     void * data ATTRIBUTE_UNUSED,
      asection *input_section ATTRIBUTE_UNUSED,
      bfd *output_bfd ATTRIBUTE_UNUSED,
      char **error_message ATTRIBUTE_UNUSED)
@@ -48,7 +48,7 @@ static bfd_reloc_status_type
 bfin_pcrel24_reloc (bfd *abfd,
                     arelent *reloc_entry,
                     asymbol *symbol,
-                    PTR data,
+                    void * data,
                     asection *input_section,
                     bfd *output_bfd,
                     char **error_message ATTRIBUTE_UNUSED)
@@ -145,7 +145,7 @@ static bfd_reloc_status_type
 bfin_imm16_reloc (bfd *abfd,
      		  arelent *reloc_entry,
      		  asymbol *symbol,
-     		  PTR data,
+     		  void * data,
      		  asection *input_section,
      		  bfd *output_bfd,
      		  char **error_message ATTRIBUTE_UNUSED)
@@ -217,7 +217,7 @@ static bfd_reloc_status_type
 bfin_byte4_reloc (bfd *abfd,
                   arelent *reloc_entry,
                   asymbol *symbol,
-                  PTR data,
+                  void * data,
                   asection *input_section,
                   bfd *output_bfd,
                   char **error_message ATTRIBUTE_UNUSED)
@@ -283,7 +283,7 @@ static bfd_reloc_status_type
 bfin_bfd_reloc (bfd *abfd,
 		arelent *reloc_entry,
      		asymbol *symbol,
-     		PTR data,
+     		void * data,
      		asection *input_section,
      		bfd *output_bfd,
      		char **error_message ATTRIBUTE_UNUSED)
@@ -1109,7 +1109,7 @@ bfin_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 /* Given a bfin relocation type, return the howto.  */
 static reloc_howto_type *
 bfin_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
-			    unsigned int r_type)
+			unsigned int r_type)
 {
   if (r_type <= BFIN_RELOC_MAX)
     return &bfin_howto_table [r_type];
@@ -1139,9 +1139,7 @@ elf32_bfin_final_write_processing (bfd *abfd,
 /* Return TRUE if the name is a local label.
    bfin local labels begin with L$.  */
 static bfd_boolean
-bfin_is_local_label_name (
-     bfd *abfd,
-     const char *label)
+bfin_is_local_label_name (bfd *abfd, const char *label)
 {
   if (label[0] == 'L' && label[1] == '$' )
     return TRUE;
@@ -1167,6 +1165,7 @@ bfin_check_relocs (bfd * abfd,
   const Elf_Internal_Rela *rel_end;
   asection *sgot;
   asection *srelgot;
+
   if (info->relocatable)
     return TRUE;
 
@@ -1997,10 +1996,10 @@ bfinfdpic_relocs_info_find (struct htab *ht,
    for memory allocation purposes.  */
 inline static struct bfinfdpic_relocs_info *
 bfinfdpic_relocs_info_for_global (struct htab *ht,
-				 bfd *abfd,
-				 struct elf_link_hash_entry *h,
-				 bfd_vma addend,
-				 enum insert_option insert)
+				  bfd *abfd,
+				  struct elf_link_hash_entry *h,
+				  bfd_vma addend,
+				  enum insert_option insert)
 {
   struct bfinfdpic_relocs_info entry;
 
@@ -2035,7 +2034,7 @@ bfinfdpic_relocs_info_for_local (struct htab *ht,
 
 inline static void
 bfinfdpic_pic_merge_early_relocs_info (struct bfinfdpic_relocs_info *e2,
-				      struct bfinfdpic_relocs_info const *e1)
+				       struct bfinfdpic_relocs_info const *e1)
 {
   e2->got17m4 |= e1->got17m4;
   e2->gothilo |= e1->gothilo;
@@ -2101,7 +2100,7 @@ _bfinfdpic_add_dyn_reloc (bfd *output_bfd, asection *sreloc, bfd_vma offset,
 
 static bfd_vma
 _bfinfdpic_add_rofixup (bfd *output_bfd, asection *rofixup, bfd_vma offset,
-		       struct bfinfdpic_relocs_info *entry)
+			struct bfinfdpic_relocs_info *entry)
 {
   bfd_vma fixup_offset;
 
@@ -2156,9 +2155,8 @@ _bfinfdpic_emit_got_relocs_plt_entries (struct bfinfdpic_relocs_info *entry,
 					asection *sec,
 					Elf_Internal_Sym *sym,
 					bfd_vma addend)
-
 {
-  bfd_vma fd_lazy_rel_offset = (bfd_vma)-1;
+  bfd_vma fd_lazy_rel_offset = (bfd_vma) -1;
   int dynindx = -1;
 
   if (entry->done)
@@ -4350,9 +4348,8 @@ elf32_bfinfdpic_always_size_sections (bfd *output_bfd,
    subtract it from the relocation or fixup count.  */
 static bfd_boolean
 _bfinfdpic_check_discarded_relocs (bfd *abfd, asection *sec,
-				  struct bfd_link_info *info,
-				  
-				  bfd_boolean *changed)
+				   struct bfd_link_info *info,
+				   bfd_boolean *changed)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
@@ -4600,9 +4597,8 @@ elf32_bfinfdpic_finish_dynamic_sections (bfd *output_bfd,
    regular object.  */
 
 static bfd_boolean
-elf32_bfinfdpic_adjust_dynamic_symbol
-(struct bfd_link_info *info,
- struct elf_link_hash_entry *h)
+elf32_bfinfdpic_adjust_dynamic_symbol (struct bfd_link_info *info,
+				       struct elf_link_hash_entry *h)
 {
   bfd * dynobj;
 
@@ -5065,7 +5061,7 @@ elf32_bfinfdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 /* Display the flags field.  */
 static bfd_boolean
-elf32_bfin_print_private_bfd_data (bfd * abfd, PTR ptr)
+elf32_bfin_print_private_bfd_data (bfd * abfd, void * ptr)
 {
   FILE *file = (FILE *) ptr;
   flagword flags;
@@ -5213,7 +5209,7 @@ bfin_link_hash_table_create (bfd * abfd)
 
 static bfd_boolean
 bfin_finish_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
-				  struct bfd_link_info *info)
+			      struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *sdyn;
@@ -5247,9 +5243,9 @@ bfin_finish_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 
 static bfd_boolean
 bfin_finish_dynamic_symbol (bfd * output_bfd,
-				struct bfd_link_info *info,
-				struct elf_link_hash_entry *h,
-				Elf_Internal_Sym * sym)
+			    struct bfd_link_info *info,
+			    struct elf_link_hash_entry *h,
+			    Elf_Internal_Sym * sym)
 {
   bfd *dynobj;
 
@@ -5324,7 +5320,7 @@ bfin_finish_dynamic_symbol (bfd * output_bfd,
 
 static bfd_boolean
 bfin_adjust_dynamic_symbol (struct bfd_link_info *info,
-				struct elf_link_hash_entry *h)
+			    struct elf_link_hash_entry *h)
 {
   bfd *dynobj;
   asection *s;
@@ -5452,7 +5448,7 @@ struct bfin_pcrel_relocs_copied
    case.  */
 
 static bfd_boolean
-bfin_discard_copies (struct elf_link_hash_entry *h, PTR inf)
+bfin_discard_copies (struct elf_link_hash_entry *h, void * inf)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
   struct bfin_pcrel_relocs_copied *s;
@@ -5483,7 +5479,7 @@ bfin_discard_copies (struct elf_link_hash_entry *h, PTR inf)
 
 static bfd_boolean
 bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
-				struct bfd_link_info *info)
+			    struct bfd_link_info *info)
 {
   bfd *dynobj;
   asection *s;
@@ -5523,7 +5519,7 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
      will not fill them in in the relocate_section routine.  */
   if (info->shared)
     elf_link_hash_traverse (elf_hash_table (info),
-			    bfin_discard_copies, (PTR) info);
+			    bfin_discard_copies, info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -5634,16 +5630,12 @@ bfin_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
    after the add_symbols entry point has been called for all the
    objects, and before the final_link entry point is called.  */
 
-bfd_boolean bfd_bfin_elf32_create_embedded_relocs
-  PARAMS ((bfd *, struct bfd_link_info *, asection *, asection *, char **));
-
 bfd_boolean
-bfd_bfin_elf32_create_embedded_relocs (
-     bfd *abfd,
-     struct bfd_link_info *info,
-     asection *datasec,
-     asection *relsec,
-     char **errmsg)
+bfd_bfin_elf32_create_embedded_relocs (bfd *abfd,
+				       struct bfd_link_info *info,
+				       asection *datasec,
+				       asection *relsec,
+				       char **errmsg)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Sym *isymbuf = NULL;
@@ -5663,7 +5655,7 @@ bfd_bfin_elf32_create_embedded_relocs (
 
   /* Get a copy of the native relocations.  */
   internal_relocs = (_bfd_elf_link_read_relocs
-		     (abfd, datasec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+		     (abfd, datasec, NULL, (Elf_Internal_Rela *) NULL,
 		      info->keep_memory));
   if (internal_relocs == NULL)
     goto error_return;

@@ -37,14 +37,7 @@ static void m68hc11_info_to_howto_rel
   (bfd *, arelent *, Elf_Internal_Rela *);
 
 /* Trampoline generation.  */
-static bfd_boolean m68hc12_elf_size_one_stub
-  (struct bfd_hash_entry *gen_entry, void *in_arg);
-static bfd_boolean m68hc12_elf_build_one_stub
-  (struct bfd_hash_entry *gen_entry, void *in_arg);
-static struct bfd_link_hash_table* m68hc12_elf_bfd_link_hash_table_create
-  (bfd*);
 
-static bfd_boolean m68hc12_elf_set_mach_from_flags PARAMS ((bfd *));
 
 /* Use REL instead of RELA to save space */
 #define USE_REL	1

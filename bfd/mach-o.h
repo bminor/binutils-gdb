@@ -608,7 +608,7 @@ long bfd_mach_o_get_dynamic_reloc_upper_bound (bfd *);
 long bfd_mach_o_canonicalize_dynamic_reloc (bfd *, arelent **, asymbol **);
 asymbol *bfd_mach_o_make_empty_symbol (bfd *);
 void bfd_mach_o_get_symbol_info (bfd *, asymbol *, symbol_info *);
-void bfd_mach_o_print_symbol (bfd *, PTR, asymbol *, bfd_print_symbol_type);
+void bfd_mach_o_print_symbol (bfd *, void *, asymbol *, bfd_print_symbol_type);
 int bfd_mach_o_sizeof_headers (bfd *, struct bfd_link_info *);
 unsigned long bfd_mach_o_stack_addr (enum bfd_mach_o_cpu_type);
 int bfd_mach_o_core_fetch_environment (bfd *, unsigned char **, unsigned int *);

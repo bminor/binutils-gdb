@@ -178,18 +178,18 @@ static bfd_boolean elfNN_ia64_choose_gp
   (bfd *abfd, struct bfd_link_info *info, bfd_boolean final);
 static void elfNN_ia64_dyn_sym_traverse
   (struct elfNN_ia64_link_hash_table *ia64_info,
-   bfd_boolean (*func) (struct elfNN_ia64_dyn_sym_info *, PTR),
-   PTR info);
+   bfd_boolean (*func) (struct elfNN_ia64_dyn_sym_info *, void *),
+   void * info);
 static bfd_boolean allocate_global_data_got
-  (struct elfNN_ia64_dyn_sym_info *dyn_i, PTR data);
+  (struct elfNN_ia64_dyn_sym_info *dyn_i, void * data);
 static bfd_boolean allocate_global_fptr_got
-  (struct elfNN_ia64_dyn_sym_info *dyn_i, PTR data);
+  (struct elfNN_ia64_dyn_sym_info *dyn_i, void * data);
 static bfd_boolean allocate_local_got
-  (struct elfNN_ia64_dyn_sym_info *dyn_i, PTR data);
+  (struct elfNN_ia64_dyn_sym_info *dyn_i, void * data);
 static bfd_boolean elfNN_ia64_hpux_vec
   (const bfd_target *vec);
 static bfd_boolean allocate_dynrel_entries
-  (struct elfNN_ia64_dyn_sym_info *dyn_i, PTR data);
+  (struct elfNN_ia64_dyn_sym_info *dyn_i, void * data);
 static asection *get_pltoff
   (bfd *abfd, struct bfd_link_info *info,
    struct elfNN_ia64_link_hash_table *ia64_info);
@@ -1408,7 +1408,7 @@ elfNN_ia64_hash_table_create (bfd *abfd)
 
 static bfd_boolean
 elfNN_ia64_global_dyn_info_free (void **xentry,
-				PTR unused ATTRIBUTE_UNUSED)
+				 void * unused ATTRIBUTE_UNUSED)
 {
   struct elfNN_ia64_link_hash_entry *entry
     = (struct elfNN_ia64_link_hash_entry *) xentry;
@@ -1429,7 +1429,7 @@ elfNN_ia64_global_dyn_info_free (void **xentry,
 
 static bfd_boolean
 elfNN_ia64_local_dyn_info_free (void **slot,
-				PTR unused ATTRIBUTE_UNUSED)
+				void * unused ATTRIBUTE_UNUSED)
 {
   struct elfNN_ia64_local_hash_entry *entry
     = (struct elfNN_ia64_local_hash_entry *) *slot;
@@ -1470,13 +1470,13 @@ elfNN_ia64_hash_table_free (struct bfd_link_hash_table *hash)
 
 struct elfNN_ia64_dyn_sym_traverse_data
 {
-  bfd_boolean (*func) (struct elfNN_ia64_dyn_sym_info *, PTR);
-  PTR data;
+  bfd_boolean (*func) (struct elfNN_ia64_dyn_sym_info *, void *);
+  void * data;
 };
 
 static bfd_boolean
 elfNN_ia64_global_dyn_sym_thunk (struct bfd_hash_entry *xentry,
-				 PTR xdata)
+				 void * xdata)
 {
   struct elfNN_ia64_link_hash_entry *entry
     = (struct elfNN_ia64_link_hash_entry *) xentry;
@@ -1494,7 +1494,7 @@ elfNN_ia64_global_dyn_sym_thunk (struct bfd_hash_entry *xentry,
 }
 
 static bfd_boolean
-elfNN_ia64_local_dyn_sym_thunk (void **slot, PTR xdata)
+elfNN_ia64_local_dyn_sym_thunk (void **slot, void * xdata)
 {
   struct elfNN_ia64_local_hash_entry *entry
     = (struct elfNN_ia64_local_hash_entry *) *slot;
@@ -1513,8 +1513,8 @@ elfNN_ia64_local_dyn_sym_thunk (void **slot, PTR xdata)
 
 static void
 elfNN_ia64_dyn_sym_traverse (struct elfNN_ia64_link_hash_table *ia64_info,
-			     bfd_boolean (*func) (struct elfNN_ia64_dyn_sym_info *, PTR),
-			     PTR data)
+			     bfd_boolean (*func) (struct elfNN_ia64_dyn_sym_info *, void *),
+			     void * data)
 {
   struct elfNN_ia64_dyn_sym_traverse_data xdata;
 
@@ -2659,7 +2659,7 @@ allocate_global_fptr_got (struct elfNN_ia64_dyn_sym_info *dyn_i,
 
 static bfd_boolean
 allocate_local_got (struct elfNN_ia64_dyn_sym_info *dyn_i,
-		    PTR data)
+		    void * data)
 {
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
@@ -2694,7 +2694,7 @@ global_sym_index (struct elf_link_hash_entry *h)
    in a main executable that is not exported.  */
 
 static bfd_boolean
-allocate_fptr (struct elfNN_ia64_dyn_sym_info *dyn_i, PTR data)
+allocate_fptr (struct elfNN_ia64_dyn_sym_info *dyn_i, void * data)
 {
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
@@ -2741,7 +2741,7 @@ allocate_fptr (struct elfNN_ia64_dyn_sym_info *dyn_i, PTR data)
 
 static bfd_boolean
 allocate_plt_entries (struct elfNN_ia64_dyn_sym_info *dyn_i,
-		      PTR data)
+		      void * data)
 {
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
@@ -2778,7 +2778,7 @@ allocate_plt_entries (struct elfNN_ia64_dyn_sym_info *dyn_i,
 
 static bfd_boolean
 allocate_plt2_entries (struct elfNN_ia64_dyn_sym_info *dyn_i,
-		       PTR data)
+		       void * data)
 {
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
@@ -2805,7 +2805,7 @@ allocate_plt2_entries (struct elfNN_ia64_dyn_sym_info *dyn_i,
 
 static bfd_boolean
 allocate_pltoff_entries (struct elfNN_ia64_dyn_sym_info *dyn_i,
-			 PTR data)
+			 void * data)
 {
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
@@ -2822,7 +2822,7 @@ allocate_pltoff_entries (struct elfNN_ia64_dyn_sym_info *dyn_i,
 
 static bfd_boolean
 allocate_dynrel_entries (struct elfNN_ia64_dyn_sym_info *dyn_i,
-			 PTR data)
+			 void * data)
 {
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
   struct elfNN_ia64_link_hash_table *ia64_info;
@@ -3537,7 +3537,7 @@ elfNN_ia64_dtprel_base (struct bfd_link_info *info)
 static bfd *elfNN_ia64_unwind_entry_compare_bfd;
 
 static int
-elfNN_ia64_unwind_entry_compare (const PTR a, const PTR b)
+elfNN_ia64_unwind_entry_compare (const void * a, const void * b)
 {
   bfd_vma av, bv;
 
@@ -4786,7 +4786,7 @@ elfNN_ia64_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 }
 
 static bfd_boolean
-elfNN_ia64_print_private_bfd_data (bfd *abfd, PTR ptr)
+elfNN_ia64_print_private_bfd_data (bfd *abfd, void * ptr)
 {
   FILE *file = (FILE *) ptr;
   flagword flags = elf_elfheader (abfd)->e_flags;

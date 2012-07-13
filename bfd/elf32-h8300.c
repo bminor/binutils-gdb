@@ -52,12 +52,13 @@ static bfd_boolean elf32_h8_relocate_section
    bfd_byte *, Elf_Internal_Rela *,
    Elf_Internal_Sym *, asection **);
 static bfd_reloc_status_type special
-  (bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **);
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 
 /* This does not include any relocation information, but should be
    good enough for GDB or objdump to read the file.  */
 
-static reloc_howto_type h8_elf_howto_table[] = {
+static reloc_howto_type h8_elf_howto_table[] =
+{
 #define R_H8_NONE_X 0
   HOWTO (R_H8_NONE,		/* type */
 	 0,			/* rightshift */
@@ -304,7 +305,7 @@ static bfd_reloc_status_type
 special (bfd *abfd ATTRIBUTE_UNUSED,
 	 arelent *reloc_entry ATTRIBUTE_UNUSED,
 	 asymbol *symbol ATTRIBUTE_UNUSED,
-	 PTR data ATTRIBUTE_UNUSED,
+	 void * data ATTRIBUTE_UNUSED,
 	 asection *input_section ATTRIBUTE_UNUSED,
 	 bfd *output_bfd,
 	 char **error_message ATTRIBUTE_UNUSED)
@@ -699,7 +700,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 
   /* Get a copy of the native relocations.  */
   internal_relocs = (_bfd_elf_link_read_relocs
-		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+		     (abfd, sec, NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
     goto error_return;
@@ -1523,7 +1524,7 @@ elf32_h8_get_relocated_section_contents (bfd *output_bfd,
       bfd_size_type amt;
 
       internal_relocs = (_bfd_elf_link_read_relocs
-			 (input_bfd, input_section, (PTR) NULL,
+			 (input_bfd, input_section, NULL,
 			  (Elf_Internal_Rela *) NULL, FALSE));
       if (internal_relocs == NULL)
 	goto error_return;

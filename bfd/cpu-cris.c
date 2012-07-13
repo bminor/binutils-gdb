@@ -1,5 +1,5 @@
 /* BFD support for the Axis CRIS architecture.
-   Copyright 2000, 2002, 2004, 2005, 2007
+   Copyright 2000, 2002, 2004, 2005, 2007, 2012
    Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson.
@@ -30,12 +30,11 @@
    there's a compatible subset for which we provide an arch_info.  */
 
 static const bfd_arch_info_type * get_compatible
-  PARAMS ((const bfd_arch_info_type *, const bfd_arch_info_type *));
+  (const bfd_arch_info_type *, const bfd_arch_info_type *);
 
 static const bfd_arch_info_type *
-get_compatible (a,b)
-     const bfd_arch_info_type *a;
-     const bfd_arch_info_type *b;
+get_compatible (const bfd_arch_info_type *a,
+		const bfd_arch_info_type *b)
 {
   /* Arches must match.  */
   if (a->arch != b->arch)

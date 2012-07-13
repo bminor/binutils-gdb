@@ -57,7 +57,7 @@ elf64_sparc_slurp_one_reloc_table (bfd *abfd, asection *asect,
 				   Elf_Internal_Shdr *rel_hdr,
 				   asymbol **symbols, bfd_boolean dynamic)
 {
-  PTR allocated = NULL;
+  void * allocated = NULL;
   bfd_byte *native_relocs;
   arelent *relent;
   unsigned int i;
@@ -65,7 +65,7 @@ elf64_sparc_slurp_one_reloc_table (bfd *abfd, asection *asect,
   bfd_size_type count;
   arelent *relents;
 
-  allocated = (PTR) bfd_malloc (rel_hdr->sh_size);
+  allocated = bfd_malloc (rel_hdr->sh_size);
   if (allocated == NULL)
     goto error_return;
 
@@ -279,7 +279,7 @@ elf64_sparc_canonicalize_dynamic_reloc (bfd *abfd, arelent **storage,
 /* Write out the relocs.  */
 
 static void
-elf64_sparc_write_relocs (bfd *abfd, asection *sec, PTR data)
+elf64_sparc_write_relocs (bfd *abfd, asection *sec, void * data)
 {
   bfd_boolean *failedp = (bfd_boolean *) data;
   Elf_Internal_Shdr *rela_hdr;
@@ -330,7 +330,7 @@ elf64_sparc_write_relocs (bfd *abfd, asection *sec, PTR data)
   rela_hdr = elf_section_data (sec)->rela.hdr;
 
   rela_hdr->sh_size = rela_hdr->sh_entsize * count;
-  rela_hdr->contents = (PTR) bfd_alloc (abfd, rela_hdr->sh_size);
+  rela_hdr->contents = bfd_alloc (abfd, rela_hdr->sh_size);
   if (rela_hdr->contents == NULL)
     {
       *failedp = TRUE;
@@ -545,8 +545,8 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 static bfd_boolean
 elf64_sparc_output_arch_syms (bfd *output_bfd ATTRIBUTE_UNUSED,
 			      struct bfd_link_info *info,
-			      PTR flaginfo,
-			      int (*func) (PTR, const char *,
+			      void * flaginfo,
+			      int (*func) (void *, const char *,
 					   Elf_Internal_Sym *,
 					   asection *,
 					   struct elf_link_hash_entry *))
@@ -741,7 +741,7 @@ elf64_sparc_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
 /* Print a STT_REGISTER symbol to file FILE.  */
 
 static const char *
-elf64_sparc_print_symbol_all (bfd *abfd ATTRIBUTE_UNUSED, PTR filep,
+elf64_sparc_print_symbol_all (bfd *abfd ATTRIBUTE_UNUSED, void * filep,
 			      asymbol *symbol)
 {
   FILE *file = (FILE *) filep;

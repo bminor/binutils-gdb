@@ -507,10 +507,9 @@ bfd_pef_scan_start_address (bfd *abfd)
 }
 
 int
-bfd_pef_scan (abfd, header, mdata)
-     bfd *abfd;
-     bfd_pef_header *header;
-     bfd_pef_data_struct *mdata;
+bfd_pef_scan (bfd *abfd,
+	      bfd_pef_header *header,
+	      bfd_pef_data_struct *mdata)
 {
   unsigned int i;
   enum bfd_architecture cputype;
