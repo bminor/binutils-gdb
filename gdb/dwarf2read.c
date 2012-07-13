@@ -8878,7 +8878,18 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
 	  parameter->kind = CALL_SITE_PARAMETER_PARAM_OFFSET;
 	  offset = dwarf2_get_ref_die_offset (origin);
-	  gdb_assert (offset.sect_off >= cu->header.offset.sect_off);
+	  if (!offset_in_cu_p (&cu->header, offset))
+	    {
+	      /* As DW_OP_GNU_parameter_ref uses CU-relative offset this
+		 binding can be done only inside one CU.  Such referenced DIE
+		 therefore cannot be even moved to DW_TAG_partial_unit.  */
+	      complaint (&symfile_complaints,
+			 _("DW_AT_abstract_origin offset is not in CU for "
+			   "DW_TAG_GNU_call_site child DIE 0x%x "
+			   "[in module %s]"),
+			 child_die->offset.sect_off, objfile->name);
+	      continue;
+	    }
 	  parameter->u.param_offset.cu_off = (offset.sect_off
 	                                      - cu->header.offset.sect_off);
 	}

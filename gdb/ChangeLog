@@ -1,3 +1,8 @@
+2012-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (read_call_site_scope): Do not gdb_assert for invalid
+	read-in CALL_SITE_PARAMETER_PARAM_OFFSET.
+
 2012-07-13  Doug Evans  <dje@google.com>
 
 	* symtab.c (output_source_filename): Delete unnecessary forward decl.
