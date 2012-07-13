@@ -412,7 +412,7 @@ fragment <<EOF
   /* First strip off everything before the last '/'.  */
   soname = lbasename (abfd->filename);
 
-  if (trace_file_tries)
+  if (verbose)
     info_msg (_("found %s at %s\n"), soname, name);
 
   global_found = NULL;
@@ -1216,7 +1216,7 @@ gld${EMULATION_NAME}_after_open (void)
       n.by = l->by;
       n.name = l->name;
       nn.by = l->by;
-      if (trace_file_tries)
+      if (verbose)
 	info_msg (_("%s needed by %B\n"), l->name, l->by);
 
       /* As-needed libs specified on the command line (or linker script)

@@ -126,7 +126,7 @@ ldfile_try_open_bfd (const char *attempt,
 {
   entry->the_bfd = bfd_openr (attempt, entry->target);
 
-  if (trace_file_tries)
+  if (verbose)
     {
       if (entry->the_bfd == NULL)
 	info_msg (_("attempt to open %s failed\n"), attempt);
@@ -465,7 +465,7 @@ try_open (const char *name, bfd_boolean *sysrooted)
   if (result != NULL)
     *sysrooted = is_sysrooted_pathname (name);
 
-  if (trace_file_tries)
+  if (verbose)
     {
       if (result == NULL)
 	info_msg (_("cannot find script file %s\n"), name);

@@ -535,7 +535,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
   cmd[3] = entry->the_bfd->filename;
   cmd[4] = oname;
   cmd[5] = NULL;
-  if (trace_file_tries)
+  if (verbose)
     {
       info_msg (_("running: %s \"%s\" \"%s\" \"%s\" \"%s\"\n"),
 		cmd[0], cmd[1], cmd[2], cmd[3], cmd[4]);

@@ -2740,7 +2740,7 @@ load_symbols (lang_input_statement_type *entry,
       if (!entry->flags.reload)
 #endif
 	ldlang_add_file (entry);
-      if (trace_files || trace_file_tries)
+      if (trace_files || verbose)
 	info_msg ("%I\n", entry);
       break;
 

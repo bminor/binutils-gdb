@@ -31,7 +31,7 @@ extern FILE *previous_script_handle;
 extern bfd_boolean force_make_executable;
 extern char *default_target;
 extern bfd_boolean trace_files;
-extern bfd_boolean trace_file_tries;
+extern bfd_boolean verbose;
 extern bfd_boolean version_printed;
 extern bfd_boolean demangling;
 extern int g_switch_value;

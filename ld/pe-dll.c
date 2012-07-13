@@ -2713,8 +2713,9 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
       return;
     }
 
-  /* xgettext:c-format */
-  info_msg (_("Creating library file: %s\n"), impfilename);
+  if (verbose)
+    /* xgettext:c-format */
+    info_msg (_("Creating library file: %s\n"), impfilename);
 
   bfd_set_format (outarch, bfd_archive);
   outarch->has_armap = 1;

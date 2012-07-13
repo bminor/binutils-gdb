@@ -1214,7 +1214,7 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_VERBOSE:
 	  ldversion (1);
 	  version_printed = TRUE;
-	  trace_file_tries = TRUE;
+	  verbose = TRUE;
 	  overflow_cutoff_limit = -2;
 	  if (optarg != NULL)
 	    {
