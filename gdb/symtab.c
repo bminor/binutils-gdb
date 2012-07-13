@@ -75,8 +75,6 @@ static void variables_info (char *, int);
 
 static void sources_info (char *, int);
 
-static void output_source_filename (const char *, int *);
-
 static int find_line_common (struct linetable *, int, int *, int);
 
 static struct symbol *lookup_symbol_aux (const char *name,
@@ -3105,57 +3103,104 @@ operator_chars (char *p, char **end)
 }
 
 
+/* Cache to watch for file names already seen by filename_seen.  */
+
+struct filename_seen_cache
+{
+  /* Table of files seen so far.  */
+  const char **tab;
+
+  /* Allocated size of tab in elements.  */
+  int tab_alloc_size;
+#define INITIAL_FILENAME_SEEN_CACHE_SIZE 100
+
+  /* Current size of tab in elements.  */
+  int tab_cur_size;
+};
+
+/* filename_seen_cache constructor.  */
+
+static struct filename_seen_cache *
+create_filename_seen_cache (void)
+{
+  struct filename_seen_cache *cache;
+
+  cache = XNEW (struct filename_seen_cache);
+  cache->tab_alloc_size = INITIAL_FILENAME_SEEN_CACHE_SIZE;
+  cache->tab = XNEWVEC (const char *, cache->tab_alloc_size);
+  cache->tab_cur_size = 0;
+
+  return cache;
+}
+
+/* Empty the cache, but do not delete it.  */
+
+static void
+clear_filename_seen_cache (struct filename_seen_cache * cache)
+{
+  cache->tab_cur_size = 0;
+}
+
+/* filename_seen_cache destructor.
+   This takes a void * argument as it is generally used as a cleanup.  */
+
+static void
+delete_filename_seen_cache (void *ptr)
+{
+  struct filename_seen_cache *cache = ptr;
+
+  xfree (cache->tab);
+  xfree (cache);
+}
+
 /* If FILE is not already in the table of files, return zero;
    otherwise return non-zero.  Optionally add FILE to the table if ADD
    is non-zero.  If *FIRST is non-zero, forget the old table
    contents.  */
 
 static int
-filename_seen (const char *file, int add, int *first)
+filename_seen (struct filename_seen_cache *cache, const char *file, int add)
 {
-  /* Table of files seen so far.  */
-  static const char **tab = NULL;
-  /* Allocated size of tab in elements.
-     Start with one 256-byte block (when using GNU malloc.c).
-     24 is the malloc overhead when range checking is in effect.  */
-  static int tab_alloc_size = (256 - 24) / sizeof (char *);
-  /* Current size of tab in elements.  */
-  static int tab_cur_size;
   const char **p;
 
-  if (*first)
-    {
-      if (tab == NULL)
-	tab = (const char **) xmalloc (tab_alloc_size * sizeof (*tab));
-      tab_cur_size = 0;
-    }
-
   /* Is FILE in tab?  */
-  for (p = tab; p < tab + tab_cur_size; p++)
+  for (p = cache->tab; p < cache->tab + cache->tab_cur_size; p++)
     if (filename_cmp (*p, file) == 0)
       return 1;
 
   /* No; maybe add it to tab.  */
   if (add)
     {
-      if (tab_cur_size == tab_alloc_size)
+      if (cache->tab_cur_size == cache->tab_alloc_size)
 	{
-	  tab_alloc_size *= 2;
-	  tab = (const char **) xrealloc ((char *) tab,
-					  tab_alloc_size * sizeof (*tab));
+	  cache->tab_alloc_size *= 2;
+	  cache->tab = XRESIZEVEC (const char *, cache->tab,
+				   cache->tab_alloc_size);
 	}
-      tab[tab_cur_size++] = file;
+      cache->tab[cache->tab_cur_size++] = file;
     }
 
   return 0;
 }
 
+/* Data structure to maintain printing state for output_source_filename.  */
+
+struct output_source_filename_data
+{
+  /* Cache of what we've seen so far.  */
+  struct filename_seen_cache *filename_seen_cache;
+
+  /* Flag of whether we're printing the first one.  */
+  int first;
+};
+
 /* Slave routine for sources_info.  Force line breaks at ,'s.
-   NAME is the name to print and *FIRST is nonzero if this is the first
-   name printed.  Set *FIRST to zero.  */
+   NAME is the name to print.
+   DATA contains the state for printing and watching for duplicates.  */
 
 static void
-output_source_filename (const char *name, int *first)
+output_source_filename (const char *name,
+			struct output_source_filename_data *data)
 {
   /* Since a single source file can result in several partial symbol
      tables, we need to avoid printing it more than once.  Note: if
@@ -3167,20 +3212,16 @@ output_source_filename (const char *name, int *first)
      symtabs; it doesn't hurt to check.  */
 
   /* Was NAME already seen?  */
-  if (filename_seen (name, 1, first))
+  if (filename_seen (data->filename_seen_cache, name, 1))
     {
       /* Yes; don't print it again.  */
       return;
     }
+
   /* No; print it and reset *FIRST.  */
-  if (*first)
-    {
-      *first = 0;
-    }
-  else
-    {
-      printf_filtered (", ");
-    }
+  if (! data->first)
+    printf_filtered (", ");
+  data->first = 0;
 
   wrap_here ("");
   fputs_filtered (name, gdb_stdout);
@@ -3200,31 +3241,39 @@ sources_info (char *ignore, int from_tty)
 {
   struct symtab *s;
   struct objfile *objfile;
-  int first;
+  struct output_source_filename_data data;
+  struct cleanup *cleanups;
 
   if (!have_full_symbols () && !have_partial_symbols ())
     {
       error (_("No symbol table is loaded.  Use the \"file\" command."));
     }
 
+  data.filename_seen_cache = create_filename_seen_cache ();
+  cleanups = make_cleanup (delete_filename_seen_cache,
+			   data.filename_seen_cache);
+
   printf_filtered ("Source files for which symbols have been read in:\n\n");
 
-  first = 1;
+  data.first = 1;
   ALL_SYMTABS (objfile, s)
   {
     const char *fullname = symtab_to_fullname (s);
 
-    output_source_filename (fullname ? fullname : s->filename, &first);
+    output_source_filename (fullname ? fullname : s->filename, &data);
   }
   printf_filtered ("\n\n");
 
   printf_filtered ("Source files for which symbols "
 		   "will be read in on demand:\n\n");
 
-  first = 1;
-  map_partial_symbol_filenames (output_partial_symbol_filename, &first,
+  clear_filename_seen_cache (data.filename_seen_cache);
+  data.first = 1;
+  map_partial_symbol_filenames (output_partial_symbol_filename, &data,
 				1 /*need_fullname*/);
   printf_filtered ("\n");
+
+  do_cleanups (cleanups);
 }
 
 static int
@@ -4543,7 +4592,7 @@ not_interesting_fname (const char *fname)
    map_partial_symbol_filenames.  */
 struct add_partial_filename_data
 {
-  int *first;
+  struct filename_seen_cache *filename_seen_cache;
   char *text;
   char *word;
   int text_len;
@@ -4560,7 +4609,7 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
 
   if (not_interesting_fname (filename))
     return;
-  if (!filename_seen (filename, 1, data->first)
+  if (!filename_seen (data->filename_seen_cache, filename, 1)
       && filename_ncmp (filename, data->text, data->text_len) == 0)
     {
       /* This file matches for a completion; add it to the
@@ -4572,7 +4621,7 @@ maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
       const char *base_name = lbasename (filename);
 
       if (base_name != filename
-	  && !filename_seen (base_name, 1, data->first)
+	  && !filename_seen (data->filename_seen_cache, base_name, 1)
 	  && filename_ncmp (base_name, data->text, data->text_len) == 0)
 	add_filename_to_list (base_name, data->text, data->word, data->list);
     }
@@ -4588,23 +4637,27 @@ make_source_files_completion_list (char *text, char *word)
 {
   struct symtab *s;
   struct objfile *objfile;
-  int first = 1;
   size_t text_len = strlen (text);
   VEC (char_ptr) *list = NULL;
   const char *base_name;
   struct add_partial_filename_data datum;
-  struct cleanup *back_to;
+  struct filename_seen_cache *filename_seen_cache;
+  struct cleanup *back_to, *cache_cleanup;
 
   if (!have_full_symbols () && !have_partial_symbols ())
     return list;
 
   back_to = make_cleanup (do_free_completion_list, &list);
 
+  filename_seen_cache = create_filename_seen_cache ();
+  cache_cleanup = make_cleanup (delete_filename_seen_cache,
+				filename_seen_cache);
+
   ALL_SYMTABS (objfile, s)
     {
       if (not_interesting_fname (s->filename))
 	continue;
-      if (!filename_seen (s->filename, 1, &first)
+      if (!filename_seen (filename_seen_cache, s->filename, 1)
 	  && filename_ncmp (s->filename, text, text_len) == 0)
 	{
 	  /* This file matches for a completion; add it to the current
@@ -4619,19 +4672,21 @@ make_source_files_completion_list (char *text, char *word)
 	     command do when they parse file names.  */
 	  base_name = lbasename (s->filename);
 	  if (base_name != s->filename
-	      && !filename_seen (base_name, 1, &first)
+	      && !filename_seen (filename_seen_cache, base_name, 1)
 	      && filename_ncmp (base_name, text, text_len) == 0)
 	    add_filename_to_list (base_name, text, word, &list);
 	}
     }
 
-  datum.first = &first;
+  datum.filename_seen_cache = filename_seen_cache;
   datum.text = text;
   datum.word = word;
   datum.text_len = text_len;
   datum.list = &list;
   map_partial_symbol_filenames (maybe_add_partial_symtab_filename, &datum,
 				0 /*need_fullname*/);
+
+  do_cleanups (cache_cleanup);
   discard_cleanups (back_to);
 
   return list;

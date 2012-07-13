@@ -1,3 +1,22 @@
+2012-07-13  Doug Evans  <dje@google.com>
+
+	* symtab.c (output_source_filename): Delete unnecessary forward decl.
+	(filename_seen_cache): New struct.
+	(INITIAL_FILENAME_SEEN_CACHE_SIZE): New macro.
+	(create_filename_seen_cache): New function.
+	(clear_filename_seen_cache, delete_filename_seen_cache): New functions.
+	(filename_seen): Delete arg "first".  New arg "cache".  All callers
+	updated.
+	(output_source_filename_data): New struct.
+	(output_source_filename): Delete arg "first".  New arg "data".
+	All callers updated.
+	(sources_info): Delete local "first".  New locals "data", "cleanups".
+	Rewrite to use filename_seen_cache.
+	(add_partial_filename_data): Delete member "first".  New member
+	"filename_seen_cache".  All uses updated.
+	(make_source_files_completion_list): Rewrite to use
+	filename_seen_cache.
+
 2012-07-12  Doug Evans  <dje@google.com>
 
 	* psymtab.c (map_symbol_filenames_psymtab): Skip shared psymtabs.
