@@ -1,4 +1,10 @@
 2012-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw2-minsym-in-cu.S: New file.
+	* gdb.dwarf2/dw2-minsym-in-cu.exp: New file.
+
+2012-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix gdbserver run regression.
 	* gdb.trace/disconnected-tracing.exp (executabel): Fix typo.

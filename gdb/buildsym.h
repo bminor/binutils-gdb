@@ -258,6 +258,15 @@ extern void push_subfile (void);
 
 extern char *pop_subfile (void);
 
+extern struct block *end_symtab_get_static_block (CORE_ADDR end_addr,
+						  struct objfile *objfile,
+						  int expandable);
+
+extern struct symtab *end_symtab_from_static_block (struct block *static_block,
+						    struct objfile *objfile,
+						    int section,
+						    int expandable);
+
 extern struct symtab *end_symtab (CORE_ADDR end_addr,
 				  struct objfile *objfile, int section);
 

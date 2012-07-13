@@ -957,42 +957,28 @@ reset_symtab_globals (void)
     }
 }
 
-/* Finish the symbol definitions for one main source file, close off
-   all the lexical contexts for that file (creating struct block's for
-   them), then make the struct symtab for that file and put it in the
-   list of all such.
+/* Implementation of the first part of end_symtab.  It allows modifying
+   STATIC_BLOCK before it gets finalized by end_symtab_from_static_block.
+   If the returned value is NULL there is no blockvector created for
+   this symtab (you still must call end_symtab_from_static_block).
 
-   END_ADDR is the address of the end of the file's text.  SECTION is
-   the section number (in objfile->section_offsets) of the blockvector
-   and linetable.
+   END_ADDR is the same as for end_symtab: the address of the end of the
+   file's text.
 
-   If EXPANDABLE is non-zero the dictionaries for the global and static
-   blocks are made expandable.
+   If EXPANDABLE is non-zero the STATIC_BLOCK dictionary is made
+   expandable.  */
 
-   Note that it is possible for end_symtab() to return NULL.  In
-   particular, for the DWARF case at least, it will return NULL when
-   it finds a compilation unit that has exactly one DIE, a
-   TAG_compile_unit DIE.  This can happen when we link in an object
-   file that was compiled from an empty source file.  Returning NULL
-   is probably not the correct thing to do, because then gdb will
-   never know about this empty file (FIXME).  */
-
-static struct symtab *
-end_symtab_1 (CORE_ADDR end_addr, struct objfile *objfile, int section,
-	      int expandable)
+struct block *
+end_symtab_get_static_block (CORE_ADDR end_addr, struct objfile *objfile,
+			     int expandable)
 {
-  struct symtab *symtab = NULL;
-  struct blockvector *blockvector;
-  struct subfile *subfile;
-  struct context_stack *cstk;
-  struct subfile *nextsub;
-
   /* Finish the lexical context of the last function in the file; pop
      the context stack.  */
 
   if (context_stack_depth > 0)
     {
-      cstk = pop_context ();
+      struct context_stack *cstk = pop_context ();
+
       /* Make a block for the local symbols within.  */
       finish_block (cstk->name, &local_symbols, cstk->old_blocks,
 		    cstk->start_addr, end_addr, objfile);
@@ -1058,18 +1044,51 @@ end_symtab_1 (CORE_ADDR end_addr, struct objfile *objfile, int section,
       && have_line_numbers == 0
       && pending_macros == NULL)
     {
-      /* Ignore symtabs that have no functions with real debugging
-         info.  */
+      /* Ignore symtabs that have no functions with real debugging info.  */
+      return NULL;
+    }
+  else
+    {
+      /* Define the STATIC_BLOCK.  */
+      return finish_block_internal (NULL, &file_symbols, NULL,
+				    last_source_start_addr, end_addr, objfile,
+				    0, expandable);
+    }
+}
+
+/* Implementation of the second part of end_symtab.  Pass STATIC_BLOCK
+   as value returned by end_symtab_get_static_block.
+
+   SECTION is the same as for end_symtab: the section number
+   (in objfile->section_offsets) of the blockvector and linetable.
+
+   If EXPANDABLE is non-zero the GLOBAL_BLOCK dictionary is made
+   expandable.  */
+
+struct symtab *
+end_symtab_from_static_block (struct block *static_block,
+			      struct objfile *objfile, int section,
+			      int expandable)
+{
+  struct symtab *symtab = NULL;
+  struct blockvector *blockvector;
+  struct subfile *subfile;
+  struct subfile *nextsub;
+
+  if (static_block == NULL)
+    {
+      /* Ignore symtabs that have no functions with real debugging info.  */
       blockvector = NULL;
     }
   else
     {
-      /* Define the STATIC_BLOCK & GLOBAL_BLOCK, and build the
+      CORE_ADDR end_addr = BLOCK_END (static_block);
+
+      /* Define after STATIC_BLOCK also GLOBAL_BLOCK, and build the
          blockvector.  */
-      finish_block_internal (0, &file_symbols, 0, last_source_start_addr,
-			     end_addr, objfile, 0, expandable);
-      finish_block_internal (0, &global_symbols, 0, last_source_start_addr,
-			     end_addr, objfile, 1, expandable);
+      finish_block_internal (NULL, &global_symbols, NULL,
+			     last_source_start_addr, end_addr, objfile,
+			     1, expandable);
       blockvector = make_blockvector (objfile);
     }
 
@@ -1251,21 +1270,46 @@ end_symtab_1 (CORE_ADDR end_addr, struct objfile *objfile, int section,
   return symtab;
 }
 
-/* See end_symtab_1 for details.  */
+/* Finish the symbol definitions for one main source file, close off
+   all the lexical contexts for that file (creating struct block's for
+   them), then make the struct symtab for that file and put it in the
+   list of all such.
+
+   END_ADDR is the address of the end of the file's text.  SECTION is
+   the section number (in objfile->section_offsets) of the blockvector
+   and linetable.
+
+   Note that it is possible for end_symtab() to return NULL.  In
+   particular, for the DWARF case at least, it will return NULL when
+   it finds a compilation unit that has exactly one DIE, a
+   TAG_compile_unit DIE.  This can happen when we link in an object
+   file that was compiled from an empty source file.  Returning NULL
+   is probably not the correct thing to do, because then gdb will
+   never know about this empty file (FIXME).
+
+   If you need to modify STATIC_BLOCK before it is finalized you should
+   call end_symtab_get_static_block and end_symtab_from_static_block
+   yourself.  */
 
 struct symtab *
 end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 {
-  return end_symtab_1 (end_addr, objfile, section, 0);
+  struct block *static_block;
+
+  static_block = end_symtab_get_static_block (end_addr, objfile, 0);
+  return end_symtab_from_static_block (static_block, objfile, section, 0);
 }
 
-/* See end_symtab_1 for details.  */
+/* Same as end_symtab except create a symtab that can be later added to.  */
 
 struct symtab *
 end_expandable_symtab (CORE_ADDR end_addr, struct objfile *objfile,
 		       int section)
 {
-  return end_symtab_1 (end_addr, objfile, section, 1);
+  struct block *static_block;
+
+  static_block = end_symtab_get_static_block (end_addr, objfile, 1);
+  return end_symtab_from_static_block (static_block, objfile, section, 1);
 }
 
 /* Subroutine of augment_type_symtab to simplify it.

@@ -1,4 +1,16 @@
 2012-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	* buildsym.c (end_symtab_1): Split it to ...
+	(end_symtab_get_static_block): ... this ...
+	(end_symtab_from_static_block): ... and this function.
+	(end_symtab, end_expandable_symtab): Call them.
+	* buildsym.h (end_symtab_get_static_block)
+	(end_symtab_from_static_block): New declarations.
+	* dwarf2read.c (process_full_comp_unit): New variable static_block.
+	Set its valid CU ranges.
+
+2012-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2loc.c (disassemble_dwarf_expression): Handle
 	DW_OP_GNU_parameter_ref.

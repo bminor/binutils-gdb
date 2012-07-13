@@ -6593,6 +6593,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   struct symtab *symtab;
   struct cleanup *back_to, *delayed_list_cleanup;
   CORE_ADDR baseaddr;
+  struct block *static_block;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -6623,7 +6624,17 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
      it, by scanning the DIE's below the compilation unit.  */
   get_scope_pc_bounds (cu->dies, &lowpc, &highpc, cu);
 
-  symtab = end_symtab (highpc + baseaddr, objfile, SECT_OFF_TEXT (objfile));
+  static_block = end_symtab_get_static_block (highpc + baseaddr, objfile, 0);
+
+  /* If the comp unit has DW_AT_ranges, it may have discontiguous ranges.
+     Also, DW_AT_ranges may record ranges not belonging to any child DIEs
+     (such as virtual method tables).  Record the ranges in STATIC_BLOCK's
+     addrmap to help ensure it has an accurate map of pc values belonging to
+     this comp unit.  */
+  dwarf2_record_block_ranges (cu->dies, static_block, baseaddr, cu);
+
+  symtab = end_symtab_from_static_block (static_block, objfile,
+					 SECT_OFF_TEXT (objfile), 0);
 
   if (symtab != NULL)
     {
