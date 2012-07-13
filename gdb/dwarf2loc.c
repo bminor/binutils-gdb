@@ -3797,6 +3797,12 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  data += ul;
 	  continue;
 
+	case DW_OP_GNU_parameter_ref:
+	  ul = extract_unsigned_integer (data, 4, gdbarch_byte_order (arch));
+	  data += 4;
+	  fprintf_filtered (stream, " offset %s", phex_nz (ul, 4));
+	  break;
+
 	case DW_OP_GNU_addr_index:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  ul = dwarf2_read_addr_index (per_cu, ul);
