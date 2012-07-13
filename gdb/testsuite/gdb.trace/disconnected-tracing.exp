@@ -18,7 +18,7 @@
 load_lib "trace-support.exp";
 
 standard_testfile
-set executabel $testfile
+set executable $testfile
 set expfile $testfile.exp
 set gdbserver_reconnect_p 1
 
