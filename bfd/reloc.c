@@ -4694,6 +4694,11 @@ ENUMDOC
   Long displacement extension.
 
 ENUM
+  BFD_RELOC_390_IRELATIVE
+ENUMDOC
+  STT_GNU_IFUNC relocation.
+
+ENUM
   BFD_RELOC_SCORE_GPREL15
 ENUMDOC
   Score relocations

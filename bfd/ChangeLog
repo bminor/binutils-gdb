@@ -1,3 +1,36 @@
+2012-07-13  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* elf64-s390.c: Include elf-s390-common.c.
+	(R_390_IRELATIVE): New reloc.
+	(elf_s390_reloc_type_lookup): Support R_390_IRELATIVE.
+	(RELA_ENTRY_SIZE): New macro.
+	(elf_s390_link_hash_entry): New fields ifunc_resolver_address and
+	*ifunc_resolver_section.
+	(struct plt_entry): New struct.
+	(struct elf_s390_obj_tdata): New field local_plt.
+	(elf_s390_local_plt): New macro.
+	(struct elf_s390_link_hash_table): New field irelifunc.
+	(ELF64): New macro.
+	(link_hash_newfunc): Initialize new fields.
+	(elf_s390_check_relocs): Handle IFUNC symbols.
+	(elf_s390_adjust_dynamic_symbol): Don't do anything for IFUNC
+	symbols.
+	(allocate_dynrelocs): Call s390_elf_allocate_ifunc_dyn_relocs for
+	IFUNC symbols.
+	(elf_s390_size_dynamic_sections): Handle IFUNC symbols.
+	(elf_s390_relocate_section): Likewise.
+	(elf_s390_finish_dynamic_symbol): Likewise.
+	(elf_s390_finish_dynamic_sections): Handle local IFUNC symbols.
+	(elf_s390_finish_ifunc_symbol): New function.
+	(elf_s390_gc_sweep_hook): Handle local plt entries.
+	(elf_backend_add_symbol_hook): Define.
+	* elf32-s390.c: See elf64-s390.c changes.
+	* elf-s390-common.c: New file.
+	* bfd-in2.h (BFD_RELOC_390_IRELATIVE): New enum field.
+	* libbfd.h (BFD_RELOC_390_IRELATIVE): New entry for
+	BFD_RELOC_390_IRELATIVE.
+	* reloc.c (BFD_RELOC_390_IRELATIVE): Document new relocation.
+
 2012-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* aix386-core.c: Remove use of PTR and PARAMS macros.
