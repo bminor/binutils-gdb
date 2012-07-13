@@ -1,3 +1,7 @@
+2012-07-13  Doug Evans  <dje@google.com>
+
+	* symtab.c (filename_seen): Update comment.
+
 2012-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Doug Evans  <dje@google.com>
 

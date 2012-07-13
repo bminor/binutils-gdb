@@ -3153,10 +3153,9 @@ delete_filename_seen_cache (void *ptr)
   xfree (cache);
 }
 
-/* If FILE is not already in the table of files, return zero;
+/* If FILE is not already in the table of files in CACHE, return zero;
    otherwise return non-zero.  Optionally add FILE to the table if ADD
-   is non-zero.  If *FIRST is non-zero, forget the old table
-   contents.  */
+   is non-zero.  */
 
 static int
 filename_seen (struct filename_seen_cache *cache, const char *file, int add)
