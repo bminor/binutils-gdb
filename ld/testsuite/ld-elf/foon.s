@@ -1,4 +1,4 @@
-	.section .foo,"ax",@progbits
+	.section .foo,"ax",%progbits
 	.p2align 8
 	.type	last,%function
 last:

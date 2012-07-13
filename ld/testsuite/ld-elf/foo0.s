@@ -9,7 +9,7 @@ __start:
 main:
 	.dc.a 0
 
-	.section .foo,"ax",@progbits
+	.section .foo,"ax",%progbits
 	.p2align 2
 .globl foo
 	.type	foo,%function
