@@ -231,7 +231,7 @@ main:
 	.uleb128 0x11	/* (DW_AT_low_pc) */
 	.uleb128 0x1	/* (DW_FORM_addr) */
 	.uleb128 0x12	/* (DW_AT_high_pc) */
-	.uleb128 0x7	/* (DW_FORM_data8) */
+	.uleb128 0x6	/* (DW_FORM_data4) */
 	.uleb128 0x10	/* (DW_AT_stmt_list) */
 	.uleb128 0x17	/* (DW_FORM_sec_offset) */
 	.uleb128 0x1b	/* (DW_AT_comp_dir) */
@@ -351,7 +351,7 @@ main:
 	.uleb128 0x11	/* (DW_AT_low_pc) */
 	.uleb128 0x1f01	/* (DW_FORM_GNU_addr_index) */
 	.uleb128 0x12	/* (DW_AT_high_pc) */
-	.uleb128 0x7	/* (DW_FORM_data8) */
+	.uleb128 0x6	/* (DW_FORM_data4) */
 	.uleb128 0x40	/* (DW_AT_frame_base) */
 	.uleb128 0x18	/* (DW_FORM_exprloc) */
 	.byte	0

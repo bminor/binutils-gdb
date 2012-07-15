@@ -1,3 +1,9 @@
+2012-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix a testcase regression by me.
+	* gdb.dwarf2/fission-reread.S: Fix two DW_FORM_data8 to be
+	DW_FORM_data4.
+
 2012-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Doug Evans  <dje@google.com>
 
