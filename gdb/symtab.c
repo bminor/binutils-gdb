@@ -3108,14 +3108,9 @@ operator_chars (char *p, char **end)
 struct filename_seen_cache
 {
   /* Table of files seen so far.  */
-  const char **tab;
-
-  /* Allocated size of tab in elements.  */
-  int tab_alloc_size;
+  htab_t tab;
+  /* Initial size of the table.  It automagically grows from here.  */
 #define INITIAL_FILENAME_SEEN_CACHE_SIZE 100
-
-  /* Current size of tab in elements.  */
-  int tab_cur_size;
 };
 
 /* filename_seen_cache constructor.  */
@@ -3126,9 +3121,9 @@ create_filename_seen_cache (void)
   struct filename_seen_cache *cache;
 
   cache = XNEW (struct filename_seen_cache);
-  cache->tab_alloc_size = INITIAL_FILENAME_SEEN_CACHE_SIZE;
-  cache->tab = XNEWVEC (const char *, cache->tab_alloc_size);
-  cache->tab_cur_size = 0;
+  cache->tab = htab_create_alloc (INITIAL_FILENAME_SEEN_CACHE_SIZE,
+				  filename_hash, filename_eq,
+				  NULL, xcalloc, xfree);
 
   return cache;
 }
@@ -3136,9 +3131,9 @@ create_filename_seen_cache (void)
 /* Empty the cache, but do not delete it.  */
 
 static void
-clear_filename_seen_cache (struct filename_seen_cache * cache)
+clear_filename_seen_cache (struct filename_seen_cache *cache)
 {
-  cache->tab_cur_size = 0;
+  htab_empty (cache->tab);
 }
 
 /* filename_seen_cache destructor.
@@ -3149,35 +3144,30 @@ delete_filename_seen_cache (void *ptr)
 {
   struct filename_seen_cache *cache = ptr;
 
-  xfree (cache->tab);
+  htab_delete (cache->tab);
   xfree (cache);
 }
 
 /* If FILE is not already in the table of files in CACHE, return zero;
    otherwise return non-zero.  Optionally add FILE to the table if ADD
-   is non-zero.  */
+   is non-zero.
+
+   NOTE: We don't manage space for FILE, we assume FILE lives as long
+   as the caller needs.  */
 
 static int
 filename_seen (struct filename_seen_cache *cache, const char *file, int add)
 {
-  const char **p;
+  void **slot;
 
   /* Is FILE in tab?  */
-  for (p = cache->tab; p < cache->tab + cache->tab_cur_size; p++)
-    if (filename_cmp (*p, file) == 0)
-      return 1;
+  slot = htab_find_slot (cache->tab, file, add ? INSERT : NO_INSERT);
+  if (*slot != NULL)
+    return 1;
 
   /* No; maybe add it to tab.  */
   if (add)
-    {
-      if (cache->tab_cur_size == cache->tab_alloc_size)
-	{
-	  cache->tab_alloc_size *= 2;
-	  cache->tab = XRESIZEVEC (const char *, cache->tab,
-				   cache->tab_alloc_size);
-	}
-      cache->tab[cache->tab_cur_size++] = file;
-    }
+    *slot = (char *) file;
 
   return 0;
 }

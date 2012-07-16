@@ -1,3 +1,11 @@
+2012-07-15  Doug Evans  <dje@google.com>
+
+	* symtab.c (filename_seen_cache): Delete members "tab_alloc_size",
+	"tab_cur_size".  Change member "tab" to be a htab_t.
+	(create_filename_seen_cache): Update.
+	(clear_filename_seen_cache, delete_filename_seen_cache): Update.
+	(filename_seen): Update.
+
 2012-07-13  Doug Evans  <dje@google.com>
 
 	* symtab.c (filename_seen): Update comment.
