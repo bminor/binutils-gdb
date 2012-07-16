@@ -46,10 +46,8 @@ movbe   (%ecx),%ebx
 invept  (%ecx),%ebx
 # RDTSCP
 rdtscp
-# 3DNow
-pmulhrw %mm4,%mm3
-# 3DNow Extensions
-pswapd %mm4,%mm3
+# 3DNow or PRFCHW
+prefetchw 0x1000(,%esi,2)
 # SSE4a
 insertq %xmm2,%xmm1
 # SVME

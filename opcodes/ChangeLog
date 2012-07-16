@@ -1,3 +1,18 @@
+2012-07-16  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* i386-dis.c (PREFIX_0F38F6): New.
+	(prefix_table): Add adcx, adox instructions.
+	(three_byte_table): Use PREFIX_0F38F6.
+	(mod_table): Add rdseed instruction.
+	* i386-gen.c (cpu_flag_init): Add CpuADX, CpuRDSEED, CpuPRFCHW.
+	(cpu_flags): Likewise.
+	* i386-opc.h: Add CpuADX, CpuRDSEED, CpuPRFCHW.
+	(i386_cpu_flags): Add fields cpurdseed, cpuadx, cpuprfchw.
+	* i386-opc.tbl: Add instrcutions adcx, adox, rdseed. Extend
+	prefetchw.
+	* i386-tbl.h: Regenerate.
+	* i386-init.h: Likewise.
+
 2012-07-05  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* mips-dis.c: Remove gratuitous newline.

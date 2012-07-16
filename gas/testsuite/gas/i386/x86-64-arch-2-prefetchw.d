@@ -1,6 +1,7 @@
-#as: -march=generic64+avx+vmx+smx+xsave+xsaveopt+aes+pclmul+fma+movbe+ept+clflush+syscall+rdtscp+3dnowa+sse4a+svme+abm+padlock+bmi+tbm
+#source: x86-64-arch-2.s
+#as: -march=generic64+avx+vmx+smx+xsave+xsaveopt+aes+pclmul+fma+movbe+ept+clflush+syscall+rdtscp+sse4a+svme+lzcnt+padlock+bmi+tbm+prfchw
 #objdump: -dw
-#name: x86-64 arch 2
+#name: x86-64 arch 2 (prefetchw)
 
 .*:     file format .*
 

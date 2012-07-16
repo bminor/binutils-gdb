@@ -767,6 +767,12 @@ static const arch_entry cpu_arch[] =
     CPU_BMI_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".tbm"), PROCESSOR_UNKNOWN,
     CPU_TBM_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".adx"), PROCESSOR_UNKNOWN,
+    CPU_ADX_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".rdseed"), PROCESSOR_UNKNOWN,
+    CPU_RDSEED_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".prfchw"), PROCESSOR_UNKNOWN,
+    CPU_PRFCHW_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF

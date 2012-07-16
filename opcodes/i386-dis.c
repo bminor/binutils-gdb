@@ -851,6 +851,7 @@ enum
   PREFIX_0F38DF,
   PREFIX_0F38F0,
   PREFIX_0F38F1,
+  PREFIX_0F38F6,
   PREFIX_0F3A08,
   PREFIX_0F3A09,
   PREFIX_0F3A0A,
@@ -3485,6 +3486,14 @@ static const struct dis386 prefix_table[][4] = {
     { "crc32",	{ Gdq, { CRC32_Fixup, v_mode } } },	
   },
 
+  /* PREFIX_0F38F6 */
+  {
+    { Bad_Opcode },
+    { "adoxS",	{ Gdq, Edq} },
+    { "adcxS",	{ Gdq, Edq} },
+    { Bad_Opcode },
+  },
+
   /* PREFIX_0F3A08 */
   {
     { Bad_Opcode },
@@ -6055,7 +6064,7 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F38F6) },
     { Bad_Opcode },
     /* f8 */
     { Bad_Opcode },
@@ -10323,6 +10332,7 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0FC7_REG_7 */
     { "vmptrst",	{ Mq } },
+    { "rdseed",		{ Ev } },
   },
   {
     /* MOD_0FD7 */

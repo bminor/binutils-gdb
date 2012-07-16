@@ -1,3 +1,8 @@
+2012-07-16  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* config/tc-i386.c: Add ADX, RDSEED and PRFCHW asm directives.
+	* doc/c-i386.texi: Document the new directives.
+
 2012-07-02  Nick Clifton  <nickc@redhat.com>
 
 	* write.c (fixup_segment): Only perform the subtraction of an

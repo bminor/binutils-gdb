@@ -1,3 +1,32 @@
+2012-07-16  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* gas/i386/i386.exp: Run adx, rdseed and prefetchw tests.
+	* gas/i386/x86-64-arch-2.s: Use prefetchw as 3dnow and Prfchw tests.
+	* gas/i386/arch-10.s: Likewise.
+	* gas/i386/arch-10-1.l: Changed correspondingly.
+	* gas/i386/arch-10-2.l: Likewise.
+	* gas/i386/arch-10-3.l: Likewise.
+	* gas/i386/arch-10-4.l: Likewise.
+	* gas/i386/arch-10.d: Likewise.
+	* gas/i386/arch-10-lzcnt.d: Likewise.
+	* gas/i386/x86-64-arch-2.d: Likewise.
+	* gas/i386/x86-64-arch-2-lzcnt.d: Likewise.
+	* gas/i386/ilp32/x86-64-arch-2.d: Likewise.
+	* gas/i386/arch-10-prefetchw.d: New file.
+	* gas/i386/x86-64-arch-2-prefetchw.d: Likewise.
+	* gas/i386/rdseed.s: Likewise.
+	* gas/i386/rdseed.d: Likewise.
+	* gas/i386/rdseed-intel.d: Likewise.
+	* gas/i386/adx.s: Likewise.
+	* gas/i386/adx.d: Likewise.
+	* gas/i386/adx-intel.d: Likewise.
+	* gas/i386/x86-64-rdseed.s: Likewise.
+	* gas/i386/x86-64-rdseed.d: Likewise.
+	* gas/i386/x86-64-rdseed-intel.d: Likewise.
+	* gas/i386/x86-64-adx.s: Likewise.
+	* gas/i386/x86-64-adx.d: Likewise.
+	* gas/i386/x86-64-adx-intel.d: Likewise.
+
 2012-07-02  Roland McGrath  <mcgrathr@google.com>
 
 	* gas/i386/rep-suffix.s: Add 'rep nop' case.

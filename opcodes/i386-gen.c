@@ -192,6 +192,12 @@ static initializer cpu_flag_init[] =
     "unknown" },
   { "CPU_K1OM_FLAGS",
     "unknown" },
+  { "CPU_ADX_FLAGS",
+    "CpuADX" },
+  { "CPU_RDSEED_FLAGS",
+    "CpuRdSeed" },
+  { "CPU_PRFCHW_FLAGS",
+    "CpuPRFCHW" },
 };
 
 static initializer operand_type_init[] =
@@ -359,6 +365,9 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuRTM),
   BITFIELD (CpuINVPCID),
   BITFIELD (CpuVMFUNC),
+  BITFIELD (CpuRDSEED),
+  BITFIELD (CpuADX),
+  BITFIELD (CpuPRFCHW),
   BITFIELD (Cpu64),
   BITFIELD (CpuNo64),
 #ifdef CpuUnused

@@ -144,6 +144,12 @@ enum
   CpuVMFUNC,
   /* 64bit support available, used by -march= in assembler.  */
   CpuLM,
+  /* RDRSEED instruction required.  */
+  CpuRDSEED,
+  /* Multi-presisionn add-carry instructions are required.  */
+  CpuADX,
+  /* Supports prefetchw instruction.  */
+  CpuPRFCHW,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -223,6 +229,9 @@ typedef union i386_cpu_flags
       unsigned int cpuinvpcid:1;
       unsigned int cpuvmfunc:1;
       unsigned int cpulm:1;
+      unsigned int cpurdseed:1;
+      unsigned int cpuadx:1;
+      unsigned int cpuprfchw:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused
