@@ -329,9 +329,6 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 
 /* LEVEL is the depth to indent lines by.  */
 
-extern void c_type_print_varspec_suffix (struct type *, struct ui_file *,
-					 int, int, int);
-
 void
 java_print_type (struct type *type, const char *varstring,
 		 struct ui_file *stream, int show, int level)

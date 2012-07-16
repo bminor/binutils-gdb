@@ -1,3 +1,7 @@
+2012-07-16  Tom Tromey  <tromey@redhat.com>
+
+	* jv-typeprint.c (c_type_print_varspec_suffix): Don't declare.
+
 2012-07-15  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (stmt_list_hash): New struct.
