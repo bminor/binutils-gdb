@@ -48,12 +48,23 @@ if ![runto_main] then {
 #
 
 proc check_set { t l r new add } {
+    global gdb_prompt
+
     set prefix "var ${t} l"
     gdb_test "tbreak wack_${t}"
-    gdb_test "continue" "register ${t} l = u, r = v;" \
-	"continue to wack_${t}"
-    gdb_test "next" "l = add_${t} .l, r.;" \
-	"${prefix}; next ${t}"
+
+    set test "continue to wack_${t}"
+    gdb_test_multiple "continue" $test {
+	-re "register ${t} l = u, r = v;\r\n$gdb_prompt $" {
+	    # See GCC PR debug/53948.
+	    send_gdb "next\n"
+	    exp_continue
+	}
+	-re "l = add_${t} .l, r.;\r\n$gdb_prompt $" {
+	    pass $test
+	}
+    }
+
     gdb_test "print l" " = ${l}" \
 	"${prefix}; print old l, expecting ${l}"
     gdb_test "print r" " = ${r}" \

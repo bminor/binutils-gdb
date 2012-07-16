@@ -1,5 +1,11 @@
 2012-07-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/store.exp (check_set): Import gdb_prompt.
+	(continue to wack_${t}): Make it to conditional gdb_test_multiple.
+	(${prefix}; next ${t}): Hide its name, handle it conditionally now.
+
+2012-07-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR 11914
 	* gdb.python/py-prettyprint.c (eval_func, eval_sub): New.
 	(main): Call eval_sub.
