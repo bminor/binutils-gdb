@@ -1,3 +1,9 @@
+2012-07-16  Marc Khouzam  <marc.khouzam@ericsson.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_nat_detach): Don't unregister from the event
+	loop.
+
 2012-07-16  Tom Tromey  <tromey@redhat.com>
 
 	* jv-typeprint.c (c_type_print_varspec_suffix): Don't declare.

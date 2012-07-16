@@ -1848,8 +1848,8 @@ linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
 
   pid = GET_PID (inferior_ptid);
 
-  if (target_can_async_p ())
-    linux_nat_async (NULL, 0);
+  /* Don't unregister from the event loop, as there may be other
+     inferiors running. */
 
   /* Stop all threads before detaching.  ptrace requires that the
      thread is stopped to sucessfully detach.  */
@@ -1892,9 +1892,6 @@ linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
 	 the current fork, and context-switch to the first
 	 available.  */
       linux_fork_detach (args, from_tty);
-
-      if (non_stop && target_can_async_p ())
- 	target_async (inferior_event_handler, 0);
     }
   else
     linux_ops->to_detach (ops, args, from_tty);
