@@ -593,6 +593,18 @@ struct signatured_type
   sect_offset type_offset_in_section;
 };
 
+/* A struct that can be used as a hash key for tables based on DW_AT_stmt_list.
+   This includes type_unit_group and quick_file_names.  */
+
+struct stmt_list_hash
+{
+  /* The DWO unit this table is from or NULL if there is none.  */
+  struct dwo_unit *dwo_unit;
+
+  /* Offset in .debug_line or .debug_line.dwo.  */
+  sect_offset line_offset;
+};
+
 /* Each element of dwarf2_per_objfile->type_unit_groups is a pointer to
    an object of this type.  */
 
@@ -604,20 +616,28 @@ struct type_unit_group
      a "per_cu" handle on the symtab.
      This PER_CU is recognized by having no section.  */
 #define IS_TYPE_UNIT_GROUP(per_cu) ((per_cu)->info_or_types_section == NULL)
-  struct dwarf2_per_cu_data *per_cu;
+  struct dwarf2_per_cu_data per_cu;
 
-  /* The TUs that share this DW_AT_stmt_list entry.
-     This is added to while parsing type units to build partial symtabs,
-     and is deleted afterwards and not used again.  */
-  VEC (dwarf2_per_cu_ptr) *tus;
+  union
+  {
+    /* The TUs that share this DW_AT_stmt_list entry.
+       This is added to while parsing type units to build partial symtabs,
+       and is deleted afterwards and not used again.  */
+    VEC (dwarf2_per_cu_ptr) *tus;
+
+    /* When reading the line table in "quick" functions, we need a real TU.
+       Any will do, we know they all share the same DW_AT_stmt_list entry.
+       For simplicity's sake, we pick the first one.  */
+    struct dwarf2_per_cu_data *first_tu;
+  } t;
 
   /* The primary symtab.
-     Type units don't have DW_AT_name so we create an essentially
-     anonymous symtab as the primary symtab.  */
+     Type units in a group needn't all be defined in the same source file,
+     so we create an essentially anonymous symtab as the primary symtab.  */
   struct symtab *primary_symtab;
 
-  /* Offset in .debug_line.  This is the hash key.  */
-  sect_offset line_offset;
+  /* The data used to construct the hash key.  */
+  struct stmt_list_hash hash;
 
   /* The number of symtabs from the line header.
      The value here must match line_header.num_file_names.  */
@@ -1466,7 +1486,7 @@ static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
 static void read_signatured_type (struct signatured_type *);
 
 static struct type_unit_group *get_type_unit_group
-    (struct dwarf2_per_cu_data *, struct attribute *);
+    (struct dwarf2_cu *, struct attribute *);
 
 static void build_type_unit_groups (die_reader_func_ftype *, void *);
 
@@ -1999,8 +2019,8 @@ dwarf2_get_section_info (struct objfile *objfile,
    line_header when we're done and don't need to record it here.  */
 struct quick_file_names
 {
-  /* The offset in .debug_line of the line table.  We hash on this.  */
-  unsigned int offset;
+  /* The data used to construct the hash key.  */
+  struct stmt_list_hash hash;
 
   /* The number of entries in file_names, real_names.  */
   unsigned int num_file_names;
@@ -2037,6 +2057,34 @@ struct dwarf2_per_cu_quick_data
   unsigned int no_file_data : 1;
 };
 
+/* Utility hash function for a stmt_list_hash.  */
+
+static hashval_t
+hash_stmt_list_entry (const struct stmt_list_hash *stmt_list_hash)
+{
+  hashval_t v = 0;
+
+  if (stmt_list_hash->dwo_unit != NULL)
+    v += (uintptr_t) stmt_list_hash->dwo_unit->dwo_file;
+  v += stmt_list_hash->line_offset.sect_off;
+  return v;
+}
+
+/* Utility equality function for a stmt_list_hash.  */
+
+static int
+eq_stmt_list_entry (const struct stmt_list_hash *lhs,
+		    const struct stmt_list_hash *rhs)
+{
+  if ((lhs->dwo_unit != NULL) != (rhs->dwo_unit != NULL))
+    return 0;
+  if (lhs->dwo_unit != NULL
+      && lhs->dwo_unit->dwo_file != rhs->dwo_unit->dwo_file)
+    return 0;
+
+  return lhs->line_offset.sect_off == rhs->line_offset.sect_off;
+}
+
 /* Hash function for a quick_file_names.  */
 
 static hashval_t
@@ -2044,7 +2092,7 @@ hash_file_name_entry (const void *e)
 {
   const struct quick_file_names *file_data = e;
 
-  return file_data->offset;
+  return hash_stmt_list_entry (&file_data->hash);
 }
 
 /* Equality function for a quick_file_names.  */
@@ -2055,7 +2103,7 @@ eq_file_name_entry (const void *a, const void *b)
   const struct quick_file_names *ea = a;
   const struct quick_file_names *eb = b;
 
-  return ea->offset == eb->offset;
+  return eq_stmt_list_entry (&ea->hash, &eb->hash);
 }
 
 /* Delete function for a quick_file_names.  */
@@ -2172,12 +2220,9 @@ dw2_get_cu (int index)
 {
   if (index >= dwarf2_per_objfile->n_comp_units)
     {
-      struct dwarf2_per_cu_data *per_cu;
-
       index -= dwarf2_per_objfile->n_comp_units;
-      per_cu = &dwarf2_per_objfile->all_type_units[index]->per_cu;
-      gdb_assert (! IS_TYPE_UNIT_GROUP (per_cu));
-      return per_cu;
+      gdb_assert (index < dwarf2_per_objfile->n_type_units);
+      return &dwarf2_per_objfile->all_type_units[index]->per_cu;
     }
 
   return dwarf2_per_objfile->all_comp_units[index];
@@ -2203,12 +2248,9 @@ dw2_get_primary_cu (int index)
 {
   if (index >= dwarf2_per_objfile->n_comp_units)
     {
-      struct dwarf2_per_cu_data *per_cu;
-
       index -= dwarf2_per_objfile->n_comp_units;
-      per_cu = dwarf2_per_objfile->all_type_unit_groups[index]->per_cu;
-      gdb_assert (IS_TYPE_UNIT_GROUP (per_cu));
-      return per_cu;
+      gdb_assert (index < dwarf2_per_objfile->n_type_unit_groups);
+      return &dwarf2_per_objfile->all_type_unit_groups[index]->per_cu;
     }
 
   return dwarf2_per_objfile->all_comp_units[index];
@@ -2621,7 +2663,6 @@ dw2_build_type_unit_groups_reader (const struct die_reader_specs *reader,
 				   void *data)
 {
   struct dwarf2_cu *cu = reader->cu;
-  struct dwarf2_per_cu_data *per_cu = cu->per_cu;
   struct attribute *attr;
   struct type_unit_group *tu_group;
 
@@ -2633,7 +2674,7 @@ dw2_build_type_unit_groups_reader (const struct die_reader_specs *reader,
   attr = dwarf2_attr_no_follow (type_unit_die, DW_AT_stmt_list);
   /* Call this for its side-effect of creating the associated
      struct type_unit_group if it doesn't already exist.  */
-  tu_group = get_type_unit_group (per_cu, attr);
+  tu_group = get_type_unit_group (cu, attr);
 }
 
 /* Build dwarf2_per_objfile->type_unit_groups.
@@ -2658,6 +2699,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   struct dwarf2_cu *cu = reader->cu;
   struct dwarf2_per_cu_data *this_cu = cu->per_cu;  
   struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct dwarf2_per_cu_data *lh_cu;
   struct line_header *lh;
   struct attribute *attr;
   int i;
@@ -2674,6 +2716,18 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
       return;
     }
 
+  /* If we're reading the line header for TUs, store it in the "per_cu"
+     for tu_group.  */
+  if (this_cu->is_debug_types)
+    {
+      struct type_unit_group *tu_group = data;
+
+      gdb_assert (tu_group != NULL);
+      lh_cu = &tu_group->per_cu;
+    }
+  else
+    lh_cu = this_cu;
+
   lh = NULL;
   slot = NULL;
   line_offset = 0;
@@ -2687,12 +2741,13 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 
       /* We may have already read in this line header (TU line header sharing).
 	 If we have we're done.  */
-      find_entry.offset = line_offset;
+      find_entry.hash.dwo_unit = cu->dwo_unit;
+      find_entry.hash.line_offset.sect_off = line_offset;
       slot = htab_find_slot (dwarf2_per_objfile->quick_file_names_table,
 			     &find_entry, INSERT);
       if (*slot != NULL)
 	{
-	  this_cu->v.quick->file_names = *slot;
+	  lh_cu->v.quick->file_names = *slot;
 	  return;
 	}
 
@@ -2700,12 +2755,13 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
     }
   if (lh == NULL)
     {
-      this_cu->v.quick->no_file_data = 1;
+      lh_cu->v.quick->no_file_data = 1;
       return;
     }
 
   qfn = obstack_alloc (&objfile->objfile_obstack, sizeof (*qfn));
-  qfn->offset = line_offset;
+  qfn->hash.dwo_unit = cu->dwo_unit;
+  qfn->hash.line_offset.sect_off = line_offset;
   gdb_assert (slot != NULL);
   *slot = qfn;
 
@@ -2720,7 +2776,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 
   free_line_header (lh);
 
-  this_cu->v.quick->file_names = qfn;
+  lh_cu->v.quick->file_names = qfn;
 }
 
 /* A helper for the "quick" functions which attempts to read the line
@@ -2745,8 +2801,12 @@ dw2_get_file_names (struct objfile *objfile,
      However, that's not the case for TUs where DW_AT_stmt_list lives in the
      DWO file.  */
   if (this_cu->is_debug_types)
-    init_cutu_and_read_dies (this_cu, NULL, 0, 0,
-			     dw2_get_file_names_reader, NULL);
+    {
+      struct type_unit_group *tu_group = this_cu->s.type_unit_group;
+
+      init_cutu_and_read_dies (tu_group->t.first_tu, NULL, 0, 0,
+			       dw2_get_file_names_reader, tu_group);
+    }
   else
     init_cutu_and_read_dies_simple (this_cu, dw2_get_file_names_reader, NULL);
 
@@ -4707,9 +4767,9 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
 static hashval_t
 hash_type_unit_group (const void *item)
 {
-  const struct type_unit_group *symtab = item;
+  const struct type_unit_group *tu_group = item;
 
-  return symtab->line_offset.sect_off;
+  return hash_stmt_list_entry (&tu_group->hash);
 }
 
 static int
@@ -4718,7 +4778,7 @@ eq_type_unit_group (const void *item_lhs, const void *item_rhs)
   const struct type_unit_group *lhs = item_lhs;
   const struct type_unit_group *rhs = item_rhs;
 
-  return lhs->line_offset.sect_off == rhs->line_offset.sect_off;
+  return eq_stmt_list_entry (&lhs->hash, &rhs->hash);
 }
 
 /* Allocate a hash table for type unit groups.  */
@@ -4741,54 +4801,59 @@ allocate_type_unit_groups_table (void)
 #define NO_STMT_LIST_TYPE_UNIT_PSYMTAB (1 << 31)
 #define NO_STMT_LIST_TYPE_UNIT_PSYMTAB_SIZE 10
 
-/* Helper routine for build_type_psymtabs_reader.
+/* Helper routine for get_type_unit_group.
    Create the type_unit_group object used to hold one or more TUs.  */
 
 static struct type_unit_group *
-create_type_unit_group (struct dwarf2_per_cu_data *per_cu,
-			sect_offset line_offset_struct)
+create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct dwarf2_per_cu_data *per_cu;
   struct type_unit_group *tu_group;
-  struct partial_symtab *pst;
-  unsigned int line_offset;
-  char *name;
-
-  line_offset = line_offset_struct.sect_off;
-
-  /* Give the symtab a useful name for debug purposes.  */
-  if ((line_offset & NO_STMT_LIST_TYPE_UNIT_PSYMTAB) != 0)
-    name = xstrprintf ("<type_units_%d>",
-		       (line_offset & ~NO_STMT_LIST_TYPE_UNIT_PSYMTAB));
-  else
-    name = xstrprintf ("<type_units_at_0x%x>", line_offset);
 
   tu_group = OBSTACK_ZALLOC (&objfile->objfile_obstack,
 			     struct type_unit_group);
-
-  per_cu = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-			   struct dwarf2_per_cu_data);
+  per_cu = &tu_group->per_cu;
   per_cu->objfile = objfile;
   per_cu->is_debug_types = 1;
   per_cu->s.type_unit_group = tu_group;
 
-  pst = create_partial_symtab (per_cu, name);
-  pst->anonymous = 1;
+  if (dwarf2_per_objfile->using_index)
+    {
+      per_cu->v.quick = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+					struct dwarf2_per_cu_quick_data);
+      tu_group->t.first_tu = cu->per_cu;
+    }
+  else
+    {
+      unsigned int line_offset = line_offset_struct.sect_off;
+      struct partial_symtab *pst;
+      char *name;
 
-  xfree (name);
+      /* Give the symtab a useful name for debug purposes.  */
+      if ((line_offset & NO_STMT_LIST_TYPE_UNIT_PSYMTAB) != 0)
+	name = xstrprintf ("<type_units_%d>",
+			   (line_offset & ~NO_STMT_LIST_TYPE_UNIT_PSYMTAB));
+      else
+	name = xstrprintf ("<type_units_at_0x%x>", line_offset);
 
-  tu_group->per_cu = per_cu;
-  tu_group->line_offset.sect_off = line_offset;
+      pst = create_partial_symtab (per_cu, name);
+      pst->anonymous = 1;
+
+      xfree (name);
+    }
+
+  tu_group->hash.dwo_unit = cu->dwo_unit;
+  tu_group->hash.line_offset = line_offset_struct;
 
   return tu_group;
 }
 
-/* Look up the type_unit_group for PER_CU, and create it if necessary.
-   STMT_LIST is an DW_AT_stmt_list attribute.  */
+/* Look up the type_unit_group for type unit CU, and create it if necessary.
+   STMT_LIST is a DW_AT_stmt_list attribute.  */
 
 static struct type_unit_group *
-get_type_unit_group (struct dwarf2_per_cu_data *per_cu,
-		     struct attribute *stmt_list)
+get_type_unit_group (struct dwarf2_cu *cu, struct attribute *stmt_list)
 {
   struct tu_stats *tu_stats = &dwarf2_per_objfile->tu_stats;
   struct type_unit_group *tu_group;
@@ -4822,7 +4887,8 @@ get_type_unit_group (struct dwarf2_per_cu_data *per_cu,
       ++tu_stats->nr_stmt_less_type_units;
     }
 
-  type_unit_group_for_lookup.line_offset.sect_off = line_offset;
+  type_unit_group_for_lookup.hash.dwo_unit = cu->dwo_unit;
+  type_unit_group_for_lookup.hash.line_offset.sect_off = line_offset;
   slot = htab_find_slot (dwarf2_per_objfile->type_unit_groups,
 			 &type_unit_group_for_lookup, INSERT);
   if (*slot != NULL)
@@ -4835,7 +4901,7 @@ get_type_unit_group (struct dwarf2_per_cu_data *per_cu,
       sect_offset line_offset_struct;
 
       line_offset_struct.sect_off = line_offset;
-      tu_group = create_type_unit_group (per_cu, line_offset_struct);
+      tu_group = create_type_unit_group (cu, line_offset_struct);
       *slot = tu_group;
       ++tu_stats->nr_symtabs;
     }
@@ -4953,7 +5019,9 @@ build_type_unit_groups (die_reader_func_ftype *func, void *data)
   qsort (sorted_by_abbrev, dwarf2_per_objfile->n_type_units,
 	 sizeof (struct tu_abbrev_offset), sort_tu_by_abbrev_offset);
 
-  memset (tu_stats, 0, sizeof (*tu_stats));
+  /* Note: In the .gdb_index case, get_type_unit_group may have already been
+     called any number of times, so we don't reset tu_stats here.  */
+
   abbrev_offset.sect_off = ~(unsigned) 0;
   abbrev_table = NULL;
   make_cleanup (abbrev_table_free_cleanup, &abbrev_table);
@@ -5040,9 +5108,9 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
     return;
 
   attr = dwarf2_attr_no_follow (type_unit_die, DW_AT_stmt_list);
-  tu_group = get_type_unit_group (per_cu, attr);
+  tu_group = get_type_unit_group (cu, attr);
 
-  VEC_safe_push (dwarf2_per_cu_ptr, tu_group->tus, per_cu);
+  VEC_safe_push (dwarf2_per_cu_ptr, tu_group->t.tus, per_cu);
 
   prepare_one_comp_unit (cu, type_unit_die, language_minimal);
   cu->list_in_scope = &file_symbols;
@@ -5069,9 +5137,9 @@ build_type_psymtab_dependencies (void **slot, void *info)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct type_unit_group *tu_group = (struct type_unit_group *) *slot;
-  struct dwarf2_per_cu_data *per_cu = tu_group->per_cu;
+  struct dwarf2_per_cu_data *per_cu = &tu_group->per_cu;
   struct partial_symtab *pst = per_cu->v.psymtab;
-  int len = VEC_length (dwarf2_per_cu_ptr, tu_group->tus);
+  int len = VEC_length (dwarf2_per_cu_ptr, tu_group->t.tus);
   struct dwarf2_per_cu_data *iter;
   int i;
 
@@ -5081,14 +5149,14 @@ build_type_psymtab_dependencies (void **slot, void *info)
   pst->dependencies = obstack_alloc (&objfile->objfile_obstack,
 				     len * sizeof (struct psymtab *));
   for (i = 0;
-       VEC_iterate (dwarf2_per_cu_ptr, tu_group->tus, i, iter);
+       VEC_iterate (dwarf2_per_cu_ptr, tu_group->t.tus, i, iter);
        ++i)
     {
       pst->dependencies[i] = iter->v.psymtab;
       iter->s.type_unit_group = tu_group;
     }
 
-  VEC_free (dwarf2_per_cu_ptr, tu_group->tus);
+  VEC_free (dwarf2_per_cu_ptr, tu_group->t.tus);
 
   return 1;
 }
@@ -6718,8 +6786,8 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
 
   /* TUs share symbol tables.
      If this is the first TU to use this symtab, complete the construction
-     of it with end_symtab.  Otherwise, complete the addition of this TU's
-     symbols to the existing symtab.  */
+     of it with end_expandable_symtab.  Otherwise, complete the addition of
+     this TU's symbols to the existing symtab.  */
   if (per_cu->s.type_unit_group->primary_symtab == NULL)
     {
       symtab = end_expandable_symtab (0, objfile, SECT_OFF_TEXT (objfile));
@@ -7658,7 +7726,7 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
   /* If we're using .gdb_index (includes -readnow) then
      per_cu->s.type_unit_group may not have been set up yet.  */
   if (per_cu->s.type_unit_group == NULL)
-    per_cu->s.type_unit_group = get_type_unit_group (per_cu, attr);
+    per_cu->s.type_unit_group = get_type_unit_group (cu, attr);
   tu_group = per_cu->s.type_unit_group;
 
   /* If we've already processed this stmt_list there's no real need to

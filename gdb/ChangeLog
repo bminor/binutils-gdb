@@ -1,5 +1,23 @@
 2012-07-15  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (stmt_list_hash): New struct.
+	(type_unit_group): Embed "per_cu" member, remove pointer.
+	New union member "t", move member "tus" into it, all uses updated.
+	New member "hash", replaces member "line_offset, all uses updated.
+	(quick_file_names): Replace member "offset" with "hash", all uses
+	updated.
+	(hash_stmt_list_entry, eq_stmt_list_entry): New functions.
+	(hash_file_name_entry, eq_file_name_entry): Call them.
+	(hash_type_unit_group, eq_type_unit_group): Ditto.
+	(dw2_get_cu, dw2_get_primary_cu): Replace assert with a better one.
+	(dw2_get_file_names_reader): Fix file name table calculation for TUs.
+	(dw2_get_file_names): Update.
+	(create_type_unit_group): Replace "per_cu" arg with "cu".
+	All callers updated.  Fix "quick" (.gdb_index) handling.
+	(get_type_unit_group): Replace "per_cu" arg with "cu".
+	All callers updated.
+	(build_type_unit_groups): Don't reset tu_stats.
+
 	* symtab.c (filename_seen_cache): Delete members "tab_alloc_size",
 	"tab_cur_size".  Change member "tab" to be a htab_t.
 	(create_filename_seen_cache): Update.
