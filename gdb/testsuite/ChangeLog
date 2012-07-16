@@ -1,3 +1,16 @@
+2012-07-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR 11914
+	* gdb.python/py-prettyprint.c (eval_func, eval_sub): New.
+	(main): Call eval_sub.
+	* gdb.python/py-prettyprint.exp:
+	(python execfile ('py-prettyprint.py')): Move it earlier.
+	New breakpoint for eval-break.
+	(continue to breakpoint: eval-break, info locals): New test.
+	(python execfile ('py-prettyprint.py')): Move it from here.
+	* gdb.python/py-prettyprint.py (class pp_eval_type): New.
+	(register_pretty_printers): Register pp_eval_type.
+
 2012-07-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix a testcase regression by me.

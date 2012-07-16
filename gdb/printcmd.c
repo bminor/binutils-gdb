@@ -1961,7 +1961,9 @@ clear_dangling_display_expressions (struct so_list *solib)
    struct symbol.  NAME is the name to print; if NULL then VAR's print
    name will be used.  STREAM is the ui_file on which to print the
    value.  INDENT specifies the number of indent levels to print
-   before printing the variable name.  */
+   before printing the variable name.
+
+   This function invalidates FRAME.  */
 
 void
 print_variable_and_value (const char *name, struct symbol *var,
@@ -1983,6 +1985,10 @@ print_variable_and_value (const char *name, struct symbol *var,
       get_user_print_options (&opts);
       opts.deref_ref = 1;
       common_val_print (val, stream, indent, &opts, current_language);
+
+      /* common_val_print invalidates FRAME when a pretty printer calls inferior
+	 function.  */
+      frame = NULL;
     }
   if (except.reason < 0)
     fprintf_filtered(stream, "<error reading variable %s (%s)>", name,

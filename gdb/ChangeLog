@@ -1,3 +1,19 @@
+2012-07-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR 11914
+	* f-valprint.c (info_common_command): New variable frame_id.
+	Reinitialize FI form FRAME_ID after each print_variable_and_value.
+	* printcmd.c (print_variable_and_value): Extend function comment.
+	Add comment for invalidated FRAME.
+	* stack.c (backtrace_command_1): New variable frame_id.  Reinitialize
+	FI form FRAME_ID after each print_frame_local_vars.
+	(struct print_variable_and_value_data): Change frame to frame_id.
+	(do_print_variable_and_value): New variable frame, initialize it from
+	p->frame_id.  Add comment for invalidated FRAME.
+	(print_frame_local_vars, print_frame_arg_vars): New function comment.
+	Update CB_DATA.FRAME to CB_DATA.FRAME_ID initialization.  Add comment
+	for invalidated FRAME.
+
 2012-07-16  Marc Khouzam  <marc.khouzam@ericsson.com>
 	    Pedro Alves  <palves@redhat.com>
 

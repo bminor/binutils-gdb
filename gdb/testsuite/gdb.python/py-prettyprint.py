@@ -199,6 +199,14 @@ class MemoryErrorString:
     def display_hint (self):
         return 'string'
 
+class pp_eval_type:
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+	gdb.execute("bt", to_string=True)
+        return "eval=<" + str(gdb.parse_and_eval("eval_func (123456789, 2, 3, 4, 5, 6, 7, 8)")) + ">"
+
 def lookup_function (val):
     "Look-up and return a pretty-printer that can print val."
 
@@ -275,6 +283,8 @@ def register_pretty_printers ():
     pretty_printers_dict[re.compile ('^hint_error$')]  = pp_hint_error
 
     pretty_printers_dict[re.compile ('^memory_error$')]  = MemoryErrorString
+
+    pretty_printers_dict[re.compile ('^eval_type_s$')] = pp_eval_type
 
 pretty_printers_dict = {}
 

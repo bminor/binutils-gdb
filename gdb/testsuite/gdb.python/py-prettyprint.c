@@ -219,6 +219,22 @@ struct nullstr
 struct string_repr string_1 = { { "one" } };
 struct string_repr string_2 = { { "two" } };
 
+static int
+eval_func (int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8)
+{
+  return p1;
+}
+
+static void
+eval_sub (void)
+{
+  struct eval_type_s { int x; } eval1 = { 1 }, eval2 = { 2 }, eval3 = { 3 },
+				eval4 = { 4 }, eval5 = { 5 }, eval6 = { 6 },
+				eval7 = { 7 }, eval8 = { 8 }, eval9 = { 9 };
+
+  eval1.x++; /* eval-break */
+}
+
 int
 main ()
 {
@@ -308,6 +324,8 @@ main ()
   nstype.len = 2;
   
   nstype2 = nstype;
+
+  eval_sub ();
 
   return 0;      /* break to inspect struct and union */
 }

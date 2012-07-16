@@ -1727,7 +1727,20 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
          the frame->prev field gets set to NULL in that case).  */
       print_frame_info (fi, 1, LOCATION, 1);
       if (show_locals)
-	print_frame_local_vars (fi, 1, gdb_stdout);
+	{
+	  struct frame_id frame_id = get_frame_id (fi);
+
+	  print_frame_local_vars (fi, 1, gdb_stdout);
+
+	  /* print_frame_local_vars invalidates FI.  */
+	  fi = frame_find_by_id (frame_id);
+	  if (fi == NULL)
+	    {
+	      trailing = NULL;
+	      warning (_("Unable to restore previously selected frame."));
+	      break;
+	    }
+	}
 
       /* Save the last frame to check for error conditions.  */
       trailing = fi;
@@ -1919,7 +1932,7 @@ iterate_over_block_local_vars (struct block *block,
 
 struct print_variable_and_value_data
 {
-  struct frame_info *frame;
+  struct frame_id frame_id;
   int num_tabs;
   struct ui_file *stream;
   int values_printed;
@@ -1933,11 +1946,27 @@ do_print_variable_and_value (const char *print_name,
 			     void *cb_data)
 {
   struct print_variable_and_value_data *p = cb_data;
+  struct frame_info *frame;
 
-  print_variable_and_value (print_name, sym,
-			    p->frame, p->stream, p->num_tabs);
+  frame = frame_find_by_id (p->frame_id);
+  if (frame == NULL)
+    {
+      warning (_("Unable to restore previously selected frame."));
+      return;
+    }
+
+  print_variable_and_value (print_name, sym, frame, p->stream, p->num_tabs);
+
+  /* print_variable_and_value invalidates FRAME.  */
+  frame = NULL;
+
   p->values_printed = 1;
 }
+
+/* Print all variables from the innermost up to the function block of FRAME.
+   Print them with values to STREAM indented by NUM_TABS.
+
+   This function will invalidate FRAME.  */
 
 static void
 print_frame_local_vars (struct frame_info *frame, int num_tabs,
@@ -1961,7 +1990,7 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
       return;
     }
 
-  cb_data.frame = frame;
+  cb_data.frame_id = get_frame_id (frame);
   cb_data.num_tabs = 4 * num_tabs;
   cb_data.stream = stream;
   cb_data.values_printed = 0;
@@ -1969,6 +1998,9 @@ print_frame_local_vars (struct frame_info *frame, int num_tabs,
   iterate_over_block_local_vars (block,
 				 do_print_variable_and_value,
 				 &cb_data);
+
+  /* do_print_variable_and_value invalidates FRAME.  */
+  frame = NULL;
 
   if (!cb_data.values_printed)
     fprintf_filtered (stream, _("No locals.\n"));
@@ -2016,6 +2048,11 @@ iterate_over_block_arg_vars (struct block *b,
     }
 }
 
+/* Print all argument variables of the function of FRAME.
+   Print them with values to STREAM.
+
+   This function will invalidate FRAME.  */
+
 static void
 print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
 {
@@ -2036,13 +2073,16 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
       return;
     }
 
-  cb_data.frame = frame;
+  cb_data.frame_id = get_frame_id (frame);
   cb_data.num_tabs = 0;
   cb_data.stream = gdb_stdout;
   cb_data.values_printed = 0;
 
   iterate_over_block_arg_vars (SYMBOL_BLOCK_VALUE (func),
 			       do_print_variable_and_value, &cb_data);
+
+  /* do_print_variable_and_value invalidates FRAME.  */
+  frame = NULL;
 
   if (!cb_data.values_printed)
     fprintf_filtered (stream, _("No arguments.\n"));

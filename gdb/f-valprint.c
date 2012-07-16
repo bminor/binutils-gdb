@@ -505,6 +505,8 @@ info_common_command (char *comname, int from_tty)
 
   if (the_common)
     {
+      struct frame_id frame_id = get_frame_id (fi);
+
       if (strcmp (comname, BLANK_COMMON_NAME_LOCAL) == 0)
 	printf_filtered (_("Contents of blank COMMON block:\n"));
       else
@@ -515,7 +517,18 @@ info_common_command (char *comname, int from_tty)
 
       while (entry != NULL)
 	{
+	  fi = frame_find_by_id (frame_id);
+	  if (fi == NULL)
+	    {
+	      warning (_("Unable to restore previously selected frame."));
+	      break;
+	    }
+
 	  print_variable_and_value (NULL, entry->symbol, fi, gdb_stdout, 0);
+
+	  /* print_variable_and_value invalidates FI.  */
+	  fi = NULL;
+
 	  entry = entry->next;
 	}
     }
