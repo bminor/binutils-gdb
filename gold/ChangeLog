@@ -1,3 +1,8 @@
+2012-07-16  Sriraman Tallam  <tmsriram@google.com>
+
+	* gold.cc (queue_middle_tasks): Update function order only after
+	deferred objects due to plugins are processed.
+
 2012-07-11  Ian Lance Taylor  <iant@google.com>
 
 	* arm.cc (Arm_relocate_functions::abs16): Remove unused typedef.
