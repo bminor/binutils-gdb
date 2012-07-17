@@ -1,3 +1,14 @@
+2012-07-17  Nick Clifton  <nickc@redhat.com>
+
+	* elfcomm.c (setup_archive): Extract index table and symbol table
+	scanning code into...
+	(process_archive_index_and_symbols): ... this function and add
+	support for 64-bit index tables.
+	* elfcomm.h (struct archive_info): Change type of index_num and
+	index_array to elf_vma.
+	Add 'uses_64bit_indicies' field.
+	* readelf.c (process_archive): Fix support for 64-bit indicies.
+
 2012-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (process_archive): Display member indicies when
