@@ -9245,6 +9245,9 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
 {
   *cond_string = NULL;
   *thread = -1;
+  *task = 0;
+  *rest = NULL;
+
   while (tok && *tok)
     {
       char *end_tok;
@@ -9495,9 +9498,7 @@ create_breakpoint (struct gdbarch *gdbarch,
                from thread number, so parsing in context of first
                sal is OK.  When setting the breakpoint we'll 
                re-parse it in context of each sal.  */
-            cond_string = NULL;
-            thread = -1;
-	    rest = NULL;
+
             find_condition_and_thread (arg, lsal->sals.sals[0].pc, &cond_string,
                                        &thread, &task, &rest);
             if (cond_string)
@@ -14009,10 +14010,8 @@ addr_string_to_sals (struct breakpoint *b, char *addr_string, int *found)
 	resolve_sal_pc (&sals.sals[i]);
       if (b->condition_not_parsed && s && s[0])
 	{
-	  char *cond_string = 0;
-	  int thread = -1;
-	  int task = 0;
-	  char *extra_string = NULL;
+	  char *cond_string, *extra_string;
+	  int thread, task;
 
 	  find_condition_and_thread (s, sals.sals[0].pc,
 				     &cond_string, &thread, &task,

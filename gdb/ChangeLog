@@ -1,3 +1,11 @@
+2012-07-18  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (find_condition_and_thread): Initialize
+	TASK and REST.
+	(create_breakpiont): find_condition_and_thread will now
+	initialize COND_STRING, THREAD, and REST (and TASK).
+	(addr_string_to_sals): Likewise.
+
 2012-07-18  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (handle_inferior_event) <TARGET_WAITKIND_NO_HISTORY>:
