@@ -1075,7 +1075,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
       add_flags &= ~SYMFILE_NO_READ;
     }
 
-  my_cleanups = make_cleanup_bfd_close (abfd);
+  my_cleanups = make_cleanup_bfd_unref (abfd);
 
   /* Give user a chance to burp if we'd be
      interactively wiping out any existing symbols.  */
@@ -1731,7 +1731,7 @@ symfile_bfd_open (char *name)
 
       if (!bfd_check_format (sym_bfd, bfd_object))
 	{
-	  make_cleanup_bfd_close (sym_bfd);
+	  make_cleanup_bfd_unref (sym_bfd);
 	  error (_("`%s': can't read symbols: %s."), name,
 		 bfd_errmsg (bfd_get_error ()));
 	}
@@ -1775,7 +1775,7 @@ symfile_bfd_open (char *name)
 
   if (!bfd_check_format (sym_bfd, bfd_object))
     {
-      make_cleanup_bfd_close (sym_bfd);
+      make_cleanup_bfd_unref (sym_bfd);
       error (_("`%s': can't read symbols: %s."), name,
 	     bfd_errmsg (bfd_get_error ()));
     }
@@ -2113,7 +2113,7 @@ generic_load (char *args, int from_tty)
       return;
     }
 
-  make_cleanup_bfd_close (loadfile_bfd);
+  make_cleanup_bfd_unref (loadfile_bfd);
 
   if (!bfd_check_format (loadfile_bfd, bfd_object))
     {

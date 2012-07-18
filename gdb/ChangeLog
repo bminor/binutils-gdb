@@ -1,5 +1,28 @@
 2012-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* utils.c (make_cleanup_bfd_unref): Rename from
+	make_cleanup_bfd_close.
+	* defs.h (make_cleanup_bfd_unref): Rename from
+	make_cleanup_bfd_close.
+	* cli/cli-dump.c (bfd_openr_with_cleanup): Update.
+	(bfd_openw_with_cleanup): Update.
+	* corelow.c (core_open): Update.
+	* dsrec.c (load_srec): Update.
+	* m32r-rom.c (m32r_load, m32r_upload_command): Update.
+	* remote-m32r-sdi.c (m32r_load): Update.
+	* remote-mips.c (mips_load_srec): Update.
+	(pmon_load_fast): Update.
+	* solib-darwin.c (darwin_solib_get_all_image_info_addr_at_init):
+	Update.
+	(darwin_bfd_open): Update.
+	* solib.c (solib_bfd_fopen): Update.
+	* symfile-mem.c (symbol_file_add_from_memory): Update.
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Update.
+	(symfile_bfd_open): Update.
+	(generic_load): Update.
+
+2012-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* remote-mips.c (mips_load_srec): Use make_cleanup_bfd_close.
 	(pmon_load_fast): Likewise.
 	* m32r-rom.c (m32r_load): Use make_cleanup_bfd_close.

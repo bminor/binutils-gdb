@@ -315,7 +315,7 @@ extern struct cleanup *make_cleanup_close (int fd);
 
 extern struct cleanup *make_cleanup_fclose (FILE *file);
 
-extern struct cleanup *make_cleanup_bfd_close (bfd *abfd);
+extern struct cleanup *make_cleanup_bfd_unref (bfd *abfd);
 
 struct obstack;
 extern struct cleanup *make_cleanup_obstack_free (struct obstack *obstack);

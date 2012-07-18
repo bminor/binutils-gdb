@@ -203,7 +203,7 @@ do_bfd_close_cleanup (void *arg)
 }
 
 struct cleanup *
-make_cleanup_bfd_close (bfd *abfd)
+make_cleanup_bfd_unref (bfd *abfd)
 {
   return make_cleanup (do_bfd_close_cleanup, abfd);
 }

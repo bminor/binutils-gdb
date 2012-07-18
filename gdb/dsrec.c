@@ -68,7 +68,7 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
       return;
     }
 
-  cleanup = make_cleanup_bfd_close (abfd);
+  cleanup = make_cleanup_bfd_unref (abfd);
   if (bfd_check_format (abfd, bfd_object) == 0)
     {
       printf_filtered (_("File is not an object file\n"));

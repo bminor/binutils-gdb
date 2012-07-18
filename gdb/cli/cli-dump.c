@@ -117,7 +117,7 @@ bfd_openr_with_cleanup (const char *filename, const char *target)
     error (_("Failed to open %s: %s."), filename, 
 	   bfd_errmsg (bfd_get_error ()));
 
-  make_cleanup_bfd_close (ibfd);
+  make_cleanup_bfd_unref (ibfd);
   if (!bfd_check_format (ibfd, bfd_object))
     error (_("'%s' is not a recognized file format."), filename);
 
@@ -136,7 +136,7 @@ bfd_openw_with_cleanup (const char *filename, const char *target,
       if (obfd == NULL)
 	error (_("Failed to open %s: %s."), filename, 
 	       bfd_errmsg (bfd_get_error ()));
-      make_cleanup_bfd_close (obfd);
+      make_cleanup_bfd_unref (obfd);
       if (!bfd_set_format (obfd, bfd_object))
 	error (_("bfd_openw_with_cleanup: %s."), bfd_errmsg (bfd_get_error ()));
     }

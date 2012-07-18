@@ -376,13 +376,13 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
     {
       bfd *sub;
 
-      make_cleanup_bfd_close (dyld_bfd);
+      make_cleanup_bfd_unref (dyld_bfd);
       sub = bfd_mach_o_fat_extract (dyld_bfd, bfd_object,
 				    gdbarch_bfd_arch_info (target_gdbarch));
       if (sub)
 	{
 	  dyld_bfd = gdb_bfd_ref (sub);
-	  make_cleanup_bfd_close (sub);
+	  make_cleanup_bfd_unref (sub);
 	}
       else
 	dyld_bfd = NULL;
@@ -517,7 +517,7 @@ darwin_bfd_open (char *pathname)
 				gdbarch_bfd_arch_info (target_gdbarch));
   if (!res)
     {
-      make_cleanup_bfd_close (abfd);
+      make_cleanup_bfd_unref (abfd);
       error (_("`%s': not a shared-library: %s"),
 	     bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
     }

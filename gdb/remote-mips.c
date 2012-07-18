@@ -2796,7 +2796,7 @@ mips_load_srec (char *args)
       return;
     }
 
-  cleanup = make_cleanup_bfd_close (abfd);
+  cleanup = make_cleanup_bfd_unref (abfd);
   if (bfd_check_format (abfd, bfd_object) == 0)
     {
       printf_filtered ("File is not an object file\n");
@@ -3382,7 +3382,7 @@ pmon_load_fast (char *file)
       printf_filtered ("Unable to open file %s\n", file);
       return;
     }
-  cleanup = make_cleanup_bfd_close (abfd);
+  cleanup = make_cleanup_bfd_unref (abfd);
 
   if (bfd_check_format (abfd, bfd_object) == 0)
     {

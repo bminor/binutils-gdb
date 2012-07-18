@@ -424,7 +424,7 @@ solib_bfd_open (char *pathname)
   /* Check bfd format.  */
   if (!bfd_check_format (abfd, bfd_object))
     {
-      make_cleanup_bfd_close (abfd);
+      make_cleanup_bfd_unref (abfd);
       error (_("`%s': not in executable format: %s"),
 	     bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
     }

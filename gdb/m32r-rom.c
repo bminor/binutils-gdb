@@ -133,7 +133,7 @@ m32r_load (char *filename, int from_tty)
   abfd = gdb_bfd_ref (bfd_openr (filename, 0));
   if (!abfd)
     error (_("Unable to open file %s."), filename);
-  cleanup = make_cleanup_bfd_close (abfd);
+  cleanup = make_cleanup_bfd_unref (abfd);
   if (bfd_check_format (abfd, bfd_object) == 0)
     error (_("File is not an object file."));
   gettimeofday (&start_time, NULL);
@@ -530,7 +530,7 @@ m32r_upload_command (char *args, int from_tty)
 
   gettimeofday (&end_time, NULL);
   abfd = gdb_bfd_ref (bfd_openr (args, 0));
-  cleanup = make_cleanup_bfd_close (abfd);
+  cleanup = make_cleanup_bfd_unref (abfd);
   if (abfd != NULL)
     {		/* Download is done -- print section statistics.  */
       if (bfd_check_format (abfd, bfd_object) == 0)

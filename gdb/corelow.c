@@ -333,7 +333,7 @@ core_open (char *filename, int from_tty)
       /* FIXME: should be checking for errors from bfd_close (for one
          thing, on error it does not free all the storage associated
          with the bfd).  */
-      make_cleanup_bfd_close (temp_bfd);
+      make_cleanup_bfd_unref (temp_bfd);
       error (_("\"%s\" is not a core dump: %s"),
 	     filename, bfd_errmsg (bfd_get_error ()));
     }

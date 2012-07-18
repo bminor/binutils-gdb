@@ -113,7 +113,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
 
   if (!bfd_check_format (nbfd, bfd_object))
     {
-      make_cleanup_bfd_close (nbfd);
+      make_cleanup_bfd_unref (nbfd);
       error (_("Got object file from memory but can't read symbols: %s."),
 	     bfd_errmsg (bfd_get_error ()));
     }
