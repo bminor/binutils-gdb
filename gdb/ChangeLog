@@ -1,5 +1,41 @@
 2012-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.c (symfile_bfd_open): Don't copy name.  Call
+	gdb_bfd_stash_filename.
+	(load_command): Open the new BFD before freeing the old.
+	(bfd_open_maybe_remote): Call gdb_bfd_stash_filename.
+	* symfile-mem.c (symbol_file_add_from_memory): Don't copy name.
+	Call gdb_bfd_stash_filename.
+	* spu-linux-nat.c (spu_bfd_open): Don't copy name.
+	* solib-spu.c (spu_bfd_fopen): Don't copy name.  Call
+	gdb_bfd_stash_filename.
+	* solib-darwin.c (darwin_solib_get_all_image_info_addr_at_init):
+	Free found_pathname.
+	* rs6000-nat.c (add_vmap): Don't copy filename.  Call
+	gdb_bfd_stash_filename.
+	* remote.c (remote_bfd_open): Call gdb_bfd_stash_filename.
+	* machoread.c (macho_add_oso_symfile): Call
+	gdb_bfd_stash_filename.
+	(macho_symfile_read_all_oso): Arrange to free archive_name.  Call
+	gdb_bfd_stash_filename.
+	(macho_check_dsym): Don't copy filename.  Call
+	gdb_bfd_stash_filename.
+	* jit.c (bfd_open_from_target_memory): Don't copy the filename.
+	* gdb_bfd.c (gdb_bfd_stash_filename): New function.
+	* gdb_bfd.h (gdb_bfd_stash_filename): Declare.
+	* gcore.c (create_gcore_bfd): Call gdb_bfd_stash_filename.
+	* exec.c (exec_close): Don't free the BFD's filename.
+	(exec_file_attach): Don't copy the filename.  Call
+	gdb_bfd_stash_filename.
+	* corelow.c (core_close): Don't free the BFD's filename.
+	(core_open): Call gdb_bfd_stash_filename.
+	* corefile.c (reopen_exec_file): Remove #if 0 code.
+	* solib.c (solib_bfd_fopen): Call gdb_bfd_stash_filename.  Free
+	pathname.
+	* dwarf2read.c (try_open_dwo_file): Call gdb_bfd_stash_filename.
+
+2012-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (try_open_dwo_file): Use gdb_bfd_ref and
 	gdb_bfd_unref.
 	(free_dwo_file): Use gdb_bfd_unref.

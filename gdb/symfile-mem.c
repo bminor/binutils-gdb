@@ -103,9 +103,13 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
 
   gdb_bfd_ref (nbfd);
   if (name == NULL)
-    nbfd->filename = xstrdup ("shared object read from target memory");
+    nbfd->filename = "shared object read from target memory";
   else
-    nbfd->filename = name;
+    {
+      nbfd->filename = name;
+      gdb_bfd_stash_filename (nbfd);
+      xfree (name);
+    }
 
   if (!bfd_check_format (nbfd, bfd_object))
     {

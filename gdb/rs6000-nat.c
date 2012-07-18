@@ -730,7 +730,7 @@ static struct vmap *
 add_vmap (LdInfo *ldi)
 {
   bfd *abfd, *last;
-  char *mem, *objname, *filename;
+  char *mem, *filename;
   struct objfile *obj;
   struct vmap *vp;
   int fd;
@@ -743,22 +743,22 @@ add_vmap (LdInfo *ldi)
   filename = LDI_FILENAME (ldi, arch64);
   mem = filename + strlen (filename) + 1;
   mem = xstrdup (mem);
-  objname = xstrdup (filename);
 
   fd = LDI_FD (ldi, arch64);
   if (fd < 0)
     /* Note that this opens it once for every member; a possible
        enhancement would be to only open it once for every object.  */
-    abfd = bfd_openr (objname, gnutarget);
+    abfd = bfd_openr (filename, gnutarget);
   else
-    abfd = bfd_fdopenr (objname, gnutarget, fd);
+    abfd = bfd_fdopenr (filename, gnutarget, fd);
   abfd = gdb_bfd_ref (abfd);
   if (!abfd)
     {
       warning (_("Could not open `%s' as an executable file: %s"),
-	       objname, bfd_errmsg (bfd_get_error ()));
+	       filename, bfd_errmsg (bfd_get_error ()));
       return NULL;
     }
+  gdb_bfd_stash_filename (abfd);
 
   /* Make sure we have an object file.  */
 
@@ -775,7 +775,7 @@ add_vmap (LdInfo *ldi)
 
       if (!last)
 	{
-	  warning (_("\"%s\": member \"%s\" missing."), objname, mem);
+	  warning (_("\"%s\": member \"%s\" missing."), filename, mem);
 	  gdb_bfd_unref (abfd);
 	  return NULL;
 	}
@@ -783,7 +783,7 @@ add_vmap (LdInfo *ldi)
       if (!bfd_check_format (last, bfd_object))
 	{
 	  warning (_("\"%s\": member \"%s\" not in executable format: %s."),
-		   objname, mem, bfd_errmsg (bfd_get_error ()));
+		   filename, mem, bfd_errmsg (bfd_get_error ()));
 	  gdb_bfd_unref (last);
 	  gdb_bfd_unref (abfd);
 	  return NULL;
@@ -794,7 +794,7 @@ add_vmap (LdInfo *ldi)
   else
     {
       warning (_("\"%s\": not in executable format: %s."),
-	       objname, bfd_errmsg (bfd_get_error ()));
+	       filename, bfd_errmsg (bfd_get_error ()));
       gdb_bfd_unref (abfd);
       return NULL;
     }

@@ -629,10 +629,10 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
 
   bfd_hash_table_free (&table);
 
-  /* Make sure that the filename was malloc'ed.  The current filename comes
-     either from an OSO symbol name or from an archive name.  Memory for both
-     is not managed by gdb.  */
-  abfd->filename = xstrdup (abfd->filename);
+  /* Make sure that the filename has the correct lifetime.  The
+     current filename comes either from an OSO symbol name or from an
+     archive name.  Memory for both is not managed by gdb.  */
+  gdb_bfd_stash_filename (abfd);
 
   /* We need to clear SYMFILE_MAINLINE to avoid interractive question
      from symfile.c:symbol_file_add_with_addrs_or_offsets.  */
@@ -651,6 +651,7 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
   int ix;
   VEC (oso_el) *vec;
   oso_el *oso;
+  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
   vec = oso_vector;
   oso_vector = NULL;
@@ -677,6 +678,8 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
 	  memcpy (archive_name, oso->name, pfx_len);
 	  archive_name[pfx_len] = '\0';
 
+	  make_cleanup (xfree, archive_name);
+
           /* Compute number of oso for this archive.  */
           for (last_ix = ix;
                VEC_iterate (oso_el, vec, last_ix, oso2); last_ix++)
@@ -702,6 +705,9 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
               ix = last_ix;
 	      continue;
 	    }
+
+	  gdb_bfd_stash_filename (archive_bfd);
+
 	  member_bfd = gdb_bfd_ref (bfd_openr_next_archived_file (archive_bfd,
 								  NULL));
 
@@ -773,6 +779,7 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
     }
 
   VEC_free (oso_el, vec);
+  do_cleanups (cleanup);
 }
 
 /* DSYM (debug symbols) files contain the debug info of an executable.
@@ -810,20 +817,18 @@ macho_check_dsym (struct objfile *objfile)
       warning (_("can't find UUID in %s"), objfile->name);
       return NULL;
     }
-  dsym_filename = xstrdup (dsym_filename);
   dsym_bfd = gdb_bfd_ref (bfd_openr (dsym_filename, gnutarget));
   if (dsym_bfd == NULL)
     {
       warning (_("can't open dsym file %s"), dsym_filename);
-      xfree (dsym_filename);
       return NULL;
     }
+  gdb_bfd_stash_filename (dsym_filename);
 
   if (!bfd_check_format (dsym_bfd, bfd_object))
     {
       gdb_bfd_unref (dsym_bfd);
       warning (_("bad dsym file format: %s"), bfd_errmsg (bfd_get_error ()));
-      xfree (dsym_filename);
       return NULL;
     }
 
@@ -832,7 +837,6 @@ macho_check_dsym (struct objfile *objfile)
     {
       warning (_("can't find UUID in %s"), dsym_filename);
       gdb_bfd_unref (dsym_bfd);
-      xfree (dsym_filename);
       return NULL;
     }
   if (memcmp (dsym_uuid->command.uuid.uuid, main_uuid->command.uuid.uuid,
@@ -840,7 +844,6 @@ macho_check_dsym (struct objfile *objfile)
     {
       warning (_("dsym file UUID doesn't match the one in %s"), objfile->name);
       gdb_bfd_unref (dsym_bfd);
-      xfree (dsym_filename);
       return NULL;
     }
   return dsym_bfd;

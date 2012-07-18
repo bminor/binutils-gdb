@@ -326,7 +326,7 @@ spu_bfd_fopen (char *name, CORE_ADDR addr)
   CORE_ADDR *open_closure = xmalloc (sizeof (CORE_ADDR));
   *open_closure = addr;
 
-  nbfd = gdb_bfd_ref (bfd_openr_iovec (xstrdup (name), "elf32-spu",
+  nbfd = gdb_bfd_ref (bfd_openr_iovec (name, "elf32-spu",
 				       spu_bfd_iovec_open, open_closure,
 				       spu_bfd_iovec_pread, spu_bfd_iovec_close,
 				       spu_bfd_iovec_stat));
@@ -339,6 +339,7 @@ spu_bfd_fopen (char *name, CORE_ADDR addr)
       return NULL;
     }
 
+  gdb_bfd_stash_filename (nbfd);
   return nbfd;
 }
 

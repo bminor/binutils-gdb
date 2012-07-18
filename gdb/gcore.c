@@ -55,6 +55,7 @@ create_gcore_bfd (char *filename)
 
   if (!obfd)
     error (_("Failed to open '%s' for output."), filename);
+  gdb_bfd_stash_filename (obfd);
   bfd_set_format (obfd, bfd_core);
   bfd_set_arch_mach (obfd, default_gcore_arch (), default_gcore_mach ());
   return obfd;

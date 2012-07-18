@@ -8121,11 +8121,12 @@ try_open_dwo_file (const char *file_name)
       xfree (absolute_name);
       return NULL;
     }
+  gdb_bfd_stash_filename (sym_bfd);
+  xfree (absolute_name);
   bfd_set_cacheable (sym_bfd, 1);
 
   if (!bfd_check_format (sym_bfd, bfd_object))
     {
-      xfree (absolute_name);
       gdb_bfd_unref (sym_bfd); /* This also closes desc.  */
       return NULL;
     }

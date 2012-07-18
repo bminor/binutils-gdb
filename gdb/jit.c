@@ -133,12 +133,11 @@ mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 static struct bfd *
 bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size, char *target)
 {
-  const char *filename = xstrdup ("<in-memory>");
   struct target_buffer *buffer = xmalloc (sizeof (struct target_buffer));
 
   buffer->base = addr;
   buffer->size = size;
-  return bfd_openr_iovec (filename, target,
+  return bfd_openr_iovec ("<in-memory>", target,
                           mem_bfd_iovec_open,
                           buffer,
                           mem_bfd_iovec_pread,

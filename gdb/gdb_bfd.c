@@ -21,6 +21,22 @@
 #include "defs.h"
 #include "gdb_bfd.h"
 #include "gdb_assert.h"
+#include "gdb_string.h"
+
+/* See gdb_bfd.h.  */
+
+void
+gdb_bfd_stash_filename (struct bfd *abfd)
+{
+  char *name = bfd_get_filename (abfd);
+  char *data;
+
+  data = bfd_alloc (abfd, strlen (name) + 1);
+  strcpy (data, name);
+
+  /* Unwarranted chumminess with BFD.  */
+  abfd->filename = data;
+}
 
 /* Close ABFD, and warn if that fails.  */
 

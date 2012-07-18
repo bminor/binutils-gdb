@@ -1700,7 +1700,13 @@ bfd_open_maybe_remote (const char *name)
   if (remote_filename_p (name))
     return gdb_bfd_ref (remote_bfd_open (name, gnutarget));
   else
-    return gdb_bfd_ref (bfd_openr (name, gnutarget));
+    {
+      bfd *result = gdb_bfd_ref (bfd_openr (name, gnutarget));
+
+      if (result != NULL)
+	gdb_bfd_stash_filename (result);
+      return result;
+    }
 }
 
 
@@ -1718,19 +1724,14 @@ symfile_bfd_open (char *name)
 
   if (remote_filename_p (name))
     {
-      name = xstrdup (name);
       sym_bfd = gdb_bfd_ref (remote_bfd_open (name, gnutarget));
       if (!sym_bfd)
-	{
-	  make_cleanup (xfree, name);
-	  error (_("`%s': can't open to read symbols: %s."), name,
-		 bfd_errmsg (bfd_get_error ()));
-	}
+	error (_("`%s': can't open to read symbols: %s."), name,
+	       bfd_errmsg (bfd_get_error ()));
 
       if (!bfd_check_format (sym_bfd, bfd_object))
 	{
-	  gdb_bfd_unref (sym_bfd);
-	  make_cleanup (xfree, name);
+	  make_cleanup_bfd_close (sym_bfd);
 	  error (_("`%s': can't read symbols: %s."), name,
 		 bfd_errmsg (bfd_get_error ()));
 	}
@@ -1759,10 +1760,9 @@ symfile_bfd_open (char *name)
       perror_with_name (name);
     }
 
-  /* Free 1st new malloc'd copy, but keep the 2nd malloc'd copy in
-     bfd.  It'll be freed in free_objfile().  */
   xfree (name);
   name = absolute_name;
+  make_cleanup (xfree, name);
 
   sym_bfd = gdb_bfd_ref (bfd_fopen (name, gnutarget, FOPEN_RB, desc));
   if (!sym_bfd)
@@ -1776,10 +1776,11 @@ symfile_bfd_open (char *name)
   if (!bfd_check_format (sym_bfd, bfd_object))
     {
       make_cleanup_bfd_close (sym_bfd);
-      make_cleanup (xfree, name);
       error (_("`%s': can't read symbols: %s."), name,
 	     bfd_errmsg (bfd_get_error ()));
     }
+
+  gdb_bfd_stash_filename (sym_bfd);
 
   return sym_bfd;
 }
@@ -2511,9 +2512,16 @@ reread_symbols (void)
 	  /* Clean up any state BFD has sitting around.  We don't need
 	     to close the descriptor but BFD lacks a way of closing the
 	     BFD without closing the descriptor.  */
-	  obfd_filename = bfd_get_filename (objfile->obfd);
-	  gdb_bfd_unref (objfile->obfd);
-	  objfile->obfd = bfd_open_maybe_remote (obfd_filename);
+	  {
+	    struct bfd *obfd = objfile->obfd;
+
+	    obfd_filename = bfd_get_filename (objfile->obfd);
+	    /* Open the new BFD before freeing the old one, so that
+	       the filename remains live.  */
+	    objfile->obfd = bfd_open_maybe_remote (obfd_filename);
+	    gdb_bfd_unref (obfd);
+	  }
+
 	  if (objfile->obfd == NULL)
 	    error (_("Can't open %s to read symbols."), objfile->name);
 	  /* bfd_openr sets cacheable to true, which is what we want.  */

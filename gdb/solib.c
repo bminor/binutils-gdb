@@ -361,9 +361,9 @@ solib_find (char *in_pathname, int *fd)
    it is used as file handle to open the file.  Throws an error if the file
    could not be opened.  Handles both local and remote file access.
 
-   PATHNAME must be malloc'ed by the caller.  If successful, the new BFD's
-   name will point to it.  If unsuccessful, PATHNAME will be freed and the
-   FD will be closed (unless FD was -1).  */
+   PATHNAME must be malloc'ed by the caller.  It will be freed by this
+   function.  If unsuccessful, the FD will be closed (unless FD was
+   -1).  */
 
 bfd *
 solib_bfd_fopen (char *pathname, int fd)
@@ -389,6 +389,9 @@ solib_bfd_fopen (char *pathname, int fd)
       error (_("Could not open `%s' as an executable file: %s"),
 	     pathname, bfd_errmsg (bfd_get_error ()));
     }
+
+  gdb_bfd_stash_filename (abfd);
+  xfree (pathname);
 
   return gdb_bfd_ref (abfd);
 }
@@ -421,17 +424,16 @@ solib_bfd_open (char *pathname)
   /* Check bfd format.  */
   if (!bfd_check_format (abfd, bfd_object))
     {
-      gdb_bfd_unref (abfd);
-      make_cleanup (xfree, found_pathname);
+      make_cleanup_bfd_close (abfd);
       error (_("`%s': not in executable format: %s"),
-	     found_pathname, bfd_errmsg (bfd_get_error ()));
+	     bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
     }
 
   /* Check bfd arch.  */
   b = gdbarch_bfd_arch_info (target_gdbarch);
   if (!b->compatible (b, bfd_get_arch_info (abfd)))
     warning (_("`%s': Shared library architecture %s is not compatible "
-               "with target architecture %s."), found_pathname,
+               "with target architecture %s."), bfd_get_filename (abfd),
              bfd_get_arch_info (abfd)->printable_name, b->printable_name);
 
   return abfd;

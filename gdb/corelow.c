@@ -216,9 +216,7 @@ core_close (int quitting)
 	  core_data = NULL;
 	}
 
-      name = bfd_get_filename (core_bfd);
       gdb_bfd_unref (core_bfd);
-      xfree (name);
       core_bfd = NULL;
     }
   core_vec = NULL;
@@ -326,6 +324,8 @@ core_open (char *filename, int from_tty)
   if (temp_bfd == NULL)
     perror_with_name (filename);
 
+  gdb_bfd_stash_filename (temp_bfd);
+
   if (!bfd_check_format (temp_bfd, bfd_core)
       && !gdb_check_format (temp_bfd))
     {
@@ -341,7 +341,7 @@ core_open (char *filename, int from_tty)
   /* Looks semi-reasonable.  Toss the old core file and work on the
      new.  */
 
-  discard_cleanups (old_chain);	/* Don't free filename any more */
+  do_cleanups (old_chain);
   unpush_target (&core_ops);
   core_bfd = temp_bfd;
   old_chain = make_cleanup (core_close_cleanup, 0 /*ignore*/);
