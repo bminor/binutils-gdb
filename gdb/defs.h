@@ -70,6 +70,10 @@
 /* For ``enum gdb_signal''.  */
 #include "gdb/signals.h"
 
+#include "ui-file.h"
+
+#include "host-defs.h"
+
 /* Just in case they're not defined in stdio.h.  */
 
 #ifndef SEEK_SET
@@ -169,7 +173,6 @@ extern char *debug_file_directory;
 
 extern int quit_flag;
 extern int immediate_quit;
-extern int sevenbit_strings;
 
 extern void quit (void);
 
@@ -252,11 +255,6 @@ enum return_value_convention
   RETURN_VALUE_ABI_PRESERVES_ADDRESS,
 };
 
-/* vec.h-style vectors of strings want a typedef for char * or const char *.  */
-
-typedef char * char_ptr;
-typedef const char * const_char_ptr;
-
 /* Needed for various prototypes */
 
 struct symtab;
@@ -271,271 +269,11 @@ struct value;
    globals that are currently only available to main.c.  */
 extern char *relocate_gdb_directory (const char *initial, int flag);
 
-/* From utils.c */
-
-extern void initialize_utils (void);
-
-extern void notice_quit (void);
-
-extern int strcmp_iw (const char *, const char *);
-
-extern int strcmp_iw_ordered (const char *, const char *);
-
-extern int streq (const char *, const char *);
-
-extern int subset_compare (char *, char *);
-
-extern char *safe_strerror (int);
-
-extern void set_display_time (int);
-
-extern void set_display_space (int);
-
-/* Cleanup utilities.  */
-
-#include "cleanups.h"
-
-extern struct cleanup *make_cleanup_freeargv (char **);
-
-struct dyn_string;
-extern struct cleanup *make_cleanup_dyn_string_delete (struct dyn_string *);
-
-struct ui_file;
-extern struct cleanup *make_cleanup_ui_file_delete (struct ui_file *);
-
-struct ui_out;
-extern struct cleanup *
-  make_cleanup_ui_out_redirect_pop (struct ui_out *uiout);
-
-struct section_addr_info;
-extern struct cleanup *(make_cleanup_free_section_addr_info 
-                        (struct section_addr_info *));
-
-extern struct cleanup *make_cleanup_close (int fd);
-
-extern struct cleanup *make_cleanup_fclose (FILE *file);
-
-extern struct cleanup *make_cleanup_bfd_unref (bfd *abfd);
-
-struct obstack;
-extern struct cleanup *make_cleanup_obstack_free (struct obstack *obstack);
-
-extern struct cleanup *make_cleanup_restore_integer (int *variable);
-extern struct cleanup *make_cleanup_restore_uinteger (unsigned int *variable);
-
-struct target_ops;
-extern struct cleanup *make_cleanup_unpush_target (struct target_ops *ops);
-
-extern struct cleanup *
-  make_cleanup_restore_ui_file (struct ui_file **variable);
-
-extern struct cleanup *make_cleanup_value_free_to_mark (struct value *);
-extern struct cleanup *make_cleanup_value_free (struct value *);
-
-struct so_list;
-extern struct cleanup *make_cleanup_free_so (struct so_list *so);
-
-extern struct cleanup *make_cleanup_htab_delete (htab_t htab);
-
-extern void free_current_contents (void *);
-
-extern struct cleanup *make_command_stats_cleanup (int);
-
-extern int myread (int, char *, int);
-
-extern int query (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
-extern int nquery (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
-extern int yquery (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
-
-extern void init_page_info (void);
-
-extern struct cleanup *make_cleanup_restore_page_info (void);
-extern struct cleanup *
-  set_batch_flag_and_make_cleanup_restore_page_info (void);
-
-extern char *gdb_realpath (const char *);
-extern char *xfullpath (const char *);
-
-extern unsigned long gnu_debuglink_crc32 (unsigned long crc,
-                                          unsigned char *buf, size_t len);
-
-ULONGEST strtoulst (const char *num, const char **trailer, int base);
-
-char *ldirname (const char *filename);
-
-char **gdb_buildargv (const char *);
-
-int compare_positive_ints (const void *ap, const void *bp);
-int compare_strings (const void *ap, const void *bp);
-
-/* A wrapper for bfd_errmsg to produce a more helpful error message
-   in the case of bfd_error_file_ambiguously recognized.
-   MATCHING, if non-NULL, is the corresponding argument to
-   bfd_check_format_matches, and will be freed.  */
-
-extern const char *gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
-
-extern int parse_pid_to_attach (char *args);
-
-extern struct cleanup *make_bpstat_clear_actions_cleanup (void);
-
-extern int producer_is_gcc_ge_4 (const char *producer);
-
-extern void substitute_path_component (char **stringp, const char *from,
-				       const char *to);
-
-#ifdef HAVE_WAITPID
-extern pid_t wait_to_die_with_timeout (pid_t pid, int *status, int timeout);
-#endif
-
-extern int gdb_filename_fnmatch (const char *pattern, const char *string,
-				 int flags);
-
 
 /* Annotation stuff.  */
 
 extern int annotation_level;	/* in stack.c */
 
-extern void begin_line (void);
-
-extern void wrap_here (char *);
-
-extern void reinitialize_more_filter (void);
-
-/* Normal results */
-extern struct ui_file *gdb_stdout;
-/* Input stream */
-extern struct ui_file *gdb_stdin;
-/* Serious error notifications */
-extern struct ui_file *gdb_stderr;
-/* Log/debug/trace messages that should bypass normal stdout/stderr
-   filtering.  For moment, always call this stream using
-   *_unfiltered.  In the very near future that restriction shall be
-   removed - either call shall be unfiltered.  (cagney 1999-06-13).  */
-extern struct ui_file *gdb_stdlog;
-/* Target output that should bypass normal stdout/stderr filtering.
-   For moment, always call this stream using *_unfiltered.  In the
-   very near future that restriction shall be removed - either call
-   shall be unfiltered.  (cagney 1999-07-02).  */
-extern struct ui_file *gdb_stdtarg;
-extern struct ui_file *gdb_stdtargerr;
-extern struct ui_file *gdb_stdtargin;
-
-#include "ui-file.h"
-
-/* More generic printf like operations.  Filtered versions may return
-   non-locally on error.  */
-
-extern void fputs_filtered (const char *, struct ui_file *);
-
-extern void fputs_unfiltered (const char *, struct ui_file *);
-
-extern int fputc_filtered (int c, struct ui_file *);
-
-extern int fputc_unfiltered (int c, struct ui_file *);
-
-extern int putchar_filtered (int c);
-
-extern int putchar_unfiltered (int c);
-
-extern void puts_filtered (const char *);
-
-extern void puts_unfiltered (const char *);
-
-extern void puts_filtered_tabular (char *string, int width, int right);
-
-extern void puts_debug (char *prefix, char *string, char *suffix);
-
-extern void vprintf_filtered (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
-
-extern void vfprintf_filtered (struct ui_file *, const char *, va_list)
-  ATTRIBUTE_PRINTF (2, 0);
-
-extern void fprintf_filtered (struct ui_file *, const char *, ...)
-  ATTRIBUTE_PRINTF (2, 3);
-
-extern void fprintfi_filtered (int, struct ui_file *, const char *, ...)
-  ATTRIBUTE_PRINTF (3, 4);
-
-extern void printf_filtered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
-
-extern void printfi_filtered (int, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
-
-extern void vprintf_unfiltered (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
-
-extern void vfprintf_unfiltered (struct ui_file *, const char *, va_list)
-  ATTRIBUTE_PRINTF (2, 0);
-
-extern void fprintf_unfiltered (struct ui_file *, const char *, ...)
-  ATTRIBUTE_PRINTF (2, 3);
-
-extern void printf_unfiltered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
-
-extern void print_spaces (int, struct ui_file *);
-
-extern void print_spaces_filtered (int, struct ui_file *);
-
-extern char *n_spaces (int);
-
-extern void fputstr_filtered (const char *str, int quotr,
-			      struct ui_file * stream);
-
-extern void fputstr_unfiltered (const char *str, int quotr,
-				struct ui_file * stream);
-
-extern void fputstrn_filtered (const char *str, int n, int quotr,
-			       struct ui_file * stream);
-
-extern void fputstrn_unfiltered (const char *str, int n, int quotr,
-				 struct ui_file * stream);
-
-/* Display the host ADDR on STREAM formatted as ``0x%x''.  */
-extern void gdb_print_host_address (const void *addr, struct ui_file *stream);
-
-extern const char *host_address_to_string (const void *addr);
-
-/* Convert CORE_ADDR to string in platform-specific manner.
-   This is usually formatted similar to 0x%lx.  */
-extern const char *paddress (struct gdbarch *gdbarch, CORE_ADDR addr);
-
-/* Return a string representation in hexadecimal notation of ADDRESS,
-   which is suitable for printing.  */
-
-extern const char *print_core_address (struct gdbarch *gdbarch,
-				       CORE_ADDR address);
-
-/* Callback hash_f and eq_f for htab_create_alloc or htab_create_alloc_ex.  */
-
-extern hashval_t core_addr_hash (const void *ap);
-extern int core_addr_eq (const void *ap, const void *bp);
-
-/* %d for LONGEST */
-extern char *plongest (LONGEST l);
-/* %u for ULONGEST */
-extern char *pulongest (ULONGEST l);
-
-extern char *phex (ULONGEST l, int sizeof_l);
-extern char *phex_nz (ULONGEST l, int sizeof_l);
-extern char *int_string (LONGEST, int, int, int, int);
-
-/* Convert a CORE_ADDR into a HEX string with leading zeros.
-   The output from core_addr_to_string() can be passed direct to
-   string_to_core_addr().  */
-extern const char *core_addr_to_string (const CORE_ADDR addr);
-extern const char *core_addr_to_string_nz (const CORE_ADDR addr);
-extern CORE_ADDR string_to_core_addr (const char *my_string);
-
-/* Return a string that contains a number formatted as a hex
-   string.  */
-extern char *hex_string (LONGEST);
-extern char *hex_string_custom (LONGEST, int);
-
-extern void fprintf_symbol_filtered (struct ui_file *, const char *,
-				     enum language, int);
-
-extern void perror_with_name (const char *) ATTRIBUTE_NORETURN;
-
-extern void print_sys_errmsg (const char *, int);
 
 /* From regex.c or libc.  BSD 4.4 declares this with the argument type as
    "const char *" in unistd.h, so we can't declare the argument
@@ -809,11 +547,6 @@ enum val_prettyprint
 
 extern int longest_to_int (LONGEST);
 
-/* Assorted functions we can declare, now that const and volatile are 
-   defined.  */
-
-extern char *savestring (const char *, size_t);
-
 /* Utility macros to allocate typed memory.  Avoids errors like:
    struct foo *foo = xmalloc (sizeof struct bar); and memset (foo,
    sizeof (struct foo), 0).  */
@@ -822,49 +555,6 @@ extern char *savestring (const char *, size_t);
 #define XCALLOC(NMEMB, TYPE) ((TYPE*) xcalloc ((NMEMB), sizeof (TYPE)))
 
 #include "common-utils.h"
-
-extern int parse_escape (struct gdbarch *, char **);
-
-/* Message to be printed before the error message, when an error occurs.  */
-
-extern char *error_pre_print;
-
-/* Message to be printed before the error message, when an error occurs.  */
-
-extern char *quit_pre_print;
-
-/* Message to be printed before the warning message, when a warning occurs.  */
-
-extern char *warning_pre_print;
-
-extern void verror (const char *fmt, va_list ap)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 0);
-
-extern void error (const char *fmt, ...)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
-
-extern void error_stream (struct ui_file *) ATTRIBUTE_NORETURN;
-
-extern void vfatal (const char *fmt, va_list ap)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 0);
-
-extern void fatal (const char *fmt, ...)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
-
-extern void internal_verror (const char *file, int line, const char *,
-			     va_list ap)
-     ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (3, 0);
-
-extern void internal_vwarning (const char *file, int line,
-			       const char *, va_list ap)
-     ATTRIBUTE_PRINTF (3, 0);
-
-extern void internal_warning (const char *file, int line,
-			      const char *, ...) ATTRIBUTE_PRINTF (3, 4);
-
-extern void warning (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
-
-extern void vwarning (const char *, va_list args) ATTRIBUTE_PRINTF (1, 0);
 
 /* List of known OS ABIs.  If you change this, make sure to update the
    table in osabi.c.  */
@@ -1054,37 +744,12 @@ extern void (*deprecated_call_command_hook) (struct cmd_list_element * c,
 
 extern void (*deprecated_set_hook) (struct cmd_list_element * c);
 
-extern void (*deprecated_error_begin_hook) (void);
-
 extern int (*deprecated_ui_load_progress_hook) (const char *section,
 						unsigned long num);
-
 
 /* Inhibit window interface if non-zero.  */
 
 extern int use_windows;
-
-/* Definitions of filename-related things.  */
-
-/* Host specific things.  */
-
-#ifdef __MSDOS__
-# define CANT_FORK
-# define GLOBAL_CURDIR
-# define DIRNAME_SEPARATOR ';'
-#endif
-
-#if !defined (__CYGWIN__) && defined (_WIN32)
-# define DIRNAME_SEPARATOR ';'
-#endif
-
-#ifndef DIRNAME_SEPARATOR
-#define DIRNAME_SEPARATOR ':'
-#endif
-
-#ifndef SLASH_STRING
-#define SLASH_STRING "/"
-#endif
 
 /* Provide default definitions of PIDGET, TIDGET, and MERGEPID.
    The name ``TIDGET'' is a historical accident.  Many uses of TIDGET
@@ -1118,43 +783,6 @@ extern int use_windows;
 /* A width that can achieve a better legibility for GDB MI mode.  */
 #define GDB_MI_MSG_WIDTH  80
 
-/* Ensure that V is aligned to an N byte boundary (B's assumed to be a
-   power of 2).  Round up/down when necessary.  Examples of correct
-   use include:
-
-   addr = align_up (addr, 8); -- VALUE needs 8 byte alignment
-   write_memory (addr, value, len);
-   addr += len;
-
-   and:
-
-   sp = align_down (sp - len, 16); -- Keep SP 16 byte aligned
-   write_memory (sp, value, len);
-
-   Note that uses such as:
-
-   write_memory (addr, value, len);
-   addr += align_up (len, 8);
-
-   and:
-
-   sp -= align_up (len, 8);
-   write_memory (sp, value, len);
-
-   are typically not correct as they don't ensure that the address (SP
-   or ADDR) is correctly aligned (relying on previous alignment to
-   keep things right).  This is also why the methods are called
-   "align_..." instead of "round_..." as the latter reads better with
-   this incorrect coding style.  */
-
-extern ULONGEST align_up (ULONGEST v, int n);
-extern ULONGEST align_down (ULONGEST v, int n);
-
-/* Allocation and deallocation functions for the libiberty hash table
-   which use obstacks.  */
-void *hashtab_obstack_allocate (void *data, size_t size, size_t count);
-void dummy_obstack_deallocate (void *object, void *data);
-
 /* From progspace.c */
 
 extern void initialize_progspace (void);
@@ -1168,5 +796,7 @@ enum block_enum
   STATIC_BLOCK = 1,
   FIRST_LOCAL_BLOCK = 2
 };
+
+#include "utils.h"
 
 #endif /* #ifndef DEFS_H */

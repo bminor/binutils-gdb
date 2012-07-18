@@ -1,3 +1,21 @@
+2012-07-18  Doug Evans  <dje@google.com>
+
+	* common/gdb_vecs.h: Moved here from ./gdb_vecs.h.
+	* common/gdb_vecs.c: New file, contents from utils.c.
+	* common/host-defs.h: New file, contents from defs.h.
+	* utils.h: New file, contents from defs.h.
+	* defs.h: Move all declarations of objects defined in utils.c
+	to utils.h (except QUIT() and related).
+	#include "utils.h", "host-defs.h".
+	* probe.h (probe_p): Move here from gdb_vecs.h.
+	* symfile.c: #include "probe.h" instead of "gdb_vecs.h".
+	* utils.c (free_char_ptr_vec): Moved to common/gdb_vecs.c.
+	(dirnames_to_char_ptr_vec_append, dirnames_to_char_ptr_vec): Ditto.
+	* Makefile.in (SFILES): Add common/gdb_vecs.c.
+	(HFILES_NO_SRCDIR): Add common/gdb_vecs.h, common/host-defs.h, utils.h.
+	(COMMON_OBS): Add gdb_vecs.o.
+	(gdb_vecs.o): New rule.
+
 2012-07-18  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (add_sal_to_sals): Add LITERAL_CANONICAL

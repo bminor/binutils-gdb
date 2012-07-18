@@ -22,7 +22,7 @@
 
 /* This file requires that you first include "bfd.h".  */
 #include "symtab.h"
-#include "gdb_vecs.h"
+#include "probe.h"
 
 /* Opaque declarations.  */
 struct target_section;

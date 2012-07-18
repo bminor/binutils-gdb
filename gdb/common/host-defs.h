@@ -1,6 +1,5 @@
-/* Some commonly-used VEC types.
-
-   Copyright (C) 2012 Free Software Foundation, Inc.
+/* Basic host-specific definitions for GDB.
+   Copyright (C) 1986, 1988-2005, 2007-2012 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,31 +16,25 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef HOST_DEFS_H
+#define HOST_DEFS_H
 
-#ifndef GDB_VECS_H
-#define GDB_VECS_H
+#ifdef __MSDOS__
+# define CANT_FORK
+# define GLOBAL_CURDIR
+# define DIRNAME_SEPARATOR ';'
+#endif
 
-#include "vec.h"
+#if !defined (__CYGWIN__) && defined (_WIN32)
+# define DIRNAME_SEPARATOR ';'
+#endif
 
-struct probe;
+#ifndef DIRNAME_SEPARATOR
+#define DIRNAME_SEPARATOR ':'
+#endif
 
-DEF_VEC_P (char_ptr);
+#ifndef SLASH_STRING
+#define SLASH_STRING "/"
+#endif
 
-DEF_VEC_P (const_char_ptr);
-
-/* From utils.c: */
-
-extern void free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec);
-
-extern struct cleanup *
-  make_cleanup_free_char_ptr_vec (VEC (char_ptr) *char_ptr_vec);
-
-extern void dirnames_to_char_ptr_vec_append (VEC (char_ptr) **vecp,
-					     const char *dirnames);
-
-extern VEC (char_ptr) *dirnames_to_char_ptr_vec (const char *dirnames);
-
-typedef struct probe *probe_p;
-DEF_VEC_P (probe_p);
-
-#endif /* GDB_VECS_H */
+#endif /* HOST_DEFS_H */

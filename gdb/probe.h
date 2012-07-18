@@ -22,6 +22,11 @@
 
 #include "gdb_vecs.h"
 
+/* Definition of a vector of probes.  */
+
+typedef struct probe *probe_p;
+DEF_VEC_P (probe_p);
+
 struct linespec_result;
 
 /* Structure useful for passing the header names in the method

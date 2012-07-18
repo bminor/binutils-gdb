@@ -744,7 +744,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	xml-syscall.c \
 	annotate.c common/signals.c copying.c dfp.c gdb.c inf-child.c \
 	regset.c sol-thread.c windows-termcap.c \
-	common/common-utils.c common/xml-utils.c \
+	common/gdb_vecs.c common/common-utils.c common/xml-utils.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
 	common/format.c
 
@@ -765,8 +765,8 @@ osf-share/cma_errors.h osf-share/cma_tcb_defs.h osf-share/cma_attr.h \
 osf-share/cma_stack_int.h osf-share/cma_init.h \
 osf-share/cma_deb_core.h osf-share/AT386/cma_thread_io.h \
 osf-share/cma_sched.h \
-common/gdb_signals.h common/gdb_thread_db.h common/i386-xstate.h \
-common/linux-ptrace.h \
+common/gdb_signals.h common/gdb_thread_db.h common/gdb_vecs.h \
+common/i386-xstate.h common/linux-ptrace.h \
 proc-utils.h arm-tdep.h ax-gdb.h ppcnbsd-tdep.h	\
 cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
 exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h amd64bsd-nat.h \
@@ -828,7 +828,7 @@ gnulib/import/extra/snippet/arg-nonnull.h gnulib/import/extra/snippet/c++defs.h 
 gnulib/import/extra/snippet/warn-on-use.h \
 gnulib/import/stddef.in.h gnulib/import/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
-common/format.h \
+common/format.h common/host-defs.h utils.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h gdb_bfd.h
 
 # Header files that already have srcdir in them, or which are in objdir.
@@ -917,7 +917,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	xml-support.o xml-syscall.o xml-utils.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
 	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
-	jit.o progspace.o skip.o probe.o \
+	gdb_vecs.o jit.o progspace.o skip.o probe.o \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
 	format.o
 
@@ -1905,6 +1905,10 @@ signals.o: $(srcdir)/common/signals.c
 
 common-utils.o: ${srcdir}/common/common-utils.c
 	$(COMPILE) $(srcdir)/common/common-utils.c
+	$(POSTCOMPILE)
+
+gdb_vecs.o: ${srcdir}/common/gdb_vecs.c
+	$(COMPILE) $(srcdir)/common/gdb_vecs.c
 	$(POSTCOMPILE)
 
 xml-utils.o: ${srcdir}/common/xml-utils.c
