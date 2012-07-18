@@ -1,5 +1,10 @@
 2012-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* cc-with-index.sh, cc-with-dwz.sh: Remove.
+	* contrib/cc-with-tweaks.sh: New file.
+
+2012-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (struct dwz_file) <gdb_index>: New field.
 	(locate_dwz_sections): Recognize .gdb_index.
 	(create_cus_from_index_list): New function.

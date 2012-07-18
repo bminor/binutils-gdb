@@ -1,5 +1,6 @@
 #! /bin/sh
-# Wrapper around gcc to add the .gdb_index section when running the testsuite.
+# Wrapper around gcc to tweak the output in various ways when running
+# the testsuite.
 
 # Copyright (C) 2010-2012 Free Software Foundation, Inc.
 # This program is free software; you can redistribute it and/or modify
@@ -25,12 +26,21 @@
 #
 # bash$ cd $objdir/gdb/testsuite
 # bash$ runtest \
-#   CC_FOR_TARGET="/bin/sh $srcdir/cc-with-index.sh gcc" \
-#   CXX_FOR_TARGET="/bin/sh $srcdir/cc-with-index.sh g++"
+#   CC_FOR_TARGET="/bin/sh $srcdir/cc-with-tweaks.sh ARGS gcc" \
+#   CXX_FOR_TARGET="/bin/sh $srcdir/cc-with-tweaks.sh ARGS g++"
 #
 # For documentation on index files: info -f gdb.info -n "Index Files"
+# For information about 'dwz', see the announcement:
+#     http://gcc.gnu.org/ml/gcc/2012-04/msg00686.html
+# (More documentation is to come.)
 
-myname=cc-with-index.sh
+# ARGS determine what is done.  They can be:
+# -z compress using dwz
+# -m compress using dwz -m
+# -i make an index
+# If nothing is given, no changes are made
+
+myname=cc-with-tweaks.sh
 
 if [ -z "$GDB" ]
 then
@@ -51,9 +61,25 @@ fi
 
 OBJCOPY=${OBJCOPY:-objcopy}
 
+DWZ=${DWZ:-dwz}
+
 have_link=unknown
 next_is_output_file=no
 output_file=a.out
+
+want_index=false
+want_dwz=false
+want_multi=false
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+	-z) want_dwz=true ;;
+	-i) want_index=true ;;
+	-m) want_multi=true ;;
+	*) break ;;
+    esac
+    shift
+done
 
 for arg in "$@"
 do
@@ -89,7 +115,7 @@ then
 fi
 
 index_file="${output_file}.gdb-index"
-if [ -f "$index_file" ]
+if [ "$want_index" = true ] && [ -f "$index_file" ]
 then
     echo "$myname: Index file $index_file exists, won't clobber." >&2
     exit 1
@@ -107,19 +133,29 @@ then
     exit 1
 fi
 
-$GDB --batch-silent -nx -ex "set auto-load no" -ex "file $output_file" -ex "save gdb-index $output_dir"
-rc=$?
-[ $rc != 0 ] && exit $rc
-
-# GDB might not always create an index.  Cope.
-if [ -f "$index_file" ]
-then
-    $OBJCOPY --add-section .gdb_index="$index_file" \
-	--set-section-flags .gdb_index=readonly \
-	"$output_file" "$output_file"
+if [ "$want_index" = true ]; then
+    $GDB --batch-silent -nx -ex "set auto-load no" -ex "file $output_file" -ex "save gdb-index $output_dir"
     rc=$?
-else
-    rc=0
+    [ $rc != 0 ] && exit $rc
+
+    # GDB might not always create an index.  Cope.
+    if [ -f "$index_file" ]
+    then
+	$OBJCOPY --add-section .gdb_index="$index_file" \
+	    --set-section-flags .gdb_index=readonly \
+	    "$output_file" "$output_file"
+	rc=$?
+    else
+	rc=0
+    fi
+    [ $rc != 0 ] && exit $rc
+fi
+
+if [ "$want_dwz" = true ]; then
+    $DWZ "$output_file" > /dev/null 2>&1
+elif [ "$want_multi" = true ]; then
+    cp $output_file ${output_file}.alt
+    $DWZ -m ${output_file}.dwz "$output_file" ${output_file}.alt > /dev/null 2>&1
 fi
 
 rm -f "$index_file"
