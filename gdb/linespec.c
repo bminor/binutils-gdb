@@ -110,7 +110,7 @@ struct linespec
      currently precludes the use of other members.  */
 
   /* The expression entered by the user.  */
-  char *expression;
+  const char *expression;
 
   /* The resulting PC expression derived from evaluating EXPRESSION.  */
   CORE_ADDR expr_pc;
@@ -118,7 +118,7 @@ struct linespec
   /* Any specified file symtabs.  */
 
   /* The user-supplied source filename or NULL if none was specified.  */
-  char *source_filename;
+  const char *source_filename;
 
   /* The list of symtabs to search to which to limit the search.  May not
      be NULL.  If SOURCE_FILENAME is NULL (no user-specified filename),
@@ -130,7 +130,7 @@ struct linespec
 
   /* The user-specified function name.  If no function name was
      supplied, this may be NULL.  */
-  char *function_name;
+  const char *function_name;
 
   /* A list of matching function symbols and minimal symbols.  Both lists
      may be NULL if no matching symbols were found.  */
@@ -140,7 +140,7 @@ struct linespec
   /* The name of a label and matching symbols.  */
 
   /* The user-specified label name.  */
-  char *label_name;
+  const char *label_name;
 
   /* A structure of matching label symbols and the corresponding
      function symbol in which the label was found.  Both may be NULL
@@ -1347,7 +1347,7 @@ decode_line_2 (struct linespec_state *self,
    FILENAME).  */
 
 static void ATTRIBUTE_NORETURN
-symbol_not_found_error (char *symbol, char *filename)
+symbol_not_found_error (const char *symbol, const char *filename)
 {
   if (symbol == NULL)
     symbol = "";
@@ -2220,14 +2220,10 @@ linespec_parser_delete (void *arg)
 {
   linespec_parser *parser = (linespec_parser *) arg;
 
-  if (PARSER_RESULT (parser)->expression)
-    xfree (PARSER_RESULT (parser)->expression);
-  if (PARSER_RESULT (parser)->source_filename)
-    xfree (PARSER_RESULT (parser)->source_filename);
-  if (PARSER_RESULT (parser)->label_name)
-    xfree (PARSER_RESULT (parser)->label_name);
-  if (PARSER_RESULT (parser)->function_name)
-    xfree (PARSER_RESULT (parser)->function_name);
+  xfree ((char *) PARSER_RESULT (parser)->expression);
+  xfree ((char *) PARSER_RESULT (parser)->source_filename);
+  xfree ((char *) PARSER_RESULT (parser)->label_name);
+  xfree ((char *) PARSER_RESULT (parser)->function_name);
 
   if (PARSER_RESULT (parser)->file_symtabs != NULL)
     VEC_free (symtab_p, PARSER_RESULT (parser)->file_symtabs);
