@@ -1,5 +1,14 @@
 2012-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* gdb_bfd.c (struct gdb_bfd_data): New.
+	(gdb_bfd_cache): New global.
+	(struct gdb_bfd_cache_search): New.
+	(hash_bfd, eq_bfd, gdb_bfd_open): New functions.
+	(gdb_bfd_ref, gdb_bfd_unref): Use gdb_bfd_data.
+	* gdb_bfd.h (gdb_bfd_open): Declare.
+
+2012-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* utils.c (make_cleanup_bfd_unref): Rename from
 	make_cleanup_bfd_close.
 	* defs.h (make_cleanup_bfd_unref): Rename from

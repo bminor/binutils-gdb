@@ -27,6 +27,14 @@
 
 void gdb_bfd_stash_filename (struct bfd *abfd);
 
+/* Open a read-only (FOPEN_RB) BFD given arguments like bfd_fopen.
+   Returns NULL on error.  On success, returns a new reference to the
+   BFD, which must be freed with gdb_bfd_unref.  BFDs returned by this
+   call are shared among all callers opening the same file.  If FD is
+   not -1, then after this call it is owned by BFD.  */
+
+struct bfd *gdb_bfd_open (const char *name, const char *target, int fd);
+
 /* Acquire a new reference to ABFD.  Returns ABFD for convenience.
    It is fine for ABFD to be NULL; in this case the function does
    nothing and returns NULL.  */
