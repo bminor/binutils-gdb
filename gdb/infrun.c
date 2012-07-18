@@ -5518,7 +5518,6 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 static void
 insert_exception_resume_from_probe (struct thread_info *tp,
 				    const struct probe *probe,
-				    struct objfile *objfile,
 				    struct frame_info *frame)
 {
   struct value *arg_value;
@@ -5534,7 +5533,7 @@ insert_exception_resume_from_probe (struct thread_info *tp,
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
 			"infrun: exception resume at %s\n",
-			paddress (get_objfile_arch (objfile),
+			paddress (get_objfile_arch (probe->objfile),
 				  handler));
 
   bp = set_momentary_breakpoint_at_pc (get_frame_arch (frame),
@@ -5552,7 +5551,6 @@ check_exception_resume (struct execution_control_state *ecs,
 			struct frame_info *frame)
 {
   volatile struct gdb_exception e;
-  struct objfile *objfile;
   const struct probe *probe;
   struct symbol *func;
 
@@ -5560,11 +5558,10 @@ check_exception_resume (struct execution_control_state *ecs,
      SystemTap probe point.  If so, the probe has two arguments: the
      CFA and the HANDLER.  We ignore the CFA, extract the handler, and
      set a breakpoint there.  */
-  probe = find_probe_by_pc (get_frame_pc (frame), &objfile);
+  probe = find_probe_by_pc (get_frame_pc (frame));
   if (probe)
     {
-      insert_exception_resume_from_probe (ecs->event_thread, probe,
-					  objfile, frame);
+      insert_exception_resume_from_probe (ecs->event_thread, probe, frame);
       return;
     }
 

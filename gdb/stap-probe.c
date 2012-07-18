@@ -903,10 +903,10 @@ stap_parse_argument (const char **arg, struct type *atype,
    this information.  */
 
 static void
-stap_parse_probe_arguments (struct stap_probe *probe, struct objfile *objfile)
+stap_parse_probe_arguments (struct stap_probe *probe)
 {
   const char *cur;
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = get_objfile_arch (probe->p.objfile);
 
   gdb_assert (!probe->args_parsed);
   cur = probe->args_u.text;
@@ -991,15 +991,14 @@ stap_parse_probe_arguments (struct stap_probe *probe, struct objfile *objfile)
    argument string.  */
 
 static unsigned
-stap_get_probe_argument_count (struct probe *probe_generic,
-			       struct objfile *objfile)
+stap_get_probe_argument_count (struct probe *probe_generic)
 {
   struct stap_probe *probe = (struct stap_probe *) probe_generic;
 
   gdb_assert (probe_generic->pops == &stap_probe_ops);
 
   if (!probe->args_parsed)
-    stap_parse_probe_arguments (probe, objfile);
+    stap_parse_probe_arguments (probe);
 
   gdb_assert (probe->args_parsed);
   return VEC_length (stap_probe_arg_s, probe->args_u.vec);
@@ -1042,10 +1041,10 @@ stap_is_operator (const char *op)
 }
 
 static struct stap_probe_arg *
-stap_get_arg (struct stap_probe *probe, struct objfile *objfile, unsigned n)
+stap_get_arg (struct stap_probe *probe, unsigned n)
 {
   if (!probe->args_parsed)
-    stap_parse_probe_arguments (probe, objfile);
+    stap_parse_probe_arguments (probe);
 
   return VEC_index (stap_probe_arg_s, probe->args_u.vec, n);
 }
@@ -1054,8 +1053,7 @@ stap_get_arg (struct stap_probe *probe, struct objfile *objfile, unsigned n)
    corresponding to it.  Assertion is thrown if N does not exist.  */
 
 static struct value *
-stap_evaluate_probe_argument (struct probe *probe_generic,
-			      struct objfile *objfile, unsigned n)
+stap_evaluate_probe_argument (struct probe *probe_generic, unsigned n)
 {
   struct stap_probe *stap_probe = (struct stap_probe *) probe_generic;
   struct stap_probe_arg *arg;
@@ -1063,7 +1061,7 @@ stap_evaluate_probe_argument (struct probe *probe_generic,
 
   gdb_assert (probe_generic->pops == &stap_probe_ops);
 
-  arg = stap_get_arg (stap_probe, objfile, n);
+  arg = stap_get_arg (stap_probe, n);
   return evaluate_subexp_standard (arg->atype, arg->aexpr, &pos, EVAL_NORMAL);
 }
 
@@ -1071,9 +1069,8 @@ stap_evaluate_probe_argument (struct probe *probe_generic,
    Assertion is thrown if N does not exist.  */
 
 static void
-stap_compile_to_ax (struct probe *probe_generic, struct objfile *objfile,
-		    struct agent_expr *expr, struct axs_value *value,
-		    unsigned n)
+stap_compile_to_ax (struct probe *probe_generic, struct agent_expr *expr,
+		    struct axs_value *value, unsigned n)
 {
   struct stap_probe *stap_probe = (struct stap_probe *) probe_generic;
   struct stap_probe_arg *arg;
@@ -1081,7 +1078,7 @@ stap_compile_to_ax (struct probe *probe_generic, struct objfile *objfile,
 
   gdb_assert (probe_generic->pops == &stap_probe_ops);
 
-  arg = stap_get_arg (stap_probe, objfile, n);
+  arg = stap_get_arg (stap_probe, n);
 
   pc = arg->aexpr->elts;
   gen_expr (arg->aexpr, &pc, expr, value);
@@ -1124,20 +1121,24 @@ compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar,
   struct frame_info *frame = get_selected_frame (_("No frame selected"));
   CORE_ADDR pc = get_frame_pc (frame);
   int sel = (int) (uintptr_t) data;
-  struct objfile *objfile;
   struct probe *pc_probe;
+  const struct sym_probe_fns *pc_probe_fns;
   unsigned n_args;
 
   /* SEL == -1 means "_probe_argc".  */
   gdb_assert (sel >= -1);
 
-  pc_probe = find_probe_by_pc (pc, &objfile);
+  pc_probe = find_probe_by_pc (pc);
   if (pc_probe == NULL)
     error (_("No SystemTap probe at PC %s"), core_addr_to_string (pc));
 
-  n_args
-    = objfile->sf->sym_probe_fns->sym_get_probe_argument_count (objfile,
-								pc_probe);
+  gdb_assert (pc_probe->objfile != NULL);
+  gdb_assert (pc_probe->objfile->sf != NULL);
+  gdb_assert (pc_probe->objfile->sf->sym_probe_fns != NULL);
+
+  pc_probe_fns = pc_probe->objfile->sf->sym_probe_fns;
+
+  n_args = pc_probe_fns->sym_get_probe_argument_count (pc_probe);
   if (sel == -1)
     return value_from_longest (builtin_type (arch)->builtin_int, n_args);
 
@@ -1145,9 +1146,7 @@ compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar,
     error (_("Invalid probe argument %d -- probe has %u arguments available"),
 	   sel, n_args);
 
-  return objfile->sf->sym_probe_fns->sym_evaluate_probe_argument (objfile,
-								  pc_probe,
-								  sel);
+  return pc_probe_fns->sym_evaluate_probe_argument (pc_probe, sel);
 }
 
 /* This is called to compile one of the $_probe_arg* convenience
@@ -1159,20 +1158,25 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
 {
   CORE_ADDR pc = expr->scope;
   int sel = (int) (uintptr_t) data;
-  struct objfile *objfile;
   struct probe *pc_probe;
+  const struct sym_probe_fns *pc_probe_fns;
   int n_probes;
 
   /* SEL == -1 means "_probe_argc".  */
   gdb_assert (sel >= -1);
 
-  pc_probe = find_probe_by_pc (pc, &objfile);
+  pc_probe = find_probe_by_pc (pc);
   if (pc_probe == NULL)
     error (_("No SystemTap probe at PC %s"), core_addr_to_string (pc));
 
-  n_probes
-    = objfile->sf->sym_probe_fns->sym_get_probe_argument_count (objfile,
-								pc_probe);
+  gdb_assert (pc_probe->objfile != NULL);
+  gdb_assert (pc_probe->objfile->sf != NULL);
+  gdb_assert (pc_probe->objfile->sf->sym_probe_fns != NULL);
+
+  pc_probe_fns = pc_probe->objfile->sf->sym_probe_fns;
+
+  n_probes = pc_probe_fns->sym_get_probe_argument_count (pc_probe);
+
   if (sel == -1)
     {
       value->kind = axs_rvalue;
@@ -1186,8 +1190,7 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
     error (_("Invalid probe argument %d -- probe has %d arguments available"),
 	   sel, n_probes);
 
-  objfile->sf->sym_probe_fns->sym_compile_to_ax (objfile, pc_probe,
-						 expr, value, sel);
+  pc_probe_fns->sym_compile_to_ax (pc_probe, expr, value, sel);
 }
 
 
@@ -1297,6 +1300,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
 
   ret = obstack_alloc (&objfile->objfile_obstack, sizeof (*ret));
   ret->p.pops = &stap_probe_ops;
+  ret->p.objfile = objfile;
 
   /* Provider and the name of the probe.  */
   ret->p.provider = &el->data[3 * size];
@@ -1481,14 +1485,15 @@ stap_gen_info_probes_table_header (VEC (info_probe_column_s) **heads)
 
 static void
 stap_gen_info_probes_table_values (struct probe *probe_generic,
-				   struct objfile *objfile,
 				   VEC (const_char_ptr) **ret)
 {
   struct stap_probe *probe = (struct stap_probe *) probe_generic;
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch;
   const char *val = NULL;
 
   gdb_assert (probe_generic->pops == &stap_probe_ops);
+
+  gdbarch = get_objfile_arch (probe->p.objfile);
 
   if (probe->sem_addr)
     val = print_core_address (gdbarch, probe->sem_addr);

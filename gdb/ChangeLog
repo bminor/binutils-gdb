@@ -1,3 +1,37 @@
+2012-07-18  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* elfread.c (elf_get_probe_argument_count): Remove `objfile' argument.
+	(elf_compile_to_ax): Likewise.
+	* infrun.c (insert_exception_resume_from_probe): Likewise.
+	(check_exception_resume): Remove `objfile' variable.
+	* probe.c (find_probe_by_pc): Remove `objfile' argument.
+	(struct probe_and_objfile, probe_and_objfile_s): Delete.
+	(collect_probes): Adjust return value to `VEC (probe_p) *'.
+	(compare_entries): Rename to...
+	(compare_probes): ...this.  Adjust function to work with
+	`struct probe *'.  Rename variables `ea' and `eb' to `pa' and `pb'
+	respectively.
+	(gen_ui_out_table_header_info): Adjust `probes' argument to be
+	`VEC (probe_p) *'.
+	(print_ui_out_info): Adjust argument to be `struct probe *'.
+	(info_probes_for_ops): Adjust internal computations to use
+	`VEC (probe_p) *'.
+	(probe_safe_evaluate_at_pc): Refactor to not pass `objfile' anymore.
+	* probe.h (struct probe_ops) <get_probe_argument_count, compile_to_ax,
+	gen_info_probes_table_values>: Remove `objfile' argument.
+	(struct probe) <objfile>: New field.
+	(find_probe_by_pc): Remove `objfile' argument.
+	* stap-probe.c (stap_parse_probe_arguments): Likewise.
+	(stap_get_probe_argument_count): Likewise.
+	(stap_get_arg): Likewise.
+	(stap_evaluate_probe_argument): Likewise.
+	(stap_compile_to_ax): Likewise.
+	(compile_probe_arg): Refactor not to pass `objfile' anymore.
+	(handle_stap_probe): Fill `objfile' field from `struct probe'.
+	(stap_gen_info_probes_table_header): Remove `objfile' argument.
+	* symfile.h (struct sym_probe_fns) <sym_evaluate_probe_argument,
+	sym_compile_to_ax>: Likewise.
+
 2012-07-18  Terry Guo  <terry.guo@arm.com>
 
 	PR 14329

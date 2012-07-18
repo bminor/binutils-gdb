@@ -66,21 +66,18 @@ struct probe_ops
 
     /* Return the number of arguments of PROBE.  */
 
-    unsigned (*get_probe_argument_count) (struct probe *probe,
-					  struct objfile *objfile);
+    unsigned (*get_probe_argument_count) (struct probe *probe);
 
     /* Evaluate the Nth argument from the PROBE, returning a value
        corresponding to it.  The argument number is represented N.  */
 
     struct value *(*evaluate_probe_argument) (struct probe *probe,
-					      struct objfile *objfile,
 					      unsigned n);
 
     /* Compile the Nth argument of the PROBE to an agent expression.
        The argument number is represented by N.  */
 
-    void (*compile_to_ax) (struct probe *probe, struct objfile *objfile,
-			   struct agent_expr *aexpr,
+    void (*compile_to_ax) (struct probe *probe, struct agent_expr *aexpr,
 			   struct axs_value *axs_value, unsigned n);
 
     /* Set the semaphore associated with the PROBE.  This function only makes
@@ -108,8 +105,8 @@ struct probe_ops
     void (*gen_info_probes_table_header) (VEC (info_probe_column_s) **heads);
 
     /* Function that will fill VALUES with the values of the extra fields
-       to be printed for PROBE  and OBJFILE.  If the backend implements
-       the `gen_ui_out_table_header' method, then it should implement
+       to be printed for PROBE.  If the backend implements the
+       `gen_ui_out_table_header' method, then it should implement
        this method as well.  The backend should also guarantee that the
        order and the number of values in the vector is exactly the same
        as the order of the extra fields provided in the method
@@ -118,7 +115,6 @@ struct probe_ops
        position in the vector.  */
 
     void (*gen_info_probes_table_values) (struct probe *probe,
-					  struct objfile *objfile,
 					  VEC (const_char_ptr) **values);
   };
 
@@ -157,6 +153,11 @@ struct probe
     /* The operations associated with this probe.  */
     const struct probe_ops *pops;
 
+    /* The objfile which contains this probe.  Even if the probe is also
+       present in a separate debug objfile, this variable always points to
+       the non-separate debug objfile.  */
+    struct objfile *objfile;
+
     /* The name of the probe.  */
     const char *name;
 
@@ -181,11 +182,9 @@ extern struct symtabs_and_lines parse_probes (char **argptr,
 extern void register_probe_ops (struct probe *probe);
 
 /* Given a PC, find an associated probe with type PTYPE.  If a probe is
-   found, set *OBJFILE_OUT to the probe's objfile, and return the
-   probe.  If no probe is found, return NULL.  */
+   found, return it.  If no probe is found, return NULL.  */
 
-extern struct probe *find_probe_by_pc (CORE_ADDR pc,
-				       struct objfile **objfile_out);
+extern struct probe *find_probe_by_pc (CORE_ADDR pc);
 
 /* Search OBJFILE for a probe with the given PROVIDER, NAME and PTYPE.
    Return a VEC of all probes that were found.  If no matching probe

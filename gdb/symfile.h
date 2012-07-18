@@ -320,8 +320,7 @@ struct sym_probe_fns
      have come from a call to this objfile's sym_get_probes method.
      If you provide an implementation of sym_get_probes, you must
      implement this method as well.  */
-  unsigned (*sym_get_probe_argument_count) (struct objfile *objfile,
-					    struct probe *probe);
+  unsigned (*sym_get_probe_argument_count) (struct probe *probe);
 
   /* Evaluate the Nth argument available to PROBE.  PROBE will have
      come from a call to this objfile's sym_get_probes method.  N will
@@ -330,8 +329,7 @@ struct sym_probe_fns
      PC will match the address of the probe.  If you provide an
      implementation of sym_get_probes, you must implement this method
      as well.  */
-  struct value *(*sym_evaluate_probe_argument) (struct objfile *objfile,
-						struct probe *probe,
+  struct value *(*sym_evaluate_probe_argument) (struct probe *probe,
 						unsigned n);
 
   /* Compile the Nth probe argument to an agent expression.  PROBE
@@ -339,8 +337,7 @@ struct sym_probe_fns
      method.  N will be between 0 and the number of arguments
      available to this probe.  EXPR and VALUE are the agent expression
      that is being updated.  */
-  void (*sym_compile_to_ax) (struct objfile *objfile,
-			     struct probe *probe,
+  void (*sym_compile_to_ax) (struct probe *probe,
 			     struct agent_expr *expr,
 			     struct axs_value *value,
 			     unsigned n);

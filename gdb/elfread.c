@@ -1635,33 +1635,29 @@ elf_get_probes (struct objfile *objfile)
    symfile.h.  */
 
 static unsigned
-elf_get_probe_argument_count (struct objfile *objfile,
-			      struct probe *probe)
+elf_get_probe_argument_count (struct probe *probe)
 {
-  return probe->pops->get_probe_argument_count (probe, objfile);
+  return probe->pops->get_probe_argument_count (probe);
 }
 
 /* Implementation of `sym_evaluate_probe_argument', as documented in
    symfile.h.  */
 
 static struct value *
-elf_evaluate_probe_argument (struct objfile *objfile,
-			     struct probe *probe,
-			     unsigned n)
+elf_evaluate_probe_argument (struct probe *probe, unsigned n)
 {
-  return probe->pops->evaluate_probe_argument (probe, objfile, n);
+  return probe->pops->evaluate_probe_argument (probe, n);
 }
 
 /* Implementation of `sym_compile_to_ax', as documented in symfile.h.  */
 
 static void
-elf_compile_to_ax (struct objfile *objfile,
-		   struct probe *probe,
+elf_compile_to_ax (struct probe *probe,
 		   struct agent_expr *expr,
 		   struct axs_value *value,
 		   unsigned n)
 {
-  probe->pops->compile_to_ax (probe, objfile, expr, value, n);
+  probe->pops->compile_to_ax (probe, expr, value, n);
 }
 
 /* Implementation of `sym_relocate_probe', as documented in symfile.h.  */
