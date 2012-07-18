@@ -1,3 +1,7 @@
+2012-07-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in2.h: Regenerated.
+
 2012-07-18  Nicolàs Alejandro Di Risio <sheeva@tiscali.it>
 
 	PR binutils/14335

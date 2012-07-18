@@ -4293,6 +4293,8 @@ in .byte hlo8(symbol)  */
   BFD_RELOC_390_GOT20,
   BFD_RELOC_390_GOTPLT20,
   BFD_RELOC_390_TLS_GOTIE20,
+
+/* STT_GNU_IFUNC relocation.  */
   BFD_RELOC_390_IRELATIVE,
 
 /* Score relocations
