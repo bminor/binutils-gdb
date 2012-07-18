@@ -1,5 +1,16 @@
 2012-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (struct dwz_file) <gdb_index>: New field.
+	(locate_dwz_sections): Recognize .gdb_index.
+	(create_cus_from_index_list): New function.
+	(create_cus_from_index): Use it.  Handle .dwz data.
+	(read_index_from_section): New function, extracted from
+	dwarf2_read_index.
+	(dwarf2_read_index): Use it.  Read .gdb_index from dwz file,
+	if needed.
+
+2012-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (struct dwarf2_per_objfile) <dwz_file>: New field.
 	(struct dwarf2_per_cu_data) <length>: No longer bitfield.
 	<is_dwz>: New field.

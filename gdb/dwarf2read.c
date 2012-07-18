@@ -716,6 +716,7 @@ struct dwz_file
   struct dwarf2_section_info str;
   struct dwarf2_section_info line;
   struct dwarf2_section_info macro;
+  struct dwarf2_section_info gdb_index;
 
   /* The dwz's BFD.  */
   bfd *dwz_bfd;
@@ -1953,6 +1954,11 @@ locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
       dwz_file->macro.asection = sectp;
       dwz_file->macro.size = bfd_get_section_size (sectp);
     }
+  else if (section_is_p (sectp->name, &dwarf2_elf_names.gdb_index))
+    {
+      dwz_file->gdb_index.asection = sectp;
+      dwz_file->gdb_index.size = bfd_get_section_size (sectp);
+    }
 }
 
 /* Open the separate '.dwz' debug file, if needed.  Error if the file
@@ -2289,23 +2295,19 @@ extract_cu_value (const char *bytes, ULONGEST *result)
   return 1;
 }
 
-/* Read the CU list from the mapped index, and use it to create all
-   the CU objects for this objfile.  Return 0 if something went wrong,
-   1 if everything went ok.  */
+/* A helper for create_cus_from_index that handles a given list of
+   CUs.  */
 
 static int
-create_cus_from_index (struct objfile *objfile, const gdb_byte *cu_list,
-		       offset_type cu_list_elements)
+create_cus_from_index_list (struct objfile *objfile,
+			    const gdb_byte *cu_list, offset_type n_elements,
+			    struct dwarf2_section_info *section,
+			    int is_dwz,
+			    int base_offset)
 {
   offset_type i;
 
-  dwarf2_per_objfile->n_comp_units = cu_list_elements / 2;
-  dwarf2_per_objfile->all_comp_units
-    = obstack_alloc (&objfile->objfile_obstack,
-		     dwarf2_per_objfile->n_comp_units
-		     * sizeof (struct dwarf2_per_cu_data *));
-
-  for (i = 0; i < cu_list_elements; i += 2)
+  for (i = 0; i < n_elements; i += 2)
     {
       struct dwarf2_per_cu_data *the_cu;
       ULONGEST offset, length;
@@ -2320,13 +2322,43 @@ create_cus_from_index (struct objfile *objfile, const gdb_byte *cu_list,
       the_cu->offset.sect_off = offset;
       the_cu->length = length;
       the_cu->objfile = objfile;
-      the_cu->info_or_types_section = &dwarf2_per_objfile->info;
+      the_cu->info_or_types_section = section;
       the_cu->v.quick = OBSTACK_ZALLOC (&objfile->objfile_obstack,
 					struct dwarf2_per_cu_quick_data);
-      dwarf2_per_objfile->all_comp_units[i / 2] = the_cu;
+      the_cu->is_dwz = is_dwz;
+      dwarf2_per_objfile->all_comp_units[base_offset + i / 2] = the_cu;
     }
 
   return 1;
+}
+
+/* Read the CU list from the mapped index, and use it to create all
+   the CU objects for this objfile.  Return 0 if something went wrong,
+   1 if everything went ok.  */
+
+static int
+create_cus_from_index (struct objfile *objfile,
+		       const gdb_byte *cu_list, offset_type cu_list_elements,
+		       const gdb_byte *dwz_list, offset_type dwz_elements)
+{
+  struct dwz_file *dwz;
+
+  dwarf2_per_objfile->n_comp_units = (cu_list_elements + dwz_elements) / 2;
+  dwarf2_per_objfile->all_comp_units
+    = obstack_alloc (&objfile->objfile_obstack,
+		     dwarf2_per_objfile->n_comp_units
+		     * sizeof (struct dwarf2_per_cu_data *));
+
+  if (!create_cus_from_index_list (objfile, cu_list, cu_list_elements,
+				   &dwarf2_per_objfile->info, 0, 0))
+    return 0;
+
+  if (dwz_elements == 0)
+    return 1;
+
+  dwz = dwarf2_get_dwz_file ();
+  return create_cus_from_index_list (objfile, dwz_list, dwz_elements,
+				     &dwz->info, 1, cu_list_elements / 2);
 }
 
 /* Create the signatured type hash table from the index.  */
@@ -2518,33 +2550,44 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
     }
 }
 
-/* Read the index file.  If everything went ok, initialize the "quick"
-   elements of all the CUs and return 1.  Otherwise, return 0.  */
+/* A helper function that reads the .gdb_index from SECTION and fills
+   in MAP.  FILENAME is the name of the file containing the section;
+   it is used for error reporting.  DEPRECATED_OK is nonzero if it is
+   ok to use deprecated sections.
+
+   CU_LIST, CU_LIST_ELEMENTS, TYPES_LIST, and TYPES_LIST_ELEMENTS are
+   out parameters that are filled in with information about the CU and
+   TU lists in the section.
+
+   Returns 1 if all went well, 0 otherwise.  */
 
 static int
-dwarf2_read_index (struct objfile *objfile)
+read_index_from_section (struct objfile *objfile,
+			 const char *filename,
+			 int deprecated_ok,
+			 struct dwarf2_section_info *section,
+			 struct mapped_index *map,
+			 const gdb_byte **cu_list,
+			 offset_type *cu_list_elements,
+			 const gdb_byte **types_list,
+			 offset_type *types_list_elements)
 {
   char *addr;
-  struct mapped_index *map;
+  offset_type version;
   offset_type *metadata;
-  const gdb_byte *cu_list;
-  const gdb_byte *types_list = NULL;
-  offset_type version, cu_list_elements;
-  offset_type types_list_elements = 0;
   int i;
 
-  if (dwarf2_section_empty_p (&dwarf2_per_objfile->gdb_index))
+  if (dwarf2_section_empty_p (section))
     return 0;
 
   /* Older elfutils strip versions could keep the section in the main
      executable while splitting it for the separate debug info file.  */
-  if ((bfd_get_file_flags (dwarf2_per_objfile->gdb_index.asection)
-       & SEC_HAS_CONTENTS) == 0)
+  if ((bfd_get_file_flags (section->asection) & SEC_HAS_CONTENTS) == 0)
     return 0;
 
-  dwarf2_read_section (objfile, &dwarf2_per_objfile->gdb_index);
+  dwarf2_read_section (objfile, section);
 
-  addr = dwarf2_per_objfile->gdb_index.buffer;
+  addr = section->buffer;
   /* Version check.  */
   version = MAYBE_SWAP (*(offset_type *) addr);
   /* Versions earlier than 3 emitted every copy of a psymbol.  This
@@ -2557,7 +2600,7 @@ dwarf2_read_index (struct objfile *objfile)
       if (!warning_printed)
 	{
 	  warning (_("Skipping obsolete .gdb_index section in %s."),
-		   objfile->name);
+		   filename);
 	  warning_printed = 1;
 	}
       return 0;
@@ -2570,14 +2613,14 @@ dwarf2_read_index (struct objfile *objfile)
      set breakpoints on inlined functions by name, so we ignore these
      indices unless the --use-deprecated-index-sections command line
      option was supplied.  */
-  if (version < 6 && !use_deprecated_index_sections)
+  if (version < 6 && !deprecated_ok)
     {
       static int warning_printed = 0;
       if (!warning_printed)
 	{
 	  warning (_("Skipping deprecated .gdb_index section in %s, pass "
 		     "--use-deprecated-index-sections to use them anyway"),
-		   objfile->name);
+		   filename);
 	  warning_printed = 1;
 	}
       return 0;
@@ -2587,22 +2630,21 @@ dwarf2_read_index (struct objfile *objfile)
   if (version > 7)
     return 0;
 
-  map = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct mapped_index);
   map->version = version;
-  map->total_size = dwarf2_per_objfile->gdb_index.size;
+  map->total_size = section->size;
 
   metadata = (offset_type *) (addr + sizeof (offset_type));
 
   i = 0;
-  cu_list = addr + MAYBE_SWAP (metadata[i]);
-  cu_list_elements = ((MAYBE_SWAP (metadata[i + 1]) - MAYBE_SWAP (metadata[i]))
-		      / 8);
+  *cu_list = addr + MAYBE_SWAP (metadata[i]);
+  *cu_list_elements = ((MAYBE_SWAP (metadata[i + 1]) - MAYBE_SWAP (metadata[i]))
+		       / 8);
   ++i;
 
-  types_list = addr + MAYBE_SWAP (metadata[i]);
-  types_list_elements = ((MAYBE_SWAP (metadata[i + 1])
-			  - MAYBE_SWAP (metadata[i]))
-			 / 8);
+  *types_list = addr + MAYBE_SWAP (metadata[i]);
+  *types_list_elements = ((MAYBE_SWAP (metadata[i + 1])
+			   - MAYBE_SWAP (metadata[i]))
+			  / 8);
   ++i;
 
   map->address_table = addr + MAYBE_SWAP (metadata[i]);
@@ -2618,11 +2660,55 @@ dwarf2_read_index (struct objfile *objfile)
 
   map->constant_pool = addr + MAYBE_SWAP (metadata[i]);
 
-  /* Don't use the index if it's empty.  */
-  if (map->symbol_table_slots == 0)
+  return 1;
+}
+
+
+/* Read the index file.  If everything went ok, initialize the "quick"
+   elements of all the CUs and return 1.  Otherwise, return 0.  */
+
+static int
+dwarf2_read_index (struct objfile *objfile)
+{
+  struct mapped_index local_map, *map;
+  const gdb_byte *cu_list, *types_list, *dwz_list = NULL;
+  offset_type cu_list_elements, types_list_elements, dwz_list_elements = 0;
+
+  if (!read_index_from_section (objfile, objfile->name,
+				use_deprecated_index_sections,
+				&dwarf2_per_objfile->gdb_index, &local_map,
+				&cu_list, &cu_list_elements,
+				&types_list, &types_list_elements))
     return 0;
 
-  if (!create_cus_from_index (objfile, cu_list, cu_list_elements))
+  /* Don't use the index if it's empty.  */
+  if (local_map.symbol_table_slots == 0)
+    return 0;
+
+  /* If there is a .dwz file, read it so we can get its CU list as
+     well.  */
+  if (bfd_get_section_by_name (objfile->obfd, ".gnu_debugaltlink") != NULL)
+    {
+      struct dwz_file *dwz = dwarf2_get_dwz_file ();
+      struct mapped_index dwz_map;
+      const gdb_byte *dwz_types_ignore;
+      offset_type dwz_types_elements_ignore;
+
+      if (!read_index_from_section (objfile, bfd_get_filename (dwz->dwz_bfd),
+				    1,
+				    &dwz->gdb_index, &dwz_map,
+				    &dwz_list, &dwz_list_elements,
+				    &dwz_types_ignore,
+				    &dwz_types_elements_ignore))
+	{
+	  warning (_("could not read '.gdb_index' section from %s; skipping"),
+		   bfd_get_filename (dwz->dwz_bfd));
+	  return 0;
+	}
+    }
+
+  if (!create_cus_from_index (objfile, cu_list, cu_list_elements,
+			      dwz_list, dwz_list_elements))
     return 0;
 
   if (types_list_elements)
@@ -2643,7 +2729,10 @@ dwarf2_read_index (struct objfile *objfile)
 	return 0;
     }
 
-  create_addrmap_from_index (objfile, map);
+  create_addrmap_from_index (objfile, &local_map);
+
+  map = obstack_alloc (&objfile->objfile_obstack, sizeof (struct mapped_index));
+  *map = local_map;
 
   dwarf2_per_objfile->index_table = map;
   dwarf2_per_objfile->using_index = 1;
