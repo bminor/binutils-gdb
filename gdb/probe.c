@@ -637,7 +637,7 @@ probe_safe_evaluate_at_pc (struct frame_info *frame, unsigned n)
 {
   struct probe *probe;
   const struct sym_probe_fns *probe_fns;
-  unsigned n_probes;
+  unsigned n_args;
 
   probe = find_probe_by_pc (get_frame_pc (frame));
   if (!probe)
@@ -648,9 +648,9 @@ probe_safe_evaluate_at_pc (struct frame_info *frame, unsigned n)
   gdb_assert (probe->objfile->sf->sym_probe_fns != NULL);
 
   probe_fns = probe->objfile->sf->sym_probe_fns;
-  n_probes = probe_fns->sym_get_probe_argument_count (probe);
+  n_args = probe_fns->sym_get_probe_argument_count (probe);
 
-  if (n >= n_probes)
+  if (n >= n_args)
     return NULL;
 
   return probe_fns->sym_evaluate_probe_argument (probe, n);

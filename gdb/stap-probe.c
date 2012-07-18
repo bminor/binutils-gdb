@@ -1160,7 +1160,7 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
   int sel = (int) (uintptr_t) data;
   struct probe *pc_probe;
   const struct sym_probe_fns *pc_probe_fns;
-  int n_probes;
+  int n_args;
 
   /* SEL == -1 means "_probe_argc".  */
   gdb_assert (sel >= -1);
@@ -1175,20 +1175,20 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
 
   pc_probe_fns = pc_probe->objfile->sf->sym_probe_fns;
 
-  n_probes = pc_probe_fns->sym_get_probe_argument_count (pc_probe);
+  n_args = pc_probe_fns->sym_get_probe_argument_count (pc_probe);
 
   if (sel == -1)
     {
       value->kind = axs_rvalue;
       value->type = builtin_type (expr->gdbarch)->builtin_int;
-      ax_const_l (expr, n_probes);
+      ax_const_l (expr, n_args);
       return;
     }
 
   gdb_assert (sel >= 0);
-  if (sel >= n_probes)
+  if (sel >= n_args)
     error (_("Invalid probe argument %d -- probe has %d arguments available"),
-	   sel, n_probes);
+	   sel, n_args);
 
   pc_probe_fns->sym_compile_to_ax (pc_probe, expr, value, sel);
 }

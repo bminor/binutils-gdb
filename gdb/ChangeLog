@@ -1,5 +1,10 @@
 2012-07-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* probe.c (probe_safe_evaluate_at_pc): Rename variable `n_probes'.
+	* stap-probe.c (compile_probe_arg): Likewise.
+
+2012-07-18  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* elfread.c (elf_get_probe_argument_count): Remove `objfile' argument.
 	(elf_compile_to_ax): Likewise.
 	* infrun.c (insert_exception_resume_from_probe): Likewise.
