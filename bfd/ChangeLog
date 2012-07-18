@@ -1,3 +1,8 @@
+2012-07-18  Nicolàs Alejandro Di Risio <sheeva@tiscali.it>
+
+	PR binutils/14335
+	* section.c: Fix a typo in comments.
+
 2012-07-13  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* elf64-s390.c: Include elf-s390-common.c.

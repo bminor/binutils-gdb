@@ -1311,7 +1311,7 @@ DESCRIPTION
 	This is the preferred method for iterating over sections; an
 	alternative would be to use a loop:
 
-|	   section *p;
+|	   asection *p;
 |	   for (p = abfd->sections; p != NULL; p = p->next)
 |	      func (abfd, p, ...)
 
