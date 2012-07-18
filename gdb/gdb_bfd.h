@@ -1,6 +1,6 @@
 /* Definitions for BFD wrappers used by GDB.
 
-   Copyright (C) 2011
+   Copyright (C) 2011, 2012
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -45,5 +45,17 @@ struct bfd *gdb_bfd_ref (struct bfd *abfd);
    will be freed.  If ABFD is NULL, this function does nothing.  */
 
 void gdb_bfd_unref (struct bfd *abfd);
+
+/* Try to read or map the contents of the section SECT.  If
+   successful, the section data is returned and *SIZE is set to the
+   size of the section data; this may not be the same as the size
+   according to bfd_get_section_size if the section was compressed.
+   The returned section data is associated with the BFD and will be
+   destroyed when the BFD is destroyed.  There is no other way to free
+   it; for temporary uses of section data, see
+   bfd_malloc_and_get_section.  SECT may not have relocations.  This
+   function will throw on error.  */
+
+const gdb_byte *gdb_bfd_map_section (asection *section, bfd_size_type *size);
 
 #endif /* GDB_BFD_H */

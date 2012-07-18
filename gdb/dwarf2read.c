@@ -70,15 +70,6 @@
 #include "gdb_string.h"
 #include "gdb_assert.h"
 #include <sys/types.h>
-#ifdef HAVE_ZLIB_H
-#include <zlib.h>
-#endif
-#ifdef HAVE_MMAP
-#include <sys/mman.h>
-#ifndef MAP_FAILED
-#define MAP_FAILED ((void *) -1)
-#endif
-#endif
 
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
@@ -96,8 +87,6 @@ static int check_physname = 0;
 /* When non-zero, do not reject deprecated .gdb_index sections.  */
 int use_deprecated_index_sections = 0;
 
-static int pagesize;
-
 /* When set, the file that we're processing is known to have debugging
    info for C++ namespaces.  GCC 3.3.x did not produce this information,
    but later versions do.  */
@@ -111,10 +100,6 @@ struct dwarf2_section_info
   asection *asection;
   gdb_byte *buffer;
   bfd_size_type size;
-  /* Not NULL if the section was actually mmapped.  */
-  void *map_addr;
-  /* Page aligned size of mmapped area.  */
-  bfd_size_type map_len;
   /* True if we have tried to read this section.  */
   int readin;
 };
@@ -1609,8 +1594,6 @@ static struct dwo_unit *lookup_dwo_type_unit
 
 static void free_dwo_file_cleanup (void *);
 
-static void munmap_section_buffer (struct dwarf2_section_info *);
-
 static void process_cu_includes (void);
 
 #if WORDS_BIGENDIAN
@@ -1780,85 +1763,6 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
     dwarf2_per_objfile->has_section_at_zero = 1;
 }
 
-/* Decompress a section that was compressed using zlib.  Store the
-   decompressed buffer, and its size, in OUTBUF and OUTSIZE.  */
-
-static void
-zlib_decompress_section (struct objfile *objfile, asection *sectp,
-                         gdb_byte **outbuf, bfd_size_type *outsize)
-{
-  bfd *abfd = sectp->owner;
-#ifndef HAVE_ZLIB_H
-  error (_("Support for zlib-compressed DWARF data (from '%s') "
-           "is disabled in this copy of GDB"),
-         bfd_get_filename (abfd));
-#else
-  bfd_size_type compressed_size = bfd_get_section_size (sectp);
-  gdb_byte *compressed_buffer = xmalloc (compressed_size);
-  struct cleanup *cleanup = make_cleanup (xfree, compressed_buffer);
-  bfd_size_type uncompressed_size;
-  gdb_byte *uncompressed_buffer;
-  z_stream strm;
-  int rc;
-  int header_size = 12;
-
-  if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
-      || bfd_bread (compressed_buffer,
-		    compressed_size, abfd) != compressed_size)
-    error (_("Dwarf Error: Can't read DWARF data from '%s'"),
-           bfd_get_filename (abfd));
-
-  /* Read the zlib header.  In this case, it should be "ZLIB" followed
-     by the uncompressed section size, 8 bytes in big-endian order.  */
-  if (compressed_size < header_size
-      || strncmp (compressed_buffer, "ZLIB", 4) != 0)
-    error (_("Dwarf Error: Corrupt DWARF ZLIB header from '%s'"),
-           bfd_get_filename (abfd));
-  uncompressed_size = compressed_buffer[4]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[5]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[6]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[7]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[8]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[9]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[10]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[11];
-
-  /* It is possible the section consists of several compressed
-     buffers concatenated together, so we uncompress in a loop.  */
-  strm.zalloc = NULL;
-  strm.zfree = NULL;
-  strm.opaque = NULL;
-  strm.avail_in = compressed_size - header_size;
-  strm.next_in = (Bytef*) compressed_buffer + header_size;
-  strm.avail_out = uncompressed_size;
-  uncompressed_buffer = obstack_alloc (&objfile->objfile_obstack,
-                                       uncompressed_size);
-  rc = inflateInit (&strm);
-  while (strm.avail_in > 0)
-    {
-      if (rc != Z_OK)
-        error (_("Dwarf Error: setting up DWARF uncompression in '%s': %d"),
-               bfd_get_filename (abfd), rc);
-      strm.next_out = ((Bytef*) uncompressed_buffer
-                       + (uncompressed_size - strm.avail_out));
-      rc = inflate (&strm, Z_FINISH);
-      if (rc != Z_STREAM_END)
-        error (_("Dwarf Error: zlib error uncompressing from '%s': %d"),
-               bfd_get_filename (abfd), rc);
-      rc = inflateReset (&strm);
-    }
-  rc = inflateEnd (&strm);
-  if (rc != Z_OK
-      || strm.avail_out != 0)
-    error (_("Dwarf Error: concluding DWARF uncompression in '%s': %d"),
-           bfd_get_filename (abfd), rc);
-
-  do_cleanups (cleanup);
-  *outbuf = uncompressed_buffer;
-  *outsize = uncompressed_size;
-#endif
-}
-
 /* A helper function that decides whether a section is empty,
    or not present.  */
 
@@ -1885,56 +1789,27 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
   if (info->readin)
     return;
   info->buffer = NULL;
-  info->map_addr = NULL;
   info->readin = 1;
 
   if (dwarf2_section_empty_p (info))
     return;
 
-  /* Note that ABFD may not be from OBJFILE, e.g. a DWO section.  */
   abfd = sectp->owner;
 
-  /* Check if the file has a 4-byte header indicating compression.  */
-  if (info->size > sizeof (header)
-      && bfd_seek (abfd, sectp->filepos, SEEK_SET) == 0
-      && bfd_bread (header, sizeof (header), abfd) == sizeof (header))
+  /* If the section has relocations, we must read it ourselves.
+     Otherwise we attach it to the BFD.  */
+  if ((sectp->flags & SEC_RELOC) == 0)
     {
-      /* Upon decompression, update the buffer and its size.  */
-      if (strncmp (header, "ZLIB", sizeof (header)) == 0)
-        {
-          zlib_decompress_section (objfile, sectp, &info->buffer,
-				   &info->size);
-          return;
-        }
+      const gdb_byte *bytes = gdb_bfd_map_section (sectp, &info->size);
+
+      /* We have to cast away const here for historical reasons.
+	 Fixing dwarf2read to be const-correct would be quite nice.  */
+      info->buffer = (gdb_byte *) bytes;
+      return;
     }
 
-#ifdef HAVE_MMAP
-  if (pagesize == 0)
-    pagesize = getpagesize ();
-
-  /* Only try to mmap sections which are large enough: we don't want to
-     waste space due to fragmentation.  Also, only try mmap for sections
-     without relocations.  */
-
-  if (info->size > 4 * pagesize && (sectp->flags & SEC_RELOC) == 0)
-    {
-      info->buffer = bfd_mmap (abfd, 0, info->size, PROT_READ,
-                         MAP_PRIVATE, sectp->filepos,
-                         &info->map_addr, &info->map_len);
-
-      if ((caddr_t)info->buffer != MAP_FAILED)
-	{
-#if HAVE_POSIX_MADVISE
-	  posix_madvise (info->map_addr, info->map_len, POSIX_MADV_WILLNEED);
-#endif
-	  return;
-	}
-    }
-#endif
-
-  /* If we get here, we are a normal, not-compressed section.  */
-  info->buffer = buf
-    = obstack_alloc (&objfile->objfile_obstack, info->size);
+  buf = obstack_alloc (&objfile->objfile_obstack, info->size);
+  info->buffer = buf;
 
   /* When debugging .o files, we may need to apply relocations; see
      http://sourceware.org/ml/gdb-patches/2002-04/msg00136.html .
@@ -8323,19 +8198,6 @@ free_dwo_file (struct dwo_file *dwo_file, struct objfile *objfile)
 
   gdb_assert (dwo_file->dwo_bfd != objfile->obfd);
   gdb_bfd_unref (dwo_file->dwo_bfd);
-
-  munmap_section_buffer (&dwo_file->sections.abbrev);
-  munmap_section_buffer (&dwo_file->sections.info);
-  munmap_section_buffer (&dwo_file->sections.line);
-  munmap_section_buffer (&dwo_file->sections.loc);
-  munmap_section_buffer (&dwo_file->sections.str);
-  munmap_section_buffer (&dwo_file->sections.str_offsets);
-
-  for (ix = 0;
-       VEC_iterate (dwarf2_section_info_def, dwo_file->sections.types,
-		    ix, section);
-       ++ix)
-    munmap_section_buffer (section);
 
   VEC_free (dwarf2_section_info_def, dwo_file->sections.types);
 }
@@ -18338,53 +18200,13 @@ show_dwarf2_cmd (char *args, int from_tty)
   cmd_show_list (show_dwarf2_cmdlist, from_tty, "");
 }
 
-/* If section described by INFO was mmapped, munmap it now.  */
-
-static void
-munmap_section_buffer (struct dwarf2_section_info *info)
-{
-  if (info->map_addr != NULL)
-    {
-#ifdef HAVE_MMAP
-      int res;
-
-      res = munmap (info->map_addr, info->map_len);
-      gdb_assert (res == 0);
-#else
-      /* Without HAVE_MMAP, we should never be here to begin with.  */
-      gdb_assert_not_reached ("no mmap support");
-#endif
-    }
-}
-
-/* munmap debug sections for OBJFILE, if necessary.  */
+/* Free data associated with OBJFILE, if necessary.  */
 
 static void
 dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 {
   struct dwarf2_per_objfile *data = d;
   int ix;
-  struct dwarf2_section_info *section;
-
-  /* This is sorted according to the order they're defined in to make it easier
-     to keep in sync.  */
-  munmap_section_buffer (&data->info);
-  munmap_section_buffer (&data->abbrev);
-  munmap_section_buffer (&data->line);
-  munmap_section_buffer (&data->loc);
-  munmap_section_buffer (&data->macinfo);
-  munmap_section_buffer (&data->macro);
-  munmap_section_buffer (&data->str);
-  munmap_section_buffer (&data->ranges);
-  munmap_section_buffer (&data->addr);
-  munmap_section_buffer (&data->frame);
-  munmap_section_buffer (&data->eh_frame);
-  munmap_section_buffer (&data->gdb_index);
-
-  for (ix = 0;
-       VEC_iterate (dwarf2_section_info_def, data->types, ix, section);
-       ++ix)
-    munmap_section_buffer (section);
 
   for (ix = 0; ix < dwarf2_per_objfile->n_comp_units; ++ix)
     VEC_free (dwarf2_per_cu_ptr,

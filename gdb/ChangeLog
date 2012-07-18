@@ -1,5 +1,23 @@
 2012-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c: Don't include zlib.h or sys/mman.h.
+	(pagesize): Remove.
+	(struct dwarf2_section_info) <map_addr, map_len>: Remove.
+	(zlib_decompress_section): Remove.
+	(dwarf2_read_section): Use gdb_bfd_map_section.
+	(munmap_section_buffer): Remove.
+	(free_dwo_file, dwarf2_per_objfile_free): Don't use
+	munmap_section_buffer.
+	* gdb_bfd.c: Include zlib.h, sys/mman.h.
+	(struct gdb_bfd_section_data): New.
+	(free_one_bfd_section): New function.
+	(gdb_bfd_close_or_warn): Use free_one_bfd_section.
+	(get_section_descriptor, zlib_decompress_section)
+	(gdb_bfd_map_section): New functions.
+	* gdb_bfd.h (gdb_bfd_map_section): Declare.
+
+2012-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (try_open_dwo_file): use gdb_bfd_open.
 
 2012-07-18  Tom Tromey  <tromey@redhat.com>
