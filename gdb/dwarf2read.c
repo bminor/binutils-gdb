@@ -233,6 +233,10 @@ struct dwarf2_per_objfile
      This is NULL if the table hasn't been allocated yet.  */
   htab_t dwo_files;
 
+  /* The shared '.dwz' file, if one exists.  This is used when the
+     original data was compressed using 'dwz -m'.  */
+  struct dwz_file *dwz_file;
+
   /* A flag indicating wether this objfile has a section loaded at a
      VMA of 0.  */
   int has_section_at_zero;
@@ -491,15 +495,13 @@ struct dwarf2_cu
 
 struct dwarf2_per_cu_data
 {
-  /* The start offset and length of this compilation unit.  2**29-1
-     bytes should suffice to store the length of any compilation unit
-     - if it doesn't, GDB will fall over anyway.
+  /* The start offset and length of this compilation unit.
      NOTE: Unlike comp_unit_head.length, this length includes
      initial_length_size.
      If the DIE refers to a DWO file, this is always of the original die,
      not the DWO file.  */
   sect_offset offset;
-  unsigned int length : 29;
+  unsigned int length;
 
   /* Flag indicating this compilation unit will be read in before
      any of the current compilation units are processed.  */
@@ -513,6 +515,9 @@ struct dwarf2_per_cu_data
 
   /* Non-zero if this CU is from .debug_types.  */
   unsigned int is_debug_types : 1;
+
+  /* Non-zero if this CU is from the .dwz file.  */
+  unsigned int is_dwz : 1;
 
   /* The section this CU/TU lives in.
      If the DIE refers to a DWO file, this is always the original die,
@@ -701,6 +706,21 @@ struct dwo_file
   htab_t tus;
 };
 
+/* This represents a '.dwz' file.  */
+
+struct dwz_file
+{
+  /* A dwz file can only contain a few sections.  */
+  struct dwarf2_section_info abbrev;
+  struct dwarf2_section_info info;
+  struct dwarf2_section_info str;
+  struct dwarf2_section_info line;
+  struct dwarf2_section_info macro;
+
+  /* The dwz's BFD.  */
+  bfd *dwz_bfd;
+};
+
 /* Struct used to pass misc. parameters to read_die_and_children, et
    al.  which are used for both .debug_info and .debug_types dies.
    All parameters here are unchanging for the life of the call.  This
@@ -813,6 +833,12 @@ struct partial_die_info
 
     /* Flag set if fixup_partial_die has been called on this die.  */
     unsigned int fixup_called : 1;
+
+    /* Flag set if DW_TAG_imported_unit uses DW_FORM_GNU_ref_alt.  */
+    unsigned int is_dwz : 1;
+
+    /* Flag set if spec_offset uses DW_FORM_GNU_ref_alt.  */
+    unsigned int spec_is_dwz : 1;
 
     /* The name of this DIE.  Normally the value of DW_AT_name, but
        sometimes a default name for unnamed DIEs.  */
@@ -1199,7 +1225,7 @@ static gdb_byte *read_partial_die (const struct die_reader_specs *,
 				   unsigned int,
 				   gdb_byte *);
 
-static struct partial_die_info *find_partial_die (sect_offset,
+static struct partial_die_info *find_partial_die (sect_offset, int,
 						  struct dwarf2_cu *);
 
 static void fixup_partial_die (struct partial_die_info *,
@@ -1243,6 +1269,8 @@ static char *read_direct_string (bfd *, gdb_byte *, unsigned int *);
 static char *read_indirect_string (bfd *, gdb_byte *,
                                    const struct comp_unit_head *,
                                    unsigned int *);
+
+static char *read_indirect_string_from_dwz (struct dwz_file *, LONGEST);
 
 static ULONGEST read_unsigned_leb128 (bfd *, gdb_byte *, unsigned int *);
 
@@ -1510,7 +1538,7 @@ static hashval_t partial_die_hash (const void *item);
 static int partial_die_eq (const void *item_lhs, const void *item_rhs);
 
 static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
-  (sect_offset offset, struct objfile *objfile);
+  (sect_offset offset, unsigned int offset_in_dwz, struct objfile *objfile);
 
 static void init_one_comp_unit (struct dwarf2_cu *cu,
 				struct dwarf2_per_cu_data *per_cu);
@@ -1572,6 +1600,12 @@ static void find_file_and_directory (struct die_info *die,
 
 static char *file_full_name (int file, struct line_header *lh,
 			     const char *comp_dir);
+
+static gdb_byte *read_and_check_comp_unit_head
+  (struct comp_unit_head *header,
+   struct dwarf2_section_info *section,
+   struct dwarf2_section_info *abbrev_section, gdb_byte *info_ptr,
+   int is_debug_types_section);
 
 static void init_cutu_and_read_dies
   (struct dwarf2_per_cu_data *this_cu, struct abbrev_table *abbrev_table,
@@ -1885,6 +1919,106 @@ dwarf2_get_section_info (struct objfile *objfile,
   *sizep = info->size;
 }
 
+/* A helper function to find the sections for a .dwz file.  */
+
+static void
+locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
+{
+  struct dwz_file *dwz_file = arg;
+
+  /* Note that we only support the standard ELF names, because .dwz
+     is ELF-only (at the time of writing).  */
+  if (section_is_p (sectp->name, &dwarf2_elf_names.abbrev))
+    {
+      dwz_file->abbrev.asection = sectp;
+      dwz_file->abbrev.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &dwarf2_elf_names.info))
+    {
+      dwz_file->info.asection = sectp;
+      dwz_file->info.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &dwarf2_elf_names.str))
+    {
+      dwz_file->str.asection = sectp;
+      dwz_file->str.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &dwarf2_elf_names.line))
+    {
+      dwz_file->line.asection = sectp;
+      dwz_file->line.size = bfd_get_section_size (sectp);
+    }
+  else if (section_is_p (sectp->name, &dwarf2_elf_names.macro))
+    {
+      dwz_file->macro.asection = sectp;
+      dwz_file->macro.size = bfd_get_section_size (sectp);
+    }
+}
+
+/* Open the separate '.dwz' debug file, if needed.  Error if the file
+   cannot be found.  */
+
+static struct dwz_file *
+dwarf2_get_dwz_file (void)
+{
+  bfd *abfd, *dwz_bfd;
+  asection *section;
+  gdb_byte *data;
+  struct cleanup *cleanup;
+  const char *filename;
+  struct dwz_file *result;
+
+  if (dwarf2_per_objfile->dwz_file != NULL)
+    return dwarf2_per_objfile->dwz_file;
+
+  abfd = dwarf2_per_objfile->objfile->obfd;
+  section = bfd_get_section_by_name (abfd, ".gnu_debugaltlink");
+  if (section == NULL)
+    error (_("could not find '.gnu_debugaltlink' section"));
+  if (!bfd_malloc_and_get_section (abfd, section, &data))
+    error (_("could not read '.gnu_debugaltlink' section: %s"),
+	   bfd_errmsg (bfd_get_error ()));
+  cleanup = make_cleanup (xfree, data);
+
+  filename = data;
+  if (!IS_ABSOLUTE_PATH (filename))
+    {
+      char *abs = gdb_realpath (dwarf2_per_objfile->objfile->name);
+      char *rel;
+
+      make_cleanup (xfree, abs);
+      abs = ldirname (abs);
+      make_cleanup (xfree, abs);
+
+      rel = concat (abs, SLASH_STRING, filename, (char *) NULL);
+      make_cleanup (xfree, rel);
+      filename = rel;
+    }
+
+  /* The format is just a NUL-terminated file name, followed by the
+     build-id.  For now, though, we ignore the build-id.  */
+  dwz_bfd = gdb_bfd_open (filename, gnutarget, -1);
+  if (dwz_bfd == NULL)
+    error (_("could not read '%s': %s"), filename,
+	   bfd_errmsg (bfd_get_error ()));
+
+  if (!bfd_check_format (dwz_bfd, bfd_object))
+    {
+      gdb_bfd_unref (dwz_bfd);
+      error (_("file '%s' was not usable: %s"), filename,
+	     bfd_errmsg (bfd_get_error ()));
+    }
+
+  result = OBSTACK_ZALLOC (&dwarf2_per_objfile->objfile->objfile_obstack,
+			   struct dwz_file);
+  result->dwz_bfd = dwz_bfd;
+
+  bfd_map_over_sections (dwz_bfd, locate_dwz_sections, result);
+
+  do_cleanups (cleanup);
+
+  return result;
+}
 
 /* DWARF quick_symbols_functions support.  */
 
@@ -3560,6 +3694,22 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
   return info_ptr;
 }
 
+/* Helper function that returns the proper abbrev section for
+   THIS_CU.  */
+
+static struct dwarf2_section_info *
+get_abbrev_section_for_cu (struct dwarf2_per_cu_data *this_cu)
+{
+  struct dwarf2_section_info *abbrev;
+
+  if (this_cu->is_dwz)
+    abbrev = &dwarf2_get_dwz_file ()->abbrev;
+  else
+    abbrev = &dwarf2_per_objfile->abbrev;
+
+  return abbrev;
+}
+
 /* Subroutine of read_and_check_comp_unit_head and
    read_and_check_type_unit_head to simplify them.
    Perform various error checking on the header.  */
@@ -3578,8 +3728,7 @@ error_check_comp_unit_head (struct comp_unit_head *header,
 	   filename);
 
   if (header->abbrev_offset.sect_off
-      >= dwarf2_section_size (dwarf2_per_objfile->objfile,
-			      &dwarf2_per_objfile->abbrev))
+      >= dwarf2_section_size (dwarf2_per_objfile->objfile, abbrev_section))
     error (_("Dwarf Error: bad offset (0x%lx) in compilation unit header "
 	   "(offset 0x%lx + 6) [in module %s]"),
 	   (long) header->abbrev_offset.sect_off, (long) header->offset.sect_off,
@@ -3816,6 +3965,7 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
     {
       bfd *abfd;
       gdb_byte *info_ptr, *end_ptr;
+      struct dwarf2_section_info *abbrev_section;
 
       dwarf2_read_section (objfile, section);
       info_ptr = section->buffer;
@@ -3826,6 +3976,11 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
       /* We can't set abfd until now because the section may be empty or
 	 not present, in which case section->asection will be NULL.  */
       abfd = section->asection->owner;
+
+      if (dwo_file)
+	abbrev_section = &dwo_file->sections.abbrev;
+      else
+	abbrev_section = &dwarf2_per_objfile->abbrev;
 
       if (types_htab == NULL)
 	{
@@ -4066,7 +4221,8 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   dwarf2_read_section (objfile, section);
 
   begin_info_ptr = info_ptr = section->buffer + this_cu->offset.sect_off;
-  abbrev_section = &dwarf2_per_objfile->abbrev;
+
+  abbrev_section = get_abbrev_section_for_cu (this_cu);
 
   if (use_existing_cu && this_cu->cu != NULL)
     {
@@ -4448,7 +4604,7 @@ init_cutu_and_read_dies_simple (struct dwarf2_per_cu_data *this_cu,
 				void *data)
 {
   init_cutu_and_read_dies_no_follow (this_cu,
-				     &dwarf2_per_objfile->abbrev,
+				     get_abbrev_section_for_cu (this_cu),
 				     NULL,
 				     die_reader_func, data);
 }
@@ -5076,6 +5232,9 @@ set_partial_user (struct objfile *objfile)
       struct partial_symtab *pst = per_cu->v.psymtab;
       int j;
 
+      if (pst == NULL)
+	continue;
+
       for (j = 0; j < pst->number_of_dependencies; ++j)
 	{
 	  /* Set the 'user' field only if it is not already set.  */
@@ -5170,6 +5329,57 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
 			   load_partial_comp_unit_reader, NULL);
 }
 
+static void
+read_comp_units_from_section (struct objfile *objfile,
+			      struct dwarf2_section_info *section,
+			      unsigned int is_dwz,
+			      int *n_allocated,
+			      int *n_comp_units,
+			      struct dwarf2_per_cu_data ***all_comp_units)
+{
+  gdb_byte *info_ptr;
+  bfd *abfd = section->asection->owner;
+
+  dwarf2_read_section (objfile, section);
+
+  info_ptr = section->buffer;
+
+  while (info_ptr < section->buffer + section->size)
+    {
+      unsigned int length, initial_length_size;
+      struct dwarf2_per_cu_data *this_cu;
+      sect_offset offset;
+
+      offset.sect_off = info_ptr - section->buffer;
+
+      /* Read just enough information to find out where the next
+	 compilation unit is.  */
+      length = read_initial_length (abfd, info_ptr, &initial_length_size);
+
+      /* Save the compilation unit for later lookup.  */
+      this_cu = obstack_alloc (&objfile->objfile_obstack,
+			       sizeof (struct dwarf2_per_cu_data));
+      memset (this_cu, 0, sizeof (*this_cu));
+      this_cu->offset = offset;
+      this_cu->length = length + initial_length_size;
+      this_cu->is_dwz = is_dwz;
+      this_cu->objfile = objfile;
+      this_cu->info_or_types_section = section;
+
+      if (*n_comp_units == *n_allocated)
+	{
+	  *n_allocated *= 2;
+	  *all_comp_units = xrealloc (*all_comp_units,
+				      *n_allocated
+				      * sizeof (struct dwarf2_per_cu_data *));
+	}
+      (*all_comp_units)[*n_comp_units] = this_cu;
+      ++*n_comp_units;
+
+      info_ptr = info_ptr + this_cu->length;
+    }
+}
+
 /* Create a list of all compilation units in OBJFILE.
    This is only done for -readnow and building partial symtabs.  */
 
@@ -5179,49 +5389,22 @@ create_all_comp_units (struct objfile *objfile)
   int n_allocated;
   int n_comp_units;
   struct dwarf2_per_cu_data **all_comp_units;
-  gdb_byte *info_ptr;
-
-  dwarf2_read_section (objfile, &dwarf2_per_objfile->info);
-  info_ptr = dwarf2_per_objfile->info.buffer;
 
   n_comp_units = 0;
   n_allocated = 10;
   all_comp_units = xmalloc (n_allocated
 			    * sizeof (struct dwarf2_per_cu_data *));
 
-  while (info_ptr < dwarf2_per_objfile->info.buffer
-	 + dwarf2_per_objfile->info.size)
+  read_comp_units_from_section (objfile, &dwarf2_per_objfile->info, 0,
+				&n_allocated, &n_comp_units, &all_comp_units);
+
+  if (bfd_get_section_by_name (objfile->obfd, ".gnu_debugaltlink") != NULL)
     {
-      unsigned int length, initial_length_size;
-      struct dwarf2_per_cu_data *this_cu;
-      sect_offset offset;
+      struct dwz_file *dwz = dwarf2_get_dwz_file ();
 
-      offset.sect_off = info_ptr - dwarf2_per_objfile->info.buffer;
-
-      /* Read just enough information to find out where the next
-	 compilation unit is.  */
-      length = read_initial_length (objfile->obfd, info_ptr,
-				    &initial_length_size);
-
-      /* Save the compilation unit for later lookup.  */
-      this_cu = obstack_alloc (&objfile->objfile_obstack,
-			       sizeof (struct dwarf2_per_cu_data));
-      memset (this_cu, 0, sizeof (*this_cu));
-      this_cu->offset = offset;
-      this_cu->length = length + initial_length_size;
-      this_cu->objfile = objfile;
-      this_cu->info_or_types_section = &dwarf2_per_objfile->info;
-
-      if (n_comp_units == n_allocated)
-	{
-	  n_allocated *= 2;
-	  all_comp_units = xrealloc (all_comp_units,
-				     n_allocated
-				     * sizeof (struct dwarf2_per_cu_data *));
-	}
-      all_comp_units[n_comp_units++] = this_cu;
-
-      info_ptr = info_ptr + this_cu->length;
+      read_comp_units_from_section (objfile, &dwz->info, 1,
+				    &n_allocated, &n_comp_units,
+				    &all_comp_units);
     }
 
   dwarf2_per_objfile->all_comp_units
@@ -5315,6 +5498,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		  }
 
 		per_cu = dwarf2_find_containing_comp_unit (pdi->d.offset,
+							   pdi->is_dwz,
 							   cu->objfile);
 
 		/* Go read the partial unit, if needed.  */
@@ -5372,7 +5556,8 @@ partial_die_parent_scope (struct partial_die_info *pdi,
 
   real_pdi = pdi;
   while (real_pdi->has_specification)
-    real_pdi = find_partial_die (real_pdi->spec_offset, cu);
+    real_pdi = find_partial_die (real_pdi->spec_offset,
+				 real_pdi->spec_is_dwz, cu);
 
   parent = real_pdi->die_parent;
   if (parent == NULL)
@@ -5872,6 +6057,9 @@ skip_one_die (const struct die_reader_specs *reader, gdb_byte *info_ptr,
 	  else
 	    info_ptr += cu->header.offset_size;
 	  break;
+	case DW_FORM_GNU_ref_alt:
+	  info_ptr += cu->header.offset_size;
+	  break;
 	case DW_FORM_addr:
 	  info_ptr += cu->header.addr_size;
 	  break;
@@ -5901,6 +6089,7 @@ skip_one_die (const struct die_reader_specs *reader, gdb_byte *info_ptr,
 	  break;
 	case DW_FORM_sec_offset:
 	case DW_FORM_strp:
+	case DW_FORM_GNU_strp_alt:
 	  info_ptr += cu->header.offset_size;
 	  break;
 	case DW_FORM_exprloc:
@@ -6568,7 +6757,9 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
      it, by scanning the DIE's below the compilation unit.  */
   get_scope_pc_bounds (cu->dies, &lowpc, &highpc, cu);
 
-  static_block = end_symtab_get_static_block (highpc + baseaddr, objfile, 0);
+  static_block
+    = end_symtab_get_static_block (highpc + baseaddr, objfile, 0,
+				   per_cu->s.imported_symtabs != NULL);
 
   /* If the comp unit has DW_AT_ranges, it may have discontiguous ranges.
      Also, DW_AT_ranges may record ranges not belonging to any child DIEs
@@ -6719,9 +6910,11 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
       struct dwarf2_per_cu_data *per_cu;
       struct symtab *imported_symtab;
       sect_offset offset;
+      int is_dwz;
 
       offset = dwarf2_get_ref_die_offset (attr);
-      per_cu = dwarf2_find_containing_comp_unit (offset, cu->objfile);
+      is_dwz = (attr->form == DW_FORM_GNU_ref_alt || cu->per_cu->is_dwz);
+      per_cu = dwarf2_find_containing_comp_unit (offset, is_dwz, cu->objfile);
 
       /* Queue the unit, if needed.  */
       if (maybe_queue_comp_unit (cu, per_cu, cu->language))
@@ -12403,6 +12596,8 @@ read_partial_die (const struct die_reader_specs *reader,
 	case DW_AT_extension:
 	  part_die->has_specification = 1;
 	  part_die->spec_offset = dwarf2_get_ref_die_offset (&attr);
+	  part_die->spec_is_dwz = (attr.form == DW_FORM_GNU_ref_alt
+				   || cu->per_cu->is_dwz);
 	  break;
 	case DW_AT_sibling:
 	  /* Ignore absolute siblings, they might point outside of
@@ -12449,7 +12644,11 @@ read_partial_die (const struct die_reader_specs *reader,
 
 	case DW_AT_import:
 	  if (part_die->tag == DW_TAG_imported_unit)
-	    part_die->d.offset = dwarf2_get_ref_die_offset (&attr);
+	    {
+	      part_die->d.offset = dwarf2_get_ref_die_offset (&attr);
+	      part_die->is_dwz = (attr.form == DW_FORM_GNU_ref_alt
+				  || cu->per_cu->is_dwz);
+	    }
 	  break;
 
 	default:
@@ -12520,13 +12719,14 @@ find_partial_die_in_comp_unit (sect_offset offset, struct dwarf2_cu *cu)
    DW_FORM_ref_sig8).  */
 
 static struct partial_die_info *
-find_partial_die (sect_offset offset, struct dwarf2_cu *cu)
+find_partial_die (sect_offset offset, int offset_in_dwz, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   struct dwarf2_per_cu_data *per_cu = NULL;
   struct partial_die_info *pd = NULL;
 
-  if (offset_in_cu_p (&cu->header, offset))
+  if (offset_in_dwz == cu->per_cu->is_dwz
+      && offset_in_cu_p (&cu->header, offset))
     {
       pd = find_partial_die_in_comp_unit (offset, cu);
       if (pd != NULL)
@@ -12545,7 +12745,8 @@ find_partial_die (sect_offset offset, struct dwarf2_cu *cu)
 		 (long) cu->header.offset.sect_off, (long) offset.sect_off,
 		 bfd_get_filename (objfile->obfd));
 	}
-      per_cu = dwarf2_find_containing_comp_unit (offset, objfile);
+      per_cu = dwarf2_find_containing_comp_unit (offset, offset_in_dwz,
+						 objfile);
 
       if (per_cu->cu == NULL || per_cu->cu->partial_dies == NULL)
 	load_partial_comp_unit (per_cu);
@@ -12603,7 +12804,8 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
 
   real_pdi = struct_pdi;
   while (real_pdi->has_specification)
-    real_pdi = find_partial_die (real_pdi->spec_offset, cu);
+    real_pdi = find_partial_die (real_pdi->spec_offset,
+				 real_pdi->spec_is_dwz, cu);
 
   if (real_pdi->die_parent != NULL)
     return;
@@ -12651,7 +12853,8 @@ fixup_partial_die (struct partial_die_info *part_die,
     {
       struct partial_die_info *spec_die;
 
-      spec_die = find_partial_die (part_die->spec_offset, cu);
+      spec_die = find_partial_die (part_die->spec_offset,
+				   part_die->spec_is_dwz, cu);
 
       fixup_partial_die (spec_die, cu);
 
@@ -12739,6 +12942,10 @@ read_attribute_value (const struct die_reader_specs *reader,
 				       &cu->header, &bytes_read);
       info_ptr += bytes_read;
       break;
+    case DW_FORM_GNU_ref_alt:
+      DW_UNSND (attr) = read_offset (abfd, info_ptr, &cu->header, &bytes_read);
+      info_ptr += bytes_read;
+      break;
     case DW_FORM_addr:
       DW_ADDR (attr) = read_address (abfd, info_ptr, cu, &bytes_read);
       info_ptr += bytes_read;
@@ -12781,10 +12988,25 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += bytes_read;
       break;
     case DW_FORM_strp:
-      DW_STRING (attr) = read_indirect_string (abfd, info_ptr, cu_header,
-					       &bytes_read);
-      DW_STRING_IS_CANONICAL (attr) = 0;
-      info_ptr += bytes_read;
+      if (!cu->per_cu->is_dwz)
+	{
+	  DW_STRING (attr) = read_indirect_string (abfd, info_ptr, cu_header,
+						   &bytes_read);
+	  DW_STRING_IS_CANONICAL (attr) = 0;
+	  info_ptr += bytes_read;
+	  break;
+	}
+      /* FALLTHROUGH */
+    case DW_FORM_GNU_strp_alt:
+      {
+	struct dwz_file *dwz = dwarf2_get_dwz_file ();
+	LONGEST str_offset = read_offset (abfd, info_ptr, cu_header,
+					  &bytes_read);
+
+	DW_STRING (attr) = read_indirect_string_from_dwz (dwz, str_offset);
+	DW_STRING_IS_CANONICAL (attr) = 0;
+	info_ptr += bytes_read;
+      }
       break;
     case DW_FORM_exprloc:
     case DW_FORM_block:
@@ -12895,6 +13117,10 @@ read_attribute_value (const struct die_reader_specs *reader,
 	     dwarf_form_name (form),
 	     bfd_get_filename (abfd));
     }
+
+  /* Super hack.  */
+  if (cu->per_cu->is_dwz && is_ref_attr (attr))
+    attr->form = DW_FORM_GNU_ref_alt;
 
   /* We have seen instances where the compiler tried to emit a byte
      size attribute of -1 which ended up being encoded as an unsigned
@@ -13190,6 +13416,30 @@ read_indirect_string_at_offset (bfd *abfd, LONGEST str_offset)
   if (dwarf2_per_objfile->str.buffer[str_offset] == '\0')
     return NULL;
   return (char *) (dwarf2_per_objfile->str.buffer + str_offset);
+}
+
+/* Read a string at offset STR_OFFSET in the .debug_str section from
+   the .dwz file DWZ.  Throw an error if the offset is too large.  If
+   the string consists of a single NUL byte, return NULL; otherwise
+   return a pointer to the string.  */
+
+static char *
+read_indirect_string_from_dwz (struct dwz_file *dwz, LONGEST str_offset)
+{
+  dwarf2_read_section (dwarf2_per_objfile->objfile, &dwz->str);
+
+  if (dwz->str.buffer == NULL)
+    error (_("DW_FORM_GNU_strp_alt used without .debug_str "
+	     "section [in module %s]"),
+	   bfd_get_filename (dwz->dwz_bfd));
+  if (str_offset >= dwz->str.size)
+    error (_("DW_FORM_GNU_strp_alt pointing outside of "
+	     ".debug_str section [in module %s]"),
+	   bfd_get_filename (dwz->dwz_bfd));
+  gdb_assert (HOST_CHAR_BIT == 8);
+  if (dwz->str.buffer[str_offset] == '\0')
+    return NULL;
+  return (char *) (dwz->str.buffer + str_offset);
 }
 
 static char *
@@ -13663,6 +13913,30 @@ add_file_name (struct line_header *lh,
   fe->symtab = NULL;
 }
 
+/* A convenience function to find the proper .debug_line section for a
+   CU.  */
+
+static struct dwarf2_section_info *
+get_debug_line_section (struct dwarf2_cu *cu)
+{
+  struct dwarf2_section_info *section;
+
+  /* For TUs in DWO files, the DW_AT_stmt_list attribute lives in the
+     DWO file.  */
+  if (cu->dwo_unit && cu->per_cu->is_debug_types)
+    section = &cu->dwo_unit->dwo_file->sections.line;
+  else if (cu->per_cu->is_dwz)
+    {
+      struct dwz_file *dwz = dwarf2_get_dwz_file ();
+
+      section = &dwz->line;
+    }
+  else
+    section = &dwarf2_per_objfile->line;
+
+  return section;
+}
+
 /* Read the statement program header starting at OFFSET in
    .debug_line, or .debug_line.dwo.  Return a pointer
    to a struct line_header, allocated using xmalloc.
@@ -13683,13 +13957,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
   struct dwarf2_section_info *section;
   bfd *abfd;
 
-  /* For TUs in DWO files, the DW_AT_stmt_list attribute lives in the
-     DWO file.  */
-  if (cu->dwo_unit && cu->per_cu->is_debug_types)
-    section = &cu->dwo_unit->dwo_file->sections.line;
-  else
-    section = &dwarf2_per_objfile->line;
-
+  section = get_debug_line_section (cu);
   dwarf2_read_section (dwarf2_per_objfile->objfile, section);
   if (section->buffer == NULL)
     {
@@ -14014,7 +14282,7 @@ dwarf_decode_lines_1 (struct line_header *lh, const char *comp_dir,
 			 GCd by the linker.  Ignore it.  PR gdb/12528 */
 
 		      long line_offset
-			= line_ptr - dwarf2_per_objfile->line.buffer;
+			= line_ptr - get_debug_line_section (cu)->buffer;
 
 		      complaint (&symfile_complaints,
 				 _(".debug_line address at offset 0x%lx is 0 "
@@ -14860,6 +15128,7 @@ dwarf2_const_value_attr (struct attribute *attr, struct type *type,
     case DW_FORM_string:
     case DW_FORM_strp:
     case DW_FORM_GNU_str_index:
+    case DW_FORM_GNU_strp_alt:
       /* DW_STRING is already allocated on the objfile obstack, point
 	 directly to it.  */
       *bytes = (gdb_byte *) DW_STRING (attr);
@@ -15046,7 +15315,15 @@ lookup_die_type (struct die_info *die, struct attribute *attr,
 
   /* First see if we have it cached.  */
 
-  if (is_ref_attr (attr))
+  if (attr->form == DW_FORM_GNU_ref_alt)
+    {
+      struct dwarf2_per_cu_data *per_cu;
+      sect_offset offset = dwarf2_get_ref_die_offset (attr);
+
+      per_cu = dwarf2_find_containing_comp_unit (offset, 1, cu->objfile);
+      this_type = get_die_type_at_offset (offset, per_cu);
+    }
+  else if (is_ref_attr (attr))
     {
       sect_offset offset = dwarf2_get_ref_die_offset (attr);
 
@@ -15819,6 +16096,10 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  fprintf_unfiltered (f, "ref address: ");
 	  fputs_filtered (hex_string (DW_UNSND (&die->attrs[i])), f);
 	  break;
+	case DW_FORM_GNU_ref_alt:
+	  fprintf_unfiltered (f, "alt ref address: ");
+	  fputs_filtered (hex_string (DW_UNSND (&die->attrs[i])), f);
+	  break;
 	case DW_FORM_ref1:
 	case DW_FORM_ref2:
 	case DW_FORM_ref4:
@@ -15850,6 +16131,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_string:
 	case DW_FORM_strp:
 	case DW_FORM_GNU_str_index:
+	case DW_FORM_GNU_strp_alt:
 	  fprintf_unfiltered (f, "string: \"%s\" (%s canonicalized)",
 		   DW_STRING (&die->attrs[i])
 		   ? DW_STRING (&die->attrs[i]) : "",
@@ -15953,6 +16235,7 @@ is_ref_attr (struct attribute *attr)
     case DW_FORM_ref4:
     case DW_FORM_ref8:
     case DW_FORM_ref_udata:
+    case DW_FORM_GNU_ref_alt:
       return 1;
     default:
       return 0;
@@ -16030,7 +16313,8 @@ follow_die_ref_or_sig (struct die_info *src_die, struct attribute *attr,
    Returns NULL if OFFSET is invalid.  */
 
 static struct die_info *
-follow_die_offset (sect_offset offset, struct dwarf2_cu **ref_cu)
+follow_die_offset (sect_offset offset, int offset_in_dwz,
+		   struct dwarf2_cu **ref_cu)
 {
   struct die_info temp_die;
   struct dwarf2_cu *target_cu, *cu = *ref_cu;
@@ -16047,11 +16331,13 @@ follow_die_offset (sect_offset offset, struct dwarf2_cu **ref_cu)
       if (! offset_in_cu_p (&cu->header, offset))
 	return NULL;
     }
-  else if (! offset_in_cu_p (&cu->header, offset))
+  else if (offset_in_dwz != cu->per_cu->is_dwz
+	   || ! offset_in_cu_p (&cu->header, offset))
     {
       struct dwarf2_per_cu_data *per_cu;
 
-      per_cu = dwarf2_find_containing_comp_unit (offset, cu->objfile);
+      per_cu = dwarf2_find_containing_comp_unit (offset, offset_in_dwz,
+						 cu->objfile);
 
       /* If necessary, add it to the queue and load its DIEs.  */
       if (maybe_queue_comp_unit (cu, per_cu, cu->language))
@@ -16083,7 +16369,10 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
   struct dwarf2_cu *cu = *ref_cu;
   struct die_info *die;
 
-  die = follow_die_offset (offset, ref_cu);
+  die = follow_die_offset (offset,
+			   (attr->form == DW_FORM_GNU_ref_alt
+			    || cu->per_cu->is_dwz),
+			   ref_cu);
   if (!die)
     error (_("Dwarf Error: Cannot find DIE at 0x%x referenced from DIE "
 	   "at 0x%x [in module %s]"),
@@ -16114,7 +16403,7 @@ dwarf2_fetch_die_location_block (cu_offset offset_in_cu,
     load_cu (per_cu);
   cu = per_cu->cu;
 
-  die = follow_die_offset (offset, &cu);
+  die = follow_die_offset (offset, per_cu->is_dwz, &cu);
   if (!die)
     error (_("Dwarf Error: Cannot find DIE at 0x%x referenced in module %s"),
 	   offset.sect_off, per_cu->objfile->name);
@@ -16908,6 +17197,7 @@ skip_form_bytes (bfd *abfd, gdb_byte *bytes, gdb_byte *buffer_end,
 
     case DW_FORM_sec_offset:
     case DW_FORM_strp:
+    case DW_FORM_GNU_strp_alt:
       bytes += offset_size;
       break;
 
@@ -17063,7 +17353,7 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
 			  struct macro_source_file *current_file,
 			  struct line_header *lh, char *comp_dir,
 			  struct dwarf2_section_info *section,
-			  int section_is_gnu,
+			  int section_is_gnu, int section_is_dwz,
 			  unsigned int offset_size,
 			  struct objfile *objfile,
 			  htab_t include_hash)
@@ -17114,6 +17404,8 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
         case DW_MACRO_GNU_undef:
 	case DW_MACRO_GNU_define_indirect:
 	case DW_MACRO_GNU_undef_indirect:
+	case DW_MACRO_GNU_define_indirect_alt:
+	case DW_MACRO_GNU_undef_indirect_alt:
           {
             unsigned int bytes_read;
             int line;
@@ -17136,11 +17428,20 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
 		str_offset = read_offset_1 (abfd, mac_ptr, offset_size);
 		mac_ptr += offset_size;
 
-		body = read_indirect_string_at_offset (abfd, str_offset);
+		if (macinfo_type == DW_MACRO_GNU_define_indirect_alt
+		    || macinfo_type == DW_MACRO_GNU_undef_indirect_alt)
+		  {
+		    struct dwz_file *dwz = dwarf2_get_dwz_file ();
+
+		    body = read_indirect_string_from_dwz (dwz, str_offset);
+		  }
+		else
+		  body = read_indirect_string_at_offset (abfd, str_offset);
 	      }
 
 	    is_define = (macinfo_type == DW_MACRO_GNU_define
-			 || macinfo_type == DW_MACRO_GNU_define_indirect);
+			 || macinfo_type == DW_MACRO_GNU_define_indirect
+			 || macinfo_type == DW_MACRO_GNU_define_indirect_alt);
             if (! current_file)
 	      {
 		/* DWARF violation as no main source is present.  */
@@ -17164,7 +17465,8 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
 	    else
 	      {
 		gdb_assert (macinfo_type == DW_MACRO_GNU_undef
-			    || macinfo_type == DW_MACRO_GNU_undef_indirect);
+			    || macinfo_type == DW_MACRO_GNU_undef_indirect
+			    || macinfo_type == DW_MACRO_GNU_undef_indirect_alt);
 		macro_undef (current_file, line, body);
 	      }
           }
@@ -17239,6 +17541,7 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
           break;
 
 	case DW_MACRO_GNU_transparent_include:
+	case DW_MACRO_GNU_transparent_include_alt:
 	  {
 	    LONGEST offset;
 	    void **slot;
@@ -17257,13 +17560,32 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
 	      }
 	    else
 	      {
+		bfd *include_bfd = abfd;
+		struct dwarf2_section_info *include_section = section;
+		struct dwarf2_section_info alt_section;
+		gdb_byte *include_mac_end = mac_end;
+		int is_dwz = section_is_dwz;
+
 		*slot = mac_ptr;
 
-		dwarf_decode_macro_bytes (abfd,
-					  section->buffer + offset,
-					  mac_end, current_file,
+		if (macinfo_type == DW_MACRO_GNU_transparent_include_alt)
+		  {
+		    struct dwz_file *dwz = dwarf2_get_dwz_file ();
+
+		    dwarf2_read_section (dwarf2_per_objfile->objfile,
+					 &dwz->macro);
+
+		    include_bfd = dwz->macro.asection->owner;
+		    include_section = &dwz->macro;
+		    include_mac_end = dwz->macro.buffer + dwz->macro.size;
+		    is_dwz = 1;
+		  }
+
+		dwarf_decode_macro_bytes (include_bfd,
+					  include_section->buffer + offset,
+					  include_mac_end, current_file,
 					  lh, comp_dir,
-					  section, section_is_gnu,
+					  section, section_is_gnu, is_dwz,
 					  offset_size, objfile, include_hash);
 
 		htab_remove_elt (include_hash, mac_ptr);
@@ -17482,7 +17804,8 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
   slot = htab_find_slot (include_hash, mac_ptr, INSERT);
   *slot = mac_ptr;
   dwarf_decode_macro_bytes (abfd, mac_ptr, mac_end,
-			    current_file, lh, comp_dir, section, section_is_gnu,
+			    current_file, lh, comp_dir, section,
+			    section_is_gnu, 0,
 			    offset_size, objfile, include_hash);
   do_cleanups (cleanup);
 }
@@ -17737,28 +18060,35 @@ dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *per_cu)
 
 static struct dwarf2_per_cu_data *
 dwarf2_find_containing_comp_unit (sect_offset offset,
+				  unsigned int offset_in_dwz,
 				  struct objfile *objfile)
 {
   struct dwarf2_per_cu_data *this_cu;
   int low, high;
+  const sect_offset *cu_off;
 
   low = 0;
   high = dwarf2_per_objfile->n_comp_units - 1;
   while (high > low)
     {
+      struct dwarf2_per_cu_data *mid_cu;
       int mid = low + (high - low) / 2;
 
-      if (dwarf2_per_objfile->all_comp_units[mid]->offset.sect_off
-	  >= offset.sect_off)
+      mid_cu = dwarf2_per_objfile->all_comp_units[mid];
+      cu_off = &mid_cu->offset;
+      if (mid_cu->is_dwz > offset_in_dwz
+	  || (mid_cu->is_dwz == offset_in_dwz
+	      && cu_off->sect_off >= offset.sect_off))
 	high = mid;
       else
 	low = mid + 1;
     }
   gdb_assert (low == high);
-  if (dwarf2_per_objfile->all_comp_units[low]->offset.sect_off
-      > offset.sect_off)
+  this_cu = dwarf2_per_objfile->all_comp_units[low];
+  cu_off = &this_cu->offset;
+  if (this_cu->is_dwz != offset_in_dwz || cu_off->sect_off > offset.sect_off)
     {
-      if (low == 0)
+      if (low == 0 || this_cu->is_dwz != offset_in_dwz)
 	error (_("Dwarf Error: could not find partial DIE containing "
 	       "offset 0x%lx [in module %s]"),
 	       (long) offset.sect_off, bfd_get_filename (objfile->obfd));
@@ -18216,6 +18546,9 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 
   if (data->dwo_files)
     free_dwo_files (data->dwo_files, objfile);
+
+  if (data->dwz_file && data->dwz_file->dwz_bfd)
+    gdb_bfd_unref (data->dwz_file->dwz_bfd);
 }
 
 

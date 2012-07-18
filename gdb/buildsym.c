@@ -966,11 +966,14 @@ reset_symtab_globals (void)
    file's text.
 
    If EXPANDABLE is non-zero the STATIC_BLOCK dictionary is made
-   expandable.  */
+   expandable.
+
+   If REQUIRED is non-zero, then a symtab is created even if it does
+   not contain any symbols.  */
 
 struct block *
 end_symtab_get_static_block (CORE_ADDR end_addr, struct objfile *objfile,
-			     int expandable)
+			     int expandable, int required)
 {
   /* Finish the lexical context of the last function in the file; pop
      the context stack.  */
@@ -1038,7 +1041,8 @@ end_symtab_get_static_block (CORE_ADDR end_addr, struct objfile *objfile,
   cleanup_undefined_stabs_types (objfile);
   finish_global_stabs (objfile);
 
-  if (pending_blocks == NULL
+  if (!required
+      && pending_blocks == NULL
       && file_symbols == NULL
       && global_symbols == NULL
       && have_line_numbers == 0
@@ -1296,7 +1300,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 {
   struct block *static_block;
 
-  static_block = end_symtab_get_static_block (end_addr, objfile, 0);
+  static_block = end_symtab_get_static_block (end_addr, objfile, 0, 0);
   return end_symtab_from_static_block (static_block, objfile, section, 0);
 }
 
@@ -1308,7 +1312,7 @@ end_expandable_symtab (CORE_ADDR end_addr, struct objfile *objfile,
 {
   struct block *static_block;
 
-  static_block = end_symtab_get_static_block (end_addr, objfile, 1);
+  static_block = end_symtab_get_static_block (end_addr, objfile, 1, 0);
   return end_symtab_from_static_block (static_block, objfile, section, 1);
 }
 

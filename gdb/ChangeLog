@@ -1,5 +1,52 @@
 2012-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (struct dwarf2_per_objfile) <dwz_file>: New field.
+	(struct dwarf2_per_cu_data) <length>: No longer bitfield.
+	<is_dwz>: New field.
+	(struct dwz_file): New.
+	(struct partial_die_info) <is_dwz, spec_is_dwz>: New fields.
+	(locate_dwz_sections, dwarf2_get_dwz_file)
+	(get_abbrev_section_for_cu): New functions.
+	(error_check_comp_unit_head, read_and_check_comp_unit_head)
+	(read_and_check_type_unit_head): Add abbrev_section argument.
+	(create_debug_types_hash_table): Update.
+	(init_cutu_and_read_dies): Use proper abbrev section.
+	(init_cutu_and_read_dies_no_follow): Likewise.
+	(set_partial_user): Do nothing if PST==NULL.
+	(read_comp_units_from_section): New function.
+	(create_all_comp_units): Use it.
+	(scan_partial_symbols, partial_die_parent_scope): Update.
+	(skip_one_die): Handle DW_FORM_GNU_ref_alt, DW_FORM_GNU_strp_alt.
+	(process_imported_unit_die, read_partial_die): Handle .dwz files.
+	(find_partial_die): Add offset_in_dwz argument.  Update.
+	(guess_partial_die_structure_name, fixup_partial_die): Update.
+	(read_attribute_value): Handle DW_FORM_GNU_ref_alt,
+	DW_FORM_GNU_strp_alt.
+	(read_indirect_string_from_dwz): New function.
+	(dwarf2_const_value_attr): Handle DW_FORM_GNU_strp_alt.
+	(dump_die_shallow): Handle DW_FORM_GNU_ref_alt, DW_FORM_GNU_strp_alt.
+	(is_ref_attr): Handle DW_FORM_GNU_ref_alt.
+	(follow_die_offset): Add offset_in_dwz argument.
+	(follow_die_ref, dwarf2_fetch_die_location_block): Update.
+	(skip_form_bytes): Handle DW_FORM_GNU_strp_alt.
+	(dwarf_decode_macro_bytes): Add section_is_dwz argument.
+	Handle new macro forms.
+	(dwarf_decode_macros): Update.
+	(dwarf2_find_containing_comp_unit): Add offset_in_dwz argument.
+	(dwarf2_per_objfile_free): Unref dwz_bfd, if it exists
+	(lookup_die_type): Handle DW_FORM_GNU_ref_alt.
+	(create_debug_types_hash_table): Use correct abbrev section.
+	(get_debug_line_section): New function.
+	(dwarf_decode_line_header, dwarf_decode_lines_1): Use it.
+	(process_full_comp_unit): Pass 'required' argument to
+	end_symtab_get_static_block.
+	* buildsym.h (end_symtab_get_static_block): Update.
+	* buildsym.c (end_symtab_get_static_block): Add 'required'
+	argument.
+	(end_symtab, end_expandable_symtab): Update.
+
+2012-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c: Don't include zlib.h or sys/mman.h.
 	(pagesize): Remove.
 	(struct dwarf2_section_info) <map_addr, map_len>: Remove.
