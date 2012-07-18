@@ -1,5 +1,16 @@
 2012-07-18  Keith Seitz  <keiths@redhat.com>
 
+	* linespec.c (add_sal_to_sals): Add LITERAL_CANONICAL
+	parameter.  If non-zero, use SYMNAME as the canonical name
+	for the SaL.
+	Update all callers.
+	(convert_linespec_to_sals): Use add_sal_to_sals for
+	expressions, too.
+	(decode_line_full): No need to "fill in missing canonical names"
+	anymore. Simply make cleanups for the allocated names.
+
+2012-07-18  Keith Seitz  <keiths@redhat.com>
+
 	* linespec.c (struct linespec): Constify expression,
 	source_filename, function_name, and label_name.
 	(symbol_not_found_error): Make all parameters const.

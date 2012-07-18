@@ -810,13 +810,16 @@ add_sal_to_sals_basic (struct symtabs_and_lines *sals,
 
 /* Add SAL to SALS, and also update SELF->CANONICAL_NAMES to reflect
    the new sal, if needed.  If not NULL, SYMNAME is the name of the
-   symbol to use when constructing the new canonical name.  */
+   symbol to use when constructing the new canonical name.
+
+   If LITERAL_CANONICAL is non-zero, SYMNAME will be used as the
+   canonical name for the SAL.  */
 
 static void
 add_sal_to_sals (struct linespec_state *self,
 		 struct symtabs_and_lines *sals,
 		 struct symtab_and_line *sal,
-		 const char *symname)
+		 const char *symname, int literal_canonical)
 {
   add_sal_to_sals_basic (sals, sal);
 
@@ -826,7 +829,7 @@ add_sal_to_sals (struct linespec_state *self,
 
       self->canonical_names = xrealloc (self->canonical_names,
 					sals->nelts * sizeof (char *));
-      if (sal->symtab && sal->symtab->filename)
+      if (!literal_canonical && sal->symtab && sal->symtab->filename)
 	{
 	  char *filename = sal->symtab->filename;
 
@@ -842,6 +845,8 @@ add_sal_to_sals (struct linespec_state *self,
 	  else
 	    canonical_name = xstrprintf ("%s:%d", filename, sal->line);
 	}
+      else if (symname != NULL)
+	canonical_name = xstrdup (symname);
 
       self->canonical_names[sals->nelts - 1] = canonical_name;
     }
@@ -1809,7 +1814,7 @@ create_sals_line_offset (struct linespec_state *self,
 	       found.  */
 	    intermediate_results.sals[i].line = val.line;
 	    add_sal_to_sals (self, &values, &intermediate_results.sals[i],
-			     sym ? SYMBOL_NATURAL_NAME (sym) : NULL);
+			     sym ? SYMBOL_NATURAL_NAME (sym) : NULL, 0);
 	  }
 
       do_cleanups (cleanup);
@@ -1837,13 +1842,14 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 
   if (ls->expression != NULL)
     {
+      struct symtab_and_line sal;
+
       /* We have an expression.  No other attribute is allowed.  */
-      sals.sals = XMALLOC (struct symtab_and_line);
-      sals.nelts = 1;
-      sals.sals[0] = find_pc_line (ls->expr_pc, 0);
-      sals.sals[0].pc = ls->expr_pc;
-      sals.sals[0].section = find_pc_overlay (ls->expr_pc);
-      sals.sals[0].explicit_pc = 1;
+      sal = find_pc_line (ls->expr_pc, 0);
+      sal.pc = ls->expr_pc;
+      sal.section = find_pc_overlay (ls->expr_pc);
+      sal.explicit_pc = 1;
+      add_sal_to_sals (state, &sals, &sal, ls->expression, 1);
     }
   else if (ls->labels.label_symbols != NULL)
     {
@@ -1856,7 +1862,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	{
 	  symbol_to_sal (&sal, state->funfirstline, sym);
 	  add_sal_to_sals (state, &sals, &sal,
-			   SYMBOL_NATURAL_NAME (sym));
+			   SYMBOL_NATURAL_NAME (sym), 0);
 	}
     }
   else if (ls->function_symbols != NULL || ls->minimal_symbols != NULL)
@@ -1882,7 +1888,8 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	      set_current_program_space (pspace);
 	      symbol_to_sal (&sal, state->funfirstline, sym);
 	      if (maybe_add_address (state->addr_set, pspace, sal.pc))
-		add_sal_to_sals (state, &sals, &sal, SYMBOL_NATURAL_NAME (sym));
+		add_sal_to_sals (state, &sals, &sal,
+				 SYMBOL_NATURAL_NAME (sym), 0);
 	    }
 	}
 
@@ -2280,19 +2287,15 @@ decode_line_full (char **argptr, int flags,
   gdb_assert (canonical->addr_string != NULL);
   canonical->pre_expanded = 1;
 
-  /* Fill in the missing canonical names.  */
+  /* Arrange for allocated canonical names to be freed.  */
   if (result.nelts > 0)
     {
       int i;
 
-      if (state->canonical_names == NULL)
-	state->canonical_names = xcalloc (result.nelts, sizeof (char *));
       make_cleanup (xfree, state->canonical_names);
       for (i = 0; i < result.nelts; ++i)
 	{
-	  if (state->canonical_names[i] == NULL)
-	    state->canonical_names[i] = savestring (arg_start,
-						    *argptr - arg_start);
+	  gdb_assert (state->canonical_names[i] != NULL);
 	  make_cleanup (xfree, state->canonical_names[i]);
 	}
     }
@@ -3106,7 +3109,7 @@ decode_digits_list_mode (struct linespec_state *self,
       val.pc = 0;
       val.explicit_line = 1;
 
-      add_sal_to_sals (self, values, &val, NULL);
+      add_sal_to_sals (self, values, &val, NULL, 0);
     }
 }
 
@@ -3250,7 +3253,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
     skip_prologue_sal (&sal);
 
   if (maybe_add_address (self->addr_set, objfile->pspace, sal.pc))
-    add_sal_to_sals (self, result, &sal, SYMBOL_NATURAL_NAME (msymbol));
+    add_sal_to_sals (self, result, &sal, SYMBOL_NATURAL_NAME (msymbol), 0);
 }
 
 /* A helper struct to pass some data through
