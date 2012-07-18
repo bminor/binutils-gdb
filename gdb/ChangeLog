@@ -1,3 +1,8 @@
+2012-07-18  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_inferior_event) <TARGET_WAITKIND_NO_HISTORY>:
+	Pull the single step breakpoints out of the target.
+
 2012-07-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* probe.c (probe_safe_evaluate_at_pc): Rename variable `n_probes'.
