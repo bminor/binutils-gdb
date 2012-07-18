@@ -2784,6 +2784,7 @@ mips_load_srec (char *args)
   unsigned int i;
   unsigned int srec_frame = 200;
   int reclen;
+  struct cleanup *cleanup;
   static int hashmark = 1;
 
   buffer = alloca (srec_frame * 2 + 256);
@@ -2795,9 +2796,11 @@ mips_load_srec (char *args)
       return;
     }
 
+  cleanup = make_cleanup_bfd_close (abfd);
   if (bfd_check_format (abfd, bfd_object) == 0)
     {
       printf_filtered ("File is not an object file\n");
+      do_cleanups (cleanup);
       return;
     }
 
@@ -2851,6 +2854,7 @@ mips_load_srec (char *args)
   send_srec (srec, reclen, abfd->start_address);
 
   serial_flush_input (mips_desc);
+  do_cleanups (cleanup);
 }
 
 /*
@@ -3367,6 +3371,7 @@ pmon_load_fast (char *file)
   int bintotal = 0;
   int final = 0;
   int finished = 0;
+  struct cleanup *cleanup;
 
   buffer = (char *) xmalloc (MAXRECSIZE + 1);
   binbuf = (unsigned char *) xmalloc (BINCHUNK);
@@ -3377,10 +3382,12 @@ pmon_load_fast (char *file)
       printf_filtered ("Unable to open file %s\n", file);
       return;
     }
+  cleanup = make_cleanup_bfd_close (abfd);
 
   if (bfd_check_format (abfd, bfd_object) == 0)
     {
       printf_filtered ("File is not an object file\n");
+      do_cleanups (cleanup);
       return;
     }
 
@@ -3504,6 +3511,7 @@ pmon_load_fast (char *file)
       pmon_end_download (final, bintotal);
     }
 
+  do_cleanups (cleanup);
   return;
 }
 

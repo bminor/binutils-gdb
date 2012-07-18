@@ -357,6 +357,7 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
   gdb_byte *interp_name;
   CORE_ADDR load_addr = 0;
   bfd *dyld_bfd = NULL;
+  struct cleanup *cleanup;
 
   /* This method doesn't work with an attached process.  */
   if (current_inferior ()->attach_flag)
@@ -367,24 +368,30 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
   if (!interp_name)
     return;
 
+  cleanup = make_cleanup (null_cleanup, NULL);
+
   /* Create a bfd for the interpreter.  */
   dyld_bfd = gdb_bfd_ref (bfd_openr (interp_name, gnutarget));
   if (dyld_bfd)
     {
       bfd *sub;
 
+      make_cleanup_bfd_close (dyld_bfd);
       sub = bfd_mach_o_fat_extract (dyld_bfd, bfd_object,
 				    gdbarch_bfd_arch_info (target_gdbarch));
       if (sub)
-	dyld_bfd = sub;
-      else
 	{
-	  gdb_bfd_unref (dyld_bfd);
-	  dyld_bfd = NULL;
+	  dyld_bfd = gdb_bfd_ref (sub);
+	  make_cleanup_bfd_close (sub);
 	}
+      else
+	dyld_bfd = NULL;
     }
   if (!dyld_bfd)
-    return;
+    {
+      do_cleanups (cleanup);
+      return;
+    }
 
   /* We find the dynamic linker's base address by examining
      the current pc (which should point at the entry point for the
@@ -396,7 +403,7 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
   info->all_image_addr =
     lookup_symbol_from_bfd (dyld_bfd, "_dyld_all_image_infos");
 
-  gdb_bfd_unref (dyld_bfd);
+  do_cleanups (cleanup);
 
   if (info->all_image_addr == 0)
     return;

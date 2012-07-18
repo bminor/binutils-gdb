@@ -1,5 +1,15 @@
 2012-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* remote-mips.c (mips_load_srec): Use make_cleanup_bfd_close.
+	(pmon_load_fast): Likewise.
+	* m32r-rom.c (m32r_load): Use make_cleanup_bfd_close.
+	(m32r_upload_command): Likewise.
+	* dsrec.c (load_srec): Use make_cleanup_bfd_close.
+	* solib-darwin.c (darwin_solib_get_all_image_info_addr_at_init):
+	Use make_cleanup_bfd_close.
+
+2012-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (symfile_bfd_open): Don't copy name.  Call
 	gdb_bfd_stash_filename.
 	(load_command): Open the new BFD before freeing the old.
