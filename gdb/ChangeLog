@@ -1,3 +1,12 @@
+2012-07-18  Terry Guo  <terry.guo@arm.com>
+
+	PR 14329
+	* defs.h (GDB_MI_MSG_WIDTH): New.
+	* ser_base (ser_base_read_error_fd): New function.
+	(do_ser_base_readchar): Poll error file descriptor as well as
+	standard output.
+	(generic_readchar): Refactor error handling. 
+
 2012-07-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.

@@ -25,6 +25,7 @@
 
 #include "gdb_select.h"
 #include "gdb_string.h"
+#include "gdb_assert.h"
 #include <sys/time.h>
 #ifdef USE_WIN32API
 #include <winsock2.h>
@@ -242,6 +243,64 @@ ser_base_wait_for (struct serial *scb, int timeout)
     }
 }
 
+/* Read any error output we might have.  */
+
+static void
+ser_base_read_error_fd (struct serial *scb, int close_fd)
+{
+  if (scb->error_fd != -1)
+    {
+      ssize_t s;
+      char buf[GDB_MI_MSG_WIDTH + 1];
+
+      for (;;)
+	{
+	  char *current;
+	  char *newline;
+	  int to_read = GDB_MI_MSG_WIDTH;
+	  int num_bytes = -1;
+
+	  if (scb->ops->avail)
+	    num_bytes = (scb->ops->avail)(scb, scb->error_fd);
+
+	  if (num_bytes != -1)
+	    to_read = (num_bytes < to_read) ? num_bytes : to_read;
+
+	  if (to_read == 0)
+	    break;
+
+	  s = read (scb->error_fd, &buf, to_read);
+	  if ((s == -1) || (s == 0 && !close_fd))
+	    break;
+
+	  if (s == 0 && close_fd)
+	    {
+	      /* End of file.  */
+	      close (scb->error_fd);
+	      scb->error_fd = -1;
+	      break;
+	    }
+
+	  /* In theory, embedded newlines are not a problem.
+	     But for MI, we want each output line to have just
+	     one newline for legibility.  So output things
+	     in newline chunks.  */
+	  gdb_assert (s > 0 && s <= GDB_MI_MSG_WIDTH);
+	  buf[s] = '\0';
+	  current = buf;
+	  while ((newline = strstr (current, "\n")) != NULL)
+	    {
+	      *newline = '\0';
+	      fputs_unfiltered (current, gdb_stderr);
+	      fputs_unfiltered ("\n", gdb_stderr);
+	      current = newline + 1;
+	    }
+
+	  fputs_unfiltered (current, gdb_stderr);
+       }
+    }
+}
+
 /* Read a character with user-specified timeout.  TIMEOUT is number of seconds
    to wait, or -1 to wait forever.  Use timeout of 0 to effect a poll.  Returns
    char if successful.  Returns -2 if timeout expired, EOF if line dropped
@@ -292,6 +351,11 @@ do_ser_base_readchar (struct serial *scb, int timeout)
 	  status = SERIAL_TIMEOUT;
 	  break;
 	}
+
+      /* We also need to check and consume the stderr because it could
+	 come before the stdout for some stubs.  If we just sit and wait
+	 for stdout, we would hit a deadlock for that case.  */
+      ser_base_read_error_fd (scb, 0);
     }
 
   if (status < 0)
@@ -362,54 +426,9 @@ generic_readchar (struct serial *scb, int timeout,
 	    }
 	}
     }
+
   /* Read any error output we might have.  */
-  if (scb->error_fd != -1)
-    {
-      ssize_t s;
-      char buf[81];
-
-      for (;;)
-        {
- 	  char *current;
- 	  char *newline;
-	  int to_read = 80;
-
-	  int num_bytes = -1;
-	  if (scb->ops->avail)
-	    num_bytes = (scb->ops->avail)(scb, scb->error_fd);
-	  if (num_bytes != -1)
-	    to_read = (num_bytes < to_read) ? num_bytes : to_read;
-
-	  if (to_read == 0)
-	    break;
-
-	  s = read (scb->error_fd, &buf, to_read);
-	  if (s == -1)
-	    break;
-	  if (s == 0)
-	    {
-	      /* EOF */
-	      close (scb->error_fd);
-	      scb->error_fd = -1;
-	      break;
-	    }
-
-	  /* In theory, embedded newlines are not a problem.
-	     But for MI, we want each output line to have just
-	     one newline for legibility.  So output things
-	     in newline chunks.  */
-	  buf[s] = '\0';
-	  current = buf;
-	  while ((newline = strstr (current, "\n")) != NULL)
-	    {
-	      *newline = '\0';
-	      fputs_unfiltered (current, gdb_stderr);
-	      fputs_unfiltered ("\n", gdb_stderr);
-	      current = newline + 1;
-	    }
-	  fputs_unfiltered (current, gdb_stderr);
-	}
-    }
+  ser_base_read_error_fd (scb, 1);
 
   reschedule (scb);
   return ch;

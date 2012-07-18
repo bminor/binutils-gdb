@@ -1115,6 +1115,9 @@ extern int use_windows;
 #define ISATTY(FP)	(isatty (fileno (FP)))
 #endif
 
+/* A width that can achieve a better legibility for GDB MI mode.  */
+#define GDB_MI_MSG_WIDTH  80
+
 /* Ensure that V is aligned to an N byte boundary (B's assumed to be a
    power of 2).  Round up/down when necessary.  Examples of correct
    use include:
