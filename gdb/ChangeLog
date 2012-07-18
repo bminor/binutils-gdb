@@ -1,5 +1,9 @@
 2012-07-18  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Replace "Changes since GDB 7.4" with "Changes in GDB 7.5".
+
+2012-07-18  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Update GDB version number to 7.4.91.
 
 2012-07-18  Joel Brobecker  <brobecker@adacore.com>

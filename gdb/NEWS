@@ -1,7 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.4
+*** Changes in GDB 7.5
 
 * GDB now supports x32 ABI.  Visit <http://sites.google.com/site/x32abi/>
   for more x32 ABI info.
