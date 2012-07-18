@@ -1,3 +1,9 @@
+2012-07-18  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (invalid_thread_id_error): New function.
+	(find_condition_and_thread): Use invalid_thread_id_error.
+	(watch_command_1): Likewise.
+
 2012-07-18  Tom Tromey  <tromey@redhat.com>
 
 	* cc-with-index.sh, cc-with-dwz.sh: Remove.

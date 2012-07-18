@@ -9231,6 +9231,14 @@ check_fast_tracepoint_sals (struct gdbarch *gdbarch,
     }
 }
 
+/* Issue an invalid thread ID error.  */
+
+static void ATTRIBUTE_NORETURN
+invalid_thread_id_error (int id)
+{
+  error (_("Unknown thread %d."), id);
+}
+
 /* Given TOK, a string specification of condition and thread, as
    accepted by the 'break' command, extract the condition
    string and thread number and set *COND_STRING and *THREAD.
@@ -9287,7 +9295,7 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
 	  if (tok == tmptok)
 	    error (_("Junk after thread keyword."));
 	  if (!valid_thread_id (*thread))
-	    error (_("Unknown thread %d."), *thread);
+	    invalid_thread_id_error (*thread);
 	}
       else if (toklen >= 1 && strncmp (tok, "task", toklen) == 0)
 	{
@@ -10764,7 +10772,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
 
 	      /* Check if the thread actually exists.  */
 	      if (!valid_thread_id (thread))
-		error (_("Unknown thread %d."), thread);
+		invalid_thread_id_error (thread);
 	    }
 	  else if (toklen == 4 && !strncmp (tok, "mask", 4))
 	    {
