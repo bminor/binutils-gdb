@@ -2686,7 +2686,7 @@ fi
 # Provide more thorough testing by -lmcheck.
 # Set it to 'true' for development snapshots, 'false' for releases or
 # pre-releases.
-development=true
+development=false
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'

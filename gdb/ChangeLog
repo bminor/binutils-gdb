@@ -1,5 +1,10 @@
 2012-07-18  Joel Brobecker  <brobecker@adacore.com>
 
+	* configure.ac (development): Set to false.
+	* configure: Regenerate.
+
+2012-07-18  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 7.5 branch created (branch timestamp: 2012-07-18 03:22 UTC)
 	* version.in: Bump version to 7.4.90.20120718-cvs.
 

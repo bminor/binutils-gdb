@@ -26,7 +26,7 @@ AM_MAINTAINER_MODE
 # Provide more thorough testing by -lmcheck.
 # Set it to 'true' for development snapshots, 'false' for releases or
 # pre-releases.
-development=true
+development=false
 
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
