@@ -8115,7 +8115,7 @@ try_open_dwo_file (const char *file_name)
   if (desc < 0)
     return NULL;
 
-  sym_bfd = gdb_bfd_ref (bfd_fopen (absolute_name, gnutarget, FOPEN_RB, desc));
+  sym_bfd = gdb_bfd_open (absolute_name, gnutarget, desc);
   if (!sym_bfd)
     {
       xfree (absolute_name);

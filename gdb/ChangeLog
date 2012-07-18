@@ -1,5 +1,9 @@
 2012-07-18  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (try_open_dwo_file): use gdb_bfd_open.
+
+2012-07-18  Tom Tromey  <tromey@redhat.com>
+
 	* gdb_bfd.c (struct gdb_bfd_data): New.
 	(gdb_bfd_cache): New global.
 	(struct gdb_bfd_cache_search): New.
