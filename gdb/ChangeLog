@@ -1,3 +1,90 @@
+2012-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (try_open_dwo_file): Use gdb_bfd_ref and
+	gdb_bfd_unref.
+	(free_dwo_file): Use gdb_bfd_unref.
+	* cli/cli-dump.c: Include gdb_bfd.h.
+	(bfd_openw_with_cleanup): Use gdb_bfd_ref.
+	(bfd_openr_with_cleanup): Likewise.
+	* windows-nat.c (windows_make_so): Use gdb_bfd_ref,
+	gdb_bfd_unref.
+	* utils.c: Include gdb_bfd.h.
+	(do_bfd_close_cleanup): Use gdb_bfd_unref.
+	* symfile.c: Include gdb_bfd.h.
+	(separate_debug_file_exists): Use gdb_bfd_unref.
+	(bfd_open_maybe_remote): Use gdb_bfd_ref.
+	(symfile_bfd_open): Use gdb_bfd_ref, gdb_bfd_unref.
+	(generic_load): Use gdb_bfd_ref.
+	(reread_symbols): Use gdb_bfd_unref.
+	* symfile-mem.c: Include gdb_bfd.h.
+	(symbol_file_add_from_memory): Use make_cleanup_bfd_close.
+	* spu-linux-nat.c (spu_bfd_open): Use gdb_bfd_ref, gdb_bfd_unref.
+	* solib.c: Include gdb_bfd.h.
+	(solib_bfd_fopen): Use gdb_bfd_ref.
+	(solib_bfd_open): Use gdb_bfd_unref.
+	(free_so_symbols): Use gdb_bfd_unref.
+	(reload_shared_libraries_1): Use gdb_bfd_unref.
+	* solib-spu.c: Include gdb_bfd.h.
+	(spu_bfd_fopen): Use gdb_bfd_ref, gdb_bfd_unref.
+	* solib-pa64.c (pa64_solib_create_inferior_hook): Use gdb_bfd_ref,
+	gdb_bfd_unref.
+	* solib-frv.c: Include gdb_bfd.h.
+	(enable_break2): Use gdb_bfd_unref.
+	* solib-dsbt.c: Include gdb_bfd.h.
+	(enable_break2): Use gdb_bfd_unref.
+	* solib-darwin.c: Include gdb_bfd.h.
+	(darwin_solib_get_all_image_info_addr_at_init): Use gdb_bfd_ref,
+	gdb_bfd_unref.
+	(darwin_bfd_open): Use gdb_bfd_unref.
+	* rs6000-nat.c (add_vmap): Use gdb_bfd_ref, gdb_bfd_unref.
+	* remote-mips.c: Include gdb_bfd.h.
+	(mips_load_srec): Use gdb_bfd_ref.
+	(pmon_load_fast): Use gdb_bfd_ref.
+	* remote-m32r-sdi.c: Include gdb_bfd.h.
+	(m32r_load): Use gdb_bfd_ref.
+	* record.c: Include gdb_bfd.h.
+	(record_save_cleanups): Use gdb_bfd_unref.
+	(cmd_record_save): Use gdb_bfd_unref.
+	* procfs.c (insert_dbx_link_bpt_in_file): Use gdb_bfd_ref,
+	gdb_bfd_unref.
+	* objfiles.h (gdb_bfd_close_or_warn): Remove.
+	(gdb_bfd_ref, gdb_bfd_unref): Move to gdb_bfd.h.
+	* objfiles.c: Include gdb_bfd.h.
+	(free_objfile): Use gdb_bfd_unref.
+	(gdb_bfd_close_or_warn, gdb_bfd_ref, gdb_bfd_unref): Move to
+	gdb_bfd.c.
+	* machoread.c (macho_add_oso_symfile): Use gdb_bfd_unref.
+	(macho_symfile_read_all_oso): Use gdb_bfd_ref, gdb_bfd_unref.
+	(macho_check_dsym): Likewise.
+	* m32r-rom.c: Include gdb_bfd.h.
+	(m32r_load): Use gdb_bfd_ref.
+	(m32r_upload_command): Use gdb_bfd_ref.
+	* jit.c: Include gdb_bfd.h.
+	(jit_bfd_try_read_symtab): Use gdb_bfd_ref, gdb_bfd_unref.
+	* gdb_bfd.h: New file.
+	* gdb_bfd.c: New file.
+	* gcore.c: Include gdb_bfd.h.
+	(create_gcore_bfd): Use gdb_bfd_ref.
+	(do_bfd_delete_cleanup): Use gdb_bfd_unref.
+	(gcore_command): Use gdb_bfd_unref.
+	* exec.c: Include gdb_bfd.h.
+	(exec_close): Use gdb_bfd_unref.
+	(exec_close_1): Use gdb_bfd_unref.
+	(exec_file_attach): Use gdb_bfd_ref.
+	* elfread.c: Include gdb_bfd.h.
+	(build_id_verify): Use gdb_bfd_unref.
+	* dsrec.c: Include gdb_bfd.h.
+	(load_srec): Use gdb_bfd_ref.
+	* corelow.c: Include gdb_bfd.h.
+	(core_close): Use gdb_bfd_unref.
+	(core_open): Use gdb_bfd_ref.
+	* bfd-target.c: Include gdb_bfd.h.
+	(target_bfd_xclose): Use gdb_bfd_unref.
+	(target_bfd_reopen): Use gdb_bfd_ref.
+	* Makefile.in (SFILES): Add gdb_bfd.c.
+	(HFILES_NO_SRCDIR): Add gdb_bfd.h.
+	(COMMON_OBS): Add gdb_bfd.o.
+
 2012-07-18  Keith Seitz  <keiths@redhat.com>
 
 	* breakpoint.c (find_condition_and_thread): Initialize

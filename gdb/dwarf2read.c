@@ -64,6 +64,7 @@
 #include "gdbcore.h" /* for gnutarget */
 #include "gdb/gdb-index.h"
 #include <ctype.h>
+#include "gdb_bfd.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -8114,7 +8115,7 @@ try_open_dwo_file (const char *file_name)
   if (desc < 0)
     return NULL;
 
-  sym_bfd = bfd_fopen (absolute_name, gnutarget, FOPEN_RB, desc);
+  sym_bfd = gdb_bfd_ref (bfd_fopen (absolute_name, gnutarget, FOPEN_RB, desc));
   if (!sym_bfd)
     {
       xfree (absolute_name);
@@ -8124,13 +8125,10 @@ try_open_dwo_file (const char *file_name)
 
   if (!bfd_check_format (sym_bfd, bfd_object))
     {
-      bfd_close (sym_bfd); /* This also closes desc.  */
       xfree (absolute_name);
+      gdb_bfd_unref (sym_bfd); /* This also closes desc.  */
       return NULL;
     }
-
-  /* bfd_usrdata exists for applications and libbfd must not touch it.  */
-  gdb_assert (bfd_usrdata (sym_bfd) == NULL);
 
   return sym_bfd;
 }
@@ -8323,7 +8321,7 @@ free_dwo_file (struct dwo_file *dwo_file, struct objfile *objfile)
   struct dwarf2_section_info *section;
 
   gdb_assert (dwo_file->dwo_bfd != objfile->obfd);
-  bfd_close (dwo_file->dwo_bfd);
+  gdb_bfd_unref (dwo_file->dwo_bfd);
 
   munmap_section_buffer (&dwo_file->sections.abbrev);
   munmap_section_buffer (&dwo_file->sections.info);

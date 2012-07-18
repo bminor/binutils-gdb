@@ -38,6 +38,7 @@
 #include "gdb-dlfcn.h"
 #include "gdb_stat.h"
 #include "exceptions.h"
+#include "gdb_bfd.h"
 
 static const char *jit_reader_dir = NULL;
 
@@ -861,6 +862,7 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
       puts_unfiltered (_("Error opening JITed symbol file, ignoring it.\n"));
       return;
     }
+  nbfd = gdb_bfd_ref (nbfd);
 
   /* Check the format.  NOTE: This initializes important data that GDB uses!
      We would segfault later without this line.  */
@@ -868,7 +870,7 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
     {
       printf_unfiltered (_("\
 JITed symbol file is not an object file, ignoring it.\n"));
-      bfd_close (nbfd);
+      gdb_bfd_unref (nbfd);
       return;
     }
 

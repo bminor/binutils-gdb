@@ -23,6 +23,7 @@
 #include <time.h>
 #include "gdb_assert.h"
 #include "gdb_string.h"
+#include "gdb_bfd.h"
 
 extern void report_transfer_performance (unsigned long, time_t, time_t);
 
@@ -59,7 +60,7 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
 
   srec = (char *) alloca (maxrecsize + 1);
 
-  abfd = bfd_openr (file, 0);
+  abfd = gdb_bfd_ref (bfd_openr (file, 0));
   if (!abfd)
     {
       printf_filtered (_("Unable to open file %s\n"), file);

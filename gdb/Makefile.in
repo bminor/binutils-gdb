@@ -704,7 +704,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	exceptions.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c filesystem.c \
 	findcmd.c findvar.c frame.c frame-base.c frame-unwind.c \
-	gdbarch.c arch-utils.c gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
+	gdbarch.c arch-utils.c gdb_bfd.c gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
 	go-exp.y go-lang.c go-typeprint.c go-valprint.c \
 	inf-loop.c \
 	infcall.c \
@@ -829,7 +829,7 @@ gnulib/import/extra/snippet/warn-on-use.h \
 gnulib/import/stddef.in.h gnulib/import/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/format.h \
-common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h
+common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h gdb_bfd.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -879,7 +879,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	macrotab.o macrocmd.o macroexp.o macroscope.o \
 	mi-common.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
-	gdbarch.o arch-utils.o gdbtypes.o osabi.o copying.o \
+	gdbarch.o arch-utils.o gdbtypes.o gdb_bfd.o osabi.o copying.o \
 	memattr.o mem-break.o target.o parse.o language.o buildsym.o \
 	findcmd.o \
 	std-regs.o \

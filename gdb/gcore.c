@@ -33,6 +33,7 @@
 #include <fcntl.h>
 #include "regcache.h"
 #include "regset.h"
+#include "gdb_bfd.h"
 
 /* The largest amount of memory to read from the target at once.  We
    must throttle it to limit the amount of memory used by GDB during
@@ -50,7 +51,7 @@ static int gcore_memory_sections (bfd *);
 bfd *
 create_gcore_bfd (char *filename)
 {
-  bfd *obfd = bfd_openw (filename, default_gcore_target ());
+  bfd *obfd = gdb_bfd_ref (bfd_openw (filename, default_gcore_target ()));
 
   if (!obfd)
     error (_("Failed to open '%s' for output."), filename);
@@ -110,7 +111,7 @@ do_bfd_delete_cleanup (void *arg)
   bfd *obfd = arg;
   const char *filename = obfd->filename;
 
-  bfd_close (arg);
+  gdb_bfd_unref (arg);
   unlink (filename);
 }
 
@@ -154,7 +155,7 @@ gcore_command (char *args, int from_tty)
   fprintf_filtered (gdb_stdout, "Saved corefile %s\n", corefilename);
 
   discard_cleanups (old_chain);
-  bfd_close (obfd);
+  gdb_bfd_unref (obfd);
 }
 
 static unsigned long

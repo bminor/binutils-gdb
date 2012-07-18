@@ -3486,7 +3486,7 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
   long storage_needed;
   CORE_ADDR sym_addr;
 
-  abfd = bfd_fdopenr ("unamed", 0, fd);
+  abfd = gdb_bfd_ref (bfd_fdopenr ("unamed", 0, fd));
   if (abfd == NULL)
     {
       warning (_("Failed to create a bfd: %s."), bfd_errmsg (bfd_get_error ()));
@@ -3497,7 +3497,7 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
     {
       /* Not the correct format, so we can not possibly find the dbx_link
 	 symbol in it.	*/
-      bfd_close (abfd);
+      gdb_bfd_unref (abfd);
       return 0;
     }
 
@@ -3511,14 +3511,14 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
       if (dbx_link_bpt == NULL)
 	{
 	  warning (_("Failed to insert dbx_link breakpoint."));
-	  bfd_close (abfd);
+	  gdb_bfd_unref (abfd);
 	  return 0;
 	}
-      bfd_close (abfd);
+      gdb_bfd_unref (abfd);
       return 1;
     }
 
-  bfd_close (abfd);
+  gdb_bfd_unref (abfd);
   return 0;
 }
 

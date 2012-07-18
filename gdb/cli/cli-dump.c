@@ -32,6 +32,7 @@
 #include "readline/readline.h"
 #include "gdbcore.h"
 #include "cli/cli-utils.h"
+#include "gdb_bfd.h"
 
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
@@ -111,7 +112,7 @@ bfd_openr_with_cleanup (const char *filename, const char *target)
 {
   bfd *ibfd;
 
-  ibfd = bfd_openr (filename, target);
+  ibfd = gdb_bfd_ref (bfd_openr (filename, target));
   if (ibfd == NULL)
     error (_("Failed to open %s: %s."), filename, 
 	   bfd_errmsg (bfd_get_error ()));
@@ -131,7 +132,7 @@ bfd_openw_with_cleanup (const char *filename, const char *target,
 
   if (*mode == 'w')	/* Write: create new file */
     {
-      obfd = bfd_openw (filename, target);
+      obfd = gdb_bfd_ref (bfd_openw (filename, target));
       if (obfd == NULL)
 	error (_("Failed to open %s: %s."), filename, 
 	       bfd_errmsg (bfd_get_error ()));

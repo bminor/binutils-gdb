@@ -321,10 +321,11 @@ spu_bfd_open (ULONGEST addr)
 			  spu_bfd_iovec_stat);
   if (!nbfd)
     return NULL;
+  nbfd = gdb_bfd_ref (nbfd);
 
   if (!bfd_check_format (nbfd, bfd_object))
     {
-      bfd_close (nbfd);
+      gdb_bfd_unref (nbfd);
       return NULL;
     }
 

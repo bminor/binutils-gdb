@@ -46,6 +46,7 @@
 #include "filenames.h"
 #include "progspace.h"
 #include "objfiles.h"
+#include "gdb_bfd.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -216,7 +217,7 @@ core_close (int quitting)
 	}
 
       name = bfd_get_filename (core_bfd);
-      gdb_bfd_close_or_warn (core_bfd);
+      gdb_bfd_unref (core_bfd);
       xfree (name);
       core_bfd = NULL;
     }
@@ -319,9 +320,9 @@ core_open (char *filename, int from_tty)
   if (scratch_chan < 0)
     perror_with_name (filename);
 
-  temp_bfd = bfd_fopen (filename, gnutarget, 
-			write_files ? FOPEN_RUB : FOPEN_RB,
-			scratch_chan);
+  temp_bfd = gdb_bfd_ref (bfd_fopen (filename, gnutarget, 
+				     write_files ? FOPEN_RUB : FOPEN_RB,
+				     scratch_chan));
   if (temp_bfd == NULL)
     perror_with_name (filename);
 

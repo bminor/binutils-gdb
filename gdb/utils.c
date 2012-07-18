@@ -27,6 +27,7 @@
 #include "exceptions.h"
 #include "gdbthread.h"
 #include "fnmatch.h"
+#include "gdb_bfd.h"
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif /* HAVE_SYS_RESOURCE_H */
@@ -198,7 +199,7 @@ make_cleanup_dyn_string_delete (dyn_string_t arg)
 static void
 do_bfd_close_cleanup (void *arg)
 {
-  bfd_close (arg);
+  gdb_bfd_unref (arg);
 }
 
 struct cleanup *

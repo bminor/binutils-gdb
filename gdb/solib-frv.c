@@ -31,6 +31,7 @@
 #include "gdbcmd.h"
 #include "elf/frv.h"
 #include "exceptions.h"
+#include "gdb_bfd.h"
 
 /* Flag which indicates whether internal debug messages should be printed.  */
 static int solib_frv_debug;
@@ -574,7 +575,7 @@ enable_break2 (void)
 	{
 	  warning (_("Unable to determine dynamic linker loadmap address."));
 	  enable_break_failure_warning ();
-	  bfd_close (tmp_bfd);
+	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
 
@@ -589,7 +590,7 @@ enable_break2 (void)
 	  warning (_("Unable to load dynamic linker loadmap at address %s."),
 	           hex_string_custom (interp_loadmap_addr, 8));
 	  enable_break_failure_warning ();
-	  bfd_close (tmp_bfd);
+	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
 
@@ -623,7 +624,7 @@ enable_break2 (void)
 	  warning (_("Could not find symbol _dl_debug_addr "
 		     "in dynamic linker"));
 	  enable_break_failure_warning ();
-	  bfd_close (tmp_bfd);
+	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
 
@@ -674,7 +675,7 @@ enable_break2 (void)
 		     "(at address %s) from dynamic linker"),
 	           hex_string_custom (addr + 8, 8));
 	  enable_break_failure_warning ();
-	  bfd_close (tmp_bfd);
+	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
@@ -686,13 +687,13 @@ enable_break2 (void)
 		     "(at address %s) from dynamic linker"),
 	           hex_string_custom (addr, 8));
 	  enable_break_failure_warning ();
-	  bfd_close (tmp_bfd);
+	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
 
       /* We're done with the temporary bfd.  */
-      bfd_close (tmp_bfd);
+      gdb_bfd_unref (tmp_bfd);
 
       /* We're also done with the loadmap.  */
       xfree (ldm);

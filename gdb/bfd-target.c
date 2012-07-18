@@ -21,6 +21,7 @@
 #include "target.h"
 #include "bfd-target.h"
 #include "exec.h"
+#include "gdb_bfd.h"
 
 /* The object that is stored in the target_ops->to_data field has this
    type.  */
@@ -70,7 +71,7 @@ target_bfd_xclose (struct target_ops *t, int quitting)
 {
   struct target_bfd_data *data = t->to_data;
 
-  bfd_close (data->bfd);
+  gdb_bfd_unref (data->bfd);
   xfree (data->table.sections);
   xfree (data);
   xfree (t);
@@ -83,7 +84,7 @@ target_bfd_reopen (struct bfd *abfd)
   struct target_bfd_data *data;
 
   data = XZALLOC (struct target_bfd_data);
-  data->bfd = abfd;
+  data->bfd = gdb_bfd_ref (abfd);
   build_section_table (abfd, &data->table.sections, &data->table.sections_end);
 
   t = XZALLOC (struct target_ops);

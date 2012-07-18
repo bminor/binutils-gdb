@@ -36,6 +36,7 @@
 #include "breakpoint.h"
 #include "gdbthread.h"
 #include "exceptions.h"
+#include "gdb_bfd.h"
 
 #include "spu-tdep.h"
 
@@ -325,16 +326,16 @@ spu_bfd_fopen (char *name, CORE_ADDR addr)
   CORE_ADDR *open_closure = xmalloc (sizeof (CORE_ADDR));
   *open_closure = addr;
 
-  nbfd = bfd_openr_iovec (xstrdup (name), "elf32-spu",
-                          spu_bfd_iovec_open, open_closure,
-                          spu_bfd_iovec_pread, spu_bfd_iovec_close,
-			  spu_bfd_iovec_stat);
+  nbfd = gdb_bfd_ref (bfd_openr_iovec (xstrdup (name), "elf32-spu",
+				       spu_bfd_iovec_open, open_closure,
+				       spu_bfd_iovec_pread, spu_bfd_iovec_close,
+				       spu_bfd_iovec_stat));
   if (!nbfd)
     return NULL;
 
   if (!bfd_check_format (nbfd, bfd_object))
     {
-      bfd_close (nbfd);
+      gdb_bfd_unref (nbfd);
       return NULL;
     }
 

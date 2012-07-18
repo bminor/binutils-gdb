@@ -32,6 +32,7 @@
 #include "gcore.h"
 #include "event-loop.h"
 #include "inf-loop.h"
+#include "gdb_bfd.h"
 
 #include <signal.h>
 
@@ -2638,7 +2639,7 @@ record_save_cleanups (void *data)
   bfd *obfd = data;
   char *pathname = xstrdup (bfd_get_filename (obfd));
 
-  bfd_close (obfd);
+  gdb_bfd_unref (obfd);
   unlink (pathname);
   xfree (pathname);
 }
@@ -2854,7 +2855,7 @@ cmd_record_save (char *args, int from_tty)
     }
 
   do_cleanups (set_cleanups);
-  bfd_close (obfd);
+  gdb_bfd_unref (obfd);
   discard_cleanups (old_cleanups);
 
   /* Succeeded.  */

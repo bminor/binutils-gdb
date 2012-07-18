@@ -39,6 +39,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <time.h>
+#include "gdb_bfd.h"
 
 
 #include "serial.h"
@@ -1257,7 +1258,7 @@ m32r_load (char *args, int from_tty)
   if (!filename)
     filename = get_exec_file (1);
 
-  pbfd = bfd_openr (filename, gnutarget);
+  pbfd = gdb_bfd_ref (bfd_openr (filename, gnutarget));
   if (pbfd == NULL)
     {
       perror_with_name (filename);

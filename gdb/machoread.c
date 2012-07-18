@@ -466,14 +466,14 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
     {
       warning (_("`%s': can't read symbols: %s."), oso->name,
                bfd_errmsg (bfd_get_error ()));
-      bfd_close (abfd);
+      gdb_bfd_unref (abfd);
       return;
     }
 
   if (abfd->my_archive == NULL && oso->mtime != bfd_get_mtime (abfd))
     {
       warning (_("`%s': file time stamp mismatch."), oso->name);
-      bfd_close (abfd);
+      gdb_bfd_unref (abfd);
       return;
     }
 
@@ -482,7 +482,7 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
                               oso->nbr_syms))
     {
       warning (_("`%s': can't create hash table"), oso->name);
-      bfd_close (abfd);
+      gdb_bfd_unref (abfd);
       return;
     }
 
@@ -686,7 +686,7 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
             }
 
 	  /* Open the archive and check the format.  */
-	  archive_bfd = bfd_openr (archive_name, gnutarget);
+	  archive_bfd = gdb_bfd_ref (bfd_openr (archive_name, gnutarget));
 	  if (archive_bfd == NULL)
 	    {
 	      warning (_("Could not open OSO archive file \"%s\""),
@@ -698,17 +698,18 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
 	    {
 	      warning (_("OSO archive file \"%s\" not an archive."),
 		       archive_name);
-	      bfd_close (archive_bfd);
+	      gdb_bfd_unref (archive_bfd);
               ix = last_ix;
 	      continue;
 	    }
-	  member_bfd = bfd_openr_next_archived_file (archive_bfd, NULL);
+	  member_bfd = gdb_bfd_ref (bfd_openr_next_archived_file (archive_bfd,
+								  NULL));
 
 	  if (member_bfd == NULL)
 	    {
 	      warning (_("Could not read archive members out of "
 			 "OSO archive \"%s\""), archive_name);
-	      bfd_close (archive_bfd);
+	      gdb_bfd_unref (archive_bfd);
               ix = last_ix;
 	      continue;
 	    }
@@ -738,12 +739,13 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
                 }
 
               prev = member_bfd;
-	      member_bfd = bfd_openr_next_archived_file
-		(archive_bfd, member_bfd);
+	      member_bfd
+		= gdb_bfd_ref (bfd_openr_next_archived_file (archive_bfd,
+							     member_bfd));
 
               /* Free previous member if not referenced by an oso.  */
               if (ix2 >= last_ix)
-                bfd_close (prev);
+                gdb_bfd_unref (prev);
 	    }
           for (ix2 = ix; ix2 < last_ix; ix2++)
             {
@@ -759,7 +761,7 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
 	{
           bfd *abfd;
 
-	  abfd = bfd_openr (oso->name, gnutarget);
+	  abfd = gdb_bfd_ref (bfd_openr (oso->name, gnutarget));
 	  if (!abfd)
             warning (_("`%s': can't open to read symbols: %s."), oso->name,
                      bfd_errmsg (bfd_get_error ()));
@@ -809,7 +811,7 @@ macho_check_dsym (struct objfile *objfile)
       return NULL;
     }
   dsym_filename = xstrdup (dsym_filename);
-  dsym_bfd = bfd_openr (dsym_filename, gnutarget);
+  dsym_bfd = gdb_bfd_ref (bfd_openr (dsym_filename, gnutarget));
   if (dsym_bfd == NULL)
     {
       warning (_("can't open dsym file %s"), dsym_filename);
@@ -819,7 +821,7 @@ macho_check_dsym (struct objfile *objfile)
 
   if (!bfd_check_format (dsym_bfd, bfd_object))
     {
-      bfd_close (dsym_bfd);
+      gdb_bfd_unref (dsym_bfd);
       warning (_("bad dsym file format: %s"), bfd_errmsg (bfd_get_error ()));
       xfree (dsym_filename);
       return NULL;
@@ -829,7 +831,7 @@ macho_check_dsym (struct objfile *objfile)
                                  BFD_MACH_O_LC_UUID, &dsym_uuid) == 0)
     {
       warning (_("can't find UUID in %s"), dsym_filename);
-      bfd_close (dsym_bfd);
+      gdb_bfd_unref (dsym_bfd);
       xfree (dsym_filename);
       return NULL;
     }
@@ -837,7 +839,7 @@ macho_check_dsym (struct objfile *objfile)
               sizeof (main_uuid->command.uuid.uuid)))
     {
       warning (_("dsym file UUID doesn't match the one in %s"), objfile->name);
-      bfd_close (dsym_bfd);
+      gdb_bfd_unref (dsym_bfd);
       xfree (dsym_filename);
       return NULL;
     }

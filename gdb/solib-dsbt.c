@@ -30,6 +30,7 @@
 #include "gdbcmd.h"
 #include "elf-bfd.h"
 #include "exceptions.h"
+#include "gdb_bfd.h"
 
 #define GOT_MODULE_OFFSET 4
 
@@ -899,7 +900,7 @@ enable_break2 (void)
 	{
 	  warning (_("Could not find symbol _dl_debug_addr in dynamic linker"));
 	  enable_break_failure_warning ();
-	  bfd_close (tmp_bfd);
+	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
 
@@ -948,13 +949,13 @@ enable_break2 (void)
 		     "(at address %s) from dynamic linker"),
 	           hex_string_custom (addr + 8, 8));
 	  enable_break_failure_warning ();
-	  bfd_close (tmp_bfd);
+	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
 
       /* We're done with the temporary bfd.  */
-      bfd_close (tmp_bfd);
+      gdb_bfd_unref (tmp_bfd);
 
       /* We're also done with the loadmap.  */
       xfree (ldm);

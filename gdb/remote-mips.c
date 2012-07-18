@@ -36,6 +36,7 @@
 #include <ctype.h>
 #include "mips-tdep.h"
 #include "gdbthread.h"
+#include "gdb_bfd.h"
 
 
 /* Breakpoint types.  Values 0, 1, and 2 must agree with the watch
@@ -2787,7 +2788,7 @@ mips_load_srec (char *args)
 
   buffer = alloca (srec_frame * 2 + 256);
 
-  abfd = bfd_openr (args, 0);
+  abfd = gdb_bfd_ref (bfd_openr (args, 0));
   if (!abfd)
     {
       printf_filtered ("Unable to open file %s\n", args);
@@ -3370,7 +3371,7 @@ pmon_load_fast (char *file)
   buffer = (char *) xmalloc (MAXRECSIZE + 1);
   binbuf = (unsigned char *) xmalloc (BINCHUNK);
 
-  abfd = bfd_openr (file, 0);
+  abfd = gdb_bfd_ref (bfd_openr (file, 0));
   if (!abfd)
     {
       printf_filtered ("Unable to open file %s\n", file);

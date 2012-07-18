@@ -53,6 +53,7 @@
 #include "complaints.h"
 #include "psymtab.h"
 #include "solist.h"
+#include "gdb_bfd.h"
 
 /* Prototypes for local functions */
 
@@ -193,9 +194,9 @@ allocate_objfile (bfd *abfd, int flags)
 
   /* Update the per-objfile information that comes from the bfd, ensuring
      that any data that is reference is saved in the per-objfile data
-     region.  */
+     region.  Note that we steal a reference to ABFD.  */
 
-  objfile->obfd = gdb_bfd_ref (abfd);
+  objfile->obfd = abfd;
   if (abfd != NULL)
     {
       /* Look up the gdbarch associated with the BFD.  */
@@ -1454,75 +1455,6 @@ objfiles_changed (void)
 {
   /* Rebuild section map next time we need it.  */
   get_objfile_pspace_data (current_program_space)->objfiles_changed_p = 1;
-}
-
-/* Close ABFD, and warn if that fails.  */
-
-int
-gdb_bfd_close_or_warn (struct bfd *abfd)
-{
-  int ret;
-  char *name = bfd_get_filename (abfd);
-
-  ret = bfd_close (abfd);
-
-  if (!ret)
-    warning (_("cannot close \"%s\": %s"),
-	     name, bfd_errmsg (bfd_get_error ()));
-
-  return ret;
-}
-
-/* Add reference to ABFD.  Returns ABFD.  */
-struct bfd *
-gdb_bfd_ref (struct bfd *abfd)
-{
-  int *p_refcount;
-
-  if (abfd == NULL)
-    return NULL;
-
-  p_refcount = bfd_usrdata (abfd);
-
-  if (p_refcount != NULL)
-    {
-      *p_refcount += 1;
-      return abfd;
-    }
-
-  p_refcount = xmalloc (sizeof (*p_refcount));
-  *p_refcount = 1;
-  bfd_usrdata (abfd) = p_refcount;
-
-  return abfd;
-}
-
-/* Unreference and possibly close ABFD.  */
-void
-gdb_bfd_unref (struct bfd *abfd)
-{
-  int *p_refcount;
-  char *name;
-
-  if (abfd == NULL)
-    return;
-
-  p_refcount = bfd_usrdata (abfd);
-
-  /* Valid range for p_refcount: a pointer to int counter, which has a
-     value of 1 (single owner) or 2 (shared).  */
-  gdb_assert (*p_refcount == 1 || *p_refcount == 2);
-
-  *p_refcount -= 1;
-  if (*p_refcount > 0)
-    return;
-
-  xfree (p_refcount);
-  bfd_usrdata (abfd) = NULL;  /* Paranoia.  */
-
-  name = bfd_get_filename (abfd);
-  gdb_bfd_close_or_warn (abfd);
-  xfree (name);
 }
 
 /* The default implementation for the "iterate_over_objfiles_in_search_order"

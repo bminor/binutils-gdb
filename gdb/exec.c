@@ -33,6 +33,7 @@
 #include "arch-utils.h"
 #include "gdbthread.h"
 #include "progspace.h"
+#include "gdb_bfd.h"
 
 #include <fcntl.h>
 #include "readline/readline.h"
@@ -100,7 +101,7 @@ exec_close (void)
       bfd *abfd = exec_bfd;
       char *name = bfd_get_filename (abfd);
 
-      gdb_bfd_close_or_warn (abfd);
+      gdb_bfd_unref (abfd);
       xfree (name);
 
       /* Removing target sections may close the exec_ops target.
@@ -137,8 +138,7 @@ exec_close_1 (int quitting)
 	  need_symtab_cleanup = 1;
 	}
       else if (vp->bfd != exec_bfd)
-	/* FIXME-leak: We should be freeing vp->name too, I think.  */
-	gdb_bfd_close_or_warn (vp->bfd);
+	gdb_bfd_unref (vp->bfd);
 
       xfree (vp);
     }
@@ -232,9 +232,9 @@ exec_file_attach (char *filename, int from_tty)
 #endif
       if (scratch_chan < 0)
 	perror_with_name (filename);
-      exec_bfd = bfd_fopen (scratch_pathname, gnutarget,
-			    write_files ? FOPEN_RUB : FOPEN_RB,
-			    scratch_chan);
+      exec_bfd = gdb_bfd_ref (bfd_fopen (scratch_pathname, gnutarget,
+					 write_files ? FOPEN_RUB : FOPEN_RB,
+					 scratch_chan));
 
       if (!exec_bfd)
 	{

@@ -44,6 +44,7 @@
 #include "gdbthread.h"
 #include "regcache.h"
 #include "bcache.h"
+#include "gdb_bfd.h"
 
 extern void _initialize_elfread (void);
 
@@ -1123,7 +1124,7 @@ build_id_verify (const char *filename, struct build_id *check)
   else
     retval = 1;
 
-  gdb_bfd_close_or_warn (abfd);
+  gdb_bfd_unref (abfd);
 
   xfree (found);
 

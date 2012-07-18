@@ -40,6 +40,7 @@
 #include "inferior.h"
 #include <ctype.h>
 #include "regcache.h"
+#include "gdb_bfd.h"
 
 /*
  * All this stuff just to get my host computer's IP address!
@@ -128,7 +129,7 @@ m32r_load (char *filename, int from_tty)
   if (filename == NULL || filename[0] == 0)
     filename = get_exec_file (1);
 
-  abfd = bfd_openr (filename, 0);
+  abfd = gdb_bfd_ref (bfd_openr (filename, 0));
   if (!abfd)
     error (_("Unable to open file %s."), filename);
   if (bfd_check_format (abfd, bfd_object) == 0)
@@ -524,7 +525,7 @@ m32r_upload_command (char *args, int from_tty)
     printf_filtered (" -- Ethernet load complete.\n");
 
   gettimeofday (&end_time, NULL);
-  abfd = bfd_openr (args, 0);
+  abfd = gdb_bfd_ref (bfd_openr (args, 0));
   if (abfd != NULL)
     {		/* Download is done -- print section statistics.  */
       if (bfd_check_format (abfd, bfd_object) == 0)

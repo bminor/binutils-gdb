@@ -752,7 +752,7 @@ windows_make_so (const char *name, LPVOID load_addr)
       asection *text = NULL;
       CORE_ADDR text_vma;
 
-      abfd = bfd_openr (so->so_name, "pei-i386");
+      abfd = gdb_bfd_ref (bfd_openr (so->so_name, "pei-i386"));
 
       if (!abfd)
 	return so;
@@ -762,7 +762,7 @@ windows_make_so (const char *name, LPVOID load_addr)
 
       if (!text)
 	{
-	  bfd_close (abfd);
+	  gdb_bfd_unref (abfd);
 	  return so;
 	}
 
@@ -773,7 +773,7 @@ windows_make_so (const char *name, LPVOID load_addr)
 						   load_addr + 0x1000);
       cygwin_load_end = cygwin_load_start + bfd_section_size (abfd, text);
 
-      bfd_close (abfd);
+      gdb_bfd_unref (abfd);
     }
 #endif
 

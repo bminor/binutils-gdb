@@ -522,10 +522,6 @@ extern void set_objfile_data (struct objfile *objfile,
 extern void *objfile_data (struct objfile *objfile,
 			   const struct objfile_data *data);
 
-extern struct bfd *gdb_bfd_ref (struct bfd *abfd);
-extern void gdb_bfd_unref (struct bfd *abfd);
-extern int gdb_bfd_close_or_warn (struct bfd *abfd);
-
 extern void default_iterate_over_objfiles_in_search_order
   (struct gdbarch *gdbarch,
    iterate_over_objfiles_in_search_order_cb_ftype *cb,
