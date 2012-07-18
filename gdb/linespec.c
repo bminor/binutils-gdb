@@ -1420,7 +1420,7 @@ unexpected_linespec_error (linespec_parser *parser)
 /* Parse and return a line offset in STRING.  */
 
 static struct line_offset
-linespec_parse_line_offset (char *string)
+linespec_parse_line_offset (const char *string)
 {
   struct line_offset line_offset = {0, LINE_OFFSET_NONE};
 
