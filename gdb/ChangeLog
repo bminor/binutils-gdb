@@ -1,5 +1,9 @@
 2012-07-18  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Update GDB version number to 7.4.91.
+
+2012-07-18  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac (development): Set to false.
 	* configure: Regenerate.
 
