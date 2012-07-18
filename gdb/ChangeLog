@@ -1,3 +1,8 @@
+2012-07-18  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.5 branch created (branch timestamp: 2012-07-18 03:22 UTC)
+	* version.in: Bump version to 7.5.50.20120718-cvs.
+
 2012-07-17  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (linespec_parse_line_offset): Make parameter
