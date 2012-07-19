@@ -1,5 +1,13 @@
 2012-07-19  Tom Tromey  <tromey@redhat.com>
 
+	* c-exp.y (enum token_flags): New.
+	(struct token) <cxx_only>: Remove.
+	<flags>: New field.
+	(tokentab3, tokentab2, ident_tokens): Update.
+	(lex_one_token): Update.  Handle FLAG_SHADOW.
+
+2012-07-19  Tom Tromey  <tromey@redhat.com>
+
 	* ax-gdb.c (gen_expr): Handle UNOP_CAST_TYPE, UNOP_MEMVAL_TYPE.
 	* breakpoint.c (watchpoint_exp_is_const): Handle UNOP_CAST_TYPE,
 	UNOP_REINTERPRET_CAST, UNOP_DYNAMIC_CAST.

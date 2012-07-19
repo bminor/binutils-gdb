@@ -1963,19 +1963,34 @@ parse_string_or_char (char *tokptr, char **outptr, struct typed_stoken *value,
   return quote == '"' ? STRING : CHAR;
 }
 
+/* This is used to associate some attributes with a token.  */
+
+enum token_flags
+{
+  /* If this bit is set, the token is C++-only.  */
+
+  FLAG_CXX = 1,
+
+  /* If this bit is set, the token is conditional: if there is a
+     symbol of the same name, then the token is a symbol; otherwise,
+     the token is a keyword.  */
+
+  FLAG_SHADOW = 2
+};
+
 struct token
 {
   char *operator;
   int token;
   enum exp_opcode opcode;
-  int cxx_only;
+  enum token_flags flags;
 };
 
 static const struct token tokentab3[] =
   {
     {">>=", ASSIGN_MODIFY, BINOP_RSH, 0},
     {"<<=", ASSIGN_MODIFY, BINOP_LSH, 0},
-    {"->*", ARROW_STAR, BINOP_END, 1},
+    {"->*", ARROW_STAR, BINOP_END, FLAG_CXX},
     {"...", DOTDOTDOT, BINOP_END, 0}
   };
 
@@ -2003,48 +2018,48 @@ static const struct token tokentab2[] =
     {"!=", NOTEQUAL, BINOP_END, 0},
     {"<=", LEQ, BINOP_END, 0},
     {">=", GEQ, BINOP_END, 0},
-    {".*", DOT_STAR, BINOP_END, 1}
+    {".*", DOT_STAR, BINOP_END, FLAG_CXX}
   };
 
 /* Identifier-like tokens.  */
 static const struct token ident_tokens[] =
   {
     {"unsigned", UNSIGNED, OP_NULL, 0},
-    {"template", TEMPLATE, OP_NULL, 1},
+    {"template", TEMPLATE, OP_NULL, FLAG_CXX},
     {"volatile", VOLATILE_KEYWORD, OP_NULL, 0},
     {"struct", STRUCT, OP_NULL, 0},
     {"signed", SIGNED_KEYWORD, OP_NULL, 0},
     {"sizeof", SIZEOF, OP_NULL, 0},
     {"double", DOUBLE_KEYWORD, OP_NULL, 0},
-    {"false", FALSEKEYWORD, OP_NULL, 1},
-    {"class", CLASS, OP_NULL, 1},
+    {"false", FALSEKEYWORD, OP_NULL, FLAG_CXX},
+    {"class", CLASS, OP_NULL, FLAG_CXX},
     {"union", UNION, OP_NULL, 0},
     {"short", SHORT, OP_NULL, 0},
     {"const", CONST_KEYWORD, OP_NULL, 0},
     {"enum", ENUM, OP_NULL, 0},
     {"long", LONG, OP_NULL, 0},
-    {"true", TRUEKEYWORD, OP_NULL, 1},
+    {"true", TRUEKEYWORD, OP_NULL, FLAG_CXX},
     {"int", INT_KEYWORD, OP_NULL, 0},
-    {"new", NEW, OP_NULL, 1},
-    {"delete", DELETE, OP_NULL, 1},
-    {"operator", OPERATOR, OP_NULL, 1},
+    {"new", NEW, OP_NULL, FLAG_CXX},
+    {"delete", DELETE, OP_NULL, FLAG_CXX},
+    {"operator", OPERATOR, OP_NULL, FLAG_CXX},
 
-    {"and", ANDAND, BINOP_END, 1},
-    {"and_eq", ASSIGN_MODIFY, BINOP_BITWISE_AND, 1},
-    {"bitand", '&', OP_NULL, 1},
-    {"bitor", '|', OP_NULL, 1},
-    {"compl", '~', OP_NULL, 1},
-    {"not", '!', OP_NULL, 1},
-    {"not_eq", NOTEQUAL, BINOP_END, 1},
-    {"or", OROR, BINOP_END, 1},
-    {"or_eq", ASSIGN_MODIFY, BINOP_BITWISE_IOR, 1},
-    {"xor", '^', OP_NULL, 1},
-    {"xor_eq", ASSIGN_MODIFY, BINOP_BITWISE_XOR, 1},
+    {"and", ANDAND, BINOP_END, FLAG_CXX},
+    {"and_eq", ASSIGN_MODIFY, BINOP_BITWISE_AND, FLAG_CXX},
+    {"bitand", '&', OP_NULL, FLAG_CXX},
+    {"bitor", '|', OP_NULL, FLAG_CXX},
+    {"compl", '~', OP_NULL, FLAG_CXX},
+    {"not", '!', OP_NULL, FLAG_CXX},
+    {"not_eq", NOTEQUAL, BINOP_END, FLAG_CXX},
+    {"or", OROR, BINOP_END, FLAG_CXX},
+    {"or_eq", ASSIGN_MODIFY, BINOP_BITWISE_IOR, FLAG_CXX},
+    {"xor", '^', OP_NULL, FLAG_CXX},
+    {"xor_eq", ASSIGN_MODIFY, BINOP_BITWISE_XOR, FLAG_CXX},
 
-    {"const_cast", CONST_CAST, OP_NULL, 1 },
-    {"dynamic_cast", DYNAMIC_CAST, OP_NULL, 1 },
-    {"static_cast", STATIC_CAST, OP_NULL, 1 },
-    {"reinterpret_cast", REINTERPRET_CAST, OP_NULL, 1 }
+    {"const_cast", CONST_CAST, OP_NULL, FLAG_CXX },
+    {"dynamic_cast", DYNAMIC_CAST, OP_NULL, FLAG_CXX },
+    {"static_cast", STATIC_CAST, OP_NULL, FLAG_CXX },
+    {"reinterpret_cast", REINTERPRET_CAST, OP_NULL, FLAG_CXX }
   };
 
 /* When we find that lexptr (the global var defined in parse.c) is
@@ -2180,7 +2195,7 @@ lex_one_token (void)
   for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
     if (strncmp (tokstart, tokentab3[i].operator, 3) == 0)
       {
-	if (tokentab3[i].cxx_only
+	if ((tokentab3[i].flags & FLAG_CXX) != 0
 	    && parse_language->la_language != language_cplus)
 	  break;
 
@@ -2193,7 +2208,7 @@ lex_one_token (void)
   for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
     if (strncmp (tokstart, tokentab2[i].operator, 2) == 0)
       {
-	if (tokentab2[i].cxx_only
+	if ((tokentab2[i].flags & FLAG_CXX) != 0
 	    && parse_language->la_language != language_cplus)
 	  break;
 
@@ -2467,9 +2482,25 @@ lex_one_token (void)
   for (i = 0; i < sizeof ident_tokens / sizeof ident_tokens[0]; i++)
     if (strcmp (copy, ident_tokens[i].operator) == 0)
       {
-	if (ident_tokens[i].cxx_only
+	if ((ident_tokens[i].flags & FLAG_CXX) != 0
 	    && parse_language->la_language != language_cplus)
 	  break;
+
+	if ((ident_tokens[i].flags & FLAG_SHADOW) != 0)
+	  {
+	    int is_a_field_of_this = 0;
+
+	    if (lookup_symbol (copy, expression_context_block,
+			       VAR_DOMAIN,
+			       (parse_language->la_language == language_cplus
+				? &is_a_field_of_this
+				: NULL))
+		!= NULL)
+	      {
+		/* The keyword is shadowed.  */
+		break;
+	      }
+	  }
 
 	/* It is ok to always set this, even though we don't always
 	   strictly need to.  */
