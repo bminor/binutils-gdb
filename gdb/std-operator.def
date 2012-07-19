@@ -332,3 +332,12 @@ OP (OP_DECFLOAT)
 /* OP_ADL_FUNC specifies that the function is to be looked up in an
    Argument Dependent manner (Koenig lookup).  */
 OP (OP_ADL_FUNC)
+
+/* The typeof operator.  This has one expression argument, which is
+   evaluated solely for its type.  */
+OP (OP_TYPEOF)
+
+/* The decltype operator.  This has one expression argument, which is
+   evaluated solely for its type.  This is similar to typeof, but has
+   slight different semantics.  */
+OP (OP_DECLTYPE)

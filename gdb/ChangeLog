@@ -1,5 +1,24 @@
 2012-07-19  Tom Tromey  <tromey@redhat.com>
 
+	PR exp/13206:
+	* ax-gdb.c (gen_expr) <OP_TYPEOF, OP_DECLTYPE>: New cases.
+	* breakpoint.c (watchpoint_exp_is_const) <OP_TYPEOF,
+	OP_DECLTYPE>: New cases.
+	* c-exp.y (TYPEOF, DECLTYPE): New tokens.
+	(type_exp): Add new productions.
+	(ident_tokens): Add __typeof__, typeof, __typeof, __decltype,
+	and decltype.
+	* eval.c (evaluate_subexp_standard) <OP_TYPEOF, OP_DECLTYPE>:
+	New case.
+	* expprint.c (dump_subexp_body_standard) <OP_TYPEOF,
+	OP_DECLTYPE>: New case.
+	* parse.c (operator_length_standard) <OP_TYPEOF, OP_DECLTYPE>:
+	New case.
+	* std-operator.def (OP_TYPEOF, OP_DECLTYPE): New constants.
+	* varobj.c (varobj_create): Handle OP_TYPEOF, OP_DECLTYPE.
+
+2012-07-19  Tom Tromey  <tromey@redhat.com>
+
 	* c-exp.y (enum token_flags): New.
 	(struct token) <cxx_only>: Remove.
 	<flags>: New field.

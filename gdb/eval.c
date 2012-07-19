@@ -2900,6 +2900,45 @@ evaluate_subexp_standard (struct type *expect_type,
       else
         error (_("Attempt to use a type name as an expression"));
 
+    case OP_TYPEOF:
+    case OP_DECLTYPE:
+      if (noside == EVAL_SKIP)
+	{
+	  evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
+	  goto nosideret;
+	}
+      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	{
+	  enum exp_opcode sub_op = exp->elts[*pos].opcode;
+	  struct value *result;
+
+	  result = evaluate_subexp (NULL_TYPE, exp, pos,
+				    EVAL_AVOID_SIDE_EFFECTS);
+
+	  /* 'decltype' has special semantics for lvalues.  */
+	  if (op == OP_DECLTYPE
+	      && (sub_op == BINOP_SUBSCRIPT
+		  || sub_op == STRUCTOP_MEMBER
+		  || sub_op == STRUCTOP_MPTR
+		  || sub_op == UNOP_IND
+		  || sub_op == STRUCTOP_STRUCT
+		  || sub_op == STRUCTOP_PTR
+		  || sub_op == OP_SCOPE))
+	    {
+	      struct type *type = value_type (result);
+
+	      if (TYPE_CODE (check_typedef (type)) != TYPE_CODE_REF)
+		{
+		  type = lookup_reference_type (type);
+		  result = allocate_value (type);
+		}
+	    }
+
+	  return result;
+	}
+      else
+        error (_("Attempt to use a type as an expression"));
+
     default:
       /* Removing this case and compiling with gcc -Wall reveals that
          a lot of cases are hitting this case.  Some of these should

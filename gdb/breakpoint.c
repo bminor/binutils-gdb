@@ -10162,6 +10162,8 @@ watchpoint_exp_is_const (const struct expression *exp)
 	case OP_BITSTRING:
 	case OP_ARRAY:
 	case OP_TYPE:
+	case OP_TYPEOF:
+	case OP_DECLTYPE:
 	case OP_NAME:
 	case OP_OBJC_NSSTRING:
 

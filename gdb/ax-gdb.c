@@ -2255,6 +2255,8 @@ gen_expr (struct expression *exp, union exp_element **pc,
       break;
 
     case OP_TYPE:
+    case OP_TYPEOF:
+    case OP_DECLTYPE:
       error (_("Attempt to use a type name as an expression."));
 
     default:

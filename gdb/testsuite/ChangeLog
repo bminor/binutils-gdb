@@ -1,3 +1,9 @@
+2012-07-19  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/casts.exp: Add tests for typeof and decltype.
+	* gdb.cp/casts.cc (decltype): New function.
+	(main): Use it.
+
 2012-07-19  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/sigall.exp (signals): New list.

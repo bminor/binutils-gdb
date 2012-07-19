@@ -971,6 +971,12 @@ dump_subexp_body_standard (struct expression *exp,
       fprintf_filtered (stream, ")");
       elt += 2;
       break;
+    case OP_TYPEOF:
+    case OP_DECLTYPE:
+      fprintf_filtered (stream, "Typeof (");
+      elt = dump_subexp (exp, stream, elt);
+      fprintf_filtered (stream, ")");
+      break;
     case STRUCTOP_STRUCT:
     case STRUCTOP_PTR:
       {

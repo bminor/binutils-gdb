@@ -675,7 +675,9 @@ varobj_create (char *objname,
 	}
 
       /* Don't allow variables to be created for types.  */
-      if (var->root->exp->elts[0].opcode == OP_TYPE)
+      if (var->root->exp->elts[0].opcode == OP_TYPE
+	  || var->root->exp->elts[0].opcode == OP_TYPEOF
+	  || var->root->exp->elts[0].opcode == OP_DECLTYPE)
 	{
 	  do_cleanups (old_chain);
 	  fprintf_unfiltered (gdb_stderr, "Attempt to use a type name"

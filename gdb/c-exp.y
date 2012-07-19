@@ -219,6 +219,8 @@ static void check_parameter_typelist (VEC (type_ptr) *);
 %type <sval> operator
 %token REINTERPRET_CAST DYNAMIC_CAST STATIC_CAST CONST_CAST
 %token ENTRY
+%token TYPEOF
+%token DECLTYPE
 
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
@@ -268,6 +270,20 @@ type_exp:	type
 			{ write_exp_elt_opcode(OP_TYPE);
 			  write_exp_elt_type($1);
 			  write_exp_elt_opcode(OP_TYPE);}
+	|	TYPEOF '(' exp ')'
+			{
+			  write_exp_elt_opcode (OP_TYPEOF);
+			}
+	|	TYPEOF '(' type ')'
+			{
+			  write_exp_elt_opcode (OP_TYPE);
+			  write_exp_elt_type ($3);
+			  write_exp_elt_opcode (OP_TYPE);
+			}
+	|	DECLTYPE '(' exp ')'
+			{
+			  write_exp_elt_opcode (OP_DECLTYPE);
+			}
 	;
 
 /* Expressions, including the comma operator.  */
@@ -2059,7 +2075,13 @@ static const struct token ident_tokens[] =
     {"const_cast", CONST_CAST, OP_NULL, FLAG_CXX },
     {"dynamic_cast", DYNAMIC_CAST, OP_NULL, FLAG_CXX },
     {"static_cast", STATIC_CAST, OP_NULL, FLAG_CXX },
-    {"reinterpret_cast", REINTERPRET_CAST, OP_NULL, FLAG_CXX }
+    {"reinterpret_cast", REINTERPRET_CAST, OP_NULL, FLAG_CXX },
+
+    {"__typeof__", TYPEOF, OP_TYPEOF, 0 },
+    {"__typeof", TYPEOF, OP_TYPEOF, 0 },
+    {"typeof", TYPEOF, OP_TYPEOF, FLAG_SHADOW },
+    {"__decltype", DECLTYPE, OP_DECLTYPE, FLAG_CXX },
+    {"decltype", DECLTYPE, OP_DECLTYPE, FLAG_CXX | FLAG_SHADOW }
   };
 
 /* When we find that lexptr (the global var defined in parse.c) is
