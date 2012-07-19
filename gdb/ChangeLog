@@ -1,3 +1,8 @@
+2012-07-19  Pedro Alves  <palves@redhat.com>
+
+	* record.c (record_resume): Ask the target beneath to report all
+	signals.
+
 2012-07-19  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_ranges_read): Ignore ranges starting at zero if

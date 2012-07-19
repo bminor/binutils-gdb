@@ -1104,6 +1104,9 @@ record_resume (struct target_ops *ops, ptid_t ptid, int step,
             }
         }
 
+      /* Make sure the target beneath reports all signals.  */
+      target_pass_signals (0, NULL);
+
       record_beneath_to_resume (record_beneath_to_resume_ops,
                                 ptid, step, signal);
     }
