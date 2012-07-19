@@ -1,3 +1,15 @@
+2012-07-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/sigall.exp (signals): New list.
+	<top level>: Loop over signals in the $signals list instead of
+	calling a test function once per signal.
+	* gdb.reverse/sigall-precsave.exp (signals): New list.
+	<top level>: Loop over signals in the $signals list instead of
+	calling a test function once per signal.
+	* gdb.reverse/sigall-reverse.exp (signals): New list.
+	<top level>: Loop over signals in the $signals list instead of
+	calling a test function once per signal.
+
 2012-07-19  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/setshow.exp: Test 'set args ~'.
