@@ -1,3 +1,9 @@
+2012-07-19  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_ranges_read): Ignore ranges starting at zero if
+	there's no section at address zero.
+	(dwarf2_record_block_ranges): Ditto.
+
 2012-07-19  Yao Qi  <yao@codesourcery.com>
 
 	* command.h, remote.c: Fix a typo in comment.

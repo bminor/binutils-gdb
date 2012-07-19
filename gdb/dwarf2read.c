@@ -9284,6 +9284,17 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
       range_beginning += base;
       range_end += base;
 
+      /* A not-uncommon case of bad debug info.
+	 Don't pollute the addrmap with bad data.  */
+      if (range_beginning + baseaddr == 0
+	  && !dwarf2_per_objfile->has_section_at_zero)
+	{
+	  complaint (&symfile_complaints,
+		     _(".debug_ranges entry has start address of zero"
+		       " [in module %s]"), objfile->name);
+	  continue;
+	}
+
       if (ranges_pst != NULL)
 	addrmap_set_empty (objfile->psymtabs_addrmap,
 			   range_beginning + baseaddr,
@@ -9599,9 +9610,20 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 	      if (start == end)
 		continue;
 
-              record_block_range (block,
-                                  baseaddr + base + start,
-                                  baseaddr + base + end - 1);
+	      start += base + baseaddr;
+	      end += base + baseaddr;
+
+	      /* A not-uncommon case of bad debug info.
+		 Don't pollute the addrmap with bad data.  */
+	      if (start == 0 && !dwarf2_per_objfile->has_section_at_zero)
+		{
+		  complaint (&symfile_complaints,
+			     _(".debug_ranges entry has start address of zero"
+			       " [in module %s]"), objfile->name);
+		  continue;
+		}
+
+              record_block_range (block, start, end - 1);
             }
         }
     }
