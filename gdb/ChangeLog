@@ -1,3 +1,7 @@
+2012-07-19  Yao Qi  <yao@codesourcery.com>
+
+	* command.h, remote.c: Fix a typo in comment.
+
 2012-07-19  Tom Tromey  <tromey@redhat.com>
 
 	PR exp/13206:

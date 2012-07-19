@@ -93,7 +93,7 @@ typedef enum var_types
     /* String which stores a filename.  (*VAR) is a malloc'd
        string.  */
     var_filename,
-    /* ZeroableInteger.  *VAR is an int.  Like Unsigned Integer except
+    /* ZeroableInteger.  *VAR is an int.  Like var_integer except
        that zero really means zero.  */
     var_zinteger,
     /* ZeroableUnsignedInteger.  *VAR is an unsigned int.  Zero really
