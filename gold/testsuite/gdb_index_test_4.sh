@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# gdb_index_test_3.sh -- a test case for the --gdb-index option.
+# gdb_index_test_4.sh -- a test case for the --gdb-index option.
 
 # Copyright 2012 Free Software Foundation, Inc.
 # Written by Cary Coutant <ccoutant@google.com>.
@@ -22,28 +22,4 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-check()
-{
-    if ! grep -q "$2" "$1"
-    then
-	echo "Did not find expected output:"
-	echo "   $2"
-	echo ""
-	echo "Actual error output below:"
-	cat "$1"
-	exit 1
-    fi
-}
-
-STDOUT=gdb_index_test_3.stdout
-
-check $STDOUT "^Version [45]"
-
-# Look for the symbols we know should be in the symbol table.
-
-check $STDOUT "^\[ *[0-9]*\] main:"
-check $STDOUT "^\[ *[0-9]*\] check_int:"
-check $STDOUT "^\[ *[0-9]*\] j:"
-check $STDOUT "^\[ *[0-9]*\] int:"
-
-exit 0
+exec ${srcdir}/gdb_index_test_comm.sh gdb_index_test_4.stdout

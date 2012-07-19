@@ -1967,12 +1967,14 @@ memory_test: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t
 memory_test.stdout: memory_test
 	$(TEST_READELF) -lWS  $< > $@
 
-# Test that --gdb-index functions correctly.
+if HAVE_PUBNAMES
+
+# Test that --gdb-index functions correctly without gcc-generated pubnames.
 check_SCRIPTS += gdb_index_test_1.sh
 check_DATA += gdb_index_test_1.stdout
 MOSTLYCLEANFILES += gdb_index_test_1.stdout gdb_index_test_1
 gdb_index_test.o: gdb_index_test.cc
-	$(CXXCOMPILE) -O0 -g -c -o $@ $<
+	$(CXXCOMPILE) -O0 -g -gno-pubnames -c -o $@ $<
 gdb_index_test_1: gdb_index_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
 gdb_index_test_1.stdout: gdb_index_test_1
@@ -1980,6 +1982,7 @@ gdb_index_test_1.stdout: gdb_index_test_1
 
 if HAVE_ZLIB
 
+# Test that --gdb-index functions correctly with compressed debug sections.
 check_SCRIPTS += gdb_index_test_2.sh
 check_DATA += gdb_index_test_2.stdout
 MOSTLYCLEANFILES += gdb_index_test_2.stdout gdb_index_test_2
@@ -1992,7 +1995,7 @@ gdb_index_test_2.stdout: gdb_index_test_2
 
 endif HAVE_ZLIB
 
-# Another simple C test (DW_AT_high_pc encoding) for --gdb-index
+# Another simple C test (DW_AT_high_pc encoding) for --gdb-index.
 check_SCRIPTS += gdb_index_test_3.sh
 check_DATA += gdb_index_test_3.stdout
 MOSTLYCLEANFILES += gdb_index_test_3.stdout gdb_index_test_3
@@ -2003,6 +2006,18 @@ gdb_index_test_3: gdb_index_test_3.o gcctestdir/ld
 gdb_index_test_3.stdout: gdb_index_test_3
 	$(TEST_READELF) --debug-dump=gdb_index $< > $@
 
+# Test that --gdb-index functions correctly with gcc-generated pubnames.
+check_SCRIPTS += gdb_index_test_4.sh
+check_DATA += gdb_index_test_4.stdout
+MOSTLYCLEANFILES += gdb_index_test_4.stdout gdb_index_test_4
+gdb_index_test_pub.o: gdb_index_test.cc
+	$(CXXCOMPILE) -O0 -g -gpubnames -c -o $@ $<
+gdb_index_test_4: gdb_index_test_pub.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--gdb-index $<
+gdb_index_test_4.stdout: gdb_index_test_4
+	$(TEST_READELF) --debug-dump=gdb_index $< > $@
+
+endif HAVE_PUBNAMES
 
 # End-to-end incremental linking tests.
 # Incremental linking is currently supported only on the x86_64 target.

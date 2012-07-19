@@ -1,3 +1,21 @@
+2012-07-18  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/14344
+	* configure.ac: Add check for -gpubnames support.
+	* configure: Regenerate.
+	* testsuite/Makefile.am (gdb_index_test_1): Add check for -gpubnames
+	support; force -gno-pubnames.
+	(gdb_index_test_2, gdb_index_test_3): Add check for -gpubnames
+	support.
+	(gdb_index_test_4): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/gdb_index_test_1.sh: Refactor code into common file.
+	* testsuite/gdb_index_test_2.sh: Likewise.
+	* testsuite/gdb_index_test_3.sh: Don't look for space after colon.
+	* testsuite/gdb_index_test_4.sh: New script.
+	* testsuite/gdb_index_test_comm.sh: New script with common code;
+	don't look for space after colon.
+
 2012-07-16  Sriraman Tallam  <tmsriram@google.com>
 
 	* gold.cc (queue_middle_tasks): Update function order only after

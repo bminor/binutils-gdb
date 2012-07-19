@@ -562,6 +562,13 @@ if test "$gold_cv_stat_st_mtim" = "yes"; then
 	    [Define if struct stat has a field st_mtim with timespec for mtime])
 fi
 
+dnl Check if gcc supports the -gpubnames option.
+save_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -gpubnames"
+AC_COMPILE_IFELSE([int i;], [have_pubnames=yes], [have_pubnames=no])
+CXXFLAGS="$save_CXXFLAGS"
+AM_CONDITIONAL(HAVE_PUBNAMES, test "$have_pubnames" = "yes")
+
 AC_LANG_POP(C++)
 
 AC_CHECK_HEADERS(locale.h)
