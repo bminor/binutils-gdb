@@ -471,16 +471,12 @@ exp	:	lcurly arglist rcurly	%prec ARROW
 			  write_exp_elt_opcode (OP_ARRAY); }
 	;
 
-exp	:	lcurly type rcurly exp  %prec UNARY
-			{ write_exp_elt_opcode (UNOP_MEMVAL);
-			  write_exp_elt_type ($2);
-			  write_exp_elt_opcode (UNOP_MEMVAL); }
+exp	:	lcurly type_exp rcurly exp  %prec UNARY
+			{ write_exp_elt_opcode (UNOP_MEMVAL_TYPE); }
 	;
 
-exp	:	'(' type ')' exp  %prec UNARY
-			{ write_exp_elt_opcode (UNOP_CAST);
-			  write_exp_elt_type ($2);
-			  write_exp_elt_opcode (UNOP_CAST); }
+exp	:	'(' type_exp ')' exp  %prec UNARY
+			{ write_exp_elt_opcode (UNOP_CAST_TYPE); }
 	;
 
 exp	:	'(' exp1 ')'
@@ -639,30 +635,22 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			  write_exp_elt_opcode (OP_LONG); }
 	;
 
-exp	:	REINTERPRET_CAST '<' type '>' '(' exp ')' %prec UNARY
-			{ write_exp_elt_opcode (UNOP_REINTERPRET_CAST);
-			  write_exp_elt_type ($3);
-			  write_exp_elt_opcode (UNOP_REINTERPRET_CAST); }
+exp	:	REINTERPRET_CAST '<' type_exp '>' '(' exp ')' %prec UNARY
+			{ write_exp_elt_opcode (UNOP_REINTERPRET_CAST); }
 	;
 
-exp	:	STATIC_CAST '<' type '>' '(' exp ')' %prec UNARY
-			{ write_exp_elt_opcode (UNOP_CAST);
-			  write_exp_elt_type ($3);
-			  write_exp_elt_opcode (UNOP_CAST); }
+exp	:	STATIC_CAST '<' type_exp '>' '(' exp ')' %prec UNARY
+			{ write_exp_elt_opcode (UNOP_CAST_TYPE); }
 	;
 
-exp	:	DYNAMIC_CAST '<' type '>' '(' exp ')' %prec UNARY
-			{ write_exp_elt_opcode (UNOP_DYNAMIC_CAST);
-			  write_exp_elt_type ($3);
-			  write_exp_elt_opcode (UNOP_DYNAMIC_CAST); }
+exp	:	DYNAMIC_CAST '<' type_exp '>' '(' exp ')' %prec UNARY
+			{ write_exp_elt_opcode (UNOP_DYNAMIC_CAST); }
 	;
 
-exp	:	CONST_CAST '<' type '>' '(' exp ')' %prec UNARY
+exp	:	CONST_CAST '<' type_exp '>' '(' exp ')' %prec UNARY
 			{ /* We could do more error checking here, but
 			     it doesn't seem worthwhile.  */
-			  write_exp_elt_opcode (UNOP_CAST);
-			  write_exp_elt_type ($3);
-			  write_exp_elt_opcode (UNOP_CAST); }
+			  write_exp_elt_opcode (UNOP_CAST_TYPE); }
 	;
 
 string_exp:

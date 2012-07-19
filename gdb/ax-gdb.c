@@ -2076,11 +2076,53 @@ gen_expr (struct expression *exp, union exp_element **pc,
       }
       break;
 
+    case UNOP_CAST_TYPE:
+      {
+	int offset;
+	struct value *val;
+	struct type *type;
+
+	++*pc;
+	offset = *pc - exp->elts;
+	val = evaluate_subexp (NULL, exp, &offset, EVAL_AVOID_SIDE_EFFECTS);
+	type = value_type (val);
+	*pc = &exp->elts[offset];
+
+	gen_expr (exp, pc, ax, value);
+	gen_cast (ax, value, type);
+      }
+      break;
+
     case UNOP_MEMVAL:
       {
 	struct type *type = check_typedef ((*pc)[1].type);
 
 	(*pc) += 3;
+	gen_expr (exp, pc, ax, value);
+
+	/* If we have an axs_rvalue or an axs_lvalue_memory, then we
+	   already have the right value on the stack.  For
+	   axs_lvalue_register, we must convert.  */
+	if (value->kind == axs_lvalue_register)
+	  require_rvalue (ax, value);
+
+	value->type = type;
+	value->kind = axs_lvalue_memory;
+      }
+      break;
+
+    case UNOP_MEMVAL_TYPE:
+      {
+	int offset;
+	struct value *val;
+	struct type *type;
+
+	++*pc;
+	offset = *pc - exp->elts;
+	val = evaluate_subexp (NULL, exp, &offset, EVAL_AVOID_SIDE_EFFECTS);
+	type = value_type (val);
+	*pc = &exp->elts[offset];
+
 	gen_expr (exp, pc, ax, value);
 
 	/* If we have an axs_rvalue or an axs_lvalue_memory, then we

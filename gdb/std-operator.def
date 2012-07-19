@@ -216,6 +216,9 @@ OP (OP_ARRAY)
    It casts the value of the following subexpression.  */
 OP (UNOP_CAST)
 
+/* Like UNOP_CAST, but the type is a subexpression.  */
+OP (UNOP_CAST_TYPE)
+
 /* The C++ dynamic_cast operator.  */
 OP (UNOP_DYNAMIC_CAST)
 
@@ -234,6 +237,9 @@ OP (UNOP_MEMVAL)
    It casts the contents of the word offsetted by the value of the
    following subexpression from the TLS specified by `struct objfile'.  */
 OP (UNOP_MEMVAL_TLS)
+
+/* Like UNOP_MEMVAL, but the type is supplied as a subexpression.  */
+OP (UNOP_MEMVAL_TYPE)
 
 /* UNOP_... operate on one value from a following subexpression
    and replace it with a result.  They take no immediate arguments.  */

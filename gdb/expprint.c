@@ -429,13 +429,25 @@ print_subexp_standard (struct expression *exp, int *pos,
 	fputs_filtered (")", stream);
       return;
 
+    case UNOP_CAST_TYPE:
+      (*pos) += 1;
+      if ((int) prec > (int) PREC_PREFIX)
+	fputs_filtered ("(", stream);
+      fputs_filtered ("(", stream);
+      print_subexp (exp, pos, stream, PREC_PREFIX);
+      fputs_filtered (") ", stream);
+      print_subexp (exp, pos, stream, PREC_PREFIX);
+      if ((int) prec > (int) PREC_PREFIX)
+	fputs_filtered (")", stream);
+      return;
+
     case UNOP_DYNAMIC_CAST:
     case UNOP_REINTERPRET_CAST:
       fputs_filtered (opcode == UNOP_DYNAMIC_CAST ? "dynamic_cast"
 		      : "reinterpret_cast", stream);
       fputs_filtered ("<", stream);
-      (*pos) += 2;
-      type_print (exp->elts[pc + 1].type, "", stream, 0);
+      (*pos) += 1;
+      print_subexp (exp, pos, stream, PREC_PREFIX);
       fputs_filtered ("> (", stream);
       print_subexp (exp, pos, stream, PREC_PREFIX);
       fputs_filtered (")", stream);
@@ -467,6 +479,18 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  fputs_filtered ("} ", stream);
 	  print_subexp (exp, pos, stream, PREC_PREFIX);
 	}
+      if ((int) prec > (int) PREC_PREFIX)
+	fputs_filtered (")", stream);
+      return;
+
+    case UNOP_MEMVAL_TYPE:
+      (*pos) += 1;
+      if ((int) prec > (int) PREC_PREFIX)
+	fputs_filtered ("(", stream);
+      fputs_filtered ("{", stream);
+      print_subexp (exp, pos, stream, PREC_PREFIX);
+      fputs_filtered ("} ", stream);
+      print_subexp (exp, pos, stream, PREC_PREFIX);
       if ((int) prec > (int) PREC_PREFIX)
 	fputs_filtered (")", stream);
       return;
@@ -910,10 +934,18 @@ dump_subexp_body_standard (struct expression *exp,
 	  elt = dump_subexp (exp, stream, elt);
       }
       break;
-    case UNOP_MEMVAL:
-    case UNOP_CAST:
     case UNOP_DYNAMIC_CAST:
     case UNOP_REINTERPRET_CAST:
+    case UNOP_CAST_TYPE:
+    case UNOP_MEMVAL_TYPE:
+      ++elt;
+      fprintf_filtered (stream, " (");
+      elt = dump_subexp (exp, stream, elt);
+      fprintf_filtered (stream, ")");
+      elt = dump_subexp (exp, stream, elt);
+      break;
+    case UNOP_MEMVAL:
+    case UNOP_CAST:
       fprintf_filtered (stream, "Type @");
       gdb_print_host_address (exp->elts[elt].type, stream);
       fprintf_filtered (stream, " (");

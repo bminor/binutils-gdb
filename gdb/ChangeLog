@@ -1,3 +1,28 @@
+2012-07-19  Tom Tromey  <tromey@redhat.com>
+
+	* ax-gdb.c (gen_expr): Handle UNOP_CAST_TYPE, UNOP_MEMVAL_TYPE.
+	* breakpoint.c (watchpoint_exp_is_const): Handle UNOP_CAST_TYPE,
+	UNOP_REINTERPRET_CAST, UNOP_DYNAMIC_CAST.
+	* c-exp.y (exp): Emit UNOP_MEMVAL_TYPE, UNOP_CAST_TYPE.  Update
+	for changes to UNOP_REINTERPRET_CAST, UNOP_DYNAMIC_CAST.  Use
+	type_exp production where appropriate.
+	* eval.c (evaluate_subexp_standard) <UNOP_CAST_TYPE>: New case.
+	<UNOP_DYNAMIC_CAST, UNOP_REINTERPRET_CAST>: Update.
+	<UNOP_MEMVAL_TYPE>: New case.
+	(evaluate_subexp_for_address) <UNOP_MEMVAL_TYPE>: New case.
+	(evaluate_subexp_for_sizeof) <UNOP_MEMVAL_TYPE>: New case.
+	* expprint.c (print_subexp_standard) <UNOP_CAST_TYPE>: New case.
+	<UNOP_MEMVAL_TYPE>: New case.
+	(dump_subexp_body_standard) <UNOP_DYNAMIC_CAST,
+	UNOP_REINTERPRET_CAST>: Update.
+	<UNOP_CAST_TYPE, UNOP_MEMVAL_TYPE>: New cases.
+	* parse.c (operator_length_standard) <UNOP_DYNAMIC_CAST,
+	UNOP_REINTERPRET_CAST>: Update.
+	<UNOP_CAST_TYPE, UNOP_MEMVAL_TYPE>: New cases.
+	* stack.c (return_command): Also check for UNOP_CAST_TYPE.
+	* std-operator.def (UNOP_CAST_TYPE, UNOP_MEMVAL_TYPE): New
+	constants.
+
 2012-07-19  Yao Qi  <yao@codesourcery.com>
 	    Jan Kratochvil <jan.kratochvil@redhat.com>
 
