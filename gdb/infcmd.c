@@ -2918,6 +2918,7 @@ _initialize_infcmd (void)
 {
   static struct cmd_list_element *info_proc_cmdlist;
   struct cmd_list_element *c = NULL;
+  char *cmd_name;
 
   /* Add the filename of the terminal connected to inferior I/O.  */
   add_setshow_filename_cmd ("inferior-tty", class_run,
@@ -2930,14 +2931,18 @@ Usage: set inferior-tty /dev/pts/1"),
 			    &setlist, &showlist);
   add_com_alias ("tty", "set inferior-tty", class_alias, 0);
 
-  add_setshow_optional_filename_cmd ("args", class_run,
-				     &inferior_args_scratch, _("\
+  cmd_name = "args";
+  add_setshow_string_noescape_cmd (cmd_name, class_run,
+				   &inferior_args_scratch, _("\
 Set argument list to give program being debugged when it is started."), _("\
 Show argument list to give program being debugged when it is started."), _("\
 Follow this command with any number of args, to be passed to the program."),
-				     set_args_command,
-				     show_args_command,
-				     &setlist, &showlist);
+				   set_args_command,
+				   show_args_command,
+				   &setlist, &showlist);
+  c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
+  gdb_assert (c != NULL);
+  set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("environment", no_class, environment_info, _("\
 The environment to give the program, or one variable's value.\n\

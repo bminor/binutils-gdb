@@ -1,3 +1,12 @@
+2012-07-19  Yao Qi  <yao@codesourcery.com>
+	    Jan Kratochvil <jan.kratochvil@redhat.com>
+
+	* cli/cli-setshow.c (do_setshow_command): Handle case 'var_filename'
+	and case 'var_optional_filename' together.
+	* infcmd.c (_initialize_infcmd): Call add_setshow_string_noescape_cmd
+	instead of add_setshow_optional_filename_cmd for setshow command
+	'args'.  Set completer for 'set args'.
+
 2012-07-18  Doug Evans  <dje@google.com>
 
 	* common/gdb_vecs.h: Moved here from ./gdb_vecs.h.

@@ -182,27 +182,27 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    xfree (*(char **) c->var);
 	  *(char **) c->var = xstrdup (arg);
 	  break;
-	case var_optional_filename:
-	  if (arg == NULL)
-	    arg = "";
-	  if (*(char **) c->var != NULL)
-	    xfree (*(char **) c->var);
-	  *(char **) c->var = xstrdup (arg);
-	  break;
 	case var_filename:
 	  if (arg == NULL)
 	    error_no_arg (_("filename to set it to."));
+	  /* FALLTHROUGH */
+	case var_optional_filename:
 	  if (*(char **) c->var != NULL)
 	    xfree (*(char **) c->var);
-	  {
-	    /* Clear trailing whitespace of filename.  */
-	    char *ptr = arg + strlen (arg) - 1;
 
-	    while (ptr >= arg && (*ptr == ' ' || *ptr == '\t'))
-	      ptr--;
-	    *(ptr + 1) = '\0';
-	  }
-	  *(char **) c->var = tilde_expand (arg);
+	  if (arg != NULL)
+	    {
+	      /* Clear trailing whitespace of filename.  */
+	      char *ptr = arg + strlen (arg) - 1;
+
+	      while (ptr >= arg && (*ptr == ' ' || *ptr == '\t'))
+		ptr--;
+	      *(ptr + 1) = '\0';
+
+	      *(char **) c->var = tilde_expand (arg);
+	    }
+	  else
+	    *(char **) c->var = xstrdup ("");
 	  break;
 	case var_boolean:
 	  *(int *) c->var = parse_binary_operation (arg);

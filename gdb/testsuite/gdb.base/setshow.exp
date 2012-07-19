@@ -87,6 +87,10 @@ gdb_test_no_output "set annotate 0" "set annotate 0"
 gdb_test "show annotate" "Annotation_level is 0..*"  "show annotate (0)" 
 #test annotation_level 0
 gdb_test "info line 1" "Line 1 of .* is at address .* but contains no code.*"  "annotation_level 0" 
+
+gdb_test_no_output "set args ~"
+gdb_test "show args" "Argument list to give program being debugged when it is started is \"~\"..*" \
+    "show args ~"
 #test set args
 gdb_test_no_output "set args foo bar blup baz bubble" "set args" 
 #test show args
