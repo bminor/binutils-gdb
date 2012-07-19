@@ -77,7 +77,7 @@ proc test_set { args } {
     set count 1;
 
     # Set up the variables.
-    for {set x 0;} {$x < $length} {incr x;} {
+    for {set x 0} {$x < $length} {incr x} {
 	if { "[lindex $args $x]" != "" } {
 	    set arg [lindex $args $x];
 	    if { ($x == $final) || ([string first ".*" [lindex $args [expr $x + 1]]] >= 0) } {

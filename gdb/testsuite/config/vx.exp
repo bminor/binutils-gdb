@@ -59,7 +59,7 @@ proc gdb_start { } {
     global reboot
 
     # get a connection to the board
-    for { set x 0; } { $x < 3 } { incr x } {
+    for { set x 0 } { $x < 3 } { incr x } {
 	set shell_id [remote_open target]
 	if { $shell_id > 0 } {
 	    verbose "Spawn id for remote shell is $shell_id"

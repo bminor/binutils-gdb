@@ -424,9 +424,9 @@ proc test_print_all_chars {} {
 proc test_print_repeats_10 {} {
     global gdb_prompt decimal
 
-    for { set x 1; } { $x <= 16 } { incr x; } {
+    for { set x 1 } { $x <= 16 } { incr x } {
 	gdb_test_no_output "set print elements $x"
-	for { set e 1; } { $e <= 16 } {incr e; } {
+	for { set e 1 } { $e <= 16 } {incr e } {
 	    set v [expr $e - 1];
 	    set command "p &ctable2\[${v}*16\]"
 	    if { $x < $e } {

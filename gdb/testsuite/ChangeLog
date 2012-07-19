@@ -1,5 +1,15 @@
 2012-07-19  Pedro Alves  <palves@redhat.com>
 
+	* config/monitor.exp (gdb_load): Remove redundant ';' in for loop.
+	* config/vx.exp (gdb_start): Likewise.
+	* gdb.base/printcmds.exp (test_print_repeats_10): Likewise.
+	* gdb.base/setvar.exp (test_set): Likewise.
+	* gdb.base/sigall.exp: Use foreach+lrange instead of for+continue.
+	* gdb.reverse/sigall-precsave.exp: Likewise.
+	* gdb.reverse/sigall-reverse.exp: Likewise.
+
+2012-07-19  Pedro Alves  <palves@redhat.com>
+
 	* gdb.reverse/sigall-precsave.exp: Set a breakpoint at each signal
 	handler before recording.
 

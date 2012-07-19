@@ -159,7 +159,7 @@ proc gdb_load { arg } {
 
     set last_gdb_file $arg;
 
-    for { set j 1; } { $j <= 2 } {incr j; } {
+    for { set j 1 } { $j <= 2 } {incr j } {
 	if [target_info exists gdb,use_standard_load] {
 	    gdb_target_exec;
 	    if ![target_info exists gdb,no_push_conn] {

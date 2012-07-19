@@ -182,13 +182,7 @@ set thissig "ABRT"
 
 runto gen_ABRT
 
-for {set i 0;} {$i < [llength $signals]} {incr i;} {
-    # Skip the first.
-    if { $i == 0 } {
-	continue
-    }
-
-    set sig [lindex $signals $i]
+foreach sig [lrange $signals 1 end] {
     test_one_sig $sig
 }
 
