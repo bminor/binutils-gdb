@@ -1,3 +1,8 @@
+2012-07-19  Pedro Alves  <palves@redhat.com>
+
+	* gdb.reverse/sigall-precsave.exp: Set a breakpoint at each signal
+	handler before recording.
+
 2012-07-19  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/casts.exp: Add tests for typeof and decltype.
