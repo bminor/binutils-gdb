@@ -561,7 +561,7 @@ x86_insert_point (char type, CORE_ADDR addr, int len)
   struct process_info *proc = current_process ();
   switch (type)
     {
-    case '0':
+    case '0': /* software-breakpoint */
       {
 	int ret;
 
@@ -572,11 +572,13 @@ x86_insert_point (char type, CORE_ADDR addr, int len)
 	done_accessing_memory ();
 	return ret;
       }
-    case '2':
-    case '3':
-    case '4':
+    case '1': /* hardware-breakpoint */
+    case '2': /* write watchpoint */
+    case '3': /* read watchpoint */
+    case '4': /* access watchpoint */
       return i386_low_insert_watchpoint (&proc->private->arch_private->debug_reg_state,
 					 type, addr, len);
+
     default:
       /* Unsupported.  */
       return 1;
@@ -589,7 +591,7 @@ x86_remove_point (char type, CORE_ADDR addr, int len)
   struct process_info *proc = current_process ();
   switch (type)
     {
-    case '0':
+    case '0': /* software-breakpoint */
       {
 	int ret;
 
@@ -600,9 +602,10 @@ x86_remove_point (char type, CORE_ADDR addr, int len)
 	done_accessing_memory ();
 	return ret;
       }
-    case '2':
-    case '3':
-    case '4':
+    case '1': /* hardware-breakpoint */
+    case '2': /* write watchpoint */
+    case '3': /* read watchpoint */
+    case '4': /* access watchpoint */
       return i386_low_remove_watchpoint (&proc->private->arch_private->debug_reg_state,
 					 type, addr, len);
     default:

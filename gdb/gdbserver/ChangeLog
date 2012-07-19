@@ -1,3 +1,11 @@
+2012-07-19  Michael Eager  <eager@eagercon.com>
+
+	* i386-low.c (Z_packet_to_hw_type): Add Z_PACKET_HW_BP, translate 
+	to hw_execute.
+	* linux-x86-low.c (x86_insert_point, x86_remove_point):
+	Call i386_low_insert_watchpoint, i386_low_remove_watchpoint to add/del
+	hardware breakpoint.
+
 2012-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbserver/linux-low.c (initialize_low): Call
