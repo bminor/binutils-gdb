@@ -1,3 +1,21 @@
+2012-07-19  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	PR binutils/14355
+	* i386-dis.c (VEX_LEN_0FXOP_08_CC): New.
+	(VEX_LEN_0FXOP_08_CD): Likewise.
+	(VEX_LEN_0FXOP_08_CE): Likewise.
+	(VEX_LEN_0FXOP_08_CF): Likewise.
+	(VEX_LEN_0FXOP_08_EC): Likewise.
+	(VEX_LEN_0FXOP_08_ED): Likewise.
+	(VEX_LEN_0FXOP_08_EE): Likewise.
+	(VEX_LEN_0FXOP_08_EF): Likewise.
+	(xop_table): Fix entries for vpcomb, vpcomw, vpcomd, vpcomq,
+	vpcomub, vpcomuw, vpcomud, vpcomuq.
+	(vex_len_table): Add entries for VEX_LEN_0FXOP_08_CC,
+	VEX_LEN_0FXOP_08_CD, VEX_LEN_0FXOP_08_CE, VEX_LEN_0FXOP_08_CF,
+	VEX_LEN_0FXOP_08_EC, VEX_LEN_0FXOP_08_ED, VEX_LEN_0FXOP_08_EE,
+	VEX_LEN_0FXOP_08_EF.
+
 2012-07-16  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
 
 	* i386-dis.c (PREFIX_0F38F6): New.

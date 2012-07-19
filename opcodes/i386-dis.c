@@ -1319,6 +1319,14 @@ enum
   VEX_LEN_0F3A7F_P_2,
   VEX_LEN_0F3ADF_P_2,
   VEX_LEN_0F3AF0_P_3,
+  VEX_LEN_0FXOP_08_CC,
+  VEX_LEN_0FXOP_08_CD,
+  VEX_LEN_0FXOP_08_CE,
+  VEX_LEN_0FXOP_08_CF,
+  VEX_LEN_0FXOP_08_EC,
+  VEX_LEN_0FXOP_08_ED,
+  VEX_LEN_0FXOP_08_EE,
+  VEX_LEN_0FXOP_08_EF,
   VEX_LEN_0FXOP_09_80,
   VEX_LEN_0FXOP_09_81
 };
@@ -6894,10 +6902,10 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpcomb", 	{ XM, Vex128, EXx, Ib } },
-    { "vpcomw", 	{ XM, Vex128, EXx, Ib } },
-    { "vpcomd", 	{ XM, Vex128, EXx, Ib } },
-    { "vpcomq", 	{ XM, Vex128, EXx, Ib } },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_CC) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_CD) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_CE) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_CF) },
     /* d0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6930,10 +6938,10 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpcomub",	{ XM, Vex128, EXx, Ib } },
-    { "vpcomuw",	{ XM, Vex128, EXx, Ib } },
-    { "vpcomud",	{ XM, Vex128, EXx, Ib } },
-    { "vpcomuq",	{ XM, Vex128, EXx, Ib } },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_EC) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_ED) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_EE) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_EF) },
     /* f0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -9000,6 +9008,46 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F3AF0_P_3 */
   {
     { "rorxS",		{ Gdq, Edq, Ib } },
+  },
+
+  /* VEX_LEN_0FXOP_08_CC */
+  {
+     { "vpcomb",	{ XM, Vex128, EXx, Ib } },
+  },
+
+  /* VEX_LEN_0FXOP_08_CD */
+  {
+     { "vpcomw",	{ XM, Vex128, EXx, Ib } },
+  },
+
+  /* VEX_LEN_0FXOP_08_CE */
+  {
+     { "vpcomd",	{ XM, Vex128, EXx, Ib } },
+  },
+
+  /* VEX_LEN_0FXOP_08_CF */
+  {
+     { "vpcomq",	{ XM, Vex128, EXx, Ib } },
+  },
+
+  /* VEX_LEN_0FXOP_08_EC */
+  {
+     { "vpcomub",	{ XM, Vex128, EXx, Ib } },
+  },
+
+  /* VEX_LEN_0FXOP_08_ED */
+  {
+     { "vpcomuw",	{ XM, Vex128, EXx, Ib } },
+  },
+
+  /* VEX_LEN_0FXOP_08_EE */
+  {
+     { "vpcomud",	{ XM, Vex128, EXx, Ib } },
+  },
+
+  /* VEX_LEN_0FXOP_08_EF */
+  {
+     { "vpcomuq",	{ XM, Vex128, EXx, Ib } },
   },
 
   /* VEX_LEN_0FXOP_09_80 */
