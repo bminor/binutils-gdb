@@ -1,3 +1,8 @@
+2012-07-20  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (try_open_dwo_file): Don't call
+	gdb_bfd_stash_filename.
+
 2012-07-20  Pedro Alves  <palves@redhat.com>
 
 	* i386-tdep.c (i386_record_modrm, i386_record_lea_modrm_addr)
