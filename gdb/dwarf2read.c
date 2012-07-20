@@ -17539,7 +17539,8 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
 		mac_ptr += offset_size;
 
 		if (macinfo_type == DW_MACRO_GNU_define_indirect_alt
-		    || macinfo_type == DW_MACRO_GNU_undef_indirect_alt)
+		    || macinfo_type == DW_MACRO_GNU_undef_indirect_alt
+		    || section_is_dwz)
 		  {
 		    struct dwz_file *dwz = dwarf2_get_dwz_file ();
 
@@ -17862,6 +17863,8 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 
 	case DW_MACRO_GNU_define_indirect:
 	case DW_MACRO_GNU_undef_indirect:
+	case DW_MACRO_GNU_define_indirect_alt:
+	case DW_MACRO_GNU_undef_indirect_alt:
 	  {
 	    unsigned int bytes_read;
 
@@ -17872,6 +17875,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 	  break;
 
 	case DW_MACRO_GNU_transparent_include:
+	case DW_MACRO_GNU_transparent_include_alt:
 	  /* Note that, according to the spec, a transparent include
 	     chain cannot call DW_MACRO_GNU_start_file.  So, we can just
 	     skip this opcode.  */
