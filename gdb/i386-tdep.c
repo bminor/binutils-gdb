@@ -3933,8 +3933,8 @@ struct i386_record_s
   const int *regmap;
 };
 
-/* Parse "modrm" part in current memory address that irp->addr point to
-   Return -1 if something wrong.  */
+/* Parse the "modrm" part of the memory address irp->addr points at.
+   Returns -1 if something goes wrong, 0 otherwise.  */
 
 static int
 i386_record_modrm (struct i386_record_s *irp)
@@ -3952,9 +3952,8 @@ i386_record_modrm (struct i386_record_s *irp)
   return 0;
 }
 
-/* Get the memory address that current instruction  write to and set it to
-   the argument "addr".
-   Return -1 if something wrong.  */
+/* Extract the memory address that the current instruction writes to,
+   and return it in *ADDR.  Return -1 if something goes wrong.  */
 
 static int
 i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
@@ -4143,9 +4142,9 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
   return 0;
 }
 
-/* Record the value of the memory that willbe changed in current instruction
-   to "record_arch_list".
-   Return -1 if something wrong.  */
+/* Record the address and contents of the memory that will be changed
+   by the current instruction.  Return -1 if something goes wrong, 0
+   otherwise.  */
 
 static int
 i386_record_lea_modrm (struct i386_record_s *irp)
@@ -4182,8 +4181,8 @@ Do you want to stop the program?"),
   return 0;
 }
 
-/* Record the push operation to "record_arch_list".
-   Return -1 if something wrong.  */
+/* Record the effects of a push operation.  Return -1 if something
+   goes wrong, 0 otherwise.  */
 
 static int
 i386_record_push (struct i386_record_s *irp, int size)
@@ -4208,9 +4207,9 @@ i386_record_push (struct i386_record_s *irp, int size)
 #define I386_SAVE_FPU_ENV               0xfffe
 #define I386_SAVE_FPU_ENV_REG_STACK     0xffff
 
-/* Record the value of floating point registers which will be changed
-   by the current instruction to "record_arch_list".  Return -1 if
-   something is wrong.  */
+/* Record the values of the floating point registers which will be
+   changed by the current instruction.  Returns -1 if something is
+   wrong, 0 otherwise.  */
 
 static int i386_record_floats (struct gdbarch *gdbarch,
                                struct i386_record_s *ir,
@@ -4270,9 +4269,9 @@ static int i386_record_floats (struct gdbarch *gdbarch,
   return 0;
 }
 
-/* Parse the current instruction and record the values of the registers and
-   memory that will be changed in current instruction to "record_arch_list".
-   Return -1 if something wrong.  */
+/* Parse the current instruction, and record the values of the
+   registers and memory that will be changed by the current
+   instruction.  Returns -1 if something goes wrong, 0 otherwise.  */
 
 #define I386_RECORD_ARCH_LIST_ADD_REG(regnum) \
     record_arch_list_add_reg (ir.regcache, ir.regmap[(regnum)])
