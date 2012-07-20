@@ -1247,13 +1247,6 @@ memory usage after it completes each command and returns to the prompt.
 This option causes @value{GDBN} to print its version number and
 no-warranty blurb, and exit.
 
-@item -use-deprecated-index-sections
-@cindex @code{--use-deprecated-index-sections}
-This option causes @value{GDBN} to read and use deprecated
-@samp{.gdb_index} sections from symbol files.  This can speed up
-startup, but may result in some functionality being lost.
-@xref{Index Section Format}.
-
 @end table
 
 @node Startup
@@ -16751,6 +16744,28 @@ file, here named @file{symfile}, using @command{objcopy}:
 @smallexample
 $ objcopy --add-section .gdb_index=symfile.gdb-index \
     --set-section-flags .gdb_index=readonly symfile symfile
+@end smallexample
+
+@value{GDBN} will normally ignore older versions of @file{.gdb_index}
+sections that have been deprecated.  Usually they are deprecated because
+they are missing a new feature or have performance issues.
+To tell @value{GDBN} to use a deprecated index section anyway
+specify @code{set use-deprecated-index-sections on}.
+The default is @code{off}.
+This can speed up startup, but may result in some functionality being lost.
+@xref{Index Section Format}.
+
+@emph{Warning:} Setting @code{use-deprecated-index-sections} to @code{on}
+must be done before gdb reads the file.  The following will not work:
+
+@smallexample
+$ gdb -ex "set use-deprecated-index-sections on" <program>
+@end smallexample
+
+Instead you must do, for example,
+
+@smallexample
+$ gdb -iex "set use-deprecated-index-sections on" <program>
 @end smallexample
 
 There are currently some limitation on indices.  They only work when
@@ -40408,7 +40423,7 @@ Version 4 uses a different hashing function from versions 5 and 6.
 Version 6 includes symbols for inlined functions, whereas versions 4
 and 5 do not.  Version 7 adds attributes to the CU indices in the
 symbol table.  @value{GDBN} will only read version 4, 5, or 6 indices
-if the @code{--use-deprecated-index-sections} option is used.
+by specifying @code{set use-deprecated-index-sections on}.
 
 @item
 The offset, from the start of the file, of the CU list.

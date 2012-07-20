@@ -1,3 +1,11 @@
+2012-07-20  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Mode Options): Delete --use-deprecated-index-sections.
+	(Index Files): Document how to control the use of deprecated index
+	sections.
+	(Index Section Format): Replace --use-deprecated-index-sections with
+	"set use-deprecated-index-sections on".
+
 2012-07-12  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdbint.texinfo: Remove @syncodeindex directives that put all the

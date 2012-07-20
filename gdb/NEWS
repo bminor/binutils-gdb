@@ -112,11 +112,11 @@
 * The .gdb_index section has been updated to include symbols for
   inlined functions.  GDB will ignore older .gdb_index sections by
   default, which could cause symbol files to be loaded more slowly
-  until their .gdb_index sections can be recreated.  The new option
-  --use-deprecated-index-sections will cause GDB to use any older
-  .gdb_index sections it finds.  This will restore performance, but
-  the ability to set breakpoints on inlined functions will be lost
-  in symbol files with older .gdb_index sections.
+  until their .gdb_index sections can be recreated.  The new command
+  "set use-deprecated-index-sections on" will cause GDB to use any older
+  .gdb_index sections it finds.  This will restore performance, but the
+  ability to set breakpoints on inlined functions will be lost in symbol
+  files with older .gdb_index sections.
 
   The .gdb_index section has also been updated to record more information
   about each symbol.  This speeds up the "info variables", "info functions"
@@ -136,6 +136,10 @@
   ** Output logs ("set logging" and related) now include MI output.
 
 * New commands
+
+  ** "set use-deprecated-index-sections on|off"
+     "show use-deprecated-index-sections on|off"
+     Controls the use of deprecated .gdb_index sections.
 
   ** "catch load" and "catch unload" can be used to stop when a shared
      library is loaded or unloaded, respectively.

@@ -1,3 +1,15 @@
+2012-07-20  Doug Evans  <dje@google.com>
+
+	* NEWS: Document new options "set/show use-deprecated-index-sections",
+	and delete reference to --use-deprecated-index-sections.
+	* symfile.h (use_deprecated_index_sections): Delete.
+	* dwarf2read.c (use_deprecated_index_sections): Make static.
+	(read_index_from_section): Update wording of how to load
+	deprecated index sections.
+	(_initialize_dwarf2_read): New options
+	"set/show use-deprecated-index-sections".
+	* main.c (captured_main): Delete --use-deprecated-index-sections.
+
 2012-07-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 7.4.91.20120718-cvs.

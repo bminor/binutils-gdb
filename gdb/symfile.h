@@ -676,9 +676,6 @@ extern void dwarf2_build_frame_info (struct objfile *);
 
 void dwarf2_free_objfile (struct objfile *);
 
-/* Whether to use deprecated .gdb_index sections.  */
-extern int use_deprecated_index_sections;
-
 /* From mdebugread.c */
 
 /* Hack to force structures to exist before use in parameter list.  */
