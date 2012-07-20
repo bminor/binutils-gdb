@@ -85,7 +85,7 @@ static int dwarf2_die_debug = 0;
 static int check_physname = 0;
 
 /* When non-zero, do not reject deprecated .gdb_index sections.  */
-int use_deprecated_index_sections = 0;
+static int use_deprecated_index_sections = 0;
 
 /* When set, the file that we're processing is known to have debugging
    info for C++ namespaces.  GCC 3.3.x did not produce this information,
@@ -2611,15 +2611,17 @@ read_index_from_section (struct objfile *objfile,
      Versions earlier than 6 did not emit psymbols for inlined
      functions.  Using these files will cause GDB not to be able to
      set breakpoints on inlined functions by name, so we ignore these
-     indices unless the --use-deprecated-index-sections command line
-     option was supplied.  */
+     indices unless the user has done
+     "set use-deprecated-index-sections on".  */
   if (version < 6 && !deprecated_ok)
     {
       static int warning_printed = 0;
       if (!warning_printed)
 	{
-	  warning (_("Skipping deprecated .gdb_index section in %s, pass "
-		     "--use-deprecated-index-sections to use them anyway"),
+	  warning (_("\
+Skipping deprecated .gdb_index section in %s.\n\
+Do \"set use-deprecated-index-sections on\" before the file is read\n\
+to use the section anyway."),
 		   filename);
 	  warning_printed = 1;
 	}
@@ -19654,6 +19656,18 @@ When enabled, GDB's internal \"physname\" code is checked against\n\
 the demangler."),
 			   NULL, show_check_physname,
 			   &setdebuglist, &showdebuglist);
+
+  add_setshow_boolean_cmd ("use-deprecated-index-sections",
+			   no_class, &use_deprecated_index_sections, _("\
+Set whether to use deprecated gdb_index sections."), _("\
+Show whether to use deprecated gdb_index sections."), _("\
+When enabled, deprecated .gdb_index sections are used anyway.\n\
+Normally they are ignored either because of a missing feature or\n\
+performance issue.\n\
+Warning: This option must be enabled before gdb reads the file."),
+			   NULL,
+			   NULL,
+			   &setlist, &showlist);
 
   c = add_cmd ("gdb-index", class_files, save_gdb_index_command,
 	       _("\

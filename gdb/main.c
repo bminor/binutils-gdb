@@ -471,8 +471,6 @@ captured_main (void *data)
       {"args", no_argument, &set_args, 1},
       {"l", required_argument, 0, 'l'},
       {"return-child-result", no_argument, &return_child_result, 1},
-      {"use-deprecated-index-sections", no_argument,
-       &use_deprecated_index_sections, 1},
       {0, no_argument, 0, 0}
     };
 
