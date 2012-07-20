@@ -1,3 +1,11 @@
+2012-07-20  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_nat_wait): Dump the passed in target options.
+	* target.c (target_wait): Likewise.
+	(str_comma_list_concat_elem, do_option, target_options_to_string):
+	New functions.
+	* target.h (target_options_to_string): Declare.
+
 2012-07-20  Jan Kratochvil <jan.kratochvil@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 

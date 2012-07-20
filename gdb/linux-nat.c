@@ -3929,8 +3929,16 @@ linux_nat_wait (struct target_ops *ops,
   ptid_t event_ptid;
 
   if (debug_linux_nat)
-    fprintf_unfiltered (gdb_stdlog,
-			"linux_nat_wait: [%s]\n", target_pid_to_str (ptid));
+    {
+      char *options_string;
+
+      options_string = target_options_to_string (target_options);
+      fprintf_unfiltered (gdb_stdlog,
+			  "linux_nat_wait: [%s], [%s]\n",
+			  target_pid_to_str (ptid),
+			  options_string);
+      xfree (options_string);
+    }
 
   /* Flush the async file first.  */
   if (target_can_async_p ())
