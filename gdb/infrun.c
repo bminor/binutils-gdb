@@ -3194,8 +3194,7 @@ handle_inferior_event (struct execution_control_state *ecs)
     }
 
   if (ecs->ws.kind != TARGET_WAITKIND_EXITED
-      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
-      && !ptid_equal (ecs->ptid, minus_one_ptid))
+      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED)
     {
       ecs->event_thread = find_thread_ptid (ecs->ptid);
       /* If it's a new thread, add it to the thread database.  */
@@ -3363,8 +3362,7 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_SPURIOUS:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_SPURIOUS\n");
-      if (!ptid_equal (ecs->ptid, inferior_ptid)
-	  && !ptid_equal (ecs->ptid, minus_one_ptid))
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
 	context_switch (ecs->ptid);
       resume (0, GDB_SIGNAL_0);
       prepare_to_wait (ecs);

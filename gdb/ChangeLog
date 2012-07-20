@@ -1,5 +1,23 @@
 2012-07-20  Pedro Alves  <palves@redhat.com>
 
+	PR threads/11692
+	PR gdb/12203
+
+	* infrun.c (handle_inferior_event) <new thread>: Don't special
+	case minus_one_ptid.
+	<TARGET_WAITKIND_SPURIOUS>: Ditto.
+	* linux-thread-db.c (thread_get_info_callback): Don't return early
+	if the thread is zombie.
+	(thread_from_lwp): Change return type to void.  Rewrite stale
+	comment.
+	(attach_thread): Don't return early if the thread is zombie,
+	instead set its "dying" flag.
+	(thread_db_wait): Don't return TARGET_WAITKIND_SPURIOUS anymore.
+	(find_new_threads_callback): Don't return early if the thread is
+	zombie.
+
+2012-07-20  Pedro Alves  <palves@redhat.com>
+
 	* linux-nat.c (linux_nat_wait): Dump the passed in target options.
 	* target.c (target_wait): Likewise.
 	(str_comma_list_concat_elem, do_option, target_options_to_string):

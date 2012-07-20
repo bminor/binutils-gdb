@@ -1,3 +1,11 @@
+2012-07-20  Pedro Alves  <palves@redhat.com>
+
+	PR threads/11692
+	PR gdb/12203
+
+	* gdb.threads/create-fail.c: New file.
+	* gdb.threads/create-fail.exp: New file.
+
 2012-07-19  Pedro Alves  <palves@redhat.com>
 
 	* config/monitor.exp (gdb_load): Remove redundant ';' in for loop.

@@ -422,11 +422,6 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *argp)
   thread_ptid = ptid_build (info->pid, ti.ti_lid, 0);
   inout->thread_info = find_thread_ptid (thread_ptid);
 
-  /* In the case of a zombie thread, don't continue.  We don't want to
-     attach to it thinking it is a new thread.  */
-  if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
-    return TD_THR_ZOMBIE;
-
   if (inout->thread_info == NULL)
     {
       /* New thread.  Attach to it now (why wait?).  */
@@ -441,9 +436,9 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *argp)
   return 0;
 }
 
-/* Convert between user-level thread ids and LWP ids.  */
+/* Fetch the user-level thread id of PTID.  */
 
-static ptid_t
+static void
 thread_from_lwp (ptid_t ptid)
 {
   td_thrhandle_t th;
@@ -467,22 +462,10 @@ thread_from_lwp (ptid_t ptid)
     error (_("Cannot find user-level thread for LWP %ld: %s"),
 	   GET_LWP (ptid), thread_db_err_str (err));
 
-  /* Fetch the thread info.  If we get back TD_THR_ZOMBIE, then the
-     event thread has already died.  If another gdb interface has called
-     thread_alive() previously, the thread won't be found on the thread list
-     anymore.  In that case, we don't want to process this ptid anymore
-     to avoid the possibility of later treating it as a newly
-     discovered thread id that we should add to the list.  Thus,
-     we return a -1 ptid which is also how the thread list marks a
-     dead thread.  */
+  /* Long-winded way of fetching the thread info.  */
   io.thread_db_info = info;
   io.thread_info = NULL;
-  if (thread_get_info_callback (&th, &io) == TD_THR_ZOMBIE
-      && io.thread_info == NULL)
-    return minus_one_ptid;
-
-  gdb_assert (ptid_get_tid (ptid) == 0);
-  return ptid;
+  thread_get_info_callback (&th, &io);
 }
 
 
@@ -1260,9 +1243,6 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   if (target_has_execution)
     check_thread_signals ();
 
-  if (ti_p->ti_state == TD_THR_UNKNOWN || ti_p->ti_state == TD_THR_ZOMBIE)
-    return 0;			/* A zombie thread -- do not attach.  */
-
   /* Under GNU/Linux, we have to attach to each and every thread.  */
   if (target_has_execution
       && tp == NULL)
@@ -1297,6 +1277,8 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   gdb_assert (ti_p->ti_tid != 0);
   private->th = *th_p;
   private->tid = ti_p->ti_tid;
+  if (ti_p->ti_state == TD_THR_UNKNOWN || ti_p->ti_state == TD_THR_ZOMBIE)
+    private->dying = 1;
 
   /* Add the thread to GDB's thread list.  */
   if (tp == NULL)
@@ -1514,15 +1496,8 @@ thread_db_wait (struct target_ops *ops,
 
   if (have_threads (ptid))
     {
-      /* Change ptids back into the higher level PID + TID format.  If
-	 the thread is dead and no longer on the thread list, we will
-	 get back a dead ptid.  This can occur if the thread death
-	 event gets postponed by other simultaneous events.  In such a
-	 case, we want to just ignore the event and continue on.  */
-
-      ptid = thread_from_lwp (ptid);
-      if (GET_PID (ptid) == -1)
-	ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+      /* Fill in the thread's user-level thread id.  */
+      thread_from_lwp (ptid);
     }
 
   return ptid;
@@ -1566,9 +1541,6 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (err != TD_OK)
     error (_("find_new_threads_callback: cannot get thread info: %s"),
 	   thread_db_err_str (err));
-
-  if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
-    return 0;			/* A zombie -- ignore.  */
 
   if (ti.ti_tid == 0)
     {
