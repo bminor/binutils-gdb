@@ -1,3 +1,8 @@
+2012-07-20  Yao Qi  <yao@codesourcery.com>
+
+	* cli/cli-setshow.c (do_setshow_command): Don't check pointer is
+	NULL for xfree.
+
 2012-07-19  Pedro Alves  <palves@redhat.com>
 
 	* record.c (record_resume): Ask the target beneath to report all

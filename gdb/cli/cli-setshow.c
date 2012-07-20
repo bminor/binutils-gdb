@@ -170,16 +170,14 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 #endif
 	    *q++ = '\0';
 	    new = (char *) xrealloc (new, q - new);
-	    if (*(char **) c->var != NULL)
-	      xfree (*(char **) c->var);
+	    xfree (*(char **) c->var);
 	    *(char **) c->var = new;
 	  }
 	  break;
 	case var_string_noescape:
 	  if (arg == NULL)
 	    arg = "";
-	  if (*(char **) c->var != NULL)
-	    xfree (*(char **) c->var);
+	  xfree (*(char **) c->var);
 	  *(char **) c->var = xstrdup (arg);
 	  break;
 	case var_filename:
@@ -187,8 +185,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    error_no_arg (_("filename to set it to."));
 	  /* FALLTHROUGH */
 	case var_optional_filename:
-	  if (*(char **) c->var != NULL)
-	    xfree (*(char **) c->var);
+	  xfree (*(char **) c->var);
 
 	  if (arg != NULL)
 	    {
