@@ -30,4 +30,10 @@ extern int record_arch_list_add_mem (CORE_ADDR addr, int len);
 extern int record_arch_list_add_end (void);
 extern struct cleanup *record_gdb_operation_disable_set (void);
 
+/* Wrapper for target_read_memory that prints a debug message if
+   reading memory fails.  */
+extern int record_read_memory (struct gdbarch *gdbarch,
+			       CORE_ADDR memaddr, gdb_byte *myaddr,
+			       ssize_t len);
+
 #endif /* _RECORD_H_ */

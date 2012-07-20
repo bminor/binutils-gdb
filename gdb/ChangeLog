@@ -1,3 +1,12 @@
+2012-07-20  Pedro Alves  <palves@redhat.com>
+
+	* i386-tdep.c (i386_record_modrm, i386_record_lea_modrm_addr)
+	(i386_process_record): Use record_read_memory.
+	* record.c (record_read_memory): New function.
+	(record_arch_list_add_mem, record_exec_insn): Use
+	record_read_memory.
+	* record.h (record_read_memory): Declare.
+
 2012-07-20  Yao Qi  <yao@codesourcery.com>
 
 	* cli/cli-setshow.c (do_setshow_command): Don't check pointer is
