@@ -39,13 +39,23 @@ tilegx_linux_sigframe_init (const struct tramp_frame *self,
 {
   CORE_ADDR pc = get_frame_register_unsigned (this_frame, 64);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, 54);
-  CORE_ADDR base = sp + 16;
+
+  /* Base address of register save area.  */
+  CORE_ADDR base = sp
+                   + 16    /* Skip ABI_SAVE_AREA.  */
+                   + 128   /* Skip SIGINFO.  */
+                   + 40;   /* Skip UCONTEXT.  */
+
+  /* Address of saved LR register (R56) which holds previous PC.  */
+  CORE_ADDR prev_pc = base + 56 * 8;
+
   int i;
 
   for (i = 0; i < 56; i++)
     trad_frame_set_reg_addr (this_cache, i, base + i * 8);
 
-  trad_frame_set_reg_value (this_cache, 64, pc);
+  trad_frame_set_reg_value (this_cache, 64,
+                            get_frame_memory_unsigned (this_frame, prev_pc, 8));
 
   /* Save a frame ID.  */
   trad_frame_set_id (this_cache, frame_id_build (base, func));
