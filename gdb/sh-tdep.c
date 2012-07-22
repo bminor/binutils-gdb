@@ -1032,8 +1032,6 @@ sh_next_flt_argreg (struct gdbarch *gdbarch, int len, struct type *func_type)
 static int
 sh_treat_as_flt_p (struct type *type)
 {
-  int len = TYPE_LENGTH (type);
-
   /* Ordinary float types are obviously treated as float.  */
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     return 1;

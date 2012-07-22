@@ -1,3 +1,7 @@
+2012-07-22  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* sh-tdep.c (sh_treat_as_flt_p): Remove unused variable LEN.
+
 2012-07-20  Jeff Kenton  <jkenton@tilera.com>
 
 	* tilegx-linux-tdep.c (tilegx_linux_sigframe_init): Fix
