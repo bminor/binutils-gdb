@@ -1,5 +1,10 @@
 2012-07-23  Tom Tromey  <tromey@redhat.com>
 
+	* solib-svr4.c (enable_break): Update.
+	* bfd-target.h (target_bfd_reopen): Update documentation.
+
+2012-07-23  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (separate_debug_file_exists): Update.
 	(gdb_bfd_open_maybe_remote): Rename from bfd_open_maybe_remote.
 	(reread_symbols): Update.
