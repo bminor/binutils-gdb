@@ -377,7 +377,7 @@ solib_bfd_fopen (char *pathname, int fd)
     }
   else
     {
-      abfd = bfd_fopen (pathname, gnutarget, FOPEN_RB, fd);
+      abfd = gdb_bfd_fopen (pathname, gnutarget, FOPEN_RB, fd);
 
       if (abfd)
 	bfd_set_cacheable (abfd, 1);
@@ -390,10 +390,8 @@ solib_bfd_fopen (char *pathname, int fd)
 	     pathname, bfd_errmsg (bfd_get_error ()));
     }
 
-  gdb_bfd_stash_filename (abfd);
   xfree (pathname);
 
-  gdb_bfd_ref (abfd);
   return abfd;
 }
 

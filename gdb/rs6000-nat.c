@@ -748,17 +748,15 @@ add_vmap (LdInfo *ldi)
   if (fd < 0)
     /* Note that this opens it once for every member; a possible
        enhancement would be to only open it once for every object.  */
-    abfd = bfd_openr (filename, gnutarget);
+    abfd = gdb_bfd_openr (filename, gnutarget);
   else
-    abfd = bfd_fdopenr (filename, gnutarget, fd);
-  gdb_bfd_ref (abfd);
+    abfd = gdb_bfd_fdopenr (filename, gnutarget, fd);
   if (!abfd)
     {
       warning (_("Could not open `%s' as an executable file: %s"),
 	       filename, bfd_errmsg (bfd_get_error ()));
       return NULL;
     }
-  gdb_bfd_stash_filename (abfd);
 
   /* Make sure we have an object file.  */
 
@@ -769,9 +767,8 @@ add_vmap (LdInfo *ldi)
     {
       last = 0;
       /* FIXME??? am I tossing BFDs?  bfd?  */
-      while ((last = bfd_openr_next_archived_file (abfd, last)))
+      while ((last = gdb_bfd_openr_next_archived_file (abfd, last)))
 	{
-	  gdb_bfd_ref (last);
 	  if (strcmp (mem, last->filename) == 0)
 	    break;
 	}

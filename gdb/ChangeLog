@@ -1,5 +1,44 @@
 2012-07-23  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-dump.c (bfd_openr_with_cleanup): Use gdb_bfd_openr.
+	(bfd_openw_with_cleanup): Use gdb_bfd_openw.
+	* corelow.c (core_open): Use gdb_bfd_fopen.
+	* dsrec.c (load_srec): Use gdb_bfd_openr.
+	* exec.c (exec_file_attach): Use gdb_bfd_fopen.
+	* gcore.c (gcore_memory_sections): Use gdb_bfd_openw.
+	* gdb_bfd.c (gdb_bfd_fopen, gdb_bfd_openr, gdb_bfd_openw)
+	(gdb_bfd_openr_iovec, gdb_bfd_openr_next_archived_file)
+	(gdb_bfd_fdopenr): New functions.
+	* gdb_bfd.h (gdb_bfd_fopen, gdb_bfd_openr, gdb_bfd_openw)
+	(gdb_bfd_openr_iovec, gdb_bfd_openr_next_archived_file)
+	(gdb_bfd_fdopenr): Declare.
+	* jit.c (bfd_open_from_target_memory): Use gdb_bfd_openr_iovec.
+	* m32-rom.c (m32r_load, m32r_upload_command): Use gdb_bfd_openr.
+	* machoread.c (macho_symfile_read_all_oso): Use gdb_bfd_openr,
+	gdb_bfd_openr_next_archived_file.
+	(macho_check_dsym): Use gdb_bfd_openr.
+	(macho_add_oso_symfile): Don't call gdb_bfd_stash_filename.
+	* procfs.c (insert_dbx_link_bpt_in_file): Use gdb_bfd_fdopenr.
+	* remote-m32r-sdi.c (m32r_load): Use gdb_bfd_openr.
+	* remote-mips.c (mips_load_srec, pmon_load_fast): Use
+	gdb_bfd_openr.
+	* remote.c (remote_bfd_open): Use gdb_bfd_openr_iovec.
+	* rs6000-nat.c (add_vmap): Use gdb_bfd_openr, gdb_bfd_fdopenr,
+	gdb_bfd_openr_next_archived_file.
+	* solib-darwin.c (darwin_solib_get_all_image_info_addr_at_init):
+	Use gdb_bfd_openr.
+	* solib-pa64.c (pa64_solib_create_inferior_hook): Use
+	gdb_bfd_openr.
+	* solib-spu.c (spu_bfd_fopen): Use gdb_bfd_openr_iovec.
+	* solib.c (solib_bfd_fopen): Use gdb_bfd_fopen.
+	* spu-linux-nat.c (spu_bfd_open): Use gdb_bfd_openr_iovec.
+	* symfile.c (bfd_open_maybe_remote): Use gdb_bfd_openr.
+	(symfile_bfd_open): Use gdb_bfd_fopen.
+	(generic_load): Use gdb_bfd_openr.
+	* windows-nat.c (windows_make_so): Use gdb_bfd_openr.
+
+2012-07-23  Tom Tromey  <tromey@redhat.com>
+
 	* bfd-target.c (target_bfd_reopen): Update.
 	* cli/cli-dump.c (bfd_openr_with_cleanup)
 	(bfd_openw_with_cleanup): Update.

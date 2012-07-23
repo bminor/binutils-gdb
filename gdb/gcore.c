@@ -51,12 +51,10 @@ static int gcore_memory_sections (bfd *);
 bfd *
 create_gcore_bfd (char *filename)
 {
-  bfd *obfd = bfd_openw (filename, default_gcore_target ());
+  bfd *obfd = gdb_bfd_openw (filename, default_gcore_target ());
 
-  gdb_bfd_ref (obfd);
   if (!obfd)
     error (_("Failed to open '%s' for output."), filename);
-  gdb_bfd_stash_filename (obfd);
   bfd_set_format (obfd, bfd_core);
   bfd_set_arch_mach (obfd, default_gcore_arch (), default_gcore_mach ());
   return obfd;

@@ -629,11 +629,6 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
 
   bfd_hash_table_free (&table);
 
-  /* Make sure that the filename has the correct lifetime.  The
-     current filename comes either from an OSO symbol name or from an
-     archive name.  Memory for both is not managed by gdb.  */
-  gdb_bfd_stash_filename (abfd);
-
   /* We need to clear SYMFILE_MAINLINE to avoid interractive question
      from symfile.c:symbol_file_add_with_addrs_or_offsets.  */
   symbol_file_add_from_bfd
@@ -689,8 +684,7 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
             }
 
 	  /* Open the archive and check the format.  */
-	  archive_bfd = bfd_openr (archive_name, gnutarget);
-	  gdb_bfd_ref (archive_bfd);
+	  archive_bfd = gdb_bfd_openr (archive_name, gnutarget);
 	  if (archive_bfd == NULL)
 	    {
 	      warning (_("Could not open OSO archive file \"%s\""),
@@ -707,10 +701,7 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
 	      continue;
 	    }
 
-	  gdb_bfd_stash_filename (archive_bfd);
-
-	  member_bfd = bfd_openr_next_archived_file (archive_bfd, NULL);
-	  gdb_bfd_ref (member_bfd);
+	  member_bfd = gdb_bfd_openr_next_archived_file (archive_bfd, NULL);
 
 	  if (member_bfd == NULL)
 	    {
@@ -746,9 +737,8 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
                 }
 
               prev = member_bfd;
-	      member_bfd = bfd_openr_next_archived_file (archive_bfd,
-							 member_bfd);
-	      gdb_bfd_ref (member_bfd);
+	      member_bfd = gdb_bfd_openr_next_archived_file (archive_bfd,
+							     member_bfd);
 
               /* Free previous member if not referenced by an oso.  */
               if (ix2 >= last_ix)
@@ -768,8 +758,7 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
 	{
           bfd *abfd;
 
-	  abfd = bfd_openr (oso->name, gnutarget);
-	  gdb_bfd_ref (abfd);
+	  abfd = gdb_bfd_openr (oso->name, gnutarget);
 	  if (!abfd)
             warning (_("`%s': can't open to read symbols: %s."), oso->name,
                      bfd_errmsg (bfd_get_error ()));
@@ -819,14 +808,12 @@ macho_check_dsym (struct objfile *objfile)
       warning (_("can't find UUID in %s"), objfile->name);
       return NULL;
     }
-  dsym_bfd = bfd_openr (dsym_filename, gnutarget);
-  gdb_bfd_ref (dsym_bfd);
+  dsym_bfd = gdb_bfd_openr (dsym_filename, gnutarget);
   if (dsym_bfd == NULL)
     {
       warning (_("can't open dsym file %s"), dsym_filename);
       return NULL;
     }
-  gdb_bfd_stash_filename (dsym_filename);
 
   if (!bfd_check_format (dsym_bfd, bfd_object))
     {

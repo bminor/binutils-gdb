@@ -233,10 +233,9 @@ exec_file_attach (char *filename, int from_tty)
 
       if (scratch_chan < 0)
 	perror_with_name (filename);
-      exec_bfd = bfd_fopen (scratch_pathname, gnutarget,
-			    write_files ? FOPEN_RUB : FOPEN_RB,
-			    scratch_chan);
-      gdb_bfd_ref (exec_bfd);
+      exec_bfd = gdb_bfd_fopen (scratch_pathname, gnutarget,
+				write_files ? FOPEN_RUB : FOPEN_RB,
+				scratch_chan);
 
       if (!exec_bfd)
 	{
@@ -253,8 +252,6 @@ exec_file_attach (char *filename, int from_tty)
 		 scratch_pathname,
 		 gdb_bfd_errmsg (bfd_get_error (), matching));
 	}
-
-      gdb_bfd_stash_filename (exec_bfd);
 
       /* FIXME - This should only be run for RS6000, but the ifdef is a poor
          way to accomplish.  */

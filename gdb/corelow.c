@@ -318,14 +318,11 @@ core_open (char *filename, int from_tty)
   if (scratch_chan < 0)
     perror_with_name (filename);
 
-  temp_bfd = bfd_fopen (filename, gnutarget, 
-			write_files ? FOPEN_RUB : FOPEN_RB,
-			scratch_chan);
-  gdb_bfd_ref (temp_bfd);
+  temp_bfd = gdb_bfd_fopen (filename, gnutarget, 
+			    write_files ? FOPEN_RUB : FOPEN_RB,
+			    scratch_chan);
   if (temp_bfd == NULL)
     perror_with_name (filename);
-
-  gdb_bfd_stash_filename (temp_bfd);
 
   if (!bfd_check_format (temp_bfd, bfd_core)
       && !gdb_check_format (temp_bfd))

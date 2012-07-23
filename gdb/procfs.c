@@ -3486,8 +3486,7 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
   long storage_needed;
   CORE_ADDR sym_addr;
 
-  abfd = bfd_fdopenr ("unamed", 0, fd);
-  gdb_bfd_ref (abfd);
+  abfd = gdb_bfd_fdopenr ("unamed", 0, fd);
   if (abfd == NULL)
     {
       warning (_("Failed to create a bfd: %s."), bfd_errmsg (bfd_get_error ()));

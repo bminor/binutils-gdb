@@ -752,8 +752,7 @@ windows_make_so (const char *name, LPVOID load_addr)
       asection *text = NULL;
       CORE_ADDR text_vma;
 
-      abfd = bfd_openr (so->so_name, "pei-i386");
-      gdb_bfd_ref (abfd);
+      abfd = gdb_bfd_openr (so->so_name, "pei-i386");
 
       if (!abfd)
 	return so;

@@ -9824,14 +9824,12 @@ remote_filename_p (const char *filename)
 bfd *
 remote_bfd_open (const char *remote_file, const char *target)
 {
-  bfd *abfd = bfd_openr_iovec (remote_file, target,
-			       remote_bfd_iovec_open, NULL,
-			       remote_bfd_iovec_pread,
-			       remote_bfd_iovec_close,
-			       remote_bfd_iovec_stat);
+  bfd *abfd = gdb_bfd_openr_iovec (remote_file, target,
+				   remote_bfd_iovec_open, NULL,
+				   remote_bfd_iovec_pread,
+				   remote_bfd_iovec_close,
+				   remote_bfd_iovec_stat);
 
-  if (abfd != NULL)
-    gdb_bfd_stash_filename (abfd);
   return abfd;
 }
 

@@ -1702,13 +1702,8 @@ bfd_open_maybe_remote (const char *name)
   if (remote_filename_p (name))
     result = remote_bfd_open (name, gnutarget);
   else
-    {
-      result = bfd_openr (name, gnutarget);
-      if (result != NULL)
-	gdb_bfd_stash_filename (result);
-    }
+    result = gdb_bfd_openr (name, gnutarget);
 
-  gdb_bfd_ref (result);
   return result;
 }
 
@@ -1728,7 +1723,6 @@ symfile_bfd_open (char *name)
   if (remote_filename_p (name))
     {
       sym_bfd = remote_bfd_open (name, gnutarget);
-      gdb_bfd_ref (sym_bfd);
       if (!sym_bfd)
 	error (_("`%s': can't open to read symbols: %s."), name,
 	       bfd_errmsg (bfd_get_error ()));
@@ -1768,8 +1762,7 @@ symfile_bfd_open (char *name)
   name = absolute_name;
   make_cleanup (xfree, name);
 
-  sym_bfd = bfd_fopen (name, gnutarget, FOPEN_RB, desc);
-  gdb_bfd_ref (sym_bfd);
+  sym_bfd = gdb_bfd_fopen (name, gnutarget, FOPEN_RB, desc);
   if (!sym_bfd)
     {
       make_cleanup (xfree, name);
@@ -1784,8 +1777,6 @@ symfile_bfd_open (char *name)
       error (_("`%s': can't read symbols: %s."), name,
 	     bfd_errmsg (bfd_get_error ()));
     }
-
-  gdb_bfd_stash_filename (sym_bfd);
 
   return sym_bfd;
 }
@@ -2111,8 +2102,7 @@ generic_load (char *args, int from_tty)
     }
 
   /* Open the file for loading.  */
-  loadfile_bfd = bfd_openr (filename, gnutarget);
-  gdb_bfd_ref (loadfile_bfd);
+  loadfile_bfd = gdb_bfd_openr (filename, gnutarget);
   if (loadfile_bfd == NULL)
     {
       perror_with_name (filename);

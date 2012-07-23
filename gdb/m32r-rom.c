@@ -130,8 +130,7 @@ m32r_load (char *filename, int from_tty)
   if (filename == NULL || filename[0] == 0)
     filename = get_exec_file (1);
 
-  abfd = bfd_openr (filename, 0);
-  gdb_bfd_ref (abfd);
+  abfd = gdb_bfd_openr (filename, 0);
   if (!abfd)
     error (_("Unable to open file %s."), filename);
   cleanup = make_cleanup_bfd_unref (abfd);
@@ -530,8 +529,7 @@ m32r_upload_command (char *args, int from_tty)
     printf_filtered (" -- Ethernet load complete.\n");
 
   gettimeofday (&end_time, NULL);
-  abfd = bfd_openr (args, 0);
-  gdb_bfd_ref (abfd);
+  abfd = gdb_bfd_openr (args, 0);
   cleanup = make_cleanup_bfd_unref (abfd);
   if (abfd != NULL)
     {		/* Download is done -- print section statistics.  */
