@@ -1,5 +1,11 @@
 2012-07-23  Keith Seitz  <keiths@redhat.com>
 
+	* linespec.c (convert_linespec_to_sal): Don't add
+	any symbols to the result vector if symbol_to_sal
+	returns zero.
+
+2012-07-23  Keith Seitz  <keiths@redhat.com>
+
 	* linespec.c (decode_objc): Record the function name
 	in the linespec.
 
