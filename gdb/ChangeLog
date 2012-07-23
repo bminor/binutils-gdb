@@ -1,5 +1,9 @@
 2012-07-23  Tom Tromey  <tromey@redhat.com>
 
+	* gdb_bfd.c (gdb_bfd_ref, gdb_bfd_unref): Fix comment.
+
+2012-07-23  Tom Tromey  <tromey@redhat.com>
+
 	* coffread.c (coff_symfile_read): Make a cleanup for 'debugfile'
 	and 'abfd'.
 	* elfread.c (elf_symfile_read): Make a cleanup for 'debugfile'

@@ -218,7 +218,7 @@ gdb_bfd_close_or_warn (struct bfd *abfd)
   return ret;
 }
 
-/* Add reference to ABFD.  Returns ABFD.  */
+/* See gdb_bfd.h.  */
 
 void
 gdb_bfd_ref (struct bfd *abfd)
@@ -242,7 +242,7 @@ gdb_bfd_ref (struct bfd *abfd)
   bfd_usrdata (abfd) = gdata;
 }
 
-/* Unreference and possibly close ABFD.  */
+/* See gdb_bfd.h.  */
 
 void
 gdb_bfd_unref (struct bfd *abfd)
