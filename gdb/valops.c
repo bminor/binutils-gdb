@@ -2281,8 +2281,13 @@ search_struct_method (const char *name, struct value **arg1p,
 
 	  if (offset < 0 || offset >= TYPE_LENGTH (type))
 	    {
-	      gdb_byte *tmp = alloca (TYPE_LENGTH (baseclass));
-	      CORE_ADDR address = value_address (*arg1p);
+	      gdb_byte *tmp;
+	      struct cleanup *back_to;
+	      CORE_ADDR address;
+
+	      tmp = xmalloc (TYPE_LENGTH (baseclass));
+	      back_to = make_cleanup (xfree, tmp);
+	      address = value_address (*arg1p);
 
 	      if (target_read_memory (address + offset,
 				      tmp, TYPE_LENGTH (baseclass)) != 0)
@@ -2293,6 +2298,7 @@ search_struct_method (const char *name, struct value **arg1p,
 							  address + offset);
 	      base_valaddr = value_contents_for_printing (base_val);
 	      this_offset = 0;
+	      do_cleanups (back_to);
 	    }
 	  else
 	    {

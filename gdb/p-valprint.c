@@ -797,8 +797,11 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 
 	  if (boffset < 0 || boffset >= TYPE_LENGTH (type))
 	    {
-	      /* FIXME (alloc): not safe is baseclass is really really big. */
-	      gdb_byte *buf = alloca (TYPE_LENGTH (baseclass));
+	      gdb_byte *buf;
+	      struct cleanup *back_to;
+
+	      buf = xmalloc (TYPE_LENGTH (baseclass));
+	      back_to = make_cleanup (xfree, buf);
 
 	      base_valaddr = buf;
 	      if (target_read_memory (address + boffset, buf,
@@ -807,6 +810,7 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 	      address = address + boffset;
 	      thisoffset = 0;
 	      boffset = 0;
+	      do_cleanups (back_to);
 	    }
 	  else
 	    base_valaddr = valaddr;

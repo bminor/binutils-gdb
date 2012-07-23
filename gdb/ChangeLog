@@ -1,3 +1,9 @@
+2012-07-23  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* p-valprint.c (pascal_object_print_value): Replace potentially
+	unsafe alloca with xmalloc/xfree.
+	* valops.c (search_struct_method): Likewise.
+
 2012-07-23  Tom Tromey  <tromey@redhat.com>
 
 	* solib-svr4.c (enable_break): Update.
