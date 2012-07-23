@@ -1109,7 +1109,7 @@ build_id_verify (const char *filename, struct build_id *check)
   int retval = 0;
 
   /* We expect to be silent on the non-existing files.  */
-  abfd = bfd_open_maybe_remote (filename);
+  abfd = gdb_bfd_open_maybe_remote (filename);
   if (abfd == NULL)
     return 0;
 

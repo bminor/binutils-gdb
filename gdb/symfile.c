@@ -1353,7 +1353,7 @@ separate_debug_file_exists (const char *name, unsigned long crc,
   if (filename_cmp (name, parent_objfile->name) == 0)
     return 0;
 
-  abfd = bfd_open_maybe_remote (name);
+  abfd = gdb_bfd_open_maybe_remote (name);
 
   if (!abfd)
     return 0;
@@ -1697,7 +1697,7 @@ set_initial_language (void)
    returns NULL with the BFD error set.  */
 
 bfd *
-bfd_open_maybe_remote (const char *name)
+gdb_bfd_open_maybe_remote (const char *name)
 {
   bfd *result;
 
@@ -2516,7 +2516,7 @@ reread_symbols (void)
 	    obfd_filename = bfd_get_filename (objfile->obfd);
 	    /* Open the new BFD before freeing the old one, so that
 	       the filename remains live.  */
-	    objfile->obfd = bfd_open_maybe_remote (obfd_filename);
+	    objfile->obfd = gdb_bfd_open_maybe_remote (obfd_filename);
 	    gdb_bfd_unref (obfd);
 	  }
 
