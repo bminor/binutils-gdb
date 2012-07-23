@@ -765,12 +765,16 @@ add_vmap (LdInfo *ldi)
 
   else if (bfd_check_format (abfd, bfd_archive))
     {
-      last = 0;
-      /* FIXME??? am I tossing BFDs?  bfd?  */
-      while ((last = gdb_bfd_openr_next_archived_file (abfd, last)))
+      last = gdb_bfd_openr_next_archived_file (abfd, NULL);
+      while (last != NULL)
 	{
+	  bfd *next;
+
 	  if (strcmp (mem, last->filename) == 0)
 	    break;
+
+	  next = gdb_bfd_openr_next_archived_file (abfd, last);
+	  gdb_bfd_unref (last);
 	}
 
       if (!last)
@@ -790,6 +794,9 @@ add_vmap (LdInfo *ldi)
 	}
 
       vp = map_vmap (last, abfd);
+      /* map_vmap acquired a reference to LAST, so we can release
+	 ours.  */
+      gdb_bfd_unref (last);
     }
   else
     {
@@ -804,6 +811,11 @@ add_vmap (LdInfo *ldi)
   /* Always add symbols for the main objfile.  */
   if (vp == vmap || auto_solib_add)
     vmap_add_symbols (vp);
+
+  /* Anything needing a reference to ABFD has already acquired it, so
+     release our local reference.  */
+  gdb_bfd_unref (abfd);
+
   return vp;
 }
 

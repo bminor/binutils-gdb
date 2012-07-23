@@ -1,3 +1,10 @@
+2012-07-23  Tom Tromey  <tromey@redhat.com>
+
+	* rs6000-nat.c (add_vmap): Rewrite archive loop.  Fix reference
+	counting.
+	* exec.c (exec_close_1): Unconditionally release vmap's BFD.
+	(map_vmap): Acquire a reference to the BFD.
+
 2012-07-23  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* p-valprint.c (pascal_object_print_value): Replace potentially
