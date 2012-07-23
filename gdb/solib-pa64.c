@@ -362,7 +362,8 @@ manpage for methods to privately map shared library text."));
 	 to find any magic formula to find it for Solaris (appears to
 	 be trivial on GNU/Linux).  Therefore, we have to try an alternate
 	 mechanism to find the dynamic linker's base address.  */
-      tmp_bfd = gdb_bfd_ref (bfd_openr (buf, gnutarget));
+      tmp_bfd = bfd_openr (buf, gnutarget);
+      gdb_bfd_ref (tmp_bfd);
       if (tmp_bfd == NULL)
 	return;
 

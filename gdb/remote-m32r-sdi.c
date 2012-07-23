@@ -1258,7 +1258,8 @@ m32r_load (char *args, int from_tty)
   if (!filename)
     filename = get_exec_file (1);
 
-  pbfd = gdb_bfd_ref (bfd_openr (filename, gnutarget));
+  pbfd = bfd_openr (filename, gnutarget);
+  gdb_bfd_ref (pbfd);
   if (pbfd == NULL)
     {
       perror_with_name (filename);

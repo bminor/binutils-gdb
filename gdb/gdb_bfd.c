@@ -158,7 +158,8 @@ gdb_bfd_open (const char *name, const char *target, int fd)
   if (abfd != NULL)
     {
       close (fd);
-      return gdb_bfd_ref (abfd);
+      gdb_bfd_ref (abfd);
+      return abfd;
     }
 
   abfd = bfd_fopen (name, target, FOPEN_RB, fd);
@@ -170,7 +171,8 @@ gdb_bfd_open (const char *name, const char *target, int fd)
   *slot = abfd;
 
   gdb_bfd_stash_filename (abfd);
-  return gdb_bfd_ref (abfd);
+  gdb_bfd_ref (abfd);
+  return abfd;
 }
 
 /* A helper function that releases any section data attached to the
@@ -218,28 +220,26 @@ gdb_bfd_close_or_warn (struct bfd *abfd)
 
 /* Add reference to ABFD.  Returns ABFD.  */
 
-struct bfd *
+void
 gdb_bfd_ref (struct bfd *abfd)
 {
   struct gdb_bfd_data *gdata;
 
   if (abfd == NULL)
-    return NULL;
+    return;
 
   gdata = bfd_usrdata (abfd);
 
   if (gdata != NULL)
     {
       gdata->refc += 1;
-      return abfd;
+      return;
     }
 
   gdata = bfd_zalloc (abfd, sizeof (struct gdb_bfd_data));
   gdata->refc = 1;
   gdata->mtime = bfd_get_mtime (abfd);
   bfd_usrdata (abfd) = gdata;
-
-  return abfd;
 }
 
 /* Unreference and possibly close ABFD.  */

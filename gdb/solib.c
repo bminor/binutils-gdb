@@ -393,7 +393,8 @@ solib_bfd_fopen (char *pathname, int fd)
   gdb_bfd_stash_filename (abfd);
   xfree (pathname);
 
-  return gdb_bfd_ref (abfd);
+  gdb_bfd_ref (abfd);
+  return abfd;
 }
 
 /* Find shared library PATHNAME and open a BFD for it.  */
@@ -611,7 +612,8 @@ solib_read_symbols (struct so_list *so, int flags)
 
 	  sap = build_section_addr_info_from_section_table (so->sections,
 							    so->sections_end);
-	  so->objfile = symbol_file_add_from_bfd (gdb_bfd_ref (so->abfd),
+	  gdb_bfd_ref (so->abfd);
+	  so->objfile = symbol_file_add_from_bfd (so->abfd,
 						  flags, sap, OBJF_SHARED,
 						  NULL);
 	  so->objfile->addr_low = so->addr_low;

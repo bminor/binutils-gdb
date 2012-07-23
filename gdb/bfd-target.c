@@ -84,7 +84,8 @@ target_bfd_reopen (struct bfd *abfd)
   struct target_bfd_data *data;
 
   data = XZALLOC (struct target_bfd_data);
-  data->bfd = gdb_bfd_ref (abfd);
+  data->bfd = abfd;
+  gdb_bfd_ref (abfd);
   build_section_table (abfd, &data->table.sections, &data->table.sections_end);
 
   t = XZALLOC (struct target_ops);

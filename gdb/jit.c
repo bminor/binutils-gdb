@@ -861,7 +861,7 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
       puts_unfiltered (_("Error opening JITed symbol file, ignoring it.\n"));
       return;
     }
-  nbfd = gdb_bfd_ref (nbfd);
+  gdb_bfd_ref (nbfd);
 
   /* Check the format.  NOTE: This initializes important data that GDB uses!
      We would segfault later without this line.  */

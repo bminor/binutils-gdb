@@ -751,7 +751,7 @@ add_vmap (LdInfo *ldi)
     abfd = bfd_openr (filename, gnutarget);
   else
     abfd = bfd_fdopenr (filename, gnutarget, fd);
-  abfd = gdb_bfd_ref (abfd);
+  gdb_bfd_ref (abfd);
   if (!abfd)
     {
       warning (_("Could not open `%s' as an executable file: %s"),
@@ -769,9 +769,12 @@ add_vmap (LdInfo *ldi)
     {
       last = 0;
       /* FIXME??? am I tossing BFDs?  bfd?  */
-      while ((last = gdb_bfd_ref (bfd_openr_next_archived_file (abfd, last))))
-	if (strcmp (mem, last->filename) == 0)
-	  break;
+      while ((last = bfd_openr_next_archived_file (abfd, last)))
+	{
+	  gdb_bfd_ref (last);
+	  if (strcmp (mem, last->filename) == 0)
+	    break;
+	}
 
       if (!last)
 	{
@@ -798,7 +801,8 @@ add_vmap (LdInfo *ldi)
       gdb_bfd_unref (abfd);
       return NULL;
     }
-  obj = allocate_objfile (gdb_bfd_ref (vp->bfd), 0);
+  gdb_bfd_ref (vp->bfd);
+  obj = allocate_objfile (vp->bfd, 0);
   vp->objfile = obj;
 
   /* Always add symbols for the main objfile.  */

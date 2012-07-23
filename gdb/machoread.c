@@ -689,7 +689,8 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
             }
 
 	  /* Open the archive and check the format.  */
-	  archive_bfd = gdb_bfd_ref (bfd_openr (archive_name, gnutarget));
+	  archive_bfd = bfd_openr (archive_name, gnutarget);
+	  gdb_bfd_ref (archive_bfd);
 	  if (archive_bfd == NULL)
 	    {
 	      warning (_("Could not open OSO archive file \"%s\""),
@@ -708,8 +709,8 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
 
 	  gdb_bfd_stash_filename (archive_bfd);
 
-	  member_bfd = gdb_bfd_ref (bfd_openr_next_archived_file (archive_bfd,
-								  NULL));
+	  member_bfd = bfd_openr_next_archived_file (archive_bfd, NULL);
+	  gdb_bfd_ref (member_bfd);
 
 	  if (member_bfd == NULL)
 	    {
@@ -745,9 +746,9 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
                 }
 
               prev = member_bfd;
-	      member_bfd
-		= gdb_bfd_ref (bfd_openr_next_archived_file (archive_bfd,
-							     member_bfd));
+	      member_bfd = bfd_openr_next_archived_file (archive_bfd,
+							 member_bfd);
+	      gdb_bfd_ref (member_bfd);
 
               /* Free previous member if not referenced by an oso.  */
               if (ix2 >= last_ix)
@@ -767,7 +768,8 @@ macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
 	{
           bfd *abfd;
 
-	  abfd = gdb_bfd_ref (bfd_openr (oso->name, gnutarget));
+	  abfd = bfd_openr (oso->name, gnutarget);
+	  gdb_bfd_ref (abfd);
 	  if (!abfd)
             warning (_("`%s': can't open to read symbols: %s."), oso->name,
                      bfd_errmsg (bfd_get_error ()));
@@ -817,7 +819,8 @@ macho_check_dsym (struct objfile *objfile)
       warning (_("can't find UUID in %s"), objfile->name);
       return NULL;
     }
-  dsym_bfd = gdb_bfd_ref (bfd_openr (dsym_filename, gnutarget));
+  dsym_bfd = bfd_openr (dsym_filename, gnutarget);
+  gdb_bfd_ref (dsym_bfd);
   if (dsym_bfd == NULL)
     {
       warning (_("can't open dsym file %s"), dsym_filename);

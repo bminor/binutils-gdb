@@ -35,14 +35,14 @@ void gdb_bfd_stash_filename (struct bfd *abfd);
 
 struct bfd *gdb_bfd_open (const char *name, const char *target, int fd);
 
-/* Acquire a new reference to ABFD.  Returns ABFD for convenience.
-   It is fine for ABFD to be NULL; in this case the function does
-   nothing and returns NULL.  */
+/* Increment the reference count of ABFD.  It is fine for ABFD to be
+   NULL; in this case the function does nothing.  */
 
-struct bfd *gdb_bfd_ref (struct bfd *abfd);
+void gdb_bfd_ref (struct bfd *abfd);
 
-/* Release a reference to ABFD.  If this is the last reference, ABFD
-   will be freed.  If ABFD is NULL, this function does nothing.  */
+/* Decrement the reference count of ABFD.  If this is the last
+   reference, ABFD will be freed.  If ABFD is NULL, this function does
+   nothing.  */
 
 void gdb_bfd_unref (struct bfd *abfd);
 

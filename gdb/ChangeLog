@@ -1,3 +1,34 @@
+2012-07-23  Tom Tromey  <tromey@redhat.com>
+
+	* bfd-target.c (target_bfd_reopen): Update.
+	* cli/cli-dump.c (bfd_openr_with_cleanup)
+	(bfd_openw_with_cleanup): Update.
+	* corelow.c (core_open): Update.
+	* dsrec.c (load_srec): Update.
+	* exec.c (exec_file_attach): Update.
+	* gcore.c (create_gcore_bfd): Update.
+	* gdb_bfd.c (gdb_bfd_ref): Return void.
+	(gdb_bfd_open): Update.
+	* gdb_bfd.h (gdb_bfd_ref): Return void.
+	Update comments.
+	* jit.c (jit_bfd_try_read_symtab): Update.
+	* m32r-rom.c (m32r_load, m32r_upload_command): Update.
+	* machoread.c (macho_symfile_read_all_oso): Update.
+	(macho_check_dsym): Update.
+	* procfs.c (insert_dbx_link_bpt_in_file): Update.
+	* remote-m32r-sdi.c (m32r_load): Update.
+	* remote-mips.c (mips_load_srec, pmon_load_fast): Update.
+	* rs6000-nat.c (add_vmap): Update.
+	* solib-darwin.c (darwin_solib_get_all_image_info_addr_at_init):
+	Update.
+	* solib-pa64.c (pa64_solib_create_inferior_hook): Update.
+	* solib-spu.c (spu_bfd_open): Update.
+	* solib.c (solib_bfd_fopen, solib_read_symbols): Update.
+	* spu-linux-nat.c (spu_bfd_open): Update.
+	* symfile.c (bfd_open_maybe_remote, symfile_bfd_open)
+	(generic_load): Update.
+	* windows-nat.c (windows_make_so): Update.
+
 2012-07-22  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* sh-tdep.c (sh_treat_as_flt_p): Remove unused variable LEN.
