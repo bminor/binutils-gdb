@@ -1854,9 +1854,9 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 
       for (i = 0; VEC_iterate (symbolp, ls->labels.label_symbols, i, sym); ++i)
 	{
-	  symbol_to_sal (&sal, state->funfirstline, sym);
-	  add_sal_to_sals (state, &sals, &sal,
-			   SYMBOL_NATURAL_NAME (sym));
+	  if (symbol_to_sal (&sal, state->funfirstline, sym))
+	    add_sal_to_sals (state, &sals, &sal,
+			     SYMBOL_NATURAL_NAME (sym));
 	}
     }
   else if (ls->function_symbols != NULL || ls->minimal_symbols != NULL)
@@ -1880,8 +1880,8 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	    {
 	      pspace = SYMTAB_PSPACE (SYMBOL_SYMTAB (sym));
 	      set_current_program_space (pspace);
-	      symbol_to_sal (&sal, state->funfirstline, sym);
-	      if (maybe_add_address (state->addr_set, pspace, sal.pc))
+	      if (symbol_to_sal (&sal, state->funfirstline, sym)
+		  && maybe_add_address (state->addr_set, pspace, sal.pc))
 		add_sal_to_sals (state, &sals, &sal, SYMBOL_NATURAL_NAME (sym));
 	    }
 	}

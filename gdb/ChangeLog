@@ -1,3 +1,9 @@
+2012-07-23  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (convert_linespec_to_sal): Don't add
+	any symbols to the result vector if symbol_to_sal
+	returns zero.
+
 2012-07-20  Doug Evans  <dje@google.com>
 
 	* NEWS: Document new options "set/show use-deprecated-index-sections",
