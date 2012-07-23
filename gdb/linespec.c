@@ -2477,6 +2477,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, char **argptr)
       memcpy (saved_arg, *argptr, new_argptr - *argptr);
       saved_arg[new_argptr - *argptr] = '\0';
 
+      ls->function_name = xstrdup (saved_arg);
       ls->function_symbols = info.result.symbols;
       ls->minimal_symbols = info.result.minimal_symbols;
       values = convert_linespec_to_sals (self, ls);

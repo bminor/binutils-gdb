@@ -1,3 +1,8 @@
+2012-07-23  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (decode_objc): Record the function name
+	in the linespec.
+
 2012-07-23  Tom Tromey  <tromey@redhat.com>
 
 	* rs6000-nat.c (add_vmap): Rewrite archive loop.  Fix reference
