@@ -194,9 +194,10 @@ allocate_objfile (bfd *abfd, int flags)
 
   /* Update the per-objfile information that comes from the bfd, ensuring
      that any data that is reference is saved in the per-objfile data
-     region.  Note that we steal a reference to ABFD.  */
+     region.  */
 
   objfile->obfd = abfd;
+  gdb_bfd_ref (abfd);
   if (abfd != NULL)
     {
       /* Look up the gdbarch associated with the BFD.  */

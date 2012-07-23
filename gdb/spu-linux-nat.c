@@ -374,8 +374,13 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   /* Open BFD representing SPE executable and read its symbols.  */
   nbfd = spu_bfd_open (addr);
   if (nbfd)
-    symbol_file_add_from_bfd (nbfd, SYMFILE_VERBOSE | SYMFILE_MAINLINE,
-                              NULL, 0, NULL);
+    {
+      struct cleanup *cleanup = make_cleanup_bfd_unref (nbfd);
+
+      symbol_file_add_from_bfd (nbfd, SYMFILE_VERBOSE | SYMFILE_MAINLINE,
+				NULL, 0, NULL);
+      do_cleanups (cleanup);
+    }
 }
 
 

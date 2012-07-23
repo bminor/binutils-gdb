@@ -1,5 +1,26 @@
 2012-07-23  Tom Tromey  <tromey@redhat.com>
 
+	* coffread.c (coff_symfile_read): Make a cleanup for 'debugfile'
+	and 'abfd'.
+	* elfread.c (elf_symfile_read): Make a cleanup for 'debugfile'
+	and 'abfd'.
+	* jit.c (jit_bfd_try_read_symtab): Make a cleanup for 'nbfd'.
+	* machoread.c (macho_add_oso_symfile): Make a cleanup for
+	'abfd'.
+	(macho_symfile_read): Make a cleanup for 'dsym_bfd'.
+	* objfiles.c (allocate_objfile): Acquire a new reference.
+	* rs6000-nat.c (add_vmap): Don't acquire a BFD reference.
+	* solib.c (solib_read_symbols): Don't acquire a BFD reference.
+	* spu-linux-nat.c (spu_symbol_file_add_from_memory): Make
+	a cleanup for 'nbfd'.
+	* symfile-mem.c (symbol_file_add_from_memory): Make a cleanup
+	for 'nbfd'.
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Don't
+	make a cleanup for 'abfd'.
+	(symbol_file_add): Make a BFD cleanup.
+
+2012-07-23  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-dump.c (bfd_openr_with_cleanup): Use gdb_bfd_openr.
 	(bfd_openw_with_cleanup): Use gdb_bfd_openw.
 	* corelow.c (core_open): Use gdb_bfd_fopen.

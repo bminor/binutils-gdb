@@ -454,6 +454,7 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
   asymbol **symp;
   struct bfd_hash_table table;
   int nbr_sections;
+  struct cleanup *cleanup;
 
   /* Per section flag to mark which section have been rebased.  */
   unsigned char *sections_rebased;
@@ -631,11 +632,13 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
 
   /* We need to clear SYMFILE_MAINLINE to avoid interractive question
      from symfile.c:symbol_file_add_with_addrs_or_offsets.  */
+  cleanup = make_cleanup_bfd_unref (abfd);
   symbol_file_add_from_bfd
     (abfd, symfile_flags & ~(SYMFILE_MAINLINE | SYMFILE_VERBOSE), NULL,
      main_objfile->flags & (OBJF_REORDERED | OBJF_SHARED
 			    | OBJF_READNOW | OBJF_USERLOADED),
      main_objfile);
+  do_cleanups (cleanup);
 }
 
 /* Read symbols from the vector of oso files.  */
@@ -897,6 +900,7 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 	  int ix;
 	  oso_el *oso;
           struct bfd_section *asect, *dsect;
+	  struct cleanup *cleanup;
 
 	  if (mach_o_debug_level > 0)
 	    printf_unfiltered (_("dsym file found\n"));
@@ -917,7 +921,9 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
             }
 
 	  /* Add the dsym file as a separate file.  */
+	  cleanup = make_cleanup_bfd_unref (dsym_bfd);
           symbol_file_add_separate (dsym_bfd, symfile_flags, objfile);
+	  do_cleanups (cleanup);
 
 	  /* Don't try to read dwarf2 from main file or shared libraries.  */
           return;

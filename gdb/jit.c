@@ -896,7 +896,8 @@ JITed symbol file is not an object file, ignoring it.\n"));
         ++i;
       }
 
-  /* This call takes ownership of NBFD.  It does not take ownership of SAI.  */
+  /* This call does not take ownership of SAI.  */
+  make_cleanup_bfd_unref (nbfd);
   objfile = symbol_file_add_from_bfd (nbfd, 0, sai, OBJF_SHARED, NULL);
 
   do_cleanups (old_cleanups);

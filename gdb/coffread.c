@@ -653,13 +653,14 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
       char *debugfile;
 
       debugfile = find_separate_debug_file_by_debuglink (objfile);
+      make_cleanup (xfree, debugfile);
 
       if (debugfile)
 	{
 	  bfd *abfd = symfile_bfd_open (debugfile);
 
+	  make_cleanup_bfd_unref (abfd);
 	  symbol_file_add_separate (abfd, symfile_flags, objfile);
-	  xfree (debugfile);
 	}
     }
 

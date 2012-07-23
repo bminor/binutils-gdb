@@ -798,7 +798,6 @@ add_vmap (LdInfo *ldi)
       gdb_bfd_unref (abfd);
       return NULL;
     }
-  gdb_bfd_ref (vp->bfd);
   obj = allocate_objfile (vp->bfd, 0);
   vp->objfile = obj;
 
