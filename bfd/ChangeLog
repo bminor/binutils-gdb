@@ -1,3 +1,8 @@
+2012-07-23  Nick Clifton  <nickc@redhat.com>
+
+	* cisco-core.c (cisco_core_file_failing_command): Make static.
+	(cisco_core_file_failing_signal): Make static.
+
 2012-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd-in2.h: Regenerated.

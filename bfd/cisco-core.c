@@ -303,13 +303,13 @@ cisco_core_file_p (bfd *abfd)
   return (target);
 }
 
-char *
+static char *
 cisco_core_file_failing_command (bfd *abfd ATTRIBUTE_UNUSED)
 {
   return NULL;
 }
 
-int
+static int
 cisco_core_file_failing_signal (bfd *abfd ATTRIBUTE_UNUSED)
 {
   return abfd->tdata.cisco_core_data->sig;
