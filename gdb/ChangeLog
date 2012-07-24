@@ -1,3 +1,8 @@
+2012-07-24  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* breakpoint.c (create_breakpoint): Store condition for pending
+	breakpoints.
+
 2012-07-23  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (convert_linespec_to_sal): Don't add
