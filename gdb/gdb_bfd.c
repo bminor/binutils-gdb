@@ -312,7 +312,7 @@ zlib_decompress_section (asection *sectp,
   error (_("Support for zlib-compressed data (from '%s', section '%s') "
            "is disabled in this copy of GDB"),
          bfd_get_filename (abfd),
-	 bfd_get_section_name (sectp));
+	 bfd_get_section_name (abfd, sectp));
 #else
   bfd_size_type compressed_size = bfd_get_section_size (sectp);
   gdb_byte *compressed_buffer = xmalloc (compressed_size);

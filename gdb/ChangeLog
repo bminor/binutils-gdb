@@ -1,3 +1,8 @@
+2012-07-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* gdb_bfd.c (zlib_decompress_section) <!HAVE_ZLIB_H>: Adjust
+	parameters to bfd_get_section_name.
+
 2012-07-24  Yao Qi  <yao@codesourcery.com>
 
 	* cli/cli-setshow.c: Handle case 'var_uinteger'
