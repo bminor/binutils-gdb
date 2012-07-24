@@ -1,3 +1,9 @@
+2012-07-24  Jan Waclawek <konfera@efton.sk>
+
+	PR ld/14058
+	* emultempl/avrelf.em (avr_elf_after_allocation): Call
+	elf32_avr_size_stubs with is_prealloc_run as TRUE.
+
 2012-07-13  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* emulparams/elf_s390.sh (IREL_IN_PLT): Define.

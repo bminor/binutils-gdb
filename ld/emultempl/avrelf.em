@@ -152,7 +152,7 @@ avr_elf_after_allocation (void)
     {
       /* If relaxing, elf32_avr_size_stubs will be called from
 	 elf32_avr_relax_section.  */
-      if (!elf32_avr_size_stubs (link_info.output_bfd, &link_info, FALSE))
+      if (!elf32_avr_size_stubs (link_info.output_bfd, &link_info, TRUE))
 	einfo ("%X%P: can not size stub section: %E\n");
     }
 
