@@ -948,6 +948,8 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       bfd_vma insn_addr;
       bfd_vma insn_page;
       bfd_boolean is_far = FALSE;
+      bfd_boolean is_xgate_symbol = FALSE;
+      bfd_boolean is_section_symbol = FALSE;
       struct elf_link_hash_entry *h;
       bfd_vma val;
 
@@ -955,7 +957,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       r_type = ELF32_R_TYPE (rel->r_info);
 
       if (r_type == R_M68HC11_GNU_VTENTRY
-          || r_type == R_M68HC11_GNU_VTINHERIT )
+          || r_type == R_M68HC11_GNU_VTINHERIT)
         continue;
 
       (*ebd->elf_info_to_howto_rel) (input_bfd, &arel, rel);
@@ -972,6 +974,8 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			+ sec->output_offset
 			+ sym->st_value);
 	  is_far = (sym && (sym->st_other & STO_M68HC12_FAR));
+	  is_xgate_symbol = (sym && (sym->st_target_internal));
+	  is_section_symbol = ELF_ST_TYPE (sym->st_info) & STT_SECTION;
 	}
       else
 	{
@@ -983,6 +987,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 				   warned);
 
 	  is_far = (h && (h->other & STO_M68HC12_FAR));
+	  is_xgate_symbol = (h && (h->target_internal));
 	}
 
       if (sec != NULL && discarded_section (sec))
@@ -1122,12 +1127,45 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
           insn_page = m68hc11_phys_page (pinfo, insn_addr);
 
+         /* If we are linking an S12 instruction against an XGATE symbol, we
+            need to change the offset of the symbol value so that it's correct
+	    from the S12's perspective.  */
+          if (is_xgate_symbol)
+	    {
+	      /* The ram in the global space is mapped to 0x2000 in the 16-bit
+		 address space for S12 and 0xE000 in the 16-bit address space
+		 for XGATE.  */
+	      if (relocation >= 0xE000)
+		{
+		  /* We offset the address by the difference
+		     between these two mappings.  */
+		  relocation -= 0xC000;
+		  break;
+		}
+	      else
+		{
+		  const char * msg;
+		  char * buf;
+
+		  msg = _("XGATE address (%lx) is not within shared RAM"
+			  "(0xE000-0xFFFF), therefore you must manually offset "
+			  "the address, and possibly manage the page, in your "
+			  "code.");
+		  buf = alloca (strlen (msg) + 128);
+		  sprintf (buf, msg, phys_addr);
+		  if (!((*info->callbacks->warning) (info, buf, name, input_bfd,
+						     input_section, insn_addr)))
+		    return FALSE;
+		  break;
+		}
+	    }
+
           if (m68hc11_addr_is_banked (pinfo, relocation + rel->r_addend)
               && m68hc11_addr_is_banked (pinfo, insn_addr)
               && phys_page != insn_page)
             {
-              const char* msg;
-              char* buf;
+              const char * msg;
+              char * buf;
 
               msg = _("banked address [%lx:%04lx] (%lx) is not in the same bank "
                       "as current banked address [%lx:%04lx] (%lx)");
@@ -1143,10 +1181,11 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                 return FALSE;
               break;
             }
+
           if (phys_page != 0 && insn_page == 0)
             {
-              const char* msg;
-              char* buf;
+              const char * msg;
+              char * buf;
 
               msg = _("reference to a banked address [%lx:%04lx] in the "
                       "normal address space at %04lx");
@@ -1167,6 +1206,45 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
           if (m68hc11_addr_is_banked (pinfo, relocation + rel->r_addend))
             relocation = phys_addr;
           break;
+        }
+
+      /* If we are linking an XGATE instruction against an S12 symbol, we
+         need to change the offset of the symbol value so that it's correct
+	 from the XGATE's perspective.  */
+      if (!strcmp (howto->name, "R_XGATE_IMM8_LO")
+          || !strcmp (howto->name, "R_XGATE_IMM8_HI"))
+        {
+          /* We can only offset S12 addresses that lie within the non-paged
+             area of RAM.  */
+          if (!is_xgate_symbol && !is_section_symbol)
+            {
+              /* The ram in the global space is mapped to 0x2000 and stops at
+                 0x4000 in the 16-bit address space for S12 and 0xE000 in the
+                 16-bit address space for XGATE.  */
+              if (relocation >= 0x2000 && relocation < 0x4000)
+                 /* We offset the address by the difference
+                   between these two mappings.  */
+                relocation += 0xC000;
+              else
+                {
+                  const char * msg;
+                  char * buf;
+
+                  /* Get virtual address of instruction having the relocation.  */
+                  insn_addr = input_section->output_section->vma
+                      + input_section->output_offset + rel->r_offset;
+
+                  msg = _("S12 address (%lx) is not within shared RAM"
+                      "(0x2000-0x4000), therefore you must manually "
+                      "offset the address in your code");
+                  buf = alloca (strlen (msg) + 128);
+                  sprintf (buf, msg, phys_addr);
+                  if (!((*info->callbacks->warning) (info, buf, name, input_bfd,
+						     input_section, insn_addr)))
+                    return FALSE;
+                  break;
+                }
+            }
         }
 
       if (r_type != R_M68HC11_NONE)
