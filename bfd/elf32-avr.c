@@ -1558,7 +1558,7 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
        irel = elf_section_data (isec)->relocs;
        /* PR 12161: Read in the relocs for this section if necessary.  */
        if (irel == NULL)
-	 irel = _bfd_elf_link_read_relocs (abfd, isec, NULL, NULL, FALSE);
+         irel = _bfd_elf_link_read_relocs (abfd, isec, NULL, NULL, TRUE);
 
        for (irelend = irel + isec->reloc_count;
             irel < irelend;
@@ -1617,9 +1617,6 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
 	   /* else...Reference symbol is extern.  No need for adjusting
 	      the addend.  */
 	 }
-
-       if (elf_section_data (isec)->relocs == NULL)
-	 free (irelend - isec->reloc_count);
      }
   }
 

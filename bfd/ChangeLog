@@ -1,3 +1,8 @@
+2012-07-24  Jan Waclawek <konfera@efton.sk>
+	PR 13899
+	* elf32-avr.c (elf32_avr_relax_delete_bytes): Call
+	_bfd_elf_link_read_relocs with keep_memory as TRUE.
+
 2012-07-24  Teresa Johnson  <tejohnson@google.com>
 
 	* bfd.c (bfd_find_nearest_line_discriminator): New macro.
