@@ -1,3 +1,9 @@
+2012-07-24  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* m68k-tdep.c (m68k_reg_struct_return_p): Accept complex types.
+	(m68k_return_value): Handle complex types like structures.
+	(m68k_svr4_return_value): Likewise.
+
 2012-07-24  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* gdb_bfd.c (zlib_decompress_section) <!HAVE_ZLIB_H>: Adjust

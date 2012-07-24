@@ -377,8 +377,8 @@ m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
     m68k_store_return_value (type, regcache, valbuf);
 }
 
-/* Return non-zero if TYPE, which is assumed to be a structure or
-   union type, should be returned in registers for architecture
+/* Return non-zero if TYPE, which is assumed to be a structure, union or
+   complex type, should be returned in registers for architecture
    GDBARCH.  */
 
 static int
@@ -388,7 +388,8 @@ m68k_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
   enum type_code code = TYPE_CODE (type);
   int len = TYPE_LENGTH (type);
 
-  gdb_assert (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION);
+  gdb_assert (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
+	      || code == TYPE_CODE_COMPLEX);
 
   if (tdep->struct_return == pcc_struct_return)
     return 0;
@@ -410,7 +411,8 @@ m68k_return_value (struct gdbarch *gdbarch, struct value *function,
   enum type_code code = TYPE_CODE (type);
 
   /* GCC returns a `long double' in memory too.  */
-  if (((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
+  if (((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
+	|| code == TYPE_CODE_COMPLEX)
        && !m68k_reg_struct_return_p (gdbarch, type))
       || (code == TYPE_CODE_FLT && TYPE_LENGTH (type) == 12))
     {
@@ -444,7 +446,8 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct value *function,
 {
   enum type_code code = TYPE_CODE (type);
 
-  if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
+  if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
+       || code == TYPE_CODE_COMPLEX)
       && !m68k_reg_struct_return_p (gdbarch, type))
     {
       /* The System V ABI says that:
