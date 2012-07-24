@@ -208,20 +208,22 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  *(enum auto_boolean *) c->var = parse_auto_binary_operation (arg);
 	  break;
 	case var_uinteger:
+	case var_zuinteger:
 	  if (arg == NULL)
 	    error_no_arg (_("integer to set it to."));
 	  *(unsigned int *) c->var = parse_and_eval_long (arg);
-	  if (*(unsigned int *) c->var == 0)
+	  if (c->var_type == var_uinteger && *(unsigned int *) c->var == 0)
 	    *(unsigned int *) c->var = UINT_MAX;
 	  break;
 	case var_integer:
+	case var_zinteger:
 	  {
 	    unsigned int val;
 
 	    if (arg == NULL)
 	      error_no_arg (_("integer to set it to."));
 	    val = parse_and_eval_long (arg);
-	    if (val == 0)
+	    if (val == 0 && c->var_type == var_integer)
 	      *(int *) c->var = INT_MAX;
 	    else if (val >= INT_MAX)
 	      error (_("integer %u out of range"), val);
@@ -229,16 +231,6 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	      *(int *) c->var = val;
 	    break;
 	  }
-	case var_zinteger:
-	  if (arg == NULL)
-	    error_no_arg (_("integer to set it to."));
-	  *(int *) c->var = parse_and_eval_long (arg);
-	  break;
-	case var_zuinteger:
-	  if (arg == NULL)
-	    error_no_arg (_("integer to set it to."));
-	  *(unsigned int *) c->var = parse_and_eval_long (arg);
-	  break;
 	case var_enum:
 	  {
 	    int i;
