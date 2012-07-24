@@ -1208,8 +1208,7 @@ symbol_file_add (char *name, int add_flags, struct section_addr_info *addrs,
   struct cleanup *cleanup = make_cleanup_bfd_unref (bfd);
   struct objfile *objf;
 
-  objf = symbol_file_add_from_bfd (symfile_bfd_open (name), add_flags, addrs,
-                                   flags, NULL);
+  objf = symbol_file_add_from_bfd (bfd, add_flags, addrs, flags, NULL);
   do_cleanups (cleanup);
   return objf;
 }
