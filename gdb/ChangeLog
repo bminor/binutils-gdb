@@ -1,4 +1,4 @@
-2012-07-20  Marc Khouzam  <marc.khouzam@ericsson.com>
+2012-07-24  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* breakpoint.c (create_breakpoint): Store condition for pending
 	breakpoints.
