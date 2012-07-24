@@ -1,6 +1,7 @@
 /* Instruction printing code for the ARM
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012
+   Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
    Modification by James G. Smith (jsmith@cygnus.co.uk)
 
@@ -1925,7 +1926,7 @@ print_insn_coprocessor (bfd_vma pc,
 		      {
 			if (offset)
 			  func (stream, ", #%d]%s",
-				offset,
+				(int) offset,
 				WRITEBACK_BIT_SET ? "!" : "");
 			else if (NEGATIVE_BIT_SET)
 			  func (stream, ", #-0]");
@@ -1939,7 +1940,7 @@ print_insn_coprocessor (bfd_vma pc,
 			if (WRITEBACK_BIT_SET)
 			  {
 			    if (offset)
-			      func (stream, ", #%d", offset);
+			      func (stream, ", #%d", (int) offset);
 			    else if (NEGATIVE_BIT_SET)
 			      func (stream, ", #-0");
 			  }
@@ -1947,7 +1948,7 @@ print_insn_coprocessor (bfd_vma pc,
 			  {
 			    func (stream, ", {%s%d}",
 				  (NEGATIVE_BIT_SET && !offset) ? "-" : "",
-				  offset);
+				  (int) offset);
 			    value_in_comment = offset;
 			  }
 		      }
@@ -2258,7 +2259,7 @@ print_insn_coprocessor (bfd_vma pc,
 		    {
 		      /* given (20, 23) | given (0, 3) */
 		      value = ((given >> 16) & 0xf0) | (given & 0xf);
-		      func (stream, "%d", value);
+		      func (stream, "%d", (int) value);
 		    }
 		    break;
 
@@ -2383,7 +2384,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 	  /* Pre-indexed.  Elide offset of positive zero when
 	     non-writeback.  */
 	  if (WRITEBACK_BIT_SET || NEGATIVE_BIT_SET || offset)
-	    func (stream, ", #%s%d", NEGATIVE_BIT_SET ? "-" : "", offset);
+	    func (stream, ", #%s%d", NEGATIVE_BIT_SET ? "-" : "", (int) offset);
 
 	  if (NEGATIVE_BIT_SET)
 	    offset = -offset;
@@ -2398,7 +2399,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 	}
       else  /* Post indexed.  */
 	{
-	  func (stream, "], #%s%d", NEGATIVE_BIT_SET ? "-" : "", offset);
+	  func (stream, "], #%s%d", NEGATIVE_BIT_SET ? "-" : "", (int) offset);
 
 	  /* Ie ignore the offset.  */
 	  offset = pc + 8;
@@ -2420,7 +2421,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 	      /* Elide offset of positive zero when non-writeback.  */
 	      offset = given & 0xfff;
 	      if (WRITEBACK_BIT_SET || NEGATIVE_BIT_SET || offset)
-		func (stream, ", #%s%d", NEGATIVE_BIT_SET ? "-" : "", offset);
+		func (stream, ", #%s%d", NEGATIVE_BIT_SET ? "-" : "", (int) offset);
 	    }
 	  else
 	    {
@@ -2438,7 +2439,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 	      /* Always show offset.  */
 	      offset = given & 0xfff;
 	      func (stream, "], #%s%d",
-		    NEGATIVE_BIT_SET ? "-" : "", offset);
+		    NEGATIVE_BIT_SET ? "-" : "", (int) offset);
 	    }
 	  else
 	    {
@@ -3036,7 +3037,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			      /* Elide positive zero offset.  */
 			      if (offset || NEGATIVE_BIT_SET)
 				func (stream, "[pc, #%s%d]\t; ",
-				      NEGATIVE_BIT_SET ? "-" : "", offset);
+				      NEGATIVE_BIT_SET ? "-" : "", (int) offset);
 			      else
 				func (stream, "[pc]\t; ");
 			      if (NEGATIVE_BIT_SET)
@@ -3047,7 +3048,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			    {
 			      /* Always show the offset.  */
 			      func (stream, "[pc], #%s%d",
-				    NEGATIVE_BIT_SET ? "-" : "", offset);
+				    NEGATIVE_BIT_SET ? "-" : "", (int) offset);
 			      if (! allow_unpredictable)
 				is_unpredictable = TRUE;
 			    }
@@ -3226,7 +3227,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  {
 			    if (offset)
 			      func (stream, ", #%d]%s",
-				    value_in_comment,
+				    (int) value_in_comment,
 				    WRITEBACK_BIT_SET ? "!" : "");
 			    else
 			      func (stream, "]");
@@ -3238,11 +3239,11 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			    if (WRITEBACK_BIT_SET)
 			      {
 				if (offset)
-				  func (stream, ", #%d", value_in_comment);
+				  func (stream, ", #%d", (int) value_in_comment);
 			      }
 			    else
 			      {
-				func (stream, ", {%d}", offset);
+				func (stream, ", {%d}", (int) offset);
 				value_in_comment = offset;
 			      }
 			  }
@@ -3284,7 +3285,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  if (name != NULL)
 			    func (stream, "%s", name);
 			  else
-			    func (stream, "(UNDEF: %lu)", sysm);
+			    func (stream, "(UNDEF: %lu)", (unsigned long) sysm);
 			}
 		      else
 			{
@@ -3448,7 +3449,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  if (name != NULL)
 			    func (stream, "%s", name);
 			  else
-			    func (stream, "(UNDEF: %lu)", sysm);
+			    func (stream, "(UNDEF: %lu)", (unsigned long) sysm);
 			}
 			break;
 
@@ -3607,14 +3608,14 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 		      if (started)
 			func (stream, ", ");
 		      started = 1;
-		      func (stream, arm_regnames[14] /* "lr" */);
+		      func (stream, "%s", arm_regnames[14] /* "lr" */);
 		    }
 
 		  if (domaskpc)
 		    {
 		      if (started)
 			func (stream, ", ");
-		      func (stream, arm_regnames[15] /* "pc" */);
+		      func (stream, "%s", arm_regnames[15] /* "pc" */);
 		    }
 
 		  func (stream, "}");
@@ -3680,17 +3681,17 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 			    break;
 
 			  case 'd':
-			    func (stream, "%ld", reg);
+			    func (stream, "%ld", (long) reg);
 			    value_in_comment = reg;
 			    break;
 
 			  case 'H':
-			    func (stream, "%ld", reg << 1);
+			    func (stream, "%ld", (long) (reg << 1));
 			    value_in_comment = reg << 1;
 			    break;
 
 			  case 'W':
-			    func (stream, "%ld", reg << 2);
+			    func (stream, "%ld", (long) (reg << 2));
 			    value_in_comment = reg << 2;
 			    break;
 
@@ -3704,7 +3705,7 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 			    break;
 
 			  case 'x':
-			    func (stream, "0x%04lx", reg);
+			    func (stream, "0x%04lx", (long) reg);
 			    break;
 
 			  case 'B':
@@ -4010,11 +4011,11 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		    }
 
 		  if (postind)
-		    func (stream, "], #%d", offset);
+		    func (stream, "], #%d", (int) offset);
 		  else
 		    {
 		      if (offset)
-			func (stream, ", #%d", offset);
+			func (stream, ", #%d", (int) offset);
 		      func (stream, writeback ? "]!" : "]");
 		    }
 
@@ -4243,11 +4244,11 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		    if (name != NULL)
 		      func (stream, "%s", name);
 		    else
-		      func (stream, "(UNDEF: %lu)", sysm);
+		      func (stream, "(UNDEF: %lu)", (unsigned long) sysm);
 		  }
 		else
 		  {
-		    func (stream, psr_name (given & 0xff));
+		    func (stream, "%s", psr_name (given & 0xff));
 		  }
 		break;
 
@@ -4265,10 +4266,10 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		    if (name != NULL)
 		      func (stream, "%s", name);
 		    else
-		      func (stream, "(UNDEF: %lu)", sm);
+		      func (stream, "(UNDEF: %lu)", (unsigned long) sm);
 		  }
 		else
-		  func (stream, psr_name (given & 0xff));
+		  func (stream, "%s", psr_name (given & 0xff));
 		break;
 
 	      case '0': case '1': case '2': case '3': case '4':

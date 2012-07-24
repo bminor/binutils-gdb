@@ -1,3 +1,14 @@
+2012-07-24  Dr David Alan Gilbert  <dave@treblig.org>
+
+	PR binutils/13135
+	* arm-dis.c: Add necessary casts for printing integer values.
+	Use %s when printing string values.
+	* hppa-dis.c: Likewise.
+	* m68k-dis.c: Likewise.
+	* microblaze-dis.c: Likewise.
+	* mips-dis.c: Likewise.
+	* sparc-dis.c: Likewise.
+
 2012-07-19  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
 
 	PR binutils/14355

@@ -666,7 +666,7 @@ print_insn_powerpc (bfd_vma memaddr,
 	      (*info->fprintf_func) (info->stream, "%s", cbnames[cc]);
 	    }
 	  else
-	    (*info->fprintf_func) (info->stream, "%d", value);
+	    (*info->fprintf_func) (info->stream, "%d", (int) value);
 
 	  if (need_paren)
 	    {
