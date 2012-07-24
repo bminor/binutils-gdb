@@ -2153,7 +2153,7 @@ coff_find_nearest_line_with_names (bfd *abfd,
   if (_bfd_dwarf2_find_nearest_line (abfd, debug_sections,
                                      section, symbols, offset,
 				     filename_ptr, functionname_ptr,
-				     line_ptr, 0,
+				     line_ptr, NULL, 0,
 				     &coff_data(abfd)->dwarf2_find_line_info))
     return TRUE;
 

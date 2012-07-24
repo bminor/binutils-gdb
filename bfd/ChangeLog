@@ -1,3 +1,47 @@
+2012-07-24  Teresa Johnson  <tejohnson@google.com>
+
+	* bfd.c (bfd_find_nearest_line_discriminator): New macro.
+	* coff-rs6000.c: Init _bfd_find_nearest_line_discriminator.
+	* coff64-rs6000.c: Likewise.
+	* dwarf2.c (struct line_info): Add discriminator field.
+	(add_line_info): Fill in new discriminator field.
+	(decode_line_info): Record discriminator information instead
+        of ignoring it.
+	(lookup_address_in_line_info_table): Return discriminator field if
+        requested.
+	(comp_unit_find_nearest_line): Add discriminator argument.
+	(find_line): Likewise.
+	(_bfd_dwarf2_find_nearest_line): Likewise.
+	(_bfd_dwarf2_find_line): Likewise.
+	* elf-bfd.h (_bfd_elf_find_nearest_line_discriminator): New.
+        (_bfd_elf_find_line_discriminator): Likewise.
+        (_bfd_generic_find_nearest_line_discriminator): Likewise. Defined.
+	* elf.c (_bfd_elf_find_nearest_line): Change to a wrapper
+        that invokes _bfd_elf_find_nearest_line_discriminator with correct
+        arguments.
+	(_bfd_elf_find_nearest_line_discriminator): New.
+	(_bfd_elf_find_line): Change to a wrapper
+        that invokes _bfd_elf_find_line_discriminator with correct
+        arguments.
+	(_bfd_elf_find_line_discriminator): New.
+	* coffgen.c (coff_find_nearest_line_with_names): Handle
+        new discriminator argument.
+	* elf32-arm.c (elf32_arm_find_nearest_line): Likewise.
+	* elf64-alpha.c (elf64_alpha_find_nearest_line): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_find_nearest_line): Likewise.
+	* mach-o.c (bfd_mach_o_find_nearest_line): Likewise.
+	* libbfd-in.h (_bfd_dwarf2_find_nearest_line): Add discriminator
+        argument.
+        (_bfd_dwarf2_find_line): Likewise.
+        (_bfd_generic_find_nearest_line_discriminator): New.
+	* libbfd.c (_bfd_generic_find_nearest_line_discriminator): New.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Initialize
+        _bfd_find_nearest_line_discriminator with
+        _bfd_generic_find_nearest_line_discriminator.
+        (bfd_target): Add _bfd_find_nearest_line_discriminator.
+
 2012-07-24  Sean Keys  <skeys@ipdatasys.com>
 
         * elf32-m68hc1x.c (elf32_m68hc11_relocate_section): Added code

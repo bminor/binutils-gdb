@@ -139,6 +139,7 @@ static bfd_vma pc;
 static const char *filename;
 static const char *functionname;
 static unsigned int line;
+static unsigned int discriminator;
 static bfd_boolean found;
 
 /* Look for an address in a section.  This is called via
@@ -165,8 +166,9 @@ find_address_in_section (bfd *abfd, asection *section,
   if (pc >= vma + size)
     return;
 
-  found = bfd_find_nearest_line (abfd, section, syms, pc - vma,
-				 &filename, &functionname, &line);
+  found = bfd_find_nearest_line_discriminator (abfd, section, syms, pc - vma,
+                                               &filename, &functionname,
+                                               &line, &discriminator);
 }
 
 /* Look for an offset in a section.  This is directly called.  */
@@ -186,8 +188,9 @@ find_offset_in_section (bfd *abfd, asection *section)
   if (pc >= size)
     return;
 
-  found = bfd_find_nearest_line (abfd, section, syms, pc,
-				 &filename, &functionname, &line);
+  found = bfd_find_nearest_line_discriminator (abfd, section, syms, pc,
+                                               &filename, &functionname,
+                                               &line, &discriminator);
 }
 
 /* Read hexadecimal addresses from stdin, translate into
@@ -294,7 +297,12 @@ translate_addresses (bfd *abfd, asection *section)
 
               printf ("%s:", filename ? filename : "??");
 	      if (line != 0)
-		printf ("%u\n", line);
+                {
+                  if (discriminator != 0)
+                    printf ("%u (discriminator %u)\n", line, discriminator);
+                  else
+                    printf ("%u\n", line);
+                }
 	      else
 		printf ("?\n");
               if (!unwind_inlines)

@@ -980,6 +980,7 @@ struct line_info
   char *filename;
   unsigned int line;
   unsigned int column;
+  unsigned int discriminator;
   unsigned char op_index;
   unsigned char end_sequence;		/* End of (sequential) code sequence.  */
 };
@@ -1080,6 +1081,7 @@ add_line_info (struct line_info_table *table,
 	       char *filename,
 	       unsigned int line,
 	       unsigned int column,
+	       unsigned int discriminator,
 	       int end_sequence)
 {
   bfd_size_type amt = sizeof (struct line_info);
@@ -1095,6 +1097,7 @@ add_line_info (struct line_info_table *table,
   info->op_index = op_index;
   info->line = line;
   info->column = column;
+  info->discriminator = discriminator;
   info->end_sequence = end_sequence;
 
   if (filename && filename[0])
@@ -1573,6 +1576,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       char * filename = table->num_files ? concat_filename (table, 1) : NULL;
       unsigned int line = 1;
       unsigned int column = 0;
+      unsigned int discriminator = 0;
       int is_stmt = lh.default_is_stmt;
       int end_sequence = 0;
       /* eraxxon@alumni.rice.edu: Against the DWARF2 specs, some
@@ -1607,8 +1611,9 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	      line += lh.line_base + (adj_opcode % lh.line_range);
 	      /* Append row to matrix using current values.  */
 	      if (!add_line_info (table, address, op_index, filename,
-				  line, column, 0))
+				  line, column, discriminator, 0))
 		goto line_fail;
+              discriminator = 0;
 	      if (address < low_pc)
 		low_pc = address;
 	      if (address > high_pc)
@@ -1626,9 +1631,10 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
-		  if (!add_line_info (table, address, op_index, filename,
-				      line, column, end_sequence))
+		  if (!add_line_info (table, address, op_index, filename, line,
+				      column, discriminator, end_sequence))
 		    goto line_fail;
+                  discriminator = 0;
 		  if (address < low_pc)
 		    low_pc = address;
 		  if (address > high_pc)
@@ -1668,7 +1674,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		  table->num_files++;
 		  break;
 		case DW_LNE_set_discriminator:
-		  (void) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+		  discriminator =
+                      read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
 		  line_ptr += bytes_read;
 		  break;
 		case DW_LNE_HP_source_file_correlation:
@@ -1686,8 +1693,9 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	      break;
 	    case DW_LNS_copy:
 	      if (!add_line_info (table, address, op_index,
-				  filename, line, column, 0))
+				  filename, line, column, discriminator, 0))
 		goto line_fail;
+              discriminator = 0;
 	      if (address < low_pc)
 		low_pc = address;
 	      if (address > high_pc)
@@ -1788,7 +1796,8 @@ static bfd_boolean
 lookup_address_in_line_info_table (struct line_info_table *table,
 				   bfd_vma addr,
 				   const char **filename_ptr,
-				   unsigned int *linenumber_ptr)
+				   unsigned int *linenumber_ptr,
+				   unsigned int *discriminator_ptr)
 {
   struct line_sequence *seq = NULL;
   struct line_info *each_line;
@@ -1823,6 +1832,8 @@ lookup_address_in_line_info_table (struct line_info_table *table,
         {
           *filename_ptr = each_line->filename;
           *linenumber_ptr = each_line->line;
+          if (discriminator_ptr)
+            *discriminator_ptr = each_line->discriminator;
           return TRUE;
         }
     }
@@ -2552,6 +2563,7 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
 			     const char **filename_ptr,
 			     const char **functionname_ptr,
 			     unsigned int *linenumber_ptr,
+			     unsigned int *discriminator_ptr,
 			     struct dwarf2_debug *stash)
 {
   bfd_boolean line_p;
@@ -2592,7 +2604,8 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
     stash->inliner_chain = function;
   line_p = lookup_address_in_line_info_table (unit->line_table, addr,
 					      filename_ptr,
-					      linenumber_ptr);
+					      linenumber_ptr,
+					      discriminator_ptr);
   return line_p || func_p;
 }
 
@@ -3308,6 +3321,7 @@ find_line (bfd *abfd,
 	   const char **filename_ptr,
 	   const char **functionname_ptr,
 	   unsigned int *linenumber_ptr,
+	   unsigned int *discriminator_ptr,
 	   unsigned int addr_size,
 	   void **pinfo)
 {
@@ -3419,6 +3433,7 @@ find_line (bfd *abfd,
 						   filename_ptr,
 						   functionname_ptr,
 						   linenumber_ptr,
+						   discriminator_ptr,
 						   stash));
 	  if (found)
 	    goto done;
@@ -3512,6 +3527,7 @@ find_line (bfd *abfd,
 						     filename_ptr,
 						     functionname_ptr,
 						     linenumber_ptr,
+						     discriminator_ptr,
 						     stash));
 
 	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
@@ -3546,12 +3562,13 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 			       const char **filename_ptr,
 			       const char **functionname_ptr,
 			       unsigned int *linenumber_ptr,
+                               unsigned int *discriminator_ptr,
 			       unsigned int addr_size,
 			       void **pinfo)
 {
   return find_line (abfd, debug_sections, section, offset, NULL, symbols,
-                    filename_ptr, functionname_ptr, linenumber_ptr, addr_size,
-		    pinfo);
+                    filename_ptr, functionname_ptr, linenumber_ptr,
+                    discriminator_ptr, addr_size, pinfo);
 }
 
 /* The DWARF2 version of find_line.
@@ -3563,11 +3580,13 @@ _bfd_dwarf2_find_line (bfd *abfd,
 		       asymbol *symbol,
 		       const char **filename_ptr,
 		       unsigned int *linenumber_ptr,
+                       unsigned int *discriminator_ptr,
 		       unsigned int addr_size,
 		       void **pinfo)
 {
   return find_line (abfd, dwarf_debug_sections, NULL, 0, symbol, symbols,
-                    filename_ptr, NULL, linenumber_ptr, addr_size, pinfo);
+                    filename_ptr, NULL, linenumber_ptr, discriminator_ptr,
+                    addr_size, pinfo);
 }
 
 bfd_boolean
