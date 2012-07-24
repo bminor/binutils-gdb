@@ -1,3 +1,9 @@
+2012-07-24  Sandra Loosemore  <sandra@codesourcery.com>
+	    Jie Zhang  <jzhang918@gmail.com>
+
+	* gas/arm/adr.d: New test.
+	* gas/arm/adr.s: New test.
+
 2012-07-16  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
 
 	* gas/i386/i386.exp: Run adx, rdseed and prefetchw tests.

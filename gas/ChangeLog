@@ -1,3 +1,9 @@
+2012-07-24  Sandra Loosemore  <sandra@codesourcery.com>
+	    Jie Zhang  <jzhang918@gmail.com>
+
+	* config/tc-arm.c (md_apply_fix): Use encoding A2 of ADR
+	if offset is negative.
+
 2012-07-16  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
 
 	* config/tc-i386.c: Add ADX, RDSEED and PRFCHW asm directives.

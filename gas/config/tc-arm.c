@@ -20637,13 +20637,22 @@ md_apply_fix (fixS *	fixP,
 	    }
 	}
 
-      newimm = encode_arm_immediate (value);
       temp = md_chars_to_number (buf, INSN_SIZE);
 
-      /* If the instruction will fail, see if we can fix things up by
-	 changing the opcode.  */
-      if (newimm == (unsigned int) FAIL
-	  && (newimm = negate_data_op (&temp, value)) == (unsigned int) FAIL)
+      /* If the offset is negative, we should use encoding A2 for ADR.  */
+      if ((temp & 0xfff0000) == 0x28f0000 && value < 0)
+	newimm = negate_data_op (&temp, value);
+      else
+	{
+	  newimm = encode_arm_immediate (value);
+
+	  /* If the instruction will fail, see if we can fix things up by
+	     changing the opcode.  */
+	  if (newimm == (unsigned int) FAIL)
+	    newimm = negate_data_op (&temp, value);
+	}
+
+      if (newimm == (unsigned int) FAIL)
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("invalid constant (%lx) after fixup"),
