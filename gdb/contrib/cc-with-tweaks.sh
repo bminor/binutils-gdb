@@ -26,8 +26,8 @@
 #
 # bash$ cd $objdir/gdb/testsuite
 # bash$ runtest \
-#   CC_FOR_TARGET="/bin/sh $srcdir/cc-with-tweaks.sh ARGS gcc" \
-#   CXX_FOR_TARGET="/bin/sh $srcdir/cc-with-tweaks.sh ARGS g++"
+#   CC_FOR_TARGET="/bin/sh $srcdir/gdb/contrib/cc-with-tweaks.sh ARGS gcc" \
+#   CXX_FOR_TARGET="/bin/sh $srcdir/gdb/contrib/cc-with-tweaks.sh ARGS g++"
 #
 # For documentation on index files: info -f gdb.info -n "Index Files"
 # For information about 'dwz', see the announcement:

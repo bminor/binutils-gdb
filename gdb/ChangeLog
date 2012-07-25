@@ -1,3 +1,7 @@
+2012-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* contrib/cc-with-tweaks.sh: Put into comment path gdb/contrib/.
+
 2012-07-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* doublest.c (convert_doublest_to_floatformat): If the exponent
