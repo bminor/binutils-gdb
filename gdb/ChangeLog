@@ -1,3 +1,7 @@
+2012-07-25  Ralf Corsépius  <ralf.corsepius@rtems.org>
+
+	* configure.tgt: Add v850*-*-rtems*.
+
 2012-07-25  Hui Zhu  <hui_zhu@mentor.com>
 
 	* linespec.c (linespec_lexer_lex_number): Update comments,
