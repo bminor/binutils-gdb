@@ -1,3 +1,7 @@
+2012-07-25  James Lemke  <jwlemke@codesourcery.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add/remove PPCVLE for some 32-bit insns.
+
 2012-07-24  Dr David Alan Gilbert  <dave@treblig.org>
 
 	PR binutils/13135
