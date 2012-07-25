@@ -1,3 +1,11 @@
+2012-07-25  Hui Zhu  <hui_zhu@mentor.com>
+
+	* linespec.c (linespec_lexer_lex_number): Update comments,
+	change the return and add check to make sure the input is
+	the decimal numbers.
+	(linespec_lexer_lex_one): If linespec_lexer_lex_number return
+	false, call linespec_lexer_lex_string.
+
 2012-07-24  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* breakpoint.c (create_breakpoint): Store condition for pending
