@@ -521,3 +521,16 @@ if {$use_gdb_compile} {
     catch {rename default_target_compile {}}
     rename gdb_default_target_compile default_target_compile
 }
+
+
+# Provide 'lreverse' missing in Tcl before 7.5.
+
+if {[info procs lreverse] == ""} {
+    proc lreverse { arg } {
+	set retval {}
+	while { [llength $retval] < [llength $arg] } {
+	    lappend retval [lindex $arg end-[llength $retval]]
+	}
+	return $retval
+    }
+}
