@@ -1,5 +1,11 @@
 2012-07-25  Joel Brobecker  <brobecker@adacore.com>
 
+	* doublest.c (convert_doublest_to_floatformat): If the exponent
+	is too small, treat the value as zero.  If the exponent is too
+	large, treat the value as infinity.
+
+2012-07-25  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac: Add --enable-lmcheck configure option.
 	* configure: Regenerate.
 

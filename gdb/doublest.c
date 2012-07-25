@@ -472,6 +472,28 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
   mant = frexp (dfrom, &exponent);
 #endif
 
+  if (exponent + fmt->exp_bias <= 0)
+    {
+      /* The value is too small to be expressed in the destination
+	 type (not enough bits in the exponent.  Treat as 0.  */
+      put_field (uto, order, fmt->totalsize, fmt->exp_start,
+		 fmt->exp_len, 0);
+      put_field (uto, order, fmt->totalsize, fmt->man_start,
+		 fmt->man_len, 0);
+      goto finalize_byteorder;
+    }
+
+  if (exponent + fmt->exp_bias >= (1 << fmt->exp_len) - 1)
+    {
+      /* The value is too large to fit into the destination.
+	 Treat as infinity.  */
+      put_field (uto, order, fmt->totalsize, fmt->exp_start,
+		 fmt->exp_len, fmt->exp_nan);
+      put_field (uto, order, fmt->totalsize, fmt->man_start,
+		 fmt->man_len, 0);
+      goto finalize_byteorder;
+    }
+
   put_field (uto, order, fmt->totalsize, fmt->exp_start, fmt->exp_len,
 	     exponent + fmt->exp_bias - 1);
 
