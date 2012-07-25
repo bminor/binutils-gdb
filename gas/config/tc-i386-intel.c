@@ -278,10 +278,24 @@ i386_intel_simplify_register (expressionS *e)
 	}
       i.op[this_operand].regs = i386_regtab + reg_num;
     }
+  else if (!intel_state.index
+	   && (i386_regtab[reg_num].reg_type.bitfield.regxmm
+	       || i386_regtab[reg_num].reg_type.bitfield.regymm))
+    intel_state.index = i386_regtab + reg_num;
   else if (!intel_state.base && !intel_state.in_scale)
     intel_state.base = i386_regtab + reg_num;
   else if (!intel_state.index)
-    intel_state.index = i386_regtab + reg_num;
+    {
+      if (intel_state.in_scale
+	  || i386_regtab[reg_num].reg_type.bitfield.baseindex)
+	intel_state.index = i386_regtab + reg_num;
+      else
+	{
+	  /* Convert base to index and make ESP/RSP the base.  */
+	  intel_state.index = intel_state.base;
+	  intel_state.base = i386_regtab + reg_num;
+	}
+    }
   else
     {
       /* esp is invalid as index */

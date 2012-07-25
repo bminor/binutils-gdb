@@ -1,5 +1,11 @@
 2012-07-24  Jan Beulich <jbeulich@suse.com>
 
+	* config/tc-i386-intel.c (i386_intel_simplify_register): Handle
+	xmm/ymm index register being specified first as well as esp/rsp
+	base register being specified last in a memory operand.
+
+2012-07-24  Jan Beulich <jbeulich@suse.com>
+
 	* config/tc-i386-intel.c (i386_intel_simplify_register):
 	Replace literal 4 by corresponding ESP_REG_NUM.
 
