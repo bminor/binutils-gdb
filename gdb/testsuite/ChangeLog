@@ -1,5 +1,10 @@
 2012-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix testsuite regression after --use-deprecated-index-sections removal.
+	* lib/mi-support.exp (gdbindex_warning_re): Update the expect string.
+
+2012-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix compatibility with Tcl before 7.5.
 	* lib/future.exp (lreverse): New function if it does not exist.
 
