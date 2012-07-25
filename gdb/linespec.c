@@ -366,31 +366,36 @@ static const char *const linespec_quote_characters = "\"\'";
 /* Lexer functions.  */
 
 /* Lex a number from the input in PARSER.  This only supports
-   decimal numbers.  */
+   decimal numbers.\
+   Return true if input is decimal numbers.  Return false if not.  */
 
-static linespec_token
-linespec_lexer_lex_number (linespec_parser *parser)
+static int
+linespec_lexer_lex_number (linespec_parser *parser, linespec_token *tokenp)
 {
-  linespec_token token;
-
-  token.type = LSTOKEN_NUMBER;
-  LS_TOKEN_STOKEN (token).length = 0;
-  LS_TOKEN_STOKEN (token).ptr = PARSER_STREAM (parser);
+  tokenp->type = LSTOKEN_NUMBER;
+  LS_TOKEN_STOKEN (*tokenp).length = 0;
+  LS_TOKEN_STOKEN (*tokenp).ptr = PARSER_STREAM (parser);
 
   /* Keep any sign at the start of the stream.  */
   if (*PARSER_STREAM (parser) == '+' || *PARSER_STREAM (parser) == '-')
     {
-      ++LS_TOKEN_STOKEN (token).length;
+      ++LS_TOKEN_STOKEN (*tokenp).length;
       ++(PARSER_STREAM (parser));
     }
 
   while (isdigit (*PARSER_STREAM (parser)))
     {
-      ++LS_TOKEN_STOKEN (token).length;
+      ++LS_TOKEN_STOKEN (*tokenp).length;
       ++(PARSER_STREAM (parser));
     }
 
-  return token;
+  if (*PARSER_STREAM (parser) != '\0' && !isspace(*PARSER_STREAM (parser)))
+    {
+      PARSER_STREAM (parser) = LS_TOKEN_STOKEN (*tokenp).ptr;
+      return 0;
+    }
+
+  return 1;
 }
 
 /* Does P represent one of the keywords?  If so, return
@@ -724,7 +729,8 @@ linespec_lexer_lex_one (linespec_parser *parser)
 	case '+': case '-':
 	case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
-          parser->lexer.current = linespec_lexer_lex_number (parser);
+           if (!linespec_lexer_lex_number (parser, &(parser->lexer.current)))
+	     parser->lexer.current = linespec_lexer_lex_string (parser);
           break;
 
 	case ':':
