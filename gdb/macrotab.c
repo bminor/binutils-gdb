@@ -128,7 +128,7 @@ macro_bcache (struct macro_table *t, const void *addr, int len)
 static const char *
 macro_bcache_str (struct macro_table *t, const char *s)
 {
-  return (char *) macro_bcache (t, s, strlen (s) + 1);
+  return macro_bcache (t, s, strlen (s) + 1);
 }
 
 

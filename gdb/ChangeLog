@@ -1,3 +1,7 @@
+2012-07-25  Tom Tromey  <tromey@redhat.com>
+
+	* macrotab.c (macro_bcache_str): Remove cast.
+
 2012-07-25  Hui Zhu  <hui_zhu@mentor.com>
 
 	* linespec.c (linespec_lexer_lex_number): Update comments,
