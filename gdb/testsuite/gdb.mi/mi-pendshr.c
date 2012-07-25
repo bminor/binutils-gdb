@@ -23,7 +23,13 @@ void pendfunc1 (int x)
   printf ("in pendfunc1, x is %d\n", x);
 }
 
+void pendfunc2 (int x)
+{
+  printf ("in pendfunc2, x is %d\n", x);
+}
+
 void pendfunc (int x)
 {
   pendfunc1 (x);
+  pendfunc2 (x);
 }

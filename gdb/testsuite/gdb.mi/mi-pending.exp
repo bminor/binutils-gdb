@@ -48,12 +48,29 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 mi_load_shlibs $lib_sl
 
-# Set pending breakpoint via MI
+# Set pending breakpoint via MI.
 mi_gdb_test "-break-insert -f pendfunc1" \
     ".*\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"<PENDING>\",pending=\"pendfunc1\",times=\"0\",original-location=\"pendfunc1\"\}"\
     "MI pending breakpoint on pendfunc1"
+
+# Set pending breakpoint with a condition via MI.
+mi_gdb_test "-break-insert -f -c x==4 ${srcfile2}:pendfunc2" \
+    ".*\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"<PENDING>\",pending=\"${srcfile2}:pendfunc2\",cond=\"x==4\",times=\"0\",original-location=\"${srcfile2}:pendfunc2\"\}"\
+    "MI pending breakpoint on ${srcfile2}:pendfunc2 if x==4"
 
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "pendfunc1" ".*" ".*" ".*" \
     { "" "disp=\"keep\"" } \
     "Run till MI pending breakpoint on pendfunc1"
+
+mi_send_resuming_command "exec-continue" "continuing execution to skip conditional bp"
+# We should not stop on the conditional breakpoint yet, but we stop on the original bp. 
+mi_expect_stop "breakpoint-hit" "pendfunc1" ".*" ".*" ".*" \
+    { "" "disp=\"keep\"" } \
+    "Run till MI pending breakpoint on pendfunc1 a second time"
+
+mi_send_resuming_command "exec-continue" "continuing execution to conditional bp"
+# Now we should stop on the conditional breakpoint.
+mi_expect_stop "breakpoint-hit" "pendfunc2" "\{name=\"x\",value=\"4\"\}" ".*" ".*" \
+    { "" "disp=\"keep\"" } \
+    "Run till MI pending breakpoint on pendfunc2 with x==4"

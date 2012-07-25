@@ -1,3 +1,10 @@
+2012-07-25  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* gdb.mi/mi-pending.c: New method to set a second pending
+	breakpoint.
+	* gdb.mi/mi-pending.exp: Set a pending breakpoint with a
+	condition.
+
 2012-07-20  Pedro Alves  <palves@redhat.com>
 
 	PR threads/11692
