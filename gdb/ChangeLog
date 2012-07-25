@@ -1,3 +1,7 @@
+2012-07-25  Ralf Corsépius  <ralf.corsepius@rtems.org>
+
+	* configure.tgt: Add v850*-*-rtems*.
+
 2012-07-25  Tom Tromey  <tromey@redhat.com>
 
 	* macrotab.c (macro_bcache_str): Remove cast.
