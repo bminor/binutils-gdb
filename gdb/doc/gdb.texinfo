@@ -34536,6 +34536,11 @@ Shared library events.
 
 @end table
 
+@kindex maint info bfds
+@item maint info bfds
+This prints information about each @code{bfd} object that is known to
+@value{GDBN}.  @xref{Top, , BFD, bfd, The Binary File Descriptor Library}.
+
 @kindex set displaced-stepping
 @kindex show displaced-stepping
 @cindex displaced stepping support

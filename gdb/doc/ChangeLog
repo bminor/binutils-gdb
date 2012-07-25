@@ -1,3 +1,7 @@
+2012-07-25  Tom Tromey  <tromey@redhat.com>
+
+    	* gdb.texinfo (Maintenance Commands): Document maint info bfds.
+
 2012-07-20  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Mode Options): Delete --use-deprecated-index-sections.

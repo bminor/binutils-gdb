@@ -3,6 +3,11 @@
 
 *** Changes since GDB 7.5
 
+* New commands (for set/show, see "New options" below)
+
+maint info bfds
+  List the BFDs known to GDB.
+
 *** Changes in GDB 7.5
 
 * GDB now supports x32 ABI.  Visit <http://sites.google.com/site/x32abi/>

@@ -1,3 +1,11 @@
+2012-07-25  Tom Tromey  <tromey@redhat.com>
+
+    	* NEWS: Mention maint info bfds.
+    	* gdb_bfd.c (all_bfds): New global.
+    	(gdb_bfd_ref, gdb_bfd_unref): Update all_bfds.
+    	(print_one_bfd, maintenance_info_bfds, _initialize_gdb_bfd):
+    	New functions.
+
 2012-07-25  Ralf Corsépius  <ralf.corsepius@rtems.org>
 
 	* configure.tgt: Add v850*-*-rtems*.
