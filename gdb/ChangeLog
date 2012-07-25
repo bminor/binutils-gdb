@@ -1,3 +1,8 @@
+2012-07-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Add --enable-lmcheck configure option.
+	* configure: Regenerate.
+
 2012-07-25  Tom Tromey  <tromey@redhat.com>
 
     	* NEWS: Mention maint info bfds.

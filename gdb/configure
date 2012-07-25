@@ -795,6 +795,7 @@ with_zlib
 with_libiconv_prefix
 with_iconv_bin
 with_system_readline
+enable_libmcheck
 with_jit_reader_dir
 with_expat
 with_gnu_ld
@@ -1465,6 +1466,7 @@ Optional Features:
   --enable-tui            enable full-screen terminal user interface (TUI)
   --enable-gdbtk          enable gdbtk graphical user interface (GUI)
   --enable-profiling      enable profiling of GDB
+  --enable-libmcheck      Try building GDB with -lmcheck if available
   --disable-rpath         do not hardcode runtime library paths
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
@@ -7039,7 +7041,26 @@ fi
 
 
 
-if $development; then
+# Provide a --enable-libmcheck/--disable-libmcheck set of options
+# allowing a user to enable this option even when building releases,
+# or to disable it when building a snapshot.
+# Check whether --enable-libmcheck was given.
+if test "${enable_libmcheck+set}" = set; then :
+  enableval=$enable_libmcheck; case "${enableval}" in
+     yes | y) ENABLE_LIBMCHECK="yes" ;;
+     no | n)  ENABLE_LIBMCHECK="no" ;;
+     *) as_fn_error "bad value ${enableval} for --enable-libmcheck" "$LINENO" 5 ;;
+   esac
+fi
+
+
+# Enable -lmcheck by default (it provides cheap-enough memory mangling),
+# but turn it off for releases.
+if test -z "${ENABLE_LIBMCHECK}" && $development; then
+    ENABLE_LIBMCHECK=yes
+fi
+
+if test "$ENABLE_LIBMCHECK" = "yes" ; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lmcheck" >&5
 $as_echo_n "checking for main in -lmcheck... " >&6; }
 if test "${ac_cv_lib_mcheck_main+set}" = set; then :

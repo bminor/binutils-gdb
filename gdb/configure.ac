@@ -645,8 +645,25 @@ AC_SUBST(READLINE_DEPS)
 AC_SUBST(READLINE_CFLAGS)
 AC_SUBST(READLINE_TEXI_INCFLAG)
 
-dnl -lmcheck provides cheap enough memory mangling for debugging purposes.
-if $development; then
+# Provide a --enable-libmcheck/--disable-libmcheck set of options
+# allowing a user to enable this option even when building releases,
+# or to disable it when building a snapshot.
+AC_ARG_ENABLE(libmcheck,
+  AS_HELP_STRING([--enable-libmcheck],
+                 [Try building GDB with -lmcheck if available]),
+  [case "${enableval}" in
+     yes | y) ENABLE_LIBMCHECK="yes" ;;
+     no | n)  ENABLE_LIBMCHECK="no" ;;
+     *) AC_MSG_ERROR(bad value ${enableval} for --enable-libmcheck) ;;
+   esac])
+
+# Enable -lmcheck by default (it provides cheap-enough memory mangling),
+# but turn it off for releases.
+if test -z "${ENABLE_LIBMCHECK}" && $development; then
+    ENABLE_LIBMCHECK=yes
+fi
+
+if test "$ENABLE_LIBMCHECK" = "yes" ; then
   AC_CHECK_LIB(mcheck, main)
 fi
 
