@@ -1,3 +1,7 @@
+2012-07-26  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* python/py-inferior.c (infpy_threads): Call update_thread_list ().
+
 2012-07-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* auto-load.c (auto_load_info_scripts): Remove immediate_quit increment

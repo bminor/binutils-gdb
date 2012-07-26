@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <pthread.h>
 
 #define CHUNK_SIZE 16000 /* same as findcmd.c's */
 #define BUF_SIZE (2 * CHUNK_SIZE) /* at least two chunks */
+#define NUMTH 8
 
 int8_t int8_search_buf[100];
 int16_t int16_search_buf[100];
@@ -43,8 +45,47 @@ init_bufs ()
   memset (search_buf, 'x', search_buf_size);
 }
 
+static void *
+thread (void *param)
+{
+  pthread_barrier_t *barrier = (pthread_barrier_t *) param;
+
+  pthread_barrier_wait (barrier);
+
+  return param;
+}
+
+static void
+check_threads (pthread_barrier_t *barrier)
+{
+  pthread_barrier_wait (barrier);
+}
+
+extern int
+test_threads (void)
+{
+  pthread_t threads[NUMTH];
+  pthread_barrier_t barrier;
+  int i;
+
+  pthread_barrier_init (&barrier, NULL, NUMTH + 1);
+
+  for (i = 0; i < NUMTH; ++i)
+    pthread_create (&threads[i], NULL, thread, &barrier);
+
+  check_threads (&barrier);
+
+  for (i = 0; i < NUMTH; ++i)
+    pthread_join (threads[i], NULL);
+
+  pthread_barrier_destroy (&barrier);
+
+  return 0;
+}
+
 int main (int argc, char *argv[])
 {
+  test_threads ();
   init_bufs ();
 
   return f1 (1, 2);

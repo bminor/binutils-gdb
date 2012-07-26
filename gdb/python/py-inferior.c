@@ -300,8 +300,13 @@ infpy_threads (PyObject *self, PyObject *args)
   struct threadlist_entry *entry;
   inferior_object *inf_obj = (inferior_object *) self;
   PyObject *tuple;
+  volatile struct gdb_exception except;
 
   INFPY_REQUIRE_VALID (inf_obj);
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    update_thread_list ();
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   tuple = PyTuple_New (inf_obj->nthreads);
   if (!tuple)

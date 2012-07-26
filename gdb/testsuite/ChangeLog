@@ -1,3 +1,11 @@
+2012-07-26  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.python/py-inferior.c (thread): New function.
+	(check_threads): New function.
+	(test_threads): New function.
+	* gdb.python/py-inferior.exp: Added test.
+	Replaced runto with continue to breakpoint.
+
 2012-07-26  Tom Tromey  <tromey@redhat.com>
 
 	* lib/ada.exp (standard_ada_testfile): New proc.

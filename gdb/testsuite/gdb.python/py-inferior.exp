@@ -20,7 +20,7 @@ load_lib gdb-python.exp
 
 standard_testfile
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
+if { [gdb_compile_pthreads ${srcdir}/${subdir}/${srcfile} ${binfile} executable {debug}] != "" } {
     return -1
 }
 
@@ -48,8 +48,6 @@ if ![runto_main] then {
     return 0
 }
 
-runto [gdb_get_line_number "Break here."]
-
 # Test basic gdb.Inferior attributes and methods.
 
 gdb_py_test_silent_cmd "python inferiors = gdb.inferiors ()" "get inferiors list" 1
@@ -61,6 +59,17 @@ gdb_test "python print 'result =', i0.num" " = \[0-9\]+" "test Inferior.num"
 gdb_test "python print 'result =', i0.pid" " = \[0-9\]+" "test Inferior.pid"
 gdb_test "python print 'result =', i0.was_attached" " = False" "test Inferior.was_attached"
 gdb_test "python print i0.threads ()" "\\(<gdb.InferiorThread object at 0x\[\[:xdigit:\]\]+>,\\)" "test Inferior.threads"
+
+# Test the number of inferior threads.
+
+gdb_breakpoint check_threads
+gdb_continue_to_breakpoint "cont to check_threads" ".*pthread_barrier_wait.*"
+gdb_test "python print len (i0.threads ())" "\r\n9" "test Inferior.threads 2"
+
+# Proceed to the next test.
+
+gdb_breakpoint [gdb_get_line_number "Break here."]
+gdb_continue_to_breakpoint "cont to Break here." ".*Break here\..*"
 
 # Test memory read and write operations.
 
