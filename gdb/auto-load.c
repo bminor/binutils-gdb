@@ -916,11 +916,9 @@ auto_load_info_scripts (char *pattern, int from_tty,
     {
       struct collect_matching_scripts_data data = { &scripts, language };
 
-      immediate_quit++;
       /* Pass a pointer to scripts as VEC_safe_push can realloc space.  */
       htab_traverse_noresize (pspace_info->loaded_scripts,
 			      collect_matching_scripts, &data);
-      immediate_quit--;
     }
 
   nr_scripts = VEC_length (loaded_script_ptr, scripts);
