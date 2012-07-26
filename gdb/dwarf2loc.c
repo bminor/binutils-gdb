@@ -3430,7 +3430,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	   && data[1 + leb128_size] == DW_OP_GNU_push_tls_address
 	   && piece_end_p (data + 2 + leb128_size, end))
     {
-      ULONGEST offset;
+      uint64_t offset;
 
       data = safe_read_uleb128 (data + 1, end, &offset);
       offset = dwarf2_read_addr_index (per_cu, offset);
