@@ -1,5 +1,11 @@
 2012-07-26  Tom Tromey  <tromey@redhat.com>
 
+	* copying.c: Rebuild.
+	* copying.awk: Don't use immediate_quit.  Use 'no_set_class', not
+	'no_class'.
+
+2012-07-26  Tom Tromey  <tromey@redhat.com>
+
 	* symmisc.c (print_symbol_bcache_statistics): Use QUIT, not
 	immediate_quit.
 	(print_objfile_statistics): Likewise.

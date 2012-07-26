@@ -13,11 +13,9 @@ BEGIN	{
 	  print ""
 	  print "void _initialize_copying (void);"
 	  print ""
-	  print "extern int immediate_quit;";
 	  print "static void";
 	  print "show_copying_command (char *ignore, int from_tty)";
 	  print "{";
-	  print "  immediate_quit++;";
 	}
 NR == 1,/^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/	{
 	  if ($0 ~ //)
@@ -33,13 +31,11 @@ NR == 1,/^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/	{
 	    }
 	}
 /^[	 ]*15\. Disclaimer of Warranty\.[ 	]*$/	{
-	  print "  immediate_quit--;";
 	  print "}";
 	  print "";
 	  print "static void";
 	  print "show_warranty_command (char *ignore, int from_tty)";
 	  print "{";
-	  print "  immediate_quit++;";
 	}
 /^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/, /^[ 	]*END OF TERMS AND CONDITIONS[ 	]*$/{  
 	  if (! ($0 ~ /^[ 	]*END OF TERMS AND CONDITIONS[ 	]*$/)) 
@@ -51,16 +47,15 @@ NR == 1,/^[ 	]*15\. Disclaimer of Warranty\.[ 	]*$/	{
 	    }
 	}
 END	{
-	  print "  immediate_quit--;";
 	  print "}";
 	  print "";
 	  print "void"
 	  print "_initialize_copying (void)";
 	  print "{";
-	  print "  add_cmd (\"copying\", no_class, show_copying_command,";
+	  print "  add_cmd (\"copying\", no_set_class, show_copying_command,";
 	  print "	   _(\"Conditions for redistributing copies of GDB.\"),";
 	  print "	   &showlist);";
-	  print "  add_cmd (\"warranty\", no_class, show_warranty_command,";
+	  print "  add_cmd (\"warranty\", no_set_class, show_warranty_command,";
 	  print "	   _(\"Various kinds of warranty you do not have.\"),";
 	  print "	   &showlist);";
 	  print "";

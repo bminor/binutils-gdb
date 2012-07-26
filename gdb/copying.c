@@ -17,7 +17,7 @@ show_copying_command (char *ignore, int from_tty)
   printf_filtered ("                    GNU GENERAL PUBLIC LICENSE\n");
   printf_filtered ("                       Version 3, 29 June 2007\n");
   printf_filtered ("\n");
-  printf_filtered (" Copyright (C) 2007, 2012 Free Software Foundation, Inc. <http://fsf.org/>\n");
+  printf_filtered (" Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n");
   printf_filtered (" Everyone is permitted to copy and distribute verbatim copies\n");
   printf_filtered (" of this license document, but changing it is not allowed.\n");
   printf_filtered ("\n");
