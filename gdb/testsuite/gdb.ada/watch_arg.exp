@@ -17,12 +17,8 @@ load_lib "ada.exp"
 
 if { [skip_ada_tests] } { return -1 }
 
-set testdir "watch_arg"
-set testfile "${testdir}/watch"
-set srcfile ${srcdir}/${subdir}/${testfile}.adb
-set binfile ${objdir}/${subdir}/${testfile}
+standard_ada_testfile watch
 
-file mkdir ${objdir}/${subdir}/${testdir}
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
     return -1
 }

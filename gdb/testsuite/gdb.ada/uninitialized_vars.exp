@@ -18,12 +18,8 @@
 
 load_lib "ada.exp"
 
-set testdir "uninitialized_vars"
-set testfile "${testdir}/parse"
-set srcfile ${srcdir}/${subdir}/${testfile}.adb
-set binfile ${objdir}/${subdir}/${testfile}
+standard_ada_testfile parse
 
-file mkdir ${objdir}/${subdir}/${testdir}
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } {
   return -1
 }

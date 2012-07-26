@@ -15,12 +15,8 @@
 
 load_lib "ada.exp"
 
-set testdir "mi_task_arg"
-set testfile "${testdir}/task_switch"
-set srcfile ${srcdir}/${subdir}/${testfile}.adb
-set binfile ${objdir}/${subdir}/${testfile}
+standard_ada_testfile task_switch
 
-file mkdir ${objdir}/${subdir}/${testdir}
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug additional_flags=-gnata ]] != "" } {
   return -1
 }

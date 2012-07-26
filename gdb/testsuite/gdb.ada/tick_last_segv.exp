@@ -15,12 +15,8 @@
 
 load_lib "ada.exp"
 
-set testdir "tick_last_segv"
-set testfile "${testdir}/foo"
-set srcfile ${srcdir}/${subdir}/${testfile}.adb
-set binfile ${objdir}/${subdir}/${testfile}
+standard_ada_testfile foo
 
-file mkdir ${objdir}/${subdir}/${testdir}
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
   return -1
 }

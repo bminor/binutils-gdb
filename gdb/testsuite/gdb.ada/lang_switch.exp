@@ -15,17 +15,13 @@
 
 load_lib "ada.exp"
 
-set testdir "lang_switch"
-set testfile "${testdir}/lang_switch"
+standard_ada_testfile lang_switch
 set cfile "${testdir}/foo"
-set adasrcfile ${srcdir}/${subdir}/${testfile}.adb
 set csrcfile ${srcdir}/${subdir}/${cfile}.c
-set cobject  ${objdir}/${subdir}/${cfile}.o
-set binfile ${objdir}/${subdir}/${testfile}
+set cobject [standard_output_file ${cfile}.o]
 
-file mkdir ${objdir}/${subdir}/${testdir}
 gdb_compile "${csrcfile}" "${cobject}" object [list debug]
-if {[gdb_compile_ada "${adasrcfile}" "${binfile}" executable [list debug]] != "" } {
+if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } {
   return -1
 }
 

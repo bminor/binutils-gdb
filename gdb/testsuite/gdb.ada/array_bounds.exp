@@ -15,12 +15,8 @@
 
 load_lib "ada.exp"
 
-set testdir "array_bounds"
-set testfile "${testdir}/bar"
-set srcfile ${srcdir}/${subdir}/${testfile}.adb
-set binfile ${objdir}/${subdir}/${testfile}
+standard_ada_testfile bar
 
-file mkdir ${objdir}/${subdir}/${testdir}
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
   return -1
 }

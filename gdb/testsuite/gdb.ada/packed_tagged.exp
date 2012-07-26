@@ -15,12 +15,8 @@
 
 load_lib "ada.exp"
 
-set testdir "packed_tagged"
-set testfile "${testdir}/comp_bug"
-set srcfile ${srcdir}/${subdir}/${testfile}.adb
-set binfile ${objdir}/${subdir}/${testfile}
+standard_ada_testfile comp_bug
 
-file mkdir ${objdir}/${subdir}/${testdir}
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } {
   return -1
 }

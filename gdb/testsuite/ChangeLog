@@ -1,3 +1,81 @@
+2012-07-26  Tom Tromey  <tromey@redhat.com>
+
+	* lib/ada.exp (standard_ada_testfile): New proc.
+	* gdb.ada/aliased_array.exp: Use standard_ada_testfile.
+	* gdb.ada/array_bounds.exp: Use standard_ada_testfile.
+	* gdb.ada/array_return.exp: Use standard_ada_testfile.
+	* gdb.ada/array_subscript_addr.exp: Use standard_ada_testfile.
+	* gdb.ada/arrayidx.exp: Use standard_ada_testfile.
+	* gdb.ada/arrayparam.exp: Use standard_ada_testfile.
+	* gdb.ada/arrayptr.exp: Use standard_ada_testfile.
+	* gdb.ada/atomic_enum.exp: Use standard_ada_testfile.
+	* gdb.ada/bad-task-bp-keyword.exp: Use standard_ada_testfile.
+	* gdb.ada/bp_enum_homonym.exp: Use standard_ada_testfile.
+	* gdb.ada/bp_on_var.exp: Use standard_ada_testfile.
+	* gdb.ada/bp_range_type.exp: Use standard_ada_testfile.
+	* gdb.ada/call_pn.exp: Use standard_ada_testfile.
+	* gdb.ada/catch_ex.exp: Use standard_ada_testfile.
+	* gdb.ada/char_enum.exp: Use standard_ada_testfile.
+	* gdb.ada/char_param.exp: Use standard_ada_testfile.
+	* gdb.ada/complete.exp: Use standard_ada_testfile.
+	* gdb.ada/cond_lang.exp: Use standard_ada_testfile,
+	standard_output_file.
+	* gdb.ada/dyn_loc.exp: Use standard_ada_testfile.
+	* gdb.ada/enum_idx_packed.exp: Use standard_ada_testfile.
+	* gdb.ada/exec_changed.exp: Use standard_ada_testfile,
+	standard_output_file.
+	* gdb.ada/exprs.exp: Use standard_ada_testfile.
+	* gdb.ada/fixed_cmp.exp: Use standard_ada_testfile.
+	* gdb.ada/fixed_points.exp: Use standard_ada_testfile.
+	* gdb.ada/formatted_ref.exp: Use standard_ada_testfile.
+	* gdb.ada/frame_args.exp: Use standard_ada_testfile.
+	* gdb.ada/fullname_bp.exp: Use standard_ada_testfile.
+	* gdb.ada/fun_addr.exp: Use standard_ada_testfile.
+	* gdb.ada/fun_in_declare.exp: Use standard_ada_testfile.
+	* gdb.ada/funcall_param.exp: Use standard_ada_testfile.
+	* gdb.ada/homonym.exp: Use standard_ada_testfile.
+	* gdb.ada/info_locals_renaming.exp: Use standard_ada_testfile.
+	* gdb.ada/int_deref.exp: Use standard_ada_testfile.
+	* gdb.ada/interface.exp: Use standard_ada_testfile.
+	* gdb.ada/lang_switch.exp: Use standard_ada_testfile,
+	standard_output_file
+	* gdb.ada/mi_catch_ex.exp: Use standard_ada_testfile.
+	* gdb.ada/mi_task_arg.exp: Use standard_ada_testfile.
+	* gdb.ada/mi_task_info.exp: Use standard_ada_testfile.
+	* gdb.ada/mod_from_name.exp: Use standard_ada_testfile.
+	* gdb.ada/nested.exp: Use standard_ada_testfile.
+	* gdb.ada/null_array.exp: Use standard_ada_testfile.
+	* gdb.ada/null_record.exp: Use standard_ada_testfile.
+	* gdb.ada/operator_bp.exp: Use standard_ada_testfile.
+	* gdb.ada/packed_array.exp: Use standard_ada_testfile.
+	* gdb.ada/packed_tagged.exp: Use standard_ada_testfile.
+	* gdb.ada/print_chars.exp: Use standard_ada_testfile.
+	* gdb.ada/print_pc.exp: Use standard_ada_testfile.
+	* gdb.ada/ptr_typedef.exp: Use standard_ada_testfile.
+	* gdb.ada/ptype_field.exp: Use standard_ada_testfile.
+	* gdb.ada/ptype_tagged_param.exp: Use standard_ada_testfile.
+	* gdb.ada/rec_return.exp: Use standard_ada_testfile.
+	* gdb.ada/ref_param.exp: Use standard_ada_testfile.
+	* gdb.ada/ref_tick_size.exp: Use standard_ada_testfile.
+	* gdb.ada/same_enum.exp: Use standard_ada_testfile.
+	* gdb.ada/set_pckd_arr_elt.exp: Use standard_ada_testfile.
+	* gdb.ada/small_reg_param.exp: Use standard_ada_testfile.
+	* gdb.ada/start.exp: Use standard_ada_testfile.
+	* gdb.ada/str_ref_cmp.exp: Use standard_ada_testfile.
+	* gdb.ada/sym_print_name.exp: Use standard_ada_testfile.
+	* gdb.ada/taft_type.exp: Use standard_ada_testfile.
+	* gdb.ada/tagged.exp: Use standard_ada_testfile.
+	* gdb.ada/tagged_not_init.exp: Use standard_ada_testfile.
+	* gdb.ada/task_bp.exp: Use standard_ada_testfile.
+	* gdb.ada/tasks.exp: Use standard_ada_testfile.
+	* gdb.ada/tick_last_segv.exp: Use standard_ada_testfile.
+	* gdb.ada/type_coercion.exp: Use standard_ada_testfile.
+	* gdb.ada/uninitialized_vars.exp: Use standard_ada_testfile.
+	* gdb.ada/variant_record_packed_array.exp: Use standard_ada_testfile.
+	* gdb.ada/watch_arg.exp: Use standard_ada_testfile.
+	* gdb.ada/whatis_array_val.exp: Use standard_ada_testfile.
+	* gdb.ada/widewide.exp: Use standard_ada_testfile.
+
 2012-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix testsuite regression after --use-deprecated-index-sections removal.

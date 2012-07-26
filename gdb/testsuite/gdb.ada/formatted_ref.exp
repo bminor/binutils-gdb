@@ -26,13 +26,8 @@
 
 load_lib "ada.exp"
 
-set testdir "formatted_ref"
-set testfile "${testdir}/formatted_ref"
-set srcfile ${srcdir}/${subdir}/${testfile}.adb
-set binfile ${objdir}/${subdir}/${testfile}
+standard_ada_testfile formatted_ref
 
-
-file mkdir ${objdir}/${subdir}/${testdir}
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
     untested formatted-ref.exp
     return -1

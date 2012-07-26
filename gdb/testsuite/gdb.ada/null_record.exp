@@ -17,12 +17,8 @@ load_lib "ada.exp"
 
 if { [skip_ada_tests] } { return -1 }
 
-set testdir "null_record"
-set testfile "${testdir}/null_record"
-set srcfile ${srcdir}/${subdir}/${testfile}.adb
-set binfile ${objdir}/${subdir}/${testfile}
+standard_ada_testfile null_record
 
-file mkdir ${objdir}/${subdir}/${testdir}
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
     return -1
 }

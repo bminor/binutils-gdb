@@ -15,12 +15,8 @@
 
 load_lib "ada.exp"
 
-set testdir "homonym"
-set testfile "${testdir}/homonym_main"
-set srcfile ${srcdir}/${subdir}/${testfile}.adb
-set binfile ${objdir}/${subdir}/${testfile}
+standard_ada_testfile homonym_main
 
-file mkdir ${objdir}/${subdir}/${testdir}
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } {
   return -1
 }
