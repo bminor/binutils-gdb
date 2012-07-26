@@ -1,3 +1,7 @@
+2012-07-26  Tom Tromey  <tromey@redhat.com>
+
+    	* gdb.objc/print.exp (test_float_accepted): Remove kfails.
+
 2012-07-26  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.python/py-inferior.c (thread): New function.

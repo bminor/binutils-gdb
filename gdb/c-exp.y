@@ -53,6 +53,7 @@
 #include "dfp.h"
 #include "gdb_assert.h"
 #include "macroscope.h"
+#include "objc-lang.h"
 
 #define parse_type builtin_type (parse_gdbarch)
 
@@ -159,6 +160,8 @@ void yyerror (char *);
     int *ivec;
 
     struct type_stack *type_stack;
+
+    struct objc_class_str class;
   }
 
 %{
@@ -194,15 +197,23 @@ static void check_parameter_typelist (VEC (type_ptr) *);
    nonterminal "name", which matches either NAME or TYPENAME.  */
 
 %token <tsval> STRING
+%token <sval> NSSTRING		/* ObjC Foundation "NSString" literal */
+%token SELECTOR			/* ObjC "@selector" pseudo-operator   */
 %token <tsval> CHAR
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
 %token <ssym> UNKNOWN_CPP_NAME
 %token <voidval> COMPLETE
 %token <tsym> TYPENAME
+%token <class> CLASSNAME	/* ObjC Class name */
 %type <sval> name
 %type <svec> string_exp
 %type <ssym> name_not_typename
 %type <tsym> typename
+
+ /* This is like a '[' token, but is only generated when parsing
+    Objective C.  This lets us reuse the same parser without
+    erroneously parsing ObjC-specific expressions in C.  */
+%token OBJC_LBRAC
 
 /* A NAME_OR_INT is a symbol which is not known in the symbol table,
    but which would parse as a valid number in the current input radix.
@@ -251,7 +262,7 @@ static void check_parameter_typelist (VEC (type_ptr) *);
 %left '+' '-'
 %left '*' '/' '%'
 %right UNARY INCREMENT DECREMENT
-%right ARROW ARROW_STAR '.' DOT_STAR '[' '('
+%right ARROW ARROW_STAR '.' DOT_STAR '[' OBJC_LBRAC '('
 %token <ssym> BLOCKNAME 
 %token <bval> FILENAME
 %type <bval> block
@@ -409,6 +420,78 @@ exp	:	exp DOT_STAR exp
 
 exp	:	exp '[' exp1 ']'
 			{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
+	;
+
+exp	:	exp OBJC_LBRAC exp1 ']'
+			{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
+	;
+
+/*
+ * The rules below parse ObjC message calls of the form:
+ *	'[' target selector {':' argument}* ']'
+ */
+
+exp	: 	OBJC_LBRAC TYPENAME
+			{
+			  CORE_ADDR class;
+
+			  class = lookup_objc_class (parse_gdbarch,
+						     copy_name ($2.stoken));
+			  if (class == 0)
+			    error (_("%s is not an ObjC Class"),
+				   copy_name ($2.stoken));
+			  write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (parse_type->builtin_int);
+			  write_exp_elt_longcst ((LONGEST) class);
+			  write_exp_elt_opcode (OP_LONG);
+			  start_msglist();
+			}
+		msglist ']'
+			{ write_exp_elt_opcode (OP_OBJC_MSGCALL);
+			  end_msglist();
+			  write_exp_elt_opcode (OP_OBJC_MSGCALL);
+			}
+	;
+
+exp	:	OBJC_LBRAC CLASSNAME
+			{
+			  write_exp_elt_opcode (OP_LONG);
+			  write_exp_elt_type (parse_type->builtin_int);
+			  write_exp_elt_longcst ((LONGEST) $2.class);
+			  write_exp_elt_opcode (OP_LONG);
+			  start_msglist();
+			}
+		msglist ']'
+			{ write_exp_elt_opcode (OP_OBJC_MSGCALL);
+			  end_msglist();
+			  write_exp_elt_opcode (OP_OBJC_MSGCALL);
+			}
+	;
+
+exp	:	OBJC_LBRAC exp
+			{ start_msglist(); }
+		msglist ']'
+			{ write_exp_elt_opcode (OP_OBJC_MSGCALL);
+			  end_msglist();
+			  write_exp_elt_opcode (OP_OBJC_MSGCALL);
+			}
+	;
+
+msglist :	name
+			{ add_msglist(&$1, 0); }
+	|	msgarglist
+	;
+
+msgarglist :	msgarg
+	|	msgarglist msgarg
+	;
+
+msgarg	:	name ':' exp
+			{ add_msglist(&$1, 1); }
+	|	':' exp	/* Unnamed arg.  */
+			{ add_msglist(0, 1);   }
+	|	',' exp	/* Variable number of args.  */
+			{ add_msglist(0, 0);   }
 	;
 
 exp	:	exp '(' 
@@ -641,6 +724,13 @@ exp	:	VARIABLE
 			}
 	;
 
+exp	:	SELECTOR '(' name ')'
+			{
+			  write_exp_elt_opcode (OP_OBJC_SELECTOR);
+			  write_exp_string ($3);
+			  write_exp_elt_opcode (OP_OBJC_SELECTOR); }
+	;
+
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type (lookup_signed_typename
@@ -736,6 +826,14 @@ exp	:	string_exp
 			    free ($1.tokens[i].ptr);
 			  free ($1.tokens);
 			}
+	;
+
+exp     :	NSSTRING	/* ObjC NextStep NSString constant
+				 * of the form '@' '"' string '"'.
+				 */
+			{ write_exp_elt_opcode (OP_OBJC_NSSTRING);
+			  write_exp_string ($1);
+			  write_exp_elt_opcode (OP_OBJC_NSSTRING); }
 	;
 
 /* C++.  */
@@ -1026,7 +1124,11 @@ direct_abs_decl: '(' abs_decl ')'
 
 array_mod:	'[' ']'
 			{ $$ = -1; }
+	|	OBJC_LBRAC ']'
+			{ $$ = -1; }
 	|	'[' INT ']'
+			{ $$ = $2.val; }
+	|	OBJC_LBRAC INT ']'
 			{ $$ = $2.val; }
 	;
 
@@ -1293,6 +1395,10 @@ operator:	OPERATOR NEW
 			{ $$ = operator_stoken (" new[]"); }
 	|	OPERATOR DELETE '[' ']'
 			{ $$ = operator_stoken (" delete[]"); }
+	|	OPERATOR NEW OBJC_LBRAC ']'
+			{ $$ = operator_stoken (" new[]"); }
+	|	OPERATOR DELETE OBJC_LBRAC ']'
+			{ $$ = operator_stoken (" delete[]"); }
 	|	OPERATOR '+'
 			{ $$ = operator_stoken ("+"); }
 	|	OPERATOR '-'
@@ -1388,6 +1494,8 @@ operator:	OPERATOR NEW
 	|	OPERATOR '(' ')'
 			{ $$ = operator_stoken ("()"); }
 	|	OPERATOR '[' ']'
+			{ $$ = operator_stoken ("[]"); }
+	|	OPERATOR OBJC_LBRAC ']'
 			{ $$ = operator_stoken ("[]"); }
 	|	OPERATOR conversion_type_id
 			{ char *name;
@@ -1897,6 +2005,7 @@ parse_string_or_char (char *tokptr, char **outptr, struct typed_stoken *value,
 {
   int quote;
   enum c_string_type type;
+  int is_objc = 0;
 
   /* Build the gdb internal form of the input string in tempbuf.  Note
      that the buffer is null byte terminated *only* for the
@@ -1927,6 +2036,13 @@ parse_string_or_char (char *tokptr, char **outptr, struct typed_stoken *value,
   else if (*tokptr == 'U')
     {
       type = C_STRING_32;
+      ++tokptr;
+    }
+  else if (*tokptr == '@')
+    {
+      /* An Objective C string.  */
+      is_objc = 1;
+      type = C_STRING;
       ++tokptr;
     }
   else
@@ -1976,7 +2092,7 @@ parse_string_or_char (char *tokptr, char **outptr, struct typed_stoken *value,
 
   *outptr = tokptr;
 
-  return quote == '"' ? STRING : CHAR;
+  return quote == '"' ? (is_objc ? NSSTRING : STRING) : CHAR;
 }
 
 /* This is used to associate some attributes with a token.  */
@@ -2275,6 +2391,8 @@ lex_one_token (void)
     case '(':
       paren_depth++;
       lexptr++;
+      if (parse_language->la_language == language_objc && c == '[')
+	return OBJC_LBRAC;
       return c;
 
     case ']':
@@ -2371,6 +2489,20 @@ lex_one_token (void)
 	char *p = &tokstart[1];
 	size_t len = strlen ("entry");
 
+	if (parse_language->la_language == language_objc)
+	  {
+	    size_t len = strlen ("selector");
+
+	    if (strncmp (p, "selector", len) == 0
+		&& (p[len] == '\0' || isspace (p[len])))
+	      {
+		lexptr = p + len;
+		return SELECTOR;
+	      }
+	    else if (*p == '"')
+	      goto parse_string;
+	  }
+
 	while (isspace (*p))
 	  p++;
 	if (strncmp (p, "entry", len) == 0 && !isalnum (p[len])
@@ -2410,6 +2542,8 @@ lex_one_token (void)
       /* Fall through.  */
     case '\'':
     case '"':
+
+    parse_string:
       {
 	int host_len;
 	int result = parse_string_or_char (tokstart, &lexptr, &yylval.tsval,
@@ -2572,7 +2706,7 @@ classify_name (struct block *block)
   copy = copy_name (yylval.sval);
 
   sym = lookup_symbol (copy, block, VAR_DOMAIN, 
-		       parse_language->la_language == language_cplus
+		       parse_language->la_name_of_this
 		       ? &is_a_field_of_this : (int *) NULL);
 
   if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
@@ -2605,6 +2739,20 @@ classify_name (struct block *block)
 					      parse_gdbarch, copy);
   if (yylval.tsym.type != NULL)
     return TYPENAME;
+
+  /* See if it's an ObjC classname.  */
+  if (parse_language->la_language == language_objc && !sym)
+    {
+      CORE_ADDR Class = lookup_objc_class (parse_gdbarch, copy);
+      if (Class)
+	{
+	  yylval.class.class = Class;
+	  if ((sym = lookup_struct_typedef (copy, expression_context_block,
+					    1)))
+	    yylval.class.type = SYMBOL_TYPE (sym);
+	  return CLASSNAME;
+	}
+    }
 
   /* Input names that aren't symbols but ARE valid hex numbers, when
      the input radix permits them, can be names or numbers depending

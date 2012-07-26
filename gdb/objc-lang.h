@@ -27,10 +27,6 @@ struct stoken;
 struct value;
 struct block;
 
-extern int objc_parse (void);		/* Defined in c-exp.y */
-
-extern void objc_error (char *);	/* Defined in c-exp.y */
-
 extern CORE_ADDR lookup_objc_class     (struct gdbarch *gdbarch,
 					char *classname);
 extern CORE_ADDR lookup_child_selector (struct gdbarch *gdbarch,

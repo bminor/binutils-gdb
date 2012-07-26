@@ -717,7 +717,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
 	mdebugread.c memattr.c mem-break.c minsyms.c mipsread.c memory-map.c \
 	memrange.c mi/mi-common.c \
-	objc-exp.y objc-lang.c \
+	objc-lang.c \
 	objfiles.c osabi.c observer.c osdata.c \
 	opencl-lang.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
@@ -935,14 +935,12 @@ REQUIRED_SUBDIRS = doc | testsuite | $(GNULIB_BUILDDIR) | data-directory
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.c \
 	cp-name-parser.c \
-	objc-exp.c \
 	ada-lex.c \
 	ada-exp.c \
 	jv-exp.c \
 	f-exp.c go-exp.c m2-exp.c p-exp.c
 YYOBJ = c-exp.o \
 	cp-name-parser.o \
-	objc-exp.o \
 	ada-exp.o \
 	jv-exp.o \
 	f-exp.o go-exp.o m2-exp.o p-exp.o
@@ -1245,7 +1243,6 @@ local-maintainer-clean:
 	rm -f c-exp.c \
 		cp-name-parser.c \
 		ada-lex.c ada-exp.c \
-	        objc-exp.c \
 		jv-exp.tab \
 		f-exp.c go-exp.c m2-exp.c p-exp.c
 	rm -f TAGS $(INFOFILES)

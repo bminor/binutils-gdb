@@ -32,13 +32,9 @@ proc test_float_accepted {} {
     # Test all the suffixes (including no suffix).
     gdb_test "p 1." " = 1"
     gdb_test "p 1.5" " = 1.5"
-    setup_kfail gdb/11925 "*-*-*"
     gdb_test "p 1.f" " = 1"
-    setup_kfail gdb/11925 "*-*-*"
     gdb_test "p 1.5f" " = 1.5"
-    setup_kfail gdb/11925 "*-*-*"
     gdb_test "p 1.l" " = 1"
-    setup_kfail gdb/11925 "*-*-*"
     gdb_test "p 1.5l" " = 1.5"
 
     # Test hexadecimal floating point.
