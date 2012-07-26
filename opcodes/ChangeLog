@@ -2,7 +2,8 @@
 
 	* ppc-opc.c (powerpc_opcodes): Add/remove PPCVLE for some 32-bit insns.
 
-2012-07-24  Dr David Alan Gilbert  <dave@treblig.org>
+2012-07-24  Stephan McCamant  <smcc@cs.berkeley.edu>
+	    Dr David Alan Gilbert  <dave@treblig.org>
 
 	PR binutils/13135
 	* arm-dis.c: Add necessary casts for printing integer values.
