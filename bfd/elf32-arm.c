@@ -14083,7 +14083,14 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	      name = RELOC_SECTION (htab, ".plt");
 	    get_vma:
 	      s = bfd_get_section_by_name (output_bfd, name);
-	      BFD_ASSERT (s != NULL);
+	      if (s == NULL)
+		{
+		  /* PR ld/14397: Issue an error message if a required section is missing.  */
+		  (*_bfd_error_handler)
+		    (_("error: required section '%s' not found in the linker script"), name);
+		  bfd_set_error (bfd_error_invalid_operation);
+		  return FALSE;
+		}
 	      if (!htab->symbian_p)
 		dyn.d_un.d_ptr = s->vma;
 	      else

@@ -1,3 +1,10 @@
+2012-07-26  Meador Inge  <meadori@codesourcery.com>
+
+	PR ld/14397
+	* ld-arm/arm-elf.exp: Add tests of linking without .rel.plt.
+	* ld-arm/arm-no-rel-plt.out: Linker script without .rel.plt section.
+	* ld-arm/arm-no-rel-plt.out: Expected output.
+
 2012-07-13  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-elf/foo0.s: Use ARM-compatible .section syntax.

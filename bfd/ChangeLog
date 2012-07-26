@@ -1,3 +1,10 @@
+2012-07-26  Meador Inge  <meadori@codesourcery.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR ld/14397
+	* elf32-arm.c (elf32_arm_finish_dynamic_sections): Report an error
+	if a required section is missing from the linker script.
+
 2012-07-24  Jan Waclawek <konfera@efton.sk>
 	PR 13899
 	* elf32-avr.c (elf32_avr_relax_delete_bytes): Call
