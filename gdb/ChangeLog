@@ -1,3 +1,9 @@
+2012-07-26  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (linespec_lexer_lex_number): The input
+	is also a valid number if the next character is a comma
+	or colon.
+
 2012-07-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Document new --enable-libmcheck/--disable-libmcheck
