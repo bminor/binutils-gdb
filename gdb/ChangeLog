@@ -1,3 +1,18 @@
+2012-07-26  Tom Tromey  <tromey@redhat.com>
+
+	* symmisc.c (print_symbol_bcache_statistics): Use QUIT, not
+	immediate_quit.
+	(print_objfile_statistics): Likewise.
+	(maintenance_print_symbols): Likewise.
+	(maintenance_print_msymbols): Likewise.
+	(maintenance_print_objfiles): Likewise.
+	* psymtab.c (print_partial_symbols): Call QUIT.
+	(maintenance_print_psymbols): Likewise.  Don't modify
+	immediate_quit.
+	* copying.c (show_copying_command): Don't modify immediate_quit.
+	(show_warranty_command): Likewise.
+	* cli/cli-cmds.c (show_version): Don't modify immediate_quit.
+
 2012-07-26  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (linespec_lexer_lex_number): The input

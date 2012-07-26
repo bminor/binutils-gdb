@@ -319,10 +319,8 @@ is_complete_command (struct cmd_list_element *c)
 static void
 show_version (char *args, int from_tty)
 {
-  immediate_quit++;
   print_gdb_version (gdb_stdout);
   printf_filtered ("\n");
-  immediate_quit--;
 }
 
 /* Handle the quit command.  */

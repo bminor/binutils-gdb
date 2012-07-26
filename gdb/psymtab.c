@@ -888,6 +888,7 @@ print_partial_symbols (struct gdbarch *gdbarch,
   fprintf_filtered (outfile, "  %s partial symbols:\n", what);
   while (count-- > 0)
     {
+      QUIT;
       fprintf_filtered (outfile, "    `%s'", SYMBOL_LINKAGE_NAME (*p));
       if (SYMBOL_DEMANGLED_NAME (*p) != NULL)
 	{
@@ -1852,11 +1853,12 @@ print-psymbols takes an output file name and optional symbol file name"));
     perror_with_name (filename);
   make_cleanup_ui_file_delete (outfile);
 
-  immediate_quit++;
   ALL_PSYMTABS (objfile, ps)
-    if (symname == NULL || filename_cmp (symname, ps->filename) == 0)
-    dump_psymtab (objfile, ps, outfile);
-  immediate_quit--;
+    {
+      QUIT;
+      if (symname == NULL || filename_cmp (symname, ps->filename) == 0)
+	dump_psymtab (objfile, ps, outfile);
+    }
   do_cleanups (cleanups);
 }
 

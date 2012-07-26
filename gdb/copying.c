@@ -11,15 +11,13 @@ static void show_warranty_command (char *, int);
 
 void _initialize_copying (void);
 
-extern int immediate_quit;
 static void
 show_copying_command (char *ignore, int from_tty)
 {
-  immediate_quit++;
   printf_filtered ("                    GNU GENERAL PUBLIC LICENSE\n");
   printf_filtered ("                       Version 3, 29 June 2007\n");
   printf_filtered ("\n");
-  printf_filtered (" Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n");
+  printf_filtered (" Copyright (C) 2007, 2012 Free Software Foundation, Inc. <http://fsf.org/>\n");
   printf_filtered (" Everyone is permitted to copy and distribute verbatim copies\n");
   printf_filtered (" of this license document, but changing it is not allowed.\n");
   printf_filtered ("\n");
@@ -604,13 +602,11 @@ show_copying_command (char *ignore, int from_tty)
   printf_filtered ("author or copyright holder as a result of your choosing to follow a\n");
   printf_filtered ("later version.\n");
   printf_filtered ("\n");
-  immediate_quit--;
 }
 
 static void
 show_warranty_command (char *ignore, int from_tty)
 {
-  immediate_quit++;
   printf_filtered ("  15. Disclaimer of Warranty.\n");
   printf_filtered ("\n");
   printf_filtered ("  THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY\n");
@@ -643,7 +639,6 @@ show_warranty_command (char *ignore, int from_tty)
   printf_filtered ("Program, unless a warranty or assumption of liability accompanies a\n");
   printf_filtered ("copy of the Program in return for a fee.\n");
   printf_filtered ("\n");
-  immediate_quit--;
 }
 
 void
