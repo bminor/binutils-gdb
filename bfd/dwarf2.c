@@ -3344,6 +3344,8 @@ find_line (bfd *abfd,
   if (functionname_ptr != NULL)
     *functionname_ptr = NULL;
   *linenumber_ptr = 0;
+  if (discriminator_ptr)
+    *discriminator_ptr = 0;
 
   if (! _bfd_dwarf2_slurp_debug_info (abfd, NULL,
 				      debug_sections, symbols, pinfo))
