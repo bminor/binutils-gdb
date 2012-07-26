@@ -3,6 +3,15 @@
 
 *** Changes since GDB 7.5
 
+* New configure options
+
+--enable-libmcheck/--disable-libmcheck
+  By default, development versions are built with -lmcheck on hosts
+  that support it, in order to help track memory corruption issues.
+  Release versions, on the other hand, are built without -lmcheck
+  by default.  The --enable-libmcheck/--disable-libmcheck configure
+  options allow the user to override that default.
+
 * New commands (for set/show, see "New options" below)
 
 maint info bfds

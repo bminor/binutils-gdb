@@ -1,3 +1,8 @@
+2012-07-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Document new --enable-libmcheck/--disable-libmcheck
+	configure options.
+
 2012-07-26  Tristan Gingold  <gingold@adacore.com>
 
 	* machoread.c: Include gdb_bfd.h.
