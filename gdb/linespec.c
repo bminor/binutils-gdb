@@ -366,7 +366,8 @@ static const char *const linespec_quote_characters = "\"\'";
 /* Lexer functions.  */
 
 /* Lex a number from the input in PARSER.  This only supports
-   decimal numbers.\
+   decimal numbers.
+
    Return true if input is decimal numbers.  Return false if not.  */
 
 static int
@@ -389,7 +390,11 @@ linespec_lexer_lex_number (linespec_parser *parser, linespec_token *tokenp)
       ++(PARSER_STREAM (parser));
     }
 
-  if (*PARSER_STREAM (parser) != '\0' && !isspace(*PARSER_STREAM (parser)))
+  /* If the next character in the input buffer is not a space, comma,
+     or colon, the input does not represent a number.  */
+  if (*PARSER_STREAM (parser) != '\0'
+      && !isspace (*PARSER_STREAM (parser)) && *PARSER_STREAM (parser) != ','
+      && *PARSER_STREAM (parser) != ':')
     {
       PARSER_STREAM (parser) = LS_TOKEN_STOKEN (*tokenp).ptr;
       return 0;
