@@ -1,3 +1,17 @@
+2012-07-26  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Expand parameter
+	SIZE to size_t.
+	(dwarf2_evaluate_loc_desc): Likewise.
+	(dwarf2_loc_desc_needs_frame): Likewise.
+	(locexpr_describe_location_1): Likewise.
+	* dwarf2loc.h (struct dwarf2_locexpr_baton): Make SIZE as
+	size_t.
+	(struct dwarf2_loclist_baton): Likewise.
+	* dwarf2read.c (struct dwarf_block): Likewise.
+	(dump_die_shallow): Use pulongest to print dwarf_block.size.
+	(decode_locdesc): Expand SIZE and I to size_t.
+
 2012-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* contrib/cc-with-tweaks.sh: Put into comment path gdb/contrib/.

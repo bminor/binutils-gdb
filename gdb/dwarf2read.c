@@ -990,7 +990,7 @@ struct die_info
 /* Blocks are a bunch of untyped bytes.  */
 struct dwarf_block
   {
-    unsigned int size;
+    size_t size;
 
     /* Valid only if SIZE is not zero.  */
     gdb_byte *data;
@@ -16197,12 +16197,12 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_block4:
 	case DW_FORM_block:
 	case DW_FORM_block1:
-	  fprintf_unfiltered (f, "block: size %d",
-			      DW_BLOCK (&die->attrs[i])->size);
+	  fprintf_unfiltered (f, "block: size %s",
+			      pulongest (DW_BLOCK (&die->attrs[i])->size));
 	  break;
 	case DW_FORM_exprloc:
-	  fprintf_unfiltered (f, "expression: size %u",
-			      DW_BLOCK (&die->attrs[i])->size);
+	  fprintf_unfiltered (f, "expression: size %s",
+			      pulongest (DW_BLOCK (&die->attrs[i])->size));
 	  break;
 	case DW_FORM_ref_addr:
 	  fprintf_unfiltered (f, "ref address: ");
@@ -16746,8 +16746,8 @@ static CORE_ADDR
 decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  int i;
-  int size = blk->size;
+  size_t i;
+  size_t size = blk->size;
   gdb_byte *data = blk->data;
   CORE_ADDR stack[64];
   int stacki;

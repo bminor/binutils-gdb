@@ -77,7 +77,7 @@ struct type *dwarf2_get_die_type (cu_offset die_offset,
 struct value *dwarf2_evaluate_loc_desc (struct type *type,
 					struct frame_info *frame,
 					const gdb_byte *data,
-					unsigned short size,
+					size_t size,
 					struct dwarf2_per_cu_data *per_cu);
 
 CORE_ADDR dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
@@ -97,7 +97,7 @@ struct dwarf2_locexpr_baton
 
   /* Length of the location expression.  For optimized out expressions it is
      zero.  */
-  unsigned long size;
+  size_t size;
 
   /* The compilation unit containing the symbol whose location
      we're computing.  */
@@ -114,7 +114,7 @@ struct dwarf2_loclist_baton
   const gdb_byte *data;
 
   /* Length of the location list.  */
-  unsigned long size;
+  size_t size;
 
   /* The compilation unit containing the symbol whose location
      we're computing.  */

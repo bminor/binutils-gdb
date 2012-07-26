@@ -54,8 +54,8 @@ static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs;
 static struct value *dwarf2_evaluate_loc_desc_full (struct type *type,
 						    struct frame_info *frame,
 						    const gdb_byte *data,
-						    unsigned short size,
-					      struct dwarf2_per_cu_data *per_cu,
+						    size_t size,
+						    struct dwarf2_per_cu_data *per_cu,
 						    LONGEST byte_offset);
 
 /* Until these have formal names, we define these here.
@@ -2111,7 +2111,7 @@ static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs =
 
 static struct value *
 dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
-			       const gdb_byte *data, unsigned short size,
+			       const gdb_byte *data, size_t size,
 			       struct dwarf2_per_cu_data *per_cu,
 			       LONGEST byte_offset)
 {
@@ -2312,7 +2312,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
 struct value *
 dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
-			  const gdb_byte *data, unsigned short size,
+			  const gdb_byte *data, size_t size,
 			  struct dwarf2_per_cu_data *per_cu)
 {
   return dwarf2_evaluate_loc_desc_full (type, frame, data, size, per_cu, 0);
@@ -2433,7 +2433,7 @@ static const struct dwarf_expr_context_funcs needs_frame_ctx_funcs =
    requires a frame to evaluate.  */
 
 static int
-dwarf2_loc_desc_needs_frame (const gdb_byte *data, unsigned short size,
+dwarf2_loc_desc_needs_frame (const gdb_byte *data, size_t size,
 			     struct dwarf2_per_cu_data *per_cu)
 {
   struct needs_frame_baton baton;
@@ -3827,7 +3827,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 static void
 locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 			     struct ui_file *stream,
-			     const gdb_byte *data, int size,
+			     const gdb_byte *data, size_t size,
 			     struct objfile *objfile, unsigned int addr_size,
 			     int offset_size, struct dwarf2_per_cu_data *per_cu)
 {
