@@ -34,6 +34,7 @@
 #include "vec.h"
 #include "psympriv.h"
 #include "complaints.h"
+#include "gdb_bfd.h"
 
 #include <string.h>
 

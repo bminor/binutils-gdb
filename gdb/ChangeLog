@@ -1,5 +1,9 @@
 2012-07-26  Tristan Gingold  <gingold@adacore.com>
 
+	* machoread.c: Include gdb_bfd.h.
+
+2012-07-26  Tristan Gingold  <gingold@adacore.com>
+
 	* dwarf2loc.c (locexpr_describe_location_piece): Use uint64_t for
 	offset.
 
