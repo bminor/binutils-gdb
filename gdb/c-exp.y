@@ -2747,8 +2747,8 @@ classify_name (struct block *block)
       if (Class)
 	{
 	  yylval.class.class = Class;
-	  if ((sym = lookup_struct_typedef (copy, expression_context_block,
-					    1)))
+	  sym = lookup_struct_typedef (copy, expression_context_block, 1);
+	  if (sym)
 	    yylval.class.type = SYMBOL_TYPE (sym);
 	  return CLASSNAME;
 	}

@@ -1,3 +1,7 @@
+2012-07-27  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (classify_name): Avoid assignment in condition.
+
 2012-07-27  Roland Schwingel  <roland.schwingel@onevision.com>
 
 	* amd64-windows-tdep.c: Include "frame.h".
