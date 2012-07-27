@@ -1,3 +1,8 @@
+2012-07-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* cpu-s390.c (bfd_s390_64_arch, bfd_s390_arch): Pick the default
+	arch depending on the target size.
+
 2012-07-27  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Bump version to 2.23.51
