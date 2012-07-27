@@ -1,3 +1,7 @@
+2012-07-27  Yao Qi  <yao@codesourcery.com>
+
+	* server.c (process_point_options): Stop at 'X' when parsing.
+
 2012-07-19  Michael Eager  <eager@eagercon.com>
 
 	* i386-low.c (Z_packet_to_hw_type): Add Z_PACKET_HW_BP, translate 
