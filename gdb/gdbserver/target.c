@@ -182,3 +182,11 @@ target_waitstatus_to_string (const struct target_waitstatus *ws)
 
   return buf;
 }
+
+int
+kill_inferior (int pid)
+{
+  gdb_agent_about_to_close (pid);
+
+  return (*the_target->kill) (pid);
+}

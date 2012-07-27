@@ -3923,6 +3923,38 @@ cmd_qtstmat (char *packet)
     run_inferior_command (packet, strlen (packet) + 1);
 }
 
+/* Sent the agent a command to close it.  */
+
+void
+gdb_agent_about_to_close (int pid)
+{
+  char buf[IPA_CMD_BUF_SIZE];
+
+  if (!maybe_write_ipa_not_loaded (buf))
+    {
+      struct thread_info *save_inferior;
+      struct inferior_list_entry *inf = all_threads.head;
+
+      save_inferior = current_inferior;
+
+      /* Find a certain thread which belongs to process PID.  */
+      while (inf != NULL)
+	{
+	  if (ptid_get_pid (inf->id) == pid)
+	    break;
+	  inf = inf->next;
+	}
+
+      current_inferior = (struct thread_info *) inf;
+
+      strcpy (buf, "close");
+
+      run_inferior_command (buf, strlen (buf) + 1);
+
+      current_inferior = save_inferior;
+    }
+}
+
 /* Return the minimum instruction size needed for fast tracepoints as a
    hexadecimal number.  */
 
@@ -6748,13 +6780,14 @@ init_named_socket (const char *name)
   return fd;
 }
 
+static char agent_socket_name[UNIX_PATH_MAX];
+
 static int
 gdb_agent_socket_init (void)
 {
   int result, fd;
-  char name[UNIX_PATH_MAX];
 
-  result = xsnprintf (name, UNIX_PATH_MAX, "%s/gdb_ust%d",
+  result = xsnprintf (agent_socket_name, UNIX_PATH_MAX, "%s/gdb_ust%d",
 		      SOCK_DIR, getpid ());
   if (result >= UNIX_PATH_MAX)
     {
@@ -6762,11 +6795,11 @@ gdb_agent_socket_init (void)
       return -1;
     }
 
-  fd = init_named_socket (name);
+  fd = init_named_socket (agent_socket_name);
   if (fd < 0)
     warning ("Error initializing named socket (%s) for communication with the "
 	     "ust helper thread. Check that directory exists and that it "
-	     "is writable.", name);
+	     "is writable.", agent_socket_name);
 
   return fd;
 }
@@ -6995,6 +7028,13 @@ gdb_ust_init (void)
 #endif /* HAVE_UST */
 
 #include <sys/syscall.h>
+#include <stdlib.h>
+
+static void
+gdb_agent_remove_socket (void)
+{
+  unlink (agent_socket_name);
+}
 
 /* Helper thread of agent.  */
 
@@ -7002,6 +7042,8 @@ static void *
 gdb_agent_helper_thread (void *arg)
 {
   int listen_fd;
+
+  atexit (gdb_agent_remove_socket);
 
   while (1)
     {
@@ -7023,6 +7065,7 @@ gdb_agent_helper_thread (void *arg)
 	  int fd;
 	  char buf[1];
 	  int ret;
+	  int stop_loop = 0;
 
 	  tmp = sizeof (sockaddr);
 
@@ -7055,8 +7098,12 @@ gdb_agent_helper_thread (void *arg)
 
 	  if (cmd_buf[0])
 	    {
+	      if (strncmp ("close", cmd_buf, 5) == 0)
+		{
+		  stop_loop = 1;
+		}
 #ifdef HAVE_UST
-	      if (strcmp ("qTfSTM", cmd_buf) == 0)
+	      else if (strcmp ("qTfSTM", cmd_buf) == 0)
 		{
 		  cmd_qtfstm (cmd_buf);
 		}
@@ -7088,6 +7135,20 @@ gdb_agent_helper_thread (void *arg)
 	  /* Fix compiler's warning: ignoring return value of 'write'.  */
 	  ret = write (fd, buf, 1);
 	  close (fd);
+
+	  if (stop_loop)
+	    {
+	      close (listen_fd);
+	      unlink (agent_socket_name);
+
+	      /* Sleep endlessly to wait the whole inferior stops.  This
+		 thread can not exit because GDB or GDBserver may still need
+		 'current_inferior' (representing this thread) to access
+		 inferior memory.  Otherwise, this thread exits earlier than
+		 other threads, and 'current_inferior' is set to NULL.  */
+	      while (1)
+		sleep (10);
+	    }
 	}
     }
 

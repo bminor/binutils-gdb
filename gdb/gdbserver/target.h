@@ -409,8 +409,7 @@ void set_target_ops (struct target_ops *);
 #define myattach(pid) \
   (*the_target->attach) (pid)
 
-#define kill_inferior(pid) \
-  (*the_target->kill) (pid)
+int kill_inferior (int);
 
 #define detach_inferior(pid) \
   (*the_target->detach) (pid)

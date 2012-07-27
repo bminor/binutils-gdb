@@ -1,3 +1,10 @@
+2012-07-27  Yao Qi  <yao@codesourcery.com>
+
+	KFAIL for PR remote/14161.
+	* gdb.trace/strace.exp (strace_remove_socket): kfail for native.
+	Cleanup socket files.
+	(strace_info_marker): Detach inferior.
+
 2012-07-26  Tom Tromey  <tromey@redhat.com>
 
     	* gdb.objc/print.exp (test_float_accepted): Remove kfails.

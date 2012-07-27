@@ -1,5 +1,22 @@
 2012-07-27  Yao Qi  <yao@codesourcery.com>
 
+	PR remote/14161.
+
+	* server.h: Declare gdb_agent_about_to_close.
+	* target.c (kill_inferior): Include "agent.h".
+	New.  Send command 'kill'.
+	* target.h (kill_inferior): Removed macro.
+	* tracepoint.c (gdb_agent_about_to_close): New.
+	(gdb_agent_helper_thread): Handle command 'close'.
+	Wait endlessly until the inferior stops.
+	Install gdb_agent_remove_socket to atexit hook.
+	(agent_socket_name): New static variable.
+	(gdb_agent_socket_init): Replace local variable 'name' with
+	'agent_socket_name'.
+	(gdb_agent_remove_socket): New.
+
+2012-07-27  Yao Qi  <yao@codesourcery.com>
+
 	* server.c (process_point_options): Stop at 'X' when parsing.
 
 2012-07-19  Michael Eager  <eager@eagercon.com>

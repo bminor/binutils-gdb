@@ -1,3 +1,8 @@
+2012-07-27  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (IPA Protocol Commands): Document new command
+	'close'.
+
 2012-07-25  Tom Tromey  <tromey@redhat.com>
 
     	* gdb.texinfo (Maintenance Commands): Document maint info bfds.

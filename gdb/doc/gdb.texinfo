@@ -33673,6 +33673,10 @@ for an error
 
 @end table
 
+@item close
+Closes the in-process agent.  This command is sent when @value{GDBN} or GDBserver
+is about to kill inferiors.
+
 @item qTfSTM
 @xref{qTfSTM}.
 @item qTsSTM

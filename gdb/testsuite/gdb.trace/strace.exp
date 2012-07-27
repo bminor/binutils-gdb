@@ -37,12 +37,103 @@ if { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $additional_flags
     return -1
 }
 
-proc strace_info_marker { } { with_test_prefix "info_marker" {
+# Test that the socket file is removed when GDB quits, detaches or
+# resumes the inferior until it exits.
+
+proc strace_remove_socket { action } {
+    with_test_prefix "remove_socket_after_${action}" {
+
     global executable
     global gdb_prompt
+    global libipa
 
     # Restart with a fresh gdb.
     clean_restart $executable
+    gdb_load_shlibs $libipa
+    if ![runto_main] {
+	fail "Can't run to main"
+	return -1
+    }
+
+    # List the markers in program.
+    gdb_test "info static-tracepoint-markers" \
+	".*ust/bar\[\t \]+n\[\t \]+.*ust/bar2\[\t \]+n\[\t \]+.*"
+
+    set pid ""
+    set test "collect pid"
+    gdb_test_multiple "info inferiors" $test {
+	-re "process (\[-0-9a-fx\]+) \[^\n\]*\n.*${gdb_prompt} $" {
+	    set pid $expect_out(1,string)
+	    pass $test
+	}
+	-re ".*${gdb_prompt} $" {
+	    fail $test
+	}
+    }
+
+    set test "socket file exists"
+    set socket_file "/tmp/gdb_ust${pid}"
+    set status [remote_exec target "sh -c { \[ -S $socket_file \] }"]
+
+    if { [lindex $status 0] == 0 } {
+	pass $test
+    } else {
+	fail $test
+    }
+
+    send_gdb "${action}\n"
+    gdb_expect {
+	-re "A debugging session is active.\r\n.*\r\nQuit anyway\\? \\(y or n\\) $" {
+	    send_gdb "y\n"
+	}
+	-re "Detaching .*, process .*$" {
+	}
+	-re "Continuing.*$" {
+	}
+    }
+
+    set exists 1
+
+    for {set i 1} {$i <= 5} {incr i} {
+	set status [remote_exec target "sh -c { \[ -S $socket_file \] }"]
+	if { [lindex $status 0] != 0 } {
+	    set exists 0
+	    break
+	}
+	sleep 1
+    }
+
+    if { ![is_remote target] && ![string equal $action "detach"] } {
+	setup_kfail gdb/14161 *-*-*
+    }
+
+    set test "socket file removed"
+
+    if { $exists } {
+	fail $test
+	# Since $socket_file is a socket file instead of a regular file, we
+	# can't use 'remote_file target delete $socket_file' here.
+	remote_exec target "sh -c \"rm -r $socket_file\""
+    } else {
+	pass $test
+    }
+
+    if { [string equal $action "quit"] && [is_remote host] } {
+	global gdb_spawn_id
+	# unset gdb_spawn_id here to avoid sending command 'quit' to GDB
+	# later in default_gdb_exit.
+	unset gdb_spawn_id
+    }
+}}
+
+proc strace_info_marker { } { with_test_prefix "info_marker" {
+    global executable
+    global gdb_prompt
+    global libipa
+
+    # Restart with a fresh gdb.
+    clean_restart $executable
+    gdb_load_shlibs $libipa
     if ![runto_main] {
 	fail "Can't run to main"
 	return -1
@@ -59,6 +150,13 @@ proc strace_info_marker { } { with_test_prefix "info_marker" {
 	    pass "info threads"
 	}
     }
+
+    # GDB detaches inferior so that the socket file can be removed.
+    gdb_test_multiple "detach" "detach" {
+	-re "Detaching .*, process .*${gdb_prompt} $" {
+	    pass "detach"
+	}
+    }
 }}
 
 proc strace_probe_marker { } { with_test_prefix "probe_marker" {
@@ -66,9 +164,11 @@ proc strace_probe_marker { } { with_test_prefix "probe_marker" {
     global expect_out
     global gdb_prompt
     global hex
+    global libipa
 
     # Restart with a fresh gdb.
     clean_restart $executable
+    gdb_load_shlibs $libipa
     if ![runto_main] {
 	fail "Can't run to main"
 	return -1
@@ -97,9 +197,11 @@ with_test_prefix "trace_same_addr $type" {
     global expect_out
     global gdb_prompt
     global hex
+    global libipa
 
     # Restart with a fresh gdb.
     clean_restart $executable
+    gdb_load_shlibs $libipa
     if ![runto_main] {
 	fail "Can't run to main"
 	return -1
@@ -192,9 +294,11 @@ proc strace_trace_on_diff_addr { } { with_test_prefix "trace_diff_addr" {
     global expect_out
     global gdb_prompt
     global hex
+    global libipa
 
     # Restart with a fresh gdb.
     clean_restart $executable
+    gdb_load_shlibs $libipa
     if ![runto_main] {
 	fail "Can't run to main"
 	return -1
@@ -240,28 +344,30 @@ proc strace_trace_on_diff_addr { } { with_test_prefix "trace_diff_addr" {
     gdb_test "tfind" "Target failed to find requested trace frame\\..*"
 }}
 
-clean_restart $executable
+# Run it on x86/x86_64 linux.
+if { [istarget "x86_64-*-linux*"] || [istarget "i\[34567\]86-*-linux*"] } {
+    strace_info_marker
+    strace_remove_socket "quit"
+    strace_remove_socket "detach"
+    strace_remove_socket "continue"
+}
 
+clean_restart $executable
+gdb_load_shlibs $libipa
 if ![runto_main] {
     fail "Can't run to main to check for trace support"
     return -1
 }
-
-# Run it on native x86/x86_64 linux.
-if { ![is_remote target]
-     && ([istarget "x86_64-*-linux*"] || [istarget "i\[34567\]86-*-linux*"]) } {
-    strace_info_marker
-    return
-}
-
 if { ![gdb_target_supports_trace] } then {
+    # At this point, the socket file has been created.  We must make sure it is
+    # removed when we return here.  GDB detaches inferior so that the socket
+    # file can be removed.  Note that GDB simply kill inferior doesn't remove
+    # the socket file.
+    gdb_test "detach" "Detaching .*, process .*"
     unsupported "Current target does not support trace"
     return -1;
 }
 
-gdb_load_shlibs $libipa
-
-strace_info_marker
 strace_probe_marker
 
 strace_trace_on_same_addr "trace"

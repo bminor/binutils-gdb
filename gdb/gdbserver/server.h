@@ -467,6 +467,7 @@ void stop_tracing (void);
 
 int claim_trampoline_space (ULONGEST used, CORE_ADDR *trampoline);
 int have_fast_tracepoint_trampoline_buffer (char *msgbuf);
+void gdb_agent_about_to_close (int pid);
 #endif
 
 struct traceframe;
