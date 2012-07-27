@@ -1,3 +1,7 @@
+2012-07-27  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.23.
+
 2012-07-24  Teresa Johnson  <tejohnson@google.com>
 
 	* addr2line.c (find_address_in_section): Invoke

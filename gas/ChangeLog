@@ -1,3 +1,7 @@
+2012-07-27  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.23.
+
 2012-07-26  Segher Boessenkool  <segher@kernel.crashing.org>
 
 	* listing.c (struct list_message): New.

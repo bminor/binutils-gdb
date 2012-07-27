@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.23:
+
 * Added SORT_NONE to the linker script language to disable section sorting.
 
 * Add a linker-provided symbol when producing ELF output, '__ehdr_start'
