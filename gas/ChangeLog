@@ -1,3 +1,12 @@
+2012-07-26  Segher Boessenkool  <segher@kernel.crashing.org>
+
+	* listing.c (struct list_message): New.
+	(struct list_info_struct): Delete "message".  Add "messages"
+	and "last_message".
+	(listing_message): Adjust.
+	(listing_newline): Adjust.
+	(print_lines): Adjust.
+
 2012-07-24  Jan Beulich <jbeulich@suse.com>
 
 	* config/tc-i386-intel.c (i386_intel_simplify_register): Handle

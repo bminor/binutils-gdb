@@ -143,6 +143,12 @@ enum edict_enum
 };
 
 
+struct list_message
+{
+  char *message;
+  struct list_message *next;
+};
+
 /* This structure remembers which line from which file goes into which
    frag.  */
 struct list_info_struct
@@ -170,8 +176,8 @@ struct list_info_struct
   /* High level language source line.  */
   unsigned int hll_line;
 
-  /* Pointer to any error message associated with this line.  */
-  char *message;
+  /* Pointers to linked list of messages associated with this line.  */
+  struct list_message *messages, *last_message;
 
   enum edict_enum edict;
   char *edict_arg;
@@ -232,9 +238,17 @@ listing_message (const char *name, const char *message)
     {
       unsigned int l = strlen (name) + strlen (message) + 1;
       char *n = (char *) xmalloc (l);
+      struct list_message *lm = xmalloc (sizeof *lm);
       strcpy (n, name);
       strcat (n, message);
-      listing_tail->message = n;
+      lm->message = n;
+      lm->next = NULL;
+
+      if (listing_tail->last_message)
+	listing_tail->last_message->next = lm;
+      else
+	listing_tail->messages = lm;
+      listing_tail->last_message = lm;
     }
 }
 
@@ -404,7 +418,8 @@ listing_newline (char *ps)
   new_i->line = line;
   new_i->file = file_info (file);
   new_i->next = (list_info_type *) NULL;
-  new_i->message = (char *) NULL;
+  new_i->messages = NULL;
+  new_i->last_message = NULL;
   new_i->edict = EDICT_NONE;
   new_i->hll_file = (file_info_type *) NULL;
   new_i->hll_line = 0;
@@ -792,6 +807,7 @@ print_lines (list_info_type *list, unsigned int lineno,
   unsigned int octet_in_word = 0;
   char *src = data_buffer;
   int cur;
+  struct list_message *msg;
 
   /* Print the stuff on the first line.  */
   listing_page (list);
@@ -839,8 +855,8 @@ print_lines (list_info_type *list, unsigned int lineno,
 
   emit_line (list, "\t%s\n", string ? string : "");
 
-  if (list->message)
-    emit_line (list, "****  %s\n", list->message);
+  for (msg = list->messages; msg; msg = msg->next)
+    emit_line (list, "****  %s\n", msg->message);
 
   for (lines = 0;
        lines < (unsigned int) listing_lhs_cont_lines
