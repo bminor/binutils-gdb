@@ -16,4 +16,5 @@ run_dump_test abi-xgate-32-32
 run_dump_test insns-dwarf2
 run_dump_test all_insns
 run_dump_test insns
+run_dump_test hilo
 

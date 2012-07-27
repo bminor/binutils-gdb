@@ -122,9 +122,7 @@ xgate_get_operands (char *, s_operand []);
 static register_id
 reg_name_search (char *);
 op_modifiers
-xgate_determine_hi_low(char **);
-op_modifiers
-xgate_determine_increment(char **);
+xgate_determine_modifiers(char **);
 
 void
 xgate_scan_operands (struct xgate_opcode *opcode, s_operand []);
@@ -142,7 +140,7 @@ static unsigned int prev = 0;
 static unsigned char fixup_required = 0;
 
 /* Used to enable clipping of 16 bit operands into 8 bit constraints.  */
-static unsigned char macroClipping = 0;	
+static unsigned char autoHiLo = 0;	
 
 static char oper_check;
 static char flag_print_insn_syntax = 0;
@@ -540,7 +538,7 @@ md_assemble (char *input_line)
       else
         {
 	  /* Insn is a simplified instruction - expand it out.  */
-          macroClipping = 1;
+          autoHiLo = 1;
           unsigned int i;
 
           /* skip past our ';' separator.  */
@@ -581,7 +579,7 @@ md_assemble (char *input_line)
             }
         }
     }
-  macroClipping = 0;
+  autoHiLo = 0;
   input_line = saved_input_line;
 }
 
@@ -971,8 +969,7 @@ xgate_get_operands (char *line, s_operand oprs[])
       if (*line == '#')
         line++;
 
-      oprs[num_operands].mod = xgate_determine_hi_low (&line);
-      oprs[num_operands].mod = xgate_determine_increment (&line);
+      oprs[num_operands].mod = xgate_determine_modifiers (&line);
 
       if ((oprs[num_operands].reg = reg_name_search (line)) == REG_NONE)
         line = xgate_parse_exp (line, &oprs[num_operands].exp);
@@ -1063,8 +1060,10 @@ reg_name_search (char *name)
   return REG_NONE;
 }
 
+/* Parse operand modifiers such as inc/dec/hi/low.  */
+
 op_modifiers
-xgate_determine_hi_low(char **line)
+xgate_determine_modifiers(char **line)
 {
   char *local_line = line[0];
 
@@ -1078,21 +1077,13 @@ xgate_determine_hi_low(char **line)
       *line += 3;
       return MOD_LOAD_LOW;
     }
-  return MOD_NONE;
-}
-
-op_modifiers
-xgate_determine_increment(char **line)
-{
-  char *local_line = line[0];
-
   if (*(local_line + 2) == '+')
-      return MOD_POSTINC;
+        return MOD_POSTINC;
   if (strncasecmp (local_line, "-r", 2) == 0)
     {
       *line += 1;
       return MOD_PREDEC;
-    }
+   }
   return MOD_NONE;
 }
 
@@ -1197,7 +1188,7 @@ xgate_parse_operand (struct xgate_opcode *opcode,
                int *bit_width,
                int where,
                char **op_con,
-               s_operand operand_two)
+               s_operand operand)
 {
   fixS *fixp = 0;
   char *op_constraint = *op_con;
@@ -1216,24 +1207,24 @@ xgate_parse_operand (struct xgate_opcode *opcode,
       pp_fix = 0;
       *bit_width = 5;
 
-      if (operand_two.reg == REG_NONE)
+      if (operand.reg == REG_NONE)
             as_bad (_(": expected register name r0-r7 ") );
-      op_mask = operand_two.reg;
-      if(operand_two.mod == MOD_POSTINC)
+      op_mask = operand.reg;
+      if(operand.mod == MOD_POSTINC)
         pp_fix = INCREMENT;
-      if(operand_two.mod == MOD_PREDEC)
+      if(operand.mod == MOD_PREDEC)
         pp_fix = DECREMENT;
       op_mask <<= 2;
       op_mask |= pp_fix;
       break;
 
     case 'r': /* Register operand.  */
-    if (operand_two.reg == REG_NONE)
+    if (operand.reg == REG_NONE)
       as_bad (_(": expected register name r0-r7 "));
 
     *bit_width = 3;
 
-    op_mask = operand_two.reg;
+    op_mask = operand.reg;
       break;
 
     case 'i': /* Immediate value or expression expected.  */
@@ -1253,15 +1244,16 @@ xgate_parse_operand (struct xgate_opcode *opcode,
           *bit_width = 0x0F;
         }
       /* http://tigcc.ticalc.org/doc/gnuasm.html#SEC31 */
-      if (operand_two.exp.X_op == O_constant)
+      if (operand.exp.X_op == O_constant)
         {
-          op_mask = operand_two.exp.X_add_number;
-          if ((opcode->name[strlen (opcode->name) - 1] == 'l') && macroClipping)
+          op_mask = operand.exp.X_add_number;
+          if (((opcode->name[strlen (opcode->name) - 1] == 'l') && autoHiLo)
+              || operand.mod == MOD_LOAD_LOW)
             {
               op_mask &= 0x00FF;
             }
-          else if ((opcode->name[strlen (opcode->name) - 1]) == 'h'
-                   && macroClipping)
+          else if (((opcode->name[strlen (opcode->name) - 1]) == 'h'
+                   && autoHiLo) || operand.mod == MOD_LOAD_HIGH)
             {
               op_mask >>= 8;
             }
@@ -1277,42 +1269,46 @@ xgate_parse_operand (struct xgate_opcode *opcode,
         }
       else
         {
+          /* Should be BFD_RELOC_XGATE_IMM8_LO instead of BFD_RELOC_XGATE_24
+             TODO fix.  */
           fixup_required = 1;
           if (*op_constraint == '8')
             {
-              if ((opcode->name[strlen (opcode->name) - 1] == 'l')
-                  && macroClipping)
+              if (((opcode->name[strlen (opcode->name) - 1] == 'l')
+                  && autoHiLo) || operand.mod == MOD_LOAD_LOW)
                 {
-                  fixp = fix_new_exp (frag_now, where, 2, &operand_two.exp, FALSE,
+                    fixp = fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
                                       BFD_RELOC_XGATE_24);
-                  /* Should be BFD_RELOC_XGATE_IMM8_LO TODO fix.  */
-                  fixp->fx_pcrel_adjust = 0;
                 }
-              if ((opcode->name[strlen (opcode->name) - 1]) == 'h'
-                  && macroClipping)
+              else if (((opcode->name[strlen (opcode->name) - 1]) == 'h'
+                  && autoHiLo) || operand.mod == MOD_LOAD_HIGH )
                 {
-                  fixp = fix_new_exp (frag_now, where, 2, &operand_two.exp, FALSE,
+                    fixp = fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
                                       BFD_RELOC_XGATE_IMM8_HI);
-                  fixp->fx_pcrel_adjust = 0;
                 }
-              if (!fixp)
-                as_bad (_(":unknown relocation"));
+              else
+                {
+                  as_bad (_("you must use a hi/lo directive or 16-bit macro "
+                      "to load a 16-bit value."));
+                  break;
+                }
+              fixp->fx_pcrel_adjust = 0;
             }
           else if (*op_constraint == '5')
             {
-              fixp = fix_new_exp (frag_now, where, 2, &operand_two.exp, FALSE,
+              fixp = fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
                                   BFD_RELOC_XGATE_IMM5);
               fixp->fx_pcrel_adjust = 0;
             }
           else if (*op_constraint == '4')
             {
-              fixp = fix_new_exp (frag_now, where, 2, &operand_two.exp, FALSE,
+              fixp = fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
                                   BFD_RELOC_XGATE_IMM4);
               fixp->fx_pcrel_adjust = 0;
             }
           else if (*op_constraint == '3')
             {
-            fixp = fix_new_exp (frag_now, where, 2, &operand_two.exp, FALSE,
+            fixp = fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
                 BFD_RELOC_XGATE_IMM3);
             fixp->fx_pcrel_adjust = 0;
           }
@@ -1321,17 +1317,17 @@ xgate_parse_operand (struct xgate_opcode *opcode,
             as_bad (_(":unknown relocation constraint size"));
           }
       }
-    break;
+      break;
 
     case 'c': /* CCR register expected.  */
       *bit_width = 0;
-      if (operand_two.reg != REG_CCR)
+      if (operand.reg != REG_CCR)
             as_bad (_(": expected register name ccr "));
-    break;
+      break;
 
     case 'p': /* PC register expected.  */
       *bit_width = 0;
-            if (operand_two.reg != REG_PC)
+            if (operand.reg != REG_PC)
                   as_bad (_(": expected register name pc "));
       break;
 
@@ -1339,24 +1335,24 @@ xgate_parse_operand (struct xgate_opcode *opcode,
       (*op_con)++;
       op_constraint++;
 
-      if (operand_two.exp.X_op != O_register)
+      if (operand.exp.X_op != O_register)
         {
           if (*op_constraint == '9')
             {
-              fixp = fix_new_exp (frag_now, where, 2, &operand_two.exp, TRUE,
+              fixp = fix_new_exp (frag_now, where, 2, &operand.exp, TRUE,
                                   R_XGATE_PCREL_9);
               fixp->fx_pcrel_adjust = 1;
             }
           else if (*op_constraint == 'a')
             {
-              fixp = fix_new_exp (frag_now, where, 2, &operand_two.exp, TRUE,
+              fixp = fix_new_exp (frag_now, where, 2, &operand.exp, TRUE,
                                   R_XGATE_PCREL_10);
               fixp->fx_pcrel_adjust = 1;
             }
         }
       else
         {
-          as_fatal (_("Operand `%x' not recognized in fixup8."), operand_two.exp.X_op);
+          as_fatal (_("Operand `%x' not recognized in fixup8."), operand.exp.X_op);
         }
       break;
     case '?':
