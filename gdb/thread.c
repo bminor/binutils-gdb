@@ -987,7 +987,6 @@ switch_to_thread (ptid_t ptid)
 
   inferior_ptid = ptid;
   reinit_frame_cache ();
-  registers_changed ();
 
   /* We don't check for is_stopped, because we're called at times
      while in the TARGET_RUNNING state, e.g., while handling an
