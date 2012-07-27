@@ -1,5 +1,13 @@
 2012-07-27  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (cur_traceframe_number): Remove.
+	(set_tfile_traceframe): Remove.
+	(tfile_trace_find, tfile_fetch_registers): Update callers.
+	(tfile_xfer_partial, tfile_get_trace_state_variable_value): Likewise.
+	(tfile_open, tfile_trace_find): Likewise.
+
+2012-07-27  Yao Qi  <yao@codesourcery.com>
+
 	* thread.c (switch_to_thread): Don't call registers_changed.
 
 2012-07-26  Tom Tromey  <tromey@redhat.com>
