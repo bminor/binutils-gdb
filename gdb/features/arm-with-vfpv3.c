@@ -1,4 +1,5 @@
-/* THIS FILE IS GENERATED.  Original: arm-with-vfpv3.xml */
+/* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
+  Original: arm-with-vfpv3.xml */
 
 #include "defs.h"
 #include "osabi.h"

@@ -1,4 +1,5 @@
-/* THIS FILE IS GENERATED.  Original: s390x-linux64v2.xml */
+/* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
+  Original: s390x-linux64v2.xml */
 
 #include "defs.h"
 #include "osabi.h"

@@ -1,5 +1,6 @@
-/* ==> Do not modify this file!!  It is created automatically
-   by copying.awk.  Modify copying.awk instead.  <== */
+/* ==> Do not modify this file!!  -*- buffer-read-only: t -*- vi:set ro:
+   It is created automatically by copying.awk.
+   Modify copying.awk instead.  <== */
 
 #include "defs.h"
 #include "command.h"

@@ -1,4 +1,5 @@
-/* THIS FILE IS GENERATED.  Original: arm-with-m.xml */
+/* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
+  Original: arm-with-m.xml */
 
 #include "defs.h"
 #include "osabi.h"

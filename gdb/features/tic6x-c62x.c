@@ -1,4 +1,5 @@
-/* THIS FILE IS GENERATED.  Original: tic6x-c62x.xml */
+/* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
+  Original: tic6x-c62x.xml */
 
 #include "defs.h"
 #include "osabi.h"

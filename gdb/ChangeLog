@@ -1,4 +1,88 @@
 2012-07-27  Tom Tromey  <tromey@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* copying.awk: Print buffer-read-only and vi ro markers.
+	* copying.c: Rebuild.
+	* gdbarch.sh (copyright): Print buffer-read-only and vi ro markers.
+	* gdbarch.c, gdbarch.h: Rebuild.
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Print
+	buffer-read-only and vi ro markers.
+	* features/arm-with-iwmmxt.c: Rebuild.
+	* features/arm-with-m-fpa-layout.c: Rebuild.
+	* features/arm-with-m-vfp-d16.c: Rebuild.
+	* features/arm-with-m.c: Rebuild.
+	* features/arm-with-neon.c: Rebuild.
+	* features/arm-with-vfpv2.c: Rebuild.
+	* features/arm-with-vfpv3.c: Rebuild.
+	* features/i386/amd64-avx-linux.c: Rebuild.
+	* features/i386/amd64-avx.c: Rebuild.
+	* features/i386/amd64-linux.c: Rebuild.
+	* features/i386/amd64.c: Rebuild.
+	* features/i386/i386-avx-linux.c: Rebuild.
+	* features/i386/i386-avx.c: Rebuild.
+	* features/i386/i386-linux.c: Rebuild.
+	* features/i386/i386-mmx-linux.c: Rebuild.
+	* features/i386/i386-mmx.c: Rebuild.
+	* features/i386/i386.c: Rebuild.
+	* features/i386/x32-avx-linux.c: Rebuild.
+	* features/i386/x32-avx.c: Rebuild.
+	* features/i386/x32-linux.c: Rebuild.
+	* features/i386/x32.c: Rebuild.
+	* features/mips-dsp-linux.c: Rebuild.
+	* features/mips-linux.c: Rebuild.
+	* features/mips64-dsp-linux.c: Rebuild.
+	* features/mips64-linux.c: Rebuild.
+	* features/rs6000/powerpc-32.c: Rebuild.
+	* features/rs6000/powerpc-32l.c: Rebuild.
+	* features/rs6000/powerpc-403.c: Rebuild.
+	* features/rs6000/powerpc-403gc.c: Rebuild.
+	* features/rs6000/powerpc-405.c: Rebuild.
+	* features/rs6000/powerpc-505.c: Rebuild.
+	* features/rs6000/powerpc-601.c: Rebuild.
+	* features/rs6000/powerpc-602.c: Rebuild.
+	* features/rs6000/powerpc-603.c: Rebuild.
+	* features/rs6000/powerpc-604.c: Rebuild.
+	* features/rs6000/powerpc-64.c: Rebuild.
+	* features/rs6000/powerpc-64l.c: Rebuild.
+	* features/rs6000/powerpc-7400.c: Rebuild.
+	* features/rs6000/powerpc-750.c: Rebuild.
+	* features/rs6000/powerpc-860.c: Rebuild.
+	* features/rs6000/powerpc-altivec32.c: Rebuild.
+	* features/rs6000/powerpc-altivec32l.c: Rebuild.
+	* features/rs6000/powerpc-altivec64.c: Rebuild.
+	* features/rs6000/powerpc-altivec64l.c: Rebuild.
+	* features/rs6000/powerpc-cell32l.c: Rebuild.
+	* features/rs6000/powerpc-cell64l.c: Rebuild.
+	* features/rs6000/powerpc-e500.c: Rebuild.
+	* features/rs6000/powerpc-e500l.c: Rebuild.
+	* features/rs6000/powerpc-isa205-32l.c: Rebuild.
+	* features/rs6000/powerpc-isa205-64l.c: Rebuild.
+	* features/rs6000/powerpc-isa205-altivec32l.c: Rebuild.
+	* features/rs6000/powerpc-isa205-altivec64l.c: Rebuild.
+	* features/rs6000/powerpc-isa205-vsx32l.c: Rebuild.
+	* features/rs6000/powerpc-isa205-vsx64l.c: Rebuild.
+	* features/rs6000/powerpc-vsx32.c: Rebuild.
+	* features/rs6000/powerpc-vsx32l.c: Rebuild.
+	* features/rs6000/powerpc-vsx64.c: Rebuild.
+	* features/rs6000/powerpc-vsx64l.c: Rebuild.
+	* features/rs6000/rs6000.c: Rebuild.
+	* features/s390-linux32.c: Rebuild.
+	* features/s390-linux32v1.c: Rebuild.
+	* features/s390-linux32v2.c: Rebuild.
+	* features/s390-linux64.c: Rebuild.
+	* features/s390-linux64v1.c: Rebuild.
+	* features/s390-linux64v2.c: Rebuild.
+	* features/s390x-linux64.c: Rebuild.
+	* features/s390x-linux64v1.c: Rebuild.
+	* features/s390x-linux64v2.c: Rebuild.
+	* features/tic6x-c62x-linux.c: Rebuild.
+	* features/tic6x-c62x.c: Rebuild.
+	* features/tic6x-c64x-linux.c: Rebuild.
+	* features/tic6x-c64x.c: Rebuild.
+	* features/tic6x-c64xp-linux.c: Rebuild.
+	* features/tic6x-c64xp.c: Rebuild.
+
+2012-07-27  Tom Tromey  <tromey@redhat.com>
 
 	* c-exp.y (classify_name): Avoid assignment in condition.
 

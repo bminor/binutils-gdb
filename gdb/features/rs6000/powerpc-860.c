@@ -1,6 +1,8 @@
-/* THIS FILE IS GENERATED.  Original: powerpc-860.xml */
+/* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
+  Original: powerpc-860.xml */
 
 #include "defs.h"
+#include "osabi.h"
 #include "target-descriptions.h"
 
 struct target_desc *tdesc_powerpc_860;

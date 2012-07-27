@@ -1,7 +1,10 @@
 BEGIN	{
 	  FS="\"";
-	  print "/* ==> Do not modify this file!!  It is created automatically";
-	  print "   by copying.awk.  Modify copying.awk instead.  <== */";
+	  print "/* ==> Do not modify this file!!  " \
+		"-*- buffer-read-only: t -*- vi" \
+		":set ro:";
+	  print "   It is created automatically by copying.awk.";
+	  print "   Modify copying.awk instead.  <== */";
 	  print ""
 	  print "#include \"defs.h\""
 	  print "#include \"command.h\""

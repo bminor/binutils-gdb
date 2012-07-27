@@ -1,4 +1,5 @@
-/* THIS FILE IS GENERATED.  Original: arm-with-iwmmxt.xml */
+/* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
+  Original: arm-with-iwmmxt.xml */
 
 #include "defs.h"
 #include "osabi.h"
@@ -27,7 +28,7 @@ initialize_tdesc_arm_with_iwmmxt (void)
   tdesc_create_reg (feature, "r8", 8, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "r9", 9, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "r10", 10, 1, NULL, 32, "uint32");
-  tdesc_create_reg (feature, "r11", 11, 1, NULL, 32, "data_ptr");
+  tdesc_create_reg (feature, "r11", 11, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "r12", 12, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "sp", 13, 1, NULL, 32, "data_ptr");
   tdesc_create_reg (feature, "lr", 14, 1, NULL, 32, "int");

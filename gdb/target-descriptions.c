@@ -1575,8 +1575,10 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
   *outp = '\0';
 
   /* Standard boilerplate.  */
-  printf_unfiltered ("/* THIS FILE IS GENERATED.  Original: %s */\n\n",
-		     filename);
+  printf_unfiltered ("/* THIS FILE IS GENERATED.  "
+		     "-*- buffer-read-only: t -*- vi"
+		     ":set ro:\n");
+  printf_unfiltered ("  Original: %s */\n\n", filename);
   printf_unfiltered ("#include \"defs.h\"\n");
   printf_unfiltered ("#include \"osabi.h\"\n");
   printf_unfiltered ("#include \"target-descriptions.h\"\n");
