@@ -1,3 +1,9 @@
+2012-07-27  Roland Schwingel  <roland.schwingel@onevision.com>
+
+	* amd64-windows-tdep.c: Include "frame.h".
+	(amd64_windows_skip_trampoline_code): New function.
+	(amd64_windows_init_abi): Add trampoline registration.
+
 2012-07-27  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (cur_traceframe_number): Remove.
