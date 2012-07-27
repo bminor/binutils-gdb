@@ -1,3 +1,9 @@
+2012-07-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.in (BFD_VERSION): Run bfd/configure --version and
+	parse the output of that.
+	* configure: Regenerate.
+
 2012-07-27  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.23.

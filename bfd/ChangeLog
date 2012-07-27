@@ -1,3 +1,9 @@
+2012-07-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.in (AC_INIT): Call with the args bfd and 2.22.52.
+	(AM_INIT_AUTOMAKE): Remove args.
+	* configure: Regenerate.
+
 2012-07-27  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* cpu-s390.c (bfd_s390_64_arch, bfd_s390_arch): Pick the default

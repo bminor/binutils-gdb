@@ -1,3 +1,9 @@
+2012-07-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.in (BFD_VERSION): Run bfd/configure --version and
+	parse the output of that.
+	* configure: Regenerate.
+
 2012-07-25  James Lemke  <jwlemke@codesourcery.com>
 
 	* ppc-opc.c (powerpc_opcodes): Add/remove PPCVLE for some 32-bit insns.

@@ -1,3 +1,9 @@
+2012-07-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.in (BFD_VERSION): Run bfd/configure --version and
+	parse the output of that.
+	* configure: Regenerate.
+
 2012-06-02  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* Makefile.am (TEXINFO_TEX): Remove $(top_srcdir) prefix.
