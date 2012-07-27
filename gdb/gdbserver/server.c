@@ -2944,7 +2944,7 @@ process_point_options (CORE_ADDR point_addr, char **packet)
 	}
 
       /* Skip tokens until we find one that we recognize.  */
-      while (*dataptr && *dataptr != ';')
+      while (*dataptr && *dataptr != 'X' && *dataptr != ';')
 	dataptr++;
     }
   *packet = dataptr;

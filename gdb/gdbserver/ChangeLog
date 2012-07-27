@@ -1,3 +1,7 @@
+2012-07-27  Yao Qi  <yao@codesourcery.com>
+
+	* server.c (process_point_options): Stop at 'X' when parsing.
+
 2012-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbserver/linux-low.c (initialize_low): Call
