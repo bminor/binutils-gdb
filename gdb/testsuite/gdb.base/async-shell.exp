@@ -29,7 +29,7 @@ if { [prepare_for_testing ${testfile}.exp ${testfile}] } {
     return -1
 }
 
-set gdbindex_warning_re "warning: Skipping \[^\r\n\]+ \\.gdb_index section \[^\r\n\]*"
+set gdbindex_warning_re "warning: Skipping \[^\r\n\]+ \\.gdb_index section \[^\r\n\]*\r\nDo \"set use-deprecated-index-sections on\" before the file is read\r\nto use the section anyway\\."
 
 gdb_test_no_output "set target-async on "
 gdb_test_no_output "set non-stop on"

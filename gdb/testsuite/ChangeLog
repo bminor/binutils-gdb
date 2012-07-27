@@ -1,3 +1,10 @@
+2012-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix testsuite regression after --use-deprecated-index-sections removal.
+	* gdb.base/annota1.exp (run until main breakpoint): Update the expect
+	string.
+	* gdb.base/async-shell.exp (gdbindex_warning_re): Likewise.
+
 2012-07-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix testsuite regression after --use-deprecated-index-sections removal.
