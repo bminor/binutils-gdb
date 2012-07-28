@@ -1423,13 +1423,15 @@ fixedverinfo:
 		  res_alloc (sizeof (rc_fixed_versioninfo)));
 	    memset ($$, 0, sizeof (rc_fixed_versioninfo));
 	  }
-	| fixedverinfo FILEVERSION numexpr cnumexpr cnumexpr cnumexpr
+	| fixedverinfo FILEVERSION numexpr optcnumexpr optcnumexpr
+	  optcnumexpr
 	  {
 	    $1->file_version_ms = ($3 << 16) | $4;
 	    $1->file_version_ls = ($5 << 16) | $6;
 	    $$ = $1;
 	  }
-	| fixedverinfo PRODUCTVERSION numexpr cnumexpr cnumexpr cnumexpr
+	| fixedverinfo PRODUCTVERSION numexpr optcnumexpr optcnumexpr
+	  optcnumexpr
 	  {
 	    $1->product_version_ms = ($3 << 16) | $4;
 	    $1->product_version_ls = ($5 << 16) | $6;
