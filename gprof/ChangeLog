@@ -1,3 +1,9 @@
+2012-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/gprof.pot: Updated template.
+	* po/bg.po: Updated Bulgarian translation.
+	* po/es.po: Updated Spanish translation.
+
 2012-06-02  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* Makefile.am (TEXINFO_TEX): Remove $(top_srcdir) prefix.

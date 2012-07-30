@@ -1,3 +1,12 @@
+2012-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/binutils.pot: Updated template.
+	* po/bg.po: Updated Bulgarian translation.
+	* po/es.po: Updated Spanish translation.
+	* po/fi.po: Updated Finnish translation.
+	* po/fr.po: Updated French translation.
+	* po/uk.po: Updated Ukranian translation.
+
 2012-07-27  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.23.

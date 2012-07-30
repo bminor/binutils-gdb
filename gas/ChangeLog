@@ -1,3 +1,10 @@
+2012-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/gas.pot: Updated template.
+	* po/es.po: Updated Spanish translation.
+	* po/fi.po: Updated Finnish translation.
+	* po/fr.po: Updated French translation.
+
 2012-07-27  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.23.
