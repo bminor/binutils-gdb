@@ -40,7 +40,7 @@
 	.file	"pr13961.cc"
 
 	.globl	baz
-	.bss
+	.data	/* Previously this used .bss, but it's not portable.  */
 	.align 4
 	.type	baz, @object
 	.size	baz, 4
