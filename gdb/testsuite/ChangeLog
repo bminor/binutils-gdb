@@ -1,3 +1,7 @@
+2012-07-30  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw4-sig-types.exp: Fix typo.
+
 2012-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix testsuite regression after --use-deprecated-index-sections removal.
