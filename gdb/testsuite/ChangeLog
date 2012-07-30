@@ -1,3 +1,7 @@
+2012-07-30  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw4-sig-types.exp: Fix typo.
+
 2012-07-30  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.mi/mi-var-invalidate.exp: Create a floating variable and
