@@ -2,6 +2,12 @@
 
 	* gas/i386/inval-equ-2.l: Updated.
 
+2012-07-27  Sean Keys  <skeys@ipdatasys.com>
+
+        * gas/xgate/xgate.exp: Added hi/lo test.
+        * gas/xgate/hilo.d: New test file
+        * gas/xgate/hilo.s: Net test source file.
+
 2012-07-24  Sandra Loosemore  <sandra@codesourcery.com>
 	    Jie Zhang  <jzhang918@gmail.com>
 
