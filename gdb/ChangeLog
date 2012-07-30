@@ -1,3 +1,9 @@
+2012-07-30  Andrew Burgess  <aburgess@broadcom.com>
+
+	* varobj.c (varobj_invalidate_iter): All varobj must be marked as
+	invalid or reevaluated to prevent prevent references to possibly
+	delete'd type objects being left in the varobj.
+
 2012-07-27  Tom Tromey  <tromey@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

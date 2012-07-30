@@ -4186,18 +4186,17 @@ _initialize_varobj (void)
 }
 
 /* Invalidate varobj VAR if it is tied to locals and re-create it if it is
-   defined on globals.  It is a helper for varobj_invalidate.  */
+   defined on globals.  It is a helper for varobj_invalidate.
+
+   This function is called after changing the symbol file, in this case the
+   pointers to "struct type" stored by the varobj are no longer valid.  All
+   varobj must be either re-evaluated, or marked as invalid here.  */
 
 static void
 varobj_invalidate_iter (struct varobj *var, void *unused)
 {
-  /* Floating varobjs are reparsed on each stop, so we don't care if the
-     presently parsed expression refers to something that's gone.  */
-  if (var->root->floating)
-    return;
-
-  /* global var must be re-evaluated.  */     
-  if (var->root->valid_block == NULL)
+  /* global and floating var must be re-evaluated.  */
+  if (var->root->floating || var->root->valid_block == NULL)
     {
       struct varobj *tmp_var;
 

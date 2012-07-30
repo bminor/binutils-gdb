@@ -1,3 +1,8 @@
+2012-07-30  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.mi/mi-var-invalidate.exp: Create a floating variable and
+	change its format immediately after reloading the binary.
+
 2012-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix testsuite regression after --use-deprecated-index-sections removal.
