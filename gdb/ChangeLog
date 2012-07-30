@@ -1,3 +1,8 @@
+2012-07-30  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (linespec_lex_number): A number followed
+	by quotes is a valid number, too.
+
 2012-07-30  Tom Tromey  <tromey@redhat.com>
 
 	* remote-sim.c (gdb_os_poll_quit): Don't check immediate_quit.
