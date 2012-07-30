@@ -955,10 +955,6 @@ gdb_os_poll_quit (host_callback *p)
       quit_flag = 0;		/* we've stolen it */
       return 1;
     }
-  else if (immediate_quit)
-    {
-      return 1;
-    }
   return 0;
 }
 

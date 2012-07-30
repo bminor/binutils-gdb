@@ -1,3 +1,7 @@
+2012-07-30  Tom Tromey  <tromey@redhat.com>
+
+	* remote-sim.c (gdb_os_poll_quit): Don't check immediate_quit.
+
 2012-07-30  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* arm-linux-nat.c (arm_linux_hw_breakpoint_initialize): Do not
