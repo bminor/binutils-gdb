@@ -2221,7 +2221,7 @@ build_indexed_byte (operand *op, int format ATTRIBUTE_UNUSED, int move_insn)
 		  /* Must treat as a 16bit relocate as size of final result is unknown.  */
 
 		  byte <<= 3;
-		  byte |= 0b11100010;
+		  byte |= 0xe2;
 		  number_to_chars_bigendian (f, byte, 1);
 		  fix_new (frag_now, f - frag_now->fr_literal, 2,
 			   sym, off, 0, BFD_RELOC_M68HC12_16B);

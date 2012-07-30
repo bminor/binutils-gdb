@@ -1,3 +1,8 @@
+2012-07-20  James Murray  <jsm@jsm-net.demon.co.uk>
+
+	* config/tc-m68hc11.c (build_indexed_byte): Replace use of binary
+	constant with hex for building on cygwin.
+
 2012-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/gas.pot: Updated template.
