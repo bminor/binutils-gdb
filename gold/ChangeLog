@@ -1,3 +1,8 @@
+2012-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/gold.pot: Updated template.
+	* po/es.po: Updated Spanish translation.
+
 2012-07-18  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/14344

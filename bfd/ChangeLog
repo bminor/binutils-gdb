@@ -1,3 +1,12 @@
+2012-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/bfd.pot: Updated template.
+	* po/es.po: Updated Spanish translation.
+	* po/fi.po: Updated Finnish translation.
+	* po/fr.po: Updated French translation.
+	* po/ru.po: Updated Russian translation.
+	* po/uk.po: Updated Ukranian translation.
+
 2012-07-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.in (AC_INIT): Call with the args bfd and 2.22.52.
