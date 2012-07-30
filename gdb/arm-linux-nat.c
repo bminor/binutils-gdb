@@ -896,11 +896,17 @@ arm_linux_hw_breakpoint_initialize (struct gdbarch *gdbarch,
   /* We have to create a mask for the control register which says which bits
      of the word pointed to by address to break on.  */
   if (arm_pc_is_thumb (gdbarch, address))
-    mask = 0x3 << (address & 2);
+    {
+      mask = 0x3;
+      address &= ~1;
+    }
   else
-    mask = 0xf;
+    {
+      mask = 0xf;
+      address &= ~3;
+    }
 
-  p->address = (unsigned int) (address & ~3);
+  p->address = (unsigned int) address;
   p->control = arm_hwbp_control_initialize (mask, arm_hwbp_break, 1);
 }
 

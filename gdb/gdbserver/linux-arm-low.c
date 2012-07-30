@@ -474,17 +474,17 @@ arm_linux_hw_point_initialize (char type, CORE_ADDR addr, int len,
 	{
 	case 2:	 /* 16-bit Thumb mode breakpoint */
 	case 3:  /* 32-bit Thumb mode breakpoint */
-	  mask = 0x3 << (addr & 2);
+	  mask = 0x3;
+	  addr &= ~1;
 	  break;
 	case 4:  /* 32-bit ARM mode breakpoint */
 	  mask = 0xf;
+	  addr &= ~3;
 	  break;
 	default:
 	  /* Unsupported. */
 	  return -1;
 	}
-
-      addr &= ~3;
     }
   else
     {
