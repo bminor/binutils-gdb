@@ -1,3 +1,8 @@
+2012-07-30  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (linespec_lexer_lex_number): A number followed
+	by quotes is a valid number, too.
+
 2012-07-26  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (linespec_lexer_lex_number): The input

@@ -391,10 +391,11 @@ linespec_lexer_lex_number (linespec_parser *parser, linespec_token *tokenp)
     }
 
   /* If the next character in the input buffer is not a space, comma,
-     or colon, the input does not represent a number.  */
+     quote, or colon, the input does not represent a number.  */
   if (*PARSER_STREAM (parser) != '\0'
       && !isspace (*PARSER_STREAM (parser)) && *PARSER_STREAM (parser) != ','
-      && *PARSER_STREAM (parser) != ':')
+      && *PARSER_STREAM (parser) != ':'
+      && !strchr (linespec_quote_characters, *PARSER_STREAM (parser)))
     {
       PARSER_STREAM (parser) = LS_TOKEN_STOKEN (*tokenp).ptr;
       return 0;

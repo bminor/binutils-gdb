@@ -146,6 +146,8 @@ add the_tests "$srcfile:3 foo" unexpected_opt "string" "foo"
 
 foreach x $invalid_offsets {
     add the_tests "$srcfile:$x" invalid_offset_f $x $srcfile
+    add the_tests "\"$srcfile:$x\"" invalid_offset_f $x $srcfile
+    add the_tests "'$srcfile:$x'" invalid_offset_f $x $srcfile
 }
 
 # Test invalid filespecs starting with function.
