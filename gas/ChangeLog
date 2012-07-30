@@ -15,6 +15,10 @@
 
 	* NEWS: Add marker for 2.23.
 
+2012-07-27  James Murray  <jsm@jsm-net.demon.co.uk>
+
+	* config/tc-m68hc11.c: Replace binary with hex for cygwin.
+
 2012-07-26  Segher Boessenkool  <segher@kernel.crashing.org>
 
 	* listing.c (struct list_message): New.
