@@ -63,6 +63,13 @@
 
 	* mips-dis.c: Remove gratuitous newline.
 
+2012-07-05  Sean Keys  <skeys@ipdatasys.com>
+
+	* xgate-dis.c: Removed an IF statement that will
+        always be false due to overlapping operand masks.
+        * xgate-opc.c: Corrected 'com' opcode entry and
+        fixed spacing.
+
 2012-07-02  Roland McGrath  <mcgrathr@google.com>
 
 	* i386-opc.tbl: Add RepPrefixOk to nop.
