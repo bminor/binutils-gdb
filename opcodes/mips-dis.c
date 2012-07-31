@@ -2411,12 +2411,49 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 		  infprintf (is, "0x%x", GET_OP (insn, STYPE));
 		  break;
 
+		case '2':
+		  infprintf (is, "0x%lx", GET_OP (insn, BP));
+		  break;
+
+		case '3':
+		  infprintf (is, "0x%lx", GET_OP (insn, SA3));
+		  break;
+
+		case '4':
+		  infprintf (is, "0x%lx", GET_OP (insn, SA4));
+		  break;
+
+		case '5':
+		  infprintf (is, "0x%lx", GET_OP (insn, IMM8));
+		  break;
+
+		case '6':
+		  infprintf (is, "0x%lx", GET_OP (insn, RS));
+		  break;
+
+		case '7':
+		  infprintf (is, "$ac%ld", GET_OP (insn, DSPACC));
+		  break;
+
+		case '8':
+		  infprintf (is, "0x%lx", GET_OP (insn, WRDSP));
+		  break;
+
+		case '0': /* DSP 6-bit signed immediate in bit 16.  */
+		  delta = (GET_OP (insn, DSPSFT) ^ 0x20) - 0x20;
+		  infprintf (is, "%d", delta);
+		  break;
+
 		case '<':
 		  infprintf (is, "0x%x", GET_OP (insn, SHAMT));
 		  break;
 
 		case '\\':
 		  infprintf (is, "0x%x", GET_OP (insn, 3BITPOS));
+		  break;
+
+		case '^':
+		  infprintf (is, "0x%lx", GET_OP (insn, RD));
 		  break;
 
 		case '|':
@@ -2533,6 +2570,11 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 
 		case 'z':
 		  infprintf (is, "%s", mips_gpr_names[0]);
+		  break;
+
+		case '@': /* DSP 10-bit signed immediate in bit 16.  */
+		  delta = (GET_OP (insn, IMM10) ^ 0x200) - 0x200;
+		  infprintf (is, "%d", delta);
 		  break;
 
 		case 'B':

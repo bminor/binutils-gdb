@@ -351,7 +351,8 @@ static int file_ase_smartmips;
 static int file_ase_dsp;
 
 #define ISA_SUPPORTS_DSP_ASE (mips_opts.isa == ISA_MIPS32R2		\
-			      || mips_opts.isa == ISA_MIPS64R2)
+			      || mips_opts.isa == ISA_MIPS64R2		\
+			      || mips_opts.micromips)
 
 #define ISA_SUPPORTS_DSP64_ASE (mips_opts.isa == ISA_MIPS64R2)
 
@@ -360,7 +361,8 @@ static int file_ase_dsp;
 static int file_ase_dspr2;
 
 #define ISA_SUPPORTS_DSPR2_ASE (mips_opts.isa == ISA_MIPS32R2		\
-			        || mips_opts.isa == ISA_MIPS64R2)
+			        || mips_opts.isa == ISA_MIPS64R2	\
+				|| mips_opts.micromips)
 
 /* True if -mmt was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
@@ -4898,8 +4900,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	  continue;
 
 	case '2':
-	  gas_assert (!mips_opts.micromips);
-	  INSERT_OPERAND (0, BP, insn, va_arg (args, int));
+	  INSERT_OPERAND (mips_opts.micromips, BP, insn, va_arg (args, int));
 	  continue;
 
 	case 'n':
@@ -6414,9 +6415,14 @@ macro (struct mips_cl_insn *ip)
 	case 2:
 	  macro_build (NULL, "packrl.ph", "d,s,t", treg, treg, sreg);
 	  break;
-	default:
+	case 1:
+	case 3:
 	  macro_build (NULL, "balign", "t,s,2", treg, sreg,
 		       (int) imm_expr.X_add_number);
+	  break;
+	default:
+	  as_bad (_("BALIGN immediate not 0, 1, 2 or 3 (%lu)"),
+		  (unsigned long) imm_expr.X_add_number);
 	  break;
 	}
       break;
@@ -10486,8 +10492,17 @@ validate_micromips_insn (const struct mips_opcode *opc)
 	break;
       case '.': USE_BITS (OFFSET10);	break;
       case '1': USE_BITS (STYPE);	break;
+      case '2': USE_BITS (BP);		break;
+      case '3': USE_BITS (SA3);		break;
+      case '4': USE_BITS (SA4);		break;
+      case '5': USE_BITS (IMM8);	break;
+      case '6': USE_BITS (RS);		break;
+      case '7': USE_BITS (DSPACC);	break;
+      case '8': USE_BITS (WRDSP);	break;
+      case '0': USE_BITS (DSPSFT);	break;
       case '<': USE_BITS (SHAMT);	break;
       case '>': USE_BITS (SHAMT);	break;
+      case '@': USE_BITS (IMM10);	break;
       case 'B': USE_BITS (CODE10);	break;
       case 'C': USE_BITS (COPZ);	break;
       case 'D': USE_BITS (FD);		break;
@@ -10502,6 +10517,7 @@ validate_micromips_insn (const struct mips_opcode *opc)
       case 'T': USE_BITS (FT);		break;
       case 'V': USE_BITS (FS);		break;
       case '\\': USE_BITS (3BITPOS);	break;
+      case '^': USE_BITS (RD);		break;
       case 'a': USE_BITS (TARGET);	break;
       case 'b': USE_BITS (RS);		break;
       case 'c': USE_BITS (CODE);	break;
@@ -10773,8 +10789,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		return;
 	      break;
 
-	    case '2': /* DSP 2-bit unsigned immediate in bit 11.  */
-	      gas_assert (!mips_opts.micromips);
+	    case '2':
+	      /* DSP 2-bit unsigned immediate in bit 11 (for standard MIPS
+	         code) or 14 (for microMIPS code).  */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number != 1
@@ -10783,100 +10800,125 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  as_bad (_("BALIGN immediate not 1 or 3 (%lu)"),
 			  (unsigned long) imm_expr.X_add_number);
 		}
-	      INSERT_OPERAND (0, BP, *ip, imm_expr.X_add_number);
+	      INSERT_OPERAND (mips_opts.micromips,
+			      BP, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
 
-	    case '3': /* DSP 3-bit unsigned immediate in bit 21.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if (imm_expr.X_add_number & ~OP_MASK_SA3)
-		{
-		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
-			  OP_MASK_SA3, (unsigned long) imm_expr.X_add_number);
-		}
-	      INSERT_OPERAND (0, SA3, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
+	    case '3':
+	      /* DSP 3-bit unsigned immediate in bit 13 (for standard MIPS
+	         code) or 21 (for microMIPS code).  */
+	      {
+		unsigned long mask = (mips_opts.micromips
+				      ? MICROMIPSOP_MASK_SA3 : OP_MASK_SA3);
+
+		my_getExpression (&imm_expr, s);
+		check_absolute_expr (ip, &imm_expr);
+		if ((unsigned long) imm_expr.X_add_number > mask)
+		  as_bad (_("DSP immediate not in range 0..%lu (%lu)"),
+			  mask, (unsigned long) imm_expr.X_add_number);
+		INSERT_OPERAND (mips_opts.micromips,
+				SA3, *ip, imm_expr.X_add_number);
+		imm_expr.X_op = O_absent;
+		s = expr_end;
+	      }
 	      continue;
 
-	    case '4': /* DSP 4-bit unsigned immediate in bit 21.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if (imm_expr.X_add_number & ~OP_MASK_SA4)
-		{
-		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
-			  OP_MASK_SA4, (unsigned long) imm_expr.X_add_number);
-		}
-	      INSERT_OPERAND (0, SA4, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
+	    case '4':
+	      /* DSP 4-bit unsigned immediate in bit 12 (for standard MIPS
+	         code) or 21 (for microMIPS code).  */
+	      {
+		unsigned long mask = (mips_opts.micromips
+				      ? MICROMIPSOP_MASK_SA4 : OP_MASK_SA4);
+
+		my_getExpression (&imm_expr, s);
+		check_absolute_expr (ip, &imm_expr);
+		if ((unsigned long) imm_expr.X_add_number > mask)
+		  as_bad (_("DSP immediate not in range 0..%lu (%lu)"),
+			  mask, (unsigned long) imm_expr.X_add_number);
+		INSERT_OPERAND (mips_opts.micromips,
+				SA4, *ip, imm_expr.X_add_number);
+		imm_expr.X_op = O_absent;
+		s = expr_end;
+	      }
 	      continue;
 
-	    case '5': /* DSP 8-bit unsigned immediate in bit 16.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if (imm_expr.X_add_number & ~OP_MASK_IMM8)
-		{
-		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
-			  OP_MASK_IMM8, (unsigned long) imm_expr.X_add_number);
-		}
-	      INSERT_OPERAND (0, IMM8, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
+	    case '5':
+	      /* DSP 8-bit unsigned immediate in bit 13 (for standard MIPS
+	         code) or 16 (for microMIPS code).  */
+	      {
+		unsigned long mask = (mips_opts.micromips
+				      ? MICROMIPSOP_MASK_IMM8 : OP_MASK_IMM8);
+
+		my_getExpression (&imm_expr, s);
+		check_absolute_expr (ip, &imm_expr);
+		if ((unsigned long) imm_expr.X_add_number > mask)
+		  as_bad (_("DSP immediate not in range 0..%lu (%lu)"),
+			  mask, (unsigned long) imm_expr.X_add_number);
+		INSERT_OPERAND (mips_opts.micromips,
+				IMM8, *ip, imm_expr.X_add_number);
+		imm_expr.X_op = O_absent;
+		s = expr_end;
+	      }
 	      continue;
 
-	    case '6': /* DSP 5-bit unsigned immediate in bit 21.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if (imm_expr.X_add_number & ~OP_MASK_RS)
-		{
-		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
-			  OP_MASK_RS, (unsigned long) imm_expr.X_add_number);
-		}
-	      INSERT_OPERAND (0, RS, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
+	    case '6':
+	      /* DSP 5-bit unsigned immediate in bit 16 (for standard MIPS
+	         code) or 21 (for microMIPS code).  */
+	      {
+		unsigned long mask = (mips_opts.micromips
+				      ? MICROMIPSOP_MASK_RS : OP_MASK_RS);
+
+		my_getExpression (&imm_expr, s);
+		check_absolute_expr (ip, &imm_expr);
+		if ((unsigned long) imm_expr.X_add_number > mask)
+		  as_bad (_("DSP immediate not in range 0..%lu (%lu)"),
+			  mask, (unsigned long) imm_expr.X_add_number);
+		INSERT_OPERAND (mips_opts.micromips,
+				RS, *ip, imm_expr.X_add_number);
+		imm_expr.X_op = O_absent;
+		s = expr_end;
+	      }
 	      continue;
 
 	    case '7': /* Four DSP accumulators in bits 11,12.  */
-	      gas_assert (!mips_opts.micromips);
-	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c' &&
-		  s[3] >= '0' && s[3] <= '3')
+	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c'
+		  && s[3] >= '0' && s[3] <= '3')
 		{
 		  regno = s[3] - '0';
 		  s += 4;
-		  INSERT_OPERAND (0, DSPACC, *ip, regno);
+		  INSERT_OPERAND (mips_opts.micromips, DSPACC, *ip, regno);
 		  continue;
 		}
 	      else
 		as_bad (_("Invalid dsp acc register"));
 	      break;
 
-	    case '8': /* DSP 6-bit unsigned immediate in bit 11.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if (imm_expr.X_add_number & ~OP_MASK_WRDSP)
-		{
-		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
-			  OP_MASK_WRDSP,
-			  (unsigned long) imm_expr.X_add_number);
-		}
-	      INSERT_OPERAND (0, WRDSP, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
+	    case '8':
+	      /* DSP 6-bit unsigned immediate in bit 11 (for standard MIPS
+	         code) or 14 (for microMIPS code).  */
+	      {
+		unsigned long mask = (mips_opts.micromips
+				      ? MICROMIPSOP_MASK_WRDSP
+				      : OP_MASK_WRDSP);
+
+		my_getExpression (&imm_expr, s);
+		check_absolute_expr (ip, &imm_expr);
+		if ((unsigned long) imm_expr.X_add_number > mask)
+		  as_bad (_("DSP immediate not in range 0..%lu (%lu)"),
+			  mask, (unsigned long) imm_expr.X_add_number);
+		INSERT_OPERAND (mips_opts.micromips,
+				WRDSP, *ip, imm_expr.X_add_number);
+		imm_expr.X_op = O_absent;
+		s = expr_end;
+	      }
 	      continue;
 
 	    case '9': /* Four DSP accumulators in bits 21,22.  */
 	      gas_assert (!mips_opts.micromips);
-	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c' &&
-		  s[3] >= '0' && s[3] <= '3')
+	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c'
+		  && s[3] >= '0' && s[3] <= '3')
 		{
 		  regno = s[3] - '0';
 		  s += 4;
@@ -10887,22 +10929,27 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		as_bad (_("Invalid dsp acc register"));
 	      break;
 
-	    case '0': /* DSP 6-bit signed immediate in bit 20.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      min_range = -((OP_MASK_DSPSFT + 1) >> 1);
-	      max_range = ((OP_MASK_DSPSFT + 1) >> 1) - 1;
-	      if (imm_expr.X_add_number < min_range ||
-		  imm_expr.X_add_number > max_range)
-		{
+	    case '0':
+	      /* DSP 6-bit signed immediate in bit 16 (for standard MIPS
+	         code) or 20 (for microMIPS code).  */
+	      {
+		long mask = (mips_opts.micromips
+			     ? MICROMIPSOP_MASK_DSPSFT : OP_MASK_DSPSFT);
+
+		my_getExpression (&imm_expr, s);
+		check_absolute_expr (ip, &imm_expr);
+		min_range = -((mask + 1) >> 1);
+		max_range = ((mask + 1) >> 1) - 1;
+		if (imm_expr.X_add_number < min_range
+		    || imm_expr.X_add_number > max_range)
 		  as_bad (_("DSP immediate not in range %ld..%ld (%ld)"),
 			  (long) min_range, (long) max_range,
 			  (long) imm_expr.X_add_number);
-		}
-	      INSERT_OPERAND (0, DSPSFT, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
+		INSERT_OPERAND (mips_opts.micromips,
+				DSPSFT, *ip, imm_expr.X_add_number);
+		imm_expr.X_op = O_absent;
+		s = expr_end;
+	      }
 	      continue;
 
 	    case '\'': /* DSP 6-bit unsigned immediate in bit 16.  */
@@ -10939,19 +10986,35 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case '@': /* DSP 10-bit signed immediate in bit 16.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      min_range = -((OP_MASK_IMM10 + 1) >> 1);
-	      max_range = ((OP_MASK_IMM10 + 1) >> 1) - 1;
-	      if (imm_expr.X_add_number < min_range ||
-		  imm_expr.X_add_number > max_range)
-		{
+	      {
+		long mask = (mips_opts.micromips
+			     ? MICROMIPSOP_MASK_IMM10 : OP_MASK_IMM10);
+
+		my_getExpression (&imm_expr, s);
+		check_absolute_expr (ip, &imm_expr);
+		min_range = -((mask + 1) >> 1);
+		max_range = ((mask + 1) >> 1) - 1;
+		if (imm_expr.X_add_number < min_range
+		    || imm_expr.X_add_number > max_range)
 		  as_bad (_("DSP immediate not in range %ld..%ld (%ld)"),
 			  (long) min_range, (long) max_range,
 			  (long) imm_expr.X_add_number);
-		}
-	      INSERT_OPERAND (0, IMM10, *ip, imm_expr.X_add_number);
+		INSERT_OPERAND (mips_opts.micromips,
+				IMM10, *ip, imm_expr.X_add_number);
+		imm_expr.X_op = O_absent;
+		s = expr_end;
+	      }
+	      continue;
+
+	    case '^': /* DSP 5-bit unsigned immediate in bit 11.  */
+	      gas_assert (mips_opts.micromips);
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if (imm_expr.X_add_number & ~MICROMIPSOP_MASK_RD)
+		as_bad (_("DSP immediate not in range 0..%d (%lu)"),
+			MICROMIPSOP_MASK_RD,
+			(unsigned long) imm_expr.X_add_number);
+	      INSERT_OPERAND (1, RD, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;

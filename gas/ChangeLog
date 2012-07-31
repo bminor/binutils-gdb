@@ -1,3 +1,16 @@
+2012-07-31  Maciej W. Rozycki  <macro@codesourcery.com>
+            Chao-Ying Fu  <fu@mips.com>
+            Catherine Moore  <clm@codesourcery.com>
+
+	* config/tc-mips.c (macro_build) <'2'>: Handle microMIPS.
+	(macro) <M_BALIGN>: Update error handling.
+	(validate_micromips_insn) <'2', '3', '4', '5', '6'>: New cases.
+	<'7', '8', '0', '@', '^'>: Likewise.
+	(mips_ip) <'2', '3', '4', '5', '6', '7', '8'>: Handle microMIPS.
+	<'9'>: Fix formatting.
+	<'0', '@'>: Handle microMIPS.
+	<'^'>: New case.
+
 2012-07-31  Jan Beulich <jbeulich@suse.com>
 
 	* config/tc-i386.c (match_template): Adjust error message
