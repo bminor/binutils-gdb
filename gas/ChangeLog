@@ -1,3 +1,10 @@
+2012-07-31  Jan Beulich <jbeulich@suse.com>
+
+	* config/tc-i386.c (match_template): New local variable
+	'specific_error'. Set it from i.error after failed
+	check_VecOperands or VEX_check_operands. Use it if set in
+	preference to i.error when actually issuing disagnostic.
+
 2012-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/gas.pot: Updated template.

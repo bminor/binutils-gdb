@@ -4015,6 +4015,7 @@ match_template (void)
   unsigned int j;
   unsigned int found_cpu_match;
   unsigned int check_register;
+  enum i386_error specific_error = 0;
 
 #if MAX_OPERANDS != 5
 # error "MAX_OPERANDS must be 5."
@@ -4311,13 +4312,12 @@ check_reverse:
 	  continue;
 	}
 
-      /* Check if vector operands are valid.  */
-      if (check_VecOperands (t))
-	continue;
-
-      /* Check if VEX operands are valid.  */
-      if (VEX_check_operands (t))
-	continue;
+      /* Check if vector and VEX operands are valid.  */
+      if (check_VecOperands (t) || VEX_check_operands (t))
+	{
+	  specific_error = i.error;
+	  continue;
+	}
 
       /* We've found a match; break out of loop.  */
       break;
@@ -4327,7 +4327,7 @@ check_reverse:
     {
       /* We found no match.  */
       const char *err_msg;
-      switch (i.error)
+      switch (specific_error ? specific_error : i.error)
 	{
 	default:
 	  abort ();
