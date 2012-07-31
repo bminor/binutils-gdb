@@ -1,3 +1,12 @@
+2012-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* infcall.c (call_function_by_hand): Move BP_ADDR comment to
+	AT_ENTRY_POINT.
+	(call_function_by_hand) <ON_STACK>: Call write_memory with
+	gdbarch_breakpoint_from_pc, if possible.
+	(call_function_by_hand) <AT_ENTRY_POINT>: The BP_ADDR comment is moved
+	here.
+
 2012-07-30  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (linespec_lexer_lex_number): A number followed

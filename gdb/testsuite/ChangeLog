@@ -1,3 +1,8 @@
+2012-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/valgrind-infcall.c: New file.
+	* gdb.base/valgrind-infcall.exp: New file.
+
 2012-07-30  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.linespec/ls-errs.exp: Check some quote-enclosed
