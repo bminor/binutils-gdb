@@ -336,7 +336,7 @@ read_command_file (FILE *stream)
 void (*pre_init_ui_hook) (void);
 
 #ifdef __MSDOS__
-void
+static void
 do_chdir_cleanup (void *old_dir)
 {
   chdir (old_dir);
