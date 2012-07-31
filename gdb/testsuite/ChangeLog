@@ -1,3 +1,8 @@
+2012-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/valgrind-infcall.c: New file.
+	* gdb.base/valgrind-infcall.exp: New file.
+
 2012-07-30  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/fission-reread.S: Use .data instead of .bss.
