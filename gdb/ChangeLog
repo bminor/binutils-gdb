@@ -1,5 +1,9 @@
 2012-07-31  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c: Add 'static' for some variables.
+
+2012-07-31  Yao Qi  <yao@codesourcery.com>
+
 	* go32-nat.c: Declare _initialize_go32_nat.
 	* ser-go32.c: Declare _initialize_ser_dos.
 	* top.c (do_chdir_cleanup): Add 'static'.

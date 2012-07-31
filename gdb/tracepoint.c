@@ -3613,17 +3613,17 @@ merge_uploaded_trace_state_variables (struct uploaded_tsv **uploaded_tsvs)
 
 /* target tfile command */
 
-struct target_ops tfile_ops;
+static struct target_ops tfile_ops;
 
 /* Fill in tfile_ops with its defined operations and properties.  */
 
 #define TRACE_HEADER_SIZE 8
 
-char *trace_filename;
-int trace_fd = -1;
-off_t trace_frames_offset;
-off_t cur_offset;
-int cur_data_size;
+static char *trace_filename;
+static int trace_fd = -1;
+static off_t trace_frames_offset;
+static off_t cur_offset;
+static int cur_data_size;
 int trace_regblock_size;
 
 static void tfile_interp_line (char *line,
