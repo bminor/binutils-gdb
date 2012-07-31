@@ -1,3 +1,11 @@
+2012-07-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/fini0.s: Indent global directive.
+	* ld-elf/foo0.s: Likewise.
+	* ld-elf/init0.s: Likewise.
+
+	* ld-elf/pr14156c.t: Keep text section.
+
 2012-07-26  Meador Inge  <meadori@codesourcery.com>
 
 	PR ld/14397

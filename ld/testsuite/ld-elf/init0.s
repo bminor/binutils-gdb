@@ -11,6 +11,6 @@ main:
 
 	.section .init
 	.p2align 2
-.globl foo
+	.global foo
 	.type	foo,%function
 foo:
