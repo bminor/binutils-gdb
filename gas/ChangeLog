@@ -1,5 +1,11 @@
 2012-07-31  Jan Beulich <jbeulich@suse.com>
 
+	* config/tc-i386.c (check_byte_reg): Check for I/O port
+	register earlier, and just once. Drop diagnostic that got
+	issued only for some registers.
+
+2012-07-31  Jan Beulich <jbeulich@suse.com>
+
 	* config/tc-i386.c (match_template): New local variable
 	'specific_error'. Set it from i.error after failed
 	check_VecOperands or VEX_check_operands. Use it if set in
