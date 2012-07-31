@@ -1,3 +1,8 @@
+2012-07-31  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Register
+	linux_get_siginfo_type.
+
 2012-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* infcall.c (call_function_by_hand): Move BP_ADDR comment to
