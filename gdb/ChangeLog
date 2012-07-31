@@ -1,3 +1,8 @@
+2012-07-31  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Register
+	linux_get_siginfo_type.
+
 2012-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* infcall.c (call_function_by_hand): Move BP_ADDR comment to
@@ -145,25 +150,25 @@
 
 2012-07-26  Tom Tromey  <tromey@redhat.com>
 
-    	* Makefile.in (SFILES): Remove objc-exp.y.
-    	(YYFILES): Remove objc-exp.c.
-    	(YYOBJ): Remove objc-exp.o.
-    	(local-maintainer-clean): Don't mention objc-exp.c.
-    	* c-exp.y: Include objc-lang.h.
-    	(%union) <class>: New field.
-    	(NSSTRING, SELECTOR, CLASSNAME, OBJC_LBRAC): New tokens.
-    	(exp): Clone subscript production for OBJC_LBRAC.  Add various
-    	Objective C productions.
-    	(msglist, msgarglist, msgarg): New productions.
-    	(array_mod, func_mod, operator): Clone productions for
-    	OBJC_LBRAC.
-    	(parse_string_or_char): Handle '@' strings.
-    	(lex_one_token): Return OBJC_LBRAC.  Recognize @selector.
-    	(classify_name): Check la_name_of_this.  Recognize ObjC class
-    	names.
-    	* objc-exp.y: Remove.
-    	* objc-lang.c (objc_language_defn): Use c_parse, c_error.
-    	* objc-lang.h (objc_parse, objc_error): Don't declare.
+	* Makefile.in (SFILES): Remove objc-exp.y.
+	(YYFILES): Remove objc-exp.c.
+	(YYOBJ): Remove objc-exp.o.
+	(local-maintainer-clean): Don't mention objc-exp.c.
+	* c-exp.y: Include objc-lang.h.
+	(%union) <class>: New field.
+	(NSSTRING, SELECTOR, CLASSNAME, OBJC_LBRAC): New tokens.
+	(exp): Clone subscript production for OBJC_LBRAC.  Add various
+	Objective C productions.
+	(msglist, msgarglist, msgarg): New productions.
+	(array_mod, func_mod, operator): Clone productions for
+	OBJC_LBRAC.
+	(parse_string_or_char): Handle '@' strings.
+	(lex_one_token): Return OBJC_LBRAC.  Recognize @selector.
+	(classify_name): Check la_name_of_this.  Recognize ObjC class
+	names.
+	* objc-exp.y: Remove.
+	* objc-lang.c (objc_language_defn): Use c_parse, c_error.
+	* objc-lang.h (objc_parse, objc_error): Don't declare.
 
 2012-07-26  Markus Metzger  <markus.t.metzger@intel.com>
 
@@ -246,11 +251,11 @@
 
 2012-07-25  Tom Tromey  <tromey@redhat.com>
 
-    	* NEWS: Mention maint info bfds.
-    	* gdb_bfd.c (all_bfds): New global.
-    	(gdb_bfd_ref, gdb_bfd_unref): Update all_bfds.
-    	(print_one_bfd, maintenance_info_bfds, _initialize_gdb_bfd):
-    	New functions.
+	* NEWS: Mention maint info bfds.
+	* gdb_bfd.c (all_bfds): New global.
+	(gdb_bfd_ref, gdb_bfd_unref): Update all_bfds.
+	(print_one_bfd, maintenance_info_bfds, _initialize_gdb_bfd):
+	New functions.
 
 2012-07-25  Ralf Corsépius  <ralf.corsepius@rtems.org>
 
@@ -936,7 +941,7 @@
 	* ser_base (ser_base_read_error_fd): New function.
 	(do_ser_base_readchar): Poll error file descriptor as well as
 	standard output.
-	(generic_readchar): Refactor error handling. 
+	(generic_readchar): Refactor error handling.
 
 2012-07-18  Joel Brobecker  <brobecker@adacore.com>
 
@@ -1730,7 +1735,7 @@
 2012-06-25  Michael Eager  <eager@eagercon.com>
 
 	PR python/14291
-	* python/python.c (gdbpy_write): Check for interrupted output. 
+	* python/python.c (gdbpy_write): Check for interrupted output.
 
 2012-06-25  Greta Yorsh  <greta.yorsh@arm.com>
 
@@ -2245,7 +2250,7 @@
 	* valarith.c (binop_types_user_defined_p): Fix a typo.
 
 2012-06-08  Yao Qi  <yao@codesourcery.com>
-            Chung-Lin Tang <cltang@codesourcery.com>
+	    Chung-Lin Tang <cltang@codesourcery.com>
 
 	* arch-utils.c (default_return_in_first_hidden_param_p): New.
 	* arch-utils.h: Declare.
@@ -2640,7 +2645,7 @@
 
 	PR gdb/7205
 
-        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+	Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
@@ -2960,7 +2965,7 @@
 	(mips16_instruction_has_delay_slot): Simplify making use of the
 	updated mips_fetch_instruction interface.
 	(mips_adjust_breakpoint_address): Check for the standard MIPS
-	ISA rather than for MIPS16 ISA.  Update for unmake_compact_addr 
+	ISA rather than for MIPS16 ISA.  Update for unmake_compact_addr
 	calls.  Handle microMIPS code.
 	(mips_get_mips16_fn_stub_pc): Update mips_fetch_instruction call.
 	(mips_skip_trampoline_code): Handle microMIPS code.
@@ -3220,7 +3225,7 @@
 	* dwarf2read.c (macro_start_file): Call macro_define_special.
 
 2012-05-16  Maciej W. Rozycki  <macro@codesourcery.com>
-            Maciej W. Rozycki  <macro@mips.com>
+	    Maciej W. Rozycki  <macro@mips.com>
 
 	* breakpoint.h (bp_location): Add related_address member.
 	* inferior.h (get_return_value): Take a pointer to struct value
@@ -4349,7 +4354,7 @@
 	no default by the DWARF standard.
 
 2012-04-26  Maciej W. Rozycki  <macro@mips.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): Move the check for return
 	trampolines ahead of the check for function trampolines.
@@ -4489,9 +4494,9 @@
 	Revert this patch to allow breakpoint always-inserted
 	in record target.
 	2011-12-05  Pedro Alves  <pedro@codesourcery.com>
-        * breakpoint.c: Include record.h.
-        (breakpoints_always_inserted_mode): Return false when the record
-        target is in use.
+	* breakpoint.c: Include record.h.
+	(breakpoints_always_inserted_mode): Return false when the record
+	target is in use.
 
 	* breakpoint.c (iterate_over_bp_locations): New.
 	* breakpoint.h: Declare.
@@ -4544,8 +4549,8 @@
 2012-04-21  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp): Add cases for
-        TYPE_CODE_INTERNAL_FUNCTION and for TYPE_GNU_IFUNC, following
-        their treatment in eval.c.
+	TYPE_CODE_INTERNAL_FUNCTION and for TYPE_GNU_IFUNC, following
+	their treatment in eval.c.
 
 2012-04-21  David S. Miller  <davem@davemloft.net>
 
@@ -4558,7 +4563,7 @@
 	* arm-tdep.c (arm_register_g_packet_guesses): Fix comment.
 
 2012-04-20  Nigel Stephens  <nigel@mips.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_float_register_p): New function.
 	(mips_convert_register_float_case_p): Use mips_float_register_p.
