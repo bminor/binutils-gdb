@@ -1,5 +1,9 @@
 2012-07-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/d30v/bittest.l: Updated.
+
+2012-07-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/rdseed-intel.d: Append "#pass".
 
 2012-07-30  H.J. Lu  <hongjiu.lu@intel.com>
