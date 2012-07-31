@@ -2938,14 +2938,12 @@ process_point_options (CORE_ADDR point_addr, char **packet)
 	}
       else
 	{
-	  /* Unrecognized token, just skip it.  */
 	  fprintf (stderr, "Unknown token %c, ignoring.\n",
 		   *dataptr);
+	  /* Skip tokens until we find one that we recognize.  */
+	  while (*dataptr && *dataptr != ';')
+	    dataptr++;
 	}
-
-      /* Skip tokens until we find one that we recognize.  */
-      while (*dataptr && *dataptr != 'X' && *dataptr != ';')
-	dataptr++;
     }
   *packet = dataptr;
 }

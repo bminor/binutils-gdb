@@ -1,3 +1,9 @@
+2012-07-31  Pedro Alves  <palves@redhat.com>
+
+	* server.c (process_point_options): Only skip tokens if we find
+	one that is unrecognized.  Don't treat 'X' specially while
+	skipping unrecognized tokens.
+
 2012-07-30  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* linux-arm-low.c (arm_linux_hw_point_initialize): Do not attempt
