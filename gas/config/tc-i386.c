@@ -4347,7 +4347,7 @@ check_reverse:
 	  err_msg = _("invalid instruction suffix");
 	  break;
 	case bad_imm4:
-	  err_msg = _("Imm4 isn't the first operand");
+	  err_msg = _("constant doesn't fit in 4 bits");
 	  break;
 	case old_gcc_only:
 	  err_msg = _("only supported with old gcc");
