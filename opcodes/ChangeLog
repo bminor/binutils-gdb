@@ -1,3 +1,9 @@
+2012-07-31  Jan Beulich <jbeulich@suse.com>
+
+	* i386-opc.tbl (vmovntdqa): Move up into 256-bit integer AVX2
+	instruction group. Mark as requiring AVX2.
+	* i386-tbl.h: Re-generate.
+
 2012-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/opcodes.pot: Updated template.
