@@ -1,7 +1,9 @@
-2012-07-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2012-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/valgrind-infcall.c: New file.
 	* gdb.base/valgrind-infcall.exp: New file.
+
+	* gdb.base/valgrind-db-attach.exp: Do not run in remote mode.
 
 2012-07-30  Doug Evans  <dje@google.com>
 
