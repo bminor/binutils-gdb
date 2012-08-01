@@ -1,3 +1,9 @@
+2012-07-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* machs.c (bfin_reg_fetch): Change return 0 to return -1, and
+	return -1 to return 4.
+	(bfin_reg_store): Likewise.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* config.in, configure: Regenerate.
