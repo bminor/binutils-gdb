@@ -1,5 +1,12 @@
 2012-08-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* gdb.base/catch-load.exp: Fix argument to gdb_load_shlibs.
+	* gdb.base/ctxobj.exp: Call gdb_load_shlibs.
+	* gdb.base/print-file-var.exp: Likewise.
+	* gdb.server/solib-list.exp: Skip on remote targets.
+
+2012-08-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* gdb.base/watchpoint.exp (test_wide_location_1): Expect software
 	watchpoints on ARM.  When expecting software watchpoints, tolerate
 	(remote) targets that report unsupported hardware watchpoint only

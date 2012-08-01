@@ -27,6 +27,12 @@ if {[skip_gdbserver_tests] || [skip_shlib_tests]} {
     return
 }
 
+# This test case (currently) does not support remote targets, since it
+# assumes the ELF interpreter can be found on the host system
+if [is_remote target] then {
+    return
+}
+
 standard_testfile solib-list-main.c
 set srclibfile ${testfile}-lib.c
 set binlibfile [standard_output_file ${testfile}.so]
