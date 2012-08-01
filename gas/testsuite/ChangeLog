@@ -3,7 +3,7 @@
 	* gas/cfi/cfi-ppc-1.d: Allow for code alignment of 2 or 4.
 
 2012-07-31  Catherine Moore  <clm@codesourcery.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/micromips@mips32-dsp.d: New test.
 	* gas/mips/micromips@mips32-dspr2.d: New test.
@@ -28,9 +28,9 @@
 
 2012-07-27  Sean Keys  <skeys@ipdatasys.com>
 
-        * gas/xgate/xgate.exp: Added hi/lo test.
-        * gas/xgate/hilo.d: New test file
-        * gas/xgate/hilo.s: Net test source file.
+	* gas/xgate/xgate.exp: Added hi/lo test.
+	* gas/xgate/hilo.d: New test file
+	* gas/xgate/hilo.s: Net test source file.
 
 2012-07-24  Sandra Loosemore  <sandra@codesourcery.com>
 	    Jie Zhang  <jzhang918@gmail.com>
@@ -518,7 +518,7 @@
 	* gas/arm/thumbrel.d: Likewise.
 
 2012-04-12  Jie Zhang  <jie@codesourcery.com>
-            Meador Inge  <meadori@codesourcery.com>
+	    Meador Inge  <meadori@codesourcery.com>
 
 	* gas/arm/push-pop.d: New testcase.
 	* gas/arm/push-pop.s: Ditto.
