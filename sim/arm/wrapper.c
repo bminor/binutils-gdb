@@ -37,6 +37,7 @@
 #include "run-sim.h"
 #include "gdb/sim-arm.h"
 #include "gdb/signals.h"
+#include "libiberty.h"
 
 host_callback *sim_callback;
 
@@ -443,7 +444,7 @@ sim_store_register (sd, rn, memory, length)
      SIM_DESC sd ATTRIBUTE_UNUSED;
      int rn;
      unsigned char *memory;
-     int length ATTRIBUTE_UNUSED;
+     int length;
 {
   init ();
 
@@ -544,7 +545,7 @@ sim_store_register (sd, rn, memory, length)
       return 0;
     }
 
-  return -1;
+  return length;
 }
 
 int
@@ -552,9 +553,10 @@ sim_fetch_register (sd, rn, memory, length)
      SIM_DESC sd ATTRIBUTE_UNUSED;
      int rn;
      unsigned char *memory;
-     int length ATTRIBUTE_UNUSED;
+     int length;
 {
   ARMword regval;
+  int len = length;
 
   init ();
 
@@ -657,16 +659,16 @@ sim_fetch_register (sd, rn, memory, length)
       return 0;
     }
 
-  while (length)
+  while (len)
     {
       tomem (state, memory, regval);
 
-      length -= 4;
+      len -= 4;
       memory += 4;
       regval = 0;
     }  
 
-  return -1;
+  return length;
 }
 
 #ifdef SIM_TARGET_SWITCHES

@@ -1,3 +1,9 @@
+2012-08-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* wrapper.c (libiberty.h): Include.
+	(sim_store_register, sim_fetch_register): On success, return
+	length, instead of -1.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* config.in, configure: Regenerate.
