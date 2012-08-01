@@ -1,3 +1,7 @@
+2012-08-01  James Lemke  <jwlemke@codesourcery.com>
+
+	* gas/cfi/cfi-ppc-1.d: Allow for code alignment of 2 or 4.
+
 2012-07-31  Catherine Moore  <clm@codesourcery.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 

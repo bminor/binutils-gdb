@@ -213,6 +213,9 @@ const char ppc_symbol_chars[] = "%[";
 /* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
 int ppc_cie_data_alignment;
 
+/* The dwarf2 minimum instruction length.  */
+int ppc_dwarf2_line_min_insn_length;
+
 /* More than this number of nops in an alignment op gets a branch
    instead.  */
 unsigned long nop_limit = 4;
@@ -1695,6 +1698,7 @@ md_begin (void)
   ppc_set_cpu ();
 
   ppc_cie_data_alignment = ppc_obj64 ? -8 : -4;
+  ppc_dwarf2_line_min_insn_length = (ppc_cpu & PPC_OPCODE_VLE) ? 2 : 4;
 
 #ifdef OBJ_ELF
   /* Set the ELF flags if desired.  */
@@ -6882,9 +6886,18 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		insn = bfd_getb32 ((unsigned char *) where);
 	      else
 		insn = bfd_getl32 ((unsigned char *) where);
-	      if ((value & 3) != 0)
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("must branch to an address a multiple of 4"));
+	      if (ppc_mach() == bfd_mach_ppc_vle)
+		{
+		  if ((value & 1) != 0)
+		    as_bad_where (fixP->fx_file, fixP->fx_line,
+			          _("branch address must be a multiple of 2"));
+		}
+	      else
+		{
+		  if ((value & 3) != 0)
+		    as_bad_where (fixP->fx_file, fixP->fx_line,
+			          _("branch address must be a multiple of 4"));
+		}
 	      if ((offsetT) value < -0x40000000
 		  || (offsetT) value >= 0x40000000)
 		as_bad_where (fixP->fx_file, fixP->fx_line,

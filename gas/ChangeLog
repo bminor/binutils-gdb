@@ -1,3 +1,13 @@
+2012-08-01  James Lemke  <jwlemke@codesourcery.com>
+
+	* gas/dwarf2dbg.c (out_set_addr): Allow for non-constant value of
+	DWARF2_LINE_MIN_INSN_LENGTH
+	* gas/config/tc-ppc.c (ppc_dwarf2_line_min_insn_length): Declare
+	and initialize.
+	(md_apply_fix): Branch addr can be a multiple of 2 or 4.
+	* gas/config/tc-ppc.h (DWARF2_LINE_MIN_INSN_LENGTH): Now a
+	variable reference.
+
 2012-07-31  Maciej W. Rozycki  <macro@codesourcery.com>
             Chao-Ying Fu  <fu@mips.com>
             Catherine Moore  <clm@codesourcery.com>

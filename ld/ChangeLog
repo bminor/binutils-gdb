@@ -1,3 +1,7 @@
+2012-08-01  James Lemke  <jwlemke@codesourcery.com>
+
+	* ld/testsuite/ld-gc/pr13683.d: XFAIL for powerpc*-*-eabivle.
+
 2012-07-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14156

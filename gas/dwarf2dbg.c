@@ -882,24 +882,22 @@ out_set_addr (symbolS *sym)
   emit_expr (&exp, sizeof_address);
 }
 
-#if DWARF2_LINE_MIN_INSN_LENGTH > 1
 static void scale_addr_delta (addressT *);
 
 static void
 scale_addr_delta (addressT *addr_delta)
 {
   static int printed_this = 0;
-  if (*addr_delta % DWARF2_LINE_MIN_INSN_LENGTH != 0)
+  if (DWARF2_LINE_MIN_INSN_LENGTH > 1)
     {
-      if (!printed_this)
-	as_bad("unaligned opcodes detected in executable segment");
-      printed_this = 1;
+      if (*addr_delta % DWARF2_LINE_MIN_INSN_LENGTH != 0  && !printed_this)
+        {
+	  as_bad("unaligned opcodes detected in executable segment");
+          printed_this = 1;
+        }
+      *addr_delta /= DWARF2_LINE_MIN_INSN_LENGTH;
     }
-  *addr_delta /= DWARF2_LINE_MIN_INSN_LENGTH;
 }
-#else
-#define scale_addr_delta(A)
-#endif
 
 /* Encode a pair of line and address skips as efficiently as possible.
    Note that the line skip is signed, whereas the address skip is unsigned.
