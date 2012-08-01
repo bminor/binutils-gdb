@@ -1,3 +1,9 @@
+2012-08-01  Catherine Moore  <clm@codesourcery.com>
+	    Sandra Loosemore  <sandra@codesourcery.com>
+
+	* config/mips/tc-mips.c (mips_cpu_info):  Add the 34kn.
+	* doc/c-mips.texi (MIPS Opts): Document it.
+
 2012-08-01  James Lemke  <jwlemke@codesourcery.com>
 
 	* dwarf2dbg.c (out_set_addr): Allow for non-constant value of

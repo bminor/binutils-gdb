@@ -19130,6 +19130,8 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
 						ISA_MIPS32R2,	CPU_MIPS32R2 },
   { "34kx",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
 						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  /* 34Kn is a 34kc without DSP.  */
+  { "34kn",           MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
   /* 74K with DSP and DSPR2 ASE, other ASEs are optional.  */
   { "74kc",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2,
 						ISA_MIPS32R2,	CPU_MIPS32R2 },
