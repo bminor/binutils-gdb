@@ -1859,7 +1859,7 @@ bfin_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int len)
   else if (rn == SIM_BFIN_CC_REGNUM)
     value = CCREG;
   else
-    return 0; // will be an error in gdb
+    return -1;
 
   /* Handle our KSP/USP shadowing in SP.  While in supervisor mode, we
      have the normal SP/USP behavior.  User mode is tricky though.  */
@@ -1874,7 +1874,7 @@ bfin_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int len)
 
   bfin_store_unsigned_integer (buf, 4, value);
 
-  return -1; // disables size checking in gdb
+  return 4;
 }
 
 static int
@@ -1893,9 +1893,9 @@ bfin_reg_store (SIM_CPU *cpu, int rn, unsigned char *buf, int len)
   else if (rn == SIM_BFIN_CC_REGNUM)
     SET_CCREG (value);
   else
-    return 0; // will be an error in gdb
+    return -1;
 
-  return -1; // disables size checking in gdb
+  return 4;
 }
 
 static sim_cia
