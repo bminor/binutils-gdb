@@ -1,3 +1,8 @@
+2012-08-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/valgrind-infcall.exp: Relax the UNSUPPORTED check for more
+	valgrind versions.
+
 2012-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/valgrind-infcall.c: New file.
