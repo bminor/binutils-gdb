@@ -267,7 +267,7 @@ lm32-*-*)
 
 m32c-*-*)
 	# Target: Renesas M32C family
-	gdb_target_obs="m32c-tdep.o prologue-value.o"
+	gdb_target_obs="m32c-tdep.o"
 	# There may also be a SID / CGEN simulator for this,
 	# but we do have DJ Delorie's mini-sim.
 	gdb_sim=../sim/m32c/libsim.a
@@ -321,7 +321,7 @@ m88*-*-openbsd*)
 
 mep-*-*)
 	# Target: Toshiba Media Processor (MEP)
-	gdb_target_obs="mep-tdep.o prologue-value.o"
+	gdb_target_obs="mep-tdep.o"
 	# No sim needed. Target uses SID.
 	;;
 
