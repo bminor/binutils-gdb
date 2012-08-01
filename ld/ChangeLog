@@ -1,8 +1,7 @@
 2012-07-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14156
-	* ldlang.c (wild_sort): Don't call compare_section in case of
-	by_none.
+	* ldlang.c (wild_sort): Properly handle by_none.
 
 	* scripttempl/elf.sc: Add SORT_NONE to .init and .fini sections.
 	* scripttempl/elf32msp430.sc: Likewise.

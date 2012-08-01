@@ -3512,8 +3512,6 @@ update_wild_statements (lang_statement_union_type *s)
 		      if (sort_section == by_name)
 			sec->spec.sorted = by_alignment_name;
 		      break;
-		    case by_none:
-		      sec->spec.sorted = none;
 		    default:
 		      break;
 		    }
