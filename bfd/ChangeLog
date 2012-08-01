@@ -1,3 +1,10 @@
+2012-08-01  Alan Modra  <amodra@gmail.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add close_on_cleanup.
+	(_bfd_dwarf2_slurp_debug_info): Set close_on_cleanup if we open
+	gnu_debuglink bfd.
+	(_bfd_dwarf2_cleanup_debug_info): Act on close_on_cleanup.
+
 2012-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/bfd.pot: Updated template.

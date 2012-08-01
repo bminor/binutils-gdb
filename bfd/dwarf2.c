@@ -173,6 +173,9 @@ struct dwarf2_debug
 #define STASH_INFO_HASH_OFF        0
 #define STASH_INFO_HASH_ON         1
 #define STASH_INFO_HASH_DISABLED   2
+
+  /* True if we opened bfd_ptr.  */
+  bfd_boolean close_on_cleanup;
 };
 
 struct arange
@@ -3206,6 +3209,7 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   if (! stash)
     return FALSE;
   stash->debug_sections = debug_sections;
+  stash->syms = symbols;
 
   *pinfo = stash;
 
@@ -3235,7 +3239,9 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	  free (debug_filename);
 	  return FALSE;
 	}
+      stash->close_on_cleanup = TRUE;
     }
+  stash->bfd_ptr = debug_bfd;
 
   /* There can be more than one DWARF2 info section in a BFD these
      days.  First handle the easy case when there's only one.  If
@@ -3293,9 +3299,6 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   stash->info_ptr_end = stash->info_ptr + total_size;
   stash->sec = find_debug_info (debug_bfd, debug_sections, NULL);
   stash->sec_info_ptr = stash->info_ptr;
-  stash->syms = symbols;
-  stash->bfd_ptr = debug_bfd;
-
   return TRUE;
 }
 
@@ -3689,4 +3692,6 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
     free (stash->dwarf_ranges_buffer);
   if (stash->info_ptr_memory)
     free (stash->info_ptr_memory);
+  if (stash->close_on_cleanup)
+    bfd_close (stash->bfd_ptr);
 }
