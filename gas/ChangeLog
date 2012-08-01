@@ -2,7 +2,10 @@
             Chao-Ying Fu  <fu@mips.com>
             Catherine Moore  <clm@codesourcery.com>
 
-	* config/tc-mips.c (macro_build) <'2'>: Handle microMIPS.
+	* config/tc-mips.c (ISA_SUPPORTS_DSP_ASE): Also set if microMIPS
+	mode.
+	(ISA_SUPPORTS_DSPR2_ASE): Likewise.
+	(macro_build) <'2'>: Handle microMIPS.
 	(macro) <M_BALIGN>: Update error handling.
 	(validate_micromips_insn) <'2', '3', '4', '5', '6'>: New cases.
 	<'7', '8', '0', '@', '^'>: Likewise.

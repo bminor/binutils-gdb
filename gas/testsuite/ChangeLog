@@ -1,12 +1,14 @@
 2012-07-31  Catherine Moore  <clm@codesourcery.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 
-	* gas/mips/micromips@mips32-dsp.d: New.
-	* gas/mips/micromips@mips32-dspr2.d: New.
+	* gas/mips/micromips@mips32-dsp.d: New test.
+	* gas/mips/micromips@mips32-dspr2.d: New test.
 	* gas/mips/mips32-dsp.d: Remove -mips32r2.
 	* gas/mips/mips32-dspr2.d: Likewise.
-	* gas/mips/mips.exp: (mips_create_arch): Use -mips64r2
-	for micromips.  Use run_dump_test_arches to run dsp tests.
+	* gas/mips/mips32-dsp.s: Update padding.
+	* gas/mips/mips32-dspr2.s: Likewise.
+	* gas/mips/mips.exp: Use run_dump_test_arches to run MIPS32 DSP
+	tests.
 
 2012-07-31  H.J. Lu  <hongjiu.lu@intel.com>
 
