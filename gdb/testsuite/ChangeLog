@@ -1,3 +1,11 @@
+2012-08-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* gdb.base/watchpoint.exp (test_wide_location_1): Expect software
+	watchpoints on ARM.  When expecting software watchpoints, tolerate
+	(remote) targets that report unsupported hardware watchpoint only
+	at continue time.
+	(test_wide_location_2): Likewise.
+
 2012-08-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/valgrind-infcall.exp: Relax the UNSUPPORTED check for more

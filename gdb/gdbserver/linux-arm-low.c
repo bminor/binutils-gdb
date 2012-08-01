@@ -432,8 +432,9 @@ arm_linux_hw_breakpoint_equal (const struct arm_linux_hw_breakpoint *p1,
 
 /* Initialize the hardware breakpoint structure P for a breakpoint or
    watchpoint at ADDR to LEN.  The type of watchpoint is given in TYPE.
-   Returns -1 if TYPE is unsupported, 0 if TYPE represents a breakpoint,
-   and 1 if type represents a watchpoint.  */
+   Returns -1 if TYPE is unsupported, or -2 if the particular combination
+   of ADDR and LEN cannot be implemented.  Otherwise, returns 0 if TYPE
+   represents a breakpoint and 1 if type represents a watchpoint.  */
 static int
 arm_linux_hw_point_initialize (char type, CORE_ADDR addr, int len,
 			       struct arm_linux_hw_breakpoint *p)
@@ -483,7 +484,7 @@ arm_linux_hw_point_initialize (char type, CORE_ADDR addr, int len,
 	  break;
 	default:
 	  /* Unsupported. */
-	  return -1;
+	  return -2;
 	}
     }
   else
@@ -493,17 +494,17 @@ arm_linux_hw_point_initialize (char type, CORE_ADDR addr, int len,
 
       /* Can not set watchpoints for zero or negative lengths.  */
       if (len <= 0)
-	return -1;
+	return -2;
       /* The current ptrace interface can only handle watchpoints that are a
 	 power of 2.  */
       if ((len & (len - 1)) != 0)
-	return -1;
+	return -2;
 
       /* Test that the range [ADDR, ADDR + LEN) fits into the largest address
 	 range covered by a watchpoint.  */
       aligned_addr = addr & ~(max_wp_length - 1);
       if (aligned_addr + max_wp_length < addr + len)
-	return -1;
+	return -2;
 
       mask = (1 << len) - 1;
     }
@@ -560,7 +561,7 @@ arm_insert_point (char type, CORE_ADDR addr, int len)
   if (watch < 0)
     {
       /* Unsupported.  */
-      return 1;
+      return watch == -1 ? 1 : -1;
     }
 
   if (watch)
