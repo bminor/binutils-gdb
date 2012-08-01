@@ -1,3 +1,8 @@
+2012-08-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* linux-arm-low.c (arm_linux_hw_point_initialize): Do not attempt
+	to 4-byte-align HW breakpoint addresses for Thumb.
+
 2012-07-27  Yao Qi  <yao@codesourcery.com>
 
 	* server.c (process_point_options): Stop at 'X' when parsing.
