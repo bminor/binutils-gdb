@@ -1619,27 +1619,27 @@ static const struct bfrom bf538_roms[] =
 };
 static const struct bfrom bf54x_roms[] =
 {
-  BFROM (54x, 4, 0),
-  BFROM (54x, 2, 0),
-  BFROM (54x, 1, 0),
-  BFROM (54x, 0, 0),
-  BFROMA (0xffa14000, 54x_l1, 4, 0),
-  BFROMA (0xffa14000, 54x_l1, 2, 0),
-  BFROMA (0xffa14000, 54x_l1, 1, 0),
-  BFROMA (0xffa14000, 54x_l1, 0, 0),
+  BFROM (54x, 4, 0x1000),
+  BFROM (54x, 2, 0x1000),
+  BFROM (54x, 1, 0x1000),
+  BFROM (54x, 0, 0x1000),
+  BFROMA (0xffa14000, 54x_l1, 4, 0x10000),
+  BFROMA (0xffa14000, 54x_l1, 2, 0x10000),
+  BFROMA (0xffa14000, 54x_l1, 1, 0x10000),
+  BFROMA (0xffa14000, 54x_l1, 0, 0x10000),
   BFROM_STUB,
 };
 static const struct bfrom bf561_roms[] =
 {
   /* XXX: No idea what the actual wrap limit is here.  */
-  BFROM (561, 5, 0),
+  BFROM (561, 5, 0x1000),
   BFROM_STUB,
 };
 static const struct bfrom bf59x_roms[] =
 {
   BFROM (59x, 1, 0x1000000),
   BFROM (59x, 0, 0x1000000),
-  BFROMA (0xffa10000, 59x_l1, 1, 0),
+  BFROMA (0xffa10000, 59x_l1, 1, 0x10000),
   BFROM_STUB,
 };
 

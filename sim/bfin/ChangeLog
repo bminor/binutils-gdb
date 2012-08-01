@@ -1,5 +1,12 @@
 2012-07-31  Mike Frysinger  <vapier@gentoo.org>
 
+	* machs.c (bf54x_roms): Pass 0x1000 to alias field of BFROM, and
+	0x10000 to the alias field of BFROMA.
+	(bf561_roms): Pass 0x1000 to alias field of BFROM.
+	(bf59x_roms): Pass 0x10000 to alias field of BFROMA.
+
+2012-07-31  Mike Frysinger  <vapier@gentoo.org>
+
 	* machs.c (bfin_reg_fetch): Change return 0 to return -1, and
 	return -1 to return 4.
 	(bfin_reg_store): Likewise.
