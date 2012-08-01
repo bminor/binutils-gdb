@@ -1,3 +1,16 @@
+2012-08-01  Alan Modra  <amodra@gmail.com>
+
+	* h8300-dis.c: Fix printf arg warnings.
+	* i960-dis.c: Likewise.
+	* mips-dis.c: Likewise.
+	* pdp11-dis.c: Likewise.
+	* sh-dis.c: Likewise.
+	* v850-dis.c: Likewise.
+	* configure.in: Formatting.
+	* configure: Regenerate.
+	* rl78-decode.c: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2012-07-31  Chao-Ying Fu  <fu@mips.com>
             Catherine Moore  <clm@codesourcery.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
@@ -6,7 +19,7 @@
 	(DSP_VOLA): Likewise.
 	(D32, D33): Likewise.
 	(micromips_opcodes): Add DSP ASE instructions.
-	* micromips-dis.c (print_insn_micromips) <'2', '3'>: New cases.
+	* mips-dis.c (print_insn_micromips) <'2', '3'>: New cases.
 	<'4', '5', '6', '7', '8', '0', '^', '@'>: Likewise.
 
 2012-07-31  Jan Beulich <jbeulich@suse.com>

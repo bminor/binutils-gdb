@@ -406,7 +406,7 @@ disassemble (bfd_vma memaddr, struct disassemble_info *info, int bytes_read, uns
 				  else
 				    shown_one = 1;
 
-				  info->fprintf_func (info->stream, v850_reg_names[first]);
+				  info->fprintf_func (info->stream, "%s", v850_reg_names[first]);
 
 				  for (bit++; bit < 32; bit++)
 				    if ((mask & (1 << bit)) == 0)

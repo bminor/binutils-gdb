@@ -203,6 +203,8 @@ xc16x-dis.c
 xc16x-ibld.c
 xc16x-opc.c
 xc16x-opc.h
+xgate-dis.c
+xgate-opc.c
 xstormy16-asm.c
 xstormy16-desc.c
 xstormy16-desc.h
