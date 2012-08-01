@@ -2462,7 +2462,9 @@ wild_sort (lang_wild_statement_type *wild,
       /* Here either the files are not sorted by name, or we are
 	 looking at the sections for this file.  */
 
-      if (sec != NULL && sec->spec.sorted != none)
+      if (sec != NULL
+	  && sec->spec.sorted != none
+	  && sec->spec.sorted != by_none)
 	if (compare_section (sec->spec.sorted, section, ls->section) < 0)
 	  break;
     }

@@ -87,10 +87,10 @@ SECTIONS
   .text ${RELOCATING+${TEXT_START_ADDR}} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
-    KEEP (*(.init))
-    KEEP (*(.init.*))
-    KEEP (*(.fini))
-    KEEP (*(.fini.*))
+    KEEP (*(SORT_NONE(.init)))
+    KEEP (*(SORT_NONE(.init.*)))
+    KEEP (*(SORT_NONE(.fini)))
+    KEEP (*(SORT_NONE(.fini.*)))
     *(.text)
     *(.text.*)
     /* .gnu.warning sections are handled specially by elf32.em.  */
