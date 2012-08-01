@@ -42,6 +42,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${executable}.c" \
 }
 
 clean_restart $executable
+gdb_load_shlibs $libobj1 $libobj2
 
 if ![runto_main] {
     untested "could not run to main"
