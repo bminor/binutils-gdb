@@ -603,13 +603,15 @@ proc test_watch_location {} {
 
 proc test_wide_location_1 {} {
     global no_hw
+    global gdb_prompt
 
     # This test watches two words on most 32-bit ABIs, and one word on
     # most 64-bit ABIs.
 
     # Platforms where the target can't watch such a large region
     # should clear hw_expected below.
-    if { $no_hw || [target_info exists gdb,no_hardware_watchpoints] } {
+    if { $no_hw || [target_info exists gdb,no_hardware_watchpoints]
+         || [istarget arm*-*-*] } {
 	set hw_expected 0
     } else {
 	set hw_expected 1
@@ -625,9 +627,21 @@ proc test_wide_location_1 {} {
 	    "continue with watch foo2"
     } else {
 	gdb_test "watch foo2" "atchpoint .*: .*" "watch foo2"
-	gdb_test "continue" \
-	    "Continuing.*\[Ww\]atchpoint .*: .*New value = \\\{val = \\\{0, 11\\\}\\\}.*" \
-	    "continue with watch foo2"
+	set test "continue with watch foo2"
+	gdb_test_multiple "cont" $test {
+	    -re "Continuing.*\[Ww\]atchpoint .*: .*New value = \\\{val = \\\{0, 11\\\}\\\}.*$gdb_prompt $" {
+		pass $test
+	    }
+	    -re "Could not insert hardware breakpoints:.*You may have requested too many hardware breakpoints/watchpoints.*$gdb_prompt $" {
+		# This may happen with remote targets that support
+		# hardware watchpoints.  We only find out the
+		# watchpoint was too large, for example, at insert
+		# time.  If GDB is ever adjusted to downgrade the
+		# watchpoint automatically in this case, this match
+		# should be removed.
+		pass $test
+	    }
+	}
     }
 
     gdb_test_no_output "delete \$bpnum" "delete watch foo2"
@@ -635,13 +649,15 @@ proc test_wide_location_1 {} {
 
 proc test_wide_location_2 {} {
     global no_hw
+    global gdb_prompt
 
     # This test watches four words on most 32-bit ABIs, and two words
     # on 64-bit ABIs.
 
     # Platforms where the target can't watch such a large region
     # should clear hw_expected below.
-    if { $no_hw || [target_info exists gdb,no_hardware_watchpoints] } {
+    if { $no_hw || [target_info exists gdb,no_hardware_watchpoints]
+         || [istarget arm*-*-*] } {
 	set hw_expected 0
     } else {
 	set hw_expected 1
@@ -657,9 +673,21 @@ proc test_wide_location_2 {} {
 	    "continue with watch foo4"
     } else {
 	gdb_test "watch foo4" "atchpoint .*: .*" "watch foo4"
-	gdb_test "continue" \
-	    "Continuing.*\[Ww\]atchpoint .*: .*New value = \\\{val = \\\{0, 0, 0, 33\\\}\\\}.*" \
-	    "continue with watch foo4"
+	set test "continue with watch foo4"
+	gdb_test_multiple "cont" $test {
+	    -re "Continuing.*\[Ww\]atchpoint .*: .*New value = \\\{val = \\\{0, 0, 0, 33\\\}\\\}.*$gdb_prompt $" {
+		pass $test
+	    }
+	    -re "Could not insert hardware breakpoints:.*You may have requested too many hardware breakpoints/watchpoints.*$gdb_prompt $" {
+		# This may happen with remote targets that support
+		# hardware watchpoints.  We only find out the
+		# watchpoint was too large, for example, at insert
+		# time.  If GDB is ever adjusted to downgrade the
+		# watchpoint automatically in this case, this match
+		# should be removed.
+		pass $test
+	    }
+	}
     }
 
     gdb_test_no_output "delete \$bpnum" "delete watch foo4"

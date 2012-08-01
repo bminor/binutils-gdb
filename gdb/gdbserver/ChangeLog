@@ -1,5 +1,11 @@
 2012-08-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
+	* linux-arm-low.c (arm_linux_hw_point_initialize): Distinguish
+	between unsupported TYPE and unimplementable ADDR/LEN combination.
+	(arm_insert_point): Act on new return value.
+
+2012-08-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
 	* linux-arm-low.c (arm_linux_hw_point_initialize): Do not attempt
 	to 4-byte-align HW breakpoint addresses for Thumb.
 
