@@ -1,3 +1,13 @@
+2012-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14420
+	* dwarf.c (process_abbrev_section): Add attribute terminator.
+	Warn missing section terminator.
+	(get_FORM_name): Special check for 0 value.
+	(get_AT_name): Likewise.
+	(process_debug_info): Display zero abbrev number.  Check
+	attribute terminator.
+
 2012-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/binutils.pot: Updated template.

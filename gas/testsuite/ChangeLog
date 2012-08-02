@@ -1,3 +1,10 @@
+2012-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14420
+	* gas/elf/dwarf2-1.d: Updated.
+	* gas/elf/dwarf2-2.d: Likwise.
+	* gas/i386/dw2-compress-1.d: Likwise.
+
 2012-08-01  James Lemke  <jwlemke@codesourcery.com>
 
 	* gas/cfi/cfi-ppc-1.d: Allow for code alignment of 2 or 4.

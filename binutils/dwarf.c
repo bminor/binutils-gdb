@@ -647,11 +647,13 @@ process_abbrev_section (unsigned char *start, unsigned char *end)
 	  form = read_leb128 (start, & bytes_read, 0);
 	  start += bytes_read;
 
-	  if (attribute != 0)
-	    add_abbrev_attr (attribute, form);
+	  add_abbrev_attr (attribute, form);
 	}
       while (attribute != 0);
     }
+
+  /* Report the missing single zero which ends the section.  */
+  error (_(".debug_abbrev section not zero terminated\n"));
 
   return NULL;
 }
@@ -675,8 +677,12 @@ get_TAG_name (unsigned long tag)
 static const char *
 get_FORM_name (unsigned long form)
 {
-  const char *name = get_DW_FORM_name (form);
+  const char *name;
+  
+  if (form == 0)
+    return "DW_FORM value: 0";
 
+  name = get_DW_FORM_name (form);
   if (name == NULL)
     {
       static char buffer[100];
@@ -1860,6 +1866,9 @@ get_AT_name (unsigned long attribute)
 {
   const char *name;
 
+  if (attribute == 0)
+    return "DW_AT value: 0";
+
   /* One value is shared by the MIPS and HP extensions:  */
   if (attribute == DW_AT_MIPS_fde)
     return "DW_AT_MIPS_fde or DW_AT_HP_unmodifiable";
@@ -2161,6 +2170,10 @@ process_debug_info (struct dwarf_section *section,
 		    break;
 		}
 
+	      if (!do_loc && die_offset >= dwarf_start_die)
+		printf (_(" <%d><%lx>: Abbrev Number: 0\n"),
+			level, die_offset);
+
 	      --level;
 	      if (level < 0)
 		{
@@ -2238,7 +2251,9 @@ process_debug_info (struct dwarf_section *section,
 	      break;
 	    }
 
-	  for (attr = entry->first_attr; attr; attr = attr->next)
+	  for (attr = entry->first_attr;
+	       attr && attr->attribute;
+	       attr = attr->next)
 	    {
 	      debug_info *arg;
 

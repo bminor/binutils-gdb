@@ -1,3 +1,11 @@
+2012-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14420
+	* binutils-all/i386/compressed-1a.d: Updated.
+	* binutils-all/objdump.W: Likewise.
+	* binutils-all/readelf.wa: Likewise.
+	* binutils-all/x86-64/compressed-1a.d: Likewise.
+
 2012-07-28  Kai Tietz  <ktietz@redhat.com>
 
 	* binutils-all/windres/version_small.rc: New test.
