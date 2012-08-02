@@ -140,7 +140,7 @@ show_debug_displaced (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Displace stepping debugging is %s.\n"), value);
 }
 
-int debug_infrun = 0;
+unsigned int debug_infrun = 0;
 static void
 show_debug_infrun (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
@@ -7110,13 +7110,13 @@ There is no `stop' command, but you can set a hook on `stop'.\n\
 This allows you to set a list of commands to be run each time execution\n\
 of the program stops."), &cmdlist);
 
-  add_setshow_zinteger_cmd ("infrun", class_maintenance, &debug_infrun, _("\
+  add_setshow_zuinteger_cmd ("infrun", class_maintenance, &debug_infrun, _("\
 Set inferior debugging."), _("\
 Show inferior debugging."), _("\
 When non-zero, inferior specific debugging is enabled."),
-			    NULL,
-			    show_debug_infrun,
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     show_debug_infrun,
+			     &setdebuglist, &showdebuglist);
 
   add_setshow_boolean_cmd ("displaced", class_maintenance,
 			   &debug_displaced, _("\

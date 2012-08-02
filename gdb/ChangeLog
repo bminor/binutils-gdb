@@ -1,5 +1,89 @@
 2012-08-02  Yao Qi  <yao@codesourcery.com>
 
+	* dwarf2loc.c (entry_values_debug): Add 'unsigned'.
+	(_initialize_dwarf2loc): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* dwarf2loc.h: Update the declaration of 'entry_values_debug'.
+	* dwarf2read.c (dwarf2_die_debug): Add 'unsigned'.
+	(_initialize_dwarf2_read): Call add_setshow_zuinteger_cmd
+	instead of add_setshow_zinteger_cmd.
+	* darwin-nat.c (dwarwin_debug_flag): Add 'unsigned'.
+	(_initialize_darwin_inferior): Call add_setshow_zuinteger_cmd
+	instead of add_setshow_zinteger_cmd.
+	* frame.c (frame_debug): Add 'unsigned'.
+	(_intialize_frame): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* frame.h: Update the declaration of 'frame_debug'.
+	* gdbtypes.c (overload_debug): Add 'unsigned'.
+	(_initialize_gdbtypes): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* inferior.h: Update declaration of 'debug_infrun'.
+	* infrun.c (debug_infrun): Add 'unsigned'.
+	(_initialize_infrun): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* jit.c (jit_debug): Add 'unsigned'.
+	(_initialize_jit): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* linux-nat.c (debug_linux_nat): Add 'unsigned'.
+	(_initialize_linux_nat): Call add_setshow_zuinteger_cmd
+	instead of add_setshow_zinteger_cmd.
+	* linux-thread-db.c (libthread_db_debug): Add 'unsigned'.
+	(_initialize_thread_db): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* machoread.c (mach_o_debug_level): Add 'unsigned'.
+	(_initialize_machoread): Call add_setshow_zuinteger_cmd
+	instead of add_setshow_zinteger_cmd.
+	* mi/mi-cmd-var.c: Update the declaration of 'varobjdebug'.
+	* microblaze-tdep.c (microblaze_debug_flag): Add 'unsigned'.
+	(_initialize_microblaze_tdep): Call add_setshow_zuinteger_cmd
+	intead of add_setshow_zinteger_cmd.
+	* mips-tdep.c (mips_debug): Add 'unsigned'.
+	(_initialize_mips_tdep): Call add_setshow_zuinteger_cmd
+	instead of add_setshow_zinteger_cmd.
+	* monitor.c (monitor_debug): Add 'unsigned'.
+	(_initialize_remote_monitors): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* observer.c (observer_debug): Add 'unsigned'.
+	(_initialize_observer): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* parse.c (expressiondebug): Add 'unsigned'.
+	(_initialize_parse): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* record.c (record_debug): Add 'unsigned'.
+	(_initialize_record): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* record.h: Update the declaration of 'record_debug'.
+	* stap-probe.c (stap_expression_debug): Add 'unsigned'.
+	(_initialize_stap_probe): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* serial.c (global_serial_debug_p): Add 'unsigned'.
+	(_initialize_serial): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* solib-dsbt.c (solib_dsbt_debug): Add 'unsigned'.
+	(_initialize_dsbt_solib): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* solib-frv.c (solib_frv_debug): Add 'unsigned'.
+	(_initialize_frv_solib): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* target.c (targetdebug): Add 'unsigned'.
+	(initialize_targets): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* valops.c (overload_debug): Add 'unsigned'.
+	* varobj.c (varobjdebug): Add 'unsigned'.
+	(_initialize_varobj): Call add_setshow_zuinteger_cmd instead of
+	add_setshow_zinteger_cmd.
+	* xtensa-tdep.c (xtensa_debug_level): Add 'unsigned'.
+	(_initialize_xtensa_tdep): Call add_setshow_zuinteger_cmd
+	instead of add_setshow_zinteger_cmd.
+
+	* arch-utils.h: Remove the declaration of 'gdbarch_debug'.
+	* gdbarch.sh (gdbarch_debug): Add 'unsigned'.
+	(extern void _initialize_gdbarch): Call add_setshow_zuinteger_cmd
+	instead of add_setshow_zinteger_cmd.
+	* gdbarch.c, gdbarch.h: Re-generated.
+
+2012-08-02  Yao Qi  <yao@codesourcery.com>
+
 	* nto-tdep.c: Don't include cli/cli-decode.h and
 	cli/cli-cmds.h.
 	(_initialize_nto_tdep): Remove.

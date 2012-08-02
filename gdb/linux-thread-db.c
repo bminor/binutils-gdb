@@ -102,7 +102,7 @@ set_libthread_db_search_path (char *ignored, int from_tty,
 
 /* If non-zero, print details of libthread_db processing.  */
 
-static int libthread_db_debug;
+static unsigned int libthread_db_debug;
 
 static void
 show_libthread_db_debug (struct ui_file *file, int from_tty,
@@ -2076,14 +2076,14 @@ Setting the search path to an empty list resets it to its default value."),
 			    NULL,
 			    &setlist, &showlist);
 
-  add_setshow_zinteger_cmd ("libthread-db", class_maintenance,
-			    &libthread_db_debug, _("\
+  add_setshow_zuinteger_cmd ("libthread-db", class_maintenance,
+			     &libthread_db_debug, _("\
 Set libthread-db debugging."), _("\
 Show libthread-db debugging."), _("\
 When non-zero, libthread-db debugging is enabled."),
-			    NULL,
-			    show_libthread_db_debug,
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     show_libthread_db_debug,
+			     &setdebuglist, &showdebuglist);
 
   add_setshow_boolean_cmd ("libthread-db", class_support,
 			   &auto_load_thread_db, _("\

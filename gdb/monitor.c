@@ -120,7 +120,7 @@ static ptid_t monitor_ptid;
 
 static void monitor_debug (const char *fmt, ...) ATTRIBUTE_PRINTF (1, 2);
 
-static int monitor_debug_p = 0;
+static unsigned int monitor_debug_p = 0;
 
 /* NOTE: This file alternates between monitor_debug_p and remote_debug
    when determining if debug information is printed.  Perhaps this
@@ -2376,14 +2376,14 @@ When enabled, a hashmark \'#\' is displayed."),
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
 
-  add_setshow_zinteger_cmd ("monitor", no_class, &monitor_debug_p, _("\
+  add_setshow_zuinteger_cmd ("monitor", no_class, &monitor_debug_p, _("\
 Set debugging of remote monitor communication."), _("\
 Show debugging of remote monitor communication."), _("\
 When enabled, communication between GDB and the remote monitor\n\
 is displayed."),
-			    NULL,
-			    NULL, /* FIXME: i18n: */
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     NULL, /* FIXME: i18n: */
+			     &setdebuglist, &showdebuglist);
 
   /* Yes, 42000 is arbitrary.  The only sense out of it, is that it
      isn't 0.  */

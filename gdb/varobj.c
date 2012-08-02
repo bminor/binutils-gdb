@@ -49,7 +49,7 @@ typedef int PyObject;
 
 /* Non-zero if we want to see trace of varobj level stuff.  */
 
-int varobjdebug = 0;
+unsigned int varobjdebug = 0;
 static void
 show_varobjdebug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
@@ -4176,13 +4176,13 @@ _initialize_varobj (void)
   varobj_table = xmalloc (sizeof_table);
   memset (varobj_table, 0, sizeof_table);
 
-  add_setshow_zinteger_cmd ("debugvarobj", class_maintenance,
-			    &varobjdebug,
-			    _("Set varobj debugging."),
-			    _("Show varobj debugging."),
-			    _("When non-zero, varobj debugging is enabled."),
-			    NULL, show_varobjdebug,
-			    &setlist, &showlist);
+  add_setshow_zuinteger_cmd ("debugvarobj", class_maintenance,
+			     &varobjdebug,
+			     _("Set varobj debugging."),
+			     _("Show varobj debugging."),
+			     _("When non-zero, varobj debugging is enabled."),
+			     NULL, show_varobjdebug,
+			     &setlist, &showlist);
 }
 
 /* Invalidate varobj VAR if it is tied to locals and re-create it if it is

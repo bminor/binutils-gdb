@@ -205,7 +205,7 @@ int may_stop = 1;
 
 /* Non-zero if we want to see trace of target level stuff.  */
 
-static int targetdebug = 0;
+static unsigned int targetdebug = 0;
 static void
 show_targetdebug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
@@ -4774,15 +4774,15 @@ initialize_targets (void)
   add_info ("target", target_info, targ_desc);
   add_info ("files", target_info, targ_desc);
 
-  add_setshow_zinteger_cmd ("target", class_maintenance, &targetdebug, _("\
+  add_setshow_zuinteger_cmd ("target", class_maintenance, &targetdebug, _("\
 Set target debugging."), _("\
 Show target debugging."), _("\
 When non-zero, target debugging is enabled.  Higher numbers are more\n\
 verbose.  Changes do not take effect until the next \"run\" or \"target\"\n\
 command."),
-			    NULL,
-			    show_targetdebug,
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     show_targetdebug,
+			     &setdebuglist, &showdebuglist);
 
   add_setshow_boolean_cmd ("trust-readonly-sections", class_support,
 			   &trust_readonly, _("\

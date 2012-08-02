@@ -34,7 +34,7 @@ const char mi_no_values[] = "--no-values";
 const char mi_simple_values[] = "--simple-values";
 const char mi_all_values[] = "--all-values";
 
-extern int varobjdebug;		/* defined in varobj.c.  */
+extern unsigned int varobjdebug;		/* defined in varobj.c.  */
 
 static void varobj_update_one (struct varobj *var,
 			       enum print_values print_values,

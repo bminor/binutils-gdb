@@ -60,7 +60,7 @@ static struct gdbarch_data *jit_gdbarch_data;
 
 /* Non-zero if we want to see trace of jit level stuff.  */
 
-static int jit_debug = 0;
+static unsigned int jit_debug = 0;
 
 static void
 show_jit_debug (struct ui_file *file, int from_tty,
@@ -1402,13 +1402,13 @@ _initialize_jit (void)
 {
   jit_reader_dir = relocate_gdb_directory (JIT_READER_DIR,
                                            JIT_READER_DIR_RELOCATABLE);
-  add_setshow_zinteger_cmd ("jit", class_maintenance, &jit_debug,
-			    _("Set JIT debugging."),
-			    _("Show JIT debugging."),
-			    _("When non-zero, JIT debugging is enabled."),
-			    NULL,
-			    show_jit_debug,
-			    &setdebuglist, &showdebuglist);
+  add_setshow_zuinteger_cmd ("jit", class_maintenance, &jit_debug,
+			     _("Set JIT debugging."),
+			     _("Show JIT debugging."),
+			     _("When non-zero, JIT debugging is enabled."),
+			     NULL,
+			     show_jit_debug,
+			     &setdebuglist, &showdebuglist);
 
   observer_attach_inferior_exit (jit_inferior_exit_hook);
   jit_objfile_data =

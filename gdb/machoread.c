@@ -39,7 +39,7 @@
 #include <string.h>
 
 /* If non-zero displays debugging message.  */
-static int mach_o_debug_level = 0;
+static unsigned int mach_o_debug_level = 0;
 
 /* Dwarf debugging information are never in the final executable.  They stay
    in object files and the executable contains the list of object files read
@@ -1046,10 +1046,10 @@ _initialize_machoread ()
 {
   add_symtab_fns (&macho_sym_fns);
 
-  add_setshow_zinteger_cmd ("mach-o", class_obscure,
-			    &mach_o_debug_level,
-			    _("Set if printing Mach-O symbols processing."),
-			    _("Show if printing Mach-O symbols processing."),
-			    NULL, NULL, NULL,
-			    &setdebuglist, &showdebuglist);
+  add_setshow_zuinteger_cmd ("mach-o", class_obscure,
+			     &mach_o_debug_level,
+			     _("Set if printing Mach-O symbols processing."),
+			     _("Show if printing Mach-O symbols processing."),
+			     NULL, NULL, NULL,
+			     &setdebuglist, &showdebuglist);
 }

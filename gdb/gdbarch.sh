@@ -1376,7 +1376,7 @@ extern void set_gdbarch_from_file (bfd *);
 extern void initialize_current_architecture (void);
 
 /* gdbarch trace variable */
-extern int gdbarch_debug;
+extern unsigned int gdbarch_debug;
 
 extern void gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file);
 
@@ -1422,7 +1422,7 @@ static void alloc_gdbarch_data (struct gdbarch *);
 #ifndef GDBARCH_DEBUG
 #define GDBARCH_DEBUG 0
 #endif
-int gdbarch_debug = GDBARCH_DEBUG;
+unsigned int gdbarch_debug = GDBARCH_DEBUG;
 static void
 show_gdbarch_debug (struct ui_file *file, int from_tty,
                     struct cmd_list_element *c, const char *value)
@@ -2291,7 +2291,7 @@ extern void _initialize_gdbarch (void);
 void
 _initialize_gdbarch (void)
 {
-  add_setshow_zinteger_cmd ("arch", class_maintenance, &gdbarch_debug, _("\\
+  add_setshow_zuinteger_cmd ("arch", class_maintenance, &gdbarch_debug, _("\\
 Set architecture debugging."), _("\\
 Show architecture debugging."), _("\\
 When non-zero, architecture debugging is enabled."),

@@ -1427,7 +1427,7 @@ extern void set_gdbarch_from_file (bfd *);
 extern void initialize_current_architecture (void);
 
 /* gdbarch trace variable */
-extern int gdbarch_debug;
+extern unsigned int gdbarch_debug;
 
 extern void gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file);
 

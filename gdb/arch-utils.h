@@ -27,9 +27,6 @@ struct minimal_symbol;
 struct type;
 struct gdbarch_info;
 
-/* gdbarch trace variable */
-extern int gdbarch_debug;
-
 /* An implementation of gdbarch_displaced_step_copy_insn for
    processors that don't need to modify the instruction before
    single-stepping the displaced copy.

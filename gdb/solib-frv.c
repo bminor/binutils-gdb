@@ -34,7 +34,7 @@
 #include "gdb_bfd.h"
 
 /* Flag which indicates whether internal debug messages should be printed.  */
-static int solib_frv_debug;
+static unsigned int solib_frv_debug;
 
 /* FR-V pointers are four bytes wide.  */
 enum { FRV_PTR_SIZE = 4 };
@@ -1184,12 +1184,12 @@ _initialize_frv_solib (void)
   frv_so_ops.bfd_open = solib_bfd_open;
 
   /* Debug this file's internals.  */
-  add_setshow_zinteger_cmd ("solib-frv", class_maintenance,
-			    &solib_frv_debug, _("\
+  add_setshow_zuinteger_cmd ("solib-frv", class_maintenance,
+			     &solib_frv_debug, _("\
 Set internal debugging of shared library code for FR-V."), _("\
 Show internal debugging of shared library code for FR-V."), _("\
 When non-zero, FR-V solib specific internal debugging is enabled."),
-			    NULL,
-			    NULL, /* FIXME: i18n: */
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     NULL, /* FIXME: i18n: */
+			     &setdebuglist, &showdebuglist);
 }

@@ -458,7 +458,7 @@ dwarf_expr_get_base_type (struct dwarf_expr_context *ctx,
 
 /* See dwarf2loc.h.  */
 
-int entry_values_debug = 0;
+unsigned int entry_values_debug = 0;
 
 /* Helper to set entry_values_debug.  */
 
@@ -4146,16 +4146,16 @@ extern initialize_file_ftype _initialize_dwarf2loc;
 void
 _initialize_dwarf2loc (void)
 {
-  add_setshow_zinteger_cmd ("entry-values", class_maintenance,
-			    &entry_values_debug,
-			    _("Set entry values and tail call frames "
-			      "debugging."),
-			    _("Show entry values and tail call frames "
-			      "debugging."),
-			    _("When non-zero, the process of determining "
-			      "parameter values from function entry point "
-			      "and tail call frames will be printed."),
-			    NULL,
-			    show_entry_values_debug,
-			    &setdebuglist, &showdebuglist);
+  add_setshow_zuinteger_cmd ("entry-values", class_maintenance,
+			     &entry_values_debug,
+			     _("Set entry values and tail call frames "
+			       "debugging."),
+			     _("Show entry values and tail call frames "
+			       "debugging."),
+			     _("When non-zero, the process of determining "
+			       "parameter values from function entry point "
+			       "and tail call frames will be printed."),
+			     NULL,
+			     show_entry_values_debug,
+			     &setdebuglist, &showdebuglist);
 }

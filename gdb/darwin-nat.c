@@ -145,7 +145,7 @@ static struct inferior *darwin_inf_fake_stop;
 #define PAGE_ROUND(x) PAGE_TRUNC((x) + mach_page_size - 1)
 
 /* This controls output of inferior debugging.  */
-static int darwin_debug_flag = 0;
+static unsigned int darwin_debug_flag = 0;
 
 /* Create a __TEXT __info_plist section in the executable so that gdb could
    be signed.  This is required to get an authorization for task_for_pid.
@@ -2057,12 +2057,12 @@ _initialize_darwin_inferior (void)
   inferior_debug (2, _("GDB task: 0x%lx, pid: %d\n"), mach_task_self (),
                   getpid ());
 
-  add_setshow_zinteger_cmd ("darwin", class_obscure,
-			    &darwin_debug_flag, _("\
+  add_setshow_zuinteger_cmd ("darwin", class_obscure,
+			     &darwin_debug_flag, _("\
 Set if printing inferior communication debugging statements."), _("\
 Show if printing inferior communication debugging statements."), NULL,
-			    NULL, NULL,
-			    &setdebuglist, &showdebuglist);
+			     NULL, NULL,
+			     &setdebuglist, &showdebuglist);
 
   add_setshow_boolean_cmd ("mach-exceptions", class_support,
 			   &enable_mach_exceptions, _("\

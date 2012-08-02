@@ -79,7 +79,7 @@ static const char *microblaze_register_names[] =
 
 #define MICROBLAZE_NUM_REGS ARRAY_SIZE (microblaze_register_names)
 
-static int microblaze_debug_flag = 0;
+static unsigned int microblaze_debug_flag = 0;
 
 static void
 microblaze_debug (const char *fmt, ...)
@@ -739,13 +739,13 @@ _initialize_microblaze_tdep (void)
   register_gdbarch_init (bfd_arch_microblaze, microblaze_gdbarch_init);
 
   /* Debug this files internals.  */
-  add_setshow_zinteger_cmd ("microblaze", class_maintenance,
-			    &microblaze_debug_flag, _("\
+  add_setshow_zuinteger_cmd ("microblaze", class_maintenance,
+			     &microblaze_debug_flag, _("\
 Set microblaze debugging."), _("\
 Show microblaze debugging."), _("\
 When non-zero, microblaze specific debugging is enabled."),
-			    NULL,
-			    NULL, 
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     NULL,
+			     &setdebuglist, &showdebuglist);
 
 }

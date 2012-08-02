@@ -153,7 +153,7 @@ struct record_entry
 };
 
 /* This is the debug switch for process record.  */
-int record_debug = 0;
+unsigned int record_debug = 0;
 
 /* If true, query if PREC cannot record memory
    change of next instruction.  */
@@ -2982,13 +2982,13 @@ _initialize_record (void)
   init_record_core_ops ();
   add_target (&record_core_ops);
 
-  add_setshow_zinteger_cmd ("record", no_class, &record_debug,
-			    _("Set debugging of record/replay feature."),
-			    _("Show debugging of record/replay feature."),
-			    _("When enabled, debugging output for "
-			      "record/replay feature is displayed."),
-			    NULL, show_record_debug, &setdebuglist,
-			    &showdebuglist);
+  add_setshow_zuinteger_cmd ("record", no_class, &record_debug,
+			     _("Set debugging of record/replay feature."),
+			     _("Show debugging of record/replay feature."),
+			     _("When enabled, debugging output for "
+			       "record/replay feature is displayed."),
+			     NULL, show_record_debug, &setdebuglist,
+			     &showdebuglist);
 
   c = add_prefix_cmd ("record", class_obscure, cmd_record_start,
 		      _("Abbreviated form of \"target record\" command."),

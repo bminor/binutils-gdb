@@ -201,7 +201,7 @@ static LONGEST (*super_xfer_partial) (struct target_ops *,
 				      const gdb_byte *,
 				      ULONGEST, LONGEST);
 
-static int debug_linux_nat;
+static unsigned int debug_linux_nat;
 static void
 show_debug_linux_nat (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
@@ -5194,14 +5194,14 @@ extern initialize_file_ftype _initialize_linux_nat;
 void
 _initialize_linux_nat (void)
 {
-  add_setshow_zinteger_cmd ("lin-lwp", class_maintenance,
-			    &debug_linux_nat, _("\
+  add_setshow_zuinteger_cmd ("lin-lwp", class_maintenance,
+			     &debug_linux_nat, _("\
 Set debugging of GNU/Linux lwp module."), _("\
 Show debugging of GNU/Linux lwp module."), _("\
 Enables printf debugging output."),
-			    NULL,
-			    show_debug_linux_nat,
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     show_debug_linux_nat,
+			     &setdebuglist, &showdebuglist);
 
   /* Save this mask as the default.  */
   sigprocmask (SIG_SETMASK, NULL, &normal_mask);

@@ -90,7 +90,7 @@ int in_parse_field;
    field name.  It is -1 if no dereference operation was found.  */
 static int expout_last_struct = -1;
 
-static int expressiondebug = 0;
+static unsigned int expressiondebug = 0;
 static void
 show_expressiondebug (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
@@ -1859,15 +1859,15 @@ _initialize_parse (void)
   type_stack.depth = 0;
   type_stack.elements = NULL;
 
-  add_setshow_zinteger_cmd ("expression", class_maintenance,
-			    &expressiondebug,
-			    _("Set expression debugging."),
-			    _("Show expression debugging."),
-			    _("When non-zero, the internal representation "
-			      "of expressions will be printed."),
-			    NULL,
-			    show_expressiondebug,
-			    &setdebuglist, &showdebuglist);
+  add_setshow_zuinteger_cmd ("expression", class_maintenance,
+			     &expressiondebug,
+			     _("Set expression debugging."),
+			     _("Show expression debugging."),
+			     _("When non-zero, the internal representation "
+			       "of expressions will be printed."),
+			     NULL,
+			     show_expressiondebug,
+			     &setdebuglist, &showdebuglist);
   add_setshow_boolean_cmd ("parser", class_maintenance,
 			    &parser_debug,
 			   _("Set parser debugging."),

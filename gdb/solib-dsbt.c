@@ -35,7 +35,7 @@
 #define GOT_MODULE_OFFSET 4
 
 /* Flag which indicates whether internal debug messages should be printed.  */
-static int solib_dsbt_debug = 0;
+static unsigned int solib_dsbt_debug = 0;
 
 /* TIC6X pointers are four bytes wide.  */
 enum { TIC6X_PTR_SIZE = 4 };
@@ -1184,12 +1184,12 @@ _initialize_dsbt_solib (void)
   dsbt_so_ops.bfd_open = solib_bfd_open;
 
   /* Debug this file's internals.  */
-  add_setshow_zinteger_cmd ("solib-dsbt", class_maintenance,
-			    &solib_dsbt_debug, _("\
+  add_setshow_zuinteger_cmd ("solib-dsbt", class_maintenance,
+			     &solib_dsbt_debug, _("\
 Set internal debugging of shared library code for DSBT ELF."), _("\
 Show internal debugging of shared library code for DSBT ELF."), _("\
 When non-zero, DSBT solib specific internal debugging is enabled."),
-			    NULL,
-			    show_dsbt_debug,
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     show_dsbt_debug,
+			     &setdebuglist, &showdebuglist);
 }

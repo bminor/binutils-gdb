@@ -55,7 +55,7 @@
 #include "xtensa-config.h"
 
 
-static int xtensa_debug_level = 0;
+static unsigned int xtensa_debug_level = 0;
 
 #define DEBUGWARN(args...) \
   if (xtensa_debug_level > 0) \
@@ -3308,14 +3308,14 @@ _initialize_xtensa_tdep (void)
   gdbarch_register (bfd_arch_xtensa, xtensa_gdbarch_init, xtensa_dump_tdep);
   xtensa_init_reggroups ();
 
-  add_setshow_zinteger_cmd ("xtensa",
-			    class_maintenance,
-			    &xtensa_debug_level,
+  add_setshow_zuinteger_cmd ("xtensa",
+			     class_maintenance,
+			     &xtensa_debug_level,
 			    _("Set Xtensa debugging."),
 			    _("Show Xtensa debugging."), _("\
 When non-zero, Xtensa-specific debugging is enabled. \
 Can be 1, 2, 3, or 4 indicating the level of debugging."),
-			    NULL,
-			    NULL,
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     NULL,
+			     &setdebuglist, &showdebuglist);
 }

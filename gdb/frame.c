@@ -165,7 +165,7 @@ frame_stash_invalidate (void)
 
 /* Flag to control debugging.  */
 
-int frame_debug;
+unsigned int frame_debug;
 static void
 show_frame_debug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
@@ -2500,11 +2500,11 @@ Zero is unlimited."),
 			   &show_backtrace_cmdlist);
 
   /* Debug this files internals.  */
-  add_setshow_zinteger_cmd ("frame", class_maintenance, &frame_debug,  _("\
+  add_setshow_zuinteger_cmd ("frame", class_maintenance, &frame_debug,  _("\
 Set frame debugging."), _("\
 Show frame debugging."), _("\
 When non-zero, frame specific internal debugging is enabled."),
-			    NULL,
-			    show_frame_debug,
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     show_frame_debug,
+			     &setdebuglist, &showdebuglist);
 }

@@ -177,7 +177,7 @@ const struct register_alias mips_numeric_register_aliases[] = {
 static int mips_fpu_type_auto = 1;
 static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
 
-static int mips_debug = 0;
+static unsigned int mips_debug = 0;
 
 /* Properties (for struct target_desc) describing the g/G packet
    layout.  */
@@ -8879,13 +8879,13 @@ that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
 			   &setlist, &showlist);
 
   /* Debug this files internals.  */
-  add_setshow_zinteger_cmd ("mips", class_maintenance,
-			    &mips_debug, _("\
+  add_setshow_zuinteger_cmd ("mips", class_maintenance,
+			     &mips_debug, _("\
 Set mips debugging."), _("\
 Show mips debugging."), _("\
 When non-zero, mips specific debugging is enabled."),
-			    NULL,
-			    NULL, /* FIXME: i18n: Mips debugging is
-				     currently %s.  */
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     NULL, /* FIXME: i18n: Mips debugging is
+				      currently %s.  */
+			     &setdebuglist, &showdebuglist);
 }

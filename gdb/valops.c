@@ -46,7 +46,7 @@
 #include "symtab.h"
 #include "exceptions.h"
 
-extern int overload_debug;
+extern unsigned int overload_debug;
 /* Local functions.  */
 
 static int typecmp (int staticp, int varargs, int nargs,

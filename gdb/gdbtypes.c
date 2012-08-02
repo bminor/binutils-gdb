@@ -122,7 +122,7 @@ show_opaque_type_resolution (struct ui_file *file, int from_tty,
 		    value);
 }
 
-int overload_debug = 0;
+unsigned int overload_debug = 0;
 static void
 show_overload_debug (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
@@ -4044,14 +4044,14 @@ _initialize_gdbtypes (void)
   gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
   objfile_type_data = register_objfile_data ();
 
-  add_setshow_zinteger_cmd ("overload", no_class, &overload_debug,
-			    _("Set debugging of C++ overloading."),
-			    _("Show debugging of C++ overloading."),
-			    _("When enabled, ranking of the "
-			      "functions is displayed."),
-			    NULL,
-			    show_overload_debug,
-			    &setdebuglist, &showdebuglist);
+  add_setshow_zuinteger_cmd ("overload", no_class, &overload_debug,
+			     _("Set debugging of C++ overloading."),
+			     _("Show debugging of C++ overloading."),
+			     _("When enabled, ranking of the "
+			       "functions is displayed."),
+			     NULL,
+			     show_overload_debug,
+			     &setdebuglist, &showdebuglist);
 
   /* Add user knob for controlling resolution of opaque types.  */
   add_setshow_boolean_cmd ("opaque-type-resolution", class_support,

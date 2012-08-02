@@ -201,7 +201,7 @@ extern char *construct_inferior_arguments (int, char **);
 
 /* From infrun.c */
 
-extern int debug_infrun;
+extern unsigned int debug_infrun;
 
 extern int stop_on_solib_events;
 

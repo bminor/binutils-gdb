@@ -79,7 +79,7 @@ DEF_VEC_P (symbolp);
 static int dwarf2_read_debug = 0;
 
 /* When non-zero, dump DIEs after they are read in.  */
-static int dwarf2_die_debug = 0;
+static unsigned int dwarf2_die_debug = 0;
 
 /* When non-zero, cross-check physname against demangler.  */
 static int check_physname = 0;
@@ -19640,14 +19640,14 @@ and symtab expansion."),
 			    NULL,
 			    &setdebuglist, &showdebuglist);
 
-  add_setshow_zinteger_cmd ("dwarf2-die", no_class, &dwarf2_die_debug, _("\
+  add_setshow_zuinteger_cmd ("dwarf2-die", no_class, &dwarf2_die_debug, _("\
 Set debugging of the dwarf2 DIE reader."), _("\
 Show debugging of the dwarf2 DIE reader."), _("\
 When enabled (non-zero), DIEs are dumped after they are read in.\n\
 The value is the maximum depth to print."),
-			    NULL,
-			    NULL,
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     NULL,
+			     &setdebuglist, &showdebuglist);
 
   add_setshow_boolean_cmd ("check-physname", no_class, &check_physname, _("\
 Set cross-checking of \"physname\" code against demangler."), _("\

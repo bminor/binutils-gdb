@@ -27,7 +27,7 @@ extern void _initialize_serial (void);
 
 /* Is serial being debugged?  */
 
-static int global_serial_debug_p;
+static unsigned int global_serial_debug_p;
 
 /* Linked list of serial I/O handlers.  */
 
@@ -671,12 +671,12 @@ Show numerical base for remote session logging"), NULL,
 			NULL, /* FIXME: i18n: */
 			&setlist, &showlist);
 
-  add_setshow_zinteger_cmd ("serial", class_maintenance,
-			    &global_serial_debug_p, _("\
+  add_setshow_zuinteger_cmd ("serial", class_maintenance,
+			     &global_serial_debug_p, _("\
 Set serial debugging."), _("\
 Show serial debugging."), _("\
 When non-zero, serial port debugging is enabled."),
-			    NULL,
-			    NULL, /* FIXME: i18n: */
-			    &setdebuglist, &showdebuglist);
+			     NULL,
+			     NULL, /* FIXME: i18n: */
+			     &setdebuglist, &showdebuglist);
 }
