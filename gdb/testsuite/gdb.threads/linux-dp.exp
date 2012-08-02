@@ -342,6 +342,7 @@ for {set i 1} {$i <= $nthreads} {incr i} {
 	set any_interesting 1
     }
 }
+unset seen
 
 if {$any_interesting} {
     pass "found an interesting thread"
