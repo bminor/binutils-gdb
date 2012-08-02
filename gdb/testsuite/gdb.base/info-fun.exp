@@ -67,9 +67,17 @@ foreach libsepdebug {NO IN SEP} { with_test_prefix "$libsepdebug" {
 	append match_str {int foo\(void\);[\r\n]*}
     }
     append match_str {Non-debugging symbols:[\r\n]*}
+    # Note: Targets like {m68k,ppc64,s390x}-linux also have, e.g.,
+    # 00000011.plt_call.foo+0 (m68k).
+    set plt_foo_match "($hex \[^\r\n\]*plt\[^\r\n\]*foo\[^\r\n\]*\[\r\n\]*)?"
+    append match_str $plt_foo_match
+    # This text we want to match precisely.
     append match_str "$hex *foo(@plt)?\[\r\n\]*"
+    # Watch for again to not have to worry about the order of appearance.
+    append match_str $plt_foo_match
     if { "$libsepdebug" == "NO"  } {
-	append match_str "$hex *foo\[\r\n\]*"
+	# Note: The ".?" is for targets like m68k-linux that have ".foo" here.
+	append match_str "$hex *.?foo\[\r\n\]*"
     }
 
     gdb_test "info fun foo" "$match_str"
