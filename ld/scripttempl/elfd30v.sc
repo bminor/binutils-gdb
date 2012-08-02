@@ -110,8 +110,8 @@ SECTIONS
   {
     *(.text)
     *(.gnu.linkonce.t*)
-    *(.init)
-    *(.fini)
+    *(SORT_NONE(.init))
+    *(SORT_NONE(.fini))
     ${RELOCATING+ _etext = . ; }
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
