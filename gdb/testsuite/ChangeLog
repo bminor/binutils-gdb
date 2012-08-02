@@ -1,5 +1,12 @@
 2012-08-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdb.dwarf2/dw2-icc-opaque.S: Remove .align directives.
+	Fix wrong output on big-endian systems.
+	* gdb.dwarf2/dw2-icc-opaque.exp: Expect @mode32 attribute on
+	4-byte pointer types on 64-bit s390x.
+
+2012-08-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdb.base/watchpoint.c (func2): Initialize local_a.  Add
 	marker comment at the beginning (after intialization).
 	* gdb.base/watchpoint.exp (test_complex_watchpoint): Set func2

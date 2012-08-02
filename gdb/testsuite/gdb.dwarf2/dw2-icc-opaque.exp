@@ -36,4 +36,10 @@ clean_restart $executable
 # type = struct opaque_struct_t {
 #     <no data fields>
 # } *
-gdb_test "ptype p_struct" "type = struct opaque_struct_t {\r\n *int wrapped_value;\r\n} \\*"
+if { [istarget s390x-*-*] && [is_lp64_target] } {
+    # The hand-coded DWARF info hard-codes a pointer size of 4 bytes,
+    # which is represented as @mode32 on s390x.
+    gdb_test "ptype p_struct" "type = struct opaque_struct_t {\r\n *int wrapped_value;\r\n} \\* @mode32"
+} else {
+    gdb_test "ptype p_struct" "type = struct opaque_struct_t {\r\n *int wrapped_value;\r\n} \\*"
+}

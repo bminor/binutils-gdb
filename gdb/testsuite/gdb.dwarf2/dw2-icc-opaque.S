@@ -38,7 +38,6 @@
 	.global p_struct#
 
 	.section .debug_info
-	.align 1
 debug_info_seg1:
 	.4byte debug_info_seg1_end - 1f	/* Length of compilation unit info. */
 1:
@@ -57,7 +56,8 @@ debug_info_seg1:
 	.byte 0x01			/* DW_AT_accessibility. */
 	.asciz "p_struct"		/* DW_AT_name. */
 	.4byte 3f - debug_info_seg1	/* DW_AT_type. */
-	.2byte 0x0305			/* DW_AT_location: 5 bytes, DW_OP_addr */
+	.byte 0x05			/* DW_AT_location: 5 bytes ... */
+	.byte 0x03			/* DW_OP_addr ... */
 	.4byte p_struct			/* followed by the address of p_struct. */
 	.byte 0x01			/* DW_AT_external. */
 
@@ -76,7 +76,6 @@ debug_info_seg1_end:
 
 	.section .debug_abbrev
 .debug_abbrev_seg1:
-	.align 1
 	.byte 0x01	/* Abbrev 1. */
 	.byte 0x11	/* DW_TAG_compile_unit. */
 	.byte 0x01	/* DW_CHILDREN_yes. */
@@ -123,7 +122,6 @@ debug_info_seg1_end:
 
 	.file "opaque-struct.c"
 	.section .debug_info
-	.align 1
 debug_info_seg2:
 	.4byte debug_info_seg2_end - 1f	/* Length of compilation unit info. */
 1:
@@ -145,8 +143,9 @@ debug_info_seg2:
 
 
 	.byte 0x03			/* DIE 3: DW_TAG_member. */
-	.2byte 0x2302			/* DW_AT_data_member_location, 2 bytes, */
-	.byte 0x00			/* DW_OP_plus_uconst followed by zero. */
+	.byte 0x02			/* DW_AT_data_member_location: 2 bytes ... */
+	.byte 0x23			/* DW_OP_plus_uconst ... */
+	.byte 0x00			/* followed by zero. */
 	.asciz "wrapped_value"		/* DW_AT_name. */
 	.4byte 4f - debug_info_seg2	/* DW_AT_type. */
 	.byte 0x00
@@ -162,7 +161,6 @@ debug_info_seg2_end:
 
 	.section .debug_abbrev
 .debug_abbrev_seg2:
-	.align 1
 	.byte 0x01	/* Abbrev 1. */
 	.byte 0x11	/* DW_TAG_compile_unit. */
 	.byte 0x01	/* DW_CHILDREN_yes. */
@@ -210,7 +208,6 @@ debug_info_seg2_end:
 	.file "opaque-pointer2.c"
 
 	.section .debug_info
-	.align 1
 debug_info_seg3:
 	.4byte debug_info_seg3_end - 1f	/* Length of compilation unit info. */
 1:
@@ -235,7 +232,6 @@ debug_info_seg3_end:
 
 	.section .debug_abbrev
 .debug_abbrev_seg3:
-	.align 1
 	.byte 0x01	/* Abbrev 1. */
 	.byte 0x11	/* DW_TAG_compile_unit. */
 	.byte 0x01	/* DW_CHILDREN_yes. */
