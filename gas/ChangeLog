@@ -1,3 +1,9 @@
+2012-08-02  Sean Keys  <skeys@ipdatasys.com>
+
+	* config/tc-m68hc11.c (s_m68hc11_parse_pseudo_instruction):
+	New function to parse pseudo ops that are unreleated to
+	existing pseudo ops.
+
 2012-08-01  Catherine Moore  <clm@codesourcery.com>
 	    Sandra Loosemore  <sandra@codesourcery.com>
 
