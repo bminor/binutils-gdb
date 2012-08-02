@@ -1,3 +1,17 @@
+2012-08-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.base/watchpoint.c (func2): Initialize local_a.  Add
+	marker comment at the beginning (after intialization).
+	* gdb.base/watchpoint.exp (test_complex_watchpoint): Set func2
+	breakpoint on marker comment instead of function begin.
+	(test_wide_location_1): Do not expect HW watchpoints on 32-bit
+	PowerPC.
+	(test_wide_location_2): Do not expect HW watchpoints on 32-bit
+	or 64-bit PowerPC.
+	(do_tests): Consistently set can-use-hw-watchpoints to 0 if
+	gdb,no_hardware_watchpoints flag is set.
+	(initialize): Remove now redundant can-use-hw-watchpoints change.
+
 2012-08-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.base/catch-load.exp: Fix argument to gdb_load_shlibs.
