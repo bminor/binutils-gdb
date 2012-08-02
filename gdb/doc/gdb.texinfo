@@ -18460,7 +18460,6 @@ configurations.
 * DJGPP Native::                Features specific to the DJGPP port
 * Cygwin Native::		Features specific to the Cygwin port
 * Hurd Native::                 Features specific to @sc{gnu} Hurd
-* Neutrino::                    Features specific to QNX Neutrino
 * Darwin::			Features specific to Darwin
 @end menu
 
@@ -19237,25 +19236,6 @@ thread default exception-port}, etc.).  The @code{thread default}
 variety of commands sets the default thread properties for all
 threads; you can then change the properties of individual threads with
 the non-default commands.
-@end table
-
-
-@node Neutrino
-@subsection QNX Neutrino
-@cindex QNX Neutrino
-
-@value{GDBN} provides the following commands specific to the QNX
-Neutrino target:
-
-@table @code
-@item set debug nto-debug
-@kindex set debug nto-debug
-When set to on, enables debugging messages specific to the QNX
-Neutrino support.
-
-@item show debug nto-debug
-@kindex show debug nto-debug
-Show the current state of QNX Neutrino messages.
 @end table
 
 @node Darwin

@@ -31,9 +31,6 @@
 
 struct nto_target_ops
 {
-/* For 'maintenance debug nto-debug' command.  */
-  int internal_debugging;
-
 /* The CPUINFO flags from the remote.  Currently used by
    i386 for fxsave but future proofing other hosts.
    This is initialized in procfs_attach or nto_start_remote
@@ -78,8 +75,6 @@ struct nto_target_ops
 };
 
 extern struct nto_target_ops current_nto_target;
-
-#define nto_internal_debugging (current_nto_target.internal_debugging)
 
 #define nto_cpuinfo_flags (current_nto_target.cpuinfo_flags)
 

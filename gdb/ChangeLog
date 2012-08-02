@@ -1,3 +1,12 @@
+2012-08-02  Yao Qi  <yao@codesourcery.com>
+
+	* nto-tdep.c: Don't include cli/cli-decode.h and
+	cli/cli-cmds.h.
+	(_initialize_nto_tdep): Remove.
+	* nto-tdep.h (struct nto_target_ops) <internal_debugging>:
+	Remove field.
+	Remove macro nto_internal_debugging.
+
 2012-08-01  Richard Henderson  <rth@redhat.com>
 
 	* configure.tgt (m32c-*-*) [gdb_target_obs]: Remove prologue-value.o.

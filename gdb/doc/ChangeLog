@@ -1,3 +1,7 @@
+2012-08-02  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Native): Remove node Neutrino.
+
 2012-07-27  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (IPA Protocol Commands): Document new command
