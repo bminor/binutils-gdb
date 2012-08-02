@@ -1,3 +1,9 @@
+2012-08-02  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* hostio.c (handle_pread): If pread fails, fall back to attempting
+	lseek/read.
+	(handle_pwrite): Likewise for pwrite.
+
 2012-08-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* linux-arm-low.c (arm_linux_hw_point_initialize): Distinguish
