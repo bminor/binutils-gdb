@@ -1,3 +1,8 @@
+2012-08-02  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/pc-fp.exp: Adjust testcase to match different outputs from
+	s390x, PowerPC 64 and m68k-linux.
+
 2012-08-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.base/annota1.exp: Accept no frames-invalid notification
