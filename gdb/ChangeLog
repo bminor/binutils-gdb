@@ -1,3 +1,9 @@
+2012-08-02  Ulrich Weigand  <ulrich.weigand@linaro.org>
+
+	* inf-child.c (inf_child_fileio_pwrite): If pwrite fails, fall back
+	to attempting lseek/write.
+	(inf_child_fileio_pread): Likewise for pread.
+
 2012-08-01  Richard Henderson  <rth@redhat.com>
 
 	* configure.tgt (m32c-*-*) [gdb_target_obs]: Remove prologue-value.o.

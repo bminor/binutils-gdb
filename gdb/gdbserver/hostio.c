@@ -328,10 +328,15 @@ handle_pread (char *own_buf, int *new_packet_len)
 #ifdef HAVE_PREAD
   ret = pread (fd, data, len, offset);
 #else
-  ret = lseek (fd, offset, SEEK_SET);
-  if (ret != -1)
-    ret = read (fd, data, len);
+  ret = -1;
 #endif
+  /* If we have no pread or it failed for this file, use lseek/read.  */
+  if (ret == -1)
+    {
+      ret = lseek (fd, offset, SEEK_SET);
+      if (ret != -1)
+	ret = read (fd, data, len);
+    }
 
   if (ret == -1)
     {
@@ -376,10 +381,15 @@ handle_pwrite (char *own_buf, int packet_len)
 #ifdef HAVE_PWRITE
   ret = pwrite (fd, data, len, offset);
 #else
-  ret = lseek (fd, offset, SEEK_SET);
-  if (ret != -1)
-    ret = write (fd, data, len);
+  ret = -1;
 #endif
+  /* If we have no pwrite or it failed for this file, use lseek/write.  */
+  if (ret == -1)
+    {
+      ret = lseek (fd, offset, SEEK_SET);
+      if (ret != -1)
+	ret = write (fd, data, len);
+    }
 
   if (ret == -1)
     {
