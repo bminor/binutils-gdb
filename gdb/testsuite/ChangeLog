@@ -1,3 +1,8 @@
+2012-08-02  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* boards/local-remote-host.exp: New.
+
 2012-08-01  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* gdb.base/catch-load.exp: Fix argument to gdb_load_shlibs.
