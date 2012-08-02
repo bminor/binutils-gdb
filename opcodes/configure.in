@@ -234,14 +234,14 @@ if test x${all_targets} = xfalse ; then
 	bfd_arm_arch)		ta="$ta arm-dis.lo" ;;
 	bfd_avr_arch)		ta="$ta avr-dis.lo" ;;
 	bfd_bfin_arch)		ta="$ta bfin-dis.lo" ;;
-	bfd_cr16_arch)    	ta="$ta cr16-dis.lo cr16-opc.lo" ;;
+	bfd_cr16_arch)		ta="$ta cr16-dis.lo cr16-opc.lo" ;;
 	bfd_cris_arch)		ta="$ta cris-dis.lo cris-opc.lo cgen-bitset.lo" ;;
-	bfd_crx_arch)    	ta="$ta crx-dis.lo crx-opc.lo" ;;
+	bfd_crx_arch)		ta="$ta crx-dis.lo crx-opc.lo" ;;
 	bfd_d10v_arch)		ta="$ta d10v-dis.lo d10v-opc.lo" ;;
 	bfd_d30v_arch)		ta="$ta d30v-dis.lo d30v-opc.lo" ;;
 	bfd_dlx_arch)		ta="$ta dlx-dis.lo" ;;
-	bfd_fr30_arch)          ta="$ta fr30-asm.lo fr30-desc.lo fr30-dis.lo fr30-ibld.lo fr30-opc.lo" using_cgen=yes ;;
-	bfd_frv_arch)           ta="$ta frv-asm.lo frv-desc.lo frv-dis.lo frv-ibld.lo frv-opc.lo" using_cgen=yes ;;
+	bfd_fr30_arch)		ta="$ta fr30-asm.lo fr30-desc.lo fr30-dis.lo fr30-ibld.lo fr30-opc.lo" using_cgen=yes ;;
+	bfd_frv_arch)		ta="$ta frv-asm.lo frv-desc.lo frv-dis.lo frv-ibld.lo frv-opc.lo" using_cgen=yes ;;
 	bfd_moxie_arch)		ta="$ta moxie-dis.lo moxie-opc.lo" ;;
 	bfd_h8300_arch)		ta="$ta h8300-dis.lo" ;;
 	bfd_h8500_arch)		ta="$ta h8500-dis.lo" ;;
@@ -254,8 +254,8 @@ if test x${all_targets} = xfalse ; then
 	bfd_ia64_arch)		ta="$ta ia64-dis.lo ia64-opc.lo" ;;
 	bfd_ip2k_arch)		ta="$ta ip2k-asm.lo ip2k-desc.lo ip2k-dis.lo ip2k-ibld.lo ip2k-opc.lo" using_cgen=yes ;;
 	bfd_epiphany_arch)	ta="$ta epiphany-asm.lo epiphany-desc.lo epiphany-dis.lo epiphany-ibld.lo epiphany-opc.lo" using_cgen=yes ;;
-        bfd_iq2000_arch)        ta="$ta iq2000-asm.lo iq2000-desc.lo iq2000-dis.lo iq2000-ibld.lo iq2000-opc.lo" using_cgen=yes ;;
-	bfd_lm32_arch)          ta="$ta lm32-asm.lo lm32-desc.lo lm32-dis.lo lm32-ibld.lo lm32-opc.lo lm32-opinst.lo" using_cgen=yes ;;
+	bfd_iq2000_arch)	ta="$ta iq2000-asm.lo iq2000-desc.lo iq2000-dis.lo iq2000-ibld.lo iq2000-opc.lo" using_cgen=yes ;;
+	bfd_lm32_arch)		ta="$ta lm32-asm.lo lm32-desc.lo lm32-dis.lo lm32-ibld.lo lm32-opc.lo lm32-opinst.lo" using_cgen=yes ;;
 	bfd_m32c_arch)		ta="$ta m32c-asm.lo m32c-desc.lo m32c-dis.lo m32c-ibld.lo m32c-opc.lo" using_cgen=yes ;;
 	bfd_m32r_arch)		ta="$ta m32r-asm.lo m32r-desc.lo m32r-dis.lo m32r-ibld.lo m32r-opc.lo m32r-opinst.lo" using_cgen=yes ;;
 	bfd_m68hc11_arch)	ta="$ta m68hc11-dis.lo m68hc11-opc.lo" ;;
@@ -277,7 +277,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_openrisc_arch)	ta="$ta openrisc-asm.lo openrisc-desc.lo openrisc-dis.lo openrisc-ibld.lo openrisc-opc.lo" using_cgen=yes ;;
 	bfd_or32_arch)		ta="$ta or32-dis.lo or32-opc.lo" using_cgen=yes ;;
 	bfd_pdp11_arch)		ta="$ta pdp11-dis.lo pdp11-opc.lo" ;;
-	bfd_pj_arch)	        ta="$ta pj-dis.lo pj-opc.lo" ;;
+	bfd_pj_arch)		ta="$ta pj-dis.lo pj-opc.lo" ;;
 	bfd_powerpc_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
 	bfd_powerpc_64_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
 	bfd_pyramid_arch)	;;
@@ -286,7 +286,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_rl78_arch)		ta="$ta rl78-dis.lo rl78-decode.lo";;
 	bfd_rx_arch)		ta="$ta rx-dis.lo rx-decode.lo";;
 	bfd_s390_arch)		ta="$ta s390-dis.lo s390-opc.lo" ;;
-	bfd_score_arch)         ta="$ta score-dis.lo score7-dis.lo" ;;
+	bfd_score_arch)		ta="$ta score-dis.lo score7-dis.lo" ;;
 	bfd_sh_arch)
 	  # We can't decide what we want just from the CPU family.
 	  # We want SH5 support unless a specific version of sh is
@@ -306,7 +306,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_spu_arch)		ta="$ta spu-dis.lo spu-opc.lo" ;;
 	bfd_tahoe_arch)		;;
 	bfd_tic30_arch)		ta="$ta tic30-dis.lo" ;;
-        bfd_tic4x_arch)         ta="$ta tic4x-dis.lo" ;;
+	bfd_tic4x_arch)		ta="$ta tic4x-dis.lo" ;;
 	bfd_tic54x_arch)	ta="$ta tic54x-dis.lo tic54x-opc.lo" ;;
 	bfd_tic6x_arch)		ta="$ta tic6x-dis.lo" ;;
 	bfd_tic80_arch)		ta="$ta tic80-dis.lo tic80-opc.lo" ;;
@@ -318,8 +318,8 @@ if test x${all_targets} = xfalse ; then
 	bfd_vax_arch)		ta="$ta vax-dis.lo" ;;
 	bfd_w65_arch)		ta="$ta w65-dis.lo" ;;
 	bfd_we32k_arch)		;;
-	bfd_xc16x_arch)         ta="$ta xc16x-asm.lo xc16x-desc.lo xc16x-dis.lo xc16x-ibld.lo xc16x-opc.lo" using_cgen=yes ;;
-	bfd_xgate_arch) 	ta="$ta xgate-dis.lo xgate-opc.lo" ;;
+	bfd_xc16x_arch)		ta="$ta xc16x-asm.lo xc16x-desc.lo xc16x-dis.lo xc16x-ibld.lo xc16x-opc.lo" using_cgen=yes ;;
+	bfd_xgate_arch)		ta="$ta xgate-dis.lo xgate-opc.lo" ;;
 	bfd_xstormy16_arch)	ta="$ta xstormy16-asm.lo xstormy16-desc.lo xstormy16-dis.lo xstormy16-ibld.lo xstormy16-opc.lo" using_cgen=yes ;;
 	bfd_xtensa_arch)	ta="$ta xtensa-dis.lo" ;;
 	bfd_z80_arch)		ta="$ta z80-dis.lo" ;;

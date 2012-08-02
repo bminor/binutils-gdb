@@ -1,3 +1,8 @@
+2012-08-02  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* configure.in: Formatting.
+	* configure: Regenerate.
+
 2012-08-01  Alan Modra  <amodra@gmail.com>
 
 	* h8300-dis.c: Fix printf arg warnings.
