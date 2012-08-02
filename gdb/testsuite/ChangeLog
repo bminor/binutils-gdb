@@ -1,5 +1,16 @@
 2012-08-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdb.base/annota1.exp: Accept no frames-invalid notification
+	when starting up the program.
+	* gdb.python/py-value.exp (test_value_numeric_ops): Pointers may
+	show a symbolic value as well.
+	* gdb.server/server-exec-info.exp: Skip test when skipping
+	gdbserver test and/or when skipping shared library tests.
+	* gdb.threads/linux-dp.exp: Unset "seen" when done with it to
+	avoid name conflicts with other tests.
+
+2012-08-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdb.dwarf2/dw2-icc-opaque.S: Remove .align directives.
 	Fix wrong output on big-endian systems.
 	* gdb.dwarf2/dw2-icc-opaque.exp: Expect @mode32 attribute on

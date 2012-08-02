@@ -15,6 +15,13 @@
 
 load_lib gdbserver-support.exp
 
+# We test for skip_shlib_tests in this test because without a main
+# exec file we only have the exec target loaded if shared libraries
+# are present.
+if {[skip_gdbserver_tests] || [skip_shlib_tests]} {
+    return
+}
+
 standard_testfile server.c
 if [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] {
     return -1
