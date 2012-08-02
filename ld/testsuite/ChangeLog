@@ -1,3 +1,7 @@
+2012-08-02  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* ld-mips-elf/got-vers-1.rd: Fix a typo.
+
 2012-08-01  James Lemke  <jwlemke@codesourcery.com>
 
 	* ld-gc/pr13683.d: XFAIL for powerpc*-*-eabivle.
