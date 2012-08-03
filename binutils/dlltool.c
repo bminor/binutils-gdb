@@ -1694,10 +1694,12 @@ scan_obj_file (const char *filename)
       bfd *arfile = bfd_openr_next_archived_file (f, 0);
       while (arfile)
 	{
+	  bfd *next;
 	  if (bfd_check_format (arfile, bfd_object))
 	    scan_open_obj_file (arfile);
+	  next = bfd_openr_next_archived_file (f, arfile);
 	  bfd_close (arfile);
-	  arfile = bfd_openr_next_archived_file (f, arfile);
+	  arfile = next;
 	}
 
 #ifdef DLLTOOL_MCORE_ELF

@@ -1,3 +1,8 @@
+2012-08-03  Tom Tromey  <tromey@redhat.com>
+
+	* dlltool.c (scan_obj_file): Close arfile after calling
+	bfd_openr_next_archived_file.
+
 2012-08-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14420
