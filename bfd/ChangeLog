@@ -1,3 +1,8 @@
+2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Update the
+	comment on DT_MIPS_RLD_MAP.
+
 2012-08-03  Tom Tromey  <tromey@redhat.com>
 
 	* opncls.c (_bfd_delete_bfd): Now static.
