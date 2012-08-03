@@ -1,3 +1,8 @@
+2012-08-03  Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	* gdb.base/valgrind-infcall.exp: Expect leading `.' on ppc64's
+	symbols. Abort if vgdb remote connection is closed.
+
 2012-08-02  Doug Evans  <dje@google.com>
 
 	* gdb.base/info-fun.exp: Fix failures on m68k, ppc64, s390x.
