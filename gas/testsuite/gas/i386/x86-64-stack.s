@@ -1,6 +1,7 @@
  .macro try bytes:vararg
   .byte \bytes
   .byte 0x66, \bytes
+  .byte 0x48, \bytes
   .byte 0x66, 0x48, \bytes
  .endm
 
