@@ -1,5 +1,10 @@
 2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* lib/ld-lib.exp (at_least_gcc_version): Accept more version
+	number formats; avoid throwing exceptions in any case.
+
+2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* ld-mips-elf/mode-change-error-1.d: Update the error message.
 
 2012-08-02  Maciej W. Rozycki  <macro@codesourcery.com>
