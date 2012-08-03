@@ -85,7 +85,7 @@ unset_board_info fileid
 
 clean_restart $executable
 
-gdb_test "$vgdbcmd" " in _start .*" "target remote for vgdb"
+gdb_test "$vgdbcmd" " in \\.?_start .*" "target remote for vgdb"
 
 gdb_test "monitor v.set gdb_output" "valgrind output will go to gdb.*"
 
@@ -96,6 +96,10 @@ while 1 {
 	-re "Invalid free\\(\\).*: main .*\r\n$gdb_prompt $" {
 	    pass $test
 	    break
+	}
+	-re "Remote connection closed.*\r\n$gdb_prompt $" {
+	    fail "$test (remote connection closed)"
+	    return -1
 	}
 	-re "\r\n$gdb_prompt $" {
 	    pass "$test (false warning)"
