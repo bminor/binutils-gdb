@@ -160,8 +160,6 @@ extern bfd *_bfd_generic_get_elt_at_index
   (bfd *, symindex);
 bfd * _bfd_new_bfd
   (void);
-void _bfd_delete_bfd
-  (bfd *);
 bfd_boolean _bfd_free_cached_info
   (bfd *);
 

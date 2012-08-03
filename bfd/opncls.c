@@ -127,7 +127,7 @@ _bfd_new_bfd_contained_in (bfd *obfd)
 
 /* Delete a BFD.  */
 
-void
+static void
 _bfd_delete_bfd (bfd *abfd)
 {
   if (abfd->memory)
