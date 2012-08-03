@@ -1,3 +1,8 @@
+2012-08-03  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2-frame.c (dwarf2_frame_cache): Call do_cleanups before
+	return.
+
 2012-08-02  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* inf-child.c (inf_child_fileio_pwrite): If pwrite fails, fall back
