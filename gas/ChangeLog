@@ -1,3 +1,8 @@
+2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* frags.c (frag_grow): Never shrink the obstack size requested
+	below the default.
+
 2012-08-02  Sean Keys  <skeys@ipdatasys.com>
 
 	* config/tc-m68hc11.c (s_m68hc11_parse_pseudo_instruction):
