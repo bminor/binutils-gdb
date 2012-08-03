@@ -1,5 +1,11 @@
 2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* elf64-mips.c (mips16_elf64_howto_table_rela): Correct src_mask
+	field initializers throughout.
+	* elfn32-mips.c (elf_mips16_howto_table_rela): Likewise.
+
+2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* elfxx-mips.c (mips_elf_perform_relocation): Update the
 	cross-mode jump message.
 
