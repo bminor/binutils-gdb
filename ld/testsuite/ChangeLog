@@ -1,3 +1,7 @@
+2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* ld-mips-elf/mode-change-error-1.d: Update the error message.
+
 2012-08-02  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* ld-mips-elf/got-vers-1.rd: Fix a typo.
