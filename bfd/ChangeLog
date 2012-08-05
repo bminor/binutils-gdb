@@ -1,3 +1,8 @@
+2012-08-05  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* elf32-vax.c (elf_vax_adjust_dynamic_symbol): Don't allocate
+	PLT slots for local symbols.
+
 2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elf64-mips.c (mips16_elf64_howto_table_rela): Correct src_mask
