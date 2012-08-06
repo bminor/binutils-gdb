@@ -27607,13 +27607,14 @@ thread groups.
 
 @item =breakpoint-created,bkpt=@{...@}
 @itemx =breakpoint-modified,bkpt=@{...@}
-@itemx =breakpoint-deleted,bkpt=@{...@}
+@itemx =breakpoint-deleted,id=@var{number}
 Reports that a breakpoint was created, modified, or deleted,
 respectively.  Only user-visible breakpoints are reported to the MI
 user.
 
 The @var{bkpt} argument is of the same form as returned by the various
-breakpoint commands; @xref{GDB/MI Breakpoint Commands}.
+breakpoint commands; @xref{GDB/MI Breakpoint Commands}.  The
+@var{number} is the ordinal number of the breakpoint.
 
 Note that if a breakpoint is emitted in the result record of a
 command, then it will not also be emitted in an async record.

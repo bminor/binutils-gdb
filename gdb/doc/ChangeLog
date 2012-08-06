@@ -1,3 +1,10 @@
+2012-08-06  Yao Qi  <yao@codesourcery.com>
+
+	Fix PR14371.
+
+	* gdb.texinfo (GDB/MI Async Records): Fix the doc for
+	'=breakpoint-deleted'.
+
 2012-08-02  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Native): Remove node Neutrino.
