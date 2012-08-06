@@ -1,3 +1,8 @@
+2012-08-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/list.exp (test_only_end): New function.
+	Call it.
+
 2012-08-03  Edjunior Machado  <emachado@linux.vnet.ibm.com>
 
 	* gdb.base/valgrind-infcall.exp: Expect leading `.' on ppc64's

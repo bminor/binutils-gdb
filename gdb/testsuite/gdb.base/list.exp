@@ -505,6 +505,12 @@ proc test_forward_search {} {
 	verbose "Timeout is now $timeout seconds" 2
 }
 
+proc test_only_end {} {
+    gdb_test_no_output "set listsize 2"
+    gdb_test "list 1" "list 1\r\n1\[ \t\]\[^\r\n\]*\r\n2\[ \t\]\[^\r\n\]*"
+    gdb_test "list ,5" "list ,5\r\n4\[ \t\]\[^\r\n\]*\r\n5\[ \t\]\[^\r\n\]*"
+}
+
 # Start with a fresh gdb.
 
 gdb_exit
@@ -526,6 +532,7 @@ if [ set_listsize 10 ] then {
     test_list_range
     test_list_filename_and_function
     test_forward_search
+    test_only_end
 }
 
 remote_exec build "rm -f list0.h"
