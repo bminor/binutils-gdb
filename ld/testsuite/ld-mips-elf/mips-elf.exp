@@ -328,6 +328,44 @@ if { $linux_gnu } {
 		      "readelf --symbols pic-and-nonpic-6-${abi}.nd" \
 		      "readelf -d pic-and-nonpic-6-${abi}.ad"] \
 		 "pic-and-nonpic-6-${abi}"]]
+
+	# This checks whether our linker scripts get the scope of _gp right,
+	# and must therefore use default scripts.  If they don't, then -- in
+	# addition to dumps failing to match -- the final link fails with:
+	#
+	#  ld: gp-hidden.o: undefined reference to symbol '_gp'
+	#  ld: note: '_gp' is defined in DSO ./tmpdir/gp-hidden-lib-${abi}.so
+	#  so try adding it to the linker command line
+	#
+	set suff64 [string map {o32 "" n32 "" n64 -64} $abi]
+	run_ld_link_tests [list \
+	    [list \
+		"_gp scope test ($abi shared library)" \
+		"$abi_ldflags($abi) -shared" \
+		"$abi_asflags($abi) -KPIC" \
+		{ gp-hidden-lib.s } \
+		[list \
+		    "readelf --relocs gp-hidden-lib${suff64}.rd" \
+		    "readelf --syms gp-hidden.sd"] \
+		"gp-hidden-lib-${abi}.so"] \
+	    [list \
+		"_gp scope test ($abi versioned library)" \
+		"$abi_ldflags($abi) -shared -version-script gp-hidden-ver.ver tmpdir/gp-hidden-lib-${abi}.so" \
+		"$abi_asflags($abi) -KPIC" \
+		{ gp-hidden-ver.s } \
+		[list \
+		    "readelf --relocs gp-hidden-ver${suff64}.rd" \
+		    "readelf --syms gp-hidden.sd"] \
+		"gp-hidden-ver-${abi}.so"] \
+	    [list \
+		"_gp scope test ($abi executable)" \
+		"$abi_ldflags($abi) -e 0 -rpath-link . tmpdir/gp-hidden-ver-${abi}.so" \
+		"$abi_asflags($abi) -call_nonpic" \
+		{ gp-hidden.s } \
+		[list \
+		    "readelf --relocs gp-hidden${suff64}.rd" \
+		    "readelf --syms gp-hidden.sd"] \
+		"gp-hidden-${abi}"]]
     }
 }
 

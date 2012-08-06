@@ -1,5 +1,20 @@
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* ld-mips-elf/gp-hidden.rd: New test.
+	* ld-mips-elf/gp-hidden.sd: New test.
+	* ld-mips-elf/gp-hidden-lib.rd: New test.
+	* ld-mips-elf/gp-hidden-ver.rd: New test.
+	* ld-mips-elf/gp-hidden-64.rd: New test.
+	* ld-mips-elf/gp-hidden-lib-64.rd: New test.
+	* ld-mips-elf/gp-hidden-ver-64.rd: New test.
+	* ld-mips-elf/gp-hidden.s: New test source.
+	* ld-mips-elf/gp-hidden-lib.s: New test source.
+	* ld-mips-elf/gp-hidden-ver.s: New test source.
+	* ld-mips-elf/gp-hidden-ver.ver: New test version script.
+	* ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* ld-mips-elf/rel32-o32.d: Adjust section VMAs after the removal
 	of _gp from the global scope.
 	* ld-mips-elf/rel32-n32.d: Likewise.
