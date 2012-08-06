@@ -961,7 +961,7 @@ list_command (char *arg, int from_tty)
 	  else
 	    sals_end = decode_line_1 (&arg1, DECODE_LINE_LIST_MODE,
 				      sal.symtab, sal.line);
-	  filter_sals (&sals);
+	  filter_sals (&sals_end);
 	  if (sals_end.nelts == 0)
 	    return;
 	  if (sals_end.nelts > 1)
