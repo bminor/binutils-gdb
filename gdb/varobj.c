@@ -1114,9 +1114,6 @@ update_dynamic_varobj_children (struct varobj *var,
 
       make_cleanup_py_decref (children);
 
-      if (!PyIter_Check (children))
-	error (_("Returned value is not iterable"));
-
       Py_XDECREF (var->child_iter);
       var->child_iter = PyObject_GetIter (children);
       if (!var->child_iter)

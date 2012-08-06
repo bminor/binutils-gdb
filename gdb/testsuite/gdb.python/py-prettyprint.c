@@ -48,6 +48,10 @@ struct hint_error {
   int x;
 };
 
+struct children_as_list {
+  int x;
+};
+
 #ifdef __cplusplus
 struct S : public s {
   int zs;
@@ -252,6 +256,7 @@ main ()
   struct ns ns, ns2;
   struct lazystring estring, estring2;
   struct hint_error hint_error;
+  struct children_as_list children_as_list;
 
   nstype.elements = narray;
   nstype.len = 0;
