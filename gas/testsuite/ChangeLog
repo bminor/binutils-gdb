@@ -1,4 +1,12 @@
-2012-08-03  Roland McGrath  <mcgrathr@google.com>
+2012-08-06  Roland McGrath  <mcgrathr@google.com>
+
+	* gas/i386/x86-64-stack.s: Add cases for push immediate.
+	* gas/testsuite/gas/i386/ilp32/x86-64-stack-intel.d: Updated.
+	* gas/testsuite/gas/i386/ilp32/x86-64-stack-suffix.d: Updated.
+	* gas/testsuite/gas/i386/ilp32/x86-64-stack.d: Updated.
+	* gas/testsuite/gas/i386/x86-64-stack-intel.d: Updated.
+	* gas/testsuite/gas/i386/x86-64-stack-suffix.d: Updated.
+	* gas/testsuite/gas/i386/x86-64-stack.d: Updated.
 
 	* gas/i386/x86-64-stack.s (try): Also try just rex.W (0x48) prefix.
 	* gas/testsuite/gas/i386/ilp32/x86-64-stack-intel.d: Updated.

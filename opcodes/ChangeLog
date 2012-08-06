@@ -1,3 +1,13 @@
+2012-08-06  Roland McGrath  <mcgrathr@google.com>
+	    Victor Khimenko  <khim@google.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (OP_sI): In b_T_mode and v_mode, REX_W trumps DFLAG.
+	(putop): For 'T', 'U', and 'V', treat REX_W like DFLAG.
+	(intel_operand_size): For stack_v_mode, treat REX_W like DFLAG.
+	(OP_E_register): Likewise.
+	(OP_REG): For low 8 whole registers, treat REX_W like DFLAG.
+
 2012-08-02  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* configure.in: Formatting.
