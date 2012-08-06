@@ -918,9 +918,11 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
   struct m68hc11_page_info *pinfo;
   const struct elf_backend_data * const ebd = get_elf_backend_data (input_bfd);
   struct m68hc11_elf_link_hash_table *htab;
+  unsigned long e_flags;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
+  e_flags = elf_elfheader (input_bfd)->e_flags;
 
   htab = m68hc11_elf_hash_table (info);
   if (htab == NULL)
@@ -1048,7 +1050,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
              a LO8XG. Does not actually check that it was a LO8XG.
 	     Adjusts high and low bytes.  */
           relocation = phys_addr;
-          if ((elf_elfheader (input_bfd)->e_flags & E_M68HC11_XGATE_RAMOFFSET)
+          if ((e_flags & E_M68HC11_XGATE_RAMOFFSET)
 	      && (relocation >= 0x2000))
 	    relocation += 0xc000; /* HARDCODED RAM offset for XGATE.  */
 
@@ -1162,7 +1164,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
           if (m68hc11_addr_is_banked (pinfo, relocation + rel->r_addend)
               && m68hc11_addr_is_banked (pinfo, insn_addr)
-              && phys_page != insn_page)
+              && phys_page != insn_page && !(e_flags & E_M68HC11_NO_BANK_WARNING))
             {
               const char * msg;
               char * buf;
