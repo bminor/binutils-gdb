@@ -1,5 +1,12 @@
 2012-08-06  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2-frame.c (clear_pointer_cleanup): New function.
+	(dwarf2_frame_cache): Use it.
+	* frame-unwind.h (frame_sniffer_ftype): Document prologue
+	cache initialization constraint.
+
+2012-08-06  Tom Tromey  <tromey@redhat.com>
+
 	PR cli/14392:
 	* cli/cli-cmds.c (list_command): Filter 'sals_end'.
 
