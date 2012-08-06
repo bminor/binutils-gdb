@@ -1,5 +1,12 @@
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* emulparams/elf32bmip.sh: Make _gp hidden.
+	* emulparams/elf32bmipn32-defs.sh: Likewise.
+	* emulparams/elf32mipswindiss.sh: Likewise.
+	* scripttempl/mips.sc: Likewise.
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* ldexp.h (etree_union): Add defsym member to the assign member
 	structure.
 	(exp_assign): Add hidden argument to prototype.

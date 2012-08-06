@@ -1,5 +1,12 @@
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* ld-mips-elf/rel32-o32.d: Adjust section VMAs after the removal
+	of _gp from the global scope.
+	* ld-mips-elf/rel32-n32.d: Likewise.
+	* ld-mips-elf/rel64.d: Likewise.
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* ld-mips-elf/mips-elf.exp: Set has_newabi for all Linux targets.
 	Adjust abi_asflags for targets that do not infer the ISA from the
 	ABI.
