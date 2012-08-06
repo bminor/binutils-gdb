@@ -1,5 +1,39 @@
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* ld-mips-elf/mips-elf.exp: Set has_newabi for all Linux targets.
+	Adjust abi_asflags for targets that do not infer the ISA from the
+	ABI.
+	* ld-mips-elf/eh-frame1-n32.d: Adjust for targets that do not
+	infer the ISA from the ABI.
+	* ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* ld-mips-elf/eh-frame2-n32.d: Likewise.
+	* ld-mips-elf/eh-frame2-n64.d: Likewise.
+	* ld-mips-elf/elf-rel-got-n32-embed.d: Likewise.
+	* ld-mips-elf/elf-rel-got-n32.d: Likewise.
+	* ld-mips-elf/elf-rel-got-n64-embed.d: Likewise.
+	* ld-mips-elf/elf-rel-got-n64-linux.d: Likewise.
+	* ld-mips-elf/elf-rel-got-n64.d: Likewise.
+	* ld-mips-elf/elf-rel-xgot-n32-embed.d: Likewise.
+	* ld-mips-elf/elf-rel-xgot-n32.d: Likewise.
+	* ld-mips-elf/elf-rel-xgot-n64-embed.d: Likewise.
+	* ld-mips-elf/elf-rel-xgot-n64-linux.d: Likewise.
+	* ld-mips-elf/elf-rel-xgot-n64.d: Likewise.
+	* ld-mips-elf/emit-relocs-1.d: Likewise.
+	* ld-mips-elf/got-page-2.d: Likewise.
+	* ld-mips-elf/no-shared-1-n32.d: Likewise.
+	* ld-mips-elf/no-shared-1-n64.d: Likewise.
+	* ld-mips-elf/rel32-n32.d: Likewise.
+	* ld-mips-elf/rel64.d: Likewise.
+	* ld-mips-elf/relax-jalr-n32-shared.d: Likewise.
+	* ld-mips-elf/relax-jalr-n32.d: Likewise.
+	* ld-mips-elf/relax-jalr-n64-shared.d: Likewise.
+	* ld-mips-elf/relax-jalr-n64.d: Likewise.
+	* ld-mips-elf/reloc-1-n32.d: Likewise.
+	* ld-mips-elf/reloc-1-n64.d: Likewise.
+	* ld-mips-elf/textrel-1.d: Likewise.
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* ld-mips-elf/reloc-1-n32.d: Add -EB to GAS flags.
 	* ld-mips-elf/mips-elf.exp: Update GAS flags in reloc test 6.
 

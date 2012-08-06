@@ -1,5 +1,25 @@
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/mips.exp: Set has_newabi for all Linux targets.
+	* gas/mips/cfi-n64-1.d: Adjust for targets that do not infer the
+	ISA from the ABI.
+	* gas/mips/elf-rel-got-n32.d: Likewise.
+	* gas/mips/elf-rel-got-n64.d: Likewise.
+	* gas/mips/elf-rel-xgot-n32.d: Likewise.
+	* gas/mips/elf-rel-xgot-n64.d: Likewise.
+	* gas/mips/elf-rel18.d: Likewise.
+	* gas/mips/elf-rel28-n32.d: Likewise.
+	* gas/mips/elf-rel28-n64.d: Likewise.
+	* gas/mips/jal-newabi.d: Likewise.
+	* gas/mips/ldstla-n64-shared.d: Likewise.
+	* gas/mips/ldstla-n64-sym32.d: Likewise.
+	* gas/mips/ldstla-n64.d: Likewise.
+	* gas/mips/macro-warn-1-n32.d: Likewise.
+	* gas/mips/macro-warn-2-n32.d: Likewise.
+	* gas/mips/n32-consec.d: Likewise.
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/mips.exp: Set has_newabi for mips*-sde-elf* too.
 	* gas/mips/elf-rel-got-n32.s: Adjust padding.
 	* gas/mips/elf-rel-got-n64.s: Likewise.

@@ -458,7 +458,7 @@ if { [istarget mips*-*-vxworks*] } {
     set ecoff [expr [istarget *-*-ecoff*] || [istarget *-*-ultrix*] || [istarget *-*-irix\[1-4\]*] ]
     set aout [expr [istarget *-*-bsd*] || [istarget *-*-openbsd*] ]
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*] || [istarget mips*-*-ecoff]]
-    set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*] || [istarget mips*-sde-elf*]]
+    set has_newabi [expr [istarget *-*-irix6*] || [istarget mips*-*-linux*] || [istarget mips*-sde-elf*]]
     set no_mips16 [expr !$elf]
     set no_micromips [expr !$elf]
 

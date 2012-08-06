@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS ELF xgot reloc n64
-#as: -64 -KPIC -xgot
+#as: -march=from-abi -64 -KPIC -xgot
 #source: elf-rel-got-n64.s
 
 .*: +file format elf64-.*mips.*

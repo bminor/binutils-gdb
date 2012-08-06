@@ -1,5 +1,5 @@
 #objdump: -dr
-#as: -64 -msym32 -G8 -EB
+#as: -march=from-abi -64 -msym32 -G8 -EB
 #name: MIPS ld-st-la with sym32
 #source: ldstla-sym32.s
 

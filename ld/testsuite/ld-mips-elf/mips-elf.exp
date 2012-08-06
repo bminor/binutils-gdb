@@ -54,15 +54,15 @@ if {![istarget mips*-*-*] || ![is_elf_format]} {
 }
 
 set has_newabi [expr [istarget *-*-irix6*] \
-		     || [istarget mips64*-*-linux*] \
+		     || [istarget mips*-*-linux*] \
 		     || [istarget mips*-sde-elf*]]
 set linux_gnu [expr [istarget mips*-*-linux*]]
 set embedded_elf [expr [istarget mips*-*-elf]]
 
 # Set defaults.
 set abi_asflags(o32) ""
-set abi_asflags(n32) "-n32 -EB"
-set abi_asflags(n64) "-64 -EB"
+set abi_asflags(n32) "-march=from-abi -n32 -EB"
+set abi_asflags(n64) "-march=from-abi -64 -EB"
 set abi_ldflags(o32) ""
 set abi_ldflags(n32) -melf32bmipn32
 set abi_ldflags(n64) -melf64bmip
