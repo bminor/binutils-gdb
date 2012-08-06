@@ -1,5 +1,63 @@
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* ld-mips-elf/dyn-sec64.ld: Use HIDDEN to define _gp.
+	* ld-mips-elf/eh-frame5.ld: Likewise.
+	* ld-mips-elf/got-dump-1.ld: Likewise.
+	* ld-mips-elf/got-dump-2.ld: Likewise.
+	* ld-mips-elf/got-page-1.ld: Likewise.
+	* ld-mips-elf/mips-dyn.ld: Likewise.
+	* ld-mips-elf/mips-lib.ld: Likewise.
+	* ld-mips-elf/mips16-pic-1.ld: Likewise.
+	* ld-mips-elf/no-shared-1.ld: Likewise.
+	* ld-mips-elf/pic-and-nonpic-1.ld: Likewise.
+	* ld-mips-elf/pic-and-nonpic-3a.ld: Likewise.
+	* ld-mips-elf/pic-and-nonpic-3b.ld: Likewise.
+	* ld-mips-elf/pic-and-nonpic-4b.ld: Likewise.
+	* ld-mips-elf/pic-and-nonpic-5b.ld: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6.ld: Likewise.
+	* ld-mips-elf/reloc-2.ld: Likewise.
+	* ld-mips-elf/reloc-estimate-1.ld: Likewise.
+	* ld-mips-elf/stub-dynsym-1.ld: Likewise.
+	* ld-mips-elf/tls-hidden3.ld: Likewise.
+	* ld-mips-elf/mips16-pic-2.ad: Update accordingly.
+	* ld-mips-elf/pic-and-nonpic-3b.ad: Likewise.
+	* ld-mips-elf/pic-and-nonpic-4b.ad: Likewise.
+	* ld-mips-elf/pic-and-nonpic-5b.ad: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-n32.ad: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-n64.ad: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-o32.ad: Likewise.
+	* ld-mips-elf/eh-frame5.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-1.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32.d: Likewise.
+	* ld-mips-elf/pic-and-nonpic-3a.dd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-3b.dd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-n32.dd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-n64.dd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-o32.dd: Likewise.
+	* ld-mips-elf/tls-multi-got-1.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-1.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-2.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.got: Likewise.
+	* ld-mips-elf/tlsdyn-o32.got: Likewise.
+	* ld-mips-elf/tlslib-o32-ver.got: Likewise.
+	* ld-mips-elf/tlslib-o32.got: Likewise.
+	* ld-mips-elf/mips16-pic-2.nd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-1.nd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-3b.nd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-4b.nd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-5b.nd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-n32.nd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-n64.nd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-o32.nd: Likewise.
+	* ld-mips-elf/tls-multi-got-1.r: Likewise.
+	* ld-mips-elf/pic-and-nonpic-3b.rd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-4b.rd: Likewise.
+	* ld-mips-elf/mips-elf.exp: Likewise.
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* ld-mips-elf/gp-hidden.rd: New test.
 	* ld-mips-elf/gp-hidden.sd: New test.
 	* ld-mips-elf/gp-hidden-lib.rd: New test.

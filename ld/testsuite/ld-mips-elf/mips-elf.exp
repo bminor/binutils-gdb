@@ -474,9 +474,8 @@ if {[istarget mips*-*-linux*]} {
      #
      #     the null symbol entry
      #     the .MIPS.stubs section symbol
-     #     _gp
      #     _GLOBAL_OFFSET_TABLE_
-     set base_syms 4
+     set base_syms 3
      foreach dynsym { 7fff 8000 fff0 10000 2fe80 } {
 	 run_ld_link_tests \
 	     [list [list \
