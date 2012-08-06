@@ -1,3 +1,8 @@
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elflink.c (bfd_elf_record_link_assignment): Remove --defsym
+	symbols special case.
+
 2012-08-05  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elf32-vax.c (elf_vax_adjust_dynamic_symbol): Don't allocate

@@ -165,7 +165,7 @@ spu_place_special_section (asection *s, asection *o, const char *output_name)
 
 	  push_stat_ptr (&os->children);
 	  e_size = exp_intop (params.line_size - s->size);
-	  lang_add_assignment (exp_assign (".", e_size));
+	  lang_add_assignment (exp_assign (".", e_size, FALSE));
 	  pop_stat_ptr ();
 	}
       lang_add_section (&os->children, s, NULL, os);

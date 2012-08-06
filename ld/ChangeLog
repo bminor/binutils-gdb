@@ -1,3 +1,32 @@
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* ldexp.h (etree_union): Add defsym member to the assign member
+	structure.
+	(exp_assign): Add hidden argument to prototype.
+	* ldexp.c (exp_fold_tree_1): Use the defsym member to handle
+	--defsym symbols.
+	(exp_assop): Add defsym argument, initialize the defsym member
+	of the assign structure.
+	(exp_assign): Handle hidden symbols.
+	(exp_defsym): Update to use the defsym argument to exp_assop.
+	(exp_provide): Update to handle the defsym argument to exp_assop.
+	* ldlex.l (HIDDEN): New token.
+	* ldgram.y (HIDDEN): Likewise.
+	(assignment, section): Update calls to exp_assign.
+	* ldctor.c (ldctor_build_sets): Likewise.
+	* mri.c (mri_format): Likewise.
+	* ldlang.c (lang_insert_orphan, lang_leave_overlay): Likewise.
+	(open_input_bfds): Remove --defsym symbols special case.
+	* emultempl/beos.em (gld_${EMULATION_NAME}_set_symbols): Update
+	call to exp_assign.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_set_symbols): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_set_symbols): Likewise.
+	* emultempl/spuelf.em (spu_place_special_section): Likewise.
+	* emultempl/xtensaelf.em (ld_xtensa_insert_page_offsets):
+	Likewise.
+	* ld.texinfo (Assigning Values to Symbols): Add HIDDEN.
+	(HIDDEN): New subsection.
+
 2012-07-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14156

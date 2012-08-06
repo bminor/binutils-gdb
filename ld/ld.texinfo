@@ -3410,6 +3410,7 @@ the symbol and place it into the symbol table with a global scope.
 
 @menu
 * Simple Assignments::		Simple Assignments
+* HIDDEN::			HIDDEN
 * PROVIDE::			PROVIDE
 * PROVIDE_HIDDEN::		PROVIDE_HIDDEN
 * Source Code Reference::	How to use a linker script defined symbol in source code
@@ -3472,6 +3473,31 @@ zero.  The symbol @samp{_etext} will be defined as the address following
 the last @samp{.text} input section.  The symbol @samp{_bdata} will be
 defined as the address following the @samp{.text} output section aligned
 upward to a 4 byte boundary.
+
+@node HIDDEN
+@subsection HIDDEN
+@cindex HIDDEN
+For ELF targeted ports, define a symbol that will be hidden and won't be
+exported.  The syntax is @code{HIDDEN(@var{symbol} = @var{expression})}.
+
+Here is the example from @ref{Simple Assignments}, rewritten to use
+@code{HIDDEN}:
+
+@smallexample
+HIDDEN(floating_point = 0);
+SECTIONS
+@{
+  .text :
+    @{
+      *(.text)
+      HIDDEN(_etext = .);
+    @}
+  HIDDEN(_bdata = (. + 3) & ~ 3);
+  .data : @{ *(.data) @}
+@}
+@end smallexample
+@noindent
+In this case none of the three symbols will be visible outside this module.
 
 @node PROVIDE
 @subsection PROVIDE

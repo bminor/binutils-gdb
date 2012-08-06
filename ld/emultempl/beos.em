@@ -348,7 +348,8 @@ gld_${EMULATION_NAME}_set_symbols (void)
   for (j = 0; init[j].ptr; j++)
     {
       long val = init[j].value;
-      lang_add_assignment (exp_assign (init[j].symbol, exp_intop (val)));
+      lang_add_assignment (exp_assign (init[j].symbol, exp_intop (val),
+				       FALSE));
       if (init[j].size == sizeof(short))
 	*(short *)init[j].ptr = val;
       else if (init[j].size == sizeof(int))
