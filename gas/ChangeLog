@@ -1,3 +1,8 @@
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (append_insn): Also handle moving delay-slot
+	instruction across frags for fixed branches.
+
 2012-08-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* frags.c (frag_grow): Never shrink the obstack size requested

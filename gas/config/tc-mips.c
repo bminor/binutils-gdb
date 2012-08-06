@@ -4488,7 +4488,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	    move_insn (ip, delay.frag, delay.where);
 	    move_insn (&delay, ip->frag, ip->where + insn_length (ip));
 	  }
-	else if (relaxed_branch)
+	else if (relaxed_branch || delay.frag != ip->frag)
 	  {
 	    /* Add the delay slot instruction to the end of the
 	       current frag and shrink the fixed part of the

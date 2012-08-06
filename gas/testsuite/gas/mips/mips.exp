@@ -505,6 +505,20 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "branch-misc-2pic-64" [mips_arch_list_matching mips3]
     run_dump_test "branch-misc-3"
     run_dump_test "branch-swap"
+
+    if $elf {
+	# Sweep a range of branch offsets so that it hits a position where
+	# it is at the beginning of a frag and then swapped with a 16-bit
+	# instruction from the preceding frag.  The offset will be somewhere
+	# close below 4096 as this is the default obstack size limit that
+	# we use and some space will have been already consumed.  The exact
+	# amount depends on the host's programming model.
+	for { set count 960 } { $count <= 1024 } { incr count } {
+	    run_list_test "branch-swap-2" "--defsym count=$count" \
+		"MIPS branch swapping ($count)"
+	}
+    }
+
     run_dump_test "div"
 
     if { !$addr32 } {

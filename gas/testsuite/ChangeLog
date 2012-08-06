@@ -1,3 +1,9 @@
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/branch-swap-2.l: New list test.
+	* gas/mips/branch-swap-2.s: New test source.
+	* gas/mips/mips.exp: Run the new test.
+
 2012-08-06  Roland McGrath  <mcgrathr@google.com>
 
 	* gas/i386/x86-64-stack.s: Add cases for push immediate.
