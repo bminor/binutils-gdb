@@ -1,3 +1,8 @@
+2012-08-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/list.exp (test_only_end): New function.
+	Call it.
+
 2012-08-06  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-mi.exp: Add test for printer whose children
