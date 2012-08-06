@@ -1,5 +1,11 @@
 2012-08-06  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.texinfo (Remote Configuration): Add kindex for 'set
+	remote hardware-watchpoint-limit' and 'set
+	remote hardware-breakpoint-limit'.
+
+2012-08-06  Yao Qi  <yao@codesourcery.com>
+
 	Fix PR14371.
 
 	* gdb.texinfo (GDB/MI Async Records): Fix the doc for
