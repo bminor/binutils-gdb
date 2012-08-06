@@ -1,3 +1,8 @@
+2012-08-06  Tom Tromey  <tromey@redhat.com>
+
+	PR cli/14392:
+	* cli/cli-cmds.c (list_command): Filter 'sals_end'.
+
 2012-08-06  Nathaniel Flath  <flat0103@gmail.com>
 
 	* NEWS: New entry for 'cd' default parameters.
