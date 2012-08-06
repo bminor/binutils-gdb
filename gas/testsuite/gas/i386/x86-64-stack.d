@@ -55,5 +55,15 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	03 04 48             	add    \(%rax,%rcx,2\),%eax
 [ 	]*[a-f0-9]+:	68 01 02 03 04       	pushq  \$0x4030201
 [ 	]*[a-f0-9]+:	66 48 68 01 02 03 04 	data32 rex.W pushq \$0x4030201
+[ 	]*[a-f0-9]+:	0f a8                	pushq  %gs
+[ 	]*[a-f0-9]+:	66 0f a8             	pushw  %gs
+[ 	]*[a-f0-9]+:	48 0f a8             	rex.W pushq %gs
+[ 	]*[a-f0-9]+:	66 48 0f a8          	data32 rex.W pushq %gs
+[ 	]*[a-f0-9]+:	41 0f a8             	rex.B pushq %gs
+[ 	]*[a-f0-9]+:	66 41 0f a8          	rex.B pushw %gs
+[ 	]*[a-f0-9]+:	48                   	rex.W
+[ 	]*[a-f0-9]+:	41 0f a8             	rex.B pushq %gs
+[ 	]*[a-f0-9]+:	66 48                	data16 rex.W
+[ 	]*[a-f0-9]+:	41 0f a8             	rex.B pushq %gs
 [ 	]*[a-f0-9]+:	90                   	nop
 #pass

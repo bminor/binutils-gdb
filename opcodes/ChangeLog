@@ -1,4 +1,12 @@
 2012-08-06  Roland McGrath  <mcgrathr@google.com>
+
+	* i386-dis.c (print_insn): Print spaces between multiple excess
+	prefixes.  Return actual number of excess prefixes consumed,
+	not always one.
+
+	* i386-dis.c (OP_REG): Ignore REX_B for segment register cases.
+
+2012-08-06  Roland McGrath  <mcgrathr@google.com>
 	    Victor Khimenko  <khim@google.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

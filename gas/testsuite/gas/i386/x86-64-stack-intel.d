@@ -56,5 +56,15 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	03 04 48             	add    eax,DWORD PTR \[rax\+rcx\*2\]
 [ 	]*[a-f0-9]+:	68 01 02 03 04       	push   0x4030201
 [ 	]*[a-f0-9]+:	66 48 68 01 02 03 04 	data32 rex.W push 0x4030201
+[ 	]*[a-f0-9]+:	0f a8                	push   gs
+[ 	]*[a-f0-9]+:	66 0f a8             	pushw  gs
+[ 	]*[a-f0-9]+:	48 0f a8             	rex.W push gs
+[ 	]*[a-f0-9]+:	66 48 0f a8          	data32 rex.W push gs
+[ 	]*[a-f0-9]+:	41 0f a8             	rex.B push gs
+[ 	]*[a-f0-9]+:	66 41 0f a8          	rex.B pushw gs
+[ 	]*[a-f0-9]+:	48                   	rex.W
+[ 	]*[a-f0-9]+:	41 0f a8             	rex.B push gs
+[ 	]*[a-f0-9]+:	66 48                	data16 rex.W
+[ 	]*[a-f0-9]+:	41 0f a8             	rex.B push gs
 [ 	]*[a-f0-9]+:	90                   	nop
 #pass

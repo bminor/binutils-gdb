@@ -11450,9 +11450,10 @@ print_insn (bfd_vma pc, disassemble_info *info)
       for (i = 0;
 	   i < (int) ARRAY_SIZE (all_prefixes) && all_prefixes[i];
 	   i++)
-	(*info->fprintf_func) (info->stream, "%s",
+	(*info->fprintf_func) (info->stream, "%s%s",
+                               i == 0 ? "" : " ",
 			       prefix_name (all_prefixes[i], sizeflag));
-      return 1;
+      return i;
     }
 
   insn_codep = codep;
@@ -13471,6 +13472,15 @@ OP_REG (int code, int sizeflag)
 {
   const char *s;
   int add;
+
+  switch (code)
+    {
+    case es_reg: case ss_reg: case cs_reg:
+    case ds_reg: case fs_reg: case gs_reg:
+      oappend (names_seg[code - es_reg]);
+      return;
+    }
+
   USED_REX (REX_B);
   if (rex & REX_B)
     add = 8;
@@ -13482,10 +13492,6 @@ OP_REG (int code, int sizeflag)
     case ax_reg: case cx_reg: case dx_reg: case bx_reg:
     case sp_reg: case bp_reg: case si_reg: case di_reg:
       s = names16[code - ax_reg + add];
-      break;
-    case es_reg: case ss_reg: case cs_reg:
-    case ds_reg: case fs_reg: case gs_reg:
-      s = names_seg[code - es_reg + add];
       break;
     case al_reg: case ah_reg: case cl_reg: case ch_reg:
     case dl_reg: case dh_reg: case bl_reg: case bh_reg:
