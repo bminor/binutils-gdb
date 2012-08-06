@@ -357,14 +357,14 @@ if { $has_newabi } {
 	[list \
 	    "reloc test 6a" \
 	    "-shared $abi_ldflags(n32)" \
-	    "-n32" \
+	    "$abi_asflags(n32)" \
 	    "reloc-6a.s" \
 	    {} \
 	    "reloc-6a.so"] \
 	[list \
 	    "reloc test 6b" \
 	    "$abi_ldflags(n32) tmpdir/reloc-6a.so" \
-	    "-n32" \
+	    "$abi_asflags(n32)" \
 	    "reloc-6b.s" \
 	    {} \
 	    "reloc-6b"]]

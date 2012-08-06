@@ -1,5 +1,10 @@
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* ld-mips-elf/reloc-1-n32.d: Add -EB to GAS flags.
+	* ld-mips-elf/mips-elf.exp: Update GAS flags in reloc test 6.
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* lib/ld-lib.exp (run_dump_test): Implement the EXTRA_OPTIONS
 	argument and the "dump" keyword.
 	* ld-mips-elf/emit-relocs-1a.s: Make section alignment uniform
