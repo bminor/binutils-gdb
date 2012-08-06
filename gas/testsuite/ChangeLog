@@ -1,5 +1,20 @@
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/mips.exp: Set has_newabi for mips*-sde-elf* too.
+	* gas/mips/elf-rel-got-n32.s: Adjust padding.
+	* gas/mips/elf-rel-got-n64.s: Likewise.
+	* gas/mips/elf-rel23.s: Likewise.
+	* gas/mips/elf-rel28.s: Likewise.
+	* gas/mips/n32-consec.s: Likewise.
+	* gas/mips/elf-rel-xgot-n32.d: Adjust output expected.
+	* gas/mips/elf-rel-xgot-n64.d: Likewise.
+	* gas/mips/elf-rel23.d: Likewise.
+	* gas/mips/elf-rel23a.d: Likewise.
+	* gas/mips/elf-rel23b.d: Likewise.
+	* gas/mips/elf-rel28-n32.d: Likewise.
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/branch-swap-2.l: New list test.
 	* gas/mips/branch-swap-2.s: New test source.
 	* gas/mips/mips.exp: Run the new test.

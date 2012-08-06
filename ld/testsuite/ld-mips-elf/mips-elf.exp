@@ -53,9 +53,38 @@ if {![istarget mips*-*-*] || ![is_elf_format]} {
     return
 }
 
-set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
+set has_newabi [expr [istarget *-*-irix6*] \
+		     || [istarget mips64*-*-linux*] \
+		     || [istarget mips*-sde-elf*]]
 set linux_gnu [expr [istarget mips*-*-linux*]]
 set embedded_elf [expr [istarget mips*-*-elf]]
+
+# Set defaults.
+set abi_asflags(o32) ""
+set abi_asflags(n32) "-n32 -EB"
+set abi_asflags(n64) "-64 -EB"
+set abi_ldflags(o32) ""
+set abi_ldflags(n32) -melf32bmipn32
+set abi_ldflags(n64) -melf64bmip
+
+# Override as needed.
+if { [istarget *-*-irix6*] } {
+    set abi_asflags(o32) "-32 -EB"
+    set abi_ldflags(o32) -melf32bsmip
+} elseif { [istarget mips64*-linux*] } {
+    set abi_asflags(o32) "-32 -EB"
+    set abi_ldflags(o32) -melf32btsmip
+} elseif { [istarget mips64*-*freebsd*] } {
+    set abi_asflags(o32) "-32 -EB"
+    set abi_ldflags(o32) -melf32btsmip_fbsd
+}
+if { [istarget mips*-*-linux*] || [istarget mips*-sde-elf*] } {
+    set abi_ldflags(n32) -melf32btsmipn32
+    set abi_ldflags(n64) -melf64btsmip
+} elseif { [istarget mips64*-*freebsd*] } {
+    set abi_ldflags(n32) -melf32btsmipn32_fbsd
+    set abi_ldflags(n64) -melf64btsmip_fbsd
+}
 
 if { $linux_gnu } {
     run_ld_link_tests [list \
@@ -104,17 +133,6 @@ if { $linux_gnu } {
 	      { mips16-pic-4c.s } \
 	      { { objdump -dr mips16-pic-4b.dd } } \
 	      "mips16-pic-4"]]
-}
-
-if { [istarget mips64*-linux-gnu] } {
-    set o32_as_flags "-32 -EB"
-    set o32_ld_flags "-melf32btsmip"
-} elseif { [istarget mips64*-*freebsd*] } {
-    set o32_as_flags "-32 -EB"
-    set o32_ld_flags "-melf32btsmip_fbsd"
-} else {
-    set o32_as_flags ""
-    set o32_ld_flags ""
 }
 
 # Check MIPS16 markings being passed through link.
@@ -167,14 +185,28 @@ if { $linux_gnu } {
 }
 
 if $has_newabi {
-    run_dump_test "elf-rel-got-n32"
-    run_dump_test "elf-rel-xgot-n32"
-    if { $linux_gnu } {
-	run_dump_test "elf-rel-got-n64-linux"
-	run_dump_test "elf-rel-xgot-n64-linux"
+    if { $embedded_elf } {
+	run_dump_test "elf-rel-got-n32-embed" \
+					[list [list ld $abi_ldflags(n32)]]
+	run_dump_test "elf-rel-xgot-n32-embed" \
+					[list [list ld $abi_ldflags(n32)]]
     } else {
-	run_dump_test "elf-rel-got-n64"
-	run_dump_test "elf-rel-xgot-n64"
+	run_dump_test "elf-rel-got-n32" [list [list ld $abi_ldflags(n32)]]
+	run_dump_test "elf-rel-xgot-n32" [list [list ld $abi_ldflags(n32)]]
+    }
+    if { $linux_gnu } {
+	run_dump_test "elf-rel-got-n64-linux" \
+					[list [list ld $abi_ldflags(n64)]]
+	run_dump_test "elf-rel-xgot-n64-linux" \
+					[list [list ld $abi_ldflags(n64)]]
+    } elseif { $embedded_elf } {
+	run_dump_test "elf-rel-got-n64-embed" \
+					[list [list ld $abi_ldflags(n64)]]
+	run_dump_test "elf-rel-xgot-n64-embed" \
+					[list [list ld $abi_ldflags(n64)]]
+    } else {
+	run_dump_test "elf-rel-got-n64" [list [list ld $abi_ldflags(n64)]]
+	run_dump_test "elf-rel-xgot-n64" [list [list ld $abi_ldflags(n64)]]
     }
 
     run_dump_test "relax-jalr-n32"
@@ -309,11 +341,8 @@ if $embedded_elf {
     run_dump_test "reloc-1-rel"
 }
 if $has_newabi {
-    run_dump_test "reloc-1-n32"
-    if $linux_gnu {
-	# Uses a linux-specific ld -m switch
-	run_dump_test "reloc-1-n64"
-    }
+    run_dump_test "reloc-1-n32" [list [list ld $abi_ldflags(n32)]]
+    run_dump_test "reloc-1-n64" [list [list ld $abi_ldflags(n64)]]
 }
 run_dump_test "reloc-2"
 run_dump_test "reloc-merge-lo16"
@@ -324,16 +353,21 @@ if {$has_newabi} {
 run_dump_test "reloc-4"
 run_dump_test "reloc-5"
 if { $has_newabi } {
-    run_ld_link_tests {
-	{"reloc test 6a" "-shared"
-	 "-n32" "reloc-6a.s"
-	 {}
-	 "reloc-6a.so"}
-	{"reloc test 6b" "tmpdir/reloc-6a.so"
-	 "-n32" "reloc-6b.s"
-	 {}
-	 "reloc-6b"}
-    }
+    run_ld_link_tests [list \
+	[list \
+	    "reloc test 6a" \
+	    "-shared $abi_ldflags(n32)" \
+	    "-n32" \
+	    "reloc-6a.s" \
+	    {} \
+	    "reloc-6a.so"] \
+	[list \
+	    "reloc test 6b" \
+	    "$abi_ldflags(n32) tmpdir/reloc-6a.so" \
+	    "-n32" \
+	    "reloc-6b.s" \
+	    {} \
+	    "reloc-6b"]]
 }
 
 if {$has_newabi && $linux_gnu} {
@@ -361,7 +395,7 @@ if {$linux_gnu} {
 run_dump_test "jaloverflow"
 run_dump_test "jaloverflow-2"
 if {$has_newabi} {
-    run_dump_test "jalbal"
+    run_dump_test "jalbal" [list [list ld $abi_ldflags(n32)]]
 }
 
 run_dump_test "mode-change-error-1"
@@ -503,8 +537,8 @@ if {[istarget mips*-*-linux*]} {
 
 set mips16_call_global_test [list \
     [list "Global calls from mips16" \
-	 "$o32_ld_flags -T no-shared-1.ld" \
-	 "$o32_as_flags -mips32r2" \
+	 "$abi_ldflags(o32) -T no-shared-1.ld" \
+	 "$abi_asflags(o32) -mips32r2" \
 	 {mips16-call-global-1.s mips16-call-global-2.s mips16-call-global-3.s} \
 	 {{objdump -dr mips16-call-global.d}} \
 	 "mips16-call-global"]]
@@ -513,8 +547,8 @@ run_ld_link_tests $mips16_call_global_test
 
 set mips16_intermix_test [list \
     [list "Intermixing mips32 and mips16 functions" \
-	 "$o32_ld_flags" \
-	 "$o32_as_flags -mips32r2" \
+	 "$abi_ldflags(o32)" \
+	 "$abi_asflags(o32) -mips32r2" \
 	 {mips16-intermix-1.s mips16-intermix-2.s} \
 	 {{objdump -t mips16-intermix.d}} \
 	 "mips16-intermix"]]

@@ -93,4 +93,4 @@ Disassembly of section \.text:
 			.*: R_MIPS_TLS_TPREL_LO16	bar
 .*:	fc840000 	sd	a0,0\(a0\)
 			.*: R_MIPS_TLS_GOTTPREL	bar
-	...
+	\.\.\.

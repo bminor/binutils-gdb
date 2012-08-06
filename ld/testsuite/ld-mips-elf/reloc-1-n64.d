@@ -1,6 +1,6 @@
 #source: reloc-1a.s -mabi=64 -EB
 #source: reloc-1b.s -mabi=64 -EB
-#ld: -melf64btsmip -r
+#ld: -r
 #readelf: --relocs
 
 Relocation section '\.rela\.text' .*
