@@ -44,7 +44,9 @@ struct value;
 
 /* Given THIS frame, take a whiff of its registers (namely
    the PC and attributes) and if SELF is the applicable unwinder,
-   return non-zero.  Possibly also initialize THIS_PROLOGUE_CACHE.  */
+   return non-zero.  Possibly also initialize THIS_PROLOGUE_CACHE; but
+   only if returning 1.  Initializing THIS_PROLOGUE_CACHE in other
+   cases (0 return, or exception) is invalid.  */
 
 typedef int (frame_sniffer_ftype) (const struct frame_unwind *self,
 				   struct frame_info *this_frame,

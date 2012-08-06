@@ -994,10 +994,20 @@ struct dwarf2_frame_cache
   void *tailcall_cache;
 };
 
+/* A cleanup that sets a pointer to NULL.  */
+
+static void
+clear_pointer_cleanup (void *arg)
+{
+  void **ptr = arg;
+
+  *ptr = NULL;
+}
+
 static struct dwarf2_frame_cache *
 dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
-  struct cleanup *old_chain;
+  struct cleanup *reset_cache_cleanup, *old_chain;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   const int num_regs = gdbarch_num_regs (gdbarch)
 		       + gdbarch_num_pseudo_regs (gdbarch);
@@ -1017,6 +1027,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = FRAME_OBSTACK_ZALLOC (struct dwarf2_frame_cache);
   cache->reg = FRAME_OBSTACK_CALLOC (num_regs, struct dwarf2_frame_state_reg);
   *this_cache = cache;
+  reset_cache_cleanup = make_cleanup (clear_pointer_cleanup, this_cache);
 
   /* Allocate and initialize the frame state.  */
   fs = XZALLOC (struct dwarf2_frame_state);
@@ -1111,6 +1122,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 	{
 	  cache->unavailable_retaddr = 1;
 	  do_cleanups (old_chain);
+	  discard_cleanups (reset_cache_cleanup);
 	  return cache;
 	}
 
@@ -1226,6 +1238,7 @@ incomplete CFI data; unspecified registers (e.g., %s) at %s"),
 				 (entry_cfa_sp_offset_p
 				  ? &entry_cfa_sp_offset : NULL));
 
+  discard_cleanups (reset_cache_cleanup);
   return cache;
 }
 
