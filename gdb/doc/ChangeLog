@@ -1,3 +1,8 @@
+2012-08-06  Nathaniel Flath  <flat0103@gmail.com>
+
+	* gdb.texinfo (Working Directory): Added information about new
+	default argument for 'cd' command.
+
 2012-08-06  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Remote Configuration): Add kindex for 'set

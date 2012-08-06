@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.5
 
+* The 'cd' command now defaults to using '~' (the home directory) if not
+  given an argument.
+
 * New configure options
 
 --enable-libmcheck/--disable-libmcheck

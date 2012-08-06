@@ -2267,8 +2267,9 @@ Specify Files}.
 @table @code
 @kindex cd
 @cindex change working directory
-@item cd @var{directory}
-Set the @value{GDBN} working directory to @var{directory}.
+@item cd @r{[}@var{directory}@r{]}
+Set the @value{GDBN} working directory to @var{directory}.  If not
+given, @var{directory} uses @file{'~'}.
 
 @kindex pwd
 @item pwd
