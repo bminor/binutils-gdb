@@ -1,3 +1,12 @@
+2012-08-07  Roland McGrath  <mcgrathr@google.com>
+
+	* i386-dis.c (reg_table): Fill out REG_0F0D table with
+	AMD-reserved cases as "prefetch".
+	(MOD_0F18_REG_4, MOD_0F18_REG_5): New enum constants.
+	(MOD_0F18_REG_6, MOD_0F18_REG_7): Likewise.
+	(reg_table): Use those under REG_0F18.
+	(mod_table): Add those cases as "nop/reserved".
+
 2012-08-07  Jan Beulich <jbeulich@suse.com>
 
 	* i386-opc.tbl: Remove "FIXME" comments from SVME instructions.

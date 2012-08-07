@@ -668,6 +668,10 @@ enum
   MOD_0F18_REG_1,
   MOD_0F18_REG_2,
   MOD_0F18_REG_3,
+  MOD_0F18_REG_4,
+  MOD_0F18_REG_5,
+  MOD_0F18_REG_6,
+  MOD_0F18_REG_7,
   MOD_0F20,
   MOD_0F21,
   MOD_0F22,
@@ -2652,6 +2656,12 @@ static const struct dis386 reg_table[][8] = {
   {
     { "prefetch",	{ Mb } },
     { "prefetchw",	{ Mb } },
+    { "prefetch",	{ Mb } },
+    { "prefetch",	{ Mb } },
+    { "prefetch",	{ Mb } },
+    { "prefetch",	{ Mb } },
+    { "prefetch",	{ Mb } },
+    { "prefetch",	{ Mb } },
   },
   /* REG_0F18 */
   {
@@ -2659,6 +2669,10 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0F18_REG_1) },
     { MOD_TABLE (MOD_0F18_REG_2) },
     { MOD_TABLE (MOD_0F18_REG_3) },
+    { MOD_TABLE (MOD_0F18_REG_4) },
+    { MOD_TABLE (MOD_0F18_REG_5) },
+    { MOD_TABLE (MOD_0F18_REG_6) },
+    { MOD_TABLE (MOD_0F18_REG_7) },
   },
   /* REG_0F71 */
   {
@@ -10219,6 +10233,22 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F18_REG_3 */
     { "prefetcht2",	{ Mb } },
+  },
+  {
+    /* MOD_0F18_REG_4 */
+    { "nop/reserved",	{ Mb } },
+  },
+  {
+    /* MOD_0F18_REG_5 */
+    { "nop/reserved",	{ Mb } },
+  },
+  {
+    /* MOD_0F18_REG_6 */
+    { "nop/reserved",	{ Mb } },
+  },
+  {
+    /* MOD_0F18_REG_7 */
+    { "nop/reserved",	{ Mb } },
   },
   {
     /* MOD_0F20 */

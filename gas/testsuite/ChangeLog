@@ -1,3 +1,12 @@
+2012-08-07  Roland McGrath  <mcgrathr@google.com>
+
+	* gas/i386/prefetch.s: New file.
+	* gas/i386/prefetch.d: New file.
+	* gas/i386/prefetch-intel.d: New file.
+	* gas/i386/x86-64-prefetch.d: New file.
+	* gas/i386/x86-64-prefetch-intel.d: New file.
+	* gas/i386/i386.exp: Run them.
+
 2012-08-07  Jan Beulich <jbeulich@suse.com>
 
 	* gas/i386/x86-64-segovr.{s,l}: New.
