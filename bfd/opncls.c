@@ -130,11 +130,15 @@ _bfd_new_bfd_contained_in (bfd *obfd)
 static void
 _bfd_delete_bfd (bfd *abfd)
 {
+  if (abfd->format == bfd_archive)
+    _bfd_delete_archive_data (abfd);
+
   if (abfd->memory)
     {
       bfd_hash_table_free (&abfd->section_htab);
       objalloc_free ((struct objalloc *) abfd->memory);
     }
+
   free (abfd);
 }
 

@@ -39,9 +39,11 @@ if test "${RELOCATING}"; then
   R_CRT_XP='*(SORT(.CRT$XP*))  /* Pre-termination */'
   R_CRT_XT='*(SORT(.CRT$XT*))  /* Termination */'
   R_TLS='
+    *(.tls$AAA)    
     *(.tls)
     *(.tls$)
-    *(SORT(.tls$*))'
+    *(SORT(.tls$*))
+    *(.tls$ZZZ)'
   R_RSRC='*(SORT(.rsrc$*))'
 else
   R_TEXT=
@@ -185,6 +187,10 @@ SECTIONS
     ${RELOCATING+___crt_xt_end__ = . ;}
   }
 
+  /* Windows TLS expects .tls\$AAA to be at the start and .tls\$ZZZ to be
+     at the end of the .tls section.  This is important because _tls_start MUST
+     be at the beginning of the section to enable SECREL32 relocations with TLS
+     data.  */
   .tls ${RELOCATING+BLOCK(__section_alignment__)} :
   { 					
     ${RELOCATING+___tls_start__ = . ;}

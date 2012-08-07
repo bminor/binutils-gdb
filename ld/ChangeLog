@@ -1,3 +1,8 @@
+2012-08-07  Daniel Green  <venix1@gmail.com>
+
+	* scripttempl/pe.sc (R_TLS): Add .tls$AAA and .tls$ZZZ.
+	* scripttempl/pep.sc (R_TLS): Add .tls$AAA and .tls$ZZZ.
+
 2012-08-07  Nick Clifton  <nickc@redhat.com>
 
 	* po/ja.po: Updated Japanese translation.

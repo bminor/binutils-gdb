@@ -293,6 +293,19 @@ bfd_set_archive_head (bfd *output_archive, bfd *new_head)
   return TRUE;
 }
 
+/* Free the archive hash table, if it exists.  */
+
+void
+_bfd_delete_archive_data (bfd *abfd)
+{
+  struct artdata *ardata = bfd_ardata (abfd);
+
+  BFD_ASSERT (abfd->format == bfd_archive);
+
+  if (ardata && ardata->cache)
+    htab_delete (ardata->cache);
+}
+
 bfd *
 _bfd_look_for_bfd_in_cache (bfd *arch_bfd, file_ptr filepos)
 {

@@ -1,3 +1,10 @@
+2012-08-07  Tom Tromey  <tromey@redhat.com>
+
+	* archive.c (_bfd_delete_archive_data): New function.
+	* libbfd-in.h (_bfd_delete_archive_data): Declare.
+	* libbfd.h: Rebuild.
+	* opncls.c (_bfd_delete_bfd): Call _bfd_delete_archive_data.
+
 2012-08-07  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.

@@ -1,3 +1,8 @@
+2012-08-07  Nick Clifton  <nickc@redhat.com>
+
+	* gas/i386/secrel.s: Add test of <symbol>@SECREL32.
+	* gas/i386/secrel.d: Add expected disassembly.
+
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/mips.exp: Set has_newabi for all Linux targets.

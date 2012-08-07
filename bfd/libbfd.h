@@ -135,6 +135,8 @@ extern void bfd_release
 
 bfd * _bfd_create_empty_archive_element_shell
   (bfd *obfd);
+void _bfd_delete_archive_data
+  (bfd *abfd);
 bfd * _bfd_look_for_bfd_in_cache
   (bfd *, file_ptr);
 bfd_boolean _bfd_add_bfd_to_archive_cache

@@ -1,3 +1,8 @@
+2012-08-07  Daniel Green  <venix1@gmail.com>
+
+	* config/tc-i386.c (lex_got): Provide implementation for PE
+	format.
+
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (append_insn): Also handle moving delay-slot
