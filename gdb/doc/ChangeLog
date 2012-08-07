@@ -1,3 +1,9 @@
+2012-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbint.texinfo (Debugging GDB): In section
+	'Debugging @value{GDBN} with itself' change .gdbinit for gdb-gdb.gdb.
+	Mention also gdb-gdb.py.
+
 2012-07-20  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Mode Options): Delete --use-deprecated-index-sections.
