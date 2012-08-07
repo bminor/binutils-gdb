@@ -1,5 +1,11 @@
 2012-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/valgrind-infcall.exp (continue #$continue_count): Use
+	global variable loop, not a 'break'.  Add loop count limit to 100.
+	Add new fail case for terminated vgdb.
+
+2012-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Do not false FAIL with old GCCs.
 	* gdb.base/watchpoint.exp (self-delete local watch) <$no_hw>: XFAIL for
 	GCC < 4.5 in $no_hw mode.
