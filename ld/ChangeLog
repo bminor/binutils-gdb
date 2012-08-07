@@ -1,3 +1,7 @@
+2012-08-07  Nick Clifton  <nickc@redhat.com>
+
+	* po/ja.po: Updated Japanese translation.
+
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* emulparams/elf32bmip.sh: Make _gp hidden.
@@ -41,7 +45,7 @@
 
 	* scripttempl/elf.sc: Add SORT_NONE to .init and .fini sections.
 	* scripttempl/elf32msp430.sc: Likewise.
-	* scripttempl/elf32msp430_3.sc: Likewise. 
+	* scripttempl/elf32msp430_3.sc: Likewise.
 	* scripttempl/elfd10v.sc: Likewise.
 	* scripttempl/elfd30v.sc: Likewise.
 	* scripttempl/elfxtensa.sc: Likewise.

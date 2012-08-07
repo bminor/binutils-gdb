@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bfd 2.22.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2011-10-25 11:58+0100\n"
-"PO-Revision-Date: 2012-07-29 21:56+0300\n"
+"PO-Revision-Date: 2012-08-06 20:03+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
 "Language: uk\n"
@@ -666,7 +666,7 @@ msgstr "%P: DW_EH_PE_datarel не визначено для цієї архіт�
 
 #: elf-ifunc.c:179
 msgid "%F%P: dynamic STT_GNU_IFUNC symbol `%s' with pointer equality in `%B' can not be used when making an executable; recompile with -fPIE and relink with -pie\n"
-msgstr ""
+msgstr "%F%P: динамічний символ STT_GNU_IFUNC «%s» з рівністю вказівників у «%B» не можна використовувати під час створення виконуваного файла; виконайте повторну компіляцію з -fPIE і повторне компонування -pie\n"
 
 #: elf-m10200.c:450 elf-m10300.c:1563 elf32-avr.c:1221 elf32-bfin.c:3213
 #: elf32-cr16.c:1482 elf32-cr16c.c:780 elf32-cris.c:2081 elf32-crx.c:922
@@ -1055,11 +1055,11 @@ msgstr "помилка: %B: використання відносної адре
 
 #: elf32-arm.c:11591
 msgid "warning: %B uses %u-byte wchar_t yet the output is to use %u-byte wchar_t; use of wchar_t values across objects may fail"
-msgstr ""
+msgstr "попередження: у %B використовується %u-байтовий wchar_t, хоча у виведенні використовується %u-байтовий wchar_t; використання значень wchar_t між об’єктами може зазнати невдачі"
 
 #: elf32-arm.c:11622
 msgid "warning: %B uses %s enums yet the output is to use %s enums; use of enum values across objects may fail"
-msgstr ""
+msgstr "попередження: у %B використовуються переліки %s, хоча у виведенні використовуються переліки %s; використання значень переліків між об’єктами може зазнати невдачі"
 
 #: elf32-arm.c:11634
 msgid "error: %B uses iWMMXt register arguments, %B does not"
@@ -1290,7 +1290,7 @@ msgstr "%B(%A+0x%lx): пересування щодо «%s»: помилка %d"
 
 #: elf32-bfin.c:2725
 msgid "%B: relocation at `%A+0x%x' references symbol `%s' with nonzero addend"
-msgstr ""
+msgstr "%B: пересування у «%A+0x%x» посилається на символ «%s» з ненульовим доданком"
 
 #: elf32-bfin.c:2741
 msgid "relocation references symbol not defined in the module"
@@ -1302,7 +1302,7 @@ msgstr "R_BFIN_FUNCDESC посилається на динамічний сим�
 
 #: elf32-bfin.c:2879 elf32-bfin.c:3002
 msgid "cannot emit fixups in read-only section"
-msgstr ""
+msgstr "не можна використовувати адресну прив’язку у розділі, придатному лише для читання"
 
 #: elf32-bfin.c:2910 elf32-bfin.c:3040 elf32-lm32.c:1103 elf32-sh.c:5016
 msgid "cannot emit dynamic relocations in read-only section"
@@ -1327,12 +1327,12 @@ msgstr "%B: непідтримуваний тип пересування %i"
 #: elf32-bfin.c:5125 elf32-frv.c:6808
 #, c-format
 msgid "%s: cannot link non-fdpic object file into fdpic executable"
-msgstr ""
+msgstr "%s: не можна компонувати об’єктний файл не-fdpic до виконуваного файла fdpic"
 
 #: elf32-bfin.c:5129 elf32-frv.c:6812
 #, c-format
 msgid "%s: cannot link fdpic object file into non-fdpic executable"
-msgstr ""
+msgstr "%s: не можна компонувати об’єктний файл fdpic до виконуваного файла не-fdpic"
 
 #: elf32-bfin.c:5283
 #, c-format
@@ -1345,7 +1345,7 @@ msgstr "%B, розділ %A: нерозв’язне пересування %s �
 
 #: elf32-cris.c:1238
 msgid "%B, section %A: No PLT nor GOT for relocation %s against symbol `%s'"
-msgstr ""
+msgstr "%B, розділ %A: немає ні PLT, ні GOT для пересування %s щодо символу «%s»"
 
 #: elf32-cris.c:1240
 msgid "%B, section %A: No PLT for relocation %s against symbol `%s'"
@@ -1358,28 +1358,28 @@ msgstr "[чию назву втрачено]"
 
 #: elf32-cris.c:1365 elf32-tic6x.c:2647
 msgid "%B, section %A: relocation %s with non-zero addend %d against local symbol"
-msgstr ""
+msgstr "%B, розділ %A: пересування %s з ненульовим доданком, %d, щодо локального символу"
 
 #: elf32-cris.c:1373 elf32-cris.c:1716 elf32-cris.c:1869 elf32-tic6x.c:2655
 msgid "%B, section %A: relocation %s with non-zero addend %d against symbol `%s'"
-msgstr ""
+msgstr "%B, розділ %A: пересування %s з ненульовим доданком, %d, щодо символу «%s»"
 
 #: elf32-cris.c:1399
 msgid "%B, section %A: relocation %s is not allowed for global symbol: `%s'"
-msgstr ""
+msgstr "%B, розділ %A: не можна виконувати пересування %s для загального символу: «%s»"
 
 #: elf32-cris.c:1415
 msgid "%B, section %A: relocation %s with no GOT created"
-msgstr ""
+msgstr "%B, розділ %A: пересування %s без створеного GOT"
 
 #. We shouldn't get here for GCC-emitted code.
 #: elf32-cris.c:1630
 msgid "%B, section %A: relocation %s has an undefined reference to `%s', perhaps a declaration mixup?"
-msgstr ""
+msgstr "%B, розділ %A: у пересуванні %s є невизначене посилання на «%s», можливо, адресна прив’язка оголошення?"
 
 #: elf32-cris.c:2002
 msgid "%B, section %A: relocation %s is not allowed for symbol: `%s' which is defined outside the program, perhaps a declaration mixup?"
-msgstr ""
+msgstr "%B, розділ %A: не можна виконувати пересування %s для символу «%s», який визначено поза програмою. Можливо, помилка у оголошенні?"
 
 #: elf32-cris.c:2055
 msgid "(too many global variables for -fpic: recompile with -fPIC)"
@@ -1387,31 +1387,39 @@ msgstr "(забагато загальних змінних для -fpic: вик
 
 #: elf32-cris.c:2062
 msgid "(thread-local data too big for -fpic or -msmall-tls: recompile with -fPIC or -mno-small-tls)"
-msgstr ""
+msgstr "(дані локального потоку є надто великими для -fpic або -msmall-tls: повторно зберіть з -fPIC або -mno-small-tls)"
 
 #: elf32-cris.c:3261
 msgid ""
 "%B, section %A:\n"
 "  v10/v32 compatible object %s must not contain a PIC relocation"
 msgstr ""
+"%B, розділ %A:\n"
+"  об’єкт версії 10/32, %s, не повинен містити пересування PIC"
 
 #: elf32-cris.c:3366
 msgid ""
 "%B, section %A:\n"
 "  relocation %s not valid in a shared object; typically an option mixup, recompile with -fPIC"
 msgstr ""
+"%B, розділ %A:\n"
+"  пересування %s не є коректним у спільному об’єкті; типовою причиною є конфлікт параметрів, перекомпілюйте з -fPIC"
 
 #: elf32-cris.c:3580
 msgid ""
 "%B, section %A:\n"
 "  relocation %s should not be used in a shared object; recompile with -fPIC"
 msgstr ""
+"%B, розділ %A:\n"
+"  пересування %s не слід використовувати у спільному об’єкті; перекомпілюйте з -fPIC"
 
 #: elf32-cris.c:4002
 msgid ""
 "%B, section `%A', to symbol `%s':\n"
 "  relocation %s should not be used in a shared object; recompile with -fPIC"
 msgstr ""
+"%B, розділ «%A» до символу «%s»:\n"
+"  пересування %s не слід використовувати у спільному об’єкті; перекомпілюйте з -fPIC"
 
 #: elf32-cris.c:4118
 msgid "Unexpected machine number"
@@ -1434,11 +1442,11 @@ msgstr " [v32]"
 
 #: elf32-cris.c:4223
 msgid "%B: uses _-prefixed symbols, but writing file with non-prefixed symbols"
-msgstr ""
+msgstr "%B: використовуються символи з префіксом «_», але виконується запис файла з символами без префіксів"
 
 #: elf32-cris.c:4224
 msgid "%B: uses non-prefixed symbols, but writing file with _-prefixed symbols"
-msgstr ""
+msgstr "%B: використовуються символи без префікса «_», але виконується запис файла з символами з префіксами «_»"
 
 #: elf32-cris.c:4243
 msgid "%B contains CRIS v32 code, incompatible with previous objects"
@@ -1451,12 +1459,12 @@ msgstr "у %B міститься код, який не є кодом v32 CRIS, �
 #: elf32-dlx.c:142
 #, c-format
 msgid "BFD Link Error: branch (PC rel16) to section (%s) not supported"
-msgstr ""
+msgstr "Помилка компонування BFD: відгалуження (PC rel16) до розділу (%s) не підтримується"
 
 #: elf32-dlx.c:204
 #, c-format
 msgid "BFD Link Error: jump (PC rel26) to section (%s) not supported"
-msgstr ""
+msgstr "Помилка компонування BFD: не передбачено підтримки переходу (PC rel26) до розділу (%s)"
 
 #. Only if it's not an unresolved symbol.
 #: elf32-epiphany.c:563 elf32-ip2k.c:1475
@@ -1525,23 +1533,23 @@ msgstr "R_FRV_TLSMOFFLO є незастосовним до команди setlo 
 
 #: elf32-frv.c:3597
 msgid "%H: R_FRV_FUNCDESC references dynamic symbol with nonzero addend\n"
-msgstr ""
+msgstr "%H: R_FRV_FUNCDESC посилається на динамічний символ з ненульовим доданком\n"
 
 #: elf32-frv.c:3638 elf32-frv.c:3760
 msgid "%H: cannot emit fixups in read-only section\n"
-msgstr ""
+msgstr "%H: не можна використовувати адресну прив’язку у розділі, придатному лише для читання\n"
 
 #: elf32-frv.c:3669 elf32-frv.c:3803
 msgid "%H: cannot emit dynamic relocations in read-only section\n"
-msgstr ""
+msgstr "%H: не можна використовувати динамічні пересування у розділі, призначеному лише для читання\n"
 
 #: elf32-frv.c:3718
 msgid "%H: R_FRV_FUNCDESC_VALUE references dynamic symbol with nonzero addend\n"
-msgstr ""
+msgstr "%H: R_FRV_FUNCDESC_VALUE посилається на динамічний символ з ненульовим доданком\n"
 
 #: elf32-frv.c:3974
 msgid "%H: reloc against `%s' references a different segment\n"
-msgstr ""
+msgstr "%H: пересування щодо «%s» посилається на інший сегмент\n"
 
 #: elf32-frv.c:4124
 msgid "%H: reloc against `%s': %s\n"
@@ -1554,12 +1562,12 @@ msgstr "%B: непідтримуваний тип пересування %i\n"
 #: elf32-frv.c:6722
 #, c-format
 msgid "%s: compiled with %s and linked with modules that use non-pic relocations"
-msgstr ""
+msgstr "%s: зібрано з %s і скомпоновано з модулями, у яких використовуються пересування не-pic"
 
 #: elf32-frv.c:6775 elf32-iq2000.c:845 elf32-m32c.c:807
 #, c-format
 msgid "%s: compiled with %s and linked with modules compiled with %s"
-msgstr ""
+msgstr "%s: зібрано з %s і скомпоновано з модулями, зібраними з %s"
 
 #: elf32-frv.c:6787
 #, c-format
@@ -1574,11 +1582,11 @@ msgstr "закриті прапорці = 0x%lx:"
 
 #: elf32-gen.c:69 elf64-gen.c:69
 msgid "%B: Relocations in generic ELF (EM: %d)"
-msgstr ""
+msgstr "%B: пересування у типовому ELF (EM: %d)"
 
 #: elf32-hppa.c:850 elf32-hppa.c:3598
 msgid "%B(%A+0x%lx): cannot reach %s, recompile with -ffunction-sections"
-msgstr ""
+msgstr "%B(%A+0x%lx): не вдалося досягти %s, повторно зберіть з -ffunction-sections"
 
 #: elf32-hppa.c:1284
 msgid "%B: relocation %s can not be used when making a shared object; recompile with -fPIC"
@@ -1586,19 +1594,19 @@ msgstr "%B: пересування %s не можна використовува
 
 #: elf32-hppa.c:2791
 msgid "%B: duplicate export stub %s"
-msgstr ""
+msgstr "%B: дублювання шаблона експортування %s"
 
 #: elf32-hppa.c:3437
 msgid "%B(%A+0x%lx): %s fixup for insn 0x%x is not supported in a non-shared link"
-msgstr ""
+msgstr "%B(%A+0x%lx): підтримки адресної прив’язки %s для інструкції 0x%x не передбачено у посиланні неспільного використання"
 
 #: elf32-hppa.c:4284
 msgid "%B(%A+0x%lx): cannot handle %s for %s"
-msgstr ""
+msgstr "%B(%A+0x%lx): не вдалося обробити %s для %s"
 
 #: elf32-hppa.c:4603
 msgid ".got section not immediately after .plt section"
-msgstr ""
+msgstr "Розділ .got не перебуває одразу за розділом .plt"
 
 #. Unknown relocation.
 #: elf32-i386.c:373 elf32-m68k.c:384 elf32-ppc.c:1676 elf32-s390.c:379
@@ -1608,30 +1616,30 @@ msgstr "%B: некоректний тип пересування %d"
 
 #: elf32-i386.c:1404 elf64-x86-64.c:1308
 msgid "%B: TLS transition from %s to %s against `%s' at 0x%lx in section `%A' failed"
-msgstr ""
+msgstr "%B: перенесення TLS з %s до %s щодо «%s» у 0x%lx у розділі «%A» зазнало невдачі"
 
 #: elf32-i386.c:1549 elf32-i386.c:3244 elf64-x86-64.c:1487 elf64-x86-64.c:3125
 #: elfxx-sparc.c:3083
 msgid "%B: relocation %s against STT_GNU_IFUNC symbol `%s' isn't handled by %s"
-msgstr ""
+msgstr "%B: пересування %s щодо символу STT_GNU_IFUNC «%s» не обробляється %s"
 
 #: elf32-i386.c:1711 elf32-s390.c:1182 elf32-sh.c:6362 elf32-tilepro.c:1434
 #: elf32-xtensa.c:1182 elf64-s390.c:1151 elfxx-sparc.c:1548
 #: elfxx-tilegx.c:1701
 msgid "%B: `%s' accessed both as normal and thread local symbol"
-msgstr ""
+msgstr "%B: доступ до «%s» виконується як до звичайного символу, так і до локального для потоку виконання символу"
 
 #: elf32-i386.c:2539 elf64-x86-64.c:2506
 msgid "%P: %B: warning: relocation against `%s' in readonly section `%A'.\n"
-msgstr ""
+msgstr "%P: %B: попередження: пересування щодо «%s» у придатному лише для читання розділі «%A».\n"
 
 #: elf32-i386.c:2629 elf64-x86-64.c:2593
 msgid "%P: %B: warning: relocation in readonly section `%A'.\n"
-msgstr ""
+msgstr "%P: %B: попередження: пересування у розділі, придатному лише для читання «%A».\n"
 
 #: elf32-i386.c:3086 elf32-tilepro.c:2557 elfxx-tilegx.c:2871
 msgid "%B: unrecognized relocation (0x%x) in section `%A'"
-msgstr ""
+msgstr "%B: нерозпізнане пересування (0x%x) у розділі «%A»"
 
 #: elf32-i386.c:3494 elf64-x86-64.c:3513
 msgid "hidden symbol"
@@ -1651,11 +1659,11 @@ msgstr "символ"
 
 #: elf32-i386.c:3508
 msgid "%B: relocation R_386_GOTOFF against undefined %s `%s' can not be used when making a shared object"
-msgstr ""
+msgstr "B: пересування R_386_GOTOFF щодо невизначеного %s, «%s», не можна використовувати під час створення об’єкта спільного використання"
 
 #: elf32-i386.c:3518
 msgid "%B: relocation R_386_GOTOFF against protected function `%s' can not be used when making a shared object"
-msgstr ""
+msgstr "%B: не можна використовувати R_386_GOTOFF пересування щодо захищеної функції «%s» під час створення об’єкта спільного використання"
 
 #: elf32-i386.c:4839 elf32-tilepro.c:3467 elf64-x86-64.c:4609
 #: elfxx-tilegx.c:3847
@@ -1665,21 +1673,21 @@ msgstr "відкинуто розділ виведення даних: «%A»"
 
 #: elf32-ip2k.c:857 elf32-ip2k.c:863 elf32-ip2k.c:930 elf32-ip2k.c:936
 msgid "ip2k relaxer: switch table without complete matching relocation information."
-msgstr ""
+msgstr "Оптимізатор розміру ip2k: таблиця перемикань без повних даних щодо відповідності пересувань."
 
 #: elf32-ip2k.c:880 elf32-ip2k.c:963
 msgid "ip2k relaxer: switch table header corrupt."
-msgstr ""
+msgstr "Оптимізатор розміру ip2k: пошкоджено заголовок таблиці перемикань"
 
 #: elf32-ip2k.c:1292
 #, c-format
 msgid "ip2k linker: missing page instruction at 0x%08lx (dest = 0x%08lx)."
-msgstr ""
+msgstr "компонувальник ip2k: не вистачає інструкції щодо сторінки у 0x%08lx (призначення = 0x%08lx)."
 
 #: elf32-ip2k.c:1308
 #, c-format
 msgid "ip2k linker: redundant page instruction at 0x%08lx (dest = 0x%08lx)."
-msgstr ""
+msgstr "компонувальник ip2k: зайва інструкція щодо сторінки у 0x%08lx (призначення = 0x%08lx)."
 
 #: elf32-iq2000.c:858 elf32-m32c.c:819
 #, c-format
@@ -1705,6 +1713,8 @@ msgstr "перенесення SDA без визначення _SDA_BASE_"
 #: elf32-m32r.c:3043
 msgid "%B: The target (%s) of an %s relocation is in the wrong section (%A)"
 msgstr ""
+"%B: призначення (%s) пересування %s перебуває у помилковому розділі (%A)\n"
+")"
 
 #: elf32-m32r.c:3571
 msgid "%B: Instruction set mismatch with previous modules"
@@ -1733,29 +1743,29 @@ msgstr ": команди m32r2"
 #: elf32-m68hc1x.c:1050
 #, c-format
 msgid "Reference to the far symbol `%s' using a wrong relocation may result in incorrect execution"
-msgstr ""
+msgstr "Посилання на віддалений символ «%s», що використовує помилкове пересування, може призвести до помилок у виконанні."
 
 #: elf32-m68hc1x.c:1073
 #, c-format
 msgid "banked address [%lx:%04lx] (%lx) is not in the same bank as current banked address [%lx:%04lx] (%lx)"
-msgstr ""
+msgstr "занесена до банку адреса [%lx:%04lx] (%lx) не перебуває у одному банку з поточною адресою, занесеною до банку, [%lx:%04lx] (%lx)"
 
 #: elf32-m68hc1x.c:1092
 #, c-format
 msgid "reference to a banked address [%lx:%04lx] in the normal address space at %04lx"
-msgstr ""
+msgstr "посилання на занесену до банку адресу [%lx:%04lx] у звичайному просторі адрес, %04lx"
 
 #: elf32-m68hc1x.c:1225
 msgid "%B: linking files compiled for 16-bit integers (-mshort) and others for 32-bit integers"
-msgstr ""
+msgstr "%B: компоновані файли зібрано для 16-бітових цілих (-mshort), а решту файлів — для 32-бітових цілих чисел"
 
 #: elf32-m68hc1x.c:1232
 msgid "%B: linking files compiled for 32-bit double (-fshort-double) and others for 64-bit double"
-msgstr ""
+msgstr "%B: компоновані файли зібрано для 32-бітових дійсних чисел з подвійною точністю (-fshort-double), а інші — для 64-бітових дійсних чисел з подвійною точністю."
 
 #: elf32-m68hc1x.c:1241
 msgid "%B: linking files compiled for HCS12 with others compiled for HC12"
-msgstr ""
+msgstr "%B: компоновані файли зібрано для HCS12, інші ж — для HC12"
 
 #: elf32-m68hc1x.c:1257 elf32-ppc.c:4227 elf64-sparc.c:706 elfxx-mips.c:13965
 msgid "%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)"
@@ -1799,12 +1809,12 @@ msgstr "процесор=HC12]"
 #: elf32-m68hc1x.c:1302
 #, c-format
 msgid " [memory=bank-model]"
-msgstr ""
+msgstr " [пам’ять=модель з банками]"
 
 #: elf32-m68hc1x.c:1304
 #, c-format
 msgid " [memory=flat]"
-msgstr ""
+msgstr " [пам’ять=плоска модель]"
 
 #: elf32-m68k.c:1251 elf32-m68k.c:1252 vms-alpha.c:7314 vms-alpha.c:7329
 msgid "unknown"
@@ -1812,11 +1822,11 @@ msgstr "невідомо"
 
 #: elf32-m68k.c:1715
 msgid "%B: GOT overflow: Number of relocations with 8-bit offset > %d"
-msgstr ""
+msgstr "%B: переповнення GOT: кількість пересувань з 8-бітовим відступом > %d"
 
 #: elf32-m68k.c:1721
 msgid "%B: GOT overflow: Number of relocations with 8- or 16-bit offset > %d"
-msgstr ""
+msgstr "%B: переповнення GOT: кількість пересувань з 8- або 16-бітовим відступом > %d"
 
 #: elf32-m68k.c:3957
 msgid "%B(%A+0x%lx): R_68K_TLS_LE32 relocation not permitted in shared object"
@@ -1824,7 +1834,7 @@ msgstr "%B(%A+0x%lx): пересування R_68K_TLS_LE32 у об’єкті �
 
 #: elf32-mcore.c:99 elf32-mcore.c:442
 msgid "%B: Relocation %s (%d) is not currently supported.\n"
-msgstr ""
+msgstr "%B: підтримки пересування %s (%d) у поточній версії не передбачено.\n"
 
 #: elf32-mcore.c:428
 msgid "%B: Unknown relocation type %d\n"
@@ -1863,6 +1873,8 @@ msgstr "%s: невідомий тип пересування %d"
 #, c-format
 msgid "%s: The target (%s) of an %s relocation is in the wrong section (%s)"
 msgstr ""
+"%s: призначення (%s) пересування %s перебуває у помилковому розділі (%s)\n"
+")"
 
 #: elf32-microblaze.c:1155 elf32-tilepro.c:2891 elfxx-sparc.c:3457
 #: elfxx-tilegx.c:3230
@@ -1875,12 +1887,12 @@ msgstr "%B: помилкова назва розділу для пересува
 
 #: elf32-mips.c:1549 elf64-mips.c:2683 elfn32-mips.c:2487
 msgid "literal relocation occurs for an external symbol"
-msgstr ""
+msgstr "відбувається буквальне пересування для зовнішнього символу"
 
 #: elf32-mips.c:1596 elf32-score.c:570 elf32-score7.c:469 elf64-mips.c:2726
 #: elfn32-mips.c:2528
 msgid "32bits gp relative relocation occurs for an external symbol"
-msgstr ""
+msgstr "відбувається 32-бітове відносне gp-пересування для зовнішнього символу"
 
 #: elf32-ppc.c:1741
 #, c-format
@@ -1924,15 +1936,15 @@ msgstr "%P: %H: %s пересування за локальним символо
 #: elf32-ppc.c:4039 elf32-ppc.c:4054 elfxx-mips.c:13651 elfxx-mips.c:13677
 #: elfxx-mips.c:13699 elfxx-mips.c:13725
 msgid "Warning: %B uses hard float, %B uses soft float"
-msgstr ""
+msgstr "Попередження: у %B використовується апаратна підтримка дійсних чисел, а у %B — програмна"
 
 #: elf32-ppc.c:4042 elf32-ppc.c:4046
 msgid "Warning: %B uses double-precision hard float, %B uses single-precision hard float"
-msgstr ""
+msgstr "Попередження: у %B використовується апаратна підтримка дійсних чисел з подвійною точністю, а у %B — апаратна підтримка для дійсних чисел з одинарною точністю"
 
 #: elf32-ppc.c:4050
 msgid "Warning: %B uses soft float, %B uses single-precision hard float"
-msgstr ""
+msgstr "Попередження: у %B використовується програмна підтримка дійсних чисел, а у %B — апаратна підтримка для дійсних чисел з одинарною точністю"
 
 #: elf32-ppc.c:4057 elf32-ppc.c:4061 elfxx-mips.c:13631 elfxx-mips.c:13635
 msgid "Warning: %B uses unknown floating point ABI %d"
@@ -1944,27 +1956,27 @@ msgstr "Попередження: %B використовує невідомий
 
 #: elf32-ppc.c:4111
 msgid "Warning: %B uses vector ABI \"%s\", %B uses \"%s\""
-msgstr ""
+msgstr "Попередження: у %B використовується векторний ABI «%s», а у %B — «%s»"
 
 #: elf32-ppc.c:4128 elf32-ppc.c:4131
 msgid "Warning: %B uses r3/r4 for small structure returns, %B uses memory"
-msgstr ""
+msgstr "Попередження: у %B r3/r4 використовується для повернення малих структур, а у %B для цього використовується пам’ять"
 
 #: elf32-ppc.c:4134 elf32-ppc.c:4138
 msgid "Warning: %B uses unknown small structure return convention %d"
-msgstr ""
+msgstr "Попередження: у %B використано невідому угоду, %d, щодо повернення маленьких структур"
 
 #: elf32-ppc.c:4192
 msgid "%B: compiled with -mrelocatable and linked with modules compiled normally"
-msgstr ""
+msgstr "%B: зібрано з -mrelocatable і скомпоновано з модулями, зібраними у звичайному режимі"
 
 #: elf32-ppc.c:4200
 msgid "%B: compiled normally and linked with modules compiled with -mrelocatable"
-msgstr ""
+msgstr "%B: зібрано у звичайному режимі і скомпоновано з модулями, зібраними з -mrelocatable"
 
 #: elf32-ppc.c:4309
 msgid "%P: bss-plt forced due to %B\n"
-msgstr ""
+msgstr "%P: примусово використано bss-plt через %B\n"
 
 #: elf32-ppc.c:4312
 msgid "%P: bss-plt forced by profiling\n"
@@ -1976,7 +1988,7 @@ msgstr "%P: профілюванням примусово визначено bss
 #. the entire optimization.
 #: elf32-ppc.c:4809 elf64-ppc.c:7858
 msgid "%H arg lost __tls_get_addr, TLS optimization disabled\n"
-msgstr ""
+msgstr "%H: у аргументів не вистачає __tls_get_addr, оптимізацію TLS вимкнено.\n"
 
 #: elf32-ppc.c:5044 elf64-ppc.c:6528
 msgid "%P: dynamic variable `%s' is zero size\n"
@@ -2093,7 +2105,7 @@ msgstr " [pic]"
 #: elf32-score.c:4001 elf32-score7.c:3807
 #, c-format
 msgid " [fix dep]"
-msgstr ""
+msgstr " [фікс. розт.]"
 
 #: elf32-score.c:4043 elf32-score7.c:3849
 msgid "%B: warning: linking PIC files with non-PIC files"
@@ -2101,7 +2113,7 @@ msgstr "%B: попередження: компонування файлів PIC 
 
 #: elf32-sh-symbian.c:130
 msgid "%B: IMPORT AS directive for %s conceals previous IMPORT AS"
-msgstr ""
+msgstr "%B: директива IMPORT AS для %s приховує попередню директиву IMPORT AS"
 
 #: elf32-sh-symbian.c:383
 msgid "%B: Unrecognised .directive command: %s"
@@ -2141,7 +2153,7 @@ msgstr "%B: 0x%lx: попередження: помилковий лічильн
 
 #: elf32-sh.c:1179 elf32-sh.c:1549
 msgid "%B: 0x%lx: fatal: reloc overflow while relaxing"
-msgstr "%B: 0x%lx: критична помилка: переповнення пересування під час обчислення розміру"
+msgstr "%B: 0x%lx: критична помилка: переповнення пересування під час оптимізації розміру"
 
 #: elf32-sh.c:4048 elf64-sh64.c:1514
 msgid "Unexpected STO_SH5_ISA32 on local symbol is not handled"
@@ -2149,7 +2161,7 @@ msgstr "Неочікувану команду STO_SH5_ISA32 над локаль�
 
 #: elf32-sh.c:4299
 msgid "%B: 0x%lx: fatal: unaligned branch target for relax-support relocation"
-msgstr "%B: 0x%lx: критична помилка: невирівняне розгалужене призначення для пересування з підтримкою обчислення розміру"
+msgstr "%B: 0x%lx: критична помилка: невирівняне розгалужене призначення для пересування з підтримкою оптимізації розміру"
 
 #: elf32-sh.c:4332 elf32-sh.c:4347
 msgid "%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"
@@ -2165,7 +2177,7 @@ msgstr "%B: 0x%lx: критична помилка: пересування R_SH_
 
 #: elf32-sh.c:4519 elf32-sh.c:4989
 msgid "%B(%A+0x%lx): cannot emit fixup to `%s' in read-only section"
-msgstr ""
+msgstr "%B(%A+0x%lx): не можна використовувати адресну прив’язку до «%s» у розділі, придатному лише для читання"
 
 #: elf32-sh.c:5096
 msgid "%B(%A+0x%lx): %s relocation against external symbol \"%s\""
@@ -2187,7 +2199,7 @@ msgstr "%B: доступ до «%s» виконується як до звича
 
 #: elf32-sh.c:6358 elf32-sh.c:6440
 msgid "%B: `%s' accessed both as FDPIC and thread local symbol"
-msgstr ""
+msgstr "%B: доступ до «%s» виконується як до символу FDPIC, так і до локального для потоку виконання символу"
 
 #: elf32-sh.c:6388
 msgid "%B: Function descriptor relocation with non-zero addend"
@@ -2266,7 +2278,7 @@ msgstr "%X%P: розділ накладки %A не перебуває у обл
 
 #: elf32-spu.c:787
 msgid "%X%P: overlay sections %A and %A do not start at the same address.\n"
-msgstr ""
+msgstr "%X%P: розділи, що накладаються, %A і %A, не починаються за одною адресою.\n"
 
 #: elf32-spu.c:1011
 msgid "warning: call to non-function symbol %s defined in %B"
@@ -2292,11 +2304,11 @@ msgstr "%s у розділі накладки"
 
 #: elf32-spu.c:1951
 msgid "overlay stub relocation overflow"
-msgstr ""
+msgstr "переповнення під час пересування шаблона накладки"
 
 #: elf32-spu.c:1960
 msgid "stubs don't match calculated size"
-msgstr ""
+msgstr "шаблони не відповідають обчисленому розміру"
 
 #: elf32-spu.c:2542
 #, c-format
@@ -2350,7 +2362,7 @@ msgstr "%s дубльовано\n"
 
 #: elf32-spu.c:4318
 msgid "sorry, no support for duplicate object files in auto-overlay script\n"
-msgstr ""
+msgstr "вибачте, у скрипті автоматичного накладання не передбачено підтримки дублювання об’єктних файлів.\n"
 
 #: elf32-spu.c:4359
 msgid "non-overlay size of 0x%v plus maximum overlay size of 0x%v exceeds local store\n"
@@ -2362,13 +2374,15 @@ msgstr "%B:%A%s перевищує розмір накладки\n"
 
 #: elf32-spu.c:4676
 msgid "Stack size for call graph root nodes.\n"
-msgstr ""
+msgstr "Розмір стека для кореневих вузлів графу викликів.\n"
 
 #: elf32-spu.c:4677
 msgid ""
 "\n"
 "Stack size for functions.  Annotations: '*' max stack, 't' tail call\n"
 msgstr ""
+"\n"
+"Розмір стека для функцій. Позначення: «*» максимальна позиція у стеку, «t» хвостовий виклик\n"
 
 #: elf32-spu.c:4687
 msgid "Maximum stack required is 0x%v\n"
@@ -2392,7 +2406,7 @@ msgstr "попередження: створюється бібліотека с
 
 #: elf32-tic6x.c:2541
 msgid "%B: SB-relative relocation but __c6xabi_DSBT_BASE not defined"
-msgstr ""
+msgstr "%B: пересування відносно SB, але __c6xabi_DSBT_BASE не визначено"
 
 #: elf32-tic6x.c:2761
 msgid "dangerous relocation"
@@ -2408,7 +2422,7 @@ msgstr "%B: попередження: невідомий атрибут об’�
 
 #: elf32-tic6x.c:3853 elf32-tic6x.c:3861
 msgid "error: %B requires more stack alignment than %B preserves"
-msgstr ""
+msgstr "помилка: %B потребує більшого вирівнювання стека, ніж збережено у %B"
 
 #: elf32-tic6x.c:3871 elf32-tic6x.c:3880
 msgid "error: unknown Tag_ABI_array_object_alignment value in %B"
@@ -2428,7 +2442,7 @@ msgstr "попередження: %B і %B відрізняються за ро�
 
 #: elf32-tic6x.c:3953
 msgid "warning: %B and %B differ in whether code is compiled for DSBT"
-msgstr ""
+msgstr "попередження: %B і %B відрізняються за тим, чи було їх зібрано для DSBT"
 
 #: elf32-v850.c:173
 #, c-format
@@ -2438,22 +2452,22 @@ msgstr "Змінна «%s» не може займати декілька мал
 #: elf32-v850.c:176
 #, c-format
 msgid "Variable `%s' can only be in one of the small, zero, and tiny data regions"
-msgstr ""
+msgstr "Змінну «%s» можна зберігати лише у одній з малих, нульових і малюсіньких областей даних"
 
 #: elf32-v850.c:179
 #, c-format
 msgid "Variable `%s' cannot be in both small and zero data regions simultaneously"
-msgstr ""
+msgstr "Змінна «%s» не може зберігатися у малій і нульовій області даних одночасно"
 
 #: elf32-v850.c:182
 #, c-format
 msgid "Variable `%s' cannot be in both small and tiny data regions simultaneously"
-msgstr ""
+msgstr "Змінна «%s» не може зберігатися у малій і малюсінькій області даних одночасно"
 
 #: elf32-v850.c:185
 #, c-format
 msgid "Variable `%s' cannot be in both zero and tiny data regions simultaneously"
-msgstr ""
+msgstr "Змінна «%s» не може зберігатися у нульовій і малюсінькій області даних одночасно"
 
 #: elf32-v850.c:483
 msgid "FAILED to find previous HI16 reloc"
@@ -2509,7 +2523,7 @@ msgstr "архітектура v850e2v3"
 #: elf32-vax.c:532
 #, c-format
 msgid " [nonpic]"
-msgstr ""
+msgstr " [не-pic]"
 
 #: elf32-vax.c:535
 #, c-format
@@ -2524,22 +2538,22 @@ msgstr " [g-float]"
 #: elf32-vax.c:655
 #, c-format
 msgid "%s: warning: GOT addend of %ld to `%s' does not match previous GOT addend of %ld"
-msgstr ""
+msgstr "%s: попередження: доданок GOT %ld до «%s» не відповідає попередньому доданку GOT %ld"
 
 #: elf32-vax.c:1585
 #, c-format
 msgid "%s: warning: PLT addend of %d to `%s' from %s section ignored"
-msgstr ""
+msgstr "%s: попередження: доданок PLT %d до «%s» з розділу %s проігноровано"
 
 #: elf32-vax.c:1712
 #, c-format
 msgid "%s: warning: %s relocation against symbol `%s' from %s section"
-msgstr ""
+msgstr "%s: попередження: пересування %s відносно символу «%s» з розділу %s"
 
 #: elf32-vax.c:1718
 #, c-format
 msgid "%s: warning: %s relocation to 0x%x from %s section"
-msgstr ""
+msgstr "%s: попередження: пересування %s до 0x%x з розділу %s"
 
 #: elf32-xstormy16.c:451 elf32-ia64.c:2336 elf64-ia64.c:2336
 msgid "non-zero addend in @fptr reloc"
@@ -2587,7 +2601,7 @@ msgstr "некоректна адреса пересування"
 
 #: elf32-xtensa.c:9072
 msgid "overflow after relaxation"
-msgstr "переповнення після обчислення розмірів"
+msgstr "переповнення після оптимізації розміру"
 
 #: elf32-xtensa.c:10204
 msgid "%B(%A+0x%lx): unexpected fix for %s relocation"
@@ -2603,11 +2617,11 @@ msgstr "%B: розмір підсегмента .got перевищує 64кБ (
 
 #: elf64-alpha.c:4387 elf64-alpha.c:4399
 msgid "%B: gp-relative relocation against dynamic symbol %s"
-msgstr ""
+msgstr "%B: gp-відносне пересування щодо динамічного символу %s"
 
 #: elf64-alpha.c:4425 elf64-alpha.c:4565
 msgid "%B: pc-relative relocation against dynamic symbol %s"
-msgstr ""
+msgstr "%B: pc-відносне пересування щодо динамічного символу %s"
 
 #: elf64-alpha.c:4453
 msgid "%B: change in gp: BRSGP %s"
@@ -2640,7 +2654,7 @@ msgstr "%B: tp-відносне пересування щодо динамічн
 #: elf64-hppa.c:2083
 #, c-format
 msgid "stub entry for %s cannot load .plt, dp offset = %ld"
-msgstr ""
+msgstr "шаблон запису для %s не можна завантажувати .plt, відступ dp = %ld"
 
 #: elf64-hppa.c:3275
 msgid "%B(%A+0x"
@@ -2666,6 +2680,8 @@ msgid ""
 "%s: Internal inconsistency error for value for\n"
 " linker-allocated global register: linked: 0x%lx%08lx != relaxed: 0x%lx%08lx\n"
 msgstr ""
+"%s: помилка через внутрішню непослідовність для значення\n"
+" розміщеного компонувальником загального регістра: компоновано: 0x%lx%08lx != розміщено: 0x%lx%08lx\n"
 
 #: elf64-mmix.c:1670
 #, c-format
@@ -2680,27 +2696,27 @@ msgstr "%s: пересування основа-плюс-відступ щодо
 #: elf64-mmix.c:1719
 #, c-format
 msgid "%s: register relocation against non-register symbol: (unknown) in %s"
-msgstr ""
+msgstr "%s: пересування регістрів щодо символу, який не перебуває у регістрі: (невідоме) у %s"
 
 #: elf64-mmix.c:1724
 #, c-format
 msgid "%s: register relocation against non-register symbol: %s in %s"
-msgstr ""
+msgstr "%s: пересування регістрів щодо символу, який не перебуває у регістрі: %s у %s"
 
 #: elf64-mmix.c:1761
 #, c-format
 msgid "%s: directive LOCAL valid only with a register or absolute value"
-msgstr ""
+msgstr "%s: директиву LOCAL можна використовувати лише зі значеннями у регістрах або абсолютними значеннями"
 
 #: elf64-mmix.c:1789
 #, c-format
 msgid "%s: LOCAL directive: Register $%ld is not a local register.  First global register is $%ld."
-msgstr ""
+msgstr "%s: директива LOCAL: регістр $%ld не є локальним регістром. Першим загальним регістром є $%ld."
 
 #: elf64-mmix.c:2253
 #, c-format
 msgid "%s: Error: multiple definition of `%s'; start of %s is set in a earlier linked file\n"
-msgstr ""
+msgstr "%s: помилка: декілька визначень «%s»; початок %s встановлено у раніше скомпонований файл\n"
 
 #: elf64-mmix.c:2311
 msgid "Register section has contents\n"
@@ -2737,20 +2753,20 @@ msgstr "%B: .opd не є звичайним масивом записів opd"
 
 #: elf64-ppc.c:7085
 msgid "%B: unexpected reloc type %u in .opd section"
-msgstr ""
+msgstr "%B: неочікуваний тип пересування, %u, у розділі .opd"
 
 #: elf64-ppc.c:7106
 msgid "%B: undefined sym `%s' in .opd section"
-msgstr ""
+msgstr "%B: невизначений символ, «%s» у розділі .opd"
 
 #: elf64-ppc.c:7664
 msgid "%H __tls_get_addr lost arg, TLS optimization disabled\n"
-msgstr ""
+msgstr "%H __tls_get_addr втрачено аргумент, оптимізацію TLS вимкнено\n"
 
 #: elf64-ppc.c:8003 elf64-ppc.c:8564
 #, c-format
 msgid "%s defined on removed toc entry"
-msgstr ""
+msgstr "%s визначено у вилученому записі toc"
 
 #: elf64-ppc.c:8521
 msgid "%P: %H: %s relocation references optimized away TOC entry\n"
@@ -2758,15 +2774,15 @@ msgstr "%P: %H: пересування %s посилається на усуну
 
 #: elf64-ppc.c:9598
 msgid "%P: cannot find opd entry toc for %s\n"
-msgstr ""
+msgstr "%P: не вдалося знайти запис opd у toc для %s\n"
 
 #: elf64-ppc.c:9680
 msgid "%P: long branch stub `%s' offset overflow\n"
-msgstr ""
+msgstr "%P: переповнення відступу шаблона довгої гілки, «%s»\n"
 
 #: elf64-ppc.c:9739
 msgid "%P: can't find branch stub `%s'\n"
-msgstr ""
+msgstr "%P: не вдалося знайти шаблон розгалуження «%s»\n"
 
 #: elf64-ppc.c:9801 elf64-ppc.c:9943
 msgid "%P: linkage table error against `%s'\n"
@@ -2774,19 +2790,19 @@ msgstr "%P: помилка у таблиці компонування щодо �
 
 #: elf64-ppc.c:10126
 msgid "%P: can't build branch stub `%s'\n"
-msgstr ""
+msgstr "%P: не вдалося побудувати шаблон розгалуження «%s»\n"
 
 #: elf64-ppc.c:10941
 msgid "%B section %A exceeds stub group size"
-msgstr ""
+msgstr "Розділ %B, %A, перевищує розміри групи шаблонів"
 
 #: elf64-ppc.c:11666 elf64-ppc.c:11699
 msgid "%P: %s offset too large for .eh_frame sdata4 encoding"
-msgstr ""
+msgstr "%P: відступ %s є надто великим для кодування sdata4 .eh_frame"
 
 #: elf64-ppc.c:11744
 msgid "%P: stubs don't match calculated size\n"
-msgstr ""
+msgstr "%P: шаблони не відповідають обчисленому розміру\n"
 
 #: elf64-ppc.c:11756
 #, c-format
@@ -2798,6 +2814,12 @@ msgid ""
 "  long toc adj %lu\n"
 "  plt call     %lu"
 msgstr ""
+"шаблони компонувальника у %u групах %s\n"
+"  гілка        %lu\n"
+"  кориг. toc   %lu\n"
+"  довга гілка  %lu\n"
+"  д. кор. toc  %lu\n"
+"  plt-виклик   %lu"
 
 #: elf64-ppc.c:12042
 msgid "%P: %H: %s used with TLS symbol %s\n"
@@ -2821,48 +2843,48 @@ msgstr "%P: %B: підтримки пересування %s для символ
 
 #: elf64-ppc.c:13446
 msgid "%P: %H: error: %s not a multiple of %u\n"
-msgstr ""
+msgstr "%P: %H: помилка: %s не є кратним до %u\n"
 
 #: elf64-sh64.c:1686
 #, c-format
 msgid "%s: error: unaligned relocation type %d at %08x reloc %08x\n"
-msgstr ""
+msgstr "%s: помилка: невирівняний тип пересування %d у %08x, пересування %08x\n"
 
 #: elf64-sparc.c:446
 msgid "%B: Only registers %%g[2367] can be declared using STT_REGISTER"
-msgstr ""
+msgstr "%B: за допомогою STT_REGISTER можна оголошувати лише регістри %%g[2367]"
 
 #: elf64-sparc.c:466
 msgid "Register %%g%d used incompatibly: %s in %B, previously %s in %B"
-msgstr ""
+msgstr "Несумісне використання регістру %%g%d: %s у %B, раніше використано %s у %B"
 
 #: elf64-sparc.c:489
 msgid "Symbol `%s' has differing types: REGISTER in %B, previously %s in %B"
-msgstr ""
+msgstr "Символ «%s» належить до різних типів: REGISTER у %B і %s раніше у %B"
 
 #: elf64-sparc.c:534
 msgid "Symbol `%s' has differing types: %s in %B, previously REGISTER in %B"
-msgstr ""
+msgstr "Символ «s» належить до різних типів: %s у %B і REGISTER раніше у %B"
 
 #: elf64-sparc.c:687
 msgid "%B: linking UltraSPARC specific with HAL specific code"
-msgstr ""
+msgstr "%B: компонування UltraSPARC-специфічного та HAL-специфічного коду"
 
 #: elf64-x86-64.c:1427
 msgid "%B: relocation %s against symbol `%s' isn't supported in x32 mode"
-msgstr ""
+msgstr "%B: підтримки пересування %s щодо символу «%s» у режимі x32 не передбачено"
 
 #: elf64-x86-64.c:1656
 msgid "%B: '%s' accessed both as normal and thread local symbol"
-msgstr ""
+msgstr "'%B: доступ до «%s» виконується як до звичайного символу та локального для потоку виконання символу"
 
 #: elf64-x86-64.c:3150
 msgid "%B: relocation %s against STT_GNU_IFUNC symbol `%s' has non-zero addend: %d"
-msgstr ""
+msgstr "%B: пересування %s щодо символу STT_GNU_IFUNC, «%s», містить ненульовий доданок: %d"
 
 #: elf64-x86-64.c:3411
 msgid "%B: relocation R_X86_64_GOTOFF64 against protected function `%s' can not be used when making a shared object"
-msgstr ""
+msgstr "%B: не можна використовувати R_X86_64_GOTOFF64 пересування щодо захищеної функції «%s» під час створення об’єкта спільного використання"
 
 #: elf64-x86-64.c:3523
 msgid "; recompile with -fPIC"
@@ -2879,187 +2901,187 @@ msgstr "%B: пересування %s щодо невизначеного %s, «
 #: elfcode.h:767
 #, c-format
 msgid "warning: %s has a corrupt string table index - ignoring"
-msgstr ""
+msgstr "попередження: покажчик таблиці рядків %s пошкоджено — ігнорується"
 
 #: elfcode.h:1177
 #, c-format
 msgid "%s: version count (%ld) does not match symbol count (%ld)"
-msgstr ""
+msgstr "%s: лічильник версії (%ld) не збігається з лічильником символу (%ld)"
 
 #: elfcode.h:1431
 #, c-format
 msgid "%s(%s): relocation %d has invalid symbol index %ld"
-msgstr ""
+msgstr "%s(%s): пересування %d містить некоректний індекс символу, %ld"
 
 #: elfcore.h:312
 msgid "Warning: %B is truncated: expected core file size >= %lu, found: %lu."
-msgstr ""
+msgstr "Попередження: %B обрізано: очікуваний розмір основного файла >= %lu, виявлено: %lu."
 
 #: elflink.c:1117
 msgid "%s: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"
-msgstr ""
+msgstr "%s: визначення TLS у %B, розділ %A, не збігається з визначенням не-TLS у розділі %B %A"
 
 #: elflink.c:1121
 msgid "%s: TLS reference in %B mismatches non-TLS reference in %B"
-msgstr ""
+msgstr "%s: посилання TLS у %B не збігається з посиланням не-TLS у %B"
 
 #: elflink.c:1125
 msgid "%s: TLS definition in %B section %A mismatches non-TLS reference in %B"
-msgstr ""
+msgstr "%s: визначення TLS у %B, розділ %A, не збігається з посиланням не-TLS у розділі %B, %A"
 
 #: elflink.c:1129
 msgid "%s: TLS reference in %B mismatches non-TLS definition in %B section %A"
-msgstr ""
+msgstr "%s: посилання TLS у %B не збігається з визначенням не-TLS у розділі %B %A"
 
 #: elflink.c:1762
 msgid "%B: unexpected redefinition of indirect versioned symbol `%s'"
-msgstr ""
+msgstr "%B: неочікуване перевизначення символу з непрямим визначенням версії, «%s»"
 
 #: elflink.c:2063
 msgid "%B: version node not found for symbol %s"
-msgstr ""
+msgstr "%B: не знайдено вузла версії для символу %s"
 
 #: elflink.c:2154
 msgid "%B: bad reloc symbol index (0x%lx >= 0x%lx) for offset 0x%lx in section `%A'"
-msgstr ""
+msgstr "%B: помилковий індекс символу пересування (0x%lx >= 0x%lx) для відступу 0x%lx у розділі «%A»"
 
 #: elflink.c:2165
 msgid "%B: non-zero symbol index (0x%lx) for offset 0x%lx in section `%A' when the object file has no symbol table"
-msgstr ""
+msgstr "%B: ненульовий індекс символу (0x%lx) для відступу 0x%lx у розділі «%A», але у об’єктному файлі немає таблиці символів"
 
 #: elflink.c:2355
 msgid "%B: relocation size mismatch in %B section %A"
-msgstr ""
+msgstr "%B: невідповідність розміру пересування у розділі %B %A"
 
 #: elflink.c:2639
 #, c-format
 msgid "warning: type and size of dynamic symbol `%s' are not defined"
-msgstr ""
+msgstr "попередження: тип і розмір динамічного символу «%s» не визначено"
 
 #: elflink.c:3391
 msgid "%P: alternate ELF machine code found (%d) in %B, expecting %d\n"
-msgstr ""
+msgstr "%P: виявлено альтернативний машинний код ELF (%d) у %B, очікувалося %d\n"
 
 #: elflink.c:4037
 msgid "%B: %s: invalid version %u (max %d)"
-msgstr ""
+msgstr "%B: %s: некоректна версія, %u (максимум — %d)"
 
 #: elflink.c:4073
 msgid "%B: %s: invalid needed version %d"
-msgstr ""
+msgstr "%B: %s: некоректний запис потрібної версії %d"
 
 #: elflink.c:4269
 msgid "Warning: alignment %u of common symbol `%s' in %B is greater than the alignment (%u) of its section %A"
-msgstr ""
+msgstr "Попередження: вирівнювання %u загального символу «%s» у %B перевищує вирівнювання (%u) його розділу %A"
 
 #: elflink.c:4275
 msgid "Warning: alignment %u of symbol `%s' in %B is smaller than %u in %B"
-msgstr ""
+msgstr "Попередження: вирівнювання %u символу «%s» у %B є меншим за %u у %B"
 
 #: elflink.c:4290
 msgid "Warning: size of symbol `%s' changed from %lu in %B to %lu in %B"
-msgstr ""
+msgstr "Попередження: розмір символу «%s» змінено з %lu у %B на %lu у %B"
 
 #: elflink.c:4463
 msgid "%B: undefined reference to symbol '%s'"
-msgstr ""
+msgstr "%B: невизначене посилання на символ «%s»"
 
 #: elflink.c:4466
 msgid "note: '%s' is defined in DSO %B so try adding it to the linker command line"
-msgstr ""
+msgstr "зауваження: «%s» визначено у %B DSO, отже спробуємо додати його до командного рядка компонувальника"
 
 #: elflink.c:5781
 #, c-format
 msgid "%s: undefined version: %s"
-msgstr ""
+msgstr "%s: невизначена версія: %s"
 
 #: elflink.c:5849
 msgid "%B: .preinit_array section is not allowed in DSO"
-msgstr ""
+msgstr "%B: не можна використовувати розділ .preinit_array у DSO"
 
 #: elflink.c:7604
 #, c-format
 msgid "undefined %s reference in complex symbol: %s"
-msgstr ""
+msgstr "невизначене посилання, %s, у складеному символі: %s"
 
 #: elflink.c:7758
 #, c-format
 msgid "unknown operator '%c' in complex symbol"
-msgstr ""
+msgstr "невідомий оператор, «%c», у складеному символі"
 
 #: elflink.c:8097 elflink.c:8114 elflink.c:8151 elflink.c:8168
 msgid "%B: Unable to sort relocs - they are in more than one size"
-msgstr ""
+msgstr "%B: не вдалося впорядкувати пересування: їхні розміри не є однаковими"
 
 #: elflink.c:8128 elflink.c:8182
 msgid "%B: Unable to sort relocs - they are of an unknown size"
-msgstr ""
+msgstr "%B: не вдалося впорядкувати пересування: їхні розміри невідомі"
 
 #: elflink.c:8233
 msgid "Not enough memory to sort relocations"
-msgstr ""
+msgstr "Недостатньо пам’яті для впорядковування пересувань"
 
 #: elflink.c:8426
 msgid "%B: Too many sections: %d (>= %d)"
-msgstr ""
+msgstr "%B: забагато розділів: %d (>= %d)"
 
 #: elflink.c:8675
 msgid "%B: internal symbol `%s' in %B is referenced by DSO"
-msgstr ""
+msgstr "%B: на внутрішній символ «%s» у %B існує посилання з DSO"
 
 #: elflink.c:8677
 msgid "%B: hidden symbol `%s' in %B is referenced by DSO"
-msgstr ""
+msgstr "%B: на прихований символ «%s» у %B існує посилання з DSO"
 
 #: elflink.c:8679
 msgid "%B: local symbol `%s' in %B is referenced by DSO"
-msgstr ""
+msgstr "%B: на локальний символ «%s» у %B існує посилання з DSO"
 
 #: elflink.c:8776
 msgid "%B: could not find output section %A for input section %A"
-msgstr ""
+msgstr "%B: не вдалося знайти розділ виведення даних %A для розділу введення даних %A"
 
 #: elflink.c:8899
 msgid "%B: protected symbol `%s' isn't defined"
-msgstr ""
+msgstr "%B: захищений символ «%s» не визначено"
 
 #: elflink.c:8901
 msgid "%B: internal symbol `%s' isn't defined"
-msgstr ""
+msgstr "%B: внутрішній символ «%s» не визначено"
 
 #: elflink.c:8903
 msgid "%B: hidden symbol `%s' isn't defined"
-msgstr ""
+msgstr "%B: прихований символ «%s» не визначено"
 
 #: elflink.c:9432
 msgid "error: %B: size of section %A is not multiple of address size"
-msgstr ""
+msgstr "помилка: %B: розмір розділу %A не є кратним до розміру адреси"
 
 #: elflink.c:9479
 msgid "error: %B contains a reloc (0x%s) for section %A that references a non-existent global symbol"
-msgstr ""
+msgstr "помилка: %B містить пересування (0x%s) для розділу %A, яке посилається на загальний символ, якого не існує"
 
 #: elflink.c:10214
 msgid "%A has both ordered [`%A' in %B] and unordered [`%A' in %B] sections"
-msgstr ""
+msgstr "%A містить одразу впорядкований [«%A» у %B] і невпорядкований [«%A» у %B] розділи"
 
 #: elflink.c:10219
 #, c-format
 msgid "%A has both ordered and unordered sections"
-msgstr ""
+msgstr "%A містить одразу впорядкований і невпорядкований розділи"
 
 #: elflink.c:10784
 msgid "%B: file class %s incompatible with %s"
-msgstr ""
+msgstr "%B: клас файлів %s є несумісним з %s"
 
 #: elflink.c:11093 elflink.c:11137
 msgid "%B: could not find output section %s"
-msgstr ""
+msgstr "%B: не вдалося знайти розділ виведення даних, %s"
 
 #: elflink.c:11098
 #, c-format
 msgid "warning: %s section has zero size"
-msgstr ""
+msgstr "попередження: розмір розділу %s є нульовим"
 
 #: elflink.c:11143
 #, c-format
@@ -3068,48 +3090,48 @@ msgstr "попередження: розділ «%s» перетворено н�
 
 #: elflink.c:11212
 msgid "%P%X: read-only segment has dynamic relocations.\n"
-msgstr ""
+msgstr "%P%X: сегмент, призначений лише для читання, містить динамічні пересування.\n"
 
 #: elflink.c:11215
 msgid "%P: warning: creating a DT_TEXTREL in a shared object.\n"
-msgstr ""
+msgstr "%P: попередження: створюємо DT_TEXTREL у об’єкті спільного використання.\n"
 
 #: elflink.c:11402
 msgid "%P%X: can not read symbols: %E\n"
-msgstr ""
+msgstr "%P%X: не вдалося прочитати символи: %E\n"
 
 #: elflink.c:11792
 msgid "Removing unused section '%s' in file '%B'"
-msgstr ""
+msgstr "Вилучаємо невикористовуваний розділ «%s» у файлі «%B»"
 
 #: elflink.c:11998
 msgid "Warning: gc-sections option ignored"
-msgstr ""
+msgstr "Попередження: параметр gc-sections проігноровано"
 
 #: elflink.c:12277
 #, c-format
 msgid "Unrecognized INPUT_SECTION_FLAG %s\n"
-msgstr ""
+msgstr "Нерозпізнаний INPUT_SECTION_FLAG, %s\n"
 
 #: elfxx-mips.c:1234
 msgid "static procedure (no name)"
-msgstr ""
+msgstr "статична процедура (без назви)"
 
 #: elfxx-mips.c:5259
 msgid "MIPS16 and microMIPS functions cannot call each other"
-msgstr ""
+msgstr "Функції MIPS16 і microMIPS не можуть викликати одна одну"
 
 #: elfxx-mips.c:5856
 msgid "%B: %A+0x%lx: Direct jumps between ISA modes are not allowed; consider recompiling with interlinking enabled."
-msgstr ""
+msgstr "%B: %A+0x%lx: безпосередні переходи між режимами ISA заборонено; варто виконати повторне збирання з увімкненим взаємним компонуванням."
 
 #: elfxx-mips.c:6519 elfxx-mips.c:6742
 msgid "%B: Warning: bad `%s' option size %u smaller than its header"
-msgstr ""
+msgstr "%B: попередження: помилковий розмір «%s», %u, менший за його заголовок"
 
 #: elfxx-mips.c:7495 elfxx-mips.c:7620
 msgid "%B: Warning: cannot determine the target function for stub section `%s'"
-msgstr ""
+msgstr "%B: попередження: не вдалося визначити функцію призначення для розділу шаблона, «%s»"
 
 #: elfxx-mips.c:7749
 msgid "%B: Malformed reloc detected for section %s"
@@ -3117,11 +3139,11 @@ msgstr "%B: для розділу %s виявлено помилку у форм
 
 #: elfxx-mips.c:7801
 msgid "%B: GOT reloc at 0x%lx not expected in executables"
-msgstr ""
+msgstr "%B: пересування GOT у 0x%lx є неочікуваним у виконуваних файлах"
 
 #: elfxx-mips.c:7930
 msgid "%B: CALL16 reloc at 0x%lx not against global symbol"
-msgstr ""
+msgstr "%B: пересування CALL16 у 0x%lx не відносно загального символу"
 
 #: elfxx-mips.c:8645
 #, c-format
@@ -3130,11 +3152,11 @@ msgstr "нединамічні пересування посилаються н�
 
 #: elfxx-mips.c:9347
 msgid "%B: Can't find matching LO16 reloc against `%s' for %s at 0x%lx in section `%A'"
-msgstr ""
+msgstr "%B: не вдалося знайти відповідне пересування LO16 щодо «%s» для %s у 0x%lx у розділі «%A»"
 
 #: elfxx-mips.c:9486
 msgid "small-data section exceeds 64KB; lower small-data size limit (see option -G)"
-msgstr ""
+msgstr "розділ малих даних перевищує 64 кБ; нижчий за обмеження розміру малих даних (див. параметр -G)"
 
 #: elfxx-mips.c:9505
 msgid "JALX to a non-word-aligned address"
@@ -3159,7 +3181,7 @@ msgstr "Попередження: у %B використано -mdouble-float, �
 
 #: elfxx-mips.c:13761
 msgid "%B: endianness incompatible with that of the selected emulation"
-msgstr ""
+msgstr "%B: порядок байтів є несумісним з порядком байтів вибраної емуляції"
 
 #: elfxx-mips.c:13772
 msgid "%B: ABI is incompatible with that of the selected emulation"
@@ -3167,7 +3189,7 @@ msgstr "%B: ABI є несумісним з ABI вибраної емуляції
 
 #: elfxx-mips.c:13856
 msgid "%B: warning: linking abicalls files with non-abicalls files"
-msgstr ""
+msgstr "%B: попередження: компонування файлів abicalls з файлами без abicalls"
 
 #: elfxx-mips.c:13873
 msgid "%B: linking 32-bit code with 64-bit code"
@@ -3175,11 +3197,11 @@ msgstr "%B: компонування 32-бітового коду з 64-біто
 
 #: elfxx-mips.c:13901
 msgid "%B: linking %s module with previous %s modules"
-msgstr ""
+msgstr "%B: компонуємо модуль %s з попередніми модулями %s"
 
 #: elfxx-mips.c:13924
 msgid "%B: ABI mismatch: linking %s module with previous %s modules"
-msgstr ""
+msgstr "%B: невідповідність ABI: компонування модуля %s з попередніми модулями %s"
 
 #: elfxx-mips.c:13948
 msgid "%B: ASE mismatch: linking %s module with previous %s modules"
@@ -3258,11 +3280,11 @@ msgstr "Файлу-результату потрібна бібліотека с
 #: sparclinux.c:648 sparclinux.c:698
 #, c-format
 msgid "Symbol %s not defined for fixups\n"
-msgstr ""
+msgstr "Символ %s не визначено для адресних прив’язок\n"
 
 #: i386linux.c:722 m68klinux.c:728 sparclinux.c:722
 msgid "Warning: fixup count mismatch\n"
-msgstr ""
+msgstr "Попередження: невідповідність кількості адресних прив’язок\n"
 
 #: ieee.c:159
 #, c-format
@@ -3288,27 +3310,27 @@ msgstr "%B: неочікуваний тип після ATN"
 
 #: ihex.c:230
 msgid "%B:%d: unexpected character `%s' in Intel Hex file"
-msgstr ""
+msgstr "%B:%d: неочікуваний символ «%s» у шістнадцятковому файлі Intel"
 
 #: ihex.c:337
 msgid "%B:%u: bad checksum in Intel Hex file (expected %u, found %u)"
-msgstr ""
+msgstr "%B:%u: помилкова контрольна сума у шістнадцятковому файлі Intel (очікувалося %u, виявлено %u)"
 
 #: ihex.c:392
 msgid "%B:%u: bad extended address record length in Intel Hex file"
-msgstr ""
+msgstr "%B:%u: помилкова довжина запису розширеної адреси у шістнадцятковому файлі Intel"
 
 #: ihex.c:409
 msgid "%B:%u: bad extended start address length in Intel Hex file"
-msgstr ""
+msgstr "%B:%u: помилкова довжина розширеної початкової адреси у шістнадцятковому файлі Intel"
 
 #: ihex.c:426
 msgid "%B:%u: bad extended linear address record length in Intel Hex file"
-msgstr ""
+msgstr "%B:%u: помилкова довжина запису розширеної лінійної адреси у шістнадцятковому файлі Intel"
 
 #: ihex.c:443
 msgid "%B:%u: bad extended linear start address length in Intel Hex file"
-msgstr ""
+msgstr "%B:%u: помилкова довжина розширеної лінійної початкової адреси у шістнадцятковому файлі Intel"
 
 #: ihex.c:460
 msgid "%B:%u: unrecognized ihex type %u in Intel Hex file"
@@ -3333,11 +3355,11 @@ msgstr "%B: не вдалося отримати розпакований роз
 
 #: libbfd.c:1012
 msgid "%B: compiled for a big endian system and target is little endian"
-msgstr ""
+msgstr "%B: зібрано для системи з прямим порядком байтів, а призначенням є система зі зворотним порядком байтів"
 
 #: libbfd.c:1014
 msgid "%B: compiled for a little endian system and target is big endian"
-msgstr ""
+msgstr "%B: зібрано для системи зі зворотним порядком байтів, а призначенням є система зі прямим порядком байтів"
 
 #: libbfd.c:1043
 #, c-format
@@ -3376,65 +3398,65 @@ msgstr "%B: дублікат розділу «%A» має інший вміст\
 
 #: mach-o.c:407
 msgid "bfd_mach_o_canonicalize_symtab: unable to load symbols"
-msgstr ""
+msgstr "bfd_mach_o_canonicalize_symtab: не вдалося завантажити символи"
 
 #: mach-o.c:1301
 #, c-format
 msgid "unable to write unknown load command 0x%lx"
-msgstr ""
+msgstr "не вдалося записати невідому команду завантаження, 0x%lx"
 
 #: mach-o.c:1789
 #, c-format
 msgid "bfd_mach_o_read_symtab_symbol: unable to read %d bytes at %lu"
-msgstr ""
+msgstr "bfd_mach_o_read_symtab_symbol: не вдалося прочитати %d байтів у %lu"
 
 #: mach-o.c:1807
 #, c-format
 msgid "bfd_mach_o_read_symtab_symbol: name out of range (%lu >= %lu)"
-msgstr ""
+msgstr "bfd_mach_o_read_symtab_symbol: назва за межами доступного діапазону (%lu >= %lu)"
 
 #: mach-o.c:1892
 #, c-format
 msgid "bfd_mach_o_read_symtab_symbol: symbol \"%s\" specified invalid section %d (max %lu): setting to undefined"
-msgstr ""
+msgstr "bfd_mach_o_read_symtab_symbol: символ «%s» визначає некоректний розділ %d (max %lu): встановлюємо у невизначене значення"
 
 #: mach-o.c:1900
 #, c-format
 msgid "bfd_mach_o_read_symtab_symbol: symbol \"%s\" is unsupported 'indirect' reference: setting to undefined"
-msgstr ""
+msgstr "bfd_mach_o_read_symtab_symbol: символ «%s» є непідтримуваним посиланням «indirect»: встановлюємо у невизначене значення"
 
 #: mach-o.c:1906
 #, c-format
 msgid "bfd_mach_o_read_symtab_symbol: symbol \"%s\" specified invalid type field 0x%x: setting to undefined"
-msgstr ""
+msgstr "bfd_mach_o_read_symtab_symbol: символ «%s» визначає некоректний тип поля 0x%x: встановлюємо у невизначене значення"
 
 #: mach-o.c:1979
 msgid "bfd_mach_o_read_symtab_symbols: unable to allocate memory for symbols"
-msgstr ""
+msgstr "bfd_mach_o_read_symtab_symbols: не вдалося отримати область пам’яті для символів"
 
 #: mach-o.c:2014
 #, c-format
 msgid "bfd_mach_o_read_dysymtab_symbol: unable to read %lu bytes at %lu"
-msgstr ""
+msgstr "bfd_mach_o_read_dysymtab_symbol: не вдалося прочитати %lu байтів з %lu"
 
 #: mach-o.c:2734
 #, c-format
 msgid "unable to read unknown load command 0x%lx"
-msgstr ""
+msgstr "не вдалося прочитати невідому команду завантаження, 0x%lx"
 
 #: mach-o.c:2915
 #, c-format
 msgid "bfd_mach_o_scan: unknown architecture 0x%lx/0x%lx"
-msgstr ""
+msgstr "bfd_mach_o_scan: невідома архітектура, 0x%lx/0x%lx"
 
 #: mach-o.c:3011
 #, c-format
 msgid "unknown header byte-order value 0x%lx"
-msgstr ""
+msgstr "невідоме значення порядку байтів у заголовку, 0x%lx"
 
 #: mach-o.c:3577
 msgid "Mach-O header:\n"
-msgstr ""
+msgstr "заголовок Mach-O:\n"
 
 #: mach-o.c:3578
 #, c-format
@@ -3444,32 +3466,32 @@ msgstr ""
 #: mach-o.c:3579
 #, c-format
 msgid " cputype   : %08lx (%s)\n"
-msgstr ""
+msgstr " тип проц. : %08lx (%s)\n"
 
 #: mach-o.c:3581
 #, c-format
 msgid " cpusubtype: %08lx\n"
-msgstr ""
+msgstr " підтип проц.: %08lx\n"
 
 #: mach-o.c:3582
 #, c-format
 msgid " filetype  : %08lx (%s)\n"
-msgstr ""
+msgstr " тип файла : %08lx (%s)\n"
 
 #: mach-o.c:3585
 #, c-format
 msgid " ncmds     : %08lx (%lu)\n"
-msgstr ""
+msgstr " кть_команд: %08lx (%lu)\n"
 
 #: mach-o.c:3586
 #, c-format
 msgid " sizeofcmds: %08lx\n"
-msgstr ""
+msgstr " розмір_кмд: %08lx\n"
 
 #: mach-o.c:3587
 #, c-format
 msgid " flags     : %08lx ("
-msgstr ""
+msgstr " прапорці  : %08lx ("
 
 #: mach-o.c:3589 vms-alpha.c:7674
 msgid ")\n"
@@ -3478,7 +3500,7 @@ msgstr ")\n"
 #: mach-o.c:3590
 #, c-format
 msgid " reserved  : %08x\n"
-msgstr ""
+msgstr " зарезерв. : %08x\n"
 
 #: mach-o.c:3600
 msgid "Segments and Sections:\n"
@@ -3491,22 +3513,22 @@ msgstr " #: Назва сегмента   Назва розділу    Адре�
 #: merge.c:832
 #, c-format
 msgid "%s: access beyond end of merged section (%ld)"
-msgstr ""
+msgstr "%s: доступ за кінцем об’єднаного розділу (%ld)"
 
 #: mmo.c:456
 #, c-format
 msgid "%s: No core to allocate section name %s\n"
-msgstr ""
+msgstr "%s: немає основи для отримання назви розділу %s\n"
 
 #: mmo.c:531
 #, c-format
 msgid "%s: No core to allocate a symbol %d bytes long\n"
-msgstr ""
+msgstr "%s: немає основи для отримання символу довжиною %d байтів\n"
 
 #: mmo.c:1187
 #, c-format
 msgid "%s: invalid mmo file: initialization value for $255 is not `Main'\n"
-msgstr ""
+msgstr "%s: некоректний файл mmo: значення ініціалізації для $255 не дорівнює «Main»\n"
 
 #: mmo.c:1332
 #, c-format
@@ -3516,12 +3538,12 @@ msgstr ""
 #: mmo.c:1565
 #, c-format
 msgid "%s: invalid mmo file: unsupported lopcode `%d'\n"
-msgstr ""
+msgstr "%s: некоректний файл mmo: непідтримуване значення lopcode, «%d»\n"
 
 #: mmo.c:1575
 #, c-format
 msgid "%s: invalid mmo file: expected YZ = 1 got YZ = %d for lop_quote\n"
-msgstr ""
+msgstr "%s: некоректний файл mmo: очікувалося YZ = 1, отримано YZ = %d для lop_quote\n"
 
 #: mmo.c:1611
 #, c-format
@@ -3531,7 +3553,7 @@ msgstr ""
 #: mmo.c:1657
 #, c-format
 msgid "%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_fixo\n"
-msgstr ""
+msgstr "%s: некоректний файл mmo: очікувалося z = 1 або z = 2, отримано z = %d для lop_fixo\n"
 
 #: mmo.c:1696
 #, c-format
@@ -3541,7 +3563,7 @@ msgstr ""
 #: mmo.c:1705
 #, c-format
 msgid "%s: invalid mmo file: expected z = 16 or z = 24, got z = %d for lop_fixrx\n"
-msgstr ""
+msgstr "%s: некоректний файл mmo: очікувалося z = 16 або z = 24, отримано z = %d для lop_fixrx\n"
 
 #: mmo.c:1728
 #, c-format
@@ -3551,7 +3573,7 @@ msgstr ""
 #: mmo.c:1751
 #, c-format
 msgid "%s: cannot allocate file name for file number %d, %d bytes\n"
-msgstr ""
+msgstr "%s: не вдалося розмістити назву файла для файла з номером %d, %d байтів\n"
 
 #: mmo.c:1771
 #, c-format
@@ -3561,17 +3583,17 @@ msgstr ""
 #: mmo.c:1784
 #, c-format
 msgid "%s: invalid mmo file: file name for number %d was not specified before use\n"
-msgstr ""
+msgstr "%s: некоректний файл mmo: назву файла для номера %d не було вказано до використання\n"
 
 #: mmo.c:1890
 #, c-format
 msgid "%s: invalid mmo file: fields y and z of lop_stab non-zero, y: %d, z: %d\n"
-msgstr ""
+msgstr "%s: некоректний файл mmo: поля y і z lop_stab є ненульовими, y: %d, z: %d\n"
 
 #: mmo.c:1926
 #, c-format
 msgid "%s: invalid mmo file: lop_end not last item in file\n"
-msgstr ""
+msgstr "%s: некоректний файл mmo: lop_end не є останнім записом у файлі\n"
 
 #: mmo.c:1939
 #, c-format
@@ -3581,12 +3603,12 @@ msgstr ""
 #: mmo.c:2649
 #, c-format
 msgid "%s: invalid symbol table: duplicate symbol `%s'\n"
-msgstr ""
+msgstr "%s: некоректна таблиця символів: дублювання символу «%s»\n"
 
 #: mmo.c:2889
 #, c-format
 msgid "%s: Bad symbol definition: `Main' set to %s rather than the start address %s\n"
-msgstr ""
+msgstr "%s: помилкове визначення символу: «Main» встановлено у %s, а не у початкову адресу %s\n"
 
 #: mmo.c:2981
 #, c-format
@@ -3596,22 +3618,22 @@ msgstr ""
 #: mmo.c:3026
 #, c-format
 msgid "%s: internal error, symbol table changed size from %d to %d words\n"
-msgstr ""
+msgstr "%s: внутрішня помилка, змінено розмір таблиці символів з %d до %d слів\n"
 
 #: mmo.c:3078
 #, c-format
 msgid "%s: internal error, internal register section %s had contents\n"
-msgstr ""
+msgstr "%s: внутрішня помилка, внутрішній розділ регістрів, %s, містив дані\n"
 
 #: mmo.c:3129
 #, c-format
 msgid "%s: no initialized registers; section length 0\n"
-msgstr ""
+msgstr "%s: немає ініціалізованих регістрів, довжина розділу дорівнює 0\n"
 
 #: mmo.c:3135
 #, c-format
 msgid "%s: too many initialized registers; section length %ld\n"
-msgstr ""
+msgstr "%s: занадто багато ініціалізованих регістрів; довжина розділу — %ld\n"
 
 #: mmo.c:3140
 #, c-format
@@ -3621,7 +3643,7 @@ msgstr ""
 #: oasys.c:882
 #, c-format
 msgid "%s: can not represent section `%s' in oasys"
-msgstr ""
+msgstr "%s: відтворення розділу «%s» у форматі oasys неможливе"
 
 #: osf-core.c:140
 #, c-format
@@ -3630,7 +3652,7 @@ msgstr ""
 
 #: pe-mips.c:607
 msgid "%B: `ld -r' not supported with PE MIPS objects\n"
-msgstr ""
+msgstr "%B: підтримки «ld -r» з об’єктами PE MIPS не передбачено\n"
 
 #. OK, at this point the following variables are set up:
 #. src = VMA of the memory we're fixing up
@@ -3642,7 +3664,7 @@ msgstr "%B: нереалізований %s\n"
 
 #: pe-mips.c:745
 msgid "%B: jump too far away\n"
-msgstr ""
+msgstr "%B: занадто далекий перехід\n"
 
 #: pe-mips.c:771
 msgid "%B: bad pair/reflo after refhi\n"
@@ -3651,7 +3673,7 @@ msgstr ""
 #: pef.c:520
 #, c-format
 msgid "bfd_pef_scan: unknown architecture 0x%lx"
-msgstr ""
+msgstr "bfd_pef_scan: невідома архітектура, 0x%lx"
 
 #: pei-x86_64.c:444
 #, c-format
@@ -3674,15 +3696,15 @@ msgstr ""
 #. XXX code yet to be written.
 #: peicode.h:751
 msgid "%B: Unhandled import type; %x"
-msgstr ""
+msgstr "%B: непридатний до обробки тип імпортування; %x"
 
 #: peicode.h:756
 msgid "%B: Unrecognised import type; %x"
-msgstr ""
+msgstr "%B: нерозпізнаний тип імпортування; %x"
 
 #: peicode.h:770
 msgid "%B: Unrecognised import name type; %x"
-msgstr ""
+msgstr "%B: нерозпізнана назва імпортування; %x"
 
 #: peicode.h:1166
 msgid "%B: Unrecognised machine type (0x%x) in Import Library Format archive"
@@ -3698,7 +3720,7 @@ msgstr ""
 
 #: peicode.h:1227
 msgid "%B: string not null terminated in ILF object file."
-msgstr ""
+msgstr "%B: у об’єктному файлі ILF рядок не завершується нульовим символом."
 
 #: ppcboot.c:414
 #, c-format
@@ -3722,7 +3744,7 @@ msgstr "Довжина             = 0x%.8lx (%ld)\n"
 #: ppcboot.c:421
 #, c-format
 msgid "Flag field          = 0x%.2x\n"
-msgstr ""
+msgstr "Поле прапорців      = 0x%.2x\n"
 
 #: ppcboot.c:427
 #, c-format
@@ -3755,12 +3777,12 @@ msgstr "Довжина розділу[%d] = 0x%.8lx (%ld)\n"
 
 #: reloc.c:6160
 msgid "INPUT_SECTION_FLAGS are not supported.\n"
-msgstr ""
+msgstr "Підтримки INPUT_SECTION_FLAGS не передбачено.\n"
 
 #: rs6000-core.c:448
 #, c-format
 msgid "%s: warning core file truncated"
-msgstr ""
+msgstr "%s: попередження: файл core обрізано"
 
 #: som.c:5471
 #, c-format
@@ -3775,11 +3797,11 @@ msgstr "som_sizeof_headers не реалізовано"
 
 #: srec.c:261
 msgid "%B:%d: Unexpected character `%s' in S-record file\n"
-msgstr ""
+msgstr "%B:%d: неочікуваний символ «%s» у файлі записів S\n"
 
 #: srec.c:567 srec.c:600
 msgid "%B:%d: Bad checksum in S-record file\n"
-msgstr ""
+msgstr "%B:%d: помилкова контрольна сума у файлі записів S\n"
 
 #: stabs.c:279
 msgid "%B(%A+0x%lx): Stabs entry has invalid string index."
@@ -3792,22 +3814,22 @@ msgstr "Непідтримуване пересування .stab"
 #: vms-alpha.c:1299
 #, c-format
 msgid "Unknown EGSD subtype %d"
-msgstr ""
+msgstr "Невідомий підтип EGSD, %d"
 
 #: vms-alpha.c:1330
 #, c-format
 msgid "Stack overflow (%d) in _bfd_vms_push"
-msgstr ""
+msgstr "Переповнення стека (%d) у _bfd_vms_push"
 
 #: vms-alpha.c:1343
 msgid "Stack underflow in _bfd_vms_pop"
-msgstr ""
+msgstr "Переповнення стека у _bfd_vms_pop"
 
 #. These names have not yet been added to this switch statement.
 #: vms-alpha.c:1580
 #, c-format
 msgid "unknown ETIR command %d"
-msgstr ""
+msgstr "невідома команда ETIR, %d"
 
 #: vms-alpha.c:1767
 #, c-format
@@ -3817,7 +3839,7 @@ msgstr "помилковий номер розділу у %s"
 #: vms-alpha.c:1780
 #, c-format
 msgid "unsupported STA cmd %s"
-msgstr ""
+msgstr "непідтримувана команда STA, %s"
 
 #. Insert field.
 #. Unsigned shift.
@@ -3837,12 +3859,12 @@ msgstr "%s: не реалізовано"
 #: vms-alpha.c:2218
 #, c-format
 msgid "invalid use of %s with contexts"
-msgstr ""
+msgstr "некоректне використання %s з контекстами"
 
 #: vms-alpha.c:2252
 #, c-format
 msgid "reserved cmd %d"
-msgstr ""
+msgstr "зарезервована команда %d"
 
 #: vms-alpha.c:2337
 msgid "Object module NOT error-free !\n"
@@ -3856,7 +3878,7 @@ msgstr "Символ %s замінено на %s\n"
 #: vms-alpha.c:3769
 #, c-format
 msgid "SEC_RELOC with no relocs in section %s"
-msgstr ""
+msgstr "SEC_RELOC без пересувань у розділі %s"
 
 #: vms-alpha.c:3822 vms-alpha.c:4049
 #, c-format
@@ -4050,7 +4072,7 @@ msgstr ""
 #: vms-alpha.c:5745
 #, c-format
 msgid "   transfer address   : 0x%08x\n"
-msgstr ""
+msgstr "   адреса перенесення : 0x%08x\n"
 
 #: vms-alpha.c:5754
 msgid " WEAK"
@@ -4140,12 +4162,12 @@ msgstr "  EGSD (довж=%u):\n"
 #: vms-alpha.c:5820
 #, c-format
 msgid "  EGSD entry %2u (type: %u, len: %u): "
-msgstr ""
+msgstr "  запис EGSD %2u (тип: %u, довж: %u): "
 
 #: vms-alpha.c:5832
 #, c-format
 msgid "PSC - Program section definition\n"
-msgstr ""
+msgstr "PSC — визначення розділу програми\n"
 
 #: vms-alpha.c:5833 vms-alpha.c:5850
 #, c-format
@@ -4195,7 +4217,7 @@ msgstr "   назва         : %.*s\n"
 #: vms-alpha.c:5873
 #, c-format
 msgid "SYM - Global symbol definition\n"
-msgstr ""
+msgstr "SYM — визначення загальних символів\n"
 
 #: vms-alpha.c:5874 vms-alpha.c:5934 vms-alpha.c:5955 vms-alpha.c:5974
 #, c-format
@@ -4205,7 +4227,7 @@ msgstr "   прапорці: 0x%04x"
 #: vms-alpha.c:5877
 #, c-format
 msgid "   psect offset: 0x%08x\n"
-msgstr ""
+msgstr "   відступ psect: 0x%08x\n"
 
 #: vms-alpha.c:5881
 #, c-format
@@ -4230,7 +4252,7 @@ msgstr "   назва       : %.*s\n"
 #: vms-alpha.c:5895
 #, c-format
 msgid "SYM - Global symbol reference\n"
-msgstr ""
+msgstr "SYM — посилання на загальні символи\n"
 
 #: vms-alpha.c:5907
 #, c-format
@@ -4285,7 +4307,7 @@ msgstr ""
 #: vms-alpha.c:5939
 #, c-format
 msgid "   entry point: 0x%08x\n"
-msgstr ""
+msgstr "   точка входу: 0x%08x\n"
 
 #: vms-alpha.c:5941
 #, c-format
@@ -4305,12 +4327,12 @@ msgstr ""
 #: vms-alpha.c:5958
 #, c-format
 msgid "   vector      : 0x%08x\n"
-msgstr ""
+msgstr "   вектор      : 0x%08x\n"
 
 #: vms-alpha.c:5960 vms-alpha.c:5979
 #, c-format
 msgid "   psect offset: %u\n"
-msgstr ""
+msgstr "   відступ psect: %u\n"
 
 #: vms-alpha.c:5973
 #, c-format
@@ -4320,12 +4342,12 @@ msgstr ""
 #: vms-alpha.c:5977
 #, c-format
 msgid "   version mask: 0x%08x\n"
-msgstr ""
+msgstr "   маска версії: 0x%08x\n"
 
 #: vms-alpha.c:5988
 #, c-format
 msgid "unhandled egsd entry type %u\n"
-msgstr ""
+msgstr "непридатний до обробки тип запису egsd, %u\n"
 
 #: vms-alpha.c:6022
 #, c-format
@@ -4335,27 +4357,27 @@ msgstr ""
 #: vms-alpha.c:6025
 #, c-format
 msgid "    psect idx 1: %u, offset 1: 0x%08x %08x\n"
-msgstr ""
+msgstr "    інд. psect 1: %u, відступ 1: 0x%08x %08x\n"
 
 #: vms-alpha.c:6029
 #, c-format
 msgid "    psect idx 2: %u, offset 2: 0x%08x %08x\n"
-msgstr ""
+msgstr "    інд. psect 2: %u, відступ 2: 0x%08x %08x\n"
 
 #: vms-alpha.c:6034
 #, c-format
 msgid "    psect idx 3: %u, offset 3: 0x%08x %08x\n"
-msgstr ""
+msgstr "    інд. psect 3: %u, відступ 3: 0x%08x %08x\n"
 
 #: vms-alpha.c:6039
 #, c-format
 msgid "    global name: %.*s\n"
-msgstr ""
+msgstr "    загальна назва: %.*s\n"
 
 #: vms-alpha.c:6049
 #, c-format
 msgid "  %s (len=%u+%u):\n"
-msgstr ""
+msgstr "  %s (довж=%u+%u):\n"
 
 #: vms-alpha.c:6064
 #, c-format
@@ -4751,7 +4773,7 @@ msgstr "   відступ: 0x%08x, значення: 0x%08x\n"
 #: vms-alpha.c:6524
 #, c-format
 msgid "  image %u (%u entries), offsets:\n"
-msgstr ""
+msgstr "  образ %u (%u записів), відступи:\n"
 
 #: vms-alpha.c:6531
 #, c-format
@@ -4842,7 +4864,7 @@ msgstr "(дескриптор)\n"
 #: vms-alpha.c:6750
 #, c-format
 msgid "(trailing value)\n"
-msgstr ""
+msgstr "(хвостове значення)\n"
 
 #: vms-alpha.c:6753
 #, c-format
@@ -4852,7 +4874,7 @@ msgstr ""
 #: vms-alpha.c:6756
 #, c-format
 msgid "(at bit offset %u)\n"
-msgstr ""
+msgstr "(за відступом у бітах %u)\n"
 
 #: vms-alpha.c:6759
 #, c-format
@@ -4972,7 +4994,7 @@ msgstr "blkend: розмір: 0x%08x\n"
 #: vms-alpha.c:7009
 #, c-format
 msgid "typspec (len: %u)\n"
-msgstr ""
+msgstr "typspec (довж.: %u)\n"
 
 #: vms-alpha.c:7016
 #, c-format
@@ -5087,7 +5109,7 @@ msgstr "    pc: 0x%08x\n"
 #: vms-alpha.c:7153
 #, c-format
 msgid "delta pc +%-4d"
-msgstr ""
+msgstr "приріст pc +%-4d"
 
 #: vms-alpha.c:7156
 #, c-format
@@ -5097,7 +5119,7 @@ msgstr "    pc: 0x%08x рядок: %5u\n"
 #: vms-alpha.c:7161
 #, c-format
 msgid "    *unhandled* cmd %u\n"
-msgstr ""
+msgstr "    *непридатна* команда %u\n"
 
 #: vms-alpha.c:7176
 #, c-format
@@ -5147,7 +5169,7 @@ msgstr ""
 #: vms-alpha.c:7250
 #, c-format
 msgid "   *unhandled* cmd %u\n"
-msgstr ""
+msgstr "   *непридатна* команда %u\n"
 
 #: vms-alpha.c:7262
 #, c-format
@@ -5216,6 +5238,8 @@ msgid ""
 "\n"
 " version array off: %u\n"
 msgstr ""
+"\n"
+" відступ масиву версії: %u\n"
 
 #: vms-alpha.c:7351
 #, c-format
@@ -5273,7 +5297,7 @@ msgstr "BASE_IMAGE       "
 
 #: vms-alpha.c:7434
 msgid "MEMORY_MANAGEMENT"
-msgstr ""
+msgstr "MEMORY_MANAGEMENT"
 
 #: vms-alpha.c:7437
 msgid "IO               "
@@ -5281,19 +5305,19 @@ msgstr "IO               "
 
 #: vms-alpha.c:7440
 msgid "FILES_VOLUMES    "
-msgstr ""
+msgstr "FILES_VOLUMES    "
 
 #: vms-alpha.c:7443
 msgid "PROCESS_SCHED    "
-msgstr ""
+msgstr "PROCESS_SCHED    "
 
 #: vms-alpha.c:7446
 msgid "SYSGEN           "
-msgstr ""
+msgstr "SYSGEN           "
 
 #: vms-alpha.c:7449
 msgid "CLUSTERS_LOCKMGR "
-msgstr ""
+msgstr "CLUSTERS_LOCKMGR "
 
 #: vms-alpha.c:7452
 msgid "LOGICAL_NAMES    "
@@ -5359,12 +5383,12 @@ msgstr ": %u.%u\n"
 #: vms-alpha.c:7507 vms-alpha.c:7766
 #, c-format
 msgid "cannot read EIHA\n"
-msgstr ""
+msgstr "не вдалося прочитати EIHA\n"
 
 #: vms-alpha.c:7510
 #, c-format
 msgid "Image activation:  (size=%u)\n"
-msgstr ""
+msgstr "Активація образу:  (розмір=%u)\n"
 
 #: vms-alpha.c:7512
 #, c-format
@@ -5414,12 +5438,12 @@ msgstr " час компонування : %s\n"
 #: vms-alpha.c:7545
 #, c-format
 msgid " image ident      : %.*s\n"
-msgstr ""
+msgstr " ід. образу         : %.*s\n"
 
 #: vms-alpha.c:7547
 #, c-format
 msgid " linker ident     : %.*s\n"
-msgstr ""
+msgstr " ід. компонувальника: %.*s\n"
 
 #: vms-alpha.c:7549
 #, c-format
@@ -5429,7 +5453,7 @@ msgstr ""
 #: vms-alpha.c:7559
 #, c-format
 msgid "cannot read EIHS\n"
-msgstr ""
+msgstr "не вдалося прочитати EIHS\n"
 
 #: vms-alpha.c:7562
 #, c-format
@@ -5439,12 +5463,12 @@ msgstr ""
 #: vms-alpha.c:7567
 #, c-format
 msgid " debug symbol table : vbn: %u, size: %u (0x%x)\n"
-msgstr ""
+msgstr " таблиця діагностичних символів: vbn: %u, розмір: %u (0x%x)\n"
 
 #: vms-alpha.c:7571
 #, c-format
 msgid " global symbol table: vbn: %u, records: %u\n"
-msgstr ""
+msgstr " таблиця загальних символів: vbn: %u, записів: %u\n"
 
 #: vms-alpha.c:7575
 #, c-format
@@ -5454,7 +5478,7 @@ msgstr ""
 #: vms-alpha.c:7588
 #, c-format
 msgid "cannot read EISD\n"
-msgstr ""
+msgstr "не вдалося прочитати EISD\n"
 
 #: vms-alpha.c:7598
 #, c-format
@@ -5464,12 +5488,12 @@ msgstr ""
 #: vms-alpha.c:7605
 #, c-format
 msgid " section: base: 0x%08x%08x size: 0x%08x\n"
-msgstr ""
+msgstr " розділ: основа: 0x%08x%08x розмір: 0x%08x\n"
 
 #: vms-alpha.c:7610
 #, c-format
 msgid " flags: 0x%04x"
-msgstr ""
+msgstr " прапорці: 0x%04x"
 
 #: vms-alpha.c:7647
 #, c-format
@@ -5513,7 +5537,7 @@ msgstr "не вдалося прочитати DMT\n"
 #: vms-alpha.c:7690
 #, c-format
 msgid "Debug module table:\n"
-msgstr ""
+msgstr "Таблиця діагностичних символів:\n"
 
 #: vms-alpha.c:7699
 #, c-format
@@ -5523,7 +5547,7 @@ msgstr "не вдалося прочитати заголовок DMT\n"
 #: vms-alpha.c:7704
 #, c-format
 msgid " module offset: 0x%08x, size: 0x%08x, (%u psects)\n"
-msgstr ""
+msgstr " відступ модуля: 0x%08x, розмір: 0x%08x, (%u psect)\n"
 
 #: vms-alpha.c:7714
 #, c-format
@@ -5548,7 +5572,7 @@ msgstr "не вдалося прочитати GST\n"
 #: vms-alpha.c:7744
 #, c-format
 msgid "Global symbol table:\n"
-msgstr ""
+msgstr "Таблиця загальних символів:\n"
 
 #: vms-alpha.c:7772
 #, c-format
@@ -5618,12 +5642,12 @@ msgstr "  lppsbfixoff: %5u\n"
 #: vms-alpha.c:7816
 #, c-format
 msgid " Shareable images:\n"
-msgstr ""
+msgstr " Образи спільного використання:\n"
 
 #: vms-alpha.c:7820
 #, c-format
 msgid "  %u: size: %u, flags: 0x%02x, name: %.*s\n"
-msgstr ""
+msgstr "  %u: розмір: %u, прапорці: 0x%02x, назва: %.*s\n"
 
 #: vms-alpha.c:7827
 #, c-format
@@ -5658,12 +5682,12 @@ msgstr ""
 #: vms-alpha.c:7861
 #, c-format
 msgid " Change Protection (%u entries):\n"
-msgstr ""
+msgstr " Зміна захисту (%u записи):\n"
 
 #: vms-alpha.c:7866
 #, c-format
 msgid "  base: 0x%08x %08x, size: 0x%08x, prot: 0x%08x "
-msgstr ""
+msgstr "  осн.: 0x%08x %08x, розм: 0x%08x,  зах.: 0x%08x "
 
 #. FIXME: we do not yet support relocatable link.  It is not obvious
 #. how to do it for debug infos.
@@ -5704,7 +5728,7 @@ msgstr "%B: «%s» містить номери рядків, але не міс�
 
 #: xcofflink.c:1468
 msgid "%B: class %d symbol `%s' has no aux entries"
-msgstr ""
+msgstr "%B: клас %d, символ «%s» не має допоміжних записів"
 
 #: xcofflink.c:1490
 msgid "%B: symbol `%s' has unrecognized csect type %d"
