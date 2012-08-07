@@ -1758,6 +1758,17 @@ operand_type_register_match (i386_operand_type m0,
 }
 
 static INLINE unsigned int
+register_number (const reg_entry *r)
+{
+  unsigned int nr = r->reg_num;
+
+  if (r->reg_flags & RegRex)
+    nr += 8;
+
+  return nr;
+}
+
+static INLINE unsigned int
 mode_from_disp_size (i386_operand_type t)
 {
   if (t.bitfield.disp8)
@@ -2830,12 +2841,7 @@ build_vex_prefix (const insn_template *t)
 
   /* Check register specifier.  */
   if (i.vex.register_specifier)
-    {
-      register_specifier = i.vex.register_specifier->reg_num;
-      if ((i.vex.register_specifier->reg_flags & RegRex))
-	register_specifier += 8;
-      register_specifier = ~register_specifier & 0xf;
-    }
+    register_specifier = ~register_number (i.vex.register_specifier) & 0xf;
   else
     register_specifier = 0xf;
 
@@ -2974,16 +2980,17 @@ process_immext (void)
 {
   expressionS *exp;
 
-  if (i.tm.cpu_flags.bitfield.cpusse3 && i.operands > 0)
+  if ((i.tm.cpu_flags.bitfield.cpusse3 || i.tm.cpu_flags.bitfield.cpusvme)
+      && i.operands > 0)
     {
-      /* SSE3 Instructions have the fixed operands with an opcode
-	 suffix which is coded in the same place as an 8-bit immediate
-	 field would be.  Here we check those operands and remove them
-	 afterwards.  */
+      /* MONITOR/MWAIT as well as SVME instructions have fixed operands
+	 with an opcode suffix which is coded in the same place as an
+	 8-bit immediate field would be.
+	 Here we check those operands and remove them afterwards.  */
       unsigned int x;
 
       for (x = 0; x < i.operands; x++)
-	if (i.op[x].regs->reg_num != x)
+	if (register_number (i.op[x].regs) != x)
 	  as_bad (_("can't use register '%s%s' as operand %d in '%s'."),
 		  register_prefix, i.op[x].regs->reg_name, x + 1,
 		  i.tm.name);
@@ -5071,7 +5078,7 @@ process_operands (void)
 	{
 	  /* The first operand is implicit and must be xmm0.  */
 	  gas_assert (operand_type_equal (&i.types[0], &regxmm));
-	  if (i.op[0].regs->reg_num != 0)
+	  if (register_number (i.op[0].regs) != 0)
 	    return bad_implicit_operand (1);
 
 	  if (i.tm.opcode_modifier.vexsources == VEX3SOURCES)
@@ -5145,7 +5152,7 @@ duplicate:
       gas_assert (i.reg_operands
 		  && (operand_type_equal (&i.types[0], &regxmm)
 		      || operand_type_equal (&i.types[0], &regymm)));
-      if (i.op[0].regs->reg_num != 0)
+      if (register_number (i.op[0].regs) != 0)
 	return bad_implicit_operand (i.types[0].bitfield.regxmm);
 
       for (j = 1; j < i.operands; j++)
@@ -5348,10 +5355,7 @@ build_modrm_byte (void)
                       || operand_type_equal (&i.tm.operand_types[reg_slot],
                                              &regymm));
           exp->X_op = O_constant;
-          exp->X_add_number
-              = ((i.op[reg_slot].regs->reg_num
-                  + ((i.op[reg_slot].regs->reg_flags & RegRex) ? 8 : 0))
-		 << 4);
+          exp->X_add_number = register_number (i.op[reg_slot].regs) << 4;
         }
       else
         {
@@ -5395,9 +5399,7 @@ build_modrm_byte (void)
 		      || operand_type_equal (&i.tm.operand_types[reg_slot],
 					     &regymm));
           i.op[imm_slot].imms->X_add_number
-              |= ((i.op[reg_slot].regs->reg_num
-                   + ((i.op[reg_slot].regs->reg_flags & RegRex) ? 8 : 0))
-		  << 4);
+              |= register_number (i.op[reg_slot].regs) << 4;
         }
 
       gas_assert (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
@@ -7413,7 +7415,7 @@ i386_index_check (const char *operand_string)
 		   ? i.base_reg->reg_type.bitfield.reg32
 		   : i.base_reg->reg_type.bitfield.reg16))
 	ok = 0;
-      else if (i.base_reg->reg_num != expected)
+      else if (register_number (i.base_reg) != expected)
 	ok = -1;
 
       if (ok < 0)
@@ -7428,7 +7430,7 @@ i386_index_check (const char *operand_string)
 		 : (flag_code == CODE_16BIT) ^ !i.prefix[ADDR_PREFIX]
 		   ? i386_regtab[j].reg_type.bitfield.reg32
 		   : i386_regtab[j].reg_type.bitfield.reg16)
-		&& i386_regtab[j].reg_num == expected)
+		&& register_number(i386_regtab + j) == expected)
 	      break;
 	  gas_assert (j < i386_regtab_size);
 	  as_warn (_("`%s' is not valid here (expected `%c%s%s%c')"),

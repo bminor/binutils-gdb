@@ -1,3 +1,8 @@
+2012-08-07  Jan Beulich <jbeulich@suse.com>
+
+	* gas/i386/x86-64-specific-reg.{s,l}: New.
+	* gas/i386/i386.exp: Run new test.
+
 2012-08-07  Nick Clifton  <nickc@redhat.com>
 
 	* gas/i386/secrel.s: Add test of <symbol>@SECREL32.

@@ -1,3 +1,7 @@
+2012-08-07  Jan Beulich <jbeulich@suse.com>
+
+	* i386-opc.tbl: Remove "FIXME" comments from SVME instructions.
+
 2012-08-06  Roland McGrath  <mcgrathr@google.com>
 
 	* i386-dis.c (print_insn): Print spaces between multiple excess

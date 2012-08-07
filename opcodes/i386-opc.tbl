@@ -3004,21 +3004,16 @@ rdtscp, 0, 0xf01, 0xf9, 2, CpuRdtscp, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No
 // AMD Pacifica additions.
 clgi, 0, 0xf01, 0xdd, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 invlpga, 0, 0xf01, 0xdf, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
-// FIXME: Need to ensure only "invlpga %[re]ax,%ecx" is accepted.
 invlpga, 2, 0xf01, 0xdf, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOp0|NoRex64, { Reg32|Reg64, Reg32 }
 skinit, 0, 0xf01, 0xde, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
-// FIXME: Need to ensure only "skinit %eax" is accepted.
 skinit, 1, 0xf01, 0xde, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Reg32 }
 stgi, 0, 0xf01, 0xdc, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 vmload, 0, 0xf01, 0xda, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
-// FIXME: Need to ensure only "vmload %[re]ax" is accepted.
 vmload, 1, 0xf01, 0xda, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOp0|NoRex64, { Reg32|Reg64 }
 vmmcall, 0, 0xf01, 0xd9, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 vmrun, 0, 0xf01, 0xd8, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
-// FIXME: Need to ensure only "vmrun %[re]ax" is accepted.
 vmrun, 1, 0xf01, 0xd8, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOp0|NoRex64, { Reg32|Reg64 }
 vmsave, 0, 0xf01, 0xdb, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
-// FIXME: Need to ensure only "vmsave %[re]ax" is accepted.
 vmsave, 1, 0xf01, 0xdb, 2, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|AddrPrefixOp0|NoRex64, { Reg32|Reg64 }
 
 
