@@ -144,7 +144,7 @@ static void set_16bit_gcc_code_flag (int);
 static void set_intel_syntax (int);
 static void set_intel_mnemonic (int);
 static void set_allow_index_reg (int);
-static void set_sse_check (int);
+static void set_check (int);
 static void set_cpu_arch (int);
 #ifdef TE_PE
 static void pe_directive_secrel (int);
@@ -221,6 +221,7 @@ enum i386_error
     unsupported_syntax,
     unsupported,
     invalid_vsib_address,
+    invalid_vector_register_set,
     unsupported_vector_index_register
   };
 
@@ -449,13 +450,13 @@ static int allow_naked_reg = 0;
 /* 1 if pseudo index register, eiz/riz, is allowed .  */
 static int allow_index_reg = 0;
 
-static enum
+static enum check_kind
   {
-    sse_check_none = 0,
-    sse_check_warning,
-    sse_check_error
+    check_none = 0,
+    check_warning,
+    check_error
   }
-sse_check;
+sse_check, operand_check = check_warning;
 
 /* Register prefix used for error message.  */
 static const char *register_prefix = "%";
@@ -847,7 +848,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"att_mnemonic", set_intel_mnemonic, 0},
   {"allow_index_reg", set_allow_index_reg, 1},
   {"disallow_index_reg", set_allow_index_reg, 0},
-  {"sse_check", set_sse_check, 0},
+  {"sse_check", set_check, 0},
+  {"operand_check", set_check, 1},
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   {"largecomm", handle_large_common, 0},
 #else
@@ -2111,8 +2113,22 @@ set_allow_index_reg (int flag)
 }
 
 static void
-set_sse_check (int dummy ATTRIBUTE_UNUSED)
+set_check (int what)
 {
+  enum check_kind *kind;
+  const char *str;
+
+  if (what)
+    {
+      kind = &operand_check;
+      str = "operand";
+    }
+  else
+    {
+      kind = &sse_check;
+      str = "sse";
+    }
+
   SKIP_WHITESPACE ();
 
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
@@ -2121,17 +2137,17 @@ set_sse_check (int dummy ATTRIBUTE_UNUSED)
       int e = get_symbol_end ();
 
       if (strcmp (string, "none") == 0)
-	sse_check = sse_check_none;
+	*kind = check_none;
       else if (strcmp (string, "warning") == 0)
-	sse_check = sse_check_warning;
+	*kind = check_warning;
       else if (strcmp (string, "error") == 0)
-	sse_check = sse_check_error;
+	*kind = check_error;
       else
-	as_bad (_("bad argument to sse_check directive."));
+	as_bad (_("bad argument to %s_check directive."), str);
       *input_line_pointer = e;
     }
   else
-    as_bad (_("missing argument for sse_check directive"));
+    as_bad (_("missing argument for %s_check directive"), str);
 
   demand_empty_rest_of_line ();
 }
@@ -3136,7 +3152,7 @@ md_assemble (char *line)
   if (!(t = match_template ()))
     return;
 
-  if (sse_check != sse_check_none
+  if (sse_check != check_none
       && !i.tm.opcode_modifier.noavx
       && (i.tm.cpu_flags.bitfield.cpusse
 	  || i.tm.cpu_flags.bitfield.cpusse2
@@ -3145,7 +3161,7 @@ md_assemble (char *line)
 	  || i.tm.cpu_flags.bitfield.cpusse4_1
 	  || i.tm.cpu_flags.bitfield.cpusse4_2))
     {
-      (sse_check == sse_check_warning
+      (sse_check == check_warning
        ? as_warn
        : as_bad) (_("SSE instruction `%s' is used"), i.tm.name);
     }
@@ -3965,18 +3981,38 @@ check_VecOperands (const insn_template *t)
       return 1;
     }
 
-  /* For VSIB byte, we need a vector register for index and no PC
-     relative addressing is allowed.  */
-  if (t->opcode_modifier.vecsib
-      && (!i.index_reg
+  /* For VSIB byte, we need a vector register for index, and all vector
+     registers must be distinct.  */
+  if (t->opcode_modifier.vecsib)
+    {
+      if (!i.index_reg
 	  || !((t->opcode_modifier.vecsib == VecSIB128
 		&& i.index_reg->reg_type.bitfield.regxmm)
 	       || (t->opcode_modifier.vecsib == VecSIB256
-		   && i.index_reg->reg_type.bitfield.regymm))
-	  || (i.base_reg && i.base_reg->reg_num == RegRip)))
-    {
-      i.error = invalid_vsib_address;
-      return 1;
+		   && i.index_reg->reg_type.bitfield.regymm)))
+      {
+	i.error = invalid_vsib_address;
+	return 1;
+      }
+
+      gas_assert (i.reg_operands == 2);
+      gas_assert (i.types[0].bitfield.regxmm
+		  || i.types[0].bitfield.regymm);
+      gas_assert (i.types[2].bitfield.regxmm
+		  || i.types[2].bitfield.regymm);
+
+      if (operand_check == check_none)
+	return 0;
+      if (register_number (i.op[0].regs) != register_number (i.index_reg)
+	  && register_number (i.op[2].regs) != register_number (i.index_reg)
+	  && register_number (i.op[0].regs) != register_number (i.op[2].regs))
+	return 0;
+      if (operand_check == check_error)
+	{
+	  i.error = invalid_vector_register_set;
+	  return 1;
+	}
+      as_warn (_("mask, index, and destination registers should be distinct"));
     }
 
   return 0;
@@ -4371,6 +4407,9 @@ check_reverse:
 	  return NULL;
 	case invalid_vsib_address:
 	  err_msg = _("invalid VSIB address");
+	  break;
+	case invalid_vector_register_set:
+	  err_msg = _("mask, index, and destination registers must be distinct");
 	  break;
 	case unsupported_vector_index_register:
 	  err_msg = _("unsupported vector index register");
@@ -8502,8 +8541,9 @@ const char *md_shortopts = "qn";
 #define OPTION_MOLD_GCC (OPTION_MD_BASE + 9)
 #define OPTION_MSSE2AVX (OPTION_MD_BASE + 10)
 #define OPTION_MSSE_CHECK (OPTION_MD_BASE + 11)
-#define OPTION_MAVXSCALAR (OPTION_MD_BASE + 12)
-#define OPTION_X32 (OPTION_MD_BASE + 13)
+#define OPTION_MOPERAND_CHECK (OPTION_MD_BASE + 12)
+#define OPTION_MAVXSCALAR (OPTION_MD_BASE + 13)
+#define OPTION_X32 (OPTION_MD_BASE + 14)
 
 struct option md_longopts[] =
 {
@@ -8525,6 +8565,7 @@ struct option md_longopts[] =
   {"mold-gcc", no_argument, NULL, OPTION_MOLD_GCC},
   {"msse2avx", no_argument, NULL, OPTION_MSSE2AVX},
   {"msse-check", required_argument, NULL, OPTION_MSSE_CHECK},
+  {"moperand-check", required_argument, NULL, OPTION_MOPERAND_CHECK},
   {"mavxscalar", required_argument, NULL, OPTION_MAVXSCALAR},
   {NULL, no_argument, NULL, 0}
 };
@@ -8754,13 +8795,24 @@ md_parse_option (int c, char *arg)
 
     case OPTION_MSSE_CHECK:
       if (strcasecmp (arg, "error") == 0)
-	sse_check = sse_check_error;
+	sse_check = check_error;
       else if (strcasecmp (arg, "warning") == 0)
-	sse_check = sse_check_warning;
+	sse_check = check_warning;
       else if (strcasecmp (arg, "none") == 0)
-	sse_check = sse_check_none;
+	sse_check = check_none;
       else
 	as_fatal (_("invalid -msse-check= option: `%s'"), arg);
+      break;
+
+    case OPTION_MOPERAND_CHECK:
+      if (strcasecmp (arg, "error") == 0)
+	operand_check = check_error;
+      else if (strcasecmp (arg, "warning") == 0)
+	operand_check = check_warning;
+      else if (strcasecmp (arg, "none") == 0)
+	operand_check = check_none;
+      else
+	as_fatal (_("invalid -moperand-check= option: `%s'"), arg);
       break;
 
     case OPTION_MAVXSCALAR:
@@ -8900,6 +8952,9 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -msse-check=[none|error|warning]\n\
                           check SSE instructions\n"));
+  fprintf (stream, _("\
+  -moperand-check=[none|error|warning]\n\
+                          check operand combinations for validity\n"));
   fprintf (stream, _("\
   -mavxscalar=[128|256]   encode scalar AVX instructions with specific vector\n\
                            length\n"));

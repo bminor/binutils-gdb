@@ -1,5 +1,17 @@
 2012-08-07  Jan Beulich <jbeulich@suse.com>
 
+	* gas/i386/vgather-check-error.{s,l}: New.
+	* gas/i386/vgather-check-none.{s,d}: New.
+	* gas/i386/vgather-check-warn.{d,e}: New.
+	* gas/i386/vgather-check.{s,d}: New.
+	* gas/i386/x86-64-vgather-check-error.{s,l}: New.
+	* gas/i386/x86-64-vgather-check-none.{s,d}: New.
+	* gas/i386/x86-64-vgather-check-warn.{d,e}: New.
+	* gas/i386/x86-64-vgather-check.{s,d}: New.
+	* gas/i386/i386.exp: Run new tests.
+
+2012-08-07  Jan Beulich <jbeulich@suse.com>
+
 	* gas/i386/x86-64-specific-reg.{s,l}: New.
 	* gas/i386/i386.exp: Run new test.
 

@@ -1,5 +1,24 @@
 2012-08-07  Jan Beulich <jbeulich@suse.com>
 
+	* config/tc-i386.c (set_check): Renamed from set_sse_check.
+	Generalize to also handle operand checking option.
+	(enum i386_error): New enumerator 'invalid_vector_register_set'.
+	(match_template): Handle it.
+	(enum check_kind): Give it a tag. Drop sse_ prefixes from
+	enumerators.
+	(operand_check): New.
+	(md_pseudo_table): Add "operand_check".
+	(check_VecOperands): Don't special case RIP addressing. Check
+	that vSIB operands use distinct vector registers unless no
+	checking was requested.
+	(OPTION_MOPERAND_CHECK): New.
+	(md_parse_option): Handle it.
+	(OPTION_MAVXSCALAR, OPTION_X32): Adjust.
+	(md_longopts): Add "moperand-check".
+	(md_show_usage): Add help text for it.
+
+2012-08-07  Jan Beulich <jbeulich@suse.com>
+
 	* config/tc-i386.c (register_number): New function.
 	(build_vex_prefix, process_immext, process_operands,
 	build_modrm_byte, i386_index_check): Use it.
