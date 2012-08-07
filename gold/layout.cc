@@ -4341,19 +4341,26 @@ Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
 			 use_rel ? elfcpp::DT_REL : elfcpp::DT_RELA);
     }
 
-  if (dyn_rel != NULL && dyn_rel->output_section() != NULL)
+  if ((dyn_rel != NULL && dyn_rel->output_section() != NULL)
+      || (dynrel_includes_plt
+	  && plt_rel != NULL
+	  && plt_rel->output_section() != NULL))
     {
+      bool have_dyn_rel = dyn_rel != NULL && dyn_rel->output_section() != NULL;
+      bool have_plt_rel = plt_rel != NULL && plt_rel->output_section() != NULL;
       odyn->add_section_address(use_rel ? elfcpp::DT_REL : elfcpp::DT_RELA,
-				dyn_rel->output_section());
-      if (plt_rel != NULL
-	  && plt_rel->output_section() != NULL
-	  && dynrel_includes_plt)
-	odyn->add_section_size(use_rel ? elfcpp::DT_RELSZ : elfcpp::DT_RELASZ,
+				(have_dyn_rel
+				 ? dyn_rel->output_section()
+				 : plt_rel->output_section()));
+      elfcpp::DT size_tag = use_rel ? elfcpp::DT_RELSZ : elfcpp::DT_RELASZ;
+      if (have_dyn_rel && have_plt_rel && dynrel_includes_plt)
+	odyn->add_section_size(size_tag,
 			       dyn_rel->output_section(),
 			       plt_rel->output_section());
+      else if (have_dyn_rel)
+	odyn->add_section_size(size_tag, dyn_rel->output_section());
       else
-	odyn->add_section_size(use_rel ? elfcpp::DT_RELSZ : elfcpp::DT_RELASZ,
-			       dyn_rel->output_section());
+	odyn->add_section_size(size_tag, plt_rel->output_section());
       const int size = parameters->target().get_size();
       elfcpp::DT rel_tag;
       int rel_size;
@@ -4379,7 +4386,7 @@ Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
 	}
       odyn->add_constant(rel_tag, rel_size);
 
-      if (parameters->options().combreloc())
+      if (parameters->options().combreloc() && have_dyn_rel)
 	{
 	  size_t c = dyn_rel->relative_reloc_count();
 	  if (c > 0)

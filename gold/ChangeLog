@@ -1,3 +1,9 @@
+2012-08-07  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::add_target_dynamic_tags): If
+	dynrel_includes_plt but no dyn_rel, emit dynamic reloc tags for
+	plt_rel.
+
 2012-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* po/gold.pot: Updated template.
