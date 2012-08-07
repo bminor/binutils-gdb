@@ -84,7 +84,7 @@ gdb_test "call" "The history is empty..*" "call"
 gdb_test "catch" "Catch requires an event name..*" "catch"
 
 #test cd
-gdb_test "cd" "Argument required .new working directory.*" "cd"
+gdb_test "cd" "Working directory \[^\r\n\]*\\."
 
 #test clear
 gdb_test "clear" "No source file specified..*" "clear"
