@@ -459,7 +459,27 @@ proc test_complex_watchpoint {} {
         #
         gdb_test "watch local_a" ".*\[Ww\]atchpoint \[0-9\]*: local_a" "set local watch"
         gdb_test "cont" "\[Ww\]atchpoint.*local_a.*" "trigger local watch"
-        gdb_test "cont" "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*" "self-delete local watch"
+
+	set test "self-delete local watch"
+        gdb_test_multiple "cont" $test {
+	    -re "Continuing.*\[Ww\]atchpoint .* deleted because the program has left the block in.*which its expression is valid.*\r\n$gdb_prompt $" {
+		pass $test
+	    }
+	    -re "can't compute CFA for this frame.*\r\n$gdb_prompt $" {
+		global compiler_info no_hw
+
+		# GCC < 4.5.0 does not get LOCATIONS_VALID set by dwarf2read.c.
+		# Therefore epilogue unwinder gets applied which is
+		# incompatible with dwarf2_frame_cfa.
+		verbose -log "compiler_info: $compiler_info"
+		if {$no_hw && ([test_compiler_info {gcc-[0-3]-*}]
+			       || [test_compiler_info {gcc-4-[0-4]-*}])} {
+		    xfail "$test (old GCC has broken watchpoints in epilogues)"
+		    return
+		}
+		fail $test
+	    }
+	}
 
 	gdb_continue_to_breakpoint "func2 breakpoint here"
         # We should be in "func2" again now.  Test a watch of an

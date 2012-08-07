@@ -1,3 +1,9 @@
+2012-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Do not false FAIL with old GCCs.
+	* gdb.base/watchpoint.exp (self-delete local watch) <$no_hw>: XFAIL for
+	GCC < 4.5 in $no_hw mode.
+
 2012-08-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/list.exp (test_only_end): New function.
