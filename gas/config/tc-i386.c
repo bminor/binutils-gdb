@@ -5770,18 +5770,14 @@ build_modrm_byte (void)
 	      i.sib.base = i.base_reg->reg_num;
 	      /* x86-64 ignores REX prefix bit here to avoid decoder
 		 complications.  */
-	      if ((i.base_reg->reg_num & 7) == EBP_REG_NUM)
-		{
+	      if (!(i.base_reg->reg_flags & RegRex)
+		  && (i.base_reg->reg_num == EBP_REG_NUM
+		   || i.base_reg->reg_num == ESP_REG_NUM))
 		  default_seg = &ss;
-		  if (i.disp_operands == 0)
-		    {
-		      fake_zero_displacement = 1;
-		      i.types[op].bitfield.disp8 = 1;
-		    }
-		}
-	      else if (i.base_reg->reg_num == ESP_REG_NUM)
+	      if (i.base_reg->reg_num == 5 && i.disp_operands == 0)
 		{
-		  default_seg = &ss;
+		  fake_zero_displacement = 1;
+		  i.types[op].bitfield.disp8 = 1;
 		}
 	      i.sib.scale = i.log2_scale_factor;
 	      if (i.index_reg == 0)

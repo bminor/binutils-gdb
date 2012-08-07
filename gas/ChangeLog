@@ -1,5 +1,11 @@
 2012-08-07  Jan Beulich <jbeulich@suse.com>
 
+	* config/tc-i386-intel.c (build_modrm_byte): Split determining
+	default segment from figuring out encoding. Honor RegRex for
+	the former.
+
+2012-08-07  Jan Beulich <jbeulich@suse.com>
+
 	* config/tc-i386.c (set_check): Renamed from set_sse_check.
 	Generalize to also handle operand checking option.
 	(enum i386_error): New enumerator 'invalid_vector_register_set'.
