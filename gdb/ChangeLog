@@ -1,3 +1,21 @@
+2012-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Jean-Marc Saffroy  <saffroy@gmail.com>
+
+	PR 11804
+	* defs.h (find_memory_region_ftype): New comment.  New arg modified.
+	* fbsd-nat.c (fbsd_find_memory_regions): Add the passed modified value.
+	* gcore.c (gcore_create_callback): New function comment.  Add modified
+	parameter.  Only write modified regions.  Set SEC_READONLY exactly
+	according to MODIFIED.
+	(objfile_find_memory_regions): Ignore separate debug info files.  Ass
+	the passed modified value to FUNC.
+	* gnu-nat.c (gnu_find_memory_regions): Add the passed modified value.
+	* linux-tdep.c (linux_find_memory_regions): Try to reads smaps file
+	first.  New variables modified and has_anonymous.  Parse the lines of
+	smaps file.  Add the passed MODIFIED value to FUNC.
+	* procfs.c (find_memory_regions_callback): Add the passed modified
+	value.
+
 2012-08-06  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2-frame.c (clear_pointer_cleanup): New function.

@@ -362,9 +362,14 @@ extern void init_source_path (void);
 
 /* From exec.c */
 
+/* Process memory area starting at ADDR with length SIZE.  Area is readable iff
+   READ is non-zero, writable if WRITE is non-zero, executable if EXEC is
+   non-zero.  Area is possibly changed against its original file based copy if
+   MODIFIED is non-zero.  DATA is passed without changes from a caller.  */
+
 typedef int (*find_memory_region_ftype) (CORE_ADDR addr, unsigned long size,
 					 int read, int write, int exec,
-					 void *data);
+					 int modified, void *data);
 
 /* Take over the 'find_mapped_memory' vector from exec.c.  */
 extern void exec_set_find_memory_regions

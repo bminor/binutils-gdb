@@ -547,19 +547,28 @@ linux_find_memory_regions (struct gdbarch *gdbarch,
     return 1;
 
   xsnprintf (filename, sizeof filename,
-	     "/proc/%d/maps", current_inferior ()->pid);
+	     "/proc/%d/smaps", current_inferior ()->pid);
   data = target_fileio_read_stralloc (filename);
+  if (data == NULL)
+    {
+      /* Older Linux kernels did not support /proc/PID/smaps.  */
+      xsnprintf (filename, sizeof filename,
+		 "/proc/%d/maps", current_inferior ()->pid);
+      data = target_fileio_read_stralloc (filename);
+    }
   if (data)
     {
       struct cleanup *cleanup = make_cleanup (xfree, data);
       char *line;
 
-      for (line = strtok (data, "\n"); line; line = strtok (NULL, "\n"))
+      line = strtok (data, "\n");
+      while (line)
 	{
 	  ULONGEST addr, endaddr, offset, inode;
 	  const char *permissions, *device, *filename;
 	  size_t permissions_len, device_len;
 	  int read, write, exec;
+	  int modified = 0, has_anonymous = 0;
 
 	  read_mapping (line, &addr, &endaddr, &permissions, &permissions_len,
 			&offset, &device, &device_len, &inode, &filename);
@@ -569,8 +578,35 @@ linux_find_memory_regions (struct gdbarch *gdbarch,
 	  write = (memchr (permissions, 'w', permissions_len) != 0);
 	  exec = (memchr (permissions, 'x', permissions_len) != 0);
 
+	  /* Try to detect if region was modified by parsing smaps counters.  */
+	  for (line = strtok (NULL, "\n");
+	       line && line[0] >= 'A' && line[0] <= 'Z';
+	       line = strtok (NULL, "\n"))
+	    {
+	      char keyword[64 + 1];
+	      unsigned long number;
+
+	      if (sscanf (line, "%64s%lu kB\n", keyword, &number) != 2)
+		{
+		  warning (_("Error parsing {s,}maps file '%s'"), filename);
+		  break;
+		}
+	      if (strcmp (keyword, "Anonymous:") == 0)
+		has_anonymous = 1;
+	      if (number != 0 && (strcmp (keyword, "Shared_Dirty:") == 0
+				  || strcmp (keyword, "Private_Dirty:") == 0
+				  || strcmp (keyword, "Swap:") == 0
+				  || strcmp (keyword, "Anonymous:") == 0))
+		modified = 1;
+	    }
+
+	  /* Older Linux kernels did not support the "Anonymous:" counter.
+	     If it is missing, we can't be sure - dump all the pages.  */
+	  if (!has_anonymous)
+	    modified = 1;
+
 	  /* Invoke the callback function to create the corefile segment.  */
-	  func (addr, endaddr - addr, read, write, exec, obfd);
+	  func (addr, endaddr - addr, read, write, exec, modified, obfd);
 	}
 
       do_cleanups (cleanup);

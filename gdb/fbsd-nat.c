@@ -131,8 +131,9 @@ fbsd_find_memory_regions (find_memory_region_ftype func, void *obfd)
 			    exec ? 'x' : '-');
 	}
 
-      /* Invoke the callback function to create the corefile segment.  */
-      func (start, size, read, write, exec, obfd);
+      /* Invoke the callback function to create the corefile segment.
+	 Pass MODIFIED as true, we do not know the real modification state.  */
+      func (start, size, read, write, exec, 1, obfd);
     }
 
   do_cleanups (cleanup);

@@ -379,9 +379,12 @@ make_output_phdrs (bfd *obfd, asection *osec, void *ignored)
   bfd_record_phdr (obfd, p_type, 1, p_flags, 0, 0, 0, 0, 1, &osec);
 }
 
+/* find_memory_region_ftype implementation.  DATA is 'bfd *' for the core file
+   GDB is creating.  */
+
 static int
-gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
-		       int read, int write, int exec, void *data)
+gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
+		       int write, int exec, int modified, void *data)
 {
   bfd *obfd = data;
   asection *osec;
@@ -390,7 +393,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
   /* If the memory segment has no permissions set, ignore it, otherwise
      when we later try to access it for read/write, we'll get an error
      or jam the kernel.  */
-  if (read == 0 && write == 0 && exec == 0)
+  if (read == 0 && write == 0 && exec == 0 && modified == 0)
     {
       if (info_verbose)
         {
@@ -401,7 +404,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
       return 0;
     }
 
-  if (write == 0 && !solib_keep_data_in_core (vaddr, size))
+  if (write == 0 && modified == 0 && !solib_keep_data_in_core (vaddr, size))
     {
       /* See if this region of memory lies inside a known file on disk.
 	 If so, we can avoid copying its contents by clearing SEC_LOAD.  */
@@ -433,9 +436,11 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
 	    }
 	}
 
-    keep:
-      flags |= SEC_READONLY;
+    keep:;
     }
+
+  if (write == 0)
+    flags |= SEC_READONLY;
 
   if (exec)
     flags |= SEC_CODE;
@@ -477,6 +482,10 @@ objfile_find_memory_regions (find_memory_region_ftype func, void *obfd)
       asection *isec = objsec->the_bfd_section;
       flagword flags = bfd_get_section_flags (ibfd, isec);
 
+      /* Separate debug info files are irrelevant for gcore.  */
+      if (objfile->separate_debug_objfile_backlink != NULL)
+	continue;
+
       if ((flags & SEC_ALLOC) || (flags & SEC_LOAD))
 	{
 	  int size = bfd_section_size (ibfd, isec);
@@ -486,6 +495,7 @@ objfile_find_memory_regions (find_memory_region_ftype func, void *obfd)
 			 1, /* All sections will be readable.  */
 			 (flags & SEC_READONLY) == 0, /* Writable.  */
 			 (flags & SEC_CODE) != 0, /* Executable.  */
+			 1, /* MODIFIED is unknown, pass it as true.  */
 			 obfd);
 	  if (ret != 0)
 	    return ret;
@@ -498,6 +508,7 @@ objfile_find_memory_regions (find_memory_region_ftype func, void *obfd)
 	     1, /* Stack section will be readable.  */
 	     1, /* Stack section will be writable.  */
 	     0, /* Stack section will not be executable.  */
+	     1, /* Stack section will be modified.  */
 	     obfd);
 
   /* Make a heap segment.  */
@@ -506,6 +517,7 @@ objfile_find_memory_regions (find_memory_region_ftype func, void *obfd)
 	     1, /* Heap section will be readable.  */
 	     1, /* Heap section will be writable.  */
 	     0, /* Heap section will not be executable.  */
+	     1, /* Heap section will be modified.  */
 	     obfd);
 
   return 0;

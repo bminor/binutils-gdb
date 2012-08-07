@@ -2558,6 +2558,7 @@ gnu_find_memory_regions (find_memory_region_ftype func, void *data)
 		     last_protection & VM_PROT_READ,
 		     last_protection & VM_PROT_WRITE,
 		     last_protection & VM_PROT_EXECUTE,
+		     1, /* MODIFIED is unknown, pass it as true.  */
 		     data);
 	  last_region_address = region_address;
 	  last_region_end = region_address += region_length;
@@ -2571,6 +2572,7 @@ gnu_find_memory_regions (find_memory_region_ftype func, void *data)
 	     last_protection & VM_PROT_READ,
 	     last_protection & VM_PROT_WRITE,
 	     last_protection & VM_PROT_EXECUTE,
+	     1, /* MODIFIED is unknown, pass it as true.  */
 	     data);
 
   return 0;
