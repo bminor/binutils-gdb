@@ -8030,11 +8030,11 @@ debugged in another.  Rather than typing the command @kbd{@w{./gdb
 ./gdb}}, which works on Suns and such, you can copy @file{gdb} to
 @file{gdb2} and then type @kbd{@w{./gdb ./gdb2}}.
 
-When you run @value{GDBN} in the @value{GDBN} source directory, it will read a
-@file{.gdbinit} file that sets up some simple things to make debugging
-gdb easier.  The @code{info} command, when executed without a subcommand
-in a @value{GDBN} being debugged by gdb, will pop you back up to the top level
-gdb.  See @file{.gdbinit} for details.
+When you run @value{GDBN} in the @value{GDBN} source directory, it will read
+@file{gdb-gdb.gdb} file (plus possibly @file{gdb-gdb.py} file) that sets up
+some simple things to make debugging gdb easier.  The @code{info} command, when
+executed without a subcommand in a @value{GDBN} being debugged by gdb, will pop
+you back up to the top level gdb.  See @file{gdb-gdb.gdb} for details.
 
 If you use emacs, you will probably want to do a @code{make TAGS} after
 you configure your distribution; this will put the machine dependent
