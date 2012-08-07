@@ -1,3 +1,11 @@
+2012-08-07  Yao Qi  <yao@codesourcery.com>
+
+	Revert the folloing patch:
+	2012-08-06  Yao Qi  <yao@codesourcery.com>
+	* gdb.texinfo (Remote Configuration): Add kindex for 'set
+	remote hardware-watchpoint-limit' and 'set
+	remote hardware-breakpoint-limit'.
+
 2012-08-06  Nathaniel Flath  <flat0103@gmail.com>
 
 	* gdb.texinfo (Working Directory): Added information about new

@@ -17839,9 +17839,7 @@ responses.
 @anchor{set remote hardware-watchpoint-limit}
 @anchor{set remote hardware-breakpoint-limit}
 @item set remote hardware-watchpoint-limit @var{limit}
-@kindex set remote hardware-watchpoint-limit
 @itemx set remote hardware-breakpoint-limit @var{limit}
-@kindex set remote hardware-breakpoint-limit
 Restrict @value{GDBN} to using @var{limit} remote hardware breakpoint or
 watchpoints.  A limit of -1, the default, is treated as unlimited.
 
