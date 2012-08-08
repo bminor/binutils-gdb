@@ -1,3 +1,10 @@
+2012-08-08  Yao Qi  <yao@codesourcery.com>
+
+	* tic6x-tdep.c (tic6x_register_to_value): Remove.
+	(tic6x_value_to_register): Likewise.
+	(tic6x_gdbarch_init): Don't call set_gdbarch_register_to_value
+	and set_gdbarch_value_to_register.
+
 2012-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Jean-Marc Saffroy  <saffroy@gmail.com>
 

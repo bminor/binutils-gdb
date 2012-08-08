@@ -715,27 +715,6 @@ tic6x_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
   return align_down (addr, 8);
 }
 
-/* This is the implementation of gdbarch method register_to_value.  */
-
-static int
-tic6x_register_to_value (struct frame_info *frame, int regnum,
-			 struct type *type, gdb_byte * to,
-			 int *optimizedp, int *unavailablep)
-{
-  get_frame_register (frame, regnum, (char *) to);
-  *optimizedp = *unavailablep = 0;
-  return 1;
-}
-
-/* This is the implementation of gdbarch method value_to_register.  */
-
-static void
-tic6x_value_to_register (struct frame_info *frame, int regnum,
-			 struct type *type, const gdb_byte *from)
-{
-  put_frame_register (frame, regnum, from);
-}
-
 /* Given a return value in REGCACHE with a type VALTYPE, extract and copy its
    value into VALBUF.  */
 
@@ -1340,9 +1319,6 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call dummy code.  */
   set_gdbarch_frame_align (gdbarch, tic6x_frame_align);
-
-  set_gdbarch_register_to_value (gdbarch, tic6x_register_to_value);
-  set_gdbarch_value_to_register (gdbarch, tic6x_value_to_register);
 
   set_gdbarch_return_value (gdbarch, tic6x_return_value);
 
