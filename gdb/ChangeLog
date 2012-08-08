@@ -1,3 +1,8 @@
+2012-08-08  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (parse_breakpoint_sals): Remove unused variable
+	addr_start.
+
 2012-08-08  Doug Evans  <dje@google.com>
 
 	* linux-thread-db.c: #include "gdb_vecs.h".

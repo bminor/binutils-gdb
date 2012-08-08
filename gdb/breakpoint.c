@@ -9115,8 +9115,6 @@ static void
 parse_breakpoint_sals (char **address,
 		       struct linespec_result *canonical)
 {
-  char *addr_start = *address;
-
   /* If no arg given, or if first arg is 'if ', use the default
      breakpoint.  */
   if ((*address) == NULL
