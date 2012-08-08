@@ -1,3 +1,11 @@
+2012-08-08  Aaron Gamble  <agamble@google.com>
+
+	* utils.c (prompt_for_continue_wait_time): New static global.
+	(make_command_stats_cleanup): Initialize it.
+	(report_command_stats): Subtract time waiting for user.
+	(prompt_for_continue): Track time waiting for user.
+	(defaulted_query): Track time waiting for user.
+
 2012-08-08  Doug Evans  <dje@google.com>
 
 	* eval.c (evaluate_subexp_standard): Fix thinko in handling

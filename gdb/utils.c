@@ -106,6 +106,14 @@ static void prompt_for_continue (void);
 static void set_screen_size (void);
 static void set_width (void);
 
+/* Time spent in prompt_for_continue in the currently executing command
+   waiting for user to respond.
+   Initialized in make_command_stats_cleanup.
+   Modified in prompt_for_continue and defaulted_query.
+   Used in report_command_stats.  */
+
+static struct timeval prompt_for_continue_wait_time;
+
 /* A flag indicating whether to timestamp debugging messages.  */
 
 static int debug_timestamp = 0;
@@ -537,6 +545,10 @@ report_command_stats (void *arg)
       timeval_sub (&delta_wall_time,
 		   &now_wall_time, &start_stats->start_wall_time);
 
+      /* Subtract time spend in prompt_for_continue from walltime.  */
+      timeval_sub (&delta_wall_time,
+                   &delta_wall_time, &prompt_for_continue_wait_time);
+
       printf_unfiltered (msg_type == 0
 			 ? _("Startup time: %ld.%06ld (cpu), %ld.%06ld (wall)\n")
 			 : _("Command execution time: %ld.%06ld (cpu), %ld.%06ld (wall)\n"),
@@ -570,6 +582,7 @@ report_command_stats (void *arg)
 struct cleanup *
 make_command_stats_cleanup (int msg_type)
 {
+  static const struct timeval zero_timeval = { 0 };
   struct cmd_stats *new_stat = XMALLOC (struct cmd_stats);
   
 #ifdef HAVE_SBRK
@@ -580,6 +593,9 @@ make_command_stats_cleanup (int msg_type)
   new_stat->msg_type = msg_type;
   new_stat->start_cpu_time = get_run_time ();
   gettimeofday (&new_stat->start_wall_time, NULL);
+
+  /* Initalize timer to keep track of how long we waited for the user.  */
+  prompt_for_continue_wait_time = zero_timeval;
 
   return make_cleanup_dtor (report_command_stats, new_stat, xfree);
 }
@@ -1190,6 +1206,9 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
   int def_value;
   char def_answer, not_def_answer;
   char *y_string, *n_string, *question;
+  /* Used to add duration we waited for user to respond to
+     prompt_for_continue_wait_time.  */
+  struct timeval prompt_started, prompt_ended, prompt_delta;
 
   /* Set up according to which answer is the default.  */
   if (defchar == '\0')
@@ -1246,6 +1265,9 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
 
   /* Format the question outside of the loop, to avoid reusing args.  */
   question = xstrvprintf (ctlstr, args);
+
+  /* Used for calculating time spend waiting for user.  */
+  gettimeofday (&prompt_started, NULL);
 
   while (1)
     {
@@ -1323,6 +1345,12 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       printf_filtered (_("Please answer %s or %s.\n"),
 		       y_string, n_string);
     }
+
+  /* Add time spend in this routine to prompt_for_continue_wait_time.  */
+  gettimeofday (&prompt_ended, NULL);
+  timeval_sub (&prompt_delta, &prompt_ended, &prompt_started);
+  timeval_add (&prompt_for_continue_wait_time,
+               &prompt_for_continue_wait_time, &prompt_delta);
 
   xfree (question);
   if (annotation_level > 1)
@@ -1797,6 +1825,11 @@ prompt_for_continue (void)
 {
   char *ignore;
   char cont_prompt[120];
+  /* Used to add duration we waited for user to respond to
+     prompt_for_continue_wait_time.  */
+  struct timeval prompt_started, prompt_ended, prompt_delta;
+
+  gettimeofday (&prompt_started, NULL);
 
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032pre-prompt-for-continue\n"));
@@ -1823,6 +1856,12 @@ prompt_for_continue (void)
      whereas control-C to gdb_readline will cause the user to get dumped
      out to DOS.  */
   ignore = gdb_readline_wrapper (cont_prompt);
+
+  /* Add time spend in this routine to prompt_for_continue_wait_time.  */
+  gettimeofday (&prompt_ended, NULL);
+  timeval_sub (&prompt_delta, &prompt_ended, &prompt_started);
+  timeval_add (&prompt_for_continue_wait_time,
+               &prompt_for_continue_wait_time, &prompt_delta);
 
   if (annotation_level > 1)
     printf_unfiltered (("\n\032\032post-prompt-for-continue\n"));
