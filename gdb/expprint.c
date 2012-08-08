@@ -83,6 +83,11 @@ print_subexp_standard (struct expression *exp, int *pos,
     {
       /* Common ops */
 
+    case OP_TYPE:
+      (*pos) += 2;
+      type_print (exp->elts[pc + 1].type, "", stream, 0);
+      return;
+
     case OP_SCOPE:
       myprec = PREC_PREFIX;
       assoc = 0;
@@ -430,7 +435,6 @@ print_subexp_standard (struct expression *exp, int *pos,
       return;
 
     case UNOP_CAST_TYPE:
-      (*pos) += 1;
       if ((int) prec > (int) PREC_PREFIX)
 	fputs_filtered ("(", stream);
       fputs_filtered ("(", stream);
@@ -446,7 +450,6 @@ print_subexp_standard (struct expression *exp, int *pos,
       fputs_filtered (opcode == UNOP_DYNAMIC_CAST ? "dynamic_cast"
 		      : "reinterpret_cast", stream);
       fputs_filtered ("<", stream);
-      (*pos) += 1;
       print_subexp (exp, pos, stream, PREC_PREFIX);
       fputs_filtered ("> (", stream);
       print_subexp (exp, pos, stream, PREC_PREFIX);
@@ -484,7 +487,6 @@ print_subexp_standard (struct expression *exp, int *pos,
       return;
 
     case UNOP_MEMVAL_TYPE:
-      (*pos) += 1;
       if ((int) prec > (int) PREC_PREFIX)
 	fputs_filtered ("(", stream);
       fputs_filtered ("{", stream);
@@ -938,7 +940,6 @@ dump_subexp_body_standard (struct expression *exp,
     case UNOP_REINTERPRET_CAST:
     case UNOP_CAST_TYPE:
     case UNOP_MEMVAL_TYPE:
-      ++elt;
       fprintf_filtered (stream, " (");
       elt = dump_subexp (exp, stream, elt);
       fprintf_filtered (stream, ")");
@@ -1056,10 +1057,7 @@ dump_prefix_expression (struct expression *exp, struct ui_file *stream)
   fprintf_filtered (stream, "Dump of expression @ ");
   gdb_print_host_address (exp, stream);
   fputs_filtered (", after conversion to prefix form:\nExpression: `", stream);
-  if (exp->elts[0].opcode != OP_TYPE)
-    print_expression (exp, stream);
-  else
-    fputs_filtered ("Type printing not yet supported....", stream);
+  print_expression (exp, stream);
   fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %ld bytes each.\n",
 		    exp->language_defn->la_name, exp->nelts,
 		    (long) sizeof (union exp_element));

@@ -2751,10 +2751,9 @@ evaluate_subexp_standard (struct type *expect_type,
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (exp->elts[pc + 1].type, lval_memory);
+	return value_zero (type, lval_memory);
       else
-	return value_at_lazy (exp->elts[pc + 1].type,
-			      value_as_address (arg1));
+	return value_at_lazy (type, value_as_address (arg1));
 
     case UNOP_MEMVAL_TLS:
       (*pos) += 3;

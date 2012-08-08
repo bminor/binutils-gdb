@@ -1,3 +1,10 @@
+2012-08-08  Doug Evans  <dje@google.com>
+
+	* gdb.base/debug-expr.c: New file.
+	* gdb.base/debug-expr.exp: New file.
+	* gdb.base/exprs.exp: Test {type} casts.
+	* gdb.cp/debug-expr.exp: New file.
+
 2012-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/valgrind-infcall.exp (continue #$continue_count): Use
