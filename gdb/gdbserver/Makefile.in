@@ -140,7 +140,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/win32-arm-low.c $(srcdir)/win32-i386-low.c \
 	$(srcdir)/win32-low.c $(srcdir)/wincecompat.c \
 	$(srcdir)/hostio.c $(srcdir)/hostio-errno.c \
-	$(srcdir)/common/vec.c \
+	$(srcdir)/common/vec.c $(srcdir)/common/gdb_vecs.c \
 	$(srcdir)/common/common-utils.c $(srcdir)/common/xml-utils.c \
 	$(srcdir)/common/linux-osdata.c $(srcdir)/common/ptid.c \
 	$(srcdir)/common/buffer.c
@@ -153,7 +153,7 @@ SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
 OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
-	utils.o version.o vec.o \
+	utils.o version.o vec.o gdb_vecs.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
 	xml-utils.o common-utils.o ptid.o buffer.o format.o \
 	dll.o \
@@ -414,6 +414,8 @@ ax_h = $(srcdir)/ax.h
 agent_h = $(srcdir)/../common/agent.h
 linux_osdata_h = $(srcdir)/../common/linux-osdata.h
 vec_h = $(srcdir)/../common/vec.h
+gdb_vecs_h = $(srcdir)/../common/gdb_vecs.h
+host_defs_h = $(srcdir)/../common/host-defs.h
 # Since everything must include server.h, we make that depend on
 # generated files.
 server_h = $(srcdir)/server.h $(regcache_h) $(srcdir)/target.h \
@@ -485,7 +487,7 @@ remote-utils.o: remote-utils.c terminal.h $(server_h) $(gdbthread_h)
 server.o: server.c $(server_h) $(agent_h) $(gdbthread_h)
 target.o: target.c $(server_h) 
 thread-db.o: thread-db.c $(server_h) $(linux_low_h) $(gdb_proc_service_h) \
-	$(gdb_thread_db_h)
+	$(gdb_thread_db_h) $(gdb_vecs_h)
 tracepoint.o: tracepoint.c $(server_h) $(ax_h) $(agent_h) $(gdbthread_h)
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
@@ -504,6 +506,9 @@ common-utils.o: ../common/common-utils.c $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 vec.o: ../common/vec.c $(vec_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
+gdb_vecs.o: ../common/gdb_vecs.c $(vec_h) $(gdb_vecs_h) $(host_defs_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
 
 xml-utils.o: ../common/xml-utils.c $(server_h)

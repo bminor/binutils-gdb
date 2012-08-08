@@ -1,3 +1,18 @@
+2012-08-08  Doug Evans  <dje@google.com>
+
+	* Makefile.in (SFILES): Add gdb_vecs.c.
+	(OBS): Add gdb_vecs.o.
+	(gdb_vecs_h, host_defs_h): New variables.
+	(thread-db.o): Add $(gdb_vecs_h) dependency.
+	(gdb_vecs.o): New rule.
+	* thread-db.c: #include "gdb_vecs.h".
+	(thread_db_load_search): Use a vector to iterate over path elements.
+	Handle text appearing after "$pdir".
+
+	* configure.ac: Add check for strstr.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2012-08-02  Ulrich Weigand  <ulrich.weigand@linaro.org>
 
 	* hostio.c (handle_pread): If pread fails, fall back to attempting
