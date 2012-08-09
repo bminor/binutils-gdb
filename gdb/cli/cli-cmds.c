@@ -136,10 +136,6 @@ struct cmd_list_element *detachlist;
 
 struct cmd_list_element *killlist;
 
-/* Chain containing all defined "enable breakpoint" subcommands.  */
-
-struct cmd_list_element *enablebreaklist;
-
 /* Chain containing all defined set subcommands */
 
 struct cmd_list_element *setlist;
@@ -187,8 +183,6 @@ struct cmd_list_element *showdebuglist;
 struct cmd_list_element *setchecklist;
 
 struct cmd_list_element *showchecklist;
-
-struct cmd_list_element *skiplist;
 
 /* Command tracing state.  */
 
@@ -1576,7 +1570,6 @@ init_cmd_lists (void)
   stoplist = NULL;
   deletelist = NULL;
   detachlist = NULL;
-  enablebreaklist = NULL;
   setlist = NULL;
   unsetlist = NULL;
   showlist = NULL;
@@ -1590,7 +1583,6 @@ init_cmd_lists (void)
   showprintlist = NULL;
   setchecklist = NULL;
   showchecklist = NULL;
-  skiplist = NULL;
 }
 
 static void

@@ -1,5 +1,18 @@
 2012-08-09  Yao Qi  <yao@codesourcery.com>
 
+	* cli/cli-cmds.c (enablebreaklist): Move it to breakpoint.c.
+	(skiplist): Move it to skip.c.
+	(init_cmd_lists): Remove code setting enablebreaklist and
+	skiplist to NULL.
+	* breakpoint.c (enablebreaklist): Moved from cli/cli-cmds.c.
+	* cli/cli-cmds.h: Remove declaration of enablebreaklist and
+	skiplist.
+	* gdbcmd.h: Likewise.
+	* skip.c (_initialize_step_skip): Move 'skiplist' from
+	cli/cli-cmds.c.
+
+2012-08-09  Yao Qi  <yao@codesourcery.com>
+
 	* cli/cli-dump.c: Add 'static' to some cmd_list_element variables.
 	* gnu-nat.c, symfile.c: Likewise.
 

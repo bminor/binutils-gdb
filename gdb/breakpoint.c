@@ -15859,6 +15859,10 @@ initialize_breakpoint_ops (void)
   ops->print_recreate = bkpt_print_recreate;
 }
 
+/* Chain containing all defined "enable breakpoint" subcommands.  */
+
+static struct cmd_list_element *enablebreaklist = NULL;
+
 void
 _initialize_breakpoint (void)
 {
