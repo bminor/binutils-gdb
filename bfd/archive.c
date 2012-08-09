@@ -42,11 +42,17 @@ DESCRIPTION
 	have to read the entire archive if you don't want
 	to!  Read it until you find what you want.
 
+	A BFD returned by <<bfd_openr_next_archived_file>> can be
+	closed manually with <<bfd_close>>.  If you do not close it,
+	then a second iteration through the members of an archive may
+	return the same BFD.  If you close the archive BFD, then all
+	the member BFDs will automatically be closed as well.
+
 	Archive contents of output BFDs are chained through the
-	<<next>> pointer in a BFD.  The first one is findable through
-	the <<archive_head>> slot of the archive.  Set it with
-	<<bfd_set_archive_head>> (q.v.).  A given BFD may be in only one
-	open output archive at a time.
+	<<archive_next>> pointer in a BFD.  The first one is findable
+	through the <<archive_head>> slot of the archive.  Set it with
+	<<bfd_set_archive_head>> (q.v.).  A given BFD may be in only
+	one open output archive at a time.
 
 	As expected, the BFD archive code is more general than the
 	archive code of any given environment.  BFD archives may
@@ -293,19 +299,6 @@ bfd_set_archive_head (bfd *output_archive, bfd *new_head)
   return TRUE;
 }
 
-/* Free the archive hash table, if it exists.  */
-
-void
-_bfd_delete_archive_data (bfd *abfd)
-{
-  struct artdata *ardata = bfd_ardata (abfd);
-
-  BFD_ASSERT (abfd->format == bfd_archive);
-
-  if (ardata && ardata->cache)
-    htab_delete (ardata->cache);
-}
-
 bfd *
 _bfd_look_for_bfd_in_cache (bfd *arch_bfd, file_ptr filepos)
 {
@@ -374,6 +367,10 @@ _bfd_add_bfd_to_archive_cache (bfd *arch_bfd, file_ptr filepos, bfd *new_elt)
   cache->ptr = filepos;
   cache->arbfd = new_elt;
   *htab_find_slot (hash_table, (const void *) cache, INSERT) = cache;
+
+  /* Provide a means of accessing this from child.  */
+  arch_eltdata (new_elt)->parent_cache = hash_table;
+  arch_eltdata (new_elt)->key = filepos;
 
   return TRUE;
 }
@@ -2693,5 +2690,60 @@ coff_write_armap (bfd *arch,
 	return FALSE;
     }
 
+  return TRUE;
+}
+
+static int
+archive_close_worker (void **slot, void *inf ATTRIBUTE_UNUSED)
+{
+  struct ar_cache *ent = (struct ar_cache *) *slot;
+
+  bfd_close_all_done (ent->arbfd);
+  return 1;
+}
+
+bfd_boolean
+_bfd_archive_close_and_cleanup (bfd *abfd)
+{
+  if (bfd_read_p (abfd) && abfd->format == bfd_archive)
+    {
+      bfd *nbfd;
+      bfd *next;
+      htab_t htab;
+
+      /* Close nested archives (if this bfd is a thin archive).  */
+      for (nbfd = abfd->nested_archives; nbfd; nbfd = next)
+	{
+	  next = nbfd->archive_next;
+	  bfd_close (nbfd);
+	}
+
+      htab = bfd_ardata (abfd)->cache;
+      if (htab)
+	{
+	  htab_traverse_noresize (htab, archive_close_worker, NULL);
+	  htab_delete (htab);
+	  bfd_ardata (abfd)->cache = NULL;
+	}
+    }
+  else if (arch_eltdata (abfd) != NULL)
+    {
+      struct areltdata *ared = arch_eltdata (abfd);
+      htab_t htab = (htab_t) ared->parent_cache;
+
+      if (htab)
+	{
+	  struct ar_cache ent;
+	  void **slot;
+
+	  ent.ptr = ared->key;
+	  slot = htab_find_slot (htab, &ent, NO_INSERT);
+	  if (slot != NULL)
+	    {
+	      BFD_ASSERT (((struct ar_cache *) *slot)->arbfd == abfd);
+	      htab_clear_slot (htab, slot);
+	    }
+	}
+    }
   return TRUE;
 }

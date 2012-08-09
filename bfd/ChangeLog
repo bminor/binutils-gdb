@@ -1,3 +1,19 @@
+2012-08-09  Alan Modra  <amodra@gmail.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* archive.c (SECTION Archives): Update documentation.
+	(_bfd_delete_archive_data): Remove.
+	(_bfd_add_bfd_to_archive_cache): Set 'parent_cache' and 'key'.
+	(archive_close_worker, _bfd_archive_close_and_cleanup): New
+	functions.
+	* libbfd-in.h (struct areltdata <parent_cache, key>): New fields.
+	(_bfd_delete_archive_data): Don't declare.
+	(_bfd_archive_close_and_cleanup): Declare.
+	(_bfd_generic_close_and_cleanup): Redefine.
+	* libbfd.h: Rebuild.
+	* opncls.c (_bfd_delete_bfd): Don't call _bfd_delete_archive_data.
+	(bfd_close): Don't close nested thin archives here.
+
 2012-08-07  Tom Tromey  <tromey@redhat.com>
 
 	* archive.c (_bfd_delete_archive_data): New function.
