@@ -1,3 +1,8 @@
+2012-08-09  Andreas Tobler  <andreast@fgznet.ch>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* fbsd-nat.h (fbsd_find_memory_regions): Use find_memory_region_ftype.
+
 2012-08-09  Yao Qi  <yao@codesourcery.com>
 
 	* cli/cli-cmds.c (enablebreaklist): Move it to breakpoint.c.
