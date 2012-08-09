@@ -23,8 +23,9 @@ if [mi_gdb_start] {
 
 # Check console 'set prompt' does not affect the MI output.
 
-mi_gdb_test {-interpreter-exec console "set prompt (banana) "} {\^done} \
-	    "console set prompt"
+mi_gdb_test {-interpreter-exec console "set prompt (banana) "} \
+    ".*=cmd-param-changed,param=\"prompt\",value=\"\\(banana\\) \".*\\^done" \
+    "console set prompt"
 mi_gdb_test "-break-list" ".*}" "-break-list"
 
 gdb_exit

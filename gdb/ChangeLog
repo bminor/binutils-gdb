@@ -1,3 +1,41 @@
+2012-08-09  Yao Qi  <yao@codesourcery.com>
+
+	* cli/cli-decode.c (set_cmd_prefix): New.
+	(lookup_cmd_for_prefixlist): New.
+	(add_prefix_cmd): Call set_cmd_prefix and update field 'prefix'
+	of each cmd_list_element in *prefixlist.
+	(add_setshow_cmd_full): set_cmd_prefix.
+	(add_alias_cmd): Likewise.
+	* cli/cli-decode.h (struct cmd_list_element) <prefix>: New field.
+	Declare 'auto_boolean_enums'.
+	* cli/cli-setshow.c: Include "observer.h".
+	(notify_command_param_changed_p): New.
+	(add_setshow_auto_boolean_cmd): Move auto_boolean_enums out.
+	Remove 'static'.
+	(do_setshow_command): Split it to ...
+	(do_set_command, do_show_command): ... them.  New.
+	(do_set_command): Call observer_notify_command_param_changed if
+	notify_command_param_changed_p returns true.
+	(cmd_show_list): Caller update.
+	* auto-load.c (set_auto_load_cmd): Likewise.
+	* remote.c (show_remote_cmd): Likewise.
+	* cli/cli-setshow.h: Update declarations.
+	* top.c (execute_command): Call do_set_command and do_show_command.
+
+	* NEWS: Mention new MI notification.
+	* mi/mi-interp.c: Declare mi_command_param_changed.
+	(mi_interpreter_init): Attach mi_command_param_changed to
+	observer command_param_changed.
+	(mi_command_param_changed): New.
+	Remove mi_suppress_breakpoint_notifications.
+	Define global variable mi_suppress_notification.
+	(mi_breakpoint_created): Update.
+	(mi_breakpoint_deleted): Likewise.
+	(mi_breakpoint_modified): Likewise.
+	* mi/mi-main.c (mi_cmd_execute): Likewise.  Check command
+	'gdb-set' and set mi_suppress_notification.
+	* mi/mi-main.h: (mi_suppress_notification): New struct.
+
 2012-08-09  Andreas Tobler  <andreast@fgznet.ch>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

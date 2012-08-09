@@ -474,8 +474,10 @@ execute_command (char *p, int from_tty)
       /* c->user_commands would be NULL in the case of a python command.  */
       if (c->class == class_user && c->user_commands)
 	execute_user_command (c, arg);
-      else if (c->type == set_cmd || c->type == show_cmd)
-	do_setshow_command (arg, from_tty, c);
+      else if (c->type == set_cmd)
+	do_set_command (arg, from_tty, c);
+      else if (c->type == show_cmd)
+	do_show_command (arg, from_tty, c);
       else if (!cmd_func_p (c))
 	error (_("That is not a command, just a help topic."));
       else if (deprecated_call_command_hook)

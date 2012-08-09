@@ -1022,7 +1022,7 @@ set_auto_load_cmd (char *args, int from_tty)
     if (list->var_type == var_boolean)
       {
 	gdb_assert (list->type == set_cmd);
-	do_setshow_command (args, from_tty, list);
+	do_set_command (args, from_tty, list);
       }
 }
 

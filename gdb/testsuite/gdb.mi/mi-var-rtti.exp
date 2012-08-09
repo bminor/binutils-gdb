@@ -37,7 +37,7 @@ mi_prepare_inline_tests $srcfile
 # Enable using RTTI to determine real types of the objects
 proc set_print_object {state testname} {
     mi_gdb_test "-interpreter-exec console \"set print object ${state}\"" \
-        {\^done} \
+	"(.*=cmd-param-changed,param=\"print object\",value=\"${state}\".*|)\\^done" \
         "-interpreter-exec console \"set print object ${state}\" in $testname"
 }
 

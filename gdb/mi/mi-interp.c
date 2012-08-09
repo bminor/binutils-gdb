@@ -71,6 +71,7 @@ static void mi_about_to_proceed (void);
 static void mi_breakpoint_created (struct breakpoint *b);
 static void mi_breakpoint_deleted (struct breakpoint *b);
 static void mi_breakpoint_modified (struct breakpoint *b);
+static void mi_command_param_changed (const char *param, const char *value);
 
 static int report_initial_inferior (struct inferior *inf, void *closure);
 
@@ -128,6 +129,7 @@ mi_interpreter_init (struct interp *interp, int top_level)
       observer_attach_breakpoint_created (mi_breakpoint_created);
       observer_attach_breakpoint_deleted (mi_breakpoint_deleted);
       observer_attach_breakpoint_modified (mi_breakpoint_modified);
+      observer_attach_command_param_changed (mi_command_param_changed);
 
       /* The initial inferior is created before this function is
 	 called, so we need to report it explicitly.  Use iteration in
@@ -501,10 +503,14 @@ mi_about_to_proceed (void)
   mi_proceeded = 1;
 }
 
-/* When non-zero, no MI notifications will be emitted in
-   response to breakpoint change observers.  */
+/* When the element is non-zero, no MI notifications will be emitted in
+   response to the corresponding observers.  */
 
-int mi_suppress_breakpoint_notifications = 0;
+struct mi_suppress_notification mi_suppress_notification =
+  {
+    0,
+    0,
+  };
 
 /* Emit notification about a created breakpoint.  */
 
@@ -515,7 +521,7 @@ mi_breakpoint_created (struct breakpoint *b)
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
   volatile struct gdb_exception e;
 
-  if (mi_suppress_breakpoint_notifications)
+  if (mi_suppress_notification.breakpoint)
     return;
 
   if (b->number <= 0)
@@ -546,7 +552,7 @@ mi_breakpoint_deleted (struct breakpoint *b)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
 
-  if (mi_suppress_breakpoint_notifications)
+  if (mi_suppress_notification.breakpoint)
     return;
 
   if (b->number <= 0)
@@ -569,7 +575,7 @@ mi_breakpoint_modified (struct breakpoint *b)
   struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
   volatile struct gdb_exception e;
 
-  if (mi_suppress_breakpoint_notifications)
+  if (mi_suppress_notification.breakpoint)
     return;
 
   if (b->number <= 0)
@@ -726,6 +732,32 @@ mi_solib_unloaded (struct so_list *solib)
 			"host-name=\"%s\",thread-group=\"i%d\"",
 			solib->so_original_name, solib->so_original_name,
 			solib->so_name, current_inferior ()->num);
+
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification about the command parameter change.  */
+
+static void
+mi_command_param_changed (const char *param, const char *value)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+  struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
+
+  if (mi_suppress_notification.cmd_param_changed)
+    return;
+
+  target_terminal_ours ();
+
+  fprintf_unfiltered (mi->event_channel,
+		      "cmd-param-changed");
+
+  ui_out_redirect (mi_uiout, mi->event_channel);
+
+  ui_out_field_string (mi_uiout, "param", param);
+  ui_out_field_string (mi_uiout, "value", value);
+
+  ui_out_redirect (mi_uiout, NULL);
 
   gdb_flush (mi->event_channel);
 }

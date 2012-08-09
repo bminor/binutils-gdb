@@ -70,7 +70,7 @@ set line_callee4_body [expr $line_callee4_head + 2]
 set line_callee4_next [expr $line_callee4_body + 1]
 
 mi_gdb_test "-interpreter-exec console \"set args foobar\"" \
-  {\^done} \
+  ".*=cmd-param-changed,param=\"args\",value=\"foobar\".*\\^done" \
   "-interpreter-exec console \"set args foobar\""
 
 mi_gdb_test "-interpreter-exec console \"show args\"" \
@@ -90,7 +90,7 @@ mi_gdb_test "-interpreter-exec console \"info break\"" \
   "-interpreter-exec console \"info break\""
 
 mi_gdb_test "-interpreter-exec console \"set listsize 1\"" \
-  {\^done} \
+  ".*=cmd-param-changed,param=\"listsize\",value=\"1\".*\\^done" \
   "-interpreter-exec console \"set listsize 1\""
 
 # {.*\~"32[ \t(\\t)]*callee1.*\\n".*\^done }

@@ -149,6 +149,9 @@ struct cmd_list_element
        recognized; call the prefix's own function in that case.  */
     char allow_unknown;
 
+    /* The prefix command of this command.  */
+    struct cmd_list_element *prefix;
+
     /* Nonzero says this is an abbreviation, and should not
        be mentioned in lists of commands.
        This allows "br<tab>" to complete to "break", which it
@@ -232,5 +235,6 @@ extern void not_just_help_class_command (char *arg, int from_tty);
 
 extern void print_doc_line (struct ui_file *, char *);
 
+extern const char * const auto_boolean_enums[];
 
 #endif /* !defined (CLI_DECODE_H) */

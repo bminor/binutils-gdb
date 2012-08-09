@@ -32,7 +32,15 @@ extern char *current_token;
 
 extern int running_result_record_printed;
 extern int mi_proceeded;
-extern int mi_suppress_breakpoint_notifications;
+
+struct mi_suppress_notification
+{
+  /* Breakpoint notification suppressed?  */
+  int breakpoint;
+  /* Command param changed notification suppressed?  */
+  int cmd_param_changed;
+};
+extern struct mi_suppress_notification mi_suppress_notification;
 
 #endif
 

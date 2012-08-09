@@ -27620,6 +27620,12 @@ breakpoint commands; @xref{GDB/MI Breakpoint Commands}.  The
 Note that if a breakpoint is emitted in the result record of a
 command, then it will not also be emitted in an async record.
 
+@item =cmd-param-changed,param=@var{param},value=@var{value}
+Reports that a parameter of the command @code{set @var{param}} is
+changed to @var{value}.  In the multi-word @code{set} command,
+the @var{param} is the whole parameter list to @code{set} command.
+For example, In command @code{set check type on}, @var{param}
+is @code{check type} and @var{value} is @code{on}.
 @end table
 
 @node GDB/MI Frame Information

@@ -1,3 +1,8 @@
+2012-08-09  Yao Qi  <yao@codesourcery.com>
+
+	* observer.texi: New observer command_param_changed.
+	* gdb.texinfo (GDB/MI Async Records): Doc for '=cmd-param-changed'.
+
 2012-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbint.texinfo (Debugging GDB): In section

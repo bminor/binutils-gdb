@@ -230,6 +230,14 @@ the current top-level prompt.
 Variable gdb_datadir has been set.  The value may not necessarily change.
 @end deftypefun
 
+@deftypefun void command_param_changed (const char *@var{param}, const char *@var{value})
+The parameter of some @code{set} commands in console are changed.  This
+method is called after a command @code{set @var{param} @var{value}}.
+@var{param} is the parameter of @code{set} command, and @var{value}
+is the value of changed parameter.
+
+@end deftypefun
+
 @deftypefun void test_notification (int @var{somearg})
 This observer is used for internal testing.  Do not use.  
 See testsuite/gdb.gdb/observer.exp.

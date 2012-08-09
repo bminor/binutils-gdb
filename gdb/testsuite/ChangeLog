@@ -1,3 +1,10 @@
+2012-08-09  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-cmd-param-changed.exp: New.
+	* gdb.mi/mi-cli.exp: Update for MI notification "=cmd-param-changed".
+	* gdb.mi/mi-var-rtti.exp, gdb.mi/mi2-cli.exp: Likewise.
+	* gdb.mi/mi2-prompt.exp: Likewise.
+
 2012-08-08  Doug Evans  <dje@google.com>
 
 	* gdb.base/debug-expr.c: New file.
