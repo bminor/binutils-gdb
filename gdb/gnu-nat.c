@@ -2645,8 +2645,8 @@ gnu_target (void)
 
 /* User task commands.  */
 
-struct cmd_list_element *set_task_cmd_list = 0;
-struct cmd_list_element *show_task_cmd_list = 0;
+static struct cmd_list_element *set_task_cmd_list = 0;
+static struct cmd_list_element *show_task_cmd_list = 0;
 /* User thread commands.  */
 
 /* Commands with a prefix of `set/show thread'.  */

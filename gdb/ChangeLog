@@ -1,3 +1,8 @@
+2012-08-09  Yao Qi  <yao@codesourcery.com>
+
+	* cli/cli-dump.c: Add 'static' to some cmd_list_element variables.
+	* gnu-nat.c, symfile.c: Likewise.
+
 2012-08-08  Aaron Gamble  <agamble@google.com>
 
 	* utils.c (prompt_for_continue_wait_time): New static global.

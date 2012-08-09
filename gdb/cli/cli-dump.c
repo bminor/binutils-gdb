@@ -150,13 +150,13 @@ bfd_openw_with_cleanup (const char *filename, const char *target,
   return obfd;
 }
 
-struct cmd_list_element *dump_cmdlist;
-struct cmd_list_element *append_cmdlist;
-struct cmd_list_element *srec_cmdlist;
-struct cmd_list_element *ihex_cmdlist;
-struct cmd_list_element *tekhex_cmdlist;
-struct cmd_list_element *binary_dump_cmdlist;
-struct cmd_list_element *binary_append_cmdlist;
+static struct cmd_list_element *dump_cmdlist;
+static struct cmd_list_element *append_cmdlist;
+static struct cmd_list_element *srec_cmdlist;
+static struct cmd_list_element *ihex_cmdlist;
+static struct cmd_list_element *tekhex_cmdlist;
+static struct cmd_list_element *binary_dump_cmdlist;
+static struct cmd_list_element *binary_append_cmdlist;
 
 static void
 dump_command (char *cmd, int from_tty)

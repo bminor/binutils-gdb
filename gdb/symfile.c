@@ -3393,7 +3393,7 @@ overlay_load_command (char *args, int from_tty)
    A place-holder for a mis-typed command.  */
 
 /* Command list chain containing all defined "overlay" subcommands.  */
-struct cmd_list_element *overlaylist;
+static struct cmd_list_element *overlaylist;
 
 static void
 overlay_command (char *args, int from_tty)
