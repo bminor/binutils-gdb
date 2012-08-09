@@ -1,3 +1,18 @@
+2012-08-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (LA25_LUI_MICROMIPS_1, LA25_LUI_MICROMIPS_2):
+	Remove macros, folding them into...
+	(LA25_LUI_MICROMIPS): ... this new macro.
+	(LA25_J_MICROMIPS_1, LA25_J_MICROMIPS_2): Likewise into...
+	(LA25_J_MICROMIPS): ... this new macro.
+	(LA25_ADDIU_MICROMIPS_1, LA25_ADDIU_MICROMIPS_2): Likewise
+	into...
+	(LA25_ADDIU_MICROMIPS): ... this new macro.
+	(bfd_put_micromips_32, bfd_get_micromips_32): New functions.
+	(mips_elf_create_la25_stub): Use them.
+	(check_br32_dslot, check_br32, check_relocated_bzc): Likewise.
+	(_bfd_mips_elf_relax_section): Likewise.
+
 2012-08-09  Alan Modra  <amodra@gmail.com>
 	    Tom Tromey  <tromey@redhat.com>
 
