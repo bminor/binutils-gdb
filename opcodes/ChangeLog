@@ -1,3 +1,9 @@
+2012-08-11  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
+
+	PR gas/14423
+	* i386-gen.c (cpu_flag_init): Add CpuFMA in CPU_BDVER2_FLAGS.
+	* i386-init.h: Regenerated.
+
 2012-08-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
