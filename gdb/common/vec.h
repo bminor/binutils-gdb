@@ -210,6 +210,13 @@
 
 #define VEC_copy(T,V) (VEC_OP(T,copy)(V))
 
+/* Merge two vectors.
+   VEC(T,A) *VEC_T_merge(VEC(T) *, VEC(T) *);
+
+   Copy the live elements of both vectors into a new vector.  The new
+   and old vectors need not be allocated by the same mechanism.  */
+#define VEC_merge(T,V1,V2) (VEC_OP(T,merge)(V1, V2))
+
 /* Determine if a vector has additional capacity.
 
    int VEC_T_space (VEC(T) *v,int reserve)
@@ -459,6 +466,28 @@ static inline VEC(T) *VEC_OP (T,copy) (VEC(T) *vec_)			  \
       memcpy (new_vec_->vec, vec_->vec, sizeof (T) * len_);		  \
     }									  \
   return new_vec_;							  \
+}									  \
+									  \
+static inline VEC(T) *VEC_OP (T,merge) (VEC(T) *vec1_, VEC(T) *vec2_)	  \
+{									  \
+  if (vec1_ && vec2_)							  \
+    {									  \
+      size_t len_ = vec1_->num + vec2_->num;				  \
+      VEC (T) *new_vec_ = NULL;						  \
+									  \
+      /* We must request exact size allocation, hence the negation.  */	  \
+      new_vec_ = (VEC (T) *)						  \
+	vec_o_reserve (NULL, -len_, offsetof (VEC(T),vec), sizeof (T));	  \
+									  \
+      new_vec_->num = len_;						  \
+      memcpy (new_vec_->vec, vec1_->vec, sizeof (T) * vec1_->num);	  \
+      memcpy (new_vec_->vec + vec1_->num, vec2_->vec,			  \
+	      sizeof (T) * vec2_->num);					  \
+									  \
+      return new_vec_;							  \
+    }									  \
+  else									  \
+    return VEC_copy (T, vec1_ ? vec1_ : vec2_);				  \
 }									  \
 									  \
 static inline void VEC_OP (T,free)					  \
@@ -741,6 +770,27 @@ static inline VEC(T) *VEC_OP (T,copy) (VEC(T) *vec_)			  \
   return new_vec_;							  \
 }									  \
 									  \
+static inline VEC(T) *VEC_OP (T,merge) (VEC(T) *vec1_, VEC(T) *vec2_)	  \
+{									  \
+  if (vec1_ && vec2_)							  \
+    {									  \
+      size_t len_ = vec1_->num + vec2_->num;				  \
+      VEC (T) *new_vec_ = NULL;						  \
+									  \
+      /* We must request exact size allocation, hence the negation.  */	  \
+      new_vec_ = (VEC (T) *)(vec_p_reserve (NULL, -len_));		  \
+									  \
+      new_vec_->num = len_;						  \
+      memcpy (new_vec_->vec, vec1_->vec, sizeof (T) * vec1_->num);	  \
+      memcpy (new_vec_->vec + vec1_->num, vec2_->vec,			  \
+	      sizeof (T) * vec2_->num);					  \
+									  \
+      return new_vec_;							  \
+    }									  \
+  else									  \
+    return VEC_copy (T, vec1_ ? vec1_ : vec2_);				  \
+}									  \
+									  \
 static inline int VEC_OP (T,reserve)					  \
      (VEC(T) **vec_, int alloc_ VEC_ASSERT_DECL)			  \
 {									  \
@@ -973,6 +1023,28 @@ static inline VEC(T) *VEC_OP (T,copy) (VEC(T) *vec_)			  \
       memcpy (new_vec_->vec, vec_->vec, sizeof (T) * len_);		  \
     }									  \
   return new_vec_;							  \
+}									  \
+									  \
+static inline VEC(T) *VEC_OP (T,merge) (VEC(T) *vec1_, VEC(T) *vec2_)	  \
+{									  \
+  if (vec1_ && vec2_)							  \
+    {									  \
+      size_t len_ = vec1_->num + vec2_->num;				  \
+      VEC (T) *new_vec_ = NULL;						  \
+									  \
+      /* We must request exact size allocation, hence the negation.  */	  \
+      new_vec_ = (VEC (T) *)						  \
+	vec_o_reserve (NULL, -len_, offsetof (VEC(T),vec), sizeof (T));	  \
+									  \
+      new_vec_->num = len_;						  \
+      memcpy (new_vec_->vec, vec1_->vec, sizeof (T) * vec1_->num);	  \
+      memcpy (new_vec_->vec + vec1_->num, vec2_->vec,			  \
+	      sizeof (T) * vec2_->num);					  \
+									  \
+      return new_vec_;							  \
+    }									  \
+  else									  \
+    return VEC_copy (T, vec1_ ? vec1_ : vec2_);				  \
 }									  \
 									  \
 static inline void VEC_OP (T,free)					  \

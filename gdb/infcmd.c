@@ -3016,9 +3016,10 @@ Disconnect from a target.\n\
 The target will wait for another debugger to connect.  Not available for\n\
 all targets."));
 
-  add_com ("signal", class_run, signal_command, _("\
+  c = add_com ("signal", class_run, signal_command, _("\
 Continue program giving it signal specified by the argument.\n\
 An argument of \"0\" means continue program without giving it a signal."));
+  set_cmd_completer (c, signal_completer);
 
   add_com ("stepi", class_run, stepi_command, _("\
 Step one instruction exactly.\n\

@@ -41,6 +41,9 @@ extern VEC (char_ptr) *location_completer (struct cmd_list_element *,
 extern VEC (char_ptr) *command_completer (struct cmd_list_element *,
 					  char *, char *);
 
+extern VEC (char_ptr) *signal_completer (struct cmd_list_element *,
+					 char *, char *);
+
 extern char *get_gdb_completer_quote_characters (void);
 
 extern char *gdb_completion_word_break_characters (void);

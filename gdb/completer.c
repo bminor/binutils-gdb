@@ -24,6 +24,7 @@
 #include "language.h"
 #include "gdb_assert.h"
 #include "exceptions.h"
+#include "gdb_signals.h"
 
 #include "cli/cli-decode.h"
 
@@ -795,6 +796,37 @@ command_completer (struct cmd_list_element *ignore,
 {
   return complete_line_internal (word, text, 
 				 strlen (text), handle_help);
+}
+
+/* Complete on signals.  */
+
+VEC (char_ptr) *
+signal_completer (struct cmd_list_element *ignore,
+		  char *text, char *word)
+{
+  int i;
+  VEC (char_ptr) *return_val = NULL;
+  size_t len = strlen (word);
+  enum gdb_signal signum;
+  const char *signame;
+
+  for (signum = GDB_SIGNAL_FIRST; signum != GDB_SIGNAL_LAST; ++signum)
+    {
+      /* Can't handle this, so skip it.  */
+      if (signum == GDB_SIGNAL_0)
+	continue;
+
+      signame = gdb_signal_to_name (signum);
+
+      /* Ignore the unknown signal case.  */
+      if (!signame || strcmp (signame, "?") == 0)
+	continue;
+
+      if (strncasecmp (signame, word, len) == 0)
+	VEC_safe_push (char_ptr, return_val, xstrdup (signame));
+    }
+
+  return return_val;
 }
 
 /* Get the list of chars that are considered as word breaks

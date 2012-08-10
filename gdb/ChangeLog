@@ -1,3 +1,21 @@
+2012-08-10  Mike Frysinger  <vapier@gentoo.org>
+
+	PR cli/10436:
+	* common/vec.h (VEC_merge): Define.
+	(DEF_VEC_ALLOC_FUNC_I): Add a merge helper.
+	(DEF_VEC_ALLOC_FUNC_P): Likewise.
+	(DEF_VEC_ALLOC_FUNC_O): Likewise.
+	* completer.c: Include gdb_signals.h.
+	(signal_completer): Define.
+	* completer.h (signal_completer): Add prototype.
+	* infcmd.c (_initialize_infcmd): Assign the command
+	completer for "signal" to handle_completer.
+	* infrun.c: Include completer.h.
+	(handle_completer): Define.
+	(_initialize_infrun): Declare a new local variable c.  Store the
+	result of add_com("handle") to it.  Assign the command
+	completer for "handle" to handle_completer.
+
 2012-08-09  Yao Qi  <yao@codesourcery.com>
 
 	* cli/cli-decode.c (set_cmd_prefix): New.

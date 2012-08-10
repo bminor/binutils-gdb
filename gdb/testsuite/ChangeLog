@@ -1,3 +1,8 @@
+2012-08-10  Mike Frysinger  <vapier@gentoo.org>
+
+	PR cli/10436:
+	* gdb.base/completion.exp: Add tests for handle completion.
+
 2012-08-09  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi-cmd-param-changed.exp: New.

@@ -57,6 +57,7 @@
 #include "skip.h"
 #include "probe.h"
 #include "objfiles.h"
+#include "completer.h"
 
 /* Prototypes for local functions */
 
@@ -6416,6 +6417,36 @@ Are you sure you want to change it? "),
   do_cleanups (old_chain);
 }
 
+/* Complete the "handle" command.  */
+
+static VEC (char_ptr) *
+handle_completer (struct cmd_list_element *ignore,
+		  char *text, char *word)
+{
+  VEC (char_ptr) *vec_signals, *vec_keywords, *return_val;
+  static const char * const keywords[] =
+    {
+      "all",
+      "stop",
+      "ignore",
+      "print",
+      "pass",
+      "nostop",
+      "noignore",
+      "noprint",
+      "nopass",
+      NULL,
+    };
+
+  vec_signals = signal_completer (ignore, text, word);
+  vec_keywords = complete_on_enum (keywords, word, word);
+
+  return_val = VEC_merge (char_ptr, vec_signals, vec_keywords);
+  VEC_free (char_ptr, vec_signals);
+  VEC_free (char_ptr, vec_keywords);
+  return return_val;
+}
+
 static void
 xdb_handle_command (char *args, int from_tty)
 {
@@ -7059,13 +7090,14 @@ _initialize_infrun (void)
 {
   int i;
   int numsigs;
+  struct cmd_list_element *c;
 
   add_info ("signals", signals_info, _("\
 What debugger does when program gets various signals.\n\
 Specify a signal as argument to print info on that signal only."));
   add_info_alias ("handle", "signals", 0);
 
-  add_com ("handle", class_run, handle_command, _("\
+  c = add_com ("handle", class_run, handle_command, _("\
 Specify how to handle a signal.\n\
 Args are signals and actions to apply to those signals.\n\
 Symbolic signals (e.g. SIGSEGV) are recommended but numeric signals\n\
@@ -7080,6 +7112,7 @@ Print means print a message if this signal happens.\n\
 Pass means let program see this signal; otherwise program doesn't know.\n\
 Ignore is a synonym for nopass and noignore is a synonym for pass.\n\
 Pass and Stop may be combined."));
+  set_cmd_completer (c, handle_completer);
   if (xdb_commands)
     {
       add_com ("lz", class_info, signals_info, _("\
