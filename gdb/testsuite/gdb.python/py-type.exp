@@ -114,12 +114,27 @@ proc test_fields {lang} {
   gdb_test "python print len(fields)" "1" "Check the number of fields"
   gdb_test "python print fields\[0\].type" "<range type>" "Check array field type"
 
+  # Test gdb.Type.array.
   gdb_test "python print ar\[0\].cast(ar\[0\].type.array(1))" \
       ".1, 2." "cast to array with one argument"
   gdb_test "python print ar\[0\].cast(ar\[0\].type.array(0, 1))" \
       ".1, 2." "cast to array with two arguments"
 
   gdb_test "python print ar\[0\].type == ar\[0\].type" "True"
+
+  # Test gdb.Type.vector.
+  # Note: vectors cast differently than arrays.  Here ar[0] is replicated
+  # for the size of the vector.
+  gdb_py_test_silent_cmd \
+      "python vec1 = ar\[0\].cast(ar\[0\].type.vector(1))" "set vec1" 1
+  gdb_test "python print vec1" ".1, 1." "cast to vector with one argument"
+  gdb_py_test_silent_cmd \
+      "python vec2 = ar\[0\].cast(ar\[0\].type.vector(0, 1))" "set vec2" 1
+  gdb_test "python print vec2" ".1, 1." "cast to vector with two arguments"
+  gdb_test "python print vec1 == vec2" "True"
+  gdb_py_test_silent_cmd \
+      "python vec3 = ar\[1\].cast(ar\[1\].type.vector(1))" "set vec3" 1
+  gdb_test "python print vec1 == vec3" "False"
 }
 
 proc test_enums {} {

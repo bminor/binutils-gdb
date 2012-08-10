@@ -1,3 +1,9 @@
+2012-08-10  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-strfns.c: New file.
+	* gdb.python/py-strfns.exp: New file.
+	* gdb.python/py-type.exp (test_fields): Add vector tests.
+
 2012-08-10  Mike Frysinger  <vapier@gentoo.org>
 
 	PR cli/10436:

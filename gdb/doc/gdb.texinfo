@@ -7558,6 +7558,7 @@ being passed the type of @var{arg} as the argument.
 * Pretty Printing::             Python pretty printing
 * Value History::               Value history
 * Convenience Vars::            Convenience variables
+* Convenience Funs::            Convenience functions
 * Registers::                   Registers
 * Floating Point Hardware::     Floating point hardware
 * Vector Unit::                 Vector Unit
@@ -9311,12 +9312,47 @@ On HP-UX systems, if you refer to a function or variable name that
 begins with a dollar sign, @value{GDBN} searches for a user or system
 name first, before it searches for a convenience variable.
 
+@node Convenience Funs
+@section Convenience Functions
+
 @cindex convenience functions
 @value{GDBN} also supplies some @dfn{convenience functions}.  These
 have a syntax similar to convenience variables.  A convenience
 function can be used in an expression just like an ordinary function;
 however, a convenience function is implemented internally to
 @value{GDBN}.
+
+These functions require @value{GDBN} to be configured with
+@code{Python} support.
+
+@table @code
+
+@item $_memeq(@var{buf1}, @var{buf2}, @var{length})
+@findex $_memeq@r{, convenience function}
+Returns one if the @var{length} bytes at the addresses given by
+@var{buf1} and @var{buf2} are equal.
+Otherwise it returns zero.
+
+@item $_regex(@var{str}, @var{regex})
+@findex $_regex@r{, convenience function}
+Returns one if the string @var{str} matches the regular expression
+@var{regex}.  Otherwise it returns zero.
+The syntax of the regular expression is that specified by @code{Python}'s
+regular expression support.
+
+@item $_streq(@var{str1}, @var{str2})
+@findex $_streq@r{, convenience function}
+Returns one if the strings @var{str1} and @var{str2} are equal.
+Otherwise it returns zero.
+
+@item $_strlen(@var{str})
+@findex $_strlen@r{, convenience function}
+Returns the length of string @var{str}.
+
+@end table
+
+@value{GDBN} provides the ability to list and get help on
+convenience functions.
 
 @table @code
 @item help function
@@ -23359,6 +23395,19 @@ the array; in this case the lower bound is zero.  If two arguments are
 given, the first argument is the lower bound of the array, and the
 second argument is the upper bound of the array.  An array's length
 must not be negative, but the bounds can be.
+@end defun
+
+@defun Type.vector (@var{n1} @r{[}, @var{n2}@r{]})
+Return a new @code{gdb.Type} object which represents a vector of this
+type.  If one argument is given, it is the inclusive upper bound of
+the vector; in this case the lower bound is zero.  If two arguments are
+given, the first argument is the lower bound of the vector, and the
+second argument is the upper bound of the vector.  A vector's length
+must not be negative, but the bounds can be.
+
+The difference between an @code{array} and a @code{vector} is that
+arrays behave like in C: when used in expressions they decay to a pointer
+to the first element whereas vectors are treated as first class values.
 @end defun
 
 @defun Type.const ()

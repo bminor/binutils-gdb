@@ -461,10 +461,10 @@ typy_get_composite (struct type *type)
   return type;
 }
 
-/* Return an array type.  */
+/* Helper for typy_array and typy_vector.  */
 
 static PyObject *
-typy_array (PyObject *self, PyObject *args)
+typy_array_1 (PyObject *self, PyObject *args, int is_vector)
 {
   long n1, n2;
   PyObject *n2_obj = NULL;
@@ -503,10 +503,28 @@ typy_array (PyObject *self, PyObject *args)
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       array = lookup_array_range_type (type, n1, n2);
+      if (is_vector)
+	make_vector_type (array);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
   return type_to_type_object (array);
+}
+
+/* Return an array type.  */
+
+static PyObject *
+typy_array (PyObject *self, PyObject *args)
+{
+  return typy_array_1 (self, args, 0);
+}
+
+/* Return a vector type.  */
+
+static PyObject *
+typy_vector (PyObject *self, PyObject *args)
+{
+  return typy_array_1 (self, args, 1);
 }
 
 /* Return a Type object which represents a pointer to SELF.  */
@@ -1559,6 +1577,14 @@ static PyMethodDef type_object_methods[] =
 Return a type which represents an array of objects of this type.\n\
 The bounds of the array are [LOW_BOUND, HIGH_BOUND] inclusive.\n\
 If LOW_BOUND is omitted, a value of zero is used." },
+  { "vector", typy_vector, METH_VARARGS,
+    "vector ([LOW_BOUND,] HIGH_BOUND) -> Type\n\
+Return a type which represents a vector of objects of this type.\n\
+The bounds of the array are [LOW_BOUND, HIGH_BOUND] inclusive.\n\
+If LOW_BOUND is omitted, a value of zero is used.\n\
+Vectors differ from arrays in that if the current language has C-style\n\
+arrays, vectors don't decay to a pointer to the first element.\n\
+They are first class values." },
    { "__contains__", typy_has_key, METH_VARARGS,
      "T.__contains__(k) -> True if T has a field named k, else False" },
   { "const", typy_const, METH_NOARGS,

@@ -3,6 +3,17 @@
 
 *** Changes since GDB 7.5
 
+* Python scripting
+
+  ** Vectors can be created with gdb.Type.vector.
+
+* New Python-based convenience functions:
+
+  ** $_memeq(buf1, buf2, length)
+  ** $_streq(str1, str2)
+  ** $_strlen(str)
+  ** $_regex(str, regex)
+
 * The 'cd' command now defaults to using '~' (the home directory) if not
   given an argument.
 
