@@ -1,3 +1,9 @@
+2012-08-10  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* python/py-type.c (convert_field): Use gdb_py_long_from_longest
+	for TYPE_FIELD_BITPOS.
+	(typy_get_sizeof): Likewise for TYPE_LENGTH.
+
 2012-08-10  Mike Frysinger  <vapier@gentoo.org>
 
 	PR cli/10436:

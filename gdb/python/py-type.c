@@ -176,7 +176,7 @@ convert_field (struct type *type, int field)
 	}
       else
 	{
-	  arg = PyLong_FromLong (TYPE_FIELD_BITPOS (type, field));
+	  arg = gdb_py_long_from_longest (TYPE_FIELD_BITPOS (type, field));
 	  attrstring = "bitpos";
 	}
 
@@ -683,7 +683,7 @@ typy_get_sizeof (PyObject *self, void *closure)
     }
   /* Ignore exceptions.  */
 
-  return PyLong_FromLong (TYPE_LENGTH (type));
+  return gdb_py_long_from_longest (TYPE_LENGTH (type));
 }
 
 static struct type *
