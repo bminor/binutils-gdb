@@ -1,3 +1,11 @@
+2012-08-10  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/14444
+	* elf.c (IS_VALID_GROUP_SECTION_HEADER) Add minsize param.
+	(setup_group): Adjust uses.
+	(bfd_section_from_shdr): Allow SHT_GROUP sections with just a flag
+	word.
+
 2012-08-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
@@ -139,47 +147,47 @@
 	* dwarf2.c (struct line_info): Add discriminator field.
 	(add_line_info): Fill in new discriminator field.
 	(decode_line_info): Record discriminator information instead
-        of ignoring it.
+	of ignoring it.
 	(lookup_address_in_line_info_table): Return discriminator field if
-        requested.
+	requested.
 	(comp_unit_find_nearest_line): Add discriminator argument.
 	(find_line): Likewise.
 	(_bfd_dwarf2_find_nearest_line): Likewise.
 	(_bfd_dwarf2_find_line): Likewise.
 	* elf-bfd.h (_bfd_elf_find_nearest_line_discriminator): New.
-        (_bfd_elf_find_line_discriminator): Likewise.
-        (_bfd_generic_find_nearest_line_discriminator): Likewise. Defined.
+	(_bfd_elf_find_line_discriminator): Likewise.
+	(_bfd_generic_find_nearest_line_discriminator): Likewise. Defined.
 	* elf.c (_bfd_elf_find_nearest_line): Change to a wrapper
-        that invokes _bfd_elf_find_nearest_line_discriminator with correct
-        arguments.
+	that invokes _bfd_elf_find_nearest_line_discriminator with correct
+	arguments.
 	(_bfd_elf_find_nearest_line_discriminator): New.
 	(_bfd_elf_find_line): Change to a wrapper
-        that invokes _bfd_elf_find_line_discriminator with correct
-        arguments.
+	that invokes _bfd_elf_find_line_discriminator with correct
+	arguments.
 	(_bfd_elf_find_line_discriminator): New.
 	* coffgen.c (coff_find_nearest_line_with_names): Handle
-        new discriminator argument.
+	new discriminator argument.
 	* elf32-arm.c (elf32_arm_find_nearest_line): Likewise.
 	* elf64-alpha.c (elf64_alpha_find_nearest_line): Likewise.
 	* elfxx-mips.c (_bfd_mips_elf_find_nearest_line): Likewise.
 	* mach-o.c (bfd_mach_o_find_nearest_line): Likewise.
 	* libbfd-in.h (_bfd_dwarf2_find_nearest_line): Add discriminator
-        argument.
-        (_bfd_dwarf2_find_line): Likewise.
-        (_bfd_generic_find_nearest_line_discriminator): New.
+	argument.
+	(_bfd_dwarf2_find_line): Likewise.
+	(_bfd_generic_find_nearest_line_discriminator): New.
 	* libbfd.c (_bfd_generic_find_nearest_line_discriminator): New.
 	* bfd-in2.h: Regenerated.
 	* libbfd.h: Likewise.
 	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Initialize
-        _bfd_find_nearest_line_discriminator with
-        _bfd_generic_find_nearest_line_discriminator.
-        (bfd_target): Add _bfd_find_nearest_line_discriminator.
+	_bfd_find_nearest_line_discriminator with
+	_bfd_generic_find_nearest_line_discriminator.
+	(bfd_target): Add _bfd_find_nearest_line_discriminator.
 
 2012-07-24  Sean Keys  <skeys@ipdatasys.com>
 
-        * elf32-m68hc1x.c (elf32_m68hc11_relocate_section): Added code
+	* elf32-m68hc1x.c (elf32_m68hc11_relocate_section): Added code
 	that enables the linker to offset addresses, when linking against
-        symbols from the XGATE processor and vice versa.
+	symbols from the XGATE processor and vice versa.
 
 2012-07-23  Nick Clifton  <nickc@redhat.com>
 
@@ -657,7 +665,7 @@
 2012-05-23  Alan Modra  <amodra@gmail.com>
 
 	* elf-eh-frame.c (_bfd_elf_maybe_strip_eh_frame_hdr): Handle
-        BFDs with multiple .eh_frame sections.
+	BFDs with multiple .eh_frame sections.
 
 2012-05-23  Alan Modra  <amodra@gmail.com>
 
@@ -891,8 +899,8 @@
 
 2012-05-16  Alan Modra  <amodra@gmail.com>
 
- 	PR ld/13962
- 	PR ld/7023
+	PR ld/13962
+	PR ld/7023
 	* elf.c (bfd_section_from_shdr): Fail when .dynsym sh_info is
 	out of range.  As a special case, fix sh_info for zero sh_size.
 	Do the same for .symtab.
