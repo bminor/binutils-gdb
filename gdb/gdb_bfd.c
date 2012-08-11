@@ -264,7 +264,6 @@ gdb_bfd_unref (struct bfd *abfd)
 {
   struct gdb_bfd_data *gdata;
   struct gdb_bfd_cache_search search;
-  void **slot;
 
   if (abfd == NULL)
     return;
@@ -341,7 +340,6 @@ zlib_decompress_section (asection *sectp,
   z_stream strm;
   int rc;
   int header_size = 12;
-  struct dwarf2_per_bfd_section *section_data;
 
   if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
       || bfd_bread (compressed_buffer,
@@ -417,7 +415,6 @@ const gdb_byte *
 gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
 {
   bfd *abfd;
-  gdb_byte *buf, *retbuf;
   unsigned char header[4];
   struct gdb_bfd_section_data *descriptor;
 

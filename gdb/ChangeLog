@@ -1,3 +1,9 @@
+2012-08-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb_bfd.c (gdb_bfd_unref): Remove unused variable `slot'.
+	(zlib_decompress_section): Likewise for `section_data'.
+	(gdb_bfd_map_section): Likewise for `buf' and `retbuf'.
+
 2012-08-10  Doug Evans  <dje@google.com>
 
 	Add $_memeq, $_regex, $_streq, $_strlen convenience functions.
