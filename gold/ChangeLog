@@ -1,3 +1,28 @@
+2012-08-11  Alan Modra  <amodra@gmail.com>
+
+	* object.h (Sized_relobj_file::find_shdr): New function.
+	(Sized_relobj_file::find_special_sections): New function.
+	* object.cc (Sized_relobj_file::find_shdr): New function.
+	(Sized_relobj_file::find_eh_frame): Use find_shdr.
+	(Sized_relobj_file::find_special_sections): New function, split out..
+	(Sized_relobj_file::do_read_symbols): ..from here.
+	* output.h (Output_data_got::replace_constant): New function.
+	(Output_data_got::num_entries): New function.
+	(Output_data_got::last_got_offset,set_got_size): Use num_entries.
+	(Output_data_got::got_offset): Protected rather than private.
+	(Output_data_got::replace_got_entry): New function.
+	* output.cc (Output_data_got::replace_got_entry): New function.
+	* powerpc.cc (class Powerpc_relobj): New.
+	(class Powerpc_relocate_functions): Delete all psymval variants or
+	convert to value,addend type.  Delete pcrela, pcrela_unaligned.
+	Implement _ha functions using corresponding _hi function.
+	(Powerpc_relobj::find_special_sections): New function.
+	(Target_powerpc::do_make_elf_object): New function.
+	(class Output_data_got_powerpc): New.
+	(class Output_data_glink): New.
+	(class Powerpc_scan_relocatable_reloc): New.
+	Many more changes througout file.
+
 2012-08-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.

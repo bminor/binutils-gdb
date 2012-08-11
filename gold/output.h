@@ -2257,6 +2257,13 @@ class Output_data_got : public Output_data_got_base
     return got_offset;
   }
 
+  // Replace GOT entry I with a new constant.
+  void
+  replace_constant(unsigned int i, Valtype constant)
+  {
+    this->replace_got_entry(i, Got_entry(constant));
+  }
+
   // Reserve a slot in the GOT for a local symbol.
   void
   reserve_local(unsigned int i, Relobj* object, unsigned int sym_index,
@@ -2280,6 +2287,16 @@ class Output_data_got : public Output_data_got_base
   virtual void
   do_reserve_slot(unsigned int i)
   { this->free_list_.remove(i * got_size / 8, (i + 1) * got_size / 8); }
+
+  // Return the number of words in the GOT.
+  unsigned int
+  num_entries () const
+  { return this->entries_.size(); }
+
+  // Return the offset into the GOT of GOT entry I.
+  unsigned int
+  got_offset(unsigned int i) const
+  { return i * (got_size / 8); }
 
  private:
   // This POD class holds a single GOT entry.
@@ -2352,20 +2369,19 @@ class Output_data_got : public Output_data_got_base
   unsigned int
   add_got_entry_pair(Got_entry got_entry_1, Got_entry got_entry_2);
 
-  // Return the offset into the GOT of GOT entry I.
-  unsigned int
-  got_offset(unsigned int i) const
-  { return i * (got_size / 8); }
+  // Replace GOT entry I with a new value.
+  void
+  replace_got_entry(unsigned int i, Got_entry got_entry);
 
   // Return the offset into the GOT of the last entry added.
   unsigned int
   last_got_offset() const
-  { return this->got_offset(this->entries_.size() - 1); }
+  { return this->got_offset(this->num_entries() - 1); }
 
   // Set the size of the section.
   void
   set_got_size()
-  { this->set_current_data_size(this->got_offset(this->entries_.size())); }
+  { this->set_current_data_size(this->got_offset(this->num_entries())); }
 
   // The list of GOT entries.
   Got_entries entries_;

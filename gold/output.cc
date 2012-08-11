@@ -1701,6 +1701,18 @@ Output_data_got<size, big_endian>::add_got_entry_pair(Got_entry got_entry_1,
     }
 }
 
+// Replace GOT entry I with a new value.
+
+template<int size, bool big_endian>
+void
+Output_data_got<size, big_endian>::replace_got_entry(
+    unsigned int i,
+    Got_entry got_entry)
+{
+  gold_assert(i < this->entries_.size());
+  this->entries_[i] = got_entry;
+}
+
 // Output_data_dynamic::Dynamic_entry methods.
 
 // Write out the entry.

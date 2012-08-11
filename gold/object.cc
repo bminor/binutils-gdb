@@ -510,6 +510,64 @@ Sized_relobj_file<size, big_endian>::check_eh_frame_flags(
 	  && (shdr->get_sh_flags() & elfcpp::SHF_ALLOC) != 0);
 }
 
+// Find the section header with the given name.
+
+template<int size, bool big_endian>
+const unsigned char*
+Sized_relobj_file<size, big_endian>::find_shdr(
+    const unsigned char* pshdrs,
+    const char* name,
+    const char* names,
+    section_size_type names_size,
+    const unsigned char* hdr) const
+{
+  const unsigned int shnum = this->shnum();
+  const unsigned char* hdr_end = pshdrs + This::shdr_size * shnum;
+  size_t sh_name = 0;
+
+  while (1)
+    {
+      if (hdr)
+	{
+	  // We found HDR last time we were called, continue looking.
+	  typename This::Shdr shdr(hdr);
+	  sh_name = shdr.get_sh_name();
+	}
+      else
+	{
+	  // Look for the next occurrence of NAME in NAMES.
+	  // The fact that .shstrtab produced by current GNU tools is
+	  // string merged means we shouldn't have both .not.foo and
+	  // .foo in .shstrtab, and multiple .foo sections should all
+	  // have the same sh_name.  However, this is not guaranteed
+	  // by the ELF spec and not all ELF object file producers may
+	  // be so clever.
+	  size_t len = strlen(name) + 1;
+	  const char *p = sh_name ? names + sh_name + len : names;
+	  p = reinterpret_cast<const char*>(memmem(p, names_size - (p - names),
+						   name, len));
+	  if (p == NULL)
+	    return NULL;
+	  sh_name = p - names;
+	  hdr = pshdrs;
+	  if (sh_name == 0)
+	    return hdr;
+	}
+
+      hdr += This::shdr_size;
+      while (hdr < hdr_end)
+	{
+	  typename This::Shdr shdr(hdr);
+	  if (shdr.get_sh_name() == sh_name)
+	    return hdr;
+	  hdr += This::shdr_size;
+	}
+      hdr = NULL;
+      if (sh_name == 0)
+	return hdr;
+    }
+}
+
 // Return whether there is a GNU .eh_frame section, given the section
 // headers and the section names.
 
@@ -520,26 +578,18 @@ Sized_relobj_file<size, big_endian>::find_eh_frame(
     const char* names,
     section_size_type names_size) const
 {
-  const unsigned int shnum = this->shnum();
-  const unsigned char* p = pshdrs + This::shdr_size;
-  for (unsigned int i = 1; i < shnum; ++i, p += This::shdr_size)
-    {
-      typename This::Shdr shdr(p);
-      if (this->check_eh_frame_flags(&shdr))
-	{
-	  if (shdr.get_sh_name() >= names_size)
-	    {
-	      this->error(_("bad section name offset for section %u: %lu"),
-			  i, static_cast<unsigned long>(shdr.get_sh_name()));
-	      continue;
-	    }
+  const unsigned char* s = NULL;
 
-	  const char* name = names + shdr.get_sh_name();
-	  if (strcmp(name, ".eh_frame") == 0)
-	    return true;
-	}
+  while (1)
+    {
+      s = this->find_shdr(pshdrs, ".eh_frame", names, names_size, s);
+      if (s == NULL)
+	return false;
+
+      typename This::Shdr shdr(s);
+      if (this->check_eh_frame_flags(&shdr))
+	return true;
     }
-  return false;
 }
 
 // Return TRUE if this is a section whose contents will be needed in the
@@ -651,39 +701,46 @@ build_compressed_section_map(
   return uncompressed_map;
 }
 
+// Stash away info for a number of special sections.
+// Return true if any of the sections found require local symbols to be read.
+
+template<int size, bool big_endian>
+bool
+Sized_relobj_file<size, big_endian>::do_find_special_sections(
+    Read_symbols_data* sd)
+{
+  const unsigned char* const pshdrs = sd->section_headers->data();
+  const unsigned char* namesu = sd->section_names->data();
+  const char* names = reinterpret_cast<const char*>(namesu);
+
+  if (this->find_eh_frame(pshdrs, names, sd->section_names_size))
+    this->has_eh_frame_ = true;
+
+  if (memmem(names, sd->section_names_size, ".zdebug_", 8) != NULL)
+    this->compressed_sections_
+      = build_compressed_section_map(pshdrs, this->shnum(), names,
+				     sd->section_names_size, this);
+  return (this->has_eh_frame_
+	  || (!parameters->options().relocatable()
+	      && parameters->options().gdb_index()
+	      && (memmem(names, sd->section_names_size, "debug_info", 12) == 0
+		  || memmem(names, sd->section_names_size, "debug_types",
+			    13) == 0)));
+}
+
 // Read the sections and symbols from an object file.
 
 template<int size, bool big_endian>
 void
 Sized_relobj_file<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 {
-  bool need_local_symbols = false;
-
   this->read_section_data(&this->elf_file_, sd);
 
   const unsigned char* const pshdrs = sd->section_headers->data();
 
   this->find_symtab(pshdrs);
 
-  const unsigned char* namesu = sd->section_names->data();
-  const char* names = reinterpret_cast<const char*>(namesu);
-  if (memmem(names, sd->section_names_size, ".eh_frame", 10) != NULL)
-    {
-      if (this->find_eh_frame(pshdrs, names, sd->section_names_size))
-	this->has_eh_frame_ = true;
-    }
-  if (memmem(names, sd->section_names_size, ".zdebug_", 8) != NULL)
-    this->compressed_sections_ =
-	build_compressed_section_map(pshdrs, this->shnum(), names,
-				     sd->section_names_size, this);
-
-  if (this->has_eh_frame_
-      || (!parameters->options().relocatable()
-	  && parameters->options().gdb_index()
-	  && (memmem(names, sd->section_names_size, "debug_info", 12) == 0
-	      || memmem(names, sd->section_names_size, "debug_types",
-			13) == 0)))
-    need_local_symbols = true;
+  bool need_local_symbols = this->do_find_special_sections(sd);
 
   sd->symbols = NULL;
   sd->symbols_size = 0;
