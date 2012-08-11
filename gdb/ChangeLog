@@ -1,5 +1,11 @@
 2012-08-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 
+	* linespec.c (find_methods): Remove unused variables `i1' and
+	`name_len'.
+	(decode_line_full): Likewise for `arg_start'.
+
+2012-08-10  Sergio Durigan Junior  <sergiodj@redhat.com>
+
 	* gdb_bfd.c (gdb_bfd_unref): Remove unused variable `slot'.
 	(zlib_decompress_section): Likewise for `section_data'.
 	(gdb_bfd_map_section): Likewise for `buf' and `retbuf'.

@@ -1063,7 +1063,6 @@ find_methods (struct type *t, const char *name,
 	      VEC (const_char_ptr) **result_names,
 	      VEC (typep) **superclasses)
 {
-  int i1 = 0;
   int ibase;
   const char *class_name = type_name_no_tag (t);
 
@@ -1073,7 +1072,6 @@ find_methods (struct type *t, const char *name,
   if (class_name)
     {
       int method_counter;
-      int name_len = strlen (name);
 
       CHECK_TYPEDEF (t);
 
@@ -2273,7 +2271,6 @@ decode_line_full (char **argptr, int flags,
 {
   struct symtabs_and_lines result;
   struct cleanup *cleanups;
-  char *arg_start = *argptr;
   VEC (const_char_ptr) *filters = NULL;
   linespec_parser parser;
   struct linespec_state *state;
