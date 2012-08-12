@@ -1,3 +1,9 @@
+2012-08-12  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc: Whitespace fixes.  Wrap overly long lines.
+	(glink insn constants): Use uint32_t.
+	(Output_data_glink::add_entry): Use insert, not [] operator.
+
 2012-08-11  Alan Modra  <amodra@gmail.com>
 
 	* object.h (Sized_relobj_file::find_shdr): New function.

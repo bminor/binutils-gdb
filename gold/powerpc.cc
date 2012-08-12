@@ -95,7 +95,8 @@ template<int size, bool big_endian>
 class Target_powerpc : public Sized_target<size, big_endian>
 {
  public:
-  typedef Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian> Reloc_section;
+  typedef
+    Output_data_reloc<elfcpp::SHT_RELA, true, size, big_endian> Reloc_section;
 
   Target_powerpc()
     : Sized_target<size, big_endian>(&powerpc_info),
@@ -684,7 +685,7 @@ public:
 	   typename elfcpp::Elf_types<size>::Elf_Addr value,
 	   typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	   typename elfcpp::Elf_types<size>::Elf_Addr address)
-  { 
+  {
     This::template rela<16>(view, 16, 0xffff, value - address, addend);
   }
 
@@ -696,7 +697,7 @@ public:
 	   typename elfcpp::Elf_types<size>::Elf_Addr value,
 	   typename elfcpp::Elf_types<size>::Elf_Addr addend,
 	   typename elfcpp::Elf_types<size>::Elf_Addr address)
-  { 
+  {
     This::rel16_hi(view, value + 0x8000, addend, address);
   }
 };
@@ -930,7 +931,10 @@ class Output_data_plt_powerpc : public Output_section_data_build
   // Return the number of PLT entries.
   unsigned int
   entry_count() const
-  { return (this->current_data_size() - initial_plt_entry_size) / plt_entry_size; }
+  {
+    return ((this->current_data_size() - initial_plt_entry_size)
+	    / plt_entry_size);
+  }
 
   // Return the offset of the first non-reserved PLT entry.
   static unsigned int
@@ -968,8 +972,9 @@ class Output_data_plt_powerpc : public Output_section_data_build
 // Create the PLT section.
 
 template<int size, bool big_endian>
-Output_data_plt_powerpc<size, big_endian>::Output_data_plt_powerpc(Layout* layout,
-								   Target_powerpc<size, big_endian>* targ)
+Output_data_plt_powerpc<size, big_endian>::Output_data_plt_powerpc(
+    Layout* layout,
+    Target_powerpc<size, big_endian>* targ)
   : Output_section_data_build(size == 32 ? 4 : 8),
     targ_(targ)
 {
@@ -999,45 +1004,45 @@ Output_data_plt_powerpc<size, big_endian>::add_entry(Symbol* gsym)
     }
 }
 
-static const unsigned int addis_11_11     = 0x3d6b0000;
-static const unsigned int addis_11_30     = 0x3d7e0000;
-static const unsigned int addis_12_12     = 0x3d8c0000;
-static const unsigned int addi_11_11      = 0x396b0000;
-static const unsigned int add_0_11_11     = 0x7c0b5a14;
-static const unsigned int add_11_0_11     = 0x7d605a14;
-static const unsigned int b               = 0x48000000;
-static const unsigned int bcl_20_31       = 0x429f0005;
-static const unsigned int bctr            = 0x4e800420;
-static const unsigned int blrl            = 0x4e800021;
-static const unsigned int lis_11          = 0x3d600000;
-static const unsigned int lis_12          = 0x3d800000;
-static const unsigned int lwzu_0_12       = 0x840c0000;
-static const unsigned int lwz_0_12        = 0x800c0000;
-static const unsigned int lwz_11_11       = 0x816b0000;
-static const unsigned int lwz_11_30       = 0x817e0000;
-static const unsigned int lwz_12_12       = 0x818c0000;
-static const unsigned int mflr_0          = 0x7c0802a6;
-static const unsigned int mflr_12         = 0x7d8802a6;
-static const unsigned int mtctr_0         = 0x7c0903a6;
-static const unsigned int mtctr_11        = 0x7d6903a6;
-static const unsigned int mtlr_0          = 0x7c0803a6;
-static const unsigned int nop             = 0x60000000;
-static const unsigned int sub_11_11_12    = 0x7d6c5850;
-static const unsigned int addis_12_2      = 0x3d820000;
-static const unsigned int std_2_1         = 0xf8410000;
-static const unsigned int ld_11_12        = 0xe96c0000;
-static const unsigned int ld_2_12         = 0xe84c0000;
-static const unsigned int addi_12_12      = 0x398c0000;
-static const unsigned int ld_11_2         = 0xe9620000;
-static const unsigned int addi_2_2        = 0x38420000;
-static const unsigned int ld_2_2          = 0xe8420000;
-static const unsigned int mflr_11         = 0x7d6802a6;
-static const unsigned int ld_2_11         = 0xe84b0000;
-static const unsigned int mtlr_12         = 0x7d8803a6;
-static const unsigned int add_12_2_11     = 0x7d825a14;
-static const unsigned int li_0_0          = 0x38000000;
-static const unsigned int lis_0_0         = 0x3c000000;
-static const unsigned int ori_0_0_0       = 0x60000000;
+static const uint32_t addis_11_11       = 0x3d6b0000;
+static const uint32_t addis_11_30       = 0x3d7e0000;
+static const uint32_t addis_12_12       = 0x3d8c0000;
+static const uint32_t addi_11_11        = 0x396b0000;
+static const uint32_t add_0_11_11       = 0x7c0b5a14;
+static const uint32_t add_11_0_11       = 0x7d605a14;
+static const uint32_t b                 = 0x48000000;
+static const uint32_t bcl_20_31         = 0x429f0005;
+static const uint32_t bctr              = 0x4e800420;
+static const uint32_t blrl              = 0x4e800021;
+static const uint32_t lis_11            = 0x3d600000;
+static const uint32_t lis_12            = 0x3d800000;
+static const uint32_t lwzu_0_12         = 0x840c0000;
+static const uint32_t lwz_0_12          = 0x800c0000;
+static const uint32_t lwz_11_11         = 0x816b0000;
+static const uint32_t lwz_11_30         = 0x817e0000;
+static const uint32_t lwz_12_12         = 0x818c0000;
+static const uint32_t mflr_0            = 0x7c0802a6;
+static const uint32_t mflr_12           = 0x7d8802a6;
+static const uint32_t mtctr_0           = 0x7c0903a6;
+static const uint32_t mtctr_11          = 0x7d6903a6;
+static const uint32_t mtlr_0            = 0x7c0803a6;
+static const uint32_t nop               = 0x60000000;
+static const uint32_t sub_11_11_12      = 0x7d6c5850;
+static const uint32_t addis_12_2        = 0x3d820000;
+static const uint32_t std_2_1           = 0xf8410000;
+static const uint32_t ld_11_12          = 0xe96c0000;
+static const uint32_t ld_2_12           = 0xe84c0000;
+static const uint32_t addi_12_12        = 0x398c0000;
+static const uint32_t ld_11_2           = 0xe9620000;
+static const uint32_t addi_2_2          = 0x38420000;
+static const uint32_t ld_2_2            = 0xe8420000;
+static const uint32_t mflr_11           = 0x7d6802a6;
+static const uint32_t ld_2_11           = 0xe84b0000;
+static const uint32_t mtlr_12           = 0x7d8803a6;
+static const uint32_t add_12_2_11       = 0x7d825a14;
+static const uint32_t li_0_0            = 0x38000000;
+static const uint32_t lis_0_0           = 0x3c000000;
+static const uint32_t ori_0_0_0         = 0x60000000;
 
 // Write out the PLT.
 
@@ -1207,7 +1212,8 @@ class Output_data_glink : public Output_section_data
 // Create the glink section.
 
 template<int size, bool big_endian>
-Output_data_glink<size, big_endian>::Output_data_glink(Target_powerpc<size, big_endian>* targ)
+Output_data_glink<size, big_endian>::Output_data_glink(
+    Target_powerpc<size, big_endian>* targ)
   : Output_section_data(16),
     pltresolve_(0), targ_(targ)
 {
@@ -1218,24 +1224,24 @@ Output_data_glink<size, big_endian>::Output_data_glink(Target_powerpc<size, big_
 
 template<int size, bool big_endian>
 void
-Output_data_glink<size, big_endian>
-::add_entry(const Symbol* gsym,
-	    const elfcpp::Rela<size, big_endian>& reloc,
-	    const Sized_relobj<size, big_endian>* object,
-	    unsigned int shndx)
+Output_data_glink<size, big_endian>::add_entry(
+    const Symbol* gsym,
+    const elfcpp::Rela<size, big_endian>& reloc,
+    const Sized_relobj<size, big_endian>* object,
+    unsigned int shndx)
 {
   Glink_sym_ent ent(gsym, reloc, object, shndx);
   unsigned int indx = this->glink_entries_.size();
-  this->glink_entries_[ent] = indx;
+  this->glink_entries_.insert(std::make_pair(ent, indx));
 }
 
 template<int size, bool big_endian>
 unsigned int
-Output_data_glink<size, big_endian>
-::find_entry(const Symbol* gsym,
-	     const elfcpp::Rela<size, big_endian>& reloc,
-	     const Sized_relobj<size, big_endian>* object,
-	     unsigned int shndx) const
+Output_data_glink<size, big_endian>::find_entry(
+    const Symbol* gsym,
+    const elfcpp::Rela<size, big_endian>& reloc,
+    const Sized_relobj<size, big_endian>* object,
+    unsigned int shndx) const
 {
   Glink_sym_ent ent(gsym, reloc, object, shndx);
   typename Glink_entries::const_iterator p = this->glink_entries_.find(ent);
@@ -1427,9 +1433,10 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 	  p = oview + g->second * this->glink_entry_size();
 	  if (parameters->options().output_is_position_independent())
 	    {
-	      if (g->first.shndx_)
-		got_addr = (g->first.object_->output_section(g->first.shndx_)->address()
-			    + g->first.object_->output_section_offset(g->first.shndx_)
+	      unsigned int got2 = g->first.shndx_;
+	      if (got2)
+		got_addr = (g->first.object_->output_section(got2)->address()
+			    + g->first.object_->output_section_offset(got2)
 			    + g->first.addend_);
 	      else
 		got_addr = g_o_t;
@@ -1554,10 +1561,11 @@ Target_powerpc<size, big_endian>::make_glink_section(Layout* layout)
 
 template<int size, bool big_endian>
 void
-Target_powerpc<size, big_endian>::make_plt_entry(Layout* layout,
-						 Symbol* gsym,
-						 const elfcpp::Rela<size, big_endian>& reloc,
-						 const Sized_relobj<size, big_endian>* object)
+Target_powerpc<size, big_endian>::make_plt_entry(
+    Layout* layout,
+    Symbol* gsym,
+    const elfcpp::Rela<size, big_endian>& reloc,
+    const Sized_relobj<size, big_endian>* object)
 {
   if (this->plt_ == NULL)
     this->make_plt_section(layout);
@@ -1650,8 +1658,7 @@ Target_powerpc<size, big_endian>::optimize_tls_reloc(bool, int)
 
 template<int size, bool big_endian>
 int
-Target_powerpc<size, big_endian>::Scan::get_reference_flags(
-			unsigned int r_type)
+Target_powerpc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
 {
   switch (r_type)
     {
@@ -1714,8 +1721,8 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(
 template<int size, bool big_endian>
 void
 Target_powerpc<size, big_endian>::Scan::unsupported_reloc_local(
-			Sized_relobj_file<size, big_endian>* object,
-			unsigned int r_type)
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int r_type)
 {
   gold_error(_("%s: unsupported reloc %u against local symbol"),
 	     object->name().c_str(), r_type);
@@ -1819,15 +1826,15 @@ Target_powerpc<size, big_endian>::Scan::check_non_pic(Relobj* object,
 template<int size, bool big_endian>
 inline void
 Target_powerpc<size, big_endian>::Scan::local(
-			Symbol_table* symtab,
-			Layout* layout,
-			Target_powerpc<size, big_endian>* target,
-			Sized_relobj_file<size, big_endian>* object,
-			unsigned int data_shndx,
-			Output_section* output_section,
-			const elfcpp::Rela<size, big_endian>& reloc,
-			unsigned int r_type,
-			const elfcpp::Sym<size, big_endian>& lsym)
+    Symbol_table* symtab,
+    Layout* layout,
+    Target_powerpc<size, big_endian>* target,
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int data_shndx,
+    Output_section* output_section,
+    const elfcpp::Rela<size, big_endian>& reloc,
+    unsigned int r_type,
+    const elfcpp::Sym<size, big_endian>& lsym)
 {
   switch (r_type)
     {
@@ -1940,9 +1947,9 @@ Target_powerpc<size, big_endian>::Scan::local(
 template<int size, bool big_endian>
 void
 Target_powerpc<size, big_endian>::Scan::unsupported_reloc_global(
-			Sized_relobj_file<size, big_endian>* object,
-			unsigned int r_type,
-			Symbol* gsym)
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int r_type,
+    Symbol* gsym)
 {
   gold_error(_("%s: unsupported reloc %u against global symbol %s"),
 	     object->name().c_str(), r_type, gsym->demangled_name().c_str());
@@ -1953,15 +1960,15 @@ Target_powerpc<size, big_endian>::Scan::unsupported_reloc_global(
 template<int size, bool big_endian>
 inline void
 Target_powerpc<size, big_endian>::Scan::global(
-				Symbol_table* symtab,
-				Layout* layout,
-				Target_powerpc<size, big_endian>* target,
-				Sized_relobj_file<size, big_endian>* object,
-				unsigned int data_shndx,
-				Output_section* output_section,
-				const elfcpp::Rela<size, big_endian>& reloc,
-				unsigned int r_type,
-				Symbol* gsym)
+    Symbol_table* symtab,
+    Layout* layout,
+    Target_powerpc<size, big_endian>* target,
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int data_shndx,
+    Output_section* output_section,
+    const elfcpp::Rela<size, big_endian>& reloc,
+    unsigned int r_type,
+    Symbol* gsym)
 {
   switch (r_type)
     {
@@ -2143,17 +2150,17 @@ Target_powerpc<size, big_endian>::Scan::global(
 template<int size, bool big_endian>
 void
 Target_powerpc<size, big_endian>::gc_process_relocs(
-			Symbol_table* symtab,
-			Layout* layout,
-			Sized_relobj_file<size, big_endian>* object,
-			unsigned int data_shndx,
-			unsigned int,
-			const unsigned char* prelocs,
-			size_t reloc_count,
-			Output_section* output_section,
-			bool needs_special_offset_handling,
-			size_t local_symbol_count,
-			const unsigned char* plocal_symbols)
+    Symbol_table* symtab,
+    Layout* layout,
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int data_shndx,
+    unsigned int,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    size_t local_symbol_count,
+    const unsigned char* plocal_symbols)
 {
   typedef Target_powerpc<size, big_endian> Powerpc;
   typedef typename Target_powerpc<size, big_endian>::Scan Scan;
@@ -2178,17 +2185,17 @@ Target_powerpc<size, big_endian>::gc_process_relocs(
 template<int size, bool big_endian>
 void
 Target_powerpc<size, big_endian>::scan_relocs(
-			Symbol_table* symtab,
-			Layout* layout,
-			Sized_relobj_file<size, big_endian>* object,
-			unsigned int data_shndx,
-			unsigned int sh_type,
-			const unsigned char* prelocs,
-			size_t reloc_count,
-			Output_section* output_section,
-			bool needs_special_offset_handling,
-			size_t local_symbol_count,
-			const unsigned char* plocal_symbols)
+    Symbol_table* symtab,
+    Layout* layout,
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int data_shndx,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    size_t local_symbol_count,
+    const unsigned char* plocal_symbols)
 {
   typedef Target_powerpc<size, big_endian> Powerpc;
   typedef typename Target_powerpc<size, big_endian>::Scan Scan;
@@ -2271,17 +2278,17 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
 template<int size, bool big_endian>
 inline bool
 Target_powerpc<size, big_endian>::Relocate::relocate(
-			const Relocate_info<size, big_endian>* relinfo,
-			Target_powerpc* target,
-			Output_section* os,
-			size_t relnum,
-			const elfcpp::Rela<size, big_endian>& rela,
-			unsigned int r_type,
-			const Sized_symbol<size>* gsym,
-			const Symbol_value<size>* psymval,
-			unsigned char* view,
-			typename elfcpp::Elf_types<size>::Elf_Addr address,
-			section_size_type /* view_size */)
+    const Relocate_info<size, big_endian>* relinfo,
+    Target_powerpc* target,
+    Output_section* os,
+    size_t relnum,
+    const elfcpp::Rela<size, big_endian>& rela,
+    unsigned int r_type,
+    const Sized_symbol<size>* gsym,
+    const Symbol_value<size>* psymval,
+    unsigned char* view,
+    typename elfcpp::Elf_types<size>::Elf_Addr address,
+    section_size_type /* view_size */)
 {
   const unsigned int toc_base_offset = 0x8000;
   typedef Powerpc_relocate_functions<size, big_endian> Reloc;
@@ -2469,16 +2476,16 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 template<int size, bool big_endian>
 inline void
 Target_powerpc<size, big_endian>::Relocate::relocate_tls(
-			const Relocate_info<size, big_endian>* relinfo,
-			Target_powerpc<size, big_endian>* target,
-			size_t relnum,
-			const elfcpp::Rela<size, big_endian>& rela,
-			unsigned int r_type,
-			const Sized_symbol<size>* gsym,
-			const Symbol_value<size>* psymval,
-			unsigned char* view,
-			typename elfcpp::Elf_types<size>::Elf_Addr address,
-			section_size_type)
+    const Relocate_info<size, big_endian>* relinfo,
+    Target_powerpc<size, big_endian>* target,
+    size_t relnum,
+    const elfcpp::Rela<size, big_endian>& rela,
+    unsigned int r_type,
+    const Sized_symbol<size>* gsym,
+    const Symbol_value<size>* psymval,
+    unsigned char* view,
+    typename elfcpp::Elf_types<size>::Elf_Addr address,
+    section_size_type)
 {
   Output_segment* tls_segment = relinfo->layout->tls_segment();
   const Sized_relobj_file<size, big_endian>* object = relinfo->object;
@@ -2502,16 +2509,16 @@ Target_powerpc<size, big_endian>::Relocate::relocate_tls(
 template<int size, bool big_endian>
 void
 Target_powerpc<size, big_endian>::relocate_section(
-			const Relocate_info<size, big_endian>* relinfo,
-			unsigned int sh_type,
-			const unsigned char* prelocs,
-			size_t reloc_count,
-			Output_section* output_section,
-			bool needs_special_offset_handling,
-			unsigned char* view,
-			typename elfcpp::Elf_types<size>::Elf_Addr address,
-			section_size_type view_size,
-			const Reloc_symbol_changes* reloc_symbol_changes)
+    const Relocate_info<size, big_endian>* relinfo,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    unsigned char* view,
+    typename elfcpp::Elf_types<size>::Elf_Addr address,
+    section_size_type view_size,
+    const Reloc_symbol_changes* reloc_symbol_changes)
 {
   typedef Target_powerpc<size, big_endian> Powerpc;
   typedef typename Target_powerpc<size, big_endian>::Relocate Powerpc_relocate;
@@ -2519,7 +2526,7 @@ Target_powerpc<size, big_endian>::relocate_section(
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
   gold::relocate_section<size, big_endian, Powerpc, elfcpp::SHT_RELA,
-    Powerpc_relocate>(
+			 Powerpc_relocate>(
     relinfo,
     this,
     prelocs,
@@ -2569,23 +2576,23 @@ public:
 template<int size, bool big_endian>
 void
 Target_powerpc<size, big_endian>::scan_relocatable_relocs(
-			Symbol_table* symtab,
-			Layout* layout,
-			Sized_relobj_file<size, big_endian>* object,
-			unsigned int data_shndx,
-			unsigned int sh_type,
-			const unsigned char* prelocs,
-			size_t reloc_count,
-			Output_section* output_section,
-			bool needs_special_offset_handling,
-			size_t local_symbol_count,
-			const unsigned char* plocal_symbols,
-			Relocatable_relocs* rr)
+    Symbol_table* symtab,
+    Layout* layout,
+    Sized_relobj_file<size, big_endian>* object,
+    unsigned int data_shndx,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    size_t local_symbol_count,
+    const unsigned char* plocal_symbols,
+    Relocatable_relocs* rr)
 {
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
   gold::scan_relocatable_relocs<size, big_endian, elfcpp::SHT_RELA,
-    Powerpc_scan_relocatable_reloc>(
+				Powerpc_scan_relocatable_reloc>(
     symtab,
     layout,
     object,
