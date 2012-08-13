@@ -1,3 +1,127 @@
+2012-08-13  Ian Bolton  <ian.bolton@arm.com>
+            Laurent Desnogues  <laurent.desnogues@arm.com>
+            Jim MacArthur  <jim.macarthur@arm.com>
+            Marcus Shawcroft  <marcus.shawcroft@arm.com>
+            Nigel Stephens  <nigel.stephens@arm.com>
+            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+            Richard Earnshaw  <rearnsha@arm.com>
+            Sofiane Naci  <sofiane.naci@arm.com>
+            Tejas Belagod  <tejas.belagod@arm.com>
+            Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64: New directory.
+	* gas/aarch64/aarch64.exp: New file.
+	* gas/aarch64/addsub.d: New file.
+	* gas/aarch64/addsub.s: New file.
+	* gas/aarch64/advsimd-across.d: New file.
+	* gas/aarch64/advsimd-across.s: New file.
+	* gas/aarch64/advsimd-misc.d: New file.
+	* gas/aarch64/advsimd-misc.s: New file.
+	* gas/aarch64/advsisd-copy.d: New file.
+	* gas/aarch64/advsisd-copy.s: New file.
+	* gas/aarch64/advsisd-misc.d: New file.
+	* gas/aarch64/advsisd-misc.s: New file.
+	* gas/aarch64/alias.d: New file.
+	* gas/aarch64/alias.s: New file.
+	* gas/aarch64/bitfield-alias.d: New file.
+	* gas/aarch64/bitfield-alias.s: New file.
+	* gas/aarch64/bitfield-bfm.d: New file.
+	* gas/aarch64/bitfield-bfm.s: New file.
+	* gas/aarch64/bitfield-dump: New file.
+	* gas/aarch64/bitfield-no-aliases.d: New file.
+	* gas/aarch64/crypto.d: New file.
+	* gas/aarch64/crypto.s: New file.
+	* gas/aarch64/diagnostic.d: New file.
+	* gas/aarch64/diagnostic.l: New file.
+	* gas/aarch64/diagnostic.s: New file.
+	* gas/aarch64/floatdp2.d: New file.
+	* gas/aarch64/floatdp2.s: New file.
+	* gas/aarch64/fp_cvt_int.d: New file.
+	* gas/aarch64/fp_cvt_int.s: New file.
+	* gas/aarch64/illegal-2.d: New file.
+	* gas/aarch64/illegal-2.l: New file.
+	* gas/aarch64/illegal-2.s: New file.
+	* gas/aarch64/illegal.d: New file.
+	* gas/aarch64/illegal.l: New file.
+	* gas/aarch64/illegal.s: New file.
+	* gas/aarch64/inst-directive.d: New file.
+	* gas/aarch64/inst-directive.s: New file.
+	* gas/aarch64/int-insns.d: New file.
+	* gas/aarch64/int-insns.s: New file.
+	* gas/aarch64/ldst-exclusive.d: New file.
+	* gas/aarch64/ldst-exclusive.s: New file.
+	* gas/aarch64/ldst-reg-imm-post-ind.d: New file.
+	* gas/aarch64/ldst-reg-imm-post-ind.s: New file.
+	* gas/aarch64/ldst-reg-imm-pre-ind.d: New file.
+	* gas/aarch64/ldst-reg-imm-pre-ind.s: New file.
+	* gas/aarch64/ldst-reg-pair.d: New file.
+	* gas/aarch64/ldst-reg-pair.s: New file.
+	* gas/aarch64/ldst-reg-reg-offset.d: New file.
+	* gas/aarch64/ldst-reg-reg-offset.s: New file.
+	* gas/aarch64/ldst-reg-uns-imm.d: New file.
+	* gas/aarch64/ldst-reg-uns-imm.s: New file.
+	* gas/aarch64/ldst-reg-unscaled-imm.d: New file.
+	* gas/aarch64/ldst-reg-unscaled-imm.s: New file.
+	* gas/aarch64/legacy_reg_names.d: New file.
+	* gas/aarch64/legacy_reg_names.l: New file.
+	* gas/aarch64/legacy_reg_names.s: New file.
+	* gas/aarch64/mapmisc.d: New file.
+	* gas/aarch64/mapmisc.dat: New file.
+	* gas/aarch64/mapmisc.s: New file.
+	* gas/aarch64/mapping.d: New file.
+	* gas/aarch64/mapping.s: New file.
+	* gas/aarch64/mapping2.d: New file.
+	* gas/aarch64/mapping2.s: New file.
+	* gas/aarch64/mapping3.d: New file.
+	* gas/aarch64/mapping3.s: New file.
+	* gas/aarch64/mapping4.d: New file.
+	* gas/aarch64/mapping4.s: New file.
+	* gas/aarch64/mov-no-aliases.d: New file.
+	* gas/aarch64/mov.d: New file.
+	* gas/aarch64/mov.s: New file.
+	* gas/aarch64/movi.d: New file.
+	* gas/aarch64/movi.s: New file.
+	* gas/aarch64/msr.d: New file.
+	* gas/aarch64/msr.s: New file.
+	* gas/aarch64/neon-fp-cvt-int.d: New file.
+	* gas/aarch64/neon-fp-cvt-int.s: New file.
+	* gas/aarch64/neon-frint.d: New file.
+	* gas/aarch64/neon-frint.s: New file.
+	* gas/aarch64/neon-ins.d: New file.
+	* gas/aarch64/neon-ins.s: New file.
+	* gas/aarch64/neon-not.d: New file.
+	* gas/aarch64/neon-not.s: New file.
+	* gas/aarch64/neon-vfp-reglist-post.d: New file.
+	* gas/aarch64/neon-vfp-reglist-post.s: New file.
+	* gas/aarch64/neon-vfp-reglist.d: New file.
+	* gas/aarch64/neon-vfp-reglist.s: New file.
+	* gas/aarch64/no-aliases.d: New file.
+	* gas/aarch64/optional.d: New file.
+	* gas/aarch64/optional.s: New file.
+	* gas/aarch64/programmer-friendly.d: New file.
+	* gas/aarch64/programmer-friendly.s: New file.
+	* gas/aarch64/reloc-data.d: New file.
+	* gas/aarch64/reloc-data.s: New file.
+	* gas/aarch64/reloc-insn.d: New file.
+	* gas/aarch64/reloc-insn.s: New file.
+	* gas/aarch64/shifted.d: New file.
+	* gas/aarch64/shifted.s: New file.
+	* gas/aarch64/symbol.d: New file.
+	* gas/aarch64/symbol.s: New file.
+	* gas/aarch64/sysreg-1.d: New file.
+	* gas/aarch64/sysreg-1.s: New file.
+	* gas/aarch64/sysreg.d: New file.
+	* gas/aarch64/sysreg.s: New file.
+	* gas/aarch64/system.d: New file.
+	* gas/aarch64/system.s: New file.
+	* gas/aarch64/tlbi_op.d: New file.
+	* gas/aarch64/tlbi_op.s: New file.
+	* gas/aarch64/tls.d: New file.
+	* gas/aarch64/tls.s: New file.
+	* gas/aarch64/verbose-error.d: New file.
+	* gas/aarch64/verbose-error.l: New file.
+	* gas/aarch64/verbose-error.s: New file.
+
 2012-08-11  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
 
 	PR gas/14423

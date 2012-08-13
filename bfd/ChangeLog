@@ -1,3 +1,47 @@
+2012-08-13  Ian Bolton  <ian.bolton@arm.com>
+            Laurent Desnogues  <laurent.desnogues@arm.com>
+            Jim MacArthur  <jim.macarthur@arm.com>
+            Marcus Shawcroft  <marcus.shawcroft@arm.com>
+            Nigel Stephens  <nigel.stephens@arm.com>
+            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+            Richard Earnshaw  <rearnsha@arm.com>
+            Sofiane Naci  <sofiane.naci@arm.com>
+            Tejas Belagod  <tejas.belagod@arm.com>
+            Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* Makefile.am: Add AArch64 files.
+	* Makefile.in: Regenerate.
+	* archures.c (bfd_aarch64_arch): New declaration.
+	(bfd_archures_list): Use bfd_archures_list.
+	* bfd-in.h (bfd_elf64_aarch64_init_maps): New declaration.
+	(bfd_aarch64_process_before_allocation): New declaration.
+	(bfd_elf64_aarch64_process_before_allocation): New declaration.
+	(bfd_elf64_aarch64_set_options): New declaration.
+	(bfd_elf64_aarch64_add_glue_sections_to_bfd): New declaration.
+	(BFD_AARCH64_SPECIAL_SYM_TYPE_MAP): New definition.
+	(BFD_AARCH64_SPECIAL_SYM_TYPE_TAG): New definition.
+	(BFD_AARCH64_SPECIAL_SYM_TYPE_OTHER): New definition.
+	(BFD_AARCH64_SPECIAL_SYM_TYPE_ANY): New definition.
+	(bfd_is_aarch64_special_symbol_name): New declaration.
+	(bfd_aarch64_merge_machines): New declaration.
+	(bfd_aarch64_update_notes): New declaration.
+	(int bfd_aarch64_get_mach_from_notes): New declaration.
+	(elf64_aarch64_setup_section_lists): New declaration.
+	(elf64_aarch64_next_input_section): New declaration.
+	(elf64_aarch64_size_stubs): New declaration.
+	(elf64_aarch64_build_stubs): New declaration.
+	* config.bfd: Add AArch64.
+	* configure.in: Add AArch64.
+	* configure: Regenerate.
+	* cpu-aarch64.c: New file.
+	* elf-bfd.h: Add AArch64.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf64-aarch64.c: New file.
+	* reloc.c: Add AArch64 relocations.
+	* targets.c: Add AArch64.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Fix the handling

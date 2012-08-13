@@ -1,3 +1,27 @@
+2012-08-13  Ian Bolton  <ian.bolton@arm.com>
+            Laurent Desnogues  <laurent.desnogues@arm.com>
+            Jim MacArthur  <jim.macarthur@arm.com>
+            Marcus Shawcroft  <marcus.shawcroft@arm.com>
+            Nigel Stephens  <nigel.stephens@arm.com>
+            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+            Richard Earnshaw  <rearnsha@arm.com>
+            Sofiane Naci  <sofiane.naci@arm.com>
+            Tejas Belagod  <tejas.belagod@arm.com>
+            Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* Makefile.am: Add AArch64.
+	* Makefile.in: Regenerate.
+	* config/tc-aarch64.c: New file.
+	* config/tc-aarch64.h: New file.
+	* configure.tgt: Add AArch64.
+	* doc/Makefile.am: Add AArch64.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi: Add AArch64.
+	* doc/as.texinfo: Add AArch64.
+	* doc/c-aarch64.texi: New file.
+	* po/POTFILES.in: Regenerate.
+	* NEWS: Mention the new support.
+
 2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (NO_ISA_COP, COP_INSN): Remove macros.

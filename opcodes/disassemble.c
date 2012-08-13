@@ -24,6 +24,7 @@
 #include "dis-asm.h"
 
 #ifdef ARCH_all
+#define ARCH_aarch64
 #define ARCH_alpha
 #define ARCH_arc
 #define ARCH_arm
@@ -113,6 +114,11 @@ disassembler (abfd)
     {
       /* If you add a case to this table, also add it to the
 	 ARCH_all definition right above this function.  */
+#ifdef ARCH_aarch64
+    case bfd_arch_aarch64:
+      disassemble = print_insn_aarch64;
+      break;
+#endif
 #ifdef ARCH_alpha
     case bfd_arch_alpha:
       disassemble = print_insn_alpha;
@@ -516,6 +522,9 @@ void
 disassembler_usage (stream)
      FILE * stream ATTRIBUTE_UNUSED;
 {
+#ifdef ARCH_aarch64
+  print_aarch64_disassembler_options (stream);
+#endif
 #ifdef ARCH_arm
   print_arm_disassembler_options (stream);
 #endif
@@ -543,6 +552,12 @@ disassemble_init_for_target (struct disassemble_info * info)
 
   switch (info->arch)
     {
+#ifdef ARCH_aarch64
+    case bfd_arch_aarch64:
+      info->symbol_is_valid = aarch64_symbol_is_valid;
+      info->disassembler_needs_relocs = TRUE;
+      break;
+#endif
 #ifdef ARCH_arm
     case bfd_arch_arm:
       info->symbol_is_valid = arm_symbol_is_valid;

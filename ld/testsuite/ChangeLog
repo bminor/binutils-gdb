@@ -1,3 +1,142 @@
+2012-08-13  Ian Bolton  <ian.bolton@arm.com>
+            Laurent Desnogues  <laurent.desnogues@arm.com>
+            Jim MacArthur  <jim.macarthur@arm.com>
+            Marcus Shawcroft  <marcus.shawcroft@arm.com>
+            Nigel Stephens  <nigel.stephens@arm.com>
+            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+            Richard Earnshaw  <rearnsha@arm.com>
+            Sofiane Naci  <sofiane.naci@arm.com>
+            Tejas Belagod  <tejas.belagod@arm.com>
+            Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* ld-aarch64/aarch64-elf.exp: New file.
+	* ld-aarch64/aarch64.ld: New file.
+	* ld-aarch64/eh-frame-bar.s: New file.
+	* ld-aarch64/eh-frame-foo.s: New file.
+	* ld-aarch64/eh-frame.d: New file.
+	* ld-aarch64/emit-relocs-257-be.d: New file.
+	* ld-aarch64/emit-relocs-257.d: New file.
+	* ld-aarch64/emit-relocs-257.s: New file.
+	* ld-aarch64/emit-relocs-260-be.d: New file.
+	* ld-aarch64/emit-relocs-260.d: New file.
+	* ld-aarch64/emit-relocs-260.s: New file.
+	* ld-aarch64/emit-relocs-262.d: New file.
+	* ld-aarch64/emit-relocs-262.s: New file.
+	* ld-aarch64/emit-relocs-263.d: New file.
+	* ld-aarch64/emit-relocs-263.s: New file.
+	* ld-aarch64/emit-relocs-264.d: New file.
+	* ld-aarch64/emit-relocs-264.s: New file.
+	* ld-aarch64/emit-relocs-265.d: New file.
+	* ld-aarch64/emit-relocs-265.s: New file.
+	* ld-aarch64/emit-relocs-266.d: New file.
+	* ld-aarch64/emit-relocs-266.s: New file.
+	* ld-aarch64/emit-relocs-267.d: New file.
+	* ld-aarch64/emit-relocs-267.s: New file.
+	* ld-aarch64/emit-relocs-268.d: New file.
+	* ld-aarch64/emit-relocs-268.s: New file.
+	* ld-aarch64/emit-relocs-269.d: New file.
+	* ld-aarch64/emit-relocs-269.s: New file.
+	* ld-aarch64/emit-relocs-270-bad.d: New file.
+	* ld-aarch64/emit-relocs-270.d: New file.
+	* ld-aarch64/emit-relocs-270.s: New file.
+	* ld-aarch64/emit-relocs-271.d: New file.
+	* ld-aarch64/emit-relocs-271.s: New file.
+	* ld-aarch64/emit-relocs-272.d: New file.
+	* ld-aarch64/emit-relocs-272.s: New file.
+	* ld-aarch64/emit-relocs-273.d: New file.
+	* ld-aarch64/emit-relocs-273.s: New file.
+	* ld-aarch64/emit-relocs-274.d: New file.
+	* ld-aarch64/emit-relocs-274.s: New file.
+	* ld-aarch64/emit-relocs-275.d: New file.
+	* ld-aarch64/emit-relocs-275.s: New file.
+	* ld-aarch64/emit-relocs-276.d: New file.
+	* ld-aarch64/emit-relocs-276.s: New file.
+	* ld-aarch64/emit-relocs-277.d: New file.
+	* ld-aarch64/emit-relocs-277.s: New file.
+	* ld-aarch64/emit-relocs-278.d: New file.
+	* ld-aarch64/emit-relocs-278.s: New file.
+	* ld-aarch64/emit-relocs-279-bad.d: New file.
+	* ld-aarch64/emit-relocs-279.d: New file.
+	* ld-aarch64/emit-relocs-279.s: New file.
+	* ld-aarch64/emit-relocs-280.d: New file.
+	* ld-aarch64/emit-relocs-280.s: New file.
+	* ld-aarch64/emit-relocs-282.d: New file.
+	* ld-aarch64/emit-relocs-282.s: New file.
+	* ld-aarch64/emit-relocs-283.d: New file.
+	* ld-aarch64/emit-relocs-283.s: New file.
+	* ld-aarch64/emit-relocs-284.d: New file.
+	* ld-aarch64/emit-relocs-284.s: New file.
+	* ld-aarch64/emit-relocs-285.d: New file.
+	* ld-aarch64/emit-relocs-285.s: New file.
+	* ld-aarch64/emit-relocs-286-bad.d: New file.
+	* ld-aarch64/emit-relocs-286.d: New file.
+	* ld-aarch64/emit-relocs-286.s: New file.
+	* ld-aarch64/emit-relocs-287.d: New file.
+	* ld-aarch64/emit-relocs-287.s: New file.
+	* ld-aarch64/emit-relocs-299.d: New file.
+	* ld-aarch64/emit-relocs-299.s: New file.
+	* ld-aarch64/emit-relocs-311.d: New file.
+	* ld-aarch64/emit-relocs-311.s: New file.
+	* ld-aarch64/emit-relocs-312.d: New file.
+	* ld-aarch64/emit-relocs-312.s: New file.
+	* ld-aarch64/emit-relocs1.s: New file.
+	* ld-aarch64/farcall-b-none-function.d: New file.
+	* ld-aarch64/farcall-b-none-function.s: New file.
+	* ld-aarch64/farcall-b.d: New file.
+	* ld-aarch64/farcall-b.s: New file.
+	* ld-aarch64/farcall-back.d: New file.
+	* ld-aarch64/farcall-back.s: New file.
+	* ld-aarch64/farcall-bl-none-function.d: New file.
+	* ld-aarch64/farcall-bl-none-function.s: New file.
+	* ld-aarch64/farcall-bl.d: New file.
+	* ld-aarch64/farcall-bl.s: New file.
+	* ld-aarch64/farcall-section.d: New file.
+	* ld-aarch64/farcall-section.s: New file.
+	* ld-aarch64/limit-b.d: New file.
+	* ld-aarch64/limit-b.s: New file.
+	* ld-aarch64/limit-bl.d: New file.
+	* ld-aarch64/limit-bl.s: New file.
+	* ld-aarch64/relocs.ld: New file.
+	* ld-aarch64/tls-desc-ie.d: New file.
+	* ld-aarch64/tls-desc-ie.s: New file.
+	* ld-aarch64/tls-relax-all.d: New file.
+	* ld-aarch64/tls-relax-all.s: New file.
+	* ld-aarch64/tls-relax-gd-ie.d: New file.
+	* ld-aarch64/tls-relax-gd-ie.s: New file.
+	* ld-aarch64/tls-relax-gd-le.d: New file.
+	* ld-aarch64/tls-relax-gd-le.s: New file.
+	* ld-aarch64/tls-relax-gdesc-ie-2.d: New file.
+	* ld-aarch64/tls-relax-gdesc-ie-2.s: New file.
+	* ld-aarch64/tls-relax-gdesc-ie.d: New file.
+	* ld-aarch64/tls-relax-gdesc-ie.s: New file.
+	* ld-aarch64/tls-relax-gdesc-le-2.d: New file.
+	* ld-aarch64/tls-relax-gdesc-le-2.s: New file.
+	* ld-aarch64/tls-relax-gdesc-le.d: New file.
+	* ld-aarch64/tls-relax-gdesc-le.s: New file.
+	* ld-aarch64/tls-relax-ie-le-2.d: New file.
+	* ld-aarch64/tls-relax-ie-le-2.s: New file.
+	* ld-aarch64/tls-relax-ie-le-3.d: New file.
+	* ld-aarch64/tls-relax-ie-le-3.s: New file.
+	* ld-aarch64/tls-relax-ie-le.d: New file.
+	* ld-aarch64/tls-relax-ie-le.s: New file.
+	* ld-aarch64/weak-undefined.d: New file.
+	* ld-aarch64/weak-undefined.s: New file.
+	* ld-elf/binutils.exp (binutils_test): Add optional parameter
+	'test_name'; change to construct 'test_name' from the 'prog_name'
+	and 'ld_options' only when "$test_name" == "".
+	* ld-elf/group8a.d (#notarget): Add AArch64.
+	* ld-elf/group8b.d (#notarget): Add AArch64.
+	* ld-elf/group9a.d (#notarget): Add AArch64.
+	* ld-elf/group9b.d (#notarget): Add AArch64.
+	* ld-elf/pr12851.d (#notarget): Add AArch64.
+	* ld-elf/pr12975.d (#notarget): Add AArch64.
+	* ld-elf/pr13177.d (#notarget): Add AArch64.
+	* ld-elf/pr13195.d (#notarget): Add AArch64.
+	* ld-elfvers/vers.exp: Add AArch64.
+	* ld-shared/shared.exp: Add AArch64.
+	* ld-srec/srec.exp: Add AArch64.
+	* lib/ld-lib.exp: Add AArch64.
+
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* ld-mips-elf/dyn-sec64.ld: Use HIDDEN to define _gp.

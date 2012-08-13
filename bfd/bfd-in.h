@@ -928,6 +928,32 @@ extern unsigned int _bfd_elf_ppc_at_tls_transform
 extern unsigned int _bfd_elf_ppc_at_tprel_transform
   (unsigned int, unsigned int);
 
+extern void bfd_elf64_aarch64_init_maps
+  (bfd *);
+
+void bfd_elf64_aarch64_set_options
+  (bfd *, struct bfd_link_info *, int, int, int);
+
+/* ELF AArch64 mapping symbol support.  */
+#define BFD_AARCH64_SPECIAL_SYM_TYPE_MAP	(1 << 0)
+#define BFD_AARCH64_SPECIAL_SYM_TYPE_TAG	(1 << 1)
+#define BFD_AARCH64_SPECIAL_SYM_TYPE_OTHER	(1 << 2)
+#define BFD_AARCH64_SPECIAL_SYM_TYPE_ANY	(~0)
+extern bfd_boolean bfd_is_aarch64_special_symbol_name
+  (const char * name, int type);
+
+/* AArch64 stub generation support.  Called from the linker.  */
+extern int elf64_aarch64_setup_section_lists
+  (bfd *, struct bfd_link_info *);
+extern void elf64_aarch64_next_input_section
+  (struct bfd_link_info *, struct bfd_section *);
+extern bfd_boolean elf64_aarch64_size_stubs
+  (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
+   struct bfd_section * (*) (const char *, struct bfd_section *),
+   void (*) (void));
+extern bfd_boolean elf64_aarch64_build_stubs
+  (struct bfd_link_info *);
+  
 /* TI COFF load page support.  */
 extern void bfd_ticoff_set_section_load_page
   (struct bfd_section *, int);

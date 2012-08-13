@@ -34,7 +34,12 @@ if { [istarget *-*-linux*aout*]
     return
 }
 
-proc binutils_test { prog_name ld_options test } {
+# The optional test_name argument provides a mechanism for the caller
+# to hardwire the test name. This is important if ld_options contains
+# absolute path names because the default test name is constructed
+# from the prog_name and ld_options and we do not want absolute paths
+# to appear in the test_name.
+proc binutils_test { prog_name ld_options test {test_name ""}} {
     global as
     global ld
     global READELF
@@ -45,7 +50,10 @@ proc binutils_test { prog_name ld_options test } {
     global link_output
 
     eval set prog \$$prog_name
-    set test_name "$prog_name $ld_options ($test)"
+
+    if { "$test_name" == "" } {
+      set test_name "$prog_name $ld_options ($test)"
+    }
 
     if { ![ld_assemble $as $srcdir/$subdir/$test.s tmpdir/$test.o ] } {
 	unresolved "$test_name"
@@ -123,7 +131,7 @@ if { ([istarget "i?86-*-elf*"]
     binutils_test objcopy "-z relro -shared" relro2
 }
 
-binutils_test strip "-T ${srcdir}/${subdir}/lma.lnk" lma
+binutils_test strip "-T ${srcdir}/${subdir}/lma.lnk" lma "strip -T lma.lnk"
 
 set tls_tests { "tdata1" "tdata2" }
 # hppa64 has its own .tbss section, with different flags.

@@ -375,6 +375,7 @@ HFILES = \
 
 # CPU files in config.
 TARGET_CPU_CFILES = \
+	config/tc-aarch64.c \
 	config/tc-alpha.c \
 	config/tc-arc.c \
 	config/tc-arm.c \
@@ -444,6 +445,7 @@ TARGET_CPU_CFILES = \
 	config/xtensa-relax.c
 
 TARGET_CPU_HFILES = \
+	config/tc-aarch64.h \
 	config/tc-alpha.h \
 	config/tc-arc.h \
 	config/tc-arm.h \
@@ -793,6 +795,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stabs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/subsegs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symbols.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-aarch64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-alpha.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-arc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-arm.Po@am__quote@
@@ -883,6 +886,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+tc-aarch64.o: config/tc-aarch64.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-aarch64.o -MD -MP -MF $(DEPDIR)/tc-aarch64.Tpo -c -o tc-aarch64.o `test -f 'config/tc-aarch64.c' || echo '$(srcdir)/'`config/tc-aarch64.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-aarch64.Tpo $(DEPDIR)/tc-aarch64.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-aarch64.c' object='tc-aarch64.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-aarch64.o `test -f 'config/tc-aarch64.c' || echo '$(srcdir)/'`config/tc-aarch64.c
+
+tc-aarch64.obj: config/tc-aarch64.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-aarch64.obj -MD -MP -MF $(DEPDIR)/tc-aarch64.Tpo -c -o tc-aarch64.obj `if test -f 'config/tc-aarch64.c'; then $(CYGPATH_W) 'config/tc-aarch64.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-aarch64.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-aarch64.Tpo $(DEPDIR)/tc-aarch64.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-aarch64.c' object='tc-aarch64.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-aarch64.obj `if test -f 'config/tc-aarch64.c'; then $(CYGPATH_W) 'config/tc-aarch64.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-aarch64.c'; fi`
 
 tc-alpha.o: config/tc-alpha.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-alpha.o -MD -MP -MF $(DEPDIR)/tc-alpha.Tpo -c -o tc-alpha.o `test -f 'config/tc-alpha.c' || echo '$(srcdir)/'`config/tc-alpha.c

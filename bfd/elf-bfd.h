@@ -402,7 +402,8 @@ struct eh_frame_hdr_info
    one line.  */
 enum elf_target_id
 {
-  ALPHA_ELF_DATA = 1,
+  AARCH64_ELF_DATA = 1,
+  ALPHA_ELF_DATA,
   ARM_ELF_DATA,
   AVR_ELF_DATA,
   BFIN_ELF_DATA,

@@ -91,6 +91,7 @@
 
 #define RELOC_MACROS_GEN_FUNC
 
+#include "elf/aarch64.h"
 #include "elf/alpha.h"
 #include "elf/arc.h"
 #include "elf/arm.h"
@@ -551,6 +552,7 @@ guess_is_rela (unsigned int e_machine)
       /* Targets that use RELA relocations.  */
     case EM_68K:
     case EM_860:
+    case EM_AARCH64:
     case EM_ADAPTEVA_EPIPHANY:
     case EM_ALPHA:
     case EM_ALTERA_NIOS2:
@@ -981,6 +983,10 @@ dump_relocations (FILE * file,
 	{
 	default:
 	  rtype = NULL;
+	  break;
+
+	case EM_AARCH64:
+	  rtype = elf_aarch64_reloc_type (type);
 	  break;
 
 	case EM_M32R:
@@ -1830,6 +1836,7 @@ get_machine_name (unsigned e_machine)
   switch (e_machine)
     {
     case EM_NONE:		return _("None");
+    case EM_AARCH64:		return "AArch64";
     case EM_M32:		return "WE32100";
     case EM_SPARC:		return "Sparc";
     case EM_SPU:		return "SPU";
@@ -2695,6 +2702,20 @@ get_osabi_name (unsigned int osabi)
 }
 
 static const char *
+get_aarch64_segment_type (unsigned long type)
+{
+  switch (type)
+    {
+    case PT_AARCH64_ARCHEXT:
+      return "AARCH64_ARCHEXT";
+    default:
+      break;
+    }
+
+  return NULL;
+}
+
+static const char *
 get_arm_segment_type (unsigned long type)
 {
   switch (type)
@@ -2816,6 +2837,9 @@ get_segment_type (unsigned long p_type)
 
 	  switch (elf_header.e_machine)
 	    {
+	    case EM_AARCH64:
+	      result = get_aarch64_segment_type (p_type);
+	      break;
 	    case EM_ARM:
 	      result = get_arm_segment_type (p_type);
 	      break;
@@ -2977,6 +3001,19 @@ get_x86_64_section_type_name (unsigned int sh_type)
 }
 
 static const char *
+get_aarch64_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_AARCH64_ATTRIBUTES:
+      return "AARCH64_ATTRIBUTES";
+    default:
+      break;
+    }
+  return NULL;
+}
+
+static const char *
 get_arm_section_type_name (unsigned int sh_type)
 {
   switch (sh_type)
@@ -3074,6 +3111,9 @@ get_section_type_name (unsigned int sh_type)
 	    case EM_L1OM:
 	    case EM_K1OM:
 	      result = get_x86_64_section_type_name (sh_type);
+	      break;
+	    case EM_AARCH64:
+	      result = get_aarch64_section_type_name (sh_type);
 	      break;
 	    case EM_ARM:
 	      result = get_arm_section_type_name (sh_type);
@@ -9770,6 +9810,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_860_32.  */
     case EM_960:
       return reloc_type == 2; /* R_960_32.  */
+    case EM_AARCH64:
+      return reloc_type == 258; /* R_AARCH64_ABS32 */
     case EM_ALPHA:
       return reloc_type == 1; /* R_ALPHA_REFLONG.  */
     case EM_ARC:
@@ -9924,6 +9966,8 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
       return reloc_type == 2;  /* R_386_PC32.  */
     case EM_68K:
       return reloc_type == 4;  /* R_68K_PC32.  */
+    case EM_AARCH64:
+      return reloc_type == 261; /* R_AARCH64_PREL32 */
     case EM_ADAPTEVA_EPIPHANY:
       return reloc_type == 6;
     case EM_ALPHA:
@@ -9978,6 +10022,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
 {
   switch (elf_header.e_machine)
     {
+    case EM_AARCH64:
+      return reloc_type == 257;	/* R_AARCH64_ABS64.  */
     case EM_ALPHA:
       return reloc_type == 2; /* R_ALPHA_REFQUAD.  */
     case EM_IA_64:
@@ -10014,6 +10060,8 @@ is_64bit_pcrel_reloc (unsigned int reloc_type)
 {
   switch (elf_header.e_machine)
     {
+    case EM_AARCH64:
+      return reloc_type == 260;	/* R_AARCH64_PREL64.  */
     case EM_ALPHA:
       return reloc_type == 11; /* R_ALPHA_SREL64.  */
     case EM_IA_64:
@@ -10143,6 +10191,8 @@ is_none_reloc (unsigned int reloc_type)
     case EM_XC16X:
     case EM_C166:    /* R_XC16X_NONE.  */
       return reloc_type == 0;
+    case EM_AARCH64:
+      return reloc_type == 0 || reloc_type == 256;
     case EM_XTENSA_OLD:
     case EM_XTENSA:
       return (reloc_type == 0      /* R_XTENSA_NONE.  */

@@ -57,6 +57,7 @@ maintainer.  The first maintainer is free to devolve that
 responsibility among the other maintainers.
 
   ALPHA            Richard Henderson <rth@redhat.com>
+  AARCH64	   Richard Earnshaw <rearnsha@arm.com>
   ARM		   Nick Clifton <nickc@redhat.com>
   ARM		   Richard Earnshaw <rearnsha@arm.com>
   ARM		   Paul Brook <paul@codesourcery.com>

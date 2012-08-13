@@ -1,3 +1,32 @@
+2012-08-13  Ian Bolton  <ian.bolton@arm.com>
+            Laurent Desnogues  <laurent.desnogues@arm.com>
+            Jim MacArthur  <jim.macarthur@arm.com>
+            Marcus Shawcroft  <marcus.shawcroft@arm.com>
+            Nigel Stephens  <nigel.stephens@arm.com>
+            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+            Richard Earnshaw  <rearnsha@arm.com>
+            Sofiane Naci  <sofiane.naci@arm.com>
+            Tejas Belagod  <tejas.belagod@arm.com>
+            Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* Makefile.am: Add AArch64.
+	* Makefile.in: Regenerate.
+	* aarch64-asm.c: New file.
+	* aarch64-asm.h: New file.
+	* aarch64-dis.c: New file.
+	* aarch64-dis.h: New file.
+	* aarch64-gen.c: New file.
+	* aarch64-opc.c: New file.
+	* aarch64-opc.h: New file.
+	* aarch64-tbl.h: New file.
+	* configure.in: Add AArch64.
+	* configure: Regenerate.
+	* disassemble.c: Add AArch64.
+	* aarch64-asm-2.c: New file (automatically generated).
+	* aarch64-dis-2.c: New file (automatically generated).
+	* aarch64-opc-2.c: New file (automatically generated).
+	* po/POTFILES.in: Regenerate.
+
 2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* micromips-opc.c (micromips_opcodes): Update comment.

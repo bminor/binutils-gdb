@@ -1,3 +1,26 @@
+2012-08-13  Ian Bolton  <ian.bolton@arm.com>
+            Laurent Desnogues  <laurent.desnogues@arm.com>
+            Jim MacArthur  <jim.macarthur@arm.com>
+            Marcus Shawcroft  <marcus.shawcroft@arm.com>
+            Nigel Stephens  <nigel.stephens@arm.com>
+            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+            Richard Earnshaw  <rearnsha@arm.com>
+            Sofiane Naci  <sofiane.naci@arm.com>
+            Tejas Belagod  <tejas.belagod@arm.com>
+            Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* readelf.c (guess_is_rela): Handle EM_AARCH64.
+	(get_machine_name): Likewise.
+	(get_aarch64_segment_type): New function.
+	(get_segment_type): Handle EM_AARCH64 by calling the new function.
+	(get_aarch64_section_type_name): New function.
+	(get_section_type_name): Handle EM_AARCH64 by calling the new function.
+	(is_32bit_abs_reloc): Handle EM_AARCH64.
+	(is_32bit_pcrel_reloc): Likewise.
+	(is_64bit_abs_reloc): Likewise.
+	(is_64bit_pcrel_reloc): Likewise.
+	(is_none_reloc): Likewise.
+
 2012-08-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.

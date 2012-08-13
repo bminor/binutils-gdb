@@ -57,6 +57,7 @@ if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget rs6000*-*-aix*] \
      && ![istarget powerpc*-*-aix*] \
      && ![istarget s390*-*-linux*] \
+     && ![istarget aarch64*-*-linux*] \
      && ![istarget x86_64-*-linux*] } {
     return
 }

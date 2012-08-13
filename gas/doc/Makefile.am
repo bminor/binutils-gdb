@@ -29,6 +29,7 @@ asconfig.texi: $(CONFIG).texi
 	chmod u+w ./asconfig.texi
 
 CPU_DOCS = \
+	c-aarch64.texi \
 	c-alpha.texi \
 	c-arc.texi \
 	c-arm.texi \
