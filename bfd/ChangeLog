@@ -1,3 +1,8 @@
+2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config.bfd: Wrap mips*el-*-linux* and mips*-*-linux* into
+	#ifdef BFD64.
+
 2012-08-13  Ian Bolton  <ian.bolton@arm.com>
             Laurent Desnogues  <laurent.desnogues@arm.com>
             Jim MacArthur  <jim.macarthur@arm.com>
