@@ -1,3 +1,19 @@
+2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* ld-mips-elf/export-class-call16-o32.dd: New test.
+	* ld-mips-elf/export-class-call16-o32-irix.dd: New test.
+	* ld-mips-elf/export-class-call16-o32.gd: New test.
+	* ld-mips-elf/export-class-call16-n32.dd: New test.
+	* ld-mips-elf/export-class-call16-n32.gd: New test.
+	* ld-mips-elf/export-class-call16-n64.dd: New test.
+	* ld-mips-elf/export-class-call16-n64.gd: New test.
+	* ld-mips-elf/export-class-call16-def.s: New test source.
+	* ld-mips-elf/export-class-call16-o32.s: New test source.
+	* ld-mips-elf/export-class-call16-n32.s: New test source.
+	* ld-mips-elf/export-class-call16-n64.s: New test source.
+	* ld-mips-elf/export-class-call16.ld: New test linker script.
+	* ld-mips-elf/mips-elf.exp: Run the new tests.
+
 2012-08-13  Ian Bolton  <ian.bolton@arm.com>
             Laurent Desnogues  <laurent.desnogues@arm.com>
             Jim MacArthur  <jim.macarthur@arm.com>
