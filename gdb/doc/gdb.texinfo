@@ -9225,9 +9225,10 @@ variable, when used as an expression, has the type of its current value.
 
 @table @code
 @kindex show convenience
-@cindex show all user variables
+@cindex show all user variables and functions
 @item show convenience
-Print a list of convenience variables used so far, and their values.
+Print a list of convenience variables used so far, and their values,
+as well as a list of the convenience functions.
 Abbreviated @code{show conv}.
 
 @kindex init-if-undefined

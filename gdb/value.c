@@ -2255,11 +2255,17 @@ show_convenience (char *ignore, int from_tty)
       printf_filtered (("\n"));
     }
   if (!varseen)
-    printf_unfiltered (_("No debugger convenience variables now defined.\n"
-			 "Convenience variables have "
-			 "names starting with \"$\";\n"
-			 "use \"set\" as in \"set "
-			 "$foo = 5\" to define them.\n"));
+    {
+      /* This text does not mention convenience functions on purpose.
+	 The user can't create them except via Python, and if Python support
+	 is installed this message will never be printed ($_streq will
+	 exist).  */
+      printf_unfiltered (_("No debugger convenience variables now defined.\n"
+			   "Convenience variables have "
+			   "names starting with \"$\";\n"
+			   "use \"set\" as in \"set "
+			   "$foo = 5\" to define them.\n"));
+    }
 }
 
 /* Extract a value as a C number (either long or double).
@@ -3363,14 +3369,18 @@ void
 _initialize_values (void)
 {
   add_cmd ("convenience", no_class, show_convenience, _("\
-Debugger convenience (\"$foo\") variables.\n\
-These variables are created when you assign them values;\n\
-thus, \"print $foo=1\" gives \"$foo\" the value 1.  Values may be any type.\n\
+Debugger convenience (\"$foo\") variables and functions.\n\
+Convenience variables are created when you assign them values;\n\
+thus, \"set $foo=1\" gives \"$foo\" the value 1.  Values may be any type.\n\
 \n\
 A few convenience variables are given values automatically:\n\
 \"$_\"holds the last address examined with \"x\" or \"info lines\",\n\
-\"$__\" holds the contents of the last address examined with \"x\"."),
-	   &showlist);
+\"$__\" holds the contents of the last address examined with \"x\"."
+#ifdef HAVE_PYTHON
+"\n\n\
+Convenience functions are defined via the Python API."
+#endif
+	   ), &showlist);
 
   add_cmd ("values", no_set_class, show_values, _("\
 Elements of value history around item number IDX (or last ten)."),

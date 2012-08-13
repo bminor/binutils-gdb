@@ -1,3 +1,8 @@
+2012-08-13  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Convenience Vars): Update text for "show convenience"
+	to include functions.
+
 2012-08-10  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Convenience Funs): New node.

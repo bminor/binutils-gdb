@@ -595,11 +595,10 @@ gdb_test "show complaints" "Max number of complaints about incorrect symbols is 
 gdb_test "show confirm" "Whether to confirm potentially dangerous operations is o\[a-z\]*." "show confirm"
 
 #test show convenience
-# This is tricker as there are multiple internal convenience vars and we
-# can't assume any particular order.
-gdb_test_list_exact "show convenience" "show convenience" \
-    "\[^\r\n\]+\[\r\n\]+" \
-    "\[^\r\n\]+" \
+# This is trickier as there are multiple internal convenience vars and
+# functions and we can't assume any particular order.
+# And we have to handle the extra convenience funs provided by Python.
+set show_conv_list \
     { \
 	{$_sdata = void} \
 	{$_siginfo = void} \
@@ -618,6 +617,19 @@ gdb_test_list_exact "show convenience" "show convenience" \
 	{$_probe_arg10 = <error: No frame selected>} \
 	{$_probe_arg11 = <error: No frame selected>} \
     }
+if ![skip_python_tests] {
+    append show_conv_list \
+	{
+	    {$_memeq = <internal function _memeq>} \
+	    {$_regex = <internal function _regex>} \
+	    {$_streq = <internal function _streq>} \
+	    {$_strlen = <internal function _strlen>} \
+	}
+}
+gdb_test_list_exact "show convenience" "show convenience" \
+    "\[^\r\n\]+\[\r\n\]+" \
+    "\[^\r\n\]+" \
+    $show_conv_list
 
 #test show directories
 gdb_test "show directories" "Source directories searched: .cdir\[:;\].cwd" "show directories"

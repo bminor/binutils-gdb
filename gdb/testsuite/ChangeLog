@@ -1,3 +1,7 @@
+2012-08-13  Doug Evans  <dje@google.com>
+
+	* gdb.base/default.exp: Update expected output of "show convenience".
+
 2012-08-10  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-strfns.c: New file.
