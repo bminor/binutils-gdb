@@ -967,12 +967,6 @@ operator_length_standard (const struct expression *expr, int endpos,
       oplen = 4 + BYTES_TO_EXP_ELEM (oplen + 1);
       break;
 
-    case OP_BITSTRING:
-      oplen = longest_to_int (expr->elts[endpos - 2].longconst);
-      oplen = (oplen + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
-      oplen = 4 + BYTES_TO_EXP_ELEM (oplen);
-      break;
-
     case OP_ARRAY:
       oplen = 4;
       args = longest_to_int (expr->elts[endpos - 2].longconst);

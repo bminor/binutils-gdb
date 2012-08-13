@@ -194,12 +194,6 @@ OP (OP_COMPLEX)
    is executed.  */
 OP (OP_STRING)
 
-/* OP_BITSTRING represents a packed bitstring constant.
-   Its format is the same as that of a STRUCTOP, but the bitstring
-   data is just made into a bitstring constant when the operation
-   is executed.  */
-OP (OP_BITSTRING)
-
 /* OP_ARRAY creates an array constant out of the following subexpressions.
    It is followed by two exp_elements, the first containing an integer
    that is the lower bound of the array and the second containing another

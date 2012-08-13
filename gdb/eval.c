@@ -970,16 +970,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       return value_nsstring (exp->gdbarch, &exp->elts[pc + 2].string, tem + 1);
 
-    case OP_BITSTRING:
-      tem = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos)
-	+= 3 + BYTES_TO_EXP_ELEM ((tem + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT);
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-      return value_bitstring (&exp->elts[pc + 2].string, tem,
-			      builtin_type (exp->gdbarch)->builtin_int);
-      break;
-
     case OP_ARRAY:
       (*pos) += 3;
       tem2 = longest_to_int (exp->elts[pc + 1].longconst);

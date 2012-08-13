@@ -1,3 +1,15 @@
+2012-08-13  Yao Qi  <yao@codesourcery.com>
+
+	* std-operator.def: Remove OP_BITSTRING.
+	* breakpoint.c (watchpoint_exp_is_const): Update.
+	* eval.c (evaluate_subexp_standard): Remove handling to
+	OP_BITSTRING.
+	* expprint.c (print_subexp_standard): Likewise.
+	(dump_subexp_body_standard): Likewise.
+	* parse.c (operator_length_standard): Likewise.
+	* valops.c (value_bitstring): Remove.
+	* value.h: Remove the declaration of 'value_bitstring'.
+
 2012-08-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* linespec.c (find_methods): Remove unused variables `i1' and
