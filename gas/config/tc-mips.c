@@ -16439,6 +16439,13 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
+  if (mips_opts.mips16)
+    {
+      as_bad (_("%s not supported in MIPS16 mode"), ".cpload");
+      ignore_rest_of_line ();
+      return;
+    }
+
   /* .cpload should be in a .set noreorder section.  */
   if (mips_opts.noreorder == 0)
     as_warn (_(".cpload not in noreorder section"));
@@ -16502,6 +16509,13 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
   if (mips_pic != SVR4_PIC || ! HAVE_NEWABI)
     {
       s_ignore (0);
+      return;
+    }
+
+  if (mips_opts.mips16)
+    {
+      as_bad (_("%s not supported in MIPS16 mode"), ".cpsetup");
+      ignore_rest_of_line ();
       return;
     }
 
@@ -16597,6 +16611,13 @@ s_cplocal (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
+  if (mips_opts.mips16)
+    {
+      as_bad (_("%s not supported in MIPS16 mode"), ".cplocal");
+      ignore_rest_of_line ();
+      return;
+    }
+
   mips_gp_register = tc_get_register (0);
   demand_empty_rest_of_line ();
 }
@@ -16615,6 +16636,13 @@ s_cprestore (int ignore ATTRIBUTE_UNUSED)
   if (mips_pic != SVR4_PIC || HAVE_NEWABI)
     {
       s_ignore (0);
+      return;
+    }
+
+  if (mips_opts.mips16)
+    {
+      as_bad (_("%s not supported in MIPS16 mode"), ".cprestore");
+      ignore_rest_of_line ();
       return;
     }
 
@@ -16651,6 +16679,13 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
   if (mips_pic != SVR4_PIC || ! HAVE_NEWABI)
     {
       s_ignore (0);
+      return;
+    }
+
+  if (mips_opts.mips16)
+    {
+      as_bad (_("%s not supported in MIPS16 mode"), ".cpreturn");
+      ignore_rest_of_line ();
       return;
     }
 

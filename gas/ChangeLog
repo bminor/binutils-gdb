@@ -1,3 +1,8 @@
+2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (s_cpload, s_cpsetup): Fail if MIPS16 mode.
+	(s_cplocal, s_cprestore, s_cpreturn): Likewise.
+
 2012-08-07  Jan Beulich <jbeulich@suse.com>
 
 	* config/tc-i386-intel.c (build_modrm_byte): Split determining
