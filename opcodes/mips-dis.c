@@ -1562,7 +1562,7 @@ print_insn_mips (bfd_vma memaddr,
 	      const char *d;
 
 	      /* We always allow to disassemble the jalx instruction.  */
-	      if (! OPCODE_IS_MEMBER (op, mips_isa, mips_processor)
+	      if (!opcode_is_member (op, mips_isa, mips_processor)
 		  && strcmp (op->name, "jalx"))
 		continue;
 

@@ -1,5 +1,14 @@
 2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (NO_ISA_COP, COP_INSN): Remove macros.
+	(is_opcode_valid): Remove coprocessor instruction exclusions.
+	Replace OPCODE_IS_MEMBER with opcode_is_member.
+	(is_opcode_valid_16): Replace OPCODE_IS_MEMBER with
+	opcode_is_member.
+	(macro): Remove coprocessor instruction exclusions.
+
+2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (s_cpload, s_cpsetup): Fail if MIPS16 mode.
 	(s_cplocal, s_cprestore, s_cpreturn): Likewise.
 

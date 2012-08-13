@@ -1,3 +1,22 @@
+2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* micromips-opc.c (micromips_opcodes): Update comment.
+	* mips-opc.c (mips_builtin_opcodes): Likewise.  Mark coprocessor
+	instructions for IOCT as appropriate.
+	* mips-dis.c (print_insn_mips): Replace OPCODE_IS_MEMBER with
+	opcode_is_member.
+	* configure.in: Substitute NO_WMISSING_FIELD_INITIALIZERS with
+	the result of a check for the -Wno-missing-field-initializers
+	GCC option.
+	* Makefile.am (NO_WMISSING_FIELD_INITIALIZERS): New variable.
+	(mips-opc.lo): Pass $(NO_WMISSING_FIELD_INITIALIZERS) to
+	compilation.
+	(mips16-opc.lo): Likewise.
+	(micromips-opc.lo): Likewise.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2012-08-11  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
 
 	PR gas/14423
