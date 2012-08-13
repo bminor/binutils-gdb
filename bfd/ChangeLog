@@ -1,5 +1,11 @@
 2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Look up
+	the options section in the output rather than input BFD to
+	decide if to add a DT_MIPS_OPTIONS tag.
+
+2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config.bfd: Wrap mips*el-*-linux* and mips*-*-linux* into
 	#ifdef BFD64.
 
