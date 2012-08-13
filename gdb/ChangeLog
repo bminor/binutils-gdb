@@ -1,3 +1,7 @@
+2012-08-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* .gitignore: Add go-exp.c.
+
 2012-08-13  Doug Evans  <dje@google.com>
 
 	* value.c (show_convenience): Tweak comment.
