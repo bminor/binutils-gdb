@@ -360,7 +360,6 @@ print_subexp_standard (struct expression *exp, int *pos,
       return;
 
     case TERNOP_SLICE:
-    case TERNOP_SLICE_COUNT:
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered ("(", stream);
       print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
@@ -787,7 +786,6 @@ dump_subexp_body_standard (struct expression *exp,
     {
     case TERNOP_COND:
     case TERNOP_SLICE:
-    case TERNOP_SLICE_COUNT:
       elt = dump_subexp (exp, stream, elt);
       /* FALL THROUGH */
     case BINOP_ADD:

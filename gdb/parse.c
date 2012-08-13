@@ -976,7 +976,6 @@ operator_length_standard (const struct expression *expr, int endpos,
 
     case TERNOP_COND:
     case TERNOP_SLICE:
-    case TERNOP_SLICE_COUNT:
       args = 3;
       break;
 

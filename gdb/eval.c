@@ -1140,17 +1140,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	return value_slice (array, lowbound, upper - lowbound + 1);
       }
 
-    case TERNOP_SLICE_COUNT:
-      {
-	struct value *array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-	int lowbound
-	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
-	int length
-	  = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
-
-	return value_slice (array, lowbound, length);
-      }
-
     case TERNOP_COND:
       /* Skip third and second args to evaluate the first one.  */
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);

@@ -1,5 +1,15 @@
 2012-08-13  Yao Qi  <yao@codesourcery.com>
 
+	* std-operator.def: Remove TERNOP_SLICE_COUNT.
+	* breakpoint.c (watchpoint_exp_is_const): Remove handling to
+	TERNOP_SLICE_COUNT.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* expprint.c (print_subexp_standard): Likewise.
+	(dump_subexp_body_standard): Likewise.
+	* parse.c (operator_length_standard): Likewise.
+
+2012-08-13  Yao Qi  <yao@codesourcery.com>
+
 	* std-operator.def: Remove OP_BITSTRING.
 	* breakpoint.c (watchpoint_exp_is_const): Update.
 	* eval.c (evaluate_subexp_standard): Remove handling to

@@ -105,11 +105,6 @@ OP (TERNOP_COND)		/* ?: */
    OP1(OP2:OP3).  Return elements OP2 through OP3 of OP1.  */
 OP (TERNOP_SLICE)
 
-/* A sub-string/sub-array.  (The deleted) Chill syntax: OP1(OP2 UP
-   OP3).  Return OP3 elements of OP1, starting with element
-   OP2.  */
-OP (TERNOP_SLICE_COUNT)
-
 /* Multidimensional subscript operator, such as Modula-2 x[a,b,...].
    The dimensionality is encoded in the operator, like the number of
    function arguments in OP_FUNCALL, I.E. <OP><dimension><OP>.
