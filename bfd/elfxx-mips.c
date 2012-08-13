@@ -5360,7 +5360,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 				&& (target_is_16_bit_code_p
 				    || target_is_micromips_code_p))));
 
-  local_p = h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->root);
+  local_p = (h == NULL
+	     || (h->got_only_for_calls
+		 ? SYMBOL_CALLS_LOCAL (info, &h->root)
+		 : SYMBOL_REFERENCES_LOCAL (info, &h->root)));
 
   gp0 = _bfd_get_gp_value (input_bfd);
   gp = _bfd_get_gp_value (abfd);

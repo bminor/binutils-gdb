@@ -1,3 +1,8 @@
+2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Fix the handling
+	of protected symbols.
+
 2012-08-10  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/14444
