@@ -1,3 +1,11 @@
+2012-08-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/14457
+	* gas/i386/i386.exp: Run reg-bad.
+
+	* gas/i386/reg-bad.l: New.
+	* gas/i386/reg-bad.s: Likewise.
+
 2012-08-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/mmix/err-fb-2.s: New test.

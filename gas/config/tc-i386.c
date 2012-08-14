@@ -7782,6 +7782,9 @@ i386_att_operand (char *operand_string)
 		    }
 		  else if (*base_string == REGISTER_PREFIX)
 		    {
+		      end_op = strchr (base_string, ',');
+		      if (end_op)
+			*end_op = '\0';
 		      as_bad (_("bad register name `%s'"), base_string);
 		      return 0;
 		    }
@@ -7823,6 +7826,9 @@ i386_att_operand (char *operand_string)
 	    }
 	  else if (*base_string == REGISTER_PREFIX)
 	    {
+	      end_op = strchr (base_string, ',');
+	      if (end_op)
+		*end_op = '\0';
 	      as_bad (_("bad register name `%s'"), base_string);
 	      return 0;
 	    }
