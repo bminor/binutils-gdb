@@ -1,0 +1,8 @@
+[^:]*: Assembler messages:
+[^:]*:10: Error: .*$
+[^:]*:13: Error: .*$
+[^:]*:14: Error: .*$
+[^:]*:15: Error: .*$
+[^:]*:16: Error: .*$
+[^:]*:19: Error: .*$
+[^:]*:20: Error: .*$
