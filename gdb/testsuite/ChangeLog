@@ -1,3 +1,7 @@
+2012-08-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/attach-twice.exp: Remove excessive ps exec.
+
 2012-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/valgrind-infcall.exp (continue #$continue_count): Use
