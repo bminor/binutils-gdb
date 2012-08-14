@@ -1,3 +1,14 @@
+2012-08-14  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-mmix.c (loc_asserts): New variable.
+	(mmix_greg_internal): Handle expressions not determinable at first
+	pass.
+	(s_loc): Ditto.  Record expressions where the section isn't
+	determinable at the first pass, and assume they don't refer to
+	other sections.
+	(mmix_md_end): Verify that recorded LOC expressions weren't
+	to other sections, else emit error messages.
+
 2012-08-13  Ian Bolton  <ian.bolton@arm.com>
             Laurent Desnogues  <laurent.desnogues@arm.com>
             Jim MacArthur  <jim.macarthur@arm.com>
