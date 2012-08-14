@@ -412,6 +412,15 @@ class Target
   define_standard_symbols(Symbol_table* symtab, Layout* layout)
   { this->do_define_standard_symbols(symtab, layout); }
 
+  // Return the output section name to use given an input section
+  // name, or NULL if no target specific name mapping is required.
+  // Set *PLEN to the length of the name if returning non-NULL.
+  const char*
+  output_section_name(const Relobj* relobj,
+		      const char* name,
+		      size_t* plen) const
+  { return this->do_output_section_name(relobj, name, plen); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -654,6 +663,11 @@ class Target
   virtual void
   do_define_standard_symbols(Symbol_table*, Layout*)
   { }
+
+  // This may be overridden by the child class.
+  virtual const char*
+  do_output_section_name(const Relobj*, const char*, size_t*) const
+  { return NULL; }
 
  private:
   // The implementations of the four do_make_elf_object virtual functions are

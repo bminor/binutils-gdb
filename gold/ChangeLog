@@ -1,5 +1,12 @@
 2012-08-14  Alan Modra  <amodra@gmail.com>
 
+	* target.h (Target::output_section_name): New function.
+	(Target::do_output_section_name): New function.
+	* layout.cc (Layout::choose_output_section): Call the above.
+	* powerpc.cc (Target_powerpc::do_output_section_name): New function.
+
+2012-08-14  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc: Update for renamed R_PPC_REL16 relocs.
 	(Output_data_got_powerpc::do_write): Don't rely on base class lookup
 	for replace_constant call.

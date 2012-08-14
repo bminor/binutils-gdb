@@ -939,7 +939,12 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
   if (is_input_section
       && !this->script_options_->saw_sections_clause()
       && !parameters->options().relocatable())
-    name = Layout::output_section_name(relobj, name, &len);
+    {
+      const char *orig_name = name;
+      name = parameters->target().output_section_name(relobj, name, &len);
+      if (name == NULL)
+	name = Layout::output_section_name(relobj, orig_name, &len);
+    }
 
   Stringpool::Key name_key;
   name = this->namepool_.add_with_length(name, len, true, &name_key);

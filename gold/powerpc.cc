@@ -125,6 +125,19 @@ class Target_powerpc : public Sized_target<size, big_endian>
 	      bool needs_special_offset_handling,
 	      size_t local_symbol_count,
 	      const unsigned char* plocal_symbols);
+
+  // Map input .toc section to output .got section.
+  const char*
+  do_output_section_name(const Relobj*, const char* name, size_t* plen) const
+  {
+    if (size == 64 && strcmp(name, ".toc") == 0)
+      {
+	*plen = 4;
+	return ".got";
+      }
+    return NULL;
+  }
+
   // Finalize the sections.
   void
   do_finalize_sections(Layout*, const Input_objects*, Symbol_table*);
