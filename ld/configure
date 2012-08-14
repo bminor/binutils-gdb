@@ -15536,7 +15536,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW ga fi id bg it"
+ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW ga fi id bg it uk"
 # If we haven't got the data from the intl directory,
 # assume NLS is disabled.
 USE_NLS=no
