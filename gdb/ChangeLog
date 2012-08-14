@@ -1,3 +1,7 @@
+2012-08-14  Gary Benson  <gbenson@redhat.com>
+
+	* solib-svr4.c (svr4_free_library_list): Use free_so.
+
 2012-08-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* .gitignore: Add go-exp.c.

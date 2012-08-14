@@ -980,7 +980,7 @@ svr4_free_library_list (void *p_list)
     {
       struct so_list *next = list->next;
 
-      svr4_free_so (list);
+      free_so (list);
       list = next;
     }
 }
