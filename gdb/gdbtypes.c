@@ -324,9 +324,6 @@ make_pointer_type (struct type *type, struct type **typeptr)
      gdbarch_address_to_pointer.  */
   TYPE_UNSIGNED (ntype) = 1;
 
-  if (!TYPE_POINTER_TYPE (type))	/* Remember it, if don't have one.  */
-    TYPE_POINTER_TYPE (type) = ntype;
-
   /* Update the length of all the other variants of this type.  */
   chain = TYPE_CHAIN (ntype);
   while (chain != ntype)

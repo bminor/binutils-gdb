@@ -1,3 +1,8 @@
+2012-08-14  Doug Evans  <dje@google.com>
+
+	* gdbtypes.c (make_pointer_type): Remove redundant setting of
+	TYPE_POINTER_TYPE (type).
+
 2012-08-14  Gary Benson  <gbenson@redhat.com>
 
 	* solib-svr4.c (svr4_free_library_list): Use free_so.
