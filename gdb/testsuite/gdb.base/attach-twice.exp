@@ -45,7 +45,6 @@ gdb_test_multiple "attach $testpid" $test {
     }
 }
 
-eval exec ps xfw
 if {$parentpid != 0} {
   eval exec kill -9 $parentpid
 }
