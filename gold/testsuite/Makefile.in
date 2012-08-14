@@ -76,7 +76,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = incremental_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.sh gc_tls_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr14265.sh icf_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_so_test.sh \
@@ -104,7 +104,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	pr14265.stdout icf_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test_1.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test_2.stdout \
@@ -118,8 +118,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt_shared.so debug_msg.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = incremental_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test gc_tls_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test icf_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test pr14265 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test icf_keep_unique_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test icf_safe_so_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_virtual_function_folding_test \
@@ -3661,6 +3661,8 @@ gc_tls_test.sh.log: gc_tls_test.sh
 	@p='gc_tls_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 gc_orphan_section_test.sh.log: gc_orphan_section_test.sh
 	@p='gc_orphan_section_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+pr14265.sh.log: pr14265.sh
+	@p='pr14265.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 icf_test.sh.log: icf_test.sh
 	@p='icf_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 icf_keep_unique_test.sh.log: icf_keep_unique_test.sh
@@ -4272,6 +4274,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--gc-sections gc_orphan_section_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@gc_orphan_section_test.stdout: gc_orphan_section_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) gc_orphan_section_test > gc_orphan_section_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr14265.o: pr14265.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr14265: pr14265.o 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,--gc-sections -T $(srcdir)/pr14265.t -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@pr14265.stdout: pr14265
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) --format=bsd --numeric-sort $< > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test.o: icf_test.cc 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test: icf_test.o gcctestdir/ld

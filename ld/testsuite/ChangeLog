@@ -1,3 +1,11 @@
+2012-08-14  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/14265
+	* ld-gc/gc.exp: Add a new test.
+	* ld-gc/pr14265.c: Source file for the new test.
+	* ld-gc/pr14265.t: Linker script for the new test.
+	* ld-gc/pr14265.d: Expected symbol dump.
+
 2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* ld-mips-elf/export-class-call16-o32.dd: New test.

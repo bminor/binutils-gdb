@@ -1,3 +1,25 @@
+2012-08-14  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/14265
+	* script-sections.cc (Sections_element::output_section_name): Add
+	keep return parameter.
+	(Output_section_element::match_name): Add keep return parameter.
+	Return the value of the keep_ member.
+	* script-sections.h (class Output_section): Update
+	output_section_name prototype.
+	* layout.cc (Layout::keep_input_section): New public member
+	function.
+	(Layout::choose_output_section): Pass keep parameter to
+	output_section_name.
+	* layout.h (class Layout): Add keep_input_section.
+	* object.cc (Sized_relobj_file::do_layout): Check for kept input
+	sections.
+	* testsuite/Makefile.am: Add a test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/pr14265.c: Source file for the test.
+	* testsuite/pr14265.t: Linker script for the test.
+	* testsuite/pr14265.sh: Shell script for the test.
+
 2012-08-14  Alan Modra  <amodra@gmail.com>
 
 	* target.h (Target::output_section_name): New function.

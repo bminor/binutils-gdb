@@ -1494,6 +1494,7 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
       if (is_gc_pass_one && parameters->options().gc_sections())
 	{
 	  if (this->is_section_name_included(name)
+	      || layout->keep_input_section (this, name)
 	      || shdr.get_sh_type() == elfcpp::SHT_INIT_ARRAY
 	      || shdr.get_sh_type() == elfcpp::SHT_FINI_ARRAY)
 	    {

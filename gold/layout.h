@@ -920,6 +920,11 @@ class Layout
   section_list() const
   { return this->section_list_; }
 
+  // Returns TRUE iff NAME (an input section from RELOBJ) will
+  // be mapped to an output section that should be KEPT.
+  bool
+  keep_input_section(const Relobj*, const char*);
+  
  private:
   Layout(const Layout&);
   Layout& operator=(const Layout&);

@@ -164,6 +164,16 @@ gc_orphan_section_test:gc_orphan_section_test.o gcctestdir/ld
 gc_orphan_section_test.stdout: gc_orphan_section_test
 	$(TEST_NM) gc_orphan_section_test > gc_orphan_section_test.stdout
 
+check_SCRIPTS += pr14265.sh
+check_DATA += pr14265.stdout
+MOSTLYCLEANFILES += pr14265
+pr14265.o: pr14265.c
+	$(COMPILE) -O0 -c -o $@ $<
+pr14265: pr14265.o 
+	$(LINK) -Bgcctestdir/ -Wl,--gc-sections -T $(srcdir)/pr14265.t -o $@ $<
+pr14265.stdout: pr14265
+	$(TEST_NM) --format=bsd --numeric-sort $< > $@
+
 check_SCRIPTS += icf_test.sh
 check_DATA += icf_test.stdout
 MOSTLYCLEANFILES += icf_test

@@ -805,6 +805,26 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
     }
 }
 
+// Returns TRUE iff NAME (an input section from RELOBJ) will
+// be mapped to an output section that should be KEPT.
+
+bool
+Layout::keep_input_section(const Relobj* relobj, const char* name)
+{
+  if (! this->script_options_->saw_sections_clause())
+    return false;
+
+  Script_sections* ss = this->script_options_->script_sections();
+  const char* file_name = relobj == NULL ? NULL : relobj->name().c_str();
+  Output_section** output_section_slot;
+  Script_sections::Section_type script_section_type;
+  bool keep;
+
+  name = ss->output_section_name(file_name, name, &output_section_slot,
+				 &script_section_type, &keep);
+  return name != NULL && keep;
+}
+
 // Pick the output section to use for section NAME, in input file
 // RELOBJ, with type TYPE and flags FLAGS.  RELOBJ may be NULL for a
 // linker created section.  IS_INPUT_SECTION is true if we are
@@ -845,8 +865,10 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
       Output_section** output_section_slot;
       Script_sections::Section_type script_section_type;
       const char* orig_name = name;
+      bool keep;
       name = ss->output_section_name(file_name, name, &output_section_slot,
-				     &script_section_type);
+				     &script_section_type, &keep);
+
       if (name == NULL)
 	{
 	  gold_debug(DEBUG_SCRIPT, _("Unable to create output section '%s' "
