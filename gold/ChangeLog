@@ -1,5 +1,15 @@
 2012-08-14  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc: Update for renamed R_PPC_REL16 relocs.
+	(Output_data_got_powerpc::do_write): Don't rely on base class lookup
+	for replace_constant call.
+	(Output_data_plt_powerpc::do_print_to_mapfile): New function.
+	(Output_data_glink::do_print_to_mapfile): New function.
+	(Target_powerpc::Scan::local): Ignore R_PPC64_TOCSAVE.
+	(Target_powerpc::Relocate::relocate): Likewise.
+
+2012-08-14  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Powerpc_relobj::set_got2_shndx): Delete.
 	(Powerpc_relobj::do_find_special_sections): Don't use set_got2_shndx.
 	(Output_data_glink::add_entry,find_entry): Remove shndx param.

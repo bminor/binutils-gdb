@@ -654,7 +654,7 @@ public:
     This::addr16_hi(view, value + 0x8000, addend);
   }
 
-  // R_PPC_REL16: (Symbol + Addend - Address) & 0xffff
+  // R_POWERPC_REL16: (Symbol + Addend - Address) & 0xffff
   static inline void
   rel16(unsigned char* view,
 	typename elfcpp::Elf_types<size>::Elf_Addr value,
@@ -662,7 +662,7 @@ public:
 	typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This_reloc::pcrela16(view, value, addend, address); }
 
-  // R_PPC_REL16_LO: (Symbol + Addend - Address) & 0xffff
+  // R_POWERPC_REL16_LO: (Symbol + Addend - Address) & 0xffff
   static inline void
   rel16_lo(unsigned char* view,
 	   typename elfcpp::Elf_types<size>::Elf_Addr value,
@@ -670,7 +670,7 @@ public:
 	   typename elfcpp::Elf_types<size>::Elf_Addr address)
   { This_reloc::pcrela16(view, value, addend, address); }
 
-  // R_PPC_REL16_HI: ((Symbol + Addend - Address) >> 16) & 0xffff
+  // R_POWERPC_REL16_HI: ((Symbol + Addend - Address) >> 16) & 0xffff
   static inline void
   rel16_hi(unsigned char* view,
 	   typename elfcpp::Elf_types<size>::Elf_Addr value,
@@ -680,7 +680,7 @@ public:
     This::template rela<16>(view, 16, 0xffff, value - address, addend);
   }
 
-  // R_PPC_REL16_HA: Same as R_PPC_REL16_HI except that if the
+  // R_POWERPC_REL16_HA: Same as R_POWERPC_REL16_HI except that if the
   //                 final value of the low 16 bits of the
   //                 relocation is negative, add one.
   static inline void
@@ -806,10 +806,10 @@ public:
   void
   do_write(Output_file* of)
   {
-    replace_constant(this->header_index_,
-		     (size == 32
-		      ? this->layout_->dynamic_section()->address()
-		      : this->address() + 0x8000));
+    this->replace_constant(this->header_index_,
+			   (size == 32
+			    ? this->layout_->dynamic_section()->address()
+			    : this->address() + 0x8000));
 
     Output_data_got<size, big_endian>::do_write(of);
   }
@@ -943,6 +943,11 @@ class Output_data_plt_powerpc : public Output_section_data_build
   {
     os->set_entsize(0);
   }
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** PLT")); }
 
  private:
   // The size of an entry in the PLT.
@@ -1130,6 +1135,12 @@ class Output_data_glink : public Output_section_data
   {
     return this->pltresolve_;
   }
+
+ protected:
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** glink")); }
 
  private:
   static const int pltresolve_size = 16*4;
@@ -1661,10 +1672,10 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
 
     case elfcpp::R_POWERPC_REL24:
     case elfcpp::R_PPC_LOCAL24PC:
-    case elfcpp::R_PPC_REL16:
-    case elfcpp::R_PPC_REL16_LO:
-    case elfcpp::R_PPC_REL16_HI:
-    case elfcpp::R_PPC_REL16_HA:
+    case elfcpp::R_POWERPC_REL16:
+    case elfcpp::R_POWERPC_REL16_LO:
+    case elfcpp::R_POWERPC_REL16_HI:
+    case elfcpp::R_POWERPC_REL16_HA:
       return Symbol::RELATIVE_REF;
 
     case elfcpp::R_PPC_PLTREL24:
@@ -1823,6 +1834,7 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_NONE:
     case elfcpp::R_POWERPC_GNU_VTINHERIT:
     case elfcpp::R_POWERPC_GNU_VTENTRY:
+    case elfcpp::R_PPC64_TOCSAVE:
       break;
 
     case elfcpp::R_PPC64_ADDR64:
@@ -1859,8 +1871,8 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_REL24:
     case elfcpp::R_PPC_LOCAL24PC:
     case elfcpp::R_POWERPC_REL32:
-    case elfcpp::R_PPC_REL16_LO:
-    case elfcpp::R_PPC_REL16_HA:
+    case elfcpp::R_POWERPC_REL16_LO:
+    case elfcpp::R_POWERPC_REL16_HA:
       break;
 
     case elfcpp::R_POWERPC_GOT16:
@@ -2050,10 +2062,10 @@ Target_powerpc<size, big_endian>::Scan::global(
       }
       break;
 
-    case elfcpp::R_PPC_REL16:
-    case elfcpp::R_PPC_REL16_LO:
-    case elfcpp::R_PPC_REL16_HI:
-    case elfcpp::R_PPC_REL16_HA:
+    case elfcpp::R_POWERPC_REL16:
+    case elfcpp::R_POWERPC_REL16_LO:
+    case elfcpp::R_POWERPC_REL16_HI:
+    case elfcpp::R_POWERPC_REL16_HA:
       break;
 
     case elfcpp::R_POWERPC_GOT16:
@@ -2400,15 +2412,15 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       Reloc::addr16_ha(view, value, 0);
       break;
 
-    case elfcpp::R_PPC_REL16_LO:
+    case elfcpp::R_POWERPC_REL16_LO:
       Reloc::rel16_lo(view, value, 0, address);
       break;
 
-    case elfcpp::R_PPC_REL16_HI:
+    case elfcpp::R_POWERPC_REL16_HI:
       Reloc::rel16_hi(view, value, 0, address);
       break;
 
-    case elfcpp::R_PPC_REL16_HA:
+    case elfcpp::R_POWERPC_REL16_HA:
       Reloc::rel16_ha(view, value, 0, address);
       break;
 
@@ -2433,6 +2445,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			     _("unexpected reloc %u in object file"),
 			     r_type);
+      break;
+
+    case elfcpp::R_PPC64_TOCSAVE:
+      // For the time being this can be ignored.
       break;
 
     default:
