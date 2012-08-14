@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bfd 2.22.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2011-10-25 11:58+0100\n"
-"PO-Revision-Date: 2012-08-06 20:03+0300\n"
+"PO-Revision-Date: 2012-08-10 20:17+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
 "Language: uk\n"
@@ -2366,7 +2366,7 @@ msgstr "вибачте, у скрипті автоматичного накла�
 
 #: elf32-spu.c:4359
 msgid "non-overlay size of 0x%v plus maximum overlay size of 0x%v exceeds local store\n"
-msgstr ""
+msgstr "сума розміру 0x%v без оверлею та максимального розміру оверлею 0x%v перевищують місткість локального сховища даних\n"
 
 #: elf32-spu.c:4514
 msgid "%B:%A%s exceeds overlay size\n"
@@ -3461,7 +3461,7 @@ msgstr "заголовок Mach-O:\n"
 #: mach-o.c:3578
 #, c-format
 msgid " magic     : %08lx\n"
-msgstr ""
+msgstr " magic     : %08lx\n"
 
 #: mach-o.c:3579
 #, c-format
@@ -3533,7 +3533,7 @@ msgstr "%s: некоректний файл mmo: значення ініціал
 #: mmo.c:1332
 #, c-format
 msgid "%s: unsupported wide character sequence 0x%02X 0x%02X after symbol name starting with `%s'\n"
-msgstr ""
+msgstr "%s: непідтримувана широка послідовність символів 0x%02X 0x%02X після назви символу, починаючи з «%s»\n"
 
 #: mmo.c:1565
 #, c-format
@@ -3548,7 +3548,7 @@ msgstr "%s: некоректний файл mmo: очікувалося YZ = 1, 
 #: mmo.c:1611
 #, c-format
 msgid "%s: invalid mmo file: expected z = 1 or z = 2, got z = %d for lop_loc\n"
-msgstr ""
+msgstr "%s: некоректний файл mmo: очікувалося z = 1 або z = 2, отримано z = %d для lop_loc\n"
 
 #: mmo.c:1657
 #, c-format
@@ -3558,7 +3558,7 @@ msgstr "%s: некоректний файл mmo: очікувалося z = 1 а
 #: mmo.c:1696
 #, c-format
 msgid "%s: invalid mmo file: expected y = 0, got y = %d for lop_fixrx\n"
-msgstr ""
+msgstr "%s: некоректний файл mmo: очікувалося y=0, отримано y = %d для lop_fixrx\n"
 
 #: mmo.c:1705
 #, c-format
@@ -3648,7 +3648,7 @@ msgstr "%s: відтворення розділу «%s» у форматі oasys
 #: osf-core.c:140
 #, c-format
 msgid "Unhandled OSF/1 core file section type %d\n"
-msgstr ""
+msgstr "Непридатни до обробки тип розділу файла core OSF/1, %d\n"
 
 #: pe-mips.c:607
 msgid "%B: `ld -r' not supported with PE MIPS objects\n"
@@ -3668,7 +3668,7 @@ msgstr "%B: занадто далекий перехід\n"
 
 #: pe-mips.c:771
 msgid "%B: bad pair/reflo after refhi\n"
-msgstr ""
+msgstr "%B: помилкове pair/reflo після refhi\n"
 
 #: pef.c:520
 #, c-format
@@ -3687,6 +3687,8 @@ msgid ""
 "\n"
 "The Function Table (interpreted .pdata section contents)\n"
 msgstr ""
+"\n"
+"Таблиця функцій (оброблений вміст розділу .pdata)\n"
 
 #: pei-x86_64.c:450
 #, c-format
@@ -3708,15 +3710,15 @@ msgstr "%B: нерозпізнана назва імпортування; %x"
 
 #: peicode.h:1166
 msgid "%B: Unrecognised machine type (0x%x) in Import Library Format archive"
-msgstr ""
+msgstr "%B: нерозпізнаний тип архітектури (0x%x) у архіві Import Library Format"
 
 #: peicode.h:1178
 msgid "%B: Recognised but unhandled machine type (0x%x) in Import Library Format archive"
-msgstr ""
+msgstr "%B: розпізнаний, але непридатний до обробки тип архітектури (0x%x) у архіві Import Library Format"
 
 #: peicode.h:1196
 msgid "%B: size field is zero in Import Library Format header"
-msgstr ""
+msgstr "%B: у заголовку Import Library Format поле розміру є нульовим"
 
 #: peicode.h:1227
 msgid "%B: string not null terminated in ILF object file."
@@ -3957,7 +3959,7 @@ msgstr "Некоректний номер розділу у ETIR"
 
 #: vms-alpha.c:5109
 msgid "Relocation for non-REL psect"
-msgstr ""
+msgstr "Пересування для psect, який не є REL"
 
 #: vms-alpha.c:5156
 #, c-format
@@ -4062,12 +4064,12 @@ msgstr "   код завершення: %u\n"
 #: vms-alpha.c:5742
 #, c-format
 msgid "   transfer addr flags: 0x%02x\n"
-msgstr ""
+msgstr "   прапорці передавання адреси: 0x%02x\n"
 
 #: vms-alpha.c:5743
 #, c-format
 msgid "   transfer addr psect: %u\n"
-msgstr ""
+msgstr "   psect передавання адреси: %u\n"
 
 #: vms-alpha.c:5745
 #, c-format
@@ -4237,7 +4239,7 @@ msgstr "   адреса коду: 0x%08x\n"
 #: vms-alpha.c:5883
 #, c-format
 msgid "   psect index for entry point : %u\n"
-msgstr ""
+msgstr "   індекс psect для точки входження: %u\n"
 
 #: vms-alpha.c:5886 vms-alpha.c:5962 vms-alpha.c:5981
 #, c-format
@@ -4257,7 +4259,7 @@ msgstr "SYM — посилання на загальні символи\n"
 #: vms-alpha.c:5907
 #, c-format
 msgid "IDC - Ident Consistency check\n"
-msgstr ""
+msgstr "IDC — перевірка коректності ідентифікаторів\n"
 
 #: vms-alpha.c:5908
 #, c-format
@@ -4287,12 +4289,12 @@ msgstr "   назва об’єкта : %.*s\n"
 #: vms-alpha.c:5922
 #, c-format
 msgid "   binary ident  : 0x%08x\n"
-msgstr ""
+msgstr "   двійк. ідент. : 0x%08x\n"
 
 #: vms-alpha.c:5925
 #, c-format
 msgid "   ascii ident   : %.*s\n"
-msgstr ""
+msgstr "   ідент. ascii  : %.*s\n"
 
 #: vms-alpha.c:5933
 #, c-format
@@ -4322,7 +4324,7 @@ msgstr "   індекс psect: %u\n"
 #: vms-alpha.c:5954
 #, c-format
 msgid "SYMV - Vectored symbol definition\n"
-msgstr ""
+msgstr "SYMV — визначення векторизованого символу\n"
 
 #: vms-alpha.c:5958
 #, c-format
@@ -4337,7 +4339,7 @@ msgstr "   відступ psect: %u\n"
 #: vms-alpha.c:5973
 #, c-format
 msgid "SYMM - Global symbol definition with version\n"
-msgstr ""
+msgstr "SYMM — визначення загального символу з версією\n"
 
 #: vms-alpha.c:5977
 #, c-format
@@ -4422,7 +4424,7 @@ msgstr ""
 #: vms-alpha.c:6094
 #, c-format
 msgid "STA_CKARG (compare procedure argument)\n"
-msgstr ""
+msgstr "STA_CKARG (аргумент процедури порівняння)\n"
 
 #: vms-alpha.c:6098
 #, c-format
@@ -4723,7 +4725,7 @@ msgstr "не вдалося прочитати довжину запису GST\n
 #: vms-alpha.c:6354
 #, c-format
 msgid "cannot find EMH in first GST record\n"
-msgstr ""
+msgstr "не вдалося знайти EMH у першому записі GST\n"
 
 #: vms-alpha.c:6380
 #, c-format
@@ -4743,7 +4745,7 @@ msgstr "не вдалося прочитати запис GST\n"
 #: vms-alpha.c:6430
 #, c-format
 msgid " unhandled EOBJ record type %u\n"
-msgstr ""
+msgstr " непридатний до обробки тип запису EOBJ, %u\n"
 
 #: vms-alpha.c:6453
 #, c-format
@@ -4979,7 +4981,7 @@ msgstr ""
 #: vms-alpha.c:6985
 #, c-format
 msgid "epilog: flags: %u, count: %u\n"
-msgstr ""
+msgstr "епілог: прапорці: %u, лічильник: %u\n"
 
 #: vms-alpha.c:6994
 #, c-format
@@ -5174,7 +5176,7 @@ msgstr "   *непридатна* команда %u\n"
 #: vms-alpha.c:7262
 #, c-format
 msgid "*unhandled* dst type %u\n"
-msgstr ""
+msgstr "*непридатний* тип призначення, %u\n"
 
 #: vms-alpha.c:7294
 #, c-format
@@ -5448,7 +5450,7 @@ msgstr " ід. компонувальника: %.*s\n"
 #: vms-alpha.c:7549
 #, c-format
 msgid " image build ident: %.*s\n"
-msgstr ""
+msgstr " ідентифікатор збирання образу: %.*s\n"
 
 #: vms-alpha.c:7559
 #, c-format
@@ -5458,7 +5460,7 @@ msgstr "не вдалося прочитати EIHS\n"
 #: vms-alpha.c:7562
 #, c-format
 msgid "Image symbol & debug table: (major: %u, minor: %u)\n"
-msgstr ""
+msgstr "Таблиця символів і діагностики образу (основна: %u, модифікація: %u)\n"
 
 #: vms-alpha.c:7567
 #, c-format
@@ -5473,7 +5475,7 @@ msgstr " таблиця загальних символів: vbn: %u, запис
 #: vms-alpha.c:7575
 #, c-format
 msgid " debug module table : vbn: %u, size: %u\n"
-msgstr ""
+msgstr " таблиця діагностики модулів: vbn: %u, розмір: %u\n"
 
 #: vms-alpha.c:7588
 #, c-format
@@ -5483,7 +5485,7 @@ msgstr "не вдалося прочитати EISD\n"
 #: vms-alpha.c:7598
 #, c-format
 msgid "Image section descriptor: (major: %u, minor: %u, size: %u, offset: %u)\n"
-msgstr ""
+msgstr "Дескриптор розділу образу: (основна: %u, модифікація: %u, розмір: %u, відступ: %u)\n"
 
 #: vms-alpha.c:7605
 #, c-format
@@ -5557,7 +5559,7 @@ msgstr "не вдалося прочитати psect DMT\n"
 #: vms-alpha.c:7717
 #, c-format
 msgid "  psect start: 0x%08x, length: %u\n"
-msgstr ""
+msgstr "  початок psect: 0x%08x, довжина: %u\n"
 
 #: vms-alpha.c:7730
 #, c-format
@@ -5577,7 +5579,7 @@ msgstr "Таблиця загальних символів:\n"
 #: vms-alpha.c:7772
 #, c-format
 msgid "Image activator fixup: (major: %u, minor: %u)\n"
-msgstr ""
+msgstr "Прив’язка адреси активатора образу: (основна: %u, модифікація: %u)\n"
 
 #: vms-alpha.c:7775
 #, c-format
@@ -5672,7 +5674,7 @@ msgstr ""
 #: vms-alpha.c:7847
 #, c-format
 msgid " Code Address Reference Fixups:\n"
-msgstr ""
+msgstr " Прив’язки адрес коду:\n"
 
 #: vms-alpha.c:7852
 #, c-format
@@ -5762,7 +5764,7 @@ msgstr "%s: немає такого символу"
 #: xcofflink.c:3299
 #, c-format
 msgid "warning: attempt to export undefined symbol `%s'"
-msgstr ""
+msgstr "попередження: спроба експортування невизначеного символу «%s»"
 
 #: xcofflink.c:3678
 msgid "error: undefined symbol __rtinit"
@@ -5849,7 +5851,7 @@ msgstr "%B: компонування файлів зі прямим порядк
 
 #: elf32-ia64.c:4766 elf64-ia64.c:4766
 msgid "%B: linking 64-bit files with 32-bit files"
-msgstr ""
+msgstr "%B: компонування 64-бітових файлів з 32-бітовими файлами"
 
 #: elf32-ia64.c:4775 elf64-ia64.c:4775
 msgid "%B: linking constant-gp files with non-constant-gp files"
@@ -5866,7 +5868,7 @@ msgstr "%s: переповнення номерів рядків; 0x%lx > 0xffff
 
 #: peigen.c:1029 pepigen.c:1029 pex64igen.c:1029
 msgid "Export Directory [.edata (or where ever we found it)]"
-msgstr ""
+msgstr "Каталог експортування [.edata (або інше місце, де його знайдено)]"
 
 #: peigen.c:1030 pepigen.c:1030 pex64igen.c:1030
 msgid "Import Directory [parts of .idata]"
@@ -5906,15 +5908,15 @@ msgstr "Каталог зберігання потоків [.tls]"
 
 #: peigen.c:1039 pepigen.c:1039 pex64igen.c:1039
 msgid "Load Configuration Directory"
-msgstr ""
+msgstr "Каталог завантаження налаштувань"
 
 #: peigen.c:1040 pepigen.c:1040 pex64igen.c:1040
 msgid "Bound Import Directory"
-msgstr ""
+msgstr "Каталог вимушеного імпортування"
 
 #: peigen.c:1041 pepigen.c:1041 pex64igen.c:1041
 msgid "Import Address Table Directory"
-msgstr ""
+msgstr "Каталог імпортування таблиці адрес"
 
 #: peigen.c:1042 pepigen.c:1042 pex64igen.c:1042
 msgid "Delay Import Directory"
@@ -5976,7 +5978,7 @@ msgid ""
 "The Import Tables (interpreted %s section contents)\n"
 msgstr ""
 "\n"
-"Таблиця імпортування (оброблений вміст розділу %s)\n"
+"Таблиці імпортування (оброблений вміст розділу %s)\n"
 
 #: peigen.c:1170 pepigen.c:1170 pex64igen.c:1170
 #, c-format
@@ -6005,6 +6007,8 @@ msgid ""
 "\n"
 "There is a first thunk, but the section containing it could not be found\n"
 msgstr ""
+"\n"
+"Існує запис першого переходу, але розділу, що його містить не знайдено\n"
 
 #: peigen.c:1415 pepigen.c:1415 pex64igen.c:1415
 #, c-format
@@ -6012,6 +6016,8 @@ msgid ""
 "\n"
 "There is an export table, but the section containing it could not be found\n"
 msgstr ""
+"\n"
+"Існує запис таблиці експортування, але розділу, що її містить не знайдено\n"
 
 #: peigen.c:1424 pepigen.c:1424 pex64igen.c:1424
 #, c-format
@@ -6026,6 +6032,8 @@ msgid ""
 "\n"
 "There is an export table in %s at 0x%lx\n"
 msgstr ""
+"\n"
+"У %s зберігається таблиця експортування у 0x%lx\n"
 
 #: peigen.c:1458 pepigen.c:1458 pex64igen.c:1458
 #, c-format
@@ -6034,6 +6042,8 @@ msgid ""
 "The Export Tables (interpreted %s section contents)\n"
 "\n"
 msgstr ""
+"\n"
+"Таблиці експортування (оброблений вміст розділу %s)\n"
 
 #: peigen.c:1462 pepigen.c:1462 pex64igen.c:1462
 #, c-format
@@ -6048,7 +6058,7 @@ msgstr "Позначка часу/дати\t\t%lx\n"
 #: peigen.c:1468 pepigen.c:1468 pex64igen.c:1468
 #, c-format
 msgid "Major/Minor \t\t\t%d/%d\n"
-msgstr ""
+msgstr "Основна/Модифікація \t\t\t%d/%d\n"
 
 #: peigen.c:1471 pepigen.c:1471 pex64igen.c:1471
 #, c-format
@@ -6211,7 +6221,7 @@ msgstr "%B: не вдалося заповнити DataDictionary[PE_IMPORT_ADDR
 
 #: peigen.c:2438 pepigen.c:2438 pex64igen.c:2438
 msgid "%B: unable to fill in DataDictionary[9] because __tls_used is missing"
-msgstr ""
+msgstr "%B: не вдалося заповнити DataDictionary[9], оскільки не вистачає __tls_used"
 
 #~ msgid "%B: error: taking the address of protected function '%s' cannot be done when making a shared library"
 #~ msgstr "%B: помилка: не можна виконувати отримання адреси захищеної функції «%s» під час створення бібліотеки спільного використання"

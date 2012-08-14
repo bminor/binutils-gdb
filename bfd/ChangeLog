@@ -1,3 +1,7 @@
+2012-08-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/uk.po: Updated Ukranian translation.
+
 2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_size_dynamic_sections): Look up
