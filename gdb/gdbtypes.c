@@ -132,12 +132,6 @@ show_overload_debug (struct ui_file *file, int from_tty,
 		    value);
 }
 
-struct extra
-  {
-    char str[128];
-    int len;
-  };				/* Maximum extension is 128!  FIXME  */
-
 static void print_bit_vector (B_TYPE *, int);
 static void print_arg_types (struct field *, int, int);
 static void dump_fn_fieldlists (struct type *, int);
