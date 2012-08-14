@@ -1,5 +1,9 @@
 2012-08-14  Doug Evans  <dje@google.com>
 
+	* gdbtypes.c: Whitespace cleanup.
+	(address_space_name_to_int): Remove "extern" from definition.
+	(_initialize_gdbtypes): Declare with initialize_file_ftype.
+
 	* gdbtypes.c (make_pointer_type): Remove redundant setting of
 	TYPE_POINTER_TYPE (type).
 

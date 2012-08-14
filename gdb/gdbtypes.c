@@ -110,8 +110,8 @@ const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_ibm_long_double
 };
 
-
 int opaque_type_resolution = 1;
+
 static void
 show_opaque_type_resolution (struct ui_file *file, int from_tty,
 			     struct cmd_list_element *c, 
@@ -123,6 +123,7 @@ show_opaque_type_resolution (struct ui_file *file, int from_tty,
 }
 
 unsigned int overload_debug = 0;
+
 static void
 show_overload_debug (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
@@ -141,8 +142,7 @@ static void print_bit_vector (B_TYPE *, int);
 static void print_arg_types (struct field *, int, int);
 static void dump_fn_fieldlists (struct type *, int);
 static void print_cplus_stuff (struct type *, int);
-
-
+
 /* Allocate a new OBJFILE-associated type structure and fill it
    with some defaults.  Space for the type structure is allocated
    on the objfile's objfile_obstack.  */
@@ -225,7 +225,6 @@ get_type_arch (const struct type *type)
     return TYPE_OWNER (type).gdbarch;
 }
 
-
 /* Alloc a new type instance structure, fill it with some defaults,
    and point it at OLDTYPE.  Allocate the new type instance from the
    same place as OLDTYPE.  */
@@ -252,6 +251,7 @@ alloc_type_instance (struct type *oldtype)
 
 /* Clear all remnants of the previous type at TYPE, in preparation for
    replacing it with something else.  Preserve owner information.  */
+
 static void
 smash_type (struct type *type)
 {
@@ -312,8 +312,7 @@ make_pointer_type (struct type *type, struct type **typeptr)
   TYPE_TARGET_TYPE (ntype) = type;
   TYPE_POINTER_TYPE (type) = ntype;
 
-  /* FIXME!  Assume the machine has only one representation for
-     pointers!  */
+  /* FIXME!  Assumes the machine has only one representation for pointers!  */
 
   TYPE_LENGTH (ntype)
     = gdbarch_ptr_bit (get_type_arch (type)) / TARGET_CHAR_BIT;
@@ -449,7 +448,6 @@ make_function_type (struct type *type, struct type **typeptr)
   return ntype;
 }
 
-
 /* Given a type TYPE, return a type of functions that return that type.
    May need to construct such a type if this is the first use.  */
 
@@ -498,7 +496,8 @@ lookup_function_type_with_arguments (struct type *type,
 
 /* Identify address space identifier by name --
    return the integer flag defined in gdbtypes.h.  */
-extern int
+
+int
 address_space_name_to_int (struct gdbarch *gdbarch, char *space_identifier)
 {
   int type_flags;
@@ -620,6 +619,7 @@ make_type_with_address_space (struct type *type, int space_flag)
    in the same objfile.  Otherwise, allocate fresh memory for the new
    type whereever TYPE lives.  If TYPEPTR is non-zero, set it to the
    new type we construct.  */
+
 struct type *
 make_cv_type (int cnst, int voltl, 
 	      struct type *type, 
@@ -672,6 +672,7 @@ make_cv_type (int cnst, int voltl,
    smashing is ugly, and needs to be replaced with something more
    controlled.  TYPE_MAIN_TYPE is a step in this direction; it's not
    clear if more steps are needed.  */
+
 void
 replace_type (struct type *ntype, struct type *type)
 {
@@ -1261,7 +1262,6 @@ lookup_union (const char *name, struct block *block)
   error (_("This context has class, struct or enum %s, not a union."), 
 	 name);
 }
-
 
 /* Lookup an enum type named "enum NAME",
    visible in lexical block BLOCK.  */
@@ -1914,6 +1914,7 @@ const struct gnat_aux_type gnat_aux_default =
 /* Set the TYPE's type-specific kind to TYPE_SPECIFIC_GNAT_STUFF,
    and allocate the associated gnat-specific data.  The gnat-specific
    data is also initialized to gnat_aux_default.  */
+
 void
 allocate_gnat_aux_type (struct type *type)
 {
@@ -1922,7 +1923,6 @@ allocate_gnat_aux_type (struct type *type)
     TYPE_ALLOC (type, sizeof (struct gnat_aux_type));
   *(TYPE_GNAT_SPECIFIC (type)) = gnat_aux_default;
 }
-
 
 /* Helper function to initialize the standard scalar types.
 
@@ -1992,6 +1992,8 @@ init_type (enum type_code code, int length, int flags,
     }
   return type;
 }
+
+/* Queries on types.  */
 
 int
 can_dereference (struct type *t)
@@ -2226,6 +2228,7 @@ is_unique_ancestor (struct type *base, struct value *val)
 }
 
 
+/* Overload resolution.  */
 
 /* Return the sum of the rank of A with the rank of B.  */
 
@@ -2803,8 +2806,9 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
     }				/* switch (TYPE_CODE (arg)) */
 }
 
-
 /* End of functions for overload resolution.  */
+
+/* Routines to pretty-print types.  */
 
 static void
 print_bit_vector (B_TYPE *bits, int nbits)
@@ -3316,7 +3320,7 @@ recursive_dump_type (struct type *type, int spaces)
   if (spaces == 0)
     obstack_free (&dont_print_type_obstack, NULL);
 }
-
+
 /* Trivial helpers for the libiberty hash table, for mapping one
    type to another.  */
 
@@ -3505,12 +3509,12 @@ copy_type (const struct type *type)
 
   return new_type;
 }
-
-
+
 /* Helper functions to initialize architecture-specific types.  */
 
 /* Allocate a type structure associated with GDBARCH and set its
    CODE, LENGTH, and NAME fields.  */
+
 struct type *
 arch_type (struct gdbarch *gdbarch,
 	   enum type_code code, int length, char *name)
@@ -3530,6 +3534,7 @@ arch_type (struct gdbarch *gdbarch,
 /* Allocate a TYPE_CODE_INT type structure associated with GDBARCH.
    BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
    the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
+
 struct type *
 arch_integer_type (struct gdbarch *gdbarch,
 		   int bit, int unsigned_p, char *name)
@@ -3548,6 +3553,7 @@ arch_integer_type (struct gdbarch *gdbarch,
 /* Allocate a TYPE_CODE_CHAR type structure associated with GDBARCH.
    BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
    the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
+
 struct type *
 arch_character_type (struct gdbarch *gdbarch,
 		     int bit, int unsigned_p, char *name)
@@ -3564,6 +3570,7 @@ arch_character_type (struct gdbarch *gdbarch,
 /* Allocate a TYPE_CODE_BOOL type structure associated with GDBARCH.
    BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
    the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
+
 struct type *
 arch_boolean_type (struct gdbarch *gdbarch,
 		   int bit, int unsigned_p, char *name)
@@ -3581,6 +3588,7 @@ arch_boolean_type (struct gdbarch *gdbarch,
    BIT is the type size in bits; if BIT equals -1, the size is
    determined by the floatformat.  NAME is the type name.  Set the
    TYPE_FLOATFORMAT from FLOATFORMATS.  */
+
 struct type *
 arch_float_type (struct gdbarch *gdbarch,
 		 int bit, char *name, const struct floatformat **floatformats)
@@ -3602,6 +3610,7 @@ arch_float_type (struct gdbarch *gdbarch,
 
 /* Allocate a TYPE_CODE_COMPLEX type structure associated with GDBARCH.
    NAME is the type name.  TARGET_TYPE is the component float type.  */
+
 struct type *
 arch_complex_type (struct gdbarch *gdbarch,
 		   char *name, struct type *target_type)
@@ -3616,6 +3625,7 @@ arch_complex_type (struct gdbarch *gdbarch,
 
 /* Allocate a TYPE_CODE_FLAGS type structure associated with GDBARCH.
    NAME is the type name.  LENGTH is the size of the flag word in bytes.  */
+
 struct type *
 arch_flags_type (struct gdbarch *gdbarch, char *name, int length)
 {
@@ -3632,6 +3642,7 @@ arch_flags_type (struct gdbarch *gdbarch, char *name, int length)
 
 /* Add field to TYPE_CODE_FLAGS type TYPE to indicate the bit at
    position BITPOS is called NAME.  */
+
 void
 append_flags_type_flag (struct type *type, int bitpos, char *name)
 {
@@ -3653,6 +3664,7 @@ append_flags_type_flag (struct type *type, int bitpos, char *name)
 
 /* Allocate a TYPE_CODE_STRUCT or TYPE_CODE_UNION type structure (as
    specified by CODE) associated with GDBARCH.  NAME is the type name.  */
+
 struct type *
 arch_composite_type (struct gdbarch *gdbarch, char *name, enum type_code code)
 {
@@ -3668,6 +3680,7 @@ arch_composite_type (struct gdbarch *gdbarch, char *name, enum type_code code)
 /* Add new field with name NAME and type FIELD to composite type T.
    Do not set the field's position or adjust the type's length;
    the caller should do so.  Return the new field.  */
+
 struct field *
 append_composite_type_field_raw (struct type *t, char *name,
 				 struct type *field)
@@ -3686,6 +3699,7 @@ append_composite_type_field_raw (struct type *t, char *name,
 
 /* Add new field with name NAME and type FIELD to composite type T.
    ALIGNMENT (if non-zero) specifies the minimum field alignment.  */
+
 void
 append_composite_type_field_aligned (struct type *t, char *name,
 				     struct type *field, int alignment)
@@ -3725,13 +3739,13 @@ append_composite_type_field_aligned (struct type *t, char *name,
 }
 
 /* Add new field with name NAME and type FIELD to composite type T.  */
+
 void
 append_composite_type_field (struct type *t, char *name,
 			     struct type *field)
 {
   append_composite_type_field_aligned (t, name, field, 0);
 }
-
 
 static struct gdbarch_data *gdbtypes_data;
 
@@ -3868,7 +3882,6 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 
   return builtin_type;
 }
-
 
 /* This set of objfile-based types is intended to be used by symbol
    readers as basic types.  */
@@ -4033,8 +4046,8 @@ objfile_type (struct objfile *objfile)
   return objfile_type;
 }
 
+extern initialize_file_ftype _initialize_gdbtypes;
 
-extern void _initialize_gdbtypes (void);
 void
 _initialize_gdbtypes (void)
 {
