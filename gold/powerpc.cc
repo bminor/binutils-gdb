@@ -75,15 +75,6 @@ public:
       return 0;
   }
 
-  void
-  set_got2_shndx(unsigned int shndx)
-  {
-    if (size == 32)
-      this->got2_section_ = shndx;
-    else
-      gold_unreachable();
-  }
-
   bool
   do_find_special_sections(Read_symbols_data* sd);
 
@@ -722,7 +713,7 @@ Powerpc_relobj<size, big_endian>::do_find_special_sections(
       if (s != NULL)
 	{
 	  unsigned int ndx = (s - pshdrs) / elfcpp::Elf_sizes<size>::shdr_size;
-	  this->set_got2_shndx(ndx);
+	  this->got2_section_ = ndx;
 	}
     }
   return Sized_relobj_file<size, big_endian>::do_find_special_sections(sd);
@@ -1117,11 +1108,11 @@ class Output_data_glink : public Output_section_data
   // Add an entry
   void
   add_entry(const Symbol*, const elfcpp::Rela<size, big_endian>&,
-	    const Sized_relobj<size, big_endian>*, unsigned int);
+	    const Sized_relobj<size, big_endian>*);
 
   unsigned int
   find_entry(const Symbol*, const elfcpp::Rela<size, big_endian>&,
-	     const Sized_relobj<size, big_endian>*, unsigned int) const;
+	     const Sized_relobj<size, big_endian>*) const;
 
   unsigned int
   glink_entry_size() const
@@ -1150,54 +1141,50 @@ class Output_data_glink : public Output_section_data
   void
   do_write(Output_file*);
 
-  struct Glink_sym_ent
+  class Glink_sym_ent
   {
-    Glink_sym_ent(const Symbol *sym,
+  public:
+    Glink_sym_ent(const Symbol* sym,
 		  const elfcpp::Rela<size, big_endian>& reloc,
-		  const Sized_relobj<size, big_endian>* object,
-		  unsigned int shndx)
-      : sym_(sym), object_(0), shndx_(0), addend_(0)
+		  const Sized_relobj<size, big_endian>* object)
+      : sym_(sym), object_(0), addend_(0)
     {
       if (size != 32)
 	this->addend_ = reloc.get_r_addend();
-      else if (parameters->options().output_is_position_independent())
+      else if (parameters->options().output_is_position_independent()
+	       && (elfcpp::elf_r_type<size>(reloc.get_r_info())
+		   == elfcpp::R_PPC_PLTREL24))
 	{
-	  if (object != NULL && shndx != 0)
-	    this->addend_ = reloc.get_r_addend();
+	  this->addend_ = reloc.get_r_addend();
 	  if (this->addend_ != 0)
-	    {
-	      this->object_ = object;
-	      this->shndx_ = shndx;
-	    }
+	    this->object_ = object;
 	}
     }
 
-    const Symbol *sym_;
+    const Symbol* sym_;
     const Sized_relobj<size, big_endian>* object_;
-    unsigned int shndx_;
     unsigned int addend_;
 
     bool operator==(const Glink_sym_ent& that) const
     {
       return (this->sym_ == that.sym_
 	      && this->object_ == that.object_
-              && this->shndx_ == that.shndx_
-              && this->addend_ == that.addend_);
+	      && this->addend_ == that.addend_);
     }
   };
 
-  struct Glink_sym_ent_hash
+  class Glink_sym_ent_hash
   {
+  public:
     size_t operator()(const Glink_sym_ent& ent) const
     {
       return (reinterpret_cast<uintptr_t>(ent.sym_)
 	      ^ reinterpret_cast<uintptr_t>(ent.object_)
-	      ^ ent.shndx_
 	      ^ ent.addend_);
     }
   };
 
-  // Set of sym/shndx/addend entries.
+  // Map sym/object/addend to index.
   typedef Unordered_map<Glink_sym_ent, unsigned int,
 			Glink_sym_ent_hash> Glink_entries;
   Glink_entries glink_entries_;
@@ -1220,17 +1207,16 @@ Output_data_glink<size, big_endian>::Output_data_glink(
 }
 
 // Add an entry to glink, if we do not already have one for this
-// sym/addend/shndx combo.
+// sym/object/addend combo.
 
 template<int size, bool big_endian>
 void
 Output_data_glink<size, big_endian>::add_entry(
     const Symbol* gsym,
     const elfcpp::Rela<size, big_endian>& reloc,
-    const Sized_relobj<size, big_endian>* object,
-    unsigned int shndx)
+    const Sized_relobj<size, big_endian>* object)
 {
-  Glink_sym_ent ent(gsym, reloc, object, shndx);
+  Glink_sym_ent ent(gsym, reloc, object);
   unsigned int indx = this->glink_entries_.size();
   this->glink_entries_.insert(std::make_pair(ent, indx));
 }
@@ -1240,10 +1226,9 @@ unsigned int
 Output_data_glink<size, big_endian>::find_entry(
     const Symbol* gsym,
     const elfcpp::Rela<size, big_endian>& reloc,
-    const Sized_relobj<size, big_endian>* object,
-    unsigned int shndx) const
+    const Sized_relobj<size, big_endian>* object) const
 {
-  Glink_sym_ent ent(gsym, reloc, object, shndx);
+  Glink_sym_ent ent(gsym, reloc, object);
   typename Glink_entries::const_iterator p = this->glink_entries_.find(ent);
   gold_assert(p != this->glink_entries_.end());
   return p->second;
@@ -1433,11 +1418,15 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 	  p = oview + g->second * this->glink_entry_size();
 	  if (parameters->options().output_is_position_independent())
 	    {
-	      unsigned int got2 = g->first.shndx_;
-	      if (got2)
-		got_addr = (g->first.object_->output_section(got2)->address()
-			    + g->first.object_->output_section_offset(got2)
-			    + g->first.addend_);
+	      const Powerpc_relobj<size, big_endian>* object = static_cast
+		<const Powerpc_relobj<size, big_endian>*>(g->first.object_);
+	      if (object != NULL)
+		{
+		  unsigned int got2 = object->got2_shndx();
+		  got_addr = (g->first.object_->output_section(got2)->address()
+			      + g->first.object_->output_section_offset(got2)
+			      + g->first.addend_);
+		}
 	      else
 		got_addr = g_o_t;
 
@@ -1572,14 +1561,7 @@ Target_powerpc<size, big_endian>::make_plt_entry(
 
   this->plt_->add_entry(gsym);
 
-  unsigned int got2_shndx = 0;
-  if (size == 32 && object != NULL)
-    {
-      const Powerpc_relobj<size, big_endian>* ppc_obj
-	= static_cast<const Powerpc_relobj<size, big_endian>*>(object);
-      got2_shndx = ppc_obj->got2_shndx();
-    }
-  this->glink_->add_entry(gsym, reloc, object, got2_shndx);
+  this->glink_->add_entry(gsym, reloc, object);
 }
 
 // Return the number of entries in the PLT.
@@ -2046,12 +2028,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 		 && !(gsym->is_defined()
 		      && !gsym->is_from_dynobj()
 		      && !gsym->is_preemptible())))
-	  {
-	    if (r_type == elfcpp::R_PPC_PLTREL24)
-	      target->make_plt_entry(layout, gsym, reloc, object);
-	    else
-	      target->make_plt_entry(layout, gsym, reloc, 0);
-	  }
+	  target->make_plt_entry(layout, gsym, reloc, object);
 	// Make a dynamic relocation if necessary.
 	if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type)))
 	  {
@@ -2328,10 +2305,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       const Output_data_glink<size, big_endian>* glink;
 
       glink = target->glink_section();
-      unsigned int shndx = 0;
-      if (size == 32 && r_type == elfcpp::R_PPC_PLTREL24)
-	shndx = object->got2_shndx();
-      unsigned int glink_index = glink->find_entry(gsym, rela, object, shndx);
+      unsigned int glink_index = glink->find_entry(gsym, rela, object);
       value = glink->address() + glink_index * glink->glink_entry_size();
     }
   else

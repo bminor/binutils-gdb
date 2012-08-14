@@ -1,3 +1,18 @@
+2012-08-14  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Powerpc_relobj::set_got2_shndx): Delete.
+	(Powerpc_relobj::do_find_special_sections): Don't use set_got2_shndx.
+	(Output_data_glink::add_entry,find_entry): Remove shndx param.
+	(class Glink_sym_ent): Rename from struct Glink_sym_ent.  Remove
+	all references to shndx_.  Handle special case for R_PPC_PLTREL24
+	here.
+	(class Glink_sym_ent_hash): Rename from struct Glink_sym_ent_hash.
+	(Output_data_glink::do_write): Retrieve got2_shdnx from object.
+	(Target_powerpc::make_plt_entry): Don't special case R_PPC_PLTREL24
+	here.
+	(Target_powerpc::Scan::global): Nor on make_plt_entry call.
+	(Target_powerpc::Relocate::relocate): Nor on glink->find_entry call.
+
 2012-08-12  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc: Whitespace fixes.  Wrap overly long lines.
