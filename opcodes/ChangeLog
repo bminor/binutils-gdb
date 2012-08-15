@@ -1,5 +1,9 @@
 2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
 
+	* ppc-opc.c <RSQ, RTQ>: Use PPC_OPERAND_GPR.
+
+2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
+
 	* ppc-opc.c <xnop, yield, mdoio, mdoom>: New extended mnemonics.
 
 2012-08-14  Maciej W. Rozycki  <macro@codesourcery.com>

@@ -72,6 +72,13 @@ dsym1:
 	dcbzl   3, 4
 	dcbz    5, 6
 
+	lq 2,16(0)
+	lq 0,16(5)
+	lq 2,16(5)
+	stq 2,16(0)
+	stq 0,16(5)
+	stq 2,16(5)
+
 	.section	".data"
 usym0:	.llong	0xcafebabe
 usym1:

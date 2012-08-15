@@ -512,11 +512,11 @@ const struct powerpc_operand powerpc_operands[] =
 #define RD RS
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_GPR },
 
-  /* The RS and RT fields of the DS form stq instruction, which have
-     special value restrictions.  */
+  /* The RS and RT fields of the DS form stq and DQ form lq instructions,
+     which have special value restrictions.  */
 #define RSQ RS + 1
 #define RTQ RSQ
-  { 0x1e, 21, NULL, NULL, PPC_OPERAND_GPR_0 },
+  { 0x1e, 21, NULL, NULL, PPC_OPERAND_GPR },
 
   /* The RS field of the tlbwe instruction, which is optional.  */
 #define RSO RSQ + 1

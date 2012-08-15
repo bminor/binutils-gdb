@@ -1,5 +1,10 @@
 2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
 
+	* gas/ppc/power4.s <lq, stq>: Add more tests.
+	* gas/ppc/power4.d: Likewise.
+
+2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
+
 	* gas/ppc/common.d ("nop", "xnop"): Add tests.
 	* gas/ppc/common.s: Likewise.
 	* gas/ppc/power7.d ("yield", "mdoio", "mdoom"): Add tests.
