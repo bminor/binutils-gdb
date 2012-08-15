@@ -3017,40 +3017,49 @@ The target will wait for another debugger to connect.  Not available for\n\
 all targets."));
 
   c = add_com ("signal", class_run, signal_command, _("\
-Continue program giving it signal specified by the argument.\n\
-An argument of \"0\" means continue program without giving it a signal."));
+Continue program with the specified signal.\n\
+Usage: signal SIGNAL\n\
+The SIGNAL arugment is processed the same as the handle command.\n\
+\n\
+An argument of \"0\" means continue the program without sending it a signal.\n\
+This is useful in cases where the program stopped because of a signal,\n\
+and you want to resume the program while discarding the signal."));
   set_cmd_completer (c, signal_completer);
 
   add_com ("stepi", class_run, stepi_command, _("\
 Step one instruction exactly.\n\
-Argument N means do this N times (or till program stops for another \
+Usage: stepi [N]\n\
+Argument N means step N times (or till program stops for another \
 reason)."));
   add_com_alias ("si", "stepi", class_alias, 0);
 
   add_com ("nexti", class_run, nexti_command, _("\
 Step one instruction, but proceed through subroutine calls.\n\
-Argument N means do this N times (or till program stops for another \
+Usage: nexti [N]\n\
+Argument N means step N times (or till program stops for another \
 reason)."));
   add_com_alias ("ni", "nexti", class_alias, 0);
 
   add_com ("finish", class_run, finish_command, _("\
 Execute until selected stack frame returns.\n\
+Usage: finish\n\
 Upon return, the value returned is printed and put in the value history."));
   add_com_alias ("fin", "finish", class_run, 1);
 
   add_com ("next", class_run, next_command, _("\
 Step program, proceeding through subroutine calls.\n\
-Like the \"step\" command as long as subroutine calls do not happen;\n\
-when they do, the call is treated as one instruction.\n\
-Argument N means do this N times (or till program stops for another \
-reason)."));
+Usage: next [N]\n\
+Unlike \"step\", if the current source line calls a subroutine,\n\
+this command does not enter the subroutine, but instead steps over\n\
+the call, in effect treating it as a single source line.)"));
   add_com_alias ("n", "next", class_run, 1);
   if (xdb_commands)
     add_com_alias ("S", "next", class_run, 1);
 
   add_com ("step", class_run, step_command, _("\
 Step program until it reaches a different source line.\n\
-Argument N means do this N times (or till program stops for another \
+Usage: step [N]\n\
+Argument N means step N times (or till program stops for another \
 reason)."));
   add_com_alias ("s", "step", class_run, 1);
 
@@ -3069,6 +3078,7 @@ Execution will also stop upon exit from the current stack frame."));
 
   c = add_com ("jump", class_run, jump_command, _("\
 Continue program being debugged at specified line or address.\n\
+Usage: jump <location>\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
 for an address to start at."));
   set_cmd_completer (c, location_completer);
@@ -3090,6 +3100,7 @@ This command is a combination of tbreak and jump."));
 
   add_com ("continue", class_run, continue_command, _("\
 Continue program being debugged, after signal or breakpoint.\n\
+Usage: continue [N]\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
 which means to set the ignore count of that breakpoint to N - 1 (so that\n\
 the breakpoint won't break until the Nth time it is reached).\n\

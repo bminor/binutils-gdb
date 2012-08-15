@@ -1,3 +1,10 @@
+2012-08-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* infcmd.c (_initialize_infcmd): Update help text for the signal,
+	stepi, nexti, finish, next, step, jump, and continue commands.
+	* infrun.c (_initialize_infrun): Update help text for the handle
+	command.
+
 2012-08-14  Doug Evans  <dje@google.com>
 
 	* gdbtypes.c (struct extra): Delete, unused.
