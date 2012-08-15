@@ -149,6 +149,11 @@
 
 	* gdb.base/valgrind-db-attach.exp: Do not run in remote mode.
 
+2012-07-30  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.linespec/ls-errs.exp: Check some quote-enclosed
+	linespecs.
+
 2012-07-30  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/fission-reread.S: Use .data instead of .bss.
