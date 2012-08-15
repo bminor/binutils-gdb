@@ -17658,11 +17658,32 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
 	  {
 	    LONGEST offset;
 	    void **slot;
+	    bfd *include_bfd = abfd;
+	    struct dwarf2_section_info *include_section = section;
+	    struct dwarf2_section_info alt_section;
+	    gdb_byte *include_mac_end = mac_end;
+	    int is_dwz = section_is_dwz;
+	    gdb_byte *new_mac_ptr;
 
 	    offset = read_offset_1 (abfd, mac_ptr, offset_size);
 	    mac_ptr += offset_size;
 
-	    slot = htab_find_slot (include_hash, mac_ptr, INSERT);
+	    if (macinfo_type == DW_MACRO_GNU_transparent_include_alt)
+	      {
+		struct dwz_file *dwz = dwarf2_get_dwz_file ();
+
+		dwarf2_read_section (dwarf2_per_objfile->objfile,
+				     &dwz->macro);
+
+		include_bfd = dwz->macro.asection->owner;
+		include_section = &dwz->macro;
+		include_mac_end = dwz->macro.buffer + dwz->macro.size;
+		is_dwz = 1;
+	      }
+
+	    new_mac_ptr = include_section->buffer + offset;
+	    slot = htab_find_slot (include_hash, new_mac_ptr, INSERT);
+
 	    if (*slot != NULL)
 	      {
 		/* This has actually happened; see
@@ -17673,35 +17694,15 @@ dwarf_decode_macro_bytes (bfd *abfd, gdb_byte *mac_ptr, gdb_byte *mac_end,
 	      }
 	    else
 	      {
-		bfd *include_bfd = abfd;
-		struct dwarf2_section_info *include_section = section;
-		struct dwarf2_section_info alt_section;
-		gdb_byte *include_mac_end = mac_end;
-		int is_dwz = section_is_dwz;
+		*slot = new_mac_ptr;
 
-		*slot = mac_ptr;
-
-		if (macinfo_type == DW_MACRO_GNU_transparent_include_alt)
-		  {
-		    struct dwz_file *dwz = dwarf2_get_dwz_file ();
-
-		    dwarf2_read_section (dwarf2_per_objfile->objfile,
-					 &dwz->macro);
-
-		    include_bfd = dwz->macro.asection->owner;
-		    include_section = &dwz->macro;
-		    include_mac_end = dwz->macro.buffer + dwz->macro.size;
-		    is_dwz = 1;
-		  }
-
-		dwarf_decode_macro_bytes (include_bfd,
-					  include_section->buffer + offset,
+		dwarf_decode_macro_bytes (include_bfd, new_mac_ptr,
 					  include_mac_end, current_file,
 					  lh, comp_dir,
 					  section, section_is_gnu, is_dwz,
 					  offset_size, objfile, include_hash);
 
-		htab_remove_elt (include_hash, mac_ptr);
+		htab_remove_elt (include_hash, new_mac_ptr);
 	      }
 	  }
 	  break;
