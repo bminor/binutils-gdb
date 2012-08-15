@@ -1,3 +1,10 @@
+2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/common.d ("nop", "xnop"): Add tests.
+	* gas/ppc/common.s: Likewise.
+	* gas/ppc/power7.d ("yield", "mdoio", "mdoom"): Add tests.
+	* gas/ppc/power7.s: Likewise.
+
 2012-08-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/14457

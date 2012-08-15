@@ -1,3 +1,7 @@
+2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c <xnop, yield, mdoio, mdoom>: New extended mnemonics.
+
 2012-08-14  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-dis.c (print_insn_args): Add GET_OP and GET_OP_S local

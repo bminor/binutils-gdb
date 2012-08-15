@@ -4139,6 +4139,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"oris",	OP(25),		OP_MASK,     PPCCOM,	PPCNONE,	{RA, RS, UI}},
 {"oriu",	OP(25),		OP_MASK,     PWRCOM,	PPCNONE,	{RA, RS, UI}},
 
+{"xnop",	OP(26),		0xffffffff,  PPCCOM,	PPCNONE,	{0}},
 {"xori",	OP(26),		OP_MASK,     PPCCOM,	PPCNONE,	{RA, RS, UI}},
 {"xoril",	OP(26),		OP_MASK,     PWRCOM,	PPCNONE,	{RA, RS, UI}},
 
@@ -4924,6 +4925,11 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"miso",	0x7f5ad378,	0xffffffff,  E6500,	PPCNONE,	{0}},
 
+/* The "yield", "mdoio" and "mdoom" instructions are extended mnemonics for
+   "or rX,rX,rX", with rX being r27, r29 and r30 respectively.  */
+{"yield",	0x7f7bdb78,	0xffffffff,  POWER7,	 PPCNONE,	{0}},
+{"mdoio",	0x7fbdeb78,	0xffffffff,  POWER7,	 PPCNONE,	{0}},
+{"mdoom",	0x7fdef378,	0xffffffff,  POWER7,	 PPCNONE,	{0}},
 {"mr",		XRC(31,444,0),	X_MASK,      COM|PPCVLE, PPCNONE,	{RA, RS, RBS}},
 {"or",		XRC(31,444,0),	X_MASK,      COM|PPCVLE, PPCNONE,	{RA, RS, RB}},
 {"mr.",		XRC(31,444,1),	X_MASK,      COM|PPCVLE, PPCNONE,	{RA, RS, RBS}},
