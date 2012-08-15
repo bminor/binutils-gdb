@@ -110,7 +110,16 @@ const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_ibm_long_double
 };
 
-int opaque_type_resolution = 1;
+/* Should opaque types be resolved?  */
+
+static int opaque_type_resolution = 1;
+
+/* A flag to enable printing of debugging information of C++
+   overloading.  */
+
+unsigned int overload_debug = 0;
+
+/* A function to show whether opaque types are resolved.  */
 
 static void
 show_opaque_type_resolution (struct ui_file *file, int from_tty,
@@ -122,7 +131,7 @@ show_opaque_type_resolution (struct ui_file *file, int from_tty,
 		    value);
 }
 
-unsigned int overload_debug = 0;
+/* A function to show whether C++ overload debugging is enabled.  */
 
 static void
 show_overload_debug (struct ui_file *file, int from_tty,
@@ -132,10 +141,6 @@ show_overload_debug (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static void print_bit_vector (B_TYPE *, int);
-static void print_arg_types (struct field *, int, int);
-static void dump_fn_fieldlists (struct type *, int);
-static void print_cplus_stuff (struct type *, int);
 
 /* Allocate a new OBJFILE-associated type structure and fill it
    with some defaults.  Space for the type structure is allocated

@@ -1,3 +1,15 @@
+2012-08-15  Keith Seitz  <keiths@redhat.com>
+
+	* gdbtypes.c (opaque_type_resolution): Make static.
+	Add missing comment.
+	(overload_debug): Add missing comment.
+	(show_opaque_type_resolution): Likewise.
+	(show_overload_debug): Likewise.
+	(print_bit_vector): Remove unnecessary forward declaration.
+	(print_arg_types): Likewise.
+	(dump_fn_fieldlists): Likewise.
+	(print_cplus_stuff): Likewise.
+
 2012-08-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb_bfd.c (struct gdb_bfd_data) <archive_bfd>: New field.
