@@ -25,7 +25,7 @@ static PyObject *
 create_new_objfile_event_object (struct objfile *objfile)
 {
   PyObject *objfile_event;
-  PyObject *py_objfile;
+  PyObject *py_objfile = NULL;
 
   objfile_event = create_event_object (&new_objfile_event_object_type);
   if (!objfile_event)
@@ -36,10 +36,12 @@ create_new_objfile_event_object (struct objfile *objfile)
                                          "new_objfile",
                                          py_objfile) < 0)
     goto fail;
+  Py_DECREF (py_objfile);
 
   return objfile_event;
 
  fail:
+  Py_XDECREF (py_objfile);
   Py_XDECREF (objfile_event);
   return NULL;
 }

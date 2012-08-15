@@ -1,5 +1,23 @@
 2012-08-15  Tom Tromey  <tromey@redhat.com>
 
+	PR python/14387:
+	* python/py-bpevent.c (create_breakpoint_event_object): Update
+	comment.
+	* python/py-event.c (evpy_add_attribute): Update comment.
+	* python/py-exitedevent.c (create_exited_event_object): Fix
+	reference counting and error handling.
+	* python/py-newobjfileevent.c (create_new_objfile_event_object):
+	Fix reference counting.
+	* python/py-signalevent.c (create_signal_event_object): Fix
+	reference counting and error handling.
+	* python/py-stopevent.c (emit_stop_event): Fix reference
+	counting.
+	* python/py-threadevent.c (get_event_thread): Return a
+	borrowed reference.
+	* python/py-type.c (convert_field): Fix reference counting.
+
+2012-08-15  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (dwarf_decode_macro_bytes)
 	<DW_MACRO_GNU_transparent_include>: Use pointer to included data
 	as hash key.

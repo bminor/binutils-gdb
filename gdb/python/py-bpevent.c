@@ -21,7 +21,8 @@
 
 static PyTypeObject breakpoint_event_object_type;
 
-/* Create and initialize a BreakpointEvent object.  */
+/* Create and initialize a BreakpointEvent object.  This acquires new
+   references to BREAKPOINT_LIST and FIRST_BP.  */
 
 PyObject *
 create_breakpoint_event_object (PyObject *breakpoint_list, PyObject *first_bp)

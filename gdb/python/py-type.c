@@ -186,6 +186,7 @@ convert_field (struct type *type, int field)
       /* At least python-2.4 had the second parameter non-const.  */
       if (PyObject_SetAttrString (result, (char *) attrstring, arg) < 0)
 	goto failarg;
+      Py_DECREF (arg);
     }
 
   if (TYPE_FIELD_NAME (type, field))
@@ -199,11 +200,13 @@ convert_field (struct type *type, int field)
     goto fail;
   if (PyObject_SetAttrString (result, "name", arg) < 0)
     goto failarg;
+  Py_DECREF (arg);
 
   arg = TYPE_FIELD_ARTIFICIAL (type, field) ? Py_True : Py_False;
   Py_INCREF (arg);
   if (PyObject_SetAttrString (result, "artificial", arg) < 0)
     goto failarg;
+  Py_DECREF (arg);
 
   if (TYPE_CODE (type) == TYPE_CODE_CLASS)
     arg = field < TYPE_N_BASECLASSES (type) ? Py_True : Py_False;
@@ -212,12 +215,14 @@ convert_field (struct type *type, int field)
   Py_INCREF (arg);
   if (PyObject_SetAttrString (result, "is_base_class", arg) < 0)
     goto failarg;
+  Py_DECREF (arg);
 
   arg = PyLong_FromLong (TYPE_FIELD_BITSIZE (type, field));
   if (!arg)
     goto fail;
   if (PyObject_SetAttrString (result, "bitsize", arg) < 0)
     goto failarg;
+  Py_DECREF (arg);
 
   /* A field can have a NULL type in some situations.  */
   if (TYPE_FIELD_TYPE (type, field) == NULL)
@@ -231,6 +236,7 @@ convert_field (struct type *type, int field)
     goto fail;
   if (PyObject_SetAttrString (result, "type", arg) < 0)
     goto failarg;
+  Py_DECREF (arg);
 
   return result;
 

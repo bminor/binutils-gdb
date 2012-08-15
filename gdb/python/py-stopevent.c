@@ -81,6 +81,7 @@ emit_stop_event (struct bpstats *bs, enum gdb_signal stop_signal)
       stop_event_obj = create_breakpoint_event_object (list, first_bp);
       if (!stop_event_obj)
         goto fail;
+      Py_DECREF (list);
     }
 
   /* Check if the signal is "Signal 0" or "Trace/breakpoint trap".  */

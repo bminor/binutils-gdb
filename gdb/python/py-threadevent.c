@@ -21,7 +21,7 @@
    running in non-stop mode then the event is thread specific, otherwise
    it is process wide.
    This function returns the currently stopped thread in non-stop mode and
-   Py_None otherwise.  */
+   Py_None otherwise.  In each case it returns a borrowed reference.  */
 
 static PyObject *
 get_event_thread (void)
@@ -38,8 +38,6 @@ get_event_thread (void)
       PyErr_SetString (PyExc_RuntimeError, "Could not find event thread");
       return NULL;
     }
-
-  Py_INCREF (thread);
 
   return thread;
 }
