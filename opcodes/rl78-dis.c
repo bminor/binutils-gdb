@@ -155,38 +155,34 @@ print_insn_rl78 (bfd_vma addr, disassemble_info * dis)
 	  int do_cond = 0;
 	  int do_bang = 0;
 
-	  s ++;
-
-	  if (*s == 'x')
+	  while (1)
 	    {
-	      do_hex = 1;
-	      s++;
+	      s ++;
+	      switch (*s)
+		{
+		case 'x':
+		  do_hex = 1;
+		  break;
+		case '!':
+		  do_bang = 1;
+		  break;
+		case 'e':
+		  do_es = 1;
+		  break;
+		case 'a':
+		  do_addr = 1;
+		  break;
+		case 's':
+		  do_sfr = 1;
+		  break;
+		case 'c':
+		  do_cond = 1;
+		  break;
+		default:
+		  goto no_more_modifiers;
+		}
 	    }
-	  if (*s == '!')
-	    {
-	      do_bang = 1;
-	      s++;
-	    }
-	  if (*s == 'e')
-	    {
-	      do_es = 1;
-	      s++;
-	    }
-	  if (*s == 'a')
-	    {
-	      do_addr = 1;
-	      s++;
-	    }
-	  if (*s == 's')
-	    {
-	      do_sfr = 1;
-	      s++;
-	    }
-	  if (*s == 'c')
-	    {
-	      do_cond = 1;
-	      s++;
-	    }
+	no_more_modifiers:;
 
 	  switch (*s)
 	    {
@@ -222,98 +218,103 @@ print_insn_rl78 (bfd_vma addr, disassemble_info * dis)
 	    case '0':
 	    case '1':
 	      oper = opcode.op + *s - '0';
-	      if (do_bang)
-		PC ('!');
+	    if (do_es)
+	      {
+		if (oper->use_es && indirect_type (oper->type))
+		  PR (PS, "es:");
+	      }
 
-	      if (do_es)
-		{
-		  if (oper->use_es && indirect_type (oper->type))
-		    PR (PS, "es:");
-		}
+	    if (do_bang)
+	      PC ('!');
 
-	      else if (do_cond)
-		{
-		  PR (PS, "%s", condition_names[oper->condition]);
-		}
+	    if (do_cond)
+	      {
+		PR (PS, "%s", condition_names[oper->condition]);
+		break;
+	      }
 
-	      else
-		switch (oper->type)
+	    switch (oper->type)
+	      {
+	      case RL78_Operand_Immediate:
+		if (do_addr)
+		  dis->print_address_func (oper->addend, dis);
+		else if (do_hex
+			 || oper->addend > 999
+			 || oper->addend < -999)
+		  PR (PS, "%#x", oper->addend);
+		else
+		  PR (PS, "%d", oper->addend);
+		break;
+
+	      case RL78_Operand_Register:
+		PR (PS, "%s", register_names[oper->reg]);
+		break;
+
+	      case RL78_Operand_Bit:
+		PR (PS, "%s.%d", register_names[oper->reg], oper->bit_number);
+		break;
+
+	      case RL78_Operand_Indirect:
+	      case RL78_Operand_BitIndirect:
+		switch (oper->reg)
 		  {
-		  case RL78_Operand_Immediate:
-		    if (do_addr)
-		      dis->print_address_func (oper->addend, dis);
-		    else if (do_hex
-			     || oper->addend > 999
-			     || oper->addend < -999)
+		  case RL78_Reg_None:
+		    if (oper->addend == 0xffffa && do_sfr && opcode.size == RL78_Byte)
+		      PR (PS, "psw");
+		    else if (oper->addend == 0xffff8 && do_sfr && opcode.size == RL78_Word)
+		      PR (PS, "sp");
+		    else if (oper->addend >= 0xffe20)
 		      PR (PS, "%#x", oper->addend);
 		    else
-		      PR (PS, "%d", oper->addend);
-		    break;
-
-		  case RL78_Operand_Register:
-		    PR (PS, "%s", register_names[oper->reg]);
-		    break;
-
-		  case RL78_Operand_Bit:
-		    PR (PS, "%s.%d", register_names[oper->reg], oper->bit_number);
-		    break;
-
-		  case RL78_Operand_Indirect:
-		  case RL78_Operand_BitIndirect:
-		    switch (oper->reg)
 		      {
-		      case RL78_Reg_None:
-			if (oper->addend == 0xffffa && do_sfr && opcode.size == RL78_Byte)
-			  PR (PS, "psw");
-			else if (oper->addend == 0xffff8 && do_sfr && opcode.size == RL78_Word)
-			  PR (PS, "sp");
-			else if (oper->addend >= 0xffe20)
-			  PR (PS, "%#x", oper->addend);
-			else
-			  dis->print_address_func (oper->addend, dis);
-			break;
-
-		      case RL78_Reg_B:
-		      case RL78_Reg_C:
-		      case RL78_Reg_BC:
-			PR (PS, "%d[%s]", oper->addend, register_names[oper->reg]);
-			break;
-
-		      default:
-			PR (PS, "[%s", register_names[oper->reg]);
-			if (oper->reg2 != RL78_Reg_None)
-			  PR (PS, "+%s", register_names[oper->reg2]);
-			if (oper->addend)
-			  PR (PS, "+%d", oper->addend);
-			PC (']');
-			break;
-		      
+			int faddr = oper->addend;
+			if (do_es && ! oper->use_es)
+			  faddr += 0xf0000;
+			dis->print_address_func (faddr, dis);
 		      }
-		    if (oper->type == RL78_Operand_BitIndirect)
-		      PR (PS, ".%d", oper->bit_number);
 		    break;
 
-#if DEBUG_SEMANTICS
-		    /* Shouldn't happen - push and pop don't print
-		       [SP] directly.  But we *do* use them for
-		       semantic debugging.  */
-		  case RL78_Operand_PostInc:
-		    PR (PS, "[%s++]", register_names[oper->reg]);
+		  case RL78_Reg_B:
+		  case RL78_Reg_C:
+		  case RL78_Reg_BC:
+		    PR (PS, "%d[%s]", oper->addend, register_names[oper->reg]);
 		    break;
-		  case RL78_Operand_PreDec:
-		    PR (PS, "[--%s]", register_names[oper->reg]);
-		    break;
-#endif
 
 		  default:
-		    /* If we ever print this, that means the
-		       programmer tried to print an operand with a
-		       type we don't expect.  Print the line and
-		       operand number from rl78-decode.opc for
-		       them.  */
-		    PR (PS, "???%d.%d", opcode.lineno, *s - '0');
+		    PR (PS, "[%s", register_names[oper->reg]);
+		    if (oper->reg2 != RL78_Reg_None)
+		      PR (PS, "+%s", register_names[oper->reg2]);
+		    if (oper->addend)
+		      PR (PS, "+%d", oper->addend);
+		    PC (']');
 		    break;
+		      
 		  }
+		if (oper->type == RL78_Operand_BitIndirect)
+		  PR (PS, ".%d", oper->bit_number);
+		break;
+
+#if DEBUG_SEMANTICS
+		/* Shouldn't happen - push and pop don't print
+		   [SP] directly.  But we *do* use them for
+		   semantic debugging.  */
+	      case RL78_Operand_PostInc:
+		PR (PS, "[%s++]", register_names[oper->reg]);
+		break;
+	      case RL78_Operand_PreDec:
+		PR (PS, "[--%s]", register_names[oper->reg]);
+		break;
+#endif
+
+	      default:
+		/* If we ever print this, that means the
+		   programmer tried to print an operand with a
+		   type we don't expect.  Print the line and
+		   operand number from rl78-decode.opc for
+		   them.  */
+		PR (PS, "???%d.%d", opcode.lineno, *s - '0');
+		break;
+	      }
 	    }
 	}
     }

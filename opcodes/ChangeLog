@@ -1,3 +1,13 @@
+2012-08-15  DJ Delorie  <dj@redhat.com>
+
+	* rl78-decode.opc (rl78_decode_opcode): Merge %e and %[01]
+	operands, so that data addresses can be corrected when not
+	ES-overridden.
+	* rl78-decode.c: Regenerate.
+	* rl78-dis.c (print_insn_rl78): Make order of modifiers
+	irrelevent.  When the 'e' specifier is used on an operand and no
+	ES prefix is provided, adjust address to make it absolute.
+
 2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c <RSQ, RTQ>: Use PPC_OPERAND_GPR.
