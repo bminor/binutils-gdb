@@ -3006,7 +3006,7 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 	  case elfcpp::R_X86_64_TPOFF32:     // Local-exec
 	    layout->set_has_static_tls();
 	    if (parameters->options().shared())
-	      unsupported_reloc_local(object, r_type);
+	      unsupported_reloc_global(object, r_type, gsym);
 	    break;
 
 	  default:

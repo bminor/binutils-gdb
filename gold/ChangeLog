@@ -1,3 +1,8 @@
+2012-08-14  Ian Lance Taylor  <iant@google.com>
+
+	* x86_64.cc (Target_x86_64::Scan::global): Fix erroneous call to
+	unsupported_relocal_local to call unsupported_reloc_global.
+
 2012-08-14  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/14265
