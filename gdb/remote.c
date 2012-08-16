@@ -6744,7 +6744,7 @@ remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 /* Remote notification handler.  */
 
 static void
-handle_notification (char *buf, size_t length)
+handle_notification (char *buf)
 {
   if (strncmp (buf, "Stop:", 5) == 0)
     {
@@ -7156,7 +7156,7 @@ putpkt_binary (char *buf, int cnt)
 					    str);
 			do_cleanups (old_chain);
 		      }
-		    handle_notification (rs->buf, val);
+		    handle_notification (rs->buf);
 		    /* We're in sync now, rewait for the ack.  */
 		    tcount = 0;
 		  }
@@ -7534,7 +7534,7 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 	      do_cleanups (old_chain);
 	    }
 
-	  handle_notification (*buf, val);
+	  handle_notification (*buf);
 
 	  /* Notifications require no acknowledgement.  */
 

@@ -1,3 +1,8 @@
+2012-08-16  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (handle_notification): Remove parameter 'length'.
+	(putpkt_binary, getpkt_or_notif_sane_1): Caller update.
+
 2012-08-15  Keith Seitz  <keiths@redhat.com>
 
 	* gdbtypes.c (opaque_type_resolution): Make static.
