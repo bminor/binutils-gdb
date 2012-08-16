@@ -2,6 +2,8 @@
 
 Changes in 2.23:
 
+* Add support for 64-bit ARM architecture: AArch64
+
 * Added SORT_NONE to the linker script language to disable section sorting.
 
 * Add a linker-provided symbol when producing ELF output, '__ehdr_start'

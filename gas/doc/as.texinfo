@@ -249,6 +249,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c
 @c Target dependent options are listed below.  Keep the list sorted.
 @c Add an empty line for separation.
+@ifset AARCH64
+
+@emph{Target AArch64 options:}
+   [@b{-EB}|@b{-EL}]
+@end ifset
 @ifset ALPHA
 
 @emph{Target Alpha options:}
@@ -732,6 +737,25 @@ Standard input, or source files to assemble.
 
 @end table
 @c man end
+
+@ifset AARCH64
+
+@ifclear man
+@xref{AArch64 Options}, for the options available when @value{AS} is configured
+for the 64-bit mode of the ARM Architecture (AArch64).
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for the
+64-bit mode of the ARM Architecture (AArch64).
+@c man end
+@c man begin INCLUDE
+@include c-aarch64.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
 
 @ifset ALPHA
 
@@ -6914,6 +6938,9 @@ include details on any machine's instruction set.  For details on that
 subject, see the hardware manufacturer's manual.
 
 @menu
+@ifset AARCH64
+* AArch64-Dependent::		AArch64 Dependent Features
+@end ifset
 @ifset ALPHA
 * Alpha-Dependent::		Alpha Dependent Features
 @end ifset
@@ -7071,6 +7098,10 @@ subject, see the hardware manufacturer's manual.
 @c major node below.  Node defaulting in makeinfo requires adjacency of
 @c node and sectioning commands; hence the repetition of @chapter BLAH
 @c in both conditional blocks.
+
+@ifset AARCH64
+@include c-aarch64.texi
+@end ifset
 
 @ifset ALPHA
 @include c-alpha.texi

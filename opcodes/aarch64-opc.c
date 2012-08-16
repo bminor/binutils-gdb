@@ -206,7 +206,7 @@ aarch64_get_operand_class (enum aarch64_opnd type)
   return aarch64_operands[type].op_class;
 }
 
-const char *
+const char*
 aarch64_get_operand_name (enum aarch64_opnd type)
 {
   return aarch64_operands[type].name;
@@ -214,7 +214,7 @@ aarch64_get_operand_name (enum aarch64_opnd type)
 
 /* Get operand description string.
    This is usually for the diagnosis purpose.  */
-const char *
+const char*
 aarch64_get_operand_desc (enum aarch64_opnd type)
 {
   return aarch64_operands[type].desc;
@@ -241,14 +241,14 @@ const aarch64_cond aarch64_conds[16] =
   {{"nv"}, 0xf},
 };
 
-const aarch64_cond *
+const aarch64_cond*
 get_cond_from_value (aarch64_insn value)
 {
   assert (value < 16);
   return &aarch64_conds[(unsigned int) value];
 }
 
-const aarch64_cond *
+const aarch64_cond*
 get_inverted_cond (const aarch64_cond *cond)
 {
   return &aarch64_conds[cond->value ^ 0x1];
@@ -1061,7 +1061,7 @@ aarch64_logical_immediate_p (uint64_t value, int is32, aarch64_insn *encoding)
   if (is32)
     {
       /* Allow all zeros or all ones in top 32-bits, so that
-	 constant expressions like ~1 are permitted.  */
+	 constant expressions like ~1 are permitted. */
       if (value >> 32 != 0 && value >> 32 != 0xffffffff)
 	return 0xffffffff;
       /* Replicate the 32 lower bits to the 32 upper bits.  */
@@ -1578,7 +1578,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		case OP_MOV_IMM_WIDEN:
 		  imm = ~imm;
-		  /* Fall through...  */
+		  /* Fall through... */
 		case OP_MOV_IMM_WIDE:
 		  if (!aarch64_wide_constant_p (imm, is32, NULL))
 		    {

@@ -133,7 +133,9 @@
 
   elf64_aarch64_final_link_relocate ()
 
-  Fixup the R_AARCH64_TLSGD_{ADR_PREL21, ADD_LO12_NC} relocations.  */
+  Fixup the R_AARCH64_TLSGD_{ADR_PREL21, ADD_LO12_NC} relocations.
+
+ */
 
 #include "sysdep.h"
 #include "bfd.h"
@@ -208,7 +210,7 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
 #define PLT_SMALL_ENTRY_SIZE            (16)
 #define PLT_TLSDESC_ENTRY_SIZE          (32)
 
-/* Take the PAGE component of an address or offset.  */
+/* Take the PAGE component of an address or offset. */
 #define PG(x) ((x) & ~ 0xfff)
 #define PG_OFFSET(x) ((x) & 0xfff)
 
@@ -224,8 +226,7 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
    these PLT entries. Note that the dynamic linker gets &PLTGOT[2]
    in x16 and needs to work out PLTGOT[1] by using an address of
    [x16,#-8].  */
-static const bfd_byte elf64_aarch64_small_plt0_entry[PLT_ENTRY_SIZE] =
-{
+static const bfd_byte elf64_aarch64_small_plt0_entry[PLT_ENTRY_SIZE] = {
   0xf0, 0x7b, 0xbf, 0xa9,	/* stp x16, x30, [sp, #-16]!  */
   0x10, 0x00, 0x00, 0x90,	/* adrp x16, (GOT+16)  */
   0x11, 0x0A, 0x40, 0xf9,	/* ldr x17, [x16, #PLT_GOT+0x10]  */
@@ -239,8 +240,7 @@ static const bfd_byte elf64_aarch64_small_plt0_entry[PLT_ENTRY_SIZE] =
 /* Per function entry in a procedure linkage table looks like this
    if the distance between the PLTGOT and the PLT is < 4GB use
    these PLT entries.  */
-static const bfd_byte elf64_aarch64_small_plt_entry[PLT_SMALL_ENTRY_SIZE] =
-{
+static const bfd_byte elf64_aarch64_small_plt_entry[PLT_SMALL_ENTRY_SIZE] = {
   0x10, 0x00, 0x00, 0x90,	/* adrp x16, PLTGOT + n * 8  */
   0x11, 0x02, 0x40, 0xf9,	/* ldr x17, [x16, PLTGOT + n * 8] */
   0x10, 0x02, 0x00, 0x91,	/* add x16, x16, :lo12:PLTGOT + n * 8  */
@@ -248,8 +248,7 @@ static const bfd_byte elf64_aarch64_small_plt_entry[PLT_SMALL_ENTRY_SIZE] =
 };
 
 static const bfd_byte
-elf64_aarch64_tlsdesc_small_plt_entry[PLT_TLSDESC_ENTRY_SIZE] =
-{
+  elf64_aarch64_tlsdesc_small_plt_entry[PLT_TLSDESC_ENTRY_SIZE] = {
   0xe2, 0x0f, 0xbf, 0xa9,	/* stp x2, x3, [sp, #-16]! */
   0x02, 0x00, 0x00, 0x90,	/* adrp x2, 0 */
   0x03, 0x00, 0x00, 0x90,	/* adrp x3, 0 */
@@ -284,8 +283,8 @@ static reloc_howto_type elf64_aarch64_howto_none =
 	 0,			/* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
-static reloc_howto_type elf64_aarch64_howto_dynrelocs[] =
-{
+static reloc_howto_type elf64_aarch64_howto_dynrelocs[] = {
+
   HOWTO (R_AARCH64_COPY,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -404,9 +403,8 @@ static reloc_howto_type elf64_aarch64_howto_dynrelocs[] =
    R_AARCH64_PREL64 as an index into this, and find the R_AARCH64_PREL64 HOWTO
    in that slot.  */
 
-static reloc_howto_type elf64_aarch64_howto_table[] =
-{
-  /* Basic data relocations.  */
+static reloc_howto_type elf64_aarch64_howto_table[] = {
+  /* Basic data relocations. */
 
   HOWTO (R_AARCH64_NULL,	/* type */
 	 0,			/* rightshift */
@@ -513,7 +511,7 @@ static reloc_howto_type elf64_aarch64_howto_table[] =
 	 TRUE),			/* pcrel_offset */
 
   /* Group relocations to create a 16, 32, 48 or 64 bit
-     unsigned data or abs address inline.  */
+     unsigned data or abs address inline. */
 
   /* MOVZ:   ((S+A) >>  0) & 0xffff */
   HOWTO (R_AARCH64_MOVW_UABS_G0,	/* type */
@@ -622,7 +620,7 @@ static reloc_howto_type elf64_aarch64_howto_table[] =
 
   /* Group relocations to create high part of a 16, 32, 48 or 64 bit
      signed data or abs address inline. Will change instruction
-     to MOVN or MOVZ depending on sign of calculated value.  */
+     to MOVN or MOVZ depending on sign of calculated value. */
 
   /* MOV[ZN]:   ((S+A) >>  0) & 0xffff */
   HOWTO (R_AARCH64_MOVW_SABS_G0,	/* type */
@@ -670,7 +668,7 @@ static reloc_howto_type elf64_aarch64_howto_table[] =
 	 FALSE),		/* pcrel_offset */
 
 /* Relocations to generate 19, 21 and 33 bit PC-relative load/store
-   addresses: PG(x) is (x & ~0xfff).  */
+   addresses: PG(x) is (x & ~0xfff). */
 
   /* LD-lit: ((S+A-P) >> 2) & 0x7ffff */
   HOWTO (R_AARCH64_LD_PREL_LO19,	/* type */
@@ -762,7 +760,7 @@ static reloc_howto_type elf64_aarch64_howto_table[] =
 	 0xfff,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* Relocations for control-flow instructions.  */
+  /* Relocations for control-flow instructions. */
 
   /* TBZ/NZ: ((S+A-P) >> 2) & 0x3fff */
   HOWTO (R_AARCH64_TSTBR14,	/* type */
@@ -943,8 +941,7 @@ static reloc_howto_type elf64_aarch64_howto_table[] =
 	 FALSE)			/* pcrel_offset */
 };
 
-static reloc_howto_type elf64_aarch64_tls_howto_table[] =
-{
+static reloc_howto_type elf64_aarch64_tls_howto_table[] = {
   EMPTY_HOWTO (512),
 
   /* Get to the page for the GOT entry for the symbol
@@ -1186,8 +1183,7 @@ static reloc_howto_type elf64_aarch64_tls_howto_table[] =
 	 FALSE),		/* pcrel_offset */
 };
 
-static reloc_howto_type elf64_aarch64_tlsdesc_howto_table[] =
-{
+static reloc_howto_type elf64_aarch64_tlsdesc_howto_table[] = {
   HOWTO (R_AARCH64_TLSDESC_LD64_PREL19,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1376,8 +1372,7 @@ struct elf64_aarch64_reloc_map
 
 /* All entries in this list must also be present in
    elf64_aarch64_howto_table.  */
-static const struct elf64_aarch64_reloc_map elf64_aarch64_reloc_map[] =
-{
+static const struct elf64_aarch64_reloc_map elf64_aarch64_reloc_map[] = {
   {BFD_RELOC_NONE, R_AARCH64_NONE},
 
   /* Basic data relocations.  */
@@ -1420,7 +1415,7 @@ static const struct elf64_aarch64_reloc_map elf64_aarch64_reloc_map[] =
   {BFD_RELOC_AARCH64_LDST64_LO12, R_AARCH64_LDST64_ABS_LO12_NC},
   {BFD_RELOC_AARCH64_LDST128_LO12, R_AARCH64_LDST128_ABS_LO12_NC},
 
-  /* Relocations for control-flow instructions.  */
+  /* Relocations for control-flow instructions. */
   {BFD_RELOC_AARCH64_TSTBR14, R_AARCH64_TSTBR14},
   {BFD_RELOC_AARCH64_BRANCH19, R_AARCH64_CONDBR19},
   {BFD_RELOC_AARCH64_JUMP26, R_AARCH64_JUMP26},
@@ -1430,7 +1425,7 @@ static const struct elf64_aarch64_reloc_map elf64_aarch64_reloc_map[] =
   {BFD_RELOC_AARCH64_ADR_GOT_PAGE, R_AARCH64_ADR_GOT_PAGE},
   {BFD_RELOC_AARCH64_LD64_GOT_LO12_NC, R_AARCH64_LD64_GOT_LO12_NC},
 
-  /* Relocations for TLS.  */
+  /* Relocations for TLS. */
   {BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21, R_AARCH64_TLSGD_ADR_PAGE21},
   {BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC, R_AARCH64_TLSGD_ADD_LO12_NC},
   {BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1,
@@ -1539,8 +1534,7 @@ aarch64_valid_branch_p (bfd_vma value, bfd_vma place)
 	  && offset >= AARCH64_MAX_BWD_BRANCH_OFFSET);
 }
 
-static const uint32_t aarch64_adrp_branch_stub [] =
-{
+static const uint32_t aarch64_adrp_branch_stub [] = {
   0x90000010,			/*	adrp	ip0, X */
 				/*		R_AARCH64_ADR_HI21_PCREL(X) */
   0x91000210,			/*	add	ip0, ip0, :lo12:X */
@@ -1548,8 +1542,7 @@ static const uint32_t aarch64_adrp_branch_stub [] =
   0xd61f0200,			/*	br	ip0 */
 };
 
-static const uint32_t aarch64_long_branch_stub[] =
-{
+static const uint32_t aarch64_long_branch_stub[] = {
   0x58000090,			/*	ldr   ip0, 1f */
   0x10000011,			/*	adr   ip1, #0 */
   0x8b110210,			/*	add   ip0, ip0, ip1 */
@@ -1575,6 +1568,7 @@ struct elf64_aarch64_stub_hash_entry
 {
   /* Base hash table entry structure.  */
   struct bfd_hash_entry root;
+
 
   /* The stub section.  */
   asection *stub_sec;
@@ -2747,7 +2741,7 @@ elf64_aarch64_size_stubs (bfd *output_bfd,
   if (stub_group_size == 1)
     {
       /* Default values.  */
-      /* Aarch64 branch range is +-128MB. The value used is 1MB less.  */
+      /* Aarch64 branch range is +-128MB. The value used is 1MB less. */
       stub_group_size = 127 * 1024 * 1024;
     }
 
@@ -2864,7 +2858,7 @@ elf64_aarch64_size_stubs (bfd *output_bfd,
 		      sym_sec = hdr->bfd_section;
 		      if (!sym_sec)
 			/* This is an undefined symbol.  It can never
-			   be resolved.  */
+			   be resolved. */
 			continue;
 
 		      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
@@ -3244,14 +3238,14 @@ reencode_ld_lit_ofs_19 (uint32_t insn, uint32_t ofs)
   return (insn & ~(MASK (19) << 5)) | ((ofs & MASK (19)) << 5);
 }
 
-/* Encode the 14-bit offset of test & branch.  */
+/* Encode the 14-bit offset of test & branch. */
 static inline uint32_t
 reencode_tst_branch_ofs_14 (uint32_t insn, uint32_t ofs)
 {
   return (insn & ~(MASK (14) << 5)) | ((ofs & MASK (14)) << 5);
 }
 
-/* Reencode the imm field of move wide.  */
+/* Reencode the imm field of move wide. */
 static inline uint32_t
 reencode_movw_imm (uint32_t insn, uint32_t imm)
 {
@@ -3273,7 +3267,7 @@ reencode_ldst_pos_imm (uint32_t insn, uint32_t imm)
   return (insn & ~(MASK (12) << 10)) | ((imm & MASK (12)) << 10);
 }
 
-/* Reencode the imm field of add immediate.  */
+/* Reencode the imm field of add immediate. */
 static inline uint32_t
 reencode_add_imm (uint32_t insn, uint32_t imm)
 {
@@ -3287,7 +3281,7 @@ reencode_movzn_to_movz (uint32_t opcode)
   return opcode | (1 << 30);
 }
 
-/* Reencode mov[zn] to movn.  */
+/* Reencode mov[zn] to movn. */
 static inline uint32_t
 reencode_movzn_to_movn (uint32_t opcode)
 {
@@ -3405,14 +3399,14 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
 	return bfd_reloc_overflow;
       /* Used for ldr*|str* rt, [rn, #uimm12] to provide the low order
          12 bits of the page offset following R_AARCH64_ADR_PREL_PG_HI21
-         which computes the (pc-relative) page base.  */
+         which computes the (pc-relative) page base. */
       contents = reencode_ldst_pos_imm (contents, addend);
       break;
 
       /* Group relocations to create high bits of a 16, 32, 48 or 64
          bit signed data or abs address inline. Will change
          instruction to MOVN or MOVZ depending on sign of calculated
-         value.  */
+         value. */
 
     case R_AARCH64_TLSLE_MOVW_TPREL_G2:
     case R_AARCH64_TLSLE_MOVW_TPREL_G1:
@@ -3422,7 +3416,7 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
     case R_AARCH64_MOVW_SABS_G0:
     case R_AARCH64_MOVW_SABS_G1:
     case R_AARCH64_MOVW_SABS_G2:
-      /* NOTE: We can only come here with movz or movn.  */
+      /* NOTE: We can only come here with movz or movn. */
       if (addend < 0)
 	{
 	  /* Force use of MOVN.  */
@@ -3437,7 +3431,7 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
       /* fall through */
 
       /* Group relocations to create a 16, 32, 48 or 64 bit unsigned
-         data or abs address inline.  */
+         data or abs address inline. */
 
     case R_AARCH64_MOVW_UABS_G0:
     case R_AARCH64_MOVW_UABS_G0_NC:
@@ -3641,7 +3635,7 @@ aarch64_tls_transition (bfd *input_bfd,
 }
 
 /* Return the base VMA address which should be subtracted from real addresses
-   when resolving R_AARCH64_TLS_DTPREL64 relocation.  */
+   when resolving R_AARCH64_TLS_DTPREL64 relocation. */
 
 static bfd_vma
 dtpoff_base (struct bfd_link_info *info)
@@ -3807,7 +3801,7 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
     + input_section->output_offset + rel->r_offset;
 
   /* Get addend, accumulating the addend for consecutive relocs
-     which refer to the same offset.  */
+     which refer to the same offset. */
   signed_addend = saved_addend ? *saved_addend : 0;
   signed_addend += rel->r_addend;
 
@@ -3887,7 +3881,7 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    {
 	      /* Sanity to check that we have previously allocated
 		 sufficient space in the relocation section for the
-		 number of relocations we actually want to emit.  */
+		 number of relocations we actually want to emit. */
 	      abort ();
 	    }
 
@@ -3915,7 +3909,7 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
 	/* A call to an undefined weak symbol is converted to a jump to
 	   the next instruction unless a PLT entry will be created.
 	   The jump to the next instruction is optimized as a NOP.
-	   Do the same for local undefined symbols.  */
+	   Do the same for local undefined symbols. */
 	if (weak_undef_p && ! via_plt_p)
 	  {
 	    bfd_putl32 (INSN_NOP, hit_data);
@@ -5072,9 +5066,9 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      }
 	    else
 	      {
-		/* Track dynamic relocs needed for local syms too.
-		   We really need local syms available to do this
-		   easily.  Oh well.  */
+		/*   Track dynamic relocs needed for local syms too.
+		     We really need local syms available to do this
+		     easily.  Oh well. */
 
 		asection *s;
 		void **vpp;
@@ -6856,8 +6850,7 @@ elf64_aarch64_plt_sym_val (bfd_vma i, const asection *plt,
 /* We use this so we can override certain functions
    (though currently we don't).  */
 
-const struct elf_size_info elf64_aarch64_size_info =
-{
+const struct elf_size_info elf64_aarch64_size_info = {
   sizeof (Elf64_External_Ehdr),
   sizeof (Elf64_External_Phdr),
   sizeof (Elf64_External_Shdr),
@@ -6866,10 +6859,10 @@ const struct elf_size_info elf64_aarch64_size_info =
   sizeof (Elf64_External_Sym),
   sizeof (Elf64_External_Dyn),
   sizeof (Elf_External_Note),
-  4,				/* Hash table entry size.  */
-  1,				/* Internal relocs per external relocs.  */
-  64,				/* Arch size.  */
-  3,				/* Log_file_align.  */
+  4,				/* hash-table entry size.  */
+  1,				/* internal relocs per external relocs.  */
+  64,				/* arch_size.  */
+  3,				/* log_file_align.  */
   ELFCLASS64, EV_CURRENT,
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,

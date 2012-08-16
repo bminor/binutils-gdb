@@ -351,7 +351,7 @@ divide_table_1_finish:
 
 /* Call divide_table_1 to divide the all the opcodes and thus create the
    decoding decision tree.  */
-static struct bittree *
+static struct bittree*
 divide_table (void)
 {
   struct bittree *bittree = new_bittree_node ();
@@ -361,7 +361,7 @@ divide_table (void)
 
 /* Read in all of the tables, create the decoding decision tree and return
    the tree root.  */
-static struct bittree *
+static struct bittree*
 initialize_decoder_tree (void)
 {
   int i;

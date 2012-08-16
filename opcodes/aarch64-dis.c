@@ -135,7 +135,6 @@ extract_fields (aarch64_insn code, aarch64_insn mask, ...)
   const aarch64_field *field;
   enum aarch64_field_kind kind;
   va_list va;
-
   va_start (va, mask);
   num = va_arg (va, uint32_t);
   assert (num <= 5);
@@ -155,7 +154,6 @@ static inline int32_t
 sign_extend (aarch64_insn value, unsigned i)
 {
   uint32_t ret = value;
-
   assert (i < 32);
   if ((value >> i) & 0x1)
     {
@@ -183,7 +181,6 @@ static inline enum aarch64_opnd_qualifier
 get_vreg_qualifier_from_value (aarch64_insn value)
 {
   enum aarch64_opnd_qualifier qualifier = AARCH64_OPND_QLF_V_8B + value;
-
   assert (value <= 0x8
 	  && aarch64_get_qualifier_standard_value (qualifier) == value);
   return qualifier;
@@ -194,7 +191,6 @@ static inline enum aarch64_opnd_qualifier
 get_sreg_qualifier_from_value (aarch64_insn value)
 {
   enum aarch64_opnd_qualifier qualifier = AARCH64_OPND_QLF_S_B + value;
-
   assert (value <= 0x4
 	  && aarch64_get_qualifier_standard_value (qualifier) == value);
   return qualifier;
@@ -257,7 +253,7 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
   info->reglane.regno = extract_field (self->fields[0], code,
 				       inst->opcode->mask);
 
-  /* Index and/or type.  */
+  /* index and/or type */
   if (inst->opcode->iclass == asisdone
     || inst->opcode->iclass == asimdins)
     {
@@ -294,7 +290,7 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
     }
   else
     {
-      /* Index only for e.g. SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>]
+      /* index only for e.g. SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>]
          or SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>].  */
 
       /* Need information in other operand(s) to help decoding.  */
@@ -719,7 +715,7 @@ aarch64_ext_limm (const aarch64_operand *self ATTRIBUTE_UNUSED,
     return 0;
 
   /* The immediate value is S+1 bits to 1, left rotated by SIMDsize - R
-     (in other words, right rotated by R), then replicated.  */
+     (in other words, right rotated by R), then replicated. */
   if (N != 0)
     {
       simd_size = 64;
@@ -2074,7 +2070,7 @@ print_mnemonic_name (const aarch64_inst *inst, struct disassemble_info *info)
 	 suffix.  */
       char name[8], *ptr;
       size_t len;
-
+      
       ptr = strchr (inst->opcode->name, '.');
       assert (ptr && inst->cond);
       len = ptr - inst->opcode->name;
@@ -2133,7 +2129,7 @@ print_insn_aarch64_word (bfd_vma pc,
 
   if (((word >> 21) & 0x3ff) == 1)
     {
-      /* RESERVED for ALES.  */
+      /* RESERVED for ALES. */
       assert (ret != ERR_OK);
       ret = ERR_NYI;
     }

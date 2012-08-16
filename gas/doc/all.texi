@@ -26,6 +26,7 @@
 
 @c CPUs of interest
 @c ================
+@set AARCH64
 @set ALPHA
 @set ARC
 @set ARM

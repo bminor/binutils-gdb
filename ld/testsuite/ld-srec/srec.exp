@@ -250,9 +250,12 @@ proc run_srec_test { test objs } {
 	setup_xfail "sh64*-*-*"
     }
 
-    if {[istarget arm*-*-*]} {
-        # ARM targets cannot convert format in the linker 
+    if {[istarget aarch64*-*-*]   || \
+        [istarget arm*-*-*]} {
+        # ARM targets cannot convert format in the linker
         # using the --oformat command line switch
+	setup_xfail "aarch64-*-*"
+	setup_xfail "aarch64_be-*-*"
 	setup_xfail "arm*-*-*"
     }
 
