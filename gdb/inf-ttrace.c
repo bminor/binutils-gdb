@@ -467,7 +467,11 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
   else
     {
       inferior_ptid = ptid_build (pid, lwpid, 0);
-      detach_breakpoints (fpid);
+      /* Detach any remaining breakpoints in the child.  In the case
+	 of fork events, we do not need to do this, because breakpoints
+	 should have already been removed earlier.  */
+      if (tts.tts_event == TTEVT_VFORK)
+	detach_breakpoints (fpid);
 
       target_terminal_ours ();
       fprintf_unfiltered (gdb_stdlog,
