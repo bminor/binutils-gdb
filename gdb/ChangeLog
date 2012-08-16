@@ -1,3 +1,9 @@
+2012-08-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2-frame.c (dwarf2_frame_cache): Use
+	get_frame_address_in_block instead of get_frame_pc as
+	the bound for executing the frame's FDE.
+
 2012-08-16  Yao Qi  <yao@codesourcery.com>
 
 	* gdbtypes.h (enum type_code): Define TYPE_CODE_BITSTRING -1.

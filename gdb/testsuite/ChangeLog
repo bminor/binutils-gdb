@@ -1,3 +1,7 @@
+2012-08-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/rdv_wait: New testcase.
+
 2012-08-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/attach-twice.exp: Remove excessive ps exec.

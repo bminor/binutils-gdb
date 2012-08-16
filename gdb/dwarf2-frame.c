@@ -1065,7 +1065,8 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* First decode all the insns in the CIE.  */
   execute_cfa_program (fde, fde->cie->initial_instructions,
-		       fde->cie->end, gdbarch, get_frame_pc (this_frame), fs);
+		       fde->cie->end, gdbarch,
+		       get_frame_address_in_block (this_frame), fs);
 
   /* Save the initialized register set.  */
   fs->initial = fs->regs;
@@ -1090,7 +1091,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* Then decode the insns in the FDE up to our target PC.  */
   execute_cfa_program (fde, instr, fde->end, gdbarch,
-		       get_frame_pc (this_frame), fs);
+		       get_frame_address_in_block (this_frame), fs);
 
   TRY_CATCH (ex, RETURN_MASK_ERROR)
     {
