@@ -2323,12 +2323,6 @@ evaluate_subexp_standard (struct type *expect_type,
 		  arg1 = value_subscript (arg1, value_as_long (arg2));
 		  break;
 
-		case TYPE_CODE_BITSTRING:
-		  type = language_bool_type (exp->language_defn, exp->gdbarch);
-		  arg1 = value_bitstring_subscript (type, arg1,
-						    value_as_long (arg2));
-		  break;
-
 		default:
 		  if (TYPE_NAME (type))
 		    error (_("cannot subscript something of type `%s'"),

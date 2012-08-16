@@ -409,7 +409,6 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 			       options, NULL, 0);
       break;
 
-    case TYPE_CODE_BITSTRING:
     case TYPE_CODE_SET:
       elttype = TYPE_INDEX_TYPE (type);
       CHECK_TYPEDEF (elttype);
@@ -424,13 +423,9 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  struct type *range = elttype;
 	  LONGEST low_bound, high_bound;
 	  int i;
-	  int is_bitstring = TYPE_CODE (type) == TYPE_CODE_BITSTRING;
 	  int need_comma = 0;
 
-	  if (is_bitstring)
-	    fputs_filtered ("B'", stream);
-	  else
-	    fputs_filtered ("{", stream);
+	  fputs_filtered ("{", stream);
 
 	  i = get_discrete_bounds (range, &low_bound, &high_bound);
 	maybe_bad_bstring:
@@ -450,9 +445,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 		  i = element;
 		  goto maybe_bad_bstring;
 		}
-	      if (is_bitstring)
-		fprintf_filtered (stream, "%d", element);
-	      else if (element)
+	      if (element)
 		{
 		  if (need_comma)
 		    fputs_filtered (", ", stream);
@@ -476,10 +469,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 		}
 	    }
 	done:
-	  if (is_bitstring)
-	    fputs_filtered ("'", stream);
-	  else
-	    fputs_filtered ("}", stream);
+	  fputs_filtered ("}", stream);
 	}
       break;
 

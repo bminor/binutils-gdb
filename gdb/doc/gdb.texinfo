@@ -23552,7 +23552,7 @@ language-defined string types; C strings are not represented this way.
 @findex TYPE_CODE_BITSTRING
 @findex gdb.TYPE_CODE_BITSTRING
 @item gdb.TYPE_CODE_BITSTRING
-A string of bits.
+A string of bits.  It is deprecated.
 
 @findex TYPE_CODE_ERROR
 @findex gdb.TYPE_CODE_ERROR

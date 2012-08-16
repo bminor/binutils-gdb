@@ -2034,7 +2034,6 @@ is_scalar_type (struct type *type)
     case TYPE_CODE_UNION:
     case TYPE_CODE_SET:
     case TYPE_CODE_STRING:
-    case TYPE_CODE_BITSTRING:
       return 0;
     default:
       return 1;
@@ -3074,9 +3073,6 @@ recursive_dump_type (struct type *type, int spaces)
       break;
     case TYPE_CODE_STRING:
       printf_filtered ("(TYPE_CODE_STRING)");
-      break;
-    case TYPE_CODE_BITSTRING:
-      printf_filtered ("(TYPE_CODE_BITSTRING)");
       break;
     case TYPE_CODE_ERROR:
       printf_filtered ("(TYPE_CODE_ERROR)");

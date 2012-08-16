@@ -58,7 +58,8 @@ typedef struct
 
 enum type_code
   {
-    TYPE_CODE_UNDEF,		/* Not used; catches errors */
+    TYPE_CODE_BITSTRING = -1,	/* Deprecated  */
+    TYPE_CODE_UNDEF = 0,	/* Not used; catches errors */
     TYPE_CODE_PTR,		/* Pointer type */
 
     /* Array type with lower & upper bounds.
@@ -108,10 +109,6 @@ enum type_code
        anyway) do; if we want to deal with such strings, we should use
        a new type code.  */
     TYPE_CODE_STRING,
-
-    /* String of bits; like TYPE_CODE_SET but prints differently (at
-       least for (the deleted) CHILL).  */
-    TYPE_CODE_BITSTRING,
 
     /* Unknown type.  The length field is valid if we were able to
        deduce that much about the type, or 0 if we don't even know that.  */

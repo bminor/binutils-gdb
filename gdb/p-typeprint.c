@@ -289,7 +289,6 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_STRING:
-    case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
       /* These types need no prefix.  They are listed here so that
@@ -408,7 +407,6 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_STRING:
-    case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
       /* These types do not need a suffix.  They are listed so that
@@ -790,10 +788,6 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       fputs_filtered ("set of ", stream);
       pascal_print_type (TYPE_INDEX_TYPE (type), "", stream,
 			 show - 1, level);
-      break;
-
-    case TYPE_CODE_BITSTRING:
-      fputs_filtered ("BitString", stream);
       break;
 
     case TYPE_CODE_STRING:

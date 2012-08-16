@@ -3285,7 +3285,6 @@ arm_type_align (struct type *t)
     case TYPE_CODE_FLT:
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
-    case TYPE_CODE_BITSTRING:
     case TYPE_CODE_REF:
     case TYPE_CODE_CHAR:
     case TYPE_CODE_BOOL:

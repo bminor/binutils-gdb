@@ -1,5 +1,35 @@
 2012-08-16  Yao Qi  <yao@codesourcery.com>
 
+	* gdbtypes.h (enum type_code): Define TYPE_CODE_BITSTRING -1.
+	* arm-tdep.c (arm_type_align): Remove code handling TYPE_CODE_BITSTRING.
+	* c-typeprint.c (c_type_print_varspec_prefix): Likewise.
+	(c_type_print_varspec_suffix): Likewise.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* f-typeprint.c (f_type_print_varspec_prefix): Likewise.
+	(f_type_print_varspec_suffix): Likewise.
+	* gdbtypes.c (is_scalar_type): Likewise.
+	(recursive_dump_type): Likewise.
+	* infcall.c (value_arg_coerce): Likewise.
+	* m2-valprint.c (m2_val_print): Likewise.
+	* p-typeprint.c (pascal_type_print_varspec_prefix): Likewise.
+	(pascal_type_print_varspec_suffix): Likewise.
+	(pascal_type_print_base): Likewise.
+	* p-valprint.c (pascal_val_print): Likewise.
+	(pascal_val_print): Likewise.
+	* valops.c (value_slice): Likewise.
+	* valprint.c (scalar_type_p): Likewise.
+	* valarith.c (value_bitstring_subscript): Remove.
+	(value_concat): Remove code handling TYPE_CODE_BITSTRING.
+	Remove comment on TYPE_CODE_BITSTRING.
+
+	* stabsread.c (read_type): Don't set TYPE_CODE (type) to
+	TYPE_CODE_BITSTRING.
+
+	* python/py-type.c (pyty_codes): Move ENTRY (TYPE_CODE_BITSTRING) to
+	slot 0.
+
+2012-08-16  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (trace_find_none_command): Remove.
 	(_initialize_tracepoint): Call add_alias_cmd for "tfind none".
 

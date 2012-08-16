@@ -139,7 +139,6 @@ value_ptrdiff (struct value *arg1, struct value *arg2)
 
    ARRAY may be of type TYPE_CODE_ARRAY or TYPE_CODE_STRING.  If the
    current language supports C-style arrays, it may also be TYPE_CODE_PTR.
-   To access TYPE_CODE_BITSTRING values, use value_bitstring_subscript.
 
    See comments in value_coerce_array() for rationale for reason for
    doing lower bounds adjustment here rather than there.
@@ -218,46 +217,6 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
   VALUE_REGNUM (v) = VALUE_REGNUM (array);
   VALUE_FRAME_ID (v) = VALUE_FRAME_ID (array);
   set_value_offset (v, value_offset (array) + elt_offs);
-  return v;
-}
-
-/* Return the value of BITSTRING[IDX] as (boolean) type TYPE.  */
-
-struct value *
-value_bitstring_subscript (struct type *type,
-			   struct value *bitstring, LONGEST index)
-{
-
-  struct type *bitstring_type, *range_type;
-  struct value *v;
-  int offset, byte, bit_index;
-  LONGEST lowerbound, upperbound;
-
-  bitstring_type = check_typedef (value_type (bitstring));
-  gdb_assert (TYPE_CODE (bitstring_type) == TYPE_CODE_BITSTRING);
-
-  range_type = TYPE_INDEX_TYPE (bitstring_type);
-  get_discrete_bounds (range_type, &lowerbound, &upperbound);
-  if (index < lowerbound || index > upperbound)
-    error (_("bitstring index out of range"));
-
-  index -= lowerbound;
-  offset = index / TARGET_CHAR_BIT;
-  byte = *((char *) value_contents (bitstring) + offset);
-
-  bit_index = index % TARGET_CHAR_BIT;
-  byte >>= (gdbarch_bits_big_endian (get_type_arch (bitstring_type)) ?
-	    TARGET_CHAR_BIT - 1 - bit_index : bit_index);
-
-  v = value_from_longest (type, byte & 1);
-
-  set_value_bitpos (v, bit_index);
-  set_value_bitsize (v, 1);
-  set_value_component_location (v, bitstring);
-  VALUE_FRAME_ID (v) = VALUE_FRAME_ID (bitstring);
-
-  set_value_offset (v, offset + value_offset (bitstring));
-
   return v;
 }
 
@@ -735,10 +694,9 @@ value_concat (struct value *arg1, struct value *arg2)
 	    }
 	  outval = value_string (ptr, count * inval2len, char_type);
 	}
-      else if (TYPE_CODE (type2) == TYPE_CODE_BITSTRING
-	       || TYPE_CODE (type2) == TYPE_CODE_BOOL)
+      else if (TYPE_CODE (type2) == TYPE_CODE_BOOL)
 	{
-	  error (_("unimplemented support for bitstring/boolean repeats"));
+	  error (_("unimplemented support for boolean repeats"));
 	}
       else
 	{
@@ -780,17 +738,15 @@ value_concat (struct value *arg1, struct value *arg2)
 	}
       outval = value_string (ptr, inval1len + inval2len, char_type);
     }
-  else if (TYPE_CODE (type1) == TYPE_CODE_BITSTRING
-	   || TYPE_CODE (type1) == TYPE_CODE_BOOL)
+  else if (TYPE_CODE (type1) == TYPE_CODE_BOOL)
     {
       /* We have two bitstrings to concatenate.  */
-      if (TYPE_CODE (type2) != TYPE_CODE_BITSTRING
-	  && TYPE_CODE (type2) != TYPE_CODE_BOOL)
+      if (TYPE_CODE (type2) != TYPE_CODE_BOOL)
 	{
-	  error (_("Bitstrings or booleans can only be concatenated "
+	  error (_("Booleans can only be concatenated "
 		   "with other bitstrings or booleans."));
 	}
-      error (_("unimplemented support for bitstring/boolean concatenation."));
+      error (_("unimplemented support for boolean concatenation."));
     }
   else
     {

@@ -85,6 +85,7 @@ static PyObject *typy_make_iter (PyObject *self, enum gdbpy_iter_kind kind);
 
 static struct pyty_code pyty_codes[] =
 {
+  ENTRY (TYPE_CODE_BITSTRING),
   ENTRY (TYPE_CODE_PTR),
   ENTRY (TYPE_CODE_ARRAY),
   ENTRY (TYPE_CODE_STRUCT),
@@ -98,7 +99,6 @@ static struct pyty_code pyty_codes[] =
   ENTRY (TYPE_CODE_SET),
   ENTRY (TYPE_CODE_RANGE),
   ENTRY (TYPE_CODE_STRING),
-  ENTRY (TYPE_CODE_BITSTRING),
   ENTRY (TYPE_CODE_ERROR),
   ENTRY (TYPE_CODE_METHOD),
   ENTRY (TYPE_CODE_METHODPTR),

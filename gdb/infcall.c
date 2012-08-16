@@ -213,7 +213,6 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_STRING:
-    case TYPE_CODE_BITSTRING:
     case TYPE_CODE_ERROR:
     case TYPE_CODE_MEMBERPTR:
     case TYPE_CODE_METHODPTR:

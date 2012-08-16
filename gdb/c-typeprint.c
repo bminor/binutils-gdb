@@ -322,7 +322,6 @@ c_type_print_varspec_prefix (struct type *type,
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_STRING:
-    case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_DECFLOAT:
@@ -679,7 +678,6 @@ c_type_print_varspec_suffix (struct type *type,
     case TYPE_CODE_SET:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_STRING:
-    case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_DECFLOAT:
