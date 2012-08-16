@@ -20,6 +20,7 @@
  * 
  */
 
+#include "config.h"
 #include "sis.h"
 #include "end.h"
 #include <math.h>

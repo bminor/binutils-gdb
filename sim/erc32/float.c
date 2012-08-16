@@ -32,6 +32,7 @@
  * This can also be done using ieee_flags() library routine on sun.
  */
 
+#include "config.h"
 #include "sis.h"
 
 /* Forward declarations */
