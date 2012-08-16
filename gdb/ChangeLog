@@ -1,5 +1,13 @@
 2012-08-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* ia64-hpux-nat.c (ia64_hpux_get_register_from_save_state_t):
+	New function.
+	(ia64_hpux_xfer_memory): Check if inferior_ptid is known before
+	using the regache.  Use ia64_hpux_get_register_from_save_state_t
+	to access the bsp and bspstore registers if not.
+
+2012-08-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* breakpoint.h (detach_breakpoints): pid parameter is now a ptid.
 	* breakpoint.c (detach_breakpoints): Change pid parameter into
 	a ptid.  Adjust code accordingly.
