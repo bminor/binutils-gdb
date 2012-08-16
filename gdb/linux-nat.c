@@ -1307,7 +1307,6 @@ linux_nat_iterate_watchpoint_lwps
       pid_t child_pid = GET_PID (inferior_ptid);
       ptid_t child_ptid = ptid_build (child_pid, child_pid, 0);
 
-      gdb_assert (!is_lwp (inferior_ptid));
       gdb_assert (find_lwp_pid (child_ptid) == NULL);
       child_lp = add_lwp (child_ptid);
       child_lp->stopped = 1;
@@ -2314,7 +2313,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 
 	  /* This won't actually modify the breakpoint list, but will
 	     physically remove the breakpoints from the child.  */
-	  detach_breakpoints (new_pid);
+	  detach_breakpoints (ptid_build (new_pid, new_pid, 0));
 
 	  /* Retain child fork in ptrace (stopped) state.  */
 	  if (!find_fork_pid (new_pid))

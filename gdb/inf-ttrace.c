@@ -457,7 +457,7 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
       inf->pspace = parent_inf->pspace;
       inf->aspace = parent_inf->aspace;
       copy_terminal_info (inf, parent_inf);
-      detach_breakpoints (pid);
+      detach_breakpoints (ptid_build (pid, lwpid, 0));
 
       target_terminal_ours ();
       fprintf_unfiltered (gdb_stdlog,
@@ -471,7 +471,7 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
 	 of fork events, we do not need to do this, because breakpoints
 	 should have already been removed earlier.  */
       if (tts.tts_event == TTEVT_VFORK)
-	detach_breakpoints (fpid);
+	detach_breakpoints (ptid_build (fpid, flwpid, 0));
 
       target_terminal_ours ();
       fprintf_unfiltered (gdb_stdlog,

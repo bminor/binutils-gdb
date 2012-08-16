@@ -1,5 +1,19 @@
 2012-08-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* breakpoint.h (detach_breakpoints): pid parameter is now a ptid.
+	* breakpoint.c (detach_breakpoints): Change pid parameter into
+	a ptid.  Adjust code accordingly.
+	* infrun.c (handle_inferior_event): Delete variable child_pid.
+	Update call to detach_breakpoints to pass the child ptid for
+	fork events.
+	* linux-nat.c (linux_nat_iterate_watchpoint_lwps): Remove
+	assert that inferior_ptid's lwp is zero.
+	(linux_handle_extended_wait): Update call to detach_breakpoints.
+	* inf-ttrace.c (inf_ttrace_follow_fork): Update call to
+	detach_breakpoints.
+
+2012-08-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* inf-ttrace.c (inf_ttrace_follow_fork): When following the
 	parent, only call detach_breakpoints if tts.tts_event ==
 	TTEVT_VFORK.

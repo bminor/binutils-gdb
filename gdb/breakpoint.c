@@ -3500,18 +3500,18 @@ update_breakpoints_after_exec (void)
 }
 
 int
-detach_breakpoints (int pid)
+detach_breakpoints (ptid_t ptid)
 {
   struct bp_location *bl, **blp_tmp;
   int val = 0;
   struct cleanup *old_chain = save_inferior_ptid ();
   struct inferior *inf = current_inferior ();
 
-  if (pid == PIDGET (inferior_ptid))
+  if (PIDGET (ptid) == PIDGET (inferior_ptid))
     error (_("Cannot detach breakpoints of inferior_ptid"));
 
   /* Set inferior_ptid; remove_breakpoint_1 uses this global.  */
-  inferior_ptid = pid_to_ptid (pid);
+  inferior_ptid = ptid;
   ALL_BP_LOCATIONS (bl, blp_tmp)
   {
     if (bl->pspace != inf->pspace)

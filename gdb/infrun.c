@@ -3497,11 +3497,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	 vfork follow are detached.  */
       if (ecs->ws.kind != TARGET_WAITKIND_VFORKED)
 	{
-	  int child_pid = ptid_get_pid (ecs->ws.value.related_pid);
-
 	  /* This won't actually modify the breakpoint list, but will
 	     physically remove the breakpoints from the child.  */
-	  detach_breakpoints (child_pid);
+	  detach_breakpoints (ecs->ws.value.related_pid);
 	}
 
       if (singlestep_breakpoints_inserted_p)
