@@ -1,3 +1,14 @@
+2012-08-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14481
+	* Makefile.am (BFDTEST1_PROG): New.
+	(TEST_PROGS): Likewise.
+	(bfdtest1_DEPENDENCIES): Likewise.
+	(noinst_PROGRAMS): Add $(TEST_PROGS).
+	* Makefile.in: Regenerated.
+
+	* bfdtest1.c: New file.
+
 2012-08-13  Ian Bolton  <ian.bolton@arm.com>
             Laurent Desnogues  <laurent.desnogues@arm.com>
             Jim MacArthur  <jim.macarthur@arm.com>

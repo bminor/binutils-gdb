@@ -27,6 +27,8 @@ if ![is_remote host] {
     }
 }
 
+set bfdtest1 [findfile $base_dir/bfdtest1]
+
 # send_user "Version [binutil_version $AR]"
 
 # Test long file name support
@@ -34,6 +36,7 @@ if ![is_remote host] {
 proc long_filenames { } {
     global AR
     global host_triplet
+    global bfdtest1
 
     set testname "ar long file names"
 
@@ -121,6 +124,14 @@ proc long_filenames { } {
     if ![string match "" $exec_output] {
 	verbose -log $exec_output
 	fail $testname
+	return
+    }
+
+    verbose -log "$bfdtest1 $dest"
+    set exec_output [binutils_run $bfdtest1 "$dest"]
+    if ![string match "" $exec_output] {
+	verbose -log $exec_output
+	fail "$testname (bfdtest1)"
 	return
     }
 
@@ -224,6 +235,7 @@ proc thin_archive { } {
     global NM
     global srcdir
     global subdir
+    global bfdtest1
 
     set testname "ar thin archive"
 
@@ -249,6 +261,14 @@ proc thin_archive { } {
 	return
     }
 
+    verbose -log "$bfdtest1 $archive"
+    set exec_output [binutils_run $bfdtest1 "$archive"]
+    if ![string match "" $exec_output] {
+	verbose -log $exec_output
+	fail "$testname (bfdtest1)"
+	return
+    }
+
     set got [binutils_run $NM "--print-armap $archive"]
     if { ![string match "*text_symbol in *bintest.o*" $got] \
 	 || ![string match "*data_symbol in *bintest.o*" $got] \
@@ -271,6 +291,7 @@ proc thin_archive_with_nested { } {
     global NM
     global srcdir
     global subdir
+    global bfdtest1
 
     set testname "ar thin archive with nested archive"
 
@@ -303,6 +324,14 @@ proc thin_archive_with_nested { } {
     set got [binutils_run $AR "rcT $archive2 ${archive}"]
     if ![string match "" $got] {
 	fail $testname
+	return
+    }
+
+    verbose -log "$bfdtest1 $archive"
+    set exec_output [binutils_run $bfdtest1 "$archive"]
+    if ![string match "" $exec_output] {
+	verbose -log $exec_output
+	fail "$testname (bfdtest1)"
 	return
     }
 

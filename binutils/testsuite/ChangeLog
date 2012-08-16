@@ -1,3 +1,11 @@
+2012-08-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14481
+	* ar.exp (bfdtest1): New.
+	(long_filenames): Run bfdtest1.
+	(thin_archive): Likewise.
+	(thin_archive_with_nested): Likewise.
+
 2012-08-13  Ian Bolton  <ian.bolton@arm.com>
             Laurent Desnogues  <laurent.desnogues@arm.com>
             Jim MacArthur  <jim.macarthur@arm.com>
