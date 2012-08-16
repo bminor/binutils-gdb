@@ -1,3 +1,13 @@
+2012-08-16  Nick Clifton  <nickc@redhat.com>
+
+	* end.c: Include config.h before system header files.
+	* erc32.c: Likewise.
+	* exec.c: Likewise.
+	* float.c: Likewise.
+	* func.c: Likewise.
+	* help.c: Likewise.
+	* interf.c: Likewise.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* sys.h: Include "config.h".
