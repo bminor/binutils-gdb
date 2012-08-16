@@ -1,3 +1,9 @@
+2012-08-16  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <"lswx">: Use RAX for the second and
+	RBX for the third operand.
+	<"lswi">: Use RAX for second and NBI for the third operand.
+
 2012-08-15  DJ Delorie  <dj@redhat.com>
 
 	* rl78-decode.opc (rl78_decode_opcode): Merge %e and %[01]
