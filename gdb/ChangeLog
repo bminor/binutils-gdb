@@ -1,5 +1,10 @@
 2012-08-16  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (trace_find_none_command): Remove.
+	(_initialize_tracepoint): Call add_alias_cmd for "tfind none".
+
+2012-08-16  Yao Qi  <yao@codesourcery.com>
+
 	* remote.c (handle_notification): Remove parameter 'length'.
 	(putpkt_binary, getpkt_or_notif_sane_1): Caller update.
 

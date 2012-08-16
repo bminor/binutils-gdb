@@ -2404,13 +2404,6 @@ trace_find_end_command (char *args, int from_tty)
   trace_find_command ("-1", from_tty);
 }
 
-/* tfind none */
-static void
-trace_find_none_command (char *args, int from_tty)
-{
-  trace_find_command ("-1", from_tty);
-}
-
 /* tfind start */
 static void
 trace_find_start_command (char *args, int from_tty)
@@ -5243,13 +5236,10 @@ Default is the current PC, or the PC of the current trace frame."),
 	   &tfindlist);
 
   add_cmd ("end", class_trace, trace_find_end_command, _("\
-Synonym for 'none'.\n\
 De-select any trace frame and resume 'live' debugging."),
 	   &tfindlist);
 
-  add_cmd ("none", class_trace, trace_find_none_command,
-	   _("De-select any trace frame and resume 'live' debugging."),
-	   &tfindlist);
+  add_alias_cmd ("none", "end", class_trace, 0, &tfindlist);
 
   add_cmd ("start", class_trace, trace_find_start_command,
 	   _("Select the first trace frame in the trace buffer."),
