@@ -174,6 +174,18 @@ class pp_hint_error:
     def display_hint (self):
         raise Exception("hint failed")
 
+class pp_children_as_list:
+    "Throw error from display_hint"
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return 'children_as_list_val'
+
+    def children (self):
+        return [('one', 1)]
+
 class pp_outer:
     "Print struct outer"
 
@@ -281,6 +293,9 @@ def register_pretty_printers ():
 
     pretty_printers_dict[re.compile ('^struct hint_error$')]  = pp_hint_error
     pretty_printers_dict[re.compile ('^hint_error$')]  = pp_hint_error
+
+    pretty_printers_dict[re.compile ('^struct children_as_list$')]  = pp_children_as_list
+    pretty_printers_dict[re.compile ('^children_as_list$')]  = pp_children_as_list
 
     pretty_printers_dict[re.compile ('^memory_error$')]  = MemoryErrorString
 

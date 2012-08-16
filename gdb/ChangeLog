@@ -1,3 +1,9 @@
+2012-08-16  Tom Tromey  <tromey@redhat.com>
+
+	PR python/14386:
+	* varobj.c (update_dynamic_varobj_children): Don't call
+	PyIter_Check.
+
 2012-08-06  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2-frame.c (clear_pointer_cleanup): New function.

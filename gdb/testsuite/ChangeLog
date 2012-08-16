@@ -1,3 +1,13 @@
+2012-08-16  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-mi.exp: Add test for printer whose children
+	are a list.
+	* gdb.python/py-prettyprint.c (struct children_as_list): New.
+	(main): New variable children_as_list.
+	* gdb.python/py-prettyprint.py (class pp_children_as_list):
+	New.
+	(register_pretty_printers): Register new printer.
+
 2012-08-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/attach-twice.exp: Remove excessive ps exec.

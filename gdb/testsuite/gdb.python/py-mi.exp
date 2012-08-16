@@ -289,6 +289,10 @@ mi_gdb_test "-var-evaluate-expression me" \
 	"\\^done,value=\"<error reading variable: Cannot access memory.>.*\"" \
 	"evaluate me varobj"
 
+# Regression test for python/14836.
+mi_create_dynamic_varobj children_as_list children_as_list \
+    "printer whose children are returned as a list"
+
 # C++ MI tests
 gdb_exit
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-cxx" \
