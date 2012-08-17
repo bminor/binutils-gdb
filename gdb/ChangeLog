@@ -1,3 +1,7 @@
+2012-08-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Update GDB version number to 7.5.
+
 2012-08-16  Tom Tromey  <tromey@redhat.com>
 
 	PR python/14386:
