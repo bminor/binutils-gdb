@@ -1,3 +1,9 @@
+2012-08-17  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/14475:
+	* archive.c (bfd_ar_hdr_from_filesystem): Revert last change.
+	Instead malloc areltdata.
+
 2012-08-16  Tom Tromey  <tromey@redhat.com>
 
 	PR binutils/14475:

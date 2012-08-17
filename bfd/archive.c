@@ -1896,7 +1896,7 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
     }
 
   amt = sizeof (struct ar_hdr) + sizeof (struct areltdata);
-  ared = (struct areltdata *) bfd_zalloc (member, amt);
+  ared = (struct areltdata *) bfd_zmalloc (amt);
   if (ared == NULL)
     return NULL;
   hdr = (struct ar_hdr *) (((char *) ared) + sizeof (struct areltdata));
@@ -1927,7 +1927,10 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
   _bfd_ar_spacepad (hdr->ar_mode, sizeof (hdr->ar_mode), "%-8lo",
 		    status.st_mode);
   if (!_bfd_ar_sizepad (hdr->ar_size, sizeof (hdr->ar_size), status.st_size))
-    return NULL;
+    {
+      free (ared);
+      return NULL;
+    }
   memcpy (hdr->ar_fmag, ARFMAG, 2);
   ared->parsed_size = status.st_size;
   ared->arch_header = (char *) hdr;
