@@ -1,3 +1,8 @@
+2012-08-17  Kai Tietz  <ktietz@redhat.com>
+
+	PR ld/14326
+	* scripttempl/pe.sc: Add _etext symbol.
+
 2012-08-14  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUGAS): Add uk.

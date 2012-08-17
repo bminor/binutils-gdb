@@ -86,6 +86,7 @@ SECTIONS
     /* ??? Why is .gcc_exc here?  */
     ${RELOCATING+ *(.gcc_exc)}
     ${RELOCATING+PROVIDE (etext = .);}
+    ${RELOCATING+PROVIDE (_etext = .);}
     ${RELOCATING+ *(.gcc_except_table)}
   }
 
