@@ -148,7 +148,7 @@ enum
   CpuRDSEED,
   /* Multi-presisionn add-carry instructions are required.  */
   CpuADX,
-  /* Supports prefetchw instruction.  */
+  /* Supports prefetchw and prefetch instructions.  */
   CpuPRFCHW,
   /* 64bit support required  */
   Cpu64,

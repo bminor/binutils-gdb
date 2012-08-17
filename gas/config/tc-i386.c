@@ -664,6 +664,10 @@ static const arch_entry cpu_arch[] =
     CPU_BDVER1_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("bdver2"), PROCESSOR_BD,
     CPU_BDVER2_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN ("btver1"), PROCESSOR_BT,
+    CPU_BTVER1_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN ("btver2"), PROCESSOR_BT,
+    CPU_BTVER2_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".8087"), PROCESSOR_UNKNOWN,
     CPU_8087_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".287"), PROCESSOR_UNKNOWN,
@@ -1060,7 +1064,7 @@ i386_align_code (fragS *fragP, int count)
      PROCESSOR_CORE, PROCESSOR_CORE2, PROCESSOR_COREI7, and
      PROCESSOR_GENERIC64, alt_long_patt will be used.
      3. For PROCESSOR_ATHLON, PROCESSOR_K6, PROCESSOR_K8 and
-     PROCESSOR_AMDFAM10, and PROCESSOR_BD, alt_short_patt
+     PROCESSOR_AMDFAM10, PROCESSOR_BD and PROCESSOR_BT, alt_short_patt
      will be used.
 
      When -mtune= isn't used, alt_long_patt will be used if
@@ -1115,6 +1119,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_K8:
 	    case PROCESSOR_AMDFAM10:
 	    case PROCESSOR_BD:
+	    case PROCESSOR_BT:
 	      patt = alt_short_patt;
 	      break;
 	    case PROCESSOR_I386:
@@ -1144,6 +1149,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_K8:
 	    case PROCESSOR_AMDFAM10:
 	    case PROCESSOR_BD:
+	    case PROCESSOR_BT:
 	    case PROCESSOR_GENERIC32:
 	      /* We use cpu_arch_isa_flags to check if we CAN optimize
 		 with nops.  */

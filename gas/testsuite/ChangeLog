@@ -1,3 +1,16 @@
+2012-08-17  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
+
+	* gas/i386/i386.exp: Run btver1 and btver2 test cases.
+
+	* gas/i386/nops-1-btver1.d: New.
+	* gas/i386/nops-1-btver2.d: New.
+	* gas/i386/arch-10-btver1.d: New.
+	* gas/i386/arch-10-btver2.d: New.
+	* gas/i386/x86-64-nops-1-btver1.d: New.
+	* gas/i386/x86-64-nops-1-btver2.d: New.
+	* gas/i386/x86-64-arch-2-btver1.d: New.
+	* gas/i386/x86-64-arch-2-btver2.d: New.
+
 2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/power4.s <lq, stq>: Add more tests.

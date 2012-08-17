@@ -1,3 +1,13 @@
+2012-08-17  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Add CPU_BTVER1_FLAGS and
+	CPU_BTVER2_FLAGS.
+	(i386_align_code): Add case for PROCESSOR_BT.
+
+	* config/tc-i386.h (enum processor_type): Add PROCESSOR_BT.       
+
+	* doc/c-i386.texi: Add -march={btver1, btver2} options.
+
 2012-08-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/14457

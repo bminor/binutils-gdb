@@ -1,3 +1,14 @@
+2012-08-17  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
+
+	* i386-gen.c (cpu_flag_init): Add CPU_BTVER1_FLAGS and
+	CPU_BTVER2_FLAGS.
+
+	* i386-opc.h: Update CpuPRFCHW comment. 
+
+	* i386-opc.tbl: Enable prefetch instruction for CpuPRFCHW.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2012-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: New Ukranian translation.
