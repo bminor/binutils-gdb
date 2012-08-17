@@ -1,3 +1,7 @@
+2012-08-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb.base/help.exp: Update expected output.
+
 2012-08-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/rdv_wait: New testcase.
