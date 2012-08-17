@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: bfd-2.22.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2011-10-25 11:58+0100\n"
-"PO-Revision-Date: 2012-08-08 14:20+0700\n"
+"PO-Revision-Date: 2012-08-15 14:47+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
@@ -650,9 +650,8 @@ msgstr ""
 "      Kiểu: %s"
 
 #: elf-attrs.c:569
-#, fuzzy
 msgid "error: %B: Object has vendor-specific contents that must be processed by the '%s' toolchain"
-msgstr "lỗi: %B: Phải được dãy công cụ \"%s\" xử lý"
+msgstr "lỗi: %B: Đối tượng có nội dung \"vendor-specific\" phải được xử lý bởi toolchain '%s'"
 
 #: elf-attrs.c:578
 msgid "error: %B: Object tag '%d, %s' is incompatible with tag '%d, %s'"
@@ -2049,9 +2048,8 @@ msgid "%B(%A): error: call to undefined function '%s'"
 msgstr "%B(%A): lỗi: gọi hàm chưa được định nghĩa '%s'"
 
 #: elf32-rx.c:1338
-#, fuzzy
 msgid "%B(%A): warning: unaligned access to symbol '%s' in the small data area"
-msgstr "Cảnh báo: vị trí sắp hàng %u của ký hiệu \"%s\" trong %B là nhỏ hơn %u trong %B"
+msgstr "%B(%A): cảnh báo: unaligned access to symbol '%s' trong vùng dữ liệu nhỏ"
 
 #: elf32-rx.c:1342
 msgid "%B(%A): internal error: out of range error"
@@ -2793,9 +2791,8 @@ msgid "%P: cannot find opd entry toc for %s\n"
 msgstr "%P: không tìm thấy mục opd toc(mục lục) cho %s\n"
 
 #: elf64-ppc.c:9680
-#, fuzzy
 msgid "%P: long branch stub `%s' offset overflow\n"
-msgstr "mẩu nhánh dài \"%s\" tràn khoảng bù"
+msgstr "%P: mẩu nhánh dài \"%s\" tràn khoảng bù\n"
 
 #: elf64-ppc.c:9739
 msgid "%P: can't find branch stub `%s'\n"
@@ -2847,14 +2844,12 @@ msgid "%P: %H: %s used with non-TLS symbol %s\n"
 msgstr "%P: %H: %s được sử dụng với ký hiệu không-phải-TLS %s\n"
 
 #: elf64-ppc.c:12556
-#, fuzzy
 msgid "%P: %H: automatic multiple TOCs not supported using your crt files; recompile with -mminimal-toc or upgrade gcc\n"
-msgstr "%B(%A+0x%lx): tự động tạo nhiều TOC không được hỗ trợ khi dùng các tập tin CRT của bạn; hãy biên dịch lại với \"-mminimal-toc\", hoặc nâng cấp GCC"
+msgstr "%P: %H: tự động tạo nhiều TOC không được hỗ trợ khi dùng các tập tin CRT của bạn; hãy biên dịch lại với \"-mminimal-toc\", hoặc nâng cấp GCC\n"
 
 #: elf64-ppc.c:12562
-#, fuzzy
 msgid "%P: %H: sibling call optimization to `%s' does not allow automatic multiple TOCs; recompile with -mminimal-toc or -fno-optimize-sibling-calls, or make `%s' extern\n"
-msgstr "%B(%A+0x%lx): tối ưu hoá cuộc gọi cùng chỗ cho \"%s\" không cho phép tự động tạo nhiều TOC; hãy biên dịch lại với \"-mminimal-toc\" hoặc \"-fno-optimize-sibling-calls\", hoặc làm cho \"%s\" là bên ngoài"
+msgstr "%P: %H: tối ưu hoá cuộc gọi cùng chỗ (sibling) cho \"%s\" không cho phép tự động tạo nhiều TOC; hãy biên dịch lại với \"-mminimal-toc\" hoặc \"-fno-optimize-sibling-calls\", hoặc làm cho \"%s\" bên ngoài\n"
 
 #: elf64-ppc.c:13286
 msgid "%P: %B: relocation %s is not supported for symbol %s\n"
@@ -4073,9 +4068,9 @@ msgid "  EEOM (len=%u):\n"
 msgstr "  EEOM (dài=%u):\n"
 
 #: vms-alpha.c:5736
-#, fuzzy, c-format
+#, c-format
 msgid "   number of cond linkage pairs: %u\n"
-msgstr "STC_LP (store cond linkage pair)\n"
+msgstr "   số lượng của cặp liên kết \"cond\": %u\n"
 
 #: vms-alpha.c:5738
 #, c-format
@@ -4088,9 +4083,9 @@ msgid "   transfer addr flags: 0x%02x\n"
 msgstr "   cờ chuyển đổi địa chỉ: 0x%02x\n"
 
 #: vms-alpha.c:5743
-#, fuzzy, c-format
+#, c-format
 msgid "   transfer addr psect: %u\n"
-msgstr "   cờ chuyển đổi địa chỉ: 0x%02x\n"
+msgstr "   chuyển đổi \"addr psect\": %u\n"
 
 #: vms-alpha.c:5745
 #, c-format
@@ -4258,9 +4253,9 @@ msgid "   code address: 0x%08x\n"
 msgstr "   địa chỉ mã: 0x%08x\n"
 
 #: vms-alpha.c:5883
-#, fuzzy, c-format
+#, c-format
 msgid "   psect index for entry point : %u\n"
-msgstr "MSCGI: không tìm thấy điểm vào cho %s"
+msgstr "   mục lục psect cho điểm vào : %u\n"
 
 #: vms-alpha.c:5886 vms-alpha.c:5962 vms-alpha.c:5981
 #, c-format
@@ -4850,9 +4845,9 @@ msgid "[%u]: Lower: %u, upper: %u\n"
 msgstr "[%u]: thường: %u, hoa: %u\n"
 
 #: vms-alpha.c:6707
-#, fuzzy, c-format
+#, c-format
 msgid "unaligned bit-string of %s\n"
-msgstr "Xâu chữ tìm kiếm:"
+msgstr "chuỗi-bit chưa được căn chỉnh của %s\n"
 
 #: vms-alpha.c:6711
 #, c-format
@@ -4890,9 +4885,9 @@ msgid "(trailing value)\n"
 msgstr "(giá trị của dấu vết)\n"
 
 #: vms-alpha.c:6753
-#, fuzzy, c-format
+#, c-format
 msgid "(value spec follows)\n"
-msgstr "không hiểu giá trị dành cho đặc tính trường: %d\n"
+msgstr "(giá trị spec sau đây)\n"
 
 #: vms-alpha.c:6756
 #, c-format
@@ -5032,7 +5027,7 @@ msgstr "recbeg: tên: %.*s\n"
 #: vms-alpha.c:7032
 #, c-format
 msgid "recend\n"
-msgstr ""
+msgstr "recend\n"
 
 #: vms-alpha.c:7035
 #, c-format
@@ -5047,7 +5042,7 @@ msgstr "enumelt, tên: %.*s\n"
 #: vms-alpha.c:7043
 #, c-format
 msgid "enumend\n"
-msgstr ""
+msgstr "enumend\n"
 
 #: vms-alpha.c:7060
 #, c-format
@@ -5469,9 +5464,9 @@ msgid " linker ident     : %.*s\n"
 msgstr " ident bộ liên kết     : %.*s\n"
 
 #: vms-alpha.c:7549
-#, fuzzy, c-format
+#, c-format
 msgid " image build ident: %.*s\n"
-msgstr "IDENT: socket() không thành công"
+msgstr " ident dựng ảnh: %.*s\n"
 
 #: vms-alpha.c:7559
 #, c-format
@@ -5700,7 +5695,7 @@ msgstr " Sửa chữa tham chiếu địa chỉ mã:\n"
 #: vms-alpha.c:7852
 #, c-format
 msgid " Linkage Pairs Referece Fixups:\n"
-msgstr ""
+msgstr "Sửa chữ Tham chiếu Liên kết cặp:\n"
 
 #: vms-alpha.c:7861
 #, c-format
