@@ -1,3 +1,9 @@
+2012-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/uk.po: New Ukranian translation.
+	* configure.in (ALL_LINGUAS): Add uk.
+	* configure: Regenerate.
+
 2012-08-16  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes) <"lswx">: Use RAX for the second and

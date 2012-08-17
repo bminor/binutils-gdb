@@ -1,3 +1,7 @@
+2012-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2012-08-17  Yuri Chornoivan  <yurchor@ukr.net>
 
 	* elf-bfd.h, * elf32-ppc.c, * elf64-ia64-vms.c, * elfnn-ia64.c,
