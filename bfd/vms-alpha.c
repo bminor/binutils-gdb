@@ -7849,7 +7849,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
         }
       if (lpfixoff != 0)
         {
-          fprintf (file, _(" Linkage Pairs Referece Fixups:\n"));
+          fprintf (file, _(" Linkage Pairs Reference Fixups:\n"));
           evax_bfd_print_reference_fixups (file, buf + lpfixoff);
         }
       if (chgprtoff)

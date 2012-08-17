@@ -8980,7 +8980,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 			    htab->plt->contents + ent->plt.offset + 28);
 
 		/* Fill in the GOT entry corresponding to this PLT slot with
-		   the address immediately after the the "bctr" instruction
+		   the address immediately after the "bctr" instruction
 		   in this PLT entry.  */
 		bfd_put_32 (output_bfd, (htab->plt->output_section->vma
 					 + htab->plt->output_offset

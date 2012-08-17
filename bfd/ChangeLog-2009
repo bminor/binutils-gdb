@@ -3606,7 +3606,7 @@
 	(bfd_xcoff_set_archive_import_path): Likewise.
 	(xcoff_set_import_path): Move earlier in file.
 	(xcoff_link_add_dynamic_symbols): Set the import path of a non-archive
-	object to the the directory part of the bfd's filename.  Get the
+	object to the directory part of the bfd's filename.  Get the
 	import path and filename of an archive object from the archive's
 	xcoff_tdata, initializing it if necessary.  Update use of
 	import_file_id.

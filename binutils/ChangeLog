@@ -1,3 +1,7 @@
+2012-08-17  Yuri Chornoivan  <yurchor@ukr.net>
+
+	* doc/binutils.texi, * objdump.c, * od-xcoff.c: Typo fixes.
+
 2012-08-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14481

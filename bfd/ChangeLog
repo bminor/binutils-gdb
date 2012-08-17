@@ -1,3 +1,8 @@
+2012-08-17  Yuri Chornoivan  <yurchor@ukr.net>
+
+	* elf-bfd.h, * elf32-ppc.c, * elf64-ia64-vms.c, * elfnn-ia64.c,
+	* elfxx-mips.c, * vms-alpha.c: Typo fixes.
+
 2012-08-17  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/14475:

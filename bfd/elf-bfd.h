@@ -2465,7 +2465,7 @@ extern asection _bfd_elf_large_com_section;
     continue;								\
   }
 
-/* Will a symbol be bound to the the definition within the shared
+/* Will a symbol be bound to the definition within the shared
    library, if any.  A unique symbol can never be bound locally.  */
 #define SYMBOLIC_BIND(INFO, H) \
     (!(H)->unique_global \

@@ -1235,7 +1235,7 @@ try_print_file_open (const char *origname, const char *modname)
   return p;
 }
 
-/* If the the source file, as described in the symtab, is not found
+/* If the source file, as described in the symtab, is not found
    try to locate it in one of the paths specified with -I
    If found, add location to print_files linked list.  */
 

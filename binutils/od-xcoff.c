@@ -353,7 +353,7 @@ union xcoff32_symbol
 
   struct sym
   {
-    /* Pointer the the NUL-terminated name.  */
+    /* Pointer to the NUL-terminated name.  */
     char *name;
 
     /* XCOFF symbol fields.  */

@@ -131,7 +131,7 @@ Convert object code into a Netware Loadable Module
 Manipulate Windows resources
 
 @item windmc
-Genertor for Windows message resources
+Generator for Windows message resources
 
 @item dlltool
 Create the files needed to build and use Dynamic Link Libraries
@@ -4223,7 +4223,7 @@ Displays the contents of the file's dynamic section, if it has one.
 
 @item -V
 @itemx --version-info
-@cindex ELF version sections informations
+@cindex ELF version sections information
 Displays the contents of the version sections in the file, it they
 exist.
 
@@ -4261,7 +4261,7 @@ any other string identifies all sections with that name in the object file.
 @item -c
 @itemx --archive-index
 @cindex Archive file symbol index information
-Displays the file symbol index infomation contained in the header part
+Displays the file symbol index information contained in the header part
 of binary archives.  Performs the same function as the @option{t}
 command to @command{ar}, but without using the BFD library.  @xref{ar}.
 
