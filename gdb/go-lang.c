@@ -562,7 +562,6 @@ static const struct language_defn go_language_defn =
   "go",
   language_go,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,

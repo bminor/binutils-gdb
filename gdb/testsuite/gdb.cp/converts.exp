@@ -70,9 +70,37 @@ gdb_test_multiple "p foo3_1 (0, 0)" $t {
     pass $t
   }
 }
+
 gdb_test "p foo3_1 (0, 1)" \
     "Cannot resolve function foo3_1 to any overloaded instance"
 gdb_test "p foo3_1 (0, (const char**) 1)" " = 31"
 gdb_test "p foo3_2 (0, 0)" "= 32"
 gdb_test "p foo3_2 (0, (char const**) 0)" " = 320"
 
+# Test for strict type checking
+set error_str "Cannot resolve function %s to any overloaded instance"
+gdb_test "show check type" "Strict type checking is on\."
+gdb_test "p foo1_type_check (123)" [format $error_str "foo1_type_check"]
+gdb_test "p foo2_type_check (0, 1)" [format $error_str "foo2_type_check"]
+gdb_test "p foo2_type_check (1, 0)" [format $error_str "foo2_type_check"]
+gdb_test "p foo2_type_check (1, 1)" [format $error_str "foo2_type_check"]
+gdb_test "p foo3_type_check (0, 0, 1)" [format $error_str "foo3_type_check"]
+gdb_test "p foo3_type_check (0, 1, 0)" [format $error_str "foo3_type_check"]
+gdb_test "p foo3_type_check (1, 0, 0)" [format $error_str "foo3_type_check"]
+gdb_test "p foo3_type_check (0, 1, 1)" [format $error_str "foo3_type_check"]
+gdb_test "p foo3_type_check (1, 1, 0)" [format $error_str "foo3_type_check"]
+gdb_test "p foo3_type_check (1, 1, 1)" [format $error_str "foo3_type_check"]
+
+gdb_test_no_output "set check type off"
+gdb_test "show check type" "Strict type checking is off\."
+gdb_test "p foo1_type_check (123)" " = 1000"
+gdb_test "p foo2_type_check (0, 1)" " = 1001"
+gdb_test "p foo2_type_check (1, 0)" " = 1001"
+gdb_test "p foo2_type_check (1, 1)" " = 1001"
+gdb_test "p foo3_type_check (0, 0, 1)" " = 1002"
+gdb_test "p foo3_type_check (0, 1, 0)" " = 1002"
+gdb_test "p foo3_type_check (1, 0, 0)" " = 1002"
+gdb_test "p foo3_type_check (0, 1, 1)" " = 1002"
+gdb_test "p foo3_type_check (1, 1, 0)" " = 1002"
+gdb_test "p foo3_type_check (1, 1, 1)" " = 1002"
+gdb_test "p foo3_2 (1,1)" " = 32"

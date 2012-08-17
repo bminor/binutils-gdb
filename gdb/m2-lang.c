@@ -370,7 +370,6 @@ const struct language_defn m2_language_defn =
   "modula-2",
   language_m2,
   range_check_on,
-  type_check_on,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,

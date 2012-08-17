@@ -59,6 +59,7 @@ const struct rank BASE_CONVERSION_BADNESS = {2,0};
 const struct rank REFERENCE_CONVERSION_BADNESS = {2,0};
 const struct rank NULL_POINTER_CONVERSION_BADNESS = {2,0};
 const struct rank NS_POINTER_CONVERSION_BADNESS = {10,0};
+const struct rank NS_INTEGER_POINTER_CONVERSION_BADNESS = {3,0};
 
 /* Floatformat pairs.  */
 const struct floatformat *floatformats_ieee_half[BFD_ENDIAN_UNKNOWN] = {
@@ -119,6 +120,10 @@ static int opaque_type_resolution = 1;
 
 unsigned int overload_debug = 0;
 
+/* A flag to enable strict type checking.  */
+
+static int strict_type_checking = 1;
+
 /* A function to show whether opaque types are resolved.  */
 
 static void
@@ -139,6 +144,15 @@ show_overload_debug (struct ui_file *file, int from_tty,
 {
   fprintf_filtered (file, _("Debugging of C++ overloading is %s.\n"), 
 		    value);
+}
+
+/* A function to show the status of strict type checking.  */
+
+static void
+show_strict_type_checking (struct ui_file *file, int from_tty,
+			   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Strict type checking is %s.\n"), value);
 }
 
 
@@ -2507,12 +2521,20 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 	case TYPE_CODE_FUNC:
 	  return rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL);
 	case TYPE_CODE_INT:
-	  if (value != NULL && TYPE_CODE (value_type (value)) == TYPE_CODE_INT
-	      && value_as_long (value) == 0)
+	  if (value != NULL && TYPE_CODE (value_type (value)) == TYPE_CODE_INT)
 	    {
-	      /* Null pointer conversion: allow it to be cast to a pointer.
-		 [4.10.1 of C++ standard draft n3290]  */
-	      return NULL_POINTER_CONVERSION_BADNESS;
+	      if (value_as_long (value) == 0)
+		{
+		  /* Null pointer conversion: allow it to be cast to a pointer.
+		     [4.10.1 of C++ standard draft n3290]  */
+		  return NULL_POINTER_CONVERSION_BADNESS;
+		}
+	      else
+		{
+		  /* If type checking is disabled, allow the conversion.  */
+		  if (!strict_type_checking)
+		    return NS_INTEGER_POINTER_CONVERSION_BADNESS;
+		}
 	    }
 	  /* fall through  */
 	case TYPE_CODE_ENUM:
@@ -4068,4 +4090,13 @@ _initialize_gdbtypes (void)
 			   NULL, NULL,
 			   show_opaque_type_resolution,
 			   &setlist, &showlist);
+
+  /* Add an option to permit non-strict type checking.  */
+  add_setshow_boolean_cmd ("type", class_support,
+			   &strict_type_checking,
+			   _("Set strict type checking."),
+			   _("Show strict type checking."),
+			   NULL, NULL,
+			   show_strict_type_checking,
+			   &setchecklist, &showchecklist);
 }

@@ -274,7 +274,6 @@ const struct language_defn f_language_defn =
   "fortran",
   language_fortran,
   range_check_on,
-  type_check_on,
   case_sensitive_off,
   array_column_major,
   macro_expansion_no,

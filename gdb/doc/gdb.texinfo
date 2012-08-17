@@ -12670,29 +12670,18 @@ List all the filename extensions and the associated languages.
 @node Checks
 @section Type and Range Checking
 
-@quotation
-@emph{Warning:} In this release, the @value{GDBN} commands for type and range
-checking are included, but they do not yet have any effect.  This
-section documents the intended facilities.
-@end quotation
-@c FIXME remove warning when type/range code added
-
 Some languages are designed to guard you against making seemingly common
 errors through a series of compile- and run-time checks.  These include
-checking the type of arguments to functions and operators, and making
+checking the type of arguments to functions and operators and making
 sure mathematical overflows are caught at run time.  Checks such as
 these help to ensure a program's correctness once it has been compiled
-by eliminating type mismatches, and providing active checks for range
+by eliminating type mismatches and providing active checks for range
 errors when your program is running.
 
-@value{GDBN} can check for conditions like the above if you wish.
-Although @value{GDBN} does not check the statements in your program,
-it can check expressions entered directly into @value{GDBN} for
-evaluation via the @code{print} command, for example.  As with the
-working language, @value{GDBN} can also decide whether or not to check
-automatically based on your program's source language.
-@xref{Supported Languages, ,Supported Languages}, for the default
-settings of supported languages.
+By default @value{GDBN} checks for these errors according to the
+rules of the current source language.  Although @value{GDBN} does not check
+the statements in your program, it can check expressions entered directly
+into @value{GDBN} for evaluation via the @code{print} command, for example.
 
 @menu
 * Type Checking::               An overview of type checking
@@ -12704,69 +12693,51 @@ settings of supported languages.
 @node Type Checking
 @subsection An Overview of Type Checking
 
-Some languages, such as Modula-2, are strongly typed, meaning that the
+Some languages, such as C and C@t{++}, are strongly typed, meaning that the
 arguments to operators and functions have to be of the correct type,
 otherwise an error occurs.  These checks prevent type mismatch
 errors from ever causing any run-time problems.  For example,
 
 @smallexample
-1 + 2 @result{} 3
+int klass::my_method(char *b) @{ return  b ? 1 : 2; @}
+
+(@value{GDBP}) print obj.my_method (0)
+$1 = 2
 @exdent but
-@error{} 1 + 2.3
+(@value{GDBP}) print obj.my_method (0x1234)
+Cannot resolve method klass::my_method to any overloaded instance
 @end smallexample
 
-The second example fails because the @code{CARDINAL} 1 is not
-type-compatible with the @code{REAL} 2.3.
+The second example fails because in C@t{++} the integer constant
+@samp{0x1234} is not type-compatible with the pointer parameter type.
 
-For the expressions you use in @value{GDBN} commands, you can tell the
-@value{GDBN} type checker to skip checking;
+For the expressions you use in @value{GDBN} commands, you can tell
+@value{GDBN} to not enforce strict type checking or
 to treat any mismatches as errors and abandon the expression;
-or to only issue warnings when type mismatches occur,
-but evaluate the expression anyway.  When you choose the last of
-these, @value{GDBN} evaluates expressions like the second example above, but
-also issues a warning.
+When type checking is disabled, @value{GDBN} successfully evaluates
+expressions like the second example above.
 
-Even if you turn type checking off, there may be other reasons
+Even if type checking is off, there may be other reasons
 related to type that prevent @value{GDBN} from evaluating an expression.
 For instance, @value{GDBN} does not know how to add an @code{int} and
 a @code{struct foo}.  These particular type errors have nothing to do
-with the language in use, and usually arise from expressions, such as
-the one described above, which make little sense to evaluate anyway.
+with the language in use and usually arise from expressions which make
+little sense to evaluate anyway.
 
-Each language defines to what degree it is strict about type.  For
-instance, both Modula-2 and C require the arguments to arithmetical
-operators to be numbers.  In C, enumerated types and pointers can be
-represented as numbers, so that they are valid arguments to mathematical
-operators.  @xref{Supported Languages, ,Supported Languages}, for further
-details on specific languages.
-
-@value{GDBN} provides some additional commands for controlling the type checker:
+@value{GDBN} provides some additional commands for controlling type checking:
 
 @kindex set check type
 @kindex show check type
 @table @code
-@item set check type auto
-Set type checking on or off based on the current working language.
-@xref{Supported Languages, ,Supported Languages}, for the default settings for
-each language.
-
 @item set check type on
 @itemx set check type off
-Set type checking on or off, overriding the default setting for the
-current working language.  Issue a warning if the setting does not
-match the language default.  If any type mismatches occur in
+Set strict type checking on or off.  If any type mismatches occur in
 evaluating an expression while type checking is on, @value{GDBN} prints a
 message and aborts evaluation of the expression.
 
-@item set check type warn
-Cause the type checker to issue warnings, but to always attempt to
-evaluate the expression.  Evaluating the expression may still
-be impossible for other reasons.  For example, @value{GDBN} cannot add
-numbers and structures.
-
-@item show type
-Show the current setting of the type checker, and whether or not @value{GDBN}
-is setting it automatically.
+@item show check type
+Show the current setting of type checking and whether @value{GDBN}
+is enforcing strict type checking rules.
 @end table
 
 @cindex range checking
@@ -13217,8 +13188,8 @@ specification.
 
 @cindex C and C@t{++} defaults
 
-If you allow @value{GDBN} to set type and range checking automatically, they
-both default to @code{off} whenever the working language changes to
+If you allow @value{GDBN} to set range checking automatically, it
+defaults to @code{off} whenever the working language changes to
 C or C@t{++}.  This happens regardless of whether you or @value{GDBN}
 selects the working language.
 
@@ -13229,37 +13200,15 @@ these files, it sets the working language to C or C@t{++}.
 @xref{Automatically, ,Having @value{GDBN} Infer the Source Language},
 for further details.
 
-@c Type checking is (a) primarily motivated by Modula-2, and (b)
-@c unimplemented.  If (b) changes, it might make sense to let this node
-@c appear even if Mod-2 does not, but meanwhile ignore it. roland 16jul93.
-
 @node C Checks
 @subsubsection C and C@t{++} Type and Range Checks
 
 @cindex C and C@t{++} checks
 
-By default, when @value{GDBN} parses C or C@t{++} expressions, type checking
-is not used.  However, if you turn type checking on, @value{GDBN}
-considers two variables type equivalent if:
-
-@itemize @bullet
-@item
-The two variables are structured and have the same structure, union, or
-enumerated tag.
-
-@item
-The two variables have the same type name, or types that have been
-declared equivalent through @code{typedef}.
-
-@ignore
-@c leaving this out because neither J Gilmore nor R Pesch understand it.
-@c FIXME--beers?
-@item
-The two @code{struct}, @code{union}, or @code{enum} variables are
-declared in the same declaration.  (Note: this may not be true for all C
-compilers.)
-@end ignore
-@end itemize
+By default, when @value{GDBN} parses C or C@t{++} expressions, strict type
+checking is used.  However, if you turn type checking off, @value{GDBN}
+will allow certain non-standard conversions, such as promoting integer
+constants to pointers.
 
 Range checking, if turned on, is done on mathematical operations.  Array
 indices are not checked, since they are often used to index a pointer

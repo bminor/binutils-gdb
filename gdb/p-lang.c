@@ -429,7 +429,6 @@ const struct language_defn pascal_language_defn =
   "pascal",			/* Language name */
   language_pascal,
   range_check_on,
-  type_check_on,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,

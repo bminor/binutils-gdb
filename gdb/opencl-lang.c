@@ -993,7 +993,6 @@ const struct language_defn opencl_language_defn =
   "opencl",			/* Language name */
   language_opencl,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,

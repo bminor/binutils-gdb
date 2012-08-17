@@ -55,27 +55,6 @@ extern enum range_check
   }
 range_check;
 
-/* type_mode ==
-   type_mode_auto:   type_check set automatically to default of language.
-   type_mode_manual: type_check set manually by user.  */
-
-extern enum type_mode
-  {
-    type_mode_auto, type_mode_manual
-  }
-type_mode;
-
-/* type_check ==
-   type_check_on:    Types are checked in GDB expressions, producing errors.
-   type_check_warn:  Types are checked, producing warnings.
-   type_check_off:   Types are not checked in GDB expressions.  */
-
-extern enum type_check
-  {
-    type_check_off, type_check_warn, type_check_on
-  }
-type_check;
-
 /* case_mode ==
    case_mode_auto:   case_sensitivity set upon selection of scope.
    case_mode_manual: case_sensitivity set only by user.  */
@@ -161,10 +140,6 @@ struct language_defn
     /* Default range checking.  */
 
     enum range_check la_range_check;
-
-    /* Default type checking.  */
-
-    enum type_check la_type_check;
 
     /* Default case sensitivity.  */
     enum case_sensitivity la_case_sensitivity;
@@ -422,9 +397,6 @@ struct type *language_lookup_primitive_type_by_name (const struct language_defn 
 /* These macros define the behaviour of the expression 
    evaluator.  */
 
-/* Should we strictly type check expressions?  */
-#define STRICT_TYPE (type_check != type_check_off)
-
 /* Should we range check values against the domain of their type?  */
 #define RANGE_CHECK (range_check != range_check_off)
 
@@ -495,8 +467,6 @@ extern int pointer_type (struct type *);
 extern void binop_type_check (struct value *, struct value *, int);
 
 /* Error messages */
-
-extern void type_error (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 extern void range_error (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 

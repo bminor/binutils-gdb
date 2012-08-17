@@ -1616,6 +1616,9 @@ extern const struct rank NULL_POINTER_CONVERSION;
 /* Converting a pointer to an int is usually OK.  */
 extern const struct rank NS_POINTER_CONVERSION_BADNESS;
 
+/* Badness of converting a (non-zero) integer constant
+   to a pointer.  */
+extern const struct rank NS_INTEGER_POINTER_CONVERSION_BADNESS;
 
 extern struct rank sum_ranks (struct rank a, struct rank b);
 extern int compare_ranks (struct rank a, struct rank b);

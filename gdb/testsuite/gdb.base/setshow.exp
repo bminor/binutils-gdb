@@ -114,19 +114,22 @@ gdb_test "show check range" "Range checking is \"off\"\..*" "show check range (o
 #test set check range auto
 gdb_test_no_output "set check range auto" "set check range auto" 
 #test show check range auto
-gdb_test "show check range" "Range checking is \"auto; currently .*" "show check range (auto)" 
-#test set check type on
-gdb_test "set check type on" ".*" "set check type on" 
-#test show check type on
-gdb_test "show check type" "Type checking is \"on\"..*" "show check type (on)" 
-#test set check type off with trailing space
-gdb_test_no_output "set check type off " "set check type off" 
-#test show check type off
-gdb_test "show check type" "Type checking is \"off\"..*" "show check type (off)" 
-#test set check type auto
-gdb_test_no_output "set check type auto" "set check type auto" 
-#test show check type
-gdb_test "show check type" "Type checking is \"auto; currently .*" "show check type (auto)" 
+gdb_test "show check range" "Range checking is \"auto; currently .*" "show check range (auto)"
+
+# Test set check type on
+gdb_test "set check type on" ".*" "set check type on"
+
+# Test show check type on
+gdb_test "show check type" "Strict type checking is on\..*" \
+    "show check type (on)"
+
+# Test set check type off with trailing space
+gdb_test_no_output "set check type off " "set check type off"
+
+# Test show check type off
+gdb_test "show check type" "Strict type checking is off\..*" \
+    "show check type (off)"
+
 #test set complaints 100
 gdb_test_no_output "set complaints 100" "set complaints 100" 
 #test show complaints 100

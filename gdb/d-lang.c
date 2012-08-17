@@ -240,7 +240,6 @@ static const struct language_defn d_language_defn =
   "d",
   language_d,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,

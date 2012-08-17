@@ -1167,7 +1167,6 @@ const struct language_defn java_language_defn =
   "java",			/* Language name */
   language_java,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,

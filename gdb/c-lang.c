@@ -831,7 +831,6 @@ const struct language_defn c_language_defn =
   "c",				/* Language name */
   language_c,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
@@ -955,7 +954,6 @@ const struct language_defn cplus_language_defn =
   "c++",			/* Language name */
   language_cplus,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
@@ -997,7 +995,6 @@ const struct language_defn asm_language_defn =
   "asm",			/* Language name */
   language_asm,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
@@ -1044,7 +1041,6 @@ const struct language_defn minimal_language_defn =
   "minimal",			/* Language name */
   language_minimal,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,

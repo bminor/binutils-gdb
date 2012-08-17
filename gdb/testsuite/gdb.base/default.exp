@@ -495,12 +495,13 @@ gdb_test "section" "Must specify section name and its virtual address.*" "sectio
 gdb_test "set annotate" "Argument required .integer to set it to.*" "set annotate"
 #test set args
 gdb_test_no_output "set args" "set args"
-#test set check "c" abbreviation
-gdb_test "set c" "\"set check\" must be followed by the name of a check subcommand.(\[^\r\n\]*\[\r\n\])+List of set check subcommands:(\[^\r\n\]*\[\r\n\])+set check range -- Set range checking(\[^\r\n\]*\[\r\n\])+set check type -- Set type checking(\[^\r\n\]*\[\r\n\])+Type \"help set check\" followed by set check subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set check \"c\" abbreviation"
-#test set check "ch" abbreviation
-gdb_test "set ch" "\"set check\" must be followed by the name of a check subcommand.(\[^\r\n\]*\[\r\n\])+List of set check subcommands:(\[^\r\n\]*\[\r\n\])+set check range -- Set range checking(\[^\r\n\]*\[\r\n\])+set check type -- Set type checking(\[^\r\n\]*\[\r\n\])+Type \"help set check\" followed by set check subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set check \"ch\" abbreviation"
-#test set check
-gdb_test "set check" "\"set check\" must be followed by the name of a check subcommand.(\[^\r\n\]*\[\r\n\])+List of set check subcommands:(\[^\r\n\]*\[\r\n\])+set check range -- Set range checking(\[^\r\n\]*\[\r\n\])+set check type -- Set type checking(\[^\r\n\]*\[\r\n\])+Type \"help set check\" followed by set check subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set check"
+
+# Test set check abbreviations
+foreach x {"c" "ch" "check"} {
+    gdb_test "set $x" "\"set check\" must be followed by the name of a check subcommand.(\[^\r\n\]*\[\r\n\])+List of set check subcommands:(\[^\r\n\]*\[\r\n\])+set check range -- Set range checking(\[^\r\n\]*\[\r\n\])+set check type -- Set strict type checking(\[^\r\n\]*\[\r\n\])+Type \"help set check\" followed by set check subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." \
+	"set check \"$x\" abbreviation"
+}
+
 #test set check range
 gdb_test "set check range" ".*" "set check range"
 #test set check type
@@ -577,16 +578,17 @@ gdb_test "shell echo Hi dad!" "Hi dad!" "shell echo Hi dad!"
 gdb_test "show annotate" "Annotation_level is 0." 	 "show annotate"
 #test show args
 gdb_test "show args" "Argument list to give program being debugged when it is started is \"\"." "show args"
-#test show check "c" abbreviation
-gdb_test "show c" "range:  *Range checking is \"auto; currently off\".(\[^\r\n\]*\[\r\n\])+type:  *Type checking is \"auto; currently off\".*" "show check \"c\" abbreviation"
-#test show check "ch" abbreviation
-gdb_test "show ch" "range: *Range checking is \"auto; currently off\".(\[^\r\n\]*\[\r\n\])+type:  *Type checking is \"auto; currently off\"." "show check \"ch\" abbreviation"
-#test show check
-gdb_test "show check" "range:  *Range checking is \"auto; currently off\".(\[^\r\n\]*\[\r\n\])+type:  *Type checking is \"auto; currently off\"." "show check"
+
+# test show check abbreviations
+foreach x {"c" "ch" "check"} {
+    gdb_test "show $x" "range:  *Range checking is \"auto; currently off\".(\[^\r\n\]*\[\r\n\])+type:  *Strict type checking is on\..*" \
+	"show check \"$x\" abbreviation"
+}
+
 #test show check range
 gdb_test "show check range" "Range checking is \"auto; currently off\"." "show check range"
 #test show check type
-gdb_test "show check type" "Type checking is \"auto; currently off\"." "show check type"
+gdb_test "show check type" "Strict type checking is on\." "show check type"
 #test show commands
 gdb_test "show commands" ".*" "show commands"
 #test show complaints

@@ -376,22 +376,26 @@ gdb_test "help section" "Change the base address of section SECTION of the exec 
 gdb_test "help set annotate" "Set annotation_level\.\[\r\n\]+0 == normal;     1 == fullname \\(for use when running under emacs\\)\[\r\n\]+2 == output annotated suitably for use by programs that control GDB\." "help set annotate"
 # test help set args
 gdb_test "help set args" "Set argument list to give program being debugged when it is started\.\[\r\n\]+Follow this command with any number of args, to be passed to the program\."
-# test help set check "c" abbreviation
-test_prefix_command_help {"set c" "set check"} {
-    "Set the status of the type/range checker\.\[\r\n\]+"
-} "help set check \"c\" abbreviation"
-# test help set check "ch" abbreviation
-test_prefix_command_help {"set ch" "set check"} {
-    "Set the status of the type/range checker\.\[\r\n\]+"
-} "help set check \"ch\" abbreviation"
-# test help set check
+
+# Test help set check abbreviations
+foreach x {"c" "ch"} {
+    test_prefix_command_help [list "set $x" "set check"] {
+	"Set the status of the type/range checker\.\[\r\n\]+"
+    } "help set check \"$x\" abbreviation"
+}
+
+# Test help set check
 test_prefix_command_help {"set check"} {
     "Set the status of the type/range checker\.\[\r\n\]+"
 }
+
 # test help set check range
 gdb_test "help set check range" "Set range checking\.  \\(on/warn/off/auto\\)" "help set check range"
-# test help set check type
-gdb_test "help set check type" "Set type checking\.  \\(on/warn/off/auto\\)." "help set check type"
+
+# Test help set check type
+gdb_test "help set check type" "Set strict type checking\." \
+    "help set check type"
+
 # test help set complaints
 gdb_test "help set complaints" "Set max number of complaints about incorrect symbols\." "help set complaints"
 # test help set confirm
@@ -487,18 +491,25 @@ gdb_test "help shell" "Execute the rest of the line as a shell command\.\[\r\n\]
 gdb_test "help show annotate" "Show annotation_level\.\[\r\n\]+0 == normal;     1 == fullname \\(for use when running under emacs\\)\[\r\n\]+2 == output annotated suitably for use by programs that control GDB\." "help show annotate"
 # test help show args
 gdb_test "help show args" "Show argument list to give program being debugged when it is started\.\[\r\n\]+Follow this command with any number of args, to be passed to the program\."
-# test help show check "c" abbreviation
-test_prefix_command_help {"show c" "show check"} {
-    "Show the status of the type/range checker\.\[\r\n\]+"
-} "help show check \"c\" abbreviation"
+
+# Test help show check abbreviations
+foreach x {"c" "check"} {
+    test_prefix_command_help [list "show $x" "show check"] {
+	"Show the status of the type/range checker\.\[\r\n\]+"
+    } "help show check \"$x\" abbreviation"
+}
+
 # test help show check
 test_prefix_command_help {"show check"} {
     "Show the status of the type/range checker\.\[\r\n\]+"
 }
 # test help show check range
 gdb_test "help show check range" "Show range checking\.  \\(on/warn/off/auto\\)" "help show check range"
+
 # test help show check type
-gdb_test "help show check type" "Show type checking\.  \\(on/warn/off/auto\\)" "help show check type"
+gdb_test "help show check type" "Show strict type checking\." \
+    "help show check type"
+
 # test help show commands
 gdb_test "help show commands" "Show the history of commands you typed\.\[\r\n\]+You can supply a command number to start with, or a `\[+\]' to start after\[\r\n\]+the previous command number shown\." "help show commands"
 # test help show complaints

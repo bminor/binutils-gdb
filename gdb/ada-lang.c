@@ -12499,7 +12499,6 @@ const struct language_defn ada_language_defn = {
   "ada",                        /* Language name */
   language_ada,
   range_check_off,
-  type_check_off,
   case_sensitive_on,            /* Yes, Ada is case-insensitive, but
                                    that's not quite what this means.  */
   array_row_major,

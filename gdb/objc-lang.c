@@ -509,7 +509,6 @@ const struct language_defn objc_language_defn = {
   "objective-c",		/* Language name */
   language_objc,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,

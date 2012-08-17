@@ -1,3 +1,48 @@
+2012-08-17  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/13356
+	* gdbtypes.c (strict_type_checking): New variable.
+	(show_strict_type_checking): New function.
+	(rank_one_type): Return NS_POINTER_INTEGER_CONVERSION_BADNESS
+	if strict type checking is disabled.
+	(_initialize_gdbtypes): Add "check type" subcommand.
+	* gdbtypes.h (NS_INTEGER_POINTER_CONVERSION_BADNESS): New struct.
+
+2012-08-17  Keith Seitz  <keiths@redhat.com>
+
+	* language.h (type_mode): Remove.
+	(type_check): Remove.
+	(struct language_defn): Remove la_type_check.
+	(STRICT_TYPE): Remove unused macro.
+	(type_error): Remove.
+	* language.c (set_type_range_case): Renamed to ...
+	(set_range_case): ... this.  Update all callers.
+	Remove type_mode/type_check.
+	(type_mode): Remove.
+	(type_check): Remove.
+	(show_type_command): Remove.
+	(set_type_command): Remove.
+	(language_info): Remove type checking output.
+	(type_error): Remove unused function.
+	(range_error): Update comment.
+	(unknown_language_defn): Remove la_type_check.
+	(auto_language_defn): Likewise.
+	(local_language_defn): Likewise.
+	(_initialize_language): Remove "check type" subcommand.
+	* ada-lang.c (ada_language_defn): Remove la_type_check.
+	* c-lang.c (c_language_defn): Likewise.
+	(cplus_language_defn): Likewise.
+	(asm_language_defn): Likewise.
+	(minimal_language_defn): Likewise.
+	* d-lang.c (d_language_defn): Likewise.
+	* f-lang.c (f_language_defn): Likewise.
+	* go-lang.c (go_language_defn): Likewise.
+	* jv-lang.c (java_language_defn): Likewise.
+	* m2-lang.c (m2_language_defn): Likewise.
+	* objc-lang.c (objc_language_defn): Likewise.
+	* opencl-lang.c (opencl_language_defn): Likewise.
+	* p-lang.c (pascal_language_defn): Likewise.
+
 2012-08-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* infcmd.c (_initialize_infcmd): Remove trailing ) in next help text.

@@ -55,7 +55,7 @@ static void show_check (char *, int);
 
 static void set_check (char *, int);
 
-static void set_type_range_case (void);
+static void set_range_case (void);
 
 static void unk_lang_emit_char (int c, struct type *type,
 				struct ui_file *stream, int quoter);
@@ -81,8 +81,6 @@ extern const struct language_defn unknown_language_defn;
 
 enum range_mode range_mode = range_mode_auto;
 enum range_check range_check = range_check_off;
-enum type_mode type_mode = type_mode_auto;
-enum type_check type_check = type_check_off;
 enum case_mode case_mode = case_mode_auto;
 enum case_sensitivity case_sensitivity = case_sensitive_on;
 
@@ -174,7 +172,7 @@ set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 	      /* Enter manual mode.  Set the specified language.  */
 	      language_mode = language_mode_manual;
 	      current_language = languages[i];
-	      set_type_range_case ();
+	      set_range_case ();
 	      expected_language = current_language;
 	      return;
 	    }
@@ -184,79 +182,6 @@ set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
   internal_error (__FILE__, __LINE__,
 		  "Couldn't find language `%s' in known languages list.",
 		  language);
-}
-
-/* Show command.  Display a warning if the type setting does
-   not match the current language.  */
-static void
-show_type_command (struct ui_file *file, int from_tty,
-		   struct cmd_list_element *c, const char *value)
-{
-  if (type_mode == type_mode_auto)
-    {
-      char *tmp = NULL;
-
-      switch (type_check)
-	{
-	case type_check_on:
-	  tmp = "on";
-	  break;
-	case type_check_off:
-	  tmp = "off";
-	  break;
-	case type_check_warn:
-	  tmp = "warn";
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__,
-			  "Unrecognized type check setting.");
-	}
-
-      fprintf_filtered (gdb_stdout,
-			_("Type checking is \"auto; currently %s\".\n"),
-			tmp);
-    }
-  else
-    fprintf_filtered (gdb_stdout, _("Type checking is \"%s\".\n"),
-		      value);
-
-   if (type_check != current_language->la_type_check)
-    warning (_("the current type check setting"
-	       " does not match the language.\n"));
-}
-
-/* Set command.  Change the setting for type checking.  */
-static void
-set_type_command (char *ignore, int from_tty, struct cmd_list_element *c)
-{
-  if (strcmp (type, "on") == 0)
-    {
-      type_check = type_check_on;
-      type_mode = type_mode_manual;
-    }
-  else if (strcmp (type, "warn") == 0)
-    {
-      type_check = type_check_warn;
-      type_mode = type_mode_manual;
-    }
-  else if (strcmp (type, "off") == 0)
-    {
-      type_check = type_check_off;
-      type_mode = type_mode_manual;
-    }
-  else if (strcmp (type, "auto") == 0)
-    {
-      type_mode = type_mode_auto;
-      set_type_range_case ();
-      return;
-    }
-  else
-    internal_error (__FILE__, __LINE__,
-		    _("Unrecognized type check setting: \"%s\""), type);
-
-  if (type_check != current_language->la_type_check)
-    warning (_("the current type check setting"
-	       " does not match the language.\n"));
 }
 
 /* Show command.  Display a warning if the range setting does
@@ -320,7 +245,7 @@ set_range_command (char *ignore, int from_tty, struct cmd_list_element *c)
   else if (strcmp (range, "auto") == 0)
     {
       range_mode = range_mode_auto;
-      set_type_range_case ();
+      set_range_case ();
       return;
     }
   else
@@ -389,7 +314,7 @@ set_case_command (char *ignore, int from_tty, struct cmd_list_element *c)
    else if (strcmp (case_sensitive, "auto") == 0)
      {
        case_mode = case_mode_auto;
-       set_type_range_case ();
+       set_range_case ();
        return;
      }
    else
@@ -409,13 +334,10 @@ set_case_command (char *ignore, int from_tty, struct cmd_list_element *c)
    If SHOW is non-zero, then print out the current language,
    type and range checking status.  */
 static void
-set_type_range_case (void)
+set_range_case (void)
 {
   if (range_mode == range_mode_auto)
     range_check = current_language->la_range_check;
-
-  if (type_mode == type_mode_auto)
-    type_check = current_language->la_type_check;
 
   if (case_mode == case_mode_auto)
     case_sensitivity = current_language->la_case_sensitivity;
@@ -437,7 +359,7 @@ set_language (enum language lang)
       if (languages[i]->la_language == lang)
 	{
 	  current_language = languages[i];
-	  set_type_range_case ();
+	  set_range_case ();
 	  break;
 	}
     }
@@ -461,8 +383,6 @@ language_info (int quietly)
 
   if (!quietly)
     {
-      printf_unfiltered (_("Type checking:     %s\n"), type);
-      show_type_command (NULL, 1, NULL, NULL);
       printf_unfiltered (_("Range checking:    %s\n"), range);
       show_range_command (NULL, 1, NULL, NULL);
       printf_unfiltered (_("Case sensitivity:  %s\n"), case_sensitive);
@@ -500,38 +420,11 @@ value_true (struct value *val)
    error messages that occur during type- and range-
    checking.  */
 
-/* These are called when a language fails a type- or range-check.  The
+/* This is called when a language fails a range-check.  The
    first argument should be a printf()-style format string, and the
-   rest of the arguments should be its arguments.  If
-   [type|range]_check is [type|range]_check_on, an error is printed;
-   if [type|range]_check_warn, a warning; otherwise just the
-   message.  */
-
-void
-type_error (const char *string,...)
-{
-  va_list args;
-
-  va_start (args, string);
-  switch (type_check)
-    {
-    case type_check_warn:
-      vwarning (string, args);
-      break;
-    case type_check_on:
-      verror (string, args);
-      break;
-    case type_check_off:
-      /* FIXME: cagney/2002-01-30: Should this function print anything
-         when type error is off?  */
-      vfprintf_filtered (gdb_stderr, string, args);
-      fprintf_filtered (gdb_stderr, "\n");
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
-    }
-  va_end (args);
-}
+   rest of the arguments should be its arguments.  If range_check is
+   range_check_on, an error is printed;  if range_check_warn, a warning;
+   otherwise just the message.  */
 
 void
 range_error (const char *string,...)
@@ -902,7 +795,6 @@ const struct language_defn unknown_language_defn =
   "unknown",
   language_unknown,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
@@ -946,7 +838,6 @@ const struct language_defn auto_language_defn =
   "auto",
   language_auto,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
@@ -988,7 +879,6 @@ const struct language_defn local_language_defn =
   "local",
   language_auto,
   range_check_off,
-  type_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
@@ -1134,13 +1024,6 @@ _initialize_language (void)
 		  &showchecklist, "show check ", 0, &showlist);
   add_alias_cmd ("c", "check", no_class, 1, &showlist);
   add_alias_cmd ("ch", "check", no_class, 1, &showlist);
-
-  add_setshow_enum_cmd ("type", class_support, type_or_range_names, &type,
-			_("Set type checking.  (on/warn/off/auto)"),
-			_("Show type checking.  (on/warn/off/auto)"),
-			NULL, set_type_command,
-			show_type_command,
-			&setchecklist, &showchecklist);
 
   add_setshow_enum_cmd ("range", class_support, type_or_range_names,
 			&range,

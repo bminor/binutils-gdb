@@ -27,6 +27,10 @@ int foo3_1 (int a, const char **b) { return 31; }
 int foo3_2 (int a, int b) { return 32; }
 int foo3_2 (int a, const char **b) { return 320; }
 
+int foo1_type_check (char *a) { return 1000; }
+int foo2_type_check (char *a, char *b) { return 1001; }
+int foo3_type_check (char *a, char *b, char *c) { return 1002; }
+
 int main()
 {
 
@@ -61,6 +65,10 @@ int main()
   foo3_1 (0, 0);
   foo3_2 (0, static_cast<char const**> (0));
   foo3_2 (0, 0);
+
+  foo1_type_check (a);
+  foo2_type_check (a, a);
+  foo3_type_check (a, a, a);
 
   return 0;          // end of main
 }
