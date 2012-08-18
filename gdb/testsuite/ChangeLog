@@ -1,3 +1,8 @@
+2012-08-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/solib-corrupted.exp (make solibs looping): Replace
+	verbose -log by more specific untested call.
+
 2012-08-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/tfind.exp: Move tests on various command help before

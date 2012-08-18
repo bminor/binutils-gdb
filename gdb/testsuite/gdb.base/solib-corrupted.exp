@@ -44,9 +44,8 @@ gdb_test_multiple "p/x _r_debug->r_map->l_next = _r_debug->r_map" $test {
     -re "(No symbol \"_r_debug\" in current context\\.|Attempt to extract a component of a value that is not a structure pointer\\.)\r\n$gdb_prompt $" {
 	# glibc debug info is not available and it is too difficult to find and
 	# parse it from this testcase without the gdb supporting functions.
-	verbose -log "no _r_debug symbol has been found"
 	xfail $test
-	untested ${testfile}.exp
+	untested "no _r_debug symbol has been found"
 	return
     }
     -re " = 0x\[0-9a-f\]+\r\n$gdb_prompt $" {
