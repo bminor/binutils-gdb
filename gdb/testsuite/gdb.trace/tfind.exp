@@ -31,6 +31,34 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" "$binfile" \
 gdb_load $binfile
 gdb_test "tstop"       ".*" ""
 gdb_test "tfind none"  ".*" ""
+
+# 6.2 test help tstart
+gdb_test "help tstart" \
+    "Start trace data collection\.\[\r\n\]+Usage: tstart \\\[ <notes> \.\.\. \\\]\[\r\n\]+Any arguments supplied are recorded with the trace as a note and\[\r\n\]+reported by tstatus \\(if the target supports trace notes\\)\." \
+    "6.2: help tstart"
+# 7.2 test help tstop
+gdb_test "help tstop" \
+    "Stop trace data collection\.\[\r\n\]+Usage: tstop \\\[ <notes> \.\.\. \\\]\[\r\n\]+Any arguments supplied are recorded with the trace as a stop reason and\[\r\n\]+reported by tstatus \\(if the target supports trace notes\\)\." \
+    "7.2: help tstop"
+
+# 8.38 test help tfind
+gdb_test "help tfind"       "Select a trace frame.*"      \
+	"8.38: help tfind"
+gdb_test "help tfind pc"    "Select a trace frame by PC.*" \
+	"8.38: help tfind PC"
+gdb_test "help tfind end"   "De-select any trace frame.*" \
+	"8.38: help tfind end"
+gdb_test "help tfind none"  "De-select any trace frame.*" \
+	"8.38: help tfind none"
+gdb_test "help tfind line"  "Select a trace frame by source line.*" \
+	"8.38: help tfind line"
+gdb_test "help tfind start" "Select the first trace frame.*" \
+	"8.38: help tfind start"
+gdb_test "help tfind range" "Select a trace frame whose PC is in.*" \
+	"8.38: help tfind range"
+gdb_test "help tfind trace" "Select a trace frame by tracepoint number.*" \
+	"8.38: help tfind tracepoint"
+
 runto_main
 gdb_reinitialize_dir $srcdir/$subdir
 
@@ -99,9 +127,6 @@ if { $return_me == 1 } then {
 # test tstatus (when trace on)
 gdb_test "tstatus" "\[Tt\]race is running.*" "test tstatus on"
 
-# 6.2 test help tstart
-gdb_test "help tstart" "Start trace data collection\.\[\r\n\]+Usage: tstart \\\[ <notes> \.\.\. \\\]\[\r\n\]+Any arguments supplied are recorded with the trace as a note and\[\r\n\]+reported by tstatus \\(if the target supports trace notes\\)\." "6.2: help tstart"
-
 gdb_test "break end" ".*" ""
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
@@ -129,9 +154,6 @@ gdb_test_multiple "tstop" "7.1: tstop" {
 if { $return_me == 1 } then {
     return -1;
 }
-
-# 7.2 test help tstop
-gdb_test "help tstop" "Stop trace data collection\.\[\r\n\]+Usage: tstop \\\[ <notes> \.\.\. \\\]\[\r\n\]+Any arguments supplied are recorded with the trace as a stop reason and\[\r\n\]+reported by tstatus \\(if the target supports trace notes\\)\." "7.2: help tstop"
 
 # test tstatus (when trace off)
 gdb_test "tstatus" "Trace stopped by a tstop command.*" \
@@ -338,24 +360,6 @@ gdb_test "tfind line NoSuChFiLe.c:$baseline" \
 gdb_test "tfind NoSuChOpTiOn 21" \
 	"No symbol.*|\[Ww\]arning.*|\[Ee\]rror.*" \
 	"8.32: tfind with bad subcommand"
-
-# 8.38 test help tfind
-gdb_test "help tfind"       "Select a trace frame.*"      \
-	"8.38: help tfind"
-gdb_test "help tfind pc"    "Select a trace frame by PC.*" \
-	"8.38: help tfind PC"
-gdb_test "help tfind end"   "Synonym for 'none'.*"        \
-	"8.38: help tfind end"
-gdb_test "help tfind none"  "De-select any trace frame.*" \
-	"8.38: help tfind none"
-gdb_test "help tfind line"  "Select a trace frame by source line.*" \
-	"8.38: help tfind line"
-gdb_test "help tfind start" "Select the first trace frame.*" \
-	"8.38: help tfind start"
-gdb_test "help tfind range" "Select a trace frame whose PC is in.*" \
-	"8.38: help tfind range"
-gdb_test "help tfind trace" "Select a trace frame by tracepoint number.*" \
-	"8.38: help tfind tracepoint"
 
 # Finished!
 gdb_tfind_test "8.17: tfind none" "none" "-1"
