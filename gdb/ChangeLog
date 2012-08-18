@@ -1,3 +1,8 @@
+2012-08-18  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Fix a typo: golang.h -> go-lang.h.
+	The typo broke "make TAGS".
+
 2012-08-17  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.5 released.
