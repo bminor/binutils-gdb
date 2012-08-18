@@ -1,3 +1,11 @@
+2012-08-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/ar.exp (long_filenames): Remove extra verbose
+	before binutils_run.
+	(thin_archive): Likewise.
+	(thin_archive_with_nested): Likewise.  Also run bfdtest1 on
+	$archive2.
+
 2012-08-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14481
