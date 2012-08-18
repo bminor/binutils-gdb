@@ -62,7 +62,7 @@ class Garbage_collection;
 class Icf;
 
 // The base class of an entry in the symbol table.  The symbol table
-// can have a lot of entries, so we don't want this class to big.
+// can have a lot of entries, so we don't want this class too big.
 // Size dependent fields can be found in the template class
 // Sized_symbol.  Targets may support their own derived classes.
 

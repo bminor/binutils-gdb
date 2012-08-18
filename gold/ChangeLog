@@ -1,3 +1,30 @@
+2012-08-18  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc: Formatting and white space.
+	(Powerpc_relobj): Rename got2_section_ to special_.
+	Add opd_ent_shndx_ and opd_ent_off_ vectors.
+	(Powerpc_relobj::opd_shndx, init_opd, get_opd_ent, set_opd_ent,
+	scan_opd_relocs, do_read_relocs, opd_ent_ndx): New functions.
+	(Target_powerpc): Add Address typedef and invalid_address.  Use
+	throughout.
+	(Target_powerpc::is_branch_reloc): New function.
+	(Powerpc_relocate_functions): Add Address typedef, use throughout.
+	(Powerpc_relocate_functions:rela, rela_ua): Correct type used
+	for dst_mask, value and addend.
+	(Powerpc_relobj::do_find_special_sections): Find .opd for 64-bit.
+	(ld_2_1, cror_15_15_15, cror_31_31_31): New insn constants.
+	(Output_data_glink::do_write): Correct toc base.  Don't try to use
+	uint16_t for 24-bit offset.  Use get_output_section_offset and
+	check return.
+	(Target_powerpc::Scan::local): Handle more relocs.
+	(Target_powerpc::do_finalize_sections): Set up DT_PPC64_GLINK.
+	(Target_powerpc::Relocate::relocate): Correct toc base calculation.
+	Plug in toc restoring insn after plt calls.  Translate branches
+	to function descriptor symbols to corresponding entry point.
+	(Target_powerpc::relocate_for_relocatable): Check return from
+	get_output_section_offset.
+	* symtab.h: Comment typo.
+
 2012-08-14  Ian Lance Taylor  <iant@google.com>
 
 	* x86_64.cc (Target_x86_64::Scan::global): Fix erroneous call to
