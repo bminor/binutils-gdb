@@ -1,3 +1,9 @@
+012-08-19  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/14365
+	* gdb.dwarf2/dw2-anon-mptr.exp: New file.
+	* gdb.dwarf2/dw2-anon-mptr.S: New file.
+
 2012-08-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/solib-corrupted.exp (make solibs looping): Replace

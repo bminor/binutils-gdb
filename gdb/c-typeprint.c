@@ -265,7 +265,7 @@ c_type_print_varspec_prefix (struct type *type,
 	fputs_filtered (name, stream);
       else
 	c_type_print_base (TYPE_DOMAIN_TYPE (type),
-			   stream, 0, passed_a_ptr);
+			   stream, -1, passed_a_ptr);
       fprintf_filtered (stream, "::*");
       break;
 
@@ -278,7 +278,7 @@ c_type_print_varspec_prefix (struct type *type,
 	fputs_filtered (name, stream);
       else
 	c_type_print_base (TYPE_DOMAIN_TYPE (type),
-			   stream, 0, passed_a_ptr);
+			   stream, -1, passed_a_ptr);
       fprintf_filtered (stream, "::*");
       break;
 
