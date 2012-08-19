@@ -1,3 +1,8 @@
+012-08-19  Andrew Pinski  <apinski@cavium.com>
+
+	* gdb.arch/mips-octeon-bbit.c: New file.
+	* gdb.arch/mips-octeon-bbit.exp: New Test.
+
 012-08-19  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/14365

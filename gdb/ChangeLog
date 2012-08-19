@@ -1,5 +1,12 @@
 2012-08-19  Andrew Pinski  <apinski@cavium.com>
 
+	* mips-tdep.c (is_octeon): New function.
+	(is_octeon_bbit_op): New function.
+	(mips32_next_pc): Handle Octeon's bbit instructions.
+	(mips32_instruction_has_delay_slot): Likewise.
+
+2012-08-19  Andrew Pinski  <apinski@cavium.com>
+
 	* mips-tdep.c (mips32_next_pc): Fix line spacing of the comment
 	before the function.
 

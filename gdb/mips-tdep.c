@@ -1466,6 +1466,35 @@ mips32_bc1_pc (struct gdbarch *gdbarch, struct frame_info *frame,
   return pc;
 }
 
+/* Return nonzero if the gdbarch is an Octeon series.  */
+
+static int
+is_octeon (struct gdbarch *gdbarch)
+{
+  const struct bfd_arch_info *info = gdbarch_bfd_arch_info (gdbarch);
+
+  return (info->mach == bfd_mach_mips_octeon
+         || info->mach == bfd_mach_mips_octeonp
+         || info->mach == bfd_mach_mips_octeon2);
+}
+
+/* Return true if the OP represents the Octeon's BBIT instruction.  */
+
+static int
+is_octeon_bbit_op (int op, struct gdbarch *gdbarch)
+{
+  if (!is_octeon (gdbarch))
+    return 0;
+  /* BBIT0 is encoded as LWC2: 110 010.  */
+  /* BBIT032 is encoded as LDC2: 110 110.  */
+  /* BBIT1 is encoded as SWC2: 111 010.  */
+  /* BBIT132 is encoded as SDC2: 111 110.  */
+  if (op == 50 || op == 54 || op == 58 || op == 62)
+    return 1;
+  return 0;
+}
+
+
 /* Determine where to set a single step breakpoint while considering
    branch prediction.  */
 
@@ -1518,6 +1547,25 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	  /* Add 1 to indicate 16-bit mode -- invert ISA mode.  */
 	  pc = ((pc + 4) & ~(CORE_ADDR) 0x0fffffff) + reg + 1;
 	}
+      else if (is_octeon_bbit_op (op, gdbarch))
+	{
+	  int bit, branch_if;
+
+	  branch_if = op == 58 || op == 62;
+	  bit = itype_rt (inst);
+
+	  /* Take into account the *32 instructions.  */
+	  if (op == 54 || op == 62)
+	    bit += 32;
+
+	  if (((get_frame_register_signed (frame,
+					   itype_rs (inst)) >> bit) & 1)
+              == branch_if)
+	    pc += mips32_relative_offset (inst) + 4;
+          else
+	    pc += 8;        /* After the delay slot.  */
+	}
+
       else
 	pc += 4;		/* Not a branch, next instruction is easy.  */
     }
@@ -6947,7 +6995,8 @@ mips32_instruction_has_delay_slot (struct gdbarch *gdbarch, CORE_ADDR addr)
     {
       rs = itype_rs (inst);
       rt = itype_rt (inst);
-      return (op >> 2 == 5	/* BEQL, BNEL, BLEZL, BGTZL: bits 0101xx  */
+      return (is_octeon_bbit_op (op, gdbarch) 
+	      || op >> 2 == 5	/* BEQL, BNEL, BLEZL, BGTZL: bits 0101xx  */
 	      || op == 29	/* JALX: bits 011101  */
 	      || (op == 17
 		  && (rs == 8
