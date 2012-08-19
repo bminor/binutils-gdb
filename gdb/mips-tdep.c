@@ -1468,6 +1468,7 @@ mips32_bc1_pc (struct gdbarch *gdbarch, struct frame_info *frame,
 
 /* Determine where to set a single step breakpoint while considering
    branch prediction.  */
+
 static CORE_ADDR
 mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
