@@ -1475,14 +1475,14 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
   unsigned long inst;
   int op;
   inst = mips_fetch_instruction (gdbarch, ISA_MIPS, pc, NULL);
+  op = itype_op (inst);
   if ((inst & 0xe0000000) != 0)		/* Not a special, jump or branch
 					   instruction.  */
     {
-      if (itype_op (inst) >> 2 == 5)
+      if (op >> 2 == 5)
 	/* BEQL, BNEL, BLEZL, BGTZL: bits 0101xx */
 	{
-	  op = (itype_op (inst) & 0x03);
-	  switch (op)
+	  switch (op & 0x03)
 	    {
 	    case 0:		/* BEQL */
 	      goto equal_branch;
@@ -1496,18 +1496,18 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	      pc += 4;
 	    }
 	}
-      else if (itype_op (inst) == 17 && itype_rs (inst) == 8)
+      else if (op == 17 && itype_rs (inst) == 8)
 	/* BC1F, BC1FL, BC1T, BC1TL: 010001 01000 */
 	pc = mips32_bc1_pc (gdbarch, frame, inst, pc + 4, 1);
-      else if (itype_op (inst) == 17 && itype_rs (inst) == 9
+      else if (op == 17 && itype_rs (inst) == 9
 	       && (itype_rt (inst) & 2) == 0)
 	/* BC1ANY2F, BC1ANY2T: 010001 01001 xxx0x */
 	pc = mips32_bc1_pc (gdbarch, frame, inst, pc + 4, 2);
-      else if (itype_op (inst) == 17 && itype_rs (inst) == 10
+      else if (op == 17 && itype_rs (inst) == 10
 	       && (itype_rt (inst) & 2) == 0)
 	/* BC1ANY4F, BC1ANY4T: 010001 01010 xxx0x */
 	pc = mips32_bc1_pc (gdbarch, frame, inst, pc + 4, 4);
-      else if (itype_op (inst) == 29)
+      else if (op == 29)
 	/* JALX: 011101 */
 	/* The new PC will be alternate mode.  */
 	{
@@ -1524,7 +1524,7 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
     {				/* This gets way messy.  */
 
       /* Further subdivide into SPECIAL, REGIMM and other.  */
-      switch (op = itype_op (inst) & 0x07)	/* Extract bits 28,27,26.  */
+      switch (op & 0x07)	/* Extract bits 28,27,26.  */
 	{
 	case 0:		/* SPECIAL */
 	  op = rtype_funct (inst);

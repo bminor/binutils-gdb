@@ -1,3 +1,7 @@
+2012-08-19  Andrew Pinski  <apinski@cavium.com>
+
+	* mips-tdep.c (mips32_next_pc): Consolidate calls to itype_op.
+
 2012-08-19  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/14365
