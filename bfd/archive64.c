@@ -77,7 +77,7 @@ bfd_elf64_archive_slurp_armap (bfd *abfd)
   if (mapdata == NULL)
     return FALSE;
   parsed_size = mapdata->parsed_size;
-  bfd_release (abfd, mapdata);
+  free (mapdata);
 
   if (bfd_bread (int_buf, 8, abfd) != 8)
     {

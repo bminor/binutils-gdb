@@ -2904,7 +2904,7 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
   if (mapdata == NULL)
     return FALSE;
   parsed_size = mapdata->parsed_size;
-  bfd_release (abfd, (void *) mapdata);
+  free (mapdata);
 
   raw_armap = (char *) bfd_alloc (abfd, parsed_size);
   if (raw_armap == NULL)

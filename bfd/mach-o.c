@@ -4294,7 +4294,7 @@ bfd_mach_o_fat_member_init (bfd *abfd,
       abfd->filename = name;
     }
 
-  areltdata = bfd_zalloc (abfd, sizeof (struct areltdata));
+  areltdata = bfd_zmalloc (sizeof (struct areltdata));
   areltdata->parsed_size = entry->size;
   abfd->arelt_data = areltdata;
   abfd->iostream = NULL;

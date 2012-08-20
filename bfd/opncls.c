@@ -136,6 +136,7 @@ _bfd_delete_bfd (bfd *abfd)
       objalloc_free ((struct objalloc *) abfd->memory);
     }
 
+  free (abfd->arelt_data);
   free (abfd);
 }
 

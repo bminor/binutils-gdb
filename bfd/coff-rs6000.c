@@ -1496,7 +1496,7 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
   struct areltdata *ret;
   bfd_size_type amt = sizeof (struct areltdata);
 
-  ret = (struct areltdata *) bfd_alloc (abfd, amt);
+  ret = (struct areltdata *) bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -2113,7 +2113,7 @@ xcoff_write_archive_contents_old (bfd *abfd)
       total_namlen += strlen (normalize_filename (sub)) + 1;
       if (sub->arelt_data == NULL)
 	{
-	  sub->arelt_data = bfd_zalloc (sub, sizeof (struct areltdata));
+	  sub->arelt_data = bfd_zmalloc (sizeof (struct areltdata));
 	  if (sub->arelt_data == NULL)
 	    return FALSE;
 	}
@@ -2329,7 +2329,7 @@ xcoff_write_archive_contents_big (bfd *abfd)
       if (current_bfd->arelt_data == NULL)
 	{
 	  size = sizeof (struct areltdata);
-	  current_bfd->arelt_data = bfd_zalloc (current_bfd, size);
+	  current_bfd->arelt_data = bfd_zmalloc (size);
 	  if (current_bfd->arelt_data == NULL)
 	    return FALSE;
 	}

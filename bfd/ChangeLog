@@ -1,3 +1,26 @@
+2012-08-20  Tom Tromey  <tromey@redhat.com>
+
+	* vms-lib.c (_bfd_vms_lib_get_module): Use bfd_zmalloc for
+	areltdata.
+	* opncls.c (_bfd_delete_bfd): Free arelt_data.
+	* mach-o.c (bfd_mach_o_fat_member_init): Use bfd_zmalloc for
+	areltdata.
+	* ecoff.c (_bfd_ecoff_slurp_armap): Use free for mapdata.
+	* coff-rs6000.c (_bfd_xcoff_read_ar_hdr): Use bfd_zmalloc for
+	areltdata.
+	(xcoff_write_archive_contents_old): Likewise.
+	(xcoff_write_archive_contents_big): Likewise.
+	* archive64.c (bfd_elf64_archive_slurp_armap): Use free for
+	areltdata.
+	* archive.c (_bfd_generic_read_ar_hdr_mag): Use bfd_zmalloc and
+	free for areltdata.
+	(_bfd_get_elt_at_filepos): Likewise.  Clear n_nfd->arelt_data on
+	failure.
+	(do_slurp_bsd_armap): Use bfd_zmalloc and free for areltdata.
+	(do_slurp_coff_armap): Likewise.
+	(_bfd_slurp_extended_name_table): Likewise.
+	(bfd_slurp_bsd_armap_f2): Likewise.  Don't leak 'mapdata'.
+
 2012-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.

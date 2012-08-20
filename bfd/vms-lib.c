@@ -1,6 +1,6 @@
 /* BFD back-end for VMS archive files.
 
-   Copyright 2010, 2011 Free Software Foundation, Inc.
+   Copyright 2010, 2011, 2012 Free Software Foundation, Inc.
    Written by Tristan Gingold <gingold@adacore.com>, AdaCore.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1337,7 +1337,7 @@ _bfd_vms_lib_get_module (bfd *abfd, unsigned int modidx)
       res = _bfd_create_empty_archive_element_shell (abfd);
       if (res == NULL)
         return NULL;
-      arelt = bfd_zalloc (res, sizeof (*arelt));
+      arelt = bfd_zmalloc (sizeof (*arelt));
       if (arelt == NULL)
         return NULL;
       res->arelt_data = arelt;

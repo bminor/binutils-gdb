@@ -517,7 +517,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
       parsed_size -= namelen;
       extra_size = namelen;
 
-      allocptr = (char *) bfd_zalloc (abfd, allocsize);
+      allocptr = (char *) bfd_zmalloc (allocsize);
       if (allocptr == NULL)
 	return NULL;
       filename = (allocptr
@@ -525,6 +525,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
 		  + sizeof (struct ar_hdr));
       if (bfd_bread (filename, namelen, abfd) != namelen)
 	{
+	  free (allocptr);
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_no_more_archived_files);
 	  return NULL;
@@ -560,7 +561,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
 
   if (!allocptr)
     {
-      allocptr = (char *) bfd_zalloc (abfd, allocsize);
+      allocptr = (char *) bfd_zmalloc (allocsize);
       if (allocptr == NULL)
 	return NULL;
     }
@@ -643,7 +644,10 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 	{
 	  filename = _bfd_append_relative_path (archive, filename);
 	  if (filename == NULL)
-	    return NULL;
+	    {
+	      free (new_areldata);
+	      return NULL;
+	    }
 	}
 
       if (new_areldata->origin > 0)
@@ -655,13 +659,13 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 	  if (ext_arch == NULL
 	      || ! bfd_check_format (ext_arch, bfd_archive))
 	    {
-	      bfd_release (archive, new_areldata);
+	      free (new_areldata);
 	      return NULL;
 	    }
 	  n_nfd = _bfd_get_elt_at_filepos (ext_arch, new_areldata->origin);
 	  if (n_nfd == NULL)
 	    {
-	      bfd_release (archive, new_areldata);
+	      free (new_areldata);
 	      return NULL;
 	    }
 	  n_nfd->proxy_origin = bfd_tell (archive);
@@ -683,7 +687,7 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 
   if (n_nfd == NULL)
     {
-      bfd_release (archive, new_areldata);
+      free (new_areldata);
       return NULL;
     }
 
@@ -707,7 +711,8 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   if (_bfd_add_bfd_to_archive_cache (archive, filepos, n_nfd))
     return n_nfd;
 
-  bfd_release (archive, new_areldata);
+  free (new_areldata);
+  n_nfd->arelt_data = NULL;
   return NULL;
 }
 
@@ -894,7 +899,7 @@ do_slurp_bsd_armap (bfd *abfd)
   if (mapdata == NULL)
     return FALSE;
   parsed_size = mapdata->parsed_size;
-  bfd_release (abfd, mapdata);	/* Don't need it any more.  */
+  free (mapdata);
 
   raw_armap = (bfd_byte *) bfd_zalloc (abfd, parsed_size);
   if (raw_armap == NULL)
@@ -970,7 +975,7 @@ do_slurp_coff_armap (bfd *abfd)
   if (mapdata == NULL)
     return FALSE;
   parsed_size = mapdata->parsed_size;
-  bfd_release (abfd, mapdata);	/* Don't need it any more.  */
+  free (mapdata);
 
   if (bfd_bread (int_buf, 4, abfd) != 4)
     {
@@ -1063,7 +1068,7 @@ do_slurp_coff_armap (bfd *abfd)
 	    ardata->first_file_filepos +=
 	      (tmp->parsed_size + sizeof (struct ar_hdr) + 1) & ~(unsigned) 1;
 	  }
-	bfd_release (abfd, tmp);
+	free (tmp);
       }
   }
 
@@ -1180,15 +1185,17 @@ bfd_slurp_bsd_armap_f2 (bfd *abfd)
 
   if (mapdata->parsed_size < HPUX_SYMDEF_COUNT_SIZE + BSD_STRING_COUNT_SIZE)
     {
+      free (mapdata);
     wrong_format:
       bfd_set_error (bfd_error_wrong_format);
     byebye:
-      bfd_release (abfd, mapdata);
       return FALSE;
     }
   left = mapdata->parsed_size - HPUX_SYMDEF_COUNT_SIZE - BSD_STRING_COUNT_SIZE;
 
   amt = mapdata->parsed_size;
+  free (mapdata);
+
   raw_armap = (bfd_byte *) bfd_zalloc (abfd, amt);
   if (raw_armap == NULL)
     goto byebye;
@@ -1290,7 +1297,7 @@ _bfd_slurp_extended_name_table (bfd *abfd)
       if (bfd_ardata (abfd)->extended_names == NULL)
 	{
 	byebye:
-	  bfd_release (abfd, namedata);
+	  free (namedata);
 	  return FALSE;
 	}
 
@@ -1327,8 +1334,7 @@ _bfd_slurp_extended_name_table (bfd *abfd)
       bfd_ardata (abfd)->first_file_filepos +=
 	(bfd_ardata (abfd)->first_file_filepos) % 2;
 
-      /* FIXME, we can't release namedata here because it was allocated
-	 below extended_names on the objalloc...  */
+      free (namedata);
     }
   return TRUE;
 }
