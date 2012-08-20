@@ -2858,14 +2858,12 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"machhwsu",	XO (4,	76,0,0),XO_MASK,     MULHW|PPCVLE,  PPCNONE,	{RT, RA, RB}},
 {"machhwsu.",	XO (4,	76,0,1),XO_MASK,     MULHW|PPCVLE,  PPCNONE,	{RT, RA, RB}},
 {"ps_cmpo1",	X  (4,	96), X_MASK|(3<<21), PPCPS,	PPCNONE,	{BF, FRA, FRB}},
-{"vabsdub",	VX (4, 192),	VX_MASK,     PPCVEC2,	PPCNONE,	{VD, VA, VB}},
 {"vcmpeqfp",	VXR(4, 198,0),	VXR_MASK,    PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vpkuwus",	VX (4, 206),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"machhws",	XO (4, 108,0,0),XO_MASK,     MULHW|PPCVLE, PPCNONE,	{RT, RA, RB}},
 {"machhws.",	XO (4, 108,0,1),XO_MASK,     MULHW|PPCVLE, PPCNONE,	{RT, RA, RB}},
 {"nmachhws",	XO (4, 110,0,0),XO_MASK,     MULHW|PPCVLE, PPCNONE,	{RT, RA, RB}},
 {"nmachhws.",	XO (4, 110,0,1),XO_MASK,     MULHW|PPCVLE, PPCNONE,	{RT, RA, RB}},
-{"vabsduh",	VX (4, 256),	VX_MASK,     PPCVEC2,	PPCNONE,	{VD, VA, VB}},
 {"vmaxsb",	VX (4, 258),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vslb",	VX (4, 260),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vmulosb",	VX (4, 264),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
@@ -2878,7 +2876,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mulchwu.",	XRC(4, 136,1),	X_MASK,      MULHW|PPCVLE, PPCNONE,	{RT, RA, RB}},
 {"macchwu",	XO (4, 140,0,0),XO_MASK,     MULHW|PPCVLE, PPCNONE,	{RT, RA, RB}},
 {"macchwu.",	XO (4, 140,0,1),XO_MASK,     MULHW|PPCVLE, PPCNONE,	{RT, RA, RB}},
-{"vabsduw",	VX (4, 320),	VX_MASK,     PPCVEC2,	PPCNONE,	{VD, VA, VB}},
 {"vmaxsh",	VX (4, 322),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vslh",	VX (4, 324),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vmulosh",	VX (4, 328),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
@@ -3142,6 +3139,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"nmaclhws.",	XO (4, 494,0,1),XO_MASK,     MULHW|PPCVLE, PPCNONE,	{RT, RA, RB}},
 {"vsububm",	VX (4,1024),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vavgub",	VX (4,1026),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
+{"vabsdub",	VX (4,1027),	VX_MASK,     PPCVEC2,	PPCNONE,	{VD, VA, VB}},
 {"evmhessf",	VX (4,1027),	VX_MASK,     PPCSPE|PPCVLE, PPCNONE,	{RS, RA, RB}},
 {"vand",	VX (4,1028),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vcmpequb.",	VXR(4,	 6,1),	VXR_MASK,    PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
@@ -3170,6 +3168,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"evmhosmfa",	VX (4,1071),	VX_MASK,     PPCSPE|PPCVLE, PPCNONE,	{RS, RA, RB}},
 {"vsubuhm",	VX (4,1088),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vavguh",	VX (4,1090),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
+{"vabsduh",	VX (4,1091),	VX_MASK,     PPCVEC2,	PPCNONE,	{VD, VA, VB}},
 {"vandc",	VX (4,1092),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vcmpequh.",	VXR(4,	70,1),	VXR_MASK,    PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"udi1fcm.",	APU(4, 547,0), APU_MASK, PPC405|PPC440, PPC476,		{URT, URA, URB}},
@@ -3202,6 +3201,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"evmwsmfa",	VX (4,1147),	VX_MASK,     PPCSPE|PPCVLE, PPCNONE,	{RS, RA, RB}},
 {"vsubuwm",	VX (4,1152),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vavguw",	VX (4,1154),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
+{"vabsduw",	VX (4,1155),	VX_MASK,     PPCVEC2,	PPCNONE,	{VD, VA, VB}},
 {"vor",		VX (4,1156),	VX_MASK,     PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"vcmpequw.",	VXR(4, 134,1),	VXR_MASK,    PPCVEC|PPCVLE, PPCNONE,	{VD, VA, VB}},
 {"udi2fcm.",	APU(4, 579,0), APU_MASK, PPC405|PPC440, PPC476,		{URT, URA, URB}},
@@ -4286,6 +4286,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"lvehx",	X(31,39),	X_MASK,      PPCVEC|PPCVLE, PPCNONE,	{VD, RA0, RB}},
 {"lhfcmx",	APU(31,39,0), 	APU_MASK,    PPC405,	PPCNONE,	{FCRT, RA, RB}},
 
+{"mviwsplt",	X(31,46),	X_MASK,      PPCVEC2,	PPCNONE,	{VD, RA, RB}},
+
 {"iselgt",	X(31,47),	X_MASK,      PPCISEL,	PPCNONE,	{RT, RA0, RB}},
 
 {"lvewx",	X(31,71),	X_MASK,      PPCVEC|PPCVLE, PPCNONE,	{VD, RA0, RB}},
@@ -4409,8 +4411,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"ae",		XO(31,138,0,0),	XO_MASK,     PWRCOM,	PPCNONE,	{RT, RA, RB}},
 {"adde.",	XO(31,138,0,1),	XO_MASK,     PPCCOM|PPCVLE, PPCNONE,	{RT, RA, RB}},
 {"ae.",		XO(31,138,0,1),	XO_MASK,     PWRCOM,	PPCNONE,	{RT, RA, RB}},
-
-{"mviwsplt",	X(31,142),	X_MASK,      PPCVEC2,	PPCNONE,	{VD, RA, RB}},
 
 {"dcbtstlse",	X(31,142),	X_MASK,      PPCCHLK,	E500MC,		{CT, RA0, RB}},
 

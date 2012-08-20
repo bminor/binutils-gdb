@@ -7,11 +7,11 @@
 Disassembly of section \.text:
 
 0+00 <start>:
-   0:	10 01 10 c0 	vabsdub v0,v1,v2
-   4:	10 01 11 00 	vabsduh v0,v1,v2
-   8:	10 01 11 40 	vabsduw v0,v1,v2
+   0:	10 01 14 03 	vabsdub v0,v1,v2
+   4:	10 01 14 43 	vabsduh v0,v1,v2
+   8:	10 01 14 83 	vabsduw v0,v1,v2
    c:	7c 01 10 dc 	mvidsplt v0,r1,r2
-  10:	7c 01 11 1c 	mviwsplt v0,r1,r2
+  10:	7c 01 10 5c 	mviwsplt v0,r1,r2
   14:	7c 00 12 0a 	lvexbx  v0,0,r2
   18:	7c 01 12 0a 	lvexbx  v0,r1,r2
   1c:	7c 00 12 4a 	lvexhx  v0,0,r2

@@ -1,9 +1,14 @@
+2012-08-20  Edmar Wienskoski  <edmar@freescale.com>
+
+	* ppc-opc.c (powerpc_opcodes): Changed opcode for vabsdub,
+	vabsduh, vabsduw, mviwsplt.
+
 2012-08-17  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
 
 	* i386-gen.c (cpu_flag_init): Add CPU_BTVER1_FLAGS and
 	CPU_BTVER2_FLAGS.
 
-	* i386-opc.h: Update CpuPRFCHW comment. 
+	* i386-opc.h: Update CpuPRFCHW comment.
 
 	* i386-opc.tbl: Enable prefetch instruction for CpuPRFCHW.
 	* i386-init.h: Regenerated.
@@ -53,15 +58,15 @@
 	the instruction word.
 
 2012-08-13  Ian Bolton  <ian.bolton@arm.com>
-            Laurent Desnogues  <laurent.desnogues@arm.com>
-            Jim MacArthur  <jim.macarthur@arm.com>
-            Marcus Shawcroft  <marcus.shawcroft@arm.com>
-            Nigel Stephens  <nigel.stephens@arm.com>
-            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
-            Richard Earnshaw  <rearnsha@arm.com>
-            Sofiane Naci  <sofiane.naci@arm.com>
-            Tejas Belagod  <tejas.belagod@arm.com>
-            Yufeng Zhang  <yufeng.zhang@arm.com>
+	    Laurent Desnogues  <laurent.desnogues@arm.com>
+	    Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+	    Sofiane Naci  <sofiane.naci@arm.com>
+	    Tejas Belagod  <tejas.belagod@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* Makefile.am: Add AArch64.
 	* Makefile.in: Regenerate.
@@ -160,8 +165,8 @@
 	* po/POTFILES.in: Regenerate.
 
 2012-07-31  Chao-Ying Fu  <fu@mips.com>
-            Catherine Moore  <clm@codesourcery.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
+	    Catherine Moore  <clm@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* micromips-opc.c (WR_a, RD_a, MOD_a): New macros.
 	(DSP_VOLA): Likewise.
@@ -244,9 +249,9 @@
 2012-07-05  Sean Keys  <skeys@ipdatasys.com>
 
 	* xgate-dis.c: Removed an IF statement that will
-        always be false due to overlapping operand masks.
-        * xgate-opc.c: Corrected 'com' opcode entry and
-        fixed spacing.
+	always be false due to overlapping operand masks.
+	* xgate-opc.c: Corrected 'com' opcode entry and
+	fixed spacing.
 
 2012-07-02  Roland McGrath  <mcgrathr@google.com>
 
