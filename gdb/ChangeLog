@@ -1,3 +1,9 @@
+2012-08-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* symfile.c (allocate_symtab): Use host_address_to_string
+	function instead of cast of pointer to long which is not
+	compatible with x86_64-w64-mingw32 build.
+
 2012-08-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 7.5.0.20120817-cvs.

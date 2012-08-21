@@ -2889,8 +2889,8 @@ allocate_symtab (const char *filename, struct objfile *objfile)
 			      last_objfile_name);
 	}
       fprintf_unfiltered (gdb_stdlog,
-			  "Created symtab 0x%lx for module %s.\n",
-			  (long) symtab, filename);
+			  "Created symtab %s for module %s.\n",
+			  host_address_to_string (symtab), filename);
     }
 
   return (symtab);
