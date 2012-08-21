@@ -1,3 +1,9 @@
+2012-08-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* symfile.c (allocate_symtab): Use host_address_to_string
+	function instead of cast of pointer to long which is not
+	compatible with x86_64-w64-mingw32 build.
+
 2012-08-19  Andrew Pinski  <apinski@cavium.com>
 
 	* mips-tdep.c (is_octeon): New function.
