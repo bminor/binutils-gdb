@@ -1,3 +1,7 @@
+2012-08-21  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.hp/gdb.aCC/exception.exp: Remove.
+
 012-08-19  Andrew Pinski  <apinski@cavium.com>
 
 	* gdb.arch/mips-octeon-bbit.c: New file.
