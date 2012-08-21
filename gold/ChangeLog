@@ -1,3 +1,8 @@
+2012-08-21  Cary Coutant  <ccoutant@google.com>
+
+	* symtab.cc (Symbol_table::gc_mark_undef_symbols): Don't assert
+	if --export-dynamic-symbol names an undef symbol.
+
 2012-08-18  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc: Formatting and white space.
