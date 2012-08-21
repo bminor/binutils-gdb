@@ -1,3 +1,7 @@
+2012-08-21  David S. Miller  <davem@davemloft.net>
+
+	* gas/sparc/crypto.d: Fix opcodes for 4-arg crypto instructions.
+
 2012-08-20  Edmar Wienskoski  <edmar@freescale.com>
 
 	* gas/ppc/e6500.d: Changed opcode for vabsdub, vabsduh, vabsduw,
