@@ -1534,13 +1534,14 @@ filter_sals (struct symtabs_and_lines *sals)
 	  ++out;
 	}
     }
-  sals->nelts = out;
 
   if (sals->nelts == 0)
     {
       xfree (sals->sals);
       sals->sals = NULL;
     }
+  else
+    sals->nelts = out;
 }
 
 static void

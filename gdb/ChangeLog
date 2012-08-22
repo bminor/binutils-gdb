@@ -1,3 +1,7 @@
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-cmds.c (filter_sals): Handle nelts == 0 case.
+
 2012-08-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* symfile.c (allocate_symtab): Use host_address_to_string
