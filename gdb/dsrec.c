@@ -61,7 +61,7 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
 
   srec = (char *) alloca (maxrecsize + 1);
 
-  abfd = gdb_bfd_openr (file, 0);
+  abfd = gdb_bfd_open (file, NULL, -1);
   if (!abfd)
     {
       printf_filtered (_("Unable to open file %s\n"), file);

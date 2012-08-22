@@ -1,5 +1,38 @@
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* windows-nat.c (windows_make_so): Use gdb_bfd_open.
+	* symfile.c (bfd_open_maybe_remote): Use gdb_bfd_open.
+	(symfile_bfd_open): Likewise.
+	(generic_load): Likewise.
+	* solib.c (solib_bfd_fopen): Use gdb_bfd_open.
+	* solib-pa64.c (pa64_solib_create_inferior_hook): Use
+	gdb_bfd_open.
+	* solib-darwin.c (darwin_solib_get_all_image_info_addr_at_init):
+	Use gdb_bfd_open.
+	* rs6000-nat.c (add_vmap): Use gdb_bfd_open.
+	* remote-mips.c (mips_load_srec): Use gdb_bfd_open.
+	(pmon_load_fast): Likewise.
+	* remote-m32r-sdi.c (m32r_load): Use gdb_bfd_open.
+	* procfs.c (insert_dbx_link_bpt_in_file): Use gdb_bfd_open.
+	* machoread.c (macho_symfile_read_all_oso): Use gdb_bfd_open.
+	(macho_check_dsym): Likewise.
+	* m32r-rom.c (m32r_load): Use gdb_bfd_open.
+	(m32r_upload_command): Likewise.
+	* gdb_bfd.h (gdb_bfd_cache): Declare.
+	* gdb_bfd.c (struct gdb_bfd_data): New.
+	(gdb_bfd_cache): New global.
+	(struct gdb_bfd_cache_search): New.
+	(hash_bfd): New function.
+	(eq_bfd): Likewise.
+	(gdb_bfd_open): Likewise.
+	(gdb_bfd_ref): Allocate a gdb_bfd_data and attach to the BFD.
+	(gdb_bfd_unref): Remove closed BFD from cache.  Update for
+	gdb_bfd_data.
+	* exec.c (exec_file_attach): Use gdb_bfd_open.
+	* dsrec.c (load_srec): Use gdb_bfd_open.
+
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (macro_start_file): Update.
 	* objfiles.c (get_objfile_bfd_data): Initialize macro_cache.
 	(free_objfile_per_bfd_storage): Destroy macro_cache.

@@ -377,7 +377,7 @@ solib_bfd_fopen (char *pathname, int fd)
     }
   else
     {
-      abfd = gdb_bfd_fopen (pathname, gnutarget, FOPEN_RB, fd);
+      abfd = gdb_bfd_open (pathname, gnutarget, fd);
 
       if (abfd)
 	bfd_set_cacheable (abfd, 1);

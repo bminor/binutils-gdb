@@ -230,9 +230,11 @@ exec_file_attach (char *filename, int from_tty)
 
       if (scratch_chan < 0)
 	perror_with_name (filename);
-      exec_bfd = gdb_bfd_fopen (scratch_pathname, gnutarget,
-				write_files ? FOPEN_RUB : FOPEN_RB,
-				scratch_chan);
+      if (write_files)
+	exec_bfd = gdb_bfd_fopen (scratch_pathname, gnutarget,
+				  FOPEN_RUB, scratch_chan);
+      else
+	exec_bfd = gdb_bfd_open (scratch_pathname, gnutarget, scratch_chan);
 
       if (!exec_bfd)
 	{

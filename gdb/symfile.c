@@ -1703,7 +1703,7 @@ gdb_bfd_open_maybe_remote (const char *name)
   if (remote_filename_p (name))
     result = remote_bfd_open (name, gnutarget);
   else
-    result = gdb_bfd_openr (name, gnutarget);
+    result = gdb_bfd_open (name, gnutarget, -1);
 
   return result;
 }
@@ -1763,7 +1763,7 @@ symfile_bfd_open (char *name)
   name = absolute_name;
   make_cleanup (xfree, name);
 
-  sym_bfd = gdb_bfd_fopen (name, gnutarget, FOPEN_RB, desc);
+  sym_bfd = gdb_bfd_open (name, gnutarget, desc);
   if (!sym_bfd)
     {
       make_cleanup (xfree, name);
@@ -2103,7 +2103,7 @@ generic_load (char *args, int from_tty)
     }
 
   /* Open the file for loading.  */
-  loadfile_bfd = gdb_bfd_openr (filename, gnutarget);
+  loadfile_bfd = gdb_bfd_open (filename, gnutarget, -1);
   if (loadfile_bfd == NULL)
     {
       perror_with_name (filename);

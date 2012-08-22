@@ -745,12 +745,7 @@ add_vmap (LdInfo *ldi)
   mem = xstrdup (mem);
 
   fd = LDI_FD (ldi, arch64);
-  if (fd < 0)
-    /* Note that this opens it once for every member; a possible
-       enhancement would be to only open it once for every object.  */
-    abfd = gdb_bfd_openr (filename, gnutarget);
-  else
-    abfd = gdb_bfd_fdopenr (filename, gnutarget, fd);
+  abfd = gdb_bfd_open (filename, gnutarget, fd < 0 ? -1 : fd);
   if (!abfd)
     {
       warning (_("Could not open `%s' as an executable file: %s"),
