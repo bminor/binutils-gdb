@@ -1,5 +1,23 @@
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* elfread.c (elf_symtab_read): Update.
+	* objfiles.c (objfiles_bfd_data): New global.
+	(get_objfile_bfd_data, free_objfile_per_bfd_storage)
+	(objfile_bfd_data_free, set_objfile_per_bfd): New functions.
+	(allocate_objfile, free_objfile): Update.
+	(_initialize_objfiles): Initialize objfiles_bfd_data.
+	* objfiles.h (struct objfile_per_bfd_storage): New.
+	(struct objfile) <per_bfd>: New field.
+	<filename_cache>: Remove.
+	(set_objfile_per_bfd): Declare.
+	* symfile.c (reread_symbols): Update.  Call
+	set_objfile_per_bfd.
+	(allocate_symtab): Update.
+	* symmisc.c (print_symbol_bcache_statistics): Update.
+	(print_objfile_statistics): Print the size of the BFD obstack.
+
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* gdb_bfd.h: Include registry.h.  Use DECLARE_REGISTRY.
 	* gdb_bfd.c: Use DEFINE_REGISTRY.
 	(struct gdb_bfd_data): Add REGISTRY_FIELDS.

@@ -93,7 +93,8 @@ print_symbol_bcache_statistics (void)
     print_bcache_statistics (psymbol_bcache_get_bcache (objfile->psymbol_cache),
                              "partial symbol cache");
     print_bcache_statistics (objfile->macro_cache, "preprocessor macro cache");
-    print_bcache_statistics (objfile->filename_cache, "file name cache");
+    print_bcache_statistics (objfile->per_bfd->filename_cache,
+			     "file name cache");
   }
 }
 
@@ -147,13 +148,15 @@ print_objfile_statistics (void)
 		       OBJSTAT (objfile, sz_strtab));
     printf_filtered (_("  Total memory used for objfile obstack: %d\n"),
 		     obstack_memory_used (&objfile->objfile_obstack));
+    printf_filtered (_("  Total memory used for BFD obstack: %d\n"),
+		     obstack_memory_used (&objfile->per_bfd->storage_obstack));
     printf_filtered (_("  Total memory used for psymbol cache: %d\n"),
 		     bcache_memory_used (psymbol_bcache_get_bcache
 		                          (objfile->psymbol_cache)));
     printf_filtered (_("  Total memory used for macro cache: %d\n"),
 		     bcache_memory_used (objfile->macro_cache));
     printf_filtered (_("  Total memory used for file name cache: %d\n"),
-		     bcache_memory_used (objfile->filename_cache));
+		     bcache_memory_used (objfile->per_bfd->filename_cache));
   }
 }
 

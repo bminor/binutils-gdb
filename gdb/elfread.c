@@ -353,7 +353,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 	    }
 	  filesym = sym;
 	  filesymname = bcache (filesym->name, strlen (filesym->name) + 1,
-				objfile->filename_cache);
+				objfile->per_bfd->filename_cache);
 	}
       else if (sym->flags & BSF_SECTION_SYM)
 	continue;

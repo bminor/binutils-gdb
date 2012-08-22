@@ -2550,8 +2550,6 @@ reread_symbols (void)
 	  objfile->psymbol_cache = psymbol_bcache_init ();
 	  bcache_xfree (objfile->macro_cache);
 	  objfile->macro_cache = bcache_xmalloc (NULL, NULL);
-	  bcache_xfree (objfile->filename_cache);
-	  objfile->filename_cache = bcache_xmalloc (NULL,NULL);
 	  if (objfile->demangled_names_hash != NULL)
 	    {
 	      htab_delete (objfile->demangled_names_hash);
@@ -2571,6 +2569,8 @@ reread_symbols (void)
 		  sizeof (objfile->msymbol_hash));
 	  memset (&objfile->msymbol_demangled_hash, 0,
 		  sizeof (objfile->msymbol_demangled_hash));
+
+	  set_objfile_per_bfd (objfile);
 
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but
@@ -2856,7 +2856,7 @@ allocate_symtab (const char *filename, struct objfile *objfile)
     obstack_alloc (&objfile->objfile_obstack, sizeof (struct symtab));
   memset (symtab, 0, sizeof (*symtab));
   symtab->filename = (char *) bcache (filename, strlen (filename) + 1,
-				      objfile->filename_cache);
+				      objfile->per_bfd->filename_cache);
   symtab->fullname = NULL;
   symtab->language = deduce_language_from_filename (filename);
   symtab->debugformat = "unknown";

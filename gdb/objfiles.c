@@ -106,6 +106,74 @@ get_objfile_pspace_data (struct program_space *pspace)
   return info;
 }
 
+
+
+/* Per-BFD data key.  */
+
+static const struct bfd_data *objfiles_bfd_data;
+
+/* Create the per-BFD storage object for OBJFILE.  If ABFD is not
+   NULL, and it already has a per-BFD storage object, use that.
+   Otherwise, allocate a new per-BFD storage object.  If ABFD is not
+   NULL, the object is allocated on the BFD; otherwise it is allocated
+   on OBJFILE's obstack.  Note that it is not safe to call this
+   multiple times for a given OBJFILE -- it can only be called when
+   allocating or re-initializing OBJFILE.  */
+
+static struct objfile_per_bfd_storage *
+get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
+{
+  struct objfile_per_bfd_storage *storage = NULL;
+
+  if (abfd != NULL)
+    storage = bfd_data (abfd, objfiles_bfd_data);
+
+  if (storage == NULL)
+    {
+      if (abfd != NULL)
+	{
+	  storage = bfd_zalloc (abfd, sizeof (struct objfile_per_bfd_storage));
+	  set_bfd_data (abfd, objfiles_bfd_data, storage);
+	}
+      else
+	storage = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+				  struct objfile_per_bfd_storage);
+
+      obstack_init (&storage->storage_obstack);
+      storage->filename_cache = bcache_xmalloc (NULL, NULL);
+    }
+
+  return storage;
+}
+
+/* Free STORAGE.  */
+
+static void
+free_objfile_per_bfd_storage (struct objfile_per_bfd_storage *storage)
+{
+  bcache_xfree (storage->filename_cache);
+  obstack_free (&storage->storage_obstack, 0);
+}
+
+/* A wrapper for free_objfile_per_bfd_storage that can be passed as a
+   cleanup function to the BFD registry.  */
+
+static void
+objfile_bfd_data_free (struct bfd *unused, void *d)
+{
+  free_objfile_per_bfd_storage (d);
+}
+
+/* See objfiles.h.  */
+
+void
+set_objfile_per_bfd (struct objfile *objfile)
+{
+  objfile->per_bfd = get_objfile_bfd_data (objfile, objfile->obfd);
+}
+
+
+
 /* Called via bfd_map_over_sections to build up the section table that
    the objfile references.  The objfile contains pointers to the start
    of the table (objfile->sections) and to the first location after
@@ -184,7 +252,6 @@ allocate_objfile (bfd *abfd, int flags)
   objfile = (struct objfile *) xzalloc (sizeof (struct objfile));
   objfile->psymbol_cache = psymbol_bcache_init ();
   objfile->macro_cache = bcache_xmalloc (NULL, NULL);
-  objfile->filename_cache = bcache_xmalloc (NULL, NULL);
   /* We could use obstack_specify_allocation here instead, but
      gdb_obstack.h specifies the alloc/dealloc functions.  */
   obstack_init (&objfile->objfile_obstack);
@@ -214,6 +281,7 @@ allocate_objfile (bfd *abfd, int flags)
       objfile->name = xstrdup ("<<anonymous objfile>>");
     }
 
+  objfile->per_bfd = get_objfile_bfd_data (objfile, abfd);
   objfile->pspace = current_program_space;
 
   /* Initialize the section indexes for this objfile, so that we can
@@ -557,7 +625,10 @@ free_objfile (struct objfile *objfile)
      still may reference objfile->obfd.  */
   objfile_free_data (objfile);
 
-  gdb_bfd_unref (objfile->obfd);
+  if (objfile->obfd)
+    gdb_bfd_unref (objfile->obfd);
+  else
+    free_objfile_per_bfd_storage (objfile->per_bfd);
 
   /* Remove it from the chain of all objfiles.  */
 
@@ -606,7 +677,6 @@ free_objfile (struct objfile *objfile)
   /* Free the obstacks for non-reusable objfiles.  */
   psymbol_bcache_free (objfile->psymbol_cache);
   bcache_xfree (objfile->macro_cache);
-  bcache_xfree (objfile->filename_cache);
   if (objfile->demangled_names_hash)
     htab_delete (objfile->demangled_names_hash);
   obstack_free (&objfile->objfile_obstack, 0);
@@ -1383,4 +1453,7 @@ _initialize_objfiles (void)
   objfiles_pspace_data
     = register_program_space_data_with_cleanup (NULL,
 						objfiles_pspace_data_cleanup);
+
+  objfiles_bfd_data = register_bfd_data_with_cleanup (NULL,
+						      objfile_bfd_data_free);
 }

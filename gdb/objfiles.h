@@ -160,6 +160,22 @@ extern void print_symbol_bcache_statistics (void);
 /* Number of entries in the minimal symbol hash table.  */
 #define MINIMAL_SYMBOL_HASH_SIZE 2039
 
+/* Some objfile data is hung off the BFD.  This enables sharing of the
+   data across all objfiles using the BFD.  The data is stored in an
+   instance of this structure, and associated with the BFD using the
+   registry system.  */
+
+struct objfile_per_bfd_storage
+{
+  /* The storage has an obstack of its own.  */
+
+  struct obstack storage_obstack;
+  
+  /* Byte cache for file names.  */
+
+  struct bcache *filename_cache;
+};
+
 /* Master structure for keeping track of each file from which
    gdb reads symbols.  There are several ways these get allocated: 1.
    The main symbol file, symfile_objfile, set by the symbol-file command,
@@ -222,6 +238,11 @@ struct objfile
 
     bfd *obfd;
 
+    /* The per-BFD data.  Note that this is treated specially if OBFD
+       is NULL.  */
+
+    struct objfile_per_bfd_storage *per_bfd;
+
     /* The gdbarch associated with the BFD.  Note that this gdbarch is
        determined solely from BFD information, without looking at target
        information.  The gdbarch determined from a running target may
@@ -249,7 +270,6 @@ struct objfile
 
     struct psymbol_bcache *psymbol_cache; /* Byte cache for partial syms.  */
     struct bcache *macro_cache;           /* Byte cache for macros.  */
-    struct bcache *filename_cache;	  /* Byte cache for file names.  */
 
     /* Hash table for mapping symbol names to demangled names.  Each
        entry in the hash table is actually two consecutive strings,
@@ -648,5 +668,9 @@ extern void default_iterate_over_objfiles_in_search_order
 /* Answer whether there is more than one object file loaded.  */
 
 #define MULTI_OBJFILE_P() (object_files && object_files->next)
+
+/* Reset the per-BFD storage area on OBJ.  */
+
+void set_objfile_per_bfd (struct objfile *obj);
 
 #endif /* !defined (OBJFILES_H) */
