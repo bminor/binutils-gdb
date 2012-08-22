@@ -2739,14 +2739,6 @@ are:
 The default name of @value{GDBN}'s initialization file (normally
 @file{.gdbinit}).
 
-@item SIGWINCH_HANDLER
-If your host defines @code{SIGWINCH}, you can define this to be the name
-of a function to be called if @code{SIGWINCH} is received.
-
-@item SIGWINCH_HANDLER_BODY
-Define this to expand into code that will define the function named by
-the expansion of @code{SIGWINCH_HANDLER}.
-
 @item CRLF_SOURCE_FILES
 @cindex DOS text files
 Define this if host files use @code{\r\n} rather than @code{\n} as a

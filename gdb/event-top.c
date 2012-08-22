@@ -58,9 +58,6 @@ static void handle_sigquit (int sig);
 static void handle_sighup (int sig);
 #endif
 static void handle_sigfpe (int sig);
-#if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-static void handle_sigwinch (int sig);
-#endif
 
 /* Functions to be invoked by the event loop in response to
    signals.  */
@@ -134,9 +131,6 @@ void *sighup_token;
 void *sigquit_token;
 #endif
 void *sigfpe_token;
-#if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-void *sigwinch_token;
-#endif
 #ifdef STOP_SIGNAL
 void *sigtstp_token;
 #endif
@@ -769,11 +763,6 @@ async_init_signals (void)
   sigfpe_token =
     create_async_signal_handler (async_float_handler, NULL);
 
-#if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-  signal (SIGWINCH, handle_sigwinch);
-  sigwinch_token =
-    create_async_signal_handler (SIGWINCH_HANDLER, NULL);
-#endif
 #ifdef STOP_SIGNAL
   sigtstp_token =
     create_async_signal_handler (async_stop_sig, NULL);
@@ -950,17 +939,6 @@ async_float_handler (gdb_client_data arg)
      divide by zero causes this, so "float" is a misnomer.  */
   error (_("Erroneous arithmetic operation."));
 }
-
-/* Tell the event loop what to do if SIGWINCH is received.
-   See event-signal.c.  */
-#if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-static void
-handle_sigwinch (int sig)
-{
-  mark_async_signal_handler_wrapper (sigwinch_token);
-  signal (sig, handle_sigwinch);
-}
-#endif
 
 
 /* Called by do_setshow_command.  */

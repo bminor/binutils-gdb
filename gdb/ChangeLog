@@ -1,5 +1,12 @@
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* event-top.c (sigwinch_token, handle_sigwinch): Remove.
+	(async_init_signals): Update.
+	* utils.c (init_page_info): Don't use SIGWINCH_HANDLER.
+	(SIGWINCH_HANDLER_BODY): Remove.
+
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* jit.c (jit_object_close_impl): Don't malloc the objfile
 	name.
 	* objfiles.c (allocate_objfile): Don't malloc the objfile

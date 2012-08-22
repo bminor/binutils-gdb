@@ -1714,11 +1714,6 @@ init_page_info (void)
 	  lines_per_page = UINT_MAX;
 	}
 
-      /* FIXME: Get rid of this junk.  */
-#if defined(SIGWINCH) && defined(SIGWINCH_HANDLER)
-      SIGWINCH_HANDLER (SIGWINCH);
-#endif
-
       /* If the output is not a terminal, don't paginate it.  */
       if (!ui_file_isatty (gdb_stdout))
 	lines_per_page = UINT_MAX;
@@ -2743,11 +2738,6 @@ When set, debugging messages will be marked with seconds and microseconds."),
 			   &setdebuglist, &showdebuglist);
 }
 
-/* Machine specific function to handle SIGWINCH signal.  */
-
-#ifdef  SIGWINCH_HANDLER_BODY
-SIGWINCH_HANDLER_BODY
-#endif
 /* Print routines to handle variable size regs, etc.  */
 /* Temporary storage using circular buffer.  */
 #define NUMCELLS 16

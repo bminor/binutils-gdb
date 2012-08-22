@@ -1,3 +1,8 @@
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdbint.texinfo (Host Definition): Remove documentation for
+	SIGWINCH_HANDLER and SIGWINCH_HANDLER_BODY.
+
 2012-08-17  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/13356
