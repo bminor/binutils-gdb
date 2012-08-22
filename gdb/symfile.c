@@ -2506,9 +2506,7 @@ reread_symbols (void)
 
 	  clear_objfile_data (objfile);
 
-	  /* Clean up any state BFD has sitting around.  We don't need
-	     to close the descriptor but BFD lacks a way of closing the
-	     BFD without closing the descriptor.  */
+	  /* Clean up any state BFD has sitting around.  */
 	  {
 	    struct bfd *obfd = objfile->obfd;
 
@@ -2516,11 +2514,18 @@ reread_symbols (void)
 	    /* Open the new BFD before freeing the old one, so that
 	       the filename remains live.  */
 	    objfile->obfd = gdb_bfd_open_maybe_remote (obfd_filename);
+	    if (objfile->obfd == NULL)
+	      {
+		/* We have to make a cleanup and error here, rather
+		   than erroring later, because once we unref OBFD,
+		   OBFD_FILENAME will be freed.  */
+		make_cleanup_bfd_unref (obfd);
+		error (_("Can't open %s to read symbols."), obfd_filename);
+	      }
 	    gdb_bfd_unref (obfd);
 	  }
 
-	  if (objfile->obfd == NULL)
-	    error (_("Can't open %s to read symbols."), objfile->name);
+	  objfile->name = bfd_get_filename (objfile->obfd);
 	  /* bfd_openr sets cacheable to true, which is what we want.  */
 	  if (!bfd_check_format (objfile->obfd, bfd_object))
 	    error (_("Can't read symbols from %s: %s."), objfile->name,

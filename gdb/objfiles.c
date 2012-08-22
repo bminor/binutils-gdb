@@ -271,7 +271,7 @@ allocate_objfile (bfd *abfd, int flags)
       /* Look up the gdbarch associated with the BFD.  */
       objfile->gdbarch = gdbarch_from_bfd (abfd);
 
-      objfile->name = xstrdup (bfd_get_filename (abfd));
+      objfile->name = bfd_get_filename (abfd);
       objfile->mtime = bfd_get_mtime (abfd);
 
       /* Build section table.  */
@@ -279,7 +279,7 @@ allocate_objfile (bfd *abfd, int flags)
     }
   else
     {
-      objfile->name = xstrdup ("<<anonymous objfile>>");
+      objfile->name = "<<anonymous objfile>>";
     }
 
   objfile->per_bfd = get_objfile_bfd_data (objfile, abfd);
@@ -670,7 +670,6 @@ free_objfile (struct objfile *objfile)
 
   /* The last thing we do is free the objfile struct itself.  */
 
-  xfree (objfile->name);
   if (objfile->global_psymbols.list)
     xfree (objfile->global_psymbols.list);
   if (objfile->static_psymbols.list)

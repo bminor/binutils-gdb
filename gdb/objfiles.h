@@ -197,8 +197,9 @@ struct objfile
 
     struct objfile *next;
 
-    /* The object file's name, tilde-expanded and absolute.  Malloc'd; free it
-       if you free this struct.  This pointer is never NULL.  */
+    /* The object file's name, tilde-expanded and absolute.  This
+       pointer is never NULL.  This does not have to be freed; it is
+       guaranteed to have a lifetime at least as long as the objfile.  */
 
     char *name;
 
