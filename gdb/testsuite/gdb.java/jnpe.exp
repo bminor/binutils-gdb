@@ -31,20 +31,7 @@ if ![runto "$testfile.java:$line"] then {
     continue
 } 
 
-# See whether we have the needed unwinder hooks.
-set ok 1
-gdb_test_multiple "print _Unwind_DebugHook" "check for unwinder hook in java" {
-    -re "= .*_Unwind_DebugHook.*\r\n$gdb_prompt $" {
-	pass "check for unwinder hook in java"
-    }
-    -re "No symbol .* in current context.?\r\n$gdb_prompt $" {
-	# Pass the test so we don't get bogus fails in the results.
-	setup_xfail *-*-*
-	fail "check for unwinder hook in java"
-	set ok 0
-    }
-}
-if {!$ok} {
+if {![skip_unwinder_tests]} {
     unsupported "jnpe.exp could not find _Unwind_DebugHook"
     return -1
 }

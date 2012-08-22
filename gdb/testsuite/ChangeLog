@@ -1,3 +1,9 @@
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
+	* lib/gdb.exp (skip_unwinder_tests): New proc.
+	* gdb.cp/nextoverthrow.exp: Use skip_unwinder_tests.
+	* gdb.java/jnpe.exp: Use skip_unwinder_tests.
+
 2012-08-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.hp/gdb.aCC/exception.exp: Remove.
