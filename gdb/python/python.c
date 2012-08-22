@@ -176,6 +176,75 @@ check_quit_flag (void)
   return PyOS_InterruptOccurred ();
 }
 
+/* Evaluate a Python command like PyRun_SimpleString, but uses
+   Py_single_input which prints the result of expressions, and does
+   not automatically print the stack on errors.  */
+
+static int
+eval_python_command (const char *command)
+{
+  PyObject *m, *d, *v;
+
+  m = PyImport_AddModule ("__main__");
+  if (m == NULL)
+    return -1;
+
+  d = PyModule_GetDict (m);
+  if (d == NULL)
+    return -1;
+  v = PyRun_StringFlags (command, Py_single_input, d, d, NULL);
+  if (v == NULL)
+    return -1;
+
+  Py_DECREF (v);
+  if (Py_FlushLine ())
+    PyErr_Clear ();
+
+  return 0;
+}
+
+/* Implementation of the gdb "python-interactive" command.  */
+
+static void
+python_interactive_command (char *arg, int from_tty)
+{
+  struct cleanup *cleanup;
+  int err;
+
+  cleanup = make_cleanup_restore_integer (&interpreter_async);
+  interpreter_async = 0;
+
+  while (arg && *arg && isspace (*arg))
+    ++arg;
+
+  ensure_python_env (get_current_arch (), current_language);
+
+  if (arg && *arg)
+    {
+      int len = strlen (arg);
+      char *script = xmalloc (len + 2);
+
+      strcpy (script, arg);
+      script[len] = '\n';
+      script[len + 1] = '\0';
+      err = eval_python_command (script);
+      xfree (script);
+    }
+  else
+    {
+      err = PyRun_InteractiveLoop (instream, "<stdin>");
+      dont_repeat ();
+    }
+
+  if (err)
+    {
+      gdbpy_print_stack ();
+      error (_("Error while executing Python code."));
+    }
+
+  do_cleanups (cleanup);
+}
+
 /* A wrapper around PyRun_SimpleFile.  FILE is the Python script to run
    named FILENAME.
 
@@ -1112,10 +1181,11 @@ gdbpy_objfiles (PyObject *unused1, PyObject *unused2)
 
 #else /* HAVE_PYTHON */
 
-/* Dummy implementation of the gdb "python" command.  */
+/* Dummy implementation of the gdb "python-interactive" and "python"
+   command. */
 
 static void
-python_command (char *arg, int from_tty)
+python_interactive_command (char *arg, int from_tty)
 {
   while (arg && *arg && isspace (*arg))
     ++arg;
@@ -1129,6 +1199,12 @@ python_command (char *arg, int from_tty)
       execute_control_command_untraced (l);
       do_cleanups (cleanups);
     }
+}
+
+static void
+python_command (char *arg, int from_tty)
+{
+  python_interactive_command (arg, from_tty);
 }
 
 void
@@ -1197,6 +1273,29 @@ _initialize_python (void)
   char *cmd_name;
   struct cmd_list_element *cmd;
 
+  add_com ("python-interactive", class_obscure,
+	   python_interactive_command,
+#ifdef HAVE_PYTHON
+	   _("\
+Start a Python interactive prompt.\n\
+\n\
+Alternatively, a single-line Python command can be given as an\n\
+argument, and if the command is an expression, the result will be\n\
+printed.  For example:\n\
+\n\
+    (gdb) python-interactive 2 + 3\n\
+    5\n\
+")
+#else /* HAVE_PYTHON */
+	   _("\
+Start a Python interactive prompt.\n\
+\n\
+Python scripting is not supported in this copy of GDB.\n\
+This command is only a placeholder.")
+#endif /* HAVE_PYTHON */
+	   );
+  add_com_alias ("pi", "python-interactive", class_obscure, 1);
+
   add_com ("python", class_obscure, python_command,
 #ifdef HAVE_PYTHON
 	   _("\
@@ -1217,6 +1316,7 @@ Python scripting is not supported in this copy of GDB.\n\
 This command is only a placeholder.")
 #endif /* HAVE_PYTHON */
 	   );
+  add_com_alias ("py", "python", class_obscure, 1);
 
   /* Add set/show python print-stack.  */
   add_prefix_cmd ("python", no_class, user_show_python,

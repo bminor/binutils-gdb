@@ -31,6 +31,14 @@
 maint info bfds
   List the BFDs known to GDB.
 
+python-interactive [command]
+pi [command]
+  Start a Python interactive prompt, or evaluate the optional command
+  and print the result of expressions.
+
+py [command]
+  "py" is a new alias for "python".
+
 * MI changes
 
   ** Command parameter changes are now notified using new async record

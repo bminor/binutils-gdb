@@ -22506,12 +22506,30 @@ automatically imported when @value{GDBN} starts.
 @cindex python commands
 @cindex commands to access python
 
-@value{GDBN} provides one command for accessing the Python interpreter,
+@value{GDBN} provides two commands for accessing the Python interpreter,
 and one related setting:
 
 @table @code
+@kindex python-interactive
+@kindex pi
+@item python-interactive @r{[}@var{command}@r{]}
+@itemx pi @r{[}@var{command}@r{]}
+Without an argument, the @code{python-interactive} command can be used
+to start an interactive Python prompt.
+
+Alternatively, a single-line Python command can be given as an
+argument and evaluated.  If the command is an expression, the result
+will be printed; otherwise, nothing will be printed.  For example:
+
+@smallexample
+(@value{GDBP}) python-interactive 2 + 3
+5
+@end smallexample
+
 @kindex python
-@item python @r{[}@var{code}@r{]}
+@kindex py
+@item python @r{[}@var{command}@r{]}
+@itemx py @r{[}@var{command}@r{]}
 The @code{python} command can be used to evaluate Python code.
 
 If given an argument, the @code{python} command will evaluate the

@@ -1,3 +1,18 @@
+2012-08-22  Khoo Yit Phang <khooyp@cs.umd.edu>
+
+	Add a new "python-interactive" command that starts a standard
+	Python interactive prompt with "pi" as alias, and add "py" as
+	an alias to "python".
+	* NEWS: Mention the new commands.
+	* doc/gdb.texinfo (Python Commands): Document the new
+	commands.
+	* python/python.c (eval_python_command): New function.
+	(python_interactive_command): For "python-interactive" with
+	arguments, call eval_python_command.  For "python-interactive"
+	without arguments, call PyRun_InteractiveLoop.
+	(_initialize_python): Add "python-interactive" command with
+	"pi" as alias, and add "py" as an alias to "python".
+
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
 	* defs.h (quit_flag): Don't declare.
