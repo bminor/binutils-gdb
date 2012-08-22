@@ -1,3 +1,7 @@
+2012-08-22  Keith Seitz  <keiths@redhat.com>
+
+	* defs.h: Include build-gnulib/config.h
+
 2012-08-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* symfile.c (allocate_symtab): Use host_address_to_string
