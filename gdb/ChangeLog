@@ -1,5 +1,13 @@
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* gdb_bfd.h: Include registry.h.  Use DECLARE_REGISTRY.
+	* gdb_bfd.c: Use DEFINE_REGISTRY.
+	(struct gdb_bfd_data): Add REGISTRY_FIELDS.
+	(gdb_bfd_ref): Call bfd_alloc_data.
+	(gdb_bfd_unref): Call bfd_free_data.
+
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* registry.h (struct registry_fields): New.
 	(REGISTRY_FIELDS): Redefine.
 	(REGISTRY_ACCESS_FIELD): New macro.

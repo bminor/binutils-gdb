@@ -21,6 +21,10 @@
 #ifndef GDB_BFD_H
 #define GDB_BFD_H
 
+#include "registry.h"
+
+DECLARE_REGISTRY (bfd);
+
 /* Make a copy ABFD's filename using bfd_alloc, and reassign it to the
    BFD.  This ensures that the BFD's filename has the same lifetime as
    the BFD itself.  */

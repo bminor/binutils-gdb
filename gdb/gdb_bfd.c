@@ -85,7 +85,15 @@ struct gdb_bfd_data
   /* If the BFD comes from an archive, this points to the archive's
      BFD.  Otherwise, this is NULL.  */
   bfd *archive_bfd;
+
+  /* The registry.  */
+  REGISTRY_FIELDS;
 };
+
+#define GDB_BFD_DATA_ACCESSOR(ABFD) \
+  ((struct gdb_bfd_data *) bfd_usrdata (ABFD))
+
+DEFINE_REGISTRY (bfd, GDB_BFD_DATA_ACCESSOR)
 
 /* A hash table storing all the BFDs maintained in the cache.  */
 
@@ -256,6 +264,8 @@ gdb_bfd_ref (struct bfd *abfd)
   gdata->archive_bfd = NULL;
   bfd_usrdata (abfd) = gdata;
 
+  bfd_alloc_data (abfd);
+
   /* This is the first we've seen it, so add it to the hash table.  */
   slot = htab_find_slot (all_bfds, abfd, INSERT);
   gdb_assert (slot && !*slot);
@@ -297,6 +307,7 @@ gdb_bfd_unref (struct bfd *abfd)
 	htab_clear_slot (gdb_bfd_cache, slot);
     }
 
+  bfd_free_data (abfd);
   bfd_usrdata (abfd) = NULL;  /* Paranoia.  */
 
   htab_remove_elt (all_bfds, abfd);
