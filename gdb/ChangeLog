@@ -1,3 +1,16 @@
+2012-08-22  Khoo Yit Phang <khooyp@cs.umd.edu>
+
+	Enable readline in Python in a GDB-specific way and block the
+	standard Python readline module to prevent conflicts with GDB.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-gdb-readline.o.
+	(SUBDIR_PYTHON_SRCS): Add python/py-gdb-readline.c.
+	(py-gdb-readline.o): Add rule to compile python/py-gdb-readline.c.
+	* python/py-gdb-readline.c: New file.
+	* python/python-internal.h (gdbpy_initialize_gdb_readline): New
+	prototype.
+	* python/python.c (_initialize_python): Call
+	gdbpy_initialize_gdb_readline.
+
 2012-08-22  Keith Seitz  <keiths@redhat.com>
 
 	* defs.h: Include build-gnulib/config.h

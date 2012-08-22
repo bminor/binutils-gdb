@@ -1389,6 +1389,7 @@ message == an error message without a stack will be printed."),
   gdbpy_gdberror_exc = PyErr_NewException ("gdb.GdbError", NULL, NULL);
   PyModule_AddObject (gdb_module, "GdbError", gdbpy_gdberror_exc);
 
+  gdbpy_initialize_gdb_readline ();
   gdbpy_initialize_auto_load ();
   gdbpy_initialize_values ();
   gdbpy_initialize_frames ();

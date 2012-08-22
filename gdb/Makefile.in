@@ -280,6 +280,7 @@ SUBDIR_PYTHON_OBS = \
 	py-finishbreakpoint.o \
 	py-frame.o \
 	py-function.o \
+	py-gdb-readline.o \
 	py-inferior.o \
 	py-infthread.o \
 	py-lazy-string.o \
@@ -312,6 +313,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-finishbreakpoint.c \
 	python/py-frame.c \
 	python/py-function.c \
+	python/py-gdb-readline.c \
 	python/py-inferior.c \
 	python/py-infthread.c \
 	python/py-lazy-string.c \
@@ -2081,6 +2083,10 @@ py-frame.o: $(srcdir)/python/py-frame.c
 
 py-function.o: $(srcdir)/python/py-function.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-function.c
+	$(POSTCOMPILE)
+
+py-gdb-readline.o: $(srcdir)/python/py-gdb-readline.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-gdb-readline.c
 	$(POSTCOMPILE)
 
 py-inferior.o: $(srcdir)/python/py-inferior.c
