@@ -725,7 +725,7 @@ gdbpy_initialize_inferior (void)
 		      (PyObject *) &inferior_object_type);
 
   infpy_inf_data_key =
-    register_inferior_data_with_cleanup (py_free_inferior);
+    register_inferior_data_with_cleanup (NULL, py_free_inferior);
 
   observer_attach_new_thread (add_thread_object);
   observer_attach_thread_exit (delete_thread_object);

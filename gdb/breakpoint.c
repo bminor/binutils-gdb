@@ -15876,7 +15876,8 @@ _initialize_breakpoint (void)
     = register_objfile_data_with_cleanup (NULL, free_breakpoint_probes);
 
   catch_syscall_inferior_data
-    = register_inferior_data_with_cleanup (catch_syscall_inferior_data_cleanup);
+    = register_inferior_data_with_cleanup (NULL,
+					   catch_syscall_inferior_data_cleanup);
 
   breakpoint_chain = 0;
   /* Don't bother to call set_breakpoint_count.  $bpnum isn't useful

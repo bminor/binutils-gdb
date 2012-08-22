@@ -2484,7 +2484,7 @@ _initialize_svr4_solib (void)
 {
   solib_svr4_data = gdbarch_data_register_pre_init (solib_svr4_init);
   solib_svr4_pspace_data
-    = register_program_space_data_with_cleanup (svr4_pspace_data_cleanup);
+    = register_program_space_data_with_cleanup (NULL, svr4_pspace_data_cleanup);
 
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;

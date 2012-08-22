@@ -873,7 +873,7 @@ i386_use_watchpoints (struct target_ops *t)
 
   if (i386_inferior_data == NULL)
     i386_inferior_data
-      = register_inferior_data_with_cleanup (i386_inferior_data_cleanup);
+      = register_inferior_data_with_cleanup (NULL, i386_inferior_data_cleanup);
 }
 
 void

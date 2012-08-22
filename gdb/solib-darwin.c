@@ -534,7 +534,8 @@ void
 _initialize_darwin_solib (void)
 {
   solib_darwin_pspace_data
-    = register_program_space_data_with_cleanup (darwin_pspace_data_cleanup);
+    = register_program_space_data_with_cleanup (NULL,
+						darwin_pspace_data_cleanup);
 
   darwin_so_ops.relocate_section_addresses = darwin_relocate_section_addresses;
   darwin_so_ops.free_so = darwin_free_so;

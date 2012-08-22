@@ -23,6 +23,7 @@
 #include "gdb_obstack.h"	/* For obstack internals.  */
 #include "symfile.h"		/* For struct psymbol_allocation_list.  */
 #include "progspace.h"
+#include "registry.h"
 
 struct bcache;
 struct htab;
@@ -323,8 +324,7 @@ struct objfile
        deprecated_sym_stab_info and deprecated_sym_private
        entirely.  */
 
-    void **data;
-    unsigned num_data;
+    REGISTRY_FIELDS;
 
     /* Set of relocation offsets to apply to each section.
        The table is indexed by the_bfd_section->index, thus it is generally
@@ -503,24 +503,7 @@ extern int in_plt_section (CORE_ADDR, char *);
 
 /* Keep a registry of per-objfile data-pointers required by other GDB
    modules.  */
-
-/* Allocate an entry in the per-objfile registry.  */
-extern const struct objfile_data *register_objfile_data (void);
-
-/* Allocate an entry in the per-objfile registry.
-   SAVE and FREE are called when clearing objfile data.
-   First all registered SAVE functions are called.
-   Then all registered FREE functions are called.
-   Either or both of SAVE, FREE may be NULL.  */
-extern const struct objfile_data *register_objfile_data_with_cleanup
-  (void (*save) (struct objfile *, void *),
-   void (*free) (struct objfile *, void *));
-
-extern void clear_objfile_data (struct objfile *objfile);
-extern void set_objfile_data (struct objfile *objfile,
-			      const struct objfile_data *data, void *value);
-extern void *objfile_data (struct objfile *objfile,
-			   const struct objfile_data *data);
+DECLARE_REGISTRY(objfile);
 
 extern void default_iterate_over_objfiles_in_search_order
   (struct gdbarch *gdbarch,

@@ -1171,7 +1171,7 @@ void
 _initialize_dsbt_solib (void)
 {
   solib_dsbt_pspace_data
-    = register_program_space_data_with_cleanup (dsbt_pspace_data_cleanup);
+    = register_program_space_data_with_cleanup (NULL, dsbt_pspace_data_cleanup);
 
   dsbt_so_ops.relocate_section_addresses = dsbt_relocate_section_addresses;
   dsbt_so_ops.free_so = dsbt_free_so;

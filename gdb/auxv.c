@@ -530,7 +530,7 @@ This is information provided by the operating system at program startup."));
 
   /* Set an auxv cache per-inferior.  */
   auxv_inferior_data
-    = register_inferior_data_with_cleanup (auxv_inferior_data_cleanup);
+    = register_inferior_data_with_cleanup (NULL, auxv_inferior_data_cleanup);
 
   /* Observers used to invalidate the auxv cache when needed.  */
   observer_attach_inferior_exit (invalidate_auxv_cache_inf);

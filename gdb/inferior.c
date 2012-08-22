@@ -36,8 +36,10 @@
 
 void _initialize_inferiors (void);
 
-static void inferior_alloc_data (struct inferior *inf);
-static void inferior_free_data (struct inferior *inf);
+/* Keep a registry of per-inferior data-pointers required by other GDB
+   modules.  */
+
+DEFINE_REGISTRY (inferior)
 
 struct inferior *inferior_list = NULL;
 static int highest_inferior_num;
@@ -954,105 +956,6 @@ show_print_inferior_events (struct ui_file *file, int from_tty,
 }
 
 
-
-/* Keep a registry of per-inferior data-pointers required by other GDB
-   modules.  */
-
-struct inferior_data
-{
-  unsigned index;
-  void (*cleanup) (struct inferior *, void *);
-};
-
-struct inferior_data_registration
-{
-  struct inferior_data *data;
-  struct inferior_data_registration *next;
-};
-
-struct inferior_data_registry
-{
-  struct inferior_data_registration *registrations;
-  unsigned num_registrations;
-};
-
-static struct inferior_data_registry inferior_data_registry
-  = { NULL, 0 };
-
-const struct inferior_data *
-register_inferior_data_with_cleanup
-  (void (*cleanup) (struct inferior *, void *))
-{
-  struct inferior_data_registration **curr;
-
-  /* Append new registration.  */
-  for (curr = &inferior_data_registry.registrations;
-       *curr != NULL; curr = &(*curr)->next);
-
-  *curr = XMALLOC (struct inferior_data_registration);
-  (*curr)->next = NULL;
-  (*curr)->data = XMALLOC (struct inferior_data);
-  (*curr)->data->index = inferior_data_registry.num_registrations++;
-  (*curr)->data->cleanup = cleanup;
-
-  return (*curr)->data;
-}
-
-const struct inferior_data *
-register_inferior_data (void)
-{
-  return register_inferior_data_with_cleanup (NULL);
-}
-
-static void
-inferior_alloc_data (struct inferior *inf)
-{
-  gdb_assert (inf->data == NULL);
-  inf->num_data = inferior_data_registry.num_registrations;
-  inf->data = XCALLOC (inf->num_data, void *);
-}
-
-static void
-inferior_free_data (struct inferior *inf)
-{
-  gdb_assert (inf->data != NULL);
-  clear_inferior_data (inf);
-  xfree (inf->data);
-  inf->data = NULL;
-}
-
-void
-clear_inferior_data (struct inferior *inf)
-{
-  struct inferior_data_registration *registration;
-  int i;
-
-  gdb_assert (inf->data != NULL);
-
-  for (registration = inferior_data_registry.registrations, i = 0;
-       i < inf->num_data;
-       registration = registration->next, i++)
-    if (inf->data[i] != NULL && registration->data->cleanup)
-      registration->data->cleanup (inf, inf->data[i]);
-
-  memset (inf->data, 0, inf->num_data * sizeof (void *));
-}
-
-void
-set_inferior_data (struct inferior *inf,
-		       const struct inferior_data *data,
-		       void *value)
-{
-  gdb_assert (data->index < inf->num_data);
-  inf->data[data->index] = value;
-}
-
-void *
-inferior_data (struct inferior *inf, const struct inferior_data *data)
-{
-  gdb_assert (data->index < inf->num_data);
-  return inf->data[data->index];
-}
 
 void
 initialize_inferiors (void)

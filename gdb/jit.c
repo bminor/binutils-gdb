@@ -1414,7 +1414,7 @@ _initialize_jit (void)
   jit_objfile_data =
     register_objfile_data_with_cleanup (NULL, free_objfile_data);
   jit_inferior_data =
-    register_inferior_data_with_cleanup (jit_inferior_data_cleanup);
+    register_inferior_data_with_cleanup (NULL, jit_inferior_data_cleanup);
   jit_gdbarch_data = gdbarch_data_register_pre_init (jit_gdbarch_data_init);
   if (is_dl_available ())
     {

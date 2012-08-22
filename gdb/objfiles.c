@@ -55,10 +55,10 @@
 #include "solist.h"
 #include "gdb_bfd.h"
 
-/* Prototypes for local functions */
+/* Keep a registry of per-objfile data-pointers required by other GDB
+   modules.  */
 
-static void objfile_alloc_data (struct objfile *objfile);
-static void objfile_free_data (struct objfile *objfile);
+DEFINE_REGISTRY (objfile)
 
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info.  */
@@ -1339,115 +1339,6 @@ in_plt_section (CORE_ADDR pc, char *name)
 }
 
 
-/* Keep a registry of per-objfile data-pointers required by other GDB
-   modules.  */
-
-struct objfile_data
-{
-  unsigned index;
-  void (*save) (struct objfile *, void *);
-  void (*free) (struct objfile *, void *);
-};
-
-struct objfile_data_registration
-{
-  struct objfile_data *data;
-  struct objfile_data_registration *next;
-};
-  
-struct objfile_data_registry
-{
-  struct objfile_data_registration *registrations;
-  unsigned num_registrations;
-};
-
-static struct objfile_data_registry objfile_data_registry = { NULL, 0 };
-
-const struct objfile_data *
-register_objfile_data_with_cleanup (void (*save) (struct objfile *, void *),
-				    void (*free) (struct objfile *, void *))
-{
-  struct objfile_data_registration **curr;
-
-  /* Append new registration.  */
-  for (curr = &objfile_data_registry.registrations;
-       *curr != NULL; curr = &(*curr)->next);
-
-  *curr = XMALLOC (struct objfile_data_registration);
-  (*curr)->next = NULL;
-  (*curr)->data = XMALLOC (struct objfile_data);
-  (*curr)->data->index = objfile_data_registry.num_registrations++;
-  (*curr)->data->save = save;
-  (*curr)->data->free = free;
-
-  return (*curr)->data;
-}
-
-const struct objfile_data *
-register_objfile_data (void)
-{
-  return register_objfile_data_with_cleanup (NULL, NULL);
-}
-
-static void
-objfile_alloc_data (struct objfile *objfile)
-{
-  gdb_assert (objfile->data == NULL);
-  objfile->num_data = objfile_data_registry.num_registrations;
-  objfile->data = XCALLOC (objfile->num_data, void *);
-}
-
-static void
-objfile_free_data (struct objfile *objfile)
-{
-  gdb_assert (objfile->data != NULL);
-  clear_objfile_data (objfile);
-  xfree (objfile->data);
-  objfile->data = NULL;
-}
-
-void
-clear_objfile_data (struct objfile *objfile)
-{
-  struct objfile_data_registration *registration;
-  int i;
-
-  gdb_assert (objfile->data != NULL);
-
-  /* Process all the save handlers.  */
-
-  for (registration = objfile_data_registry.registrations, i = 0;
-       i < objfile->num_data;
-       registration = registration->next, i++)
-    if (objfile->data[i] != NULL && registration->data->save != NULL)
-      registration->data->save (objfile, objfile->data[i]);
-
-  /* Now process all the free handlers.  */
-
-  for (registration = objfile_data_registry.registrations, i = 0;
-       i < objfile->num_data;
-       registration = registration->next, i++)
-    if (objfile->data[i] != NULL && registration->data->free != NULL)
-      registration->data->free (objfile, objfile->data[i]);
-
-  memset (objfile->data, 0, objfile->num_data * sizeof (void *));
-}
-
-void
-set_objfile_data (struct objfile *objfile, const struct objfile_data *data,
-		  void *value)
-{
-  gdb_assert (data->index < objfile->num_data);
-  objfile->data[data->index] = value;
-}
-
-void *
-objfile_data (struct objfile *objfile, const struct objfile_data *data)
-{
-  gdb_assert (data->index < objfile->num_data);
-  return objfile->data[data->index];
-}
-
 /* Set objfiles_changed_p so section map will be rebuilt next time it
    is used.  Called by reread_symbols.  */
 
@@ -1490,5 +1381,6 @@ void
 _initialize_objfiles (void)
 {
   objfiles_pspace_data
-    = register_program_space_data_with_cleanup (objfiles_pspace_data_cleanup);
+    = register_program_space_data_with_cleanup (NULL,
+						objfiles_pspace_data_cleanup);
 }

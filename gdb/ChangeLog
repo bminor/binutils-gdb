@@ -1,5 +1,57 @@
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* auto-load.c (_initialize_auto_load): Update.
+	* solib-svr4.c (_initialize_svr4_solib): Update
+	* solib-dsbt.c (_initialize_dsbt_solib): Update.
+	* solib-darwin.c (_initialize_darwin_solib): Update.
+	* registry.h: New file.
+	* python/py-progspace.c (gdbpy_initialize_pspace): Update.
+	* python/py-inferior.c (gdbpy_initialize_inferior): Update.
+	* progspace.h: Include registry.h.  Use DECLARE_REGISTRY.
+	(register_program_space_data_with_cleanup)
+	(register_program_space_data, program_space_alloc_data)
+	(clear_program_space_data, set_program_space_data)
+	(program_space_data): Don't declare.
+	* progspace.c: Use DEFINE_REGISTRY.
+	(struct program_space_data, struct
+	program_space_data_registration, struct
+	program_space_data_registry, program_space_data_registry)
+	(register_program_space_data_with_cleanup)
+	(register_program_space_data, program_space_alloc_data)
+	(program_space_free_data, clear_program_space_data)
+	(set_program_space_data, program_space_data): Remove.
+	* objfiles.h: Include registry.h.  Use DECLARE_REGISTRY.
+	(struct objfile) <data, num_data>: Replace with REGISTRY_FIELDS.
+	(register_objfile_data_with_cleanup, register_objfile_data)
+	(clear_objfile_data, set_objfile_data, objfile_data): Don't
+	declare.
+	* objfiles.c: Use DEFINE_REGISTRY.
+	(struct objfile_data, struct objfile_data_registration, struct
+	objfile_data_registry, objfile_data_registry)
+	(register_objfile_data_with_cleanup, register_objfile_data)
+	(objfile_alloc_data, objfile_free_data, clear_objfile_data)
+	(set_objfile_data, objfile_data): Remove.
+	(_initialize_objfiles): Update.
+	* jit.c (_initialize_jit): Update.
+	* inflow.c (_initialize_inflow): Update.
+	* inferior.h: Include registry.h.  Use DECLARE_REGISTRY.
+	(struct inferior) <data, num_data>: Replace with REGISTRY_FIELDS.
+	(register_inferior_data_with_cleanup, register_inferior_data)
+	(clear_inferior_data, set_inferior_data, inferior_data): Don't
+	declare.
+	* inferior.c: Use DEFINE_REGISTRY.
+	(struct inferior_data, struct inferior_data_registration, struct
+	inferior_data_registry, inferior_data_registry)
+	(register_inferior_data_with_cleanup, register_inferior_data)
+	(inferior_alloc_data, inferior_free_data  clear_inferior_data)
+	(set_inferior_data, inferior_data): Remove.
+	* auxv.c (_initialize_auxv): Update.
+	* ada-lang.c (_initialize_ada_language): Update.
+	* breakpoint.c (_initialize_breakpoint): Update.
+	* i386-nat.c (i386_use_watchpoints): Update.
+
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* exec.c (exec_close, exec_file_attach): Update.
 	(add_to_section_table): Initialize 'key' field.
 	(add_target_sections, remove_target_sections): Add 'key' argument.

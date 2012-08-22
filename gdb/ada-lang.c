@@ -12657,5 +12657,5 @@ With an argument, catch only exceptions with the given name."),
   /* Setup per-inferior data.  */
   observer_attach_inferior_exit (ada_inferior_exit);
   ada_inferior_data
-    = register_inferior_data_with_cleanup (ada_inferior_data_cleanup);
+    = register_inferior_data_with_cleanup (NULL, ada_inferior_data_cleanup);
 }

@@ -24,6 +24,7 @@
 #include "target.h"
 #include "vec.h"
 #include "gdb_vecs.h"
+#include "registry.h"
 
 struct target_ops;
 struct bfd;
@@ -201,8 +202,7 @@ struct program_space
     VEC (char_ptr) *deleted_solibs;
 
     /* Per pspace data-pointers required by other GDB modules.  */
-    void **data;
-    unsigned num_data;
+    REGISTRY_FIELDS;
   };
 
 /* The object file that the main symbol table was loaded from (e.g. the
@@ -298,14 +298,6 @@ extern void clear_program_space_solib_cache (struct program_space *);
 /* Keep a registry of per-pspace data-pointers required by other GDB
    modules.  */
 
-extern const struct program_space_data *register_program_space_data (void);
-extern const struct program_space_data *register_program_space_data_with_cleanup
-  (void (*cleanup) (struct program_space *, void *));
-extern void clear_program_space_data (struct program_space *pspace);
-extern void set_program_space_data (struct program_space *pspace,
-				    const struct program_space_data *data,
-				    void *value);
-extern void *program_space_data (struct program_space *pspace,
-			   const struct program_space_data *data);
+DECLARE_REGISTRY (program_space);
 
 #endif

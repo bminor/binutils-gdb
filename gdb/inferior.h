@@ -43,6 +43,7 @@ struct terminal_info;
 #include "frame.h"
 
 #include "progspace.h"
+#include "registry.h"
 
 struct infcall_suspend_state;
 struct infcall_control_state;
@@ -513,21 +514,13 @@ struct inferior
   int symfile_flags;
 
   /* Per inferior data-pointers required by other GDB modules.  */
-  void **data;
-  unsigned num_data;
+  REGISTRY_FIELDS;
 };
 
 /* Keep a registry of per-inferior data-pointers required by other GDB
    modules.  */
 
-extern const struct inferior_data *register_inferior_data (void);
-extern const struct inferior_data *register_inferior_data_with_cleanup
-  (void (*cleanup) (struct inferior *, void *));
-extern void clear_inferior_data (struct inferior *inf);
-extern void set_inferior_data (struct inferior *inf,
-			       const struct inferior_data *data, void *value);
-extern void *inferior_data (struct inferior *inf,
-			    const struct inferior_data *data);
+DECLARE_REGISTRY (inferior);
 
 /* Create an empty inferior list, or empty the existing one.  */
 extern void init_inferior_list (void);

@@ -925,5 +925,5 @@ input settings."),
   observer_attach_inferior_exit (inflow_inferior_exit);
 
   inflow_inferior_data
-    = register_inferior_data_with_cleanup (inflow_inferior_data_cleanup);
+    = register_inferior_data_with_cleanup (NULL, inflow_inferior_data_cleanup);
 }
