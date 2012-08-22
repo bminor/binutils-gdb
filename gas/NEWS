@@ -1,8 +1,8 @@
 -*- text -*-
 
-* Add support for the 64-bit ARM architecture: AArch64.
-
 Changes in 2.23:
+
+* Add support for the 64-bit ARM architecture: AArch64.
 
 * Add support for S12X processor.
 
