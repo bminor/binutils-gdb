@@ -1322,5 +1322,5 @@ _initialize_remote_sim (void)
   set_cmd_completer (c, sim_command_completer);
 
   sim_inferior_data_key
-    = register_inferior_data_with_cleanup (sim_inferior_data_cleanup);
+    = register_inferior_data_with_cleanup (NULL, sim_inferior_data_cleanup);
 }

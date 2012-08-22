@@ -1,3 +1,8 @@
+2012-08-22  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* remote-sim.c (_initialize_remote_sim): Pass NULL argument to
+	`register_inferior_data_with_cleanup', fixing regression on PowerPC64.
+
 2012-08-22  Khoo Yit Phang <khooyp@cs.umd.edu>
 
 	Enable readline in Python in a GDB-specific way and block the
