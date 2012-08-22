@@ -151,6 +151,31 @@ ensure_python_env (struct gdbarch *gdbarch,
   return make_cleanup (restore_python_env, env);
 }
 
+/* Clear the quit flag.  */
+
+void
+clear_quit_flag (void)
+{
+  /* This clears the flag as a side effect.  */
+  PyOS_InterruptOccurred ();
+}
+
+/* Set the quit flag.  */
+
+void
+set_quit_flag (void)
+{
+  PyErr_SetInterrupt ();
+}
+
+/* Return true if the quit flag has been set, false otherwise.  */
+
+int
+check_quit_flag (void)
+{
+  return PyOS_InterruptOccurred ();
+}
+
 /* A wrapper around PyRun_SimpleFile.  FILE is the Python script to run
    named FILENAME.
 

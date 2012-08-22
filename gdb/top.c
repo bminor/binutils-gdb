@@ -569,7 +569,7 @@ command_loop (void)
       if (window_hook && instream == stdin)
 	(*window_hook) (instream, get_prompt ());
 
-      quit_flag = 0;
+      clear_quit_flag ();
       if (instream == stdin && stdin_is_tty)
 	reinitialize_more_filter ();
       old_chain = make_cleanup (null_cleanup, 0);
@@ -944,6 +944,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
   /* Control-C quits instantly if typed while in this loop
      since it should not wait until the user types a newline.  */
   immediate_quit++;
+  QUIT;
 #ifdef STOP_SIGNAL
   if (job_control)
     signal (STOP_SIGNAL, handle_stop_sig);

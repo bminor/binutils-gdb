@@ -1986,7 +1986,7 @@ load_progress (ULONGEST bytes, void *untyped_arg)
   args->buffer += bytes;
   totals->write_count += 1;
   args->section_sent += bytes;
-  if (quit_flag
+  if (check_quit_flag ()
       || (deprecated_ui_load_progress_hook != NULL
 	  && deprecated_ui_load_progress_hook (args->section_name,
 					       args->section_sent)))

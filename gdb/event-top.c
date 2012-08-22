@@ -409,7 +409,7 @@ command_handler (char *command)
   int stdin_is_tty = ISATTY (stdin);
   struct cleanup *stat_chain;
 
-  quit_flag = 0;
+  clear_quit_flag ();
   if (instream == stdin && stdin_is_tty)
     reinitialize_more_filter ();
 
@@ -788,7 +788,7 @@ handle_sigint (int sig)
      set quit_flag to 1 here.  Then if QUIT is called before we get to
      the event loop, we will unwind as expected.  */
 
-  quit_flag = 1;
+  set_quit_flag ();
 
   /* If immediate_quit is set, we go ahead and process the SIGINT right
      away, even if we usually would defer this to the event loop.  The
@@ -817,10 +817,9 @@ async_request_quit (gdb_client_data arg)
   /* If the quit_flag has gotten reset back to 0 by the time we get
      back here, that means that an exception was thrown to unwind the
      current command before we got back to the event loop.  So there
-     is no reason to call quit again here, unless immediate_quit is
-     set.  */
+     is no reason to call quit again here.  */
 
-  if (quit_flag || immediate_quit)
+  if (check_quit_flag ())
     quit ();
 }
 

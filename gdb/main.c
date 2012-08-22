@@ -331,7 +331,7 @@ captured_main (void *data)
   dirarg = (char **) xmalloc (dirsize * sizeof (*dirarg));
   ndir = 0;
 
-  quit_flag = 0;
+  clear_quit_flag ();
   saved_command_line = (char *) xmalloc (saved_command_line_size);
   saved_command_line[0] = '\0';
   instream = stdin;

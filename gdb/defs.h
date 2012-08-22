@@ -171,7 +171,27 @@ extern char *python_libdir;
 /* Search path for separate debug files.  */
 extern char *debug_file_directory;
 
-extern int quit_flag;
+/* GDB has two methods for handling SIGINT.  When immediate_quit is
+   nonzero, a SIGINT results in an immediate longjmp out of the signal
+   handler.  Otherwise, SIGINT simply sets a flag; code that might
+   take a long time, and which ought to be interruptible, checks this
+   flag using the QUIT macro.
+   
+   If GDB is built with Python support, it uses Python's low-level
+   interface to implement the flag.  This approach makes it possible
+   for Python and GDB SIGINT handling to coexist seamlessly.
+
+   If GDB is built without Python, it instead uses its traditional
+   variables.  */
+
+/* Clear the quit flag.  */
+extern void clear_quit_flag (void);
+/* Evaluate to non-zero if the quit flag is set, zero otherwise.  This
+   will clear the quit flag as a side effect.  */
+extern int check_quit_flag (void);
+/* Set the quit flag.  */
+extern void set_quit_flag (void);
+
 extern int immediate_quit;
 
 extern void quit (void);
@@ -184,7 +204,7 @@ extern void quit (void);
    needed.  */
 
 #define QUIT { \
-  if (quit_flag) quit (); \
+  if (check_quit_flag ()) quit (); \
   if (deprecated_interactive_hook) deprecated_interactive_hook (); \
 }
 

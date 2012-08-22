@@ -1,5 +1,34 @@
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* defs.h (quit_flag): Don't declare.
+	(clear_quit_flag, check_quit_flag, set_quit_flag): Declare.
+	(QUIT): Use new functions.
+	* event-top.c (command_handler): Use clear_quit_flag.
+	(handle_sigint): Use set_quit_flag.
+	(async_request_quit): Use check_quit_flag.  Don't check
+	immediate_quit.
+	* exceptions.c (throw_exception): Use clear_quit_flag.
+	* main.c (captured_main): Use clear_quit_flag.
+	* python/python.c (clear_quit_flag, set_quit_flag)
+	(check_quit_flag): New functions.
+	* remote-sim.c (gdb_os_poll_quit): Use check_quit_flag,
+	clear_quit_flag.
+	* remote.c (remote_wait_as): Use check_quit_flag,
+	clear_quit_flag.
+	(remote_start_remote): Call QUIT.
+	* symfile.c (load_progress): Use check_quit_flag.
+	* top.c (command_loop): Use clear_quit_flag.
+	(command_line_input): Call QUIT.
+	* utils.c (quit_flag): Conditionally define.
+	(clear_quit_flag, check_quit_flag, set_quit_flag): New
+	functions.
+	(prompt_for_continue): Call QUIT.  Use quit, not
+	async_request_quit.
+	* remote-mips.c (mips_expect_timeout): Call QUIT.
+	* monitor.c (monitor_expect): Call QUIT.
+
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* event-top.c (sigwinch_token, handle_sigwinch): Remove.
 	(async_init_signals): Update.
 	* utils.c (init_page_info): Don't use SIGWINCH_HANDLER.

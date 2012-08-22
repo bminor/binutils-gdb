@@ -3271,6 +3271,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   char *wait_status = NULL;
 
   immediate_quit++;		/* Allow user to interrupt it.  */
+  QUIT;
 
   if (interrupt_on_connect)
     send_interrupt_sequence ();
@@ -5714,9 +5715,9 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	  ofunc = signal (SIGINT, remote_interrupt);
 	  /* If the user hit C-c before this packet, or between packets,
 	     pretend that it was hit right here.  */
-	  if (quit_flag)
+	  if (check_quit_flag ())
 	    {
-	      quit_flag = 0;
+	      clear_quit_flag ();
 	      remote_interrupt (SIGINT);
 	    }
 	}

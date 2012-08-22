@@ -512,6 +512,7 @@ monitor_expect (char *string, char *buf, int buflen)
     }
 
   immediate_quit++;
+  QUIT;
   while (1)
     {
       if (buf)

@@ -588,6 +588,7 @@ mips_expect_timeout (const char *string, int timeout)
     }
 
   immediate_quit++;
+  QUIT;
   while (1)
     {
       int c;

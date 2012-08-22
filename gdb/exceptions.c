@@ -221,7 +221,7 @@ exceptions_state_mc_action_iter_1 (void)
 void
 throw_exception (struct gdb_exception exception)
 {
-  quit_flag = 0;
+  clear_quit_flag ();
   immediate_quit = 0;
 
   do_cleanups (all_cleanups ());
