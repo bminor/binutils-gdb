@@ -606,8 +606,7 @@ Layout::include_section(Sized_relobj_file<size, big_endian>*, const char* name,
     case elfcpp::SHT_GROUP:
       // If we are emitting relocations these should be handled
       // elsewhere.
-      gold_assert(!parameters->options().relocatable()
-		  && !parameters->options().emit_relocs());
+      gold_assert(!parameters->options().relocatable());
       return false;
 
     case elfcpp::SHT_PROGBITS:

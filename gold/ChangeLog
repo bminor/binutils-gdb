@@ -1,3 +1,8 @@
+2012-08-22  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Layout::include_section): Don't assert on GROUP
+	sections with --emit-relocs.
+
 2012-08-21  Cary Coutant  <ccoutant@google.com>
 
 	* symtab.cc (Symbol_table::gc_mark_undef_symbols): Don't assert
