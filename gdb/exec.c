@@ -107,7 +107,7 @@ exec_close (void)
       exec_bfd = NULL;
       exec_bfd_mtime = 0;
 
-      remove_target_sections (abfd);
+      remove_target_sections (&exec_bfd, abfd);
     }
 }
 
@@ -284,7 +284,7 @@ exec_file_attach (char *filename, int from_tty)
       /* Add the executable's sections to the current address spaces'
 	 list of sections.  This possibly pushes the exec_ops
 	 target.  */
-      add_target_sections (sections, sections_end);
+      add_target_sections (&exec_bfd, sections, sections_end);
       xfree (sections);
 
       /* Tell display code (if any) about the changed file name.  */
@@ -378,6 +378,7 @@ add_to_section_table (bfd *abfd, struct bfd_section *asect,
   if (!(aflag & SEC_ALLOC))
     return;
 
+  (*table_pp)->key = NULL;
   (*table_pp)->bfd = abfd;
   (*table_pp)->the_bfd_section = asect;
   (*table_pp)->addr = bfd_section_vma (abfd, asect);
@@ -438,7 +439,8 @@ build_section_table (struct bfd *some_bfd, struct target_section **start,
    current set of target sections.  */
 
 void
-add_target_sections (struct target_section *sections,
+add_target_sections (void *key,
+		     struct target_section *sections,
 		     struct target_section *sections_end)
 {
   int count;
@@ -449,9 +451,13 @@ add_target_sections (struct target_section *sections,
   if (count > 0)
     {
       int space = resize_section_table (table, count);
+      int i;
 
-      memcpy (table->sections + space,
-	      sections, count * sizeof (sections[0]));
+      for (i = 0; i < count; ++i)
+	{
+	  table->sections[space + i] = sections[i];
+	  table->sections[space + i].key = key;
+	}
 
       /* If these are the first file sections we can provide memory
 	 from, push the file_stratum target.  */
@@ -466,14 +472,14 @@ add_target_sections (struct target_section *sections,
 /* Remove all target sections taken from ABFD.  */
 
 void
-remove_target_sections (bfd *abfd)
+remove_target_sections (void *key, bfd *abfd)
 {
   struct target_section *src, *dest;
   struct target_section_table *table = current_target_sections;
 
   dest = table->sections;
   for (src = table->sections; src < table->sections_end; src++)
-    if (src->bfd != abfd)
+    if (src->key != key || src->bfd != abfd)
       {
 	/* Keep this section.  */
 	if (dest < src)

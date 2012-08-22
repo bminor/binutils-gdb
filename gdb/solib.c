@@ -504,7 +504,7 @@ solib_map_sections (struct so_list *so)
      section tables.  Do this immediately after mapping the object so
      that later nodes in the list can query this object, as is needed
      in solib-osf.c.  */
-  add_target_sections (so->sections, so->sections_end);
+  add_target_sections (so, so->sections, so->sections_end);
 
   return 1;
 }
@@ -772,7 +772,7 @@ update_solib_list (int from_tty, struct target_ops *target)
 
 	  /* Some targets' section tables might be referring to
 	     sections from so->abfd; remove them.  */
-	  remove_target_sections (gdb->abfd);
+	  remove_target_sections (gdb, gdb->abfd);
 
 	  free_so (gdb);
 	  gdb = *gdb_link;
@@ -1154,7 +1154,7 @@ clear_solib (void)
       so_list_head = so->next;
       observer_notify_solib_unloaded (so);
       if (so->abfd)
-	remove_target_sections (so->abfd);
+	remove_target_sections (so, so->abfd);
       free_so (so);
     }
 
@@ -1247,7 +1247,7 @@ reload_shared_libraries_1 (int from_tty)
 	  if (so->objfile && ! (so->objfile->flags & OBJF_USERLOADED)
 	      && !solib_used (so))
 	    free_objfile (so->objfile);
-	  remove_target_sections (so->abfd);
+	  remove_target_sections (so, so->abfd);
 	  free_so_symbols (so);
 	}
 

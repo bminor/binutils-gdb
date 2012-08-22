@@ -1,5 +1,16 @@
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* exec.c (exec_close, exec_file_attach): Update.
+	(add_to_section_table): Initialize 'key' field.
+	(add_target_sections, remove_target_sections): Add 'key' argument.
+	* exec.h (add_target_sections, remove_target_sections): Add
+	'key' argument.
+	* solib.c (solib_map_sections, update_solib_list, clear_solib)
+	(reload_shared_libraries_1): Update.
+	* target.h (struct target_section) <key>: New field.
+
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-cmds.c (filter_sals): Handle nelts == 0 case.
 
 2012-08-21  Pierre Muller  <muller@ics.u-strasbg.fr>

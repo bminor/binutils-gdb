@@ -1804,6 +1804,12 @@ struct target_section
 
     struct bfd_section *the_bfd_section;
 
+    /* A given BFD may appear multiple times in the target section
+       list, so each BFD is associated with a given key.  The key is
+       just some convenient pointer that can be used to differentiate
+       the BFDs.  These are managed only by convention.  */
+    void *key;
+
     bfd *bfd;			/* BFD file pointer */
   };
 
