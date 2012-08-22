@@ -17082,8 +17082,8 @@ macro_start_file (int file, int line,
   /* We don't create a macro table for this compilation unit
      at all until we actually get a filename.  */
   if (! pending_macros)
-    pending_macros = new_macro_table (&objfile->objfile_obstack,
-                                      objfile->macro_cache);
+    pending_macros = new_macro_table (&objfile->per_bfd->storage_obstack,
+                                      objfile->per_bfd->macro_cache);
 
   if (! current_file)
     {

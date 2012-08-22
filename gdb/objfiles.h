@@ -174,6 +174,9 @@ struct objfile_per_bfd_storage
   /* Byte cache for file names.  */
 
   struct bcache *filename_cache;
+
+  /* Byte cache for macros.  */
+  struct bcache *macro_cache;
 };
 
 /* Master structure for keeping track of each file from which
@@ -269,7 +272,6 @@ struct objfile
        will not change.  */
 
     struct psymbol_bcache *psymbol_cache; /* Byte cache for partial syms.  */
-    struct bcache *macro_cache;           /* Byte cache for macros.  */
 
     /* Hash table for mapping symbol names to demangled names.  Each
        entry in the hash table is actually two consecutive strings,

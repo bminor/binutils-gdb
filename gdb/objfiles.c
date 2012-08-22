@@ -141,6 +141,7 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 
       obstack_init (&storage->storage_obstack);
       storage->filename_cache = bcache_xmalloc (NULL, NULL);
+      storage->macro_cache = bcache_xmalloc (NULL, NULL);
     }
 
   return storage;
@@ -152,6 +153,7 @@ static void
 free_objfile_per_bfd_storage (struct objfile_per_bfd_storage *storage)
 {
   bcache_xfree (storage->filename_cache);
+  bcache_xfree (storage->macro_cache);
   obstack_free (&storage->storage_obstack, 0);
 }
 
@@ -251,7 +253,6 @@ allocate_objfile (bfd *abfd, int flags)
 
   objfile = (struct objfile *) xzalloc (sizeof (struct objfile));
   objfile->psymbol_cache = psymbol_bcache_init ();
-  objfile->macro_cache = bcache_xmalloc (NULL, NULL);
   /* We could use obstack_specify_allocation here instead, but
      gdb_obstack.h specifies the alloc/dealloc functions.  */
   obstack_init (&objfile->objfile_obstack);
@@ -676,7 +677,6 @@ free_objfile (struct objfile *objfile)
     xfree (objfile->static_psymbols.list);
   /* Free the obstacks for non-reusable objfiles.  */
   psymbol_bcache_free (objfile->psymbol_cache);
-  bcache_xfree (objfile->macro_cache);
   if (objfile->demangled_names_hash)
     htab_delete (objfile->demangled_names_hash);
   obstack_free (&objfile->objfile_obstack, 0);

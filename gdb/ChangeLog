@@ -1,5 +1,18 @@
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (macro_start_file): Update.
+	* objfiles.c (get_objfile_bfd_data): Initialize macro_cache.
+	(free_objfile_per_bfd_storage): Destroy macro_cache.
+	(allocate_objfile, free_objfile): Update.
+	* objfiles.h (struct objfile_per_bfd_storage) <macro_cache>:
+	New field.
+	(struct objfile) <macro_cache>: Remove.
+	* symfile.c (reread_symbols): Update.
+	* symmisc.c (print_symbol_bcache_statistics): Update.
+	(print_objfile_statistics): Update.
+
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* elfread.c (elf_symtab_read): Update.
 	* objfiles.c (objfiles_bfd_data): New global.
 	(get_objfile_bfd_data, free_objfile_per_bfd_storage)
