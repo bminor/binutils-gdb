@@ -1,3 +1,8 @@
+2012-08-22  Keith Seitz  <keiths@redhat.com>
+
+	* server.h: Include build-gnulib-gbserver/config.h.
+	* gdbreplay.c: Likewise.
+
 2012-08-08  Doug Evans  <dje@google.com>
 
 	* Makefile.in (SFILES): Add gdb_vecs.c.

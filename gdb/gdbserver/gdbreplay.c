@@ -19,6 +19,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
+#include "build-gnulib-gdbserver/config.h"
+
 #include <stdio.h>
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>

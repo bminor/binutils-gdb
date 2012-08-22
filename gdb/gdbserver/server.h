@@ -21,6 +21,7 @@
 #define SERVER_H
 
 #include "config.h"
+#include "build-gnulib-gdbserver/config.h"
 
 #ifdef __MINGW32CE__
 #include "wincecompat.h"

@@ -1,3 +1,7 @@
+2012-08-22  Keith Seitz  <keiths@redhat.com>
+
+	* defs.h: Include build-gnulib/config.h
+
 2012-08-22  Joseph Myers  <joseph@codesourcery.com>
 
 	* arm-tdep.c (thumb_get_next_pc_raw): Mask off low bits for bx pc
