@@ -24,11 +24,20 @@
 /* The macros here implement a template type and functions for
    associating some user data with a container object.
 
+   A registry is associated with a struct tag name.  To attach a
+   registry to a structure, use DEFINE_REGISTRY.  This takes the
+   structure tag and an access method as arguments.  In the usual
+   case, where the registry fields appear directly in the struct, you
+   can use the 'REGISTRY_FIELDS' macro to declare the fields in the
+   struct definition, and you can pass 'REGISTRY_ACCESS_FIELD' as the
+   access argument to DEFINE_REGISTRY.  In other cases, use
+   REGISTRY_FIELDS to define the fields in the appropriate spot, and
+   then define your own accessor to find the registry field structure
+   given an instance of your type.
+
    The API user requests a key from a registry during gdb
    initialization.  Later this key can be used to associate some
    module-specific data with a specific container object.
-
-   A registry is associated with a struct tag name.
 
    The exported API is best used via the wrapper macros:
    
@@ -54,16 +63,31 @@
    Fetch the data for an object; returns NULL if it has not been set.
 */
 
+/* This structure is used in a container to hold the data that the
+   registry uses.  */
+
+struct registry_fields
+{
+  void **data;
+  unsigned num_data;
+};
+
 /* This macro is used in a container struct definition to define the
    fields used by the registry code.  */
 
 #define REGISTRY_FIELDS				\
-  void **data;					\
-  unsigned num_data
+  struct registry_fields registry_data
+
+/* A convenience macro for the typical case where the registry data is
+   kept as fields of the object.  This can be passed as the ACCESS
+   method to DEFINE_REGISTRY.  */
+
+#define REGISTRY_ACCESS_FIELD(CONTAINER) \
+  (CONTAINER)
 
 /* Define a new registry implementation.  */
 
-#define DEFINE_REGISTRY(TAG)						\
+#define DEFINE_REGISTRY(TAG, ACCESS)					\
 struct TAG ## _data							\
 {									\
   unsigned index;							\
@@ -114,61 +138,65 @@ register_ ## TAG ## _data (void)					\
 static void								\
 TAG ## _alloc_data (struct TAG *container)				\
 {									\
-  gdb_assert (container->data == NULL);					\
-  container->num_data = TAG ## _data_registry.num_registrations;	\
-  container->data = XCALLOC (container->num_data, void *);		\
+  struct registry_fields *rdata = &ACCESS (container)->registry_data;	\
+  gdb_assert (rdata->data == NULL);					\
+  rdata->num_data = TAG ## _data_registry.num_registrations;		\
+  rdata->data = XCALLOC (rdata->num_data, void *);			\
 }									\
 									\
 void									\
 clear_ ## TAG ## _data (struct TAG *container)				\
 {									\
+  struct registry_fields *rdata = &ACCESS (container)->registry_data;	\
   struct TAG ## _data_registration *registration;			\
   int i;								\
 									\
-  gdb_assert (container->data != NULL);					\
+  gdb_assert (rdata->data != NULL);					\
 									\
   /* Process all the save handlers.  */					\
 									\
   for (registration = TAG ## _data_registry.registrations, i = 0;	\
-       i < container->num_data;						\
+       i < rdata->num_data;						\
        registration = registration->next, i++)				\
-    if (container->data[i] != NULL && registration->data->save != NULL)	\
-      registration->data->save (container, container->data[i]);		\
+    if (rdata->data[i] != NULL && registration->data->save != NULL)	\
+      registration->data->save (container, rdata->data[i]);		\
 									\
   /* Now process all the free handlers.  */				\
 									\
   for (registration = TAG ## _data_registry.registrations, i = 0;	\
-       i < container->num_data;						\
+       i < rdata->num_data;						\
        registration = registration->next, i++)				\
-    if (container->data[i] != NULL && registration->data->free != NULL)	\
-      registration->data->free (container, container->data[i]);		\
+    if (rdata->data[i] != NULL && registration->data->free != NULL)	\
+      registration->data->free (container, rdata->data[i]);		\
 									\
-  memset (container->data, 0, container->num_data * sizeof (void *));	\
+  memset (rdata->data, 0, rdata->num_data * sizeof (void *));		\
 }									\
 									\
 static void								\
 TAG ## _free_data (struct TAG *container)				\
 {									\
-  void ***rdata = &container->data;					\
-  gdb_assert (*rdata != NULL);						\
+  struct registry_fields *rdata = &ACCESS (container)->registry_data;	\
+  gdb_assert (rdata->data != NULL);					\
   clear_ ## TAG ## _data (container);					\
-  xfree (*rdata);							\
-  *rdata = NULL;							\
+  xfree (rdata->data);							\
+  rdata->data = NULL;							\
 }									\
 									\
 void									\
 set_ ## TAG ## _data (struct TAG *container, const struct TAG ## _data *data, \
 		  void *value)						\
 {									\
-  gdb_assert (data->index < container->num_data);			\
-  container->data[data->index] = value;					\
+  struct registry_fields *rdata = &ACCESS (container)->registry_data;	\
+  gdb_assert (data->index < rdata->num_data);				\
+  rdata->data[data->index] = value;					\
 }									\
 									\
 void *									\
 TAG ## _data (struct TAG *container, const struct TAG ## _data *data)	\
 {									\
-  gdb_assert (data->index < container->num_data);			\
-  return container->data[data->index];					\
+  struct registry_fields *rdata = &ACCESS (container)->registry_data;	\
+  gdb_assert (data->index < rdata->num_data);				\
+  return rdata->data[data->index];					\
 }
 
 

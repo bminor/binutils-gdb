@@ -42,7 +42,7 @@ static int highest_address_space_num;
 /* Keep a registry of per-program_space data-pointers required by other GDB
    modules.  */
 
-DEFINE_REGISTRY (program_space)
+DEFINE_REGISTRY (program_space, REGISTRY_ACCESS_FIELD)
 
 
 

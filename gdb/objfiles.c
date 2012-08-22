@@ -58,7 +58,7 @@
 /* Keep a registry of per-objfile data-pointers required by other GDB
    modules.  */
 
-DEFINE_REGISTRY (objfile)
+DEFINE_REGISTRY (objfile, REGISTRY_ACCESS_FIELD)
 
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info.  */

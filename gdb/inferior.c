@@ -39,7 +39,7 @@ void _initialize_inferiors (void);
 /* Keep a registry of per-inferior data-pointers required by other GDB
    modules.  */
 
-DEFINE_REGISTRY (inferior)
+DEFINE_REGISTRY (inferior, REGISTRY_ACCESS_FIELD)
 
 struct inferior *inferior_list = NULL;
 static int highest_inferior_num;

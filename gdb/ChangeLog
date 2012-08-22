@@ -1,5 +1,13 @@
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* registry.h (struct registry_fields): New.
+	(REGISTRY_FIELDS): Redefine.
+	(REGISTRY_ACCESS_FIELD): New macro.
+	(DEFINE_REGISTRY): Add ACCESS argument.  Update defined
+	functions.
+
+2012-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* auto-load.c (_initialize_auto_load): Update.
 	* solib-svr4.c (_initialize_svr4_solib): Update
 	* solib-dsbt.c (_initialize_dsbt_solib): Update.
