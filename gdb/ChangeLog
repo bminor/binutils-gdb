@@ -1,3 +1,8 @@
+2012-08-23  Pedro Alves  <palves@redhat.com>
+
+	* infcmd.c (_initialize_infcmd) <signal command>: Fix typo in help
+	string.
+
 2012-08-23  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (disconnect_tracing): Call set_tracepoint_num.

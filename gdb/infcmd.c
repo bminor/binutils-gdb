@@ -3019,7 +3019,7 @@ all targets."));
   c = add_com ("signal", class_run, signal_command, _("\
 Continue program with the specified signal.\n\
 Usage: signal SIGNAL\n\
-The SIGNAL arugment is processed the same as the handle command.\n\
+The SIGNAL argument is processed the same as the handle command.\n\
 \n\
 An argument of \"0\" means continue the program without sending it a signal.\n\
 This is useful in cases where the program stopped because of a signal,\n\
