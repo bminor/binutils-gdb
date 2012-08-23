@@ -1,3 +1,7 @@
+2012-08-23  Yao Qi  <yao@codesourcery.com>
+
+	* server.h: Remove declaration of 'xsnprintf'.
+
 2012-08-22  Keith Seitz  <keiths@redhat.com>
 
 	* server.h: Include build-gnulib-gbserver/config.h.
