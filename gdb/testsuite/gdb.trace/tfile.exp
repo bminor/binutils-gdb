@@ -22,12 +22,6 @@
 
 load_lib "trace-support.exp";
 
-if [target_info exists gdb,nofileio] {
-    verbose "Skipping tfile.exp because of no fileio capabilities."
-    continue
-}
-
-
 gdb_exit
 gdb_start
 standard_testfile
@@ -41,18 +35,15 @@ gdb_reinitialize_dir $srcdir/$subdir
 # Make sure we are starting fresh.
 remote_file host delete basic.tf
 remote_file host delete error.tf
+remote_file target delete basic.tf
+remote_file target delete error.tf
+
+remote_exec target "$binfile"
+# Copy tracefile from target to host through build.
+remote_download host [remote_upload target basic.tf] basic.tf
+remote_download host [remote_upload target error.tf] error.tf
 
 gdb_load $binfile
-
-runto_main
-
-gdb_test "break done_making_trace_files" ".*" ""
-
-gdb_test "continue" ".*" ""
-
-# tsave command would be tested here...
-
-gdb_test "continue" ".*" ""
 
 # Program has presumably exited, now target a trace file it created.
 

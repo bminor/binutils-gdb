@@ -1,3 +1,11 @@
+2012-08-23  Yao Qi  <yao@codesourcery.com>
+
+	* boards/native-gdbserver.exp (${board}_upload): New.
+	* boards/native-stdio-gdbserver.exp (${board}_upload): New.
+	* gdb.trace/tfile.exp: Don't check 'gdb,nofileio'.
+	Execute tfile on remote target.
+	Copy trace file from target to host.
+
 2012-08-22  Joseph Myers  <joseph@codesourcery.com>
 
 	* gdb.arch/thumb-bx-pc.S: New file.

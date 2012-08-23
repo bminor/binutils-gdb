@@ -142,6 +142,10 @@ proc ${board}_download { board host dest } {
     return $host
 }
 
+proc ${board}_upload {dest srcfile args} {
+    return $srcfile
+}
+
 proc ${board}_file { dest op args } {
     if { $op == "delete" } {
 	return 0
