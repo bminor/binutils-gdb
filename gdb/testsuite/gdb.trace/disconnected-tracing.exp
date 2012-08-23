@@ -43,32 +43,84 @@ if ![gdb_target_supports_trace] {
     return -1;
 }
 
-delete_breakpoints
-gdb_test_no_output "set confirm off"
-gdb_test_no_output "set disconnected-tracing on"
-gdb_test "trace main" ".*"
-gdb_test_no_output "tstart"
+# Disconnect in tracing.
 
-gdb_test "info tracepoints" ".*in main at.*" "first info tracepoints"
+proc disconnected_tracing {  } { with_test_prefix "trace" {
+    global executable
 
-gdb_test "disconnect" "Ending remote debugging\\." "first disconnect"
-if { [gdb_reconnect] == 0 } {
-    pass "first reconnect after unload"
-} else {
-    fail "first reconnect after unload"
-    return 0
-}
-gdb_test "info tracepoints" ".*in main at.*" "second info tracepoints"
+    # Start with a fresh gdb.
+    clean_restart ${executable}
+    if ![runto_main] {
+	fail "Can't run to main"
+	return -1
+    }
 
-delete_breakpoints
-gdb_test "info tracepoints" ".*No tracepoints..*" "third info tracepoints"
+    gdb_test_no_output "set confirm off"
+    gdb_test_no_output "set disconnected-tracing on"
+    gdb_test "trace main" ".*"
+    gdb_test_no_output "tstart"
 
-gdb_test "disconnect" "Ending remote debugging\\." "second disconnect"
-if { [gdb_reconnect] == 0 } {
-    pass "second reconnect after unload"
-} else {
-    fail "second reconnect after unload"
-    return 0
-}
-gdb_test "info tracepoints" ".*in main at.*" "fourth info tracepoints"
+    gdb_test "info tracepoints" ".*in main at.*" "first info tracepoints"
 
+    gdb_test "disconnect" "Ending remote debugging\\." "first disconnect"
+    if { [gdb_reconnect] == 0 } {
+	pass "first reconnect after unload"
+    } else {
+	fail "first reconnect after unload"
+	return 0
+    }
+    gdb_test "info tracepoints" ".*in main at.*" "second info tracepoints"
+
+    delete_breakpoints
+    gdb_test "info tracepoints" ".*No tracepoints..*" "third info tracepoints"
+
+    gdb_test "disconnect" "Ending remote debugging\\." "second disconnect"
+    if { [gdb_reconnect] == 0 } {
+	pass "second reconnect after unload"
+    } else {
+	fail "second reconnect after unload"
+	return 0
+    }
+    gdb_test "info tracepoints" ".*in main at.*" "fourth info tracepoints"
+}}
+
+disconnected_tracing
+
+# Disconnected in tfind
+
+proc disconnected_tfind {  } { with_test_prefix "tfind" {
+    global executable
+    global decimal
+
+    # Start with a fresh gdb.
+    clean_restart ${executable}
+    if ![runto_main] {
+	fail "Can't run to main"
+	return -1
+    }
+
+    gdb_test_no_output "set confirm off"
+    gdb_test_no_output "set disconnected-tracing on"
+    gdb_test "trace start" ".*"
+    gdb_test_no_output "tstart"
+
+    gdb_test "break end" "Breakpoint ${decimal} at .*"
+    gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*"
+    gdb_test_no_output "tstop"
+
+    gdb_test "tfind" "Found trace frame 0, tracepoint .*" "tfind frame 0"
+    gdb_test "p \$trace_frame" ".*\\\$${decimal} = 0.*" \
+	"p \$trace_frame before disconnected"
+    gdb_test "p \$tracepoint" ".*\\\$${decimal} = 2.*" \
+	"p \$tracepoint before disconnected"
+
+    gdb_test "disconnect" "Ending remote debugging\\." "first disconnect"
+
+    gdb_test "p \$trace_frame" ".*\\\$${decimal} = -1.*"
+    gdb_test "p \$tracepoint" ".*\\\$${decimal} = -1.*"
+    gdb_test "p \$trace_line" ".*\\\$${decimal} = -1.*"
+    gdb_test "p \$trace_file" ".*\\\$${decimal} = void.*"
+    gdb_test "p \$trace_func" ".*\\\$${decimal} = void.*"
+}}
+
+disconnected_tfind

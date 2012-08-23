@@ -1,3 +1,11 @@
+2012-08-23  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (disconnect_tracing): Call set_tracepoint_num.
+	(tfind_1): Don't call registers_changed, set_traceframe_num,
+	and clear_traceframe_info.
+	Call set_current_traceframe.
+	(set_current_traceframe): call set_traceframe_num.
+
 2012-08-22  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* remote-sim.c (_initialize_remote_sim): Pass NULL argument to

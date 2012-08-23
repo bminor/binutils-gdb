@@ -1,5 +1,13 @@
 2012-08-23  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/disconnected-tracing.c (start, end): New.
+	(main): Call start and end.
+	* gdb.trace/disconnected-tracing.exp (disconnected_tracing): Move
+	existing tests into this proc.
+	(disconnected_tfind): New.
+
+2012-08-23  Yao Qi  <yao@codesourcery.com>
+
 	* boards/native-gdbserver.exp (${board}_upload): New.
 	* boards/native-stdio-gdbserver.exp (${board}_upload): New.
 	* gdb.trace/tfile.exp: Don't check 'gdb,nofileio'.

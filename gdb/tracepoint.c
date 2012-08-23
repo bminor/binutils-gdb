@@ -2212,6 +2212,7 @@ disconnect_tracing (int from_tty)
      full tfind_1 behavior because we're in the middle of detaching,
      and there's no point to updating current stack frame etc.  */
   set_current_traceframe (-1);
+  set_tracepoint_num (-1);
   set_traceframe_context (NULL);
 }
 
@@ -2285,10 +2286,10 @@ tfind_1 (enum trace_find_type type, int num,
   tp = get_tracepoint_by_number_on_target (target_tracept);
 
   reinit_frame_cache ();
-  registers_changed ();
   target_dcache_invalidate ();
-  set_traceframe_num (target_frameno);
-  clear_traceframe_info ();
+
+  set_current_traceframe (target_frameno);
+
   set_tracepoint_num (tp ? tp->base.number : target_tracept);
   if (target_frameno == -1)
     set_traceframe_context (NULL);
@@ -3273,7 +3274,7 @@ set_current_traceframe (int num)
   if (newnum != num)
     warning (_("could not change traceframe"));
 
-  traceframe_number = newnum;
+  set_traceframe_num (newnum);
 
   /* Changing the traceframe changes our view of registers and of the
      frame chain.  */
