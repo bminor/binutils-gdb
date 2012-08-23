@@ -1277,7 +1277,10 @@ _initialize_python (void)
 	   python_interactive_command,
 #ifdef HAVE_PYTHON
 	   _("\
-Start a Python interactive prompt.\n\
+Start an interactive Python prompt.\n\
+\n\
+To return to GDB, type the EOF character (e.g., Ctrl-D on an empty\n\
+prompt).\n\
 \n\
 Alternatively, a single-line Python command can be given as an\n\
 argument, and if the command is an expression, the result will be\n\

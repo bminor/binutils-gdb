@@ -22515,7 +22515,8 @@ and one related setting:
 @item python-interactive @r{[}@var{command}@r{]}
 @itemx pi @r{[}@var{command}@r{]}
 Without an argument, the @code{python-interactive} command can be used
-to start an interactive Python prompt.
+to start an interactive Python prompt.  To return to @value{GDBN},
+type the @code{EOF} character (e.g., @kbd{Ctrl-D} on an empty prompt).
 
 Alternatively, a single-line Python command can be given as an
 argument and evaluated.  If the command is an expression, the result

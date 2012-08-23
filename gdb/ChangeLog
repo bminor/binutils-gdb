@@ -1,3 +1,9 @@
+2012-08-23  Khoo Yit Phang <khooyp@cs.umd.edu>
+
+	Document how to return from "python-interactive" to GDB.
+	* doc/gdb.texinfo (Python Commands): Update documentation.
+	* python/python.c (_initialize_python): Update documentation.
+
 2012-08-23  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (_initialize_infrun) <handle command help text>:
