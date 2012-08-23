@@ -1,3 +1,7 @@
+2012-08-23  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/help.exp: Adjust to "handle" help text change.
+
 2012-08-23  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/disconnected-tracing.c (start, end): New.

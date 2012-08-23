@@ -7096,10 +7096,10 @@ Specify a signal as argument to print info on that signal only."));
   add_info_alias ("handle", "signals", 0);
 
   c = add_com ("handle", class_run, handle_command, _("\
-Specify how to handle a signal.\n\
+Specify how to handle signals.\n\
 Usage: handle SIGNAL [ACTIONS]\n\
 Args are signals and actions to apply to those signals.\n\
-If no actions are specified, the current settings for the specified signal\n\
+If no actions are specified, the current settings for the specified signals\n\
 will be displayed instead.\n\
 \n\
 Symbolic signals (e.g. SIGSEGV) are recommended but numeric signals\n\
@@ -7114,7 +7114,11 @@ Stop means reenter debugger if this signal happens (implies print).\n\
 Print means print a message if this signal happens.\n\
 Pass means let program see this signal; otherwise program doesn't know.\n\
 Ignore is a synonym for nopass and noignore is a synonym for pass.\n\
-Pass and Stop may be combined."));
+Pass and Stop may be combined.\n\
+\n\
+Multiple signals may be specified.  Signal numbers and signal names\n\
+may be interspersed with actions, with the actions being performed for\n\
+all signals cumulatively specified."));
   set_cmd_completer (c, handle_completer);
 
   if (xdb_commands)
