@@ -22,6 +22,34 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f3b0e3ce 	aesimc.8	q7, q7
 0[0-9a-f]+ <[^>]+> f3f003e0 	aesimc.8	q8, q8
 0[0-9a-f]+ <[^>]+> f3f0e3ee 	aesimc.8	q15, q15
+0[0-9a-f]+ <[^>]+> f2000c40 	sha1c.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> f20eec4e 	sha1c.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> f2400ce0 	sha1c.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> f24eecee 	sha1c.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> f2100c40 	sha1p.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> f21eec4e 	sha1p.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> f2500ce0 	sha1p.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> f25eecee 	sha1p.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> f2200c40 	sha1m.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> f22eec4e 	sha1m.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> f2600ce0 	sha1m.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> f26eecee 	sha1m.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> f2300c40 	sha1su0.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> f23eec4e 	sha1su0.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> f2700ce0 	sha1su0.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> f27eecee 	sha1su0.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> f3000c40 	sha256h.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> f30eec4e 	sha256h.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> f3400ce0 	sha256h.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> f34eecee 	sha256h.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> f3100c40 	sha256h2.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> f31eec4e 	sha256h2.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> f3500ce0 	sha256h2.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> f35eecee 	sha256h2.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> f3200c40 	sha256su1.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> f32eec4e 	sha256su1.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> f3600ce0 	sha256su1.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> f36eecee 	sha256su1.32	q15, q15, q15
 0[0-9a-f]+ <[^>]+> efa0 0e00 	vmull.p64	q0, d0, d0
 0[0-9a-f]+ <[^>]+> efef eeaf 	vmull.p64	q15, d31, d31
 0[0-9a-f]+ <[^>]+> ffb0 0300 	aese.8	q0, q0
@@ -40,3 +68,31 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> ffb0 e3ce 	aesimc.8	q7, q7
 0[0-9a-f]+ <[^>]+> fff0 03e0 	aesimc.8	q8, q8
 0[0-9a-f]+ <[^>]+> fff0 e3ee 	aesimc.8	q15, q15
+0[0-9a-f]+ <[^>]+> ef00 0c40 	sha1c.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> ef0e ec4e 	sha1c.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> ef40 0ce0 	sha1c.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> ef4e ecee 	sha1c.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> ef10 0c40 	sha1p.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> ef1e ec4e 	sha1p.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> ef50 0ce0 	sha1p.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> ef5e ecee 	sha1p.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> ef20 0c40 	sha1m.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> ef2e ec4e 	sha1m.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> ef60 0ce0 	sha1m.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> ef6e ecee 	sha1m.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> ef30 0c40 	sha1su0.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> ef3e ec4e 	sha1su0.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> ef70 0ce0 	sha1su0.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> ef7e ecee 	sha1su0.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> ff00 0c40 	sha256h.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> ff0e ec4e 	sha256h.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> ff40 0ce0 	sha256h.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> ff4e ecee 	sha256h.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> ff10 0c40 	sha256h2.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> ff1e ec4e 	sha256h2.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> ff50 0ce0 	sha256h2.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> ff5e ecee 	sha256h2.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> ff20 0c40 	sha256su1.32	q0, q0, q0
+0[0-9a-f]+ <[^>]+> ff2e ec4e 	sha256su1.32	q7, q7, q7
+0[0-9a-f]+ <[^>]+> ff60 0ce0 	sha256su1.32	q8, q8, q8
+0[0-9a-f]+ <[^>]+> ff6e ecee 	sha256su1.32	q15, q15, q15

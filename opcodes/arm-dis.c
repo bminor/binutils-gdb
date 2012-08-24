@@ -625,6 +625,13 @@ static const struct opcode32 neon_opcodes[] =
   {FPU_NEON_EXT_V1, 0xf3b30600, 0xffb30e10, "vcvt%c.%7-8?usff%18-19Sa.%7-8?ffus%18-19Sa\t%12-15,22R, %0-3,5R"},
 
   /* Three registers of the same length.  */
+  {FPU_CRYPTO_EXT_ARMV8, 0xf2000c40, 0xffb00f50, "sha1c%u.32\t%12-15,22Q, %16-19,7Q, %0-3,5Q"},
+  {FPU_CRYPTO_EXT_ARMV8, 0xf2100c40, 0xffb00f50, "sha1p%u.32\t%12-15,22Q, %16-19,7Q, %0-3,5Q"},
+  {FPU_CRYPTO_EXT_ARMV8, 0xf2200c40, 0xffb00f50, "sha1m%u.32\t%12-15,22Q, %16-19,7Q, %0-3,5Q"},
+  {FPU_CRYPTO_EXT_ARMV8, 0xf2300c40, 0xffb00f50, "sha1su0%u.32\t%12-15,22Q, %16-19,7Q, %0-3,5Q"},
+  {FPU_CRYPTO_EXT_ARMV8, 0xf3000c40, 0xffb00f50, "sha256h%u.32\t%12-15,22Q, %16-19,7Q, %0-3,5Q"},
+  {FPU_CRYPTO_EXT_ARMV8, 0xf3100c40, 0xffb00f50, "sha256h2%u.32\t%12-15,22Q, %16-19,7Q, %0-3,5Q"},
+  {FPU_CRYPTO_EXT_ARMV8, 0xf3200c40, 0xffb00f50, "sha256su1%u.32\t%12-15,22Q, %16-19,7Q, %0-3,5Q"},
   {FPU_NEON_EXT_ARMV8, 0xf3000f10, 0xffa00f10, "vmaxnm%u.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
   {FPU_NEON_EXT_ARMV8, 0xf3200f10, 0xffa00f10, "vminnm%u.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
   {FPU_NEON_EXT_V1, 0xf2000110, 0xffb00f10, "vand%c\t%12-15,22R, %16-19,7R, %0-3,5R"},

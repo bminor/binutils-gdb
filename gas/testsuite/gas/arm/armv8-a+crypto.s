@@ -21,6 +21,35 @@
 	aesimc.8	q7, q7
 	aesimc.8	q8, q8
 	aesimc.8	q15, q15
+	sha1c.32	q0, q0, q0
+	sha1c.32	q7, q7, q7
+	sha1c.32	q8, q8, q8
+	sha1c.32	q15, q15, q15
+	sha1p.32	q0, q0, q0
+	sha1p.32	q7, q7, q7
+	sha1p.32	q8, q8, q8
+	sha1p.32	q15, q15, q15
+	sha1m.32	q0, q0, q0
+	sha1m.32	q7, q7, q7
+	sha1m.32	q8, q8, q8
+	sha1m.32	q15, q15, q15
+	sha1su0.32	q0, q0, q0
+	sha1su0.32	q7, q7, q7
+	sha1su0.32	q8, q8, q8
+	sha1su0.32	q15, q15, q15
+	sha256h.32	q0, q0, q0
+	sha256h.32	q7, q7, q7
+	sha256h.32	q8, q8, q8
+	sha256h.32	q15, q15, q15
+	sha256h2.32	q0, q0, q0
+	sha256h2.32	q7, q7, q7
+	sha256h2.32	q8, q8, q8
+	sha256h2.32	q15, q15, q15
+	sha256su1.32	q0, q0, q0
+	sha256su1.32	q7, q7, q7
+	sha256su1.32	q8, q8, q8
+	sha256su1.32	q15, q15, q15
+
 
 	.thumb
 	vmull.p64	q0, d0, d0
@@ -41,3 +70,31 @@
 	aesimc.8	q7, q7
 	aesimc.8	q8, q8
 	aesimc.8	q15, q15
+	sha1c.32	q0, q0, q0
+	sha1c.32	q7, q7, q7
+	sha1c.32	q8, q8, q8
+	sha1c.32	q15, q15, q15
+	sha1p.32	q0, q0, q0
+	sha1p.32	q7, q7, q7
+	sha1p.32	q8, q8, q8
+	sha1p.32	q15, q15, q15
+	sha1m.32	q0, q0, q0
+	sha1m.32	q7, q7, q7
+	sha1m.32	q8, q8, q8
+	sha1m.32	q15, q15, q15
+	sha1su0.32	q0, q0, q0
+	sha1su0.32	q7, q7, q7
+	sha1su0.32	q8, q8, q8
+	sha1su0.32	q15, q15, q15
+	sha256h.32	q0, q0, q0
+	sha256h.32	q7, q7, q7
+	sha256h.32	q8, q8, q8
+	sha256h.32	q15, q15, q15
+	sha256h2.32	q0, q0, q0
+	sha256h2.32	q7, q7, q7
+	sha256h2.32	q8, q8, q8
+	sha256h2.32	q15, q15, q15
+	sha256su1.32	q0, q0, q0
+	sha256su1.32	q7, q7, q7
+	sha256su1.32	q8, q8, q8
+	sha256su1.32	q15, q15, q15

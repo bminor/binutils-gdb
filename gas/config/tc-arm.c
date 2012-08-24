@@ -12351,7 +12351,8 @@ struct neon_tab_entry
   X(vcvta,	0xebc0a40, 0x3bb0000, N_INV),		\
   X(vrintr,	0xeb60a40, 0x3ba0400, N_INV),		\
   X(vrinta,	0xeb80a40, 0x3ba0400, N_INV),		\
-  X(aes,	0x3b00300, N_INV,     N_INV)
+  X(aes,	0x3b00300, N_INV,     N_INV),		\
+  X(sha3op,	0x2000c00, N_INV,     N_INV)
 
 enum neon_opc
 {
@@ -16200,6 +16201,21 @@ do_crypto_2op_1 (unsigned elttype, int op)
 }
 
 static void
+do_crypto_3op_1 (int u, int op)
+{
+  set_it_insn_type (OUTSIDE_IT_INSN);
+
+  if (neon_check_type (3, NS_QQQ, N_EQK | N_UNT, N_EQK | N_UNT,
+		       N_32 | N_UNT | N_KEY).type == NT_invtype)
+    return;
+
+  inst.error = NULL;
+
+  NEON_ENCODE (INTEGER, inst);
+  neon_three_same (1, u, 8 << op);
+}
+
+static void
 do_aese (void)
 {
   do_crypto_2op_1 (N_8, 0);
@@ -16223,7 +16239,47 @@ do_aesimc (void)
   do_crypto_2op_1 (N_8, 3);
 }
 
+static void
+do_sha1c (void)
+{
+  do_crypto_3op_1 (0, 0);
+}
 
+static void
+do_sha1p (void)
+{
+  do_crypto_3op_1 (0, 1);
+}
+
+static void
+do_sha1m (void)
+{
+  do_crypto_3op_1 (0, 2);
+}
+
+static void
+do_sha1su0 (void)
+{
+  do_crypto_3op_1 (0, 3);
+}
+
+static void
+do_sha256h (void)
+{
+  do_crypto_3op_1 (1, 0);
+}
+
+static void
+do_sha256h2 (void)
+{
+  do_crypto_3op_1 (1, 1);
+}
+
+static void
+do_sha256su1 (void)
+{
+  do_crypto_3op_1 (1, 2);
+}
 
 /* Overall per-instruction processing.	*/
 
@@ -18461,7 +18517,13 @@ static const struct asm_opcode insns[] =
   nUF(aesd, _aes, 2, (RNQ, RNQ), aesd),
   nUF(aesmc, _aes, 2, (RNQ, RNQ), aesmc),
   nUF(aesimc, _aes, 2, (RNQ, RNQ), aesimc),
-
+  nUF(sha1c, _sha3op, 3, (RNQ, RNQ, RNQ), sha1c),
+  nUF(sha1p, _sha3op, 3, (RNQ, RNQ, RNQ), sha1p),
+  nUF(sha1m, _sha3op, 3, (RNQ, RNQ, RNQ), sha1m),
+  nUF(sha1su0, _sha3op, 3, (RNQ, RNQ, RNQ), sha1su0),
+  nUF(sha256h, _sha3op, 3, (RNQ, RNQ, RNQ), sha256h),
+  nUF(sha256h2, _sha3op, 3, (RNQ, RNQ, RNQ), sha256h2),
+  nUF(sha256su1, _sha3op, 3, (RNQ, RNQ, RNQ), sha256su1),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */

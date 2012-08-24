@@ -5,6 +5,11 @@
 
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* gas/arm/armv8-a+crypto.d: Update testcase.
+	* gas/arm/armv8-a+crypto.s: Likewise.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* gas/arm/armv8-a+crypto.d: New testcase.
 	* gas/arm/armv8-a+crypto.s: Likewise.
 

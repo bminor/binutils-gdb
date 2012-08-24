@@ -1,5 +1,18 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (NEON_ENC_TAB): Add sha3op entry.
+	(do_crypto_3op_1): New function.
+	(do_sha1c): Likewise.
+	(do_sha1p): Likewise.
+	(do_sha1m): Likewise.
+	(do_sha1su0): Likewise.
+	(do_sha256h): Likewise.
+	(do_sha256h2): Likewise.
+	(do_sha256su1): Likewise.
+	(insns): Add SHA 3 operand instructions.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (neon_type_mask): Add P64 type.
 	(type_chk_of_el_type): Handle P64 type.
 	(el_type_of_type_chk): Likewise.
