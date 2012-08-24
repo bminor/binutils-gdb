@@ -92,7 +92,8 @@ struct opcode16
 
    %c			print condition code (always bits 28-31 in ARM mode)
    %q			print shifter argument
-   %u			print condition code (unconditional in ARM mode)
+   %u			print condition code (unconditional in ARM mode,
+                          UNPREDICTABLE if not AL in Thumb)
    %A			print address for ldc/stc/ldf/stf instruction
    %B			print vstm/vldm register list
    %I                   print cirrus signed shift immediate: bits 0..3|4..6
@@ -519,6 +520,8 @@ static const struct opcode32 coprocessor_opcodes[] =
    %%			%
 
    %c			print condition code
+   %u			print condition code (unconditional in ARM mode,
+                          UNPREDICTABLE if not AL in Thumb)
    %A			print v{st,ld}[1234] operands
    %B			print v{st,ld}[1234] any one operands
    %C			print v{st,ld}[1234] single->all operands
@@ -1692,6 +1695,9 @@ static unsigned int ifthen_next_state;
 /* The address of the insn for which the IT state is valid.  */
 static bfd_vma ifthen_address;
 #define IFTHEN_COND ((ifthen_state >> 4) & 0xf)
+/* Indicates that the current Conditional state is unconditional or outside
+   an IT block.  */
+#define COND_UNCOND 16
 
 
 /* Functions.  */
@@ -1870,7 +1876,7 @@ print_insn_coprocessor (bfd_vma pc,
 	  if (ifthen_state)
 	    cond = IFTHEN_COND;
 	  else
-	    cond = 16;
+	    cond = COND_UNCOND;
 	}
       else
 	{
@@ -1879,13 +1885,13 @@ print_insn_coprocessor (bfd_vma pc,
 	  if ((given & 0xf0000000) == 0xf0000000)
 	    {
 	      mask |= 0xf0000000;
-	      cond = 16;
+	      cond = COND_UNCOND;
 	    }
 	  else
 	    {
 	      cond = (given >> 28) & 0xf;
 	      if (cond == 0xe)
-		cond = 16;
+		cond = COND_UNCOND;
 	    }
 	}
       
@@ -1979,6 +1985,11 @@ print_insn_coprocessor (bfd_vma pc,
 		  }
 		  break;
 
+		case 'u':
+		  if (cond != COND_UNCOND)
+		    is_unpredictable = TRUE;
+
+		  /* Fall through.  */
 		case 'c':
 		  func (stream, "%s", arm_conditional[cond]);
 		  break;
@@ -2488,6 +2499,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
       if ((given & insn->mask) == insn->value)
 	{
 	  signed long value_in_comment = 0;
+	  bfd_boolean is_unpredictable = FALSE;
 	  const char *c;
 
 	  for (c = insn->assembler; *c; c++)
@@ -2500,6 +2512,11 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 		      func (stream, "%%");
 		      break;
 
+		    case 'u':
+		      if (thumb && ifthen_state)
+			is_unpredictable = TRUE;
+
+		      /* Fall through.  */
 		    case 'c':
 		      if (thumb && ifthen_state)
 			func (stream, "%s", arm_conditional[IFTHEN_COND]);
@@ -2912,6 +2929,9 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 
 	  if (value_in_comment > 32 || value_in_comment < -16)
 	    func (stream, "\t; 0x%lx", value_in_comment);
+
+	  if (is_unpredictable)
+	    func (stream, UNPREDICTABLE_INSTRUCTION);
 
 	  return TRUE;
 	}

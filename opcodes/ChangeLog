@@ -1,3 +1,9 @@
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com
+
+	* arm-dis.c (COND_UNCOND): New constant.
+	(print_insn_coprocessor): Add support for %u format specifier.
+	(print_insn_neon): Likewise.
+
 2012-08-21  David S. Miller  <davem@davemloft.net>
 
 	* sparc-opc.c (4-argument crypto instructions): Fix encoding using
