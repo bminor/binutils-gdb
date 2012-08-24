@@ -1,3 +1,15 @@
+2012-08-23  Khoo Yit Phang <khooyp@cs.umd.edu>
+
+	Document how to return from "python-interactive" to GDB.
+	* gdb.texinfo (Python Commands): Update documentation.
+
+2012-08-22  Khoo Yit Phang <khooyp@cs.umd.edu>
+
+	Add a new "python-interactive" command that starts a standard
+	Python interactive prompt with "pi" as alias, and add "py" as
+	an alias to "python".
+	* gdb.texinfo (Python Commands): Document the new commands.
+
 2012-08-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdbint.texinfo (Host Definition): Remove documentation for
