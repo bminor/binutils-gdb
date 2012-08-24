@@ -1,6 +1,6 @@
 .syntax unified
+.arch armv7-a
 .thumb
-
 .macro it_test opcode operands:vararg
 itt eq
 \opcode\()eq r15, \operands

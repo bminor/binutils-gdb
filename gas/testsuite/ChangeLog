@@ -1,5 +1,18 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* gas/arm/armv8-a-it-bad.d: New testcase.
+	* gas/arm/armv8-a-it-bad.l: Likewise.
+	* gas/arm/armv8-a-it-bad.s: Likewise.
+	* gas/arm/ldr-t-bad.s: Update testcase.
+	* gas/arm/ldr-t.d: Likewise.
+	* gas/arm/ldr-t.s: Likewise.
+	* gas/arm/neon-cond-bad-inc.s: Likewise.
+	* gas/arm/sp-pc-validations-bad-t: Likewise.
+	* gas/arm/vfp-fma-inc.s: Likewise.
+	* gas/arm/vfp-neon-syntax-inc.s: Likewise.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* gas/arm/armv8-a-bad.l: Update testcase.
 	* gas/arm/armv8-a-bad.s: Likewise.
 

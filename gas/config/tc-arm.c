@@ -10356,6 +10356,7 @@ do_t_it (void)
   set_it_insn_type (IT_INSN);
   now_it.mask = (inst.instruction & 0xf) | 0x10;
   now_it.cc = cond;
+  now_it.warn_deprecated = FALSE;
 
   /* If the condition is a negative condition, invert the mask.  */
   if ((cond & 0x1) == 0x0)
@@ -10363,13 +10364,25 @@ do_t_it (void)
       unsigned int mask = inst.instruction & 0x000f;
 
       if ((mask & 0x7) == 0)
-	/* no conversion needed */;
+	{
+	  /* No conversion needed.  */
+	  now_it.block_length = 1;
+	}
       else if ((mask & 0x3) == 0)
-	mask ^= 0x8;
+	{
+	  mask ^= 0x8;
+	  now_it.block_length = 2;
+	}
       else if ((mask & 0x1) == 0)
-	mask ^= 0xC;
+	{
+	  mask ^= 0xC;
+	  now_it.block_length = 3;
+	}
       else
-	mask ^= 0xE;
+	{
+	  mask ^= 0xE;
+	  now_it.block_length = 4;
+	}
 
       inst.instruction &= 0xfff0;
       inst.instruction |= mask;
@@ -16187,6 +16200,8 @@ new_automatic_it_block (int cond)
   now_it.block_length = 1;
   mapping_state (MAP_THUMB);
   now_it.insn = output_it_inst (cond, now_it.mask, NULL);
+  now_it.warn_deprecated = FALSE;
+  now_it.insn_cond = TRUE;
 }
 
 /* Close an automatic IT block.
@@ -16294,6 +16309,7 @@ static int
 handle_it_state (void)
 {
   now_it.state_handled = 1;
+  now_it.insn_cond = FALSE;
 
   switch (now_it.state)
     {
@@ -16371,6 +16387,7 @@ handle_it_state (void)
 	    }
 	  else
 	    {
+	      now_it.insn_cond = TRUE;
 	      now_it_add_mask (inst.cond);
 	    }
 
@@ -16382,6 +16399,7 @@ handle_it_state (void)
 
 	case NEUTRAL_IT_INSN:
 	  now_it.block_length++;
+	  now_it.insn_cond = TRUE;
 
 	  if (now_it.block_length > 4)
 	    force_automatic_it_block_close ();
@@ -16404,6 +16422,7 @@ handle_it_state (void)
 	now_it.mask <<= 1;
 	now_it.mask &= 0x1f;
 	is_last = (now_it.mask == 0x10);
+	now_it.insn_cond = TRUE;
 
 	switch (inst.it_insn_type)
 	  {
@@ -16448,6 +16467,25 @@ handle_it_state (void)
   return SUCCESS;
 }
 
+struct depr_insn_mask
+{
+  unsigned long pattern;
+  unsigned long mask;
+  const char* description;
+};
+
+/* List of 16-bit instruction patterns deprecated in an IT block in
+   ARMv8.  */
+static const struct depr_insn_mask depr_it_insns[] = {
+  { 0xc000, 0xc000, N_("Short branches, Undefined, SVC, LDM/STM") },
+  { 0xb000, 0xb000, N_("Miscellaneous 16-bit instructions") },
+  { 0xa000, 0xb800, N_("ADR") },
+  { 0x4800, 0xf800, N_("Literal loads") },
+  { 0x4478, 0xf478, N_("Hi-register ADD, MOV, CMP, BX, BLX using pc") },
+  { 0x4487, 0xfc87, N_("Hi-register ADD, MOV, CMP using pc") },
+  { 0, 0, NULL }
+};
+
 static void
 it_fsm_post_encode (void)
 {
@@ -16455,6 +16493,44 @@ it_fsm_post_encode (void)
 
   if (!now_it.state_handled)
     handle_it_state ();
+
+  if (now_it.insn_cond
+      && !now_it.warn_deprecated
+      && warn_on_deprecated
+      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
+    {
+      if (inst.instruction >= 0x10000)
+	{
+	  as_warn (_("it blocks containing wide Thumb instructions are "
+		     "deprecated in ARMv8"));
+	  now_it.warn_deprecated = TRUE;
+	}
+      else
+	{
+	  const struct depr_insn_mask *p = depr_it_insns;
+
+	  while (p->mask != 0)
+	    {
+	      if ((inst.instruction & p->mask) == p->pattern)
+		{
+		  as_warn (_("it blocks containing 16-bit Thumb intsructions "
+			     "of the following class are deprecated in ARMv8: "
+			     "%s"), p->description);
+		  now_it.warn_deprecated = TRUE;
+		  break;
+		}
+
+	      ++p;
+	    }
+	}
+
+      if (now_it.block_length > 1)
+	{
+	  as_warn (_("it blocks of more than one conditional instruction are "
+		     "deprecated in ARMv8"));
+	  now_it.warn_deprecated = TRUE;
+	}
+    }
 
   is_last = (now_it.mask == 0x10);
   if (is_last)

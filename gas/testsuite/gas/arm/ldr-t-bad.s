@@ -1,5 +1,5 @@
 .syntax unified
-
+.arch armv7-a
 .thumb
 
 	@ldr-immediate

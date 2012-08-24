@@ -11,22 +11,22 @@ Disassembly of section [^>]+:
 0+10 <[^>]+> f8df f004 	ldr.w	pc, \[pc, #4\]	; 0+18 <[^>]+0x18>
 0+14 <[^>]+> bfa2      	ittt	ge
 0+16 <[^>]+> 4901      	ldrge	r1, \[pc, #4\]	; \(0+1c <[^>]+0x1c>\)
-0+18 <[^>]+> 46c0      	nopge			; \(mov r8, r8\)
-0+1a <[^>]+> 46c0      	nopge			; \(mov r8, r8\)
+0+18 <[^>]+> bf00      	nopge
+0+1a <[^>]+> bf00      	nopge
 0+1c <[^>]+> bfa8      	it	ge
 0+1e <[^>]+> f8df f004 	ldrge.w	pc, \[pc, #4\]	; 0+24 <[^>]+0x24>
 0+22 <[^>]+> bfa2      	ittt	ge
 0+24 <[^>]+> f85f 1ab8 	ldrge.w	r1, \[pc, #-2744\]	; fffff570 <[^>]+>
-0+28 <[^>]+> 46c0      	nopge			; \(mov r8, r8\)
-0+2a <[^>]+> 46c0      	nopge			; \(mov r8, r8\)
+0+28 <[^>]+> bf00      	nopge
+0+2a <[^>]+> bf00      	nopge
 0+2c <[^>]+> bfa8      	it	ge
 0+2e <[^>]+> f85f fab6 	ldrge.w	pc, \[pc, #-2742\]	; fffff57a <[^>]+>
 0+32 <[^>]+> f85f 1ab9 	ldr.w	r1, \[pc, #-2745\]	; fffff57b <[^>]+>
 0+36 <[^>]+> f85f fab6 	ldr.w	pc, \[pc, #-2742\]	; fffff582 <[^>]+>
 0+3a <[^>]+> bfa2      	ittt	ge
 0+3c <[^>]+> 5851      	ldrge	r1, \[r2, r1\]
-0+3e <[^>]+> 46c0      	nopge			; \(mov r8, r8\)
-0+40 <[^>]+> 46c0      	nopge			; \(mov r8, r8\)
+0+3e <[^>]+> bf00      	nopge
+0+40 <[^>]+> bf00      	nopge
 0+42 <[^>]+> bfa8      	it	ge
 0+44 <[^>]+> f852 f001 	ldrge.w	pc, \[r2, r1\]
 0+48 <[^>]+> 58d1      	ldr	r1, \[r2, r3\]

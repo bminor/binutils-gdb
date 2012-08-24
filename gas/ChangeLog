@@ -1,5 +1,16 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (do_t_it): Fully initialise now_it.
+	(new_automatic_it_block): Likewise.
+	(handle_it_block): Record whether current instruction is
+	conditionally executed.
+	* config/tc-arm.c (depr_insn_mask): New structure.
+	(depr_it_insns): New variable.
+	(it_fsm_post_encode): Warn on deprecated uses.
+	* config/tc-arm.h (current_it): Add new fields.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (deprecated_coproc_regs_s): New structure.
 	(deprecated_coproc_regs): New variable.
 	(deprecated_coproc_reg_count): Likewise.
