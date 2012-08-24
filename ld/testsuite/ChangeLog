@@ -1,5 +1,14 @@
 2012-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elf/exclude3a.d: Remove target and use failif.
+
+	* ld-elf/exclude3b.d: Change target to *-*-linux* *-*-gnu* and
+	use failif
+
+	* ld-elf/exclude3d.d: Removed.
+
+2012-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-elf/elf.exp: Add Solaris/x86-64 support to eh[1-4] test.
 
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
