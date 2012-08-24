@@ -12345,7 +12345,9 @@ struct neon_tab_entry
   X(vseleq,	0xe000a00, N_INV,     N_INV),		\
   X(vselvs,	0xe100a00, N_INV,     N_INV),		\
   X(vselge,	0xe200a00, N_INV,     N_INV),		\
-  X(vselgt,	0xe300a00, N_INV,     N_INV)
+  X(vselgt,	0xe300a00, N_INV,     N_INV),		\
+  X(vmaxnm,	0xe800a00, 0x3000f10, N_INV),		\
+  X(vminnm,	0xe800a40, 0x3200f10, N_INV)
 
 enum neon_opc
 {
@@ -13982,7 +13984,8 @@ do_neon_dyadic_if_i_d (void)
 enum vfp_or_neon_is_neon_bits
 {
   NEON_CHECK_CC = 1,
-  NEON_CHECK_ARCH = 2
+  NEON_CHECK_ARCH = 2,
+  NEON_CHECK_ARCH8 = 4
 };
 
 /* Call this function if an instruction which may have belonged to the VFP or
@@ -14020,7 +14023,14 @@ vfp_or_neon_is_neon (unsigned check)
     }
 
   if ((check & NEON_CHECK_ARCH)
-      && !ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1))
+      && !mark_feature_used (&fpu_neon_ext_v1))
+    {
+      first_error (_(BAD_FPU));
+      return FAIL;
+    }
+
+  if ((check & NEON_CHECK_ARCH8)
+      && !mark_feature_used (&fpu_neon_ext_armv8))
     {
       first_error (_(BAD_FPU));
       return FAIL;
@@ -15872,6 +15882,20 @@ do_vsel (void)
 
   if (try_vfp_nsyn (3, do_vfp_nsyn_fpv8) != SUCCESS)
     first_error (_("invalid instruction shape"));
+}
+
+static void
+do_vmaxnm (void)
+{
+  set_it_insn_type (OUTSIDE_IT_INSN);
+
+  if (try_vfp_nsyn (3, do_vfp_nsyn_fpv8) == SUCCESS)
+    return;
+
+  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH8) == FAIL)
+    return;
+
+  neon_dyadic_misc (NT_untyped, N_F32, 0);
 }
 
 
@@ -18087,6 +18111,8 @@ static const struct asm_opcode insns[] =
   nUF(vselvs, _vselvs, 3, (RVSD, RVSD, RVSD),		vsel),
   nUF(vselge, _vselge, 3, (RVSD, RVSD, RVSD),		vsel),
   nUF(vselgt, _vselgt, 3, (RVSD, RVSD, RVSD),		vsel),
+  nUF(vmaxnm, _vmaxnm, 3, (RNSDQ, oRNSDQ, RNSDQ),	vmaxnm),
+  nUF(vminnm, _vminnm, 3, (RNSDQ, oRNSDQ, RNSDQ),	vmaxnm),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */

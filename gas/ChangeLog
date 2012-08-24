@@ -1,5 +1,13 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (NEON_ENC_TAB): Add vmaxnm, vminnm entries.
+	(vfp_or_neon_is_neon_bits): Add NEON_CHECK_ARCH8 enumerator.
+	(vfp_or_neon_is_neon): Add check for SIMD for ARMv8.
+	(do_maxnm): New function.
+	(insns): Add vmaxnm, vminnm entries.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (NEON_ENC_TAB): Add entries for VSEL.
 	(NEON_ENC_FPV8_): New define.
 	(do_vfp_nsyn_fpv8): New function.

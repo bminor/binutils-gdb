@@ -490,6 +490,10 @@ static const struct opcode32 coprocessor_opcodes[] =
   /* FP v5.  */
   {FPU_VFP_EXT_ARMV8, 0xfe000a00, 0xff800f00, "vsel%20-21c%u.f32\t%y1, %y2, %y0"},
   {FPU_VFP_EXT_ARMV8, 0xfe000b00, 0xff800f00, "vsel%20-21c%u.f64\t%z1, %z2, %z0"},
+  {FPU_VFP_EXT_ARMV8, 0xfe800a00, 0xffb00f40, "vmaxnm%u.f32\t%y1, %y2, %y0"},
+  {FPU_VFP_EXT_ARMV8, 0xfe800b00, 0xffb00f40, "vmaxnm%u.f64\t%z1, %z2, %z0"},
+  {FPU_VFP_EXT_ARMV8, 0xfe800a40, 0xffb00f40, "vminnm%u.f32\t%y1, %y2, %y0"},
+  {FPU_VFP_EXT_ARMV8, 0xfe800b40, 0xffb00f40, "vminnm%u.f64\t%z1, %z2, %z0"},
 
   /* Generic coprocessor instructions.  */
   { 0, SENTINEL_GENERIC_START, 0, "" },
@@ -607,6 +611,8 @@ static const struct opcode32 neon_opcodes[] =
   {FPU_NEON_EXT_V1, 0xf3b30600, 0xffb30e10, "vcvt%c.%7-8?usff%18-19Sa.%7-8?ffus%18-19Sa\t%12-15,22R, %0-3,5R"},
 
   /* Three registers of the same length.  */
+  {FPU_NEON_EXT_ARMV8, 0xf3000f10, 0xffa00f10, "vmaxnm%u.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_ARMV8, 0xf3200f10, 0xffa00f10, "vminnm%u.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
   {FPU_NEON_EXT_V1, 0xf2000110, 0xffb00f10, "vand%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
   {FPU_NEON_EXT_V1, 0xf2100110, 0xffb00f10, "vbic%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
   {FPU_NEON_EXT_V1, 0xf2200110, 0xffb00f10, "vorr%c\t%12-15,22R, %16-19,7R, %0-3,5R"},
