@@ -7373,6 +7373,23 @@ do_rn_rd (void)
   inst.instruction |= inst.operands[1].reg << 12;
 }
 
+static bfd_boolean
+check_obsolete (const arm_feature_set *feature, const char *msg)
+{
+  if (ARM_CPU_IS_ANY (cpu_variant))
+    {
+      as_warn ("%s", msg);
+      return TRUE;
+    }
+  else if (ARM_CPU_HAS_FEATURE (cpu_variant, *feature))
+    {
+      as_bad ("%s", msg);
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
 static void
 do_rd_rm_rn (void)
 {
@@ -7383,12 +7400,15 @@ do_rd_rm_rn (void)
       constraint (Rn == inst.operands[0].reg || Rn == inst.operands[1].reg,
 		  _("Rn must not overlap other operands"));
 
-      /* SWP{b} is deprecated for ARMv6* and ARMv7.  */
-      if (warn_on_deprecated
-	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6))
-	as_warn (_("swp{b} use is deprecated for this architecture"));
-
+      /* SWP{b} is obsolete for ARMv8-A, and deprecated for ARMv6* and ARMv7.
+       */
+      if (!check_obsolete (&arm_ext_v8,
+			   _("swp{b} use is obsoleted for ARMv8 and later"))
+	  && warn_on_deprecated
+	  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6))
+	as_warn (_("swp{b} use is deprecated for ARMv6 and ARMv7"));
     }
+
   inst.instruction |= inst.operands[0].reg << 12;
   inst.instruction |= inst.operands[1].reg;
   inst.instruction |= Rn << 16;

@@ -1,5 +1,13 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* gas/arm/armv8-a-bad.d: New testcase.
+	* gas/arm/armv8-a-bad.l: Likewise.
+	* gas/arm/armv8-a-bad.s: Likewise.
+	* gas/arm/depr-swp.l: Update for change in expected output.
+	* gas/arm/depr-swp.s: Add additional test.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* gas/arm/attr-march-all.d: Update for change in expected
 	output.
 	* gas/arm/attr-mfpu-vfpv4-d16.d: Likewise.

@@ -1,5 +1,10 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (check_obsolete): New function.
+	(do_rd_rm_rn): Check swp{b} for obsoletion.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.h (arm_ext_v8): New variable.
 	(fpu_vfp_ext_armv8): Likewise.
 	(fpu_neon_ext_armv8): Likewise.
