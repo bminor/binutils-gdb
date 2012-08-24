@@ -1,3 +1,8 @@
+2012-08-24  Yao Qi  <yao@codesourcery.com>
+
+	* jv-exp.y (push_expression_name): Add "." at the end of error
+	message.
+
 2012-08-23  Khoo Yit Phang <khooyp@cs.umd.edu>
 
 	Document how to return from "python-interactive" to GDB.

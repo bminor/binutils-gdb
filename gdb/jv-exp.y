@@ -1399,7 +1399,7 @@ push_expression_name (struct stoken name)
       else if (!have_full_symbols () && !have_partial_symbols ())
 	error (_("No symbol table is loaded.  Use the \"file\" command"));
       else
-	error (_("No symbol \"%s\" in current context"), tmp);
+	error (_("No symbol \"%s\" in current context."), tmp);
     }
 
 }
