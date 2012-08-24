@@ -14510,16 +14510,55 @@ do_neon_shll (void)
 /* Check the various types for the VCVT instruction, and return which version
    the current instruction is.  */
 
-static int
-neon_cvt_flavour (enum neon_shape rs)
+#define CVT_FLAVOUR_VAR							      \
+  CVT_VAR (s32_f32, N_S32, N_F32, whole_reg,   "ftosls", "ftosis", "ftosizs") \
+  CVT_VAR (u32_f32, N_U32, N_F32, whole_reg,   "ftouls", "ftouis", "ftouizs") \
+  CVT_VAR (f32_s32, N_F32, N_S32, whole_reg,   "fsltos", "fsitos", NULL)      \
+  CVT_VAR (f32_u32, N_F32, N_U32, whole_reg,   "fultos", "fuitos", NULL)      \
+  /* Half-precision conversions.  */					      \
+  CVT_VAR (f32_f16, N_F32, N_F16, whole_reg,   NULL,     NULL,     NULL)      \
+  CVT_VAR (f16_f32, N_F16, N_F32, whole_reg,   NULL,     NULL,     NULL)      \
+  /* VFP instructions.  */						      \
+  CVT_VAR (f32_f64, N_F32, N_F64, N_VFP,       NULL,     "fcvtsd", NULL)      \
+  CVT_VAR (f64_f32, N_F64, N_F32, N_VFP,       NULL,     "fcvtds", NULL)      \
+  CVT_VAR (s32_f64, N_S32, N_F64 | key, N_VFP, "ftosld", "ftosid", "ftosizd") \
+  CVT_VAR (u32_f64, N_U32, N_F64 | key, N_VFP, "ftould", "ftouid", "ftouizd") \
+  CVT_VAR (f64_s32, N_F64 | key, N_S32, N_VFP, "fsltod", "fsitod", NULL)      \
+  CVT_VAR (f64_u32, N_F64 | key, N_U32, N_VFP, "fultod", "fuitod", NULL)      \
+  /* VFP instructions with bitshift.  */				      \
+  CVT_VAR (f32_s16, N_F32 | key, N_S16, N_VFP, "fshtos", NULL,     NULL)      \
+  CVT_VAR (f32_u16, N_F32 | key, N_U16, N_VFP, "fuhtos", NULL,     NULL)      \
+  CVT_VAR (f64_s16, N_F64 | key, N_S16, N_VFP, "fshtod", NULL,     NULL)      \
+  CVT_VAR (f64_u16, N_F64 | key, N_U16, N_VFP, "fuhtod", NULL,     NULL)      \
+  CVT_VAR (s16_f32, N_S16, N_F32 | key, N_VFP, "ftoshs", NULL,     NULL)      \
+  CVT_VAR (u16_f32, N_U16, N_F32 | key, N_VFP, "ftouhs", NULL,     NULL)      \
+  CVT_VAR (s16_f64, N_S16, N_F64 | key, N_VFP, "ftoshd", NULL,     NULL)      \
+  CVT_VAR (u16_f64, N_U16, N_F64 | key, N_VFP, "ftouhd", NULL,     NULL)
+
+#define CVT_VAR(C, X, Y, R, BSN, CN, ZN) \
+  neon_cvt_flavour_##C,
+
+/* The different types of conversions we can do.  */
+enum neon_cvt_flavour
 {
-#define CVT_VAR(C,X,Y)							\
-  et = neon_check_type (2, rs, whole_reg | (X), whole_reg | (Y));	\
-  if (et.type != NT_invtype)						\
-    {									\
-      inst.error = NULL;						\
-      return (C);							\
+  CVT_FLAVOUR_VAR
+  neon_cvt_flavour_invalid,
+  neon_cvt_flavour_first_fp = neon_cvt_flavour_f32_f64
+};
+
+#undef CVT_VAR
+
+static enum neon_cvt_flavour
+get_neon_cvt_flavour (enum neon_shape rs)
+{
+#define CVT_VAR(C,X,Y,R,BSN,CN,ZN)			\
+  et = neon_check_type (2, rs, (R) | (X), (R) | (Y));	\
+  if (et.type != NT_invtype)				\
+    {							\
+      inst.error = NULL;				\
+      return (neon_cvt_flavour_##C);			\
     }
+
   struct neon_type_el et;
   unsigned whole_reg = (rs == NS_FFI || rs == NS_FD || rs == NS_DF
                         || rs == NS_FF) ? N_VFP : 0;
@@ -14529,41 +14568,16 @@ neon_cvt_flavour (enum neon_shape rs)
      here by making the size equal to the key (wider, in this case) operand.  */
   unsigned key = (rs == NS_QQI || rs == NS_DDI || rs == NS_FFI) ? N_KEY : 0;
 
-  CVT_VAR (0, N_S32, N_F32);
-  CVT_VAR (1, N_U32, N_F32);
-  CVT_VAR (2, N_F32, N_S32);
-  CVT_VAR (3, N_F32, N_U32);
-  /* Half-precision conversions.  */
-  CVT_VAR (4, N_F32, N_F16);
-  CVT_VAR (5, N_F16, N_F32);
+  CVT_FLAVOUR_VAR;
 
-  whole_reg = N_VFP;
-
-  /* VFP instructions.  */
-  CVT_VAR (6, N_F32, N_F64);
-  CVT_VAR (7, N_F64, N_F32);
-  CVT_VAR (8, N_S32, N_F64 | key);
-  CVT_VAR (9, N_U32, N_F64 | key);
-  CVT_VAR (10, N_F64 | key, N_S32);
-  CVT_VAR (11, N_F64 | key, N_U32);
-  /* VFP instructions with bitshift.  */
-  CVT_VAR (12, N_F32 | key, N_S16);
-  CVT_VAR (13, N_F32 | key, N_U16);
-  CVT_VAR (14, N_F64 | key, N_S16);
-  CVT_VAR (15, N_F64 | key, N_U16);
-  CVT_VAR (16, N_S16, N_F32 | key);
-  CVT_VAR (17, N_U16, N_F32 | key);
-  CVT_VAR (18, N_S16, N_F64 | key);
-  CVT_VAR (19, N_U16, N_F64 | key);
-
-  return -1;
+  return neon_cvt_flavour_invalid;
 #undef CVT_VAR
 }
 
 /* Neon-syntax VFP conversions.  */
 
 static void
-do_vfp_nsyn_cvt (enum neon_shape rs, int flavour)
+do_vfp_nsyn_cvt (enum neon_shape rs, enum neon_cvt_flavour flavour)
 {
   const char *opname = 0;
 
@@ -14572,29 +14586,13 @@ do_vfp_nsyn_cvt (enum neon_shape rs, int flavour)
       /* Conversions with immediate bitshift.  */
       const char *enc[] =
         {
-          "ftosls",
-          "ftouls",
-          "fsltos",
-          "fultos",
-          NULL,
-          NULL,
-	  NULL,
-	  NULL,
-          "ftosld",
-          "ftould",
-          "fsltod",
-          "fultod",
-          "fshtos",
-          "fuhtos",
-          "fshtod",
-          "fuhtod",
-          "ftoshs",
-          "ftouhs",
-          "ftoshd",
-          "ftouhd"
+#define CVT_VAR(C,A,B,R,BSN,CN,ZN) BSN,
+	  CVT_FLAVOUR_VAR
+	  NULL
+#undef CVT_VAR
         };
 
-      if (flavour >= 0 && flavour < (int) ARRAY_SIZE (enc))
+      if (flavour < (int) ARRAY_SIZE (enc))
         {
           opname = enc[flavour];
           constraint (inst.operands[0].reg != inst.operands[1].reg,
@@ -14608,21 +14606,13 @@ do_vfp_nsyn_cvt (enum neon_shape rs, int flavour)
       /* Conversions without bitshift.  */
       const char *enc[] =
         {
-          "ftosis",
-          "ftouis",
-          "fsitos",
-          "fuitos",
-	  "NULL",
-	  "NULL",
-          "fcvtsd",
-          "fcvtds",
-          "ftosid",
-          "ftouid",
-          "fsitod",
-          "fuitod"
+#define CVT_VAR(C,A,B,R,BSN,CN,ZN) CN,
+	  CVT_FLAVOUR_VAR
+	  NULL
+#undef CVT_VAR
         };
 
-      if (flavour >= 0 && flavour < (int) ARRAY_SIZE (enc))
+      if (flavour < (int) ARRAY_SIZE (enc))
         opname = enc[flavour];
     }
 
@@ -14634,22 +14624,16 @@ static void
 do_vfp_nsyn_cvtz (void)
 {
   enum neon_shape rs = neon_select_shape (NS_FF, NS_FD, NS_NULL);
-  int flavour = neon_cvt_flavour (rs);
+  enum neon_cvt_flavour flavour = get_neon_cvt_flavour (rs);
   const char *enc[] =
     {
-      "ftosizs",
-      "ftouizs",
-      NULL,
-      NULL,
-      NULL,
-      NULL,
-      NULL,
-      NULL,
-      "ftosizd",
-      "ftouizd"
+#define CVT_VAR(C,A,B,R,BSN,CN,ZN) ZN,
+      CVT_FLAVOUR_VAR
+      NULL
+#undef CVT_VAR
     };
 
-  if (flavour >= 0 && flavour < (int) ARRAY_SIZE (enc) && enc[flavour])
+  if (flavour < (int) ARRAY_SIZE (enc) && enc[flavour])
     do_vfp_nsyn_opcode (enc[flavour]);
 }
 
@@ -14658,12 +14642,15 @@ do_neon_cvt_1 (bfd_boolean round_to_zero ATTRIBUTE_UNUSED)
 {
   enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_FFI, NS_DD, NS_QQ,
     NS_FD, NS_DF, NS_FF, NS_QD, NS_DQ, NS_NULL);
-  int flavour = neon_cvt_flavour (rs);
+  enum neon_cvt_flavour flavour = get_neon_cvt_flavour (rs);
 
   /* PR11109: Handle round-to-zero for VCVT conversions.  */
   if (round_to_zero
       && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_arch_vfp_v2)
-      && (flavour == 0 || flavour == 1 || flavour == 8 || flavour == 9)
+      && (flavour == neon_cvt_flavour_s32_f32 
+	  || flavour == neon_cvt_flavour_u32_f32 
+	  || flavour == neon_cvt_flavour_s32_f64 
+	  || flavour == neon_cvt_flavour_u32_f64)
       && (rs == NS_FD || rs == NS_FF))
     {
       do_vfp_nsyn_cvtz ();
@@ -14671,7 +14658,7 @@ do_neon_cvt_1 (bfd_boolean round_to_zero ATTRIBUTE_UNUSED)
     }
 
   /* VFP rather than Neon conversions.  */
-  if (flavour >= 6)
+  if (flavour >= neon_cvt_flavour_first_fp)
     {
       do_vfp_nsyn_cvt (rs, flavour);
       return;
@@ -14694,7 +14681,7 @@ do_neon_cvt_1 (bfd_boolean round_to_zero ATTRIBUTE_UNUSED)
           goto int_encode;
        immbits = 32 - inst.operands[2].imm;
         NEON_ENCODE (IMMED, inst);
-        if (flavour != -1)
+        if (flavour != neon_cvt_flavour_invalid)
           inst.instruction |= enctab[flavour];
         inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
         inst.instruction |= HI1 (inst.operands[0].reg) << 22;
@@ -14719,8 +14706,8 @@ do_neon_cvt_1 (bfd_boolean round_to_zero ATTRIBUTE_UNUSED)
         if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
           return;
 
-        if (flavour != -1)
-          inst.instruction |= enctab[flavour];
+        if (flavour != neon_cvt_flavour_invalid)
+	   inst.instruction |= enctab[flavour];
 
         inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
         inst.instruction |= HI1 (inst.operands[0].reg) << 22;

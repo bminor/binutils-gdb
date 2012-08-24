@@ -1,3 +1,13 @@
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm>
+
+	* config/tc-arm.c (CVT_FLAVOUR_VAR): New define.
+	(CVT_VAR): New helper define.
+	(neon_cvt_flavour): New enumeration, function renamed...
+	(get_neon_cvt_flavour): ...to this.
+	(do_vfp_nsyn_cvt): Update to use new neon_cvt_flavour.
+	(do_vfp_nsyn_cvtz): Likewise.
+	(do_neon_cvt_1): Likewise.
+
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (NEON_ENC_TAB): Add vmaxnm, vminnm entries.
