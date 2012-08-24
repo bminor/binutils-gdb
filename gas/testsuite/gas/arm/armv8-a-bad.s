@@ -18,3 +18,14 @@
 
 	.thumb
 	setend le
+
+	// HLT A32
+	.arm
+	hlt 0x10000
+	hltne 0x1
+
+	// HLT T32
+	.thumb
+	hlt 64
+	it ne
+	hltne 0

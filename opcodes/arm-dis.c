@@ -851,6 +851,8 @@ static const struct opcode32 arm_opcodes[] =
 
   /* V8 instructions.  */
   {ARM_EXT_V8,   0x0320f005, 0x0fffffff, "sevl"},
+  {ARM_EXT_V8,   0xe1000070, 0xfff000f0, "hlt\t0x%16-19X%12-15X%8-11X%0-3X"},
+
 
   /* Virtualization Extension instructions.  */
   {ARM_EXT_VIRT, 0x0160006e, 0x0fffffff, "eret%c"},
@@ -1249,6 +1251,7 @@ static const struct opcode16 thumb_opcodes[] =
 
   /* ARM V8 instructions.  */
   {ARM_EXT_V8,  0xbf50, 0xffff, "sevl%c"},
+  {ARM_EXT_V8,  0xba80, 0xffc0, "hlt\t%0-5x"},
 
   /* ARM V6K no-argument instructions.  */
   {ARM_EXT_V6K, 0xbf00, 0xffff, "nop%c"},

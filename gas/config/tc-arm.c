@@ -10198,18 +10198,34 @@ do_t_branch (void)
   inst.reloc.pc_rel = 1;
 }
 
+/* Actually do the work for Thumb state bkpt and hlt.  The only difference
+   between the two is the maximum immediate allowed - which is passed in 
+   RANGE.  */
 static void
-do_t_bkpt (void)
+do_t_bkpt_hlt1 (int range)
 {
   constraint (inst.cond != COND_ALWAYS,
 	      _("instruction is always unconditional"));
   if (inst.operands[0].present)
     {
-      constraint (inst.operands[0].imm > 255,
+      constraint (inst.operands[0].imm > range,
 		  _("immediate value out of range"));
       inst.instruction |= inst.operands[0].imm;
-      set_it_insn_type (NEUTRAL_IT_INSN);
     }
+
+  set_it_insn_type (NEUTRAL_IT_INSN);
+}
+
+static void
+do_t_hlt (void)
+{
+  do_t_bkpt_hlt1 (63);
+}
+
+static void
+do_t_bkpt (void)
+{
+  do_t_bkpt_hlt1 (255);
 }
 
 static void
@@ -17974,7 +17990,9 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT & arm_ext_v8
 
  tCE("sevl",	320f005, _sevl,    0, (),		noargs,	t_hint),
+ TUE("hlt",	1000070, ba80,     1, (oIffffb),	bkpt,	t_hlt),
 
+ /* ARMv8 T32 only.  */
 #undef ARM_VARIANT
 #define ARM_VARIANT  NULL
  TUF("dcps1",	0,	 f78f8001, 0, (),	noargs, noargs),

@@ -1,5 +1,12 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (do_t_bkpt_hlt1): New function.
+	(do_t_hlt): New function.
+	(do_t_bkpt): Use do_t_bkpt_hlt1.
+	(insns): Add HLT.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (insns): Add DCPS instruction.
 
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
