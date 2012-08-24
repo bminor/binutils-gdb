@@ -1,5 +1,14 @@
 2012-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/i386/ilp32/ilp32.exp (gas_64_check): Renamed to ...
+	(gas_x32_check): This.  Check elf32-x86-64.
+	Remove Solaris check.
+	* gas/i386/ilp32/cfi/ilp32.exp: Likewise.
+	* gas/i386/ilp32/elf/ilp32.exp: Likewise.
+	* gas/i386/ilp32/lns/ilp32.exp: Likewise.
+
+2012-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/ilp32/ilp32.exp: Skip Solaris.
 	* gas/i386/ilp32/cfi/ilp32.exp: Likewise.
 	* gas/i386/ilp32/elf/ilp32.exp: Likewise.
