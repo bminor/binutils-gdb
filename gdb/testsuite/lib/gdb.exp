@@ -2101,15 +2101,14 @@ proc skip_hw_watchpoint_access_tests {} {
 proc skip_unwinder_tests {} {
     global gdb_prompt
 
-    set ok 1
+    set ok 0
     gdb_test_multiple "print _Unwind_DebugHook" "check for unwinder hook" {
 	-re "= .*no debug info.*_Unwind_DebugHook.*\r\n$gdb_prompt $" {
-	    set ok 0
 	}
 	-re "= .*_Unwind_DebugHook.*\r\n$gdb_prompt $" {
+	    set ok 1
 	}
 	-re "No symbol .* in current context.\r\n$gdb_prompt $" {
-	    set ok 0
 	}
     }
     if {!$ok} {
