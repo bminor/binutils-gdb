@@ -343,16 +343,20 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
   for (j = nargs - 1; j >= i; j--)
     {
       gdb_byte *val;
+      struct cleanup *back_to;
+      const gdb_byte *contents = value_contents (args[j]);
 
       typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
       slacklen = ((typelen + 3) & (~3)) - typelen;
-      val = alloca (typelen + slacklen);
-      memcpy (val, value_contents (args[j]), typelen);
+      val = xmalloc (typelen + slacklen);
+      back_to = make_cleanup (xfree, val);
+      memcpy (val, contents, typelen);
       memset (val + typelen, 0, slacklen);
 
       /* Now write data to the stack.  The stack grows downwards.  */
       stack_dest -= typelen + slacklen;
       write_memory (stack_dest, val, typelen + slacklen);
+      do_cleanups (back_to);
     }
 
   /* Add 2 words for linkage space to the stack.  */

@@ -1,3 +1,11 @@
+2012-08-24  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* h8300-tdep.c (h8300_push_dummy_call): Replace unsafe alloca
+	with xmalloc/cleanup.
+	* mt-tdep.c (mt_push_dummy_call): Likewise.
+	* tilegx-tdep.c (tilegx_push_dummy_call): Likewise.
+	* xstormy16-tdep.c (xstormy16_push_dummy_call): Likewise.
+
 2012-08-24  Yao Qi  <yao@codesourcery.com>
 
 	* jv-exp.y (push_expression_name): Add "." at the end of error

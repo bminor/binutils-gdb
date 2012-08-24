@@ -845,16 +845,20 @@ mt_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (j = nargs - 1; j >= i; j--)
     {
       gdb_byte *val;
+      struct cleanup *back_to;
+      const gdb_byte *contents = value_contents (args[j]);
       
       /* Right-justify the value in an aligned-length buffer.  */
       typelen = TYPE_LENGTH (value_type (args[j]));
       slacklen = (wordsize - (typelen % wordsize)) % wordsize;
-      val = alloca (typelen + slacklen);
-      memcpy (val, value_contents (args[j]), typelen);
+      val = xmalloc (typelen + slacklen);
+      back_to = make_cleanup (xfree, val);
+      memcpy (val, contents, typelen);
       memset (val + typelen, 0, slacklen);
       /* Now write this data to the stack.  */
       stack_dest -= typelen + slacklen;
       write_memory (stack_dest, val, typelen + slacklen);
+      do_cleanups (back_to);
     }
 
   /* Finally, if a param needs to be split between registers and stack, 

@@ -666,13 +666,15 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   for (argument = 0; argument < nargs; argument++)
     {
+      struct cleanup *back_to;
       struct type *type = value_type (args[argument]);
       int len = TYPE_LENGTH (type);
       char *contents = (char *) value_contents (args[argument]);
 
       /* Pad the argument appropriately.  */
       int padded_len = align_up (len, wordsize);
-      gdb_byte *padded = alloca (padded_len);
+      gdb_byte *padded = xmalloc (padded_len);
+      back_to = make_cleanup (xfree, padded);
 
       memset (padded, 0, padded_len);
       memcpy (len < wordsize ? padded + padded_len - len : padded,
@@ -720,6 +722,8 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     subsequent arguments go on the stack.  */
 	  reg = E_ARGLAST_REGNUM + 1;
 	}
+
+      do_cleanups (back_to);
     }
 
   /* Store return address.  */
