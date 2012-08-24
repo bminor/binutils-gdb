@@ -12570,6 +12570,7 @@ enum neon_type_mask
   N_F16  = 0x0040000,
   N_F32  = 0x0080000,
   N_F64  = 0x0100000,
+  N_P64	 = 0x0200000,
   N_KEY  = 0x1000000, /* Key element (main type specifier).  */
   N_EQK  = 0x2000000, /* Given operand has the same type & size as the key.  */
   N_VFP  = 0x4000000, /* VFP mode: operand size must match register width.  */
@@ -12582,7 +12583,7 @@ enum neon_type_mask
   N_FLT  = 0x0000020, /* If N_EQK, this operand is forced to be float.  */
   N_SIZ  = 0x0000040, /* If N_EQK, this operand is forced to be size-only.  */
   N_UTYP = 0,
-  N_MAX_NONSPECIAL = N_F64
+  N_MAX_NONSPECIAL = N_P64
 };
 
 #define N_ALLMODS  (N_DBL | N_HLF | N_SGN | N_UNS | N_INT | N_FLT | N_SIZ)
@@ -12790,6 +12791,7 @@ type_chk_of_el_type (enum neon_el_type type, unsigned size)
         {
         case 8:  return N_P8;
         case 16: return N_P16;
+	case 64: return N_P64;
         default: ;
         }
       break;
@@ -12838,7 +12840,7 @@ el_type_of_type_chk (enum neon_el_type *type, unsigned *size,
     *size = 16;
   else if ((mask & (N_S32 | N_U32 | N_I32 | N_32 | N_F32)) != 0)
     *size = 32;
-  else if ((mask & (N_S64 | N_U64 | N_I64 | N_64 | N_F64)) != 0)
+  else if ((mask & (N_S64 | N_U64 | N_I64 | N_64 | N_F64 | N_P64)) != 0)
     *size = 64;
   else
     return FAIL;
@@ -12851,7 +12853,7 @@ el_type_of_type_chk (enum neon_el_type *type, unsigned *size,
     *type = NT_integer;
   else if ((mask & (N_8 | N_16 | N_32 | N_64)) != 0)
     *type = NT_untyped;
-  else if ((mask & (N_P8 | N_P16)) != 0)
+  else if ((mask & (N_P8 | N_P16 | N_P64)) != 0)
     *type = NT_poly;
   else if ((mask & (N_F16 | N_F32 | N_F64)) != 0)
     *type = NT_float;
@@ -15120,13 +15122,26 @@ do_neon_vmull (void)
   else
     {
       struct neon_type_el et = neon_check_type (3, NS_QDD,
-        N_EQK | N_DBL, N_EQK, N_SU_32 | N_P8 | N_KEY);
+        N_EQK | N_DBL, N_EQK, N_SU_32 | N_P8 | N_P64 | N_KEY);
+
       if (et.type == NT_poly)
         NEON_ENCODE (POLY, inst);
       else
         NEON_ENCODE (INTEGER, inst);
-      /* For polynomial encoding, size field must be 0b00 and the U bit must be
-         zero. Should be OK as-is.  */
+
+      /* For polynomial encoding the U bit must be zero, and the size must
+	 be 8 (encoded as 0b00) or, on ARMv8 or later 64 (encoded, non
+	 obviously, as 0b10).  */
+      if (et.size == 64)
+	{
+	  /* Check we're on the correct architecture.  */
+	  if (!mark_feature_used (&fpu_crypto_ext_armv8))
+	    inst.error =
+	      _("Instruction form not available on this architecture.");
+
+	  et.size = 32;
+	}
+
       neon_mixed_length (et, et.size);
     }
 }

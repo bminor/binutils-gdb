@@ -4,6 +4,8 @@
 .*: +file format .*arm.*
 
 Disassembly of section .text:
+0[0-9a-f]+ <[^>]+> f2a00e00 	vmull.p64	q0, d0, d0
+0[0-9a-f]+ <[^>]+> f2efeeaf 	vmull.p64	q15, d31, d31
 0[0-9a-f]+ <[^>]+> f3b00300 	aese.8	q0, q0
 0[0-9a-f]+ <[^>]+> f3b0e30e 	aese.8	q7, q7
 0[0-9a-f]+ <[^>]+> f3f00320 	aese.8	q8, q8
@@ -20,6 +22,8 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f3b0e3ce 	aesimc.8	q7, q7
 0[0-9a-f]+ <[^>]+> f3f003e0 	aesimc.8	q8, q8
 0[0-9a-f]+ <[^>]+> f3f0e3ee 	aesimc.8	q15, q15
+0[0-9a-f]+ <[^>]+> efa0 0e00 	vmull.p64	q0, d0, d0
+0[0-9a-f]+ <[^>]+> efef eeaf 	vmull.p64	q15, d31, d31
 0[0-9a-f]+ <[^>]+> ffb0 0300 	aese.8	q0, q0
 0[0-9a-f]+ <[^>]+> ffb0 e30e 	aese.8	q7, q7
 0[0-9a-f]+ <[^>]+> fff0 0320 	aese.8	q8, q8
