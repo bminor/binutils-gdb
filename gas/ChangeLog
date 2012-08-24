@@ -1,3 +1,12 @@
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.c (asm_barrier_opt): Add arch field.
+	(mark_feature_used): New function.
+	(parse_barrier): Check specified option is valid for the
+	specified architecture.
+	(UL_BARRIER): New macro.
+	(barrier_opt_names): Update for new barrier options.
+
 2012-08-24  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (do_setend): Warn on deprecated SETEND.

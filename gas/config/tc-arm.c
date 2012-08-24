@@ -461,8 +461,9 @@ struct asm_psr
 
 struct asm_barrier_opt
 {
-  const char *   template_name;
-  unsigned long  value;
+  const char *    template_name;
+  unsigned long   value;
+  const arm_feature_set arch;
 };
 
 /* The bit that distinguishes CPSR and SPSR.  */
@@ -5766,6 +5767,25 @@ parse_cond (char **str)
   return c->value;
 }
 
+/* If the given feature available in the selected CPU, mark it as used.
+   Returns TRUE iff feature is available.  */
+static bfd_boolean
+mark_feature_used (const arm_feature_set *feature)
+{
+  /* Ensure the option is valid on the current architecture.  */
+  if (!ARM_CPU_HAS_FEATURE (cpu_variant, *feature))
+    return FALSE;
+
+  /* Add the appropriate architecture feature for the barrier option used.
+     */
+  if (thumb_mode)
+    ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used, *feature);
+  else
+    ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used, *feature);
+
+  return TRUE;
+}
+
 /* Parse an option for a barrier instruction.  Returns the encoding for the
    option, or FAIL.  */
 static int
@@ -5781,6 +5801,9 @@ parse_barrier (char **str)
   o = (const struct asm_barrier_opt *) hash_find_n (arm_barrier_opt_hsh, p,
                                                     q - p);
   if (!o)
+    return FAIL;
+
+  if (!mark_feature_used (&o->arch))
     return FAIL;
 
   *str = q;
@@ -17170,21 +17193,31 @@ static const struct asm_cond conds[] =
   {"al", 0xe}
 };
 
+#define UL_BARRIER(L,U,CODE,FEAT) \
+  { L, CODE, ARM_FEATURE (FEAT, 0) }, \
+  { U, CODE, ARM_FEATURE (FEAT, 0) }
+
 static struct asm_barrier_opt barrier_opt_names[] =
 {
-  { "sy",    0xf }, { "SY",    0xf },
-  { "un",    0x7 }, { "UN",    0x7 },
-  { "st",    0xe }, { "ST",    0xe },
-  { "unst",  0x6 }, { "UNST",  0x6 },
-  { "ish",   0xb }, { "ISH",   0xb },
-  { "sh",    0xb }, { "SH",    0xb },
-  { "ishst", 0xa }, { "ISHST", 0xa },
-  { "shst",  0xa }, { "SHST",  0xa },
-  { "nsh",   0x7 }, { "NSH",   0x7 },
-  { "nshst", 0x6 }, { "NSHST", 0x6 },
-  { "osh",   0x3 }, { "OSH",   0x3 },
-  { "oshst", 0x2 }, { "OSHST", 0x2 }
+  UL_BARRIER ("sy",	"SY",	 0xf, ARM_EXT_BARRIER),
+  UL_BARRIER ("st",	"ST",	 0xe, ARM_EXT_BARRIER),
+  UL_BARRIER ("ld",	"LD",	 0xd, ARM_EXT_V8),
+  UL_BARRIER ("ish",	"ISH",	 0xb, ARM_EXT_BARRIER),
+  UL_BARRIER ("sh",	"SH",	 0xb, ARM_EXT_BARRIER),
+  UL_BARRIER ("ishst",	"ISHST", 0xa, ARM_EXT_BARRIER),
+  UL_BARRIER ("shst",	"SHST",	 0xa, ARM_EXT_BARRIER),
+  UL_BARRIER ("ishld",	"ISHLD", 0x9, ARM_EXT_V8),
+  UL_BARRIER ("un",	"UN",	 0x7, ARM_EXT_BARRIER),
+  UL_BARRIER ("nsh",	"NSH",	 0x7, ARM_EXT_BARRIER),
+  UL_BARRIER ("unst",	"UNST",	 0x6, ARM_EXT_BARRIER),
+  UL_BARRIER ("nshst",	"NSHST", 0x6, ARM_EXT_BARRIER),
+  UL_BARRIER ("nshld",	"NSHLD", 0x5, ARM_EXT_V8),
+  UL_BARRIER ("osh",	"OSH",	 0x3, ARM_EXT_BARRIER),
+  UL_BARRIER ("oshst",	"OSHST", 0x2, ARM_EXT_BARRIER),
+  UL_BARRIER ("oshld",	"OSHLD", 0x1, ARM_EXT_V8)
 };
+
+#undef UL_BARRIER
 
 /* Table of ARM-format instructions.	*/
 

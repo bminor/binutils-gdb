@@ -1,3 +1,9 @@
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm-dis.c (data_barrier_option): New function.
+	(print_insn_arm): Use data_barrier_option.
+	(print_insn_thumb32): Use data_barrier_option.
+
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com
 
 	* arm-dis.c (COND_UNCOND): New constant.

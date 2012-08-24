@@ -863,6 +863,8 @@ static const struct opcode32 arm_opcodes[] =
   /* V7 instructions.  */
   {ARM_EXT_V7, 0xf450f000, 0xfd70f000, "pli\t%P"},
   {ARM_EXT_V7, 0x0320f0f0, 0x0ffffff0, "dbg%c\t#%0-3d"},
+  {ARM_EXT_V8, 0xf57ff051, 0xfffffff3, "dmb\t%U"},
+  {ARM_EXT_V8, 0xf57ff041, 0xfffffff3, "dsb\t%U"},
   {ARM_EXT_V7, 0xf57ff050, 0xfffffff0, "dmb\t%U"},
   {ARM_EXT_V7, 0xf57ff040, 0xfffffff0, "dsb\t%U"},
   {ARM_EXT_V7, 0xf57ff060, 0xfffffff0, "isb\t%U"},
@@ -1414,6 +1416,8 @@ static const struct opcode32 thumb32_opcodes[] =
   /* V7 instructions.  */
   {ARM_EXT_V7, 0xf910f000, 0xff70f000, "pli%c\t%a"},
   {ARM_EXT_V7, 0xf3af80f0, 0xfffffff0, "dbg%c\t#%0-3d"},
+  {ARM_EXT_V8, 0xf3bf8f51, 0xfffffff3, "dmb%c\t%U"},
+  {ARM_EXT_V8, 0xf3bf8f41, 0xfffffff3, "dsb%c\t%U"},
   {ARM_EXT_V7, 0xf3bf8f50, 0xfffffff0, "dmb%c\t%U"},
   {ARM_EXT_V7, 0xf3bf8f40, 0xfffffff0, "dsb%c\t%U"},
   {ARM_EXT_V7, 0xf3bf8f60, 0xfffffff0, "isb%c\t%U"},
@@ -2985,6 +2989,28 @@ banked_regname (unsigned reg)
     }
 }
 
+/* Return the name of the DMB/DSB option.  */
+static const char *
+data_barrier_option (unsigned option)
+{
+  switch (option & 0xf)
+    {
+    case 0xf: return "sy";
+    case 0xe: return "st";
+    case 0xd: return "ld";
+    case 0xb: return "ish";
+    case 0xa: return "ishst";
+    case 0x9: return "ishld";
+    case 0x7: return "un";
+    case 0x6: return "unst";
+    case 0x5: return "nshld";
+    case 0x3: return "osh";
+    case 0x2: return "oshst";
+    case 0x1: return "oshld";
+    default:  return NULL;
+    }
+}
+
 /* Print one ARM instruction from PC on INFO->STREAM.  */
 
 static void
@@ -3335,20 +3361,11 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			} 
 		      else 
 			{
-			  switch (given & 0xf)
-			    {
-			    case 0xf: func (stream, "sy"); break;
-			    case 0x7: func (stream, "un"); break;
-			    case 0xe: func (stream, "st"); break;
-			    case 0x6: func (stream, "unst"); break;
-			    case 0xb: func (stream, "ish"); break;
-			    case 0xa: func (stream, "ishst"); break;
-			    case 0x3: func (stream, "osh"); break;
-			    case 0x2: func (stream, "oshst"); break;
-			    default:
+			  const char * opt = data_barrier_option (given & 0xf);
+			  if (opt != NULL)
+			    func (stream, "%s", opt);
+			  else
 			      func (stream, "#%d", (int) given & 0xf);
-			      break;
-			    }
 			}
 		      break;
 
@@ -4222,20 +4239,11 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		  }
 		else 
 		  {
-		    switch (given & 0xf)
-		      {
-			case 0xf: func (stream, "sy"); break;
-			case 0x7: func (stream, "un"); break;
-			case 0xe: func (stream, "st"); break;
-			case 0x6: func (stream, "unst"); break;
-			case 0xb: func (stream, "ish"); break;
-			case 0xa: func (stream, "ishst"); break;
-			case 0x3: func (stream, "osh"); break;
-			case 0x2: func (stream, "oshst"); break;
-			default:
-			  func (stream, "#%d", (int) given & 0xf);
-			  break;
-		      }
+		    const char * opt = data_barrier_option (given & 0xf);
+		    if (opt != NULL)
+		      func (stream, "%s", opt);
+		    else
+		      func (stream, "#%d", (int) given & 0xf);
 		   }
 		break;
 
