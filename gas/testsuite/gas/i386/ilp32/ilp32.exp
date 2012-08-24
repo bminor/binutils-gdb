@@ -9,7 +9,7 @@ proc gas_64_check { } {
     return [regexp "targets:.*x86-64" [lindex $status 1]];
 }
 
-if [istarget "x86_64-*-solaris*"] then {
+if [expr [istarget "i*86-*-solaris*"] || [istarget "x86_64-*-solaris*"]] then {
     return
 }
 
