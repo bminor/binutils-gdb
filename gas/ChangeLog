@@ -1,5 +1,12 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (deprecated_coproc_regs_s): New structure.
+	(deprecated_coproc_regs): New variable.
+	(deprecated_coproc_reg_count): Likewise.
+	(do_co_reg): Error on obsolete & warn on deprecated registers.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (check_obsolete): New function.
 	(do_rd_rm_rn): Check swp{b} for obsoletion.
 

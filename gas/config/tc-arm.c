@@ -7710,10 +7710,52 @@ do_cmp (void)
 
    No special properties.  */
 
+struct deprecated_coproc_regs_s
+{
+  unsigned cp;
+  int opc1;
+  unsigned crn;
+  unsigned crm;
+  int opc2;
+  arm_feature_set deprecated;
+  arm_feature_set obsoleted;
+  const char *dep_msg;
+  const char *obs_msg;
+};
+
+#define DEPR_ACCESS_V8 \
+  N_("This coprocessor register access is deprecated in ARMv8")
+
+/* Table of all deprecated coprocessor registers.  */
+static struct deprecated_coproc_regs_s deprecated_coproc_regs[] =
+{
+    {15, 0, 7, 10, 5,					/* CP15DMB.  */
+     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     DEPR_ACCESS_V8, NULL},
+    {15, 0, 7, 10, 4,					/* CP15DSB.  */
+     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     DEPR_ACCESS_V8, NULL},
+    {15, 0, 7,  5, 4,					/* CP15ISB.  */
+     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     DEPR_ACCESS_V8, NULL},
+    {14, 6, 1,  0, 0,					/* TEEHBR.  */
+     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     DEPR_ACCESS_V8, NULL},
+    {14, 6, 0,  0, 0,					/* TEECR.  */
+     ARM_FEATURE (ARM_EXT_V8, 0), ARM_FEATURE (0, 0),
+     DEPR_ACCESS_V8, NULL},
+};
+
+#undef DEPR_ACCESS_V8
+
+static const size_t deprecated_coproc_reg_count =
+  sizeof (deprecated_coproc_regs) / sizeof (deprecated_coproc_regs[0]);
+
 static void
 do_co_reg (void)
 {
   unsigned Rd;
+  size_t i;
 
   Rd = inst.operands[2].reg;
   if (thumb_mode)
@@ -7733,6 +7775,23 @@ do_co_reg (void)
 	constraint (Rd == REG_PC, BAD_PC);
     }
 
+    for (i = 0; i < deprecated_coproc_reg_count; ++i)
+      {
+	const struct deprecated_coproc_regs_s *r =
+	  deprecated_coproc_regs + i;
+
+	if (inst.operands[0].reg == r->cp
+	    && inst.operands[1].imm == r->opc1
+	    && inst.operands[3].reg == r->crn
+	    && inst.operands[4].reg == r->crm
+	    && inst.operands[5].imm == r->opc2)
+	  {
+	    if (!check_obsolete (&r->obsoleted, r->obs_msg)
+	        && warn_on_deprecated
+		&& ARM_CPU_HAS_FEATURE (cpu_variant, r->deprecated))
+	      as_warn ("%s", r->dep_msg);
+	  }
+      }
 
   inst.instruction |= inst.operands[0].reg << 8;
   inst.instruction |= inst.operands[1].imm << 21;
