@@ -1,5 +1,11 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* arm-dis.c (coprocessor_opcodes): Add VSEL.
+	(print_insn_coprocessor): Add new %<>c bitfield format
+	specifier.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* arm-dis.c (arm_opcodes): Add LDRA/STRL instructions.
 	(thumb32_opcodes): Likewise.
 	(print_arm_insn): Add support for %<>T formatter.

@@ -1,5 +1,13 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (NEON_ENC_TAB): Add entries for VSEL.
+	(NEON_ENC_FPV8_): New define.
+	(do_vfp_nsyn_fpv8): New function.
+	(do_vsel): Likewise.
+	(insns): Add VSEL instructions.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (do_rm_rn): New function.
 	(do_strlex): Likewise.
 	(do_t_strlex): Likewise.

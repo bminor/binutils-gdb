@@ -12341,7 +12341,11 @@ struct neon_tab_entry
   X(vcmp,	0xeb40a40, 0xeb40b40, N_INV),		\
   X(vcmpz,	0xeb50a40, 0xeb50b40, N_INV),		\
   X(vcmpe,	0xeb40ac0, 0xeb40bc0, N_INV),		\
-  X(vcmpez,     0xeb50ac0, 0xeb50bc0, N_INV)
+  X(vcmpez,     0xeb50ac0, 0xeb50bc0, N_INV),		\
+  X(vseleq,	0xe000a00, N_INV,     N_INV),		\
+  X(vselvs,	0xe100a00, N_INV,     N_INV),		\
+  X(vselge,	0xe200a00, N_INV,     N_INV),		\
+  X(vselgt,	0xe300a00, N_INV,     N_INV)
 
 enum neon_opc
 {
@@ -12371,6 +12375,8 @@ NEON_ENC_TAB
   ((neon_enc_tab[(X) & 0x0fffffff].integer) | ((X) & 0xf0000000))
 #define NEON_ENC_DOUBLE_(X) \
   ((neon_enc_tab[(X) & 0x0fffffff].float_or_poly) | ((X) & 0xf0000000))
+#define NEON_ENC_FPV8_(X) \
+  ((neon_enc_tab[(X) & 0x0fffffff].integer) | ((X) & 0xf000000))
 
 #define NEON_ENCODE(type, inst)					\
   do								\
@@ -15841,6 +15847,33 @@ do_neon_ldx_stx (void)
   else
     inst.instruction |= 0xf4000000;
 }
+
+/* FP v8.  */
+static void
+do_vfp_nsyn_fpv8 (enum neon_shape rs)
+{
+  NEON_ENCODE (FPV8, inst);
+
+  if (rs == NS_FFF)
+    do_vfp_sp_dyadic ();
+  else
+    do_vfp_dp_rd_rn_rm ();
+
+  if (rs == NS_DDD)
+    inst.instruction |= 0x100;
+
+  inst.instruction |= 0xf0000000;
+}
+
+static void
+do_vsel (void)
+{
+  set_it_insn_type (OUTSIDE_IT_INSN);
+
+  if (try_vfp_nsyn (3, do_vfp_nsyn_fpv8) != SUCCESS)
+    first_error (_("invalid instruction shape"));
+}
+
 
 /* Overall per-instruction processing.	*/
 
@@ -18043,6 +18076,17 @@ static const struct asm_opcode insns[] =
  TUF("dcps1",	0,	 f78f8001, 0, (),	noargs, noargs),
  TUF("dcps2",	0,	 f78f8002, 0, (),	noargs, noargs),
  TUF("dcps3",	0,	 f78f8003, 0, (),	noargs, noargs),
+
+  /* FP for ARMv8.  */
+#undef  ARM_VARIANT
+#define ARM_VARIANT & fpu_vfp_ext_armv8
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & fpu_vfp_ext_armv8
+
+  nUF(vseleq, _vseleq, 3, (RVSD, RVSD, RVSD),		vsel),
+  nUF(vselvs, _vselvs, 3, (RVSD, RVSD, RVSD),		vsel),
+  nUF(vselge, _vselge, 3, (RVSD, RVSD, RVSD),		vsel),
+  nUF(vselgt, _vselgt, 3, (RVSD, RVSD, RVSD),		vsel),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */

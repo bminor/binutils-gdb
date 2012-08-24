@@ -102,6 +102,7 @@ struct opcode16
    %Q			print floating point precision in ldf/stf insn
    %R			print floating point rounding mode
 
+   %<bitfield>c		print as a condition code (for vsel)
    %<bitfield>r		print as an ARM register
    %<bitfield>R		as %<>r but r15 is UNPREDICTABLE
    %<bitfield>ru        as %<>r but each u register must be unique.
@@ -485,6 +486,10 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_VFP_EXT_FMA, 0x0e900b40, 0x0fb00f50, "vfnma%c.f64\t%z1, %z2, %z0"},
   {FPU_VFP_EXT_FMA, 0x0e900a00, 0x0fb00f50, "vfnms%c.f32\t%y1, %y2, %y0"},
   {FPU_VFP_EXT_FMA, 0x0e900b00, 0x0fb00f50, "vfnms%c.f64\t%z1, %z2, %z0"},
+
+  /* FP v5.  */
+  {FPU_VFP_EXT_ARMV8, 0xfe000a00, 0xff800f00, "vsel%20-21c%u.f32\t%y1, %y2, %y0"},
+  {FPU_VFP_EXT_ARMV8, 0xfe000b00, 0xff800f00, "vsel%20-21c%u.f64\t%z1, %z2, %z0"},
 
   /* Generic coprocessor instructions.  */
   { 0, SENTINEL_GENERIC_START, 0, "" },
@@ -2196,6 +2201,31 @@ print_insn_coprocessor (bfd_vma pc,
 
 		      case 'x':
 			func (stream, "0x%lx", (value & 0xffffffffUL));
+			break;
+
+		      case 'c':
+			switch (value)
+			  {
+			  case 0:
+			    func (stream, "eq");
+			    break;
+
+			  case 1:
+			    func (stream, "vs");
+			    break;
+
+			  case 2:
+			    func (stream, "ge");
+			    break;
+
+			  case 3:
+			    func (stream, "gt");
+			    break;
+
+			  default:
+			    func (stream, "??");
+			    break;
+			  }
 			break;
 
 		      case '`':
