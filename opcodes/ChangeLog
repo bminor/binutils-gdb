@@ -1,5 +1,9 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* arm-dis.c (neon_opcodes): Add 2 operand sha instructions.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* arm-dis.c (neon_opcodes): Add SHA 3-operand instructions.
 
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>

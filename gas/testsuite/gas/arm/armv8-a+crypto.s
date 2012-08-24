@@ -49,7 +49,18 @@
 	sha256su1.32	q7, q7, q7
 	sha256su1.32	q8, q8, q8
 	sha256su1.32	q15, q15, q15
-
+	sha1h.32	q0, q0
+	sha1h.32	q7, q7
+	sha1h.32	q8, q8
+	sha1h.32	q15, q15
+	sha1su1.32	q0, q0
+	sha1su1.32	q7, q7
+	sha1su1.32	q8, q8
+	sha1su1.32	q15, q15
+	sha256su0.32	q0, q0
+	sha256su0.32	q7, q7
+	sha256su0.32	q8, q8
+	sha256su0.32	q15, q15
 
 	.thumb
 	vmull.p64	q0, d0, d0
@@ -98,3 +109,15 @@
 	sha256su1.32	q7, q7, q7
 	sha256su1.32	q8, q8, q8
 	sha256su1.32	q15, q15, q15
+	sha1h.32	q0, q0
+	sha1h.32	q7, q7
+	sha1h.32	q8, q8
+	sha1h.32	q15, q15
+	sha1su1.32	q0, q0
+	sha1su1.32	q7, q7
+	sha1su1.32	q8, q8
+	sha1su1.32	q15, q15
+	sha256su0.32	q0, q0
+	sha256su0.32	q7, q7
+	sha256su0.32	q8, q8
+	sha256su0.32	q15, q15

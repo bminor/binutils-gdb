@@ -50,6 +50,18 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f32eec4e 	sha256su1.32	q7, q7, q7
 0[0-9a-f]+ <[^>]+> f3600ce0 	sha256su1.32	q8, q8, q8
 0[0-9a-f]+ <[^>]+> f36eecee 	sha256su1.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> f3b902c0 	sha1h.32	q0, q0
+0[0-9a-f]+ <[^>]+> f3b9e2ce 	sha1h.32	q7, q7
+0[0-9a-f]+ <[^>]+> f3f902e0 	sha1h.32	q8, q8
+0[0-9a-f]+ <[^>]+> f3f9e2ee 	sha1h.32	q15, q15
+0[0-9a-f]+ <[^>]+> f3ba0380 	sha1su1.32	q0, q0
+0[0-9a-f]+ <[^>]+> f3bae38e 	sha1su1.32	q7, q7
+0[0-9a-f]+ <[^>]+> f3fa03a0 	sha1su1.32	q8, q8
+0[0-9a-f]+ <[^>]+> f3fae3ae 	sha1su1.32	q15, q15
+0[0-9a-f]+ <[^>]+> f3ba03c0 	sha256su0.32	q0, q0
+0[0-9a-f]+ <[^>]+> f3bae3ce 	sha256su0.32	q7, q7
+0[0-9a-f]+ <[^>]+> f3fa03e0 	sha256su0.32	q8, q8
+0[0-9a-f]+ <[^>]+> f3fae3ee 	sha256su0.32	q15, q15
 0[0-9a-f]+ <[^>]+> efa0 0e00 	vmull.p64	q0, d0, d0
 0[0-9a-f]+ <[^>]+> efef eeaf 	vmull.p64	q15, d31, d31
 0[0-9a-f]+ <[^>]+> ffb0 0300 	aese.8	q0, q0
@@ -96,3 +108,15 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> ff2e ec4e 	sha256su1.32	q7, q7, q7
 0[0-9a-f]+ <[^>]+> ff60 0ce0 	sha256su1.32	q8, q8, q8
 0[0-9a-f]+ <[^>]+> ff6e ecee 	sha256su1.32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> ffb9 02c0 	sha1h.32	q0, q0
+0[0-9a-f]+ <[^>]+> ffb9 e2ce 	sha1h.32	q7, q7
+0[0-9a-f]+ <[^>]+> fff9 02e0 	sha1h.32	q8, q8
+0[0-9a-f]+ <[^>]+> fff9 e2ee 	sha1h.32	q15, q15
+0[0-9a-f]+ <[^>]+> ffba 0380 	sha1su1.32	q0, q0
+0[0-9a-f]+ <[^>]+> ffba e38e 	sha1su1.32	q7, q7
+0[0-9a-f]+ <[^>]+> fffa 03a0 	sha1su1.32	q8, q8
+0[0-9a-f]+ <[^>]+> fffa e3ae 	sha1su1.32	q15, q15
+0[0-9a-f]+ <[^>]+> ffba 03c0 	sha256su0.32	q0, q0
+0[0-9a-f]+ <[^>]+> ffba e3ce 	sha256su0.32	q7, q7
+0[0-9a-f]+ <[^>]+> fffa 03e0 	sha256su0.32	q8, q8
+0[0-9a-f]+ <[^>]+> fffa e3ee 	sha256su0.32	q15, q15
