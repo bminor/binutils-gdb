@@ -12832,7 +12832,7 @@ el_type_of_type_chk (enum neon_el_type *type, unsigned *size,
 
   if ((mask & (N_S8 | N_U8 | N_I8 | N_8 | N_P8)) != 0)
     *size = 8;
-  else if ((mask & (N_S16 | N_U16 | N_I16 | N_16 | N_P16)) != 0)
+  else if ((mask & (N_S16 | N_U16 | N_I16 | N_16 | N_F16 | N_P16)) != 0)
     *size = 16;
   else if ((mask & (N_S32 | N_U32 | N_I32 | N_32 | N_F32)) != 0)
     *size = 32;
@@ -12851,7 +12851,7 @@ el_type_of_type_chk (enum neon_el_type *type, unsigned *size,
     *type = NT_untyped;
   else if ((mask & (N_P8 | N_P16)) != 0)
     *type = NT_poly;
-  else if ((mask & (N_F32 | N_F64)) != 0)
+  else if ((mask & (N_F16 | N_F32 | N_F64)) != 0)
     *type = NT_float;
   else
     return FAIL;
@@ -14888,31 +14888,63 @@ do_neon_cvtm (void)
 }
 
 static void
+do_neon_cvttb_2 (bfd_boolean t, bfd_boolean to, bfd_boolean is_double)
+{
+  if (is_double)
+    mark_feature_used (&fpu_vfp_ext_armv8);
+
+  encode_arm_vfp_reg (inst.operands[0].reg,
+		      (is_double && !to) ? VFP_REG_Dd : VFP_REG_Sd);
+  encode_arm_vfp_reg (inst.operands[1].reg,
+		      (is_double && to) ? VFP_REG_Dm : VFP_REG_Sm);
+  inst.instruction |= to ? 0x10000 : 0;
+  inst.instruction |= t ? 0x80 : 0;
+  inst.instruction |= is_double ? 0x100 : 0;
+  do_vfp_cond_or_thumb ();
+}
+
+static void
+do_neon_cvttb_1 (bfd_boolean t)
+{
+  enum neon_shape rs = neon_select_shape (NS_FF, NS_FD, NS_DF, NS_NULL);
+
+  if (rs == NS_NULL)
+    return;
+  else if (neon_check_type (2, rs, N_F16, N_F32 | N_VFP).type != NT_invtype)
+    {
+      inst.error = NULL;
+      do_neon_cvttb_2 (t, /*to=*/TRUE, /*is_double=*/FALSE);
+    }
+  else if (neon_check_type (2, rs, N_F32 | N_VFP, N_F16).type != NT_invtype)
+    {
+      inst.error = NULL;
+      do_neon_cvttb_2 (t, /*to=*/FALSE, /*is_double=*/FALSE);
+    }
+  else if (neon_check_type (2, rs, N_F16, N_F64 | N_VFP).type != NT_invtype)
+    {
+      inst.error = NULL;
+      do_neon_cvttb_2 (t, /*to=*/TRUE, /*is_double=*/TRUE);
+    }
+  else if (neon_check_type (2, rs, N_F64 | N_VFP, N_F16).type != NT_invtype)
+    {
+      inst.error = NULL;
+      do_neon_cvttb_2 (t, /*to=*/FALSE, /*is_double=*/TRUE);
+    }
+  else
+    return;
+}
+
+static void
 do_neon_cvtb (void)
 {
-  inst.instruction = 0xeb20a40;
-
-  /* The sizes are attached to the mnemonic.  */
-  if (inst.vectype.el[0].type != NT_invtype
-      && inst.vectype.el[0].size == 16)
-    inst.instruction |= 0x00010000;
-
-  /* Programmer's syntax: the sizes are attached to the operands.  */
-  else if (inst.operands[0].vectype.type != NT_invtype
-	   && inst.operands[0].vectype.size == 16)
-    inst.instruction |= 0x00010000;
-
-  encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Sd);
-  encode_arm_vfp_reg (inst.operands[1].reg, VFP_REG_Sm);
-  do_vfp_cond_or_thumb ();
+  do_neon_cvttb_1 (FALSE);
 }
 
 
 static void
 do_neon_cvtt (void)
 {
-  do_neon_cvtb ();
-  inst.instruction |= 0x80;
+  do_neon_cvttb_1 (TRUE);
 }
 
 static void
@@ -18958,8 +18990,8 @@ static const struct asm_opcode insns[] =
 
  nCEF(vcvt,     _vcvt,   3, (RNSDQ, RNSDQ, oI32z), neon_cvt),
  nCEF(vcvtr,    _vcvt,   2, (RNSDQ, RNSDQ), neon_cvtr),
- nCEF(vcvtb,	_vcvt,	 2, (RVS, RVS), neon_cvtb),
- nCEF(vcvtt,	_vcvt,	 2, (RVS, RVS), neon_cvtt),
+ NCEF(vcvtb,	eb20a40, 2, (RVSD, RVSD), neon_cvtb),
+ NCEF(vcvtt,	eb20a40, 2, (RVSD, RVSD), neon_cvtt),
 
 
   /* NOTE: All VMOV encoding is special-cased!  */

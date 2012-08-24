@@ -319,6 +319,8 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_NEON_EXT_V1, 0x0e400b10, 0x0fd00f10, "vmov%c.8\t%16-19,7D[%5,6,21d], %12-15r"},
   {FPU_NEON_EXT_V1, 0x0e500b10, 0x0f500f10, "vmov%c.%23?us8\t%12-15r, %16-19,7D[%5,6,21d]"},
   /* Half-precision conversion instructions.  */
+  {FPU_VFP_EXT_ARMV8, 0x0eb20b40, 0x0fbf0f50, "vcvt%7?tb%c.f64.f16\t%z1, %y0"},
+  {FPU_VFP_EXT_ARMV8, 0x0eb30b40, 0x0fbf0f50, "vcvt%7?tb%c.f16.f64\t%y1, %z0"},
   {FPU_VFP_EXT_FP16, 0x0eb20a40, 0x0fbf0f50, "vcvt%7?tb%c.f32.f16\t%y1, %y0"},
   {FPU_VFP_EXT_FP16, 0x0eb30a40, 0x0fbf0f50, "vcvt%7?tb%c.f16.f32\t%y1, %y0"},
 

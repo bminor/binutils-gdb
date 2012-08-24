@@ -50,6 +50,14 @@
 	vrintn.f64.f64	d1, d1
 	vrintp.f64.f64	d30, d30
 	vrintm.f64.f64	d31, d31
+	vcvtt.f16.f64	s0, d0
+	vcvtb.f16.f64	s1, d16
+	vcvtt.f16.f64	s30, d15
+	vcvtb.f16.f64	s31, d31
+	vcvtt.f64.f16	d0, s0
+	vcvtb.f64.f16	d16, s1
+	vcvtt.f64.f16	d15, s30
+	vcvtb.f64.f16	d31, s31
 
 	.thumb
 	vseleq.f32	s0, s0, s0
@@ -98,3 +106,11 @@
 	vrintn.f64.f64	d1, d1
 	vrintp.f64.f64	d30, d30
 	vrintm.f64.f64	d31, d31
+	vcvtt.f16.f64	s0, d0
+	vcvtb.f16.f64	s1, d16
+	vcvtt.f16.f64	s30, d15
+	vcvtb.f16.f64	s31, d31
+	vcvtt.f64.f16	d0, s0
+	vcvtb.f64.f16	d16, s1
+	vcvtt.f64.f16	d15, s30
+	vcvtb.f64.f16	d31, s31

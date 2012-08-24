@@ -50,6 +50,14 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> feb91b41 	vrintn.f64.f64	d1, d1
 0[0-9a-f]+ <[^>]+> fefaeb6e 	vrintp.f64.f64	d30, d30
 0[0-9a-f]+ <[^>]+> fefbfb6f 	vrintm.f64.f64	d31, d31
+0[0-9a-f]+ <[^>]+> eeb30bc0 	vcvtt.f16.f64	s0, d0
+0[0-9a-f]+ <[^>]+> eef30b60 	vcvtb.f16.f64	s1, d16
+0[0-9a-f]+ <[^>]+> eeb3fbcf 	vcvtt.f16.f64	s30, d15
+0[0-9a-f]+ <[^>]+> eef3fb6f 	vcvtb.f16.f64	s31, d31
+0[0-9a-f]+ <[^>]+> eeb20bc0 	vcvtt.f64.f16	d0, s0
+0[0-9a-f]+ <[^>]+> eef20b60 	vcvtb.f64.f16	d16, s1
+0[0-9a-f]+ <[^>]+> eeb2fbcf 	vcvtt.f64.f16	d15, s30
+0[0-9a-f]+ <[^>]+> eef2fb6f 	vcvtb.f64.f16	d31, s31
 0[0-9a-f]+ <[^>]+> fe00 0a00 	vseleq.f32	s0, s0, s0
 0[0-9a-f]+ <[^>]+> fe50 0aa0 	vselvs.f32	s1, s1, s1
 0[0-9a-f]+ <[^>]+> fe2f fa0f 	vselge.f32	s30, s30, s30
@@ -96,3 +104,11 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> feb9 1b41 	vrintn.f64.f64	d1, d1
 0[0-9a-f]+ <[^>]+> fefa eb6e 	vrintp.f64.f64	d30, d30
 0[0-9a-f]+ <[^>]+> fefb fb6f 	vrintm.f64.f64	d31, d31
+0[0-9a-f]+ <[^>]+> eeb3 0bc0 	vcvtt.f16.f64	s0, d0
+0[0-9a-f]+ <[^>]+> eef3 0b60 	vcvtb.f16.f64	s1, d16
+0[0-9a-f]+ <[^>]+> eeb3 fbcf 	vcvtt.f16.f64	s30, d15
+0[0-9a-f]+ <[^>]+> eef3 fb6f 	vcvtb.f16.f64	s31, d31
+0[0-9a-f]+ <[^>]+> eeb2 0bc0 	vcvtt.f64.f16	d0, s0
+0[0-9a-f]+ <[^>]+> eef2 0b60 	vcvtb.f64.f16	d16, s1
+0[0-9a-f]+ <[^>]+> eeb2 fbcf 	vcvtt.f64.f16	d15, s30
+0[0-9a-f]+ <[^>]+> eef2 fb6f 	vcvtb.f64.f16	d31, s31
