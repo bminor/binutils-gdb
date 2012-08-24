@@ -17975,6 +17975,12 @@ static const struct asm_opcode insns[] =
 
  tCE("sevl",	320f005, _sevl,    0, (),		noargs,	t_hint),
 
+#undef ARM_VARIANT
+#define ARM_VARIANT  NULL
+ TUF("dcps1",	0,	 f78f8001, 0, (),	noargs, noargs),
+ TUF("dcps2",	0,	 f78f8002, 0, (),	noargs, noargs),
+ TUF("dcps3",	0,	 f78f8003, 0, (),	noargs, noargs),
+
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
 #undef  THUMB_VARIANT

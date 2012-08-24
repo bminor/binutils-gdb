@@ -12,3 +12,6 @@ bar:
 	sevl
 	sevl.n
 	sevl.w
+	dcps1
+	dcps2
+	dcps3

@@ -1421,6 +1421,7 @@ static const struct opcode32 thumb32_opcodes[] =
 {
   /* V8 instructions.  */
   {ARM_EXT_V8, 0xf3af8005, 0xffffffff, "sevl%c.w"},
+  {ARM_EXT_V8, 0xf78f8000, 0xfffffffc, "dcps%0-1d"},
 
   /* V7 instructions.  */
   {ARM_EXT_V7, 0xf910f000, 0xff70f000, "pli%c\t%a"},

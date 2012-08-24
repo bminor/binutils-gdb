@@ -1,5 +1,10 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* gas/arm/armv8-a.d: Update.
+	* gas/arm/armv8-a.s: Likewise.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* gas/arm/armv8-a.s: New testcase.
 	* gas/arm/armv8-a.d: Likewise.
 

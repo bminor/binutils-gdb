@@ -1,5 +1,9 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* arm-dis.c (thumb32_opcodes): Add DCPS instruction.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* arm-dis.c (arm_opcodes): Add SEVL.
 	(thumb_opcodes): Likewise.
 	(thumb32_opcodes): Likewise.
