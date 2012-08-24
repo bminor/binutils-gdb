@@ -9549,7 +9549,8 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_yield, bf10, f3af8001),			\
   X(_wfe,   bf20, f3af8002),			\
   X(_wfi,   bf30, f3af8003),			\
-  X(_sev,   bf40, f3af8004),
+  X(_sev,   bf40, f3af8004),                    \
+  X(_sevl,  bf50, f3af8005)
 
 /* To catch errors in encoding functions, the codes are all offset by
    0xF800, putting them in one of the 32-bit prefix ranges, ergo undefined
@@ -17966,8 +17967,18 @@ static const struct asm_opcode insns[] =
 
  TUF("pldw",	410f000, f830f000, 1, (ADDR),	pld,	t_pld),
 
+ /* AArchv8 instructions.  */
+#undef  ARM_VARIANT
+#define ARM_VARIANT   & arm_ext_v8
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8
+
+ tCE("sevl",	320f005, _sevl,    0, (),		noargs,	t_hint),
+
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT NULL
 
  cCE("wfs",	e200110, 1, (RR),	     rd),
  cCE("rfs",	e300110, 1, (RR),	     rd),

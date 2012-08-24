@@ -849,6 +849,9 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V3M, 0x00800090, 0x0fa000f0, "%22?sumull%20's%c\t%12-15Ru, %16-19Ru, %0-3R, %8-11R"},
   {ARM_EXT_V3M, 0x00a00090, 0x0fa000f0, "%22?sumlal%20's%c\t%12-15Ru, %16-19Ru, %0-3R, %8-11R"},
 
+  /* V8 instructions.  */
+  {ARM_EXT_V8,   0x0320f005, 0x0fffffff, "sevl"},
+
   /* Virtualization Extension instructions.  */
   {ARM_EXT_VIRT, 0x0160006e, 0x0fffffff, "eret%c"},
   {ARM_EXT_VIRT, 0x01400070, 0x0ff000f0, "hvc%c\t%e"},
@@ -1244,6 +1247,9 @@ static const struct opcode16 thumb_opcodes[] =
 {
   /* Thumb instructions.  */
 
+  /* ARM V8 instructions.  */
+  {ARM_EXT_V8,  0xbf50, 0xffff, "sevl%c"},
+
   /* ARM V6K no-argument instructions.  */
   {ARM_EXT_V6K, 0xbf00, 0xffff, "nop%c"},
   {ARM_EXT_V6K, 0xbf10, 0xffff, "yield%c"},
@@ -1413,6 +1419,9 @@ static const struct opcode16 thumb_opcodes[] =
    makes heavy use of special-case bit patterns.  */
 static const struct opcode32 thumb32_opcodes[] =
 {
+  /* V8 instructions.  */
+  {ARM_EXT_V8, 0xf3af8005, 0xffffffff, "sevl%c.w"},
+
   /* V7 instructions.  */
   {ARM_EXT_V7, 0xf910f000, 0xff70f000, "pli%c\t%a"},
   {ARM_EXT_V7, 0xf3af80f0, 0xfffffff0, "dbg%c\t#%0-3d"},
