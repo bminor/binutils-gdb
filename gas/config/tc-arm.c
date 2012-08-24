@@ -12348,7 +12348,9 @@ struct neon_tab_entry
   X(vselgt,	0xe300a00, N_INV,     N_INV),		\
   X(vmaxnm,	0xe800a00, 0x3000f10, N_INV),		\
   X(vminnm,	0xe800a40, 0x3200f10, N_INV),		\
-  X(vcvta,	0xebc0a40, 0x3bb0000, N_INV)
+  X(vcvta,	0xebc0a40, 0x3bb0000, N_INV),		\
+  X(vrintr,	0xeb60a40, 0x3ba0400, N_INV),		\
+  X(vrinta,	0xeb80a40, 0x3ba0400, N_INV)
 
 enum neon_opc
 {
@@ -14582,7 +14584,8 @@ enum neon_cvt_mode
   neon_cvt_mode_p,
   neon_cvt_mode_m,
   neon_cvt_mode_z,
-  neon_cvt_mode_x
+  neon_cvt_mode_x,
+  neon_cvt_mode_r
 };
 
 /* Neon-syntax VFP conversions.  */
@@ -15999,6 +16002,125 @@ do_vmaxnm (void)
     return;
 
   neon_dyadic_misc (NT_untyped, N_F32, 0);
+}
+
+static void
+do_vrint_1 (enum neon_cvt_mode mode)
+{
+  enum neon_shape rs = neon_select_shape (NS_FF, NS_DD, NS_QQ, NS_NULL);
+  struct neon_type_el et;
+
+  if (rs == NS_NULL)
+    return;
+
+  et = neon_check_type (2, rs, N_EQK | N_VFP, N_F32 | N_F64 | N_KEY | N_VFP);
+  if (et.type != NT_invtype)
+    {
+      /* VFP encodings.  */
+      if (mode == neon_cvt_mode_a || mode == neon_cvt_mode_n
+	  || mode == neon_cvt_mode_p || mode == neon_cvt_mode_m)
+	set_it_insn_type (OUTSIDE_IT_INSN);
+
+      NEON_ENCODE (FPV8, inst);
+      if (rs == NS_FF)
+	do_vfp_sp_monadic ();
+      else
+	do_vfp_dp_rd_rm ();
+
+      switch (mode)
+	{
+	case neon_cvt_mode_r: inst.instruction |= 0x00000000; break;
+	case neon_cvt_mode_z: inst.instruction |= 0x00000080; break;
+	case neon_cvt_mode_x: inst.instruction |= 0x00010000; break;
+	case neon_cvt_mode_a: inst.instruction |= 0xf0000000; break;
+	case neon_cvt_mode_n: inst.instruction |= 0xf0010000; break;
+	case neon_cvt_mode_p: inst.instruction |= 0xf0020000; break;
+	case neon_cvt_mode_m: inst.instruction |= 0xf0030000; break;
+	default: abort ();
+	}
+
+      inst.instruction |= (rs == NS_DD) << 8;
+      do_vfp_cond_or_thumb ();
+    }
+  else
+    {
+      /* Neon encodings (or something broken...).  */
+      inst.error = NULL;
+      et = neon_check_type (2, rs, N_EQK, N_F32 | N_KEY);
+
+      if (et.type == NT_invtype)
+	return;
+
+      set_it_insn_type (OUTSIDE_IT_INSN);
+      NEON_ENCODE (FLOAT, inst);
+
+      if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH8) == FAIL)
+	return;
+
+      inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+      inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+      inst.instruction |= LOW4 (inst.operands[1].reg);
+      inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+      inst.instruction |= neon_quad (rs) << 6;
+      switch (mode)
+	{
+	case neon_cvt_mode_z: inst.instruction |= 3 << 7; break;
+	case neon_cvt_mode_x: inst.instruction |= 1 << 7; break;
+	case neon_cvt_mode_a: inst.instruction |= 2 << 7; break;
+	case neon_cvt_mode_n: inst.instruction |= 0 << 7; break;
+	case neon_cvt_mode_p: inst.instruction |= 7 << 7; break;
+	case neon_cvt_mode_m: inst.instruction |= 5 << 7; break;
+	case neon_cvt_mode_r: inst.error = _("invalid rounding mode"); break;
+	default: abort ();
+	}
+
+      if (thumb_mode)
+	inst.instruction |= 0xfc000000;
+      else
+	inst.instruction |= 0xf0000000;
+    }
+}
+
+static void
+do_vrintx (void)
+{
+  do_vrint_1 (neon_cvt_mode_x);
+}
+
+static void
+do_vrintz (void)
+{
+  do_vrint_1 (neon_cvt_mode_z);
+}
+
+static void
+do_vrintr (void)
+{
+  do_vrint_1 (neon_cvt_mode_r);
+}
+
+static void
+do_vrinta (void)
+{
+  do_vrint_1 (neon_cvt_mode_a);
+}
+
+static void
+do_vrintn (void)
+{
+  do_vrint_1 (neon_cvt_mode_n);
+}
+
+static void
+do_vrintp (void)
+{
+  do_vrint_1 (neon_cvt_mode_p);
+}
+
+static void
+do_vrintm (void)
+{
+  do_vrint_1 (neon_cvt_mode_m);
 }
 
 
@@ -18220,6 +18342,13 @@ static const struct asm_opcode insns[] =
   nUF(vcvtn,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvtn),
   nUF(vcvtp,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvtp),
   nUF(vcvtm,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvtm),
+  nCE(vrintr, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintr),
+  nCE(vrintz, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintz),
+  nCE(vrintx, _vrintr, 2, (RNSDQ, oRNSDQ),		vrintx),
+  nUF(vrinta, _vrinta, 2, (RNSDQ, oRNSDQ),		vrinta),
+  nUF(vrintn, _vrinta, 2, (RNSDQ, oRNSDQ),		vrintn),
+  nUF(vrintp, _vrinta, 2, (RNSDQ, oRNSDQ),		vrintp),
+  nUF(vrintm, _vrinta, 2, (RNSDQ, oRNSDQ),		vrintm),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */

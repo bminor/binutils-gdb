@@ -1,5 +1,19 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (NEON_ENC_TAB): Add vrint entries.
+	(neon_cvt_mode): Add neon_cvt_mode_r.
+	(do_vrint_1): New function.
+	(do_vrint_x): Likewise.
+	(do_vrint_z): Likewise.
+	(do_vrint_r): Likewise.
+	(do_vrint_a): Likewise.
+	(do_vrint_n): Likewise.
+	(do_vrint_p): Likewise.
+	(do_vrint_m): Likewise.
+	(insns): Add VRINT instructions.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (NEON_ENC_TAB): Add vcvta entry.
 	(neon_cvt_mode): New enumeration.
 	(do_vfp_nsyn_cvt_fpv8): New function.
