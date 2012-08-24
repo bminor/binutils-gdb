@@ -1,3 +1,17 @@
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.h (arm_ext_v8): New variable.
+	(fpu_vfp_ext_armv8): Likewise.
+	(fpu_neon_ext_armv8): Likewise.
+	(fpu_crypto_ext_armv8): Likewise.
+	(arm_archs): Add armv8-a.
+	(arm_extensions): Add crypto, fp, and simd.
+	(arm_fpus): Add fp-armv8, neon-fp-armv8, crypto-neon-fp-armv8.
+	(cpu_arch_ver): Add support for ARMv8.
+	(aeabi_set_public_sttributes): Likewise.
+	* doc/c-arm.texi (ARM Options): Document new architecture and
+	extension options for ARMv8.
+
 2012-08-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/as.texinfo: Replace --n32 with --x32.

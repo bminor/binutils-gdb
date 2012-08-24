@@ -1,3 +1,14 @@
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* gas/arm/attr-march-all.d: Update for change in expected
+	output.
+	* gas/arm/attr-mfpu-vfpv4-d16.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv4.d: Likewise.
+	* gas/arm/attr-march-armv8-a+crypto.d: New testcase.
+	* gas/arm/attr-march-armv8-a+fp.d: Likewise.
+	* gas/arm/attr-march-armv8-a+simd.d: Likewise.
+	* gas/arm/attr-march-armv8-a.d: Likewise.
+
 2012-08-21  David S. Miller  <davem@davemloft.net>
 
 	* gas/sparc/crypto.d: Fix opcodes for 4-arg crypto instructions.

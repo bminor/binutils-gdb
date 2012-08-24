@@ -195,6 +195,7 @@ static const arm_feature_set arm_ext_v7 = ARM_FEATURE (ARM_EXT_V7, 0);
 static const arm_feature_set arm_ext_v7a = ARM_FEATURE (ARM_EXT_V7A, 0);
 static const arm_feature_set arm_ext_v7r = ARM_FEATURE (ARM_EXT_V7R, 0);
 static const arm_feature_set arm_ext_v7m = ARM_FEATURE (ARM_EXT_V7M, 0);
+static const arm_feature_set arm_ext_v8 = ARM_FEATURE (ARM_EXT_V8, 0);
 static const arm_feature_set arm_ext_m =
   ARM_FEATURE (ARM_EXT_V6M | ARM_EXT_OS | ARM_EXT_V7M, 0);
 static const arm_feature_set arm_ext_mp = ARM_FEATURE (ARM_EXT_MP, 0);
@@ -233,6 +234,12 @@ static const arm_feature_set fpu_vfp_v3_or_neon_ext =
 static const arm_feature_set fpu_vfp_fp16 = ARM_FEATURE (0, FPU_VFP_EXT_FP16);
 static const arm_feature_set fpu_neon_ext_fma = ARM_FEATURE (0, FPU_NEON_EXT_FMA);
 static const arm_feature_set fpu_vfp_ext_fma = ARM_FEATURE (0, FPU_VFP_EXT_FMA);
+static const arm_feature_set fpu_vfp_ext_armv8 =
+  ARM_FEATURE (0, FPU_VFP_EXT_ARMV8);
+static const arm_feature_set fpu_neon_ext_armv8 =
+  ARM_FEATURE (0, FPU_NEON_EXT_ARMV8);
+static const arm_feature_set fpu_crypto_ext_armv8 =
+  ARM_FEATURE (0, FPU_CRYPTO_EXT_ARMV8);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -23188,6 +23195,7 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT ("armv7-r",	ARM_ARCH_V7R,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv7-m",	ARM_ARCH_V7M,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv7e-m",	ARM_ARCH_V7EM,	 FPU_ARCH_VFP),
+  ARM_ARCH_OPT ("armv8-a",	ARM_ARCH_V8A,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("xscale",	ARM_ARCH_XSCALE, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt",	ARM_ARCH_IWMMXT, FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt2",	ARM_ARCH_IWMMXT2,FPU_ARCH_VFP),
@@ -23209,6 +23217,10 @@ struct arm_option_extension_value_table
 #define ARM_EXT_OPT(N, V, AA) { N, sizeof (N) - 1, V, AA }
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
+  ARM_EXT_OPT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
+				   ARM_FEATURE (ARM_EXT_V8, 0)),
+  ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8,
+				   ARM_FEATURE (ARM_EXT_V8, 0)),
   ARM_EXT_OPT ("idiv",	ARM_FEATURE (ARM_EXT_ADIV | ARM_EXT_DIV, 0),
 				   ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)),
   ARM_EXT_OPT ("iwmmxt",ARM_FEATURE (0, ARM_CEXT_IWMMXT),	ARM_ANY),
@@ -23218,6 +23230,8 @@ static const struct arm_option_extension_value_table arm_extensions[] =
                         ARM_FEATURE (0, ARM_CEXT_MAVERICK),	ARM_ANY),
   ARM_EXT_OPT ("mp",	ARM_FEATURE (ARM_EXT_MP, 0),
 				   ARM_FEATURE (ARM_EXT_V7A | ARM_EXT_V7R, 0)),
+  ARM_EXT_OPT ("simd",   FPU_ARCH_NEON_VFP_ARMV8,
+				   ARM_FEATURE (ARM_EXT_V8, 0)),
   ARM_EXT_OPT ("os",	ARM_FEATURE (ARM_EXT_OS, 0),
 				   ARM_FEATURE (ARM_EXT_V6M, 0)),
   ARM_EXT_OPT ("sec",	ARM_FEATURE (ARM_EXT_SEC, 0),
@@ -23275,6 +23289,10 @@ static const struct arm_option_fpu_value_table arm_fpus[] =
   {"vfpv4-d16",		FPU_ARCH_VFP_V4D16},
   {"fpv4-sp-d16",	FPU_ARCH_VFP_V4_SP_D16},
   {"neon-vfpv4",	FPU_ARCH_NEON_VFP_V4},
+  {"fp-armv8",		FPU_ARCH_VFP_ARMV8},
+  {"neon-fp-armv8",	FPU_ARCH_NEON_VFP_ARMV8},
+  {"crypto-neon-fp-armv8",
+			FPU_ARCH_CRYPTO_NEON_VFP_ARMV8},
   {NULL,		ARM_ARCH_NONE}
 };
 
@@ -23749,9 +23767,10 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {11, ARM_ARCH_V6M},
     {12, ARM_ARCH_V6SM},
     {8, ARM_ARCH_V6T2},
-    {10, ARM_ARCH_V7A},
+    {10, ARM_ARCH_V7A_IDIV_MP_SEC_VIRT},
     {10, ARM_ARCH_V7R},
     {10, ARM_ARCH_V7M},
+    {14, ARM_ARCH_V8A},
     {0, ARM_ARCH_NONE}
 };
 
@@ -23781,6 +23800,7 @@ aeabi_set_public_attributes (void)
   int arch;
   char profile;
   int virt_sec = 0;
+  int fp16_optional = 0;
   arm_feature_set flags;
   arm_feature_set tmp;
   const cpu_arch_ver_table *p;
@@ -23880,14 +23900,22 @@ aeabi_set_public_attributes (void)
 	ARM_CPU_HAS_FEATURE (flags, arm_arch_t2) ? 2 : 1);
 
   /* Tag_VFP_arch.  */
-  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_fma))
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_armv8))
+    aeabi_set_attribute_int (Tag_VFP_arch, 7);
+  else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_fma))
     aeabi_set_attribute_int (Tag_VFP_arch,
 			     ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32)
 			     ? 5 : 6);
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32))
-    aeabi_set_attribute_int (Tag_VFP_arch, 3);
+    {
+      fp16_optional = 1;
+      aeabi_set_attribute_int (Tag_VFP_arch, 3);
+    }
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v3xd))
-    aeabi_set_attribute_int (Tag_VFP_arch, 4);
+    {
+      aeabi_set_attribute_int (Tag_VFP_arch, 4);
+      fp16_optional = 1;
+    }
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v2))
     aeabi_set_attribute_int (Tag_VFP_arch, 2);
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v1)
@@ -23906,13 +23934,23 @@ aeabi_set_public_attributes (void)
     aeabi_set_attribute_int (Tag_WMMX_arch, 1);
 
   /* Tag_Advanced_SIMD_arch (formerly Tag_NEON_arch).  */
-  if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_v1))
-    aeabi_set_attribute_int
-      (Tag_Advanced_SIMD_arch, (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_fma)
-				? 2 : 1));
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_armv8))
+    aeabi_set_attribute_int (Tag_Advanced_SIMD_arch, 3);
+  else if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_v1))
+    {
+      if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_fma))
+	{
+	  aeabi_set_attribute_int (Tag_Advanced_SIMD_arch, 2);
+	}
+      else
+	{
+	  aeabi_set_attribute_int (Tag_Advanced_SIMD_arch, 1);
+	  fp16_optional = 1;
+	}
+    }
 
   /* Tag_VFP_HP_extension (formerly Tag_NEON_FP16_arch).  */
-  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_fp16))
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_fp16) && fp16_optional)
     aeabi_set_attribute_int (Tag_VFP_HP_extension, 1);
 
   /* Tag_DIV_use.
@@ -23921,12 +23959,17 @@ aeabi_set_public_attributes (void)
      in ARM state, or when Thumb integer divide instructions have been used,
      but we have no architecture profile set, nor have we any ARM instructions.
 
+     For ARMv8 we set the tag to 0 as integer divide is implied by the base
+     architecture.
+
      For new architectures we will have to check these tests.  */
-  gas_assert (arch <= TAG_CPU_ARCH_V7E_M);
-  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_adiv)
-      || (profile == '\0'
-	  && ARM_CPU_HAS_FEATURE (flags, arm_ext_div)
-	  && !ARM_CPU_HAS_FEATURE (arm_arch_used, arm_arch_any)))
+  gas_assert (arch <= TAG_CPU_ARCH_V8);
+  if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v8))
+    aeabi_set_attribute_int (Tag_DIV_use, 0);
+  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_adiv)
+	   || (profile == '\0'
+	       && ARM_CPU_HAS_FEATURE (flags, arm_ext_div)
+	       && !ARM_CPU_HAS_FEATURE (arm_arch_used, arm_arch_any)))
     aeabi_set_attribute_int (Tag_DIV_use, 2);
 
   /* Tag_MP_extension_use.  */

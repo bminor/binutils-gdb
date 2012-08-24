@@ -1,3 +1,9 @@
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Update for ARMv8.
+	(arm_attr_tag_FP_arch): Likewise.
+	(arm_attr_tag_Advanced_SIMD_arch): Likewise.
+
 2012-08-17  Yuri Chornoivan  <yurchor@ukr.net>
 
 	* doc/binutils.texi, * objdump.c, * od-xcoff.c: Typo fixes.

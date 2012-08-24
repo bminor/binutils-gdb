@@ -11327,6 +11327,24 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V7E_M),  /* V6S_M.  */
       T(V7E_M)   /* V7E_M.  */
     };
+  const int v8[] =
+    {
+      T(V8),		/* PRE_V4.  */
+      T(V8),		/* V4.  */
+      T(V8),		/* V4T.  */
+      T(V8),		/* V5T.  */
+      T(V8),		/* V5TE.  */
+      T(V8),		/* V5TEJ.  */
+      T(V8),		/* V6.  */
+      T(V8),		/* V6KZ.  */
+      T(V8),		/* V6T2.  */
+      T(V8),		/* V6K.  */
+      T(V8),		/* V7.  */
+      T(V8),		/* V6_M.  */
+      T(V8),		/* V6S_M.  */
+      T(V8),		/* V7E_M.  */
+      T(V8)		/* V8.  */
+    };
   const int v4t_plus_v6_m[] =
     {
       -1,		/* PRE_V4.  */
@@ -11343,6 +11361,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V6_M),		/* V6_M.  */
       T(V6S_M),		/* V6S_M.  */
       T(V7E_M),		/* V7E_M.  */
+      T(V8),		/* V8.  */
       T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
     };
   const int *comb[] =
@@ -11353,6 +11372,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       v6_m,
       v6s_m,
       v7e_m,
+      v8,
       /* Pseudo-architecture.  */
       v4t_plus_v6_m
     };
@@ -11554,7 +11574,8 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		"ARM v6K",
 		"ARM v7",
 		"ARM v6-M",
-		"ARM v6S-M"
+		"ARM v6S-M",
+		"ARM v8"
 	    };
 
 	    /* Merge Tag_CPU_arch and Tag_also_compatible_with.  */
@@ -11699,11 +11720,12 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		 when it's 0.  It might mean absence of FP hardware if
 		 Tag_FP_arch is zero, otherwise it is effectively SP + DP.  */
 
+#define VFP_VERSION_COUNT 8
 	      static const struct
 	      {
 		  int ver;
 		  int regs;
-	      } vfp_versions[7] =
+	      } vfp_versions[VFP_VERSION_COUNT] =
 		{
 		  {0, 0},
 		  {1, 16},
@@ -11711,7 +11733,8 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		  {3, 32},
 		  {3, 16},
 		  {4, 32},
-		  {4, 16}
+		  {4, 16},
+		  {8, 32}
 		};
 	      int ver;
 	      int regs;
@@ -11751,9 +11774,10 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 
 	      /* Now we can handle Tag_FP_arch.  */
 
-	      /* Values greater than 6 aren't defined, so just pick the
-	         biggest */
-	      if (in_attr[i].i > 6 && in_attr[i].i > out_attr[i].i)
+	      /* Values of VFP_VERSION_COUNT or more aren't defined, so just
+		 pick the biggest.  */
+	      if (in_attr[i].i >= VFP_VERSION_COUNT
+		  && in_attr[i].i > out_attr[i].i)
 		{
 		  out_attr[i] = in_attr[i];
 		  break;
@@ -11768,7 +11792,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		regs = vfp_versions[out_attr[i].i].regs;
 	      /* This assumes all possible supersets are also a valid
 	         options.  */
-	      for (newval = 6; newval > 0; newval--)
+	      for (newval = VFP_VERSION_COUNT - 1; newval > 0; newval--)
 		{
 		  if (regs == vfp_versions[newval].regs
 		      && ver == vfp_versions[newval].ver)

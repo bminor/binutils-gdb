@@ -1,3 +1,18 @@
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ld-arm/arm-elf.exp: Add new testcases.
+	* ld-arm/attr-merge-vfp-3.d: Update for change in expected
+	output.
+	* ld-arm/attr-merge-vfp-3r.d: Likewise.
+	* ld-arm/attr-merge-vfp-4.d: Likewise.
+	* ld-arm/attr-merge-vfp-4r.d: Likewise.
+	* ld-arm/attr-merge-vfp-5.d: Likewise.
+	* ld-arm/attr-merge-vfp-5r.d: Likewise.
+	* ld-arm/attr-merge-vfp-7.d: New testcase.
+	* ld-arm/attr-merge-vfp-7r.d: Likewise.
+	* ld-arm/attr-merge-vfp-armv8-hard.s: Likewise.
+	* ld-arm/attr-merge-vfp-armv8.s: Likewise.
+
 2012-08-14  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/14265

@@ -767,6 +767,8 @@ run_dump_test "attr-merge-vfp-5"
 run_dump_test "attr-merge-vfp-5r"
 run_dump_test "attr-merge-vfp-6"
 run_dump_test "attr-merge-vfp-6r"
+run_dump_test "attr-merge-vfp-7"
+run_dump_test "attr-merge-vfp-7r"
 run_dump_test "attr-merge-incompatible"
 run_dump_test "unresolved-1"
 if { ![istarget "arm*-*-nacl*"] } {
