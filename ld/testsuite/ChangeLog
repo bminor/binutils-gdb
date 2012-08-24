@@ -1,3 +1,7 @@
+2012-08-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/elf.exp: Add Solaris/x86-64 support to eh[1-4] test.
+
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-arm/arm-elf.exp: Add new testcases.

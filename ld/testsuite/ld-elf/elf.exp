@@ -44,6 +44,11 @@ if { [istarget "*-*-nacl*"] } {
     set options_regsub(ld) {-melf_x86_64 -melf_x86_64_nacl}
 }
 
+if { [istarget "*-*-solaris*"] } {
+    # Same for Solaris
+    set options_regsub(ld) {-melf_x86_64 -melf_x86_64_sol2}
+}
+
 if { [is_remote host] } then {
     remote_download host merge.ld
 }
