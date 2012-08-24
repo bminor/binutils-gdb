@@ -7383,6 +7383,13 @@ do_rd_rm (void)
 }
 
 static void
+do_rm_rn (void)
+{
+  inst.instruction |= inst.operands[0].reg;
+  inst.instruction |= inst.operands[1].reg << 16;
+}
+
+static void
 do_rd_rn (void)
 {
   inst.instruction |= inst.operands[0].reg << 12;
@@ -8727,6 +8734,25 @@ do_strexd (void)
   inst.instruction |= inst.operands[0].reg << 12;
   inst.instruction |= inst.operands[1].reg;
   inst.instruction |= inst.operands[3].reg << 16;
+}
+
+/* ARM V8 STRL.  */
+static void
+do_strlex (void)
+{
+  constraint (inst.operands[0].reg == inst.operands[1].reg
+	      || inst.operands[0].reg == inst.operands[2].reg, BAD_OVERLAP);
+
+  do_rd_rm_rn ();
+}
+
+static void
+do_t_strlex (void)
+{
+  constraint (inst.operands[0].reg == inst.operands[1].reg
+	      || inst.operands[0].reg == inst.operands[2].reg, BAD_OVERLAP);
+
+  do_rm_rd_rn ();
 }
 
 /* ARM V6 SXTAH extracts a 16-bit value from a register, sign
@@ -17991,6 +18017,25 @@ static const struct asm_opcode insns[] =
 
  tCE("sevl",	320f005, _sevl,    0, (),		noargs,	t_hint),
  TUE("hlt",	1000070, ba80,     1, (oIffffb),	bkpt,	t_hlt),
+ TCE("ldraex",	1900e9f, e8d00fef, 2, (RRnpc, RRnpcb),	rd_rn,	rd_rn),
+ TCE("ldraexd",	1b00e9f, e8d000ff, 3, (RRnpc, oRRnpc, RRnpcb),
+							ldrexd, t_ldrexd),
+ TCE("ldraexb",	1d00e9f, e8d00fcf, 2, (RRnpc,RRnpcb),	rd_rn,  rd_rn),
+ TCE("ldraexh",	1f00e9f, e8d00fdf, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
+ TCE("strlex",	1800e90, e8c00fe0, 3, (RRnpc, RRnpc, RRnpcb),
+							strlex,  t_strlex),
+ TCE("strlexd",	1a00e90, e8c000f0, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb),
+							strexd, t_strexd),
+ TCE("strlexb",	1c00e90, e8c00fc0, 3, (RRnpc, RRnpc, RRnpcb),
+							strlex, t_strlex),
+ TCE("strlexh",	1e00e90, e8c00fd0, 3, (RRnpc, RRnpc, RRnpcb),
+							strlex, t_strlex),
+ TCE("ldra",	1900c9f, e8d00faf, 2, (RRnpc, RRnpcb),	rd_rn,	rd_rn),
+ TCE("ldrab",	1d00c9f, e8d00f8f, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
+ TCE("ldrah",	1f00c9f, e8d00f9f, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
+ TCE("strl",	180fc90, e8c00faf, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
+ TCE("strlb",	1c0fc90, e8c00f8f, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
+ TCE("strlh",	1e0fc90, e8c00f9f, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
 
  /* ARMv8 T32 only.  */
 #undef ARM_VARIANT

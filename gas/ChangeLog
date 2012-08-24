@@ -1,5 +1,12 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (do_rm_rn): New function.
+	(do_strlex): Likewise.
+	(do_t_strlex): Likewise.
+	(insns): Add support for LDRA/STRL instructions.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (do_t_bkpt_hlt1): New function.
 	(do_t_hlt): New function.
 	(do_t_bkpt): Use do_t_bkpt_hlt1.
