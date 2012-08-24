@@ -8528,6 +8528,10 @@ do_usat16 (void)
 static void
 do_setend (void)
 {
+  if (warn_on_deprecated
+      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
+      as_warn (_("setend use is deprecated for ARMv8"));
+
   if (inst.operands[0].imm)
     inst.instruction |= 0x200;
 }
@@ -11769,6 +11773,10 @@ do_t_rsb (void)
 static void
 do_t_setend (void)
 {
+  if (warn_on_deprecated
+      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8))
+      as_warn (_("setend use is deprecated for ARMv8"));
+
   set_it_insn_type (OUTSIDE_IT_INSN);
   if (inst.operands[0].imm)
     inst.instruction |= 0x8;

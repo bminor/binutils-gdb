@@ -12,3 +12,9 @@
 	mcr p15, 0, r2, c7, c10, 5
 	mrc p14, 6, r1, c0, c0, 0
 	mrc p14, 6, r0, c1, c0, 0
+
+	// deprecated SETEND
+	setend be
+
+	.thumb
+	setend le

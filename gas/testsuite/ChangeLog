@@ -1,5 +1,10 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* gas/arm/armv8-a-bad.l: Update
+	* gas/arm/armv8-a-bad.s: Likewise.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* gas/arm/armv8-a-it-bad.d: New testcase.
 	* gas/arm/armv8-a-it-bad.l: Likewise.
 	* gas/arm/armv8-a-it-bad.s: Likewise.

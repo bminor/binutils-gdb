@@ -5,3 +5,5 @@
 .*:12: Warning: This coprocessor register access is deprecated in ARMv8
 .*:13: Warning: This coprocessor register access is deprecated in ARMv8
 .*:14: Warning: This coprocessor register access is deprecated in ARMv8
+.*:17: Warning: setend use is deprecated for ARMv8
+.*:20: Warning: setend use is deprecated for ARMv8
