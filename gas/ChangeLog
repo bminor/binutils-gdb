@@ -1,5 +1,17 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* config/tc-arm.c (NEON_ENC_TAB): Add aes entry.
+	(neon_type_mask): Add N_UNT.
+	(neon_check_type): Don't always decay typed to untyped sizes.
+	(do_crypto_2op_1): New function.
+	(do_aese): Likewise.
+	(do_aesd): Likewise.
+	(do_aesmc.8): Likewise.
+	(do_aesimc.8): Likewise.
+	(insns): Add AES instructions.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* config/tc-arm.c (el_type_type_check): Add handling for 16-bit
 	floating point types.
 	(do_neon_cvttb_2): New function.

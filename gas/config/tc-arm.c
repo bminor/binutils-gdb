@@ -12350,7 +12350,8 @@ struct neon_tab_entry
   X(vminnm,	0xe800a40, 0x3200f10, N_INV),		\
   X(vcvta,	0xebc0a40, 0x3bb0000, N_INV),		\
   X(vrintr,	0xeb60a40, 0x3ba0400, N_INV),		\
-  X(vrinta,	0xeb80a40, 0x3ba0400, N_INV)
+  X(vrinta,	0xeb80a40, 0x3ba0400, N_INV),		\
+  X(aes,	0x3b00300, N_INV,     N_INV)
 
 enum neon_opc
 {
@@ -12572,6 +12573,7 @@ enum neon_type_mask
   N_KEY  = 0x1000000, /* Key element (main type specifier).  */
   N_EQK  = 0x2000000, /* Given operand has the same type & size as the key.  */
   N_VFP  = 0x4000000, /* VFP mode: operand size must match register width.  */
+  N_UNT  = 0x8000000, /* Must be explicitly untyped.  */
   N_DBL  = 0x0000001, /* If N_EQK, this operand is twice the size.  */
   N_HLF  = 0x0000002, /* If N_EQK, this operand is half the size.  */
   N_SGN  = 0x0000004, /* If N_EQK, this operand is forced to be signed.  */
@@ -12999,10 +13001,11 @@ neon_check_type (unsigned els, enum neon_shape ns, ...)
           /* If only untyped args are allowed, decay any more specific types to
 	     them. Some instructions only care about signs for some element
 	     sizes, so handle that properly.  */
-          if ((g_size == 8 && (types_allowed & N_8) != 0)
-	      || (g_size == 16 && (types_allowed & N_16) != 0)
-	      || (g_size == 32 && (types_allowed & N_32) != 0)
-	      || (g_size == 64 && (types_allowed & N_64) != 0))
+          if (((types_allowed & N_UNT) == 0)
+	      && ((g_size == 8 && (types_allowed & N_8) != 0)
+		  || (g_size == 16 && (types_allowed & N_16) != 0)
+		  || (g_size == 32 && (types_allowed & N_32) != 0)
+		  || (g_size == 64 && (types_allowed & N_64) != 0)))
 	    g_type = NT_untyped;
 
           if (pass == 0)
@@ -16155,6 +16158,57 @@ do_vrintm (void)
   do_vrint_1 (neon_cvt_mode_m);
 }
 
+/* Crypto v1 instructions.  */
+static void
+do_crypto_2op_1 (unsigned elttype, int op)
+{
+  set_it_insn_type (OUTSIDE_IT_INSN);
+
+  if (neon_check_type (2, NS_QQ, N_EQK | N_UNT, elttype | N_UNT | N_KEY).type
+      == NT_invtype)
+    return;
+
+  inst.error = NULL;
+
+  NEON_ENCODE (INTEGER, inst);
+  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+  inst.instruction |= LOW4 (inst.operands[1].reg);
+  inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+  if (op != -1)
+    inst.instruction |= op << 6;
+
+  if (thumb_mode)
+    inst.instruction |= 0xfc000000;
+  else
+    inst.instruction |= 0xf0000000;
+}
+
+static void
+do_aese (void)
+{
+  do_crypto_2op_1 (N_8, 0);
+}
+
+static void
+do_aesd (void)
+{
+  do_crypto_2op_1 (N_8, 1);
+}
+
+static void
+do_aesmc (void)
+{
+  do_crypto_2op_1 (N_8, 2);
+}
+
+static void
+do_aesimc (void)
+{
+  do_crypto_2op_1 (N_8, 3);
+}
+
+
 
 /* Overall per-instruction processing.	*/
 
@@ -18381,6 +18435,18 @@ static const struct asm_opcode insns[] =
   nUF(vrintn, _vrinta, 2, (RNSDQ, oRNSDQ),		vrintn),
   nUF(vrintp, _vrinta, 2, (RNSDQ, oRNSDQ),		vrintp),
   nUF(vrintm, _vrinta, 2, (RNSDQ, oRNSDQ),		vrintm),
+
+  /* Crypto v1 extensions.  */
+#undef  ARM_VARIANT
+#define ARM_VARIANT & fpu_crypto_ext_armv8
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & fpu_crypto_ext_armv8
+
+  nUF(aese, _aes, 2, (RNQ, RNQ), aese),
+  nUF(aesd, _aes, 2, (RNQ, RNQ), aesd),
+  nUF(aesmc, _aes, 2, (RNQ, RNQ), aesmc),
+  nUF(aesimc, _aes, 2, (RNQ, RNQ), aesimc),
+
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
