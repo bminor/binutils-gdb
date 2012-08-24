@@ -1,3 +1,7 @@
+2012-08-24  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (skip_unwinder_tests): Remove pass.
+
 2012-08-23  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/help.exp: Adjust to "handle" help text change.
