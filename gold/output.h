@@ -3265,6 +3265,28 @@ class Output_section : public Output_data
   requires_postprocessing() const
   { return this->requires_postprocessing_; }
 
+  bool
+  is_unique_segment() const
+  { return this->is_unique_segment_; }
+
+  void
+  set_is_unique_segment()
+  { this->is_unique_segment_ = true; }
+
+  uint64_t extra_segment_flags() const
+  { return this->extra_segment_flags_; }
+
+  void
+  set_extra_segment_flags(uint64_t flags)
+  { this->extra_segment_flags_ = flags; }
+
+  uint64_t segment_alignment() const
+  { return this->segment_alignment_; }
+
+  void
+  set_segment_alignment(uint64_t align)
+  { this->segment_alignment_ = align; }
+  
   // If a section requires postprocessing, return the buffer to use.
   unsigned char*
   postprocessing_buffer() const
@@ -4216,9 +4238,17 @@ class Output_section : public Output_data
   bool has_fixed_layout_ : 1;
   // True if we can add patch space to this section.
   bool is_patch_space_allowed_ : 1;
+  // True if this output section goes into a unique segment.
+  bool is_unique_segment_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;
+  // Additional segment flags, specified via linker plugin, when mapping some
+  // input sections to unique segments.
+  uint64_t extra_segment_flags_; 
+  // Segment alignment specified via linker plugin, when mapping some
+  // input sections to unique segments.
+  uint64_t segment_alignment_;
   // Saved checkpoint.
   Checkpoint_output_section* checkpoint_;
   // Fast lookup maps for merged and relaxed input sections.
@@ -4293,6 +4323,16 @@ class Output_segment
   void
   set_is_large_data_segment()
   { this->is_large_data_segment_ = true; }
+
+  bool
+  is_unique_segment() const
+  { return this->is_unique_segment_; }
+
+  // Mark segment as unique, happens when linker plugins request that
+  // certain input sections be mapped to unique segments.
+  void
+  set_is_unique_segment()
+  { this->is_unique_segment_ = true; }
 
   // Return the maximum alignment of the Output_data.
   uint64_t
@@ -4504,6 +4544,8 @@ class Output_segment
   bool are_addresses_set_ : 1;
   // Whether this segment holds large data sections.
   bool is_large_data_segment_ : 1;
+  // Whether this was marked as a unique segment via a linker plugin.
+  bool is_unique_segment_ : 1;
 };
 
 // This class represents the output file.

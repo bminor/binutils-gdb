@@ -2257,7 +2257,10 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     always_keeps_input_sections_(false),
     has_fixed_layout_(false),
     is_patch_space_allowed_(false),
+    is_unique_segment_(false),
     tls_offset_(0),
+    extra_segment_flags_(0),
+    segment_alignment_(0),
     checkpoint_(NULL),
     lookup_maps_(new Output_section_lookup_maps),
     free_list_(),
@@ -3991,7 +3994,8 @@ Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
     flags_(flags),
     is_max_align_known_(false),
     are_addresses_set_(false),
-    is_large_data_segment_(false)
+    is_large_data_segment_(false),
+    is_unique_segment_(false)
 {
   // The ELF ABI specifies that a PT_TLS segment always has PF_R as
   // the flags.

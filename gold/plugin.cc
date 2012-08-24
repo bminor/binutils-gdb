@@ -115,6 +115,15 @@ update_section_order(const struct ld_plugin_section *section_list,
 static enum ld_plugin_status
 allow_section_ordering();
 
+static enum ld_plugin_status
+allow_unique_segment_for_sections();
+
+static enum ld_plugin_status
+unique_segment_for_sections(const char* segment_name,
+			    uint64_t flags,
+			    uint64_t align,
+			    const struct ld_plugin_section *section_list,
+			    unsigned int num_sections);
 };
 
 #endif // ENABLE_PLUGINS
@@ -159,7 +168,7 @@ Plugin::load()
   sscanf(ver, "%d.%d", &major, &minor);
 
   // Allocate and populate a transfer vector.
-  const int tv_fixed_size = 24;
+  const int tv_fixed_size = 26;
 
   int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv* tv = new ld_plugin_tv[tv_size];
@@ -271,6 +280,15 @@ Plugin::load()
   ++i;
   tv[i].tv_tag = LDPT_ALLOW_SECTION_ORDERING;
   tv[i].tv_u.tv_allow_section_ordering = allow_section_ordering;
+
+  ++i;
+  tv[i].tv_tag = LDPT_ALLOW_UNIQUE_SEGMENT_FOR_SECTIONS;
+  tv[i].tv_u.tv_allow_unique_segment_for_sections
+    = allow_unique_segment_for_sections;
+
+  ++i;
+  tv[i].tv_tag = LDPT_UNIQUE_SEGMENT_FOR_SECTIONS;
+  tv[i].tv_u.tv_unique_segment_for_sections = unique_segment_for_sections;
 
   ++i;
   tv[i].tv_tag = LDPT_NULL;
@@ -1682,6 +1700,64 @@ allow_section_ordering()
   gold_assert(parameters->options().has_plugins());
   Layout* layout = parameters->options().plugins()->layout();
   layout->set_section_ordering_specified();
+  return LDPS_OK;
+}
+
+// Let the linker know that a subset of sections could be mapped
+// to a unique segment.
+
+static enum ld_plugin_status
+allow_unique_segment_for_sections()
+{
+  gold_assert(parameters->options().has_plugins());
+  Layout* layout = parameters->options().plugins()->layout();
+  layout->set_unique_segment_for_sections_specified();
+  return LDPS_OK;
+}
+
+// This function should map the list of sections specified in the
+// SECTION_LIST to a unique segment.  ELF segments do not have names
+// and the NAME is used to identify Output Section which should contain
+// the list of sections.  This Output Section will then be mapped to
+// a unique segment.  FLAGS is used to specify if any additional segment
+// flags need to be set.  For instance, a specific segment flag can be
+// set to identify this segment.  Unsetting segment flags is not possible.
+// ALIGN specifies the alignment of the segment.
+
+static enum ld_plugin_status
+unique_segment_for_sections(const char* segment_name,
+			    uint64_t flags,
+			    uint64_t align,
+			    const struct ld_plugin_section* section_list,
+			    unsigned int num_sections)
+{
+  gold_assert(parameters->options().has_plugins());
+
+  if (num_sections == 0)
+    return LDPS_OK;
+
+  if (section_list == NULL)
+    return LDPS_ERR;
+
+  Layout* layout = parameters->options().plugins()->layout();
+  gold_assert (layout != NULL);
+
+  Layout::Unique_segment_info* s = new Layout::Unique_segment_info;
+  s->name = segment_name;
+  s->flags = flags;
+  s->align = align;
+
+  for (unsigned int i = 0; i < num_sections; ++i)
+    {
+      Object* obj = parameters->options().plugins()->get_elf_object(
+          section_list[i].handle);
+      if (obj == NULL)
+	return LDPS_BAD_HANDLE;
+      unsigned int shndx = section_list[i].shndx;
+      Const_section_id secn_id(obj, shndx);
+      layout->insert_section_segment_map(secn_id, s);
+    }
+
   return LDPS_OK;
 }
 

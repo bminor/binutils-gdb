@@ -1,3 +1,59 @@
+2012-08-24  Sriraman Tallam  <tmsriram@google.com>
+
+	* gold.cc (queue_middle_tasks): Call layout again when unique
+	segments for sections is desired.
+	* layout.cc (Layout::Layout): Initialize new members.
+	(Layout::get_output_section_flags): New function.
+	(Layout::choose_output_section): Call get_output_section_flags.
+	(Layout::layout): Make output section for mapping to a unique segment.
+	(Layout::insert_section_segment_map): New function.
+	(Layout::attach_allocated_section_to_segment): Make unique segment for
+	output sections marked so. 
+	(Layout::segment_precedes): Check for unique segments when sorting.
+	* layout.h (Layout::Unique_segment_info): New struct.
+	(Layout::Section_segment_map): New typedef.
+	(Layout::insert_section_segment_map): New function.
+	(Layout::get_output_section_flags): New function.
+	(Layout::is_unique_segment_for_sections_specified): New function.
+	(Layout::set_unique_segment_for_sections_specified): New function.
+	(Layout::unique_segment_for_sections_specified_): New member.
+	(Layout::section_segment_map_): New member.
+	* object.cc (Sized_relobj_file<size, big_endian>::do_layout):
+	Rename is_gc_pass_one to is_pass_one.
+	Rename is_gc_pass_two to is_pass_two.
+	Rename is_gc_or_icf to is_two_pass.
+	Check for which pass based on whether symbols data is present.
+	Make it two pass when unique segments for sections is desired.
+	* output.cc (Output_section::Output_section): Initialize new
+	members.
+	* output.h (Output_section::is_unique_segment): New function.
+	(Output_section::set_is_unique_segment): New function.
+	(Output_section::is_unique_segment_): New member.
+	(Output_section::extra_segment_flags): New function.
+	(Output_section::set_extra_segment_flags): New function.
+	(Output_section::extra_segment_flags_): New member.
+	(Output_section::segment_alignment): New function.
+	(Output_section::set_segment_alignment): New function.
+	(Output_section::segment_alignment_): New member.
+	(Output_segment::Output_segment): Initialize is_unique_segment_.
+	(Output_segment::is_unique_segment): New function.
+	(Output_segment::set_is_unique_segment): New function.
+	(Output_segment::is_unique_segment_): New member.
+	* plugin.cc (allow_unique_segment_for_sections): New function.
+	(unique_segment_for_sections): New function.
+	(Plugin::load): Add new functions to transfer vector.
+	* Makefile.am (plugin_final_layout.readelf.stdout): Add readelf output.
+	* Makefile.in: Regenerate.
+	* testsuite/plugin_final_layout.sh: Check if unique segment
+	functionality works.
+	* testsuite/plugin_section_order.c (onload): Check if new interfaces
+	are available.
+	(allow_unique_segment_for_sections): New global.
+	(unique_segment_for_sections): New global.
+	(claim_file_hook): Call allow_unique_segment_for_sections.
+	(all_symbols_read_hook): Call unique_segment_for_sections.
+	
+
 2012-08-22  Cary Coutant  <ccoutant@google.com>
 
 	* layout.cc (Layout::include_section): Don't assert on GROUP

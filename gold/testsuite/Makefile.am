@@ -1529,13 +1529,15 @@ unused.c:
 	@cp /dev/null $@
 
 check_SCRIPTS += plugin_final_layout.sh
-check_DATA += plugin_final_layout.stdout
+check_DATA += plugin_final_layout.stdout plugin_final_layout_readelf.stdout
 plugin_final_layout.o: plugin_final_layout.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections  -fdata-sections -g -o $@ $<
 plugin_final_layout: plugin_final_layout.o plugin_section_order.so gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_section_order.so" plugin_final_layout.o
 plugin_final_layout.stdout: plugin_final_layout
 	$(TEST_NM) -n plugin_final_layout > plugin_final_layout.stdout
+plugin_final_layout_readelf.stdout: plugin_final_layout
+	$(TEST_READELF) -Wl plugin_final_layout > plugin_final_layout_readelf.stdout
 
 plugin_section_order.so: plugin_section_order.o
 	$(LINK) -Bgcctestdir/ -shared plugin_section_order.o
