@@ -1,3 +1,17 @@
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* config/tc-arm.c (NEON_ENC_TAB): Add vcvta entry.
+	(neon_cvt_mode): New enumeration.
+	(do_vfp_nsyn_cvt_fpv8): New function.
+	(do_neon_cvt_1): Add support for new conversions.
+	(do_neon_cvtr): Use neon_cvt_mode enumerator.
+	(do_neon_cvt): Likewise.
+	(do_neon_cvta): New function.
+	(do_neon_cvtn): Likewise.
+	(do_neon_cvtp): Likewise.
+	(do_neon_cvtm): Likewise.
+	(insns): Add new VCVT instructions.
+
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm>
 
 	* config/tc-arm.c (CVT_FLAVOUR_VAR): New define.

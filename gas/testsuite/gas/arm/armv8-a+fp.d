@@ -28,6 +28,14 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> fec00be0 	vminnm.f64	d16, d16, d16
 0[0-9a-f]+ <[^>]+> fe8ffb4f 	vminnm.f64	d15, d15, d15
 0[0-9a-f]+ <[^>]+> fecffbef 	vminnm.f64	d31, d31, d31
+0[0-9a-f]+ <[^>]+> febc0ac0 	vcvta.s32.f32	s0, s0
+0[0-9a-f]+ <[^>]+> fefd0ae0 	vcvtn.s32.f32	s1, s1
+0[0-9a-f]+ <[^>]+> febefa4f 	vcvtp.u32.f32	s30, s30
+0[0-9a-f]+ <[^>]+> fefffa6f 	vcvtm.u32.f32	s31, s31
+0[0-9a-f]+ <[^>]+> febc0b40 	vcvta.u32.f64	s0, d0
+0[0-9a-f]+ <[^>]+> fefd0b60 	vcvtn.u32.f64	s1, d16
+0[0-9a-f]+ <[^>]+> febefb4f 	vcvtp.u32.f64	s30, d15
+0[0-9a-f]+ <[^>]+> fefffb6f 	vcvtm.u32.f64	s31, d31
 0[0-9a-f]+ <[^>]+> fe00 0a00 	vseleq.f32	s0, s0, s0
 0[0-9a-f]+ <[^>]+> fe50 0aa0 	vselvs.f32	s1, s1, s1
 0[0-9a-f]+ <[^>]+> fe2f fa0f 	vselge.f32	s30, s30, s30
@@ -52,3 +60,11 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> fec0 0be0 	vminnm.f64	d16, d16, d16
 0[0-9a-f]+ <[^>]+> fe8f fb4f 	vminnm.f64	d15, d15, d15
 0[0-9a-f]+ <[^>]+> fecf fbef 	vminnm.f64	d31, d31, d31
+0[0-9a-f]+ <[^>]+> febc 0ac0 	vcvta.s32.f32	s0, s0
+0[0-9a-f]+ <[^>]+> fefd 0ae0 	vcvtn.s32.f32	s1, s1
+0[0-9a-f]+ <[^>]+> febe fa4f 	vcvtp.u32.f32	s30, s30
+0[0-9a-f]+ <[^>]+> feff fa6f 	vcvtm.u32.f32	s31, s31
+0[0-9a-f]+ <[^>]+> febc 0b40 	vcvta.u32.f64	s0, d0
+0[0-9a-f]+ <[^>]+> fefd 0b60 	vcvtn.u32.f64	s1, d16
+0[0-9a-f]+ <[^>]+> febe fb4f 	vcvtp.u32.f64	s30, d15
+0[0-9a-f]+ <[^>]+> feff fb6f 	vcvtm.u32.f64	s31, d31

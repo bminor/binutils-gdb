@@ -1,5 +1,11 @@
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* arm-dis.c (coprocessor_opcodes): Add support for new VCVT
+	variants.
+	(neon_opcodes): Likewise.
+
+2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* arm-dis.c (coprocessor_opcodes): Add VMAXNM/VMINNM.
 	(neon_opcodes): Likewise.
 

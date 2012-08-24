@@ -494,6 +494,8 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_VFP_EXT_ARMV8, 0xfe800b00, 0xffb00f40, "vmaxnm%u.f64\t%z1, %z2, %z0"},
   {FPU_VFP_EXT_ARMV8, 0xfe800a40, 0xffb00f40, "vminnm%u.f32\t%y1, %y2, %y0"},
   {FPU_VFP_EXT_ARMV8, 0xfe800b40, 0xffb00f40, "vminnm%u.f64\t%z1, %z2, %z0"},
+  {FPU_VFP_EXT_ARMV8, 0xfebc0a40, 0xffbc0f50, "vcvt%16-17?mpna%u.%7?su32.f32\t%y1, %y0"},
+  {FPU_VFP_EXT_ARMV8, 0xfebc0b40, 0xffbc0f50, "vcvt%16-17?mpna%u.%7?su32.f64\t%y1, %z0"},
 
   /* Generic coprocessor instructions.  */
   { 0, SENTINEL_GENERIC_START, 0, "" },
@@ -576,6 +578,7 @@ static const struct opcode32 neon_opcodes[] =
   {FPU_NEON_EXT_FMA, 0xf2200c10, 0xffa00f10, "vfms%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
 
   /* Two registers, miscellaneous.  */
+  {FPU_NEON_EXT_ARMV8, 0xf3bb0000, 0xffbf0c10, "vcvt%8-9?mpna%u.%7?us32.f32\t%12-15,22R, %0-3,5R"},
   {FPU_NEON_EXT_V1, 0xf2880a10, 0xfebf0fd0, "vmovl%c.%24?us8\t%12-15,22Q, %0-3,5D"},
   {FPU_NEON_EXT_V1, 0xf2900a10, 0xfebf0fd0, "vmovl%c.%24?us16\t%12-15,22Q, %0-3,5D"},
   {FPU_NEON_EXT_V1, 0xf2a00a10, 0xfebf0fd0, "vmovl%c.%24?us32\t%12-15,22Q, %0-3,5D"},
@@ -2917,7 +2920,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			  func (stream, "{d%d-d%d}", regno, regno + num);
 		      }
 		      break;
-      
+
 
 		    case '0': case '1': case '2': case '3': case '4':
 		    case '5': case '6': case '7': case '8': case '9':

@@ -28,6 +28,14 @@
 	vminnm.f64	d16, d16, d16
 	vminnm.f64	d15, d15, d15
 	vminnm.f64	d31, d31, d31
+	vcvta.s32.f32	s0, s0
+	vcvtn.s32.f32	s1, s1
+	vcvtp.u32.f32	s30, s30
+	vcvtm.u32.f32	s31, s31
+	vcvta.s32.f64	s0, d0
+	vcvtn.s32.f64	s1, d16
+	vcvtp.u32.f64	s30, d15
+	vcvtm.u32.f64	s31, d31
 
 	.thumb
 	vseleq.f32	s0, s0, s0
@@ -54,3 +62,11 @@
 	vminnm.f64	d16, d16, d16
 	vminnm.f64	d15, d15, d15
 	vminnm.f64	d31, d31, d31
+	vcvta.s32.f32	s0, s0
+	vcvtn.s32.f32	s1, s1
+	vcvtp.u32.f32	s30, s30
+	vcvtm.u32.f32	s31, s31
+	vcvta.s32.f64	s0, d0
+	vcvtn.s32.f64	s1, d16
+	vcvtp.u32.f64	s30, d15
+	vcvtm.u32.f64	s31, d31

@@ -19,6 +19,14 @@
 	vminnm.f32	q8, q8, q8
 	vminnm.f32	q7, q7, q7
 	vminnm.f32	q15, q15, q15
+	vcvta.s32.f32	d0, d0
+	vcvtn.s32.f32	d16, d16
+	vcvtp.u32.f32	d15, d15
+	vcvtm.u32.f32	d31, d31
+	vcvta.s32.f32	q0, q0
+	vcvtn.s32.f32	q8, q8
+	vcvtp.u32.f32	q7, q7
+	vcvtm.u32.f32	q15, q15
 
 	.thumb
 	vmaxnm.f32	d0, d0, d0
@@ -37,3 +45,11 @@
 	vminnm.f32	q8, q8, q8
 	vminnm.f32	q7, q7, q7
 	vminnm.f32	q15, q15, q15
+	vcvta.s32.f32	d0, d0
+	vcvtn.s32.f32	d16, d16
+	vcvtp.u32.f32	d15, d15
+	vcvtm.u32.f32	d31, d31
+	vcvta.s32.f32	q0, q0
+	vcvtn.s32.f32	q8, q8
+	vcvtp.u32.f32	q7, q7
+	vcvtm.u32.f32	q15, q15

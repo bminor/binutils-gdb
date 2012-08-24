@@ -20,6 +20,14 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f3600ff0 	vminnm.f32	q8, q8, q8
 0[0-9a-f]+ <[^>]+> f32eef5e 	vminnm.f32	q7, q7, q7
 0[0-9a-f]+ <[^>]+> f36eeffe 	vminnm.f32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> f3bb0000 	vcvta.s32.f32	d0, d0
+0[0-9a-f]+ <[^>]+> f3fb0120 	vcvtn.s32.f32	d16, d16
+0[0-9a-f]+ <[^>]+> f3bbf28f 	vcvtp.u32.f32	d15, d15
+0[0-9a-f]+ <[^>]+> f3fbf3af 	vcvtm.u32.f32	d31, d31
+0[0-9a-f]+ <[^>]+> f3bb0040 	vcvta.s32.f32	q0, q0
+0[0-9a-f]+ <[^>]+> f3fb0160 	vcvtn.s32.f32	q8, q8
+0[0-9a-f]+ <[^>]+> f3bbe2ce 	vcvtp.u32.f32	q7, q7
+0[0-9a-f]+ <[^>]+> f3fbe3ee 	vcvtm.u32.f32	q15, q15
 0[0-9a-f]+ <[^>]+> ff00 0f10 	vmaxnm.f32	d0, d0, d0
 0[0-9a-f]+ <[^>]+> ff40 0fb0 	vmaxnm.f32	d16, d16, d16
 0[0-9a-f]+ <[^>]+> ff0f ff1f 	vmaxnm.f32	d15, d15, d15
@@ -36,3 +44,11 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> ff60 0ff0 	vminnm.f32	q8, q8, q8
 0[0-9a-f]+ <[^>]+> ff2e ef5e 	vminnm.f32	q7, q7, q7
 0[0-9a-f]+ <[^>]+> ff6e effe 	vminnm.f32	q15, q15, q15
+0[0-9a-f]+ <[^>]+> ffbb 0000 	vcvta.s32.f32	d0, d0
+0[0-9a-f]+ <[^>]+> fffb 0120 	vcvtn.s32.f32	d16, d16
+0[0-9a-f]+ <[^>]+> ffbb f28f 	vcvtp.u32.f32	d15, d15
+0[0-9a-f]+ <[^>]+> fffb f3af 	vcvtm.u32.f32	d31, d31
+0[0-9a-f]+ <[^>]+> ffbb 0040 	vcvta.s32.f32	q0, q0
+0[0-9a-f]+ <[^>]+> fffb 0160 	vcvtn.s32.f32	q8, q8
+0[0-9a-f]+ <[^>]+> ffbb e2ce 	vcvtp.u32.f32	q7, q7
+0[0-9a-f]+ <[^>]+> fffb e3ee 	vcvtm.u32.f32	q15, q15

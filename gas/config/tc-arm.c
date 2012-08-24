@@ -12347,7 +12347,8 @@ struct neon_tab_entry
   X(vselge,	0xe200a00, N_INV,     N_INV),		\
   X(vselgt,	0xe300a00, N_INV,     N_INV),		\
   X(vmaxnm,	0xe800a00, 0x3000f10, N_INV),		\
-  X(vminnm,	0xe800a40, 0x3200f10, N_INV)
+  X(vminnm,	0xe800a40, 0x3200f10, N_INV),		\
+  X(vcvta,	0xebc0a40, 0x3bb0000, N_INV)
 
 enum neon_opc
 {
@@ -14574,6 +14575,16 @@ get_neon_cvt_flavour (enum neon_shape rs)
 #undef CVT_VAR
 }
 
+enum neon_cvt_mode
+{
+  neon_cvt_mode_a,
+  neon_cvt_mode_n,
+  neon_cvt_mode_p,
+  neon_cvt_mode_m,
+  neon_cvt_mode_z,
+  neon_cvt_mode_x
+};
+
 /* Neon-syntax VFP conversions.  */
 
 static void
@@ -14638,14 +14649,65 @@ do_vfp_nsyn_cvtz (void)
 }
 
 static void
-do_neon_cvt_1 (bfd_boolean round_to_zero ATTRIBUTE_UNUSED)
+do_vfp_nsyn_cvt_fpv8 (enum neon_cvt_flavour flavour, 
+		      enum neon_cvt_mode mode)
+{
+  int sz, op;
+  int rm;
+
+  set_it_insn_type (OUTSIDE_IT_INSN);
+
+  switch (flavour)
+    {
+    case neon_cvt_flavour_s32_f64:
+      sz = 1;
+      op = 0;
+      break;
+    case neon_cvt_flavour_s32_f32:
+      sz = 0;
+      op = 1;
+      break;
+    case neon_cvt_flavour_u32_f64:
+      sz = 1;
+      op = 0;
+      break;
+    case neon_cvt_flavour_u32_f32:
+      sz = 0;
+      op = 0;
+      break;
+    default:
+      first_error (_("invalid instruction shape"));
+      return;
+    }
+
+  switch (mode)
+    {
+    case neon_cvt_mode_a: rm = 0; break;
+    case neon_cvt_mode_n: rm = 1; break;
+    case neon_cvt_mode_p: rm = 2; break;
+    case neon_cvt_mode_m: rm = 3; break;
+    default: first_error (_("invalid rounding mode")); return;
+    }
+
+  NEON_ENCODE (FPV8, inst);
+  encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Sd);
+  encode_arm_vfp_reg (inst.operands[1].reg, sz == 1 ? VFP_REG_Dm : VFP_REG_Sm);
+  inst.instruction |= sz << 8;
+  inst.instruction |= op << 7;
+  inst.instruction |= rm << 16;
+  inst.instruction |= 0xf0000000;
+  inst.is_neon = TRUE;
+}
+
+static void
+do_neon_cvt_1 (enum neon_cvt_mode mode)
 {
   enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_FFI, NS_DD, NS_QQ,
     NS_FD, NS_DF, NS_FF, NS_QD, NS_DQ, NS_NULL);
   enum neon_cvt_flavour flavour = get_neon_cvt_flavour (rs);
 
   /* PR11109: Handle round-to-zero for VCVT conversions.  */
-  if (round_to_zero
+  if (mode == neon_cvt_mode_z
       && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_arch_vfp_v2)
       && (flavour == neon_cvt_flavour_s32_f32 
 	  || flavour == neon_cvt_flavour_u32_f32 
@@ -14660,7 +14722,11 @@ do_neon_cvt_1 (bfd_boolean round_to_zero ATTRIBUTE_UNUSED)
   /* VFP rather than Neon conversions.  */
   if (flavour >= neon_cvt_flavour_first_fp)
     {
-      do_vfp_nsyn_cvt (rs, flavour);
+      if (mode == neon_cvt_mode_x || mode == neon_cvt_mode_z)
+	do_vfp_nsyn_cvt (rs, flavour);
+      else
+	do_vfp_nsyn_cvt_fpv8 (flavour, mode);
+
       return;
     }
 
@@ -14697,28 +14763,51 @@ do_neon_cvt_1 (bfd_boolean round_to_zero ATTRIBUTE_UNUSED)
 
     case NS_DD:
     case NS_QQ:
+      if (mode != neon_cvt_mode_x && mode != neon_cvt_mode_z)
+	{
+	  NEON_ENCODE (FLOAT, inst);
+	  set_it_insn_type (OUTSIDE_IT_INSN);
+
+	  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH8) == FAIL)
+	    return;
+
+	  inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+	  inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+	  inst.instruction |= LOW4 (inst.operands[1].reg);
+	  inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+	  inst.instruction |= neon_quad (rs) << 6;
+	  inst.instruction |= (flavour == neon_cvt_flavour_u32_f32) << 7;
+	  inst.instruction |= mode << 8;
+	  if (thumb_mode)
+	    inst.instruction |= 0xfc000000;
+	  else
+	    inst.instruction |= 0xf0000000;
+	}
+      else
+	{
     int_encode:
-      {
-        unsigned enctab[] = { 0x100, 0x180, 0x0, 0x080 };
+	  {
+	    unsigned enctab[] = { 0x100, 0x180, 0x0, 0x080 };
 
-        NEON_ENCODE (INTEGER, inst);
+	    NEON_ENCODE (INTEGER, inst);
 
-        if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
-          return;
+	    if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+	      return;
 
-        if (flavour != neon_cvt_flavour_invalid)
-	   inst.instruction |= enctab[flavour];
+	    if (flavour != neon_cvt_flavour_invalid)
+	      inst.instruction |= enctab[flavour];
 
-        inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
-        inst.instruction |= HI1 (inst.operands[0].reg) << 22;
-        inst.instruction |= LOW4 (inst.operands[1].reg);
-        inst.instruction |= HI1 (inst.operands[1].reg) << 5;
-        inst.instruction |= neon_quad (rs) << 6;
-        inst.instruction |= 2 << 18;
+	    inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
+	    inst.instruction |= HI1 (inst.operands[0].reg) << 22;
+	    inst.instruction |= LOW4 (inst.operands[1].reg);
+	    inst.instruction |= HI1 (inst.operands[1].reg) << 5;
+	    inst.instruction |= neon_quad (rs) << 6;
+	    inst.instruction |= 2 << 18;
 
-        neon_dp_fixup (&inst);
-      }
-    break;
+	    neon_dp_fixup (&inst);
+	  }
+	}
+      break;
 
     /* Half-precision conversions for Advanced SIMD -- neon.  */
     case NS_QD:
@@ -14752,20 +14841,47 @@ do_neon_cvt_1 (bfd_boolean round_to_zero ATTRIBUTE_UNUSED)
 
     default:
       /* Some VFP conversions go here (s32 <-> f32, u32 <-> f32).  */
-      do_vfp_nsyn_cvt (rs, flavour);
+      if (mode == neon_cvt_mode_x || mode == neon_cvt_mode_z)
+	do_vfp_nsyn_cvt (rs, flavour);
+      else
+	do_vfp_nsyn_cvt_fpv8 (flavour, mode);
     }
 }
 
 static void
 do_neon_cvtr (void)
 {
-  do_neon_cvt_1 (FALSE);
+  do_neon_cvt_1 (neon_cvt_mode_x);
 }
 
 static void
 do_neon_cvt (void)
 {
-  do_neon_cvt_1 (TRUE);
+  do_neon_cvt_1 (neon_cvt_mode_z);
+}
+
+static void
+do_neon_cvta (void)
+{
+  do_neon_cvt_1 (neon_cvt_mode_a);
+}
+
+static void
+do_neon_cvtn (void)
+{
+  do_neon_cvt_1 (neon_cvt_mode_n);
+}
+
+static void
+do_neon_cvtp (void)
+{
+  do_neon_cvt_1 (neon_cvt_mode_p);
+}
+
+static void
+do_neon_cvtm (void)
+{
+  do_neon_cvt_1 (neon_cvt_mode_m);
 }
 
 static void
@@ -18100,6 +18216,10 @@ static const struct asm_opcode insns[] =
   nUF(vselgt, _vselgt, 3, (RVSD, RVSD, RVSD),		vsel),
   nUF(vmaxnm, _vmaxnm, 3, (RNSDQ, oRNSDQ, RNSDQ),	vmaxnm),
   nUF(vminnm, _vminnm, 3, (RNSDQ, oRNSDQ, RNSDQ),	vmaxnm),
+  nUF(vcvta,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvta),
+  nUF(vcvtn,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvtn),
+  nUF(vcvtp,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvtp),
+  nUF(vcvtm,  _vcvta,  2, (RNSDQ, oRNSDQ),		neon_cvtm),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
