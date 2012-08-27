@@ -1,3 +1,8 @@
+2012-08-27  Wei-cheng Wang  <cole945@gmail.com>
+
+	* memattr.c (create_mem_region): Fix memory region overlapping
+	checking.
+
 2012-08-24  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* h8300-tdep.c (h8300_push_dummy_call): Replace unsafe alloca

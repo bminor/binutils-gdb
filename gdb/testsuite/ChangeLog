@@ -1,3 +1,11 @@
+2012-08-27  Wei-cheng Wang  <cole945@gmail.com>
+	    Yao Qi <yao@codesourcery.com>
+	    Pedro Alves <palves@redhat.com>
+
+	* gdb.base/memattr.exp (delete_memory, region_pass, region_fail):
+	New procedures.
+	(top level): Add overlap checking tests.
+
 2012-08-24  Tom Tromey  <tromey@redhat.com>
 
 	* lib/gdb.exp (skip_unwinder_tests): Don't leave 'ok' set if

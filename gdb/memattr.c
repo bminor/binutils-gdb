@@ -207,7 +207,7 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
 
       if ((lo >= n->lo && (lo < n->hi || n->hi == 0)) 
 	  || (hi > n->lo && (hi <= n->hi || n->hi == 0))
-	  || (lo <= n->lo && (hi >= n->hi || hi == 0)))
+	  || (lo <= n->lo && ((hi >= n->hi && n->hi != 0) || hi == 0)))
 	{
 	  printf_unfiltered (_("overlapping memory region\n"));
 	  return;
