@@ -1,3 +1,9 @@
+2010-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR tui/14486
+	* tui/tui-source.c (tui_source_is_displayed): Check if TUI_SRC_WIN
+	is not NULL before referencing it.
+
 2012-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (parse_breakpoint_sals) <(*address) == NULL>: New

@@ -334,7 +334,8 @@ tui_show_symtab_source (struct gdbarch *gdbarch, struct symtab *s,
 int
 tui_source_is_displayed (char *fname)
 {
-  return (TUI_SRC_WIN->generic.content_in_use 
+  return (TUI_SRC_WIN != NULL
+	  && TUI_SRC_WIN->generic.content_in_use 
 	  && (filename_cmp (((struct tui_win_element *)
 			     (tui_locator_win_info_ptr ())->
 			     content[0])->which_element.locator.file_name,
