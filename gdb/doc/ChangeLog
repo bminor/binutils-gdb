@@ -1,3 +1,7 @@
+2012-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (objfile-gdb.py file): New paragraph for .exe stripping.
+
 2012-08-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbint.texinfo (Debugging GDB): In section

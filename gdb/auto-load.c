@@ -693,27 +693,25 @@ clear_section_scripts (void)
     }
 }
 
-/* Look for the auto-load script in LANGUAGE associated with OBJFILE and load
-   it.  */
+/* Look for the auto-load script in LANGUAGE associated with OBJFILE where
+   OBJFILE's gdb_realpath is REALNAME and load it.  Return 1 if we found any
+   matching script, return 0 otherwise.  */
 
-void
-auto_load_objfile_script (struct objfile *objfile,
-			  const struct script_language *language)
+static int
+auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
+			    const struct script_language *language)
 {
-  char *realname;
   char *filename, *debugfile;
-  int len;
+  int len, retval;
   FILE *input;
   struct cleanup *cleanups;
 
-  realname = gdb_realpath (objfile->name);
   len = strlen (realname);
   filename = xmalloc (len + strlen (language->suffix) + 1);
   memcpy (filename, realname, len);
   strcpy (filename + len, language->suffix);
 
   cleanups = make_cleanup (xfree, filename);
-  make_cleanup (xfree, realname);
 
   input = fopen (filename, "r");
   debugfile = filename;
@@ -768,6 +766,44 @@ auto_load_objfile_script (struct objfile *objfile,
 	 and these scripts are required to be idempotent under multiple
 	 loads anyway.  */
       language->source_script_for_objfile (objfile, input, debugfile);
+
+      retval = 1;
+    }
+  else
+    retval = 0;
+
+  do_cleanups (cleanups);
+  return retval;
+}
+
+/* Look for the auto-load script in LANGUAGE associated with OBJFILE and load
+   it.  */
+
+void
+auto_load_objfile_script (struct objfile *objfile,
+			  const struct script_language *language)
+{
+  char *realname = gdb_realpath (objfile->name);
+  struct cleanup *cleanups = make_cleanup (xfree, realname);
+
+  if (!auto_load_objfile_script_1 (objfile, realname, language))
+    {
+      /* For Windows/DOS .exe executables, strip the .exe suffix, so that
+	 FOO-gdb.gdb could be used for FOO.exe, and try again.  */
+
+      size_t len = strlen (realname);
+      const size_t lexe = sizeof (".exe") - 1;
+
+      if (len > lexe && strcasecmp (realname + len - lexe, ".exe") == 0)
+	{
+	  len -= lexe;
+	  realname[len] = '\0';
+	  if (debug_auto_load)
+	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Stripped .exe suffix, "
+					      "retrying with \"%s\".\n"),
+				realname);
+	  auto_load_objfile_script_1 (objfile, realname, language);
+	}
     }
 
   do_cleanups (cleanups);

@@ -25785,6 +25785,13 @@ If this file does not exist, then @value{GDBN} will look for
 Note that loading of this script file also requires accordingly configured
 @code{auto-load safe-path} (@pxref{Auto-loading safe path}).
 
+For object files using @file{.exe} suffix @value{GDBN} tries to load first the
+scripts normally according to its @file{.exe} filename.  But if no scripts are
+found @value{GDBN} also tries script filenames matching the object file without
+its @file{.exe} suffix.  This @file{.exe} stripping is case insensitive and it
+is attempted on any platform.  This makes the script filenames compatible
+between Unix and MS-Windows hosts.
+
 @table @code
 @anchor{set auto-load scripts-directory}
 @kindex set auto-load scripts-directory
