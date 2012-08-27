@@ -1,5 +1,5 @@
 # Copyright 2012 Free Software Foundation, Inc.
-#
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
@@ -13,23 +13,22 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-load_lib "ada.exp"
+# [RFA] DWARF frame unwinder executes one too many rows
+# http://sourceware.org/ml/gdb-patches/2012-07/msg00650.html
 
-standard_ada_testfile foo
-
-if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
-  return -1
+if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_ilp32_target] } {
+    return 0
 }
 
-clean_restart ${testfile}
+set testfile "i386-cfi-notcurrent"
+set srcfile ${testfile}.S
 
-# This test won't work properly if system debuginfo is installed.
-gdb_test_no_output "set debug-file-directory"
+if [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {nodebug}] {
+    return -1
+}
 
-runto "break_me"
+if ![runto f] {
+    return -1
+}
 
-# Switch to task 2, and verify that GDB is able to unwind all the way
-# to foo.T.
-gdb_test "task 2" \
-         [join {"\\\[Switching to task 2\\\].*" \
-                ".*foo\\.t \\(.*\\).*foo\\.adb:.*"} ""]
+gdb_test "backtrace" "#0 \[^\r\n\]* f \[^\r\n\]*\r\n#1 \[^\r\n\]* g \[^\r\n\]*\r\n#2 \[^\r\n\]* main \[^\r\n\]*"
