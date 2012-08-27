@@ -1,3 +1,10 @@
+2012-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dwarf2_locate_sections): Move variable aflag here.
+	Move the SEC_HAS_CONTENTS check here - for any NAMES use.
+	(dwarf2_locate_sections) <eh_frame>: Move the variable and check from
+	here.
+
 2012-08-27  Wei-cheng Wang  <cole945@gmail.com>
 
 	* memattr.c (create_mem_region): Fix memory region overlapping
