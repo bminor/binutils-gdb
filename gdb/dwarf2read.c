@@ -1691,13 +1691,17 @@ static void
 dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
 {
   const struct dwarf2_debug_sections *names;
+  flagword aflag = bfd_get_section_flags (abfd, sectp);
 
   if (vnames == NULL)
     names = &dwarf2_elf_names;
   else
     names = (const struct dwarf2_debug_sections *) vnames;
 
-  if (section_is_p (sectp->name, &names->info))
+  if ((aflag & SEC_HAS_CONTENTS) == 0)
+    {
+    }
+  else if (section_is_p (sectp->name, &names->info))
     {
       dwarf2_per_objfile->info.asection = sectp;
       dwarf2_per_objfile->info.size = bfd_get_section_size (sectp);
@@ -1744,13 +1748,8 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
     }
   else if (section_is_p (sectp->name, &names->eh_frame))
     {
-      flagword aflag = bfd_get_section_flags (abfd, sectp);
-
-      if (aflag & SEC_HAS_CONTENTS)
-        {
-	  dwarf2_per_objfile->eh_frame.asection = sectp;
-          dwarf2_per_objfile->eh_frame.size = bfd_get_section_size (sectp);
-        }
+      dwarf2_per_objfile->eh_frame.asection = sectp;
+      dwarf2_per_objfile->eh_frame.size = bfd_get_section_size (sectp);
     }
   else if (section_is_p (sectp->name, &names->ranges))
     {
