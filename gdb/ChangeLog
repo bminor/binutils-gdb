@@ -1,3 +1,11 @@
+2012-08-27  Eli Zaretskii  <eliz@gnu.org>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* auto-load.c (auto_load_objfile_script): Rename to ...
+	(auto_load_objfile_script_1): ... here, change variable realname to
+	parameter realname, document it, add return value, add variable retval.
+	(auto_load_objfile_script): New function.
+
 2012-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* cli/cli-decode.c (print_doc_line): Keep skipping '.' and ',' not
