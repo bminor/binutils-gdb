@@ -9126,21 +9126,27 @@ parse_breakpoint_sals (char **address,
 	{
 	  struct linespec_sals lsal;
 	  struct symtab_and_line sal;
+	  CORE_ADDR pc;
 
 	  init_sal (&sal);		/* Initialize to zeroes.  */
 	  lsal.sals.sals = (struct symtab_and_line *)
 	    xmalloc (sizeof (struct symtab_and_line));
 
 	  /* Set sal's pspace, pc, symtab, and line to the values
-	     corresponding to the last call to print_frame_info.  */
+	     corresponding to the last call to print_frame_info.
+	     Be sure to reinitialize LINE with NOTCURRENT == 0
+	     as the breakpoint line number is inappropriate otherwise.
+	     find_pc_line would adjust PC, re-set it back.  */
 	  get_last_displayed_sal (&sal);
-          sal.section = find_pc_overlay (sal.pc);
+	  pc = sal.pc;
+	  sal = find_pc_line (pc, 0);
 
 	  /* "break" without arguments is equivalent to "break *PC"
 	     where PC is the last displayed codepoint's address.  So
 	     make sure to set sal.explicit_pc to prevent GDB from
 	     trying to expand the list of sals to include all other
 	     instances with the same symtab and line.  */
+	  sal.pc = pc;
 	  sal.explicit_pc = 1;
 
 	  lsal.sals.sals[0] = sal;

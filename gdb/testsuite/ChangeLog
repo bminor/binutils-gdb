@@ -1,5 +1,10 @@
 2012-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/break-caller-line.c: New file.
+	* gdb.base/break-caller-line.exp: New file.
+
+2012-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.ada/rdv_wait.exp (set debug-file-directory): New command.
 	* gdb.arch/i386-cfi-notcurrent.S: New file.
 	* gdb.arch/i386-cfi-notcurrent.exp: New file.
