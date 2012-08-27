@@ -1,5 +1,10 @@
 2012-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* cli/cli-decode.c (print_doc_line): Keep skipping '.' and ',' not
+	followed by a whitespace.
+
+2012-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR gdb/14494.
 	* dwarf2read.c (dwarf2_locate_sections): Move variable aflag here.
 	Move the SEC_HAS_CONTENTS check here - for any NAMES use.

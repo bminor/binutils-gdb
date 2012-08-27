@@ -1003,8 +1003,11 @@ print_doc_line (struct ui_file *stream, char *str)
       line_buffer = (char *) xmalloc (line_size);
     }
 
+  /* Keep printing '.' or ',' not followed by a whitespace for embedded strings
+     like '.gdbinit'.  */
   p = str;
-  while (*p && *p != '\n' && *p != '.' && *p != ',')
+  while (*p && *p != '\n'
+	 && ((*p != '.' && *p != ',') || (p[1] && !isspace (p[1]))))
     p++;
   if (p - str > line_size - 1)
     {
