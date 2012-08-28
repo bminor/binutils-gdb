@@ -173,6 +173,10 @@ md_show_usage (FILE *stream)
 #define O_tls_gd_add		O_md22
 #define O_tls_ie_load		O_md23
 #define O_tls_add		O_md24
+#define O_hw0_plt		O_md25
+#define O_hw1_plt		O_md26
+#define O_hw1_last_plt		O_md27
+#define O_hw2_last_plt		O_md28
 
 static struct hash_control *special_operator_hash;
 
@@ -300,6 +304,10 @@ md_begin (void)
   INSERT_SPECIAL_OP (tls_gd_add);
   INSERT_SPECIAL_OP (tls_ie_load);
   INSERT_SPECIAL_OP (tls_add);
+  INSERT_SPECIAL_OP (hw0_plt);
+  INSERT_SPECIAL_OP (hw1_plt);
+  INSERT_SPECIAL_OP (hw1_last_plt);
+  INSERT_SPECIAL_OP (hw2_last_plt);
 #undef INSERT_SPECIAL_OP
 
   /* Initialize op_hash hash table.  */
@@ -609,6 +617,22 @@ emit_tilegx_instruction (tilegx_bundle_bits bits,
 	    case O_hw1_last_tls_le:
 	      HANDLE_OP16 (HW1_LAST_TLS_LE);
 	      require_symbol = 1;
+	      break;
+
+	    case O_hw0_plt:
+	      HANDLE_OP16 (HW0_PLT_PCREL);
+	      break;
+
+	    case O_hw1_plt:
+	      HANDLE_OP16 (HW1_PLT_PCREL);
+	      break;
+
+	    case O_hw1_last_plt:
+	      HANDLE_OP16 (HW1_LAST_PLT_PCREL);
+	      break;
+
+	    case O_hw2_last_plt:
+	      HANDLE_OP16 (HW2_LAST_PLT_PCREL);
 	      break;
 
 #undef HANDLE_OP16
@@ -1475,6 +1499,13 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
 	fixP->fx_r_type = rtype;		\
       break
 
+#define FIX_PLT_PCREL(rtype)			\
+      case rtype##_PLT_PCREL:			\
+	if (!fixP->fx_pcrel)			\
+	  fixP->fx_r_type = rtype;		\
+						\
+      break;
+
       FIX_PCREL (BFD_RELOC_8);
       FIX_PCREL (BFD_RELOC_16);
       FIX_PCREL (BFD_RELOC_32);
@@ -1493,6 +1524,14 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
       FIX_PCREL (BFD_RELOC_TILEGX_IMM16_X1_HW1_LAST);
       FIX_PCREL (BFD_RELOC_TILEGX_IMM16_X0_HW2_LAST);
       FIX_PCREL (BFD_RELOC_TILEGX_IMM16_X1_HW2_LAST);
+      FIX_PLT_PCREL (BFD_RELOC_TILEGX_IMM16_X0_HW0);
+      FIX_PLT_PCREL (BFD_RELOC_TILEGX_IMM16_X1_HW0);
+      FIX_PLT_PCREL (BFD_RELOC_TILEGX_IMM16_X0_HW1);
+      FIX_PLT_PCREL (BFD_RELOC_TILEGX_IMM16_X1_HW1);
+      FIX_PLT_PCREL (BFD_RELOC_TILEGX_IMM16_X0_HW1_LAST);
+      FIX_PLT_PCREL (BFD_RELOC_TILEGX_IMM16_X1_HW1_LAST);
+      FIX_PLT_PCREL (BFD_RELOC_TILEGX_IMM16_X0_HW2_LAST);
+      FIX_PLT_PCREL (BFD_RELOC_TILEGX_IMM16_X1_HW2_LAST);
 
 #undef FIX_PCREL
 
@@ -1560,6 +1599,8 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_TILEGX_IMM16_X1_HW0:
     case BFD_RELOC_TILEGX_IMM16_X0_HW0_PCREL:
     case BFD_RELOC_TILEGX_IMM16_X1_HW0_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X0_HW0_PLT_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X1_HW0_PLT_PCREL:
       special = O_hw0;
       break;
 
@@ -1568,6 +1609,8 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_TILEGX_IMM16_X1_HW0_LAST:
     case BFD_RELOC_TILEGX_IMM16_X0_HW0_LAST_PCREL:
     case BFD_RELOC_TILEGX_IMM16_X1_HW0_LAST_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X0_HW0_LAST_PLT_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X1_HW0_LAST_PLT_PCREL:
       special = O_hw0_last;
       break;
 
@@ -1576,6 +1619,8 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_TILEGX_IMM16_X1_HW1:
     case BFD_RELOC_TILEGX_IMM16_X0_HW1_PCREL:
     case BFD_RELOC_TILEGX_IMM16_X1_HW1_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X0_HW1_PLT_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X1_HW1_PLT_PCREL:
       special = O_hw1;
       break;
 
@@ -1584,6 +1629,8 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_TILEGX_IMM16_X1_HW1_LAST:
     case BFD_RELOC_TILEGX_IMM16_X0_HW1_LAST_PCREL:
     case BFD_RELOC_TILEGX_IMM16_X1_HW1_LAST_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X0_HW1_LAST_PLT_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X1_HW1_LAST_PLT_PCREL:
       special = O_hw1_last;
       break;
 
@@ -1592,6 +1639,8 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_TILEGX_IMM16_X1_HW2:
     case BFD_RELOC_TILEGX_IMM16_X0_HW2_PCREL:
     case BFD_RELOC_TILEGX_IMM16_X1_HW2_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X0_HW2_PLT_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X1_HW2_PLT_PCREL:
       special = O_hw2;
       break;
 
@@ -1600,6 +1649,8 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_TILEGX_IMM16_X1_HW2_LAST:
     case BFD_RELOC_TILEGX_IMM16_X0_HW2_LAST_PCREL:
     case BFD_RELOC_TILEGX_IMM16_X1_HW2_LAST_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X0_HW2_LAST_PLT_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X1_HW2_LAST_PLT_PCREL:
       special = O_hw2_last;
       break;
 
@@ -1608,6 +1659,8 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_TILEGX_IMM16_X1_HW3:
     case BFD_RELOC_TILEGX_IMM16_X0_HW3_PCREL:
     case BFD_RELOC_TILEGX_IMM16_X1_HW3_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X0_HW3_PLT_PCREL:
+    case BFD_RELOC_TILEGX_IMM16_X1_HW3_PLT_PCREL:
       special = O_hw3;
       break;
 

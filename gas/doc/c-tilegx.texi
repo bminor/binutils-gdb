@@ -242,6 +242,26 @@ called (at latest; depending environment variables).  It is only safe
 to leave the symbol unresolved this way if all references are function
 calls.
 
+@item hw0_plt
+
+This modifier is used to load bits 0-15 of the pc-relative address of
+a plt entry.
+
+@item hw1_plt
+
+This modifier is used to load bits 16-31 of the pc-relative address of
+a plt entry.
+
+@item hw1_last_plt
+
+This modifier yields the same value as @code{hw1_plt}, but it also
+checks that the value does not overflow.
+
+@item hw2_last_plt
+
+This modifier is used to load bits 32-47 of the pc-relative address of
+a plt entry, and it also checks that the value does not overflow.
+
 @item hw0_tls_gd
 
 This modifier is used to load bits 0-15 of the offset of the GOT entry

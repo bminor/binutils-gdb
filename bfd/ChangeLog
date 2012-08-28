@@ -1,3 +1,28 @@
+2012-08-27  Walter Lee  <walt@tilera.com>
+
+	* reloc.c (Add BFD_RELOC_TILEGX_IMM16_X0_HW0_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X1_HW0_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X0_HW1_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X1_HW1_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X0_HW2_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X1_HW2_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X0_HW3_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X1_HW3_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X0_HW0_LAST_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X1_HW0_LAST_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X0_HW1_LAST_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X1_HW1_LAST_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X0_HW2_LAST_PLT_PCREL,
+	BFD_RELOC_TILEGX_IMM16_X1_HW2_LAST_PLT_PCREL): new relocations.
+	* elfxx-tilegx.c (tilegx_elf_howto_table): Handle new relocations.
+	(tilegx_reloc_map): Ditto.
+	(reloc_to_create_func): Ditto.
+	(tilegx_elf_check_relocs): Ditto.
+	(tilegx_elf_gc_sweep_hook): Ditto.
+	(tilegx_elf_relocate_section): Ditto.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* elf32-arm.c (v8): New array.

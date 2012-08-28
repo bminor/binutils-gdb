@@ -1,3 +1,14 @@
+2012-08-27  Walter Lee  <walt@tilera.com>
+
+	* tc-tilegx.c (O_hw0_plt): Define operator.
+	(O_hw1_plt): Ditto.
+	(O_hw1_last_plt): Ditto.
+	(O_hw2_last_plt): Ditto.
+	(md_begin): Handle new operators.
+	(emit_tilegx_instruction): Ditto.
+	(md_apply_fix): Ditto.
+	* doc/c-tilegx.texi: Document new operators.
+
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* config/tc-arm.c (ARM_ENC_TAB): Add sha1h and sha2op entries.
