@@ -1,3 +1,163 @@
+2012-08-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	Apply mainline patches
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (ARM_ENC_TAB): Add sha1h and sha2op entries.
+	(do_sha1h): New function.
+	(do_sha1su1): Likewise.
+	(do_sha256su0): Likewise.
+	(insns): Add 2 operand SHA instructions.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (NEON_ENC_TAB): Add sha3op entry.
+	(do_crypto_3op_1): New function.
+	(do_sha1c): Likewise.
+	(do_sha1p): Likewise.
+	(do_sha1m): Likewise.
+	(do_sha1su0): Likewise.
+	(do_sha256h): Likewise.
+	(do_sha256h2): Likewise.
+	(do_sha256su1): Likewise.
+	(insns): Add SHA 3 operand instructions.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (neon_type_mask): Add P64 type.
+	(type_chk_of_el_type): Handle P64 type.
+	(el_type_of_type_chk): Likewise.
+	(do_neon_vmull): Handle VMULL.P64.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (NEON_ENC_TAB): Add aes entry.
+	(neon_type_mask): Add N_UNT.
+	(neon_check_type): Don't always decay typed to untyped sizes.
+	(do_crypto_2op_1): New function.
+	(do_aese): Likewise.
+	(do_aesd): Likewise.
+	(do_aesmc.8): Likewise.
+	(do_aesimc.8): Likewise.
+	(insns): Add AES instructions.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (el_type_type_check): Add handling for 16-bit
+	floating point types.
+	(do_neon_cvttb_2): New function.
+	(do_neon_cvttb_1): Likewise.
+	(do_neon_cvtb): Refactor to use do_neon_cvttb_1.
+	(do_neon_cvtt): Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (NEON_ENC_TAB): Add vrint entries.
+	(neon_cvt_mode): Add neon_cvt_mode_r.
+	(do_vrint_1): New function.
+	(do_vrint_x): Likewise.
+	(do_vrint_z): Likewise.
+	(do_vrint_r): Likewise.
+	(do_vrint_a): Likewise.
+	(do_vrint_n): Likewise.
+	(do_vrint_p): Likewise.
+	(do_vrint_m): Likewise.
+	(insns): Add VRINT instructions.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (NEON_ENC_TAB): Add vcvta entry.
+	(neon_cvt_mode): New enumeration.
+	(do_vfp_nsyn_cvt_fpv8): New function.
+	(do_neon_cvt_1): Add support for new conversions.
+	(do_neon_cvtr): Use neon_cvt_mode enumerator.
+	(do_neon_cvt): Likewise.
+	(do_neon_cvta): New function.
+	(do_neon_cvtn): Likewise.
+	(do_neon_cvtp): Likewise.
+	(do_neon_cvtm): Likewise.
+	(insns): Add new VCVT instructions.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm>
+	* config/tc-arm.c (CVT_FLAVOUR_VAR): New define.
+	(CVT_VAR): New helper define.
+	(neon_cvt_flavour): New enumeration, function renamed...
+	(get_neon_cvt_flavour): ...to this.
+	(do_vfp_nsyn_cvt): Update to use new neon_cvt_flavour.
+	(do_vfp_nsyn_cvtz): Likewise.
+	(do_neon_cvt_1): Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (NEON_ENC_TAB): Add vmaxnm, vminnm entries.
+	(vfp_or_neon_is_neon_bits): Add NEON_CHECK_ARCH8 enumerator.
+	(vfp_or_neon_is_neon): Add check for SIMD for ARMv8.
+	(do_maxnm): New function.
+	(insns): Add vmaxnm, vminnm entries.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (NEON_ENC_TAB): Add entries for VSEL.
+	(NEON_ENC_FPV8_): New define.
+	(do_vfp_nsyn_fpv8): New function.
+	(do_vsel): Likewise.
+	(insns): Add VSEL instructions.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (do_rm_rn): New function.
+	(do_strlex): Likewise.
+	(do_t_strlex): Likewise.
+	(insns): Add support for LDRA/STRL instructions.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (do_t_bkpt_hlt1): New function.
+	(do_t_hlt): New function.
+	(do_t_bkpt): Use do_t_bkpt_hlt1.
+	(insns): Add HLT.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (insns): Add DCPS instruction.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (T16_32_TAB): Add _sevl.
+	(insns): Add SEVL.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (asm_barrier_opt): Add arch field.
+	(mark_feature_used): New function.
+	(parse_barrier): Check specified option is valid for the
+	specified architecture.
+	(UL_BARRIER): New macro.
+	(barrier_opt_names): Update for new barrier options.
+
+	2012-08-24  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (do_setend): Warn on deprecated SETEND.
+	(do_t_setend): Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (do_t_it): Fully initialise now_it.
+	(new_automatic_it_block): Likewise.
+	(handle_it_block): Record whether current instruction is
+	conditionally executed.
+	* config/tc-arm.c (depr_insn_mask): New structure.
+	(depr_it_insns): New variable.
+	(it_fsm_post_encode): Warn on deprecated uses.
+	* config/tc-arm.h (current_it): Add new fields.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (deprecated_coproc_regs_s): New structure.
+	(deprecated_coproc_regs): New variable.
+	(deprecated_coproc_reg_count): Likewise.
+	(do_co_reg): Error on obsolete & warn on deprecated registers.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.c (check_obsolete): New function.
+	(do_rd_rm_rn): Check swp{b} for obsoletion.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* config/tc-arm.h (arm_ext_v8): New variable.
+	(fpu_vfp_ext_armv8): Likewise.
+	(fpu_neon_ext_armv8): Likewise.
+	(fpu_crypto_ext_armv8): Likewise.
+	(arm_archs): Add armv8-a.
+	(arm_extensions): Add crypto, fp, and simd.
+	(arm_fpus): Add fp-armv8, neon-fp-armv8, crypto-neon-fp-armv8.
+	(cpu_arch_ver): Add support for ARMv8.
+	(aeabi_set_public_sttributes): Likewise.
+	* doc/c-arm.texi (ARM Options): Document new architecture and
+	extension options for ARMv8.
+
 2012-08-16  Ian Bolton  <ian.bolton@arm.com>
             Laurent Desnogues  <laurent.desnogues@arm.com>
             Jim MacArthur  <jim.macarthur@arm.com>

@@ -1,3 +1,67 @@
+2012-08-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	Apply mainline patches.
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (neon_opcodes): Add 2 operand sha instructions.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (neon_opcodes): Add SHA 3-operand instructions.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (neon_opcodes): Handle VMULL.P64.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (neon_opcodes): Add support for AES instructions.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (coprocessor_opcodes): Add support for HP/DP
+	conversions.
+
+	2012-08-24  Matthew  Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (coprocessor_opcodes): Add VRINT.
+	(neon_opcodes): Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (coprocessor_opcodes): Add support for new VCVT
+	variants.
+	(neon_opcodes): Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (coprocessor_opcodes): Add VMAXNM/VMINNM.
+	(neon_opcodes): Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (coprocessor_opcodes): Add VSEL.
+	(print_insn_coprocessor): Add new %<>c bitfield format
+	specifier.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (arm_opcodes): Add LDRA/STRL instructions.
+	(thumb32_opcodes): Likewise.
+	(print_arm_insn): Add support for %<>T formatter.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (arm_opcodes): Add HLT.
+	(thumb_opcodes): Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (thumb32_opcodes): Add DCPS instruction.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (arm_opcodes): Add SEVL.
+	(thumb_opcodes): Likewise.
+	(thumb32_opcodes): Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* arm-dis.c (data_barrier_option): New function.
+	(print_insn_arm): Use data_barrier_option.
+	(print_insn_thumb32): Use data_barrier_option.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com
+	* arm-dis.c (COND_UNCOND): New constant.
+	(print_insn_coprocessor): Add support for %u format specifier.
+	(print_insn_neon): Likewise.
+
 2012-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: New Ukranian translation.

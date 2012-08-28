@@ -257,6 +257,8 @@ struct current_it
   int block_length;
   char *insn;
   int state_handled;
+  int warn_deprecated;
+  int insn_cond;
 };
 
 #ifdef OBJ_ELF

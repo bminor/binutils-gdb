@@ -1,4 +1,112 @@
-2012-08-13  Ian Bolton  <ian.bolton@arm.com>
+2012-08-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	Apply mainline patches
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a+crypto.s: Update testcase.
+	* gas/arm/armv8-a+crypto.d: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a+crypto.d: Update testcase.
+	* gas/arm/armv8-a+crypto.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a+crypto.d: Update testcase.
+	* gas/arm/armv8-a+crypto.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a+crypto.d: New testcase.
+	* gas/arm/armv8-a+crypto.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a+fp.d: Update testcase.
+	* gas/arm/armv8-a+fp.s: Likewise.
+	* gas/arm/half-prec-vfpv3.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a+fpv5.d: Update testcase.
+	* gas/arm/armv8-a+fpv5.s: Likewise.
+	* gas/arm/armv8-a+simdv3.d: Likewise.
+	* gas/arm/armv8-a+simdv3.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a+fp.d: Update testcase.
+	* gas/arm/armv8-a+fp.s: Likewise.
+	* gas/arm/armv8-a+simd.d: Likewise.
+	* gas/arm/armv8-a+simd.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/testsuite/gas/armv8-a+fp.d: Update testcase.
+	* gas/testsuite/gas/armv8-a+fp.s: Likewise.
+	* gas/testsuite/gas/armv8-a+simd.d: New testcase.
+	* gas/testsuite/gas/armv8-a+simd.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a+fp.d: New testcase.
+	* gas/arm/armv8-a+fp.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a-bad.l: Update testcase.
+	* gas/arm/armv8-a-bad.s: Likewise.
+	* gas/arm/armv8-a.d: Likewise.
+	* gas/arm/armv8-a.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a-bad.l: Update for HLT.
+	* gas/arm/armv8-a-bad.s: Likewise.
+	* gas/arm/armv8-a.d: Likewise.
+	* gas/arm/armv8-a.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a.d: Update.
+	* gas/arm/armv8-a.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a.s: New testcase.
+	* gas/arm/armv8-a.d: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a-barrier.s: New testcase.
+	* gas/arm/armv8-a-barrier-arm.d: Likewise.
+	* gas/arm/armv8-a-barrier-thumb.d: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a-bad.l: Update
+	* gas/arm/armv8-a-bad.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a-it-bad.d: New testcase.
+	* gas/arm/armv8-a-it-bad.l: Likewise.
+	* gas/arm/armv8-a-it-bad.s: Likewise.
+	* gas/arm/ldr-t-bad.s: Update testcase.
+	* gas/arm/ldr-t.d: Likewise.
+	* gas/arm/ldr-t.s: Likewise.
+	* gas/arm/neon-cond-bad-inc.s: Likewise.
+	* gas/arm/sp-pc-validations-bad-t: Likewise.
+	* gas/arm/vfp-fma-inc.s: Likewise.
+	* gas/arm/vfp-neon-syntax-inc.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a-bad.l: Update testcase.
+	* gas/arm/armv8-a-bad.s: Likewise.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/armv8-a-bad.d: New testcase.
+	* gas/arm/armv8-a-bad.l: Likewise.
+	* gas/arm/armv8-a-bad.s: Likewise.
+	* gas/arm/depr-swp.l: Update for change in expected output.
+	* gas/arm/depr-swp.s: Add additional test.
+
+	2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+	* gas/arm/attr-march-all.d: Update for change in expected
+	output.
+	* gas/arm/attr-mfpu-vfpv4-d16.d: Likewise.
+	* gas/arm/attr-mfpu-vfpv4.d: Likewise.
+	* gas/arm/attr-march-armv8-a+crypto.d: New testcase.
+	* gas/arm/attr-march-armv8-a+fp.d: Likewise.
+	* gas/arm/attr-march-armv8-a+simd.d: Likewise.
+	* gas/arm/attr-march-armv8-a.d: Likewise.
+
+012-08-13  Ian Bolton  <ian.bolton@arm.com>
             Laurent Desnogues  <laurent.desnogues@arm.com>
             Jim MacArthur  <jim.macarthur@arm.com>
             Marcus Shawcroft  <marcus.shawcroft@arm.com>

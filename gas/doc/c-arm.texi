@@ -154,13 +154,16 @@ been added, again in ascending alphabetical order.  For example,
 
 
 The following extensions are currently supported:
-@code{idiv}, (Integer Divide Extensions for v7-A and v7-R architectures),
+@code{crypto} (Cryptography Extensions for v8-A architecture, implies @code{fp+simd}),
+@code{fp} (Floating Point Extensions for v8-A architecture),
+@code{idiv} (Integer Divide Extensions for v7-A and v7-R architectures),
 @code{iwmmxt},
 @code{iwmmxt2},
 @code{maverick},
 @code{mp} (Multiprocessing Extensions for v7-A and v7-R architectures),
 @code{os} (Operating System for v6M architecture),
 @code{sec} (Security Extensions for v6K and v7-A architectures),
+@code{simd} (Advanced SIMD Extensions for v8-A architecture, implies @code{fp}),
 @code{virt} (Virtualization Extensions for v7-A architecture, implies 
 @code{idiv}),
 and
@@ -199,6 +202,7 @@ names are recognized:
 @code{armv7-r},
 @code{armv7-m},
 @code{armv7e-m},
+@code{armv8-a},
 @code{iwmmxt}
 and
 @code{xscale}.
@@ -241,13 +245,16 @@ The following format options are recognized:
 @code{vfpv4},
 @code{vfpv4-d16},
 @code{fpv4-sp-d16},
+@code{fp-armv8},
 @code{arm1020t},
 @code{arm1020e},
 @code{arm1136jf-s},
 @code{maverick},
 @code{neon},
+@code{neon-vfpv4},
+@code{neon-fp-armv8},
 and
-@code{neon-vfpv4}.
+@code{crypto-neon-fp-armv8}.
 
 In addition to determining which instructions are assembled, this option
 also affects the way in which the @code{.double} assembler directive behaves
