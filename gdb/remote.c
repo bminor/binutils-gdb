@@ -834,7 +834,7 @@ static struct serial *remote_desc = NULL;
    some remote targets this variable is principly provided to
    facilitate backward compatibility.  */
 
-static int remote_address_size;
+static unsigned int remote_address_size;
 
 /* Temporary to track who currently owns the terminal.  See
    remote_terminal_* for more details.  */
@@ -6314,7 +6314,7 @@ hexnumnstr (char *buf, ULONGEST num, int width)
 static CORE_ADDR
 remote_address_masked (CORE_ADDR addr)
 {
-  int address_size = remote_address_size;
+  unsigned int address_size = remote_address_size;
 
   /* If "remoteaddresssize" was not set, default to target address size.  */
   if (!address_size)
@@ -11461,13 +11461,13 @@ Specify a negative limit for unlimited."),
 					   breakpoints is %s.  */
 			    &remote_set_cmdlist, &remote_show_cmdlist);
 
-  add_setshow_integer_cmd ("remoteaddresssize", class_obscure,
-			   &remote_address_size, _("\
+  add_setshow_uinteger_cmd ("remoteaddresssize", class_obscure,
+			    &remote_address_size, _("\
 Set the maximum size of the address (in bits) in a memory packet."), _("\
 Show the maximum size of the address (in bits) in a memory packet."), NULL,
-			   NULL,
-			   NULL, /* FIXME: i18n: */
-			   &setlist, &showlist);
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_X],
 			 "X", "binary-download", 1);

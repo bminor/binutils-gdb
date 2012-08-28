@@ -710,7 +710,7 @@ show_write_history_p (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static int history_size;
+static unsigned int history_size;
 static void
 show_history_size (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
@@ -1380,7 +1380,7 @@ show_commands (char *args, int from_tty)
 
   /* The first command in the history which doesn't exist (i.e. one more
      than the number of the last command).  Relative to history_base.  */
-  int hist_len;
+  unsigned int hist_len;
 
   /* Print out some of the commands from the command history.  */
   /* First determine the length of the history list.  */
@@ -1445,15 +1445,16 @@ show_commands (char *args, int from_tty)
 static void
 set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
 {
-  if (history_size == INT_MAX)
-    unstifle_history ();
-  else if (history_size >= 0)
-    stifle_history (history_size);
-  else
+  /* The type of parameter in stifle_history is int, so values from INT_MAX up
+     mean 'unlimited'.  */
+  if (history_size >= INT_MAX)
     {
-      history_size = INT_MAX;
-      error (_("History size must be non-negative"));
+      /* Ensure that 'show history size' prints 'unlimited'.  */
+      history_size = UINT_MAX;
+      unstifle_history ();
     }
+  else
+    stifle_history (history_size);
 }
 
 void
@@ -1633,13 +1634,13 @@ Without an argument, saving is enabled."),
 			   show_write_history_p,
 			   &sethistlist, &showhistlist);
 
-  add_setshow_integer_cmd ("size", no_class, &history_size, _("\
+  add_setshow_uinteger_cmd ("size", no_class, &history_size, _("\
 Set the size of the command history,"), _("\
 Show the size of the command history,"), _("\
 ie. the number of previous commands to keep a record of."),
-			   set_history_size_command,
-			   show_history_size,
-			   &sethistlist, &showhistlist);
+			    set_history_size_command,
+			    show_history_size,
+			    &sethistlist, &showhistlist);
 
   add_setshow_filename_cmd ("filename", no_class, &history_filename, _("\
 Set the filename in which to record the command history"), _("\

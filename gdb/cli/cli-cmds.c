@@ -96,7 +96,7 @@ static void filter_sals (struct symtabs_and_lines *);
 
 
 /* Limit the call depth of user-defined commands */
-int max_user_call_depth;
+unsigned int max_user_call_depth;
 
 /* Define all cmd_list_elements.  */
 
@@ -1907,13 +1907,13 @@ With no argument, show definitions of all user defined commands."), &showlist);
   add_com ("apropos", class_support, apropos_command,
 	   _("Search for commands matching a REGEXP"));
 
-  add_setshow_integer_cmd ("max-user-call-depth", no_class,
+  add_setshow_uinteger_cmd ("max-user-call-depth", no_class,
 			   &max_user_call_depth, _("\
 Set the max call depth for non-python user-defined commands."), _("\
 Show the max call depth for non-python user-defined commands."), NULL,
-			   NULL,
-			   show_max_user_call_depth,
-			   &setlist, &showlist);
+			    NULL,
+			    show_max_user_call_depth,
+			    &setlist, &showlist);
 
   add_setshow_boolean_cmd ("trace-commands", no_class, &trace_commands, _("\
 Set tracing of GDB CLI commands."), _("\

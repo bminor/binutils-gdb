@@ -314,7 +314,7 @@ execute_user_command (struct cmd_list_element *c, char *args)
   struct cleanup *old_chain;
   enum command_control_type ret;
   static int user_call_depth = 0;
-  extern int max_user_call_depth;
+  extern unsigned int max_user_call_depth;
 
   cmdlines = c->user_commands;
   if (cmdlines == 0)

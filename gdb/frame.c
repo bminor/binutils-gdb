@@ -196,7 +196,7 @@ show_backtrace_past_entry (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static int backtrace_limit = INT_MAX;
+static unsigned int backtrace_limit = UINT_MAX;
 static void
 show_backtrace_limit (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
@@ -2488,16 +2488,16 @@ the rest of the stack trace."),
 			   &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 
-  add_setshow_integer_cmd ("limit", class_obscure,
-			   &backtrace_limit, _("\
+  add_setshow_uinteger_cmd ("limit", class_obscure,
+			    &backtrace_limit, _("\
 Set an upper bound on the number of backtrace levels."), _("\
 Show the upper bound on the number of backtrace levels."), _("\
 No more than the specified number of frames can be displayed or examined.\n\
 Zero is unlimited."),
-			   NULL,
-			   show_backtrace_limit,
-			   &set_backtrace_cmdlist,
-			   &show_backtrace_cmdlist);
+			    NULL,
+			    show_backtrace_limit,
+			    &set_backtrace_cmdlist,
+			    &show_backtrace_cmdlist);
 
   /* Debug this files internals.  */
   add_setshow_zuinteger_cmd ("frame", class_maintenance, &frame_debug,  _("\

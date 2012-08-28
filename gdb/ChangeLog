@@ -1,3 +1,24 @@
+2012-08-28  Yao Qi  <yao@codesourcery.com>
+
+	* cli/cli-cmds.c (max_user_call_depth): Add 'unsigned'.
+	(init_cmds): Call add_setshow_uinteger_cmd for command
+	'max-user-call-depth'.
+	* cli/cli-script.c (execute_user_command): Add 'unsigned' to the
+	declaration of 'max_user_call_depth'.
+	* frame.c (backtrace_limit): Add 'unsigned'.
+	(_initialize_frame): Call add_setshow_uinteger_cmd for command
+	'limit'.
+	* remote.c (remoteaddresssize): Add 'unsigned'.
+	(remote_address_masked): Change local var 'address_size' to
+	'unsigned'.
+	(_initialize_remote): Call add_setshow_uinteger_cmd for
+	'remoteaddresssize'.
+	* top.c (history_size): Add 'unsigned'.
+	(show_commands): Change local variables to 'unsigned'.
+	(set_history_size_command): Don't check history_size is negative.
+	Adjust the condition to call unstifle_history and set history_size
+	to UNIT_MAX.
+
 2012-08-28  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/14428
