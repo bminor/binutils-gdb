@@ -1,3 +1,9 @@
+2012-08-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Also override the version
+	a dynamic symbol defaulted to if preempted with a hidden or
+	internal definition.
+
 2012-08-28  Walter Lee  <walt@tilera.com>
 
 	* elf32-tilepro.c (allocate_dynrelocs): Use PLT_ENTRY_SIZE as size

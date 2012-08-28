@@ -1210,23 +1210,25 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	      vh->root.type = h->root.type;
 	      h->root.type = bfd_link_hash_indirect;
 	      (*bed->elf_backend_copy_indirect_symbol) (info, vh, h);
-	      /* Protected symbols will override the dynamic definition
-		 with default version.  */
-	      if (ELF_ST_VISIBILITY (sym->st_other) == STV_PROTECTED)
+
+	      h->root.u.i.link = (struct bfd_link_hash_entry *) vh;
+	      if (ELF_ST_VISIBILITY (sym->st_other) != STV_PROTECTED)
 		{
-		  h->root.u.i.link = (struct bfd_link_hash_entry *) vh;
-		  vh->dynamic_def = 1;
-		  vh->ref_dynamic = 1;
+		  /* If the new symbol is hidden or internal, completely undo
+		     any dynamic link state.  */
+		  (*bed->elf_backend_hide_symbol) (info, h, TRUE);
+		  h->forced_local = 0;
+		  h->ref_dynamic = 0;
 		}
 	      else
-		{
-		  h->root.type = vh->root.type;
-		  vh->ref_dynamic = 0;
-		  /* We have to hide it here since it was made dynamic
-		     global with extra bits when the symbol info was
-		     copied from the old dynamic definition.  */
-		  (*bed->elf_backend_hide_symbol) (info, vh, TRUE);
-		}
+		h->ref_dynamic = 1;
+
+	      h->def_dynamic = 0;
+	      h->dynamic_def = 0;
+	      /* FIXME: Should we check type and size for protected symbol?  */
+	      h->size = 0;
+	      h->type = 0;
+
 	      h = vh;
 	    }
 	  else
