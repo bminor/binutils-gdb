@@ -416,6 +416,7 @@ linux_osdata_h = $(srcdir)/../common/linux-osdata.h
 vec_h = $(srcdir)/../common/vec.h
 gdb_vecs_h = $(srcdir)/../common/gdb_vecs.h
 host_defs_h = $(srcdir)/../common/host-defs.h
+libiberty_h = $(srcdir)/../../include/libiberty.h
 # Since everything must include server.h, we make that depend on
 # generated files.
 server_h = $(srcdir)/server.h $(regcache_h) $(srcdir)/target.h \
@@ -427,6 +428,8 @@ server_h = $(srcdir)/server.h $(regcache_h) $(srcdir)/target.h \
 		$(srcdir)/../common/gdb_locale.h \
 		$(ptid_h) \
 		$(signals_h) \
+		$(libiberty_h) \
+		$(srcdir)/../../include/ansidecl.h \
 		$(generated_files)
 
 gdbthread_h = $(srcdir)/gdbthread.h $(target_h) $(srcdir)/server.h
@@ -550,7 +553,7 @@ linux-low.o: linux-low.c $(linux_low_h) $(linux_ptrace_h) $(linux_procfs_h) \
 
 linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h) \
 	$(gdb_proc_service_h)
-linux-bfin-low.o: linux-bfin-low.c $(linux_low_h) $(server_h)
+linux-bfin-low.o: linux-bfin-low.c $(linux_low_h) $(server_h) $(libiberty_h)
 linux-cris-low.o: linux-cris-low.c $(linux_low_h) $(server_h)
 linux-crisv32-low.o: linux-crisv32-low.c $(linux_low_h) $(server_h)
 linux-ia64-low.o: linux-ia64-low.c $(linux_low_h) $(server_h)

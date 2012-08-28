@@ -57,7 +57,7 @@
 
 */
 
-static void trace_vdebug (const char *, ...) ATTR_FORMAT (printf, 1, 2);
+static void trace_vdebug (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 static void
 trace_vdebug (const char *fmt, ...)

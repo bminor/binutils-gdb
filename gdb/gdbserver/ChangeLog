@@ -1,3 +1,14 @@
+2012-08-28  Yao Qi  <yao@codesourcery.com>
+
+	* ax.c, tracepoint.c: Replace ATTR_FORMAT with ATTRIBUTE_PRINTF.
+	* server.h: Include 'libiberty.h' and 'ansidecl.h'.
+	(ATTR_NORETURN, ATTR_FORMAT, ATTR_MALLOC): Remove.
+	Remove declarations of xmalloc, xreallloc, xstrdup and
+	freeargv.
+	* Makefile.in (libiberty_h): New.
+	(server_h): Append dependencies 'libiberty.h' and 'ansidecl.h'.
+	(linux-bfin-low.o): Append dependency 'libiberty.h'.
+
 2012-08-23  Yao Qi  <yao@codesourcery.com>
 
 	* server.h: Remove declaration of 'xsnprintf'.

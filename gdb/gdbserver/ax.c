@@ -20,7 +20,7 @@
 #include "ax.h"
 #include "format.h"
 
-static void ax_vdebug (const char *, ...) ATTR_FORMAT (printf, 1, 2);
+static void ax_vdebug (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 #ifdef IN_PROCESS_AGENT
 int debug_agent = 0;

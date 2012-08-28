@@ -27,6 +27,9 @@
 #include "wincecompat.h"
 #endif
 
+#include "libiberty.h"
+#include "ansidecl.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,32 +68,6 @@ extern int vasprintf(char **strp, const char *fmt, va_list ap);
 #endif
 #if !HAVE_DECL_VSNPRINTF
 int vsnprintf(char *str, size_t size, const char *format, va_list ap);
-#endif
-
-#ifndef ATTR_NORETURN
-#if defined(__GNUC__) && (__GNUC__ > 2 \
-			  || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
-#define ATTR_NORETURN __attribute__ ((noreturn))
-#else
-#define ATTR_NORETURN           /* nothing */
-#endif
-#endif
-
-#ifndef ATTR_FORMAT
-#if defined(__GNUC__) && (__GNUC__ > 2 \
-			  || (__GNUC__ == 2 && __GNUC_MINOR__ >= 4))
-#define ATTR_FORMAT(type, x, y) __attribute__ ((format(type, x, y)))
-#else
-#define ATTR_FORMAT(type, x, y) /* nothing */
-#endif
-#endif
-
-#ifndef ATTR_MALLOC
-#if defined(__GNUC__) && (__GNUC__ >= 3)
-#define ATTR_MALLOC __attribute__ ((__malloc__))
-#else
-#define ATTR_MALLOC             /* nothing */
-#endif
 #endif
 
 /* Define underscore macro, if not available, to be able to use it inside
@@ -364,16 +341,10 @@ void monitor_output (const char *msg);
 /* Functions from utils.c */
 #include "common-utils.h"
 
-void *xmalloc (size_t) ATTR_MALLOC;
-void *xrealloc (void *, size_t);
-void *xcalloc (size_t, size_t) ATTR_MALLOC;
-char *xstrdup (const char *) ATTR_MALLOC;
-void freeargv (char **argv);
-
 void perror_with_name (const char *string);
-void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
-void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
-void warning (const char *string,...) ATTR_FORMAT (printf, 1, 2);
+void error (const char *string,...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
+void fatal (const char *string,...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
+void warning (const char *string,...) ATTRIBUTE_PRINTF (1, 2);
 char *paddress (CORE_ADDR addr);
 char *pulongest (ULONGEST u);
 char *plongest (LONGEST l);
