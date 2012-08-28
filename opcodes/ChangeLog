@@ -1,3 +1,17 @@
+2012-08-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (UIMM4, UIMM3, UIMM2, VXVA_MASK, VXVB_MASK, VXVAVB_MASK,
+	VXVDVA_MASK, VXUIMM4_MASK, VXUIMM3_MASK, VXUIMM2_MASK): New defines.
+	(powerpc_opcodes) <vexptefp, vlogefp, vrefp, vrfim, vrfin, vrfip,
+	vrfiz, vrsqrtefp, vupkhpx, vupkhsb, vupkhsh, vupklpx, vupklsb,
+	vupklsh>: Use VXVA_MASK.
+	<vspltisb, vspltish, vspltisw>: Use VXVB_MASK.
+	<mfvscr>: Use VXVAVB_MASK.
+	<mtvscr>: Use VXVDVA_MASK.
+	<vspltb>: Use VXUIMM4_MASK.
+	<vsplth>: Use VXUIMM3_MASK.
+	<vspltw>: Use VXUIMM2_MASK.
+
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* arm-dis.c (neon_opcodes): Add 2 operand sha instructions.
