@@ -2015,6 +2015,84 @@ path_command (char *dirname, int from_tty)
 }
 
 
+/* Print out the register NAME with value VAL, to FILE, in the default
+   fashion.  */
+
+static void
+default_print_one_register_info (struct ui_file *file,
+				 const char *name,
+				 struct value *val)
+{
+  struct type *regtype = value_type (val);
+
+  fputs_filtered (name, file);
+  print_spaces_filtered (15 - strlen (name), file);
+
+  if (!value_entirely_available (val))
+    {
+      fprintf_filtered (file, "*value not available*\n");
+      return;
+    }
+
+  /* If virtual format is floating, print it that way, and in raw
+     hex.  */
+  if (TYPE_CODE (regtype) == TYPE_CODE_FLT
+      || TYPE_CODE (regtype) == TYPE_CODE_DECFLOAT)
+    {
+      int j;
+      struct value_print_options opts;
+      const gdb_byte *valaddr = value_contents_for_printing (val);
+      enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (regtype));
+
+      get_user_print_options (&opts);
+      opts.deref_ref = 1;
+
+      val_print (regtype,
+		 value_contents_for_printing (val),
+		 value_embedded_offset (val), 0,
+		 file, 0, val, &opts, current_language);
+
+      fprintf_filtered (file, "\t(raw 0x");
+      for (j = 0; j < TYPE_LENGTH (regtype); j++)
+	{
+	  int idx;
+
+	  if (byte_order == BFD_ENDIAN_BIG)
+	    idx = j;
+	  else
+	    idx = TYPE_LENGTH (regtype) - 1 - j;
+	  fprintf_filtered (file, "%02x", (unsigned char) valaddr[idx]);
+	}
+      fprintf_filtered (file, ")");
+    }
+  else
+    {
+      struct value_print_options opts;
+
+      /* Print the register in hex.  */
+      get_formatted_print_options (&opts, 'x');
+      opts.deref_ref = 1;
+      val_print (regtype,
+		 value_contents_for_printing (val),
+		 value_embedded_offset (val), 0,
+		 file, 0, val, &opts, current_language);
+      /* If not a vector register, print it also according to its
+	 natural format.  */
+      if (TYPE_VECTOR (regtype) == 0)
+	{
+	  get_user_print_options (&opts);
+	  opts.deref_ref = 1;
+	  fprintf_filtered (file, "\t");
+	  val_print (regtype,
+		     value_contents_for_printing (val),
+		     value_embedded_offset (val), 0,
+		     file, 0, val, &opts, current_language);
+	}
+    }
+
+  fprintf_filtered (file, "\n");
+}
+
 /* Print out the machine register regnum.  If regnum is -1, print all
    registers (print_all == 1) or all non-float and non-vector
    registers (print_all == 0).
@@ -2068,76 +2146,16 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	  || *(gdbarch_register_name (gdbarch, i)) == '\0')
 	continue;
 
-      fputs_filtered (gdbarch_register_name (gdbarch, i), file);
-      print_spaces_filtered (15 - strlen (gdbarch_register_name
-					  (gdbarch, i)), file);
-
       regtype = register_type (gdbarch, i);
       val = allocate_value (regtype);
 
       /* Get the data in raw format.  */
       if (! frame_register_read (frame, i, value_contents_raw (val)))
-	{
-	  fprintf_filtered (file, "*value not available*\n");
-	  continue;
-	}
+	mark_value_bytes_unavailable (val, 0, TYPE_LENGTH (value_type (val)));
 
-      /* If virtual format is floating, print it that way, and in raw
-         hex.  */
-      if (TYPE_CODE (regtype) == TYPE_CODE_FLT
-	  || TYPE_CODE (regtype) == TYPE_CODE_DECFLOAT)
-	{
-	  int j;
-	  struct value_print_options opts;
-	  const gdb_byte *valaddr = value_contents_for_printing (val);
-
-	  get_user_print_options (&opts);
-	  opts.deref_ref = 1;
-
-	  val_print (regtype,
-		     value_contents_for_printing (val),
-		     value_embedded_offset (val), 0,
-		     file, 0, val, &opts, current_language);
-
-	  fprintf_filtered (file, "\t(raw 0x");
-	  for (j = 0; j < register_size (gdbarch, i); j++)
-	    {
-	      int idx;
-
-	      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-		idx = j;
-	      else
-		idx = register_size (gdbarch, i) - 1 - j;
-	      fprintf_filtered (file, "%02x", (unsigned char) valaddr[idx]);
-	    }
-	  fprintf_filtered (file, ")");
-	}
-      else
-	{
-	  struct value_print_options opts;
-
-	  /* Print the register in hex.  */
-	  get_formatted_print_options (&opts, 'x');
-	  opts.deref_ref = 1;
-	  val_print (regtype,
-		     value_contents_for_printing (val),
-		     value_embedded_offset (val), 0,
-		     file, 0, val, &opts, current_language);
-          /* If not a vector register, print it also according to its
-             natural format.  */
-	  if (TYPE_VECTOR (regtype) == 0)
-	    {
-	      get_user_print_options (&opts);
-	      opts.deref_ref = 1;
-	      fprintf_filtered (file, "\t");
-	      val_print (regtype,
-			 value_contents_for_printing (val),
-			 value_embedded_offset (val), 0,
-			 file, 0, val, &opts, current_language);
-	    }
-	}
-
-      fprintf_filtered (file, "\n");
+      default_print_one_register_info (file,
+				       gdbarch_register_name (gdbarch, i),
+				       val);
     }
 }
 
@@ -2198,17 +2216,16 @@ registers_info (char *addr_exp, int fpregs)
 	    if (regnum >= gdbarch_num_regs (gdbarch)
 			  + gdbarch_num_pseudo_regs (gdbarch))
 	      {
-		struct value_print_options opts;
-		struct value *val = value_of_user_reg (regnum, frame);
+		struct value *regval = value_of_user_reg (regnum, frame);
+		const char *regname = user_reg_map_regnum_to_name (gdbarch,
+								   regnum);
 
-		printf_filtered ("%.*s: ", (int) (end - start), start);
-		get_formatted_print_options (&opts, 'x');
-		val_print_scalar_formatted (check_typedef (value_type (val)),
-					    value_contents_for_printing (val),
-					    value_embedded_offset (val),
-					    val,
-					    &opts, 0, gdb_stdout);
-		printf_filtered ("\n");
+		/* Print in the same fashion
+		   gdbarch_print_registers_info's default
+		   implementation prints.  */
+		default_print_one_register_info (gdb_stdout,
+						 regname,
+						 regval);
 	      }
 	    else
 	      gdbarch_print_registers_info (gdbarch, gdb_stdout,

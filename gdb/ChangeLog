@@ -1,3 +1,14 @@
+2012-08-28  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/14428
+
+	* infcmd.c (default_print_one_register_info): New, factored out
+	from default_print_registers_info.
+	(default_print_registers_info): Use it.  Mark value unavailable if
+	necessary.
+	(registers_info): Print user registers with
+	default_print_one_register_info.
+
 2010-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR tui/14486
