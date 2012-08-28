@@ -2470,10 +2470,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  /* Allocate room for the header and tail.  */
 	  if (s->size == 0)
 	    {
-	      s->size = PLT_HEADER_SIZE + PLT_TAIL_SIZE;
+	      s->size = PLT_ENTRY_SIZE;
 	    }
 
-          h->plt.offset = s->size - PLT_TAIL_SIZE;
+          h->plt.offset = s->size - PLT_ENTRY_SIZE + PLT_HEADER_SIZE;
 
 	  /* If this symbol is not defined in a regular file, and we are
 	     not generating a shared library, then set the symbol to this
@@ -4247,6 +4247,7 @@ tilegx_elf_finish_dynamic_sections (bfd *output_bfd,
   bfd *dynobj;
   asection *sdyn;
   struct tilegx_elf_link_hash_table *htab;
+  size_t pad_size;
 
   htab = tilegx_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
@@ -4275,10 +4276,15 @@ tilegx_elf_finish_dynamic_sections (bfd *output_bfd,
 		    tilegx64_plt0_entry : tilegx32_plt0_entry,
 		  PLT_HEADER_SIZE);
 
-	  memcpy (splt->contents + splt->size - PLT_TAIL_SIZE,
+	  memcpy (splt->contents + splt->size
+		  - PLT_ENTRY_SIZE + PLT_HEADER_SIZE,
 		  ABI_64_P (output_bfd) ?
 		    tilegx64_plt_tail_entry : tilegx32_plt_tail_entry,
 		  PLT_TAIL_SIZE);
+	  /* Add padding so that the plt section is a multiple of its
+	     entry size.  */
+	  pad_size = PLT_ENTRY_SIZE - PLT_HEADER_SIZE - PLT_TAIL_SIZE;
+	  memset (splt->contents + splt->size - pad_size, 0, pad_size);
 	}
 
       elf_section_data (splt->output_section)->this_hdr.sh_entsize

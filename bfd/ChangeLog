@@ -1,3 +1,14 @@
+2012-08-28  Walter Lee  <walt@tilera.com>
+
+	* elf32-tilepro.c (allocate_dynrelocs): Use PLT_ENTRY_SIZE as size
+	of header.
+	(tilepro_plt_entry_build): Account for new header size.
+	(tilepro_elf_finish_dynamic_sections): Ditto.
+	(tilepro_elf_plt_sym_val): Ditto.
+	* elfxx-tilegx.c (allocate_dynrelocs): Use PLT_ENTRY_SIZE as size
+	of header + tail.
+	(tilegx_elf_finish_dynamic_sections): Account for new padding.
+
 2012-08-27  Walter Lee  <walt@tilera.com>
 
 	* reloc.c (Add BFD_RELOC_TILEGX_IMM16_X0_HW0_PLT_PCREL,
