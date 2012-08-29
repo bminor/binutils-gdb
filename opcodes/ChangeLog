@@ -1,3 +1,8 @@
+2012-08-29  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (VXASHB_MASK): New define.
+	(powerpc_opcodes) <vsldoi>: Use VXASHB_MASK.
+
 2012-08-28  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (UIMM4, UIMM3, UIMM2, VXVA_MASK, VXVB_MASK, VXVAVB_MASK,
