@@ -1083,10 +1083,6 @@ Options:\n\n\
 "), stream);
 #endif
   fputs_unfiltered (_("\
-  --use-deprecated-index-sections\n\
-                     Do not reject deprecated .gdb_index sections.\n\
-"), stream);
-  fputs_unfiltered (_("\
   --version          Print version information and then exit.\n\
   -w                 Use a window interface.\n\
   --write            Set writing into executable and core files.\n\

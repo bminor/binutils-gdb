@@ -1,3 +1,8 @@
+2012-08-29  Doug Evans  <dje@google.com>
+
+	* main.c (print_gdb_help): Remove reference to
+	--use-deprecated-index-sections.
+
 2012-08-28  Yao Qi  <yao@codesourcery.com>
 
 	* cli/cli-cmds.c (max_user_call_depth): Add 'unsigned'.
