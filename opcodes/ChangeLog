@@ -1,3 +1,34 @@
+2012-08-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	Backport from mainline
+	2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
+	* ppc-opc.c <xnop, yield, mdoio, mdoom>: New extended mnemonics.
+
+	2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
+	* ppc-opc.c <RSQ, RTQ>: Use PPC_OPERAND_GPR.
+
+	2012-08-16  Peter Bergner  <bergner@vnet.ibm.com>
+	* ppc-opc.c (powerpc_opcodes) <"lswx">: Use RAX for the second and
+	RBX for the third operand.
+	<"lswi">: Use RAX for second and NBI for the third operand.
+
+	2012-08-20  Edmar Wienskoski  <edmar@freescale.com>
+	* ppc-opc.c (powerpc_opcodes): Changed opcode for vabsdub,
+	vabsduh, vabsduw, mviwsplt.
+
+	2012-08-28  Peter Bergner  <bergner@vnet.ibm.com>
+	* ppc-opc.c (UIMM4, UIMM3, UIMM2, VXVA_MASK, VXVB_MASK, VXVAVB_MASK,
+	VXVDVA_MASK, VXUIMM4_MASK, VXUIMM3_MASK, VXUIMM2_MASK): New defines.
+	(powerpc_opcodes) <vexptefp, vlogefp, vrefp, vrfim, vrfin, vrfip,
+	vrfiz, vrsqrtefp, vupkhpx, vupkhsb, vupkhsh, vupklpx, vupklsb,
+	vupklsh>: Use VXVA_MASK.
+	<vspltisb, vspltish, vspltisw>: Use VXVB_MASK.
+	<mfvscr>: Use VXVAVB_MASK.
+	<mtvscr>: Use VXVDVA_MASK.
+	<vspltb>: Use VXUIMM4_MASK.
+	<vsplth>: Use VXUIMM3_MASK.
+	<vspltw>: Use VXUIMM2_MASK.
+
 2012-08-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	Apply mainline patches.

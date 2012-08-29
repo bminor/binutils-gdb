@@ -1,3 +1,22 @@
+2012-08-28  Peter Bergner  <bergner@vnet.ibm.com>
+
+	Backport from mainline
+	2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/common.d ("nop", "xnop"): Add tests.
+	* gas/ppc/common.s: Likewise.
+	* gas/ppc/power7.d ("yield", "mdoio", "mdoom"): Add tests.
+	* gas/ppc/power7.s: Likewise.
+
+	2012-08-15  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/power4.s <lq, stq>: Add more tests.
+	* gas/ppc/power4.d: Likewise.
+
+	2012-08-20  Edmar Wienskoski  <edmar@freescale.com>
+	* gas/ppc/e6500.d: Changed opcode for vabsdub, vabsduh, vabsduw,
+	mviwsplt.
+
 2012-08-28  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	Apply mainline patches

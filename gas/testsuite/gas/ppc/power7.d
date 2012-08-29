@@ -111,3 +111,9 @@ Disassembly of section \.text:
  194:	60 00 00 00 	nop
  198:	60 00 00 00 	nop
  19c:	60 42 00 00 	ori     r2,r2,0
+ 1a0:	7f 7b db 78 	yield
+ 1a4:	7f 7b db 78 	yield
+ 1a8:	7f bd eb 78 	mdoio
+ 1ac:	7f bd eb 78 	mdoio
+ 1b0:	7f de f3 78 	mdoom
+ 1b4:	7f de f3 78 	mdoom

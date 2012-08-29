@@ -102,3 +102,9 @@ power7:
 	isel	  2,3,4,28
 	ori	  2,2,0
 	.p2align 4,,15
+	yield
+	or	  27,27,27
+	mdoio
+	or	  29,29,29
+	mdoom
+	or	  30,30,30

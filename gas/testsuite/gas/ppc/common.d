@@ -188,3 +188,7 @@ Disassembly of section \.text:
  2c4:	7d 8d 73 2e 	sthx    r12,r13,r14
  2c8:	7f dd fa 79 	xor.    r29,r30,r31
  2cc:	7f dd fa 78 	xor     r29,r30,r31
+ 2d0:	60 00 00 00 	nop
+ 2d4:	60 00 00 00 	nop
+ 2d8:	68 00 00 00 	xnop
+ 2dc:	68 00 00 00 	xnop
