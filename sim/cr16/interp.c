@@ -1192,7 +1192,11 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
       iaddr = imem_addr ((uint32)PC);
       if (iaddr == State.mem.fault)
         {
+#ifdef SIGBUS
           State.exception = SIGBUS;
+#else
+          State.exception = SIGSEGV;
+#endif
           break;
         }
  

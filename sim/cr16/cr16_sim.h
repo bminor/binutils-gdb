@@ -472,3 +472,9 @@ extern void write_longlong PARAMS ((uint8 *addr, int64 data));
    PSR is masked for zero bits. */
 
 extern creg_t move_to_cr (int cr, creg_t mask, creg_t val, int psw_hw_p);
+
+#ifndef SIGTRAP
+#define SIGTRAP 5
+#endif
+/* Special purpose trap  */
+#define TRAP_BREAKPOINT 8
