@@ -1548,6 +1548,11 @@ sim_store_register (sd, rn, memory, length)
   return size;
 }
 
+char **
+sim_complete_command (SIM_DESC sd, char *text, char *word)
+{
+  return NULL;
+}
 
 void
 sim_do_command (sd, cmd)
