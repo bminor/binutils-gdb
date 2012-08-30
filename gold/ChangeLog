@@ -1,5 +1,12 @@
 2012-08-30  Alan Modra  <amodra@gmail.com>
 
+	* layout.cc (Layout::set_segment_offsets): Set p_align to
+	abi_pagesize, not common_pagesize.
+	(Layout::relaxation_loop_body): Similarly use abi_pagesize
+	to determine whether file header can go in segment.
+
+2012-08-30  Alan Modra  <amodra@gmail.com>
+
 	* output.h (Output_reloc::Output_reloc <output section>): Add
 	is_relative param.  Adjust calls.
 	(Output_reloc::add_output_section_relative): New functions.
