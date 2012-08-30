@@ -1046,11 +1046,11 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   // A reloc against the STT_SECTION symbol of an output section.
 
   Output_reloc(Output_section* os, unsigned int type, Output_data* od,
-	       Address address);
+	       Address address, bool is_relative);
 
   Output_reloc(Output_section* os, unsigned int type,
-               Sized_relobj<size, big_endian>* relobj,
-	       unsigned int shndx, Address address);
+	       Sized_relobj<size, big_endian>* relobj, unsigned int shndx,
+	       Address address, bool is_relative);
 
   // An absolute relocation with no symbol.
 
@@ -1296,14 +1296,15 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   // A reloc against the STT_SECTION symbol of an output section.
 
   Output_reloc(Output_section* os, unsigned int type, Output_data* od,
-	       Address address, Addend addend)
-    : rel_(os, type, od, address), addend_(addend)
+	       Address address, Addend addend, bool is_relative)
+    : rel_(os, type, od, address, is_relative), addend_(addend)
   { }
 
   Output_reloc(Output_section* os, unsigned int type,
                Sized_relobj<size, big_endian>* relobj,
-	       unsigned int shndx, Address address, Addend addend)
-    : rel_(os, type, relobj, shndx, address), addend_(addend)
+	       unsigned int shndx, Address address, Addend addend,
+	       bool is_relative)
+    : rel_(os, type, relobj, shndx, address, is_relative), addend_(addend)
   { }
 
   // An absolute relocation with no symbol.
@@ -1745,13 +1746,13 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   void
   add_output_section(Output_section* os, unsigned int type,
 		     Output_data* od, Address address)
-  { this->add(od, Output_reloc_type(os, type, od, address)); }
+  { this->add(od, Output_reloc_type(os, type, od, address, false)); }
 
   void
   add_output_section(Output_section* os, unsigned int type, Output_data* od,
 		     Sized_relobj<size, big_endian>* relobj,
                      unsigned int shndx, Address address)
-  { this->add(od, Output_reloc_type(os, type, relobj, shndx, address)); }
+  { this->add(od, Output_reloc_type(os, type, relobj, shndx, address, false)); }
 
   void
   add_output_section_generic(Output_section* os, unsigned int type,
@@ -1760,7 +1761,8 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   {
     gold_assert(addend == 0);
     this->add(od, Output_reloc_type(os, type, od,
-				    convert_types<Address, uint64_t>(address)));
+				    convert_types<Address, uint64_t>(address),
+				    false));
   }
 
   void
@@ -1773,8 +1775,23 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
     Sized_relobj<size, big_endian>* sized_relobj =
       static_cast<Sized_relobj<size, big_endian>*>(relobj);
     this->add(od, Output_reloc_type(os, type, sized_relobj, shndx,
-				    convert_types<Address, uint64_t>(address)));
+				    convert_types<Address, uint64_t>(address),
+				    false));
   }
+
+  // As above, but the reloc TYPE is relative
+
+  void
+  add_output_section_relative(Output_section* os, unsigned int type,
+			      Output_data* od, Address address)
+  { this->add(od, Output_reloc_type(os, type, od, address, true)); }
+
+  void
+  add_output_section_relative(Output_section* os, unsigned int type,
+			      Output_data* od,
+			      Sized_relobj<size, big_endian>* relobj,
+			      unsigned int shndx, Address address)
+  { this->add(od, Output_reloc_type(os, type, relobj, shndx, address, true)); }
 
   // Add an absolute relocation.
 
@@ -2021,14 +2038,14 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   void
   add_output_section(Output_section* os, unsigned int type, Output_data* od,
 		     Address address, Addend addend)
-  { this->add(od, Output_reloc_type(os, type, od, address, addend)); }
+  { this->add(od, Output_reloc_type(os, type, od, address, addend, false)); }
 
   void
   add_output_section(Output_section* os, unsigned int type, Output_data* od,
                      Sized_relobj<size, big_endian>* relobj,
 		     unsigned int shndx, Address address, Addend addend)
   { this->add(od, Output_reloc_type(os, type, relobj, shndx, address,
-                                    addend)); }
+                                    addend, false)); }
 
   void
   add_output_section_generic(Output_section* os, unsigned int type,
@@ -2037,7 +2054,8 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   {
     this->add(od, Output_reloc_type(os, type, od,
 				    convert_types<Address, uint64_t>(address),
-				    convert_types<Addend, uint64_t>(addend)));
+				    convert_types<Addend, uint64_t>(addend),
+				    false));
   }
 
   void
@@ -2050,7 +2068,26 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
       static_cast<Sized_relobj<size, big_endian>*>(relobj);
     this->add(od, Output_reloc_type(os, type, sized_relobj, shndx,
 				    convert_types<Address, uint64_t>(address),
-				    convert_types<Addend, uint64_t>(addend)));
+				    convert_types<Addend, uint64_t>(addend),
+				    false));
+  }
+
+  // As above, but the reloc TYPE is relative
+
+  void
+  add_output_section_relative(Output_section* os, unsigned int type,
+			      Output_data* od, Address address, Addend addend)
+  { this->add(od, Output_reloc_type(os, type, od, address, addend, true)); }
+
+  void
+  add_output_section_relative(Output_section* os, unsigned int type,
+			      Output_data* od,
+			      Sized_relobj<size, big_endian>* relobj,
+			      unsigned int shndx, Address address,
+			      Addend addend)
+  {
+    this->add(od, Output_reloc_type(os, type, relobj, shndx,
+				    address, addend, true));
   }
 
   // Add an absolute relocation.

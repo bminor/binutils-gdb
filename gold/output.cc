@@ -811,9 +811,10 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Output_section* os,
     unsigned int type,
     Output_data* od,
-    Address address)
+    Address address,
+    bool is_relative)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
-    is_relative_(false), is_symbolless_(false),
+    is_relative_(is_relative), is_symbolless_(is_relative),
     is_section_symbol_(true), use_plt_offset_(false), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -832,9 +833,10 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int type,
     Sized_relobj<size, big_endian>* relobj,
     unsigned int shndx,
-    Address address)
+    Address address,
+    bool is_relative)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
-    is_relative_(false), is_symbolless_(false),
+    is_relative_(is_relative), is_symbolless_(is_relative),
     is_section_symbol_(true), use_plt_offset_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
@@ -1134,8 +1136,12 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
       else
 	return sym->value() + addend;
     }
-  gold_assert(this->local_sym_index_ != SECTION_CODE
-	      && this->local_sym_index_ != TARGET_CODE
+  if (this->local_sym_index_ == SECTION_CODE)
+    {
+      gold_assert(!this->use_plt_offset_);
+      return this->u1_.os->address() + addend;
+    }
+  gold_assert(this->local_sym_index_ != TARGET_CODE
               && this->local_sym_index_ != INVALID_CODE
 	      && this->local_sym_index_ != 0
               && !this->is_section_symbol_);
