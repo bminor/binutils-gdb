@@ -1,3 +1,8 @@
+2012-08-28  Kaushik Phatak  <kaushik.phatak@kpitcummins.com>
+
+	* gennltvals.sh: Use libgloss/syscall.h for cr16.
+	* nltvals.def: Regenerate.
+
 2012-06-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* acinclude.m4 (SIM_AC_COMMON): Define PACKAGE.
