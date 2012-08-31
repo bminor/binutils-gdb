@@ -1,3 +1,43 @@
+2012-08-31  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Powerpc_relobj): Add and use Address typedef.
+	(Powerpc_relobj::toc_base_offset): New stub function.
+	(Target_powerpc): Add tp_offset, dtp_offset.  Rename
+	got_mod_index_offset to tlsld_got_offset.  Update all refs.
+	(Target_powerpc::Relocate::enum skip_tls): New.
+	(Target_powerpc::call_tls_get_addr_): New var.
+	(Target_powerpc::is_branch_reloc): Move to file scope.
+	(Target_powerpc::relocate_tls, optimize_tls_reloc): Delete.
+	(Target_powerpc::optimize_tls_gd, optimize_tls_ld, optimize_tls_ie):
+	New functions.
+	(Target_powerpc::enum Got_type): Delete old values, add new ones.
+	(powerpc_info): Correct common_pagesize for ppc64.
+	(at_tls_transform, needs_dynamic_reloc, use_plt_offset): New functions.
+	(Powerpc_relocate_functions): Add overflow check enums and functions.
+	Add non-shift version of rela, rela_ua.  Delete all rel public
+	functions.  Delete addr16_lo.  Add addr64, addr64_u, addr32,
+	addr32_u, addr24, addr16_u, addr16_hi2, addr16_ha2, addr16_hi3,
+	addr16_ha3, addr14 functions.
+	(Output_data_got_powerpc::add_constant_pair): New function.
+	(Output_data_got_powerpc::got_base_offset): Likewise.
+	(Output_data_got_powerpc::do_write): Correct 64-bit got header.
+	(instruction constants): Sort, add some more.
+	(Output_data_glink::do_write): Add and use Address typedef.  Use
+	object->toc_base_offset() stub for 64-bit.
+	(Target_powerpc::tlsld_got_offset): Use add_constant_pair.
+	(Target_powerpc::Scan::get_reference_flags): Handle more relocs.
+	(Target_powerpc::Scan::local, global): Emit relative dynamic reloc
+	for R_PPC64_TOC.  Handle more relocs.  Generate got entries for TLS.
+	Always treat .opd relocs as against locally defined symbol.
+	Correct condition for RELATIVE relocs.
+	(Target_powerpc::do_finalize_sections): Test for NULL sections.
+	(Target_powerpc::Relocate::relocate): Use plt call stub as value
+	for 32-bit syms with a plt entry.  Correct ppc64 toc base
+	calculations.  Handle TLS relocs, and more.  Add overflow
+	checking and adjust for Powerpc_relocate_functions changes.
+	(Target_powerpc::relocate_for_relocatable): Handle zero r_sym.
+	Reinstate --emit-relocs code with FIXME.
+
 2012-08-30  Alan Modra  <amodra@gmail.com>
 
 	* layout.cc (Layout::set_segment_offsets): Set p_align to
