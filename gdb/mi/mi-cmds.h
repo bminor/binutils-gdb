@@ -138,6 +138,12 @@ struct mi_cmd
   struct mi_cli cli;
   /* If non-null, the function implementing the MI command.  */
   mi_cmd_argv_ftype *argv_func;
+  /* If non-null, the pointer to a field in
+     'struct mi_suppress_notification', which will be set to true by MI
+     command processor (mi-main.c:mi_cmd_execute) when this command is
+     being executed.  It will be set back to false when command has been
+     executed.  */
+  int *suppress_notification;
 };
 
 /* Lookup a command in the MI command table.  */

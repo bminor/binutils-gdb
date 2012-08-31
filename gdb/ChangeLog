@@ -1,5 +1,14 @@
 2012-08-31  Yao Qi  <yao@codesourcery.com>
 
+	* mi/mi-cmds.c (mi_cmds): New macros DEF_MI_CMD_CLI
+	DEF_MI_CMD_MI DEF_MI_CMD_CLI_1 and DEF_MI_CMD_CLI_1.
+	Update some commands.
+	* mi/mi-cmds.h (struct mi_cmd) <suppress_notification>: New field.
+	* mi/mi-main.c (mi_cmd_execute): Set '*parse->cmd->suppress_notification'
+	to 1.
+
+2012-08-31  Yao Qi  <yao@codesourcery.com>
+
 	* mi/mi-cmds.c (mi_cmds): Add 'static'.
 
 2012-08-29  Doug Evans  <dje@google.com>

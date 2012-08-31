@@ -2097,17 +2097,10 @@ mi_cmd_execute (struct mi_parse *parse)
 
   current_context = parse;
 
-  if (strncmp (parse->command, "break-", sizeof ("break-") - 1 ) == 0)
+  if (parse->cmd->suppress_notification != NULL)
     {
-      make_cleanup_restore_integer (&mi_suppress_notification.breakpoint);
-      mi_suppress_notification.breakpoint = 1;
-    }
-  else if (strncmp (parse->command, "gdb-set", sizeof ("gdb-set") - 1) == 0)
-    {
-      int *p = &mi_suppress_notification.cmd_param_changed;
-
-      make_cleanup_restore_integer (p);
-      mi_suppress_notification.cmd_param_changed = 1;
+      make_cleanup_restore_integer (parse->cmd->suppress_notification);
+      *parse->cmd->suppress_notification = 1;
     }
 
   if (parse->cmd->argv_func != NULL)
