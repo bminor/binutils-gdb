@@ -1,3 +1,11 @@
+2012-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14525
+	* ld-elf/elf.exp: Run pr14525.
+
+	* ld-elf/pr14525.c: New.
+	* ld-elf/pr14525.out: Likewise.
+
 2012-08-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* ld-elf/export-class.sd: New test.
@@ -81,15 +89,15 @@
 	* ld-mips-elf/mips-elf.exp: Run the new tests.
 
 2012-08-13  Ian Bolton  <ian.bolton@arm.com>
-            Laurent Desnogues  <laurent.desnogues@arm.com>
-            Jim MacArthur  <jim.macarthur@arm.com>
-            Marcus Shawcroft  <marcus.shawcroft@arm.com>
-            Nigel Stephens  <nigel.stephens@arm.com>
-            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
-            Richard Earnshaw  <rearnsha@arm.com>
-            Sofiane Naci  <sofiane.naci@arm.com>
-            Tejas Belagod  <tejas.belagod@arm.com>
-            Yufeng Zhang  <yufeng.zhang@arm.com>
+	    Laurent Desnogues  <laurent.desnogues@arm.com>
+	    Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+	    Sofiane Naci  <sofiane.naci@arm.com>
+	    Tejas Belagod  <tejas.belagod@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp: New file.
 	* ld-aarch64/aarch64.ld: New file.

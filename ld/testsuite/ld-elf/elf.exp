@@ -151,6 +151,7 @@ set array_tests_pie {
     {"PIE init array" "-pie" "" {init.c} "init" "init.out" "-fPIE"}
     {"PIE fini array" "-pie" "" {fini.c} "fini" "fini.out" "-fPIE"}
     {"PIE init array mixed" "-pie" "" {init-mixed.c} "init-mixed" "init-mixed.out" "-I. -fPIE"}
+    {"PIE PR ld/14525" "-pie" "" {pr14525.c} "pr14525" "pr14525.out" "-fPIE"}
 }
 set array_tests_static {
     {"static preinit array" "-static" "" {preinit.c} "preinit" "preinit.out"}
