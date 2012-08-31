@@ -1,3 +1,13 @@
+2012-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Convert
+	"mov foo@GOT(%reg), %reg" to "lea foo@GOTOFF(%reg), %reg"
+	for local symbols.
+
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Convert
+	"mov foo@GOTPCREL(%rip), %reg" to "lea foo(%rip), %reg"
+	for local symbols.
+
 2012-08-31  Alan Modra  <amodra@gmail.com>
 
 	PR ld/14464

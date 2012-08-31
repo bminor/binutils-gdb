@@ -1,5 +1,23 @@
 2012-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-i386/i386.exp: Run lea1a, lea1b, lea1c.
+	* ld-x86-64/x86-64.exp: Run lea1a, lea1b, lea1c, lea1d, lea1e,
+	lea1f.
+
+	* ld-i386/lea1.s: New file.
+	* ld-i386/lea1a.d: Likewise.
+	* ld-i386/lea1b.d: Likewise.
+	* ld-i386/lea1c.d: Likewise.
+	* ld-x86-64/lea1.s: Likewise.
+	* ld-x86-64/lea1a.d: Likewise.
+	* ld-x86-64/lea1b.d: Likewise.
+	* ld-x86-64/lea1c.d: Likewise.
+	* ld-x86-64/lea1d.d: Likewise.
+	* ld-x86-64/lea1e.d: Likewise.
+	* ld-x86-64/lea1f.d: Likewise.
+
+2012-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/14525
 	* ld-elf/elf.exp: Run pr14525.
 

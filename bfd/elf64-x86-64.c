@@ -3460,6 +3460,22 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
+	  if (r_type == R_X86_64_GOTPCREL
+	      && h->def_regular
+	      && SYMBOL_REFERENCES_LOCAL (info, h)
+	      && bfd_get_8 (input_bfd,
+			    contents + rel->r_offset - 2) == 0x8b)
+	    {
+	      /* Convert
+		 mov foo@GOTPCREL(%rip), %reg
+		 to
+		 lea foo(%rip), %reg
+	       */
+	      bfd_put_8 (output_bfd, 0x8d,
+			 contents + rel->r_offset - 2);
+	      break;
+	    }
+
 	  relocation = base_got->output_section->vma
 		       + base_got->output_offset + off;
 	  if (r_type != R_X86_64_GOTPCREL && r_type != R_X86_64_GOTPCREL64)

@@ -3470,6 +3470,24 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
+	  if (h != NULL
+	      && h->def_regular
+	      && SYMBOL_REFERENCES_LOCAL (info, h)
+	      && bfd_get_8 (input_bfd,
+			    contents + rel->r_offset - 2) == 0x8b)
+	    {
+	      /* Convert
+		 mov	foo@GOT(%reg), %reg
+		 to
+		 lea	foo@GOTOFF(%reg), %reg
+	       */
+	      bfd_put_8 (output_bfd, 0x8d,
+			 contents + rel->r_offset - 2);
+	      relocation -= (htab->elf.sgotplt->output_section->vma
+			     + htab->elf.sgotplt->output_offset);
+	      break;
+	    }
+
 	  relocation = htab->elf.sgot->output_section->vma
 		       + htab->elf.sgot->output_offset + off
 		       - htab->elf.sgotplt->output_section->vma
