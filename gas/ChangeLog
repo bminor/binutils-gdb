@@ -1,3 +1,8 @@
+2012-08-31  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* doc/c-mips.texi (MIPS Opts): Correct a typo in the -mips5
+	option.
+
 2012-08-27  Walter Lee  <walt@tilera.com>
 
 	* tc-tilegx.c (O_hw0_plt): Define operator.
