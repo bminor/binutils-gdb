@@ -236,6 +236,9 @@ run_dump_test "pr12570b"
 run_dump_test "lea1a"
 run_dump_test "lea1b"
 run_dump_test "lea1c"
+run_dump_test "lea1d"
+run_dump_test "lea1e"
+run_dump_test "lea1f"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]

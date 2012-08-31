@@ -282,6 +282,12 @@ run_dump_test "lea1c"
 run_dump_test "lea1d"
 run_dump_test "lea1e"
 run_dump_test "lea1f"
+run_dump_test "lea1g"
+run_dump_test "lea1h"
+run_dump_test "lea1i"
+run_dump_test "lea1j"
+run_dump_test "lea1k"
+run_dump_test "lea1l"
 
 # Must be native with the C compiler
 if { [isnative] && [which $CC] != 0 } {

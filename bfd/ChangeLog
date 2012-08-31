@@ -1,3 +1,17 @@
+2012-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_convert_mov_to_lea): New.
+	(elf_i386_size_dynamic_sections): Use it on input sections.
+	(elf_i386_relocate_section): Don't convert
+	"mov foo@GOT(%reg), %reg" to "lea foo@GOTOFF(%reg), %reg"
+	for local symbols here.
+
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): New.
+	(elf_x86_64_size_dynamic_sections): Use it on input sections.
+	(elf_x86_64_relocate_section): Don't convert
+	"mov foo@GOTPCREL(%rip), %reg" to "lea foo(%rip), %reg"
+	for local symbols here.
+
 2012-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Convert

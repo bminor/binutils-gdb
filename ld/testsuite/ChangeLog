@@ -1,3 +1,21 @@
+2012-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/i386.exp: Run lea1d, lea1f, lea1f.
+	* ld-x86-64/x86-64.exp: Run lea1g, lea1h, lea1i, lea1j, lea1k,
+	lea1l.
+
+	* ld-ifunc/ifunc-13-i386.d: Remove R_386_RELATIVE entry.
+
+	* ld-i386/lea1d.d: New file.
+	* ld-i386/lea1e.d: Likewise.
+	* ld-i386/lea1f.d: Likewise.
+	* ld-x86-64/lea1g.d: Likewise.
+	* ld-x86-64/lea1h.d: Likewise.
+	* ld-x86-64/lea1i.d: Likewise.
+	* ld-x86-64/lea1j.d: Likewise.
+	* ld-x86-64/lea1k.d: Likewise.
+	* ld-x86-64/lea1l.d: Likewise.
+
 2012-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/i386.exp: Run lea1a, lea1b, lea1c.
