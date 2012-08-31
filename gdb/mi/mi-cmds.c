@@ -30,7 +30,7 @@ struct mi_cmd;
 static struct mi_cmd **lookup_table (const char *command);
 static void build_table (struct mi_cmd *commands);
 
-struct mi_cmd mi_cmds[] =
+static struct mi_cmd mi_cmds[] =
 {
   { "ada-task-info", { NULL, 0 }, mi_cmd_ada_task_info },
   { "add-inferior", { NULL, 0 }, mi_cmd_add_inferior },
