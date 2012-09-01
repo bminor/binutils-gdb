@@ -11,6 +11,10 @@
 
 	* mi/mi-cmds.c (mi_cmds): Add 'static'.
 
+2012-08-30  Khoo Yit Phang  <khooyp@cs.umd.edu>
+
+	* MAINTAINERS (Write After Approval): Add "Khoo Yit Phang".
+
 2012-08-29  Doug Evans  <dje@google.com>
 
 	* main.c (print_gdb_help): Remove reference to
