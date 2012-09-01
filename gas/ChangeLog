@@ -1,3 +1,9 @@
+2012-09-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR gas/14521
+	* config/tc-mmix.h (tc_frob_file_before_fix): Renumber sections
+	after call to mmix_frob_file.
+
 2012-08-31  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* doc/c-mips.texi (MIPS Opts): Correct a typo in the -mips5
