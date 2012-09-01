@@ -1,3 +1,8 @@
+2012-09-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR gas/14521
+	* gas/mmix/group-1.d, gas/mmix/group-1.s: New test.
+
 2012-08-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/elf/group0c.d: Skip Solaris.
