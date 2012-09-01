@@ -1,5 +1,19 @@
 2012-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-i386/i386.exp: Run mov1a, mov1b.
+	* ld-x86-64/x86-64.exp: Run mov1a, mov1b, mov1c, mov1d.
+
+	* ld-i386/mov1.s: New file.
+	* ld-i386/mov1a.d: Likewise.
+	* ld-i386/mov1b.d: Likewise.
+	* ld-x86-64/mov1.s: Likewise.
+	* ld-x86-64/mov1a.d: Likewise.
+	* ld-x86-64/mov1b.d: Likewise.
+	* ld-x86-64/mov1c.d: Likewise.
+	* ld-x86-64/mov1d.d: Likewise.
+
+2012-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-i386/i386.exp: Run lea1d, lea1f, lea1f.
 	* ld-x86-64/x86-64.exp: Run lea1g, lea1h, lea1i, lea1j, lea1k,
 	lea1l.

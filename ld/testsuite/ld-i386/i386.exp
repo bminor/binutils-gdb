@@ -239,6 +239,8 @@ run_dump_test "lea1c"
 run_dump_test "lea1d"
 run_dump_test "lea1e"
 run_dump_test "lea1f"
+run_dump_test "mov1a"
+run_dump_test "mov1b"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]

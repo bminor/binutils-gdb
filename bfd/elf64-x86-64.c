@@ -2667,9 +2667,12 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-      /* STT_GNU_IFUNC must keep R_X86_64_GOTPCREL relocation.  */
+      /* STT_GNU_IFUNC must keep R_X86_64_GOTPCREL relocation.  We also
+	 avoid optimizing _DYNAMIC since ld.so may use its link-time
+	 address.  */
       if (h->def_regular
 	  && h->type != STT_GNU_IFUNC
+	  && strcmp (h->root.root.string, "_DYNAMIC") != 0
 	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
 	  && bfd_get_8 (input_bfd,
 			contents + irel->r_offset - 2) == 0x8b)

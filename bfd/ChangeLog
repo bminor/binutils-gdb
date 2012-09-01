@@ -1,5 +1,11 @@
 2012-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_convert_mov_to_lea): Don't optimize
+	_DYNAMIC.
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Likewise.
+
+2012-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_convert_mov_to_lea): New.
 	(elf_i386_size_dynamic_sections): Use it on input sections.
 	(elf_i386_relocate_section): Don't convert
