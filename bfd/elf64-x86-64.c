@@ -2672,7 +2672,7 @@ elf_x86_64_convert_mov_to_lea (bfd *abfd, asection *sec,
 	 address.  */
       if (h->def_regular
 	  && h->type != STT_GNU_IFUNC
-	  && strcmp (h->root.root.string, "_DYNAMIC") != 0
+	  && h != htab->elf.hdynamic
 	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
 	  && bfd_get_8 (input_bfd,
 			contents + irel->r_offset - 2) == 0x8b)

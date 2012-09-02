@@ -187,6 +187,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   flagword flags;
   asection *s;
   const struct elf_backend_data *bed;
+  struct elf_link_hash_entry *h;
 
   if (! is_elf_hash_table (info->hash))
     return FALSE;
@@ -254,7 +255,9 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
      section.  We don't want to define it if there is no .dynamic
      section, since on some ELF platforms the start up code examines it
      to decide how to initialize the process.  */
-  if (!_bfd_elf_define_linkage_sym (abfd, info, s, "_DYNAMIC"))
+  h = _bfd_elf_define_linkage_sym (abfd, info, s, "_DYNAMIC");
+  elf_hash_table (info)->hdynamic = h;
+  if (h == NULL)
     return FALSE;
 
   if (info->emit_hash)

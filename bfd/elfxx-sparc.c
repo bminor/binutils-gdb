@@ -4511,7 +4511,7 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
      _GLOBAL_OFFSET_TABLE_ is not absolute: it is relative to the
      ".got" section.  Likewise _PROCEDURE_LINKAGE_TABLE_ and ".plt".  */
   if (sym != NULL
-      && (strcmp (h->root.root.string, "_DYNAMIC") == 0
+      && (h == htab->elf.hdynamic
 	  || (!htab->is_vxworks
 	      && (h == htab->elf.hgot || h == htab->elf.hplt))))
     sym->st_shndx = SHN_ABS;

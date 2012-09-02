@@ -498,6 +498,9 @@ struct elf_link_hash_table
   /* The _PROCEDURE_LINKAGE_TABLE_ symbol.  */
   struct elf_link_hash_entry *hplt;
 
+  /* The _DYNAMIC symbol.  */
+  struct elf_link_hash_entry *hdynamic;
+
   /* A pointer to information used to merge SEC_MERGE sections.  */
   void *merge_info;
 

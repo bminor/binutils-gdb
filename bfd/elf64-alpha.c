@@ -4902,7 +4902,7 @@ elf64_alpha_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
     }
 
   /* Mark some specially defined symbols as absolute.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
+  if (h == elf_hash_table (info)->hdynamic
       || h == elf_hash_table (info)->hgot
       || h == elf_hash_table (info)->hplt)
     sym->st_shndx = SHN_ABS;

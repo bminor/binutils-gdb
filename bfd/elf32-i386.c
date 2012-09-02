@@ -2635,7 +2635,7 @@ elf_i386_convert_mov_to_lea (bfd *abfd, asection *sec,
 	 optimizing _DYNAMIC since ld.so may use its link-time address.  */
       if (h->def_regular
 	  && h->type != STT_GNU_IFUNC
-	  && strcmp (h->root.root.string, "_DYNAMIC") != 0
+	  && h != htab->elf.hdynamic
 	  && SYMBOL_REFERENCES_LOCAL (link_info, h)
 	  && bfd_get_8 (input_bfd,
 			contents + irel->r_offset - 2) == 0x8b)

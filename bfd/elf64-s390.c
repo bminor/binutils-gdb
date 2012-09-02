@@ -3506,7 +3506,7 @@ do_glob_dat:
     }
 
   /* Mark some specially defined symbols as absolute.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
+  if (h == htab->elf.hdynamic
       || h == htab->elf.hgot
       || h == htab->elf.hplt)
     sym->st_shndx = SHN_ABS;

@@ -6590,7 +6590,7 @@ elf64_aarch64_finish_dynamic_symbol (bfd *output_bfd,
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  SYM may
      be NULL for local symbols.  */
   if (sym != NULL
-      && (strcmp (h->root.root.string, "_DYNAMIC") == 0
+      && (h == elf_hash_table (info)->hdynamic
 	  || h == elf_hash_table (info)->hgot))
     sym->st_shndx = SHN_ABS;
 

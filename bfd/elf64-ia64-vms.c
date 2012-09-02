@@ -4030,7 +4030,7 @@ elf64_ia64_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   /* Mark some specially defined symbols as absolute.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
+  if (h == ia64_info->root.hdynamic
       || h == ia64_info->root.hgot
       || h == ia64_info->root.hplt)
     sym->st_shndx = SHN_ABS;

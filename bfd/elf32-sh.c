@@ -7157,7 +7157,7 @@ sh_elf_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  On VxWorks,
      _GLOBAL_OFFSET_TABLE_ is not absolute: it is relative to the
      ".got" section.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
+  if (h == htab->root.hdynamic
       || (!htab->vxworks_p && h == htab->root.hgot))
     sym->st_shndx = SHN_ABS;
 

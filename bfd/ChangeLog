@@ -1,3 +1,43 @@
+2012-09-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_link_hash_table): Add hdynamic for the
+	_DYNAMIC symbol.
+
+	* elflink.c (_bfd_elf_link_create_dynamic_sections): Set
+	hdynamic.
+
+	* elf-m10300.c (_bfd_mn10300_elf_finish_dynamic_symbol): Check
+	hdynamic instead of "_DYNAMIC".
+	* elf32-arm.c (elf32_arm_finish_dynamic_symbol): Likewise.
+	* elf32-cr16.c (elf32_arm_finish_dynamic_symbol): Likewise.
+	* elf32-cris.c (elf_cris_finish_dynamic_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_finish_dynamic_symbol): Likewise.
+	* elf32-i386.c (elf_i386_convert_mov_to_lea): Likewise.
+	* elf32-lm32.c (lm32_elf_finish_dynamic_symbol): Likewise.
+	* elf32-m32r.c (m32r_elf_finish_dynamic_symbol): Likewise.
+	* elf32-s390.c (elf_s390_finish_dynamic_symbol): Likewise.
+	* elf32-sh.c (sh_elf_finish_dynamic_symbol): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_finish_dynamic_symbol): Likewise.
+	* elf32-tilepro.c (tilepro_elf_finish_dynamic_symbol): Likewise.
+	* elf32-vax.c (elf_vax_finish_dynamic_symbol): Likewise.
+	* elf32-xtensa.c (elf_xtensa_finish_dynamic_symbol): Likewise.
+	* elf64-aarch64.c elf64_aarch64_finish_dynamic_symbol(): Likewise.
+	* elf64-alpha.c (elf64_alpha_finish_dynamic_symbol): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_finish_dynamic_symbol): Likewise.
+	* elf64-s390.c (elf_s390_finish_dynamic_symbol): Likewise.
+	* elf64-sh64.c (sh64_elf64_finish_dynamic_symbol): Likewise.
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_finish_dynamic_symbol): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_symbol): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_finish_dynamic_symbol): Likewise.
+
+	* elf32-microblaze.c (microblaze_elf_finish_dynamic_symbol): Check
+	hdynamic, hgot, hplt instead of _DYNAMIC, _GLOBAL_OFFSET_TABLE_,
+	_PROCEDURE_LINKAGE_TABLE_.
+	* elf32-score.c (s3_bfd_score_elf_finish_dynamic_symbol): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_finish_dynamic_symbol): Likewise.
+
 2012-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_convert_mov_to_lea): Don't optimize

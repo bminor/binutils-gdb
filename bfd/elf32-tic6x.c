@@ -1903,7 +1903,7 @@ elf32_tic6x_finish_dynamic_symbol (bfd * output_bfd,
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
+  if (h == elf_hash_table (info)->hdynamic
       || h == elf_hash_table (info)->hgot)
     sym->st_shndx = SHN_ABS;
 

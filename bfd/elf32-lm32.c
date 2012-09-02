@@ -1745,8 +1745,7 @@ lm32_elf_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   /* Mark some specially defined symbols as absolute.  */
-  if (strcmp (h->root.root.string, "_DYNAMIC") == 0
-      || h == htab->root.hgot)
+  if (h == htab->root.hdynamic || h == htab->root.hgot)
     sym->st_shndx = SHN_ABS;
 
   return TRUE;
