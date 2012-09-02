@@ -1,3 +1,14 @@
+2012-09-02  Khoo Yit Phang  <khooyp@cs.umd.edu>
+
+	Do not enable -lmcheck by default when Python is enabled with
+	threading support.
+	* configure.ac: (python_has_threads) New variable, by testing
+	if WITH_THREAD is defined in Python.h.
+	Move --enable-lmcheck after --with-python.
+	Do not enable -lmcheck by default if python_has_threads=yes.
+	Warn if --enable-lmcheck and python_has_threads=yes.
+	* configure: Regenerate.
+
 2012-08-31  Yao Qi  <yao@codesourcery.com>
 
 	* mi/mi-cmds.c (mi_cmds): New macros DEF_MI_CMD_CLI

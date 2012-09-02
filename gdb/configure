@@ -795,13 +795,13 @@ with_zlib
 with_libiconv_prefix
 with_iconv_bin
 with_system_readline
-enable_libmcheck
 with_jit_reader_dir
 with_expat
 with_gnu_ld
 enable_rpath
 with_libexpat_prefix
 with_python
+enable_libmcheck
 with_included_regex
 with_sysroot
 with_system_gdbinit
@@ -1466,8 +1466,8 @@ Optional Features:
   --enable-tui            enable full-screen terminal user interface (TUI)
   --enable-gdbtk          enable gdbtk graphical user interface (GUI)
   --enable-profiling      enable profiling of GDB
-  --enable-libmcheck      Try building GDB with -lmcheck if available
   --disable-rpath         do not hardcode runtime library paths
+  --enable-libmcheck      Try building GDB with -lmcheck if available
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
   --enable-gdb-build-warnings
@@ -7041,67 +7041,6 @@ fi
 
 
 
-# Provide a --enable-libmcheck/--disable-libmcheck set of options
-# allowing a user to enable this option even when building releases,
-# or to disable it when building a snapshot.
-# Check whether --enable-libmcheck was given.
-if test "${enable_libmcheck+set}" = set; then :
-  enableval=$enable_libmcheck; case "${enableval}" in
-     yes | y) ENABLE_LIBMCHECK="yes" ;;
-     no | n)  ENABLE_LIBMCHECK="no" ;;
-     *) as_fn_error "bad value ${enableval} for --enable-libmcheck" "$LINENO" 5 ;;
-   esac
-fi
-
-
-# Enable -lmcheck by default (it provides cheap-enough memory mangling),
-# but turn it off for releases.
-if test -z "${ENABLE_LIBMCHECK}" && $development; then
-    ENABLE_LIBMCHECK=yes
-fi
-
-if test "$ENABLE_LIBMCHECK" = "yes" ; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lmcheck" >&5
-$as_echo_n "checking for main in -lmcheck... " >&6; }
-if test "${ac_cv_lib_mcheck_main+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmcheck  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_mcheck_main=yes
-else
-  ac_cv_lib_mcheck_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mcheck_main" >&5
-$as_echo "$ac_cv_lib_mcheck_main" >&6; }
-if test "x$ac_cv_lib_mcheck_main" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBMCHECK 1
-_ACEOF
-
-  LIBS="-lmcheck $LIBS"
-
-fi
-
-fi
-
 # Generate jit-reader.h
 
 # This is typedeffed to GDB_CORE_ADDR in jit-reader.h
@@ -8539,6 +8478,34 @@ $as_echo "${PYTHON_CFLAGS}" >&6; }
            fi
            ;;
   esac
+
+  # Note that "python -m threading" cannot be used to check for
+  # threading support due to a bug in Python 2.7.3
+  # (http://bugs.python.org/issue15567).
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether python supports threads" >&5
+$as_echo_n "checking whether python supports threads... " >&6; }
+  saved_CPPFLAGS="${CPPFLAGS}"
+  CPPFLAGS="${PYTHON_CPPFLAGS}"
+  # Note that the test is reversed so that python_has_threads=yes on
+  # unexpected failures.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <Python.h>
+#ifdef WITH_THREAD
+# error
+#endif
+
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"; then :
+  python_has_threads=no
+else
+  python_has_threads=yes
+fi
+rm -f conftest.err conftest.$ac_ext
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${python_has_threads}" >&5
+$as_echo "${python_has_threads}" >&6; }
+  CPPFLAGS="${saved_CPPFLAGS}"
 else
   # Even if Python support is not compiled in, we need to have these files
   # included.
@@ -8549,6 +8516,76 @@ fi
 
 
 
+
+# Provide a --enable-libmcheck/--disable-libmcheck set of options
+# allowing a user to enable this option even when building releases,
+# or to disable it when building a snapshot.
+# Check whether --enable-libmcheck was given.
+if test "${enable_libmcheck+set}" = set; then :
+  enableval=$enable_libmcheck; case "${enableval}" in
+     yes | y) ENABLE_LIBMCHECK="yes" ;;
+     no | n)  ENABLE_LIBMCHECK="no" ;;
+     *) as_fn_error "bad value ${enableval} for --enable-libmcheck" "$LINENO" 5 ;;
+   esac
+fi
+
+
+# Enable -lmcheck by default (it provides cheap-enough memory mangling),
+# but turn it off if Python is enabled with threads, since -lmcheck is
+# not thread safe (http://sourceware.org/bugzilla/show_bug.cgi?id=9939),
+# and for releases.
+if test -z "${ENABLE_LIBMCHECK}" \
+        -a \( "${have_libpython}" = "no" \
+	     -o "${python_has_threads}" = "no" \) \
+    && $development; then
+  ENABLE_LIBMCHECK=yes
+fi
+
+if test "$ENABLE_LIBMCHECK" = "yes" ; then
+  if test "${have_libpython}" != "no" -a "${python_has_threads}" = "yes" ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --enable-libmcheck may lead to spurious crashes if threads are used in python" >&5
+$as_echo "$as_me: WARNING: --enable-libmcheck may lead to spurious crashes if threads are used in python" >&2;}
+  fi
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lmcheck" >&5
+$as_echo_n "checking for main in -lmcheck... " >&6; }
+if test "${ac_cv_lib_mcheck_main+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmcheck  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_mcheck_main=yes
+else
+  ac_cv_lib_mcheck_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mcheck_main" >&5
+$as_echo "$ac_cv_lib_mcheck_main" >&6; }
+if test "x$ac_cv_lib_mcheck_main" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBMCHECK 1
+_ACEOF
+
+  LIBS="-lmcheck $LIBS"
+
+fi
+
+fi
 
 # ------------------------- #
 # Checks for header files.  #

@@ -645,28 +645,6 @@ AC_SUBST(READLINE_DEPS)
 AC_SUBST(READLINE_CFLAGS)
 AC_SUBST(READLINE_TEXI_INCFLAG)
 
-# Provide a --enable-libmcheck/--disable-libmcheck set of options
-# allowing a user to enable this option even when building releases,
-# or to disable it when building a snapshot.
-AC_ARG_ENABLE(libmcheck,
-  AS_HELP_STRING([--enable-libmcheck],
-                 [Try building GDB with -lmcheck if available]),
-  [case "${enableval}" in
-     yes | y) ENABLE_LIBMCHECK="yes" ;;
-     no | n)  ENABLE_LIBMCHECK="no" ;;
-     *) AC_MSG_ERROR(bad value ${enableval} for --enable-libmcheck) ;;
-   esac])
-
-# Enable -lmcheck by default (it provides cheap-enough memory mangling),
-# but turn it off for releases.
-if test -z "${ENABLE_LIBMCHECK}" && $development; then
-    ENABLE_LIBMCHECK=yes
-fi
-
-if test "$ENABLE_LIBMCHECK" = "yes" ; then
-  AC_CHECK_LIB(mcheck, main)
-fi
-
 # Generate jit-reader.h
 
 # This is typedeffed to GDB_CORE_ADDR in jit-reader.h
@@ -1017,6 +995,23 @@ if test "${have_libpython}" != no; then
            fi
            ;;
   esac
+
+  # Note that "python -m threading" cannot be used to check for
+  # threading support due to a bug in Python 2.7.3
+  # (http://bugs.python.org/issue15567).
+  AC_MSG_CHECKING(whether python supports threads)
+  saved_CPPFLAGS="${CPPFLAGS}"
+  CPPFLAGS="${PYTHON_CPPFLAGS}"
+  # Note that the test is reversed so that python_has_threads=yes on
+  # unexpected failures.
+  AC_PREPROC_IFELSE(AC_LANG_SOURCE([[
+#include <Python.h>
+#ifdef WITH_THREAD
+# error
+#endif
+  ]]), [python_has_threads=no], [python_has_threads=yes])
+  AC_MSG_RESULT(${python_has_threads})
+  CPPFLAGS="${saved_CPPFLAGS}"
 else
   # Even if Python support is not compiled in, we need to have these files
   # included.
@@ -1027,6 +1022,36 @@ fi
 AC_SUBST(PYTHON_CFLAGS)
 AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(PYTHON_LIBS)
+
+# Provide a --enable-libmcheck/--disable-libmcheck set of options
+# allowing a user to enable this option even when building releases,
+# or to disable it when building a snapshot.
+AC_ARG_ENABLE(libmcheck,
+  AS_HELP_STRING([--enable-libmcheck],
+                 [Try building GDB with -lmcheck if available]),
+  [case "${enableval}" in
+     yes | y) ENABLE_LIBMCHECK="yes" ;;
+     no | n)  ENABLE_LIBMCHECK="no" ;;
+     *) AC_MSG_ERROR(bad value ${enableval} for --enable-libmcheck) ;;
+   esac])
+
+# Enable -lmcheck by default (it provides cheap-enough memory mangling),
+# but turn it off if Python is enabled with threads, since -lmcheck is
+# not thread safe (http://sourceware.org/bugzilla/show_bug.cgi?id=9939),
+# and for releases.
+if test -z "${ENABLE_LIBMCHECK}" \
+        -a \( "${have_libpython}" = "no" \
+	     -o "${python_has_threads}" = "no" \) \
+    && $development; then
+  ENABLE_LIBMCHECK=yes
+fi
+
+if test "$ENABLE_LIBMCHECK" = "yes" ; then
+  if test "${have_libpython}" != "no" -a "${python_has_threads}" = "yes" ; then
+    AC_MSG_WARN(--enable-libmcheck may lead to spurious crashes if threads are used in python)
+  fi
+  AC_CHECK_LIB(mcheck, main)
+fi
 
 # ------------------------- #
 # Checks for header files.  #
