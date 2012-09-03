@@ -1,3 +1,9 @@
+2012-09-03  Nick Clifton  <nickc@redhat.com>
+
+	PR sim/14540
+	* armsupp.c (ARMul_MRC): Return 0 if access to the MRC instruction
+	is denied.
+
 2012-08-01  Kevin Buettner  <kevinb@redhat.com>
 
 	* wrapper.c (libiberty.h): Include.
