@@ -1,3 +1,9 @@
+2012-09-03  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* elf32-s390.c (elf_s390_relocate_section): Handle PLTOFF for
+	local and global ifunc symbols.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+
 2012-09-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_link_hash_table): Add hdynamic for the

@@ -2349,6 +2349,10 @@ elf_s390_relocate_section (bfd *output_bfd,
 
 	      switch (r_type)
 		{
+		case R_390_PLTOFF16:
+		case R_390_PLTOFF32:
+		  relocation -= htab->elf.sgot->output_section->vma;
+		  break;
 		case R_390_GOTPLT12:
 		case R_390_GOTPLT16:
 		case R_390_GOTPLT20:
@@ -2625,9 +2629,9 @@ elf_s390_relocate_section (bfd *output_bfd,
 
 	  /* For local symbols or if we didn't make a PLT entry for
 	     this symbol resolve the symbol directly.  */
-	  if (   h == NULL
+	  if (h == NULL
 	      || h->plt.offset == (bfd_vma) -1
-	      || htab->elf.splt == NULL)
+	      || (htab->elf.splt == NULL && !s390_is_ifunc_symbol_p (h)))
 	    {
 	      relocation -= htab->elf.sgot->output_section->vma;
 	      break;
