@@ -1,3 +1,8 @@
+2012-09-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14493
+	* readelf.c (get_symbol_index_type): Check bad section index.
+
 2012-08-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* readelf.c (arm_attr_tag_CPU_arch): Update for ARMv8.
@@ -20,15 +25,15 @@
 	* bfdtest1.c: New file.
 
 2012-08-13  Ian Bolton  <ian.bolton@arm.com>
-            Laurent Desnogues  <laurent.desnogues@arm.com>
-            Jim MacArthur  <jim.macarthur@arm.com>
-            Marcus Shawcroft  <marcus.shawcroft@arm.com>
-            Nigel Stephens  <nigel.stephens@arm.com>
-            Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
-            Richard Earnshaw  <rearnsha@arm.com>
-            Sofiane Naci  <sofiane.naci@arm.com>
-            Tejas Belagod  <tejas.belagod@arm.com>
-            Yufeng Zhang  <yufeng.zhang@arm.com>
+	    Laurent Desnogues  <laurent.desnogues@arm.com>
+	    Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+	    Sofiane Naci  <sofiane.naci@arm.com>
+	    Tejas Belagod  <tejas.belagod@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* readelf.c (guess_is_rela): Handle EM_AARCH64.
 	(get_machine_name): Likewise.
@@ -88,17 +93,17 @@
 2012-07-24  Teresa Johnson  <tejohnson@google.com>
 
 	* addr2line.c (find_address_in_section): Invoke
-        bfd_find_nearest_line_discriminator to get the discriminator.
+	bfd_find_nearest_line_discriminator to get the discriminator.
 	(find_offset_in_section): Likewise.
 	(translate_addresses): Print discriminator if it is non-zero.
 	* objdump.c (show_line): Invoke
-        bfd_find_nearest_line_discriminator to get the discriminator,
-        and keep track of prev_discriminator. Print discriminator
-        if it is non-zero.
+	bfd_find_nearest_line_discriminator to get the discriminator,
+	and keep track of prev_discriminator. Print discriminator
+	if it is non-zero.
 	(disassemble_data): Initialize prev_discriminator.
 	(dump_reloc_set): Invoke bfd_find_nearest_line_discriminator
-        to get the discriminator, and keep track of last_discriminator.
-        Print discriminator if it is non-zero.
+	to get the discriminator, and keep track of last_discriminator.
+	Print discriminator if it is non-zero.
 
 2012-07-17  Nick Clifton  <nickc@redhat.com>
 
@@ -360,8 +365,8 @@
 
 2012-04-11  Ryan Mansfield  <rmansfield@qnx.com>
 
-        * objdump.c (dump_bfd): If defaulting to dwarf call
-        dwarf_select_sections_all to enable displays.
+	* objdump.c (dump_bfd): If defaulting to dwarf call
+	dwarf_select_sections_all to enable displays.
 
 2012-04-06  Roland McGrath  <mcgrathr@google.com>
 

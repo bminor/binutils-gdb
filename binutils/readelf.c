@@ -8974,6 +8974,8 @@ get_symbol_index_type (unsigned int type)
 	sprintf (buff, "OS [0x%04x]", type & 0xffff);
       else if (type >= SHN_LORESERVE)
 	sprintf (buff, "RSV[0x%04x]", type & 0xffff);
+      else if (type >= elf_header.e_shnum)
+	sprintf (buff, "bad section index[%3d]", type);
       else
 	sprintf (buff, "%3d", type);
       break;

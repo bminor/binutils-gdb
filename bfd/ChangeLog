@@ -1,3 +1,9 @@
+2012-09-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14493
+	* elf.c (ignore_section_sym): Also ignore section symbols without
+	a BFD section.
+
 2012-09-03  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* elf32-s390.c (elf_s390_relocate_section): Handle PLTOFF for

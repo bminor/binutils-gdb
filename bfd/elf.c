@@ -3264,13 +3264,21 @@ sym_is_global (bfd *abfd, asymbol *sym)
 }
 
 /* Don't output section symbols for sections that are not going to be
-   output, or that are duplicates.  */
+   output, that are duplicates or there is no BFD section.  */
 
 static bfd_boolean
 ignore_section_sym (bfd *abfd, asymbol *sym)
 {
-  return ((sym->flags & BSF_SECTION_SYM) != 0
-	  && !(sym->section->owner == abfd
+  elf_symbol_type *type_ptr;
+
+  if ((sym->flags & BSF_SECTION_SYM) == 0)
+    return FALSE;
+
+  type_ptr = elf_symbol_from (abfd, sym);
+  return ((type_ptr != NULL
+	   && type_ptr->internal_elf_sym.st_shndx != 0
+	   && bfd_is_abs_section (sym->section))
+	  || !(sym->section->owner == abfd
 	       || (sym->section->output_section->owner == abfd
 		   && sym->section->output_offset == 0)
 	       || bfd_is_abs_section (sym->section)));
