@@ -1,3 +1,8 @@
+2012-09-04  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (cmd_qtsv): Adjust debug message.
+	Don't check CUR_TPOINT.
+
 2012-08-28  Yao Qi  <yao@codesourcery.com>
 
 	* ax.c, tracepoint.c: Replace ATTR_FORMAT with ATTRIBUTE_PRINTF.

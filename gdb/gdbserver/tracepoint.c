@@ -3873,15 +3873,9 @@ cmd_qtfv (char *packet)
 static void
 cmd_qtsv (char *packet)
 {
-  trace_debug ("Returning first trace state variable definition");
+  trace_debug ("Returning additional trace state variable definition");
 
-  if (!cur_tpoint)
-    {
-      /* This case would normally never occur, but be prepared for
-	 GDB misbehavior.  */
-      strcpy (packet, "l");
-    }
-  else if (cur_tsv)
+  if (cur_tsv)
     {
       cur_tsv = cur_tsv->next;
       if (cur_tsv)
