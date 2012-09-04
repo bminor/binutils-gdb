@@ -1023,8 +1023,10 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "octeon2"	[mips_arch_list_matching octeon2]
 
     run_dump_test "smartmips"
-    run_dump_test "mips32-dsp"
-    run_dump_test "mips32-dspr2"
+    run_dump_test_arches "mips32-dsp"	[mips_arch_list_matching mips32r2 \
+					    !octeon]
+    run_dump_test_arches "mips32-dspr2"	[mips_arch_list_matching mips32r2 \
+					    !octeon]
     run_dump_test "mips64-dsp"
     run_dump_test "mips32-mt"
 
