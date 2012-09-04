@@ -1,3 +1,7 @@
+2012-09-05  Michael Brandt  <michael.brandt@axis.com>
+
+	* linux-crisv32-low.c: Fix compile errors.
+
 2012-09-04  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (cmd_qtsv): Adjust debug message.
