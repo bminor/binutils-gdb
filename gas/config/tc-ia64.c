@@ -114,7 +114,8 @@ enum reg_symbol
     REG_FR	= (REG_GR + 128),
     REG_AR	= (REG_FR + 128),
     REG_CR	= (REG_AR + 128),
-    REG_P	= (REG_CR + 128),
+    REG_DAHR	= (REG_CR + 128),
+    REG_P	= (REG_DAHR + 8),
     REG_BR	= (REG_P  + 64),
     REG_IP	= (REG_BR + 8),
     REG_CFM,
@@ -133,6 +134,7 @@ enum reg_symbol
     IND_PKR,
     IND_PMC,
     IND_PMD,
+    IND_DAHR,
     IND_RR,
     /* The following pseudo-registers are used for unwind directives only:  */
     REG_PSP,
@@ -539,6 +541,7 @@ indirect_reg[] =
     { "pkr",	IND_PKR },
     { "pmc",	IND_PMC },
     { "pmd",	IND_PMD },
+    { "dahr",	IND_DAHR },
     { "rr",	IND_RR },
   };
 
@@ -609,6 +612,12 @@ pseudo_func[] =
 
     /* hint constants: */
     { "pause",	PSEUDO_FUNC_CONST, { 0x0 } },
+    { "priority", PSEUDO_FUNC_CONST, { 0x1 } },
+
+    /* tf constants: */
+    { "clz",	PSEUDO_FUNC_CONST, {  32 } },
+    { "mpy",	PSEUDO_FUNC_CONST, {  33 } },
+    { "datahints",	PSEUDO_FUNC_CONST, {  34 } },
 
     /* unwind-related constants:  */
     { "svr4",	PSEUDO_FUNC_CONST,	{ ELFOSABI_NONE } },
@@ -5567,6 +5576,12 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
 	return OPERAND_MATCH;
       break;
 
+    case IA64_OPND_DAHR3:
+      if (e->X_op == O_register && e->X_add_number >= REG_DAHR
+	  && e->X_add_number < REG_DAHR + 8)
+	return OPERAND_MATCH;
+      break;
+
     case IA64_OPND_F1:
     case IA64_OPND_F2:
     case IA64_OPND_F3:
@@ -5611,6 +5626,7 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
     case IA64_OPND_PKR_R3:
     case IA64_OPND_PMC_R3:
     case IA64_OPND_PMD_R3:
+    case IA64_OPND_DAHR_R3:
     case IA64_OPND_RR_R3:
       if (e->X_op == O_index && e->X_op_symbol
 	  && (S_GET_VALUE (e->X_op_symbol) - IND_CPUID
@@ -5731,6 +5747,8 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
     case IA64_OPND_IMMU2:
     case IA64_OPND_IMMU7a:
     case IA64_OPND_IMMU7b:
+    case IA64_OPND_IMMU16:
+    case IA64_OPND_IMMU19:
     case IA64_OPND_IMMU21:
     case IA64_OPND_IMMU24:
     case IA64_OPND_MBTYPE4:
@@ -5986,6 +6004,39 @@ operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
       fix->is_pcrel = 0;
       ++CURR_SLOT.num_fixups;
       return OPERAND_MATCH;
+
+    case IA64_OPND_STRD5b:
+      if (e->X_op == O_constant)
+	{
+	  /* 5-bit signed scaled by 64 */
+	  if ((e->X_add_number <=  	( 0xf  << 6 )) 
+	       && (e->X_add_number >=  -( 0x10 << 6 )))
+	    {
+	      
+	      /* Must be a multiple of 64 */
+	      if ((e->X_add_number & 0x3f) != 0)
+	        as_warn (_("stride must be a multiple of 64; lower 6 bits ignored"));
+
+	      e->X_add_number &= ~ 0x3f;
+	      return OPERAND_MATCH;
+	    }
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
+      break;
+    case IA64_OPND_CNT6a:
+      if (e->X_op == O_constant)
+	{
+	  /* 6-bit unsigned biased by 1 -- count 0 is meaningless */
+	  if ((e->X_add_number     <=   64) 
+	       && (e->X_add_number > 0) )
+	    {
+	      return OPERAND_MATCH;
+	    }
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
+      break;
 
     default:
       break;
@@ -6437,6 +6488,10 @@ build_insn (struct slot *slot, bfd_vma *insnp)
 	  val -= REG_CR;
 	  break;
 
+	case IA64_OPND_DAHR3:
+	  val -= REG_DAHR;
+	  break;
+
 	case IA64_OPND_F1:
 	case IA64_OPND_F2:
 	case IA64_OPND_F3:
@@ -6463,6 +6518,7 @@ build_insn (struct slot *slot, bfd_vma *insnp)
 	case IA64_OPND_PKR_R3:
 	case IA64_OPND_PMC_R3:
 	case IA64_OPND_PMD_R3:
+	case IA64_OPND_DAHR_R3:
 	case IA64_OPND_RR_R3:
 	  val -= REG_GR;
 	  break;
@@ -7434,6 +7490,9 @@ md_begin (void)
   declare_register_set ("cr", 128, REG_CR);
   for (i = 0; i < NELEMS (cr); ++i)
     declare_register (cr[i].name, REG_CR + cr[i].regnum);
+
+  /* dahr registers:  */
+  declare_register_set ("dahr", 8, REG_DAHR);
 
   declare_register ("ip", REG_IP);
   declare_register ("cfm", REG_CFM);
@@ -8688,6 +8747,22 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	}
       break;
 
+    case IA64_RS_DAHR:
+      if (note == 0)
+	{
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_DAHR3)
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index =
+		CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_DAHR;
+	    }
+	}
+      else
+	{
+	  UNHANDLED;
+	}
+      break;
+
     case IA64_RS_FR:
     case IA64_RS_FRb:
       if (note != 1)
@@ -8762,6 +8837,7 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		      || idesc->operands[i] == IA64_OPND_PKR_R3
 		      || idesc->operands[i] == IA64_OPND_PMC_R3
 		      || idesc->operands[i] == IA64_OPND_PMD_R3
+		      || idesc->operands[i] == IA64_OPND_DAHR_R3
 		      || idesc->operands[i] == IA64_OPND_RR_R3
 		      || ((i >= idesc->num_outputs)
 			  && (idesc->operands[i] == IA64_OPND_R1
