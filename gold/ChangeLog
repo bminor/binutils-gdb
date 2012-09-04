@@ -1,3 +1,8 @@
+2012-09-04  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* powerpc.cc (do_make_elf_object): Allow ET_EXEC files with
+	--just-symbols.
+
 2012-08-31  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Powerpc_relobj): Add and use Address typedef.
