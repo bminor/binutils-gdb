@@ -1,6 +1,6 @@
 #name: MIPS textrel-1
 #source: textrel-1.s
-#as: -EB -n32
+#as: -march=from-abi -EB -n32
 #ld: -shared -melf32btsmipn32
 #readelf: -d
 

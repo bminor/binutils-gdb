@@ -41,14 +41,19 @@ proc at_least_gcc_version { major minor } {
     set state [remote_exec host $CC --version]
     set tmp "[lindex $state 1]\n"
     # Look for (eg) 4.6.1 in the version output.
-    regexp " .* (\[1-9\])\\.(\[0-9\])\\.\[0-9\]* .*" "$tmp" fred maj min
+    set ver_re "\[^\\.0-9\]+(\[1-9\]\[0-9\]*)\\.(\[0-9\]+)(?:\\.\[0-9\]+)?"
+    regexp $ver_re $tmp fred maj min
     verbose "gcc version: $tmp"
+    if { ![info exists maj] || ![info exists min] } then {
+	perror "can't decipher gcc version number, fix the framework!"
+	return 0
+    }
     verbose "major gcc version is $maj, want at least $major"
     if { $maj == $major } then {
 	verbose "minor gcc version is $min, want at least $minor"
-	return [expr  $min >= $minor ]
+	return [expr $min >= $minor]
     } else {
-	return [expr $maj > $major ]
+	return [expr $maj > $major]
     }
 }
 
@@ -431,7 +436,7 @@ proc ld_simple_link_defsyms {} {
     return $flags
 }
 
-# run_dump_test FILE
+# run_dump_test FILE (optional:) EXTRA_OPTIONS
 # Copied from gas testsuite, tweaked and further extended.
 #
 # Assemble a .s file, then run some utility on it and check the output.
@@ -455,6 +460,12 @@ proc ld_simple_link_defsyms {} {
 # Whitespace is ignored everywhere, except within VALUE.  The option
 # list ends with the first line that doesn't match the above syntax
 # (hmm, not great for error detection).
+#
+# The optional EXTRA_OPTIONS argument to `run_dump_test' is a list of
+# two-element lists.  The first element of each is an option name, and
+# the second additional arguments to be added on to the end of the
+# option list as given in FILE.d.  (If omitted, no additional options
+# are added.)
 #
 # The interesting options are:
 #
@@ -503,6 +514,11 @@ proc ld_simple_link_defsyms {} {
 #       More than one "source" directive can be given, which is useful
 #       when testing linking.
 #
+#   dump: DUMP
+#	Match against DUMP.d.  If omitted, this defaults to FILE.d.  This
+#	is useful if several .d files differ by options only.  Options are
+#	always read from FILE.d.
+#
 #   xfail: TARGET
 #       The test is expected to fail on TARGET.  This may occur more than
 #       once.
@@ -534,7 +550,7 @@ proc ld_simple_link_defsyms {} {
 # regexps in FILE.d.  `regexp_diff' is defined in binutils-common.exp;
 # see further comments there.
 #
-proc run_dump_test { name } {
+proc run_dump_test { name {extra_options {}} } {
     global subdir srcdir
     global OBJDUMP NM AS OBJCOPY READELF LD
     global OBJDUMPFLAGS NMFLAGS ASFLAGS OBJCOPYFLAGS READELFFLAGS LDFLAGS
@@ -574,6 +590,7 @@ proc run_dump_test { name } {
     set opts(name) {}
     set opts(PROG) {}
     set opts(source) {}
+    set opts(dump) {}
     set opts(error) {}
     set opts(warning) {}
     set opts(objcopy_linked_file) {}
@@ -636,6 +653,24 @@ proc run_dump_test { name } {
 	    }
 	}
     }
+
+    foreach i $extra_options {
+	set opt_name [lindex $i 0]
+	set opt_val [lindex $i 1]
+	if ![info exists opts($opt_name)] {
+	    perror "unknown option $opt_name given in extra_opts"
+	    unresolved $subdir/$name
+	    return
+	}
+	# Add extra option to end of existing option, adding space
+	# if necessary.
+	if { ![regexp "warning|error" $opt_name]
+	     && [string length $opts($opt_name)] } {
+	    append opts($opt_name) " "
+	}
+	append opts($opt_name) $opt_val
+    }
+
     foreach opt { as ld } {
 	regsub {\[big_or_little_endian\]} $opts($opt) \
 	    [big_or_little_endian] opts($opt)
@@ -714,6 +749,12 @@ proc run_dump_test { name } {
 		lappend sourcefiles "$srcdir/$subdir/$sf"
 	    }
 	}
+    }
+
+    if { $opts(dump) == "" } {
+	set dfile ${file}.d
+    } else {
+	set dfile $srcdir/$subdir/$opts(dump)
     }
 
     # Time to setup xfailures.
@@ -871,7 +912,7 @@ proc run_dump_test { name } {
     }
 
     if { $verbose > 2 } then { verbose "output is [file_contents $dumpfile]" 3 }
-    if { [regexp_diff $dumpfile "${file}.d"] } then {
+    if { [regexp_diff $dumpfile "${dfile}"] } then {
 	fail $testname
 	if { $verbose == 2 } then { verbose "output is [file_contents $dumpfile]" 2 }
 	return

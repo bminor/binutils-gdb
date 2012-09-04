@@ -306,12 +306,12 @@ struct mips_elf_la25_stub {
 #define LA25_LUI(VAL) (0x3c190000 | (VAL))	/* lui t9,VAL */
 #define LA25_J(VAL) (0x08000000 | (((VAL) >> 2) & 0x3ffffff)) /* j VAL */
 #define LA25_ADDIU(VAL) (0x27390000 | (VAL))	/* addiu t9,t9,VAL */
-#define LA25_LUI_MICROMIPS_1(VAL) (0x41b9)	/* lui t9,VAL */
-#define LA25_LUI_MICROMIPS_2(VAL) (VAL)
-#define LA25_J_MICROMIPS_1(VAL) (0xd400 | (((VAL) >> 17) & 0x3ff)) /* j VAL */
-#define LA25_J_MICROMIPS_2(VAL) ((VAL) >> 1)
-#define LA25_ADDIU_MICROMIPS_1(VAL) (0x3339)	/* addiu t9,t9,VAL */
-#define LA25_ADDIU_MICROMIPS_2(VAL) (VAL)
+#define LA25_LUI_MICROMIPS(VAL)						\
+  (0x41b90000 | (VAL))				/* lui t9,VAL */
+#define LA25_J_MICROMIPS(VAL)						\
+  (0xd4000000 | (((VAL) >> 1) & 0x3ffffff))	/* j VAL */
+#define LA25_ADDIU_MICROMIPS(VAL)					\
+  (0x33390000 | (VAL))				/* addiu t9,t9,VAL */
 
 /* This structure is passed to mips_elf_sort_hash_table_f when sorting
    the dynamic symbols.  */
@@ -1012,6 +1012,23 @@ static const bfd_vma mips_vxworks_shared_plt_entry[] =
   0x10000000,	/* b .PLT_resolver	*/
   0x24180000	/* li t8, <pltindex>	*/
 };
+
+/* microMIPS 32-bit opcode helper installer.  */
+
+static void
+bfd_put_micromips_32 (const bfd *abfd, bfd_vma opcode, bfd_byte *ptr)
+{
+  bfd_put_16 (abfd, (opcode >> 16) & 0xffff, ptr);
+  bfd_put_16 (abfd,  opcode        & 0xffff, ptr + 2);
+}
+
+/* microMIPS 32-bit opcode helper retriever.  */
+
+static bfd_vma
+bfd_get_micromips_32 (const bfd *abfd, const bfd_byte *ptr)
+{
+  return (bfd_get_16 (abfd, ptr) << 16) | bfd_get_16 (abfd, ptr + 2);
+}
 
 /* Look up an entry in a MIPS ELF linker hash table.  */
 
@@ -5343,7 +5360,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 				&& (target_is_16_bit_code_p
 				    || target_is_micromips_code_p))));
 
-  local_p = h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->root);
+  local_p = (h == NULL
+	     || (h->got_only_for_calls
+		 ? SYMBOL_CALLS_LOCAL (info, &h->root)
+		 : SYMBOL_REFERENCES_LOCAL (info, &h->root)));
 
   gp0 = _bfd_get_gp_value (input_bfd);
   gp = _bfd_get_gp_value (abfd);
@@ -5930,11 +5950,12 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 	  jalx_opcode = 0x1d;
 	}
 
-      /* If the opcode is not JAL or JALX, there's a problem.  */
+      /* If the opcode is not JAL or JALX, there's a problem.  We cannot
+         convert J or JALS to JALX.  */
       if (!ok)
 	{
 	  (*_bfd_error_handler)
-	    (_("%B: %A+0x%lx: Direct jumps between ISA modes are not allowed; consider recompiling with interlinking enabled."),
+	    (_("%B: %A+0x%lx: Unsupported jump between ISA modes; consider recompiling with interlinking enabled."),
 	     input_bfd,
 	     input_section,
 	     (unsigned long) relocation->r_offset);
@@ -9261,7 +9282,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 
 	  if (IRIX_COMPAT (dynobj) == ict_irix6
 	      && (bfd_get_section_by_name
-		  (dynobj, MIPS_ELF_OPTIONS_SECTION_NAME (dynobj)))
+		  (output_bfd, MIPS_ELF_OPTIONS_SECTION_NAME (dynobj)))
 	      && !MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_OPTIONS, 0))
 	    return FALSE;
 	}
@@ -9776,14 +9797,12 @@ mips_elf_create_la25_stub (void **slot, void *data)
       loc += offset;
       if (ELF_ST_IS_MICROMIPS (stub->h->root.other))
 	{
-	  bfd_put_16 (hti->output_bfd, LA25_LUI_MICROMIPS_1 (target_high),
-		      loc);
-	  bfd_put_16 (hti->output_bfd, LA25_LUI_MICROMIPS_2 (target_high),
-		      loc + 2);
-	  bfd_put_16 (hti->output_bfd, LA25_ADDIU_MICROMIPS_1 (target_low),
-		      loc + 4);
-	  bfd_put_16 (hti->output_bfd, LA25_ADDIU_MICROMIPS_2 (target_low),
-		      loc + 6);
+	  bfd_put_micromips_32 (hti->output_bfd,
+				LA25_LUI_MICROMIPS (target_high),
+				loc);
+	  bfd_put_micromips_32 (hti->output_bfd,
+				LA25_ADDIU_MICROMIPS (target_low),
+				loc + 4);
 	}
       else
 	{
@@ -9797,16 +9816,12 @@ mips_elf_create_la25_stub (void **slot, void *data)
       loc += offset;
       if (ELF_ST_IS_MICROMIPS (stub->h->root.other))
 	{
-	  bfd_put_16 (hti->output_bfd, LA25_LUI_MICROMIPS_1 (target_high),
-		      loc);
-	  bfd_put_16 (hti->output_bfd, LA25_LUI_MICROMIPS_2 (target_high),
-		      loc + 2);
-	  bfd_put_16 (hti->output_bfd, LA25_J_MICROMIPS_1 (target), loc + 4);
-	  bfd_put_16 (hti->output_bfd, LA25_J_MICROMIPS_2 (target), loc + 6);
-	  bfd_put_16 (hti->output_bfd, LA25_ADDIU_MICROMIPS_1 (target_low),
-		      loc + 8);
-	  bfd_put_16 (hti->output_bfd, LA25_ADDIU_MICROMIPS_2 (target_low),
-		      loc + 10);
+	  bfd_put_micromips_32 (hti->output_bfd,
+				LA25_LUI_MICROMIPS (target_high), loc);
+	  bfd_put_micromips_32 (hti->output_bfd,
+				LA25_J_MICROMIPS (target), loc + 4);
+	  bfd_put_micromips_32 (hti->output_bfd,
+				LA25_ADDIU_MICROMIPS (target_low), loc + 8);
 	  bfd_put_32 (hti->output_bfd, 0, loc + 12);
 	}
       else
@@ -12339,7 +12354,7 @@ check_br32_dslot (bfd *abfd, bfd_byte *ptr)
   unsigned long opcode;
   int bdsize;
 
-  opcode = (bfd_get_16 (abfd, ptr) << 16) | bfd_get_16 (abfd, ptr + 2);
+  opcode = bfd_get_micromips_32 (abfd, ptr);
   if (find_match (opcode, ds_insns_32_bd32) >= 0)
     /* 32-bit branch/jump with a 32-bit delay slot.  */
     bdsize = 4;
@@ -12384,7 +12399,7 @@ check_br32 (bfd *abfd, bfd_byte *ptr, unsigned long reg)
 {
   unsigned long opcode;
 
-  opcode = (bfd_get_16 (abfd, ptr) << 16) | bfd_get_16 (abfd, ptr + 2);
+  opcode = bfd_get_micromips_32 (abfd, ptr);
   if (MATCH (opcode, j_insn_32)
 						/* J  */
       || MATCH (opcode, bc_insn_32)
@@ -12416,9 +12431,7 @@ check_relocated_bzc (bfd *abfd, const bfd_byte *ptr, bfd_vma offset,
   const Elf_Internal_Rela *irel;
   unsigned long opcode;
 
-  opcode   = bfd_get_16 (abfd, ptr);
-  opcode <<= 16;
-  opcode  |= bfd_get_16 (abfd, ptr + 2);
+  opcode = bfd_get_micromips_32 (abfd, ptr);
   if (find_match (opcode, bzc_insns_32) < 0)
     return FALSE;
 
@@ -12576,8 +12589,7 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
       if (irel->r_offset + 4 > sec->size)
 	continue;
 
-      opcode  = bfd_get_16 (abfd, ptr    ) << 16;
-      opcode |= bfd_get_16 (abfd, ptr + 2);
+      opcode = bfd_get_micromips_32 (abfd, ptr);
 
       /* This is the pc-relative distance from the instruction the
          relocation is applied to, to the symbol referred.  */
@@ -12659,8 +12671,7 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 	      continue;
 	    }
 
-	  nextopc  = bfd_get_16 (abfd, contents + irel[1].r_offset    ) << 16;
-	  nextopc |= bfd_get_16 (abfd, contents + irel[1].r_offset + 2);
+	  nextopc = bfd_get_micromips_32 (abfd, contents + irel[1].r_offset);
 
 	  /* Give up unless the same register is used with both
 	     relocations.  */
@@ -12701,10 +12712,8 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 	      nextopc = (addiupc_insn.match
 			 | ADDIUPC_REG_FIELD (OP32_TREG (nextopc)));
 
-	      bfd_put_16 (abfd, (nextopc >> 16) & 0xffff,
-			  contents + irel[1].r_offset);
-	      bfd_put_16 (abfd,  nextopc        & 0xffff,
-			  contents + irel[1].r_offset + 2);
+	      bfd_put_micromips_32 (abfd, nextopc,
+				    contents + irel[1].r_offset);
 	    }
 
 	  /* Can't do anything, give up, sigh...  */
@@ -12738,8 +12747,7 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 		    | BZC32_REG_FIELD (reg)
 		    | (opcode & 0xffff));		/* Addend value.  */
 
-	  bfd_put_16 (abfd, (opcode >> 16) & 0xffff, ptr);
-	  bfd_put_16 (abfd,  opcode        & 0xffff, ptr + 2);
+	  bfd_put_micromips_32 (abfd, opcode, ptr);
 
 	  /* Delete the 16-bit delay slot NOP: two bytes from
 	     irel->offset + 4.  */
@@ -12804,8 +12812,7 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 	  unsigned long n32opc;
 	  bfd_boolean relaxed = FALSE;
 
-	  n32opc  = bfd_get_16 (abfd, ptr + 4) << 16;
-	  n32opc |= bfd_get_16 (abfd, ptr + 6);
+	  n32opc = bfd_get_micromips_32 (abfd, ptr + 4);
 
 	  if (MATCH (n32opc, nop_insn_32))
 	    {
@@ -12832,10 +12839,7 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 	    {
 	      /* JAL with 32-bit delay slot that is changed to a JALS
 	         with 16-bit delay slot.  */
-	      bfd_put_16 (abfd, (jal_insn_32_bd16.match >> 16) & 0xffff,
-			  ptr);
-	      bfd_put_16 (abfd,  jal_insn_32_bd16.match        & 0xffff,
-			  ptr + 2);
+	      bfd_put_micromips_32 (abfd, jal_insn_32_bd16.match, ptr);
 
 	      /* Delete 2 bytes from irel->r_offset + 6.  */
 	      delcnt = 2;

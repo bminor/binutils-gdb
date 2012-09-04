@@ -115,7 +115,7 @@ const struct mips_opcode micromips_opcodes[] =
 /* These instructions appear first so that the disassembler will find
    them first.  The assemblers uses a hash table based on the
    instruction name anyhow.  */
-/* name,    args,	match,      mask,	pinfo,			pinfo2,		membership */
+/* name,    args,	match,      mask,	pinfo,			pinfo2,		membership,	[exclusions] */
 {"pref",    "k,~(b)",	0x60002000, 0xfc00f000,	RD_b,			0,		I1	},
 {"pref",    "k,o(b)",	0,    (int) M_PREF_OB,	INSN_MACRO,		0,		I1	},
 {"pref",    "k,A(b)",	0,    (int) M_PREF_AB,	INSN_MACRO,		0,		I1	},

@@ -146,7 +146,7 @@ static int error_index;
 %token STARTUP HLL SYSLIB FLOAT NOFLOAT NOCROSSREFS
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
-%token ALIGNMOD AT SUBALIGN PROVIDE PROVIDE_HIDDEN AS_NEEDED
+%token ALIGNMOD AT SUBALIGN HIDDEN PROVIDE PROVIDE_HIDDEN AS_NEEDED
 %type <token> assign_op atype attributes_opt sect_constraint
 %type <name>  filename
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD ASSERT_K
@@ -759,7 +759,7 @@ end:	';' | ','
 assignment:
 		NAME '=' mustbe_exp
 		{
-		  lang_add_assignment (exp_assign ($1, $3));
+		  lang_add_assignment (exp_assign ($1, $3, FALSE));
 		}
 	|	NAME assign_op mustbe_exp
 		{
@@ -767,7 +767,11 @@ assignment:
 						   exp_binop ($2,
 							      exp_nameop (NAME,
 									  $1),
-							      $3)));
+							      $3), FALSE));
+		}
+	|	HIDDEN '(' NAME '=' mustbe_exp ')'
+		{
+		  lang_add_assignment (exp_assign ($3, $5, TRUE));
 		}
 	|	PROVIDE '(' NAME '=' mustbe_exp ')'
 		{
@@ -1085,7 +1089,7 @@ section:	NAME 		{ ldlex_expression(); }
 		opt_exp_with_type
 		{
 		  ldlex_popstate ();
-		  lang_add_assignment (exp_assign (".", $3));
+		  lang_add_assignment (exp_assign (".", $3, FALSE));
 		}
 		'{' sec_or_group_p1 '}'
 	|	INCLUDE filename

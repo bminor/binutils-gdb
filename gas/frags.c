@@ -101,9 +101,11 @@ frag_grow (unsigned int nchars)
       if (newc < 0)
         as_fatal (_("can't extend frag %u chars"), nchars);
 
-      /* Force to allocate at least NEWC bytes.  */
+      /* Force to allocate at least NEWC bytes, but not less than the
+         default.  */
       oldc = obstack_chunk_size (&frchain_now->frch_obstack);
-      obstack_chunk_size (&frchain_now->frch_obstack) = newc;
+      if (newc > oldc)
+	obstack_chunk_size (&frchain_now->frch_obstack) = newc;
 
       while (obstack_room (&frchain_now->frch_obstack) < nchars)
         {

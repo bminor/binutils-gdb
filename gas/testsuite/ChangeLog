@@ -1,3 +1,44 @@
+	* gas/mips/mips.exp: Set has_newabi for all Linux targets.
+	* gas/mips/cfi-n64-1.d: Adjust for targets that do not infer the
+	ISA from the ABI.
+	* gas/mips/elf-rel-got-n32.d: Likewise.
+	* gas/mips/elf-rel-got-n64.d: Likewise.
+	* gas/mips/elf-rel-xgot-n32.d: Likewise.
+	* gas/mips/elf-rel-xgot-n64.d: Likewise.
+	* gas/mips/elf-rel18.d: Likewise.
+	* gas/mips/elf-rel28-n32.d: Likewise.
+	* gas/mips/elf-rel28-n64.d: Likewise.
+	* gas/mips/jal-newabi.d: Likewise.
+	* gas/mips/ldstla-n64-shared.d: Likewise.
+	* gas/mips/ldstla-n64-sym32.d: Likewise.
+	* gas/mips/ldstla-n64.d: Likewise.
+	* gas/mips/macro-warn-1-n32.d: Likewise.
+	* gas/mips/macro-warn-2-n32.d: Likewise.
+	* gas/mips/n32-consec.d: Likewise.
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/mips.exp: Set has_newabi for mips*-sde-elf* too.
+	* gas/mips/elf-rel-got-n32.s: Adjust padding.
+	* gas/mips/elf-rel-got-n64.s: Likewise.
+	* gas/mips/elf-rel23.s: Likewise.
+	* gas/mips/elf-rel28.s: Likewise.
+	* gas/mips/n32-consec.s: Likewise.
+	* gas/mips/elf-rel-xgot-n32.d: Adjust output expected.
+	* gas/mips/elf-rel-xgot-n64.d: Likewise.
+	* gas/mips/elf-rel23.d: Likewise.
+	* gas/mips/elf-rel23a.d: Likewise.
+	* gas/mips/elf-rel23b.d: Likewise.
+	* gas/mips/elf-rel28-n32.d: Likewise.
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/branch-swap-2.l: New list test.
+	* gas/mips/branch-swap-2.s: New test source.
+	* gas/mips/mips.exp: Run the new test.
+
 	* gas/mips/micromips@mips32-dsp.d: New test.
 	* gas/mips/micromips@mips32-dspr2.d: New test.
 	* gas/mips/mips32-dsp.s: Update padding.

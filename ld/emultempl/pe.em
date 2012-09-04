@@ -944,7 +944,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
       lang_assignment_statement_type *rv;
 
       rv = lang_add_assignment (exp_assign (GET_INIT_SYMBOL_NAME (j),
-					    exp_intop (val)));
+					    exp_intop (val), FALSE));
       if (init[j].size == sizeof (short))
 	*(short *) init[j].ptr = val;
       else if (init[j].size == sizeof (int))
@@ -1721,8 +1721,9 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 		= pe_def_file->base_address;
 	      init[IMAGEBASEOFF].inited = 1;
 	      if (image_base_statement)
-		image_base_statement->exp = exp_assign ("__image_base__",
-							exp_intop (pe.ImageBase));
+		image_base_statement->exp
+		  = exp_assign ("__image_base__", exp_intop (pe.ImageBase),
+				FALSE);
 	    }
 
 	  if (pe_def_file->stack_reserve != -1
