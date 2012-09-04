@@ -1,3 +1,8 @@
+2012-09-03 Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Always link against dv-sockser.o.
+	* configure: Regenerate.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* config.in, configure: Regenerate.

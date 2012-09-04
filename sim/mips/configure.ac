@@ -409,14 +409,13 @@ case "${target}" in
   mips*tx39*)
 	hw_enabled=yes
 	hw_extra_devices="tx3904cpu tx3904irc tx3904tmr tx3904sio" 
-	mips_extra_objs="dv-sockser.o"
 	SIM_SUBTARGET="$SIM_SUBTARGET -DTARGET_TX3904=1"
 	;;
   *)
-	mips_extra_objs="" 
 	;;
 esac
 SIM_AC_OPTION_HARDWARE($hw_enabled,$hw_devices,$hw_extra_devices)
+mips_extra_objs="dv-sockser.o"
 AC_SUBST(mips_extra_objs)
 
 
