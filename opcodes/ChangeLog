@@ -1,3 +1,21 @@
+2012-09-04  Sergey A. Guriev <sergey.a.guriev@intel.com>
+
+	* ia64-asmtab.h (completer_index): Extend bitfield to full uint.
+	* ia64-gen.c: Promote completer index type to longlong.
+	(irf_operand): Add new register recognition.
+	(in_iclass_mov_x): Add an entry for the new mov_* instruction type.
+	(lookup_specifier): Add new resource recognition.
+	(insert_bit_table_ent): Relax abort condition according to the
+	changed completer index type.
+	(print_dis_table): Fix printf format for completer index.
+	* ia64-ic.tbl: Add a new instruction class.
+	* ia64-opc-i.c (ia64_opcodes_i): Define new I-instructions.
+	* ia64-opc-m.c (ia64_opcodes_m): Define new M-instructions.
+	* ia64-opc.h: Define short names for new operand types.
+	* ia64-raw.tbl: Add new RAW resource for DAHR register.
+	* ia64-waw.tbl: Add new WAW resource for DAHR register.
+	* ia64-asmtab.c: Regenerate.
+
 2012-08-29  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (VXASHB_MASK): New define.

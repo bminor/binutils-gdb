@@ -1,3 +1,11 @@
+2012-09-04  Sergey A. Guriev <sergey.a.guriev@intel.com>
+
+	* cpu-ia64-opc.c (ins_cnt6a): New function.
+	(ext_cnt6a): Ditto.
+	(ins_strd5b): Ditto.
+	(ext_strd5b): Ditto.
+	(elf64_ia64_operands): Add new operand types.
+
 2012-09-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14493

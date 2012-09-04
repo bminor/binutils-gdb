@@ -1,3 +1,13 @@
+2012-09-04  Sergey A. Guriev  <sergey.a.guriev@intel.com>
+
+	* config/tc-ia64.c (reg_symbol): Add a new register.
+	(indirect_reg): Ditto.
+	(pseudo_func): Add new symbolic constants.
+	(operand_match): Add new operand types recognition.
+	(operand_insn): Add new register recognition.
+	(md_begin): Add new register definition.
+	(specify_resource): Add new register recognition.
+
 2012-09-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR gas/14521

@@ -1,3 +1,11 @@
+2012-09-04  Sergey A. Guriev  <sergey.a.guriev@intel.com>
+
+	* gas/testsuite/gas/ia64/psn.d: New file.
+	* gas/testsuite/gas/ia64/psn.s: New file.
+	* gas/testsuite/gas/ia64/ia64.exp: Add new testcase.
+	* gas/testsuite/gas/ia64/opc-i.d: Fixed failing tests.
+	* gas/testsuite/gas/ia64/opc-m.d: Ditto.
+
 2012-09-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR gas/14521
