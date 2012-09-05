@@ -1,5 +1,17 @@
 2012-09-05  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Powerpc_relobj::get_opd_ent): Make const.
+	(Powerpc_relocate_functions::Status): New typedef.
+	(Target_powerpc::Scan::get_reference_flags): Handle more relocs.
+	(Target_powerpc::Scan::local): Handle REL64.
+	(Target_powerpc::Scan::global): Likewise, and dynamic relocs
+	for REL32 and REL64.
+	(Target_powerpc::symval_for_branch): New function, extracted from..
+	(Target_powerpc::Relocate::relocate): ..here.  Correct plt call
+	checks.  Report overflow errors.
+
+2012-09-05  Alan Modra  <amodra@gmail.com>
+
 	* object.h (Sized_relobj_file::emit_relocs): Delete.
 	(Sized_relobj_file::emit_relocs_reltype): Delete.
 	* reloc.cc (Sized_relobj_file::do_relocate_sections): Call target

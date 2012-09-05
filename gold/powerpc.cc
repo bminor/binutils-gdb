@@ -100,7 +100,7 @@ public:
 
   // Return section and offset of function entry for .opd + R_OFF.
   void
-  get_opd_ent(Address r_off, unsigned int* shndx, Address* value)
+  get_opd_ent(Address r_off, unsigned int* shndx, Address* value) const
   {
     size_t ndx = this->opd_ent_ndx(r_off);
     gold_assert(ndx < this->opd_ent_shndx_.size());
@@ -410,6 +410,11 @@ class Target_powerpc : public Sized_target<size, big_endian>
     // Whether we have issued an error about a non-PIC compilation.
     bool issued_non_pic_error_;
   };
+
+  Address
+  symval_for_branch(Address value, const Sized_symbol<size>* gsym,
+		    Powerpc_relobj<size, big_endian>* object,
+		    unsigned int *dest_shndx);
 
   // The class which implements relocation.
   class Relocate
@@ -847,11 +852,11 @@ public:
     check_bitfield
   };
 
-  enum overflow_status
+  typedef enum overflow_status
   {
     status_ok,
     status_overflow
-  };
+  } Status;
 
 private:
   typedef Powerpc_relocate_functions<size, big_endian> This;
@@ -2190,6 +2195,7 @@ Target_powerpc<size, big_endian>::Scan::check_non_pic(Relobj* object,
   // and 64-bit powerpc.
   switch (r_type)
     {
+    case elfcpp::R_POWERPC_NONE:
     case elfcpp::R_POWERPC_RELATIVE:
     case elfcpp::R_POWERPC_GLOB_DAT:
     case elfcpp::R_POWERPC_DTPMOD:
@@ -2197,9 +2203,24 @@ Target_powerpc<size, big_endian>::Scan::check_non_pic(Relobj* object,
     case elfcpp::R_POWERPC_TPREL:
     case elfcpp::R_POWERPC_JMP_SLOT:
     case elfcpp::R_POWERPC_COPY:
+    case elfcpp::R_POWERPC_IRELATIVE:
     case elfcpp::R_POWERPC_ADDR32:
+    case elfcpp::R_POWERPC_UADDR32:
     case elfcpp::R_POWERPC_ADDR24:
+    case elfcpp::R_POWERPC_ADDR16:
+    case elfcpp::R_POWERPC_UADDR16:
+    case elfcpp::R_POWERPC_ADDR16_LO:
+    case elfcpp::R_POWERPC_ADDR16_HI:
+    case elfcpp::R_POWERPC_ADDR16_HA:
+    case elfcpp::R_POWERPC_ADDR14:
+    case elfcpp::R_POWERPC_ADDR14_BRTAKEN:
+    case elfcpp::R_POWERPC_ADDR14_BRNTAKEN:
+    case elfcpp::R_POWERPC_REL32:
     case elfcpp::R_POWERPC_REL24:
+    case elfcpp::R_POWERPC_TPREL16:
+    case elfcpp::R_POWERPC_TPREL16_LO:
+    case elfcpp::R_POWERPC_TPREL16_HI:
+    case elfcpp::R_POWERPC_TPREL16_HA:
       return;
 
     default:
@@ -2212,34 +2233,22 @@ Target_powerpc<size, big_endian>::Scan::check_non_pic(Relobj* object,
 	{
 	  // These are the relocation types supported only on 64-bit.
 	case elfcpp::R_PPC64_ADDR64:
-	case elfcpp::R_PPC64_TPREL16_LO_DS:
-	case elfcpp::R_PPC64_TPREL16_DS:
-	case elfcpp::R_POWERPC_TPREL16:
-	case elfcpp::R_POWERPC_TPREL16_LO:
-	case elfcpp::R_POWERPC_TPREL16_HI:
-	case elfcpp::R_POWERPC_TPREL16_HA:
-	case elfcpp::R_PPC64_TPREL16_HIGHER:
-	case elfcpp::R_PPC64_TPREL16_HIGHEST:
-	case elfcpp::R_PPC64_TPREL16_HIGHERA:
-	case elfcpp::R_PPC64_TPREL16_HIGHESTA:
-	case elfcpp::R_PPC64_ADDR16_LO_DS:
-	case elfcpp::R_POWERPC_ADDR16_LO:
-	case elfcpp::R_POWERPC_ADDR16_HI:
-	case elfcpp::R_POWERPC_ADDR16_HA:
-	case elfcpp::R_POWERPC_ADDR30:
 	case elfcpp::R_PPC64_UADDR64:
-	case elfcpp::R_POWERPC_UADDR32:
-	case elfcpp::R_POWERPC_ADDR16:
-	case elfcpp::R_POWERPC_UADDR16:
+	case elfcpp::R_PPC64_JMP_IREL:
 	case elfcpp::R_PPC64_ADDR16_DS:
+	case elfcpp::R_PPC64_ADDR16_LO_DS:
 	case elfcpp::R_PPC64_ADDR16_HIGHER:
 	case elfcpp::R_PPC64_ADDR16_HIGHEST:
 	case elfcpp::R_PPC64_ADDR16_HIGHERA:
 	case elfcpp::R_PPC64_ADDR16_HIGHESTA:
-	case elfcpp::R_POWERPC_ADDR14_BRTAKEN:
-	case elfcpp::R_POWERPC_ADDR14_BRNTAKEN:
-	case elfcpp::R_POWERPC_REL32:
 	case elfcpp::R_PPC64_REL64:
+	case elfcpp::R_POWERPC_ADDR30:
+	case elfcpp::R_PPC64_TPREL16_DS:
+	case elfcpp::R_PPC64_TPREL16_LO_DS:
+	case elfcpp::R_PPC64_TPREL16_HIGHER:
+	case elfcpp::R_PPC64_TPREL16_HIGHEST:
+	case elfcpp::R_PPC64_TPREL16_HIGHERA:
+	case elfcpp::R_PPC64_TPREL16_HIGHESTA:
 	  return;
 
 	default:
@@ -2251,6 +2260,12 @@ Target_powerpc<size, big_endian>::Scan::check_non_pic(Relobj* object,
       switch (r_type)
 	{
 	  // These are the relocation types supported only on 32-bit.
+	  // ??? glibc ld.so doesn't need to support these.
+	case elfcpp::R_POWERPC_DTPREL16:
+	case elfcpp::R_POWERPC_DTPREL16_LO:
+	case elfcpp::R_POWERPC_DTPREL16_HI:
+	case elfcpp::R_POWERPC_DTPREL16_HA:
+	  return;
 
 	default:
 	  break;
@@ -2361,6 +2376,7 @@ Target_powerpc<size, big_endian>::Scan::local(
 	}
       break;
 
+    case elfcpp::R_PPC64_REL64:
     case elfcpp::R_POWERPC_REL32:
     case elfcpp::R_POWERPC_REL24:
     case elfcpp::R_PPC_LOCAL24PC:
@@ -2670,35 +2686,36 @@ Target_powerpc<size, big_endian>::Scan::global(
 
     case elfcpp::R_PPC_PLTREL24:
     case elfcpp::R_POWERPC_REL24:
-      {
-	if (gsym->needs_plt_entry()
-	    || (!gsym->final_value_is_known()
-		 && !(gsym->is_defined()
-		      && !gsym->is_from_dynobj()
-		      && !gsym->is_preemptible())))
-	  target->make_plt_entry(layout, gsym, reloc, object);
-	// Make a dynamic relocation if necessary.
-	if (needs_dynamic_reloc<size>(gsym, Scan::get_reference_flags(r_type)))
-	  {
-	    if (gsym->may_need_copy_reloc())
-	      {
-		target->copy_reloc(symtab, layout, object,
-				   data_shndx, output_section, gsym,
-				   reloc);
-	      }
-	    else
-	      {
-		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-		check_non_pic(object, r_type);
-		rela_dyn->add_global(gsym, r_type, output_section, object,
-				     data_shndx, reloc.get_r_offset(),
-				     reloc.get_r_addend());
-	      }
-	  }
-      }
+      if (gsym->needs_plt_entry()
+	  || (!gsym->final_value_is_known()
+	      && (gsym->is_undefined()
+		  || gsym->is_from_dynobj()
+		  || gsym->is_preemptible())))
+	target->make_plt_entry(layout, gsym, reloc, object);
+      // Fall thru
+
+    case elfcpp::R_PPC64_REL64:
+    case elfcpp::R_POWERPC_REL32:
+      // Make a dynamic relocation if necessary.
+      if (needs_dynamic_reloc<size>(gsym, Scan::get_reference_flags(r_type)))
+	{
+	  if (gsym->may_need_copy_reloc())
+	    {
+	      target->copy_reloc(symtab, layout, object,
+				 data_shndx, output_section, gsym,
+				 reloc);
+	    }
+	  else
+	    {
+	      Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	      check_non_pic(object, r_type);
+	      rela_dyn->add_global(gsym, r_type, output_section, object,
+				   data_shndx, reloc.get_r_offset(),
+				   reloc.get_r_addend());
+	    }
+	}
       break;
 
-    case elfcpp::R_POWERPC_REL32:
     case elfcpp::R_POWERPC_REL16:
     case elfcpp::R_POWERPC_REL16_LO:
     case elfcpp::R_POWERPC_REL16_HI:
@@ -3022,6 +3039,43 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
     this->copy_relocs_.emit(this->rela_dyn_section(layout));
 }
 
+// Return the value to use for a branch relocation.
+
+template<int size, bool big_endian>
+typename elfcpp::Elf_types<size>::Elf_Addr
+Target_powerpc<size, big_endian>::symval_for_branch(
+    Address value,
+    const Sized_symbol<size>* gsym,
+    Powerpc_relobj<size, big_endian>* object,
+    unsigned int *dest_shndx)
+{
+  *dest_shndx = 0;
+  if (size == 32)
+    return value;
+
+  // If the symbol is defined in an opd section, ie. is a function
+  // descriptor, use the function descriptor code entry address
+  Powerpc_relobj<size, big_endian>* symobj = object;
+  if (gsym != NULL)
+    symobj = static_cast<Powerpc_relobj<size, big_endian>*>(gsym->object());
+  unsigned int shndx = symobj->opd_shndx();
+  if (shndx == 0)
+    return value;
+  Address opd_addr = symobj->get_output_section_offset(shndx);
+  gold_assert(opd_addr != invalid_address);
+  opd_addr += symobj->output_section(shndx)->address();
+  if (value >= opd_addr && value < opd_addr + symobj->section_size(shndx))
+    {
+      Address sec_off;
+      symobj->get_opd_ent(value - opd_addr, dest_shndx, &sec_off);
+      Address sec_addr = symobj->get_output_section_offset(*dest_shndx);
+      gold_assert(sec_addr != invalid_address);
+      sec_addr += symobj->output_section(*dest_shndx)->address();
+      value = sec_addr + sec_off;
+    }
+  return value;
+}
+
 // Perform a relocation.
 
 template<int size, bool big_endian>
@@ -3060,8 +3114,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 
   typedef Powerpc_relocate_functions<size, big_endian> Reloc;
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insn;
-  const Powerpc_relobj<size, big_endian>* const object
-    = static_cast<const Powerpc_relobj<size, big_endian>*>(relinfo->object);
+  Powerpc_relobj<size, big_endian>* const object
+    = static_cast<Powerpc_relobj<size, big_endian>*>(relinfo->object);
   Address value = 0;
   bool has_plt_value = false;
   if (gsym != NULL
@@ -3111,17 +3165,50 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  bool can_plt_call = false;
 	  if (rela.get_r_offset() + 8 <= view_size)
 	    {
+	      Valtype insn = elfcpp::Swap<32, big_endian>::readval(wv);
 	      Valtype insn2 = elfcpp::Swap<32, big_endian>::readval(wv + 1);
-	      if (insn2 == nop
-		  || insn2 == cror_15_15_15 || insn2 == cror_31_31_31)
+	      if ((insn & 1) != 0
+		  && (insn2 == nop
+		      || insn2 == cror_15_15_15 || insn2 == cror_31_31_31))
 		{
 		  elfcpp::Swap<32, big_endian>::writeval(wv + 1, ld_2_1 + 40);
 		  can_plt_call = true;
 		}
 	    }
 	  if (!can_plt_call)
-	    gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
-				   _("call lacks nop, can't restore toc"));
+	    {
+	      // If we don't have a branch and link followed by a nop,
+	      // we can't go via the plt because there is no place to
+	      // put a toc restoring instruction.
+	      // Unless we know we won't be returning.
+	      if (strcmp(gsym->name(), "__libc_start_main") == 0)
+		can_plt_call = true;
+	    }
+	  if (!can_plt_call)
+	    {
+	      // This is not an error in one special case: A self
+	      // call.  It isn't possible to cheaply verify we have
+	      // such a call so just check for a call to the same
+	      // section.
+	      bool ok = false;
+	      if (gsym->source() == Symbol::FROM_OBJECT
+		  && gsym->object() == object)
+		{
+		  Address addend = rela.get_r_addend();
+		  unsigned int dest_shndx;
+		  value = psymval->value(object, addend);
+		  value = target->symval_for_branch(value, gsym, object,
+						    &dest_shndx);
+		  bool is_ordinary;
+		  if (dest_shndx == 0)
+		    dest_shndx = gsym->shndx(&is_ordinary);
+		  ok = dest_shndx == relinfo->data_shndx;
+		}
+	      if (!ok)
+		gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+				       _("call lacks nop, can't restore toc; "
+					 "recompile with -fPIC"));
+	    }
 	}
     }
   else if (r_type == elfcpp::R_POWERPC_GOT_TLSGD16
@@ -3365,34 +3452,13 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   else
     {
       Address addend = 0;
+      unsigned int dest_shndx;
       if (r_type != elfcpp::R_PPC_PLTREL24)
 	addend = rela.get_r_addend();
       if (size == 64 || !has_plt_value)
 	value = psymval->value(object, addend);
       if (size == 64 && is_branch_reloc(r_type))
-	{
-	  // If the symbol is defined in an opd section, ie. is a function
-	  // descriptor, use the function descriptor code entry address
-	  Powerpc_relobj<size, big_endian>* symobj = const_cast
-	    <Powerpc_relobj<size, big_endian>*>(object);
-	  if (gsym != NULL)
-	    symobj = static_cast
-	      <Powerpc_relobj<size, big_endian>*>(gsym->object());
-	  unsigned int shndx = symobj->opd_shndx();
-	  Address opd_addr = symobj->get_output_section_offset(shndx);
-	  gold_assert(opd_addr != invalid_address);
-	  opd_addr += symobj->output_section(shndx)->address();
-	  if (value >= opd_addr
-	      && value < opd_addr + symobj->section_size(shndx))
-	    {
-	      Address sec_off;
-	      symobj->get_opd_ent(value - opd_addr, &shndx, &sec_off);
-	      Address sec_addr = symobj->get_output_section_offset(shndx);
-	      gold_assert(sec_addr != invalid_address);
-	      sec_addr += symobj->output_section(shndx)->address();
-	      value = sec_addr + sec_off;
-	    }
-	}
+	value = target->symval_for_branch(value, gsym, object, &dest_shndx);
     }
 
   switch (r_type)
@@ -3562,6 +3628,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       break;
     }
 
+  typename Powerpc_relocate_functions<size, big_endian>::Status status
+    = Powerpc_relocate_functions<size, big_endian>::status_ok;
   switch (r_type)
     {
     case elfcpp::R_POWERPC_NONE:
@@ -3582,7 +3650,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (size == 64)
 	Reloc::addr64(view, value);
       else
-	Reloc::addr32(view, value, overflow);
+	status = Reloc::addr32(view, value, overflow);
       break;
 
     case elfcpp::R_PPC64_UADDR64:
@@ -3591,25 +3659,25 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 
     case elfcpp::R_POWERPC_ADDR32:
     case elfcpp::R_POWERPC_REL32:
-      Reloc::addr32(view, value, overflow);
+      status = Reloc::addr32(view, value, overflow);
       break;
 
     case elfcpp::R_POWERPC_UADDR32:
-      Reloc::addr32_u(view, value, overflow);
+      status = Reloc::addr32_u(view, value, overflow);
       break;
 
     case elfcpp::R_POWERPC_ADDR24:
     case elfcpp::R_POWERPC_REL24:
     case elfcpp::R_PPC_PLTREL24:
     case elfcpp::R_PPC_LOCAL24PC:
-      Reloc::addr24(view, value, overflow);
+      status = Reloc::addr24(view, value, overflow);
       break;
 
     case elfcpp::R_POWERPC_GOT_DTPREL16:
     case elfcpp::R_POWERPC_GOT_DTPREL16_LO:
       if (size == 64)
 	{
-	  Reloc::addr16_ds(view, value, overflow);
+	  status = Reloc::addr16_ds(view, value, overflow);
 	  break;
 	}
     case elfcpp::R_POWERPC_ADDR16:
@@ -3632,11 +3700,11 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_GOT_TLSGD16_LO:
     case elfcpp::R_POWERPC_GOT_TLSLD16_LO:
     case elfcpp::R_POWERPC_GOT_TPREL16_LO:
-      Reloc::addr16(view, value, overflow);
+      status = Reloc::addr16(view, value, overflow);
       break;
 
     case elfcpp::R_POWERPC_UADDR16:
-      Reloc::addr16_u(view, value, overflow);
+      status = Reloc::addr16_u(view, value, overflow);
       break;
 
     case elfcpp::R_POWERPC_ADDR16_HI:
@@ -3721,7 +3789,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_PPC64_GOT16_LO_DS:
     case elfcpp::R_PPC64_SECTOFF_DS:
     case elfcpp::R_PPC64_SECTOFF_LO_DS:
-      Reloc::addr16_ds(view, value, overflow);
+      status = Reloc::addr16_ds(view, value, overflow);
       break;
 
     case elfcpp::R_POWERPC_ADDR14:
@@ -3730,7 +3798,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_REL14:
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
-      Reloc::addr14(view, value, overflow);
+      status = Reloc::addr14(view, value, overflow);
       break;
 
     case elfcpp::R_POWERPC_COPY:
@@ -3791,6 +3859,9 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 			     r_type);
       break;
     }
+  if (status != Powerpc_relocate_functions<size, big_endian>::status_ok)
+    gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+			   _("relocation overflow"));
 
   return true;
 }
