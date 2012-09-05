@@ -37,6 +37,7 @@ SECTIONS
   . = ALIGN(0x100);
   .dynamic : { *(.dynamic) }
   .data : { *(.data) }
+  .got : { *(.got .toc) }
   . += 0x100000;
   . = ALIGN(0x100);
   .bss : { *(.bss) }

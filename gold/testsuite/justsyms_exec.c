@@ -47,7 +47,10 @@ check(void *sym, long v, const char *name)
 int
 main(void)
 {
+#ifndef __powerpc64__
+  /* PowerPC64 uses function descriptors.  */
   check(exported_func, 0x1000200, "exported_func");
+#endif
   check(&exported_data, 0x2000000, "exported_data");
   return errs;
 }

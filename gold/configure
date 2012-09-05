@@ -6279,7 +6279,7 @@ fi
 
  if
   case $target_cpu in
-    i?86) true;;
+    powerpc*) false;;
     x86_64) false;;
     sparc64) false;;
     *) true;;

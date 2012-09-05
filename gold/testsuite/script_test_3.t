@@ -35,6 +35,7 @@ SECTIONS
   . = ALIGN(0x100);
   .dynamic : { *(.dynamic) } :data :dynamic
   .data : { *(.data) } :data
+  .got : { *(.got .toc) }
   .tdata : { *(.tdata*) } :data :tls
   .tbss : { *(.tbss*) } :data :tls
   . += 0x100000;

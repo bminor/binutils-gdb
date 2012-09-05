@@ -38,6 +38,7 @@ SECTIONS
 
   . = SEGMENT_START(".data", 0x10200000);
   .data : { *(.data) }
+  .got : { *(.got .toc) }
 
   . = SEGMENT_START(".bss", 0x10400000);
   .bss : { *(.bss) }

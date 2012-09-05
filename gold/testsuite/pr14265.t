@@ -15,6 +15,8 @@ SECTIONS
         KEEP(*(.foo2.*))
         __foo2_end = .;
     }
+
+    .got : { *(.got .toc) }
 }
 
 

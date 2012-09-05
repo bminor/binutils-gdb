@@ -32,6 +32,7 @@ SECTIONS
   . += 0x100000;
   . = ALIGN(0x100);
   .data : { *(.data) }
+  .got : { *(.got .toc) }
   .bss : { *(.bss) }
 
   /* Now the real test.  */

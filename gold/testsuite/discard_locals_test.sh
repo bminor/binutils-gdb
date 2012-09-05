@@ -55,8 +55,10 @@ check_non_discarded()
 
 check_discarded     "discard_locals_test.syms" "should_be_discarded"
 
+# FIXME: gcc doesn't generate a .LC0 sym for powerpc64
 check_non_discarded "discard_locals_relocatable_test1.syms" ".LC0"
 check_discarded     "discard_locals_relocatable_test1.syms" "should_be_discarded"
+# FIXME: gcc doesn't generate a .LC0 sym for powerpc64
 check_non_discarded "discard_locals_relocatable_test2.syms" ".LC0"
 check_discarded     "discard_locals_relocatable_test2.syms" "should_be_discarded"
 

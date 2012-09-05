@@ -304,7 +304,7 @@ dnl tell the unittest framework if we're compiling for one of those
 dnl targets, so it doesn't try to run the tests that do that.
 AM_CONDITIONAL(FN_PTRS_IN_SO_WITHOUT_PIC, [
   case $target_cpu in
-    i?86) true;;
+    powerpc*) false;;
     x86_64) false;;
     sparc64) false;;
     *) true;;

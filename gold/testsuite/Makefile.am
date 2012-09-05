@@ -228,7 +228,7 @@ final_layout_sequence.txt:
 final_layout: final_layout.o final_layout_sequence.txt gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--section-ordering-file,final_layout_sequence.txt final_layout.o
 final_layout.stdout: final_layout
-	$(TEST_NM) -n final_layout > final_layout.stdout
+	$(TEST_NM) -n --synthetic final_layout > final_layout.stdout
 
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test
@@ -1535,7 +1535,7 @@ plugin_final_layout.o: plugin_final_layout.cc
 plugin_final_layout: plugin_final_layout.o plugin_section_order.so gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--plugin,"./plugin_section_order.so" plugin_final_layout.o
 plugin_final_layout.stdout: plugin_final_layout
-	$(TEST_NM) -n plugin_final_layout > plugin_final_layout.stdout
+	$(TEST_NM) -n --synthetic plugin_final_layout > plugin_final_layout.stdout
 plugin_final_layout_readelf.stdout: plugin_final_layout
 	$(TEST_READELF) -Wl plugin_final_layout > plugin_final_layout_readelf.stdout
 
@@ -1975,7 +1975,7 @@ MOSTLYCLEANFILES += memory_test.stdout memory_test memory_test.o
 memory_test.o: memory_test.s
 	$(COMPILE) -o $@ -c $<
 memory_test: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t
-	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -T $(srcdir)/memory_test.t -o $@ memory_test.o
+	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -T $(srcdir)/memory_test.t -o $@ memory_test.o
 memory_test.stdout: memory_test
 	$(TEST_READELF) -lWS  $< > $@
 

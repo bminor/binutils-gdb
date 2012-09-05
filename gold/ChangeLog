@@ -1,5 +1,24 @@
 2012-09-05  Alan Modra  <amodra@gmail.com>
 
+	* configure.ac (FN_PTRS_IN_SO_WITHOUT_PIC): False for powerpc.
+	* configure: Regenerate.
+	* testsuite/Makefile.am (final_layout.stdout): Pass --synthetic to nm.
+	(plugin_final_layout.stdout): Likewise.
+	(memory_test): Set page sizes to 0x1000.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/discard_locals_test.sh: Add FIXME comment.
+	* testsuite/justsyms_exec.c: Disable function test for powerpc64.
+	* testsuite/pr14265.t: Add .got output section statement.
+	* testsuite/script_test_2.t: Likewise.
+	* testsuite/script_test_3.t: Likewise.
+	* testsuite/script_test_4.t: Likewise.
+	* testsuite/script_test_5.t: Likewise.
+	* testsuite/script_test_6.t: Likewise.
+	* testsuite/script_test_7.t: Likewise.
+	* testsuite/script_test_9.t: Likewise.
+
+2012-09-05  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Powerpc_relobj::get_opd_ent): Make const.
 	(Powerpc_relocate_functions::Status): New typedef.
 	(Target_powerpc::Scan::get_reference_flags): Handle more relocs.
