@@ -261,20 +261,20 @@ class Target_powerpc : public Sized_target<size, big_endian>
 			  const unsigned char* plocal_symbols,
 			  Relocatable_relocs*);
 
-  // Relocate a section during a relocatable link.
+  // Emit relocations for a section.
   void
-  relocate_for_relocatable(const Relocate_info<size, big_endian>*,
-			   unsigned int sh_type,
-			   const unsigned char* prelocs,
-			   size_t reloc_count,
-			   Output_section* output_section,
-			   off_t offset_in_output_section,
-			   const Relocatable_relocs*,
-			   unsigned char*,
-			   Address view_address,
-			   section_size_type,
-			   unsigned char* reloc_view,
-			   section_size_type reloc_view_size);
+  relocate_relocs(const Relocate_info<size, big_endian>*,
+		  unsigned int sh_type,
+		  const unsigned char* prelocs,
+		  size_t reloc_count,
+		  Output_section* output_section,
+		  off_t offset_in_output_section,
+		  const Relocatable_relocs*,
+		  unsigned char*,
+		  Address view_address,
+		  section_size_type,
+		  unsigned char* reloc_view,
+		  section_size_type reloc_view_size);
 
   // Return whether SYM is defined by the ABI.
   bool
@@ -2294,6 +2294,7 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_GNU_VTENTRY:
     case elfcpp::R_PPC64_TOCSAVE:
     case elfcpp::R_PPC_EMB_MRKREF:
+    case elfcpp::R_POWERPC_TLS:
       break;
 
     case elfcpp::R_PPC64_TOC:
@@ -2485,6 +2486,12 @@ Target_powerpc<size, big_endian>::Scan::local(
 	else if (tls_type == tls::TLSOPT_TO_LE)
 	  {
 	    // no GOT relocs needed for Local Exec.
+	    if (parameters->options().emit_relocs())
+	      {
+		Output_section* os = layout->tls_segment()->first_section();
+		gold_assert(os != NULL);
+		os->set_needs_symtab_index();
+	      }
 	  }
 	else
 	  gold_unreachable();
@@ -2573,6 +2580,7 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_GNU_VTENTRY:
     case elfcpp::R_PPC_LOCAL24PC:
     case elfcpp::R_PPC_EMB_MRKREF:
+    case elfcpp::R_POWERPC_TLS:
       break;
 
     case elfcpp::R_PPC64_TOC:
@@ -2817,6 +2825,12 @@ Target_powerpc<size, big_endian>::Scan::global(
 	else if (tls_type == tls::TLSOPT_TO_LE)
 	  {
 	    // no GOT relocs needed for Local Exec.
+	    if (parameters->options().emit_relocs())
+	      {
+		Output_section* os = layout->tls_segment()->first_section();
+		gold_assert(os != NULL);
+		os->set_needs_symtab_index();
+	      }
 	  }
 	else
 	  gold_unreachable();
@@ -3201,7 +3215,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		insn = addis_3_2;
 	      elfcpp::Swap<32, big_endian>::writeval(iview, insn);
 	      r_type = elfcpp::R_POWERPC_TPREL16_HA;
-	      value = relinfo->layout->tls_segment()->vaddr() + dtp_offset;
+	      value = dtp_offset;
 	    }
 	  else
 	    {
@@ -3327,7 +3341,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  this->call_tls_get_addr_ = CALL_SKIP;
 	  r_type = elfcpp::R_POWERPC_TPREL16_LO;
 	  view += 2 * big_endian;
-	  value = relinfo->layout->tls_segment()->vaddr() + dtp_offset;
+	  value = dtp_offset;
 	}
     }
   else if (r_type == elfcpp::R_POWERPC_TLS)
@@ -3883,7 +3897,7 @@ Target_powerpc<size, big_endian>::scan_relocatable_relocs(
     rr);
 }
 
-// Relocate a section during a relocatable link.
+// Emit relocations for a section.
 // This is a modified version of the function by the same name in
 // target-reloc.h.  Using relocate_special_relocatable for
 // R_PPC_PLTREL24 would require duplication of the entire body of the
@@ -3891,7 +3905,7 @@ Target_powerpc<size, big_endian>::scan_relocatable_relocs(
 
 template<int size, bool big_endian>
 void
-Target_powerpc<size, big_endian>::relocate_for_relocatable(
+Target_powerpc<size, big_endian>::relocate_relocs(
     const Relocate_info<size, big_endian>* relinfo,
     unsigned int sh_type,
     const unsigned char* prelocs,
@@ -3926,7 +3940,7 @@ Target_powerpc<size, big_endian>::relocate_for_relocatable(
     }
 
   unsigned char* pwrite = reloc_view;
-
+  bool zap_next = false;
   for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
     {
       Relocatable_relocs::Reloc_strategy strategy = rr->strategy(i);
@@ -3936,25 +3950,35 @@ Target_powerpc<size, big_endian>::relocate_for_relocatable(
       Reltype reloc(prelocs);
       Reltype_write reloc_write(pwrite);
 
+      Address offset = reloc.get_r_offset();
       typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
-      const unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
-      const unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
+      unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
+      unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
+      const unsigned int orig_r_sym = r_sym;
+      typename elfcpp::Elf_types<size>::Elf_Swxword addend
+	= reloc.get_r_addend();
+      const Symbol* gsym = NULL;
+
+      if (zap_next)
+	{
+	  // We could arrange to discard these and other relocs for
+	  // tls optimised sequences in the strategy methods, but for
+	  // now do as BFD ld does.
+	  r_type = elfcpp::R_POWERPC_NONE;
+	  zap_next = false;
+	}
 
       // Get the new symbol index.
-
-      unsigned int new_symndx;
       if (r_sym < local_count)
 	{
 	  switch (strategy)
 	    {
 	    case Relocatable_relocs::RELOC_COPY:
 	    case Relocatable_relocs::RELOC_SPECIAL:
-	      if (r_sym == 0)
-		new_symndx = 0;
-	      else
+	      if (r_sym != 0)
 		{
-		  new_symndx = object->symtab_index(r_sym);
-		  gold_assert(new_symndx != -1U);
+		  r_sym = object->symtab_index(r_sym);
+		  gold_assert(r_sym != -1U);
 		}
 	      break;
 
@@ -3972,7 +3996,7 @@ Target_powerpc<size, big_endian>::relocate_for_relocatable(
 		Output_section* os = object->output_section(shndx);
 		gold_assert(os != NULL);
 		gold_assert(os->needs_symtab_index());
-		new_symndx = os->symtab_index();
+		r_sym = os->symtab_index();
 	      }
 	      break;
 
@@ -3982,22 +4006,19 @@ Target_powerpc<size, big_endian>::relocate_for_relocatable(
 	}
       else
 	{
-	  const Symbol* gsym = object->global_symbol(r_sym);
+	  gsym = object->global_symbol(r_sym);
 	  gold_assert(gsym != NULL);
 	  if (gsym->is_forwarder())
 	    gsym = relinfo->symtab->resolve_forwards(gsym);
 
 	  gold_assert(gsym->has_symtab_index());
-	  new_symndx = gsym->symtab_index();
+	  r_sym = gsym->symtab_index();
 	}
 
       // Get the new offset--the location in the output section where
       // this relocation should be applied.
-
-      Address offset = reloc.get_r_offset();
-      Address new_offset;
       if (static_cast<Address>(offset_in_output_section) != invalid_address)
-	new_offset = offset + offset_in_output_section;
+	offset += offset_in_output_section;
       else
 	{
 	  section_offset_type sot_offset =
@@ -4006,34 +4027,25 @@ Target_powerpc<size, big_endian>::relocate_for_relocatable(
 	    output_section->output_offset(object, relinfo->data_shndx,
 					  sot_offset);
 	  gold_assert(new_sot_offset != -1);
-	  new_offset = new_sot_offset;
+	  offset = new_sot_offset;
 	}
 
       // In an object file, r_offset is an offset within the section.
       // In an executable or dynamic object, generated by
       // --emit-relocs, r_offset is an absolute address.
-      // FIXME: Arrange to call this function for --emit-relocs too,
-      // so that we can make emitted relocs match edited TLS code.
-      if (0 && !parameters->options().relocatable())
+      if (!parameters->options().relocatable())
 	{
-	  new_offset += view_address;
+	  offset += view_address;
 	  if (static_cast<Address>(offset_in_output_section) != invalid_address)
-	    new_offset -= offset_in_output_section;
+	    offset -= offset_in_output_section;
 	}
 
-      reloc_write.put_r_offset(new_offset);
-      reloc_write.put_r_info(elfcpp::elf_r_info<size>(new_symndx, r_type));
-
       // Handle the reloc addend based on the strategy.
-      typename elfcpp::Elf_types<size>::Elf_Swxword addend;
-      addend = Reloc_types<elfcpp::SHT_RELA, size, big_endian>::
-	get_reloc_addend(&reloc);
-
       if (strategy == Relocatable_relocs::RELOC_COPY)
 	;
       else if (strategy == Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA)
 	{
-	  const Symbol_value<size>* psymval = object->local_symbol(r_sym);
+	  const Symbol_value<size>* psymval = object->local_symbol(orig_r_sym);
 	  addend = psymval->value(object, addend);
 	}
       else if (strategy == Relocatable_relocs::RELOC_SPECIAL)
@@ -4044,8 +4056,136 @@ Target_powerpc<size, big_endian>::relocate_for_relocatable(
       else
 	gold_unreachable();
 
-      Reloc_types<elfcpp::SHT_RELA, size, big_endian>::
-	set_reloc_addend(&reloc_write, addend);
+      if (!parameters->options().relocatable())
+	{
+	  if (r_type == elfcpp::R_POWERPC_GOT_TLSGD16
+	      || r_type == elfcpp::R_POWERPC_GOT_TLSGD16_LO
+	      || r_type == elfcpp::R_POWERPC_GOT_TLSGD16_HI
+	      || r_type == elfcpp::R_POWERPC_GOT_TLSGD16_HA)
+	    {
+	      // First instruction of a global dynamic sequence,
+	      // arg setup insn.
+	      const bool final = gsym == NULL || gsym->final_value_is_known();
+	      switch (this->optimize_tls_gd(final))
+		{
+		case tls::TLSOPT_TO_IE:
+		  r_type += (elfcpp::R_POWERPC_GOT_TPREL16
+			     - elfcpp::R_POWERPC_GOT_TLSGD16);
+		  break;
+		case tls::TLSOPT_TO_LE:
+		  if (r_type == elfcpp::R_POWERPC_GOT_TLSGD16
+		      || r_type == elfcpp::R_POWERPC_GOT_TLSGD16_LO)
+		    r_type = elfcpp::R_POWERPC_TPREL16_HA;
+		  else
+		    {
+		      r_type = elfcpp::R_POWERPC_NONE;
+		      offset -= 2 * big_endian;
+		    }
+		  break;
+		default:
+		  break;
+		}
+	    }
+	  else if (r_type == elfcpp::R_POWERPC_GOT_TLSLD16
+		   || r_type == elfcpp::R_POWERPC_GOT_TLSLD16_LO
+		   || r_type == elfcpp::R_POWERPC_GOT_TLSLD16_HI
+		   || r_type == elfcpp::R_POWERPC_GOT_TLSLD16_HA)
+	    {
+	      // First instruction of a local dynamic sequence,
+	      // arg setup insn.
+	      if (this->optimize_tls_ld() == tls::TLSOPT_TO_LE)
+		{
+		  if (r_type == elfcpp::R_POWERPC_GOT_TLSLD16
+		      || r_type == elfcpp::R_POWERPC_GOT_TLSLD16_LO)
+		    {
+		      r_type = elfcpp::R_POWERPC_TPREL16_HA;
+		      const Output_section* os = relinfo->layout->tls_segment()
+			->first_section();
+		      gold_assert(os != NULL);
+		      gold_assert(os->needs_symtab_index());
+		      r_sym = os->symtab_index();
+		      addend = dtp_offset;
+		    }
+		  else
+		    {
+		      r_type = elfcpp::R_POWERPC_NONE;
+		      offset -= 2 * big_endian;
+		    }
+		}
+	    }
+	  else if (r_type == elfcpp::R_POWERPC_GOT_TPREL16
+		   || r_type == elfcpp::R_POWERPC_GOT_TPREL16_LO
+		   || r_type == elfcpp::R_POWERPC_GOT_TPREL16_HI
+		   || r_type == elfcpp::R_POWERPC_GOT_TPREL16_HA)
+	    {
+	      // First instruction of initial exec sequence.
+	      const bool final = gsym == NULL || gsym->final_value_is_known();
+	      if (this->optimize_tls_ie(final) == tls::TLSOPT_TO_LE)
+		{
+		  if (r_type == elfcpp::R_POWERPC_GOT_TPREL16
+		      || r_type == elfcpp::R_POWERPC_GOT_TPREL16_LO)
+		    r_type = elfcpp::R_POWERPC_TPREL16_HA;
+		  else
+		    {
+		      r_type = elfcpp::R_POWERPC_NONE;
+		      offset -= 2 * big_endian;
+		    }
+		}
+	    }
+	  else if ((size == 64 && r_type == elfcpp::R_PPC64_TLSGD)
+		   || (size == 32 && r_type == elfcpp::R_PPC_TLSGD))
+	    {
+	      // Second instruction of a global dynamic sequence,
+	      // the __tls_get_addr call
+	      const bool final = gsym == NULL || gsym->final_value_is_known();
+	      switch (this->optimize_tls_gd(final))
+		{
+		case tls::TLSOPT_TO_IE:
+		  r_type = elfcpp::R_POWERPC_NONE;
+		  zap_next = true;
+		  break;
+		case tls::TLSOPT_TO_LE:
+		  r_type = elfcpp::R_POWERPC_TPREL16_LO;
+		  offset += 2 * big_endian;
+		  zap_next = true;
+		  break;
+		default:
+		  break;
+		}
+	    }
+	  else if ((size == 64 && r_type == elfcpp::R_PPC64_TLSLD)
+		   || (size == 32 && r_type == elfcpp::R_PPC_TLSLD))
+	    {
+	      // Second instruction of a local dynamic sequence,
+	      // the __tls_get_addr call
+	      if (this->optimize_tls_ld() == tls::TLSOPT_TO_LE)
+		{
+		  const Output_section* os = relinfo->layout->tls_segment()
+		    ->first_section();
+		  gold_assert(os != NULL);
+		  gold_assert(os->needs_symtab_index());
+		  r_sym = os->symtab_index();
+		  addend = dtp_offset;
+		  r_type = elfcpp::R_POWERPC_TPREL16_LO;
+		  offset += 2 * big_endian;
+		  zap_next = true;
+		}
+	    }
+	  else if (r_type == elfcpp::R_POWERPC_TLS)
+	    {
+	      // Second instruction of an initial exec sequence
+	      const bool final = gsym == NULL || gsym->final_value_is_known();
+	      if (this->optimize_tls_ie(final) == tls::TLSOPT_TO_LE)
+		{
+		  r_type = elfcpp::R_POWERPC_TPREL16_LO;
+		  offset += 2 * big_endian;
+		}
+	    }
+	}
+
+      reloc_write.put_r_offset(offset);
+      reloc_write.put_r_info(elfcpp::elf_r_info<size>(r_sym, r_type));
+      reloc_write.put_r_addend(addend);
 
       pwrite += reloc_size;
     }

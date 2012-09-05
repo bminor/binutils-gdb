@@ -4613,10 +4613,10 @@ Output_segment::set_tls_offsets()
     (*p)->set_tls_offset(this->vaddr_);
 }
 
-// Return the load address of the first section.
+// Return the first section.
 
-uint64_t
-Output_segment::first_section_load_address() const
+Output_section*
+Output_segment::first_section() const
 {
   for (int i = 0; i < static_cast<int>(ORDER_MAX); ++i)
     {
@@ -4626,9 +4626,7 @@ Output_segment::first_section_load_address() const
 	   ++p)
 	{
 	  if ((*p)->is_section())
-	    return ((*p)->has_load_address()
-		    ? (*p)->load_address()
-		    : (*p)->address());
+	    return (*p)->output_section();
 	}
     }
   gold_unreachable();

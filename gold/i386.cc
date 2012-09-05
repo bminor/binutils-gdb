@@ -407,20 +407,20 @@ class Target_i386 : public Sized_target<32, false>
 			  const unsigned char* plocal_symbols,
 			  Relocatable_relocs*);
 
-  // Relocate a section during a relocatable link.
+  // Emit relocations for a section.
   void
-  relocate_for_relocatable(const Relocate_info<32, false>*,
-			   unsigned int sh_type,
-			   const unsigned char* prelocs,
-			   size_t reloc_count,
-			   Output_section* output_section,
-			   off_t offset_in_output_section,
-			   const Relocatable_relocs*,
-			   unsigned char* view,
-			   elfcpp::Elf_types<32>::Elf_Addr view_address,
-			   section_size_type view_size,
-			   unsigned char* reloc_view,
-			   section_size_type reloc_view_size);
+  relocate_relocs(const Relocate_info<32, false>*,
+		  unsigned int sh_type,
+		  const unsigned char* prelocs,
+		  size_t reloc_count,
+		  Output_section* output_section,
+		  off_t offset_in_output_section,
+		  const Relocatable_relocs*,
+		  unsigned char* view,
+		  elfcpp::Elf_types<32>::Elf_Addr view_address,
+		  section_size_type view_size,
+		  unsigned char* reloc_view,
+		  section_size_type reloc_view_size);
 
   // Return a string used to fill a code section with nops.
   std::string
@@ -3602,10 +3602,10 @@ Target_i386::scan_relocatable_relocs(Symbol_table* symtab,
     rr);
 }
 
-// Relocate a section during a relocatable link.
+// Emit relocations for a section.
 
 void
-Target_i386::relocate_for_relocatable(
+Target_i386::relocate_relocs(
     const Relocate_info<32, false>* relinfo,
     unsigned int sh_type,
     const unsigned char* prelocs,
@@ -3621,7 +3621,7 @@ Target_i386::relocate_for_relocatable(
 {
   gold_assert(sh_type == elfcpp::SHT_REL);
 
-  gold::relocate_for_relocatable<32, false, elfcpp::SHT_REL>(
+  gold::relocate_relocs<32, false, elfcpp::SHT_REL>(
     relinfo,
     prelocs,
     reloc_count,

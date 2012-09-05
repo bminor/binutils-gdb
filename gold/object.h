@@ -2499,27 +2499,6 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
 			   const Read_relocs_data::Relocs_list::iterator&,
 			   Relocatable_relocs*);
 
-  // Emit the relocs for --emit-relocs.
-  void
-  emit_relocs(const Relocate_info<size, big_endian>*, unsigned int,
-	      unsigned int sh_type, const unsigned char* prelocs,
-	      size_t reloc_count, Output_section*, Address output_offset,
-	      unsigned char* view, Address address,
-	      section_size_type view_size,
-	      unsigned char* reloc_view, section_size_type reloc_view_size);
-
-  // Emit the relocs for --emit-relocs, templatized on the type of the
-  // relocation section.
-  template<int sh_type>
-  void
-  emit_relocs_reltype(const Relocate_info<size, big_endian>*, unsigned int,
-		      const unsigned char* prelocs, size_t reloc_count,
-		      Output_section*, Address output_offset,
-		      unsigned char* view, Address address,
-		      section_size_type view_size,
-		      unsigned char* reloc_view,
-		      section_size_type reloc_view_size);
-
   // Scan the input relocations for --incremental.
   void
   incremental_relocs_scan(const Read_relocs_data::Relocs_list::iterator&);

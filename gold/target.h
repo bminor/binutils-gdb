@@ -801,23 +801,22 @@ class Sized_target : public Target
 			  const unsigned char* plocal_symbols,
 			  Relocatable_relocs*) = 0;
 
-  // Relocate a section during a relocatable link.  The parameters are
-  // like relocate_section, with additional parameters for the view of
-  // the output reloc section.
+  // Emit relocations for a section during a relocatable link, and for
+  // --emit-relocs.  The parameters are like relocate_section, with
+  // additional parameters for the view of the output reloc section.
   virtual void
-  relocate_for_relocatable(const Relocate_info<size, big_endian>*,
-			   unsigned int sh_type,
-			   const unsigned char* prelocs,
-			   size_t reloc_count,
-			   Output_section* output_section,
-			   off_t offset_in_output_section,
-			   const Relocatable_relocs*,
-			   unsigned char* view,
-			   typename elfcpp::Elf_types<size>::Elf_Addr
-			     view_address,
-			   section_size_type view_size,
-			   unsigned char* reloc_view,
-			   section_size_type reloc_view_size) = 0;
+  relocate_relocs(const Relocate_info<size, big_endian>*,
+		  unsigned int sh_type,
+		  const unsigned char* prelocs,
+		  size_t reloc_count,
+		  Output_section* output_section,
+		  off_t offset_in_output_section,
+		  const Relocatable_relocs*,
+		  unsigned char* view,
+		  typename elfcpp::Elf_types<size>::Elf_Addr view_address,
+		  section_size_type view_size,
+		  unsigned char* reloc_view,
+		  section_size_type reloc_view_size) = 0;
 
   // Perform target-specific processing in a relocatable link.  This is
   // only used if we use the relocation strategy RELOC_SPECIAL.

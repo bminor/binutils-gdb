@@ -2123,7 +2123,7 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 
 // Output_relocatable_relocs represents a relocation section in a
 // relocatable link.  The actual data is written out in the target
-// hook relocate_for_relocatable.  This just saves space for it.
+// hook relocate_relocs.  This just saves space for it.
 
 template<int sh_type, int size, bool big_endian>
 class Output_relocatable_relocs : public Output_section_data
@@ -4406,9 +4406,17 @@ class Output_segment
   bool
   has_dynamic_reloc() const;
 
+  // Return the first section.
+  Output_section*
+  first_section() const;
+
   // Return the address of the first section.
   uint64_t
-  first_section_load_address() const;
+  first_section_load_address() const
+  {
+    const Output_section* os = this->first_section();
+    return os->has_load_address() ? os->load_address() : os->address();
+  }
 
   // Return whether the addresses have been set already.
   bool

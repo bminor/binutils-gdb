@@ -1014,9 +1014,14 @@ Sized_relobj_file<size, big_endian>::do_relocate_sections(
 				   output_offset == invalid_address,
 				   view, address, view_size, reloc_map);
 	  if (parameters->options().emit_relocs())
-	    this->emit_relocs(&relinfo, i, sh_type, prelocs, reloc_count,
-			      os, output_offset, view, address, view_size,
-			      (*pviews)[i].view, (*pviews)[i].view_size);
+	    {
+	      Relocatable_relocs* rr = this->relocatable_relocs(i);
+	      target->relocate_relocs(&relinfo, sh_type, prelocs, reloc_count,
+				      os, output_offset, rr,
+				      view, address, view_size,
+				      (*pviews)[i].view,
+				      (*pviews)[i].view_size);
+	    }
 	  if (parameters->incremental())
 	    this->incremental_relocs_write(&relinfo, sh_type, prelocs,
 					   reloc_count, os, output_offset, of);
@@ -1024,82 +1029,13 @@ Sized_relobj_file<size, big_endian>::do_relocate_sections(
       else
 	{
 	  Relocatable_relocs* rr = this->relocatable_relocs(i);
-	  target->relocate_for_relocatable(&relinfo, sh_type, prelocs,
-					   reloc_count, os, output_offset, rr,
-					   view, address, view_size,
-					   (*pviews)[i].view,
-					   (*pviews)[i].view_size);
+	  target->relocate_relocs(&relinfo, sh_type, prelocs, reloc_count,
+				  os, output_offset, rr,
+				  view, address, view_size,
+				  (*pviews)[i].view,
+				  (*pviews)[i].view_size);
 	}
     }
-}
-
-// Emit the relocs for --emit-relocs.
-
-template<int size, bool big_endian>
-void
-Sized_relobj_file<size, big_endian>::emit_relocs(
-    const Relocate_info<size, big_endian>* relinfo,
-    unsigned int i,
-    unsigned int sh_type,
-    const unsigned char* prelocs,
-    size_t reloc_count,
-    Output_section* output_section,
-    typename elfcpp::Elf_types<size>::Elf_Addr offset_in_output_section,
-    unsigned char* view,
-    typename elfcpp::Elf_types<size>::Elf_Addr address,
-    section_size_type view_size,
-    unsigned char* reloc_view,
-    section_size_type reloc_view_size)
-{
-  if (sh_type == elfcpp::SHT_REL)
-    this->emit_relocs_reltype<elfcpp::SHT_REL>(relinfo, i, prelocs,
-					       reloc_count, output_section,
-					       offset_in_output_section,
-					       view, address, view_size,
-					       reloc_view, reloc_view_size);
-  else
-    {
-      gold_assert(sh_type == elfcpp::SHT_RELA);
-      this->emit_relocs_reltype<elfcpp::SHT_RELA>(relinfo, i, prelocs,
-						  reloc_count, output_section,
-						  offset_in_output_section,
-						  view, address, view_size,
-						  reloc_view, reloc_view_size);
-    }
-}
-
-// Emit the relocs for --emit-relocs, templatized on the type of the
-// relocation section.
-
-template<int size, bool big_endian>
-template<int sh_type>
-void
-Sized_relobj_file<size, big_endian>::emit_relocs_reltype(
-    const Relocate_info<size, big_endian>* relinfo,
-    unsigned int i,
-    const unsigned char* prelocs,
-    size_t reloc_count,
-    Output_section* output_section,
-    typename elfcpp::Elf_types<size>::Elf_Addr offset_in_output_section,
-    unsigned char* view,
-    typename elfcpp::Elf_types<size>::Elf_Addr address,
-    section_size_type view_size,
-    unsigned char* reloc_view,
-    section_size_type reloc_view_size)
-{
-  const Relocatable_relocs* rr = this->relocatable_relocs(i);
-  relocate_for_relocatable<size, big_endian, sh_type>(
-    relinfo,
-    prelocs,
-    reloc_count,
-    output_section,
-    offset_in_output_section,
-    rr,
-    view,
-    address,
-    view_size,
-    reloc_view,
-    reloc_view_size);
 }
 
 // Write the incremental relocs.

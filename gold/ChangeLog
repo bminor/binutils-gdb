@@ -1,3 +1,32 @@
+2012-09-05  Alan Modra  <amodra@gmail.com>
+
+	* object.h (Sized_relobj_file::emit_relocs): Delete.
+	(Sized_relobj_file::emit_relocs_reltype): Delete.
+	* reloc.cc (Sized_relobj_file::do_relocate_sections): Call target
+	relocate_relocs for --emit-relocs.
+	(Sized_relobj_file::emit_relocs, emit_relocs_reltype): Delete.
+	* output.h: Update comment.
+	(Output_segment::first_section): New function.
+	(Output_segment::first_section_load_address): Use first_section.
+	* output.cc (Output_segment::first_section): New function extracted..
+	(Output_segment::first_section_load_address): ..from here.  Delete.
+	* target-reloc.h (relocate_for_relocatable): Rename to relocate_relocs.
+	* target.h (Sized_target::relocate_for_relocatable): Likewise.
+	* arm.cc (Target_arm::relocate_for_relocatable): Likewise, and
+	adjust call to target.h function.
+	* i386.cc (Target_i386): Likewise.
+	* sparc.cc (Target_sparc): Likewise.
+	* x86_64.cc (Target_x86_64): Likewise.
+	* powerpc.cc (Target_powerpc): Likewise.
+	(Target_powerpc::Scan::local, global): Handle R_POWERPC_TLS.  Ensure
+	first tls section has section symbol for optimised local dynamic
+	output relocs.
+	(Target_powerpc::Relocate::relocate): Correct local dynamic value.
+	(Target_powerpc::relocate_relocs): Adjust relocs emitted for
+	optimised tls code.
+	* testsuite/testfile.cc (Target_test::relocate_for_relocatable):
+	Rename to relocate_relocs.  Update error message.
+
 2012-09-04  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* powerpc.cc (do_make_elf_object): Allow ET_EXEC files with

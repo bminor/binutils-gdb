@@ -590,12 +590,12 @@ scan_relocatable_relocs(
     }
 }
 
-// Relocate relocs during a relocatable link.  This is a default
-// definition which should work for most targets.
+// Relocate relocs.  Called for a relocatable link, and for --emit-relocs.
+// This is a default definition which should work for most targets.
 
 template<int size, bool big_endian, int sh_type>
 void
-relocate_for_relocatable(
+relocate_relocs(
     const Relocate_info<size, big_endian>* relinfo,
     const unsigned char* prelocs,
     size_t reloc_count,
