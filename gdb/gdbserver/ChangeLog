@@ -1,3 +1,7 @@
+2012-09-05  Michael Brandt  <michael.brandt@axis.com>
+
+	* linux-crisv32-low.c: Fix compile errors.
+
 2012-08-22  Keith Seitz  <keiths@redhat.com>
 
 	* server.h: Include build-gnulib-gbserver/config.h.
