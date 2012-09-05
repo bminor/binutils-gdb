@@ -845,18 +845,18 @@ template<int size, bool big_endian>
 class Powerpc_relocate_functions
 {
 public:
-  enum overflow_check
+  enum Overflow_check
   {
-    check_none,
-    check_signed,
-    check_bitfield
+    CHECK_NONE,
+    CHECK_SIGNED,
+    CHECK_BITFIELD
   };
 
-  typedef enum overflow_status
+  enum Status
   {
-    status_ok,
-    status_overflow
-  } Status;
+    STATUS_OK,
+    STATUS_OVERFLOW
+  };
 
 private:
   typedef Powerpc_relocate_functions<size, big_endian> This;
@@ -884,26 +884,26 @@ private:
   }
 
   template<int valsize>
-  static inline enum overflow_status
-  overflowed(Address value, enum overflow_check overflow)
+  static inline Status
+  overflowed(Address value, Overflow_check overflow)
   {
-    if (overflow == check_signed)
+    if (overflow == CHECK_SIGNED)
       {
 	if (has_overflow_signed<valsize>(value))
-	  return status_overflow;
+	  return STATUS_OVERFLOW;
       }
-    else if (overflow == check_bitfield)
+    else if (overflow == CHECK_BITFIELD)
       {
 	if (has_overflow_bitfield<valsize>(value))
-	  return status_overflow;
+	  return STATUS_OVERFLOW;
       }
-    return status_ok;
+    return STATUS_OK;
   }
 
   // Do a simple RELA relocation
   template<int valsize>
-  static inline enum overflow_status
-  rela(unsigned char* view, Address value, enum overflow_check overflow)
+  static inline Status
+  rela(unsigned char* view, Address value, Overflow_check overflow)
   {
     typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
@@ -912,12 +912,12 @@ private:
   }
 
   template<int valsize>
-  static inline enum overflow_status
+  static inline Status
   rela(unsigned char* view,
        unsigned int right_shift,
        typename elfcpp::Valtype_base<valsize>::Valtype dst_mask,
        Address value,
-       enum overflow_check overflow)
+       Overflow_check overflow)
   {
     typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
@@ -931,20 +931,20 @@ private:
 
   // Do a simple RELA relocation, unaligned.
   template<int valsize>
-  static inline enum overflow_status
-  rela_ua(unsigned char* view, Address value, enum overflow_check overflow)
+  static inline Status
+  rela_ua(unsigned char* view, Address value, Overflow_check overflow)
   {
     elfcpp::Swap_unaligned<valsize, big_endian>::writeval(view, value);
     return overflowed<valsize>(value, overflow);
   }
 
   template<int valsize>
-  static inline enum overflow_status
+  static inline Status
   rela_ua(unsigned char* view,
 	  unsigned int right_shift,
 	  typename elfcpp::Valtype_base<valsize>::Valtype dst_mask,
 	  Address value,
-	  enum overflow_check overflow)
+	  Overflow_check overflow)
   {
     typedef typename elfcpp::Swap_unaligned<valsize, big_endian>::Valtype
       Valtype;
@@ -960,59 +960,57 @@ public:
   // R_PPC64_ADDR64: (Symbol + Addend)
   static inline void
   addr64(unsigned char* view, Address value)
-  { This::template rela<64>(view, value, check_none); }
+  { This::template rela<64>(view, value, CHECK_NONE); }
 
   // R_PPC64_UADDR64: (Symbol + Addend) unaligned
   static inline void
   addr64_u(unsigned char* view, Address value)
-  { This::template rela_ua<64>(view, value, check_none); }
+  { This::template rela_ua<64>(view, value, CHECK_NONE); }
 
   // R_POWERPC_ADDR32: (Symbol + Addend)
-  static inline enum overflow_status
-  addr32(unsigned char* view, Address value, enum overflow_check overflow)
+  static inline Status
+  addr32(unsigned char* view, Address value, Overflow_check overflow)
   { return This::template rela<32>(view, value, overflow); }
 
   // R_POWERPC_UADDR32: (Symbol + Addend) unaligned
-  static inline enum overflow_status
-  addr32_u(unsigned char* view, Address value, enum overflow_check overflow)
+  static inline Status
+  addr32_u(unsigned char* view, Address value, Overflow_check overflow)
   { return This::template rela_ua<32>(view, value, overflow); }
 
   // R_POWERPC_ADDR24: (Symbol + Addend) & 0x3fffffc
-  static inline enum overflow_status
-  addr24(unsigned char* view, Address value, enum overflow_check overflow)
+  static inline Status
+  addr24(unsigned char* view, Address value, Overflow_check overflow)
   {
-    enum overflow_status stat
-      = This::template rela<32>(view, 0, 0x03fffffc, value, overflow);
-    if (overflow != check_none && (value & 3) != 0)
-      stat = status_overflow;
+    Status stat = This::template rela<32>(view, 0, 0x03fffffc, value, overflow);
+    if (overflow != CHECK_NONE && (value & 3) != 0)
+      stat = STATUS_OVERFLOW;
     return stat;
   }
 
   // R_POWERPC_ADDR16: (Symbol + Addend) & 0xffff
-  static inline enum overflow_status
-  addr16(unsigned char* view, Address value, enum overflow_check overflow)
+  static inline Status
+  addr16(unsigned char* view, Address value, Overflow_check overflow)
   { return This::template rela<16>(view, value, overflow); }
 
   // R_POWERPC_ADDR16: (Symbol + Addend) & 0xffff, unaligned
-  static inline enum overflow_status
-  addr16_u(unsigned char* view, Address value, enum overflow_check overflow)
+  static inline Status
+  addr16_u(unsigned char* view, Address value, Overflow_check overflow)
   { return This::template rela_ua<16>(view, value, overflow); }
 
   // R_POWERPC_ADDR16_DS: (Symbol + Addend) & 0xfffc
-  static inline enum overflow_status
-  addr16_ds(unsigned char* view, Address value, enum overflow_check overflow)
+  static inline Status
+  addr16_ds(unsigned char* view, Address value, Overflow_check overflow)
   {
-    enum overflow_status stat
-      = This::template rela<16>(view, 0, 0xfffc, value, overflow);
-    if (overflow != check_none && (value & 3) != 0)
-      stat = status_overflow;
+    Status stat = This::template rela<16>(view, 0, 0xfffc, value, overflow);
+    if (overflow != CHECK_NONE && (value & 3) != 0)
+      stat = STATUS_OVERFLOW;
     return stat;
   }
 
   // R_POWERPC_ADDR16_HI: ((Symbol + Addend) >> 16) & 0xffff
   static inline void
   addr16_hi(unsigned char* view, Address value)
-  { This::template rela<16>(view, 16, 0xffff, value, check_none); }
+  { This::template rela<16>(view, 16, 0xffff, value, CHECK_NONE); }
 
   // R_POWERPC_ADDR16_HA: ((Symbol + Addend + 0x8000) >> 16) & 0xffff
   static inline void
@@ -1022,7 +1020,7 @@ public:
   // R_POWERPC_ADDR16_HIGHER: ((Symbol + Addend) >> 32) & 0xffff
   static inline void
   addr16_hi2(unsigned char* view, Address value)
-  { This::template rela<16>(view, 32, 0xffff, value, check_none); }
+  { This::template rela<16>(view, 32, 0xffff, value, CHECK_NONE); }
 
   // R_POWERPC_ADDR16_HIGHERA: ((Symbol + Addend + 0x8000) >> 32) & 0xffff
   static inline void
@@ -1032,7 +1030,7 @@ public:
   // R_POWERPC_ADDR16_HIGHEST: ((Symbol + Addend) >> 48) & 0xffff
   static inline void
   addr16_hi3(unsigned char* view, Address value)
-  { This::template rela<16>(view, 48, 0xffff, value, check_none); }
+  { This::template rela<16>(view, 48, 0xffff, value, CHECK_NONE); }
 
   // R_POWERPC_ADDR16_HIGHESTA: ((Symbol + Addend + 0x8000) >> 48) & 0xffff
   static inline void
@@ -1040,13 +1038,12 @@ public:
   { This::addr16_hi3(view, value + 0x8000); }
 
   // R_POWERPC_ADDR14: (Symbol + Addend) & 0xfffc
-  static inline enum overflow_status
-  addr14(unsigned char* view, Address value, enum overflow_check overflow)
+  static inline Status
+  addr14(unsigned char* view, Address value, Overflow_check overflow)
   {
-    enum overflow_status stat
-      = This::template rela<32>(view, 0, 0xfffc, value, overflow);
-    if (overflow != check_none && (value & 3) != 0)
-      stat = status_overflow;
+    Status stat = This::template rela<32>(view, 0, 0xfffc, value, overflow);
+    if (overflow != CHECK_NONE && (value & 3) != 0)
+      stat = STATUS_OVERFLOW;
     return stat;
   }
 };
@@ -3579,18 +3576,18 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       break;
     }
 
-  enum Reloc::overflow_check overflow = Reloc::check_none;
+  typename Reloc::Overflow_check overflow = Reloc::CHECK_NONE;
   switch (r_type)
     {
     case elfcpp::R_POWERPC_ADDR32:
     case elfcpp::R_POWERPC_UADDR32:
       if (size == 64)
-	overflow = Reloc::check_bitfield;
+	overflow = Reloc::CHECK_BITFIELD;
       break;
 
     case elfcpp::R_POWERPC_REL32:
       if (size == 64)
-	overflow = Reloc::check_signed;
+	overflow = Reloc::CHECK_SIGNED;
       break;
 
     case elfcpp::R_POWERPC_ADDR24:
@@ -3600,7 +3597,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_ADDR14:
     case elfcpp::R_POWERPC_ADDR14_BRTAKEN:
     case elfcpp::R_POWERPC_ADDR14_BRNTAKEN:
-      overflow = Reloc::check_bitfield;
+      overflow = Reloc::CHECK_BITFIELD;
       break;
 
     case elfcpp::R_POWERPC_REL24:
@@ -3624,12 +3621,12 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_GOT_TLSLD16:
     case elfcpp::R_POWERPC_GOT_TPREL16:
     case elfcpp::R_POWERPC_GOT_DTPREL16:
-      overflow = Reloc::check_signed;
+      overflow = Reloc::CHECK_SIGNED;
       break;
     }
 
   typename Powerpc_relocate_functions<size, big_endian>::Status status
-    = Powerpc_relocate_functions<size, big_endian>::status_ok;
+    = Powerpc_relocate_functions<size, big_endian>::STATUS_OK;
   switch (r_type)
     {
     case elfcpp::R_POWERPC_NONE:
@@ -3859,7 +3856,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 			     r_type);
       break;
     }
-  if (status != Powerpc_relocate_functions<size, big_endian>::status_ok)
+  if (status != Powerpc_relocate_functions<size, big_endian>::STATUS_OK)
     gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
 			   _("relocation overflow"));
 

@@ -1,5 +1,10 @@
 2012-09-05  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Powerpc_relocate_functions): Upcase enum values,
+	update all uses and lose "enum" when using type.
+
+2012-09-05  Alan Modra  <amodra@gmail.com>
+
 	* configure.ac (FN_PTRS_IN_SO_WITHOUT_PIC): False for powerpc.
 	* configure: Regenerate.
 	* testsuite/Makefile.am (final_layout.stdout): Pass --synthetic to nm.
