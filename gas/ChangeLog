@@ -1,6 +1,7 @@
 2012-09-05  James Lemke  <jwlemke@codesourcery.com>
 
 	* doc/c-ppc.texi: Document -mvle.
+	* doc/as.texinfo: Likewise.
 
 2012-09-04  Sergey A. Guriev  <sergey.a.guriev@intel.com>
 
