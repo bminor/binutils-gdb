@@ -4,8 +4,7 @@
     #ifdef FOO
     #undef FOO
     #endif
-
-  #define FOO "hello"
+    #define FOO "hello"
   #else
     #undef FOO
   #endif
@@ -15,15 +14,14 @@
     #ifdef FOO
     #undef FOO
     #endif
-  #define FOO " "
+    #define FOO " "
   #endif
 
   #ifdef THREE
     #ifdef FOO
     #undef FOO
     #endif
-
-  #define FOO "world"
+    #define FOO "world"
   #endif
 
   #ifdef FOUR

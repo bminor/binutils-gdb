@@ -1,3 +1,7 @@
+2012-09-05  Doug Evans  <dje@google.com>
+
+	* gdb.base/info-macros.c: Fix whitespace.
+
 2012-08-28  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/14428
