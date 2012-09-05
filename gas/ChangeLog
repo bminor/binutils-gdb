@@ -1,3 +1,7 @@
+2012-09-05  James Lemke  <jwlemke@codesourcery.com>
+
+	* doc/c-ppc.texi: Document -mvle.
+
 2012-09-04  Sergey A. Guriev  <sergey.a.guriev@intel.com>
 
 	* config/tc-ia64.c (reg_symbol): Add a new register.

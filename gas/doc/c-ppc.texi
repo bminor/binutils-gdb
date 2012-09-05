@@ -115,6 +115,9 @@ Generate code for PowerPC e300 family.
 @item -maltivec
 Generate code for processors with AltiVec instructions.
 
+@item -mvle
+Generate code for Freescale PowerPC VLE instructions.
+
 @item -mvsx
 Generate code for processors with Vector-Scalar (VSX) instructions.
 
