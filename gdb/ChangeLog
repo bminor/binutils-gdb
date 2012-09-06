@@ -1,3 +1,8 @@
+2012-09-06  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-newobjfileevent.c (create_new_objfile_event_object):
+	Don't decref py_objfile.
+
 2012-09-02  Khoo Yit Phang  <khooyp@cs.umd.edu>
 
 	Do not enable -lmcheck by default when Python is enabled with

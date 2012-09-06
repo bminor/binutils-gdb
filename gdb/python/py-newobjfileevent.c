@@ -25,23 +25,23 @@ static PyObject *
 create_new_objfile_event_object (struct objfile *objfile)
 {
   PyObject *objfile_event;
-  PyObject *py_objfile = NULL;
+  PyObject *py_objfile;
 
   objfile_event = create_event_object (&new_objfile_event_object_type);
   if (!objfile_event)
     goto fail;
 
+  /* Note that objfile_to_objfile_object returns a borrowed reference,
+     so we don't need a decref here.  */
   py_objfile = objfile_to_objfile_object (objfile);
   if (!py_objfile || evpy_add_attribute (objfile_event,
                                          "new_objfile",
                                          py_objfile) < 0)
     goto fail;
-  Py_DECREF (py_objfile);
 
   return objfile_event;
 
  fail:
-  Py_XDECREF (py_objfile);
   Py_XDECREF (objfile_event);
   return NULL;
 }
