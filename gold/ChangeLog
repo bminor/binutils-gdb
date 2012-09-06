@@ -1,3 +1,9 @@
+2012-09-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/script_test_3.t: Add .got.plt output section
+	statement.
+	* testsuite/script_test_4.t: Likewise.
+
 2012-09-05  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Powerpc_relocate_functions): Upcase enum values,

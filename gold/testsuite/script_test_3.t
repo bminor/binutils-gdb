@@ -36,6 +36,7 @@ SECTIONS
   .dynamic : { *(.dynamic) } :data :dynamic
   .data : { *(.data) } :data
   .got : { *(.got .toc) }
+  .got.plt : { *(.got.plt) } 
   .tdata : { *(.tdata*) } :data :tls
   .tbss : { *(.tbss*) } :data :tls
   . += 0x100000;
