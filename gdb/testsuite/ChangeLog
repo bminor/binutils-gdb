@@ -1,5 +1,7 @@
 2012-09-06  Doug Evans  <dje@google.com>
 
+	* boards/fission.exp: New file.
+
 	* gdb.python/py-value.exp: Use clean_restart.
 
 2012-09-05  Doug Evans  <dje@google.com>
