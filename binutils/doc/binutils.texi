@@ -723,17 +723,19 @@ The @sc{gnu} linker @command{ld} is now described in a separate manual.
 
 @smallexample
 @c man begin SYNOPSIS nm
-nm [@option{-a}|@option{--debug-syms}]
-   [@option{-g}|@option{--extern-only}][@option{--plugin} @var{name}]
-   [@option{-B}] [@option{-C}|@option{--demangle}[=@var{style}]] [@option{-D}|@option{--dynamic}]
-   [@option{-S}|@option{--print-size}] [@option{-s}|@option{--print-armap}]
-   [@option{-A}|@option{-o}|@option{--print-file-name}][@option{--special-syms}]
-   [@option{-n}|@option{-v}|@option{--numeric-sort}] [@option{-p}|@option{--no-sort}]
-   [@option{-r}|@option{--reverse-sort}] [@option{--size-sort}] [@option{-u}|@option{--undefined-only}]
-   [@option{-t} @var{radix}|@option{--radix=}@var{radix}] [@option{-P}|@option{--portability}]
-   [@option{--target=}@var{bfdname}] [@option{-f}@var{format}|@option{--format=}@var{format}]
-   [@option{--defined-only}] [@option{-l}|@option{--line-numbers}] [@option{--no-demangle}]
-   [@option{-V}|@option{--version}] [@option{-X 32_64}] [@option{--help}]  [@var{objfile}@dots{}]
+nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--debug-syms}]
+   [@option{-B}|@option{--format=bsd}] [@option{-C}|@option{--demangle}[=@var{style}]]
+   [@option{-D}|@option{--dynamic}] [@option{-f}@var{format}|@option{--format=}@var{format}]
+   [@option{-g}|@option{--extern-only}] [@option{-h}|@option{--help}]
+   [@option{-l}|@option{--line-numbers}] [@option{-n}|@option{-v}|@option{--numeric-sort}]
+   [@option{-P}|@option{--portability}] [@option{-p}|@option{--no-sort}]
+   [@option{-r}|@option{--reverse-sort}] [@option{-S}|@option{--print-size}]
+   [@option{-s}|@option{--print-armap}] [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
+   [@option{-u}|@option{--undefined-only}] [@option{-V}|@option{--version}]
+   [@option{-X 32_64}] [@option{--defined-only}] [@option{--no-demangle}]
+   [@option{--plugin} @var{name}] [@option{--size-sort}] [@option{--special-syms}]
+   [@option{--synthetic}] [@option{--target=}@var{bfdname}]
+   [@var{objfile}@dots{}]
 @c man end
 @end smallexample
 
@@ -920,11 +922,9 @@ either upper or lower case.
 @cindex external symbols
 Display only external symbols.
 
-@item --plugin @var{name}
-@cindex load plugin
-Load the plugin called @var{name} to add support for extra target
-types.  This option is only available if the toolchain has been built
-with plugin support enabled.
+@item -h
+@itemx --help
+Show a summary of the options to @command{nm} and exit.
 
 @item -l
 @itemx --line-numbers
@@ -952,6 +952,11 @@ encountered.
 Use the POSIX.2 standard output format instead of the default format.
 Equivalent to @samp{-f posix}.
 
+@item -r
+@itemx --reverse-sort
+Reverse the order of the sort (whether numeric or alphabetic); let the
+last come first.
+
 @item -S
 @itemx --print-size
 Print both value and size of defined symbols for the @code{bsd} output style.
@@ -966,10 +971,37 @@ When listing symbols from archive members, include the index: a mapping
 (stored in the archive by @command{ar} or @command{ranlib}) of which modules
 contain definitions for which names.
 
-@item -r
-@itemx --reverse-sort
-Reverse the order of the sort (whether numeric or alphabetic); let the
-last come first.
+@item -t @var{radix}
+@itemx --radix=@var{radix}
+Use @var{radix} as the radix for printing the symbol values.  It must be
+@samp{d} for decimal, @samp{o} for octal, or @samp{x} for hexadecimal.
+
+@item -u
+@itemx --undefined-only
+@cindex external symbols
+@cindex undefined symbols
+Display only undefined symbols (those external to each object file).
+
+@item -V
+@itemx --version
+Show the version number of @command{nm} and exit.
+
+@item -X
+This option is ignored for compatibility with the AIX version of
+@command{nm}.  It takes one parameter which must be the string
+@option{32_64}.  The default mode of AIX @command{nm} corresponds
+to @option{-X 32}, which is not supported by @sc{gnu} @command{nm}.
+
+@item --defined-only
+@cindex external symbols
+@cindex undefined symbols
+Display only defined symbols for each object file.
+
+@item --plugin @var{name}
+@cindex load plugin
+Load the plugin called @var{name} to add support for extra target
+types.  This option is only available if the toolchain has been built
+with plugin support enabled.
 
 @item --size-sort
 Sort symbols by size.  The size is computed as the difference between
@@ -986,39 +1018,16 @@ lists.  For example for ARM targets this option would skip the mapping
 symbols used to mark transitions between ARM code, THUMB code and
 data.
 
-@item -t @var{radix}
-@itemx --radix=@var{radix}
-Use @var{radix} as the radix for printing the symbol values.  It must be
-@samp{d} for decimal, @samp{o} for octal, or @samp{x} for hexadecimal.
+@item --synthetic
+Include synthetic symbols in the output.  These are special symbols
+created by the linker for various purposes.  They are not shown by
+default since they are not part of the binary's original source code.
 
 @item --target=@var{bfdname}
 @cindex object code format
 Specify an object code format other than your system's default format.
 @xref{Target Selection}, for more information.
 
-@item -u
-@itemx --undefined-only
-@cindex external symbols
-@cindex undefined symbols
-Display only undefined symbols (those external to each object file).
-
-@item --defined-only
-@cindex external symbols
-@cindex undefined symbols
-Display only defined symbols for each object file.
-
-@item -V
-@itemx --version
-Show the version number of @command{nm} and exit.
-
-@item -X
-This option is ignored for compatibility with the AIX version of
-@command{nm}.  It takes one parameter which must be the string
-@option{32_64}.  The default mode of AIX @command{nm} corresponds
-to @option{-X 32}, which is not supported by @sc{gnu} @command{nm}.
-
-@item --help
-Show a summary of the options to @command{nm} and exit.
 @end table
 
 @c man end
