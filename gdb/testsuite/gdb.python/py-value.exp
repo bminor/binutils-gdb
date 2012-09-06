@@ -363,9 +363,6 @@ proc test_value_after_death {} {
 # subscript operation to proceed.
 
 proc test_subscript_regression {exefile lang} {
-
- global srcdir subdir
-
  # Start with a fresh gdb.
  clean_restart ${exefile}
 
@@ -463,7 +460,6 @@ build_inferior "${binfile}" "c"
 build_inferior "${binfile}-cxx" "c++"
 
 # Start with a fresh gdb.
-
 clean_restart ${binfile}
 
 # Skip all tests if Python scripting is not enabled.
