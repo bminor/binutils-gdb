@@ -367,10 +367,7 @@ proc test_subscript_regression {exefile lang} {
  global srcdir subdir
 
  # Start with a fresh gdb.
- gdb_exit
- gdb_start
- gdb_reinitialize_dir $srcdir/$subdir
- gdb_load ${exefile}
+ clean_restart ${exefile}
 
  if ![runto_main ] then {
      perror "couldn't run to breakpoint"
@@ -467,10 +464,7 @@ build_inferior "${binfile}-cxx" "c++"
 
 # Start with a fresh gdb.
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${binfile}
 
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
