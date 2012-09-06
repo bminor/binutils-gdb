@@ -1,3 +1,15 @@
+2012-09-06  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* config/tc-s390.c (set_highgprs_p): New variable.
+	(s390_machinemode): New function.
+	(md_pseudo_table): Add new pseudo command machinemode.
+	(md_parse_option): Set set_highgprs_p to TRUE if -mzarch was
+	specified on command line.
+	(s390_elf_final_processing): Set the highgprs flag in the ELF
+	header depending on set_highgprs_p.
+
+	* doc/c-s390.texi: Document new pseudo machinemode.
+
 2012-09-05  James Lemke  <jwlemke@codesourcery.com>
 
 	* doc/c-ppc.texi: Document -mvle.

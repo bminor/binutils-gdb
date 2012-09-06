@@ -873,6 +873,19 @@ restored with @code{.machine pop}.  Be aware that the cpu string has
 to be put into double quotes in case it contains characters not
 appropriate for identifiers.  So you have to write @code{"z9-109"}
 instead of just @code{z9-109}.
+
+@cindex @code{.machinemode} directive, s390
+@item .machinemode string
+This directive allows to change the architecture mode for which code
+is being generated.  @code{string} may be @code{esa}, @code{zarch},
+@code{zarch_nohighgprs}, @code{push}, or @code{pop}.
+@code{.machinemode zarch_nohighgprs} can be used to prevent the
+@code{highgprs} flag from being set in the ELF header of the output
+file.  This is useful in situations where the code is gated with a
+runtime check which makes sure that the code is only executed on
+kernels providing the @code{highgprs} feature.
+@code{.machinemode push} saves the currently selected mode, which may
+be restored with @code{.machinemode pop}.
 @end table
 
 @node s390 Floating Point

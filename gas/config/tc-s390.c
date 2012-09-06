@@ -44,6 +44,10 @@ static int s390_arch_size = 0;
 static unsigned int current_cpu = S390_OPCODE_MAXCPU - 1;
 static unsigned int current_mode_mask = 0;
 
+/* Set to TRUE if the highgprs flag in the ELF header needs to be set
+   for the output file.  */
+static bfd_boolean set_highgprs_p = FALSE;
+
 /* Whether to use user friendly register names. Default is TRUE.  */
 #ifndef TARGET_REG_NAMES_P
 #define TARGET_REG_NAMES_P TRUE
@@ -86,22 +90,24 @@ static void s390_bss (int);
 static void s390_insn (int);
 static void s390_literals (int);
 static void s390_machine (int);
+static void s390_machinemode (int);
 
 const pseudo_typeS md_pseudo_table[] =
 {
-  { "align", s_align_bytes, 0 },
+  { "align",        s_align_bytes,      0 },
   /* Pseudo-ops which must be defined.  */
-  { "bss",      s390_bss,       0 },
-  { "insn",     s390_insn,      0 },
+  { "bss",          s390_bss,           0 },
+  { "insn",         s390_insn,          0 },
   /* Pseudo-ops which must be overridden.  */
-  { "byte",	s390_byte,	0 },
-  { "short",    s390_elf_cons,  2 },
-  { "long",	s390_elf_cons,	4 },
-  { "quad",     s390_elf_cons,  8 },
-  { "ltorg",    s390_literals,  0 },
-  { "string",   stringer,       8 + 1 },
-  { "machine",  s390_machine,   0 },
-  { NULL,	NULL,		0 }
+  { "byte",	    s390_byte,	        0 },
+  { "short",        s390_elf_cons,      2 },
+  { "long",	    s390_elf_cons,	4 },
+  { "quad",         s390_elf_cons,      8 },
+  { "ltorg",        s390_literals,      0 },
+  { "string",       stringer,           8 + 1 },
+  { "machine",      s390_machine,       0 },
+  { "machinemode",  s390_machinemode,   0 },
+  { NULL,	    NULL,		0 }
 };
 
 
@@ -409,7 +415,11 @@ md_parse_option (int c, char *arg)
 	current_mode_mask = 1 << S390_OPCODE_ESA;
 
       else if (arg != NULL && strcmp (arg, "zarch") == 0)
-	current_mode_mask = 1 << S390_OPCODE_ZARCH;
+	{
+	  if (s390_arch_size == 32)
+	    set_highgprs_p = TRUE;
+	  current_mode_mask = 1 << S390_OPCODE_ZARCH;
+	}
 
       else if (arg != NULL && strncmp (arg, "arch=", 5) == 0)
 	{
@@ -1799,7 +1809,7 @@ s390_literals (int ignore ATTRIBUTE_UNUSED)
 
 /* The .machine pseudo op allows to switch to a different CPU level in
    the asm listing.  The current CPU setting can be stored on a stack
-   with .machine push and restored with .machined pop.  */
+   with .machine push and restored with .machine pop.  */
 
 static void
 s390_machine (int ignore ATTRIBUTE_UNUSED)
@@ -1857,6 +1867,83 @@ s390_machine (int ignore ATTRIBUTE_UNUSED)
 	as_bad (_("invalid machine `%s'"), cpu_string);
 
       if (current_cpu != old_cpu)
+	s390_setup_opcodes ();
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+/* The .machinemode pseudo op allows to switch to a different
+   architecture mode in the asm listing.  The current architecture
+   mode setting can be stored on a stack with .machinemode push and
+   restored with .machinemode pop.  */
+
+static void
+s390_machinemode (int ignore ATTRIBUTE_UNUSED)
+{
+  char *mode_string;
+#define MAX_HISTORY 100
+  static unsigned int *mode_history;
+  static int curr_hist;
+
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer == '"')
+    {
+      int len;
+      mode_string = demand_copy_C_string (&len);
+    }
+  else
+    {
+      char c;
+      mode_string = input_line_pointer;
+      c = get_symbol_end ();
+      mode_string = xstrdup (mode_string);
+      *input_line_pointer = c;
+    }
+
+  if (mode_string != NULL)
+    {
+      unsigned int old_mode_mask = current_mode_mask;
+      char *p;
+
+      for (p = mode_string; *p != 0; p++)
+	*p = TOLOWER (*p);
+
+      if (strcmp (mode_string, "push") == 0)
+	{
+	  if (mode_history == NULL)
+	    mode_history = xmalloc (MAX_HISTORY * sizeof (*mode_history));
+
+	  if (curr_hist >= MAX_HISTORY)
+	    as_bad (_(".machinemode stack overflow"));
+	  else
+	    mode_history[curr_hist++] = current_mode_mask;
+	}
+      else if (strcmp (mode_string, "pop") == 0)
+	{
+	  if (curr_hist <= 0)
+	    as_bad (_(".machinemode stack underflow"));
+	  else
+	    current_mode_mask = mode_history[--curr_hist];
+	}
+      else
+	{
+	  if (strcmp (mode_string, "esa") == 0)
+	    current_mode_mask = 1 << S390_OPCODE_ESA;
+	  else if (strcmp (mode_string, "zarch") == 0)
+	    {
+	      if (s390_arch_size == 32)
+		set_highgprs_p = TRUE;
+	      current_mode_mask = 1 << S390_OPCODE_ZARCH;
+	    }
+	  else if (strcmp (mode_string, "zarch_nohighgprs") == 0)
+	    current_mode_mask = 1 << S390_OPCODE_ZARCH;
+	  else
+	    as_bad (_("invalid machine `%s'"), mode_string);
+	}
+
+      if (current_mode_mask != old_mode_mask)
 	s390_setup_opcodes ();
     }
 
@@ -2381,6 +2468,6 @@ tc_s390_regname_to_dw2regnum (char *regname)
 void
 s390_elf_final_processing (void)
 {
-  if (s390_arch_size == 32 && (current_mode_mask & (1 << S390_OPCODE_ZARCH)))
+  if (set_highgprs_p)
     elf_elfheader (stdoutput)->e_flags |= EF_S390_HIGH_GPRS;
 }
