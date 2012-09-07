@@ -1192,6 +1192,11 @@ decode_location_expression (unsigned char * data,
           data += bytes_read;
           printf ("DW_OP_GNU_addr_index <0x%s>", dwarf_vmatoa ("x", uvalue));
           break;
+        case DW_OP_GNU_const_index:
+          uvalue = read_leb128 (data, &bytes_read, 0);
+          data += bytes_read;
+          printf ("DW_OP_GNU_const_index <0x%s>", dwarf_vmatoa ("x", uvalue));
+          break;
 
 	  /* HP extensions.  */
 	case DW_OP_HP_is_value:

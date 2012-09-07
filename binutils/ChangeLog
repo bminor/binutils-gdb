@@ -1,3 +1,8 @@
+2012-09-06  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.c (decode_location_expression): Add
+	DW_OP_GNU_const_index.
+
 2012-09-06  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi (nm): Alpha-sort the option descriptions.
