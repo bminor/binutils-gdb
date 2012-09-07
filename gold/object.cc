@@ -48,7 +48,8 @@ namespace gold
 
 // Struct Read_symbols_data.
 
-// Destroy any remaining File_view objects.
+// Destroy any remaining File_view objects and buffers of decompressed
+// sections.
 
 Read_symbols_data::~Read_symbols_data()
 {

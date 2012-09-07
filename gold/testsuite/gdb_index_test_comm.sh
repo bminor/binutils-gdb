@@ -80,5 +80,6 @@ check $STDOUT "^\[ *[0-9]*\] two::c2<int>:"
 check $STDOUT "^\[ *[0-9]*\] two::c2v1:"
 check $STDOUT "^\[ *[0-9]*\] two::c2v2:"
 check $STDOUT "^\[ *[0-9]*\] anonymous_union_var:"
+check $STDOUT "^\[ *[0-9]*\] inline_func_1:"
 
 exit 0

@@ -1,3 +1,13 @@
+2012-09-06  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf_reader.cc (Dwarf_die::read_attributes): Add
+	DW_FORM_GNU_addr_index and DW_FORM_GNU_str_index.
+	(Dwarf_die::skip_attributes): Likewise.
+	* object.cc (Read_symbols_data::~Read_symbols_data): Update comment.
+	* testsuite/gdb_index_test.cc (inline_func_1): New function.
+	(main): Call it.
+	* testsuite/gdb_index_test_comm.sh: Check index for inline function.
+
 2012-09-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/script_test_3.t: Add .got.plt output section

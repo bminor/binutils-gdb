@@ -745,6 +745,8 @@ Dwarf_die::read_attributes()
 	    pattr += len;
 	    break;
 	  case elfcpp::DW_FORM_udata:
+	  case elfcpp::DW_FORM_GNU_addr_index:
+	  case elfcpp::DW_FORM_GNU_str_index:
 	    attr_value.val.uintval = read_unsigned_LEB_128(pattr, &len);
 	    pattr += len;
 	    break;
@@ -895,6 +897,8 @@ Dwarf_die::skip_attributes()
 	    break;
 	  case elfcpp::DW_FORM_ref_udata:
 	  case elfcpp::DW_FORM_udata:
+	  case elfcpp::DW_FORM_GNU_addr_index:
+	  case elfcpp::DW_FORM_GNU_str_index:
 	    read_unsigned_LEB_128(pattr, &len);
 	    pattr += len;
 	    break;
