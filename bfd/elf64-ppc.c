@@ -12328,6 +12328,33 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 				   unresolved_reloc, warned);
 	  sym_name = h_elf->root.root.string;
 	  sym_type = h_elf->type;
+	  if (sec != NULL
+	      && sec->owner == output_bfd
+	      && strcmp (sec->name, ".opd") == 0)
+	    {
+	      /* This is a symbol defined in a linker script.  All
+		 such are defined in output sections, even those
+		 defined by simple assignment from a symbol defined in
+		 an input section.  Transfer the symbol to an
+		 appropriate input .opd section, so that a branch to
+		 this symbol will be mapped to the location specified
+		 by the opd entry.  */
+	      struct bfd_link_order *lo;
+	      for (lo = sec->map_head.link_order; lo != NULL; lo = lo->next)
+		if (lo->type == bfd_indirect_link_order)
+		  {
+		    asection *isec = lo->u.indirect.section;
+		    if (h_elf->root.u.def.value >= isec->output_offset
+			&& h_elf->root.u.def.value < (isec->output_offset
+						      + isec->size))
+		      {
+			h_elf->root.u.def.value -= isec->output_offset;
+			h_elf->root.u.def.section = isec;
+			sec = isec;
+			break;
+		      }
+		  }
+	    }
 	}
       h = (struct ppc_link_hash_entry *) h_elf;
 
