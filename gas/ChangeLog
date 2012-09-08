@@ -1,3 +1,8 @@
+2012-09-07  Anthony Green  <green@moxielogic.com>
+
+	* config/tc-moxie.c (md_pcrel_from): Branches are now relative
+          to the address following the branch instruction.
+
 2012-09-06  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* config/tc-s390.c (set_highgprs_p): New variable.

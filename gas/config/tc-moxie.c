@@ -774,7 +774,8 @@ md_pcrel_from (fixS *fixP)
     case BFD_RELOC_32:
       return addr + 4;
     case BFD_RELOC_MOXIE_10_PCREL:
-      return addr;
+      /* Offset is from the end of the instruction.  */
+      return addr + 2;
     default:
       abort ();
       return addr;
