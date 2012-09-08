@@ -1,3 +1,13 @@
+2012-09-08  Khoo Yit Phang  <khooyp@cs.umd.edu>
+
+	Replace -nw option with $INTERNAL_GDBFLAGS in "xgdb" tests to
+	avoid spurious results due to ~/.gdbinit.
+	* gdb.gdb/complaint.exp (setup_test): Replace -nw option with
+	$INTERNAL_GDBFLAGS in run command.
+	* gdb.gdb/observer.exp (setup_test): Ditto.
+	* gdb.gdb/selftest.exp (test_with_self): Ditto.
+	* gdb.gdb/xfullpath.exp (setup_test): Ditto.
+
 2012-09-06  Doug Evans  <dje@google.com>
 
 	* boards/fission.exp: New file.

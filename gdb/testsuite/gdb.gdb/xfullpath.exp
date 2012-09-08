@@ -25,6 +25,7 @@ if { [is_remote target] || ![isnative] } then {
 proc setup_test { executable } {
     global gdb_prompt
     global timeout
+    global INTERNAL_GDBFLAGS
 
     # load yourself into the debugger
     # This can take a relatively long time, particularly for testing where
@@ -67,7 +68,7 @@ proc setup_test { executable } {
     set timeout 600
 
     set description "run until breakpoint at captured_main"
-    gdb_test_multiple "run -nw" "$description" {
+    gdb_test_multiple "run $INTERNAL_GDBFLAGS" "$description" {
         -re "Starting program.*Breakpoint \[0-9\]+,.*captured_main .data.* at .*main.c:.*$gdb_prompt $" {
             pass "$description"
         }

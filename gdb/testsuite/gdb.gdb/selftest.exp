@@ -242,6 +242,7 @@ proc test_with_self { executable } {
     global det_file
     global decimal
     global timeout
+    global INTERNAL_GDBFLAGS
 
     # load yourself into the debugger
     # This can take a relatively long time, particularly for testing where
@@ -303,7 +304,7 @@ proc test_with_self { executable } {
     set timeout 600
 
     set description "run until breakpoint at captured_main"
-    gdb_test_multiple "run -nw" "$description" {
+    gdb_test_multiple "run $INTERNAL_GDBFLAGS" "$description" {
 	-re "Starting program.*Breakpoint \[0-9\]+,.*captured_main .data.* at .*main.c:.*$gdb_prompt $" {
 	    pass "$description"
 	}
