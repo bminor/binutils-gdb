@@ -1,3 +1,15 @@
+2012-09-09  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/sec-1.d, ld-mmix/sec-3.d: Force end-of-section symbols
+	to be emitted and checked.
+	* ld-mmix/data-1.s, ld-mmix/orph-.d, ld-mmix/orph-awp.d,
+	ld-mmix/orph-d-a.d, ld-mmix/orph-d-awn.d, ld-mmix/orph-d-awp.d,
+	ld-mmix/orph-d-awpe.d, ld-mmix/orph-d.d, ld-mmix/orph-dc-ap.d,
+	ld-mmix/orph-dc-awp.d, ld-mmix/orph-dc.d, ld-mmix/tm-ae.s,
+	ld-mmix/tm-ape.s, ld-mmix/tm-awne.s, ld-mmix/tm-awpe.s,
+	ld-mmix/tm-d-ap.s, ld-mmix/tm-d-awp.s, ld-mmix/tm-d.s,
+	ld-mmix/tm-e.s, ld-mmix/tm-orph1.s: New test files.
+
 2012-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/i386.exp: Run mov1a, mov1b.
