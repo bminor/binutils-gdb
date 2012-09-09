@@ -421,6 +421,11 @@ class Target
 		      size_t* plen) const
   { return this->do_output_section_name(relobj, name, plen); }
 
+  // Add any special sections for this symbol to the gc work list.
+  void
+  gc_mark_symbol(Symbol_table* symtab, Symbol* sym) const
+  { this->do_gc_mark_symbol(symtab, sym); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -668,6 +673,11 @@ class Target
   virtual const char*
   do_output_section_name(const Relobj*, const char*, size_t*) const
   { return NULL; }
+
+  // This may be overridden by the child class.
+  virtual void
+  do_gc_mark_symbol(Symbol_table*, Symbol*) const
+  { }
 
  private:
   // The implementations of the four do_make_elf_object virtual functions are
@@ -935,6 +945,21 @@ class Sized_target : public Target
 		   section_size_type /* view_size */)
   { gold_unreachable(); }
 
+  // Handle target specific gc actions when adding a gc reference from
+  // SRC_OBJ, SRC_SHNDX to a location specified by DST_OBJ, DST_SHNDX
+  // and DST_OFF.
+  void
+  gc_add_reference(Symbol_table* symtab,
+		   Object* src_obj,
+		   unsigned int src_shndx,
+		   Object* dst_obj,
+		   unsigned int dst_shndx,
+		   typename elfcpp::Elf_types<size>::Elf_Addr dst_off) const
+  {
+    this->do_gc_add_reference(symtab, src_obj, src_shndx,
+			      dst_obj, dst_shndx, dst_off);
+  }
+
  protected:
   Sized_target(const Target::Target_info* pti)
     : Target(pti)
@@ -946,6 +971,13 @@ class Sized_target : public Target
   // Set the EI_OSABI field if requested.
   virtual void
   do_adjust_elf_header(unsigned char*, int) const;
+
+  // Handle target specific gc actions when adding a gc reference.
+  virtual void
+  do_gc_add_reference(Symbol_table*, Object*, unsigned int,
+		      Object*, unsigned int,
+		      typename elfcpp::Elf_types<size>::Elf_Addr) const
+  { }
 };
 
 } // End namespace gold.

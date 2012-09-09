@@ -59,11 +59,14 @@ class Powerpc_relobj : public Sized_relobj_file<size, big_endian>
 public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   typedef typename elfcpp::Elf_types<size>::Elf_Off Offset;
+  typedef Unordered_set<Section_id, Section_id_hash> Section_refs;
+  typedef Unordered_map<Address, Section_refs> Access_from;
 
   Powerpc_relobj(const std::string& name, Input_file* input_file, off_t offset,
 		 const typename elfcpp::Ehdr<size, big_endian>& ehdr)
     : Sized_relobj_file<size, big_endian>(name, input_file, offset, ehdr),
-      special_(0), opd_ent_shndx_(), opd_ent_off_()
+      special_(0), opd_ent_shndx_(), opd_ent_off_(), access_from_map_(),
+      opd_valid_(false)
   { }
 
   ~Powerpc_relobj()
@@ -99,14 +102,15 @@ public:
   }
 
   // Return section and offset of function entry for .opd + R_OFF.
-  void
-  get_opd_ent(Address r_off, unsigned int* shndx, Address* value) const
+  unsigned int
+  get_opd_ent(Address r_off, Address* value = NULL) const
   {
     size_t ndx = this->opd_ent_ndx(r_off);
     gold_assert(ndx < this->opd_ent_shndx_.size());
     gold_assert(this->opd_ent_shndx_[ndx] != 0);
-    *shndx = this->opd_ent_shndx_[ndx];
-    *value = this->opd_ent_off_[ndx];
+    if (value != NULL)
+      *value = this->opd_ent_off_[ndx];
+    return this->opd_ent_shndx_[ndx];
   }
 
   // Set section and offset of function entry for .opd + R_OFF.
@@ -118,6 +122,29 @@ public:
     this->opd_ent_shndx_[ndx] = shndx;
     this->opd_ent_off_[ndx] = value;
   }
+
+  Access_from*
+  access_from_map()
+  { return &this->access_from_map_; }
+
+  // Add a reference from SRC_OBJ, SRC_INDX to this object's .opd
+  // section at DST_OFF.
+  void
+  add_reference(Object* src_obj,
+		unsigned int src_indx,
+		typename elfcpp::Elf_types<size>::Elf_Addr dst_off)
+  {
+    Section_id src_id(src_obj, src_indx);
+    this->access_from_map_[dst_off].insert(src_id);
+  }
+
+  bool
+  opd_valid() const
+  { return this->opd_valid_; }
+
+  void
+  set_opd_valid()
+  { this->opd_valid_ = true; }
 
   // Examine .rela.opd to build info about function entry points.
   void
@@ -160,6 +187,16 @@ private:
   // section and offset specified by these relocations.
   std::vector<unsigned int> opd_ent_shndx_;
   std::vector<Offset> opd_ent_off_;
+  // References made to this object's .opd section when running
+  // gc_process_relocs for another object, before the opd_ent vectors
+  // are valid for this object.
+  Access_from access_from_map_;
+  // Set at the start of gc_process_relocs, when we know opd_ent
+  // vectors are valid.  The flag could be made atomic and set in
+  // do_read_relocs with memory_order_release and then tested with
+  // memory_order_acquire, potentially resulting in fewer entries in
+  // access_from_map_.
+  bool opd_valid_;
 };
 
 template<int size, bool big_endian>
@@ -339,6 +376,24 @@ class Target_powerpc : public Sized_target<size, big_endian>
   // Return the size of each PLT entry.
   unsigned int
   plt_entry_size() const;
+
+  // Add any special sections for this symbol to the gc work list.
+  // For powerpc64, this adds the code section of a function
+  // descriptor.
+  void
+  do_gc_mark_symbol(Symbol_table* symtab, Symbol* sym) const;
+
+  // Handle target specific gc actions when adding a gc reference from
+  // SRC_OBJ, SRC_SHNDX to a location specified by DST_OBJ, DST_SHNDX
+  // and DST_OFF.  For powerpc64, this adds a referenc to the code
+  // section of a function descriptor.
+  void
+  do_gc_add_reference(Symbol_table* symtab,
+		      Object* src_obj,
+		      unsigned int src_shndx,
+		      Object* dst_obj,
+		      unsigned int dst_shndx,
+		      Address dst_off) const;
 
  private:
 
@@ -2913,6 +2968,33 @@ Target_powerpc<size, big_endian>::gc_process_relocs(
 {
   typedef Target_powerpc<size, big_endian> Powerpc;
   typedef typename Target_powerpc<size, big_endian>::Scan Scan;
+  Powerpc_relobj<size, big_endian>* ppc_object
+    = static_cast<Powerpc_relobj<size, big_endian>*>(object);
+  if (size == 64)
+    ppc_object->set_opd_valid();
+  if (size == 64 && data_shndx == ppc_object->opd_shndx())
+    {
+      typename Powerpc_relobj<size, big_endian>::Access_from::iterator p;
+      for (p = ppc_object->access_from_map()->begin();
+	   p != ppc_object->access_from_map()->end();
+	   ++p)
+	{
+	  Address dst_off = p->first;
+	  unsigned int dst_indx = ppc_object->get_opd_ent(dst_off);
+	  typename Powerpc_relobj<size, big_endian>::Section_refs::iterator s;
+	  for (s = p->second.begin(); s != p->second.end(); ++s)
+	    {
+	      Object* src_obj = s->first;
+	      unsigned int src_indx = s->second;
+	      symtab->gc()->add_reference(src_obj, src_indx,
+					  ppc_object, dst_indx);
+	    }
+	  p->second.clear();
+	}
+      ppc_object->access_from_map()->clear();
+      // Don't look at .opd relocs as .opd will reference everything.
+      return;
+    }
 
   gold::gc_process_relocs<size, big_endian, Powerpc, elfcpp::SHT_RELA, Scan,
 			  typename Target_powerpc::Relocatable_size_for_reloc>(
@@ -2927,6 +3009,65 @@ Target_powerpc<size, big_endian>::gc_process_relocs(
     needs_special_offset_handling,
     local_symbol_count,
     plocal_symbols);
+}
+
+// Handle target specific gc actions when adding a gc reference from
+// SRC_OBJ, SRC_SHNDX to a location specified by DST_OBJ, DST_SHNDX
+// and DST_OFF.  For powerpc64, this adds a referenc to the code
+// section of a function descriptor.
+
+template<int size, bool big_endian>
+void
+Target_powerpc<size, big_endian>::do_gc_add_reference(
+    Symbol_table* symtab,
+    Object* src_obj,
+    unsigned int src_shndx,
+    Object* dst_obj,
+    unsigned int dst_shndx,
+    Address dst_off) const
+{
+  Powerpc_relobj<size, big_endian>* ppc_object
+    = static_cast<Powerpc_relobj<size, big_endian>*>(dst_obj);
+  if (size == 64 && dst_shndx == ppc_object->opd_shndx())
+    {
+      if (ppc_object->opd_valid())
+	{
+	  dst_shndx = ppc_object->get_opd_ent(dst_off);
+	  symtab->gc()->add_reference(src_obj, src_shndx, dst_obj, dst_shndx);
+	}
+      else
+	{
+	  // If we haven't run scan_opd_relocs, we must delay
+	  // processing this function descriptor reference.
+	  ppc_object->add_reference(src_obj, src_shndx, dst_off);
+	}
+    }
+}
+
+// Add any special sections for this symbol to the gc work list.
+// For powerpc64, this adds the code section of a function
+// descriptor.
+
+template<int size, bool big_endian>
+void
+Target_powerpc<size, big_endian>::do_gc_mark_symbol(
+    Symbol_table* symtab,
+    Symbol* sym) const
+{
+  if (size == 64)
+    {
+      Powerpc_relobj<size, big_endian>* ppc_object
+	= static_cast<Powerpc_relobj<size, big_endian>*>(sym->object());
+      bool is_ordinary;
+      unsigned int shndx = sym->shndx(&is_ordinary);
+      if (is_ordinary && shndx == ppc_object->opd_shndx())
+	{
+	  Sized_symbol<size>* gsym = symtab->get_sized_symbol<size>(sym);
+	  Address dst_off = gsym->value();
+	  unsigned int dst_indx = ppc_object->get_opd_ent(dst_off);
+	  symtab->gc()->worklist().push(Section_id(ppc_object, dst_indx));
+	}
+    }
 }
 
 // Scan relocations for a section.
@@ -3064,7 +3205,7 @@ Target_powerpc<size, big_endian>::symval_for_branch(
   if (value >= opd_addr && value < opd_addr + symobj->section_size(shndx))
     {
       Address sec_off;
-      symobj->get_opd_ent(value - opd_addr, dest_shndx, &sec_off);
+      *dest_shndx = symobj->get_opd_ent(value - opd_addr, &sec_off);
       Address sec_addr = symobj->get_output_section_offset(*dest_shndx);
       gold_assert(sec_addr != invalid_address);
       sec_addr += symobj->output_section(*dest_shndx)->address();

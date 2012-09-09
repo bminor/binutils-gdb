@@ -187,8 +187,6 @@ gc_process_relocs(
     size_t local_count,
     const unsigned char* plocal_syms)
 {
-  Object* dst_obj;
-  unsigned int dst_indx;
   Scan scan;
 
   typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
@@ -235,6 +233,9 @@ gc_process_relocs(
       unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
       typename elfcpp::Elf_types<size>::Elf_Swxword addend =
       Reloc_types<sh_type, size, big_endian>::get_reloc_addend_noerror(&reloc);
+      Object* dst_obj;
+      unsigned int dst_indx;
+      typename elfcpp::Elf_types<size>::Elf_Addr dst_off;
 
       if (r_sym < local_count)
         {
@@ -246,6 +247,8 @@ gc_process_relocs(
           shndx = src_obj->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
           dst_obj = src_obj;
           dst_indx = shndx;
+	  dst_off = lsym.get_st_value();
+
           if (is_icf_tracked)
             {
 	      if (is_ordinary) 
@@ -288,11 +291,13 @@ gc_process_relocs(
 
           dst_obj = NULL;
           dst_indx = 0;
+	  dst_off = 0;
           bool is_ordinary = false;
           if (gsym->source() == Symbol::FROM_OBJECT)
             {
               dst_obj = gsym->object();
               dst_indx = gsym->shndx(&is_ordinary);
+	      dst_off = static_cast<const Sized_symbol<size>*>(gsym)->value();
             }
 
 	  // When doing safe folding, check to see if this relocation is that
@@ -348,6 +353,10 @@ gc_process_relocs(
       if (parameters->options().gc_sections())
         {
 	  symtab->gc()->add_reference(src_obj, src_indx, dst_obj, dst_indx);
+	  dst_off += addend;
+	  parameters->sized_target<size, big_endian>()
+	    ->gc_add_reference(symtab, src_obj, src_indx,
+			       dst_obj, dst_indx, dst_off);
           if (cident_section_name != NULL)
             {
               Garbage_collection::Cident_section_map::iterator ele =

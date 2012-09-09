@@ -504,15 +504,7 @@ queue_middle_tasks(const General_options& options,
       // Find the start symbol if any.
       Symbol* start_sym = symtab->lookup(parameters->entry());
       if (start_sym != NULL)
-	{
-	  bool is_ordinary;
-	  unsigned int shndx = start_sym->shndx(&is_ordinary);
-	  if (is_ordinary)
-	    {
-	      symtab->gc()->worklist().push(
-		Section_id(start_sym->object(), shndx));
-	    }
-	}
+	symtab->gc_mark_symbol(start_sym);
       // Symbols named with -u should not be considered garbage.
       symtab->gc_mark_undef_symbols(layout);
       gold_assert(symtab->gc() != NULL);

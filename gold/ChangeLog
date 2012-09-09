@@ -1,3 +1,22 @@
+2012-09-09  Alan Modra  <amodra@gmail.com>
+
+	* target.h (Target::gc_mark_symbol, do_gc_mark_symbol): New functions.
+	(Sized_target::gc_add_reference, do_gc_add_reference): New functions.
+	* gc.h (gc_process_relocs): Call target gc_add_reference.
+	* gold.cc (queue_middle_tasks): Use gc_mark_symbol on start sym.
+	* symtab.cc (Symbol_table::gc_mark_undef_symbols): Use gc_mark_symbol.
+	(Symbol_table::gc_mark_symbol): Call target gc_mark_symbol. Remove
+	unnecessary cast.
+	* powerpc.cc (Powerpc_relobj::get_opd_ent): Rearrange parameters
+	to cater for when we don't need code offset.  Update use.
+	(Powerpc_relobj::access_from_map_, opd_valid_): New vars.
+	(Powerpc_relobj::access_from_map, add_reference, opd_valid,
+	set_opd_valid): New functions.
+	(Target_powerpc::do_gc_add_reference): New function.
+	(Target_powerpc::gc_process_relocs): Call gc()->add_reference on
+	stashed refs.
+	(Target_powerpc::do_gc_mark_symbol): New function.
+
 2012-09-06  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf_reader.cc (Dwarf_die::read_attributes): Add
