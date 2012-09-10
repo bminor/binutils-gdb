@@ -91,15 +91,15 @@ class Gdb_index : public Output_section_data
   void
   add_symbol(int cu_index, const char* sym_name);
 
-  // Return TRUE if we have already processed the pubnames set at
-  // OFFSET in section SHNDX
+  // Return TRUE if we have already processed the pubnames set for
+  // OBJECT at OFFSET in section SHNDX
   bool
-  pubnames_read(unsigned int shndx, off_t offset);
+  pubnames_read(const Relobj* object, unsigned int shndx, off_t offset);
 
-  // Return TRUE if we have already processed the pubtypes set at
-  // OFFSET in section SHNDX
+  // Return TRUE if we have already processed the pubtypes set for
+  // OBJECT at OFFSET in section SHNDX
   bool
-  pubtypes_read(unsigned int shndx, off_t offset);
+  pubtypes_read(const Relobj* object,  unsigned int shndx, off_t offset);
 
   // Print usage statistics.
   static void
@@ -200,10 +200,12 @@ class Gdb_index : public Output_section_data
   off_t symtab_offset_;
   off_t cu_pool_offset_;
   off_t stringpool_offset_;
-  // Section index and offset of last read pubnames section.
+  // Object, section index and offset of last read pubnames section.
+  const Relobj* pubnames_object_;
   unsigned int pubnames_shndx_;
   off_t pubnames_offset_;
-  // Section index and offset of last read pubtypes section.
+  // Object, section index and offset of last read pubtypes section.
+  const Relobj* pubtypes_object_;
   unsigned int pubtypes_shndx_;
   off_t pubtypes_offset_;
 };
