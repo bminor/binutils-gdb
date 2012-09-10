@@ -1,5 +1,8 @@
 2012-09-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	PR gas/14521
+	* gas/mmix/group-1.d, gas/mmix/group-1.s: New test.
+
 	* gas/mmix/err-fb-2.s: New test.
 
 2012-09-10  Maciej W. Rozycki  <macro@codesourcery.com>
