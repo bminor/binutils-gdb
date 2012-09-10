@@ -1,3 +1,8 @@
+2012-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (coerce_unspec_val_to_type): Make sure that
+	the optimized_out flag is preserved.
+
 2012-09-10  Anthony Green  <green@moxielogic.com>
 
 	* moxie-tdep.c (moxie_analyze_prologue): Update for function

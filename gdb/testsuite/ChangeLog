@@ -1,3 +1,7 @@
+2012-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/optim_drec: New testcase.
+
 2012-09-10  Doug Evans  <dje@google.com>
 
 	* boards/fission.exp: Explicitly mark "board" as not remote.
