@@ -1,5 +1,9 @@
 2012-09-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	PR gas/14521
+	* config/tc-mmix.h (tc_frob_file_before_fix): Renumber sections
+	after call to mmix_frob_file.
+
 	* config/tc-mmix.c (loc_asserts): New variable.
 	(mmix_greg_internal): Handle expressions not determinable at first
 	pass.
