@@ -1,3 +1,7 @@
+2012-09-10  Doug Evans  <dje@google.com>
+
+	* boards/fission.exp: Explicitly mark "board" as not remote.
+
 2012-09-10  Keith Seitz  <keiths@redhat.com>
 
 	PR gdb/13483
