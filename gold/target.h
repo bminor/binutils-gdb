@@ -270,6 +270,20 @@ class Target
   plt_address_for_local(const Relobj* object, unsigned int symndx) const
   { return this->do_plt_address_for_local(object, symndx); }
 
+  // Return the offset to use for the GOT_INDX'th got entry which is
+  // for a local tls symbol specified by OBJECT, SYMNDX.
+  int64_t
+  tls_offset_for_local(const Relobj* object,
+		       unsigned int symndx,
+		       unsigned int got_indx) const
+  { return do_tls_offset_for_local(object, symndx, got_indx); }
+
+  // Return the offset to use for the GOT_INDX'th got entry which is
+  // for global tls symbol GSYM.
+  int64_t
+  tls_offset_for_global(Symbol* gsym, unsigned int got_indx) const
+  { return do_tls_offset_for_global(gsym, got_indx); }
+
   // Return whether this target can use relocation types to determine
   // if a function's address is taken.
   bool
@@ -544,6 +558,14 @@ class Target
 
   virtual uint64_t
   do_plt_address_for_local(const Relobj*, unsigned int) const
+  { gold_unreachable(); }
+
+  virtual int64_t
+  do_tls_offset_for_local(const Relobj*, unsigned int, unsigned int) const
+  { gold_unreachable(); }
+
+  virtual int64_t
+  do_tls_offset_for_global(Symbol*, unsigned int) const
   { gold_unreachable(); }
 
   // Virtual function which may be overriden by the child class.

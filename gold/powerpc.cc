@@ -270,6 +270,18 @@ class Target_powerpc : public Sized_target<size, big_endian>
   uint64_t
   do_dynsym_value(const Symbol*) const;
 
+  // Return the offset to use for the GOT_INDX'th got entry which is
+  // for a local tls symbol specified by OBJECT, SYMNDX.
+  int64_t
+  do_tls_offset_for_local(const Relobj* object,
+			  unsigned int symndx,
+			  unsigned int got_indx) const;
+
+  // Return the offset to use for the GOT_INDX'th got entry which is
+  // for global tls symbol GSYM.
+  int64_t
+  do_tls_offset_for_global(Symbol* gsym, unsigned int got_indx) const;
+
   // Relocate a section.
   void
   relocate_section(const Relocate_info<size, big_endian>*,
@@ -2349,7 +2361,7 @@ Target_powerpc<size, big_endian>::Scan::local(
     Output_section* output_section,
     const elfcpp::Rela<size, big_endian>& reloc,
     unsigned int r_type,
-    const elfcpp::Sym<size, big_endian>& lsym)
+    const elfcpp::Sym<size, big_endian>& /* lsym */)
 {
   Powerpc_relobj<size, big_endian>* ppc_object
     = static_cast<Powerpc_relobj<size, big_endian>*>(object);
@@ -2523,16 +2535,9 @@ Target_powerpc<size, big_endian>::Scan::local(
 	    Output_data_got_powerpc<size, big_endian>* got
 	      = target->got_section(symtab, layout);
 	    unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
-	    unsigned int shndx = lsym.get_st_shndx();
-	    bool is_ordinary;
-	    shndx = object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
-	    gold_assert(is_ordinary);
-	    got->add_local_pair_with_rel(object, r_sym,
-					 shndx,
-					 GOT_TYPE_TLSGD,
-					 target->rela_dyn_section(layout),
-					 elfcpp::R_POWERPC_DTPMOD,
-					 elfcpp::R_POWERPC_DTPREL);
+	    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	    got->add_local_tls_pair(object, r_sym, GOT_TYPE_TLSGD,
+				    rela_dyn, elfcpp::R_POWERPC_DTPMOD);
 	  }
 	else if (tls_type == tls::TLSOPT_TO_LE)
 	  {
@@ -2574,9 +2579,7 @@ Target_powerpc<size, big_endian>::Scan::local(
 	Output_data_got_powerpc<size, big_endian>* got
 	  = target->got_section(symtab, layout);
 	unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
-	got->add_local_with_rel(object, r_sym, GOT_TYPE_DTPREL,
-				target->rela_dyn_section(layout),
-				elfcpp::R_POWERPC_DTPREL);
+	got->add_local_tls(object, r_sym, GOT_TYPE_DTPREL);
       }
       break;
 
@@ -2591,9 +2594,7 @@ Target_powerpc<size, big_endian>::Scan::local(
 	    Output_data_got_powerpc<size, big_endian>* got
 	      = target->got_section(symtab, layout);
 	    unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
-	    got->add_local_with_rel(object, r_sym, GOT_TYPE_TPREL,
-				    target->rela_dyn_section(layout),
-				    elfcpp::R_POWERPC_TPREL);
+	    got->add_local_tls(object, r_sym, GOT_TYPE_TPREL);
 	  }
 	else if (tls_type == tls::TLSOPT_TO_LE)
 	  {
@@ -2913,9 +2914,15 @@ Target_powerpc<size, big_endian>::Scan::global(
       {
 	Output_data_got_powerpc<size, big_endian>* got
 	  = target->got_section(symtab, layout);
-	got->add_global_with_rel(gsym, GOT_TYPE_DTPREL,
-				 target->rela_dyn_section(layout),
-				 elfcpp::R_POWERPC_DTPREL);
+	if (!gsym->final_value_is_known()
+	    && (gsym->is_from_dynobj()
+		|| gsym->is_undefined()
+		|| gsym->is_preemptible()))
+	  got->add_global_with_rel(gsym, GOT_TYPE_DTPREL,
+				   target->rela_dyn_section(layout),
+				   elfcpp::R_POWERPC_DTPREL);
+	else
+	  got->add_global_tls(gsym, GOT_TYPE_DTPREL);
       }
       break;
 
@@ -2930,9 +2937,15 @@ Target_powerpc<size, big_endian>::Scan::global(
 	  {
 	    Output_data_got_powerpc<size, big_endian>* got
 	      = target->got_section(symtab, layout);
-	    got->add_global_with_rel(gsym, GOT_TYPE_TPREL,
-				     target->rela_dyn_section(layout),
-				     elfcpp::R_POWERPC_TPREL);
+	    if (!gsym->final_value_is_known()
+		&& (gsym->is_from_dynobj()
+		    || gsym->is_undefined()
+		    || gsym->is_preemptible()))
+	      got->add_global_with_rel(gsym, GOT_TYPE_TPREL,
+				       target->rela_dyn_section(layout),
+				       elfcpp::R_POWERPC_TPREL);
+	    else
+	      got->add_global_tls(gsym, GOT_TYPE_TPREL);
 	  }
 	else if (tls_type == tls::TLSOPT_TO_LE)
 	  {
@@ -4419,6 +4432,69 @@ Target_powerpc<size, big_endian>::do_dynsym_value(const Symbol* gsym) const
     }
   else
     gold_unreachable();
+}
+
+// Return the offset to use for the GOT_INDX'th got entry which is
+// for a local tls symbol specified by OBJECT, SYMNDX.
+template<int size, bool big_endian>
+int64_t
+Target_powerpc<size, big_endian>::do_tls_offset_for_local(
+    const Relobj* object,
+    unsigned int symndx,
+    unsigned int got_indx) const
+{
+  const Powerpc_relobj<size, big_endian>* ppc_object
+    = static_cast<const Powerpc_relobj<size, big_endian>*>(object);
+  if (ppc_object->local_symbol(symndx)->is_tls_symbol())
+    {
+      for (Got_type got_type = GOT_TYPE_TLSGD;
+	   got_type <= GOT_TYPE_TPREL;
+	   got_type = Got_type(got_type + 1))
+	if (ppc_object->local_has_got_offset(symndx, got_type))
+	  {
+	    unsigned int off = ppc_object->local_got_offset(symndx, got_type);
+	    if (got_type == GOT_TYPE_TLSGD)
+	      off += size / 8;
+	    if (off == got_indx * (size / 8))
+	      {
+		if (got_type == GOT_TYPE_TPREL)
+		  return -tp_offset;
+		else
+		  return -dtp_offset;
+	      }
+	  }
+    }
+  gold_unreachable();
+}
+
+// Return the offset to use for the GOT_INDX'th got entry which is
+// for global tls symbol GSYM.
+template<int size, bool big_endian>
+int64_t
+Target_powerpc<size, big_endian>::do_tls_offset_for_global(
+    Symbol* gsym,
+    unsigned int got_indx) const
+{
+  if (gsym->type() == elfcpp::STT_TLS)
+    {
+      for (Got_type got_type = GOT_TYPE_TLSGD;
+	   got_type <= GOT_TYPE_TPREL;
+	   got_type = Got_type(got_type + 1))
+	if (gsym->has_got_offset(got_type))
+	  {
+	    unsigned int off = gsym->got_offset(got_type);
+	    if (got_type == GOT_TYPE_TLSGD)
+	      off += size / 8;
+	    if (off == got_indx * (size / 8))
+	      {
+		if (got_type == GOT_TYPE_TPREL)
+		  return -tp_offset;
+		else
+		  return -dtp_offset;
+	      }
+	  }
+    }
+  gold_unreachable();
 }
 
 // The selector for powerpc object files.

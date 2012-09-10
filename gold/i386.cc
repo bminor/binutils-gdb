@@ -1874,7 +1874,7 @@ Target_i386::Scan::local(Symbol_table* symtab,
 		  got->add_local_pair_with_rel(object, r_sym, shndx,
 					       GOT_TYPE_TLS_PAIR,
 					       target->rel_dyn_section(layout),
-					       elfcpp::R_386_TLS_DTPMOD32, 0);
+					       elfcpp::R_386_TLS_DTPMOD32);
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);

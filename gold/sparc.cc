@@ -2429,8 +2429,7 @@ Target_sparc<size, big_endian>::Scan::local(
 					       target->rela_dyn_section(layout),
 					       (size == 64
 						? elfcpp::R_SPARC_TLS_DTPMOD64
-						: elfcpp::R_SPARC_TLS_DTPMOD32),
-					       0);
+						: elfcpp::R_SPARC_TLS_DTPMOD32));
 		if (r_type == elfcpp::R_SPARC_TLS_GD_CALL)
 		  generate_tls_call(symtab, layout, target);
 	      }

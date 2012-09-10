@@ -1369,7 +1369,9 @@ Output_data_group<size, big_endian>::do_write(Output_file* of)
 
 template<int size, bool big_endian>
 void
-Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
+Output_data_got<size, big_endian>::Got_entry::write(
+    unsigned int got_indx,
+    unsigned char* pov) const
 {
   Valtype val = 0;
 
@@ -1381,7 +1383,7 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 	// link-time value, which will be relocated dynamically by a
 	// RELATIVE relocation.
 	Symbol* gsym = this->u_.gsym;
-	if (this->use_plt_offset_ && gsym->has_plt_offset())
+	if (this->use_plt_or_tls_offset_ && gsym->has_plt_offset())
 	  val = (parameters->target().plt_address_for_global(gsym)
 		 + gsym->plt_offset());
 	else
@@ -1392,6 +1394,9 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 	    // as small as possible.
 	    sgsym = static_cast<Sized_symbol<size>*>(gsym);
 	    val = sgsym->value();
+	    if (this->use_plt_or_tls_offset_ && gsym->type() == elfcpp::STT_TLS)
+	      val += parameters->target().tls_offset_for_global(gsym,
+								got_indx);
 	  }
       }
       break;
@@ -1409,18 +1414,23 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 
     default:
       {
-	const Relobj* object = this->u_.object;
+	const Sized_relobj_file<size, big_endian>* object
+	  = static_cast<Sized_relobj_file<size, big_endian>*>(this->u_.object);
         const unsigned int lsi = this->local_sym_index_;
-	if (!this->use_plt_offset_)
-	  {
-	    uint64_t lval = object->local_symbol_value(lsi, 0);
-	    val = convert_types<Valtype, uint64_t>(lval);
-	  }
-	else
+	bool is_tls = object->local_symbol(lsi)->is_tls_symbol();
+	if (this->use_plt_or_tls_offset_ && !is_tls)
 	  {
 	    uint64_t plt_address =
 	      parameters->target().plt_address_for_local(object, lsi);
 	    val = plt_address + object->local_plt_offset(lsi);
+	  }
+	else
+	  {
+	    uint64_t lval = object->local_symbol_value(lsi, 0);
+	    val = convert_types<Valtype, uint64_t>(lval);
+	    if (this->use_plt_or_tls_offset_ && is_tls)
+	      val += parameters->target().tls_offset_for_local(object, lsi,
+							       got_indx);
 	  }
       }
       break;
@@ -1566,8 +1576,10 @@ Output_data_got<size, big_endian>::add_local_with_rel(
 }
 
 // Add a pair of entries for a local symbol to the GOT, and add
-// dynamic relocations of type R_TYPE_1 and R_TYPE_2, respectively.
-// If R_TYPE_2 == 0, add the second entry with no relocation.
+// a dynamic relocation of type R_TYPE using the section symbol of
+// the output section to which input section SHNDX maps, on the first.
+// The first got entry will have a value of zero, the second the
+// value of the local symbol.
 template<int size, bool big_endian>
 void
 Output_data_got<size, big_endian>::add_local_pair_with_rel(
@@ -1576,8 +1588,7 @@ Output_data_got<size, big_endian>::add_local_pair_with_rel(
     unsigned int shndx,
     unsigned int got_type,
     Output_data_reloc_generic* rel_dyn,
-    unsigned int r_type_1,
-    unsigned int r_type_2)
+    unsigned int r_type)
 {
   if (object->local_has_got_offset(symndx, got_type))
     return;
@@ -1587,11 +1598,30 @@ Output_data_got<size, big_endian>::add_local_pair_with_rel(
 			       Got_entry(object, symndx, false));
   object->set_local_got_offset(symndx, got_type, got_offset);
   Output_section* os = object->output_section(shndx);
-  rel_dyn->add_output_section_generic(os, r_type_1, this, got_offset, 0);
+  rel_dyn->add_output_section_generic(os, r_type, this, got_offset, 0);
+}
 
-  if (r_type_2 != 0)
-    rel_dyn->add_output_section_generic(os, r_type_2, this,
-					got_offset + size / 8, 0);
+// Add a pair of entries for a local symbol to the GOT, and add
+// a dynamic relocation of type R_TYPE using STN_UNDEF on the first.
+// The first got entry will have a value of zero, the second the
+// value of the local symbol offset by Target::tls_offset_for_local.
+template<int size, bool big_endian>
+void
+Output_data_got<size, big_endian>::add_local_tls_pair(
+    Relobj* object,
+    unsigned int symndx,
+    unsigned int got_type,
+    Output_data_reloc_generic* rel_dyn,
+    unsigned int r_type)
+{
+  if (object->local_has_got_offset(symndx, got_type))
+    return;
+
+  unsigned int got_offset
+    = this->add_got_entry_pair(Got_entry(),
+			       Got_entry(object, symndx, true));
+  object->set_local_got_offset(symndx, got_type, got_offset);
+  rel_dyn->add_local_generic(object, 0, r_type, this, got_offset, 0);
 }
 
 // Reserve a slot in the GOT for a local symbol or the second slot of a pair.
@@ -1634,11 +1664,9 @@ Output_data_got<size, big_endian>::do_write(Output_file* of)
   unsigned char* const oview = of->get_output_view(off, oview_size);
 
   unsigned char* pov = oview;
-  for (typename Got_entries::const_iterator p = this->entries_.begin();
-       p != this->entries_.end();
-       ++p)
+  for (unsigned int i = 0; i < this->entries_.size(); ++i)
     {
-      p->write(pov);
+      this->entries_[i].write(i, pov);
       pov += add;
     }
 

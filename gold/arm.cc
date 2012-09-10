@@ -8068,7 +8068,7 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
 		  got->add_local_pair_with_rel(object, r_sym, shndx,
 					       GOT_TYPE_TLS_PAIR,
 					       target->rel_dyn_section(layout),
-					       elfcpp::R_ARM_TLS_DTPMOD32, 0);
+					       elfcpp::R_ARM_TLS_DTPMOD32);
 		else
 		  got->add_tls_gd32_with_static_reloc(GOT_TYPE_TLS_PAIR,
 						      object, r_sym);

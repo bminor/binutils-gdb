@@ -2477,7 +2477,7 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 					       shndx,
 					       GOT_TYPE_TLS_PAIR,
 					       target->rela_dyn_section(layout),
-					       elfcpp::R_X86_64_DTPMOD64, 0);
+					       elfcpp::R_X86_64_DTPMOD64);
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);

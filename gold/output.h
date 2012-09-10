@@ -2246,6 +2246,12 @@ class Output_data_got : public Output_data_got_base
   bool
   add_global_plt(Symbol* gsym, unsigned int got_type);
 
+  // Like add_global, but for a TLS symbol where the value will be
+  // offset using Target::tls_offset_for_global
+  bool
+  add_global_tls(Symbol* gsym, unsigned int got_type)
+  { return add_global_plt(gsym, got_type); }
+
   // Add an entry for a global symbol to the GOT, and add a dynamic
   // relocation of type R_TYPE for the GOT entry.
   void
@@ -2270,6 +2276,12 @@ class Output_data_got : public Output_data_got_base
   bool
   add_local_plt(Relobj* object, unsigned int sym_index, unsigned int got_type);
 
+  // Like add_local, but for a TLS symbol where the value will be
+  // offset using Target::tls_offset_for_local
+  bool
+  add_local_tls(Relobj* object, unsigned int sym_index, unsigned int got_type)
+  { return add_local_plt(object, sym_index, got_type); }
+
   // Add an entry for a local symbol to the GOT, and add a dynamic
   // relocation of type R_TYPE for the GOT entry.
   void
@@ -2278,12 +2290,25 @@ class Output_data_got : public Output_data_got_base
 		     unsigned int r_type);
 
   // Add a pair of entries for a local symbol to the GOT, and add
-  // dynamic relocations of type R_TYPE_1 and R_TYPE_2, respectively.
+  // a dynamic relocation of type R_TYPE using the section symbol of
+  // the output section to which input section SHNDX maps, on the first.
+  // The first got entry will have a value of zero, the second the
+  // value of the local symbol.
   void
   add_local_pair_with_rel(Relobj* object, unsigned int sym_index,
 			  unsigned int shndx, unsigned int got_type,
 			  Output_data_reloc_generic* rel_dyn,
-                          unsigned int r_type_1, unsigned int r_type_2);
+                          unsigned int r_type);
+
+  // Add a pair of entries for a local symbol to the GOT, and add
+  // a dynamic relocation of type R_TYPE using STN_UNDEF on the first.
+  // The first got entry will have a value of zero, the second the
+  // value of the local symbol offset by Target::tls_offset_for_local.
+  void
+  add_local_tls_pair(Relobj* object, unsigned int sym_index,
+		     unsigned int got_type,
+		     Output_data_reloc_generic* rel_dyn,
+		     unsigned int r_type);
 
   // Add a constant to the GOT.  This returns the offset of the new
   // entry from the start of the GOT.
@@ -2342,18 +2367,20 @@ class Output_data_got : public Output_data_got_base
    public:
     // Create a zero entry.
     Got_entry()
-      : local_sym_index_(RESERVED_CODE), use_plt_offset_(false)
+      : local_sym_index_(RESERVED_CODE), use_plt_or_tls_offset_(false)
     { this->u_.constant = 0; }
 
     // Create a global symbol entry.
-    Got_entry(Symbol* gsym, bool use_plt_offset)
-      : local_sym_index_(GSYM_CODE), use_plt_offset_(use_plt_offset)
+    Got_entry(Symbol* gsym, bool use_plt_or_tls_offset)
+      : local_sym_index_(GSYM_CODE),
+	use_plt_or_tls_offset_(use_plt_or_tls_offset)
     { this->u_.gsym = gsym; }
 
     // Create a local symbol entry.
     Got_entry(Relobj* object, unsigned int local_sym_index,
-	      bool use_plt_offset)
-      : local_sym_index_(local_sym_index), use_plt_offset_(use_plt_offset)
+	      bool use_plt_or_tls_offset)
+      : local_sym_index_(local_sym_index),
+	use_plt_or_tls_offset_(use_plt_or_tls_offset)
     {
       gold_assert(local_sym_index != GSYM_CODE
 		  && local_sym_index != CONSTANT_CODE
@@ -2365,12 +2392,12 @@ class Output_data_got : public Output_data_got_base
     // Create a constant entry.  The constant is a host value--it will
     // be swapped, if necessary, when it is written out.
     explicit Got_entry(Valtype constant)
-      : local_sym_index_(CONSTANT_CODE), use_plt_offset_(false)
+      : local_sym_index_(CONSTANT_CODE), use_plt_or_tls_offset_(false)
     { this->u_.constant = constant; }
 
     // Write the GOT entry to an output view.
     void
-    write(unsigned char* pov) const;
+    write(unsigned int got_indx, unsigned char* pov) const;
 
    private:
     enum
@@ -2393,7 +2420,8 @@ class Output_data_got : public Output_data_got_base
     // for a global symbol, or CONSTANT_CODE for a constant.
     unsigned int local_sym_index_ : 31;
     // Whether to use the PLT offset of the symbol if it has one.
-    bool use_plt_offset_ : 1;
+    // For TLS symbols, whether to offset the symbol value.
+    bool use_plt_or_tls_offset_ : 1;
   };
 
   typedef std::vector<Got_entry> Got_entries;

@@ -1,3 +1,33 @@
+2012-09-11  Alan Modra  <amodra@gmail.com>
+
+	* output.h (Output_data_got::add_global_tls, add_local_tls,
+	add_local_tls_pair): New functions.
+	(Output_data_got::add_local_pair_with_rel): Remove second
+	reloc param.  Expand comment.
+	(Output_data_got::Got_entry): Rename use_plt_offset_ to
+	use_plt_or_tls_offset_, similarly for constructor param.
+	(Output_data_got::Got_entry::write): Add got_index param.
+	* output.cc (Output_data_got::add_global_tls, add_local_tls,
+	add_local_tls_pair): New functions.
+	(Output_data_got::Got_entry::write): Handle tls symbols
+	with use_plt_or_tls_offset_ set specially.
+	(Output_data_got::add_local_pair_with_rel): Only one reloc.
+	(Output_data_got::do_write): Replace iterator with index, pass
+	index to entry write function.
+	* target.h (Target::tls_offset_for_local, tls_offset_for_global,
+	do_tls_offset_for_local, do_tls_offset_for_global): New functions.
+	* arm.cc (Target_arm::Scan::local): Update add_local_pair_with_rel
+	call.
+	* i386.cc (Target_i386::Scan::local): Likewise.
+	* sparc.cc (Target_sparc::Scan::local): Likewise.
+	* x86_64.cc (Target_x86_64::Scan::local): Likewise.
+	* powerpc.cc (Target_powerpc::do_tls_offset_for_local,
+	do_tls_offset_for_global): New functions.
+	(Target_powerpc::Scan::local): Correct TLS relocations and got
+	entry values.
+	(Target_powerpc::Scan::global): Don't emit unnecessary
+	dynamic relocations on TLS GOT entries.
+
 2012-09-10  Matthias Klose  <doko@ubuntu.com>
 
 	* config.in: Disable sanity check for kfreebsd.
