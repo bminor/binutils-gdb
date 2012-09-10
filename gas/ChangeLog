@@ -1,7 +1,11 @@
+2012-09-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2012-09-07  Anthony Green  <green@moxielogic.com>
 
 	* config/tc-moxie.c (md_pcrel_from): Branches are now relative
-          to the address following the branch instruction.
+	to the address following the branch instruction.
 
 2012-09-06  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 

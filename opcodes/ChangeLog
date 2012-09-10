@@ -1,3 +1,7 @@
+2012-09-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2012-09-04  Sergey A. Guriev <sergey.a.guriev@intel.com>
 
 	* ia64-asmtab.h (completer_index): Extend bitfield to full uint.

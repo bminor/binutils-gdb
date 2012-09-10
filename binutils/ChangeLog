@@ -1,3 +1,7 @@
+2012-09-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2012-09-06  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf.c (decode_location_expression): Add
