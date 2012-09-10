@@ -166,8 +166,8 @@ moxie_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
     {
       inst = read_memory_unsigned_integer (next_addr, 2, byte_order);
 
-      /* Match "push $rN" where N is between 2 and 13 inclusive.  */
-      if (inst >= 0x0614 && inst <= 0x061f)
+      /* Match "push $sp $rN" where N is between 0 and 13 inclusive.  */
+      if (inst >= 0x0612 && inst <= 0x061f)
 	{
 	  regnum = inst & 0x000f;
 	  cache->framesize += 4;
@@ -182,19 +182,19 @@ moxie_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 
   /* Optional stack allocation for args and local vars <= 4
      byte.  */
-  if (inst == 0x0170)           /* ldi.l $r5, X */
+  if (inst == 0x01e0)          /* ldi.l $r12, X */
     {
       offset = read_memory_integer (next_addr + 2, 4, byte_order);
       inst2 = read_memory_unsigned_integer (next_addr + 6, 2, byte_order);
       
-      if (inst2 == 0x0517)           /* add.l $sp, $r5 */
+      if (inst2 == 0x291e)     /* sub.l $sp, $r12 */
 	{
 	  cache->framesize += offset;
 	}
       
       return (next_addr + 8);
     }
-  else if ((inst & 0xff00) == 0x91)   /* dec $sp, X */
+  else if ((inst & 0xff00) == 0x9100)   /* dec $sp, X */
     {
       cache->framesize += (inst & 0x00ff);
       next_addr += 2;
@@ -202,7 +202,7 @@ moxie_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
       while (next_addr < end_addr)
 	{
 	  inst = read_memory_unsigned_integer (next_addr, 2, byte_order);
-	  if ((inst & 0xff00) != 0x91) /* no more dec $sp, X */
+	  if ((inst & 0xff00) != 0x9100) /* no more dec $sp, X */
 	    break;
 	  cache->framesize += (inst & 0x00ff);
 	  next_addr += 2;
