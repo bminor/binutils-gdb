@@ -1,4 +1,11 @@
 2012-09-10  Iain Sandoe  <iain@codesourcery.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* configure.tgt (powerpc-*-elf, et al): Define targ_extra_libpath.
+	Correct whitespace.
+	(powerpcle-*-elf, et al): Likewise.  Correct targ_extra_emuls.
+
+2012-09-10  Iain Sandoe  <iain@codesourcery.com>
 
 	* configure.tgt (powerpc-*-elf, et al): Define targ64_extra_emuls
 	and targ64_extra_libpath.
