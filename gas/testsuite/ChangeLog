@@ -1,3 +1,9 @@
+2012-09-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/mmix/err-fb-2.s: New test.
+
+2012-09-10  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/mips.exp: Set has_newabi for all Linux targets.
 	* gas/mips/cfi-n64-1.d: Adjust for targets that do not infer the
 	ISA from the ABI.
