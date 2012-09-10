@@ -527,7 +527,10 @@ powerpc*le-*-elf* | powerpc*le-*-eabi* | powerpc*le-*-solaris* \
 				tdir_elf32lppcsim=$tdir_elf32lppc
 				;;
 			*)	targ_emul=elf32lppc
-				targ_extra_emuls="elf32ppcsim" ;;
+				targ_extra_emuls="elf32ppcsim"
+				targ64_extra_emuls=elf64lppc
+				targ64_extra_libpath=elf64lppc
+				;;
 			esac ;;
 powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
   | powerpc*-*-netbsd* | powerpc-*-openbsd* | powerpc*-*-kaos*)
@@ -539,7 +542,10 @@ powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
 				tdir_elf32ppcsim=$tdir_elf32ppc
 				;;
 			*)	targ_emul=elf32ppc
-				targ_extra_emuls="elf32ppclinux elf32ppcsim" ;;
+				targ_extra_emuls="elf32ppclinux elf32ppcsim"
+				targ64_extra_emuls=elf64ppc
+				targ64_extra_libpath=elf64ppc
+				;;
 			esac ;;
 powerpc-*-vxworks*)
 			targ_emul=elf32ppcvxworks

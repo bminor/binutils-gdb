@@ -1,3 +1,9 @@
+2012-09-10  Iain Sandoe  <iain@codesourcery.com>
+
+	* configure.tgt (powerpc-*-elf, et al): Define targ64_extra_emuls
+	and targ64_extra_libpath.
+	(powerpcle-*-elf, et al): Likewise.
+
 2012-09-09  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* emultempl/mmo.em (mmo_place_orphan): Rewrite to also attach
