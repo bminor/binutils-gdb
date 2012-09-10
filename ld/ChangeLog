@@ -1,9 +1,21 @@
+2012-09-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* emultempl/mmo.em (mmo_place_orphan): Rewrite to also attach
+	orphan sections to .data and .bss output sections, not just .text.
+	When giving up on finding a suitable output section, attach to any
+	output section other than .MMIX.reg_contents, if it exists.
+	* scripttempl/mmo.sc: Move output debug sections to just before
+	.MMIX.reg_contents.  Add .gnu.attributes.  Add new . = . NOP
+	assignments and move end-of-section provide-symbols after them
+	to force the end-of-section symbols to the address after orphan
+	placement.  Add SORT_NONE to .init and .fini sections.
+
+2012-09-10  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* emulparams/elf32bmip.sh: Make _gp hidden.
 	* emulparams/elf32bmipn32-defs.sh: Likewise.
 	* emulparams/elf32mipswindiss.sh: Likewise.
 	* scripttempl/mips.sc: Likewise.
-
-2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
 2012-08-06  Maciej W. Rozycki  <macro@codesourcery.com>
 
