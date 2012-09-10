@@ -1,3 +1,7 @@
+2012-09-10  Matthias Klose  <doko@ubuntu.com>
+
+	* config.in: Disable sanity check for kfreebsd.
+
 2012-09-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* emultempl/mmo.em (mmo_place_orphan): Rewrite to also attach

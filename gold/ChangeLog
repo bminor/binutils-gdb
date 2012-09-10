@@ -1,3 +1,7 @@
+2012-09-10  Matthias Klose  <doko@ubuntu.com>
+
+	* config.in: Disable sanity check for kfreebsd.
+
 2012-08-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.

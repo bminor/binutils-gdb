@@ -1,3 +1,7 @@
+2012-09-10  Matthias Klose  <doko@ubuntu.com>
+
+	* config.in: Disable sanity check for kfreebsd.
+
 2012-08-14  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-dis.c (print_insn_args): Add GET_OP and GET_OP_S local
