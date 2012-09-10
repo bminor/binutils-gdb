@@ -1,5 +1,15 @@
 2012-09-11  Alan Modra  <amodra@gmail.com>
 
+	PR gold/14566
+	* layout.cc (Layout::set_segment_offsets): When using
+	common-page-size alignment, ensure we are on a new max-page-size
+	page.
+	* output.cc (Output_segment::set_section_addresses): Use
+	abi_pagesize, not common_pagesize for relro boundary.
+	(Output_segment::set_offset): Likewise.
+
+2012-09-11  Alan Modra  <amodra@gmail.com>
+
 	* output.h (Output_data_got::add_global_tls, add_local_tls,
 	add_local_tls_pair): New functions.
 	(Output_data_got::add_local_pair_with_rel): Remove second

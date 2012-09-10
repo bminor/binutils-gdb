@@ -4239,7 +4239,7 @@ Output_segment::set_section_addresses(Layout* layout, bool reset,
   bool in_tls = false;
 
   // If we have relro sections, we need to pad forward now so that the
-  // relro sections plus INCREASE_RELRO end on a common page boundary.
+  // relro sections plus INCREASE_RELRO end on an abi page boundary.
   if (parameters->options().relro()
       && this->is_first_section_relro()
       && (!this->are_addresses_set_ || reset))
@@ -4294,7 +4294,7 @@ Output_segment::set_section_addresses(Layout* layout, bool reset,
       last_relro_pad = aligned_size - relro_size;
       *has_relro = true;
 
-      uint64_t page_align = parameters->target().common_pagesize();
+      uint64_t page_align = parameters->target().abi_pagesize();
 
       // Align to offset N such that (N + RELRO_SIZE) % PAGE_ALIGN == 0.
       uint64_t desired_align = page_align - (aligned_size % page_align);
@@ -4604,7 +4604,7 @@ Output_segment::set_offset(unsigned int increase)
   // page boundary.
   if (this->type_ == elfcpp::PT_GNU_RELRO)
     {
-      uint64_t page_align = parameters->target().common_pagesize();
+      uint64_t page_align = parameters->target().abi_pagesize();
       uint64_t segment_end = this->vaddr_ + this->memsz_;
       if (parameters->incremental_update())
 	{

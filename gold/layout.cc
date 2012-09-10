@@ -3420,6 +3420,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 		  *pshndx = shndx_hold;
 		  addr = align_address(aligned_addr, common_pagesize);
 		  addr = align_address(addr, (*p)->maximum_alignment());
+		  if ((addr & (abi_pagesize - 1)) != 0)
+		    addr = addr + abi_pagesize;
 		  off = orig_off + ((addr - orig_addr) & (abi_pagesize - 1));
 		  off = align_file_offset(off, addr, abi_pagesize);
 
