@@ -1,3 +1,12 @@
+2012-09-10  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/13483
+	* gdbtypes.h (BOOL_PTR_CONVERSION_BADNESS): Rename to ...
+	(BOOL_CONVERSION_BADNESS): ... this.
+	* gdbtypes.c (BOOL_PTR_CONVERSION_BADNESS): Likewise.
+	(rank_one_type): Allow all boolean conversions
+	permitted by the standard.
+
 2012-09-06  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-newobjfileevent.c (create_new_objfile_event_object):

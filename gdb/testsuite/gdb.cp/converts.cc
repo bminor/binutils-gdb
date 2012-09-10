@@ -1,9 +1,16 @@
-class A {};
+class A
+{
+public:
+  A() : member_ (0) {};
+  int member_;
+};
 class B : public A {};
 
 typedef A TA1;
 typedef A TA2;
 typedef TA2 TA3;
+
+enum my_enum {MY_A, MY_B, MY_C, MY_D};
 
 int foo0_1 (TA1)  { return 1; }
 int foo0_2 (TA3)  { return 2; }
@@ -61,6 +68,21 @@ int main()
   foo2_2 (ba);       // ..array of arrays
   foo2_3 (b);        // ..array of pointers
   foo2_4 ((int**)b); // ..array of wrong pointers
+
+  // X to boolean conversions allowed by the standard
+  int integer = 0;
+  long long_int = 1;
+  float fp = 1.0;
+  double dp = 1.0;
+  foo1_7 (integer);		// integer to boolean
+  foo1_7 (long_int);		// long to boolean
+  foo1_7 (*a);			// char to boolean
+  foo1_7 (MY_A);		// unscoped enum to boolean
+  foo1_7 (&foo1_7);		// pointer to boolean
+  foo1_7 (&A::member_);		// pointer to member to boolean
+  foo1_7 (a);			// pointer to boolean
+  foo1_7 (fp);			// float to boolean
+  foo1_7 (dp);			// double  to boolean
 
   foo3_1 (0, 0);
   foo3_2 (0, static_cast<char const**> (0));

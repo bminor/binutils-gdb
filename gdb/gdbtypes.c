@@ -54,7 +54,7 @@ const struct rank INTEGER_CONVERSION_BADNESS = {2,0};
 const struct rank FLOAT_CONVERSION_BADNESS = {2,0};
 const struct rank INT_FLOAT_CONVERSION_BADNESS = {2,0};
 const struct rank VOID_PTR_CONVERSION_BADNESS = {2,0};
-const struct rank BOOL_PTR_CONVERSION_BADNESS = {3,0};
+const struct rank BOOL_CONVERSION_BADNESS = {3,0};
 const struct rank BASE_CONVERSION_BADNESS = {2,0};
 const struct rank REFERENCE_CONVERSION_BADNESS = {2,0};
 const struct rank NULL_POINTER_CONVERSION_BADNESS = {2,0};
@@ -2718,14 +2718,23 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
     case TYPE_CODE_BOOL:
       switch (TYPE_CODE (arg))
 	{
+	  /* n3290 draft, section 4.12.1 (conv.bool):
+
+	     "A prvalue of arithmetic, unscoped enumeration, pointer, or
+	     pointer to member type can be converted to a prvalue of type
+	     bool.  A zero value, null pointer value, or null member pointer
+	     value is converted to false; any other value is converted to
+	     true.  A prvalue of type std::nullptr_t can be converted to a
+	     prvalue of type bool; the resulting value is false."  */
 	case TYPE_CODE_INT:
 	case TYPE_CODE_CHAR:
-	case TYPE_CODE_RANGE:
 	case TYPE_CODE_ENUM:
 	case TYPE_CODE_FLT:
-	  return INCOMPATIBLE_TYPE_BADNESS;
+	case TYPE_CODE_MEMBERPTR:
 	case TYPE_CODE_PTR:
-	  return BOOL_PTR_CONVERSION_BADNESS;
+	  return BOOL_CONVERSION_BADNESS;
+	case TYPE_CODE_RANGE:
+	  return INCOMPATIBLE_TYPE_BADNESS;
 	case TYPE_CODE_BOOL:
 	  return EXACT_MATCH_BADNESS;
 	default:

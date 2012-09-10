@@ -1,3 +1,14 @@
+2012-09-10  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/13483
+	* gdb.cp/converts.cc (A::A): Add ctor.
+	(A::member_): Add member.
+	(enum my_enum): New enumeration.
+	(main): Add calls to foo1_7 with various
+	permitted arguments.
+	* gdb.cp/converts.exp: Add tests for boolean
+	conversions permitted by the standard.
+
 2012-09-08  Khoo Yit Phang  <khooyp@cs.umd.edu>
 
 	Replace -nw option with $INTERNAL_GDBFLAGS in "xgdb" tests to

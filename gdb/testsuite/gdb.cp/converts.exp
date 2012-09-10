@@ -77,6 +77,21 @@ gdb_test "p foo3_1 (0, (const char**) 1)" " = 31"
 gdb_test "p foo3_2 (0, 0)" "= 32"
 gdb_test "p foo3_2 (0, (char const**) 0)" " = 320"
 
+# Tests for boolean conversions allowed by the standard
+gdb_test "p foo1_7(0)" " = 17"
+gdb_test "p foo1_7(integer)" " = 17"
+gdb_test "p foo1_7(long_int)" " = 17"
+gdb_test "p foo1_7(*a)" " = 17"
+gdb_test "p foo1_7(MY_A)" " = 17"
+gdb_test "p foo1_7(&foo1_7)" " = 17"
+gdb_test "p foo1_7(&A::member_)" " = 17"
+gdb_test "p foo1_7(a)" " = 17"
+gdb_test "p foo1_7(fp)" " = 17"
+gdb_test "p foo1_7(dp)" " = 17"
+gdb_test "p foo1_7(-1.23)" " = 17"
+gdb_test "p foo1_7(ta)" \
+    "Cannot resolve function foo1_7 to any overloaded instance"
+
 # Test for strict type checking
 set error_str "Cannot resolve function %s to any overloaded instance"
 gdb_test "show check type" "Strict type checking is on\."
