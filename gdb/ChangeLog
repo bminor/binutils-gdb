@@ -1,3 +1,8 @@
+2012-09-11  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dw2_do_expand_symtabs_matching): Don't examine
+	.gdb_index symbol attributes if there are none.
+
 2012-09-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* symtab.h (struct minimal_symbol) [has_size]: New field.

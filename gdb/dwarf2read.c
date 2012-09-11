@@ -3133,15 +3133,21 @@ dw2_do_expand_symtabs_matching (struct objfile *objfile,
 	      int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
 	      gdb_index_symbol_kind symbol_kind =
 		GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
+	      /* Only check the symbol attributes if they're present.
+		 Indices prior to version 7 don't record them,
+		 and indices >= 7 may elide them for certain symbols
+		 (gold does this).  */
+	      int attrs_valid =
+		(index->version >= 7
+		 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
 
-	      if (want_specific_block
-		  && index->version >= 7
+	      if (attrs_valid
+		  && want_specific_block
 		  && want_static != is_static)
 		continue;
 
-	      /* Only check the symbol's kind if it has one.
-		 Indices prior to version 7 don't record it.  */
-	      if (index->version >= 7)
+	      /* Only check the symbol's kind if it has one.  */
+	      if (attrs_valid)
 		{
 		  switch (domain)
 		    {
