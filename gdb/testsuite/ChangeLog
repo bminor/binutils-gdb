@@ -1,3 +1,10 @@
+2012-09-11  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/fission-base.S: Include gdb.dwarf2/ in dwo_name.
+	* gdb.dwarf2/fission-reread.S: Ditto.
+	* gdb.dwarf2/fission-base.exp: Remove setting of debug-file-directory.
+	* gdb.dwarf2/fission-reread.exp: Ditto.
+
 2012-09-11  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.base/ptype.exp: Test ptype on a pointer to a typedef.

@@ -133,10 +133,13 @@ main:
 	.byte	0x90
 	.4byte	0	/* Offset to Type DIE */
 	.uleb128 0x2	/* (DIE (0) DW_TAG_type_unit) */
-	.ascii "/tmp/src/gdb/testsuite/gdb.dwarf2\0"	/* DW_AT_comp_dir */
-	/* Normally dwo_name would be "fission-reread.dwo". */
-	/* Simplification: Leave the DWO contents in the executable. */
-	.ascii "fission-reread\0"	/* DW_AT_GNU_dwo_name */
+	.ascii "/tmp/src/gdb/testsuite\0"	/* DW_AT_comp_dir */
+	/* Normally dwo_name would be "fission-reread.dwo".
+	   Simplification: Leave the DWO contents in the executable.
+	   "gdb.dwarf2/" is included so that gdb can load the file without
+	   having to set "debug-file-directory".  This is useful when
+	   testing with cc-with-tweaks.sh -i.  */
+	.ascii "gdb.dwarf2/fission-reread\0"	/* DW_AT_GNU_dwo_name */
 	.4byte	.Ldebug_pubnames0	/* DW_AT_GNU_pubnames */
 	.4byte	.Ldebug_pubtypes0	/* DW_AT_GNU_pubtypes */
 	.4byte	.Ldebug_addr0	/* DW_AT_GNU_addr_base */
@@ -151,8 +154,8 @@ main:
 	.uleb128 0x5	/* (DIE (0xb) DW_TAG_compile_unit) */
 	.ascii "GNU C++ 4.6.x-fission\0"	/* DW_AT_producer */
 	.byte	0x4	/* DW_AT_language */
-	.ascii "fission-reread.cc\0"	/* DW_AT_name */
-	.ascii "/tmp/src/gdb/testsuite/gdb.dwarf2\0"	/* DW_AT_comp_dir */
+	.ascii "gdb.dwarf2/fission-reread.cc\0"	/* DW_AT_name */
+	.ascii "/tmp/src/gdb/testsuite\0"	/* DW_AT_comp_dir */
 	.byte	0	/* DW_AT_GNU_dwo_id */
 	.byte	0
 	.byte	0
@@ -206,10 +209,13 @@ main:
 	.4byte	.Ltext0	/* DW_AT_low_pc */
 	.4byte	.Letext0-.Ltext0	/* DW_AT_high_pc */
 	.4byte	.Ldebug_line0	/* DW_AT_stmt_list */
-	.ascii "/tmp/src/gdb/testsuite/gdb.dwarf2\0"	/* DW_AT_comp_dir */
-	/* Normally dwo_name would be "fission-reread.dwo". */
-	/* Simplification: Leave the DWO contents in the executable. */
-	.ascii "fission-reread\0"	/* DW_AT_GNU_dwo_name */
+	.ascii "/tmp/src/gdb/testsuite\0"	/* DW_AT_comp_dir */
+	/* Normally dwo_name would be "fission-reread.dwo".
+	   Simplification: Leave the DWO contents in the executable.
+	   "gdb.dwarf2/" is included so that gdb can load the file without
+	   having to set "debug-file-directory".  This is useful when
+	   testing with cc-with-tweaks.sh -i.  */
+	.ascii "gdb.dwarf2/fission-reread\0"	/* DW_AT_GNU_dwo_name */
 	.4byte	.Ldebug_pubnames0	/* DW_AT_GNU_pubnames */
 	.4byte	.Ldebug_pubtypes0	/* DW_AT_GNU_pubtypes */
 	.4byte	.Ldebug_addr0	/* DW_AT_GNU_addr_base */

@@ -85,8 +85,8 @@ main:
 	.uleb128 0x1	# (DIE (0xb) DW_TAG_compile_unit)
 	.ascii "GNU C 4.6.x-fission\0"	# DW_AT_producer
 	.byte	0x1	# DW_AT_language
-	.ascii "fission-base.c\0"	# DW_AT_name
-	.ascii "/tmp/src/gdb/testsuite/gdb.dwarf2\0"	# DW_AT_comp_dir
+	.ascii "gdb.dwarf2/fission-base.c\0"	# DW_AT_name
+	.ascii "/tmp/src/gdb/testsuite\0"	# DW_AT_comp_dir
 	.byte	0	# DW_AT_GNU_dwo_id
 	.byte	0
 	.byte	0
@@ -142,10 +142,13 @@ main:
 	.8byte	.Ltext0	# DW_AT_low_pc
 	.8byte	.Letext0-.Ltext0	# DW_AT_high_pc
 	.4byte	.Ldebug_line0	# DW_AT_stmt_list
-	.ascii "/tmp/src/gdb/testsuite/gdb.dwarf2\0"	# DW_AT_comp_dir
+	.ascii "/tmp/src/gdb/testsuite\0"	# DW_AT_comp_dir
 	# Normally dwo_name would be "fission-base.dwo".
 	# Simplification: Leave the DWO contents in the executable.
-	.ascii "fission-base\0"	# DW_AT_GNU_dwo_name
+	# "gdb.dwarf2/" is included so that gdb can load the file without
+	# having to set "debug-file-directory".  This is useful when
+	# testing with cc-with-tweaks.sh -i.
+	.ascii "gdb.dwarf2/fission-base\0"	# DW_AT_GNU_dwo_name
 	.4byte	.Ldebug_pubnames0	# DW_AT_GNU_pubnames
 	.4byte	.Ldebug_pubtypes0	# DW_AT_GNU_pubtypes
 	.4byte	.Ldebug_addr0_begin	# DW_AT_GNU_addr_base
