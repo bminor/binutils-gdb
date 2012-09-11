@@ -1,3 +1,10 @@
+
+2012-09-11  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR gas/13503
+	* config/tc-avr.h (TC_VALIDATE_FIX): Skip: BFD_RELOC_AVR_8_LO,
+	BFD_RELOC_AVR_8_HI, BFD_RELOC_AVR_8_HLO.
+
 2012-09-11  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (bootstrap): Add $EXEEXT to dependency.

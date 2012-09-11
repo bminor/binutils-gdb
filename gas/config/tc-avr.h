@@ -139,11 +139,14 @@ extern long md_pcrel_from_section (struct fix *, segT);
        || FIXP->fx_r_type == BFD_RELOC_AVR_LO8_LDI_PM_NEG    \
        || FIXP->fx_r_type == BFD_RELOC_AVR_HI8_LDI_PM_NEG    \
        || FIXP->fx_r_type == BFD_RELOC_AVR_HH8_LDI_PM_NEG    \
+       || FIXP->fx_r_type == BFD_RELOC_AVR_8_LO              \
+       || FIXP->fx_r_type == BFD_RELOC_AVR_8_HI              \
+       || FIXP->fx_r_type == BFD_RELOC_AVR_8_HLO             \
        || FIXP->fx_r_type == BFD_RELOC_AVR_16_PM)            \
       && (FIXP->fx_addsy))			             \
     {                                                        \
       goto SKIP;                                             \
-   }
+    }
 
 /* This target is buggy, and sets fix size too large.  */
 #define TC_FX_SIZE_SLACK(FIX) 2
