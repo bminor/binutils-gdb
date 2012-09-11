@@ -680,6 +680,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
     }
 
   if (msymbol != NULL
+      && MSYMBOL_HAS_SIZE (msymbol)
       && MSYMBOL_SIZE (msymbol) == 0
       && MSYMBOL_TYPE (msymbol) != mst_text
       && MSYMBOL_TYPE (msymbol) != mst_text_gnu_ifunc

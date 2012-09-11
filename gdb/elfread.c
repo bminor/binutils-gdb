@@ -570,7 +570,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 		elf_sym = (elf_symbol_type *) sym->udata.p;
 
 	      if (elf_sym)
-		MSYMBOL_SIZE(msym) = elf_sym->internal_elf_sym.st_size;
+		SET_MSYMBOL_SIZE (msym, elf_sym->internal_elf_sym.st_size);
 
 	      msym->filename = filesymname;
 	      gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
@@ -594,7 +594,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 						  sym->section, objfile);
 		  if (mtramp)
 		    {
-		      MSYMBOL_SIZE (mtramp) = MSYMBOL_SIZE (msym);
+		      SET_MSYMBOL_SIZE (mtramp, MSYMBOL_SIZE (msym));
 		      mtramp->created_by_gdb = 1;
 		      mtramp->filename = filesymname;
 		      gdbarch_elf_make_msymbol_special (gdbarch, sym, mtramp);
@@ -689,7 +689,7 @@ elf_rel_plt_read (struct objfile *objfile, asymbol **dyn_symbol_table)
                                     1, address, mst_slot_got_plt, got_plt,
 				    objfile);
       if (msym)
-	MSYMBOL_SIZE (msym) = ptr_size;
+	SET_MSYMBOL_SIZE (msym, ptr_size);
     }
 
   do_cleanups (back_to);

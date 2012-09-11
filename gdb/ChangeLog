@@ -1,5 +1,17 @@
 2012-09-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* symtab.h (struct minimal_symbol) [has_size]: New field.
+	(MSYMBOL_SIZE): Adjust to forbid macro from being used as lvalue.
+	(SET_MSYMBOL_SIZE, MSYMBOL_HAS_SIZE): New macros.
+	* printcmd.c (build_address_symbolic): Only filter out zero-sized
+	minimal symbols if the symbol's size is actually known.
+	* minsyms.c (prim_record_minimal_symbol_full): Adjust setting
+	of msymbol's size field.  Add comment.
+	* elfread.c (elf_symtab_read, elf_rel_plt_read): Use
+	SET_MSYMBOL_SIZE to set the minimal symbol size.
+
+2012-09-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* minsyms.c (install_minimal_symbols): Use memset to fill entire
 	minimal_symbol struct object, rather than setting some of its
 	fields one by one.

@@ -937,7 +937,9 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
   MSYMBOL_TYPE (msymbol) = ms_type;
   MSYMBOL_TARGET_FLAG_1 (msymbol) = 0;
   MSYMBOL_TARGET_FLAG_2 (msymbol) = 0;
-  MSYMBOL_SIZE (msymbol) = 0;
+  /* Do not use the SET_MSYMBOL_SIZE macro to initialize the size,
+     as it would also set the has_size flag.  */
+  msymbol->size = 0;
 
   /* The hash pointers must be cleared! If they're not,
      add_minsym_to_hash_table will NOT add this msymbol to the hash table.  */

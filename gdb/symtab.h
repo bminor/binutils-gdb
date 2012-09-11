@@ -348,6 +348,11 @@ struct minimal_symbol
   unsigned int target_flag_1 : 1;
   unsigned int target_flag_2 : 1;
 
+  /* Nonzero iff the size of the minimal symbol has been set.
+     Symbol size information can sometimes not be determined, because
+     the object file format may not carry that piece of information.  */
+  unsigned int has_size : 1;
+
   /* Minimal symbols with the same hash key are kept on a linked
      list.  This is the link.  */
 
@@ -361,7 +366,14 @@ struct minimal_symbol
 
 #define MSYMBOL_TARGET_FLAG_1(msymbol)  (msymbol)->target_flag_1
 #define MSYMBOL_TARGET_FLAG_2(msymbol)  (msymbol)->target_flag_2
-#define MSYMBOL_SIZE(msymbol)		(msymbol)->size
+#define MSYMBOL_SIZE(msymbol)		((msymbol)->size + 0)
+#define SET_MSYMBOL_SIZE(msymbol, sz)		\
+  do						\
+    {						\
+      (msymbol)->size = sz;			\
+      (msymbol)->has_size = 1;			\
+    } while (0)
+#define MSYMBOL_HAS_SIZE(msymbol)	((msymbol)->has_size + 0)
 #define MSYMBOL_TYPE(msymbol)		(msymbol)->type
 
 #include "minsyms.h"
