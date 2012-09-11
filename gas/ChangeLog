@@ -1,3 +1,8 @@
+2012-09-11  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (bootstrap): Add $EXEEXT to dependency.
+	* Makefile.in: Regenerate.
+
 2012-09-10  Matthias Klose  <doko@ubuntu.com>
 
 	* config.in: Disable sanity check for kfreebsd.
