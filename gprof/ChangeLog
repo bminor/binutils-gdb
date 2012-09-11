@@ -1,3 +1,8 @@
+2012-09-11  Molly Heidecker <tworoses1@gmail.com>
+
+	PR gprof/13836
+	* fsf_callg_bl.m: Fix typo.
+
 2012-08-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
