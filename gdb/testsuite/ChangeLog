@@ -1,5 +1,8 @@
 2012-09-11  Doug Evans  <dje@google.com>
 
+	* gdb.cp/mb-inline.exp: Do "info break" after setting multi-location
+	breakpoint.
+
 	* gdb.dwarf2/fission-base.S: Include gdb.dwarf2/ in dwo_name.
 	* gdb.dwarf2/fission-reread.S: Ditto.
 	* gdb.dwarf2/fission-base.exp: Remove setting of debug-file-directory.

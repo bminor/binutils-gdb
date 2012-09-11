@@ -40,6 +40,11 @@ gdb_test "break $hdrfile:$bp_location" \
     "Breakpoint.*at.*: $hdrfile:$bp_location. \\(2 locations\\).*" \
     "set breakpoint"
 
+# Do "info break" now so we can easily compare it with the later "info break"
+# if problems arise.
+gdb_test "info break" \
+    "\[\r\n\]1\.1.* y .* at .*$hdrfile:$bp_location.*\[\r\n\]1\.2.* y .* at .*$hdrfile:$bp_location.*"
+
 gdb_run_cmd
 gdb_expect {
     -re "Breakpoint \[0-9\]+,.*foo \\(i=0\\).*$gdb_prompt $" {
