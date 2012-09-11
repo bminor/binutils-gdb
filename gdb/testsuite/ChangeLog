@@ -1,3 +1,7 @@
+2012-09-11  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.base/ptype.exp: Test ptype on a pointer to a typedef.
+
 2012-09-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/optim_drec: New testcase.

@@ -1,3 +1,8 @@
+2012-09-11  Andrew Burgess  <aburgess@broadcom.com>
+
+	* c-typeprint.c (c_type_print_varspec_prefix): Pass through the
+	passed_a_ptr flag when displaying typedef types.
+
 2012-09-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (coerce_unspec_val_to_type): Make sure that

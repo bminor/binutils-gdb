@@ -306,7 +306,7 @@ c_type_print_varspec_prefix (struct type *type,
 
     case TYPE_CODE_TYPEDEF:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0);
+				   stream, show, passed_a_ptr, 0);
       break;
 
     case TYPE_CODE_UNDEF:

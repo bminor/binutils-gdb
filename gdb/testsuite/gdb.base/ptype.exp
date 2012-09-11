@@ -370,6 +370,8 @@ if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "i*86-*-sysv4*" }
 if {$hp_aCC_compiler} {setup_xfail "hppa*-*-*"}
 gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
 
+gdb_test "ptype pv_char_array" "type = (|unsigned )char \\(\\*\\)\\\[0?\\\]"
+
 #
 ##
 ## test ptype command with pointers
