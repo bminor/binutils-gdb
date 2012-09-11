@@ -1,3 +1,9 @@
+2012-09-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* minsyms.c (install_minimal_symbols): Use memset to fill entire
+	minimal_symbol struct object, rather than setting some of its
+	fields one by one.
+
 2012-09-11  Andrew Burgess  <aburgess@broadcom.com>
 
 	* c-typeprint.c (c_type_print_varspec_prefix): Pass through the
