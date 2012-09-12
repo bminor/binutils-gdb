@@ -1079,6 +1079,11 @@ class Relobj : public Object
 		       unsigned int got_offset)
   { this->do_set_local_got_offset(symndx, got_type, got_offset); }
 
+  // Return whether the local symbol SYMNDX is a TLS symbol.
+  bool
+  local_is_tls(unsigned int symndx) const
+  { return this->do_local_is_tls(symndx); }
+
   // The number of local symbols in the input symbol table.
   virtual unsigned int
   local_symbol_count() const
@@ -1258,6 +1263,10 @@ class Relobj : public Object
   virtual void
   do_set_local_got_offset(unsigned int symndx, unsigned int got_type,
 			  unsigned int got_offset) = 0;
+
+  // Return whether local symbol SYMNDX is a TLS symbol.
+  virtual bool
+  do_local_is_tls(unsigned int symndx) const = 0;
 
   // Return the number of local symbols--implemented by child class.
   virtual unsigned int
@@ -2165,6 +2174,11 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // this if it doesn't have one.
   unsigned int
   do_local_plt_offset(unsigned int symndx) const;
+
+  // Return whether local symbol SYMNDX is a TLS symbol.
+  bool
+  do_local_is_tls(unsigned int symndx) const
+  { return this->local_symbol(symndx)->is_tls_symbol(); }
 
   // Return the number of local symbols.
   unsigned int

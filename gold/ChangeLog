@@ -1,3 +1,16 @@
+2012-09-12  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/14570
+	* output.cc: Rename Output_data_got template parameter from size
+	to got_size for all functions.  Compile all variants of
+	Output_data_got.
+	(Output_data_got::Got_entry::write): Correct use of size for
+	symbol value.  Use local_is_tls rather than casting to
+	Sized_relobj_file.
+	* object.h (class Object): Add local_is_tls and do_local_is_tls.
+	(class Sized_relobj_file): Add do_local_is_tls.
+	* incremental.h (class Sized_relobj_incr): Add do_local_is_tls.
+
 2012-09-11  Alan Modra  <amodra@gmail.com>
 
 	PR gold/14566
