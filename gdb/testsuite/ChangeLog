@@ -1,3 +1,9 @@
+2012-09-12  Doug Evans  <dje@google.com>
+
+	* gdb.base/help.exp: Remove testing of individual command help text,
+	too much of a maintenance burden.  Instead, test the functionality
+	of "help" itself.
+
 2012-09-11  Doug Evans  <dje@google.com>
 
 	* gdb.cp/mb-inline.exp: Do "info break" after setting multi-location
