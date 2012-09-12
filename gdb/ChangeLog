@@ -1,3 +1,8 @@
+2012-09-12  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_read_addr_index): Fix handling the case where
+	cu == NULL.
+
 2012-09-11  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dw2_do_expand_symtabs_matching): Don't examine

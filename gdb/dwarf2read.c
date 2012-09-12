@@ -13728,8 +13728,9 @@ dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
 
      We don't need to read the entire CU(/TU).
      We just need the header and top level die.
+
      IWBN to use the aging mechanism to let us lazily later discard the CU.
-     See however init_cutu_and_read_dies_simple.  */
+     For now we skip this optimization.  */
 
   if (cu != NULL)
     {
@@ -13740,8 +13741,10 @@ dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
     {
       struct dwarf2_read_addr_index_data aidata;
 
-      init_cutu_and_read_dies_simple (per_cu, dwarf2_read_addr_index_reader,
-				      &aidata);
+      /* Note: We can't use init_cutu_and_read_dies_simple here,
+	 we need addr_base.  */
+      init_cutu_and_read_dies (per_cu, NULL, 0, 0,
+			       dwarf2_read_addr_index_reader, &aidata);
       addr_base = aidata.addr_base;
       addr_size = aidata.addr_size;
     }
