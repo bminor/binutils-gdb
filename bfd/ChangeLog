@@ -1,3 +1,8 @@
+2012-09-12  Doug Kwan  <dougkwan@google.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Use pre-adjusted
+	relocation for stub lookup.
+
 2012-09-12  Chris Schlumberger-Socha  <chris.schlumberger-socha@arm.com>
 
 	* bfd-in2.h: Regenerated.
