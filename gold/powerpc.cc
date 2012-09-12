@@ -65,8 +65,7 @@ public:
   Powerpc_relobj(const std::string& name, Input_file* input_file, off_t offset,
 		 const typename elfcpp::Ehdr<size, big_endian>& ehdr)
     : Sized_relobj_file<size, big_endian>(name, input_file, offset, ehdr),
-      special_(0), opd_ent_shndx_(), opd_ent_off_(), access_from_map_(),
-      opd_valid_(false)
+      special_(0), opd_valid_(false), opd_ent_(), access_from_map_()
   { }
 
   ~Powerpc_relobj()
@@ -97,8 +96,7 @@ public:
   init_opd(size_t opd_size)
   {
     size_t count = this->opd_ent_ndx(opd_size);
-    this->opd_ent_shndx_.resize(count);
-    this->opd_ent_off_.reserve(count);
+    this->opd_ent_.resize(count);
   }
 
   // Return section and offset of function entry for .opd + R_OFF.
@@ -106,11 +104,11 @@ public:
   get_opd_ent(Address r_off, Address* value = NULL) const
   {
     size_t ndx = this->opd_ent_ndx(r_off);
-    gold_assert(ndx < this->opd_ent_shndx_.size());
-    gold_assert(this->opd_ent_shndx_[ndx] != 0);
+    gold_assert(ndx < this->opd_ent_.size());
+    gold_assert(this->opd_ent_[ndx].shndx != 0);
     if (value != NULL)
-      *value = this->opd_ent_off_[ndx];
-    return this->opd_ent_shndx_[ndx];
+      *value = this->opd_ent_[ndx].off;
+    return this->opd_ent_[ndx].shndx;
   }
 
   // Set section and offset of function entry for .opd + R_OFF.
@@ -118,9 +116,27 @@ public:
   set_opd_ent(Address r_off, unsigned int shndx, Address value)
   {
     size_t ndx = this->opd_ent_ndx(r_off);
-    gold_assert(ndx < this->opd_ent_shndx_.size());
-    this->opd_ent_shndx_[ndx] = shndx;
-    this->opd_ent_off_[ndx] = value;
+    gold_assert(ndx < this->opd_ent_.size());
+    this->opd_ent_[ndx].shndx = shndx;
+    this->opd_ent_[ndx].off = value;
+  }
+
+  // Return discard flag for .opd + R_OFF.
+  bool
+  get_opd_discard(Address r_off) const
+  {
+    size_t ndx = this->opd_ent_ndx(r_off);
+    gold_assert(ndx < this->opd_ent_.size());
+    return this->opd_ent_[ndx].discard;
+  }
+
+  // Set discard flag for .opd + R_OFF.
+  void
+  set_opd_discard(Address r_off)
+  {
+    size_t ndx = this->opd_ent_ndx(r_off);
+    gold_assert(ndx < this->opd_ent_.size());
+    this->opd_ent_[ndx].discard = true;
   }
 
   Access_from*
@@ -165,38 +181,47 @@ public:
   { return 0x8000; }
 
 private:
-  // Return index into opd_ent_shndx or opd_ent_off array for .opd entry
-  // at OFF.  .opd entries are 24 bytes long, but they can be spaced
-  // 16 bytes apart when the language doesn't use the last 8-byte
-  // word, the environment pointer.  Thus dividing the entry section
-  // offset by 16 will give an index into opd_ent_shndx_ and
-  // opd_ent_off_ that works for either layout of .opd.  (It leaves
-  // some elements of the vectors unused when .opd entries are spaced
-  // 24 bytes apart, but we don't know the spacing until relocations
-  // are processed, and in any case it is possible for an object to
-  // have some entries spaced 16 bytes apart and others 24 bytes apart.)
+  struct Opd_ent
+  {
+    unsigned int shndx;
+    bool discard;
+    Offset off;
+  };
+
+  // Return index into opd_ent_ array for .opd entry at OFF.
+  // .opd entries are 24 bytes long, but they can be spaced 16 bytes
+  // apart when the language doesn't use the last 8-byte word, the
+  // environment pointer.  Thus dividing the entry section offset by
+  // 16 will give an index into opd_ent_ that works for either layout
+  // of .opd.  (It leaves some elements of the vector unused when .opd
+  // entries are spaced 24 bytes apart, but we don't know the spacing
+  // until relocations are processed, and in any case it is possible
+  // for an object to have some entries spaced 16 bytes apart and
+  // others 24 bytes apart.)
   size_t
   opd_ent_ndx(size_t off) const
   { return off >> 4;}
 
   // For 32-bit the .got2 section shdnx, for 64-bit the .opd section shndx.
   unsigned int special_;
-  // The first 8-byte word of an OPD entry gives the address of the
-  // entry point of the function.  Relocatable object files have a
-  // relocation on this word.  The following two vectors record the
-  // section and offset specified by these relocations.
-  std::vector<unsigned int> opd_ent_shndx_;
-  std::vector<Offset> opd_ent_off_;
-  // References made to this object's .opd section when running
-  // gc_process_relocs for another object, before the opd_ent vectors
-  // are valid for this object.
-  Access_from access_from_map_;
-  // Set at the start of gc_process_relocs, when we know opd_ent
-  // vectors are valid.  The flag could be made atomic and set in
+
+  // Set at the start of gc_process_relocs, when we know opd_ent_
+  // vector is valid.  The flag could be made atomic and set in
   // do_read_relocs with memory_order_release and then tested with
   // memory_order_acquire, potentially resulting in fewer entries in
   // access_from_map_.
   bool opd_valid_;
+
+  // The first 8-byte word of an OPD entry gives the address of the
+  // entry point of the function.  Relocatable object files have a
+  // relocation on this word.  The following vector records the
+  // section and offset specified by these relocations.
+  std::vector<Opd_ent> opd_ent_;
+
+  // References made to this object's .opd section when running
+  // gc_process_relocs for another object, before the opd_ent_ vector
+  // is valid for this object.
+  Access_from access_from_map_;
 };
 
 template<int size, bool big_endian>
@@ -413,6 +438,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
   class Scan
   {
   public:
+    typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+
     Scan()
       : issued_non_pic_error_(false)
     { }
@@ -426,7 +453,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
 	  unsigned int data_shndx,
 	  Output_section* output_section,
 	  const elfcpp::Rela<size, big_endian>& reloc, unsigned int r_type,
-	  const elfcpp::Sym<size, big_endian>& lsym);
+	  const elfcpp::Sym<size, big_endian>& lsym,
+	  bool is_discarded);
 
     inline void
     global(Symbol_table* symtab, Layout* layout, Target_powerpc* target,
@@ -2361,10 +2389,20 @@ Target_powerpc<size, big_endian>::Scan::local(
     Output_section* output_section,
     const elfcpp::Rela<size, big_endian>& reloc,
     unsigned int r_type,
-    const elfcpp::Sym<size, big_endian>& /* lsym */)
+    const elfcpp::Sym<size, big_endian>& /* lsym */,
+    bool is_discarded)
 {
   Powerpc_relobj<size, big_endian>* ppc_object
     = static_cast<Powerpc_relobj<size, big_endian>*>(object);
+
+  if (is_discarded)
+    {
+      if (size == 64
+	  && data_shndx == ppc_object->opd_shndx()
+	  && r_type == elfcpp::R_PPC64_ADDR64)
+	ppc_object->set_opd_discard(reloc.get_r_offset());
+      return;
+    }
 
   switch (r_type)
     {
@@ -2382,13 +2420,19 @@ Target_powerpc<size, big_endian>::Scan::local(
 	  = target->got_section(symtab, layout);
 	if (parameters->options().output_is_position_independent())
 	  {
+	    Address off = reloc.get_r_offset();
+	    if (size == 64
+		&& data_shndx == ppc_object->opd_shndx()
+		&& ppc_object->get_opd_discard(off - 8))
+	      break;
+
 	    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	    Powerpc_relobj<size, big_endian>* symobj = ppc_object;
 	    rela_dyn->add_output_section_relative(got->output_section(),
 						  elfcpp::R_POWERPC_RELATIVE,
 						  output_section,
-						  object, data_shndx,
-						  reloc.get_r_offset(),
-						  ppc_object->toc_base_offset());
+						  object, data_shndx, off,
+						  symobj->toc_base_offset());
 	  }
       }
       break;
@@ -2658,6 +2702,12 @@ Target_powerpc<size, big_endian>::Scan::global(
 	  = target->got_section(symtab, layout);
 	if (parameters->options().output_is_position_independent())
 	  {
+	    Address off = reloc.get_r_offset();
+	    if (size == 64
+		&& data_shndx == ppc_object->opd_shndx()
+		&& ppc_object->get_opd_discard(off - 8))
+	      break;
+
 	    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 	    Powerpc_relobj<size, big_endian>* symobj = ppc_object;
 	    if (data_shndx != ppc_object->opd_shndx())
@@ -2666,14 +2716,22 @@ Target_powerpc<size, big_endian>::Scan::global(
 	    rela_dyn->add_output_section_relative(got->output_section(),
 						  elfcpp::R_POWERPC_RELATIVE,
 						  output_section,
-						  object, data_shndx,
-						  reloc.get_r_offset(),
+						  object, data_shndx, off,
 						  symobj->toc_base_offset());
 	  }
       }
       break;
 
     case elfcpp::R_PPC64_ADDR64:
+      if (size == 64
+	  && data_shndx == ppc_object->opd_shndx()
+	  && (gsym->is_defined_in_discarded_section()
+	      || gsym->object() != object))
+	{
+	  ppc_object->set_opd_discard(reloc.get_r_offset());
+	  break;
+	}
+      // Fall thru
     case elfcpp::R_PPC64_UADDR64:
     case elfcpp::R_POWERPC_ADDR32:
     case elfcpp::R_POWERPC_UADDR32:
@@ -4038,6 +4096,43 @@ Target_powerpc<size, big_endian>::relocate_section(
 
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
+  unsigned char *opd_rel = NULL;
+  Powerpc_relobj<size, big_endian>* const object
+    = static_cast<Powerpc_relobj<size, big_endian>*>(relinfo->object);
+  if (size == 64
+      && relinfo->data_shndx == object->opd_shndx())
+    {
+      // Rewrite opd relocs, omitting those for discarded sections
+      // to silence gold::relocate_section errors.
+      const int reloc_size
+	= Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
+      opd_rel = new unsigned char[reloc_count * reloc_size];
+      const unsigned char* rrel = prelocs;
+      unsigned char* wrel = opd_rel;
+
+      for (size_t i = 0;
+	   i < reloc_count;
+	   ++i, rrel += reloc_size, wrel += reloc_size)
+	{
+	  typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc
+	    reloc(rrel);
+	  typename elfcpp::Elf_types<size>::Elf_WXword r_info
+	    = reloc.get_r_info();
+	  unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
+	  Address r_off = reloc.get_r_offset();
+	  if (r_type == elfcpp::R_PPC64_TOC)
+	    r_off -= 8;
+	  bool is_discarded = object->get_opd_discard(r_off);
+
+	  // Reloc number is reported in some errors, so keep all relocs.
+	  if (is_discarded)
+	    memset(wrel, 0, reloc_size);
+	  else
+	    memcpy(wrel, rrel, reloc_size);
+	}
+      prelocs = opd_rel;
+    }
+
   gold::relocate_section<size, big_endian, Powerpc, elfcpp::SHT_RELA,
 			 Powerpc_relocate>(
     relinfo,
@@ -4050,6 +4145,9 @@ Target_powerpc<size, big_endian>::relocate_section(
     address,
     view_size,
     reloc_symbol_changes);
+
+  if (opd_rel != NULL)
+    delete[] opd_rel;
 }
 
 class Powerpc_scan_relocatable_reloc

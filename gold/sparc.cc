@@ -237,7 +237,8 @@ class Target_sparc : public Sized_target<size, big_endian>
 	  unsigned int data_shndx,
 	  Output_section* output_section,
 	  const elfcpp::Rela<size, big_endian>& reloc, unsigned int r_type,
-	  const elfcpp::Sym<size, big_endian>& lsym);
+	  const elfcpp::Sym<size, big_endian>& lsym,
+	  bool is_discarded);
 
     inline void
     global(Symbol_table* symtab, Layout* layout, Target_sparc* target,
@@ -2240,8 +2241,12 @@ Target_sparc<size, big_endian>::Scan::local(
 			Output_section* output_section,
 			const elfcpp::Rela<size, big_endian>& reloc,
 			unsigned int r_type,
-			const elfcpp::Sym<size, big_endian>& lsym)
+			const elfcpp::Sym<size, big_endian>& lsym,
+			bool is_discarded)
 {
+  if (is_discarded)
+    return;
+
   bool is_ifunc = lsym.get_st_type() == elfcpp::STT_GNU_IFUNC;
   unsigned int orig_r_type = r_type;
   r_type &= 0xff;

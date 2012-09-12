@@ -1,3 +1,21 @@
+2012-09-13  Alan Modra  <amodra@gmail.com>
+
+	* target-reloc.h (scan_relocs): Call scan.local for relocs
+	against symbols in discarded sections.  Pass is_discarded
+	param.
+	* arm.cc, * i386.cc, * sparc.cc, * x86_64.cc (Target_*::Scan::local):
+	Add is_discarded param.
+	* powerpc (Target_powerpc::Scan::local): Likewise.  Use
+	is_discarded to flag opd entry as discarded.  Don't emit dyn
+	relocs on such entries.
+	(Target_powerpc::Scan::global): Similarly detect and handle
+	such opd entries.
+	(Powerpc_relobj): Replace opd_ent_shndx_ and opd_ent_off_ with
+	opd_ent_.  Update all uses.
+	(Powerpc_relobj::get_opd_discard, set_opd_discard): New functions.
+	(Target_powerpc::relocate_section): Zero out discarded opd
+	entry relocs.
+
 2012-09-12  Ian Lance Taylor  <iant@google.com>
 
 	PR gold/14570
