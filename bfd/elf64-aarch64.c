@@ -908,7 +908,23 @@ static reloc_howto_type elf64_aarch64_howto_table[] =
   EMPTY_HOWTO (306),
   EMPTY_HOWTO (307),
   EMPTY_HOWTO (308),
-  EMPTY_HOWTO (309),
+
+  /* Set a load-literal immediate field to bits
+     0x1FFFFC of G(S)-P */
+  HOWTO (R_AARCH64_GOT_LD_PREL19,	/* type */
+	 2,				/* rightshift */
+	 2,				/* size (0 = byte,1 = short,2 = long) */
+	 19,				/* bitsize */
+	 TRUE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_AARCH64_GOT_LD_PREL19",	/* name */
+	 FALSE,				/* partial_inplace */
+	 0xffffe0,			/* src_mask */
+	 0xffffe0,			/* dst_mask */
+	 TRUE),				/* pcrel_offset */
+
   EMPTY_HOWTO (310),
 
   /* Get to the page for the GOT entry for the symbol
@@ -1427,6 +1443,7 @@ static const struct elf64_aarch64_reloc_map elf64_aarch64_reloc_map[] =
   {BFD_RELOC_AARCH64_CALL26, R_AARCH64_CALL26},
 
   /* Relocations for PIC.  */
+  {BFD_RELOC_AARCH64_GOT_LD_PREL19, R_AARCH64_GOT_LD_PREL19},
   {BFD_RELOC_AARCH64_ADR_GOT_PAGE, R_AARCH64_ADR_GOT_PAGE},
   {BFD_RELOC_AARCH64_LD64_GOT_LO12_NC, R_AARCH64_LD64_GOT_LO12_NC},
 
@@ -2141,6 +2158,10 @@ aarch64_resolve_relocation (unsigned int r_type, bfd_vma place, bfd_vma value,
       if (weak_undef_p)
 	value = PG (place);
       value = PG (value + addend) - PG (place);
+      break;
+
+    case R_AARCH64_GOT_LD_PREL19:
+      value = value + addend - place;
       break;
 
     case R_AARCH64_ADR_GOT_PAGE:
@@ -3362,6 +3383,7 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
       break;
 
     case R_AARCH64_LD_PREL_LO19:
+    case R_AARCH64_GOT_LD_PREL19:
       if (old_addend & ((1 << howto->rightshift) - 1))
 	return bfd_reloc_overflow;
       contents = reencode_ld_lit_ofs_19 (contents, addend);
@@ -3570,6 +3592,7 @@ aarch64_reloc_got_type (unsigned int r_type)
     {
     case R_AARCH64_LD64_GOT_LO12_NC:
     case R_AARCH64_ADR_GOT_PAGE:
+    case R_AARCH64_GOT_LD_PREL19:
       return GOT_NORMAL;
 
     case R_AARCH64_TLSGD_ADR_PAGE21:
@@ -3992,6 +4015,7 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
 
     case R_AARCH64_LD64_GOT_LO12_NC:
     case R_AARCH64_ADR_GOT_PAGE:
+    case R_AARCH64_GOT_LD_PREL19:
       if (globals->root.sgot == NULL)
 	BFD_ASSERT (h != NULL);
 
@@ -5116,6 +5140,7 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* RR: We probably want to keep a consistency check that
 	     there are no dangling GOT_PAGE relocs.  */
 	case R_AARCH64_LD64_GOT_LO12_NC:
+	case R_AARCH64_GOT_LD_PREL19:
 	case R_AARCH64_ADR_GOT_PAGE:
 	case R_AARCH64_TLSGD_ADR_PAGE21:
 	case R_AARCH64_TLSGD_ADD_LO12_NC:
@@ -5201,6 +5226,7 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_AARCH64_ADR_PREL_PG_HI21_NC:
 	case R_AARCH64_ADR_PREL_PG_HI21:
+	case R_AARCH64_ADR_PREL_LO21:
 	  if (h != NULL && info->executable)
 	    {
 	      /* If this reloc is in a read-only section, we might

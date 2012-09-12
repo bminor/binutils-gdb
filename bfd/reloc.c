@@ -5889,6 +5889,14 @@ ENUMDOC
   AArch64 ADD immediate instruction, holding bits 0 to 11 of the address.
   Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.
 ENUM
+  BFD_RELOC_AARCH64_GOT_LD_PREL19
+ENUMDOC
+  AArch64 Load Literal instruction, holding a 19 bit PC relative word
+  offset of the global offset table entry for a symbol.  The lowest two
+  bits must be zero and are not stored in the instruction, giving a 21
+  bit signed byte offset.  This relocation type requires signed overflow
+  checking.
+ENUM
   BFD_RELOC_AARCH64_ADR_GOT_PAGE
 ENUMDOC
   Get to the page base of the global offset table entry for a symbol as

@@ -2298,6 +2298,12 @@ static struct reloc_table_entry reloc_table[] = {
    BFD_RELOC_AARCH64_MOVW_G3,
    0,
    0},
+  /* Get to the GOT entry for a symbol.  */
+  {"got_prel19", 0,
+   0,
+   0,
+   0,
+   BFD_RELOC_AARCH64_GOT_LD_PREL19},
   /* Get to the page containing GOT entry for a symbol.  */
   {"got", 1,
    BFD_RELOC_AARCH64_ADR_GOT_PAGE,
@@ -2816,14 +2822,53 @@ parse_address_main (char **str, aarch64_opnd_info *operand, int reloc,
       operand->addr.pcrel = 1;
       operand->addr.preind = 1;
 
-      if (skip_past_char (&p, '='))
-	/* =immediate; need to generate the literal in the liternal pool.  */
-	inst.gen_lit_pool = 1;
-
-      if (! my_get_expression (exp, &p, GE_NO_PREFIX, 1))
+      /* #:<reloc_op>:<symbol>  */
+      skip_past_char (&p, '#');
+      if (reloc && skip_past_char (&p, ':'))
 	{
-	  set_syntax_error (_("invalid address"));
-	  return FALSE;
+	  struct reloc_table_entry *entry;
+
+	  /* Try to parse a relocation modifier.  Anything else is
+	     an error.  */
+	  entry = find_reloc_table_entry (&p);
+	  if (! entry)
+	    {
+	      set_syntax_error (_("unknown relocation modifier"));
+	      return FALSE;
+	    }
+
+	  if (entry->ldst_type == 0)
+	    {
+	      set_syntax_error
+		(_("this relocation modifier is not allowed on this "
+		   "instruction"));
+	      return FALSE;
+	    }
+
+	  /* #:<reloc_op>:  */
+	  if (! my_get_expression (exp, &p, GE_NO_PREFIX, 1))
+	    {
+	      set_syntax_error (_("invalid relocation expression"));
+	      return FALSE;
+	    }
+
+	  /* #:<reloc_op>:<expr>  */
+	  /* Record the load/store relocation type.  */
+	  inst.reloc.type = entry->ldst_type;
+	  inst.reloc.pc_rel = entry->pc_rel;
+	}
+      else
+	{
+
+	  if (skip_past_char (&p, '='))
+	    /* =immediate; need to generate the literal in the literal pool. */
+	    inst.gen_lit_pool = 1;
+
+	  if (!my_get_expression (exp, &p, GE_NO_PREFIX, 1))
+	    {
+	      set_syntax_error (_("invalid address"));
+	      return FALSE;
+	    }
 	}
 
       *str = p;
@@ -4889,37 +4934,39 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  else
 	    {
 	      info->imm.value = 0;
-	      switch (opcode->iclass)
-		{
-		case compbranch:
-		case condbranch:
-		  /* e.g. CBZ or B.COND  */
-		  gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL19);
-		  inst.reloc.type = BFD_RELOC_AARCH64_BRANCH19;
-		  break;
-		case testbranch:
-		  /* e.g. TBZ  */
-		  gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL14);
-		  inst.reloc.type = BFD_RELOC_AARCH64_TSTBR14;
-		  break;
-		case branch_imm:
-		  /* e.g. B or BL  */
-		  gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL26);
-		  inst.reloc.type = (opcode->op == OP_BL)
-		    ? BFD_RELOC_AARCH64_CALL26 : BFD_RELOC_AARCH64_JUMP26;
-		  break;
-		case loadlit:
-		  gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL19);
-		  inst.reloc.type = BFD_RELOC_AARCH64_LD_LO19_PCREL;
-		  break;
-		case pcreladdr:
-		  gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL21);
-		  inst.reloc.type = BFD_RELOC_AARCH64_ADR_LO21_PCREL;
-		  break;
-		default:
-		  gas_assert (0);
-		  abort ();
-		}
+	      if (inst.reloc.type == BFD_RELOC_UNUSED)
+		switch (opcode->iclass)
+		  {
+		  case compbranch:
+		  case condbranch:
+		    /* e.g. CBZ or B.COND  */
+		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL19);
+		    inst.reloc.type = BFD_RELOC_AARCH64_BRANCH19;
+		    break;
+		  case testbranch:
+		    /* e.g. TBZ  */
+		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL14);
+		    inst.reloc.type = BFD_RELOC_AARCH64_TSTBR14;
+		    break;
+		  case branch_imm:
+		    /* e.g. B or BL  */
+		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL26);
+		    inst.reloc.type =
+		      (opcode->op == OP_BL) ? BFD_RELOC_AARCH64_CALL26
+			 : BFD_RELOC_AARCH64_JUMP26;
+		    break;
+		  case loadlit:
+		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL19);
+		    inst.reloc.type = BFD_RELOC_AARCH64_LD_LO19_PCREL;
+		    break;
+		  case pcreladdr:
+		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL21);
+		    inst.reloc.type = BFD_RELOC_AARCH64_ADR_LO21_PCREL;
+		    break;
+		  default:
+		    gas_assert (0);
+		    abort ();
+		  }
 	      inst.reloc.pc_rel = 1;
 	    }
 	  break;
@@ -6418,6 +6465,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_LDST32_LO12:
     case BFD_RELOC_AARCH64_LDST64_LO12:
     case BFD_RELOC_AARCH64_LDST128_LO12:
+    case BFD_RELOC_AARCH64_GOT_LD_PREL19:
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
       /* Should always be exported to object file, see
@@ -6575,6 +6623,7 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_LDST32_LO12:
     case BFD_RELOC_AARCH64_LDST64_LO12:
     case BFD_RELOC_AARCH64_LDST128_LO12:
+    case BFD_RELOC_AARCH64_GOT_LD_PREL19:
       /* Always leave these relocations for the linker.  */
       return 1;
 

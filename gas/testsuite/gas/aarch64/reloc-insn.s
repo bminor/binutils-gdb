@@ -176,6 +176,10 @@ func:
 
 	// BFD_RELOC_AARCH64_LDST64_LO12
 	prfm	pstl1keep, [x7, #:lo12:ldata+4100]
+
+	// BFD_RELOC_AARCH64_GOT_LD_PREL19
+	ldr	x0, :got_prel19:cdata
+	ldrb	w1, [x0]
 	
 	ret
 	
@@ -201,3 +205,5 @@ ldata:	.xword	0x1122334455667788
 .set u64, 0xfedcba9876543210
 .set bit1,0xf000000000000000
 .set bit2,~0xf
+
+.comm	cdata,1,8
