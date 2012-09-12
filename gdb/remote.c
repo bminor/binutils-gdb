@@ -7026,6 +7026,7 @@ putpkt_binary (char *buf, int cnt)
   int ch;
   int tcount = 0;
   char *p;
+  char *message;
 
   /* Catch cases like trying to read memory or listing threads while
      we're waiting for a stop reply.  The remote server wouldn't be
@@ -8181,6 +8182,7 @@ remote_insert_hw_breakpoint (struct gdbarch *gdbarch,
   CORE_ADDR addr;
   struct remote_state *rs;
   char *p, *endbuf;
+  char *message;
 
   /* The length field should be set to the size of a breakpoint
      instruction, even though we aren't inserting one ourselves.  */
@@ -8215,6 +8217,13 @@ remote_insert_hw_breakpoint (struct gdbarch *gdbarch,
   switch (packet_ok (rs->buf, &remote_protocol_packets[PACKET_Z1]))
     {
     case PACKET_ERROR:
+      if (rs->buf[1] == '.')
+        {
+          message = strchr (rs->buf + 2, '.');
+          if (message)
+            error ("Remote failure reply: %s", message + 1);
+        }
+      return -1;
     case PACKET_UNKNOWN:
       return -1;
     case PACKET_OK:
