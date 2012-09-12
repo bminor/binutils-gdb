@@ -1,3 +1,8 @@
+2012-09-12  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/converts.cc (main): Comment out the pointer to boolean
+	conversion statement.
+
 2012-09-12  Doug Evans  <dje@google.com>
 
 	* gdb.base/help.exp: Remove testing of individual command help text,
