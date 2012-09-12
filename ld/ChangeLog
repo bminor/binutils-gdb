@@ -1,3 +1,7 @@
+2012-09-12  DJ Delorie  <dj@redhat.com>
+
+	* emulparams/elf32rx.sh (OTHER_READONLY_SECTIONS): Add W_* sections.
+
 2012-09-10  Matthias Klose  <doko@ubuntu.com>
 
 	* config.in: Disable sanity check for kfreebsd.
