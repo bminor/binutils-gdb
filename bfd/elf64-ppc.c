@@ -12249,7 +12249,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   for (; rel < relend; rel++)
     {
       enum elf_ppc64_reloc_type r_type;
-      bfd_vma addend, orig_addend;
+      bfd_vma addend;
       bfd_reloc_status_type r;
       Elf_Internal_Sym *sym;
       asection *sec;
@@ -12269,6 +12269,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       struct ppc_stub_hash_entry *stub_entry;
       bfd_vma max_br_offset;
       bfd_vma from;
+      const Elf_Internal_Rela orig_rel = *rel;
 
       r_type = ELF64_R_TYPE (rel->r_info);
       r_symndx = ELF64_R_SYM (rel->r_info);
@@ -12288,7 +12289,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       sym_name = NULL;
       unresolved_reloc = FALSE;
       warned = FALSE;
-      orig_addend = rel->r_addend;
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
@@ -12877,7 +12877,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && h->oh != NULL
 	      && h->oh->is_func_descriptor)
 	    fdh = ppc_follow_link (h->oh);
-	  stub_entry = ppc_get_stub_entry (input_section, sec, fdh, rel, htab);
+	  stub_entry = ppc_get_stub_entry (input_section, sec, fdh, &orig_rel,
+					   htab);
 	  if (stub_entry != NULL
 	      && (stub_entry->stub_type == ppc_stub_plt_call
 		  || stub_entry->stub_type == ppc_stub_plt_call_r2save
@@ -13159,7 +13160,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  }
 
 		for (; ent != NULL; ent = ent->next)
-		  if (ent->addend == orig_addend
+		  if (ent->addend == orig_rel.r_addend
 		      && ent->owner == input_bfd
 		      && ent->tls_type == tls_type)
 		    break;
@@ -13312,7 +13313,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    {
 	      struct plt_entry *ent;
 	      for (ent = h->elf.plt.plist; ent != NULL; ent = ent->next)
-		if (ent->addend == orig_addend
+		if (ent->addend == orig_rel.r_addend
 		    && ent->plt.offset != (bfd_vma) -1)
 		  {
 		    relocation = (htab->plt->output_section->vma
@@ -13884,7 +13885,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (!((*info->callbacks->reloc_overflow)
 		    (info, (h ? &h->elf.root : NULL), sym_name,
 		     ppc64_elf_howto_table[r_type]->name,
-		     orig_addend, input_bfd, input_section, rel->r_offset)))
+		     orig_rel.r_addend, input_bfd, input_section,
+		     rel->r_offset)))
 		return FALSE;
 	    }
 	  else
