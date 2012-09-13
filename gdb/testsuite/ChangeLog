@@ -1,3 +1,7 @@
+2012-09-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/valgrind-infcall.exp: Remove comment about Ubuntu.
+
 2012-08-16  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-mi.exp: Add test for printer whose children
