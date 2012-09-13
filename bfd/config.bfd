@@ -419,7 +419,8 @@ case "${targ}" in
     ;;
 
   moxie-*-elf | moxie-*-rtems | moxie-*-uclinux)
-    targ_defvec=bfd_elf32_moxie_vec
+    targ_defvec=bfd_elf32_bigmoxie_vec
+    targ_selvecs=bfd_elf32_littlemoxie_vec
     ;;
 
   h8300*-*-rtemscoff*)

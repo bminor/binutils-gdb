@@ -1,3 +1,13 @@
+2012-09-13  Anthony Green  <green@moxielogic.com>
+
+	* targets.c (bfd_elf32_bigmoxie_vec, bfd_elf32_littlemoxie_vec):
+	Define.
+	(bfd_elf32_moxie_vec): Remove.
+	* config.bfd, configure.in: Add bi-endian support for moxie.
+	* configure: Rebuilt.
+	* elf32-moxie.c (TARGET_LITTLE_NAME, TARGET_LITTLE_SYM): Define.
+	(TARGET_BIG_NAME, TARGET_BIG_SYM): Update for bi-endian support.
+
 2012-09-12  Doug Kwan  <dougkwan@google.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Use pre-adjusted

@@ -366,8 +366,10 @@ moxie_elf_check_relocs (bfd *abfd,
 #define ELF_MACHINE_CODE	EM_MOXIE
 #define ELF_MAXPAGESIZE		0x1
 
-#define TARGET_BIG_SYM          bfd_elf32_moxie_vec
-#define TARGET_BIG_NAME		"elf32-moxie"
+#define TARGET_BIG_SYM          bfd_elf32_bigmoxie_vec
+#define TARGET_BIG_NAME		"elf32-bigmoxie"
+#define TARGET_LITTLE_SYM       bfd_elf32_littlemoxie_vec
+#define TARGET_LITTLE_NAME	"elf32-littlemoxie"
 
 #define elf_info_to_howto_rel			NULL
 #define elf_info_to_howto			moxie_info_to_howto_rela

@@ -1,3 +1,14 @@
+2012-09-13  Anthony Green  <green@moxielogic.com>
+
+	* config/tc-moxie.h (DEFAULT_TARGET_FORMAT): Define.
+	(TARGET_FORMAT): Don't hard-code endian-ness.
+	* config/tc-moxie.c (target_big_endian, moxie_target_format):
+	Define.
+	(md_assemble): Handle bi-endian encodings.
+	(md_shortopts, md_parse_option, md_show_usage, md_apply_fix)
+	(md_number_to_chars, md_chars_to_number): Update for bi-endian
+	support.
+
 2012-09-12  Chris Schlumberger-Socha  <chris.schlumberger-socha@arm.com>
 
 	* config/tc-aarch64.c
