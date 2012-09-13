@@ -1,3 +1,15 @@
+2012-09-13  Nick Clifton  <nickc@redhat.com>
+
+	* v850.igen (W,WWWW): Correct computation of register number.
+	(JR32): Remove unnecessary comma.
+	(cmovf.s): Register 0 is an invalid source register.
+	(maddf.s): Remove bogus intermediary rounding.
+	(nmaddf.s): Likewise.
+	(trncf.sl): Remove bogus initial rounding.
+	(trncf.dw): Likewise.
+	(trncf.sl): Likewise.
+	(trncf.sw): Likewise.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* config.in, configure: Regenerate.
