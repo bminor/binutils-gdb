@@ -96,7 +96,6 @@ while {$loop && $continue_count < 100} {
     gdb_test_multiple "continue" "" {
 	-re "Invalid free\\(\\).*: main .*\r\n$gdb_prompt $" {
 	    pass $test
-	    # In Ubuntu 10.04.4 environments 'break' does not work here.
 	    set loop 0
 	}
 	-re "Remote connection closed.*\r\n$gdb_prompt $" {
