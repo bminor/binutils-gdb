@@ -85,48 +85,85 @@ struct registry_fields
 #define REGISTRY_ACCESS_FIELD(CONTAINER) \
   (CONTAINER)
 
+/* Opaque type representing a container type with a registry.  This
+   type is never defined.  This is used to factor out common
+   functionality of all struct tag names into common code.  IOW,
+   "struct tag name" pointers are cast to and from "struct
+   registry_container" pointers when calling the common registry
+   "backend" functions.  */
+struct registry_container;
+
+/* Registry callbacks have this type.  */
+typedef void (*registry_data_callback) (struct registry_container *, void *);
+
+struct registry_data
+{
+  unsigned index;
+  registry_data_callback save;
+  registry_data_callback free;
+};
+
+struct registry_data_registration
+{
+  struct registry_data *data;
+  struct registry_data_registration *next;
+};
+
+struct registry_data_registry
+{
+  struct registry_data_registration *registrations;
+  unsigned num_registrations;
+};
+
+/* Registry backend functions.  Client code uses the frontend
+   functions defined by DEFINE_REGISTRY below instead.  */
+
+const struct registry_data *register_data_with_cleanup
+  (struct registry_data_registry *registry,
+   registry_data_callback save,
+   registry_data_callback free);
+
+void registry_alloc_data (struct registry_data_registry *registry,
+			  struct registry_fields *registry_fields);
+
+/* Cast FUNC and CONTAINER to the real types, and call FUNC, also
+   passing DATA.  */
+typedef void (*registry_callback_adaptor) (registry_data_callback func,
+					   struct registry_container *container,
+					   void *data);
+
+void registry_clear_data (struct registry_data_registry *data_registry,
+			  registry_callback_adaptor adaptor,
+			  struct registry_container *container,
+			  struct registry_fields *fields);
+
+void registry_container_free_data (struct registry_data_registry *data_registry,
+				   registry_callback_adaptor adaptor,
+				   struct registry_container *container,
+				   struct registry_fields *fields);
+
+void registry_set_data (struct registry_fields *fields,
+			const struct registry_data *data,
+			void *value);
+
+void *registry_data (struct registry_fields *fields,
+		     const struct registry_data *data);
+
 /* Define a new registry implementation.  */
 
 #define DEFINE_REGISTRY(TAG, ACCESS)					\
-struct TAG ## _data							\
-{									\
-  unsigned index;							\
-  void (*save) (struct TAG *, void *);					\
-  void (*free) (struct TAG *, void *);					\
-};									\
-									\
-struct TAG ## _data_registration					\
-{									\
-  struct TAG ## _data *data;						\
-  struct TAG ## _data_registration *next;				\
-};									\
-									\
-struct TAG ## _data_registry						\
-{									\
-  struct TAG ## _data_registration *registrations;			\
-  unsigned num_registrations;						\
-};									\
-									\
-struct TAG ## _data_registry TAG ## _data_registry = { NULL, 0 };	\
+struct registry_data_registry TAG ## _data_registry = { NULL, 0 };	\
 									\
 const struct TAG ## _data *						\
 register_ ## TAG ## _data_with_cleanup (void (*save) (struct TAG *, void *), \
-				    void (*free) (struct TAG *, void *)) \
+					void (*free) (struct TAG *, void *)) \
 {									\
-  struct TAG ## _data_registration **curr;				\
+  struct registry_data_registration **curr;				\
 									\
-  /* Append new registration.  */					\
-  for (curr = &TAG ## _data_registry.registrations;			\
-       *curr != NULL; curr = &(*curr)->next);				\
-									\
-  *curr = XMALLOC (struct TAG ## _data_registration);			\
-  (*curr)->next = NULL;							\
-  (*curr)->data = XMALLOC (struct TAG ## _data);			\
-  (*curr)->data->index = TAG ## _data_registry.num_registrations++;	\
-  (*curr)->data->save = save;						\
-  (*curr)->data->free = free;						\
-									\
-  return (*curr)->data;							\
+  return (struct TAG ## _data *)					\
+    register_data_with_cleanup (&TAG ## _data_registry,			\
+				(registry_data_callback) save,		\
+				(registry_data_callback) free);		\
 }									\
 									\
 const struct TAG ## _data *						\
@@ -139,76 +176,81 @@ static void								\
 TAG ## _alloc_data (struct TAG *container)				\
 {									\
   struct registry_fields *rdata = &ACCESS (container)->registry_data;	\
-  gdb_assert (rdata->data == NULL);					\
-  rdata->num_data = TAG ## _data_registry.num_registrations;		\
-  rdata->data = XCALLOC (rdata->num_data, void *);			\
+									\
+  registry_alloc_data (&TAG ## _data_registry, rdata);			\
+}									\
+									\
+static void								\
+TAG ## registry_callback_adaptor (registry_data_callback func,		\
+				  struct registry_container *container, \
+				  void *data)				\
+{									\
+  struct TAG *tagged_container = (struct TAG *) container;		\
+  struct registry_fields *rdata						\
+    = &ACCESS (tagged_container)->registry_data;			\
+									\
+  registry_ ## TAG ## _callback tagged_func				\
+    = (registry_ ## TAG ## _callback) func;				\
+									\
+  tagged_func (tagged_container, data);					\
 }									\
 									\
 void									\
 clear_ ## TAG ## _data (struct TAG *container)				\
 {									\
   struct registry_fields *rdata = &ACCESS (container)->registry_data;	\
-  struct TAG ## _data_registration *registration;			\
-  int i;								\
 									\
-  gdb_assert (rdata->data != NULL);					\
-									\
-  /* Process all the save handlers.  */					\
-									\
-  for (registration = TAG ## _data_registry.registrations, i = 0;	\
-       i < rdata->num_data;						\
-       registration = registration->next, i++)				\
-    if (rdata->data[i] != NULL && registration->data->save != NULL)	\
-      registration->data->save (container, rdata->data[i]);		\
-									\
-  /* Now process all the free handlers.  */				\
-									\
-  for (registration = TAG ## _data_registry.registrations, i = 0;	\
-       i < rdata->num_data;						\
-       registration = registration->next, i++)				\
-    if (rdata->data[i] != NULL && registration->data->free != NULL)	\
-      registration->data->free (container, rdata->data[i]);		\
-									\
-  memset (rdata->data, 0, rdata->num_data * sizeof (void *));		\
+  registry_clear_data (&TAG ## _data_registry,				\
+		       TAG ## registry_callback_adaptor,		\
+		       (struct registry_container *) container,		\
+		       rdata);						\
 }									\
 									\
 static void								\
 TAG ## _free_data (struct TAG *container)				\
 {									\
   struct registry_fields *rdata = &ACCESS (container)->registry_data;	\
-  gdb_assert (rdata->data != NULL);					\
-  clear_ ## TAG ## _data (container);					\
-  xfree (rdata->data);							\
-  rdata->data = NULL;							\
+									\
+  registry_container_free_data (&TAG ## _data_registry,			\
+				TAG ## registry_callback_adaptor,	\
+				(struct registry_container *) container, \
+				rdata);					\
 }									\
 									\
 void									\
-set_ ## TAG ## _data (struct TAG *container, const struct TAG ## _data *data, \
-		  void *value)						\
+set_ ## TAG ## _data (struct TAG *container,				\
+		      const struct TAG ## _data *data,			\
+		      void *value)					\
 {									\
   struct registry_fields *rdata = &ACCESS (container)->registry_data;	\
-  gdb_assert (data->index < rdata->num_data);				\
-  rdata->data[data->index] = value;					\
+									\
+  registry_set_data (rdata,						\
+		     (struct registry_data *) data,			\
+		     value);						\
 }									\
 									\
 void *									\
 TAG ## _data (struct TAG *container, const struct TAG ## _data *data)	\
 {									\
   struct registry_fields *rdata = &ACCESS (container)->registry_data;	\
-  gdb_assert (data->index < rdata->num_data);				\
-  return rdata->data[data->index];					\
+									\
+  return registry_data (rdata,						\
+			(struct registry_data *) data);			\
 }
 
 
 /* External declarations for the registry functions.  */
 
 #define DECLARE_REGISTRY(TAG)						\
+struct TAG ## _data;							\
+typedef void (*registry_ ## TAG ## _callback) (struct TAG *, void *);	\
 extern const struct TAG ## _data *register_ ## TAG ## _data (void);	\
 extern const struct TAG ## _data *register_ ## TAG ## _data_with_cleanup \
- (void (*save) (struct TAG *, void *), void (*free) (struct TAG *, void *)); \
+ (registry_ ## TAG ## _callback save, registry_ ## TAG ## _callback free); \
 extern void clear_ ## TAG ## _data (struct TAG *);		\
 extern void set_ ## TAG ## _data (struct TAG *,			\
-			       const struct TAG ## _data *data, void *value); \
+				  const struct TAG ## _data *data, \
+				  void *value);			\
 extern void *TAG ## _data (struct TAG *,			\
 			   const struct TAG ## _data *data);
 

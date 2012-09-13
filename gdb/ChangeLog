@@ -1,3 +1,20 @@
+2012-09-13  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (COMMON_OBS): Add registry.o.
+	* registry.c: New file.
+	* registry.h (struct registry_container): Declare.
+	(registry_data_callback): New typedef.
+	(struct registry_data, struct registry_data_registration, struct
+	registry_data_registry): New type.
+	(register_data_with_cleanup, registry_alloc_data)
+	(registry_callback_adaptor, registry_clear_data)
+	(registry_container_free_data, registry_set_data, registry_data):
+	Declare.
+	(DEFINE_REGISTRY): Refactor structures and functions as shims over
+	the new common structures and functions.
+	(DECLARE_REGISTRY): Declare struct TAG ## _data.  Use the tagged
+	callback typedefs.
+
 2012-09-12  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_read_addr_index): Fix handling the case where
