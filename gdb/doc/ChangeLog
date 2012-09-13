@@ -1,3 +1,10 @@
+2012-09-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdbint.texinfo (Defining Other Architecture Features): Clarify *pcptr
+	encoding for gdbarch_breakpoint_from_pc, bp_addr for
+	gdbarch_push_dummy_call and bp_addr for gdbarch_push_dummy_code.
+
 2012-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (objfile-gdb.py file): New paragraph for .exe stripping.

@@ -4532,8 +4532,11 @@ contents and size of a breakpoint instruction.  It returns a pointer to
 a static string of bytes that encode a breakpoint instruction, stores the
 length of the string to @code{*@var{lenptr}}, and adjusts the program
 counter (if necessary) to point to the actual memory location where the
-breakpoint should be inserted.  May return @code{NULL} to indicate that
-software breakpoints are not supported.
+breakpoint should be inserted.  On input, the program counter
+(@code{*@var{pcptr}} is the encoded inferior's PC register.  If software
+breakpoints are supported, the function sets this argument to the PC's
+plain address.  If software breakpoints are not supported, the function
+returns NULL instead of the encoded breakpoint instruction.
 
 Although it is common to use a trap instruction for a breakpoint, it's
 not required; for instance, the bit pattern could be an invalid
@@ -4813,7 +4816,7 @@ instead of value.
 @anchor{gdbarch_push_dummy_call} Define this to push the dummy frame's call to
 the inferior function onto the stack.  In addition to pushing @var{nargs}, the
 code should push @var{struct_addr} (when @var{struct_return} is non-zero), and
-the return address (@var{bp_addr}).
+the return address (@var{bp_addr}, in inferior's PC register encoding).
 
 @var{function} is a pointer to a @code{struct value}; on architectures that use
 function descriptors, this contains the function descriptor value.
@@ -4827,12 +4830,14 @@ instruction sequence (including space for a breakpoint) to which the
 called function should return.
 
 Set @var{bp_addr} to the address at which the breakpoint instruction
-should be inserted, @var{real_pc} to the resume address when starting
-the call sequence, and return the updated inner-most stack address.
+should be inserted (in inferior's PC register encoding), @var{real_pc} to the
+resume address when starting the call sequence, and return the updated
+inner-most stack address.
 
 By default, the stack is grown sufficient to hold a frame-aligned
 (@pxref{frame_align}) breakpoint, @var{bp_addr} is set to the address
-reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
+reserved for that breakpoint (in inferior's PC register encoding), and
+@var{real_pc} set to @var{funaddr}.
 
 This method replaces @w{@code{gdbarch_call_dummy_location (@var{gdbarch})}}.
 
