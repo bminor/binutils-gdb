@@ -5072,6 +5072,13 @@ the dynamic object into the runtime process image.  */
 Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
   BFD_RELOC_AARCH64_ADD_LO12,
 
+/* AArch64 Load Literal instruction, holding a 19 bit PC relative word
+offset of the global offset table entry for a symbol.  The lowest two
+bits must be zero and are not stored in the instruction, giving a 21
+bit signed byte offset.  This relocation type requires signed overflow
+checking.  */
+  BFD_RELOC_AARCH64_GOT_LD_PREL19,
+
 /* Get to the page base of the global offset table entry for a symbol as
 part of an ADRP instruction using a 21 bit PC relative value.Used in
 conjunction with BFD_RELOC_AARCH64_LD64_GOT_LO12_NC.  */
