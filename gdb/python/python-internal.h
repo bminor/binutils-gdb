@@ -114,6 +114,7 @@ struct bpstats;
 struct inferior;
 
 extern PyObject *gdb_module;
+extern PyObject *gdb_python_module;
 extern PyTypeObject value_object_type;
 extern PyTypeObject block_object_type;
 extern PyTypeObject symbol_object_type;

@@ -1,3 +1,29 @@
+2012-09-13  Khoo Yit Phang  <khooyp@cs.umd.edu>
+
+	Refactor Python "gdb" module into a proper Python package, by
+	introducing a new "_gdb" module for code implemented in C, and
+	using reload/__import__ instead of exec.
+	* python/lib/gdb/__init__.py: Import * from _gdb.
+	(GdbOutputFile, sys.stdout, GdbOutputErrorFile, sys.stderr,
+	prompt_hook, sys.argv): Moved from finish_python_initialization.
+	(pretty_printers, PYTHONDIR): Moved from _initialize_python.
+	(packages, auto_load_packages): New list and function replacing
+	module_dict and auto-loading code, using __file__ instead of
+	gdb.PYTHONDIR and reload/__import__ instead of exec.
+	(GdbSetPythonDirectory): Replacing function of the same name
+	from finish_python_initialization, using reload/__import__ instead
+	of exec, as well as call auto_load_packages.
+	* python/py-prettyprint.c (find_pretty_printer_from_gdb): Check
+	gdb_python_module and not gdb_module.
+	* python/python-internal.h (gdb_python_module): Declare.
+	* python/python.c (gdb_python_module): New global.
+	(before_prompt_hook): Check gdb_python_module and not gdb_module.
+	(_initialize_python): Rename gdb module to _gdb.
+	Move gdb.PYTHONDIR and gdb.pretty_printer to lib/gdb/__init__.py.
+	(finish_python_initialization): Move Python code to
+	lib/gdb/__init__.py; instead, set up sys.path and import gdb into
+	__main__.
+
 2012-09-13  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (COMMON_OBS): Add registry.o.

@@ -74,6 +74,7 @@ static const char *gdbpy_should_print_stack = python_excp_message;
 static PyMethodDef GdbMethods[];
 
 PyObject *gdb_module;
+PyObject *gdb_python_module;
 
 /* Some string constants we may wish to use.  */
 PyObject *gdbpy_to_string_cst;
@@ -879,11 +880,12 @@ before_prompt_hook (const char *current_gdb_prompt)
 
   cleanup = ensure_python_env (get_current_arch (), current_language);
 
-  if (PyObject_HasAttrString (gdb_module, "prompt_hook"))
+  if (gdb_python_module
+      && PyObject_HasAttrString (gdb_python_module, "prompt_hook"))
     {
       PyObject *hook;
 
-      hook = PyObject_GetAttrString (gdb_module, "prompt_hook");
+      hook = PyObject_GetAttrString (gdb_python_module, "prompt_hook");
       if (hook == NULL)
 	goto fail;
 
@@ -1358,7 +1360,7 @@ message == an error message without a stack will be printed."),
   Py_Initialize ();
   PyEval_InitThreads ();
 
-  gdb_module = Py_InitModule ("gdb", GdbMethods);
+  gdb_module = Py_InitModule ("_gdb", GdbMethods);
 
   /* The casts to (char*) are for python 2.4.  */
   PyModule_AddStringConstant (gdb_module, "VERSION", (char*) version);
@@ -1370,17 +1372,6 @@ message == an error message without a stack will be printed."),
   PyModule_AddIntConstant (gdb_module, "STDOUT", 0);
   PyModule_AddIntConstant (gdb_module, "STDERR", 1);
   PyModule_AddIntConstant (gdb_module, "STDLOG", 2);
-  
-  /* gdb.parameter ("data-directory") doesn't necessarily exist when the python
-     script below is run (depending on order of _initialize_* functions).
-     Define the initial value of gdb.PYTHONDIR here.  */
-  {
-    char *gdb_pythondir;
-
-    gdb_pythondir = concat (gdb_datadir, SLASH_STRING, "python", NULL);
-    PyModule_AddStringConstant (gdb_module, "PYTHONDIR", gdb_pythondir);
-    xfree (gdb_pythondir);
-  }
 
   gdbpy_gdb_error = PyErr_NewException ("gdb.error", PyExc_RuntimeError, NULL);
   PyModule_AddObject (gdb_module, "error", gdbpy_gdb_error);
@@ -1425,9 +1416,6 @@ message == an error message without a stack will be printed."),
 
   observer_attach_before_prompt (before_prompt_hook);
 
-  PyRun_SimpleString ("import gdb");
-  PyRun_SimpleString ("gdb.pretty_printers = []");
-
   gdbpy_to_string_cst = PyString_FromString ("to_string");
   gdbpy_children_cst = PyString_FromString ("children");
   gdbpy_display_hint_cst = PyString_FromString ("display_hint");
@@ -1452,88 +1440,67 @@ message == an error message without a stack will be printed."),
 void
 finish_python_initialization (void)
 {
+  PyObject *m;
+  char *gdb_pythondir;
+  PyObject *sys_path;
   struct cleanup *cleanup;
 
   cleanup = ensure_python_env (get_current_arch (), current_language);
 
-  PyRun_SimpleString ("\
-import os\n\
-import sys\n\
-\n\
-class GdbOutputFile:\n\
-  def close(self):\n\
-    # Do nothing.\n\
-    return None\n\
-\n\
-  def isatty(self):\n\
-    return False\n\
-\n\
-  def write(self, s):\n\
-    gdb.write(s, stream=gdb.STDOUT)\n   \
-\n\
-  def writelines(self, iterable):\n\
-    for line in iterable:\n\
-      self.write(line)\n\
-\n\
-  def flush(self):\n\
-    gdb.flush()\n\
-\n\
-sys.stdout = GdbOutputFile()\n\
-\n\
-class GdbOutputErrorFile:\n\
-  def close(self):\n\
-    # Do nothing.\n\
-    return None\n\
-\n\
-  def isatty(self):\n\
-    return False\n\
-\n\
-  def write(self, s):\n\
-    gdb.write(s, stream=gdb.STDERR)\n		\
-\n\
-  def writelines(self, iterable):\n\
-    for line in iterable:\n\
-      self.write(line)\n \
-\n\
-  def flush(self):\n\
-    gdb.flush()\n\
-\n\
-sys.stderr = GdbOutputErrorFile()\n\
-\n\
-# Ideally this would live in the gdb module, but it's intentionally written\n\
-# in python, and we need this to bootstrap the gdb module.\n\
-\n\
-def GdbSetPythonDirectory (dir):\n\
-  \"Set gdb.PYTHONDIR and update sys.path,etc.\"\n\
-  old_dir = gdb.PYTHONDIR\n\
-  gdb.PYTHONDIR = dir\n\
-  # GDB's python scripts are stored inside gdb.PYTHONDIR.  So insert\n\
-  # that directory name at the start of sys.path to allow the Python\n\
-  # interpreter to find them.\n\
-  if old_dir in sys.path:\n\
-    sys.path.remove (old_dir)\n\
-  sys.path.insert (0, gdb.PYTHONDIR)\n\
-\n\
-  # Tell python where to find submodules of gdb.\n\
-  gdb.__path__ = [os.path.join (gdb.PYTHONDIR, 'gdb')]\n\
-\n\
-  # The gdb module is implemented in C rather than in Python.  As a result,\n\
-  # the associated __init.py__ script is not not executed by default when\n\
-  # the gdb module gets imported.  Execute that script manually if it\n\
-  # exists.\n\
-  ipy = os.path.join (gdb.PYTHONDIR, 'gdb', '__init__.py')\n\
-  if os.path.exists (ipy):\n\
-    execfile (ipy)\n\
-\n\
-# Install the default gdb.PYTHONDIR.\n\
-GdbSetPythonDirectory (gdb.PYTHONDIR)\n\
-# Default prompt hook does nothing.\n\
-prompt_hook = None\n\
-# Ensure that sys.argv is set to something.\n\
-# We do not use PySys_SetArgvEx because it did not appear until 2.6.6.\n\
-sys.argv = ['']\n\
-");
+  /* Add the initial data-directory to sys.path.  */
 
+  gdb_pythondir = concat (gdb_datadir, SLASH_STRING, "python", NULL);
+  make_cleanup (xfree, gdb_pythondir);
+
+  sys_path = PySys_GetObject ("path");
+
+  if (sys_path && PyList_Check (sys_path))
+    {
+      PyObject *pythondir;
+      int err;
+
+      pythondir = PyString_FromString (gdb_pythondir);
+      if (pythondir == NULL)
+	goto fail;
+
+      err = PyList_Insert (sys_path, 0, pythondir);
+      if (err)
+	goto fail;
+
+      Py_DECREF (pythondir);
+    }
+  else
+    PySys_SetPath (gdb_pythondir);
+
+  /* Import the gdb module to finish the initialization, and
+     add it to __main__ for convenience.  */
+  m = PyImport_AddModule ("__main__");
+  if (m == NULL)
+    goto fail;
+
+  gdb_python_module = PyImport_ImportModule ("gdb");
+  if (gdb_python_module == NULL)
+    {
+      gdbpy_print_stack ();
+      warning (_("Could not load the Python gdb module from `%s'."),
+		 gdb_pythondir);
+      warning (_("Limited Python support is available from the _gdb module."));
+      do_cleanups (cleanup);
+      return;
+    }
+
+  if (PyModule_AddObject (m, "gdb", gdb_python_module))
+    goto fail;
+
+  /* Keep the reference to gdb_python_module since it is in a global
+     variable.  */
+
+  do_cleanups (cleanup);
+  return;
+
+ fail:
+  gdbpy_print_stack ();
+  warning (_("internal error: Unhandled Python exception"));
   do_cleanups (cleanup);
 }
 

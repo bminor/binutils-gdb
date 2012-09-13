@@ -162,9 +162,10 @@ find_pretty_printer_from_gdb (PyObject *value)
   PyObject *function;
 
   /* Fetch the global pretty printer list.  */
-  if (! PyObject_HasAttrString (gdb_module, "pretty_printers"))
+  if (gdb_python_module == NULL
+      || ! PyObject_HasAttrString (gdb_python_module, "pretty_printers"))
     Py_RETURN_NONE;
-  pp_list = PyObject_GetAttrString (gdb_module, "pretty_printers");
+  pp_list = PyObject_GetAttrString (gdb_python_module, "pretty_printers");
   if (pp_list == NULL || ! PyList_Check (pp_list))
     {
       Py_XDECREF (pp_list);

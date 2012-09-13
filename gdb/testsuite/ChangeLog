@@ -1,3 +1,12 @@
+2012-09-13  Khoo Yit Phang  <khooyp@cs.umd.edu>
+
+	Refactor Python "gdb" module into a proper Python package, by
+	introducing a new "_gdb" module for code implemented in C, and
+	using reload/__import__ instead of exec.
+	* gdb.python/python.exp (Test stderr location): Update module
+	location of GDB-specific sys.stderr.
+	(Test stdout location): Ditto for sys.stdout.
+
 2012-09-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/valgrind-infcall.exp: Remove comment about Ubuntu.
