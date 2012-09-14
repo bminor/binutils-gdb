@@ -668,9 +668,12 @@ value_concat (struct value *arg1, struct value *arg2)
       if (TYPE_CODE (type2) == TYPE_CODE_STRING
 	  || TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	{
+	  struct cleanup *back_to;
+
 	  count = longest_to_int (value_as_long (inval1));
 	  inval2len = TYPE_LENGTH (type2);
-	  ptr = (char *) alloca (count * inval2len);
+	  ptr = (char *) xmalloc (count * inval2len);
+	  back_to = make_cleanup (xfree, ptr);
 	  if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	    {
 	      char_type = type2;
@@ -693,6 +696,7 @@ value_concat (struct value *arg1, struct value *arg2)
 		}
 	    }
 	  outval = value_string (ptr, count * inval2len, char_type);
+	  do_cleanups (back_to);
 	}
       else if (TYPE_CODE (type2) == TYPE_CODE_BOOL)
 	{
@@ -706,6 +710,8 @@ value_concat (struct value *arg1, struct value *arg2)
   else if (TYPE_CODE (type1) == TYPE_CODE_STRING
 	   || TYPE_CODE (type1) == TYPE_CODE_CHAR)
     {
+      struct cleanup *back_to;
+
       /* We have two character strings to concatenate.  */
       if (TYPE_CODE (type2) != TYPE_CODE_STRING
 	  && TYPE_CODE (type2) != TYPE_CODE_CHAR)
@@ -714,7 +720,8 @@ value_concat (struct value *arg1, struct value *arg2)
 	}
       inval1len = TYPE_LENGTH (type1);
       inval2len = TYPE_LENGTH (type2);
-      ptr = (char *) alloca (inval1len + inval2len);
+      ptr = (char *) xmalloc (inval1len + inval2len);
+      back_to = make_cleanup (xfree, ptr);
       if (TYPE_CODE (type1) == TYPE_CODE_CHAR)
 	{
 	  char_type = type1;
@@ -737,6 +744,7 @@ value_concat (struct value *arg1, struct value *arg2)
 	  memcpy (ptr + inval1len, value_contents (inval2), inval2len);
 	}
       outval = value_string (ptr, inval1len + inval2len, char_type);
+      do_cleanups (back_to);
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_BOOL)
     {
