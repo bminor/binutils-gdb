@@ -1,3 +1,8 @@
+2012-09-14  Anthony Green  <green@moxielogic.com>
+
+	* moxie-dis.c (print_insn_moxie): Branch targets are relative to
+	the address after the branch instruction.
+
 2012-09-13  Anthony Green  <green@moxielogic.com>
 
 	* moxie-dis.c (print_insn_moxie): Handle bi-endian encodings.
