@@ -618,15 +618,17 @@ c_type_print_varspec_suffix (struct type *type,
     case TYPE_CODE_ARRAY:
       {
 	LONGEST low_bound, high_bound;
+	int is_vector = TYPE_VECTOR (type);
 
 	if (passed_a_ptr)
 	  fprintf_filtered (stream, ")");
 
-	fprintf_filtered (stream, "[");
+	fprintf_filtered (stream, (is_vector ?
+				   "__attribute__ ((vector_size(" : "["));
 	if (get_array_bounds (type, &low_bound, &high_bound))
 	  fprintf_filtered (stream, "%d", 
 			    (int) (high_bound - low_bound + 1));
-	fprintf_filtered (stream, "]");
+	fprintf_filtered (stream, (is_vector ? ")))" : "]"));
 
 	c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
 				     show, 0, 0);

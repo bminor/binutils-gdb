@@ -1,3 +1,8 @@
+2012-09-14  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.xml/tdesc-regs.exp: Update expected output for new
+	vector_size syntax of vector types.
+
 2012-09-13  Khoo Yit Phang  <khooyp@cs.umd.edu>
 
 	Refactor Python "gdb" module into a proper Python package, by

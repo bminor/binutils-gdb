@@ -1,3 +1,9 @@
+2012-09-14  Andrew Burgess  <aburgess@broadcom.com>
+
+	* c-typeprint.c (c_type_print_varspec_suffix): Display the size of
+	vector variables using vector_size syntax rather than array
+	syntax.
+
 2012-09-14  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* valarith.c (value_concat): Replace unsafe ALLOCA with
