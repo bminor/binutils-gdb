@@ -1,3 +1,7 @@
+2012-09-14  Pedro Alves  <palves@redhat.com>
+
+	* gdb.1 (SEE ALSO): Expand pointer to GDB's Texinfo manual.
+
 2012-09-14  Khoo Yit Phang  <khooyp@cs.umd.edu>
 
 	Point contrib/cc-with-tweaks.sh to the build-local data-directory.
