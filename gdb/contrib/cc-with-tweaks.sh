@@ -19,7 +19,8 @@
 # This program requires gdb and objcopy in addition to gcc.
 # The default values are gdb from the build tree and objcopy from $PATH.
 # They may be overridden by setting environment variables GDB and OBJCOPY
-# respectively.
+# respectively.  Note that GDB should contain the gdb binary as well as the
+# -data-directory flag, e.g., "foo/gdb -data-directory foo/data-directory".
 # We assume the current directory is either $obj/gdb or $obj/gdb/testsuite.
 #
 # Example usage:
@@ -46,13 +47,13 @@ if [ -z "$GDB" ]
 then
     if [ -f ./gdb ]
     then
-	GDB="./gdb"
+	GDB="./gdb -data-directory data-directory"
     elif [ -f ../gdb ]
     then
-	GDB="../gdb"
+	GDB="../gdb -data-directory ../data-directory"
     elif [ -f ../../gdb ]
     then
-	GDB="../../gdb"
+	GDB="../../gdb -data-directory ../../data-directory"
     else
 	echo "$myname: unable to find usable gdb" >&2
 	exit 1
