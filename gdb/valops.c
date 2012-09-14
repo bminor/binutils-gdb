@@ -1374,7 +1374,6 @@ value_assign (struct value *toval, struct value *fromval)
 
 	if (deprecated_register_changed_hook)
 	  deprecated_register_changed_hook (-1);
-	observer_notify_target_changed (&current_target);
 	break;
       }
 
@@ -1396,7 +1395,7 @@ value_assign (struct value *toval, struct value *fromval)
 
   /* Assigning to the stack pointer, frame pointer, and other
      (architecture and calling convention specific) registers may
-     cause the frame cache to be out of date.  Assigning to memory
+     cause the frame cache and regcache to be out of date.  Assigning to memory
      also can.  We just do this on all assignments to registers or
      memory, for simplicity's sake; I doubt the slowdown matters.  */
   switch (VALUE_LVAL (toval))
@@ -1405,7 +1404,7 @@ value_assign (struct value *toval, struct value *fromval)
     case lval_register:
     case lval_computed:
 
-      reinit_frame_cache ();
+      observer_notify_target_changed (&current_target);
 
       /* Having destroyed the frame cache, restore the selected
 	 frame.  */

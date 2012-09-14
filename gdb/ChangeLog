@@ -1,3 +1,9 @@
+2012-09-14  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* valops.c (value_assign): Move observer_notify_target_changed
+	below to replace reinit_frame_cache.
+
 2012-09-13  Khoo Yit Phang  <khooyp@cs.umd.edu>
 
 	Refactor Python "gdb" module into a proper Python package, by
