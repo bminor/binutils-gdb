@@ -72,6 +72,14 @@ x86_64*)
     ;;
   esac
   ;;
+tilegx*)
+  targ_obj=tilegx
+  targ_machine=EM_TILEGX
+  targ_size=64
+  targ_extra_size=32
+  targ_big_endian=false
+  targ_extra_big_endian=true
+  ;;
 sparc-*)
   targ_obj=sparc
   targ_machine=EM_SPARC

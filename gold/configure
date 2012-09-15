@@ -3470,6 +3470,15 @@ else
   DEFAULT_TARGET_SPARC_FALSE=
 fi
 
+	 if test "$targ_obj" = "tilegx"; then
+  DEFAULT_TARGET_TILEGX_TRUE=
+  DEFAULT_TARGET_TILEGX_FALSE='#'
+else
+  DEFAULT_TARGET_TILEGX_TRUE='#'
+  DEFAULT_TARGET_TILEGX_FALSE=
+fi
+
+
 	 if test "$targ_obj" = "x86_64"; then
   DEFAULT_TARGET_X86_64_TRUE=
   DEFAULT_TARGET_X86_64_FALSE='#'

@@ -269,6 +269,7 @@ enum EM
   EM_UNICORE = 110,
   EM_ALTERA_NIOS2 = 113,
   EM_CRX = 114,
+  EM_TILEGX = 191,
   // The Morph MT.
   EM_MT = 0x2530,
   // DLX.

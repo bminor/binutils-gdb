@@ -1,3 +1,15 @@
+2012-09-15  Jiong Wang  <jiwang@tilera.com>
+
+	* tilegx.cc: New file.
+	* Makefile.am (TARGETSOURCES): Add tilegx.cc
+	(ALL_TARGETOBJS): Add tilegx.$(OBJEXT)
+	* configure.tgt: Add entries for tilegx*.
+	* configure.ac: Likewise.
+	* Makefile.in: Rebuild.
+	* configure: Likewise.
+	* testsuite/icf_safe_test.sh (arch_specific_safe_fold): Handle
+	tilegx.
+
 2012-09-13  Alan Modra  <amodra@gmail.com>
 
 	* target-reloc.h (scan_relocs): Call scan.local for relocs
