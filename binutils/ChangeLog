@@ -1,3 +1,7 @@
+2012-09-14  David Edelsohn  <dje.gcc@gmail.com>
+
+	* configure: Regenerate.
+
 2012-09-10  Matthias Klose  <doko@ubuntu.com>
 
 	* config.in: Disable sanity check for kfreebsd.
