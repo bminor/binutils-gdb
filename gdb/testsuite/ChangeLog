@@ -1,3 +1,8 @@
+2012-09-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compatibility with old GCC (~4.1).
+	* gdb.cp/converts.cc (my_enum_var): New variable.
+
 2012-09-14  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.xml/tdesc-regs.exp: Update expected output for new

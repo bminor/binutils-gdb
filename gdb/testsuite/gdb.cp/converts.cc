@@ -12,6 +12,10 @@ typedef TA2 TA3;
 
 enum my_enum {MY_A, MY_B, MY_C, MY_D};
 
+/* Without this variable older 'enum my_enum' incl. its 'MY_A' would be omitted
+   by older versions of GCC (~4.1) failing the testcase using it below.  */
+enum my_enum my_enum_var;
+
 int foo0_1 (TA1)  { return 1; }
 int foo0_2 (TA3)  { return 2; }
 int foo0_3 (A***) { return 3; }
