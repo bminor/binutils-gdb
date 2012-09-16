@@ -1,3 +1,9 @@
+2012-09-17  Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (Expression Section): Correct description of
+	conversions for a binary operation involving an absolute symbol
+	and a number.
+
 2012-09-14  David Edelsohn  <dje.gcc@gmail.com>
 
 	* configure: Regenerate.

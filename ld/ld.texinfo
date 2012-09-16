@@ -5646,14 +5646,18 @@ addresses, ld follows these rules to evaluate terms:
 
 @itemize @bullet
 @item
+Unary operations on an absolute address or number, and binary
+operations on two absolute addresses or two numbers, or between one
+absolute address and a number, apply the operator to the value(s).
+@item
 Unary operations on a relative address, and binary operations on two
 relative addresses in the same section or between one relative address
 and a number, apply the operator to the offset part of the address(es).
 @item
-Unary operations on an absolute address, and binary operations on one
-or more absolute addresses or on two relative addresses not in the
-same section, first convert any non-absolute term to an absolute
-address before applying the operator.
+Other binary operations, that is, between two relative addresses not
+in the same section, or between a relative address and an absolute
+address, first convert any non-absolute term to an absolute address
+before applying the operator.
 @end itemize
 
 The result section of each sub-expression is as follows:
