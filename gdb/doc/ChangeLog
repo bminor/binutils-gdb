@@ -1,3 +1,8 @@
+2012-09-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (List): Describe the meaning of 0 and -1 in
+	'set listsize'.
+
 2012-09-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 

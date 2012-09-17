@@ -77,7 +77,8 @@ typedef enum var_types
 
     /* Like var_uinteger but signed.  *VAR is an int.  The user can
        type 0 to mean "unlimited", which is stored in *VAR as
-       INT_MAX.  */
+       INT_MAX.  The only remaining use of it is the Python API.
+       Don't use it elsewhere.  */
     var_integer,
 
     /* String which the user enters with escapes (e.g. the user types
@@ -99,6 +100,9 @@ typedef enum var_types
     /* ZeroableUnsignedInteger.  *VAR is an unsigned int.  Zero really
        means zero.  */
     var_zuinteger,
+    /* ZeroableUnsignedInteger with unlimited value.  *VAR is an unsigned
+       int, but its range is [0, INT_MAX].  -1 stands for unlimited.  */
+    var_zuinteger_unlimited,
     /* Enumerated type.  Can only have one of the specified values.
        *VAR is a char pointer to the name of the element that we
        find.  */
@@ -344,6 +348,18 @@ extern void add_setshow_zinteger_cmd (char *name,
 				      struct cmd_list_element **show_list);
 
 extern void add_setshow_zuinteger_cmd (char *name,
+				       enum command_class class,
+				       unsigned int *var,
+				       const char *set_doc,
+				       const char *show_doc,
+				       const char *help_doc,
+				       cmd_sfunc_ftype *set_func,
+				       show_value_ftype *show_func,
+				       struct cmd_list_element **set_list,
+				       struct cmd_list_element **show_list);
+
+extern void
+  add_setshow_zuinteger_unlimited_cmd (char *name,
 				       enum command_class class,
 				       unsigned int *var,
 				       const char *set_doc,

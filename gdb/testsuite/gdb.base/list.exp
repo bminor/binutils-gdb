@@ -62,7 +62,7 @@ proc set_listsize { arg } {
     if [gdb_test "set listsize $arg" ".*" "setting listsize to $arg #$set_listsize_count"] {
 	return 0;
     }
-    if { $arg <= 0 } {
+    if { $arg < 0 } {
 	set arg "unlimited";
     }
 

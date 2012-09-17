@@ -1,3 +1,17 @@
+2012-09-17  Yao Qi  <yao@codesourcery.com>
+
+	* cli/cli-decode.c (add_setshow_zuinteger_unlimited_cmd): New.
+	Update comment to add_setshow_integer_cmd.
+	* cli/cli-setshow.c (do_set_command): Handle case
+	'var_zuinteger_unlimited'.
+	(do_show_command): Likewise.
+	* cli/cli-cmds.c (init_cmds): Call add_setshow_zuinteger_unlimited_cmd
+	for command 'remotetimeout'.
+	* command.h (enum var_types): New zuinteger_unlimited.  Update comment
+	to var_integer.
+	* source.c (_initialize_source): Call add_setshow_zuinteger_unlimited_cmd
+	for command 'set listsize'.
+
 2012-09-17  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* infrun.c (restore_infcall_suspend_state): Eliminate single-use

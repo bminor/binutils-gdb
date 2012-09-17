@@ -1,3 +1,8 @@
+2012-09-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/list.exp (set_listsize): Don't set arg to "unlimited"
+	when it is less than 0.
+
 2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR 14119

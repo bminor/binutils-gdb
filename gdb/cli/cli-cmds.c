@@ -1826,14 +1826,15 @@ is displayed."),
 			    show_remote_debug,
 			    &setdebuglist, &showdebuglist);
 
-  add_setshow_integer_cmd ("remotetimeout", no_class, &remote_timeout, _("\
+  add_setshow_zuinteger_unlimited_cmd ("remotetimeout", no_class,
+				       &remote_timeout, _("\
 Set timeout limit to wait for target to respond."), _("\
 Show timeout limit to wait for target to respond."), _("\
 This value is used to set the time limit for gdb to wait for a response\n\
 from the target."),
-			   NULL,
-			   show_remote_timeout,
-			   &setlist, &showlist);
+				       NULL,
+				       show_remote_timeout,
+				       &setlist, &showlist);
 
   add_prefix_cmd ("debug", no_class, set_debug,
 		  _("Generic command for setting gdb debugging flags"),
