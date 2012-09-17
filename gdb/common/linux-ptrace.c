@@ -49,7 +49,7 @@ linux_ptrace_attach_warnings (pid_t pid, struct buffer *buffer)
 		       (int) pid);
 }
 
-#ifdef __i386__
+#if defined __i386__ || defined __x86_64__
 
 /* Address of the 'ret' instruction in asm code block below.  */
 extern void (linux_ptrace_test_ret_to_nx_instr) (void);
@@ -60,15 +60,17 @@ extern void (linux_ptrace_test_ret_to_nx_instr) (void);
 #include <sys/wait.h>
 #include <stdint.h>
 
-#endif /* __i386__ */
+#endif /* defined __i386__ || defined __x86_64__ */
 
 /* Test broken off-trunk Linux kernel patchset for NX support on i386.  It was
-   removed in Fedora kernel 88fa1f0332d188795ed73d7ac2b1564e11a0b4cd.  */
+   removed in Fedora kernel 88fa1f0332d188795ed73d7ac2b1564e11a0b4cd.
+
+   Test also x86_64 arch for PaX support.  */
 
 static void
 linux_ptrace_test_ret_to_nx (void)
 {
-#ifdef __i386__
+#if defined __i386__ || defined __x86_64__
   pid_t child, got_pid;
   gdb_byte *return_address, *pc;
   long l;
@@ -101,39 +103,105 @@ linux_ptrace_test_ret_to_nx (void)
 		 strerror (errno));
       else
 	{
+#if defined __i386__
 	  asm volatile ("pushl %0;"
 			".globl linux_ptrace_test_ret_to_nx_instr;"
 			"linux_ptrace_test_ret_to_nx_instr:"
 			"ret"
 			: : "r" (return_address) : "%esp", "memory");
+#elif defined __x86_64__
+	  asm volatile ("pushq %0;"
+			".globl linux_ptrace_test_ret_to_nx_instr;"
+			"linux_ptrace_test_ret_to_nx_instr:"
+			"ret"
+			: : "r" (return_address) : "%rsp", "memory");
+#else
+# error "!__i386__ && !__x86_64__"
+#endif
 	  gdb_assert_not_reached ("asm block did not terminate");
 	}
 
       _exit (1);
     }
 
+  errno = 0;
   got_pid = waitpid (child, &status, 0);
-  gdb_assert (got_pid == child);
-  gdb_assert (WIFSTOPPED (status));
+  if (got_pid != child)
+    {
+      warning (_("linux_ptrace_test_ret_to_nx: waitpid returned %ld: %s"),
+	       (long) got_pid, strerror (errno));
+      return;
+    }
+
+  if (WIFSIGNALED (status))
+    {
+      if (WTERMSIG (status) != SIGKILL)
+	warning (_("linux_ptrace_test_ret_to_nx: WTERMSIG %d is not SIGKILL!"),
+		 (int) WTERMSIG (status));
+      else
+	warning (_("Cannot call inferior functions, Linux kernel PaX "
+		   "protection forbids return to non-executable pages!"));
+      return;
+    }
+
+  if (!WIFSTOPPED (status))
+    {
+      warning (_("linux_ptrace_test_ret_to_nx: status %d is not WIFSTOPPED!"),
+	       status);
+      return;
+    }
 
   /* We may get SIGSEGV due to missing PROT_EXEC of the return_address.  */
-  gdb_assert (WSTOPSIG (status) == SIGTRAP || WSTOPSIG (status) == SIGSEGV);
+  if (WSTOPSIG (status) != SIGTRAP && WSTOPSIG (status) != SIGSEGV)
+    {
+      warning (_("linux_ptrace_test_ret_to_nx: "
+		 "WSTOPSIG %d is neither SIGTRAP nor SIGSEGV!"),
+	       (int) WSTOPSIG (status));
+      return;
+    }
 
   errno = 0;
+#if defined __i386__
   l = ptrace (PTRACE_PEEKUSER, child, (void *) (uintptr_t) (EIP * 4), NULL);
-  gdb_assert (errno == 0);
+#elif defined __x86_64__
+  l = ptrace (PTRACE_PEEKUSER, child, (void *) (uintptr_t) (RIP * 8), NULL);
+#else
+# error "!__i386__ && !__x86_64__"
+#endif
+  if (errno != 0)
+    {
+      warning (_("linux_ptrace_test_ret_to_nx: Cannot PTRACE_PEEKUSER: %s"),
+	       strerror (errno));
+      return;
+    }
   pc = (void *) (uintptr_t) l;
 
   if (ptrace (PTRACE_KILL, child, NULL, NULL) != 0)
-    warning (_("linux_ptrace_test_ret_to_nx: Cannot PTRACE_KILL: %s"),
-	     strerror (errno));
+    {
+      warning (_("linux_ptrace_test_ret_to_nx: Cannot PTRACE_KILL: %s"),
+	       strerror (errno));
+      return;
+    }
   else
     {
       int kill_status;
 
+      errno = 0;
       got_pid = waitpid (child, &kill_status, 0);
-      gdb_assert (got_pid == child);
-      gdb_assert (WIFSIGNALED (kill_status));
+      if (got_pid != child)
+	{
+	  warning (_("linux_ptrace_test_ret_to_nx: "
+		     "PTRACE_KILL waitpid returned %ld: %s"),
+		   (long) got_pid, strerror (errno));
+	  return;
+	}
+      if (!WIFSIGNALED (kill_status))
+	{
+	  warning (_("linux_ptrace_test_ret_to_nx: "
+		     "PTRACE_KILL status %d is not WIFSIGNALED!"),
+		   status);
+	  return;
+	}
     }
 
   /* + 1 is there as x86* stops after the 'int3' instruction.  */
@@ -150,11 +218,14 @@ linux_ptrace_test_ret_to_nx (void)
       return;
     }
 
-  gdb_assert ((void (*) (void)) pc == &linux_ptrace_test_ret_to_nx_instr);
-
-  warning (_("Cannot call inferior functions, you have broken "
-	     "Linux kernel i386 NX (non-executable pages) support!"));
-#endif /* __i386__ */
+  if ((void (*) (void)) pc != &linux_ptrace_test_ret_to_nx_instr)
+    warning (_("linux_ptrace_test_ret_to_nx: PC %p is neither near return "
+	       "address %p nor is the return instruction %p!"),
+	     pc, return_address, &linux_ptrace_test_ret_to_nx_instr);
+  else
+    warning (_("Cannot call inferior functions, you have broken "
+	       "Linux kernel i386 NX (non-executable pages) support!"));
+#endif /* defined __i386__ || defined __x86_64__ */
 }
 
 /* Display possible problems on this system.  Display them only once per GDB
