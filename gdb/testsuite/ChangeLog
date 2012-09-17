@@ -1,5 +1,15 @@
 2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR 14119
+	* gdb.arch/amd64-tailcall-ret.S: New file.
+	* gdb.arch/amd64-tailcall-ret.c: New file.
+	* gdb.arch/amd64-tailcall-ret.exp: New file.
+	* gdb.reverse/amd64-tailcall-reverse.S: New file.
+	* gdb.reverse/amd64-tailcall-reverse.c: New file.
+	* gdb.reverse/amd64-tailcall-reverse.exp: New file.
+
+2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR 14548
 	* gdb.reverse/singlejmp-reverse-nodebug.S: New file.
 	* gdb.reverse/singlejmp-reverse-nodebug.c: New file.

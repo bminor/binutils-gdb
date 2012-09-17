@@ -309,7 +309,8 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
 static struct frame_info *
 skip_inlined_frames (struct frame_info *frame)
 {
-  while (get_frame_type (frame) == INLINE_FRAME)
+  while (get_frame_type (frame) == INLINE_FRAME
+	 || get_frame_type (frame) == TAILCALL_FRAME)
     frame = get_prev_frame (frame);
 
   return frame;
@@ -813,6 +814,11 @@ frame_pop (struct frame_info *this_frame)
 
   if (!prev_frame)
     error (_("Cannot pop the initial frame."));
+
+  /* Ignore TAILCALL_FRAME type frames, they were executed already before
+     entering THISFRAME.  */
+  while (get_frame_type (prev_frame) == TAILCALL_FRAME)
+    prev_frame = get_prev_frame (prev_frame);
 
   /* Make a copy of all the register values unwound from this frame.
      Save them in a scratch buffer so that there isn't a race between
