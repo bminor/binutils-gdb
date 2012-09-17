@@ -4896,14 +4896,22 @@ process_event_stop_test:
 
 	  if (execution_direction == EXEC_REVERSE)
 	    {
-	      struct symtab_and_line sr_sal;
+	      /* If we're already at the start of the function, we've either
+		 just stepped backward into a single instruction function,
+		 or stepped back out of a signal handler to the first instruction
+		 of the function.  Just keep going, which will single-step back
+		 to the caller.  */
+	      if (ecs->stop_func_start != stop_pc)
+		{
+		  struct symtab_and_line sr_sal;
 
-	      /* Normal function call return (static or dynamic).  */
-	      init_sal (&sr_sal);
-	      sr_sal.pc = ecs->stop_func_start;
-	      sr_sal.pspace = get_frame_program_space (frame);
-	      insert_step_resume_breakpoint_at_sal (gdbarch,
-						    sr_sal, null_frame_id);
+		  /* Normal function call return (static or dynamic).  */
+		  init_sal (&sr_sal);
+		  sr_sal.pc = ecs->stop_func_start;
+		  sr_sal.pspace = get_frame_program_space (frame);
+		  insert_step_resume_breakpoint_at_sal (gdbarch,
+							sr_sal, null_frame_id);
+		}
 	    }
 	  else
 	    insert_step_resume_breakpoint_at_caller (frame);
@@ -4973,15 +4981,23 @@ process_event_stop_test:
 
       if (execution_direction == EXEC_REVERSE)
 	{
-	  /* Set a breakpoint at callee's start address.
-	     From there we can step once and be back in the caller.  */
-	  struct symtab_and_line sr_sal;
+	  /* If we're already at the start of the function, we've either just
+	     stepped backward into a single instruction function without line
+	     number info, or stepped back out of a signal handler to the first
+	     instruction of the function without line number info.  Just keep
+	     going, which will single-step back to the caller.  */
+	  if (ecs->stop_func_start != stop_pc)
+	    {
+	      /* Set a breakpoint at callee's start address.
+		 From there we can step once and be back in the caller.  */
+	      struct symtab_and_line sr_sal;
 
-	  init_sal (&sr_sal);
-	  sr_sal.pc = ecs->stop_func_start;
-	  sr_sal.pspace = get_frame_program_space (frame);
-	  insert_step_resume_breakpoint_at_sal (gdbarch,
-						sr_sal, null_frame_id);
+	      init_sal (&sr_sal);
+	      sr_sal.pc = ecs->stop_func_start;
+	      sr_sal.pspace = get_frame_program_space (frame);
+	      insert_step_resume_breakpoint_at_sal (gdbarch,
+						    sr_sal, null_frame_id);
+	    }
 	}
       else
 	/* Set a breakpoint at callee's return address (the address
