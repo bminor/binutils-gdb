@@ -1,3 +1,11 @@
+2012-09-17  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-asm.c (aarch64_ins_imm_half): Remove ATTRIBUTE_UNUSED from
+	the parameter 'inst'.
+	(aarch64_ins_addr_simm): Add ATTRIBUTE_UNUSED to the parameter 'inst'.
+	(convert_mov_to_movewide): Change to assert (0) when
+	aarch64_wide_constant_p returns FALSE.
+
 2012-09-14  David Edelsohn  <dje.gcc@gmail.com>
 
 	* configure: Regenerate.

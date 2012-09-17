@@ -336,8 +336,7 @@ aarch64_ins_imm (const aarch64_operand *self, const aarch64_opnd_info *info,
      MOVZ <Wd>, #<imm16>{, LSL #<shift>}.  */
 const char *
 aarch64_ins_imm_half (const aarch64_operand *self, const aarch64_opnd_info *info,
-		      aarch64_insn *code,
-		      const aarch64_inst *inst ATTRIBUTE_UNUSED)
+		      aarch64_insn *code, const aarch64_inst *inst)
 {
   /* imm16 */
   aarch64_ins_imm (self, info, code, inst);
@@ -532,7 +531,8 @@ aarch64_ins_addr_regoff (const aarch64_operand *self ATTRIBUTE_UNUSED,
 const char *
 aarch64_ins_addr_simm (const aarch64_operand *self,
 		       const aarch64_opnd_info *info,
-		       aarch64_insn *code, const aarch64_inst *inst)
+		       aarch64_insn *code,
+		       const aarch64_inst *inst ATTRIBUTE_UNUSED)
 {
   int imm;
 
@@ -1090,8 +1090,9 @@ convert_mov_to_movewide (aarch64_inst *inst)
     }
   inst->operands[1].type = AARCH64_OPND_HALF;
   is32 = inst->operands[0].qualifier == AARCH64_OPND_QLF_W;
-  /* This should have been guaranteed by the constraint check.  */
-  assert (aarch64_wide_constant_p (value, is32, &shift_amount) == TRUE);
+  if (! aarch64_wide_constant_p (value, is32, &shift_amount))
+    /* The constraint check should have guaranteed this wouldn't happen.  */
+    assert (0);
   value >>= shift_amount;
   value &= 0xffff;
   inst->operands[1].imm.value = value;
