@@ -1,5 +1,13 @@
 2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* common/linux-ptrace.c: Change __i386__ to __i386__ || __x86_64__.
+	(linux_ptrace_test_ret_to_nx): Extend comment for x86_64.  Change
+	__i386__ to __i386__ || __x86_64__. Extend code also for __x86_64__.
+	Extend code also for PaX support.  Convert all gdb_assert to warning
+	calls.
+
+2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Implement auto-load user conveniences suggested by Doug Evans.
 	* auto-load.c: Include top.h.
 	(file_is_auto_load_safe): New variable advice_printed.  Print advice.
