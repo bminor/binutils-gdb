@@ -37,6 +37,7 @@
 #include "completer.h"
 #include "observer.h"
 #include "fnmatch.h"
+#include "top.h"
 
 /* The suffix of per-objfile scripts to auto-load as non-Python command files.
    E.g. When the program loads libfoo.so, look for libfoo-gdb.gdb.  */
@@ -441,6 +442,7 @@ file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
 {
   char *filename_real = NULL;
   struct cleanup *back_to;
+  static int advice_printed = 0;
 
   if (debug_auto_load)
     {
@@ -469,6 +471,30 @@ file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
   warning (_("File \"%s\" auto-loading has been declined by your "
 	     "`auto-load safe-path' set to \"%s\"."),
 	   filename_real, auto_load_safe_path);
+
+  if (!advice_printed)
+    {
+      const char *homedir = getenv ("HOME");
+      char *homeinit;
+
+      if (homedir == NULL)
+	homedir = "$HOME";
+      homeinit = xstrprintf ("%s/%s", homedir, gdbinit);
+      make_cleanup (xfree, homeinit);
+
+      printf_filtered (_("\
+To enable execution of this file add\n\
+\tadd-auto-load-safe-path %s\n\
+line to your configuration file \"%s\".\n\
+To completely disable this security protection add\n\
+\tset auto-load safe-path /\n\
+line to your configuration file \"%s\".\n\
+For more information about this security protection see the\n\
+\"Auto-loading safe path\" section in the GDB manual.  E.g., run from the shell:\n\
+\tinfo \"(gdb)Auto-loading safe path\"\n"),
+		       filename_real, homeinit, homeinit);
+      advice_printed = 1;
+    }
 
   do_cleanups (back_to);
   return 0;
@@ -1164,6 +1190,7 @@ void
 _initialize_auto_load (void)
 {
   struct cmd_list_element *cmd;
+  char *scripts_directory_help;
 
   auto_load_pspace_data
     = register_program_space_data_with_cleanup (NULL,
@@ -1207,30 +1234,50 @@ Usage: info auto-load local-gdbinit"),
 	   auto_load_info_cmdlist_get ());
 
   auto_load_dir = xstrdup (AUTO_LOAD_DIR);
+  scripts_directory_help = xstrprintf (
+#ifdef HAVE_PYTHON
+				       _("\
+Automatically loaded Python scripts (named OBJFILE%s) and GDB scripts\n\
+(named OBJFILE%s) are located in one of the directories listed by this\n\
+option.\n\
+%s"),
+				       GDBPY_AUTO_FILE_NAME,
+#else
+				       _("\
+Automatically loaded GDB scripts (named OBJFILE%s) are located in one\n\
+of the directories listed by this option.\n\
+%s"),
+#endif
+				       GDB_AUTO_FILE_NAME,
+				       _("\
+This option is ignored for the kinds of scripts \
+having 'set auto-load ... off'.\n\
+Directories listed here need to be present also \
+in the 'set auto-load safe-path'\n\
+option."));
   add_setshow_optional_filename_cmd ("scripts-directory", class_support,
 				     &auto_load_dir, _("\
 Set the list of directories from which to load auto-loaded scripts."), _("\
-Show the list of directories from which to load auto-loaded scripts."), _("\
-Automatically loaded Python scripts and GDB scripts are located in one of the\n\
-directories listed by this option.  This option is ignored for the kinds of\n\
-scripts having 'set auto-load ... off'.  Directories listed here need to be\n\
-present also in the 'set auto-load safe-path' option."),
+Show the list of directories from which to load auto-loaded scripts."),
+				     scripts_directory_help,
 				     set_auto_load_dir, show_auto_load_dir,
 				     auto_load_set_cmdlist_get (),
 				     auto_load_show_cmdlist_get ());
+  xfree (scripts_directory_help);
 
   auto_load_safe_path = xstrdup (AUTO_LOAD_SAFE_PATH);
   auto_load_safe_path_vec_update ();
   add_setshow_optional_filename_cmd ("safe-path", class_support,
 				     &auto_load_safe_path, _("\
-Set the list of directories from which it is safe to auto-load files."), _("\
-Show the list of directories from which it is safe to auto-load files."), _("\
+Set the list of files and directories that are safe for auto-loading."), _("\
+Show the list of files and directories that are safe for auto-loading."), _("\
 Various files loaded automatically for the 'set auto-load ...' options must\n\
 be located in one of the directories listed by this option.  Warning will be\n\
 printed and file will not be used otherwise.\n\
+You can mix both directory and filename entries.\n\
 Setting this parameter to an empty list resets it to its default value.\n\
 Setting this parameter to '/' (without the quotes) allows any file\n\
-for the 'set auto-load ...' options.  Each directory can be also shell\n\
+for the 'set auto-load ...' options.  Each path entry can be also shell\n\
 wildcard pattern; '*' does not match directory separator.\n\
 This option is ignored for the kinds of files having 'set auto-load ... off'.\n\
 This options has security implications for untrusted inferiors."),
