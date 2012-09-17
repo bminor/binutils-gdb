@@ -1,3 +1,11 @@
+2012-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/shared.exp (build_cxx_tests): Move out the commented out
+	test.
+
+	* lib/ld-lib.exp (run_ld_link_exec_tests): Assemble all sources
+	files in each test.
+
 2012-09-12  Chris Schlumberger-Socha  <chris.schlumberger-socha@arm.com>
 
 	* ld-aarch64/aarch64-elf.exp: New reloc tests.
