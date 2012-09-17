@@ -1,4 +1,13 @@
 2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR 14548
+	* infrun.c (handle_inferior_event): Do not reverse-continue back to the
+	function start if we are already at function start.  Both for
+	reverse-next and for reverse-step into function without line number
+	info.
+
+2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup - rename 'inline' depth to 'artificial' depth.
 	* breakpoint.c (set_momentary_breakpoint): Rename at a caller to

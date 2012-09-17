@@ -1,3 +1,12 @@
+2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR 14548
+	* gdb.reverse/singlejmp-reverse-nodebug.S: New file.
+	* gdb.reverse/singlejmp-reverse-nodebug.c: New file.
+	* gdb.reverse/singlejmp-reverse.S: New file.
+	* gdb.reverse/singlejmp-reverse.c: New file.
+	* gdb.reverse/singlejmp-reverse.exp: New file.
+
 2012-09-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with old GCC (~4.1).
