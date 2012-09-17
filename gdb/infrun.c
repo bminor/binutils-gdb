@@ -6777,11 +6777,10 @@ restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
   if (inf_state->siginfo_gdbarch == gdbarch)
     {
       struct type *type = gdbarch_get_siginfo_type (gdbarch);
-      size_t len = TYPE_LENGTH (type);
 
       /* Errors ignored.  */
       target_write (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,
-		    inf_state->siginfo_data, 0, len);
+		    inf_state->siginfo_data, 0, TYPE_LENGTH (type));
     }
 
   /* The inferior can be gone if the user types "print exit(0)"

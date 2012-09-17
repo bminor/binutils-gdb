@@ -1,3 +1,8 @@
+2012-09-17  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* infrun.c (restore_infcall_suspend_state): Eliminate single-use
+	variable LEN.
+
 2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR 14119
