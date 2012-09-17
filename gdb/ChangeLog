@@ -179,7 +179,6 @@
 	(DECLARE_REGISTRY): Declare struct TAG ## _data.  Use the tagged
 	callback typedefs.
 
->>>>>>> 1.14670
 2012-09-12  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_read_addr_index): Fix handling the case where
