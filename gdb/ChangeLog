@@ -1,5 +1,17 @@
 2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Implement auto-load user conveniences suggested by Doug Evans.
+	* auto-load.c: Include top.h.
+	(file_is_auto_load_safe): New variable advice_printed.  Print advice.
+	(_initialize_auto_load): New variable scripts_directory_help.  Mention
+	GDBPY_AUTO_FILE_NAME and GDB_AUTO_FILE_NAME for set auto-load
+	scripts-directory.  Document in online help one can use also files for
+	set auto-load safe-path.
+	* python/py-auto-load.c: (GDBPY_AUTO_FILE_NAME): Move it from here ...
+	* python/python.h (GDBPY_AUTO_FILE_NAME): ... to here.
+
+2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	PR 14119
 	* frame.c (skip_inlined_frames): Skip also TAILCALL_FRAME frames.
 	(frame_pop): Drop also TAILCALL_FRAME frames.

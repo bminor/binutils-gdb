@@ -31,10 +31,6 @@
 
 #include "python-internal.h"
 
-/* The suffix of per-objfile scripts to auto-load.
-   E.g. When the program loads libfoo.so, look for libfoo-gdb.py.  */
-#define GDBPY_AUTO_FILE_NAME "-gdb.py"
-
 /* The section to look for Python auto-loaded scripts (in file formats that
    support sections).
    Each entry in this section is a byte of value 1, and then the nul-terminated
