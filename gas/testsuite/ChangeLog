@@ -1,3 +1,12 @@
+2012-09-17  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/crypto.d (#as): Update for v8->v8-A change.
+	* gas/aarch64/int-insns.d (#as): Likewise.
+	* gas/aarch64/legacy_reg_names.s (.arch): Likewise.
+	* gas/aarch64/neon-not.s (.arch): Likewise.
+	* gas/aarch64/neon-vfp-reglist-post.s (.arch): Likewise.
+	* gas/aarch64/neon-vfp-reglist.s (.arch): Likewise.
+
 2012-09-12  Chris Schlumberger-Socha  <chris.schlumberger-socha@arm.com>
 
 	* gas/aarch64/reloc-insn.d

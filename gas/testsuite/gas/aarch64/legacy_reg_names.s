@@ -1,6 +1,6 @@
 
 	.text
-	.arch armv8
+	.arch armv8-a
 
 	dup v0.b, v1.b[7] 
 	mov r0.w, r1.w

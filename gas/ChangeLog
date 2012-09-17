@@ -1,3 +1,7 @@
+2012-09-17  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (aarch64_archs): Rename 'armv8' to 'armv8-a'.
+
 2012-09-14  David Edelsohn  <dje.gcc@gmail.com>
 
 	* configure: Regenerate.
