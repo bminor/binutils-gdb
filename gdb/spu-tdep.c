@@ -1373,8 +1373,7 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct value *arg = args[i];
       struct type *type = check_typedef (value_type (arg));
       const gdb_byte *contents = value_contents (arg);
-      int len = TYPE_LENGTH (type);
-      int n_regs = align_up (len, 16) / 16;
+      int n_regs = align_up (TYPE_LENGTH (type), 16) / 16;
 
       /* If the argument doesn't wholly fit into registers, it and
 	 all subsequent arguments go to the stack.  */

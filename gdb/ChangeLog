@@ -1,3 +1,23 @@
+2012-09-17  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* m2-valprint.c (m2_print_array_contents): Eliminate variable
+	ELTLEN and use TYPE_LENGTH directly.
+	(m2_val_print): Likewise.
+	* m68k-tdep.c (m68k_svr4_extract_return_value): Eliminate
+	variable LEN and use TYPE_LENGTH directly.
+	(m68k_svr4_store_return_value): Likewise.
+	* mips-tdep.c (mips_o32_push_dummy_call): Eliminate variable
+	ARGLEN and use TYPE_LENGTH directly.
+	(mips_o64_push_dummy_call): Likewise.
+	* s390-tdep (s390_function_arg_pass_by_reference): Eliminate
+	variable LENGTH and use TYPE_LENGTH directly.
+	(s390_function_arg_float): Likewise.
+	(s390_function_arg_integer): Likewise.
+	(s390_push_dummy_call): Likewise.
+	(s390_return_value_convention): Likewise.
+	* spu-tdep.c (spu_push_dummy_call): Eliminate LEN and use
+	TYPE_LENGTH directly.
+
 2012-09-17  Yao Qi  <yao@codesourcery.com>
 
 	* cli/cli-decode.c (add_setshow_zuinteger_unlimited_cmd): New.

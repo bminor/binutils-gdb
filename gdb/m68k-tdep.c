@@ -315,7 +315,6 @@ static void
 m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
 				gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -326,7 +325,7 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
       regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
       convert_typed_floating (buf, fpreg_type, valbuf, type);
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_PTR && len == 4)
+  else if (TYPE_CODE (type) == TYPE_CODE_PTR && TYPE_LENGTH (type) == 4)
     regcache_raw_read (regcache, M68K_A0_REGNUM, valbuf);
   else
     m68k_extract_return_value (type, regcache, valbuf);
@@ -357,7 +356,6 @@ static void
 m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
 			      const gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -368,7 +366,7 @@ m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
       convert_typed_floating (valbuf, type, buf, fpreg_type);
       regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_PTR && len == 4)
+  else if (TYPE_CODE (type) == TYPE_CODE_PTR && TYPE_LENGTH (type) == 4)
     {
       regcache_raw_write (regcache, M68K_A0_REGNUM, valbuf);
       regcache_raw_write (regcache, M68K_D0_REGNUM, valbuf);

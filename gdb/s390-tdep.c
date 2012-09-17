@@ -2489,8 +2489,7 @@ is_power_of_two (unsigned int n)
 static int
 s390_function_arg_pass_by_reference (struct type *type)
 {
-  unsigned length = TYPE_LENGTH (type);
-  if (length > 8)
+  if (TYPE_LENGTH (type) > 8)
     return 1;
 
   return (is_struct_like (type) && !is_power_of_two (TYPE_LENGTH (type)))
@@ -2503,8 +2502,7 @@ s390_function_arg_pass_by_reference (struct type *type)
 static int
 s390_function_arg_float (struct type *type)
 {
-  unsigned length = TYPE_LENGTH (type);
-  if (length > 8)
+  if (TYPE_LENGTH (type) > 8)
     return 0;
 
   return is_float_like (type);
@@ -2515,13 +2513,12 @@ s390_function_arg_float (struct type *type)
 static int
 s390_function_arg_integer (struct type *type)
 {
-  unsigned length = TYPE_LENGTH (type);
-  if (length > 8)
+  if (TYPE_LENGTH (type) > 8)
     return 0;
 
    return is_integer_like (type)
 	  || is_pointer_like (type)
-	  || (is_struct_like (type) && is_power_of_two (length));
+	  || (is_struct_like (type) && is_power_of_two (TYPE_LENGTH (type)));
 }
 
 /* Return ARG, a `SIMPLE_ARG', sign-extended or zero-extended to a full
@@ -2616,11 +2613,10 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       struct value *arg = args[i];
       struct type *type = check_typedef (value_type (arg));
-      unsigned length = TYPE_LENGTH (type);
 
       if (s390_function_arg_pass_by_reference (type))
         {
-          sp -= length;
+          sp -= TYPE_LENGTH (type);
           sp = align_down (sp, alignment_of (type));
           copy_addr[i] = sp;
         }
@@ -2799,8 +2795,7 @@ s390_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 static enum return_value_convention
 s390_return_value_convention (struct gdbarch *gdbarch, struct type *type)
 {
-  int length = TYPE_LENGTH (type);
-  if (length > 8)
+  if (TYPE_LENGTH (type) > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   switch (TYPE_CODE (type))

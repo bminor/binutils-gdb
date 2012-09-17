@@ -5174,13 +5174,12 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       struct type *arg_type = check_typedef (value_type (args[argnum]));
-      int arglen = TYPE_LENGTH (arg_type);
 
       /* Align to double-word if necessary.  */
       if (mips_type_needs_double_align (arg_type))
 	len = align_up (len, MIPS32_REGSIZE * 2);
       /* Allocate space on the stack.  */
-      len += align_up (arglen, MIPS32_REGSIZE);
+      len += align_up (TYPE_LENGTH (arg_type), MIPS32_REGSIZE);
     }
   sp -= align_up (len, 16);
 
@@ -5703,10 +5702,9 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       struct type *arg_type = check_typedef (value_type (args[argnum]));
-      int arglen = TYPE_LENGTH (arg_type);
 
       /* Allocate space on the stack.  */
-      len += align_up (arglen, MIPS64_REGSIZE);
+      len += align_up (TYPE_LENGTH (arg_type), MIPS64_REGSIZE);
     }
   sp -= align_up (len, 16);
 
