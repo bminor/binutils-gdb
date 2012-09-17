@@ -178,7 +178,7 @@ inline_frame_this_id (struct frame_info *this_frame,
   func = get_frame_function (this_frame);
   gdb_assert (func != NULL);
   (*this_id).code_addr = BLOCK_START (SYMBOL_BLOCK_VALUE (func));
-  (*this_id).inline_depth++;
+  (*this_id).artificial_depth++;
 }
 
 static struct value *

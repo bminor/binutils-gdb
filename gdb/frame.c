@@ -226,8 +226,8 @@ fprint_frame_id (struct ui_file *file, struct frame_id id)
   fprint_field (file, "code", id.code_addr_p, id.code_addr);
   fprintf_unfiltered (file, ",");
   fprint_field (file, "special", id.special_addr_p, id.special_addr);
-  if (id.inline_depth)
-    fprintf_unfiltered (file, ",inlined=%d", id.inline_depth);
+  if (id.artificial_depth)
+    fprintf_unfiltered (file, ",artificial=%d", id.artificial_depth);
   fprintf_unfiltered (file, "}");
 }
 
@@ -303,11 +303,12 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
   fprintf_unfiltered (file, "}");
 }
 
-/* Given FRAME, return the enclosing normal frame for inlined
-   function frames.  Otherwise return the original frame.  */
+/* Given FRAME, return the enclosing frame as found in real frames read-in from
+   inferior memory.  Skip any previous frames which were made up by GDB.
+   Return the original frame if no immediate previous frames exist.  */
 
 static struct frame_info *
-skip_inlined_frames (struct frame_info *frame)
+skip_artificial_frames (struct frame_info *frame)
 {
   while (get_frame_type (frame) == INLINE_FRAME)
     frame = get_prev_frame (frame);
@@ -354,7 +355,7 @@ get_frame_id (struct frame_info *fi)
 struct frame_id
 get_stack_frame_id (struct frame_info *next_frame)
 {
-  return get_frame_id (skip_inlined_frames (next_frame));
+  return get_frame_id (skip_artificial_frames (next_frame));
 }
 
 struct frame_id
@@ -367,10 +368,10 @@ frame_unwind_caller_id (struct frame_info *next_frame)
      returning a null_frame_id (e.g., when a caller requests the frame
      ID of "main()"s caller.  */
 
-  next_frame = skip_inlined_frames (next_frame);
+  next_frame = skip_artificial_frames (next_frame);
   this_frame = get_prev_frame_1 (next_frame);
   if (this_frame)
-    return get_frame_id (skip_inlined_frames (this_frame));
+    return get_frame_id (skip_artificial_frames (this_frame));
   else
     return null_frame_id;
 }
@@ -435,12 +436,12 @@ frame_id_p (struct frame_id l)
 }
 
 int
-frame_id_inlined_p (struct frame_id l)
+frame_id_artificial_p (struct frame_id l)
 {
   if (!frame_id_p (l))
     return 0;
 
-  return (l.inline_depth != 0);
+  return (l.artificial_depth != 0);
 }
 
 int
@@ -472,8 +473,8 @@ frame_id_eq (struct frame_id l, struct frame_id r)
     /* An invalid special addr is a wild card (or unused).  Otherwise
        if special addresses are different, the frames are different.  */
     eq = 0;
-  else if (l.inline_depth != r.inline_depth)
-    /* If inline depths are different, the frames must be different.  */
+  else if (l.artificial_depth != r.artificial_depth)
+    /* If artifical depths are different, the frames must be different.  */
     eq = 0;
   else
     /* Frames are equal.  */
@@ -530,7 +531,7 @@ frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
   if (!l.stack_addr_p || !r.stack_addr_p)
     /* Like NaN, any operation involving an invalid ID always fails.  */
     inner = 0;
-  else if (l.inline_depth > r.inline_depth
+  else if (l.artificial_depth > r.artificial_depth
 	   && l.stack_addr == r.stack_addr
 	   && l.code_addr_p == r.code_addr_p
 	   && l.special_addr_p == r.special_addr_p
@@ -706,14 +707,14 @@ frame_unwind_pc (struct frame_info *this_frame)
 CORE_ADDR
 frame_unwind_caller_pc (struct frame_info *this_frame)
 {
-  return frame_unwind_pc (skip_inlined_frames (this_frame));
+  return frame_unwind_pc (skip_artificial_frames (this_frame));
 }
 
 int
 frame_unwind_caller_pc_if_available (struct frame_info *this_frame,
 				     CORE_ADDR *pc)
 {
-  return frame_unwind_pc_if_available (skip_inlined_frames (this_frame), pc);
+  return frame_unwind_pc_if_available (skip_artificial_frames (this_frame), pc);
 }
 
 int
@@ -2326,7 +2327,7 @@ frame_unwind_arch (struct frame_info *next_frame)
 struct gdbarch *
 frame_unwind_caller_arch (struct frame_info *next_frame)
 {
-  return frame_unwind_arch (skip_inlined_frames (next_frame));
+  return frame_unwind_arch (skip_artificial_frames (next_frame));
 }
 
 /* Stack pointer methods.  */

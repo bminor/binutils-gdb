@@ -134,9 +134,11 @@ struct frame_id
   unsigned int code_addr_p : 1;
   unsigned int special_addr_p : 1;
 
-  /* The inline depth of this frame.  A frame representing a "called"
-     inlined function will have this set to a nonzero value.  */
-  int inline_depth;
+  /* It is non-zero for a frame made up by GDB without stack data
+     representation in inferior, such as INLINE_FRAME or TAILCALL_FRAME.
+     Caller of inlined function will have it zero, each more inner called frame
+     will have it increasingly one, two etc.  Similarly for TAILCALL_FRAME.  */
+  int artificial_depth;
 };
 
 /* Methods for constructing and comparing Frame IDs.  */
@@ -178,9 +180,10 @@ extern struct frame_id frame_id_build_wild (CORE_ADDR stack_addr);
    ID.  */
 extern int frame_id_p (struct frame_id l);
 
-/* Returns non-zero when L is a valid frame representing an inlined
-   function.  */
-extern int frame_id_inlined_p (struct frame_id l);
+/* Returns non-zero when L is a valid frame representing a frame made up by GDB
+   without stack data representation in inferior, such as INLINE_FRAME or
+   TAILCALL_FRAME.  */
+extern int frame_id_artificial_p (struct frame_id l);
 
 /* Returns non-zero when L and R identify the same frame, or, if
    either L or R have a zero .func, then the same frame base.  */

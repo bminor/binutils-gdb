@@ -1,3 +1,25 @@
+2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup - rename 'inline' depth to 'artificial' depth.
+	* breakpoint.c (set_momentary_breakpoint): Rename at a caller to
+	frame_id_artificial_p, extend the comment.
+	* dwarf2-frame-tailcall.c (tailcall_frame_this_id): Rename at a user.
+	* frame.c (fprint_frame_id): Rename at a user, change debug output
+	text to "artificial=".
+	(skip_inlined_frames): Rename to ...
+	(skip_artificial_frames): ... here.  Extend the comment.
+	(get_stack_frame_id, frame_unwind_caller_id): Rename at a caller.
+	(frame_id_inlined_p): Rename to ...
+	(frame_id_artificial_p): ... here.  Rename at a user.
+	(frame_id_eq, frame_id_inner, frame_unwind_caller_pc)
+	(frame_unwind_caller_pc_if_available, frame_unwind_caller_arch): Rename
+	at a user.
+	* frame.h (struct frame_id): Rename inline_depth to artificial_depth.
+	Extend the comment.
+	(frame_id_inlined_p): Rename to ...
+	(frame_id_artificial_p): ... here.
+	* inline-frame.c (inline_frame_this_id): Rename at a user.
+
 2012-09-14  Andrew Burgess  <aburgess@broadcom.com>
 
 	* c-typeprint.c (c_type_print_varspec_suffix): Display the size of
