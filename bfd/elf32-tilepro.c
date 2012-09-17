@@ -3092,7 +3092,7 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  local_got_offsets[r_symndx] |= 1;
 		}
 	    }
-	  relocation = htab->elf.sgot->output_offset + off - got_base;
+	  relocation = off;
 	  break;
 
         case R_TILEPRO_JOFFLONG_X1_PLT:
@@ -3511,7 +3511,7 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = htab->elf.sgot->output_offset + off - got_base;
+	  relocation = off;
 	  unresolved_reloc = FALSE;
 	  howto = tilepro_elf_howto_table + r_type;
 	  break;
