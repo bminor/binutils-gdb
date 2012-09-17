@@ -1,5 +1,10 @@
 2012-09-17  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
+	* tic6x-tdep.c (tic6x_push_dummy_call): Remove unused definition
+	of LEN.
+
+2012-09-17  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
 	* m2-valprint.c (m2_print_array_contents): Eliminate variable
 	ELTLEN and use TYPE_LENGTH directly.
 	(m2_val_print): Likewise.

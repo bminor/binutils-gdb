@@ -895,7 +895,6 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   int argreg = 0;
   int argnum;
-  int len = 0;
   int stack_offset = 4;
   int references_offset = 4;
   CORE_ADDR func_addr = find_function_addr (function, NULL);
