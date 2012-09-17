@@ -1,4 +1,11 @@
 2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR 14119
+	* frame.c (skip_inlined_frames): Skip also TAILCALL_FRAME frames.
+	(frame_pop): Drop also TAILCALL_FRAME frames.
+	* infcmd.c (finish_command): Ignore also TAILCALL_FRAME frames.
+
+2012-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	PR 14548
