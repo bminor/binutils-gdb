@@ -27,7 +27,12 @@
 	(mmix_md_end): Verify that recorded LOC expressions weren't
 	to other sections, else emit error messages.
 
-2012-09-10  Maciej W. Rozycki  <macro@codesourcery.com>
+2012-08-31  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* doc/c-mips.texi (MIPS Opts): Correct a typo in the -mips5
+	option.
+
+2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (NO_ISA_COP, COP_INSN): Remove macros.
 	(is_opcode_valid): Remove coprocessor instruction exclusions.
@@ -35,11 +40,6 @@
 	(is_opcode_valid_16): Replace OPCODE_IS_MEMBER with
 	opcode_is_member.
 	(macro): Remove coprocessor instruction exclusions.
-
-2012-08-31  Maciej W. Rozycki  <macro@codesourcery.com>
-
-	* doc/c-mips.texi (MIPS Opts): Correct a typo in the -mips5
-	option.
 
 2012-08-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
