@@ -8738,7 +8738,7 @@ do_strexd (void)
 
 /* ARM V8 STRL.  */
 static void
-do_strlex (void)
+do_stlex (void)
 {
   constraint (inst.operands[0].reg == inst.operands[1].reg
 	      || inst.operands[0].reg == inst.operands[2].reg, BAD_OVERLAP);
@@ -8747,7 +8747,7 @@ do_strlex (void)
 }
 
 static void
-do_t_strlex (void)
+do_t_stlex (void)
 {
   constraint (inst.operands[0].reg == inst.operands[1].reg
 	      || inst.operands[0].reg == inst.operands[2].reg, BAD_OVERLAP);
@@ -18476,25 +18476,25 @@ static const struct asm_opcode insns[] =
 
  tCE("sevl",	320f005, _sevl,    0, (),		noargs,	t_hint),
  TUE("hlt",	1000070, ba80,     1, (oIffffb),	bkpt,	t_hlt),
- TCE("ldraex",	1900e9f, e8d00fef, 2, (RRnpc, RRnpcb),	rd_rn,	rd_rn),
- TCE("ldraexd",	1b00e9f, e8d000ff, 3, (RRnpc, oRRnpc, RRnpcb),
+ TCE("ldaex",	1900e9f, e8d00fef, 2, (RRnpc, RRnpcb),	rd_rn,	rd_rn),
+ TCE("ldaexd",	1b00e9f, e8d000ff, 3, (RRnpc, oRRnpc, RRnpcb),
 							ldrexd, t_ldrexd),
- TCE("ldraexb",	1d00e9f, e8d00fcf, 2, (RRnpc,RRnpcb),	rd_rn,  rd_rn),
- TCE("ldraexh",	1f00e9f, e8d00fdf, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
- TCE("strlex",	1800e90, e8c00fe0, 3, (RRnpc, RRnpc, RRnpcb),
-							strlex,  t_strlex),
- TCE("strlexd",	1a00e90, e8c000f0, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb),
+ TCE("ldaexb",	1d00e9f, e8d00fcf, 2, (RRnpc,RRnpcb),	rd_rn,  rd_rn),
+ TCE("ldaexh",	1f00e9f, e8d00fdf, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
+ TCE("stlex",	1800e90, e8c00fe0, 3, (RRnpc, RRnpc, RRnpcb),
+							stlex,  t_stlex),
+ TCE("stlexd",	1a00e90, e8c000f0, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb),
 							strexd, t_strexd),
- TCE("strlexb",	1c00e90, e8c00fc0, 3, (RRnpc, RRnpc, RRnpcb),
-							strlex, t_strlex),
- TCE("strlexh",	1e00e90, e8c00fd0, 3, (RRnpc, RRnpc, RRnpcb),
-							strlex, t_strlex),
- TCE("ldra",	1900c9f, e8d00faf, 2, (RRnpc, RRnpcb),	rd_rn,	rd_rn),
- TCE("ldrab",	1d00c9f, e8d00f8f, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
- TCE("ldrah",	1f00c9f, e8d00f9f, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
- TCE("strl",	180fc90, e8c00faf, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
- TCE("strlb",	1c0fc90, e8c00f8f, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
- TCE("strlh",	1e0fc90, e8c00f9f, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
+ TCE("stlexb",	1c00e90, e8c00fc0, 3, (RRnpc, RRnpc, RRnpcb),
+							stlex, t_stlex),
+ TCE("stlexh",	1e00e90, e8c00fd0, 3, (RRnpc, RRnpc, RRnpcb),
+							stlex, t_stlex),
+ TCE("lda",	1900c9f, e8d00faf, 2, (RRnpc, RRnpcb),	rd_rn,	rd_rn),
+ TCE("ldab",	1d00c9f, e8d00f8f, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
+ TCE("ldah",	1f00c9f, e8d00f9f, 2, (RRnpc, RRnpcb),	rd_rn,  rd_rn),
+ TCE("stl",	180fc90, e8c00faf, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
+ TCE("stlb",	1c0fc90, e8c00f8f, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
+ TCE("stlh",	1e0fc90, e8c00f9f, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
 
  /* ARMv8 T32 only.  */
 #undef ARM_VARIANT

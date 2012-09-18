@@ -1,3 +1,8 @@
+2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-arm.c: Changed ldra and strl-form mnemonics
+	to lda and stl-form for armv8.
+
 2012-09-17  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (aarch64_archs): Rename 'armv8' to 'armv8-a'.

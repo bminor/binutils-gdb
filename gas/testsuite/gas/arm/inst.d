@@ -201,3 +201,4 @@ Disassembly of section .text:
 0+2e4 <[^>]*> e1a01fe2 ?	ror	r1, r2, #31
 0+2e8 <[^>]*> e1a01372 ?	ror	r1, r2, r3
 0+2ec <[^>]*> e1a01062 ?	rrx	r1, r2
+0+2f0 <[^>]*> e6b21003 ?	ldrt	r1, \[r2\], r3

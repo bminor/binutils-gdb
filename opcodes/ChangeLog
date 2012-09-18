@@ -1,3 +1,8 @@
+2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+        * arm-dis.c: Changed ldra and strl-form mnemonics
+	to lda and stl-form.
+
 2012-09-18  Chao-ying Fu  <fu@mips.com>
 
 	* micromips-opc.c (micromips_opcodes): Correct the encoding of
