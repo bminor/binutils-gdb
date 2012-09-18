@@ -1,3 +1,10 @@
+2012-09-18  Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/micromips.d: Correct the disassembly of SWXC1.
+	* gas/mips/micromips-trap.d: Likewise.
+	* gas/mips/micromips@24k-triple-stores-1.d: Likewise.
+	* gas/mips/micromips@mips4-fp.d: Likewise.
+
 2012-08-17  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
 
 	* gas/i386/i386.exp: Run btver1 and btver2 test cases.
