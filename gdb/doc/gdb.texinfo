@@ -27639,6 +27639,15 @@ Reports that the trace frame was changed and its new number is
 @var{tfnum}.  The number of the tracepoint associated with this trace
 frame is @var{tpnum}.
 
+@item =tsv-created,name=@var{name},value=@var{value}
+Reports that the new trace state variable @var{name} is created with
+value @var{value}.
+
+@item =tsv-deleted,name=@var{name}
+@itemx =tsv-deleted
+Reports that the trace state variable @var{name} is deleted or all
+trace state variables are deleted.
+
 @item =breakpoint-created,bkpt=@{...@}
 @itemx =breakpoint-modified,bkpt=@{...@}
 @itemx =breakpoint-deleted,id=@var{number}

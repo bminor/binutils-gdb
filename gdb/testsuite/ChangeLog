@@ -1,5 +1,9 @@
 2012-09-18  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/mi-tsv-changed.exp: New.
+
+2012-09-18  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.trace/mi-traceframe-changed.exp: New.
 
 2012-09-17  Yao Qi  <yao@codesourcery.com>

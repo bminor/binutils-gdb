@@ -45,6 +45,8 @@ py [command]
      "=cmd-param-changed".
   ** Trace frame changes caused by command "tfind" are now notified using
      new async record "=traceframe-changed".
+  ** The creation and deletion of trace state variables are now notified
+     using new async records "=tsv-created" and "=tsv-deleted".
 
 *** Changes in GDB 7.5
 

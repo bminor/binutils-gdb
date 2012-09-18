@@ -69,6 +69,8 @@ static void mi_solib_loaded (struct so_list *solib);
 static void mi_solib_unloaded (struct so_list *solib);
 static void mi_about_to_proceed (void);
 static void mi_traceframe_changed (int tfnum, int tpnum);
+static void mi_tsv_created (const char *name, LONGEST value);
+static void mi_tsv_deleted (const char *name);
 static void mi_breakpoint_created (struct breakpoint *b);
 static void mi_breakpoint_deleted (struct breakpoint *b);
 static void mi_breakpoint_modified (struct breakpoint *b);
@@ -128,6 +130,8 @@ mi_interpreter_init (struct interp *interp, int top_level)
       observer_attach_solib_unloaded (mi_solib_unloaded);
       observer_attach_about_to_proceed (mi_about_to_proceed);
       observer_attach_traceframe_changed (mi_traceframe_changed);
+      observer_attach_tsv_created (mi_tsv_created);
+      observer_attach_tsv_deleted (mi_tsv_deleted);
       observer_attach_breakpoint_created (mi_breakpoint_created);
       observer_attach_breakpoint_deleted (mi_breakpoint_deleted);
       observer_attach_breakpoint_modified (mi_breakpoint_modified);
@@ -533,6 +537,40 @@ mi_traceframe_changed (int tfnum, int tpnum)
 			tfnum, tpnum);
   else
     fprintf_unfiltered (mi->event_channel, "traceframe-changed,end");
+
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification on creating a trace state variable.  */
+
+static void
+mi_tsv_created (const char *name, LONGEST value)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  target_terminal_ours ();
+
+  fprintf_unfiltered (mi->event_channel, "tsv-created,"
+		      "name=\"%s\",value=\"%s\"\n",
+		      name, plongest (value));
+
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification on deleting a trace state variable.  */
+
+static void
+mi_tsv_deleted (const char *name)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  target_terminal_ours ();
+
+  if (name != NULL)
+    fprintf_unfiltered (mi->event_channel, "tsv-deleted,"
+			"name=\"%s\"\n", name);
+  else
+    fprintf_unfiltered (mi->event_channel, "tsv-deleted\n");
 
   gdb_flush (mi->event_channel);
 }

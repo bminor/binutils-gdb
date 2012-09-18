@@ -1,5 +1,12 @@
 2012-09-18  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.texinfo (GDB/MI Async Records): Document new MI
+	notifications '=tsv-created' and '=tsv-deleted'.
+	* observer.texi (GDB Observers): New observer tsv_created and
+	tsv_deleted.
+
+2012-09-18  Yao Qi  <yao@codesourcery.com>
+
 	* observer.texi (GDB Observers): New observer 'traceframe_changed'.
 	* gdb.texinfo (GDB/MI Async Records): Mention new MI notification
 	'=traceframe-changed'.

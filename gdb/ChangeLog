@@ -1,5 +1,19 @@
 2012-09-18  Yao Qi  <yao@codesourcery.com>
 
+	* mi/mi-interp.c: Declare mi_tsv_created and mi_tsv_deleted.
+	(mi_interpreter_init): Call observer_attach_tsv_created and
+	observer_attach_tsv_deleted.
+	(mi_tsv_created, mi_tsv_deleted): New.
+	* tracepoint.c (delete_trace_state_variable): Call
+	observer_notify_tsv_deleted.
+	(trace_variable_command): Call observer_notify_tsv_created.
+	(delete_trace_variable_command): Call
+	observer_notify_tsv_deleted.
+	(create_tsv_from_upload): Call observer_notify_tsv_created.
+	* NEWS: Mention it.
+
+2012-09-18  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (tfind_1): Call observer_notify_traceframe_changed
 	if traceframe changed.
 	* mi/mi-cmds.c (mi_cmd mi_cmds): Adjust for command

@@ -242,7 +242,16 @@ The parameter of some @code{set} commands in console are changed.  This
 method is called after a command @code{set @var{param} @var{value}}.
 @var{param} is the parameter of @code{set} command, and @var{value}
 is the value of changed parameter.
+@end deftypefun
 
+@deftypefun void tsv_created (const char *@var{name}, LONGEST @var{value})
+The new trace state variable @var{name} is created with value
+@var{value}.
+@end deftypefun
+
+@deftypefun void tsv_deleted (const char *@var{name})
+The trace state variable @var{name} is deleted.  If @var{name} is
+@code{NULL}, all trace state variables are deleted.
 @end deftypefun
 
 @deftypefun void test_notification (int @var{somearg})
