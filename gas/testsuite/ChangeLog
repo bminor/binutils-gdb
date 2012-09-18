@@ -1,3 +1,10 @@
+2012-09-18  Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/micromips.d: Correct the disassembly of SWXC1.
+	* gas/mips/micromips-trap.d: Likewise.
+	* gas/mips/micromips@24k-triple-stores-1.d: Likewise.
+	* gas/mips/micromips@mips4-fp.d: Likewise.
+
 2012-09-17  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/crypto.d (#as): Update for v8->v8-A change.

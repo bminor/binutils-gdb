@@ -911,7 +911,7 @@ const struct mips_opcode micromips_opcodes[] =
 {"invalidate", "t,~(b)",0x60009000, 0xfc00f000,	SM|RD_b|RD_t,		0,		I1	}, /* same */
 {"invalidate", "t,o(b)",0,    (int) M_SWR_OB,	INSN_MACRO,		0,		I1	},
 {"invalidate", "t,A(b)",0,    (int) M_SWR_AB,	INSN_MACRO,		0,		I1	},
-{"swxc1",   "D,t(b)",	0x54000048, 0xfc0007ff,	SM|RD_t|RD_b|FP_S,	RD_D,		I1	},
+{"swxc1",   "D,t(b)",	0x54000088, 0xfc0007ff,	SM|RD_t|RD_b|FP_S,	RD_D,		I1	},
 {"sync_acquire", "",	0x00116b7c, 0xffffffff,	NODS,			0,		I1	},
 {"sync_mb", "",		0x00106b7c, 0xffffffff,	NODS,			0,		I1	},
 {"sync_release", "",	0x00126b7c, 0xffffffff,	NODS,			0,		I1	},
