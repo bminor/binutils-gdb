@@ -1,3 +1,7 @@
+2012-09-18  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (jump): Mention new alias `j' for `jump'.
+
 2012-09-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Async Records): Document new MI

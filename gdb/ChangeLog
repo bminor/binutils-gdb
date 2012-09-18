@@ -1,3 +1,8 @@
+2012-09-18  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* infcmd.c (_initialize_infcmd): Register `j' as an alias for
+	`jump'.
+
 2012-09-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* linespec.c (iterate_over_all_matching_symtabs): Use the correct

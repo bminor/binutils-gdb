@@ -15495,8 +15495,11 @@ an address of your own choosing, with the following commands:
 
 @table @code
 @kindex jump
+@kindex j @r{(@code{jump})}
 @item jump @var{linespec}
+@itemx j @var{linespec}
 @itemx jump @var{location}
+@itemx j @var{location}
 Resume execution at line @var{linespec} or at address given by
 @var{location}.  Execution stops again immediately if there is a
 breakpoint there.  @xref{Specify Location}, for a description of the

@@ -3104,6 +3104,7 @@ Usage: jump <location>\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
 for an address to start at."));
   set_cmd_completer (c, location_completer);
+  add_com_alias ("j", "jump", class_run, 1);
 
   if (xdb_commands)
     {
