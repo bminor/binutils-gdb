@@ -1,3 +1,12 @@
+2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* gas/arm/armv8-a-bad.l: Updated for changed mnemonics.
+	* gas/arm/armv8-a-bad.s: Likewise.
+	* gas/arm/armv8-a.d: Likewise.
+	* gas/arm/armv8-a.s: Likewise.
+	* gas/arm/inst.s: Added test for ldrt encoding compatibly with ldralt.
+	* gas/arm/inst.d: Updated.
+
 2012-09-18  Chao-ying Fu  <fu@mips.com>
 
 	* gas/mips/micromips.d: Correct the disassembly of SWXC1.
