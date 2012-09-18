@@ -1,3 +1,9 @@
+	* elf32-tilepro.c (tilepro_elf_relocate_section): Remove unused
+	got_base variable.
+	* elfxx-tilegx.c (tilegx_elf_relocate_section): Ditto.
+
+2012-09-17  Walter Lee  <walt@tilera.com>
+
 2012-09-17  Walter Lee  <walt@tilera.com>
 
 	* elf32-tilepro.c (tilepro_elf_relocate_section): Fix computation
