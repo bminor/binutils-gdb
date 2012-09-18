@@ -1,3 +1,7 @@
+2012-09-17  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (aarch64_archs): Rename 'armv8' to 'armv8-a'.
+
 2012-08-17  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Add CPU_BTVER1_FLAGS and
