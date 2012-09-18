@@ -1,5 +1,11 @@
 2012-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_convert_mov_to_lea): Ignore discarded
+	section.
+	* elf64-x86-64.c (elf_x86_64_convert_mov_to_lea): Likewise.
+
+2012-09-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Replace return
 	FALSE with abort.
 	* elf64-x86-64.c (elf_x86_64_finish_dynamic_symbol): Likewise.
