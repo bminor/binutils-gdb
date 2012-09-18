@@ -1,3 +1,8 @@
+2012-09-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* linespec.c (iterate_over_all_matching_symtabs): Use the correct
+	language when iterating over symbols.
+
 2012-09-18  Yao Qi  <yao@codesourcery.com>
 
 	* mi/mi-interp.c: Declare mi_tsv_created and mi_tsv_deleted.

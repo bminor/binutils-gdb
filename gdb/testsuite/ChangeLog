@@ -1,3 +1,7 @@
+2012-09-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/bp_reset: New testcase.
+
 2012-09-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/mi-tsv-changed.exp: New.
