@@ -187,6 +187,13 @@ A tracepoint has been modified in some way.  The argument @var{tpnum}
 is the number of the modified tracepoint.
 @end deftypefun
 
+@deftypefun void traceframe_changed (int @var{tfnum}, int @var{tpnum})
+The trace frame is changed to @var{tfnum} (e.g., by using the
+@code{tfind} command).  If @var{tfnum} is negative, it means
+@value{GDBN} resumes live debugging.  The number of the tracepoint
+associated with this traceframe is @var{tpnum}.
+@end deftypefun
+
 @deftypefun void architecture_changed (struct gdbarch *@var{newarch})
 The current architecture has changed.  The argument @var{newarch} is
 a pointer to the new architecture.

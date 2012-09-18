@@ -68,6 +68,7 @@ static void mi_on_resume (ptid_t ptid);
 static void mi_solib_loaded (struct so_list *solib);
 static void mi_solib_unloaded (struct so_list *solib);
 static void mi_about_to_proceed (void);
+static void mi_traceframe_changed (int tfnum, int tpnum);
 static void mi_breakpoint_created (struct breakpoint *b);
 static void mi_breakpoint_deleted (struct breakpoint *b);
 static void mi_breakpoint_modified (struct breakpoint *b);
@@ -126,6 +127,7 @@ mi_interpreter_init (struct interp *interp, int top_level)
       observer_attach_solib_loaded (mi_solib_loaded);
       observer_attach_solib_unloaded (mi_solib_unloaded);
       observer_attach_about_to_proceed (mi_about_to_proceed);
+      observer_attach_traceframe_changed (mi_traceframe_changed);
       observer_attach_breakpoint_created (mi_breakpoint_created);
       observer_attach_breakpoint_deleted (mi_breakpoint_deleted);
       observer_attach_breakpoint_modified (mi_breakpoint_modified);
@@ -510,7 +512,30 @@ struct mi_suppress_notification mi_suppress_notification =
   {
     0,
     0,
+    0,
   };
+
+/* Emit notification on changing a traceframe.  */
+
+static void
+mi_traceframe_changed (int tfnum, int tpnum)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  if (mi_suppress_notification.traceframe)
+    return;
+
+  target_terminal_ours ();
+
+  if (tfnum >= 0)
+    fprintf_unfiltered (mi->event_channel, "traceframe-changed,"
+			"num=\"%d\",tracepoint=\"%d\"\n",
+			tfnum, tpnum);
+  else
+    fprintf_unfiltered (mi->event_channel, "traceframe-changed,end");
+
+  gdb_flush (mi->event_channel);
+}
 
 /* Emit notification about a created breakpoint.  */
 

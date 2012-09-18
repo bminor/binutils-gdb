@@ -39,6 +39,8 @@ struct mi_suppress_notification
   int breakpoint;
   /* Command param changed notification suppressed?  */
   int cmd_param_changed;
+  /* Traceframe changed notification suppressed?  */
+  int traceframe;
 };
 extern struct mi_suppress_notification mi_suppress_notification;
 

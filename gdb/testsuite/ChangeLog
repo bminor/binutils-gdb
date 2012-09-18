@@ -1,3 +1,7 @@
+2012-09-18  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/mi-traceframe-changed.exp: New.
+
 2012-09-17  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/list.exp (set_listsize): Don't set arg to "unlimited"

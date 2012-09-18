@@ -27633,6 +27633,12 @@ thread group in whose context the library was unloaded.  If the field is
 absent, it means the library was unloaded in the context of all present
 thread groups.
 
+@item =traceframe-changed,num=@var{tfnum},tracepoint=@var{tpnum}
+@itemx =traceframe-changed,end
+Reports that the trace frame was changed and its new number is
+@var{tfnum}.  The number of the tracepoint associated with this trace
+frame is @var{tpnum}.
+
 @item =breakpoint-created,bkpt=@{...@}
 @itemx =breakpoint-modified,bkpt=@{...@}
 @itemx =breakpoint-deleted,id=@var{number}

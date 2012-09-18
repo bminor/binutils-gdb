@@ -43,6 +43,8 @@ py [command]
 
   ** Command parameter changes are now notified using new async record
      "=cmd-param-changed".
+  ** Trace frame changes caused by command "tfind" are now notified using
+     new async record "=traceframe-changed".
 
 *** Changes in GDB 7.5
 

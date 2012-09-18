@@ -1,3 +1,17 @@
+2012-09-18  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (tfind_1): Call observer_notify_traceframe_changed
+	if traceframe changed.
+	* mi/mi-cmds.c (mi_cmd mi_cmds): Adjust for command
+	"trace-find".
+	* mi/mi-interp.c: Declare 'mi_traceframe_changed'.
+	(mi_interpreter_init): Hook mi_traceframe_changed to observer
+	'traceframe_changed'.
+	(mi_traceframe_changed): New.
+	* mi/mi-main.h (struct mi_suppress_notification) <traceframe>:
+	New field.
+	* NEWS: Mention the new MI notification.
+
 2012-09-17  Mike Wrighton  <wrighton@codesourcery.com>
 
 	* MAINTAINERS (Write After Approval): Add "Mike Wrighton".

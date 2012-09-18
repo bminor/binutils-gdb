@@ -2288,9 +2288,13 @@ tfind_1 (enum trace_find_type type, int num,
   reinit_frame_cache ();
   target_dcache_invalidate ();
 
+  set_tracepoint_num (tp ? tp->base.number : target_tracept);
+
+  if (target_frameno != get_traceframe_number ())
+    observer_notify_traceframe_changed (target_frameno, tracepoint_number);
+
   set_current_traceframe (target_frameno);
 
-  set_tracepoint_num (tp ? tp->base.number : target_tracept);
   if (target_frameno == -1)
     set_traceframe_context (NULL);
   else
