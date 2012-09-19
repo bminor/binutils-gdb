@@ -1,3 +1,8 @@
+2012-09-19  Chris Schlumberger-Socha  <chris.schlumberger-socha@arm.com>
+
+	* ld-aarch64/emit-relocs-309-low.d: Replace symbol with regexp.
+	* ld-aarch64/emit-relocs-309-up.d: Likewise.
+
 2012-09-19  Andrew Burgess  <aburgess@broadcom.com>
 
 	* ld-scripts/assign-loc.d: New file.  Test for assigning absolute

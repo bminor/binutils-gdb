@@ -9,4 +9,4 @@ Disassembly of section \.text:
 
 00000000000ffffc <_start>:
    ffffc:	d503201f 	nop
-  100000:	58800000 	ldr	x0, 0 <_GLOBAL_OFFSET_TABLE_-0x8>
+  100000:	58800000 	ldr	x0, 0 .*
