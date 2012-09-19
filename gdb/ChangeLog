@@ -1,5 +1,11 @@
 2012-09-19  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* h8300-tdep.c (h8300_gdbarch_init): Invoke
+	set_gdbarch_double_format and set_gdbarch_long_double_format.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Invoke
+	set_gdbarch_double_format.
+	* sh-tdep.c (sh_gdbarch_init): Likewise.
+
 	* NEWS: Document the removal of SH's 'regs' command.
 	* sh-tdep.c (_initialize_sh_tdep): Remove the deprecated 'regs'
 	command.

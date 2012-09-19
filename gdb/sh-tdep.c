@@ -2299,6 +2299,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sh2e:
       /* doubles on sh2e and sh3e are actually 4 byte.  */
       set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      set_gdbarch_double_format (gdbarch, floatformats_ieee_single);
 
       set_gdbarch_register_name (gdbarch, sh_sh2e_register_name);
       set_gdbarch_register_type (gdbarch, sh_sh3e_register_type);
@@ -2344,6 +2345,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sh2a_or_sh3e:
       /* doubles on sh2e and sh3e are actually 4 byte.  */
       set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      set_gdbarch_double_format (gdbarch, floatformats_ieee_single);
 
       set_gdbarch_register_name (gdbarch, sh_sh3e_register_name);
       set_gdbarch_register_type (gdbarch, sh_sh3e_register_type);
