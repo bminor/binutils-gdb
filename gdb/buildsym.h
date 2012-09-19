@@ -120,10 +120,6 @@ EXTERN struct pending *global_symbols;
 
 EXTERN struct pending *local_symbols;
 
-/* func params local to lexical  context */
-
-EXTERN struct pending *param_symbols;
-
 /* "using" directives local to lexical context.  */
 
 EXTERN struct using_direct *using_directives;
@@ -136,10 +132,6 @@ struct context_stack
     /* Outer locals at the time we entered */
 
     struct pending *locals;
-
-    /* Pending func params at the time we entered */
-
-    struct pending *params;
 
     /* Pending using directives at the time we entered.  */
 

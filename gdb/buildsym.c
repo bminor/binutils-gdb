@@ -1404,14 +1404,12 @@ push_context (int desc, CORE_ADDR valu)
   new = &context_stack[context_stack_depth++];
   new->depth = desc;
   new->locals = local_symbols;
-  new->params = param_symbols;
   new->old_blocks = pending_blocks;
   new->start_addr = valu;
   new->using_directives = using_directives;
   new->name = NULL;
 
   local_symbols = NULL;
-  param_symbols = NULL;
   using_directives = NULL;
 
   return new;

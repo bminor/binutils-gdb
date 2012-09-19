@@ -1,3 +1,10 @@
+2012-09-19  Doug Evans  <dje@google.com>
+
+	* buildsym.h (param_symbols): Delete, unused.
+	(context_stack): Delete member "params", unused.
+	* buildsym.c (push_context): Update.
+	* dwarf2read.c (read_func_scope): Update.
+
 2012-09-19  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* sh-tdep.c (sh_register_convert_to_virtual)

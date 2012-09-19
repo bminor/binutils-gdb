@@ -8837,7 +8837,6 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
      when we finish processing a function scope, we may need to go
      back to building a containing block's symbol lists.  */
   local_symbols = new->locals;
-  param_symbols = new->params;
   using_directives = new->using_directives;
 
   /* If we've finished processing a top-level function, subsequent
