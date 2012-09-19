@@ -342,15 +342,16 @@ sh_sh4_register_name (struct gdbarch *gdbarch, int reg_nr)
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
     /* bank 1 51 - 58 */
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
+    /* 59 - 66 */
     "", "", "", "", "", "", "", "",
     /* pseudo bank register.  */
     "",
-    /* double precision (pseudo) 59 - 66 */
+    /* double precision (pseudo) 68 - 75 */
     "dr0", "dr2", "dr4", "dr6", "dr8", "dr10", "dr12", "dr14",
-    /* vectors (pseudo) 67 - 70 */
+    /* vectors (pseudo) 76 - 79 */
     "fv0", "fv4", "fv8", "fv12",
-    /* FIXME: missing XF 71 - 86 */
-    /* FIXME: missing XD 87 - 94 */
+    /* FIXME: missing XF */
+    /* FIXME: missing XD */
   };
   if (reg_nr < 0)
     return NULL;
@@ -379,12 +380,13 @@ sh_sh4_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
     /* bank 1 51 - 58 */
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
+    /* 59 - 66 */
     "", "", "", "", "", "", "", "",
     /* pseudo bank register.  */
     "",
-    /* double precision (pseudo) 59 - 66 -- not for nofpu target */
+    /* double precision (pseudo) 68 - 75 -- not for nofpu target */
     "", "", "", "", "", "", "", "",
-    /* vectors (pseudo) 67 - 70 -- not for nofpu target */
+    /* vectors (pseudo) 76 - 79 -- not for nofpu target */
     "", "", "", "",
   };
   if (reg_nr < 0)
@@ -1521,16 +1523,16 @@ sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 /* On the sh4, the DRi pseudo registers are problematic if the target
    is little endian.  When the user writes one of those registers, for
-   instance with 'ser var $dr0=1', we want the double to be stored
+   instance with 'set var $dr0=1', we want the double to be stored
    like this: 
-   fr0 = 0x00 0x00 0x00 0x00 0x00 0xf0 0x3f 
-   fr1 = 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
+   fr0 = 0x00 0x00 0xf0 0x3f 
+   fr1 = 0x00 0x00 0x00 0x00 
 
    This corresponds to little endian byte order & big endian word
    order.  However if we let gdb write the register w/o conversion, it
    will write fr0 and fr1 this way:
-   fr0 = 0x00 0x00 0x00 0x00 0x00 0x00 0x00
-   fr1 = 0x00 0x00 0x00 0x00 0x00 0xf0 0x3f
+   fr0 = 0x00 0x00 0x00 0x00
+   fr1 = 0x00 0x00 0xf0 0x3f
    because it will consider fr0 and fr1 as a single LE stretch of memory.
    
    To achieve what we want we must force gdb to store things in
@@ -1539,16 +1541,23 @@ sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
    In case the target is big endian, there is no problem, the
    raw bytes will look like:
-   fr0 = 0x3f 0xf0 0x00 0x00 0x00 0x00 0x00
-   fr1 = 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
+   fr0 = 0x3f 0xf0 0x00 0x00
+   fr1 = 0x00 0x00 0x00 0x00
 
    The other pseudo registers (the FVs) also don't pose a problem
    because they are stored as 4 individual FP elements.  */
 
 static void
-sh_register_convert_to_virtual (int regnum, struct type *type,
-				char *from, char *to)
+sh_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum,
+				struct type *type, char *from, char *to)
 {
+  if (gdbarch_byte_order (gdbarch) != BFD_ENDIAN_LITTLE)
+    {
+      /* It is a no-op.  */
+      memcpy (to, from, register_size (gdbarch, regnum));
+      return;
+    }
+
   if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
     {
       DOUBLEST val;
@@ -1562,9 +1571,16 @@ sh_register_convert_to_virtual (int regnum, struct type *type,
 }
 
 static void
-sh_register_convert_to_raw (struct type *type, int regnum,
-			    const void *from, void *to)
+sh_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type,
+			    int regnum, const void *from, void *to)
 {
+  if (gdbarch_byte_order (gdbarch) != BFD_ENDIAN_LITTLE)
+    {
+      /* It is a no-op.  */
+      memcpy (to, from, register_size (gdbarch, regnum));
+      return;
+    }
+
   if (regnum >= DR0_REGNUM && regnum <= DR_LAST_REGNUM)
     {
       DOUBLEST val = extract_typed_floating (from, type);
@@ -1643,7 +1659,7 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       if (status == REG_VALID)
 	{
 	  /* We must pay attention to the endiannes. */
-	  sh_register_convert_to_virtual (reg_nr,
+	  sh_register_convert_to_virtual (gdbarch, reg_nr,
 					  register_type (gdbarch, reg_nr),
 					  temp_buffer, buffer);
 	}
@@ -1685,7 +1701,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       base_regnum = dr_reg_base_num (gdbarch, reg_nr);
 
       /* We must pay attention to the endiannes.  */
-      sh_register_convert_to_raw (register_type (gdbarch, reg_nr),
+      sh_register_convert_to_raw (gdbarch, register_type (gdbarch, reg_nr),
 				  reg_nr, buffer, temp_buffer);
 
       /* Write the real regs for which this one is an alias.  */

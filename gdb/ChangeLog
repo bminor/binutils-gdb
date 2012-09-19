@@ -1,5 +1,9 @@
 2012-09-19  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* sh-tdep.c (sh_register_convert_to_virtual)
+	(sh_register_convert_to_raw): Add a gdbarch parameter.  Update
+	all callers.  Just do a memcpy if not the little-endian case.
+
 	* h8300-tdep.c (h8300_gdbarch_init): Invoke
 	set_gdbarch_double_format and set_gdbarch_long_double_format.
 	* m68hc11-tdep.c (m68hc11_gdbarch_init): Invoke
