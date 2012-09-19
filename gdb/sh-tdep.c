@@ -2416,15 +2416,7 @@ extern initialize_file_ftype _initialize_sh_tdep;  /* -Wmissing-prototypes */
 void
 _initialize_sh_tdep (void)
 {
-  struct cmd_list_element *c;
-
   gdbarch_register (bfd_arch_sh, sh_gdbarch_init, NULL);
-
-  /* We can't use an alias here because 'info registers' has not yet been
-     registered.  */
-  c = add_com ("regs", class_vars, all_registers_info,
-               _("Print all registers"));
-  deprecate_cmd (c, "info all-registers");
 
   add_prefix_cmd ("sh", no_class, set_sh_command, "SH specific commands.",
                   &setshcmdlist, "set sh ", 0, &setlist);

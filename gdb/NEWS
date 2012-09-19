@@ -39,6 +39,12 @@ pi [command]
 py [command]
   "py" is a new alias for "python".
 
+* Removed commands
+
+  ** For the Renesas Super-H architecture, the "regs" command has been removed
+     (has been deprecated in GDB 7.5), and "info all-registers" should be used
+     instead.
+
 * MI changes
 
   ** Command parameter changes are now notified using new async record

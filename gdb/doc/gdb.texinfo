@@ -20463,13 +20463,6 @@ For the Renesas Super-H processor, @value{GDBN} provides these
 commands:
 
 @table @code
-@item regs
-@kindex regs@r{, Super-H}
-This command is deprecated, and @code{info all-registers} should be
-used instead.
-
-Show the values of all Super-H registers.
-
 @item set sh calling-convention @var{convention}
 @kindex set sh calling-convention
 Set the calling-convention used when calling functions from @value{GDBN}.

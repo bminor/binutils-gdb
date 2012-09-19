@@ -1,3 +1,7 @@
+2012-09-19  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* gdb.texinfo: Document the removal of SH's 'regs' command.
+
 2012-09-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.texinfo (jump): Mention new alias `j' for `jump'.

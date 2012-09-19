@@ -1,3 +1,9 @@
+2012-09-19  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* NEWS: Document the removal of SH's 'regs' command.
+	* sh-tdep.c (_initialize_sh_tdep): Remove the deprecated 'regs'
+	command.
+
 2012-09-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* infcmd.c (_initialize_infcmd): Register `j' as an alias for
