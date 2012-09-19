@@ -1970,7 +1970,7 @@ extern bfd_boolean _bfd_elf_maybe_strip_eh_frame_hdr
 
 extern bfd_boolean _bfd_elf_merge_symbol
   (bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
-   asection **, bfd_vma *, unsigned int *,
+   asection **, bfd_vma *, bfd_boolean *, unsigned int *,
    struct elf_link_hash_entry **, bfd_boolean *,
    bfd_boolean *, bfd_boolean *, bfd_boolean *);
 

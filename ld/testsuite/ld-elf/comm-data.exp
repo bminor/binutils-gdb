@@ -75,4 +75,24 @@ run_ld_link_tests [list \
 	} \
 	"comm-data" \
     ] \
+    [list \
+	"$testname 3a" \
+	"-static" \
+	"" \
+	{ comm-data3a.s comm-data3b.s } \
+	{ \
+	    { readelf -s comm-data3.sd } \
+	} \
+	"comm-data3a" \
+    ] \
+    [list \
+	"$testname 3b" \
+	"-static" \
+	"" \
+	{ comm-data3b.s comm-data3a.s } \
+	{ \
+	    { readelf -s comm-data3.sd } \
+	} \
+	"comm-data3b" \
+    ] \
 ]

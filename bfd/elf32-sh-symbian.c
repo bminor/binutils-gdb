@@ -497,7 +497,7 @@ sh_symbian_relocate_section (bfd *                  output_bfd,
 	      if (! _bfd_elf_merge_symbol (input_bfd, info,
 					   ptr->new_name, & new_sym,
 					   & psec, & new_value, NULL,
-					   & new_hash, & skip,
+					   NULL, & new_hash, & skip,
 					   & override, & type_change_ok,
 					   & size_change_ok))
 		{
