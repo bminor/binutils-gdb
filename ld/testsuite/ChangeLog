@@ -1,3 +1,10 @@
+2012-09-19  Andrew Burgess  <aburgess@broadcom.com>
+
+	* ld-scripts/assign-loc.d: New file.  Test for assigning absolute
+	symbol to location counter.
+	* ld-scripts/assign-loc.t: New file.  Linker script for above test.
+	* ld-scripts/expr.exp: Add new assignment test.
+
 2012-09-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14591
