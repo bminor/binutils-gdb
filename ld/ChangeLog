@@ -1,3 +1,7 @@
+2012-09-19  Steve Ellcey  <sellcey@mips.com>
+
+	* configure.tgt: Add mips*-mti-elf* target.
+
 2012-09-17  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (Expression Section): Correct description of
