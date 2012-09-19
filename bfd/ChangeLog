@@ -1,3 +1,7 @@
+2012-09-19  Steve Ellcey  <sellcey@mips.com>
+
+	* config.bfd: Add mips*-mti-elf* target.
+
 2012-09-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14591
