@@ -1,3 +1,7 @@
+2012-09-20  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/python.exp: Test atexit.register.
+
 2012-09-20  Doug Evans  <dje@google.com>
 
 	* boards/dwarf4-gdb-index.exp: New file.

@@ -141,6 +141,24 @@ gdb_test "python print a" ".*aliases -- Aliases of other commands.*" "verify hel
 gdb_py_test_silent_cmd "python nothread = gdb.selected_thread()" "Attempt to aquire thread with no inferior" 1
 gdb_test "python print nothread == None" "True" "Ensure that no threads are returned"
 
+gdb_py_test_multiple "register atexit function" \
+    "python" "" \
+    "import atexit" "" \
+    "def printit(arg):" "" \
+    "  print arg" "" \
+    "atexit.register(printit, 'good bye world')" "" \
+    "end" ""
+
+send_gdb "quit\n"
+gdb_expect {
+    -re "good bye world" {
+	pass "atexit handling"
+    }
+    default {
+	fail "atexit handling"
+    }
+}
+
 # Start with a fresh gdb.
 clean_restart ${testfile}
 

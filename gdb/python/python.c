@@ -1266,6 +1266,24 @@ user_show_python (char *args, int from_tty)
 
 /* Initialize the Python code.  */
 
+/* This is installed as a final cleanup and cleans up the
+   interpreter.  This lets Python's 'atexit' work.  */
+
+static void
+finalize_python (void *ignore)
+{
+  /* We don't use ensure_python_env here because if we ever ran the
+     cleanup, gdb would crash -- because the cleanup calls into the
+     Python interpreter, which we are about to destroy.  It seems
+     clearer to make the needed calls explicitly here than to create a
+     cleanup and then mysteriously discard it.  */
+  PyGILState_Ensure ();
+  python_gdbarch = target_gdbarch;
+  python_language = current_language;
+
+  Py_Finalize ();
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_python;
 
@@ -1427,6 +1445,7 @@ message == an error message without a stack will be printed."),
   PyThreadState_Swap (NULL);
   PyEval_ReleaseLock ();
 
+  make_final_cleanup (finalize_python, NULL);
 #endif /* HAVE_PYTHON */
 }
 

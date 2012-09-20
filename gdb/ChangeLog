@@ -1,3 +1,9 @@
+2012-09-20  Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Update.
+	* python/python.c (finalize_python): New function.
+	(_initialize_python): Make a final cleanup.
+
 2012-09-19  Doug Evans  <dje@google.com>
 
 	* buildsym.h (param_symbols): Delete, unused.
