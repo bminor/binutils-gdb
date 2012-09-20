@@ -399,6 +399,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-arch-2-bdver2"
     run_dump_test "x86-64-arch-2-btver1"
     run_dump_test "x86-64-arch-2-btver2"
+    run_list_test "x86-64-arch-2-1" "-march=generic64 -I${srcdir}/$subdir -al"
+    run_list_test "x86-64-arch-2-2" "-march=generic64+cx16 -I${srcdir}/$subdir -al"
     run_dump_test "x86-64-xsave"
     run_dump_test "x86-64-xsave-intel"
     run_dump_test "x86-64-aes"
