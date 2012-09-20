@@ -1,6 +1,19 @@
+2012-09-20  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Add CpuCX16 to CPU_NOCONA_FLAGS,
+	CPU_CORE_FLAGS, CPU_CORE2_FLAGS, CPU_COREI7_FLAGS,
+	CPU_BDVER1_FLAGS, CPU_BDVER2_FLAGS, CPU_BTVER1_FLAGS,
+	CPU_BTVER2_FLAGS.  Add CPU_CX16_FLAGS.
+	(cpu_flags): Add CpuCX16.
+	* i386-opc.h (CpuCX16): New.
+	(i386_cpu_flags): Add cpucx16.
+	* i386-opc.tbl: Replace CpuSSE3 with CpuCX16 for cmpxchg16b.
+	* i386-tbl.h: Regenerate.
+	* i386-init.h: Likewise.
+
 2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
-        * arm-dis.c: Changed ldra and strl-form mnemonics
+	* arm-dis.c: Changed ldra and strl-form mnemonics
 	to lda and stl-form.
 
 2012-09-18  Chao-ying Fu  <fu@mips.com>

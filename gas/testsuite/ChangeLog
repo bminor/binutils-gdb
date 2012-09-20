@@ -1,3 +1,14 @@
+2012-09-20  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* gas/i386/x86-64-arch-2.s: Add test for cmpxchg16b.
+	* gas/i386/x86-64-arch-2.d: Update correspondingly.
+	* gas/i386/x86-64-arch-2-bdver2.d: Likewise.
+	* gas/i386/x86-64-arch-2-btver1.d: Likewise.
+	* gas/i386/x86-64-arch-2-btver2.d: Likewise.
+	* gas/i386/x86-64-arch-2-lzcnt.d: Likewise.
+	* gas/i386/x86-64-arch-2-prefetchw.d: Likewise.
+	* gas/i386/ilp32/x86-64-arch-2.d: Likewise.
+
 2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* gas/arm/armv8-a-bad.l: Updated for changed mnemonics.

@@ -1,3 +1,8 @@
+2012-09-20  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .cx16.
+	* doc/c-i386.texi: Document .cx16.
+
 2012-09-19  Steve Ellcey  <sellcey@mips.com>
 
 	* configure.tgt: Add mips*-mti-elf* target.

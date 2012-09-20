@@ -736,6 +736,8 @@ static const arch_entry cpu_arch[] =
     CPU_LWP_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".movbe"), PROCESSOR_UNKNOWN,
     CPU_MOVBE_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".cx16"), PROCESSOR_UNKNOWN,
+    CPU_CX16_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".ept"), PROCESSOR_UNKNOWN,
     CPU_EPT_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".lzcnt"), PROCESSOR_UNKNOWN,
