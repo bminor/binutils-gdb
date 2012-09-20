@@ -1,3 +1,8 @@
+2012-09-20  Joe Seymour  <jseymour@codesourcery.com>
+
+	* corefile.c (core_sym_class): Allow for ".constprop.N" cloned
+	functions.
+
 2012-09-14  David Edelsohn  <dje.gcc@gmail.com>
 
 	* configure: Regenerate.
