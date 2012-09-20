@@ -1,5 +1,7 @@
 2012-09-20  Doug Evans  <dje@google.com>
 
+	* boards/dwarf4-gdb-index.exp: New file.
+
 	* gdb.base/callfuncs.exp (do_function_calls): Set unwindonsignal to on
 	while running the tests.
 
