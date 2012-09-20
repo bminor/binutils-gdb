@@ -1,3 +1,9 @@
+2012-09-20  Walter Lee  <walt@tilera.com>
+
+	* elf32-tilepro.c (tilepro_elf_relocate_section): Adjust got
+	relocations with value of hgot.
+	* elfxx-tilegx.c (tilegx_elf_relocate_section): Ditto.
+
 2012-09-19  Steve Ellcey  <sellcey@mips.com>
 
 	* config.bfd: Add mips*-mti-elf* target.
