@@ -1,5 +1,10 @@
 2012-09-21  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.mi/mi-reverse.exp: Fix the typo in expected output of
+	"=record-started" notification.
+
+2012-09-21  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.mi/mi-record-changed.exp: New.
 	* gdb.mi/mi-reverse.exp: Adjust expected output.
 
