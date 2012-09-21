@@ -213,6 +213,25 @@ gdb_test {p $sp0 == $sp} " = true"
 gdb_test "frame 3" "\r\n#3 .*"
 gdb_test {p $sp0 + sizeof (void *) == $sp} " = true"
 
+# Test $pc adjustment which is now right after the function end.
+# Also verify the current PC indicator "=> " is not displayed anywhere.
+gdb_test "down" "\r\n#2 .*"
+set test "disassemble"
+gdb_test_multiple $test $test {
+    -re "^$test\r\n" {
+	exp_continue
+    }
+    -re "^Dump of assembler code for function b\\(int, double\\):\r\n" {
+	exp_continue
+    }
+    -re "^   0x\[^\r\n\]*\r\n" {
+	exp_continue
+    }
+    -re "^End of assembler dump\\.\r\n$gdb_prompt $" {
+	pass $test
+    }
+}
+
 
 # Test partial-ambiguous virtual tail call frames chain.
 

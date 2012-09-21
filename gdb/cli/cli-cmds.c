@@ -1091,7 +1091,7 @@ disassemble_current_function (int flags)
 
   frame = get_selected_frame (_("No frame selected."));
   gdbarch = get_frame_arch (frame);
-  pc = get_frame_pc (frame);
+  pc = get_frame_address_in_block (frame);
   if (find_pc_partial_function (pc, &name, &low, &high) == 0)
     error (_("No function contains program counter for selected frame."));
 #if defined(TUI)

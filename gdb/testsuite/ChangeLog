@@ -1,3 +1,8 @@
+2012-09-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix disassemble without parameters in tailcall frame.
+	* gdb.arch/amd64-entry-value.exp (down, disassemble): New tests.
+
 2012-09-21  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.dwarf2/dw2-op-out-param.S: New file.
