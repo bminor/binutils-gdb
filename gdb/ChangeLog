@@ -1,5 +1,10 @@
 2012-09-21  Tom Tromey  <tromey@redhat.com>
 
+	* c-typeprint.c (c_type_print_base) <TYPE_CODE_STRUCT,
+	TYPE_CODE_UNION>: Unify, removing a goto.
+
+2012-09-21  Tom Tromey  <tromey@redhat.com>
+
 	* c-typeprint.c (cp_type_print_derivation_info): Fix comment.
 
 2012-09-21  Andrew Burgess  <aburgess@broadcom.com>

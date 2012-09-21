@@ -768,18 +768,14 @@ c_type_print_base (struct type *type, struct ui_file *stream,
       break;
 
     case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
       c_type_print_modifier (type, stream, 0, 1);
-      if (TYPE_DECLARED_CLASS (type))
+      if (TYPE_CODE (type) == TYPE_CODE_UNION)
+	fprintf_filtered (stream, "union ");
+      else if (TYPE_DECLARED_CLASS (type))
 	fprintf_filtered (stream, "class ");
       else
 	fprintf_filtered (stream, "struct ");
-      goto struct_union;
-
-    case TYPE_CODE_UNION:
-      c_type_print_modifier (type, stream, 0, 1);
-      fprintf_filtered (stream, "union ");
-
-    struct_union:
 
       /* Print the tag if it exists.  The HP aCC compiler emits a
          spurious "{unnamed struct}"/"{unnamed union}"/"{unnamed
