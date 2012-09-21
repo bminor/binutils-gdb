@@ -1,3 +1,8 @@
+2012-09-21  Andrew Burgess  <aburgess@broadcom.com>
+
+	* findvar.c (read_frame_register_value): Mark the result value as
+	optimized out if any of the input registers have been optimized out.
+
 2012-09-21  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* python/python.c (finalize_python): Only define if HAVE_PYTHON.

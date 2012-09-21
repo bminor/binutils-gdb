@@ -1,3 +1,8 @@
+2012-09-21  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.dwarf2/dw2-op-out-param.S: New file.
+	* gdb.dwarf2/dw2-op-out-param.exp: New file.
+
 2012-09-21  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi2-cli.exp: Remove redundant '\'.

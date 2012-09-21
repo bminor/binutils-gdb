@@ -677,7 +677,10 @@ default_value_from_register (struct type *type, int regnum,
 /* VALUE must be an lval_register value.  If regnum is the value's
    associated register number, and len the length of the values type,
    read one or more registers in FRAME, starting with register REGNUM,
-   until we've read LEN bytes.  */
+   until we've read LEN bytes.
+
+   If any of the registers we try to read are optimized out, then mark the
+   complete resulting value as optimized out.  */
 
 void
 read_frame_register_value (struct value *value, struct frame_info *frame)
@@ -702,6 +705,12 @@ read_frame_register_value (struct value *value, struct frame_info *frame)
     {
       struct value *regval = get_frame_register_value (frame, regnum);
       int reg_len = TYPE_LENGTH (value_type (regval)) - reg_offset;
+
+      if (value_optimized_out (regval))
+	{
+	  set_value_optimized_out (value, 1);
+	  break;
+	}
 
       /* If the register length is larger than the number of bytes
          remaining to copy, then only copy the appropriate bytes.  */
