@@ -60,6 +60,7 @@ static void mi_on_normal_stop (struct bpstats *bs, int print_frame);
 
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t, int silent);
+static void mi_record_changed (struct inferior*, int);
 static void mi_inferior_added (struct inferior *inf);
 static void mi_inferior_appeared (struct inferior *inf);
 static void mi_inferior_exit (struct inferior *inf);
@@ -124,6 +125,7 @@ mi_interpreter_init (struct interp *interp, int top_level)
       observer_attach_inferior_appeared (mi_inferior_appeared);
       observer_attach_inferior_exit (mi_inferior_exit);
       observer_attach_inferior_removed (mi_inferior_removed);
+      observer_attach_record_changed (mi_record_changed);
       observer_attach_normal_stop (mi_on_normal_stop);
       observer_attach_target_resumed (mi_on_resume);
       observer_attach_solib_loaded (mi_solib_loaded);
@@ -378,6 +380,19 @@ mi_thread_exit (struct thread_info *t, int silent)
   fprintf_unfiltered (mi->event_channel, 
 		      "thread-exited,id=\"%d\",group-id=\"i%d\"",
 		      t->num, inf->num);
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification on changing the state of record.  */
+
+static void
+mi_record_changed (struct inferior *inferior, int started)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  fprintf_unfiltered (mi->event_channel,  "record-%s,thread-group=\"i%d\"",
+		      started ? "started" : "stopped", inferior->num);
+
   gdb_flush (mi->event_channel);
 }
 

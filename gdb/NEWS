@@ -55,6 +55,8 @@ py [command]
      new async record "=traceframe-changed".
   ** The creation and deletion of trace state variables are now notified
      using new async records "=tsv-created" and "=tsv-deleted".
+  ** The start and stop of process record are now notified using new
+     async record "=record-started" and "=record-stopped".
 
 *** Changes in GDB 7.5
 

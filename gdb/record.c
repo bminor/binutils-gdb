@@ -33,6 +33,7 @@
 #include "event-loop.h"
 #include "inf-loop.h"
 #include "gdb_bfd.h"
+#include "observer.h"
 
 #include <signal.h>
 
@@ -1001,6 +1002,8 @@ record_open (char *name, int from_tty)
 				  NULL);
 
   record_init_record_breakpoints ();
+
+  observer_notify_record_changed (current_inferior (),  1);
 }
 
 /* "to_close" target method.  Close the process record target.  */
@@ -2260,6 +2263,8 @@ cmd_record_stop (char *args, int from_tty)
       unpush_target (&record_ops);
       printf_unfiltered (_("Process record is stopped and all execution "
                            "logs are deleted.\n"));
+
+      observer_notify_record_changed (current_inferior (), 0);
     }
   else
     printf_unfiltered (_("Process record is not started.\n"));

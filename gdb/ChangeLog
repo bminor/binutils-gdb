@@ -1,3 +1,12 @@
+2012-09-21  Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-interp.c: Declare mi_record_changed.
+	(mi_interpreter_init): Call observer_attach_record_changed.
+	(mi_record_changed): New.
+	* record.c (record_open): Call observer_notify_record_changed.
+	(cmd_record_stop): Call observer_notify_record_changed.
+	* NEWS: Mention it.
+
 2012-09-20  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Update.

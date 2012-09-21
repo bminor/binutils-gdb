@@ -113,6 +113,13 @@ at the entry-point instruction.  For @samp{attach} and @samp{core},
 inferior, and before any information on the inferior has been printed.
 @end deftypefun
 
+@deftypefun void record_changed (struct inferior *@var{inferior}, int @var{started})
+The status of process record for inferior @var{inferior} in
+@value{GDBN} has changed.  The process record is started if
+@var{started} is true, and the process record is stopped if
+@var{started} is false.
+@end deftypefun
+
 @deftypefun void solib_loaded (struct so_list *@var{solib})
 The shared library specified by @var{solib} has been loaded.  Note that
 when @value{GDBN} calls this observer, the library's symbols probably

@@ -27658,6 +27658,12 @@ breakpoint commands; @xref{GDB/MI Breakpoint Commands}.  The
 Note that if a breakpoint is emitted in the result record of a
 command, then it will not also be emitted in an async record.
 
+@item =record-started,thread-group="@var{id}"
+@itemx =record-stopped,thread-group="@var{id}"
+Execution log recording was either started or stopped on an
+inferior.  The @var{id} is the @value{GDBN} identifier of the thread
+group corresponding to the affected inferior.
+
 @item =cmd-param-changed,param=@var{param},value=@var{value}
 Reports that a parameter of the command @code{set @var{param}} is
 changed to @var{value}.  In the multi-word @code{set} command,

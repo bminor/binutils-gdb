@@ -1,3 +1,10 @@
+2012-09-21  Yao Qi  <yao@codesourcery.com>
+            Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Document notification
+	'record-started' and 'record-stopped'.
+	* observer.texi (GDB Observers): New observer 'record-changed'.
+
 2012-09-19  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* gdb.texinfo: Document the removal of SH's 'regs' command.
