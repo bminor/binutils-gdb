@@ -810,7 +810,6 @@ evaluate_subexp_standard (struct type *expect_type,
   struct type *type;
   int nargs;
   struct value **argvec;
-  int lower;
   int code;
   int ix;
   long mem_offset;
@@ -2370,8 +2369,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	    struct type *array_type = check_typedef (value_type (array));
 	    LONGEST index = subscript_array[i - 1];
 
-	    lower = f77_get_lowerbound (array_type);
-	    array = value_subscripted_rvalue (array, index, lower);
+	    array = value_subscripted_rvalue (array, index,
+					      f77_get_lowerbound (array_type));
 	  }
 
 	return array;

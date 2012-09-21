@@ -1,3 +1,8 @@
+2012-09-21  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* eval.c (evaluate_subexp_standard): Eliminate single-use
+	variable LOWER.
+
 2012-09-21  Yao Qi  <yao@codesourcery.com>
 
 	* mi/mi-interp.c: Declare mi_record_changed.
