@@ -131,12 +131,7 @@ c_print_typedef (struct type *type,
    }
 
    In general, gdb should try to print the types as closely as
-   possible to the form that they appear in the source code.
-
-   Note that in case of protected derivation gcc will not say
-   'protected' but 'private'.  The HP's aCC compiler emits specific
-   information for derivation via protected inheritance, so gdb can
-   print it out */
+   possible to the form that they appear in the source code.  */
 
 static void
 cp_type_print_derivation_info (struct ui_file *stream,

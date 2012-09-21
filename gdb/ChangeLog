@@ -1,3 +1,7 @@
+2012-09-21  Tom Tromey  <tromey@redhat.com>
+
+	* c-typeprint.c (cp_type_print_derivation_info): Fix comment.
+
 2012-09-21  Andrew Burgess  <aburgess@broadcom.com>
 
 	* findvar.c (read_frame_register_value): Mark the result value as
