@@ -446,13 +446,29 @@ demangler_special
 		;
 
 operator	:	OPERATOR NEW
-			{ $$ = make_operator ("new", 3); }
+			{
+			  /* Match the whitespacing of cplus_demangle_operators.
+			     It would abort on unrecognized string otherwise.  */
+			  $$ = make_operator ("new", 3);
+			}
 		|	OPERATOR DELETE
-			{ $$ = make_operator ("delete ", 1); }
+			{
+			  /* Match the whitespacing of cplus_demangle_operators.
+			     It would abort on unrecognized string otherwise.  */
+			  $$ = make_operator ("delete ", 1);
+			}
 		|	OPERATOR NEW '[' ']'
-			{ $$ = make_operator ("new[]", 3); }
+			{
+			  /* Match the whitespacing of cplus_demangle_operators.
+			     It would abort on unrecognized string otherwise.  */
+			  $$ = make_operator ("new[]", 3);
+			}
 		|	OPERATOR DELETE '[' ']'
-			{ $$ = make_operator ("delete[] ", 1); }
+			{
+			  /* Match the whitespacing of cplus_demangle_operators.
+			     It would abort on unrecognized string otherwise.  */
+			  $$ = make_operator ("delete[] ", 1);
+			}
 		|	OPERATOR '+'
 			{ $$ = make_operator ("+", 2); }
 		|	OPERATOR '-'
@@ -1183,7 +1199,11 @@ exp	:	FLOAT
 	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
-		{ $$ = d_unary ("sizeof", $3); }
+		{
+		  /* Match the whitespacing of cplus_demangle_operators.
+		     It would abort on unrecognized string otherwise.  */
+		  $$ = d_unary ("sizeof ", $3);
+		}
 	;
 
 /* C++.  */

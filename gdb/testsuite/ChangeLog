@@ -1,5 +1,12 @@
 2012-09-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix internal error on canonicalization of clang types.
+	* gdb.dwarf2/dw2-canonicalize-type.S: New file.
+	* gdb.dwarf2/dw2-canonicalize-type.exp: New file.
+	* lib/gdb.exp (gdb_file_cmd): Catch also GDB internal error.
+
+2012-09-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix disassemble without parameters in tailcall frame.
 	* gdb.arch/amd64-entry-value.exp (down, disassemble): New tests.
 

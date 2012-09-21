@@ -1,5 +1,12 @@
 2012-09-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix internal error on canonicalization of clang types.
+	* cp-name-parser.y (operator): New comment at make_operator call for
+	new, delete, new[] and delete[].
+	(exp): Use "sizeof ".  Add new comment at make_operator call.
+
+2012-09-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix disassemble without parameters in tailcall frame.
 	* cli/cli-cmds.c (disassemble_current_function): Use
 	get_frame_address_in_block.

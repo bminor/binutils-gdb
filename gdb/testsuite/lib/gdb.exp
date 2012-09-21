@@ -1277,6 +1277,11 @@ proc gdb_file_cmd { arg } {
             perror "($arg) No such file or directory"
 	    return -1
         }
+	-re "A problem internal to GDB has been detected" {
+	    fail "($arg) GDB internal error"
+	    gdb_internal_error_resync
+	    return -1
+	}
         -re "$gdb_prompt $" {
             perror "couldn't load $arg into $GDB."
 	    return -1
