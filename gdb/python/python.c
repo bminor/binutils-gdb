@@ -1266,6 +1266,8 @@ user_show_python (char *args, int from_tty)
 
 /* Initialize the Python code.  */
 
+#ifdef HAVE_PYTHON
+
 /* This is installed as a final cleanup and cleans up the
    interpreter.  This lets Python's 'atexit' work.  */
 
@@ -1283,6 +1285,7 @@ finalize_python (void *ignore)
 
   Py_Finalize ();
 }
+#endif
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_python;
