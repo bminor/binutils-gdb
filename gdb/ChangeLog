@@ -1,3 +1,8 @@
+2012-09-22  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (remote_get_trace_status): Remove setting default
+	values of fields of 'ts'.
+
 2012-09-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix internal error on canonicalization of clang types.
