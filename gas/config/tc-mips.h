@@ -137,8 +137,6 @@ extern int mips_fix_adjustable (struct fix *);
 #define EXTERN_FORCE_RELOC			\
   (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 
-/* When generating NEWABI code, we may need to have to keep combined
-   relocations which don't have symbols.  */
 #define TC_FORCE_RELOCATION(FIX) mips_force_relocation (FIX)
 extern int mips_force_relocation (struct fix *);
 

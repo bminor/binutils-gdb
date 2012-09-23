@@ -1,3 +1,19 @@
+2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.h (TC_FORCE_RELOCATION): Remove comment.
+	* config/tc-mips.c (calculate_reloc): New function.
+	(append_insn): Use it.  Do not resolve compound relocations here.
+	(mips16_macro_build, mips16_ip): Use calculate_reloc.
+	(mips16_immed_extend): New function, split out from...
+	(mips16_immed): ...here.
+	(mips_frob_file): Handle null symbols.
+	(mips_force_relocation): Remove NEWABI handling.
+	(read_reloc_insn, write_reloc_insn): New functions.
+	(md_apply_fix): Report TLS relocations against constants.
+	Use read_reloc_insn, calculate_reloc and write_reloc_insn.
+	Report relocations against constants that can't be resolved
+	at assembly time.
+
 2012-09-23  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (append_insn) <BFD_RELOC_MIPS_JMP>: Don't

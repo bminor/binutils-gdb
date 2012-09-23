@@ -4022,6 +4022,52 @@ micromips_map_reloc (bfd_reloc_code_real_type reloc)
   return reloc;
 }
 
+/* Try to resolve relocation RELOC against constant OPERAND at assembly time.
+   Return true on success, storing the resolved value in RESULT.  */
+
+static bfd_boolean
+calculate_reloc (bfd_reloc_code_real_type reloc, offsetT operand,
+		 offsetT *result)
+{
+  switch (reloc)
+    {
+    case BFD_RELOC_MIPS_HIGHEST:
+    case BFD_RELOC_MICROMIPS_HIGHEST:
+      *result = ((operand + 0x800080008000ull) >> 48) & 0xffff;
+      return TRUE;
+
+    case BFD_RELOC_MIPS_HIGHER:
+    case BFD_RELOC_MICROMIPS_HIGHER:
+      *result = ((operand + 0x80008000ull) >> 32) & 0xffff;
+      return TRUE;
+
+    case BFD_RELOC_HI16_S:
+    case BFD_RELOC_MICROMIPS_HI16_S:
+    case BFD_RELOC_MIPS16_HI16_S:
+      *result = ((operand + 0x8000) >> 16) & 0xffff;
+      return TRUE;
+
+    case BFD_RELOC_HI16:
+    case BFD_RELOC_MICROMIPS_HI16:
+    case BFD_RELOC_MIPS16_HI16:
+      *result = (operand >> 16) & 0xffff;
+      return TRUE;
+
+    case BFD_RELOC_LO16:
+    case BFD_RELOC_MICROMIPS_LO16:
+    case BFD_RELOC_MIPS16_LO16:
+      *result = operand & 0xffff;
+      return TRUE;
+
+    case BFD_RELOC_UNUSED:
+      *result = operand;
+      return TRUE;
+
+    default:
+      return FALSE;
+    }
+}
+
 /* Output an instruction.  IP is the instruction information.
    ADDRESS_EXPR is an operand of the instruction to be used with
    RELOC_TYPE.  EXPANSIONP is true if the instruction is part of
@@ -4057,43 +4103,13 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
   if (address_expr == NULL)
     ip->complete_p = 1;
-  else if (*reloc_type <= BFD_RELOC_UNUSED
+  else if (reloc_type[0] <= BFD_RELOC_UNUSED
+	   && reloc_type[1] == BFD_RELOC_UNUSED
+	   && reloc_type[2] == BFD_RELOC_UNUSED
 	   && address_expr->X_op == O_constant)
     {
-      unsigned int tmp;
-
-      ip->complete_p = 1;
       switch (*reloc_type)
 	{
-	case BFD_RELOC_32:
-	  ip->insn_opcode |= address_expr->X_add_number;
-	  break;
-
-	case BFD_RELOC_MIPS_HIGHEST:
-	  tmp = (address_expr->X_add_number + 0x800080008000ull) >> 48;
-	  ip->insn_opcode |= tmp & 0xffff;
-	  break;
-
-	case BFD_RELOC_MIPS_HIGHER:
-	  tmp = (address_expr->X_add_number + 0x80008000ull) >> 32;
-	  ip->insn_opcode |= tmp & 0xffff;
-	  break;
-
-	case BFD_RELOC_HI16_S:
-	  tmp = (address_expr->X_add_number + 0x8000) >> 16;
-	  ip->insn_opcode |= tmp & 0xffff;
-	  break;
-
-	case BFD_RELOC_HI16:
-	  ip->insn_opcode |= (address_expr->X_add_number >> 16) & 0xffff;
-	  break;
-
-	case BFD_RELOC_UNUSED:
-	case BFD_RELOC_LO16:
-	case BFD_RELOC_MIPS_GOT_DISP:
-	  ip->insn_opcode |= address_expr->X_add_number & 0xffff;
-	  break;
-
 	case BFD_RELOC_MIPS_JMP:
 	  {
 	    int shift;
@@ -4136,13 +4152,22 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		ip->insn_opcode |= ((address_expr->X_add_number >> shift)
 				    & 0xffff);
 	      }
-	    ip->complete_p = 0;
 	  }
 	  break;
 
 	default:
-	  internalError ();
-	}	
+	  {
+	    offsetT value;
+
+	    if (calculate_reloc (*reloc_type, address_expr->X_add_number,
+				 &value))
+	      {
+		ip->insn_opcode |= value & 0xffff;
+		ip->complete_p = 1;
+	      }
+	  }
+	  break;
+	}
     }
 
   if (mips_relax.sequence != 2 && !mips_opts.noreorder)
@@ -5227,14 +5252,15 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	case 'p':
 	case 'q':
 	  {
+	    offsetT value;
+
 	    gas_assert (ep != NULL);
 
 	    if (ep->X_op != O_constant)
 	      *r = (int) BFD_RELOC_UNUSED + c;
-	    else
+	    else if (calculate_reloc (*r, ep->X_add_number, &value))
 	      {
-		mips16_immed (NULL, 0, c, *r, ep->X_add_number,
-			      0, &insn.insn_opcode);
+		mips16_immed (NULL, 0, c, *r, value, 0, &insn.insn_opcode);
 		ep = NULL;
 		*r = BFD_RELOC_UNUSED;
 	      }
@@ -13376,40 +13402,17 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	    case '\0':
 	      if (*s == '\0')
 		{
+		  offsetT value;
+
 		  /* Stuff the immediate value in now, if we can.  */
 		  if (imm_expr.X_op == O_constant
 		      && *imm_reloc > BFD_RELOC_UNUSED
-		      && *imm_reloc != BFD_RELOC_MIPS16_GOT16
-		      && *imm_reloc != BFD_RELOC_MIPS16_CALL16
-		      && insn->pinfo != INSN_MACRO)
+		      && insn->pinfo != INSN_MACRO
+		      && calculate_reloc (*offset_reloc,
+					  imm_expr.X_add_number, &value))
 		    {
-		      valueT tmp;
-
-		      switch (*offset_reloc)
-			{
-			  case BFD_RELOC_MIPS16_HI16_S:
-			    tmp = (imm_expr.X_add_number + 0x8000) >> 16;
-			    break;
-
-			  case BFD_RELOC_MIPS16_HI16:
-			    tmp = imm_expr.X_add_number >> 16;
-			    break;
-
-			  case BFD_RELOC_MIPS16_LO16:
-			    tmp = ((imm_expr.X_add_number + 0x8000) & 0xffff)
-				  - 0x8000;
-			    break;
-
-			  case BFD_RELOC_UNUSED:
-			    tmp = imm_expr.X_add_number;
-			    break;
-
-			  default:
-			    internalError ();
-			}
-
 		      mips16_immed (NULL, 0, *imm_reloc - BFD_RELOC_UNUSED,
-				    *offset_reloc, tmp, forced_insn_length,
+				    *offset_reloc, value, forced_insn_length,
 				    &ip->insn_opcode);
 		      imm_expr.X_op = O_absent;
 		      *imm_reloc = BFD_RELOC_UNUSED;
@@ -13995,6 +13998,31 @@ static const struct mips16_immed_operand mips16_immed_operands[] =
 #define MIPS16_NUM_IMMED \
   (sizeof mips16_immed_operands / sizeof mips16_immed_operands[0])
 
+/* Marshal immediate value VAL for an extended MIPS16 instruction.
+   NBITS is the number of significant bits in VAL.  */
+
+static unsigned long
+mips16_immed_extend (offsetT val, unsigned int nbits)
+{
+  int extval;
+  if (nbits == 16)
+    {
+      extval = ((val >> 11) & 0x1f) | (val & 0x7e0);
+      val &= 0x1f;
+    }
+  else if (nbits == 15)
+    {
+      extval = ((val >> 11) & 0xf) | (val & 0x7f0);
+      val &= 0xf;
+    }
+  else
+    {
+      extval = ((val & 0x1f) << 6) | (val & 0x20);
+      val = 0;
+    }
+  return (extval << 16) | val;
+}
+
 /* Install immediate value VAL into MIPS16 instruction *INSN,
    extending it if necessary.  The instruction in *INSN may
    already be extended.
@@ -14078,7 +14106,6 @@ mips16_immed (char *file, unsigned int line, int type,
   else
     {
       long minext, maxext;
-      int extval;
 
       if (reloc == BFD_RELOC_UNUSED)
 	{
@@ -14097,23 +14124,7 @@ mips16_immed (char *file, unsigned int line, int type,
 			  _("operand value out of range for instruction"));
 	}
 
-      if (op->extbits == 16)
-	{
-	  extval = ((val >> 11) & 0x1f) | (val & 0x7e0);
-	  val &= 0x1f;
-	}
-      else if (op->extbits == 15)
-	{
-	  extval = ((val >> 11) & 0xf) | (val & 0x7f0);
-	  val &= 0xf;
-	}
-      else
-	{
-	  extval = ((val & 0x1f) << 6) | (val & 0x20);
-	  val = 0;
-	}
-
-      *insn |= (extval << 16) | val;
+      *insn |= mips16_immed_extend (val, op->extbits);
     }
 }
 
@@ -15357,9 +15368,11 @@ mips_frob_file (void)
       gas_assert (reloc_needs_lo_p (l->fixp->fx_r_type));
 
       /* If a GOT16 relocation turns out to be against a global symbol,
-	 there isn't supposed to be a matching LO.  */
+	 there isn't supposed to be a matching LO.  Ignore %gots against
+	 constants; we'll report an error for those later.  */
       if (got16_reloc_p (l->fixp->fx_r_type)
-	  && !pic_need_relax (l->fixp->fx_addsy, l->seg))
+	  && !(l->fixp->fx_addsy
+	       && pic_need_relax (l->fixp->fx_addsy, l->seg)))
 	continue;
 
       /* Check quickly whether the next fixup happens to be a matching %lo.  */
@@ -15417,9 +15430,6 @@ mips_frob_file (void)
     }
 }
 
-/* We may have combined relocations without symbols in the N32/N64 ABI.
-   We have to prevent gas from dropping them.  */
-
 int
 mips_force_relocation (fixS *fixp)
 {
@@ -15433,14 +15443,31 @@ mips_force_relocation (fixS *fixp)
       || fixp->fx_r_type == BFD_RELOC_MICROMIPS_16_PCREL_S1)
     return 1;
 
-  if (HAVE_NEWABI
-      && S_GET_SEGMENT (fixp->fx_addsy) == bfd_abs_section_ptr
-      && (fixp->fx_r_type == BFD_RELOC_MIPS_SUB
-	  || hi16_reloc_p (fixp->fx_r_type)
-	  || lo16_reloc_p (fixp->fx_r_type)))
-    return 1;
-
   return 0;
+}
+
+/* Read the instruction associated with RELOC from BUF.  */
+
+static unsigned int
+read_reloc_insn (char *buf, bfd_reloc_code_real_type reloc)
+{
+  if (mips16_reloc_p (reloc) || micromips_reloc_p (reloc))
+    return read_compressed_insn (buf, 4);
+  else
+    return read_insn (buf);
+}
+
+/* Write instruction INSN to BUF, given that it has been relocated
+   by RELOC.  */
+
+static void
+write_reloc_insn (char *buf, bfd_reloc_code_real_type reloc,
+		  unsigned long insn)
+{
+  if (mips16_reloc_p (reloc) || micromips_reloc_p (reloc))
+    write_compressed_insn (buf, insn, 4);
+  else
+    write_insn (buf, insn);
 }
 
 /* Apply a fixup to the object file.  */
@@ -15449,7 +15476,7 @@ void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf;
-  long insn;
+  unsigned long insn;
   reloc_howto_type *howto;
 
   /* We ignore generic BFD relocations we don't know about.  */
@@ -15515,6 +15542,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS16_TLS_GOTTPREL:
     case BFD_RELOC_MIPS16_TLS_TPREL_HI16:
     case BFD_RELOC_MIPS16_TLS_TPREL_LO16:
+      if (!fixP->fx_addsy)
+	{
+	  as_bad_where (fixP->fx_file, fixP->fx_line,
+			_("TLS relocation against a constant"));
+	  break;
+	}
       S_SET_THREAD_LOCAL (fixP->fx_addsy);
       /* fall through */
 
@@ -15536,6 +15569,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS_JALR:
     case BFD_RELOC_HI16:
     case BFD_RELOC_HI16_S:
+    case BFD_RELOC_LO16:
     case BFD_RELOC_GPREL16:
     case BFD_RELOC_MIPS_LITERAL:
     case BFD_RELOC_MIPS_CALL16:
@@ -15550,6 +15584,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS16_CALL16:
     case BFD_RELOC_MIPS16_HI16:
     case BFD_RELOC_MIPS16_HI16_S:
+    case BFD_RELOC_MIPS16_LO16:
     case BFD_RELOC_MIPS16_JMP:
     case BFD_RELOC_MICROMIPS_JMP:
     case BFD_RELOC_MICROMIPS_GOT_DISP:
@@ -15562,6 +15597,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MICROMIPS_JALR:
     case BFD_RELOC_MICROMIPS_HI16:
     case BFD_RELOC_MICROMIPS_HI16_S:
+    case BFD_RELOC_MICROMIPS_LO16:
     case BFD_RELOC_MICROMIPS_GPREL16:
     case BFD_RELOC_MICROMIPS_LITERAL:
     case BFD_RELOC_MICROMIPS_CALL16:
@@ -15570,7 +15606,23 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MICROMIPS_GOT_LO16:
     case BFD_RELOC_MICROMIPS_CALL_HI16:
     case BFD_RELOC_MICROMIPS_CALL_LO16:
-      /* Nothing needed to do.  The value comes from the reloc entry.  */
+      if (fixP->fx_done)
+	{
+	  offsetT value;
+
+	  if (calculate_reloc (fixP->fx_r_type, *valP, &value))
+	    {
+	      insn = read_reloc_insn (buf, fixP->fx_r_type);
+	      if (mips16_reloc_p (fixP->fx_r_type))
+		insn |= mips16_immed_extend (value, 16);
+	      else
+		insn |= (value & 0xffff);
+	      write_reloc_insn (buf, fixP->fx_r_type, insn);
+	    }
+	  else
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("Unsupported constant in relocation"));
+	}
       break;
 
     case BFD_RELOC_64:
@@ -15602,27 +15654,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	 resolved when it appears but is later defined.  */
       if (fixP->fx_done)
 	md_number_to_chars (buf, *valP, fixP->fx_size);
-      break;
-
-    case BFD_RELOC_LO16:
-    case BFD_RELOC_MIPS16_LO16:
-    case BFD_RELOC_MICROMIPS_LO16:
-      /* FIXME: Now that embedded-PIC is gone, some of this code/comment
-	 may be safe to remove, but if so it's not obvious.  */
-      /* When handling an embedded PIC switch statement, we can wind
-	 up deleting a LO16 reloc.  See the 'o' case in mips_ip.  */
-      if (fixP->fx_done)
-	{
-	  if (*valP + 0x8000 > 0xffff)
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("relocation overflow"));
-	  /* 32-bit microMIPS instructions are divided into two halfwords.
-	     Relocations always refer to the second halfword, regardless
-	     of endianness.  */
-	  if (target_big_endian || fixP->fx_r_type == BFD_RELOC_MICROMIPS_LO16)
-	    buf += 2;
-	  md_number_to_chars (buf, *valP, 2);
-	}
       break;
 
     case BFD_RELOC_16_PCREL_S2:

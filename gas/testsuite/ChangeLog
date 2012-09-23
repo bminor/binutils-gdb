@@ -1,5 +1,13 @@
 2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/elf-rel22.s, gas/mips/elf-rel22.d: Add more tests.
+	* gas/mips/elf-rel29.s, gas/mips/elf-rel29.d,
+	gas/mips/micromips@elf-rel29.d, gas/mips/elf-rel30.s,
+	gas/mips/elf-rel30.l: New tests.
+	* gas/mips/mips.exp: Run them.
+
+2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/dot-1.s, gas/mips/dot-1.d, gas/mips/micromips@dot-1.d,
 	gas/mips/mips16@dot-1.d: New test.
 	* gas/mips/mips.exp: Run it.
