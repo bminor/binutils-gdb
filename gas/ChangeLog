@@ -1,3 +1,9 @@
+2012-09-23  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (append_insn) <BFD_RELOC_MIPS_JMP>: Don't
+	mark as incomplete for constant expressions.
+	<BFD_RELOC_MIPS16_JMP>: Likewise.
+
 2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
 	    Maciej W. Rozycki  <macro@codesourcery.com>
 
