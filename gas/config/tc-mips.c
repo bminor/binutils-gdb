@@ -1574,6 +1574,11 @@ static bfd_reloc_code_real_type offset_reloc[3]
 
 static unsigned int forced_insn_length;
 
+/* True if we are assembling an instruction.  All dot symbols defined during
+   this time should be treated as code labels.  */
+
+static bfd_boolean mips_assembling_insn;
+
 #ifdef OBJ_ELF
 /* The pdr segment for per procedure frame/regmask info.  Not used for
    ECOFF debugging.  */
@@ -2592,6 +2597,9 @@ md_assemble (char *str)
   offset_reloc[1] = BFD_RELOC_UNUSED;
   offset_reloc[2] = BFD_RELOC_UNUSED;
 
+  mips_mark_labels ();
+  mips_assembling_insn = TRUE;
+
   if (mips_opts.mips16)
     mips16_ip (str, &insn);
   else
@@ -2602,12 +2610,8 @@ md_assemble (char *str)
     }
 
   if (insn_error)
-    {
-      as_bad ("%s `%s'", insn_error, str);
-      return;
-    }
-
-  if (insn.insn_mo->pinfo == INSN_MACRO)
+    as_bad ("%s `%s'", insn_error, str);
+  else if (insn.insn_mo->pinfo == INSN_MACRO)
     {
       macro_start ();
       if (mips_opts.mips16)
@@ -2625,6 +2629,8 @@ md_assemble (char *str)
       else
 	append_insn (&insn, NULL, unused_reloc, FALSE);
     }
+
+  mips_assembling_insn = FALSE;
 }
 
 /* Convenience functions for abstracting away the differences between
@@ -2832,7 +2838,7 @@ s_is_linkonce (symbolS *sym, segT from_seg)
   return linkonce;
 }
 
-/* Mark instruction labels in MIPS16/microMIPS mode.  This permits the
+/* Mark MIPS16 or microMIPS instruction label LABEL.  This permits the
    linker to handle them specially, such as generating jalx instructions
    when needed.  We also make them odd for the duration of the assembly,
    in order to generate the right sort of code.  We will make them even
@@ -2841,36 +2847,39 @@ s_is_linkonce (symbolS *sym, segT from_seg)
    to make them odd again.  */
 
 static void
-mips_compressed_mark_labels (void)
+mips_compressed_mark_label (symbolS *label)
 {
-  segment_info_type *si = seg_info (now_seg);
-  struct insn_label_list *l;
-
   gas_assert (HAVE_CODE_COMPRESSION);
 
-  for (l = si->label_list; l != NULL; l = l->next)
-   {
-      symbolS *label = l->label;
-
 #if defined(OBJ_ELF) || defined(OBJ_MAYBE_ELF)
-      if (IS_ELF)
-	{
-	  if (mips_opts.mips16)
-	    S_SET_OTHER (label, ELF_ST_SET_MIPS16 (S_GET_OTHER (label)));
-	  else
-	    S_SET_OTHER (label, ELF_ST_SET_MICROMIPS (S_GET_OTHER (label)));
-	}
-#endif
-      if ((S_GET_VALUE (label) & 1) == 0
-	/* Don't adjust the address if the label is global or weak, or
-	   in a link-once section, since we'll be emitting symbol reloc
-	   references to it which will be patched up by the linker, and
-	   the final value of the symbol may or may not be MIPS16/microMIPS.  */
-	  && ! S_IS_WEAK (label)
-	  && ! S_IS_EXTERNAL (label)
-	  && ! s_is_linkonce (label, now_seg))
-	S_SET_VALUE (label, S_GET_VALUE (label) | 1);
+  if (IS_ELF)
+    {
+      if (mips_opts.mips16)
+	S_SET_OTHER (label, ELF_ST_SET_MIPS16 (S_GET_OTHER (label)));
+      else
+	S_SET_OTHER (label, ELF_ST_SET_MICROMIPS (S_GET_OTHER (label)));
     }
+#endif
+  if ((S_GET_VALUE (label) & 1) == 0
+      /* Don't adjust the address if the label is global or weak, or
+	 in a link-once section, since we'll be emitting symbol reloc
+	 references to it which will be patched up by the linker, and
+	 the final value of the symbol may or may not be MIPS16/microMIPS.  */
+      && !S_IS_WEAK (label)
+      && !S_IS_EXTERNAL (label)
+      && !s_is_linkonce (label, now_seg))
+    S_SET_VALUE (label, S_GET_VALUE (label) | 1);
+}
+
+/* Mark preceding MIPS16 or microMIPS instruction labels.  */
+
+static void
+mips_compressed_mark_labels (void)
+{
+  struct insn_label_list *l;
+
+  for (l = seg_info (now_seg)->label_list; l != NULL; l = l->next)
+    mips_compressed_mark_label (l->label);
 }
 
 /* End the current frag.  Make it a variant frag and record the
@@ -4030,8 +4039,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 
   if (mips_fix_loongson2f && !HAVE_CODE_COMPRESSION)
     fix_loongson2f (ip);
-
-  mips_mark_labels ();
 
   file_ase_mips16 |= mips_opts.mips16;
   file_ase_micromips |= mips_opts.micromips;
@@ -18405,7 +18412,7 @@ mips_frob_file_after_relocs (void)
    move it.  This also bumps the value of the symbol by 1 in compressed
    code.  */
 
-void
+static void
 mips_record_label (symbolS *sym)
 {
   segment_info_type *si = seg_info (now_seg);
@@ -18434,6 +18441,17 @@ mips_define_label (symbolS *sym)
 #ifdef OBJ_ELF
   dwarf2_emit_label (sym);
 #endif
+}
+
+/* This function is called by tc_new_dot_label whenever a new dot symbol
+   is defined.  */
+
+void
+mips_add_dot_label (symbolS *sym)
+{
+  mips_record_label (sym);
+  if (mips_assembling_insn && HAVE_CODE_COMPRESSION)
+    mips_compressed_mark_label (sym);
 }
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)

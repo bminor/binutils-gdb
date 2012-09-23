@@ -478,7 +478,8 @@ if { [istarget mips*-*-vxworks*] } {
     if { $no_micromips } {
 	mips_arch_destroy micromips
     }
-    
+
+    run_dump_test_arches "dot-1"	[mips_arch_list_matching mips1]
     run_dump_test_arches "abs"		[mips_arch_list_matching mips1]
     run_dump_test_arches "add"		[mips_arch_list_matching mips1]
     run_dump_test_arches "and"		[mips_arch_list_matching mips1]
