@@ -18280,7 +18280,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	user_length = 0;
 
       mips16_immed (fragp->fr_file, fragp->fr_line, type,
-		    BFD_RELOC_NONE, val, user_length, &insn);
+		    BFD_RELOC_UNUSED, val, user_length, &insn);
 
       length = (ext ? 4 : 2);
       gas_assert (mips16_opcode_length (insn) == length);
