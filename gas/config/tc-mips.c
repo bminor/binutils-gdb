@@ -1176,6 +1176,9 @@ static int mips_relax_branch;
 #define RELAX_MICROMIPS_MARK_TOOFAR32(i) ((i) | 0x40000)
 #define RELAX_MICROMIPS_CLEAR_TOOFAR32(i) ((i) & ~0x40000)
 
+/* Sign-extend 16-bit value X.  */
+#define SEXT_16BIT(X) ((((X) + 0x8000) & 0xffff) - 0x8000)
+
 /* Is the given value a sign-extended 32-bit value?  */
 #define IS_SEXT_32BIT_NUM(x)						\
   (((x) &~ (offsetT) 0x7fffffff) == 0					\
@@ -1321,7 +1324,8 @@ static void mips16_macro (struct mips_cl_insn * ip);
 static void mips_ip (char *str, struct mips_cl_insn * ip);
 static void mips16_ip (char *str, struct mips_cl_insn * ip);
 static void mips16_immed
-  (char *, unsigned int, int, offsetT, unsigned int, unsigned long *);
+  (char *, unsigned int, int, bfd_reloc_code_real_type, offsetT,
+   unsigned int, unsigned long *);
 static size_t my_getSmallExpression
   (expressionS *, bfd_reloc_code_real_type *, char *);
 static void my_getExpression (expressionS *, char *);
@@ -5222,7 +5226,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	      *r = (int) BFD_RELOC_UNUSED + c;
 	    else
 	      {
-		mips16_immed (NULL, 0, c, ep->X_add_number,
+		mips16_immed (NULL, 0, c, *r, ep->X_add_number,
 			      0, &insn.insn_opcode);
 		ep = NULL;
 		*r = BFD_RELOC_UNUSED;
@@ -7277,7 +7281,7 @@ macro (struct mips_cl_insn *ip)
 	    {
 	      expr1.X_add_number = offset_expr.X_add_number;
 	      offset_expr.X_add_number =
-		((offset_expr.X_add_number + 0x8000) & 0xffff) - 0x8000;
+		SEXT_16BIT (offset_expr.X_add_number);
 	      load_got_offset (tempreg, &offset_expr);
 	      offset_expr.X_add_number = expr1.X_add_number;
 	      /* If we are going to add in a base register, and the
@@ -7505,8 +7509,7 @@ macro (struct mips_cl_insn *ip)
 
 	      used_at = 1;
 	    }
-	  offset_expr.X_add_number =
-	    ((expr1.X_add_number + 0x8000) & 0xffff) - 0x8000;
+	  offset_expr.X_add_number = SEXT_16BIT (expr1.X_add_number);
 	  relax_switch ();
 
 	  if (gpdelay)
@@ -13397,12 +13400,13 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 			  default:
 			    internalError ();
 			}
-		      *offset_reloc = BFD_RELOC_UNUSED;
 
 		      mips16_immed (NULL, 0, *imm_reloc - BFD_RELOC_UNUSED,
-				    tmp, forced_insn_length, &ip->insn_opcode);
+				    *offset_reloc, tmp, forced_insn_length,
+				    &ip->insn_opcode);
 		      imm_expr.X_op = O_absent;
 		      *imm_reloc = BFD_RELOC_UNUSED;
+		      *offset_reloc = BFD_RELOC_UNUSED;
 		    }
 
 		  return;
@@ -13988,11 +13992,16 @@ static const struct mips16_immed_operand mips16_immed_operands[] =
    extending it if necessary.  The instruction in *INSN may
    already be extended.
 
-   TYPE is the type of the immediate field.  USER_INSN_LENGTH is the
-   length that the user requested, or 0 if none.  */
+   RELOC is the relocation that produced VAL, or BFD_RELOC_UNUSED
+   if none.  In the former case, VAL is a 16-bit number with no
+   defined signedness.
+
+   TYPE is the type of the immediate field.  USER_INSN_LENGTH
+   is the length that the user requested, or 0 if none.  */
 
 static void
-mips16_immed (char *file, unsigned int line, int type, offsetT val,
+mips16_immed (char *file, unsigned int line, int type,
+	      bfd_reloc_code_real_type reloc, offsetT val,
 	      unsigned int user_insn_length, unsigned long *insn)
 {
   const struct mips16_immed_operand *op;
@@ -14017,11 +14026,15 @@ mips16_immed (char *file, unsigned int line, int type, offsetT val,
 	  mintiny = 0;
 	  maxtiny = (1 << op->nbits) - 1;
 	}
+      if (reloc != BFD_RELOC_UNUSED)
+	val &= 0xffff;
     }
   else
     {
       mintiny = - (1 << (op->nbits - 1));
       maxtiny = (1 << (op->nbits - 1)) - 1;
+      if (reloc != BFD_RELOC_UNUSED)
+	val = SEXT_16BIT (val);
     }
 
   /* Branch offsets have an implicit 0 in the lowest bit.  */
@@ -14060,19 +14073,22 @@ mips16_immed (char *file, unsigned int line, int type, offsetT val,
       long minext, maxext;
       int extval;
 
-      if (op->extu)
+      if (reloc == BFD_RELOC_UNUSED)
 	{
-	  minext = 0;
-	  maxext = (1 << op->extbits) - 1;
+	  if (op->extu)
+	    {
+	      minext = 0;
+	      maxext = (1 << op->extbits) - 1;
+	    }
+	  else
+	    {
+	      minext = - (1 << (op->extbits - 1));
+	      maxext = (1 << (op->extbits - 1)) - 1;
+	    }
+	  if (val < minext || val > maxext)
+	    as_bad_where (file, line,
+			  _("operand value out of range for instruction"));
 	}
-      else
-	{
-	  minext = - (1 << (op->extbits - 1));
-	  maxext = (1 << (op->extbits - 1)) - 1;
-	}
-      if (val < minext || val > maxext)
-	as_bad_where (file, line,
-		      _("operand value out of range for instruction"));
 
       if (op->extbits == 16)
 	{
@@ -18263,8 +18279,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       else
 	user_length = 0;
 
-      mips16_immed (fragp->fr_file, fragp->fr_line, type, val,
-		    user_length, &insn);
+      mips16_immed (fragp->fr_file, fragp->fr_line, type,
+		    BFD_RELOC_NONE, val, user_length, &insn);
 
       length = (ext ? 4 : 2);
       gas_assert (mips16_opcode_length (insn) == length);

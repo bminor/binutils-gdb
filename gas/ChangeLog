@@ -1,5 +1,15 @@
 2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (SEXT_16BIT): New macro.
+	(mips16_immed): Take the reloc type as a parameter.  Do not impose
+	a signed vs. unsigned distinction on the value when a relocation
+	operator was used.
+	(mips16_macro_build, mips16_ip, md_convert_frag): Pass the reloc
+	type to mips16_immed.
+	(macro): Use SEXT_16BIT.
+
+2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (read_insn, write_insn, read_compressed_insn):
 	New functions.
 	(install_insn, md_apply_fix, md_convert_frag, mips_handle_align):
