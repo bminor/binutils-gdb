@@ -145,15 +145,10 @@ struct mips_cl_insn
   /* The opcode's entry in mips_opcodes or mips16_opcodes.  */
   const struct mips_opcode *insn_mo;
 
-  /* True if this is a mips16 instruction and if we want the extended
-     form of INSN_MO.  */
-  bfd_boolean use_extend;
-
-  /* The 16-bit extension instruction to use when USE_EXTEND is true.  */
-  unsigned short extend;
-
   /* The 16-bit or 32-bit bitstring of the instruction itself.  This is
-     a copy of INSN_MO->match with the operands filled in.  */
+     a copy of INSN_MO->match with the operands filled in.  If we have
+     decided to use an extended MIPS16 instruction, this includes the
+     extension.  */
   unsigned long insn_opcode;
 
   /* The frag that contains the instruction.  */
@@ -1240,6 +1235,9 @@ static int mips_relax_branch;
   EXTRACT_BITS ((INSN).insn_opcode, \
 		MIPS16OP_MASK_##FIELD, \
 		MIPS16OP_SH_##FIELD)
+
+/* The MIPS16 EXTEND opcode, shifted left 16 places.  */
+#define MIPS16_EXTEND (0xf000U << 16)
 
 /* Whether or not we are emitting a branch-likely macro.  */
 static bfd_boolean emit_branch_likely_macro = FALSE;
@@ -1323,8 +1321,7 @@ static void mips16_macro (struct mips_cl_insn * ip);
 static void mips_ip (char *str, struct mips_cl_insn * ip);
 static void mips16_ip (char *str, struct mips_cl_insn * ip);
 static void mips16_immed
-  (char *, unsigned int, int, offsetT, bfd_boolean, bfd_boolean, bfd_boolean,
-   unsigned long *, bfd_boolean *, unsigned short *);
+  (char *, unsigned int, int, offsetT, unsigned int, unsigned long *);
 static size_t my_getSmallExpression
   (expressionS *, bfd_reloc_code_real_type *, char *);
 static void my_getExpression (expressionS *, char *);
@@ -1635,6 +1632,14 @@ micromips_insn_length (const struct mips_opcode *mo)
   return (mo->mask >> 16) == 0 ? 2 : 4;
 }
 
+/* Return the length of MIPS16 instruction OPCODE.  */
+
+static inline unsigned int
+mips16_opcode_length (unsigned long opcode)
+{
+  return (opcode >> 16) == 0 ? 2 : 4;
+}
+
 /* Return the length of instruction INSN.  */
 
 static inline unsigned int
@@ -1643,7 +1648,7 @@ insn_length (const struct mips_cl_insn *insn)
   if (mips_opts.micromips)
     return micromips_insn_length (insn->insn_mo);
   else if (mips_opts.mips16)
-    return insn->mips16_absolute_jump_p || insn->use_extend ? 4 : 2;
+    return mips16_opcode_length (insn->insn_opcode);
   else
     return 4;
 }
@@ -1656,8 +1661,6 @@ create_insn (struct mips_cl_insn *insn, const struct mips_opcode *mo)
   size_t i;
 
   insn->insn_mo = mo;
-  insn->use_extend = FALSE;
-  insn->extend = 0;
   insn->insn_opcode = mo->match;
   insn->frag = NULL;
   insn->where = 0;
@@ -1683,42 +1686,29 @@ mips_record_compressed_mode (void)
     si->tc_segment_info_data.micromips = mips_opts.micromips;
 }
 
+/* Write microMIPS or MIPS16 instruction INSN to BUF, given that the
+   instruction is LENGTH bytes long.  Return a pointer to the next byte.  */
+
+static char *
+write_compressed_insn (char *buf, unsigned int insn, unsigned int length)
+{
+  unsigned int i;
+
+  for (i = 0; i < length; i += 2)
+    md_number_to_chars (buf + i, insn >> ((length - i - 2) * 8), 2);
+  return buf + length;
+}
+
 /* Install INSN at the location specified by its "frag" and "where" fields.  */
 
 static void
 install_insn (const struct mips_cl_insn *insn)
 {
   char *f = insn->frag->fr_literal + insn->where;
-  if (!HAVE_CODE_COMPRESSION)
-    md_number_to_chars (f, insn->insn_opcode, 4);
-  else if (mips_opts.micromips)
-    {
-      unsigned int length = insn_length (insn);
-      if (length == 2)
-	md_number_to_chars (f, insn->insn_opcode, 2);
-      else if (length == 4)
-	{
-	  md_number_to_chars (f, insn->insn_opcode >> 16, 2);
-	  f += 2;
-	  md_number_to_chars (f, insn->insn_opcode & 0xffff, 2);
-	}
-      else
-	as_bad (_("48-bit microMIPS instructions are not supported"));
-    }
-  else if (insn->mips16_absolute_jump_p)
-    {
-      md_number_to_chars (f, insn->insn_opcode >> 16, 2);
-      md_number_to_chars (f + 2, insn->insn_opcode & 0xffff, 2);
-    }
+  if (HAVE_CODE_COMPRESSION)
+    write_compressed_insn (f, insn->insn_opcode, insn_length (insn));
   else
-    {
-      if (insn->use_extend)
-	{
-	  md_number_to_chars (f, 0xf000 | insn->extend, 2);
-	  f += 2;
-	}
-      md_number_to_chars (f, insn->insn_opcode, 2);
-    }
+    md_number_to_chars (f, insn->insn_opcode, 4);
   mips_record_compressed_mode ();
 }
 
@@ -4274,9 +4264,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 			 history[0].mips16_absolute_jump_p),
 			make_expr_symbol (address_expr), 0);
     }
-  else if (mips_opts.mips16
-	   && ! ip->use_extend
-	   && *reloc_type != BFD_RELOC_MIPS16_JMP)
+  else if (mips_opts.mips16 && insn_length (ip) == 2)
     {
       if (!delayed_branch_p (ip))
 	/* Make sure there is enough room to swap this instruction with
@@ -5191,9 +5179,8 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	      *r = (int) BFD_RELOC_UNUSED + c;
 	    else
 	      {
-		mips16_immed (NULL, 0, c, ep->X_add_number, FALSE, FALSE,
-			      FALSE, &insn.insn_opcode, &insn.use_extend,
-			      &insn.extend);
+		mips16_immed (NULL, 0, c, ep->X_add_number,
+			      0, &insn.insn_opcode);
 		ep = NULL;
 		*r = BFD_RELOC_UNUSED;
 	      }
@@ -13370,9 +13357,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		      *offset_reloc = BFD_RELOC_UNUSED;
 
 		      mips16_immed (NULL, 0, *imm_reloc - BFD_RELOC_UNUSED,
-				    tmp, TRUE, forced_insn_length == 2,
-				    forced_insn_length == 4, &ip->insn_opcode,
-				    &ip->use_extend, &ip->extend);
+				    tmp, forced_insn_length, &ip->insn_opcode);
 		      imm_expr.X_op = O_absent;
 		      *imm_reloc = BFD_RELOC_UNUSED;
 		    }
@@ -13552,8 +13537,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		  if (imm_expr.X_op != O_constant)
 		    {
 		      forced_insn_length = 4;
-		      ip->use_extend = TRUE;
-		      ip->extend = 0;
+		      ip->insn_opcode |= MIPS16_EXTEND;
 		    }
 		  else
 		    {
@@ -13707,7 +13691,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	    case 'm':		/* Register list for save insn.  */
 	    case 'M':		/* Register list for restore insn.  */
 	      {
-		int opcode = 0;
+		int opcode = ip->insn_opcode;
 		int framesz = 0, seen_framesz = 0;
 		int nargs = 0, statics = 0, sregs = 0;
 
@@ -13861,11 +13845,8 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 
 		/* Finally build the instruction.  */
 		if ((opcode >> 16) != 0 || framesz == 0)
-		  {
-		    ip->use_extend = TRUE;
-		    ip->extend = opcode >> 16;
-		  }
-		ip->insn_opcode |= opcode & 0x7f;
+		  opcode |= MIPS16_EXTEND;
+		ip->insn_opcode = opcode;
 	      }
 	    continue;
 
@@ -13960,23 +13941,19 @@ static const struct mips16_immed_operand mips16_immed_operands[] =
 #define MIPS16_NUM_IMMED \
   (sizeof mips16_immed_operands / sizeof mips16_immed_operands[0])
 
-/* Handle a mips16 instruction with an immediate value.  This or's the
-   small immediate value into *INSN.  It sets *USE_EXTEND to indicate
-   whether an extended value is needed; if one is needed, it sets
-   *EXTEND to the value.  The argument type is TYPE.  The value is VAL.
-   If SMALL is true, an unextended opcode was explicitly requested.
-   If EXT is true, an extended opcode was explicitly requested.  If
-   WARN is true, warn if EXT does not match reality.  */
+/* Install immediate value VAL into MIPS16 instruction *INSN,
+   extending it if necessary.  The instruction in *INSN may
+   already be extended.
+
+   TYPE is the type of the immediate field.  USER_INSN_LENGTH is the
+   length that the user requested, or 0 if none.  */
 
 static void
 mips16_immed (char *file, unsigned int line, int type, offsetT val,
-	      bfd_boolean warn, bfd_boolean small, bfd_boolean ext,
-	      unsigned long *insn, bfd_boolean *use_extend,
-	      unsigned short *extend)
+	      unsigned int user_insn_length, unsigned long *insn)
 {
   const struct mips16_immed_operand *op;
   int mintiny, maxtiny;
-  bfd_boolean needext;
 
   op = mips16_immed_operands;
   while (op->type != type)
@@ -14011,21 +13988,26 @@ mips16_immed (char *file, unsigned int line, int type, offsetT val,
   if ((val & ((1 << op->shift) - 1)) != 0
       || val < (mintiny << op->shift)
       || val > (maxtiny << op->shift))
-    needext = TRUE;
-  else
-    needext = FALSE;
+    {
+      /* We need an extended instruction.  */
+      if (user_insn_length == 2)
+	as_bad_where (file, line, _("invalid unextended operand value"));
+      else
+	*insn |= MIPS16_EXTEND;
+    }
+  else if (user_insn_length == 4)
+    {
+      /* The operand doesn't force an unextended instruction to be extended.
+	 Warn if the user wanted an extended instruction anyway.  */
+      *insn |= MIPS16_EXTEND;
+      as_warn_where (file, line,
+		     _("extended operand requested but not required"));
+    }
 
-  if (warn && ext && ! needext)
-    as_warn_where (file, line,
-		   _("extended operand requested but not required"));
-  if (small && needext)
-    as_bad_where (file, line, _("invalid unextended operand value"));
-
-  if (small || (! ext && ! needext))
+  if (mips16_opcode_length (*insn) == 2)
     {
       int insnval;
 
-      *use_extend = FALSE;
       insnval = ((val >> op->shift) & ((1 << op->nbits) - 1));
       insnval <<= op->op_shift;
       *insn |= insnval;
@@ -14049,7 +14031,6 @@ mips16_immed (char *file, unsigned int line, int type, offsetT val,
 	as_bad_where (file, line,
 		      _("operand value out of range for instruction"));
 
-      *use_extend = TRUE;
       if (op->extbits == 16)
 	{
 	  extval = ((val >> 11) & 0x1f) | (val & 0x7e0);
@@ -14066,8 +14047,7 @@ mips16_immed (char *file, unsigned int line, int type, offsetT val,
 	  val = 0;
 	}
 
-      *extend = (unsigned short) extval;
-      *insn |= val;
+      *insn |= (extval << 16) | val;
     }
 }
 
@@ -18250,29 +18230,18 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
     {
       int type;
       const struct mips16_immed_operand *op;
-      bfd_boolean small, ext;
       offsetT val;
-      bfd_byte *buf;
+      char *buf;
+      unsigned int user_length, length;
       unsigned long insn;
-      bfd_boolean use_extend;
-      unsigned short extend;
+      bfd_boolean ext;
 
       type = RELAX_MIPS16_TYPE (fragp->fr_subtype);
       op = mips16_immed_operands;
       while (op->type != type)
 	++op;
 
-      if (RELAX_MIPS16_EXTENDED (fragp->fr_subtype))
-	{
-	  small = FALSE;
-	  ext = TRUE;
-	}
-      else
-	{
-	  small = TRUE;
-	  ext = FALSE;
-	}
-
+      ext = RELAX_MIPS16_EXTENDED (fragp->fr_subtype);
       val = resolve_symbol_value (fragp->fr_symbol);
       if (op->pcrel)
 	{
@@ -18312,27 +18281,30 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	as_warn_where (fragp->fr_file, fragp->fr_line,
 		       _("extended instruction in delay slot"));
 
-      buf = (bfd_byte *) (fragp->fr_literal + fragp->fr_fix);
+      buf = fragp->fr_literal + fragp->fr_fix;
 
       if (target_big_endian)
-	insn = bfd_getb16 (buf);
+	insn = bfd_getb16 ((bfd_byte *) buf);
       else
-	insn = bfd_getl16 (buf);
+	insn = bfd_getl16 ((bfd_byte *) buf);
+
+      if (ext)
+	insn |= MIPS16_EXTEND;
+
+      if (RELAX_MIPS16_USER_EXT (fragp->fr_subtype))
+	user_length = 4;
+      else if (RELAX_MIPS16_USER_SMALL (fragp->fr_subtype))
+	user_length = 2;
+      else
+	user_length = 0;
 
       mips16_immed (fragp->fr_file, fragp->fr_line, type, val,
-		    RELAX_MIPS16_USER_EXT (fragp->fr_subtype),
-		    small, ext, &insn, &use_extend, &extend);
+		    user_length, &insn);
 
-      if (use_extend)
-	{
-	  md_number_to_chars ((char *) buf, 0xf000 | extend, 2);
-	  fragp->fr_fix += 2;
-	  buf += 2;
-	}
-
-      md_number_to_chars ((char *) buf, insn, 2);
-      fragp->fr_fix += 2;
-      buf += 2;
+      length = (ext ? 4 : 2);
+      gas_assert (mips16_opcode_length (insn) == length);
+      write_compressed_insn (buf, insn, length);
+      fragp->fr_fix += length;
     }
   else
     {

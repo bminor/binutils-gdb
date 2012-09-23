@@ -1,3 +1,24 @@
+2012-09-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (mips_cl_insn): Remove use_extend and extend.
+	(MIPS16_EXTEND): New macro.
+	(mips16_opcode_length): New function.
+	(insn_length): Use it.
+	(create_insn): Update after mips_cl_insn change.
+	(write_compressed_insn): New function.
+	(install_insn): Use it.
+	(append_insn): Use insn_length to check for unextended MIPS16
+	instructions.
+	(mips16_macro_build): Update call to mips16_immed.
+	(mips16_ip): Likewise.  Use MIPS16_EXTEND to force an extended
+	instruction.
+	(mips16_immed): Remove use_extend and extend; install EXTEND
+	opcodes in the upper 16 bits of *INSN instead.  Keep the
+	instruction extended if it already is.  Replace warn, small
+	and ext with a forced_insn_length-like parameter.
+	(md_convert_frag): Update call mips16_immed.
+	Use write_compressed_insn.
+
 2012-09-20  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .cx16.
