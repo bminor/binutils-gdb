@@ -1686,6 +1686,49 @@ mips_record_compressed_mode (void)
     si->tc_segment_info_data.micromips = mips_opts.micromips;
 }
 
+/* Read a standard MIPS instruction from BUF.  */
+
+static unsigned long
+read_insn (char *buf)
+{
+  if (target_big_endian)
+    return bfd_getb32 ((bfd_byte *) buf);
+  else
+    return bfd_getl32 ((bfd_byte *) buf);
+}
+
+/* Write standard MIPS instruction INSN to BUF.  Return a pointer to
+   the next byte.  */
+
+static char *
+write_insn (char *buf, unsigned int insn)
+{
+  md_number_to_chars (buf, insn, 4);
+  return buf + 4;
+}
+
+/* Read a microMIPS or MIPS16 opcode from BUF, given that it
+   has length LENGTH.  */
+
+static unsigned long
+read_compressed_insn (char *buf, unsigned int length)
+{
+  unsigned long insn;
+  unsigned int i;
+
+  insn = 0;
+  for (i = 0; i < length; i += 2)
+    {
+      insn <<= 16;
+      if (target_big_endian)
+	insn |= bfd_getb16 ((char *) buf);
+      else
+	insn |= bfd_getl16 ((char *) buf);
+      buf += 2;
+    }
+  return insn;
+}
+
 /* Write microMIPS or MIPS16 instruction INSN to BUF, given that the
    instruction is LENGTH bytes long.  Return a pointer to the next byte.  */
 
@@ -1708,7 +1751,7 @@ install_insn (const struct mips_cl_insn *insn)
   if (HAVE_CODE_COMPRESSION)
     write_compressed_insn (f, insn->insn_opcode, insn_length (insn));
   else
-    md_number_to_chars (f, insn->insn_opcode, 4);
+    write_insn (f, insn->insn_opcode);
   mips_record_compressed_mode ();
 }
 
@@ -15382,7 +15425,7 @@ mips_force_relocation (fixS *fixp)
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
-  bfd_byte *buf;
+  char *buf;
   long insn;
   reloc_howto_type *howto;
 
@@ -15402,7 +15445,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
 	      || fixP->fx_r_type == BFD_RELOC_MIPS_TLS_DTPREL64);
 
-  buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
+  buf = fixP->fx_frag->fr_literal + fixP->fx_where;
 
   gas_assert (!fixP->fx_pcrel || fixP->fx_r_type == BFD_RELOC_16_PCREL_S2
 	      || fixP->fx_r_type == BFD_RELOC_MICROMIPS_7_PCREL_S1
@@ -15513,7 +15556,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       if (fixP->fx_done)
 	{
 	  if (8 <= sizeof (valueT))
-	    md_number_to_chars ((char *) buf, *valP, 8);
+	    md_number_to_chars (buf, *valP, 8);
 	  else
 	    {
 	      valueT hiv;
@@ -15522,10 +15565,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 		hiv = 0xffffffff;
 	      else
 		hiv = 0;
-	      md_number_to_chars ((char *)(buf + (target_big_endian ? 4 : 0)),
-				  *valP, 4);
-	      md_number_to_chars ((char *)(buf + (target_big_endian ? 0 : 4)),
-				  hiv, 4);
+	      md_number_to_chars (buf + (target_big_endian ? 4 : 0), *valP, 4);
+	      md_number_to_chars (buf + (target_big_endian ? 0 : 4), hiv, 4);
 	    }
 	}
       break;
@@ -15537,7 +15578,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	 value now.  This can happen if we have a .word which is not
 	 resolved when it appears but is later defined.  */
       if (fixP->fx_done)
-	md_number_to_chars ((char *) buf, *valP, fixP->fx_size);
+	md_number_to_chars (buf, *valP, fixP->fx_size);
       break;
 
     case BFD_RELOC_LO16:
@@ -15557,7 +15598,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	     of endianness.  */
 	  if (target_big_endian || fixP->fx_r_type == BFD_RELOC_MICROMIPS_LO16)
 	    buf += 2;
-	  md_number_to_chars ((char *) buf, *valP, 2);
+	  md_number_to_chars (buf, *valP, 2);
 	}
       break;
 
@@ -15573,15 +15614,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	break;
 
       /* Update old instruction data.  */
-      if (target_big_endian)
-	insn = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
-      else
-	insn = (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
+      insn = read_insn (buf);
 
       if (*valP + 0x20000 <= 0x3ffff)
 	{
 	  insn |= (*valP >> 2) & 0xffff;
-	  md_number_to_chars ((char *) buf, insn, 4);
+	  write_insn (buf, insn);
 	}
       else if (mips_pic == NO_PIC
 	       && fixP->fx_done
@@ -15603,7 +15641,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  fixP->fx_done = 0;
 	  fixP->fx_addsy = section_symbol (text_section);
 	  *valP += md_pcrel_from (fixP);
-	  md_number_to_chars ((char *) buf, insn, 4);
+	  write_insn (buf, insn);
 	}
       else
 	{
@@ -17750,17 +17788,13 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 {
   if (RELAX_BRANCH_P (fragp->fr_subtype))
     {
-      bfd_byte *buf;
+      char *buf;
       unsigned long insn;
       expressionS exp;
       fixS *fixp;
 
-      buf = (bfd_byte *)fragp->fr_literal + fragp->fr_fix;
-
-      if (target_big_endian)
-	insn = bfd_getb32 (buf);
-      else
-	insn = bfd_getl32 (buf);
+      buf = fragp->fr_literal + fragp->fr_fix;
+      insn = read_insn (buf);
 
       if (!RELAX_BRANCH_TOOFAR (fragp->fr_subtype))
 	{
@@ -17771,13 +17805,12 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  exp.X_add_symbol = fragp->fr_symbol;
 	  exp.X_add_number = fragp->fr_offset;
 
-	  fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-			      4, &exp, TRUE, BFD_RELOC_16_PCREL_S2);
+	  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp, TRUE,
+			      BFD_RELOC_16_PCREL_S2);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
-	  md_number_to_chars ((char *) buf, insn, 4);
-	  buf += 4;
+	  buf = write_insn (buf, insn);
 	}
       else
 	{
@@ -17838,7 +17871,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  else
 	    {
 	      /* How many bytes in instructions we've already emitted?  */
-	      i = buf - (bfd_byte *)fragp->fr_literal - fragp->fr_fix;
+	      i = buf - fragp->fr_literal - fragp->fr_fix;
 	      /* How many bytes in instructions from here to the end?  */
 	      i = fragp->fr_var - i;
 	    }
@@ -17848,12 +17881,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  i--;
 	  insn |= i;
 	  /* Branch over the jump.  */
-	  md_number_to_chars ((char *) buf, insn, 4);
-	  buf += 4;
+	  buf = write_insn (buf, insn);
 
 	  /* nop */
-	  md_number_to_chars ((char *) buf, 0, 4);
-	  buf += 4;
+	  buf = write_insn (buf, 0);
 
 	  if (RELAX_BRANCH_LIKELY (fragp->fr_subtype))
 	    {
@@ -17862,20 +17893,17 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      /* Compute the PC offset from the current instruction to
 		 the end of the variable frag.  */
 	      /* How many bytes in instructions we've already emitted?  */
-	      i = buf - (bfd_byte *)fragp->fr_literal - fragp->fr_fix;
+	      i = buf - fragp->fr_literal - fragp->fr_fix;
 	      /* How many bytes in instructions from here to the end?  */
 	      i = fragp->fr_var - i;
 	      /* Convert to instruction count.  */
 	      i >>= 2;
 	      /* Don't decrement i, because we want to branch over the
 		 delay slot.  */
-
 	      insn |= i;
-	      md_number_to_chars ((char *) buf, insn, 4);
-	      buf += 4;
 
-	      md_number_to_chars ((char *) buf, 0, 4);
-	      buf += 4;
+	      buf = write_insn (buf, insn);
+	      buf = write_insn (buf, 0);
 	    }
 
 	uncond:
@@ -17888,13 +17916,12 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      exp.X_add_symbol = fragp->fr_symbol;
 	      exp.X_add_number = fragp->fr_offset;
 
-	      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-				  4, &exp, FALSE, BFD_RELOC_MIPS_JMP);
+	      fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp,
+				  FALSE, BFD_RELOC_MIPS_JMP);
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
-	      md_number_to_chars ((char *) buf, insn, 4);
-	      buf += 4;
+	      buf = write_insn (buf, insn);
 	    }
 	  else
 	    {
@@ -17913,32 +17940,27 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 		  exp.X_add_number = 0;
 		}
 
-	      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-				  4, &exp, FALSE, BFD_RELOC_MIPS_GOT16);
+	      fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp,
+				  FALSE, BFD_RELOC_MIPS_GOT16);
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
-	      md_number_to_chars ((char *) buf, insn, 4);
-	      buf += 4;
+	      buf = write_insn (buf, insn);
 
 	      if (mips_opts.isa == ISA_MIPS1)
-		{
-		  /* nop */
-		  md_number_to_chars ((char *) buf, 0, 4);
-		  buf += 4;
-		}
+		/* nop */
+		buf = write_insn (buf, 0);
 
 	      /* d/addiu $at, $at, <sym>  R_MIPS_LO16 */
 	      insn = HAVE_64BIT_ADDRESSES ? 0x64000000 : 0x24000000;
 	      insn |= at << OP_SH_RS | at << OP_SH_RT;
 
-	      fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
-				  4, &exp, FALSE, BFD_RELOC_LO16);
+	      fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp,
+				  FALSE, BFD_RELOC_LO16);
 	      fixp->fx_file = fragp->fr_file;
 	      fixp->fx_line = fragp->fr_line;
 
-	      md_number_to_chars ((char *) buf, insn, 4);
-	      buf += 4;
+	      buf = write_insn (buf, insn);
 
 	      /* j(al)r $at.  */
 	      if (RELAX_BRANCH_LINK (fragp->fr_subtype))
@@ -17947,23 +17969,19 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 		insn = 0x00000008;
 	      insn |= at << OP_SH_RS;
 
-	      md_number_to_chars ((char *) buf, insn, 4);
-	      buf += 4;
+	      buf = write_insn (buf, insn);
 	    }
 	}
 
-      gas_assert (buf == (bfd_byte *)fragp->fr_literal
-	      + fragp->fr_fix + fragp->fr_var);
-
       fragp->fr_fix += fragp->fr_var;
-
+      gas_assert (buf == fragp->fr_literal + fragp->fr_fix);
       return;
     }
 
   /* Relax microMIPS branches.  */
   if (RELAX_MICROMIPS_P (fragp->fr_subtype))
     {
-      bfd_byte *buf = (bfd_byte *) (fragp->fr_literal + fragp->fr_fix);
+      char *buf = fragp->fr_literal + fragp->fr_fix;
       bfd_boolean compact = RELAX_MICROMIPS_COMPACT (fragp->fr_subtype);
       bfd_boolean al = RELAX_MICROMIPS_LINK (fragp->fr_subtype);
       int type = RELAX_MICROMIPS_TYPE (fragp->fr_subtype);
@@ -17985,14 +18003,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	     because if there is linker relaxation, we're going to
 	     need the relocations.  */
 	  if (type == 'D')
-	    fixp = fix_new_exp (fragp,
-				buf - (bfd_byte *) fragp->fr_literal,
-				2, &exp, TRUE,
+	    fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 2, &exp, TRUE,
 				BFD_RELOC_MICROMIPS_10_PCREL_S1);
 	  else if (type == 'E')
-	    fixp = fix_new_exp (fragp,
-				buf - (bfd_byte *) fragp->fr_literal,
-				2, &exp, TRUE,
+	    fixp = fix_new_exp (fragp, buf - fragp->fr_literal,	2, &exp, TRUE,
 				BFD_RELOC_MICROMIPS_7_PCREL_S1);
 	  else
 	    abort ();
@@ -18014,8 +18028,8 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  /* We generate a fixup instead of applying it right now,
 	     because if there is linker relaxation, we're going to
 	     need the relocations.  */
-	  fixp = fix_new_exp (fragp, buf - (bfd_byte *) fragp->fr_literal,
-			      4, &exp, TRUE, BFD_RELOC_MICROMIPS_16_PCREL_S1);
+	  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp, TRUE,
+			      BFD_RELOC_MICROMIPS_16_PCREL_S1);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
@@ -18026,10 +18040,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       /* Relax 16-bit branches to 32-bit branches.  */
       if (type != 0)
 	{
-	  if (target_big_endian)
-	    insn = bfd_getb16 (buf);
-	  else
-	    insn = bfd_getl16 (buf);
+	  insn = read_compressed_insn (buf, 2);
 
 	  if ((insn & 0xfc00) == 0xcc00)		/* b16  */
 	    insn = 0x94000000;				/* beq  */
@@ -18049,32 +18060,13 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  if (!RELAX_MICROMIPS_RELAX32 (fragp->fr_subtype)
 	      || !RELAX_MICROMIPS_TOOFAR32 (fragp->fr_subtype))
 	    {
-	      md_number_to_chars ((char *) buf, insn >> 16, 2);
-	      buf += 2;
-	      md_number_to_chars ((char *) buf, insn & 0xffff, 2);
-	      buf += 2;
-
-	      gas_assert (buf == ((bfd_byte *) fragp->fr_literal
-				  + fragp->fr_fix));
+	      buf = write_compressed_insn (buf, insn, 4);
+	      gas_assert (buf == fragp->fr_literal + fragp->fr_fix);
 	      return;
 	    }
 	}
       else
-	{
-	  unsigned long next;
-
-	  if (target_big_endian)
-	    {
-	      insn = bfd_getb16 (buf);
-	      next = bfd_getb16 (buf + 2);
-	    }
-	  else
-	    {
-	      insn = bfd_getl16 (buf);
-	      next = bfd_getl16 (buf + 2);
-	    }
-	  insn = (insn << 16) | next;
-	}
+	insn = read_compressed_insn (buf, 4);
 
       /* Relax 32-bit branches to a sequence of instructions.  */
       as_warn_where (fragp->fr_file, fragp->fr_line,
@@ -18129,24 +18121,16 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 #endif
 
 	  /* Refer to it.  */
-	  fixp = fix_new (fragp, buf - (bfd_byte *) fragp->fr_literal,
-			  4, l, 0, TRUE, BFD_RELOC_MICROMIPS_16_PCREL_S1);
+	  fixp = fix_new (fragp, buf - fragp->fr_literal, 4, l, 0, TRUE,
+			  BFD_RELOC_MICROMIPS_16_PCREL_S1);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
 	  /* Branch over the jump.  */
-	  md_number_to_chars ((char *) buf, insn >> 16, 2);
-	  buf += 2;
-	  md_number_to_chars ((char *) buf, insn & 0xffff, 2);
-	  buf += 2;
-
+	  buf = write_compressed_insn (buf, insn, 4);
 	  if (!compact)
-	    {
-	      /* nop  */
-	      insn = 0x0c00;
-	      md_number_to_chars ((char *) buf, insn, 2);
-	      buf += 2;
-	    }
+	    /* nop */
+	    buf = write_compressed_insn (buf, 0x0c00, 2);
 	}
 
       if (mips_pic == NO_PIC)
@@ -18156,23 +18140,15 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  /* j/jal/jals <sym>  R_MICROMIPS_26_S1  */
 	  insn = al ? jal : 0xd4000000;
 
-	  fixp = fix_new_exp (fragp, buf - (bfd_byte *) fragp->fr_literal,
-			      4, &exp, FALSE, BFD_RELOC_MICROMIPS_JMP);
+	  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp, FALSE,
+			      BFD_RELOC_MICROMIPS_JMP);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
-	  md_number_to_chars ((char *) buf, insn >> 16, 2);
-	  buf += 2;
-	  md_number_to_chars ((char *) buf, insn & 0xffff, 2);
-	  buf += 2;
-
+	  buf = write_compressed_insn (buf, insn, 4);
 	  if (compact)
-	    {
-	      /* nop  */
-	      insn = 0x0c00;
-	      md_number_to_chars ((char *) buf, insn, 2);
-	      buf += 2;
-	    }
+	    /* nop */
+	    buf = write_compressed_insn (buf, 0x0c00, 2);
 	}
       else
 	{
@@ -18190,39 +18166,32 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      exp.X_add_number = 0;
 	    }
 
-	  fixp = fix_new_exp (fragp, buf - (bfd_byte *) fragp->fr_literal,
-			      4, &exp, FALSE, BFD_RELOC_MICROMIPS_GOT16);
+	  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp, FALSE,
+			      BFD_RELOC_MICROMIPS_GOT16);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
-	  md_number_to_chars ((char *) buf, insn >> 16, 2);
-	  buf += 2;
-	  md_number_to_chars ((char *) buf, insn & 0xffff, 2);
-	  buf += 2;
+	  buf = write_compressed_insn (buf, insn, 4);
 
 	  /* d/addiu $at, $at, <sym>  R_MICROMIPS_LO16  */
 	  insn = HAVE_64BIT_ADDRESSES ? 0x5c000000 : 0x30000000;
 	  insn |= at << MICROMIPSOP_SH_RT | at << MICROMIPSOP_SH_RS;
 
-	  fixp = fix_new_exp (fragp, buf - (bfd_byte *) fragp->fr_literal,
-			      4, &exp, FALSE, BFD_RELOC_MICROMIPS_LO16);
+	  fixp = fix_new_exp (fragp, buf - fragp->fr_literal, 4, &exp, FALSE,
+			      BFD_RELOC_MICROMIPS_LO16);
 	  fixp->fx_file = fragp->fr_file;
 	  fixp->fx_line = fragp->fr_line;
 
-	  md_number_to_chars ((char *) buf, insn >> 16, 2);
-	  buf += 2;
-	  md_number_to_chars ((char *) buf, insn & 0xffff, 2);
-	  buf += 2;
+	  buf = write_compressed_insn (buf, insn, 4);
 
 	  /* jr/jrc/jalr/jalrs $at  */
 	  insn = al ? jalr : jr;
 	  insn |= at << MICROMIPSOP_SH_MJ;
 
-	  md_number_to_chars ((char *) buf, insn & 0xffff, 2);
-	  buf += 2;
+	  buf = write_compressed_insn (buf, insn, 2);
 	}
 
-      gas_assert (buf == (bfd_byte *) fragp->fr_literal + fragp->fr_fix);
+      gas_assert (buf == fragp->fr_literal + fragp->fr_fix);
       return;
     }
 
@@ -18283,11 +18252,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 
       buf = fragp->fr_literal + fragp->fr_fix;
 
-      if (target_big_endian)
-	insn = bfd_getb16 ((bfd_byte *) buf);
-      else
-	insn = bfd_getl16 ((bfd_byte *) buf);
-
+      insn = read_compressed_insn (buf, 2);
       if (ext)
 	insn |= MIPS16_EXTEND;
 
@@ -18637,8 +18602,7 @@ mips_handle_align (fragS *fragp)
     case 2:
       if (nop_opcode == NOP_OPCODE_MICROMIPS)
 	{
-	  md_number_to_chars (p, micromips_nop16_insn.insn_opcode, 2);
-	  p += 2;
+	  p = write_compressed_insn (p, micromips_nop16_insn.insn_opcode, 2);
 	  break;
 	}
       *p++ = '\0';
