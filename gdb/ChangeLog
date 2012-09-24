@@ -1,3 +1,8 @@
+2012-09-24  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* m2-typeprint.c (m2_enum): Expand LASTVAL to LONGEST.
+	* p-valprint.c (pascal_type_print_base): Likewise.
+
 2012-09-22  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (remote_get_trace_status): Remove setting default

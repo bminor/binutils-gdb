@@ -587,7 +587,8 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 void
 m2_enum (struct type *type, struct ui_file *stream, int show, int level)
 {
-  int lastval, i, len;
+  LONGEST lastval;
+  int i, len;
 
   if (show < 0)
     {

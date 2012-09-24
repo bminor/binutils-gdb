@@ -440,7 +440,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 {
   int i;
   int len;
-  int lastval;
+  LONGEST lastval;
   enum
     {
       s_none, s_public, s_private, s_protected
