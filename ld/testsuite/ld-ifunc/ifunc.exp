@@ -347,6 +347,27 @@ if { $verbose < 1 } {
     remote_file host delete "tmpdir/static_nonifunc_prog"
 }
 
+run_ld_link_exec_tests [] [list \
+    [list \
+	"Common symbol override ifunc test 1a" \
+	"-static" \
+	"" \
+	{ ifunc-common-1a.c ifunc-common-1b.c } \
+	"ifunc-common-1a" \
+	"ifunc-common-1.out" \
+	"-g" \
+    ] \
+    [list \
+	"Common symbol override ifunc test 1b" \
+	"-static" \
+	"" \
+	{ ifunc-common-1b.c ifunc-common-1a.c } \
+	"ifunc-common-1b" \
+	"ifunc-common-1.out" \
+	"-g" \
+    ] \
+]
+
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 foreach t $test_list {
     # We need to strip the ".d", but can leave the dirname.
