@@ -1,3 +1,9 @@
+2012-09-20  Walter Lee  <walt@tilera.com>
+
+	* elf32-tilepro.c (tilepro_elf_relocate_section): Adjust got
+	relocations with value of hgot.
+	* elfxx-tilegx.c (tilegx_elf_relocate_section): Ditto.
+
 2012-09-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14591

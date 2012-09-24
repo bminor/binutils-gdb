@@ -2785,6 +2785,7 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   bfd_vma *local_got_offsets;
+  bfd_vma got_base;
   asection *sreloc;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
@@ -2795,6 +2796,11 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
+
+  if (elf_hash_table (info)->hgot == NULL)
+    got_base = 0;
+  else
+    got_base = elf_hash_table (info)->hgot->root.u.def.value;
 
   sreloc = elf_section_data (input_section)->sreloc;
 
@@ -3086,7 +3092,7 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  local_got_offsets[r_symndx] |= 1;
 		}
 	    }
-	  relocation = off;
+	  relocation = off - got_base;
 	  break;
 
         case R_TILEPRO_JOFFLONG_X1_PLT:
@@ -3505,7 +3511,7 @@ tilepro_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = off;
+	  relocation = off - got_base;
 	  unresolved_reloc = FALSE;
 	  howto = tilepro_elf_howto_table + r_type;
 	  break;
