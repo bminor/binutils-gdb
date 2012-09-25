@@ -1,3 +1,8 @@
+2012-09-25  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* gdb.base/longest-types.c: New test case.
+	* gdb.base/longest-types.exp: New test case.
+
 2012-09-25  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi2-cli.exp: Check breakpoint notification.

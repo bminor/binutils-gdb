@@ -621,8 +621,8 @@ c_type_print_varspec_suffix (struct type *type,
 	fprintf_filtered (stream, (is_vector ?
 				   "__attribute__ ((vector_size(" : "["));
 	if (get_array_bounds (type, &low_bound, &high_bound))
-	  fprintf_filtered (stream, "%d", 
-			    (int) (high_bound - low_bound + 1));
+	  fprintf_filtered (stream, "%s", 
+			    plongest (high_bound - low_bound + 1));
 	fprintf_filtered (stream, (is_vector ? ")))" : "]"));
 
 	c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
