@@ -2110,7 +2110,8 @@ Sized_relobj_file<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 	  continue;
 	}
 
-      if (sym.get_st_type() == elfcpp::STT_SECTION)
+      if (sym.get_st_type() == elfcpp::STT_SECTION
+	  || !this->adjust_local_symbol(&lv))
 	{
 	  lv.set_no_output_symtab_entry();
 	  gold_assert(!lv.needs_output_dynsym_entry());

@@ -2112,6 +2112,12 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   void
   set_local_plt_offset(unsigned int symndx, unsigned int plt_offset);
 
+  // Adjust this local symbol value.  Return false if the symbol
+  // should be discarded from the output file.
+  bool
+  adjust_local_symbol(Symbol_value<size>* lv) const
+  { return this->do_adjust_local_symbol(lv); }
+
   // Return the name of the symbol that spans the given offset in the
   // specified section in this object.  This is used only for error
   // messages and is not particularly efficient.
@@ -2380,6 +2386,12 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   do_relocate_sections(const Symbol_table* symtab, const Layout* layout,
 		       const unsigned char* pshdrs, Output_file* of,
 		       Views* pviews);
+
+  // Adjust this local symbol value.  Return false if the symbol
+  // should be discarded from the output file.
+  virtual bool
+  do_adjust_local_symbol(Symbol_value<size>*) const
+  { return true; }
 
   // Allow a child to set output local symbol count.
   void

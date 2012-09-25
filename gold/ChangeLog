@@ -1,3 +1,16 @@
+2012-09-25  Alan Modra  <amodra@gmail.com>
+
+	* object.h (Sized_relobj_file::adjust_local_symbol,
+	do_adjust_local_symbol): New functions.
+	* object.cc (Sized_relobj_file::do_count_local_symbols): Use the above.
+	* powerpc.cc (Powerpc_relobj::do_adjust_local_symbol): New function.
+	(Powerpc_relobj::scan_opd_relocs): Warn on unexpected opd relocs
+	and irregular opd entry spacing.
+	(Powerpc_relobj::do_read_relocs): Add opd size checks.
+	(Global_symbol_visitor_opd): New functor.
+	(Target_powerpc::do_finalize_sections): Omit global symbols defined
+	on deleted opd entries.
+
 2012-09-15  Jiong Wang  <jiwang@tilera.com>
 
 	* tilegx.cc: New file.

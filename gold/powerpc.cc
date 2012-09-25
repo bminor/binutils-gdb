@@ -174,6 +174,22 @@ public:
   bool
   do_find_special_sections(Read_symbols_data* sd);
 
+  // Adjust this local symbol value.  Return false if the symbol
+  // should be discarded from the output file.
+  bool
+  do_adjust_local_symbol(Symbol_value<size>* lv) const
+  {
+    if (size == 64 && this->opd_shndx() != 0)
+      {
+	bool is_ordinary;
+	if (lv->input_shndx(&is_ordinary) != this->opd_shndx())
+	  return true;
+	if (this->get_opd_discard(lv->input_value()))
+	  return false;
+      }
+    return true;
+  }
+
   // Return offset in output GOT section that this object will use
   // as a TOC pointer.  Won't be just a constant with multi-toc support.
   Address
@@ -1183,6 +1199,9 @@ Powerpc_relobj<size, big_endian>::scan_opd_relocs(
       const int reloc_size
 	= Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
       const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+      Address expected_off = 0;
+      bool regular = true;
+      unsigned int opd_ent_size = 0;
 
       for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
 	{
@@ -1209,7 +1228,36 @@ Powerpc_relobj<size, big_endian>::scan_opd_relocs(
 						       &is_ordinary);
 	      this->set_opd_ent(reloc.get_r_offset(), shndx,
 				value + reloc.get_r_addend());
+	      if (i == 2)
+		{
+		  expected_off = reloc.get_r_offset();
+		  opd_ent_size = expected_off;
+		}
+	      else if (expected_off != reloc.get_r_offset())
+		regular = false;
+	      expected_off += opd_ent_size;
 	    }
+	  else if (r_type == elfcpp::R_PPC64_TOC)
+	    {
+	      if (expected_off - opd_ent_size + 8 != reloc.get_r_offset())
+		regular = false;
+	    }
+	  else
+	    {
+	      gold_warning(_("%s: unexpected reloc type %u in .opd section"),
+			   this->name().c_str(), r_type);
+	      regular = false;
+	    }
+	}
+      if (reloc_count <= 2)
+	opd_ent_size = this->section_size(this->opd_shndx());
+      if (opd_ent_size != 24 && opd_ent_size != 16)
+	regular = false;
+      if (!regular)
+	{
+	  gold_warning(_("%s: .opd is not a regular array of opd entries"),
+		       this->name().c_str());
+	  opd_ent_size = 0;
 	}
     }
 }
@@ -1227,9 +1275,14 @@ Powerpc_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 	{
 	  if (p->data_shndx == this->opd_shndx())
 	    {
-	      this->init_opd(this->section_size(this->opd_shndx()));
-	      this->scan_opd_relocs(p->reloc_count, p->contents->data(),
-				    rd->local_symbols->data());
+	      uint64_t opd_size = this->section_size(this->opd_shndx());
+	      gold_assert(opd_size == static_cast<size_t>(opd_size));
+	      if (opd_size != 0)
+		{
+		  this->init_opd(opd_size);
+		  this->scan_opd_relocs(p->reloc_count, p->contents->data(),
+					rd->local_symbols->data());
+		}
 	      break;
 	    }
 	}
@@ -3204,6 +3257,38 @@ Target_powerpc<size, big_endian>::scan_relocs(
     plocal_symbols);
 }
 
+// Functor class for processing the global symbol table.
+// Removes symbols defined on discarded opd entries.
+
+template<bool big_endian>
+class Global_symbol_visitor_opd
+{
+ public:
+  Global_symbol_visitor_opd()
+  { }
+
+  void
+  operator()(Sized_symbol<64>* sym)
+  {
+    if (sym->has_symtab_index()
+	|| sym->source() != Symbol::FROM_OBJECT
+	|| !sym->in_real_elf())
+      return;
+
+    Powerpc_relobj<64, big_endian>* symobj
+      = static_cast<Powerpc_relobj<64, big_endian>*>(sym->object());
+    if (symobj->is_dynamic()
+	|| symobj->opd_shndx() == 0)
+      return;
+
+    bool is_ordinary;
+    unsigned int shndx = sym->shndx(&is_ordinary);
+    if (shndx == symobj->opd_shndx()
+	&& symobj->get_opd_discard(sym->value()))
+      sym->set_symtab_index(-1U);
+  }
+};
+
 // Finalize the sections.
 
 template<int size, bool big_endian>
@@ -3211,8 +3296,14 @@ void
 Target_powerpc<size, big_endian>::do_finalize_sections(
     Layout* layout,
     const Input_objects*,
-    Symbol_table*)
+    Symbol_table* symtab)
 {
+  if (size == 64)
+    {
+      typedef Global_symbol_visitor_opd<big_endian> Symbol_visitor;
+      symtab->for_all_symbols<64, Symbol_visitor>(Symbol_visitor());
+    }
+
   // Fill in some more dynamic tags.
   const Reloc_section* rel_plt = (this->plt_ == NULL
 				  ? NULL
