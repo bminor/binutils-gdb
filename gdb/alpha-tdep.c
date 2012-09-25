@@ -475,14 +475,13 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int length = TYPE_LENGTH (valtype);
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
 
   switch (TYPE_CODE (valtype))
     {
     case TYPE_CODE_FLT:
-      switch (length)
+      switch (TYPE_LENGTH (valtype))
 	{
 	case 4:
 	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, raw_buffer);
@@ -505,7 +504,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
       break;
 
     case TYPE_CODE_COMPLEX:
-      switch (length)
+      switch (TYPE_LENGTH (valtype))
 	{
 	case 8:
 	  /* ??? This isn't correct wrt the ABI, but it's what GCC does.  */
@@ -531,7 +530,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
     default:
       /* Assume everything else degenerates to an integer.  */
       regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &l);
-      store_unsigned_integer (valbuf, length, byte_order, l);
+      store_unsigned_integer (valbuf, TYPE_LENGTH (valtype), byte_order, l);
       break;
     }
 }
@@ -544,14 +543,13 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 			  const gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int length = TYPE_LENGTH (valtype);
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
 
   switch (TYPE_CODE (valtype))
     {
     case TYPE_CODE_FLT:
-      switch (length)
+      switch (TYPE_LENGTH (valtype))
 	{
 	case 4:
 	  alpha_lds (gdbarch, raw_buffer, valbuf);
@@ -575,7 +573,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
       break;
 
     case TYPE_CODE_COMPLEX:
-      switch (length)
+      switch (TYPE_LENGTH (valtype))
 	{
 	case 8:
 	  /* ??? This isn't correct wrt the ABI, but it's what GCC does.  */
@@ -603,7 +601,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
       /* Assume everything else degenerates to an integer.  */
       /* 32-bit values must be sign-extended to 64 bits
 	 even if the base data type is unsigned.  */
-      if (length == 4)
+      if (TYPE_LENGTH (valtype) == 4)
 	valtype = builtin_type (gdbarch)->builtin_int32;
       l = unpack_long (valtype, valbuf);
       regcache_cooked_write_unsigned (regcache, ALPHA_V0_REGNUM, l);

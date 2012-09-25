@@ -513,9 +513,8 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
   for (i = nargs - 1; i >= 0; i--)
     {
       struct type *value_type = value_enclosing_type (args[i]);
-      int len = TYPE_LENGTH (value_type);
 
-      total_len += (len + 3) & ~3;
+      total_len += (TYPE_LENGTH (value_type) + 3) & ~3;
     }
 
   /* At least twelve bytes of stack space must be allocated for the function's
@@ -531,8 +530,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
     {
       struct type *value_type = value_enclosing_type (args[i]);
       struct type *arg_type = check_typedef (value_type);
-      int len = TYPE_LENGTH (value_type);
-      int container_len = (len + 3) & ~3;
+      int container_len = (TYPE_LENGTH (value_type) + 3) & ~3;
 
       sp -= container_len;
       write_memory (sp, value_contents_writeable (args[i]), container_len);

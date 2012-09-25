@@ -1033,15 +1033,14 @@ value_contents_equal (struct value *val1, struct value *val2)
 {
   struct type *type1;
   struct type *type2;
-  int len;
 
   type1 = check_typedef (value_type (val1));
   type2 = check_typedef (value_type (val2));
-  len = TYPE_LENGTH (type1);
-  if (len != TYPE_LENGTH (type2))
+  if (TYPE_LENGTH (type1) != TYPE_LENGTH (type2))
     return 0;
 
-  return (memcmp (value_contents (val1), value_contents (val2), len) == 0);
+  return (memcmp (value_contents (val1), value_contents (val2),
+		  TYPE_LENGTH (type1)) == 0);
 }
 
 int

@@ -1844,11 +1844,10 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
 		{
 		  CORE_ADDR addr;
-		  int len, type;
+		  int type;
 		  struct bp_location *loc, **tmp;
 
 		  addr = value_address (v);
-		  len = TYPE_LENGTH (value_type (v));
 		  type = hw_write;
 		  if (b->base.type == bp_read_watchpoint)
 		    type = hw_read;
@@ -1863,7 +1862,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 
 		  loc->pspace = frame_pspace;
 		  loc->address = addr;
-		  loc->length = len;
+		  loc->length = TYPE_LENGTH (value_type (v));
 		  loc->watchpoint_type = type;
 		}
 	    }

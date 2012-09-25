@@ -354,14 +354,15 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 
 	  if (val && entryval && !ui_out_is_mi_like_p (current_uiout))
 	    {
-	      unsigned len = TYPE_LENGTH (value_type (val));
+	      struct type *type = value_type (val);
 
 	      if (!value_optimized_out (val) && value_lazy (val))
 		value_fetch_lazy (val);
 	      if (!value_optimized_out (val) && value_lazy (entryval))
 		value_fetch_lazy (entryval);
 	      if (!value_optimized_out (val)
-		  && value_available_contents_eq (val, 0, entryval, 0, len))
+		  && value_available_contents_eq (val, 0, entryval, 0,
+						  TYPE_LENGTH (type)))
 		{
 		  /* Initialize it just to avoid a GCC false warning.  */
 		  struct value *val_deref = NULL, *entryval_deref;
@@ -373,12 +374,12 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 
 		  TRY_CATCH (except, RETURN_MASK_ERROR)
 		    {
-		      unsigned len_deref;
+		      struct type *type_deref;
 
 		      val_deref = coerce_ref (val);
 		      if (value_lazy (val_deref))
 			value_fetch_lazy (val_deref);
-		      len_deref = TYPE_LENGTH (value_type (val_deref));
+		      type_deref = value_type (val_deref);
 
 		      entryval_deref = coerce_ref (entryval);
 		      if (value_lazy (entryval_deref))
@@ -389,7 +390,7 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 		      if (val != val_deref
 			  && value_available_contents_eq (val_deref, 0,
 							  entryval_deref, 0,
-							  len_deref))
+						      TYPE_LENGTH (type_deref)))
 			val_equal = 1;
 		    }
 

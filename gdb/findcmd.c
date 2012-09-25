@@ -169,19 +169,19 @@ parse_find_args (char *args, ULONGEST *max_countp,
   while (*s != '\0')
     {
       LONGEST x;
-      int val_bytes;
+      struct type *t;
       ULONGEST pattern_buf_size_need;
 
       while (isspace (*s))
 	++s;
 
       v = parse_to_comma_and_eval (&s);
-      val_bytes = TYPE_LENGTH (value_type (v));
+      t = value_type (v);
 
       /* Keep it simple and assume size == 'g' when watching for when we
 	 need to grow the pattern buf.  */
       pattern_buf_size_need = (pattern_buf_end - pattern_buf
-			       + max (val_bytes, sizeof (int64_t)));
+			       + max (TYPE_LENGTH (t), sizeof (int64_t)));
       if (pattern_buf_size_need > pattern_buf_size)
 	{
 	  size_t current_offset = pattern_buf_end - pattern_buf;
@@ -215,8 +215,8 @@ parse_find_args (char *args, ULONGEST *max_countp,
 	}
       else
 	{
-	  memcpy (pattern_buf_end, value_contents (v), val_bytes);
-	  pattern_buf_end += val_bytes;
+	  memcpy (pattern_buf_end, value_contents (v), TYPE_LENGTH (t));
+	  pattern_buf_end += TYPE_LENGTH (t);
 	}
 
       if (*s == ',')

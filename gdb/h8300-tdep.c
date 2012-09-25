@@ -785,16 +785,15 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
   ULONGEST c;
 
-  switch (len)
+  switch (TYPE_LENGTH (type))
     {
     case 1:
     case 2:
     case 4:
       regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
-      store_unsigned_integer (valbuf, len, byte_order, c);
+      store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, c);
       break;
     case 8:			/* long long is now 8 bytes.  */
       if (TYPE_CODE (type) == TYPE_CODE_INT)
@@ -852,18 +851,17 @@ h8300_store_return_value (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
   ULONGEST val;
 
-  switch (len)
+  switch (TYPE_LENGTH (type))
     {
     case 1:
     case 2:			/* short...  */
-      val = extract_unsigned_integer (valbuf, len, byte_order);
+      val = extract_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
       break;
     case 4:			/* long, float */
-      val = extract_unsigned_integer (valbuf, len, byte_order);
+      val = extract_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM,
 				      (val >> 16) & 0xffff);
       regcache_cooked_write_unsigned (regcache, E_RET1_REGNUM, val & 0xffff);
@@ -882,19 +880,18 @@ h8300h_store_return_value (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
   ULONGEST val;
 
-  switch (len)
+  switch (TYPE_LENGTH (type))
     {
     case 1:
     case 2:
     case 4:			/* long, float */
-      val = extract_unsigned_integer (valbuf, len, byte_order);
+      val = extract_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
       break;
     case 8:
-      val = extract_unsigned_integer (valbuf, len, byte_order);
+      val = extract_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM,
 				      (val >> 32) & 0xffffffff);
       regcache_cooked_write_unsigned (regcache, E_RET1_REGNUM,

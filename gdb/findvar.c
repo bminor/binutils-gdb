@@ -446,7 +446,6 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
   struct value *v;
   struct type *type = SYMBOL_TYPE (var);
   CORE_ADDR addr;
-  int len;
 
   /* Call check_typedef on our type to make sure that, if TYPE is
      a TYPE_CODE_TYPEDEF, its length is set to the length of the target type
@@ -454,8 +453,6 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
      target type, because we want to keep the typedef in order to be able to
      set the returned value type description correctly.  */
   check_typedef (type);
-
-  len = TYPE_LENGTH (type);
 
   if (symbol_read_needs_frame (var))
     gdb_assert (frame);
@@ -465,7 +462,7 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
     case LOC_CONST:
       /* Put the constant back in target format.  */
       v = allocate_value (type);
-      store_signed_integer (value_contents_raw (v), len,
+      store_signed_integer (value_contents_raw (v), TYPE_LENGTH (type),
 			    gdbarch_byte_order (get_type_arch (type)),
 			    (LONGEST) SYMBOL_VALUE (var));
       VALUE_LVAL (v) = not_lval;
@@ -490,7 +487,8 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 
     case LOC_CONST_BYTES:
       v = allocate_value (type);
-      memcpy (value_contents_raw (v), SYMBOL_VALUE_BYTES (var), len);
+      memcpy (value_contents_raw (v), SYMBOL_VALUE_BYTES (var),
+	      TYPE_LENGTH (type));
       VALUE_LVAL (v) = not_lval;
       return v;
 

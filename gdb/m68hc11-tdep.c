@@ -1174,7 +1174,6 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int first_stack_argnum;
   struct type *type;
   char *val;
-  int len;
   char buf[2];
   
   first_stack_argnum = 0;
@@ -1185,19 +1184,18 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   else if (nargs > 0)
     {
       type = value_type (args[0]);
-      len = TYPE_LENGTH (type);
 
       /* First argument is passed in D and X registers.  */
-      if (len <= 4)
+      if (TYPE_LENGTH (type) <= 4)
         {
           ULONGEST v;
 
           v = extract_unsigned_integer (value_contents (args[0]),
-					len, byte_order);
+					TYPE_LENGTH (type), byte_order);
           first_stack_argnum = 1;
 
           regcache_cooked_write_unsigned (regcache, HARD_D_REGNUM, v);
-          if (len > 2)
+          if (TYPE_LENGTH (type) > 2)
             {
               v >>= 16;
               regcache_cooked_write_unsigned (regcache, HARD_X_REGNUM, v);
@@ -1208,9 +1206,8 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argnum = nargs - 1; argnum >= first_stack_argnum; argnum--)
     {
       type = value_type (args[argnum]);
-      len = TYPE_LENGTH (type);
 
-      if (len & 1)
+      if (TYPE_LENGTH (type) & 1)
         {
           static char zero = 0;
 
@@ -1218,8 +1215,8 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
           write_memory (sp, &zero, 1);
         }
       val = (char*) value_contents (args[argnum]);
-      sp -= len;
-      write_memory (sp, val, len);
+      sp -= TYPE_LENGTH (type);
+      write_memory (sp, val, TYPE_LENGTH (type));
     }
 
   /* Store return address.  */
@@ -1291,11 +1288,10 @@ static void
 m68hc11_extract_return_value (struct type *type, struct regcache *regcache,
                               void *valbuf)
 {
-  int len = TYPE_LENGTH (type);
   char buf[M68HC11_REG_SIZE];
 
   regcache_raw_read (regcache, HARD_D_REGNUM, buf);
-  switch (len)
+  switch (TYPE_LENGTH (type))
     {
     case 1:
       memcpy (valbuf, buf + 1, 1);

@@ -1,3 +1,36 @@
+2012-09-25  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* ada-valprint.c (ada_val_print_1): Eliminate single-use
+	variable LEN.
+	* alpha-tdep.c (alpha_extract_return_value): Use TYPE_LENGTH
+	directly.
+	(alpha_store_return_value): Likewise.
+	* amd64-tdep.c (amd64_classify_aggregate): Likewise.
+	(amd64_push_arguments): Likewise.
+	* ax-gdb.c (gen_trace_static_fields): Likewise.
+	(gen_traced_pop): Likewise.
+	* bfin-tdep.c (bfin_push_dummy_call): Likewise.
+	* breakpoint.c (update_watchpoint): Likewise.
+	* findcmd.c (parse_find_args): Use local variable for type
+	instead of length.
+	* findvar.c (default_read_var_value): Use TYPE_LENGTH directly.
+	* h8300-tdep.c (h8300h_extract_return_value): Likewise.
+	(h8300_store_return_value): Likewise.
+	* i386-darwin-tdep.c (i386_darwin_push_dummy_call): Likewise.
+	Use i386_darwin_arg_type_alignment directly.
+	* infcall.c (call_function_by_hand): Use TYPE_LENGTH directly.
+	* lm32-tdep.c (lm32_push_dummy_call): Likewise.
+	* m68hc11-tdep.c (m68hc11_push_dummy_call): Likewise.
+	(m68hc11_extract_return_value): Likewise.
+	* mep-tdep.c (mep_push_dummy_call): Likewise.
+	* printcmd.c (float_type_from_length): Likewise.
+	* s390-tdep.c (s390_value_from_register): Likewise.
+	* stack.c (read_frame_arg): Likewise.
+	* tracepoint.c (encode_actions_1): Likewise.
+	* valops.c (value_fetch_lazy): Use local variable for type
+	instead of length.  Use TYPE_LENGTH directly.
+	* value.c (value_contents_equal): Use TYPE_LENGTH directly.
+
 2012-09-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* symtab.c (skip_prologue_sal): Fix typo in comment.

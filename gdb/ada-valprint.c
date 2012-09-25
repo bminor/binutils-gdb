@@ -730,9 +730,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
       if (ada_is_fixed_point_type (type))
 	{
 	  LONGEST v = unpack_long (type, valaddr + offset_aligned);
-	  int len = TYPE_LENGTH (type);
 
-	  fprintf_filtered (stream, len < 4 ? "%.11g" : "%.17g",
+	  fprintf_filtered (stream, TYPE_LENGTH (type) < 4 ? "%.11g" : "%.17g",
 			    (double) ada_fixed_to_float (type, v));
 	  return;
 	}

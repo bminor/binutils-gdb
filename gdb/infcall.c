@@ -708,13 +708,11 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
   if (struct_return || hidden_first_param_p)
     {
-      int len = TYPE_LENGTH (values_type);
-
       if (gdbarch_inner_than (gdbarch, 1, 2))
 	{
 	  /* Stack grows downward.  Align STRUCT_ADDR and SP after
              making space for the return value.  */
-	  sp -= len;
+	  sp -= TYPE_LENGTH (values_type);
 	  if (gdbarch_frame_align_p (gdbarch))
 	    sp = gdbarch_frame_align (gdbarch, sp);
 	  struct_addr = sp;
@@ -726,7 +724,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	  if (gdbarch_frame_align_p (gdbarch))
 	    sp = gdbarch_frame_align (gdbarch, sp);
 	  struct_addr = sp;
-	  sp += len;
+	  sp += TYPE_LENGTH (values_type);
 	  if (gdbarch_frame_align_p (gdbarch))
 	    sp = gdbarch_frame_align (gdbarch, sp);
 	}

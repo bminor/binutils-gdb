@@ -2337,11 +2337,10 @@ mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   for (i = 0; i < argc; i++)
     {
-      unsigned arg_size = TYPE_LENGTH (value_type (argv[i]));
       ULONGEST value;
 
       /* Arguments that fit in a GPR get expanded to fill the GPR.  */
-      if (arg_size <= MEP_GPR_SIZE)
+      if (TYPE_LENGTH (value_type (argv[i])) <= MEP_GPR_SIZE)
         value = extract_unsigned_integer (value_contents (argv[i]),
                                           TYPE_LENGTH (value_type (argv[i])),
 					  byte_order);

@@ -261,7 +261,6 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct value *arg = args[i];
       struct type *arg_type = check_typedef (value_type (arg));
       gdb_byte *contents;
-      int len;
       ULONGEST val;
 
       /* Promote small integer types to int.  */
@@ -283,8 +282,8 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* FIXME: Handle structures.  */
 
       contents = (gdb_byte *) value_contents (arg);
-      len = TYPE_LENGTH (arg_type);
-      val = extract_unsigned_integer (contents, len, byte_order);
+      val = extract_unsigned_integer (contents, TYPE_LENGTH (arg_type),
+				      byte_order);
 
       /* First num_arg_regs parameters are passed by registers, 
          and the rest are passed on the stack.  */
@@ -292,7 +291,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	regcache_cooked_write_unsigned (regcache, first_arg_reg + i, val);
       else
 	{
-	  write_memory (sp, (void *) &val, len);
+	  write_memory (sp, (void *) &val, TYPE_LENGTH (arg_type));
 	  sp -= 4;
 	}
     }

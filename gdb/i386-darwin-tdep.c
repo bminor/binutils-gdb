@@ -196,13 +196,12 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
             }
           else
             {
-              int len = TYPE_LENGTH (arg_type);
-              int align = i386_darwin_arg_type_alignment (arg_type);
-
-              args_space = align_up (args_space, align);
+              args_space = align_up (args_space,
+				     i386_darwin_arg_type_alignment (arg_type));
               if (write_pass)
                 write_memory (sp + args_space,
-                              value_contents_all (args[i]), len);
+                              value_contents_all (args[i]),
+			      TYPE_LENGTH (arg_type));
 
               /* The System V ABI says that:
                  
@@ -211,7 +210,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                  depending on the size of the argument."
                  
                  This makes sure the stack stays word-aligned.  */
-              args_space += align_up (len, 4);
+              args_space += align_up (TYPE_LENGTH (arg_type), 4);
             }
         }
 

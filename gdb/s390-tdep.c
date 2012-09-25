@@ -376,9 +376,11 @@ s390_value_from_register (struct type *type, int regnum,
 			  struct frame_info *frame)
 {
   struct value *value = default_value_from_register (type, regnum, frame);
-  int len = TYPE_LENGTH (check_typedef (type));
 
-  if (regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM && len < 8)
+  check_typedef (type);
+
+  if (regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM
+      && TYPE_LENGTH (type) < 8)
     set_value_offset (value, 0);
 
   return value;
