@@ -1,3 +1,7 @@
+2012-09-25  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi2-cli.exp: Check breakpoint notification.
+
 2012-09-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix internal error on canonicalization of clang types.
