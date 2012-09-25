@@ -1,3 +1,10 @@
+2012-09-25  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
+
+	* i386-gen.c (cpu_flag_init): Add missing Cpu flags in 
+	CPU_BDVER1_FLAGS, CPU_BDVER2_FLAGS, CPU_BTVER1_FLAGS 
+	and CPU_BTVER2_FLAGS.
+	* i386-init.h: Regenerated.
+
 2012-09-20  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Add CpuCX16 to CPU_NOCONA_FLAGS,

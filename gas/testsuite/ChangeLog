@@ -1,3 +1,15 @@
+2012-09-25  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
+
+	* gas/i386/arch-10-bdver1.d: New file to test bdver1 core.
+	* gas/i386/x86-64-arch-2-bdver1.d: Likewise.
+	* gas/i386/i386.exp: Run bdver1 testcases.
+	* gas/i386/arch-10-bdver2.d: Updated -march flags.
+	* gas/i386/arch-10-btver1.d: Likewise.
+	* gas/i386/arch-10-btver2.d: Likewise.
+	* gas/i386/x86-64-arch-2-bdver2.d: Likewise.
+	* gas/i386/x86-64-arch-2-btver1.d: Likewise.
+	* gas/i386/x86-64-arch-2-btver2.d: Likewise.
+
 2012-09-23  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/hilo-diff-eb.d: New test.

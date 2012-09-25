@@ -1,7 +1,7 @@
 #source: x86-64-arch-2.s
-#as: -march=btver2+smx+vmx+ept+padlock+fma+tbm
+#as: -march=bdver1+vmx+smx+xsaveopt+fma+movbe+ept+padlock+bmi+tbm
 #objdump: -dw
-#name: x86-64 arch 2 (btver2)
+#name: x86-64 arch 2 (bdver1)
 
 .*:     file format .*
 

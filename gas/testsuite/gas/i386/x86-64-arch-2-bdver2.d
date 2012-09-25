@@ -1,5 +1,5 @@
 #source: x86-64-arch-2.s
-#as: -march=bdver2+avx+vmx+smx+xsave+xsaveopt+aes+pclmul+movbe+cx16+ept+clflush+svme+padlock+prfchw
+#as: -march=bdver2+vmx+smx+xsaveopt+movbe+ept+padlock
 #objdump: -dw
 #name: x86-64 arch 2 (bdver2)
 
