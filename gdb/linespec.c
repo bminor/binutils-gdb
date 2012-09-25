@@ -1711,7 +1711,7 @@ create_sals_line_offset (struct linespec_state *self,
 
   /* This is where we need to make sure we have good defaults.
      We must guarantee that this section of code is never executed
-     when we are called with just a function anme, since
+     when we are called with just a function name, since
      set_default_source_symtab_and_line uses
      select_source_symtab that calls us with such an argument.  */
 

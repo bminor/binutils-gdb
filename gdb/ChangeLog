@@ -3,6 +3,10 @@
 	* c-typeprint.c (c_type_print_varspec_suffix): Remove cast and
 	use plongest to print the array size.
 
+2012-09-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* linespec.c (create_sals_line_offset): Fix typo in comment.
+
 2012-09-24  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* m2-typeprint.c (m2_enum): Expand LASTVAL to LONGEST.
