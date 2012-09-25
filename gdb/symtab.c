@@ -2810,7 +2810,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
   struct block *b, *function_block;
   int force_skip, skip;
 
-  /* Do not change the SAL is PC was specified explicitly.  */
+  /* Do not change the SAL if PC was specified explicitly.  */
   if (sal->explicit_pc)
     return;
 

@@ -1,5 +1,9 @@
 2012-09-25  Joel Brobecker  <brobecker@adacore.com>
 
+	* symtab.c (skip_prologue_sal): Fix typo in comment.
+
+2012-09-25  Joel Brobecker  <brobecker@adacore.com>
+
 	* linespec.c (create_sals_line_offset): Fix typo in comment.
 
 2012-09-25  Siddhesh Poyarekar  <siddhesh@redhat.com>
