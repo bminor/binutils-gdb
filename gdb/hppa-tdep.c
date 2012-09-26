@@ -1160,7 +1160,7 @@ hppa64_return_value (struct gdbarch *gdbarch, struct value *function,
   int len = TYPE_LENGTH (type);
   int regnum, offset;
 
-  if (len > 16)
+  if (TYPE_LENGTH (type) > 16)
     {
       /* All return values larget than 128 bits must be aggregate
          return values.  */

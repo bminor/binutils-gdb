@@ -751,12 +751,12 @@ h8300_extract_return_value (struct type *type, struct regcache *regcache,
   int len = TYPE_LENGTH (type);
   ULONGEST c, addr;
 
-  switch (len)
+  switch (TYPE_LENGTH (type))
     {
     case 1:
     case 2:
       regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
-      store_unsigned_integer (valbuf, len, byte_order, c);
+      store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, c);
       break;
     case 4:			/* Needs two registers on plain H8/300 */
       regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
@@ -768,8 +768,9 @@ h8300_extract_return_value (struct type *type, struct regcache *regcache,
       if (TYPE_CODE (type) == TYPE_CODE_INT)
 	{
 	  regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &addr);
-	  c = read_memory_unsigned_integer ((CORE_ADDR) addr, len, byte_order);
-	  store_unsigned_integer (valbuf, len, byte_order, c);
+	  c = read_memory_unsigned_integer ((CORE_ADDR) addr,
+					    TYPE_LENGTH (type), byte_order);
+	  store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, c);
 	}
       else
 	{

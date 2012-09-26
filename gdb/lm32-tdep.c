@@ -349,18 +349,18 @@ lm32_store_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
-  int len = TYPE_LENGTH (type);
 
-  if (len <= 4)
+  if (TYPE_LENGTH (type) <= 4)
     {
-      val = extract_unsigned_integer (valbuf, len, byte_order);
+      val = extract_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order);
       regcache_cooked_write_unsigned (regcache, SIM_LM32_R1_REGNUM, val);
     }
-  else if (len <= 8)
+  else if (TYPE_LENGTH (type) <= 8)
     {
       val = extract_unsigned_integer (valbuf, 4, byte_order);
       regcache_cooked_write_unsigned (regcache, SIM_LM32_R1_REGNUM, val);
-      val = extract_unsigned_integer (valbuf + 4, len - 4, byte_order);
+      val = extract_unsigned_integer (valbuf + 4, TYPE_LENGTH (type) - 4,
+				      byte_order);
       regcache_cooked_write_unsigned (regcache, SIM_LM32_R2_REGNUM, val);
     }
   else

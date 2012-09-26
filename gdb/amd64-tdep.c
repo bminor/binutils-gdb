@@ -637,7 +637,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
     }
 
   gdb_assert (class[1] != AMD64_MEMORY);
-  gdb_assert (len <= 16);
+  gdb_assert (TYPE_LENGTH (type) <= 16);
 
   for (i = 0; len > 0; i++, len -= 8)
     {

@@ -590,22 +590,21 @@ static void
 microblaze_store_return_value (struct type *type, struct regcache *regcache,
 			       const gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
   gdb_byte buf[8];
 
   memset (buf, 0, sizeof(buf));
 
   /* Integral and pointer return values.  */
 
-  if (len > 4)
+  if (TYPE_LENGTH (type) > 4)
     {
-       gdb_assert (len == 8);
+       gdb_assert (TYPE_LENGTH (type) == 8);
        memcpy (buf, valbuf, 8);
        regcache_cooked_write (regcache, MICROBLAZE_RETVAL_REGNUM+1, buf + 4);
     }
   else
     /* ??? Do we need to do any sign-extension here?  */
-    memcpy (buf + 4 - len, valbuf, len);
+    memcpy (buf + 4 - TYPE_LENGTH (type), valbuf, TYPE_LENGTH (type));
 
   regcache_cooked_write (regcache, MICROBLAZE_RETVAL_REGNUM, buf);
 }

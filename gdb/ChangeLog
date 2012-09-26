@@ -1,5 +1,19 @@
 2012-09-26  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
+	* amd64-tdep.c (amd64_return_value): Use TYPE_LENGTH directly.
+	* bfin-tdep.c (bfin_extract_return_value): Likewise.
+	(bfin_store_return_value): Likewise.
+	* cris-tdep.c (cris_store_return_value): Likewise.
+	(cris_extract_return_value): Likewise.
+	* h8300-tdep.c (h8300_extract_return_value): Likewise.
+	* hppa-tdep.c (hppa64_return_value): Likewise.
+	* lm32-tdep.c (lm32_store_return_value): Likewise.
+	* microblaze-tdep.c (microblaze_store_return_value): Likewise.
+	* spu-tdep.c (spu_value_from_register): Likewise.
+	* vax-tdep.c (vax_return_value): Likewise.
+
+2012-09-26  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
 	* breakpoint.c (invalidate_bp_value_on_memory_change): Expand
 	parameter LEN to ssize_t.
 

@@ -316,11 +316,10 @@ spu_value_from_register (struct type *type, int regnum,
 			 struct frame_info *frame)
 {
   struct value *value = default_value_from_register (type, regnum, frame);
-  int len = TYPE_LENGTH (type);
 
-  if (regnum < SPU_NUM_GPRS && len < 16)
+  if (regnum < SPU_NUM_GPRS && TYPE_LENGTH (type) < 16)
     {
-      int preferred_slot = len < 4 ? 4 - len : 0;
+      int preferred_slot = TYPE_LENGTH (type) < 4 ? 4 - TYPE_LENGTH (type) : 0;
       set_value_offset (value, preferred_slot);
     }
 

@@ -615,7 +615,7 @@ bfin_extract_return_value (struct type *type,
   ULONGEST tmp;
   int regno = BFIN_R0_REGNUM;
 
-  gdb_assert (len <= 8);
+  gdb_assert (TYPE_LENGTH (type) <= 8);
 
   while (len > 0)
     {
@@ -643,7 +643,7 @@ bfin_store_return_value (struct type *type,
   int len = TYPE_LENGTH (type);
   int regno = BFIN_R0_REGNUM;
 
-  gdb_assert (len <= 8);
+  gdb_assert (TYPE_LENGTH (type) <= 8);
 
   while (len > 0)
     {
