@@ -60,8 +60,6 @@ struct common_block
   struct symbol *contents[1];
 };
 
-#define BLANK_COMMON_NAME_LOCAL    "__BLANK"	/* Local GDB */
-
 extern int f77_get_upperbound (struct type *);
 
 extern int f77_get_lowerbound (struct type *);

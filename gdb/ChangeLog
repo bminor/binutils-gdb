@@ -1,5 +1,9 @@
 2012-09-26  Tom Tromey  <tromey@redhat.com>
 
+	* f-lang.h (BLANK_COMMON_NAME_LOCAL): Remove.
+
+2012-09-26  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (mark_common_block_symbol_computed): New function.
 	(read_common_block): Handle child DIEs with
 	DW_AT_data_member_location.
