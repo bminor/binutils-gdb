@@ -37,6 +37,7 @@ struct agent_expr;
 struct program_space;
 struct language_defn;
 struct probe;
+struct common_block;
 
 /* Some of the structures in this file are space critical.
    The space-critical structures are:
@@ -119,6 +120,10 @@ struct general_symbol_info
 
     CORE_ADDR address;
 
+    /* A common block.  Used with COMMON_BLOCK_DOMAIN.  */
+
+    struct common_block *common_block;
+
     /* For opaque typedef struct chain.  */
 
     struct symbol *chain;
@@ -181,6 +186,7 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 #define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
 #define SYMBOL_VALUE_ADDRESS(symbol)	(symbol)->ginfo.value.address
 #define SYMBOL_VALUE_BYTES(symbol)	(symbol)->ginfo.value.bytes
+#define SYMBOL_VALUE_COMMON_BLOCK(symbol) (symbol)->ginfo.value.common_block
 #define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->ginfo.value.block
 #define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->ginfo.value.chain
 #define SYMBOL_LANGUAGE(symbol)		(symbol)->ginfo.language
@@ -406,7 +412,10 @@ typedef enum domain_enum_tag
 
   /* LABEL_DOMAIN may be used for names of labels (for gotos).  */
 
-  LABEL_DOMAIN
+  LABEL_DOMAIN,
+
+  /* Fortran common blocks.  Their naming must be separate from VAR_DOMAIN.  */
+  COMMON_BLOCK_DOMAIN
 } domain_enum;
 
 /* Searching domains, used for `search_symbols'.  Element numbers are

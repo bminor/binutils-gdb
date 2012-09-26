@@ -349,27 +349,3 @@ _initialize_f_language (void)
 
   add_language (&f_language_defn);
 }
-
-SAVED_F77_COMMON_PTR head_common_list = NULL;	/* Ptr to 1st saved COMMON  */
-
-/* This routine finds the first encountred COMMON block named "name" 
-   that belongs to function funcname.  */
-
-SAVED_F77_COMMON_PTR
-find_common_for_function (const char *name, const char *funcname)
-{
-
-  SAVED_F77_COMMON_PTR tmp;
-
-  tmp = head_common_list;
-
-  while (tmp != NULL)
-    {
-      if (strcmp (tmp->name, name) == 0
-	  && strcmp (tmp->owning_function, funcname) == 0)
-	return (tmp);
-      else
-	tmp = tmp->next;
-    }
-  return (NULL);
-}

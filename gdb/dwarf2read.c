@@ -65,6 +65,7 @@
 #include "gdb/gdb-index.h"
 #include <ctype.h>
 #include "gdb_bfd.h"
+#include "f-lang.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -11063,50 +11064,47 @@ read_set_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, set_type, cu);
 }
 
-/* First cut: install each common block member as a global variable.  */
+/* Create appropriate locally-scoped variables for all the
+   DW_TAG_common_block entries.  Also create a struct common_block
+   listing all such variables for `info common'.  COMMON_BLOCK_DOMAIN
+   is used to sepate the common blocks name namespace from regular
+   variable names.  */
 
 static void
 read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct die_info *child_die;
-  struct attribute *attr;
-  struct symbol *sym;
-  CORE_ADDR base = (CORE_ADDR) 0;
-
-  attr = dwarf2_attr (die, DW_AT_location, cu);
-  if (attr)
-    {
-      /* Support the .debug_loc offsets.  */
-      if (attr_form_is_block (attr))
-        {
-          base = decode_locdesc (DW_BLOCK (attr), cu);
-        }
-      else if (attr_form_is_section_offset (attr))
-        {
-	  dwarf2_complex_location_expr_complaint ();
-        }
-      else
-        {
-	  dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
-						 "common block member");
-        }
-    }
   if (die->child != NULL)
     {
-      child_die = die->child;
-      while (child_die && child_die->tag)
-	{
-	  LONGEST offset;
+      struct objfile *objfile = cu->objfile;
+      struct die_info *child_die;
+      size_t n_entries = 0, size;
+      struct common_block *common_block;
+      struct symbol *sym;
 
+      for (child_die = die->child;
+	   child_die && child_die->tag;
+	   child_die = sibling_die (child_die))
+	++n_entries;
+
+      size = (sizeof (struct common_block)
+	      + (n_entries - 1) * sizeof (struct symbol *));
+      common_block = obstack_alloc (&objfile->objfile_obstack, size);
+      memset (common_block->contents, 0, n_entries * sizeof (struct symbol *));
+      common_block->n_entries = 0;
+
+      for (child_die = die->child;
+	   child_die && child_die->tag;
+	   child_die = sibling_die (child_die))
+	{
+	  /* Create the symbol in the DW_TAG_common_block block in the current
+	     symbol scope.  */
 	  sym = new_symbol (child_die, NULL, cu);
-	  if (sym != NULL
-	      && handle_data_member_location (child_die, cu, &offset))
-	    {
-	      SYMBOL_VALUE_ADDRESS (sym) = base + offset;
-	      add_symbol_to_list (sym, &global_symbols);
-	    }
-	  child_die = sibling_die (child_die);
+	  if (sym)
+	    common_block->contents[common_block->n_entries++] = sym;
 	}
+
+      sym = new_symbol (die, objfile_type (objfile)->builtin_void, cu);
+      SYMBOL_VALUE_COMMON_BLOCK (sym) = common_block;
     }
 }
 
@@ -14956,6 +14954,13 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    {
 	      var_decode_location (attr, sym, cu);
 	      attr2 = dwarf2_attr (die, DW_AT_external, cu);
+
+	      /* Fortran explicitly imports any global symbols to the local
+		 scope by DW_TAG_common_block.  */
+	      if (cu->language == language_fortran && die->parent
+		  && die->parent->tag == DW_TAG_common_block)
+		attr2 = NULL;
+
 	      if (SYMBOL_CLASS (sym) == LOC_STATIC
 		  && SYMBOL_VALUE_ADDRESS (sym) == 0
 		  && !dwarf2_per_objfile->has_section_at_zero)
@@ -15119,6 +15124,11 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_namespace:
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  list_to_add = &global_symbols;
+	  break;
+	case DW_TAG_common_block:
+	  SYMBOL_CLASS (sym) = LOC_STATIC;
+	  SYMBOL_DOMAIN (sym) = COMMON_BLOCK_DOMAIN;
+	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	default:
 	  /* Not a tag we recognize.  Hopefully we aren't processing

@@ -1848,6 +1848,8 @@ iterate_over_block_locals (struct block *b,
 	case LOC_COMPUTED:
 	  if (SYMBOL_IS_ARGUMENT (sym))
 	    break;
+	  if (SYMBOL_DOMAIN (sym) == COMMON_BLOCK_DOMAIN)
+	    break;
 	  (*cb) (SYMBOL_PRINT_NAME (sym), sym, cb_data);
 	  break;
 

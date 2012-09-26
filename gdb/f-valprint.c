@@ -34,10 +34,12 @@
 #include "gdbcore.h"
 #include "command.h"
 #include "block.h"
+#include "dictionary.h"
+#include "gdb_assert.h"
+#include "exceptions.h"
 
 extern void _initialize_f_valprint (void);
 static void info_common_command (char *, int);
-static void list_all_visible_commons (const char *);
 static void f77_create_arrayprint_offset_tbl (struct type *,
 					      struct ui_file *);
 static void f77_get_dynamic_length_of_aggregate (struct type *);
@@ -410,21 +412,57 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 }
 
 static void
-list_all_visible_commons (const char *funname)
+info_common_command_for_block (struct block *block, const char *comname,
+			       int *any_printed)
 {
-  SAVED_F77_COMMON_PTR tmp;
+  struct block_iterator iter;
+  struct symbol *sym;
+  const char *name;
+  struct value_print_options opts;
 
-  tmp = head_common_list;
+  get_user_print_options (&opts);
 
-  printf_filtered (_("All COMMON blocks visible at this level:\n\n"));
+  ALL_BLOCK_SYMBOLS (block, iter, sym)
+    if (SYMBOL_DOMAIN (sym) == COMMON_BLOCK_DOMAIN)
+      {
+	struct common_block *common = SYMBOL_VALUE_COMMON_BLOCK (sym);
+	size_t index;
 
-  while (tmp != NULL)
-    {
-      if (strcmp (tmp->owning_function, funname) == 0)
-	printf_filtered ("%s\n", tmp->name);
+	gdb_assert (SYMBOL_CLASS (sym) == LOC_STATIC);
 
-      tmp = tmp->next;
-    }
+	if (comname && (!SYMBOL_LINKAGE_NAME (sym)
+	                || strcmp (comname, SYMBOL_LINKAGE_NAME (sym)) != 0))
+	  continue;
+
+	if (*any_printed)
+	  putchar_filtered ('\n');
+	else
+	  *any_printed = 1;
+	if (SYMBOL_PRINT_NAME (sym))
+	  printf_filtered (_("Contents of F77 COMMON block '%s':\n"),
+			   SYMBOL_PRINT_NAME (sym));
+	else
+	  printf_filtered (_("Contents of blank COMMON block:\n"));
+	
+	for (index = 0; index < common->n_entries; index++)
+	  {
+	    struct value *val = NULL;
+	    volatile struct gdb_exception except;
+
+	    printf_filtered ("%s = ",
+			     SYMBOL_PRINT_NAME (common->contents[index]));
+
+	    TRY_CATCH (except, RETURN_MASK_ERROR)
+	      {
+		val = value_of_variable (common->contents[index], block);
+		value_print (val, gdb_stdout, &opts);
+	      }
+
+	    if (except.reason < 0)
+	      printf_filtered ("<error reading variable: %s>", except.message);
+	    putchar_filtered ('\n');
+	  }
+      }
 }
 
 /* This function is used to print out the values in a given COMMON 
@@ -434,11 +472,9 @@ list_all_visible_commons (const char *funname)
 static void
 info_common_command (char *comname, int from_tty)
 {
-  SAVED_F77_COMMON_PTR the_common;
-  COMMON_ENTRY_PTR entry;
   struct frame_info *fi;
-  const char *funname = 0;
-  struct symbol *func;
+  struct block *block;
+  int values_printed = 0;
 
   /* We have been told to display the contents of F77 COMMON 
      block supposedly visible in this function.  Let us 
@@ -450,87 +486,30 @@ info_common_command (char *comname, int from_tty)
   /* The following is generally ripped off from stack.c's routine 
      print_frame_info().  */
 
-  func = find_pc_function (get_frame_pc (fi));
-  if (func)
+  block = get_frame_block (fi, 0);
+  if (block == NULL)
     {
-      /* In certain pathological cases, the symtabs give the wrong
-         function (when we are in the first function in a file which
-         is compiled without debugging symbols, the previous function
-         is compiled with debugging symbols, and the "foo.o" symbol
-         that is supposed to tell us where the file with debugging symbols
-         ends has been truncated by ar because it is longer than 15
-         characters).
-
-         So look in the minimal symbol tables as well, and if it comes
-         up with a larger address for the function use that instead.
-         I don't think this can ever cause any problems; there shouldn't
-         be any minimal symbols in the middle of a function.
-         FIXME:  (Not necessarily true.  What about text labels?)  */
-
-      struct minimal_symbol *msymbol = 
-	lookup_minimal_symbol_by_pc (get_frame_pc (fi));
-
-      if (msymbol != NULL
-	  && (SYMBOL_VALUE_ADDRESS (msymbol)
-	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
-	funname = SYMBOL_LINKAGE_NAME (msymbol);
-      else
-	funname = SYMBOL_LINKAGE_NAME (func);
-    }
-  else
-    {
-      struct minimal_symbol *msymbol =
-	lookup_minimal_symbol_by_pc (get_frame_pc (fi));
-
-      if (msymbol != NULL)
-	funname = SYMBOL_LINKAGE_NAME (msymbol);
-      else /* Got no 'funname', code below will fail.  */
-	error (_("No function found for frame."));
-    }
-
-  /* If comname is NULL, we assume the user wishes to see the 
-     which COMMON blocks are visible here and then return.  */
-
-  if (comname == 0)
-    {
-      list_all_visible_commons (funname);
+      printf_filtered (_("No symbol table info available.\n"));
       return;
     }
 
-  the_common = find_common_for_function (comname, funname);
-
-  if (the_common)
+  while (block)
     {
-      struct frame_id frame_id = get_frame_id (fi);
-
-      if (strcmp (comname, BLANK_COMMON_NAME_LOCAL) == 0)
-	printf_filtered (_("Contents of blank COMMON block:\n"));
-      else
-	printf_filtered (_("Contents of F77 COMMON block '%s':\n"), comname);
-
-      printf_filtered ("\n");
-      entry = the_common->entries;
-
-      while (entry != NULL)
-	{
-	  fi = frame_find_by_id (frame_id);
-	  if (fi == NULL)
-	    {
-	      warning (_("Unable to restore previously selected frame."));
-	      break;
-	    }
-
-	  print_variable_and_value (NULL, entry->symbol, fi, gdb_stdout, 0);
-
-	  /* print_variable_and_value invalidates FI.  */
-	  fi = NULL;
-
-	  entry = entry->next;
-	}
+      info_common_command_for_block (block, comname, &values_printed);
+      /* After handling the function's top-level block, stop.  Don't
+         continue to its superblock, the block of per-file symbols.  */
+      if (BLOCK_FUNCTION (block))
+	break;
+      block = BLOCK_SUPERBLOCK (block);
     }
-  else
-    printf_filtered (_("Cannot locate the common block %s in function '%s'\n"),
-		     comname, funname);
+
+  if (!values_printed)
+    {
+      if (comname)
+	printf_filtered (_("No common block '%s'.\n"), comname);
+      else
+	printf_filtered (_("No common blocks.\n"));
+    }
 }
 
 void

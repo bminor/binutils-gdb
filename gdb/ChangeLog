@@ -1,6 +1,28 @@
 2012-09-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (read_common_block): Rewrite.
+	(new_symbol_full): Handle DW_TAG_common_block.
+	* f-lang.c (head_common_list, find_common_for_function):
+	Remove.
+	* f-lang.h (struct common_entry, struct saved_f77_common,
+	SAVED_F77_COMMON, SAVED_F77_COMMON_PTR, COMMON_ENTRY,
+	COMMON_ENTRY_PTR, head_common_list, find_common_for_function,
+	BLANK_COMMON_NAME_LOCAL): Remove.
+	(struct common_block): New.
+	* f-valprint.c (list_all_visible_commons): Remove.
+	(info_common_command_for_block): New function.
+	(info_common_command): Use it.
+	* stack.c (iterate_over_block_locals): Special case for
+	COMMON_BLOCK_DOMAIN.
+	* symtab.h (enum domain_enum_tag) <COMMON_BLOCK_DOMAIN>: New
+	constant.
+	(struct general_symbol_info) <value.common_block>: New field.
+	(SYMBOL_VALUE_COMMON_BLOCK): New define.
+
+2012-09-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
 	* f-lang.c (allocate_saved_bf_node,
 	allocate_saved_function_node, allocate_saved_f77_common_node,
 	allocate_common_entry_node, tail_common_list, current_common,

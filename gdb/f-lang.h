@@ -48,33 +48,17 @@ enum f90_range_type
     NONE_BOUND_DEFAULT		/* "(low:high)"  */
   };
 
-struct common_entry
-  {
-    struct symbol *symbol;	/* The symbol node corresponding
-				   to this component */
-    struct common_entry *next;	/* The next component */
-  };
+/* A common block.  */
 
-struct saved_f77_common
-  {
-    char *name;			/* Name of COMMON */
-    char *owning_function;	/* Name of parent function */
-    int secnum;			/* Section # of .bss */
-    CORE_ADDR offset;		/* Offset from .bss for 
-				   this block */
-    struct common_entry *entries;	/* List of block's components */
-    struct common_entry *end_of_entries;	/* ptr. to end of components */
-    struct saved_f77_common *next;	/* Next saved COMMON block */
-  };
+struct common_block
+{
+  /* The number of entries in the block.  */
+  size_t n_entries;
 
-typedef struct saved_f77_common SAVED_F77_COMMON, *SAVED_F77_COMMON_PTR;
-
-typedef struct common_entry COMMON_ENTRY, *COMMON_ENTRY_PTR;
-
-extern SAVED_F77_COMMON_PTR head_common_list;	/* Ptr to 1st saved COMMON  */
-
-extern SAVED_F77_COMMON_PTR find_common_for_function (const char *,
-						      const char *);
+  /* The contents of the block, allocated using the struct hack.  All
+     pointers in the array are non-NULL.  */
+  struct symbol *contents[1];
+};
 
 #define BLANK_COMMON_NAME_LOCAL    "__BLANK"	/* Local GDB */
 
