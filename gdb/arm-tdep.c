@@ -1400,7 +1400,8 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (post_prologue_pc
 	  && (s == NULL
 	      || s->producer == NULL
-	      || strncmp (s->producer, "GNU ", sizeof ("GNU ") - 1) == 0))
+	      || strncmp (s->producer, "GNU ", sizeof ("GNU ") - 1) == 0 
+	      || strncmp (s->producer, "clang ", sizeof ("clang ") - 1) == 0))
 	return post_prologue_pc;
 
       if (post_prologue_pc != 0)

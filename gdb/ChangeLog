@@ -1,3 +1,7 @@
+2012-09-26  Karthik Bhat  <kv.bhat@samsung.com>
+
+	* arm-tdep.c (arm_skip_prologue): Extending producer check to support LLVM compiler. 
+
 2012-09-26  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* amd64-tdep.c (amd64_return_value): Use TYPE_LENGTH directly.
