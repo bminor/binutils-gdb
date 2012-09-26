@@ -37,6 +37,7 @@
 #include "target.h"
 #include "inferior.h"
 #include "regcache.h"
+#include "gdb_bfd.h"
 
 #include "hppa-tdep.h"
 #include "solist.h"

@@ -49,6 +49,7 @@
 #include "filenames.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "gdb_bfd.h"
 #include "gdb_obstack.h"
 #include "gdb_string.h"
 #include "gdbthread.h"

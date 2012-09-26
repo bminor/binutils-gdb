@@ -29,6 +29,7 @@
 #include "symfile.h"
 #include "gdb_wait.h"
 #include "gdbthread.h"
+#include "gdb_bfd.h"
 
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>

@@ -45,6 +45,7 @@
 #include "gdb_wait.h"
 #include <signal.h>
 #include <ctype.h>
+#include "gdb_bfd.h"
 #include "gdb_string.h"
 #include "gdb_assert.h"
 #include "inflow.h"
