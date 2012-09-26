@@ -14718,7 +14718,7 @@ show_breakpoint_cmd (char *args, int from_tty)
    GDB itself.  */
 
 static void
-invalidate_bp_value_on_memory_change (CORE_ADDR addr, int len,
+invalidate_bp_value_on_memory_change (CORE_ADDR addr, ssize_t len,
 				      const bfd_byte *data)
 {
   struct breakpoint *bp;

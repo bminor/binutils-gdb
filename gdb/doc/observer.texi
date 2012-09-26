@@ -230,7 +230,7 @@ The inferior @var{inf} has been removed from the list of inferiors.
 This method is called immediately before freeing @var{inf}.
 @end deftypefun
 
-@deftypefun void memory_changed (CORE_ADDR @var{addr}, int @var{len}, const bfd_byte *@var{data})
+@deftypefun void memory_changed (CORE_ADDR @var{addr}, ssize_t @var{len}, const bfd_byte *@var{data})
 Bytes from @var{data} to @var{data} + @var{len} have been written
 to the current inferior at @var{addr}.
 @end deftypefun

@@ -1,3 +1,8 @@
+2012-09-26  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* breakpoint.c (invalidate_bp_value_on_memory_change): Expand
+	parameter LEN to ssize_t.
+
 2012-09-25  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* ada-valprint.c (ada_val_print_1): Eliminate single-use
