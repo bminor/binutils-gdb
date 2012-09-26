@@ -1,3 +1,10 @@
+2012-09-26  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (mark_common_block_symbol_computed): New function.
+	(read_common_block): Handle child DIEs with
+	DW_AT_data_member_location.
+	(new_symbol_full): Add special case for common blocks.
+
 2012-09-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 

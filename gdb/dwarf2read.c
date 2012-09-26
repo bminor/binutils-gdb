@@ -11064,6 +11064,79 @@ read_set_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, set_type, cu);
 }
 
+/* A helper for read_common_block that creates a locexpr baton.
+   SYM is the symbol which we are marking as computed.
+   COMMON_DIE is the DIE for the common block.
+   COMMON_LOC is the location expression attribute for the common
+   block itself.
+   MEMBER_LOC is the location expression attribute for the particular
+   member of the common block that we are processing.
+   CU is the CU from which the above come.  */
+
+static void
+mark_common_block_symbol_computed (struct symbol *sym,
+				   struct die_info *common_die,
+				   struct attribute *common_loc,
+				   struct attribute *member_loc,
+				   struct dwarf2_cu *cu)
+{
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct dwarf2_locexpr_baton *baton;
+  gdb_byte *ptr;
+  unsigned int cu_off;
+  enum bfd_endian byte_order = gdbarch_byte_order (get_objfile_arch (objfile));
+  LONGEST offset = 0;
+
+  gdb_assert (common_loc && member_loc);
+  gdb_assert (attr_form_is_block (common_loc));
+  gdb_assert (attr_form_is_block (member_loc)
+	      || attr_form_is_constant (member_loc));
+
+  baton = obstack_alloc (&objfile->objfile_obstack,
+			 sizeof (struct dwarf2_locexpr_baton));
+  baton->per_cu = cu->per_cu;
+  gdb_assert (baton->per_cu);
+
+  baton->size = 5 /* DW_OP_call4 */ + 1 /* DW_OP_plus */;
+
+  if (attr_form_is_constant (member_loc))
+    {
+      offset = dwarf2_get_attr_constant_value (member_loc, 0);
+      baton->size += 1 /* DW_OP_addr */ + cu->header.addr_size;
+    }
+  else
+    baton->size += DW_BLOCK (member_loc)->size;
+
+  ptr = obstack_alloc (&objfile->objfile_obstack, baton->size);
+  baton->data = ptr;
+
+  *ptr++ = DW_OP_call4;
+  cu_off = common_die->offset.sect_off - cu->per_cu->offset.sect_off;
+  store_unsigned_integer (ptr, 4, byte_order, cu_off);
+  ptr += 4;
+
+  if (attr_form_is_constant (member_loc))
+    {
+      *ptr++ = DW_OP_addr;
+      store_unsigned_integer (ptr, cu->header.addr_size, byte_order, offset);
+      ptr += cu->header.addr_size;
+    }
+  else
+    {
+      /* We have to copy the data here, because DW_OP_call4 will only
+	 use a DW_AT_location attribute.  */
+      memcpy (ptr, DW_BLOCK (member_loc)->data, DW_BLOCK (member_loc)->size);
+      ptr += DW_BLOCK (member_loc)->size;
+    }
+
+  *ptr++ = DW_OP_plus;
+  gdb_assert (ptr - baton->data == baton->size);
+
+  SYMBOL_COMPUTED_OPS (sym) = &dwarf2_locexpr_funcs;
+  SYMBOL_LOCATION_BATON (sym) = baton;
+  SYMBOL_CLASS (sym) = LOC_COMPUTED;
+}
+
 /* Create appropriate locally-scoped variables for all the
    DW_TAG_common_block entries.  Also create a struct common_block
    listing all such variables for `info common'.  COMMON_BLOCK_DOMAIN
@@ -11073,6 +11146,29 @@ read_set_type (struct die_info *die, struct dwarf2_cu *cu)
 static void
 read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 {
+  struct attribute *attr;
+
+  attr = dwarf2_attr (die, DW_AT_location, cu);
+  if (attr)
+    {
+      /* Support the .debug_loc offsets.  */
+      if (attr_form_is_block (attr))
+        {
+	  /* Ok.  */
+        }
+      else if (attr_form_is_section_offset (attr))
+        {
+	  dwarf2_complex_location_expr_complaint ();
+	  attr = NULL;
+        }
+      else
+        {
+	  dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
+						 "common block member");
+	  attr = NULL;
+        }
+    }
+
   if (die->child != NULL)
     {
       struct objfile *objfile = cu->objfile;
@@ -11099,8 +11195,39 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 	  /* Create the symbol in the DW_TAG_common_block block in the current
 	     symbol scope.  */
 	  sym = new_symbol (child_die, NULL, cu);
-	  if (sym)
-	    common_block->contents[common_block->n_entries++] = sym;
+	  if (sym != NULL)
+	    {
+	      struct attribute *member_loc;
+
+	      common_block->contents[common_block->n_entries++] = sym;
+
+	      member_loc = dwarf2_attr (child_die, DW_AT_data_member_location,
+					cu);
+	      if (member_loc)
+		{
+		  /* GDB has handled this for a long time, but it is
+		     not specified by DWARF.  It seems to have been
+		     emitted by gfortran at least as recently as:
+		     http://gcc.gnu.org/bugzilla/show_bug.cgi?id=23057.  */
+		  complaint (&symfile_complaints,
+			     _("Variable in common block has "
+			       "DW_AT_data_member_location "
+			       "- DIE at 0x%x [in module %s]"),
+			     child_die->offset.sect_off, cu->objfile->name);
+
+		  if (attr_form_is_section_offset (member_loc))
+		    dwarf2_complex_location_expr_complaint ();
+		  else if (attr_form_is_constant (member_loc)
+			   || attr_form_is_block (member_loc))
+		    {
+		      if (attr)
+			mark_common_block_symbol_computed (sym, die, attr,
+							   member_loc, cu);
+		    }
+		  else
+		    dwarf2_complex_location_expr_complaint ();
+		}
+	    }
 	}
 
       sym = new_symbol (die, objfile_type (objfile)->builtin_void, cu);
@@ -15003,8 +15130,19 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	         the minimal symbol table whenever the variable is
 	         referenced.  */
 	      attr2 = dwarf2_attr (die, DW_AT_external, cu);
-	      if (attr2 && (DW_UNSND (attr2) != 0)
-		  && dwarf2_attr (die, DW_AT_type, cu) != NULL)
+
+	      /* Fortran explicitly imports any global symbols to the local
+		 scope by DW_TAG_common_block.  */
+	      if (cu->language == language_fortran && die->parent
+		  && die->parent->tag == DW_TAG_common_block)
+		{
+		  /* SYMBOL_CLASS doesn't matter here because
+		     read_common_block is going to reset it.  */
+		  if (!suppress_add)
+		    list_to_add = cu->list_in_scope;
+		}
+	      else if (attr2 && (DW_UNSND (attr2) != 0)
+		       && dwarf2_attr (die, DW_AT_type, cu) != NULL)
 		{
 		  /* A variable with DW_AT_external is never static, but it
 		     may be block-scoped.  */

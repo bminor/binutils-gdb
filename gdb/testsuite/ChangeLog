@@ -1,3 +1,8 @@
+2012-09-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/dw2-common-block.S: New file.
+	* gdb.dwarf2/dw2-common-block.exp: New file.
+
 2012-09-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.fortran/common-block.exp: New file.
