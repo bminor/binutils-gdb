@@ -1,3 +1,24 @@
+2012-09-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* f-lang.c (allocate_saved_bf_node,
+	allocate_saved_function_node, allocate_saved_f77_common_node,
+	allocate_common_entry_node, tail_common_list, current_common,
+	saved_bf_list, saved_bf_list_end, current_head_bf_list,
+	tmp_bf_ptr, add_common_block, add_common_entry,
+	find_first_common_named, patch_common_entries,
+	patch_all_commons_by_name, ADD_BF_SYMNUM, clear_bf_list,
+	global_remote_debug, get_bf_for_fcn, saved_function_list,
+	saved_function_list_end, clear_function_list, struct saved_fcn,
+	struct saved_bf_symnum, SAVED_FUNCTION, SAVED_FUNCTION_PTR,
+	SAVED_BF, SAVED_BF_PTR): Remove.
+	* f-lang.h (tail_common_list, current_common,
+	UNINITIALIZED_SECNUM, COMMON_NEEDS_PATCHING,
+	BLANK_COMMON_NAME_ORIGINAL, BLANK_COMMON_NAME_MF77,
+	DEFAULT_UPPER_BOUND, DEFAULT_LOWER_BOUND, real_main_name,
+	real_main_c_value): Remove.
+	* f-valprint.c (there_is_a_visible_common_named): Remove.
+
 2012-09-26  Andrew Burgess  <aburgess@broadcom.com>
 
 	* breakpoint.c (update_global_location_list): Ignore previous

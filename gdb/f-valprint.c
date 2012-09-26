@@ -35,10 +35,6 @@
 #include "command.h"
 #include "block.h"
 
-#if 0
-static int there_is_a_visible_common_named (char *);
-#endif
-
 extern void _initialize_f_valprint (void);
 static void info_common_command (char *, int);
 static void list_all_visible_commons (const char *);
@@ -536,67 +532,6 @@ info_common_command (char *comname, int from_tty)
     printf_filtered (_("Cannot locate the common block %s in function '%s'\n"),
 		     comname, funname);
 }
-
-/* This function is used to determine whether there is a
-   F77 common block visible at the current scope called 'comname'.  */
-
-#if 0
-static int
-there_is_a_visible_common_named (char *comname)
-{
-  SAVED_F77_COMMON_PTR the_common;
-  struct frame_info *fi;
-  char *funname = 0;
-  struct symbol *func;
-
-  if (comname == NULL)
-    error (_("Cannot deal with NULL common name!"));
-
-  fi = get_selected_frame (_("No frame selected"));
-
-  /* The following is generally ripped off from stack.c's routine 
-     print_frame_info().  */
-
-  func = find_pc_function (fi->pc);
-  if (func)
-    {
-      /* In certain pathological cases, the symtabs give the wrong
-         function (when we are in the first function in a file which
-         is compiled without debugging symbols, the previous function
-         is compiled with debugging symbols, and the "foo.o" symbol
-         that is supposed to tell us where the file with debugging symbols
-         ends has been truncated by ar because it is longer than 15
-         characters).
-
-         So look in the minimal symbol tables as well, and if it comes
-         up with a larger address for the function use that instead.
-         I don't think this can ever cause any problems; there shouldn't
-         be any minimal symbols in the middle of a function.
-         FIXME:  (Not necessarily true.  What about text labels?)  */
-
-      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
-
-      if (msymbol != NULL
-	  && (SYMBOL_VALUE_ADDRESS (msymbol)
-	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
-	funname = SYMBOL_LINKAGE_NAME (msymbol);
-      else
-	funname = SYMBOL_LINKAGE_NAME (func);
-    }
-  else
-    {
-      struct minimal_symbol *msymbol =
-	lookup_minimal_symbol_by_pc (fi->pc);
-
-      if (msymbol != NULL)
-	funname = SYMBOL_LINKAGE_NAME (msymbol);
-    }
-
-  the_common = find_common_for_function (comname, funname);
-
-  return (the_common ? 1 : 0);
-}
-#endif
 
 void
 _initialize_f_valprint (void)
