@@ -1,3 +1,12 @@
+2012-09-26  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi2-cli.exp:  Avoid line number in test summary.
+
+	Revert:
+	2012-09-21  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi2-cli.exp: Remove redundant '\'.
+
 2012-09-25  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* gdb.base/longest-types.c: New test case.
