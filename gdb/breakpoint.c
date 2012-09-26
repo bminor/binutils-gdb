@@ -12462,7 +12462,7 @@ update_global_location_list (int should_insert)
       struct bp_location **loc_first_p;
       b = loc->owner;
 
-      if (!should_be_inserted (loc)
+      if (!unduplicated_should_be_inserted (loc)
 	  || !breakpoint_address_is_meaningful (b)
 	  /* Don't detect duplicate for tracepoint locations because they are
 	   never duplicated.  See the comments in field `duplicate' of

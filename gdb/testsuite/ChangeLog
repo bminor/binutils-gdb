@@ -1,3 +1,8 @@
+2012-09-26  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.base/duplicate-bp.c: New file.
+	* gdb.base/duplicate-bp.exp: New file.
+
 2012-09-26  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi2-cli.exp:  Avoid line number in test summary.

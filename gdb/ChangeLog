@@ -1,3 +1,9 @@
+2012-09-26  Andrew Burgess  <aburgess@broadcom.com>
+
+	* breakpoint.c (update_global_location_list): Ignore previous
+	duplicate status of a breakpoint when starting a new scan for
+	duplicate breakpoints.
+
 2012-09-26  Karthik Bhat  <kv.bhat@samsung.com>
 	PR breakpoints/14419
 	* arm-tdep.c (arm_skip_prologue): Extending producer check to
