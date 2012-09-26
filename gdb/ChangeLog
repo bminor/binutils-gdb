@@ -1,3 +1,10 @@
+2012-09-27  Yao Qi  <yao@codesourcery.com>
+
+	PR breakpoints/13898
+	* breakpoint.h (tracepoint_breakpoint_ops): Forward declaration.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Set breakpoint_ops
+	per breakpoint type.
+
 2012-09-26  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* procfs.c: Add gdb_bfd header.

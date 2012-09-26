@@ -76,6 +76,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   int tracepoint = 0;
   struct cleanup *back_to;
   enum bptype type_wanted;
+  struct breakpoint_ops *ops;
 
   enum opt
     {
@@ -162,6 +163,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   type_wanted = (tracepoint
 		 ? (hardware ? bp_fast_tracepoint : bp_tracepoint)
 		 : (hardware ? bp_hardware_breakpoint : bp_breakpoint));
+  ops = tracepoint ? &tracepoint_breakpoint_ops : &bkpt_breakpoint_ops;
 
   create_breakpoint (get_current_arch (), address, condition, thread,
 		     NULL,
@@ -169,7 +171,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 		     temp_p, type_wanted,
 		     ignore_count,
 		     pending ? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
-		     &bkpt_breakpoint_ops, 0, enabled, 0, 0);
+		     ops, 0, enabled, 0, 0);
   do_cleanups (back_to);
 
 }

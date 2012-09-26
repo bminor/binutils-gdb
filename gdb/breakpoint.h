@@ -1184,6 +1184,7 @@ extern void rwatch_command_wrapper (char *, int, int);
 extern void tbreak_command (char *, int);
 
 extern struct breakpoint_ops bkpt_breakpoint_ops;
+extern struct breakpoint_ops tracepoint_breakpoint_ops;
 
 extern void initialize_breakpoint_ops (void);
 
