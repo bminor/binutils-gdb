@@ -210,7 +210,9 @@ cp_print_value_fields (struct type *type, struct type *real_type,
     {
       int statmem_obstack_initial_size = 0;
       int stat_array_obstack_initial_size = 0;
-      
+      struct type *vptr_basetype = NULL;
+      int vptr_fieldno;
+
       if (dont_print_statmem == 0)
 	{
 	  statmem_obstack_initial_size =
@@ -225,6 +227,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	    }
 	}
 
+      vptr_fieldno = get_vptr_fieldno (type, &vptr_basetype);
       for (i = n_baseclasses; i < len; i++)
 	{
 	  /* If requested, skip printing of static fields.  */
@@ -358,7 +361,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 					   v, stream, recurse + 1,
 					   options);
 		}
-	      else if (i == TYPE_VPTR_FIELDNO (type))
+	      else if (i == vptr_fieldno && type == vptr_basetype)
 		{
 		  int i_offset = offset + TYPE_FIELD_BITPOS (type, i) / 8;
 		  struct type *i_type = TYPE_FIELD_TYPE (type, i);

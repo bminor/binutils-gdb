@@ -1,3 +1,10 @@
+2012-09-27  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/derivation.exp: Add regression test.
+	* gdb.cp/derivation.cc (class V_base, class V_inter, class
+	V_derived): New.
+	(vderived): New global.
+
 2012-09-26  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/dw2-common-block.S: New file.

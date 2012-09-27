@@ -1,3 +1,8 @@
+2012-09-27  Tom Tromey  <tromey@redhat.com>
+
+	Fix https://bugzilla.redhat.com/show_bug.cgi?id=849357
+	* cp-valprint.c (cp_print_value_fields): Use get_vptr_fieldno.
+
 2012-09-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* sol-thread.c (sol_thread_fetch_registers)

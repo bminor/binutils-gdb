@@ -176,3 +176,11 @@ gdb_test_multiple "frame" "re-selected 'main' frame after inferior call" {
 
 gdb_test "print g_instance.bfoo()" "\\$\[0-9\]+ = 2" "print value of g_instance.bfoo()"
 gdb_test "print g_instance.cfoo()" "\\$\[0-9\]+ = 3" "print value of g_instance.cfoo()"
+
+# This is a regression test for a bug that caused a crash when trying
+# to print the vtbl pointer.  We don't care about the output so much
+# here (it is tested elsewhere), just that gdb doesn't crash.  We test
+# "ptype" first because, before the gdb fix, that was the only code
+# path calling get_vptr_fieldno.
+gdb_test "ptype vderived" "type = .*"
+gdb_test "print vderived" " = {.* inter = 0.*x = 0}"

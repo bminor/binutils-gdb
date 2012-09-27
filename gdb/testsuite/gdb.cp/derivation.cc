@@ -118,8 +118,37 @@ public:
     
 };
 
+class V_base
+{
+public:
+  virtual void m();
+  int base;
+};
 
+void
+V_base::m()
+{
+}
 
+class V_inter : public virtual V_base
+{
+public:
+  virtual void f();
+  int inter;
+};
+
+void
+V_inter::f()
+{
+}
+
+class V_derived : public V_inter
+{
+public:
+  double x;
+};
+
+V_derived vderived;
 
 int A::afoo() {
     return 1;
