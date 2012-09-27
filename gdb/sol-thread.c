@@ -966,26 +966,6 @@ ps_plog (const char *fmt, ...)
 ps_err_e
 ps_lgetxregsize (gdb_ps_prochandle_t ph, lwpid_t lwpid, int *xregsize)
 {
-#if 0
-  int lwp_fd;
-  int regsize;
-  ps_err_e val;
-
-  val = get_lwp_fd (ph, lwpid, &lwp_fd);
-  if (val != PS_OK)
-    return val;
-
-  if (ioctl (lwp_fd, PIOCGXREGSIZE, &regsize))
-    {
-      if (errno == EINVAL)
-	return PS_NOFREGS;	/* XXX Wrong code, but this is the closest
-				   thing in proc_service.h  */
-
-      print_sys_errmsg ("ps_lgetxregsize (): PIOCGXREGSIZE", errno);
-      return PS_ERR;
-    }
-#endif
-
   return PS_OK;
 }
 
@@ -994,21 +974,6 @@ ps_lgetxregsize (gdb_ps_prochandle_t ph, lwpid_t lwpid, int *xregsize)
 ps_err_e
 ps_lgetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
 {
-#if 0
-  int lwp_fd;
-  ps_err_e val;
-
-  val = get_lwp_fd (ph, lwpid, &lwp_fd);
-  if (val != PS_OK)
-    return val;
-
-  if (ioctl (lwp_fd, PIOCGXREG, xregset))
-    {
-      print_sys_errmsg ("ps_lgetxregs (): PIOCGXREG", errno);
-      return PS_ERR;
-    }
-#endif
-
   return PS_OK;
 }
 
@@ -1017,21 +982,6 @@ ps_lgetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
 ps_err_e
 ps_lsetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
 {
-#if 0
-  int lwp_fd;
-  ps_err_e val;
-
-  val = get_lwp_fd (ph, lwpid, &lwp_fd);
-  if (val != PS_OK)
-    return val;
-
-  if (ioctl (lwp_fd, PIOCSXREG, xregset))
-    {
-      print_sys_errmsg ("ps_lsetxregs (): PIOCSXREG", errno);
-      return PS_ERR;
-    }
-#endif
-
   return PS_OK;
 }
 

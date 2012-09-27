@@ -1,6 +1,11 @@
 2012-09-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* sol-thread.c (ps_lgetxregsize, ps_lgetxregs, ps_lsetxregs):
+	Remove commented-out code.
+
+2012-09-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* sol-thread.c (ps_lgetxregsize, ps_lgetxregs, ps_lsetxregs):
 	Enable this code for sparc hosts only.
 
 2012-09-27  Joel Brobecker  <brobecker@adacore.com>
