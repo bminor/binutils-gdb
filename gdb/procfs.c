@@ -2517,7 +2517,7 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
    register for the LWP that we're interested in.  Returns the
    matching ssh struct (LDT entry).  */
 
-struct ssd *
+static struct ssd *
 proc_get_LDT_entry (procinfo *pi, int key)
 {
   static struct ssd *ldt_entry = NULL;

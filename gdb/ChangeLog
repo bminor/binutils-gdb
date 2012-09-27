@@ -1,5 +1,9 @@
 2012-09-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* procfs.c (proc_get_LDT_entry): Make static.
+
+2012-09-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* procfs.c (proc_find_memory_regions): Fix declaration.
 
 2012-09-27  Siddhesh Poyarekar  <siddhesh@redhat.com>
