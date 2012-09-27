@@ -1,6 +1,16 @@
 2012-09-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* sol-thread.c (ps_lgetxregsize, ps_lgetxregs, ps_lsetxregs):
+	Move these functions to sparc-sol-thread.c.
+	* sparc-sol-thread.c: New file.
+	* configure.ac: Add sparc-sol-thread.o to CONFIG_OBS and
+	sparc-sol-thread.c to CONFIG_SRCS for sparc-solaris native
+	configurations.
+	* configure: Regenerate.
+
+2012-09-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* sol-thread.c (ps_lgetxregsize, ps_lgetxregs, ps_lsetxregs):
 	Remove commented-out code.
 
 2012-09-27  Joel Brobecker  <brobecker@adacore.com>
