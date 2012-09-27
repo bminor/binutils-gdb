@@ -964,7 +964,7 @@ create_array_type (struct type *result_type,
 
 struct type *
 lookup_array_range_type (struct type *element_type,
-			 int low_bound, int high_bound)
+			 LONGEST low_bound, LONGEST high_bound)
 {
   struct gdbarch *gdbarch = get_type_arch (element_type);
   struct type *index_type = builtin_type (gdbarch)->builtin_int;
@@ -1000,7 +1000,7 @@ create_string_type (struct type *result_type,
 
 struct type *
 lookup_string_range_type (struct type *string_char_type,
-			  int low_bound, int high_bound)
+			  LONGEST low_bound, LONGEST high_bound)
 {
   struct type *result_type;
 

@@ -1,3 +1,16 @@
+2012-09-27  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* gdbtypes.c (lookup_array_range_type): Expand parameters
+	LOW_BOUND and HIGH_BOUND to LONGEST.
+	(lookup_string_range_type): Likewise.
+	* gdbtypes.h (lookup_array_range_type): Likewise.
+	(lookup_string_range_type): Likewise.
+	* valops.c (value_cstring): Expand parameter LEN to ssize_t.
+	Expand HIGHBOUND to ssize_t.
+	(value_string): Likewise.
+	* value.h (value_cstring): Expand parameter LEN to ssize_t.
+	(value_string): Likewise.
+
 2012-09-27  Yao Qi  <yao@codesourcery.com>
 
 	PR breakpoints/13898

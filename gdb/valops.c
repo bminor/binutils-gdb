@@ -1838,11 +1838,11 @@ value_array (int lowbound, int highbound, struct value **elemvec)
 }
 
 struct value *
-value_cstring (char *ptr, int len, struct type *char_type)
+value_cstring (char *ptr, ssize_t len, struct type *char_type)
 {
   struct value *val;
   int lowbound = current_language->string_lower_bound;
-  int highbound = len / TYPE_LENGTH (char_type);
+  ssize_t highbound = len / TYPE_LENGTH (char_type);
   struct type *stringtype
     = lookup_array_range_type (char_type, lowbound, highbound + lowbound - 1);
 
@@ -1861,11 +1861,11 @@ value_cstring (char *ptr, int len, struct type *char_type)
    string may contain embedded null bytes.  */
 
 struct value *
-value_string (char *ptr, int len, struct type *char_type)
+value_string (char *ptr, ssize_t len, struct type *char_type)
 {
   struct value *val;
   int lowbound = current_language->string_lower_bound;
-  int highbound = len / TYPE_LENGTH (char_type);
+  ssize_t highbound = len / TYPE_LENGTH (char_type);
   struct type *stringtype
     = lookup_string_range_type (char_type, lowbound, highbound + lowbound - 1);
 
