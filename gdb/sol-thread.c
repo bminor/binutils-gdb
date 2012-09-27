@@ -959,6 +959,8 @@ ps_plog (const char *fmt, ...)
   vfprintf_filtered (gdb_stderr, fmt, args);
 }
 
+#if defined (__sparc) || defined (__sparcv9)
+
 /* Get size of extra register set.  Currently a noop.  */
 
 ps_err_e
@@ -1032,6 +1034,8 @@ ps_lsetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
 
   return PS_OK;
 }
+
+#endif /* defined (__sparc) || defined (__sparcv9) */
 
 /* Get floating-point registers for LWP.  */
 
