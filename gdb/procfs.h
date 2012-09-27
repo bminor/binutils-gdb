@@ -34,3 +34,10 @@ extern void procfs_use_watchpoints (struct target_ops *t);
    'live' procinfo.  */
 
 extern ptid_t procfs_first_available (void);
+
+#if (defined (__i386__) || defined (__x86_64__)) && defined (sun)
+struct ssd;
+
+extern struct ssd *procfs_find_LDT_entry (ptid_t);
+#endif
+

@@ -1108,7 +1108,6 @@ ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	    struct ssd *pldt)
 {
   /* NOTE: only used on Solaris, therefore OK to refer to procfs.c.  */
-  extern struct ssd *procfs_find_LDT_entry (ptid_t);
   struct ssd *ret;
 
   /* FIXME: can't I get the process ID from the prochandle or
