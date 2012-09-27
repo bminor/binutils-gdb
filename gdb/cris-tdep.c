@@ -1662,20 +1662,20 @@ cris_store_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
+  int len = TYPE_LENGTH (type);
   
-  if (TYPE_LENGTH (type) <= 4)
+  if (len <= 4)
     {
       /* Put the return value in R10.  */
-      val = extract_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order);
+      val = extract_unsigned_integer (valbuf, len, byte_order);
       regcache_cooked_write_unsigned (regcache, ARG1_REGNUM, val);
     }
-  else if (TYPE_LENGTH (type) <= 8)
+  else if (len <= 8)
     {
       /* Put the return value in R10 and R11.  */
       val = extract_unsigned_integer (valbuf, 4, byte_order);
       regcache_cooked_write_unsigned (regcache, ARG1_REGNUM, val);
-      val = extract_unsigned_integer ((char *)valbuf + 4,
-				      TYPE_LENGTH (type) - 4, byte_order);
+      val = extract_unsigned_integer ((char *)valbuf + 4, len - 4, byte_order);
       regcache_cooked_write_unsigned (regcache, ARG2_REGNUM, val);
     }
   else
@@ -1833,21 +1833,21 @@ cris_extract_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
+  int len = TYPE_LENGTH (type);
   
-  if (TYPE_LENGTH (type) <= 4)
+  if (len <= 4)
     {
       /* Get the return value from R10.  */
       regcache_cooked_read_unsigned (regcache, ARG1_REGNUM, &val);
-      store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, val);
+      store_unsigned_integer (valbuf, len, byte_order, val);
     }
-  else if (TYPE_LENGTH (type) <= 8)
+  else if (len <= 8)
     {
       /* Get the return value from R10 and R11.  */
       regcache_cooked_read_unsigned (regcache, ARG1_REGNUM, &val);
       store_unsigned_integer (valbuf, 4, byte_order, val);
       regcache_cooked_read_unsigned (regcache, ARG2_REGNUM, &val);
-      store_unsigned_integer ((char *)valbuf + 4, TYPE_LENGTH (type) - 4,
-			      byte_order, val);
+      store_unsigned_integer ((char *)valbuf + 4, len - 4, byte_order, val);
     }
   else
     error (_("cris_extract_return_value: type length too large"));

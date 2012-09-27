@@ -208,6 +208,7 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *type, struct regcache *regcache,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
+  int len = TYPE_LENGTH (type);
   gdb_byte buf[8];
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
@@ -223,7 +224,7 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
 	  ULONGEST addr;
 
 	  regcache_raw_read_unsigned (regcache, VAX_R0_REGNUM, &addr);
-	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	  read_memory (addr, readbuf, len);
 	}
 
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
@@ -233,16 +234,16 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
     {
       /* Read the contents of R0 and (if necessary) R1.  */
       regcache_cooked_read (regcache, VAX_R0_REGNUM, buf);
-      if (TYPE_LENGTH (type) > 4)
+      if (len > 4)
 	regcache_cooked_read (regcache, VAX_R1_REGNUM, buf + 4);
-      memcpy (readbuf, buf, TYPE_LENGTH (type));
+      memcpy (readbuf, buf, len);
     }
   if (writebuf)
     {
       /* Read the contents to R0 and (if necessary) R1.  */
-      memcpy (buf, writebuf, TYPE_LENGTH (type));
+      memcpy (buf, writebuf, len);
       regcache_cooked_write (regcache, VAX_R0_REGNUM, buf);
-      if (TYPE_LENGTH (type) > 4)
+      if (len > 4)
 	regcache_cooked_write (regcache, VAX_R1_REGNUM, buf + 4);
     }
 
