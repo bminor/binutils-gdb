@@ -142,11 +142,7 @@ static int procfs_thread_alive (struct target_ops *ops, ptid_t);
 static void procfs_find_new_threads (struct target_ops *ops);
 static char *procfs_pid_to_str (struct target_ops *, ptid_t);
 
-static int proc_find_memory_regions (int (*) (CORE_ADDR,
-					      unsigned long,
-					      int, int, int,
-					      void *),
-				     void *);
+static int proc_find_memory_regions (find_memory_region_ftype, void *);
 
 static char * procfs_make_note_section (bfd *, int *);
 

@@ -1,3 +1,7 @@
+2012-09-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* procfs.c (proc_find_memory_regions): Fix declaration.
+
 2012-09-27  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* amd64-tdep.c (amd64_return_value): Revert previous change
