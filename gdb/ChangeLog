@@ -1,5 +1,10 @@
 2012-09-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* sol-thread.c (sol_thread_fetch_registers)
+	(sol_thread_store_registers): Delete commented out code.
+
+2012-09-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* sol-thread.c (ps_lgetxregsize, ps_lgetxregs, ps_lsetxregs):
 	Move these functions to sparc-sol-thread.c.
 	* sparc-sol-thread.c: New file.
