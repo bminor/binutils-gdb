@@ -411,7 +411,7 @@ regcache_dup (struct regcache *src)
   return newbuf;
 }
 
-int
+enum register_status
 regcache_register_status (const struct regcache *regcache, int regnum)
 {
   gdb_assert (regcache != NULL);

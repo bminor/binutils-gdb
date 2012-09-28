@@ -1,3 +1,10 @@
+2012-09-28  selven  <pcthegreat@gmail.com>
+
+	Make definition match declaration.
+
+	* regcache.c (regcache_register_status): Change return type to
+	enum register_status.
+
 2012-09-28  Yao Qi  <yao@codesourcery.com>
 
 	* mi/mi-main.c (mi_cmd_data_write_memory): Call
