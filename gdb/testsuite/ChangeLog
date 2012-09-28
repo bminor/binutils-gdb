@@ -1,3 +1,8 @@
+2012-09-28  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/pr11022.exp: New.
+	* gdb.mi/pr11022.c: New.  Copied from gdb.base/.
+
 2012-09-27  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/derivation.exp: Add regression test.

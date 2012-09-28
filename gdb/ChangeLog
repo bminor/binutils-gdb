@@ -1,5 +1,12 @@
 2012-09-28  Yao Qi  <yao@codesourcery.com>
 
+	* mi/mi-main.c (mi_cmd_data_write_memory): Call
+	write_memory_with_notification instead of write_memory.
+	(mi_cmd_data_write_memory_bytes): Call write_memory_with_notification
+	instead of target_write_memory.
+
+2012-09-28  Yao Qi  <yao@codesourcery.com>
+
 	* mi/mi-main.c (mi_cmd_data_write_memory_bytes): Emit error
 	when the length of content is not an even number.
 

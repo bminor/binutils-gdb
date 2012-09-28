@@ -1648,7 +1648,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   old_chain = make_cleanup (xfree, buffer);
   store_signed_integer (buffer, word_size, byte_order, value);
   /* Write it down to memory.  */
-  write_memory (addr, buffer, word_size);
+  write_memory_with_notification (addr, buffer, word_size);
   /* Free the buffer.  */
   do_cleanups (old_chain);
 }
@@ -1688,9 +1688,7 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
       data[i] = (gdb_byte) x;
     }
 
-  r = target_write_memory (addr, data, len);
-  if (r != 0)
-    error (_("Could not write memory"));
+  write_memory_with_notification (addr, data, len);
 
   do_cleanups (back_to);
 }
