@@ -1672,6 +1672,10 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
 
   addr = parse_and_eval_address (argv[0]);
   cdata = argv[1];
+  if (strlen (cdata) % 2)
+    error (_("Hex-encoded '%s' must have an even number of characters."),
+	   cdata);
+
   len = strlen (cdata)/2;
 
   data = xmalloc (len);

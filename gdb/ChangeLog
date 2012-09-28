@@ -1,3 +1,8 @@
+2012-09-28  Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-main.c (mi_cmd_data_write_memory_bytes): Emit error
+	when the length of content is not an even number.
+
 2012-09-27  Tom Tromey  <tromey@redhat.com>
 
 	Fix https://bugzilla.redhat.com/show_bug.cgi?id=849357
