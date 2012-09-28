@@ -300,11 +300,6 @@ solib_find (char *in_pathname, int *fd)
   if (found_file < 0)
     temp_pathname = NULL;
 
-  /* If not found, search the solib_search_path (if any).  */
-  if (found_file < 0 && solib_search_path != NULL)
-    found_file = openp (solib_search_path, OPF_TRY_CWD_FIRST,
-			in_pathname, O_RDONLY | O_BINARY, &temp_pathname);
-
   /* If the search in gdb_sysroot failed, and the path name is
      absolute at this point, make it relative.  (openp will try and open the
      file according to its absolute path otherwise, which is not what we want.)

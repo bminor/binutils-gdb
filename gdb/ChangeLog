@@ -1,3 +1,10 @@
+2012-09-28  Nathan Miller  <nathanm2@us.ibm.com>
+	    Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	PR gdb/13989
+	* solib.c (solib_find): Prevent GDB from loading native libraries when
+	debugging a cross-target corefile.
+
 2012-09-28  selven  <pcthegreat@gmail.com>
 
 	Make definition match declaration.
