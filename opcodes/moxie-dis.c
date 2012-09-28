@@ -174,8 +174,11 @@ print_insn_moxie (bfd_vma addr, struct disassemble_info * info)
 	    length = 6;
 	  }
 	  break;
+        case MOXIE_BAD:
+	  fpr (stream, "bad");
+	  break;
 	default:
-	  abort ();
+	  abort();
 	}
     }
   else if ((iword & (1<<14)) == 0)
@@ -193,6 +196,9 @@ print_insn_moxie (bfd_vma addr, struct disassemble_info * info)
 	case MOXIE_F2_NARG:
 	  fpr (stream, "%s", opcode->name);
 	  break;
+        case MOXIE_BAD:
+	  fpr (stream, "bad");
+	  break;
 	default:
 	  abort();
 	}
@@ -207,6 +213,9 @@ print_insn_moxie (bfd_vma addr, struct disassemble_info * info)
 	  fpr (stream, "%s\t", opcode->name);
 	  info->print_address_func ((bfd_vma) (addr + INST2OFFSET(iword) + 2), 
 				    info);
+	  break;
+        case MOXIE_BAD:
+	  fpr (stream, "bad");
 	  break;
 	default:
 	  abort();

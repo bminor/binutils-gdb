@@ -1,3 +1,8 @@
+2012-09-27  Anthony Green  <green@moxielogic.com>
+
+	* moxie-dis.c (print_insn_moxie): Print 'bad' instructions.
+	* moxie-opc.c: All 'bad' instructions have the itype MOXIE_BAD.
+
 2012-09-25  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
 
 	* i386-gen.c (cpu_flag_init): Add missing Cpu flags in 
