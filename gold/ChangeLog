@@ -1,3 +1,25 @@
+2012-09-29  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::iplt_): New output section.
+	(Target_powerpc::iplt_section, make_iplt_section,
+	reloc_needs_plt_for_ifunc, make_local_ifunc_plt_entry): New functions.
+	(Target_powerpc::make_plt_entry): Handle ifunc syms.
+	Target_powerpc::plt_entry_count): Count iplt entries too.
+	(Output_data_plt_powerpc::Output_data_plt_powerpc): Don't create
+	reloc section in constructor.  New params.
+	(Target_powerpc::make_plt_section): Create reloc section here instead.
+	(Output_data_plt_powerpc::add_ifunc_entry, add_local_ifunc_entry): New
+	functions.
+	(Output_data_plt_powerpc::initial_plt_entry_size_, name_): New vars.
+	(Output_data_glink::add_entry, find_entry): New functions to
+	deal with local syms.
+	(Glink_sym_ent): Add support for local syms.
+	(Output_data_glink::do_write): Handle ifunc plt entries.
+	(Target_powerpc::Scan::get_reference_flags): Handle more relocs.
+	(Target_powerpc::Scan::local, global): Handle ifunc syms.
+	(Target_powerpc::Relocate::relocate): Likewise.
+	(Target_powerpc::do_dynsym_value): Use glink stub, not plt entry.
+
 2012-09-25  Alan Modra  <amodra@gmail.com>
 
 	* object.h (Sized_relobj_file::adjust_local_symbol,
