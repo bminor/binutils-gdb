@@ -1,3 +1,10 @@
+2012-09-29  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/mi-tracepoint-changed.exp: New.
+	* gdb.mi/mi-breakpoint-changed.exp: New.
+	* gdb.mi/pending.c, gdb.mi/pendshr1.c: New
+	* gdb.mi/pendshr2.c: New.
+
 2012-09-28  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/pr11022.exp: New.
