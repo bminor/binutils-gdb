@@ -1,3 +1,8 @@
+2012-10-01  Andrew Burgess  <aburgess@broadcom.com>
+
+	* server.c (handle_search_memory_1): Include access length in
+	warning message.
+
 2012-09-05  Michael Brandt  <michael.brandt@axis.com>
 
 	* linux-crisv32-low.c: Fix compile errors.

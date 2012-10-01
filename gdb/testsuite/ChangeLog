@@ -1,3 +1,9 @@
+2012-10-01  Andrew Burgess  <aburgess@broadcom.com>
+
+	Test find command on unmapped memory.
+	* gdb.base/find-unmapped.c: New file.
+	* gdb.base/find-unmapped.exp: New file.
+
 2012-09-29  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/mi-tracepoint-changed.exp: New.

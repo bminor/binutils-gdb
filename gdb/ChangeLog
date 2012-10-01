@@ -1,3 +1,8 @@
+2012-10-01  Andrew Burgess  <aburgess@broadcom.com>
+
+	* target.c (simple_search_memory): Include access length in
+	warning message.
+
 2012-09-28  Nathan Miller  <nathanm2@us.ibm.com>
 	    Edjunior Machado  <emachado@linux.vnet.ibm.com>
 

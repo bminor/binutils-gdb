@@ -735,8 +735,9 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
   if (gdb_read_memory (start_addr, search_buf, search_buf_size)
       != search_buf_size)
     {
-      warning ("Unable to access target memory at 0x%lx, halting search.",
-	       (long) start_addr);
+      warning ("Unable to access %ld bytes of target "
+	       "memory at 0x%lx, halting search.",
+	       (long) search_buf_size, (long) start_addr);
       return -1;
     }
 
@@ -787,9 +788,9 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 	  if (gdb_read_memory (read_addr, search_buf + keep_len,
 			       nr_to_read) != search_buf_size)
 	    {
-	      warning ("Unable to access target memory "
+	      warning ("Unable to access %ld bytes of target memory "
 		       "at 0x%lx, halting search.",
-		       (long) read_addr);
+		       (long) nr_to_read, (long) read_addr);
 	      return -1;
 	    }
 
