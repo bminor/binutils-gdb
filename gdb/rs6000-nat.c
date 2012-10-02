@@ -771,6 +771,7 @@ add_vmap (LdInfo *ldi)
 
 	  next = gdb_bfd_openr_next_archived_file (abfd, last);
 	  gdb_bfd_unref (last);
+	  last = next;
 	}
 
       if (!last)
