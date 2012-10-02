@@ -148,7 +148,7 @@ proc gdb_unload {} {
 	}
 	-re "$gdb_prompt $" {}
 	timeout {
-	    perror "couldn't unload file in $GDB (timed out)."
+	    perror "couldn't unload file in $GDB (timeout)."
 	    return -1
 	}
     }
@@ -438,7 +438,7 @@ proc runto { function args } {
 	    return 0
 	}
 	eof { 
-	    fail "running to $function in runto (end of file)"
+	    fail "running to $function in runto (eof)"
 	    return 0
 	}
 	timeout { 
@@ -1218,6 +1218,7 @@ proc gdb_file_cmd { arg } {
     global GDB
     global last_loaded_file
 
+    # Save this for the benefit of gdbserver-support.exp.
     set last_loaded_file $arg
 
     # Set whether debug info was found.
@@ -1250,12 +1251,12 @@ proc gdb_file_cmd { arg } {
     send_gdb "file $arg\n"
     gdb_expect 120 {
 	-re "Reading symbols from.*no debugging symbols found.*done.*$gdb_prompt $" {
-	    verbose "\t\tLoaded $arg into the $GDB with no debugging symbols"
+	    verbose "\t\tLoaded $arg into $GDB with no debugging symbols"
 	    set gdb_file_cmd_debug_info "nodebug"
 	    return 0
 	}
         -re "Reading symbols from.*done.*$gdb_prompt $" {
-            verbose "\t\tLoaded $arg into the $GDB"
+            verbose "\t\tLoaded $arg into $GDB"
 	    set gdb_file_cmd_debug_info "debug"
 	    return 0
         }
@@ -1268,9 +1269,13 @@ proc gdb_file_cmd { arg } {
 		    return 0
                 }
                 timeout {
-                    perror "(timeout) Couldn't load $arg, other program already loaded."
+                    perror "Couldn't load $arg, other program already loaded (timeout)."
 		    return -1
                 }
+		eof {
+		    perror "Couldn't load $arg, other program already loaded (eof)."
+		    return -1
+		}
             }
 	}
         -re "No such file or directory.*$gdb_prompt $" {
@@ -1283,18 +1288,18 @@ proc gdb_file_cmd { arg } {
 	    return -1
 	}
         -re "$gdb_prompt $" {
-            perror "couldn't load $arg into $GDB."
+            perror "Couldn't load $arg into $GDB."
 	    return -1
             }
         timeout {
-            perror "couldn't load $arg into $GDB (timed out)."
+            perror "Couldn't load $arg into $GDB (timeout)."
 	    return -1
         }
         eof {
             # This is an attempt to detect a core dump, but seems not to
             # work.  Perhaps we need to match .* followed by eof, in which
             # gdb_expect does not seem to have a way to do that.
-            perror "couldn't load $arg into $GDB (end of file)."
+            perror "Couldn't load $arg into $GDB (eof)."
 	    return -1
         }
     }
@@ -3321,7 +3326,7 @@ proc get_debug_format { } {
 	    return 1;
 	}
 	timeout {
-	    warning "couldn't check debug format (timed out)."
+	    warning "couldn't check debug format (timeout)."
 	    return 1;
 	}
     }

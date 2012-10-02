@@ -1,3 +1,11 @@
+2012-10-02  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (gdb_unload): Change wording of perror text to be
+	more consistent.
+	(runto,gdb_debug_format): Ditto.
+	(gdb_file_cmd): Watch for eof in nested gdb_expect.
+	Clean up logging and error messages.
+
 2012-10-01  Andrew Burgess  <aburgess@broadcom.com>
 
 	Test find command on unmapped memory.
