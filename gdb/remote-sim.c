@@ -273,28 +273,26 @@ sim_inferior_data_cleanup (struct inferior *inf, void *data)
 static void
 dump_mem (char *buf, int len)
 {
-  if (len <= 8)
+  printf_filtered ("\t");
+
+  if (len == 8 || len == 4)
     {
-      if (len == 8 || len == 4)
-	{
-	  long l[2];
+      uint32_t l[2];
 
-	  memcpy (l, buf, len);
-	  printf_filtered ("\t0x%lx", l[0]);
-	  if (len == 8)
-	    printf_filtered (" 0x%lx", l[1]);
-	  printf_filtered ("\n");
-	}
-      else
-	{
-	  int i;
-
-	  printf_filtered ("\t");
-	  for (i = 0; i < len; i++)
-	    printf_filtered ("0x%x ", buf[i]);
-	  printf_filtered ("\n");
-	}
+      memcpy (l, buf, len);
+      printf_filtered ("0x%08x", l[0]);
+      if (len == 8)
+	printf_filtered (" 0x%08x", l[1]);
     }
+  else
+    {
+      int i;
+
+      for (i = 0; i < len; i++)
+	printf_filtered ("0x%02x ", buf[i]);
+    }
+
+  printf_filtered ("\n");
 }
 
 /* Initialize gdb_callback.  */
