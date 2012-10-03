@@ -1,3 +1,9 @@
+2012-10-03  Doug Evans  <dje@google.com>
+
+	PR symtab/14601
+	* gdb.cp/using-crash.exp: New file.
+	* gdb.cp/using-crash.cc: New file.
+
 2012-10-02  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (gdb_unload): Change wording of perror text to be

@@ -1488,6 +1488,7 @@ buildsym_init (void)
   global_symbols = NULL;
   pending_blocks = NULL;
   pending_macros = NULL;
+  using_directives = NULL;
 
   /* We shouldn't have any address map at this point.  */
   gdb_assert (! pending_addrmap);
