@@ -241,6 +241,17 @@
 }
 
 
+011111,00000,5.RT,5.RD,00000,111011::32::RDHWR
+"rdhwr r<RT>, r<RD>"
+*mips32r2:
+*mips64r2:
+{
+  // Return 0 for all hardware registers currently
+  GPR[RT] = EXTEND32 (0);
+  TRACE_ALU_RESULT1 (GPR[RT]);
+}
+
+
 011111,00000,5.RT,5.RD,00010,100000::32::WSBH
 "wsbh r<RD>, r<RT>"
 *mips32r2:
