@@ -38,7 +38,9 @@ const char comment_chars[]        = ";";
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output.  */
 const char line_comment_chars[]   = "#";
-const char line_separator_chars[] = "|";
+/* Use something that isn't going to be needed by any expressions or
+   other syntax.  */
+const char line_separator_chars[] = "@";
 
 const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";

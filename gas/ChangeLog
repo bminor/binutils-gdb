@@ -1,3 +1,8 @@
+2012-10-03  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rl78.c: Change line_separator to '@' so that '|' can
+	be used in expressions.
+
 2012-10-01  Alan Modra  <amodra@gmail.com>
 
 	* write.c (chain_frchains_together_1): Reorder assertion to avoid
