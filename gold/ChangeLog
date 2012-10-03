@@ -1,3 +1,9 @@
+2012-10-02  Jiong Wang  <jiwang@tilera.com>
+
+	* tilegx.cc (Target_tilegx::do_finalize_sections): Adjust
+	global_offset_table_ value for larget got.
+	(Target_tilegx::Relocate::relocate): Handle adjusted got value.
+
 2012-09-29  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::iplt_): New output section.

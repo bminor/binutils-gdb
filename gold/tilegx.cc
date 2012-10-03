@@ -4256,6 +4256,13 @@ Target_tilegx<size, big_endian>::do_finalize_sections(
     {
       uint64_t data_size = this->got_->current_data_size();
       symtab->get_sized_symbol<size>(sym)->set_symsize(data_size);
+
+      // If the .got section is more than 0x8000 bytes, we add
+      // 0x8000 to the value of _GLOBAL_OFFSET_TABLE_, so that 16
+      // bit relocations have a greater chance of working.
+      if (data_size >= 0x8000)
+        symtab->get_sized_symbol<size>(sym)->set_value(
+          symtab->get_sized_symbol<size>(sym)->value() + 0x8000);
     }
 
   if (parameters->doing_static_link()
@@ -4347,7 +4354,10 @@ Target_tilegx<size, big_endian>::Relocate::relocate(
   // Get the GOT offset if needed.
   // For tilegx, the GOT pointer points to the start of the GOT section.
   bool have_got_offset = false;
-  unsigned int got_offset = 0;
+  int got_offset = 0;
+  int got_base = target->got_ != NULL
+                 ? target->got_->current_data_size() >= 0x8000 ? 0x8000 : 0
+                 : 0;
   unsigned int got_type = GOT_TYPE_STANDARD;
   bool always_apply_relocation = false;
   switch (r_type)
@@ -4361,13 +4371,14 @@ Target_tilegx<size, big_endian>::Relocate::relocate(
       if (gsym != NULL)
         {
           gold_assert(gsym->has_got_offset(got_type));
-          got_offset = gsym->got_offset(got_type);
+          got_offset = gsym->got_offset(got_type) - got_base;
         }
       else
         {
           unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
           gold_assert(object->local_has_got_offset(r_sym, got_type));
-          got_offset = object->local_got_offset(r_sym, got_type);
+          got_offset =
+            object->local_got_offset(r_sym, got_type) - got_base;
         }
       have_got_offset = true;
       break;
@@ -4590,12 +4601,13 @@ Target_tilegx<size, big_endian>::Relocate::relocate(
               if (have_got_offset) {
                 if (gsym != NULL) {
                   gold_assert(gsym->has_got_offset(got_type));
-                  got_offset = gsym->got_offset(got_type);
+                  got_offset = gsym->got_offset(got_type) - got_base;
                 } else {
                   unsigned int r_sym
                      = elfcpp::elf_r_sym<size>(rela.get_r_info());
                   gold_assert(object->local_has_got_offset(r_sym, got_type));
-                  got_offset = object->local_got_offset(r_sym, got_type);
+                  got_offset =
+                    object->local_got_offset(r_sym, got_type) - got_base;
                 }
               }
 
