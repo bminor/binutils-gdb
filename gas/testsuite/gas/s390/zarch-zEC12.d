@@ -12,8 +12,8 @@ Disassembly of section .text:
 .*:	e5 60 6f a0 fd e8 [ 	]*tbegin	4000\(%r6\),65000
 .*:	e5 61 6f a0 fd e8 [ 	]*tbeginc	4000\(%r6\),65000
 .*:	b2 f8 00 00 [ 	]*tend
-.*:	c7 a0 6f a0 d8 f0 [ 	]*bpp	10,ffffffffffffb1fe <foo+0xffffffffffffb1fe>,4000\(%r6\)
-.*:	c5 ac 18 fe c7 80 [ 	]*bprp	10,fffffffffffff854 <foo+0xfffffffffffff854>,-80000
+.*:	c7 a0 6f a0 00 00 [ 	]*bpp	10,1e <foo\+0x1e>,4000\(%r6\)
+.*:	c5 a0 00 fe c7 80 [ 	]*bprp	10,24 <foo\+0x24>,-80000
 .*:	b2 fa 00 ad [ 	]*niai	10,13
 .*:	e3 67 8a 4d fe 9f [ 	]*lat	%r6,-5555\(%r7,%r8\)
 .*:	e3 67 8a 4d fe 85 [ 	]*lgat	%r6,-5555\(%r7,%r8\)

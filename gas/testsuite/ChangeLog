@@ -1,5 +1,10 @@
 2012-10-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
+	* gas/s390/zarch-zEC12.d: Fix branch preload instructions.
+	* gas/s390/zarch-zEC12.s: Likewise.
+
+2012-10-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
 	* gas/s390/s390.exp: Run zEC12 tests.
 	* gas/s390/zarch-zEC12.d: New file.
 	* gas/s390/zarch-zEC12.s: New file.
