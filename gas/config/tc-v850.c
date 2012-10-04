@@ -1955,7 +1955,7 @@ v850_insert_operand (unsigned long insn,
 
 	  else if (val < (offsetT) min || val > (offsetT) max)
 	    {
-	      char buf [128];
+	      static char buf [128];
 
 	      /* Restore min and mix to expected values for decimal ranges.  */
 	      if ((operand->flags & V850_OPERAND_SIGNED)

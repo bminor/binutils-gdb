@@ -1,3 +1,8 @@
+2012-10-04  Nick Clifton  <nickc@redhat.com>
+
+	* gas/v850/v850e1.d: Fix expected disassembly of clr1, not1, set1
+	and tst1 insns.
+
 2012-10-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* gas/s390/zarch-zEC12.d: Fix branch preload instructions.

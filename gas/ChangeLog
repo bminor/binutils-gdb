@@ -1,3 +1,8 @@
+2012-10-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-v850.c (v850_insert_operand): Use a static buffer for
+	the error message.
+
 2012-10-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* config/tc-s390.c (s390_parse_cpu): Add new option zEC12.

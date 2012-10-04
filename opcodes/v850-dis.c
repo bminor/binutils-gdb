@@ -309,9 +309,11 @@ disassemble (bfd_vma memaddr, struct disassemble_info *info, int bytes_read, uns
 		   We may need to output a trailing ']' if the last operand
 		   in an instruction is the register for a memory address.
 
-		   The exception (and there's always an exception) is the
+		   The exception (and there's always an exception) are the
 		   "jmp" insn which needs square brackets around it's only
-		   register argument.  */
+		   register argument, and the clr1/not1/set1/tst1 insns
+		   which [...] around their second register argument.  */
+
 	      prefix = "";
 	      if (operand->flags & V850_OPERAND_BANG)
 		{
@@ -334,6 +336,16 @@ disassemble (bfd_vma memaddr, struct disassemble_info *info, int bytes_read, uns
 		  info->fprintf_func (info->stream, "%s[", prefix);
 		  square = TRUE;
 		}
+	      else if (opnum == 2
+		       && (   op->opcode == 0x00e407e0 /* clr1 */
+			   || op->opcode == 0x00e207e0 /* not1 */
+			   || op->opcode == 0x00e007e0 /* set1 */
+			   || op->opcode == 0x00e607e0 /* tst1 */
+			   ))
+		{
+		  info->fprintf_func (info->stream, ", %s[", prefix);
+		  square = TRUE;
+		}		
 	      else if (opnum > 1)
 		info->fprintf_func (info->stream, ", %s", prefix);
 
