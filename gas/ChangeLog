@@ -1,3 +1,9 @@
+2012-10-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* config/tc-s390.c (s390_parse_cpu): Add new option zEC12.
+	* doc/as.texinfo: Document new option zEC12.
+	* doc/c-s390.texi: Likewise.
+
 2012-10-03  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-rl78.c: Change line_separator to '@' so that '|' can

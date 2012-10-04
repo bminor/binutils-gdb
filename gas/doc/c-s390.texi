@@ -17,7 +17,7 @@
 The s390 version of @code{@value{AS}} supports two architectures modes
 and seven chip levels. The architecture modes are the Enterprise System
 Architecture (ESA) and the newer z/Architecture mode. The chip levels
-are g5, g6, z900, z990, z9-109, z9-ec, z10 and z196.
+are g5, g6, z900, z990, z9-109, z9-ec, z10, z196, and zEC12.
 
 @menu
 * s390 Options::                Command-line Options.

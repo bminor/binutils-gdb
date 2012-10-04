@@ -1,3 +1,9 @@
+2012-10-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* gas/s390/s390.exp: Run zEC12 tests.
+	* gas/s390/zarch-zEC12.d: New file.
+	* gas/s390/zarch-zEC12.s: New file.
+
 2012-09-25  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
 
 	* gas/i386/arch-10-bdver1.d: New file to test bdver1 core.

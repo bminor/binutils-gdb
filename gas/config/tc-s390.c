@@ -381,6 +381,8 @@ s390_parse_cpu (char *arg)
     return S390_OPCODE_Z10;
   else if (strcmp (arg, "z196") == 0)
     return S390_OPCODE_Z196;
+  else if (strcmp (arg, "zEC12") == 0)
+    return S390_OPCODE_ZEC12;
   else if (strcmp (arg, "all") == 0)
     return S390_OPCODE_MAXCPU - 1;
   else

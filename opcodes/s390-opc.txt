@@ -1017,14 +1017,14 @@ b9f2 locr RRF_U0RR "load on condition 32 bit" z196 zarch
 b9f200000000 locr*16 RRF_00RR "load on condition 32 bit" z196 zarch
 b9e2 locgr RRF_U0RR "load on condition 64  bit" z196 zarch
 b9e200000000 locgr*16 RRF_00RR "load on condition 64  bit" z196 zarch
-eb00000000f2 loc RSY_RDRM "load on condition 32 bit" z196 zarch
-eb00000000f2 loc*12 RSY_RDR0 "load on condition 32 bit" z196 zarch
-eb00000000e2 locg RSY_RDRM "load on condition 64 bit" z196 zarch
-eb00000000e2 locg*12 RSY_RDR0 "load on condition 64 bit" z196 zarch
-eb00000000f3 stoc RSY_RDRM "store on condition 32 bit" z196 zarch
-eb00000000f3 stoc*12 RSY_RDR0 "store on condition 32 bit" z196 zarch
-eb00000000e3 stocg RSY_RDRM "store on condition 64 bit" z196 zarch
-eb00000000e3 stocg*12 RSY_RDR0 "store on condition 64 bit" z196 zarch
+eb00000000f2 loc RSY_RURD2 "load on condition 32 bit" z196 zarch
+eb00000000f2 loc*12 RSY_R0RD "load on condition 32 bit" z196 zarch
+eb00000000e2 locg RSY_RURD2 "load on condition 64 bit" z196 zarch
+eb00000000e2 locg*12 RSY_R0RD "load on condition 64 bit" z196 zarch
+eb00000000f3 stoc RSY_RURD2 "store on condition 32 bit" z196 zarch
+eb00000000f3 stoc*12 RSY_R0RD "store on condition 32 bit" z196 zarch
+eb00000000e3 stocg RSY_RURD2 "store on condition 64 bit" z196 zarch
+eb00000000e3 stocg*12 RSY_R0RD "store on condition 64 bit" z196 zarch
 b9f8 ark RRF_R0RR2 "add 3 operands 32 bit" z196 zarch
 b9e8 agrk RRF_R0RR2 "add 3 operands 64 bit" z196 zarch
 ec00000000d8 ahik RIE_RRI0 "add immediate 3 operands 32 bit" z196 zarch
@@ -1104,3 +1104,26 @@ b3d8 mxtra RRF_FEUFEFE2 "multiply extended dfp with rounding mode" z196 zarch
 b3d3 sdtra RRF_FUFF2 "subtract long dfp with rounding mode" z196 zarch
 b3db sxtra RRF_FEUFEFE2 "subtract extended dfp with rounding mode" z196 zarch
 b2b8 srnmb S_RD "set 3 bit bfp rounding mode" z196 zarch
+b2ec etnd RRE_R0 "extract transaction nesting depth" zEC12 zarch
+e30000000025 ntstg RXY_RRRD "nontransactional store" zEC12 zarch
+b2fc tabort S_RD "transaction abort" zEC12 zarch
+e560 tbegin SIL_RDU "transaction begin" zEC12 zarch
+e561 tbeginc SIL_RDU "constrained transaction begin" zEC12 zarch
+b2f8 tend S_00 "transaction end" zEC12 zarch
+c7 bpp SMI_U0RDP "branch prediction preload" zEC12 zarch
+c5 bprp MII_UPI "branch prediction relative preload" zEC12 zarch
+b2fa niai IE_UU "next instruction access intent" zEC12 zarch
+e3000000009f lat RXY_RRRD "load and trap 32 bit" zEC12 zarch
+e30000000085 lgat RXY_RRRD "load and trap 64 bit" zEC12 zarch
+e300000000c8 lfhat RXY_RRRD "load high and trap" zEC12 zarch
+e3000000009d llgfat RXY_RRRD "load logical and trap 32>64" zEC12 zarch
+e3000000009c llgtat RXY_RRRD "load logical thirty one bits and trap 31>64" zEC12 zarch
+eb0000000023 clt RSY_RURD "compare logical and trap 32 bit reg-mem" zEC12 zarch
+eb0000000023 clt$12 RSY_R0RD "compare logical and trap 32 bit reg-mem" zEC12 zarch
+eb000000002b clgt RSY_RURD "compare logical and trap 64 bit reg-mem" zEC12 zarch
+eb000000002b clgt$12 RSY_R0RD "compare logical and trap 64 bit reg-mem" zEC12 zarch
+ec0000000059 risbgn RIE_RRUUU "rotate then insert selected bits nocc" zEC12 zarch
+ed00000000aa cdzt RSL_LRDFU "convert from zoned long" zEC12 zarch
+ed00000000ab cxzt RSL_LRDFEU "convert from zoned extended" zEC12 zarch
+ed00000000a8 czdt RSL_LRDFU "convert to zoned long" zEC12 zarch
+ed00000000a9 czxt RSL_LRDFEU "convert to zoned extended" zEC12 zarch

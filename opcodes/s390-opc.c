@@ -171,50 +171,64 @@ const struct s390_operand s390_operands[] =
   { 8, 8, S390_OPERAND_SIGNED },
 #define I8_32  48		  /* 8 bit signed value starting at 32 */
   { 8, 32, S390_OPERAND_SIGNED },
-#define I16_16 49                 /* 16 bit signed value starting at 16 */
+#define I12_12 49		  /* 12 bit signed value starting at 12 */
+  { 12, 12, S390_OPERAND_SIGNED },
+#define I16_16 50                 /* 16 bit signed value starting at 16 */
   { 16, 16, S390_OPERAND_SIGNED },
-#define I16_32 50                 /* 16 bit signed value starting at 32 */
+#define I16_32 51                 /* 16 bit signed value starting at 32 */
   { 16, 32, S390_OPERAND_SIGNED },
-#define I32_16 51		  /* 32 bit signed value starting at 16 */
+#define I24_24 52		  /* 24 bit signed value starting at 24 */
+  { 24, 24, S390_OPERAND_SIGNED },
+#define I32_16 53		  /* 32 bit signed value starting at 16 */
   { 32, 16, S390_OPERAND_SIGNED },
 
 /* Unsigned immediate operands.  */
 
-#define U4_8   52                 /* 4 bit unsigned value starting at 8 */
+#define U4_8   54                 /* 4 bit unsigned value starting at 8 */
   { 4, 8, 0 },
-#define U4_12  53                 /* 4 bit unsigned value starting at 12 */
+#define U4_12  55                 /* 4 bit unsigned value starting at 12 */
   { 4, 12, 0 },
-#define U4_16  54                 /* 4 bit unsigned value starting at 16 */
+#define U4_16  56                 /* 4 bit unsigned value starting at 16 */
   { 4, 16, 0 },
-#define U4_20  55                 /* 4 bit unsigned value starting at 20 */
+#define U4_20  57                 /* 4 bit unsigned value starting at 20 */
   { 4, 20, 0 },
-#define U4_32  56                 /* 4 bit unsigned value starting at 32 */
+#define U4_24  58                 /* 4 bit unsigned value starting at 24 */
+  { 4, 24, 0 },
+#define U4_28  59                 /* 4 bit unsigned value starting at 28 */
+  { 4, 28, 0 },
+#define U4_32  60                 /* 4 bit unsigned value starting at 32 */
   { 4, 32, 0 },
-#define U8_8   57                 /* 8 bit unsigned value starting at 8 */
+#define U4_36  61                 /* 4 bit unsigned value starting at 36 */
+  { 4, 36, 0 },
+#define U8_8   62                 /* 8 bit unsigned value starting at 8 */
   { 8, 8, 0 },
-#define U8_16  58                 /* 8 bit unsigned value starting at 16 */
+#define U8_16  63                 /* 8 bit unsigned value starting at 16 */
   { 8, 16, 0 },
-#define U8_24  59                 /* 8 bit unsigned value starting at 24 */
+#define U8_24  64                 /* 8 bit unsigned value starting at 24 */
   { 8, 24, 0 },
-#define U8_32  60                 /* 8 bit unsigned value starting at 32 */
+#define U8_32  65                 /* 8 bit unsigned value starting at 32 */
   { 8, 32, 0 },
-#define U16_16 61                 /* 16 bit unsigned value starting at 16 */
+#define U16_16 66                 /* 16 bit unsigned value starting at 16 */
   { 16, 16, 0 },
-#define U16_32 62		  /* 16 bit unsigned value starting at 32 */
+#define U16_32 67		  /* 16 bit unsigned value starting at 32 */
   { 16, 32, 0 },
-#define U32_16 63		  /* 32 bit unsigned value starting at 16 */
+#define U32_16 68		  /* 32 bit unsigned value starting at 16 */
   { 32, 16, 0 },
 
 /* PC-relative address operands.  */
 
-#define J16_16 64                 /* PC relative jump offset at 16 */
+#define J12_12 69                 /* PC relative offset at 12 */
+  { 12, 12, S390_OPERAND_PCREL },
+#define J16_16 70                 /* PC relative offset at 16 */
   { 16, 16, S390_OPERAND_PCREL },
-#define J32_16 65                 /* PC relative long offset at 16 */
+#define J16_32 71                 /* PC relative offset at 16 */
+  { 16, 32, S390_OPERAND_PCREL },
+#define J32_16 72                 /* PC relative offset at 16 */
   { 32, 16, S390_OPERAND_PCREL },
 
 /* Conditional mask operands.  */
 
-#define M_16OPT   66              /* 4 bit optional mask starting at 16 */
+#define M_16OPT   73              /* 4 bit optional mask starting at 16 */
   { 4, 16, S390_OPERAND_OPTIONAL },
 
 };
@@ -240,13 +254,13 @@ const struct s390_operand s390_operands[] =
       c - control register
       d - displacement, 12 bit
       f - floating pointer register
-      fe - even numbered floating point register operand
+      fe - fpr extended operand, a valid floating pointer register pair
       i - signed integer, 4, 8, 16 or 32 bit
       l - length, 4 or 8 bit
       p - pc relative
       r - general purpose register
       ro - optional register operand
-      re - even numbered register operand
+      re - gpr extended operand, a valid general purpose register pair
       u - unsigned integer, 4, 8, 16 or 32 bit
       m - mode field, 4 bit
       0 - operand skipped.
@@ -267,6 +281,8 @@ const struct s390_operand s390_operands[] =
       The instruction format is: INSTR_SS_LLRDRD / MASK_SS_LLRDRD.  */
 
 #define INSTR_E          2, { 0,0,0,0,0,0 }                    /* e.g. pr    */
+#define INSTR_IE_UU      4, { U4_24,U4_28,0,0,0,0 }            /* e.g. niai  */
+#define INSTR_MII_UPI    6, { U4_8,J12_12,I24_24 }             /* e.g. bprp  */
 #define INSTR_RIE_RRP    6, { R_8,R_12,J16_16,0,0,0 }          /* e.g. brxhg */
 #define INSTR_RIE_RRPU   6, { R_8,R_12,U4_32,J16_16,0,0 }      /* e.g. crj   */
 #define INSTR_RIE_RRP0   6, { R_8,R_12,J16_16,0,0,0 }          /* e.g. crjne */
@@ -368,14 +384,16 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RSE_CCRD   6, { C_8,C_12,D_20,B_16,0,0 }         /* e.g. lmh   */
 #define INSTR_RSE_RURD   6, { R_8,U4_12,D_20,B_16,0,0 }        /* e.g. icmh  */
 #define INSTR_RSL_R0RD   6, { D_20,L4_8,B_16,0,0,0 }           /* e.g. tp    */
+#define INSTR_RSL_LRDFU  6, { F_32,D_20,L4_8,B_16,U4_36,0 }    /* e.g. cdzt  */
+#define INSTR_RSL_LRDFEU 6, { FE_32,D_20,L4_8,B_16,U4_36,0 }   /* e.g. cxzt  */
 #define INSTR_RSI_RRP    4, { R_8,R_12,J16_16,0,0,0 }          /* e.g. brxh  */
 #define INSTR_RSY_RRRD   6, { R_8,R_12,D20_20,B_16,0,0 }       /* e.g. stmy  */
 #define INSTR_RSY_RERERD 6, { RE_8,RE_12,D20_20,B_16,0,0 }     /* e.g. cdsy  */
 #define INSTR_RSY_RURD   6, { R_8,U4_12,D20_20,B_16,0,0 }      /* e.g. icmh  */
+#define INSTR_RSY_RURD2  6, { R_8,D20_20,B_16,U4_12,0,0 }      /* e.g. loc   */
+#define INSTR_RSY_R0RD   6, { R_8,D20_20,B_16,0,0,0 }          /* e.g. locgt */
 #define INSTR_RSY_AARD   6, { A_8,A_12,D20_20,B_16,0,0 }       /* e.g. lamy  */
-#define INSTR_RSY_CCRD   6, { C_8,C_12,D20_20,B_16,0,0 }       /* e.g. lamy  */
-#define INSTR_RSY_RDRM   6, { R_8,D20_20,B_16,U4_12,0,0 }      /* e.g. loc   */
-#define INSTR_RSY_RDR0   6, { R_8,D20_20,B_16,0,0,0 }          /* e.g. loc   */
+#define INSTR_RSY_CCRD   6, { C_8,C_12,D20_20,B_16,0,0 }       /* e.g. stctg */
 #define INSTR_RS_AARD    4, { A_8,A_12,D_20,B_16,0,0 }         /* e.g. lam   */
 #define INSTR_RS_CCRD    4, { C_8,C_12,D_20,B_16,0,0 }         /* e.g. lctl  */
 #define INSTR_RS_R0RD    4, { R_8,D_20,B_16,0,0,0 }            /* e.g. sll   */
@@ -407,6 +425,7 @@ const struct s390_operand s390_operands[] =
 #define INSTR_SIY_IRD    6, { D20_20,B_16,I8_8,0,0,0 }         /* e.g. asi   */
 #define INSTR_SIL_RDI    6, { D_20,B_16,I16_32,0,0,0 }         /* e.g. chhsi */
 #define INSTR_SIL_RDU    6, { D_20,B_16,U16_32,0,0,0 }         /* e.g. clfhsi */
+#define INSTR_SMI_U0RDP  6, { U4_8,J16_32,D_20,B_16,0,0 }      /* e.g. bpp */
 #define INSTR_SSE_RDRD   6, { D_20,B_16,D_36,B_32,0,0 }        /* e.g. mvsdk */
 #define INSTR_SS_L0RDRD  6, { D_20,L8_8,B_16,D_36,B_32,0     } /* e.g. mvc   */
 #define INSTR_SS_L2RDRD  6, { D_20,B_16,D_36,L8_8,B_32,0     } /* e.g. pka   */
@@ -422,6 +441,8 @@ const struct s390_operand s390_operands[] =
 #define INSTR_S_RD       4, { D_20,B_16,0,0,0,0 }              /* e.g. lpsw  */
 
 #define MASK_E           { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
+#define MASK_IE_UU       { 0xff, 0xff, 0xff, 0x00, 0x00, 0x00 }
+#define MASK_MII_UPI     { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RIE_RRP     { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RIE_RRPU    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RIE_RRP0    { 0xff, 0x00, 0x00, 0x00, 0xf0, 0xff }
@@ -521,6 +542,8 @@ const struct s390_operand s390_operands[] =
 #define MASK_RSE_CCRD    { 0xff, 0x00, 0x00, 0x00, 0xff, 0xff }
 #define MASK_RSE_RURD    { 0xff, 0x00, 0x00, 0x00, 0xff, 0xff }
 #define MASK_RSL_R0RD    { 0xff, 0x0f, 0x00, 0x00, 0xff, 0xff }
+#define MASK_RSL_LRDFU   { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RSL_LRDFEU  { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RSI_RRP     { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RS_AARD     { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RS_CCRD     { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
@@ -532,10 +555,10 @@ const struct s390_operand s390_operands[] =
 #define MASK_RSY_RRRD    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RSY_RERERD  { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RSY_RURD    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RSY_RURD2   { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RSY_R0RD    { 0xff, 0x0f, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RSY_AARD    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RSY_CCRD    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
-#define MASK_RSY_RDRM    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
-#define MASK_RSY_RDR0    { 0xff, 0x0f, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RXE_FRRD    { 0xff, 0x00, 0x00, 0x00, 0xff, 0xff }
 #define MASK_RXE_FERRD   { 0xff, 0x00, 0x00, 0x00, 0xff, 0xff }
 #define MASK_RXE_RRRD    { 0xff, 0x00, 0x00, 0x00, 0xff, 0xff }
@@ -560,6 +583,7 @@ const struct s390_operand s390_operands[] =
 #define MASK_SIY_IRD     { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_SIL_RDI     { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SIL_RDU     { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
+#define MASK_SMI_U0RDP   { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SSE_RDRD    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SS_L0RDRD   { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SS_L2RDRD   { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }

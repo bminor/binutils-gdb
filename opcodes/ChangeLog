@@ -1,3 +1,9 @@
+2012-10-04  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-mkopc.c: Support new option zEC12.
+	* s390-opc.c: Add new instruction formats.
+	* s390-opc.txt: Add new instructions for zEC12.
+
 2012-09-27  Anthony Green  <green@moxielogic.com>
 
 	* moxie-dis.c (print_insn_moxie): Print 'bad' instructions.

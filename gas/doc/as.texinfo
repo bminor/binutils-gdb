@@ -1411,7 +1411,8 @@ Select the architecture mode, either the Enterprise System
 Architecture (esa) or the z/Architecture mode (zarch).
 @item -march=@var{processor}
 Specify which s390 processor variant is the target, @samp{g6}, @samp{g6},
-@samp{z900}, @samp{z990}, @samp{z9-109}, @samp{z9-ec}, or @samp{z10}.
+@samp{z900}, @samp{z990}, @samp{z9-109}, @samp{z9-ec}, @samp{z10},
+@samp{z196}, or @samp{zEC12}.
 @item -mregnames
 @itemx -mno-regnames
 Allow or disallow symbolic names for registers.
