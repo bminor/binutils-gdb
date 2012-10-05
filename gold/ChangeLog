@@ -1,5 +1,34 @@
 2012-10-05  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::do_plt_address_for_local,
+	do_plt_address_for_global): New functions.
+	(Output_data_got_powerpc::do_write): Don't segfault when linking
+	statically.
+	(Output_data_plt_powerpc::add_entry, add_ifunc_entry,
+	add_local_ifunc_entry): Return true on adding entry..
+	(Target_powerpc::make_plt_entry): ..use to avoid unnecessary
+	glink->add_entry call.  Remove unused symtab param.  Adjust calls.
+	(Target_powerpc::make_local_ifunc_plt_entry): Likewise.
+	(Target_powerpc::make_iplt_section): Remove symtab param.  Don't
+	set up symbols here.
+	(Target_powerpc::do_finalize_sections): Instead set up __rela_iplt
+	syms here.  Do so even when no .iplt.  Don't segfault when linking
+	statically.
+	(Output_data_glink::add_entry, find_entry): Rearrange params.  Add
+	new variants without reloc param.
+	(Glink_sym_ent::Glink_sym_ent): Likewise.
+	(Target_powerpc::Scan::reloc_needs_plt_for_ifunc): Accept any
+	reloc when refs will resolve to plt call stub.
+	(Target_powerpc::Scan::local): Correct ifunc handling.  Allow
+	R_PPC_PLTREL24 to resolve locally.
+	(Target_powerpc::Scan::global): Correct ifunc handling.
+	(Target_powerpc::Relocate::relocate): Correct local sym glink
+	lookup.  Don't destroy "value" when we have a plt call stub,
+	and when checking plt call validity.
+	(Target_powerpc::do_dynsym_value): Simplify.
+
+2012-10-05  Alan Modra  <amodra@gmail.com>
+
 	* i386.cc (Output_data_plt_i386::address_for_global,
 	address_for_local): Add plt offset to returned value.  Adjust uses.
 	* sparc.cc (Output_data_plt_sparc::address_for_global,
