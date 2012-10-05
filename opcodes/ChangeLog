@@ -1,3 +1,10 @@
+2012-10-05  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (ppc_opts) <altivec>: Use PPC_OPCODE_ALTIVEC2;
+	* ppc-opc.c (VBA): New define.
+	(powerpc_opcodes) <vcuxwfp, vcsxwfp, vcfpuxws, vcfpsxsw, vmr, vnot,
+	mfppr, mfppr32, mtppr, mtppr32>: New extended mnemonics.
+
 2012-10-04  Nick Clifton  <nickc@redhat.com>
 
 	* v850-dis.c (disassemble): Place square parentheses around second

@@ -1,3 +1,13 @@
+2012-10-05  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/power7.d: Add tests for mfppr, mfppr32, mtppr and mtppr32.
+	* gas/ppc/power7.s: Likewise.
+	* gas/ppc/altivec.d: Add tests for all legacy Altivec instructions.
+	* gas/ppc/altivec.s: Likewise.
+	* gas/ppc/altivec2.d: New test file.
+	* gas/ppc/altivec2.s: Likewise.
+	* gas/ppc/ppc.exp: Run it.
+
 2012-10-04  Nick Clifton  <nickc@redhat.com>
 
 	* gas/v850/v850e1.d: Fix expected disassembly of clr1, not1, set1

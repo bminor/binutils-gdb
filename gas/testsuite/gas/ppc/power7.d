@@ -117,3 +117,7 @@ Disassembly of section \.text:
  1ac:	7f bd eb 78 	mdoio
  1b0:	7f de f3 78 	mdoom
  1b4:	7f de f3 78 	mdoom
+ 1b8:	7d 40 e2 a6 	mfppr   r10
+ 1bc:	7d 62 e2 a6 	mfppr32 r11
+ 1c0:	7d 80 e3 a6 	mtppr   r12
+ 1c4:	7d a2 e3 a6 	mtppr32 r13
