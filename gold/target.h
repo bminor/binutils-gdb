@@ -256,16 +256,12 @@ class Target
   reloc_addend(void* arg, unsigned int type, uint64_t addend) const
   { return this->do_reloc_addend(arg, type, addend); }
 
-  // Return the PLT address to use for a global symbol.  This is used
-  // for STT_GNU_IFUNC symbols.  The symbol's plt_offset is relative
-  // to this PLT address.
+  // Return the PLT address to use for a global symbol.
   uint64_t
   plt_address_for_global(const Symbol* sym) const
   { return this->do_plt_address_for_global(sym); }
 
-  // Return the PLT address to use for a local symbol.  This is used
-  // for STT_GNU_IFUNC symbols.  The symbol's plt_offset is relative
-  // to this PLT address.
+  // Return the PLT address to use for a local symbol.
   uint64_t
   plt_address_for_local(const Relobj* object, unsigned int symndx) const
   { return this->do_plt_address_for_local(object, symndx); }

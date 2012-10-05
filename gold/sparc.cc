@@ -1619,7 +1619,7 @@ Output_data_plt_sparc<size, big_endian>::address_for_global(const Symbol* gsym)
   if (gsym->type() == elfcpp::STT_GNU_IFUNC
       && gsym->can_use_relative_reloc(false))
     offset = plt_index_to_offset(this->count_ + 4);
-  return this->address() + offset;
+  return this->address() + offset + gsym->plt_offset();
 }
 
 // Return the PLT address to use for a local symbol.  These are always
@@ -1628,10 +1628,12 @@ Output_data_plt_sparc<size, big_endian>::address_for_global(const Symbol* gsym)
 template<int size, bool big_endian>
 uint64_t
 Output_data_plt_sparc<size, big_endian>::address_for_local(
-	const Relobj*,
-	unsigned int)
+	const Relobj* object,
+	unsigned int r_sym)
 {
-  return this->address() + plt_index_to_offset(this->count_ + 4);
+  return (this->address()
+	  + plt_index_to_offset(this->count_ + 4)
+	  + object->local_plt_offset(r_sym));
 }
 
 static const unsigned int sparc_nop = 0x01000000;
@@ -3199,7 +3201,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
     {
       elfcpp::Elf_Xword value;
 
-      value = target->plt_address_for_global(gsym) + gsym->plt_offset();
+      value = target->plt_address_for_global(gsym);
 
       symval.set_output_value(value);
 
@@ -3210,8 +3212,7 @@ Target_sparc<size, big_endian>::Relocate::relocate(
       unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
       if (object->local_has_plt_offset(r_sym))
 	{
-	  symval.set_output_value(target->plt_address_for_local(object, r_sym)
-				  + object->local_plt_offset(r_sym));
+	  symval.set_output_value(target->plt_address_for_local(object, r_sym));
 	  psymval = &symval;
 	}
     }

@@ -1129,11 +1129,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
       const Sized_symbol<size>* sym;
       sym = static_cast<const Sized_symbol<size>*>(this->u1_.gsym);
       if (this->use_plt_offset_ && sym->has_plt_offset())
-	{
-	  uint64_t plt_address =
-	    parameters->target().plt_address_for_global(sym);
-	  return plt_address + sym->plt_offset();
-	}
+	return parameters->target().plt_address_for_global(sym);
       else
 	return sym->value() + addend;
     }
@@ -1151,11 +1147,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
       this->u1_.relobj->sized_relobj();
   gold_assert(relobj != NULL);
   if (this->use_plt_offset_)
-    {
-      uint64_t plt_address =
-	  parameters->target().plt_address_for_local(relobj, lsi);
-      return plt_address + relobj->local_plt_offset(lsi);
-    }
+    return parameters->target().plt_address_for_local(relobj, lsi);
   const Symbol_value<size>* symval = relobj->local_symbol(lsi);
   return symval->value(relobj, addend);
 }
@@ -1385,8 +1377,7 @@ Output_data_got<got_size, big_endian>::Got_entry::write(
 	// RELATIVE relocation.
 	Symbol* gsym = this->u_.gsym;
 	if (this->use_plt_or_tls_offset_ && gsym->has_plt_offset())
-	  val = (parameters->target().plt_address_for_global(gsym)
-		 + gsym->plt_offset());
+	  val = parameters->target().plt_address_for_global(gsym);
 	else
 	  {
 	    switch (parameters->size_and_endianness())
@@ -1442,11 +1433,7 @@ Output_data_got<got_size, big_endian>::Got_entry::write(
         const unsigned int lsi = this->local_sym_index_;
 	bool is_tls = object->local_is_tls(lsi);
 	if (this->use_plt_or_tls_offset_ && !is_tls)
-	  {
-	    uint64_t plt_address =
-	      parameters->target().plt_address_for_local(object, lsi);
-	    val = plt_address + object->local_plt_offset(lsi);
-	  }
+	  val = parameters->target().plt_address_for_local(object, lsi);
 	else
 	  {
 	    uint64_t lval = object->local_symbol_value(lsi, 0);
@@ -2609,9 +2596,9 @@ Output_section::add_relaxed_input_section(Layout* layout,
 
   // For a relaxed section, we use the current data size.  Linker scripts
   // get all the input sections, including relaxed one from an output
-  // section and add them back to them same output section to compute the
+  // section and add them back to the same output section to compute the
   // output section size.  If we do not account for sizes of relaxed input
-  // sections,  an output section would be incorrectly sized.
+  // sections, an output section would be incorrectly sized.
   off_t offset_in_section = this->current_data_size_for_child();
   off_t aligned_offset_in_section = align_address(offset_in_section,
 						  poris->addralign());

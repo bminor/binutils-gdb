@@ -1385,7 +1385,7 @@ Output_data_plt_x86_64<size>::address_for_global(const Symbol* gsym)
   if (gsym->type() == elfcpp::STT_GNU_IFUNC
       && gsym->can_use_relative_reloc(false))
     offset = (this->count_ + 1) * this->get_plt_entry_size();
-  return this->address() + offset;
+  return this->address() + offset + gsym->plt_offset();
 }
 
 // Return the PLT address to use for a local symbol.  These are always
@@ -1393,9 +1393,12 @@ Output_data_plt_x86_64<size>::address_for_global(const Symbol* gsym)
 
 template<int size>
 uint64_t
-Output_data_plt_x86_64<size>::address_for_local(const Relobj*, unsigned int)
+Output_data_plt_x86_64<size>::address_for_local(const Relobj* object,
+						unsigned int r_sym)
 {
-  return this->address() + (this->count_ + 1) * this->get_plt_entry_size();
+  return (this->address()
+	  + (this->count_ + 1) * this->get_plt_entry_size()
+	  + object->local_plt_offset(r_sym));
 }
 
 // Set the final size.
@@ -3234,8 +3237,7 @@ Target_x86_64<size>::Relocate::relocate(
   if (gsym != NULL
       && gsym->use_plt_offset(Scan::get_reference_flags(r_type)))
     {
-      symval.set_output_value(target->plt_address_for_global(gsym)
-			      + gsym->plt_offset());
+      symval.set_output_value(target->plt_address_for_global(gsym));
       psymval = &symval;
     }
   else if (gsym == NULL && psymval->is_ifunc_symbol())
@@ -3243,8 +3245,7 @@ Target_x86_64<size>::Relocate::relocate(
       unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
       if (object->local_has_plt_offset(r_sym))
 	{
-	  symval.set_output_value(target->plt_address_for_local(object, r_sym)
-				  + object->local_plt_offset(r_sym));
+	  symval.set_output_value(target->plt_address_for_local(object, r_sym));
 	  psymval = &symval;
 	}
     }
@@ -4253,7 +4254,7 @@ uint64_t
 Target_x86_64<size>::do_dynsym_value(const Symbol* gsym) const
 {
   gold_assert(gsym->is_from_dynobj() && gsym->has_plt_offset());
-  return this->plt_address_for_global(gsym) + gsym->plt_offset();
+  return this->plt_address_for_global(gsym);
 }
 
 // Return a string used to fill a code section with nops to take up

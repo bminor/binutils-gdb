@@ -1,3 +1,19 @@
+2012-10-05  Alan Modra  <amodra@gmail.com>
+
+	* i386.cc (Output_data_plt_i386::address_for_global,
+	address_for_local): Add plt offset to returned value.  Adjust uses.
+	* sparc.cc (Output_data_plt_sparc::address_for_global,
+	address_for_local): Likewise.
+	* tilegx.cc (Output_data_plt_tilegx::address_for_global,
+	address_for_local): Likewise.
+	* x86_64.cc (Output_data_plt_x86_64::address_for_global,
+	address_for_local): Likewise.
+	* target.h (Target::plt_address_for_global, plt_address_for_local):
+	Update comment.
+	* output.cc (Output_reloc::symbol_value): Don't add plt offset here.
+	(Output_data_got::Got_entry::write): Nor here.
+	* output.h: Comment fix.
+
 2012-10-02  Jiong Wang  <jiwang@tilera.com>
 
 	* tilegx.cc (Target_tilegx::do_finalize_sections): Adjust

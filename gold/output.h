@@ -2247,7 +2247,7 @@ class Output_data_got : public Output_data_got_base
   add_global_plt(Symbol* gsym, unsigned int got_type);
 
   // Like add_global, but for a TLS symbol where the value will be
-  // offset using Target::tls_offset_for_global
+  // offset using Target::tls_offset_for_global.
   bool
   add_global_tls(Symbol* gsym, unsigned int got_type)
   { return add_global_plt(gsym, got_type); }
@@ -2277,7 +2277,7 @@ class Output_data_got : public Output_data_got_base
   add_local_plt(Relobj* object, unsigned int sym_index, unsigned int got_type);
 
   // Like add_local, but for a TLS symbol where the value will be
-  // offset using Target::tls_offset_for_local
+  // offset using Target::tls_offset_for_local.
   bool
   add_local_tls(Relobj* object, unsigned int sym_index, unsigned int got_type)
   { return add_local_plt(object, sym_index, got_type); }
