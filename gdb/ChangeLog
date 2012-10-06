@@ -1,3 +1,9 @@
+2012-10-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix crash during stepping on ppc32.
+	* ppc-linux-tdep.c (powerpc_linux_in_dynsym_resolve_code): Test NULL
+	SYM.
+
 2012-10-03  Doug Evans  <dje@google.com>
 
 	PR symtab/14601

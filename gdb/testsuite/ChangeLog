@@ -1,3 +1,9 @@
+2012-10-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix crash during stepping on ppc32.
+	* gdb.base/step-symless.c: New file.
+	* gdb.base/step-symless.exp: New file.
+
 2012-10-03  Doug Evans  <dje@google.com>
 
 	PR symtab/14601
