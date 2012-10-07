@@ -1,3 +1,9 @@
+2012-10-08  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/14662
+	* elf.c (_bfd_elf_make_section_from_shdr): Treat .gdb_index as
+	SEC_DEBUGGING.
+
 2012-09-20  Walter Lee  <walt@tilera.com>
 
 	* elf32-tilepro.c (tilepro_elf_relocate_section): Adjust got
@@ -11,7 +17,7 @@
 2012-09-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14591
-	* elf-bfd.h (_bfd_elf_merge_symbol): Add an argument to return 
+	* elf-bfd.h (_bfd_elf_merge_symbol): Add an argument to return
 	if the old symbol is weak.
 
 	* elf32-sh-symbian.c (sh_symbian_relocate_section): Update

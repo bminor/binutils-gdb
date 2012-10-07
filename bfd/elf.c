@@ -880,45 +880,25 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
     {
       /* The debugging sections appear to be recognized only by name,
 	 not any sort of flag.  Their SEC_ALLOC bits are cleared.  */
-      static const struct
-	{
-	  const char *name;
-	  int len;
-	} debug_sections [] =
-	{
-	  { STRING_COMMA_LEN ("debug") },	/* 'd' */
-	  { NULL,		 0  },	/* 'e' */
-	  { NULL,		 0  },	/* 'f' */
-	  { STRING_COMMA_LEN ("gnu.linkonce.wi.") },	/* 'g' */
-	  { NULL,		 0  },	/* 'h' */
-	  { NULL,		 0  },	/* 'i' */
-	  { NULL,		 0  },	/* 'j' */
-	  { NULL,		 0  },	/* 'k' */
-	  { STRING_COMMA_LEN ("line") },	/* 'l' */
-	  { NULL,		 0  },	/* 'm' */
-	  { NULL,		 0  },	/* 'n' */
-	  { NULL,		 0  },	/* 'o' */
-	  { NULL,		 0  },	/* 'p' */
-	  { NULL,		 0  },	/* 'q' */
-	  { NULL,		 0  },	/* 'r' */
-	  { STRING_COMMA_LEN ("stab") },	/* 's' */
-	  { NULL,		 0  },	/* 't' */
-	  { NULL,		 0  },	/* 'u' */
-	  { NULL,		 0  },	/* 'v' */
-	  { NULL,		 0  },	/* 'w' */
-	  { NULL,		 0  },	/* 'x' */
-	  { NULL,		 0  },	/* 'y' */
-	  { STRING_COMMA_LEN ("zdebug") }	/* 'z' */
-	};
-
       if (name [0] == '.')
 	{
-	  int i = name [1] - 'd';
-	  if (i >= 0
-	      && i < (int) ARRAY_SIZE (debug_sections)
-	      && debug_sections [i].name != NULL
-	      && strncmp (&name [1], debug_sections [i].name,
-			  debug_sections [i].len) == 0)
+	  const char *p;
+	  int n;
+	  if (name[1] == 'd')
+	    p = ".debug", n = 6;
+	  else if (name[1] == 'g' && name[2] == 'n')
+	    p = ".gnu.linkonce.wi.", n = 17;
+	  else if (name[1] == 'g' && name[2] == 'd')
+	    p = ".gdb_index", n = 11; /* yes we really do mean 11.  */
+	  else if (name[1] == 'l')
+	    p = ".line", n = 5;
+	  else if (name[1] == 's')
+	    p = ".stab", n = 5;
+	  else if (name[1] == 'z')
+	    p = ".zdebug", n = 7;
+	  else
+	    p = NULL, n = 0;
+	  if (p != NULL && strncmp (name, p, n) == 0)
 	    flags |= SEC_DEBUGGING;
 	}
     }
