@@ -1,3 +1,8 @@
+2012-10-08  Joe Seymour  <jseymour@codesourcery.com>
+
+	* ld-scripts/sane1.d: Sort output from nm. Allow for other symbols in
+	output.
+
 2012-09-19  Chris Schlumberger-Socha  <chris.schlumberger-socha@arm.com>
 
 	* ld-aarch64/emit-relocs-309-low.d: Replace symbol with regexp.
