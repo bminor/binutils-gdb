@@ -1,3 +1,8 @@
+2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
+
+	* i386-gen.c (cpu_flag_init): Add CPU_BDVER3_FLAGS.
+	* i386-init.h: Regenerated.
+
 2012-10-05  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (ppc_opts) <altivec>: Use PPC_OPCODE_ALTIVEC2;

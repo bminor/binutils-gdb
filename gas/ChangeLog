@@ -1,3 +1,8 @@
+2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Add CPU_BDVER3_FLAGS.
+	* doc/c-i386.texi: Add -march=bdver3 option.
+
 2012-10-04  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-v850.c (v850_insert_operand): Use a static buffer for
