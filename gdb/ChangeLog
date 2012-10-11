@@ -1,3 +1,11 @@
+2012-10-10  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (read_1_byte): Add const to buf parameter.
+	(read_1_signed_byte, read_2_bytes, read_2_signed_bytes): Ditto.
+	(read_4_bytes, read_4_signed_bytes, read_8_bytes): Ditto.
+	(lookup_dwo_file): Add const to dwo_name parameter.
+	(lookup_dwo_comp_unit, lookup_dwo_type_unit): Ditto.
+
 2012-10-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix crash during stepping on ppc32.

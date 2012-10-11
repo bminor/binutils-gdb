@@ -1237,15 +1237,15 @@ static gdb_byte *read_attribute (const struct die_reader_specs *,
 				 struct attribute *, struct attr_abbrev *,
 				 gdb_byte *);
 
-static unsigned int read_1_byte (bfd *, gdb_byte *);
+static unsigned int read_1_byte (bfd *, const gdb_byte *);
 
-static int read_1_signed_byte (bfd *, gdb_byte *);
+static int read_1_signed_byte (bfd *, const gdb_byte *);
 
-static unsigned int read_2_bytes (bfd *, gdb_byte *);
+static unsigned int read_2_bytes (bfd *, const gdb_byte *);
 
-static unsigned int read_4_bytes (bfd *, gdb_byte *);
+static unsigned int read_4_bytes (bfd *, const gdb_byte *);
 
-static ULONGEST read_8_bytes (bfd *, gdb_byte *);
+static ULONGEST read_8_bytes (bfd *, const gdb_byte *);
 
 static CORE_ADDR read_address (bfd *, gdb_byte *ptr, struct dwarf2_cu *,
 			       unsigned int *);
@@ -1623,10 +1623,10 @@ static htab_t allocate_signatured_type_table (struct objfile *objfile);
 static htab_t allocate_dwo_unit_table (struct objfile *objfile);
 
 static struct dwo_unit *lookup_dwo_comp_unit
-  (struct dwarf2_per_cu_data *, char *, const char *, ULONGEST);
+  (struct dwarf2_per_cu_data *, const char *, const char *, ULONGEST);
 
 static struct dwo_unit *lookup_dwo_type_unit
-  (struct signatured_type *, char *, const char *);
+  (struct signatured_type *, const char *, const char *);
 
 static void free_dwo_file_cleanup (void *);
 
@@ -8373,7 +8373,7 @@ init_dwo_file (const char *dwo_name, const char *comp_dir)
 /* Lookup DWO file DWO_NAME.  */
 
 static struct dwo_file *
-lookup_dwo_file (char *dwo_name, const char *comp_dir)
+lookup_dwo_file (const char *dwo_name, const char *comp_dir)
 {
   struct dwo_file *dwo_file;
   struct dwo_file find_entry;
@@ -8405,7 +8405,7 @@ lookup_dwo_file (char *dwo_name, const char *comp_dir)
 
 static struct dwo_unit *
 lookup_dwo_comp_unit (struct dwarf2_per_cu_data *this_cu,
-		      char *dwo_name, const char *comp_dir,
+		      const char *dwo_name, const char *comp_dir,
 		      ULONGEST signature)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
@@ -8444,7 +8444,7 @@ lookup_dwo_comp_unit (struct dwarf2_per_cu_data *this_cu,
 
 static struct dwo_unit *
 lookup_dwo_type_unit (struct signatured_type *this_tu,
-		      char *dwo_name, const char *comp_dir)
+		      const char *dwo_name, const char *comp_dir)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwo_file *dwo_file;
@@ -13397,43 +13397,43 @@ read_attribute (const struct die_reader_specs *reader,
 /* Read dwarf information from a buffer.  */
 
 static unsigned int
-read_1_byte (bfd *abfd, gdb_byte *buf)
+read_1_byte (bfd *abfd, const gdb_byte *buf)
 {
   return bfd_get_8 (abfd, buf);
 }
 
 static int
-read_1_signed_byte (bfd *abfd, gdb_byte *buf)
+read_1_signed_byte (bfd *abfd, const gdb_byte *buf)
 {
   return bfd_get_signed_8 (abfd, buf);
 }
 
 static unsigned int
-read_2_bytes (bfd *abfd, gdb_byte *buf)
+read_2_bytes (bfd *abfd, const gdb_byte *buf)
 {
   return bfd_get_16 (abfd, buf);
 }
 
 static int
-read_2_signed_bytes (bfd *abfd, gdb_byte *buf)
+read_2_signed_bytes (bfd *abfd, const gdb_byte *buf)
 {
   return bfd_get_signed_16 (abfd, buf);
 }
 
 static unsigned int
-read_4_bytes (bfd *abfd, gdb_byte *buf)
+read_4_bytes (bfd *abfd, const gdb_byte *buf)
 {
   return bfd_get_32 (abfd, buf);
 }
 
 static int
-read_4_signed_bytes (bfd *abfd, gdb_byte *buf)
+read_4_signed_bytes (bfd *abfd, const gdb_byte *buf)
 {
   return bfd_get_signed_32 (abfd, buf);
 }
 
 static ULONGEST
-read_8_bytes (bfd *abfd, gdb_byte *buf)
+read_8_bytes (bfd *abfd, const gdb_byte *buf)
 {
   return bfd_get_64 (abfd, buf);
 }
