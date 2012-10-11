@@ -1,3 +1,18 @@
+2012-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* gas/arm/ldgesb-bad.d: New file.
+	* gas/arm/ldgesb-bad.l: Likewise.
+	* gas/arm/ldgesb-bad.s: Likewise.
+	* gas/arm/ldgesh-bad.d: Likewise.
+	* gas/arm/ldgesh-bad.l: Likewise.
+	* gas/arm/ldgesh-bad.s: Likewise.
+	* gas/arm/ldsgeb.d: Likewise.
+	* gas/arm/ldsgeb.s: Likewise.
+	* gas/arm/ldsgeb.l: Likewise.
+	* gas/arm/ldsgeh.d: Likewise.
+	* gas/arm/ldsgeh.s: Likewise.
+	* gas/arm/ldsgeh.l: Likewise.
+
 2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
 
 	* gas/i386/i386.exp: Run bdver3 test cases.

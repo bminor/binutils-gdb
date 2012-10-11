@@ -17778,38 +17778,6 @@ static struct asm_barrier_opt barrier_opt_names[] =
 #define tC3w(mnem, aop, top, nops, ops, ae, te) \
       TxC3w (mnem, aop, T_MNEM##top, nops, ops, ae, te)
 
-/* Mnemonic with a conditional infix in an unusual place.  Each and every variant has to
-   appear in the condition table.  */
-#define TxCM_(m1, m2, m3, op, top, nops, ops, ae, te)	\
-  { m1 #m2 m3, OPS##nops ops, sizeof (#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof (m1) - 1, \
-    0x##op, top, ARM_VARIANT, THUMB_VARIANT, do_##ae, do_##te }
-
-#define TxCM(m1, m2, op, top, nops, ops, ae, te)	\
-  TxCM_ (m1,   , m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, eq, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, ne, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, cs, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, hs, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, cc, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, ul, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, lo, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, mi, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, pl, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, vs, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, vc, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, hi, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, ls, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, ge, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, lt, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, gt, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, le, m2, op, top, nops, ops, ae, te),	\
-  TxCM_ (m1, al, m2, op, top, nops, ops, ae, te)
-
-#define TCM(m1,m2, aop, top, nops, ops, ae, te)		\
-      TxCM (m1,m2, aop, 0x##top, nops, ops, ae, te)
-#define tCM(m1,m2, aop, top, nops, ops, ae, te)		\
-      TxCM (m1,m2, aop, T_MNEM##top, nops, ops, ae, te)
-
 /* Mnemonic that cannot be conditionalized.  The ARM condition-code
    field is still 0xE.  Many of the Thumb variants can be executed
    conditionally, so this is checked separately.  */
@@ -18101,8 +18069,8 @@ static const struct asm_opcode insns[] =
  tC3("strh",	00000b0, _strh,     2, (RRnpc_npcsp, ADDRGLDRS), ldstv4, t_ldst),
  tC3("ldrsh",	01000f0, _ldrsh,    2, (RRnpc_npcsp, ADDRGLDRS), ldstv4, t_ldst),
  tC3("ldrsb",	01000d0, _ldrsb,    2, (RRnpc_npcsp, ADDRGLDRS), ldstv4, t_ldst),
- tCM("ld","sh",	01000f0, _ldrsh,    2, (RRnpc_npcsp, ADDRGLDRS), ldstv4, t_ldst),
- tCM("ld","sb",	01000d0, _ldrsb,    2, (RRnpc_npcsp, ADDRGLDRS), ldstv4, t_ldst),
+ tC3("ldsh",	01000f0, _ldrsh,    2, (RRnpc_npcsp, ADDRGLDRS), ldstv4, t_ldst),
+ tC3("ldsb",	01000d0, _ldrsb,    2, (RRnpc_npcsp, ADDRGLDRS), ldstv4, t_ldst),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v4t_5
@@ -19781,7 +19749,6 @@ static const struct asm_opcode insns[] =
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
 #undef TCE
-#undef TCM
 #undef TUE
 #undef TUF
 #undef TCC

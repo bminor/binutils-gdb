@@ -1,3 +1,12 @@
+2012-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-arm.c: Change condition code insertion for
+	lds[hb] instructions from after the 2nd character to after the 3rd.
+	(tCM): Remove macro.
+	(TxCM): Likewise.
+	(TxCM_): Likewise.
+	(TCM): Likewise.
+
 2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Add CPU_BDVER3_FLAGS.
