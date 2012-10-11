@@ -1,3 +1,13 @@
+2012-10-11  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (gdb_breakpoint): Fix varargs scan.
+	Recognize "message" -> print pass and fail.  Add eof case.
+	(runto): Recognize message, no-message.  Print pass/fail if requested,
+	with same treatment as gdb_breakpoint.
+	(runto_main): Pass no-message to runto.
+	(gdb_internal_error_resync): Add log message.
+	(gdb_file_cmd): Tweak internal error fail text for consistency.
+
 2012-10-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix crash during stepping on ppc32.

@@ -334,28 +334,43 @@ proc gdb_start_cmd {args} {
 
 # Set a breakpoint at FUNCTION.  If there is an additional argument it is
 # a list of options; the supported options are allow-pending, temporary,
-# and no-message.
+# message, no-message, and passfail.
+# The result is 1 for success, 0 for failure.
+#
+# Note: The handling of message vs no-message is messed up, but it's based
+# on historical usage.  By default this function does not print passes,
+# only fails.
+# no-message: turns off printing of fails (and passes, but they're already off)
+# message: turns on printing of passes (and fails, but they're already on)
 
 proc gdb_breakpoint { function args } {
     global gdb_prompt
     global decimal
 
     set pending_response n
-    if {[lsearch -exact [lindex $args 0] allow-pending] != -1} {
+    if {[lsearch -exact $args allow-pending] != -1} {
 	set pending_response y
     }
 
     set break_command "break"
     set break_message "Breakpoint"
-    if {[lsearch -exact [lindex $args 0] temporary] != -1} {
+    if {[lsearch -exact $args temporary] != -1} {
 	set break_command "tbreak"
 	set break_message "Temporary breakpoint"
     }
 
-    set no_message 0
-    if {[lsearch -exact [lindex $args 0] no-message] != -1} {
-	set no_message 1
+    set print_pass 0
+    set print_fail 1
+    set no_message_loc [lsearch -exact $args no-message]
+    set message_loc [lsearch -exact $args message]
+    # The last one to appear in args wins.
+    if { $no_message_loc > $message_loc } {
+	set print_fail 0
+    } elseif { $message_loc > $no_message_loc } {
+	set print_pass 1
     }
+
+    set test_name "setting breakpoint at $function"
 
     send_gdb "$break_command $function\n"
     # The first two regexps are what we get with -g, the third is without -g.
@@ -365,8 +380,8 @@ proc gdb_breakpoint { function args } {
 	-re "$break_message \[0-9\]* at .*$gdb_prompt $" {}
 	-re "$break_message \[0-9\]* \\(.*\\) pending.*$gdb_prompt $" {
 		if {$pending_response == "n"} {
-			if { $no_message == 0 } {
-				fail "setting breakpoint at $function"
+			if { $print_fail } {
+				fail $test_name
 			}
 			return 0
 		}
@@ -376,22 +391,33 @@ proc gdb_breakpoint { function args } {
 		exp_continue
 	}
 	-re "A problem internal to GDB has been detected" {
-		fail "setting breakpoint at $function in runto (GDB internal error)"
+		if { $print_fail } {
+		    fail "$test_name (GDB internal error)"
+		}
 		gdb_internal_error_resync
 		return 0
 	}
 	-re "$gdb_prompt $" {
-		if { $no_message == 0 } {
-			fail "setting breakpoint at $function"
+		if { $print_fail } {
+			fail $test_name
+		}
+		return 0
+	}
+	eof {
+		if { $print_fail } {
+			fail "$test_name (eof)"
 		}
 		return 0
 	}
 	timeout {
-		if { $no_message == 0 } {
-			fail "setting breakpoint at $function (timeout)"
+		if { $print_fail } {
+			fail "$test_name (timeout)"
 		}
 		return 0
 	}
+    }
+    if { $print_pass } {
+	pass $test_name
     }
     return 1;
 }    
@@ -400,8 +426,15 @@ proc gdb_breakpoint { function args } {
 # Since this is the only breakpoint that will be set, if it stops
 # at a breakpoint, we will assume it is the one we want.  We can't
 # just compare to "function" because it might be a fully qualified,
-# single quoted C++ function specifier.  If there's an additional argument,
-# pass it to gdb_breakpoint.
+# single quoted C++ function specifier.
+#
+# If there are additional arguments, pass them to gdb_breakpoint.
+# We recognize no-message/message ourselves.
+# The default is no-message.
+# no-message is messed up here, like gdb_breakpoint: to preserve
+# historical usage fails are always printed by default.
+# no-message: turns off printing of fails (and passes, but they're already off)
+# message: turns on printing of passes (and fails, but they're already on)
 
 proc runto { function args } {
     global gdb_prompt
@@ -409,7 +442,25 @@ proc runto { function args } {
 
     delete_breakpoints
 
-    if ![gdb_breakpoint $function [lindex $args 0]] {
+    # Default to "no-message".
+    set args "no-message $args"
+
+    set print_pass 0
+    set print_fail 1
+    set no_message_loc [lsearch -exact $args no-message]
+    set message_loc [lsearch -exact $args message]
+    # The last one to appear in args wins.
+    if { $no_message_loc > $message_loc } {
+	set print_fail 0
+    } elseif { $message_loc > $no_message_loc } {
+	set print_pass 1
+    }
+
+    set test_name "running to $function in runto"
+
+    # We need to use eval here to pass our varargs args to gdb_breakpoint
+    # which is also a varargs function.
+    if ![eval gdb_breakpoint $function $args] {
 	return 0;
     }
 
@@ -419,32 +470,51 @@ proc runto { function args } {
     # the "in func" output we get without -g.
     gdb_expect 30 {
 	-re "Break.* at .*:$decimal.*$gdb_prompt $" {
+	    if { $print_pass } {
+		pass $test_name
+	    }
 	    return 1
 	}
 	-re "Breakpoint \[0-9\]*, \[0-9xa-f\]* in .*$gdb_prompt $" { 
+	    if { $print_pass } {
+		pass $test_name
+	    }
 	    return 1
 	}
 	-re "The target does not support running in non-stop mode.\r\n$gdb_prompt $" {
-	    unsupported "Non-stop mode not supported"
+	    if { $print_fail } {
+		unsupported "Non-stop mode not supported"
+	    }
 	    return 0
 	}
 	-re ".*A problem internal to GDB has been detected" {
-	    fail "running to $function in runto (GDB internal error)"
+	    if { $print_fail } {
+		fail "$test_name (GDB internal error)"
+	    }
 	    gdb_internal_error_resync
 	    return 0
 	}
 	-re "$gdb_prompt $" { 
-	    fail "running to $function in runto"
+	    if { $print_fail } {
+		fail $test_name
+	    }
 	    return 0
 	}
 	eof { 
-	    fail "running to $function in runto (eof)"
+	    if { $print_fail } {
+		fail "$test_name (eof)"
+	    }
 	    return 0
 	}
 	timeout { 
-	    fail "running to $function in runto (timeout)"
+	    if { $print_fail } {
+		fail "$test_name (timeout)"
+	    }
 	    return 0
 	}
+    }
+    if { $print_pass } {
+	pass $test_name
     }
     return 1
 }
@@ -455,7 +525,7 @@ proc runto { function args } {
 # If you don't want that, use gdb_start_cmd.
 
 proc runto_main { } {
-    return [runto main]
+    return [runto main no-message]
 }
 
 ### Continue, and expect to hit a breakpoint.
@@ -507,6 +577,8 @@ proc gdb_continue_to_breakpoint {name {location_pattern .*}} {
 #
 proc gdb_internal_error_resync {} {
     global gdb_prompt
+
+    verbose -log "Resyncing due to internal error."
 
     set count 0
     while {$count < 10} {
@@ -1283,7 +1355,7 @@ proc gdb_file_cmd { arg } {
 	    return -1
         }
 	-re "A problem internal to GDB has been detected" {
-	    fail "($arg) GDB internal error"
+	    fail "($arg) (GDB internal error)"
 	    gdb_internal_error_resync
 	    return -1
 	}
