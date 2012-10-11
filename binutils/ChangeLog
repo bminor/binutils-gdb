@@ -1,3 +1,8 @@
+2012-10-11  Doug Evans  <dje@google.com>
+
+	* dwarf.c (display_gdb_index): Include static/global information
+	of each symbol.
+
 2012-09-14  David Edelsohn  <dje.gcc@gmail.com>
 
 	* configure: Regenerate.

@@ -5793,9 +5793,11 @@ display_gdb_index (struct dwarf_section *section,
 	    printf ("\n");
 	  for (j = 0; j < num_cus; ++j)
 	    {
+	      int is_static;
 	      gdb_index_symbol_kind kind;
 
 	      cu = byte_get_little_endian (constant_pool + cu_vector_offset + 4 + j * 4, 4);
+	      is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu);
 	      kind = GDB_INDEX_SYMBOL_KIND_VALUE (cu);
 	      cu = GDB_INDEX_CU_VALUE (cu);
 	      /* Convert to TU number if it's for a type unit.  */
@@ -5811,19 +5813,30 @@ display_gdb_index (struct dwarf_section *section,
 		  printf (_(" [no symbol information]"));
 		  break;
 		case GDB_INDEX_SYMBOL_KIND_TYPE:
-		  printf (_(" [type]"));
+		  printf (is_static
+			  ? _(" [static type]")
+			  : _(" [global type]"));
 		  break;
 		case GDB_INDEX_SYMBOL_KIND_VARIABLE:
-		  printf (_(" [variable]"));
+		  printf (is_static
+			  ? _(" [static variable]")
+			  : _(" [global variable]"));
 		  break;
 		case GDB_INDEX_SYMBOL_KIND_FUNCTION:
-		  printf (_(" [function]"));
+		  printf (is_static
+			  ? _(" [static function]")
+			  : _(" [global function]"));
 		  break;
 		case GDB_INDEX_SYMBOL_KIND_OTHER:
-		  printf (_(" [other]"));
+		  printf (is_static
+			  ? _(" [static other]")
+			  : _(" [global other]"));
 		  break;
 		default:
-		  printf (_(" [unknown: %d]"), kind);
+		  printf (is_static
+			  ? _(" [static unknown: %d]")
+			  : _(" [global unknown: %d]"),
+			  kind);
 		  break;
 		}
 	      if (num_cus > 1)
