@@ -1,5 +1,8 @@
 2012-10-10  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (process_psymtab_comp_unit_reader): Remove duplicate
+	"0x" prefix on address in log message.
+
 	* dwarf2read.c (read_1_byte): Add const to buf parameter.
 	(read_1_signed_byte, read_2_bytes, read_2_signed_bytes): Ditto.
 	(read_4_bytes, read_4_signed_bytes, read_8_bytes): Ditto.

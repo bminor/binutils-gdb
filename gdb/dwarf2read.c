@@ -4859,7 +4859,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
       struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
       fprintf_unfiltered (gdb_stdlog,
-			  "Psymtab for %s unit @0x%x: 0x%s - 0x%s"
+			  "Psymtab for %s unit @0x%x: %s - %s"
 			  ", %d global, %d static syms\n",
 			  per_cu->is_debug_types ? "type" : "comp",
 			  per_cu->offset.sect_off,
