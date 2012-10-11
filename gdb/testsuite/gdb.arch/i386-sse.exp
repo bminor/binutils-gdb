@@ -73,10 +73,10 @@ gdb_test "break [gdb_get_line_number "first breakpoint here"]" \
          "set first breakpoint in main"
 gdb_continue_to_breakpoint "continue to first breakpoint in main"
 
-if [is_ilp32_target] {
-    set nr_regs 8
-} else {
+if [is_amd64_regs_target] {
     set nr_regs 16
+} else {
+    set nr_regs 8
 }
 
 for { set r 0 } { $r < $nr_regs } { incr r } {
