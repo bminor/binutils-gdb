@@ -171,7 +171,7 @@ foreach x {"3" "+100" "-100" "foo"} {
 }
 
 foreach x {"if" "task" "thread"} {
-    add the_tests $x unexpected_opt "keyword" $x
+    add the_tests $x invalid_function $x
 }
 
 add the_tests "'main.c'flubber" unexpected_opt "string" "flubber"

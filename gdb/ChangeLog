@@ -1,3 +1,12 @@
+2012-10-11  Doug Evans  <dje@google.com>
+
+	PR breakpoints/14643.
+	* linespec.c (struct ls_parser): New member keyword_ok.
+	(linespec_lexer_lex_string): Add comment.
+	(linespec_lexer_lex_one): Ignore keywords if it's the wrong place
+	for one.
+	(parse_linespec): Set keyword_ok.
+
 2012-10-10  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (process_psymtab_comp_unit_reader): Remove duplicate

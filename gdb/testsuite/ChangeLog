@@ -1,5 +1,10 @@
 2012-10-11  Doug Evans  <dje@google.com>
 
+	PR breakpoints/14643.
+	* gdb.linespec/ls-errs.exp: Change tests of "b if|task|thread".
+	* gdb.linespec/thread.c: New file.
+	* gdb.linespec/thread.exp: New file.
+
 	* lib/gdb.exp (gdb_breakpoint): Fix varargs scan.
 	Recognize "message" -> print pass and fail.  Add eof case.
 	(runto): Recognize message, no-message.  Print pass/fail if requested,
