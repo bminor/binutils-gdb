@@ -498,10 +498,10 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_VFP_EXT_ARMV8, 0xfe800b40, 0xffb00f40, "vminnm%u.f64\t%z1, %z2, %z0"},
   {FPU_VFP_EXT_ARMV8, 0xfebc0a40, 0xffbc0f50, "vcvt%16-17?mpna%u.%7?su32.f32\t%y1, %y0"},
   {FPU_VFP_EXT_ARMV8, 0xfebc0b40, 0xffbc0f50, "vcvt%16-17?mpna%u.%7?su32.f64\t%y1, %z0"},
-  {FPU_VFP_EXT_ARMV8, 0x0eb60a40, 0x0fbe0f50, "vrint%7,16??xzr%c.f32.f32\t%y1, %y0"},
-  {FPU_VFP_EXT_ARMV8, 0x0eb60b40, 0x0fbe0f50, "vrint%7,16??xzr%c.f64.f64\t%z1, %z0"},
-  {FPU_VFP_EXT_ARMV8, 0xfeb80a40, 0xffbc0f50, "vrint%16-17?mpna%u.f32.f32\t%y1, %y0"},
-  {FPU_VFP_EXT_ARMV8, 0xfeb80b40, 0xffbc0f50, "vrint%16-17?mpna%u.f64.f64\t%z1, %z0"},
+  {FPU_VFP_EXT_ARMV8, 0x0eb60a40, 0x0fbe0f50, "vrint%7,16??xzr%c.f32\t%y1, %y0"},
+  {FPU_VFP_EXT_ARMV8, 0x0eb60b40, 0x0fbe0f50, "vrint%7,16??xzr%c.f64\t%z1, %z0"},
+  {FPU_VFP_EXT_ARMV8, 0xfeb80a40, 0xffbc0f50, "vrint%16-17?mpna%u.f32\t%y1, %y0"},
+  {FPU_VFP_EXT_ARMV8, 0xfeb80b40, 0xffbc0f50, "vrint%16-17?mpna%u.f64\t%z1, %z0"},
 
   /* Generic coprocessor instructions.  */
   { 0, SENTINEL_GENERIC_START, 0, "" },
@@ -584,7 +584,7 @@ static const struct opcode32 neon_opcodes[] =
   {FPU_NEON_EXT_FMA, 0xf2200c10, 0xffa00f10, "vfms%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
 
   /* Two registers, miscellaneous.  */
-  {FPU_NEON_EXT_ARMV8, 0xf3ba0400, 0xffbf0c10, "vrint%7-9?p?m?zaxn%u.f32.f32\t%12-15,22R, %0-3,5R"},
+  {FPU_NEON_EXT_ARMV8, 0xf3ba0400, 0xffbf0c10, "vrint%7-9?p?m?zaxn%u.f32\t%12-15,22R, %0-3,5R"},
   {FPU_NEON_EXT_ARMV8, 0xf3bb0000, 0xffbf0c10, "vcvt%8-9?mpna%u.%7?us32.f32\t%12-15,22R, %0-3,5R"},
   {FPU_CRYPTO_EXT_ARMV8, 0xf3b00300, 0xffbf0fd0, "aese%u.8\t%12-15,22Q, %0-3,5Q"},
   {FPU_CRYPTO_EXT_ARMV8, 0xf3b00340, 0xffbf0fd0, "aesd%u.8\t%12-15,22Q, %0-3,5Q"},

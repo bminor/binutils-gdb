@@ -1,3 +1,8 @@
+2012-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* arm-dis.c: Use preferred form of vrint instruction variants
+	for disassembly.
+
 2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
 
 	* i386-gen.c (cpu_flag_init): Add CPU_BDVER3_FLAGS.

@@ -1,5 +1,13 @@
 2012-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
+	* gas/arm/armv8-a+fp.d: Use preferred form of vrint instruction
+	variants for disassembly.
+	* gas/arm/armv8-a+fp.s: Likewise.
+	* gas/arm/armv8-a+simd.d: Likewise.
+	* gas/arm/armv8-a+simd.s: Likewise.
+
+2012-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
 	* gas/arm/ldgesb-bad.d: New file.
 	* gas/arm/ldgesb-bad.l: Likewise.
 	* gas/arm/ldgesb-bad.s: Likewise.
