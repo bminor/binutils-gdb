@@ -18,7 +18,7 @@
 
 # Test stepping over permanent breakpoints on i386.
 
-if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_ilp32_target] } then {
+if { ![is_x86_like_target] } then {
     verbose "Skipping skip over permanent breakpoint on i386 tests."
     return
 }

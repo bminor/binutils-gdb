@@ -1,5 +1,16 @@
 2012-10-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gdb.arch/i386-bp_permanent.exp: Skip if not is_x86_like_target.
+	* gdb.arch/i386-cfi-notcurrent.exp: Likewise.
+	* gdb.arch/i386-disp-step.exp: Likewise.
+	* gdb.arch/i386-gnu-cfi.exp: Likewise.
+	* gdb.arch/i386-prologue.exp: Likewise.
+	* gdb.arch/i386-size-overlap.exp: Likewise.
+	* gdb.arch/i386-size.exp: Likewise.
+	* gdb.arch/i386-unwind.exp: Likewise.
+
+2012-10-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gdb.arch/i386-byte.exp: Remove is_ilp32_target check.
 	* gdb.arch/i386-word.exp: Likewise.
 

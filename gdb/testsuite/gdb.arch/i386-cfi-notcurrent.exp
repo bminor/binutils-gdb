@@ -16,7 +16,7 @@
 # [RFA] DWARF frame unwinder executes one too many rows
 # http://sourceware.org/ml/gdb-patches/2012-07/msg00650.html
 
-if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_ilp32_target] } {
+if { ![is_x86_like_target] } {
     return 0
 }
 
