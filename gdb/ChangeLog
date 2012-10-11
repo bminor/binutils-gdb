@@ -1,3 +1,8 @@
+2012-10-11  Andrew Burgess  <aburgess@broadcom.com>
+
+	* remote-sim.c (gdbsim_create_inferior): Call init_thread_list to
+	reset thread numbering back to 1.
+
 2012-10-11  Doug Evans  <dje@google.com>
 
 	PR breakpoints/14643.
