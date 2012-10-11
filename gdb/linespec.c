@@ -286,6 +286,11 @@ struct ls_parser
   /* Is the entire linespec quote-enclosed?  */
   int is_quote_enclosed;
 
+  /* Is a keyword syntactically valid at this point?
+     In, e.g., "break thread thread 1", the leading "keyword" must not
+     be interpreted as such.  */
+  int keyword_ok;
+
   /* The state of the parse.  */
   struct linespec_state state;
 #define PARSER_STATE(PPTR) (&(PPTR)->state)
@@ -607,6 +612,10 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	  if (isspace (*PARSER_STREAM (parser)))
 	    {
 	      p = skip_spaces (PARSER_STREAM (parser));
+	      /* When we get here we know we've found something followed by
+		 a space (we skip over parens and templates below).
+		 So if we find a keyword now, we know it is a keyword and not,
+		 say, a function name.  */
 	      if (linespec_lexer_lex_keyword (p) != NULL)
 		{
 		  LS_TOKEN_STOKEN (token).ptr = start;
@@ -716,8 +725,10 @@ linespec_lexer_lex_one (linespec_parser *parser)
       /* Skip any whitespace.  */
       PARSER_STREAM (parser) = skip_spaces (PARSER_STREAM (parser));
 
-      /* Check for a keyword.  */
-      keyword = linespec_lexer_lex_keyword (PARSER_STREAM (parser));
+      /* Check for a keyword, they end the linespec.  */
+      keyword = NULL;
+      if (parser->keyword_ok)
+	keyword = linespec_lexer_lex_keyword (PARSER_STREAM (parser));
       if (keyword != NULL)
 	{
 	  parser->lexer.current.type = LSTOKEN_KEYWORD;
@@ -2018,6 +2029,10 @@ parse_linespec (linespec_parser *parser, char **argptr)
 	}
     }
 
+  /* A keyword at the start cannot be interpreted as such.
+     Consider "b thread thread 42".  */
+  parser->keyword_ok = 0;
+
   parser->lexer.saved_arg = *argptr;
   parser->lexer.stream = argptr;
   file_exception.reason = 0;
@@ -2091,6 +2106,9 @@ parse_linespec (linespec_parser *parser, char **argptr)
     }
   else if (token.type != LSTOKEN_STRING && token.type != LSTOKEN_NUMBER)
     unexpected_linespec_error (parser);
+
+  /* Now we can recognize keywords.  */
+  parser->keyword_ok = 1;
 
   /* Shortcut: If the next token is not LSTOKEN_COLON, we know that
      this token cannot represent a filename.  */
