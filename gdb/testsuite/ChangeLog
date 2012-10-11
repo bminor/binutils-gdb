@@ -1,5 +1,10 @@
 2012-10-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gdb.arch/i386-byte.exp: Remove is_ilp32_target check.
+	* gdb.arch/i386-word.exp: Likewise.
+
+2012-10-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gdb.arch/i386-avx.exp: Check is_amd64_regs_target instead of
 	is_ilp32_target to set nr_regs.
 	* gdb.arch/i386-sse.exp: Likewise.

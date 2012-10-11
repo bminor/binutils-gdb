@@ -19,7 +19,7 @@
 # This file is part of the gdb testsuite.
 
 
-if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"]) || ![is_ilp32_target] } then {
+if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"])} then {
     verbose "Skipping i386 byte register tests."
     return
 }
