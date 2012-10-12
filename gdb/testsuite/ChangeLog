@@ -1,3 +1,8 @@
+2012-10-12  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-breakpoint-changed.exp (test_pending_resolved): Remove
+	trail '.*' on matching patterns.
+
 2012-10-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gdb.arch/i386-bp_permanent.exp: Skip if not is_x86_like_target.

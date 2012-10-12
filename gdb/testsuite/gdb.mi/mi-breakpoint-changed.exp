@@ -163,11 +163,11 @@ proc test_pending_resolved { } { with_test_prefix "pending resolved" {
 
     set test "breakpoint on pendfunc1 resolved"
     gdb_expect {
-	-re ".*=breakpoint-modified,bkpt=\{number=\"1\".*addr=\"${hex}\".*,times=\"0\".*" {
+	-re ".*=breakpoint-modified,bkpt=\{number=\"1\".*addr=\"${hex}\".*,times=\"0\"" {
 	    pass $test
 	    exp_continue
 	}
-	-re ".*=breakpoint-modified,bkpt=\{number=\"1\".*addr=\"${hex}\".*,times=\"1\".*" {
+	-re ".*=breakpoint-modified,bkpt=\{number=\"1\".*addr=\"${hex}\".*,times=\"1\"" {
 	    pass "$test: hit_count is updated"
 	}
 	-re ".*${mi_gdb_prompt}$" {
@@ -219,7 +219,7 @@ proc test_pending_resolved { } { with_test_prefix "pending resolved" {
     mi_send_resuming_command "exec-continue" "continuing to exit"
     set test "breakpoint on pendfunc3 pending again"
     gdb_expect {
-	-re ".*=breakpoint-modified,bkpt=\{number=\"3\".*addr=\"<PENDING>\".*" {
+	-re ".*=breakpoint-modified,bkpt=\{number=\"3\".*addr=\"<PENDING>\"" {
 	    pass $test
 	}
 	-re ".*${mi_gdb_prompt}$" {
