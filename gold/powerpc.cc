@@ -154,6 +154,28 @@ public:
     this->access_from_map_[dst_off].insert(src_id);
   }
 
+  // Add a reference to the code section specified by the .opd entry
+  // at DST_OFF
+  void
+  add_gc_mark(typename elfcpp::Elf_types<size>::Elf_Addr dst_off)
+  {
+    size_t ndx = this->opd_ent_ndx(dst_off);
+    if (ndx >= this->opd_ent_.size())
+      this->opd_ent_.resize(ndx + 1);
+    this->opd_ent_[ndx].gc_mark = true;
+  }
+
+  void
+  process_gc_mark(Symbol_table* symtab)
+  {
+    for (size_t i = 0; i < this->opd_ent_.size(); i++)
+      if (this->opd_ent_[i].gc_mark)
+	{
+	  unsigned int shndx = this->opd_ent_[i].shndx;
+	  symtab->gc()->worklist().push(Section_id(this, shndx));
+	}
+  }
+
   bool
   opd_valid() const
   { return this->opd_valid_; }
@@ -200,7 +222,8 @@ private:
   struct Opd_ent
   {
     unsigned int shndx;
-    bool discard;
+    bool discard : 1;
+    bool gc_mark : 1;
     Offset off;
   };
 
@@ -3499,6 +3522,7 @@ Target_powerpc<size, big_endian>::gc_process_relocs(
 	  p->second.clear();
 	}
       ppc_object->access_from_map()->clear();
+      ppc_object->process_gc_mark(symtab);
       // Don't look at .opd relocs as .opd will reference everything.
       return;
     }
@@ -3571,8 +3595,13 @@ Target_powerpc<size, big_endian>::do_gc_mark_symbol(
 	{
 	  Sized_symbol<size>* gsym = symtab->get_sized_symbol<size>(sym);
 	  Address dst_off = gsym->value();
-	  unsigned int dst_indx = ppc_object->get_opd_ent(dst_off);
-	  symtab->gc()->worklist().push(Section_id(ppc_object, dst_indx));
+	  if (ppc_object->opd_valid())
+	    {
+	      unsigned int dst_indx = ppc_object->get_opd_ent(dst_off);
+	      symtab->gc()->worklist().push(Section_id(ppc_object, dst_indx));
+	    }
+	  else
+	    ppc_object->add_gc_mark(dst_off);
 	}
     }
 }

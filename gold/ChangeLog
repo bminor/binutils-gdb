@@ -1,5 +1,13 @@
 2012-10-12  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Powerpc_relobj::add_gc_mark, process_gc_mark): New.
+	(struct Opd_ent): Make "discard" a bit field.  Add "gc_mark".
+	(Target_powerpc::do_gc_mark_symbol): Delay marking function code
+	section if scan_opd_relocs not yet called.
+	(Target_powerpc::gc_process_relocs): Call process_gc_mark.
+
+2012-10-12  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Output_data_plt_powerpc::add_entry, add_ifunc_entry,
 	add_local_ifunc_entry): Revert last change.
 	(Target_powerpc::make_plt_entry, make_local_ifunc_plt_entry): Likewise.
