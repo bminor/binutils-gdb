@@ -1544,13 +1544,13 @@ class Output_data_plt_powerpc : public Output_section_data_build
   { }
 
   // Add an entry to the PLT.
-  bool
+  void
   add_entry(Symbol*);
 
-  bool
+  void
   add_ifunc_entry(Symbol*);
 
-  bool
+  void
   add_local_ifunc_entry(Sized_relobj_file<size, big_endian>*, unsigned int);
 
   // Return the .rela.plt section data.
@@ -1611,7 +1611,7 @@ class Output_data_plt_powerpc : public Output_section_data_build
 // Add an entry to the PLT.
 
 template<int size, bool big_endian>
-bool
+void
 Output_data_plt_powerpc<size, big_endian>::add_entry(Symbol* gsym)
 {
   if (!gsym->has_plt_offset())
@@ -1625,15 +1625,13 @@ Output_data_plt_powerpc<size, big_endian>::add_entry(Symbol* gsym)
       this->rel_->add_global(gsym, dynrel, this, off, 0);
       off += plt_entry_size;
       this->set_current_data_size(off);
-      return true;
     }
-  return false;
 }
 
 // Add an entry for a global ifunc symbol that resolves locally, to the IPLT.
 
 template<int size, bool big_endian>
-bool
+void
 Output_data_plt_powerpc<size, big_endian>::add_ifunc_entry(Symbol* gsym)
 {
   if (!gsym->has_plt_offset())
@@ -1646,15 +1644,13 @@ Output_data_plt_powerpc<size, big_endian>::add_ifunc_entry(Symbol* gsym)
       this->rel_->add_symbolless_global_addend(gsym, dynrel, this, off, 0);
       off += plt_entry_size;
       this->set_current_data_size(off);
-      return true;
     }
-  return false;
 }
 
 // Add an entry for a local ifunc symbol to the IPLT.
 
 template<int size, bool big_endian>
-bool
+void
 Output_data_plt_powerpc<size, big_endian>::add_local_ifunc_entry(
     Sized_relobj_file<size, big_endian>* relobj,
     unsigned int local_sym_index)
@@ -1670,9 +1666,7 @@ Output_data_plt_powerpc<size, big_endian>::add_local_ifunc_entry(
 					      this, off, 0);
       off += plt_entry_size;
       this->set_current_data_size(off);
-      return true;
     }
-  return false;
 }
 
 static const uint32_t add_0_11_11	= 0x7c0b5a14;
@@ -2430,16 +2424,15 @@ Target_powerpc<size, big_endian>::make_plt_entry(
     {
       if (this->iplt_ == NULL)
 	this->make_iplt_section(layout);
-      if (this->iplt_->add_ifunc_entry(gsym))
-	this->glink_->add_entry(object, gsym, reloc);
+      this->iplt_->add_ifunc_entry(gsym);
     }
   else
     {
       if (this->plt_ == NULL)
 	this->make_plt_section(layout);
-      if (this->plt_->add_entry(gsym))
-	this->glink_->add_entry(object, gsym, reloc);
+      this->plt_->add_entry(gsym);
     }
+  this->glink_->add_entry(object, gsym, reloc);
 }
 
 // Make a PLT entry for a local STT_GNU_IFUNC symbol.
@@ -2454,8 +2447,8 @@ Target_powerpc<size, big_endian>::make_local_ifunc_plt_entry(
   if (this->iplt_ == NULL)
     this->make_iplt_section(layout);
   unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
-  if (this->iplt_->add_local_ifunc_entry(relobj, r_sym))
-    this->glink_->add_entry(relobj, r_sym, reloc);
+  this->iplt_->add_local_ifunc_entry(relobj, r_sym);
+  this->glink_->add_entry(relobj, r_sym, reloc);
 }
 
 // Return the number of entries in the PLT.

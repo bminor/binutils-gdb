@@ -1,3 +1,9 @@
+2012-10-12  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Output_data_plt_powerpc::add_entry, add_ifunc_entry,
+	add_local_ifunc_entry): Revert last change.
+	(Target_powerpc::make_plt_entry, make_local_ifunc_plt_entry): Likewise.
+
 2012-10-05  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::do_plt_address_for_local,
