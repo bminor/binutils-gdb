@@ -1,3 +1,10 @@
+2012-10-13  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* gas/hppa/basic/unit.s: Remove uxor instructions with unit condition
+	involving a carry.
+	* gas/hppa/basic/unit2.s: Likewise.
+	* gas/hppa/basic/basic.exp: Adjusted expected.
+
 2012-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* gas/arm/armv8-a+fp.d: Use preferred form of vrint instruction
