@@ -35,7 +35,7 @@ AM_CFLAGS = $(WARN_CFLAGS)
 AM_CPPFLAGS = -DBINDIR='"$(bindir)"'
 if PLUGINS
 bfdinclude_HEADERS += $(INCDIR)/plugin-api.h
-LIBDL = -ldl
+LIBDL = @lt_cv_dlopen_libs@
 endif
 
 # bfd.h goes here, for now

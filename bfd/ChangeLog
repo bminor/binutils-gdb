@@ -1,3 +1,10 @@
+2012-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (LIBDL): Replace -ldl with @lt_cv_dlopen_libs@.
+	* configure.in (lt_cv_dlopen_libs): AC_SUBST.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+
 2012-10-08  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/14662

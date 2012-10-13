@@ -1100,6 +1100,7 @@ else
   supports_plugins=0
 fi
 AC_SUBST(supports_plugins)
+AC_SUBST(lt_cv_dlopen_libs)
 
 # Determine the host dependant file_ptr a.k.a. off_t type.  In order
 # prefer: off64_t - if ftello64 and fseeko64, off_t - if ftello and
