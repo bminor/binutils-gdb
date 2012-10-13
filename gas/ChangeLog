@@ -1,3 +1,8 @@
+2012-10-13  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* config/tc-hppa.c (pa_ip): Limit unit conditions for uxor to those
+	not involving a carry.
+
 2012-10-12  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* doc/as.texinfo (-mpwr4, -mpwr7): Fix option name typos.

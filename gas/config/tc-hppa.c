@@ -4431,6 +4431,7 @@ pa_ip (char *str)
 		    flag = 0;
 		    if (*s == ',')
 		      {
+			int uxor;
 			s++;
 
 			/* 64 bit conditions.  */
@@ -4444,6 +4445,9 @@ pa_ip (char *str)
 			else if (*s == '*')
 			  break;
 
+			/* The uxor instruction only supports unit conditions
+			   not involving carries.  */
+			uxor = (opcode & 0xfc000fc0) == 0x08000380;
 			if (strncasecmp (s, "sbz", 3) == 0)
 			  {
 			    cmpltr = 2;
@@ -4454,17 +4458,17 @@ pa_ip (char *str)
 			    cmpltr = 3;
 			    s += 3;
 			  }
-			else if (strncasecmp (s, "sdc", 3) == 0)
+			else if (!uxor && strncasecmp (s, "sdc", 3) == 0)
 			  {
 			    cmpltr = 4;
 			    s += 3;
 			  }
-			else if (strncasecmp (s, "sbc", 3) == 0)
+			else if (!uxor && strncasecmp (s, "sbc", 3) == 0)
 			  {
 			    cmpltr = 6;
 			    s += 3;
 			  }
-			else if (strncasecmp (s, "shc", 3) == 0)
+			else if (!uxor && strncasecmp (s, "shc", 3) == 0)
 			  {
 			    cmpltr = 7;
 			    s += 3;
@@ -4487,19 +4491,19 @@ pa_ip (char *str)
 			    flag = 1;
 			    s += 3;
 			  }
-			else if (strncasecmp (s, "ndc", 3) == 0)
+			else if (!uxor && strncasecmp (s, "ndc", 3) == 0)
 			  {
 			    cmpltr = 4;
 			    flag = 1;
 			    s += 3;
 			  }
-			else if (strncasecmp (s, "nbc", 3) == 0)
+			else if (!uxor && strncasecmp (s, "nbc", 3) == 0)
 			  {
 			    cmpltr = 6;
 			    flag = 1;
 			    s += 3;
 			  }
-			else if (strncasecmp (s, "nhc", 3) == 0)
+			else if (!uxor && strncasecmp (s, "nhc", 3) == 0)
 			  {
 			    cmpltr = 7;
 			    flag = 1;
@@ -4511,7 +4515,7 @@ pa_ip (char *str)
 			    flag = 0;
 			    s += 3;
 			  }
-			else if (strncasecmp (s, "swc", 3) == 0)
+			else if (!uxor && strncasecmp (s, "swc", 3) == 0)
 			  {
 			    cmpltr = 5;
 			    flag = 0;
@@ -4523,7 +4527,7 @@ pa_ip (char *str)
 			    flag = 1;
 			    s += 3;
 			  }
-			else if (strncasecmp (s, "nwc", 3) == 0)
+			else if (!uxor && strncasecmp (s, "nwc", 3) == 0)
 			  {
 			    cmpltr = 5;
 			    flag = 1;
