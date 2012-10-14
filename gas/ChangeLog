@@ -1,5 +1,10 @@
 2012-10-14  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
+	* config/tc-hppa.c (pa_get_number): New.
+	(pa_get_absolute_expression): Simplify.
+	(pa_ip): Use pa_get_number instead of pa_get_absolute_expression
+	to get SOP, SFU and COPR identifiers.
+
 	* config/tc-hppa.c (pa_ip): Reject double floating point stores and
 	loads that reference the right half of a floating point register.
 

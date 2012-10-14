@@ -2552,50 +2552,54 @@ pa_get_absolute_expression (struct pa_it *insn, char **strp)
   save_in = input_line_pointer;
   input_line_pointer = *strp;
   expression (&insn->exp);
-  /* This is not perfect, but is a huge improvement over doing nothing.
-
-     The PA assembly syntax is ambiguous in a variety of ways.  Consider
-     this string "4 %r5"  Is that the number 4 followed by the register
-     r5, or is that 4 MOD r5?
-
-     If we get a modulo expression when looking for an absolute, we try
-     again cutting off the input string at the first whitespace character.  */
-  if (insn->exp.X_op == O_modulus)
-    {
-      char *s, c;
-
-      input_line_pointer = *strp;
-      s = *strp;
-      while (*s != ',' && *s != ' ' && *s != '\t')
-	s++;
-
-      c = *s;
-      *s = 0;
-
-      pa_get_absolute_expression (insn, strp);
-
-      input_line_pointer = save_in;
-      *s = c;
-      return evaluate_absolute (insn);
-    }
-  /* When in strict mode we have a non-match, fix up the pointers
-     and return to our caller.  */
-  if (insn->exp.X_op != O_constant && strict)
-    {
-      expr_end = input_line_pointer;
-      input_line_pointer = save_in;
-      return 0;
-    }
-  if (insn->exp.X_op != O_constant)
-    {
-      as_bad (_("Bad segment (should be absolute)."));
-      expr_end = input_line_pointer;
-      input_line_pointer = save_in;
-      return 0;
-    }
   expr_end = input_line_pointer;
   input_line_pointer = save_in;
+  if (insn->exp.X_op != O_constant)
+    {
+      /* We have a non-match in strict mode.  */
+      if (!strict)
+	as_bad (_("Bad segment (should be absolute)."));
+      return 0;
+    }
   return evaluate_absolute (insn);
+}
+
+/* Get an absolute number.  The input string is terminated at the
+   first whitespace character.  */
+
+static int
+pa_get_number (struct pa_it *insn, char **strp)
+{
+  char *save_in;
+  char *s, c;
+  int result;
+
+  save_in = input_line_pointer;
+  input_line_pointer = *strp;
+
+  /* The PA assembly syntax is ambiguous in a variety of ways.  Consider
+     this string "4 %r5"  Is that the number 4 followed by the register
+     r5, or is that 4 MOD r5?  This situation occurs for example in the
+     coprocessor load and store instructions.  Previously, calling
+     pa_get_absolute_expression directly results in r5 being entered
+     in the symbol table.
+
+     So, when looking for an absolute number, we cut off the input string
+     at the first whitespace character.  Thus, expressions should generally
+     contain no whitespace.  */
+
+  s = *strp;
+  while (*s != ',' && *s != ' ' && *s != '\t')
+    s++;
+
+  c = *s;
+  *s = 0;
+
+  result = pa_get_absolute_expression (insn, strp);
+
+  input_line_pointer = save_in;
+  *s = c;
+  return result;
 }
 
 /* Given an argument location specification return the associated
@@ -5292,7 +5296,7 @@ pa_ip (char *str)
 	    case 'v':
 	      if (*s++ != ',')
 		as_bad (_("Invalid SFU identifier"));
-	      num = pa_get_absolute_expression (&the_insn, &s);
+	      num = pa_get_number (&the_insn, &s);
 	      if (strict && the_insn.exp.X_op != O_constant)
 		break;
 	      s = expr_end;
@@ -5301,7 +5305,7 @@ pa_ip (char *str)
 
 	    /* Handle a 20 bit SOP field for spop0.  */
 	    case 'O':
-	      num = pa_get_absolute_expression (&the_insn, &s);
+	      num = pa_get_number (&the_insn, &s);
 	      if (strict && the_insn.exp.X_op != O_constant)
 		break;
 	      s = expr_end;
@@ -5311,7 +5315,7 @@ pa_ip (char *str)
 
 	    /* Handle a 15bit SOP field for spop1.  */
 	    case 'o':
-	      num = pa_get_absolute_expression (&the_insn, &s);
+	      num = pa_get_number (&the_insn, &s);
 	      if (strict && the_insn.exp.X_op != O_constant)
 		break;
 	      s = expr_end;
@@ -5320,7 +5324,7 @@ pa_ip (char *str)
 
 	    /* Handle a 10bit SOP field for spop3.  */
 	    case '0':
-	      num = pa_get_absolute_expression (&the_insn, &s);
+	      num = pa_get_number (&the_insn, &s);
 	      if (strict && the_insn.exp.X_op != O_constant)
 		break;
 	      s = expr_end;
@@ -5330,7 +5334,7 @@ pa_ip (char *str)
 
 	    /* Handle a 15 bit SOP field for spop2.  */
 	    case '1':
-	      num = pa_get_absolute_expression (&the_insn, &s);
+	      num = pa_get_number (&the_insn, &s);
 	      if (strict && the_insn.exp.X_op != O_constant)
 		break;
 	      s = expr_end;
@@ -5342,7 +5346,7 @@ pa_ip (char *str)
 	    case 'u':
 	      if (*s++ != ',')
 		as_bad (_("Invalid COPR identifier"));
-	      num = pa_get_absolute_expression (&the_insn, &s);
+	      num = pa_get_number (&the_insn, &s);
 	      if (strict && the_insn.exp.X_op != O_constant)
 		break;
 	      s = expr_end;
@@ -5351,7 +5355,7 @@ pa_ip (char *str)
 
 	    /* Handle a 22bit SOP field for copr.  */
 	    case '2':
-	      num = pa_get_absolute_expression (&the_insn, &s);
+	      num = pa_get_number (&the_insn, &s);
 	      if (strict && the_insn.exp.X_op != O_constant)
 		break;
 	      s = expr_end;
