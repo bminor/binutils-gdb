@@ -5482,7 +5482,10 @@ pa_ip (char *str)
 		case 't':
 		  if (!pa_parse_number (&s, 3))
 		    break;
-		  num = (pa_number & ~FP_REG_RSEL) - FP_REG_BASE;
+		  /* RSEL should not be set.  */
+		  if (pa_number & FP_REG_RSEL)
+		    break;
+		  num = pa_number - FP_REG_BASE;
 		  CHECK_FIELD (num, 31, 0, 0);
 		  INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
