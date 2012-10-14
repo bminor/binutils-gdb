@@ -1,3 +1,9 @@
+2012-10-14  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* gas/hppa/basic/fmemLRbug.s: Remove double load and store instructions
+	which reference the right half of a floating point register.
+	* gas/hppa/basic/basic.exp: Adjust expected results.
+
 2012-10-13  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* gas/hppa/basic/unit.s: Remove uxor instructions with unit condition
