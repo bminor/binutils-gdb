@@ -1,3 +1,29 @@
+2012-10-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi2-cli.exp: Move to mi-cli.exp.
+	* gdb.mi/mi-cli.exp: New.
+
+	* gdb.mi/mi2-basics.exp: Remove.
+	* gdb.mi/mi2-break.exp: Remove.
+	* gdb.mi/mi2-console.exp: Remove.
+	* gdb.mi/mi2-disassemble.exp: Remove.
+	* gdb.mi/mi2-eval.exp: Remove.
+	* gdb.mi/mi2-file.exp: Remove.
+	* gdb.mi/mi2-hack-cli.exp: Remove.
+	* gdb.mi/mi2-pthreads.exp: Remove.
+	* gdb.mi/mi2-read-memory.exp: Remove.
+	* gdb.mi/mi2-regs.exp: Remove.
+	* gdb.mi/mi2-return.exp: Remove.
+	* gdb.mi/mi2-simplerun.exp: Remove.
+	* gdb.mi/mi2-stack.exp: Remove.
+	* gdb.mi/mi2-stepi.exp: Remove.
+	* gdb.mi/mi2-syn-frame.exp: Remove.
+	* gdb.mi/mi2-until.exp: Remove.
+	* gdb.mi/mi2-watch.exp: Remove.
+	* gdb.mi/mi2-var-block.exp: Remove.
+	* gdb.mi/mi2-var-cmd.exp: Remove.
+	* gdb.mi/mi2-var-display.exp: Remove.
+
 2012-10-12  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi-breakpoint-changed.exp (test_pending_resolved): Remove

@@ -20,7 +20,7 @@
 # handlers, etc.
 
 load_lib mi-support.exp
-set MIFLAGS "-i=mi2"
+set MIFLAGS "-i=mi"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -30,7 +30,7 @@ if [mi_gdb_start] {
 standard_testfile basics.c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested mi2-cli.exp
+     untested mi-cli.exp
      return -1
 }
 
@@ -56,7 +56,7 @@ mi_gdb_test "-interpreter-exec console bogus" \
 #   {(=.*)+\^done} \
 #   "-interpreter-exec console \"file \$binfile\""
 mi_gdb_test "-interpreter-exec console \"file $binfile\"" \
-  {~"Reading symbols from .*mi2-cli...".*\^done} \
+  {~"Reading symbols from .*mi-cli...".*\^done} \
   "-interpreter-exec console \"file \$binfile\""
 
 mi_run_to_main
