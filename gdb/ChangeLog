@@ -1,3 +1,10 @@
+2012-10-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix entry values resolving in inlined frames.
+	* dwarf2loc.c (dwarf_expr_reg_to_entry_parameter): Move func_addr,
+	gdbarch and caller_frame initialization later.  Skip INLINE_FRAME
+	entries of FRAME.
+
 2012-10-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: Build with -DMS_WIN64 if building with Python

@@ -1,4 +1,11 @@
 2012-10-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix entry values resolving in inlined frames.
+	* gdb.arch/amd64-entry-value-inline.S: New file.
+	* gdb.arch/amd64-entry-value-inline.c: New file.
+	* gdb.arch/amd64-entry-value-inline.exp: New file.
+
+2012-10-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Doug Evans  <dje@google.com>
 
 	Fix recent gdb_breakpoint regression.

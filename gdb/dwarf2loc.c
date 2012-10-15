@@ -980,16 +980,27 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
 				   union call_site_parameter_u kind_u,
 				   struct dwarf2_per_cu_data **per_cu_return)
 {
-  CORE_ADDR func_addr = get_frame_func (frame);
-  CORE_ADDR caller_pc;
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct frame_info *caller_frame = get_prev_frame (frame);
+  CORE_ADDR func_addr, caller_pc;
+  struct gdbarch *gdbarch;
+  struct frame_info *caller_frame;
   struct call_site *call_site;
   int iparams;
   /* Initialize it just to avoid a GCC false warning.  */
   struct call_site_parameter *parameter = NULL;
   CORE_ADDR target_addr;
 
+  /* Skip any inlined frames, entry value call sites work between real
+     functions.  They do not make sense between inline functions as even PC
+     does not change there.  */
+  while (get_frame_type (frame) == INLINE_FRAME)
+    {
+      frame = get_prev_frame (frame);
+      gdb_assert (frame != NULL);
+    }
+
+  func_addr = get_frame_func (frame);
+  gdbarch = get_frame_arch (frame);
+  caller_frame = get_prev_frame (frame);
   if (gdbarch != frame_unwind_arch (frame))
     {
       struct minimal_symbol *msym = lookup_minimal_symbol_by_pc (func_addr);
