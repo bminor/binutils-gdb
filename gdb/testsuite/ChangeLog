@@ -1,3 +1,11 @@
+2012-10-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Doug Evans  <dje@google.com>
+
+	Fix recent gdb_breakpoint regression.
+	* gdb.java/jmisc.exp: gdb_breakpoint for $function - remove curly
+	braces from the parameter.
+	* gdb.java/jprint.exp: Likewise.
+
 2012-10-15  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (runto): Fix call to gdb_breakpoint.
