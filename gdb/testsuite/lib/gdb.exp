@@ -460,7 +460,10 @@ proc runto { function args } {
 
     # We need to use eval here to pass our varargs args to gdb_breakpoint
     # which is also a varargs function.
-    if ![eval gdb_breakpoint $function $args] {
+    # But we also have to be careful because $function may have multiple
+    # elements, and we don't want Tcl to move the remaining elements after
+    # the first to $args.  That is why $function is wrapped in {}.
+    if ![eval gdb_breakpoint {$function} $args] {
 	return 0;
     }
 

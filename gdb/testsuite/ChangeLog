@@ -1,3 +1,7 @@
+2012-10-15  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (runto): Fix call to gdb_breakpoint.
+
 2012-10-15  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gdb.dwarf2/dw2-icc-opaque.S: Remove '#'.
