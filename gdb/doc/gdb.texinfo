@@ -1043,10 +1043,37 @@ batch mode or quiet mode.
 @itemx -n
 @cindex @code{--nx}
 @cindex @code{-n}
-Do not execute commands found in any initialization files.  Normally,
-@value{GDBN} executes the commands in these files after all the command
-options and arguments have been processed.  @xref{Command Files,,Command
-Files}.
+Do not execute commands found in any initialization file.
+There are three init files, loaded in the following order:
+
+@table @code
+@item @file{system.gdbinit}
+This is the system-wide init file.
+Its location is specified with the @code{--with-system-gdbinit}
+configure option (@pxref{System-wide configuration}).
+It is loaded first when @value{GDBN} starts, before command line options
+have been processed.
+@item @file{~/.gdbinit}
+This is the init file in your home directory.
+It is loaded next, after @file{system.gdbinit}, and before
+command options have been processed.
+@item @file{./.gdbinit}
+This is the init file in the current directory.
+It is loaded last, after command line options other than @code{-x} and
+@code{-ex} have been processed.  Command line options @code{-x} and
+@code{-ex} are processed last, after @file{./.gdbinit} has been loaded.
+@end table
+
+For further documentation on startup processing, @xref{Startup}.
+For documentation on how to write command files,
+@xref{Command Files,,Command Files}.
+
+@anchor{-nh}
+@item -nh
+@cindex @code{--nh}
+Do not execute commands found in @file{~/.gdbinit}, the init file
+in your home directory.
+@xref{Startup}.
 
 @item -quiet
 @itemx -silent

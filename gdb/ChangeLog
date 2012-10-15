@@ -1,3 +1,11 @@
+2012-10-15  Doug Evans  <dje@google.com>
+
+	New option -nh: inhibit loading of ~/.gdbinit.
+	* NEWS: Mention -nh.
+	* main.c (captured_main): Recognize and process -nh.
+	(print_gdb_help): Mention -nh.
+	* gdb.1: Mention -nh.  Remove erroneous docs on -nx behavior.
+
 2012-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR backtrace/14646

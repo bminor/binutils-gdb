@@ -9,6 +9,7 @@ gdb \- The GNU Debugger
 .TP
 .B gdb
 .RB "[\|" \-help "\|]"
+.RB "[\|" \-nh "\|]"
 .RB "[\|" \-nx "\|]"
 .RB "[\|" \-q "\|]"
 .RB "[\|" \-batch "\|]"
@@ -283,14 +284,16 @@ Add \c
 .PP
 
 .TP
+.B \-nh
+Do not execute commands from ~/.gdbinit.
+
+.TP
 .B \-nx
 .TP
 .B \-n
 Do not execute commands from any `\|\c
 .B .gdbinit\c
 \&\|' initialization files.
-Normally, the commands in these files are executed after all the
-command options and arguments have been processed.
 
 
 .TP

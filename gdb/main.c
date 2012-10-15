@@ -273,6 +273,7 @@ captured_main (void *data)
   char **argv = context->argv;
   static int quiet = 0;
   static int set_args = 0;
+  static int inhibit_home_gdbinit = 0;
 
   /* Pointers to various arguments from command line.  */
   char *symarg = NULL;
@@ -415,6 +416,7 @@ captured_main (void *data)
       {"quiet", no_argument, &quiet, 1},
       {"q", no_argument, &quiet, 1},
       {"silent", no_argument, &quiet, 1},
+      {"nh", no_argument, &inhibit_home_gdbinit, 1},
       {"nx", no_argument, &inhibit_gdbinit, 1},
       {"n", no_argument, &inhibit_gdbinit, 1},
       {"batch-silent", no_argument, 0, 'B'},
@@ -845,7 +847,7 @@ captured_main (void *data)
      global parameters, which are independent of what file you are
      debugging or what directory you are in.  */
 
-  if (home_gdbinit && !inhibit_gdbinit)
+  if (home_gdbinit && !inhibit_gdbinit && !inhibit_home_gdbinit)
     catch_command_errors (source_script, home_gdbinit, 0, RETURN_MASK_ALL);
 
   /* Process '-ix' and '-iex' options early.  */
@@ -1066,9 +1068,12 @@ Options:\n\n\
   fputs_unfiltered (_("\
   -l TIMEOUT         Set timeout in seconds for remote debugging.\n\
   --nw		     Do not use a window interface.\n\
-  --nx               Do not read "), stream);
+  --nx               Do not read any "), stream);
   fputs_unfiltered (gdbinit, stream);
-  fputs_unfiltered (_(" file.\n\
+  fputs_unfiltered (_(" files.\n\
+  --nh               Do not read "), stream);
+  fputs_unfiltered (gdbinit, stream);
+  fputs_unfiltered (_(" file from home directory.\n\
   --quiet            Do not print version number on startup.\n\
   --readnow          Fully read symbol files on first access.\n\
 "), stream);

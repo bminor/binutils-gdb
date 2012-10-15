@@ -3,6 +3,11 @@
 
 *** Changes since GDB 7.5
 
+* New command line options:
+
+-nh   Disables auto-loading of ~/.gdbinit, but still executes all the
+      other initialization files, unlike -nx which disables all of them.
+
 * Python scripting
 
   ** Vectors can be created with gdb.Type.vector.
