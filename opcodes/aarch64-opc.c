@@ -2771,6 +2771,9 @@ const struct aarch64_name_value_pair aarch64_sys_regs [] =
   { "rvbar_el1",        CPENC(3,0,C12,C0,1) }, /* RO */
   { "rvbar_el2",        CPENC(3,4,C12,C0,1) }, /* RO */
   { "rvbar_el3",        CPENC(3,6,C12,C0,1) }, /* RO */
+  { "rmr_el1",          CPENC(3,0,C12,C0,2) },
+  { "rmr_el2",          CPENC(3,4,C12,C0,2) },
+  { "rmr_el3",          CPENC(3,6,C12,C0,2) },
   { "isr_el1",          CPENC(3,0,C12,C1,0) }, /* RO */
   { "contextidr_el1",   CPENC(3,0,C13,C0,1) },
   { "tpidr_el0",        CPENC(3,3,C13,C0,2) },
@@ -2962,10 +2965,6 @@ const struct aarch64_name_value_pair aarch64_sys_regs [] =
   { "pmevtyper29_el0",   CPENC(3,3,C14,C15,5) },
   { "pmevtyper30_el0",   CPENC(3,3,C14,C15,6) },
   { "pmccfiltr_el0",     CPENC(3,3,C14,C15,7) },
-
-  { "daifset",          CPENC(0,3,C4,C0,6)  },
-  { "daifclr",          CPENC(0,3,C4,C0,7)  },
-
   { 0,          CPENC(0,0,0,0,0)  },
 };
 
