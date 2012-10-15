@@ -2061,6 +2061,9 @@ static const struct bfd_elf_special_section special_sections_d[] =
 {
   { STRING_COMMA_LEN (".data"),         -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
   { STRING_COMMA_LEN (".data1"),         0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  /* There are more DWARF sections than these, but they needn't be added here
+     unless you have to cope with broken compilers that don't emit section
+     attributes or you want to help the user writing assembler.  */
   { STRING_COMMA_LEN (".debug"),         0, SHT_PROGBITS, 0 },
   { STRING_COMMA_LEN (".debug_line"),    0, SHT_PROGBITS, 0 },
   { STRING_COMMA_LEN (".debug_info"),    0, SHT_PROGBITS, 0 },

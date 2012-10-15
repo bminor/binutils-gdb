@@ -1,3 +1,7 @@
+2012-10-15  Doug Evans  <dje@google.com>
+
+	* elf.c (special_sections_d): Add comment.
+
 2012-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (LIBDL): Replace -ldl with @lt_cv_dlopen_libs@.
