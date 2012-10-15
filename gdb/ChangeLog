@@ -1,3 +1,14 @@
+2012-10-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR backtrace/14646
+	PR gdb/14647
+	* i386-tdep.h (gdbarch_tdep): Remove sp_regnum_from_eax and
+	pc_regnum_from_eax.
+	* i386-tdep.c (i386_gdbarch_init): Don't use sp_regnum_from_eax
+	nor pc_regnum_from_eax.
+	* amd64-tdep.c (amd64_x32_init_abi): Don't set sp_regnum_from_eax
+	nor pc_regnum_from_eax.
+
 2012-10-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix entry values resolving in inlined frames.

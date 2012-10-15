@@ -149,14 +149,6 @@ struct gdbarch_tdep
      of pseudo dword register support.  */
   int eax_regnum;
 
-  /* Register number for SP, relative to %eax.  Set this to -1 to
-     indicate the absence of pseudo SP register support.  */
-  int sp_regnum_from_eax;
-
-  /* Register number for PC, relative to %eax.  Set this to -1 to
-     indicate the absence of pseudo PC register support.  */
-  int pc_regnum_from_eax;
-
   /* Number of core registers.  */
   int num_core_regs;
 
