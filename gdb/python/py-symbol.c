@@ -335,7 +335,7 @@ sympy_dealloc (PyObject *obj)
 
   if (sym_obj->prev)
     sym_obj->prev->next = sym_obj->next;
-  else if (SYMBOL_SYMTAB (sym_obj->symbol))
+  else if (sym_obj->symbol && SYMBOL_SYMTAB (sym_obj->symbol))
     {
       set_objfile_data (SYMBOL_SYMTAB (sym_obj->symbol)->objfile,
 			sympy_objfile_data_key, sym_obj->next);
