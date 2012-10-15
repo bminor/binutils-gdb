@@ -134,6 +134,22 @@ cp_test_ptype_class \
 	{ method public "int foo();" }
     }
 
+# class G
+cp_test_ptype_class \
+    "ptype g_instance" "" "class" "G" \
+    {
+	{ base          "private A" }
+	{ base          "public B" }
+	{ base          "protected C" }
+	{ field public "int g;" }
+	{ field public "int gg;" }
+	{ field public "int a;" }
+	{ field public "int b;" }
+	{ field public "int c;" }
+	{ method public "int gfoo();" }
+	{ method public "int foo();" }
+    }
+
 # Print individual fields.
 
 gdb_test "print d_instance.a"  "\\$\[0-9\]+ = 1" "print value of d_instance.a"

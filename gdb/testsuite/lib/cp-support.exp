@@ -81,6 +81,11 @@ proc cp_check_errata { expected_string actual_string errata_table } {
 #      the class has a member function with the given access type
 #      and the given declaration.
 #
+#   { typedef "access" "declaration" }
+#
+#      the class has a typedef with the given access type and the
+#      given declaration.
+#
 # If you test the same class declaration more than once, you can specify
 # IN_CLASS_TABLE as "ibid".  "ibid" means: look for a previous class
 # table that had the same IN_KEY and IN_TAG, and re-use that table.
@@ -199,6 +204,7 @@ proc cp_test_ptype_class { in_command in_testname in_key in_tag in_class_table {
     set list_vbases  { }
     set list_fields  { }
     set list_methods { }
+    set list_typedefs { }
 
     foreach class_line $in_class_table {
 	switch [lindex $class_line 0] {
@@ -206,6 +212,7 @@ proc cp_test_ptype_class { in_command in_testname in_key in_tag in_class_table {
 	    "vbase"  { lappend list_vbases  [lindex $class_line 1] }
 	    "field"  { lappend list_fields  [lrange $class_line 1 2] }
 	    "method" { lappend list_methods [lrange $class_line 1 2] }
+	    "typedef" { lappend list_typedefs [lrange $class_line 1 2] }
 	    default  { fail "$in_testname // bad line in class table: $class_line"; return; }
 	}
     }
@@ -381,6 +388,22 @@ proc cp_test_ptype_class { in_command in_testname in_key in_tag in_class_table {
 	    }
 	}
 
+	# Typedef
+
+	if {[llength $list_typedefs] > 0} {
+	    set typedef_access [lindex [lindex $list_typedefs 0] 0]
+	    set typedef_decl [lindex [lindex $list_typedefs 0] 1]
+	    if {[string equal $actual_line $typedef_decl]} {
+		if {![string equal $access $typedef_access]} {
+		    cp_check_errata $typedef_access $access $in_errata_table
+		    fail "$in_testname // wrong access specifier for typedef: $access"
+		    return
+		}
+		set list_typedefs [lreplace $list_typedefs 0 0]
+		continue
+	    }
+	}
+
 	# Synthetic operators.  These are optional and can be mixed in
 	# with the methods in any order, but duplicates are wrong.
 	#
@@ -449,6 +472,11 @@ proc cp_test_ptype_class { in_command in_testname in_key in_tag in_class_table {
 
     if { [llength $list_methods] > 0 } then {
 	fail "$in_testname // missing methods"
+	return
+    }
+
+    if {[llength $list_typedefs] > 0} {
+	fail "$in_testname // missing typedefs"
 	return
     }
 

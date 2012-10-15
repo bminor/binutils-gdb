@@ -1,3 +1,10 @@
+2012-10-15  Keith Seitz  <keiths@redhat.com>
+
+	* lib/cp-support.exp (cp_test_ptype_class): Add support
+	for class typedefs.
+
+	* gdb.cp/derivation.exp: Add tests for g_instance.
+
 2012-10-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix entry values resolving in inlined frames.
