@@ -1,3 +1,7 @@
+2012-10-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gdb.dwarf2/dw2-icc-opaque.S: Remove '#'.
+
 2012-10-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-symtab.exp: Test sal and symtab destructors.

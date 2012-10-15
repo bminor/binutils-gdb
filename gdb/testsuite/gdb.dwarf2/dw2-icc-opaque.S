@@ -35,7 +35,7 @@
 	.file "opaque-pointer.c"
 	.data
 	.comm p_struct,8,8
-	.global p_struct#
+	.global p_struct
 
 	.section .debug_info
 debug_info_seg1:
