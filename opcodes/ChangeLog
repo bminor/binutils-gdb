@@ -1,3 +1,9 @@
+2012-10-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (operand_general_constraint_met_p): Change to check
+	the alignment of addr.offset.imm instead of that of shifter.amount for
+	operand type AARCH64_OPND_ADDR_UIMM12.
+
 2012-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* arm-dis.c: Use preferred form of vrint instruction variants
