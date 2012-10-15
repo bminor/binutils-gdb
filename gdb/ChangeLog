@@ -1,5 +1,11 @@
 2012-10-15  Tom Tromey  <tromey@redhat.com>
 
+	PR python/14635:
+	* python/py-symtab.c (del_objfile_sal): Set 'symtab' field
+	to Py_None.
+
+2012-10-15  Tom Tromey  <tromey@redhat.com>
+
 	PR python/14634:
 	* python/py-symbol.c (sympy_dealloc): Check for NULL symbol.
 

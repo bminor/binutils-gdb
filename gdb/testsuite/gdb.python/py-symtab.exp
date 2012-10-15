@@ -73,3 +73,6 @@ gdb_test "python print \"simple_struct\" in static_symbols" "True" "Test simple_
 gdb_unload
 gdb_test "python print sal.is_valid()" "False" "Test sal.is_valid"
 gdb_test "python print symtab.is_valid()" "False" "Test symtab.is_valid()"
+
+gdb_test_no_output "python sal = None" "Test sal destructor"
+gdb_test_no_output "python symtab = None" "Test symtab destructor"

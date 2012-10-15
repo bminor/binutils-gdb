@@ -1,5 +1,9 @@
 2012-10-15  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.python/py-symtab.exp: Test sal and symtab destructors.
+
+2012-10-15  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.python/py-symbol.exp: Test symbol destructor.
 
 2012-10-14  Yao Qi  <yao@codesourcery.com>
