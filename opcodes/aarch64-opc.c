@@ -1426,7 +1426,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 					     0, 4095 * size);
 	      return 0;
 	    }
-	  if (!value_aligned_p (opnd->shifter.amount, size))
+	  if (!value_aligned_p (opnd->addr.offset.imm, size))
 	    {
 	      set_unaligned_error (mismatch_detail, idx, size);
 	      return 0;
