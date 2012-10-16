@@ -989,9 +989,6 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
   struct call_site_parameter *parameter = NULL;
   CORE_ADDR target_addr;
 
-  /* Skip any inlined frames, entry value call sites work between real
-     functions.  They do not make sense between inline functions as even PC
-     does not change there.  */
   while (get_frame_type (frame) == INLINE_FRAME)
     {
       frame = get_prev_frame (frame);

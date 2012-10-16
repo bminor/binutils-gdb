@@ -1,3 +1,7 @@
+2012-10-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.c (dwarf_expr_reg_to_entry_parameter): Remove comment.
+
 2012-10-15  Doug Evans  <dje@google.com>
 
 	New option -nh: inhibit loading of ~/.gdbinit.
