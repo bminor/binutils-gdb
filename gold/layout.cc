@@ -582,7 +582,8 @@ bool
 Layout::include_section(Sized_relobj_file<size, big_endian>*, const char* name,
 			const elfcpp::Shdr<size, big_endian>& shdr)
 {
-  if (shdr.get_sh_flags() & elfcpp::SHF_EXCLUDE)
+  if (!parameters->options().relocatable()
+      && (shdr.get_sh_flags() & elfcpp::SHF_EXCLUDE))
     return false;
 
   switch (shdr.get_sh_type())

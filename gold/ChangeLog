@@ -1,3 +1,8 @@
+2012-10-16  Sriraman Tallam  <tmsriram@google.com>
+
+	* layout.cc (Layout::include_section): Keep sections marked
+	SHF_EXCLUDE when doing relocatable links.
+
 2012-10-16  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::define_save_restore_funcs): New func.
