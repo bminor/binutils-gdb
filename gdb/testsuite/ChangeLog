@@ -1,3 +1,10 @@
+2012-10-16  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.reverse/solib-precsave.exp: Skip if skip_shlib_test
+	returns true.
+	Call gdb_load_shlibs.
+	* gdb.reverse/solib-reverse.exp: Likewise.
+
 2012-10-15  Keith Seitz  <keiths@redhat.com>
 
 	* lib/cp-support.exp (cp_test_ptype_class): Add support

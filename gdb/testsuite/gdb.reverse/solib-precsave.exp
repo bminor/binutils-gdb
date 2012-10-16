@@ -20,6 +20,9 @@
 if ![supports_process_record] {
     return
 }
+if {[skip_shlib_tests]} {
+    return
+}
 
 standard_testfile solib-reverse.c
 set precsave [standard_output_file solib.precsave]
@@ -59,7 +62,7 @@ gdb_test_no_output "set debug-file-directory"
 
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-
+gdb_load_shlibs $library
 
 runto main
 
