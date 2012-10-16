@@ -1,5 +1,11 @@
 2012-10-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* coff64-rs6000.c (rs6000coff64_vec): Set _close_and_cleanup
+	field to _bfd_archive_close_and_cleanup.
+	(aix5coff64_vec): Likewise.
+
+2012-10-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* coff-rs6000.c (rs6000coff_vec): Set _close_and_cleanup
 	field to _bfd_archive_close_and_cleanup.
 	(pmac_xcoff_vec): Likewise.
