@@ -1,3 +1,14 @@
+2012-10-16  Sofiane Naci  <sofiane.naci@arm.com>
+
+	* elf64-aarch64.c (elf64_aarch64_tls_howto_table): Fix shift value for
+	R_AARCH64_TLSIE_LD_GOTTPREL_PREL19, R_AARCH64_TLSLE_MOVW_TPREL_G2,
+	R_AARCH64_TLSLE_MOVW_TPREL_G1, R_AARCH64_TLSLE_MOVW_TPREL_G1_NC,
+	R_AARCH64_TLSLE_ADD_TPREL_HI12.
+	(elf64_aarch64_tlsdesc_howto_table): Fix shift value for
+	R_AARCH64_TLSDESC_LD64_PREL19 and R_AARCH64_TLSDESC_OFF_G1.
+	(elf64_aarch64_final_link_relocate): Add signed_addend when resolving
+	AARCH64_TLSLE_*_TPREL_* relocations.
+
 2012-10-16  Alan Modra  <amodra@gmail.com>
 
 	* elf32-xtensa.c (free_section_cache): Renamed from
