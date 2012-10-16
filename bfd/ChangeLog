@@ -1,3 +1,10 @@
+2012-10-16  Alan Modra  <amodra@gmail.com>
+
+	* elf32-xtensa.c (free_section_cache): Renamed from
+	clear_section_cache.  Don't zero cache.
+	(section_cache_section): Remove ineffectual zero of cache.
+	Call init_section_cache instead.
+
 2012-10-15  Doug Evans  <dje@google.com>
 
 	* elf.c (special_sections_d): Add comment.

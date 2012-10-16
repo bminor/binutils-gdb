@@ -6067,7 +6067,7 @@ init_section_cache (section_cache_t *sec_cache)
 
 
 static void
-clear_section_cache (section_cache_t *sec_cache)
+free_section_cache (section_cache_t *sec_cache)
 {
   if (sec_cache->sec)
     {
@@ -6075,7 +6075,6 @@ clear_section_cache (section_cache_t *sec_cache)
       release_internal_relocs (sec_cache->sec, sec_cache->relocs);
       if (sec_cache->ptbl)
 	free (sec_cache->ptbl);
-      memset (sec_cache, 0, sizeof (sec_cache));
     }
 }
 
@@ -6116,8 +6115,8 @@ section_cache_section (section_cache_t *sec_cache,
     goto err;
 
   /* Fill in the new section cache.  */
-  clear_section_cache (sec_cache);
-  memset (sec_cache, 0, sizeof (sec_cache));
+  free_section_cache (sec_cache);
+  init_section_cache (sec_cache);
 
   sec_cache->sec = sec;
   sec_cache->contents = contents;
@@ -8272,8 +8271,9 @@ compute_removed_literals (bfd *abfd,
 #endif /* DEBUG */
 
 error_return:
-  if (prop_table) free (prop_table);
-  clear_section_cache (&target_sec_cache);
+  if (prop_table)
+    free (prop_table);
+  free_section_cache (&target_sec_cache);
 
   release_contents (sec, contents);
   release_internal_relocs (sec, internal_relocs);
