@@ -1,3 +1,9 @@
+2012-10-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* coff-rs6000.c (rs6000coff_vec): Set _close_and_cleanup
+	field to _bfd_archive_close_and_cleanup.
+	(pmac_xcoff_vec): Likewise.
+
 2012-10-16  Sofiane Naci  <sofiane.naci@arm.com>
 
 	* elf64-aarch64.c (elf64_aarch64_tls_howto_table): Fix shift value for
