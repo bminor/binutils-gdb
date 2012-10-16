@@ -2668,7 +2668,7 @@ const bfd_target rs6000coff64_vec =
     },
 
     /* Generic */
-    bfd_true,
+    _bfd_archive_close_and_cleanup,
     bfd_true,
     coff_new_section_hook,
     _bfd_generic_get_section_contents,
@@ -2926,7 +2926,7 @@ const bfd_target aix5coff64_vec =
     },
 
     /* Generic */
-    bfd_true,
+    _bfd_archive_close_and_cleanup,
     bfd_true,
     coff_new_section_hook,
     _bfd_generic_get_section_contents,
