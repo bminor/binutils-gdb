@@ -1,3 +1,11 @@
+2012-10-16  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::define_save_restore_funcs): New func.
+	(Target_powerpc::do_finalize_sections): Call it.
+	(Output_data_save_res): New class and supporting functions.
+	(Target_powerpc::symval_for_branch): Only look up .opd entry for
+	normal symbols defined in object files.
+
 2012-10-12  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Powerpc_relobj::add_gc_mark, process_gc_mark): New.

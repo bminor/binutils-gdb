@@ -325,6 +325,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
     return NULL;
   }
 
+  // Provide linker defined save/restore functions.
+  void
+  define_save_restore_funcs(Layout*, Symbol_table*);
+
   // Finalize the sections.
   void
   do_finalize_sections(Layout*, const Input_objects*, Symbol_table*);
@@ -1713,16 +1717,21 @@ static const uint32_t addis_3_13	= 0x3c6d0000;
 static const uint32_t b			= 0x48000000;
 static const uint32_t bcl_20_31		= 0x429f0005;
 static const uint32_t bctr		= 0x4e800420;
+static const uint32_t blr		= 0x4e800020;
 static const uint32_t blrl		= 0x4e800021;
 static const uint32_t cror_15_15_15	= 0x4def7b82;
 static const uint32_t cror_31_31_31	= 0x4ffffb82;
+static const uint32_t ld_0_1		= 0xe8010000;
+static const uint32_t ld_0_12		= 0xe80c0000;
 static const uint32_t ld_11_12		= 0xe96c0000;
 static const uint32_t ld_11_2		= 0xe9620000;
 static const uint32_t ld_2_1		= 0xe8410000;
 static const uint32_t ld_2_11		= 0xe84b0000;
 static const uint32_t ld_2_12		= 0xe84c0000;
 static const uint32_t ld_2_2		= 0xe8420000;
+static const uint32_t lfd_0_1		= 0xc8010000;
 static const uint32_t li_0_0		= 0x38000000;
+static const uint32_t li_12_0		= 0x39800000;
 static const uint32_t lis_0_0		= 0x3c000000;
 static const uint32_t lis_11		= 0x3d600000;
 static const uint32_t lis_12		= 0x3d800000;
@@ -1731,6 +1740,7 @@ static const uint32_t lwz_11_11		= 0x816b0000;
 static const uint32_t lwz_11_30		= 0x817e0000;
 static const uint32_t lwz_12_12		= 0x818c0000;
 static const uint32_t lwzu_0_12		= 0x840c0000;
+static const uint32_t lvx_0_12_0	= 0x7c0c00ce;
 static const uint32_t mflr_0		= 0x7c0802a6;
 static const uint32_t mflr_11		= 0x7d6802a6;
 static const uint32_t mflr_12		= 0x7d8802a6;
@@ -1740,7 +1750,11 @@ static const uint32_t mtlr_0		= 0x7c0803a6;
 static const uint32_t mtlr_12		= 0x7d8803a6;
 static const uint32_t nop		= 0x60000000;
 static const uint32_t ori_0_0_0		= 0x60000000;
+static const uint32_t std_0_1		= 0xf8010000;
+static const uint32_t std_0_12		= 0xf80c0000;
 static const uint32_t std_2_1		= 0xf8410000;
+static const uint32_t stfd_0_1		= 0xd8010000;
+static const uint32_t stvx_0_12_0	= 0x7c0c01ce;
 static const uint32_t sub_11_11_12	= 0x7d6c5850;
 
 // Write out the PLT.
@@ -2416,6 +2430,335 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 
   of->write_output_view(off, oview_size, oview);
 }
+
+
+// A class to handle linker generated save/restore functions.
+
+template<int size, bool big_endian>
+class Output_data_save_res : public Output_section_data_build
+{
+ public:
+  Output_data_save_res(Symbol_table* symtab);
+
+ protected:
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** save/restore")); }
+
+  void
+  do_write(Output_file*);
+
+ private:
+  // The maximum size of save/restore contents.
+  static const unsigned int savres_max = 218*4;
+
+  void
+  savres_define(Symbol_table* symtab,
+		const char *name,
+		unsigned int lo, unsigned int hi,
+		unsigned char* write_ent(unsigned char*, int),
+		unsigned char* write_tail(unsigned char*, int));
+
+  unsigned char *contents_;
+};
+
+template<bool big_endian>
+static unsigned char*
+savegpr0(unsigned char* p, int r)
+{
+  uint32_t insn = std_0_1 + (r << 21) + (1 << 16) - (32 - r) * 8;
+  write_insn<big_endian>(p, insn);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char*
+savegpr0_tail(unsigned char* p, int r)
+{
+  p = savegpr0<big_endian>(p, r);
+  uint32_t insn = std_0_1 + 16;
+  write_insn<big_endian>(p, insn);
+  p = p + 4;
+  write_insn<big_endian>(p, blr);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+restgpr0(unsigned char* p, int r)
+{
+  uint32_t insn = ld_0_1 + (r << 21) + (1 << 16) - (32 - r) * 8;
+  write_insn<big_endian>(p, insn);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+restgpr0_tail(unsigned char* p, int r)
+{
+  uint32_t insn = ld_0_1 + 16;
+  write_insn<big_endian>(p, insn);
+  p = p + 4;
+  p = restgpr0<big_endian>(p, r);
+  write_insn<big_endian>(p, mtlr_0);
+  p = p + 4;
+  if (r == 29)
+    {
+      p = restgpr0<big_endian>(p, 30);
+      p = restgpr0<big_endian>(p, 31);
+    }
+  write_insn<big_endian>(p, blr);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+savegpr1(unsigned char* p, int r)
+{
+  uint32_t insn = std_0_12 + (r << 21) + (1 << 16) - (32 - r) * 8;
+  write_insn<big_endian>(p, insn);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+savegpr1_tail(unsigned char* p, int r)
+{
+  p = savegpr1<big_endian>(p, r);
+  write_insn<big_endian>(p, blr);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+restgpr1(unsigned char* p, int r)
+{
+  uint32_t insn = ld_0_12 + (r << 21) + (1 << 16) - (32 - r) * 8;
+  write_insn<big_endian>(p, insn);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+restgpr1_tail(unsigned char* p, int r)
+{
+  p = restgpr1<big_endian>(p, r);
+  write_insn<big_endian>(p, blr);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+savefpr(unsigned char* p, int r)
+{
+  uint32_t insn = stfd_0_1 + (r << 21) + (1 << 16) - (32 - r) * 8;
+  write_insn<big_endian>(p, insn);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+savefpr0_tail(unsigned char* p, int r)
+{
+  p = savefpr<big_endian>(p, r);
+  write_insn<big_endian>(p, std_0_1 + 16);
+  p = p + 4;
+  write_insn<big_endian>(p, blr);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+restfpr(unsigned char* p, int r)
+{
+  uint32_t insn = lfd_0_1 + (r << 21) + (1 << 16) - (32 - r) * 8;
+  write_insn<big_endian>(p, insn);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+restfpr0_tail(unsigned char* p, int r)
+{
+  write_insn<big_endian>(p, ld_0_1 + 16);
+  p = p + 4;
+  p = restfpr<big_endian>(p, r);
+  write_insn<big_endian>(p, mtlr_0);
+  p = p + 4;
+  if (r == 29)
+    {
+      p = restfpr<big_endian>(p, 30);
+      p = restfpr<big_endian>(p, 31);
+    }
+  write_insn<big_endian>(p, blr);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+savefpr1_tail(unsigned char* p, int r)
+{
+  p = savefpr<big_endian>(p, r);
+  write_insn<big_endian>(p, blr);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+restfpr1_tail(unsigned char* p, int r)
+{
+  p = restfpr<big_endian>(p, r);
+  write_insn<big_endian>(p, blr);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+savevr(unsigned char* p, int r)
+{
+  uint32_t insn = li_12_0 + (1 << 16) - (32 - r) * 16;
+  write_insn<big_endian>(p, insn);
+  p = p + 4;
+  insn = stvx_0_12_0 + (r << 21);
+  write_insn<big_endian>(p, insn);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+savevr_tail(unsigned char* p, int r)
+{
+  p = savevr<big_endian>(p, r);
+  write_insn<big_endian>(p, blr);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+restvr(unsigned char* p, int r)
+{
+  uint32_t insn = li_12_0 + (1 << 16) - (32 - r) * 16;
+  write_insn<big_endian>(p, insn);
+  p = p + 4;
+  insn = lvx_0_12_0 + (r << 21);
+  write_insn<big_endian>(p, insn);
+  return p + 4;
+}
+
+template<bool big_endian>
+static unsigned char* 
+restvr_tail(unsigned char* p, int r)
+{
+  p = restvr<big_endian>(p, r);
+  write_insn<big_endian>(p, blr);
+  return p + 4;
+}
+
+
+template<int size, bool big_endian>
+Output_data_save_res<size, big_endian>::Output_data_save_res(
+    Symbol_table* symtab)
+  : Output_section_data_build(4),
+    contents_(NULL)
+{
+  this->savres_define(symtab,
+		      "_savegpr0_", 14, 31,
+		      savegpr0<big_endian>, savegpr0_tail<big_endian>);
+  this->savres_define(symtab,
+		      "_restgpr0_", 14, 29,
+		      restgpr0<big_endian>, restgpr0_tail<big_endian>);
+  this->savres_define(symtab,
+		      "_restgpr0_", 30, 31,
+		      restgpr0<big_endian>, restgpr0_tail<big_endian>);
+  this->savres_define(symtab,
+		      "_savegpr1_", 14, 31,
+		      savegpr1<big_endian>, savegpr1_tail<big_endian>);
+  this->savres_define(symtab,
+		      "_restgpr1_", 14, 31,
+		      restgpr1<big_endian>, restgpr1_tail<big_endian>);
+  this->savres_define(symtab,
+		      "_savefpr_", 14, 31,
+		      savefpr<big_endian>, savefpr0_tail<big_endian>);
+  this->savres_define(symtab,
+		      "_restfpr_", 14, 29,
+		      restfpr<big_endian>, restfpr0_tail<big_endian>);
+  this->savres_define(symtab,
+		      "_restfpr_", 30, 31,
+		      restfpr<big_endian>, restfpr0_tail<big_endian>);
+  this->savres_define(symtab,
+		      "._savef", 14, 31,
+		      savefpr<big_endian>, savefpr1_tail<big_endian>);
+  this->savres_define(symtab,
+		      "._restf", 14, 31,
+		      restfpr<big_endian>, restfpr1_tail<big_endian>);
+  this->savres_define(symtab,
+		      "_savevr_", 20, 31,
+		      savevr<big_endian>, savevr_tail<big_endian>);
+  this->savres_define(symtab,
+		      "_restvr_", 20, 31,
+		      restvr<big_endian>, restvr_tail<big_endian>);
+}
+
+template<int size, bool big_endian>
+void
+Output_data_save_res<size, big_endian>::savres_define(
+    Symbol_table* symtab,
+    const char *name,
+    unsigned int lo, unsigned int hi,
+    unsigned char* write_ent(unsigned char*, int),
+    unsigned char* write_tail(unsigned char*, int))
+{
+  size_t len = strlen(name);
+  bool writing = false;
+  char sym[16];
+
+  memcpy(sym, name, len);
+  sym[len + 2] = 0;
+
+  for (unsigned int i = lo; i <= hi; i++)
+    {
+      sym[len + 0] = i / 10 + '0';
+      sym[len + 1] = i % 10 + '0';
+      Symbol* gsym = symtab->lookup(sym);
+      bool refd = gsym != NULL && gsym->is_undefined();
+      writing = writing || refd;
+      if (writing)
+	{
+	  if (this->contents_ == NULL)
+	    this->contents_ = new unsigned char[this->savres_max];
+
+	  off_t value = this->current_data_size();
+	  unsigned char* p = this->contents_ + value;
+	  if (i != hi)
+	    p = write_ent(p, i);
+	  else
+	    p = write_tail(p, i);
+	  off_t cur_size = p - this->contents_;
+	  this->set_current_data_size(cur_size);
+	  if (refd)
+	    symtab->define_in_output_data(sym, NULL, Symbol_table::PREDEFINED,
+					  this, value, cur_size - value,
+					  elfcpp::STT_FUNC, elfcpp::STB_GLOBAL,
+					  elfcpp::STV_HIDDEN, 0, false, false);
+	}
+    }
+}
+
+// Write out save/restore.
+
+template<int size, bool big_endian>
+void
+Output_data_save_res<size, big_endian>::do_write(Output_file* of)
+{
+  const off_t off = this->offset();
+  const section_size_type oview_size =
+    convert_to_section_size_type(this->data_size());
+  unsigned char* const oview = of->get_output_view(off, oview_size);
+  memcpy(oview, this->contents_, oview_size);
+  of->write_output_view(off, oview_size, oview);
+}
+
 
 // Create the glink section.
 
@@ -3701,6 +4044,22 @@ class Global_symbol_visitor_opd
   }
 };
 
+template<int size, bool big_endian>
+void
+Target_powerpc<size, big_endian>::define_save_restore_funcs(
+    Layout* layout,
+    Symbol_table* symtab)
+{
+  if (size == 64)
+    {
+      Output_data_save_res<64, big_endian>* savres
+	= new Output_data_save_res<64, big_endian>(symtab);
+      layout->add_output_section_data(".text", elfcpp::SHT_PROGBITS,
+				      elfcpp::SHF_ALLOC | elfcpp::SHF_EXECINSTR,
+				      savres, ORDER_TEXT, false);
+    }
+}
+
 // Finalize the sections.
 
 template<int size, bool big_endian>
@@ -3744,6 +4103,7 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
     {
       typedef Global_symbol_visitor_opd<big_endian> Symbol_visitor;
       symtab->for_all_symbols<64, Symbol_visitor>(Symbol_visitor());
+      this->define_save_restore_funcs(layout, symtab);
     }
 
   // Fill in some more dynamic tags.
@@ -3802,6 +4162,9 @@ Target_powerpc<size, big_endian>::symval_for_branch(
   // If the symbol is defined in an opd section, ie. is a function
   // descriptor, use the function descriptor code entry address
   Powerpc_relobj<size, big_endian>* symobj = object;
+  if (gsym != NULL
+      && gsym->source() != Symbol::FROM_OBJECT)
+    return value;
   if (gsym != NULL)
     symobj = static_cast<Powerpc_relobj<size, big_endian>*>(gsym->object());
   unsigned int shndx = symobj->opd_shndx();
