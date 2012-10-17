@@ -62,6 +62,8 @@ py [command]
      using new async records "=tsv-created" and "=tsv-deleted".
   ** The start and stop of process record are now notified using new
      async record "=record-started" and "=record-stopped".
+  ** Memory changes are now notified using new async record
+     "=memory-changed".
 
 *** Changes in GDB 7.5
 

@@ -41,6 +41,8 @@ struct mi_suppress_notification
   int cmd_param_changed;
   /* Traceframe changed notification suppressed?  */
   int traceframe;
+  /* Memory changed notification suppressed?  */
+  int memory;
 };
 extern struct mi_suppress_notification mi_suppress_notification;
 

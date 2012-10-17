@@ -1,3 +1,22 @@
+2012-10-17  Yao Qi  <yao@codesourcery.com>
+
+	* breakpoint.c (invalidate_bp_value_on_memory_change): Add one
+	more parameter 'inferior'.
+	* corefile.c (write_memory_with_notification): Caller update.
+
+	* mi/mi-cmd-var.c: Include "mi-main.h".
+	(mi_cmd_var_assign): Set mi_suppress_notification.data_write_memory
+	to 1 and restore it later.
+	* mi/mi-cmds.c (mi_cmd mi_cmds): Update for "data-write-memory"
+	and "data-write-memory-bytes.
+	* mi/mi-interp.c: Include objfiles.h.
+	(mi_interpreter_init): Call observer_attach_memory_changed.
+	(mi_memory_changed): New.
+	* mi/mi-main.h (struct mi_suppress_notification) <memory>:
+	New field.
+
+	* NEWS: Mention new MI notification "memory-changed".
+
 2012-10-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2loc.c (dwarf_expr_reg_to_entry_parameter): Remove comment.

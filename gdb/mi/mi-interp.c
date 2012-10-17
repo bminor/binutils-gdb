@@ -35,6 +35,7 @@
 #include "gdbthread.h"
 #include "solist.h"
 #include "gdb.h"
+#include "objfiles.h"
 
 /* These are the interpreter setup, etc. functions for the MI
    interpreter.  */
@@ -76,6 +77,8 @@ static void mi_breakpoint_created (struct breakpoint *b);
 static void mi_breakpoint_deleted (struct breakpoint *b);
 static void mi_breakpoint_modified (struct breakpoint *b);
 static void mi_command_param_changed (const char *param, const char *value);
+static void mi_memory_changed (struct inferior *inf, CORE_ADDR memaddr,
+			       ssize_t len, const bfd_byte *myaddr);
 
 static int report_initial_inferior (struct inferior *inf, void *closure);
 
@@ -138,6 +141,7 @@ mi_interpreter_init (struct interp *interp, int top_level)
       observer_attach_breakpoint_deleted (mi_breakpoint_deleted);
       observer_attach_breakpoint_modified (mi_breakpoint_modified);
       observer_attach_command_param_changed (mi_command_param_changed);
+      observer_attach_memory_changed (mi_memory_changed);
 
       /* The initial inferior is created before this function is
 	 called, so we need to report it explicitly.  Use iteration in
@@ -834,6 +838,47 @@ mi_command_param_changed (const char *param, const char *value)
 
   ui_out_field_string (mi_uiout, "param", param);
   ui_out_field_string (mi_uiout, "value", value);
+
+  ui_out_redirect (mi_uiout, NULL);
+
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification about the target memory change.  */
+
+static void
+mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
+		   ssize_t len, const bfd_byte *myaddr)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+  struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
+  struct obj_section *sec;
+
+  if (mi_suppress_notification.memory)
+    return;
+
+  target_terminal_ours ();
+
+  fprintf_unfiltered (mi->event_channel,
+		      "memory-changed");
+
+  ui_out_redirect (mi_uiout, mi->event_channel);
+
+  ui_out_field_fmt (mi_uiout, "thread-group", "i%d", inferior->num);
+  ui_out_field_core_addr (mi_uiout, "addr", target_gdbarch, memaddr);
+  ui_out_field_fmt (mi_uiout, "len", "0x%zx", len);
+
+  /* Append 'type=code' into notification if MEMADDR falls in the range of
+     sections contain code.  */
+  sec = find_pc_section (memaddr);
+  if (sec != NULL && sec->objfile != NULL)
+    {
+      flagword flags = bfd_get_section_flags (sec->objfile->obfd,
+					      sec->the_bfd_section);
+
+      if (flags & SEC_CODE)
+	ui_out_field_string (mi_uiout, "type", "code");
+    }
 
   ui_out_redirect (mi_uiout, NULL);
 

@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "mi-cmds.h"
+#include "mi-main.h"
 #include "ui-out.h"
 #include "mi-out.h"
 #include "varobj.h"
@@ -616,6 +617,7 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
   struct ui_out *uiout = current_uiout;
   struct varobj *var;
   char *expression, *val;
+  struct cleanup *cleanup;
 
   if (argc != 2)
     error (_("-var-assign: Usage: NAME EXPRESSION."));
@@ -628,6 +630,12 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
 
   expression = xstrdup (argv[1]);
 
+  /* MI command '-var-assign' may write memory, so suppress memory
+     changed notification if it does.  */
+  cleanup
+    = make_cleanup_restore_integer (&mi_suppress_notification.memory);
+  mi_suppress_notification.memory = 1;
+
   if (!varobj_set_value (var, expression))
     error (_("-var-assign: Could not assign "
 	     "expression to variable object"));
@@ -635,6 +643,8 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
   val = varobj_get_value (var);
   ui_out_field_string (uiout, "value", val);
   xfree (val);
+
+  do_cleanups (cleanup);
 }
 
 /* Type used for parameters passing to mi_cmd_var_update_iter.  */

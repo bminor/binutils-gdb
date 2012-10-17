@@ -1,3 +1,7 @@
+2012-10-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-memory-changed.exp: New.
+
 2012-10-16  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.reverse/solib-precsave.exp: Skip if skip_shlib_test

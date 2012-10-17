@@ -27697,6 +27697,13 @@ changed to @var{value}.  In the multi-word @code{set} command,
 the @var{param} is the whole parameter list to @code{set} command.
 For example, In command @code{set check type on}, @var{param}
 is @code{check type} and @var{value} is @code{on}.
+
+@item =memory-changed,thread-group=@var{id},addr=@var{addr},len=@var{len}[,type="code"]
+Reports that bytes from @var{addr} to @var{data} + @var{len} were
+written in an inferior.  The @var{id} is the identifier of the
+thread group corresponding to the affected inferior.  The optional
+@code{type="code"} part is reported if the memory written to holds
+executable code.
 @end table
 
 @node GDB/MI Frame Information
