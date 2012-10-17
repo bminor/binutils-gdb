@@ -502,9 +502,15 @@ queue_middle_tasks(const General_options& options,
   if (parameters->options().gc_sections())
     {
       // Find the start symbol if any.
-      Symbol* start_sym = symtab->lookup(parameters->entry());
-      if (start_sym != NULL)
-	symtab->gc_mark_symbol(start_sym);
+      Symbol* sym = symtab->lookup(parameters->entry());
+      if (sym != NULL)
+	symtab->gc_mark_symbol(sym);
+      sym = symtab->lookup(parameters->options().init());
+      if (sym != NULL && sym->is_defined() && !sym->is_from_dynobj())
+	symtab->gc_mark_symbol(sym);
+      sym = symtab->lookup(parameters->options().fini());
+      if (sym != NULL && sym->is_defined() && !sym->is_from_dynobj())
+	symtab->gc_mark_symbol(sym);
       // Symbols named with -u should not be considered garbage.
       symtab->gc_mark_undef_symbols(layout);
       gold_assert(symtab->gc() != NULL);

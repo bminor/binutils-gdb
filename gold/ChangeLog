@@ -1,3 +1,8 @@
+2012-10-17  Alan Modra  <amodra@gmail.com>
+
+	PR gold/14726
+	* gold.cc (queue_middle_tasks): Call gc_mark_symbol on _init and _fini.
+
 2012-10-16  Sriraman Tallam  <tmsriram@google.com>
 
 	* layout.cc (Layout::include_section): Keep sections marked
