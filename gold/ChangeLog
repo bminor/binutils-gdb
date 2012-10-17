@@ -1,3 +1,12 @@
+2012-10-18  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Scan::local, global): Always emit
+	dynamic relocs for GOT_TPREL got entries, without symbol if
+	resolving locally.
+	(Target_powerpc::do_gc_add_reference): Don't add for dynamic objects.
+	(Target_powerpc::scan_relocs): Define _GLOBAL_OFFSET_TABLE_ early.
+	(Target_powerpc::Relocate:relocate): REL32 reloc may be unaligned.
+
 2012-10-17  Alan Modra  <amodra@gmail.com>
 
 	PR gold/14726

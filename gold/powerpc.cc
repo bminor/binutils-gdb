@@ -3411,10 +3411,19 @@ Target_powerpc<size, big_endian>::Scan::local(
 	const tls::Tls_optimization tls_type = target->optimize_tls_ie(true);
 	if (tls_type == tls::TLSOPT_NONE)
 	  {
-	    Output_data_got_powerpc<size, big_endian>* got
-	      = target->got_section(symtab, layout);
 	    unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
-	    got->add_local_tls(object, r_sym, GOT_TYPE_TPREL);
+	    if (!object->local_has_got_offset(r_sym, GOT_TYPE_TPREL))
+	      {
+		Output_data_got_powerpc<size, big_endian>* got
+		  = target->got_section(symtab, layout);
+		unsigned int off = got->add_constant(0);
+		object->set_local_got_offset(r_sym, GOT_TYPE_TPREL, off);
+
+		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+		rela_dyn->add_symbolless_local_addend(object, r_sym,
+						      elfcpp::R_POWERPC_TPREL,
+						      got, off, 0);
+	      }
 	  }
 	else if (tls_type == tls::TLSOPT_TO_LE)
 	  {
@@ -3729,11 +3738,26 @@ Target_powerpc<size, big_endian>::Scan::global(
 	  }
 	else if (tls_type == tls::TLSOPT_TO_IE)
 	  {
-	    Output_data_got_powerpc<size, big_endian>* got
-	      = target->got_section(symtab, layout);
-	    got->add_global_with_rel(gsym, GOT_TYPE_TPREL,
-				     target->rela_dyn_section(layout),
-				     elfcpp::R_POWERPC_TPREL);
+	    if (!gsym->has_got_offset(GOT_TYPE_TPREL))
+	      {
+		Output_data_got_powerpc<size, big_endian>* got
+		  = target->got_section(symtab, layout);
+		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+		if (gsym->is_undefined()
+		    || gsym->is_from_dynobj())
+		  {
+		    got->add_global_with_rel(gsym, GOT_TYPE_TPREL, rela_dyn,
+					     elfcpp::R_POWERPC_TPREL);
+		  }
+		else
+		  {
+		    unsigned int off = got->add_constant(0);
+		    gsym->set_got_offset(GOT_TYPE_TPREL, off);
+		    unsigned int dynrel = elfcpp::R_POWERPC_TPREL;
+		    rela_dyn->add_symbolless_global_addend(gsym, dynrel,
+							   got, off, 0);
+		  }
+	      }
 	  }
 	else if (tls_type == tls::TLSOPT_TO_LE)
 	  {
@@ -3795,17 +3819,26 @@ Target_powerpc<size, big_endian>::Scan::global(
 	const tls::Tls_optimization tls_type = target->optimize_tls_ie(final);
 	if (tls_type == tls::TLSOPT_NONE)
 	  {
-	    Output_data_got_powerpc<size, big_endian>* got
-	      = target->got_section(symtab, layout);
-	    if (!gsym->final_value_is_known()
-		&& (gsym->is_from_dynobj()
-		    || gsym->is_undefined()
-		    || gsym->is_preemptible()))
-	      got->add_global_with_rel(gsym, GOT_TYPE_TPREL,
-				       target->rela_dyn_section(layout),
-				       elfcpp::R_POWERPC_TPREL);
-	    else
-	      got->add_global_tls(gsym, GOT_TYPE_TPREL);
+	    if (!gsym->has_got_offset(GOT_TYPE_TPREL))
+	      {
+		Output_data_got_powerpc<size, big_endian>* got
+		  = target->got_section(symtab, layout);
+		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+		if (gsym->is_undefined()
+		    || gsym->is_from_dynobj())
+		  {
+		    got->add_global_with_rel(gsym, GOT_TYPE_TPREL, rela_dyn,
+					     elfcpp::R_POWERPC_TPREL);
+		  }
+		else
+		  {
+		    unsigned int off = got->add_constant(0);
+		    gsym->set_got_offset(GOT_TYPE_TPREL, off);
+		    unsigned int dynrel = elfcpp::R_POWERPC_TPREL;
+		    rela_dyn->add_symbolless_global_addend(gsym, dynrel,
+							   got, off, 0);
+		  }
+	      }
 	  }
 	else if (tls_type == tls::TLSOPT_TO_LE)
 	  {
@@ -3902,7 +3935,9 @@ Target_powerpc<size, big_endian>::do_gc_add_reference(
 {
   Powerpc_relobj<size, big_endian>* ppc_object
     = static_cast<Powerpc_relobj<size, big_endian>*>(dst_obj);
-  if (size == 64 && dst_shndx == ppc_object->opd_shndx())
+  if (size == 64
+      && !ppc_object->is_dynamic()
+      && dst_shndx == ppc_object->opd_shndx())
     {
       if (ppc_object->opd_valid())
 	{
@@ -3978,6 +4013,20 @@ Target_powerpc<size, big_endian>::scan_relocs(
 
   if (size == 32)
     {
+      // Define a weak hidden _GLOBAL_OFFSET_TABLE_ to ensure it isn't
+      // seen as undefined when scanning relocs (and thus requires
+      // non-relative dynamic relocs).  The proper value will be
+      // updated later.
+      Symbol *gotsym = symtab->lookup("_GLOBAL_OFFSET_TABLE_", NULL);
+      if (gotsym != NULL && gotsym->is_undefined())
+	symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
+				      Symbol_table::PREDEFINED,
+				      this->got_section(symtab, layout), 0, 0,
+				      elfcpp::STT_OBJECT,
+				      elfcpp::STB_WEAK,
+				      elfcpp::STV_HIDDEN, 0,
+				      false, false);
+
       static Output_data_space* sdata;
 
       // Define _SDA_BASE_ at the start of the .sdata section.
@@ -4776,10 +4825,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_POWERPC_ADDR32:
-    case elfcpp::R_POWERPC_REL32:
       status = Reloc::addr32(view, value, overflow);
       break;
 
+    case elfcpp::R_POWERPC_REL32:
     case elfcpp::R_POWERPC_UADDR32:
       status = Reloc::addr32_u(view, value, overflow);
       break;
