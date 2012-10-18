@@ -1,5 +1,8 @@
 2012-10-18  Kai Tietz  <ktietz@redhat.com>
 
+	* objdump.c (dump_bfd): Call dump headers after
+	call of slurp_symtab.
+
 	* objcopy.c (is_strip_section_1): Don't strip
 	.reloc section by default.
 

@@ -372,6 +372,7 @@ CODE_FRAGMENT
 #define STRING_SIZE_SIZE 4
 
 #define DOT_DEBUG	".debug"
+#define DOT_ZDEBUG	".zdebug"
 #define GNU_LINKONCE_WI ".gnu.linkonce.wi."
 #define GNU_LINKONCE_WT ".gnu.linkonce.wt."
 #define DOT_RELOC	".reloc"
@@ -545,7 +546,8 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
       styp_flags = STYP_LIT;
 #endif /* _LIT */
     }
-  else if (CONST_STRNEQ (sec_name, DOT_DEBUG))
+  else if (CONST_STRNEQ (sec_name, DOT_DEBUG)
+           || CONST_STRNEQ (sec_name, DOT_ZDEBUG))
     {
       /* Handle the XCOFF debug section and DWARF2 debug sections.  */
       if (!sec_name[6])
@@ -652,6 +654,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
   bfd_boolean is_dbg = FALSE;
 
   if (CONST_STRNEQ (sec_name, DOT_DEBUG)
+      || CONST_STRNEQ (sec_name, DOT_ZDEBUG)
 #ifdef COFF_LONG_SECTION_NAMES
       || CONST_STRNEQ (sec_name, GNU_LINKONCE_WI)
       || CONST_STRNEQ (sec_name, GNU_LINKONCE_WT)
@@ -821,6 +824,7 @@ styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
 	sec_flags |= SEC_ALLOC;
     }
   else if (CONST_STRNEQ (name, DOT_DEBUG)
+	   || CONST_STRNEQ (name, DOT_ZDEBUG)
 #ifdef _COMMENT
 	   || strcmp (name, _COMMENT) == 0
 #endif
@@ -1158,6 +1162,7 @@ styp_to_sec_flags (bfd *abfd,
   bfd_boolean is_dbg = FALSE;
 
   if (CONST_STRNEQ (name, DOT_DEBUG)
+      || CONST_STRNEQ (name, DOT_ZDEBUG)
 #ifdef COFF_LONG_SECTION_NAMES
       || CONST_STRNEQ (name, GNU_LINKONCE_WI)
       || CONST_STRNEQ (name, GNU_LINKONCE_WT)

@@ -1,3 +1,35 @@
+2012-10-18  Kai Tietz  <ktietz@redhat.com>
+
+	PR binutils/14067
+	* coff-i386.c (bfd_target): Add section flag SEC_EXCLUDE.
+	Allow BFD_COMPRESS and BFD_DECOMPRESS flags.
+	* coff-x86_64.c: Likewise.
+	* coffcode.h (DOT_ZDEBUG): New define.
+	(sec_to_styp_flags): Check for .zdebug.
+	(styp_to_sec_flags): Likewise.
+	* coffgen.c (make_a_section): Handle .debug_* section
+	compression/decompression flags.
+	* cofflink.c (mark_relocs): Ignore relocations
+	for a section, which isn't marked as used.
+	(_bfd_coff_link_input_bfd): Add support of compressed
+	debug sections.
+	* compress.c (decompress_contents): Loop as long
+	as there is input available and there is room for
+	output.
+	* bfd/pe-arm.c: Add .zdebug_ partial match entry.
+	* pe-i386.c: Likewise.
+	* pe-x86_64.c: Likewise.
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Don't clear all
+	data-directories as this might destroy content.
+
+	* coff-i386.c (_bfd_generic_find_nearest_line_discriminator):
+	define as coff_find_nearest_line_discriminator.
+	* libcoff-in.h (coff_find_nearest_line_discriminator): New
+	* libcoff.h: Regenerated.
+	* coff-x86_64.c: Likewise.
+	* coffgen.c (coff_find_nearest_line_discriminator): New function.
+	prototype.
+
 2012-10-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* coff64-rs6000.c (rs6000coff64_vec): Set _close_and_cleanup

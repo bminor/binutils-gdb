@@ -1,3 +1,10 @@
+2012-10-18  Kai Tietz  <ktietz@redhat.com>
+
+	PR binutils/14067
+	* NEWS: Menition new feature.
+	* scripttempl/pep.sc: Add zdebug sections.
+	* scripttempl/pe.sc: L
+
 2012-09-19  Steve Ellcey  <sellcey@mips.com>
 
 	* configure.tgt: Add mips*-mti-elf* target.

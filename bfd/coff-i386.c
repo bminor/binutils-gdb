@@ -607,6 +607,9 @@ coff_i386_is_local_label_name (bfd *abfd, const char *name)
 
 #include "coffcode.h"
 
+#define _bfd_generic_find_nearest_line_discriminator \
+	coff_find_nearest_line_discriminator
+
 const bfd_target
 #ifdef TARGET_SYM
   TARGET_SYM =
@@ -625,13 +628,13 @@ const bfd_target
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED | BFD_COMPRESS | BFD_DECOMPRESS ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
 #ifdef COFF_WITH_PE
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_READONLY
+   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES | SEC_READONLY | SEC_DEBUGGING
 #endif
-   | SEC_CODE | SEC_DATA),
+   | SEC_CODE | SEC_DATA | SEC_EXCLUDE ),
 
 #ifdef TARGET_UNDERSCORE
   TARGET_UNDERSCORE,		/* leading underscore */

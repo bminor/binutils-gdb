@@ -1424,7 +1424,8 @@ mark_relocs (struct coff_final_link_info *flaginfo, bfd *input_bfd)
       struct internal_reloc *	irel;
       struct internal_reloc *	irelend;
 
-      if ((a->flags & SEC_RELOC) == 0 || a->reloc_count  < 1)
+      if ((a->flags & SEC_RELOC) == 0 || a->reloc_count  < 1
+	  || a->linker_mark == 0)
 	continue;
       /* Don't mark relocs in excluded sections.  */
       if (a->output_section == bfd_abs_section_ptr)
@@ -2426,10 +2427,9 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 	contents = secdata->contents;
       else
 	{
-	  bfd_size_type x = o->rawsize ? o->rawsize : o->size;
-	  if (! bfd_get_section_contents (input_bfd, o, flaginfo->contents, 0, x))
-	    return FALSE;
 	  contents = flaginfo->contents;
+	  if (! bfd_get_full_section_contents (input_bfd, o, &contents))
+	    return FALSE;
 	}
 
       if ((o->flags & SEC_RELOC) != 0)
@@ -2447,7 +2447,8 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 			       ? (flaginfo->section_info[target_index].relocs
 				  + o->output_section->reloc_count)
 			       : flaginfo->internal_relocs)));
-	  if (internal_relocs == NULL)
+	  if (internal_relocs == NULL
+	      && o->reloc_count > 0)
 	    return FALSE;
 
 	  /* Run through the relocs looking for relocs against symbols

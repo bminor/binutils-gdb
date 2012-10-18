@@ -3215,8 +3215,6 @@ dump_bfd (bfd *abfd)
     dump_target_specific (abfd);
   if (! dump_debugging_tags && ! suppress_bfd_header)
     putchar ('\n');
-  if (dump_section_headers)
-    dump_headers (abfd);
 
   if (dump_symtab
       || dump_reloc_info
@@ -3224,6 +3222,10 @@ dump_bfd (bfd *abfd)
       || dump_debugging
       || dump_dwarf_section_info)
     syms = slurp_symtab (abfd);
+
+  if (dump_section_headers)
+    dump_headers (abfd);
+
   if (dump_dynamic_symtab || dump_dynamic_reloc_info
       || (disassemble && bfd_get_dynamic_symtab_upper_bound (abfd) > 0))
     dynsyms = slurp_dynamic_symtab (abfd);

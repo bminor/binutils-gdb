@@ -46,7 +46,7 @@ decompress_contents (bfd_byte *compressed_buffer,
   strm.avail_out = uncompressed_size;
 
   rc = inflateInit (&strm);
-  while (strm.avail_in > 0)
+  while (strm.avail_in > 0 && strm.avail_out > 0)
     {
       if (rc != Z_OK)
 	return FALSE;
