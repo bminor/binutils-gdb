@@ -1,3 +1,10 @@
+2012-10-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* terminal.c: Remove duplicate includes of windows.h and
+	wincon.h.
+	(_rl_get_screen_size): Remove redundant code for MinGW getting
+	the console size from the Windows API.
+
 2012-02-24  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* signals.c (_rl_block_sigwinch, _rl_release_sigwinch): Add
