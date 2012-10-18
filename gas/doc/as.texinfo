@@ -5953,6 +5953,8 @@ section is not loaded
 writable section
 @item d
 data section
+@item e
+exclude section from linking
 @item r
 read-only section
 @item x
