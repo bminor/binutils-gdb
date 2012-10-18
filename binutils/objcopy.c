@@ -102,7 +102,7 @@ enum strip_action
   };
 
 /* Which symbols to remove.  */
-static enum strip_action strip_symbols;
+static enum strip_action strip_symbols = STRIP_UNDEF;
 
 enum locals_action
   {
@@ -977,7 +977,13 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	  || strip_symbols == STRIP_ALL
 	  || discard_locals == LOCALS_ALL
 	  || convert_debugging)
-	return TRUE;
+	{
+	  /* By default we don't want to strip .reloc section.
+	     This section has for pe-coff special meaning.   See
+	     pe-dll.c file in ld, and peXXigen.c in bfd for details.  */
+	  if (strcmp (bfd_get_section_name (abfd, sec), ".reloc") != 0)
+	    return TRUE;
+	}
 
       if (strip_symbols == STRIP_DWO)
 	return is_dwo_section (abfd, sec);
