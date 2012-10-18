@@ -4733,8 +4733,8 @@ Target_tilegx<size, big_endian>::relocate_section(
 
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
-  gold::relocate_section<size, big_endian, Tilegx,
-                         elfcpp::SHT_RELA, Tilegx_relocate>(
+  gold::relocate_section<size, big_endian, Tilegx, elfcpp::SHT_RELA,
+			 Tilegx_relocate, gold::Default_comdat_behavior>(
     relinfo,
     this,
     prelocs,

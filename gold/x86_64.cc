@@ -4060,7 +4060,8 @@ Target_x86_64<size>::relocate_section(
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
   gold::relocate_section<size, false, Target_x86_64<size>, elfcpp::SHT_RELA,
-			 typename Target_x86_64<size>::Relocate>(
+			 typename Target_x86_64<size>::Relocate,
+			 gold::Default_comdat_behavior>(
     relinfo,
     this,
     prelocs,

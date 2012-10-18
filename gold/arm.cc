@@ -9518,7 +9518,7 @@ Target_arm<big_endian>::relocate_section(
     }
 
   gold::relocate_section<32, big_endian, Target_arm, elfcpp::SHT_REL,
-			 Arm_relocate>(
+			 Arm_relocate, gold::Default_comdat_behavior>(
     relinfo,
     this,
     prelocs,
@@ -11150,6 +11150,7 @@ Target_arm<big_endian>::scan_reloc_section_for_stubs(
     Arm_relobj<big_endian>::as_arm_relobj(relinfo->object);
   unsigned int local_count = arm_object->local_symbol_count();
 
+  gold::Default_comdat_behavior default_comdat_behavior;
   Comdat_behavior comdat_behavior = CB_UNDETERMINED;
 
   for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
@@ -11323,7 +11324,7 @@ Target_arm<big_endian>::scan_reloc_section_for_stubs(
 	  if (comdat_behavior == CB_UNDETERMINED)
 	    {
 	      std::string name = arm_object->section_name(relinfo->data_shndx);
-	      comdat_behavior = get_comdat_behavior(name.c_str());
+ 	      comdat_behavior = default_comdat_behavior.get(name.c_str());
 	    }
 	  if (comdat_behavior == CB_PRETEND)
 	    {

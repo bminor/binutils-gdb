@@ -124,20 +124,24 @@ enum Comdat_behavior
   CB_WARNING         // Print a warning.
 };
 
-// Decide what the linker should do for relocations that refer to discarded
-// comdat sections.  This decision is based on the name of the section being
-// relocated.
-
-inline Comdat_behavior
-get_comdat_behavior(const char* name)
+class Default_comdat_behavior
 {
-  if (Layout::is_debug_info_section(name))
-    return CB_PRETEND;
-  if (strcmp(name, ".eh_frame") == 0
-      || strcmp(name, ".gcc_except_table") == 0)
-    return CB_IGNORE;
-  return CB_WARNING;
-}
+ public:
+  // Decide what the linker should do for relocations that refer to
+  // discarded comdat sections.  This decision is based on the name of
+  // the section being relocated.
+
+  inline Comdat_behavior
+  get(const char* name)
+  {
+    if (Layout::is_debug_info_section(name))
+      return CB_PRETEND;
+    if (strcmp(name, ".eh_frame") == 0
+	|| strcmp(name, ".gcc_except_table") == 0)
+      return CB_IGNORE;
+    return CB_WARNING;
+  }
+};
 
 // Give an error for a symbol with non-default visibility which is not
 // defined locally.
@@ -220,6 +224,11 @@ issue_undefined_symbol_error(const Symbol* sym)
 // a single function, relocate(), which implements the machine
 // specific part of a relocation.
 
+// The template parameter Relocate_comdat_behavior is a class type
+// which provides a single function, get(), which determines what the
+// linker should do for relocations that refer to discarded comdat
+// sections.
+
 // SIZE is the ELF size: 32 or 64.  BIG_ENDIAN is the endianness of
 // the data.  SH_TYPE is the section type: SHT_REL or SHT_RELA.
 // RELOCATE implements operator() to do a relocation.
@@ -241,7 +250,8 @@ issue_undefined_symbol_error(const Symbol* sym)
 // relocation.
 
 template<int size, bool big_endian, typename Target_type, int sh_type,
-	 typename Relocate>
+	 typename Relocate,
+	 typename Relocate_comdat_behavior>
 inline void
 relocate_section(
     const Relocate_info<size, big_endian>* relinfo,
@@ -258,6 +268,7 @@ relocate_section(
   typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
   const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
   Relocate relocate;
+  Relocate_comdat_behavior relocate_comdat_behavior;
 
   Sized_relobj_file<size, big_endian>* object = relinfo->object;
   unsigned int local_count = object->local_symbol_count();
@@ -348,7 +359,7 @@ relocate_section(
 	  if (comdat_behavior == CB_UNDETERMINED)
 	    {
 	      std::string name = object->section_name(relinfo->data_shndx);
-	      comdat_behavior = get_comdat_behavior(name.c_str());
+	      comdat_behavior = relocate_comdat_behavior.get(name.c_str());
 	    }
 	  if (comdat_behavior == CB_PRETEND)
 	    {

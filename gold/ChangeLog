@@ -1,5 +1,21 @@
 2012-10-18  Alan Modra  <amodra@gmail.com>
 
+	* target-reloc.h (class Default_comdat_behavior): New, package up..
+	(get_comdat_behaviour): ..this.
+	(relocate_section): Add Relocate_comdat_behavior template arg,
+	adjust code to suit.
+	* arm.cc (Target_arm::relocate_section): Adjust to suit.
+	(Target_arm::scan_reloc_section): Likewise.
+	* i386.cc (Target_i386::relocate_section): Likewise.
+	* sparc.cc (Target_sparc::relocate_section): Likewise.
+	* tilegx.cc (Target_tilegx::relocate_section): Likewise.
+	* x86_64.cc (Target_x86_64::relocate_section): Likewise.
+	* powerpc.cc (class Relocate_comdat_behavior): New.
+	(Target_powerpc::relocate_section): Don't zap opd relocs.  Supply
+	gold::relocate_section with new template arg.
+
+2012-10-18  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::Scan::local, global): Always emit
 	dynamic relocs for GOT_TPREL got entries, without symbol if
 	resolving locally.

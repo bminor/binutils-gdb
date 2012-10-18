@@ -4138,7 +4138,7 @@ Target_sparc<size, big_endian>::relocate_section(
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
   gold::relocate_section<size, big_endian, Sparc, elfcpp::SHT_RELA,
-    Sparc_relocate>(
+			 Sparc_relocate, gold::Default_comdat_behavior>(
     relinfo,
     this,
     prelocs,

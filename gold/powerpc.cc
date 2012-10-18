@@ -619,6 +619,32 @@ class Target_powerpc : public Sized_target<size, big_endian>
     enum skip_tls call_tls_get_addr_;
   };
 
+  class Relocate_comdat_behavior
+  {
+   public:
+    // Decide what the linker should do for relocations that refer to
+    // discarded comdat sections.
+    inline Comdat_behavior
+    get(const char* name)
+    {
+      gold::Default_comdat_behavior default_behavior;
+      Comdat_behavior ret = default_behavior.get(name);
+      if (ret == CB_WARNING)
+	{
+	  if (size == 32
+	      && (strcmp(name, ".fixup") == 0
+		  || strcmp(name, ".got2") == 0))
+	    ret = CB_IGNORE;
+	  if (size == 64
+	      && (strcmp(name, ".opd") == 0
+		  || strcmp(name, ".toc") == 0
+		  || strcmp(name, ".toc1") == 0))
+	    ret = CB_IGNORE;
+	}
+      return ret;
+    }
+  };
+
   // A class which returns the size required for a relocation type,
   // used while scanning relocs during a relocatable link.
   class Relocatable_size_for_reloc
@@ -5051,48 +5077,13 @@ Target_powerpc<size, big_endian>::relocate_section(
 {
   typedef Target_powerpc<size, big_endian> Powerpc;
   typedef typename Target_powerpc<size, big_endian>::Relocate Powerpc_relocate;
+  typedef typename Target_powerpc<size, big_endian>::Relocate_comdat_behavior
+    Powerpc_comdat_behavior;
 
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
-  unsigned char *opd_rel = NULL;
-  Powerpc_relobj<size, big_endian>* const object
-    = static_cast<Powerpc_relobj<size, big_endian>*>(relinfo->object);
-  if (size == 64
-      && relinfo->data_shndx == object->opd_shndx())
-    {
-      // Rewrite opd relocs, omitting those for discarded sections
-      // to silence gold::relocate_section errors.
-      const int reloc_size
-	= Reloc_types<elfcpp::SHT_RELA, size, big_endian>::reloc_size;
-      opd_rel = new unsigned char[reloc_count * reloc_size];
-      const unsigned char* rrel = prelocs;
-      unsigned char* wrel = opd_rel;
-
-      for (size_t i = 0;
-	   i < reloc_count;
-	   ++i, rrel += reloc_size, wrel += reloc_size)
-	{
-	  typename Reloc_types<elfcpp::SHT_RELA, size, big_endian>::Reloc
-	    reloc(rrel);
-	  typename elfcpp::Elf_types<size>::Elf_WXword r_info
-	    = reloc.get_r_info();
-	  unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
-	  Address r_off = reloc.get_r_offset();
-	  if (r_type == elfcpp::R_PPC64_TOC)
-	    r_off -= 8;
-	  bool is_discarded = object->get_opd_discard(r_off);
-
-	  // Reloc number is reported in some errors, so keep all relocs.
-	  if (is_discarded)
-	    memset(wrel, 0, reloc_size);
-	  else
-	    memcpy(wrel, rrel, reloc_size);
-	}
-      prelocs = opd_rel;
-    }
-
   gold::relocate_section<size, big_endian, Powerpc, elfcpp::SHT_RELA,
-			 Powerpc_relocate>(
+			 Powerpc_relocate, Powerpc_comdat_behavior>(
     relinfo,
     this,
     prelocs,
@@ -5103,9 +5094,6 @@ Target_powerpc<size, big_endian>::relocate_section(
     address,
     view_size,
     reloc_symbol_changes);
-
-  if (opd_rel != NULL)
-    delete[] opd_rel;
 }
 
 class Powerpc_scan_relocatable_reloc

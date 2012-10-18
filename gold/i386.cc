@@ -3487,7 +3487,7 @@ Target_i386::relocate_section(const Relocate_info<32, false>* relinfo,
   gold_assert(sh_type == elfcpp::SHT_REL);
 
   gold::relocate_section<32, false, Target_i386, elfcpp::SHT_REL,
-			 Target_i386::Relocate>(
+			 Target_i386::Relocate, gold::Default_comdat_behavior>(
     relinfo,
     this,
     prelocs,
