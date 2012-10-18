@@ -2,6 +2,8 @@
 
 Changes in 2.23:
 
+* Enable compressed debug section feature for x86/x86_64 pe-coff.
+
 * Add support for the 64-bit ARM architecture: AArch64.
 
 * Added SORT_NONE to the linker script language to disable section sorting.
