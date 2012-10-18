@@ -26,6 +26,7 @@
 #include "safe-ctype.h"
 #include "obstack.h"
 #include "subsegs.h"
+#include "struc-symbol.h"
 
 #ifdef TE_PE
 #include "coff/pe.h"
@@ -1359,7 +1360,8 @@ coff_frob_symbol (symbolS *symp, int *punt)
 		}
 	    }
 
-	  if (coff_last_function == 0 && SF_GET_FUNCTION (symp))
+	  if (coff_last_function == 0 && SF_GET_FUNCTION (symp)
+	      && S_IS_DEFINED (symp))
 	    {
 	      union internal_auxent *auxp;
 
@@ -1371,7 +1373,8 @@ coff_frob_symbol (symbolS *symp, int *punt)
 		      sizeof (auxp->x_sym.x_fcnary.x_ary.x_dimen));
 	    }
 
-	  if (S_GET_STORAGE_CLASS (symp) == C_EFCN)
+	  if (S_GET_STORAGE_CLASS (symp) == C_EFCN
+	      && S_IS_DEFINED (symp))
 	    {
 	      if (coff_last_function == 0)
 		as_fatal (_("C_EFCN symbol for %s out of scope"),
@@ -1678,6 +1681,7 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
     }
 
   sec = subseg_new (name, (subsegT) exp);
+
   if (alignment >= 0)
     sec->alignment_power = alignment;
 

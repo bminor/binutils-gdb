@@ -1,5 +1,9 @@
 2012-10-18  Kai Tietz  <ktietz@redhat.com>
 
+	* config/obj-coff.c: Add include of struc-symbol.h header.
+	(coff_frob_symbol): Check that function-aux entries are generated for
+	defined symbols only.
+
 	* doc/as.texinfo: Add missing documentation about section flag
 	exclude.
 
