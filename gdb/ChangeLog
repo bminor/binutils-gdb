@@ -1,5 +1,9 @@
 2012-10-18  Tom Tromey  <tromey@redhat.com>
 
+	* breakpoint.c (compare_breakpoints): Fix comparison.
+
+2012-10-18  Tom Tromey  <tromey@redhat.com>
+
 	* valprint.c (generic_emit_char, generic_printstr): Pass size of
 	gdb_wchar_t to convert_between_encodings.
 

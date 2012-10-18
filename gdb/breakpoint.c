@@ -11766,7 +11766,7 @@ compare_breakpoints (const void *a, const void *b)
      the number 0.  */
   if (ua < ub)
     return -1;
-  return ub > ub ? 1 : 0;
+  return ua > ub ? 1 : 0;
 }
 
 /* Delete breakpoints by address or line.  */
