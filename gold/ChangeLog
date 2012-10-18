@@ -1,5 +1,11 @@
 2012-10-18  Alan Modra  <amodra@gmail.com>
 
+	PR gold/14727
+	* object.cc (Relobj::is_section_name_included): Also match
+	.sdata personality section.
+
+2012-10-18  Alan Modra  <amodra@gmail.com>
+
 	* target-reloc.h (class Default_comdat_behavior): New, package up..
 	(get_comdat_behaviour): ..this.
 	(relocate_section): Add Relocate_comdat_behavior template arg,
