@@ -4838,7 +4838,7 @@ print_one_static_tracepoint_marker (int count,
 
       if (ui_out_is_mi_like_p (uiout))
 	{
-	  char *fullname = symtab_to_fullname (sal.symtab);
+	  const char *fullname = symtab_to_fullname (sal.symtab);
 
 	  if (fullname)
 	    ui_out_field_string (uiout, "fullname", fullname);

@@ -1,5 +1,16 @@
 2012-10-18  Tom Tromey  <tromey@redhat.com>
 
+	* tracepoint.c (print_one_static_tracepoint_marker): Constify.
+	* symtab.c (iterate_over_some_symtabs): Constify.
+	* source.h (symtab_to_fullname): Return 'const char *'.
+	* source.c (symtab_to_fullname): Return 'const char *'.
+	* python/py-symtab.c (stpy_fullname): Constify.
+	* cli/cli-cmds.c (edit_command): Constify.
+	* breakpoint.c (print_breakpoint_location)
+	(update_static_tracepoint): Constify.
+
+2012-10-18  Tom Tromey  <tromey@redhat.com>
+
 	* breakpoint.c (compare_breakpoints): Fix comparison.
 
 2012-10-18  Tom Tromey  <tromey@redhat.com>

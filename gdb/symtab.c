@@ -242,7 +242,7 @@ iterate_over_some_symtabs (const char *name,
 
     if (real_path != NULL)
       {
-        char *fullname = symtab_to_fullname (s);
+        const char *fullname = symtab_to_fullname (s);
 
         if (fullname != NULL)
           {

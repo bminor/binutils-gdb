@@ -48,7 +48,7 @@ extern int find_and_open_source (const char *filename,
    negative number for error.  */
 extern int open_source_file (struct symtab *s);
 
-extern char* symtab_to_fullname (struct symtab *s);
+extern const char *symtab_to_fullname (struct symtab *s);
 
 /* Create and initialize the table S->line_charpos that records the
    positions of the lines in the source file, which is assumed to be

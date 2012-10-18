@@ -126,7 +126,7 @@ stpy_get_objfile (PyObject *self, void *closure)
 static PyObject *
 stpy_fullname (PyObject *self, PyObject *args)
 {
-  char *fullname;
+  const char *fullname;
   struct symtab *symtab = NULL;
 
   STPY_REQUIRE_VALID (self, symtab);

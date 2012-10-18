@@ -1081,7 +1081,7 @@ open_source_file (struct symtab *s)
    If this function fails to find the file that this symtab represents,
    NULL will be returned and s->fullname will be set to NULL.  */
 
-char *
+const char *
 symtab_to_fullname (struct symtab *s)
 {
   int r;

@@ -762,7 +762,8 @@ edit_command (char *arg, int from_tty)
   struct symbol *sym;
   char *arg1;
   char *editor;
-  char *p, *fn;
+  char *p;
+  const char *fn;
 
   /* Pull in the current default source line if necessary.  */
   if (arg == 0)
