@@ -426,8 +426,7 @@ write_comments_(struct arcDisState * state,
 	    strcpy (state->commentBuffer, comment_prefix);
 	  else
 	    strcat (state->commentBuffer, ", ");
-	  strncat (state->commentBuffer, state->comm[i],
-		   sizeof (state->commentBuffer));
+	  strcat (state->commentBuffer, state->comm[i]);
 	}
     }
 }

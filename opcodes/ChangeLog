@@ -1,3 +1,13 @@
+2012-10-18  Kai Tietz  <ktietz@redhat.com>
+
+	* aarch64-asm.c (aarch64_ins_ldst_reglist): Initialize
+	value with a default.
+	(do_special_encoding): Likewise.
+	(aarch64_ins_ldst_elemlist): Pre-initialize QSsize, and opcodeh2
+	variables with default.
+	* arc-dis.c (write_comments_): Don't use strncat due
+	size of state->commentBuffer pointer isn't predictable.
+
 2012-10-15  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-opc.c (aarch64_sys_regs): Add rmr_el1, rmr_el2 and

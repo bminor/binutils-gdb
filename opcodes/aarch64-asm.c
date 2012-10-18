@@ -146,7 +146,7 @@ aarch64_ins_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			  const aarch64_opnd_info *info, aarch64_insn *code,
 			  const aarch64_inst *inst)
 {
-  aarch64_insn value;
+  aarch64_insn value = 0;
   /* Number of elements in each structure to be loaded/stored.  */
   unsigned num = get_opcode_dependent_value (inst->opcode);
 
@@ -215,8 +215,8 @@ aarch64_ins_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			   const aarch64_inst *inst ATTRIBUTE_UNUSED)
 {
   aarch64_field field = {0, 0};
-  aarch64_insn QSsize;		/* fields Q:S:size.  */
-  aarch64_insn opcodeh2;	/* opcode<2:1> */
+  aarch64_insn QSsize = 0;	/* fields Q:S:size.  */
+  aarch64_insn opcodeh2 = 0;	/* opcode<2:1> */
 
   assert (info->reglist.has_index);
 
@@ -452,7 +452,7 @@ const char *
 aarch64_ins_ft (const aarch64_operand *self, const aarch64_opnd_info *info,
 		aarch64_insn *code, const aarch64_inst *inst)
 {
-  aarch64_insn value;
+  aarch64_insn value = 0;
 
   assert (info->idx == 0);
 
@@ -834,7 +834,7 @@ static void
 do_special_encoding (struct aarch64_inst *inst)
 {
   int idx;
-  aarch64_insn value;
+  aarch64_insn value = 0;
 
   DEBUG_TRACE ("enter with coding 0x%x", (uint32_t) inst->value);
 
