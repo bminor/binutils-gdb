@@ -1,3 +1,10 @@
+2012-10-18  Tom Tromey  <tromey@redhat.com>
+
+	* tic54x-dis.c (print_instruction): Don't use K&R style.
+	(print_parallel_instruction, sprint_dual_address)
+	(sprint_indirect_address, sprint_direct_address, sprint_mmr)
+	(sprint_cc2, sprint_condition): Likewise.
+
 2012-10-18  Kai Tietz  <ktietz@redhat.com>
 
 	* aarch64-asm.c (aarch64_ins_ldst_reglist): Initialize
