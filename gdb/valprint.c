@@ -2037,7 +2037,7 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
   convert_between_encodings (INTERMEDIATE_ENCODING, host_charset (),
 			     obstack_base (&wchar_buf),
 			     obstack_object_size (&wchar_buf),
-			     1, &output, translit_char);
+			     sizeof (gdb_wchar_t), &output, translit_char);
   obstack_1grow (&output, '\0');
 
   fputs_filtered (obstack_base (&output), stream);
@@ -2278,7 +2278,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
   convert_between_encodings (INTERMEDIATE_ENCODING, host_charset (),
 			     obstack_base (&wchar_buf),
 			     obstack_object_size (&wchar_buf),
-			     1, &output, translit_char);
+			     sizeof (gdb_wchar_t), &output, translit_char);
   obstack_1grow (&output, '\0');
 
   fputs_filtered (obstack_base (&output), stream);

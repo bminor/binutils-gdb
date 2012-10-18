@@ -1,3 +1,8 @@
+2012-10-18  Tom Tromey  <tromey@redhat.com>
+
+	* valprint.c (generic_emit_char, generic_printstr): Pass size of
+	gdb_wchar_t to convert_between_encodings.
+
 2012-10-17  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (invalidate_bp_value_on_memory_change): Add one
