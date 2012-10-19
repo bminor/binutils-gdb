@@ -1057,7 +1057,7 @@ static reloc_howto_type elf64_aarch64_tls_howto_table[] = {
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_AARCH64_TLSIE_LD_GOTTPREL_PREL19,	/* type */
-	 0,			/* rightshift */
+	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 21,			/* bitsize */
 	 FALSE,			/* pc_relative */
@@ -1071,7 +1071,7 @@ static reloc_howto_type elf64_aarch64_tls_howto_table[] = {
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_AARCH64_TLSLE_MOVW_TPREL_G2,	/* type */
-	 8,			/* rightshift */
+	 32,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
 	 FALSE,			/* pc_relative */
@@ -1085,7 +1085,7 @@ static reloc_howto_type elf64_aarch64_tls_howto_table[] = {
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_AARCH64_TLSLE_MOVW_TPREL_G1,	/* type */
-	 4,			/* rightshift */
+	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
 	 FALSE,			/* pc_relative */
@@ -1099,7 +1099,7 @@ static reloc_howto_type elf64_aarch64_tls_howto_table[] = {
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_AARCH64_TLSLE_MOVW_TPREL_G1_NC,	/* type */
-	 4,			/* rightshift */
+	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
 	 FALSE,			/* pc_relative */
@@ -1141,7 +1141,7 @@ static reloc_howto_type elf64_aarch64_tls_howto_table[] = {
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_AARCH64_TLSLE_ADD_TPREL_HI12,	/* type */
-	 3,			/* rightshift */
+	 12,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
 	 FALSE,			/* pc_relative */
@@ -1185,7 +1185,7 @@ static reloc_howto_type elf64_aarch64_tls_howto_table[] = {
 
 static reloc_howto_type elf64_aarch64_tlsdesc_howto_table[] = {
   HOWTO (R_AARCH64_TLSDESC_LD64_PREL19,	/* type */
-	 0,			/* rightshift */
+	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 21,			/* bitsize */
 	 TRUE,			/* pc_relative */
@@ -1259,7 +1259,7 @@ static reloc_howto_type elf64_aarch64_tlsdesc_howto_table[] = {
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_AARCH64_TLSDESC_OFF_G1,	/* type */
-	 4,			/* rightshift */
+	 16,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
 	 FALSE,			/* pc_relative */
@@ -4024,7 +4024,7 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
     case R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
     case R_AARCH64_TLSLE_MOVW_TPREL_G2:
       value = aarch64_resolve_relocation (r_type, place, value,
-					  - tpoff_base (info), weak_undef_p);
+					  signed_addend - tpoff_base (info), weak_undef_p);
       *unresolved_reloc_p = FALSE;
       break;
 
