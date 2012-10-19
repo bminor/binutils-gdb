@@ -1,3 +1,8 @@
+2012-10-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* parser-defs.h (struct exp_descriptor): Document constraint
+	on return value for "op_name" callbacks.
+
 2012-10-18  Tom Tromey  <tromey@redhat.com>
 
 	* tracepoint.c (print_one_static_tracepoint_marker): Constify.

@@ -335,7 +335,10 @@ struct exp_descriptor
 						void *data),
 			   void *data);
 
-    /* Name of this operator for dumping purposes.  */
+    /* Name of this operator for dumping purposes.
+       The returned value should never be NULL, even if EXP_OPCODE is
+       an unknown opcode (a string containing an image of the numeric
+       value of the opcode can be returned, for instance).  */
     char *(*op_name) (enum exp_opcode);
 
     /* Dump the rest of this (prefix) expression after the operator
