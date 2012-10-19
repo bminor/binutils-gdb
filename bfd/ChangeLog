@@ -1,5 +1,9 @@
 2012-10-19  Tom Tromey  <tromey@redhat.com>
 
+	* compress.c: Revert previous patch.
+
+2012-10-19  Tom Tromey  <tromey@redhat.com>
+
 	* compress.c (bfd_get_full_section_contents): Don't cache
 	decompressed contents.
 
