@@ -165,7 +165,6 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
   bfd_size_type uncompressed_size;
   bfd_size_type rawsize;
   bfd_byte *compressed_buffer;
-  bfd_byte *uncompressed_buffer;
 #endif
 
   if (abfd->direction != write_direction && sec->rawsize != 0)
@@ -220,24 +219,24 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
       if (!ret)
 	goto fail_compressed;
 
-      uncompressed_buffer = (bfd_byte *) bfd_malloc (uncompressed_size);
-      if (uncompressed_buffer == NULL)
+      if (p == NULL)
+	p = (bfd_byte *) bfd_malloc (uncompressed_size);
+      if (p == NULL)
 	goto fail_compressed;
 
       if (!decompress_contents (compressed_buffer, compressed_size,
-				uncompressed_buffer, uncompressed_size))
+				p, uncompressed_size))
 	{
 	  bfd_set_error (bfd_error_bad_value);
-	  free (uncompressed_buffer);
+	  free (p);
 	fail_compressed:
 	  free (compressed_buffer);
 	  return FALSE;
 	}
 
       free (compressed_buffer);
-      sec->contents = uncompressed_buffer;
-      sec->compress_status = COMPRESS_SECTION_DONE;
-      /* Fall thru */
+      *ptr = p;
+      return TRUE;
 #endif
 
     case COMPRESS_SECTION_DONE:

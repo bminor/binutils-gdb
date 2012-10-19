@@ -1,3 +1,8 @@
+2012-10-19  Tom Tromey  <tromey@redhat.com>
+
+	* compress.c (bfd_get_full_section_contents): Don't cache
+	decompressed contents.
+
 2012-10-18  Kai Tietz  <ktietz@redhat.com>
 
 	PR binutils/14067
