@@ -15,6 +15,10 @@
 
 # Test resolving of an opaque type from the loaded shared library.
 
+if {[skip_shlib_tests]} {
+    return -1
+}
+
 set testfile type-opaque-main
 set libfile type-opaque-lib
 set srcfile ${testfile}.c

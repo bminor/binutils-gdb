@@ -1,3 +1,9 @@
+2012-10-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+        * gdb.base/ctxobj.exp: Skip if skip_shlib_tests returns true.
+        * gdb.base/print-file-var.exp: Likewise.
+        * gdb.base/type-opaque.exp: Likewise.
+
 2012-10-17  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi-memory-changed.exp: New.
