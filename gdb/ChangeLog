@@ -1,3 +1,10 @@
+2012-10-10  Joel Brobecker  <brobecker@adacore.com>
+            Tom Tromey  <tromey@redhat.com>
+
+	* rs6000-aix-tdep.c (rs6000_aix_osabi_sniffer): Replace
+	inneffective if condition by gdb assertion.  Add function
+	description comment.
+
 2012-10-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* parser-defs.h (struct exp_descriptor): Document constraint

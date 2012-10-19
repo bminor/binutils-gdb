@@ -719,14 +719,19 @@ rs6000_software_single_step (struct frame_info *frame)
   return 1;
 }
 
+/* Implement an osabi sniffer for RS6000/AIX.
+
+   This function assumes that ABFD's flavour is XCOFF.  In other words,
+   it should be registered as a sniffer for bfd_target_xcoff_flavour
+   objfiles only.  A failed assertion will be raised if this condition
+   is not met.  */
+
 static enum gdb_osabi
 rs6000_aix_osabi_sniffer (bfd *abfd)
 {
-  
-  if (bfd_get_flavour (abfd) == bfd_target_xcoff_flavour);
-    return GDB_OSABI_AIX;
+  gdb_assert (bfd_get_flavour (abfd) == bfd_target_xcoff_flavour);
 
-  return GDB_OSABI_UNKNOWN;
+  return GDB_OSABI_AIX;
 }
 
 static void
