@@ -1,3 +1,9 @@
+2012-10-20  Alan Modra  <amodra@gmail.com>
+
+	* compress.c: Reinstate 2012-10-19 change.
+	(bfd_get_full_section_contents): Don't free unless we alloc.
+	Use proper decompress size.  Delete some vars, rename others.
+
 2012-10-19  Tom Tromey  <tromey@redhat.com>
 
 	* compress.c: Revert previous patch.
