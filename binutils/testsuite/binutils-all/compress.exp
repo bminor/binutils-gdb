@@ -134,6 +134,18 @@ if ![string match "" $got] then {
     }
 }
 
+set testname "objdump compress debug sections"
+set got [remote_exec host "$OBJDUMP -W $compressedfile" "" "/dev/null" "objdump.out"]
+if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+    fail "$testname"
+    send_log "$got\n"
+}
+if { [regexp_diff objdump.out $srcdir/$subdir/dw2-1.W] } then {
+    fail "$testname"
+} else {
+    pass "$testname"
+}
+
 set testfile tmpdir/dw2-emty.o
 
 if { ![binutils_assemble_flags $srcdir/$subdir/dw2-empty.S $testfile --nocompress-debug-sections] } then {
