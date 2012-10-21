@@ -1,3 +1,8 @@
+2012-10-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objdump.c (dump_dwarf): Handle bfd_mach_x64_32 and
+	bfd_mach_x64_32_intel_syntax.
+
 2012-10-21  Alan Modra  <amodra@gmail.com>
 
 	* objdump.c (load_specific_debug_section): Use
