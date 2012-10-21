@@ -1,3 +1,8 @@
+2012-10-21  Alan Modra  <amodra@gmail.com>
+
+	* compress.c (bfd_cache_section_contents): New function.
+	* bfd-in2.h: Regenerate.
+
 2012-10-21  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* linker.c (_bfd_generic_link_output_symbols): Handle a

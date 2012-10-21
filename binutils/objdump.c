@@ -2272,13 +2272,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 
   if (is_relocatable && debug_displays [debug].relocate)
     {
-      /* We want to relocate the data we've already read (and
-         decompressed), so we store a pointer to the data in
-         the bfd_section, and tell it that the contents are
-         already in memory.  */
-      sec->contents = section->start;
-      sec->flags |= SEC_IN_MEMORY;
-      sec->size = section->size;
+      bfd_cache_section_contents (sec, section->start);
 
       ret = bfd_simple_get_relocated_section_contents (abfd,
 						       sec,

@@ -6709,6 +6709,9 @@ bfd_boolean bfd_compress_section_contents
 bfd_boolean bfd_get_full_section_contents
    (bfd *abfd, asection *section, bfd_byte **ptr);
 
+void bfd_cache_section_contents
+   (asection *sec, void *contents);
+
 bfd_boolean bfd_is_section_compressed
    (bfd *abfd, asection *section);
 

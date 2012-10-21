@@ -255,6 +255,29 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 
 /*
 FUNCTION
+	bfd_cache_section_contents
+
+SYNOPSIS
+	void bfd_cache_section_contents
+	  (asection *sec, void *contents);
+
+DESCRIPTION
+	Stash @var(contents) so any following reads of @var(sec) do
+	not need to decompress again.
+*/
+
+void
+bfd_cache_section_contents (asection *sec, void *contents)
+{
+  if (sec->compress_status == DECOMPRESS_SECTION_SIZED)
+    sec->compress_status = COMPRESS_SECTION_DONE;
+  sec->contents = contents;
+  sec->flags |= SEC_IN_MEMORY;
+}
+
+
+/*
+FUNCTION
 	bfd_is_section_compressed
 
 SYNOPSIS

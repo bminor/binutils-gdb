@@ -1,3 +1,8 @@
+2012-10-21  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (load_specific_debug_section): Use
+	bfd_cache_section_contents.
+
 2012-10-18  Kai Tietz  <ktietz@redhat.com>
 
 	* objdump.c (dump_bfd): Call dump headers after
