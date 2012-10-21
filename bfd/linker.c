@@ -2359,6 +2359,12 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	  else
 	    output = FALSE;
 	}
+      else if (sym->flags == 0
+	       && (sym->section->owner->flags & BFD_PLUGIN) != 0)
+	/* LTO doesn't set symbol information.  We get here with the
+	   generic linker for a symbol that was "common" but no longer
+	   needs to be global.  */
+	output = FALSE;
       else
 	abort ();
 
