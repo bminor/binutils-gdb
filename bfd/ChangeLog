@@ -1,7 +1,7 @@
 2012-10-21  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* linker.c (_bfd_generic_link_output_symbols): Handle a
-	no-longer-global symbol entered as a BFD_PLUGIN.
+	no-longer-global symbol entered through a plugin.
 
 2012-10-20  Alan Modra  <amodra@gmail.com>
 
