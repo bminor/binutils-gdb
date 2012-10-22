@@ -437,7 +437,7 @@ cache_bmmap (struct bfd *abfd ATTRIBUTE_UNUSED,
         {
           *map_addr = ret;
           *map_len = pg_len;
-          ret += offset & pagesize_m1;
+          ret = (char *) ret + (offset & pagesize_m1);
         }
     }
 #endif

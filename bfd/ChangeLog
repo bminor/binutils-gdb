@@ -1,3 +1,7 @@
+2012-10-22  Alan Modra  <amodra@gmail.com>
+
+	* cache.c (cache_bmmap): Don't use void* arithmetic.
+
 2012-10-21  Alan Modra  <amodra@gmail.com>
 
 	* compress.c (bfd_cache_section_contents): New function.
