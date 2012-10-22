@@ -809,10 +809,10 @@ M:LONGEST:get_syscall_number:ptid_t ptid:ptid
 #  \$10 ;; integer constant 10
 #
 # in this case, this prefix would be the character \`\$\'.
-v:const char *:stap_integer_prefix:::0:0::0:gdbarch->stap_integer_prefix
+v:const char *:stap_integer_prefix:::0:0::0:pstring (gdbarch->stap_integer_prefix)
 
 # Suffix used to mark an integer constant on the architecture's assembly.
-v:const char *:stap_integer_suffix:::0:0::0:gdbarch->stap_integer_suffix
+v:const char *:stap_integer_suffix:::0:0::0:pstring (gdbarch->stap_integer_suffix)
 
 # Prefix used to mark a register name on the architecture's assembly.
 # For example, on x86 the register name is written as:
@@ -820,10 +820,10 @@ v:const char *:stap_integer_suffix:::0:0::0:gdbarch->stap_integer_suffix
 #  \%eax ;; register eax
 #
 # in this case, this prefix would be the character \`\%\'.
-v:const char *:stap_register_prefix:::0:0::0:gdbarch->stap_register_prefix
+v:const char *:stap_register_prefix:::0:0::0:pstring (gdbarch->stap_register_prefix)
 
 # Suffix used to mark a register name on the architecture's assembly
-v:const char *:stap_register_suffix:::0:0::0:gdbarch->stap_register_suffix
+v:const char *:stap_register_suffix:::0:0::0:pstring (gdbarch->stap_register_suffix)
 
 # Prefix used to mark a register indirection on the architecture's assembly.
 # For example, on x86 the register indirection is written as:
@@ -834,7 +834,7 @@ v:const char *:stap_register_suffix:::0:0::0:gdbarch->stap_register_suffix
 #
 # Please note that we use the indirection prefix also for register
 # displacement, e.g., \`4\(\%eax\)\' on x86.
-v:const char *:stap_register_indirection_prefix:::0:0::0:gdbarch->stap_register_indirection_prefix
+v:const char *:stap_register_indirection_prefix:::0:0::0:pstring (gdbarch->stap_register_indirection_prefix)
 
 # Suffix used to mark a register indirection on the architecture's assembly.
 # For example, on x86 the register indirection is written as:
@@ -845,7 +845,7 @@ v:const char *:stap_register_indirection_prefix:::0:0::0:gdbarch->stap_register_
 #
 # Please note that we use the indirection suffix also for register
 # displacement, e.g., \`4\(\%eax\)\' on x86.
-v:const char *:stap_register_indirection_suffix:::0:0::0:gdbarch->stap_register_indirection_suffix
+v:const char *:stap_register_indirection_suffix:::0:0::0:pstring (gdbarch->stap_register_indirection_suffix)
 
 # Prefix used to name a register using GDB's nomenclature.
 #
@@ -853,10 +853,10 @@ v:const char *:stap_register_indirection_suffix:::0:0::0:gdbarch->stap_register_
 # language (e.g., \`10\' is the 10th general-purpose register).  However,
 # inside GDB this same register has an \`r\' appended to its name, so the 10th
 # register would be represented as \`r10\' internally.
-v:const char *:stap_gdb_register_prefix:::0:0::0:gdbarch->stap_gdb_register_prefix
+v:const char *:stap_gdb_register_prefix:::0:0::0:pstring (gdbarch->stap_gdb_register_prefix)
 
 # Suffix used to name a register using GDB's nomenclature.
-v:const char *:stap_gdb_register_suffix:::0:0::0:gdbarch->stap_gdb_register_suffix
+v:const char *:stap_gdb_register_suffix:::0:0::0:pstring (gdbarch->stap_gdb_register_suffix)
 
 # Check if S is a single operand.
 #

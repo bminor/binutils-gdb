@@ -1,3 +1,9 @@
+2012-10-22  Ali Anwar  <ali_anwar@codesourcery.com>
+
+	* gdbarch.sh (function_list): Use 'pstring' when printing
+	a variable which could return NULL.
+	* gdbarch.c: Regenerate.
+
 2012-10-10  Joel Brobecker  <brobecker@adacore.com>
             Tom Tromey  <tromey@redhat.com>
 
