@@ -55,7 +55,7 @@ start:
 	vavgub   6,7,25
 	vavguh   25,22,10
 	vavguw   3,23,29
-	vcfpsxsw 14,2,6
+	vcfpsxws 14,2,6
 	vcfpuxws 9,31,20
 	vcfsx    24,30,3
 	vcfux    17,21,29

@@ -1,3 +1,7 @@
+2012-10-22  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <vcfpsxws>: Fix opcode spelling.
+
 2012-10-18  Tom Tromey  <tromey@redhat.com>
 
 	* tic54x-dis.c (print_instruction): Don't use K&R style.

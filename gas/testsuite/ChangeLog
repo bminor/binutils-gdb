@@ -1,3 +1,7 @@
+2012-10-22  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/altivec.s <vcfpsxws>: Fix opcode spelling.
+
 2012-10-15  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/sysreg-1.s: Add tests of rmr_el1, rmr_el2 and rmr_el3.
