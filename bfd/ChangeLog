@@ -1,3 +1,15 @@
+2012-10-22  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.23.0
+	* Makefile.am (RELEASE): Unset.
+	* configure, Makefile.in: Regenerate.
+
+2012-10-22  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.23
+	* Makefile.am (RELEASE): Set.
+	* configure, Makefile.in: Regenerate.
+
 2012-10-16  Sofiane Naci  <sofiane.naci@arm.com>
 
 	* elf64-aarch64.c (elf64_aarch64_tls_howto_table): Fix shift value for
