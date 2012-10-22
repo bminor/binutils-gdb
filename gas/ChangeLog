@@ -1,3 +1,9 @@
+2012-10-22  Simon Baldwin  <simonb@google.com>
+
+	* as.c (dump_statistics): Compute data size as the delta between
+	current sbrk(0) and start_sbrk.
+	* (main): Set start_sbrk to sbrk(0) on entry.
+
 2012-10-18  Kai Tietz  <ktietz@redhat.com>
 
 	* config/obj-coff.c: Add include of struc-symbol.h header.

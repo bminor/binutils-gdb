@@ -124,6 +124,9 @@ static struct itbl_file_list *itbl_files;
 #endif
 
 static long start_time;
+#ifdef HAVE_SBRK
+char *start_sbrk;
+#endif
 
 static int flag_macro_alternate;
 
@@ -975,7 +978,7 @@ dump_statistics (void)
 	   myname, run_time / 1000000, run_time % 1000000);
 #ifdef HAVE_SBRK
   fprintf (stderr, _("%s: data size %ld\n"),
-	   myname, (long) (lim - (char *) &environ));
+	   myname, (long) (lim - start_sbrk));
 #endif
 
   subsegs_print_statistics (stderr);
@@ -1135,6 +1138,9 @@ main (int argc, char ** argv)
   int macro_strip_at;
 
   start_time = get_run_time ();
+#ifdef HAVE_SBRK
+  start_sbrk = (char *) sbrk (0);
+#endif
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
