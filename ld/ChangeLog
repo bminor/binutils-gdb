@@ -1,3 +1,7 @@
+2012-10-22  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (plugin_load_plugins): Warning fix.
+
 2012-10-18  Kai Tietz  <ktietz@redhat.com>
 
 	PR binutils/14067

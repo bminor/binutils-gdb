@@ -800,9 +800,11 @@ plugin_load_plugins (void)
   while (curplug)
     {
       enum ld_plugin_status rv;
-      ld_plugin_onload onloadfn = dlsym (curplug->dlhandle, "onload");
+      ld_plugin_onload onloadfn;
+
+      onloadfn = (ld_plugin_onload) dlsym (curplug->dlhandle, "onload");
       if (!onloadfn)
-	onloadfn = dlsym (curplug->dlhandle, "_onload");
+	onloadfn = (ld_plugin_onload) dlsym (curplug->dlhandle, "_onload");
       if (!onloadfn)
 	return set_plugin_error (curplug->name);
       set_tv_plugin_args (curplug, &my_tv[tv_header_size]);
