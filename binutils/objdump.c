@@ -2398,6 +2398,8 @@ dump_dwarf (bfd *abfd)
 	{
 	case bfd_mach_x86_64:
 	case bfd_mach_x86_64_intel_syntax:
+	case bfd_mach_x64_32:
+	case bfd_mach_x64_32_intel_syntax:
 	  init_dwarf_regnames_x86_64 ();
 	  break;
 
