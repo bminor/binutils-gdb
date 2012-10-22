@@ -496,6 +496,10 @@ static const struct ld_option ld_options[] =
     TWO_DASHES },
   { {"wrap", required_argument, NULL, OPTION_WRAP},
     '\0', N_("SYMBOL"), N_("Use wrapper functions for SYMBOL"), TWO_DASHES },
+  { {"ignore-unresolved-symbol", required_argument, NULL,
+    OPTION_IGNORE_UNRESOLVED_SYMBOL},
+    '\0', N_("SYMBOL"),
+    N_("Unresolved SYMBOL will not cause an error or warning"), TWO_DASHES },
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -1340,6 +1344,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_WRAP:
 	  add_wrap (optarg);
+	  break;
+	case OPTION_IGNORE_UNRESOLVED_SYMBOL:
+	  add_ignoresym (&link_info, optarg);
 	  break;
 	case OPTION_DISCARD_NONE:
 	  link_info.discard = discard_none;

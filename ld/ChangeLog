@@ -1,3 +1,16 @@
+2012-10-22  Jan Beich  <jbeich@tormail.org>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR ld/14426
+	* ldlex.h (option_values): Add OPTION_IGNORE_UNRESOLVED_SYMBOL.
+	* lexsup.c (parse_args): Likewise.
+	(ld_options): Describe --ignore-unresolved-symbol.
+	* ldmain.h (add_ignoresym): Declare.
+	* ldmain.c (add_ignoresym): New function, extracted from..
+	(undefined_symbol): ..here.  Return if the symbol is in ignore_hash.
+	(constructor_callback): Don't use global link_info here.
+	(reloc_overflow): Likewise.
+
 2012-10-22  Alan Modra  <amodra@gmail.com>
 
 	* plugin.c (plugin_load_plugins): Warning fix.
