@@ -586,6 +586,23 @@ amd64_classify (struct type *type, enum amd64_reg_class class[2])
     /* Class X87 and X87UP.  */
     class[0] = AMD64_X87, class[1] = AMD64_X87UP;
 
+  /* Arguments of complex T where T is one of the types float or
+     double get treated as if they are implemented as:
+
+     struct complexT {
+       T real;
+       T imag;
+     };  */
+  else if (code == TYPE_CODE_COMPLEX && len == 8)
+    class[0] = AMD64_SSE;
+  else if (code == TYPE_CODE_COMPLEX && len == 16)
+    class[0] = class[1] = AMD64_SSE;
+
+  /* A variable of type complex long double is classified as type
+     COMPLEX_X87.  */
+  else if (code == TYPE_CODE_COMPLEX && len == 32)
+    class[0] = AMD64_COMPLEX_X87;
+
   /* Aggregates.  */
   else if (code == TYPE_CODE_ARRAY || code == TYPE_CODE_STRUCT
 	   || code == TYPE_CODE_UNION)
@@ -634,6 +651,30 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 	}
 
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
+
+  /* 8. If the class is COMPLEX_X87, the real part of the value is
+        returned in %st0 and the imaginary part in %st1.  */
+  if (class[0] == AMD64_COMPLEX_X87)
+    {
+      if (readbuf)
+	{
+	  regcache_raw_read (regcache, AMD64_ST0_REGNUM, readbuf);
+	  regcache_raw_read (regcache, AMD64_ST1_REGNUM, readbuf + 16);
+	}
+
+      if (writebuf)
+	{
+	  i387_return_value (gdbarch, regcache);
+	  regcache_raw_write (regcache, AMD64_ST0_REGNUM, writebuf);
+	  regcache_raw_write (regcache, AMD64_ST1_REGNUM, writebuf + 16);
+
+	  /* Fix up the tag word such that both %st(0) and %st(1) are
+	     marked as valid.  */
+	  regcache_raw_write_unsigned (regcache, AMD64_FTAG_REGNUM, 0xfff);
+	}
+
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
 
   gdb_assert (class[1] != AMD64_MEMORY);

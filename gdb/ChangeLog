@@ -1,3 +1,13 @@
+2012-10-23  Mark Kettenis  <kettenis@gnu.org>
+
+	PR gdb/12796
+	PR gdb/12798
+	PR gdb/12800
+	* amd64-tdep.h (enum amd64_regnum): Add AMD64_ST1_REGNUM and
+	AMD64_FTAG_REGNUM.
+	* amd64-tdep.c (amd64_classify): Classify complex types.
+	(amd64_return_value): Handle the COMPLEX_X87 class.
+
 2012-10-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* rs6000-aix-tdep.c (rs6000_aix_auto_wide_charset): New function.
