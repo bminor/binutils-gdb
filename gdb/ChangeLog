@@ -1,5 +1,10 @@
 2012-10-23  Joel Brobecker  <brobecker@adacore.com>
 
+	* rs6000-aix-tdep.c (rs6000_aix_auto_wide_charset): New function.
+	(rs6000_aix_init_osabi): Set auto_wide_charset gdbarch method.
+
+2012-10-23  Joel Brobecker  <brobecker@adacore.com>
+
 	* amd64-windows-tdep.c (amd64_windows_auto_wide_charset): New
 	function.
 	(amd64_windows_init_abi): Set auto_wide_charset gdbarch method

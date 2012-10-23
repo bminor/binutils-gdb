@@ -719,6 +719,14 @@ rs6000_software_single_step (struct frame_info *frame)
   return 1;
 }
 
+/* Implement the "auto_wide_charset" gdbarch method for this platform.  */
+
+static const char *
+rs6000_aix_auto_wide_charset (void)
+{
+  return "UTF-16";
+}
+
 /* Implement an osabi sniffer for RS6000/AIX.
 
    This function assumes that ABFD's flavour is XCOFF.  In other words,
@@ -775,6 +783,8 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
     set_gdbarch_frame_red_zone_size (gdbarch, 224);
   else
     set_gdbarch_frame_red_zone_size (gdbarch, 0);
+
+  set_gdbarch_auto_wide_charset (gdbarch, rs6000_aix_auto_wide_charset);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
