@@ -1,5 +1,16 @@
 2012-10-23  Yao Qi  <yao@codesourcery.com>
 
+	* event-top.c (mark_async_signal_handler_wrapper): Remove.
+	* event-top.h: Remove its declaration.
+	(async_request_quit): Call mark_async_signal_handler instead of
+	mark_async_signal_handler_wrapper.
+	(async_do_nothing, async_disconnect): Likewise.
+	(async_stop_sig): Likewise.
+	* remote.c (handle_remote_sigint): Likewise.
+	(handle_remote_sigint_twice): Likewise.
+
+2012-10-23  Yao Qi  <yao@codesourcery.com>
+
 	* event-top.c (sigint_token, sighup_token): Replace 'void *'
 	with 'static struct async_signal_handler *'.
 	(sighup_token, sigquit_token, sigstp_token): Likewise.

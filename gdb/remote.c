@@ -4862,7 +4862,7 @@ static void
 handle_remote_sigint (int sig)
 {
   signal (sig, handle_remote_sigint_twice);
-  mark_async_signal_handler_wrapper (sigint_remote_token);
+  mark_async_signal_handler (sigint_remote_token);
 }
 
 /* Signal handler for SIGINT, installed after SIGINT has already been
@@ -4872,7 +4872,7 @@ static void
 handle_remote_sigint_twice (int sig)
 {
   signal (sig, handle_remote_sigint);
-  mark_async_signal_handler_wrapper (sigint_remote_twice_token);
+  mark_async_signal_handler (sigint_remote_twice_token);
 }
 
 /* Perform the real interruption of the target execution, in response

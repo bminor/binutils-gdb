@@ -46,7 +46,6 @@ extern void handle_stop_sig (int sig);
 extern void handle_sigint (int sig);
 extern void handle_sigterm (int sig);
 extern void gdb_readline2 (void *client_data);
-extern void mark_async_signal_handler_wrapper (void *token);
 extern void async_request_quit (void *arg);
 extern void stdin_event_handler (int error, void *client_data);
 extern void async_disable_stdin (void);

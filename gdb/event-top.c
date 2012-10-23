@@ -770,12 +770,6 @@ async_init_signals (void)
 
 }
 
-void
-mark_async_signal_handler_wrapper (void *token)
-{
-  mark_async_signal_handler ((struct async_signal_handler *) token);
-}
-
 /* Tell the event loop what to do if SIGINT is received.
    See event-signal.c.  */
 void
@@ -829,7 +823,7 @@ async_request_quit (gdb_client_data arg)
 static void
 handle_sigquit (int sig)
 {
-  mark_async_signal_handler_wrapper (sigquit_token);
+  mark_async_signal_handler (sigquit_token);
   signal (sig, handle_sigquit);
 }
 #endif
@@ -850,7 +844,7 @@ async_do_nothing (gdb_client_data arg)
 static void
 handle_sighup (int sig)
 {
-  mark_async_signal_handler_wrapper (sighup_token);
+  mark_async_signal_handler (sighup_token);
   signal (sig, handle_sighup);
 }
 
@@ -886,7 +880,7 @@ async_disconnect (gdb_client_data arg)
 void
 handle_stop_sig (int sig)
 {
-  mark_async_signal_handler_wrapper (sigtstp_token);
+  mark_async_signal_handler (sigtstp_token);
   signal (sig, handle_stop_sig);
 }
 
@@ -926,7 +920,7 @@ async_stop_sig (gdb_client_data arg)
 static void
 handle_sigfpe (int sig)
 {
-  mark_async_signal_handler_wrapper (sigfpe_token);
+  mark_async_signal_handler (sigfpe_token);
   signal (sig, handle_sigfpe);
 }
 
