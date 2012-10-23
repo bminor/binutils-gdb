@@ -856,6 +856,16 @@ File_view::~File_view()
 
 // Class Input_file.
 
+// Create a file given just the filename.
+
+Input_file::Input_file(const char* name)
+  : found_name_(), file_(), is_in_sysroot_(false), format_(FORMAT_NONE)
+{
+  this->input_argument_ =
+    new Input_file_argument(name, Input_file_argument::INPUT_FILE_TYPE_FILE,
+                            "", false, Position_dependent_options());
+}
+
 // Create a file for testing.
 
 Input_file::Input_file(const Task* task, const char* name,

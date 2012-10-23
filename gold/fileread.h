@@ -493,6 +493,9 @@ class Input_file
       is_in_sysroot_(false), format_(FORMAT_NONE)
   { }
 
+  // Create an input file given just a filename.
+  Input_file(const char* name);
+
   // Create an input file with the contents already provided.  This is
   // only used for testing.  With this path, don't call the open
   // method.

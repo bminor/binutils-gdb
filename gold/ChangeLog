@@ -1,3 +1,8 @@
+2012-10-23  Cary Coutant  <ccoutant@google.com>
+
+	* fileread.cc (Input_file::Input_file): New constructor.
+	* fileread.h (class Input_file): Add new constructor.
+
 2012-10-18  Alan Modra  <amodra@gmail.com>
 
 	PR gold/14727
