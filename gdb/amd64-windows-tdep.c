@@ -190,6 +190,14 @@ amd64_windows_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   return destination;
 }
 
+/* Implement the "auto_wide_charset" gdbarch method.  */
+
+static const char *
+amd64_windows_auto_wide_charset (void)
+{
+  return "UTF-16";
+}
+
 static void
 amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -214,6 +222,8 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_iterate_over_objfiles_in_search_order
     (gdbarch, windows_iterate_over_objfiles_in_search_order);
+
+  set_gdbarch_auto_wide_charset (gdbarch, amd64_windows_auto_wide_charset);
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
 }
