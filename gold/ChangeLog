@@ -1,5 +1,15 @@
 2012-10-23  Cary Coutant  <ccoutant@google.com>
 
+	* dwarf_reader.cc (make_elf_reloc_mapper): Check size and endianness
+	from object, not parameters.
+	(Dwarf_info_reader::parse): Likewise.
+	* object.h (Relobj::elfsize, Relobj::is_big_endian): New methods.
+	(Relobj::do_elfsize, Relobj::do_is_big_endian): New methods.
+	(Sized_relobj::do_elfsize, Sized_relobj::do_is_big_endian): New
+	methods.
+
+2012-10-23  Cary Coutant  <ccoutant@google.com>
+
 	* fileread.cc (Input_file::Input_file): New constructor.
 	* fileread.h (class Input_file): Add new constructor.
 

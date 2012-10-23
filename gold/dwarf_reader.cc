@@ -28,7 +28,6 @@
 #include "elfcpp_swap.h"
 #include "dwarf.h"
 #include "object.h"
-#include "parameters.h"
 #include "reloc.h"
 #include "dwarf_reader.h"
 #include "int_encoding.h"
@@ -90,34 +89,53 @@ Sized_elf_reloc_mapper<size, big_endian>::do_get_reloc_target(
 }
 
 static inline Elf_reloc_mapper*
-make_elf_reloc_mapper(Object* object, const unsigned char* symtab,
+make_elf_reloc_mapper(Relobj* object, const unsigned char* symtab,
 		      off_t symtab_size)
 {
-  switch (parameters->size_and_endianness())
+  if (object->elfsize() == 32)
     {
-#ifdef HAVE_TARGET_32_LITTLE
-      case Parameters::TARGET_32_LITTLE:
-	return new Sized_elf_reloc_mapper<32, false>(object, symtab,
-						     symtab_size);
-#endif
+      if (object->is_big_endian())
+        {
 #ifdef HAVE_TARGET_32_BIG
-      case Parameters::TARGET_32_BIG:
-	return new Sized_elf_reloc_mapper<32, true>(object, symtab,
-						    symtab_size);
+	  return new Sized_elf_reloc_mapper<32, true>(object, symtab,
+						      symtab_size);
+#else
+	  gold_unreachable();
 #endif
-#ifdef HAVE_TARGET_64_LITTLE
-      case Parameters::TARGET_64_LITTLE:
-	return new Sized_elf_reloc_mapper<64, false>(object, symtab,
-						     symtab_size);
+        }
+      else
+        {
+#ifdef HAVE_TARGET_32_LITTLE
+	  return new Sized_elf_reloc_mapper<32, false>(object, symtab,
+						       symtab_size);
+#else
+	  gold_unreachable();
 #endif
-#ifdef HAVE_TARGET_64_BIG
-      case Parameters::TARGET_64_BIG:
-	return new Sized_elf_reloc_mapper<64, true>(object, symtab,
-						    symtab_size);
-#endif
-      default:
-	gold_unreachable();
+        }
     }
+  else if (object->elfsize() == 64)
+    {
+      if (object->is_big_endian())
+        {
+#ifdef HAVE_TARGET_64_BIG
+	  return new Sized_elf_reloc_mapper<64, true>(object, symtab,
+						      symtab_size);
+#else
+	  gold_unreachable();
+#endif
+        }
+      else
+        {
+#ifdef HAVE_TARGET_64_LITTLE
+	  return new Sized_elf_reloc_mapper<64, false>(object, symtab,
+						       symtab_size);
+#else
+	  gold_unreachable();
+#endif
+        }
+    }
+  else
+    gold_unreachable();
 }
 
 // class Dwarf_abbrev_table
@@ -1136,30 +1154,21 @@ Dwarf_info_reader::check_buffer(const unsigned char* p) const
 void
 Dwarf_info_reader::parse()
 {
-  switch (parameters->size_and_endianness())
+  if (this->object_->is_big_endian())
     {
-#ifdef HAVE_TARGET_32_LITTLE
-      case Parameters::TARGET_32_LITTLE:
-        this->do_parse<false>();
-        break;
+#if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
+      this->do_parse<true>();
+#else
+      gold_unreachable();
 #endif
-#ifdef HAVE_TARGET_32_BIG
-      case Parameters::TARGET_32_BIG:
-        this->do_parse<true>();
-        break;
+    }
+  else
+    {
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
+      this->do_parse<false>();
+#else
+      gold_unreachable();
 #endif
-#ifdef HAVE_TARGET_64_LITTLE
-      case Parameters::TARGET_64_LITTLE:
-        this->do_parse<false>();
-        break;
-#endif
-#ifdef HAVE_TARGET_64_BIG
-      case Parameters::TARGET_64_BIG:
-        this->do_parse<true>();
-        break;
-#endif
-      default:
-	gold_unreachable();
     }
 }
 

@@ -1224,6 +1224,16 @@ class Relobj : public Object
   do_get_incremental_reloc_count(unsigned int symndx) const
   { return this->reloc_counts_[symndx]; }
 
+  // Return the word size of the object file.
+  int
+  elfsize() const
+  { return this->do_elfsize(); }
+
+  // Return TRUE if this is a big-endian object file.
+  bool
+  is_big_endian() const
+  { return this->do_is_big_endian(); }
+
  protected:
   // The output section to be used for each input section, indexed by
   // the input section number.  The output section is NULL if the
@@ -1385,6 +1395,16 @@ class Relobj : public Object
     unsigned int counter = this->reloc_counts_[symndx]++;
     return this->reloc_bases_[symndx] + counter;
   }
+
+  // Return the word size of the object file--
+  // implemented by child class.
+  virtual int
+  do_elfsize() const = 0;
+
+  // Return TRUE if this is a big-endian object file--
+  // implemented by child class.
+  virtual bool
+  do_is_big_endian() const = 0;
 
  private:
   // Mapping from input sections to output section.
@@ -1962,6 +1982,16 @@ class Sized_relobj : public Relobj
         gold_assert(ins.second);
       }
   }
+
+  // Return the word size of the object file.
+  virtual int
+  do_elfsize() const
+  { return size; }
+
+  // Return TRUE if this is a big-endian object file.
+  virtual bool
+  do_is_big_endian() const
+  { return big_endian; }
 
  private:
   // The GOT offsets of local symbols. This map also stores GOT offsets
