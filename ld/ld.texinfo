@@ -1093,6 +1093,11 @@ Set the emulation maximum page size to @var{value}.
 @item common-page-size=@var{value}
 Set the emulation common page size to @var{value}.
 
+@item stack-size=@var{value}
+Specify a stack size for in an ELF @code{PT_GNU_STACK} segment.
+Specifying zero will override any default non-zero sized
+@code{PT_GNU_STACK} segment creation.
+
 @end table
 
 Other keywords are ignored for Solaris compatibility.

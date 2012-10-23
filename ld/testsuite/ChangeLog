@@ -1,3 +1,27 @@
+2012-10-23  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-elf/binutils.exp: Add -z stack-size=0.
+	* ld-elf/elf.exp: Add stack-exec and stack-size tests.
+	* ld-elf/orphan-region.d: Add stack-size option. Remove xfail.
+	* ld-elf/stack-exec.rd: New.
+	* ld-elf/stack-size.rd: New.
+	* ld-elf/stack.s: New.
+	* ld-scripts/empty-aligned.d: Add stack-size option.
+	* ld-sh/fdpic-stack-set.d: New.
+	* ld-tic6x/shlib-1.rd: Remove __stacksize symbol.
+	* ld-tic6x/shlib-1b.rd: Likewise.
+	* ld-tic6x/shlib-1r.rd: Likewise.
+	* ld-tic6x/shlib-1rb.rd: Likewise.
+	* ld-tic6x/shlib-app-1.rd: Likewise.
+	* ld-tic6x/shlib-app-1b.rd: Likewise.
+	* ld-tic6x/shlib-app-1r.rd: Likewise.
+	* ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* ld-tic6x/shlib-noindex.rd: Likewise.
+	* ld-tic6x/static-app-1.rd: Likewise.
+	* ld-tic6x/static-app-1b.rd: Likewise.
+	* ld-tic6x/static-app-1r.rd: Likewise.
+	* ld-tic6x/static-app-1rb.rd: Likewise.
+
 2012-10-16  Sofiane Naci  <sofiane.naci@arm.com>
 
 	* ld-aarch64/tlsle-symbol-offset.s: New file.

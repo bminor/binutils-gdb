@@ -2615,134 +2615,21 @@ lm32_elf_copy_indirect_symbol (struct bfd_link_info *info,
 }
 
 static bfd_boolean
-lm32_elf_always_size_sections (bfd *output_bfd,
-				 struct bfd_link_info *info)
+lm32_elf_always_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   if (!info->relocatable)
     {
-      struct elf_link_hash_entry *h;
+      if (!bfd_elf_stack_segment_size (output_bfd, info,
+				       "__stacksize", DEFAULT_STACK_SIZE))
+	return FALSE;
 
-      /* Force a PT_GNU_STACK segment to be created.  */
-      if (! elf_tdata (output_bfd)->stack_flags)
-	elf_tdata (output_bfd)->stack_flags = PF_R | PF_W | PF_X;
-
-      /* Define __stacksize if it's not defined yet.  */
-      h = elf_link_hash_lookup (elf_hash_table (info), "__stacksize",
-				FALSE, FALSE, FALSE);
-      if (! h || h->root.type != bfd_link_hash_defined
-	  || h->type != STT_OBJECT
-	  || !h->def_regular)
-	{
-	  struct bfd_link_hash_entry *bh = NULL;
-
-	  if (!(_bfd_generic_link_add_one_symbol
-		(info, output_bfd, "__stacksize",
-		 BSF_GLOBAL, bfd_abs_section_ptr, DEFAULT_STACK_SIZE,
-		 (const char *) NULL, FALSE,
-		 get_elf_backend_data (output_bfd)->collect, &bh)))
-	    return FALSE;
-
-	  h = (struct elf_link_hash_entry *) bh;
-	  h->def_regular = 1;
-	  h->type = STT_OBJECT;
-	  /* This one must NOT be hidden.  */
-	}
-    }
-
-  return TRUE;
-}
-
-static bfd_boolean
-lm32_elf_modify_segment_map (bfd *output_bfd,
-			     struct bfd_link_info *info)
-{
-  struct elf_segment_map *m;
-
-  /* objcopy and strip preserve what's already there using elf32_lm32fdpic_copy_
-     private_bfd_data ().  */
-  if (! info)
-    return TRUE;
-
-  for (m = elf_tdata (output_bfd)->segment_map; m != NULL; m = m->next)
-    if (m->p_type == PT_GNU_STACK)
-      break;
-
-  if (m)
-    {
       asection *sec = bfd_get_section_by_name (output_bfd, ".stack");
-      struct elf_link_hash_entry *h;
-
       if (sec)
-	{
-	  /* Obtain the pointer to the __stacksize symbol.  */
-	  h = elf_link_hash_lookup (elf_hash_table (info), "__stacksize",
-				    FALSE, FALSE, FALSE);
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *)h->root.u.i.link;
-	  BFD_ASSERT (h->root.type == bfd_link_hash_defined);
-
-	  /* Set the section size from the symbol value.  We
-	     intentionally ignore the symbol section.  */
-	  if (h->root.type == bfd_link_hash_defined)
-	    sec->size = h->root.u.def.value;
-	  else
-	    sec->size = DEFAULT_STACK_SIZE;
-
-	  /* Add the stack section to the PT_GNU_STACK segment,
-	     such that its size and alignment requirements make it
-	     to the segment.  */
-	  m->sections[m->count] = sec;
-	  m->count++;
-	}
+	sec->size = info->stacksize >= 0 ? info->stacksize : 0;
     }
 
   return TRUE;
 }
-
-static bfd_boolean
-lm32_elf_modify_program_headers (bfd *output_bfd,
-				       struct bfd_link_info *info)
-{
-  struct elf_obj_tdata *tdata = elf_tdata (output_bfd);
-  struct elf_segment_map *m;
-  Elf_Internal_Phdr *p;
-
-  if (! info)
-    return TRUE;
-
-  for (p = tdata->phdr, m = tdata->segment_map; m != NULL; m = m->next, p++)
-    if (m->p_type == PT_GNU_STACK)
-      break;
-
-  if (m)
-    {
-      struct elf_link_hash_entry *h;
-
-      /* Obtain the pointer to the __stacksize symbol.  */
-      h = elf_link_hash_lookup (elf_hash_table (info), "__stacksize",
-				FALSE, FALSE, FALSE);
-      if (h)
-	{
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  BFD_ASSERT (h->root.type == bfd_link_hash_defined);
-	}
-
-      /* Set the header p_memsz from the symbol value.  We
-	 intentionally ignore the symbol section.  */
-      if (h && h->root.type == bfd_link_hash_defined)
-	p->p_memsz = h->root.u.def.value;
-      else
-	p->p_memsz = DEFAULT_STACK_SIZE;
-
-      p->p_align = 8;
-    }
-
-  return TRUE;
-}
-
 
 static bfd_boolean
 lm32_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
@@ -2822,6 +2709,7 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define elf_backend_rela_normal                 1
 #define elf_backend_object_p                    lm32_elf_object_p
 #define elf_backend_final_write_processing      lm32_elf_final_write_processing
+#define elf_backend_stack_align			8
 #define elf_backend_can_gc_sections             1
 #define elf_backend_can_refcount                1
 #define elf_backend_gc_mark_hook                lm32_elf_gc_mark_hook
@@ -2857,10 +2745,6 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
 #undef  elf_backend_always_size_sections
 #define elf_backend_always_size_sections        lm32_elf_always_size_sections
-#undef  elf_backend_modify_segment_map
-#define elf_backend_modify_segment_map          lm32_elf_modify_segment_map
-#undef  elf_backend_modify_program_headers
-#define elf_backend_modify_program_headers      lm32_elf_modify_program_headers
 #undef  bfd_elf32_bfd_copy_private_bfd_data
 #define bfd_elf32_bfd_copy_private_bfd_data     lm32_elf_fdpic_copy_private_bfd_data
 

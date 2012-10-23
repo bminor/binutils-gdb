@@ -109,6 +109,9 @@
 #ifndef elf_backend_default_execstack
 #define elf_backend_default_execstack 1
 #endif
+#ifndef elf_backend_stack_align
+#define elf_backend_stack_align 16
+#endif
 
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
 #define bfd_elfNN_bfd_debug_info_end	bfd_void
@@ -770,6 +773,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_obj_attrs_order,
   elf_backend_obj_attrs_handle_unknown,
   elf_backend_static_tls_alignment,
+  elf_backend_stack_align,
   elf_backend_collect,
   elf_backend_type_change_ok,
   elf_backend_may_use_rel_p,

@@ -1,5 +1,5 @@
 #source: empty-aligned.s
-#ld: -T empty-aligned.t
+#ld: -T empty-aligned.t -z stack-size=0
 #readelf: -l --wide
 #xfail: "hppa64-*-*"
 #notarget: frv-*-*linux*

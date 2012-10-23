@@ -4140,7 +4140,14 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  m->next = NULL;
 	  m->p_type = PT_GNU_STACK;
 	  m->p_flags = elf_tdata (abfd)->stack_flags;
+	  m->p_align = bed->stack_align;
 	  m->p_flags_valid = 1;
+	  m->p_align_valid = m->p_align != 0;
+	  if (info->stacksize > 0)
+	    {
+	      m->p_size = info->stacksize;
+	      m->p_size_valid = 1;
+	    }
 
 	  *pm = m;
 	  pm = &m->next;
@@ -5021,6 +5028,11 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      memset (p, 0, sizeof *p);
 	      p->p_type = PT_NULL;
 	    }
+	}
+      else if (p->p_type == PT_GNU_STACK)
+	{
+	  if (m->p_size_valid)
+	    p->p_memsz = m->p_size;
 	}
       else if (m->count != 0)
 	{
@@ -6166,12 +6178,15 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_align_valid = 1;
       map->p_vaddr_offset = 0;
 
-      if (map->p_type == PT_GNU_RELRO)
+      if (map->p_type == PT_GNU_RELRO
+	  || map->p_type == PT_GNU_STACK)
 	{
 	  /* The PT_GNU_RELRO segment may contain the first a few
 	     bytes in the .got.plt section even if the whole .got.plt
 	     section isn't in the PT_GNU_RELRO segment.  We won't
-	     change the size of the PT_GNU_RELRO segment.  */
+	     change the size of the PT_GNU_RELRO segment.
+	     Similarly, PT_GNU_STACK size is significant on uclinux
+	     systems.    */
 	  map->p_size = segment->p_memsz;
 	  map->p_size_valid = 1;
 	}

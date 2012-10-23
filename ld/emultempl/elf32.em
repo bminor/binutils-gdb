@@ -2276,6 +2276,17 @@ fragment <<EOF
 	    einfo (_("%P%F: invalid common page size \`%s'\n"),
 		   optarg + 17);
 	}
+      else if (CONST_STRNEQ (optarg, "stack-size="))
+	{
+	  char *end;
+	  link_info.stacksize = strtoul (optarg + 11, &end, 0);
+	  if (*end || link_info.stacksize < 0)
+	    einfo (_("%P%F: invalid stack size \`%s'\n"), optarg + 11);
+	  if (!link_info.stacksize)
+	    /* Use -1 for explicit no-stack, because zero means
+	       'default'.   */
+	    link_info.stacksize = -1;
+	}
       else if (strcmp (optarg, "execstack") == 0)
 	{
 	  link_info.execstack = TRUE;
