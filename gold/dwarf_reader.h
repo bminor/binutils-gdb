@@ -335,10 +335,10 @@ class Dwarf_range_list
 class Dwarf_ranges_table
 {
  public:
-  Dwarf_ranges_table()
-    : ranges_shndx_(0), ranges_buffer_(NULL), ranges_buffer_end_(NULL),
-      owns_ranges_buffer_(false), ranges_reloc_mapper_(NULL),
-      output_section_offset_(0)
+  Dwarf_ranges_table(Dwarf_info_reader* dwinfo)
+    : dwinfo_(dwinfo), ranges_shndx_(0), ranges_buffer_(NULL),
+      ranges_buffer_end_(NULL), owns_ranges_buffer_(false),
+      ranges_reloc_mapper_(NULL), output_section_offset_(0)
   { }
 
   ~Dwarf_ranges_table()
@@ -366,6 +366,8 @@ class Dwarf_ranges_table
 		  off_t ranges_offset);
 
  private:
+  // The Dwarf_info_reader, for reading data.
+  Dwarf_info_reader* dwinfo_;
   // The section index of the ranges table.
   unsigned int ranges_shndx_;
   // The buffer containing the .debug_ranges section.
@@ -388,8 +390,8 @@ class Dwarf_ranges_table
 class Dwarf_pubnames_table
 {
  public:
-  Dwarf_pubnames_table(bool is_pubtypes)
-    : buffer_(NULL), buffer_end_(NULL), owns_buffer_(false),
+  Dwarf_pubnames_table(Dwarf_info_reader* dwinfo, bool is_pubtypes)
+    : dwinfo_(dwinfo), buffer_(NULL), buffer_end_(NULL), owns_buffer_(false),
       offset_size_(0), pinfo_(NULL), is_pubtypes_(is_pubtypes),
       output_section_offset_(0)
   { }
@@ -413,6 +415,8 @@ class Dwarf_pubnames_table
   next_name();
 
  private:
+  // The Dwarf_info_reader, for reading data.
+  Dwarf_info_reader* dwinfo_;
   // The buffer containing the .debug_ranges section.
   const unsigned char* buffer_;
   const unsigned char* buffer_end_;
@@ -665,8 +669,8 @@ class Dwarf_info_reader
       reloc_type_(reloc_type), abbrev_shndx_(0), string_shndx_(0),
       buffer_(NULL), buffer_end_(NULL), cu_offset_(0), cu_length_(0),
       offset_size_(0), address_size_(0), cu_version_(0), type_signature_(0),
-      type_offset_(0), abbrev_table_(), reloc_mapper_(NULL),
-      string_buffer_(NULL), string_buffer_end_(NULL),
+      type_offset_(0), abbrev_table_(), ranges_table_(this),
+      reloc_mapper_(NULL), string_buffer_(NULL), string_buffer_end_(NULL),
       owns_string_buffer_(false), string_output_section_offset_(0)
   { }
 
@@ -699,6 +703,16 @@ class Dwarf_info_reader
       return p;
     return NULL;
   }
+
+  // Read a possibly unaligned integer of SIZE.
+  template <int valsize>
+  inline typename elfcpp::Valtype_base<valsize>::Valtype
+  read_from_pointer(const unsigned char* source);
+
+  // Read a possibly unaligned integer of SIZE.  Update SOURCE after read.
+  template <int valsize>
+  inline typename elfcpp::Valtype_base<valsize>::Valtype
+  read_from_pointer(const unsigned char** source);
 
   // Look for a relocation at offset ATTR_OFF in the dwarf info,
   // and return the section index and offset of the target.

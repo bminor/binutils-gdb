@@ -1,5 +1,20 @@
 2012-10-23  Cary Coutant  <ccoutant@google.com>
 
+	* dwarf_reader.cc (Dwarf_ranges_table::read_range_list): Call
+	Dwarf_info_reader::read_from_pointer.
+	(Dwarf_pubnames_table::read_header): Likewise.
+	(Dwarf_pubnames_table::next_name): Likewise.
+	(Dwarf_die::read_attributes): Likewise.
+	(Dwarf_die::skip_attributes): Likewise.
+	(Dwarf_info_reader::read_from_pointer): New function template.
+	* dwarf_reader.h (Dwarf_ranges_table): Add dwinfo_.
+	(Dwarf_pubnames_table): Likewise.
+	(Dwarf_info_reader::read_from_pointer): New function template.
+	* gdb-index.cc (Gdb_index_info_reader): Adjust call to
+	Dwarf_pubnames_table ctor.
+
+2012-10-23  Cary Coutant  <ccoutant@google.com>
+
 	* dwarf_reader.cc (Dwarf_info_reader::do_parse): Use stored
 	abbrev_shndx.
 	* dwarf_reader.h (Dwarf_info_reader::Dwarf_info_reader): Initialize

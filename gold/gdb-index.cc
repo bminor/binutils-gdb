@@ -869,7 +869,7 @@ Gdb_index_info_reader::read_pubnames_and_pubtypes(Dwarf_die* die)
 	ret = true;
       else
 	{
-	  Dwarf_pubnames_table pubnames(false);
+	  Dwarf_pubnames_table pubnames(this, false);
 	  if (!pubnames.read_section(this->object(), pubnames_shndx))
 	    return false;
 	  if (!pubnames.read_header(pubnames_offset))
@@ -896,7 +896,7 @@ Gdb_index_info_reader::read_pubnames_and_pubtypes(Dwarf_die* die)
 	ret = true;
       else
 	{
-	  Dwarf_pubnames_table pubtypes(true);
+	  Dwarf_pubnames_table pubtypes(this, true);
 	  if (!pubtypes.read_section(this->object(), pubtypes_shndx))
 	    return false;
 	  if (!pubtypes.read_header(pubtypes_offset))

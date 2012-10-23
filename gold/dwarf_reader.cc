@@ -412,13 +412,17 @@ Dwarf_ranges_table::read_range_list(
       // Read the raw contents of the section.
       if (addr_size == 4)
 	{
-	  start = read_from_pointer<32>(this->ranges_buffer_ + offset);
-	  end = read_from_pointer<32>(this->ranges_buffer_ + offset + 4);
+	  start = this->dwinfo_->read_from_pointer<32>(this->ranges_buffer_
+						       + offset);
+	  end = this->dwinfo_->read_from_pointer<32>(this->ranges_buffer_
+						     + offset + 4);
 	}
       else
 	{
-	  start = read_from_pointer<64>(this->ranges_buffer_ + offset);
-	  end = read_from_pointer<64>(this->ranges_buffer_ + offset + 8);
+	  start = this->dwinfo_->read_from_pointer<64>(this->ranges_buffer_
+						       + offset);
+	  end = this->dwinfo_->read_from_pointer<64>(this->ranges_buffer_
+						     + offset + 8);
 	}
 
       // Check for relocations and adjust the values.
@@ -510,11 +514,11 @@ Dwarf_pubnames_table::read_header(off_t offset)
   const unsigned char* pinfo = this->buffer_ + offset;
 
   // Read the unit_length field.
-  uint32_t unit_length = read_from_pointer<32>(pinfo);
+  uint32_t unit_length = this->dwinfo_->read_from_pointer<32>(pinfo);
   pinfo += 4;
   if (unit_length == 0xffffffff)
     {
-      unit_length = read_from_pointer<64>(pinfo);
+      unit_length = this->dwinfo_->read_from_pointer<64>(pinfo);
       pinfo += 8;
       this->offset_size_ = 8;
     }
@@ -522,7 +526,7 @@ Dwarf_pubnames_table::read_header(off_t offset)
     this->offset_size_ = 4;
 
   // Check the version.
-  unsigned int version = read_from_pointer<16>(pinfo);
+  unsigned int version = this->dwinfo_->read_from_pointer<16>(pinfo);
   pinfo += 2;
   if (version != 2)
     return false;
@@ -548,9 +552,9 @@ Dwarf_pubnames_table::next_name()
   // the end of the list.
   uint32_t offset;
   if (this->offset_size_ == 4)
-    offset = read_from_pointer<32>(&pinfo);
+    offset = this->dwinfo_->read_from_pointer<32>(&pinfo);
   else
-    offset = read_from_pointer<64>(&pinfo);
+    offset = this->dwinfo_->read_from_pointer<64>(&pinfo);
   if (offset == 0)
     return NULL;
 
@@ -638,9 +642,9 @@ Dwarf_die::read_attributes()
 	    {
 	      off_t str_off;
 	      if (this->dwinfo_->offset_size() == 4)
-		str_off = read_from_pointer<32>(&pattr);
+		str_off = this->dwinfo_->read_from_pointer<32>(&pattr);
 	      else
-		str_off = read_from_pointer<64>(&pattr);
+		str_off = this->dwinfo_->read_from_pointer<64>(&pattr);
 	      unsigned int shndx =
 		  this->dwinfo_->lookup_reloc(attr_off, &str_off);
 	      attr_value.aux.shndx = shndx;
@@ -651,9 +655,9 @@ Dwarf_die::read_attributes()
 	    {
 	      off_t sec_off;
 	      if (this->dwinfo_->offset_size() == 4)
-		sec_off = read_from_pointer<32>(&pattr);
+		sec_off = this->dwinfo_->read_from_pointer<32>(&pattr);
 	      else
-		sec_off = read_from_pointer<64>(&pattr);
+		sec_off = this->dwinfo_->read_from_pointer<64>(&pattr);
 	      unsigned int shndx =
 		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
 	      attr_value.aux.shndx = shndx;
@@ -666,9 +670,9 @@ Dwarf_die::read_attributes()
 	    {
 	      off_t sec_off;
 	      if (this->dwinfo_->address_size() == 4)
-		sec_off = read_from_pointer<32>(&pattr);
+		sec_off = this->dwinfo_->read_from_pointer<32>(&pattr);
 	      else
-		sec_off = read_from_pointer<64>(&pattr);
+		sec_off = this->dwinfo_->read_from_pointer<64>(&pattr);
 	      unsigned int shndx =
 		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
 	      attr_value.aux.shndx = shndx;
@@ -682,12 +686,14 @@ Dwarf_die::read_attributes()
 	    pattr += attr_value.aux.blocklen;
 	    break;
 	  case elfcpp::DW_FORM_block2:
-	    attr_value.aux.blocklen = read_from_pointer<16>(&pattr);
+	    attr_value.aux.blocklen =
+		this->dwinfo_->read_from_pointer<16>(&pattr);
 	    attr_value.val.blockval = pattr;
 	    pattr += attr_value.aux.blocklen;
 	    break;
 	  case elfcpp::DW_FORM_block4:
-	    attr_value.aux.blocklen = read_from_pointer<32>(&pattr);
+	    attr_value.aux.blocklen =
+		this->dwinfo_->read_from_pointer<32>(&pattr);
 	    attr_value.val.blockval = pattr;
 	    pattr += attr_value.aux.blocklen;
 	    break;
@@ -706,16 +712,18 @@ Dwarf_die::read_attributes()
 	    ref_form = true;
 	    break;
 	  case elfcpp::DW_FORM_data2:
-	    attr_value.val.intval = read_from_pointer<16>(&pattr);
+	    attr_value.val.intval =
+		this->dwinfo_->read_from_pointer<16>(&pattr);
 	    break;
 	  case elfcpp::DW_FORM_ref2:
-	    attr_value.val.refval = read_from_pointer<16>(&pattr);
+	    attr_value.val.refval =
+		this->dwinfo_->read_from_pointer<16>(&pattr);
 	    ref_form = true;
 	    break;
 	  case elfcpp::DW_FORM_data4:
 	    {
 	      off_t sec_off;
-	      sec_off = read_from_pointer<32>(&pattr);
+	      sec_off = this->dwinfo_->read_from_pointer<32>(&pattr);
 	      unsigned int shndx =
 		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
 	      attr_value.aux.shndx = shndx;
@@ -725,7 +733,7 @@ Dwarf_die::read_attributes()
 	  case elfcpp::DW_FORM_ref4:
 	    {
 	      off_t sec_off;
-	      sec_off = read_from_pointer<32>(&pattr);
+	      sec_off = this->dwinfo_->read_from_pointer<32>(&pattr);
 	      unsigned int shndx =
 		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
 	      attr_value.aux.shndx = shndx;
@@ -736,7 +744,7 @@ Dwarf_die::read_attributes()
 	  case elfcpp::DW_FORM_data8:
 	    {
 	      off_t sec_off;
-	      sec_off = read_from_pointer<64>(&pattr);
+	      sec_off = this->dwinfo_->read_from_pointer<64>(&pattr);
 	      unsigned int shndx =
 		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
 	      attr_value.aux.shndx = shndx;
@@ -744,12 +752,13 @@ Dwarf_die::read_attributes()
 	      break;
 	    }
 	  case elfcpp::DW_FORM_ref_sig8:
-	    attr_value.val.uintval = read_from_pointer<64>(&pattr);
+	    attr_value.val.uintval =
+		this->dwinfo_->read_from_pointer<64>(&pattr);
 	    break;
 	  case elfcpp::DW_FORM_ref8:
 	    {
 	      off_t sec_off;
-	      sec_off = read_from_pointer<64>(&pattr);
+	      sec_off = this->dwinfo_->read_from_pointer<64>(&pattr);
 	      unsigned int shndx =
 		  this->dwinfo_->lookup_reloc(attr_off, &sec_off);
 	      attr_value.aux.shndx = shndx;
@@ -876,14 +885,14 @@ Dwarf_die::skip_attributes()
 	  case elfcpp::DW_FORM_block2:
 	    {
 	      uint16_t block_size;
-	      block_size = read_from_pointer<16>(&pattr);
+	      block_size = this->dwinfo_->read_from_pointer<16>(&pattr);
 	      pattr += block_size;
 	      break;
 	    }
 	  case elfcpp::DW_FORM_block4:
 	    {
 	      uint32_t block_size;
-	      block_size = read_from_pointer<32>(&pattr);
+	      block_size = this->dwinfo_->read_from_pointer<32>(&pattr);
 	      pattr += block_size;
 	      break;
 	    }
@@ -1350,6 +1359,33 @@ Dwarf_info_reader::do_read_string_table(unsigned int string_shndx)
   this->string_buffer_end_ = this->string_buffer_ + buffer_size;
   this->string_shndx_ = string_shndx;
   return true;
+}
+
+// Read a possibly unaligned integer of SIZE.
+template <int valsize>
+inline typename elfcpp::Valtype_base<valsize>::Valtype
+Dwarf_info_reader::read_from_pointer(const unsigned char* source)
+{
+  typename elfcpp::Valtype_base<valsize>::Valtype return_value;
+  if (this->object_->is_big_endian())
+    return_value = elfcpp::Swap_unaligned<valsize, true>::readval(source);
+  else
+    return_value = elfcpp::Swap_unaligned<valsize, false>::readval(source);
+  return return_value;
+}
+
+// Read a possibly unaligned integer of SIZE.  Update SOURCE after read.
+template <int valsize>
+inline typename elfcpp::Valtype_base<valsize>::Valtype
+Dwarf_info_reader::read_from_pointer(const unsigned char** source)
+{
+  typename elfcpp::Valtype_base<valsize>::Valtype return_value;
+  if (this->object_->is_big_endian())
+    return_value = elfcpp::Swap_unaligned<valsize, true>::readval(*source);
+  else
+    return_value = elfcpp::Swap_unaligned<valsize, false>::readval(*source);
+  *source += valsize / 8;
+  return return_value;
 }
 
 // Look for a relocation at offset ATTR_OFF in the dwarf info,
