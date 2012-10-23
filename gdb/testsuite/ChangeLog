@@ -1,3 +1,8 @@
+2012-10-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/callfuncs.exp: PR gdb/12796, gdb/12798 and gdb/12800
+	are now fixed.
+
 2012-10-23  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/info-os.exp: Resume the inferior until it exits.
