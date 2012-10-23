@@ -1,3 +1,9 @@
+2012-10-23  Tom Tromey  <tromey@redhat.com>
+
+	* readelf.c (get_note_type): Handle NT_SIGINFO, NT_FILE.
+	(print_core_note): New function.
+	(process_note): Call it.
+
 2012-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objdump.c (dump_dwarf): Handle bfd_mach_x64_32 and

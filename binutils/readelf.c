@@ -12612,6 +12612,10 @@ get_note_type (unsigned e_type)
 	return _("NT_LWPSINFO (lwpsinfo_t structure)");
       case NT_WIN32PSTATUS:
 	return _("NT_WIN32PSTATUS (win32_pstatus structure)");
+      case NT_SIGINFO:
+	return _("NT_SIGINFO (siginfo_t data)");
+      case NT_FILE:
+	return _("NT_FILE (mapped files)");
       default:
 	break;
       }
@@ -12628,6 +12632,92 @@ get_note_type (unsigned e_type)
 
   snprintf (buff, sizeof (buff), _("Unknown note type: (0x%08x)"), e_type);
   return buff;
+}
+
+static int
+print_core_note (Elf_Internal_Note *pnote)
+{
+  unsigned int addr_size = is_32bit_elf ? 4 : 8;
+  bfd_vma count, page_size;
+  unsigned char *descdata, *filenames, *descend;
+
+  if (pnote->type != NT_FILE)
+    return 1;
+
+#ifndef BFD64
+  if (!is_32bit_elf)
+    {
+      printf (_("    Cannot decode 64-bit note in 32-bit build\n"));
+      /* Still "successful".  */
+      return 1;
+    }
+#endif
+
+  if (pnote->descsz < 2 * addr_size)
+    {
+      printf (_("    Malformed note - too short for header\n"));
+      return 0;
+    }
+
+  descdata = (unsigned char *) pnote->descdata;
+  descend = descdata + pnote->descsz;
+
+  if (descdata[pnote->descsz - 1] != '\0')
+    {
+      printf (_("    Malformed note - does not end with \\0\n"));
+      return 0;
+    }
+
+  count = byte_get (descdata, addr_size);
+  descdata += addr_size;
+
+  page_size = byte_get (descdata, addr_size);
+  descdata += addr_size;
+
+  if (pnote->descsz < 2 * addr_size + count * 3 * addr_size)
+    {
+      printf (_("    Malformed note - too short for supplied file count\n"));
+      return 0;
+    }
+
+  printf (_("    Page size: "));
+  print_vma (page_size, DEC);
+  printf ("\n");
+
+  printf (_("    %*s%*s%*s\n"),
+	  (int) (2 + 2 * addr_size), _("Start"),
+	  (int) (4 + 2 * addr_size), _("End"),
+	  (int) (4 + 2 * addr_size), _("Page Offset"));
+  filenames = descdata + count * 3 * addr_size;
+  while (--count > 0)
+    {
+      bfd_vma start, end, file_ofs;
+
+      if (filenames == descend)
+	{
+	  printf (_("    Malformed note - filenames end too early\n"));
+	  return 0;
+	}
+
+      start = byte_get (descdata, addr_size);
+      descdata += addr_size;
+      end = byte_get (descdata, addr_size);
+      descdata += addr_size;
+      file_ofs = byte_get (descdata, addr_size);
+      descdata += addr_size;
+
+      printf ("    ");
+      print_vma (start, FULL_HEX);
+      printf ("  ");
+      print_vma (end, FULL_HEX);
+      printf ("  ");
+      print_vma (file_ofs, FULL_HEX);
+      printf ("\n        %s\n", filenames);
+
+      filenames += 1 + strlen ((char *) filenames);
+    }
+
+  return 1;
 }
 
 static const char *
@@ -12990,6 +13080,8 @@ process_note (Elf_Internal_Note * pnote)
     return print_gnu_note (pnote);
   else if (const_strneq (pnote->namedata, "stapsdt"))
     return print_stapsdt_note (pnote);
+  else if (const_strneq (pnote->namedata, "CORE"))
+    return print_core_note (pnote);
   else
     return 1;
 }
