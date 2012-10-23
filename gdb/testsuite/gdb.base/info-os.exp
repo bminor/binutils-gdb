@@ -176,4 +176,4 @@ expect_multiline "info os msg" "$msgkey +$msqid +666 .*" "get message queues"
 # The SysV IPC primitives linger on after the creating process is killed
 # unless they are destroyed explicitly, so allow the test program to tidy
 # up after itself.
-send_gdb "continue\n"
+gdb_test "continue" "exited.*"

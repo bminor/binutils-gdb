@@ -1,3 +1,7 @@
+2012-10-23  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/info-os.exp: Resume the inferior until it exits.
+
 2012-10-18  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gdb.base/ctxobj.exp: Skip if skip_shlib_tests returns true.
