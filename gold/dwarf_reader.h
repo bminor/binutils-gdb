@@ -662,12 +662,12 @@ class Dwarf_info_reader
 		    unsigned int reloc_type)
     : is_type_unit_(is_type_unit), object_(object), symtab_(symtab),
       symtab_size_(symtab_size), shndx_(shndx), reloc_shndx_(reloc_shndx),
-      reloc_type_(reloc_type), string_shndx_(0), buffer_(NULL),
-      buffer_end_(NULL), cu_offset_(0), cu_length_(0), offset_size_(0),
-      address_size_(0), cu_version_(0), type_signature_(0), type_offset_(0),
-      abbrev_table_(), reloc_mapper_(NULL), string_buffer_(NULL),
-      string_buffer_end_(NULL), owns_string_buffer_(false),
-      string_output_section_offset_(0)
+      reloc_type_(reloc_type), abbrev_shndx_(0), string_shndx_(0),
+      buffer_(NULL), buffer_end_(NULL), cu_offset_(0), cu_length_(0),
+      offset_size_(0), address_size_(0), cu_version_(0), type_signature_(0),
+      type_offset_(0), abbrev_table_(), reloc_mapper_(NULL),
+      string_buffer_(NULL), string_buffer_end_(NULL),
+      owns_string_buffer_(false), string_output_section_offset_(0)
   { }
 
   virtual
@@ -718,6 +718,13 @@ class Dwarf_info_reader
   unsigned int
   address_size() const
   { return this->address_size_; }
+
+  // Set the section index of the .debug_abbrev section.
+  // We use this if there are no relocations for the .debug_info section.
+  // If not set, the code parse() routine will search for the section by name.
+  void
+  set_abbrev_shndx(unsigned int abbrev_shndx)
+  { this->abbrev_shndx_ = abbrev_shndx; }
 
  protected:
   // Begin parsing the debug info.  This calls visit_compilation_unit()
@@ -811,6 +818,8 @@ class Dwarf_info_reader
   unsigned int reloc_shndx_;
   // Type of the relocation section (SHT_REL or SHT_RELA).
   unsigned int reloc_type_;
+  // Index of the .debug_abbrev section (0 if not known).
+  unsigned int abbrev_shndx_;
   // Index of the .debug_str section.
   unsigned int string_shndx_;
   // The buffer for the debug info.

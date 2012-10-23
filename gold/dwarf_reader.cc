@@ -1195,7 +1195,7 @@ Dwarf_info_reader::do_parse()
   this->reloc_mapper_->initialize(this->reloc_shndx_, this->reloc_type_);
 
   // Loop over compilation units (or type units).
-  unsigned int abbrev_shndx = 0;
+  unsigned int abbrev_shndx = this->abbrev_shndx_;
   off_t abbrev_offset = 0;
   const unsigned char* pinfo = this->buffer_;
   while (pinfo < this->buffer_end_)

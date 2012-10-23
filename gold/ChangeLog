@@ -1,5 +1,14 @@
 2012-10-23  Cary Coutant  <ccoutant@google.com>
 
+	* dwarf_reader.cc (Dwarf_info_reader::do_parse): Use stored
+	abbrev_shndx.
+	* dwarf_reader.h (Dwarf_info_reader::Dwarf_info_reader): Initialize
+	abbrev_shndx_.
+	(Dwarf_info_reader::set_abbrev_shndx): New method.
+	(Dwarf_info_reader::abbrev_shndx_): New data member.
+
+2012-10-23  Cary Coutant  <ccoutant@google.com>
+
 	* dwarf_reader.cc (make_elf_reloc_mapper): Check size and endianness
 	from object, not parameters.
 	(Dwarf_info_reader::parse): Likewise.
