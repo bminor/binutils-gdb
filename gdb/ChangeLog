@@ -1,3 +1,9 @@
+2012-10-23  Yao Qi  <yao@codesourcery.com>
+
+	* event-top.c (sigint_token, sighup_token): Replace 'void *'
+	with 'static struct async_signal_handler *'.
+	(sighup_token, sigquit_token, sigstp_token): Likewise.
+
 2012-10-22  Ali Anwar  <ali_anwar@codesourcery.com>
 
 	* gdbarch.sh (function_list): Use 'pstring' when printing

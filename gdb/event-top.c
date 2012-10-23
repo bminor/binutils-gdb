@@ -123,16 +123,16 @@ int input_fd;
    handlers mark these functions as ready to be executed and the event
    loop, in a later iteration, calls them.  See the function
    invoke_async_signal_handler.  */
-void *sigint_token;
+static struct async_signal_handler *sigint_token;
 #ifdef SIGHUP
-void *sighup_token;
+static struct async_signal_handler *sighup_token;
 #endif
 #ifdef SIGQUIT
-void *sigquit_token;
+static struct async_signal_handler *sigquit_token;
 #endif
-void *sigfpe_token;
+static struct async_signal_handler *sigfpe_token;
 #ifdef STOP_SIGNAL
-void *sigtstp_token;
+static struct async_signal_handler *sigtstp_token;
 #endif
 
 /* Structure to save a partially entered command.  This is used when
