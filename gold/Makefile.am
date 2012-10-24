@@ -34,6 +34,8 @@ AM_YFLAGS = -d
 am__skiplex =
 am__skipyacc =
 
+bin_PROGRAMS = dwp
+
 noinst_PROGRAMS = ld-new incremental-dump
 noinst_LIBRARIES = libgold.a
 
@@ -171,6 +173,12 @@ incremental_dump_DEPENDENCIES = $(TARGETOBJS) libgold.a $(LIBIBERTY) \
 	$(LIBINTL_DEP)
 incremental_dump_LDADD = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL) \
 	 $(THREADSLIB) $(LIBDL)
+
+dwp_SOURCES = dwp.cc
+dwp_DEPENDENCIES = libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
+dwp_LDADD = libgold.a $(LIBIBERTY) $(GOLD_LDADD) $(LIBINTL) $(THREADSLIB) \
+	$(LIBDL)
+dwp_LDFLAGS = $(GOLD_LDFLAGS)
 
 # Use an explicit dependency for the bison generated header file.
 expression.$(OBJEXT): yyscript.h

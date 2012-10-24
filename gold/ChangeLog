@@ -1,5 +1,14 @@
 2012-10-23  Cary Coutant  <ccoutant@google.com>
 
+	* dwp.h: New header file.
+	* dwp.cc: New source file.
+	* gold.h: Move shared declarations to system.h.
+	* system.h: New header file.
+	* Makefile.am: Add dwp.
+	* Makefile.in: Regenerate.
+
+2012-10-23  Cary Coutant  <ccoutant@google.com>
+
 	* dwarf_reader.cc (Dwarf_ranges_table::read_range_list): Call
 	Dwarf_info_reader::read_from_pointer.
 	(Dwarf_pubnames_table::read_header): Likewise.
