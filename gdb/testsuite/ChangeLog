@@ -1,3 +1,7 @@
+2012-10-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/unc_arr_ptr_in_var_rec: New testcase.
+
 2012-10-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/callfuncs.exp: PR gdb/12783 is now fixed.

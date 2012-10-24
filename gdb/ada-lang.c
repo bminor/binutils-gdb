@@ -7504,25 +7504,35 @@ ada_template_to_fixed_record_type_1 (struct type *type,
         }
       else
         {
-          struct type *field_type = TYPE_FIELD_TYPE (type, f);
+	  /* Note: If this field's type is a typedef, it is important
+	     to preserve the typedef layer.
 
-	  /* If our field is a typedef type (most likely a typedef of
-	     a fat pointer, encoding an array access), then we need to
-	     look at its target type to determine its characteristics.
-	     In particular, we would miscompute the field size if we took
-	     the size of the typedef (zero), instead of the size of
-	     the target type.  */
-	  if (TYPE_CODE (field_type) == TYPE_CODE_TYPEDEF)
-	    field_type = ada_typedef_target_type (field_type);
-
-          TYPE_FIELD_TYPE (rtype, f) = field_type;
+	     Otherwise, we might be transforming a typedef to a fat
+	     pointer (encoding a pointer to an unconstrained array),
+	     into a basic fat pointer (encoding an unconstrained
+	     array).  As both types are implemented using the same
+	     structure, the typedef is the only clue which allows us
+	     to distinguish between the two options.  Stripping it
+	     would prevent us from printing this field appropriately.  */
+          TYPE_FIELD_TYPE (rtype, f) = TYPE_FIELD_TYPE (type, f);
           TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
           if (TYPE_FIELD_BITSIZE (type, f) > 0)
             fld_bit_len =
               TYPE_FIELD_BITSIZE (rtype, f) = TYPE_FIELD_BITSIZE (type, f);
           else
-            fld_bit_len =
-              TYPE_LENGTH (ada_check_typedef (field_type)) * TARGET_CHAR_BIT;
+	    {
+	      struct type *field_type = TYPE_FIELD_TYPE (type, f);
+
+	      /* We need to be careful of typedefs when computing
+		 the length of our field.  If this is a typedef,
+		 get the length of the target type, not the length
+		 of the typedef.  */
+	      if (TYPE_CODE (field_type) == TYPE_CODE_TYPEDEF)
+		field_type = ada_typedef_target_type (field_type);
+
+              fld_bit_len =
+                TYPE_LENGTH (ada_check_typedef (field_type)) * TARGET_CHAR_BIT;
+	    }
         }
       if (off + fld_bit_len > bit_len)
         bit_len = off + fld_bit_len;

@@ -1,3 +1,9 @@
+2012-10-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_template_to_fixed_record_type_1): Do not
+	strip typedef layer when computing the fixed type's field type,
+	only when computing its size.
+
 2012-10-24  Mark Kettenis  <kettenis@gnu.org>
 
 	PR gdb/12783
