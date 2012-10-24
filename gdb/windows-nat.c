@@ -2036,6 +2036,7 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
   char shell[__PMAX]; /* Path to shell */
   char *toexec;
   char *args;
+  size_t args_len;
   HANDLE tty;
   char *w32env;
   char *temp;
@@ -2188,10 +2189,13 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
     }
 #else
   toexec = exec_file;
-  args = alloca (strlen (toexec) + strlen (allargs) + 2);
-  strcpy (args, toexec);
-  strcat (args, " ");
-  strcat (args, allargs);
+  /* Build the command line, a space-separated list of tokens where
+     the first token is the name of the module to be executed.
+     To avoid ambiguities introduced by spaces in the module name,
+     we quote it.  */
+  args_len = strlen (toexec) + 2 /* quotes */ + strlen (allargs) + 2;
+  args = alloca (args_len);
+  xsnprintf (args, args_len, "\"%s\" %s", toexec, allargs);
 
   flags |= DEBUG_ONLY_THIS_PROCESS;
 
