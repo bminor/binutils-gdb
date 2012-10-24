@@ -1,5 +1,11 @@
 2012-10-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (is_known_support_routine): Use lbasename when
+	matching the symtab's filename against
+	known_runtime_file_name_patterns.
+
+2012-10-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_same_array_size_p): New function.
 	(ada_promote_array_of_integrals): New function.
 	(coerce_for_assign): Add handling of arrays where the elements
