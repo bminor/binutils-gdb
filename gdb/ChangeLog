@@ -1,5 +1,13 @@
 2012-10-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_same_array_size_p): New function.
+	(ada_promote_array_of_integrals): New function.
+	(coerce_for_assign): Add handling of arrays where the elements
+	are integrals of a smaller size than the size of the target
+	array element type.
+
+2012-10-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* doublest.c (convert_doublest_to_floatformat): Fix comparison
 	against maximum exponent value.
 
