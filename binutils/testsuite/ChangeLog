@@ -1,3 +1,7 @@
+2012-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/ar.exp (bfdtest1): Remove findfile.
+
 2012-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/dw2-1.W: Updated.

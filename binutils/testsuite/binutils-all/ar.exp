@@ -27,7 +27,7 @@ if ![is_remote host] {
     }
 }
 
-set bfdtest1 [findfile $base_dir/bfdtest1]
+set bfdtest1 $base_dir/bfdtest1
 
 # send_user "Version [binutil_version $AR]"
 
