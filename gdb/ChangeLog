@@ -1,5 +1,10 @@
 2012-10-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* doublest.c (convert_doublest_to_floatformat): Fix comparison
+	against maximum exponent value.
+
+2012-10-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h (ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS): Add entry for
 	"unwind-seh.c".
 

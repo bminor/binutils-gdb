@@ -483,7 +483,7 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
       goto finalize_byteorder;
     }
 
-  if (exponent + fmt->exp_bias >= (1 << fmt->exp_len) - 1)
+  if (exponent + fmt->exp_bias >= (1 << fmt->exp_len))
     {
       /* The value is too large to fit into the destination.
 	 Treat as infinity.  */

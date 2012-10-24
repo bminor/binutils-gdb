@@ -1,5 +1,9 @@
 2012-10-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.base/ldbl_e308.c, gdb.base/ldbl_e308.exp: New files.
+
+2012-10-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/unc_arr_ptr_in_var_rec: New testcase.
 
 2012-10-24  Mark Kettenis  <kettenis@gnu.org>
