@@ -1,5 +1,21 @@
 2012-10-23  Cary Coutant  <ccoutant@google.com>
 
+	* testsuite/Makefile.am (TEST_OBJCOPY): New macro.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/dwp_test.h: New source file.
+	* testsuite/dwp_test_1.cc: New source file.
+	* testsuite/dwp_test_1.s: New source file.
+	* testsuite/dwp_test_1.sh: New source file.
+	* testsuite/dwp_test_1b.cc: New source file.
+	* testsuite/dwp_test_1b.s: New source file.
+	* testsuite/dwp_test_2.cc: New source file.
+	* testsuite/dwp_test_2.s: New source file.
+	* testsuite/dwp_test_2.sh: New source file.
+	* testsuite/dwp_test_main.cc: New source file.
+	* testsuite/dwp_test_main.s: New source file.
+
+2012-10-23  Cary Coutant  <ccoutant@google.com>
+
 	* dwp.h: New header file.
 	* dwp.cc: New source file.
 	* gold.h: Move shared declarations to system.h.

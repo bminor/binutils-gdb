@@ -653,6 +653,10 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb_6m \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm_5t
+@DEFAULT_TARGET_X86_64_TRUE@am__append_76 = dwp_test_1.sh \
+@DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.sh
+@DEFAULT_TARGET_X86_64_TRUE@am__append_77 = dwp_test_1.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.stdout
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -2005,6 +2009,7 @@ AM_CPPFLAGS = \
 
 TEST_READELF = $(top_builddir)/../binutils/readelf
 TEST_OBJDUMP = $(top_builddir)/../binutils/objdump
+TEST_OBJCOPY = $(top_builddir)/../binutils/objcopy
 TEST_CXXFILT = $(top_builddir)/../binutils/cxxfilt
 TEST_STRIP = $(top_builddir)/../binutils/strip-new
 TEST_AR = $(top_builddir)/../binutils/ar
@@ -2031,11 +2036,12 @@ MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_4) \
 check_SCRIPTS = $(am__append_2) $(am__append_34) $(am__append_38) \
 	$(am__append_54) $(am__append_57) $(am__append_60) \
 	$(am__append_65) $(am__append_67) $(am__append_70) \
-	$(am__append_73)
+	$(am__append_73) $(am__append_76)
 check_DATA = $(am__append_3) $(am__append_27) $(am__append_29) \
 	$(am__append_35) $(am__append_39) $(am__append_55) \
 	$(am__append_58) $(am__append_61) $(am__append_66) \
-	$(am__append_68) $(am__append_71) $(am__append_74)
+	$(am__append_68) $(am__append_71) $(am__append_74) \
+	$(am__append_77)
 BUILT_SOURCES = $(am__append_25)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
@@ -3792,6 +3798,10 @@ arm_farcall_thumb_thumb.sh.log: arm_farcall_thumb_thumb.sh
 	@p='arm_farcall_thumb_thumb.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 arm_farcall_thumb_arm.sh.log: arm_farcall_thumb_arm.sh
 	@p='arm_farcall_thumb_arm.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+dwp_test_1.sh.log: dwp_test_1.sh
+	@p='dwp_test_1.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+dwp_test_2.sh.log: dwp_test_2.sh
+	@p='dwp_test_2.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 object_unittest.log: object_unittest$(EXEEXT)
 	@p='object_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 binary_unittest.log: binary_unittest$(EXEEXT)
@@ -5647,6 +5657,41 @@ uninstall-am:
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_farcall_thumb_arm_5t.o: arm_farcall_thumb_arm.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -march=armv5t -o $@ $<
+
+# Tests for the dwp tool.
+# We don't want to rely yet on GCC support for -gsplit-dwarf,
+# so we use (for now) test cases in x86 assembly language,
+# compiled from the dwp_test_*.cc sources.
+
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_main.o: dwp_test_main.s
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_1.o: dwp_test_1.s
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_1b.o: dwp_test_1b.s
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_2.o: dwp_test_2.s
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_main.dwo: dwp_test_main.o
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_OBJCOPY) --extract-dwo $< $@
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_1.dwo: dwp_test_1.o
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_OBJCOPY) --extract-dwo $< $@
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_1b.dwo: dwp_test_1b.o
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_OBJCOPY) --extract-dwo $< $@
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_2.dwo: dwp_test_2.o
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_OBJCOPY) --extract-dwo $< $@
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_1.stdout: dwp_test_1.dwp
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_READELF) -wi $< > $@
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_1.dwp: ../dwp dwp_test_main.dwo dwp_test_1.dwo dwp_test_1b.dwo dwp_test_2.dwo
+@DEFAULT_TARGET_X86_64_TRUE@	../dwp -o $@ dwp_test_main.dwo dwp_test_1.dwo dwp_test_1b.dwo dwp_test_2.dwo
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_2.stdout: dwp_test_2.dwp
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_READELF) -wi $< > $@
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_2.dwp: ../dwp dwp_test_2a.dwp dwp_test_2b.dwp
+@DEFAULT_TARGET_X86_64_TRUE@	../dwp -o $@ dwp_test_2a.dwp dwp_test_2b.dwp
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_2a.dwp: ../dwp dwp_test_main.dwo dwp_test_1.dwo
+@DEFAULT_TARGET_X86_64_TRUE@	../dwp -o $@ dwp_test_main.dwo dwp_test_1.dwo
+@DEFAULT_TARGET_X86_64_TRUE@dwp_test_2b.dwp: ../dwp dwp_test_1b.dwo dwp_test_2.dwo
+@DEFAULT_TARGET_X86_64_TRUE@	../dwp -o $@ dwp_test_1b.dwo dwp_test_2.dwo
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

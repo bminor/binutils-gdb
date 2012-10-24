@@ -21,6 +21,7 @@ AM_CPPFLAGS = \
 
 TEST_READELF = $(top_builddir)/../binutils/readelf
 TEST_OBJDUMP = $(top_builddir)/../binutils/objdump
+TEST_OBJCOPY = $(top_builddir)/../binutils/objcopy
 TEST_CXXFILT = $(top_builddir)/../binutils/cxxfilt
 TEST_STRIP = $(top_builddir)/../binutils/strip-new
 TEST_AR = $(top_builddir)/../binutils/ar
@@ -2730,3 +2731,47 @@ endif DEFAULT_TARGET_ARM
 
 endif NATIVE_OR_CROSS_LINKER
 
+# Tests for the dwp tool.
+# We don't want to rely yet on GCC support for -gsplit-dwarf,
+# so we use (for now) test cases in x86 assembly language,
+# compiled from the dwp_test_*.cc sources.
+
+if DEFAULT_TARGET_X86_64
+
+dwp_test_main.o: dwp_test_main.s
+	$(TEST_AS) -o $@ $<
+dwp_test_1.o: dwp_test_1.s
+	$(TEST_AS) -o $@ $<
+dwp_test_1b.o: dwp_test_1b.s
+	$(TEST_AS) -o $@ $<
+dwp_test_2.o: dwp_test_2.s
+	$(TEST_AS) -o $@ $<
+
+dwp_test_main.dwo: dwp_test_main.o
+	$(TEST_OBJCOPY) --extract-dwo $< $@
+dwp_test_1.dwo: dwp_test_1.o
+	$(TEST_OBJCOPY) --extract-dwo $< $@
+dwp_test_1b.dwo: dwp_test_1b.o
+	$(TEST_OBJCOPY) --extract-dwo $< $@
+dwp_test_2.dwo: dwp_test_2.o
+	$(TEST_OBJCOPY) --extract-dwo $< $@
+
+check_SCRIPTS += dwp_test_1.sh
+check_DATA += dwp_test_1.stdout
+dwp_test_1.stdout: dwp_test_1.dwp
+	$(TEST_READELF) -wi $< > $@
+dwp_test_1.dwp: ../dwp dwp_test_main.dwo dwp_test_1.dwo dwp_test_1b.dwo dwp_test_2.dwo
+	../dwp -o $@ dwp_test_main.dwo dwp_test_1.dwo dwp_test_1b.dwo dwp_test_2.dwo
+
+check_SCRIPTS += dwp_test_2.sh
+check_DATA += dwp_test_2.stdout
+dwp_test_2.stdout: dwp_test_2.dwp
+	$(TEST_READELF) -wi $< > $@
+dwp_test_2.dwp: ../dwp dwp_test_2a.dwp dwp_test_2b.dwp
+	../dwp -o $@ dwp_test_2a.dwp dwp_test_2b.dwp
+dwp_test_2a.dwp: ../dwp dwp_test_main.dwo dwp_test_1.dwo
+	../dwp -o $@ dwp_test_main.dwo dwp_test_1.dwo
+dwp_test_2b.dwp: ../dwp dwp_test_1b.dwo dwp_test_2.dwo
+	../dwp -o $@ dwp_test_1b.dwo dwp_test_2.dwo
+
+endif DEFAULT_TARGET_X86_64
