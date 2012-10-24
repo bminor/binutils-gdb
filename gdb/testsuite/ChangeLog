@@ -1,3 +1,8 @@
+2012-10-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls): Fix
+	setup_kfail_for_target for -m32 mode.
+
 2012-10-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/callfuncs.exp: PR gdb/12796, gdb/12798 and gdb/12800
