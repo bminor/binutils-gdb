@@ -1,3 +1,9 @@
+2012-10-25  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/empty-aligned.d: Revert last change.  Allow more
+	than one header, just not two PT_LOAD.
+	* ld-elf/stack.s: Use .long 0 rather than nops.
+
 2012-10-23  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-elf/binutils.exp: Add -z stack-size=0.

@@ -3,8 +3,4 @@
 	.globl _start
 start:
 _start:
-	nop
-	nop
-	nop
-	nop
-	
+	.long 0
