@@ -292,11 +292,20 @@ bfd_boolean
 bfd_is_section_compressed (bfd *abfd, sec_ptr sec)
 {
   bfd_byte compressed_buffer [12];
+  unsigned int saved = sec->compress_status;
+  bfd_boolean compressed;
+
+  /* Don't decompress the section.  */
+  sec->compress_status = COMPRESS_SECTION_NONE;
 
   /* Read the zlib header.  In this case, it should be "ZLIB" followed
      by the uncompressed section size, 8 bytes in big-endian order.  */
-  return (bfd_get_section_contents (abfd, sec, compressed_buffer, 0, 12)
-	  && CONST_STRNEQ ((char*) compressed_buffer, "ZLIB"));
+  compressed = (bfd_get_section_contents (abfd, sec, compressed_buffer, 0, 12)
+		&& CONST_STRNEQ ((char*) compressed_buffer, "ZLIB"));
+
+  /* Restore compress_status.  */
+  sec->compress_status = saved;
+  return compressed;
 }
 
 /*
