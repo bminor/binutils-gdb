@@ -1,3 +1,8 @@
+2012-10-24  Tristan Gingold  <gingold@adacore.com>
+
+	* ravenscar-sparc-thread.c (ravenscar_sparc_fetch_registers):
+	Add comments.
+
 2012-10-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* ravenscar-thread.c (ravenscar_wait): Only update the list

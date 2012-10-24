@@ -112,12 +112,16 @@ ravenscar_sparc_fetch_registers (struct regcache *regcache, int regnum)
   CORE_ADDR thread_descriptor_address;
   ULONGEST stack_address;
 
+  /* The tid is the thread_id field, which is a pointer to the thread.  */
   thread_descriptor_address = (CORE_ADDR) ptid_get_tid (inferior_ptid);
+
+  /* Read the saved SP in the context buffer.  */
   current_address = thread_descriptor_address
     + sparc_register_offsets [sp_regnum];
   supply_register_at_address (regcache, sp_regnum, current_address);
   regcache_cooked_read_unsigned (regcache, sp_regnum, &stack_address);
 
+  /* Read registers.  */
   for (current_regnum = 0; current_regnum < num_regs; current_regnum ++)
     {
       if (register_in_thread_descriptor_p (current_regnum))
