@@ -1,3 +1,21 @@
+2012-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.h (command_line): Remove
+	disable_target_specific_optimizations.
+	(RELAXATION_DISABLED_BY_DEFAULT): Removed.
+	(RELAXATION_DISABLED_BY_USER): Likewise.
+	(RELAXATION_ENABLED): Likewise.
+	(DISABLE_RELAXATION): Likewise.
+	(ENABLE_RELAXATION): Likewise.
+
+	* ldmain.c (main): Updated.
+
+	* ldmain.h (RELAXATION_DISABLED_BY_DEFAULT): New macro.
+	(RELAXATION_DISABLED_BY_USER): Likewise.
+	(RELAXATION_ENABLED): Likewise.
+	(DISABLE_RELAXATION): Likewise.
+	(ENABLE_RELAXATION): Likewise.
+
 2012-10-23  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld.texinfo (stack-size): New option.

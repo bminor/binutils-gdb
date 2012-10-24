@@ -260,11 +260,11 @@ main (int argc, char **argv)
   config.make_executable = TRUE;
   config.magic_demand_paged = TRUE;
   config.text_read_only = TRUE;
+  link_info.disable_target_specific_optimizations = -1;
 
   command_line.warn_mismatch = TRUE;
   command_line.warn_search_mismatch = TRUE;
   command_line.check_section_addresses = -1;
-  command_line.disable_target_specific_optimizations = -1;
 
   /* We initialize DEMANGLING based on the environment variable
      COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the
@@ -954,7 +954,7 @@ multiple_definition (struct bfd_link_info *info,
   if (RELAXATION_ENABLED)
     {
       einfo (_("%P: Disabling relaxation: it will not work with multiple definitions\n"));
-      command_line.disable_target_specific_optimizations = -1;
+      link_info.disable_target_specific_optimizations = -1;
     }
 
   return TRUE;

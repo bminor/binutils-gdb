@@ -39,6 +39,17 @@ extern const char *output_filename;
 extern struct bfd_link_info link_info;
 extern int overflow_cutoff_limit;
 
+#define RELAXATION_DISABLED_BY_DEFAULT	\
+  (link_info.disable_target_specific_optimizations < 0)
+#define RELAXATION_DISABLED_BY_USER	\
+  (link_info.disable_target_specific_optimizations > 0)
+#define RELAXATION_ENABLED		\
+  (link_info.disable_target_specific_optimizations == 0)
+#define DISABLE_RELAXATION		\
+  do { link_info.disable_target_specific_optimizations = 1; } while (0)
+#define ENABLE_RELAXATION		\
+  do { link_info.disable_target_specific_optimizations = 0; } while (0)
+
 extern void add_ysym (const char *);
 extern void add_wrap (const char *);
 extern void add_ignoresym (struct bfd_link_info *, const char *);
