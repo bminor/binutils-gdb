@@ -10756,6 +10756,9 @@ ckprefix (void)
 	    {
 	      prefixes |= PREFIX_FWAIT;
 	      codep++;
+	      /* This ensures that the previous REX prefixes are noticed
+		 as unused prefixes, as in the return case below.  */
+	      rex_used = rex;
 	      return 1;
 	    }
 	  prefixes = PREFIX_FWAIT;
@@ -11481,7 +11484,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	   i < (int) ARRAY_SIZE (all_prefixes) && all_prefixes[i];
 	   i++)
 	(*info->fprintf_func) (info->stream, "%s%s",
-                               i == 0 ? "" : " ",
+			       i == 0 ? "" : " ",
 			       prefix_name (all_prefixes[i], sizeflag));
       return i;
     }
@@ -11576,7 +11579,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     {
       dp = get_valid_dis386 (dp, info);
       if (dp != NULL && putop (dp->name, sizeflag) == 0)
-        {
+	{
 	  get_sib (info);
 	  for (i = 0; i < MAX_OPERANDS; ++i)
 	    {
@@ -11659,13 +11662,13 @@ print_insn (bfd_vma pc, disassemble_info *info)
       bfd_vma riprel;
 
       for (i = 0; i < MAX_OPERANDS; ++i)
-        op_txt[i] = op_out[i];
+	op_txt[i] = op_out[i];
 
       for (i = 0; i < (MAX_OPERANDS >> 1); ++i)
 	{
-          op_ad = op_index[i];
-          op_index[i] = op_index[MAX_OPERANDS - 1 - i];
-          op_index[MAX_OPERANDS - 1 - i] = op_ad;
+	  op_ad = op_index[i];
+	  op_index[i] = op_index[MAX_OPERANDS - 1 - i];
+	  op_index[MAX_OPERANDS - 1 - i] = op_ad;
 	  riprel = op_riprel[i];
 	  op_riprel[i] = op_riprel [MAX_OPERANDS - 1 - i];
 	  op_riprel[MAX_OPERANDS - 1 - i] = riprel;
@@ -11674,7 +11677,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
   else
     {
       for (i = 0; i < MAX_OPERANDS; ++i)
-        op_txt[MAX_OPERANDS - 1 - i] = op_out[i];
+	op_txt[MAX_OPERANDS - 1 - i] = op_out[i];
     }
 
   needcomma = 0;
@@ -12345,7 +12348,7 @@ case_L:
 	  if (intel_syntax)
 	    break;
 	  if (address_mode == mode_64bit
-              && ((sizeflag & DFLAG) || (rex & REX_W)))
+	      && ((sizeflag & DFLAG) || (rex & REX_W)))
 	    {
 	      if (modrm.mod != 3 || (sizeflag & SUFFIX_ALWAYS))
 		*obufp++ = 'q';
@@ -12418,7 +12421,7 @@ case_Q:
 	      if (intel_syntax)
 		break;
 	      if (address_mode == mode_64bit
-                  && ((sizeflag & DFLAG) || (rex & REX_W)))
+		  && ((sizeflag & DFLAG) || (rex & REX_W)))
 		{
 		  if (sizeflag & SUFFIX_ALWAYS)
 		    *obufp++ = 'q';
@@ -13534,7 +13537,7 @@ OP_REG (int code, int sizeflag)
     case rAX_reg: case rCX_reg: case rDX_reg: case rBX_reg:
     case rSP_reg: case rBP_reg: case rSI_reg: case rDI_reg:
       if (address_mode == mode_64bit
-          && ((sizeflag & DFLAG) || (rex & REX_W)))
+	  && ((sizeflag & DFLAG) || (rex & REX_W)))
 	{
 	  s = names64[code - rAX_reg + add];
 	  break;
@@ -13665,7 +13668,7 @@ OP_I (int bytemode, int sizeflag)
       break;
     case const_1_mode:
       if (intel_syntax)
-        oappend ("1");
+	oappend ("1");
       return;
     default:
       oappend (INTERNAL_DISASSEMBLER_ERROR);
@@ -13751,8 +13754,8 @@ OP_sI (int bytemode, int sizeflag)
 	  if (address_mode != mode_64bit
 	      || !((sizeflag & DFLAG) || (rex & REX_W)))
 	    {
-              /* The operand-size prefix is overridden by a REX prefix.  */
-              if ((sizeflag & DFLAG) || (rex & REX_W))
+	      /* The operand-size prefix is overridden by a REX prefix.  */
+	      if ((sizeflag & DFLAG) || (rex & REX_W))
 		op &= 0xffffffff;
 	      else
 		op &= 0xffff;
@@ -14118,7 +14121,7 @@ OP_EM (int bytemode, int sizeflag)
 	{
 	  bytemode = (prefixes & PREFIX_DATA) ? x_mode : q_mode;
 	  used_prefixes |= (prefixes & PREFIX_DATA);
- 	}
+	}
       OP_E (bytemode, sizeflag);
       return;
     }
@@ -14157,7 +14160,7 @@ OP_EMC (int bytemode, int sizeflag)
 	{
 	  bytemode = (prefixes & PREFIX_DATA) ? x_mode : q_mode;
 	  used_prefixes |= (prefixes & PREFIX_DATA);
- 	}
+	}
       OP_E (bytemode, sizeflag);
       return;
     }
@@ -14776,55 +14779,55 @@ get_vex_imm8 (int sizeflag, int opnum)
     {
       /* There are SIB/displacement bytes.  */
       if ((sizeflag & AFLAG) || address_mode == mode_64bit)
-        {
+	{
 	  /* 32/64 bit address mode */
-          int base = modrm.rm;
+	  int base = modrm.rm;
 
 	  /* Check SIB byte.  */
-          if (base == 4)
-            {
-              FETCH_DATA (the_info, codep + 1);
-              base = *codep & 7;
-              /* When decoding the third source, don't increase
-                 bytes_before_imm as this has already been incremented
-                 by one in OP_E_memory while decoding the second
-                 source operand.  */
-              if (opnum == 0)
-                bytes_before_imm++;
-            }
+	  if (base == 4)
+	    {
+	      FETCH_DATA (the_info, codep + 1);
+	      base = *codep & 7;
+	      /* When decoding the third source, don't increase
+		 bytes_before_imm as this has already been incremented
+		 by one in OP_E_memory while decoding the second
+		 source operand.  */
+	      if (opnum == 0)
+		bytes_before_imm++;
+	    }
 
-          /* Don't increase bytes_before_imm when decoding the third source,
-             it has already been incremented by OP_E_memory while decoding
-             the second source operand.  */
-          if (opnum == 0)
-            {
-              switch (modrm.mod)
-                {
-                  case 0:
-                    /* When modrm.rm == 5 or modrm.rm == 4 and base in
-                       SIB == 5, there is a 4 byte displacement.  */
-                    if (base != 5)
-                      /* No displacement. */
-                      break;
-                  case 2:
-                    /* 4 byte displacement.  */
-                    bytes_before_imm += 4;
-                    break;
-                  case 1:
-                    /* 1 byte displacement.  */
-                    bytes_before_imm++;
-                    break;
-                }
-            }
-        }
+	  /* Don't increase bytes_before_imm when decoding the third source,
+	     it has already been incremented by OP_E_memory while decoding
+	     the second source operand.  */
+	  if (opnum == 0)
+	    {
+	      switch (modrm.mod)
+		{
+		  case 0:
+		    /* When modrm.rm == 5 or modrm.rm == 4 and base in
+		       SIB == 5, there is a 4 byte displacement.  */
+		    if (base != 5)
+		      /* No displacement. */
+		      break;
+		  case 2:
+		    /* 4 byte displacement.  */
+		    bytes_before_imm += 4;
+		    break;
+		  case 1:
+		    /* 1 byte displacement.  */
+		    bytes_before_imm++;
+		    break;
+		}
+	    }
+	}
       else
 	{
 	  /* 16 bit address mode */
-          /* Don't increase bytes_before_imm when decoding the third source,
-             it has already been incremented by OP_E_memory while decoding
-             the second source operand.  */
-          if (opnum == 0)
-            {
+	  /* Don't increase bytes_before_imm when decoding the third source,
+	     it has already been incremented by OP_E_memory while decoding
+	     the second source operand.  */
+	  if (opnum == 0)
+	    {
 	      switch (modrm.mod)
 		{
 		case 0:

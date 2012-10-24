@@ -1,3 +1,8 @@
+2012-10-24  Roland McGrath  <mcgrathr@google.com>
+
+	* i386-dis.c (ckprefix): When bailing out for fwait with prefixes,
+	set rex_used to rex.
+
 2012-10-22  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes) <vcfpsxws>: Fix opcode spelling.
