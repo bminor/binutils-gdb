@@ -1,3 +1,30 @@
+2012-10-23  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.c (do_debug_addr, do_debug_cu_index): New global flags.
+	(load_debug_info): Fix typo.
+	(cu_tu_indexes_read, shndx_pool, shndx_pool_size, shndx_pool_used):
+	New global variables.
+	(prealloc_cu_tu_list, add_shndx_to_cu_tu_entry, end_cu_tu_entry)
+	(process_cu_tu_index, load_cu_tu_indexes, find_cu_tu_set)
+	(display_cu_index): New functions.
+	(dwarf_select_sections_by_names): Add "debug_addr", "cu_index".
+	Sort entries alphabetically.
+	(dwarf_select_sections_all): Set do_debug_addr, do_debug_cu_index.
+	(debug_displays): Add .debug_cu_index, .debug_tu_index.
+	Clean up formatting.
+	* dwarf.h (dwarf_section_display_enum): Add dwp_cu_index,
+	dwp_tu_index.
+	(do_debug_addr, do_debug_cu_index): New global flags.
+	(find_cu_tu_set): New function declaration.
+	* objdump.c (usage): Add --dwarf=addr, --dwarf=cu_index.
+	* readelf.c (find_section_in_set): New function.
+	(usage): Add --debug-dump=addr, --debug_dump=cu_index.
+	(process_section_headers): Check do_debug_addr and do_debug_cu_index.
+	(section_subset): New global variable.
+	(load_debug_section): Restrict search to section subset.
+	(display_debug_section): Add section index as paramter.  Select subset
+	of sections when dumping a .dwp file.  Update caller.
+
 2012-10-23  Tom Tromey  <tromey@redhat.com>
 
 	* readelf.c (get_note_type): Handle NT_SIGINFO, NT_FILE.

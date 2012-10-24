@@ -505,6 +505,24 @@ find_section_by_address (bfd_vma addr)
   return NULL;
 }
 
+/* Return a pointer to section NAME, or NULL if no such section exists,
+   restricted to the list of sections given in SET.  */
+
+static Elf_Internal_Shdr *
+find_section_in_set (const char * name, unsigned int * set)
+{
+  unsigned int i;
+
+  if (set != NULL)
+    {
+      while ((i = *set++) > 0)
+	if (streq (SECTION_NAME (section_headers + i), name))
+	  return section_headers + i;
+    }
+
+  return find_section (name);
+}
+
 /* Read an unsigned LEB128 encoded value from p.  Set *PLEN to the number of
    bytes read.  */
 
@@ -3244,7 +3262,8 @@ usage (FILE * stream)
   -w[lLiaprmfFsoRt] or\n\
   --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
                =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
-               =gdb_index,=trace_info,=trace_abbrev,=trace_aranges]\n\
+               =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n\
+               =addr,=cu_index]\n\
                          Display the contents of DWARF2 debug sections\n"));
   fprintf (stream, _("\
   --dwarf-depth=N        Do not display DIEs at depth N or greater\n\
@@ -4671,7 +4690,8 @@ process_section_headers (FILE * file)
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
 		|| do_debug_lines || do_debug_pubnames || do_debug_pubtypes
 		|| do_debug_aranges || do_debug_frames || do_debug_macinfo
-		|| do_debug_str || do_debug_loc || do_debug_ranges)
+		|| do_debug_str || do_debug_loc || do_debug_ranges
+		|| do_debug_addr || do_debug_cu_index)
 	       && (const_strneq (name, ".debug_")
                    || const_strneq (name, ".zdebug_")))
 	{
@@ -4694,6 +4714,9 @@ process_section_headers (FILE * file)
 	      || (do_debug_macinfo  && const_strneq (name, "macro"))
 	      || (do_debug_str      && const_strneq (name, "str"))
 	      || (do_debug_loc      && const_strneq (name, "loc"))
+	      || (do_debug_addr     && const_strneq (name, "addr"))
+	      || (do_debug_cu_index && const_strneq (name, "cu_index"))
+	      || (do_debug_cu_index && const_strneq (name, "tu_index"))
 	      )
 	    request_dump_bynumber (i, DEBUG_DUMP);
 	}
@@ -10673,6 +10696,10 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   return 1;
 }
 
+/* If this is not NULL, load_debug_section will only look for sections
+   within the list of sections given here.  */
+unsigned int *section_subset = NULL;
+
 int
 load_debug_section (enum dwarf_section_display_enum debug, void * file)
 {
@@ -10680,17 +10707,23 @@ load_debug_section (enum dwarf_section_display_enum debug, void * file)
   Elf_Internal_Shdr * sec;
 
   /* Locate the debug section.  */
-  sec = find_section (section->uncompressed_name);
+  sec = find_section_in_set (section->uncompressed_name, section_subset);
   if (sec != NULL)
     section->name = section->uncompressed_name;
   else
     {
-      sec = find_section (section->compressed_name);
+      sec = find_section_in_set (section->compressed_name, section_subset);
       if (sec != NULL)
 	section->name = section->compressed_name;
     }
   if (sec == NULL)
     return 0;
+
+  /* If we're loading from a subset of sections, and we've loaded
+     a section matching this name before, it's likely that it's a
+     different one.  */
+  if (section_subset != NULL)
+    free_debug_section (debug);
 
   return load_specific_debug_section (debug, sec, (FILE *) file);
 }
@@ -10710,7 +10743,7 @@ free_debug_section (enum dwarf_section_display_enum debug)
 }
 
 static int
-display_debug_section (Elf_Internal_Shdr * section, FILE * file)
+display_debug_section (int shndx, Elf_Internal_Shdr * section, FILE * file)
 {
   char * name = SECTION_NAME (section);
   bfd_size_type length;
@@ -10754,7 +10787,13 @@ display_debug_section (Elf_Internal_Shdr * section, FILE * file)
 	if (load_specific_debug_section ((enum dwarf_section_display_enum) i,
                                          section, file))
 	  {
+	    /* If this debug section is part of a CU/TU set in a .dwp file,
+	       restrict load_debug_section to the sections in that set.  */
+	    section_subset = find_cu_tu_set (file, shndx);
+
 	    result &= debug_displays[i].display (sec, file);
+
+	    section_subset = NULL;
 
 	    if (secondary || (i != info && i != abbrev))
 	      free_debug_section ((enum dwarf_section_display_enum) i);
@@ -10827,7 +10866,7 @@ process_section_contents (FILE * file)
 	dump_section_as_strings (section, file);
 
       if (dump_sects[i] & DEBUG_DUMP)
-	display_debug_section (section, file);
+	display_debug_section (i, section, file);
     }
 
   /* Check to see if the user requested a

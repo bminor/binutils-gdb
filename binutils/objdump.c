@@ -216,7 +216,8 @@ usage (FILE *stream, int status)
   -W[lLiaprmfFsoRt] or\n\
   --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
           =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
-          =gdb_index,=trace_info,=trace_abbrev,=trace_aranges]\n\
+          =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n\
+          =addr,=cu_index]\n\
                            Display DWARF info in the file\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\

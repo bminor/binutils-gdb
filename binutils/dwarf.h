@@ -143,6 +143,8 @@ enum dwarf_section_display_enum
   str_index,
   str_index_dwo,
   debug_addr,
+  dwp_cu_index,
+  dwp_tu_index,
   max
 };
 
@@ -218,6 +220,8 @@ extern int do_gdb_index;
 extern int do_trace_info;
 extern int do_trace_abbrevs;
 extern int do_trace_aranges;
+extern int do_debug_addr;
+extern int do_debug_cu_index;
 extern int do_wide;
 
 extern int dwarf_cutoff_level;
@@ -237,6 +241,8 @@ extern void free_debug_memory (void);
 extern void dwarf_select_sections_by_names (const char *);
 extern void dwarf_select_sections_by_letters (const char *);
 extern void dwarf_select_sections_all (void);
+
+unsigned int * find_cu_tu_set (void *, unsigned int);
 
 void * cmalloc (size_t, size_t);
 void * xcmalloc (size_t, size_t);
