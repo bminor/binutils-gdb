@@ -204,8 +204,19 @@ ravenscar_wait (struct target_ops *ops, ptid_t ptid,
 
   inferior_ptid = base_ptid;
   beneath->to_wait (beneath, base_ptid, status, 0);
-  ravenscar_find_new_threads (ops);
-  ravenscar_update_inferior_ptid ();
+  /* Find any new threads that might have been created, and update
+     inferior_ptid to the active thread.
+
+     Only do it if the program is still alive, though.  Otherwise,
+     this causes problems when debugging through the remote protocol,
+     because we might try switching threads (and thus sending packets)
+     after the remote has disconnected.  */
+  if (status->kind != TARGET_WAITKIND_EXITED
+      && status->kind != TARGET_WAITKIND_SIGNALLED)
+    {
+      ravenscar_find_new_threads (ops);
+      ravenscar_update_inferior_ptid ();
+    }
   return inferior_ptid;
 }
 

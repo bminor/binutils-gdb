@@ -1,5 +1,10 @@
 2012-10-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* ravenscar-thread.c (ravenscar_wait): Only update the list
+	of threads and inferior_ptid if the inferior is still alive.
+
+2012-10-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (is_known_support_routine): Use lbasename when
 	matching the symtab's filename against
 	known_runtime_file_name_patterns.
