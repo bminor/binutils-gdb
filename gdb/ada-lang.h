@@ -45,6 +45,7 @@ struct inferior;
 
 #if !defined (ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS)
 #define ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS \
+   "^unwind-seh.c$", \
    "^[agis]-.*\\.ad[bs]$",
 #endif
 
