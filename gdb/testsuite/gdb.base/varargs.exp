@@ -121,13 +121,11 @@ if [support_complex_tests] {
     gdb_test $test ".*= 4 \\+ 4 \\* I" $test
 
     set test "print find_max_double_real(4, dc1, dc2, dc3, dc4)"
-    setup_kfail_for_target gdb/12776 "i?86-*-*"
     setup_kfail_for_target gdb/12790 "x86_64-*-*"
     setup_kfail_for_target gdb/12791 "arm*-*-*"
     gdb_test $test ".*= 4 \\+ 4 \\* I" $test
 
     set test "print find_max_long_double_real(4, ldc1, ldc2, ldc3, ldc4)"
-    setup_kfail_for_target gdb/12776 "i?86-*-*"
     setup_kfail_for_target gdb/12790 "x86_64-*-*"
     setup_kfail_for_target gdb/12791 "arm*-*-*"
     gdb_test $test ".*= 4 \\+ 4 \\* I" $test

@@ -1,3 +1,7 @@
+2012-10-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/varargs.exp: PR gdb/12776 is now fixed.
+
 2012-10-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/set_wstr: New testcase.
