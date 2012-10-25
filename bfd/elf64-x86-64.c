@@ -2917,15 +2917,10 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 
   if (htab->elf.sgotplt)
     {
-      struct elf_link_hash_entry *got;
-      got = elf_link_hash_lookup (elf_hash_table (info),
-				  "_GLOBAL_OFFSET_TABLE_",
-				  FALSE, FALSE, FALSE);
-
       /* Don't allocate .got.plt section if there are no GOT nor PLT
 	 entries and there is no refeence to _GLOBAL_OFFSET_TABLE_.  */
-      if ((got == NULL
-	   || !got->ref_regular_nonweak)
+      if ((htab->elf.hgot == NULL
+	   || !htab->elf.hgot->ref_regular_nonweak)
 	  && (htab->elf.sgotplt->size
 	      == get_elf_backend_data (output_bfd)->got_header_size)
 	  && (htab->elf.splt == NULL

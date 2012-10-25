@@ -1,3 +1,9 @@
+2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Replace
+	_GLOBAL_OFFSET_TABLE_ lookup with htab->elf.hgot.
+	* elf64-x86-64.c (elf_x86_64_size_dynamic_sections): Likewise.
+
 2012-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* compress.c (bfd_is_section_compressed): Don't decompress the
