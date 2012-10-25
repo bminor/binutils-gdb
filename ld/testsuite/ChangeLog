@@ -1,3 +1,10 @@
+2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elfvsb/main.c (main_visibility_checkcom): Remove address
+	check for visibility_def if HIDDEN_UNDEF_TEST is defined.
+	(main_visibility_checkweak): Remove address check for
+	visibility_func if HIDDEN_UNDEF_TEST is defined.
+
 2012-10-25  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/empty-aligned.d: Revert last change.  Allow more
