@@ -132,13 +132,13 @@ proc test_fast_tracepoints {} {
 	gdb_test "tfind pc *set_point" "Found trace frame .*" \
 	    "tfind set_point frame, first time"
 
-	setup_kfail_for_target "gdb/13808" "x86_64-*-linux*"
+	setup_kfail "gdb/13808" "x86_64-*-linux*"
 	gdb_test "print globvar" " = 1"
 
 	gdb_test "tfind pc *set_point" "Found trace frame .*" \
 	    "tfind set_point frame, second time"
 
-	setup_kfail_for_target "gdb/13808" "x86_64-*-linux*"
+	setup_kfail "gdb/13808" "x86_64-*-linux*"
 	gdb_test "print anarg" " = 200"
 
 	gdb_test "tfind start" "Found trace frame .*" \

@@ -3434,14 +3434,6 @@ proc setup_xfail_format { format } {
     return $ret;
 }
 
-# Like setup_kfail, but only call setup_kfail conditionally if
-# istarget[TARGET] returns true.
-proc setup_kfail_for_target { PR target } {
-    if { [istarget $target] } {
-	setup_kfail $PR $target
-    }
-}
-
 # gdb_get_line_number TEXT [FILE]
 #
 # Search the source file FILE, and return the line number of the

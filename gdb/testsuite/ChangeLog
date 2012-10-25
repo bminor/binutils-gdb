@@ -1,3 +1,10 @@
+2012-10-25  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/ftrace.exp (test_fast_tracepoints): Use
+	'setup_kfail' instead of 'setup_kfail_for_target'.
+	* gdb.base/varargs.exp: Likewise.
+	* lib/gdb.exp (setup_kfail_for_target): Remove.
+
 2012-10-25  Mark Kettenis  <kettenis@openbsd.nfra.nl>
 
 	* gdb.base/varargs.exp: PR gdb/12790 is now fixed.
