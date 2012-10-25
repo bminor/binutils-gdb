@@ -1,3 +1,7 @@
+2012-10-25  Mark Kettenis  <kettenis@openbsd.nfra.nl>
+
+	* gdb.base/varargs.exp: PR gdb/12790 is now fixed.
+
 2012-10-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/varargs.exp: PR gdb/12776 is now fixed.
