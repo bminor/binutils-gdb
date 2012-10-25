@@ -36364,7 +36364,7 @@ Don't use this packet; use the @samp{qThreadExtraInfo} query instead
 Reply: see @code{remote.c:remote_unpack_thread_info_response()}.
 
 @item QNonStop:1
-@item QNonStop:0
+@itemx QNonStop:0
 @cindex non-stop mode, remote request
 @cindex @samp{QNonStop} packet
 @anchor{QNonStop}
@@ -36988,8 +36988,8 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 @end table
 
 @item qTBuffer
-@item QTBuffer
-@item QTDisconnected
+@itemx QTBuffer
+@itemx QTDisconnected
 @itemx QTDP
 @itemx QTDPsrc
 @itemx QTDV
@@ -37026,10 +37026,10 @@ conventions above.  Please don't use this packet as a model for new
 packets.)
 
 @item QTNotes
-@item qTP
-@item QTSave
-@item qTsP
-@item qTsV
+@itemx qTP
+@itemx QTSave
+@itemx qTsP
+@itemx qTsV
 @itemx QTStart    
 @itemx QTStop     
 @itemx QTEnable
