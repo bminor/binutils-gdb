@@ -1,5 +1,10 @@
 2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* dwp.cc (Dwo_file::record_target_info): Issue a fatal error
+	on bad fwrite return.
+
+2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* dwp.cc (Dwo_file::remap_str_offset): Use section_offset_type
 	on val.
 

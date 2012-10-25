@@ -1458,7 +1458,9 @@ Dwp_output_file::record_target_info(const char*, int machine,
   // Write zeroes for the ELF header initially.  We'll write
   // the actual header during finalize().
   static const char buf[elfcpp::Elf_sizes<64>::ehdr_size] = { 0 };
-  ::fwrite(buf, 1, this->next_file_offset_, this->fd_);
+  if (::fwrite(buf, 1, this->next_file_offset_, this->fd_)
+      < (size_t) this->next_file_offset_)
+    gold_fatal(_("%s: %s"), this->name_, strerror(errno));
 }
 
 // Add a string to the debug strings section.
