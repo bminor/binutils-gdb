@@ -5726,7 +5726,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"psq_l",	OP(56),		OP_MASK,     PPCPS,	PPCNONE,	{FRT,PSD,RA,PSW,PSQ}},
 {"lfq",		OP(56),		OP_MASK,     POWER2,	PPCNONE,	{FRT, D, RA0}},
 
-{"lfdp",	OP(57),		OP_MASK,     POWER6,	POWER7,		{FRTp, D, RA0}},
+{"lfdp",	OP(57),		OP_MASK,     POWER6,	POWER7,		{FRTp, DS, RA0}},
 {"psq_lu",	OP(57),		OP_MASK,     PPCPS,	PPCNONE,	{FRT,PSD,RA,PSW,PSQ}},
 {"lfqu",	OP(57),		OP_MASK,     POWER2,	PPCNONE,	{FRT, D, RA0}},
 
@@ -5989,7 +5989,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"psq_st",	OP(60),		OP_MASK,     PPCPS,	PPCNONE,	{FRS,PSD,RA,PSW,PSQ}},
 {"stfq",	OP(60),		OP_MASK,     POWER2,	PPCNONE,	{FRS, D, RA}},
 
-{"stfdp",	OP(61),		OP_MASK,     POWER6,	POWER7,		{FRSp, D, RA0}},
+{"stfdp",	OP(61),		OP_MASK,     POWER6,	POWER7,		{FRSp, DS, RA0}},
 {"psq_stu",	OP(61),		OP_MASK,     PPCPS,	PPCNONE,	{FRS,PSD,RA,PSW,PSQ}},
 {"stfqu",	OP(61),		OP_MASK,     POWER2,	PPCNONE,	{FRS, D, RA}},
 

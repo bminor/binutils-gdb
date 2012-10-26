@@ -1,3 +1,7 @@
+2012-10-26  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc (powerpc_opcodes): "lfdp" and "stfdp" use DS offset.
+
 2012-10-24  Roland McGrath  <mcgrathr@google.com>
 
 	* i386-dis.c (ckprefix): When bailing out for fwait with prefixes,
