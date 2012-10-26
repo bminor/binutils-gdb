@@ -1513,7 +1513,7 @@ insn_validate (const struct powerpc_opcode *op)
 }
 
 /* Insert opcodes and macros into hash tables.  Called at startup and
-   for .cpu pseudo.  */
+   for .machine pseudo.  */
 
 static void
 ppc_setup_opcodes (void)
@@ -3062,8 +3062,7 @@ md_assemble (char *str)
 		  break;
 		}
 
-	      if (ppc_obj64
-		  && (operand->flags & (PPC_OPERAND_DS | PPC_OPERAND_DQ)) != 0)
+	      if ((operand->flags & (PPC_OPERAND_DS | PPC_OPERAND_DQ)) != 0)
 		{
 		  switch (reloc)
 		    {

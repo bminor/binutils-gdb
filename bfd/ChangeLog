@@ -1,3 +1,12 @@
+2012-10-26  Alan Modra  <amodra@gmail.com>
+
+	PR target/14758
+	* elf32-ppc.c (ppc_elf_reloc_type_lookup): Decode ppc64 _DS
+	bfd_reloc values.  Map to corresponding D-form relocs.
+	(is_insn_ds_form, is_insn_qs_form): New functions.
+	(ppc_elf_relocate_section): Validate insn with DS-form or DQ-form
+	fields using D-form reloc.
+
 2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_size_dynamic_sections): Replace

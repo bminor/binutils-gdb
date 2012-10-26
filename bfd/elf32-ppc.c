@@ -1815,7 +1815,9 @@ ppc_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_NONE:		r = R_PPC_NONE;			break;
     case BFD_RELOC_32:			r = R_PPC_ADDR32;		break;
     case BFD_RELOC_PPC_BA26:		r = R_PPC_ADDR24;		break;
+    case BFD_RELOC_PPC64_ADDR16_DS:
     case BFD_RELOC_16:			r = R_PPC_ADDR16;		break;
+    case BFD_RELOC_PPC64_ADDR16_LO_DS:
     case BFD_RELOC_LO16:		r = R_PPC_ADDR16_LO;		break;
     case BFD_RELOC_HI16:		r = R_PPC_ADDR16_HI;		break;
     case BFD_RELOC_HI16_S:		r = R_PPC_ADDR16_HA;		break;
@@ -1826,7 +1828,9 @@ ppc_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_PPC_B16:		r = R_PPC_REL14;		break;
     case BFD_RELOC_PPC_B16_BRTAKEN:	r = R_PPC_REL14_BRTAKEN;	break;
     case BFD_RELOC_PPC_B16_BRNTAKEN:	r = R_PPC_REL14_BRNTAKEN;	break;
+    case BFD_RELOC_PPC64_GOT16_DS:
     case BFD_RELOC_16_GOTOFF:		r = R_PPC_GOT16;		break;
+    case BFD_RELOC_PPC64_GOT16_LO_DS:
     case BFD_RELOC_LO16_GOTOFF:		r = R_PPC_GOT16_LO;		break;
     case BFD_RELOC_HI16_GOTOFF:		r = R_PPC_GOT16_HI;		break;
     case BFD_RELOC_HI16_S_GOTOFF:	r = R_PPC_GOT16_HA;		break;
@@ -1837,26 +1841,34 @@ ppc_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     case BFD_RELOC_32_PCREL:		r = R_PPC_REL32;		break;
     case BFD_RELOC_32_PLTOFF:		r = R_PPC_PLT32;		break;
     case BFD_RELOC_32_PLT_PCREL:	r = R_PPC_PLTREL32;		break;
+    case BFD_RELOC_PPC64_PLT16_LO_DS:
     case BFD_RELOC_LO16_PLTOFF:		r = R_PPC_PLT16_LO;		break;
     case BFD_RELOC_HI16_PLTOFF:		r = R_PPC_PLT16_HI;		break;
     case BFD_RELOC_HI16_S_PLTOFF:	r = R_PPC_PLT16_HA;		break;
     case BFD_RELOC_GPREL16:		r = R_PPC_SDAREL16;		break;
+    case BFD_RELOC_PPC64_SECTOFF_DS:
     case BFD_RELOC_16_BASEREL:		r = R_PPC_SECTOFF;		break;
+    case BFD_RELOC_PPC64_SECTOFF_LO_DS:
     case BFD_RELOC_LO16_BASEREL:	r = R_PPC_SECTOFF_LO;		break;
     case BFD_RELOC_HI16_BASEREL:	r = R_PPC_SECTOFF_HI;		break;
     case BFD_RELOC_HI16_S_BASEREL:	r = R_PPC_SECTOFF_HA;		break;
     case BFD_RELOC_CTOR:		r = R_PPC_ADDR32;		break;
+    case BFD_RELOC_PPC64_TOC16_DS:
     case BFD_RELOC_PPC_TOC16:		r = R_PPC_TOC16;		break;
     case BFD_RELOC_PPC_TLS:		r = R_PPC_TLS;			break;
     case BFD_RELOC_PPC_TLSGD:		r = R_PPC_TLSGD;		break;
     case BFD_RELOC_PPC_TLSLD:		r = R_PPC_TLSLD;		break;
     case BFD_RELOC_PPC_DTPMOD:		r = R_PPC_DTPMOD32;		break;
+    case BFD_RELOC_PPC64_TPREL16_DS:
     case BFD_RELOC_PPC_TPREL16:		r = R_PPC_TPREL16;		break;
+    case BFD_RELOC_PPC64_TPREL16_LO_DS:
     case BFD_RELOC_PPC_TPREL16_LO:	r = R_PPC_TPREL16_LO;		break;
     case BFD_RELOC_PPC_TPREL16_HI:	r = R_PPC_TPREL16_HI;		break;
     case BFD_RELOC_PPC_TPREL16_HA:	r = R_PPC_TPREL16_HA;		break;
     case BFD_RELOC_PPC_TPREL:		r = R_PPC_TPREL32;		break;
+    case BFD_RELOC_PPC64_DTPREL16_DS:
     case BFD_RELOC_PPC_DTPREL16:	r = R_PPC_DTPREL16;		break;
+    case BFD_RELOC_PPC64_DTPREL16_LO_DS:
     case BFD_RELOC_PPC_DTPREL16_LO:	r = R_PPC_DTPREL16_LO;		break;
     case BFD_RELOC_PPC_DTPREL16_HI:	r = R_PPC_DTPREL16_HI;		break;
     case BFD_RELOC_PPC_DTPREL16_HA:	r = R_PPC_DTPREL16_HA;		break;
@@ -7243,6 +7255,21 @@ _bfd_elf_ppc_at_tprel_transform (unsigned int insn, unsigned int reg)
   return insn;
 }
 
+static bfd_boolean
+is_insn_ds_form (unsigned int insn)
+{
+  return ((insn & (0x3f << 26)) == 58u << 26 /* ld,ldu,lwa */
+	  || (insn & (0x3f << 26)) == 62u << 26 /* std,stdu,stq */
+	  || (insn & (0x3f << 26)) == 57u << 26 /* lfdp */
+	  || (insn & (0x3f << 26)) == 61u << 26 /* stfdp */);
+}
+
+static bfd_boolean
+is_insn_dq_form (unsigned int insn)
+{
+  return (insn & (0x3f << 26)) == 56u << 26; /* lq */
+}
+
 /* The RELOCATE_SECTION function is called by the ELF backend linker
    to handle the relocations for a section.
 
@@ -8787,6 +8814,54 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  /* Add 0x10000 if sign bit in 0:15 is set.
 	     Bits 0:15 are not used.  */
 	  addend += 0x8000;
+	  break;
+
+	case R_PPC_ADDR16:
+	case R_PPC_ADDR16_LO:
+	case R_PPC_GOT16:
+	case R_PPC_GOT16_LO:
+	case R_PPC_SDAREL16:
+	case R_PPC_SECTOFF:
+	case R_PPC_SECTOFF_LO:
+	case R_PPC_DTPREL16:
+	case R_PPC_DTPREL16_LO:
+	case R_PPC_TPREL16:
+	case R_PPC_TPREL16_LO:
+	case R_PPC_GOT_TLSGD16:
+	case R_PPC_GOT_TLSGD16_LO:
+	case R_PPC_GOT_TLSLD16:
+	case R_PPC_GOT_TLSLD16_LO:
+	case R_PPC_GOT_DTPREL16:
+	case R_PPC_GOT_DTPREL16_LO:
+	case R_PPC_GOT_TPREL16:
+	case R_PPC_GOT_TPREL16_LO:
+	  {
+	    /* The 32-bit ABI lacks proper relocations to deal with
+	       certain 64-bit instructions.  Prevent damage to bits
+	       that make up part of the insn opcode.  */
+	    unsigned int insn, mask, lobit;
+
+	    insn = bfd_get_32 (output_bfd, contents + rel->r_offset - d_offset);
+	    mask = 0;
+	    if (is_insn_ds_form (insn))
+	      mask = 3;
+	    else if (is_insn_dq_form (insn))
+	      mask = 15;
+	    else
+	      break;
+	    lobit = mask & (relocation + addend);
+	    if (lobit != 0)
+	      {
+		addend -= lobit;
+		info->callbacks->einfo
+		  (_("%P: %H: error: %s against `%s' not a multiple of %u\n"),
+		   input_bfd, input_section, rel->r_offset,
+		   howto->name, sym_name, mask + 1);
+		bfd_set_error (bfd_error_bad_value);
+		ret = FALSE;
+	      }
+	    addend += insn & mask;
+	  }
 	  break;
 	}
 
