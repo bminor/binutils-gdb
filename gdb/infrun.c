@@ -3424,7 +3424,12 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_FORKED:
     case TARGET_WAITKIND_VFORKED:
       if (debug_infrun)
-        fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_FORKED\n");
+	{
+	  if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
+	    fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_FORKED\n");
+	  else
+	    fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_VFORKED\n");
+	}
 
       /* Check whether the inferior is displaced stepping.  */
       {

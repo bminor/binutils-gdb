@@ -1,3 +1,8 @@
+2012-10-26  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_inferior_event): Print TARGET_WAITKIND_VFORKED
+	as "TARGET_WAITKIND_VFORKED", not "TARGET_WAITKIND_FORKED".
+
 2012-10-24  Tristan Gingold  <gingold@adacore.com>
 
 	* ravenscar-sparc-thread.c (ravenscar_sparc_fetch_registers):
