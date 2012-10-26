@@ -1631,7 +1631,7 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
       /* Where "ret" in the original code will return to.  */
       ret_addr = oldloc + insn_length;
       push_buf[0] = 0x68; /* pushq $...  */
-      memcpy (&push_buf[1], &ret_addr, 4);
+      store_unsigned_integer (&push_buf[1], 4, byte_order, ret_addr);
       /* Push the push.  */
       append_insns (to, 5, push_buf);
 

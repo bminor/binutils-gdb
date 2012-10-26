@@ -1,5 +1,11 @@
 2012-10-26  Pedro Alves  <palves@redhat.com>
 
+	* amd64-tdep.c (amd64_relocate_instruction): Use
+	store_unsigned_integer instead of memcpy.
+	* i386-tdep.c (i386_relocate_instruction): Ditto.
+
+2012-10-26  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (handle_inferior_event): Merge handling of
 	TARGET_WAITKIND_EXITED and TARGET_WAITKIND_SIGNALLED into a single
 	switch case.
