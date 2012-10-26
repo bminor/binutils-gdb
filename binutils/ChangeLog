@@ -1,3 +1,9 @@
+2012-10-26  Nick Clifton  <nickc@redhat.com>
+
+	* po/hr.po: New Croation translation.
+	* configure.in (ALL_LINGUAS): Add hr.
+	* configure: Regenerate.
+
 2012-10-23  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf.c (do_debug_addr, do_debug_cu_index): New global flags.
