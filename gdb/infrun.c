@@ -3406,11 +3406,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       stop_print_frame = 0;
       target_terminal_ours ();	/* Must do this before mourn anyway.  */
 
-      /* Note: By definition of TARGET_WAITKIND_SIGNALLED, we shouldn't
-         reach here unless the inferior is dead.  However, for years
-         target_kill() was called here, which hints that fatal signals aren't
-         really fatal on some systems.  If that's true, then some changes
-         may be needed.  */
       target_mourn_inferior ();
 
       print_signal_exited_reason (ecs->ws.value.sig);

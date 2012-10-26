@@ -1,5 +1,10 @@
 2012-10-26  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (handle_inferior_event) <TARGET_WAITKIND_SIGNALLED>:
+	Remove comment.
+
+2012-10-26  Pedro Alves  <palves@redhat.com>
+
 	* target.c (target_waitstatus_to_string): Handle
 	TARGET_WAITKIND_VFORK_DONE.
 
