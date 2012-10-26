@@ -3370,47 +3370,44 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
 
     case TARGET_WAITKIND_EXITED:
+    case TARGET_WAITKIND_SIGNALLED:
       if (debug_infrun)
-        fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_EXITED\n");
+	{
+	  if (ecs->ws.kind == TARGET_WAITKIND_EXITED)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: TARGET_WAITKIND_EXITED\n");
+	  else
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: TARGET_WAITKIND_SIGNALLED\n");
+	}
+
       inferior_ptid = ecs->ptid;
       set_current_inferior (find_inferior_pid (ptid_get_pid (ecs->ptid)));
       set_current_program_space (current_inferior ()->pspace);
       handle_vfork_child_exec_or_exit (0);
       target_terminal_ours ();	/* Must do this before mourn anyway.  */
-      print_exited_reason (ecs->ws.value.integer);
 
-      /* Record the exit code in the convenience variable $_exitcode, so
-         that the user can inspect this again later.  */
-      set_internalvar_integer (lookup_internalvar ("_exitcode"),
-			       (LONGEST) ecs->ws.value.integer);
+      if (ecs->ws.kind == TARGET_WAITKIND_EXITED)
+	{
+	  /* Record the exit code in the convenience variable $_exitcode, so
+	     that the user can inspect this again later.  */
+	  set_internalvar_integer (lookup_internalvar ("_exitcode"),
+				   (LONGEST) ecs->ws.value.integer);
 
-      /* Also record this in the inferior itself.  */
-      current_inferior ()->has_exit_code = 1;
-      current_inferior ()->exit_code = (LONGEST) ecs->ws.value.integer;
+	  /* Also record this in the inferior itself.  */
+	  current_inferior ()->has_exit_code = 1;
+	  current_inferior ()->exit_code = (LONGEST) ecs->ws.value.integer;
+
+	  print_exited_reason (ecs->ws.value.integer);
+	}
+      else
+	print_signal_exited_reason (ecs->ws.value.sig);
 
       gdb_flush (gdb_stdout);
       target_mourn_inferior ();
       singlestep_breakpoints_inserted_p = 0;
       cancel_single_step_breakpoints ();
       stop_print_frame = 0;
-      stop_stepping (ecs);
-      return;
-
-    case TARGET_WAITKIND_SIGNALLED:
-      if (debug_infrun)
-        fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_SIGNALLED\n");
-      inferior_ptid = ecs->ptid;
-      set_current_inferior (find_inferior_pid (ptid_get_pid (ecs->ptid)));
-      set_current_program_space (current_inferior ()->pspace);
-      handle_vfork_child_exec_or_exit (0);
-      stop_print_frame = 0;
-      target_terminal_ours ();	/* Must do this before mourn anyway.  */
-
-      target_mourn_inferior ();
-
-      print_signal_exited_reason (ecs->ws.value.sig);
-      singlestep_breakpoints_inserted_p = 0;
-      cancel_single_step_breakpoints ();
       stop_stepping (ecs);
       return;
 

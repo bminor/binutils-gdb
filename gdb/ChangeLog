@@ -1,5 +1,11 @@
 2012-10-26  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (handle_inferior_event): Merge handling of
+	TARGET_WAITKIND_EXITED and TARGET_WAITKIND_SIGNALLED into a single
+	switch case.
+
+2012-10-26  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (handle_inferior_event) <TARGET_WAITKIND_SIGNALLED>:
 	Remove comment.
 
