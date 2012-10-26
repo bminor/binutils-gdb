@@ -230,6 +230,8 @@ const struct s390_operand s390_operands[] =
 
 #define M_16OPT   73              /* 4 bit optional mask starting at 16 */
   { 4, 16, S390_OPERAND_OPTIONAL },
+#define M_20OPT   74              /* 4 bit optional mask starting at 20 */
+  { 4, 20, S390_OPERAND_OPTIONAL },
 
 };
 
@@ -342,8 +344,10 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RRF_FUFF2  4, { F_24,F_28,F_16,U4_20,0,0 }       /* e.g. adtra */
 #define INSTR_RRF_FEUFEFE2 4, { FE_24,FE_28,FE_16,U4_20,0,0 }  /* e.g. axtra */
 #define INSTR_RRF_RURR   4, { R_24,R_28,R_16,U4_20,0,0 }       /* e.g. .insn */
+#define INSTR_RRF_RURR2  4, { R_24,R_16,R_28,U4_20,0,0 }       /* e.g. lptea */
 #define INSTR_RRF_R0RR   4, { R_24,R_16,R_28,0,0,0 }           /* e.g. idte  */
 #define INSTR_RRF_R0RR2  4, { R_24,R_28,R_16,0,0,0 }           /* e.g. ark   */
+#define INSTR_RRF_RMRR   4, { R_24,R_16,R_28,M_20OPT,0,0 }     /* e.g. crdte */
 #define INSTR_RRF_U0FF   4, { F_24,U4_16,F_28,0,0,0 }          /* e.g. fixr  */
 #define INSTR_RRF_U0FEFE 4, { FE_24,U4_16,FE_28,0,0,0 }        /* e.g. fixbr */
 #define INSTR_RRF_U0RF   4, { R_24,U4_16,F_28,0,0,0 }          /* e.g. cfebr */
@@ -500,8 +504,10 @@ const struct s390_operand s390_operands[] =
 #define MASK_RRF_FUFF2   { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRF_FEUFEFE2 { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRF_RURR    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
+#define MASK_RRF_RURR2   { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRF_R0RR    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRF_R0RR2   { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
+#define MASK_RRF_RMRR    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRF_U0FF    { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }
 #define MASK_RRF_U0FEFE  { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }
 #define MASK_RRF_U0RF    { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }

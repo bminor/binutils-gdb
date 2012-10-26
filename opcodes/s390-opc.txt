@@ -715,6 +715,11 @@ b92f kmc RRE_RR "cipher message with chaining" z990 esa,zarch
 b93e kimd RRE_RR "compute intermediate message digest" z990 esa,zarch
 b93f klmd RRE_RR "compute last message digest" z990 esa,zarch
 b91e kmac RRE_RR "compute message authentication code" z990 esa,zarch
+b99a epair RRE_R0 "extract primary ASN and instance" z990 esa,zarch
+b99b esair RRE_R0 "extract secondary ASN and instance" z990 esa,zarch
+b99e pti RRE_RR "program transfer with instance" z990 esa,zarch
+b99f ssair RRE_R0 "set secondary ASN with instance" z990 esa,zarch
+
 # z9-109 extended immediate instructions
 c209 afi RIL_RI "add immediate 32" z9-109 zarch
 c208 agfi RIL_RI "add immediate 64<32" z9-109 zarch
@@ -759,7 +764,7 @@ b27c stckf S_RD "store clock fast" z9-109 zarch
 # z9-109 move with optional specifications instruction
 c800 mvcos SSF_RRDRD "move with optional specifications" z9-109 zarch
 # z9-109 load page-table-entry address instruction
-b9aa lptea RRF_RURR "load page-table-entry address" z9-109 zarch
+b9aa lptea RRF_RURR2 "load page-table-entry address" z9-109 zarch
 # z9-109 conditional sske facility, sske instruction entered twice
 b22b sske RRF_M0RR "set storage key extended" z9-109 zarch
 # z9-109 etf2-enhancement facility, instructions entered twice
@@ -857,6 +862,7 @@ ed0000000059 tdgxt RXE_FERRD "test data group extended dfp" z9-ec zarch
 010a pfpo E "perform floating point operation" z9-ec zarch
 c801 ectg SSF_RRDRD "extract cpu time" z9-ec zarch
 c802 csst SSF_RRDRD "compare and swap and store" z9-ec zarch
+
 # The new instructions of the System z10 Enterprise Class
 eb000000006a asi SIY_IRD "add immediate (32<8)" z10 zarch
 eb000000007a agsi SIY_IRD "add immediate (64<8)" z10 zarch
@@ -971,6 +977,9 @@ b286 qsi S_RD "query sampling information" z10 zarch
 b2e0 scctr RRE_RR "set cpu counter" z10 zarch
 b2e1 spctr RRE_RR "set peripheral counter" z10 zarch
 b280 lpp S_RD "load program parameter" z10 zarch
+b928 pckmo RRE_00 "perform cryptographic key management operation" z10 zarch
+
+# The new instructions of the IBM zEnterprise z196
 b9c8 ahhhr RRF_R0RR2 "add high high" z196 zarch
 b9d8 ahhlr RRF_R0RR2 "add high low" z196 zarch
 cc08 aih RIL_RI "add immediate high" z196 zarch
@@ -992,7 +1001,7 @@ e300000000c4 lhh RXY_RRRD "load halfword high" z196 zarch
 e300000000ca lfh RXY_RRRD "load high" z196 zarch
 e300000000c2 llch RXY_RRRD "load logical character high" z196 zarch
 e300000000c6 llhh RXY_RRRD "load logical halfword high" z196 zarch
-ec000000005D risbhg RIE_RRUUU "rotate then insert selected bits high" z196 zarch
+ec000000005d risbhg RIE_RRUUU "rotate then insert selected bits high" z196 zarch
 ec0000000051 risblg RIE_RRUUU "rotate then insert selected bits low" z196 zarch
 e300000000c3 stch RXY_RRRD "store character high" z196 zarch
 e300000000c7 sthh RXY_RRRD "store halfword high" z196 zarch
@@ -1104,6 +1113,12 @@ b3d8 mxtra RRF_FEUFEFE2 "multiply extended dfp with rounding mode" z196 zarch
 b3d3 sdtra RRF_FUFF2 "subtract long dfp with rounding mode" z196 zarch
 b3db sxtra RRF_FEUFEFE2 "subtract extended dfp with rounding mode" z196 zarch
 b2b8 srnmb S_RD "set 3 bit bfp rounding mode" z196 zarch
+b92a kmf RRE_RR "cipher message with CFB" z196 zarch
+b92b kmo RRE_RR "cipher message with OFB" z196 zarch
+b92c pcc RRE_00 "perform cryptographic computation" z196 zarch
+b92d kmctr RRF_R0RR2 "cipher message with counter" z196 zarch
+
+# The new instructions of the IBM zEnterprise EC12
 b2ec etnd RRE_R0 "extract transaction nesting depth" zEC12 zarch
 e30000000025 ntstg RXY_RRRD "nontransactional store" zEC12 zarch
 b2fc tabort S_RD "transaction abort" zEC12 zarch
@@ -1112,7 +1127,9 @@ e561 tbeginc SIL_RDU "constrained transaction begin" zEC12 zarch
 b2f8 tend S_00 "transaction end" zEC12 zarch
 c7 bpp SMI_U0RDP "branch prediction preload" zEC12 zarch
 c5 bprp MII_UPI "branch prediction relative preload" zEC12 zarch
+b2e8 ppa RRF_U0RR "perform processor assist" zEC12 zarch
 b2fa niai IE_UU "next instruction access intent" zEC12 zarch
+b98f crdte RRF_RMRR "compare and replace DAT table entry" zEC12 zarch
 e3000000009f lat RXY_RRRD "load and trap 32 bit" zEC12 zarch
 e30000000085 lgat RXY_RRRD "load and trap 64 bit" zEC12 zarch
 e300000000c8 lfhat RXY_RRRD "load high and trap" zEC12 zarch

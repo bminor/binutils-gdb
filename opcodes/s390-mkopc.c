@@ -343,7 +343,7 @@ main (void)
       int   mode_bits;
       char  *str;
 
-      if (currentLine[0] == '#')
+      if (currentLine[0] == '#' || currentLine[0] == '\n')
         continue;
       memset (opcode, 0, 8);
       if (sscanf (currentLine, "%15s %15s %15s \"%79[^\"]\" %15s %15s",

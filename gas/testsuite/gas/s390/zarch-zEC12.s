@@ -48,3 +48,7 @@ foo:
 	cxzt	%f4,4000(10,%r8),13
 	czdt	%f6,4000(10,%r8),13
 	czxt	%f4,4000(10,%r8),13
+
+	ppa	%r5,%r6,12
+	crdte	%r5,%r6,%r9
+	crdte	%r5,%r6,%r9,1
