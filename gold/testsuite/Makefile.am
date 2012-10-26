@@ -240,7 +240,7 @@ icf_safe_so_test_2.stdout: icf_safe_so_test
 
 check_SCRIPTS += final_layout.sh
 check_DATA += final_layout.stdout
-MOSTLYCLEANFILES += final_layout
+MOSTLYCLEANFILES += final_layout final_layout_sequence.txt
 final_layout.o: final_layout.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections  -fdata-sections -g -o $@ $<
 final_layout_sequence.txt:

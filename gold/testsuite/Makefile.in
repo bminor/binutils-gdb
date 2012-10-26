@@ -122,6 +122,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test icf_keep_unique_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test icf_safe_so_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout_sequence.txt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_virtual_function_folding_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test \
