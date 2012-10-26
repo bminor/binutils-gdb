@@ -3874,6 +3874,8 @@ target_waitstatus_to_string (const struct target_waitstatus *ws)
       return xstrprintf ("%svforked", kind_str);
     case TARGET_WAITKIND_EXECD:
       return xstrprintf ("%sexecd", kind_str);
+    case TARGET_WAITKIND_VFORK_DONE:
+      return xstrprintf ("%svfork-done", kind_str);
     case TARGET_WAITKIND_SYSCALL_ENTRY:
       return xstrprintf ("%sentered syscall", kind_str);
     case TARGET_WAITKIND_SYSCALL_RETURN:
