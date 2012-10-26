@@ -1,3 +1,8 @@
+2012-10-26  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/power4.s: Fix invalid lq offsets.
+	* gas/ppc/power4.d: Update.
+
 2012-10-24  Roland McGrath  <mcgrathr@google.com>
 
 	* gas/i386/rex.s: Add test of REX prefix before fsave (i.e. fwait).
