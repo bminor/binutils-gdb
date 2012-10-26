@@ -1,3 +1,7 @@
+2012-10-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (General Query Packets): Use @itemx for QAgent.
+
 2012-10-25  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (General Query Packets): Use @itemx.

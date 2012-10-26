@@ -36129,7 +36129,7 @@ Here are the currently defined query and set packets:
 @table @samp
 
 @item QAgent:1
-@item QAgent:0
+@itemx QAgent:0
 Turn on or off the agent as a helper to perform some debugging operations
 delegated from @value{GDBN} (@pxref{Control Agent}).
 
