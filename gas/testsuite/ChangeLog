@@ -1,3 +1,7 @@
+2012-10-27  James Lemke  <jwlemke@codesourcery.com>
+
+	* gas/m68k/all.exp: Exclude pr11676 for fido-*-*.
+
 2012-10-26  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* gas/testsuite/gas/s390/zarch-z10.d: Refreshed.

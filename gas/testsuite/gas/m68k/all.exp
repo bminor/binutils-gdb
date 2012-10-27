@@ -98,7 +98,10 @@ if { [istarget m68*-*-*] || [istarget fido*-*-*] } then {
       run_dump_test tls-gd-3
     }
 
-    run_dump_test pr11676
+    if { ! [istarget fido-*-*] } then {
+      # The testcase uses an invalid instruction for this architecture.
+      run_dump_test pr11676
+    }
 
     run_dump_test pmove
 }
