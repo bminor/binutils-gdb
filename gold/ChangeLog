@@ -1,3 +1,10 @@
+2012-10-29  Cary Coutant  <ccoutant@google.com>
+
+	* dwp.cc (usage): Add file and exit status parameters;
+	add --help and --version options.
+	(print_version): New function.
+	(main): Add --help and --version options.
+
 2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add

@@ -34,6 +34,7 @@
 
 #include "getopt.h"
 #include "libiberty.h"
+#include "../bfd/bfdver.h"
 
 #include "elfcpp.h"
 #include "elfcpp_file.h"
@@ -45,7 +46,10 @@
 #include "dwarf_reader.h"
 
 static void
-usage() ATTRIBUTE_NORETURN;
+usage(FILE* fd, int) ATTRIBUTE_NORETURN;
+
+static void
+print_version() ATTRIBUTE_NORETURN;
 
 namespace gold {
 
@@ -1983,21 +1987,45 @@ using namespace gold;
 
 struct option dwp_options[] =
   {
-    { "verbose", no_argument, NULL, 'v' },
+    { "help", no_argument, NULL, 'h' },
     { "output", required_argument, NULL, 'o' },
+    { "verbose", no_argument, NULL, 'v' },
+    { "version", no_argument, NULL, 'V' },
     { NULL, 0, NULL, 0 }
   };
 
 // Print usage message and exit.
 
 static void
-usage()
+usage(FILE* fd, int exit_status)
 {
-  fprintf(stderr, _("Usage: %s [options] file...\n"), program_name);
-  fprintf(stderr, _("  -v, --verbose            Verbose output\n"));
-  fprintf(stderr, _("  -o FILE, --output FILE   Set output dwp file name"
+  fprintf(fd, _("Usage: %s [options] file...\n"), program_name);
+  fprintf(fd, _("  -h, --help               Print this help message\n"));
+  fprintf(fd, _("  -o FILE, --output FILE   Set output dwp file name"
 		    " (required)\n"));
-  exit(1);
+  fprintf(fd, _("  -v, --verbose            Verbose output\n"));
+  fprintf(fd, _("  -V, --version            Print version number\n"));
+
+  // REPORT_BUGS_TO is defined in bfd/bfdver.h.
+  const char* report = REPORT_BUGS_TO;
+  if (*report != '\0')
+    fprintf(fd, _("\nReport bugs to %s\n"), report);
+  exit(exit_status);
+}
+
+// Report version information.
+
+static void
+print_version()
+{
+  // This output is intended to follow the GNU standards.
+  printf("GNU dwp %s\n", BFD_VERSION_STRING);
+  printf(_("Copyright 2012 Free Software Foundation, Inc.\n"));
+  printf(_("\
+This program is free software; you may redistribute it under the terms of\n\
+the GNU General Public License version 3 or (at your option) any later version.\n\
+This program has absolutely no warranty.\n"));
+  exit(EXIT_SUCCESS);
 }
 
 // Main program.
@@ -2036,19 +2064,23 @@ main(int argc, char** argv)
   const char* output_filename = NULL;
   bool verbose = false;
   int c;
-  while ((c = getopt_long(argc, argv, "vo:", dwp_options, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "ho:vV", dwp_options, NULL)) != -1)
     {
       switch (c)
         {
-	  case 'v':
-	    verbose = true;
-	    break;
+	  case 'h':
+	    usage(stdout, EXIT_SUCCESS);
 	  case 'o':
 	    output_filename = optarg;
 	    break;
+	  case 'v':
+	    verbose = true;
+	    break;
+	  case 'V':
+	    print_version();
 	  case '?':
 	  default:
-	    usage();
+	    usage(stderr, EXIT_FAILURE);
 	}
     }
   for (int i = optind; i < argc; ++i)
