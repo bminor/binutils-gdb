@@ -106,8 +106,8 @@ static reloc_howto_type elf_xgate_howto_table[] =
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_XGATE_16", /* name */
 	 FALSE, /* partial_inplace */
-	 0x00ff, /* src_mask */
-	 0x00ff, /* dst_mask */
+	 0xffff, /* src_mask */
+	 0xffff, /* dst_mask */
 	 FALSE), /* pcrel_offset */
 
   /* A 32 bit absolute relocation.  This one is never used for the
