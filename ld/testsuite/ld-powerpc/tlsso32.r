@@ -1,6 +1,6 @@
 #source: tls32.s
 #as: -a32
-#ld: -shared -melf32ppc
+#ld: -shared
 #readelf: -WSsrl
 #target: powerpc*-*-*
 

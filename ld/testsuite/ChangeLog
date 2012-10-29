@@ -1,3 +1,57 @@
+2012-10-29  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/powerpc.exp: Modify emulation option passed to ld
+	when little-endian.
+	* ld-powerpc/apuinfo-nul.rd: Update for le output.
+	* ld-powerpc/apuinfo.rd: Likewise.
+	* ld-powerpc/plt1.d: Likewise.
+	* ld-powerpc/relax.d: Likewise.
+	* ld-powerpc/relaxr.d: Likewise.
+	* ld-powerpc/sdadyn.d: Likewise.
+	* ld-powerpc/tls.d: Likewise.
+	* ld-powerpc/tls.g: Likewise.
+	* ld-powerpc/tls.t: Likewise.
+	* ld-powerpc/tls32.d: Likewise.
+	* ld-powerpc/tls32.g: Likewise.
+	* ld-powerpc/tls32.t: Likewise.
+	* ld-powerpc/tlsexe.d: Likewise.
+	* ld-powerpc/tlsexe.g: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexe.t: Likewise.
+	* ld-powerpc/tlsexe32.d: Likewise.
+	* ld-powerpc/tlsexe32.g: Likewise.
+	* ld-powerpc/tlsexe32.r: Likewise.
+	* ld-powerpc/tlsexe32.t: Likewise.
+	* ld-powerpc/tlsexetoc.d: Likewise.
+	* ld-powerpc/tlsexetoc.g: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsexetoc.t: Likewise.
+	* ld-powerpc/tlsmark.d: Likewise.
+	* ld-powerpc/tlsmark32.d: Likewise.
+	* ld-powerpc/tlsopt1.d: Likewise.
+	* ld-powerpc/tlsopt1_32.d: Likewise.
+	* ld-powerpc/tlsopt2.d: Likewise.
+	* ld-powerpc/tlsopt2_32.d: Likewise.
+	* ld-powerpc/tlsopt3.d: Likewise.
+	* ld-powerpc/tlsopt3_32.d: Likewise.
+	* ld-powerpc/tlsopt4.d: Likewise.
+	* ld-powerpc/tlsopt4_32.d: Likewise.
+	* ld-powerpc/tlsso.d: Likewise.
+	* ld-powerpc/tlsso.g: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlsso.t: Likewise.
+	* ld-powerpc/tlsso32.d: Likewise.
+	* ld-powerpc/tlsso32.g: Likewise.
+	* ld-powerpc/tlsso32.r: Likewise.
+	* ld-powerpc/tlsso32.t: Likewise.
+	* ld-powerpc/tlstoc.d: Likewise.
+	* ld-powerpc/tlstoc.g: Likewise.
+	* ld-powerpc/tlstoc.t: Likewise.
+	* ld-powerpc/tlstocso.d: Likewise.
+	* ld-powerpc/tlstocso.g: Likewise.
+	* ld-powerpc/tlstocso.t: Likewise.
+	* ld-powerpc/tocopt.out: Likewise.
+
 2012-10-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elfvsb/main.c (main_visibility_checkcom): Remove address

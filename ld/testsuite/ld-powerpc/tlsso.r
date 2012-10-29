@@ -1,6 +1,6 @@
 #source: tls.s
 #as: -a64
-#ld: -shared -melf64ppc
+#ld: -shared
 #readelf: -WSsrl
 #target: powerpc64*-*-*
 
