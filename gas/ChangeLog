@@ -1,5 +1,10 @@
 2012-10-29  Alan Modra  <amodra@gmail.com>
 
+	* sb.c (sb_check): Use __builtin_clzll when size_t is not the
+	same size as long.
+
+2012-10-29  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (ppc_znop): Remove unused vars.
 
 2012-10-26  Alan Modra  <amodra@gmail.com>
