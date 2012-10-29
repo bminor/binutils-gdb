@@ -1,6 +1,8 @@
-#readelf: -wf
+#objdump: -Wf
 #name: CFI on ppc
 #as: -a32
+
+.*
 
 Contents of the .eh_frame section:
 
@@ -10,7 +12,7 @@ Contents of the .eh_frame section:
   Code alignment factor: [24]
   Data alignment factor: -4
   Return address column: 65
-  Augmentation data:     1b
+  Augmentation data:     [01]b
 
   DW_CFA_def_cfa: r1 ofs 0
 

@@ -1,4 +1,4 @@
-	.section .text
+	.text
 
 target0:
 	e_bdnz	target1

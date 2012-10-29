@@ -1,4 +1,4 @@
-	.section	".data"
+	.data
 	.p2align	4
 dsym0:	.llong	0xdeadbeef
 	.llong	0xc0ffee
@@ -13,7 +13,7 @@ dsym1:
 	.tc	ignored2[TC],usym0
 	.tc	ignored3[TC],usym1
 
-	.section	".text"
+	.text
 	.p2align	4
 	lq	4,dsym0@l(3)
 	lq	4,dsym1@l(3)

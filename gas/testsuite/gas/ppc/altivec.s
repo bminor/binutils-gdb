@@ -1,6 +1,6 @@
 # PowerPC AltiVec tests
 #as: -m601 -maltivec
-	.section ".text"
+	.text
 start:
 	dss	3
 	dssall	

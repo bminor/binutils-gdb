@@ -1,5 +1,5 @@
 # Power E6500 tests
-	.section ".text"
+	.text
 start:
 	vabsdub	0, 1, 2
 	vabsduh	0, 1, 2

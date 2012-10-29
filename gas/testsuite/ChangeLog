@@ -1,3 +1,51 @@
+2012-10-29  Alan Modra  <amodra@gmail.com>
+
+	* gas/cfi/cfi.exp: Remove redundant ppc test.  Exclude
+	powerpc-pe targets from cfi-common-6 test.
+	* gas/cfi/cfi-ppc-1.d: Use objdump to handle pe.
+	* gas/cfi/cfi-ppc-1.s: Don't use .type and .size.
+	* gas/ppc/ppc.exp: Exclude various tests for powerpc-pe.  Exclude
+	vle tests for le targets.
+	* gas/ppc/476.d, * gas/ppc/476.s: Update for le output.  Use .text
+	rather than section directive with quotes.
+	* gas/ppc/a2.d,	* gas/ppc/a2.s: Likewise.
+	* gas/ppc/altivec.d, * gas/ppc/altivec.s: Likewise.
+	* gas/ppc/altivec2.d: Likewise.
+	* gas/ppc/altivec_and_spe.d: Likewise.
+	* gas/ppc/astest.d: Likewise.
+	* gas/ppc/astest2.d: Likewise.
+	* gas/ppc/astest2_64.d: Likewise.
+	* gas/ppc/astest64.d: Likewise.
+	* gas/ppc/booke.d, * gas/ppc/booke.s: Likewise.
+	* gas/ppc/cell.d, * gas/ppc/cell.s: Likewise.
+	* gas/ppc/common.d, * gas/ppc/common.s: Likewise.
+	* gas/ppc/e500.d, * gas/ppc/e500.s: Likewise.
+	* gas/ppc/e500mc.d, * gas/ppc/e500mc.s: Likewise.
+	* gas/ppc/e500mc64_nop.d, * gas/ppc/e500mc64_nop.s: Likewise.
+	* gas/ppc/e5500_nop.d, * gas/ppc/e5500_nop.s: Likewise.
+	* gas/ppc/e6500.d, * gas/ppc/e6500.s: Likewise.
+	* gas/ppc/e6500_nop.d, * gas/ppc/e6500_nop.s: Likewise.
+	* gas/ppc/machine.d: Likewise.
+	* gas/ppc/power4.d, * gas/ppc/power4.s: Likewise.
+	* gas/ppc/power4_32.d, * gas/ppc/power4_32.s: Likewise.
+	* gas/ppc/power6.d, * gas/ppc/power6.s: Likewise.
+	* gas/ppc/power7.d, * gas/ppc/power7.s: Likewise.
+	* gas/ppc/ppc750ps.d, * gas/ppc/ppc750ps.s: Likewise.
+	* gas/ppc/regnames.d: Likewise.
+	* gas/ppc/simpshft.d: Likewise.
+	* gas/ppc/test1elf32.d: Likewise.
+	* gas/ppc/test1elf64.d: Likewise.
+	* gas/ppc/titan.d, * gas/ppc/titan.s: Likewise.
+	* gas/ppc/vle-reloc.s: Likewise.
+	* gas/ppc/vle-simple-1.s: Likewise.
+	* gas/ppc/vle-simple-2.s: Likewise.
+	* gas/ppc/vle-simple-3.s: Likewise.
+	* gas/ppc/vle-simple-4.s: Likewise.
+	* gas/ppc/vle-simple-5.s: Likewise.
+	* gas/ppc/vle-simple-6.s: Likewise.
+	* gas/ppc/vle.s: Likewise.
+	* gas/ppc/vsx.d, * gas/ppc/vsx.s: Likewise.
+
 2012-10-27  James Lemke  <jwlemke@codesourcery.com>
 
 	* gas/m68k/all.exp: Exclude pr11676 for fido-*-*.

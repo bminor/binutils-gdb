@@ -1,6 +1,6 @@
 # Freescale PowerPC VLE instruction tests
 #as: -mvle
-	.section .text
+	.text
 	.extern extern_subr
 	.equ	UI8,0x37
 	.equ	SCI0,UI8<<0

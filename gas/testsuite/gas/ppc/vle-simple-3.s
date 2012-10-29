@@ -1,4 +1,4 @@
-	.section .text
+	.text
 trap:
         trap
         twlt    1, 2

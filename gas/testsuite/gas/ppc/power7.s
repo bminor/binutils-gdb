@@ -1,4 +1,4 @@
-	.section	".text"
+	.text
 power7:
 	lxvd2x    3,4,5
 	lxvd2x    43,4,5

@@ -1,4 +1,4 @@
-	.section .text
+	.text
 	se_b	sub1
 	se_bl	sub1
 	se_bc	0,1,sub2
