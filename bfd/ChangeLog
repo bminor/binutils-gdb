@@ -1,3 +1,8 @@
+2012-10-29  Sean Keys <skeys@ipdatasys.com>
+
+	* elf32-xgate.c(elf_xgate_howto_table): Fix src and dest mask for
+	R_XGATE_16
+
 2012-10-29  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_howto_raw): Correct dst_mask in
