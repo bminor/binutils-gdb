@@ -559,9 +559,9 @@ powerpcle-*-nto*)       targ_emul=elf32lppcnto ;;
 powerpc-*-rtems*)	targ_emul=elf32ppc ;;
 powerpc-*-macos*)	targ_emul=ppcmacos ;;
 powerpc-*-netware*)	targ_emul=ppcnw ;;
-powerpcle-*-pe)         targ_emul=ppcpe ;;
-powerpcle-*-winnt*)     targ_emul=ppcpe ;;
-powerpcle-*-cygwin*)    targ_emul=ppcpe ;;
+powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin*)
+			targ_emul=ppcpe
+			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 powerpc-*-aix[5-9]*)	targ_emul=aix5ppc ;;
 powerpc-*-aix*)		targ_emul=aixppc ;;
 powerpc-*-beos*)	targ_emul=aixppc ;;

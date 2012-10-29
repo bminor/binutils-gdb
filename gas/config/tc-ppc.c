@@ -4887,8 +4887,6 @@ ppc_set_current_section (segT new)
 static void
 ppc_previous (int ignore ATTRIBUTE_UNUSED)
 {
-  symbolS *tmp;
-
   if (ppc_previous_section == NULL)
     {
       as_warn (_("no previous section to return to, ignored."));
@@ -5060,15 +5058,11 @@ ppc_znop (int ignore ATTRIBUTE_UNUSED)
 {
   unsigned long insn;
   const struct powerpc_opcode *opcode;
-  expressionS ex;
   char *f;
   symbolS *sym;
   char *symbol_name;
   char c;
   char *name;
-  unsigned int exp;
-  flagword flags;
-  asection *sec;
 
   /* Strip out the symbol name.  */
   symbol_name = input_line_pointer;

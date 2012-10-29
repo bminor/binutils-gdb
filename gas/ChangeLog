@@ -1,3 +1,7 @@
+2012-10-29  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_znop): Remove unused vars.
+
 2012-10-26  Alan Modra  <amodra@gmail.com>
 
 	PR target/14758

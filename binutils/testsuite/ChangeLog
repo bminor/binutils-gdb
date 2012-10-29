@@ -1,3 +1,8 @@
+2012-10-29  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/copy-3.d: Exclude all cygwin and mingw targets,
+	and rs6000.
+
 2012-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/ar.exp (bfdtest1): Remove findfile.

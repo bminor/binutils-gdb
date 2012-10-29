@@ -1,3 +1,8 @@
+2012-10-29  Alan Modra  <amodra@gmail.com>
+
+	* dlltool.c (INIT_SEC_DATA): Move.
+	(secdata <DLLTOOL_PPC>): Use here too.
+
 2012-10-26  Nick Clifton  <nickc@redhat.com>
 
 	* po/hr.po: New Croation translation.
