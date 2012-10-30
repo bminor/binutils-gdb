@@ -449,7 +449,7 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 	}
       else
 	{
-	  prpsinfo_t data;
+	  prpsinfo64_t data;
 	  memset (&data, 0, sizeof (data));
 	  strncpy (data.pr_fname, fname, sizeof (data.pr_fname));
 	  strncpy (data.pr_psargs, psargs, sizeof (data.pr_psargs));
@@ -490,7 +490,7 @@ elf_x86_64_write_core_note (bfd *abfd, char *buf, int *bufsiz,
 	}
       else
 	{
-	  prstatus_t prstat;
+	  prstatus64_t prstat;
 	  memset (&prstat, 0, sizeof (prstat));
 	  prstat.pr_pid = pid;
 	  prstat.pr_cursig = cursig;

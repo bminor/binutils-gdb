@@ -1,3 +1,29 @@
+2012-10-30  Yao Qi  <yao@codesourcery.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.in: Set CORE_HEADER to hosts/x86-64linux.h for 
+	'i[3-7]86-*-linux-*' if x86_64-*linux is enabled.
+	* configure: Regenerated.
+
+	* elf64-x86-64.c (elf_x86_64_write_core_note): Replace type
+	'prpsinfo_t' and 'prstatus_t' with 'prpsinfo64_t' and
+	'prstatus64_t' respectively.
+
+	* hosts/x86-64linux.h (a8_uint64_t): New.
+	(user_regsx32_struct): Renamed to ...
+	(user_regs64_struct): This.  Replace uint64_t with a8_uint64_t.
+	(elf_gregx32_t): Renamed to ...
+	(elf_greg64_t): This.  Replace uint64_t with a8_uint64_t.
+	(ELF_NGREGX32): Removed.
+	(ELF_NGREG64): New.
+	(elf_gregx32_t): Removed.
+	(elf_greg64_t): New.
+	(struct prstatus64_timeval): New.
+	(elf_prstatusx32): Replace elf_gregsetx32_t with elf_gregset64_t.
+	(elf_prstatus64): New.
+	(elf_prpsinfo64): New.
+	(prstatus64_t, prpsinfo64_t): New typedef.
+
 2012-10-29  Sean Keys <skeys@ipdatasys.com>
 
 	* elf32-xgate.c(elf_xgate_howto_table): Fix src and dest mask for

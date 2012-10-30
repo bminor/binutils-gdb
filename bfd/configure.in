@@ -331,6 +331,10 @@ changequote(,)dnl
 changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386linux.h"'
+	case "$enable_targets" in
+	*x86_64-*linux*)
+	  CORE_HEADER='"hosts/x86-64linux.h"'
+	esac
 	;;
 changequote(,)dnl
   i[3-7]86-*-isc*)	COREFILE=trad-core.lo ;;

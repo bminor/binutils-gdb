@@ -13927,6 +13927,10 @@ if test "${target}" = "${host}"; then
   i[3-7]86-*-linux-*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386linux.h"'
+	case "$enable_targets" in
+	*x86_64-*linux*)
+	  CORE_HEADER='"hosts/x86-64linux.h"'
+	esac
 	;;
   i[3-7]86-*-isc*)	COREFILE=trad-core.lo ;;
   i[3-7]86-*-aix*)	COREFILE=aix386-core.lo ;;
