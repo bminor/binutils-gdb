@@ -331,8 +331,8 @@ changequote(,)dnl
 changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386linux.h"'
-	case "$enable_targets" in
-	*x86_64-*linux*)
+	case "$enable_targets"-"$want64" in
+	*x86_64-*linux*|*-true)
 	  CORE_HEADER='"hosts/x86-64linux.h"'
 	esac
 	;;

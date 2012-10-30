@@ -1,3 +1,8 @@
+2012-10-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.in: Also handle --enable-64-bit-bfd when setting
+	CORE_HEADER for 'i[3-7]86-*-linux-*'.
+
 2012-10-30  Steve McIntyre  <steve.mcintyre@linaro.org>
 
 	* elf32-arm.c (elf32_arm_print_private_bfd_data): Recognise and
