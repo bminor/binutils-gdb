@@ -12110,6 +12110,15 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
 
     case EF_ARM_EABI_VER5:
       fprintf (file, _(" [Version5 EABI]"));
+
+      if (flags & EF_ARM_ABI_FLOAT_SOFT)
+	fprintf (file, _(" [soft-float ABI]"));
+
+      if (flags & EF_ARM_ABI_FLOAT_HARD)
+	fprintf (file, _(" [hard-float ABI]"));
+
+      flags &= ~(EF_ARM_ABI_FLOAT_SOFT | EF_ARM_ABI_FLOAT_HARD);
+
     eabi:
       if (flags & EF_ARM_BE8)
 	fprintf (file, _(" [BE8]"));
@@ -14416,6 +14425,16 @@ elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATT
       globals = elf32_arm_hash_table (link_info);
       if (globals != NULL && globals->byteswap_code)
 	i_ehdrp->e_flags |= EF_ARM_BE8;
+    }
+
+  if (EF_ARM_EABI_VERSION (i_ehdrp->e_flags) == EF_ARM_EABI_VER5
+      && ((i_ehdrp->e_type == ET_DYN) || (i_ehdrp->e_type == ET_EXEC)))
+    {
+      int abi = bfd_elf_get_obj_attr_int (abfd, OBJ_ATTR_PROC, Tag_ABI_VFP_args);
+      if (abi)
+	i_ehdrp->e_flags |= EF_ARM_ABI_FLOAT_HARD;
+      else
+	i_ehdrp->e_flags |= EF_ARM_ABI_FLOAT_SOFT;
     }
 }
 

@@ -2,7 +2,7 @@
 
 /* Check that config.h is #included before system headers
    (this works only for glibc, but that should be enough).  */
-#if defined(__GLIBC__) && !defined(__FreeBSD_kernel__)
+#if defined(__GLIBC__)
 #  error config.h must be #included before system headers
 #endif
 
@@ -100,6 +100,9 @@
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
 
+/* Define if mbstate_t exists in wchar.h. */
+#undef HAVE_MBSTATE_T
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -159,6 +162,9 @@
 
 /* Define to 1 if you have the `utimes' function. */
 #undef HAVE_UTIMES
+
+/* Define to 1 if you have the <wchar.h> header file. */
+#undef HAVE_WCHAR_H
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H

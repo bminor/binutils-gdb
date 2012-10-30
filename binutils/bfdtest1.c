@@ -35,9 +35,11 @@ main (int argc, char **argv)
   bfd *last, *next;
 
   if (argc != 2)
-    die ("bad usage");
+    die ("usage: bfdtest1 <archive>");
 
   archive = bfd_openr (argv[1], NULL);
+  if (archive == NULL)
+    die ("no such archive");
 
   if (!bfd_check_format (archive, bfd_archive))
     {

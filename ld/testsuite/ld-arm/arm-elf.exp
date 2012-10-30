@@ -271,6 +271,21 @@ set armelftests_common {
     {"Simple non-PIC shared library (no PLT check)" "-shared" "" {arm-lib.s}
      {{objdump -Rw arm-lib.r}}
      "arm-lib.so"}
+    {"EABI soft-float ET_EXEC ABI flag" "-T arm.ld" "-mfloat-abi=soft -meabi=5" {eabi-soft-float.s}
+     {{readelf -h eabi-soft-float.d}}
+     "eabi-soft-float"}
+    {"EABI hard-float ET_EXEC ABI flag" "-T arm.ld" "-mfloat-abi=hard -meabi=5" {eabi-hard-float.s}
+     {{readelf -h eabi-hard-float.d}}
+     "eabi-hard-float"}
+    {"EABI hard-float ET_DYN ABI flag" "-shared" "-mfloat-abi=hard -meabi=5" {eabi-hard-float.s}
+     {{readelf -h eabi-hard-float.d}}
+     "eabi-hard-float.so"}
+    {"EABI ABI flags wrong ABI version" "-T arm.ld" "-mfloat-abi=soft -meabi=4" {eabi-soft-float.s}
+     {{readelf -h eabi-soft-float-ABI4.d}}
+     "eabi-soft-float-no-flags"}
+    {"EABI ABI flags ld -r" "-r" "-mfloat-abi=soft -meabi=5" {eabi-soft-float.s}
+     {{readelf -h eabi-soft-float-r.d}}
+     "eabi-soft-float-r.o"}
 }
 
 set armelftests_nonacl {

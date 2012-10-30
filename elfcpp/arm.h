@@ -1,6 +1,6 @@
 // arm.h -- ELF definitions specific to EM_ARM  -*- C++ -*-
 
-// Copyright 2009, Free Software Foundation, Inc.
+// Copyright 2009, 2012 Free Software Foundation, Inc.
 // Written by Doug Kwan <dougkwan@google.com>.
 
 // This file is part of elfcpp.
@@ -221,6 +221,14 @@ enum
 inline Elf_Word
 arm_eabi_version(Elf_Word flags)
 { return flags & EF_ARM_EABIMASK; }
+
+// EABI_VER5 e_flags values for identifying soft- and hard-float ABI
+// choice.
+enum
+{
+  EF_ARM_ABI_FLOAT_SOFT = 0x200,
+  EF_ARM_ABI_FLOAT_HARD = 0x400,
+};
 
 // Values for the Tag_CPU_arch EABI attribute.
 enum

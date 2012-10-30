@@ -2476,7 +2476,7 @@ class Target_arm : public Sized_target<32, big_endian>
   { return new Arm_output_section<big_endian>(name, type, flags); }
 
   void
-  do_adjust_elf_header(unsigned char* view, int len) const;
+  do_adjust_elf_header(unsigned char* view, int len);
 
   // We only need to generate stubs, and hence perform relaxation if we are
   // not doing relocatable linking.
@@ -10016,15 +10016,16 @@ template<bool big_endian>
 void
 Target_arm<big_endian>::do_adjust_elf_header(
     unsigned char* view,
-    int len) const
+    int len)
 {
   gold_assert(len == elfcpp::Elf_sizes<32>::ehdr_size);
 
   elfcpp::Ehdr<32, big_endian> ehdr(view);
+  elfcpp::Elf_Word flags = this->processor_specific_flags();
   unsigned char e_ident[elfcpp::EI_NIDENT];
   memcpy(e_ident, ehdr.get_e_ident(), elfcpp::EI_NIDENT);
 
-  if (elfcpp::arm_eabi_version(this->processor_specific_flags())
+  if (elfcpp::arm_eabi_version(flags)
       == elfcpp::EF_ARM_EABI_UNKNOWN)
     e_ident[elfcpp::EI_OSABI] = elfcpp::ELFOSABI_ARM;
   else
@@ -10033,6 +10034,21 @@ Target_arm<big_endian>::do_adjust_elf_header(
 
   // FIXME: Do EF_ARM_BE8 adjustment.
 
+  // If we're working in EABI_VER5, set the hard/soft float ABI flags
+  // as appropriate.
+  if (elfcpp::arm_eabi_version(flags) == elfcpp::EF_ARM_EABI_VER5)
+  {
+    elfcpp::Elf_Half type = ehdr.get_e_type();
+    if (type == elfcpp::ET_EXEC || type == elfcpp::ET_DYN)
+      {
+	Object_attribute* attr = this->get_aeabi_object_attribute(elfcpp::Tag_ABI_VFP_args);
+	if (attr->int_value())
+	  flags |= elfcpp::EF_ARM_ABI_FLOAT_HARD;
+	else
+	  flags |= elfcpp::EF_ARM_ABI_FLOAT_SOFT;
+	this->set_processor_specific_flags(flags);
+      }
+  }
   elfcpp::Ehdr_write<32, big_endian> oehdr(view);
   oehdr.put_e_ident(e_ident);
 }

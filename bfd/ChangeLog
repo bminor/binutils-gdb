@@ -1,7 +1,14 @@
+2012-10-30  Steve McIntyre  <steve.mcintyre@linaro.org>
+
+	* elf32-arm.c (elf32_arm_print_private_bfd_data): Recognise and
+	display the new ARM hard-float/soft-float ABI flags for EABI_VER5
+	(elf32_arm_post_process_headers): Add the hard-float/soft-float
+	ABI flag as appropriate for ET_DYN/ET_EXEC in EABI_VER5.
+
 2012-10-30  Yao Qi  <yao@codesourcery.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
-	* configure.in: Set CORE_HEADER to hosts/x86-64linux.h for 
+	* configure.in: Set CORE_HEADER to hosts/x86-64linux.h for
 	'i[3-7]86-*-linux-*' if x86_64-*linux is enabled.
 	* configure: Regenerated.
 

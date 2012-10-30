@@ -1,3 +1,18 @@
+2012-10-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/14779
+	* configure.in: Add checks for wchar.h and mbstate_t.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* readelf.c: Conditionally include wchar.h.
+	(print_symbol): Conditionally use mbstate_t.
+
+2012-10-30  	Steve McIntyre  <steve.mcintyre@linaro.org>
+
+	* readelf.c (decode_ARM_machine_flags): Recognise and display the
+	new ARM hard-float/soft-float ABI flags for EABI_VER5. Split out
+	the code for EABI_VER4 and EABI_VER5 to allow this.
+
 2012-10-29  Alan Modra  <amodra@gmail.com>
 
 	* dlltool.c (INIT_SEC_DATA): Move.

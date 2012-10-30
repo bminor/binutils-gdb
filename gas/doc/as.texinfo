@@ -458,7 +458,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 
 @emph{Target RX options:}
    [@b{-mlittle-endian}|@b{-mbig-endian}]
-   [@b{-m32bit-ints}|@b{-m16bit-ints}]
    [@b{-m32bit-doubles}|@b{-m64bit-doubles}]
 @end ifset
 @ifset S390
@@ -7532,8 +7531,8 @@ things without first using the debugger to find the facts.
 If you have contributed to GAS and your name isn't listed here,
 it is not meant as a slight.  We just don't know about it.  Send mail to the
 maintainer, and we'll correct the situation.  Currently
-@c (January 1994),
-the maintainer is Ken Raeburn (email address @code{raeburn@@cygnus.com}).
+@c (October 2012),
+the maintainer is Nick Clifton (email address @code{nickc@@redhat.com}).
 
 Dean Elsner wrote the original @sc{gnu} assembler for the VAX.@footnote{Any
 more details?}

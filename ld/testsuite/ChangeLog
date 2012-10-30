@@ -1,3 +1,13 @@
+2012-10-30  Steve McIntyre   <steve.mcintyre@linaro.org>
+
+	* ld-arm/eabi-hard-float.s: New test source.
+	* ld-arm/eabi-soft-float.s: New test source.
+	* ld-arm/eabi-hard-float.d: New test.
+	* ld-arm/eabi-soft-float.d: New test.
+	* ld-arm/eabi-soft-float-ABI4.d: New test.
+	* ld-arm/eabi-soft-float-r.d: New test.
+	* ld-arm/arm-elf.xp: Use the new tests.
+
 2012-10-29  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/powerpc.exp: Modify emulation option passed to ld
