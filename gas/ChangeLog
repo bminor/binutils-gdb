@@ -1,3 +1,8 @@
+2012-10-31  David Holsgrove  <david.holsgrove@xilinx.com>
+
+	* config/tc-microblaze.c: Check for weak symbols before
+	emitting relocation.
+
 2012-10-29  Alan Modra  <amodra@gmail.com>
 
 	* sb.c (sb_check): Use __builtin_clzll when size_t is not the

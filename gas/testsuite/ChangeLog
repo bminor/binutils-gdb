@@ -1,3 +1,11 @@
+2012-10-31  David Holsgrove  <david.holsgrove@xilinx.com>
+
+	* gas/microblaze: New.
+	* gas/microblaze/reloc_sym.exp: Add test case.
+	* gas/microblaze/reloc_strongsym.s: Likewise.
+	* gas/microblaze/reloc_weaksym.s: Likewise.
+	* gas/microblaze/reloc_sym.d: Likewise.
+
 2012-10-29  Alan Modra  <amodra@gmail.com>
 
 	* gas/cfi/cfi.exp: Remove redundant ppc test.  Exclude
