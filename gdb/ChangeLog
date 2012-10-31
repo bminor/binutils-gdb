@@ -1,3 +1,9 @@
+2012-10-31  Tom Tromey  <tromey@redhat.com>
+
+	* gdbarch.c: Rebuild.
+	* gdbarch.sh: Remove references to gdbarch_swap.
+	* corelow.c (core_open): Remove obsolete comment.
+
 2012-10-31  Andrew Burgess  <aburgess@broadcom.com>
 
 	PR cli/14772

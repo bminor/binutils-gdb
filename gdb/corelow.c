@@ -344,12 +344,6 @@ core_open (char *filename, int from_tty)
   core_bfd = temp_bfd;
   old_chain = make_cleanup (core_close_cleanup, 0 /*ignore*/);
 
-  /* FIXME: kettenis/20031023: This is very dangerous.  The
-     CORE_GDBARCH that results from this call may very well be
-     different from CURRENT_GDBARCH.  However, its methods may only
-     work if it is selected as the current architecture, because they
-     rely on swapped data (see gdbarch.c).  We should get rid of that
-     swapped data.  */
   core_gdbarch = gdbarch_from_bfd (core_bfd);
 
   /* Find a suitable core file handler to munch on core_bfd */

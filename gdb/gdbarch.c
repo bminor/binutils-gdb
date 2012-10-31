@@ -113,9 +113,6 @@ struct gdbarch
   unsigned nr_data;
   void **data;
 
-  /* per-architecture swap-regions.  */
-  struct gdbarch_swap *swap;
-
   /* Multi-arch values.
 
      When extending this structure you must:
@@ -308,8 +305,8 @@ struct gdbarch startup_gdbarch =
   0,  /* target_desc */
   /* target specific vector and its dump routine.  */
   NULL, NULL,
-  /*per-architecture data-pointers and swap regions.  */
-  0, NULL, NULL,
+  /*per-architecture data-pointers.  */
+  0, NULL,
   /* Multi-arch values */
   1,  /* bits_big_endian */
   8 * sizeof (short),  /* short_bit */

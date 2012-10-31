@@ -1479,9 +1479,6 @@ printf "  /* per-architecture data-pointers.  */\n"
 printf "  unsigned nr_data;\n"
 printf "  void **data;\n"
 printf "\n"
-printf "  /* per-architecture swap-regions.  */\n"
-printf "  struct gdbarch_swap *swap;\n"
-printf "\n"
 cat <<EOF
   /* Multi-arch values.
 
@@ -1547,8 +1544,8 @@ done
 cat <<EOF
   /* target specific vector and its dump routine.  */
   NULL, NULL,
-  /*per-architecture data-pointers and swap regions.  */
-  0, NULL, NULL,
+  /*per-architecture data-pointers.  */
+  0, NULL,
   /* Multi-arch values */
 EOF
 function_list | while do_read
