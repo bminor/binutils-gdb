@@ -1,3 +1,10 @@
+2012-10-31  Andrew Burgess  <aburgess@broadcom.com>
+
+	PR cli/14772
+	* c-typeprint.c (c_print_type): Don't print a space for vector
+	types, this is handled within the suffix.
+	(c_type_print_varspec_suffix): Add a space to vector suffix.
+
 2012-10-26  Pedro Alves  <palves@redhat.com>
 
 	* amd64-tdep.c (amd64_relocate_instruction): Use

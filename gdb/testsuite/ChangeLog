@@ -1,3 +1,12 @@
+2012-10-31  Andrew Burgess  <aburgess@broadcom.com>
+
+	PR cli/14772
+	* gdb.base/gnu_vector.c (union_with_vector_1)
+	(struct_with_vector_1): Add new struct and union for testing
+	ptype.
+	* gdb.base/gnu_vector.exp: Add testing of ptype on vectors, and
+	structs / unions containing vectors.
+
 2012-10-25  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/ftrace.exp (test_fast_tracepoints): Use

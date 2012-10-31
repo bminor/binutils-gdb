@@ -67,7 +67,8 @@ c_print_type (struct type *type,
       || ((show > 0 || TYPE_NAME (type) == 0)
 	  && (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC
 	      || code == TYPE_CODE_METHOD
-	      || code == TYPE_CODE_ARRAY
+	      || (code == TYPE_CODE_ARRAY
+		  && !TYPE_VECTOR (type))
 	      || code == TYPE_CODE_MEMBERPTR
 	      || code == TYPE_CODE_METHODPTR
 	      || code == TYPE_CODE_REF)))
@@ -619,7 +620,7 @@ c_type_print_varspec_suffix (struct type *type,
 	  fprintf_filtered (stream, ")");
 
 	fprintf_filtered (stream, (is_vector ?
-				   "__attribute__ ((vector_size(" : "["));
+				   " __attribute__ ((vector_size(" : "["));
 	if (get_array_bounds (type, &low_bound, &high_bound))
 	  fprintf_filtered (stream, "%s", 
 			    plongest (high_bound - low_bound + 1));

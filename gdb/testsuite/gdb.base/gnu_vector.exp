@@ -130,3 +130,13 @@ gdb_test "print i2 + i4a" "Cannot perform operation on vectors with different ty
 gdb_test "print f4a + f2" "Cannot perform operation on vectors with different types"
 gdb_test "print f2 + f4a" "Cannot perform operation on vectors with different types"
 
+# Test ptype on vector types.
+gdb_test "ptype c4" "type = char __attribute__ \\(\\(vector_size\\(4\\)\\)\\)"
+gdb_test "ptype char4" "type = char __attribute__ \\(\\(vector_size\\(4\\)\\)\\)"
+gdb_test "ptype i4a" "type = int __attribute__ \\(\\(vector_size\\(4\\)\\)\\)"
+gdb_test "ptype int4" "type = int __attribute__ \\(\\(vector_size\\(4\\)\\)\\)"
+gdb_test "ptype f4b" "type = float __attribute__ \\(\\(vector_size\\(4\\)\\)\\)"
+gdb_test "ptype float4" "type = float __attribute__ \\(\\(vector_size\\(4\\)\\)\\)"
+
+gdb_test "ptype union_with_vector_1" "type = union {\r\n\[\t \]+int i;\r\n\[\t \]+char cv __attribute__ \\(\\(vector_size\\(4\\)\\)\\);\r\n}"
+gdb_test "ptype struct_with_vector_1" "type = struct {\r\n\[\t \]+int i;\r\n\[\t \]+char cv __attribute__ \\(\\(vector_size\\(4\\)\\)\\);\r\n\[\t \]+float4 f4;\r\n}"
