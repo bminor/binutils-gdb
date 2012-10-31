@@ -48,7 +48,9 @@
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
 #endif
+#ifdef HAVE_WCHAR_H
 #include <wchar.h>
+#endif
 
 #if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
@@ -386,7 +388,7 @@ print_vma (bfd_vma vma, print_mode mode)
 }
 
 /* Display a symbol on stdout.  Handles the display of control characters and
-   multibye characters.
+   multibye characters (assuming the host environment supports them).
 
    Display at most abs(WIDTH) characters, truncating as necessary, unless do_wide is true.
 
@@ -400,7 +402,9 @@ print_symbol (int width, const char *symbol)
 {
   bfd_boolean extra_padding = FALSE;
   int num_printed = 0;
+#ifdef HAVE_MBSTATE_T
   mbstate_t state;
+#endif
   int width_remaining;
 
   if (width < 0)
@@ -417,13 +421,14 @@ print_symbol (int width, const char *symbol)
   else
     width_remaining = width;
 
+#ifdef HAVE_MBSTATE_T
   /* Initialise the multibyte conversion state.  */
   memset (& state, 0, sizeof (state));
+#endif
 
   while (width_remaining)
     {
       size_t  n;
-      wchar_t w;
       const char c = *symbol++;
 
       if (c == 0)
@@ -449,15 +454,22 @@ print_symbol (int width, const char *symbol)
 	}
       else
 	{
+#ifdef HAVE_MBSTATE_T
+	  wchar_t w;
+#endif
 	  /* Let printf do the hard work of displaying multibyte characters.  */
 	  printf ("%.1s", symbol - 1);
 	  width_remaining --;
 	  num_printed ++;
 
+#ifdef HAVE_MBSTATE_T
 	  /* Try to find out how many bytes made up the character that was
 	     just printed.  Advance the symbol pointer past the bytes that
 	     were displayed.  */
 	  n = mbrtowc (& w, symbol - 1, MB_CUR_MAX, & state);
+#else
+	  n = 1;
+#endif
 	  if (n != (size_t) -1 && n != (size_t) -2 && n > 0)
 	    symbol += (n - 1);
 	}

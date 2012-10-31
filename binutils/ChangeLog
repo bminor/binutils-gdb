@@ -1,3 +1,12 @@
+2012-10-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/14779
+	* configure.in: Add checks for wchar.h and mbstate_t.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* readelf.c: Conditionally include wchar.h.
+	(print_symbol): Conditionally use mbstate_t.
+
 2012-10-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objdump.c (dump_dwarf): Handle bfd_mach_x64_32 and
