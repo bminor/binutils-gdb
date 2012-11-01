@@ -1,4 +1,10 @@
 2012-11-01  Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/micromips-b16.d: New test.
+	* gas/mips/micromips-b16.s: New test source.
+	* gas/mips/mips.exp: Run the new test.
+
+2012-11-01  Chao-ying Fu  <fu@mips.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/micromips-branch-delay.l: Update messages for 16-bit

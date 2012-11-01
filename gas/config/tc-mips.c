@@ -4464,6 +4464,11 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      || lo16_reloc_p (reloc_type[0])))
 	ip->fixp[0]->fx_no_overflow = 1;
 
+      /* These relocations can have an addend that won't fit in 2 octets.  */
+      if (reloc_type[0] == BFD_RELOC_MICROMIPS_7_PCREL_S1
+	  || reloc_type[0] == BFD_RELOC_MICROMIPS_10_PCREL_S1)
+	ip->fixp[0]->fx_no_overflow = 1;
+
       if (mips_relax.sequence)
 	{
 	  if (mips_relax.first_fixup == 0)

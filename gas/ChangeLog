@@ -1,3 +1,8 @@
+2012-11-01  Chao-ying Fu  <fu@mips.com>
+
+	* config/tc-mips.c (append_insn): Set fx_no_overflow for 16-bit
+	microMIPS branch relocations.
+
 2012-11-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (is_delay_slot_valid): Don't accept macros
