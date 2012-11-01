@@ -12666,6 +12666,10 @@ get_note_type (unsigned e_type)
 	return _("NT_PPC_VMX (ppc Altivec registers)");
       case NT_PPC_VSX:
 	return _("NT_PPC_VSX (ppc VSX registers)");
+      case NT_386_TLS:
+	return _("NT_386_TLS (x86 TLS information)");
+      case NT_386_IOPERM:
+	return _("NT_386_IOPERM (x86 I/O permissions)");
       case NT_X86_XSTATE:
 	return _("NT_X86_XSTATE (x86 XSAVE extended state)");
       case NT_S390_HIGH_GPRS:
