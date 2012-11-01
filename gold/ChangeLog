@@ -10,6 +10,11 @@
 
 	* nacl.cc: Include "libiberty.h" for vasprintf declaration.
 
+2012-11-01  Roland McGrath  <mcgrathr@google.com>
+
+	* descriptors.cc (set_close_on_exec): Add ATTRIBUTE_UNUSED to the
+	parameter, which is unused in the [!F_SETFD] case.
+
 2012-10-30  Steve McIntyre  <steve.mcintyre@linaro.org>
 
 	* gold.cc (Target_arm::do_adjust_elf_header): Add the
