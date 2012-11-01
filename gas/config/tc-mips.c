@@ -2321,8 +2321,7 @@ is_delay_slot_valid (const struct mips_opcode *mo)
     return TRUE;
 
   if (mo->pinfo == INSN_MACRO)
-    return ((history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_16BIT) == 0
-	    ? TRUE : FALSE);
+    return (history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_16BIT) == 0;
   if ((history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT) != 0
       && micromips_insn_length (mo) != 4)
     return FALSE;
