@@ -1,3 +1,7 @@
+2012-11-01  Roland McGrath  <mcgrathr@google.com>
+
+	* nacl.cc: Include "libiberty.h" for vasprintf declaration.
+
 2012-10-30  Steve McIntyre  <steve.mcintyre@linaro.org>
 
 	* gold.cc (Target_arm::do_adjust_elf_header): Add the
