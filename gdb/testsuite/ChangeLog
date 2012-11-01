@@ -1,3 +1,9 @@
+2012-11-01  Doug Evans  <dje@google.com>
+
+	* gdb.arch/amd64-pseudo.c (main): Mark registers that the testsuite
+	changes as clobbered (e.g., amd64-dword.exp) so gcc doesn't try to
+	use them.
+
 2012-10-31  Andrew Burgess  <aburgess@broadcom.com>
 
 	PR cli/14772
