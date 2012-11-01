@@ -4594,7 +4594,8 @@ insert_pad (lang_statement_union_type **ptr,
     }
   pad->padding_statement.output_offset = dot - output_section->vma;
   pad->padding_statement.size = alignment_needed;
-  output_section->size += alignment_needed;
+  output_section->size = TO_SIZE (dot + TO_ADDR (alignment_needed)
+				  - output_section->vma);
 }
 
 /* Work out how much this section will move the dot point.  */
@@ -5159,7 +5160,9 @@ lang_size_sections_1
 	    if (size < TO_SIZE ((unsigned) 1))
 	      size = TO_SIZE ((unsigned) 1);
 	    dot += TO_ADDR (size);
-	    output_section_statement->bfd_section->size += size;
+	    output_section_statement->bfd_section->size
+	      = TO_SIZE (dot - output_section_statement->bfd_section->vma);
+
 	  }
 	  break;
 
@@ -5173,7 +5176,8 @@ lang_size_sections_1
 	      output_section_statement->bfd_section;
 	    size = bfd_get_reloc_size (s->reloc_statement.howto);
 	    dot += TO_ADDR (size);
-	    output_section_statement->bfd_section->size += size;
+	    output_section_statement->bfd_section->size
+	      = TO_SIZE (dot - output_section_statement->bfd_section->vma);
 	  }
 	  break;
 

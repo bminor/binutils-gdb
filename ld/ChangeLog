@@ -1,3 +1,9 @@
+2012-11-01  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (insert_pad): Correct output section size calculation.
+	(lang_size_sections_1): Likewise for lang_data_statement and
+	lang_reloc_statement.
+
 2012-10-29  Alan Modra  <amodra@gmail.com>
 
 	* configure.tgt (powerpcle-pe,winnt,cygwin): Add deffilep.o
