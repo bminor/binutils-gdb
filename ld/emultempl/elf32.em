@@ -2467,6 +2467,8 @@ fragment <<EOF
                                 processing at runtime\n"));
   fprintf (file, _("\
   -z relro                    Create RELRO program header\n"));
+  fprintf (file, _("\
+  -z stacksize=SIZE           Set size of stack segment\n"));
 EOF
 fi
 
