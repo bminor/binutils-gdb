@@ -8,6 +8,9 @@
 
 2012-11-01  Roland McGrath  <mcgrathr@google.com>
 
+	* system.h: Move inclusion of <clocale> to after <libintl.h> in
+	[ENABLE_NLS] section, and separately at top of [!ENABLE_NLS] section.
+
 	* nacl.cc: Include "libiberty.h" for vasprintf declaration.
 
 2012-11-01  Roland McGrath  <mcgrathr@google.com>
