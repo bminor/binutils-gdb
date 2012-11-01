@@ -1,5 +1,13 @@
 2012-11-01  Roland McGrath  <mcgrathr@google.com>
 
+	* dwarf_reader.cc (Sized_elf_reloc_mapper::symbol_section): Cast
+	SYMNDX to off_t before comparing it to this->data_size().
+	* output.cc (Output_symtab_xindex::endian_do_write): Likewise.
+	* incremental.cc (Output_section_incremental_inputs::do_write):
+	Cast GLOBAL_SYM_COUNT to off_t before comparing it to SYMTAB_SIZE.
+
+2012-11-01  Roland McGrath  <mcgrathr@google.com>
+
 	* nacl.cc: Include "libiberty.h" for vasprintf declaration.
 
 2012-10-30  Steve McIntyre  <steve.mcintyre@linaro.org>

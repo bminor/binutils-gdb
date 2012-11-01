@@ -1432,7 +1432,7 @@ Output_section_incremental_inputs<size, big_endian>::do_write(Output_file* of)
   gold_assert(pov - oview == oview_size);
 
   // Write the .gnu_incremental_symtab section.
-  gold_assert(global_sym_count * 4 == symtab_size);
+  gold_assert(static_cast<off_t>(global_sym_count) * 4 == symtab_size);
   this->write_symtab(symtab_view, global_syms, global_sym_count);
 
   delete[] global_syms;
