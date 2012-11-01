@@ -2293,7 +2293,8 @@ class Target_arm : public Sized_target<32, big_endian>
 		  const unsigned char* prelocs,
 		  size_t reloc_count,
 		  Output_section* output_section,
-		  off_t offset_in_output_section,
+		  typename elfcpp::Elf_types<32>::Elf_Off
+                    offset_in_output_section,
 		  const Relocatable_relocs*,
 		  unsigned char* view,
 		  Arm_address view_address,
@@ -2309,7 +2310,8 @@ class Target_arm : public Sized_target<32, big_endian>
 			       const unsigned char* preloc_in,
 			       size_t relnum,
 			       Output_section* output_section,
-			       off_t offset_in_output_section,
+			       typename elfcpp::Elf_types<32>::Elf_Off
+                                 offset_in_output_section,
 			       unsigned char* view,
 			       typename elfcpp::Elf_types<32>::Elf_Addr
 				 view_address,
@@ -9603,7 +9605,7 @@ Target_arm<big_endian>::relocate_relocs(
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section* output_section,
-    off_t offset_in_output_section,
+    typename elfcpp::Elf_types<32>::Elf_Off offset_in_output_section,
     const Relocatable_relocs* rr,
     unsigned char* view,
     Arm_address view_address,
@@ -9638,7 +9640,7 @@ Target_arm<big_endian>::relocate_special_relocatable(
     const unsigned char* preloc_in,
     size_t relnum,
     Output_section* output_section,
-    off_t offset_in_output_section,
+    typename elfcpp::Elf_types<32>::Elf_Off offset_in_output_section,
     unsigned char* view,
     elfcpp::Elf_types<32>::Elf_Addr view_address,
     section_size_type,

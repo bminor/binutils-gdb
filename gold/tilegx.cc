@@ -316,7 +316,7 @@ class Target_tilegx : public Sized_target<size, big_endian>
       const unsigned char* prelocs,
       size_t reloc_count,
       Output_section* output_section,
-      off_t offset_in_output_section,
+      typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
       const Relocatable_relocs*,
       unsigned char* view,
       typename elfcpp::Elf_types<size>::Elf_Addr view_address,
@@ -780,7 +780,7 @@ public:
     // right shift operand by this number of bits.
     unsigned char srshift;
 
-    // the offset to apply relocation. 
+    // the offset to apply relocation.
     unsigned char doffset;
 
     // set to 1 for pc-relative relocation.
@@ -899,7 +899,7 @@ private:
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<valsize, big_endian>::readval(wv);
     Valtype reloc = 0;
-    if (size == 32) 
+    if (size == 32)
       reloc = Bits<32>::sign_extend(psymval->value(object, addend) - address)
                >> srshift;
     else
@@ -927,7 +927,7 @@ private:
       Valtype;
     unsigned char* wv = view;
     Valtype reloc = 0;
-    if (size == 32) 
+    if (size == 32)
       reloc = Bits<32>::sign_extend(psymval->value(object, addend) - address)
                >> srshift;
     else
@@ -954,7 +954,7 @@ private:
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<valsize, big_endian>::readval(wv);
     Valtype reloc = 0;
-    if (size == 32) 
+    if (size == 32)
       reloc = Bits<32>::sign_extend(psymval->value(object, addend) - address)
                >> srshift;
     else
@@ -1043,7 +1043,7 @@ public:
                 const Symbol_value<size>* psymval,
                 typename elfcpp::Elf_types<size>::Elf_Addr addend,
                 Tilegx_howto &r_howto)
-  { 
+  {
     This::template rela<64>(view, object, psymval, addend,
                             (elfcpp::Elf_Xword)(r_howto.srshift),
                             (elfcpp::Elf_Xword)(r_howto.doffset),
@@ -1057,7 +1057,7 @@ public:
                       typename elfcpp::Elf_types<size>::Elf_Addr addend,
                       typename elfcpp::Elf_types<size>::Elf_Addr address,
                       Tilegx_howto &r_howto)
-  { 
+  {
     This::template pcrela<64>(view, object, psymval, addend, address,
                               (elfcpp::Elf_Xword)(r_howto.srshift),
                               (elfcpp::Elf_Xword)(r_howto.doffset),
@@ -1071,7 +1071,7 @@ public:
                          typename elfcpp::Elf_types<size>::Elf_Addr addend,
                          typename elfcpp::Elf_types<size>::Elf_Addr address,
                          unsigned int r_type)
-  { 
+  {
 
     elfcpp::Elf_Xword doffset1 = 0llu;
     elfcpp::Elf_Xword doffset2 = 0llu;
@@ -1111,8 +1111,8 @@ public:
   static inline void
   tls_relax(unsigned char* view, unsigned int r_type,
             tls::Tls_optimization opt_t)
-  { 
- 
+  {
+
     const uint64_t TILEGX_X_MOVE_R0_R0 = 0x283bf8005107f000llu;
     const uint64_t TILEGX_Y_MOVE_R0_R0 = 0xae05f800540bf000llu;
     const uint64_t TILEGX_X_LD         = 0x286ae80000000000llu;
@@ -1176,7 +1176,7 @@ public:
           // LE: 1. copy dest operand into the first source operand
           //     2. change the opcode to "move"
           reloc = (val & 0x3Fllu) << 6;
-          reloc |= (TILEGX_X_MOVE_R0_R0 & TILEGX_X0_RRR_SRCB_MASK); 
+          reloc |= (TILEGX_X_MOVE_R0_R0 & TILEGX_X0_RRR_SRCB_MASK);
           val &= ~R_TILEGX_IMM8_X0_TLS_ADD_LE_MASK;
         } else
           gold_unreachable();
@@ -1228,7 +1228,7 @@ public:
         break;
       case elfcpp::R_TILEGX_IMM8_X0_TLS_GD_ADD:
         if (opt_t == tls::TLSOPT_NONE) {
-          // GD see comments for optimize_tls_reloc 
+          // GD see comments for optimize_tls_reloc
           reloc = TILEGX_X_MOVE_R0_R0 & TILEGX_X0_RRR_SRCB_MASK;
           val &= ~TILEGX_X0_RRR_SRCB_MASK;
         } else if (opt_t == tls::TLSOPT_TO_IE
@@ -1890,7 +1890,7 @@ Target_tilegx<size, big_endian>::got_section(Symbol_table* symtab,
                                         false, false);
 
         this->got_->add_global(this->tilegx_dynamic_, GOT_TYPE_STANDARD);
-      } else 
+      } else
         // for executable, just set the first entry to zero.
         this->got_->set_current_data_size(size / 8);
 
@@ -2022,7 +2022,7 @@ Output_data_plt_tilegx<size, big_endian>::add_entry(Symbol_table* symtab,
       plt_index = *pcount;
 
       // TILEGX .plt section layout
-      // 
+      //
       //  ----
       //   plt_header
       //  ----
@@ -2030,9 +2030,9 @@ Output_data_plt_tilegx<size, big_endian>::add_entry(Symbol_table* symtab,
       //  ----
       //   ...
       //  ----
-      //  
+      //
       // TILEGX .got.plt section layout
-      // 
+      //
       //  ----
       //  reserv1
       //  ----
@@ -2041,7 +2041,7 @@ Output_data_plt_tilegx<size, big_endian>::add_entry(Symbol_table* symtab,
       //   entries for normal function
       //  ----
       //   ...
-      //  ---- 
+      //  ----
       //   entries for ifunc
       //  ----
       //   ...
@@ -2874,8 +2874,8 @@ Target_tilegx<size, big_endian>::got_mod_index_entry(Symbol_table* symtab,
 //       move        r0,  r0                     Y0/Y1/X0/X1
 //       move        r0,  r0                     Y0/Y1/X0/X1
 //       add         adr, r0, tp                 Y0/Y1/X0/X1
-//     
-//     
+//
+//
 //   compiler IE reference
 //    |
 //    V
@@ -3123,7 +3123,7 @@ Target_tilegx<size, big_endian>::Scan::unsupported_reloc_local(
 }
 
 // We are about to emit a dynamic relocation of type R_TYPE.  If the
-// dynamic linker does not support it, issue an error. 
+// dynamic linker does not support it, issue an error.
 template<int size, bool big_endian>
 void
 Target_tilegx<size, big_endian>::Scan::check_non_pic(Relobj* object,
@@ -3296,7 +3296,7 @@ Target_tilegx<size, big_endian>::Scan::local(Symbol_table* symtab,
                                                     data_shndx,
                                                     reloc.get_r_offset(),
                                                     reloc.get_r_addend());
-             
+
             }
         }
       break;
@@ -3450,7 +3450,7 @@ Target_tilegx<size, big_endian>::Scan::local(Symbol_table* symtab,
                break;
 
              // GD: requires two GOT entry for module index and offset
-             // IE: requires one GOT entry for tp-relative offset 
+             // IE: requires one GOT entry for tp-relative offset
              // LE: shouldn't happen for global symbol
              case elfcpp::R_TILEGX_IMM16_X0_HW0_TLS_GD:
              case elfcpp::R_TILEGX_IMM16_X1_HW0_TLS_GD:
@@ -3473,7 +3473,7 @@ Target_tilegx<size, big_endian>::Scan::local(Symbol_table* symtab,
                                    r_sym, shndx);
                    else
                      got->add_local_pair_with_rel(object, r_sym, shndx,
-                                           GOT_TYPE_TLS_PAIR, 
+                                           GOT_TYPE_TLS_PAIR,
                                            target->rela_dyn_section(layout),
                                            size == 32
                                            ? elfcpp::R_TILEGX_TLS_DTPMOD32
@@ -3493,7 +3493,7 @@ Target_tilegx<size, big_endian>::Scan::local(Symbol_table* symtab,
                                             ? elfcpp::R_TILEGX_TLS_TPOFF32
                                             : elfcpp::R_TILEGX_TLS_TPOFF64,
                                             got, off, 0);
-                  } else if (opt_t != tls::TLSOPT_TO_LE) 
+                  } else if (opt_t != tls::TLSOPT_TO_LE)
                     // only TO_LE is allowed for local symbol
                     unsupported_reloc_local(object, r_type);
                }
@@ -4010,7 +4010,7 @@ Target_tilegx<size, big_endian>::Scan::global(Symbol_table* symtab,
                                          symtab->lookup("__tls_get_addr"));
                 }
                 break;
-          
+
               // only make effect when applying relocation
               case elfcpp::R_TILEGX_TLS_IE_LOAD:
               case elfcpp::R_TILEGX_IMM8_X0_TLS_ADD:
@@ -4022,9 +4022,9 @@ Target_tilegx<size, big_endian>::Scan::global(Symbol_table* symtab,
               case elfcpp::R_TILEGX_IMM8_Y0_TLS_GD_ADD:
               case elfcpp::R_TILEGX_IMM8_Y1_TLS_GD_ADD:
                 break;
-          
+
               // GD: requires two GOT entry for module index and offset
-              // IE: requires one GOT entry for tp-relative offset 
+              // IE: requires one GOT entry for tp-relative offset
               // LE: shouldn't happen for global symbol
               case elfcpp::R_TILEGX_IMM16_X0_HW0_TLS_GD:
               case elfcpp::R_TILEGX_IMM16_X1_HW0_TLS_GD:
@@ -4058,7 +4058,7 @@ Target_tilegx<size, big_endian>::Scan::global(Symbol_table* symtab,
                     unsupported_reloc_global(object, r_type, gsym);
                 }
                 break;
-          
+
               // IE
               case elfcpp::R_TILEGX_IMM16_X0_HW0_TLS_IE:
               case elfcpp::R_TILEGX_IMM16_X1_HW0_TLS_IE:
@@ -4081,7 +4081,7 @@ Target_tilegx<size, big_endian>::Scan::global(Symbol_table* symtab,
                     unsupported_reloc_global(object, r_type, gsym);
                 }
                 break;
-          
+
               // LE
               case elfcpp::R_TILEGX_IMM16_X0_HW0_TLS_LE:
               case elfcpp::R_TILEGX_IMM16_X1_HW0_TLS_LE:
@@ -4626,16 +4626,16 @@ Target_tilegx<size, big_endian>::Relocate::relocate(
               } // else if (opt_t == tls::TLSOPT_TO_LE)
                 //   both GD/IE are turned into LE, which
                 //   is absolute relocation.
-                // 
+                //
                 //  |  go through
-                //  |  
+                //  |
                 //  V
             // LE
-            // 
+            //
             // tp
             // |
             // V
-            //  t_var1 | t_var2 | t_var3 | ... 
+            //  t_var1 | t_var2 | t_var3 | ...
             //  --------------------------------------------------
             //
             //  so offset to tp should be negative, we get offset
@@ -4656,7 +4656,7 @@ Target_tilegx<size, big_endian>::Relocate::relocate(
                               || issue_undefined_symbol_error(gsym));
                   return false;
                 }
-                
+
                 typename elfcpp::Elf_types<size>::Elf_Addr value
                   = psymval->value(relinfo->object, 0);
                 symval.set_output_value(value);
@@ -4836,7 +4836,7 @@ Target_tilegx<size, big_endian>::relocate_relocs(
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section* output_section,
-    off_t offset_in_output_section,
+    typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
     const Relocatable_relocs* rr,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr view_address,
@@ -4889,7 +4889,7 @@ Target_tilegx<size, big_endian>::do_ehframe_datarel_base() const
   return ssym->value();
 }
 
-// The selector for tilegx object files. 
+// The selector for tilegx object files.
 
 template<int size, bool big_endian>
 class Target_selector_tilegx : public Target_selector

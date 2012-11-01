@@ -1,22 +1,31 @@
 2012-11-01  Roland McGrath  <mcgrathr@google.com>
 
+	* target.h (Sized_target::relocate_relocs): Use Elf_Off
+	for offset_in_output_section parameter.
+	(Sized_target::relocate_special_relocatable): Likewise.
+	* arm.cc (Target_arm::relocate_relocs): Likewise.
+	(Target_arm::relocate_special_relocatable): Likewise.
+	* i386.cc (Target_i386::relocate_relocs): Likewise.
+	* powerpc.cc (Target_powerpc::relocate_relocs): Likewise.
+	* sparc.cc (Target_sparc::relocate_relocs): Likewise.
+	* target-reloc.h (relocate_relocs): Likewise.
+	* testsuite/testfile.cc (Target_test): Likewise.
+	* tilegx.cc (Target_tilegx::relocate_relocs): Likewise.
+	* x86_64.cc (Target_x86_64::relocate_relocs): Likewise.
+
+	* system.h: Move inclusion of <clocale> to after <libintl.h> in
+	[ENABLE_NLS] section, and separately at top of [!ENABLE_NLS] section.
+
+	* descriptors.cc (set_close_on_exec): Add ATTRIBUTE_UNUSED to the
+	parameter, which is unused in the [!F_SETFD] case.
+
 	* dwarf_reader.cc (Sized_elf_reloc_mapper::symbol_section): Cast
 	SYMNDX to off_t before comparing it to this->data_size().
 	* output.cc (Output_symtab_xindex::endian_do_write): Likewise.
 	* incremental.cc (Output_section_incremental_inputs::do_write):
 	Cast GLOBAL_SYM_COUNT to off_t before comparing it to SYMTAB_SIZE.
 
-2012-11-01  Roland McGrath  <mcgrathr@google.com>
-
-	* system.h: Move inclusion of <clocale> to after <libintl.h> in
-	[ENABLE_NLS] section, and separately at top of [!ENABLE_NLS] section.
-
 	* nacl.cc: Include "libiberty.h" for vasprintf declaration.
-
-2012-11-01  Roland McGrath  <mcgrathr@google.com>
-
-	* descriptors.cc (set_close_on_exec): Add ATTRIBUTE_UNUSED to the
-	parameter, which is unused in the [!F_SETFD] case.
 
 2012-10-30  Steve McIntyre  <steve.mcintyre@linaro.org>
 

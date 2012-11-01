@@ -838,7 +838,8 @@ class Sized_target : public Target
 		  const unsigned char* prelocs,
 		  size_t reloc_count,
 		  Output_section* output_section,
-		  off_t offset_in_output_section,
+		  typename elfcpp::Elf_types<size>::Elf_Off
+                    offset_in_output_section,
 		  const Relocatable_relocs*,
 		  unsigned char* view,
 		  typename elfcpp::Elf_types<size>::Elf_Addr view_address,
@@ -868,7 +869,8 @@ class Sized_target : public Target
 			       const unsigned char* /* preloc_in */,
 			       size_t /* relnum */,
 			       Output_section* /* output_section */,
-			       off_t /* offset_in_output_section */,
+			       typename elfcpp::Elf_types<size>::Elf_Off
+                                 /* offset_in_output_section */,
 			       unsigned char* /* view */,
 			       typename elfcpp::Elf_types<size>::Elf_Addr
 				 /* view_address */,

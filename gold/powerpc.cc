@@ -393,7 +393,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
 		  const unsigned char* prelocs,
 		  size_t reloc_count,
 		  Output_section* output_section,
-		  off_t offset_in_output_section,
+		  typename elfcpp::Elf_types<size>::Elf_Off
+                    offset_in_output_section,
 		  const Relocatable_relocs*,
 		  unsigned char*,
 		  Address view_address,
@@ -2511,7 +2512,7 @@ savegpr0_tail(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 restgpr0(unsigned char* p, int r)
 {
   uint32_t insn = ld_0_1 + (r << 21) + (1 << 16) - (32 - r) * 8;
@@ -2520,7 +2521,7 @@ restgpr0(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 restgpr0_tail(unsigned char* p, int r)
 {
   uint32_t insn = ld_0_1 + 16;
@@ -2539,7 +2540,7 @@ restgpr0_tail(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 savegpr1(unsigned char* p, int r)
 {
   uint32_t insn = std_0_12 + (r << 21) + (1 << 16) - (32 - r) * 8;
@@ -2548,7 +2549,7 @@ savegpr1(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 savegpr1_tail(unsigned char* p, int r)
 {
   p = savegpr1<big_endian>(p, r);
@@ -2557,7 +2558,7 @@ savegpr1_tail(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 restgpr1(unsigned char* p, int r)
 {
   uint32_t insn = ld_0_12 + (r << 21) + (1 << 16) - (32 - r) * 8;
@@ -2566,7 +2567,7 @@ restgpr1(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 restgpr1_tail(unsigned char* p, int r)
 {
   p = restgpr1<big_endian>(p, r);
@@ -2575,7 +2576,7 @@ restgpr1_tail(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 savefpr(unsigned char* p, int r)
 {
   uint32_t insn = stfd_0_1 + (r << 21) + (1 << 16) - (32 - r) * 8;
@@ -2584,7 +2585,7 @@ savefpr(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 savefpr0_tail(unsigned char* p, int r)
 {
   p = savefpr<big_endian>(p, r);
@@ -2595,7 +2596,7 @@ savefpr0_tail(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 restfpr(unsigned char* p, int r)
 {
   uint32_t insn = lfd_0_1 + (r << 21) + (1 << 16) - (32 - r) * 8;
@@ -2604,7 +2605,7 @@ restfpr(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 restfpr0_tail(unsigned char* p, int r)
 {
   write_insn<big_endian>(p, ld_0_1 + 16);
@@ -2622,7 +2623,7 @@ restfpr0_tail(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 savefpr1_tail(unsigned char* p, int r)
 {
   p = savefpr<big_endian>(p, r);
@@ -2631,7 +2632,7 @@ savefpr1_tail(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 restfpr1_tail(unsigned char* p, int r)
 {
   p = restfpr<big_endian>(p, r);
@@ -2640,7 +2641,7 @@ restfpr1_tail(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 savevr(unsigned char* p, int r)
 {
   uint32_t insn = li_12_0 + (1 << 16) - (32 - r) * 16;
@@ -2652,7 +2653,7 @@ savevr(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 savevr_tail(unsigned char* p, int r)
 {
   p = savevr<big_endian>(p, r);
@@ -2661,7 +2662,7 @@ savevr_tail(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 restvr(unsigned char* p, int r)
 {
   uint32_t insn = li_12_0 + (1 << 16) - (32 - r) * 16;
@@ -2673,7 +2674,7 @@ restvr(unsigned char* p, int r)
 }
 
 template<bool big_endian>
-static unsigned char* 
+static unsigned char*
 restvr_tail(unsigned char* p, int r)
 {
   p = restvr<big_endian>(p, r);
@@ -5177,7 +5178,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section* output_section,
-    off_t offset_in_output_section,
+    typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
     const Relocatable_relocs* rr,
     unsigned char*,
     Address view_address,

@@ -414,7 +414,8 @@ class Target_i386 : public Sized_target<32, false>
 		  const unsigned char* prelocs,
 		  size_t reloc_count,
 		  Output_section* output_section,
-		  off_t offset_in_output_section,
+		  typename elfcpp::Elf_types<32>::Elf_Off
+                    offset_in_output_section,
 		  const Relocatable_relocs*,
 		  unsigned char* view,
 		  elfcpp::Elf_types<32>::Elf_Addr view_address,
@@ -3617,7 +3618,7 @@ Target_i386::relocate_relocs(
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section* output_section,
-    off_t offset_in_output_section,
+    typename elfcpp::Elf_types<32>::Elf_Off offset_in_output_section,
     const Relocatable_relocs* rr,
     unsigned char* view,
     elfcpp::Elf_types<32>::Elf_Addr view_address,
