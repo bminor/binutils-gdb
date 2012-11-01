@@ -1,3 +1,11 @@
+2012-11-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (is_delay_slot_valid): Don't accept macros
+	in 16-bit delay slots.
+	(macro_build_jalr): Emit 32-bit JALR if placed in a 32-bit delay
+	slot.
+	(macro) <M_JAL_2>: Likewise
+
 2012-10-31  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* config/tc-microblaze.c: Check for weak symbols before

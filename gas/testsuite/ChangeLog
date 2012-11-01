@@ -1,3 +1,16 @@
+2012-11-01  Chao-ying Fu  <fu@mips.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/micromips-branch-delay.l: Update messages for 16-bit
+	delay slot changes.
+	* gas/mips/micromips-warn-branch-delay.d: New test.
+	* gas/mips/micromips-warn-branch-delay.l: Stderr output for the
+	new test.
+	* gas/mips/micromips-warn-branch-delay-1.d: New test.
+	* gas/mips/micromips-warn-branch-delay.s: New test source.
+	* gas/mips/micromips-warn-branch-delay-1.s: New test source.
+	* gas/mips/mips.exp: Run the new tests.
+
 2012-10-31  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* gas/microblaze: New.

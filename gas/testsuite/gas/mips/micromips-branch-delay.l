@@ -1,6 +1,6 @@
 .*: Assembler messages:
-.*:17: Warning: Macro instruction expanded into a wrong size instruction in a 16-bit branch delay slot
-.*:19: Warning: Macro instruction expanded into a wrong size instruction in a 16-bit branch delay slot
+.*:17: Warning: Wrong size instruction in a 16-bit branch delay slot
+.*:19: Warning: Wrong size instruction in a 16-bit branch delay slot
 .*:21: Warning: Macro instruction expanded into a wrong size instruction in a 16-bit branch delay slot
 .*:40: Warning: Wrong size instruction in a 16-bit branch delay slot
 .*:44: Warning: Wrong size instruction in a 16-bit branch delay slot

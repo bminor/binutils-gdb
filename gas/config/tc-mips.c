@@ -2301,7 +2301,18 @@ is_size_valid (const struct mips_opcode *mo)
 }
 
 /* Return TRUE if the microMIPS opcode MO is valid for the delay slot
-   of the preceding instruction.  Always TRUE in the standard MIPS mode.  */
+   of the preceding instruction.  Always TRUE in the standard MIPS mode.
+
+   We don't accept macros in 16-bit delay slots to avoid a case where
+   a macro expansion fails because it relies on a preceding 32-bit real
+   instruction to have matched and does not handle the operands correctly.
+   The only macros that may expand to 16-bit instructions are JAL that
+   cannot be placed in a delay slot anyway, and corner cases of BALIGN
+   and BGT (that likewise cannot be placed in a delay slot) that decay to
+   a NOP.  In all these cases the macros precede any corresponding real
+   instruction definitions in the opcode table, so they will match in the
+   second pass where the size of the delay slot is ignored and therefore
+   produce correct code.  */
 
 static bfd_boolean
 is_delay_slot_valid (const struct mips_opcode *mo)
@@ -2310,7 +2321,8 @@ is_delay_slot_valid (const struct mips_opcode *mo)
     return TRUE;
 
   if (mo->pinfo == INSN_MACRO)
-    return TRUE;
+    return ((history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_16BIT) == 0
+	    ? TRUE : FALSE);
   if ((history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT) != 0
       && micromips_insn_length (mo) != 4)
     return FALSE;
@@ -5328,7 +5340,8 @@ macro_build_jalr (expressionS *ep, int cprestore)
   if (mips_opts.micromips)
     {
       jalr = mips_opts.noreorder && !cprestore ? "jalr" : "jalrs";
-      if (MIPS_JALR_HINT_P (ep))
+      if (MIPS_JALR_HINT_P (ep)
+	  || (history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
 	macro_build (NULL, jalr, "t,s", RA, PIC_CALL_REG);
       else
 	macro_build (NULL, jalr, "mj", PIC_CALL_REG);
@@ -7768,7 +7781,9 @@ macro (struct mips_cl_insn *ip)
       if (mips_pic == NO_PIC)
 	{
 	  s = jals ? "jalrs" : "jalr";
-	  if (mips_opts.micromips && dreg == RA)
+	  if (mips_opts.micromips
+	      && dreg == RA
+	      && !(history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
 	    macro_build (NULL, s, "mj", sreg);
 	  else
 	    macro_build (NULL, s, JALR_FMT, dreg, sreg);
@@ -7783,7 +7798,9 @@ macro (struct mips_cl_insn *ip)
 
 	  s = (mips_opts.micromips && (!mips_opts.noreorder || cprestore)
 	       ? "jalrs" : "jalr");
-	  if (mips_opts.micromips && dreg == RA)
+	  if (mips_opts.micromips
+	      && dreg == RA
+	      && !(history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
 	    macro_build (NULL, s, "mj", sreg);
 	  else
 	    macro_build (NULL, s, JALR_FMT, dreg, sreg);
