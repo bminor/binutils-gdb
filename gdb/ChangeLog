@@ -1,3 +1,11 @@
+2012-11-01  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Incorporate ARI web page generator into GDB sources.
+	* contrib/ari/create-web-ari-in-src.sh: New file.
+	* contrib/ari/gdb_ari.sh: New file.
+	* contrib/ari/gdb_find.sh: New file.
+	* contrib/ari/update-web-ari.sh: New file.
+
 2012-10-31  Tom Tromey  <tromey@redhat.com>
 
 	* gdbarch.c: Rebuild.
