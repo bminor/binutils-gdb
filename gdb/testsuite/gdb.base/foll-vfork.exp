@@ -60,9 +60,28 @@ if {[build_executable $testfile.exp $testfile2 $srcfile2 {debug}] == -1} {
 set oldtimeout $timeout
 set timeout [expr "$timeout + 10"]
 
+# Start with a fresh GDB, with verbosity enabled, and run to main.  On
+# error, behave as "return", so we don't try to continue testing with
+# a borked session.
+proc setup_gdb {} {
+    global testfile
+
+    clean_restart $testfile
+
+    # The "Detaching..." and "Attaching..." messages may be hidden by
+    # default.
+    gdb_test_no_output "set verbose"
+
+    if ![runto_main] {
+	return -code return
+    }
+}
+
 proc check_vfork_catchpoints {} {
   global gdb_prompt
   global has_vfork_catchpoints
+
+  setup_gdb
 
   # Verify that the system supports "catch vfork".
   gdb_test "catch vfork" "Catchpoint \[0-9\]* \\(vfork\\)" "insert first vfork catchpoint"
@@ -87,6 +106,8 @@ proc vfork_parent_follow_through_step {} {
   with_test_prefix "vfork parent follow, through step" {
    global gdb_prompt
 
+   setup_gdb
+
    gdb_test_no_output "set follow-fork parent"
 
    set test "step"
@@ -107,6 +128,8 @@ proc vfork_parent_follow_to_bp {} {
    global gdb_prompt
    global srcfile
 
+   setup_gdb
+
    gdb_test_no_output "set follow-fork parent"
 
    set bp_location [gdb_get_line_number "printf (\"I'm the proud parent of child"]
@@ -125,37 +148,12 @@ proc vfork_parent_follow_to_bp {} {
    exec sleep 1
 }}
 
-# Kill child and reload symbols.
-proc kill_child {} {
-   global binfile
-   global gdb_prompt
-
-   set test "killing inferior"
-   gdb_test_multiple "kill" $test {
-      -re ".*Kill the program being debugged.*y or n. $" {
-         gdb_test_no_output "y" ""
-         set test2 "file $binfile"
-         gdb_test_multiple "file $binfile" $test2 {
-            -re ".*Load new symbol table from.*y or n. $" {
-               send_gdb "y\n"
-               gdb_test_multiple "" "loading symbols" {
-                  -re "Reading symbols from.*$gdb_prompt $" {
-		  }
-               }
-            }
-            -re ".*gdb_prompt $" {
-	    }
-          }
-      }
-      -re ".*$gdb_prompt $" {
-      }
-    }
-}
-
 proc vfork_and_exec_child_follow_to_main_bp {} {
   with_test_prefix "vfork and exec child follow, to main bp" {
    global gdb_prompt
    global srcfile2
+
+   setup_gdb
 
    gdb_test_no_output "set follow-fork child"
 
@@ -172,10 +170,6 @@ proc vfork_and_exec_child_follow_to_main_bp {} {
    # any gdb_expected debugger output from a subsequent testpoint.
    #
    exec sleep 1
-
-   # Explicitly kill this child, or a subsequent rerun actually runs
-   # the exec'd child, not the original program...
-   kill_child
 }}
 
 proc vfork_and_exec_child_follow_through_step {} {
@@ -196,6 +190,8 @@ proc vfork_and_exec_child_follow_through_step {} {
       verbose "vfork child-following next test ignored for pre-HP/UX-10.30 targets."
       return 0
    }
+
+   setup_gdb
 
    gdb_test_no_output "set follow-fork child"
 
@@ -228,16 +224,14 @@ proc vfork_and_exec_child_follow_through_step {} {
    # any expected debugger output from a subsequent testpoint.
    #
    exec sleep 1
-
-   # Explicitly kill this child, or a subsequent rerun actually runs
-   # the exec'd child, not the original program...
-   kill_child
 }}
 
 proc tcatch_vfork_then_parent_follow {} {
   with_test_prefix "vfork parent follow, finish after tcatch vfork" {
    global gdb_prompt
    global srcfile
+
+   setup_gdb
 
    gdb_test_no_output "set follow-fork parent"
 
@@ -278,6 +272,8 @@ proc tcatch_vfork_then_child_follow {} {
    global gdb_prompt
    global srcfile
    global srcfile2
+
+   setup_gdb
 
    gdb_test_no_output "set follow-fork child"
 
@@ -323,22 +319,22 @@ proc do_vfork_and_exec_tests {} {
 
    # Check that vfork catchpoints are supported, as an indicator for whether
    # vfork-following is supported.
-   if [runto_main] then { check_vfork_catchpoints }
+   check_vfork_catchpoints
 
    # Try following the parent process by stepping through a call to
    # vfork.  Do this without catchpoints.
-   if [runto_main] then { vfork_parent_follow_through_step }
+   vfork_parent_follow_through_step
 
    # Try following the parent process by setting a breakpoint on the
    # other side of a vfork, and running to that point.  Do this
    # without catchpoints.
-   if [runto_main] then { vfork_parent_follow_to_bp }
+   vfork_parent_follow_to_bp
 
    # Try following the child process by just continuing through the
    # vfork, and letting the parent's breakpoint on "main" be auto-
    # magically reset in the child.
    #
-   if [runto_main] then { vfork_and_exec_child_follow_to_main_bp }
+   vfork_and_exec_child_follow_to_main_bp
 
    # Try following the child process by stepping through a call to
    # vfork.  The child also executes an exec.  Since the child cannot
@@ -347,15 +343,15 @@ proc do_vfork_and_exec_tests {} {
    # recomputed in the exec'd child, the step through a vfork should
    # land us in the "main" for the exec'd child, too.
    #
-   if [runto_main] then { vfork_and_exec_child_follow_through_step }
+   vfork_and_exec_child_follow_through_step
 
    # Try catching a vfork, and stepping out to the parent.
    #
-   if [runto_main] then { tcatch_vfork_then_parent_follow }
+   tcatch_vfork_then_parent_follow
 
    # Try catching a vfork, and stepping out to the child.
    #
-   if [runto_main] then { tcatch_vfork_then_child_follow }
+   tcatch_vfork_then_child_follow
 
    # Test the ability to follow both child and parent of a vfork.  Do
    # this without catchpoints.
@@ -368,13 +364,6 @@ proc do_vfork_and_exec_tests {} {
    # ??rehrauer: NYI.  Will add testpoints here when implemented.
    #
 }
-
-# Start with a fresh gdb
-clean_restart $testfile
-
-# The "Detaching..." and "Attaching..." messages may be hidden by
-# default.
-gdb_test_no_output "set verbose"
 
 # This is a test of gdb's ability to follow the parent or child
 # of a Unix vfork() system call.  (The child will subsequently

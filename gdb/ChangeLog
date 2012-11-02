@@ -1,5 +1,20 @@
 2012-11-02  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/foll-vfork.exp (setup_gdb): New procedure.
+	(check_vfork_catchpoints, vfork_parent_follow_through_step)
+	(vfork_parent_follow_to_bp): Call it.
+	(kill_child): Delete.
+	(vfork_and_exec_child_follow_to_main_bp)
+	(vfork_and_exec_child_follow_through_step): Call setup_gdb.  No
+	longer call kill_child.
+	(tcatch_vfork_then_parent_follow): Call setup_gdb.
+	(do_vfork_and_exec_tests): Don't runto_main before calling each
+	test procedure.
+	(top level): Don't clean restart and set verbose before running
+	each test procedure.
+
+2012-11-02  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/foll-vfork.exp (vfork_parent_follow_through_step)
 	(vfork_parent_follow_to_bp)
 	(vfork_and_exec_child_follow_to_main_bp)
