@@ -1,5 +1,10 @@
 2012-11-02  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/foll-vfork.c: Add copyright header.
+	* gdb.base/vforked-prog.c: Add copyright header.
+
+2012-11-02  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/foll-vfork.exp
 	(vfork_and_exec_child_follow_through_step): Don't skip on
 	non-HP/UX targets.  Expect the next to only step one line on
