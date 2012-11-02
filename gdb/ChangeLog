@@ -1,3 +1,18 @@
+2012-11-02  Tom Tromey  <tromey@redhat.com>
+
+	* configure: Rebuild.
+	* configure.ac (build_warnings): Add -Wempty-body.
+	* m68k-tdep.c (m68k_gdbarch_init): Remove empty 'if'.
+	* remote.c (handle_notification): Use braces for empty 'else' body.
+	* s390-tdep.c (s390_analyze_prologue): Use braces for empty
+	'else' body.
+	* sh64-tdep.c (sh64_push_dummy_call): Use braces for empty
+	'else' body.
+	* solib-som.c (som_relocate_section_addresses): Use braces
+	for empty 'else' body.
+	* ui-file.c (stdio_file_write): Use braces for empty 'if' body.
+	(stdio_file_write_async_safe, stdio_file_fputs): Likewise.
+
 2012-11-02  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/14766

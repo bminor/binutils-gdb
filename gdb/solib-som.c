@@ -126,7 +126,9 @@ som_relocate_section_addresses (struct so_list *so,
       sec->endaddr += so->lm_info->data_start;
     }
   else
-    ;
+    {
+      /* Nothing.  */
+    }
 }
 
 

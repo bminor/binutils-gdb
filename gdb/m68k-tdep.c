@@ -1100,9 +1100,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       feature = tdesc_find_feature (info.target_desc,
 				    "org.gnu.gdb.m68k.core");
-      if (feature != NULL)
-	/* Do nothing.  */
-	;
 
       if (feature == NULL)
 	{

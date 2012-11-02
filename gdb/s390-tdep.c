@@ -1461,13 +1461,14 @@ s390_analyze_prologue (struct gdbarch *gdbarch,
 	break;
 
       else
-        /* An instruction we don't know how to simulate.  The only
-           safe thing to do would be to set every value we're tracking
-           to 'unknown'.  Instead, we'll be optimistic: we assume that
-	   we *can* interpret every instruction that the compiler uses
-	   to manipulate any of the data we're interested in here --
-	   then we can just ignore anything else.  */
-        ;
+	{
+	  /* An instruction we don't know how to simulate.  The only
+	     safe thing to do would be to set every value we're tracking
+	     to 'unknown'.  Instead, we'll be optimistic: we assume that
+	     we *can* interpret every instruction that the compiler uses
+	     to manipulate any of the data we're interested in here --
+	     then we can just ignore anything else.  */
+	}
 
       /* Record the address after the last instruction that changed
          the FP, SP, or backlink.  Ignore instructions that changed

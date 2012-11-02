@@ -1175,10 +1175,10 @@ sh64_push_dummy_call (struct gdbarch *gdbarch,
 		  int_argreg ++;
 		}
 	      else 
-		;
-		/* Store it as the integers, 8 bytes at the time, if
-		   necessary spilling on the stack.  */
-	      
+		{
+		  /* Store it as the integers, 8 bytes at the time, if
+		     necessary spilling on the stack.  */
+		}
 	    }
 	    else if (len == 8)
 	      {
@@ -1202,9 +1202,10 @@ sh64_push_dummy_call (struct gdbarch *gdbarch,
 		    int_argreg ++;
 		  }
 		else
-		  ;
-		  /* Store it as the integers, 8 bytes at the time, if
-                     necessary spilling on the stack.  */
+		  {
+		    /* Store it as the integers, 8 bytes at the time, if
+		       necessary spilling on the stack.  */
+		  }
 	      }
 	}
     }

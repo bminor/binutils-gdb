@@ -561,7 +561,9 @@ stdio_file_write (struct ui_file *file, const char *buf, long length_buf)
 		    _("stdio_file_write: bad magic number"));
   /* Calling error crashes when we are called from the exception framework.  */
   if (fwrite (buf, length_buf, 1, stdio->file))
-    ;
+    {
+      /* Nothing.  */
+    }
 }
 
 static void
@@ -583,7 +585,9 @@ stdio_file_write_async_safe (struct ui_file *file,
      result of write (since it can be declared with attribute warn_unused_result).
      Alas casting to void doesn't work for this.  */
   if (write (stdio->fd, buf, length_buf))
-    ;
+    {
+      /* Nothing.  */
+    }
 }
 
 static void
@@ -596,7 +600,9 @@ stdio_file_fputs (const char *linebuffer, struct ui_file *file)
 		    _("stdio_file_fputs: bad magic number"));
   /* Calling error crashes when we are called from the exception framework.  */
   if (fputs (linebuffer, stdio->file))
-    ;
+    {
+      /* Nothing.  */
+    }
 }
 
 static int

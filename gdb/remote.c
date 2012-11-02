@@ -6781,9 +6781,10 @@ handle_notification (char *buf)
 	}
     }
   else
-    /* We ignore notifications we don't recognize, for compatibility
-       with newer stubs.  */
-    ;
+    {
+      /* We ignore notifications we don't recognize, for compatibility
+	 with newer stubs.  */
+    }
 }
 
 
