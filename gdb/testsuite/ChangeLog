@@ -1,5 +1,22 @@
 2012-11-02  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/foll-vfork-exit.c: New file.
+	* gdb.base/foll-vfork.exp (top level): New file-describing
+	comment.
+	(vfork_child_follow_to_exit): New procedure.
+	(tcatch_vfork_then_child_follow): Rename as ...
+	(tcatch_vfork_then_child_follow_exec): ... this.
+	(tcatch_vfork_then_child_follow_exit): New procedure.
+	(do_vfork_and_follow_parent_tests): New procedure, factored out
+	from do_vfork_and_exec_tests.
+	(do_vfork_and_follow_child_tests_exec): Ditto.
+	(do_vfork_and_exec_tests): Delete.
+	(do_vfork_and_follow_child_tests_exit): New procedure.
+	(top level): Run tests with both the program that has the vfork
+	child execing, and the program has the vfork child exiting.
+
+2012-11-02  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/foll-vfork.exp (setup_gdb): New procedure.
 	(check_vfork_catchpoints, vfork_parent_follow_through_step)
 	(vfork_parent_follow_to_bp): Call it.
