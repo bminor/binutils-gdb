@@ -1,3 +1,12 @@
+2012-11-02  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/14766
+
+	* infrun.c (handle_inferior_event)
+	<TARGET_WAITKIND_EXITED/TARGET_WAITKIND_SIGNALLED>: Switch to
+	null_ptid before handling a vfork child exec or exit.  Switch to
+	the event ptid afterwards.
+
 2012-11-02  Yao Qi  <yao@codesourcery.com>
 
 	* std-operator.def: Remove OP_LABELED.

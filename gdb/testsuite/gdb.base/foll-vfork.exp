@@ -164,7 +164,7 @@ proc vfork_child_follow_to_exit {} {
    set test "continue to child exit"
    gdb_test_multiple "continue" $test {
       -re "Couldn't get registers.*$gdb_prompt " {
-	  setup_kfail "gdb/14766" *-*-*
+	  # PR gdb/14766
 	  fail "$test"
       }
       -re "Attaching after.* vfork to.*Detaching vfork parent .* after child exit.*$gdb_prompt " {
@@ -369,10 +369,6 @@ proc tcatch_vfork_then_child_follow_exit {} {
 
    set test "finish"
    gdb_test_multiple "finish" $test {
-      -re "Couldn't get registers.*$gdb_prompt " {
-	  setup_kfail "gdb/14766" *-*-*
-	  fail "$test "
-      }
       -re "Run till exit from.*vfork.*exited normally.*$gdb_prompt " {
 	  setup_kfail "gdb/14762" *-*-*
 	  fail $test

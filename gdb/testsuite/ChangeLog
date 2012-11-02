@@ -1,5 +1,14 @@
 2012-11-02  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/14766
+
+	* gdb.base/foll-vfork.exp (vfork_child_follow_to_exit): Remove
+	setup_kfail.
+	(tcatch_vfork_then_child_follow_exit): No longer expect "Couldn't
+	get registers".
+
+2012-11-02  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/foll-vfork-exit.c: New file.
 	* gdb.base/foll-vfork.exp (top level): New file-describing
 	comment.

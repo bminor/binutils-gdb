@@ -663,7 +663,16 @@ handle_vfork_child_exec_or_exit (int exec)
 
 	  /* follow-fork child, detach-on-fork on.  */
 
-	  old_chain = make_cleanup_restore_current_thread ();
+	  if (!exec)
+	    {
+	      /* If we're handling a child exit, then inferior_ptid
+		 points at the inferior's pid, not to a thread.  */
+	      old_chain = save_inferior_ptid ();
+	      save_current_program_space ();
+	      save_current_inferior ();
+	    }
+	  else
+	    old_chain = save_current_space_and_thread ();
 
 	  /* We're letting loose of the parent.  */
 	  tp = any_live_thread_of_process (inf->vfork_parent->pid);
