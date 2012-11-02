@@ -1,3 +1,8 @@
+2012-11-02  Roland McGrath  <mcgrathr@google.com>
+
+	* i386.cc (Target_i386::relocate_relocs): Remove extraneous typename
+	from last change.
+
 2012-11-01  Roland McGrath  <mcgrathr@google.com>
 
 	* target.h (Sized_target::relocate_relocs): Use Elf_Off
