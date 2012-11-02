@@ -1,5 +1,15 @@
 2012-11-02  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/foll-vfork.exp (vfork_parent_follow_through_step)
+	(vfork_parent_follow_to_bp)
+	(vfork_and_exec_child_follow_to_main_bp)
+	(vfork_and_exec_child_follow_through_step)
+	(tcatch_vfork_then_parent_follow)
+	(tcatch_vfork_then_parent_follow, tcatch_vfork_then_child_follow):
+	Use with_test_prefix.
+
+2012-11-02  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/foll-vfork.c: Add copyright header.
 	* gdb.base/vforked-prog.c: Add copyright header.
 
