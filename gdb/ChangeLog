@@ -1,3 +1,20 @@
+2012-11-02  Pedro Alves  <palves@redhat.com>
+
+	Modernize.
+
+	* gdb.base/foll-vfork.exp: Use standard_testfile and
+	build_executable.  Pass descriptive string to untested.
+	(vfork_parent_follow_through_step, vfork_parent_follow_to_bp)
+	(vfork_and_exec_child_follow_to_main_bp)
+	(vfork_and_exec_child_follow_through_step)
+	(tcatch_vfork_then_parent_follow, tcatch_vfork_then_child_follow)
+	(do_vfork_and_exec_tests): Use gdb_test/gdb_test_multiple instead
+	of send_gdb/gdb_expect.
+
+	(kill_child): New procedure.
+	(vfork_and_exec_child_follow_to_main_bp)
+	(vfork_and_exec_child_follow_through_step): Use it.
+
 2012-11-02  Yao Qi  <yao@codesourcery.com>
 
 	* std-operator.def: Remove OP_LABELED.
