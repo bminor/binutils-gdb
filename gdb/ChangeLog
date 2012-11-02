@@ -1,3 +1,17 @@
+2012-11-02  Yao Qi  <yao@codesourcery.com>
+
+	* std-operator.def: Remove OP_LABELED.
+	* eval.c: Remove the declaration of 'get_label'.
+	(get_label): Remove.
+	(evaluate_struct_tuple): Remove code handling OP_LABELED.
+	Update comment.
+	Remove local variable 'variantno' and related code.
+	Replace 'substruct_type' with 'struct_type'.  Replace 'subfieldno'
+	with 'fieldno'.
+	* expprint.c (print_subexp_standard): Likewise.
+	(dump_subexp_body_standard): Likewise.
+	* parse.c (operator_length_standard): Likewise.
+
 2012-11-01  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Incorporate ARI web page generator into GDB sources.

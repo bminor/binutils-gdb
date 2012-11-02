@@ -951,7 +951,6 @@ operator_length_standard (const struct expression *expr, int endpos,
       oplen++;
       break;
 
-    case OP_LABELED:
     case STRUCTOP_STRUCT:
     case STRUCTOP_PTR:
       args = 1;

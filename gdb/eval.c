@@ -56,8 +56,6 @@ static struct value *evaluate_subexp_for_sizeof (struct expression *, int *);
 static struct value *evaluate_subexp_for_address (struct expression *,
 						  int *, enum noside);
 
-static char *get_label (struct expression *, int *);
-
 static struct value *evaluate_struct_tuple (struct value *,
 					    struct expression *, int *,
 					    enum noside, int);
@@ -280,27 +278,8 @@ extract_field_op (struct expression *exp, int *subexp)
   return result;
 }
 
-/* If the next expression is an OP_LABELED, skips past it,
-   returning the label.  Otherwise, does nothing and returns NULL.  */
-
-static char *
-get_label (struct expression *exp, int *pos)
-{
-  if (exp->elts[*pos].opcode == OP_LABELED)
-    {
-      int pc = (*pos)++;
-      char *name = &exp->elts[pc + 2].string;
-      int tem = longest_to_int (exp->elts[pc + 1].longconst);
-
-      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
-      return name;
-    }
-  else
-    return NULL;
-}
-
-/* This function evaluates tuples (in (the deleted) Chill) or
-   brace-initializers (in C/C++) for structure types.  */
+/* This function evaluates brace-initializers (in C/C++) for
+   structure types.  */
 
 static struct value *
 evaluate_struct_tuple (struct value *struct_val,
@@ -308,143 +287,57 @@ evaluate_struct_tuple (struct value *struct_val,
 		       int *pos, enum noside noside, int nargs)
 {
   struct type *struct_type = check_typedef (value_type (struct_val));
-  struct type *substruct_type = struct_type;
   struct type *field_type;
   int fieldno = -1;
-  int variantno = -1;
-  int subfieldno = -1;
 
   while (--nargs >= 0)
     {
-      int pc = *pos;
       struct value *val = NULL;
-      int nlabels = 0;
       int bitpos, bitsize;
       bfd_byte *addr;
 
-      /* Skip past the labels, and count them.  */
-      while (get_label (exp, pos) != NULL)
-	nlabels++;
+      fieldno++;
+      /* Skip static fields.  */
+      while (fieldno < TYPE_NFIELDS (struct_type)
+	     && field_is_static (&TYPE_FIELD (struct_type,
+					      fieldno)))
+	fieldno++;
+      if (fieldno >= TYPE_NFIELDS (struct_type))
+	error (_("too many initializers"));
+      field_type = TYPE_FIELD_TYPE (struct_type, fieldno);
+      if (TYPE_CODE (field_type) == TYPE_CODE_UNION
+	  && TYPE_FIELD_NAME (struct_type, fieldno)[0] == '0')
+	error (_("don't know which variant you want to set"));
 
-      do
-	{
-	  char *label = get_label (exp, &pc);
+      /* Here, struct_type is the type of the inner struct,
+	 while substruct_type is the type of the inner struct.
+	 These are the same for normal structures, but a variant struct
+	 contains anonymous union fields that contain substruct fields.
+	 The value fieldno is the index of the top-level (normal or
+	 anonymous union) field in struct_field, while the value
+	 subfieldno is the index of the actual real (named inner) field
+	 in substruct_type.  */
 
-	  if (label)
-	    {
-	      for (fieldno = 0; fieldno < TYPE_NFIELDS (struct_type);
-		   fieldno++)
-		{
-		  const char *field_name =
-		    TYPE_FIELD_NAME (struct_type, fieldno);
+      field_type = TYPE_FIELD_TYPE (struct_type, fieldno);
+      if (val == 0)
+	val = evaluate_subexp (field_type, exp, pos, noside);
 
-		  if (field_name != NULL && strcmp (field_name, label) == 0)
-		    {
-		      variantno = -1;
-		      subfieldno = fieldno;
-		      substruct_type = struct_type;
-		      goto found;
-		    }
-		}
-	      for (fieldno = 0; fieldno < TYPE_NFIELDS (struct_type);
-		   fieldno++)
-		{
-		  const char *field_name =
-		    TYPE_FIELD_NAME (struct_type, fieldno);
+      /* Now actually set the field in struct_val.  */
 
-		  field_type = TYPE_FIELD_TYPE (struct_type, fieldno);
-		  if ((field_name == 0 || *field_name == '\0')
-		      && TYPE_CODE (field_type) == TYPE_CODE_UNION)
-		    {
-		      variantno = 0;
-		      for (; variantno < TYPE_NFIELDS (field_type);
-			   variantno++)
-			{
-			  substruct_type
-			    = TYPE_FIELD_TYPE (field_type, variantno);
-			  if (TYPE_CODE (substruct_type) == TYPE_CODE_STRUCT)
-			    {
-			      for (subfieldno = 0;
-				 subfieldno < TYPE_NFIELDS (substruct_type);
-				   subfieldno++)
-				{
-				  if (strcmp(TYPE_FIELD_NAME (substruct_type,
-							      subfieldno),
-					     label) == 0)
-				    {
-				      goto found;
-				    }
-				}
-			    }
-			}
-		    }
-		}
-	      error (_("there is no field named %s"), label);
-	    found:
-	      ;
-	    }
-	  else
-	    {
-	      /* Unlabelled tuple element - go to next field.  */
-	      if (variantno >= 0)
-		{
-		  subfieldno++;
-		  if (subfieldno >= TYPE_NFIELDS (substruct_type))
-		    {
-		      variantno = -1;
-		      substruct_type = struct_type;
-		    }
-		}
-	      if (variantno < 0)
-		{
-		  fieldno++;
-		  /* Skip static fields.  */
-		  while (fieldno < TYPE_NFIELDS (struct_type)
-			 && field_is_static (&TYPE_FIELD (struct_type,
-							  fieldno)))
-		    fieldno++;
-		  subfieldno = fieldno;
-		  if (fieldno >= TYPE_NFIELDS (struct_type))
-		    error (_("too many initializers"));
-		  field_type = TYPE_FIELD_TYPE (struct_type, fieldno);
-		  if (TYPE_CODE (field_type) == TYPE_CODE_UNION
-		      && TYPE_FIELD_NAME (struct_type, fieldno)[0] == '0')
-		    error (_("don't know which variant you want to set"));
-		}
-	    }
+      /* Assign val to field fieldno.  */
+      if (value_type (val) != field_type)
+	val = value_cast (field_type, val);
 
-	  /* Here, struct_type is the type of the inner struct,
-	     while substruct_type is the type of the inner struct.
-	     These are the same for normal structures, but a variant struct
-	     contains anonymous union fields that contain substruct fields.
-	     The value fieldno is the index of the top-level (normal or
-	     anonymous union) field in struct_field, while the value
-	     subfieldno is the index of the actual real (named inner) field
-	     in substruct_type.  */
+      bitsize = TYPE_FIELD_BITSIZE (struct_type, fieldno);
+      bitpos = TYPE_FIELD_BITPOS (struct_type, fieldno);
+      addr = value_contents_writeable (struct_val) + bitpos / 8;
+      if (bitsize)
+	modify_field (struct_type, addr,
+		      value_as_long (val), bitpos % 8, bitsize);
+      else
+	memcpy (addr, value_contents (val),
+		TYPE_LENGTH (value_type (val)));
 
-	  field_type = TYPE_FIELD_TYPE (substruct_type, subfieldno);
-	  if (val == 0)
-	    val = evaluate_subexp (field_type, exp, pos, noside);
-
-	  /* Now actually set the field in struct_val.  */
-
-	  /* Assign val to field fieldno.  */
-	  if (value_type (val) != field_type)
-	    val = value_cast (field_type, val);
-
-	  bitsize = TYPE_FIELD_BITSIZE (substruct_type, subfieldno);
-	  bitpos = TYPE_FIELD_BITPOS (struct_type, fieldno);
-	  if (variantno >= 0)
-	    bitpos += TYPE_FIELD_BITPOS (substruct_type, subfieldno);
-	  addr = value_contents_writeable (struct_val) + bitpos / 8;
-	  if (bitsize)
-	    modify_field (struct_type, addr,
-			  value_as_long (val), bitpos % 8, bitsize);
-	  else
-	    memcpy (addr, value_contents (val),
-		    TYPE_LENGTH (value_type (val)));
-	}
-      while (--nlabels > 0);
     }
   return struct_val;
 }

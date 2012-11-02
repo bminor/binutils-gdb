@@ -328,21 +328,6 @@ print_subexp_standard (struct expression *exp, int *pos,
 	}
       return;
 
-    case OP_LABELED:
-      tem = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
-      /* Gcc support both these syntaxes.  Unsure which is preferred.  */
-#if 1
-      fputs_filtered (&exp->elts[pc + 2].string, stream);
-      fputs_filtered (": ", stream);
-#else
-      fputs_filtered (".", stream);
-      fputs_filtered (&exp->elts[pc + 2].string, stream);
-      fputs_filtered ("=", stream);
-#endif
-      print_subexp (exp, pos, stream, PREC_SUFFIX);
-      return;
-
     case TERNOP_COND:
       if ((int) prec > (int) PREC_COMMA)
 	fputs_filtered ("(", stream);
@@ -1031,7 +1016,6 @@ dump_subexp_body_standard (struct expression *exp,
     case OP_BOOL:
     case OP_M2_STRING:
     case OP_THIS:
-    case OP_LABELED:
     case OP_NAME:
       fprintf_filtered (stream, "Unknown format");
     }

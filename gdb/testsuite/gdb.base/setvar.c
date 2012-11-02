@@ -115,6 +115,13 @@ struct {
     double	v_double_member;
 } v_struct2;
 
+struct
+{
+  long v_long_member;
+  struct t_struct t;
+  char v_char_member;
+} v_struct3;
+
 /**** unions *******/
 
 union t_union {

@@ -1,3 +1,8 @@
+2012-11-02  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/setvar.exp: Test setting nested struct.
+	* gdb.base/setvar.c (v_struct3): New.
+
 2012-11-01  Doug Evans  <dje@google.com>
 
 	* gdb.arch/amd64-pseudo.c (main): Mark registers that the testsuite

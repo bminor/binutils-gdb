@@ -383,6 +383,14 @@ test_set "set variable v_struct1 = {'h', 1, 2, 3, 4.0, 5.0}" \
 v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\\}" \
   "set print structure #3"
 
+#
+# test "set variable" for nested struct
+#
+test_set "set variable v_struct3 = {1, {'h', 1, 2, 3, 4.0, 5.0}, 37}" \
+  "print v_struct3" \
+    ".*.\[0-9\]* = \\{.*v_long_member = 1,.*t = \\{.*v_char_member = 104 \'h\',.*v_short_member = 1,.*v_int_member = 2,.*v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\\},.*v_char_member = 37 \'%\'\\}" \
+  "set print structure #4"
+
 set timeout $prev_timeout
 
 # Test printing of enumeration bitfields.
