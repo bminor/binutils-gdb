@@ -1,5 +1,10 @@
 2012-11-02  Tom Tromey  <tromey@redhat.com>
 
+	* breakpoint.c (catch_syscall_completer): Pass 'word' as second
+	argument to complete_on_enum.
+
+2012-11-02  Tom Tromey  <tromey@redhat.com>
+
 	* configure: Rebuild.
 	* configure.ac (build_warnings): Add -Wempty-body.
 	* m68k-tdep.c (m68k_gdbarch_init): Remove empty 'if'.

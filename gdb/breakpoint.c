@@ -14972,7 +14972,7 @@ catch_syscall_completer (struct cmd_list_element *cmd,
 {
   const char **list = get_syscall_names ();
   VEC (char_ptr) *retlist
-    = (list == NULL) ? NULL : complete_on_enum (list, text, word);
+    = (list == NULL) ? NULL : complete_on_enum (list, word, word);
 
   xfree (list);
   return retlist;

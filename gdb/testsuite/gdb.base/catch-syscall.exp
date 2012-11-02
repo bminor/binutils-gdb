@@ -288,6 +288,11 @@ proc do_syscall_tests {} {
     set thistest "catch syscall to a nonsense syscall is prohibited"
     gdb_test "catch syscall nonsense_syscall" "Unknown syscall name .*" $thistest
 
+    # Regression test for syscall completer bug.
+    gdb_test "complete catch syscall close chroo" \
+	"catch syscall close chroot" \
+	"complete catch syscall with multiple words"
+
     # Testing the 'catch syscall' command without arguments.
     # This test should catch any syscalls.
     if [runto_main] then { test_catch_syscall_without_args }

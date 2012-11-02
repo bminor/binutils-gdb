@@ -1,3 +1,8 @@
+2012-11-02  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/catch-syscall.exp (do_syscall_tests): Add completion
+	test.
+
 2012-11-02  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/14766
