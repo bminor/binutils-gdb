@@ -91,7 +91,7 @@ proc vfork_parent_follow_through_step {} {
 
    set test "vfork parent follow, through step"
    gdb_test_multiple "next" $test {
-       -re "Detaching after fork from.*13.*$gdb_prompt " {
+       -re "Detaching after fork from.*if \\(pid == 0\\).*$gdb_prompt " {
 	   pass "vfork parent follow, through step"
        }
    }
@@ -109,11 +109,12 @@ proc vfork_parent_follow_to_bp {} {
    gdb_test_no_output "set follow-fork parent" \
        "set follow-fork parent, vfork to bp"
 
-   gdb_test "break ${srcfile}:18" ".*" "break, vfork to bp"
+   set bp_location [gdb_get_line_number "printf (\"I'm the proud parent of child"]
+   gdb_test "break ${srcfile}:${bp_location}" ".*" "break, vfork to bp"
 
    set test "vfork parent follow, to bp"
    gdb_test_multiple "continue" $test {
-       -re ".*Detaching after fork from child process.*Breakpoint.*18.*$gdb_prompt " {
+       -re ".*Detaching after fork from child process.*Breakpoint.*${bp_location}.*$gdb_prompt " {
 	   pass $test
        }
    }
@@ -153,14 +154,17 @@ proc kill_child {} {
 
 proc vfork_and_exec_child_follow_to_main_bp {} {
    global gdb_prompt
+   global srcfile2
 
    gdb_test_no_output \
        "set follow-fork child" \
        "set follow-fork child, vfork and exec to main bp"
 
+   set linenum [gdb_get_line_number "printf(\"Hello from vforked-prog" ${srcfile2}]
+
    set test "vfork and exec child follow, to main bp"
    gdb_test_multiple "continue" $test {
-      -re "Attaching after.* vfork to.*xecuting new program.*Breakpoint.*vforked-prog.c:9.*$gdb_prompt " {
+      -re "Attaching after.* vfork to.*xecuting new program.*Breakpoint.*vforked-prog.c:${linenum}.*$gdb_prompt " {
 	  pass $test
       }
    }
@@ -177,6 +181,7 @@ proc vfork_and_exec_child_follow_to_main_bp {} {
 
 proc vfork_and_exec_child_follow_through_step {} {
    global gdb_prompt
+   global srcfile2
 
 # This test cannot be performed prior to HP-UX 10.30, because ptrace-based
 # debugging of a vforking program basically doesn't allow the child to do
@@ -195,8 +200,9 @@ proc vfork_and_exec_child_follow_through_step {} {
        "set follow-fork child, vfork and exec through step"
 
    set test "vfork and exec child follow, through step"
+   set linenum [gdb_get_line_number "printf(\"Hello from vforked-prog" ${srcfile2}]
    gdb_test_multiple "next" $test {
-      -re "Attaching after fork to.*Executing new program.*Breakpoint.*vforked-prog.c:9.*$gdb_prompt " {
+      -re "Attaching after fork to.*Executing new program.*Breakpoint.*vforked-prog.c:${linenum}.*$gdb_prompt " {
 	  pass "$test"
       }
    }
@@ -235,9 +241,10 @@ proc tcatch_vfork_then_parent_follow {} {
       }
    }
 
+   set linenum [gdb_get_line_number "pid = vfork ();"]
    set test "vfork parent follow, finish after tcatch vfork"
    gdb_test_multiple "finish" $test {
-      -re "Run till exit from.*vfork.*0x\[0-9a-fA-F\]* in main .* at .*${srcfile}:12.*$gdb_prompt " {
+      -re "Run till exit from.*vfork.*0x\[0-9a-fA-F\]* in main .* at .*${srcfile}:${linenum}.*$gdb_prompt " {
 	  pass $test
       }
       -re "Run till exit from.*__kernel_v?syscall.*0x\[0-9a-fA-F\]* in vfork .*$gdb_prompt " {
@@ -277,16 +284,19 @@ proc tcatch_vfork_then_child_follow {} {
       }
    }
 
+   set linenum1 [gdb_get_line_number "pid = vfork ();"]
+   set linenum2 [gdb_get_line_number "printf(\"Hello from vforked-prog" ${srcfile2}]
+
    set test "vfork child follow, finish after tcatch vfork"
    gdb_test_multiple "finish" $test {
-      -re "Run till exit from.*vfork.*${srcfile}:12.*$gdb_prompt " {
+      -re "Run till exit from.*vfork.*${srcfile}:${linenum1}.*$gdb_prompt " {
 	  pass $test
       }
       -re "Run till exit from.*__kernel_v?syscall.*0x\[0-9a-fA-F\]* in vfork .*$gdb_prompt " {
 	  send_gdb "finish\n"
 	  exp_continue
       }
-      -re "Run till exit from.*vfork.*${srcfile2}:9.*$gdb_prompt " {
+      -re "Run till exit from.*vfork.*${srcfile2}:${linenum2}.*$gdb_prompt " {
 	  pass "$test (followed exec)"
       }
    }
