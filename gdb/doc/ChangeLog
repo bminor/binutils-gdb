@@ -1,3 +1,9 @@
+2012-11-03  Yao Qi  <yao@codesourcery.com>
+
+	* observer.texi (GDB Observers): Remove observer
+	'tracepoint_modified', 'tracepoint_created' and
+	'tracepoint_deleted'.
+
 2012-10-26  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (General Query Packets): Use @itemx for QAgent.

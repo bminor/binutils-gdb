@@ -179,21 +179,6 @@ A breakpoint has been modified in some way.  The argument @var{b}
 is the modified breakpoint.
 @end deftypefun
 
-@deftypefun void tracepoint_created (int @var{tpnum})
-A new tracepoint has been created.  The argument @var{tpnum} is the
-number of the newly-created tracepoint.
-@end deftypefun
-
-@deftypefun void tracepoint_deleted (int @var{tpnum})
-A tracepoint has been destroyed.  The argument @var{tpnum} is the
-number of the newly-destroyed tracepoint.
-@end deftypefun
-
-@deftypefun void tracepoint_modified (int @var{tpnum})
-A tracepoint has been modified in some way.  The argument @var{tpnum}
-is the number of the modified tracepoint.
-@end deftypefun
-
 @deftypefun void traceframe_changed (int @var{tfnum}, int @var{tpnum})
 The trace frame is changed to @var{tfnum} (e.g., by using the
 @code{tfind} command).  If @var{tfnum} is negative, it means

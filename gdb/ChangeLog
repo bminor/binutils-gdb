@@ -1,3 +1,11 @@
+2012-11-03  Yao Qi  <yao@codesourcery.com>
+
+	Fix PR gdb/14617.
+	* breakpoint.c (trace_pass_set_count): Call
+	observer_notify_breakpoint_modified instead of
+	observer_notify_tracepoint_modified.
+	* mi/mi-cmd-break.c (mi_cmd_break_passcount): Likewise.
+
 2012-11-02  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (catch_syscall_completer): Pass 'word' as second

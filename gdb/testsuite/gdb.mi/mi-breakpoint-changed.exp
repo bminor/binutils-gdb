@@ -120,10 +120,9 @@ proc test_insert_delete_modify { } {
 	{.*=breakpoint-modified,bkpt=\{number="5",.*,ignore=\"1\".*\}.*\n\^done} \
 	$test
     # 5. when modifying pass count.
-    setup_kfail gdb/14617  *-*-*
     set test "passcount 1 4"
     mi_gdb_test $test \
-	{.*=breakpoint-modified,bkpt=\{number="4",.*\}.*\n\^done} \
+	{.*=breakpoint-modified,bkpt=\{number="4",.*pass="1".*\}.*\n\^done} \
 	$test
 
     # Delete some breakpoints and verify that '=breakpoint-deleted

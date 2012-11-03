@@ -1,3 +1,9 @@
+2012-11-03  Yao Qi  <yao@codesourcery.com>
+
+	Fix PR gdb/14617.
+	* gdb.mi/mi-breakpoint-changed.exp (test_insert_delete_modify):
+	Remove setup_kfail, and update test.
+
 2012-11-02  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/catch-syscall.exp (do_syscall_tests): Add completion

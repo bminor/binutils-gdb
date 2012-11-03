@@ -15245,7 +15245,7 @@ static void
 trace_pass_set_count (struct tracepoint *tp, int count, int from_tty)
 {
   tp->pass_count = count;
-  observer_notify_tracepoint_modified (tp->base.number);
+  observer_notify_breakpoint_modified (&tp->base);
   if (from_tty)
     printf_filtered (_("Setting tracepoint %d's passcount to %d\n"),
 		     tp->base.number, count);
