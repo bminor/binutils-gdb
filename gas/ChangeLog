@@ -1,5 +1,16 @@
 2012-11-05  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-ppc.c (md_chars_to_number): Delete.
+	(ppc_setup_opcodes): Assert num_powerpc_operands fit.
+	(ppc_is_toc_sym): Move earlier in file.
+	(md_assemble): Move code setting reloc from md_apply_fix.  Combine
+	non-ELF code setting fixup with ELF code.  Stash opindex in
+	fx_pcrel_adjust.  Adjust fixup offset for VLE.  Don't set
+	fx_no_overflow here.
+	(md_apply_fix): Rewrite to use ppc_insert_operand for all
+	resolved instruction fields.  Leave insn field zero when
+	emitting an ELF reloc in most cases.
+
 	* write.h (struct fix <fx_pcrel_adjust>): Make it a signed char.
 	* config/tc-m68k.c (tc_gen_reloc, md_pcrel_from): Remove explicit
 	sign extendion of fx_pxrel_adjust.
