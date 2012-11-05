@@ -24715,6 +24715,13 @@ registration of the function with @value{GDBN}.  Depending on how the
 Python code is read into @value{GDBN}, you may need to import the
 @code{gdb} module explicitly.
 
+Now you can use the function in an expression:
+
+@smallexample
+(gdb) print $greet("Bob")
+$1 = "Hello, Bob!"
+@end smallexample
+
 @node Progspaces In Python
 @subsubsection Program Spaces In Python
 
