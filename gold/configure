@@ -679,6 +679,8 @@ CFLAGS
 CC
 NM
 TARGETOBJS
+DEFAULT_TARGET_TILEGX_FALSE
+DEFAULT_TARGET_TILEGX_TRUE
 DEFAULT_TARGET_X86_64_FALSE
 DEFAULT_TARGET_X86_64_TRUE
 DEFAULT_TARGET_SPARC_FALSE
@@ -3470,21 +3472,20 @@ else
   DEFAULT_TARGET_SPARC_FALSE=
 fi
 
-	 if test "$targ_obj" = "tilegx"; then
-  DEFAULT_TARGET_TILEGX_TRUE=
-  DEFAULT_TARGET_TILEGX_FALSE='#'
-else
-  DEFAULT_TARGET_TILEGX_TRUE='#'
-  DEFAULT_TARGET_TILEGX_FALSE=
-fi
-
-
 	 if test "$targ_obj" = "x86_64"; then
   DEFAULT_TARGET_X86_64_TRUE=
   DEFAULT_TARGET_X86_64_FALSE='#'
 else
   DEFAULT_TARGET_X86_64_TRUE='#'
   DEFAULT_TARGET_X86_64_FALSE=
+fi
+
+	 if test "$targ_obj" = "tilegx"; then
+  DEFAULT_TARGET_TILEGX_TRUE=
+  DEFAULT_TARGET_TILEGX_FALSE='#'
+else
+  DEFAULT_TARGET_TILEGX_TRUE='#'
+  DEFAULT_TARGET_TILEGX_FALSE=
 fi
 
       fi
@@ -7619,6 +7620,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DEFAULT_TARGET_X86_64_TRUE}" && test -z "${DEFAULT_TARGET_X86_64_FALSE}"; then
   as_fn_error "conditional \"DEFAULT_TARGET_X86_64\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DEFAULT_TARGET_TILEGX_TRUE}" && test -z "${DEFAULT_TARGET_TILEGX_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_TILEGX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then
