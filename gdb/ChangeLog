@@ -1,3 +1,41 @@
+2012-11-05  Doug Evans  <dje@google.com>
+
+	Add support for DWP files.  http://gcc.gnu.org/wiki/DebugFissionDWP
+	* contrib/cc-with-tweaks.sh: Add -p parameter to invoke dwp.
+	* dwarf2read.c: #include "elf-bfd.h".
+	(struct dwarf2_per_objfile): New members dwp_checked, dwp_file.
+	(dwop_section_names): Renamed from dwo_section names.  All uses
+	updated.  Add entries for .debug_cu_index, .debug_tu_index.
+	(struct dwo_file): Rename dwo_name to name, dwo_bfd to dbfd.
+	All uses updated.
+	(struct dwp_sections): New type.
+	(struct virtual_dwo_sections): New type.
+	(struct dwp_hash_table): New type.
+	(struct dwp_file): New type.
+	(init_cutu_and_read_dies): Ensure DWO info/types section has been
+	read in.  Handle DWOs coming from DWP files.
+	(lookup_dwo_file_slot): New function.
+	(dwarf2_locate_dwo_sections): Move definition closer to use.
+	(create_dwo_debug_info_hash_table_reader): Renamed from
+	create_debug_info_hash_table_reader.  All callers updated.
+	(create_dwo_debug_info_hash_table): Renamed from
+	create_debug_info_hash_table.  All callers updated.
+	(create_dwp_hash_table): New function.
+	(locate_virtual_dwo_sections, create_dwo_in_dwp): New functions.
+	(lookup_dwo_in_dwp): New function.
+	(try_open_dwop_file): Renamed from try_open_dwo_file.  New parameter
+	is_dwp.  All callers updated.
+	(open_dwop_file): Renamed from open_dwo_file.  All callers updated.
+	(open_and_init_dwo_file): Renamed from init_dwo_file.
+	All callers updated.
+	(lookup_dwo_file): Delete.
+	(dwarf2_locate_dwp_sections): New function.
+	(hash_dwp_loaded_cutus, eq_dwp_loaded_cutus): New functions.
+	(allocate_dwp_loaded_cutus_table): New function.
+	(open_and_init_dwp_file): New function.
+	(lookup_dwo_cutu): New function.
+	(lookup_dwo_comp_unit, lookup_dwo_type_unit): Call it.
+
 2012-11-03  Yao Qi  <yao@codesourcery.com>
 
 	Fix PR gdb/14617.

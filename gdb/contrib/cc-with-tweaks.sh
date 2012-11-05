@@ -61,8 +61,10 @@ then
 fi
 
 OBJCOPY=${OBJCOPY:-objcopy}
+READELF=${READELF:-readelf}
 
 DWZ=${DWZ:-dwz}
+DWP=${DWP:-dwp}
 
 have_link=unknown
 next_is_output_file=no
@@ -71,12 +73,14 @@ output_file=a.out
 want_index=false
 want_dwz=false
 want_multi=false
+want_dwp=false
 
 while [ $# -gt 0 ]; do
     case "$1" in
 	-z) want_dwz=true ;;
 	-i) want_index=true ;;
 	-m) want_multi=true ;;
+	-p) want_dwp=true ;;
 	*) break ;;
     esac
     shift
@@ -157,6 +161,13 @@ if [ "$want_dwz" = true ]; then
 elif [ "$want_multi" = true ]; then
     cp $output_file ${output_file}.alt
     $DWZ -m ${output_file}.dwz "$output_file" ${output_file}.alt > /dev/null 2>&1
+fi
+
+if [ "$want_dwp" = true ]; then
+    dwo_files=$($READELF -wi "${output_file}" | grep _dwo_name | \
+	sed -e 's/^.*: //' | sort | uniq)
+    $DWP -o "${output_file}.dwp" ${dwo_files} > /dev/null
+    rm -f ${dwo_files}
 fi
 
 rm -f "$index_file"
