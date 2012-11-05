@@ -1,3 +1,7 @@
+2012-11-05  Tom Tromey  <tromey@redhat.com>
+
+	* frame.c (put_frame_register): Don't use temporary buffer.
+
 2012-11-05  Pedro Alves  <palves@redhat.com>
 
 	* inferior.c (exit_inferior_1): Clear 'vfork_parent' in the vfork

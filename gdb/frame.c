@@ -1077,12 +1077,7 @@ put_frame_register (struct frame_info *frame, int regnum,
     {
     case lval_memory:
       {
-	/* FIXME: write_memory doesn't yet take constant buffers.
-           Arrrg!  */
-	gdb_byte tmp[MAX_REGISTER_SIZE];
-
-	memcpy (tmp, buf, register_size (gdbarch, regnum));
-	write_memory (addr, tmp, register_size (gdbarch, regnum));
+	write_memory (addr, buf, register_size (gdbarch, regnum));
 	break;
       }
     case lval_register:
