@@ -1,3 +1,13 @@
+2012-11-05  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Powerpc_relobj): Delete "Offset" typedef.
+	(struct Opd_ent): Use "Address" rather than "Offset".
+	(Output_data_got_powerpc::got_base_offset): Return Valtype.
+	(Target_powerpc::got_section): Make public.
+	(Target_powerpc::scan_relocs): Move code setting symbols..
+	(Powerpc_relobj::do_scan_relocs): ..to here, new function.
+	Create _SDA_BASE_ only when referenced.
+
 2012-11-02  Roland McGrath  <mcgrathr@google.com>
 
 	* i386.cc (Target_i386::relocate_relocs): Remove extraneous typename

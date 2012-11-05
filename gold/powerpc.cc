@@ -58,7 +58,6 @@ class Powerpc_relobj : public Sized_relobj_file<size, big_endian>
 {
 public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
-  typedef typename elfcpp::Elf_types<size>::Elf_Off Offset;
   typedef Unordered_set<Section_id, Section_id_hash> Section_refs;
   typedef Unordered_map<Address, Section_refs> Access_from;
 
@@ -190,8 +189,16 @@ public:
 		  const unsigned char* prelocs,
 		  const unsigned char* plocal_syms);
 
+  // Perform the Sized_relobj_file method, then set up opd info from
+  // .opd relocs.
   void
   do_read_relocs(Read_relocs_data*);
+
+  // Set up some symbols, then perform Sized_relobj_file method.
+  // Occurs after garbage collection, which is why opd info can't be
+  // set up here.
+  void
+  do_scan_relocs(Symbol_table*, Layout*, Read_relocs_data*);
 
   bool
   do_find_special_sections(Read_symbols_data* sd);
@@ -224,7 +231,7 @@ private:
     unsigned int shndx;
     bool discard : 1;
     bool gc_mark : 1;
-    Offset off;
+    Address off;
   };
 
   // Return index into opd_ent_ array for .opd entry at OFF.
@@ -448,6 +455,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
     gold_assert(this->got_ != NULL);
     return this->got_;
   }
+
+  // Get the GOT section, creating it if necessary.
+  Output_data_got_powerpc<size, big_endian>*
+  got_section(Symbol_table*, Layout*);
 
   Object*
   do_make_elf_object(const std::string&, Input_file*, off_t,
@@ -693,10 +704,6 @@ class Target_powerpc : public Sized_target<size, big_endian>
 
     return tls::TLSOPT_TO_LE;
   }
-
-  // Get the GOT section, creating it if necessary.
-  Output_data_got_powerpc<size, big_endian>*
-  got_section(Symbol_table*, Layout*);
 
   // Create glink.
   void
@@ -1374,6 +1381,57 @@ Powerpc_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
     }
 }
 
+// Set up some symbols, then perform Sized_relobj_file method.
+
+template<int size, bool big_endian>
+void
+Powerpc_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
+						 Layout* layout,
+						 Read_relocs_data* rd)
+{
+  if (size == 32)
+    {
+      // Define a weak hidden _GLOBAL_OFFSET_TABLE_ to ensure it isn't
+      // seen as undefined when scanning relocs (and thus requires
+      // non-relative dynamic relocs).  The proper value will be
+      // updated later.
+      Symbol *gotsym = symtab->lookup("_GLOBAL_OFFSET_TABLE_", NULL);
+      if (gotsym != NULL && gotsym->is_undefined())
+	{
+	  Target_powerpc<size, big_endian>* target =
+	    static_cast<Target_powerpc<size, big_endian>*>(
+		parameters->sized_target<size, big_endian>());
+	  Output_data_got_powerpc<size, big_endian>* got
+	    = target->got_section(symtab, layout);
+	  symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
+					Symbol_table::PREDEFINED,
+					got, 0, 0,
+					elfcpp::STT_OBJECT,
+					elfcpp::STB_WEAK,
+					elfcpp::STV_HIDDEN, 0,
+					false, false);
+	}
+
+      // Define _SDA_BASE_ at the start of the .sdata section + 32768.
+      Symbol *sdasym = symtab->lookup("_SDA_BASE_", NULL);
+      if (sdasym != NULL && sdasym->is_undefined())
+	{
+	  Output_data_space* sdata = new Output_data_space(4, "** sdata");
+	  Output_section* os
+	    = layout->add_output_section_data(".sdata", 0,
+					      elfcpp::SHF_ALLOC
+					      | elfcpp::SHF_WRITE,
+					      sdata, ORDER_SMALL_DATA, false);
+	  symtab->define_in_output_data("_SDA_BASE_", NULL,
+					Symbol_table::PREDEFINED,
+					os, 32768, 0, elfcpp::STT_OBJECT,
+					elfcpp::STB_LOCAL, elfcpp::STV_HIDDEN,
+					0, false, false);
+	}
+    }
+  Sized_relobj_file<size, big_endian>::do_scan_relocs(symtab, layout, rd);
+}
+
 // Set up PowerPC target specific relobj.
 
 template<int size, bool big_endian>
@@ -1459,7 +1517,7 @@ public:
 
   // Offset of base used to access the GOT/TOC.
   // The got/toc pointer reg will be set to this value.
-  typename elfcpp::Elf_types<size>::Elf_Off
+  Valtype
   got_base_offset(const Powerpc_relobj<size, big_endian>* object) const
   {
     if (size == 32)
@@ -4036,42 +4094,6 @@ Target_powerpc<size, big_endian>::scan_relocs(
       gold_error(_("%s: unsupported REL reloc section"),
 		 object->name().c_str());
       return;
-    }
-
-  if (size == 32)
-    {
-      // Define a weak hidden _GLOBAL_OFFSET_TABLE_ to ensure it isn't
-      // seen as undefined when scanning relocs (and thus requires
-      // non-relative dynamic relocs).  The proper value will be
-      // updated later.
-      Symbol *gotsym = symtab->lookup("_GLOBAL_OFFSET_TABLE_", NULL);
-      if (gotsym != NULL && gotsym->is_undefined())
-	symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
-				      Symbol_table::PREDEFINED,
-				      this->got_section(symtab, layout), 0, 0,
-				      elfcpp::STT_OBJECT,
-				      elfcpp::STB_WEAK,
-				      elfcpp::STV_HIDDEN, 0,
-				      false, false);
-
-      static Output_data_space* sdata;
-
-      // Define _SDA_BASE_ at the start of the .sdata section.
-      if (sdata == NULL)
-	{
-	  // layout->find_output_section(".sdata") == NULL
-	  sdata = new Output_data_space(4, "** sdata");
-	  Output_section* os
-	    = layout->add_output_section_data(".sdata", 0,
-					      elfcpp::SHF_ALLOC
-					      | elfcpp::SHF_WRITE,
-					      sdata, ORDER_SMALL_DATA, false);
-	  symtab->define_in_output_data("_SDA_BASE_", NULL,
-					Symbol_table::PREDEFINED,
-					os, 32768, 0, elfcpp::STT_OBJECT,
-					elfcpp::STB_LOCAL, elfcpp::STV_HIDDEN,
-					0, false, false);
-	}
     }
 
   gold::scan_relocs<size, big_endian, Powerpc, elfcpp::SHT_RELA, Scan>(
