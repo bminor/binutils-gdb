@@ -1,10 +1,10 @@
-2012-11-05  Stephane Carrez  <Stephane.Carrez@gmail.com>
-
-	* MAINTAINERS: Update my email address.
-
 2012-11-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gnulib/update-gnulib.sh: New script.
+
+2012-11-05  Stephane Carrez  <Stephane.Carrez@gmail.com>
+
+	* MAINTAINERS: Update my email address.
 
 2012-11-05  Tom Tromey  <tromey@redhat.com>
 
