@@ -8372,150 +8372,156 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	    goto error_ret;
 
 	  /* Mark toc entries referenced as used.  */
-	  repeat = 0;
 	  do
-	    for (rel = relstart; rel < relstart + sec->reloc_count; ++rel)
-	      {
-		enum elf_ppc64_reloc_type r_type;
-		unsigned long r_symndx;
-		asection *sym_sec;
-		struct elf_link_hash_entry *h;
-		Elf_Internal_Sym *sym;
-		bfd_vma val;
-		enum {no_check, check_lo, check_ha} insn_check;
+	    {
+	      repeat = 0;
+	      for (rel = relstart; rel < relstart + sec->reloc_count; ++rel)
+		{
+		  enum elf_ppc64_reloc_type r_type;
+		  unsigned long r_symndx;
+		  asection *sym_sec;
+		  struct elf_link_hash_entry *h;
+		  Elf_Internal_Sym *sym;
+		  bfd_vma val;
+		  enum {no_check, check_lo, check_ha} insn_check;
 
-		r_type = ELF64_R_TYPE (rel->r_info);
-		switch (r_type)
-		  {
-		  default:
-		    insn_check = no_check;
-		    break;
+		  r_type = ELF64_R_TYPE (rel->r_info);
+		  switch (r_type)
+		    {
+		    default:
+		      insn_check = no_check;
+		      break;
 
-		  case R_PPC64_GOT_TLSLD16_HA:
-		  case R_PPC64_GOT_TLSGD16_HA:
-		  case R_PPC64_GOT_TPREL16_HA:
-		  case R_PPC64_GOT_DTPREL16_HA:
-		  case R_PPC64_GOT16_HA:
-		  case R_PPC64_TOC16_HA:
-		    insn_check = check_ha;
-		    break;
+		    case R_PPC64_GOT_TLSLD16_HA:
+		    case R_PPC64_GOT_TLSGD16_HA:
+		    case R_PPC64_GOT_TPREL16_HA:
+		    case R_PPC64_GOT_DTPREL16_HA:
+		    case R_PPC64_GOT16_HA:
+		    case R_PPC64_TOC16_HA:
+		      insn_check = check_ha;
+		      break;
 
-		  case R_PPC64_GOT_TLSLD16_LO:
-		  case R_PPC64_GOT_TLSGD16_LO:
-		  case R_PPC64_GOT_TPREL16_LO_DS:
-		  case R_PPC64_GOT_DTPREL16_LO_DS:
-		  case R_PPC64_GOT16_LO:
-		  case R_PPC64_GOT16_LO_DS:
-		  case R_PPC64_TOC16_LO:
-		  case R_PPC64_TOC16_LO_DS:
-		    insn_check = check_lo;
-		    break;
-		  }
+		    case R_PPC64_GOT_TLSLD16_LO:
+		    case R_PPC64_GOT_TLSGD16_LO:
+		    case R_PPC64_GOT_TPREL16_LO_DS:
+		    case R_PPC64_GOT_DTPREL16_LO_DS:
+		    case R_PPC64_GOT16_LO:
+		    case R_PPC64_GOT16_LO_DS:
+		    case R_PPC64_TOC16_LO:
+		    case R_PPC64_TOC16_LO_DS:
+		      insn_check = check_lo;
+		      break;
+		    }
 
-		if (insn_check != no_check)
-		  {
-		    bfd_vma off = rel->r_offset & ~3;
-		    unsigned char buf[4];
-		    unsigned int insn;
+		  if (insn_check != no_check)
+		    {
+		      bfd_vma off = rel->r_offset & ~3;
+		      unsigned char buf[4];
+		      unsigned int insn;
 
-		    if (!bfd_get_section_contents (ibfd, sec, buf, off, 4))
-		      {
-			free (used);
-			goto error_ret;
-		      }
-		    insn = bfd_get_32 (ibfd, buf);
-		    if (insn_check == check_lo
-			? !ok_lo_toc_insn (insn)
-			: ((insn & ((0x3f << 26) | 0x1f << 16))
-			   != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
-		      {
-			char str[12];
+		      if (!bfd_get_section_contents (ibfd, sec, buf, off, 4))
+			{
+			  free (used);
+			  goto error_ret;
+			}
+		      insn = bfd_get_32 (ibfd, buf);
+		      if (insn_check == check_lo
+			  ? !ok_lo_toc_insn (insn)
+			  : ((insn & ((0x3f << 26) | 0x1f << 16))
+			     != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */))
+			{
+			  char str[12];
 
-			ppc64_elf_tdata (ibfd)->unexpected_toc_insn = 1;
-			sprintf (str, "%#08x", insn);
-			info->callbacks->einfo
-			  (_("%P: %H: toc optimization is not supported for"
-			     " %s instruction.\n"),
-			   ibfd, sec, rel->r_offset & ~3, str);
-		      }
-		  }
+			  ppc64_elf_tdata (ibfd)->unexpected_toc_insn = 1;
+			  sprintf (str, "%#08x", insn);
+			  info->callbacks->einfo
+			    (_("%P: %H: toc optimization is not supported for"
+			       " %s instruction.\n"),
+			     ibfd, sec, rel->r_offset & ~3, str);
+			}
+		    }
 
-		switch (r_type)
-		  {
-		  case R_PPC64_TOC16:
-		  case R_PPC64_TOC16_LO:
-		  case R_PPC64_TOC16_HI:
-		  case R_PPC64_TOC16_HA:
-		  case R_PPC64_TOC16_DS:
-		  case R_PPC64_TOC16_LO_DS:
-		    /* In case we're taking addresses of toc entries.  */
-		  case R_PPC64_ADDR64:
-		    break;
+		  switch (r_type)
+		    {
+		    case R_PPC64_TOC16:
+		    case R_PPC64_TOC16_LO:
+		    case R_PPC64_TOC16_HI:
+		    case R_PPC64_TOC16_HA:
+		    case R_PPC64_TOC16_DS:
+		    case R_PPC64_TOC16_LO_DS:
+		      /* In case we're taking addresses of toc entries.  */
+		    case R_PPC64_ADDR64:
+		      break;
 
-		  default:
+		    default:
+		      continue;
+		    }
+
+		  r_symndx = ELF64_R_SYM (rel->r_info);
+		  if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
+				  r_symndx, ibfd))
+		    {
+		      free (used);
+		      goto error_ret;
+		    }
+
+		  if (sym_sec != toc)
 		    continue;
-		  }
 
-		r_symndx = ELF64_R_SYM (rel->r_info);
-		if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms,
-				r_symndx, ibfd))
-		  {
-		    free (used);
-		    goto error_ret;
-		  }
+		  if (h != NULL)
+		    val = h->root.u.def.value;
+		  else
+		    val = sym->st_value;
+		  val += rel->r_addend;
 
-		if (sym_sec != toc)
-		  continue;
+		  if (val >= toc->size)
+		    continue;
 
-		if (h != NULL)
-		  val = h->root.u.def.value;
-		else
-		  val = sym->st_value;
-		val += rel->r_addend;
+		  if ((skip[val >> 3] & can_optimize) != 0)
+		    {
+		      bfd_vma off;
+		      unsigned char opc;
 
-		if (val >= toc->size)
-		  continue;
-
-		if ((skip[val >> 3] & can_optimize) != 0)
-		  {
-		    bfd_vma off;
-		    unsigned char opc;
-
-		    switch (r_type)
-		      {
-		      case R_PPC64_TOC16_HA:
-			break;
-
-		      case R_PPC64_TOC16_LO_DS:
-			off = rel->r_offset + (bfd_big_endian (ibfd) ? -2 : 3);
-			if (!bfd_get_section_contents (ibfd, sec, &opc, off, 1))
-			  {
-			    free (used);
-			    goto error_ret;
-			  }
-			if ((opc & (0x3f << 2)) == (58u << 2))
+		      switch (r_type)
+			{
+			case R_PPC64_TOC16_HA:
 			  break;
-			/* Fall thru */
 
-		      default:
-			/* Wrong sort of reloc, or not a ld.  We may
-			   as well clear ref_from_discarded too.  */
-			skip[val >> 3] = 0;
-		      }
-		  }
+			case R_PPC64_TOC16_LO_DS:
+			  off = rel->r_offset;
+			  off += (bfd_big_endian (ibfd) ? -2 : 3);
+			  if (!bfd_get_section_contents (ibfd, sec, &opc,
+							 off, 1))
+			    {
+			      free (used);
+			      goto error_ret;
+			    }
+			  if ((opc & (0x3f << 2)) == (58u << 2))
+			    break;
+			  /* Fall thru */
 
-		/* For the toc section, we only mark as used if
-		   this entry itself isn't unused.  */
-		if (sec == toc
-		    && !used[val >> 3]
-		    && (used[rel->r_offset >> 3]
-			|| !(skip[rel->r_offset >> 3] & ref_from_discarded)))
-		  /* Do all the relocs again, to catch reference
-		     chains.  */
-		  repeat = 1;
+			default:
+			  /* Wrong sort of reloc, or not a ld.  We may
+			     as well clear ref_from_discarded too.  */
+			  skip[val >> 3] = 0;
+			}
+		    }
 
-		used[val >> 3] = 1;
-	      }
+		  if (sec != toc)
+		    used[val >> 3] = 1;
+		  /* For the toc section, we only mark as used if this
+		     entry itself isn't unused.  */
+		  else if ((used[rel->r_offset >> 3]
+			    || !(skip[rel->r_offset >> 3] & ref_from_discarded))
+			   && !used[val >> 3])
+		    {
+		      /* Do all the relocs again, to catch reference
+			 chains.  */
+		      repeat = 1;
+		      used[val >> 3] = 1;
+		    }
+		}
+	    }
 	  while (repeat);
 
 	  if (elf_section_data (sec)->relocs != relstart)

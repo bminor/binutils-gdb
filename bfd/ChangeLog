@@ -1,3 +1,9 @@
+2012-11-05  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_edit_toc): Clear "repeat" inside
+	loop.  Really mark toc entry referring to another toc entry
+	only if the first is used.
+
 2012-10-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.in: Also handle --enable-64-bit-bfd when setting
