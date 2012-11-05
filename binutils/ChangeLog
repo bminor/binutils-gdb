@@ -1,3 +1,9 @@
+2012-11-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Apply 2012-09-10 change to config.in here.  Add
+	__CONFIG_H__ check.
+	* config.in: Regenerate.
+
 2012-10-30  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/14779

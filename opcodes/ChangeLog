@@ -1,3 +1,7 @@
+2012-11-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Apply 2012-09-10 change to config.in here.
+
 2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
         * arm-dis.c: Changed ldra and strl-form mnemonics
@@ -21,7 +25,7 @@
 	* i386-gen.c (cpu_flag_init): Add CPU_BTVER1_FLAGS and
 	CPU_BTVER2_FLAGS.
 
-	* i386-opc.h: Update CpuPRFCHW comment. 
+	* i386-opc.h: Update CpuPRFCHW comment.
 
 	* i386-opc.tbl: Enable prefetch instruction for CpuPRFCHW.
 	* i386-init.h: Regenerated.
