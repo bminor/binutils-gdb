@@ -1,5 +1,9 @@
 2012-11-05  Alan Modra  <amodra@gmail.com>
 
+	* configure.in: Apply 2012-09-10 change to config.in here.
+
+2012-11-05  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_edit_toc): Clear "repeat" inside
 	loop.  Really mark toc entry referring to another toc entry
 	only if the first is used.

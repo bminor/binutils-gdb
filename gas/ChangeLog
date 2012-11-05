@@ -1,5 +1,9 @@
 2012-11-05  Alan Modra  <amodra@gmail.com>
 
+	* configure.in: Apply 2012-09-10 change to config.in here.
+
+2012-11-05  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (md_chars_to_number): Delete.
 	(ppc_setup_opcodes): Assert num_powerpc_operands fit.
 	(ppc_is_toc_sym): Move earlier in file.

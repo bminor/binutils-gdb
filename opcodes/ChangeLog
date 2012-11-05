@@ -1,7 +1,12 @@
+2012-11-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Apply 2012-09-10 change to config.in here.
+
 2012-10-26  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-mkopc.c: Accept empty lines in s390-opc.txt.
-	* s390-opc.c: Add M_20OPT field. New instruction formats RRF_RURR2 and RRF_RMRR.
+	* s390-opc.c: Add M_20OPT field. New instruction formats RRF_RURR2
+	and RRF_RMRR.
 	* s390-opc.txt: Add new instructions.  New instruction type for lptea.
 
 2012-10-26  Christian Groessler  <chris@groessler.org>
