@@ -663,6 +663,8 @@ handle_vfork_child_exec_or_exit (int exec)
 
 	  /* follow-fork child, detach-on-fork on.  */
 
+	  inf->vfork_parent->pending_detach = 0;
+
 	  if (!exec)
 	    {
 	      /* If we're handling a child exit, then inferior_ptid

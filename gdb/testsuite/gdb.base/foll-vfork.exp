@@ -388,6 +388,58 @@ proc tcatch_vfork_then_child_follow_exit {} {
    exec sleep 1
 }}
 
+proc vfork_relations_in_info_inferiors { variant } {
+  with_test_prefix "vfork relations in info inferiors" {
+   global gdb_prompt
+
+   setup_gdb
+
+   gdb_test_no_output "set follow-fork child"
+
+   set test "step over vfork"
+   gdb_test_multiple "next" $test {
+       -re "Attaching after .* vfork to child.*if \\(pid == 0\\).*$gdb_prompt " {
+	   pass "$test"
+       }
+   }
+
+   gdb_test "info inferiors" \
+       ".*is vfork child of inferior 1.*is vfork parent of inferior 2" \
+       "info inferiors shows vfork parent/child relation"
+
+   if { $variant == "exec" } {
+       global srcfile2
+
+       set linenum [gdb_get_line_number "printf(\"Hello from vforked-prog" ${srcfile2}]
+       set test "continue to bp"
+       gdb_test_multiple "continue" $test {
+	   -re ".*xecuting new program.*Breakpoint.*vforked-prog.c:${linenum}.*$gdb_prompt " {
+	       pass $test
+	   }
+       }
+   } else {
+       set test "continue to child exit"
+       gdb_test_multiple "continue" $test {
+	   -re "exited normally.*$gdb_prompt " {
+	       pass $test
+	   }
+       }
+   }
+
+   set test "vfork relation no longer appears in info inferiors"
+   gdb_test_multiple "info inferiors" $test {
+       -re "is vfork child of inferior 1.*$gdb_prompt $" {
+	   fail $test
+       }
+       -re "is vfork parent of inferior 2.*$gdb_prompt $" {
+	   fail $test
+       }
+       -re "$gdb_prompt $" {
+	   pass $test
+       }
+   }
+}}
+
 proc do_vfork_and_follow_parent_tests {} {
    global gdb_prompt
 
@@ -435,6 +487,13 @@ proc do_vfork_and_follow_child_tests_exec {} {
    # catchpoints.
    # ??rehrauer: NYI.  Will add testpoints here when implemented.
    #
+
+   # Step over a vfork in the child, do "info inferiors" and check the
+   # parent/child relation is displayed.  Run the child over the exec,
+   # and confirm the relation is no longer displayed in "info
+   # inferiors".
+   #
+   vfork_relations_in_info_inferiors "exec"
 }
 
 proc do_vfork_and_follow_child_tests_exit {} {
@@ -446,6 +505,13 @@ proc do_vfork_and_follow_child_tests_exit {} {
    # Try catching a vfork, and stepping out to the child.
    #
    tcatch_vfork_then_child_follow_exit
+
+   # Step over a vfork in the child, do "info inferiors" and check the
+   # parent/child relation is displayed.  Run the child to completion,
+   # and confirm the relation is no longer displayed in "info
+   # inferiors".
+   #
+   vfork_relations_in_info_inferiors "exit"
 }
 
 with_test_prefix "check vfork support" {

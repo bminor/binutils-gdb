@@ -1,5 +1,12 @@
 2012-11-05  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/foll-vfork.exp (vfork_relations_in_info_inferiors): New
+	procedure.
+	(do_vfork_and_follow_child_tests_exec)
+	(do_vfork_and_follow_child_tests_exit): Call it.
+
+2012-11-05  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/foll-vfork.c (main): Call perror and _exit if execlp()
 	fails.
 

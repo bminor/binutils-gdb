@@ -1,3 +1,10 @@
+2012-11-05  Pedro Alves  <palves@redhat.com>
+
+	* inferior.c (exit_inferior_1): Clear 'vfork_parent' in the vfork
+	child.  Clear 'pending_detach'.
+	* infrun.c (handle_vfork_child_exec_or_exit): Clear
+	'pending_detach' in the vfork parent.
+
 2012-11-05  Doug Evans  <dje@google.com>
 
 	Add support for DWP files.  http://gcc.gnu.org/wiki/DebugFissionDWP
