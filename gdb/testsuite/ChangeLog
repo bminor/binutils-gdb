@@ -1,3 +1,8 @@
+2012-11-05  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/foll-vfork.c (main): Call perror and _exit if execlp()
+	fails.
+
 2012-11-03  Yao Qi  <yao@codesourcery.com>
 
 	Fix PR gdb/14617.

@@ -30,6 +30,8 @@ main ()
   if (pid == 0) {
     printf ("I'm the child!\n");
     execlp ("gdb.base/vforked-prog", "gdb.base/vforked-prog", (char *)0);
+    perror ("exec failed");
+    _exit (1);
   }
   else {
     printf ("I'm the proud parent of child #%d!\n", pid);
