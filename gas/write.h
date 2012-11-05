@@ -64,8 +64,8 @@ struct fix
   /* The value is signed when checking for overflow.  */
   unsigned fx_signed : 1;
 
-  /* pc-relative offset adjust (only used by m68k and m68hc11) */
-  char fx_pcrel_adjust;
+  /* pc-relative offset adjust (only used by some CPU specific code) */
+  signed char fx_pcrel_adjust;
 
   /* How many bytes are involved? */
   unsigned char fx_size;

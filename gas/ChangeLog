@@ -1,3 +1,9 @@
+2012-11-05  Alan Modra  <amodra@gmail.com>
+
+	* write.h (struct fix <fx_pcrel_adjust>): Make it a signed char.
+	* config/tc-m68k.c (tc_gen_reloc, md_pcrel_from): Remove explicit
+	sign extendion of fx_pxrel_adjust.
+
 2012-11-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (is_delay_slot_valid): Simplify expression.

@@ -1377,9 +1377,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     reloc->addend = fixp->fx_addnumber;
   else
     reloc->addend = (section->vma
-		     /* Explicit sign extension in case char is
-			unsigned.  */
-		     + ((fixp->fx_pcrel_adjust & 0xff) ^ 0x80) - 0x80
+		     + fixp->fx_pcrel_adjust
 		     + fixp->fx_addnumber
 		     + md_pcrel_from (fixp));
 #endif
@@ -7911,9 +7909,7 @@ md_pcrel_from (fixS *fixP)
 {
   int adjust;
 
-  /* Because fx_pcrel_adjust is a char, and may be unsigned, we explicitly
-     sign extend the value here.  */
-  adjust = ((fixP->fx_pcrel_adjust & 0xff) ^ 0x80) - 0x80;
+  adjust = fixP->fx_pcrel_adjust;
   if (adjust == 64)
     adjust = -1;
   return fixP->fx_where + fixP->fx_frag->fr_address - adjust;
