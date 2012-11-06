@@ -1,3 +1,9 @@
+2012-11-06  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (inferior_has_forked, inferior_has_vforked)
+	(inferior_has_execd, inferior_has_called_syscall): Remove
+	declarations.
+
 2012-11-06  Pierre Muller  <muller@sourceware.org>
 
 	* remote.c (remote_insert_hw_breakpoint): ARI fix,

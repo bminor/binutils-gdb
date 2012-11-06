@@ -1081,16 +1081,6 @@ int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 				enum flash_preserve_mode preserve_flash_p,
 				void (*progress_cb) (ULONGEST, void *));
 
-/* From infrun.c.  */
-
-extern int inferior_has_forked (ptid_t pid, ptid_t *child_pid);
-
-extern int inferior_has_vforked (ptid_t pid, ptid_t *child_pid);
-
-extern int inferior_has_execd (ptid_t pid, char **execd_pathname);
-
-extern int inferior_has_called_syscall (ptid_t pid, int *syscall_number);
-
 /* Print a line about the current target.  */
 
 #define	target_files_info()	\
