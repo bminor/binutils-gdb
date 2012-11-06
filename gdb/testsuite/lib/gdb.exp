@@ -3026,6 +3026,36 @@ proc gdb_load_cmd { args } {
     return -1
 }
 
+# Invoke "gcore".  CORE is the name of the core file to write.  TEST
+# is the name of the test case.  This will return 1 if the core file
+# was created, 0 otherwise.  If this fails to make a core file because
+# this configuration of gdb does not support making core files, it
+# will call "unsupported", not "fail".  However, if this fails to make
+# a core file for some other reason, then it will call "fail".
+
+proc gdb_gcore_cmd {core test} {
+    global gdb_prompt
+
+    set result 0
+    gdb_test_multiple "gcore $core" $test {
+	-re "Saved corefile .*\[\r\n\]+$gdb_prompt $" {
+	    pass $test
+	    set result 1
+	}
+
+	-re "Undefined command.*$gdb_prompt $" {
+	    unsupported $test
+	    verbose -log "'gcore' command undefined in gdb_gcore_cmd"
+	}
+
+	-re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
+	    unsupported $test
+	}
+    }
+
+    return $result
+}
+
 # Return the filename to download to the target and load on the target
 # for this shared library.  Normally just LIBNAME, unless shared libraries
 # for this target have separate link and load images.

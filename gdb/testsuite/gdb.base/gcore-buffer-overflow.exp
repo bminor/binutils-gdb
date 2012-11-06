@@ -55,17 +55,4 @@ if { ! [ runto_main ] } then {
     return -1
 }
 
-set escapedfilename [string_to_regexp ${objdir}/${subdir}/gcore-buffer-overflow.test]
-
-set test "save a corefile"
-gdb_test_multiple "gcore ${objdir}/${subdir}/gcore-buffer-overflow.test" $test {
-    -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
-	pass $test
-    }
-    -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
-	unsupported $test
-    }
-    eof {
-	fail $test
-    }
-}
+gdb_gcore_cmd "${objdir}/${subdir}/gcore-buffer-overflow.test" "save a corefile"

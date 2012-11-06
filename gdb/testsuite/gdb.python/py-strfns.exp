@@ -67,20 +67,11 @@ proc test_strfns_core_file { } {
     global objdir subdir gdb_prompt testfile
 
     set filename "${objdir}/${subdir}/py-strfns.core"
-    set escapedfilename [string_to_regexp $filename]
 
-    gdb_test_multiple "gcore $filename" \
-	"save a corefile" \
-	{
-	    -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
-		pass "save a corefile"
-	    }
-	    -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
-		unsupported "save a corefile"
-		# No use proceeding from here.
-		return
-	    }
-	}
+    if {![gdb_gcore_cmd "$filename" "save a corefile"]} {
+	# No use proceeding from here.
+	return
+    }
 
     clean_restart $testfile
 

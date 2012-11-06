@@ -95,23 +95,8 @@ set pre_corefile_local_array \
 set pre_corefile_extern_array \
 	[capture_command_output "print extern_array" "$print_prefix"]
 
-set escapedfilename [string_to_regexp ${objdir}/${subdir}/gcore.test]
-
-set core_supported 0
-gdb_test_multiple "gcore ${objdir}/${subdir}/gcore.test" \
-	"save a corefile" \
-{
-  -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
-    pass "save a corefile"
-    global core_supported
-    set core_supported 1
-  }
-  -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
-    unsupported "save a corefile"
-    global core_supported
-    set core_supported 0
-  }
-}
+set core_supported [gdb_gcore_cmd "${objdir}/${subdir}/gcore.test" \
+			"save a corefile"]
 
 if {!$core_supported} {
   return -1

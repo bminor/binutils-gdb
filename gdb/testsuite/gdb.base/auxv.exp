@@ -127,20 +127,7 @@ proc fetch_auxv {test} {
 set live_data [fetch_auxv "info auxv on live process"]
 
 # Now try gcore.
-set gcore_works 0
-set escapedfilename [string_to_regexp $gcorefile]
-gdb_test_multiple "gcore $gcorefile" "gcore" {
-    -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
-	pass "gcore"
-	set gcore_works 1
-    }
-    -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
-	unsupported "gcore"
-    }
-    -re "Undefined command: .*\[\r\n\]+$gdb_prompt $" {
-	unsupported "gcore"
-    }
-}
+set gcore_works [gdb_gcore_cmd "$gcorefile" "gcore"]
 
 # Let the program continue and die.
 gdb_test continue ".*Program received signal.*"

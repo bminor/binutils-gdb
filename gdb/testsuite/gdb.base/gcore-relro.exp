@@ -55,17 +55,8 @@ if ![runto lib] {
     return -1
 }
 
-set escapedfilename [string_to_regexp ${gcorefile}]
-
-set test "save a corefile"
-gdb_test_multiple "gcore ${gcorefile}" $test {
-    -re "Saved corefile ${escapedfilename}\r\n$gdb_prompt $" {
-	pass $test
-    }
-    -re "Can't create a corefile\r\n$gdb_prompt $" {
-	unsupported $test
-	return -1
-    }
+if {![gdb_gcore_cmd $gcorefile "save a corefile"]} {
+    return -1
 }
 
 # Now restart gdb and load the corefile.

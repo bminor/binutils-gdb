@@ -91,20 +91,8 @@ delete_breakpoints
 gdb_breakpoint "thread2"
 gdb_test "continue" "Continuing.*Breakpoint.* thread2 .*" "thread 2 is running"
 
-set escapedfilename [string_to_regexp $corefile]
 # Drop corefile
-set core_supported 0
-gdb_test_multiple "gcore $corefile" "save a corefile" \
-{
-  -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
-    pass "save a corefile"
-    global core_supported
-    set core_supported 1
-  }
-  -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
-    unsupported "save a corefile"
-  }
-}
+set core_supported [gdb_gcore_cmd "$corefile" "save a corefile"]
 
 if {!$core_supported} {
   return -1

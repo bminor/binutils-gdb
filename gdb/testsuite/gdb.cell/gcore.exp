@@ -69,20 +69,10 @@ delete_breakpoints
 
 gdb_test "continue" ".*Aborted.*"
 
-set escapedfilename [string_to_regexp ${objdir}/${subdir}/gcore.test]
-
-gdb_test_multiple "gcore ${objdir}/${subdir}/gcore.test" \
-        "save a corefile" \
-{
-  -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
-    pass "save a corefile"
-  }
-  -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
-    unsupported "save a corefile"
+if {![gdb_gcore_cmd "${objdir}/${subdir}/gcore.test" \
+	  "save a corefile"]} {
     return -1
-  }
 }
-
 
 # Now restart gdb and load the corefile.
 gdb_exit

@@ -1,3 +1,18 @@
+2012-11-06  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.threads/gcore-thread.exp: Use gdb_gcore_cmd.
+	* gdb.python/py-strfns.exp (test_strfns_core_file): Use
+	gdb_gcore_cmd.
+	* gdb.cell/gcore.exp: Use gdb_gcore_cmd.
+	* gdb.base/gcore.exp: Use gdb_gcore_cmd.
+	* gdb.base/gcore-relro.exp: Use gdb_gcore_cmd.
+	* gdb.base/gcore-buffer-overflow.exp: Use gdb_gcore_cmd.
+	* gdb.base/auxv.exp: Use gdb_gcore_cmd.
+	* gdb.arch/vsx-regs.exp: Use gdb_gcore_cmd.
+	* gdb.arch/system-gcore.exp: Use gdb_gcore_cmd.
+	* gdb.arch/pa-nullify.exp (test_core_bt): Use gdb_gcore_cmd.
+	* lib/gdb.exp (gdb_gcore_cmd): New proc.
+
 2012-11-05  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/foll-vfork.exp (vfork_relations_in_info_inferiors): New

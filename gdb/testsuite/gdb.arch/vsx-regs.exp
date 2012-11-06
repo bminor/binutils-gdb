@@ -128,24 +128,8 @@ for {set i 0} {$i < 32} {incr i 1} {
 # later when loading the core file (i.e., different register values for different
 # vector register banks).
 
-set escapedfilename [string_to_regexp ${objdir}/${subdir}/vsx-core.test]
-
-set core_supported 0
-
-gdb_test_multiple "gcore ${objdir}/${subdir}/vsx-core.test" \
-        "Save a VSX-enabled corefile" \
-{
-  -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
-    pass "Save a VSX-enabled corefile"
-    global core_supported
-    set core_supported 1
-  }
-  -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
-    unsupported "Save a VSX-enabled corefile"
-    global core_supported
-    set core_supported 0
-  }
-}
+set core_supported [gdb_gcore_cmd "${objdir}/${subdir}/vsx-core.test" \
+			"Save a VSX-enabled corefile"]
 
 # Now run the F32~F63/VR0~VR31 tests.
 
