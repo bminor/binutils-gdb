@@ -1190,7 +1190,6 @@ xgate_parse_operand (struct xgate_opcode *opcode,
                char **op_con,
                s_operand operand)
 {
-  fixS *fixp = 0;
   char *op_constraint = *op_con;
   unsigned int op_mask = 0;
   unsigned int pp_fix = 0;
@@ -1277,14 +1276,14 @@ xgate_parse_operand (struct xgate_opcode *opcode,
               if (((opcode->name[strlen (opcode->name) - 1] == 'l')
                   && autoHiLo) || operand.mod == MOD_LOAD_LOW)
                 {
-                    fixp = fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
-                                      BFD_RELOC_XGATE_24);
+                    fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
+                                 BFD_RELOC_XGATE_24);
                 }
               else if (((opcode->name[strlen (opcode->name) - 1]) == 'h'
                   && autoHiLo) || operand.mod == MOD_LOAD_HIGH )
                 {
-                    fixp = fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
-                                      BFD_RELOC_XGATE_IMM8_HI);
+                    fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
+                                 BFD_RELOC_XGATE_IMM8_HI);
                 }
               else
                 {
@@ -1292,25 +1291,21 @@ xgate_parse_operand (struct xgate_opcode *opcode,
                       "to load a 16-bit value."));
                   break;
                 }
-              fixp->fx_pcrel_adjust = 0;
             }
           else if (*op_constraint == '5')
             {
-              fixp = fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
-                                  BFD_RELOC_XGATE_IMM5);
-              fixp->fx_pcrel_adjust = 0;
+              fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
+                           BFD_RELOC_XGATE_IMM5);
             }
           else if (*op_constraint == '4')
             {
-              fixp = fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
-                                  BFD_RELOC_XGATE_IMM4);
-              fixp->fx_pcrel_adjust = 0;
+              fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
+                           BFD_RELOC_XGATE_IMM4);
             }
           else if (*op_constraint == '3')
             {
-            fixp = fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
-                BFD_RELOC_XGATE_IMM3);
-            fixp->fx_pcrel_adjust = 0;
+              fix_new_exp (frag_now, where, 2, &operand.exp, FALSE,
+                           BFD_RELOC_XGATE_IMM3);
           }
         else
           {
@@ -1339,15 +1334,13 @@ xgate_parse_operand (struct xgate_opcode *opcode,
         {
           if (*op_constraint == '9')
             {
-              fixp = fix_new_exp (frag_now, where, 2, &operand.exp, TRUE,
-                                  R_XGATE_PCREL_9);
-              fixp->fx_pcrel_adjust = 1;
+              fix_new_exp (frag_now, where, 2, &operand.exp, TRUE,
+                           R_XGATE_PCREL_9);
             }
           else if (*op_constraint == 'a')
             {
-              fixp = fix_new_exp (frag_now, where, 2, &operand.exp, TRUE,
-                                  R_XGATE_PCREL_10);
-              fixp->fx_pcrel_adjust = 1;
+              fix_new_exp (frag_now, where, 2, &operand.exp, TRUE,
+                           R_XGATE_PCREL_10);
             }
         }
       else

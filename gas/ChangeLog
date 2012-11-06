@@ -1,3 +1,8 @@
+2012-11-05  Sean Keys  <skeys@ipdatasys.com>
+
+	* config/tc-xgate.c: Remove bogus use of <fx_pcrel_adjust>.
+	* config/tc-m68hc11.c: Likewise.
+
 2012-11-05  Alan Modra  <amodra@gmail.com>
 
 	* configure.in: Apply 2012-09-10 change to config.in here.
