@@ -1,5 +1,13 @@
 2012-11-06  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-ppc.c (ppc_elf_adjust_symtab): New function, split out..
+	(ppc_frob_file_before_adjust): ..from here.
+	(md_apply_fix): Set BSF_KEEP on .TOC. if not @tocbase.
+	* config/tc-ppc.h (ppc_elf_adjust_symtab): Declare.
+	(tc_adjust_symtab): Define.
+
+2012-11-06  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (md_apply_fix): Fix xcoff build breakage from
 	last patch.
 

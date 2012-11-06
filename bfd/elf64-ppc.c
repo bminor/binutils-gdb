@@ -3757,6 +3757,9 @@ struct ppc_link_hash_table
   struct ppc_link_hash_entry *tls_get_addr;
   struct ppc_link_hash_entry *tls_get_addr_fd;
 
+  /* The special .TOC. symbol.  */
+  struct ppc_link_hash_entry *dot_toc_dot;
+
   /* The size of reliplt used by got entry relocs.  */
   bfd_size_type got_reli_size;
 
@@ -11364,6 +11367,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
 	}
     }
   htab->plt_thread_safe = plt_thread_safe;
+  htab->dot_toc_dot = ((struct ppc_link_hash_entry *)
+		       elf_link_hash_lookup (&htab->elf, ".TOC.",
+					     FALSE, FALSE, TRUE));
   stubs_always_before_branch = group_size < 0;
   if (group_size < 0)
     stub_group_size = -group_size;
@@ -12361,6 +12367,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			break;
 		      }
 		  }
+	    }
+	  if (h_elf == &htab->dot_toc_dot->elf)
+	    {
+	      relocation = (TOCstart
+			    + htab->stub_group[input_section->id].toc_off);
+	      sec = bfd_abs_section_ptr;
+	      unresolved_reloc = FALSE;
 	    }
 	}
       h = (struct ppc_link_hash_entry *) h_elf;

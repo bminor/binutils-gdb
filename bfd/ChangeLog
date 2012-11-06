@@ -1,5 +1,11 @@
 2012-11-06  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct ppc_link_hash_table): Add dot_toc_dot.
+	(ppc64_elf_size_stubs): Lookup ".TOC.".
+	(ppc64_elf_relocate_section): Resolve special symbol ".TOC.".
+
+2012-11-06  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (maybe_strip_output): Heed SEC_KEEP.
 
 2012-11-05  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
@@ -1589,7 +1595,7 @@
 	* reloc.c: Add new ENUM for BFD_RELOC_AVR_8_LO,
 	BFD_RELOC_AVR_8_HI, BFD_RELOC_AVR_8_HHI.
 	* bfd-in2.h: Regenerate.
-	* libbfd.h: Regenrate.
+	* libbfd.h: Regenerate.
 	* elf32-avr.c (elf_avr_howto_table): Add entries for
 	R_AVR_8_LO8, R_AVR_8_HI8, R_AVR_8_HHI8.
 	(avr_reloc_map): Add RELOC mappings for R_AVR_8_LO8, R_AVR_8_HI8,

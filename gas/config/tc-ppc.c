@@ -2323,11 +2323,28 @@ ppc_frob_file_before_adjust (void)
       && toc_reloc_types != has_large_toc_reloc
       && bfd_section_size (stdoutput, toc) > 0x10000)
     as_warn (_("TOC section size exceeds 64k"));
+}
 
-  /* Don't emit .TOC. symbol.  */
-  symp = symbol_find (".TOC.");
-  if (symp != NULL)
-    symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+/* .TOC. used in an opd entry as .TOC.@tocbase doesn't need to be
+   emitted.  Other uses of .TOC. will cause the symbol to be marked
+   with BSF_KEEP in md_apply_fix.  */
+
+void
+ppc_elf_adjust_symtab (void)
+{
+  if (ppc_obj64)
+    {
+      symbolS *symp;
+      symp = symbol_find (".TOC.");
+      if (symp != NULL)
+	{
+	  asymbol *bsym = symbol_get_bfdsym (symp);
+	  if ((bsym->flags & BSF_KEEP) == 0)
+	    symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+	  else
+	    S_SET_WEAK (symp);
+	}
+    }
 }
 #endif /* OBJ_ELF */
 
@@ -6850,7 +6867,17 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
      then the section contents are immaterial, so don't warn if they
      happen to overflow.  Leave such warnings to ld.  */
   if (!fixP->fx_done)
-    fixP->fx_no_overflow = 1;
+    {
+      fixP->fx_no_overflow = 1;
+
+      /* Arrange to emit .TOC. as a normal symbol if used in anything
+	 but .TOC.@tocbase.  */
+      if (ppc_obj64
+	  && fixP->fx_r_type != BFD_RELOC_PPC64_TOC
+	  && fixP->fx_addsy != NULL
+	  && strcmp (S_GET_NAME (fixP->fx_addsy), ".TOC.") == 0)
+	symbol_get_bfdsym (fixP->fx_addsy)->flags |= BSF_KEEP;
+    }
 #else
   if (fixP->fx_r_type != BFD_RELOC_PPC_TOC16)
     fixP->fx_addnumber = 0;
