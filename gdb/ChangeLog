@@ -1,3 +1,8 @@
+2012-11-06  Pierre Muller  <muller@sourceware.org>
+
+	* contrib/ari/create-web-ari-in-src.sh: Avoid problem if script
+	is not executable.
+
 2012-11-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gnulib/update-gnulib.sh: New script.

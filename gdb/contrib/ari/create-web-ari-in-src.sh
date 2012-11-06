@@ -67,7 +67,7 @@ if [ -z "${webdir}" ] ; then
 fi
 
 # Launch update-web-ari.sh in same directory as current script.
-${scriptpath}/update-web-ari.sh ${srcdir} ${tempdir} ${webdir} gdb
+${SHELL} ${scriptpath}/update-web-ari.sh ${srcdir} ${tempdir} ${webdir} gdb
 
 if [ -f "${webdir}/index.html" ] ; then
   echo "ARI output can be viewed in file \"${webdir}/index.html\""
