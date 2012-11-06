@@ -1,3 +1,8 @@
+2012-11-06  Pierre Muller  <muller@sourceware.org>
+
+	* remote.c (remote_insert_hw_breakpoint): ARI fix,
+	add missing internalization markup.
+
 2012-11-06  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/14810

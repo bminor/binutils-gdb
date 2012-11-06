@@ -8222,7 +8222,7 @@ remote_insert_hw_breakpoint (struct gdbarch *gdbarch,
         {
           message = strchr (rs->buf + 2, '.');
           if (message)
-            error ("Remote failure reply: %s", message + 1);
+            error (_("Remote failure reply: %s"), message + 1);
         }
       return -1;
     case PACKET_UNKNOWN:
