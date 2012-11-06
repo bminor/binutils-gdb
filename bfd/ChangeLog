@@ -1,5 +1,12 @@
 2012-11-06  Alan Modra  <amodra@gmail.com>
 
+	PR binutils/14567
+	* opncls.c (opncls_iovec): Forward declare.
+	(_bfd_new_bfd_contained_in): If using opncls_iovec, copy iostream
+	to new bfd.
+
+2012-11-06  Alan Modra  <amodra@gmail.com>
+
 	* mach-o.c (bfd_mach_o_close_and_cleanup): Don't call
 	_bfd_generic_close_and_cleanup for mach_o_fat archives.
 
