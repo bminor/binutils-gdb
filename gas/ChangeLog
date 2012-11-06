@@ -1,5 +1,10 @@
 2012-11-06  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-tic4x.c: Remove alignment TODO comments.
+	(tic4x_do_align): Enable subseg_text_p test.
+
+2012-11-06  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (ppc_elf_adjust_symtab): New function, split out..
 	(ppc_frob_file_before_adjust): ..from here.
 	(md_apply_fix): Set BSF_KEEP on .TOC. if not @tocbase.

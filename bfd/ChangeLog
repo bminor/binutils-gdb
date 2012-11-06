@@ -1,5 +1,12 @@
 2012-11-06  Alan Modra  <amodra@gmail.com>
 
+	* coff-tic4x.c (tic4x_coff0_vec, tic4x_coff0_beh_vec,
+	tic4x_coff1_vec, tic4x_coff1_beh_vec, tic4x_coff2_vec,
+	tic4x_coff2_beh_vec): Allow SEC_CODE and SEC_READONLY in
+	section flags.
+
+2012-11-06  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (struct ppc_link_hash_table): Add dot_toc_dot.
 	(ppc64_elf_size_stubs): Lookup ".TOC.".
 	(ppc64_elf_relocate_section): Resolve special symbol ".TOC.".

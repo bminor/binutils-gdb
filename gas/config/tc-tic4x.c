@@ -27,11 +27,6 @@
   o .align cannot handle fill-data-width larger than 0xFF/8-bits. It
     should be possible to define a 32-bits pattern.
 
-  o .align fills all section with NOP's when used regardless if has
-    been used in .text or .data. (However the .align is primarily
-    intended used in .text sections. If you require something else,
-    use .align <size>,0x00)
-
   o .align: Implement a 'bu' insn if the number of nop's exceeds 4
     within the align frag. if(fragsize>4words) insert bu fragend+1
     first.
@@ -2966,9 +2961,7 @@ tic4x_do_align (int alignment,
     {
       if (fill == NULL)
         {
-	  /* FIXME: subseg_text_p tests SEC_CODE which isn't in allowed
-	     section flags.  See bfd/coff-tic4x.c target vecs.  */
-          if (1 || subseg_text_p (now_seg))
+          if (subseg_text_p (now_seg))
 	    {
 	      char nop[4];
 
