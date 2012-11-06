@@ -41,7 +41,7 @@ bin_PROGRAMS = $(am__EXEEXT_6) $(am__EXEEXT_7) $(am__EXEEXT_8) \
 	@BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ \
 	@BUILD_WINDMC@ $(am__EXEEXT_12) $(am__EXEEXT_13) \
 	$(am__EXEEXT_14) @BUILD_DLLWRAP@
-noinst_PROGRAMS = $(am__EXEEXT_18) $(am__EXEEXT_20) @BUILD_MISC@
+noinst_PROGRAMS = $(am__EXEEXT_18) $(am__EXEEXT_21) @BUILD_MISC@
 EXTRA_PROGRAMS = $(am__EXEEXT_1) srconv$(EXEEXT) sysdump$(EXEEXT) \
 	coffdump$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_4) $(am__EXEEXT_5)
@@ -102,7 +102,8 @@ am__EXEEXT_16 = strip-new$(EXEEXT)
 am__EXEEXT_17 = cxxfilt$(EXEEXT)
 am__EXEEXT_18 = $(am__EXEEXT_15) $(am__EXEEXT_16) $(am__EXEEXT_17)
 am__EXEEXT_19 = bfdtest1$(EXEEXT)
-am__EXEEXT_20 = $(am__EXEEXT_19)
+am__EXEEXT_20 = bfdtest2$(EXEEXT)
+am__EXEEXT_21 = $(am__EXEEXT_19) $(am__EXEEXT_20)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am__objects_1 = bucomm.$(OBJEXT) version.$(OBJEXT) filemode.$(OBJEXT)
 am_addr2line_OBJECTS = addr2line.$(OBJEXT) $(am__objects_1)
@@ -116,6 +117,9 @@ ar_OBJECTS = $(am_ar_OBJECTS)
 bfdtest1_SOURCES = bfdtest1.c
 bfdtest1_OBJECTS = bfdtest1.$(OBJEXT)
 bfdtest1_LDADD = $(LDADD)
+bfdtest2_SOURCES = bfdtest2.c
+bfdtest2_OBJECTS = bfdtest2.$(OBJEXT)
+bfdtest2_LDADD = $(LDADD)
 am_coffdump_OBJECTS = coffdump.$(OBJEXT) coffgrok.$(OBJEXT) \
 	$(am__objects_1)
 coffdump_OBJECTS = $(am_coffdump_OBJECTS)
@@ -226,7 +230,7 @@ YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
 LTYACCCOMPILE = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=compile $(YACC) $(YFLAGS) $(AM_YFLAGS)
 SOURCES = $(addr2line_SOURCES) $(ar_SOURCES) $(EXTRA_ar_SOURCES) \
-	bfdtest1.c $(coffdump_SOURCES) $(cxxfilt_SOURCES) \
+	bfdtest1.c bfdtest2.c $(coffdump_SOURCES) $(cxxfilt_SOURCES) \
 	$(dlltool_SOURCES) $(dllwrap_SOURCES) $(elfedit_SOURCES) \
 	$(nlmconv_SOURCES) $(nm_new_SOURCES) $(objcopy_SOURCES) \
 	$(objdump_SOURCES) $(EXTRA_objdump_SOURCES) $(ranlib_SOURCES) \
@@ -449,7 +453,8 @@ SRCONV_PROG = srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT)
 bin_SCRIPTS = @BUILD_INSTALL_MISC@
 EXTRA_SCRIPTS = embedspu
 BFDTEST1_PROG = bfdtest1
-TEST_PROGS = $(BFDTEST1_PROG)
+BFDTEST2_PROG = bfdtest2
+TEST_PROGS = $(BFDTEST1_PROG) $(BFDTEST2_PROG)
 RENAMED_PROGS = $(NM_PROG) $(STRIP_PROG) $(DEMANGLER_PROG)
 
 # Stuff that goes in tooldir/ if appropriate.
@@ -545,6 +550,7 @@ readelf_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY)
 elfedit_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY)
 dllwrap_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY)
 bfdtest1_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+bfdtest2_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 LDADD = $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 size_SOURCES = size.c $(BULIBS)
 objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
@@ -721,6 +727,9 @@ ar$(EXEEXT): $(ar_OBJECTS) $(ar_DEPENDENCIES)
 bfdtest1$(EXEEXT): $(bfdtest1_OBJECTS) $(bfdtest1_DEPENDENCIES) 
 	@rm -f bfdtest1$(EXEEXT)
 	$(LINK) $(bfdtest1_OBJECTS) $(bfdtest1_LDADD) $(LIBS)
+bfdtest2$(EXEEXT): $(bfdtest2_OBJECTS) $(bfdtest2_DEPENDENCIES) 
+	@rm -f bfdtest2$(EXEEXT)
+	$(LINK) $(bfdtest2_OBJECTS) $(bfdtest2_LDADD) $(LIBS)
 coffdump$(EXEEXT): $(coffdump_OBJECTS) $(coffdump_DEPENDENCIES) 
 	@rm -f coffdump$(EXEEXT)
 	$(LINK) $(coffdump_OBJECTS) $(coffdump_LDADD) $(LIBS)
@@ -842,6 +851,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arparse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arsup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bfdtest1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bfdtest2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bin2c.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binemul.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bucomm.Po@am__quote@

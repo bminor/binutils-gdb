@@ -27,16 +27,14 @@ if ![is_remote host] {
     }
 }
 
-set bfdtest1 $base_dir/bfdtest1
-
 # send_user "Version [binutil_version $AR]"
 
 # Test long file name support
 
-proc long_filenames { } {
+proc long_filenames { bfdtests } {
     global AR
     global host_triplet
-    global bfdtest1
+    global base_dir
 
     set testname "ar long file names"
 
@@ -126,11 +124,13 @@ proc long_filenames { } {
 	return
     }
 
-    set exec_output [binutils_run $bfdtest1 "$dest"]
-    if ![string match "" $exec_output] {
-	verbose -log $exec_output
-	fail "$testname (bfdtest1)"
-	return
+    foreach bfdtest $bfdtests {
+	set exec_output [binutils_run "$base_dir/$bfdtest" "$dest"]
+	if ![string match "" $exec_output] {
+	    verbose -log $exec_output
+	    fail "$testname ($bfdtest)"
+	    return
+	}
     }
 
     if [is_remote host] {
@@ -227,13 +227,13 @@ proc symbol_table { } {
 
 # Test building a thin archive.
 
-proc thin_archive { } {
+proc thin_archive { bfdtests } {
     global AR
     global AS
     global NM
     global srcdir
     global subdir
-    global bfdtest1
+    global base_dir
 
     set testname "ar thin archive"
 
@@ -259,11 +259,13 @@ proc thin_archive { } {
 	return
     }
 
-    set exec_output [binutils_run $bfdtest1 "$archive"]
-    if ![string match "" $exec_output] {
-	verbose -log $exec_output
-	fail "$testname (bfdtest1)"
-	return
+    foreach bfdtest $bfdtests {
+	set exec_output [binutils_run "$base_dir/$bfdtest" "$archive"]
+	if ![string match "" $exec_output] {
+	    verbose -log $exec_output
+	    fail "$testname ($bfdtest)"
+	    return
+	}
     }
 
     set got [binutils_run $NM "--print-armap $archive"]
@@ -282,13 +284,13 @@ proc thin_archive { } {
 
 # Test building a thin archive with a nested archive.
 
-proc thin_archive_with_nested { } {
+proc thin_archive_with_nested { bfdtests } {
     global AR
     global AS
     global NM
     global srcdir
     global subdir
-    global bfdtest1
+    global base_dir
 
     set testname "ar thin archive with nested archive"
 
@@ -324,18 +326,20 @@ proc thin_archive_with_nested { } {
 	return
     }
 
-    set exec_output [binutils_run $bfdtest1 "$archive"]
-    if ![string match "" $exec_output] {
-	verbose -log $exec_output
-	fail "$testname (bfdtest1)"
-	return
-    }
+    foreach bfdtest $bfdtests {
+	set exec_output [binutils_run "$base_dir/$bfdtest" "$archive"]
+	if ![string match "" $exec_output] {
+	    verbose -log $exec_output
+	    fail "$testname ($bfdtest)"
+	    return
+	}
 
-    set exec_output [binutils_run $bfdtest1 "$archive2"]
-    if ![string match "" $exec_output] {
-	verbose -log $exec_output
-	fail "$testname (bfdtest1)"
-	return
+	set exec_output [binutils_run "$base_dir/$bfdtest" "$archive2"]
+	if ![string match "" $exec_output] {
+	    verbose -log $exec_output
+	    fail "$testname ($bfdtest)"
+	    return
+	}
     }
 
     set got [binutils_run $NM "--print-armap $archive"]
@@ -554,10 +558,12 @@ proc move_an_element { } {
 
 # Run the tests.
 
-long_filenames
+set bfdtests [list bfdtest1 bfdtest2]
+
+long_filenames $bfdtests
 symbol_table
-thin_archive
-thin_archive_with_nested
+thin_archive $bfdtests
+thin_archive_with_nested $bfdtests
 argument_parsing
 deterministic_archive
 delete_an_element

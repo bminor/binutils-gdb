@@ -67,8 +67,9 @@ EXTRA_SCRIPTS = embedspu
 
 ## Test programs.
 BFDTEST1_PROG = bfdtest1
+BFDTEST2_PROG = bfdtest2
 
-TEST_PROGS = $(BFDTEST1_PROG)
+TEST_PROGS = $(BFDTEST1_PROG) $(BFDTEST2_PROG)
 
 ## We need a special rule to install the programs which are built with
 ## -new, and to rename cxxfilt to c++filt.
@@ -200,6 +201,7 @@ readelf_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY)
 elfedit_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY)
 dllwrap_DEPENDENCIES =   $(LIBINTL_DEP) $(LIBIBERTY)
 bfdtest1_DEPENDENCIES =  $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
+bfdtest2_DEPENDENCIES =  $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 
 LDADD = $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
