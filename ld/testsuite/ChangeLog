@@ -1,3 +1,9 @@
+2012-10-16  Sofiane Naci  <sofiane.naci@arm.com>
+
+	* ld-aarch64/tlsle-symbol-offset.s: New file.
+	* ld-aarch64/tlsle-symbol-offset.d: New file.
+	* ld-aarch64/aarch64-elf.exp: Add tlsle-symbol-offset test.
+
 2012-09-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14591
