@@ -1,5 +1,11 @@
 2012-11-06  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-xgate.c: Make some functions static.  Formatting
+	style and whitespace fixes.  Wrap overly long lines.  Format
+	help message.
+
+2012-11-06  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-tic4x.c: Remove alignment TODO comments.
 	(tic4x_do_align): Enable subseg_text_p test.
 
