@@ -1,3 +1,8 @@
+2012-11-06  Tristan Gingold  <gingold@adacore.com>
+
+	* coff-x86_64.c (_bfd_generic_find_nearest_line_discriminator):
+	Define as coff_find_nearest_line_discriminator.
+
 2012-11-06  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/14567

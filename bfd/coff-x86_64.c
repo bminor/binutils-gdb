@@ -731,6 +731,9 @@ coff_amd64_is_local_label_name (bfd *abfd, const char *name)
 #define amd64coff_object_p coff_object_p
 #endif
 
+#define _bfd_generic_find_nearest_line_discriminator \
+	coff_find_nearest_line_discriminator
+
 const bfd_target
 #ifdef TARGET_SYM
   TARGET_SYM =
