@@ -5175,7 +5175,7 @@ bpstat_stop_status (struct address_space *aspace,
 	  if (b->type == bp_hardware_watchpoint && bl != b->loc)
 	    break;
 
-	  if (bl->shlib_disabled)
+	  if (!bl->enabled || bl->shlib_disabled)
 	    continue;
 
 	  if (!bpstat_check_location (bl, aspace, bp_addr, ws))

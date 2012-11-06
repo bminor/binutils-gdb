@@ -1,3 +1,9 @@
+2012-11-06  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/14810
+
+	* breakpoint.c (bpstat_stop_status): Skip disabled locations.
+
 2012-11-06  Pierre Muller  <muller@sourceware.org>
 
 	* contrib/ari/create-web-ari-in-src.sh: Avoid problem if script
