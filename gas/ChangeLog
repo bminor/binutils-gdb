@@ -1,3 +1,8 @@
+2012-11-06  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_apply_fix): Fix xcoff build breakage from
+	last patch.
+
 2012-11-05  Sean Keys  <skeys@ipdatasys.com>
 
 	* config/tc-xgate.c: Remove bogus use of <fx_pcrel_adjust>.

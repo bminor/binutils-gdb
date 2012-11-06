@@ -6360,10 +6360,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       fieldval = value;
       switch (fixP->fx_r_type)
 	{
+#ifdef OBJ_ELF
 	case BFD_RELOC_PPC64_ADDR16_LO_DS:
 	  if (fixP->fx_pcrel)
 	    goto bad_pcrel;
 	  /* fall through */
+#endif
 	case BFD_RELOC_LO16:
 	  if (fixP->fx_pcrel)
 	    fixP->fx_r_type = BFD_RELOC_LO16_PCREL;
