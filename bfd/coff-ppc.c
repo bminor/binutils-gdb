@@ -2480,10 +2480,11 @@ const bfd_target TARGET_LITTLE_SYM =
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
 #ifndef COFF_WITH_PE
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
+   | SEC_RELOC),		/* section flags */
 #else
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
+   | SEC_RELOC | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
 #endif
 
   0,				/* leading char */
@@ -2540,10 +2541,11 @@ const bfd_target TARGET_BIG_SYM =
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
 #ifndef COFF_WITH_PE
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
+   | SEC_RELOC),		/* section flags */
 #else
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC /* section flags */
-   | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY
+   | SEC_RELOC | SEC_LINK_ONCE | SEC_LINK_DUPLICATES),
 #endif
 
   0,				/* leading char */

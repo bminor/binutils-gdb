@@ -4,6 +4,8 @@
 	tic4x_coff1_vec, tic4x_coff1_beh_vec, tic4x_coff2_vec,
 	tic4x_coff2_beh_vec): Allow SEC_CODE and SEC_READONLY in
 	section flags.
+	* coff-ppc.c (TARGET_LITTLE_SYM): Likewise.
+	(TARGET_BIG_SYM): Likewise.
 
 2012-11-06  Alan Modra  <amodra@gmail.com>
 
