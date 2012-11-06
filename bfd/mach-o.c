@@ -4864,6 +4864,9 @@ bfd_mach_o_close_and_cleanup (bfd *abfd)
         }
     }
 
+  if (bfd_get_format (abfd) == bfd_archive
+      && abfd->xvec == &mach_o_fat_vec)
+    return TRUE;
   return _bfd_generic_close_and_cleanup (abfd);
 }
 
