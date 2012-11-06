@@ -11300,6 +11300,7 @@ maybe_strip_output (struct bfd_link_info *info, asection *isec)
 {
   if (isec->size == 0
       && isec->output_section->size == 0
+      && !(isec->output_section->flags & SEC_KEEP)
       && !bfd_section_removed_from_list (info->output_bfd,
 					 isec->output_section)
       && elf_section_data (isec->output_section)->dynindx == 0)
