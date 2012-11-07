@@ -2823,7 +2823,11 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
 	  for (; from < end; from += interleave)
 	    for (i = 0; i < copy_width; i++)
-	      *to++ = from[i];
+	      {
+		if (&from[i] >= end)
+		  break;
+		*to++ = from[i];
+	      }
 
 	  size = (size + interleave - 1 - copy_byte) / interleave * copy_width;
 	  osection->lma /= interleave;

@@ -1,3 +1,7 @@
+2012-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (copy_section): Don't read beyond section end.
+
 2012-11-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14567
