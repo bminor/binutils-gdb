@@ -359,7 +359,7 @@ cache_bwrite (struct bfd *abfd, const void *where, file_ptr nbytes)
   return nwrite;
 }
 
-static int
+static bfd_boolean
 cache_bclose (struct bfd *abfd)
 {
   return bfd_cache_close (abfd);

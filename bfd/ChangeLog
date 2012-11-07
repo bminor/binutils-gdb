@@ -1,3 +1,14 @@
+2012-11-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14813
+	* bfdio.c (bfd_iovec): Change return type of bclose to
+	bfd_boolean.
+	(memory_bclose): Change return type to bfd_boolean.
+	* cache.c (cache_bclose): Likewise.
+	* opncls.c (opncls_bclose): Likewise.  Return TRUE on success.
+	* vms-lib.c (vms_lib_bclose): Likewise.  Return TRUE.
+	* libbfd.h: Regenerated.
+
 2012-11-06  Tristan Gingold  <gingold@adacore.com>
 
 	* coff-x86_64.c (_bfd_generic_find_nearest_line_discriminator):

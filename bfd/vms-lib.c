@@ -1174,11 +1174,11 @@ vms_lib_bwrite (struct bfd *abfd ATTRIBUTE_UNUSED,
   return -1;
 }
 
-static int
+static bfd_boolean
 vms_lib_bclose (struct bfd *abfd)
 {
   abfd->iostream = NULL;
-  return 0;
+  return TRUE;
 }
 
 static int

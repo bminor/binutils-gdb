@@ -508,7 +508,7 @@ opncls_bwrite (struct bfd *abfd ATTRIBUTE_UNUSED,
   return -1;
 }
 
-static int
+static bfd_boolean
 opncls_bclose (struct bfd *abfd)
 {
   struct opncls *vec = (struct opncls *) abfd->iostream;
@@ -518,7 +518,7 @@ opncls_bclose (struct bfd *abfd)
   if (vec->close != NULL)
     status = (vec->close) (abfd, vec->stream);
   abfd->iostream = NULL;
-  return status;
+  return status == 0;
 }
 
 static int
