@@ -1,6 +1,6 @@
 // descriptors.cc -- manage file descriptors for gold
 
-// Copyright 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2008, 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -45,7 +45,7 @@
 #endif
 
 static inline void
-set_close_on_exec(int fd)
+set_close_on_exec(int fd ATTRIBUTE_UNUSED)
 {
 // Mingw does not define F_SETFD.
 #ifdef F_SETFD

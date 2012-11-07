@@ -1,5 +1,8 @@
 2012-11-07  Roland McGrath  <mcgrathr@google.com>
 
+	* descriptors.cc (set_close_on_exec): Add ATTRIBUTE_UNUSED to the
+	parameter, which is unused in the [!F_SETFD] case.
+
 	* dwarf_reader.cc (Sized_elf_reloc_mapper::symbol_section): Cast
 	SYMNDX to off_t before comparing it to this->data_size().
 	* output.cc (Output_symtab_xindex::endian_do_write): Likewise.
