@@ -22,6 +22,7 @@
 #include "gold.h"
 
 #include <cstdio>
+#include "libiberty.h"
 
 #include "nacl.h"
 #include "elfcpp.h"

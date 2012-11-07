@@ -1,3 +1,7 @@
+2012-11-07  Roland McGrath  <mcgrathr@google.com>
+
+	* nacl.cc: Include "libiberty.h" for vasprintf declaration.
+
 2012-11-05  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Apply 2012-09-10 change to config.in here.
