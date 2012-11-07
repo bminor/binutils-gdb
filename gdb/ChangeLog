@@ -1,5 +1,17 @@
 2012-11-07  Pedro Alves  <palves@redhat.com>
 
+	* arm-tdep.c: Make defs.h be the first include.
+	* coff-pe-read.c: Ditto.
+	* gnu-nat.c: Ditto.
+	* go32-nat.c: Ditto.
+	* i386-nat.c: Ditto.
+	* ppcnbsd-nat.c: Ditto.
+	* ada-varobj.h: Don't include defs.h.
+	* i386-darwin-tdep.h: Ditto.
+	* i386-nat.h: Ditto.
+
+2012-11-07  Pedro Alves  <palves@redhat.com>
+
 	* MAINTAINERS: New FSF-appointed maintainers replace the Steering
 	Committee.
 

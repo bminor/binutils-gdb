@@ -82,9 +82,10 @@
    GDB does not use those as of this writing, and will never need
    to.  */
 
+#include "defs.h"
+
 #include <fcntl.h>
 
-#include "defs.h"
 #include "i386-nat.h"
 #include "inferior.h"
 #include "gdbthread.h"

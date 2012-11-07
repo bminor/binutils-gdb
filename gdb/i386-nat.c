@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "i386-nat.h"
 #include "defs.h"
+#include "i386-nat.h"
 #include "breakpoint.h"
 #include "command.h"
 #include "gdbcmd.h"

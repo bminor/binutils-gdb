@@ -21,9 +21,10 @@
 
    Contributed by Raoul M. Gough (RaoulGough@yahoo.co.uk).  */
 
+#include "defs.h"
+
 #include "coff-pe-read.h"
 
-#include "defs.h"
 #include "bfd.h"
 #include "gdbtypes.h"
 

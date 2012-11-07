@@ -19,7 +19,6 @@
 #ifndef __I386_DARWIN_TDEP_H__
 #define __I386_DARWIN_TDEP_H__
 
-#include "defs.h"
 #include "frame.h"
 
 /* Mapping between the general-purpose registers in Darwin x86 thread_state

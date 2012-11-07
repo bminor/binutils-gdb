@@ -20,7 +20,6 @@
 #ifndef ADA_VAROBJ_H
 #define ADA_VAROBJ_H
 
-#include "defs.h"
 #include "varobj.h"
 
 struct value;
