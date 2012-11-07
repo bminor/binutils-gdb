@@ -1,3 +1,8 @@
+2012-11-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* section.c (bfd_get_section_contents): Replace memcpy
+	with memmove.
+
 2012-11-07  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR binutils/14481

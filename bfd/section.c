@@ -1546,7 +1546,7 @@ bfd_get_section_contents (bfd *abfd,
 	  return FALSE;
 	}
       
-      memcpy (location, section->contents + offset, (size_t) count);
+      memmove (location, section->contents + offset, (size_t) count);
       return TRUE;
     }
 
