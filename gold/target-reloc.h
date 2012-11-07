@@ -1,6 +1,7 @@
 // target-reloc.h -- target specific relocation support  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -93,7 +94,7 @@ scan_relocs(
 	      //
 	      // FIXME: We should issue a warning if this is an
 	      // allocated section; is this the best place to do it?
-	      // 
+	      //
 	      // FIXME: The old GNU linker would in some cases look
 	      // for the linkonce section which caused this section to
 	      // be discarded, and, if the other section was the same
@@ -305,7 +306,7 @@ relocate_section(
           // If the local symbol belongs to a section we are discarding,
           // and that section is a debug section, try to find the
           // corresponding kept section and map this symbol to its
-          // counterpart in the kept section.  The symbol must not 
+          // counterpart in the kept section.  The symbol must not
           // correspond to a section we are folding.
 	  bool is_ordinary;
 	  shndx = psymval->input_shndx(&is_ordinary);
@@ -600,7 +601,7 @@ relocate_for_relocatable(
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section* output_section,
-    typename elfcpp::Elf_types<size>::Elf_Addr offset_in_output_section,
+    typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
     const Relocatable_relocs* rr,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr view_address,

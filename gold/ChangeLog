@@ -1,5 +1,18 @@
 2012-11-07  Roland McGrath  <mcgrathr@google.com>
 
+	* target.h (Sized_target::relocate_for_relocatable): Use Elf_Off
+	for offset_in_output_section parameter.
+	(Sized_target::relocate_special_relocatable): Likewise.
+	* arm.cc (Target_arm::relocate_for_relocatable): Likewise.
+	(Target_arm::relocate_special_relocatable): Likewise.
+	* i386.cc (Target_i386::relocate_for_relocatable): Likewise.
+	* powerpc.cc (Target_powerpc::relocate_for_relocatable): Likewise.
+	* sparc.cc (Target_sparc::relocate_for_relocatable): Likewise.
+	* target-reloc.h (relocate_for_relocatable): Likewise.
+	* testsuite/testfile.cc (Target_test): Likewise.
+	* tilegx.cc (Target_tilegx::relocate_for_relocatable): Likewise.
+	* x86_64.cc (Target_x86_64::relocate_for_relocatable): Likewise.
+
 	* gold.h: Move inclusion of <clocale> to after <libintl.h> in
 	[ENABLE_NLS] section, and separately at top of [!ENABLE_NLS] section.
 

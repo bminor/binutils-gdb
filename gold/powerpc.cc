@@ -134,7 +134,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
 			   const unsigned char* prelocs,
 			   size_t reloc_count,
 			   Output_section* output_section,
-			   off_t offset_in_output_section,
+			   typename elfcpp::Elf_types<size>::Elf_Off
+                             offset_in_output_section,
 			   const Relocatable_relocs*,
 			   unsigned char* view,
 			   typename elfcpp::Elf_types<size>::Elf_Addr view_address,
@@ -2086,7 +2087,7 @@ Target_powerpc<size, big_endian>::relocate_for_relocatable(
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section* output_section,
-    off_t offset_in_output_section,
+    typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
     const Relocatable_relocs* rr,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr view_address,

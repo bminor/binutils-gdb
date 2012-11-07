@@ -74,8 +74,9 @@ class Target_test : public Sized_target<size, big_endian>
   void
   relocate_for_relocatable(const Relocate_info<size, big_endian>*,
 			   unsigned int, const unsigned char*, size_t,
-			   Output_section*, off_t, const Relocatable_relocs*,
-			   unsigned char*,
+                           Output_section*,
+                           typename elfcpp::Elf_types<size>::Elf_Off,
+                           const Relocatable_relocs*, unsigned char*,
 			   typename elfcpp::Elf_types<size>::Elf_Addr,
 			   section_size_type, unsigned char*,
 			   section_size_type)

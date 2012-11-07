@@ -477,7 +477,7 @@ class Target_x86_64 : public Sized_target<size, false>
       const unsigned char* prelocs,
       size_t reloc_count,
       Output_section* output_section,
-      off_t offset_in_output_section,
+      typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
       const Relocatable_relocs*,
       unsigned char* view,
       typename elfcpp::Elf_types<size>::Elf_Addr view_address,
@@ -2299,7 +2299,7 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 	  unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
 	  Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 	  rela_dyn->add_local_relative(object, r_sym,
-				       (size == 32 
+				       (size == 32
 					? elfcpp::R_X86_64_RELATIVE64
 					: elfcpp::R_X86_64_RELATIVE),
 				       output_section, data_shndx,
@@ -4214,7 +4214,7 @@ Target_x86_64<size>::relocate_for_relocatable(
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section* output_section,
-    off_t offset_in_output_section,
+    typename elfcpp::Elf_types<size>::Elf_Off offset_in_output_section,
     const Relocatable_relocs* rr,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr view_address,
