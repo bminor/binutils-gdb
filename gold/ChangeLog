@@ -1,5 +1,8 @@
 2012-11-07  Roland McGrath  <mcgrathr@google.com>
 
+	* i386.cc (Target_i386::relocate_for_relocatable): Remove extraneous
+	typename from last change.
+
 	* target.h (Sized_target::relocate_for_relocatable): Use Elf_Off
 	for offset_in_output_section parameter.
 	(Sized_target::relocate_special_relocatable): Likewise.
