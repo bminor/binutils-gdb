@@ -42,12 +42,10 @@
 # define _LIBGETTEXT_H
 #endif
 
-// Always include <clocale> first to avoid conflicts with the macros
-// used when ENABLE_NLS is not defined.
-#include <clocale>
-
 #ifdef ENABLE_NLS
+// On some systems, things go awry when <libintl.h> comes after <clocale>.
 # include <libintl.h>
+# include <clocale>
 # define _(String) gettext (String)
 # ifdef gettext_noop
 #  define N_(String) gettext_noop (String)
@@ -55,6 +53,8 @@
 #  define N_(String) (String)
 # endif
 #else
+// Include <clocale> first to avoid conflicts with these macros.
+# include <clocale>
 # define gettext(Msgid) (Msgid)
 # define dgettext(Domainname, Msgid) (Msgid)
 # define dcgettext(Domainname, Msgid, Category) (Msgid)
