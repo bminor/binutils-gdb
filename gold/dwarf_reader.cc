@@ -58,7 +58,7 @@ Sized_elf_reloc_mapper<size, big_endian>::symbol_section(
     unsigned int symndx, Address* value, bool* is_ordinary)
 {
   const int symsize = elfcpp::Elf_sizes<size>::sym_size;
-  gold_assert((symndx + 1) * symsize <= this->symtab_size_);
+  gold_assert(static_cast<off_t>((symndx + 1) * symsize) <= this->symtab_size_);
   elfcpp::Sym<size, big_endian> elfsym(this->symtab_ + symndx * symsize);
   *value = elfsym.get_st_value();
   return this->object_->adjust_sym_shndx(symndx, elfsym.get_st_shndx(),
@@ -508,7 +508,7 @@ Dwarf_pubnames_table::read_header(off_t offset)
   pinfo += 2;
   if (version != 2)
     return false;
-  
+
   // Skip the debug_info_offset and debug_info_size fields.
   pinfo += 2 * this->offset_size_;
 

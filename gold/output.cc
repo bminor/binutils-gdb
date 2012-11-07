@@ -1876,7 +1876,7 @@ Output_symtab_xindex::endian_do_write(unsigned char* const oview)
        ++p)
     {
       unsigned int symndx = p->first;
-      gold_assert(symndx * 4 < this->data_size());
+      gold_assert(static_cast<off_t>(symndx) * 4 < this->data_size());
       elfcpp::Swap<32, big_endian>::writeval(oview + symndx * 4, p->second);
     }
 }
@@ -2703,7 +2703,7 @@ Output_section::convert_input_sections_in_list_to_relaxed_sections(
       (*input_sections)[p->second].set_section_order_index(soi);
     }
 }
-  
+
 // Convert regular input sections into relaxed input sections. RELAXED_SECTIONS
 // is a vector of pointers to Output_relaxed_input_section or its derived
 // classes.  The relaxed sections must correspond to existing input sections.
@@ -2718,7 +2718,7 @@ Output_section::convert_input_sections_to_relaxed_sections(
   // this.  If there is no checkpoint active, just search the current
   // input section list and replace the sections there.  If there is
   // a checkpoint, also replace the sections there.
-  
+
   // By default, we look at the whole list.
   size_t limit = this->input_sections_.size();
 
@@ -2831,13 +2831,13 @@ Output_section::build_lookup_maps() const
 	  for (Output_merge_base::Input_sections::const_iterator is =
 		 pomb->input_sections_begin();
 	       is != pomb->input_sections_end();
-	       ++is) 
+	       ++is)
 	    {
 	      const Const_section_id& csid = *is;
 	    this->lookup_maps_->add_merge_input_section(csid.first,
 							csid.second, pomb);
 	    }
-	    
+
 	}
       else if (p->is_relaxed_input_section())
 	{
@@ -2879,7 +2879,7 @@ Output_section::is_input_address_mapped(const Relobj* object,
     {
       section_offset_type output_offset;
       bool found = posd->output_offset(object, shndx, offset, &output_offset);
-      gold_assert(found);   
+      gold_assert(found);
       return output_offset != -1;
     }
 
@@ -2914,13 +2914,13 @@ Output_section::output_offset(const Relobj* object, unsigned int shndx,
 
   // Look at the Output_section_data_maps first.
   const Output_section_data* posd = this->find_merge_section(object, shndx);
-  if (posd == NULL) 
+  if (posd == NULL)
     posd = this->find_relaxed_input_section(object, shndx);
   if (posd != NULL)
     {
       section_offset_type output_offset;
       bool found = posd->output_offset(object, shndx, offset, &output_offset);
-      gold_assert(found);   
+      gold_assert(found);
       return output_offset;
     }
 
@@ -2947,7 +2947,7 @@ Output_section::output_address(const Relobj* object, unsigned int shndx,
 
   // Look at the Output_section_data_maps first.
   const Output_section_data* posd = this->find_merge_section(object, shndx);
-  if (posd == NULL) 
+  if (posd == NULL)
     posd = this->find_relaxed_input_section(object, shndx);
   if (posd != NULL && posd->is_address_valid())
     {
@@ -3433,7 +3433,7 @@ Output_section::Input_section_sort_section_order_index_compare::operator()(
   // Keep input order if section ordering cannot determine order.
   if (s1_secn_index == s2_secn_index)
     return s1.index() < s2.index();
-  
+
   return s1_secn_index < s2_secn_index;
 }
 
@@ -3796,7 +3796,7 @@ Output_section::add_script_input_section(const Input_section& sis)
 
   this->input_sections_.push_back(sis);
 
-  // Update fast lookup maps if necessary. 
+  // Update fast lookup maps if necessary.
   if (this->lookup_maps_->is_valid())
     {
       if (sis.is_merge_section())
@@ -4110,7 +4110,7 @@ Output_segment::maximum_alignment()
   if (!this->is_max_align_known_)
     {
       for (int i = 0; i < static_cast<int>(ORDER_MAX); ++i)
-	{	
+	{
 	  const Output_data_list* pdl = &this->output_lists_[i];
 	  uint64_t addralign = Output_segment::maximum_alignment_list(pdl);
 	  if (addralign > this->max_align_)
