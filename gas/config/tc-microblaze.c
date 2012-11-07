@@ -1198,9 +1198,6 @@ md_assemble (char * str)
           as_fatal (_("Error in statement syntax"));
           immed = 0;
         }
-      /* Check for spl registers.  */
-      if (check_spl_reg (&reg1))
-        as_fatal (_("Cannot use special register with this instruction"));
       inst |= (immed << IMM_LOW) & RFSL_MASK;
       output = frag_more (isize);
       break;

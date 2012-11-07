@@ -1,3 +1,9 @@
+2012-11-07  David Holsgrove  <david.holsgrove@xilinx.com>
+
+	* testsuite/gas/microblaze/special_reg.exp: Add test case.
+	* testsuite/gas/microblaze/special_reg.s: Likewise.
+	* testsuite/gas/microblaze/special_reg.d: Likewise.
+
 2012-11-01  Chao-ying Fu  <fu@mips.com>
 
 	* gas/mips/micromips-b16.d: New test.

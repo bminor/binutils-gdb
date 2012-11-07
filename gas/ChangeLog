@@ -1,3 +1,8 @@
+2012-11-07  David Holsgrove  <david.holsgrove@xilinx.com>
+
+	* config/tc-microblaze.c: Remove special register condition check
+	for INST_TYPE_RFSL related instructions.
+
 2012-11-06  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-xgate.c: Make some functions static.  Formatting
