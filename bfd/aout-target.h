@@ -577,7 +577,18 @@ MY_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 #endif
 
 #ifndef MY_close_and_cleanup
-#define MY_close_and_cleanup MY_bfd_free_cached_info
+
+/* Handle closing of a BFD including the resource-releasing parts.  */
+
+static bfd_boolean
+MY_close_and_cleanup (bfd *abfd)
+{
+  if (!MY_bfd_free_cached_info (abfd))
+    return FALSE;
+
+  return _bfd_generic_close_and_cleanup (abfd);
+}
+
 #endif
 
 #ifndef MY_get_dynamic_symtab_upper_bound

@@ -1,3 +1,10 @@
+2012-11-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR binutils/14481
+	* aout-target.h (MY_close_and_cleanup): Make local function
+	instead of alias of MY_bfd_free_cached_info.  Also call
+	_bfd_generic_close_and_cleanup.
+
 2012-11-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14813
