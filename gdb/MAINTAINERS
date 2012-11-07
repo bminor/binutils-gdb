@@ -55,13 +55,14 @@ ask questions about a patch!
 There's also a couple of other people who play special roles in the GDB
 community, separately from the patch process:
 
-  - The GDB Steering Committee.
+  - The Official FSF-appointed GDB Maintainers.
 
-    These are the official (FSF-appointed) maintainers of GDB.  They have
-    final and overriding authority for all GDB-related decisions, including
-    anything described in this file.  The committee is not generally
-    involved in day-to-day development (although its members may be, as
-    individuals).
+    These maintainers are the ones who take the overall responsibility
+    for GDB, as a package of the GNU project.  Other GDB contributors
+    work under the official maintainers' supervision.  They have final
+    and overriding authority for all GDB-related decisions, including
+    anything described in this file.  As individuals, they may or not
+    be generally involved in day-to-day development.
 
   - The Release Manager.
 
@@ -75,7 +76,7 @@ community, separately from the patch process:
 Most changes to the list of maintainers in this file are handled by
 consensus among the global maintainers and any other involved parties.
 In cases where consensus can not be reached, the global maintainers may
-ask the Steering Committee for a final decision.
+ask the official FSF-appointed GDB maintainers for a final decision.
 
 
 			The Obvious Fix Rule
@@ -99,32 +100,24 @@ For documentation changes, about the only kind of fix that is obvious
 is correction of a typo or bad English usage.
 
 
-	     GDB Steering Committee
-	     ----------------------
+	     The Official FSF-appointed GDB Maintainers
+	     ------------------------------------------
 
-The members of the GDB Steering Committee are the FSF-appointed
-maintainers of the GDB project.
+These maintainers as a group have final authority for all GDB-related
+topics; they may make whatever changes that they deem necessary, or
+that the FSF requests.
 
-The Steering Committee has final authority for all GDB-related topics;
-they may make whatever changes that they deem necessary, or that the FSF
-requests.  However, they are generally not involved in day-to-day
-development.
+The current official FSF-appointed GDB maintainers are listed below,
+in alphabetical order.  Their affiliations are provided for reference
+only - their maintainership status is individual and not through their
+affiliation, and they act on behalf of the GNU project.
 
-The current members of the steering committee are listed below, in
-alphabetical order.  Their affiliations are provided for reference only -
-their membership on the Steering Committee is individual and not through
-their affiliation, and they act on behalf of the GNU project.
-
-	Andrew Cagney (Red Hat)
-	Robert Dewar (AdaCore, NYU)
-	Klee Dienes (Apple)
-	Paul Hilfinger (UC Berkeley)
-	Dan Jacobowitz (Google)
-	Stan Shebs (CodeSourcery)
-	Richard Stallman (FSF)
-	Ian Lance Taylor (Google)
-	Todd Whitesel
-
+       Pedro Alves (Red Hat)
+       Joel Brobecker (AdaCore)
+       Doug Evans (Google)
+       Jan Kratochvil (Red Hat)
+       Tom Tromey (Red Hat)
+       Eli Zaretskii
 
 		  Global Maintainers
 		  ------------------
@@ -149,8 +142,8 @@ maintainer who originally committed it), then after 48 hours the maintainer
 who called for the reversion may revert the patch.
 
 No one may reapply a reverted patch without the agreement of the maintainer
-who reverted it, or bringing the issue to the GDB Steering Committee for
-discussion.
+who reverted it, or bringing the issue to the official FSF-appointed
+GDB maintainers for discussion.
 
 At the moment there are no documented roadmaps for GDB development; in the
 future, if there are, a reference to the list will be included here.

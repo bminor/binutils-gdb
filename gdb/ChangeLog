@@ -1,3 +1,8 @@
+2012-11-07  Pedro Alves  <palves@redhat.com>
+
+	* MAINTAINERS: New FSF-appointed maintainers replace the Steering
+	Committee.
+
 2012-11-07  Pierre Muller  <muller@sourceware.org>
 
 	* common/linux-osdata.c (dirent.h): ARI fix: Remove.
