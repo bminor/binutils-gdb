@@ -1,3 +1,8 @@
+2012-11-07  James Murray   <jsm@jsm-net.demon.co.uk>
+
+	* ld-m68hc11/movw.d: New test for 16bit relocate.
+	* ld-m68hc11/movw.s: Source for test.
+
 2012-10-30  Steve McIntyre   <steve.mcintyre@linaro.org>
 
 	* ld-arm/eabi-hard-float.s: New test source.
