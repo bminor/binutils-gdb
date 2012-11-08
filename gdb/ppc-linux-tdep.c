@@ -390,8 +390,8 @@ static struct insn_pattern ppc64_standard_linkage1[] =
     /* mtctr r11 */
     { insn_xfx (-1, -1, -1, -1), insn_xfx (31, 11, 9, 467), 0 },
 
-    /* ld r11, <any>(r12) */
-    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 0 },
+    /* ld r11, <any>(r12) <optional> */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 1 },
       
     /* bctr */
     { -1, 0x4e800420, 0 },
@@ -421,8 +421,8 @@ static struct insn_pattern ppc64_standard_linkage2[] =
     /* ld r2, <any>(r12) */
     { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 2, 12, 0, 0), 0 },
 
-    /* ld r11, <any>(r12) */
-    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 0 },
+    /* ld r11, <any>(r12) <optional> */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 1 },
       
     /* bctr */
     { -1, 0x4e800420, 0 },
@@ -446,8 +446,8 @@ static struct insn_pattern ppc64_standard_linkage3[] =
     /* mtctr r11 */
     { insn_xfx (-1, -1, -1, -1), insn_xfx (31, 11, 9, 467), 0 },
 
-    /* ld r11, <any>(r2) */
-    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 2, 0, 0), 0 },
+    /* ld r11, <any>(r2) <optional> */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 2, 0, 0), 1 },
       
     /* ld r2, <any>(r2) */
     { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 2, 2, 0, 0), 0 },

@@ -1,3 +1,9 @@
+2012-11-08  Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-tdep.c (ppc64_standard_linkage1, ppc64_standard_linkage2,
+	ppc64_standard_linkage3): Mark ld r11 instructions as optional,
+	following the change in PLT call stubs on linker.
+
 2012-11-08  Pierre Muller  <muller@sourceware.org>
 
 	* contrib/ari/gdb_ari.sh (LANG, LC_ALL): Use 'C' instead of 'c'
