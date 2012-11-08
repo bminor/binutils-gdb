@@ -61,6 +61,7 @@ cofflink.c
 coffswap.h
 compress.c
 corefile.c
+cpu-aarch64.c
 cpu-alpha.c
 cpu-arc.c
 cpu-arm.c
@@ -97,6 +98,8 @@ cpu-m68hc11.c
 cpu-m68hc12.c
 cpu-m68k.c
 cpu-m88k.c
+cpu-m9s12x.c
+cpu-m9s12xg.c
 cpu-mcore.c
 cpu-mep.c
 cpu-microblaze.c
@@ -132,6 +135,7 @@ cpu-vax.c
 cpu-w65.c
 cpu-we32k.c
 cpu-xc16x.c
+cpu-xgate.c
 cpu-xstormy16.c
 cpu-xtensa.c
 cpu-z80.c
@@ -149,6 +153,8 @@ elf-hppa.h
 elf-ifunc.c
 elf-m10200.c
 elf-m10300.c
+elf-nacl.c
+elf-nacl.c
 elf-strtab.c
 elf-vxworks.c
 elf.c
@@ -213,13 +219,16 @@ elf32-tilepro.c
 elf32-v850.c
 elf32-vax.c
 elf32-xc16x.c
+elf32-xgate.c
 elf32-xstormy16.c
 elf32-xtensa.c
 elf32.c
+elf64-aarch64.c
 elf64-alpha.c
 elf64-gen.c
 elf64-hppa.c
 elf64-hppa.h
+elf64-ia64-vms.c
 elf64-mips.c
 elf64-mmix.c
 elf64-ppc.c

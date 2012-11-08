@@ -37,6 +37,8 @@ config/obj-multi.c
 config/obj-multi.h
 config/obj-som.c
 config/obj-som.h
+config/tc-aarch64.c
+config/tc-aarch64.h
 config/tc-alpha.c
 config/tc-alpha.h
 config/tc-arc.c
@@ -158,6 +160,8 @@ config/tc-vax.c
 config/tc-vax.h
 config/tc-xc16x.c
 config/tc-xc16x.h
+config/tc-xgate.c
+config/tc-xgate.h
 config/tc-xstormy16.c
 config/tc-xstormy16.h
 config/tc-xtensa.c

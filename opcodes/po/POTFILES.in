@@ -1,3 +1,14 @@
+aarch64-asm-2.c
+aarch64-asm.c
+aarch64-asm.h
+aarch64-dis-2.c
+aarch64-dis.c
+aarch64-dis.h
+aarch64-gen.c
+aarch64-opc-2.c
+aarch64-opc.c
+aarch64-opc.h
+aarch64-tbl.h
 alpha-dis.c
 alpha-opc.c
 arc-dis.c

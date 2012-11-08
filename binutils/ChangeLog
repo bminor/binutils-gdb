@@ -1,3 +1,7 @@
+2012-11-08  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2012-11-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objcopy.c (copy_section): Don't read beyond section end.

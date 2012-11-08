@@ -35,6 +35,8 @@ fileread.h
 freebsd.h
 gc.cc
 gc.h
+gdb-index.cc
+gdb-index.h
 gold-threads.cc
 gold-threads.h
 gold.cc
@@ -51,6 +53,8 @@ mapfile.cc
 mapfile.h
 merge.cc
 merge.h
+nacl.cc
+nacl.h
 object.cc
 object.h
 options.cc
@@ -85,6 +89,7 @@ target-select.cc
 target-select.h
 target.cc
 target.h
+tilegx.cc
 timer.cc
 timer.h
 tls.h

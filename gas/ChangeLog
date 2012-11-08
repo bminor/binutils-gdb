@@ -1,3 +1,7 @@
+2012-11-08  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2012-11-07  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* config/tc-microblaze.c: Remove special register condition check
