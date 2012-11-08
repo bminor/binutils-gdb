@@ -656,6 +656,36 @@ add_to_spuid_list (bfd *abfd, asection *asect, void *list_p)
   list->pos += 4;
 }
 
+/* Read siginfo data from the core, if possible.  Returns -1 on
+   failure.  Otherwise, returns the number of bytes read.  ABFD is the
+   core file's BFD; READBUF, OFFSET, and LEN are all as specified by
+   the to_xfer_partial interface.  */
+
+static LONGEST
+get_core_siginfo (bfd *abfd, gdb_byte *readbuf, ULONGEST offset, LONGEST len)
+{
+  asection *section;
+  long pid;
+  char *section_name;
+  const char *name = ".note.linuxcore.siginfo";
+
+  if (ptid_get_lwp (inferior_ptid))
+    section_name = xstrprintf ("%s/%ld", name,
+			       ptid_get_lwp (inferior_ptid));
+  else
+    section_name = xstrdup (name);
+
+  section = bfd_get_section_by_name (abfd, section_name);
+  xfree (section_name);
+  if (section == NULL)
+    return -1;
+
+  if (!bfd_get_section_contents (abfd, section, readbuf, offset, len))
+    return -1;
+
+  return len;
+}
+
 static LONGEST
 core_xfer_partial (struct target_ops *ops, enum target_object object,
 		   const char *annex, gdb_byte *readbuf,
@@ -792,6 +822,11 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 	  bfd_map_over_sections (core_bfd, add_to_spuid_list, &list);
 	  return list.written;
 	}
+      return -1;
+
+    case TARGET_OBJECT_SIGNAL_INFO:
+      if (readbuf)
+	return get_core_siginfo (core_bfd, readbuf, offset, len);
       return -1;
 
     default:

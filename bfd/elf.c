@@ -8604,6 +8604,10 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 
 	return TRUE;
       }
+
+    case NT_SIGINFO:
+      return elfcore_make_note_pseudosection (abfd, ".note.linuxcore.siginfo",
+					      note);
     }
 }
 

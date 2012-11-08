@@ -765,6 +765,44 @@ linux_collect_thread_registers (const struct regcache *regcache,
   return note_data;
 }
 
+/* Fetch the siginfo data for the current thread, if it exists.  If
+   there is no data, or we could not read it, return NULL.  Otherwise,
+   return a newly malloc'd buffer holding the data and fill in *SIZE
+   with the size of the data.  The caller is responsible for freeing
+   the data.  */
+
+static gdb_byte *
+linux_get_siginfo_data (struct gdbarch *gdbarch, LONGEST *size)
+{
+  struct type *siginfo_type;
+  gdb_byte *buf;
+  LONGEST bytes_read;
+  struct cleanup *cleanups;
+
+  if (!gdbarch_get_siginfo_type_p (gdbarch))
+    return NULL;
+  
+  siginfo_type = gdbarch_get_siginfo_type (gdbarch);
+
+  buf = xmalloc (TYPE_LENGTH (siginfo_type));
+  cleanups = make_cleanup (xfree, buf);
+
+  bytes_read = target_read (&current_target, TARGET_OBJECT_SIGNAL_INFO, NULL,
+			    buf, 0, TYPE_LENGTH (siginfo_type));
+  if (bytes_read == TYPE_LENGTH (siginfo_type))
+    {
+      discard_cleanups (cleanups);
+      *size = bytes_read;
+    }
+  else
+    {
+      do_cleanups (cleanups);
+      buf = NULL;
+    }
+
+  return buf;
+}
+
 struct linux_corefile_thread_data
 {
   struct gdbarch *gdbarch;
@@ -789,17 +827,35 @@ linux_corefile_thread_callback (struct thread_info *info, void *data)
     {
       struct cleanup *old_chain;
       struct regcache *regcache;
+      gdb_byte *siginfo_data;
+      LONGEST siginfo_size;
+
       regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
 
       old_chain = save_inferior_ptid ();
       inferior_ptid = info->ptid;
       target_fetch_registers (regcache, -1);
+      siginfo_data = linux_get_siginfo_data (args->gdbarch, &siginfo_size);
       do_cleanups (old_chain);
+
+      old_chain = make_cleanup (xfree, siginfo_data);
 
       args->note_data = args->collect (regcache, info->ptid, args->obfd,
 				       args->note_data, args->note_size,
 				       args->stop_signal);
       args->num_notes++;
+
+      if (siginfo_data != NULL)
+	{
+	  args->note_data = elfcore_write_note (args->obfd,
+						args->note_data,
+						args->note_size,
+						"CORE", NT_SIGINFO,
+						siginfo_data, siginfo_size);
+	  args->num_notes++;
+	}
+
+      do_cleanups (old_chain);
     }
 
   return !args->note_data;

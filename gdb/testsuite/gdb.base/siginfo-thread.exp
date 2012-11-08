@@ -14,43 +14,32 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-# The program siginfo-obj.c arranges for a signal handler registered
-# using sigaction's sa_sigaction / SA_SIGINFO to be called with
-# si_addr filled in.
-
-# This test confirms that we can inspect signal info using the
-# $_siginfo convenience variable.
+# Multi-threaded siginfo test.
 
 if [target_info exists gdb,nosignals] {
-    verbose "Skipping siginfo-obj.exp because of nosignals."
+    verbose "Skipping siginfo-thread.exp because of nosignals."
     continue
 }
 
 if { ! [istarget "i?86-*-linux*"]
      && ! [istarget "x86_64-*-linux*"]
      && ! [istarget "arm*-*-linux*"] } {
-    verbose "Skipping siginfo-obj.exp because of lack of support."
+    verbose "Skipping siginfo-thread.exp because of lack of support."
     return
 }
 
+standard_testfile .c
 
-set testfile siginfo-obj
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "Couldn't compile ${srcfile}.c"
+if  {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" \
+	  "${binfile}" executable {debug}] != "" } {
     return -1
 }
 
-# get things started
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart $binfile
 
 # Advance to main
 if { ![runto_main] } then {
-    gdb_suppress_tests;
+    gdb_suppress_tests
 }
 
 # Run to the signal.
@@ -103,30 +92,11 @@ gdb_test "p ssi_errno" " = $ssi_errno"
 gdb_test "p ssi_code" " = $ssi_code"
 gdb_test "p ssi_signo" " = $ssi_signo"
 
-# Again, but this time, patch si_addr and check that the inferior sees
-# the changed value.
-
-# Advance to main
-if { ![runto_main] } then {
-    gdb_suppress_tests;
-}
-
-# Run to the signal.
-gdb_test "continue" ".*Program received signal SIGSEGV.*" "continue to signal"
-
-set test "Set si_addr"
-gdb_test "p \$_siginfo._sifields._sigfault.si_addr = 0x666" " = \\(void \\*\\) 0x666"
-gdb_test "p \$_siginfo.si_errno = 666" " = 666"
-gdb_test "p \$_siginfo.si_code = 999" " = 999"
-gdb_test "p \$_siginfo.si_signo = 11" " = 11"
-
-gdb_test "break $bp_location"
-gdb_test "continue" ".* handler .*" "continue to handler"
-
-gdb_test "p ssi_addr" " = \\(void \\*\\) 0x666"
-gdb_test "p ssi_errno" " = 666"
-gdb_test "p ssi_code" " = 999"
-gdb_test "p ssi_signo" " = 11"
+gdb_test "thread 1" ".*"
+# siginfo is available here -- it shows SIGSTOP -- so we test to make
+# sure that we have a different signal from the SEGV thread.
+gdb_test "p \$_siginfo.si_signo == $ssi_signo" " = 0" \
+    "test signal in main thread"
 
 # Test siginfo preservation in core files.
 if {$gcore_created} {
@@ -144,4 +114,15 @@ if {$gcore_created} {
     gdb_test "p \$_siginfo._sifields._sigfault.si_addr" \
 	" = \\(void \\*\\) $ssi_addr" \
 	"p \$_siginfo._sifields._sigfault.si_addr from core file"
+
+    # We don't know which thread will be signalled, so we simply
+    # ensure that only one thread got a SEGV.
+    gdb_test_no_output "set variable \$count = 0"
+    foreach thread {1 2} {
+	gdb_test "thread $thread" ".*" "select thread $thread with core file"
+	gdb_test_no_output \
+	    "set variable \$count += (\$_siginfo.si_signo == $ssi_signo)" \
+	    "update counter in thread $thread"
+    }
+    gdb_test "print \$count" " = 1"
 }

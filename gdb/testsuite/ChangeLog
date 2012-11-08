@@ -1,5 +1,12 @@
 2012-11-08  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/siginfo-obj.exp: Create core file.  Test siginfo from
+	core files, if possible.
+	* gdb.base/siginfo-thread.c: New file
+	* gdb.base/siginfo-thread.exp: New file
+
+2012-11-08  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/comprdebug.exp: New file.
 
 2012-11-06  Pedro Alves  <palves@redhat.com>

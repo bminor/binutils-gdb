@@ -1,5 +1,12 @@
 2012-11-08  Tom Tromey  <tromey@redhat.com>
 
+	* linux-tdep.c (linux_make_siginfo_note): New function.
+	(linux_make_corefile_notes): Use it.
+	* corelow.c (get_core_siginfo): New function.
+	(core_xfer_partial) <TARGET_OBJECT_SIGNAL_INFO>: New case.
+
+2012-11-08  Tom Tromey  <tromey@redhat.com>
+
 	PR gdb/14704:
 	* gdb_bfd.c (gdb_bfd_ref): Set BFD_DECOMPRESS.
 	(zlib_decompress_section): Remove.
