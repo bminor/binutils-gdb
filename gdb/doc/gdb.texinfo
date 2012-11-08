@@ -6955,6 +6955,7 @@ regular expression.
 @table @code
 @kindex search
 @kindex forward-search
+@kindex fo @r{(@code{forward-search})}
 @item forward-search @var{regexp}
 @itemx search @var{regexp}
 The command @samp{forward-search @var{regexp}} checks each line,

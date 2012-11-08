@@ -1,3 +1,9 @@
+2012-11-08  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/14777.
+	* source.c (_initialize_source): Call add_com_alias to abbreviate
+	'forward-search' as 'fo'.
+
 2012-11-07  Pedro Alves  <palves@redhat.com>
 
 	* arm-tdep.c: Make defs.h be the first include.

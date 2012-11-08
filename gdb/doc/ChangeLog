@@ -1,3 +1,7 @@
+2012-11-08  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Search): Add kindex for 'fo'.
+
 2012-11-05  Tom Tromey  <tromey@redhat.com>
 
 	PR python/14802:
