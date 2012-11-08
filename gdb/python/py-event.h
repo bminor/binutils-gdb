@@ -20,7 +20,6 @@
 #ifndef GDB_PY_EVENT_H
 #define GDB_PY_EVENT_H
 
-#include "defs.h"
 #include "py-events.h"
 #include "command.h"
 #include "python-internal.h"

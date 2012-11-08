@@ -1,3 +1,17 @@
+2012-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-bpevent.c: Include defs.h.
+	* python/py-continueevent.c: Include defs.h.
+	* python/py-event.c: Include defs.h.
+	* python/py-event.h: Don't include defs.h.
+	* python/py-events.h: Don't include defs.h.
+	* python/py-evts.c: Include defs.h.
+	* python/py-exitedevent.c: Include defs.h.
+	* python/py-newobjfileevent.c: Include defs.h.
+	* python/py-signalevent.c: Include defs.h.
+	* python/py-stopevent.c: Include defs.h.
+	* python/py-threadevent.c: Include defs.h.
+
 2012-11-08  Pierre Muller  <muller@sourceware.org>
 
 	* update-web-ari.sh (print_heading): Add number of files
