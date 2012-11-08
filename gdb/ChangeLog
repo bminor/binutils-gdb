@@ -1,5 +1,22 @@
 2012-11-08  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/14704:
+	* gdb_bfd.c (gdb_bfd_ref): Set BFD_DECOMPRESS.
+	(zlib_decompress_section): Remove.
+	(gdb_bfd_map_section): Only check for compressed section
+	in mmap case.  Use bfd_get_full_section_contents.
+	* osabi.c (check_note): Add 'sectsize' argument.  Read
+	section data.
+	(generic_elf_osabi_sniff_abi_tag_sections): Don't read
+	section data.  Update for check_note change.
+	* xcoffread.c (xcoff_initial_scan): Use
+	bfd_get_full_section_contents.
+	* py-auto-load.c (auto_load_section_scripts): Use
+	bfd_get_full_section_contents.
+	* contrib/cc-with-tweaks.sh: Add -Z option.
+
+2012-11-08  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-bpevent.c: Include defs.h.
 	* python/py-continueevent.c: Include defs.h.
 	* python/py-event.c: Include defs.h.

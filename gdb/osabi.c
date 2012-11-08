@@ -370,13 +370,22 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 /* Limit on the amount of data to be read.  */
 #define MAX_NOTESZ	128
 
-/* Return non-zero if NOTE matches NAME, DESCSZ and TYPE.  */
+/* Return non-zero if NOTE matches NAME, DESCSZ and TYPE.  If
+   *SECTSIZE is non-zero, then this reads that many bytes from
+   the start of the section and clears *SECTSIZE.  */
 
 static int
-check_note (bfd *abfd, asection *sect, const char *note,
+check_note (bfd *abfd, asection *sect, char *note, unsigned int *sectsize,
 	    const char *name, unsigned long descsz, unsigned long type)
 {
   unsigned long notesz;
+
+  if (*sectsize)
+    {
+      if (!bfd_get_section_contents (abfd, sect, note, 0, *sectsize))
+	return 0;
+      *sectsize = 0;
+    }
 
   /* Calculate the size of this note.  */
   notesz = strlen (name) + 1;
@@ -424,14 +433,18 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
   if (sectsize > MAX_NOTESZ)
     sectsize = MAX_NOTESZ;
 
+  /* We lazily read the section data here.  Since we use
+     BFD_DECOMPRESS, we can't use bfd_get_section_contents on a
+     compressed section.  But, since note sections are not compressed,
+     deferring the reading until we recognize the section avoids any
+     error.  */
   note = alloca (sectsize);
-  bfd_get_section_contents (abfd, sect, note, 0, sectsize);
 
   /* .note.ABI-tag notes, used by GNU/Linux and FreeBSD.  */
   if (strcmp (name, ".note.ABI-tag") == 0)
     {
       /* GNU.  */
-      if (check_note (abfd, sect, note, "GNU", 16, NT_GNU_ABI_TAG))
+      if (check_note (abfd, sect, note, &sectsize, "GNU", 16, NT_GNU_ABI_TAG))
 	{
 	  unsigned int abi_tag = bfd_h_get_32 (abfd, note + 16);
 
@@ -467,7 +480,8 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	}
 
       /* FreeBSD.  */
-      if (check_note (abfd, sect, note, "FreeBSD", 4, NT_FREEBSD_ABI_TAG))
+      if (check_note (abfd, sect, note, &sectsize, "FreeBSD", 4,
+		      NT_FREEBSD_ABI_TAG))
 	{
 	  /* There is no need to check the version yet.  */
 	  *osabi = GDB_OSABI_FREEBSD_ELF;
@@ -479,7 +493,7 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
       
   /* .note.netbsd.ident notes, used by NetBSD.  */
   if (strcmp (name, ".note.netbsd.ident") == 0
-      && check_note (abfd, sect, note, "NetBSD", 4, NT_NETBSD_IDENT))
+      && check_note (abfd, sect, note, &sectsize, "NetBSD", 4, NT_NETBSD_IDENT))
     {
       /* There is no need to check the version yet.  */
       *osabi = GDB_OSABI_NETBSD_ELF;
@@ -488,7 +502,8 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 
   /* .note.openbsd.ident notes, used by OpenBSD.  */
   if (strcmp (name, ".note.openbsd.ident") == 0
-      && check_note (abfd, sect, note, "OpenBSD", 4, NT_OPENBSD_IDENT))
+      && check_note (abfd, sect, note, &sectsize, "OpenBSD", 4,
+		     NT_OPENBSD_IDENT))
     {
       /* There is no need to check the version yet.  */
       *osabi = GDB_OSABI_OPENBSD_ELF;

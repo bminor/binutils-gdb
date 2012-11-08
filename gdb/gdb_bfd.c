@@ -258,6 +258,9 @@ gdb_bfd_ref (struct bfd *abfd)
       return;
     }
 
+  /* Ask BFD to decompress sections in bfd_get_full_section_contents.  */
+  abfd->flags |= BFD_DECOMPRESS;
+
   gdata = bfd_zalloc (abfd, sizeof (struct gdb_bfd_data));
   gdata->refc = 1;
   gdata->mtime = bfd_get_mtime (abfd);
@@ -337,98 +340,6 @@ get_section_descriptor (asection *section)
   return result;
 }
 
-/* Decompress a section that was compressed using zlib.  Store the
-   decompressed buffer, and its size, in DESCRIPTOR.  */
-
-static void
-zlib_decompress_section (asection *sectp,
-			 struct gdb_bfd_section_data *descriptor)
-{
-  bfd *abfd = sectp->owner;
-#ifndef HAVE_ZLIB_H
-  error (_("Support for zlib-compressed data (from '%s', section '%s') "
-           "is disabled in this copy of GDB"),
-         bfd_get_filename (abfd),
-	 bfd_get_section_name (abfd, sectp));
-#else
-  bfd_size_type compressed_size = bfd_get_section_size (sectp);
-  gdb_byte *compressed_buffer = xmalloc (compressed_size);
-  struct cleanup *cleanup = make_cleanup (xfree, compressed_buffer);
-  struct cleanup *inner_cleanup;
-  bfd_size_type uncompressed_size;
-  gdb_byte *uncompressed_buffer;
-  z_stream strm;
-  int rc;
-  int header_size = 12;
-
-  if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
-      || bfd_bread (compressed_buffer,
-		    compressed_size, abfd) != compressed_size)
-    error (_("can't read data from '%s', section '%s'"),
-           bfd_get_filename (abfd),
-	   bfd_get_section_name (abfd, sectp));
-
-  /* Read the zlib header.  In this case, it should be "ZLIB" followed
-     by the uncompressed section size, 8 bytes in big-endian order.  */
-  if (compressed_size < header_size
-      || strncmp (compressed_buffer, "ZLIB", 4) != 0)
-    error (_("corrupt ZLIB header from '%s', section '%s'"),
-           bfd_get_filename (abfd),
-	   bfd_get_section_name (abfd, sectp));
-  uncompressed_size = compressed_buffer[4]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[5]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[6]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[7]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[8]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[9]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[10]; uncompressed_size <<= 8;
-  uncompressed_size += compressed_buffer[11];
-
-  /* It is possible the section consists of several compressed
-     buffers concatenated together, so we uncompress in a loop.  */
-  strm.zalloc = NULL;
-  strm.zfree = NULL;
-  strm.opaque = NULL;
-  strm.avail_in = compressed_size - header_size;
-  strm.next_in = (Bytef*) compressed_buffer + header_size;
-  strm.avail_out = uncompressed_size;
-  uncompressed_buffer = xmalloc (uncompressed_size);
-  inner_cleanup = make_cleanup (xfree, uncompressed_buffer);
-  rc = inflateInit (&strm);
-  while (strm.avail_in > 0)
-    {
-      if (rc != Z_OK)
-        error (_("setting up uncompression in '%s', section '%s': %d"),
-               bfd_get_filename (abfd),
-	       bfd_get_section_name (abfd, sectp),
-	       rc);
-      strm.next_out = ((Bytef*) uncompressed_buffer
-                       + (uncompressed_size - strm.avail_out));
-      rc = inflate (&strm, Z_FINISH);
-      if (rc != Z_STREAM_END)
-        error (_("zlib error uncompressing from '%s', section '%s': %d"),
-               bfd_get_filename (abfd),
-	       bfd_get_section_name (abfd, sectp),
-	       rc);
-      rc = inflateReset (&strm);
-    }
-  rc = inflateEnd (&strm);
-  if (rc != Z_OK
-      || strm.avail_out != 0)
-    error (_("concluding uncompression in '%s', section '%s': %d"),
-           bfd_get_filename (abfd),
-	   bfd_get_section_name (abfd, sectp),
-	   rc);
-
-  discard_cleanups (inner_cleanup);
-  do_cleanups (cleanup);
-
-  /* Attach the data to the BFD section.  */
-  descriptor->data = uncompressed_buffer;
-  descriptor->size = uncompressed_size;
-#endif
-}
-
 /* See gdb_bfd.h.  */
 
 const gdb_byte *
@@ -437,6 +348,7 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
   bfd *abfd;
   unsigned char header[4];
   struct gdb_bfd_section_data *descriptor;
+  bfd_byte *data;
 
   gdb_assert ((sectp->flags & SEC_RELOC) == 0);
   gdb_assert (size != NULL);
@@ -449,67 +361,53 @@ gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
   if (descriptor->data != NULL)
     goto done;
 
-  /* Check if the file has a 4-byte header indicating compression.  */
-  if (bfd_get_section_size (sectp) > sizeof (header)
-      && bfd_seek (abfd, sectp->filepos, SEEK_SET) == 0
-      && bfd_bread (header, sizeof (header), abfd) == sizeof (header))
-    {
-      /* Upon decompression, update the buffer and its size.  */
-      if (strncmp (header, "ZLIB", sizeof (header)) == 0)
-        {
-          zlib_decompress_section (sectp, descriptor);
-	  goto done;
-        }
-    }
-
 #ifdef HAVE_MMAP
-  {
-    /* The page size, used when mmapping.  */
-    static int pagesize;
+  if (!bfd_is_section_compressed (abfd, sectp))
+    {
+      /* The page size, used when mmapping.  */
+      static int pagesize;
 
-    if (pagesize == 0)
-      pagesize = getpagesize ();
+      if (pagesize == 0)
+	pagesize = getpagesize ();
 
-    /* Only try to mmap sections which are large enough: we don't want
-       to waste space due to fragmentation.  */
+      /* Only try to mmap sections which are large enough: we don't want
+	 to waste space due to fragmentation.  */
 
-    if (bfd_get_section_size (sectp) > 4 * pagesize)
-      {
-	descriptor->size = bfd_get_section_size (sectp);
-	descriptor->data = bfd_mmap (abfd, 0, descriptor->size, PROT_READ,
-				     MAP_PRIVATE, sectp->filepos,
-				     &descriptor->map_addr,
-				     &descriptor->map_len);
+      if (bfd_get_section_size (sectp) > 4 * pagesize)
+	{
+	  descriptor->size = bfd_get_section_size (sectp);
+	  descriptor->data = bfd_mmap (abfd, 0, descriptor->size, PROT_READ,
+				       MAP_PRIVATE, sectp->filepos,
+				       &descriptor->map_addr,
+				       &descriptor->map_len);
 
-	if ((caddr_t)descriptor->data != MAP_FAILED)
-	  {
+	  if ((caddr_t)descriptor->data != MAP_FAILED)
+	    {
 #if HAVE_POSIX_MADVISE
-	    posix_madvise (descriptor->map_addr, descriptor->map_len,
-			   POSIX_MADV_WILLNEED);
+	      posix_madvise (descriptor->map_addr, descriptor->map_len,
+			     POSIX_MADV_WILLNEED);
 #endif
-	    goto done;
-	  }
+	      goto done;
+	    }
 
-	/* On failure, clear out the section data and try again.  */
-	memset (descriptor, 0, sizeof (*descriptor));
-      }
-  }
+	  /* On failure, clear out the section data and try again.  */
+	  memset (descriptor, 0, sizeof (*descriptor));
+	}
+    }
 #endif /* HAVE_MMAP */
 
-  /* If we get here, we are a normal, not-compressed section.  */
+  /* Handle compressed sections, or ordinary uncompressed sections in
+     the no-mmap case.  */
 
   descriptor->size = bfd_get_section_size (sectp);
-  descriptor->data = xmalloc (descriptor->size);
+  descriptor->data = NULL;
 
-  if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
-      || bfd_bread (descriptor->data, bfd_get_section_size (sectp),
-		    abfd) != bfd_get_section_size (sectp))
-    {
-      xfree (descriptor->data);
-      descriptor->data = NULL;
-      error (_("Can't read data for section '%s'"),
-	     bfd_get_filename (abfd));
-    }
+  data = NULL;
+  if (!bfd_get_full_section_contents (abfd, sectp, &data))
+    error (_("Can't read data for section '%s' in file '%s'"),
+	   bfd_get_section_name (abfd, sectp),
+	   bfd_get_filename (abfd));
+  descriptor->data = data;
 
  done:
   gdb_assert (descriptor->data != NULL);

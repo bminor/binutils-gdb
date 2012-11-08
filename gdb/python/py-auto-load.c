@@ -197,26 +197,25 @@ auto_load_section_scripts (struct objfile *objfile, const char *section_name)
 {
   bfd *abfd = objfile->obfd;
   asection *scripts_sect;
-  bfd_size_type size;
-  char *p;
-  struct cleanup *cleanups;
+  bfd_byte *data = NULL;
 
   scripts_sect = bfd_get_section_by_name (abfd, section_name);
   if (scripts_sect == NULL)
     return;
 
-  size = bfd_get_section_size (scripts_sect);
-  p = xmalloc (size);
-  
-  cleanups = make_cleanup (xfree, p);
-
-  if (bfd_get_section_contents (abfd, scripts_sect, p, (file_ptr) 0, size))
-    source_section_scripts (objfile, section_name, p, p + size);
-  else
+  if (!bfd_get_full_section_contents (abfd, scripts_sect, &data))
     warning (_("Couldn't read %s section of %s"),
 	     section_name, bfd_get_filename (abfd));
+  else
+    {
+      struct cleanup *cleanups;
+      char *p = (char *) data;
 
-  do_cleanups (cleanups);
+      cleanups = make_cleanup (xfree, p);
+      source_section_scripts (objfile, section_name, p,
+			      p + bfd_get_section_size (scripts_sect));
+      do_cleanups (cleanups);
+    }
 }
 
 /* Load any Python auto-loaded scripts for OBJFILE.  */
