@@ -1366,9 +1366,9 @@ can use @kbd{gdb --help}.
 The @value{GDBN} init files are normally called @file{.gdbinit}.
 The DJGPP port of @value{GDBN} uses the name @file{gdb.ini}, due to
 the limitations of file names imposed by DOS filesystems.  The Windows
-ports of @value{GDBN} use the standard name, but if they find a
-@file{gdb.ini} file, they warn you about that and suggest to rename
-the file to the standard name.
+port of @value{GDBN} uses the standard name, but if it finds a
+@file{gdb.ini} file in your home directory, it warns you about that
+and suggests to rename the file to the standard name.
 
 
 @node Quitting GDB
