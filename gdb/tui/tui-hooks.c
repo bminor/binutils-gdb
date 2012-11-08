@@ -164,14 +164,11 @@ tui_event_modify_breakpoint (struct breakpoint *b)
   tui_update_all_breakpoint_info ();
 }
 
-/* Called when going to wait for the target.
-   Leave curses mode and setup program mode.  */
-static ptid_t
-tui_target_wait_hook (ptid_t pid, 
-		      struct target_waitstatus *status, int options)
-{
-  ptid_t res;
+/* Called when a command is about to proceed the inferior.  */
 
+static void
+tui_about_to_proceed (void)
+{
   /* Leave tui mode (optional).  */
 #if 0
   if (tui_active)
@@ -182,13 +179,6 @@ tui_target_wait_hook (ptid_t pid,
     }
 #endif
   tui_target_has_run = 1;
-  res = target_wait (pid, status, options);
-
-  if (tui_active)
-    {
-      /* TODO: need to refresh (optional).  */
-    }
-  return res;
 }
 
 /* The selected frame has changed.  This is happens after a target
@@ -262,12 +252,12 @@ static struct observer *tui_bp_created_observer;
 static struct observer *tui_bp_deleted_observer;
 static struct observer *tui_bp_modified_observer;
 static struct observer *tui_inferior_exit_observer;
+static struct observer *tui_about_to_proceed_observer;
 
 /* Install the TUI specific hooks.  */
 void
 tui_install_hooks (void)
 {
-  deprecated_target_wait_hook = tui_target_wait_hook;
   deprecated_selected_frame_level_changed_hook
     = tui_selected_frame_level_changed_hook;
   deprecated_print_frame_info_listing_hook
@@ -284,6 +274,8 @@ tui_install_hooks (void)
     = observer_attach_breakpoint_modified (tui_event_modify_breakpoint);
   tui_inferior_exit_observer
     = observer_attach_inferior_exit (tui_inferior_exit);
+  tui_about_to_proceed_observer
+    = observer_attach_about_to_proceed (tui_about_to_proceed);
 
   deprecated_register_changed_hook = tui_register_changed_hook;
 }
@@ -292,7 +284,6 @@ tui_install_hooks (void)
 void
 tui_remove_hooks (void)
 {
-  deprecated_target_wait_hook = 0;
   deprecated_selected_frame_level_changed_hook = 0;
   deprecated_print_frame_info_listing_hook = 0;
   deprecated_query_hook = 0;
@@ -307,6 +298,8 @@ tui_remove_hooks (void)
   tui_bp_modified_observer = NULL;
   observer_detach_inferior_exit (tui_inferior_exit_observer);
   tui_inferior_exit_observer = NULL;
+  observer_detach_about_to_proceed (tui_about_to_proceed_observer);
+  tui_about_to_proceed_observer = NULL;
 }
 
 void _initialize_tui_hooks (void);
