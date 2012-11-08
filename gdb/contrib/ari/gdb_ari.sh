@@ -22,8 +22,8 @@
 # Make certain that the script is not running in an internationalized
 # environment.
 
-LANG=c ; export LANG
-LC_ALL=c ; export LC_ALL
+LANG=C ; export LANG
+LC_ALL=C ; export LC_ALL
 
 # Permanent checks take the form:
 
@@ -130,7 +130,7 @@ do
     errors="${errors} error[ari_${e}]  = 1;"
 done
 
-if [ "$AWK" == "" ] ; then
+if [ "$AWK" = "" ] ; then
   AWK=awk
 fi
 
@@ -268,7 +268,7 @@ Do not use `Linux'\'', instead use `Linux kernel'\'' or `GNU/Linux system'\'';\
 && !/(^|[^_[:alnum:]])Linux\[sic\]([^_[:alnum:]]|$)/ \
 && !/(^|[^_[:alnum:]])GNU\/Linux([^_[:alnum:]]|$)/ \
 && !/(^|[^_[:alnum:]])Linux kernel([^_[:alnum:]]|$)/ \
-&& !/(^|[^_[:alnum:]])Linux [:digit:]\.[:digit:]+)/ {
+&& !/(^|[^_[:alnum:]])Linux [[:digit:]]\.[[:digit:]]+)/ {
     fail("GNU/Linux")
 }
 
@@ -479,7 +479,7 @@ Do not use PARAMS(), ISO C 90 implies prototypes"
 BEGIN { doc["__func__"] = "\
 Do not use __func__, ISO C 90 does not support this macro"
     category["__func__"] = ari_regression
-    fix("__func__", "gdb/gdb_assert.h", 1)
+    fix("__func__", "common/gdb_assert.h", 1)
 }
 /(^|[^_[:alnum:]])__func__([^_[:alnum:]]|$)/ {
     fail("__func__")
@@ -1120,7 +1120,7 @@ Do not use asprintf(), instead use xstrprintf()"
 
 BEGIN { doc["vasprintf"] = "\
 Do not use vasprintf(), instead use xstrvprintf"
-    fix("vasprintf", "gdb/utils.c", 1)
+    fix("vasprintf", "common/common-utils.c", 1)
     category["vasprintf"] = ari_regression
 }
 /(^|[^_[:alnum:]])vasprintf[[:space:]]*\(/ {
@@ -1129,8 +1129,8 @@ Do not use vasprintf(), instead use xstrvprintf"
 
 BEGIN { doc["xasprintf"] = "\
 Do not use xasprintf(), instead use xstrprintf"
-    fix("xasprintf", "gdb/defs.h", 1)
-    fix("xasprintf", "gdb/utils.c", 1)
+    fix("xasprintf", "common/common-utils.h", 1)
+    fix("xasprintf", "common/common-utils.c", 1)
     category["xasprintf"] = ari_regression
 }
 /(^|[^_[:alnum:]])xasprintf[[:space:]]*\(/ {
@@ -1139,8 +1139,8 @@ Do not use xasprintf(), instead use xstrprintf"
 
 BEGIN { doc["xvasprintf"] = "\
 Do not use xvasprintf(), instead use xstrvprintf"
-    fix("xvasprintf", "gdb/defs.h", 1)
-    fix("xvasprintf", "gdb/utils.c", 1)
+    fix("xvasprintf", "common/common-utils.h", 1)
+    fix("xvasprintf", "common/common-utils.c", 1)
     category["xvasprintf"] = ari_regression
 }
 /(^|[^_[:alnum:]])xvasprintf[[:space:]]*\(/ {
@@ -1244,7 +1244,8 @@ Replace var_boolean with add_setshow_boolean_cmd"
     fix("var_boolean", "cli/cli-decode.c", 2)
 }
 /(^|[^_[:alnum:]])var_boolean([^_[:alnum:]]|$)/ {
-    if ($0 !~ /(^|[^_[:alnum:]])case *var_boolean:/) {
+    if (($0 !~ /(^|[^_[:alnum:]])case *var_boolean:/) \
+        && ($0 !~ /(^|[^_[:alnum:]])[=!]= *var_boolean/)) {
 	fail("var_boolean")
     }
 }

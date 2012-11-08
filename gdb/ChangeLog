@@ -1,3 +1,17 @@
+2012-11-08  Pierre Muller  <muller@sourceware.org>
+
+	* contrib/ari/gdb_ari.sh (LANG, LC_ALL): Use 'C' instead of 'c'
+	as default language.
+	(AWK): Use = instead of == for sh test to avoid warning.
+	(Linux rule): Correct [:digit] into [[:digit:]].
+	(__func__ rule): Adapt to "gdb_assert.h" move to common subdirectory.
+	(vasprintf rule): Adapt to common subdirectory moves.
+	(xasprintf rule): Idem.
+	(xvasprintf rule): Idem.
+	(var_boolean rule): Accept occurence in == or != test.
+
+	* contrib/ari/gdb_find.sh: Also prune gdbtk directory.
+
 2012-11-08  Stephane Carrez  <Stephane.Carrez@gmail.com>
 
 	* tui/tui-hooks.c (tui_inferior_exit): New function.

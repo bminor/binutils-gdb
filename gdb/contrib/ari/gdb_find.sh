@@ -32,6 +32,7 @@ LC_ALL=C ; export LC_ALL
 find "$@" \
     -name testsuite -prune -o \
     -name gdbserver -prune -o \
+    -name gdbtk -prune -o \
     -name gnulib -prune -o \
     -name osf-share -prune -o \
     -name '*-stub.c' -prune -o \
