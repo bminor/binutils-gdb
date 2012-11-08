@@ -540,10 +540,10 @@ function qsort (table,
     }
     return result
 }
-function print_heading (where, bug_i) {
+function print_heading (nb_file, where, bug_i) {
     print ""
     print "<tr border=1>"
-    print "<th align=left>File</th>"
+    print "<th align=left>File " nb_file "</th>"
     print "<th align=left><em>Total</em></th>"
     print "<th></th>"
     for (bug_i = 1; bug_i <= nr_bug; bug_i++) {
@@ -561,7 +561,7 @@ function print_heading (where, bug_i) {
     #print "<th></th>"
     printf "<th><a name=\"%s,\">&nbsp;</a></th>\n", i2bug[bug_i-1]
     print "<th align=left><em>Total</em></th>"
-    print "<th align=left>File</th>"
+    print "<th align=left>File " nb_file "</th>"
     print "</tr>"
 }
 function print_totals (where, bug_i) {
@@ -665,7 +665,7 @@ END {
 
     print "<table border=1 cellspacing=0>"
     print "<tr></tr>"
-    print_heading(0);
+    print_heading(nr_file, 0);
     print "<tr></tr>"
     print_totals(0);
     print "<tr></tr>"
@@ -708,7 +708,7 @@ END {
     print "<tr></tr>"
     print_totals(-1)
     print "<tr></tr>"
-    print_heading(-1);
+    print_heading(nr_file, -1);
     print "<tr></tr>"
     print ""
     print "</table>"
@@ -721,8 +721,17 @@ END {
 # Make the scripts available
 cp ${aridir}/gdb_*.sh ${wwwdir}
 
+nb_files=`cd "${srcdir}" && /bin/sh ${aridir}/gdb_find.sh "${project}" | wc -l`
+
+echo "Total number of tested files is $nb_files"
+
+if [ "x$debug_awk" = "x" ]
+then
+  debug_awk=0
+fi
+
 # Compute the ARI index - ratio of zero vs non-zero problems.
-indexes=`${AWK} '
+indexes=`${AWK} -v debug=${debug_awk} -v nr="$nb_files" '
 BEGIN {
     FS=":"
 }
@@ -730,20 +739,29 @@ BEGIN {
     # ari.*.doc: <BUG>:<COUNT>:<CATEGORY>:<DOC>
     bug = $1; count = $2; category = $3; doc = $4
 
-    if (bug ~ /^legacy_/) legacy++
-    if (bug ~ /^deprecated_/) deprecated++
+    # legacy type error have at least one entry,
+    #corresponding to the declaration.
+    if (bug ~ /^legacy /) legacy++
+    # Idem for deprecated_XXX symbols/functions.
+    if (bug ~ /^deprecated /) deprecated++
 
     if (category !~ /^gdbarch$/) {
 	bugs += count
+	nrtests += 1
     }
     if (count == 0) {
 	oks++
     }
 }
 END {
-    #print "tests/ok:", nr / ok
-    #print "bugs/tests:", bugs / nr
-    #print "bugs/ok:", bugs / ok
+    if (debug == 1) {
+      print "nb files: " nr
+      print "tests/oks: " nrtests "/" oks
+      print "bugs/tests: " bugs "/" nrtests
+      print "bugs/oks: " bugs "/" oks
+      print bugs "/ (" oks "+" legacy "+" deprecated ")"
+    }
+    # This value should be as low as possible 
     print bugs / ( oks + legacy + deprecated )
 }
 ' ${wwwdir}/ari.doc`

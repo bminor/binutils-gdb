@@ -1,3 +1,12 @@
+2012-11-08  Pierre Muller  <muller@sourceware.org>
+
+	* update-web-ari.sh (print_heading): Add number of files
+	checked.
+	(nb_files): New variable counting the number of sources
+	files found by gdb_find.sh script.
+	(debug_awk): New variable to allow extra debug output.
+	(indexes): Add more information if DEBUG_AWK is set.
+
 2012-11-08  Edjunior Machado  <emachado@linux.vnet.ibm.com>
 
 	* ppc-linux-tdep.c (ppc64_standard_linkage1, ppc64_standard_linkage2,
