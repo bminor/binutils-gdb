@@ -245,11 +245,14 @@ tui_print_frame_info_listing_hook (struct symtab *s,
   tui_show_frame_info (get_selected_frame (NULL));
 }
 
-/* Called when the target process died or is detached.
-   Update the status line.  */
+/* Perform all necessary cleanups regarding our module's inferior data
+   that is required after the inferior INF just exited.  */
+
 static void
-tui_detach_hook (void)
+tui_inferior_exit (struct inferior *inf)
 {
+  /* Leave the SingleKey mode to make sure the gdb prompt is visible.  */
+  tui_set_key_mode (TUI_COMMAND_MODE);
   tui_show_frame_info (0);
   tui_display_main ();
 }
@@ -258,6 +261,7 @@ tui_detach_hook (void)
 static struct observer *tui_bp_created_observer;
 static struct observer *tui_bp_deleted_observer;
 static struct observer *tui_bp_modified_observer;
+static struct observer *tui_inferior_exit_observer;
 
 /* Install the TUI specific hooks.  */
 void
@@ -278,9 +282,10 @@ tui_install_hooks (void)
     = observer_attach_breakpoint_deleted (tui_event_delete_breakpoint);
   tui_bp_modified_observer
     = observer_attach_breakpoint_modified (tui_event_modify_breakpoint);
+  tui_inferior_exit_observer
+    = observer_attach_inferior_exit (tui_inferior_exit);
 
   deprecated_register_changed_hook = tui_register_changed_hook;
-  deprecated_detach_hook = tui_detach_hook;
 }
 
 /* Remove the TUI specific hooks.  */
@@ -292,7 +297,6 @@ tui_remove_hooks (void)
   deprecated_print_frame_info_listing_hook = 0;
   deprecated_query_hook = 0;
   deprecated_register_changed_hook = 0;
-  deprecated_detach_hook = 0;
 
   /* Remove our observers.  */
   observer_detach_breakpoint_created (tui_bp_created_observer);
@@ -301,6 +305,8 @@ tui_remove_hooks (void)
   tui_bp_deleted_observer = NULL;
   observer_detach_breakpoint_modified (tui_bp_modified_observer);
   tui_bp_modified_observer = NULL;
+  observer_detach_inferior_exit (tui_inferior_exit_observer);
+  tui_inferior_exit_observer = NULL;
 }
 
 void _initialize_tui_hooks (void);

@@ -1,3 +1,10 @@
+2012-11-08  Stephane Carrez  <Stephane.Carrez@gmail.com>
+
+	* tui/tui-hooks.c (tui_inferior_exit): New function.
+	(tui_detach_hook): Remove.
+	(tui_install_hooks): Install the inferior exit observer.
+	(tui_remove_hooks): Remove it.
+
 2012-11-08  Yao Qi  <yao@codesourcery.com>
 
 	PR gdb/14777.
