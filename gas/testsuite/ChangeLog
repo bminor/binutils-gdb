@@ -1,3 +1,14 @@
+2012-11-08  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/lui.d: New test.
+	* gas/mips/micromips@lui.d: New test.
+	* gas/mips/lui-1.l: New list test.
+	* gas/mips/lui-2.l: New list test.
+	* gas/mips/lui.s: New test source.
+	* gas/mips/lui-1.s: New test source.
+	* gas/mips/lui-2.s: New test source.
+	* gas/mips/mips.exp: Run the new tests.
+
 2012-11-07  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* testsuite/gas/microblaze/special_reg.exp: Add test case.

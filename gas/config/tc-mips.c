@@ -12413,6 +12413,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case 'u':		/* Upper 16 bits.  */
+	      *imm_reloc = BFD_RELOC_LO16;
 	      if (my_getSmallExpression (&imm_expr, imm_reloc, s) == 0
 		  && imm_expr.X_op == O_constant
 		  && (imm_expr.X_add_number < 0

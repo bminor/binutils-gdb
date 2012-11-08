@@ -1128,4 +1128,7 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test_arches "hilo-diff-eb-n64" [mips_arch_list_matching mips3]
 	run_dump_test_arches "hilo-diff-el-n64" [mips_arch_list_matching mips3]
     }
+    run_dump_test_arches "lui"		[mips_arch_list_matching mips1]
+    run_list_test_arches "lui-1" "-32"	[mips_arch_list_matching mips1]
+    run_list_test_arches "lui-2" "-32"	[mips_arch_list_matching mips1]
 }
