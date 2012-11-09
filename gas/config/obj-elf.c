@@ -658,6 +658,14 @@ obj_elf_change_section (const char *name,
 	  else if ((attr & ~ssect->attr) == SHF_ALPHA_GPREL)
 	    override = TRUE;
 #endif
+#ifdef TC_RX
+	  else if (attr == (SHF_EXECINSTR | SHF_WRITE | SHF_ALLOC)
+		   && (ssect->type == SHT_INIT_ARRAY
+		       || ssect->type == SHT_FINI_ARRAY
+		       || ssect->type == SHT_PREINIT_ARRAY))
+	    /* RX init/fini arrays can and should have the "awx" attributes set.  */
+	    ;
+#endif
 	  else
 	    {
 	      if (group_name == NULL)

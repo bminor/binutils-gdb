@@ -1,3 +1,13 @@
+2012-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-rx.c (describe_flags): New function.  Returns a buffer
+	containing a description of the E_FLAG_RX_... values set.
+	(rx_elf_merge_private_bfd_data): Use it.
+	(rx_elf_print_private_bfd_data): Likewise.
+	(elf32_rx_machine): Skip EF_RX_CPU_RX check.
+	(elf32_rx_special_sections): Define.
+	(elf_backend_special_sections): Define.
+
 2012-11-09  Edgar E. Iglesias <edgar.iglesias@gmail.com>
 
 	* config.bfd: Add microblazeel-*-*

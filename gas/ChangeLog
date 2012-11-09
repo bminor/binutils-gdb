@@ -1,3 +1,16 @@
+2012-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-elf.c (obj_elf_change_section): Allow init array
+	sections to have the SHF_EXECINSTR attribute for the RX target.
+	* config/tc-rx.c (elf_flags): Initialise with E_FLAG_RX_ABI.
+	(enum options): Add OPTION_USES_GCC_ABI and OPTION_USES_RX_ABI.
+	(md_longopts): Add -mgcc-abi and -mrx-abi.
+	(md_parse_option): Add support for OPTION_USES_GCC_ABI and
+	OPTION_USES_RX_ABI.
+	* doc/as.texinfo (RX Options): Add mention of remaining RX
+	options.
+	* doc/c-rx.texi: Document -mgcc-abi and -mrx-abi.
+
 2012-11-09  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* gas/microblaze/endian.exp: New file - endian testcase for microblaze / microblazeel.

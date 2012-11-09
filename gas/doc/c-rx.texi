@@ -93,6 +93,19 @@ This option tells the assembler how many registers have been reserved
 for use by interrupt handlers.  This is needed in order to compute the
 correct values for the @code{%gpreg} and @code{%pidreg} meta registers.
 
+@cindex @samp{-mgcc-abi}
+@item -mgcc-abi
+This option tells the assembler that the old GCC ABI is being used by
+the assembled code.  With this version of the ABI function arguments
+that are passed on the stack are aligned to a 32-bit boundary.
+
+@cindex @samp{-mrx-abi}
+@item -mrx-abi
+This option tells the assembler that the official RX ABI is being used
+by the assembled code.  With this version of the ABI function
+arguments that are passed on the stack are aligned to their natural
+alignments.  This option is the default.
+
 @end table
 
 @node RX-Modifiers

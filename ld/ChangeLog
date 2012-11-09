@@ -1,3 +1,11 @@
+2012-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/rxelf.em (no_flag_mismatch_warnings): Initialise to
+	true.
+	(PARSE_AND_LIST_LONGOPTS): Add flag-mismatch-warnings.
+	(PARSE_AND_LIST_ARG_CASES): Add support for
+	--flag-mismatch-warnings.
+
 2012-11-09  Edgar E. Iglesias <edgar.iglesias@gmail.com>
 
 	* Makefile.am: Add eelf32microblazeel.c and eelf32mbel_linux.c.

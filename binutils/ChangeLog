@@ -1,3 +1,7 @@
+2012-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_flags): Add support for E_FLAG_RX_ABI.
+
 2012-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coffgrok.c (coff_grok): Remove trailing redundant `;'.

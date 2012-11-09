@@ -46,7 +46,7 @@ const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";
 
 /* ELF flags to set in the output file header.  */
-static int elf_flags = 0;
+static int elf_flags = E_FLAG_RX_ABI;
 
 bfd_boolean rx_use_conventional_section_names = FALSE;
 static bfd_boolean rx_use_small_data_limit = FALSE;
@@ -70,6 +70,8 @@ enum options
   OPTION_RELAX,
   OPTION_PID,
   OPTION_INT_REGS,
+  OPTION_USES_GCC_ABI,
+  OPTION_USES_RX_ABI,
 };
 
 #define RX_SHORTOPTS ""
@@ -94,6 +96,8 @@ struct option md_longopts[] =
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"mpid", no_argument, NULL, OPTION_PID},
   {"mint-register", required_argument, NULL, OPTION_INT_REGS},
+  {"mgcc-abi", no_argument, NULL, OPTION_USES_GCC_ABI},
+  {"mrx-abi", no_argument, NULL, OPTION_USES_RX_ABI},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -142,6 +146,14 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
 
     case OPTION_INT_REGS:
       rx_num_int_regs = atoi (optarg);
+      return 1;
+
+    case OPTION_USES_GCC_ABI:
+      elf_flags &= ~ E_FLAG_RX_ABI;
+      return 1;
+
+    case OPTION_USES_RX_ABI:
+      elf_flags |= E_FLAG_RX_ABI;
       return 1;
     }
   return 0;

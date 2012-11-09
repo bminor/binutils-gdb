@@ -634,6 +634,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_TI_C6000:
     case EM_TILEGX:
     case EM_TILEPRO:
+    case EM_V800:
     case EM_V850:
     case EM_CYGNUS_V850:
     case EM_VAX:
@@ -1058,6 +1059,9 @@ dump_relocations (FILE * file,
 	  rtype = elf_spu_reloc_type (type);
 	  break;
 
+	case EM_V800:
+	  rtype = v800_reloc_type (type);
+	  break;
 	case EM_V850:
 	case EM_CYGNUS_V850:
 	  rtype = v850_reloc_type (type);
@@ -1885,7 +1889,6 @@ get_machine_name (unsigned e_machine)
     case EM_960:		return "Intel 90860";
     case EM_PPC:		return "PowerPC";
     case EM_PPC64:		return "PowerPC64";
-    case EM_V800:		return "NEC V800";
     case EM_FR20:		return "Fujitsu FR20";
     case EM_RH32:		return "TRW RH32";
     case EM_MCORE:		return "MCORE";
@@ -1910,6 +1913,7 @@ get_machine_name (unsigned e_machine)
     case EM_CYGNUS_M32R:
     case EM_M32R:		return "Renesas M32R (formerly Mitsubishi M32r)";
     case EM_CYGNUS_V850:
+    case EM_V800:		return "Renesas V850 (using RH850 ABI)";
     case EM_V850:		return "Renesas V850";
     case EM_CYGNUS_MN10300:
     case EM_MN10300:		return "mn10300";
@@ -2412,6 +2416,56 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    strcat (buf, _(", relocatable-lib"));
 	  break;
 
+	case EM_V800:
+	  if ((e_flags & EF_RH850_ABI) == EF_RH850_ABI)
+	    strcat (buf, ", RH850 ABI");
+	    
+	  if (e_flags & EF_V800_850E3)
+	    strcat (buf, ", V3 architecture");
+
+	  if ((e_flags & (EF_RH850_FPU_DOUBLE | EF_RH850_FPU_SINGLE)) == 0)
+	    strcat (buf, ", FPU not used");
+
+	  if ((e_flags & (EF_RH850_REGMODE22 | EF_RH850_REGMODE32)) == 0)
+	    strcat (buf, ", regmode: COMMON");
+
+	  if ((e_flags & (EF_RH850_GP_FIX | EF_RH850_GP_NOFIX)) == 0)
+	    strcat (buf, ", r4 not used");
+
+	  if ((e_flags & (EF_RH850_EP_FIX | EF_RH850_EP_NOFIX)) == 0)
+	    strcat (buf, ", r30 not used");
+
+	  if ((e_flags & (EF_RH850_TP_FIX | EF_RH850_TP_NOFIX)) == 0)
+	    strcat (buf, ", r5 not used");
+
+	  if ((e_flags & (EF_RH850_REG2_RESERVE | EF_RH850_REG2_NORESERVE)) == 0)
+	    strcat (buf, ", r2 not used");
+
+	  for (e_flags &= 0xFFFF; e_flags; e_flags &= ~ (e_flags & - e_flags))
+	    {
+	      switch (e_flags & - e_flags)
+		{
+		case EF_RH850_FPU_DOUBLE: strcat (buf, ", double precision FPU"); break;
+		case EF_RH850_FPU_SINGLE: strcat (buf, ", single precision FPU"); break;
+		case EF_RH850_SIMD: strcat (buf, ", SIMD"); break;
+		case EF_RH850_CACHE: strcat (buf, ", CACHE"); break;
+		case EF_RH850_MMU: strcat (buf, ", MMU"); break;
+		case EF_RH850_REGMODE22: strcat (buf, ", regmode:22"); break;
+		case EF_RH850_REGMODE32: strcat (buf, ", regmode:23"); break;
+		case EF_RH850_DATA_ALIGN8: strcat (buf, ", 8-byte alignment"); break;
+		case EF_RH850_GP_FIX: strcat (buf, ", r4 fixed"); break;
+		case EF_RH850_GP_NOFIX: strcat (buf, ", r4 free"); break;
+		case EF_RH850_EP_FIX: strcat (buf, ", r30 fixed"); break;
+		case EF_RH850_EP_NOFIX: strcat (buf, ", r30 free"); break;
+		case EF_RH850_TP_FIX: strcat (buf, ", r5 fixed"); break;
+		case EF_RH850_TP_NOFIX: strcat (buf, ", r5 free"); break;
+		case EF_RH850_REG2_RESERVE: strcat (buf, ", r2 fixed"); break;
+		case EF_RH850_REG2_NORESERVE: strcat (buf, ", r2 free"); break;
+		default: break;
+		}
+	    }
+	  break;
+
 	case EM_V850:
 	case EM_CYGNUS_V850:
 	  switch (e_flags & EF_V850_ARCH)
@@ -2682,6 +2736,8 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    strcat (buf, ", dsp");
 	  if (e_flags & E_FLAG_RX_PID)
 	    strcat (buf, ", pid");	  
+	  if (e_flags & E_FLAG_RX_ABI)
+	    strcat (buf, ", RX ABI");
 	  break;
 
 	case EM_S390:
@@ -9998,6 +10054,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_CYGNUS_V850:
     case EM_V850:
       return reloc_type == 6; /* R_V850_ABS32.  */
+    case EM_V800:
+      return reloc_type == 0x33; /* R_V810_WORD.  */
     case EM_VAX:
       return reloc_type == 1; /* R_VAX_32.  */
     case EM_X86_64:
