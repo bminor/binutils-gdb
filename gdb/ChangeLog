@@ -1,5 +1,10 @@
 2012-11-09  Yao Qi  <yao@codesourcery.com>
 
+	* i386-tdep.c (i386_analyze_frame_setup): Handle opcode
+	0x8d (lea).
+
+2012-11-09  Yao Qi  <yao@codesourcery.com>
+
 	* breakpoint.c: Declare set_tracepoint_count.
 	(install_breakpoint): Call set_tracepoint_count if B is a
 	tracepoint.
