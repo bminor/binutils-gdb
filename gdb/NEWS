@@ -24,6 +24,8 @@
 * The 'cd' command now defaults to using '~' (the home directory) if not
   given an argument.
 
+* The command 'forward-search' can now be abbreviated as 'fo'.
+
 * New configure options
 
 --enable-libmcheck/--disable-libmcheck
