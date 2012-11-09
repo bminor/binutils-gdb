@@ -190,5 +190,4 @@ extern void stringer (int append_zero);
 extern void s_xstab (int what);
 extern void s_rva (int);
 extern void s_incbin (int);
-extern int s_vendor_attribute (int);
 extern void s_weakref (int);

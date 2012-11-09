@@ -693,7 +693,7 @@ static bfd_boolean tic6x_attributes_set_explicitly[NUM_KNOWN_OBJ_ATTRIBUTES];
 static void
 s_tic6x_c6xabi_attribute (int ignored ATTRIBUTE_UNUSED)
 {
-  int tag = s_vendor_attribute (OBJ_ATTR_PROC);
+  int tag = obj_elf_vendor_attribute (OBJ_ATTR_PROC);
 
   if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
     tic6x_attributes_set_explicitly[tag] = TRUE;

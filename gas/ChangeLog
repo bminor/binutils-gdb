@@ -1,3 +1,25 @@
+2012-11-09  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* read.h (s_vendor_attribute): Move to...
+	* config/obj-elf.h (obj_elf_vendor_attribute): ... here.
+	* read.c (potable): Remove "gnu_attribute".
+	(skip_whitespace, skip_past_char, skip_past_comma): Delete, move
+	to config/obj-elf.c.
+	(s_vendor_attribute): Delete, move to obj_elf_vendor_attribute
+	in config/obj-elf.c.
+	(s_gnu_attribute): Delete, move to obj_elf_gnu_attribute in
+	config/obj-elf.c.
+	* config/obj-elf.c (elf_pseudo_table): Add "gnu_attribute".
+	(skip_whitespace, skip_past_char, skip_past_comma): New, moved
+	from read.c.
+	(obj_elf_vendor_attribute): New, moved from s_vendor_attribute
+	in read.c.
+	(obj_elf_gnu_attribute): New, moved from s_gnu_attribute in
+	read.c.
+	* config/tc-arm.c (s_arm_eabi_attribute): Rename
+	s_vendor_attribute to obj_elf_vendor_attribute.
+	* config/tc-tic6x.c (s_tic6x_c6xabi_attribute): Likewise.
+
 2012-11-09  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-elf.c (obj_elf_change_section): Allow init array
