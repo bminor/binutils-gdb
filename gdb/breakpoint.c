@@ -261,6 +261,8 @@ static void disable_trace_command (char *, int);
 
 static void trace_pass_command (char *, int);
 
+static void set_tracepoint_count (int num);
+
 static int is_masked_watchpoint (const struct breakpoint *b);
 
 static struct bp_location **get_first_locp_gte_addr (CORE_ADDR address);
@@ -8319,6 +8321,8 @@ install_breakpoint (int internal, struct breakpoint *b, int update_gll)
 {
   add_to_breakpoint_chain (b);
   set_breakpoint_number (internal, b);
+  if (is_tracepoint (b))
+    set_tracepoint_count (breakpoint_count);
   if (!internal)
     mention (b);
   observer_notify_breakpoint_created (b);
@@ -14999,35 +15003,33 @@ trace_command (char *arg, int from_tty)
   else
     ops = &tracepoint_breakpoint_ops;
 
-  if (create_breakpoint (get_current_arch (),
-			 arg,
-			 NULL, 0, NULL, 1 /* parse arg */,
-			 0 /* tempflag */,
-			 bp_tracepoint /* type_wanted */,
-			 0 /* Ignore count */,
-			 pending_break_support,
-			 ops,
-			 from_tty,
-			 1 /* enabled */,
-			 0 /* internal */, 0))
-    set_tracepoint_count (breakpoint_count);
+  create_breakpoint (get_current_arch (),
+		     arg,
+		     NULL, 0, NULL, 1 /* parse arg */,
+		     0 /* tempflag */,
+		     bp_tracepoint /* type_wanted */,
+		     0 /* Ignore count */,
+		     pending_break_support,
+		     ops,
+		     from_tty,
+		     1 /* enabled */,
+		     0 /* internal */, 0);
 }
 
 static void
 ftrace_command (char *arg, int from_tty)
 {
-  if (create_breakpoint (get_current_arch (),
-			 arg,
-			 NULL, 0, NULL, 1 /* parse arg */,
-			 0 /* tempflag */,
-			 bp_fast_tracepoint /* type_wanted */,
-			 0 /* Ignore count */,
-			 pending_break_support,
-			 &tracepoint_breakpoint_ops,
-			 from_tty,
-			 1 /* enabled */,
-			 0 /* internal */, 0))
-    set_tracepoint_count (breakpoint_count);
+  create_breakpoint (get_current_arch (),
+		     arg,
+		     NULL, 0, NULL, 1 /* parse arg */,
+		     0 /* tempflag */,
+		     bp_fast_tracepoint /* type_wanted */,
+		     0 /* Ignore count */,
+		     pending_break_support,
+		     &tracepoint_breakpoint_ops,
+		     from_tty,
+		     1 /* enabled */,
+		     0 /* internal */, 0);
 }
 
 /* strace command implementation.  Creates a static tracepoint.  */
@@ -15044,18 +15046,17 @@ strace_command (char *arg, int from_tty)
   else
     ops = &tracepoint_breakpoint_ops;
 
-  if (create_breakpoint (get_current_arch (),
-			 arg,
-			 NULL, 0, NULL, 1 /* parse arg */,
-			 0 /* tempflag */,
-			 bp_static_tracepoint /* type_wanted */,
-			 0 /* Ignore count */,
-			 pending_break_support,
-			 ops,
-			 from_tty,
-			 1 /* enabled */,
-			 0 /* internal */, 0))
-    set_tracepoint_count (breakpoint_count);
+  create_breakpoint (get_current_arch (),
+		     arg,
+		     NULL, 0, NULL, 1 /* parse arg */,
+		     0 /* tempflag */,
+		     bp_static_tracepoint /* type_wanted */,
+		     0 /* Ignore count */,
+		     pending_break_support,
+		     ops,
+		     from_tty,
+		     1 /* enabled */,
+		     0 /* internal */, 0);
 }
 
 /* Set up a fake reader function that gets command lines from a linked
@@ -15124,8 +15125,6 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 			  CREATE_BREAKPOINT_FLAGS_INSERTED))
     return NULL;
 
-  set_tracepoint_count (breakpoint_count);
-  
   /* Get the tracepoint we just created.  */
   tp = get_tracepoint (tracepoint_count);
   gdb_assert (tp != NULL);

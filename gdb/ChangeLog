@@ -1,3 +1,12 @@
+2012-11-09  Yao Qi  <yao@codesourcery.com>
+
+	* breakpoint.c: Declare set_tracepoint_count.
+	(install_breakpoint): Call set_tracepoint_count if B is a
+	tracepoint.
+	(trace_command): Don't call set_tracepoint_count.  Re-indent.
+	(strace_command, ftrace_command):
+	(create_tracepoint_from_upload): Likewise.
+
 2012-11-09  Pedro Alves  <palves@redhat.com>
 
 	* gdbarch.sh (target_gdbarch) <gdbarch.h>: Reimplement as macro.

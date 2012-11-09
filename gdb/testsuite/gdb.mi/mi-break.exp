@@ -150,6 +150,24 @@ proc test_rbreak_creation_and_listing {} {
 	    "delete temp breakpoints"
 }
 
+proc test_abreak_creation {} {
+    mi_create_varobj tpnum \$tpnum "create local variable tpnum"
+    # Test that $tpnum is not set before creating a tracepoint.
+    mi_gdb_test "521-var-evaluate-expression tpnum" \
+	"521\\^done,value=\"void\"" "eval tpnum before tracepoint"
+
+    mi_gdb_test "522-break-insert -a main" \
+	"522\\^done,bkpt=\{number=\"10\",type=\"tracepoint\".*\"\}" \
+	"break-insert -a operation"
+
+    mi_gdb_test "523-var-update tpnum" \
+	"523\\^done,changelist=\\\[\{name=\"tpnum\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"\}\\\]" \
+	"update tpnum"
+    # Test that $tpnum is updated after creating a tracepoint.
+    mi_gdb_test "524-var-evaluate-expression tpnum" \
+	"524\\^done,value=\"10\"" "eval tpnum after tracepoint"
+}
+
 proc test_ignore_count {} {
     global mi_gdb_prompt
     global line_callme_body
@@ -255,6 +273,8 @@ test_error
 test_disabled_creation
 
 test_breakpoint_commands
+
+test_abreak_creation
 
 mi_gdb_exit
 return 0

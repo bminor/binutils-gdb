@@ -1,5 +1,10 @@
 2012-11-09  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.mi/mi-break.exp (test_abreak_creation): New procedure.
+	(top level): Call it.
+
+2012-11-09  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.mi/mi-watch.exp (test_rwatch_creation_and_listing): Fix
 	typo.
 
