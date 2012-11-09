@@ -436,6 +436,7 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_v850
     case bfd_arch_v850:
+    case bfd_arch_v850_rh850:
       disassemble = print_insn_v850;
       break;
 #endif

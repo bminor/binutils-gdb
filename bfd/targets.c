@@ -722,6 +722,7 @@ extern const bfd_target bfd_elf32_tradbigmips_freebsd_vec;
 extern const bfd_target bfd_elf32_tradlittlemips_freebsd_vec;
 extern const bfd_target bfd_elf32_us_cris_vec;
 extern const bfd_target bfd_elf32_v850_vec;
+extern const bfd_target bfd_elf32_v850_rh850_vec;
 extern const bfd_target bfd_elf32_vax_vec;
 extern const bfd_target bfd_elf32_xc16x_vec;
 extern const bfd_target bfd_elf32_xgate_vec;
@@ -1099,6 +1100,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfd_elf32_tradlittlemips_freebsd_vec,
 	&bfd_elf32_us_cris_vec,
 	&bfd_elf32_v850_vec,
+	&bfd_elf32_v850_rh850_vec,
 	&bfd_elf32_vax_vec,
 	&bfd_elf32_xc16x_vec,
 	&bfd_elf32_xgate_vec,

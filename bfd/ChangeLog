@@ -1,5 +1,34 @@
 2012-11-09  Nick Clifton  <nickc@redhat.com>
 
+	* Makefile.am (ALL_MACHINES): Add cpu-v850-rh850.lo.
+	(ALL_MACHINES_CFILES): Add cpu-v850-rh850.c.
+	* archures.c (bfd_arch_info): Add bfd_v850_rh850_arch.
+	* config.bfd: Likewise.
+	* configure.in: Add bfd_elf32_v850_rh850_vec.
+	* cpu-v850.c: Update printed description.
+	* cpu-v850_rh850.c: New file.
+	* elf32-v850.c (v850_elf_check_relocs): Add support for RH850 ABI
+	relocs.
+	(v850_elf_perform_relocation): Likewise.
+	(v850_elf_final_link_relocate): Likewise.
+	(v850_elf_relocate_section): Likewise.
+	(v850_elf_relax_section): Likewise.
+	(v800_elf_howto_table): New.
+	(v850_elf_object_p): Add support for RH850 ABI values.
+	(v850_elf_final_write_processing): Likewise.
+	(v850_elf_merge_private_bfd_data): Likewise.
+	(v850_elf_print_private_bfd_data): Likewise.
+	(v800_elf_reloc_map): New.
+	(v800_elf_reloc_type_lookup): New.
+	(v800_elf_reloc_name_lookup): New.
+	(v800_elf_info_to_howto): New.
+	(bfd_elf32_v850_rh850_vec): New.
+	(bfd_arch_v850_rh850): New.
+	* targets.c (_bfd_targets): Add bfd_elf32_v850_rh850_vec.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+
 	* elf32-rx.c (describe_flags): New function.  Returns a buffer
 	containing a description of the E_FLAG_RX_... values set.
 	(rx_elf_merge_private_bfd_data): Use it.

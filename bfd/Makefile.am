@@ -141,6 +141,7 @@ ALL_MACHINES = \
 	cpu-tilegx.lo \
 	cpu-tilepro.lo \
 	cpu-v850.lo \
+	cpu-v850_rh850.lo \
 	cpu-vax.lo \
 	cpu-w65.lo \
 	cpu-we32k.lo \
@@ -222,6 +223,7 @@ ALL_MACHINES_CFILES = \
 	cpu-tilegx.c \
 	cpu-tilepro.c \
 	cpu-v850.c \
+	cpu-v850_rh850.c \
 	cpu-vax.c \
 	cpu-w65.c \
 	cpu-we32k.c \

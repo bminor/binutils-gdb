@@ -1,6 +1,6 @@
 /* tc-v850.c -- Assembler code for the NEC V850
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2009, 2010, 2011  Free Software Foundation, Inc.
+   2006, 2007, 2009, 2010, 2011, 2012  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -37,6 +37,12 @@ static bfd_boolean warn_unsigned_overflows = FALSE;
 
 /* Indicates the target BFD machine number.  */
 static int machine = -1;
+
+
+/* Indiciates the target BFD architecture.  */
+int          v850_target_arch = bfd_arch_v850_rh850;
+const char * v850_target_format = "elf32-v850-rh850";
+static flagword v850_e_flags = 0;
 
 /* Indicates the target processor(s) for the assemble.  */
 static int processor_mask = 0;
@@ -512,7 +518,7 @@ static void
 set_machine (int number)
 {
   machine = number;
-  bfd_set_arch_mach (stdoutput, TARGET_ARCH, machine);
+  bfd_set_arch_mach (stdoutput, v850_target_arch, machine);
 
   switch (machine)
     {
@@ -1338,6 +1344,10 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("  -mextension               enable extension opcode support\n"));
   fprintf (stream, _("  -mno-bcond17		  disable b<cond> disp17 instruction\n"));
   fprintf (stream, _("  -mno-stld23		  disable st/ld offset23 instruction\n"));
+  fprintf (stream, _("  -mgcc-abi                 Mark the binary as using the old GCC ABI\n"));
+  fprintf (stream, _("  -mrh850-abi               Mark the binary as using the RH850 ABI (default)\n"));
+  fprintf (stream, _("  -m8byte-align             Mark the binary as using 64-bit alignment\n"));
+  fprintf (stream, _("  -m4byte-align             Mark the binary as using 32-bit alignment (default)\n"));
 }
 
 int
@@ -1403,6 +1413,20 @@ md_parse_option (int c, char *arg)
     }
   else if (strcmp (arg, "relax") == 0)
     v850_relax = 1;
+  else if (strcmp (arg, "gcc-abi") == 0)
+    {
+      v850_target_arch = bfd_arch_v850;
+      v850_target_format = "elf32-v850";
+    }
+  else if (strcmp (arg, "rh850-abi") == 0)
+    {
+      v850_target_arch = bfd_arch_v850_rh850;
+      v850_target_format = "elf32-v850-rh850";
+    }
+  else if (strcmp (arg, "8byte-align") == 0)
+    v850_e_flags |= EF_RH850_DATA_ALIGN8;
+  else if (strcmp (arg, "4byte-align") == 0)
+    v850_e_flags &= ~ EF_RH850_DATA_ALIGN8;
   else
     return 0;
 
@@ -1673,7 +1697,8 @@ md_begin (void)
     }
 
   v850_seg_table[BSS_SECTION].s = bss_section;
-  bfd_set_arch_mach (stdoutput, TARGET_ARCH, machine);
+  bfd_set_arch_mach (stdoutput, v850_target_arch, machine);
+  bfd_set_private_flags (stdoutput, v850_e_flags);
 }
 
 
@@ -1996,7 +2021,7 @@ md_assemble (char *str)
   int relaxable = 0;
   unsigned long insn;
   unsigned long insn_size;
-  char *f;
+  char *f = NULL;
   int i;
   int match;
   bfd_boolean extra_data_after_insn = FALSE;
@@ -3219,7 +3244,8 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
 	      break;
 
 	    case BFD_RELOC_V850_16_PCREL:
-	      bfd_putl16 (-value & 0xfffe, (unsigned char *) where);
+	      bfd_putl16 ((-value & 0xfffe) | (bfd_getl16 (where + 2) & 0x0001),
+			  (unsigned char *) (where + 2));
 	      break;
 
 	    case BFD_RELOC_V850_22_PCREL:

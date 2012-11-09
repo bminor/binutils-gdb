@@ -716,7 +716,8 @@ tilegxbe-*-*)		targ_emul=elf64tilegx_be
 			targ_extra_emuls="elf64tilegx elf32tilegx elf32tilegx_be"
 			targ_extra_libpath=$targ_extra_emuls ;;
 tilepro-*-*)		targ_emul=elf32tilepro ;;
-v850*-*-*)		targ_emul=v850
+v850*-*-*)		targ_emul=v850_rh850
+			targ_extra_emuls=v850
 			;;
 vax-dec-ultrix* | vax-dec-bsd*) targ_emul=vax ;;
 vax-*-netbsdelf*)	targ_emul=elf32vax

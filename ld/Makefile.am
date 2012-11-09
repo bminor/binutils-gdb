@@ -453,6 +453,7 @@ ALL_EMULATION_SOURCES = \
 	etic54xcoff.c \
 	etic80coff.c \
 	ev850.c \
+	ev850_rh850.c \
 	evanilla.c \
 	evax.c \
 	evaxnbsd.c \
@@ -1924,6 +1925,9 @@ etic80coff.c: $(srcdir)/emulparams/tic80coff.sh \
 ev850.c: $(srcdir)/emulparams/v850.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/v850.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} v850 "$(tdir_v850)"
+ev850_rh850.c: $(srcdir)/emulparams/v850_rh850.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/v850_rh850.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} v850_rh850 "$(tdir_v850_rh850)"
 evanilla.c: $(srcdir)/emulparams/vanilla.sh \
   $(srcdir)/emultempl/vanilla.em $(srcdir)/scripttempl/vanilla.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} vanilla "$(tdir_vanilla)"

@@ -1,6 +1,5 @@
-/* BFD support for the NEC V850 processor
-   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2005, 2007,
-   2010, 2012  Free Software Foundation, Inc.
+/* BFD support for the NEC V850 processor with the RH850 ABI.
+   Copyright 2012  Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -24,22 +23,17 @@
 #include "libbfd.h"
 #include "safe-ctype.h"
 
-#define N(number, print, default, next)  \
-{  32, 32, 8, bfd_arch_v850, number, "v850", print " (using old gcc ABI)", 2, default, \
+#define R(number, print, default, next)  \
+{  32, 32, 8, bfd_arch_v850_rh850, number, "v850", print, 2, default, \
    bfd_default_compatible, bfd_default_scan, bfd_arch_default_fill, next }
-
-#define NEXT NULL
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (bfd_mach_v850e2v3, "v850e2v3", 	FALSE, & arch_info_struct[1]),
-  N (bfd_mach_v850e2,   "v850e2", 	FALSE, & arch_info_struct[2]),
-  N (bfd_mach_v850e1,   "v850e1",  	FALSE, & arch_info_struct[3]),
-  N (bfd_mach_v850e,    "v850e",   	FALSE, NULL)
+  R (bfd_mach_v850e2v3, "v850e2v3", 	FALSE, & arch_info_struct[1]),
+  R (bfd_mach_v850e2,   "v850e2", 	FALSE, & arch_info_struct[2]),
+  R (bfd_mach_v850e1,   "v850e1",  	FALSE, & arch_info_struct[3]),
+  R (bfd_mach_v850e,    "v850e",   	FALSE, NULL)
 };
 
-#undef  NEXT
-#define NEXT & arch_info_struct[0]
-
-const bfd_arch_info_type bfd_v850_arch =
-  N (bfd_mach_v850, "v850", TRUE, NEXT);
+const bfd_arch_info_type bfd_v850_rh850_arch =
+  R (bfd_mach_v850,     "v850-rh850",   TRUE,  & arch_info_struct[0]);

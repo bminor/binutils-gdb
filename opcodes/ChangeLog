@@ -1,3 +1,9 @@
+2012-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Add bfd_v850_rh850_arch.
+	* configure: Regenerate.
+	* disassemble.c (disassembler): Likewise.
+
 2012-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* aarch64-opc.h (gen_mask): Remove trailing redundant `;'.

@@ -6,6 +6,13 @@
 	(PARSE_AND_LIST_ARG_CASES): Add support for
 	--flag-mismatch-warnings.
 
+	* Makefile.am: (ALL_EMULATION_SOURCES): Add ev850_rh850.c.
+	* Makefile.in: Regenerate.
+	* configure.tgt (v850*-*-*): Make v850_rh850 the default
+	emulation. Add vanilla v850 as an extra emulation.
+	* emulparams/v850_rh850.sh: New file.
+	* scripttempl/v850_rh850.sc: New file.
+
 2012-11-09  Edgar E. Iglesias <edgar.iglesias@gmail.com>
 
 	* Makefile.am: Add eelf32microblazeel.c and eelf32mbel_linux.c.

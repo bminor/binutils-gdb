@@ -1,5 +1,5 @@
 /* tc-v850.h -- Header file for tc-v850.c.
-   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2005, 2006, 2007
+   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2012
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -26,10 +26,12 @@
 #define TARGET_BYTES_BIG_ENDIAN 0
 
 /* The target BFD architecture.  */
-#define TARGET_ARCH 		bfd_arch_v850
+#define TARGET_ARCH 		v850_target_arch
+extern int v850_target_arch;
 
 /* The target BFD format.  */
-#define TARGET_FORMAT 		"elf32-v850"
+#define TARGET_FORMAT 		v850_target_format
+extern const char * v850_target_format;
 
 #define md_operand(x)
 

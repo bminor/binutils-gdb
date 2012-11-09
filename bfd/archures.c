@@ -323,6 +323,7 @@ DESCRIPTION
 .  bfd_arch_tic6x,     {* Texas Instruments TMS320C6X *}
 .  bfd_arch_tic80,     {* TI TMS320c80 (MVP) *}
 .  bfd_arch_v850,      {* NEC V850 *}
+.  bfd_arch_v850_rh850,{* NEC V850 (using RH850 ABI) *}
 .#define bfd_mach_v850          1
 .#define bfd_mach_v850e 	'E'
 .#define bfd_mach_v850e1        '1'
@@ -578,6 +579,7 @@ extern const bfd_arch_info_type bfd_tic80_arch;
 extern const bfd_arch_info_type bfd_tilegx_arch;
 extern const bfd_arch_info_type bfd_tilepro_arch;
 extern const bfd_arch_info_type bfd_v850_arch;
+extern const bfd_arch_info_type bfd_v850_rh850_arch;
 extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_we32k_arch;
@@ -661,6 +663,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_tilegx_arch,
     &bfd_tilepro_arch,
     &bfd_v850_arch,
+    &bfd_v850_rh850_arch,
     &bfd_vax_arch,
     &bfd_w65_arch,
     &bfd_we32k_arch,

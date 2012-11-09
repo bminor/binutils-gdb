@@ -1,6 +1,11 @@
 2012-11-09  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_machine_flags): Add support for E_FLAG_RX_ABI.
+	(guess_is_rela): Add EM_V800.
+	(dump_relocations): Likewise.
+	(get_machine_name): Update EM_V800.
+	(get_machine_flags): Add support for RH850 ABI flags.
+	(is_32bit_abs_reloc): Add support for RH850 ABI reloc.
 
 2012-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 

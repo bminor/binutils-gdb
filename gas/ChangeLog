@@ -11,6 +11,17 @@
 	options.
 	* doc/c-rx.texi: Document -mgcc-abi and -mrx-abi.
 
+	* config/tc-v850.c (v850_target_arch): New.
+	(v850_target_format): New.
+	(set_machine): Use v850_target_arch.
+	(md_begin): Likewise.
+	(md_show_usage): Document new switches.
+	(md_parse_option): Add -mgcc-abi, -mrh850-abi, -m8byte-align and
+	-m4byte-align.
+	* config/tc-v850.c (TARGET_ARCH) Use v850_target_arch.
+	(TARGET_FORMAT): Use v850_target_format.
+	* doc/c-v850.texi: Document new options.
+
 2012-11-09  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* gas/microblaze/endian.exp: New file - endian testcase for microblaze / microblazeel.

@@ -2054,6 +2054,7 @@ enum bfd_architecture
   bfd_arch_tic6x,     /* Texas Instruments TMS320C6X */
   bfd_arch_tic80,     /* TI TMS320c80 (MVP) */
   bfd_arch_v850,      /* NEC V850 */
+  bfd_arch_v850_rh850,/* NEC V850 (using RH850 ABI) */
 #define bfd_mach_v850          1
 #define bfd_mach_v850e         'E'
 #define bfd_mach_v850e1        '1'
