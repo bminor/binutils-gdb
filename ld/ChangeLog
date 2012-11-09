@@ -1,3 +1,13 @@
+2012-11-09  Edgar E. Iglesias <edgar.iglesias@gmail.com>
+
+	* Makefile.am: Add eelf32microblazeel.c and eelf32mbel_linux.c.
+	* Makefile.in: Regenerated.
+	* configure.tgt: Add microblazeel and set endian per target.
+	* emulparams/elf32mb_linux.sh: Add OUTPUT_FORMAT.
+	* emulparams/elf32microblaze.sh: Likewise.
+	* emulparams/elf32mbel_linux.sh: New file.
+	* emulparams/elf32microblazeel.sh: Likewise.
+
 2012-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testplug.c (record_add_file): Remove trailing redundant `;'.

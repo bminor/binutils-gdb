@@ -916,8 +916,14 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_mep_little_vec
     ;;
 
+  microblazeel*-*)
+    targ_defvec=bfd_elf32_microblazeel_vec
+    targ_selvecs=bfd_elf32_microblaze_vec
+    ;;
+
   microblaze*-*)
     targ_defvec=bfd_elf32_microblaze_vec
+    targ_selvecs=bfd_elf32_microblazeel_vec
     ;;
 
   mips*-big-*)

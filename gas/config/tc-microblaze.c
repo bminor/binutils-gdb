@@ -35,6 +35,9 @@
 #define streq(a,b) (strcmp (a, b) == 0)
 #endif
 
+#define OPTION_EB (OPTION_MD_BASE + 0)
+#define OPTION_EL (OPTION_MD_BASE + 1)
+
 void microblaze_generate_symbol (char *sym);
 static bfd_boolean check_spl_reg (unsigned *);
 
@@ -1707,6 +1710,8 @@ const char * md_shortopts = "";
 
 struct option md_longopts[] =
 {
+  {"EB", no_argument, NULL, OPTION_EB},
+  {"EL", no_argument, NULL, OPTION_EL},
   { NULL,          no_argument, NULL, 0}
 };
 
@@ -2304,6 +2309,12 @@ md_parse_option (int c, char * arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {
+    case OPTION_EB:
+      target_big_endian = 1;
+      break;
+    case OPTION_EL:
+      target_big_endian = 0;
+      break;
     default:
       return 0;
     }

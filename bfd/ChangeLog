@@ -1,3 +1,17 @@
+2012-11-09  Edgar E. Iglesias <edgar.iglesias@gmail.com>
+
+	* config.bfd: Add microblazeel-*-*
+	* configure.in: Likewise.
+	* configure: Regenerate.
+	* elf32-microblaze.c (microblaze_elf_relocate_section): Add endian awareness.
+	(microblaze_elf_merge_private_bfd_data): New.
+	(microblaze_bfd_write_imm_value_32): New.
+	(microblaze_bfd_write_imm_value_64): New.
+	(microblaze_elf_relax_section): Add endian awareness.
+	(microblaze_elf_add_symbol_hook): Define TARGET_LITTLE_NAME,
+	TARGET_LITTLE_SYM and bfd_elf32_bfd_merge_private_bfd_data.
+	* targets.c: Add bfd target bfd_elf32_microblazeel_vec.
+
 2012-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* aout-tic30.c (MY_final_link_callback): Remove trailing

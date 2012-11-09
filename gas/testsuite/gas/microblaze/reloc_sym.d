@@ -1,6 +1,5 @@
 
-reloc_sym.x:     file format elf32-microblaze
-
+.*: +file format .*
 
 Disassembly of section .text:
 

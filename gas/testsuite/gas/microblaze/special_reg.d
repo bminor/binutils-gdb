@@ -1,10 +1,7 @@
 #as:
-#objdump: -ds
+#objdump: -d
 
-.*:     file format .*
-
-Contents of section .text:
- 0000 9409d000 6c00d000 001ff800           ....l.......    
+.*: +file format .*
 
 Disassembly of section .text:
 

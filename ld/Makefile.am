@@ -237,6 +237,7 @@ ALL_EMULATION_SOURCES = \
 	eelf32mb_linux.c \
 	eelf32mcore.c \
 	eelf32mep.c \
+	eelf32microblazeel.c \
 	eelf32microblaze.c \
 	eelf32mipswindiss.c \
 	eelf32moxie.c \
@@ -1107,6 +1108,9 @@ eelf32m32c.c: $(srcdir)/emulparams/elf32m32c.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32m32c "$(tdir_m32c)"
+eelf32mbel_linux.c: $(srcdir)/emulparams/elf32mbel_linux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32mbel_linux "$(tdir_microblazeel)"
 eelf32mb_linux.c: $(srcdir)/emulparams/elf32mb_linux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mb_linux "$(tdir_microblaze)"
@@ -1116,6 +1120,9 @@ eelf32mcore.c: $(srcdir)/emulparams/elf32mcore.sh \
 eelf32mep.c: $(srcdir)/emulparams/elf32mep.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/mep.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mep "$(tdir_mep)"
+eelf32microblazeel.c: $(srcdir)/emulparams/elf32microblazeel.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfmicroblaze.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32microblazeel "$(tdir_microblazeel)"
 eelf32microblaze.c: $(srcdir)/emulparams/elf32microblaze.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfmicroblaze.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32microblaze "$(tdir_microblaze)"

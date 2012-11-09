@@ -395,9 +395,18 @@ mcore-*-pe)		targ_emul=mcorepe ;
 mcore-*-elf)		targ_emul=elf32mcore
 			;;
 mep-*-elf)		targ_emul=elf32mep ;;
-microblaze*-linux*)
-			targ_emul="elf32mb_linux" ;;
-microblaze*)		targ_emul=elf32microblaze ;;
+microblazeel*-linux*)	targ_emul="elf32mbel_linux"
+			targ_extra_emuls="elf32mb_linux"
+			;;
+microblaze*-linux*)	targ_emul="elf32mb_linux"
+			targ_extra_emuls="elf32mbel_linux"
+			;;
+microblazeel*)		targ_emul=elf32microblazeel
+			targ_extra_emuls=elf32microblaze
+			;;
+microblaze*)		targ_emul=elf32microblaze
+			targ_extra_emuls=elf32microblazeel
+			;;
 mips*-*-pe)		targ_emul=mipspe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 mips*-dec-ultrix*)	targ_emul=mipslit ;;
