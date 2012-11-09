@@ -1,3 +1,8 @@
+2012-11-09  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-watch.exp (test_rwatch_creation_and_listing): Fix
+	typo.
+
 2012-11-09  Pedro Alves  <palves@redhat.com>
 
 	* gdb.multi/multi-arch.exp: New.
