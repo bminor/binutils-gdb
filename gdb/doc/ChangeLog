@@ -1,3 +1,9 @@
+2012-11-09  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/14777.
+	* gdb.texinfo (OS Information): Remove doc on command
+	'info udot'.
+
 2012-11-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Startup): Minor rewording, and clarify scope of

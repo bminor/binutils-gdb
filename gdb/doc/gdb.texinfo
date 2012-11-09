@@ -9563,24 +9563,6 @@ layout vary depending on the hardware.
 @value{GDBN} provides interfaces to useful OS facilities that can help
 you debug your program.
 
-@cindex @code{ptrace} system call
-@cindex @code{struct user} contents
-When @value{GDBN} runs on a @dfn{Posix system} (such as GNU or Unix
-machines), it interfaces with the inferior via the @code{ptrace}
-system call.  The operating system creates a special sata structure,
-called @code{struct user}, for this interface.  You can use the
-command @code{info udot} to display the contents of this data
-structure.
-
-@table @code
-@item info udot
-@kindex info udot
-Display the contents of the @code{struct user} maintained by the OS
-kernel for the program being debugged.  @value{GDBN} displays the
-contents of @code{struct user} as a list of hex numbers, similar to
-the @code{examine} command.
-@end table
-
 @cindex auxiliary vector
 @cindex vector, auxiliary
 Some operating systems supply an @dfn{auxiliary vector} to programs at
