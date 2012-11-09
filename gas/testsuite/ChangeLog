@@ -1,3 +1,11 @@
+2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
+
+	* gas/i386/i386.exp: Run bdver3 test cases.
+	* gas/i386/nops-1-bdver3.d: New.
+	* gas/i386/arch-10-bdver3.d: New.
+	* gas/i386/x86-64-nops-1-bdver3.d: New.
+	* gas/i386/x86-64-arch-2-bdver3.d: New.
+
 2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* gas/arm/armv8-a-bad.l: Updated for changed mnemonics.

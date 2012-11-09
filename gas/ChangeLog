@@ -1,3 +1,8 @@
+2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Add CPU_BDVER3_FLAGS.
+	* doc/c-i386.texi: Add -march=bdver3 option.
+
 2012-11-05  Alan Modra  <amodra@gmail.com>
 
 	* configure.in: Apply 2012-09-10 change to config.in here.

@@ -120,6 +120,7 @@ processor names are recognized:
 @code{amdfam10},
 @code{bdver1},
 @code{bdver2},
+@code{bdver3},
 @code{btver1},
 @code{btver2},
 @code{generic32} and
@@ -1014,7 +1015,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{prescott} @tab @samp{nocona} @tab @samp{core} @tab @samp{core2}
 @item @samp{corei7} @tab @samp{l1om} @tab @samp{k1om}
 @item @samp{k6} @tab @samp{k6_2} @tab @samp{athlon} @tab @samp{k8}
-@item @samp{amdfam10} @tab @samp{bdver1} @tab @samp{bdver2}
+@item @samp{amdfam10} @tab @samp{bdver1} @tab @samp{bdver2} @tab @samp{bdver3}
 @item @samp{btver1} @tab @samp{btver2}
 @item @samp{generic32} @tab @samp{generic64}
 @item @samp{.mmx} @tab @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3}
