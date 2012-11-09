@@ -20,6 +20,10 @@
 
 	* po/POTFILES.in: Regenerate.
 
+2012-11-07  James Murray <jsm@jsm-net.demon.co.uk>
+
+	* config/tc-m68hc11.c: Fix R_M68HC12_16B relocation for movb/w
+
 2012-11-07  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* config/tc-microblaze.c: Remove special register condition check
