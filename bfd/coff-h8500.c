@@ -222,7 +222,7 @@ extra_case (bfd *in_abfd,
 	v = (v & 0x00ffffff) | (o & 0xff00000);
 	bfd_put_32 (in_abfd, (bfd_vma) v, data  + *dst_ptr -1);
 	(*dst_ptr) += 3;
-	(*src_ptr) += 3;;
+	(*src_ptr) += 3;
       }
       break;
     case R_H8500_IMM32:
@@ -230,7 +230,7 @@ extra_case (bfd *in_abfd,
 	int v = bfd_coff_reloc16_get_value (reloc, link_info, input_section);
 	bfd_put_32 (in_abfd, (bfd_vma) v, data  + *dst_ptr);
 	(*dst_ptr) += 4;
-	(*src_ptr) += 4;;
+	(*src_ptr) += 4;
       }
       break;
 

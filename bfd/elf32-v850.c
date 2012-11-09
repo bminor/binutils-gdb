@@ -624,7 +624,7 @@ v850_elf_perform_relocation (bfd *abfd,
     case R_V850_CALLT_15_16_OFFSET:
       insn = bfd_get_16 (abfd, address);
 
-      addend += insn & 0xfffe;;
+      addend += insn & 0xfffe;
 
       saddend = (bfd_signed_vma) addend;
 

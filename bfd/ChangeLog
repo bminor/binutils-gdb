@@ -1,3 +1,18 @@
+2012-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* aout-tic30.c (MY_final_link_callback): Remove trailing
+	redundant `;'.
+	* coff-h8500.c (extra_case): Likewise.
+	(bfd_coff_reloc16_get_value): Likewise.
+	* dwarf2.c (_bfd_dwarf2_cleanup_debug_info): Likewise.
+	* elf.c (_bfd_elf_slurp_version_tables): Likewise.
+	* elf32-frv.c (elf32_frv_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_perform_relocation): Likewise.
+	* opncls.c (bfd_calc_gnu_debuglink_crc32): Likewise.
+	* plugin.c (add_symbols): Likewise.
+	* reloc.c (bfd_check_overflow): Likewise.
+	* vms-lib.c (_bfd_vms_lib_archive_p): Likewise.
+
 2012-11-08  Tom Tromey  <tromey@redhat.com>
 
 	* elf.c (elfcore_grok_note) <NT_SIGINFO>: New case; make

@@ -323,7 +323,7 @@ open_input_stream (char *cmd)
       if (run_cmd (cmd, cpp_temp_file))
 	fatal (_("can't execute `%s': %s"), cmd, strerror (errno));
 
-      cpp_pipe = fopen (cpp_temp_file, FOPEN_RT);;
+      cpp_pipe = fopen (cpp_temp_file, FOPEN_RT);
       if (cpp_pipe == NULL)
 	fatal (_("can't open temporary file `%s': %s"),
 	       cpp_temp_file, strerror (errno));

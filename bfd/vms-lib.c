@@ -630,7 +630,7 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 
  err:
   bfd_release (abfd, tdata);
-  abfd->tdata.any = (void *)tdata_hold;;
+  abfd->tdata.any = (void *)tdata_hold;
   return NULL;
 }
 

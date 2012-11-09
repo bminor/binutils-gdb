@@ -503,7 +503,7 @@ bfd_check_overflow (enum complain_overflow how,
   fieldmask = N_ONES (bitsize);
   signmask = ~fieldmask;
   addrmask = N_ONES (addrsize) | (fieldmask << rightshift);
-  a = (relocation & addrmask) >> rightshift;;
+  a = (relocation & addrmask) >> rightshift;
 
   switch (how)
     {

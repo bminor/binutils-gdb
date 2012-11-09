@@ -3363,7 +3363,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		   with ldi @(grB, #gottlsoff12(symbol+offset), grC.
 		   Preserve the packing bit.  */
 		insn = (insn & (unsigned long)0xfe03f000)
-		  | (unsigned long)0x00c80000;;
+		  | (unsigned long)0x00c80000;
 		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
 
 		r_type = R_FRV_GOTTLSOFF12;

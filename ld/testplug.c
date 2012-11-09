@@ -168,7 +168,7 @@ record_add_file (const char *file, addfile_enum_t type)
     return LDPS_ERR;
   newfile->next = NULL;
   newfile->name = file;
-  newfile->type = type;;
+  newfile->type = type;
   /* Chain it on the end of the list.  */
   *addfiles_tail_chain_ptr = newfile;
   addfiles_tail_chain_ptr = &newfile->next;

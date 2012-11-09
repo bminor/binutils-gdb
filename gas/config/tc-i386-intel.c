@@ -337,7 +337,7 @@ static int i386_intel_simplify (expressionS *e)
 	  if (!i386_intel_simplify_symbol (e->X_add_symbol)
 	      || !i386_intel_check(the_reg, intel_state.base,
 				   intel_state.index))
-	    return 0;;
+	    return 0;
 	}
       if (!intel_state.in_offset)
 	++intel_state.in_bracket;

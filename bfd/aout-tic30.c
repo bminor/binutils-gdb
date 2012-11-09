@@ -701,7 +701,7 @@ MY_final_link_callback (bfd *abfd,
 
   *ptreloff = obj_datasec (abfd)->filepos + execp->a_data;
   *pdreloff = *ptreloff + execp->a_trsize;
-  *psymoff = *pdreloff + execp->a_drsize;;
+  *psymoff = *pdreloff + execp->a_drsize;
 }
 
 #endif

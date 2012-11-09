@@ -137,7 +137,7 @@ add_symbols (void * handle,
 {
   bfd *abfd = handle;
   struct plugin_data_struct *plugin_data =
-    bfd_alloc (abfd, sizeof (plugin_data_struct));;
+    bfd_alloc (abfd, sizeof (plugin_data_struct));
 
   plugin_data->nsyms = nsyms;
   plugin_data->syms = syms;

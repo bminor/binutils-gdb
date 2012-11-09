@@ -1119,7 +1119,7 @@ write_2_short (struct d10v_opcode *opcode1,
 static unsigned long prev_insn;
 static struct d10v_opcode *prev_opcode = 0;
 static subsegT prev_subseg;
-static segT prev_seg = 0;;
+static segT prev_seg = 0;
 
 /* Find the symbol which has the same name as the register in exp.  */
 

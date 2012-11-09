@@ -8878,7 +8878,7 @@ find_address_of_next_align_frag (fragS **fragPP,
 		  (*widens)++;
 		  break;
 		}
-	      address += total_frag_text_expansion (fragP);;
+	      address += total_frag_text_expansion (fragP);
 	      break;
 
 	    case RELAX_IMMED:

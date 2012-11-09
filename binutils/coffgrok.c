@@ -736,7 +736,7 @@ coff_grok (bfd *inabfd)
   if (symcount < 0)
     bfd_fatal (abfd->filename);
   rawsyms = obj_raw_syments (abfd);
-  rawcount = obj_raw_syment_count (abfd);;
+  rawcount = obj_raw_syment_count (abfd);
   tindex = (struct coff_symbol **) (xcalloc (sizeof (struct coff_symbol *), rawcount));
 
   p = doit ();

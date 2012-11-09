@@ -2111,7 +2111,7 @@ tc_s390_force_relocation (struct fix *fixp)
     case BFD_RELOC_390_GOTPLTENT:
       return 1;
     default:
-      break;;
+      break;
     }
 
   return generic_force_reloc (fixp);

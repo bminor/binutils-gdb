@@ -1391,7 +1391,7 @@ md_parse_option (int c, char *arg)
     }
   else if (strcmp (arg, "extension") == 0)
     {
-      processor_mask |= PROCESSOR_OPTION_EXTENSION | PROCESSOR_OPTION_ALIAS;;
+      processor_mask |= PROCESSOR_OPTION_EXTENSION | PROCESSOR_OPTION_ALIAS;
     }
   else if (strcmp (arg, "no-bcond17") == 0)
     {

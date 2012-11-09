@@ -1,3 +1,17 @@
+2012-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/atof-ieee.c (gen_to_words): Remove trailing redundant
+	`;'.
+	* config/atof-vax.c (flonum_gen2vax): Likewise.
+	* config/tc-d10v.c (write_2_short): Likewise.
+	* config/tc-i386-intel.c (i386_intel_simplify): Likewise.
+	* config/tc-s390.c (tc_s390_force_relocation): Likewise.
+	* config/tc-v850.c (md_parse_option): Likewise.
+	* config/tc-xtensa.c (find_address_of_next_align_frag): Likewise.
+	* dwarf2dbg.c (out_header): Likewise.
+	* symbols.c (dollar_label_name): Likewise.
+	(fb_label_name): Likewise.
+
 2012-11-08  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (mips_ip) <'u'>: Default to BFD_RELOC_LO16.

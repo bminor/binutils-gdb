@@ -212,7 +212,7 @@ reset_operand_qualifier (aarch64_inst *inst, int idx)
 static inline aarch64_insn
 gen_mask (int width)
 {
-  return ((aarch64_insn) 1 << width) - 1;;
+  return ((aarch64_insn) 1 << width) - 1;
 }
 
 /* LSB_REL is the relative location of the lsb in the sub field, starting from 0.  */

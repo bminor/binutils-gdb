@@ -1447,7 +1447,7 @@ out_header (asection *sec, expressionS *exp)
   symbolS *end_sym;
 
   subseg_set (sec, 0);
-  start_sym = symbol_temp_new_now ();;
+  start_sym = symbol_temp_new_now ();
   end_sym = symbol_temp_make ();
 
   /* Total length of the information.  */

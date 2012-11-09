@@ -1,3 +1,7 @@
+2012-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testplug.c (record_add_file): Remove trailing redundant `;'.
+
 2012-11-05  Alan Modra  <amodra@gmail.com>
 
 	* configure.in: Apply 2012-09-10 change to config.in here.
