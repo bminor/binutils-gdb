@@ -127,8 +127,8 @@ static void
 darwin_load_image_infos (struct darwin_info *info)
 {
   gdb_byte buf[24];
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   int len;
 
   /* If the structure address is not known, don't continue.  */
@@ -245,8 +245,8 @@ open_symbol_file_object (void *from_ttyp)
 static struct so_list *
 darwin_current_sos (void)
 {
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int ptr_len = TYPE_LENGTH (ptr_type);
   unsigned int image_info_size;
   struct so_list *head = NULL;
@@ -378,7 +378,7 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
 
       make_cleanup_bfd_unref (dyld_bfd);
       sub = bfd_mach_o_fat_extract (dyld_bfd, bfd_object,
-				    gdbarch_bfd_arch_info (target_gdbarch));
+				    gdbarch_bfd_arch_info (target_gdbarch ()));
       if (sub)
 	{
 	  dyld_bfd = sub;
@@ -420,7 +420,7 @@ darwin_solib_read_all_image_info_addr (struct darwin_info *info)
 {
   gdb_byte buf[8 + 8 + 4];
   LONGEST len;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
   len = target_read (&current_target, TARGET_OBJECT_DARWIN_DYLD_INFO, NULL,
                      buf, 0, sizeof (buf));
@@ -450,7 +450,7 @@ darwin_solib_create_inferior_hook (int from_tty)
   darwin_load_image_infos (info);
 
   if (darwin_dyld_version_ok (info))
-    create_solib_event_breakpoint (target_gdbarch, info->all_image.notifier);
+    create_solib_event_breakpoint (target_gdbarch (), info->all_image.notifier);
 }
 
 static void
@@ -515,7 +515,7 @@ darwin_bfd_open (char *pathname)
   abfd = solib_bfd_fopen (found_pathname, found_file);
 
   res = bfd_mach_o_fat_extract (abfd, bfd_object,
-				gdbarch_bfd_arch_info (target_gdbarch));
+				gdbarch_bfd_arch_info (target_gdbarch ()));
   if (!res)
     {
       make_cleanup_bfd_unref (abfd);

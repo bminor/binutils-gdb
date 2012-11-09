@@ -506,7 +506,7 @@ gdbarch_update_p (struct gdbarch_info info)
 
   /* If it is the same old architecture, accept the request (but don't
      swap anything).  */
-  if (new_gdbarch == target_gdbarch)
+  if (new_gdbarch == target_gdbarch ())
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
@@ -757,7 +757,7 @@ get_current_arch (void)
   if (has_stack_frames ())
     return get_frame_arch (get_selected_frame (NULL));
   else
-    return target_gdbarch;
+    return target_gdbarch ();
 }
 
 int

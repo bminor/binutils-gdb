@@ -778,7 +778,7 @@ mi_solib_loaded (struct so_list *solib)
   struct mi_interp *mi = top_level_interpreter_data ();
 
   target_terminal_ours ();
-  if (gdbarch_has_global_solist (target_gdbarch))
+  if (gdbarch_has_global_solist (target_gdbarch ()))
     fprintf_unfiltered (mi->event_channel,
 			"library-loaded,id=\"%s\",target-name=\"%s\","
 			"host-name=\"%s\",symbols-loaded=\"%d\"",
@@ -802,7 +802,7 @@ mi_solib_unloaded (struct so_list *solib)
   struct mi_interp *mi = top_level_interpreter_data ();
 
   target_terminal_ours ();
-  if (gdbarch_has_global_solist (target_gdbarch))
+  if (gdbarch_has_global_solist (target_gdbarch ()))
     fprintf_unfiltered (mi->event_channel,
 			"library-unloaded,id=\"%s\",target-name=\"%s\","
 			"host-name=\"%s\"",
@@ -865,7 +865,7 @@ mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
   ui_out_redirect (mi_uiout, mi->event_channel);
 
   ui_out_field_fmt (mi_uiout, "thread-group", "i%d", inferior->num);
-  ui_out_field_core_addr (mi_uiout, "addr", target_gdbarch, memaddr);
+  ui_out_field_core_addr (mi_uiout, "addr", target_gdbarch (), memaddr);
   ui_out_field_fmt (mi_uiout, "len", "0x%zx", len);
 
   /* Append 'type=code' into notification if MEMADDR falls in the range of

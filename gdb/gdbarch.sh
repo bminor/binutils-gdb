@@ -1089,8 +1089,7 @@ struct stap_parse_info;
    gdbarch.  */
 
 /* This is a convenience wrapper for 'current_inferior ()->gdbarch'.  */
-#define target_gdbarch get_target_gdbarch ()
-extern struct gdbarch *get_target_gdbarch (void);
+extern struct gdbarch *target_gdbarch (void);
 
 /* The initial, default architecture.  It uses host values (for want of a better
    choice).  */
@@ -2291,10 +2290,10 @@ deprecated_target_gdbarch_select_hack (struct gdbarch *new_gdbarch)
   registers_changed ();
 }
 
-/* Helper for 'target_gdbarch'.  */
+/* Return the current inferior's arch.  */
 
 struct gdbarch *
-get_target_gdbarch (void)
+target_gdbarch (void)
 {
   return current_inferior ()->gdbarch;
 }

@@ -155,12 +155,12 @@ lm_info_read (CORE_ADDR lm_addr)
   if (target_read_memory (lm_addr, lm, lmo->link_map_size) != 0)
     {
       warning (_("Error reading shared library list entry at %s"),
-	       paddress (target_gdbarch, lm_addr)),
+	       paddress (target_gdbarch (), lm_addr)),
       lm_info = NULL;
     }
   else
     {
-      struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+      struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
 
       lm_info = xzalloc (sizeof (*lm_info));
       lm_info->lm_addr = lm_addr;
@@ -264,7 +264,7 @@ lm_addr_check (struct so_list *so, bfd *abfd)
 	      if (info_verbose)
 		printf_unfiltered (_("Using PIC (Position Independent Code) "
 				     "prelink displacement %s for \"%s\".\n"),
-				   paddress (target_gdbarch, l_addr),
+				   paddress (target_gdbarch (), l_addr),
 				   so->so_name);
 	    }
 	  else
@@ -363,7 +363,7 @@ static int match_main (const char *);
 static gdb_byte *
 read_program_header (int type, int *p_sect_size, int *p_arch_size)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   CORE_ADDR at_phdr, at_phent, at_phnum, pt_phdr = 0;
   int arch_size, sect_size;
   CORE_ADDR sect_addr;
@@ -612,7 +612,7 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 	     gdb_byte ptr_buf[8];
 	     CORE_ADDR ptr_addr;
 
-	     ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+	     ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
 	     ptr_addr = dyn_addr + (buf - bufstart) + arch_size / 8;
 	     if (target_read_memory (ptr_addr, ptr_buf, arch_size / 8) == 0)
 	       dyn_ptr = extract_typed_address (ptr_buf, ptr_type);
@@ -632,7 +632,7 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 static int
 scan_dyntag_auxv (int dyntag, CORE_ADDR *ptr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int sect_size, arch_size, step;
   long dyn_tag;
   CORE_ADDR dyn_ptr;
@@ -709,7 +709,7 @@ elf_locate_base (void)
   if (scan_dyntag (DT_MIPS_RLD_MAP, exec_bfd, &dyn_ptr)
       || scan_dyntag_auxv (DT_MIPS_RLD_MAP, &dyn_ptr))
     {
-      struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+      struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
       gdb_byte *pbuf;
       int pbuf_size = TYPE_LENGTH (ptr_type);
 
@@ -787,7 +787,7 @@ static CORE_ADDR
 solib_svr4_r_map (struct svr4_info *info)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   CORE_ADDR addr = 0;
   volatile struct gdb_exception ex;
 
@@ -806,7 +806,7 @@ static CORE_ADDR
 solib_svr4_r_brk (struct svr4_info *info)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
 
   return read_memory_typed_address (info->debug_base + lmo->r_brk_offset,
 				    ptr_type);
@@ -819,8 +819,8 @@ static CORE_ADDR
 solib_svr4_r_ldsomap (struct svr4_info *info)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   ULONGEST version;
 
   /* Check version, and return zero if `struct r_debug' doesn't have
@@ -889,7 +889,7 @@ open_symbol_file_object (void *from_ttyp)
   int errcode;
   int from_tty = *(int *)from_ttyp;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   int l_name_size = TYPE_LENGTH (ptr_type);
   gdb_byte *l_name_buf = xmalloc (l_name_size);
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
@@ -1197,8 +1197,8 @@ svr4_read_so_list (CORE_ADDR lm, struct so_list ***link_ptr_ptr,
       if (new->lm_info->l_prev != prev_lm)
 	{
 	  warning (_("Corrupted shared library list: %s != %s"),
-		   paddress (target_gdbarch, prev_lm),
-		   paddress (target_gdbarch, new->lm_info->l_prev));
+		   paddress (target_gdbarch (), prev_lm),
+		   paddress (target_gdbarch (), new->lm_info->l_prev));
 	  do_cleanups (old_chain);
 	  break;
 	}
@@ -1396,7 +1396,7 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
      gdbarch_convert_from_func_ptr_addr().  The method
      gdbarch_convert_from_func_ptr_addr() is the merely the identify
      function for targets which don't use function descriptors.  */
-  return gdbarch_convert_from_func_ptr_addr (target_gdbarch,
+  return gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 					     bfd_get_start_address (abfd),
 					     targ);
 }
@@ -1468,7 +1468,7 @@ enable_break (struct svr4_info *info, int from_tty)
       struct obj_section *os;
 
       sym_addr = gdbarch_addr_bits_remove
-	(target_gdbarch, gdbarch_convert_from_func_ptr_addr (target_gdbarch,
+	(target_gdbarch (), gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							     sym_addr,
 							     &current_target));
 
@@ -1522,7 +1522,7 @@ enable_break (struct svr4_info *info, int from_tty)
 		+ bfd_section_size (tmp_bfd, interp_sect);
 	    }
 
-	  create_solib_event_breakpoint (target_gdbarch, sym_addr);
+	  create_solib_event_breakpoint (target_gdbarch (), sym_addr);
 	  return 1;
 	}
     }
@@ -1585,7 +1585,7 @@ enable_break (struct svr4_info *info, int from_tty)
       if (!load_addr_found)
         if (target_auxv_search (&current_target, AT_BASE, &load_addr) > 0)
 	  {
-	    int addr_bit = gdbarch_addr_bit (target_gdbarch);
+	    int addr_bit = gdbarch_addr_bit (target_gdbarch ());
 
 	    /* Ensure LOAD_ADDR has proper sign in its possible upper bits so
 	       that `+ load_addr' will overflow CORE_ADDR width not creating
@@ -1621,7 +1621,7 @@ enable_break (struct svr4_info *info, int from_tty)
       if (!load_addr_found)
 	{
 	  struct regcache *regcache
-	    = get_thread_arch_regcache (inferior_ptid, target_gdbarch);
+	    = get_thread_arch_regcache (inferior_ptid, target_gdbarch ());
 
 	  load_addr = (regcache_read_pc (regcache)
 		       - exec_entry_point (tmp_bfd, tmp_bfd_target));
@@ -1669,7 +1669,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	/* Convert 'sym_addr' from a function pointer to an address.
 	   Because we pass tmp_bfd_target instead of the current
 	   target, this will always produce an unrelocated value.  */
-	sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch,
+	sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 						       sym_addr,
 						       tmp_bfd_target);
 
@@ -1680,7 +1680,7 @@ enable_break (struct svr4_info *info, int from_tty)
 
       if (sym_addr != 0)
 	{
-	  create_solib_event_breakpoint (target_gdbarch, load_addr + sym_addr);
+	  create_solib_event_breakpoint (target_gdbarch (), load_addr + sym_addr);
 	  xfree (interp_name);
 	  return 1;
 	}
@@ -1703,10 +1703,10 @@ enable_break (struct svr4_info *info, int from_tty)
       if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	{
 	  sym_addr = SYMBOL_VALUE_ADDRESS (msymbol);
-	  sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch,
+	  sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							 sym_addr,
 							 &current_target);
-	  create_solib_event_breakpoint (target_gdbarch, sym_addr);
+	  create_solib_event_breakpoint (target_gdbarch (), sym_addr);
 	  return 1;
 	}
     }
@@ -1719,10 +1719,10 @@ enable_break (struct svr4_info *info, int from_tty)
 	  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	    {
 	      sym_addr = SYMBOL_VALUE_ADDRESS (msymbol);
-	      sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch,
+	      sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							     sym_addr,
 							     &current_target);
-	      create_solib_event_breakpoint (target_gdbarch, sym_addr);
+	      create_solib_event_breakpoint (target_gdbarch (), sym_addr);
 	      return 1;
 	    }
 	}
@@ -1863,7 +1863,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
       buf2 = read_program_headers_from_bfd (exec_bfd, &phdrs2_size);
       if (buf != NULL && buf2 != NULL)
 	{
-	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
 	  /* We are dealing with three different addresses.  EXEC_BFD
 	     represents current address in on-disk file.  target memory content
@@ -2118,7 +2118,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 
       printf_unfiltered (_("Using PIE (Position Independent Executable) "
 			   "displacement %s for \"%s\".\n"),
-			 paddress (target_gdbarch, displacement),
+			 paddress (target_gdbarch (), displacement),
 			 bfd_get_filename (exec_bfd));
     }
 
@@ -2301,12 +2301,12 @@ svr4_clear_solib (void)
 static CORE_ADDR
 svr4_truncate_ptr (CORE_ADDR addr)
 {
-  if (gdbarch_ptr_bit (target_gdbarch) == sizeof (CORE_ADDR) * 8)
+  if (gdbarch_ptr_bit (target_gdbarch ()) == sizeof (CORE_ADDR) * 8)
     /* We don't need to truncate anything, and the bit twiddling below
        will fail due to overflow problems.  */
     return addr;
   else
-    return addr & (((CORE_ADDR) 1 << gdbarch_ptr_bit (target_gdbarch)) - 1);
+    return addr & (((CORE_ADDR) 1 << gdbarch_ptr_bit (target_gdbarch ())) - 1);
 }
 
 
@@ -2364,7 +2364,7 @@ set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
 static struct link_map_offsets *
 svr4_fetch_link_map_offsets (void)
 {
-  struct solib_svr4_ops *ops = gdbarch_data (target_gdbarch, solib_svr4_data);
+  struct solib_svr4_ops *ops = gdbarch_data (target_gdbarch (), solib_svr4_data);
 
   gdb_assert (ops->fetch_link_map_offsets);
   return ops->fetch_link_map_offsets ();
@@ -2375,7 +2375,7 @@ svr4_fetch_link_map_offsets (void)
 static int
 svr4_have_link_map_offsets (void)
 {
-  struct solib_svr4_ops *ops = gdbarch_data (target_gdbarch, solib_svr4_data);
+  struct solib_svr4_ops *ops = gdbarch_data (target_gdbarch (), solib_svr4_data);
 
   return (ops->fetch_link_map_offsets != NULL);
 }

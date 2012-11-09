@@ -392,7 +392,7 @@ bpfinishpy_handle_stop (struct bpstats *bs, int print_frame)
 static void
 bpfinishpy_handle_exit (struct inferior *inf)
 {
-  struct cleanup *cleanup = ensure_python_env (target_gdbarch,
+  struct cleanup *cleanup = ensure_python_env (target_gdbarch (),
                                                current_language);
 
   iterate_over_breakpoints (bpfinishpy_detect_out_scope_cb, NULL);

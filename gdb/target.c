@@ -1128,7 +1128,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
     }
 
   if (target != NULL
-      && gdbarch_fetch_tls_load_module_address_p (target_gdbarch))
+      && gdbarch_fetch_tls_load_module_address_p (target_gdbarch ()))
     {
       ptid_t ptid = inferior_ptid;
       volatile struct gdb_exception ex;
@@ -1138,7 +1138,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	  CORE_ADDR lm_addr;
 	  
 	  /* Fetch the load module address for this objfile.  */
-	  lm_addr = gdbarch_fetch_tls_load_module_address (target_gdbarch,
+	  lm_addr = gdbarch_fetch_tls_load_module_address (target_gdbarch (),
 	                                                   objfile);
 	  /* If it's 0, throw the appropriate exception.  */
 	  if (lm_addr == 0)
@@ -2497,7 +2497,7 @@ target_pre_inferior (int from_tty)
   /* In some OSs, the shared library list is the same/global/shared
      across inferiors.  If code is shared between processes, so are
      memory regions and features.  */
-  if (!gdbarch_has_global_solist (target_gdbarch))
+  if (!gdbarch_has_global_solist (target_gdbarch ()))
     {
       no_shared_libraries (NULL, from_tty);
 
@@ -2566,7 +2566,7 @@ target_detach (char *args, int from_tty)
 {
   struct target_ops* t;
   
-  if (gdbarch_has_global_breakpoints (target_gdbarch))
+  if (gdbarch_has_global_breakpoints (target_gdbarch ()))
     /* Don't remove global breakpoints here.  They're removed on
        disconnection from the target.  */
     ;
@@ -3554,7 +3554,7 @@ target_fileio_read_stralloc (const char *filename)
 static int
 default_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
-  return (len <= gdbarch_ptr_bit (target_gdbarch) / TARGET_CHAR_BIT);
+  return (len <= gdbarch_ptr_bit (target_gdbarch ()) / TARGET_CHAR_BIT);
 }
 
 static int
@@ -3568,7 +3568,7 @@ default_watchpoint_addr_within_range (struct target_ops *target,
 static struct gdbarch *
 default_thread_architecture (struct target_ops *ops, ptid_t ptid)
 {
-  return target_gdbarch;
+  return target_gdbarch ();
 }
 
 static int
@@ -4055,7 +4055,7 @@ target_verify_memory (const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
 				"target_verify_memory (%s, %s) = %d\n",
-				paddress (target_gdbarch, memaddr),
+				paddress (target_gdbarch (), memaddr),
 				pulongest (size),
 				retval);
 	  return retval;
@@ -4169,7 +4169,7 @@ deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len,
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_xfer_memory (%s, xxx, %d, %s, xxx) = %d",
-		      paddress (target_gdbarch, memaddr), len,
+		      paddress (target_gdbarch (), memaddr), len,
 		      write ? "write" : "read", retval);
 
   if (retval > 0)

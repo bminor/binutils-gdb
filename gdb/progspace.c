@@ -75,7 +75,7 @@ new_address_space (void)
 struct address_space *
 maybe_new_address_space (void)
 {
-  int shared_aspace = gdbarch_has_shared_address_space (target_gdbarch);
+  int shared_aspace = gdbarch_has_shared_address_space (target_gdbarch ());
 
   if (shared_aspace)
     {
@@ -148,7 +148,7 @@ release_program_space (struct program_space *pspace)
   no_shared_libraries (NULL, 0);
   exec_close ();
   free_all_objfiles ();
-  if (!gdbarch_has_shared_address_space (target_gdbarch))
+  if (!gdbarch_has_shared_address_space (target_gdbarch ()))
     free_address_space (pspace->aspace);
   resize_section_table (&pspace->target_sections,
 			-resize_section_table (&pspace->target_sections, 0));
@@ -432,7 +432,7 @@ number_of_program_spaces (void)
 void
 update_address_spaces (void)
 {
-  int shared_aspace = gdbarch_has_shared_address_space (target_gdbarch);
+  int shared_aspace = gdbarch_has_shared_address_space (target_gdbarch ());
   struct program_space *pspace;
   struct inferior *inf;
 
@@ -454,7 +454,7 @@ update_address_spaces (void)
       }
 
   for (inf = inferior_list; inf; inf = inf->next)
-    if (gdbarch_has_global_solist (target_gdbarch))
+    if (gdbarch_has_global_solist (target_gdbarch ()))
       inf->aspace = maybe_new_address_space ();
     else
       inf->aspace = inf->pspace->aspace;

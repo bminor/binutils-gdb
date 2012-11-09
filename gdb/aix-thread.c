@@ -887,7 +887,7 @@ pd_enable (void)
     return;
 
   /* Check application word size.  */
-  arch64 = register_size (target_gdbarch, 0) == 8;
+  arch64 = register_size (target_gdbarch (), 0) == 8;
 
   /* Check whether the application is pthreaded.  */
   stub_name = NULL;
@@ -901,7 +901,7 @@ pd_enable (void)
   if (!(ms = lookup_minimal_symbol (stub_name, NULL, NULL)))
     return;
   pd_brk_addr = SYMBOL_VALUE_ADDRESS (ms);
-  if (!create_thread_event_breakpoint (target_gdbarch, pd_brk_addr))
+  if (!create_thread_event_breakpoint (target_gdbarch (), pd_brk_addr))
     return;
 
   /* Prepare for thread debugging.  */

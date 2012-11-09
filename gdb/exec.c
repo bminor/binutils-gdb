@@ -767,7 +767,7 @@ exec_files_info (struct target_ops *t)
 
   if (vmap)
     {
-      int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
+      int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
       struct vmap *vp;
 
       printf_unfiltered (_("\tMapping info for file `%s'.\n"), vmap->name);

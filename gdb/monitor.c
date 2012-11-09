@@ -217,11 +217,11 @@ monitor_error (char *function, char *message,
 
   if (final_char)
     error (_("%s (%s): %s: %s%c"),
-	   function, paddress (target_gdbarch, memaddr),
+	   function, paddress (target_gdbarch (), memaddr),
 	   message, safe_string, final_char);
   else
     error (_("%s (%s): %s: %s"),
-	   function, paddress (target_gdbarch, memaddr),
+	   function, paddress (target_gdbarch (), memaddr),
 	   message, safe_string);
 }
 
@@ -256,7 +256,7 @@ fromhex (int a)
 static void
 monitor_vsprintf (char *sndbuf, char *pattern, va_list args)
 {
-  int addr_bit = gdbarch_addr_bit (target_gdbarch);
+  int addr_bit = gdbarch_addr_bit (target_gdbarch ());
   char format[10];
   char fmt;
   char *p;
@@ -1440,15 +1440,15 @@ monitor_files_info (struct target_ops *ops)
 static int
 monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   unsigned int val, hostval;
   char *cmd;
   int i;
 
-  monitor_debug ("MON write %d %s\n", len, paddress (target_gdbarch, memaddr));
+  monitor_debug ("MON write %d %s\n", len, paddress (target_gdbarch (), memaddr));
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
-    memaddr = gdbarch_addr_bits_remove (target_gdbarch, memaddr);
+    memaddr = gdbarch_addr_bits_remove (target_gdbarch (), memaddr);
 
   /* Use memory fill command for leading 0 bytes.  */
 
@@ -1707,7 +1707,7 @@ monitor_write_memory_block (CORE_ADDR memaddr, char *myaddr, int len)
 static int
 monitor_read_memory_single (CORE_ADDR memaddr, char *myaddr, int len)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   unsigned int val;
   char membuf[sizeof (int) * 2 + 1];
   char *p;
@@ -1852,11 +1852,11 @@ monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
     }
 
   monitor_debug ("MON read block ta(%s) ha(%s) %d\n",
-		 paddress (target_gdbarch, memaddr),
+		 paddress (target_gdbarch (), memaddr),
 		 host_address_to_string (myaddr), len);
 
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
-    memaddr = gdbarch_addr_bits_remove (target_gdbarch, memaddr);
+    memaddr = gdbarch_addr_bits_remove (target_gdbarch (), memaddr);
 
   if (current_monitor->flags & MO_GETMEM_READ_SINGLE)
     return monitor_read_memory_single (memaddr, myaddr, len);

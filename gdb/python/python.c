@@ -1280,7 +1280,7 @@ finalize_python (void *ignore)
      clearer to make the needed calls explicitly here than to create a
      cleanup and then mysteriously discard it.  */
   PyGILState_Ensure ();
-  python_gdbarch = target_gdbarch;
+  python_gdbarch = target_gdbarch ();
   python_language = current_language;
 
   Py_Finalize ();

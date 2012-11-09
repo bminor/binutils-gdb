@@ -893,7 +893,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 	 contains debug information on the task type (due to implicit with of
 	 Ada.Tasking).  */
       data->known_tasks_element =
-	builtin_type (target_gdbarch)->builtin_data_ptr;
+	builtin_type (target_gdbarch ())->builtin_data_ptr;
       data->known_tasks_length = MAX_NUMBER_OF_KNOWN_TASKS;
       return;
     }
@@ -924,7 +924,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 
       /* Fallback to default values.  */
       data->known_tasks_element =
-	builtin_type (target_gdbarch)->builtin_data_ptr;
+	builtin_type (target_gdbarch ())->builtin_data_ptr;
       data->known_tasks_length = 1;
       return;
     }
@@ -1173,7 +1173,7 @@ info_task (struct ui_out *uiout, char *taskno_str, struct inferior *inf)
 
   /* Print the Ada task ID.  */
   printf_filtered (_("Ada Task: %s\n"),
-		   paddress (target_gdbarch, task_info->task_id));
+		   paddress (target_gdbarch (), task_info->task_id));
 
   /* Print the name of the task.  */
   if (task_info->name[0] != '\0')

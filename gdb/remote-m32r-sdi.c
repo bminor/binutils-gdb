@@ -487,7 +487,7 @@ m32r_resume (struct target_ops *ops,
       else
 	{
 	  buf[0] = SDI_WRITE_MEMORY;
-	  if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (target_gdbarch ()) == BFD_ENDIAN_BIG)
 	    store_long_parameter (buf + 1, pc_addr);
 	  else
 	    store_long_parameter (buf + 1, pc_addr - 1);
@@ -527,7 +527,7 @@ m32r_resume (struct target_ops *ops,
 	continue;
 
       /* Set PBP.  */
-      if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (target_gdbarch ()) == BFD_ENDIAN_BIG)
 	send_three_arg_cmd (SDI_WRITE_MEMORY, 0xffff8000 + 4 * i, 4,
 			    0x00000006);
       else
@@ -554,7 +554,7 @@ m32r_resume (struct target_ops *ops,
       store_long_parameter (buf + 5, 4);
       if ((bp_addr & 2) == 0 && bp_addr != (pc_addr & 0xfffffffc))
 	{
-	  if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (target_gdbarch ()) == BFD_ENDIAN_BIG)
 	    {
 	      buf[9] = dbt_bp_entry[0];
 	      buf[10] = dbt_bp_entry[1];
@@ -571,7 +571,7 @@ m32r_resume (struct target_ops *ops,
 	}
       else
 	{
-	  if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (target_gdbarch ()) == BFD_ENDIAN_BIG)
 	    {
 	      if ((bp_addr & 2) == 0)
 		{
@@ -618,7 +618,7 @@ m32r_resume (struct target_ops *ops,
 	continue;
 
       /* DBC register.  */
-      if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (target_gdbarch ()) == BFD_ENDIAN_BIG)
 	{
 	  switch (ab_type[i])
 	    {
@@ -760,7 +760,7 @@ m32r_wait (struct target_ops *ops,
   if (last_pc_addr != 0xffffffff)
     {
       buf[0] = SDI_WRITE_MEMORY;
-      if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (target_gdbarch ()) == BFD_ENDIAN_BIG)
 	store_long_parameter (buf + 1, last_pc_addr);
       else
 	store_long_parameter (buf + 1, last_pc_addr - 1);
@@ -789,7 +789,7 @@ m32r_wait (struct target_ops *ops,
 	     address, we have to take care of it later.  */
 	  if ((pc_addr & 0x2) != 0)
 	    {
-	      if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
+	      if (gdbarch_byte_order (target_gdbarch ()) == BFD_ENDIAN_BIG)
 		{
 		  if ((bp_data[i][2] & 0x80) != 0)
 		    {
@@ -851,7 +851,7 @@ m32r_wait (struct target_ops *ops,
 	  c = serial_readchar (sdi_desc, SDI_TIMEOUT);
 	  if (c != '-' && recv_data (buf, 4) != -1)
 	    {
-	      if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
+	      if (gdbarch_byte_order (target_gdbarch ()) == BFD_ENDIAN_BIG)
 		{
 		  if ((buf[3] & 0x1) == 0x1)
 		    hit_watchpoint_addr = ab_address[i];
@@ -1055,10 +1055,10 @@ m32r_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
     {
       if (write)
 	fprintf_unfiltered (gdb_stdlog, "m32r_xfer_memory(%s,%d,write)\n",
-			    paddress (target_gdbarch, memaddr), len);
+			    paddress (target_gdbarch (), memaddr), len);
       else
 	fprintf_unfiltered (gdb_stdlog, "m32r_xfer_memory(%s,%d,read)\n",
-			    paddress (target_gdbarch, memaddr), len);
+			    paddress (target_gdbarch (), memaddr), len);
     }
 
   if (write)
@@ -1424,7 +1424,7 @@ m32r_insert_watchpoint (CORE_ADDR addr, int len, int type,
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_insert_watchpoint(%s,%d,%d)\n",
-			paddress (target_gdbarch, addr), len, type);
+			paddress (target_gdbarch (), addr), len, type);
 
   for (i = 0; i < MAX_ACCESS_BREAKS; i++)
     {
@@ -1449,7 +1449,7 @@ m32r_remove_watchpoint (CORE_ADDR addr, int len, int type,
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_remove_watchpoint(%s,%d,%d)\n",
-			paddress (target_gdbarch, addr), len, type);
+			paddress (target_gdbarch (), addr), len, type);
 
   for (i = 0; i < MAX_ACCESS_BREAKS; i++)
     {

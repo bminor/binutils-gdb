@@ -158,7 +158,7 @@ append_ocl_sos (struct so_list **link_ptr)
 static struct so_list *
 spu_current_sos (void)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   struct so_list *head;
   struct so_list **link_ptr;
 
@@ -418,9 +418,9 @@ spu_enable_break (struct objfile *objfile)
     {
       CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (spe_event_sym);
 
-      addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch, addr,
+      addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (), addr,
                                                  &current_target);
-      create_solib_event_breakpoint (target_gdbarch, addr);
+      create_solib_event_breakpoint (target_gdbarch (), addr);
       return 1;
     }
 

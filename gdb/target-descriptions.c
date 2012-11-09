@@ -334,7 +334,7 @@ target_find_description (void)
   /* The current architecture should not have any target description
      specified.  It should have been cleared, e.g. when we
      disconnected from the previous target.  */
-  gdb_assert (gdbarch_target_desc (target_gdbarch) == NULL);
+  gdb_assert (gdbarch_target_desc (target_gdbarch ()) == NULL);
 
   /* First try to fetch an XML description from the user-specified
      file.  */
@@ -367,7 +367,7 @@ target_find_description (void)
 	{
 	  struct tdesc_arch_data *data;
 
-	  data = gdbarch_data (target_gdbarch, tdesc_data);
+	  data = gdbarch_data (target_gdbarch (), tdesc_data);
 	  if (tdesc_has_registers (current_target_desc)
 	      && data->arch_regs == NULL)
 	    warning (_("Target-supplied registers are not supported "

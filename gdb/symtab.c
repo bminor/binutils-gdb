@@ -1767,7 +1767,7 @@ lookup_symbol_global (const char *name,
   lookup_data.name = name;
   lookup_data.domain = domain;
   gdbarch_iterate_over_objfiles_in_search_order
-    (objfile != NULL ? get_objfile_arch (objfile) : target_gdbarch,
+    (objfile != NULL ? get_objfile_arch (objfile) : target_gdbarch (),
      lookup_symbol_global_iterator_cb, &lookup_data, objfile);
 
   return lookup_data.result;

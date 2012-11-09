@@ -1242,7 +1242,7 @@ mips_request (int cmd,
 	      int timeout,
 	      char *buff)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
+  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
   char myBuff[DATA_MAXLEN + 1];
   char response_string[17];
   int len;
@@ -1663,10 +1663,10 @@ static void
 mips_open (char *name, int from_tty)
 {
   const char *monitor_prompt = NULL;
-  if (gdbarch_bfd_arch_info (target_gdbarch) != NULL
-      && gdbarch_bfd_arch_info (target_gdbarch)->arch == bfd_arch_mips)
+  if (gdbarch_bfd_arch_info (target_gdbarch ()) != NULL
+      && gdbarch_bfd_arch_info (target_gdbarch ())->arch == bfd_arch_mips)
     {
-    switch (gdbarch_bfd_arch_info (target_gdbarch)->mach)
+    switch (gdbarch_bfd_arch_info (target_gdbarch ())->mach)
       {
       case bfd_mach_mips4100:
       case bfd_mach_mips4300:
@@ -2147,7 +2147,7 @@ static int
 mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		  struct mem_attrib *attrib, struct target_ops *target)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int i;
   CORE_ADDR addr;
   int count;
@@ -2479,7 +2479,7 @@ static int
 mips_check_lsi_error (CORE_ADDR addr, int rerrflg)
 {
   struct lsi_error *err;
-  const char *saddr = paddress (target_gdbarch, addr);
+  const char *saddr = paddress (target_gdbarch (), addr);
 
   if (rerrflg == 0)		/* no error */
     return 0;
@@ -2547,13 +2547,13 @@ mips_common_breakpoint (%s): Unknown error: 0x%x\n",
 static int
 mips_common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
+  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
   char buf[DATA_MAXLEN + 1];
   char cmd, rcmd;
   int rpid, rerrflg, rresponse, rlen;
   int nfields;
 
-  addr = gdbarch_addr_bits_remove (target_gdbarch, addr);
+  addr = gdbarch_addr_bits_remove (target_gdbarch (), addr);
 
   if (mips_monitor == MON_LSI)
     {
@@ -2581,7 +2581,7 @@ mips_common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
 	    {
 	      warning (_("\
 mips_common_breakpoint: Attempt to clear bogus breakpoint at %s"),
-		       paddress (target_gdbarch, addr));
+		       paddress (target_gdbarch (), addr));
 	      return 1;
 	    }
 
@@ -2732,7 +2732,7 @@ mips_common_breakpoint: Attempt to clear bogus breakpoint at %s"),
 	  if (rresponse != 22)	/* invalid argument */
 	    fprintf_unfiltered (gdb_stderr, "\
 mips_common_breakpoint (%s):  Got error: 0x%x\n",
-				paddress (target_gdbarch, addr), rresponse);
+				paddress (target_gdbarch (), addr), rresponse);
 	  return 1;
 	}
     }
@@ -2765,7 +2765,7 @@ send_srec (char *srec, int len, CORE_ADDR addr)
 	case 0x15:		/* NACK */
 	  fprintf_unfiltered (gdb_stderr,
 			      "Download got a NACK at byte %s!  Retrying.\n",
-			      paddress (target_gdbarch, addr));
+			      paddress (target_gdbarch (), addr));
 	  continue;
 	default:
 	  error (_("Download got unexpected ack char: 0x%x, retrying."),

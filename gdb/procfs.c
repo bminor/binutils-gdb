@@ -159,7 +159,7 @@ static int
 procfs_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 		   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
@@ -1206,12 +1206,12 @@ proc_watchpoint_address (procinfo *pi, CORE_ADDR *addr)
       return 0;
 
 #ifdef NEW_PROC_API
-  *addr = (CORE_ADDR) gdbarch_pointer_to_address (target_gdbarch,
-	    builtin_type (target_gdbarch)->builtin_data_ptr,
+  *addr = (CORE_ADDR) gdbarch_pointer_to_address (target_gdbarch (),
+	    builtin_type (target_gdbarch ())->builtin_data_ptr,
 	    (gdb_byte *) &pi->prstatus.pr_lwp.pr_info.si_addr);
 #else
-  *addr = (CORE_ADDR) gdbarch_pointer_to_address (target_gdbarch,
-	    builtin_type (target_gdbarch)->builtin_data_ptr,
+  *addr = (CORE_ADDR) gdbarch_pointer_to_address (target_gdbarch (),
+	    builtin_type (target_gdbarch ())->builtin_data_ptr,
 	    (gdb_byte *) &pi->prstatus.pr_info.si_addr);
 #endif
   return 1;
@@ -2455,11 +2455,11 @@ proc_parent_pid (procinfo *pi)
 static void *
 procfs_address_to_host_pointer (CORE_ADDR addr)
 {
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   void *ptr;
 
   gdb_assert (sizeof (ptr) == TYPE_LENGTH (ptr_type));
-  gdbarch_address_to_pointer (target_gdbarch, ptr_type,
+  gdbarch_address_to_pointer (target_gdbarch (), ptr_type,
 			      (gdb_byte *) &ptr, addr);
   return ptr;
 }
@@ -3430,7 +3430,7 @@ remove_dbx_link_breakpoint (void)
   if (dbx_link_bpt_addr == 0)
     return;
 
-  if (deprecated_remove_raw_breakpoint (target_gdbarch, dbx_link_bpt) != 0)
+  if (deprecated_remove_raw_breakpoint (target_gdbarch (), dbx_link_bpt) != 0)
     warning (_("Unable to remove __dbx_link breakpoint."));
 
   dbx_link_bpt_addr = 0;
@@ -3503,7 +3503,7 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
     {
       /* Insert the breakpoint.  */
       dbx_link_bpt_addr = sym_addr;
-      dbx_link_bpt = deprecated_insert_raw_breakpoint (target_gdbarch, NULL,
+      dbx_link_bpt = deprecated_insert_raw_breakpoint (target_gdbarch (), NULL,
 						       sym_addr);
       if (dbx_link_bpt == NULL)
 	{
@@ -4118,7 +4118,7 @@ invalidate_cache (procinfo *parent, procinfo *pi, void *ptr)
       if (!proc_set_gregs (pi))	/* flush gregs cache */
 	proc_warn (pi, "target_resume, set_gregs",
 		   __LINE__);
-  if (gdbarch_fp0_regnum (target_gdbarch) >= 0)
+  if (gdbarch_fp0_regnum (target_gdbarch ()) >= 0)
     if (pi->fpregs_dirty)
       if (parent == NULL ||
 	  proc_get_current_thread (parent) != pi->tid)
@@ -4396,7 +4396,7 @@ procfs_mourn_inferior (struct target_ops *ops)
 
   if (dbx_link_bpt != NULL)
     {
-      deprecated_remove_raw_breakpoint (target_gdbarch, dbx_link_bpt);
+      deprecated_remove_raw_breakpoint (target_gdbarch (), dbx_link_bpt);
       dbx_link_bpt_addr = 0;
       dbx_link_bpt = NULL;
     }
@@ -4881,7 +4881,7 @@ procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
      procfs_address_to_host_pointer will reveal that an internal error
      will be generated when the host and target pointer sizes are
      different.  */
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
 
   if (sizeof (void *) != TYPE_LENGTH (ptr_type))
     return 0;
@@ -4938,7 +4938,7 @@ procfs_insert_watchpoint (CORE_ADDR addr, int len, int type,
 			  struct expression *cond)
 {
   if (!target_have_steppable_watchpoint
-      && !gdbarch_have_nonsteppable_watchpoint (target_gdbarch))
+      && !gdbarch_have_nonsteppable_watchpoint (target_gdbarch ()))
     {
       /* When a hardware watchpoint fires off the PC will be left at
 	 the instruction following the one which caused the
@@ -5138,7 +5138,7 @@ info_mappings_callback (struct prmap *map, find_memory_region_ftype ignore,
   pr_off = map->pr_off;
 #endif
 
-  if (gdbarch_addr_bit (target_gdbarch) == 32)
+  if (gdbarch_addr_bit (target_gdbarch ()) == 32)
     printf_filtered ("\t%#10lx %#10lx %#10lx %#10x %7s\n",
 		     (unsigned long) map->pr_vaddr,
 		     (unsigned long) map->pr_vaddr + map->pr_size - 1,
@@ -5165,7 +5165,7 @@ info_proc_mappings (procinfo *pi, int summary)
     return;	/* No output for summary mode.  */
 
   printf_filtered (_("Mapped address spaces:\n\n"));
-  if (gdbarch_ptr_bit (target_gdbarch) == 32)
+  if (gdbarch_ptr_bit (target_gdbarch ()) == 32)
     printf_filtered ("\t%10s %10s %10s %10s %7s\n",
 		     "Start Addr",
 		     "  End Addr",

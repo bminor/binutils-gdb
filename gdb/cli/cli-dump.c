@@ -486,10 +486,10 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
 
   if (data->load_offset != 0 || data->load_start != 0 || data->load_end != 0)
     printf_filtered (" into memory (%s to %s)\n",
-		     paddress (target_gdbarch,
+		     paddress (target_gdbarch (),
 			       (unsigned long) sec_start
 			       + sec_offset + data->load_offset), 
-		     paddress (target_gdbarch,
+		     paddress (target_gdbarch (),
 			       (unsigned long) sec_start + sec_offset
 				+ data->load_offset + sec_load_count));
   else

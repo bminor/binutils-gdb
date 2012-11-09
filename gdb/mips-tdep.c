@@ -1087,7 +1087,7 @@ static void
 show_mask_address (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch ());
 
   deprecated_show_value_hack (file, from_tty, c, value);
   switch (mask_address_var)
@@ -6652,7 +6652,7 @@ show_mipsfpu_command (char *args, int from_tty)
 {
   char *fpu;
 
-  if (gdbarch_bfd_arch_info (target_gdbarch)->arch != bfd_arch_mips)
+  if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_mips)
     {
       printf_unfiltered
 	("The MIPS floating-point coprocessor is unknown "
@@ -6660,7 +6660,7 @@ show_mipsfpu_command (char *args, int from_tty)
       return;
     }
 
-  switch (MIPS_FPU_TYPE (target_gdbarch))
+  switch (MIPS_FPU_TYPE (target_gdbarch ()))
     {
     case MIPS_FPU_SINGLE:
       fpu = "single-precision";
@@ -8681,7 +8681,7 @@ show_mips_abi (struct ui_file *file,
 	       struct cmd_list_element *ignored_cmd,
 	       const char *ignored_value)
 {
-  if (gdbarch_bfd_arch_info (target_gdbarch)->arch != bfd_arch_mips)
+  if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_mips)
     fprintf_filtered
       (file, 
        "The MIPS ABI is unknown because the current architecture "
@@ -8689,7 +8689,7 @@ show_mips_abi (struct ui_file *file,
   else
     {
       enum mips_abi global_abi = global_mips_abi ();
-      enum mips_abi actual_abi = mips_abi (target_gdbarch);
+      enum mips_abi actual_abi = mips_abi (target_gdbarch ());
       const char *actual_abi_str = mips_abi_strings[actual_abi];
 
       if (global_abi == MIPS_ABI_UNKNOWN)

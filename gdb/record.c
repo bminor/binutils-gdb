@@ -512,14 +512,14 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
     fprintf_unfiltered (gdb_stdlog,
 			"Process record: add mem addr = %s len = %d to "
 			"record list.\n",
-			paddress (target_gdbarch, addr), len);
+			paddress (target_gdbarch (), addr), len);
 
   if (!addr)	/* FIXME: Why?  Some arch must permit it...  */
     return 0;
 
   rec = record_mem_alloc (addr, len);
 
-  if (record_read_memory (target_gdbarch, addr, record_get_loc (rec), len))
+  if (record_read_memory (target_gdbarch (), addr, record_get_loc (rec), len))
     {
       record_mem_release (rec);
       return -1;
@@ -874,7 +874,7 @@ record_open_1 (char *name, int from_tty)
     error (_("Process record target can't debug inferior in non-stop mode "
 	     "(non-stop)."));
 
-  if (!gdbarch_process_record_p (target_gdbarch))
+  if (!gdbarch_process_record_p (target_gdbarch ()))
     error (_("Process record: the current architecture doesn't support "
 	     "record function."));
 
@@ -1686,7 +1686,7 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 	  if (!query (_("Because GDB is in replay mode, writing to memory "
 		        "will make the execution log unusable from this "
 		        "point onward.  Write memory at address %s?"),
-		       paddress (target_gdbarch, offset)))
+		       paddress (target_gdbarch (), offset)))
 	    error (_("Process record canceled the operation."));
 
 	  /* Destroy the record from here forward.  */

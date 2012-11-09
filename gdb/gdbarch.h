@@ -71,8 +71,7 @@ struct stap_parse_info;
    gdbarch.  */
 
 /* This is a convenience wrapper for 'current_inferior ()->gdbarch'.  */
-#define target_gdbarch get_target_gdbarch ()
-extern struct gdbarch *get_target_gdbarch (void);
+extern struct gdbarch *target_gdbarch (void);
 
 /* The initial, default architecture.  It uses host values (for want of a better
    choice).  */

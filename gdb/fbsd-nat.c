@@ -125,7 +125,7 @@ fbsd_find_memory_regions (find_memory_region_ftype func, void *obfd)
 	{
 	  fprintf_filtered (gdb_stdout, 
 			    "Save segment, %ld bytes at %s (%c%c%c)\n",
-			    size, paddress (target_gdbarch, start),
+			    size, paddress (target_gdbarch (), start),
 			    read ? 'r' : '-',
 			    write ? 'w' : '-',
 			    exec ? 'x' : '-');

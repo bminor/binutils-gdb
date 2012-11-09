@@ -2792,7 +2792,7 @@ update_inserted_breakpoint_locations (void)
 	 to select an inferior to insert breakpoint to.  In fact, even
 	 if we aren't attached to any process yet, we should still
 	 insert breakpoints.  */
-      if (!gdbarch_has_global_breakpoints (target_gdbarch)
+      if (!gdbarch_has_global_breakpoints (target_gdbarch ())
 	  && ptid_equal (inferior_ptid, null_ptid))
 	continue;
 
@@ -2851,7 +2851,7 @@ insert_breakpoint_locations (void)
 	 to select an inferior to insert breakpoint to.  In fact, even
 	 if we aren't attached to any process yet, we should still
 	 insert breakpoints.  */
-      if (!gdbarch_has_global_breakpoints (target_gdbarch)
+      if (!gdbarch_has_global_breakpoints (target_gdbarch ())
 	  && ptid_equal (inferior_ptid, null_ptid))
 	continue;
 
@@ -3732,7 +3732,7 @@ breakpoint_init_inferior (enum inf_context context)
 
   /* If breakpoint locations are shared across processes, then there's
      nothing to do.  */
-  if (gdbarch_has_global_breakpoints (target_gdbarch))
+  if (gdbarch_has_global_breakpoints (target_gdbarch ()))
     return;
 
   ALL_BP_LOCATIONS (bl, blp_tmp)
@@ -5936,7 +5936,7 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (loc != NULL
       && !header_of_multiple
       && (allflag
-	  || (!gdbarch_has_global_breakpoints (target_gdbarch)
+	  || (!gdbarch_has_global_breakpoints (target_gdbarch ())
 	      && (number_of_program_spaces () > 1
 		  || number_of_inferiors () > 1)
 	      /* LOC is for existing B, it cannot be in
@@ -6596,7 +6596,7 @@ static int
 breakpoint_address_match (struct address_space *aspace1, CORE_ADDR addr1,
 			  struct address_space *aspace2, CORE_ADDR addr2)
 {
-  return ((gdbarch_has_global_breakpoints (target_gdbarch)
+  return ((gdbarch_has_global_breakpoints (target_gdbarch ())
 	   || aspace1 == aspace2)
 	  && addr1 == addr2);
 }
@@ -6611,7 +6611,7 @@ breakpoint_address_match_range (struct address_space *aspace1, CORE_ADDR addr1,
 				int len1, struct address_space *aspace2,
 				CORE_ADDR addr2)
 {
-  return ((gdbarch_has_global_breakpoints (target_gdbarch)
+  return ((gdbarch_has_global_breakpoints (target_gdbarch ())
 	   || aspace1 == aspace2)
 	  && addr2 >= addr1 && addr2 < addr1 + len1);
 }
@@ -12529,7 +12529,7 @@ update_global_location_list (int should_insert)
 
   if (breakpoints_always_inserted_mode ()
       && (have_live_inferiors ()
-	  || (gdbarch_has_global_breakpoints (target_gdbarch))))
+	  || (gdbarch_has_global_breakpoints (target_gdbarch ()))))
     {
       if (should_insert)
 	insert_breakpoint_locations ();

@@ -318,7 +318,7 @@ i386_show_dr (struct i386_debug_reg_state *state,
 	      const char *func, CORE_ADDR addr,
 	      int len, enum target_hw_bp_type type)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
+  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
   int i;
 
   puts_unfiltered (func);

@@ -4376,7 +4376,7 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
 {
   /* FIXME: uweigand/2011-10-06: Once all GNU/Linux architectures have been
      converted to gdbarch_core_regset_sections, this function can go away.  */
-  return linux_make_corefile_notes (target_gdbarch, obfd, note_size,
+  return linux_make_corefile_notes (target_gdbarch (), obfd, note_size,
 				    linux_nat_collect_thread_registers);
 }
 
@@ -4431,7 +4431,7 @@ linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
 static LONGEST
 spu_enumerate_spu_ids (int pid, gdb_byte *buf, ULONGEST offset, LONGEST len)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   LONGEST pos = 0;
   LONGEST written = 0;
   char path[128];
@@ -4640,7 +4640,7 @@ linux_xfer_partial (struct target_ops *ops, enum target_object object,
 
   if (object == TARGET_OBJECT_MEMORY)
     {
-      int addr_bit = gdbarch_addr_bit (target_gdbarch);
+      int addr_bit = gdbarch_addr_bit (target_gdbarch ());
 
       if (addr_bit < (sizeof (ULONGEST) * HOST_CHAR_BIT))
 	offset &= ((ULONGEST) 1 << addr_bit) - 1;

@@ -667,7 +667,7 @@ linux_spu_make_corefile_notes (bfd *obfd, char *note_data, int *note_size)
       "proxydma_info",
    };
 
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   gdb_byte *spu_ids;
   LONGEST i, j, size;
 

@@ -1,3 +1,29 @@
+2012-11-09  Tom Tromey  <tromey@redhat.com>
+
+	* gdbarch.sh (target_gdbarch): Remove macro.
+	(get_target_gdbarch): Rename to target_gdbarch.
+	* gdbarch.c, gdbarch.h: Rebuild.
+	* ada-tasks.c, aix-thread.c, amd64-linux-nat.c, arch-utils.c,
+	arm-tdep.c, auxv.c, breakpoint.c, bsd-uthread.c, corefile.c,
+	darwin-nat-info.c, dcache.c, dsrec.c, exec.c, fbsd-nat.c,
+	filesystem.c, gcore.c, gnu-nat.c, i386-darwin-nat.c, i386-nat.c,
+	ia64-vms-tdep.c, inf-ptrace.c, infcmd.c, jit.c, linux-nat.c,
+	linux-tdep.c, linux-thread-db.c, m32r-rom.c, memattr.c,
+	mep-tdep.c, microblaze-tdep.c, mips-linux-nat.c,
+	mips-linux-tdep.c, mips-tdep.c, monitor.c, moxie-tdep.c,
+	nto-procfs.c, nto-tdep.c, ppc-linux-nat.c, proc-service.c,
+	procfs.c, progspace.c, ravenscar-thread.c, record.c,
+	remote-m32r-sdi.c, remote-mips.c, remote-sim.c, remote.c,
+	rl78-tdep.c, rs6000-nat.c, rx-tdep.c, s390-nat.c, sol-thread.c,
+	solib-darwin.c, solib-dsbt.c, solib-frv.c, solib-ia64-hpux.c,
+	solib-irix.c, solib-pa64.c, solib-som.c, solib-spu.c,
+	solib-sunos.c, solib-svr4.c, solib.c, spu-linux-nat.c,
+	spu-multiarch.c, spu-tdep.c, symfile-mem.c, symfile.c, symtab.c,
+	target-descriptions.c, target.c, target.h, tracepoint.c,
+	windows-nat.c, windows-tdep.c, xcoffsolib.c, cli/cli-dump.c,
+	common/agent.c, mi/mi-interp.c, python/py-finishbreakpoint.c,
+	python/py-inferior.c, python/python.c: Update.
+
 2012-11-09  Andrew Burgess  <aburgess@broadcom.com>
 
 	* source.c (print_source_lines_base): Add fullname field giving

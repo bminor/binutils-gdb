@@ -396,7 +396,7 @@ ia64_hpux_clear_solib (void)
 static CORE_ADDR
 ia64_hpux_get_load_info_addr (void)
 {
-  struct type *data_ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  struct type *data_ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   CORE_ADDR addr;
   int status;
 

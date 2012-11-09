@@ -62,7 +62,7 @@ static void sharedlibrary_command (char *pattern, int from_tty);
 static void
 solib_info (char *args, int from_tty)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
+  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
   struct vmap *vp = vmap;
 
   /* Check for new shared libraries loaded with load ().  */

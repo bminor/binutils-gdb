@@ -4675,10 +4675,10 @@ deprecated_target_gdbarch_select_hack (struct gdbarch *new_gdbarch)
   registers_changed ();
 }
 
-/* Helper for 'target_gdbarch'.  */
+/* Return the current inferior's arch.  */
 
 struct gdbarch *
-get_target_gdbarch (void)
+target_gdbarch (void)
 {
   return current_inferior ()->gdbarch;
 }

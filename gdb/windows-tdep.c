@@ -290,8 +290,8 @@ display_one_tib (ptid_t ptid)
   gdb_byte *index;
   CORE_ADDR thread_local_base;
   ULONGEST i, val, max, max_name, size, tib_size;
-  ULONGEST sizeof_ptr = gdbarch_ptr_bit (target_gdbarch);
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  ULONGEST sizeof_ptr = gdbarch_ptr_bit (target_gdbarch ());
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
   if (sizeof_ptr == 64)
     {
@@ -329,13 +329,13 @@ display_one_tib (ptid_t ptid)
       printf_filtered (_("Unable to read thread information "
 			 "block for %s at address %s\n"),
 	target_pid_to_str (ptid), 
-	paddress (target_gdbarch, thread_local_base));
+	paddress (target_gdbarch (), thread_local_base));
       return -1;
     }
 
   printf_filtered (_("Thread Information Block %s at %s\n"),
 		   target_pid_to_str (ptid),
-		   paddress (target_gdbarch, thread_local_base));
+		   paddress (target_gdbarch (), thread_local_base));
 
   index = (gdb_byte *) tib;
 

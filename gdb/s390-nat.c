@@ -601,7 +601,7 @@ s390_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 		 gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
   int sizeof_auxv_field = s390_target_wordsize ();
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)

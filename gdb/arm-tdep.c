@@ -9195,7 +9195,7 @@ arm_update_current_architecture (void)
   struct gdbarch_info info;
 
   /* If the current architecture is not ARM, we have nothing to do.  */
-  if (gdbarch_bfd_arch_info (target_gdbarch)->arch != bfd_arch_arm)
+  if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_arm)
     return;
 
   /* Update the architecture.  */
@@ -9229,10 +9229,10 @@ static void
 show_fp_model (struct ui_file *file, int from_tty,
 	       struct cmd_list_element *c, const char *value)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch ());
 
   if (arm_fp_model == ARM_FLOAT_AUTO
-      && gdbarch_bfd_arch_info (target_gdbarch)->arch == bfd_arch_arm)
+      && gdbarch_bfd_arch_info (target_gdbarch ())->arch == bfd_arch_arm)
     fprintf_filtered (file, _("\
 The current ARM floating point model is \"auto\" (currently \"%s\").\n"),
 		      fp_model_strings[tdep->fp_model]);
@@ -9266,10 +9266,10 @@ static void
 arm_show_abi (struct ui_file *file, int from_tty,
 	     struct cmd_list_element *c, const char *value)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch ());
 
   if (arm_abi_global == ARM_ABI_AUTO
-      && gdbarch_bfd_arch_info (target_gdbarch)->arch == bfd_arch_arm)
+      && gdbarch_bfd_arch_info (target_gdbarch ())->arch == bfd_arch_arm)
     fprintf_filtered (file, _("\
 The current ARM ABI is \"auto\" (currently \"%s\").\n"),
 		      arm_abi_strings[tdep->arm_abi]);
@@ -9292,7 +9292,7 @@ static void
 arm_show_force_mode (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch ());
 
   fprintf_filtered (file,
 		    _("The current execution mode assumed "

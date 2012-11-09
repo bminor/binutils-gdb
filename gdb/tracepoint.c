@@ -4206,7 +4206,7 @@ tfile_get_traceframe_address (off_t tframe_offset)
   tfile_read ((gdb_byte *) &tpnum, 2);
   tpnum = (short) extract_signed_integer ((gdb_byte *) &tpnum, 2,
 					  gdbarch_byte_order
-					      (target_gdbarch));
+					      (target_gdbarch ()));
 
   tp = get_tracepoint_by_number_on_target (tpnum);
   /* FIXME this is a poor heuristic if multiple locations.  */
@@ -4250,14 +4250,14 @@ tfile_trace_find (enum trace_find_type type, int num,
       tfile_read ((gdb_byte *) &tpnum, 2);
       tpnum = (short) extract_signed_integer ((gdb_byte *) &tpnum, 2,
 					      gdbarch_byte_order
-						  (target_gdbarch));
+						  (target_gdbarch ()));
       offset += 2;
       if (tpnum == 0)
 	break;
       tfile_read ((gdb_byte *) &data_size, 4);
       data_size = (unsigned int) extract_unsigned_integer
                                      ((gdb_byte *) &data_size, 4,
-				      gdbarch_byte_order (target_gdbarch));
+				      gdbarch_byte_order (target_gdbarch ()));
       offset += 4;
       switch (type)
 	{
@@ -4365,7 +4365,7 @@ traceframe_walk_blocks (walk_blocks_callback_func callback,
           mlen = (unsigned short)
                 extract_unsigned_integer ((gdb_byte *) &mlen, 2,
                                           gdbarch_byte_order
-                                              (target_gdbarch));
+                                              (target_gdbarch ()));
 	  lseek (trace_fd, mlen, SEEK_CUR);
 	  pos += (8 + 2 + mlen);
 	  break;
@@ -4502,7 +4502,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	{
 	  ULONGEST maddr, amt;
 	  unsigned short mlen;
-	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
 	  tfile_read ((gdb_byte *) &maddr, 8);
 	  maddr = extract_unsigned_integer ((gdb_byte *) &maddr, 8,
@@ -4585,13 +4585,13 @@ tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
       tfile_read ((gdb_byte *) &vnum, 4);
       vnum = (int) extract_signed_integer ((gdb_byte *) &vnum, 4,
 					   gdbarch_byte_order
-					   (target_gdbarch));
+					   (target_gdbarch ()));
       if (tsvnum == vnum)
 	{
 	  tfile_read ((gdb_byte *) val, 8);
 	  *val = extract_signed_integer ((gdb_byte *) val, 8,
 					 gdbarch_byte_order
-					 (target_gdbarch));
+					 (target_gdbarch ()));
 	  return 1;
 	}
       pos += (4 + 8);
@@ -4739,7 +4739,7 @@ parse_static_tracepoint_marker_definition (char *line, char **pp,
   p = unpack_varlen_hex (p, &addr);
   p++;  /* skip a colon */
 
-  marker->gdbarch = target_gdbarch;
+  marker->gdbarch = target_gdbarch ();
   marker->address = (CORE_ADDR) addr;
 
   endp = strchr (p, ':');
@@ -4916,7 +4916,7 @@ info_static_tracepoint_markers_command (char *arg, int from_tty)
   ui_out_table_header (uiout, 40, ui_left, "marker-id", "ID");
 
   ui_out_table_header (uiout, 3, ui_left, "enabled", "Enb");
-  if (gdbarch_addr_bit (target_gdbarch) <= 32)
+  if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
     ui_out_table_header (uiout, 10, ui_left, "addr", "Address");
   else
     ui_out_table_header (uiout, 18, ui_left, "addr", "Address");

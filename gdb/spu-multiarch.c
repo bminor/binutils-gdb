@@ -57,19 +57,19 @@ static int spu_nr_solib;
 static int
 parse_spufs_run (ptid_t ptid, int *fd, CORE_ADDR *addr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   struct gdbarch_tdep *tdep;
   struct regcache *regcache;
   char buf[4];
   ULONGEST regval;
 
   /* If we're not on PPU, there's nothing to detect.  */
-  if (gdbarch_bfd_arch_info (target_gdbarch)->arch != bfd_arch_powerpc)
+  if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_powerpc)
     return 0;
 
   /* Get PPU-side registers.  */
-  regcache = get_thread_arch_regcache (ptid, target_gdbarch);
-  tdep = gdbarch_tdep (target_gdbarch);
+  regcache = get_thread_arch_regcache (ptid, target_gdbarch ());
+  tdep = gdbarch_tdep (target_gdbarch ());
 
   /* Fetch instruction preceding current NIP.  */
   if (target_read_memory (regcache_read_pc (regcache) - 4, buf, 4) != 0)
@@ -113,7 +113,7 @@ spu_thread_architecture (struct target_ops *ops, ptid_t ptid)
   if (parse_spufs_run (ptid, &spufs_fd, &spufs_addr))
     return spu_gdbarch (spufs_fd);
 
-  return target_gdbarch;
+  return target_gdbarch ();
 }
 
 /* Override the to_region_ok_for_hw_watchpoint routine.  */

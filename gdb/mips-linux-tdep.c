@@ -682,8 +682,8 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
 {
   unsigned char buf[28], *p;
   ULONGEST insn, insn1;
-  int n64 = (mips_abi (target_gdbarch) == MIPS_ABI_N64);
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  int n64 = (mips_abi (target_gdbarch ()) == MIPS_ABI_N64);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
   read_memory (pc - 12, buf, 28);
 

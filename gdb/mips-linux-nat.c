@@ -688,7 +688,7 @@ mips_show_dr (const char *func, CORE_ADDR addr,
   puts_unfiltered (func);
   if (addr || len)
     printf_unfiltered (" (addr=%s, len=%d, type=%s)",
-		       paddress (target_gdbarch, addr), len,
+		       paddress (target_gdbarch (), addr), len,
 		       type == hw_write ? "data-write"
 		       : (type == hw_read ? "data-read"
 			  : (type == hw_access ? "data-read/write"
@@ -698,9 +698,9 @@ mips_show_dr (const char *func, CORE_ADDR addr,
 
   for (i = 0; i < MAX_DEBUG_REGISTER; i++)
     printf_unfiltered ("\tDR%d: lo=%s, hi=%s\n", i,
-		       paddress (target_gdbarch,
+		       paddress (target_gdbarch (),
 				 get_watchlo (&watch_mirror, i)),
-		       paddress (target_gdbarch,
+		       paddress (target_gdbarch (),
 				 get_watchhi (&watch_mirror, i)));
 }
 

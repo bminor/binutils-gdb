@@ -757,7 +757,7 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
   priv_data = cb->priv_data;
 
   objfile = allocate_objfile (NULL, 0);
-  objfile->gdbarch = target_gdbarch;
+  objfile->gdbarch = target_gdbarch ();
 
   terminate_minimal_symbol_table (objfile);
 
@@ -1290,7 +1290,7 @@ jit_inferior_init (struct gdbarch *gdbarch)
 void
 jit_inferior_created_hook (void)
 {
-  jit_inferior_init (target_gdbarch);
+  jit_inferior_init (target_gdbarch ());
 }
 
 /* Exported routine to call to re-set the jit breakpoints,
@@ -1299,7 +1299,7 @@ jit_inferior_created_hook (void)
 void
 jit_breakpoint_re_set (void)
 {
-  jit_breakpoint_re_set_internal (target_gdbarch,
+  jit_breakpoint_re_set_internal (target_gdbarch (),
 				  get_jit_inferior_data ());
 }
 
