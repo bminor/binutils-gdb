@@ -30707,21 +30707,65 @@ mixed source and disassembly with raw opcodes).
 
 @subsubheading Result
 
-The output for each instruction is composed of four fields:
+The result of the @code{-data-disassemble} command will be a list named
+@samp{asm_insns}, the contents of this list depend on the @var{mode}
+used with the @code{-data-disassemble} command.
 
-@itemize @bullet
-@item Address
-@item Func-name
-@item Offset
-@item Instruction
-@end itemize
+For modes 0 and 2 the @samp{asm_insns} list contains tuples with the
+following fields:
 
-Note that whatever included in the instruction field, is not manipulated
-directly by @sc{gdb/mi}, i.e., it is not possible to adjust its format.
+@table @code
+@item address
+The address at which this instruction was disassembled.
+
+@item func-name
+The name of the function this instruction is within.
+
+@item offset
+The decimal offset in bytes from the start of @samp{func-name}.
+
+@item inst
+The text disassembly for this @samp{address}.
+
+@item opcodes
+This field is only present for mode 2.  This contains the raw opcode
+bytes for the @samp{inst} field.
+
+@end table
+
+For modes 1 and 3 the @samp{asm_insns} list contains tuples named
+@samp{src_and_asm_line}, each of which has the following fields:
+
+@table @code
+@item line
+The line number within @samp{file}.
+
+@item file
+The file name from the compilation unit.  This might be an absolute
+file name or a relative file name depending on the compile command
+used.
+
+@item fullname
+This field is optional.  If it is present it will contain an absolute
+file name of @samp{file}.  If this field is not present then
+@value{GDBN} was unable to determine the absolute file name.
+
+@item line_asm_insn
+This is a list of tuples containing the disassembly for @samp{line} in
+@samp{file}.  The fields of each tuple are the same as for
+@code{-data-disassemble} in @var{mode} 0 and 2, so @samp{address},
+@samp{func-name}, @samp{offset}, @samp{inst}, and optionally
+@samp{opcodes}.
+
+@end table
+
+Note that whatever included in the @samp{inst} field, is not
+manipulated directly by @sc{gdb/mi}, i.e., it is not possible to
+adjust its format.
 
 @subsubheading @value{GDBN} Command
 
-There's no direct mapping from this command to the CLI.
+The corresponding @value{GDBN} command is @samp{disassemble}.
 
 @subsubheading Example
 
@@ -30785,15 +30829,15 @@ Disassemble 3 instructions from the start of @code{main} in mixed mode:
 -data-disassemble -f basics.c -l 32 -n 3 -- 1
 ^done,asm_insns=[
 src_and_asm_line=@{line="31",
-file="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb/ \
-  testsuite/gdb.mi/basics.c",line_asm_insn=[
-@{address="0x000107bc",func-name="main",offset="0",
-inst="save  %sp, -112, %sp"@}]@},
+file="../../../src/gdb/testsuite/gdb.mi/basics.c",
+fullname="/absolute/path/to/src/gdb/testsuite/gdb.mi/basics.c",
+line_asm_insn=[@{address="0x000107bc",
+func-name="main",offset="0",inst="save  %sp, -112, %sp"@}]@},
 src_and_asm_line=@{line="32",
-file="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb/ \
-  testsuite/gdb.mi/basics.c",line_asm_insn=[
-@{address="0x000107c0",func-name="main",offset="4",
-inst="mov  2, %o0"@},
+file="../../../src/gdb/testsuite/gdb.mi/basics.c",
+fullname="/absolute/path/to/src/gdb/testsuite/gdb.mi/basics.c",
+line_asm_insn=[@{address="0x000107c0",
+func-name="main",offset="4",inst="mov  2, %o0"@},
 @{address="0x000107c4",func-name="main",offset="8",
 inst="sethi  %hi(0x11800), %o2"@}]@}]
 (gdb)

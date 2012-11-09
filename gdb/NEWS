@@ -66,6 +66,9 @@ py [command]
      async record "=record-started" and "=record-stopped".
   ** Memory changes are now notified using new async record
      "=memory-changed".
+  ** The data-disassemble command response will include a "fullname" field
+     containing the absolute file name when GDB can determine it and source
+     has been requested.
 
 *** Changes in GDB 7.5
 

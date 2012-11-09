@@ -1301,6 +1301,13 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 	  ui_out_field_int (uiout, "line", line);
 	  ui_out_text (uiout, "\tin ");
 	  ui_out_field_string (uiout, "file", s->filename);
+	  if (ui_out_is_mi_like_p (uiout))
+	    {
+	      const char *fullname = symtab_to_fullname (s);
+
+	      if (fullname != NULL)
+		ui_out_field_string (uiout, "fullname", fullname);
+	    }
 	  ui_out_text (uiout, "\n");
 	}
 

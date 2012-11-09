@@ -1,3 +1,10 @@
+2012-11-09  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.texinfo (GDB/MI Data Manipulation): Add fullname field to
+	the example -data-disassemble output.  Extend the description of
+	the -data-disassemble results to document all fields.  Document
+	the cli disassemble command as being related to -data-disassemble.
+
 2012-11-09  Yao Qi  <yao@codesourcery.com>
 
 	PR gdb/14777.

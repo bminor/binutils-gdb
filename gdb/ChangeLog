@@ -1,3 +1,9 @@
+2012-11-09  Andrew Burgess  <aburgess@broadcom.com>
+
+	* source.c (print_source_lines_base): Add fullname field giving
+	full path to file in mi output.
+	* NEWS: Mention the new fullname field.
+
 2012-11-09  Yao Qi  <yao@codesourcery.com>
 
 	* NEWS: Mention the fix to the ambiguity of 'fo' command.
