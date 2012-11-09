@@ -406,7 +406,7 @@ static void
 thread_db_find_new_threads (void)
 {
   td_err_e err;
-  ptid_t ptid = ((struct inferior_list_entry *) current_inferior)->id;
+  ptid_t ptid = current_ptid;
   struct thread_db *thread_db = current_process ()->private->thread_db;
   int loop, iteration;
 

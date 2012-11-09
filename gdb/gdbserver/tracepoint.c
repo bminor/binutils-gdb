@@ -6692,7 +6692,7 @@ static int
 run_inferior_command (char *cmd, int len)
 {
   int err = -1;
-  int pid = ptid_get_pid (current_inferior->entry.id);
+  int pid = ptid_get_pid (current_ptid);
 
   trace_debug ("run_inferior_command: running: %s", cmd);
 

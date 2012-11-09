@@ -1,3 +1,12 @@
+2012-11-09  Yao Qi  <yao@codesourcery.com>
+
+	* spu-low.c (current_ptid): Move it to ..
+	* gdbthread.h: ... here.  New.
+	* remote-utils.c (read_ptid): Use macro 'current_ptid'.
+	* server.c (myresume, process_serial_event): Likewise.
+	* thread-db.c (thread_db_find_new_threads): Likewise.
+	* tracepoint.c (run_inferior_command): Likewise.
+
 2012-10-01  Andrew Burgess  <aburgess@broadcom.com>
 
 	* server.c (handle_search_memory_1): Include access length in

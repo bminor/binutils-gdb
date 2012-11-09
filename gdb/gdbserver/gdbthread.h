@@ -68,4 +68,6 @@ void add_thread (ptid_t ptid, void *target_data);
 struct thread_info *find_thread_ptid (ptid_t ptid);
 struct thread_info *gdb_id_to_thread (unsigned int);
 
+/* Get current thread ID (Linux task ID).  */
+#define current_ptid ((struct inferior_list_entry *) current_inferior)->id
 #endif /* GDB_THREAD_H */

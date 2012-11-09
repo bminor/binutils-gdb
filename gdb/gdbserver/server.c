@@ -2283,8 +2283,7 @@ myresume (char *own_buf, int step, int sig)
 
   if (step || sig || valid_cont_thread)
     {
-      resume_info[0].thread
-	= ((struct inferior_list_entry *) current_inferior)->id;
+      resume_info[0].thread = current_ptid;
       if (step)
 	resume_info[0].kind = resume_step;
       else
@@ -3006,8 +3005,7 @@ process_serial_event (void)
 	  pid = strtol (&own_buf[i], NULL, 16);
 	}
       else
-	pid =
-	  ptid_get_pid (((struct inferior_list_entry *) current_inferior)->id);
+	pid = ptid_get_pid (current_ptid);
 
       if ((tracing && disconnected_tracing) || any_persistent_commands ())
 	{

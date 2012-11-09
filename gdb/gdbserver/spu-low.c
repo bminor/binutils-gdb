@@ -51,9 +51,6 @@
 #define INSTR_SC	0x44000002
 #define NR_spu_run	0x0116
 
-/* Get current thread ID (Linux task ID).  */
-#define current_ptid ((struct inferior_list_entry *)current_inferior)->id
-
 /* These are used in remote-utils.c.  */
 int using_threads = 0;
 
