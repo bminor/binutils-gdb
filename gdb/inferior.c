@@ -33,6 +33,8 @@
 #include "environ.h"
 #include "cli/cli-utils.h"
 #include "continuations.h"
+#include "arch-utils.h"
+#include "target-descriptions.h"
 
 void _initialize_inferiors (void);
 
@@ -98,6 +100,7 @@ free_inferior (struct inferior *inf)
   xfree (inf->args);
   xfree (inf->terminal);
   free_environ (inf->environment);
+  target_desc_info_free (inf->tdesc_info);
   xfree (inf->private);
   xfree (inf);
 }
@@ -794,6 +797,7 @@ add_inferior_with_spaces (void)
   struct address_space *aspace;
   struct program_space *pspace;
   struct inferior *inf;
+  struct gdbarch_info info;
 
   /* If all inferiors share an address space on this system, this
      doesn't really return a new address space; otherwise, it
@@ -803,6 +807,14 @@ add_inferior_with_spaces (void)
   inf = add_inferior (0);
   inf->pspace = pspace;
   inf->aspace = pspace->aspace;
+
+  /* Setup the inferior's initial arch, based on information obtained
+     from the global "set ..." options.  */
+  gdbarch_info_init (&info);
+  inf->gdbarch = gdbarch_find_by_info (info);
+  /* The "set ..." options reject invalid settings, so we should
+     always have a valid arch by now.  */
+  gdb_assert (inf->gdbarch != NULL);
 
   return inf;
 }
@@ -942,6 +954,12 @@ clone_inferior_command (char *args, int from_tty)
       inf = add_inferior (0);
       inf->pspace = pspace;
       inf->aspace = pspace->aspace;
+      inf->gdbarch = orginf->gdbarch;
+
+      /* If the original inferior had a user specified target
+	 description, make the clone use it too.  */
+      if (target_desc_info_from_user_p (inf->tdesc_info))
+	copy_inferior_target_desc_info (inf, orginf);
 
       printf_filtered (_("Added inferior %d.\n"), inf->num);
 
@@ -977,6 +995,8 @@ initialize_inferiors (void)
   current_inferior_ = add_inferior (0);
   current_inferior_->pspace = current_program_space;
   current_inferior_->aspace = current_program_space->aspace;
+  /* The architecture will be initialized shortly, by
+     initialize_current_architecture.  */
 
   add_info ("inferiors", info_inferiors_command, 
 	    _("IDs of specified inferiors (all inferiors if no argument)."));

@@ -30,6 +30,7 @@ struct gdbarch;
 struct regcache;
 struct ui_out;
 struct terminal_info;
+struct target_desc_info;
 
 #include "ptid.h"
 
@@ -512,6 +513,23 @@ struct inferior
      used whenever a new objfile is created.  The valid values come
      from enum symfile_add_flags.  */
   int symfile_flags;
+
+  /* Info about an inferior's target description (if it's fetched; the
+     user supplied description's filename, if any; etc.).  */
+  struct target_desc_info *tdesc_info;
+
+  /* The architecture associated with the inferior through the
+     connection to the target.
+
+     The architecture vector provides some information that is really
+     a property of the inferior, accessed through a particular target:
+     ptrace operations; the layout of certain RSP packets; the
+     solib_ops vector; etc.  To differentiate architecture accesses to
+     per-inferior/target properties from
+     per-thread/per-frame/per-objfile properties, accesses to
+     per-inferior/target properties should be made through
+     this gdbarch.  */
+  struct gdbarch *gdbarch;
 
   /* Per inferior data-pointers required by other GDB modules.  */
   REGISTRY_FIELDS;

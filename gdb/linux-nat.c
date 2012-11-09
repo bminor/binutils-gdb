@@ -66,6 +66,7 @@
 #include "exceptions.h"
 #include "linux-ptrace.h"
 #include "buffer.h"
+#include "target-descriptions.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -723,6 +724,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  parent_inf = current_inferior ();
 	  child_inf->attach_flag = parent_inf->attach_flag;
 	  copy_terminal_info (child_inf, parent_inf);
+	  child_inf->gdbarch = parent_inf->gdbarch;
+	  copy_inferior_target_desc_info (child_inf, parent_inf);
 
 	  old_chain = save_inferior_ptid ();
 	  save_current_program_space ();
@@ -887,6 +890,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       parent_inf = current_inferior ();
       child_inf->attach_flag = parent_inf->attach_flag;
       copy_terminal_info (child_inf, parent_inf);
+      child_inf->gdbarch = parent_inf->gdbarch;
+      copy_inferior_target_desc_info (child_inf, parent_inf);
 
       parent_pspace = parent_inf->pspace;
 

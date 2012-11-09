@@ -34,6 +34,7 @@
 #include "gdb_assert.h"
 #include "gdb_obstack.h"
 #include "hashtab.h"
+#include "inferior.h"
 
 /* Types.  */
 
@@ -231,33 +232,91 @@ struct tdesc_arch_data
   gdbarch_register_reggroup_p_ftype *pseudo_register_reggroup_p;
 };
 
-/* Global state.  These variables are associated with the current
-   target; if GDB adds support for multiple simultaneous targets, then
-   these variables should become target-specific data.  */
+/* Info about an inferior's target description.  There's one of these
+   for each inferior.  */
 
-/* A flag indicating that a description has already been fetched from
-   the current target, so it should not be queried again.  */
+struct target_desc_info
+{
+  /* A flag indicating that a description has already been fetched
+     from the target, so it should not be queried again.  */
 
-static int target_desc_fetched;
+  int fetched;
 
-/* The description fetched from the current target, or NULL if the
-   current target did not supply any description.  Only valid when
-   target_desc_fetched is set.  Only the description initialization
-   code should access this; normally, the description should be
-   accessed through the gdbarch object.  */
+  /* The description fetched from the target, or NULL if the target
+     did not supply any description.  Only valid when
+     target_desc_fetched is set.  Only the description initialization
+     code should access this; normally, the description should be
+     accessed through the gdbarch object.  */
 
-static const struct target_desc *current_target_desc;
+  const struct target_desc *tdesc;
 
-/* Other global variables.  */
+  /* The filename to read a target description from, as set by "set
+     tdesc filename ..."  */
 
-/* The filename to read a target description from.  */
+  char *filename;
+};
 
-static char *target_description_filename;
+/* Get the inferior INF's target description info, allocating one on
+   the stop if necessary.  */
+
+static struct target_desc_info *
+get_tdesc_info (struct inferior *inf)
+{
+  if (inf->tdesc_info == NULL)
+    inf->tdesc_info = XCNEW (struct target_desc_info);
+  return inf->tdesc_info;
+}
 
 /* A handle for architecture-specific data associated with the
    target description (see struct tdesc_arch_data).  */
 
 static struct gdbarch_data *tdesc_data;
+
+/* See target-descriptions.h.  */
+
+int
+target_desc_info_from_user_p (struct target_desc_info *info)
+{
+  return info != NULL && info->filename != NULL;
+}
+
+/* See target-descriptions.h.  */
+
+void
+copy_inferior_target_desc_info (struct inferior *destinf, struct inferior *srcinf)
+{
+  struct target_desc_info *src = get_tdesc_info (srcinf);
+  struct target_desc_info *dest = get_tdesc_info (destinf);
+
+  dest->fetched = src->fetched;
+  dest->tdesc = src->tdesc;
+  dest->filename = src->filename != NULL ? xstrdup (src->filename) : NULL;
+}
+
+/* See target-descriptions.h.  */
+
+void
+target_desc_info_free (struct target_desc_info *tdesc_info)
+{
+  if (tdesc_info != NULL)
+    {
+      xfree (tdesc_info->filename);
+      xfree (tdesc_info);
+    }
+}
+
+/* Convenience helper macros.  */
+
+#define target_desc_fetched \
+  get_tdesc_info (current_inferior ())->fetched
+#define current_target_desc \
+  get_tdesc_info (current_inferior ())->tdesc
+#define target_description_filename \
+  get_tdesc_info (current_inferior ())->filename
+
+/* The string manipulated by the "set tdesc filename ..." command.  */
+
+static char *tdesc_filename_cmd_string;
 
 /* Fetch the current target's description, and switch the current
    architecture to one which incorporates that description.  */
@@ -1510,6 +1569,9 @@ static void
 set_tdesc_filename_cmd (char *args, int from_tty,
 			struct cmd_list_element *c)
 {
+  xfree (target_description_filename);
+  target_description_filename = xstrdup (tdesc_filename_cmd_string);
+
   target_clear_description ();
   target_find_description ();
 }
@@ -1519,6 +1581,8 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c,
 			 const char *value)
 {
+  value = target_description_filename;
+
   if (value != NULL && *value != '\0')
     printf_filtered (_("The target description will be read from \"%s\".\n"),
 		     value);
@@ -1758,7 +1822,7 @@ Unset target description specific variables."),
 		  0 /* allow-unknown */, &unsetlist);
 
   add_setshow_filename_cmd ("filename", class_obscure,
-			    &target_description_filename,
+			    &tdesc_filename_cmd_string,
 			    _("\
 Set the file to read for an XML target description"), _("\
 Show the file to read for an XML target description"), _("\

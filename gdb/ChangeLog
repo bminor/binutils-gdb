@@ -1,3 +1,48 @@
+2012-11-09  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch.sh (target_gdbarch) <gdbarch.h>: Reimplement as macro.
+	(get_target_gdbarch) <gdbarch.h>: New function.
+	(startup_gdbarch) <gdbarch.h>: Declare.
+	<gdbarch.c> (target_gdbarch): Delete.
+	<gdbarch.c> (deprecated_target_gdbarch_select_hack): Set the
+	current inferior's gdbarch.
+	<gdbarch.c> (get_target_gdbarch): New function.
+	* inferior.c: Include target-descriptions.h.
+	(free_inferior): Free target description info.
+	(add_inferior_with_spaces): Set the inferior's initial
+	architecture.
+	(clone_inferior_command): Copy the original inferior's target
+	description if it was user specified.
+	(initialize_inferiors): Add comment.
+	* inferior.h (struct target_desc_info): Forward declare.
+	(struct inferior) <gdbarch>: New field.
+	* linux-nat.c: Include target-descriptions.h.
+	(linux_child_follow_fork): Copy the parent's architecture and
+	target description to the child.
+	* target-descriptions.c: Include inferior.h.
+	(struct target_desc_info): New structure, holding the equivalents
+	of ...
+	(target_desc_fetched, current_target_desc)
+	(target_description_filename): ... these removed globals.
+	(get_tdesc_info, target_desc_info_from_user_p)
+	(copy_inferior_target_desc_info, target_desc_info_free): New.
+	(target_desc_fetched, current_target_desc)
+	(target_description_filename): Reimplemented as convenience
+	macros.
+	(tdesc_filename_cmd_string): New global.
+	(set_tdesc_filename_cmd): Copy the string manipulated by the "set
+	tdescs filename ..." commands to the per-inferior equivalent.
+	(show_tdesc_filename_cmd): Get the value to show from the
+	per-inferior description filename.
+	(_initilize_target_descriptions): Change the "set/show tdesc
+	filename" commands' variable.
+	* target-descriptions.h (struct target_desc, struct target_desc_info)
+	(struct inferior): Forward declare.
+	(target_find_description, target_clear_description)
+	(target_current_description): Adjust comments.
+	(copy_inferior_target_desc_info, target_desc_info_free)
+	(target_desc_info_from_user_p). Declare.
+
 2012-11-08  Stephane Carrez  <Stephane.Carrez@gmail.com>
 
 	* tui/tui-hooks.c (tui_about_to_proceed): New function.
