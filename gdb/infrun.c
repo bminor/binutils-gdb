@@ -58,6 +58,7 @@
 #include "probe.h"
 #include "objfiles.h"
 #include "completer.h"
+#include "target-descriptions.h"
 
 /* Prototypes for local functions */
 
@@ -913,6 +914,16 @@ follow_exec (ptid_t pid, char *execd_pathname)
       set_current_inferior (inf);
       set_current_program_space (pspace);
     }
+  else
+    {
+      /* The old description may no longer be fit for the new image.
+	 E.g, a 64-bit process exec'ed a 32-bit process.  Clear the
+	 old description; we'll read a new one below.  No need to do
+	 this on "follow-exec-mode new", as the old inferior stays
+	 around (its description is later cleared/refetched on
+	 restart).  */
+      target_clear_description ();
+    }
 
   gdb_assert (current_program_space == inf->pspace);
 
@@ -931,6 +942,14 @@ follow_exec (ptid_t pid, char *execd_pathname)
 
   if ((inf->symfile_flags & SYMFILE_NO_READ) == 0)
     set_initial_language ();
+
+  /* If the target can specify a description, read it.  Must do this
+     after flipping to the new executable (because the target supplied
+     description must be compatible with the executable's
+     architecture, and the old executable may e.g., be 32-bit, while
+     the new one 64-bit), and before anything involving memory or
+     registers.  */
+  target_find_description ();
 
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
   SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
