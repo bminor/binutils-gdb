@@ -1,3 +1,18 @@
+2012-11-10  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/14288
+	* c-valprint.c (c_val_print): For character arrays
+	with "print null" option on, print ellipses if
+	the output is truncated and the next character is not \000.
+	* valprint.c (MAX_WCHARS): Define.
+	(WCHAR_BUFLEN): Likewise.
+	(WCHAR_BUFLEN_MAX): Likewise.
+	(struct converted_character): New structure.
+	(count_next_character): New function.
+	(print_converted_chars_to_obstack): New function.
+	(generic_printstr): Rewrite using count_next_character
+	and print_converted_chars_to_obstack.
+
 2012-11-10  Stephane Carrez  <Stephane.Carrez@gmail.com>
 
 	* tui/tui.c (tui_rl_command_key): Switch to TUI_ONE_COMMAND_MODE

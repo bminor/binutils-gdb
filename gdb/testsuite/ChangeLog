@@ -1,3 +1,13 @@
+2012-11-10  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/14288
+	* gdb.base/printcmds.c: Add invalid_XXX globals
+	for repeated byte tests.
+	* gdb.base/printcmds.exp (test_repeat_bytes): New procedure.
+	* gdb.base/wchar.c (main): Add and construct a wchar_t
+	array with repeated characters.
+	* gdb.base/wchar.exp: Add repeated character tests.
+
 2012-11-09  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.mi/mi-disassemble.exp: Expect fullname field in mi

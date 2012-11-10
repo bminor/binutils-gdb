@@ -792,6 +792,76 @@ proc gdb_test_escape_braces { args } {
     gdb_test [lindex $args 0] $esc_pattern [lindex $args 2]
 }
 
+proc test_repeat_bytes {} {
+    set start(E) {}
+    set start(S) {a}
+    set start(L) {abaabbaaabbb}
+    set start(R) {'a' <repeats 20 times>}
+    set end(E) {}
+    set end(S) {c}
+    set end(L) {cdccddcccddd}
+    set end(R) {'c' <repeats 20 times>}
+    set invalid(S) {\\240}
+    set invalid(L) {\\240\\240\\240\\240}
+    set invalid(R) {'\\240' <repeats 20 times>}
+
+    set fmt(SSS) "\"%s%s%s\""
+    set fmt(SSR) "\"%s%s\", %s"
+    set fmt(SRS) "\"%s\", %s, \"%s\""
+    set fmt(RSS) "%s, \"%s%s\""
+    set fmt(RSR) "%s, \"%s\", %s"
+    set fmt(SRR) "\"%s\", %s, %s"
+    set fmt(RRS) "%s, %s, \"%s\""
+    set fmt(RRR) "%s, %s, %s"
+
+    set fmt(RS) "%s, \"%s\""
+    set fmt(RR) "%s, %s"
+    set fmt(SR) "\"%s\", %s"
+    set fmt(SS) "\"%s%s\""
+
+    # Test the various permutations of invalid characters
+    foreach i [array names invalid] {
+	set I $i
+
+	if {$i == "L"} {
+	    set i "S"
+	}
+
+	foreach s [array names start] {
+	    set S $s
+
+	    if {$s == "L"} {
+		set s "S"
+	    }
+
+
+	    foreach e [array names end] {
+		set E $e
+
+		if {$e == "L"} {
+		    set e "S"
+		}
+
+		# Skip E*E.
+		if {$s == "E" && $e == "E"} { continue }
+
+		# Special cases...
+		if {$s == "E"} {
+		    set result [format $fmt($i$e) $invalid($I) $end($E)]
+		} elseif {$e == "E"} {
+		    set result [format $fmt($s$i) $start($S) $invalid($I)]
+		} else {
+		    set result [format $fmt($s$i$e) \
+				    $start($S) $invalid($I) $end($E)]
+		}
+
+		send_log "expecting: = $result\n"
+		gdb_test "print invalid_$S$I$E" "= $result"
+	    }
+	}
+    }
+}
+
 # Start with a fresh gdb.
 
 gdb_exit
@@ -851,3 +921,4 @@ test_print_enums
 test_printf
 test_printf_with_dfp
 test_print_symbol
+test_repeat_bytes

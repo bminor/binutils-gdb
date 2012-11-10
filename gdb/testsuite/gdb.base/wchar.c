@@ -25,11 +25,21 @@ do_nothing (wchar_t *c)
 int
 main (void)
 {
+  int i;
   wchar_t narrow = 97;
   wchar_t single = 0xbeef;
   wchar_t simple[] = L"facile";
   wchar_t difficile[] = { 0xdead, 0xbeef, 0xfeed, 0xface};
   wchar_t mixed[] = {L'f', 0xdead, L'a', L'c', 0xfeed, 0xface};
+  wchar_t *cent = L"\242";
+  wchar_t repeat[128];
+  wchar_t *repeat_p = repeat;
+
+  repeat[0] = 0;
+  wcscat (repeat, L"A");
+  for (i = 0; i < 21; ++i)
+    wcscat (repeat, cent);
+  wcscat (repeat, L"B");
 
   do_nothing (&narrow); /* START */
   do_nothing (&single);

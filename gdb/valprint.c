@@ -40,6 +40,43 @@
 
 #include <errno.h>
 
+/* Maximum number of wchars returned from wchar_iterate.  */
+#define MAX_WCHARS 4
+
+/* A convenience macro to compute the size of a wchar_t buffer containing X
+   characters.  */
+#define WCHAR_BUFLEN(X) ((X) * sizeof (gdb_wchar_t))
+
+/* Character buffer size saved while iterating over wchars.  */
+#define WCHAR_BUFLEN_MAX WCHAR_BUFLEN (MAX_WCHARS)
+
+/* A structure to encapsulate state information from iterated
+   character conversions.  */
+struct converted_character
+{
+  /* The number of characters converted.  */
+  int num_chars;
+
+  /* The result of the conversion.  See charset.h for more.  */
+  enum wchar_iterate_result result;
+
+  /* The (saved) converted character(s).  */
+  gdb_wchar_t chars[WCHAR_BUFLEN_MAX];
+
+  /* The first converted target byte.  */
+  const gdb_byte *buf;
+
+  /* The number of bytes converted.  */
+  size_t buflen;
+
+  /* How many times this character(s) is repeated.  */
+  int repeat_count;
+};
+
+typedef struct converted_character converted_character_d;
+DEF_VEC_O (converted_character_d);
+
+
 /* Prototypes for local functions */
 
 static int partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
@@ -2045,6 +2082,253 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
   do_cleanups (cleanups);
 }
 
+/* Return the repeat count of the next character/byte in ITER,
+   storing the result in VEC.  */
+
+static int
+count_next_character (struct wchar_iterator *iter,
+		      VEC (converted_character_d) **vec)
+{
+  struct converted_character *current;
+
+  if (VEC_empty (converted_character_d, *vec))
+    {
+      struct converted_character tmp;
+      gdb_wchar_t *chars;
+
+      tmp.num_chars
+	= wchar_iterate (iter, &tmp.result, &chars, &tmp.buf, &tmp.buflen);
+      if (tmp.num_chars > 0)
+	{
+	  gdb_assert (tmp.num_chars < MAX_WCHARS);
+	  memcpy (tmp.chars, chars, tmp.num_chars * sizeof (gdb_wchar_t));
+	}
+      VEC_safe_push (converted_character_d, *vec, &tmp);
+    }
+
+  current = VEC_last (converted_character_d, *vec);
+
+  /* Count repeated characters or bytes.  */
+  current->repeat_count = 1;
+  if (current->num_chars == -1)
+    {
+      /* EOF  */
+      return -1;
+    }
+  else
+    {
+      gdb_wchar_t *chars;
+      struct converted_character d;
+      int repeat;
+
+      d.repeat_count = 0;
+
+      while (1)
+	{
+	  /* Get the next character.  */
+	  d.num_chars
+	    = wchar_iterate (iter, &d.result, &chars, &d.buf, &d.buflen);
+
+	  /* If a character was successfully converted, save the character
+	     into the converted character.  */
+	  if (d.num_chars > 0)
+	    {
+	      gdb_assert (d.num_chars < MAX_WCHARS);
+	      memcpy (d.chars, chars, WCHAR_BUFLEN (d.num_chars));
+	    }
+
+	  /* Determine if the current character is the same as this
+	     new character.  */
+	  if (d.num_chars == current->num_chars && d.result == current->result)
+	    {
+	      /* There are two cases to consider:
+
+		 1) Equality of converted character (num_chars > 0)
+		 2) Equality of non-converted character (num_chars == 0)  */
+	      if ((current->num_chars > 0
+		   && memcmp (current->chars, d.chars,
+			      WCHAR_BUFLEN (current->num_chars)) == 0)
+		  || (current->num_chars == 0
+		      && current->buflen == d.buflen
+		      && memcmp (current->buf, d.buf, current->buflen) == 0))
+		++current->repeat_count;
+	      else
+		break;
+	    }
+	  else
+	    break;
+	}
+
+      /* Push this next converted character onto the result vector.  */
+      repeat = current->repeat_count;
+      VEC_safe_push (converted_character_d, *vec, &d);
+      return repeat;
+    }
+}
+
+/* Print the characters in CHARS to the OBSTACK.  QUOTE_CHAR is the quote
+   character to use with string output.  WIDTH is the size of the output
+   character type.  BYTE_ORDER is the the target byte order.  OPTIONS
+   is the user's print options.  */
+
+static void
+print_converted_chars_to_obstack (struct obstack *obstack,
+				  VEC (converted_character_d) *chars,
+				  int quote_char, int width,
+				  enum bfd_endian byte_order,
+				  const struct value_print_options *options)
+{
+  unsigned int idx;
+  struct converted_character *elem;
+  enum {START, SINGLE, REPEAT, INCOMPLETE, FINISH} state, last;
+  gdb_wchar_t wide_quote_char = gdb_btowc (quote_char);
+  int need_escape = 0;
+
+  /* Set the start state.  */
+  idx = 0;
+  last = state = START;
+  elem = NULL;
+
+  while (1)
+    {
+      switch (state)
+	{
+	case START:
+	  /* Nothing to do.  */
+	  break;
+
+	case SINGLE:
+	  {
+	    int j;
+
+	    /* We are outputting a single character
+	       (< options->repeat_count_threshold).  */
+
+	    if (last != SINGLE)
+	      {
+		/* We were outputting some other type of content, so we
+		   must output and a comma and a quote.  */
+		if (last != START)
+		  obstack_grow_wstr (obstack, LCST (", "));
+		if (options->inspect_it)
+		  obstack_grow_wstr (obstack, LCST ("\\"));
+		obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
+	      }
+	    /* Output the character.  */
+	    for (j = 0; j < elem->repeat_count; ++j)
+	      {
+		if (elem->result == wchar_iterate_ok)
+		  print_wchar (elem->chars[0], elem->buf, elem->buflen, width,
+			       byte_order, obstack, quote_char, &need_escape);
+		else
+		  print_wchar (gdb_WEOF, elem->buf, elem->buflen, width,
+			       byte_order, obstack, quote_char, &need_escape);
+	      }
+	  }
+	  break;
+
+	case REPEAT:
+	  {
+	    int j;
+	    char *s;
+
+	    /* We are outputting a character with a repeat count
+	       greater than options->repeat_count_threshold.  */
+
+	    if (last == SINGLE)
+	      {
+		/* We were outputting a single string.  Terminate the
+		   string.  */
+		if (options->inspect_it)
+		  obstack_grow_wstr (obstack, LCST ("\\"));
+		obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
+	      }
+	    if (last != START)
+	      obstack_grow_wstr (obstack, LCST (", "));
+
+	    /* Output the character and repeat string.  */
+	    obstack_grow_wstr (obstack, LCST ("'"));
+	    if (elem->result == wchar_iterate_ok)
+	      print_wchar (elem->chars[0], elem->buf, elem->buflen, width,
+			   byte_order, obstack, quote_char, &need_escape);
+	    else
+	      print_wchar (gdb_WEOF, elem->buf, elem->buflen, width,
+			   byte_order, obstack, quote_char, &need_escape);
+	    obstack_grow_wstr (obstack, LCST ("'"));
+	    s = xstrprintf (_(" <repeats %u times>"), elem->repeat_count);
+	    for (j = 0; s[j]; ++j)
+	      {
+		gdb_wchar_t w = gdb_btowc (s[j]);
+		obstack_grow (obstack, &w, sizeof (gdb_wchar_t));
+	      }
+	    xfree (s);
+	  }
+	  break;
+
+	case INCOMPLETE:
+	  /* We are outputting an incomplete sequence.  */
+	  if (last == SINGLE)
+	    {
+	      /* If we were outputting a string of SINGLE characters,
+		 terminate the quote.  */
+	      if (options->inspect_it)
+		obstack_grow_wstr (obstack, LCST ("\\"));
+	      obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
+	    }
+	  if (last != START)
+	    obstack_grow_wstr (obstack, LCST (", "));
+
+	  /* Output the incomplete sequence string.  */
+	  obstack_grow_wstr (obstack, LCST ("<incomplete sequence "));
+	  print_wchar (gdb_WEOF, elem->buf, elem->buflen, width, byte_order,
+		       obstack, 0, &need_escape);
+	  obstack_grow_wstr (obstack, LCST (">"));
+
+	  /* We do not attempt to outupt anything after this.  */
+	  state = FINISH;
+	  break;
+
+	case FINISH:
+	  /* All done.  If we were outputting a string of SINGLE
+	     characters, the string must be terminated.  Otherwise,
+	     REPEAT and INCOMPLETE are always left properly terminated.  */
+	  if (last == SINGLE)
+	    {
+	      if (options->inspect_it)
+		obstack_grow_wstr (obstack, LCST ("\\"));
+	      obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
+	    }
+
+	  return;
+	}
+
+      /* Get the next element and state.  */
+      last = state;
+      if (state != FINISH)
+	{
+	  elem = VEC_index (converted_character_d, chars, idx++);
+	  switch (elem->result)
+	    {
+	    case wchar_iterate_ok:
+	    case wchar_iterate_invalid:
+	      if (elem->repeat_count > options->repeat_count_threshold)
+		state = REPEAT;
+	      else
+		state = SINGLE;
+	      break;
+
+	    case wchar_iterate_incomplete:
+	      state = INCOMPLETE;
+	      break;
+
+	    case wchar_iterate_eof:
+	      state = FINISH;
+	      break;
+	    }
+	}
+    }
+}
+
 /* Print the character string STRING, printing at most LENGTH
    characters.  LENGTH is -1 if the string is nul terminated.  TYPE is
    the type of each character.  OPTIONS holds the printing options;
@@ -2064,16 +2348,13 @@ generic_printstr (struct ui_file *stream, struct type *type,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   unsigned int i;
-  unsigned int things_printed = 0;
-  int in_quotes = 0;
-  int need_comma = 0;
   int width = TYPE_LENGTH (type);
   struct obstack wchar_buf, output;
   struct cleanup *cleanup;
   struct wchar_iterator *iter;
   int finished = 0;
-  int need_escape = 0;
-  gdb_wchar_t wide_quote_char = gdb_btowc (quote_char);
+  struct converted_character *last;
+  VEC (converted_character_d) *converted_chars;
 
   if (length == -1)
     {
@@ -2107,166 +2388,46 @@ generic_printstr (struct ui_file *stream, struct type *type,
   /* Arrange to iterate over the characters, in wchar_t form.  */
   iter = make_wchar_iterator (string, length * width, encoding, width);
   cleanup = make_cleanup_wchar_iterator (iter);
+  converted_chars = NULL;
+  make_cleanup (VEC_cleanup (converted_character_d), &converted_chars);
+
+  /* Convert characters until the string is over or the maximum
+     number of printed characters has been reached.  */
+  i = 0;
+  while (i < options->print_max)
+    {
+      int r;
+
+      QUIT;
+
+      /* Grab the next character and repeat count.  */
+      r = count_next_character (iter, &converted_chars);
+
+      /* If less than zero, the end of the input string was reached.  */
+      if (r < 0)
+	break;
+
+      /* Otherwise, add the count to the total print count and get
+	 the next character.  */
+      i += r;
+    }
+
+  /* Get the last element and determine if the entire string was
+     processed.  */
+  last = VEC_last (converted_character_d, converted_chars);
+  finished = (last->result == wchar_iterate_eof);
+
+  /* Ensure that CONVERTED_CHARS is terminated.  */
+  last->result = wchar_iterate_eof;
 
   /* WCHAR_BUF is the obstack we use to represent the string in
      wchar_t form.  */
   obstack_init (&wchar_buf);
   make_cleanup_obstack_free (&wchar_buf);
 
-  while (!finished && things_printed < options->print_max)
-    {
-      int num_chars;
-      enum wchar_iterate_result result;
-      gdb_wchar_t *chars;
-      const gdb_byte *buf;
-      size_t buflen;
-
-      QUIT;
-
-      if (need_comma)
-	{
-	  obstack_grow_wstr (&wchar_buf, LCST (", "));
-	  need_comma = 0;
-	}
-
-      num_chars = wchar_iterate (iter, &result, &chars, &buf, &buflen);
-      /* We only look at repetitions when we were able to convert a
-	 single character in isolation.  This makes the code simpler
-	 and probably does the sensible thing in the majority of
-	 cases.  */
-      while (num_chars == 1 && things_printed < options->print_max)
-	{
-	  /* Count the number of repetitions.  */
-	  unsigned int reps = 0;
-	  gdb_wchar_t current_char = chars[0];
-	  const gdb_byte *orig_buf = buf;
-	  int orig_len = buflen;
-
-	  if (need_comma)
-	    {
-	      obstack_grow_wstr (&wchar_buf, LCST (", "));
-	      need_comma = 0;
-	    }
-
-	  while (num_chars == 1 && current_char == chars[0])
-	    {
-	      num_chars = wchar_iterate (iter, &result, &chars,
-					 &buf, &buflen);
-	      ++reps;
-	    }
-
-	  /* Emit CURRENT_CHAR according to the repetition count and
-	     options.  */
-	  if (reps > options->repeat_count_threshold)
-	    {
-	      if (in_quotes)
-		{
-		  if (options->inspect_it)
-		    obstack_grow_wstr (&wchar_buf, LCST ("\\"));
-		  obstack_grow (&wchar_buf, &wide_quote_char,
-				sizeof (gdb_wchar_t));
-		  obstack_grow_wstr (&wchar_buf, LCST (", "));
-		  in_quotes = 0;
-		}
-	      obstack_grow_wstr (&wchar_buf, LCST ("'"));
-	      need_escape = 0;
-	      print_wchar (current_char, orig_buf, orig_len, width,
-			   byte_order, &wchar_buf, '\'', &need_escape);
-	      obstack_grow_wstr (&wchar_buf, LCST ("'"));
-	      {
-		/* Painful gyrations.  */
-		int j;
-		char *s = xstrprintf (_(" <repeats %u times>"), reps);
-
-		for (j = 0; s[j]; ++j)
-		  {
-		    gdb_wchar_t w = gdb_btowc (s[j]);
-		    obstack_grow (&wchar_buf, &w, sizeof (gdb_wchar_t));
-		  }
-		xfree (s);
-	      }
-	      things_printed += options->repeat_count_threshold;
-	      need_comma = 1;
-	    }
-	  else
-	    {
-	      /* Saw the character one or more times, but fewer than
-		 the repetition threshold.  */
-	      if (!in_quotes)
-		{
-		  if (options->inspect_it)
-		    obstack_grow_wstr (&wchar_buf, LCST ("\\"));
-		  obstack_grow (&wchar_buf, &wide_quote_char,
-				sizeof (gdb_wchar_t));
-		  in_quotes = 1;
-		  need_escape = 0;
-		}
-
-	      while (reps-- > 0)
-		{
-		  print_wchar (current_char, orig_buf,
-			       orig_len, width,
-			       byte_order, &wchar_buf,
-			       quote_char, &need_escape);
-		  ++things_printed;
-		}
-	    }
-	}
-
-      /* NUM_CHARS and the other outputs from wchar_iterate are valid
-	 here regardless of which branch was taken above.  */
-      if (num_chars < 0)
-	{
-	  /* Hit EOF.  */
-	  finished = 1;
-	  break;
-	}
-
-      switch (result)
-	{
-	case wchar_iterate_invalid:
-	  if (!in_quotes)
-	    {
-	      if (options->inspect_it)
-		obstack_grow_wstr (&wchar_buf, LCST ("\\"));
-	      obstack_grow (&wchar_buf, &wide_quote_char,
-			    sizeof (gdb_wchar_t));
-	      in_quotes = 1;
-	    }
-	  need_escape = 0;
-	  print_wchar (gdb_WEOF, buf, buflen, width, byte_order,
-		       &wchar_buf, quote_char, &need_escape);
-	  break;
-
-	case wchar_iterate_incomplete:
-	  if (in_quotes)
-	    {
-	      if (options->inspect_it)
-		obstack_grow_wstr (&wchar_buf, LCST ("\\"));
-	      obstack_grow (&wchar_buf, &wide_quote_char,
-			    sizeof (gdb_wchar_t));
-	      obstack_grow_wstr (&wchar_buf, LCST (","));
-	      in_quotes = 0;
-	    }
-	  obstack_grow_wstr (&wchar_buf,
-			     LCST (" <incomplete sequence "));
-	  print_wchar (gdb_WEOF, buf, buflen, width,
-		       byte_order, &wchar_buf,
-		       0, &need_escape);
-	  obstack_grow_wstr (&wchar_buf, LCST (">"));
-	  finished = 1;
-	  break;
-	}
-    }
-
-  /* Terminate the quotes if necessary.  */
-  if (in_quotes)
-    {
-      if (options->inspect_it)
-	obstack_grow_wstr (&wchar_buf, LCST ("\\"));
-      obstack_grow (&wchar_buf, &wide_quote_char,
-		    sizeof (gdb_wchar_t));
-    }
+  /* Print the output string to the obstack.  */
+  print_converted_chars_to_obstack (&wchar_buf, converted_chars, quote_char,
+				    width, byte_order, options);
 
   if (force_ellipses || !finished)
     obstack_grow_wstr (&wchar_buf, LCST ("..."));

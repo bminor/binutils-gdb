@@ -177,6 +177,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 				   TARGET_CHAR_BIT * embedded_offset,
 				   TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	    {
+	      int force_ellipses = 0;
+
 	      /* If requested, look for the first null char and only
 	         print elements up to it.  */
 	      if (options->stop_print_at_null)
@@ -191,12 +193,26 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 						     eltlen, byte_order) != 0);
 		       ++temp_len)
 		    ;
+
+		  /* Force LA_PRINT_STRING to print ellipses if
+		     we've printed the maximum characters and
+		     the next character is not \000.  */
+		  if (temp_len == options->print_max && temp_len < len)
+		    {
+		      ULONGEST val
+			= extract_unsigned_integer (valaddr + embedded_offset
+						    + temp_len * eltlen,
+						    eltlen, byte_order);
+		      if (val != 0)
+			force_ellipses = 1;
+		    }
+
 		  len = temp_len;
 		}
 
 	      LA_PRINT_STRING (stream, unresolved_elttype,
 			       valaddr + embedded_offset, len,
-			       NULL, 0, options);
+			       NULL, force_ellipses, options);
 	      i = len;
 	    }
 	  else
