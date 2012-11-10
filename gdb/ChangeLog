@@ -1,5 +1,13 @@
 2012-11-10  Stephane Carrez  <Stephane.Carrez@gmail.com>
 
+	* tui/tui.c (tui_rl_command_key): Switch to TUI_ONE_COMMAND_MODE
+	while executing the gdb command.
+	(tui_rl_startup_hook): Do not switch back to TUI_SINGLE_KEY_MODE if we
+	are called from prompt_for_continue.
+	* tui/tui-io.c (tui_redisplay_readline): Likewise.
+
+2012-11-10  Stephane Carrez  <Stephane.Carrez@gmail.com>
+
 	PR tui/9584
 
 	* tui/tui.c (tui_rl_command_key): Do not call execute_command
