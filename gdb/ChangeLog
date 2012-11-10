@@ -1,5 +1,13 @@
 2012-11-10  Keith Seitz  <keiths@redhat.com>
 
+	* breakpoint.c (clear_command): Add cleanup for
+	sals.sals if an argument is given.
+
+	* linespec.c (parse_linespec): Do cleanups after
+	parsing a convenience variable.
+
+2012-11-10  Keith Seitz  <keiths@redhat.com>
+
 	PR gdb/14288
 	* c-valprint.c (c_val_print): For character arrays
 	with "print null" option on, print ellipses if

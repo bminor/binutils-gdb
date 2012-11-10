@@ -11792,6 +11792,7 @@ clear_command (char *arg, int from_tty)
       sals = decode_line_with_current_source (arg,
 					      (DECODE_LINE_FUNFIRSTLINE
 					       | DECODE_LINE_LIST_MODE));
+      make_cleanup (xfree, sals.sals);
       default_match = 0;
     }
   else

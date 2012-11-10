@@ -2095,20 +2095,17 @@ parse_linespec (linespec_parser *parser, char **argptr)
       cleanup = make_cleanup (xfree, var);
       PARSER_RESULT (parser)->line_offset
 	= linespec_parse_variable (PARSER_STATE (parser), var);
+      do_cleanups (cleanup);
 
       /* If a line_offset wasn't found (VAR is the name of a user
 	 variable/function), then skip to normal symbol processing.  */
       if (PARSER_RESULT (parser)->line_offset.sign != LINE_OFFSET_UNKNOWN)
 	{
-	  discard_cleanups (cleanup);
-
 	  /* Consume this token.  */
 	  linespec_lexer_consume_token (parser);
 
 	  goto convert_to_sals;
 	}
-
-      do_cleanups (cleanup);
     }
   else if (token.type != LSTOKEN_STRING && token.type != LSTOKEN_NUMBER)
     unexpected_linespec_error (parser);
