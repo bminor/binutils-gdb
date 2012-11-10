@@ -2946,9 +2946,6 @@ amd64_x32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     tdesc = tdesc_x32;
   tdep->tdesc = tdesc;
 
-  tdep->sp_regnum_from_eax = AMD64_RSP_REGNUM;
-  tdep->pc_regnum_from_eax = AMD64_RIP_REGNUM;
-
   tdep->num_dword_regs = 17;
   set_tdesc_pseudo_register_type (gdbarch, amd64_x32_pseudo_register_type);
 

@@ -7805,9 +7805,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->num_mmx_regs = 8;
   tdep->num_ymm_regs = 0;
 
-  tdep->sp_regnum_from_eax = -1;
-  tdep->pc_regnum_from_eax = -1;
-
   tdesc_data = tdesc_data_alloc ();
 
   set_gdbarch_relocate_instruction (gdbarch, i386_relocate_instruction);
@@ -7852,14 +7849,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* Support dword pseudo-register if it hasn't been disabled.  */
       tdep->eax_regnum = ymm0_regnum;
       ymm0_regnum += tdep->num_dword_regs;
-      if (tdep->sp_regnum_from_eax != -1)
-	set_gdbarch_sp_regnum (gdbarch,
-			       (tdep->eax_regnum
-				+ tdep->sp_regnum_from_eax));
-      if (tdep->pc_regnum_from_eax != -1)
-	set_gdbarch_pc_regnum (gdbarch,
-			       (tdep->eax_regnum
-				+ tdep->pc_regnum_from_eax));
     }
   else
     tdep->eax_regnum = -1;
