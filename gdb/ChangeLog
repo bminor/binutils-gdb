@@ -1,3 +1,10 @@
+2012-11-10  Stephane Carrez  <Stephane.Carrez@gmail.com>
+
+	PR tui/9584
+
+	* tui/tui.c (tui_rl_command_key): Do not call execute_command
+	but insert the command to execute in readline's buffer.
+
 2012-11-09  Tom Tromey  <tromey@redhat.com>
 
 	* gdbarch.sh (target_gdbarch): Remove macro.

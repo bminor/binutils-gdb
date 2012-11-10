@@ -240,12 +240,13 @@ tui_rl_command_key (int count, int key)
     {
       if (tui_commands[i].key == key)
         {
-          /* Must save the command because it can be modified by
-             execute_command.  */
-          char *cmd = alloca (strlen (tui_commands[i].cmd) + 1);
-
-          strcpy (cmd, tui_commands[i].cmd);
-          execute_command (cmd, TRUE);
+          /* Insert the command in the readline buffer.
+             Avoid calling the gdb command here since it creates
+             a possible recursion on readline if prompt_for_continue
+             is called (See PR 9584).  The command will also appear
+             in the readline history which turns out to be better.  */
+          rl_insert_text (tui_commands[i].cmd);
+          rl_newline (1, '\n');
           return 0;
         }
     }
