@@ -2229,9 +2229,9 @@ build_indexed_byte (operand *op, int format ATTRIBUTE_UNUSED, int move_insn)
 		  byte <<= 3;
 		  byte |= 0xe2;
 		  number_to_chars_bigendian (f, byte, 1);
+		  f = frag_more (2);
 		  fix_new (frag_now, f - frag_now->fr_literal, 2,
 			   sym, off, 0, BFD_RELOC_M68HC12_16B);
-		  f = frag_more (2);
 		  return 1;
 		}
 	      else
@@ -4471,8 +4471,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       if (value < 0)
         value += 65536;
 
-      where[1] = (value >> 8);
-      where[2] = (value & 0xff);
+      where[0] = (value >> 8);
+      where[1] = (value & 0xff);
       break;
 
     case BFD_RELOC_M68HC11_RL_JUMP:
