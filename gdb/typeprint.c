@@ -38,6 +38,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include "cli/cli-utils.h"
+#include "python/python.h"
 
 extern void _initialize_typeprint (void);
 
@@ -52,7 +53,9 @@ const struct type_print_options type_print_raw_options =
   1,				/* raw */
   1,				/* print_methods */
   1,				/* print_typedefs */
-  NULL				/* local_typedefs */
+  NULL,				/* local_typedefs */
+  NULL,				/* global_table */
+  NULL				/* global_printers */
 };
 
 /* The default flags for 'ptype' and 'whatis'.  */
@@ -62,7 +65,9 @@ static struct type_print_options default_ptype_flags =
   0,				/* raw */
   1,				/* print_methods */
   1,				/* print_typedefs */
-  NULL				/* local_typedefs */
+  NULL,				/* local_typedefs */
+  NULL,				/* global_table */
+  NULL				/* global_printers */
 };
 
 
@@ -235,6 +240,74 @@ copy_typedef_hash (struct typedef_hash_table *table)
   return result;
 }
 
+/* A cleanup to free the global typedef hash.  */
+
+static void
+do_free_global_table (void *arg)
+{
+  struct type_print_options *flags = arg;
+
+  free_typedef_hash (flags->global_typedefs);
+  free_type_printers (flags->global_printers);
+}
+
+/* Create the global typedef hash.  */
+
+static struct cleanup *
+create_global_typedef_table (struct type_print_options *flags)
+{
+  gdb_assert (flags->global_typedefs == NULL && flags->global_printers == NULL);
+  flags->global_typedefs = create_typedef_hash ();
+  flags->global_printers = start_type_printers ();
+  return make_cleanup (do_free_global_table, flags);
+}
+
+/* Look up the type T in the global typedef hash.  If it is found,
+   return the typedef name.  If it is not found, apply the
+   type-printers, if any, given by start_type_printers and return the
+   result.  A NULL return means that the name was not found.  */
+
+static const char *
+find_global_typedef (const struct type_print_options *flags,
+		     struct type *t)
+{
+  char *applied;
+  void **slot;
+  struct typedef_field tf, *new_tf;
+
+  if (flags->global_typedefs == NULL)
+    return NULL;
+
+  tf.name = NULL;
+  tf.type = t;
+
+  slot = htab_find_slot (flags->global_typedefs->table, &tf, INSERT);
+  if (*slot != NULL)
+    {
+      new_tf = *slot;
+      return new_tf->name;
+    }
+
+  /* Put an entry into the hash table now, in case apply_type_printers
+     recurses.  */
+  new_tf = XOBNEW (&flags->global_typedefs->storage, struct typedef_field);
+  new_tf->name = NULL;
+  new_tf->type = t;
+
+  *slot = new_tf;
+
+  applied = apply_type_printers (flags->global_printers, t);
+
+  if (applied != NULL)
+    {
+      new_tf->name = obstack_copy0 (&flags->global_typedefs->storage, applied,
+				    strlen (applied));
+      xfree (applied);
+    }
+
+  return new_tf->name;
+}
+
 /* Look up the type T in the typedef hash table in with FLAGS.  If T
    is in the table, return its short (class-relative) typedef name.
    Otherwise return NULL.  If the table is NULL, this always returns
@@ -243,16 +316,19 @@ copy_typedef_hash (struct typedef_hash_table *table)
 const char *
 find_typedef_in_hash (const struct type_print_options *flags, struct type *t)
 {
-  struct typedef_field tf, *found;
+  if (flags->local_typedefs != NULL)
+    {
+      struct typedef_field tf, *found;
 
-  if (flags->local_typedefs == NULL)
-    return NULL;
+      tf.name = NULL;
+      tf.type = t;
+      found = htab_find (flags->local_typedefs->table, &tf);
 
-  tf.name = NULL;
-  tf.type = t;
-  found = htab_find (flags->local_typedefs->table, &tf);
+      if (found != NULL)
+	return found->name;
+    }
 
-  return found == NULL ? NULL : found->name;
+  return find_global_typedef (flags, t);
 }
 
 
@@ -325,7 +401,7 @@ whatis_exp (char *exp, int show)
 {
   struct expression *expr;
   struct value *val;
-  struct cleanup *old_chain = NULL;
+  struct cleanup *old_chain;
   struct type *real_type = NULL;
   struct type *type;
   int full = 0;
@@ -333,6 +409,8 @@ whatis_exp (char *exp, int show)
   int using_enc = 0;
   struct value_print_options opts;
   struct type_print_options flags = default_ptype_flags;
+
+  old_chain = make_cleanup (null_cleanup, NULL);
 
   if (exp)
     {
@@ -373,7 +451,7 @@ whatis_exp (char *exp, int show)
 	}
 
       expr = parse_expression (exp);
-      old_chain = make_cleanup (free_current_contents, &expr);
+      make_cleanup (free_current_contents, &expr);
       val = evaluate_type (expr);
     }
   else
@@ -394,6 +472,9 @@ whatis_exp (char *exp, int show)
 
   printf_filtered ("type = ");
 
+  if (!flags.raw)
+    create_global_typedef_table (&flags);
+
   if (real_type)
     {
       printf_filtered ("/* real type = ");
@@ -406,8 +487,7 @@ whatis_exp (char *exp, int show)
   LA_PRINT_TYPE (type, "", gdb_stdout, show, 0, &flags);
   printf_filtered ("\n");
 
-  if (exp)
-    do_cleanups (old_chain);
+  do_cleanups (old_chain);
 }
 
 static void

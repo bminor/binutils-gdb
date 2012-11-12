@@ -1,5 +1,12 @@
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/completion.exp: Update for "info type-printers".
+	* gdb.python/py-typeprint.cc: New file.
+	* gdb.python/py-typeprint.exp: New file.
+	* gdb.python/py-typeprint.py: New file.
+
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/call-sc.exp: Use "ptype/r".
 	* gdb.base/volatile.exp: Don't expect "int".
 	* gdb.cp/ptype-flags.cc: New file.

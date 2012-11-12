@@ -38,6 +38,14 @@ struct type_print_options
   /* If not NULL, a local typedef hash table used when printing a
      type.  */
   struct typedef_hash_table *local_typedefs;
+
+  /* If not NULL, a global typedef hash table used when printing a
+     type.  */
+  struct typedef_hash_table *global_typedefs;
+
+  /* The list of type printers associated with the global typedef
+     table.  This is intentionally opaque.  */
+  void *global_printers;
 };
 
 extern const struct type_print_options type_print_raw_options;

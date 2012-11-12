@@ -17,6 +17,8 @@
 
   ** Python's atexit.register now works in GDB.
 
+  ** Types can be pretty-printed via a Python API.
+
 * New Python-based convenience functions:
 
   ** $_memeq(buf1, buf2, length)
@@ -50,6 +52,10 @@ pi [command]
 
 py [command]
   "py" is a new alias for "python".
+
+enable type-printer [name]...
+disable type-printer [name]...
+  Enable or disable type printers.
 
 * Removed commands
 

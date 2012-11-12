@@ -1,5 +1,45 @@
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
+	* NEWS: Update.
+	* data-directory/Makefile.in (PYTHON_FILES): Add
+	type_printers.py.
+	* python/lib/gdb/command/type_printers.py: New file.
+	* python/lib/gdb/command/types.py (TypePrinter): New class.
+	(_get_some_type_recognizers, get_type_recognizers,
+	apply_type_recognizers, register_type_printer): New
+	functions.
+	* python/py-objfile.c (objfile_object) <type_printers>: New
+	field.
+	(objfpy_dealloc): Decref new field.
+	(objfpy_new): Set new field.
+	(objfpy_get_type_printers, objfpy_set_type_printers): New
+	functions.
+	(objfile_to_objfile_object): Set new field.
+	(objfile_getset): Add "type_printers".
+	* python/py-progspace.c (pspace_object) <type_printers>: New
+	field.
+	(pspy_dealloc): Decref new field.
+	(pspy_new): Set new field.
+	(pspy_get_type_printers, pspy_set_type_printers): New functions.
+	(pspace_to_pspace_object): Set new field.
+	(pspace_getset): Add "type_printers".
+	* python/python.c (start_type_printers, apply_type_printers,
+	free_type_printers): New functions.
+	(_initialize_python): Set gdb.type_printers.
+	* python/python.h (start_type_printers, apply_type_printers,
+	free_type_printers): Declare.
+	* typeprint.c (type_print_raw_options, default_ptype_flags):
+	Update for new fields.
+	(do_free_global_table, create_global_typedef_table,
+	find_global_typedef): New functions.
+	(find_typedef_in_hash): Use find_global_typedef.
+	(whatis_exp): Use create_global_typedef_table.  Change cleanup
+	handling.
+	* typeprint.h (struct type_print_options) <global_typedefs,
+	global_printers>: New fields.
+
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
 	* c-typeprint.c (find_typedef_for_canonicalize,
 	print_name_maybe_canonical): New functions.
 	(c_print_type): Look up type name.

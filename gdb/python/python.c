@@ -1181,6 +1181,125 @@ gdbpy_objfiles (PyObject *unused1, PyObject *unused2)
   return list;
 }
 
+/* Compute the list of active type printers and return it.  The result
+   of this function can be passed to apply_type_printers, and should
+   be freed by free_type_printers.  */
+
+void *
+start_type_printers (void)
+{
+  struct cleanup *cleanups;
+  PyObject *type_module, *func, *result_obj;
+
+  cleanups = ensure_python_env (get_current_arch (), current_language);
+
+  type_module = PyImport_ImportModule ("gdb.types");
+  if (type_module == NULL)
+    {
+      gdbpy_print_stack ();
+      goto done;
+    }
+  make_cleanup_py_decref (type_module);
+
+  func = PyObject_GetAttrString (type_module, "get_type_recognizers");
+  if (func == NULL)
+    {
+      gdbpy_print_stack ();
+      goto done;
+    }
+  make_cleanup_py_decref (func);
+
+  result_obj = PyObject_CallFunctionObjArgs (func, (char *) NULL);
+  if (result_obj == NULL)
+    gdbpy_print_stack ();
+
+ done:
+  do_cleanups (cleanups);
+  return result_obj;
+}
+
+/* If TYPE is recognized by some type printer, return a newly
+   allocated string holding the type's replacement name.  The caller
+   is responsible for freeing the string.  Otherwise, return NULL.
+
+   This function has a bit of a funny name, since it actually applies
+   recognizers, but this seemed clearer given the start_type_printers
+   and free_type_printers functions.  */
+
+char *
+apply_type_printers (void *printers, struct type *type)
+{
+  struct cleanup *cleanups;
+  PyObject *type_obj, *type_module, *func, *result_obj;
+  PyObject *printers_obj = printers;
+  char *result = NULL;
+
+  if (printers_obj == NULL)
+    return NULL;
+
+  cleanups = ensure_python_env (get_current_arch (), current_language);
+
+  type_obj = type_to_type_object (type);
+  if (type_obj == NULL)
+    {
+      gdbpy_print_stack ();
+      goto done;
+    }
+  make_cleanup_py_decref (type_obj);
+
+  type_module = PyImport_ImportModule ("gdb.types");
+  if (type_module == NULL)
+    {
+      gdbpy_print_stack ();
+      goto done;
+    }
+  make_cleanup_py_decref (type_module);
+
+  func = PyObject_GetAttrString (type_module, "apply_type_recognizers");
+  if (func == NULL)
+    {
+      gdbpy_print_stack ();
+      goto done;
+    }
+  make_cleanup_py_decref (func);
+
+  result_obj = PyObject_CallFunctionObjArgs (func, printers_obj,
+					     type_obj, (char *) NULL);
+  if (result_obj == NULL)
+    {
+      gdbpy_print_stack ();
+      goto done;
+    }
+  make_cleanup_py_decref (result_obj);
+
+  if (result_obj != Py_None)
+    {
+      result = python_string_to_host_string (result_obj);
+      if (result == NULL)
+	gdbpy_print_stack ();
+    }
+
+ done:
+  do_cleanups (cleanups);
+  return result;
+}
+
+/* Free the result of start_type_printers.  */
+
+void
+free_type_printers (void *arg)
+{
+  struct cleanup *cleanups;
+  PyObject *printers = arg;
+
+  if (printers == NULL)
+    return;
+
+  cleanups = ensure_python_env (get_current_arch (), current_language);
+  Py_DECREF (printers);
+  do_cleanups (cleanups);
+}
+
 #else /* HAVE_PYTHON */
 
 /* Dummy implementation of the gdb "python-interactive" and "python"
@@ -1236,6 +1355,23 @@ gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj)
   internal_error (__FILE__, __LINE__,
 		  _("gdbpy_breakpoint_has_py_cond called when Python " \
 		    "scripting is not supported."));
+}
+
+void *
+start_type_printers (void)
+{
+  return NULL;
+}
+
+char *
+apply_type_printers (void *ignore, struct type *type)
+{
+  return NULL;
+}
+
+void
+free_type_printers (void *arg)
+{
 }
 
 #endif /* HAVE_PYTHON */

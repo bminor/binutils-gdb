@@ -1,5 +1,16 @@
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Symbols): Document "info type-printers",
+	"enable type-printer" and "disable type-printer".
+	(Python API): Add new node to menu.
+	(Type Printing API): New node.
+	(Progspaces In Python): Document type_printers field.
+	(Objfiles In Python): Likewise.
+	(gdb.types) <get_type_recognizers, apply_type_recognizers,
+	register_type_printer, TypePrinter>: Document.
+
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (Symbols): Document "set print type methods",
 	"set print type typedefs", and flags to ptype and whatis.
 

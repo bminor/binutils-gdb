@@ -57,6 +57,7 @@ PYTHON_FILES = \
 	gdb/printing.py \
 	gdb/prompt.py \
 	gdb/command/__init__.py \
+	gdb/command/type_printers.py \
 	gdb/command/pretty_printers.py \
 	gdb/command/prompt.py \
 	gdb/command/explore.py \

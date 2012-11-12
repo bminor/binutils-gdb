@@ -49,4 +49,10 @@ int gdbpy_should_stop (struct breakpoint_object *bp_obj);
 
 int gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj);
 
+void *start_type_printers (void);
+
+char *apply_type_printers (void *, struct type *type);
+
+void free_type_printers (void *arg);
+
 #endif /* GDB_PYTHON_H */
