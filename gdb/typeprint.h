@@ -22,6 +22,7 @@
 
 enum language;
 struct ui_file;
+struct typedef_hash_table;
 
 struct type_print_options
 {
@@ -33,9 +34,29 @@ struct type_print_options
 
   /* True means print typedefs in a class.  */
   unsigned int print_typedefs : 1;
+
+  /* If not NULL, a local typedef hash table used when printing a
+     type.  */
+  struct typedef_hash_table *local_typedefs;
 };
 
 extern const struct type_print_options type_print_raw_options;
+
+void recursively_update_typedef_hash (struct typedef_hash_table *,
+				      struct type *);
+
+void add_template_parameters (struct typedef_hash_table *, struct type *);
+
+struct typedef_hash_table *create_typedef_hash (void);
+
+void free_typedef_hash (struct typedef_hash_table *);
+
+struct cleanup *make_cleanup_free_typedef_hash (struct typedef_hash_table *);
+
+struct typedef_hash_table *copy_typedef_hash (struct typedef_hash_table *);
+
+const char *find_typedef_in_hash (const struct type_print_options *,
+				  struct type *);
 
 void print_type_scalar (struct type * type, LONGEST, struct ui_file *);
 

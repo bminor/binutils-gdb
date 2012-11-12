@@ -89,13 +89,13 @@ proc start_scalars_test { type } {
     # check that type matches what was passed in
     set test "ptype; ${testfile}"
     set foo_t "xxx"
-    gdb_test_multiple "ptype ${type}" "${test}" {
+    gdb_test_multiple "ptype/r ${type}" "${test}" {
 	-re "type = (\[^\r\n\]*)\r\n$gdb_prompt $" {
 	    set foo_t "$expect_out(1,string)"
 	    pass "$test (${foo_t})"
 	}
     }
-    gdb_test "ptype foo" "type = ${foo_t}" "ptype foo; ${testfile} $expect_out(1,string)"
+    gdb_test "ptype/r foo" "type = ${foo_t}" "ptype foo; ${testfile} $expect_out(1,string)"
 }
 
 

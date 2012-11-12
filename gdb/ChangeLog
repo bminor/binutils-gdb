@@ -1,5 +1,36 @@
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
+	* c-typeprint.c (find_typedef_for_canonicalize,
+	print_name_maybe_canonical): New functions.
+	(c_print_type): Look up type name.
+	(cp_type_print_derivation_info): Add flags argument.  Use
+	print_name_maybe_canonical.
+	(cp_type_print_method_args): Add wrapping.
+	(c_type_print_varspec_prefix): Use print_name_maybe_canonical.
+	(c_type_print_template_args): New function.
+	(c_type_print_base): Change wrapping.  Use
+	print_name_maybe_canonical.
+	<TYPE_CODE_STRUCT>: Possibly create a typedef hash, and do
+	type name lookups.
+	* gdbtypes.c (types_equal): No longer static.
+	* gdbtypes.h (types_equal): Declare.
+	* typeprint.c (type_print_raw_options, default_ptype_flags):
+	Update.
+	(struct typedef_hash_table): New.
+	(hash_typedef_field, eq_typedef_field,
+	recursively_update_typedef_hash, add_template_parameters,
+	create_typedef_hash, free_typedef_hash, do_free_typedef_hash,
+	make_cleanup_free_typedef_hash, copy_typedef_hash_element,
+	copy_typedef_hash, find_typedef_in_hash): New functions.
+	* typeprint.h (struct type_print_options) <local_typedefs>:
+	New field.
+	(recursively_update_typedef_hash, add_template_parameters,
+	create_typedef_hash, free_typedef_hash,
+	make_cleanup_free_typedef_hash, copy_typedef_hash,
+	find_typedef_in_hash): Declare.
+
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
 	* cp-support.c (inspect_type,
 	replace_typedefs_qualified_name, replace_typedefs): Add
 	finder, data arguments.  Call as needed.

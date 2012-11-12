@@ -83,9 +83,9 @@ mi_create_varobj_checked lcharacter lcharacter\[0\] char "create local variable 
 
 mi_create_varobj_checked lpcharacter lpcharacter {char \*} "create local variable lpcharacter"
 
-mi_create_varobj_checked llong llong "long int" "create local variable llong"
+mi_create_varobj_checked llong llong "long" "create local variable llong"
 
-mi_create_varobj_checked lplong lplong {long int \*} "create local variable lplong"
+mi_create_varobj_checked lplong lplong {long \*} "create local variable lplong"
 
 mi_create_varobj_checked lfloat lfloat float "create local variable lfloat"
 
@@ -408,7 +408,7 @@ mi_continue_to subroutine1
 # Desc: create variable for locals i,l in subroutine1
 mi_create_varobj_checked i i int "create i"
 
-mi_create_varobj_checked l l {long int \*} "create l"
+mi_create_varobj_checked l l {long \*} "create l"
 
 # Test: c_variable-2.11
 # Desc: create do_locals_tests local in subroutine1

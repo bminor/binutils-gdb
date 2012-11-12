@@ -1,5 +1,20 @@
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/call-sc.exp: Use "ptype/r".
+	* gdb.base/volatile.exp: Don't expect "int".
+	* gdb.cp/ptype-flags.cc: New file.
+	* gdb.cp/ptype-flags.exp: New file.
+	* gdb.cp/templates.exp: Use ptype/r.
+	(test_ptype_of_templates, test_template_typedef): Likewise.
+	* lib/cp-support.exp (cp_test_ptype_class): Add in_ptype_arg
+	argument.  Handle template names and template parameters.
+	* gdb.mi/mi-var-cmd.exp: Accept "long".
+	* gdb.mi/mi-var-child.exp: Accept "long".
+	* gdb.mi/mi-var-display.exp: Accept "long".
+	* gdb.mi/mi2-var-child.exp: Accept "long".
+
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.cp/classes.exp (test_ptype_class_objects): Remove
 	"ptype" from calls to cp_test_ptype_class.
 	(test_enums): Likewise.

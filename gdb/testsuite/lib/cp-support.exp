@@ -100,6 +100,8 @@ proc cp_check_errata { expected_string actual_string errata_table } {
 # demangler syntax adjustment, so you have to make a bigger table
 # with lines for each output variation.
 # 
+# IN_PTYPE_ARG are arguments to pass to ptype.  The default is "/r".
+#
 # gdb can vary the output of ptype in several ways:
 #
 # . CLASS/STRUCT
@@ -178,15 +180,16 @@ proc cp_check_errata { expected_string actual_string errata_table } {
 #
 # -- chastain 2004-08-07
 
-proc cp_test_ptype_class { in_exp in_testname in_key in_tag in_class_table { in_tail "" } { in_errata_table { } } } {
+proc cp_test_ptype_class { in_exp in_testname in_key in_tag in_class_table { in_tail "" } { in_errata_table { } } { in_ptype_arg /r } } {
     global gdb_prompt
     set wsopt "\[\r\n\t \]*"
 
-    # The test name defaults to the command.
+    # The test name defaults to the command, but without the
+    # arguments, for historical reasons.
 
     if { "$in_testname" == "" } then { set in_testname "ptype $in_exp" }
 
-    set in_command "ptype $in_exp"
+    set in_command "ptype${in_ptype_arg} $in_exp"
 
     # Save class tables in a history array for reuse.
 
@@ -232,13 +235,13 @@ proc cp_test_ptype_class { in_exp in_testname in_key in_tag in_class_table { in_
 
     set parse_okay 0
     gdb_test_multiple "$in_command" "$in_testname // parse failed" {
-	-re "type = (struct|class)${wsopt}(\[A-Za-z0-9_\]*)${wsopt}((:\[^\{\]*)?)${wsopt}\{(.*)\}${wsopt}(\[^\r\n\]*)\[\r\n\]+$gdb_prompt $" {
+	-re "type = (struct|class)${wsopt}(\[^ \t\]*)${wsopt}(\\\[with .*\\\]${wsopt})?((:\[^\{\]*)?)${wsopt}\{(.*)\}${wsopt}(\[^\r\n\]*)\[\r\n\]+$gdb_prompt $" {
 	    set parse_okay          1
 	    set actual_key          $expect_out(1,string)
 	    set actual_tag          $expect_out(2,string)
-	    set actual_base_string  $expect_out(3,string)
-	    set actual_body         $expect_out(5,string)
-	    set actual_tail         $expect_out(6,string)
+	    set actual_base_string  $expect_out(4,string)
+	    set actual_body         $expect_out(6,string)
+	    set actual_tail         $expect_out(7,string)
 	}
     }
     if { ! $parse_okay } then { return }

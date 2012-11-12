@@ -51,7 +51,8 @@ const struct type_print_options type_print_raw_options =
 {
   1,				/* raw */
   1,				/* print_methods */
-  1				/* print_typedefs */
+  1,				/* print_typedefs */
+  NULL				/* local_typedefs */
 };
 
 /* The default flags for 'ptype' and 'whatis'.  */
@@ -60,8 +61,199 @@ static struct type_print_options default_ptype_flags =
 {
   0,				/* raw */
   1,				/* print_methods */
-  1				/* print_typedefs */
+  1,				/* print_typedefs */
+  NULL				/* local_typedefs */
 };
+
+
+
+/* A hash table holding typedef_field objects.  This is more
+   complicated than an ordinary hash because it must also track the
+   lifetime of some -- but not all -- of the contained objects.  */
+
+struct typedef_hash_table
+{
+  /* The actual hash table.  */
+  htab_t table;
+
+  /* Storage for typedef_field objects that must be synthesized.  */
+  struct obstack storage;
+};
+
+/* A hash function for a typedef_field.  */
+
+static hashval_t
+hash_typedef_field (const void *p)
+{
+  const struct typedef_field *tf = p;
+  struct type *t = check_typedef (tf->type);
+
+  return htab_hash_string (TYPE_SAFE_NAME (t));
+}
+
+/* An equality function for a typedef field.  */
+
+static int
+eq_typedef_field (const void *a, const void *b)
+{
+  const struct typedef_field *tfa = a;
+  const struct typedef_field *tfb = b;
+
+  return types_equal (tfa->type, tfb->type);
+}
+
+/* Add typedefs from T to the hash table TABLE.  */
+
+void
+recursively_update_typedef_hash (struct typedef_hash_table *table,
+				 struct type *t)
+{
+  int i;
+
+  if (table == NULL)
+    return;
+
+  for (i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (t); ++i)
+    {
+      struct typedef_field *tdef = &TYPE_TYPEDEF_FIELD (t, i);
+      void **slot;
+
+      slot = htab_find_slot (table->table, tdef, INSERT);
+      /* Only add a given typedef name once.  Really this shouldn't
+	 happen; but it is safe enough to do the updates breadth-first
+	 and thus use the most specific typedef.  */
+      if (*slot == NULL)
+	*slot = tdef;
+    }
+
+  /* Recurse into superclasses.  */
+  for (i = 0; i < TYPE_N_BASECLASSES (t); ++i)
+    recursively_update_typedef_hash (table, TYPE_BASECLASS (t, i));
+}
+
+/* Add template parameters from T to the typedef hash TABLE.  */
+
+void
+add_template_parameters (struct typedef_hash_table *table, struct type *t)
+{
+  int i;
+
+  if (table == NULL)
+    return;
+
+  for (i = 0; i < TYPE_N_TEMPLATE_ARGUMENTS (t); ++i)
+    {
+      struct typedef_field *tf;
+      void **slot;
+
+      /* We only want type-valued template parameters in the hash.  */
+      if (SYMBOL_CLASS (TYPE_TEMPLATE_ARGUMENT (t, i)) != LOC_TYPEDEF)
+	continue;
+
+      tf = XOBNEW (&table->storage, struct typedef_field);
+      tf->name = SYMBOL_LINKAGE_NAME (TYPE_TEMPLATE_ARGUMENT (t, i));
+      tf->type = SYMBOL_TYPE (TYPE_TEMPLATE_ARGUMENT (t, i));
+
+      slot = htab_find_slot (table->table, tf, INSERT);
+      if (*slot == NULL)
+	*slot = tf;
+    }
+}
+
+/* Create a new typedef-lookup hash table.  */
+
+struct typedef_hash_table *
+create_typedef_hash (void)
+{
+  struct typedef_hash_table *result;
+
+  result = XNEW (struct typedef_hash_table);
+  result->table = htab_create_alloc (10, hash_typedef_field, eq_typedef_field,
+				     NULL, xcalloc, xfree);
+  obstack_init (&result->storage);
+
+  return result;
+}
+
+/* Free a typedef field table.  */
+
+void
+free_typedef_hash (struct typedef_hash_table *table)
+{
+  if (table != NULL)
+    {
+      htab_delete (table->table);
+      obstack_free (&table->storage, NULL);
+      xfree (table);
+    }
+}
+
+/* A cleanup for freeing a typedef_hash_table.  */
+
+static void
+do_free_typedef_hash (void *arg)
+{
+  free_typedef_hash (arg);
+}
+
+/* Return a new cleanup that frees TABLE.  */
+
+struct cleanup *
+make_cleanup_free_typedef_hash (struct typedef_hash_table *table)
+{
+  return make_cleanup (do_free_typedef_hash, table);
+}
+
+/* Helper function for copy_typedef_hash.  */
+
+static int
+copy_typedef_hash_element (void **slot, void *nt)
+{
+  htab_t new_table = nt;
+  void **new_slot;
+
+  new_slot = htab_find_slot (new_table, *slot, INSERT);
+  if (*new_slot == NULL)
+    *new_slot = *slot;
+
+  return 1;
+}
+
+/* Copy a typedef hash.  */
+
+struct typedef_hash_table *
+copy_typedef_hash (struct typedef_hash_table *table)
+{
+  struct typedef_hash_table *result;
+
+  if (table == NULL)
+    return NULL;
+
+  result = create_typedef_hash ();
+  htab_traverse_noresize (table->table, copy_typedef_hash_element,
+			  result->table);
+  return result;
+}
+
+/* Look up the type T in the typedef hash table in with FLAGS.  If T
+   is in the table, return its short (class-relative) typedef name.
+   Otherwise return NULL.  If the table is NULL, this always returns
+   NULL.  */
+
+const char *
+find_typedef_in_hash (const struct type_print_options *flags, struct type *t)
+{
+  struct typedef_field tf, *found;
+
+  if (flags->local_typedefs == NULL)
+    return NULL;
+
+  tf.name = NULL;
+  tf.type = t;
+  found = htab_find (flags->local_typedefs->table, &tf);
+
+  return found == NULL ? NULL : found->name;
+}
 
 
 

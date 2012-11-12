@@ -2406,7 +2406,7 @@ integer_types_same_name_p (const char *first, const char *second)
 /* Compares type A to type B returns 1 if the represent the same type
    0 otherwise.  */
 
-static int
+int
 types_equal (struct type *a, struct type *b)
 {
   /* Identical type pointers.  */
