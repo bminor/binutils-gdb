@@ -1,3 +1,18 @@
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/classes.exp (test_ptype_class_objects): Remove
+	"ptype" from calls to cp_test_ptype_class.
+	(test_enums): Likewise.
+	* gdb.cp/derivation.exp: Remove "ptype" from calls to
+	cp_test_ptype_class.
+	* gdb.cp/inherit.exp (test_ptype_si): Remove "ptype" from
+	calls to cp_test_ptype_class.
+	(test_ptype_mi, test_ptype_vi, test_ptype_mvi): Likewise.
+	* gdb.cp/virtfunc.exp (test_ptype_of_classes): Remove "ptype"
+	from calls to cp_test_ptype_class.
+	* lib/cp-support.exp (cp_test_ptype_class): Supply "ptype"
+	command here.  Change "in_command" argument to "in_exp".
+
 2012-11-10  Keith Seitz  <keiths@redhat.com>
 
 	PR gdb/14288

@@ -35,7 +35,7 @@ proc test_ptype_class_objects {} {
     # Simple type.
 
     cp_test_ptype_class \
-	"ptype struct default_public_struct" "" "struct" "default_public_struct" \
+	"struct default_public_struct" "" "struct" "default_public_struct" \
 	{
 	    { field public "int a;" }
 	    { field public "int b;" }
@@ -44,7 +44,7 @@ proc test_ptype_class_objects {} {
     # Another simple type.
 
     cp_test_ptype_class \
-	"ptype struct explicit_public_struct" "" "struct" "explicit_public_struct" \
+	"struct explicit_public_struct" "" "struct" "explicit_public_struct" \
 	{
 	    { field public "int a;" }
 	    { field public "int b;" }
@@ -53,7 +53,7 @@ proc test_ptype_class_objects {} {
     # Another simple type.
 
     cp_test_ptype_class \
-	"ptype struct protected_struct" "" "struct" "protected_struct" \
+	"struct protected_struct" "" "struct" "protected_struct" \
 	{
 	    { field protected "int a;" }
 	    { field protected "int b;" }
@@ -62,7 +62,7 @@ proc test_ptype_class_objects {} {
     # Another simple type.
 
     cp_test_ptype_class \
-	"ptype struct private_struct" "" "struct" "private_struct" \
+	"struct private_struct" "" "struct" "private_struct" \
 	{
 	    { field private "int a;" }
 	    { field private "int b;" }
@@ -71,7 +71,7 @@ proc test_ptype_class_objects {} {
     # A bigger type.
 
     cp_test_ptype_class \
-	"ptype struct mixed_protection_struct" "" "struct" "mixed_protection_struct" \
+	"struct mixed_protection_struct" "" "struct" "mixed_protection_struct" \
 	{
 	    { field public    "int a;" }
 	    { field public    "int b;" }
@@ -88,7 +88,7 @@ proc test_ptype_class_objects {} {
     # gdb does not care about the difference anyways.
 
     cp_test_ptype_class \
-	"ptype class public_class" "" "class" "public_class" \
+	"class public_class" "" "class" "public_class" \
 	{
 	    { field public "int a;" }
 	    { field public "int b;" }
@@ -97,7 +97,7 @@ proc test_ptype_class_objects {} {
     # Another simple type.
 
     cp_test_ptype_class \
-	"ptype class protected_class" "" "class" "protected_class" \
+	"class protected_class" "" "class" "protected_class" \
 	{
 	    { field protected "int a;" }
 	    { field protected "int b;" }
@@ -106,7 +106,7 @@ proc test_ptype_class_objects {} {
     # Another simple type.
 
     cp_test_ptype_class \
-	"ptype class default_private_class" "" "class" "default_private_class" \
+	"class default_private_class" "" "class" "default_private_class" \
 	{
 	    { field private "int a;" }
 	    { field private "int b;" }
@@ -115,7 +115,7 @@ proc test_ptype_class_objects {} {
     # Another simple type.
 
     cp_test_ptype_class \
-	"ptype class explicit_private_class" "" "class" "explicit_private_class" \
+	"class explicit_private_class" "" "class" "explicit_private_class" \
 	{
 	    { field private "int a;" }
 	    { field private "int b;" }
@@ -124,7 +124,7 @@ proc test_ptype_class_objects {} {
     # A bigger type.
 
     cp_test_ptype_class \
-	"ptype class mixed_protection_class" "" "class" "mixed_protection_class" \
+	"class mixed_protection_class" "" "class" "mixed_protection_class" \
 	{
 
 	    { field public    "int a;" }
@@ -143,7 +143,7 @@ proc test_ptype_class_objects {} {
     # Base class.
 
     cp_test_ptype_class \
-	"ptype class A" "" "class" "A" \
+	"class A" "" "class" "A" \
 	{
 	    { field public "int a;" }
 	    { field public "int x;" }
@@ -152,7 +152,7 @@ proc test_ptype_class_objects {} {
     # Derived class.
 
     cp_test_ptype_class \
-	"ptype class B" "" "class" "B" \
+	"class B" "" "class" "B" \
 	{
 	    { base         "public A" }
 	    { field public "int b;" }
@@ -162,7 +162,7 @@ proc test_ptype_class_objects {} {
     # Derived class.
 
     cp_test_ptype_class \
-	"ptype class C" "" "class" "C" \
+	"class C" "" "class" "C" \
 	{
 	    { base         "public A" }
 	    { field public "int c;" }
@@ -172,7 +172,7 @@ proc test_ptype_class_objects {} {
     # Derived class, multiple inheritance.
 
     cp_test_ptype_class \
-	"ptype class D" "" "class" "D" \
+	"class D" "" "class" "D" \
 	{
 	    { base         "public B" }
 	    { base         "public C" }
@@ -183,7 +183,7 @@ proc test_ptype_class_objects {} {
     # Derived class.
 
     cp_test_ptype_class \
-	"ptype class E" "" "class" "E" \
+	"class E" "" "class" "E" \
 	{
 	    { base         "public D" }
 	    { field public "int e;" }
@@ -196,7 +196,7 @@ proc test_ptype_class_objects {} {
     # static methods whose name is the same as their argument mangling.
  
     cp_test_ptype_class \
-	"ptype class Static" "" "class" "Static" \
+	"class Static" "" "class" "Static" \
 	{
 	    { method public "static void ii(int, int);" }
 	}
@@ -206,7 +206,7 @@ proc test_ptype_class_objects {} {
     # A virtual base class.
 
     cp_test_ptype_class \
-	"ptype class vA" "" "class" "vA" \
+	"class vA" "" "class" "vA" \
 	{
 	    { field public "int va;" }
 	    { field public "int vx;" }
@@ -215,7 +215,7 @@ proc test_ptype_class_objects {} {
     # A derived class with a virtual base.
 
     cp_test_ptype_class \
-	"ptype class vB" "" "class" "vB" \
+	"class vB" "" "class" "vB" \
 	{
 	    { base         "public virtual vA" }
 	    { vbase        "vA" }
@@ -226,7 +226,7 @@ proc test_ptype_class_objects {} {
     # Another derived class with a virtual base.
 
     cp_test_ptype_class \
-	"ptype class vC" "" "class" "vC" \
+	"class vC" "" "class" "vC" \
 	{
 	    { base         "public virtual vA" }
 	    { vbase        "vA" }
@@ -237,7 +237,7 @@ proc test_ptype_class_objects {} {
     # A classic diamond class.
 
     cp_test_ptype_class \
-	"ptype class vD" "" "class" "vD" \
+	"class vD" "" "class" "vD" \
 	{
 	    { base         "public virtual vB" }
 	    { base         "public virtual vC" }
@@ -250,7 +250,7 @@ proc test_ptype_class_objects {} {
     # A class derived from a diamond class.
 
     cp_test_ptype_class \
-	"ptype class vE" "" "class" "vE" \
+	"class vE" "" "class" "vE" \
 	{
 	    { base         "public virtual vD" }
 	    { vbase        "vD" }
@@ -263,7 +263,7 @@ proc test_ptype_class_objects {} {
     # A base class.
 
     cp_test_ptype_class \
-	"ptype class Base1" "" "class" "Base1" \
+	"class Base1" "" "class" "Base1" \
 	{
 	    { field  public "int x;" }
 	    { method public "Base1(int);" }
@@ -272,7 +272,7 @@ proc test_ptype_class_objects {} {
     # Another base class.
 
     cp_test_ptype_class \
-	"ptype class Foo" "" "class" "Foo" \
+	"class Foo" "" "class" "Foo" \
 	{
 	    { field public "int x;" }
 	    { field public "int y;" }
@@ -299,7 +299,7 @@ proc test_ptype_class_objects {} {
     # A multiple inheritance derived class.
 
     cp_test_ptype_class \
-	"ptype class Bar" "" "class" "Bar" \
+	"class Bar" "" "class" "Bar" \
 	{
 	    { base          "public Base1" }
 	    { base          "public Foo" }
@@ -445,7 +445,7 @@ proc test_enums {} {
     # stabs, we probably can't get this right; under DWARF-2, we can.
 
     cp_test_ptype_class \
-	"ptype obj_with_enum" "" "class" "ClassWithEnum" \
+	"obj_with_enum" "" "class" "ClassWithEnum" \
 	{
 	    { field public "ClassWithEnum::PrivEnum priv_enum;" }
 	    { field public "int x;" }

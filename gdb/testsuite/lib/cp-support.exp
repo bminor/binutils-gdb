@@ -45,9 +45,10 @@ proc cp_check_errata { expected_string actual_string errata_table } {
 # each line, matching it to the class description given in the
 # parameters.
 #
-# IN_COMMAND and IN_TESTNAME are the command and testname for
+# IN_EXP is the expression to use; the appropriate "ptype" invocation
+# is prepended to it.  IN_TESTNAME is the testname for
 # gdb_test_multiple.  If IN_TESTNAME is the empty string, then it
-# defaults to IN_COMMAND.
+# defaults to "ptype IN_EXP".
 #
 # IN_KEY is "class" or "struct".  For now, I ignore it, and allow either
 # "class" or "struct" in the output, as long as the access specifiers all
@@ -177,13 +178,15 @@ proc cp_check_errata { expected_string actual_string errata_table } {
 #
 # -- chastain 2004-08-07
 
-proc cp_test_ptype_class { in_command in_testname in_key in_tag in_class_table { in_tail "" } { in_errata_table { } } } {
+proc cp_test_ptype_class { in_exp in_testname in_key in_tag in_class_table { in_tail "" } { in_errata_table { } } } {
     global gdb_prompt
     set wsopt "\[\r\n\t \]*"
 
     # The test name defaults to the command.
 
-    if { "$in_testname" == "" } then { set in_testname "$in_command" }
+    if { "$in_testname" == "" } then { set in_testname "ptype $in_exp" }
+
+    set in_command "ptype $in_exp"
 
     # Save class tables in a history array for reuse.
 

@@ -34,7 +34,7 @@ proc test_ptype_of_classes {} {
     # class VA
 
     cp_test_ptype_class \
-	"ptype VA" "" "class" "VA" \
+	"VA" "" "class" "VA" \
 	{
 	    { field public "int va;" }
 	}
@@ -42,7 +42,7 @@ proc test_ptype_of_classes {} {
     # class VB
 
     cp_test_ptype_class \
-	"ptype VB" "" "class" "VB" \
+	"VB" "" "class" "VB" \
 	{
 	    { field  public "int vb;" }
 	    { method public "int fvb();" }
@@ -52,7 +52,7 @@ proc test_ptype_of_classes {} {
     # class V
 
     cp_test_ptype_class \
-	"ptype V" "" "class" "V" \
+	"V" "" "class" "V" \
 	{
 	    { base          "public VA" }
 	    { base          "public VB" }
@@ -64,7 +64,7 @@ proc test_ptype_of_classes {} {
     # class A
 
     cp_test_ptype_class \
-	"ptype A" "" "class" "A" \
+	"A" "" "class" "A" \
 	{
 	    { base           "public virtual V" }
 	    { vbase          "V" }
@@ -75,7 +75,7 @@ proc test_ptype_of_classes {} {
     # class B
 
     cp_test_ptype_class \
-	"ptype B" "" "class" "B" \
+	"B" "" "class" "B" \
 	{
 	    { base           "public A" }
 	    { field  private "int b;" }
@@ -85,7 +85,7 @@ proc test_ptype_of_classes {} {
     # class C
 
     cp_test_ptype_class \
-	"ptype C" "" "class" "C" \
+	"C" "" "class" "C" \
 	{
 	    { base         "public virtual V" }
 	    { vbase        "V" }
@@ -95,7 +95,7 @@ proc test_ptype_of_classes {} {
     # class AD
 
     cp_test_ptype_class \
-	"ptype AD" "" "class" "AD" \
+	"AD" "" "class" "AD" \
 	{
 	    { method public "virtual int vg();" }
 	}
@@ -103,7 +103,7 @@ proc test_ptype_of_classes {} {
     # class D
 
     cp_test_ptype_class \
-	"ptype D" "" "class" "D" \
+	"D" "" "class" "D" \
 	{
 	    { base          "public AD" }
 	    { base          "public virtual V" }
@@ -118,7 +118,7 @@ proc test_ptype_of_classes {} {
     # class E
 
     cp_test_ptype_class \
-	"ptype E" "" "class" "E" \
+	"E" "" "class" "E" \
 	{
 	    { base          "public B" }
 	    { base          "public virtual V" }
@@ -133,41 +133,41 @@ proc test_ptype_of_classes {} {
 
     # An instance of D
 
-    cp_test_ptype_class "ptype dd" "" "class" "D" ibid
+    cp_test_ptype_class "dd" "" "class" "D" ibid
 
     # An instance of D *
 
-    cp_test_ptype_class "ptype ppd" "" "class" "D" ibid "*"
+    cp_test_ptype_class "ppd" "" "class" "D" ibid "*"
 
     # An instance of AD *
     # TODO: this should be named pADd, not pAd.
 
-    cp_test_ptype_class "ptype pAd" "" "class" "AD" ibid "*"
+    cp_test_ptype_class "pAd" "" "class" "AD" ibid "*"
 
     # Instances of these classes.
 
-    cp_test_ptype_class "ptype a" "" "class" "A" ibid
-    cp_test_ptype_class "ptype b" "" "class" "B" ibid
-    cp_test_ptype_class "ptype c" "" "class" "C" ibid
-    cp_test_ptype_class "ptype d" "" "class" "D" ibid
-    cp_test_ptype_class "ptype e" "" "class" "E" ibid
-    cp_test_ptype_class "ptype v" "" "class" "V" ibid
-    cp_test_ptype_class "ptype vb" "" "class" "VB" ibid
+    cp_test_ptype_class "a" "" "class" "A" ibid
+    cp_test_ptype_class "b" "" "class" "B" ibid
+    cp_test_ptype_class "c" "" "class" "C" ibid
+    cp_test_ptype_class "d" "" "class" "D" ibid
+    cp_test_ptype_class "e" "" "class" "E" ibid
+    cp_test_ptype_class "v" "" "class" "V" ibid
+    cp_test_ptype_class "vb" "" "class" "VB" ibid
 
     # Instances of pointers to these classes.
 
-    cp_test_ptype_class "ptype pAa" "" "class" "A" ibid "*"
-    cp_test_ptype_class "ptype pAe" "" "class" "A" ibid "*"
-    cp_test_ptype_class "ptype pBe" "" "class" "B" ibid "*"
-    cp_test_ptype_class "ptype pDd" "" "class" "D" ibid "*"
-    cp_test_ptype_class "ptype pDe" "" "class" "D" ibid "*"
-    cp_test_ptype_class "ptype pVa" "" "class" "V" ibid "*"
-    cp_test_ptype_class "ptype pVv" "" "class" "V" ibid "*"
-    cp_test_ptype_class "ptype pVe" "" "class" "V" ibid "*"
-    cp_test_ptype_class "ptype pVd" "" "class" "V" ibid "*"
-    cp_test_ptype_class "ptype pADe" "" "class" "AD" ibid "*"
-    cp_test_ptype_class "ptype pEe" "" "class" "E" ibid "*"
-    cp_test_ptype_class "ptype pVB" "" "class" "VB" ibid "*"
+    cp_test_ptype_class "pAa" "" "class" "A" ibid "*"
+    cp_test_ptype_class "pAe" "" "class" "A" ibid "*"
+    cp_test_ptype_class "pBe" "" "class" "B" ibid "*"
+    cp_test_ptype_class "pDd" "" "class" "D" ibid "*"
+    cp_test_ptype_class "pDe" "" "class" "D" ibid "*"
+    cp_test_ptype_class "pVa" "" "class" "V" ibid "*"
+    cp_test_ptype_class "pVv" "" "class" "V" ibid "*"
+    cp_test_ptype_class "pVe" "" "class" "V" ibid "*"
+    cp_test_ptype_class "pVd" "" "class" "V" ibid "*"
+    cp_test_ptype_class "pADe" "" "class" "AD" ibid "*"
+    cp_test_ptype_class "pEe" "" "class" "E" ibid "*"
+    cp_test_ptype_class "pVB" "" "class" "VB" ibid "*"
 
 }
 
