@@ -1,5 +1,12 @@
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
+	* c-typeprint.c (cp_type_print_method_args): Add flags
+	argument.  Call c_print_type, not type_print.
+	(c_type_print_base): Call c_print_type, not type_print.
+	Update.
+
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
 	* ada-lang.c (user_select_syms, ada_print_subexp): Pass flags
 	to type-printing functions.
 	* ada-lang.h (ada_print_type): Add argument.

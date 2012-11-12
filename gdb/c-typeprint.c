@@ -166,7 +166,8 @@ cp_type_print_derivation_info (struct ui_file *stream,
 static void
 cp_type_print_method_args (struct type *mtype, const char *prefix,
 			   const char *varstring, int staticp,
-			   struct ui_file *stream)
+			   struct ui_file *stream,
+			   const struct type_print_options *flags)
 {
   struct field *args = TYPE_FIELDS (mtype);
   int nargs = TYPE_NFIELDS (mtype);
@@ -185,7 +186,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
     {
       while (i < nargs)
 	{
-	  type_print (args[i++].type, "", stream, 0);
+	  c_print_type (args[i++].type, "", stream, 0, 0, flags);
 
 	  if (i == nargs && varargs)
 	    fprintf_filtered (stream, ", ...");
@@ -1058,8 +1059,8 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 			   && !is_full_physname_constructor  /* " " */
 			   && !is_type_conversion_operator (type, i, j))
 		    {
-		      type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
-				  "", stream, -1);
+		      c_print_type (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
+				    "", stream, -1, 0, flags);
 		      fputs_filtered (" ", stream);
 		    }
 		  if (TYPE_FN_FIELD_STUB (f, j))
@@ -1093,7 +1094,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 						     "",
 						     method_name,
 						     staticp,
-						     stream);
+						     stream, flags);
 			}
 		      else
 			fprintf_filtered (stream,
