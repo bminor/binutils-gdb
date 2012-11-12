@@ -1189,7 +1189,7 @@ void *
 start_type_printers (void)
 {
   struct cleanup *cleanups;
-  PyObject *type_module, *func, *result_obj;
+  PyObject *type_module, *func, *result_obj = NULL;
 
   cleanups = ensure_python_env (get_current_arch (), current_language);
 

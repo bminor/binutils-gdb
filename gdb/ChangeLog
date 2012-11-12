@@ -1,5 +1,9 @@
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
+	* python/python.c (start_type_printers): Initialize 'result_obj'.
+
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
 	* NEWS: Update.
 	* data-directory/Makefile.in (PYTHON_FILES): Add
 	type_printers.py.
