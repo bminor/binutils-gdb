@@ -1,3 +1,51 @@
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
+	* ada-lang.c (user_select_syms, ada_print_subexp): Pass flags
+	to type-printing functions.
+	* ada-lang.h (ada_print_type): Add argument.
+	* ada-typeprint.c (print_array_type, print_variant_clauses,
+	print_variant_part, print_selected_record_field_types,
+	print_record_field_types, print_unchecked_union_type,
+	print_func_type, ada_print_type): Add flags argument.
+	(ada_print_typedef): Update.
+	* c-exp.y (OPERATOR conversion_type_id): Update.
+	* c-lang.h (c_print_type, c_type_print_base): Update.
+	* c-typeprint.c (c_print_type, c_type_print_varspec_prefix,
+	c_type_print_modifier, c_type_print_args,
+	c_type_print_varspec_suffix, c_type_print_base): Add flags
+	argument.
+	* cp-valprint.c (cp_print_class_member): Update.
+	* dwarf2read.c (dwarf2_compute_name): Update.
+	* f-lang.h (f_print_type): Add argument.
+	* f-typeprint.c (f_print_type): Add flags argument.
+	* gnu-v3-abi.c (gnuv3_print_method_ptr): Update.
+	* go-lang.h (go_print_type): Add argument.
+	* go-typeprint.c (go_print_type): Add flags argument.
+	* jv-lang.h (java_print_type): Add argument.
+	* jv-typeprint.c (java_type_print_base, java_print_type): Add
+	flags argument.
+	* language.c (unk_lang_print_type): Add flags argument.
+	* language.h (struct language_defn) <la_print_type>: Add flags
+	argument.
+	(LA_PRINT_TYPE): Likewise.
+	* m2-lang.h (m2_print_type): Add argument.
+	* m2-typeprint.c (m2_print_type, m2_range, m2_typedef,
+	m2_array, m2_pointer, m2_ref, m2_procedure, m2_long_set,
+	m2_unbounded_array, m2_record_fields): Add flags argument.
+	* p-lang.h (pascal_print_type, pascal_type_print_base,
+	pascal_type_print_varspec_prefix): Add argument.
+	* p-typeprint.c (pascal_print_type,
+	pascal_type_print_varspec_prefix, pascal_print_func_args,
+	pascal_type_print_varspec_suffix, pascal_type_print_base): Add
+	flags argument.
+	* symmisc.c (print_symbol): Update.
+	* typeprint.c (type_print_raw_options, default_ptype_flags):
+	New globals.
+	(type_print): Update.
+	* typeprint.h (struct type_print_options): New.
+	(type_print_raw_options): Declare.
+	(c_type_print_varspec_suffix, c_type_print_args): Add argument.
+
 2012-11-10  Keith Seitz  <keiths@redhat.com>
 
 	* breakpoint.c (clear_command): Add cleanup for

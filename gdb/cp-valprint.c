@@ -37,6 +37,7 @@
 #include "language.h"
 #include "python/python.h"
 #include "exceptions.h"
+#include "typeprint.h"
 
 /* Controls printing of vtbl's.  */
 static void
@@ -822,7 +823,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
       if (name)
 	fputs_filtered (name, stream);
       else
-	c_type_print_base (domain, stream, 0, 0);
+	c_type_print_base (domain, stream, 0, 0, &type_print_raw_options);
       fprintf_filtered (stream, "::");
       fputs_filtered (TYPE_FIELD_NAME (domain, fieldno), stream);
     }

@@ -54,6 +54,7 @@
 #include "gdb_assert.h"
 #include "macroscope.h"
 #include "objc-lang.h"
+#include "typeprint.h"
 
 #define parse_type builtin_type (parse_gdbarch)
 
@@ -1502,7 +1503,8 @@ operator:	OPERATOR NEW
 			  long length;
 			  struct ui_file *buf = mem_fileopen ();
 
-			  c_print_type ($2, NULL, buf, -1, 0);
+			  c_print_type ($2, NULL, buf, -1, 0,
+					&type_print_raw_options);
 			  name = ui_file_xstrdup (buf, &length);
 			  ui_file_delete (buf);
 			  $$ = operator_stoken (name);

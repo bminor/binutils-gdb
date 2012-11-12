@@ -20,6 +20,8 @@
 #if !defined (GO_LANG_H)
 #define GO_LANG_H 1
 
+struct type_print_options;
+
 #include "gdbtypes.h"
 #include "symtab.h"
 #include "value.h"
@@ -75,7 +77,8 @@ extern const struct builtin_go_type *builtin_go_type (struct gdbarch *);
 /* Defined in go-typeprint.c.  */
 
 extern void go_print_type (struct type *type, const char *varstring,
-			   struct ui_file *stream, int show, int level);
+			   struct ui_file *stream, int show, int level,
+			   const struct type_print_options *flags);
 
 /* Defined in go-valprint.c.  */
 

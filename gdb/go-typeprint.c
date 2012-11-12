@@ -43,7 +43,8 @@
 
 void
 go_print_type (struct type *type, const char *varstring,
-	       struct ui_file *stream, int show, int level)
+	       struct ui_file *stream, int show, int level,
+	       const struct type_print_options *flags)
 {
   /* Borrowed from c-typeprint.c.  */
   if (show > 0)
@@ -58,5 +59,5 @@ go_print_type (struct type *type, const char *varstring,
     }
 
   /* Punt the rest to C for now.  */
-  c_print_type (type, varstring, stream, show, level);
+  c_print_type (type, varstring, stream, show, level, flags);
 }

@@ -45,6 +45,17 @@ static void whatis_command (char *, int);
 
 static void whatis_exp (char *, int);
 
+const struct type_print_options type_print_raw_options =
+{
+  1				/* raw */
+};
+
+/* The default flags for 'ptype' and 'whatis'.  */
+
+static struct type_print_options default_ptype_flags =
+{
+  0				/* raw */
+};
 
 /* Print a description of a type in the format of a 
    typedef for the current language.
@@ -76,7 +87,7 @@ void
 type_print (struct type *type, const char *varstring, struct ui_file *stream,
 	    int show)
 {
-  LA_PRINT_TYPE (type, varstring, stream, show, 0);
+  LA_PRINT_TYPE (type, varstring, stream, show, 0, &default_ptype_flags);
 }
 
 /* Print TYPE to a string, returning it.  The caller is responsible for

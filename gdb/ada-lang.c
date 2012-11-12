@@ -58,6 +58,7 @@
 #include "vec.h"
 #include "stack.h"
 #include "gdb_vecs.h"
+#include "typeprint.h"
 
 #include "psymtab.h"
 #include "value.h"
@@ -3594,7 +3595,7 @@ See set/show multiple-symbol."));
             {
               printf_unfiltered (("[%d] "), i + first_choice);
               ada_print_type (SYMBOL_TYPE (syms[i].sym), NULL,
-                              gdb_stdout, -1, 0);
+                              gdb_stdout, -1, 0, &type_print_raw_options);
               printf_unfiltered (_("'(%s) (enumeral)\n"),
                                  SYMBOL_PRINT_NAME (syms[i].sym));
             }
@@ -12346,7 +12347,8 @@ ada_print_subexp (struct expression *exp, int *pos,
       if (exp->elts[*pos].opcode == OP_TYPE)
         {
           if (TYPE_CODE (exp->elts[*pos + 1].type) != TYPE_CODE_VOID)
-            LA_PRINT_TYPE (exp->elts[*pos + 1].type, "", stream, 0, 0);
+            LA_PRINT_TYPE (exp->elts[*pos + 1].type, "", stream, 0, 0,
+			   &type_print_raw_options);
           *pos += 3;
         }
       else
@@ -12376,7 +12378,8 @@ ada_print_subexp (struct expression *exp, int *pos,
       /* XXX: sprint_subexp */
       print_subexp (exp, pos, stream, PREC_SUFFIX);
       fputs_filtered (" in ", stream);
-      LA_PRINT_TYPE (exp->elts[pc + 1].type, "", stream, 1, 0);
+      LA_PRINT_TYPE (exp->elts[pc + 1].type, "", stream, 1, 0,
+		     &type_print_raw_options);
       return;
 
     case OP_DISCRETE_RANGE:

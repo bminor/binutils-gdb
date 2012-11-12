@@ -7396,7 +7396,7 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 
 		  if (child->tag == DW_TAG_template_type_param)
 		    {
-		      c_print_type (type, "", buf, -1, 0);
+		      c_print_type (type, "", buf, -1, 0, &type_print_raw_options);
 		      continue;
 		    }
 
@@ -7470,7 +7470,8 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 	    {
 	      struct type *type = read_type_die (die, cu);
 
-	      c_type_print_args (type, buf, 1, cu->language);
+	      c_type_print_args (type, buf, 1, cu->language,
+				 &type_print_raw_options);
 
 	      if (cu->language == language_java)
 		{
@@ -7478,7 +7479,7 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 		     names.  */
 		  if (die->tag == DW_TAG_subprogram)
 		    java_print_type (TYPE_TARGET_TYPE (type), "", buf,
-				     0, 0);
+				     0, 0, &type_print_raw_options);
 		}
 	      else if (cu->language == language_cplus)
 		{

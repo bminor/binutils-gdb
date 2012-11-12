@@ -35,6 +35,7 @@
 #include "gdb_regex.h"
 #include "gdb_stat.h"
 #include "dictionary.h"
+#include "typeprint.h"
 
 #include "gdb_string.h"
 #include "readline/readline.h"
@@ -480,7 +481,8 @@ print_symbol (void *args)
     {
       if (TYPE_TAG_NAME (SYMBOL_TYPE (symbol)))
 	{
-	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth);
+	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth,
+			 &type_print_raw_options);
 	}
       else
 	{
@@ -490,7 +492,8 @@ print_symbol (void *args)
 		     : (TYPE_CODE (SYMBOL_TYPE (symbol)) == TYPE_CODE_STRUCT
 			? "struct" : "union")),
 			    SYMBOL_LINKAGE_NAME (symbol));
-	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth);
+	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth,
+			 &type_print_raw_options);
 	}
       fprintf_filtered (outfile, ";\n");
     }
@@ -504,7 +507,8 @@ print_symbol (void *args)
 	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), SYMBOL_PRINT_NAME (symbol),
 			 outfile,
 			 TYPE_CODE (SYMBOL_TYPE (symbol)) != TYPE_CODE_ENUM,
-			 depth);
+			 depth,
+			 &type_print_raw_options);
 	  fprintf_filtered (outfile, "; ");
 	}
       else

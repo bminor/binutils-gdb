@@ -63,9 +63,6 @@ static void unk_lang_emit_char (int c, struct type *type,
 static void unk_lang_printchar (int c, struct type *type,
 				struct ui_file *stream);
 
-static void unk_lang_print_type (struct type *, const char *, struct ui_file *,
-				 int, int);
-
 static void unk_lang_value_print (struct value *, struct ui_file *,
 				  const struct value_print_options *);
 
@@ -734,7 +731,8 @@ unk_lang_printstr (struct ui_file *stream, struct type *type,
 
 static void
 unk_lang_print_type (struct type *type, const char *varstring,
-		     struct ui_file *stream, int show, int level)
+		     struct ui_file *stream, int show, int level,
+		     const struct type_print_options *flags)
 {
   error (_("internal error - unimplemented "
 	   "function unk_lang_print_type called."));

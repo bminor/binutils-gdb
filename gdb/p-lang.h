@@ -30,7 +30,7 @@ extern void pascal_error (char *);	/* Defined in p-exp.y */
 
 /* Defined in p-typeprint.c */
 extern void pascal_print_type (struct type *, const char *, struct ui_file *,
-			       int, int);
+			       int, int, const struct type_print_options *);
 
 extern void pascal_print_typedef (struct type *, struct symbol *,
 				  struct ui_file *);
@@ -63,10 +63,12 @@ extern struct type **const (pascal_builtin_types[]);
 /* These are in p-typeprint.c: */
 
 extern void
-  pascal_type_print_base (struct type *, struct ui_file *, int, int);
+  pascal_type_print_base (struct type *, struct ui_file *, int, int,
+			  const struct type_print_options *);
 
 extern void
-  pascal_type_print_varspec_prefix (struct type *, struct ui_file *, int, int);
+  pascal_type_print_varspec_prefix (struct type *, struct ui_file *, int, int,
+				    const struct type_print_options *);
 
 extern void pascal_object_print_value_fields (struct type *, const gdb_byte *,
 					      int,

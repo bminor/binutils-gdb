@@ -18,13 +18,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+struct type_print_options;
+
 extern int m2_parse (void);	/* Defined in m2-exp.y */
 
 extern void m2_error (char *);	/* Defined in m2-exp.y */
 
 /* Defined in m2-typeprint.c */
 extern void m2_print_type (struct type *, const char *, struct ui_file *, int,
-			   int);
+			   int, const struct type_print_options *);
 
 extern void m2_print_typedef (struct type *, struct symbol *,
 			      struct ui_file *);

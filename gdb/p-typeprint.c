@@ -36,20 +36,20 @@
 #include <ctype.h>
 
 static void pascal_type_print_varspec_suffix (struct type *, struct ui_file *,
-					      int, int, int);
+					      int, int, int,
+					      const struct type_print_options *);
 
 static void pascal_type_print_derivation_info (struct ui_file *,
 					       struct type *);
 
-void pascal_type_print_varspec_prefix (struct type *, struct ui_file *,
-				       int, int);
 
 
 /* LEVEL is the depth to indent lines by.  */
 
 void
 pascal_print_type (struct type *type, const char *varstring,
-		   struct ui_file *stream, int show, int level)
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags)
 {
   enum type_code code;
   int demangled_args;
@@ -62,7 +62,7 @@ pascal_print_type (struct type *type, const char *varstring,
   if ((code == TYPE_CODE_FUNC
        || code == TYPE_CODE_METHOD))
     {
-      pascal_type_print_varspec_prefix (type, stream, show, 0);
+      pascal_type_print_varspec_prefix (type, stream, show, 0, flags);
     }
   /* first the name */
   fputs_filtered (varstring, stream);
@@ -77,15 +77,16 @@ pascal_print_type (struct type *type, const char *varstring,
   if (!(code == TYPE_CODE_FUNC
 	|| code == TYPE_CODE_METHOD))
     {
-      pascal_type_print_varspec_prefix (type, stream, show, 0);
+      pascal_type_print_varspec_prefix (type, stream, show, 0, flags);
     }
 
-  pascal_type_print_base (type, stream, show, level);
+  pascal_type_print_base (type, stream, show, level, flags);
   /* For demangled function names, we have the arglist as part of the name,
      so don't print an additional pair of ()'s.  */
 
   demangled_args = varstring ? strchr (varstring, '(') != NULL : 0;
-  pascal_type_print_varspec_suffix (type, stream, show, 0, demangled_args);
+  pascal_type_print_varspec_suffix (type, stream, show, 0, demangled_args,
+				    flags);
 
 }
 
@@ -205,7 +206,8 @@ pascal_type_print_method_args (const char *physname, const char *methodname,
 
 void
 pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
-				  int show, int passed_a_ptr)
+				  int show, int passed_a_ptr,
+				  const struct type_print_options *flags)
 {
   if (type == 0)
     return;
@@ -219,7 +221,8 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     {
     case TYPE_CODE_PTR:
       fprintf_filtered (stream, "^");
-      pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1,
+					flags);
       break;			/* Pointer should be handled normally
 				   in pascal.  */
 
@@ -239,13 +242,14 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 	{
 	  fprintf_filtered (stream, " ");
 	  pascal_type_print_base (TYPE_DOMAIN_TYPE (type),
-				  stream, 0, passed_a_ptr);
+				  stream, 0, passed_a_ptr, flags);
 	  fprintf_filtered (stream, "::");
 	}
       break;
 
     case TYPE_CODE_REF:
-      pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1,
+					flags);
       fprintf_filtered (stream, "&");
       break;
 
@@ -301,7 +305,8 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 }
 
 static void
-pascal_print_func_args (struct type *type, struct ui_file *stream)
+pascal_print_func_args (struct type *type, struct ui_file *stream,
+			const struct type_print_options *flags)
 {
   int i, len = TYPE_NFIELDS (type);
 
@@ -323,7 +328,7 @@ pascal_print_func_args (struct type *type, struct ui_file *stream)
          } */
       pascal_print_type (TYPE_FIELD_TYPE (type, i), ""	/* TYPE_FIELD_NAME
 							   seems invalid!  */
-			 ,stream, -1, 0);
+			 ,stream, -1, 0, flags);
     }
   if (len)
     {
@@ -338,7 +343,8 @@ pascal_print_func_args (struct type *type, struct ui_file *stream)
 static void
 pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 				  int show, int passed_a_ptr,
-				  int demangled_args)
+				  int demangled_args,
+				  const struct type_print_options *flags)
 {
   if (type == 0)
     return;
@@ -365,32 +371,34 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	{
 	  fprintf_filtered (stream, " : ");
 	  pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-					    stream, 0, 0);
-	  pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0);
+					    stream, 0, 0, flags);
+	  pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0,
+				  flags);
 	  pascal_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-					    passed_a_ptr, 0);
+					    passed_a_ptr, 0, flags);
 	}
       break;
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
       pascal_type_print_varspec_suffix (TYPE_TARGET_TYPE (type),
-					stream, 0, 1, 0);
+					stream, 0, 1, 0, flags);
       break;
 
     case TYPE_CODE_FUNC:
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
       if (!demangled_args)
-	pascal_print_func_args (type, stream);
+	pascal_print_func_args (type, stream, flags);
       if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
 	{
 	  fprintf_filtered (stream, " : ");
 	  pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-					    stream, 0, 0);
-	  pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0);
+					    stream, 0, 0, flags);
+	  pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0,
+				  flags);
 	  pascal_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
-					    passed_a_ptr, 0);
+					    passed_a_ptr, 0, flags);
 	}
       break;
 
@@ -436,7 +444,7 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 
 void
 pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
-			int level)
+			int level, const struct type_print_options *flags)
 {
   int i;
   int len;
@@ -482,7 +490,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
     case TYPE_CODE_REF:
       /* case TYPE_CODE_FUNC:
          case TYPE_CODE_METHOD: */
-      pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level,
+			      flags);
       break;
 
     case TYPE_CODE_ARRAY:
@@ -492,7 +501,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	                         stream, show, level);
          pascal_type_print_varspec_suffix (TYPE_TARGET_TYPE (type),
 	                                   stream, 0, 0, 0); */
-      pascal_print_type (TYPE_TARGET_TYPE (type), NULL, stream, 0, 0);
+      pascal_print_type (TYPE_TARGET_TYPE (type), NULL, stream, 0, 0, flags);
       break;
 
     case TYPE_CODE_FUNC:
@@ -601,7 +610,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		fprintf_filtered (stream, "static ");
 	      pascal_print_type (TYPE_FIELD_TYPE (type, i),
 				 TYPE_FIELD_NAME (type, i),
-				 stream, show - 1, level + 4);
+				 stream, show - 1, level + 4, flags);
 	      if (!field_is_static (&TYPE_FIELD (type, i))
 		  && TYPE_FIELD_PACKED (type, i))
 		{
@@ -787,7 +796,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
     case TYPE_CODE_SET:
       fputs_filtered ("set of ", stream);
       pascal_print_type (TYPE_INDEX_TYPE (type), "", stream,
-			 show - 1, level);
+			 show - 1, level, flags);
       break;
 
     case TYPE_CODE_STRING:

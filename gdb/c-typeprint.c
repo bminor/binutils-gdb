@@ -37,7 +37,8 @@
 
 static void c_type_print_varspec_prefix (struct type *,
 					 struct ui_file *,
-					 int, int, int);
+					 int, int, int,
+					 const struct type_print_options *);
 
 /* Print "const", "volatile", or address space modifiers.  */
 static void c_type_print_modifier (struct type *,
@@ -50,7 +51,8 @@ void
 c_print_type (struct type *type,
 	      const char *varstring,
 	      struct ui_file *stream,
-	      int show, int level)
+	      int show, int level,
+	      const struct type_print_options *flags)
 {
   enum type_code code;
   int demangled_args;
@@ -59,7 +61,7 @@ c_print_type (struct type *type,
   if (show > 0)
     CHECK_TYPEDEF (type);
 
-  c_type_print_base (type, stream, show, level);
+  c_type_print_base (type, stream, show, level, flags);
   code = TYPE_CODE (type);
   if ((varstring != NULL && *varstring != '\0')
   /* Need a space if going to print stars or brackets;
@@ -74,7 +76,8 @@ c_print_type (struct type *type,
 	      || code == TYPE_CODE_REF)))
     fputs_filtered (" ", stream);
   need_post_space = (varstring != NULL && strcmp (varstring, "") != 0);
-  c_type_print_varspec_prefix (type, stream, show, 0, need_post_space);
+  c_type_print_varspec_prefix (type, stream, show, 0, need_post_space,
+			       flags);
 
   if (varstring != NULL)
     {
@@ -85,7 +88,7 @@ c_print_type (struct type *type,
 
       demangled_args = strchr (varstring, '(') != NULL;
       c_type_print_varspec_suffix (type, stream, show,
-				   0, demangled_args);
+				   0, demangled_args, flags);
     }
 }
 
@@ -232,7 +235,8 @@ static void
 c_type_print_varspec_prefix (struct type *type,
 			     struct ui_file *stream,
 			     int show, int passed_a_ptr,
-			     int need_post_space)
+			     int need_post_space,
+			     const struct type_print_options *flags)
 {
   const char *name;
 
@@ -248,39 +252,39 @@ c_type_print_varspec_prefix (struct type *type,
     {
     case TYPE_CODE_PTR:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 1, 1);
+				   stream, show, 1, 1, flags);
       fprintf_filtered (stream, "*");
       c_type_print_modifier (type, stream, 1, need_post_space);
       break;
 
     case TYPE_CODE_MEMBERPTR:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0);
+				   stream, show, 0, 0, flags);
       name = type_name_no_tag (TYPE_DOMAIN_TYPE (type));
       if (name)
 	fputs_filtered (name, stream);
       else
 	c_type_print_base (TYPE_DOMAIN_TYPE (type),
-			   stream, -1, passed_a_ptr);
+			   stream, -1, passed_a_ptr, flags);
       fprintf_filtered (stream, "::*");
       break;
 
     case TYPE_CODE_METHODPTR:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0);
+				   stream, show, 0, 0, flags);
       fprintf_filtered (stream, "(");
       name = type_name_no_tag (TYPE_DOMAIN_TYPE (type));
       if (name)
 	fputs_filtered (name, stream);
       else
 	c_type_print_base (TYPE_DOMAIN_TYPE (type),
-			   stream, -1, passed_a_ptr);
+			   stream, -1, passed_a_ptr, flags);
       fprintf_filtered (stream, "::*");
       break;
 
     case TYPE_CODE_REF:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 1, 0);
+				   stream, show, 1, 0, flags);
       fprintf_filtered (stream, "&");
       c_type_print_modifier (type, stream, 1, need_post_space);
       break;
@@ -288,21 +292,21 @@ c_type_print_varspec_prefix (struct type *type,
     case TYPE_CODE_METHOD:
     case TYPE_CODE_FUNC:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0);
+				   stream, show, 0, 0, flags);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
 
     case TYPE_CODE_ARRAY:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0);
+				   stream, show, 0, 0, flags);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
 
     case TYPE_CODE_TYPEDEF:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, passed_a_ptr, 0);
+				   stream, show, passed_a_ptr, 0, flags);
       break;
 
     case TYPE_CODE_UNDEF:
@@ -390,7 +394,8 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
 
 void
 c_type_print_args (struct type *type, struct ui_file *stream,
-		   int linkage_name, enum language language)
+		   int linkage_name, enum language language,
+		   const struct type_print_options *flags)
 {
   int i, len;
   struct field *args;
@@ -428,9 +433,9 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 	}
 
       if (language == language_java)
-	java_print_type (param_type, "", stream, -1, 0);
+	java_print_type (param_type, "", stream, -1, 0, flags);
       else
-	c_print_type (param_type, "", stream, -1, 0);
+	c_print_type (param_type, "", stream, -1, 0, flags);
       printed_any = 1;
     }
 
@@ -599,7 +604,8 @@ void
 c_type_print_varspec_suffix (struct type *type,
 			     struct ui_file *stream,
 			     int show, int passed_a_ptr,
-			     int demangled_args)
+			     int demangled_args,
+			     const struct type_print_options *flags)
 {
   if (type == 0)
     return;
@@ -627,25 +633,25 @@ c_type_print_varspec_suffix (struct type *type,
 	fprintf_filtered (stream, (is_vector ? ")))" : "]"));
 
 	c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				     show, 0, 0);
+				     show, 0, 0, flags);
       }
       break;
 
     case TYPE_CODE_MEMBERPTR:
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				   show, 0, 0);
+				   show, 0, 0, flags);
       break;
 
     case TYPE_CODE_METHODPTR:
       fprintf_filtered (stream, ")");
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				   show, 0, 0);
+				   show, 0, 0, flags);
       break;
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				   show, 1, 0);
+				   show, 1, 0, flags);
       break;
 
     case TYPE_CODE_METHOD:
@@ -653,14 +659,15 @@ c_type_print_varspec_suffix (struct type *type,
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
       if (!demangled_args)
-	c_type_print_args (type, stream, 0, current_language->la_language);
+	c_type_print_args (type, stream, 0, current_language->la_language,
+			   flags);
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				   show, passed_a_ptr, 0);
+				   show, passed_a_ptr, 0, flags);
       break;
 
     case TYPE_CODE_TYPEDEF:
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream,
-				   show, passed_a_ptr, 0);
+				   show, passed_a_ptr, 0, flags);
       break;
 
     case TYPE_CODE_UNDEF:
@@ -709,7 +716,7 @@ c_type_print_varspec_suffix (struct type *type,
 
 void
 c_type_print_base (struct type *type, struct ui_file *stream,
-		   int show, int level)
+		   int show, int level, const struct type_print_options *flags)
 {
   int i;
   int len, real_len;
@@ -765,7 +772,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
     case TYPE_CODE_METHOD:
     case TYPE_CODE_METHODPTR:
       c_type_print_base (TYPE_TARGET_TYPE (type),
-			 stream, show, level);
+			 stream, show, level, flags);
       break;
 
     case TYPE_CODE_STRUCT:
@@ -943,7 +950,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		fprintf_filtered (stream, "static ");
 	      c_print_type (TYPE_FIELD_TYPE (type, i),
 			    TYPE_FIELD_NAME (type, i),
-			    stream, show - 1, level + 4);
+			    stream, show - 1, level + 4, flags);
 	      if (!field_is_static (&TYPE_FIELD (type, i))
 		  && TYPE_FIELD_PACKED (type, i))
 		{
@@ -1144,7 +1151,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		  print_spaces_filtered (level + 4, stream);
 		  fprintf_filtered (stream, "typedef ");
 		  c_print_type (target, TYPE_TYPEDEF_FIELD_NAME (type, i),
-				stream, show - 1, level + 4);
+				stream, show - 1, level + 4, flags);
 		  fprintf_filtered (stream, ";\n");
 		}
 	    }

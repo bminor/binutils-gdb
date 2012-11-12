@@ -34,7 +34,8 @@
 
 static void java_type_print_base (struct type * type,
 				  struct ui_file *stream, int show,
-				  int level);
+				  int level,
+				  const struct type_print_options *flags);
 
 static void
 java_type_print_derivation_info (struct ui_file *stream, struct type *type)
@@ -84,7 +85,7 @@ java_type_print_derivation_info (struct ui_file *stream, struct type *type)
 
 static void
 java_type_print_base (struct type *type, struct ui_file *stream, int show,
-		      int level)
+		      int level, const struct type_print_options *flags)
 {
   int i;
   int len;
@@ -115,7 +116,8 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
-      java_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      java_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level,
+			    flags);
       break;
 
     case TYPE_CODE_STRUCT:
@@ -192,7 +194,7 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 
 	      java_print_type (TYPE_FIELD_TYPE (type, i),
 			       TYPE_FIELD_NAME (type, i),
-			       stream, show - 1, level + 4);
+			       stream, show - 1, level + 4, flags);
 
 	      fprintf_filtered (stream, ";\n");
 	    }
@@ -323,7 +325,7 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     default:
-      c_type_print_base (type, stream, show, level);
+      c_type_print_base (type, stream, show, level, flags);
     }
 }
 
@@ -331,11 +333,12 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 
 void
 java_print_type (struct type *type, const char *varstring,
-		 struct ui_file *stream, int show, int level)
+		 struct ui_file *stream, int show, int level,
+		 const struct type_print_options *flags)
 {
   int demangled_args;
 
-  java_type_print_base (type, stream, show, level);
+  java_type_print_base (type, stream, show, level, flags);
 
   if (varstring != NULL && *varstring != '\0')
     {
@@ -347,5 +350,5 @@ java_print_type (struct type *type, const char *varstring,
      so don't print an additional pair of ()'s.  */
 
   demangled_args = varstring != NULL && strchr (varstring, '(') != NULL;
-  c_type_print_varspec_suffix (type, stream, show, 0, demangled_args);
+  c_type_print_varspec_suffix (type, stream, show, 0, demangled_args, flags);
 }

@@ -31,6 +31,7 @@ struct frame_info;
 struct expression;
 struct ui_file;
 struct value_print_options;
+struct type_print_options;
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
 
@@ -185,7 +186,7 @@ struct language_defn
     /* Print a type using syntax appropriate for this language.  */
 
     void (*la_print_type) (struct type *, const char *, struct ui_file *, int,
-			   int);
+			   int, const struct type_print_options *);
 
     /* Print a typedef using syntax appropriate for this language.
        TYPE is the underlying type.  NEW_SYMBOL is the symbol naming
@@ -416,8 +417,8 @@ extern enum language set_language (enum language);
    the current setting of working_lang, which the user sets
    with the "set language" command.  */
 
-#define LA_PRINT_TYPE(type,varstring,stream,show,level) \
-  (current_language->la_print_type(type,varstring,stream,show,level))
+#define LA_PRINT_TYPE(type,varstring,stream,show,level,flags)		\
+  (current_language->la_print_type(type,varstring,stream,show,level,flags))
 
 #define LA_PRINT_TYPEDEF(type,new_symbol,stream) \
   (current_language->la_print_typedef(type,new_symbol,stream))

@@ -24,6 +24,7 @@
 
 struct ui_file;
 struct language_arch_info;
+struct type_print_options;
 
 #include "value.h"
 #include "macroexp.h"
@@ -65,7 +66,8 @@ extern int c_parse_escape (char **, struct obstack *);
 
 /* Defined in c-typeprint.c */
 extern void c_print_type (struct type *, const char *,
-			  struct ui_file *, int, int);
+			  struct ui_file *, int, int,
+			  const struct type_print_options *);
 
 extern void c_print_typedef (struct type *,
 			     struct symbol *,
@@ -110,7 +112,7 @@ extern const struct op_print c_op_print_tab[];
 /* These are in c-typeprint.c: */
 
 extern void c_type_print_base (struct type *, struct ui_file *,
-			       int, int);
+			       int, int, const struct type_print_options *);
 
 /* These are in cp-valprint.c */
 

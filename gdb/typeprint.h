@@ -23,10 +23,20 @@
 enum language;
 struct ui_file;
 
+struct type_print_options
+{
+  /* True means that no special printing flags should apply.  */
+  unsigned int raw : 1;
+};
+
+extern const struct type_print_options type_print_raw_options;
+
 void print_type_scalar (struct type * type, LONGEST, struct ui_file *);
 
 void c_type_print_varspec_suffix (struct type *, struct ui_file *, int,
-				  int, int);
+				  int, int, const struct type_print_options *);
 
-void c_type_print_args (struct type *, struct ui_file *, int, enum language);
+void c_type_print_args (struct type *, struct ui_file *, int, enum language,
+			const struct type_print_options *);
+
 #endif

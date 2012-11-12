@@ -52,7 +52,7 @@ void f_type_print_base (struct type *, struct ui_file *, int, int);
 
 void
 f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
-	      int show, int level)
+	      int show, int level, const struct type_print_options *flags)
 {
   enum type_code code;
   int demangled_args;

@@ -21,12 +21,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+struct type_print_options;
+
 extern int f_parse (void);
 
 extern void f_error (char *);	/* Defined in f-exp.y */
 
 extern void f_print_type (struct type *, const char *, struct ui_file *, int,
-			  int);
+			  int, const struct type_print_options *);
 
 extern void f_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 			 struct ui_file *, int,
