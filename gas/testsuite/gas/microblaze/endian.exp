@@ -1,0 +1,12 @@
+# MicroBlaze test for special register.
+
+if [istarget microblaze-*-*] {
+    run_dump_test "endian_be"
+    if [istarget microblaze-*-elf] {
+        run_dump_test "endian_le_elf"
+    }
+}
+
+if [istarget microblazeel-*-*] {
+    run_dump_test "endian_le"
+}
