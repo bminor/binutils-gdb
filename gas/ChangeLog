@@ -46,13 +46,12 @@
 
 2012-11-09  David Holsgrove  <david.holsgrove@xilinx.com>
 
-	* gas/microblaze/endian.exp: New file - endian testcase for microblaze / microblazeel.
-	* gas/microblaze/endian.s: Likewise.
-	* gas/microblaze/endian_be.d: Likewise.
-	* gas/microblaze/endian_le.d: Likewise.
-	* gas/microblaze/endian_le_elf.d: Likewise.
-	* gas/microblaze/reloc_sym.d: Update to accept targets other than elf32-microblaze.
-	* gas/microblaze/special_reg.d: Likewise.
+	* tc-microblaze.c (md_longopts): Define OPTION_EB and
+	OPTION_EL for target.
+	(md_parse_option): Likewise.
+	* tc-microblaze.h: Set elf32-microblazeel if not
+	target_big_endian for TARGET_FORMAT.
+	* configure.tgt: Add microblazeel and set endian per target.
 
 2012-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
