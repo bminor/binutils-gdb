@@ -1013,6 +1013,9 @@ elf_s390_check_relocs (bfd *abfd,
 	    {
 	      struct plt_entry *plt;
 
+	      if (htab->elf.dynobj == NULL)
+		htab->elf.dynobj = abfd;
+
 	      if (!s390_elf_create_ifunc_sections (htab->elf.dynobj, info))
 		return FALSE;
 
