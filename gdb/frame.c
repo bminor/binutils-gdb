@@ -1088,7 +1088,8 @@ put_frame_register (struct frame_info *frame, int regnum,
     }
 }
 
-/* frame_register_read ()
+/* This function is deprecated.  Use get_frame_register_value instead,
+   which provides more accurate information.
 
    Find and return the value of REGNUM for the specified stack frame.
    The number of bytes copied is REGISTER_SIZE (REGNUM).

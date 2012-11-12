@@ -1,3 +1,9 @@
+2012-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* frame.h (frame_register_read): Remove FIXME comment.
+	* frame.c (frame_register_read): Add suggestion explaining
+	which function to use in place of this one.
+
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
 	* python/python.c (start_type_printers): Initialize 'result_obj'.

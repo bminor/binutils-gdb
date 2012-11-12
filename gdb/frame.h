@@ -673,18 +673,6 @@ extern struct frame_info *block_innermost_frame (const struct block *);
 
 extern int deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc);
 
-/* FIXME: cagney/2003-02-02: Should be deprecated or replaced with a
-   function called get_frame_register_p().  This slightly weird (and
-   older) variant of get_frame_register() returns zero (indicating the
-   register value is unavailable/invalid) if either: the register
-   isn't cached; or the register has been optimized out; or the
-   register contents are unavailable (because they haven't been
-   collected in a traceframe).  Problem is, neither check is exactly
-   correct.  A register can't be optimized out (it may not have been
-   saved as part of a function call); The fact that a register isn't
-   in the register cache doesn't mean that the register isn't
-   available (it could have been fetched from memory).  */
-
 extern int frame_register_read (struct frame_info *frame, int regnum,
 				gdb_byte *buf);
 
