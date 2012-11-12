@@ -30,6 +30,7 @@
 #include "vec.h"
 #include "bcache.h"
 #include "dwarf2loc.h"
+#include "typeprint.h"
 
 typedef struct pyty_type_object
 {
@@ -954,7 +955,8 @@ typy_str (PyObject *self)
       stb = mem_fileopen ();
       old_chain = make_cleanup_ui_file_delete (stb);
 
-      type_print (type_object_to_type (self), "", stb, -1);
+      LA_PRINT_TYPE (type_object_to_type (self), "", stb, -1, 0,
+		     &type_print_raw_options);
 
       thetype = ui_file_xstrdup (stb, &length);
       do_cleanups (old_chain);

@@ -1,3 +1,8 @@
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Symbols): Document "set print type methods",
+	"set print type typedefs", and flags to ptype and whatis.
+
 2012-11-09  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.texinfo (GDB/MI Data Manipulation): Add fullname field to

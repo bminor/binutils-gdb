@@ -970,6 +970,8 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 	     between them.  Make sure to count only method that we
 	     will display; artificial methods will be hidden.  */
 	  len = TYPE_NFN_FIELDS (type);
+	  if (!flags->print_methods)
+	    len = 0;
 	  real_len = 0;
 	  for (i = 0; i < len; i++)
 	    {
@@ -1136,7 +1138,7 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 
 	  /* Print typedefs defined in this class.  */
 
-	  if (TYPE_TYPEDEF_FIELD_COUNT (type) != 0)
+	  if (TYPE_TYPEDEF_FIELD_COUNT (type) != 0 && flags->print_typedefs)
 	    {
 	      if (TYPE_NFIELDS (type) != 0 || TYPE_NFN_FIELDS (type) != 0)
 		fprintf_filtered (stream, "\n");

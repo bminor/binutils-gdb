@@ -1,5 +1,26 @@
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
+	* NEWS: Update.
+	* c-typeprint.c (c_type_print_base): Handle print_method and
+	print_typedefs flags.
+	* gdbcmd.h (setprinttypelist, showprinttypelist): Declare.
+	* python/py-type.c (typy_str): Use LA_PRINT_TYPE and raw
+	options.
+	* typeprint.c (type_print_raw_options, default_ptype_flags):
+	Update for new field.s
+	(whatis_exp): Parse flags.  Use LA_PRINT_TYPE.
+	(setprinttypelist, showprinttypelist, print_methods,
+	print_typedefs): New globals.
+	(set_print_type, show_print_type, set_print_type_methods,
+	show_print_type_methods, set_print_type_typedefs,
+	show_print_type_typedefs): New functions.
+	(_initialize_typeprint): Update documentation.  Add "print
+	type methods" and "print type typedefs" parameters.
+	* typeprint.h (struct type_print_options) <print_methods,
+	print_typedefs>: New fields.
+
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
 	* c-typeprint.c (cp_type_print_method_args): Add flags
 	argument.  Call c_print_type, not type_print.
 	(c_type_print_base): Call c_print_type, not type_print.

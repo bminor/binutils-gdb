@@ -36,6 +36,8 @@
 #include "exceptions.h"
 #include "valprint.h"
 #include <errno.h>
+#include <ctype.h>
+#include "cli/cli-utils.h"
 
 extern void _initialize_typeprint (void);
 
@@ -47,15 +49,21 @@ static void whatis_exp (char *, int);
 
 const struct type_print_options type_print_raw_options =
 {
-  1				/* raw */
+  1,				/* raw */
+  1,				/* print_methods */
+  1				/* print_typedefs */
 };
 
 /* The default flags for 'ptype' and 'whatis'.  */
 
 static struct type_print_options default_ptype_flags =
 {
-  0				/* raw */
+  0,				/* raw */
+  1,				/* print_methods */
+  1				/* print_typedefs */
 };
+
+
 
 /* Print a description of a type in the format of a 
    typedef for the current language.
@@ -132,9 +140,46 @@ whatis_exp (char *exp, int show)
   int top = -1;
   int using_enc = 0;
   struct value_print_options opts;
+  struct type_print_options flags = default_ptype_flags;
 
   if (exp)
     {
+      if (*exp == '/')
+	{
+	  int seen_one = 0;
+
+	  for (++exp; *exp && !isspace (*exp); ++exp)
+	    {
+	      switch (*exp)
+		{
+		case 'r':
+		  flags.raw = 1;
+		  break;
+		case 'm':
+		  flags.print_methods = 0;
+		  break;
+		case 'M':
+		  flags.print_methods = 1;
+		  break;
+		case 't':
+		  flags.print_typedefs = 0;
+		  break;
+		case 'T':
+		  flags.print_typedefs = 1;
+		  break;
+		default:
+		  error (_("unrecognized flag '%c'"), *exp);
+		}
+	      seen_one = 1;
+	    }
+
+	  if (!*exp && !seen_one)
+	    error (_("flag expected"));
+	  if (!isspace (*exp))
+	    error (_("expected space after format"));
+	  exp = skip_spaces (exp);
+	}
+
       expr = parse_expression (exp);
       old_chain = make_cleanup (free_current_contents, &expr);
       val = evaluate_type (expr);
@@ -166,7 +211,7 @@ whatis_exp (char *exp, int show)
       printf_filtered (" */\n");    
     }
 
-  type_print (type, "", gdb_stdout, show);
+  LA_PRINT_TYPE (type, "", gdb_stdout, show, 0, &flags);
   printf_filtered ("\n");
 
   if (exp)
@@ -310,17 +355,97 @@ maintenance_print_type (char *typename, int from_tty)
 }
 
 
+struct cmd_list_element *setprinttypelist;
+
+struct cmd_list_element *showprinttypelist;
+
+static void
+set_print_type (char *arg, int from_tty)
+{
+  printf_unfiltered (
+     "\"set print type\" must be followed by the name of a subcommand.\n");
+  help_list (setprintlist, "set print type ", -1, gdb_stdout);
+}
+
+static void
+show_print_type (char *args, int from_tty)
+{
+  cmd_show_list (showprinttypelist, from_tty, "");
+}
+
+static int print_methods = 1;
+
+static void
+set_print_type_methods (char *args, int from_tty, struct cmd_list_element *c)
+{
+  default_ptype_flags.print_methods = print_methods;
+}
+
+static void
+show_print_type_methods (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Printing of methods defined in a class in %s\n"),
+		    value);
+}
+
+static int print_typedefs = 1;
+
+static void
+set_print_type_typedefs (char *args, int from_tty, struct cmd_list_element *c)
+{
+  default_ptype_flags.print_typedefs = print_typedefs;
+}
+
+static void
+show_print_type_typedefs (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Printing of typedefs defined in a class in %s\n"),
+		    value);
+}
+
 void
 _initialize_typeprint (void)
 {
   add_com ("ptype", class_vars, ptype_command, _("\
 Print definition of type TYPE.\n\
+Usage: ptype[/FLAGS] TYPE-NAME | EXPRESSION\n\
 Argument may be a type name defined by typedef, or \"struct STRUCT-TAG\"\n\
 or \"class CLASS-NAME\" or \"union UNION-TAG\" or \"enum ENUM-TAG\".\n\
 The selected stack frame's lexical context is used to look up the name.\n\
-Contrary to \"whatis\", \"ptype\" always unrolls any typedefs."));
+Contrary to \"whatis\", \"ptype\" always unrolls any typedefs.\n\
+\n\
+Available FLAGS are:\n\
+  /r    print in \"raw\" form; do not substitute typedefs\n\
+  /m    do not print methods defined in a class\n\
+  /M    print methods defined in a class\n\
+  /t    do not print typedefs defined in a class\n\
+  /T    print typedefs defined in a class"));
 
   add_com ("whatis", class_vars, whatis_command,
 	   _("Print data type of expression EXP.\n\
 Only one level of typedefs is unrolled.  See also \"ptype\"."));
+
+  add_prefix_cmd ("type", no_class, show_print_type,
+		  _("Generic command for showing type-printing settings."),
+		  &showprinttypelist, "show print type ", 0, &showprintlist);
+  add_prefix_cmd ("type", no_class, set_print_type,
+		  _("Generic command for setting how types print."),
+		  &setprinttypelist, "show print type ", 0, &setprintlist);
+
+  add_setshow_boolean_cmd ("methods", no_class, &print_methods,
+			   _("\
+Set printing of methods defined in classes."), _("\
+Show printing of methods defined in classes."), NULL,
+			   set_print_type_methods,
+			   show_print_type_methods,
+			   &setprinttypelist, &showprinttypelist);
+  add_setshow_boolean_cmd ("typedefs", no_class, &print_typedefs,
+			   _("\
+Set printing of typedefs defined in classes."), _("\
+Show printing of typedefs defined in classes."), NULL,
+			   set_print_type_typedefs,
+			   show_print_type_typedefs,
+			   &setprinttypelist, &showprinttypelist);
 }

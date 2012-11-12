@@ -27,6 +27,12 @@ struct type_print_options
 {
   /* True means that no special printing flags should apply.  */
   unsigned int raw : 1;
+
+  /* True means print methods in a class.  */
+  unsigned int print_methods : 1;
+
+  /* True means print typedefs in a class.  */
+  unsigned int print_typedefs : 1;
 };
 
 extern const struct type_print_options type_print_raw_options;

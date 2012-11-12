@@ -14990,6 +14990,42 @@ case-insensitive matches.
 This command shows the current setting of case sensitivity for symbols
 lookups.
 
+@kindex set print type methods
+@item set print type methods
+@itemx set print type methods on
+@itemx set print type methods off
+Normally, when @value{GDBN} prints a class, it displays any methods
+declared in that class.  You can control this behavior either by
+passing the appropriate flag to @code{ptype}, or using @command{set
+print type methods}.  Specifying @code{on} will cause @value{GDBN} to
+display the methods; this is the default.  Specifying @code{off} will
+cause @value{GDBN} to omit the methods.
+
+@kindex show print type methods
+@item show print type methods
+This command shows the current setting of method display when printing
+classes.
+
+@kindex set print type typedefs
+@item set print type typedefs
+@itemx set print type typedefs on
+@itemx set print type typedefs off
+
+Normally, when @value{GDBN} prints a class, it displays any typedefs
+defined in that class.  You can control this behavior either by
+passing the appropriate flag to @code{ptype}, or using @command{set
+print type typedefs}.  Specifying @code{on} will cause @value{GDBN} to
+display the typedef definitions; this is the default.  Specifying
+@code{off} will cause @value{GDBN} to omit the typedef definitions.
+Note that this controls whether the typedef definition itself is
+printed, not whether typedef names are substituted when printing other
+types.
+
+@kindex show print type typedefs
+@item show print type typedefs
+This command shows the current setting of typedef display when
+printing classes.
+
 @kindex info address
 @cindex address of a symbol
 @item info address @var{symbol}
@@ -15030,7 +15066,7 @@ __read_nocancel + 6 in section .text of /usr/lib64/libc.so.6
 @end smallexample
 
 @kindex whatis
-@item whatis [@var{arg}]
+@item whatis[/@var{flags}] [@var{arg}]
 Print the data type of @var{arg}, which can be either an expression
 or a name of a data type.  With no argument, print the data type of
 @code{$}, the last value in the value history.
@@ -15060,8 +15096,34 @@ For C code, the type names may also have the form @samp{class
 @var{class-name}}, @samp{struct @var{struct-tag}}, @samp{union
 @var{union-tag}} or @samp{enum @var{enum-tag}}.
 
+@var{flags} can be used to modify how the type is displayed.
+Available flags are:
+
+@table @code
+@item r
+Display in ``raw'' form.  Normally, @value{GDBN} substitutes template
+parameters and typedefs defined in a class when printing the class'
+members.  The @code{/r} flag disables this.
+
+@item m
+Do not print methods defined in the class.
+
+@item M
+Print methods defined in the class.  This is the default, but the flag
+exists in case you change the default with @command{set print type methods}.
+
+@item t
+Do not print typedefs defined in the class.  Note that this controls
+whether the typedef definition itself is printed, not whether typedef
+names are substituted when printing other types.
+
+@item T
+Print typedefs defined in the class.  This is the default, but the flag
+exists in case you change the default with @command{set print type typedefs}.
+@end table
+
 @kindex ptype
-@item ptype [@var{arg}]
+@item ptype[/@var{flags}] [@var{arg}]
 @code{ptype} accepts the same arguments as @code{whatis}, but prints a
 detailed description of the type, instead of just the name of the type.
 @xref{Expressions, ,Expressions}.

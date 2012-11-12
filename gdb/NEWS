@@ -8,6 +8,9 @@
 -nh   Disables auto-loading of ~/.gdbinit, but still executes all the
       other initialization files, unlike -nx which disables all of them.
 
+* The 'ptype' and 'whatis' commands now accept an argument to control
+  type formatting.
+
 * Python scripting
 
   ** Vectors can be created with gdb.Type.vector.
@@ -53,6 +56,18 @@ py [command]
   ** For the Renesas Super-H architecture, the "regs" command has been removed
      (has been deprecated in GDB 7.5), and "info all-registers" should be used
      instead.
+
+* New options
+
+set print type methods (on|off)
+show print type methods
+  Control whether method declarations are displayed by "ptype".
+  The default is to show them.
+
+set print type typedefs (on|off)
+show print type typedefs
+  Control whether typedef definitions are displayed by "ptype".
+  The default is to show them.
 
 * MI changes
 
