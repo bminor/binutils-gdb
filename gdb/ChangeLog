@@ -1,5 +1,15 @@
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
+	* cp-support.c (inspect_type,
+	replace_typedefs_qualified_name, replace_typedefs): Add
+	finder, data arguments.  Call as needed.
+	(cp_canonicalize_string_full): New function.
+	(cp_canonicalize_string_no_typedefs): Rewrite.
+	* cp-support.h (canonicalization_ftype): New typedef.
+	(cp_canonicalize_string_full): Declare.
+
+2012-11-12  Tom Tromey  <tromey@redhat.com>
+
 	* NEWS: Update.
 	* c-typeprint.c (c_type_print_base): Handle print_method and
 	print_typedefs flags.
