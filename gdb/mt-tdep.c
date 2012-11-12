@@ -685,7 +685,7 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  buff = alloca (regsize);
 	  bytes = alloca (regsize * sizeof (*bytes));
 
-	  frame_register_read (frame, regnum, buff);
+	  deprecated_frame_register_read (frame, regnum, buff);
 
 	  fputs_filtered (gdbarch_register_name
 			  (gdbarch, regnum), file);
@@ -710,7 +710,7 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  struct value_print_options opts;
 
 	  buf = alloca (register_size (gdbarch, MT_COPRO_REGNUM));
-	  frame_register_read (frame, MT_COPRO_REGNUM, buf);
+	  deprecated_frame_register_read (frame, MT_COPRO_REGNUM, buf);
 	  /* And print.  */
 	  regnum = MT_COPRO_PSEUDOREG_REGNUM;
 	  fputs_filtered (gdbarch_register_name (gdbarch, regnum),
@@ -731,13 +731,13 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  gdb_byte buf[3 * sizeof (LONGEST)];
 
 	  /* Get the two "real" mac registers.  */
-	  frame_register_read (frame, MT_MAC_REGNUM, buf);
+	  deprecated_frame_register_read (frame, MT_MAC_REGNUM, buf);
 	  oldmac = extract_unsigned_integer
 	    (buf, register_size (gdbarch, MT_MAC_REGNUM), byte_order);
 	  if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mrisc2
 	      || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_ms2)
 	    {
-	      frame_register_read (frame, MT_EXMAC_REGNUM, buf);
+	      deprecated_frame_register_read (frame, MT_EXMAC_REGNUM, buf);
 	      ext_mac = extract_unsigned_integer
 		(buf, register_size (gdbarch, MT_EXMAC_REGNUM), byte_order);
 	    }

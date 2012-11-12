@@ -673,7 +673,7 @@ extern struct frame_info *block_innermost_frame (const struct block *);
 
 extern int deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc);
 
-extern int frame_register_read (struct frame_info *frame, int regnum,
+extern int deprecated_frame_register_read (struct frame_info *frame, int regnum,
 				gdb_byte *buf);
 
 /* From stack.c.  */

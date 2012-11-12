@@ -1783,7 +1783,8 @@ i386_frame_cache_1 (struct frame_info *this_frame,
       /* Saved stack pointer has been saved (but the SAVED_SP_REG
 	 register may be unavailable).  */
       if (cache->saved_sp == 0
-	  && frame_register_read (this_frame, cache->saved_sp_reg, buf))
+	  && deprecated_frame_register_read (this_frame,
+					     cache->saved_sp_reg, buf))
 	cache->saved_sp = extract_unsigned_integer (buf, 4, byte_order);
     }
   /* Now that we have the base address for the stack frame we can

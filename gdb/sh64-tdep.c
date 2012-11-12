@@ -1931,7 +1931,7 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
     alloca (register_size (gdbarch, gdbarch_fp0_regnum (gdbarch)));
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (frame, regnum, raw_buffer))
+  if (!deprecated_frame_register_read (frame, regnum, raw_buffer))
     error (_("can't read register %d (%s)"),
 	   regnum, gdbarch_register_name (gdbarch, regnum));
 
@@ -2047,7 +2047,7 @@ sh64_do_register (struct gdbarch *gdbarch, struct ui_file *file,
 				      (gdbarch, regnum)), file);
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (frame, regnum, raw_buffer))
+  if (!deprecated_frame_register_read (frame, regnum, raw_buffer))
     fprintf_filtered (file, "*value not available*\n");
 
   get_formatted_print_options (&opts, 'x');

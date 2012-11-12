@@ -2155,7 +2155,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
       val = allocate_value (regtype);
 
       /* Get the data in raw format.  */
-      if (! frame_register_read (frame, i, value_contents_raw (val)))
+      if (! deprecated_frame_register_read (frame, i, value_contents_raw (val)))
 	mark_value_bytes_unavailable (val, 0, TYPE_LENGTH (value_type (val)));
 
       default_print_one_register_info (file,

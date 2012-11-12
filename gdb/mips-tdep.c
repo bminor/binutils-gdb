@@ -6032,7 +6032,7 @@ mips_read_fp_register_single (struct frame_info *frame, int regno,
   int raw_size = register_size (gdbarch, regno);
   gdb_byte *raw_buffer = alloca (raw_size);
 
-  if (!frame_register_read (frame, regno, raw_buffer))
+  if (!deprecated_frame_register_read (frame, regno, raw_buffer))
     error (_("can't read register %d (%s)"),
 	   regno, gdbarch_register_name (gdbarch, regno));
   if (raw_size == 8)
@@ -6069,7 +6069,7 @@ mips_read_fp_register_double (struct frame_info *frame, int regno,
     {
       /* We have a 64-bit value for this register, and we should use
          all 64 bits.  */
-      if (!frame_register_read (frame, regno, rare_buffer))
+      if (!deprecated_frame_register_read (frame, regno, rare_buffer))
 	error (_("can't read register %d (%s)"),
 	       regno, gdbarch_register_name (gdbarch, regno));
     }
@@ -6302,7 +6302,7 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
 	break;			/* End row: large register.  */
 
       /* OK: get the data in raw format.  */
-      if (!frame_register_read (frame, regnum, raw_buffer))
+      if (!deprecated_frame_register_read (frame, regnum, raw_buffer))
 	error (_("can't read register %d (%s)"),
 	       regnum, gdbarch_register_name (gdbarch, regnum));
       /* pad small registers */

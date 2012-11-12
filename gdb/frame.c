@@ -776,7 +776,7 @@ get_frame_func (struct frame_info *this_frame)
 static enum register_status
 do_frame_register_read (void *src, int regnum, gdb_byte *buf)
 {
-  if (!frame_register_read (src, regnum, buf))
+  if (!deprecated_frame_register_read (src, regnum, buf))
     return REG_UNAVAILABLE;
   else
     return REG_VALID;
@@ -1097,7 +1097,7 @@ put_frame_register (struct frame_info *frame, int regnum,
    Returns 0 if the register value could not be found.  */
 
 int
-frame_register_read (struct frame_info *frame, int regnum,
+deprecated_frame_register_read (struct frame_info *frame, int regnum,
 		     gdb_byte *myaddr)
 {
   int optimized;
@@ -1218,7 +1218,7 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
 	{
 	  gdb_byte buf[MAX_REGISTER_SIZE];
 
-	  frame_register_read (frame, regnum, buf);
+	  deprecated_frame_register_read (frame, regnum, buf);
 	  memcpy (buf + offset, myaddr, curr_len);
 	  put_frame_register (frame, regnum, buf);
 	}

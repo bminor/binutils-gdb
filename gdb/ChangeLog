@@ -1,5 +1,18 @@
 2012-11-12  Joel Brobecker  <brobecker@adacore.com>
 
+	* frame.h (deprecated_frame_register_read): Renames
+	frame_register_read.
+	* frame.c (deprecated_frame_register_read): Renames
+	frame_register_read.  Update all callers.
+	* i386-tdep.c: Update all callers of frame_register_read.
+	* infcmd.c: Likewise.
+	* jit.c: Likewise.
+	* mips-tdep.c: Likewise.
+	* mt-tdep.c: Likewise.
+	* sh64-tdep.c: Likewise.
+
+2012-11-12  Joel Brobecker  <brobecker@adacore.com>
+
 	* frame.h (frame_register_read): Remove FIXME comment.
 	* frame.c (frame_register_read): Add suggestion explaining
 	which function to use in place of this one.
