@@ -1895,7 +1895,8 @@ windows_pid_to_exec_file (int pid)
   /* Try to find exe name as symlink target of /proc/<pid>/exe.  */
   int nchars;
   char procexe[sizeof ("/proc/4294967295/exe")];
-  sprintf (procexe, "/proc/%u/exe", pid);
+
+  xsnprintf (procexe, sizeof (procexe), "/proc/%u/exe", pid);
   nchars = readlink (procexe, path, sizeof(path));
   if (nchars > 0 && nchars < sizeof (path))
     {
@@ -2093,10 +2094,10 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
       cygallargs = (wchar_t *) alloca (len * sizeof (wchar_t));
       swprintf (cygallargs, len, L" -c 'exec %s %s'", exec_file, allargs);
 #else
-      cygallargs = (char *)
-	alloca (sizeof (" -c 'exec  '") + strlen (exec_file)
-				    + strlen (allargs) + 2);
-      sprintf (cygallargs, " -c 'exec %s %s'", exec_file, allargs);
+      len = (sizeof (" -c 'exec  '") + strlen (exec_file)
+	     + strlen (allargs) + 2);
+      cygallargs = (char *) alloca (len);
+      xsnprintf (cygallargs, len, " -c 'exec %s %s'", exec_file, allargs);
 #endif
       toexec = shell;
       flags |= DEBUG_PROCESS;
@@ -2724,8 +2725,9 @@ _initialize_check_for_gdb_ini (void)
 	{
 	  int len = strlen (oldini);
 	  char *newini = alloca (len + 1);
-	  sprintf (newini, "%.*s.gdbinit",
-	    (int) (len - (sizeof ("gdb.ini") - 1)), oldini);
+
+	  xsnprintf (newini, len + 1, "%.*s.gdbinit",
+		     (int) (len - (sizeof ("gdb.ini") - 1)), oldini);
 	  warning (_("obsolete '%s' found. Rename to '%s'."), oldini, newini);
 	}
     }

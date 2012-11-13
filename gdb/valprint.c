@@ -1974,9 +1974,10 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 		/* If the value fits in 3 octal digits, print it that
 		   way.  Otherwise, print it as a hex escape.  */
 		if (value <= 0777)
-		  sprintf (octal, "\\%.3o", (int) (value & 0777));
+		  xsnprintf (octal, sizeof (octal), "\\%.3o",
+			     (int) (value & 0777));
 		else
-		  sprintf (octal, "\\x%lx", (long) value);
+		  xsnprintf (octal, sizeof (octal), "\\x%lx", (long) value);
 		append_string_as_wide (octal, output);
 	      }
 	    /* If we somehow have extra bytes, print them now.  */
@@ -1984,7 +1985,7 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 	      {
 		char octal[5];
 
-		sprintf (octal, "\\%.3o", orig[i] & 0xff);
+		xsnprintf (octal, sizeof (octal), "\\%.3o", orig[i] & 0xff);
 		append_string_as_wide (octal, output);
 		++i;
 	      }

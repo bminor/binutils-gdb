@@ -233,7 +233,7 @@ set_variant_num_gprs (struct gdbarch_tdep *var, int num_gprs)
     {
       char buf[20];
 
-      sprintf (buf, "gr%d", r);
+      xsnprintf (buf, sizeof (buf), "gr%d", r);
       var->register_names[first_gpr_regnum + r] = xstrdup (buf);
     }
 }
@@ -252,7 +252,7 @@ set_variant_num_fprs (struct gdbarch_tdep *var, int num_fprs)
     {
       char buf[20];
 
-      sprintf (buf, "fr%d", r);
+      xsnprintf (buf, sizeof (buf), "fr%d", r);
       var->register_names[first_fpr_regnum + r] = xstrdup (buf);
     }
 }

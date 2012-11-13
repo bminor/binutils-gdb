@@ -198,7 +198,7 @@ mi_field_int (struct ui_out *uiout, int fldno, int width,
   if (data->suppress_output)
     return;
 
-  sprintf (buffer, "%d", value);
+  xsnprintf (buffer, sizeof (buffer), "%d", value);
   mi_field_string (uiout, fldno, width, alignment, fldname, buffer);
 }
 

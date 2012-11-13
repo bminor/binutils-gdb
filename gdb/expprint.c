@@ -670,7 +670,7 @@ op_name_standard (enum exp_opcode opcode)
       {
 	static char buf[30];
 
-	sprintf (buf, "<unknown %d>", opcode);
+	xsnprintf (buf, sizeof (buf), "<unknown %d>", opcode);
 	return buf;
       }
 #define OP(name)	\

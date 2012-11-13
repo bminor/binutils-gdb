@@ -1,3 +1,23 @@
+2012-11-13  Pierre Muller  <muller@sourceware.org>
+
+	ARI fixes: Avoid sprintf function use rule.
+	* charset.c (convert_between_encodings): Use xsnprintf.
+	* cli-out.c (cli_field_int): Likewise.
+	* cp-namespace.c (cp_lookup_nested_symbol): Likewise.
+	* expprint.c (op_name_standard): Likewise.
+	* frv-tdep.c (set_variant_num_gprs): Likewise.
+	(set_variant_num_fprs): Likewise.
+	* m68hc11-tdep.c (m68hc11_initialize_register_info): Likewise.
+	* nto-tdep.c (nto_find_and_open_solib): Likewise.
+	(nto_init_solib_absolute_prefix): Likewise.
+	* source.c (init_source_path): Likewise.
+	(print_source_lines_base): Likewise.
+	* valprint.c (print_wchar): Likewise.
+	* mi/mi-out.c (mi_field_int): Likewise.
+	windows-nat.c (windows_pid_to_exec_file): Likewise.
+	(windows_create_inferior): Likewise.
+	(_initialize_check_for_gdb_ini): Likewise.
+
 2012-11-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* frame.h (deprecated_frame_register_read): Renames

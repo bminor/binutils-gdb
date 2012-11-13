@@ -139,7 +139,7 @@ cli_field_int (struct ui_out *uiout, int fldno, int width,
 
   if (data->suppress_output)
     return;
-  sprintf (buffer, "%d", value);
+  xsnprintf (buffer, sizeof (buffer), "%d", value);
 
   /* Always go through the function pointer (virtual function call).
      We may have been extended.  */

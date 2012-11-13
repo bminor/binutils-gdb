@@ -688,6 +688,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
 	   just like members of namespaces; in particular,
 	   lookup_symbol_namespace works when looking them up.  */
 
+	int size;
 	const char *parent_name = type_name_no_tag_or_error (saved_parent_type);
 	struct symbol *sym
 	  = cp_lookup_symbol_in_namespace (parent_name, nested_name,
@@ -703,9 +704,9 @@ cp_lookup_nested_symbol (struct type *parent_type,
 	   namespace seach is is already not C++ compliant and more
 	   assumptions could make it too magic.  */
 
-	concatenated_name = alloca (strlen (parent_name) + 2
-				    + strlen (nested_name) + 1);
-	sprintf (concatenated_name, "%s::%s",
+	size = strlen (parent_name) + 2 + strlen (nested_name) + 1;
+	concatenated_name = alloca (size);
+	xsnprintf (concatenated_name, size, "%s::%s",
 		 parent_name, nested_name);
 	sym = lookup_static_symbol_aux (concatenated_name, VAR_DOMAIN);
 	if (sym != NULL)

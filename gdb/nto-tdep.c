@@ -89,7 +89,7 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
   char *buf, *arch_path, *nto_root, *endian;
   const char *base;
   const char *arch;
-  int ret;
+  int arch_len, len, ret;
 #define PATH_FMT \
   "%s/lib:%s/usr/lib:%s/usr/photon/lib:%s/usr/photon/dll:%s/lib/dll"
 
@@ -116,20 +116,22 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
 
   /* In case nto_root is short, add strlen(solib)
      so we can reuse arch_path below.  */
-  arch_path =
-    alloca (strlen (nto_root) + strlen (arch) + strlen (endian) + 2 +
-	    strlen (solib));
-  sprintf (arch_path, "%s/%s%s", nto_root, arch, endian);
 
-  buf = alloca (strlen (PATH_FMT) + strlen (arch_path) * 5 + 1);
-  sprintf (buf, PATH_FMT, arch_path, arch_path, arch_path, arch_path,
-	   arch_path);
+  arch_len = (strlen (nto_root) + strlen (arch) + strlen (endian) + 2
+	      + strlen (solib));
+  arch_path = alloca (arch_len);
+  xsnprintf (arch_path, arch_len, "%s/%s%s", nto_root, arch, endian);
+
+  len = strlen (PATH_FMT) + strlen (arch_path) * 5 + 1;
+  buf = alloca (len);
+  xsnprintf (buf, len, PATH_FMT, arch_path, arch_path, arch_path, arch_path,
+	     arch_path);
 
   base = lbasename (solib);
   ret = openp (buf, 1, base, o_flags, temp_pathname);
   if (ret < 0 && base != solib)
     {
-      sprintf (arch_path, "/%s", solib);
+      xsnprintf (arch_path, arch_len, "/%s", solib);
       ret = open (arch_path, o_flags, 0);
       if (temp_pathname)
 	{
@@ -170,9 +172,9 @@ nto_init_solib_absolute_prefix (void)
 	       == BFD_ENDIAN_BIG ? "be" : "le";
     }
 
-  sprintf (arch_path, "%s/%s%s", nto_root, arch, endian);
+  xsnprintf (arch_path, sizeof (arch_path), "%s/%s%s", nto_root, arch, endian);
 
-  sprintf (buf, "set solib-absolute-prefix %s", arch_path);
+  xsnprintf (buf, sizeof (buf), "set solib-absolute-prefix %s", arch_path);
   execute_command (buf, 0);
 }
 

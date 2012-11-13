@@ -384,7 +384,7 @@ init_source_path (void)
 {
   char buf[20];
 
-  sprintf (buf, "$cdir%c$cwd", DIRNAME_SEPARATOR);
+  xsnprintf (buf, sizeof (buf), "$cdir%c$cwd", DIRNAME_SEPARATOR);
   source_path = xstrdup (buf);
   forget_cached_source_info ();
 }
@@ -1292,8 +1292,10 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 
       if (!noerror)
 	{
-	  char *name = alloca (strlen (s->filename) + 100);
-	  sprintf (name, "%d\t%s", line, s->filename);
+	  int len = strlen (s->filename) + 100;
+	  char *name = alloca (len);
+
+	  xsnprintf (name, len, "%d\t%s", line, s->filename);
 	  print_sys_errmsg (name, errno);
 	}
       else
@@ -1344,13 +1346,13 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
       if (c == EOF)
 	break;
       last_line_listed = current_source_line;
-      sprintf (buf, "%d\t", current_source_line++);
+      xsnprintf (buf, sizeof (buf), "%d\t", current_source_line++);
       ui_out_text (uiout, buf);
       do
 	{
 	  if (c < 040 && c != '\t' && c != '\n' && c != '\r')
 	    {
-	      sprintf (buf, "^%c", c + 0100);
+	      xsnprintf (buf, sizeof (buf), "^%c", c + 0100);
 	      ui_out_text (uiout, buf);
 	    }
 	  else if (c == 0177)
@@ -1367,7 +1369,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 	    }
 	  else
 	    {
-	      sprintf (buf, "%c", c);
+	      xsnprintf (buf, sizeof (buf), "%c", c);
 	      ui_out_text (uiout, buf);
 	    }
 	}

@@ -247,7 +247,7 @@ m68hc11_initialize_register_info (void)
     {
       char buf[10];
 
-      sprintf (buf, "_.d%d", i - SOFT_D1_REGNUM + 1);
+      xsnprintf (buf, sizeof (buf), "_.d%d", i - SOFT_D1_REGNUM + 1);
       m68hc11_get_register_info (&soft_regs[i], buf);
     }
 
