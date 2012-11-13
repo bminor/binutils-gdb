@@ -1162,7 +1162,16 @@ extern void clear_solib (void);
 
 extern int identify_source_line (struct symtab *, int, int, CORE_ADDR);
 
-extern void print_source_lines (struct symtab *, int, int, int);
+/* Flags passed as 4th argument to print_source_lines.  */
+
+enum print_source_lines_flags
+  {
+    /* Do not print an error message.  */
+    PRINT_SOURCE_LINES_NOERROR = (1 << 0)
+  };
+
+extern void print_source_lines (struct symtab *, int, int,
+				enum print_source_lines_flags);
 
 extern void forget_cached_source_info_for_objfile (struct objfile *);
 extern void forget_cached_source_info (void);

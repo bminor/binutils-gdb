@@ -1,3 +1,9 @@
+2012-11-13 Markus Metzger <markus.t.metzger@intel.com>
+
+	* symtab.h (print_source_lines_flags): New enum.
+	* source.c (print_source_lines_base): Change noerror to flags.
+	(print_source_lines): Change noerror to flags.
+
 2012-11-13  Pierre Muller  <muller@sourceware.org>
 
 	ARI fixes: Avoid sprintf function use rule.

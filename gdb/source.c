@@ -1245,10 +1245,9 @@ identify_source_line (struct symtab *s, int line, int mid_statement,
 /* Print source lines from the file of symtab S,
    starting with line number LINE and stopping before line number STOPLINE.  */
 
-static void print_source_lines_base (struct symtab *s, int line, int stopline,
-				     int noerror);
 static void
-print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
+print_source_lines_base (struct symtab *s, int line, int stopline,
+			 enum print_source_lines_flags flags)
 {
   int c;
   int desc;
@@ -1276,13 +1275,13 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
       else
 	{
 	  desc = last_source_error;
-	  noerror = 1;
+	  flags |= PRINT_SOURCE_LINES_NOERROR;
 	}
     }
   else
     {
       desc = last_source_error;
-      noerror = 1;
+	  flags |= PRINT_SOURCE_LINES_NOERROR;
       noprint = 1;
     }
 
@@ -1290,7 +1289,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
     {
       last_source_error = desc;
 
-      if (!noerror)
+      if (!(flags & PRINT_SOURCE_LINES_NOERROR))
 	{
 	  int len = strlen (s->filename) + 100;
 	  char *name = alloca (len);
@@ -1385,9 +1384,10 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
    window otherwise it is simply printed.  */
 
 void
-print_source_lines (struct symtab *s, int line, int stopline, int noerror)
+print_source_lines (struct symtab *s, int line, int stopline,
+		    enum print_source_lines_flags flags)
 {
-  print_source_lines_base (s, line, stopline, noerror);
+  print_source_lines_base (s, line, stopline, flags);
 }
 
 /* Print info on range of pc's in a specified line.  */
