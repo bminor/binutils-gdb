@@ -204,9 +204,13 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
   int out_of_order = 0;
   int next_line = 0;
   int num_displayed = 0;
+  enum print_source_lines_flags psl_flags = 0;
   struct cleanup *ui_out_chain;
   struct cleanup *ui_out_tuple_chain = make_cleanup (null_cleanup, 0);
   struct cleanup *ui_out_list_chain = make_cleanup (null_cleanup, 0);
+
+  if (flags & DISASSEMBLY_FILENAME)
+    psl_flags |= PRINT_SOURCE_LINES_FILENAME;
 
   mle = (struct dis_line_entry *) alloca (nlines
 					  * sizeof (struct dis_line_entry));
@@ -275,7 +279,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		  ui_out_tuple_chain
 		    = make_cleanup_ui_out_tuple_begin_end (uiout,
 							   "src_and_asm_line");
-		  print_source_lines (symtab, next_line, mle[i].line + 1, 0);
+		  print_source_lines (symtab, next_line, mle[i].line + 1, psl_flags);
 		}
 	      else
 		{
@@ -289,7 +293,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 			= make_cleanup_ui_out_tuple_begin_end (uiout,
 							       "src_and_asm_line");
 		      print_source_lines (symtab, next_line, next_line + 1,
-					  0);
+					  psl_flags);
 		      ui_out_list_chain_line
 			= make_cleanup_ui_out_list_begin_end (uiout,
 							      "line_asm_insn");
@@ -301,7 +305,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 		  ui_out_tuple_chain
 		    = make_cleanup_ui_out_tuple_begin_end (uiout,
 							   "src_and_asm_line");
-		  print_source_lines (symtab, next_line, mle[i].line + 1, 0);
+		  print_source_lines (symtab, next_line, mle[i].line + 1, psl_flags);
 		}
 	    }
 	  else
@@ -309,7 +313,7 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch, struct ui_out *uiout,
 	      ui_out_tuple_chain
 		= make_cleanup_ui_out_tuple_begin_end (uiout,
 						       "src_and_asm_line");
-	      print_source_lines (symtab, mle[i].line, mle[i].line + 1, 0);
+	      print_source_lines (symtab, mle[i].line, mle[i].line + 1, psl_flags);
 	    }
 
 	  next_line = mle[i].line + 1;

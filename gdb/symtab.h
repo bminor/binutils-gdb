@@ -1167,7 +1167,10 @@ extern int identify_source_line (struct symtab *, int, int, CORE_ADDR);
 enum print_source_lines_flags
   {
     /* Do not print an error message.  */
-    PRINT_SOURCE_LINES_NOERROR = (1 << 0)
+    PRINT_SOURCE_LINES_NOERROR = (1 << 0),
+
+    /* Print the filename in front of the source lines.  */
+    PRINT_SOURCE_LINES_FILENAME = (1 << 1)
   };
 
 extern void print_source_lines (struct symtab *, int, int,

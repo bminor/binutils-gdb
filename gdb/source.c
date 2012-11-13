@@ -1345,6 +1345,11 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       if (c == EOF)
 	break;
       last_line_listed = current_source_line;
+      if (flags & PRINT_SOURCE_LINES_FILENAME)
+        {
+          ui_out_text (uiout, s->filename);
+          ui_out_text (uiout, ":");
+        }
       xsnprintf (buf, sizeof (buf), "%d\t", current_source_line++);
       ui_out_text (uiout, buf);
       do

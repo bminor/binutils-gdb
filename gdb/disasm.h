@@ -22,6 +22,7 @@
 #define DISASSEMBLY_SOURCE	(0x1 << 0)
 #define DISASSEMBLY_RAW_INSN	(0x1 << 1)
 #define DISASSEMBLY_OMIT_FNAME	(0x1 << 2)
+#define DISASSEMBLY_FILENAME	(0x1 << 3)
 
 struct ui_out;
 struct ui_file;
