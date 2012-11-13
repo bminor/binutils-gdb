@@ -111,7 +111,7 @@ CFLAGS = @CFLAGS@
 INTERNAL_CFLAGS_BASE =  ${CFLAGS} ${GLOBAL_CFLAGS} \
 	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS}
 INTERNAL_WARN_CFLAGS =  ${INTERNAL_CFLAGS_BASE} $(WARN_CFLAGS)
-INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS)
+INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS) -DGDBSERVER
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -450,7 +450,7 @@ UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
 # Note, we only build the IPA if -fvisibility=hidden is supported in
 # the first place.
 IPAGENT_CFLAGS = $(CPPFLAGS) $(INTERNAL_CFLAGS) $(UST_CFLAGS) \
-	-fPIC -DGDBSERVER -DIN_PROCESS_AGENT \
+	-fPIC -DIN_PROCESS_AGENT \
 	-fvisibility=hidden
 
 # In-process agent object rules
@@ -497,40 +497,40 @@ gdbreplay.o: gdbreplay.c config.h
 dll.o: dll.c $(server_h)
 
 signals.o: ../common/signals.c $(server_h) $(signals_def)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 linux-procfs.o: ../common/linux-procfs.c $(server_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 linux-ptrace.o: ../common/linux-ptrace.c $(server_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 common-utils.o: ../common/common-utils.c $(server_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 vec.o: ../common/vec.c $(vec_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 gdb_vecs.o: ../common/gdb_vecs.c $(vec_h) $(gdb_vecs_h) $(host_defs_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 xml-utils.o: ../common/xml-utils.c $(server_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 linux-osdata.o: ../common/linux-osdata.c $(server_h) $(linux_osdata_h) ../common/gdb_dirent.h
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 ptid.o: ../common/ptid.c $(ptid_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 buffer.o: ../common/buffer.c $(server_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 format.o: ../common/format.c $(server_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 agent.o: ../common/agent.c $(server_h) $(agent_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 # We build vasprintf with -DHAVE_CONFIG_H because we want that unit to
 # include our config.h file.  Otherwise, some system headers do not get
