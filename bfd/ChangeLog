@@ -1,3 +1,8 @@
+2012-11-13  Joe Seymour  <jseymour@codesourcery.com>
+
+	* elf.c (rewrite_elf_program_header): Allocate elf_segment_map
+	with bfd_zalloc, instead of bfd_alloc.
+
 2012-11-09  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am (ALL_MACHINES): Add cpu-v850-rh850.lo.

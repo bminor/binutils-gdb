@@ -6043,7 +6043,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		 and carry on looping.  */
 	      amt = sizeof (struct elf_segment_map);
 	      amt += ((bfd_size_type) section_count - 1) * sizeof (asection *);
-	      map = (struct elf_segment_map *) bfd_alloc (obfd, amt);
+	      map = (struct elf_segment_map *) bfd_zalloc (obfd, amt);
 	      if (map == NULL)
 		{
 		  free (sections);
