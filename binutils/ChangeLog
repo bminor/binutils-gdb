@@ -1,3 +1,9 @@
+2012-11-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* readelf.c (get_machine_flags) <EM_MIPS, EM_MIPS_RS3_LE>: Move
+	code to handle EF_SH_PIC and EF_SH_FDPIC...
+	<EM_SH>: ... here.
+
 2012-11-09  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_machine_flags): Add support for E_FLAG_RX_ABI.

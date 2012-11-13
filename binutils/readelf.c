@@ -2583,12 +2583,6 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    case E_MIPS_ARCH_64R2: strcat (buf, ", mips64r2"); break;
 	    default: strcat (buf, _(", unknown ISA")); break;
 	    }
-
-	  if (e_flags & EF_SH_PIC)
-	    strcat (buf, ", pic");
-
-	  if (e_flags & EF_SH_FDPIC)
-	    strcat (buf, ", fdpic");
 	  break;
 
 	case EM_SH:
@@ -2618,6 +2612,11 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    default: strcat (buf, _(", unknown ISA")); break;
 	    }
 
+	  if (e_flags & EF_SH_PIC)
+	    strcat (buf, ", pic");
+
+	  if (e_flags & EF_SH_FDPIC)
+	    strcat (buf, ", fdpic");
 	  break;
 
 	case EM_SPARCV9:
