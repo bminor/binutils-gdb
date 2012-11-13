@@ -31443,6 +31443,7 @@ The corresponding @value{GDBN} command is @samp{x}.
 
 @smallexample
  -data-write-memory-bytes @var{address} @var{contents}
+ -data-write-memory-bytes @var{address} @var{contents} @r{[}@var{count}@r{]}
 @end smallexample
 
 @noindent
@@ -31456,6 +31457,11 @@ quoted using the C convention.
 
 @item @var{contents}
 The hex-encoded bytes to write.
+
+@item @var{count}
+Optional argument indicating the number of bytes to be written.  If @var{count} 
+is greater than @var{contents}' length, @value{GDBN} will repeatedly 
+write @var{contents} until it fills @var{count} bytes.
 
 @end table
 
@@ -31472,6 +31478,12 @@ There's no corresponding @value{GDBN} command.
 (gdb)
 @end smallexample
 
+@smallexample
+(gdb)
+-data-write-memory-bytes &a "aabbccdd" 16e
+^done
+(gdb)
+@end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Tracepoint Commands

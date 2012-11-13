@@ -1,3 +1,9 @@
+2012-11-13  Giuseppe Montalto  <giuseppe.montalto@st.com>
+
+	* mi/mi-main.c (mi_cmd_data_write_memory): Handle additional
+	parameter COUNT, for pattern filling of memory regions.
+	* NEWS: Mention it.
+
 2012-11-13 Markus Metzger <markus.t.metzger@intel.com>
 
 	* disasm.h (DISASSEMBLY_FILENAME): New macro.

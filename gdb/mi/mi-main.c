@@ -1656,7 +1656,8 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
 /* Implementation of the -data-write-memory-bytes command.
 
    ADDR: start address
-   DATA: string of bytes to write at that address.  */
+   DATA: string of bytes to write at that address
+   COUNT: number of bytes to be filled (decimal integer).  */
 
 void
 mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
@@ -1664,11 +1665,13 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
   CORE_ADDR addr;
   char *cdata;
   gdb_byte *data;
-  int len, r, i;
+  gdb_byte *databuf;
+  size_t len, r, i, steps, remainder;
+  long int count, j;
   struct cleanup *back_to;
 
-  if (argc != 2)
-    error (_("Usage: ADDR DATA."));
+  if (argc != 2 && argc != 3)
+    error (_("Usage: ADDR DATA [COUNT]."));
 
   addr = parse_and_eval_address (argv[0]);
   cdata = argv[1];
@@ -1677,18 +1680,45 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
 	   cdata);
 
   len = strlen (cdata)/2;
+  if (argc == 3)
+    count = strtoul (argv[2], NULL, 10);
+  else
+    count = len;
 
-  data = xmalloc (len);
-  back_to = make_cleanup (xfree, data);
+  databuf = xmalloc (len * sizeof (gdb_byte));
+  back_to = make_cleanup (xfree, databuf);
 
   for (i = 0; i < len; ++i)
     {
       int x;
-      sscanf (cdata + i * 2, "%02x", &x);
-      data[i] = (gdb_byte) x;
+      if (sscanf (cdata + i * 2, "%02x", &x) != 1)
+        error (_("Invalid argument"));
+      databuf[i] = (gdb_byte) x;
     }
 
-  write_memory_with_notification (addr, data, len);
+  if (len < count)
+    {
+      /* Pattern is made of less bytes than count: 
+         repeat pattern to fill memory.  */
+      data = xmalloc (count);
+      make_cleanup (xfree, data);
+    
+      steps = count / len;
+      remainder = count % len;
+      for (j = 0; j < steps; j++)
+        memcpy (data + j * len, databuf, len);
+
+      if (remainder > 0)
+        memcpy (data + steps * len, databuf, remainder);
+    }
+  else 
+    {
+      /* Pattern is longer than or equal to count: 
+         just copy len bytes.  */
+      data = databuf;
+    }
+
+  write_memory_with_notification (addr, data, count);
 
   do_cleanups (back_to);
 }

@@ -90,6 +90,8 @@ show print type typedefs
   ** The data-disassemble command response will include a "fullname" field
      containing the absolute file name when GDB can determine it and source
      has been requested.
+  ** New optional parameter COUNT added to the "-data-write-memory-bytes" 
+     command, to allow pattern filling of memory areas.
 
 *** Changes in GDB 7.5
 

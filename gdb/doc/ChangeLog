@@ -1,3 +1,8 @@
+2012-11-13  Giuseppe Montalto  <giuseppe.montalto@st.com>
+
+	* gdb.texinfo (GDB/MI Data Manipulation): Document new optional
+	parameter "count" of -data-write-memory-bytes, and add an example.
+
 2012-11-12  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Symbols): Document "info type-printers",
