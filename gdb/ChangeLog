@@ -1,3 +1,11 @@
+2012-11-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdbarch.h, gdbarch.c: Rebuild.
+	* gdbarch.sh (set_target_gdbarch): Rename from
+	deprecated_target_gdbarch_select_hack.
+	* arch-utils.c (gdbarch_update_p): Update.
+	(set_gdbarch_from_file): Update.
+
 2012-11-05  Pierre Muller  <muller@sourceware.org>
 
 	* MAINTAINERS (Responsible Maintainers/misc): Add myself
