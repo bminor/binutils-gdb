@@ -1,3 +1,8 @@
+2012-11-14  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Add a special
+	handling for non-scattered pairs.  Update comments.
+
 2012-11-13  Joe Seymour  <jseymour@codesourcery.com>
 
 	* elf.c (rewrite_elf_program_header): Allocate elf_segment_map

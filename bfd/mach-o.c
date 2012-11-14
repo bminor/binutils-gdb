@@ -1018,7 +1018,7 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
   addr = bfd_get_32 (abfd, raw->r_address);
   res->sym_ptr_ptr = NULL;
   res->addend = 0;
-  
+
   if (addr & BFD_MACH_O_SR_SCATTERED)
     {
       unsigned int j;
@@ -1056,22 +1056,35 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
   else
     {
       unsigned int num;
-      
+
       /* Non-scattered relocation.  */
       reloc.r_scattered = 0;
-      
+
       /* The value and info fields have to be extracted dependent on target
          endian-ness.  */
       bfd_mach_o_swap_in_non_scattered_reloc (abfd, &reloc, raw->r_symbolnum);
       num = reloc.r_value;
 
       if (reloc.r_extern)
-          sym = syms + num;
-      else if (reloc.r_scattered
-	       || (reloc.r_type != BFD_MACH_O_GENERIC_RELOC_PAIR))
+	{
+	  /* An external symbol number.  */
+	  sym = syms + num;
+	}
+      else if (num == 0x00ffffff)
+	{
+	  /* The 'symnum' in a non-scattered PAIR is 0x00ffffff.  But as this
+	     is generic code, we don't know wether this is really a PAIR.
+	     This value is almost certainly not a valid section number, hence
+	     this specific case to avoid an assertion failure.
+	     Target specific swap_reloc_in routine should adjust that.  */
+	  sym = bfd_abs_section_ptr->symbol_ptr_ptr;
+	}
+      else
         {
+	  /* A section number.  */
           BFD_ASSERT (num != 0);
           BFD_ASSERT (num <= mdata->nsects);
+
           sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
           /* For a symbol defined in section S, the addend (stored in the
              binary) contains the address of the section.  To comply with
@@ -1080,26 +1093,23 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd,
              the vma of the section.  */
           res->addend = -mdata->sections[num - 1]->addr;
         }
-      else /* ... The 'symnum' in a non-scattered PAIR will be 0x00ffffff.  */
-        {
-          /* Pairs for PPC LO/HI/HA are not scattered, but contain the offset
-             in the lower 16bits of the address value.  So we have to find the
-             'symbol' from the preceding reloc.  We do this even thoough the
-             section symbol is probably not needed here, because NULL symbol
-             values cause an assert in generic BFD code.  */
-          sym = (res - 1)->sym_ptr_ptr;
-        }
+      /* Note: Pairs for PPC LO/HI/HA are not scattered, but contain the offset
+	 in the lower 16bits of the address value.  So we have to find the
+	 'symbol' from the preceding reloc.  We do this even though the
+	 section symbol is probably not needed here, because NULL symbol
+	 values cause an assert in generic BFD code.  This must be done in
+	 the PPC swap_reloc_in routine.  */
       res->sym_ptr_ptr = sym;
-      
+
       /* The 'address' is just r_address.
          ??? maybe this should be masked with  0xffffff for safety.  */
       res->address = addr;
       reloc.r_address = addr;
     }
-  
-  /* We have set up a reloc with all the information present, so the swapper can
-     modify address, value and addend fields, if necessary, to convey information
-     in the generic BFD reloc that is mach-o specific.  */
+
+  /* We have set up a reloc with all the information present, so the swapper
+     can modify address, value and addend fields, if necessary, to convey
+     information in the generic BFD reloc that is mach-o specific.  */
 
   if (!(*bed->_bfd_mach_o_swap_reloc_in)(res, &reloc))
     return -1;
