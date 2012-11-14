@@ -1244,7 +1244,6 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 #	verbose -log "ld_options is $ld_options"
 #	verbose -log "as_options is $as_options"
 #	verbose -log "src_files is $src_files"
-#	verbose -log "actions is $actions"
 #	verbose -log "binfile is $binfile"
 
 	# Assemble each file in the test.
@@ -1261,68 +1260,68 @@ proc run_ld_link_exec_tests { targets_to_xfail ldtests } {
 	    } else {
 		ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/$src_file $objfile
 	    }
+	}
 
-	    # We have to use $CC to build PIE and shared library.
-	    if { [ string match "c" $lang ] } {
-		set link_proc ld_simple_link
-		set link_cmd $CC
-	    } elseif { [ string match "c++" $lang ] } {
-		set link_proc ld_simple_link
-		set link_cmd $CXX
-	    } elseif { [ string match "-shared" $ld_options ] \
-		 || [ string match "-pie" $ld_options ] } {
-		set link_proc ld_simple_link
-		set link_cmd $CC
+	# We have to use $CC to build PIE and shared library.
+	if { [ string match "c" $lang ] } {
+	    set link_proc ld_simple_link
+	    set link_cmd $CC
+	} elseif { [ string match "c++" $lang ] } {
+	    set link_proc ld_simple_link
+	    set link_cmd $CXX
+	} elseif { [ string match "-shared" $ld_options ] \
+		   || [ string match "-pie" $ld_options ] } {
+	    set link_proc ld_simple_link
+	    set link_cmd $CC
+	} else {
+	    set link_proc ld_link
+	    set link_cmd $ld
+	}
+
+	if ![$link_proc $link_cmd $binfile "-L$srcdir/$subdir $ld_options $objfiles"] {
+	    set failed 1
+	} else {
+	    set failed 0
+	}
+
+	# Check if exec_output is expected.
+	if { $warning != "" } then {
+	    verbose -log "returned with: <$exec_output>, expected: <$warning>"
+	    if { [regexp $warning $exec_output] } then {
+		set failed 0
 	    } else {
-		set link_proc ld_link
-		set link_cmd $ld
+		set failed 1
 	    }
+	}
 
-	    if ![$link_proc $link_cmd $binfile "-L$srcdir/$subdir $ld_options $objfiles"] {
+	if { $failed == 0 } {
+	    send_log "Running: $binfile > $binfile.out\n"
+	    verbose "Running: $binfile > $binfile.out"
+	    catch "exec $binfile > $binfile.out" exec_output
+
+	    if ![string match "" $exec_output] then {
+		send_log "$exec_output\n"
+		verbose "$exec_output" 1
 		set failed 1
 	    } else {
-		set failed 0
-	    }
-
-	    # Check if exec_output is expected.
-	    if { $warning != "" } then {
-		verbose -log "returned with: <$exec_output>, expected: <$warning>"
-		if { [regexp $warning $exec_output] } then {
-		    set failed 0
-		} else {
-		    set failed 1
-		}
-	    }
-
-	    if { $failed == 0 } {
-		send_log "Running: $binfile > $binfile.out\n"
-		verbose "Running: $binfile > $binfile.out"
-		catch "exec $binfile > $binfile.out" exec_output
+		send_log "diff $binfile.out $srcdir/$subdir/$expfile\n"
+		verbose "diff $binfile.out $srcdir/$subdir/$expfile"
+		catch "exec diff $binfile.out $srcdir/$subdir/$expfile" exec_output
+		set exec_output [prune_warnings $exec_output]
 
 		if ![string match "" $exec_output] then {
 		    send_log "$exec_output\n"
 		    verbose "$exec_output" 1
 		    set failed 1
-		} else {
-		    send_log "diff $binfile.out $srcdir/$subdir/$expfile\n"
-		    verbose "diff $binfile.out $srcdir/$subdir/$expfile"
-		    catch "exec diff $binfile.out $srcdir/$subdir/$expfile" exec_output
-		    set exec_output [prune_warnings $exec_output]
-
-		    if ![string match "" $exec_output] then {
-			send_log "$exec_output\n"
-			verbose "$exec_output" 1
-			set failed 1
-		    }
 		}
 	    }
+	}
 
-	    if { $failed != 0 } {
-		fail $testname
-	    } else {
-		set errcnt 0
-		pass $testname
-	    }
+	if { $failed != 0 } {
+	    fail $testname
+	} else {
+	    set errcnt 0
+	    pass $testname
 	}
     }
 }

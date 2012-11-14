@@ -1,3 +1,11 @@
+2012-11-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/shared.exp (build_cxx_tests): Move out the commented out
+	test.
+
+	* lib/ld-lib.exp (run_ld_link_exec_tests): Assemble all sources
+	files in each test.
+
 2012-10-16  Sofiane Naci  <sofiane.naci@arm.com>
 
 	* ld-aarch64/tlsle-symbol-offset.s: New file.
