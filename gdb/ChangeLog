@@ -1,3 +1,8 @@
+2012-11-14  Luis Machado  <lgustavo@codesourcery.com>
+
+	* value.c (value_actual_type): Check for TYPE_CODE_STRUCT
+	target types.
+
 2012-11-14  Tom Tromey  <tromey@redhat.com>
 
 	* configure, config.in: Rebuild.

@@ -1,5 +1,10 @@
 2012-11-14  Luis Machado  <lgustavo@codesourcery.com>
 
+	* gdb.mi/mi-var-create-rtti.c: New file.
+	* gdb.mi/mi-var-create-rtti.exp: New file.
+
+2012-11-14  Luis Machado  <lgustavo@codesourcery.com>
+
 	* gdb.base/structs3.exp: Run to main before doing any tests.
 
 2012-11-14  Andrew Burgess  <aburgess@broadcom.com>
