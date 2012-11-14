@@ -1,0 +1,5 @@
+# MicroBlaze test for special register.
+
+if [istarget microblaze*-*-*] {
+    run_dump_test "allinsn"
+}

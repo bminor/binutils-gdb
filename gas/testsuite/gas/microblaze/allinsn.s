@@ -1,0 +1,27 @@
+    .text
+footext:
+    .text
+    .global lbur
+lbur:
+    lbur r0,r0,r0
+    .text
+    .global lhur
+lhur:
+    lhur r0,r0,r0
+    .text
+    .global lwr
+lwr:
+    lwr r0,r0,r0
+    .text
+    .global sbr
+sbr:
+    sbr r0,r0,r0
+    .text
+    .global shr
+shr:
+    shr r0,r0,r0
+    .text
+    .global swr
+swr:
+    swr r0,r0,r0
+

@@ -1,3 +1,10 @@
+2012-11-14  Edgar E. Iglesias <edgar.iglesias@gmail.com>
+
+	* microblaze-opc.h: Increase MAX_OPCODES (op_code_struct):  add lbur, 
+	lhur, lwr, sbr, shr, swr
+	* microblaze-opcm.h (microblaze_instr): add lbur, lhur, lwr, sbr, shr,
+	swr
+
 2012-11-09  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Add bfd_v850_rh850_arch.

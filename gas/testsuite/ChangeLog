@@ -1,3 +1,9 @@
+2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
+
+	* gas/microblaze/allinsn.exp: New file - test newly added opcodes
+	* gas/microblaze/allinsn.s: Likewise
+	* gas/microblaze/allinsn.d: Likewise
+
 2012-11-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gas/ppc/astest.d: Update for fixup changes.
