@@ -1,3 +1,7 @@
+2012-11-14  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.python/py-type.exp: Uniquify test names.
+
 2012-11-14  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.threads/manythreads.c [DEBUG]: Include "stdio.h".
