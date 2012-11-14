@@ -20,7 +20,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <pthread.h>
+#ifdef DEBUG
 #include <stdio.h>
+#endif
 #include <limits.h>
 
 void *
@@ -28,7 +30,9 @@ thread_function (void *arg)
 {
   int x = * (int *) arg;
 
+#ifdef DEBUG
   printf ("Thread <%d> executing\n", x);
+#endif /* DEBUG */
 
   return NULL;
 }

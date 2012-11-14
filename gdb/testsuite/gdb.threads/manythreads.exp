@@ -19,7 +19,13 @@
 
 standard_testfile
 
-if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable debug] != "" } {
+set opts { debug }
+if [info exists DEBUG] {
+    # make check RUNTESTFLAGS='gdb.threads/manythreads.exp DEBUG=1'
+    lappend opts "additional_flags=-DDEBUG"
+}
+
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $opts] != "" } {
     return -1
 }
 
@@ -57,9 +63,6 @@ gdb_test_multiple "" "stop threads 1" {
     exp_continue
   }
   -re "\\\[\[^\]\]* exited\\\]\r\n" {
-    exp_continue
-  }
-  -re "Thread \[^\n\]* executing\r\n" {
     exp_continue
   }
   -re "Program received signal SIGINT.*$gdb_prompt $" {
@@ -113,9 +116,6 @@ remote_expect host 1 {
   -re "\\\[\[^\]\]* exited\\\]\r\n" {
     exp_continue -continue_timer
   }
-  -re "Thread \[^\n\]* executing\r\n" {
-    exp_continue -continue_timer
-  }
   -re "Program received signal SIGINT.*$gdb_prompt $" {
     if { $failed == 0 } {
       fail "check for duplicate SIGINT"
@@ -139,9 +139,6 @@ gdb_test_multiple "" "stop threads 2" {
     exp_continue
   }
   -re "\\\[\[^\]\]* exited\\\]\r\n" {
-    exp_continue
-  }
-  -re "Thread \[^\n\]* executing\r\n" {
     exp_continue
   }
   -re "Program received signal SIGINT.*$gdb_prompt $" {

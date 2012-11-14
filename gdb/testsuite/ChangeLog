@@ -1,3 +1,11 @@
+2012-11-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.threads/manythreads.c [DEBUG]: Include "stdio.h".
+	(thread_function) [DEBUG]: Call 'printf'.
+	* gdb.threads/manythreads.exp: Pass '-DDEBUG' to compilation
+	command line if 'DEBUG=1' is passed to test.
+	Remove a pattern to match inferior's output.
+
 2012-11-13  Giuseppe Montalto  <giuseppe.montalto@st.com>
 
 	* gdb.mi/mi-fill-memory.exp: New test.
