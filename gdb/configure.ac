@@ -1075,8 +1075,6 @@ AC_HEADER_DIRENT
 AC_HEADER_STAT
 AC_HEADER_STDC
 # elf_hp.h is for HP/UX 64-bit shared library support.
-# FIXME: kettenis/20030102: In most cases we include these (ctype.h, time.h)
-# unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
                   thread_db.h signal.h stddef.h \
 		  stdlib.h string.h memory.h strings.h sys/fault.h \
@@ -1084,7 +1082,7 @@ AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
 		  sys/types.h sys/wait.h wait.h termios.h termio.h \
-		  sgtty.h unistd.h elf_hp.h ctype.h time.h locale.h \
+		  sgtty.h unistd.h elf_hp.h locale.h \
 		  dlfcn.h sys/socket.h sys/un.h])
 AC_CHECK_HEADERS(link.h, [], [],
 [#if HAVE_SYS_TYPES_H

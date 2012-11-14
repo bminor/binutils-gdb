@@ -8919,8 +8919,6 @@ $as_echo "#define STDC_HEADERS 1" >>confdefs.h
 fi
 
 # elf_hp.h is for HP/UX 64-bit shared library support.
-# FIXME: kettenis/20030102: In most cases we include these (ctype.h, time.h)
-# unconditionally, so what's the point in checking these?
 for ac_header in nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
                   thread_db.h signal.h stddef.h \
 		  stdlib.h string.h memory.h strings.h sys/fault.h \
@@ -8928,7 +8926,7 @@ for ac_header in nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
 		  sys/types.h sys/wait.h wait.h termios.h termio.h \
-		  sgtty.h unistd.h elf_hp.h ctype.h time.h locale.h \
+		  sgtty.h unistd.h elf_hp.h locale.h \
 		  dlfcn.h sys/socket.h sys/un.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`

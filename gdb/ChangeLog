@@ -1,3 +1,9 @@
+2012-11-14  Tom Tromey  <tromey@redhat.com>
+
+	* configure, config.in: Rebuild.
+	* configure.ac: Don't check for ctype.h, time.h.
+	* expprint.c: Don't use HAVE_CTYPE_H.
+
 2012-11-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdbarch.h, gdbarch.c: Rebuild.

@@ -33,9 +33,7 @@
 #include "gdb_assert.h"
 #include "valprint.h"
 
-#ifdef HAVE_CTYPE_H
 #include <ctype.h>
-#endif
 
 void
 print_expression (struct expression *exp, struct ui_file *stream)

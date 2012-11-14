@@ -78,9 +78,6 @@
 /* Define to 1 if you have the `canonicalize_file_name' function. */
 #undef HAVE_CANONICALIZE_FILE_NAME
 
-/* Define to 1 if you have the <ctype.h> header file. */
-#undef HAVE_CTYPE_H
-
 /* Define to 1 if you have the <cursesX.h> header file. */
 #undef HAVE_CURSESX_H
 
@@ -535,9 +532,6 @@
 
 /* Define if using Solaris thread debugging. */
 #undef HAVE_THREAD_DB_LIB
-
-/* Define to 1 if you have the <time.h> header file. */
-#undef HAVE_TIME_H
 
 /* Define if you support the tkill syscall. */
 #undef HAVE_TKILL_SYSCALL
