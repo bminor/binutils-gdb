@@ -74,17 +74,17 @@ Disassembly of section \.data:
    4:	(ca fe ba be|be ba fe ca) 	lfd     f23,-17730\(r30\)
 
 0+0008 <datpt>:
-   8:	(00 98 96 80|80 96 98 00) 	\.long 0x989680
+   8:	00 00 00 00 	\.long 0x0
 			8: R_PPC_REL32	jk\+0x989680
 
 0+000c <dat0>:
-   c:	(ff ff ff fc|fc ff ff ff) 	fnmsub  f31,f31,f31,f31
+   c:	00 00 00 00 	\.long 0x0
 			c: R_PPC_REL32	jk-0x4
 
 0+0010 <dat1>:
-  10:	(00 00 00 00|00 00 00 00) 	\.long 0x0
+  10:	00 00 00 00 	\.long 0x0
 			10: R_PPC_REL32	jk
 
 0+0014 <dat2>:
-  14:	(00 00 00 04|04 00 00 00) 	\.long 0x4
+  14:	00 00 00 00 	\.long 0x0
 			14: R_PPC_REL32	jk\+0x4

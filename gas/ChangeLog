@@ -1,3 +1,8 @@
+2012-11-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/tc-ppc.c (md_apply_fix): Leave field zero when emitting
+	an ELF reloc on data as well.
+
 2012-11-09  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* read.h (s_vendor_attribute): Move to...

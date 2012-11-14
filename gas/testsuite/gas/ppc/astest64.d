@@ -30,42 +30,28 @@ Disassembly of section \.text:
   30:	(48 00 00 0.|0. 00 00 48) 	b       .*
 			30: R_PPC64_REL24	a\+0x4
   34:	(4b ff ff e0|e0 ff ff 4b) 	b       14 <apfour\+0x4>
-  38:	(00 00 00 38|38 00 00 00) 	\.long 0x38
+	\.\.\.
 			38: R_PPC64_ADDR32	\.text\+0x38
-  3c:	(00 00 00 44|44 00 00 00) 	\.long 0x44
 			3c: R_PPC64_ADDR32	\.text\+0x44
-  40:	(00 00 00 00|00 00 00 00) 	\.long 0x0
 			40: R_PPC64_REL32	x
-  44:	(00 00 00 04|04 00 00 00) 	\.long 0x4
 			44: R_PPC64_REL32	x\+0x4
-  48:	(00 00 00 00|00 00 00 00) 	\.long 0x0
 			48: R_PPC64_REL32	z
-  4c:	(00 00 00 04|04 00 00 00) 	\.long 0x4
 			4c: R_PPC64_REL32	\.data\+0x4
-  50:	(00 00 00 00|00 00 00 00) 	\.long 0x0
 			50: R_PPC64_ADDR32	x
-  54:	(00 00 00 04|04 00 00 00) 	\.long 0x4
 			54: R_PPC64_ADDR32	\.data\+0x4
-  58:	(00 00 00 00|00 00 00 00) 	\.long 0x0
 			58: R_PPC64_ADDR32	z
-  5c:	(ff ff ff fc|fc ff ff ff) 	fnmsub  f31,f31,f31,f31
 			5c: R_PPC64_ADDR32	x-0x4
-  60:	(00 00 00 00|00 00 00 00) 	\.long 0x0
 			60: R_PPC64_ADDR32	\.data
-  64:	(ff ff ff fc|fc ff ff ff) 	fnmsub  f31,f31,f31,f31
 			64: R_PPC64_ADDR32	z-0x4
   68:	(ff ff ff a4|a4 ff ff ff) 	\.long 0xffffffa4
   6c:	(ff ff ff a4|a4 ff ff ff) 	\.long 0xffffffa4
-  70:	(00 00 00 00|00 00 00 00) 	\.long 0x0
+	\.\.\.
 			70: R_PPC64_ADDR32	a
-  74:	(00 00 00 10|10 00 00 00) 	\.long 0x10
 			74: R_PPC64_ADDR32	\.text\+0x10
-  78:	(00 00 00 10|10 00 00 00) 	\.long 0x10
 			78: R_PPC64_ADDR32	\.text\+0x10
   7c:	(ff ff ff fc|fc ff ff ff) 	fnmsub  f31,f31,f31,f31
-  80:	(00 00 00 12|12 00 00 00) 	\.long 0x12
+	\.\.\.
 			80: R_PPC64_ADDR32	\.text\+0x12
-  84:	(00 00 00 00|00 00 00 00) 	\.long 0x0
 Disassembly of section \.data:
 
 0000000000000000 <x>:

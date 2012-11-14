@@ -1,3 +1,12 @@
+2012-11-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gas/ppc/astest.d: Update for fixup changes.
+	* gas/ppc/astest64.d: Likewise.
+	* gas/ppc/astest2.d: Likewise.
+	* gas/ppc/astest2_64.d: Likewise.
+	* gas/ppc/test1elf32.d: Likewise.
+	* gas/ppc/test1elf64.d: Likewise.
+
 2012-11-09  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* gas/microblaze/endian.exp: New file - endian testcase for microblaze / microblazeel.
