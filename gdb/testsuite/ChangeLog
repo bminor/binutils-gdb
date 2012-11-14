@@ -1,3 +1,7 @@
+2012-11-14  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/structs3.exp: Run to main before doing any tests.
+
 2012-11-14  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.python/py-type.exp: Uniquify test names.

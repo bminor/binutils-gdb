@@ -23,6 +23,11 @@ if { [prepare_for_testing structs3.exp "structs3" "" {debug}] } {
     return -1
 }
 
+if ![runto_main] {
+    untested "could not run to main"
+    return -1
+}
+
 set vhn "\\$\[0-9\]+"
 
 # Check the real contents.
