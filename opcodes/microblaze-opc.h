@@ -56,6 +56,9 @@
 /* New insn type for t*put.  */
 #define INST_TYPE_RFSL  19
 
+/* For mbar.  */
+#define INST_TYPE_IMM5 20
+
 #define INST_TYPE_NONE 25
 
 
@@ -76,8 +79,8 @@
 #define OPCODE_MASK_H2  0xFC1F0000  /* High 6 and bits 20-16.  */
 #define OPCODE_MASK_H12 0xFFFF0000  /* High 16.  */
 #define OPCODE_MASK_H4  0xFC0007FF  /* High 6 and low 11 bits.  */
-#define OPCODE_MASK_H13S 0xFFE0EFF0 /* High 11 and 15:1 bits and last 
-				       nibble of last byte for spr.  */
+#define OPCODE_MASK_H13S 0xFFE0E7F0 /* High 11 16:18 21:27 bits, 19:20 bits
+                                       and last nibble of last byte for spr.  */
 #define OPCODE_MASK_H23S 0xFC1FC000 /* High 6, 20-16 and 15:1 bits and last 
 				       nibble of last byte for spr.  */
 #define OPCODE_MASK_H34 0xFC00FFFF  /* High 6 and low 16 bits.  */
@@ -92,11 +95,13 @@
 
 /* New Mask for msrset, msrclr insns.  */
 #define OPCODE_MASK_H23N  0xFC1F8000 /* High 6 and bits 11 - 16.  */
+/* Mask for mbar insn.  */
+#define OPCODE_MASK_HN 0xFF020004 /* High 16 bits and bits 14, 29.  */
 
 #define DELAY_SLOT 1
 #define NO_DELAY_SLOT 0
 
-#define MAX_OPCODES 285
+#define MAX_OPCODES 287
 
 struct op_code_struct
 {
@@ -395,6 +400,8 @@ struct op_code_struct
   {"necaputd",  INST_TYPE_R1_R2, INST_NO_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0x4C000760, OPCODE_MASK_H34C, necaputd,  anyware_inst },
   {"tnecaputd", INST_TYPE_R2,    INST_NO_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0x4C0007E0, OPCODE_MASK_H34C, tnecaputd, anyware_inst },
   {"clz",       INST_TYPE_RD_R1, INST_NO_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0x900000E0, OPCODE_MASK_H34,  clz,       special_inst },
+  {"mbar",      INST_TYPE_IMM5,  INST_PC_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0xB8020004, OPCODE_MASK_HN,   mbar,      special_inst },
+  {"sleep",     INST_TYPE_NONE,  INST_PC_OFFSET, NO_DELAY_SLOT, IMMVAL_MASK_NON_SPECIAL, 0xBA020004, OPCODE_MASK_HN,   invalid_inst, special_inst }, /* translates to mbar 16.  */
   {"", 0, 0, 0, 0, 0, 0, 0, 0},
 };
 
@@ -411,6 +418,9 @@ char pvr_register_prefix[] = "rpvr";
 
 #define MIN_IMM15 ((int) 0x0000)
 #define MAX_IMM15 ((int) 0x7fff)
+
+#define MIN_IMM5  ((int) 0x00000000)
+#define MAX_IMM5  ((int) 0x0000001f)
 
 #endif /* MICROBLAZE_OPC */
 

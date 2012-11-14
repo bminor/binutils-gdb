@@ -65,6 +65,15 @@ get_field_imm5 (long instr)
 }
 
 static char *
+get_field_imm5_mbar (long instr)
+{
+  char tmpstr[25];
+
+  sprintf(tmpstr, "%d", (short)((instr & IMM5_MBAR_MASK) >> IMM_MBAR));
+  return(strdup(tmpstr));
+}
+
+static char *
 get_field_rfsl (long instr)
 {
   char tmpstr[25];
@@ -374,6 +383,13 @@ print_insn_microblaze (bfd_vma memaddr, struct disassemble_info * info)
 	case INST_TYPE_RD_IMM15:
 	  print_func (stream, "\t%s, %s", get_field_rd (inst), get_field_imm15 (inst));
 	  break;
+        /* For mbar insn.  */
+        case INST_TYPE_IMM5:
+          print_func (stream, "\t%s", get_field_imm5_mbar (inst));
+          break;
+        /* For mbar 16 or sleep insn.  */
+        case INST_TYPE_NONE:
+          break;
 	/* For tuqula instruction */
 	case INST_TYPE_RD:
 	  print_func (stream, "\t%s", get_field_rd (inst));

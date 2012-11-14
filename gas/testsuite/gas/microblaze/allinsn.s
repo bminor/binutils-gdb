@@ -28,4 +28,12 @@ swr:
     .global clz
 clz:
     clz r0,r0
+    .text
+    .global mbar
+mbar:
+    mbar 2
+    .text
+    .global sleep
+sleep:
+    sleep
 

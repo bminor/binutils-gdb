@@ -1,4 +1,9 @@
-2012-11-08  David Holsgrove  <david.holsgrove@xilinx.com>
+2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
+
+	* gas/microblaze/allinsn.s: Add mbar and sleep
+	* gas/microblaze/allinsn.d: Likewise
+
+2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* gas/microblaze/allinsn.s: Add clz insn
 	* gas/microblaze/allinsn.d: Likewise

@@ -1605,6 +1605,24 @@ md_assemble (char * str)
       output = frag_more (isize);
       break;
 
+    case INST_TYPE_IMM5:
+      if (strcmp(op_end, ""))
+        op_end = parse_imm (op_end + 1, & exp, MIN_IMM5, MAX_IMM5);
+      else
+        as_fatal(_("Error in statement syntax"));
+      if (exp.X_op != O_constant) {
+        as_warn(_("Symbol used as immediate for mbar instruction"));
+      } else {
+        output = frag_more (isize);
+        immed = exp.X_add_number;
+      }
+      if (immed != (immed % 32)) {
+        as_warn(_("Immediate value for mbar > 32. using <value %% 32>"));
+        immed = immed % 32;
+      }
+      inst |= (immed << IMM_MBAR);
+      break;
+
     default:
       as_fatal (_("unimplemented opcode \"%s\""), name);
     }

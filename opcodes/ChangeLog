@@ -1,3 +1,14 @@
+2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
+
+	* microblaze-opc.h: Define new instruction type INST_TYPE_IMM5,
+	update OPCODE_MASK_H13S, add OPCODE_MASK_HN, define MIN_IMM5 / MAX_IMM5,
+	and increase MAX_OPCODES.
+	(op_code_struct):  add mbar and sleep
+	* microblaze-opcm.h (microblaze_instr): add mbar
+	Define IMM_MBAR and IMM5_MBAR_MASK
+	* microblaze-dis.c: Add get_field_imm5_mbar
+	(print_insn_microblaze): Add support for INST_TYPE_IMM5 and INST_TYPE_NONE
+
 2012-11-14  Edgar E. Iglesias <edgar.iglesias@gmail.com>
 
 	* microblaze-opc.h: Increase MAX_OPCODES (op_code_struct):  add clz insn

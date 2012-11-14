@@ -1,3 +1,7 @@
+2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
+
+	* config/tc-microblaze.c (md_assemble): Add support for INST_TYPE_IMM5
+
 2012-11-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* config/tc-ppc.c (md_apply_fix): Leave field zero when emitting

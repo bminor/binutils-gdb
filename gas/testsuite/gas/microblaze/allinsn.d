@@ -25,3 +25,9 @@ Disassembly of section .text:
 
 00000018 <clz>:
   18:	900000e0 	clz	r0, r0
+
+0000001c <mbar>:
+  1c:	b8420004 	mbar	2
+
+00000020 <sleep>:
+  20:	ba020004 	sleep
