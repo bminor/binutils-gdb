@@ -448,6 +448,12 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 static CORE_ADDR
 arm_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR val)
 {
+  /* On M-profile devices, do not strip the low bit from EXC_RETURN
+     (the magic exception return address).  */
+  if (gdbarch_tdep (gdbarch)->is_m
+      && (val & 0xfffffff0) == 0xfffffff0)
+    return val;
+
   if (arm_apcs_32)
     return UNMAKE_THUMB_ADDR (val);
   else
@@ -2924,6 +2930,127 @@ struct frame_unwind arm_stub_unwind = {
   arm_prologue_prev_register,
   NULL,
   arm_stub_unwind_sniffer
+};
+
+/* Put here the code to store, into CACHE->saved_regs, the addresses
+   of the saved registers of frame described by THIS_FRAME.  CACHE is
+   returned.  */
+
+static struct arm_prologue_cache *
+arm_m_exception_cache (struct frame_info *this_frame)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct arm_prologue_cache *cache;
+  CORE_ADDR unwound_sp;
+  LONGEST xpsr;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
+
+  unwound_sp = get_frame_register_unsigned (this_frame,
+					    ARM_SP_REGNUM);
+
+  /* The hardware saves eight 32-bit words, comprising xPSR,
+     ReturnAddress, LR (R14), R12, R3, R2, R1, R0.  See details in
+     "B1.5.6 Exception entry behavior" in
+     "ARMv7-M Architecture Reference Manual".  */
+  cache->saved_regs[0].addr = unwound_sp;
+  cache->saved_regs[1].addr = unwound_sp + 4;
+  cache->saved_regs[2].addr = unwound_sp + 8;
+  cache->saved_regs[3].addr = unwound_sp + 12;
+  cache->saved_regs[12].addr = unwound_sp + 16;
+  cache->saved_regs[14].addr = unwound_sp + 20;
+  cache->saved_regs[15].addr = unwound_sp + 24;
+  cache->saved_regs[ARM_PS_REGNUM].addr = unwound_sp + 28;
+
+  /* If bit 9 of the saved xPSR is set, then there is a four-byte
+     aligner between the top of the 32-byte stack frame and the
+     previous context's stack pointer.  */
+  cache->prev_sp = unwound_sp + 32;
+  if (safe_read_memory_integer (unwound_sp + 28, 4, byte_order, &xpsr)
+      && (xpsr & (1 << 9)) != 0)
+    cache->prev_sp += 4;
+
+  return cache;
+}
+
+/* Implementation of function hook 'this_id' in
+   'struct frame_uwnind'.  */
+
+static void
+arm_m_exception_this_id (struct frame_info *this_frame,
+			 void **this_cache,
+			 struct frame_id *this_id)
+{
+  struct arm_prologue_cache *cache;
+
+  if (*this_cache == NULL)
+    *this_cache = arm_m_exception_cache (this_frame);
+  cache = *this_cache;
+
+  /* Our frame ID for a stub frame is the current SP and LR.  */
+  *this_id = frame_id_build (cache->prev_sp,
+			     get_frame_pc (this_frame));
+}
+
+/* Implementation of function hook 'prev_register' in
+   'struct frame_uwnind'.  */
+
+static struct value *
+arm_m_exception_prev_register (struct frame_info *this_frame,
+			       void **this_cache,
+			       int prev_regnum)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct arm_prologue_cache *cache;
+
+  if (*this_cache == NULL)
+    *this_cache = arm_m_exception_cache (this_frame);
+  cache = *this_cache;
+
+  /* The value was already reconstructed into PREV_SP.  */
+  if (prev_regnum == ARM_SP_REGNUM)
+    return frame_unwind_got_constant (this_frame, prev_regnum,
+				      cache->prev_sp);
+
+  return trad_frame_get_prev_register (this_frame, cache->saved_regs,
+				       prev_regnum);
+}
+
+/* Implementation of function hook 'sniffer' in
+   'struct frame_uwnind'.  */
+
+static int
+arm_m_exception_unwind_sniffer (const struct frame_unwind *self,
+				struct frame_info *this_frame,
+				void **this_prologue_cache)
+{
+  CORE_ADDR this_pc = get_frame_pc (this_frame);
+
+  /* No need to check is_m; this sniffer is only registered for
+     M-profile architectures.  */
+
+  /* Exception frames return to one of these magic PCs.  Other values
+     are not defined as of v7-M.  See details in "B1.5.8 Exception
+     return behavior" in "ARMv7-M Architecture Reference Manual".  */
+  if (this_pc == 0xfffffff1 || this_pc == 0xfffffff9
+      || this_pc == 0xfffffffd)
+    return 1;
+
+  return 0;
+}
+
+/* Frame unwinder for M-profile exceptions.  */
+
+struct frame_unwind arm_m_exception_unwind =
+{
+  SIGTRAMP_FRAME,
+  default_frame_unwind_stop_reason,
+  arm_m_exception_this_id,
+  arm_m_exception_prev_register,
+  NULL,
+  arm_m_exception_unwind_sniffer
 };
 
 static CORE_ADDR
@@ -10218,6 +10345,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   dwarf2_frame_set_init_reg (gdbarch, arm_dwarf2_frame_init_reg);
 
   /* Add some default predicates.  */
+  if (is_m)
+    frame_unwind_append_unwinder (gdbarch, &arm_m_exception_unwind);
   frame_unwind_append_unwinder (gdbarch, &arm_stub_unwind);
   dwarf2_append_unwinders (gdbarch);
   frame_unwind_append_unwinder (gdbarch, &arm_exidx_unwind);

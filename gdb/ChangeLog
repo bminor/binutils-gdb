@@ -1,3 +1,13 @@
+2012-11-14  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* arm-tdep.c (arm_addr_bits_remove): Do not adjust the low
+	bit of EXC_RETURN.
+	(arm_m_exception_cache, arm_m_exception_this_id)
+	(arm_m_exception_prev_register, arm_m_exception_unwind_sniffer)
+	(arm_m_exception_unwind): New.
+	(arm_gdbarch_init): Register arm_m_exception_unwind.
+
 2012-11-13  Giuseppe Montalto  <giuseppe.montalto@st.com>
 
 	* mi/mi-main.c (mi_cmd_data_write_memory): Handle additional
