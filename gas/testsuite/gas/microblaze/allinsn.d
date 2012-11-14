@@ -22,3 +22,6 @@ Disassembly of section .text:
 
 00000014 <swr>:
   14:	d8000200 	swr	r0, r0, r0
+
+00000018 <clz>:
+  18:	900000e0 	clz	r0, r0

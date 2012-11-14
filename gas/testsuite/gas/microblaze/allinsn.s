@@ -24,4 +24,8 @@ shr:
     .global swr
 swr:
     swr r0,r0,r0
+    .text
+    .global clz
+clz:
+    clz r0,r0
 

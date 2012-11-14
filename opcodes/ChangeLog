@@ -1,5 +1,10 @@
 2012-11-14  Edgar E. Iglesias <edgar.iglesias@gmail.com>
 
+	* microblaze-opc.h: Increase MAX_OPCODES (op_code_struct):  add clz insn
+	* microblaze-opcm.h (microblaze_instr): add clz
+
+2012-11-14  Edgar E. Iglesias <edgar.iglesias@gmail.com>
+
 	* microblaze-opc.h: Increase MAX_OPCODES (op_code_struct):  add lbur, 
 	lhur, lwr, sbr, shr, swr
 	* microblaze-opcm.h (microblaze_instr): add lbur, lhur, lwr, sbr, shr,

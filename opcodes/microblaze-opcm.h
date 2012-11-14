@@ -25,7 +25,7 @@
 
 enum microblaze_instr
 {
-  add, rsub, addc, rsubc, addk, rsubk, addkc, rsubkc, cmp, cmpu,
+  add, rsub, addc, rsubc, addk, rsubk, addkc, rsubkc, clz, cmp, cmpu,
   addi, rsubi, addic, rsubic, addik, rsubik, addikc, rsubikc, mul, 
   mulh, mulhu, mulhsu,
   idiv, idivu, bsll, bsra, bsrl, get, put, nget, nput, cget, cput,
