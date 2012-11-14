@@ -408,6 +408,8 @@ readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
 
 tcl/ tk/ itcl/		ALL
 
+contrib/ari		Pierre Muller		muller@sourceware.org
+
 
 		Authorized Committers
 		---------------------
