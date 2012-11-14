@@ -1,5 +1,16 @@
 2012-11-14  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_read_main)
+	(bfd_mach_o_read_source_version): New functions.
+	(bfd_mach_o_read_command): Handle BFD_MACH_O_LC_DATA_IN_CODE,
+	BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS, BFD_MACH_O_LC_MAIN,
+	BFD_MACH_O_LC_SOURCE_VERSION.
+	* mach-o.h (bfd_mach_o_main_command)
+	(bfd_mach_o_source_version_command): New types.
+	(bfd_mach_o_load_command): Add fields for these new types.
+
+2012-11-14  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Add a special
 	handling for non-scattered pairs.  Update comments.
 

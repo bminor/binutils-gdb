@@ -3666,6 +3666,48 @@ bfd_mach_o_read_encryption_info (bfd *abfd, bfd_mach_o_load_command *command)
   return TRUE;
 }
 
+static bfd_boolean
+bfd_mach_o_read_main (bfd *abfd, bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_main_command *cmd = &command->command.main;
+  struct mach_o_entry_point_command_external raw;
+
+  if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
+      || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
+    return FALSE;
+
+  cmd->entryoff = bfd_get_64 (abfd, raw.entryoff);
+  cmd->stacksize = bfd_get_64 (abfd, raw.stacksize);
+  return TRUE;
+}
+
+static bfd_boolean
+bfd_mach_o_read_source_version (bfd *abfd, bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_source_version_command *cmd = &command->command.source_version;
+  struct mach_o_source_version_command_external raw;
+  bfd_uint64_t ver;
+
+  if (bfd_seek (abfd, command->offset + BFD_MACH_O_LC_SIZE, SEEK_SET) != 0
+      || bfd_bread (&raw, sizeof (raw), abfd) != sizeof (raw))
+    return FALSE;
+
+  ver = bfd_get_64 (abfd, raw.version);
+  /* Note: we use a serie of shift to avoid shift > 32 (for which gcc
+     generates warnings) in case of the host doesn't support 64 bit
+     integers.  */
+  cmd->e = ver & 0x3ff;
+  ver >>= 10;
+  cmd->d = ver & 0x3ff;
+  ver >>= 10;
+  cmd->c = ver & 0x3ff;
+  ver >>= 10;
+  cmd->b = ver & 0x3ff;
+  ver >>= 10;
+  cmd->a = ver & 0xffffff;
+  return TRUE;
+}
+
 static int
 bfd_mach_o_read_segment (bfd *abfd,
                          bfd_mach_o_load_command *command,
@@ -3842,6 +3884,8 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
     case BFD_MACH_O_LC_CODE_SIGNATURE:
     case BFD_MACH_O_LC_SEGMENT_SPLIT_INFO:
     case BFD_MACH_O_LC_FUNCTION_STARTS:
+    case BFD_MACH_O_LC_DATA_IN_CODE:
+    case BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS:
       if (bfd_mach_o_read_linkedit (abfd, command) != 0)
 	return -1;
       break;
@@ -3856,6 +3900,14 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
     case BFD_MACH_O_LC_VERSION_MIN_MACOSX:
     case BFD_MACH_O_LC_VERSION_MIN_IPHONEOS:
       if (!bfd_mach_o_read_version_min (abfd, command))
+	return -1;
+      break;
+    case BFD_MACH_O_LC_MAIN:
+      if (!bfd_mach_o_read_main (abfd, command))
+	return -1;
+      break;
+    case BFD_MACH_O_LC_SOURCE_VERSION:
+      if (!bfd_mach_o_read_source_version (abfd, command))
 	return -1;
       break;
     default:

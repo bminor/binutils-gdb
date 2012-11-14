@@ -1,3 +1,9 @@
+2012-11-14  Tristan Gingold  <gingold@adacore.com>
+
+	* od-macho.c (bfd_mach_o_load_command_name): Add new definitions.
+	(dump_load_command): Handle BFD_MACH_O_LC_SOURCE_VERSION
+	and BFD_MACH_O_LC_MAIN.
+
 2012-11-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* readelf.c (get_machine_flags) <EM_MIPS, EM_MIPS_RS3_LE>: Move

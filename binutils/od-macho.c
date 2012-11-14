@@ -182,6 +182,10 @@ static const bfd_mach_o_xlat_name bfd_mach_o_load_command_name[] =
   { "version_min_iphoneos", BFD_MACH_O_LC_VERSION_MIN_IPHONEOS},
   { "function_starts", BFD_MACH_O_LC_FUNCTION_STARTS},
   { "dyld_environment", BFD_MACH_O_LC_DYLD_ENVIRONMENT},
+  { "main", BFD_MACH_O_LC_MAIN},
+  { "data_in_code", BFD_MACH_O_LC_DATA_IN_CODE},
+  { "source_version", BFD_MACH_O_LC_SOURCE_VERSION},
+  { "dylib_code_sign_drs", BFD_MACH_O_LC_DYLIB_CODE_SIGN_DRS},
   { NULL, 0}
 };
 
@@ -1036,6 +1040,27 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
         printf (" %u.%u.%u\n", ver->rel, ver->maj, ver->min);
       }
       break;
+    case BFD_MACH_O_LC_SOURCE_VERSION:
+      {
+        bfd_mach_o_source_version_command *version =
+	  &cmd->command.source_version;
+        printf ("\n"
+                "   version a.b.c.d.e: %u.%u.%u.%u.%u\n",
+		version->a, version->b, version->c, version->d, version->e);
+        break;
+      }
+    case BFD_MACH_O_LC_MAIN:
+      {
+        bfd_mach_o_main_command *entry = &cmd->command.main;
+        printf ("\n"
+                "   entry offset: ");
+	printf_vma (entry->entryoff);
+        printf ("\n"
+                "   stack size:   ");
+	printf_vma (entry->stacksize);
+	printf ("\n");
+        break;
+      }
     default:
       putchar ('\n');
       printf ("  offset: 0x%08lx\n", (unsigned long)cmd->offset);

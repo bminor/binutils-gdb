@@ -467,7 +467,7 @@ bfd_mach_o_fvmlib_command;
 typedef struct bfd_mach_o_dyld_info_command
 {
   /* File offset and size to rebase info.  */
-  unsigned int rebase_off; 
+  unsigned int rebase_off;
   unsigned int rebase_size;
 
   /* File offset and size of binding info.  */
@@ -505,6 +505,23 @@ typedef struct bfd_mach_o_encryption_info_command
 }
 bfd_mach_o_encryption_info_command;
 
+typedef struct bfd_mach_o_main_command
+{
+  bfd_uint64_t entryoff;
+  bfd_uint64_t stacksize;
+}
+bfd_mach_o_main_command;
+
+typedef struct bfd_mach_o_source_version_command
+{
+  unsigned int a;
+  unsigned short b;
+  unsigned short c;
+  unsigned short d;
+  unsigned short e;
+}
+bfd_mach_o_source_version_command;
+
 typedef struct bfd_mach_o_load_command
 {
   bfd_mach_o_load_command_type type;
@@ -527,6 +544,8 @@ typedef struct bfd_mach_o_load_command
     bfd_mach_o_version_min_command version_min;
     bfd_mach_o_encryption_info_command encryption_info;
     bfd_mach_o_fvmlib_command fvmlib;
+    bfd_mach_o_main_command main;
+    bfd_mach_o_source_version_command source_version;
   }
   command;
 }
