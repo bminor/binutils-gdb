@@ -1,3 +1,8 @@
+2012-11-14  Roland McGrath  <mcgrathr@google.com>
+
+	* arm.cc (Output_data_plt_arm_nacl::first_plt_entry): Use bic rather
+	than bfc instruction for data sandboxing.
+
 2012-11-08  Alan Modra  <amodra@gmail.com>
 
 	* po/POTFILES.in: Regenerate.

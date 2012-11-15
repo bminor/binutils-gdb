@@ -12218,7 +12218,7 @@ const uint32_t Output_data_plt_arm_nacl<big_endian>::first_plt_entry[16] =
   0xe08cc00f,                           // add	ip, ip, pc
   0xe52dc008,                           // str	ip, [sp, #-8]!
   // Second bundle:
-  0xe7dfcf1f,                           // bfc	ip, #30, #2
+  0xe3ccc103,                           // bic	ip, ip, #0xc0000000
   0xe59cc000,                           // ldr	ip, [ip]
   0xe3ccc13f,                           // bic	ip, ip, #0xc000000f
   0xe12fff1c,                           // bx	ip
@@ -12229,7 +12229,7 @@ const uint32_t Output_data_plt_arm_nacl<big_endian>::first_plt_entry[16] =
   // .Lplt_tail:
   0xe50dc004,                           // str	ip, [sp, #-4]
   // Fourth bundle:
-  0xe7dfcf1f,                           // bfc	ip, #30, #2
+  0xe3ccc103,                           // bic	ip, ip, #0xc0000000
   0xe59cc000,                           // ldr	ip, [ip]
   0xe3ccc13f,                           // bic	ip, ip, #0xc000000f
   0xe12fff1c,                           // bx	ip
