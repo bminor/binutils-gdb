@@ -191,6 +191,9 @@ main (int argc, char **argv)
 {
   char *emulation;
   long start_time = get_run_time ();
+#ifdef HAVE_SBRK
+  char *start_sbrk = (char *) sbrk (0);
+#endif
 
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");
@@ -505,7 +508,7 @@ main (int argc, char **argv)
 	       program_name, run_time / 1000000, run_time % 1000000);
 #ifdef HAVE_SBRK
       fprintf (stderr, _("%s: data size %ld\n"), program_name,
-	       (long) (lim - (char *) &environ));
+	       (long) (lim - start_sbrk));
 #endif
       fflush (stderr);
     }

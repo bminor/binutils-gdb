@@ -1,3 +1,9 @@
+2012-11-15  Simon Baldwin  <simonb@google.com>
+
+	* ldmain.c (main): Add start_sbrk set to sbrk(0) on entry.
+	On exit, compute data size as the delta between current
+	sbrk(0) and start_sbrk.
+
 2012-11-09  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/rxelf.em (no_flag_mismatch_warnings): Initialise to
