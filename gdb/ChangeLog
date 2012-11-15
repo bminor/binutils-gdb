@@ -24,7 +24,7 @@
 	* arch-utils.c (gdbarch_update_p): Update.
 	(set_gdbarch_from_file): Update.
 
-2012-11-05  Pierre Muller  <muller@sourceware.org>
+2012-11-14  Pierre Muller  <muller@sourceware.org>
 
 	* MAINTAINERS (Responsible Maintainers/misc): Add myself
 	as responsible of contrib/ari directory.
