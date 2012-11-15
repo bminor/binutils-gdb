@@ -1,5 +1,13 @@
 2012-11-15  Pierre Muller  <muller@sourceware.org>
 
+	* configure.ac (AC_HEADER_STAT): Remove.
+	* gdb_stat.h (STAT_MACROS_BROKEN): Remove macro use
+	and corresponding code.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2012-11-15  Pierre Muller  <muller@sourceware.org>
+
 	ARI xasprintf rule fixes.
 	* dwarf2read.c (create_dwo_in_dwp): Use xstrprintf function
 	instead of xasprintf.

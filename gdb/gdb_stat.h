@@ -22,19 +22,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef STAT_MACROS_BROKEN
-#undef S_ISBLK
-#undef S_ISCHR
-#undef S_ISDIR
-#undef S_ISREG
-#undef S_ISFIFO
-#undef S_ISLNK
-#undef S_ISSOCK
-#undef S_ISMPB
-#undef S_ISMPC
-#undef S_ISNWK
-#endif
-
 #if !defined(S_ISBLK) && defined(S_IFBLK)
 #define S_ISBLK(m) (((m) & S_IFMT) == S_IFBLK)
 #endif
