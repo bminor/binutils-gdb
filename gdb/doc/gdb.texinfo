@@ -15642,7 +15642,7 @@ SIGINT} are both ways of sending an interrupt signal.
 
 Alternatively, if @var{signal} is zero, continue execution without
 giving a signal.  This is useful when your program stopped on account of
-a signal and would ordinary see the signal when resumed with the
+a signal and would ordinarily see the signal when resumed with the
 @code{continue} command; @samp{signal 0} causes it to resume without a
 signal.
 
