@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #include <signal.h>
 
 int using_threads = 1;

@@ -1,3 +1,17 @@
+2012-11-15  Pierre Muller  <muller@sourceware.org>
+
+	* configure.ac (AC_CHECK_HEADERS): Add wait.h header.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* linux-low.c: Use "gdb_stat.h" header instead of <sys/stat.h> header.
+	Use "gdb_wait.h" header instead of <sys/wait.h> header.
+	* lynx-low.c: Use "gdb_wait.h" header instead of <sys/wait.h> header.
+	* remote-utils.c: Use "gdb_stat.h" header instead of <sys/stat.h>
+	header.
+	* server.c: Remove HAVE_WAIT_H conditional.  Use "gdb_wait.h" header
+	instead of <sys/wait.h> header.
+	* spu-low.c: Use "gdb_wait.h" header instead of <sys/wait.h> header.
+
 2012-11-13 Markus Metzger <markus.t.metzger@intel.com>
 
 	* Makefile.in: (INTERNAL_CFLAGS): Add -DGDBSERVER

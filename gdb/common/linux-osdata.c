@@ -26,7 +26,6 @@
 #include "linux-osdata.h"
 
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,6 +42,7 @@
 #include "buffer.h"
 #include "gdb_assert.h"
 #include "gdb_dirent.h"
+#include "gdb_stat.h"
 
 /* Define PID_T to be a fixed size that is at least as large as pid_t,
    so that reading pid values embedded in /proc works

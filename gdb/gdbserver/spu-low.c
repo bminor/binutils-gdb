@@ -20,7 +20,7 @@
 
 #include "server.h"
 
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #include <stdio.h>
 #include <sys/ptrace.h>
 #include <fcntl.h>

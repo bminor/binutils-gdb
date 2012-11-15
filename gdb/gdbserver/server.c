@@ -27,9 +27,7 @@
 #if HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#if HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
+#include "gdb_wait.h"
 
 /* The thread set with an `Hc' packet.  `Hc' is deprecated in favor of
    `vCont'.  Note the multi-process extensions made `vCont' a

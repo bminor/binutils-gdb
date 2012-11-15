@@ -21,7 +21,7 @@
 #include "linux-osdata.h"
 #include "agent.h"
 
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #include <stdio.h>
 #include <sys/param.h>
 #include <sys/ptrace.h>
@@ -40,7 +40,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include <sys/vfs.h>
 #include <sys/uio.h>
 #ifndef ELFMAG0

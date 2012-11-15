@@ -56,7 +56,7 @@
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #if HAVE_ERRNO_H
 #include <errno.h>
 #endif

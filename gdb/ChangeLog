@@ -1,5 +1,22 @@
 2012-11-15  Pierre Muller  <muller@sourceware.org>
 
+	ARI fixes: move gdb_wait and gdb_stat headers to common subdirectory.
+	* gdb_stat.h: Delete. Moved to common directory.
+	* common/gdb_stat.h: New file.
+	* gdb_wait.h: Delete. Moved to common directory.
+	* common/gdb_wait.h: New file.
+	* Makefile.in (H_FILES_NO_SRC): Adapt to new header
+	location.
+	* contrib/ari/gdb_ari.sh (wait.h rule): Adapt to new gdb_wait.h
+	location.
+	(stat.h rule): Adapt to new gdb_stat.h location.
+	* common/linux-osdata.c: Include "gdb_stat.h" header instead of
+	<sys/stat.h> header.
+	* common/linux-ptrace.c: Include "gdb_wait.h" header instead of
+	<sys/wait.h> header.
+
+2012-11-15  Pierre Muller  <muller@sourceware.org>
+
 	* configure.ac (AC_HEADER_STAT): Remove.
 	* gdb_stat.h (STAT_MACROS_BROKEN): Remove macro use
 	and corresponding code.

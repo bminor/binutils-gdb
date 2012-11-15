@@ -358,7 +358,7 @@ Do not include gnu-regex.h, instead include gdb_regex.h"
 BEGIN { doc["stat.h"] = "\
 Do not include stat.h or sys/stat.h, instead include gdb_stat.h"
     category["stat.h"] = ari_regression
-    fix("stat.h", "gdb/gdb_stat.h", 1)
+    fix("stat.h", "common/gdb_stat.h", 1)
 }
 /^#[[:space:]]*include[[:space:]]*.stat\.h./ \
 || /^#[[:space:]]*include[[:space:]]*.sys\/stat\.h./ {
@@ -367,7 +367,7 @@ Do not include stat.h or sys/stat.h, instead include gdb_stat.h"
 
 BEGIN { doc["wait.h"] = "\
 Do not include wait.h or sys/wait.h, instead include gdb_wait.h"
-    fix("wait.h", "gdb/gdb_wait.h", 2);
+    fix("wait.h", "common/gdb_wait.h", 2);
     category["wait.h"] = ari_regression
 }
 /^#[[:space:]]*include[[:space:]]*.wait\.h./ \

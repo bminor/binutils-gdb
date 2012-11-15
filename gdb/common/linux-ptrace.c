@@ -27,6 +27,7 @@
 #include "linux-procfs.h"
 #include "buffer.h"
 #include "gdb_assert.h"
+#include "gdb_wait.h"
 
 /* Find all possible reasons we could fail to attach PID and append these
    newline terminated reason strings to initialized BUFFER.  '\0' termination
@@ -57,7 +58,6 @@ extern void (linux_ptrace_test_ret_to_nx_instr) (void);
 #include <sys/reg.h>
 #include <sys/mman.h>
 #include <signal.h>
-#include <sys/wait.h>
 #include <stdint.h>
 
 #endif /* defined __i386__ || defined __x86_64__ */
