@@ -8610,13 +8610,14 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
      (fewer struct dwo_file objects to allocated).  Remember that for really
      large apps there can be on the order of 8K CUs and 200K TUs, or more.  */
 
-  xasprintf (&virtual_dwo_name, "virtual-dwo/%d-%d-%d-%d",
-	     sections.abbrev.asection ? sections.abbrev.asection->id : 0,
-	     sections.line.asection ? sections.line.asection->id : 0,
-	     sections.loc.asection ? sections.loc.asection->id : 0,
-	     (sections.str_offsets.asection
-	      ? sections.str_offsets.asection->id
-	      : 0));
+  virtual_dwo_name =
+    xstrprintf ("virtual-dwo/%d-%d-%d-%d",
+		sections.abbrev.asection ? sections.abbrev.asection->id : 0,
+		sections.line.asection ? sections.line.asection->id : 0,
+		sections.loc.asection ? sections.loc.asection->id : 0,
+		(sections.str_offsets.asection
+		? sections.str_offsets.asection->id
+		: 0));
   make_cleanup (xfree, virtual_dwo_name);
   /* Can we use an existing virtual DWO file?  */
   dwo_file_slot = lookup_dwo_file_slot (virtual_dwo_name);
@@ -8982,7 +8983,7 @@ open_and_init_dwp_file (const char *comp_dir)
   bfd *dbfd;
   struct cleanup *cleanups;
 
-  xasprintf (&dwp_name, "%s.dwp", dwarf2_per_objfile->objfile->name);
+  dwp_name = xstrprintf ("%s.dwp", dwarf2_per_objfile->objfile->name);
   cleanups = make_cleanup (xfree, dwp_name);
 
   dbfd = open_dwop_file (dwp_name, comp_dir, 1);

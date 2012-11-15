@@ -1,3 +1,10 @@
+2012-11-15  Pierre Muller  <muller@sourceware.org>
+
+	ARI xasprintf rule fixes.
+	* dwarf2read.c (create_dwo_in_dwp): Use xstrprintf function
+	instead of xasprintf.
+	(open_and_init_dwp_file): Ditto.
+
 2012-11-14  Luis Machado  <lgustavo@codesourcery.com>
 
 	* value.c (value_actual_type): Check for TYPE_CODE_STRUCT
