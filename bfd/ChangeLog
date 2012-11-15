@@ -1,3 +1,8 @@
+2012-11-14  Roland McGrath  <mcgrathr@google.com>
+
+	* elf32-arm.c (elf32_arm_nacl_plt0_entry): Use bic rather than bfc
+	instruction for data sandboxing.
+
 2012-11-13  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.am (RELEASE): Unset.

@@ -2209,21 +2209,21 @@ static const bfd_vma elf32_arm_nacl_plt0_entry [] =
   0xe08cc00f,		/* add	ip, ip, pc			*/
   0xe52dc008,		/* str	ip, [sp, #-8]!			*/
   /* Second bundle: */
-  0xe7dfcf1f, 	/* bfc	ip, #30, #2			*/
-  0xe59cc000, 	/* ldr	ip, [ip]			*/
+  0xe3ccc103,		/* bic	ip, ip, #0xc0000000		*/
+  0xe59cc000,		/* ldr	ip, [ip]			*/
   0xe3ccc13f,		/* bic	ip, ip, #0xc000000f		*/
-  0xe12fff1c, 	/* bx	ip				*/
+  0xe12fff1c,		/* bx	ip				*/
   /* Third bundle: */
-  0xe320f000, 	/* nop					*/
-  0xe320f000, 	/* nop					*/
-  0xe320f000, 	/* nop					*/
+  0xe320f000,		/* nop					*/
+  0xe320f000,		/* nop					*/
+  0xe320f000,		/* nop					*/
   /* .Lplt_tail: */
   0xe50dc004,		/* str	ip, [sp, #-4]			*/
   /* Fourth bundle: */
-  0xe7dfcf1f,		/* bfc	ip, #30, #2			*/
-  0xe59cc000, 	/* ldr	ip, [ip]			*/
+  0xe3ccc103,		/* bic	ip, ip, #0xc0000000		*/
+  0xe59cc000,		/* ldr	ip, [ip]			*/
   0xe3ccc13f,		/* bic	ip, ip, #0xc000000f		*/
-  0xe12fff1c, 	/* bx	ip				*/
+  0xe12fff1c,		/* bx	ip				*/
 };
 #define ARM_NACL_PLT_TAIL_OFFSET	(11 * 4)
 
