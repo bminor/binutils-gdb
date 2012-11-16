@@ -1,6 +1,6 @@
 /* 32-bit ELF support for ARM
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010, 2011  Free Software Foundation, Inc.
+   2008, 2009, 2010, 2011, 2012  Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -60,6 +60,9 @@
 
 #define ARM_ELF_ABI_VERSION		0
 #define ARM_ELF_OS_ABI_VERSION		ELFOSABI_ARM
+
+/* The Adjusted Place, as defined by AAELF.  */
+#define Pa(X) ((X) & 0xfffffffc)
 
 static bfd_boolean elf32_arm_write_section (bfd *output_bfd,
 					    struct bfd_link_info *link_info,
@@ -8441,9 +8444,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
           }
 
 	relocation = value + signed_addend;
-	relocation -= (input_section->output_section->vma
-		       + input_section->output_offset
-		       + rel->r_offset);
+	relocation -= Pa (input_section->output_section->vma
+		          + input_section->output_offset
+		          + rel->r_offset);
 
         value = abs (relocation);
 
@@ -8473,12 +8476,12 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	insn = bfd_get_16 (input_bfd, hit_data);
 
         if (globals->use_rel)
-	  addend = (insn & 0x00ff) << 2;
+	  addend = ((((insn & 0x00ff) << 2) + 4) & 0x3ff) -4;
 
 	relocation = value + addend;
-	relocation -= (input_section->output_section->vma
-		       + input_section->output_offset
-		       + rel->r_offset);
+	relocation -= Pa (input_section->output_section->vma
+		          + input_section->output_offset
+		          + rel->r_offset);
 
         value = abs (relocation);
 
@@ -8513,9 +8516,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
           }
 
 	relocation = value + signed_addend;
-	relocation -= (input_section->output_section->vma
-		       + input_section->output_offset
-		       + rel->r_offset);
+	relocation -= Pa (input_section->output_section->vma
+		          + input_section->output_offset
+		          + rel->r_offset);
 
         value = abs (relocation);
 
