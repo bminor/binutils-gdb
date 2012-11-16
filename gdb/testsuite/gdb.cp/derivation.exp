@@ -38,6 +38,18 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
     return -1
 }
 
+# Check inheritance of typedefs.
+foreach klass {"A" "D" "E" "F"} {
+    gdb_test "ptype ${klass}::value_type" "type = int"
+    gdb_test "whatis ${klass}::value_type" "type = int"
+    gdb_test "p (${klass}::value_type) 0" " = 0"
+}
+foreach klass {"Z" "ZZ"} {
+    gdb_test "ptype ${klass}::value_type" "type = float"
+    gdb_test "whatis ${klass}::value_type" "type = float"
+    gdb_test "p (${klass}::value_type) 0" " = 0"
+}
+
 # Set it up at a breakpoint so we can play with the variable values.
 
 if ![runto 'marker1'] then {
@@ -56,11 +68,12 @@ gdb_test "print a_instance" "\\$\[0-9\]+ = \{a = 1, aa = 2\}" "print value of a_
 cp_test_ptype_class \
     "a_instance" "" "class" "A" \
     {
-	{ field  public "int a;" }
-	{ field  public "int aa;" }
+	{ field  public "A::value_type a;" }
+	{ field  public "A::value_type aa;" }
 	{ method public "A();" }
-	{ method public "int afoo();" }
-	{ method public "int foo();" }
+	{ method public "A::value_type afoo();" }
+	{ method public "A::value_type foo();" }
+	{ typedef public "typedef int value_type;" }
     }
 
 # class D
@@ -77,11 +90,11 @@ cp_test_ptype_class \
 	{ base          "private A" }
 	{ base          "public B" }
 	{ base          "protected C" }
-	{ field  public "int d;" }
-	{ field  public "int dd;" }
+	{ field  public "A::value_type d;" }
+	{ field  public "A::value_type dd;" }
 	{ method public "D();" }
-	{ method public "int dfoo();" }
-	{ method public "int foo();" }
+	{ method public "A::value_type dfoo();" }
+	{ method public "A::value_type foo();" }
     } \
     "" \
     {
@@ -102,11 +115,11 @@ cp_test_ptype_class \
 	{ base          "public A" }
 	{ base          "private B" }
 	{ base          "protected C" }
-	{ field  public "int e;" }
-	{ field  public "int ee;" }
+	{ field  public "A::value_type e;" }
+	{ field  public "A::value_type ee;" }
 	{ method public "E();" }
-	{ method public "int efoo();" }
-	{ method public "int foo();" }
+	{ method public "A::value_type efoo();" }
+	{ method public "A::value_type foo();" }
     } \
     "" \
     {
@@ -127,11 +140,11 @@ cp_test_ptype_class \
 	{ base          "private A" }
 	{ base          "public B" }
 	{ base          "private C" }
-	{ field  public "int f;" }
-	{ field  public "int ff;" }
+	{ field  public "A::value_type f;" }
+	{ field  public "A::value_type ff;" }
 	{ method public "F();" }
-	{ method public "int ffoo();" }
-	{ method public "int foo();" }
+	{ method public "A::value_type ffoo();" }
+	{ method public "A::value_type foo();" }
     }
 
 # class G
@@ -193,6 +206,35 @@ gdb_test_multiple "frame" "re-selected 'main' frame after inferior call" {
 gdb_test "print g_instance.bfoo()" "\\$\[0-9\]+ = 2" "print value of g_instance.bfoo()"
 gdb_test "print g_instance.cfoo()" "\\$\[0-9\]+ = 3" "print value of g_instance.cfoo()"
 
+# Check typedefs of fields
+foreach Klass {"C" "G"} {
+    set klass [string tolower $Klass]
+    set instance "${klass}_instance"
+    set var "${instance}.$klass"
+    gdb_test "whatis $var" "int"
+    gdb_test "ptype $var" "int"
+}
+
+foreach Klass {"A" "B" "D" "E" "F"} {
+    set klass [string tolower $Klass]
+    set instance "${klass}_instance"
+    set var "${instance}.$klass"
+    gdb_test "whatis $var" "A::value_type"
+    gdb_test "ptype $var" "int"
+    if {![string equal $Klass "B"]} {
+	gdb_test "p (${Klass}::value_type) 0" " = 0"
+    }
+}
+
+foreach Klass {"Z" "ZZ"} {
+    set klass [string tolower $Klass]
+    set instance "${klass}_instance"
+    set var "${instance}.$klass"
+    gdb_test "whatis $var" "Z::value_type"
+    gdb_test "ptype $var" "float"
+    gdb_test "p (${Klass}::value_type) 0" " = 0"
+}
+
 # This is a regression test for a bug that caused a crash when trying
 # to print the vtbl pointer.  We don't care about the output so much
 # here (it is tested elsewhere), just that gdb doesn't crash.  We test
@@ -200,3 +242,16 @@ gdb_test "print g_instance.cfoo()" "\\$\[0-9\]+ = 3" "print value of g_instance.
 # path calling get_vptr_fieldno.
 gdb_test "ptype vderived" "type = .*"
 gdb_test "print vderived" " = {.* inter = 0.*x = 0}"
+
+# Test whether inheritance of typedefs is properly
+# reported when stopped.
+gdb_test "ptype N::value_type" "type = double"
+gdb_test "ptype N::Derived::value_type" "type = int"
+
+# Now run to N::Derived::doit and get the type of "value_type"
+if {![runto "N::Derived::doit"]} {
+    perrro "couldn't run to N::Derived::doit"
+    continue
+}
+
+gdb_test "ptype value_type" "type = int"

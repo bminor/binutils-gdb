@@ -1,32 +1,63 @@
+/* This testcase is part of GDB, the GNU debugger.
+
+   Copyright 2003-2004, 2007-2012 Free Software Foundation, Inc.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   */
+
+namespace N {
+  typedef double value_type;
+  struct Base { typedef int value_type; };
+  struct Derived : public Base {
+    void doit (void) const {
+       int i = 3;
+
+       while (i > 0)
+         --i;
+     }
+  };
+}
+
 class A {
 public:
-    int a;
-    int aa;
+    typedef int value_type;
+    value_type a;
+    value_type aa;
 
     A()
     {
         a=1;
         aa=2;
     }
-    int afoo();
-    int foo();
-    
+    value_type afoo();
+    value_type foo();
 };
 
 
 
 class B {
 public:
-    int b;
-    int bb;
+    A::value_type b;
+    A::value_type bb;
 
     B()
     {
         b=3;
         bb=4;
     }
-    int bfoo();
-    int foo();
+    A::value_type bfoo();
+    A::value_type foo();
     
 };
 
@@ -51,48 +82,48 @@ public:
 
 class D : private A, public B, protected C {
 public:
-    int d;
-    int dd;
+    value_type d;
+    value_type dd;
 
     D()
     {
         d =7;
         dd=8;
     }
-    int dfoo();
-    int foo();
+    value_type dfoo();
+    value_type foo();
     
 };
 
 
 class E : public A, B, protected C {
 public:
-    int e;
-    int ee;
+    value_type e;
+    value_type ee;
 
     E()
     {
         e =9;
         ee=10;
     }
-    int efoo();
-    int foo();
+    value_type efoo();
+    value_type foo();
     
 };
 
 
 class F : A, public B, C {
 public:
-    int f;
-    int ff;
+    value_type f;
+    value_type ff;
 
     F()
     {
         f =11;
         ff=12;
     }
-    int ffoo();
-    int foo();
+    value_type ffoo();
+    value_type foo();
     
 };
 
@@ -116,6 +147,19 @@ public:
     int gfoo();
     int foo();
     
+};
+
+class Z : public A
+{
+public:
+  typedef float value_type;
+  value_type z;
+};
+
+class ZZ : public Z
+{
+public:
+  value_type zz;
 };
 
 class V_base
@@ -150,27 +194,27 @@ public:
 
 V_derived vderived;
 
-int A::afoo() {
+A::value_type A::afoo() {
     return 1;
 }
 
-int B::bfoo() {
+A::value_type B::bfoo() {
     return 2;
 }
 
-int C::cfoo() {
+A::value_type C::cfoo() {
     return 3;
 }
 
-int D::dfoo() {
+D::value_type D::dfoo() {
     return 4;
 }
 
-int E::efoo() {
+E::value_type E::efoo() {
     return 5;
 }
 
-int F::ffoo() {
+F::value_type F::ffoo() {
     return 6;
 }
 
@@ -178,37 +222,37 @@ int G::gfoo() {
     return 77;
 }
 
-int A::foo()
+A::value_type A::foo()
 {
     return 7;
     
 }
 
-int B::foo()
+A::value_type B::foo()
 {
     return 8;
     
 }
 
-int C::foo()
+A::value_type C::foo()
 {
     return 9;
     
 }
 
-int D::foo()
+D::value_type D::foo()
 {
     return 10;
     
 }
 
-int E::foo()
+E::value_type E::foo()
 {
     return 11;
     
 }
 
-int F::foo()
+F::value_type F::foo()
 {
     return 12;
     
@@ -236,7 +280,9 @@ int main(void)
     E e_instance;
     F f_instance;
     G g_instance;
-    
+    Z z_instance;
+    ZZ zz_instance;
+
     marker1(); // marker1-returns-here
     
     a_instance.a = 20; // marker1-returns-here
@@ -251,10 +297,15 @@ int main(void)
     e_instance.ee =29;
     f_instance.f =30;
     f_instance.ff =31;
-    
-    
-    
+    g_instance.g = 32;
+    g_instance.gg = 33;
+    z_instance.z = 34.0;
+    zz_instance.zz = 35.0;
 
+    N::Derived dobj;
+    N::Derived::value_type d = 1;
+    N::value_type n = 3.0;
+    dobj.doit ();
     return 0;
     
 }

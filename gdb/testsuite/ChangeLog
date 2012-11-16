@@ -1,3 +1,25 @@
+2012-11-16  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/13615
+	* gdb.cp/baseenum.cc: New file.
+	* gdb.cp/baseenum.exp: New file.
+	* gdb.cp/derivation.cc (A): Add copyright.
+	Add a typedef.
+	(B): Use A::value_type instead of int.  Change all references.
+	(D): Use value_type instead of int.  Change all references.
+	(E): Likewise.
+	(F); Likewise.
+	(Z): New class.
+	(ZZ): New class.
+ 	(N, Base, Derived): New namespace and classes.
+	(main): Add instances of Z and ZZ.
+	Make sure all symbols from N are kept.
+	* gdb.cp/derivation.exp: Update typedef changes in tests.
+	Add tests for class typedefs both before and after starting
+	the inferior.
+	Add tests for searching for a typedef while stopped in a
+	method.
+
 2012-11-14  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.mi/mi-var-create-rtti.c: New file.

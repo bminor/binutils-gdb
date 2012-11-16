@@ -1,3 +1,20 @@
+2012-11-16  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/13615
+	* cp-namespace.c (cp_lookup_symbol_in_namespace): Add SEARCH
+	parameter and pass it to lookup_symbol_file.
+	(cp_lookup_symbol_imports): Tell cp_lookup_symbol_in_namespace
+	to search base classes.
+	(cp_lookup_symbol_namespace): Likewise.
+	(lookup_namespace_scope): Likewise.
+	(lookup_symbol_file): Add SEARCH parameter.
+	If SEARCH is non-zero and no symbol is found, lookup the class
+	and call cp_lookup_nested_symbol.
+	(find_symbol_in_baseclass): New function.
+	(cp_lookup_nested_symbol): Do not let
+	cp_lookup_symbol_in_namespace search through base classes.
+	Do that later when there is no global symbol match.
+
 2012-11-16  Doug Evans  <dje@google.com>
 
 	* main.c (gdb_datadir_provided): New static global.
