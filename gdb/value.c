@@ -850,8 +850,12 @@ value_actual_type (struct value *value, int resolve_simple_types,
   result = value_type (value);
   if (opts.objectprint)
     {
-      if (TYPE_CODE (result) == TYPE_CODE_PTR
+      /* If result's target type is TYPE_CODE_STRUCT, proceed to
+	 fetch its rtti type.  */
+      if ((TYPE_CODE (result) == TYPE_CODE_PTR
 	  || TYPE_CODE (result) == TYPE_CODE_REF)
+	  && TYPE_CODE (check_typedef (TYPE_TARGET_TYPE (result)))
+	     == TYPE_CODE_STRUCT)
         {
           struct type *real_type;
 

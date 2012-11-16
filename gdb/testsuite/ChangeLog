@@ -1,3 +1,8 @@
+2012-11-15  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.mi/mi-var-create-rtti.c: New file.
+	* gdb.mi/mi-var-create-rtti.exp: New file.
+
 2012-10-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Doug Evans  <dje@google.com>
 

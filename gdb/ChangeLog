@@ -1,3 +1,8 @@
+2012-11-15  Luis Machado  <lgustavo@codesourcery.com>
+
+	* value.c (value_actual_type): Check for TYPE_CODE_STRUCT
+	target types.
+
 2012-11-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR backtrace/14646
