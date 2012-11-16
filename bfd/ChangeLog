@@ -1,3 +1,12 @@
+2012-11-16  Joey Ye  <joey.ye@arm.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate, 
+	case R_ARM_THM_ALU_PREL_11_0, case R_ARM_THM_PC12): Align address of
+	the place being relocated.
+	(elf32_arm_final_link_relocate, case R_ARM_THM_PC8): Align address
+	of the place being relocated and truncate addend.
+	(Pa): New macro.
+
 2012-11-14  Roland McGrath  <mcgrathr@google.com>
 
 	* elf32-arm.c (elf32_arm_nacl_plt0_entry): Use bic rather than bfc
