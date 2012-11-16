@@ -1,6 +1,6 @@
 2012-11-15  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
-	Port lib32 arangement from Debian.
+	Port lib32 arrangement from Debian.
 	* emulparams/elf_i386.sh: Include lib32 directories in library search
 	path.
 
