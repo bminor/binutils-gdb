@@ -25,7 +25,7 @@ standard_testfile .c
 set opts {debug}
 
 if [build_executable $testfile.exp $testfile $srcfile $opts] {
-    return -1;
+    return -1
 }
 
 mi_delete_breakpoints
