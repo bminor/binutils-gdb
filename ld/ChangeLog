@@ -1,3 +1,9 @@
+2012-11-15  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	Port lib32 arangement from Debian.
+	* emulparams/elf_i386.sh: Include lib32 directories in library search
+	path.
+
 2012-11-15  Simon Baldwin  <simonb@google.com>
 
 	* ldmain.c (main): Add start_sbrk set to sbrk(0) on entry.
