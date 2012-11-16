@@ -60,6 +60,11 @@ char *gdb_sysroot = 0;
 /* GDB datadir, used to store data files.  */
 char *gdb_datadir = 0;
 
+/* Non-zero if GDB_DATADIR was provided on the command line.
+   This doesn't track whether data-directory is set later from the
+   command line, but we don't reread system.gdbinit when that happens.  */
+static int gdb_datadir_provided = 0;
+
 /* If gdb was configured with --with-python=/path,
    the possibly relocated path to python's lib directory.  */
 char *python_libdir = 0;
@@ -163,13 +168,38 @@ get_init_files (char **system_gdbinit,
   if (!initialized)
     {
       struct stat homebuf, cwdbuf, s;
-      char *homedir, *relocated_sysgdbinit;
+      char *homedir;
 
       if (SYSTEM_GDBINIT[0])
 	{
-	  relocated_sysgdbinit = relocate_path (gdb_program_name,
-						SYSTEM_GDBINIT,
-						SYSTEM_GDBINIT_RELOCATABLE);
+	  int datadir_len = strlen (GDB_DATADIR);
+	  int sys_gdbinit_len = strlen (SYSTEM_GDBINIT);
+	  char *relocated_sysgdbinit;
+
+	  /* If SYSTEM_GDBINIT lives in data-directory, and data-directory
+	     has been provided, search for SYSTEM_GDBINIT there.  */
+	  if (gdb_datadir_provided
+	      && datadir_len < sys_gdbinit_len
+	      && strncmp (SYSTEM_GDBINIT, GDB_DATADIR, datadir_len) == 0
+	      && strchr (SLASH_STRING, SYSTEM_GDBINIT[datadir_len]) != NULL)
+	    {
+	      /* Append the part of SYSTEM_GDBINIT that follows GDB_DATADIR
+		 to gdb_datadir.  */
+	      char *tmp_sys_gdbinit = xstrdup (SYSTEM_GDBINIT + datadir_len);
+	      char *p;
+
+	      for (p = tmp_sys_gdbinit; strchr (SLASH_STRING, *p); ++p)
+		continue;
+	      relocated_sysgdbinit = concat (gdb_datadir, SLASH_STRING, p,
+					     NULL);
+	      xfree (tmp_sys_gdbinit);
+	    }
+	  else
+	    {
+	      relocated_sysgdbinit = relocate_path (gdb_program_name,
+						    SYSTEM_GDBINIT,
+						    SYSTEM_GDBINIT_RELOCATABLE);
+	    }
 	  if (relocated_sysgdbinit && stat (relocated_sysgdbinit, &s) == 0)
 	    sysgdbinit = relocated_sysgdbinit;
 	  else
@@ -591,6 +621,7 @@ captured_main (void *data)
 	  case 'D':
 	    xfree (gdb_datadir);
 	    gdb_datadir = xstrdup (optarg);
+	    gdb_datadir_provided = 1;
 	    break;
 #ifdef GDBTK
 	  case 'z':

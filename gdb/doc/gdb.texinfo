@@ -34765,6 +34765,17 @@ then @value{GDBN} will always look for @file{/usr/share/gdb/gdbinit},
 wherever @value{GDBN} is installed.
 @end itemize
 
+If the configured location of the system-wide init file (as given by the
+@option{--with-system-gdbinit} option at configure time) is in the
+data-directory (as specified by @option{--with-gdb-datadir} at configure
+time) or in one of its subdirectories, then @value{GDBN} will look for the
+system-wide init file in the directory specified by the
+@option{--data-directory} command-line option.
+Note that the system-wide init file is only read once, during @value{GDBN}
+initialization.  If the data-directory is changed after @value{GDBN} has
+started with the @code{set data-directory} command, the file will not be
+reread.
+
 @node Maintenance Commands
 @appendix Maintenance Commands
 @cindex maintenance commands

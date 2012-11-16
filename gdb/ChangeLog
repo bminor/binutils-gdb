@@ -1,3 +1,10 @@
+2012-11-16  Doug Evans  <dje@google.com>
+
+	* main.c (gdb_datadir_provided): New static global.
+	(get_init_files): If --data-directory is provided,
+	and SYSTEM_GDBINIT lives in data-directory, look for it there.
+	* NEWS: Mention it.
+
 2012-11-15  Pierre Muller  <muller@sourceware.org>
 
 	ARI fixes: move gdb_wait and gdb_stat headers to common subdirectory.

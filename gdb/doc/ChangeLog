@@ -1,3 +1,9 @@
+2012-11-16  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (System-wide configuration): If the system-wide init
+	file lives in the data-directory, and --data-directory is provided,
+	look for it there.
+
 2012-11-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Signaling): Fix typo.
