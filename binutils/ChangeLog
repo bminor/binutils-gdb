@@ -1,3 +1,10 @@
+2012-11-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_dynamic_section): Correct DF_1_CONFALT.
+	Also dump DF_1_ENDFILTEE, DF_1_DISPRELDNE, DF_1_NODIRECT,
+	DF_1_IGNMULDEF, DF_1_NOKSYMS, DF_1_NOHDR, DF_1_EDITED,
+	DF_1_NORELOC, DF_1_SYMINTPOSE, DF_1_GLOBAUDIT and DF_1_SINGLETON.
+
 2012-11-14  Tristan Gingold  <gingold@adacore.com>
 
 	* od-macho.c (bfd_mach_o_load_command_name): Add new definitions.
