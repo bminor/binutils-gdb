@@ -1,3 +1,13 @@
+2014-07-01  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (add_catch_command): Use cmd_sfunc_ftype.
+	* breakpoint.h (add_catch_command): Use cmd_sfunc_ftype.
+	* cli/cli-decode.c (cmd_cfunc_eq, add_cmd, add_prefix_cmd)
+	(add_abbrev_prefix_cmd, add_info, add_com): Use cmd_cfunc_ftype.
+	* command.h (cmd_cfunc_ftype): Move earlier.
+	(add_cmd, add_prefix_cmd, add_abbrev_prefix_cmd, cmd_cfunc_eq)
+	(add_com, add_info): Use cmd_cfunc_ftype.
+
 2014-06-30  Tom Tromey  <tromey@redhat.com>
 
 	* symtab.c (operator_chars): Make parameters and return type

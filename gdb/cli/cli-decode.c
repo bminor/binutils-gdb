@@ -134,8 +134,7 @@ set_cmd_sfunc (struct cmd_list_element *cmd, cmd_sfunc_ftype *sfunc)
 }
 
 int
-cmd_cfunc_eq (struct cmd_list_element *cmd,
-	      void (*cfunc) (char *args, int from_tty))
+cmd_cfunc_eq (struct cmd_list_element *cmd, cmd_cfunc_ftype *cfunc)
 {
   return cmd->func == do_cfunc && cmd->function.cfunc == cfunc;
 }
@@ -183,7 +182,7 @@ set_cmd_completer (struct cmd_list_element *cmd, completer_ftype *completer)
    of *LIST).  */
 
 struct cmd_list_element *
-add_cmd (const char *name, enum command_class class, void (*fun) (char *, int),
+add_cmd (const char *name, enum command_class class, cmd_cfunc_ftype *fun,
 	 char *doc, struct cmd_list_element **list)
 {
   struct cmd_list_element *c
@@ -329,7 +328,7 @@ add_alias_cmd (const char *name, const char *oldname, enum command_class class,
 
 struct cmd_list_element *
 add_prefix_cmd (const char *name, enum command_class class,
-		void (*fun) (char *, int),
+		cmd_cfunc_ftype *fun,
 		char *doc, struct cmd_list_element **prefixlist,
 		char *prefixname, int allow_unknown,
 		struct cmd_list_element **list)
@@ -357,7 +356,7 @@ add_prefix_cmd (const char *name, enum command_class class,
 
 struct cmd_list_element *
 add_abbrev_prefix_cmd (const char *name, enum command_class class,
-		       void (*fun) (char *, int), char *doc,
+		       cmd_cfunc_ftype *fun, char *doc,
 		       struct cmd_list_element **prefixlist, char *prefixname,
 		       int allow_unknown, struct cmd_list_element **list)
 {
@@ -846,7 +845,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 /* Add an element to the list of info subcommands.  */
 
 struct cmd_list_element *
-add_info (const char *name, void (*fun) (char *, int), char *doc)
+add_info (const char *name, cmd_cfunc_ftype *fun, char *doc)
 {
   return add_cmd (name, no_class, fun, doc, &infolist);
 }
@@ -862,7 +861,7 @@ add_info_alias (const char *name, char *oldname, int abbrev_flag)
 /* Add an element to the list of commands.  */
 
 struct cmd_list_element *
-add_com (const char *name, enum command_class class, void (*fun) (char *, int),
+add_com (const char *name, enum command_class class, cmd_cfunc_ftype *fun,
 	 char *doc)
 {
   return add_cmd (name, class, fun, doc, &cmdlist);

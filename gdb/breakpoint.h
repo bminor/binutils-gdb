@@ -1221,8 +1221,7 @@ extern void initialize_breakpoint_ops (void);
 
 extern void
   add_catch_command (char *name, char *docstring,
-		     void (*sfunc) (char *args, int from_tty,
-				    struct cmd_list_element *command),
+		     cmd_sfunc_ftype *sfunc,
 		     completer_ftype *completer,
 		     void *user_data_catch,
 		     void *user_data_tcatch);
