@@ -2392,7 +2392,7 @@ enum infwait_states
 ptid_t waiton_ptid;
 
 /* Current inferior wait state.  */
-enum infwait_states infwait_state;
+static enum infwait_states infwait_state;
 
 /* Data to be passed around while handling an event.  This data is
    discarded between events.  */

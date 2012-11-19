@@ -1,3 +1,7 @@
+2012-11-19  Yao Qi  <yao@codesourcery.com>
+
+	* infrun.c (infwait_state): Add static.
+
 2012-11-16  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/13615
