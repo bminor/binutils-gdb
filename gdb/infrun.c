@@ -3783,7 +3783,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	  context_switch (saved_singlestep_ptid);
 	  if (deprecated_context_hook)
-	    deprecated_context_hook (pid_to_thread_id (ecs->ptid));
+	    deprecated_context_hook (pid_to_thread_id (saved_singlestep_ptid));
 
 	  resume (1, GDB_SIGNAL_0);
 	  prepare_to_wait (ecs);
