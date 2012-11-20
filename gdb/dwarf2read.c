@@ -17903,7 +17903,8 @@ file_full_name (int file, struct line_header *lh, const char *comp_dir)
          won't be able to find the file by name.  */
       char fake_name[80];
 
-      sprintf (fake_name, "<bad macro file number %d>", file);
+      xsnprintf (fake_name, sizeof (fake_name),
+		 "<bad macro file number %d>", file);
 
       complaint (&symfile_complaints,
                  _("bad file number in macro information (%d)"),

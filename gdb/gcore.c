@@ -134,7 +134,8 @@ gcore_command (char *args, int from_tty)
   else
     {
       /* Default corefile name is "core.PID".  */
-      sprintf (corefilename_buffer, "core.%d", PIDGET (inferior_ptid));
+      xsnprintf (corefilename_buffer, sizeof (corefilename_buffer),
+		 "core.%d", PIDGET (inferior_ptid));
       corefilename = corefilename_buffer;
     }
 

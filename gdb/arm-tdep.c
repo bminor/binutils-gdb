@@ -3779,7 +3779,8 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 					 val + i * unit_length);
 		  else
 		    {
-		      sprintf (name_buf, "%c%d", reg_char, reg_scaled + i);
+		      xsnprintf (name_buf, sizeof (name_buf), "%c%d",
+				 reg_char, reg_scaled + i);
 		      regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 							    strlen (name_buf));
 		      regcache_cooked_write (regcache, regnum,
@@ -4110,7 +4111,7 @@ arm_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
     {
       char name_buf[4];
 
-      sprintf (name_buf, "s%d", reg - 64);
+      xsnprintf (name_buf, sizeof (name_buf), "s%d", reg - 64);
       return user_reg_map_name_to_regnum (gdbarch, name_buf,
 					  strlen (name_buf));
     }
@@ -4121,7 +4122,7 @@ arm_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
     {
       char name_buf[4];
 
-      sprintf (name_buf, "d%d", reg - 256);
+      xsnprintf (name_buf, sizeof (name_buf), "d%d", reg - 256);
       return user_reg_map_name_to_regnum (gdbarch, name_buf,
 					  strlen (name_buf));
     }
@@ -9169,7 +9170,7 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
 	      char name_buf[4];
 	      int regnum;
 
-	      sprintf (name_buf, "%c%d", reg_char, i);
+	      xsnprintf (name_buf, sizeof (name_buf), "%c%d", reg_char, i);
 	      regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 						    strlen (name_buf));
 	      if (writebuf)
@@ -9623,7 +9624,7 @@ arm_neon_quad_read (struct gdbarch *gdbarch, struct regcache *regcache,
   int offset, double_regnum;
   enum register_status status;
 
-  sprintf (name_buf, "d%d", regnum << 1);
+  xsnprintf (name_buf, sizeof (name_buf), "d%d", regnum << 1);
   double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 					       strlen (name_buf));
 
@@ -9675,7 +9676,7 @@ arm_pseudo_read (struct gdbarch *gdbarch, struct regcache *regcache,
       else
 	offset = (regnum & 1) ? 4 : 0;
 
-      sprintf (name_buf, "d%d", regnum >> 1);
+      xsnprintf (name_buf, sizeof (name_buf), "d%d", regnum >> 1);
       double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 						   strlen (name_buf));
 
@@ -9700,7 +9701,7 @@ arm_neon_quad_write (struct gdbarch *gdbarch, struct regcache *regcache,
   char name_buf[4];
   int offset, double_regnum;
 
-  sprintf (name_buf, "d%d", regnum << 1);
+  xsnprintf (name_buf, sizeof (name_buf), "d%d", regnum << 1);
   double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 					       strlen (name_buf));
 
@@ -9741,7 +9742,7 @@ arm_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
       else
 	offset = (regnum & 1) ? 4 : 0;
 
-      sprintf (name_buf, "d%d", regnum >> 1);
+      xsnprintf (name_buf, sizeof (name_buf), "d%d", regnum >> 1);
       double_regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
 						   strlen (name_buf));
 

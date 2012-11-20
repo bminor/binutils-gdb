@@ -441,9 +441,10 @@ execute_control_command (struct command_line *cmd)
 
     case while_control:
       {
-	char *buffer = alloca (strlen (cmd->line) + 7);
+	int len = strlen (cmd->line) + 7;
+	char *buffer = alloca (len);
 
-	sprintf (buffer, "while %s", cmd->line);
+	xsnprintf (buffer, len, "while %s", cmd->line);
 	print_command_trace (buffer);
 
 	/* Parse the loop control expression for the while statement.  */
@@ -509,9 +510,10 @@ execute_control_command (struct command_line *cmd)
 
     case if_control:
       {
-	char *buffer = alloca (strlen (cmd->line) + 4);
+	int len = strlen (cmd->line) + 4;
+	char *buffer = alloca (len);
 
-	sprintf (buffer, "if %s", cmd->line);
+	xsnprintf (buffer, len, "if %s", cmd->line);
 	print_command_trace (buffer);
 
 	new_line = insert_args (cmd->line);
@@ -1529,7 +1531,8 @@ define_command (char *comname, int from_tty)
     if (isupper (*tem))
       *tem = tolower (*tem);
 
-  sprintf (tmpbuf, "Type commands for definition of \"%s\".", comfull);
+  xsnprintf (tmpbuf, sizeof (tmpbuf),
+	     "Type commands for definition of \"%s\".", comfull);
   cmds = read_command_lines (tmpbuf, from_tty, 1, 0, 0);
 
   if (c && c->class == class_user)
@@ -1579,7 +1582,8 @@ document_command (char *comname, int from_tty)
   if (c->class != class_user)
     error (_("Command \"%s\" is built-in."), comfull);
 
-  sprintf (tmpbuf, "Type documentation for \"%s\".", comfull);
+  xsnprintf (tmpbuf, sizeof (tmpbuf), "Type documentation for \"%s\".",
+	     comfull);
   doclines = read_command_lines (tmpbuf, from_tty, 0, 0, 0);
 
   if (c->doc)

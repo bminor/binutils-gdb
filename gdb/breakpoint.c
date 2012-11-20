@@ -1024,9 +1024,10 @@ condition_completer (struct cmd_list_element *cmd, char *text, char *word)
 	    char location[50];
 
 	    if (single)
-	      sprintf (location, "%d", b->number);
+	      xsnprintf (location, sizeof (location), "%d", b->number);
 	    else
-	      sprintf (location, "%d.%d", b->number, count);
+	      xsnprintf (location, sizeof (location),  "%d.%d", b->number,
+			 count);
 
 	    if (strncmp (location, text, len) == 0)
 	      VEC_safe_push (char_ptr, result, xstrdup (location));
@@ -15101,7 +15102,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
       warning (_("Uploaded tracepoint %d has no "
 		 "source location, using raw address"),
 	       utp->number);
-      sprintf (small_buf, "*%s", hex_string (utp->addr));
+      xsnprintf (small_buf, sizeof (small_buf), "*%s", hex_string (utp->addr));
       addr_str = small_buf;
     }
 
@@ -15132,7 +15133,8 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 
   if (utp->pass > 0)
     {
-      sprintf (small_buf, "%d %d", utp->pass, tp->base.number);
+      xsnprintf (small_buf, sizeof (small_buf), "%d %d", utp->pass,
+		 tp->base.number);
 
       trace_pass_command (small_buf, 0);
     }

@@ -1273,9 +1273,9 @@ go32_sysinfo (char *arg, int from_tty)
 		break;
 	    }
 	}
-      sprintf (cpu_string, "%s%s Model %d Stepping %d",
-	       intel_p ? "Pentium" : (amd_p ? "AMD" : "ix86"),
-	       cpu_brand, cpu_model, cpuid_eax & 0xf);
+      xsnprintf (cpu_string, sizeof (cpu_string), "%s%s Model %d Stepping %d",
+	         intel_p ? "Pentium" : (amd_p ? "AMD" : "ix86"),
+	         cpu_brand, cpu_model, cpuid_eax & 0xf);
       printfi_filtered (31, "%s\n", cpu_string);
       if (((cpuid_edx & (6 | (0x0d << 23))) != 0)
 	  || ((cpuid_edx & 1) == 0)

@@ -601,8 +601,8 @@ fetch_register (struct regcache *regcache, int tid, int regno)
       if (errno != 0)
 	{
           char message[128];
-	  sprintf (message, "reading register %s (#%d)", 
-		   gdbarch_register_name (gdbarch, regno), regno);
+	  xsnprintf (message, sizeof (message), "reading register %s (#%d)",
+		     gdbarch_register_name (gdbarch, regno), regno);
 	  perror_with_name (message);
 	}
       memcpy (&buf[bytes_transferred], &l, sizeof (l));
@@ -1095,8 +1095,8 @@ store_register (const struct regcache *regcache, int tid, int regno)
       if (errno != 0)
 	{
           char message[128];
-	  sprintf (message, "writing register %s (#%d)", 
-		   gdbarch_register_name (gdbarch, regno), regno);
+	  xsnprintf (message, sizeof (message), "writing register %s (#%d)",
+		     gdbarch_register_name (gdbarch, regno), regno);
 	  perror_with_name (message);
 	}
     }

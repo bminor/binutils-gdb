@@ -376,14 +376,14 @@ m32r_open (char *args, int from_tty)
   push_target (&m32r_ops);
 
   if (args == NULL)
-    sprintf (hostname, "localhost:%d", SDIPORT);
+    xsnprintf (hostname, sizeof (hostname), "localhost:%d", SDIPORT);
   else
     {
       port_str = strchr (args, ':');
       if (port_str == NULL)
-	sprintf (hostname, "%s:%d", args, SDIPORT);
+	xsnprintf (hostname, sizeof (hostname), "%s:%d", args, SDIPORT);
       else
-	strcpy (hostname, args);
+	xsnprintf (hostname, sizeof (hostname), "%s", args);
     }
 
   sdi_desc = serial_open (hostname);

@@ -210,8 +210,8 @@ interp_set (struct interp *interp, int top_level)
     {
       if (!interp_quiet_p (interp))
 	{
-	  sprintf (buffer, "Switching to interpreter \"%.24s\".\n",
-		   interp->name);
+	  xsnprintf (buffer, sizeof (buffer),
+		     "Switching to interpreter \"%.24s\".\n", interp->name);
 	  ui_out_text (current_uiout, buffer);
 	}
       display_gdb_prompt (NULL);

@@ -402,19 +402,20 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
 
   if (len == 0)
     {
-      sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
+      xsnprintf (buf, sizeof (buf), "__%s%s", const_prefix, volatile_prefix);
     }
   else if (physname[0] == 't' || physname[0] == 'Q')
     {
       /* The physname for template and qualified methods already includes
          the class name.  */
-      sprintf (buf, "__%s%s", const_prefix, volatile_prefix);
+      xsnprintf (buf, sizeof (buf), "__%s%s", const_prefix, volatile_prefix);
       newname = NULL;
       len = 0;
     }
   else
     {
-      sprintf (buf, "__%s%s%d", const_prefix, volatile_prefix, len);
+      xsnprintf (buf, sizeof (buf), "__%s%s%d", const_prefix,
+		 volatile_prefix, len);
     }
   mangled_name_len = ((is_constructor ? 0 : strlen (field_name))
 		      + strlen (buf) + len + strlen (physname) + 1);

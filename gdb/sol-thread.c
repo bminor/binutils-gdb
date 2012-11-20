@@ -196,7 +196,8 @@ td_err_string (td_err_e errcode)
     if (td_err_table[i].num == errcode)
       return td_err_table[i].str;
 
-  sprintf (buf, "Unknown libthread_db error code: %d", errcode);
+  xsnprintf (buf, sizeof (buf), "Unknown libthread_db error code: %d",
+	     errcode);
 
   return buf;
 }
@@ -227,7 +228,8 @@ td_state_string (td_thr_state_e statecode)
     if (td_thr_state_table[i].num == statecode)
       return td_thr_state_table[i].str;
 
-  sprintf (buf, "Unknown libthread_db state code: %d", statecode);
+  xsnprintf (buf, sizeof (buf), "Unknown libthread_db state code: %d",
+	     statecode);
 
   return buf;
 }
@@ -1015,17 +1017,18 @@ solaris_pid_to_str (struct target_ops *ops, ptid_t ptid)
       lwp = thread_to_lwp (ptid, -2);
 
       if (PIDGET (lwp) == -1)
-	sprintf (buf, "Thread %ld (defunct)", GET_THREAD (ptid));
+	xsnprintf (buf, sizeof (buf), "Thread %ld (defunct)",
+		   GET_THREAD (ptid));
       else if (PIDGET (lwp) != -2)
-	sprintf (buf, "Thread %ld (LWP %ld)",
+	xsnprintf (buf, sizeof (buf), "Thread %ld (LWP %ld)",
 		 GET_THREAD (ptid), GET_LWP (lwp));
       else
-	sprintf (buf, "Thread %ld        ", GET_THREAD (ptid));
+	xsnprintf (buf, sizeof (buf), "Thread %ld        ", GET_THREAD (ptid));
     }
   else if (GET_LWP (ptid) != 0)
-    sprintf (buf, "LWP    %ld        ", GET_LWP (ptid));
+    xsnprintf (buf, sizeof (buf), "LWP    %ld        ", GET_LWP (ptid));
   else
-    sprintf (buf, "process %d    ", PIDGET (ptid));
+    xsnprintf (buf, sizeof (buf), "process %d    ", PIDGET (ptid));
 
   return buf;
 }

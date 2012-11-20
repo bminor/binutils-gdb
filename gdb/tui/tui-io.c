@@ -419,7 +419,8 @@ tui_rl_display_match_list (char **matches, int len, int max)
     {
       char msg[256];
 
-      sprintf (msg, "\nDisplay all %d possibilities? (y or n)", len);
+      xsnprintf (msg, sizeof (msg),
+		 "\nDisplay all %d possibilities? (y or n)", len);
       tui_puts (msg);
       if (get_y_or_n () == 0)
 	{
