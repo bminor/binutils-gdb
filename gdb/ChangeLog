@@ -1,3 +1,10 @@
+2012-11-20  David S. Miller  <davem@davemloft.net>
+
+	* common/linux-osdata.c (get_number_of_cpu_cores): Delete.
+	(linux_xfer_osdata_processes): Fetch _SC_NPROCESSORS_ONLN via
+	sysconf.
+	(get_cores_used_by_process): Update comment.
+
 2012-11-20  Yao Qi  <yao@codesourcery.com>
 
 	* objfiles.c (init_entry_point_info): Remove trailing spaces.

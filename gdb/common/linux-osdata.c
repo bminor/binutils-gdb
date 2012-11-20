@@ -26,6 +26,7 @@
 #include "linux-osdata.h"
 
 #include <sys/types.h>
+#include <sys/sysinfo.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -253,30 +254,8 @@ get_process_owner (uid_t *owner, PID_T pid)
     return -1;
 }
 
-/* Returns the number of CPU cores found on the system.  */
-
-static int
-get_number_of_cpu_cores (void)
-{
-  int cores = 0;
-  FILE *f = fopen ("/proc/cpuinfo", "r");
-
-  while (!feof (f))
-    {
-      char buf[512];
-      char *p = fgets (buf, sizeof (buf), f);
-
-      if (p && strncmp (buf, "processor", 9) == 0)
-	++cores;
-    }
-
-  fclose (f);
-
-  return cores;
-}
-
 /* Find the CPU cores used by process PID and return them in CORES.
-   CORES points to an array of at least get_number_of_cpu_cores ()
+   CORES points to an array of at least sysconf(_SC_NPROCESSOR_ONLN)
    elements.  */
 
 static int
@@ -340,7 +319,7 @@ linux_xfer_osdata_processes (gdb_byte *readbuf,
       dirp = opendir ("/proc");
       if (dirp)
 	{
-	  const int num_cores = get_number_of_cpu_cores ();
+	  const int num_cores = sysconf (_SC_NPROCESSORS_ONLN);
 	  struct dirent *dp;
 
 	  while ((dp = readdir (dirp)) != NULL)
