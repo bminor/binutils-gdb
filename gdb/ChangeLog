@@ -1,3 +1,14 @@
+2012-11-20  Pedro Alves  <palves@redhat.com>
+
+	* annotate.c (breakpoints_changed): Rename to ...
+	(annotate_breakpoints_changed): ... this.
+	(annotate_stopped, breakpoint_changed): Adjust caller.
+	* annotate.h (breakpoints_changed): Rename to ...
+	(annotate_breakpoints_changed): ... this.
+	* breakpoint.c (set_breakpoint_condition, breakpoint_set_commands)
+	(do_map_commands_command, init_raw_breakpoint, clear_command)
+	(set_ignore_count, enable_breakpoint_disp): Adjust callers.
+
 2012-11-20  David S. Miller  <davem@davemloft.net>
 
 	* common/linux-osdata.c (get_number_of_cpu_cores): Delete.
