@@ -52,7 +52,7 @@ proc test_command_param_changed { } { with_test_prefix "cmd param" {
 	"\"set scheduler-locking stepr\" no event"
 
 
-    foreach command { "circular-trace-buffer" "check type" } {
+    foreach command { "remotecache" "check type" } {
 
 	# The default value of each command option may be different, so we first
 	# set it to 'off', and this may or may not trigger MI notification.
@@ -81,12 +81,10 @@ proc test_command_param_changed { } { with_test_prefix "cmd param" {
     }
 
     # No notification is emitted for 'maint set' commands.
-    foreach command { "profile" "show-debug-regs" } {
-	foreach boolean_opt { "on" "off" } {
-	    mi_gdb_test "maint set ${command} ${boolean_opt}" \
-		"\\&\"maint set ${command} ${boolean_opt}\\\\n\"\r\n\\^done" \
-		"\"maint set ${command} ${boolean_opt}\""
-	}
+    foreach boolean_opt { "on" "off" } {
+	mi_gdb_test "maint set profile ${boolean_opt}" \
+	    "\\&\"maint set profile ${boolean_opt}\\\\n\"\r\n\\^done" \
+	    "\"maint set profile ${boolean_opt}\""
     }
 
     # Full command parameters are included in the notification when a
