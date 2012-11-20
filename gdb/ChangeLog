@@ -1,3 +1,31 @@
+2012-11-20  Pierre Muller  <muller@sourceware.org>
+
+	ARI fixes: sprintf rule.
+	Replace sprintf function calls for char arrays by
+	calls to xsnprintf calls.
+	* arm-tdep.c (arm_push_dummy_call): Replace sprintf by xsnprintf.
+	(arm_dwarf_reg_to_regnum, arm_return_value): Ditto.
+	(arm_neon_quad_read, arm_pseudo_read): Ditto.
+	(arm_neon_quad_write, arm_pseudo_write): Ditto.
+	* breakpoint.c (condition_completer): Ditto.
+	(create_tracepoint_from_upload): Ditto.
+	* dwarf2read.c (file_full_name): Ditto.
+	* gcore.c (gcore_command): Ditto.
+	* gnu-nat.c (proc_string, gnu_pid_to_str): Ditto.
+	* go32-nat.c (go32_sysinfo): Ditto.
+	* interps.c (interp_set): Ditto.
+	* m32c-tdep.c (make_types): Ditto.
+	* ppc-linux-nat.c (fetch_register, store_register): Ditto.
+	* remote-m32r-sdi.c (m32r_open): Ditto.
+	* sol-thread.c (td_err_string): Ditto.
+	(td_state_string, solaris_pid_to_str): Ditto.
+	* symtab.c (gdb_mangle_name): Ditto.
+	* cli/cli-script.c (execute_control_command): Ditto.
+	(define_command, document_command): Ditto.
+	* tui/tui-io.c (tui_rl_display_match_list): Ditto.
+	* tui/tui-stack.c (tui_make_status_line): Ditto.
+	* tui/tui-win.c (tui_update_gdb_sizes): Ditto.
+
 2012-11-20  Mike Frysinger  <vapier@gentoo.org>
 
 	* cli/cli-decode.c (complete_on_cmdlist): Add a fourth arg and check
