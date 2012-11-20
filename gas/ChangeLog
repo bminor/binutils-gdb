@@ -1,3 +1,9 @@
+2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/14859
+	* gas/i386/x86-64-opcode.s: Add jecxz.
+	* gas/i386/x86-64-opcode.d: Updated.
+
 2012-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (first_error_fmt): Add ATTRIBUTE_UNUSED to the

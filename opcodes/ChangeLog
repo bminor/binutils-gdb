@@ -1,3 +1,10 @@
+2012-11-20  Kirill Yukhin  <kirill.yukhin@intel.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/14859
+	* i386-opc.tbl: Fix opcode for 64-bit jecxz.
+	* i386-tbl.h: Regenerated.
+
 2012-11-20  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-opc.txt: Fix srstu and strag opcodes.
