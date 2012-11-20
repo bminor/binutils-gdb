@@ -1,3 +1,8 @@
+2012-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (first_error_fmt): Add ATTRIBUTE_UNUSED to the
+	local variable "ret".
+
 2012-11-07  James Murray <jsm@jsm-net.demon.co.uk>
 
 	* config/tc-m68hc11.c: Fix R_M68HC12_16B relocation for movb/w
