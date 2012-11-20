@@ -1,3 +1,8 @@
+2012-11-20  Roland McGrath  <mcgrathr@google.com>
+
+	* gas/arm/macro-pld.s: New file.
+	* gas/arm/macro-pld.d: New file.
+
 2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
 
 	* gas/i386/i386.exp: Run bdver3 test cases.
