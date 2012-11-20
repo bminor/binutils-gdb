@@ -1,3 +1,8 @@
+2012-11-20  Tom Tromey  <tromey@redhat.com>
+
+	* completer.c (count_struct_fields): Remove.
+	(expression_completer): Don't call count_struct_fields.
+
 2012-11-20  Pedro Alves  <palves@redhat.com>
 
 	* annotate.c (breakpoints_changed): Rename to ...

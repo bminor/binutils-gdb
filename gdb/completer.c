@@ -327,39 +327,6 @@ location_completer (struct cmd_list_element *ignore,
   return list;
 }
 
-/* Helper for expression_completer which recursively counts the number
-   of named fields and methods in a structure or union type.  */
-static int
-count_struct_fields (struct type *type)
-{
-  int i, result = 0;
-
-  CHECK_TYPEDEF (type);
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
-    {
-      if (i < TYPE_N_BASECLASSES (type))
-	result += count_struct_fields (TYPE_BASECLASS (type, i));
-      else if (TYPE_FIELD_NAME (type, i))
-	{
-	  if (TYPE_FIELD_NAME (type, i)[0] != '\0')
-	    ++result;
-	  else if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_UNION)
-	    {
-	      /* Recurse into anonymous unions.  */
-	      result += count_struct_fields (TYPE_FIELD_TYPE (type, i));
-	    }
-	}
-    }
-
-  for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
-    {
-      if (TYPE_FN_FIELDLIST_NAME (type, i))
-	++result;
-    }
-
-  return result;
-}
-
 /* Helper for expression_completer which recursively adds field and
    method names from TYPE, a struct or union type, to the array
    OUTPUT.  */
@@ -447,7 +414,6 @@ expression_completer (struct cmd_list_element *ignore,
       if (TYPE_CODE (type) == TYPE_CODE_UNION
 	  || TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	{
-	  int alloc = count_struct_fields (type);
 	  int flen = strlen (fieldname);
 	  VEC (char_ptr) *result = NULL;
 
