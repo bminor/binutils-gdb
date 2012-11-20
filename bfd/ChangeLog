@@ -1,7 +1,11 @@
+2012-11-20  Alan Modra  <amodra@gmail.com>
+
+	* elf32-rx.c (rx_elf_print_private_bfd_data): Warning fix.
+
 2012-11-16  Joey Ye  <joey.ye@arm.com>
 
-	* elf32-arm.c (elf32_arm_final_link_relocate, 
-	case R_ARM_THM_ALU_PREL_11_0, case R_ARM_THM_PC12): Align address of
+	* elf32-arm.c (elf32_arm_final_link_relocate
+	<case R_ARM_THM_ALU_PREL_11_0, case R_ARM_THM_PC12>): Align address of
 	the place being relocated.
 	(elf32_arm_final_link_relocate, case R_ARM_THM_PC8): Align address
 	of the place being relocated and truncate addend.

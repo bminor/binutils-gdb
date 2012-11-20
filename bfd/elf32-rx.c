@@ -3040,7 +3040,7 @@ rx_elf_print_private_bfd_data (bfd * abfd, void * ptr)
   flags = elf_elfheader (abfd)->e_flags;
   fprintf (file, _("private flags = 0x%lx:"), (long) flags);
 
-  fprintf (file, describe_flags (flags));
+  fprintf (file, "%s", describe_flags (flags));
   return TRUE;
 }
 
