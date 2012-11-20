@@ -1,3 +1,11 @@
+2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14862
+	* elf-bfd.h (elf_link_hash_entry): Remove ref_dynamic_nonweak
+	added by accident.
+	(elf_link_add_object_symbols): Don't set nor check
+	ref_dynamic_nonweak.
+
 2012-11-20  Alan Modra  <amodra@gmail.com>
 
 	* elf32-rx.c (rx_elf_print_private_bfd_data): Warning fix.

@@ -1,5 +1,17 @@
 2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/14862
+	* ld-elf/shared.exp (build_tests): Build libpr14862-1.o and
+	libpr14862.so.
+	(run_tests): Test pr14862.
+
+	* ld-elf/pr14862-1.c: New file.
+	* ld-elf/pr14862-2.c: Likewise.
+	* ld-elf/pr14862.map: Likewise.
+	* ld-elf/pr14862.out: Likewise.
+
+2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-elf/global1.d: New file.
 
 2012-11-07  James Murray   <jsm@jsm-net.demon.co.uk>
