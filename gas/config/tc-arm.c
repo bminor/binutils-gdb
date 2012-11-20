@@ -321,6 +321,11 @@ static int implicit_it_mode = IMPLICIT_IT_MODE_ARM;
 
 static bfd_boolean unified_syntax = FALSE;
 
+/* An immediate operand can start with #, and ld*, st*, pld operands
+   can contain [ and ].  We need to tell APP not to elide whitespace
+   before a [, which can appear as the first operand for pld.  */
+const char arm_symbol_chars[] = "#[]";
+
 enum neon_el_type
 {
   NT_invtype,
@@ -10225,7 +10230,7 @@ do_t_branch (void)
 }
 
 /* Actually do the work for Thumb state bkpt and hlt.  The only difference
-   between the two is the maximum immediate allowed - which is passed in 
+   between the two is the maximum immediate allowed - which is passed in
    RANGE.  */
 static void
 do_t_bkpt_hlt1 (int range)
@@ -14660,7 +14665,7 @@ do_vfp_nsyn_cvtz (void)
 }
 
 static void
-do_vfp_nsyn_cvt_fpv8 (enum neon_cvt_flavour flavour, 
+do_vfp_nsyn_cvt_fpv8 (enum neon_cvt_flavour flavour,
 		      enum neon_cvt_mode mode)
 {
   int sz, op;
@@ -14720,9 +14725,9 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
   /* PR11109: Handle round-to-zero for VCVT conversions.  */
   if (mode == neon_cvt_mode_z
       && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_arch_vfp_v2)
-      && (flavour == neon_cvt_flavour_s32_f32 
-	  || flavour == neon_cvt_flavour_u32_f32 
-	  || flavour == neon_cvt_flavour_s32_f64 
+      && (flavour == neon_cvt_flavour_s32_f32
+	  || flavour == neon_cvt_flavour_u32_f32
+	  || flavour == neon_cvt_flavour_s32_f64
 	  || flavour == neon_cvt_flavour_u32_f64)
       && (rs == NS_FD || rs == NS_FF))
     {

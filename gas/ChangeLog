@@ -9,6 +9,11 @@
 	* config/tc-aarch64.c (first_error_fmt): Add ATTRIBUTE_UNUSED to the
 	local variable "ret".
 
+2012-11-20  Roland McGrath  <mcgrathr@google.com>
+
+	* config/tc-arm.c (arm_symbol_chars): New variable.
+	* config/tc-arm.h (tc_symbol_chars): New macro, defined to that.
+
 2012-11-20  David S. Miller  <davem@davemloft.net>
 
 	* config/tc-sparc.c (md_parse_option): Only certain arch
@@ -644,7 +649,7 @@
 	CPU_BTVER2_FLAGS.
 	(i386_align_code): Add case for PROCESSOR_BT.
 
-	* config/tc-i386.h (enum processor_type): Add PROCESSOR_BT.       
+	* config/tc-i386.h (enum processor_type): Add PROCESSOR_BT.
 
 	* doc/c-i386.texi: Add -march={btver1, btver2} options.
 

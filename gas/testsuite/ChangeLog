@@ -3,6 +3,11 @@
 	* gas/s390/zarch-z9-109.d: Fix srstu opcode.
 	* gas/s390/zarch-z900.d: Replace lasp with strag.
 
+2012-11-20  Roland McGrath  <mcgrathr@google.com>
+
+	* gas/arm/macro-pld.s: New file.
+	* gas/arm/macro-pld.d: New file.
+
 2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* gas/microblaze/allinsn.s: Add mbar and sleep

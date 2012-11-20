@@ -82,6 +82,9 @@ struct fix;
 /* We support double slash line-comments for compatibility with the ARM AArch64 Assembler.  */
 #define DOUBLESLASH_LINE_COMMENTS
 
+#define tc_symbol_chars arm_symbol_chars
+extern const char arm_symbol_chars[];
+
 #define TC_FORCE_RELOCATION(FIX) arm_force_relocation (FIX)
 
 extern unsigned int arm_frag_max_var (struct frag *);
