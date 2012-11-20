@@ -643,7 +643,7 @@ first_error_fmt (const char *format, ...)
 
   if (! error_p ())
     {
-      int ret;
+      int ret ATTRIBUTE_UNUSED;
       va_start (args, format);
       ret = vsnprintf (buffer, size, format, args);
       know (ret <= size - 1 && ret >= 0);

@@ -1,3 +1,8 @@
+2012-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (first_error_fmt): Add ATTRIBUTE_UNUSED to the
+	local variable "ret".
+
 2012-11-20  David S. Miller  <davem@davemloft.net>
 
 	* config/tc-sparc.c (md_parse_option): Only certain arch
