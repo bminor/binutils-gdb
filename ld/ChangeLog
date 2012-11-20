@@ -1,3 +1,11 @@
+2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Document "-z global".
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Support
+	"-z global".
+	(gld${EMULATION_NAME}_list_options): Likewise.
+
 2012-11-15  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	Port lib32 arrangement from Debian.

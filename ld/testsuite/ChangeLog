@@ -1,3 +1,7 @@
+2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/global1.d: New file.
+
 2012-11-07  James Murray   <jsm@jsm-net.demon.co.uk>
 
 	* ld-m68hc11/movw.d: New test for 16bit relocate.

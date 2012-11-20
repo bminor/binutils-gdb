@@ -1024,6 +1024,11 @@ shared libraries are still allowed.
 @item execstack
 Marks the object as requiring executable stack.
 
+@item global
+This option is only meaningful when building a shared object.  It makes
+the symbols defined by this shared object available for symbol resolution
+of subsequently loaded libraries.
+
 @item initfirst
 This option is only meaningful when building a shared object.
 It marks the object so that its runtime initialization will occur

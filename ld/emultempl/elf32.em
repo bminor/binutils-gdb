@@ -2300,6 +2300,8 @@ fragment <<EOF
 EOF
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 fragment <<EOF
+      else if (strcmp (optarg, "global") == 0)
+	link_info.flags_1 |= (bfd_vma) DF_1_GLOBAL;
       else if (strcmp (optarg, "initfirst") == 0)
 	link_info.flags_1 |= (bfd_vma) DF_1_INITFIRST;
       else if (strcmp (optarg, "interpose") == 0)
@@ -2418,6 +2420,9 @@ EOF
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 fragment <<EOF
+  fprintf (file, _("\
+  -z global                   Make symbols in DSO available for subsequently\n\
+                               loaded objects\n"));
   fprintf (file, _("\
   -z initfirst                Mark DSO to be initialized first at runtime\n"));
   fprintf (file, _("\
