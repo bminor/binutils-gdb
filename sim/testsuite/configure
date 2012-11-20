@@ -1907,7 +1907,7 @@ case "${target}" in
        sim_arch=sh
        sim_testsuite=yes
        ;;
-   sparc-*-rtems*|sparc-*-elf*|erc32*-*-*)
+   sparc-*-rtems*|sparc-*-elf*)
        sim_arch=erc32
        sim_testsuite=yes
        ;;

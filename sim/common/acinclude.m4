@@ -21,6 +21,12 @@
 # Include global overrides and fixes for Autoconf.
 m4_include(../../config/override.m4)
 sinclude([../../config/zlib.m4])
+m4_include([../../config/plugins.m4])
+m4_include([../../libtool.m4])
+m4_include([../../ltoptions.m4])
+m4_include([../../ltsugar.m4])
+m4_include([../../ltversion.m4])
+m4_include([../../lt~obsolete.m4])
 sinclude([../../config/depstand.m4])
 
 AC_DEFUN([SIM_AC_COMMON],
@@ -89,6 +95,12 @@ AC_CHECK_LIB(nsl, gethostbyname)
 # BFD conditionally uses zlib, so we must link it in if libbfd does, by
 # using the same condition.
 AM_ZLIB
+
+# BFD uses libdl when when plugins enabled.
+AC_PLUGINS
+AM_CONDITIONAL(PLUGINS, test "$plugins" = yes)
+LT_INIT([dlopen])
+AC_SUBST(lt_cv_dlopen_libs)
 
 . ${srcdir}/../../bfd/configure.host
 

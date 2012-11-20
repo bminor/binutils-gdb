@@ -58,6 +58,7 @@ man1dir = $(mandir)/man1
 infodir = @infodir@
 includedir = @includedir@
 
+lt_cv_dlopen_libs = @lt_cv_dlopen_libs@
 # This can be referenced by the gettext configuration code.
 top_builddir = ..
 
@@ -255,6 +256,7 @@ COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH)
 
 LIBIBERTY_LIB = ../../libiberty/libiberty.a
 BFD_LIB = ../../bfd/libbfd.a
+@PLUGINS_TRUE@LIBDL = @lt_cv_dlopen_libs@
 OPCODES_LIB = ../../opcodes/libopcodes.a
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
@@ -262,7 +264,7 @@ CONFIG_LIBS = @LIBS@
 LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB) \
 	$(SIM_EXTRA_LIBDEPS)
 EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
-	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS)
+	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBDL)
 
 LIB_OBJS = callback.o syscall.o targ-map.o version.o $(SIM_OBJS)
 
