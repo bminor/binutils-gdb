@@ -1,3 +1,10 @@
+2012-11-20  Kirill Yukhin  <kirill.yukhin@intel.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/14859
+	* i386-opc.tbl: Fix opcode for 64-bit jecxz.
+	* i386-tbl.h: Regenerated.
+
 2012-10-09  Nagajyothi Eggone  <nagajyothi.eggone@amd.com>
 
 	* i386-gen.c (cpu_flag_init): Add CPU_BDVER3_FLAGS.
@@ -9,7 +16,7 @@
 
 2012-09-18  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
-        * arm-dis.c: Changed ldra and strl-form mnemonics
+	* arm-dis.c: Changed ldra and strl-form mnemonics
 	to lda and stl-form.
 
 2012-09-18  Chao-ying Fu  <fu@mips.com>
