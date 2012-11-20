@@ -1,3 +1,9 @@
+2012-11-20  David S. Miller  <davem@davemloft.net>
+
+	* config/tc-sparc.c (md_parse_option): Only certain arch
+	specifications should override the object to be 32-bit
+	or 64-bit.
+
 2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* config/tc-microblaze.c (md_assemble): Add support for INST_TYPE_IMM5

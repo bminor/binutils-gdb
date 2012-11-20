@@ -480,10 +480,18 @@ md_parse_option (int c, char *arg)
 
     case OPTION_XARCH:
 #ifdef OBJ_ELF
-      if (strncmp (arg, "v9", 2) != 0)
-	md_parse_option (OPTION_32, NULL);
-      else
+      if (!strncmp (arg, "v9", 2))
 	md_parse_option (OPTION_64, NULL);
+      else
+	{
+	  if (!strncmp (arg, "v8", 2)
+	      || !strncmp (arg, "v7", 2)
+	      || !strncmp (arg, "v6", 2)
+	      || !strcmp (arg, "sparclet")
+	      || !strcmp (arg, "sparclite")
+	      || !strcmp (arg, "sparc86x"))
+	    md_parse_option (OPTION_32, NULL);
+	}
 #endif
       /* Fall through.  */
 
