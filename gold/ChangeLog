@@ -1,3 +1,8 @@
+2012-11-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/14858
+	* x86_64.cc (Relocate::tls_ld_to_le): Support x32.
+
 2012-11-14  Roland McGrath  <mcgrathr@google.com>
 
 	* arm.cc (Output_data_plt_arm_nacl::first_plt_entry): Use bic rather

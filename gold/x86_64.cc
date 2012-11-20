@@ -3965,8 +3965,12 @@ Target_x86_64<size>::Relocate::tls_ld_to_le(
     section_size_type view_size)
 {
   // leaq foo@tlsld(%rip),%rdi; call __tls_get_addr@plt;
+  // For SIZE == 64:
   // ... leq foo@dtpoff(%rax),%reg
   // ==> .word 0x6666; .byte 0x66; movq %fs:0,%rax ... leaq x@tpoff(%rax),%rdx
+  // For SIZE == 32:
+  // ... leq foo@dtpoff(%rax),%reg
+  // ==> nopl 0x0(%rax); movl %fs:0,%eax ... leaq x@tpoff(%rax),%rdx
 
   tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -3);
   tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 9);
@@ -3976,7 +3980,10 @@ Target_x86_64<size>::Relocate::tls_ld_to_le(
 
   tls::check_tls(relinfo, relnum, rela.get_r_offset(), view[4] == 0xe8);
 
-  memcpy(view - 3, "\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0\0", 12);
+  if (size == 64)
+    memcpy(view - 3, "\x66\x66\x66\x64\x48\x8b\x04\x25\0\0\0\0", 12);
+  else
+    memcpy(view - 3, "\x0f\x1f\x40\x00\x64\x8b\x04\x25\0\0\0\0", 12);
 
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
   // We can skip it.
