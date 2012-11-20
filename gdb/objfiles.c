@@ -345,7 +345,7 @@ init_entry_point_info (struct objfile *objfile)
       /* Some shared libraries may have entry points set and be
 	 runnable.  There's no clear way to indicate this, so just check
 	 for values other than zero.  */
-      objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);    
+      objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);
       objfile->ei.entry_point_p = 1;
     }
   else

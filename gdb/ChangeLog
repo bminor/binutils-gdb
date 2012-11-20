@@ -1,5 +1,9 @@
 2012-11-20  Yao Qi  <yao@codesourcery.com>
 
+	* objfiles.c (init_entry_point_info): Remove trailing spaces.
+
+2012-11-20  Yao Qi  <yao@codesourcery.com>
+
 	* infrun.c (handle_inferior_event): Pass 'saved_singlestep_ptid'
 	to deprecated_context_hook.
 
