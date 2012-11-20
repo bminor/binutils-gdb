@@ -1,3 +1,7 @@
+2012-11-20  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-opc.txt: Fix srstu and strag opcodes.
+
 2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* microblaze-opc.h: Define new instruction type INST_TYPE_IMM5,

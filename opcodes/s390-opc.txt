@@ -452,7 +452,7 @@ eb0000000096 lmh RSE_RRRD "load multiple high" z900 zarch
 ef lmd SS_RRRDRD3 "load multiple disjoint" z900 zarch
 eb000000000f tracg RSE_RRRD "trace 64" z900 zarch
 e30000000003 lrag RXE_RRRD "load real address 64" z900 zarch
-e50000000002 strag SSE_RDRD "store read address" z900 zarch
+e502 strag SSE_RDRD "store read address" z900 zarch
 eb0000000025 stctg RSE_CCRD "store control 64" z900 zarch
 eb000000002f lctlg RSE_CCRD "load control 64" z900 zarch
 eb0000000030 csg RSE_RRRD "compare and swap 64" z900 zarch
@@ -781,7 +781,7 @@ b9b2 cu41 RRE_RERE "convert utf-32 to utf-8" z9-109 zarch
 b2a7 cu12 RRF_M0RERE "convert utf-8 to utf-16" z9-109 zarch
 b2a7 cutfu RRF_M0RERE "convert utf-8 to unicode" z9-109 zarch
 b9b0 cu14 RRF_M0RERE "convert utf-8 to utf-32" z9-109 zarch
-b9eb srstu RRE_RR "search string unicode" z9-109 zarch
+b9be srstu RRE_RR "search string unicode" z9-109 zarch
 d0 trtr SS_L0RDRD "tranlate and test reverse" z9-109 zarch
 # z9-109 unnormalized hfp multiply & multiply and add
 b33b myr RRF_FE0FF "multiply unnormalized long hfp" z9-109 zarch

@@ -1,3 +1,8 @@
+2012-11-20  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* gas/s390/zarch-z9-109.d: Fix srstu opcode.
+	* gas/s390/zarch-z900.d: Replace lasp with strag.
+
 2012-11-14  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* gas/microblaze/allinsn.s: Add mbar and sleep
