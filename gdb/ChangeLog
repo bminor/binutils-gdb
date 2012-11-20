@@ -1,3 +1,12 @@
+2012-11-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* cli/cli-decode.c (complete_on_cmdlist): Add a fourth arg and check
+	it when looking at ptr->func.
+	* command.h (complete_on_cmdlist): Add a fourth arg.
+	* completer.c (complete_line_internal): Add local ignore_help_classes,
+	and set it to 1 when reason is not handle_help.  Pass this down to
+	lookup_cmd_1 and complete_on_cmdlist.
+
 2012-11-20  Tom Tromey  <tromey@redhat.com>
 
 	* completer.c (count_struct_fields): Remove.

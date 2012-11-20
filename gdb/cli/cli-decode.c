@@ -1726,7 +1726,8 @@ lookup_cmd_composition (char *text,
    "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
 
 VEC (char_ptr) *
-complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
+complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word,
+		     int ignore_help_classes)
 {
   struct cmd_list_element *ptr;
   VEC (char_ptr) *matchlist = NULL;
@@ -1743,7 +1744,7 @@ complete_on_cmdlist (struct cmd_list_element *list, char *text, char *word)
       for (ptr = list; ptr; ptr = ptr->next)
 	if (!strncmp (ptr->name, text, textlen)
 	    && !ptr->abbrev_flag
-	    && (ptr->func
+	    && (!ignore_help_classes || ptr->func
 		|| ptr->prefixlist))
 	  {
 	    char *match;

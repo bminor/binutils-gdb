@@ -501,6 +501,7 @@ complete_line_internal (const char *text,
 {
   VEC (char_ptr) *list = NULL;
   char *tmp_command, *p;
+  int ignore_help_classes;
   /* Pointer within tmp_command which corresponds to text.  */
   char *word;
   struct cmd_list_element *c, *result_list;
@@ -520,6 +521,9 @@ complete_line_internal (const char *text,
   tmp_command = (char *) alloca (point + 1);
   p = tmp_command;
 
+  /* The help command should complete help aliases.  */
+  ignore_help_classes = reason != handle_help;
+
   strncpy (tmp_command, line_buffer, point);
   tmp_command[point] = '\0';
   /* Since text always contains some number of characters leading up
@@ -536,7 +540,7 @@ complete_line_internal (const char *text,
     }
   else
     {
-      c = lookup_cmd_1 (&p, cmdlist, &result_list, 1);
+      c = lookup_cmd_1 (&p, cmdlist, &result_list, ignore_help_classes);
     }
 
   /* Move p up to the next interesting thing.  */
@@ -577,12 +581,13 @@ complete_line_internal (const char *text,
 	    {
 	      if (reason != handle_brkchars)
 		list = complete_on_cmdlist (*result_list->prefixlist, p,
-					    word);
+					    word, ignore_help_classes);
 	    }
 	  else
 	    {
 	      if (reason != handle_brkchars)
-		list = complete_on_cmdlist (cmdlist, p, word);
+		list = complete_on_cmdlist (cmdlist, p, word,
+					    ignore_help_classes);
 	    }
 	  /* Ensure that readline does the right thing with respect to
 	     inserting quotes.  */
@@ -608,7 +613,8 @@ complete_line_internal (const char *text,
 		  /* It is a prefix command; what comes after it is
 		     a subcommand (e.g. "info ").  */
 		  if (reason != handle_brkchars)
-		    list = complete_on_cmdlist (*c->prefixlist, p, word);
+		    list = complete_on_cmdlist (*c->prefixlist, p, word,
+						ignore_help_classes);
 
 		  /* Ensure that readline does the right thing
 		     with respect to inserting quotes.  */
@@ -679,7 +685,8 @@ complete_line_internal (const char *text,
 		}
 
 	      if (reason != handle_brkchars)
-		list = complete_on_cmdlist (result_list, q, word);
+		list = complete_on_cmdlist (result_list, q, word,
+					    ignore_help_classes);
 
 	      /* Ensure that readline does the right thing
 		 with respect to inserting quotes.  */

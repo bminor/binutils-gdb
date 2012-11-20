@@ -389,6 +389,19 @@ gdb_test_multiple "" "$test" {
     }
 }
 
+set test "complete help aliases"
+send_gdb "help user-define\t"
+gdb_test_multiple "" "$test" {
+    -re "^help user-defined $" {
+	send_gdb "\n"
+	gdb_test_multiple "" "$test" {
+	    -re "$gdb_prompt $" {
+		pass "$test"
+	    }
+	}
+    }
+}
+
 
 # These tests used to try completing the shorter "p b-a".
 # Unfortunately, on some systems, there are .o files in system

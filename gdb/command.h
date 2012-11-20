@@ -216,7 +216,7 @@ extern struct cmd_list_element *add_info (char *,
 extern struct cmd_list_element *add_info_alias (char *, char *, int);
 
 extern VEC (char_ptr) *complete_on_cmdlist (struct cmd_list_element *,
-					    char *, char *);
+					    char *, char *, int);
 
 extern VEC (char_ptr) *complete_on_enum (const char *const *enumlist,
 					 char *, char *);
