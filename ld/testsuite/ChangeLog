@@ -1,3 +1,8 @@
+2012-11-21  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-elf/comm-data.exp: Add XFAIL for arm*-*-* targets, referring
+	to PR ld/13802.
+
 2012-11-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/discard1.d: Run on x86_64-*-linux-gnu*.
