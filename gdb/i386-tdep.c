@@ -1582,8 +1582,30 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   CORE_ADDR pc;
   gdb_byte op;
   int i;
-
   cache.locals = -1;
+  CORE_ADDR func_addr;
+  struct symtab *s = find_pc_symtab (func_addr);
+
+  if (find_pc_partial_function (start_pc, NULL, &func_addr, NULL))
+  {
+    CORE_ADDR post_prologue_pc
+      = skip_prologue_using_sal (gdbarch, func_addr);
+    
+    /* GCC always emits a line note before the prologue and another
+	 one after, even if the two are at the same address or on the
+	 same line.  Take advantage of this so that we do not need to
+	 know every instruction that might appear in the prologue.  We
+	 will have producer information for most binaries; if it is
+	 missing (e.g. for -gstabs), assuming the GNU tools.  */
+    if (post_prologue_pc
+	  && (s == NULL
+	      || s->producer == NULL
+	      || strncmp (s->producer, "GNU ", sizeof ("GNU ") - 1) == 0
+	      || strncmp (s->producer, "clang ", sizeof ("clang ") - 1) == 0))
+	  return  max (start_pc, post_prologue_pc);
+  }
+
+
   pc = i386_analyze_prologue (gdbarch, start_pc, 0xffffffff, &cache);
   if (cache.locals < 0)
     return start_pc;
