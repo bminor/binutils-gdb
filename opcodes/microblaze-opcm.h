@@ -79,6 +79,8 @@ enum microblaze_instr_type
 #define REG_BTR_MASK 0x800b
 #define REG_EDR_MASK 0x800d
 #define REG_PVR_MASK 0xa000
+#define REG_SLR_MASK 0x8800
+#define REG_SHR_MASK 0x8802
 
 #define REG_PID_MASK   0x9000
 #define REG_ZPR_MASK   0x9001
@@ -100,6 +102,8 @@ enum microblaze_instr_type
 #define REG_FSR 39 /* FPU Status reg.  */
 #define REG_BTR 43 /* Branch Target reg.  */
 #define REG_EDR 45 /* Exception reg.  */
+#define REG_SHR 50 /* Stack High reg.  */
+#define REG_SLR 51 /* Stack Low reg.  */
 #define REG_PVR 40960 /* Program Verification reg.  */
 
 #define REG_PID   36864 /* MMU: Process ID reg.  */

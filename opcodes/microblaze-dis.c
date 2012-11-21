@@ -139,6 +139,12 @@ get_field_special (long instr, struct op_code_struct * op)
     case REG_TLBSX_MASK :
       strcpy (spr, "tlbsx");
       break;
+    case REG_SHR_MASK :
+      strcpy (spr, "shr");
+      break;
+    case REG_SLR_MASK :
+      strcpy (spr, "slr");
+      break;
     default :
       if (((((instr & IMM_MASK) >> IMM_LOW) ^ op->immval_mask) & 0xE000)
           == REG_PVR_MASK)

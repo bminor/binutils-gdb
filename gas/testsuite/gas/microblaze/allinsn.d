@@ -31,3 +31,13 @@ Disassembly of section .text:
 
 00000020 <sleep>:
   20:	ba020004 	sleep
+
+00000024 <regslr>:
+  24:	b0000000 	imm	0
+  28:	31600000 	addik	r11, r0, 0
+  2c:	940bc800 	mts	rslr, r11
+
+00000030 <regshr>:
+  30:	b0000000 	imm	0
+  34:	31600000 	addik	r11, r0, 0
+  38:	940bc802 	mts	rshr, r11

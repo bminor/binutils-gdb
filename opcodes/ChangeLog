@@ -1,3 +1,8 @@
+2012-11-21  Edgar E. Iglesias <edgar.iglesias@gmail.com>
+
+	* microblaze-opcm.h: Add REG_SLR_MASK, REG_SHR_MASK, REG_SHR and REG_SLR
+	* microblaze-dis.c (get_field_special): Handle REG_SLR_MASK and REG_SHR_MASK
+
 2012-11-20  Kirill Yukhin  <kirill.yukhin@intel.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

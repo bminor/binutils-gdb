@@ -531,6 +531,17 @@ parse_reg (char * s, unsigned * reg)
 	}
       return s;
     }
+  /* Stack protection registers.  */
+  else if (strncasecmp (s, "rshr", 4) == 0)
+    {
+      *reg = REG_SHR;
+      return s + 4;
+    }
+  else if (strncasecmp (s, "rslr", 4) == 0)
+    {
+      *reg = REG_SLR;
+      return s + 4;
+    }
   else
     {
       if (TOLOWER (s[0]) == 'r')
@@ -760,6 +771,7 @@ check_spl_reg (unsigned * reg)
       || (*reg == REG_PID)   || (*reg == REG_ZPR)
       || (*reg == REG_TLBX)  || (*reg == REG_TLBLO)
       || (*reg == REG_TLBHI) || (*reg == REG_TLBSX)
+      || (*reg == REG_SHR)   || (*reg == REG_SLR)
       || (*reg >= REG_PVR+MIN_PVR_REGNUM && *reg <= REG_PVR+MAX_PVR_REGNUM))
     return TRUE;
 
@@ -1280,6 +1292,10 @@ md_assemble (char * str)
         immed = opcode->immval_mask | REG_TLBLO_MASK;
       else if (reg2 == REG_TLBHI)
         immed = opcode->immval_mask | REG_TLBHI_MASK;
+      else if (reg2 == REG_SHR)
+        immed = opcode->immval_mask | REG_SHR_MASK;
+      else if (reg2 == REG_SLR)
+        immed = opcode->immval_mask | REG_SLR_MASK;
       else if (reg2 >= (REG_PVR+MIN_PVR_REGNUM) && reg2 <= (REG_PVR+MAX_PVR_REGNUM))
 	immed = opcode->immval_mask | REG_PVR_MASK | reg2;
       else
@@ -1331,6 +1347,10 @@ md_assemble (char * str)
         immed = opcode->immval_mask | REG_TLBHI_MASK;
       else if (reg1 == REG_TLBSX)
         immed = opcode->immval_mask | REG_TLBSX_MASK;
+      else if (reg1 == REG_SHR)
+        immed = opcode->immval_mask | REG_SHR_MASK;
+      else if (reg1 == REG_SLR)
+        immed = opcode->immval_mask | REG_SLR_MASK;
       else
         as_fatal (_("invalid value for special purpose register"));
       inst |= (reg2 << RA_LOW) & RA_MASK;

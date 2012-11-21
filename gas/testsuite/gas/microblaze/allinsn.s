@@ -36,4 +36,14 @@ mbar:
     .global sleep
 sleep:
     sleep
+    .text
+    .global regslr
+regslr:
+    la r11,r0,r0
+    mts rslr,r11
+    .text
+    .global regshr
+regshr:
+    la r11,r0,r0
+    mts rshr,r11
 
