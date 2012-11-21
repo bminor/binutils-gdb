@@ -6356,6 +6356,26 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
     }
 
 rewrite:
+  if (ibfd->xvec == obfd->xvec)
+    {
+      /* When rewriting program header, set the output maxpagesize to
+	 the maximum alignment of input PT_LOAD segments.  */
+      Elf_Internal_Phdr *segment;
+      unsigned int i;
+      unsigned int num_segments = elf_elfheader (ibfd)->e_phnum;
+      bfd_vma maxpagesize = 0;
+
+      for (i = 0, segment = elf_tdata (ibfd)->phdr;
+	   i < num_segments;
+	   i++, segment++)
+	if (segment->p_type == PT_LOAD
+	    && maxpagesize < segment->p_align)
+	  maxpagesize = segment->p_align;
+
+      if (maxpagesize != get_elf_backend_data (obfd)->maxpagesize)
+	bfd_emul_set_maxpagesize (bfd_get_target (obfd), maxpagesize);
+    }
+
   return rewrite_elf_program_header (ibfd, obfd);
 }
 

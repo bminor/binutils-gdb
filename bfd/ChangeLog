@@ -1,3 +1,10 @@
+2012-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14493
+	* elf.c (copy_elf_program_header): When rewriting program
+	header, set the output maxpagesize to the maximum alignment
+	of input PT_LOAD segments.
+
 2012-11-21  Roland McGrath  <mcgrathr@google.com>
 
 	* elf-nacl.c (segment_nonexecutable_and_has_contents): Renamed to ...

@@ -1,3 +1,10 @@
+2012-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/14493
+	* ld-elf/maxpage5.d: New file.
+	* ld-elf/maxpage5.s: Likewise.
+	* ld-elf/maxpage5.t: Likewise.
+
 2012-11-21  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-elf/comm-data.exp: Add XFAIL for arm*-*-* targets, referring
