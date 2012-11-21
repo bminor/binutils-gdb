@@ -1,3 +1,11 @@
+2012-11-21  Roland McGrath  <mcgrathr@google.com>
+
+	* ld.h (ld_config_type): New flag member separate_code.
+	* emultempl/elf32.em
+	(gld${EMULATION_NAME}_before_parse): Set it based on $SEPARATE_CODE.
+	* ldlang.c (ldlang_override_segment_assignment): If it's set, then
+	always return TRUE when SEC_CODE differs between the sections.
+
 2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Document "-z global".

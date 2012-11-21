@@ -878,8 +878,8 @@ walk_wild_file (lang_wild_statement_type *s,
 	  if (member->usrdata != NULL)
 	    {
 	      walk_wild_section (s,
-                                 (lang_input_statement_type *) member->usrdata,
-                                 callback, data);
+				 (lang_input_statement_type *) member->usrdata,
+				 callback, data);
 	    }
 
 	  member = bfd_openr_next_archived_file (f->the_bfd, member);
@@ -1050,7 +1050,7 @@ new_afile (const char *name,
   else
     {
       p = (lang_input_statement_type *)
-          stat_alloc (sizeof (lang_input_statement_type));
+	  stat_alloc (sizeof (lang_input_statement_type));
       p->header.type = lang_input_statement_enum;
       p->header.next = NULL;
     }
@@ -1148,7 +1148,7 @@ output_section_statement_newfunc (struct bfd_hash_entry *entry,
   if (entry == NULL)
     {
       entry = (struct bfd_hash_entry *) bfd_hash_allocate (table,
-                                                           sizeof (*ret));
+							   sizeof (*ret));
       if (entry == NULL)
 	return entry;
     }
@@ -1283,12 +1283,12 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
   for (r = lang_memory_region_list; r != NULL; r = r->next)
     for (n = &r->name_list; n != NULL; n = n->next)
       if (strcmp (n->name, name) == 0)
-        {
-          if (create)
-            einfo (_("%P:%S: warning: redeclaration of memory region `%s'\n"),
-                   NULL, name);
-          return r;
-        }
+	{
+	  if (create)
+	    einfo (_("%P:%S: warning: redeclaration of memory region `%s'\n"),
+		   NULL, name);
+	  return r;
+	}
 
   if (!create && strcmp (name, DEFAULT_MEMORY_REGION))
     einfo (_("%P:%S: warning: memory region `%s' not declared\n"),
@@ -1334,19 +1334,19 @@ lang_memory_region_alias (const char * alias, const char * region_name)
   for (r = lang_memory_region_list; r != NULL; r = r->next)
     for (n = &r->name_list; n != NULL; n = n->next)
       {
-        if (region == NULL && strcmp (n->name, region_name) == 0)
-          region = r;
-        if (strcmp (n->name, alias) == 0)
-          einfo (_("%F%P:%S: error: redefinition of memory region "
-                   "alias `%s'\n"),
-                 NULL, alias);
+	if (region == NULL && strcmp (n->name, region_name) == 0)
+	  region = r;
+	if (strcmp (n->name, alias) == 0)
+	  einfo (_("%F%P:%S: error: redefinition of memory region "
+		   "alias `%s'\n"),
+		 NULL, alias);
       }
 
   /* Check if the target region exists.  */
   if (region == NULL)
     einfo (_("%F%P:%S: error: memory region `%s' "
-             "for alias `%s' does not exist\n"),
-           NULL, region_name, alias);
+	     "for alias `%s' does not exist\n"),
+	   NULL, region_name, alias);
 
   /* Add alias to region name list.  */
   n = (lang_memory_region_name *) stat_alloc (sizeof (lang_memory_region_name));
@@ -1777,7 +1777,7 @@ lang_insert_orphan (asection *s,
   os_tail = ((lang_output_section_statement_type **)
 	     lang_output_section_statement.tail);
   os = lang_enter_output_section_statement (secname, address, normal_section,
-                                            NULL, NULL, NULL, constraint);
+					    NULL, NULL, NULL, constraint);
 
   ps = NULL;
   if (config.build_constructors && *os_tail == os)
@@ -2080,14 +2080,14 @@ sort_def_symbol (struct bfd_link_hash_entry *hash_entry,
       struct map_symbol_def *def;
 
       ud = (struct fat_user_section_struct *)
-          get_userdata (hash_entry->u.def.section);
+	  get_userdata (hash_entry->u.def.section);
       if  (! ud)
 	{
 	  /* ??? What do we have to do to initialize this beforehand?  */
 	  /* The first time we get here is bfd_abs_section...  */
 	  init_map_userdata (0, hash_entry->u.def.section, 0);
 	  ud = (struct fat_user_section_struct *)
-              get_userdata (hash_entry->u.def.section);
+	      get_userdata (hash_entry->u.def.section);
 	}
       else if  (!ud->map_symbol_def_tail)
 	ud->map_symbol_def_tail = &ud->map_symbol_def_head;
@@ -2125,7 +2125,7 @@ init_os (lang_output_section_statement_type *s, flagword flags)
   if (!link_info.reduce_memory_overheads)
     {
       fat_section_userdata_type *new_userdata = (fat_section_userdata_type *)
-        stat_alloc (sizeof (fat_section_userdata_type));
+	stat_alloc (sizeof (fat_section_userdata_type));
       memset (new_userdata, 0, sizeof (fat_section_userdata_type));
       get_userdata (s->bfd_section) = new_userdata;
     }
@@ -2264,7 +2264,7 @@ lang_add_section (lang_statement_list_type *ptr,
 
       keep = bfd_lookup_section_flags (&link_info, sflag_info, section);
       if (!keep)
-        return;
+	return;
     }
 
   if (section->output_section != NULL)
@@ -4151,7 +4151,7 @@ print_all_symbols (asection *sec)
     entries[i] = def->entry;
 
   qsort (entries, ud->map_symbol_def_count, sizeof (*entries),
-         hash_entry_addr_cmp);
+	 hash_entry_addr_cmp);
 
   /* Print the symbols.  */
   for (i = 0; i < ud->map_symbol_def_count; i++)
@@ -4583,7 +4583,7 @@ insert_pad (lang_statement_union_type **ptr,
     {
       /* Make a new padding statement, linked into existing chain.  */
       pad = (lang_statement_union_type *)
-          stat_alloc (sizeof (lang_padding_statement_type));
+	  stat_alloc (sizeof (lang_padding_statement_type));
       pad->header.next = *ptr;
       *ptr = pad;
       pad->header.type = lang_padding_statement_enum;
@@ -5360,6 +5360,12 @@ ldlang_override_segment_assignment (struct bfd_link_info * info ATTRIBUTE_UNUSED
   /* Paranoia checks.  */
   if (current_section == NULL || previous_section == NULL)
     return new_segment;
+
+  /* If this flag is set, the target never wants code and non-code
+     sections comingled in the same segment.  */
+  if (config.separate_code
+      && ((current_section->flags ^ previous_section->flags) & SEC_CODE))
+    return TRUE;
 
   /* Find the memory regions associated with the two sections.
      We call lang_output_section_find() here rather than scanning the list
@@ -7237,7 +7243,7 @@ lang_record_phdrs (void)
 		    {
 		      alc *= 2;
 		      secs = (asection **) xrealloc (secs,
-                                                     alc * sizeof (asection *));
+						     alc * sizeof (asection *));
 		    }
 		  secs[c] = os->bfd_section;
 		  ++c;
@@ -7539,7 +7545,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	    {
 	      e.pattern = c_sym;
 	      expr = (struct bfd_elf_version_expr *)
-                  htab_find ((htab_t) head->htab, &e);
+		  htab_find ((htab_t) head->htab, &e);
 	      while (expr && strcmp (expr->pattern, c_sym) == 0)
 		if (expr->mask == BFD_ELF_VERSION_C_TYPE)
 		  goto out_ret;
@@ -7552,7 +7558,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	    {
 	      e.pattern = cxx_sym;
 	      expr = (struct bfd_elf_version_expr *)
-                  htab_find ((htab_t) head->htab, &e);
+		  htab_find ((htab_t) head->htab, &e);
 	      while (expr && strcmp (expr->pattern, cxx_sym) == 0)
 		if (expr->mask == BFD_ELF_VERSION_CXX_TYPE)
 		  goto out_ret;
@@ -7565,7 +7571,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	    {
 	      e.pattern = java_sym;
 	      expr = (struct bfd_elf_version_expr *)
-                  htab_find ((htab_t) head->htab, &e);
+		  htab_find ((htab_t) head->htab, &e);
 	      while (expr && strcmp (expr->pattern, java_sym) == 0)
 		if (expr->mask == BFD_ELF_VERSION_JAVA_TYPE)
 		  goto out_ret;
@@ -7862,7 +7868,7 @@ lang_register_vers_node (const char *name,
 	  if (t->locals.htab && e1->literal)
 	    {
 	      e2 = (struct bfd_elf_version_expr *)
-                  htab_find ((htab_t) t->locals.htab, e1);
+		  htab_find ((htab_t) t->locals.htab, e1);
 	      while (e2 && strcmp (e1->pattern, e2->pattern) == 0)
 		{
 		  if (e1->mask == e2->mask)
@@ -7889,7 +7895,7 @@ lang_register_vers_node (const char *name,
 	  if (t->globals.htab && e1->literal)
 	    {
 	      e2 = (struct bfd_elf_version_expr *)
-                  htab_find ((htab_t) t->globals.htab, e1);
+		  htab_find ((htab_t) t->globals.htab, e1);
 	      while (e2 && strcmp (e1->pattern, e2->pattern) == 0)
 		{
 		  if (e1->mask == e2->mask)
