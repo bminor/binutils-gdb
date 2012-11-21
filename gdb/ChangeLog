@@ -1,3 +1,19 @@
+2012-11-21  Yao Qi  <yao@codesourcery.com>
+
+	PR tdep/7438
+	* gdbarch.sh (smash_text_address): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* arm-tdep.c (arm_smash_text_address): Remove.
+	(arm_gdbarch_init): Don't call set_gdbarch_smash_text_address.
+	* hppa-tdep.c (hppa_smash_text_address): Remove.
+	(hppa_addr_bits_remove): Rename from hppa_smash_text_address.
+	(hppa_gdbarch_init): Don't call set_gdbarch_smash_text_address.
+	Caller update.
+	* coffread.c (coff_symtab_read): Caller update.
+	* dbxread.c (process_one_symbol): Likewise.
+	* elfread.c (record_minimal_symbol): Likewise.
+	* somread.c (som_symtab_read): Likewise.
+
 2012-11-20  Pierre Muller  <muller@sourceware.org>
 
 	ARI fixes: sprintf rule.

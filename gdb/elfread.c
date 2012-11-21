@@ -205,7 +205,7 @@ record_minimal_symbol (const char *name, int name_len, int copy_name,
 
   if (ms_type == mst_text || ms_type == mst_file_text
       || ms_type == mst_text_gnu_ifunc)
-    address = gdbarch_smash_text_address (gdbarch, address);
+    address = gdbarch_addr_bits_remove (gdbarch, address);
 
   return prim_record_minimal_symbol_full (name, name_len, copy_name, address,
 					  ms_type, bfd_section->index,

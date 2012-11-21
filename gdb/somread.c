@@ -121,7 +121,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_text;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_smash_text_address
+	      bufp->symbol_value = gdbarch_addr_bits_remove
 				     (gdbarch, bufp->symbol_value);
 	      break;
 
@@ -135,7 +135,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      else
 		ms_type = mst_text;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_smash_text_address
+	      bufp->symbol_value = gdbarch_addr_bits_remove
 				     (gdbarch, bufp->symbol_value);
 	      break;
 
@@ -143,7 +143,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_solib_trampoline;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_smash_text_address
+	      bufp->symbol_value = gdbarch_addr_bits_remove
 				     (gdbarch, bufp->symbol_value);
 	      break;
 
@@ -172,7 +172,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_smash_text_address
+	      bufp->symbol_value = gdbarch_addr_bits_remove
 				     (gdbarch, bufp->symbol_value);
 
 	    check_strange_names:
@@ -204,7 +204,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_smash_text_address
+	      bufp->symbol_value = gdbarch_addr_bits_remove
 				     (gdbarch, bufp->symbol_value);
 	      break;
 
@@ -216,7 +216,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 		 we do for SS_UNIVERSAL and SS_EXTERNAL symbols above.  */
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_smash_text_address
+	      bufp->symbol_value = gdbarch_addr_bits_remove
 				     (gdbarch, bufp->symbol_value);
 	      break;
 
@@ -224,7 +224,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_solib_trampoline;
 	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_smash_text_address
+	      bufp->symbol_value = gdbarch_addr_bits_remove
 				     (gdbarch, bufp->symbol_value);
 	      break;
 

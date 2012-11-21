@@ -460,14 +460,6 @@ arm_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR val)
     return (val & 0x03fffffc);
 }
 
-/* When reading symbols, we need to zap the low bit of the address,
-   which may be set to 1 for Thumb functions.  */
-static CORE_ADDR
-arm_smash_text_address (struct gdbarch *gdbarch, CORE_ADDR val)
-{
-  return val & ~1;
-}
-
 /* Return 1 if PC is the start of a compiler helper function which
    can be safely ignored during prologue skipping.  IS_THUMB is true
    if the function is known to be a Thumb function due to the way it
@@ -10283,7 +10275,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_base_set_default (gdbarch, &arm_normal_base);
 
   /* Address manipulation.  */
-  set_gdbarch_smash_text_address (gdbarch, arm_smash_text_address);
   set_gdbarch_addr_bits_remove (gdbarch, arm_addr_bits_remove);
 
   /* Advance PC across function entry code.  */
