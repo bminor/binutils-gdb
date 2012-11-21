@@ -46,4 +46,12 @@ regslr:
 regshr:
     la r11,r0,r0
     mts rshr,r11
+    .text
+    .global swapb
+swapb:
+    swapb r0,r0
+    .text
+    .global swaph
+swaph:
+    swaph r0,r0
 

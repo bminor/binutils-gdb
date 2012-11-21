@@ -1,5 +1,10 @@
 2012-11-21  David Holsgrove  <david.holsgrove@xilinx.com>
 
+	* gas/microblaze/allinsn.s: Add swapb, swaph
+	* gas/microblaze/allinsn.d: Likewise
+
+2012-11-21  David Holsgrove  <david.holsgrove@xilinx.com>
+
 	* gas/microblaze/allinsn.s: Test use of SHR, SLR
 	* gas/microblaze/allinsn.d: Likewise
 
