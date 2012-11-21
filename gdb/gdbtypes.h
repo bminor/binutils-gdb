@@ -853,15 +853,6 @@ struct cplus_struct_type
       }
      *fn_fieldlists;
 
-    /* Pointer to information about enclosing scope, if this is a
-       local type.  If it is not a local type, this is NULL. */
-    struct local_type_info
-      {
-	char *file;
-	int line;
-      }
-     *localtype_ptr;
-
     /* typedefs defined inside this class.  TYPEDEF_FIELD points to an array of
        TYPEDEF_FIELD_COUNT elements.  */
     struct typedef_field
@@ -1225,10 +1216,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_FN_FIELD_VOFFSET(thisfn, n) ((thisfn)[n].voffset-2)
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)
 #define TYPE_FN_FIELD_STATIC_P(thisfn, n) ((thisfn)[n].voffset == VOFFSET_STATIC)
-
-#define TYPE_LOCALTYPE_PTR(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr)
-#define TYPE_LOCALTYPE_FILE(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr->file)
-#define TYPE_LOCALTYPE_LINE(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr->line)
 
 #define TYPE_TYPEDEF_FIELD_ARRAY(thistype) \
   TYPE_CPLUS_SPECIFIC (thistype)->typedef_field

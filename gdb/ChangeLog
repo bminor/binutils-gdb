@@ -1,3 +1,11 @@
+2012-11-21  Tom Tromey  <tromey@redhat.com>
+
+	* gdbtypes.h (struct cplus_struct_type) <localtype_ptr>: Remove
+	field.
+	(TYPE_LOCALTYPE_PTR, TYPE_LOCALTYPE_FILE, TYPE_LOCALTYPE_LINE):
+	Remove.
+	* c-typeprint.c (c_type_print_base): Update.
+
 2012-11-21  Yao Qi  <yao@codesourcery.com>
 
 	PR tdep/7438

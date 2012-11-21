@@ -1308,12 +1308,6 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 	      }
 
 	    fprintfi_filtered (level, stream, "}");
-
-	    if (TYPE_LOCALTYPE_PTR (type) && show >= 0)
-	      fprintfi_filtered (level,
-				 stream, _(" (Local at %s:%d)\n"),
-				 TYPE_LOCALTYPE_FILE (type),
-				 TYPE_LOCALTYPE_LINE (type));
 	  }
 
 	do_cleanups (local_cleanups);
