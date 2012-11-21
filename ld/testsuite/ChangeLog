@@ -1,3 +1,12 @@
+2012-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/discard1.d: Run on x86_64-*-linux-gnu*.
+	* ld-elf/discard2.d: Likewise.
+	* ld-elf/discard3.d: Likewise.
+	* ld-elf/eh6.d: Likewise.
+	* ld-elf/maxpage3c.d: Run on i?86-*-linux-gnu.
+	* ld-elf/maxpage4.d: Likewise.
+
 2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14862
