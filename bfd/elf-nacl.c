@@ -42,11 +42,18 @@ segment_executable (struct elf_segment_map *seg)
   return FALSE;
 }
 
+/* Determine if this segment is eligible to receive the file and program
+   headers.  It must be non-executable and have contents.  Its first
+   section must start far enough past the page boundary to allow space
+   for the headers.  */
 static bfd_boolean
-segment_nonexecutable_and_has_contents (struct elf_segment_map *seg)
+segment_eligible_for_headers (struct elf_segment_map *seg,
+                              bfd_vma maxpagesize, bfd_vma sizeof_headers)
 {
   bfd_boolean any_contents = FALSE;
   unsigned int i;
+  if (seg->count == 0 || seg->sections[0]->lma % maxpagesize < sizeof_headers)
+    return FALSE;
   for (i = 0; i < seg->count; ++i)
     {
       if (seg->sections[i]->flags & SEC_CODE)
@@ -68,6 +75,8 @@ nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
   struct elf_segment_map **first_load = NULL;
   struct elf_segment_map **last_load = NULL;
   bfd_boolean moved_headers = FALSE;
+  int sizeof_headers = bfd_sizeof_headers (abfd, info);
+  bfd_vma maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
 
   if (info != NULL && info->user_phdrs)
     /* The linker script used PHDRS explicitly, so don't change what the
@@ -93,7 +102,8 @@ nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
           /* Now that we've noted the first PT_LOAD, we're looking for
              the first non-executable PT_LOAD with a nonempty p_filesz.  */
           else if (!moved_headers
-                   && segment_nonexecutable_and_has_contents (seg))
+                   && segment_eligible_for_headers (seg, maxpagesize,
+                                                    sizeof_headers))
             {
               /* This is the one we were looking for!
 

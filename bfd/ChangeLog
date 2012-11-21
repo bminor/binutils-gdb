@@ -1,3 +1,11 @@
+2012-11-21  Roland McGrath  <mcgrathr@google.com>
+
+	* elf-nacl.c (segment_nonexecutable_and_has_contents): Renamed to ...
+	(segment_eligible_for_headers): ... this.  Take new arguments
+	MAXPAGESIZE and SIZEOF_HEADERS.  Return false if the first section's
+	start address doesn't leave space for the headers.
+	(nacl_modify_segment_map): Update caller.
+
 2012-11-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14862
