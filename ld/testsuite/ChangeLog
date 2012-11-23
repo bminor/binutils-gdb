@@ -1,3 +1,17 @@
+2012-11-23  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/plt1.d: Update for default "at" branch hints.
+	* ld-powerpc/tlsexe.d: Likewise.
+	* ld-powerpc/tlsexetoc.d: Likewise.
+	* ld-powerpc/tlsopt1.d: Likewise.
+	* ld-powerpc/tlsopt1_32.d: Likewise.
+	* ld-powerpc/tlsopt2.d: Likewise.
+	* ld-powerpc/tlsopt2_32.d: Likewise.
+	* ld-powerpc/tlsopt4.d: Likewise.
+	* ld-powerpc/tlsopt4_32.d: Likewise.
+	* ld-powerpc/tlsso.d: Likewise.
+	* ld-powerpc/tlstocso.d: Likewise.
+
 2012-11-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14493

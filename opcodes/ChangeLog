@@ -1,3 +1,11 @@
+2012-11-23  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (ppc_parse_cpu): Add "sticky" param.  Track bits
+	set from ppc_opts.sticky in it.  Delete "retain_mask".
+	(powerpc_init_dialect): Choose default dialect from info->mach
+	before parsing -M options.  Handle more bfd_mach_ppc variants.
+	Update common default to power7.
+
 2012-11-21  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* microblaze-opc.h (op_code_struct): Add swapb, swaph Increase MAX_OPCODES.

@@ -223,6 +223,7 @@ unsigned long nop_limit = 4;
 /* The type of processor we are assembling for.  This is one or more
    of the PPC_OPCODE flags defined in opcode/ppc.h.  */
 ppc_cpu_t ppc_cpu = 0;
+ppc_cpu_t sticky = 0;
 
 /* Flags set on encountering toc relocs.  */
 enum {
@@ -1160,7 +1161,7 @@ md_parse_option (int c, char *arg)
       break;
 
     case 'm':
-      new_cpu = ppc_parse_cpu (ppc_cpu, arg);
+      new_cpu = ppc_parse_cpu (ppc_cpu, &sticky, arg);
       if (new_cpu != 0)
 	{
 	  ppc_cpu = new_cpu;
@@ -4863,7 +4864,7 @@ ppc_machine (int ignore ATTRIBUTE_UNUSED)
 	  else
 	    ppc_cpu = cpu_history[--curr_hist];
 	}
-      else if ((new_cpu = ppc_parse_cpu (ppc_cpu, cpu_string)) != 0)
+      else if ((new_cpu = ppc_parse_cpu (ppc_cpu, &sticky, cpu_string)) != 0)
 	ppc_cpu = new_cpu;
       else
 	as_bad (_("invalid machine `%s'"), cpu_string);

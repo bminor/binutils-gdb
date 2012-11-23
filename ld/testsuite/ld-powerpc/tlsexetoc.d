@@ -55,7 +55,7 @@ Disassembly of section \.text:
 .*	(00 01 02 28|00 00 00 00) .*
 .* <__glink_PLTresolve>:
 .*	(7d 88 02 a6|a6 02 88 7d) 	mflr    r12
-.*	(42 9f 00 05|05 00 9f 42) 	bcl-    20,4\*cr7\+so,.*
+.*	(42 9f 00 05|05 00 9f 42) 	bcl     20,4\*cr7\+so,.*
 .*	(7d 68 02 a6|a6 02 68 7d) 	mflr    r11
 .*	(e8 4b ff f0|f0 ff 4b e8) 	ld      r2,-16\(r11\)
 .*	(7d 88 03 a6|a6 03 88 7d) 	mtlr    r12

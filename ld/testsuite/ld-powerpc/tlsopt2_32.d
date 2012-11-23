@@ -17,7 +17,7 @@ Disassembly of section \.no_opt2:
 0+1800098 <\.no_opt2>:
 .*:	(38 6d ff f4|f4 ff 6d 38) 	addi    r3,r13,-12
 .*:	(2c 04 00 00|00 00 04 2c) 	cmpwi   r4,0
-.*:	(41 82 00 08|08 00 82 41) 	beq-    .*
+.*:	(41 82 00 08|08 00 82 41) 	beq     .*
 .*:	(38 6d ff f4|f4 ff 6d 38) 	addi    r3,r13,-12
 .*:	(4b ff ff ed|ed ff ff 4b) 	bl      1800094 <__tls_get_addr>
 #pass

@@ -1,4 +1,4 @@
-#objdump: -Dr
+#objdump: -Dr -Mppc
 #name: PowerPC test 2
 
 .*

@@ -8,7 +8,7 @@
 Disassembly of section .text:
 
 0+ <_start>:
-   0:	(42 9f 00 05|05 00 9f 42) 	bcl-    20,4\*cr7\+so,4 .*
+   0:	(42 9f 00 05|05 00 9f 42) 	bcl     20,4\*cr7\+so,4 .*
    4:	(7f c8 02 a6|a6 02 c8 7f) 	mflr    r30
    8:	(3f de 00 00|00 00 de 3f) 	addis   r30,r30,0
 			(a|8): R_PPC_REL16_HA	_GLOBAL_OFFSET_TABLE_\+0x(6|4)

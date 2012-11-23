@@ -1,3 +1,8 @@
+2012-11-23  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (sticky): New var.
+	(md_parse_option, ppc_machine): Update ppc_parse_cpu calls.
+
 2012-11-21  Edgar E. Iglesias <edgar.iglesias@gmail.com>
 
 	* config/tc-microblaze.c (parse_reg): Parse REG_SLR, REG_SHR

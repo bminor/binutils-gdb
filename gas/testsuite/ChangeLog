@@ -1,3 +1,7 @@
+2012-11-23  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/astest2.d: Pass -Mppc to objdump.
+
 2012-11-21  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* gas/microblaze/allinsn.s: Add swapb, swaph
