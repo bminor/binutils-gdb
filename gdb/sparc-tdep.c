@@ -1953,7 +1953,8 @@ sparc32_collect_gregset (const struct sparc_gregset *gregset,
 }
 
 void
-sparc32_supply_fpregset (struct regcache *regcache,
+sparc32_supply_fpregset (const struct sparc_fpregset *fpregset,
+			 struct regcache *regcache,
 			 int regnum, const void *fpregs)
 {
   const gdb_byte *regs = fpregs;
@@ -1962,15 +1963,18 @@ sparc32_supply_fpregset (struct regcache *regcache,
   for (i = 0; i < 32; i++)
     {
       if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
-	regcache_raw_supply (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
+	regcache_raw_supply (regcache, SPARC_F0_REGNUM + i,
+			     regs + fpregset->r_f0_offset + (i * 4));
     }
 
   if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
-    regcache_raw_supply (regcache, SPARC32_FSR_REGNUM, regs + (32 * 4) + 4);
+    regcache_raw_supply (regcache, SPARC32_FSR_REGNUM,
+			 regs + fpregset->r_fsr_offset);
 }
 
 void
-sparc32_collect_fpregset (const struct regcache *regcache,
+sparc32_collect_fpregset (const struct sparc_fpregset *fpregset,
+			  const struct regcache *regcache,
 			  int regnum, void *fpregs)
 {
   gdb_byte *regs = fpregs;
@@ -1979,11 +1983,13 @@ sparc32_collect_fpregset (const struct regcache *regcache,
   for (i = 0; i < 32; i++)
     {
       if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
-	regcache_raw_collect (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
+	regcache_raw_collect (regcache, SPARC_F0_REGNUM + i,
+			      regs + fpregset->r_f0_offset + (i * 4));
     }
 
   if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, SPARC32_FSR_REGNUM, regs + (32 * 4) + 4);
+    regcache_raw_collect (regcache, SPARC32_FSR_REGNUM,
+			  regs + fpregset->r_fsr_offset);
 }
 
 
@@ -2000,6 +2006,18 @@ const struct sparc_gregset sparc32_sunos4_gregset =
   -1,				/* %tbr */
   4 * 4,			/* %g1 */
   -1				/* %l0 */
+};
+
+const struct sparc_fpregset sparc32_sunos4_fpregset =
+{
+  0 * 4,			/* %f0 */
+  33 * 4,			/* %fsr */
+};
+
+const struct sparc_fpregset sparc32_bsd_fpregset =
+{
+  0 * 4,			/* %f0 */
+  32 * 4,			/* %fsr */
 };
 
 

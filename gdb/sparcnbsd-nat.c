@@ -63,6 +63,7 @@ void
 _initialize_sparcnbsd_nat (void)
 {
   sparc_gregset = &sparc32nbsd_gregset;
+  sparc_fpregset = &sparc32_bsd_fpregset;
 
   /* We've got nothing to add to the generic SPARC target.  */
   add_target (sparc_target ());

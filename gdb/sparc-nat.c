@@ -82,12 +82,15 @@ typedef struct fp_status fpregset_t;
 
 /* Register set description.  */
 const struct sparc_gregset *sparc_gregset;
+const struct sparc_fpregset *sparc_fpregset;
 void (*sparc_supply_gregset) (const struct sparc_gregset *,
 			      struct regcache *, int , const void *);
 void (*sparc_collect_gregset) (const struct sparc_gregset *,
 			       const struct regcache *, int, void *);
-void (*sparc_supply_fpregset) (struct regcache *, int , const void *);
-void (*sparc_collect_fpregset) (const struct regcache *, int , void *);
+void (*sparc_supply_fpregset) (const struct sparc_fpregset *,
+			       struct regcache *, int , const void *);
+void (*sparc_collect_fpregset) (const struct sparc_fpregset *,
+				const struct regcache *, int , void *);
 int (*sparc_gregset_supplies_p) (struct gdbarch *, int);
 int (*sparc_fpregset_supplies_p) (struct gdbarch *, int);
 
@@ -183,7 +186,7 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
       if (ptrace (PTRACE_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      sparc_supply_fpregset (regcache, -1, &fpregs);
+      sparc_supply_fpregset (sparc_fpregset, regcache, -1, &fpregs);
     }
 }
 
@@ -234,7 +237,7 @@ sparc_store_inferior_registers (struct target_ops *ops,
 	perror_with_name (_("Couldn't get floating-point registers"));
 
       memcpy (&saved_fpregs, &fpregs, sizeof (fpregs));
-      sparc_collect_fpregset (regcache, regnum, &fpregs);
+      sparc_collect_fpregset (sparc_fpregset, regcache, regnum, &fpregs);
 
       /* Writing the floating-point registers will fail on NetBSD with
 	 EINVAL if the inferior process doesn't have an FPU state
@@ -353,6 +356,8 @@ _initialize_sparc_nat (void)
   /* Deafult to using SunOS 4 register sets.  */
   if (sparc_gregset == NULL)
     sparc_gregset = &sparc32_sunos4_gregset;
+  if (sparc_fpregset == NULL)
+    sparc_fpregset = &sparc32_sunos4_fpregset;
   if (sparc_supply_gregset == NULL)
     sparc_supply_gregset = sparc32_supply_gregset;
   if (sparc_collect_gregset == NULL)

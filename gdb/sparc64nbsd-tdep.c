@@ -64,7 +64,7 @@ sparc64nbsd_supply_fpregset (const struct regset *regset,
 			     struct regcache *regcache,
 			     int regnum, const void *fpregs, size_t len)
 {
-  sparc64_supply_fpregset (regcache, regnum, fpregs);
+  sparc64_supply_fpregset (&sparc64_bsd_fpregset, regcache, regnum, fpregs);
 }
 
 

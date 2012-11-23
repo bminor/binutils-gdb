@@ -1448,7 +1448,8 @@ sparc64_collect_gregset (const struct sparc_gregset *gregset,
 }
 
 void
-sparc64_supply_fpregset (struct regcache *regcache,
+sparc64_supply_fpregset (const struct sparc_fpregset *fpregset,
+			 struct regcache *regcache,
 			 int regnum, const void *fpregs)
 {
   int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
@@ -1458,14 +1459,15 @@ sparc64_supply_fpregset (struct regcache *regcache,
   for (i = 0; i < 32; i++)
     {
       if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
-	regcache_raw_supply (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
+	regcache_raw_supply (regcache, SPARC_F0_REGNUM + i,
+			     regs + fpregset->r_f0_offset + (i * 4));
     }
 
   if (sparc32)
     {
       if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
 	regcache_raw_supply (regcache, SPARC32_FSR_REGNUM,
-			     regs + (32 * 4) + (16 * 8) + 4);
+			     regs + fpregset->r_fsr_offset);
     }
   else
     {
@@ -1473,17 +1475,19 @@ sparc64_supply_fpregset (struct regcache *regcache,
 	{
 	  if (regnum == (SPARC64_F32_REGNUM + i) || regnum == -1)
 	    regcache_raw_supply (regcache, SPARC64_F32_REGNUM + i,
-				 regs + (32 * 4) + (i * 8));
+				 (regs + fpregset->r_f0_offset
+				  + (32 * 4) + (i * 8)));
 	}
 
       if (regnum == SPARC64_FSR_REGNUM || regnum == -1)
 	regcache_raw_supply (regcache, SPARC64_FSR_REGNUM,
-			     regs + (32 * 4) + (16 * 8));
+			     regs + fpregset->r_fsr_offset);
     }
 }
 
 void
-sparc64_collect_fpregset (const struct regcache *regcache,
+sparc64_collect_fpregset (const struct sparc_fpregset *fpregset,
+			  const struct regcache *regcache,
 			  int regnum, void *fpregs)
 {
   int sparc32 = (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 32);
@@ -1493,14 +1497,15 @@ sparc64_collect_fpregset (const struct regcache *regcache,
   for (i = 0; i < 32; i++)
     {
       if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
-	regcache_raw_collect (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
+	regcache_raw_collect (regcache, SPARC_F0_REGNUM + i,
+			      regs + fpregset->r_f0_offset + (i * 4));
     }
 
   if (sparc32)
     {
       if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
 	regcache_raw_collect (regcache, SPARC32_FSR_REGNUM,
-			      regs + (32 * 4) + (16 * 8) + 4);
+			      regs + fpregset->r_fsr_offset);
     }
   else
     {
@@ -1508,12 +1513,18 @@ sparc64_collect_fpregset (const struct regcache *regcache,
 	{
 	  if (regnum == (SPARC64_F32_REGNUM + i) || regnum == -1)
 	    regcache_raw_collect (regcache, SPARC64_F32_REGNUM + i,
-				  regs + (32 * 4) + (i * 8));
+				  (regs + fpregset->r_f0_offset
+				   + (32 * 4) + (i * 8)));
 	}
 
       if (regnum == SPARC64_FSR_REGNUM || regnum == -1)
 	regcache_raw_collect (regcache, SPARC64_FSR_REGNUM,
-			      regs + (32 * 4) + (16 * 8));
+			      regs + fpregset->r_fsr_offset);
     }
 }
 
+const struct sparc_fpregset sparc64_bsd_fpregset =
+{
+  0 * 8,			/* %f0 */
+  32 * 8,			/* %fsr */
+};

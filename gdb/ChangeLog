@@ -1,3 +1,68 @@
+2012-11-23  David S. Miller  <davem@davemloft.net>
+
+	* sparc-tdep.h (struct sparc_fpregset): New data structure.
+	(sparc32_sunos4_fpregset, sparc32_bsd_fpregset,
+	sparc32_sol2_fpregset): Declare new globals.
+	(sparc32_supply_fpregset, sparc32_collect_fpregset): Add new
+	'fpregset' argument.
+	* sparc64-tdep.h (sparc64_supply_fpregset,
+	sparc64_collect_fpregset): Likewise.
+	(sparc64_sol2_fpregset, sparc64_bsd_fpregset): Declare new
+	globals.
+	* sparc-nat.h (struct sparc_fpregset): Add forward declaration.
+	(sparc_fpregset): Declare new global.
+	(sparc_supply_fpregset, sparc_collect_fpregset): Add new
+	'fpregset' argument.
+	* sparc-linux-nat.c (supply_fpregset): Pass sparc_fpregset down
+	into handler.
+	(fill_fpregset): Likewise.
+	(_initialize_sparc_linux_nat): Set sparc_fpregset to
+	sparc32_bsd_fpregset.
+	* sparc-linux-tdep.c (sparc32_linux_supply_core_fpregset): Pass
+	sparc32_bsd_fpregset down into handler.
+	(sparc32_linux_collect_core_fpregset): Likewise.
+	* sparc-nat.c (sparc_fpregset): Define.
+	(sparc_supply_fpregset): Add 'fpregset' argument.
+	(sparc_collect_fpregset): Likewise.
+	(sparc_fetch_inferior_registers): Pass sparc_fpregset down
+	into fpregset handler.
+	(sparc_store_inferior_registers): Likewise.
+	(_initialize_sparc_nat): Set sparc_fpregset to
+	sparc32_sunos4_fpregset if NULL.
+	* sparc-sol2-nat.c (supply_gregset): Pass sparc_sol2_fpregset
+	down into handler.
+	(fill_fpregset): Likewise.
+	* sparc-sol2-tdep.c (sparc32_sol2_fpregset): Define.
+	* sparc-tdep.c (sparc32_supply_fpregset): Add fpregset arg and
+	use it to compute offsets.
+	(sparc32_collect_fpregset): Likewise.
+	(sparc32_sunos4_fpregset, sparc32_bsd_fpregset): Define.
+	* sparc64-linux-nat.c (supply_fpregset): Pass sparc64_bsd_fpregset
+	down into handler.
+	(fill_fpregset): Likewise.
+	* sparc64-linux-tdep.c (sparc64_linux_supply_core_fpregset):
+	Likewise.
+	(sparc64_linux_collect_core_fpregset): Likewise.
+	* sparc64-sol2-tdep.c (sparc64_sol2_fpregset): Define.
+	* sparc64-tdep.c (sparc64_supply_fpregset): Add fpregset arg and
+	use it to compute offsets.
+	(sparc64_collect_fpregset): Likewise.
+	(sparc64_bsd_fpregset): Define.
+	* sparc64fbsd-tdep.c (sparc64fbsd_supply_fpregset): Padd
+	sparc64_bsd_fpregset down into handler.
+	(sparc64fbsd_collect_fpregset): Likewise.
+	* sparc64nbsd-nat.c (sparc64nbsd_supply_fpregset): Add fpregset arg
+	and pass sparc{32,64}_bsd_fpregset down into handler.
+	(sparc64nbsd_collect_fpregset): Likewise.
+	* sparc64nbsd-tdep.c (sparc64nbsd_supply_fpregset): Pass
+	sparc64_bsd_fpregset down into handler.
+	* sparc64obsd-tdep.c (sparc64obsd_supply_gregset): Likewise.
+	* sparcnbsd-nat.c (_initialize_sparcnbsd_nat): Set sparc_fpregset
+	to sparc32_bsd_fpregset.
+	* sparcnbsd-tdep.c (sparc32nbsd_supply_gregset): Pass
+	sparc32_bsd_fpregset down into sparc32_supply_fpregset.
+	(sparc32nbsd_supply_fpregset): Likewise.
+
 2012-11-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdbtypes.h (struct cplus_struct_type) <localtype_ptr>: Remove

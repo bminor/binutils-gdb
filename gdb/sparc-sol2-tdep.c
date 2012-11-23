@@ -47,6 +47,12 @@ const struct sparc_gregset sparc32_sol2_gregset =
   1 * 4,			/* %g1 */
   16 * 4,			/* %l0 */
 };
+
+const struct sparc_fpregset sparc32_sol2_fpregset =
+{
+  0 * 4,			/* %f0 */
+  33 * 4,			/* %fsr */
+};
 
 
 /* The Solaris signal trampolines reside in libc.  For normal signals,

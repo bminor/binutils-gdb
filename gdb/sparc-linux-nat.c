@@ -37,7 +37,7 @@ supply_gregset (struct regcache *regcache, const prgregset_t *gregs)
 void
 supply_fpregset (struct regcache *regcache, const prfpregset_t *fpregs)
 {
-  sparc32_supply_fpregset (regcache, -1, fpregs);
+  sparc32_supply_fpregset (sparc_fpregset, regcache, -1, fpregs);
 }
 
 void
@@ -50,7 +50,7 @@ void
 fill_fpregset (const struct regcache *regcache,
 	       prfpregset_t *fpregs, int regnum)
 {
-  sparc32_collect_fpregset (regcache, regnum, fpregs);
+  sparc32_collect_fpregset (sparc_fpregset, regcache, regnum, fpregs);
 }
 
 void _initialize_sparc_linux_nat (void);
@@ -62,6 +62,8 @@ _initialize_sparc_linux_nat (void)
 
   /* Fill in the generic GNU/Linux methods.  */
   t = linux_target ();
+
+  sparc_fpregset = &sparc32_bsd_fpregset;
 
   /* Add our register access methods.  */
   t->to_fetch_registers = sparc_fetch_inferior_registers;

@@ -45,6 +45,12 @@ const struct sparc_gregset sparc64_sol2_gregset =
   16 * 8,			/* %l0 */
   8				/* sizeof (%y) */
 };
+
+const struct sparc_fpregset sparc64_sol2_fpregset =
+{
+  0 * 8,			/* %f0 */
+  33 * 8,			/* %fsr */
+};
 
 
 static struct sparc_frame_cache *

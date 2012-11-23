@@ -53,7 +53,7 @@ supply_gregset (struct regcache *regcache, const prgregset_t *gregs)
 void
 supply_fpregset (struct regcache *regcache, const prfpregset_t *fpregs)
 {
-  sparc64_supply_fpregset (regcache, -1, fpregs);
+  sparc64_supply_fpregset (&sparc64_bsd_fpregset, regcache, -1, fpregs);
 }
 
 void
@@ -66,7 +66,7 @@ void
 fill_fpregset (const struct regcache *regcache,
 	       prfpregset_t *fpregs, int regnum)
 {
-  sparc64_collect_fpregset (regcache, regnum, fpregs);
+  sparc64_collect_fpregset (&sparc64_bsd_fpregset, regcache, regnum, fpregs);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

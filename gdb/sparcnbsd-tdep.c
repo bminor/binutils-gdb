@@ -64,7 +64,8 @@ sparc32nbsd_supply_gregset (const struct regset *regset,
      Instead, the general-purpose and floating-point registers are
      lumped together in a single section.  */
   if (len >= 212)
-    sparc32_supply_fpregset (regcache, regnum, (const char *) gregs + 80);
+    sparc32_supply_fpregset (&sparc32_bsd_fpregset, regcache, regnum,
+			     (const char *) gregs + 80);
 }
 
 static void
@@ -72,7 +73,7 @@ sparc32nbsd_supply_fpregset (const struct regset *regset,
 			     struct regcache *regcache,
 			     int regnum, const void *fpregs, size_t len)
 {
-  sparc32_supply_fpregset (regcache, regnum, fpregs);
+  sparc32_supply_fpregset (&sparc32_bsd_fpregset, regcache, regnum, fpregs);
 }
 
 

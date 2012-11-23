@@ -64,7 +64,7 @@ sparc64obsd_supply_gregset (const struct regset *regset,
   const char *regs = gregs;
 
   sparc64_supply_gregset (&sparc64obsd_core_gregset, regcache, regnum, regs);
-  sparc64_supply_fpregset (regcache, regnum, regs + 288);
+  sparc64_supply_fpregset (&sparc64_bsd_fpregset, regcache, regnum, regs + 288);
 }
 
 

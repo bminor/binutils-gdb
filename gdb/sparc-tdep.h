@@ -41,6 +41,12 @@ struct sparc_gregset
   int r_y_size;
 };
 
+struct sparc_fpregset
+{
+  int r_f0_offset;
+  int r_fsr_offset;
+};
+
 /* SPARC architecture-specific information.  */
 
 struct gdbarch_tdep
@@ -198,6 +204,8 @@ extern void sparc_collect_rwindow (const struct regcache *regcache,
 
 /* Register offsets for SunOS 4.  */
 extern const struct sparc_gregset sparc32_sunos4_gregset;
+extern const struct sparc_fpregset sparc32_sunos4_fpregset;
+extern const struct sparc_fpregset sparc32_bsd_fpregset;
 
 extern void sparc32_supply_gregset (const struct sparc_gregset *gregset,
 				    struct regcache *regcache,
@@ -205,15 +213,18 @@ extern void sparc32_supply_gregset (const struct sparc_gregset *gregset,
 extern void sparc32_collect_gregset (const struct sparc_gregset *gregset,
 				     const struct regcache *regcache,
 				     int regnum, void *gregs);
-extern void sparc32_supply_fpregset (struct regcache *regcache,
+extern void sparc32_supply_fpregset (const struct sparc_fpregset *fpregset,
+				     struct regcache *regcache,
 				     int regnum, const void *fpregs);
-extern void sparc32_collect_fpregset (const struct regcache *regcache,
+extern void sparc32_collect_fpregset (const struct sparc_fpregset *fpregset,
+				      const struct regcache *regcache,
 				      int regnum, void *fpregs);
 
 /* Functions and variables exported from sparc-sol2-tdep.c.  */
 
 /* Register offsets for Solaris 2.  */
 extern const struct sparc_gregset sparc32_sol2_gregset;
+extern const struct sparc_fpregset sparc32_sol2_fpregset;
 
 extern int sparc_sol2_pc_in_sigtramp (CORE_ADDR pc, const char *name);
 
