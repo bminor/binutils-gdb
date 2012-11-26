@@ -1,3 +1,19 @@
+2012-11-26  Alexander Larsson  <alexl@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Mention mini debuginfo feature.
+	* minidebug.c: New file.
+	* configure.ac: Check for lzma.
+	* configure, config.in: Rebuild.
+	* Makefile.in (LIBLZMA): New variable.
+	(CLIBS): Include LIBLZMA.
+	(SFILES): Mention minidebug.c.
+	(COMMON_OBS): Mention minidebug.o.
+	* symfile.c (read_symbols): New function.
+	(syms_from_objfile, reread_symbols): Call it.
+	* symfile.h (find_separate_debug_file_in_section): Declare.
+
 2012-11-26  Keith Seitz  <keiths@redhat.com>
 
 	* exec.c (exec_file_attach): Move cleanup after verifying that

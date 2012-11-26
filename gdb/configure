@@ -641,6 +641,9 @@ TCL_VERSION
 WIN32LDAPP
 GUI_CFLAGS_X
 LIBGUI
+LTLIBLZMA
+LIBLZMA
+HAVE_LIBLZMA
 WIN32LIBS
 SER_HARDWIRE
 WERROR_CFLAGS
@@ -808,6 +811,8 @@ with_system_gdbinit
 enable_werror
 enable_build_warnings
 enable_gdb_build_warnings
+with_lzma
+with_liblzma_prefix
 with_tcl
 with_tk
 with_x
@@ -1521,6 +1526,9 @@ Optional Packages:
   --with-sysroot[=DIR]    search for usr/lib et al within DIR
   --with-system-gdbinit=PATH
                           automatically load a system-wide gdbinit file
+  --with-lzma             support lzma compression (auto/yes/no)
+  --with-liblzma-prefix[=DIR]  search for liblzma in DIR/include and DIR/lib
+  --without-liblzma-prefix     don't search for liblzma in includedir and libdir
   --with-tcl              directory containing tcl configuration (tclConfig.sh)
   --with-tk               directory containing tk configuration (tkConfig.sh)
   --with-x                use the X Window System
@@ -12616,6 +12624,494 @@ LIBS=$OLD_LIBS
 
 # Add any host-specific objects to GDB.
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
+
+# If building on ELF, look for lzma support for embedded compressed debug info.
+if test $gdb_cv_var_elf = yes; then
+
+# Check whether --with-lzma was given.
+if test "${with_lzma+set}" = set; then :
+  withval=$with_lzma;
+else
+  with_lzma=auto
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use lzma" >&5
+$as_echo_n "checking whether to use lzma... " >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_lzma" >&5
+$as_echo "$with_lzma" >&6; }
+
+  if test "${with_lzma}" != no; then
+
+
+
+
+
+
+
+
+    use_additional=yes
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+
+    eval additional_includedir=\"$includedir\"
+    eval additional_libdir=\"$libdir\"
+
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+
+# Check whether --with-liblzma-prefix was given.
+if test "${with_liblzma_prefix+set}" = set; then :
+  withval=$with_liblzma_prefix;
+    if test "X$withval" = "Xno"; then
+      use_additional=no
+    else
+      if test "X$withval" = "X"; then
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+
+          eval additional_includedir=\"$includedir\"
+          eval additional_libdir=\"$libdir\"
+
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+      else
+        additional_includedir="$withval/include"
+        additional_libdir="$withval/lib"
+      fi
+    fi
+
+fi
+
+      LIBLZMA=
+  LTLIBLZMA=
+  INCLZMA=
+  rpathdirs=
+  ltrpathdirs=
+  names_already_handled=
+  names_next_round='lzma '
+  while test -n "$names_next_round"; do
+    names_this_round="$names_next_round"
+    names_next_round=
+    for name in $names_this_round; do
+      already_handled=
+      for n in $names_already_handled; do
+        if test "$n" = "$name"; then
+          already_handled=yes
+          break
+        fi
+      done
+      if test -z "$already_handled"; then
+        names_already_handled="$names_already_handled $name"
+                        uppername=`echo "$name" | sed -e 'y|abcdefghijklmnopqrstuvwxyz./-|ABCDEFGHIJKLMNOPQRSTUVWXYZ___|'`
+        eval value=\"\$HAVE_LIB$uppername\"
+        if test -n "$value"; then
+          if test "$value" = yes; then
+            eval value=\"\$LIB$uppername\"
+            test -z "$value" || LIBLZMA="${LIBLZMA}${LIBLZMA:+ }$value"
+            eval value=\"\$LTLIB$uppername\"
+            test -z "$value" || LTLIBLZMA="${LTLIBLZMA}${LTLIBLZMA:+ }$value"
+          else
+                                    :
+          fi
+        else
+                              found_dir=
+          found_la=
+          found_so=
+          found_a=
+          if test $use_additional = yes; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+              found_dir="$additional_libdir"
+              found_so="$additional_libdir/lib$name.$shlibext"
+              if test -f "$additional_libdir/lib$name.la"; then
+                found_la="$additional_libdir/lib$name.la"
+              fi
+            else
+              if test -f "$additional_libdir/lib$name.$libext"; then
+                found_dir="$additional_libdir"
+                found_a="$additional_libdir/lib$name.$libext"
+                if test -f "$additional_libdir/lib$name.la"; then
+                  found_la="$additional_libdir/lib$name.la"
+                fi
+              fi
+            fi
+          fi
+          if test "X$found_dir" = "X"; then
+            for x in $LDFLAGS $LTLIBLZMA; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+              case "$x" in
+                -L*)
+                  dir=`echo "X$x" | sed -e 's/^X-L//'`
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                    found_dir="$dir"
+                    found_so="$dir/lib$name.$shlibext"
+                    if test -f "$dir/lib$name.la"; then
+                      found_la="$dir/lib$name.la"
+                    fi
+                  else
+                    if test -f "$dir/lib$name.$libext"; then
+                      found_dir="$dir"
+                      found_a="$dir/lib$name.$libext"
+                      if test -f "$dir/lib$name.la"; then
+                        found_la="$dir/lib$name.la"
+                      fi
+                    fi
+                  fi
+                  ;;
+              esac
+              if test "X$found_dir" != "X"; then
+                break
+              fi
+            done
+          fi
+          if test "X$found_dir" != "X"; then
+                        LTLIBLZMA="${LTLIBLZMA}${LTLIBLZMA:+ }-L$found_dir -l$name"
+            if test "X$found_so" != "X"; then
+                                                        if test "$enable_rpath" = no || test "X$found_dir" = "X/usr/lib"; then
+                                LIBLZMA="${LIBLZMA}${LIBLZMA:+ }$found_so"
+              else
+                                                                                haveit=
+                for x in $ltrpathdirs; do
+                  if test "X$x" = "X$found_dir"; then
+                    haveit=yes
+                    break
+                  fi
+                done
+                if test -z "$haveit"; then
+                  ltrpathdirs="$ltrpathdirs $found_dir"
+                fi
+                                if test "$hardcode_direct" = yes; then
+                                                      LIBLZMA="${LIBLZMA}${LIBLZMA:+ }$found_so"
+                else
+                  if test -n "$hardcode_libdir_flag_spec" && test "$hardcode_minus_L" = no; then
+                                                            LIBLZMA="${LIBLZMA}${LIBLZMA:+ }$found_so"
+                                                            haveit=
+                    for x in $rpathdirs; do
+                      if test "X$x" = "X$found_dir"; then
+                        haveit=yes
+                        break
+                      fi
+                    done
+                    if test -z "$haveit"; then
+                      rpathdirs="$rpathdirs $found_dir"
+                    fi
+                  else
+                                                                                haveit=
+                    for x in $LDFLAGS $LIBLZMA; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+                      if test "X$x" = "X-L$found_dir"; then
+                        haveit=yes
+                        break
+                      fi
+                    done
+                    if test -z "$haveit"; then
+                      LIBLZMA="${LIBLZMA}${LIBLZMA:+ }-L$found_dir"
+                    fi
+                    if test "$hardcode_minus_L" != no; then
+                                                                                        LIBLZMA="${LIBLZMA}${LIBLZMA:+ }$found_so"
+                    else
+                                                                                                                                                                                LIBLZMA="${LIBLZMA}${LIBLZMA:+ }-l$name"
+                    fi
+                  fi
+                fi
+              fi
+            else
+              if test "X$found_a" != "X"; then
+                                LIBLZMA="${LIBLZMA}${LIBLZMA:+ }$found_a"
+              else
+                                                LIBLZMA="${LIBLZMA}${LIBLZMA:+ }-L$found_dir -l$name"
+              fi
+            fi
+                        additional_includedir=
+            case "$found_dir" in
+              */lib | */lib/)
+                basedir=`echo "X$found_dir" | sed -e 's,^X,,' -e 's,/lib/*$,,'`
+                additional_includedir="$basedir/include"
+                ;;
+            esac
+            if test "X$additional_includedir" != "X"; then
+                                                                                                                if test "X$additional_includedir" != "X/usr/include"; then
+                haveit=
+                if test "X$additional_includedir" = "X/usr/local/include"; then
+                  if test -n "$GCC"; then
+                    case $host_os in
+                      linux*) haveit=yes;;
+                    esac
+                  fi
+                fi
+                if test -z "$haveit"; then
+                  for x in $CPPFLAGS $INCLZMA; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+                    if test "X$x" = "X-I$additional_includedir"; then
+                      haveit=yes
+                      break
+                    fi
+                  done
+                  if test -z "$haveit"; then
+                    if test -d "$additional_includedir"; then
+                                            INCLZMA="${INCLZMA}${INCLZMA:+ }-I$additional_includedir"
+                    fi
+                  fi
+                fi
+              fi
+            fi
+                        if test -n "$found_la"; then
+                                                        save_libdir="$libdir"
+              case "$found_la" in
+                */* | *\\*) . "$found_la" ;;
+                *) . "./$found_la" ;;
+              esac
+              libdir="$save_libdir"
+                            for dep in $dependency_libs; do
+                case "$dep" in
+                  -L*)
+                    additional_libdir=`echo "X$dep" | sed -e 's/^X-L//'`
+                                                                                                                                                                if test "X$additional_libdir" != "X/usr/lib"; then
+                      haveit=
+                      if test "X$additional_libdir" = "X/usr/local/lib"; then
+                        if test -n "$GCC"; then
+                          case $host_os in
+                            linux*) haveit=yes;;
+                          esac
+                        fi
+                      fi
+                      if test -z "$haveit"; then
+                        haveit=
+                        for x in $LDFLAGS $LIBLZMA; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+                          if test "X$x" = "X-L$additional_libdir"; then
+                            haveit=yes
+                            break
+                          fi
+                        done
+                        if test -z "$haveit"; then
+                          if test -d "$additional_libdir"; then
+                                                        LIBLZMA="${LIBLZMA}${LIBLZMA:+ }-L$additional_libdir"
+                          fi
+                        fi
+                        haveit=
+                        for x in $LDFLAGS $LTLIBLZMA; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+                          if test "X$x" = "X-L$additional_libdir"; then
+                            haveit=yes
+                            break
+                          fi
+                        done
+                        if test -z "$haveit"; then
+                          if test -d "$additional_libdir"; then
+                                                        LTLIBLZMA="${LTLIBLZMA}${LTLIBLZMA:+ }-L$additional_libdir"
+                          fi
+                        fi
+                      fi
+                    fi
+                    ;;
+                  -R*)
+                    dir=`echo "X$dep" | sed -e 's/^X-R//'`
+                    if test "$enable_rpath" != no; then
+                                                                  haveit=
+                      for x in $rpathdirs; do
+                        if test "X$x" = "X$dir"; then
+                          haveit=yes
+                          break
+                        fi
+                      done
+                      if test -z "$haveit"; then
+                        rpathdirs="$rpathdirs $dir"
+                      fi
+                                                                  haveit=
+                      for x in $ltrpathdirs; do
+                        if test "X$x" = "X$dir"; then
+                          haveit=yes
+                          break
+                        fi
+                      done
+                      if test -z "$haveit"; then
+                        ltrpathdirs="$ltrpathdirs $dir"
+                      fi
+                    fi
+                    ;;
+                  -l*)
+                                        names_next_round="$names_next_round "`echo "X$dep" | sed -e 's/^X-l//'`
+                    ;;
+                  *.la)
+                                                                                names_next_round="$names_next_round "`echo "X$dep" | sed -e 's,^X.*/,,' -e 's,^lib,,' -e 's,\.la$,,'`
+                    ;;
+                  *)
+                                        LIBLZMA="${LIBLZMA}${LIBLZMA:+ }$dep"
+                    LTLIBLZMA="${LTLIBLZMA}${LTLIBLZMA:+ }$dep"
+                    ;;
+                esac
+              done
+            fi
+          else
+                                                            LIBLZMA="${LIBLZMA}${LIBLZMA:+ }-l$name"
+            LTLIBLZMA="${LTLIBLZMA}${LTLIBLZMA:+ }-l$name"
+          fi
+        fi
+      fi
+    done
+  done
+  if test "X$rpathdirs" != "X"; then
+    if test -n "$hardcode_libdir_separator"; then
+                        alldirs=
+      for found_dir in $rpathdirs; do
+        alldirs="${alldirs}${alldirs:+$hardcode_libdir_separator}$found_dir"
+      done
+            acl_save_libdir="$libdir"
+      libdir="$alldirs"
+      eval flag=\"$hardcode_libdir_flag_spec\"
+      libdir="$acl_save_libdir"
+      LIBLZMA="${LIBLZMA}${LIBLZMA:+ }$flag"
+    else
+            for found_dir in $rpathdirs; do
+        acl_save_libdir="$libdir"
+        libdir="$found_dir"
+        eval flag=\"$hardcode_libdir_flag_spec\"
+        libdir="$acl_save_libdir"
+        LIBLZMA="${LIBLZMA}${LIBLZMA:+ }$flag"
+      done
+    fi
+  fi
+  if test "X$ltrpathdirs" != "X"; then
+            for found_dir in $ltrpathdirs; do
+      LTLIBLZMA="${LTLIBLZMA}${LTLIBLZMA:+ }-R$found_dir"
+    done
+  fi
+
+
+        ac_save_CPPFLAGS="$CPPFLAGS"
+
+  for element in $INCLZMA; do
+    haveit=
+    for x in $CPPFLAGS; do
+
+  acl_save_prefix="$prefix"
+  prefix="$acl_final_prefix"
+  acl_save_exec_prefix="$exec_prefix"
+  exec_prefix="$acl_final_exec_prefix"
+  eval x=\"$x\"
+  exec_prefix="$acl_save_exec_prefix"
+  prefix="$acl_save_prefix"
+
+      if test "X$x" = "X$element"; then
+        haveit=yes
+        break
+      fi
+    done
+    if test -z "$haveit"; then
+      CPPFLAGS="${CPPFLAGS}${CPPFLAGS:+ }$element"
+    fi
+  done
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for liblzma" >&5
+$as_echo_n "checking for liblzma... " >&6; }
+if test "${ac_cv_liblzma+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_save_LIBS="$LIBS"
+    LIBS="$LIBS $LIBLZMA"
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include "lzma.h"
+int
+main ()
+{
+lzma_index_iter iter;
+			   lzma_index_iter_init (&iter, 0);
+			   lzma_mf_is_supported (LZMA_MF_HC3);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_liblzma=yes
+else
+  ac_cv_liblzma=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+    LIBS="$ac_save_LIBS"
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_liblzma" >&5
+$as_echo "$ac_cv_liblzma" >&6; }
+  if test "$ac_cv_liblzma" = yes; then
+    HAVE_LIBLZMA=yes
+
+$as_echo "#define HAVE_LIBLZMA 1" >>confdefs.h
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to link with liblzma" >&5
+$as_echo_n "checking how to link with liblzma... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $LIBLZMA" >&5
+$as_echo "$LIBLZMA" >&6; }
+  else
+    HAVE_LIBLZMA=no
+            CPPFLAGS="$ac_save_CPPFLAGS"
+    LIBLZMA=
+    LTLIBLZMA=
+  fi
+
+
+
+
+
+
+    if test "$HAVE_LIBLZMA" != yes; then
+      if test "$with_lzma" = yes; then
+        as_fn_error "missing liblzma for --with-lzma" "$LINENO" 5
+      fi
+    fi
+  fi
+fi
 
 LIBGUI="../libgui/src/libgui.a"
 GUI_CFLAGS_X="-I${srcdir}/../libgui/src"

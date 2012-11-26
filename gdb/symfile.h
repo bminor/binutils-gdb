@@ -690,4 +690,8 @@ extern void elfmdebug_build_psymtabs (struct objfile *,
 				      const struct ecoff_debug_swap *,
 				      asection *);
 
+/* From minidebug.c.  */
+
+extern bfd *find_separate_debug_file_in_section (struct objfile *);
+
 #endif /* !defined(SYMFILE_H) */

@@ -2053,6 +2053,27 @@ LIBS=$OLD_LIBS
 # Add any host-specific objects to GDB.
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
 
+# If building on ELF, look for lzma support for embedded compressed debug info.
+if test $gdb_cv_var_elf = yes; then
+  AC_ARG_WITH(lzma,
+    AS_HELP_STRING([--with-lzma], [support lzma compression (auto/yes/no)]),
+    [], [with_lzma=auto])
+  AC_MSG_CHECKING([whether to use lzma])
+  AC_MSG_RESULT([$with_lzma])
+
+  if test "${with_lzma}" != no; then
+    AC_LIB_HAVE_LINKFLAGS([lzma], [], [#include "lzma.h"],
+			  [lzma_index_iter iter;
+			   lzma_index_iter_init (&iter, 0);
+			   lzma_mf_is_supported (LZMA_MF_HC3);])
+    if test "$HAVE_LIBLZMA" != yes; then
+      if test "$with_lzma" = yes; then
+        AC_MSG_ERROR([missing liblzma for --with-lzma])
+      fi
+    fi
+  fi
+fi
+
 LIBGUI="../libgui/src/libgui.a"
 GUI_CFLAGS_X="-I${srcdir}/../libgui/src"
 AC_SUBST(LIBGUI)

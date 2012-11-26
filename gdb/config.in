@@ -192,6 +192,9 @@
 /* Define to 1 if you have the `libiconvlist' function. */
 #undef HAVE_LIBICONVLIST
 
+/* Define if you have the lzma library. */
+#undef HAVE_LIBLZMA
+
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 

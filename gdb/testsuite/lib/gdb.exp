@@ -128,6 +128,7 @@ proc gdb_version { } {
 
 #
 # gdb_unload -- unload a file if one is loaded
+# Return 0 on success, -1 on error.
 #
 
 proc gdb_unload {} {
@@ -152,6 +153,7 @@ proc gdb_unload {} {
 	    return -1
 	}
     }
+    return 0
 }
 
 # Many of the tests depend on setting breakpoints at various places and
@@ -1278,6 +1280,8 @@ proc default_gdb_exit {} {
 #
 #   debug    file was loaded successfully and has debug information
 #   nodebug  file was loaded successfully and has no debug information
+#   lzma     file was loaded, .gnu_debugdata found, but no LZMA support
+#            compiled in
 #   fail     file was not loaded
 #
 # I tried returning this information as part of the return value,
@@ -1325,6 +1329,11 @@ proc gdb_file_cmd { arg } {
 
     send_gdb "file $arg\n"
     gdb_expect 120 {
+	-re "Reading symbols from.*LZMA support was disabled.*done.*$gdb_prompt $" {
+	    verbose "\t\tLoaded $arg into $GDB; .gnu_debugdata found but no LZMA available"
+	    set gdb_file_cmd_debug_info "lzma"
+	    return 0
+	}
 	-re "Reading symbols from.*no debugging symbols found.*done.*$gdb_prompt $" {
 	    verbose "\t\tLoaded $arg into $GDB with no debugging symbols"
 	    set gdb_file_cmd_debug_info "nodebug"

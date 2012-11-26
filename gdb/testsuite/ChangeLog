@@ -1,4 +1,12 @@
 2012-11-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/gnu-debugdata.exp: New file.
+	* gdb.base/gnu-debugdata.c: New file.
+	* lib/gdb.exp (gdb_file_cmd): Handle LZMA warning.
+	(gdb_unload): Return 0 on success.
+
+2012-11-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/enumval.exp (print e, print f, print K): XFAIL on GCC <= 4.6.
 

@@ -151,6 +151,9 @@ READLINE_CFLAGS = @READLINE_CFLAGS@
 # Where is expat?  This will be empty if expat was not available.
 LIBEXPAT = @LIBEXPAT@
 
+# Where is lzma?  This will be empty if lzma was not available.
+LIBLZMA = @LIBLZMA@
+
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
 GDB_WARN_CFLAGS = $(WARN_CFLAGS)
@@ -469,7 +472,7 @@ INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_
 # LIBIBERTY appears twice on purpose.
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
 	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ @PYTHON_LIBS@ \
-	$(LIBEXPAT) \
+	$(LIBEXPAT) $(LIBLZMA) \
 	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU)
 CDEPS = $(XM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
@@ -714,7 +717,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	inline-frame.c \
 	interps.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
-	language.c linespec.c \
+	language.c linespec.c minidebug.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c \
 	macrotab.c macroexp.c macrocmd.c macroscope.c main.c maint.c \
 	mdebugread.c memattr.c mem-break.c minsyms.c mipsread.c memory-map.c \
@@ -877,6 +880,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	filesystem.o \
 	inf-child.o \
 	interps.o \
+	minidebug.o \
 	main.o \
 	macrotab.o macrocmd.o macroexp.o macroscope.o \
 	mi-common.o \

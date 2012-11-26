@@ -100,6 +100,11 @@ show print type typedefs
   ** New optional parameter COUNT added to the "-data-write-memory-bytes" 
      command, to allow pattern filling of memory areas.
 
+* GDB now supports the "mini debuginfo" section, .gnu_debugdata.
+  You must have the LZMA library available when configuring GDB for this
+  feature to be enabled.  For more information, see:
+      http://fedoraproject.org/wiki/Features/MiniDebugInfo
+
 *** Changes in GDB 7.5
 
 * GDB now supports x32 ABI.  Visit <http://sites.google.com/site/x32abi/>

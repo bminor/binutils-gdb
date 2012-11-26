@@ -15865,6 +15865,7 @@ program.  To debug a core dump of a previous run, you must also tell
 @menu
 * Files::                       Commands to specify files
 * Separate Debug Files::        Debugging information in separate files
+* MiniDebugInfo::               Debugging information in a special section
 * Index Files::                 Index files speed up GDB
 * Symbol Errors::               Errors reading symbol files
 * Data Files::                  GDB data files
@@ -16790,6 +16791,55 @@ gnu_debuglink_crc32 (unsigned long crc,
 @noindent
 This computation does not apply to the ``build ID'' method.
 
+@node MiniDebugInfo
+@section Debugging information in a special section
+@cindex separate debug sections
+@cindex @samp{.gnu_debugdata} section
+
+Some systems ship pre-built executables and libraries that have a
+special @samp{.gnu_debugdata} section.  This feature is called
+@dfn{MiniDebugInfo}.  This section holds an LZMA-compressed object and
+is used to supply extra symbols for backtraces.
+
+The intent of this section is to provide extra minimal debugging
+information for use in simple backtraces.  It is not intended to be a
+replacement for full separate debugging information (@pxref{Separate
+Debug Files}).  The example below shows the intended use; however,
+@value{GDBN} does not currently put restrictions on what sort of
+debugging information might be included in the section.
+
+@value{GDBN} has support for this extension.  If the section exists,
+then it is used provided that no other source of debugging information
+can be found, and that @value{GDBN} was configured with LZMA support.
+
+This section can be easily created using @command{objcopy} and other
+standard utilities:
+
+@smallexample
+# Extract the dynamic symbols from the main binary, there is no need
+# to also have these in the normal symbol table
+nm -D @var{binary} --format=posix --defined-only \
+  | awk '@{ print $1 @}' | sort > dynsyms
+
+# Extract all the text (i.e. function) symbols from the debuginfo .
+nm @var{binary} --format=posix --defined-only \
+  | awk '@{ if ($2 == "T" || $2 == "t") print $1 @}' \
+  | sort > funcsyms
+
+# Keep all the function symbols not already in the dynamic symbol
+# table.
+comm -13 dynsyms funcsyms > keep_symbols
+
+# Copy the full debuginfo, keeping only a minimal set of symbols and
+# removing some unnecessary sections.
+objcopy -S --remove-section .gdb_index --remove-section .comment \
+  --keep-symbols=keep_symbols @var{binary} mini_debuginfo
+
+# Inject the compressed data into the .gnu_debugdata section of the
+# original binary.
+xz mini_debuginfo
+objcopy --add-section .gnu_debugdata=mini_debuginfo.xz @var{binary}
+@end smallexample
 
 @node Index Files
 @section Index Files Speed Up @value{GDBN}

@@ -876,6 +876,27 @@ default_symfile_segments (bfd *abfd)
   return data;
 }
 
+/* This is a convenience function to call sym_read for OBJFILE and
+   possibly force the partial symbols to be read.  */
+
+static void
+read_symbols (struct objfile *objfile, int add_flags)
+{
+  (*objfile->sf->sym_read) (objfile, add_flags);
+  if (!objfile_has_partial_symbols (objfile))
+    {
+      bfd *abfd = find_separate_debug_file_in_section (objfile);
+      struct cleanup *cleanup = make_cleanup_bfd_unref (abfd);
+
+      if (abfd != NULL)
+	symbol_file_add_separate (abfd, add_flags, objfile);
+
+      do_cleanups (cleanup);
+    }
+  if ((add_flags & SYMFILE_NO_READ) == 0)
+    require_partial_symbols (objfile, 0);
+}
+
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
 
@@ -996,10 +1017,7 @@ syms_from_objfile (struct objfile *objfile,
       init_objfile_sect_indices (objfile);
     }
 
-  (*objfile->sf->sym_read) (objfile, add_flags);
-
-  if ((add_flags & SYMFILE_NO_READ) == 0)
-    require_partial_symbols (objfile, 0);
+  read_symbols (objfile, add_flags);
 
   /* Discard cleanups as symbol reading was successful.  */
 
@@ -2601,14 +2619,9 @@ reread_symbols (void)
 
 	  (*objfile->sf->sym_init) (objfile);
 	  clear_complaints (&symfile_complaints, 1, 1);
-	  /* Do not set flags as this is safe and we don't want to be
-             verbose.  */
-	  (*objfile->sf->sym_read) (objfile, 0);
-	  if ((objfile->flags & OBJF_PSYMTABS_READ) != 0)
-	    {
-	      objfile->flags &= ~OBJF_PSYMTABS_READ;
-	      require_partial_symbols (objfile, 0);
-	    }
+
+	  objfile->flags &= ~OBJF_PSYMTABS_READ;
+	  read_symbols (objfile, 0);
 
 	  if (!objfile_has_symbols (objfile))
 	    {
