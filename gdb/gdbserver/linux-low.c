@@ -659,7 +659,9 @@ linux_create_inferior (char *program, char **allargs)
 	  dup2 (2, 1);
 	  if (write (2, "stdin/stdout redirected\n",
 		     sizeof ("stdin/stdout redirected\n") - 1) < 0)
-	    /* Errors ignored.  */;
+	    {
+	      /* Errors ignored.  */;
+	    }
 	}
 
       execv (program, allargs);

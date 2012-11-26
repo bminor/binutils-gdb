@@ -1,3 +1,10 @@
+2012-11-26  Yao Qi  <yao@codesourcery.com>
+
+	* configure.ac (build_warnings): Append '-Wempty-body'.
+	* configure: Regenerated.
+	* linux-low.c (linux_create_inferior): Use braces for empty 'if'
+	body.
+
 2012-11-15  Pierre Muller  <muller@sourceware.org>
 
 	* configure.ac (AC_CHECK_HEADERS): Add wait.h header.
