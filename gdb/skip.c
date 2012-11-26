@@ -304,7 +304,7 @@ Skiplist entry should have either a filename or a function name."));
 	   if (sym)
 	     ui_out_field_fmt (current_uiout, "what", "%s at %s:%d",
 			       sym->ginfo.name,
-			       sym->symtab->filename,
+			       SYMBOL_SYMTAB (sym)->filename,
 			       sym->line);
 	   else
 	     ui_out_field_string (current_uiout, "what", "?");

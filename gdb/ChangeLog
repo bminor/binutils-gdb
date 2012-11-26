@@ -1,3 +1,10 @@
+2012-11-26  Tom Tromey  <tromey@redhat.com>
+
+	* ada-lang.c (user_select_syms): Use SYMBOL_SYMTAB.
+	* dwarf2read.c (dw2_find_symbol_file, fixup_go_packaging): Use
+	SYMBOL_SYMTAB.
+	* skip.c (skip_info): Use SYMBOL_SYMTAB.
+
 2012-11-26  Maxime Villard  <rustyBSD@gmx.fr>
 	    Pedro Alves  <palves@redhat.com>
 

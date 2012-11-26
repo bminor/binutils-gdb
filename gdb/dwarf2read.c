@@ -3402,7 +3402,7 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
 	  struct symbol *sym = lookup_block_symbol (block, name, VAR_DOMAIN);
 
 	  if (sym)
-	    return sym->symtab->filename;
+	    return SYMBOL_SYMTAB (sym)->filename;
 	}
       return NULL;
     }
@@ -6754,8 +6754,9 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 		  if (strcmp (package_name, this_package_name) != 0)
 		    complaint (&symfile_complaints,
 			       _("Symtab %s has objects from two different Go packages: %s and %s"),
-			       (sym->symtab && sym->symtab->filename
-				? sym->symtab->filename
+			       (SYMBOL_SYMTAB (sym)
+				&& SYMBOL_SYMTAB (sym)->filename
+				? SYMBOL_SYMTAB (sym)->filename
 				: cu->objfile->name),
 			       this_package_name, package_name);
 		  xfree (this_package_name);
