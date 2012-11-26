@@ -75,7 +75,7 @@ nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
   struct elf_segment_map **first_load = NULL;
   struct elf_segment_map **last_load = NULL;
   bfd_boolean moved_headers = FALSE;
-  int sizeof_headers = bfd_sizeof_headers (abfd, info);
+  int sizeof_headers = info == NULL ? 0 : bfd_sizeof_headers (abfd, info);
   bfd_vma maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
 
   if (info != NULL && info->user_phdrs)
@@ -149,8 +149,7 @@ nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
    proper order for the ELF rule that they must appear in ascending address
    order.  So find the two segments we swapped before, and swap them back.  */
 bfd_boolean
-nacl_modify_program_headers (bfd *abfd,
-                             struct bfd_link_info *info ATTRIBUTE_UNUSED)
+nacl_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
 {
   struct elf_segment_map **m = &elf_tdata (abfd)->segment_map;
   Elf_Internal_Phdr *phdr = elf_tdata (abfd)->phdr;
