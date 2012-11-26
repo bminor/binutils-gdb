@@ -34,7 +34,7 @@ nbsd_pid_to_exec_file (int pid)
   char *path;
 
   path = xstrprintf ("/proc/%d/exe", pid);
-  if (readlink (path, buf, MAXPATHLEN) == -1)
+  if (readlink (path, buf, MAXPATHLEN - 1) == -1)
     {
       xfree (buf);
       buf = NULL;

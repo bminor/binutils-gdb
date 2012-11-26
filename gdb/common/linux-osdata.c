@@ -737,7 +737,7 @@ linux_xfer_osdata_fds (gdb_byte *readbuf,
 			    continue;
 
 			  fdname = xstrprintf ("%s/%s", pathname, dp2->d_name);
-			  rslt = readlink (fdname, buf, 1000);
+			  rslt = readlink (fdname, buf, sizeof (buf) - 1);
 			  if (rslt >= 0)
 			    buf[rslt] = '\0';
 

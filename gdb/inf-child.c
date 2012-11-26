@@ -346,7 +346,7 @@ inf_child_fileio_readlink (const char *filename, int *target_errno)
   /* We support readlink only on systems that also provide a compile-time
      maximum path length (MAXPATHLEN), at least for now.  */
 #if defined (HAVE_READLINK) && defined (MAXPATHLEN)
-  char buf[MAXPATHLEN];
+  char buf[MAXPATHLEN - 1];
   int len;
   char *ret;
 

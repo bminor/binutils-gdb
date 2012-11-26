@@ -483,7 +483,7 @@ handle_readlink (char *own_buf, int *new_packet_len)
       return;
     }
 
-  ret = readlink (filename, linkname, sizeof linkname);
+  ret = readlink (filename, linkname, sizeof (linkname) - 1);
   if (ret == -1)
     {
       hostio_error (own_buf);

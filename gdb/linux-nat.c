@@ -4319,7 +4319,7 @@ linux_child_pid_to_exec_file (int pid)
   memset (name2, 0, MAXPATHLEN);
 
   sprintf (name1, "/proc/%d/exe", pid);
-  if (readlink (name1, name2, MAXPATHLEN) > 0)
+  if (readlink (name1, name2, MAXPATHLEN - 1) > 0)
     return name2;
   else
     return name1;

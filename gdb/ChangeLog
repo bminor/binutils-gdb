@@ -1,3 +1,14 @@
+2012-11-26  Maxime Villard  <rustyBSD@gmx.fr>
+	    Pedro Alves  <palves@redhat.com>
+
+	* common/linux-osdata.c (linux_xfer_osdata_fds): Decrease buffer
+	size parameter passed to readlink by one byte.
+	* fbsd-nat.c (fbsd_pid_to_exec_file): Ditto.
+	* linux-nat.c (linux_child_pid_to_exec_file): Ditto.
+	* nbsd-nat.c (nbsd_pid_to_exec_file): Ditto.
+	* inf-child.c (inf_child_fileio_readlink): Decrease local buffer's
+	size by one byte.
+
 2012-11-26  Yao Qi  <yao@codesourcery.com>
 
 	* f-valprint.c (f77_create_arrayprint_offset_tbl): Remove

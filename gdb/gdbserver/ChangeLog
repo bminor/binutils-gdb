@@ -1,3 +1,8 @@
+2012-11-26  Maxime Villard  <rustyBSD@gmx.fr>
+
+	* hostio.c (handle_readlink): Decrease buffer size
+	parameter passed to readlink by one byte.
+
 2012-11-26  Yao Qi  <yao@codesourcery.com>
 
 	* configure.ac (build_warnings): Append '-Wempty-body'.
