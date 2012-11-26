@@ -225,11 +225,11 @@ exec_file_attach (char *filename, int from_tty)
 	     &scratch_pathname);
 	}
 #endif
+      if (scratch_chan < 0)
+	perror_with_name (filename);
 
       cleanups = make_cleanup (xfree, scratch_pathname);
 
-      if (scratch_chan < 0)
-	perror_with_name (filename);
       if (write_files)
 	exec_bfd = gdb_bfd_fopen (scratch_pathname, gnutarget,
 				  FOPEN_RUB, scratch_chan);
