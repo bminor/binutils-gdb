@@ -1,3 +1,7 @@
+2012-11-26  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (remote_start_remote): Typo fix.
+
 2012-11-23  David S. Miller  <davem@davemloft.net>
 
 	* sparc-tdep.h (struct sparc_fpregset): New data structure.

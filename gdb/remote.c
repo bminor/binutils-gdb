@@ -3362,7 +3362,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   else if (rs->non_stop_aware)
     {
       /* Don't assume that the stub can operate in all-stop mode.
-	 Request it explicitely.  */
+	 Request it explicitly.  */
       putpkt ("QNonStop:0");
       getpkt (&rs->buf, &rs->buf_size, 0);
 
