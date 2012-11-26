@@ -24,8 +24,50 @@ if { [prepare_for_testing enumval.exp "enumval" "" {debug}] } {
 }
 
 # Check the real contents.
-gdb_test "print e" "= J"
-gdb_test "print f" "= K"
+
+set test "print e"
+gdb_test_multiple $test $test {
+    -re " = J\r\n$gdb_prompt $" {
+	pass $test
+    }
+    -re " = 4294967295\r\n$gdb_prompt $" {
+	if {[test_compiler_info {gcc-[0-3]-*}]
+	    || [test_compiler_info {gcc-4-[0-6]-*}]} {
+	    xfail $test
+	} else {
+	    fail $test
+	}
+    }
+}
+
+set test "print f"
+gdb_test_multiple $test $test {
+    -re " = K\r\n$gdb_prompt $" {
+	pass $test
+    }
+    -re " = -1152921504606846976\r\n$gdb_prompt $" {
+	if {[test_compiler_info {gcc-[0-3]-*}]
+	    || [test_compiler_info {gcc-4-[0-6]-*}]} {
+	    xfail $test
+	} else {
+	    fail $test
+	}
+    }
+}
 
 gdb_test "print J" "= J"
-gdb_test "print K" "= K"
+
+set test "print K"
+gdb_test_multiple $test $test {
+    -re " = K\r\n$gdb_prompt $" {
+	pass $test
+    }
+    -re " = <optimized out>\r\n$gdb_prompt $" {
+	if {[test_compiler_info {gcc-[0-3]-*}]
+	    || [test_compiler_info {gcc-4-[0-6]-*}]} {
+	    xfail $test
+	} else {
+	    fail $test
+	}
+    }
+}
