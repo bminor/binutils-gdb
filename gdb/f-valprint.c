@@ -128,7 +128,7 @@ f77_create_arrayprint_offset_tbl (struct type *type, struct ui_file *stream)
 
   tmp_type = type;
 
-  while ((TYPE_CODE (tmp_type) == TYPE_CODE_ARRAY))
+  while (TYPE_CODE (tmp_type) == TYPE_CODE_ARRAY)
     {
       upper = f77_get_upperbound (tmp_type);
       lower = f77_get_lowerbound (tmp_type);

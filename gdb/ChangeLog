@@ -1,5 +1,10 @@
 2012-11-26  Yao Qi  <yao@codesourcery.com>
 
+	* f-valprint.c (f77_create_arrayprint_offset_tbl): Remove
+	extraneous parentheses.
+
+2012-11-26  Yao Qi  <yao@codesourcery.com>
+
 	* remote.c (remote_start_remote): Typo fix.
 
 2012-11-23  David S. Miller  <davem@davemloft.net>
