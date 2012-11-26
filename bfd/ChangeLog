@@ -1,3 +1,7 @@
+2012-11-26  Roland McGrath  <mcgrathr@google.com>
+
+	* elf-nacl.c (nacl_modify_segment_map): Don't crash when INFO is null.
+
 2012-11-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14493
