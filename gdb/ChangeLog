@@ -1,4 +1,17 @@
 2012-11-27  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Kazu Hirata  <kazu@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* objfiles.c (init_entry_point_info): Call
+	gdbarch_convert_from_func_ptr_addr and
+	gdbarch_addr_bits_remove here ...
+	(entry_point_address_query): ... instead of here.
+	* solib-svr4.c (exec_entry_point): Call
+	gdbarch_addr_bits_remove.
+	* symfile.c (generic_load): Call gdbarch_addr_bits_remove on
+	the entry address.
+
+2012-11-27  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
 	* eval.c (evaluate_subexp_standard): Add handling of

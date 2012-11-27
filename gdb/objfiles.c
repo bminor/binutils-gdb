@@ -353,6 +353,23 @@ init_entry_point_info (struct objfile *objfile)
       /* Examination of non-executable.o files.  Short-circuit this stuff.  */
       objfile->ei.entry_point_p = 0;
     }
+
+  if (objfile->ei.entry_point_p)
+    {
+      CORE_ADDR entry_point =  objfile->ei.entry_point;
+
+      /* Make certain that the address points at real code, and not a
+	 function descriptor.  */
+      entry_point
+	= gdbarch_convert_from_func_ptr_addr (objfile->gdbarch,
+					      entry_point,
+					      &current_target);
+
+      /* Remove any ISA markers, so that this matches entries in the
+	 symbol table.  */
+      objfile->ei.entry_point
+	= gdbarch_addr_bits_remove (objfile->gdbarch, entry_point);
+    }
 }
 
 /* If there is a valid and known entry point, function fills *ENTRY_P with it
@@ -361,26 +378,11 @@ init_entry_point_info (struct objfile *objfile)
 int
 entry_point_address_query (CORE_ADDR *entry_p)
 {
-  struct gdbarch *gdbarch;
-  CORE_ADDR entry_point;
-
   if (symfile_objfile == NULL || !symfile_objfile->ei.entry_point_p)
     return 0;
 
-  gdbarch = get_objfile_arch (symfile_objfile);
+  *entry_p = symfile_objfile->ei.entry_point;
 
-  entry_point = symfile_objfile->ei.entry_point;
-
-  /* Make certain that the address points at real code, and not a
-     function descriptor.  */
-  entry_point = gdbarch_convert_from_func_ptr_addr (gdbarch, entry_point,
-						    &current_target);
-
-  /* Remove any ISA markers, so that this matches entries in the
-     symbol table.  */
-  entry_point = gdbarch_addr_bits_remove (gdbarch, entry_point);
-
-  *entry_p = entry_point;
   return 1;
 }
 

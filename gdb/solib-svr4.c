@@ -1388,6 +1388,8 @@ svr4_in_dynsym_resolve_code (CORE_ADDR pc)
 static CORE_ADDR
 exec_entry_point (struct bfd *abfd, struct target_ops *targ)
 {
+  CORE_ADDR addr;
+
   /* KevinB wrote ... for most targets, the address returned by
      bfd_get_start_address() is the entry point for the start
      function.  But, for some targets, bfd_get_start_address() returns
@@ -1396,9 +1398,10 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
      gdbarch_convert_from_func_ptr_addr().  The method
      gdbarch_convert_from_func_ptr_addr() is the merely the identify
      function for targets which don't use function descriptors.  */
-  return gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
+  addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 					     bfd_get_start_address (abfd),
 					     targ);
+  return gdbarch_addr_bits_remove (target_gdbarch (), addr);
 }
 
 /* Helper function for gdb_bfd_lookup_symbol.  */

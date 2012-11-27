@@ -2150,6 +2150,7 @@ generic_load (char *args, int from_tty)
   gettimeofday (&end_time, NULL);
 
   entry = bfd_get_start_address (loadfile_bfd);
+  entry = gdbarch_addr_bits_remove (target_gdbarch (), entry);
   ui_out_text (uiout, "Start address ");
   ui_out_field_fmt (uiout, "address", "%s", paddress (target_gdbarch (), entry));
   ui_out_text (uiout, ", load size ");
