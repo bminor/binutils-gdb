@@ -3778,10 +3778,11 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
   search_symbols (regexp, kind, 0, (char **) NULL, &symbols);
   old_chain = make_cleanup_free_search_symbols (symbols);
 
-  printf_filtered (regexp
-		   ? "All %ss matching regular expression \"%s\":\n"
-		   : "All defined %ss:\n",
-		   classnames[kind], regexp);
+  if (regexp != NULL)
+    printf_filtered (_("All %ss matching regular expression \"%s\":\n"),
+		     classnames[kind], regexp);
+  else
+    printf_filtered (_("All defined %ss:\n"), classnames[kind]);
 
   for (p = symbols; p != NULL; p = p->next)
     {
@@ -3791,7 +3792,7 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
 	{
 	  if (first)
 	    {
-	      printf_filtered ("\nNon-debugging symbols:\n");
+	      printf_filtered (_("\nNon-debugging symbols:\n"));
 	      first = 0;
 	    }
 	  print_msymbol_info (p->msymbol);
