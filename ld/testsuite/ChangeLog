@@ -1,3 +1,8 @@
+2012-11-27  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-elf/flags1.d: Add *-*-nacl* to xfail list.
+	* ld-elf/orphan-region.d: Likewise.
+
 2012-11-23  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/plt1.d: Update for default "at" branch hints.
