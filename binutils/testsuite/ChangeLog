@@ -1,3 +1,14 @@
+2012-11-27  Roland McGrath  <mcgrathr@google.com>
+
+	* lib/binutils-common.exp (is_zlib_supported): New function.
+	* lib/utils-lib.exp (run_dump_test): If as options include
+	--compress-debug-sections and zlib is not available, report
+	the test as unsupported.
+	* binutils-all/compress.exp: Bail out if zlib is not available.
+	* binutils-all/objdump.exp (objdump compressed debug):
+	Mark unsupported if zlib is not available.
+	* binutils-all/readelf.exp (readelf_compressed_wa_test): Likewise.
+
 2012-11-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14567
