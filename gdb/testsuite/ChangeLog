@@ -1,3 +1,11 @@
+2012-11-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/member-ptr.cc (class Diamond): Add func_ptr.
+	(func): New function.
+	(main): Initialize diamond.func_ptr and add diamond_pfunc_ptr.
+	* gdb.cp/member-ptr.exp: Add new tests for ptype and for
+	pointers to members with pointer-to-function type.
+
 2012-11-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 

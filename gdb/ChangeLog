@@ -1,3 +1,10 @@
+2012-11-27  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* eval.c (evaluate_subexp_standard): Add handling of
+	TYPE_CODE_MEMBERPTR when calling functions.  Correct the
+	result of ptype for calling a TYPE_CODE_METHODPTR.
+
 2012-11-27  Yao Qi  <yao@codesourcery.com>
 
 	* symtab.c (symtab_symbol_info): Fix a -Wformat-extra-args

@@ -1364,7 +1364,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	alloca (sizeof (struct value *) * (nargs + 3));
       if (op == STRUCTOP_MEMBER || op == STRUCTOP_MPTR)
 	{
-	  nargs++;
 	  /* First, evaluate the structure into arg2.  */
 	  pc2 = (*pos)++;
 
@@ -1388,22 +1387,37 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	  arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
-	  if (TYPE_CODE (check_typedef (value_type (arg1)))
-	      != TYPE_CODE_METHODPTR)
-	    error (_("Non-pointer-to-member value used in pointer-to-member "
-		     "construct"));
-
-	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	  type = check_typedef (value_type (arg1));
+	  if (TYPE_CODE (type) == TYPE_CODE_METHODPTR)
 	    {
-	      struct type *method_type = check_typedef (value_type (arg1));
+	      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+		arg1 = value_zero (TYPE_TARGET_TYPE (type), not_lval);
+	      else
+		arg1 = cplus_method_ptr_to_value (&arg2, arg1);
 
-	      arg1 = value_zero (method_type, not_lval);
+	      /* Now, say which argument to start evaluating from.  */
+	      nargs++;
+	      tem = 2;
+	      argvec[1] = arg2;
+	    }
+	  else if (TYPE_CODE (type) == TYPE_CODE_MEMBERPTR)
+	    {
+	      struct type *type_ptr
+		= lookup_pointer_type (TYPE_DOMAIN_TYPE (type));
+
+	      /* Now, convert these values to an address.  */
+	      arg2 = value_cast (type_ptr, arg2);
+
+	      mem_offset = value_as_long (arg1);
+
+	      arg1 = value_from_pointer (type_ptr,
+					 value_as_long (arg2) + mem_offset);
+	      arg1 = value_ind (arg1);
+	      tem = 1;
 	    }
 	  else
-	    arg1 = cplus_method_ptr_to_value (&arg2, arg1);
-
-	  /* Now, say which argument to start evaluating from.  */
-	  tem = 2;
+	    error (_("Non-pointer-to-member value used in pointer-to-member "
+		     "construct"));
 	}
       else if (op == STRUCTOP_STRUCT || op == STRUCTOP_PTR)
 	{
@@ -1654,7 +1668,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else if (op == STRUCTOP_MEMBER || op == STRUCTOP_MPTR)
 	{
-	  argvec[1] = arg2;
+	  /* Pointer to member.  argvec[1] is already set up.  */
 	  argvec[0] = arg1;
 	}
       else if (op == OP_VAR_VALUE || (op == OP_SCOPE && function != NULL))
