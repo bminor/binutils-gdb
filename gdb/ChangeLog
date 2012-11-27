@@ -1,3 +1,10 @@
+2012-11-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* sparc-sol2-nat.c (supply_gregset): Fix first parameter in
+	call to sparc_supply_fpregset.
+	(fill_fpregset): Fix first parameter in call to
+	sparc_collect_fpregset.
+
 2012-11-27  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Kazu Hirata  <kazu@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
