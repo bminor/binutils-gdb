@@ -7690,7 +7690,7 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
      we get a packet.  */
   for (;;)
     {
-      /* If we get a timeout or bad checksm, retry up to MAX_TRIES
+      /* If we get a timeout or bad checksum, retry up to MAX_TRIES
 	 times.  */
       for (tries = 1; tries <= MAX_TRIES; tries++)
 	{

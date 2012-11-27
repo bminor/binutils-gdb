@@ -1,3 +1,7 @@
+2013-11-30  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (getpkt_or_notif_sane_1): Fix typo "checksm".
+
 2013-11-29  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdbarch.sh: Remove include of "gdb_string.h", replace by
