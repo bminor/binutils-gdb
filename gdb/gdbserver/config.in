@@ -76,6 +76,9 @@
 /* Define to 1 if you have the <linux/elf.h> header file. */
 #undef HAVE_LINUX_ELF_H
 
+/* Define to 1 if you have the <linux/perf_event.h> header file. */
+#undef HAVE_LINUX_PERF_EVENT_H
+
 /* Define if the target supports register sets. */
 #undef HAVE_LINUX_REGSETS
 

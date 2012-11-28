@@ -1,3 +1,9 @@
+2012-11-28  Markus Metzger <markus.t.metzger@intel.com>
+
+	* configure.ac: Check for linux/perf_event.h.
+	* config.in: Regenerated.
+	* configure: Regenerated.
+
 2012-11-28  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (_initialize_breakpoint): Call add_alias_cmd to

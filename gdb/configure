@@ -8893,7 +8893,7 @@ for ac_header in nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
 		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
 		  sys/types.h sys/wait.h wait.h termios.h termio.h \
 		  sgtty.h unistd.h elf_hp.h locale.h \
-		  dlfcn.h sys/socket.h sys/un.h
+		  dlfcn.h sys/socket.h sys/un.h linux/perf_event.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"

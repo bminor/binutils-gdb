@@ -222,6 +222,9 @@
 /* Define to 1 if you have the <link.h> header file. */
 #undef HAVE_LINK_H
 
+/* Define to 1 if you have the <linux/perf_event.h> header file. */
+#undef HAVE_LINUX_PERF_EVENT_H
+
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
 
