@@ -348,6 +348,27 @@ darwin_special_symbol_handling (void)
 {
 }
 
+/* A wrapper for bfd_mach_o_fat_extract that handles reference
+   counting properly.  This will either return NULL, or return a new
+   reference to a BFD.  */
+
+static bfd *
+gdb_bfd_mach_o_fat_extract (bfd *abfd, bfd_format format,
+			    const bfd_arch_info_type *arch)
+{
+  bfd *result = bfd_mach_o_fat_extract (abfd, format, arch);
+
+  if (result == NULL)
+    return NULL;
+
+  if (result == abfd)
+    gdb_bfd_ref (result);
+  else
+    gdb_bfd_mark_parent (result, abfd);
+
+  return result;
+}
+
 /* Extract dyld_all_image_addr when the process was just created, assuming the
    current PC is at the entry of the dynamic linker.  */
 
@@ -377,12 +398,11 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
       bfd *sub;
 
       make_cleanup_bfd_unref (dyld_bfd);
-      sub = bfd_mach_o_fat_extract (dyld_bfd, bfd_object,
-				    gdbarch_bfd_arch_info (target_gdbarch ()));
+      sub = gdb_bfd_mach_o_fat_extract (dyld_bfd, bfd_object,
+					gdbarch_bfd_arch_info (target_gdbarch ()));
       if (sub)
 	{
 	  dyld_bfd = sub;
-	  gdb_bfd_ref (sub);
 	  make_cleanup_bfd_unref (sub);
 	}
       else
@@ -514,14 +534,16 @@ darwin_bfd_open (char *pathname)
   /* Open bfd for shared library.  */
   abfd = solib_bfd_fopen (found_pathname, found_file);
 
-  res = bfd_mach_o_fat_extract (abfd, bfd_object,
-				gdbarch_bfd_arch_info (target_gdbarch ()));
+  res = gdb_bfd_mach_o_fat_extract (abfd, bfd_object,
+				    gdbarch_bfd_arch_info (target_gdbarch ()));
   if (!res)
     {
       make_cleanup_bfd_unref (abfd);
       error (_("`%s': not a shared-library: %s"),
 	     bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
     }
+
+  gdb_bfd_unref (abfd);
   return res;
 }
 

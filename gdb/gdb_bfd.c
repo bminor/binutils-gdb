@@ -499,24 +499,34 @@ gdb_bfd_openr_iovec (const char *filename, const char *target,
 
 /* See gdb_bfd.h.  */
 
+void
+gdb_bfd_mark_parent (bfd *child, bfd *parent)
+{
+  struct gdb_bfd_data *gdata;
+
+  gdb_bfd_ref (child);
+  /* No need to stash the filename here, because we also keep a
+     reference on the parent archive.  */
+
+  gdata = bfd_usrdata (child);
+  if (gdata->archive_bfd == NULL)
+    {
+      gdata->archive_bfd = parent;
+      gdb_bfd_ref (parent);
+    }
+  else
+    gdb_assert (gdata->archive_bfd == parent);
+}
+
+/* See gdb_bfd.h.  */
+
 bfd *
 gdb_bfd_openr_next_archived_file (bfd *archive, bfd *previous)
 {
   bfd *result = bfd_openr_next_archived_file (archive, previous);
 
   if (result)
-    {
-      struct gdb_bfd_data *gdata;
-
-      gdb_bfd_ref (result);
-      /* No need to stash the filename here, because we also keep a
-	 reference on the parent archive.  */
-
-      gdata = bfd_usrdata (result);
-      gdb_assert (gdata->archive_bfd == NULL || gdata->archive_bfd == archive);
-      gdata->archive_bfd = archive;
-      gdb_bfd_ref (archive);
-    }
+    gdb_bfd_mark_parent (result, archive);
 
   return result;
 }

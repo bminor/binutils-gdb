@@ -1,3 +1,13 @@
+2012-11-28  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/14290:
+	* solib-darwin.c (gdb_bfd_mach_o_fat_extract): New function.
+	(darwin_solib_get_all_image_info_addr_at_init, darwin_bfd_open):
+	Use it.
+	* gdb_bfd.h (gdb_bfd_mark_parent): Declare.
+	* gdb_bfd.c (gdb_bfd_mark_parent): New function.
+	(gdb_bfd_openr_next_archived_file): Use it.
+
 2012-11-28  Markus Metzger <markus.t.metzger@intel.com>
 
 	* configure.ac: Check for linux/perf_event.h.
