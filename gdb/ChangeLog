@@ -1,3 +1,12 @@
+2012-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* breakpoint.c (_initialize_breakpoint): Call add_alias_cmd to
+	abbreviate 'delete tracepoints' to 'delete tr'.
+	* corefile.c (_initialize_core): Call add_alias_cmd to
+	abbreviate 'set gnutarget' to 'set g'.
+	* value.c (_initialize_values): Call add_alias_cmd to abbreviate
+	'show convenience' to 'show conv'.
+
 2012-11-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* sparc-sol2-nat.c (supply_gregset): Fix first parameter in

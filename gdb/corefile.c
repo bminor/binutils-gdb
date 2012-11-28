@@ -456,6 +456,7 @@ Use `set gnutarget auto' to specify automatic detection."),
 				   set_gnutarget_command,
 				   show_gnutarget_string,
 				   &setlist, &showlist);
+  add_alias_cmd ("g", "gnutarget", class_files, 1, &setlist);
 
   if (getenv ("GNUTARGET"))
     set_gnutarget (getenv ("GNUTARGET"));
