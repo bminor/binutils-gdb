@@ -1,3 +1,8 @@
+2012-11-28  Julian Brown  <julian@codesourcery.com>
+
+	* config/tc-arm.c (md_apply_fix): Fix conversion of BL to BLX for
+	local targets in Thumb mode.
+
 2012-11-23  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (sticky): New var.

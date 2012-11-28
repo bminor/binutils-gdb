@@ -1,3 +1,8 @@
+2012-11-28  Julian Brown  <julian@codesourcery.com>
+
+	* gas/arm/bl-local-2.s: New test.
+	* gas/arm/bl-local-2.d: New.
+
 2012-11-27  Roland McGrath  <mcgrathr@google.com>
 
 	* lib/gas-defs.exp (run_dump_test): If as options include

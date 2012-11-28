@@ -22040,18 +22040,18 @@ md_apply_fix (fixS *	fixP,
 
     thumb_bl_common:
 
-#ifdef OBJ_ELF
-       if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4
-	   && fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
-	 fixP->fx_r_type = BFD_RELOC_THUMB_PCREL_BRANCH23;
-#endif
-
       if (fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
 	/* For a BLX instruction, make sure that the relocation is rounded up
 	   to a word boundary.  This follows the semantics of the instruction
 	   which specifies that bit 1 of the target address will come from bit
 	   1 of the base address.  */
-	value = (value + 1) & ~ 1;
+	value = (value + 3) & ~ 3;
+
+#ifdef OBJ_ELF
+       if (EF_ARM_EABI_VERSION (meabi_flags) >= EF_ARM_EABI_VER4
+	   && fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
+	 fixP->fx_r_type = BFD_RELOC_THUMB_PCREL_BRANCH23;
+#endif
 
       if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
 	{
