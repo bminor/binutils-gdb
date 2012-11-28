@@ -909,7 +909,7 @@ get_version_header (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
   if (length < 8)
     toosmall (key);
 
-  *len = windres_get_16 (wrbfd, data, 2);
+  *len = (windres_get_16 (wrbfd, data, 2) + 3) & ~3;
   *vallen = windres_get_16 (wrbfd, data + 2, 2);
   *type = windres_get_16 (wrbfd, data + 4, 2);
 
@@ -1041,10 +1041,7 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 	  data += off;
 	  length -= off;
 
-	  /* It's convenient to round verlen to a 4 byte alignment,
-             since we round the subvariables in the loop.  */
-
-	  verlen = (verlen + 3) &~ 3;
+	  verlen -= off;
 
 	  vi->u.string.stringtables = NULL;
 	  ppvst = &vi->u.string.stringtables;
@@ -1070,7 +1067,7 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 	      length -= off;
 	      verlen -= off;
 
-	  stverlen = (stverlen + 3) &~ 3;
+	  stverlen -= off;
  
 	  vst->strings = NULL;
 	  ppvs = &vst->strings;
@@ -1088,14 +1085,12 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 	      get_version_header (wrbfd, data, length, (const char *) NULL,
 				  &vs->key, &sverlen, &vallen, &type, &off);
 
-	      sverlen = (sverlen + 3) &~ 3;
-
 	      data += off;
 	      length -= off;
 
 	      vs->value = get_unicode (wrbfd, data, length, &vslen);
 	      valoff = vslen * 2 + 2;
-	      valoff = (valoff + 3) &~ 3;
+	      valoff = (valoff + 3) & ~3;
 
 	      if (off + valoff != sverlen)
 		fatal (_("unexpected version string length %ld != %ld + %ld"),
@@ -1108,6 +1103,7 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 		fatal (_("unexpected version string length %ld < %ld"),
 		       (long) verlen, (long) sverlen);
 	      stverlen -= sverlen;
+	      verlen -= sverlen;
 
 	      vs->next = NULL;
 	      *ppvs = vs;

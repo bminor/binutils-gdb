@@ -1,3 +1,9 @@
+2012-11-27  Kai Tietz  <ktietz@redhat.com>
+
+	* resbin.c (bin_to_res_version):  Correct offset
+	and length calculation of resource.
+	(get_version_header): Apply alignement of 4 to len.
+
 2012-11-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (process_dynamic_section): Correct DF_1_CONFALT.
