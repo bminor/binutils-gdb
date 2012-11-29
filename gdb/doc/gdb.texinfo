@@ -8884,10 +8884,10 @@ represent C@t{++} names.  The choices for @var{style} are currently:
 @table @code
 @item auto
 Allow @value{GDBN} to choose a decoding style by inspecting your program.
+This is the default.
 
 @item gnu
 Decode based on the @sc{gnu} C@t{++} compiler (@code{g++}) encoding algorithm.
-This is the default.
 
 @item hp
 Decode based on the HP ANSI C@t{++} (@code{aCC}) encoding algorithm.

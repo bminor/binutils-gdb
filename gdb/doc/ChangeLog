@@ -1,3 +1,9 @@
+2012-11-29  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/1477.
+	* gdb.texinfo (Print Settings): Correct the default 'demangle-style'
+	to 'auto' instead of 'gnu'.
+
 2012-11-26  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (MiniDebugInfo): New node.
