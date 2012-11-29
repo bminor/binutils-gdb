@@ -82,7 +82,7 @@ typedef struct name_list {
 name_list;
 
 typedef enum {sort_none, sort_ascending, sort_descending} sort_order;
-  
+
 /* A wildcard specification.  */
 
 typedef enum {
@@ -296,6 +296,9 @@ typedef struct {
   /* If set, numbers and absolute symbols are simply treated as
      numbers everywhere.  */
   bfd_boolean sane_expr;
+
+  /* If set, code and non-code sections should never be in one segment.  */
+  bfd_boolean separate_code;
 
   /* The rpath separation character.  Usually ':'.  */
   char rpath_separator;
