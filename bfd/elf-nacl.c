@@ -43,9 +43,9 @@ segment_executable (struct elf_segment_map *seg)
 }
 
 /* Determine if this segment is eligible to receive the file and program
-   headers.  It must be non-executable and have contents.  Its first
-   section must start far enough past the page boundary to allow space
-   for the headers.  */
+   headers.  It must be read-only, non-executable, and have contents.
+   Its first section must start far enough past the page boundary to
+   allow space for the headers.  */
 static bfd_boolean
 segment_eligible_for_headers (struct elf_segment_map *seg,
                               bfd_vma maxpagesize, bfd_vma sizeof_headers)
@@ -56,7 +56,7 @@ segment_eligible_for_headers (struct elf_segment_map *seg,
     return FALSE;
   for (i = 0; i < seg->count; ++i)
     {
-      if (seg->sections[i]->flags & SEC_CODE)
+      if ((seg->sections[i]->flags & (SEC_CODE|SEC_READONLY)) != SEC_READONLY)
         return FALSE;
       if (seg->sections[i]->flags & SEC_HAS_CONTENTS)
         any_contents = TRUE;
