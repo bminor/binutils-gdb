@@ -33,7 +33,8 @@ proc run {test program args} {
     }
     set result [eval remote_exec host [list $program] $args]
     verbose "result is $result"
-    lassign $result status output
+    set status [lindex $result 0]
+    set output [lindex $result 1]
     if {$status == 0} {
  	pass $test
  	return 0
@@ -58,7 +59,11 @@ proc pipeline {test args} {
     set input_file {}
     foreach arglist $args {
 	verbose "raw args are $arglist"
-	lassign $arglist program arguments input output
+
+	set program [lindex $arglist 0]
+	set arguments [lindex $arglist 1]
+	set input [lindex $arglist 2]
+	set output [lindex $arglist 3]
 
 	if {$input == ""} {
 	    set input $input_file

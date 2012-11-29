@@ -1,3 +1,7 @@
+2012-11-29  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/gnu-debugdata.exp (run, pipeline): Don't use lassign.
+
 2012-11-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.opencl/convs_casts.exp: Always expect standard vector type names.
