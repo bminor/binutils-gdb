@@ -1358,16 +1358,16 @@ md_assemble (char * str)
       output = frag_more (isize);
       break;
 
-    case INST_TYPE_RD_R1_SPECIAL:
+    case INST_TYPE_R1_R2_SPECIAL:
       if (strcmp (op_end, ""))
-        op_end = parse_reg (op_end + 1, &reg1);  /* Get rd.  */
+        op_end = parse_reg (op_end + 1, &reg1);  /* Get r1.  */
       else
 	{
           as_fatal (_("Error in statement syntax"));
           reg1 = 0;
         }
       if (strcmp (op_end, ""))
-        op_end = parse_reg (op_end + 1, &reg2);  /* Get r1.  */
+        op_end = parse_reg (op_end + 1, &reg2);  /* Get r2.  */
       else
 	{
           as_fatal (_("Error in statement syntax"));
@@ -1381,7 +1381,6 @@ md_assemble (char * str)
         as_fatal (_("Cannot use special register with this instruction"));
 
       /* insn wic ra, rb => wic ra, ra, rb.  */
-      inst |= (reg1 << RD_LOW) & RD_MASK;
       inst |= (reg1 << RA_LOW) & RA_MASK;
       inst |= (reg2 << RB_LOW) & RB_MASK;
 

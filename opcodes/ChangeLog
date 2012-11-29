@@ -1,3 +1,9 @@
+2012-11-29  David Holsgrove  <david.holsgrove@xilinx.com>
+
+	* microblaze-opc.h: Rename INST_TYPE_RD_R1_SPECIAL to
+	INST_TYPE_R1_R2_SPECIAL
+	* microblaze-dis.c (print_insn_microblaze): Same.
+
 2012-11-23  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (ppc_parse_cpu): Add "sticky" param.  Track bits
