@@ -38,6 +38,7 @@ gld${EMULATION_NAME}_before_parse ()
 #endif /* not TARGET_ */
   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
+  config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
 }
 
 static void
@@ -74,4 +75,3 @@ LDEMUL_AFTER_OPEN=score_elf_after_open
 
 # Replace the elf before_parse function with our own.
 LDEMUL_BEFORE_PARSE=gld"${EMULATION_NAME}"_before_parse
-

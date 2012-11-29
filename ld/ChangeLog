@@ -1,3 +1,11 @@
+2012-11-26  Roland McGrath  <mcgrathr@google.com>
+
+	* emultempl/aarch64elf.em (gld${EMULATION_NAME}_before_parse):
+	Copy last elf32.em here too.
+	* emultempl/armelf.em (gld${EMULATION_NAME}_before_parse): Likewise.
+	* emultempl/mmixelf.em (gld${EMULATION_NAME}_before_parse): Likewise.
+	* emultempl/scoreelf.em (gld${EMULATION_NAME}_before_parse): Likewise.
+
 2012-11-21  Roland McGrath  <mcgrathr@google.com>
 
 	* ld.h (ld_config_type): New flag member separate_code.
