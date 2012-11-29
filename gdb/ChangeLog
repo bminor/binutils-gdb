@@ -1,3 +1,8 @@
+2012-11-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* opencl-lang.c (opencl_print_type): New function.
+	(opencl_language_arch_info): Install it.
+
 2012-11-29  Tom Tromey  <tromey@redhat.com>
 
 	* contrib/ari/gdb_ari.sh: Remove rules for xasprintf and

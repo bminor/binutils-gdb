@@ -1,3 +1,10 @@
+2012-11-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.opencl/convs_casts.exp: Always expect standard vector type names.
+	* gdb.opencl/datatypes.exp: Likewise.
+	* gdb.opencl/operators.exp: Likewise.
+	* gdb.opencl/vec_comps.exp: Likewise.
+
 2012-11-29  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.ada/iwide: New testcase.

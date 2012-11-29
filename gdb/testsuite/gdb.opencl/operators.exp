@@ -61,8 +61,8 @@ proc check_basic { name type isfloat } {
 
   gdb_test "ptype ${name}a" "type = ${type}"
   gdb_test "ptype ${name}b" "type = ${type}"
-  gdb_test "ptype ${name}4a" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4b" "type = ${type} \\\[4\\\]"
+  gdb_test "ptype ${name}4a" "type = ${type}4"
+  gdb_test "ptype ${name}4b" "type = ${type}4"
 
   if { ! ${isfloat} } {
     gdb_test "print/d u${name}a" " = 2"
@@ -71,8 +71,8 @@ proc check_basic { name type isfloat } {
     gdb_test "print/d u${name}4b" " = \\{1, 2, 8, 4\\}"
     gdb_test "ptype u${name}a" "type = (unsigned ${type}|u${type})"
     gdb_test "ptype u${name}b" "type = (unsigned ${type}|u${type})"
-    gdb_test "ptype u${name}4a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+    gdb_test "ptype u${name}4a" "type = u${type}4"
+    gdb_test "ptype u${name}4b" "type = u${type}4"
   }
 }
 
@@ -110,15 +110,15 @@ proc check_arithmetic_ops { name type isfloat size } {
   gdb_test "print/d -${name}4a" " = \\{-2, -4, -8, -16\\}"
 
   # scalar with vector
-  gdb_test "ptype ${name}a + ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a - ${name}b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}a * ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a / ${name}b" "type = ${type} \\\[4\\\]"
+  gdb_test "ptype ${name}a + ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a - ${name}b" "type = ${type}4"
+  gdb_test "ptype ${name}a * ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a / ${name}b" "type = ${type}4"
   # vector with vector
-  gdb_test "ptype ${name}4a + ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a - ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a * ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a / ${name}4b" "type = ${type} \\\[4\\\]"
+  gdb_test "ptype ${name}4a + ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a - ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a * ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a / ${name}4b" "type = ${type}4"
 
   # scalar
   gdb_test "ptype ${name}a++" "type = ${type}"
@@ -126,12 +126,12 @@ proc check_arithmetic_ops { name type isfloat size } {
   gdb_test "ptype ${name}a--" "type = ${type}"
   gdb_test "ptype --${name}a" "type = ${type}"
   # vector
-  gdb_test "ptype ${name}4a++" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ++${name}4a" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a--" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype --${name}4a" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype +${name}4a" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype -${name}4a" "type = ${type} \\\[4\\\]"
+  gdb_test "ptype ${name}4a++" "type = ${type}4"
+  gdb_test "ptype ++${name}4a" "type = ${type}4"
+  gdb_test "ptype ${name}4a--" "type = ${type}4"
+  gdb_test "ptype --${name}4a" "type = ${type}4"
+  gdb_test "ptype +${name}4a" "type = ${type}4"
+  gdb_test "ptype -${name}4a" "type = ${type}4"
 
   if { ${isfloat} } {
     # scalar with scalar
@@ -237,25 +237,25 @@ proc check_arithmetic_ops { name type isfloat size } {
     gdb_test "ptype u${name}a--" "type = (unsigned ${type}|u${type})"
     gdb_test "ptype --u${name}a" "type = (unsigned ${type}|u${type})"
     # scalar with vector
-    gdb_test "ptype ${name}a % ${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}a + u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a - u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}a * u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a / u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}a % u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+    gdb_test "ptype ${name}a % ${name}4b" "type = ${type}4"
+    gdb_test "ptype u${name}a + u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a - u${name}b" "type = u${type}4"
+    gdb_test "ptype u${name}a * u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a / u${name}b" "type = u${type}4"
+    gdb_test "ptype u${name}a % u${name}4b" "type = u${type}4"
     # vector with vector
-    gdb_test "ptype ${name}4a % ${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}4a + u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a - u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a * u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a / u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a % u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a++" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype ++u${name}4a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a--" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype --u${name}4a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype +u${name}4a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype -u${name}4a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+    gdb_test "ptype ${name}4a % ${name}4b" "type = ${type}4"
+    gdb_test "ptype u${name}4a + u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a - u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a * u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a / u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a % u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a++" "type = u${type}4"
+    gdb_test "ptype ++u${name}4a" "type = u${type}4"
+    gdb_test "ptype u${name}4a--" "type = u${type}4"
+    gdb_test "ptype --u${name}4a" "type = u${type}4"
+    gdb_test "ptype +u${name}4a" "type = u${type}4"
+    gdb_test "ptype -u${name}4a" "type = u${type}4"
   }
 }
 
@@ -287,39 +287,39 @@ proc check_relational_ops { name type isfloat size } {
     if { ${size} == 2 } {
       # result type should be short for half precision floating point vectors
       # scalar with vector
-      gdb_test "ptype ${name}4a > ${name}b" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}a < ${name}4b" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}4a >= ${name}b" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}a <= ${name}4b" "type = short \\\[4\\\]"
+      gdb_test "ptype ${name}4a > ${name}b" "type = short4"
+      gdb_test "ptype ${name}a < ${name}4b" "type = short4"
+      gdb_test "ptype ${name}4a >= ${name}b" "type = short4"
+      gdb_test "ptype ${name}a <= ${name}4b" "type = short4"
       # vector with vector
-      gdb_test "ptype ${name}4a > ${name}4b" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}4a < ${name}4b" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}4a >= ${name}4b" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}4a <= ${name}4b" "type = short \\\[4\\\]"
+      gdb_test "ptype ${name}4a > ${name}4b" "type = short4"
+      gdb_test "ptype ${name}4a < ${name}4b" "type = short4"
+      gdb_test "ptype ${name}4a >= ${name}4b" "type = short4"
+      gdb_test "ptype ${name}4a <= ${name}4b" "type = short4"
     } elseif { ${size} == 4 } {
       # result type should be int for single precision floating point vectors
       # scalar with vector
-      gdb_test "ptype ${name}4a > ${name}b" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}a < ${name}4b" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}4a >= ${name}b" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}a <= ${name}4b" "type = int \\\[4\\\]"
+      gdb_test "ptype ${name}4a > ${name}b" "type = int4"
+      gdb_test "ptype ${name}a < ${name}4b" "type = int4"
+      gdb_test "ptype ${name}4a >= ${name}b" "type = int4"
+      gdb_test "ptype ${name}a <= ${name}4b" "type = int4"
       # vector with vector
-      gdb_test "ptype ${name}4a > ${name}4b" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}4a < ${name}4b" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}4a >= ${name}4b" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}4a <= ${name}4b" "type = int \\\[4\\\]"
+      gdb_test "ptype ${name}4a > ${name}4b" "type = int4"
+      gdb_test "ptype ${name}4a < ${name}4b" "type = int4"
+      gdb_test "ptype ${name}4a >= ${name}4b" "type = int4"
+      gdb_test "ptype ${name}4a <= ${name}4b" "type = int4"
     } else { # ${size} == 8
       # result type should be long for double precision floating point vectors
       # scalar with vector
-      gdb_test "ptype ${name}4a > ${name}b" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}a < ${name}4b" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}4a >= ${name}b" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}a <= ${name}4b" "type = long \\\[4\\\]"
+      gdb_test "ptype ${name}4a > ${name}b" "type = long4"
+      gdb_test "ptype ${name}a < ${name}4b" "type = long4"
+      gdb_test "ptype ${name}4a >= ${name}b" "type = long4"
+      gdb_test "ptype ${name}a <= ${name}4b" "type = long4"
       # vector with vector
-      gdb_test "ptype ${name}4a > ${name}4b" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}4a < ${name}4b" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}4a >= ${name}4b" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}4a <= ${name}4b" "type = long \\\[4\\\]"
+      gdb_test "ptype ${name}4a > ${name}4b" "type = long4"
+      gdb_test "ptype ${name}4a < ${name}4b" "type = long4"
+      gdb_test "ptype ${name}4a >= ${name}4b" "type = long4"
+      gdb_test "ptype ${name}4a <= ${name}4b" "type = long4"
     }
   } else {
     # scalar with scalar
@@ -345,15 +345,15 @@ proc check_relational_ops { name type isfloat size } {
     gdb_test "ptype u${name}a <= u${name}b" "type = int"
     gdb_test "ptype u${name}a >= u${name}b" "type = int"
     # scalar with vector
-    gdb_test "ptype u${name}4a > u${name}b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}a < u${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}4a >= u${name}b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}a <= u${name}4b" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype u${name}4a > u${name}b" "type = ${type}4"
+    gdb_test "ptype u${name}a < u${name}4b" "type = ${type}4"
+    gdb_test "ptype u${name}4a >= u${name}b" "type = ${type}4"
+    gdb_test "ptype u${name}a <= u${name}4b" "type = ${type}4"
     # vector with vector
-    gdb_test "ptype u${name}4a > u${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}4a < u${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}4a >= u${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}4a <= u${name}4b" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype u${name}4a > u${name}4b" "type = ${type}4"
+    gdb_test "ptype u${name}4a < u${name}4b" "type = ${type}4"
+    gdb_test "ptype u${name}4a >= u${name}4b" "type = ${type}4"
+    gdb_test "ptype u${name}4a <= u${name}4b" "type = ${type}4"
   }
 }
 
@@ -377,27 +377,27 @@ proc check_equality_ops { name type isfloat size } {
     if { ${size} == 2 } {
       # result type should be short for half precision floating point vectors
       # scalar with vector
-      gdb_test "ptype ${name}4a == ${name}b" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}a != ${name}4b" "type = short \\\[4\\\]"
+      gdb_test "ptype ${name}4a == ${name}b" "type = short4"
+      gdb_test "ptype ${name}a != ${name}4b" "type = short4"
       # vector with vector
-      gdb_test "ptype ${name}4a == ${name}4b" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}4a != ${name}4b" "type = short \\\[4\\\]"
+      gdb_test "ptype ${name}4a == ${name}4b" "type = short4"
+      gdb_test "ptype ${name}4a != ${name}4b" "type = short4"
     } elseif { ${size} == 4 } {
       # result type should be int for single precision floating point vectors
       # scalar with vector
-      gdb_test "ptype ${name}4a == ${name}b" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}a != ${name}4b" "type = int \\\[4\\\]"
+      gdb_test "ptype ${name}4a == ${name}b" "type = int4"
+      gdb_test "ptype ${name}a != ${name}4b" "type = int4"
       # vector with vector
-      gdb_test "ptype ${name}4a == ${name}4b" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}4a != ${name}4b" "type = int \\\[4\\\]"
+      gdb_test "ptype ${name}4a == ${name}4b" "type = int4"
+      gdb_test "ptype ${name}4a != ${name}4b" "type = int4"
     } else { # ${size} == 8
       # result type should be long for double precision floating point vectors
       # scalar with vector
-      gdb_test "ptype ${name}4a == ${name}b" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}a != ${name}4b" "type = long \\\[4\\\]"
+      gdb_test "ptype ${name}4a == ${name}b" "type = long4"
+      gdb_test "ptype ${name}a != ${name}4b" "type = long4"
       # vector with vector
-      gdb_test "ptype ${name}4a == ${name}4b" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}4a != ${name}4b" "type = long \\\[4\\\]"
+      gdb_test "ptype ${name}4a == ${name}4b" "type = long4"
+      gdb_test "ptype ${name}4a != ${name}4b" "type = long4"
     }
   } else {
     # scalar with scalar
@@ -415,11 +415,11 @@ proc check_equality_ops { name type isfloat size } {
     gdb_test "ptype u${name}a == u${name}b" "type = int"
     gdb_test "ptype u${name}a != u${name}b" "type = int"
     # scalar with vector
-    gdb_test "ptype u${name}4a == u${name}b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}a != u${name}4b" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype u${name}4a == u${name}b" "type = ${type}4"
+    gdb_test "ptype u${name}a != u${name}4b" "type = ${type}4"
     # vector with vector
-    gdb_test "ptype u${name}4a == u${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}4a != u${name}4b" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype u${name}4a == u${name}4b" "type = ${type}4"
+    gdb_test "ptype u${name}4a != u${name}4b" "type = ${type}4"
   }
 }
 
@@ -464,15 +464,15 @@ proc check_shift_ops { name type size } {
     gdb_test "ptype u${name}a >> u${name}b" "type = (unsigned long|ulong)"
   }
   # scalar with vector
-  gdb_test "ptype ${name}4a << ${name}b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a >> ${name}b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype u${name}4a << u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-  gdb_test "ptype u${name}4a >> u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+  gdb_test "ptype ${name}4a << ${name}b" "type = ${type}4"
+  gdb_test "ptype ${name}4a >> ${name}b" "type = ${type}4"
+  gdb_test "ptype u${name}4a << u${name}b" "type = u${type}4"
+  gdb_test "ptype u${name}4a >> u${name}b" "type = u${type}4"
   # vector with vector
-  gdb_test "ptype ${name}4a << ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a >> ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype u${name}4a << u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-  gdb_test "ptype u${name}4a >> u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+  gdb_test "ptype ${name}4a << ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a >> ${name}4b" "type = ${type}4"
+  gdb_test "ptype u${name}4a << u${name}4b" "type = u${type}4"
+  gdb_test "ptype u${name}4a >> u${name}4b" "type = u${type}4"
 }
 
 # Bitwise operators
@@ -523,19 +523,19 @@ proc check_bitwise_ops { name type size } {
     gdb_test "ptype u${name}a ^ u${name}b" "type = (unsigned long|ulong)"
   }
   # scalar with vector
-  gdb_test "ptype ${name}4a & ${name}b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}a | ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a ^ ${name}b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype u${name}4a & u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-  gdb_test "ptype u${name}a | u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-  gdb_test "ptype u${name}4a ^ u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+  gdb_test "ptype ${name}4a & ${name}b" "type = ${type}4"
+  gdb_test "ptype ${name}a | ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a ^ ${name}b" "type = ${type}4"
+  gdb_test "ptype u${name}4a & u${name}b" "type = u${type}4"
+  gdb_test "ptype u${name}a | u${name}4b" "type = u${type}4"
+  gdb_test "ptype u${name}4a ^ u${name}b" "type = u${type}4"
   # vector with vector
-  gdb_test "ptype ${name}4a & ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a | ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a ^ ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype u${name}4a & u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-  gdb_test "ptype u${name}4a | u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-  gdb_test "ptype u${name}4a ^ u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+  gdb_test "ptype ${name}4a & ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a | ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a ^ ${name}4b" "type = ${type}4"
+  gdb_test "ptype u${name}4a & u${name}4b" "type = u${type}4"
+  gdb_test "ptype u${name}4a | u${name}4b" "type = u${type}4"
+  gdb_test "ptype u${name}4a ^ u${name}4b" "type = u${type}4"
 
   # scalar
   if { ${size} < 8 } {
@@ -571,8 +571,8 @@ proc check_bitwise_ops { name type size } {
     gdb_test "ptype ~u${name}a" "type = (unsigned long|ulong)"
   }
   # vector
-  gdb_test "ptype ~${name}4a" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ~u${name}4a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+  gdb_test "ptype ~${name}4a" "type = ${type}4"
+  gdb_test "ptype ~u${name}4a" "type = u${type}4"
 }
 
 # Logical operators
@@ -610,30 +610,30 @@ proc check_logical_ops { name type isfloat size } {
     if { ${size} == 2 } {
       # result type should be short for half precision floating point vectors
       # scalar with vector
-      gdb_test "ptype ${name}4a && ${name}b" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}a || ${name}4b" "type = short \\\[4\\\]"
+      gdb_test "ptype ${name}4a && ${name}b" "type = short4"
+      gdb_test "ptype ${name}a || ${name}4b" "type = short4"
       # vector with vector
-      gdb_test "ptype !${name}4a" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}4a && ${name}4b" "type = short \\\[4\\\]"
-      gdb_test "ptype ${name}4a || ${name}4b" "type = short \\\[4\\\]"
+      gdb_test "ptype !${name}4a" "type = short4"
+      gdb_test "ptype ${name}4a && ${name}4b" "type = short4"
+      gdb_test "ptype ${name}4a || ${name}4b" "type = short4"
     } elseif { ${size} == 4 } {
       # result type should be int for single precision floating point vectors
       # scalar with vector
-      gdb_test "ptype ${name}4a && ${name}b" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}a || ${name}4b" "type = int \\\[4\\\]"
+      gdb_test "ptype ${name}4a && ${name}b" "type = int4"
+      gdb_test "ptype ${name}a || ${name}4b" "type = int4"
       # vector with vector
-      gdb_test "ptype !${name}4a" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}4a && ${name}4b" "type = int \\\[4\\\]"
-      gdb_test "ptype ${name}4a || ${name}4b" "type = int \\\[4\\\]"
+      gdb_test "ptype !${name}4a" "type = int4"
+      gdb_test "ptype ${name}4a && ${name}4b" "type = int4"
+      gdb_test "ptype ${name}4a || ${name}4b" "type = int4"
     } else { # ${size} == 8
       # result type should be long for double precision floating point vectors
       # scalar with vector
-      gdb_test "ptype ${name}4a && ${name}b" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}a || ${name}4b" "type = long \\\[4\\\]"
+      gdb_test "ptype ${name}4a && ${name}b" "type = long4"
+      gdb_test "ptype ${name}a || ${name}4b" "type = long4"
       # vector with vector
-      gdb_test "ptype !${name}4a" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}4a && ${name}4b" "type = long \\\[4\\\]"
-      gdb_test "ptype ${name}4a || ${name}4b" "type = long \\\[4\\\]"
+      gdb_test "ptype !${name}4a" "type = long4"
+      gdb_test "ptype ${name}4a && ${name}4b" "type = long4"
+      gdb_test "ptype ${name}4a || ${name}4b" "type = long4"
     }
   } else {
     # unsigned scalar
@@ -656,21 +656,21 @@ proc check_logical_ops { name type isfloat size } {
     # scalar
     gdb_test "ptype !u${name}a" "type = int"
     # vector
-    gdb_test "ptype !${name}4a" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype !u${name}4a" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype !${name}4a" "type = ${type}4"
+    gdb_test "ptype !u${name}4a" "type = ${type}4"
 
     # scalar with vector
-    gdb_test "ptype ${name}4a && ${name}b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}a || ${name}4b" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype ${name}4a && ${name}b" "type = ${type}4"
+    gdb_test "ptype ${name}a || ${name}4b" "type = ${type}4"
     # result type for unsigned vector operand is signed
-    gdb_test "ptype u${name}4a && u${name}b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}a || u${name}4b" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype u${name}4a && u${name}b" "type = ${type}4"
+    gdb_test "ptype u${name}a || u${name}4b" "type = ${type}4"
     # vector with vector
-    gdb_test "ptype ${name}4a && ${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a || ${name}4b" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype ${name}4a && ${name}4b" "type = ${type}4"
+    gdb_test "ptype ${name}4a || ${name}4b" "type = ${type}4"
     # result type for unsigned vector operand is signed
-    gdb_test "ptype u${name}4a && u${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype u${name}4a || u${name}4b" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype u${name}4a && u${name}4b" "type = ${type}4"
+    gdb_test "ptype u${name}4a || u${name}4b" "type = ${type}4"
   }
 }
 
@@ -691,10 +691,10 @@ proc check_conditional_op { name type isfloat } {
   # scalar with scalar
   gdb_test "ptype ${name}a ? ${name}b : ${name}a" "type = ${type}"
   # scalar with vector
-  gdb_test "ptype ${name}4a ? ${name}4b : ${name}a" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a ? ${name}b : ${name}4a" "type = ${type} \\\[4\\\]"
+  gdb_test "ptype ${name}4a ? ${name}4b : ${name}a" "type = ${type}4"
+  gdb_test "ptype ${name}4a ? ${name}b : ${name}4a" "type = ${type}4"
   # vector with vector
-  gdb_test "ptype ${name}4a ? ${name}4b : ${name}4a" "type = ${type} \\\[4\\\]"
+  gdb_test "ptype ${name}4a ? ${name}4b : ${name}4a" "type = ${type}4"
 
   if { !${isfloat} } {
     # scalar with scalar
@@ -712,10 +712,10 @@ proc check_conditional_op { name type isfloat } {
     # scalar with scalar
     gdb_test "ptype u${name}a ? u${name}b : u${name}a" "type = (unsigned ${type}|u${type})"
     # scalar with vector
-    gdb_test "ptype u${name}4a ? u${name}4b : u${name}a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a ? u${name}b : u${name}4a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+    gdb_test "ptype u${name}4a ? u${name}4b : u${name}a" "type = u${type}4"
+    gdb_test "ptype u${name}4a ? u${name}b : u${name}4a" "type = u${type}4"
     # vector with vector
-    gdb_test "ptype u${name}4a ? u${name}4b : u${name}4a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+    gdb_test "ptype u${name}4a ? u${name}4b : u${name}4a" "type = u${type}4"
   }
 }
 
@@ -750,17 +750,17 @@ proc check_assignment_ops { name type isfloat size } {
   gdb_test "ptype ${name}a *= ${name}b" "type = ${type}"
   gdb_test "ptype ${name}a /= ${name}b" "type = ${type}"
   # scalar with vector
-  gdb_test "ptype ${name}4a = ${name}b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a += ${name}b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a -= ${name}b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4b *= ${name}a" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4b /= ${name}a" "type = ${type} \\\[4\\\]"
+  gdb_test "ptype ${name}4a = ${name}b" "type = ${type}4"
+  gdb_test "ptype ${name}4a += ${name}b" "type = ${type}4"
+  gdb_test "ptype ${name}4a -= ${name}b" "type = ${type}4"
+  gdb_test "ptype ${name}4b *= ${name}a" "type = ${type}4"
+  gdb_test "ptype ${name}4b /= ${name}a" "type = ${type}4"
   # vector with vector
-  gdb_test "ptype ${name}4a = ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a += ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4a -= ${name}4b" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4b *= ${name}4a" "type = ${type} \\\[4\\\]"
-  gdb_test "ptype ${name}4b /= ${name}4a" "type = ${type} \\\[4\\\]"
+  gdb_test "ptype ${name}4a = ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a += ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4a -= ${name}4b" "type = ${type}4"
+  gdb_test "ptype ${name}4b *= ${name}4a" "type = ${type}4"
+  gdb_test "ptype ${name}4b /= ${name}4a" "type = ${type}4"
 
   if { !${isfloat} } {
     # scalar with scalar
@@ -813,19 +813,19 @@ proc check_assignment_ops { name type isfloat size } {
     gdb_test "ptype ${name}a |= ${name}b" "type = ${type}"
     gdb_test "ptype ${name}a ^= ${name}b" "type = ${type}"
     # scalar with vector
-    gdb_test "ptype ${name}4a %= ${name}b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a <<= ${name}b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a >>= ${name}b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a &= ${name}b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a |= ${name}b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a ^= ${name}b" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype ${name}4a %= ${name}b" "type = ${type}4"
+    gdb_test "ptype ${name}4a <<= ${name}b" "type = ${type}4"
+    gdb_test "ptype ${name}4a >>= ${name}b" "type = ${type}4"
+    gdb_test "ptype ${name}4a &= ${name}b" "type = ${type}4"
+    gdb_test "ptype ${name}4a |= ${name}b" "type = ${type}4"
+    gdb_test "ptype ${name}4a ^= ${name}b" "type = ${type}4"
     # vector with vector
-    gdb_test "ptype ${name}4a %= ${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a <<= ${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a >>= ${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a &= ${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a |= ${name}4b" "type = ${type} \\\[4\\\]"
-    gdb_test "ptype ${name}4a ^= ${name}4b" "type = ${type} \\\[4\\\]"
+    gdb_test "ptype ${name}4a %= ${name}4b" "type = ${type}4"
+    gdb_test "ptype ${name}4a <<= ${name}4b" "type = ${type}4"
+    gdb_test "ptype ${name}4a >>= ${name}4b" "type = ${type}4"
+    gdb_test "ptype ${name}4a &= ${name}4b" "type = ${type}4"
+    gdb_test "ptype ${name}4a |= ${name}4b" "type = ${type}4"
+    gdb_test "ptype ${name}4a ^= ${name}4b" "type = ${type}4"
 
     # scalar with scalar
     gdb_test "print/d u${name}a = u${name}b" " = 1"
@@ -900,29 +900,29 @@ proc check_assignment_ops { name type isfloat size } {
     gdb_test "ptype u${name}a |= u${name}b" "type = (unsigned ${type}|u${type})"
     gdb_test "ptype u${name}a ^= u${name}b" "type = (unsigned ${type}|u${type})"
     # scalar with vector
-    gdb_test "ptype u${name}4a = u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a += u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a -= u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4b *= u${name}a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4b /= u${name}a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a %= u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a <<= u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a >>= u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a &= u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a |= u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a ^= u${name}b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+    gdb_test "ptype u${name}4a = u${name}b" "type = u${type}4"
+    gdb_test "ptype u${name}4a += u${name}b" "type = u${type}4"
+    gdb_test "ptype u${name}4a -= u${name}b" "type = u${type}4"
+    gdb_test "ptype u${name}4b *= u${name}a" "type = u${type}4"
+    gdb_test "ptype u${name}4b /= u${name}a" "type = u${type}4"
+    gdb_test "ptype u${name}4a %= u${name}b" "type = u${type}4"
+    gdb_test "ptype u${name}4a <<= u${name}b" "type = u${type}4"
+    gdb_test "ptype u${name}4a >>= u${name}b" "type = u${type}4"
+    gdb_test "ptype u${name}4a &= u${name}b" "type = u${type}4"
+    gdb_test "ptype u${name}4a |= u${name}b" "type = u${type}4"
+    gdb_test "ptype u${name}4a ^= u${name}b" "type = u${type}4"
     # vector with vector
-    gdb_test "ptype u${name}4a = u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a += u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a -= u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4b *= u${name}4a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4b /= u${name}4a" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a %= u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a <<= u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a >>= u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a &= u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a |= u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
-    gdb_test "ptype u${name}4a ^= u${name}4b" "type = (unsigned ${type}|u${type}) \\\[4\\\]"
+    gdb_test "ptype u${name}4a = u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a += u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a -= u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4b *= u${name}4a" "type = u${type}4"
+    gdb_test "ptype u${name}4b /= u${name}4a" "type = u${type}4"
+    gdb_test "ptype u${name}4a %= u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a <<= u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a >>= u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a &= u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a |= u${name}4b" "type = u${type}4"
+    gdb_test "ptype u${name}4a ^= u${name}4b" "type = u${type}4"
   }
 }
 

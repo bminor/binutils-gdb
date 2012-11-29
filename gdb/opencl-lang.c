@@ -961,6 +961,27 @@ Cannot perform conditional operation on vectors with different sizes"));
   return evaluate_subexp_c (expect_type, exp, pos, noside);
 }
 
+/* Print OpenCL types.  */
+
+static void
+opencl_print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags)
+{
+  /* We nearly always defer to C type printing, except that vector
+     types are considered primitive in OpenCL, and should always
+     be printed using their TYPE_NAME.  */
+  if (show > 0)
+    {
+      CHECK_TYPEDEF (type);
+      if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+	  && TYPE_NAME (type) != NULL)
+	show = 0;
+    }
+
+  c_print_type (type, varstring, stream, show, level, flags); 
+}
+
 static void
 opencl_language_arch_info (struct gdbarch *gdbarch,
 			   struct language_arch_info *lai)
@@ -1003,7 +1024,7 @@ const struct language_defn opencl_language_defn =
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
-  c_print_type,			/* Print a type using appropriate syntax */
+  opencl_print_type,		/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
