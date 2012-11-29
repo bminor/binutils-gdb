@@ -1,5 +1,11 @@
 2012-11-29  Jerome Guitton  <guitton@adacore.com>
 
+	* ada-lang.c (ada_is_interface_tag): New function.
+	(ada_is_ignored_field): Add interface tags to the list
+	of ignored fields.
+
+2012-11-29  Jerome Guitton  <guitton@adacore.com>
+
         * ada-lang.h (ada_tag_value_at_base_address): New function
 	declaration.
 	* ada-lang.c (is_ada95_tag, ada_tag_value_at_base_address):

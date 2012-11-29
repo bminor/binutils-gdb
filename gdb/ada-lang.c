@@ -5937,6 +5937,19 @@ ada_is_dispatch_table_ptr_type (struct type *type)
   return (strcmp (name, "ada__tags__dispatch_table") == 0);
 }
 
+/* Return non-zero if TYPE is an interface tag.  */
+
+static int
+ada_is_interface_tag (struct type *type)
+{
+  const char *name = TYPE_NAME (type);
+
+  if (name == NULL)
+    return 0;
+
+  return (strcmp (name, "ada__tags__interface_tag") == 0);
+}
+
 /* True if field number FIELD_NUM in struct or union type TYPE is supposed
    to be invisible to users.  */
 
@@ -5967,9 +5980,11 @@ ada_is_ignored_field (struct type *type, int field_num)
       return 1;
   }
 
-  /* If this is the dispatch table of a tagged type, then ignore.  */
+  /* If this is the dispatch table of a tagged type or an interface tag,
+     then ignore.  */
   if (ada_is_tagged_type (type, 1)
-      && ada_is_dispatch_table_ptr_type (TYPE_FIELD_TYPE (type, field_num)))
+      && (ada_is_dispatch_table_ptr_type (TYPE_FIELD_TYPE (type, field_num))
+	  || ada_is_interface_tag (TYPE_FIELD_TYPE (type, field_num))))
     return 1;
 
   /* Not a special field, so it should not be ignored.  */
