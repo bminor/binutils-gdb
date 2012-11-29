@@ -1,3 +1,8 @@
+2012-11-29  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (SVR4 Process Information): Document missing
+	"info proc" subcommands.
+
 2012-11-29  Yao Qi  <yao@codesourcery.com>
 
 	PR gdb/1477.

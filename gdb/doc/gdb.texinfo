@@ -18676,6 +18676,21 @@ a thread from the process being debugged (the leading @samp{/} still
 needs to be present, or else @value{GDBN} will interpret the number as
 a process ID rather than a thread ID).
 
+@item info proc cmdline
+@cindex info proc cmdline
+Show the original command line of the process.  This command is
+specific to @sc{gnu}/Linux.
+
+@item info proc cwd
+@cindex info proc cwd
+Show the current working directory of the process.  This command is
+specific to @sc{gnu}/Linux.
+
+@item info proc exe
+@cindex info proc exe
+Show the name of executable of the process.  This command is specific
+to @sc{gnu}/Linux.
+
 @item info proc mappings
 @cindex memory address space mappings
 Report the memory address space ranges accessible in the program, with
