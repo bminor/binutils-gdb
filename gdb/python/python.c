@@ -1415,7 +1415,7 @@ finalize_python (void *ignore)
      Python interpreter, which we are about to destroy.  It seems
      clearer to make the needed calls explicitly here than to create a
      cleanup and then mysteriously discard it.  */
-  PyGILState_Ensure ();
+  (void) PyGILState_Ensure ();
   python_gdbarch = target_gdbarch ();
   python_language = current_language;
 

@@ -1,5 +1,10 @@
 2012-11-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* python/python.c (finalize_python): Cast unused PyGILState_Ensure
+	return value to void to avoid compiler warning.
+
+2012-11-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* opencl-lang.c (opencl_print_type): New function.
 	(opencl_language_arch_info): Install it.
 
