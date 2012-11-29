@@ -30,3 +30,10 @@ gdb_test "print my_buffer" \
     "= \\(size => 8, buffer => \\(1, 2, 3, 4, 5, 6, 7, 0\\), length => 8\\)" \
     "print empty"
 
+gdb_test "print my_buffer'Address" \
+    "= \\(system\\.address\\) $hex" \
+    "print address"
+
+gdb_test "print {foo.octal_buffer} ($)" \
+    "= \\(size => 8, buffer => \\(1, 2, 3, 4, 5, 6, 7, 0\\), length => 8\\)" \
+    "print adress content"
