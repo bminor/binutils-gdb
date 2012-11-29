@@ -1,5 +1,9 @@
 2012-11-29  Jerome Guitton  <guitton@adacore.com>
 
+	* gdb.ada/iwide: New testcase.
+
+2012-11-29  Jerome Guitton  <guitton@adacore.com>
+
 	* gdb.ada/ptype_tagged_param.exp: Adjust expected output in
 	ptype test.
 
