@@ -9453,7 +9453,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     default:
       *pos -= 1;
       arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
-      arg1 = unwrap_value (arg1);
+
+      if (noside == EVAL_NORMAL)
+	arg1 = unwrap_value (arg1);
 
       /* If evaluating an OP_DOUBLE and an EXPECT_TYPE was provided,
          then we need to perform the conversion manually, because
