@@ -152,6 +152,31 @@ proc is_elf64 { binary_file } {
     return 0
 }
 
+# True if the build supports zlib compression.
+proc is_zlib_supported {} {
+
+    # This replicates the AS selection logic of dejagnu's target_assemble.
+    global AS_FOR_TARGET
+    if [info exists AS_FOR_TARGET] {
+	set AS $AS_FOR_TARGET
+    } else {
+	if {![board_info target exists assembler]} {
+	    set AS [find_gas]
+	} else {
+	    set AS [board_info target assembler]
+	}
+    }
+
+    set as_output [remote_exec host "$AS --help"]
+
+    set have_zlib 0
+    if {[string first "--compress-debug-sections" $as_output] >= 0} {
+	set have_zlib 1
+    }
+
+    return $have_zlib
+}
+
 # Compare two files line-by-line.  FILE_1 is the actual output and FILE_2
 # is the expected output.  Ignore blank lines in either file.
 #
