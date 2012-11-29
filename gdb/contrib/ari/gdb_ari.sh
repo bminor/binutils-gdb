@@ -1127,26 +1127,6 @@ Do not use vasprintf(), instead use xstrvprintf"
     fail("vasprintf")
 }
 
-BEGIN { doc["xasprintf"] = "\
-Do not use xasprintf(), instead use xstrprintf"
-    fix("xasprintf", "common/common-utils.h", 1)
-    fix("xasprintf", "common/common-utils.c", 1)
-    category["xasprintf"] = ari_regression
-}
-/(^|[^_[:alnum:]])xasprintf[[:space:]]*\(/ {
-    fail("xasprintf")
-}
-
-BEGIN { doc["xvasprintf"] = "\
-Do not use xvasprintf(), instead use xstrvprintf"
-    fix("xvasprintf", "common/common-utils.h", 1)
-    fix("xvasprintf", "common/common-utils.c", 1)
-    category["xvasprintf"] = ari_regression
-}
-/(^|[^_[:alnum:]])xvasprintf[[:space:]]*\(/ {
-    fail("xvasprintf")
-}
-
 # More generic memory operations
 
 BEGIN { doc["bzero"] = "\

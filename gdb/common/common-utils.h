@@ -43,13 +43,6 @@ char *xstrprintf (const char *format, ...) ATTRIBUTE_PRINTF (1, 2);
 char *xstrvprintf (const char *format, va_list ap)
      ATTRIBUTE_PRINTF (1, 0);
 
-/* Like asprintf/vasprintf but get an internal_error if the call
-   fails.  */
-void xasprintf (char **ret, const char *format, ...)
-     ATTRIBUTE_PRINTF (2, 3);
-void xvasprintf (char **ret, const char *format, va_list ap)
-     ATTRIBUTE_PRINTF (2, 0);
-
 /* Like snprintf, but throw an error if the output buffer is too small.  */
 int xsnprintf (char *str, size_t size, const char *format, ...)
      ATTRIBUTE_PRINTF (3, 4);

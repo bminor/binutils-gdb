@@ -1,3 +1,10 @@
+2012-11-29  Tom Tromey  <tromey@redhat.com>
+
+	* contrib/ari/gdb_ari.sh: Remove rules for xasprintf and
+	xvasprintf.
+	* common/common-utils.c (xasprintf, xvasprintf): Remove.
+	* common/common-utils.h (xasprintf, xvasprintf): Remove.
+
 2012-11-29  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (ada_is_interface_tag): New function.

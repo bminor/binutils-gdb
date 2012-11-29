@@ -137,22 +137,6 @@ xstrvprintf (const char *format, va_list ap)
   return ret;
 }
 
-void
-xasprintf (char **ret, const char *format, ...)
-{
-  va_list args;
-
-  va_start (args, format);
-  (*ret) = xstrvprintf (format, args);
-  va_end (args);
-}
-
-void
-xvasprintf (char **ret, const char *format, va_list ap)
-{
-  (*ret) = xstrvprintf (format, ap);
-}
-
 int
 xsnprintf (char *str, size_t size, const char *format, ...)
 {
