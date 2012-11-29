@@ -278,6 +278,8 @@ extern struct value *ada_value_tag (struct value *);
 
 extern const char *ada_tag_name (struct value *);
 
+extern struct value *ada_tag_value_at_base_address (struct value *obj);
+
 extern int ada_is_parent_field (struct type *, int);
 
 extern int ada_is_wrapper_field (struct type *, int);

@@ -1,5 +1,19 @@
 2012-11-29  Jerome Guitton  <guitton@adacore.com>
 
+        * ada-lang.h (ada_tag_value_at_base_address): New function
+	declaration.
+	* ada-lang.c (is_ada95_tag, ada_tag_value_at_base_address):
+	New functions.
+	(ada_to_fixed_type_1, ada_evaluate_subexp): Let ada_tag_base_address
+	relocate the class-wide value if need be.
+	(ada_value_struct_elt, ada_value_ind, ada_coerce_ref):
+	Let ada_tag_value_at_base_address relocate the class-wide access/ref
+	before dereferencing it.
+	* ada-valprint.c (ada_val_print_1): Relocate to base address
+	before displaying the content of an interface-wide ref.
+
+2012-11-29  Jerome Guitton  <guitton@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp): Unwrap only in EVAL_NORMAL.
 
 2012-11-29  Joel Brobecker  <brobecker@adacore.com>

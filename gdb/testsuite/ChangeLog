@@ -1,5 +1,10 @@
 2012-11-29  Jerome Guitton  <guitton@adacore.com>
 
+	* gdb.ada/ptype_tagged_param.exp: Adjust expected output in
+	ptype test.
+
+2012-11-29  Jerome Guitton  <guitton@adacore.com>
+
 	* gdb.ada/variant_record_packed_array.exp: Test expressions of the
 	form {VARIANT_TYPE}ADDRESS.
 

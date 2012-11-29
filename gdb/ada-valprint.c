@@ -891,6 +891,9 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
 	  deref_val = coerce_ref_if_computed (original_value);
 	  if (deref_val)
 	    {
+	      if (ada_is_tagged_type (value_type (deref_val), 1))
+		deref_val = ada_tag_value_at_base_address (deref_val);
+
 	      common_val_print (deref_val, stream, recurse + 1, options,
 				current_language);
 	      break;
@@ -903,6 +906,9 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr,
                 ada_value_ind (value_from_pointer
                                (lookup_pointer_type (elttype),
                                 deref_val_int));
+
+	      if (ada_is_tagged_type (value_type (deref_val), 1))
+		deref_val = ada_tag_value_at_base_address (deref_val);
 
               val_print (value_type (deref_val),
                          value_contents_for_printing (deref_val),
