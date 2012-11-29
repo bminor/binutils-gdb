@@ -1,3 +1,7 @@
+2012-11-29  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* Makefile.in: Regenerate.
+
 2012-11-27  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/14776
