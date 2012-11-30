@@ -6026,7 +6026,9 @@ print_one_breakpoint_location (struct breakpoint *b,
       ui_out_text (uiout, "\n");
     }
   
-  if (!part_of_multiple && b->hit_count)
+  if (!part_of_multiple)
+    {
+      if (b->hit_count)
     {
       /* FIXME should make an annotation for this.  */
       if (is_catchpoint (b))
@@ -6042,12 +6044,13 @@ print_one_breakpoint_location (struct breakpoint *b,
       else
 	ui_out_text (uiout, " times\n");
     }
-  
-  /* Output the count also if it is zero, but only if this is mi.
-     FIXME: Should have a better test for this.  */
+      else
+	{
+  /* Output the count also if it is zero, but only if this is mi.  */
   if (ui_out_is_mi_like_p (uiout))
-    if (!part_of_multiple && b->hit_count == 0)
       ui_out_field_int (uiout, "times", b->hit_count);
+	}
+    }
 
   if (!part_of_multiple && b->ignore_count)
     {
