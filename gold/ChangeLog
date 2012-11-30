@@ -1,5 +1,11 @@
 2012-11-30  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::make_plt_section): Add symtab
+	param.  Call got_section() to make .got.  Update all callers
+	and their callers and so on.
+
+2012-11-30  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Powerpc_relobj::do_scan_relocs): Make STB_LOCAL
 	_GLOBAL_OFFSET_TABLE_ rather than STB_WEAK.
 	(Output_data_got_powerpc::make_header): Update _GLOBAL_OFFSET_TABLE_
