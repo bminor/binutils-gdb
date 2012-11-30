@@ -131,10 +131,7 @@ static const CGEN_MACH epiphany_cgen_mach_table[] = {
 
 static CGEN_KEYWORD_ENTRY epiphany_cgen_opval_gr_names_entries[] =
 {
-  { "sb", 9, {0, {{{0, 0}}}}, 0, 0 },
-  { "sl", 10, {0, {{{0, 0}}}}, 0, 0 },
   { "fp", 11, {0, {{{0, 0}}}}, 0, 0 },
-  { "ip", 12, {0, {{{0, 0}}}}, 0, 0 },
   { "sp", 13, {0, {{{0, 0}}}}, 0, 0 },
   { "lr", 14, {0, {{{0, 0}}}}, 0, 0 },
   { "r0", 0, {0, {{{0, 0}}}}, 0, 0 },
@@ -212,7 +209,10 @@ static CGEN_KEYWORD_ENTRY epiphany_cgen_opval_gr_names_entries[] =
   { "v5", 8, {0, {{{0, 0}}}}, 0, 0 },
   { "v6", 9, {0, {{{0, 0}}}}, 0, 0 },
   { "v7", 10, {0, {{{0, 0}}}}, 0, 0 },
-  { "v8", 11, {0, {{{0, 0}}}}, 0, 0 }
+  { "v8", 11, {0, {{{0, 0}}}}, 0, 0 },
+  { "sb", 9, {0, {{{0, 0}}}}, 0, 0 },
+  { "sl", 10, {0, {{{0, 0}}}}, 0, 0 },
+  { "ip", 12, {0, {{{0, 0}}}}, 0, 0 }
 };
 
 CGEN_KEYWORD epiphany_cgen_opval_gr_names =
