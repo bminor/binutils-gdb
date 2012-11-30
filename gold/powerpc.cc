@@ -3664,11 +3664,15 @@ Target_powerpc<size, big_endian>::Scan::global(
 		target->copy_reloc(symtab, layout, object,
 				   data_shndx, output_section, gsym, reloc);
 	      }
-	    else if (((size == 32 && r_type == elfcpp::R_POWERPC_ADDR32)
-		      || (size == 64 && r_type == elfcpp::R_PPC64_ADDR64))
-		     && (gsym->can_use_relative_reloc(false)
-			 || (size == 64
-			     && data_shndx == ppc_object->opd_shndx())))
+	    else if ((size == 32
+		      && r_type == elfcpp::R_POWERPC_ADDR32
+		      && gsym->can_use_relative_reloc(false)
+		      && !(gsym->visibility() == elfcpp::STV_PROTECTED
+			   && parameters->options().shared()))
+		     || (size == 64
+			 && r_type == elfcpp::R_PPC64_ADDR64
+			 && (gsym->can_use_relative_reloc(false)
+			     || data_shndx == ppc_object->opd_shndx())))
 	      {
 		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 		unsigned int dynrel = elfcpp::R_POWERPC_RELATIVE;

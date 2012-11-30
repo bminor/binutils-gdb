@@ -1,5 +1,10 @@
 2012-11-30  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.c (Target_powerpc::Scan::global): Don't emit relative
+	relocs against protected symbols when building 32-bit shared libs.
+
+2012-11-30  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::make_plt_section): Add symtab
 	param.  Call got_section() to make .got.  Update all callers
 	and their callers and so on.
