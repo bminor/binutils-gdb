@@ -397,7 +397,7 @@ static void context_switch (ptid_t ptid);
 
 void init_thread_stepping_state (struct thread_info *tss);
 
-void init_infwait_state (void);
+static void init_infwait_state (void);
 
 static const char follow_fork_mode_child[] = "child";
 static const char follow_fork_mode_parent[] = "parent";
@@ -3033,7 +3033,7 @@ adjust_pc_after_break (struct execution_control_state *ecs)
     }
 }
 
-void
+static void
 init_infwait_state (void)
 {
   waiton_ptid = pid_to_ptid (-1);

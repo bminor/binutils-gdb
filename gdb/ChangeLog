@@ -1,3 +1,9 @@
+2012-11-30  Yao Qi  <yao@codesourcery.com>
+
+	* infrun.c: Make the declaration of 'init_infwait_state'
+	static.
+	(init_infwait_state): Make it 'static'.
+
 2012-11-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* python/python.c (finalize_python): Cast unused PyGILState_Ensure
