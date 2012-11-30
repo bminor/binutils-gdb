@@ -1,5 +1,14 @@
 2012-11-30  Yao Qi  <yao@codesourcery.com>
 
+	* infrun.c (error_is_running, ensure_not_running): Move them
+	to ...
+	* infcmd.c (error_is_running, ensure_not_running): ... here.
+	Make them 'static'.
+	* inferior.h: Remove declarations of error_is_running and
+	ensure_not_running.
+
+2012-11-30  Yao Qi  <yao@codesourcery.com>
+
 	* tic6x-linux-tdep.c (tic6x_register_sigcontext_offset): Don't
 	check REGNUM >= 0.
 

@@ -708,6 +708,24 @@ ensure_not_tfind_mode (void)
     error (_("Cannot execute this command while looking at trace frames."));
 }
 
+/* Throw an error indicating the current thread is running.  */
+
+static void
+error_is_running (void)
+{
+  error (_("Cannot execute this command while "
+	   "the selected thread is running."));
+}
+
+/* Calls error_is_running if the current thread is running.  */
+
+static void
+ensure_not_running (void)
+{
+  if (is_running (inferior_ptid))
+    error_is_running ();
+}
+
 void
 continue_1 (int all_threads)
 {

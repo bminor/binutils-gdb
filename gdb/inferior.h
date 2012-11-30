@@ -228,12 +228,6 @@ extern void get_last_target_status(ptid_t *ptid,
 
 extern void follow_inferior_reset_breakpoints (void);
 
-/* Throw an error indicating the current thread is running.  */
-extern void error_is_running (void);
-
-/* Calls error_is_running if the current thread is running.  */
-extern void ensure_not_running (void);
-
 void set_step_info (struct frame_info *frame, struct symtab_and_line sal);
 
 /* From infcmd.c */

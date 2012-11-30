@@ -3040,20 +3040,6 @@ init_infwait_state (void)
   infwait_state = infwait_normal_state;
 }
 
-void
-error_is_running (void)
-{
-  error (_("Cannot execute this command while "
-	   "the selected thread is running."));
-}
-
-void
-ensure_not_running (void)
-{
-  if (is_running (inferior_ptid))
-    error_is_running ();
-}
-
 static int
 stepped_in_from (struct frame_info *frame, struct frame_id step_frame_id)
 {
