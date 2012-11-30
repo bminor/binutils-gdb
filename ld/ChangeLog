@@ -1,3 +1,11 @@
+2012-11-30  Joern Rennecke <joern.rennecke@embecosm.com>
+
+	* scripttempl/epiphany_4x4.sc, emulparams/elf32epiphany_4x4.sh: Add.
+	* emultempl/epiphanyelf_4x4.em: Likewise.
+	* configure.tgt: Add elf32epiphany_4x4 support.
+	* Makefile.am: Likewise.
+	* Makefile.in: Regenerate.
+
 2012-11-29  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* Makefile.in: Regenerate.

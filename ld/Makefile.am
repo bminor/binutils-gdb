@@ -214,6 +214,7 @@ ALL_EMULATION_SOURCES = \
 	eelf32elmip.c \
 	eelf32elmipvxworks.c \
 	eelf32epiphany.c \
+	eelf32epiphany_4x4.c \
 	eelf32fr30.c \
 	eelf32frv.c \
 	eelf32frvfd.c \
@@ -1024,6 +1025,10 @@ eelf32elmipvxworks.c: $(srcdir)/emulparams/elf32elmipvxworks.sh \
 eelf32epiphany.c: $(srcdir)/emulparams/elf32epiphany.sh \
   $(ELF_DEPS) ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32epiphany "$(tdir_epiphany)"
+eelf32epiphany_4x4.c: $(srcdir)/emulparams/elf32epiphany_4x4.sh \
+  $(srcdir)/emultempl/elf32.em \
+  $(ELF_DEPS) $(srcdir)/scripttempl/epiphany_4x4.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32epiphany_4x4 "$(tdir_epiphany_4x4)"
 eelf32fr30.c: $(srcdir)/emulparams/elf32fr30.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32fr30 "$(tdir_fr30)"
