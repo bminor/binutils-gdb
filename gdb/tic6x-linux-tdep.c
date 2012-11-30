@@ -63,7 +63,7 @@ tic6x_register_sigcontext_offset (unsigned int regnum, struct gdbarch *gdbarch)
   else if (regnum == TIC6X_B5_REGNUM || regnum == TIC6X_B5_REGNUM + 2
 	   || regnum == TIC6X_B5_REGNUM + 4)
     return 4 * (regnum - TIC6X_B5_REGNUM + 19);	/* B5, B7, B9 */
-  else if (regnum >= 0 && regnum < TIC6X_A4_REGNUM)
+  else if (regnum < TIC6X_A4_REGNUM)
     return 4 * (regnum - 0 + 8);	/* A0 - A3 */
   else if (regnum >= TIC6X_B0_REGNUM && regnum < TIC6X_B4_REGNUM)
     return 4 * (regnum - TIC6X_B0_REGNUM + 15);	/* B0 - B3 */
