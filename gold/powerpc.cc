@@ -1391,8 +1391,8 @@ Powerpc_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
 {
   if (size == 32)
     {
-      // Define a weak hidden _GLOBAL_OFFSET_TABLE_ to ensure it isn't
-      // seen as undefined when scanning relocs (and thus requires
+      // Define _GLOBAL_OFFSET_TABLE_ to ensure it isn't seen as
+      // undefined when scanning relocs (and thus requires
       // non-relative dynamic relocs).  The proper value will be
       // updated later.
       Symbol *gotsym = symtab->lookup("_GLOBAL_OFFSET_TABLE_", NULL);
@@ -1407,7 +1407,7 @@ Powerpc_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
 					Symbol_table::PREDEFINED,
 					got, 0, 0,
 					elfcpp::STT_OBJECT,
-					elfcpp::STB_WEAK,
+					elfcpp::STB_LOCAL,
 					elfcpp::STV_HIDDEN, 0,
 					false, false);
 	}
@@ -1574,13 +1574,20 @@ private:
 	Output_data_got<size, big_endian>::add_constant(0);
 
 	// Define _GLOBAL_OFFSET_TABLE_ at the header
-	this->symtab_->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
-					     Symbol_table::PREDEFINED,
-					     this, this->g_o_t(), 0,
-					     elfcpp::STT_OBJECT,
-					     elfcpp::STB_LOCAL,
-					     elfcpp::STV_HIDDEN,
-					     0, false, false);
+	Symbol *gotsym = this->symtab_->lookup("_GLOBAL_OFFSET_TABLE_", NULL);
+	if (gotsym != NULL)
+	  {
+	    Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(gotsym);
+	    sym->set_value(this->g_o_t());
+	  }
+	else
+	  this->symtab_->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
+					       Symbol_table::PREDEFINED,
+					       this, this->g_o_t(), 0,
+					       elfcpp::STT_OBJECT,
+					       elfcpp::STB_LOCAL,
+					       elfcpp::STV_HIDDEN, 0,
+					       false, false);
       }
     else
       Output_data_got<size, big_endian>::add_constant(0);
