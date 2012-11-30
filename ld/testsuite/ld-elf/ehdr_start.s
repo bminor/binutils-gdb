@@ -3,7 +3,7 @@
 _start:
 	.space 16
 
-	.data
+	.section .rodata,"a"
 	.globl foo
 foo:
 	.weak __ehdr_start

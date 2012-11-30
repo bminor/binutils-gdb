@@ -1,3 +1,7 @@
+2012-11-30  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-elf/ehdr_start.s: Put reference in .rodata section, not .data.
+
 2012-11-27  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-elf/flags1.d: Add *-*-nacl* to xfail list.
