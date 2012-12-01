@@ -1,5 +1,9 @@
 2012-11-30  Yao Qi  <yao@codesourcery.com>
 
+	* breakpoint.c (print_one_breakpoint_location): Indent code.
+
+2012-11-30  Yao Qi  <yao@codesourcery.com>
+
 	* breakpoint.c (print_one_breakpoint_location): Combine two
 	blocks handling 'hit count' together.
 

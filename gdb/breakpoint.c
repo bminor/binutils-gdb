@@ -6029,26 +6029,26 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (!part_of_multiple)
     {
       if (b->hit_count)
-    {
-      /* FIXME should make an annotation for this.  */
-      if (is_catchpoint (b))
-	ui_out_text (uiout, "\tcatchpoint");
-      else if (is_tracepoint (b))
-	ui_out_text (uiout, "\ttracepoint");
-      else
-	ui_out_text (uiout, "\tbreakpoint");
-      ui_out_text (uiout, " already hit ");
-      ui_out_field_int (uiout, "times", b->hit_count);
-      if (b->hit_count == 1)
-	ui_out_text (uiout, " time\n");
-      else
-	ui_out_text (uiout, " times\n");
-    }
+	{
+	  /* FIXME should make an annotation for this.  */
+	  if (is_catchpoint (b))
+	    ui_out_text (uiout, "\tcatchpoint");
+	  else if (is_tracepoint (b))
+	    ui_out_text (uiout, "\ttracepoint");
+	  else
+	    ui_out_text (uiout, "\tbreakpoint");
+	  ui_out_text (uiout, " already hit ");
+	  ui_out_field_int (uiout, "times", b->hit_count);
+	  if (b->hit_count == 1)
+	    ui_out_text (uiout, " time\n");
+	  else
+	    ui_out_text (uiout, " times\n");
+	}
       else
 	{
-  /* Output the count also if it is zero, but only if this is mi.  */
-  if (ui_out_is_mi_like_p (uiout))
-      ui_out_field_int (uiout, "times", b->hit_count);
+	  /* Output the count also if it is zero, but only if this is mi.  */
+	  if (ui_out_is_mi_like_p (uiout))
+	    ui_out_field_int (uiout, "times", b->hit_count);
 	}
     }
 
