@@ -1,5 +1,11 @@
 2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* elf32-mips.c (mips_elf32_object_p): Return right away when the
+	ABI is not compatible.
+	* elfn32-mips.c (mips_elf_n32_object_p): Likewise.
+
+2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* elf32-tilepro.c (tilepro_elf_mkobject): New function.
 	(bfd_elf32_mkobject): New macro.
 

@@ -3165,6 +3165,9 @@ mips_elf_n32_object_p (bfd *abfd)
 {
   unsigned long mach;
 
+  if (!ABI_N32_P (abfd))
+    return FALSE;
+
   /* Irix 5 and 6 are broken.  Object file symbol tables are not always
      sorted correctly such that local symbols precede global symbols,
      and the sh_info field in the symbol table is not always right.  */
@@ -3173,10 +3176,6 @@ mips_elf_n32_object_p (bfd *abfd)
 
   mach = _bfd_elf_mips_mach (elf_elfheader (abfd)->e_flags);
   bfd_default_set_arch_mach (abfd, bfd_arch_mips, mach);
-
-  if (! ABI_N32_P(abfd))
-    return FALSE;
-
   return TRUE;
 }
 
