@@ -257,9 +257,12 @@ struct dwarf2_per_objfile
   struct mapped_index *index_table;
 
   /* When using index_table, this keeps track of all quick_file_names entries.
-     TUs can share line table entries with CUs or other TUs, and there can be
-     a lot more TUs than unique line tables, so we maintain a separate table
-     of all line table entries to support the sharing.  */
+     TUs typically share line table entries with a CU, so we maintain a
+     separate table of all line table entries to support the sharing.
+     Note that while there can be way more TUs than CUs, we've already
+     sorted all the TUs into "type unit groups", grouped by their
+     DW_AT_stmt_list value.  Therefore the only sharing done here is with a
+     CU and its associated TU group if there is one.  */
   htab_t quick_file_names_table;
 
   /* Set during partial symbol reading, to prevent queueing of full
@@ -3385,7 +3388,6 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
 {
   struct dwarf2_per_cu_data *per_cu;
   offset_type *vec;
-  struct quick_file_names *file_data;
   const char *filename;
 
   dw2_setup (objfile);

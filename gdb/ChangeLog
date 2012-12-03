@@ -1,3 +1,8 @@
+2012-12-03  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (struct dwarf2_per_objfile): Clarify comment.
+	(dw2_find_symbol_file): Delete unused local file_data.
+
 2012-12-03  Tom Tromey  <tromey@redhat.com>
 
 	* ada-exp.y (write_object_renaming, write_var_or_type)
