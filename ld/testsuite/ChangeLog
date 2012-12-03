@@ -1,5 +1,10 @@
 2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* ld-mips-elf/attr-gnu-4-45.d: Add missing "readelf" keyword.
+	Update dump according to current output.
+
+2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* ld-mips-elf/attr-gnu-4-12.d: Update the warning message.
 	* ld-mips-elf/attr-gnu-4-13.d: Likewise.
 	* ld-mips-elf/attr-gnu-4-14.d: Likewise.
