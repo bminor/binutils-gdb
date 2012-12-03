@@ -2,7 +2,7 @@
 
 	* output.h: Formatting, whitespace.
 
-i2012-12-03  Alan Modra  <amodra@gmail.com>
+2012-12-03  Alan Modra  <amodra@gmail.com>
 
 	* layout.h (Layout::get_executable_sections): Declare.
 	* layout.cc (Layout::get_executable_sections): New function.
