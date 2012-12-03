@@ -737,6 +737,16 @@ struct _bfd_tilepro_elf_obj_tdata
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == TILEPRO_ELF_DATA)
 
+/* Allocate TILEPro ELF private object data.  */
+
+static bfd_boolean
+tilepro_elf_mkobject (bfd *abfd)
+{
+  return bfd_elf_allocate_object (abfd,
+				  sizeof (struct _bfd_tilepro_elf_obj_tdata),
+				  TILEPRO_ELF_DATA);
+}
+
 #include "elf/common.h"
 #include "elf/internal.h"
 
@@ -4007,6 +4017,8 @@ tilepro_additional_program_headers (bfd *abfd,
 #define elf_backend_grok_prstatus            tilepro_elf_grok_prstatus
 #define elf_backend_grok_psinfo              tilepro_elf_grok_psinfo
 #define elf_backend_additional_program_headers tilepro_additional_program_headers
+
+#define bfd_elf32_mkobject		     tilepro_elf_mkobject
 
 #define elf_backend_init_index_section	_bfd_elf_init_1_index_section
 

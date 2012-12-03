@@ -1,5 +1,10 @@
 2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* elf32-tilepro.c (tilepro_elf_mkobject): New function.
+	(bfd_elf32_mkobject): New macro.
+
+2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* elf32-mips.c (bfd_elf32_mkobject): New macro.
 	* elf64-mips.c (bfd_elf64_mkobject): Likewise.
 	* elfn32-mips.c (bfd_elf32_mkobject): Likewise.
