@@ -1,3 +1,22 @@
+2012-12-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14904
+	* ldmain.c (main): Don't check plugin_load_plugins return.
+
+	* lexsup.c (parse_args): Don't check plugin_opt_plugin return.
+
+	* plugin.c (dlerror): New.  Defined if HAVE_DLFCN_H isn't
+	defined.
+	(plugin_opt_plugin): Change return type to void.  Stop on
+	dlopen error and report error with dlerror ().
+	(plugin_load_plugins): Change return type to void.  Stop on
+	dlsym error and report error with dlerror ().  Don't use
+	set_plugin_error.
+	(plugin_call_cleanup): Issue an error for each plugin.
+
+	* plugin.h (plugin_opt_plugin): Change return type to void.
+	(plugin_load_plugins): Likewise.
+
 2012-11-30  Joern Rennecke <joern.rennecke@embecosm.com>
 
 	* scripttempl/epiphany_4x4.sc, emulparams/elf32epiphany_4x4.sh: Add.

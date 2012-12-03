@@ -18,5 +18,5 @@ Hello from testplugin.
 .*: LDPT_OPTION 'failonload'
 .*: LDPT_NULL value        0x0 \(0\)
 #...
-.*ld.*:.*ldtestplug.*: error loading plugin
+.*ld.*:.*ldtestplug.*: plugin error: 3
 #...
