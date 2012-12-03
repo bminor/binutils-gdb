@@ -13789,7 +13789,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 	      {
 	      case 2:
 		_bfd_error_handler
-		  (_("Warning: %B uses -msingle-float, %B uses -mdouble-float"),
+		  (_("Warning: %B uses -mdouble-float, %B uses -msingle-float"),
 		   obfd, ibfd);
 		break;
 
@@ -13801,7 +13801,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 
 	      case 4:
 		_bfd_error_handler
-		  (_("Warning: %B uses -msingle-float, %B uses -mips32r2 -mfp64"),
+		  (_("Warning: %B uses -mdouble-float, %B uses -mips32r2 -mfp64"),
 		   obfd, ibfd);
 		break;
 
@@ -13816,7 +13816,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 	      case 1:
 		_bfd_error_handler
 		  (_("Warning: %B uses -msingle-float, %B uses -mdouble-float"),
-		   ibfd, obfd);
+		   obfd, ibfd);
 		break;
 
 	      case 3:
@@ -13827,7 +13827,7 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 
 	      case 4:
 		_bfd_error_handler
-		  (_("Warning: %B uses -mdouble-float, %B uses -mips32r2 -mfp64"),
+		  (_("Warning: %B uses -msingle-float, %B uses -mips32r2 -mfp64"),
 		   obfd, ibfd);
 		break;
 
@@ -13843,8 +13843,8 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 	      case 2:
 	      case 4:
 		_bfd_error_handler
-		  (_("Warning: %B uses hard float, %B uses soft float"),
-		   ibfd, obfd);
+		  (_("Warning: %B uses soft float, %B uses hard float"),
+		   obfd, ibfd);
 		break;
 
 	      default:
@@ -13857,14 +13857,14 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 	      {
 	      case 1:
 		_bfd_error_handler
-		  (_("Warning: %B uses -msingle-float, %B uses -mips32r2 -mfp64"),
-		   ibfd, obfd);
+		  (_("Warning: %B uses -mips32r2 -mfp64, %B uses -mdouble-float"),
+		   obfd, ibfd);
 		break;
 
 	      case 2:
 		_bfd_error_handler
-		  (_("Warning: %B uses -mdouble-float, %B uses -mips32r2 -mfp64"),
-		   ibfd, obfd);
+		  (_("Warning: %B uses -mips32r2 -mfp64, %B uses -msingle-float"),
+		   obfd, ibfd);
 		break;
 
 	      case 3:
