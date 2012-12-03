@@ -73,7 +73,7 @@ union exp_element
     char string;
     struct type *type;
     struct internalvar *internalvar;
-    struct block *block;
+    const struct block *block;
     struct objfile *objfile;
   };
 
@@ -100,8 +100,8 @@ extern struct expression *parse_expression (char *);
 
 extern struct type *parse_field_expression (char *, char **);
 
-extern struct expression *parse_exp_1 (char **, CORE_ADDR pc, struct block *,
-				       int);
+extern struct expression *parse_exp_1 (char **, CORE_ADDR pc,
+				       const struct block *, int);
 
 /* For use by parsers; set if we want to parse an expression and
    attempt to complete a field name.  */
@@ -110,7 +110,7 @@ extern int in_parse_field;
 /* The innermost context required by the stack and register variables
    we've encountered so far.  To use this, set it to NULL, then call
    parse_<whatever>, then look at it.  */
-extern struct block *innermost_block;
+extern const struct block *innermost_block;
 
 /* From eval.c */
 

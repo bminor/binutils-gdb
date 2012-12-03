@@ -1516,7 +1516,7 @@ value_of_variable (struct symbol *var, const struct block *b)
 }
 
 struct value *
-address_of_variable (struct symbol *var, struct block *b)
+address_of_variable (struct symbol *var, const struct block *b)
 {
   struct type *type = SYMBOL_TYPE (var);
   struct value *val;

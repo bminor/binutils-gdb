@@ -1362,7 +1362,7 @@ build_packaged_name (const char *package, int package_len,
    to mean the global scope.  */
 
 static int
-package_name_p (const char *name, struct block *block)
+package_name_p (const char *name, const struct block *block)
 {
   struct symbol *sym;
   int is_a_field_of_this;
@@ -1402,7 +1402,7 @@ classify_unsafe_function (struct stoken function_name)
    The result is one of NAME, NAME_OR_INT, or TYPENAME.  */
 
 static int
-classify_packaged_name (struct block *block)
+classify_packaged_name (const struct block *block)
 {
   char *copy;
   struct symbol *sym;
@@ -1430,7 +1430,7 @@ classify_packaged_name (struct block *block)
    The result is one of NAME, NAME_OR_INT, or TYPENAME.  */
 
 static int
-classify_name (struct block *block)
+classify_name (const struct block *block)
 {
   struct type *type;
   struct symbol *sym;

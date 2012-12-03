@@ -756,12 +756,12 @@ struct watchpoint
   struct expression *exp;
   /* The largest block within which it is valid, or NULL if it is
      valid anywhere (e.g. consists just of global symbols).  */
-  struct block *exp_valid_block;
+  const struct block *exp_valid_block;
   /* The conditional expression if any.  */
   struct expression *cond_exp;
   /* The largest block within which it is valid, or NULL if it is
      valid anywhere (e.g. consists just of global symbols).  */
-  struct block *cond_exp_valid_block;
+  const struct block *cond_exp_valid_block;
   /* Value of the watchpoint the last time we checked it, or NULL when
      we do not know the value yet or the value was not readable.  VAL
      is never lazy.  */

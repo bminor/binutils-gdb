@@ -2699,7 +2699,7 @@ static struct obstack name_obstack;
    in which lookups start; this can be NULL to mean the global
    scope.  */
 static int
-classify_name (struct block *block)
+classify_name (const struct block *block)
 {
   struct symbol *sym;
   char *copy;
@@ -2791,7 +2791,7 @@ classify_name (struct block *block)
    in `yylval' is the first component of a name, false otherwise.  */
 
 static int
-classify_inner_name (struct block *block, int first_name)
+classify_inner_name (const struct block *block, int first_name)
 {
   struct type *type, *new_type;
   char *copy;

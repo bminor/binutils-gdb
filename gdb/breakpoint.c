@@ -10750,7 +10750,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty,
   volatile struct gdb_exception e;
   struct breakpoint *b, *scope_breakpoint = NULL;
   struct expression *exp;
-  struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
+  const struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
   struct value *val, *mark, *result;
   struct frame_info *frame;
   char *exp_start = NULL;

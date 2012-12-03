@@ -128,7 +128,7 @@ static struct value *resolve_subexp (struct expression **, int *, int,
                                      struct type *);
 
 static void replace_operator_with_call (struct expression **, int, int, int,
-                                        struct symbol *, struct block *);
+                                        struct symbol *, const struct block *);
 
 static int possible_user_operator_p (enum exp_opcode, struct value **);
 
@@ -150,7 +150,7 @@ static enum ada_renaming_category parse_old_style_renaming (struct type *,
 							    const char **);
 
 static struct symbol *find_old_style_renaming_symbol (const char *,
-						      struct block *);
+						      const struct block *);
 
 static struct type *ada_lookup_struct_elt_type (struct type *, char *,
                                                 int, int, int *);
@@ -3719,7 +3719,7 @@ get_selections (int *choices, int n_choices, int max_results,
 static void
 replace_operator_with_call (struct expression **expp, int pc, int nargs,
                             int oplen, struct symbol *sym,
-                            struct block *block)
+                            const struct block *block)
 {
   /* A new expression, with 6 more elements (3 for funcall, 4 for function
      symbol, -oplen for operator being replaced).  */
@@ -4232,7 +4232,7 @@ lookup_cached_symbol (const char *name, domain_enum namespace,
 
 static void
 cache_symbol (const char *name, domain_enum namespace, struct symbol *sym,
-              struct block *block)
+              const struct block *block)
 {
 }
 
@@ -4805,7 +4805,7 @@ remove_irrelevant_renamings (struct ada_symbol_info *syms,
   for (i = 0; i < nsyms; i += 1)
     {
       struct symbol *sym = syms[i].sym;
-      struct block *block = syms[i].block;
+      const struct block *block = syms[i].block;
       const char *name;
       const char *suffix;
 
@@ -7195,7 +7195,7 @@ ada_find_any_type (const char *name)
    Return symbol if found, and NULL otherwise.  */
 
 struct symbol *
-ada_find_renaming_symbol (struct symbol *name_sym, struct block *block)
+ada_find_renaming_symbol (struct symbol *name_sym, const struct block *block)
 {
   const char *name = SYMBOL_LINKAGE_NAME (name_sym);
   struct symbol *sym;
@@ -7217,7 +7217,7 @@ ada_find_renaming_symbol (struct symbol *name_sym, struct block *block)
 }
 
 static struct symbol *
-find_old_style_renaming_symbol (const char *name, struct block *block)
+find_old_style_renaming_symbol (const char *name, const struct block *block)
 {
   const struct symbol *function_sym = block_linkage_function (block);
   char *rename;

@@ -84,7 +84,7 @@ struct varobj_root
   struct expression *exp;
 
   /* Block for which this expression is valid.  */
-  struct block *valid_block;
+  const struct block *valid_block;
 
   /* The frame for this expression.  This field is set iff valid_block is
      not NULL.  */

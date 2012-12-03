@@ -145,7 +145,7 @@ struct display
     struct program_space *pspace;
 
     /* Innermost block required by this expression when evaluated.  */
-    struct block *block;
+    const struct block *block;
 
     /* Status of this display (enabled or disabled).  */
     int enabled_p;

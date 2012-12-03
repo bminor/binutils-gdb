@@ -90,7 +90,7 @@ struct ada_symbol_info
   struct symbol *sym;
 
   /* The block where the symbol was found.  */
-  struct block *block;
+  const struct block *block;
 };
 
 /* Denotes a type of renaming symbol (see ada_parse_renaming).  */
@@ -342,7 +342,7 @@ extern struct type *ada_find_parallel_type (struct type *,
 extern LONGEST get_int_var_value (char *, int *);
 
 extern struct symbol *ada_find_renaming_symbol (struct symbol *name_sym,
-                                                struct block *block);
+                                                const struct block *block);
 
 extern int ada_prefer_type (struct type *, struct type *);
 

@@ -82,7 +82,7 @@ static const struct objfile_data *objc_objfile_data;
    suitably defined.  */
 
 struct symbol *
-lookup_struct_typedef (char *name, struct block *block, int noerr)
+lookup_struct_typedef (char *name, const struct block *block, int noerr)
 {
   struct symbol *sym;
 

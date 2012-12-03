@@ -130,10 +130,10 @@ static struct stoken string_to_operator (struct stoken);
 
 static void write_int (LONGEST, struct type *);
 
-static void write_object_renaming (struct block *, const char *, int,
+static void write_object_renaming (const struct block *, const char *, int,
 				   const char *, int);
 
-static struct type* write_var_or_type (struct block *, struct stoken);
+static struct type* write_var_or_type (const struct block *, struct stoken);
 
 static void write_name_assoc (struct stoken);
 
@@ -143,7 +143,7 @@ static struct block *block_lookup (struct block *, char *);
 
 static LONGEST convert_char_literal (struct type *, LONGEST);
 
-static void write_ambiguous_var (struct block *, char *, int);
+static void write_ambiguous_var (const struct block *, char *, int);
 
 static struct type *type_int (void);
 
@@ -818,8 +818,8 @@ string_to_operator (struct stoken string)
 /* Emit expression to access an instance of SYM, in block BLOCK (if
  * non-NULL), and with :: qualification ORIG_LEFT_CONTEXT.  */
 static void
-write_var_from_sym (struct block *orig_left_context,
-		    struct block *block,
+write_var_from_sym (const struct block *orig_left_context,
+		    const struct block *block,
 		    struct symbol *sym)
 {
   if (orig_left_context == NULL && symbol_read_needs_frame (sym))
@@ -867,7 +867,7 @@ write_exp_op_with_string (enum exp_opcode opcode, struct stoken token)
  * new encoding entirely (FIXME pnh 7/20/2007).  */
 
 static void
-write_object_renaming (struct block *orig_left_context,
+write_object_renaming (const struct block *orig_left_context,
 		       const char *renamed_entity, int renamed_entity_len,
 		       const char *renaming_expr, int max_depth)
 {
@@ -1161,7 +1161,7 @@ write_selectors (char *sels)
    a temporary symbol that is valid until the next call to ada_parse.
    */
 static void
-write_ambiguous_var (struct block *block, char *name, int len)
+write_ambiguous_var (const struct block *block, char *name, int len)
 {
   struct symbol *sym =
     obstack_alloc (&temp_parse_space, sizeof (struct symbol));
@@ -1253,7 +1253,7 @@ get_symbol_field_type (struct symbol *sym, char *encoded_field_name)
    identifier).  */
 
 static struct type*
-write_var_or_type (struct block *block, struct stoken name0)
+write_var_or_type (const struct block *block, struct stoken name0)
 {
   int depth;
   char *encoded_name;

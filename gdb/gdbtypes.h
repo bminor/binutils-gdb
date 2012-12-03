@@ -1543,7 +1543,7 @@ extern struct type *lookup_typename (const struct language_defn *,
 				     const struct block *, int);
 
 extern struct type *lookup_template_type (char *, struct type *,
-					  struct block *);
+					  const struct block *);
 
 extern int get_vptr_fieldno (struct type *, struct type **);
 

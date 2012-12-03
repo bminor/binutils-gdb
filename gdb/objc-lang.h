@@ -46,7 +46,7 @@ extern void start_msglist (void);
 extern void add_msglist (struct stoken *str, int addcolon);
 extern int end_msglist (void);
 
-struct symbol *lookup_struct_typedef (char *name, struct block *block,
+struct symbol *lookup_struct_typedef (char *name, const struct block *block,
 				      int noerr);
 
 #endif

@@ -62,6 +62,7 @@
 #include "macroscope.h"
 
 #include "psymtab.h"
+#include "parser-defs.h"
 
 /* Prototypes for local functions */
 

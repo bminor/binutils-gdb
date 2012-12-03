@@ -41,7 +41,7 @@ extern int expout_ptr;
 /* If this is nonzero, this block is used as the lexical context
    for symbol names.  */
 
-extern struct block *expression_context_block;
+extern const struct block *expression_context_block;
 
 /* If expression_context_block is non-zero, then this is the PC within
    the block that we want to evaluate expressions at.  When debugging
@@ -51,12 +51,12 @@ extern CORE_ADDR expression_context_pc;
 
 /* The innermost context required by the stack and register variables
    we've encountered so far.  */
-extern struct block *innermost_block;
+extern const struct block *innermost_block;
 
 /* The block in which the most recently discovered symbol was found.
    FIXME: Should be declared along with lookup_symbol in symtab.h; is not
    related specifically to parsing.  */
-extern struct block *block_found;
+extern const struct block *block_found;
 
 /* Number of arguments seen so far in innermost function call.  */
 extern int arglist_len;
@@ -191,7 +191,7 @@ void write_exp_string_vector (int type, struct stoken_vector *vec);
 
 extern void write_exp_bitstring (struct stoken);
 
-extern void write_exp_elt_block (struct block *);
+extern void write_exp_elt_block (const struct block *);
 
 extern void write_exp_elt_objfile (struct objfile *objfile);
 

@@ -71,9 +71,9 @@ const struct exp_descriptor exp_descriptor_standard =
 struct expression *expout;
 int expout_size;
 int expout_ptr;
-struct block *expression_context_block;
+const struct block *expression_context_block;
 CORE_ADDR expression_context_pc;
-struct block *innermost_block;
+const struct block *innermost_block;
 int arglist_len;
 static struct type_stack type_stack;
 char *lexptr;
@@ -116,7 +116,7 @@ static int prefixify_subexp (struct expression *, struct expression *, int,
 			     int);
 
 static struct expression *parse_exp_in_context (char **, CORE_ADDR,
-						struct block *, int, 
+						const struct block *, int, 
 						int, int *);
 
 void _initialize_parse (void);
@@ -248,7 +248,7 @@ write_exp_elt_sym (struct symbol *expelt)
 }
 
 void
-write_exp_elt_block (struct block *b)
+write_exp_elt_block (const struct block *b)
 {
   union exp_element tmp;
 
@@ -1097,7 +1097,8 @@ prefixify_subexp (struct expression *inexpr,
    If COMMA is nonzero, stop if a comma is reached.  */
 
 struct expression *
-parse_exp_1 (char **stringptr, CORE_ADDR pc, struct block *block, int comma)
+parse_exp_1 (char **stringptr, CORE_ADDR pc, const struct block *block,
+	     int comma)
 {
   return parse_exp_in_context (stringptr, pc, block, comma, 0, NULL);
 }
@@ -1110,7 +1111,7 @@ parse_exp_1 (char **stringptr, CORE_ADDR pc, struct block *block, int comma)
    is left untouched.  */
 
 static struct expression *
-parse_exp_in_context (char **stringptr, CORE_ADDR pc, struct block *block,
+parse_exp_in_context (char **stringptr, CORE_ADDR pc, const struct block *block,
 		      int comma, int void_context_p, int *out_subexp)
 {
   volatile struct gdb_exception except;
