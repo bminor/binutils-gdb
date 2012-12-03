@@ -4166,6 +4166,7 @@ const struct elf_size_info mips_elf64_size_info =
 #define bfd_elf64_get_dynamic_reloc_upper_bound mips_elf64_get_dynamic_reloc_upper_bound
 #define bfd_elf64_canonicalize_dynamic_reloc mips_elf64_canonicalize_dynamic_reloc
 #define bfd_elf64_bfd_relax_section     _bfd_mips_relax_section
+#define bfd_elf64_mkobject		_bfd_mips_elf_mkobject
 
 /* MIPS ELF64 archive functions.  */
 #define bfd_elf64_archive_functions

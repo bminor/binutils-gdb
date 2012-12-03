@@ -1,5 +1,17 @@
 2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* elf32-mips.c (bfd_elf32_mkobject): New macro.
+	* elf64-mips.c (bfd_elf64_mkobject): Likewise.
+	* elfn32-mips.c (bfd_elf32_mkobject): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_mkobject): New prototype.
+	* elfxx-mips.c (mips_elf_obj_tdata): New struct.
+	(mips_elf_tdata): New macro.
+	(_bfd_mips_elf_mkobject): New function.
+	(mips_elf_merge_obj_attributes): Report the originating input BFD
+	on attribute conflicts.
+
+2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* elfxx-mips.c (mips_elf_merge_obj_attributes): Correct messages
 	for the -mdouble-float and -msingle-float cases throughout; make
 	all the messages report the output file consistently on the

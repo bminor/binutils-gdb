@@ -23,6 +23,8 @@
 #include "elf/internal.h"
 #include "elf/mips.h"
 
+extern bfd_boolean _bfd_mips_elf_mkobject
+  (bfd *);
 extern bfd_boolean _bfd_mips_elf_new_section_hook
   (bfd *, asection *);
 extern void _bfd_mips_elf_symbol_processing
