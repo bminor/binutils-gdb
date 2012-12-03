@@ -1,5 +1,13 @@
 2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	PR ld/10629
+	* elfxx-mips.c (mips_elf_link_hash_table): Update comment for
+	use_rld_obj_head.
+	(_bfd_mips_elf_create_dynamic_sections): Always create a
+	.rld_map section if no __rld_obj_head symbol has been seen.
+
+2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* elf32-mips.c (mips_elf32_object_p): Return right away when the
 	ABI is not compatible.
 	* elfn32-mips.c (mips_elf_n32_object_p): Likewise.

@@ -432,8 +432,8 @@ struct mips_elf_link_hash_table
   /* The size of the .compact_rel section (if SGI_COMPAT).  */
   bfd_size_type compact_rel_size;
 
-  /* This flag indicates that the value of DT_MIPS_RLD_MAP dynamic
-     entry is set to the address of __rld_obj_head as in IRIX5.  */
+  /* This flag indicates that the value of DT_MIPS_RLD_MAP dynamic entry
+     is set to the address of __rld_obj_head as in IRIX5 and IRIX6.  */
   bfd_boolean use_rld_obj_head;
 
   /* The  __rld_map or __rld_obj_head symbol. */
@@ -7293,7 +7293,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
   htab->sstubs = s;
 
-  if ((IRIX_COMPAT (abfd) == ict_irix5 || IRIX_COMPAT (abfd) == ict_none)
+  if (!mips_elf_hash_table (info)->use_rld_obj_head
       && !info->shared
       && bfd_get_linker_section (abfd, ".rld_map") == NULL)
     {
