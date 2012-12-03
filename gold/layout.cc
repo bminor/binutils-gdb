@@ -5004,6 +5004,19 @@ Layout::get_allocated_sections(Section_list* section_list) const
       section_list->push_back(*p);
 }
 
+// Store the executable sections into the section list.
+
+void
+Layout::get_executable_sections(Section_list* section_list) const
+{
+  for (Section_list::const_iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    if (((*p)->flags() & (elfcpp::SHF_ALLOC | elfcpp::SHF_EXECINSTR))
+	== (elfcpp::SHF_ALLOC | elfcpp::SHF_EXECINSTR))
+      section_list->push_back(*p);
+}
+
 // Create an output segment.
 
 Output_segment*

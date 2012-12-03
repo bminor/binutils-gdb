@@ -5644,10 +5644,6 @@ Arm_output_section<big_endian>::group_sections(
     Target_arm<big_endian>* target,
     const Task* task)
 {
-  // We only care about sections containing code.
-  if ((this->flags() & elfcpp::SHF_EXECINSTR) == 0)
-    return;
-
   // States for grouping.
   typedef enum
   {
@@ -11442,7 +11438,7 @@ Target_arm<big_endian>::group_sections(
 {
   // Group input sections and insert stub table
   Layout::Section_list section_list;
-  layout->get_allocated_sections(&section_list);
+  layout->get_executable_sections(&section_list);
   for (Layout::Section_list::const_iterator p = section_list.begin();
        p != section_list.end();
        ++p)

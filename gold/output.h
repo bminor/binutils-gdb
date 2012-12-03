@@ -103,8 +103,8 @@ class Output_data
     return this->offset_;
   }
 
-  // Reset the address and file offset.  This essentially disables the
-  // sanity testing about duplicate and unknown settings.
+  // Reset the address, file offset and data size.  This essentially
+  // disables the sanity testing about duplicate and unknown settings.
   void
   reset_address_and_file_offset()
   {
@@ -113,6 +113,14 @@ class Output_data
     if (!this->is_data_size_fixed_)
       this->is_data_size_valid_ = false;
     this->do_reset_address_and_file_offset();
+  }
+
+  // As above, but just for data size.
+  void
+  reset_data_size()
+  {
+    if (!this->is_data_size_fixed_)
+      this->is_data_size_valid_ = false;
   }
 
   // Return true if address and file offset already have reset values. In
@@ -1052,12 +1060,13 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 	       Sized_relobj<size, big_endian>* relobj, unsigned int shndx,
 	       Address address, bool is_relative);
 
-  // An absolute relocation with no symbol.
+  // An absolute or relative relocation with no symbol.
 
-  Output_reloc(unsigned int type, Output_data* od, Address address);
+  Output_reloc(unsigned int type, Output_data* od, Address address,
+	       bool is_relative);
 
   Output_reloc(unsigned int type, Sized_relobj<size, big_endian>* relobj,
-	       unsigned int shndx, Address address);
+	       unsigned int shndx, Address address, bool is_relative);
 
   // A target specific relocation.  The target will be called to get
   // the symbol index, passing ARG.  The type and offset will be set
@@ -1307,16 +1316,17 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
     : rel_(os, type, relobj, shndx, address, is_relative), addend_(addend)
   { }
 
-  // An absolute relocation with no symbol.
+  // An absolute or relative relocation with no symbol.
 
   Output_reloc(unsigned int type, Output_data* od, Address address,
-	       Addend addend)
-    : rel_(type, od, address), addend_(addend)
+	       Addend addend, bool is_relative)
+    : rel_(type, od, address, is_relative), addend_(addend)
   { }
 
   Output_reloc(unsigned int type, Sized_relobj<size, big_endian>* relobj,
-	       unsigned int shndx, Address address, Addend addend)
-    : rel_(type, relobj, shndx, address), addend_(addend)
+	       unsigned int shndx, Address address, Addend addend,
+	       bool is_relative)
+    : rel_(type, relobj, shndx, address, is_relative), addend_(addend)
   { }
 
   // A target specific relocation.  The target will be called to get
@@ -1797,13 +1807,25 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 
   void
   add_absolute(unsigned int type, Output_data* od, Address address)
-  { this->add(od, Output_reloc_type(type, od, address)); }
+  { this->add(od, Output_reloc_type(type, od, address, false)); }
 
   void
   add_absolute(unsigned int type, Output_data* od,
 	       Sized_relobj<size, big_endian>* relobj,
 	       unsigned int shndx, Address address)
-  { this->add(od, Output_reloc_type(type, relobj, shndx, address)); }
+  { this->add(od, Output_reloc_type(type, relobj, shndx, address, false)); }
+
+  // Add a relative relocation
+
+  void
+  add_relative(unsigned int type, Output_data* od, Address address)
+  { this->add(od, Output_reloc_type(type, od, address, true)); }
+
+  void
+  add_relative(unsigned int type, Output_data* od,
+	       Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address)
+  { this->add(od, Output_reloc_type(type, relobj, shndx, address, true)); }
 
   // Add a target specific relocation.  A target which calls this must
   // define the reloc_symbol_index and reloc_addend virtual functions.
@@ -2095,13 +2117,28 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   void
   add_absolute(unsigned int type, Output_data* od, Address address,
 	       Addend addend)
-  { this->add(od, Output_reloc_type(type, od, address, addend)); }
+  { this->add(od, Output_reloc_type(type, od, address, addend, false)); }
 
   void
   add_absolute(unsigned int type, Output_data* od,
 	       Sized_relobj<size, big_endian>* relobj,
 	       unsigned int shndx, Address address, Addend addend)
-  { this->add(od, Output_reloc_type(type, relobj, shndx, address, addend)); }
+  { this->add(od, Output_reloc_type(type, relobj, shndx, address, addend,
+				    false)); }
+
+  // Add a relative relocation
+
+  void
+  add_relative(unsigned int type, Output_data* od, Address address,
+	       Addend addend)
+  { this->add(od, Output_reloc_type(type, od, address, addend, true)); }
+
+  void
+  add_relative(unsigned int type, Output_data* od,
+	       Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address, Addend addend)
+  { this->add(od, Output_reloc_type(type, relobj, shndx, address, addend,
+				    true)); }
 
   // Add a target specific relocation.  A target which calls this must
   // define the reloc_symbol_index and reloc_addend virtual functions.
@@ -2700,6 +2737,15 @@ class Output_relaxed_input_section : public Output_section_data_build
   shndx() const
   { return this->shndx_; }
 
+ protected:
+  void
+  set_relobj(Relobj* relobj)
+  { this->relobj_ = relobj; }
+
+  void
+  set_shndx(unsigned int shndx)
+  { this->shndx_ = shndx; }
+
  private:
   Relobj* relobj_;
   unsigned int shndx_;
@@ -3161,6 +3207,13 @@ class Output_section : public Output_data
   void
   set_addralign(uint64_t v)
   { this->addralign_ = v; }
+
+  void
+  checkpoint_set_addralign(uint64_t val)
+  {
+    if (this->checkpoint_ != NULL)
+      this->checkpoint_->set_addralign(val);
+  }
 
   // Whether the output section index has been set.
   bool
@@ -3794,6 +3847,11 @@ class Output_section : public Output_data
   set_section_offsets_need_adjustment()
   { this->section_offsets_need_adjustment_ = true; }
 
+  // Set section_offsets_need_adjustment to be false.
+  void
+  clear_section_offsets_need_adjustment()
+  { this->section_offsets_need_adjustment_ = false; }
+
   // Adjust section offsets of input sections in this.  This is
   // requires if relaxation caused some input sections to change sizes.
   void
@@ -3847,6 +3905,13 @@ class Output_section : public Output_data
   // incremental update links.
   off_t
   allocate(off_t len, uint64_t addralign);
+
+  typedef std::vector<Input_section> Input_section_list;
+
+  // Allow access to the input sections.
+  const Input_section_list&
+  input_sections() const
+  { return this->input_sections_; }
 
  protected:
   // Return the output section--i.e., the object itself.
@@ -3970,13 +4035,6 @@ class Output_section : public Output_data
   void
   write_to_postprocessing_buffer();
 
-  typedef std::vector<Input_section> Input_section_list;
-
-  // Allow a child class to access the input sections.
-  const Input_section_list&
-  input_sections() const
-  { return this->input_sections_; }
-
   // Whether this always keeps an input section list
   bool
   always_keeps_input_sections() const
@@ -4014,6 +4072,10 @@ class Output_section : public Output_data
     uint64_t
     addralign() const
     { return this->addralign_; }
+
+    void
+    set_addralign(uint64_t val)
+    { this->addralign_ = val; }
 
     // Return the section flags.
     elfcpp::Elf_Xword

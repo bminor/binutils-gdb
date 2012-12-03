@@ -851,15 +851,16 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     os->set_needs_symtab_index();
 }
 
-// An absolute relocation.
+// An absolute or relative relocation.
 
 template<bool dynamic, int size, bool big_endian>
 Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int type,
     Output_data* od,
-    Address address)
+    Address address,
+    bool is_relative)
   : address_(address), local_sym_index_(0), type_(type),
-    is_relative_(false), is_symbolless_(false),
+    is_relative_(is_relative), is_symbolless_(false),
     is_section_symbol_(false), use_plt_offset_(false), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -873,9 +874,10 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int type,
     Sized_relobj<size, big_endian>* relobj,
     unsigned int shndx,
-    Address address)
+    Address address,
+    bool is_relative)
   : address_(address), local_sym_index_(0), type_(type),
-    is_relative_(false), is_symbolless_(false),
+    is_relative_(is_relative), is_symbolless_(false),
     is_section_symbol_(false), use_plt_offset_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);

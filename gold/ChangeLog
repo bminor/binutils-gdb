@@ -1,3 +1,44 @@
+i2012-12-03  Alan Modra  <amodra@gmail.com>
+
+	* layout.h (Layout::get_executable_sections): Declare.
+	* layout.cc (Layout::get_executable_sections): New function.
+	* arm.cc (Target_arm::group_sections): Use it.
+	(Arm_output_section::group_sections): Delete now redundant test.
+	* output.cc (Output_reloc::Output_reloc): Add is_relative.
+	param to handle relative relocs.
+	* output.h (Output_reloc::Output_reloc <absolute reloc>): Likewise.
+	(Output_data_reloc::add_absolute): Adjust.
+	(Output_data_reloc::add_relative): New function.
+	(Output_data::reset_data_size): New function.
+	(Output_relaxed_input_section::set_relobj, set_shndx): New functions.
+	(Output_section::set_addralign): New function.
+	(Output_section::checkpoint_set_addralign): New function.
+	(Output_section::clear_section_offsets_need_adjustment): New function.
+	(Output_section::input_sections): Make public.
+	* powerpc.cc (class Output_data_brlt_powerpc): New.
+	(class Stub_table, class Stub_control): New.
+	(Powerpc_relobj::has14_, set_has_14bit_branch, has_14bit_branch,
+	stub_table_, set_stub_table, stub_table): New vectors and accessor
+	functions.
+	(Target_powerpc::do_may_relax, do_relax, push_branch,
+	new_stub_table, stub_tables, brlt_section, group_sections,
+	add_branch_lookup_table, find_branch_lookup_table,
+	write_branch_lookup_table, make_brlt_section): New functions.
+	(Target_powerpc::struct Sort_sections, class Branch_info): New.
+	(Target_powerpc::brlt_section_, stub_tables_, branch_lookup_table_,
+	branch_info_): New vars.
+	(Target_powerpc::make_plt_entry, make_local_ifunc_plt_entry): Don't
+	make call stubs here.
+	(Output_data_glink): Remove all call stub handling from this class.
+	(Target_powerpc::Scan::local, global): Save interesting branch
+	relocs and relocs for ifunc.  Adjust calls to plt entry functions.
+	(Target_powerpc::do_finalize_sections): Only make reg save/restore
+	functions on final link.
+	(Target_powerpc::Relocate::relocate): Adjust lookup of call stubs.
+	Handle long branch destinations too.
+	(Target_powerpc::do_dynsym_value, do_plt_address_for_global,
+	do_plt_address_for_local): Adjust lookup of plt call stubs.
+
 2012-11-30  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.c (Target_powerpc::Scan::global): Don't emit relative

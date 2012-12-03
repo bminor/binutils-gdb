@@ -917,6 +917,10 @@ class Layout
   void
   get_allocated_sections(Section_list*) const;
 
+  // Store the executable sections into the section list.
+  void
+  get_executable_sections(Section_list*) const;
+
   // Make a section for a linker script to hold data.
   Output_section*
   make_output_section_for_script(const char* name,
