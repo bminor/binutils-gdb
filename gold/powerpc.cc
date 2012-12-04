@@ -201,12 +201,6 @@ public:
   void
   do_read_relocs(Read_relocs_data*);
 
-  // Set up some symbols, then perform Sized_relobj_file method.
-  // Occurs after garbage collection, which is why opd info can't be
-  // set up here.
-  void
-  do_scan_relocs(Symbol_table*, Layout*, Read_relocs_data*);
-
   bool
   do_find_special_sections(Read_symbols_data* sd);
 
@@ -402,6 +396,9 @@ class Target_powerpc : public Sized_target<size, big_endian>
 
   Stub_table<size, big_endian>*
   new_stub_table();
+
+  void
+  do_define_standard_symbols(Symbol_table*, Layout*);
 
   // Finalize the sections.
   void
@@ -1540,13 +1537,13 @@ Powerpc_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
     }
 }
 
-// Set up some symbols, then perform Sized_relobj_file method.
+// Set up some symbols.
 
 template<int size, bool big_endian>
 void
-Powerpc_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
-						 Layout* layout,
-						 Read_relocs_data* rd)
+Target_powerpc<size, big_endian>::do_define_standard_symbols(
+    Symbol_table* symtab,
+    Layout* layout)
 {
   if (size == 32)
     {
@@ -1588,7 +1585,6 @@ Powerpc_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
 					0, false, false);
 	}
     }
-  Sized_relobj_file<size, big_endian>::do_scan_relocs(symtab, layout, rd);
 }
 
 // Set up PowerPC target specific relobj.
