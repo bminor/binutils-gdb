@@ -109,7 +109,7 @@ gdb_test "info tracepoints" \
 \[\t \]+collect gdb_short_test.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+.
 \[\t \]+collect gdb_long_test." \
-		"5.1e: verify actions set for second tracepoint"
+		"5.2b: verify actions set for second tracepoint"
 
 # 5.3 replace actions set earlier
 

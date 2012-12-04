@@ -1,3 +1,8 @@
+2012-12-04  Yao Qi  <yao@codesourcery.com>
+
+	PR gdb/13443
+	* gdb.trace/actions.exp: Make test messages unique.
+
 2012-11-29  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/gnu-debugdata.exp (run, pipeline): Don't use lassign.
