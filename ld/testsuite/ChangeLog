@@ -1,3 +1,15 @@
+2012-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/shared.exp (build_tests): Build libneeded1b.so,
+	libneeded1a.so and libneeded1c.o.
+	(run_tests): Test --add-needed and --copy-dt-needed-entries.
+	Add tests for --no-add-needed and --no-copy-dt-needed-entries.
+
+	* ld-elf/needed1.out: New file.
+	* ld-elf/needed1a.c: Likewise.
+	* ld-elf/needed1b.c: Likewise.
+	* ld-elf/needed1c.c: Likewise.
+
 2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* ld-mips-elf/attr-gnu-4-45.d: Add missing "readelf" keyword.
