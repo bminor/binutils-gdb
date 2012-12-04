@@ -2252,6 +2252,22 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct amd64_frame_cache cache;
   CORE_ADDR pc;
+  CORE_ADDR func_addr;
+
+  if (find_pc_partial_function (start_pc, NULL, &func_addr, NULL))
+    {
+      CORE_ADDR post_prologue_pc
+	= skip_prologue_using_sal (gdbarch, func_addr);
+      struct symtab *s = find_pc_symtab (func_addr);
+
+      /* Clang always emits a line note before the prologue and another
+	 one after.  We trust clang to emit usable line notes.  */
+      if (post_prologue_pc
+	  && (s != NULL
+	      && s->producer != NULL
+	      && strncmp (s->producer, "clang ", sizeof ("clang ") - 1) == 0))
+        return max (start_pc, post_prologue_pc);
+    }
 
   amd64_init_frame_cache (&cache);
   pc = amd64_analyze_prologue (gdbarch, start_pc, 0xffffffffffffffffLL,
