@@ -95,10 +95,12 @@ if {[pipeline "nm -D" \
 }
 
 # Extract all the text (i.e. function) symbols from the debuginfo.
+# (Note that we actually also accept "D" symbols, for the benefit
+# of platforms like PowerPC64 that use function descriptors.)
 remote_file host delete ${binfile}.funcsyms
 if {[pipeline "nm" \
 	 [list [transform nm] "${binfile} --format=posix --defined-only"] \
-	 [list awk "\\{if(\\\$2==\"T\"||\\\$2==\"t\")print\\ \\\$1\\}"] \
+	 [list awk "\\{if(\\\$2==\"T\"||\\\$2==\"t\"||\\\$2==\"D\")print\\ \\\$1\\}"] \
 	 [list sort "" "" "${binfile}.funcsyms"]]} {
     return -1
 }
