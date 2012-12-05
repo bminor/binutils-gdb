@@ -9653,8 +9653,8 @@ build_plt_stub (struct ppc_link_hash_table *htab,
       bfd_vma glinkoff = GLINK_CALL_STUB_SIZE + pltindex * 8;
       bfd_vma to, from;
 
-      if (pltindex > 32767)
-	glinkoff += (pltindex - 32767) * 4;
+      if (pltindex > 32768)
+	glinkoff += (pltindex - 32768) * 4;
       to = (glinkoff
 	    + htab->glink->output_offset
 	    + htab->glink->output_section->vma);

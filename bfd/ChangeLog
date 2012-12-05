@@ -1,3 +1,8 @@
+2012-12-05  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (build_plt_stub): Fix off by one error in branch
+	to glink.
+
 2012-12-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	PR ld/10629
