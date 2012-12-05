@@ -51,6 +51,7 @@ cmd_types;
 #define CMD_DEPRECATED            0x1
 #define DEPRECATED_WARN_USER      0x2
 #define MALLOCED_REPLACEMENT      0x4
+#define DOC_ALLOCATED             0x8
 
 struct cmd_list_element
   {
@@ -112,7 +113,9 @@ struct cmd_list_element
        memory for replacement is malloc'ed.  When a command is
        undeprecated or re-deprecated at runtime we don't want to risk
        calling free on statically allocated memory, so we check this
-       flag.  */
+       flag.
+
+       bit 3: DOC_ALLOCATED, set if the doc field should be xfree'd.  */
 
     int flags;
 

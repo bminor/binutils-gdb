@@ -306,6 +306,13 @@ add_alias_cmd (char *name, char *oldname, enum command_class class,
     }
 
   c = add_cmd (name, class, NULL, old->doc, list);
+
+  /* If OLD->DOC can be freed, we should make another copy.  */
+  if ((old->flags & DOC_ALLOCATED) != 0)
+    {
+      c->doc = xstrdup (old->doc);
+      c->flags |= DOC_ALLOCATED;
+    }
   /* NOTE: Both FUNC and all the FUNCTIONs need to be copied.  */
   c->func = old->func;
   c->function = old->function;
@@ -451,6 +458,8 @@ add_setshow_cmd_full (char *name,
     }
   set = add_set_or_show_cmd (name, set_cmd, class, var_type, var,
 			     full_set_doc, set_list);
+  set->flags |= DOC_ALLOCATED;
+
   if (set_func != NULL)
     set_cmd_sfunc (set, set_func);
 
@@ -458,6 +467,7 @@ add_setshow_cmd_full (char *name,
 
   show = add_set_or_show_cmd (name, show_cmd, class, var_type, var,
 			      full_show_doc, show_list);
+  show->flags |= DOC_ALLOCATED;
   show->show_value_func = show_func;
 
   if (set_result != NULL)
@@ -769,6 +779,8 @@ delete_cmd (char *name, struct cmd_list_element **list,
 	  *prehookee = iter->hookee_pre;
 	  if (iter->hookee_post)
 	    iter->hookee_post->hook_post = 0;
+	  if (iter->doc && (iter->flags & DOC_ALLOCATED) != 0)
+	    xfree (iter->doc);
 	  *posthook = iter->hook_post;
 	  *posthookee = iter->hookee_post;
 
