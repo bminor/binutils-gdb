@@ -523,8 +523,8 @@ CORE_ADDR get_get_tsv_func_addr (void);
    function in the IPA.  */
 CORE_ADDR get_set_tsv_func_addr (void);
 
-CORE_ADDR current_insn_ptr;
-int emit_error;
+extern CORE_ADDR current_insn_ptr;
+extern int emit_error;
 
 /* Version information, from version.c.  */
 extern const char version[];

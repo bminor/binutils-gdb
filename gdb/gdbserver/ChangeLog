@@ -1,3 +1,8 @@
+2012-12-05  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/14917:
+	* server.h (current_insn_ptr, emit_error): Declare 'extern'.
+
 2012-11-28  Markus Metzger <markus.t.metzger@intel.com>
 
 	* configure.ac: Check for linux/perf_event.h.
