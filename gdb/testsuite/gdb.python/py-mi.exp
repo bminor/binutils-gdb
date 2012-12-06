@@ -182,7 +182,7 @@ mi_varobj_update_dynamic container \
   "update after next with restricted range" {
       type_changed false new_num_children 1 dynamic 1 has_more 1
   } {
-      { name {container.\[0\]} in_scope true type_changed false dynamic 1 has_more 0 }
+      { name {container.\[0\]} in_scope true type_changed false has_more 0 }
   } {
   }
 
@@ -239,7 +239,7 @@ mi_list_varobj_children outer.s {
 mi_next "next over outer update"
 
 mi_gdb_test "-var-update outer" \
-  ".done,changelist=.{name=\"outer.s.a\",in_scope=\"true\",type_changed=\"false\",dynamic=\"1\",has_more=\"0\"}." \
+  ".done,changelist=.{name=\"outer.s.a\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"}." \
   "update after updating element of outer"
 
 mi_continue_to_line \
@@ -292,6 +292,28 @@ mi_gdb_test "-var-evaluate-expression me" \
 # Regression test for python/14836.
 mi_create_dynamic_varobj children_as_list children_as_list \
     "printer whose children are returned as a list"
+
+# Regression test for bug 14741.
+mi_continue_to_line \
+    [gdb_get_line_number {breakpoint bug 14741} ${srcfile}] \
+    "step to breakpoint for bug 14741"
+
+mi_create_dynamic_varobj c c \
+  "create varobj for c"
+
+mi_gdb_test "-var-set-visualizer c ArrayPrinter" \
+  "\\^done" \
+  "choose array visualizer for c"
+
+mi_list_varobj_children c {
+    { {c.\[0\]} {\[0\]} 0 int }
+} "list children of c"
+
+mi_next "next over change of array element"
+
+mi_gdb_test "-var-update c" \
+    "\\^done,changelist=\\\[{name=\"c.\\\[0\\\]\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"}\\\]" \
+    "update varobj after element change"
 
 # C++ MI tests
 gdb_exit

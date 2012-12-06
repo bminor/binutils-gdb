@@ -54,6 +54,36 @@ class ContainerPrinter:
     def children(self):
         return self._iterator(self.val['elements'], self.val['len'])
 
+# Treats a container as array.
+class ArrayPrinter:
+    class _iterator:
+        def __init__ (self, pointer, len):
+            self.start = pointer
+            self.pointer = pointer
+            self.end = pointer + len
+
+        def __iter__(self):
+            return self
+
+        def next(self):
+            if self.pointer == self.end:
+                raise StopIteration
+            result = self.pointer
+            self.pointer = self.pointer + 1
+            return ('[%d]' % int (result - self.start), result.dereference())
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return 'array %s with %d elements' % (self.val['name'], self.val['len'])
+
+    def children(self):
+        return self._iterator(self.val['elements'], self.val['len'])
+
+    def display_hint (self):
+        return 'array'
+
 # Flag to make NoStringContainerPrinter throw an exception.
 exception_flag = False
 

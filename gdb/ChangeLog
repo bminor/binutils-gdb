@@ -1,3 +1,10 @@
+2012-12-06  Jens Elmenthaler <jens.elmenthaler@advantest.com>
+
+	PR mi/14741:
+	* mi/mi-cmd-var.c (varobj_update_one): Take value of
+	attribute "dynamic" and "displayhint" from printed child,
+	not the root variable.
+
 2012-12-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* aix-thread.c (getthrds): Fix type of 4th parameter.

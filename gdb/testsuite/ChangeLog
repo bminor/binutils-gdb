@@ -1,3 +1,14 @@
+2012-12-06  Jens Elmenthaler <jens.elmenthaler@advantest.com>
+
+	* gdb.python/py-mi.exp: Correct expected results for attribute
+	"dynamic" returned by -var-update.
+	Add test case for correct handling of "diplayhint" for children
+	of dynamic varobjs.
+	* gdb.python/py-prettyprint.c (set_itme): New function.
+	(bug_14741) New function.
+	(main) Add call to bug_14741().
+	* gdb.python/py-prettyprint.py (class ArrayPrinter): New class.
+
 2012-12-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.base/gnu-debugdata.exp: Also include "D" symbols in
