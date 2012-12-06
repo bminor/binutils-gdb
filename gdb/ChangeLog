@@ -1,3 +1,8 @@
+2012-12-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* aix-thread.c (getthrds): Fix type of 4th parameter.
+	(get_signaled_thread): Change type of variable ktid to tid_t.
+
 2012-12-06  Hui Zhu  <hui_zhu@mentor.com>
 
 	* dwarf2loc.c (dwarf_expr_frame_base): Add check for the return
