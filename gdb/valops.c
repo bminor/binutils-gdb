@@ -569,6 +569,10 @@ value_cast (struct type *type, struct value *arg2)
 	}
       return val;
     }
+  else if (code1 == TYPE_CODE_VOID)
+    {
+      return value_zero (type, not_lval);
+    }
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (type2))
     {
       if (code1 == TYPE_CODE_PTR && code2 == TYPE_CODE_PTR)
@@ -582,10 +586,6 @@ value_cast (struct type *type, struct value *arg2)
     }
   else if (VALUE_LVAL (arg2) == lval_memory)
     return value_at_lazy (type, value_address (arg2));
-  else if (code1 == TYPE_CODE_VOID)
-    {
-      return value_zero (type, not_lval);
-    }
   else
     {
       error (_("Invalid cast."));

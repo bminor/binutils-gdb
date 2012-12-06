@@ -270,3 +270,7 @@ gdb_test {print v_int_array_init[1]@1} { = \{20\}}
 # gdb's {} extension
 gdb_test_no_output "set variable v_short_array\[0\] = 42"
 gdb_test "print {short} v_short_array" "$decimal = 42"
+
+# Regression tests for cast to void.
+gdb_test "print (void) v_int_pointer" " = void"
+gdb_test "print & (void) v_char" "value not located in memory."
