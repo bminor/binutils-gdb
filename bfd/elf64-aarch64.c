@@ -1516,10 +1516,46 @@ elf64_aarch64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
   return NULL;
 }
 
+/* Support for core dump NOTE sections.  */
+
+static bfd_boolean
+elf64_aarch64_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
+{
+  int offset;
+  size_t size;
+
+  switch (note->descsz)
+    {
+      default:
+	return FALSE;
+
+      case 408:		/* sizeof(struct elf_prstatus) on Linux/arm64.  */
+	/* pr_cursig */
+	elf_tdata (abfd)->core_signal
+	  = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core_lwpid
+	  = bfd_get_32 (abfd, note->descdata + 32);
+
+	/* pr_reg */
+	offset = 112;
+	size = 288;
+
+	break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  size, note->descpos + offset);
+}
+
 #define TARGET_LITTLE_SYM               bfd_elf64_littleaarch64_vec
 #define TARGET_LITTLE_NAME              "elf64-littleaarch64"
 #define TARGET_BIG_SYM                  bfd_elf64_bigaarch64_vec
 #define TARGET_BIG_NAME                 "elf64-bigaarch64"
+
+#define elf_backend_grok_prstatus	elf64_aarch64_grok_prstatus
 
 typedef unsigned long int insn32;
 
