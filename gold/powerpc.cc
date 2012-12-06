@@ -323,7 +323,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
       got_(NULL), plt_(NULL), iplt_(NULL), brlt_section_(NULL),
       glink_(NULL), rela_dyn_(NULL), copy_relocs_(elfcpp::R_POWERPC_COPY),
       dynbss_(NULL), tlsld_got_offset_(-1U),
-      stub_tables_(), branch_lookup_table_(), branch_info_()
+      stub_tables_(), branch_lookup_table_(), branch_info_(),
+      plt_thread_safe_(false)
   {
   }
 
@@ -602,6 +603,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
 	elfcpp::Swap<32, big_endian>::writeval(oview + p->second, p->first);
       }
   }
+
+  bool
+  plt_thread_safe() const
+  { return this->plt_thread_safe_; }
 
  private:
 
@@ -944,6 +949,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
 
   typedef std::vector<Branch_info> Branches;
   Branches branch_info_;
+
+  bool plt_thread_safe_;
 };
 
 template<>
@@ -1184,13 +1191,13 @@ use_plt_offset(const Symbol* gsym, int flags)
   if (gsym->is_from_dynobj())
     return true;
 
-  // If we are generating a shared object, and gsym symbol is
+  // If we are generating a shared object, and this symbol is
   // undefined or preemptible, we need to use the PLT entry.
   if (parameters->options().shared()
       && (gsym->is_undefined() || gsym->is_preemptible()))
     return true;
 
-  // If gsym is a call to a weak undefined symbol, we need to use
+  // If this is a call to a weak undefined symbol, we need to use
   // the PLT entry; the symbol may be defined by a library loaded
   // at runtime.
   if ((flags & Symbol::FUNCTION_CALL) && gsym->is_weak_undefined())
@@ -1633,7 +1640,7 @@ public:
       symtab_(symtab), layout_(layout),
       header_ent_cnt_(size == 32 ? 3 : 1),
       header_index_(size == 32 ? 0x2000 : 0)
-  {}
+  { }
 
   class Got_entry;
 
@@ -2089,17 +2096,41 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 {
   unsigned int prev_brlt_size = 0;
   if (pass == 1)
-    this->group_sections(layout, task);
-  else
     {
-      prev_brlt_size = this->branch_lookup_table_.size();
-      this->branch_lookup_table_.clear();
-      for (typename Stub_tables::iterator p = this->stub_tables_.begin();
-	   p != this->stub_tables_.end();
-	   ++p)
+      bool thread_safe = parameters->options().plt_thread_safe();
+      if (size == 64 && !parameters->options().user_set_plt_thread_safe())
 	{
-	  (*p)->clear_long_branch_stubs();
+	  const char* const thread_starter[] =
+	    {
+	      "pthread_create",
+	      /* libstdc++ */
+	      "_ZNSt6thread15_M_start_threadESt10shared_ptrINS_10_Impl_baseEE",
+	      /* librt */
+	      "aio_init", "aio_read", "aio_write", "aio_fsync", "lio_listio",
+	      "mq_notify", "create_timer",
+	      /* libanl */
+	      "getaddrinfo_a",
+	      /* libgomp */
+	      "GOMP_parallel_start",
+	      "GOMP_parallel_loop_static_start",
+	      "GOMP_parallel_loop_dynamic_start",
+	      "GOMP_parallel_loop_guided_start",
+	      "GOMP_parallel_loop_runtime_start",
+	      "GOMP_parallel_sections_start", 
+	    };
+
+	  for (unsigned int i = 0;
+	       i < sizeof(thread_starter) / sizeof(thread_starter[0]);
+	       i++)
+	    {
+	      Symbol* sym = symtab->lookup(thread_starter[i], NULL);
+	      thread_safe = sym != NULL && sym->in_reg() && sym->in_real_elf();
+	      if (thread_safe)
+		break;
+	    }
 	}
+      this->plt_thread_safe_ = thread_safe;
+      this->group_sections(layout, task);
     }
 
   // We need address of stub tables valid for make_stub.
@@ -2115,6 +2146,20 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
       (*p)->set_address_and_size(os, off);
     }
 
+  if (pass != 1)
+    {
+      // Clear plt call stubs, long branch stubs and branch lookup table.
+      prev_brlt_size = this->branch_lookup_table_.size();
+      this->branch_lookup_table_.clear();
+      for (typename Stub_tables::iterator p = this->stub_tables_.begin();
+	   p != this->stub_tables_.end();
+	   ++p)
+	{
+	  (*p)->clear_stubs();
+	}
+    }
+
+  // Build all the stubs.
   Stub_table<size, big_endian>* ifunc_stub_table
     = this->stub_tables_.size() == 0 ? NULL : this->stub_tables_[0];
   Stub_table<size, big_endian>* one_stub_table
@@ -2126,6 +2171,7 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
       b->make_stub(one_stub_table, ifunc_stub_table, symtab);
     }
 
+  // Did anything change size?
   unsigned int num_huge_branches = this->branch_lookup_table_.size();
   bool again = num_huge_branches != prev_brlt_size;
   if (size == 64 && num_huge_branches != 0)
@@ -2146,6 +2192,9 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 	}
     }
 
+  // Set output section offsets for all input sections in an output
+  // section that just changed size.  Anything past the stubs will
+  // need updating.
   for (typename Output_sections::iterator p = os_need_update.begin();
        p != os_need_update.end();
        p++)
@@ -2341,10 +2390,12 @@ Output_data_plt_powerpc<size, big_endian>::add_local_ifunc_entry(
 }
 
 static const uint32_t add_0_11_11	= 0x7c0b5a14;
+static const uint32_t add_2_2_11	= 0x7c425a14;
 static const uint32_t add_3_3_2		= 0x7c631214;
 static const uint32_t add_3_3_13	= 0x7c636a14;
 static const uint32_t add_11_0_11	= 0x7d605a14;
 static const uint32_t add_12_2_11	= 0x7d825a14;
+static const uint32_t add_12_12_11	= 0x7d8c5a14;
 static const uint32_t addi_11_11	= 0x396b0000;
 static const uint32_t addi_12_12	= 0x398c0000;
 static const uint32_t addi_2_2		= 0x38420000;
@@ -2363,6 +2414,8 @@ static const uint32_t bcl_20_31		= 0x429f0005;
 static const uint32_t bctr		= 0x4e800420;
 static const uint32_t blr		= 0x4e800020;
 static const uint32_t blrl		= 0x4e800021;
+static const uint32_t bnectr_p4		= 0x4ce20420;
+static const uint32_t cmpldi_2_0	= 0x28220000;
 static const uint32_t cror_15_15_15	= 0x4def7b82;
 static const uint32_t cror_31_31_31	= 0x4ffffb82;
 static const uint32_t ld_0_1		= 0xe8010000;
@@ -2401,6 +2454,7 @@ static const uint32_t std_2_1		= 0xf8410000;
 static const uint32_t stfd_0_1		= 0xd8010000;
 static const uint32_t stvx_0_12_0	= 0x7c0c01ce;
 static const uint32_t sub_11_11_12	= 0x7d6c5850;
+static const uint32_t xor_11_11_11	= 0x7d6b5a78;
 
 // Write out the PLT.
 
@@ -2613,6 +2667,31 @@ Output_data_brlt_powerpc<size, big_endian>::do_write(Output_file* of)
     }
 }
 
+static inline uint32_t
+l(uint32_t a)
+{
+  return a & 0xffff;
+}
+
+static inline uint32_t
+hi(uint32_t a)
+{
+  return l(a >> 16);
+}
+
+static inline uint32_t
+ha(uint32_t a)
+{
+  return hi(a + 0x8000);
+}
+
+template<bool big_endian>
+static inline void
+write_insn(unsigned char* p, uint32_t v)
+{
+  elfcpp::Swap<32, big_endian>::writeval(p, v);
+}
+
 // Stub_table holds information about plt and long branch stubs.
 // Stubs are built in an area following some input section determined
 // by group_sections().  This input section is converted to a relaxed
@@ -2628,7 +2707,8 @@ class Stub_table : public Output_relaxed_input_section
   Stub_table(Target_powerpc<size, big_endian>* targ)
     : Output_relaxed_input_section(NULL, 0, 0),
       targ_(targ), plt_call_stubs_(), long_branch_stubs_(),
-      orig_data_size_(0), plt_size_(0), branch_size_(0), prev_size_(0)
+      orig_data_size_(0), plt_size_(0), last_plt_size_(0),
+      branch_size_(0), last_branch_size_(0)
   { }
 
   // Delayed Output_relaxed_input_section init.
@@ -2676,8 +2756,10 @@ class Stub_table : public Output_relaxed_input_section
   find_long_branch_entry(const Powerpc_relobj<size, big_endian>*, Address);
 
   void
-  clear_long_branch_stubs()
+  clear_stubs()
   {
+    this->plt_call_stubs_.clear();
+    this->plt_size_ = 0;
     this->long_branch_stubs_.clear();
     this->branch_size_ = 0;
   }
@@ -2738,42 +2820,76 @@ class Stub_table : public Output_relaxed_input_section
 	// a suitably aligned address.
 	os->checkpoint_set_addralign(this->stub_align());
       }
-    if (this->prev_size_ != this->plt_size_ + this->branch_size_)
+    if (this->last_plt_size_ != this->plt_size_
+	|| this->last_branch_size_ != this->branch_size_)
       {
-	this->prev_size_ = this->plt_size_ + this->branch_size_;
+	this->last_plt_size_ = this->plt_size_;
+	this->last_branch_size_ = this->branch_size_;
 	return true;
       }
     return false;
   }
-
-  section_size_type
-  prev_size() const
-  { return this->prev_size_; }
-
-  void
-  set_prev_size(section_size_type val)
-  { this->prev_size_ = val; }
 
   Target_powerpc<size, big_endian>*
   targ() const
   { return targ_; }
 
  private:
-  unsigned int
-  stub_align()
-  { return size == 32 ? 16 : 32; }
+  class Plt_stub_ent;
+  class Plt_stub_ent_hash;
+  typedef Unordered_map<Plt_stub_ent, unsigned int,
+			Plt_stub_ent_hash> Plt_stub_entries;
 
-  // We keep plt stubs aligned, so no fancy sizing.
+  // Alignment of stub section.
   unsigned int
-  plt_call_size() const
-  { return size == 32 ? 16 : 32; }
+  stub_align() const
+  {
+    if (size == 32)
+      return 16;
+    unsigned int min_align = 32;
+    unsigned int user_align = 1 << parameters->options().plt_align();
+    return std::max(user_align, min_align);
+  }
+
+  // Size of a given plt call stub.
+  unsigned int
+  plt_call_size(typename Plt_stub_entries::const_iterator p) const
+  {
+    if (size == 32)
+      return 16;
+
+    Address pltaddr = p->second;
+    if (p->first.sym_ == NULL 
+	|| (p->first.sym_->type() == elfcpp::STT_GNU_IFUNC
+	    && p->first.sym_->can_use_relative_reloc(false)))
+      pltaddr += this->targ_->iplt_section()->address();
+    else
+      pltaddr += this->targ_->plt_section()->address();
+    Address tocbase = this->targ_->got_section()->output_section()->address();
+    const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
+      <const Powerpc_relobj<size, big_endian>*>(p->first.object_);
+    tocbase += ppcobj->toc_base_offset();
+    Address off = pltaddr - tocbase;
+    bool static_chain = parameters->options().plt_static_chain();
+    bool thread_safe = this->targ_->plt_thread_safe();
+    unsigned int bytes = (4 * 5
+			  + 4 * static_chain
+			  + 8 * thread_safe
+			  + 4 * (ha(off) != 0)
+			  + 4 * (ha(off + 8 + 8 * static_chain) != ha(off)));
+    unsigned int align = 1 << parameters->options().plt_align();
+    if (align > 1)
+      bytes = (bytes + align - 1) & -align;
+    return bytes;
+  }
 
   // Return long branch stub size.
   unsigned int
   branch_stub_size(Address to)
   {
-    Address loc = this->stub_address() + this->plt_size_ + this->branch_size_;
-    if (loc - to + (1 << 25) < 2 << 25)
+    Address loc
+      = this->stub_address() + this->last_plt_size_ + this->branch_size_;
+    if (to - loc + (1 << 25) < 2 << 25)
       return 4;
     if (size == 64 || !parameters->options().output_is_position_independent())
       return 16;
@@ -2885,8 +3001,6 @@ class Stub_table : public Output_relaxed_input_section
   // In a sane world this would be a global.
   Target_powerpc<size, big_endian>* targ_;
   // Map sym/object/addend to stub offset.
-  typedef Unordered_map<Plt_stub_ent, unsigned int,
-			Plt_stub_ent_hash> Plt_stub_entries;
   Plt_stub_entries plt_call_stubs_;
   // Map destination address to stub offset.
   typedef Unordered_map<Branch_stub_ent, unsigned int,
@@ -2895,7 +3009,7 @@ class Stub_table : public Output_relaxed_input_section
   // size of input section
   section_size_type orig_data_size_;
   // size of stubs
-  section_size_type plt_size_, branch_size_, prev_size_;
+  section_size_type plt_size_, last_plt_size_, branch_size_, last_branch_size_;
 };
 
 // Make a new stub table, and record.
@@ -2943,8 +3057,10 @@ Stub_table<size, big_endian>::add_plt_call_entry(
 {
   Plt_stub_ent ent(object, gsym, r_type, addend);
   Address off = this->plt_size_;
-  if (this->plt_call_stubs_.insert(std::make_pair(ent, off)).second)
-    this->plt_size_ = off + this->plt_call_size();
+  std::pair<typename Plt_stub_entries::iterator, bool> p
+    = this->plt_call_stubs_.insert(std::make_pair(ent, off));
+  if (p.second)
+    this->plt_size_ = off + this->plt_call_size(p.first);
 }
 
 template<int size, bool big_endian>
@@ -2957,8 +3073,10 @@ Stub_table<size, big_endian>::add_plt_call_entry(
 {
   Plt_stub_ent ent(object, locsym_index, r_type, addend);
   Address off = this->plt_size_;
-  if (this->plt_call_stubs_.insert(std::make_pair(ent, off)).second)
-    this->plt_size_ = off + this->plt_call_size();
+  std::pair<typename Plt_stub_entries::iterator, bool> p
+    = this->plt_call_stubs_.insert(std::make_pair(ent, off));
+  if (p.second)
+    this->plt_size_ = off + this->plt_call_size(p.first);
 }
 
 // Find a plt call stub.
@@ -3104,31 +3222,6 @@ Output_data_glink<size, big_endian>::set_final_data_size()
   this->set_data_size(total);
 }
 
-static inline uint32_t
-l(uint32_t a)
-{
-  return a & 0xffff;
-}
-
-static inline uint32_t
-hi(uint32_t a)
-{
-  return l(a >> 16);
-}
-
-static inline uint32_t
-ha(uint32_t a)
-{
-  return hi(a + 0x8000);
-}
-
-template<bool big_endian>
-static inline void
-write_insn(unsigned char* p, uint32_t v)
-{
-  elfcpp::Swap<32, big_endian>::writeval(p, v);
-}
-
 // Write out plt and long branch stub code.
 
 template<int size, bool big_endian>
@@ -3167,14 +3260,14 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	       cs != this->plt_call_stubs_.end();
 	       ++cs)
 	    {
-	      Address plt_addr;
+	      Address pltoff;
 	      bool is_ifunc;
 	      const Symbol* gsym = cs->first.sym_;
 	      if (gsym != NULL)
 		{
 		  is_ifunc = (gsym->type() == elfcpp::STT_GNU_IFUNC
 			      && gsym->can_use_relative_reloc(false));
-		  plt_addr = gsym->plt_offset();
+		  pltoff = gsym->plt_offset();
 		}
 	      else
 		{
@@ -3182,8 +3275,9 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		  const Sized_relobj_file<size, big_endian>* relobj
 		    = cs->first.object_;
 		  unsigned int local_sym_index = cs->first.locsym_;
-		  plt_addr = relobj->local_plt_offset(local_sym_index);
+		  pltoff = relobj->local_plt_offset(local_sym_index);
 		}
+	      Address plt_addr = pltoff;
 	      if (is_ifunc)
 		{
 		  if (iplt_base == invalid_address)
@@ -3195,43 +3289,86 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	      const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
 		<const Powerpc_relobj<size, big_endian>*>(cs->first.object_);
 	      Address got_addr = got_os_addr + ppcobj->toc_base_offset();
-	      Address pltoff = plt_addr - got_addr;
+	      Address off = plt_addr - got_addr;
 
-	      if (pltoff + 0x80008000 > 0xffffffff || (pltoff & 7) != 0)
+	      if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
 		gold_error(_("%s: linkage table error against `%s'"),
 			   cs->first.object_->name().c_str(),
 			   cs->first.sym_->demangled_name().c_str());
 
-	      p = oview + cs->second;
-	      if (ha(pltoff) != 0)
+	      bool static_chain = parameters->options().plt_static_chain();
+	      bool thread_safe = this->targ_->plt_thread_safe();
+	      bool use_fake_dep = false;
+	      Address cmp_branch_off = 0;
+	      if (thread_safe)
 		{
-		  write_insn<big_endian>(p, addis_12_2 + ha(pltoff)),	p += 4;
+		  unsigned int pltindex
+		    = ((pltoff - this->targ_->first_plt_entry_offset())
+		       / this->targ_->plt_entry_size());
+		  Address glinkoff
+		    = (this->targ_->glink_section()->pltresolve_size
+		       + pltindex * 8);
+		  if (pltindex > 32768)
+		    glinkoff += (pltindex - 32768) * 4;
+		  Address to
+		    = this->targ_->glink_section()->address() + glinkoff;
+		  Address from
+		    = (this->stub_address() + cs->second + 24
+		       + 4 * (ha(off) != 0)
+		       + 4 * (ha(off + 8 + 8 * static_chain) != ha(off))
+		       + 4 * static_chain);
+		  cmp_branch_off = to - from;
+		  use_fake_dep = cmp_branch_off + (1 << 25) >= (1 << 26);
+		}
+
+	      p = oview + cs->second;
+	      if (ha(off) != 0)
+		{
 		  write_insn<big_endian>(p, std_2_1 + 40),		p += 4;
-		  write_insn<big_endian>(p, ld_11_12 + l(pltoff)),	p += 4;
-		  if (ha(pltoff + 16) != ha(pltoff))
+		  write_insn<big_endian>(p, addis_12_2 + ha(off)),	p += 4;
+		  write_insn<big_endian>(p, ld_11_12 + l(off)),		p += 4;
+		  if (ha(off + 8 + 8 * static_chain) != ha(off))
 		    {
-		      write_insn<big_endian>(p, addi_12_12 + l(pltoff)),p += 4;
-		      pltoff = 0;
+		      write_insn<big_endian>(p, addi_12_12 + l(off)),	p += 4;
+		      off = 0;
 		    }
 		  write_insn<big_endian>(p, mtctr_11),			p += 4;
-		  write_insn<big_endian>(p, ld_2_12 + l(pltoff + 8)),	p += 4;
-		  write_insn<big_endian>(p, ld_11_12 + l(pltoff + 16)),	p += 4;
-		  write_insn<big_endian>(p, bctr);
+		  if (use_fake_dep)
+		    {
+		      write_insn<big_endian>(p, xor_11_11_11),		p += 4;
+		      write_insn<big_endian>(p, add_12_12_11),		p += 4;
+		    }
+		  write_insn<big_endian>(p, ld_2_12 + l(off + 8)),	p += 4;
+		  if (static_chain)
+		    write_insn<big_endian>(p, ld_11_12 + l(off + 16)),	p += 4;
 		}
 	      else
 		{
 		  write_insn<big_endian>(p, std_2_1 + 40),		p += 4;
-		  write_insn<big_endian>(p, ld_11_2 + l(pltoff)),	p += 4;
-		  if (ha(pltoff + 16) != ha(pltoff))
+		  write_insn<big_endian>(p, ld_11_2 + l(off)),	p += 4;
+		  if (ha(off + 8 + 8 * static_chain) != ha(off))
 		    {
-		      write_insn<big_endian>(p, addi_2_2 + l(pltoff)),	p += 4;
-		      pltoff = 0;
+		      write_insn<big_endian>(p, addi_2_2 + l(off)),	p += 4;
+		      off = 0;
 		    }
 		  write_insn<big_endian>(p, mtctr_11),			p += 4;
-		  write_insn<big_endian>(p, ld_11_2 + l(pltoff + 16)),	p += 4;
-		  write_insn<big_endian>(p, ld_2_2 + l(pltoff + 8)),	p += 4;
-		  write_insn<big_endian>(p, bctr);
+		  if (use_fake_dep)
+		    {
+		      write_insn<big_endian>(p, xor_11_11_11),		p += 4;
+		      write_insn<big_endian>(p, add_2_2_11),		p += 4;
+		    }
+		  if (static_chain)
+		    write_insn<big_endian>(p, ld_11_2 + l(off + 16)),	p += 4;
+		  write_insn<big_endian>(p, ld_2_2 + l(off + 8)),	p += 4;
 		}
+	      if (thread_safe && !use_fake_dep)
+		{
+		  write_insn<big_endian>(p, cmpldi_2_0),		p += 4;
+		  write_insn<big_endian>(p, bnectr_p4),			p += 4;
+		  write_insn<big_endian>(p, b | (cmp_branch_off & 0x3fffffc));
+		}
+	      else
+		write_insn<big_endian>(p, bctr);
 	    }
 	}
 
@@ -3336,17 +3473,17 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		      got_addr = g_o_t;
 		    }
 
-		  Address pltoff = plt_addr - got_addr;
-		  if (ha(pltoff) == 0)
+		  Address off = plt_addr - got_addr;
+		  if (ha(off) == 0)
 		    {
-		      write_insn<big_endian>(p +  0, lwz_11_30 + l(pltoff));
+		      write_insn<big_endian>(p +  0, lwz_11_30 + l(off));
 		      write_insn<big_endian>(p +  4, mtctr_11);
 		      write_insn<big_endian>(p +  8, bctr);
 		    }
 		  else
 		    {
-		      write_insn<big_endian>(p +  0, addis_11_30 + ha(pltoff));
-		      write_insn<big_endian>(p +  4, lwz_11_11 + l(pltoff));
+		      write_insn<big_endian>(p +  0, addis_11_30 + ha(off));
+		      write_insn<big_endian>(p +  4, lwz_11_11 + l(off));
 		      write_insn<big_endian>(p +  8, mtctr_11);
 		      write_insn<big_endian>(p + 12, bctr);
 		    }

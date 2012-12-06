@@ -936,6 +936,18 @@ class General_options
   DEFINE_bool(pipeline_knowledge, options::ONE_DASH, '\0', false,
 	      NULL, N_("(ARM only) Ignore for backward compatibility"));
 
+  DEFINE_var(plt_align, options::TWO_DASHES, '\0', 0, "5",
+	     N_("(PowerPC64 only) Align PLT call stubs to fit cache lines"),
+	     N_("[=P2ALIGN]"), true, int, int, options::parse_uint);
+
+  DEFINE_bool(plt_static_chain, options::TWO_DASHES, '\0', false,
+	      N_("(PowerPC64 only) PLT call stubs should load r11"),
+	      N_("(PowerPC64 only) PLT call stubs should not load r11"));
+
+  DEFINE_bool(plt_thread_safe, options::TWO_DASHES, '\0', false,
+	      N_("(PowerPC64 only) PLT call stubs with load-load barrier"),
+	      N_("(PowerPC64 only) PLT call stubs without barrier"));
+
 #ifdef ENABLE_PLUGINS
   DEFINE_special(plugin, options::TWO_DASHES, '\0',
                  N_("Load a plugin library"), N_("PLUGIN"));
@@ -1016,9 +1028,10 @@ class General_options
               N_("Strip LTO intermediate code sections"), NULL);
 
   DEFINE_int(stub_group_size, options::TWO_DASHES , '\0', 1,
-             N_("(ARM only) The maximum distance from instructions in a group "
-		"of sections to their stubs.  Negative values mean stubs "
-		"are always after the group. 1 means using default size.\n"),
+             N_("(ARM, PowerPC only) The maximum distance from instructions "
+		"in a group of sections to their stubs.  Negative values mean "
+		"stubs are always after (PowerPC before) the group.  1 means "
+		"use default size.\n"),
 	     N_("SIZE"));
 
   DEFINE_bool(no_keep_memory, options::TWO_DASHES, '\0', false,

@@ -1,3 +1,27 @@
+2012-12-06  Alan Modra  <amodra@gmail.com>
+
+	* options.h (General_options): Add plt_align, plt_static_chain,
+	plt_thread_safe.  Update stub_group_size help text.
+	* powerpc.cc (Target_powerpc::plt_thread_safe): New access function
+	for new plt_thread_safe_ var.
+	(use_plt_offset): Correct comments.
+	(Target_powerpc::do_relax): Look for thread creation symbols to
+	determine default plt_thread_safe value.  Clear plt call stubs
+	as well as branch stubs each iteration.
+	(add_2_2_11, add_12_12_11, bnectr_p4, cmpldi_2_0, xor_11_11_11): New
+	insn constants.
+	(l, hi, ha, write_insn): Move earlier.
+	(Stub_table): Delete prev_size, add last_plt_size and last_branch_size.
+	(Stub_table::clear_stubs): Rename from clear_long_branch_stubs, clear
+	plt stubs too.
+	(Stub_table::update_size): Adjust.
+	(Stub_table::prev_size, set_prev_size): Delete.
+	(Stub_table::stub_align): Let --plt-align affect result.
+	(Stub_table::plt_call_size): Calculate sizes for various stubs.
+	(Stub_table::branch_stub_size): Use last_plt_size in address calc.
+	(Stub_table::add_plt_call_stub): Pass iterator to plt_call_size.
+	(Stub_table::do_write): Support more stub variants.
+
 2012-12-04  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Powerpc_relobj::do_scan_relocs): Delete.
