@@ -8568,7 +8568,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (! info->relocatable
       && hmips->possibly_dynamic_relocs != 0
       && (h->root.type == bfd_link_hash_defweak
-	  || !h->def_regular
+	  || (!h->def_regular && !ELF_COMMON_DEF_P (h))
 	  || info->shared))
     {
       bfd_boolean do_copy = TRUE;
