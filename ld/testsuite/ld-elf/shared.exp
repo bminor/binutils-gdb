@@ -188,6 +188,21 @@ set build_tests {
   {"Build libneeded1c.o"
    "-r -nostdlib" ""
    {needed1c.c} {} "libneeded1c.o"}
+  {"Build libneeded1pic.o"
+   "-r -nostdlib" "-fPIC"
+   {needed1c.c} {} "libneeded1pic.o"}
+  {"Build needed1a.so with --add-needed"
+   "-shared tmpdir/libneeded1pic.o -Wl,--add-needed,-rpath=tmpdir,-z,defs -Ltmpdir -lneeded1a" ""
+   {dummy.c} {} "needed1a.so"}
+  {"Build needed1b.so with --copy-dt-needed-entries"
+   "-shared tmpdir/libneeded1pic.o -Wl,--copy-dt-needed-entries,-rpath=tmpdir,-z,defs -Ltmpdir -lneeded1a" ""
+   {dummy.c} {} "needed1b.so"}
+  {"Build needed1a.so with --no-add-needed"
+   "-shared tmpdir/libneeded1pic.o -Wl,--no-add-needed -Ltmpdir -lneeded1a" ""
+   {dummy.c} {} "needed1c.so"}
+  {"Build needed1b.so with --no-copy-dt-needed-entries"
+   "-shared tmpdir/libneeded1pic.o -Wl,--no-copy-dt-needed-entries -Ltmpdir -lneeded1a" ""
+   {dummy.c} {} "needed1d.so"}
 }
 
 run_cc_link_tests $build_tests
@@ -348,6 +363,20 @@ if { [ regexp "'bar' is defined in DSO tmpdir/libneeded1b.so" $exec_output ] } {
 set testname "--no-copy-dt-needed-entries"
 set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag tmpdir/libneeded1c.o -Wl,--no-copy-dt-needed-entries,-rpath-link=tmpdir -Ltmpdir -lneeded1a"]
 if { [ regexp "'bar' is defined in DSO tmpdir/libneeded1b.so" $exec_output ] } {
+    pass $testname
+} {
+    fail $testname
+}
+set testname "--no-add-needed -shared"
+set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -shared tmpdir/libneeded1pic.o -Wl,--no-add-needed,-z,defs -Ltmpdir -lneeded1a"]
+if { [ regexp "undefined reference to `bar'" $exec_output ] } {
+    pass $testname
+} {
+    fail $testname
+}
+set testname "--no-copy-dt-needed-entries -shared"
+set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -shared tmpdir/libneeded1pic.o -Wl,--no-copy-dt-needed-entries,-z,defs -Ltmpdir -lneeded1a"]
+if { [ regexp "undefined reference to `bar'" $exec_output ] } {
     pass $testname
 } {
     fail $testname

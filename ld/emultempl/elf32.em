@@ -1181,8 +1181,6 @@ gld${EMULATION_NAME}_after_open (void)
      special action by the person doing the link.  Note that the
      needed list can actually grow while we are stepping through this
      loop.  */
-  if (!link_info.executable)
-    return;
   needed = bfd_elf_get_needed_list (link_info.output_bfd, &link_info);
   for (l = needed; l != NULL; l = l->next)
     {
@@ -1191,9 +1189,13 @@ gld${EMULATION_NAME}_after_open (void)
       int force;
 
       /* If the lib that needs this one was --as-needed and wasn't
-	 found to be needed, then this lib isn't needed either.  */
+	 found to be needed, then this lib isn't needed either.  Skip
+	 the lib when creating a shared object unless we are copying
+	 DT_NEEDED entres.  */
       if (l->by != NULL
-	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0)
+	  && ((bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0
+	      || (!link_info.executable
+		  && bfd_elf_get_dyn_lib_class (l->by) & DYN_NO_ADD_NEEDED) != 0))
 	continue;
 
       /* If we've already seen this file, skip it.  */

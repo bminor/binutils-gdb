@@ -1,3 +1,12 @@
+2012-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14915
+	* ld-elf/shared.exp (build_tests): Test --add-needed,
+	--copy-dt-needed-entries, --no-add-needed and
+	--no-copy-dt-needed-entries with -shared.
+	Add tests for --no-add-needed and --no-copy-dt-needed-entries
+	with -shared.
+
 2012-12-06  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/comm-data4.d, ld-elf/comm-data4.s: New test.

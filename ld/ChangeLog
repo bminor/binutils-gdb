@@ -1,3 +1,10 @@
+2012-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14915
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Also
+	check DT_NEEDED entries when creating shared object with
+	--copy-dt-needed-entries.
+
 2012-12-05  Leif Ekblad  <leif@rdos.net>
 
 	* configure.tgt: Add x86_64-*-rdos.
