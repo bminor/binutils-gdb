@@ -1,3 +1,9 @@
+2012-12-06  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/programmer-friendly.s: Add tests for LDR literal with
+	the auto-generation of literal in pool.
+	* gas/aarch64/programmer-friendly.d: Update.
+
 2012-11-27  Roland McGrath  <mcgrathr@google.com>
 
 	* lib/gas-defs.exp (run_dump_test): If as options include
