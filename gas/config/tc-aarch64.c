@@ -484,25 +484,6 @@ skip_past_char (char **str, char c)
 
 /* Arithmetic expressions (possibly involving symbols).	 */
 
-/* Return TRUE if anything in the expression *SP is a bignum.  */
-
-static bfd_boolean
-exp_has_bignum_p (symbolS * sp)
-{
-  if (symbol_get_value_expression (sp)->X_op == O_big)
-    return TRUE;
-
-  if (symbol_get_value_expression (sp)->X_add_symbol)
-    {
-      return (exp_has_bignum_p (symbol_get_value_expression (sp)->X_add_symbol)
-	      || (symbol_get_value_expression (sp)->X_op_symbol
-		  && exp_has_bignum_p (symbol_get_value_expression (sp)->
-				     X_op_symbol)));
-    }
-
-  return FALSE;
-}
-
 static bfd_boolean in_my_get_expression_p = FALSE;
 
 /* Third argument to my_get_expression.	 */
@@ -570,23 +551,6 @@ my_get_expression (expressionS * ep, char **str, int prefix_mode,
 #else
   (void) seg;
 #endif
-
-  /* Get rid of any bignums now, so that we don't generate an error for which
-     we can't establish a line number later on.  Big numbers are never valid
-     in instructions, which is where this routine is always called.  */
-  if (ep->X_op == O_big
-      || (ep->X_add_symbol
-	  && (exp_has_bignum_p (ep->X_add_symbol)
-	      || (ep->X_op_symbol && exp_has_bignum_p (ep->X_op_symbol)))))
-    {
-      if (prefix_present_p && error_p ())
-	set_fatal_syntax_error (_("invalid constant"));
-      else
-	set_first_syntax_error (_("invalid constant"));
-      *str = input_line_pointer;
-      input_line_pointer = save_in;
-      return FALSE;
-    }
 
   *str = input_line_pointer;
   input_line_pointer = save_in;
@@ -1730,7 +1694,7 @@ s_ltorg (int ignored ATTRIBUTE_UNUSED)
   char sym_name[20];
   int align;
 
-  for (align = 2; align < 4; align++)
+  for (align = 2; align <= 4; align++)
     {
       int size = 1 << align;
 
@@ -5275,6 +5239,7 @@ programmer_friendly_fixup (aarch64_instruction *instr)
 	  if (op == OP_LDRSW_LIT)
 	    size = 4;
 	  if (instr->reloc.exp.X_op != O_constant
+	      && instr->reloc.exp.X_op != O_big
 	      && instr->reloc.exp.X_op != O_symbol)
 	    {
 	      record_operand_error (opcode, 1,

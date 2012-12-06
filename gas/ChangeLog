@@ -1,3 +1,10 @@
+2012-12-06  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (exp_has_bignum_p): Remove.
+	(my_get_expression): Not get rid of bignums.
+	(s_ltorg): Increase the range of 'align'.
+	(programmer_friendly_fixup): Allow bignum expression.
+
 2012-11-29  David Holsgrove  <david.holsgrove@xilinx.com>
 
 	* config/tc-microblaze.c: Rename INST_TYPE_RD_R1_SPECIAL to

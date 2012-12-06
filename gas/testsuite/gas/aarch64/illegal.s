@@ -539,3 +539,8 @@
 
 	msr	daifset, x0
 	msr	daifclr, x0
+
+	// No 16-byte relocation
+	ldr	q0, =one_label
+
+one_label:

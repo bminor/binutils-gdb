@@ -1,3 +1,11 @@
+2012-12-06  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/illegal.s: Add test for unaccepted LDR literal.
+	* gas/aarch64/illegal.l: Update.
+	* gas/aarch64/programmer-friendly.s: Add tests for LDR literal with
+	the auto-generation of literal in pool.
+	* gas/aarch64/programmer-friendly.d: Update.
+
 2012-11-28  Julian Brown  <julian@codesourcery.com>
 
 	* gas/arm/bl-local-2.s: New test.
