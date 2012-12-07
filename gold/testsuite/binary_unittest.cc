@@ -1,6 +1,6 @@
 // binary_unittest.cc -- test Binary_to_elf
 
-// Copyright 2008 Free Software Foundation, Inc.
+// Copyright 2008, 2012 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -33,6 +33,7 @@
 #include "options.h"
 #include "binary.h"
 #include "object.h"
+#include "descriptors.h"
 
 #include "test.h"
 #include "testfile.h"
@@ -53,7 +54,7 @@ Sized_binary_test()
   // Use the executable itself as the binary data.
   struct stat st;
   CHECK(::stat(gold::program_name, &st) == 0);
-  int o = ::open(gold::program_name, O_RDONLY);
+  int o = open_descriptor(-1, gold::program_name, O_RDONLY);
   CHECK(o >= 0);
   unsigned char* filedata = new unsigned char[st.st_size];
   CHECK(::read(o, filedata, st.st_size) == st.st_size);
