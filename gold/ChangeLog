@@ -1,3 +1,12 @@
+2012-12-06  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.ac (HAVE_ZLIB): Use AM_ZLIB instead of AC_SEARCH_LIBS.
+	Use $ac_cv_header_zlib_h = yes as the condition in AM_CONDITIONAL.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* testsuite/Makefile.in: Regenerate.
+
 2012-11-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/14858
