@@ -183,7 +183,7 @@ set build_tests {
    "-shared" "-fPIC"
    {needed1b.c} {} "libneeded1b.so"}
   {"Build libneeded1a.so"
-   "-shared -Ltmpdir -lneeded1b" "-fPIC"
+   "-shared -Wl,--add-needed,--no-as-needed -Ltmpdir -lneeded1b" "-fPIC"
    {needed1a.c} {} "libneeded1a.so"}
   {"Build libneeded1c.o"
    "-r -nostdlib" ""
