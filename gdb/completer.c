@@ -396,7 +396,7 @@ expression_completer (struct cmd_list_element *ignore,
   fieldname = NULL;
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      type = parse_field_expression (text, &fieldname);
+      type = parse_expression_for_completion (text, &fieldname);
     }
   if (except.reason < 0)
     return NULL;

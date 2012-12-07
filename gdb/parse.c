@@ -81,9 +81,8 @@ char *prev_lexptr;
 int paren_depth;
 int comma_terminates;
 
-/* True if parsing an expression to find a field reference.  This is
-   only used by completion.  */
-int in_parse_field;
+/* True if parsing an expression to attempt completion.  */
+int parse_completion;
 
 /* The index of the last struct expression directly before a '.' or
    '->'.  This is set when parsing and is only used when completing a
@@ -1191,7 +1190,7 @@ parse_exp_in_context (char **stringptr, CORE_ADDR pc, const struct block *block,
     }
   if (except.reason < 0)
     {
-      if (! in_parse_field)
+      if (! parse_completion)
 	{
 	  xfree (expout);
 	  throw_exception (except);
@@ -1245,7 +1244,7 @@ parse_expression (char *string)
    *NAME must be freed by the caller.  */
 
 struct type *
-parse_field_expression (char *string, char **name)
+parse_expression_for_completion (char *string, char **name)
 {
   struct expression *exp = NULL;
   struct value *val;
@@ -1254,10 +1253,10 @@ parse_field_expression (char *string, char **name)
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      in_parse_field = 1;
+      parse_completion = 1;
       exp = parse_exp_in_context (&string, 0, 0, 0, 0, &subexp);
     }
-  in_parse_field = 0;
+  parse_completion = 0;
   if (except.reason < 0 || ! exp)
     return NULL;
   if (expout_last_struct == -1)

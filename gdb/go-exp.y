@@ -1124,7 +1124,7 @@ lex_one_token (void)
       /* Might be a floating point number.  */
       if (lexptr[1] < '0' || lexptr[1] > '9')
 	{
-	  if (in_parse_field)
+	  if (parse_completion)
 	    last_was_structop = 1;
 	  goto symbol;		/* Nope, must be a symbol. */
 	}
@@ -1311,7 +1311,7 @@ lex_one_token (void)
   if (*tokstart == '$')
     return DOLLAR_VARIABLE;
 
-  if (in_parse_field && *lexptr == '\0')
+  if (parse_completion && *lexptr == '\0')
     saw_name_at_eof = 1;
   return NAME;
 }

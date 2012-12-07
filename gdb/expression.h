@@ -98,14 +98,14 @@ struct expression
 
 extern struct expression *parse_expression (char *);
 
-extern struct type *parse_field_expression (char *, char **);
+extern struct type *parse_expression_for_completion (char *, char **);
 
 extern struct expression *parse_exp_1 (char **, CORE_ADDR pc,
 				       const struct block *, int);
 
 /* For use by parsers; set if we want to parse an expression and
-   attempt to complete a field name.  */
-extern int in_parse_field;
+   attempt completion.  */
+extern int parse_completion;
 
 /* The innermost context required by the stack and register variables
    we've encountered so far.  To use this, set it to NULL, then call

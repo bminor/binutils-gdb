@@ -1237,7 +1237,7 @@ yylex (void)
       /* Might be a floating point number.  */
       if (lexptr[1] < '0' || lexptr[1] > '9')
 	{
-	  if (in_parse_field)
+	  if (parse_completion)
 	    last_was_structop = 1;
 	  goto symbol;		/* Nope, must be a symbol.  */
 	}
@@ -1529,7 +1529,7 @@ yylex (void)
 
     if (search_field && current_type)
       is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
-    if (is_a_field || in_parse_field)
+    if (is_a_field || parse_completion)
       sym = NULL;
     else
       sym = lookup_symbol (tmp, expression_context_block,
@@ -1544,7 +1544,7 @@ yylex (void)
          }
        if (search_field && current_type)
 	 is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
-       if (is_a_field || in_parse_field)
+       if (is_a_field || parse_completion)
 	 sym = NULL;
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
@@ -1572,7 +1572,7 @@ yylex (void)
           }
        if (search_field && current_type)
 	 is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
-       if (is_a_field || in_parse_field)
+       if (is_a_field || parse_completion)
 	 sym = NULL;
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
