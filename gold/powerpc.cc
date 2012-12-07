@@ -3239,9 +3239,6 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
   unsigned char* const oview = of->get_output_view(off, oview_size);
   unsigned char* p;
 
-  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
-  static const Address invalid_address = static_cast<Address>(0) - 1;
-
   if (size == 64)
     {
       const Output_data_got_powerpc<size, big_endian>* got
@@ -6983,5 +6980,15 @@ Target_selector_powerpc<32, true> target_selector_ppc32;
 Target_selector_powerpc<32, false> target_selector_ppc32le;
 Target_selector_powerpc<64, true> target_selector_ppc64;
 Target_selector_powerpc<64, false> target_selector_ppc64le;
+
+// Instantiate these constants for -O0
+template<int size, bool big_endian>
+const int Output_data_glink<size, big_endian>::pltresolve_size;
+template<int size, bool big_endian>
+const typename Stub_table<size, big_endian>::Address
+  Stub_table<size, big_endian>::invalid_address;
+template<int size, bool big_endian>
+const typename Target_powerpc<size, big_endian>::Address
+  Target_powerpc<size, big_endian>::invalid_address;
 
 } // End anonymous namespace.
