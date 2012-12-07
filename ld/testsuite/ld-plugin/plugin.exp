@@ -157,7 +157,11 @@ set plugin_extra_elf_tests [list \
 			-plugin-opt sym:${_}func3::0:3:0 \
 			-plugin-opt dumpresolutions \
 			-plugin-opt add:tmpdir/func.o \
-    $testobjfiles $libs --verbose=2" "" "" {{ld plugin-12.d}} "main.x" ] \
+			-plugin-opt add:tmpdir/func1p.o \
+			-plugin-opt add:tmpdir/func2i.o \
+			-plugin-opt add:tmpdir/func3h.o \
+    $testobjfiles $libs --verbose=2" "" "" {{ld plugin-12.d} \
+				{readelf -s plugin-vis-1.d}} "main.x" ] \
 ]
 
 if { !$can_compile || $failed_compile } {
@@ -174,7 +178,10 @@ if { !$can_compile || $failed_compile } {
 
 run_ld_link_tests $plugin_tests
 
-if { [is_elf_format] } {
+if { [is_elf_format] \
+     && [ld_compile "$CC $CFLAGS" $srcdir/$subdir/func1p.c tmpdir/func1p.o] \
+     && [ld_compile "$CC $CFLAGS" $srcdir/$subdir/func2i.c tmpdir/func2i.o] \
+     && [ld_compile "$CC $CFLAGS" $srcdir/$subdir/func3h.c tmpdir/func3h.o] } {
     run_ld_link_tests $plugin_extra_elf_tests
 }
 
