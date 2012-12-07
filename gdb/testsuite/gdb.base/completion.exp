@@ -555,6 +555,14 @@ gdb_test "complete p &values\[0\]->z" \
     "p &values.0.->z_field" \
     "completion of field in anonymous union"
 
+gdb_test "complete ptype &values\[0\]->z" \
+    "ptype &values.0.->z_field" \
+    "ptype completion of field in anonymous union"
+
+gdb_test "complete whatis &values\[0\]->z" \
+    "whatis &values.0.->z_field" \
+    "whatis completion of field in anonymous union"
+
 # The following tests used to simply try to complete `${objdir}/file',
 # and so on.  The problem is that ${objdir} can be very long; the
 # completed filename may be more than eighty characters wide.  When

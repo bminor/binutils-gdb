@@ -39,6 +39,7 @@
 #include <ctype.h>
 #include "cli/cli-utils.h"
 #include "python/python.h"
+#include "completer.h"
 
 extern void _initialize_typeprint (void);
 
@@ -680,7 +681,9 @@ show_print_type_typedefs (struct ui_file *file, int from_tty,
 void
 _initialize_typeprint (void)
 {
-  add_com ("ptype", class_vars, ptype_command, _("\
+  struct cmd_list_element *c;
+
+  c = add_com ("ptype", class_vars, ptype_command, _("\
 Print definition of type TYPE.\n\
 Usage: ptype[/FLAGS] TYPE-NAME | EXPRESSION\n\
 Argument may be a type name defined by typedef, or \"struct STRUCT-TAG\"\n\
@@ -694,10 +697,12 @@ Available FLAGS are:\n\
   /M    print methods defined in a class\n\
   /t    do not print typedefs defined in a class\n\
   /T    print typedefs defined in a class"));
+  set_cmd_completer (c, expression_completer);
 
-  add_com ("whatis", class_vars, whatis_command,
-	   _("Print data type of expression EXP.\n\
+  c = add_com ("whatis", class_vars, whatis_command,
+	       _("Print data type of expression EXP.\n\
 Only one level of typedefs is unrolled.  See also \"ptype\"."));
+  set_cmd_completer (c, expression_completer);
 
   add_prefix_cmd ("type", no_class, show_print_type,
 		  _("Generic command for showing type-printing settings."),
