@@ -42,6 +42,5 @@ gdb_test "bt" \
 # if the current language is not "auto".
 gdb_test "set lang c"
 gdb_test "bt" \
-         ".*#1.*lang_switch\\.ada_procedure\\s*\\(msg={.*\\).*" \
-         "backtrace"
-
+         ".*#1.*lang_switch\\.ada_procedure\\s*\\(msg=(@$hex: +)?{.*\\).*" \
+         "backtrace with lang set to C"
