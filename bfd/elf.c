@@ -3874,6 +3874,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 
 	  if (phdr_size == (bfd_size_type) -1)
 	    phdr_size = get_program_header_size (abfd, info);
+	  phdr_size += bed->s->sizeof_ehdr;
 	  if ((abfd->flags & D_PAGED) == 0
 	      || (sections[0]->lma & addr_mask) < phdr_size
 	      || ((sections[0]->lma & addr_mask) % maxpagesize
