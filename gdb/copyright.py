@@ -208,7 +208,6 @@ MULTIPLE_COPYRIGHT_HEADERS = (
 # Filenames are relative to the root directory.
 NOT_FSF_LIST = (
     "gdb/exc_request.defs",
-    "gdb/osf-share",
     "gdb/gdbtk",
     "gdb/testsuite/gdb.gdbtk/",
     "sim/arm/armemu.h", "sim/arm/armos.c", "sim/arm/gdbhost.c",

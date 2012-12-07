@@ -761,15 +761,7 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 # wrong if TAGS has files twice).  Because this is tricky to get
 # right, it is probably easiest just to list .h files here directly.
 
-HFILES_NO_SRCDIR = osf-share/cma_debug_client.h	\
-osf-share/HP800/cma_thread_io.h osf-share/cma_sequence.h \
-osf-share/cma_mutex.h osf-share/cma_semaphore_defs.h \
-osf-share/cma_list.h osf-share/cma_handle.h osf-share/cma_stack.h \
-osf-share/cma_util.h osf-share/RIOS/cma_thread_io.h \
-osf-share/cma_errors.h osf-share/cma_tcb_defs.h osf-share/cma_attr.h \
-osf-share/cma_stack_int.h osf-share/cma_init.h \
-osf-share/cma_deb_core.h osf-share/AT386/cma_thread_io.h \
-osf-share/cma_sched.h \
+HFILES_NO_SRCDIR = \
 common/gdb_signals.h common/gdb_thread_db.h common/gdb_vecs.h \
 common/i386-xstate.h common/linux-ptrace.h \
 proc-utils.h arm-tdep.h ax-gdb.h ppcnbsd-tdep.h	\

@@ -34,7 +34,6 @@ find "$@" \
     -name gdbserver -prune -o \
     -name gdbtk -prune -o \
     -name gnulib -prune -o \
-    -name osf-share -prune -o \
     -name '*-stub.c' -prune -o \
     -name '*-exp.c' -prune -o \
     -name ada-lex.c -prune -o \

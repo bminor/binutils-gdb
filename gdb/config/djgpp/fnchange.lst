@@ -324,7 +324,6 @@
 @V@/gdb/ns32knbsd-nat.c @V@/gdb/ns32nb-nat.c
 @V@/gdb/ns32knbsd-tdep.c @V@/gdb/ns32nb-tdep.c
 @V@/gdb/objc-exp.tab.c @V@/gdb/objc-exp_tab.c
-@V@/gdb/osf-share/cma_stack_int.h @V@/gdb/osf-share/cma_stkint.h
 @V@/gdb/p-exp.tab.c @V@/gdb/p-exp_tab.c
 @V@/gdb/ppc-linux-tdep.c @V@/gdb/ppc-lx-tdep.c
 @V@/gdb/ppc-linux-nat.c @V@/gdb/ppc-lx-nat.c
