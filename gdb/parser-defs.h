@@ -372,4 +372,8 @@ extern void parser_fprintf (FILE *, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
 extern int exp_uses_objfile (struct expression *exp, struct objfile *objfile);
 
+extern void mark_completion_tag (enum type_code, const char *ptr,
+				 int length);
+
 #endif /* PARSER_DEFS_H */
+

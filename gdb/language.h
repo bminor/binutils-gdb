@@ -284,8 +284,11 @@ struct language_defn
 
     /* Should return a vector of all symbols which are possible
        completions for TEXT.  WORD is the entire command on which the
-       completion is being made.  */
-    VEC (char_ptr) *(*la_make_symbol_completion_list) (char *text, char *word);
+       completion is being made.  If CODE is TYPE_CODE_UNDEF, then all
+       symbols should be examined; otherwise, only STRUCT_DOMAIN
+       symbols whose type has a code of CODE should be matched.  */
+    VEC (char_ptr) *(*la_make_symbol_completion_list) (char *text, char *word,
+						       enum type_code code);
 
     /* The per-architecture (OS/ABI) language information.  */
     void (*la_language_arch_info) (struct gdbarch *,

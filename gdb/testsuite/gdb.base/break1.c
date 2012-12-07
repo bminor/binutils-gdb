@@ -29,6 +29,23 @@ struct some_struct
 
 struct some_struct values[50];
 
+/* Some definitions for tag completion.  */
+enum some_enum { VALUE };
+
+enum some_enum some_enum_global;
+
+union some_union
+{
+  int f1;
+  double f2;
+};
+
+union some_union some_union_global;
+
+/* A variable with a name "similar" to the above struct, to test that
+   tag completion works ok.  */
+int some_variable;
+
 /* The following functions do nothing useful.  They are included
    simply as places to try setting breakpoints at.  They are
    explicitly "one-line functions" to verify that this case works

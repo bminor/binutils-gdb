@@ -700,6 +700,14 @@ gdb_test "complete sav" "save" "test non-deprecated completion"
 gdb_test "complete save-t" "save-tracepoints" "test deprecated completion"
 
 
+#
+# Tag name completion.
+#
+
+gdb_test "complete ptype struct some_" "ptype struct some_struct"
+gdb_test "complete ptype enum some_" "ptype enum some_enum"
+gdb_test "complete ptype union some_" "ptype union some_union"
+
 # Restore globals modified in this test...
 set timeout $oldtimeout1
 

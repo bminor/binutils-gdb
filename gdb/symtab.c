@@ -4202,7 +4202,8 @@ expand_partial_symbol_name (const char *name, void *user_data)
 
 VEC (char_ptr) *
 default_make_symbol_completion_list_break_on (char *text, char *word,
-					      const char *break_on)
+					      const char *break_on,
+					      enum type_code code)
 {
   /* Problem: All of the symbols have to be copied because readline
      frees them.  I'm not going to worry about this; hopefully there
@@ -4309,13 +4310,18 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
      anything that isn't a text symbol (everything else will be
      handled by the psymtab code above).  */
 
-  ALL_MSYMBOLS (objfile, msymbol)
-  {
-    QUIT;
-    COMPLETION_LIST_ADD_SYMBOL (msymbol, sym_text, sym_text_len, text, word);
+  if (code == TYPE_CODE_UNDEF)
+    {
+      ALL_MSYMBOLS (objfile, msymbol)
+	{
+	  QUIT;
+	  COMPLETION_LIST_ADD_SYMBOL (msymbol, sym_text, sym_text_len, text,
+				      word);
 
-    completion_list_objc_symbol (msymbol, sym_text, sym_text_len, text, word);
-  }
+	  completion_list_objc_symbol (msymbol, sym_text, sym_text_len, text,
+				       word);
+	}
+    }
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars).  Also catch fields of types defined in
@@ -4332,10 +4338,17 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
 
 	ALL_BLOCK_SYMBOLS (b, iter, sym)
 	  {
-	    COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text,
-					word);
-	    completion_list_add_fields (sym, sym_text, sym_text_len, text,
-					word);
+	    if (code == TYPE_CODE_UNDEF)
+	      {
+		COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text,
+					    word);
+		completion_list_add_fields (sym, sym_text, sym_text_len, text,
+					    word);
+	      }
+	    else if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
+		     && TYPE_CODE (SYMBOL_TYPE (sym)) == code)
+	      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text,
+					  word);
 	  }
 
 	/* Stop when we encounter an enclosing function.  Do not stop for
@@ -4348,13 +4361,16 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
 
   /* Add fields from the file's types; symbols will be added below.  */
 
-  if (surrounding_static_block != NULL)
-    ALL_BLOCK_SYMBOLS (surrounding_static_block, iter, sym)
-      completion_list_add_fields (sym, sym_text, sym_text_len, text, word);
+  if (code == TYPE_CODE_UNDEF)
+    {
+      if (surrounding_static_block != NULL)
+	ALL_BLOCK_SYMBOLS (surrounding_static_block, iter, sym)
+	  completion_list_add_fields (sym, sym_text, sym_text_len, text, word);
 
-  if (surrounding_global_block != NULL)
-      ALL_BLOCK_SYMBOLS (surrounding_global_block, iter, sym)
-	completion_list_add_fields (sym, sym_text, sym_text_len, text, word);
+      if (surrounding_global_block != NULL)
+	ALL_BLOCK_SYMBOLS (surrounding_global_block, iter, sym)
+	  completion_list_add_fields (sym, sym_text, sym_text_len, text, word);
+    }
 
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
@@ -4365,7 +4381,10 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
-	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
+	if (code == TYPE_CODE_UNDEF
+	    || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
+		&& TYPE_CODE (SYMBOL_TYPE (sym)) == code))
+	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
       }
   }
 
@@ -4375,11 +4394,17 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
-	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
+	if (code == TYPE_CODE_UNDEF
+	    || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
+		&& TYPE_CODE (SYMBOL_TYPE (sym)) == code))
+	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
       }
   }
 
-  if (current_language->la_macro_expansion == macro_expansion_c)
+  /* Skip macros if we are completing a struct tag -- arguable but
+     usually what is expected.  */
+  if (current_language->la_macro_expansion == macro_expansion_c
+      && code == TYPE_CODE_UNDEF)
     {
       struct macro_scope *scope;
 
@@ -4407,9 +4432,10 @@ default_make_symbol_completion_list_break_on (char *text, char *word,
 }
 
 VEC (char_ptr) *
-default_make_symbol_completion_list (char *text, char *word)
+default_make_symbol_completion_list (char *text, char *word,
+				     enum type_code code)
 {
-  return default_make_symbol_completion_list_break_on (text, word, "");
+  return default_make_symbol_completion_list_break_on (text, word, "", code);
 }
 
 /* Return a vector of all symbols (regardless of class) which begin by
@@ -4419,7 +4445,21 @@ default_make_symbol_completion_list (char *text, char *word)
 VEC (char_ptr) *
 make_symbol_completion_list (char *text, char *word)
 {
-  return current_language->la_make_symbol_completion_list (text, word);
+  return current_language->la_make_symbol_completion_list (text, word,
+							   TYPE_CODE_UNDEF);
+}
+
+/* Like make_symbol_completion_list, but only return STRUCT_DOMAIN
+   symbols whose type code is CODE.  */
+
+VEC (char_ptr) *
+make_symbol_completion_type (char *text, char *word, enum type_code code)
+{
+  gdb_assert (code == TYPE_CODE_UNION
+	      || code == TYPE_CODE_STRUCT
+	      || code == TYPE_CODE_CLASS
+	      || code == TYPE_CODE_ENUM);
+  return current_language->la_make_symbol_completion_list (text, word, code);
 }
 
 /* Like make_symbol_completion_list, but suitable for use as a

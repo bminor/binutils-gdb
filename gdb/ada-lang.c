@@ -5802,7 +5802,7 @@ ada_expand_partial_symbol_name (const char *name, void *user_data)
    the entire command on which completion is made.  */
 
 static VEC (char_ptr) *
-ada_make_symbol_completion_list (char *text0, char *word)
+ada_make_symbol_completion_list (char *text0, char *word, enum type_code code)
 {
   char *text;
   int text_len;
@@ -5816,6 +5816,8 @@ ada_make_symbol_completion_list (char *text0, char *word)
   struct block *b, *surrounding_static_block = 0;
   int i;
   struct block_iterator iter;
+
+  gdb_assert (code == TYPE_CODE_UNDEF);
 
   if (text0[0] == '<')
     {

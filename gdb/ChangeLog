@@ -1,5 +1,33 @@
 2012-12-07  Tom Tromey  <tromey@redhat.com>
 
+	* ada-lang.c (ada_make_symbol_completion_list): Add 'code'
+	argument, assertion.
+	* c-exp.y (typebase): Add completion productions.
+	* completer.c (expression_completer): Handle tag completion.
+	* expression.h (parse_expression_for_completion): Add argument.
+	* f-lang.c (f_make_symbol_completion_list): Add 'code'
+	argument.
+	* language.h (struct language_defn)
+	<la_make_symbol_completion_list>: Add 'code' argument.
+	* parse.c (expout_tag_completion_type, expout_completion_name):
+	New globals.
+	(mark_struct_expression): Add assertion.
+	(mark_completion_tag): New function.
+	(parse_exp_in_context): Initialize new globals.
+	(parse_expression_for_completion): Add 'code' argument.  Handle
+	tag completion.
+	* parser-defs.h (mark_completion_tag): Declare.
+	* symtab.c (default_make_symbol_completion_list_break_on): Add
+	'code' argument.  Update.
+	(default_make_symbol_completion_list): Add 'code' argument.
+	(make_symbol_completion_list): Update.
+	(make_symbol_completion_type): New function.
+	* symtab.h (default_make_symbol_completion_list_break_on)
+	(default_make_symbol_completion_list): Update.
+	(make_symbol_completion_type): Declare.
+
+2012-12-07  Tom Tromey  <tromey@redhat.com>
+
 	* expression.h (parse_expression_for_completion): Rename
 	from parse_field_expression.
 	(parse_completion): Rename from in_parse_field.

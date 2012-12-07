@@ -390,13 +390,14 @@ expression_completer (struct cmd_list_element *ignore,
   struct type *type = NULL;
   char *fieldname, *p;
   volatile struct gdb_exception except;
+  enum type_code code = TYPE_CODE_UNDEF;
 
   /* Perform a tentative parse of the expression, to see whether a
      field completion is required.  */
   fieldname = NULL;
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      type = parse_expression_for_completion (text, &fieldname);
+      type = parse_expression_for_completion (text, &fieldname, &code);
     }
   if (except.reason < 0)
     return NULL;
@@ -421,6 +422,15 @@ expression_completer (struct cmd_list_element *ignore,
 	  xfree (fieldname);
 	  return result;
 	}
+    }
+  else if (fieldname && code != TYPE_CODE_UNDEF)
+    {
+      VEC (char_ptr) *result;
+      struct cleanup *cleanup = make_cleanup (xfree, fieldname);
+
+      result = make_symbol_completion_type (fieldname, fieldname, code);
+      do_cleanups (cleanup);
+      return result;
     }
   xfree (fieldname);
 

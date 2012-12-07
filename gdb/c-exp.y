@@ -1268,15 +1268,59 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	|	STRUCT name
 			{ $$ = lookup_struct (copy_name ($2),
 					      expression_context_block); }
+	|	STRUCT COMPLETE
+			{
+			  mark_completion_tag (TYPE_CODE_STRUCT, "", 0);
+			  $$ = NULL;
+			}
+	|	STRUCT name COMPLETE
+			{
+			  mark_completion_tag (TYPE_CODE_STRUCT, $2.ptr,
+					       $2.length);
+			  $$ = NULL;
+			}
 	|	CLASS name
 			{ $$ = lookup_struct (copy_name ($2),
 					      expression_context_block); }
+	|	CLASS COMPLETE
+			{
+			  mark_completion_tag (TYPE_CODE_CLASS, "", 0);
+			  $$ = NULL;
+			}
+	|	CLASS name COMPLETE
+			{
+			  mark_completion_tag (TYPE_CODE_CLASS, $2.ptr,
+					       $2.length);
+			  $$ = NULL;
+			}
 	|	UNION name
 			{ $$ = lookup_union (copy_name ($2),
 					     expression_context_block); }
+	|	UNION COMPLETE
+			{
+			  mark_completion_tag (TYPE_CODE_UNION, "", 0);
+			  $$ = NULL;
+			}
+	|	UNION name COMPLETE
+			{
+			  mark_completion_tag (TYPE_CODE_UNION, $2.ptr,
+					       $2.length);
+			  $$ = NULL;
+			}
 	|	ENUM name
 			{ $$ = lookup_enum (copy_name ($2),
 					    expression_context_block); }
+	|	ENUM COMPLETE
+			{
+			  mark_completion_tag (TYPE_CODE_ENUM, "", 0);
+			  $$ = NULL;
+			}
+	|	ENUM name COMPLETE
+			{
+			  mark_completion_tag (TYPE_CODE_ENUM, $2.ptr,
+					       $2.length);
+			  $$ = NULL;
+			}
 	|	UNSIGNED typename
 			{ $$ = lookup_unsigned_typename (parse_language,
 							 parse_gdbarch,
