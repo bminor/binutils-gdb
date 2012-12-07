@@ -98,6 +98,3 @@ run_ld_link_tests [list \
 	"comm-data3b" \
     ] \
 ]
-
-run_dump_test comm-data4
-run_dump_test comm-data5
