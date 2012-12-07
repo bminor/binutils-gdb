@@ -1614,6 +1614,34 @@ proc check_plugin_api_available { } {
     return $plugin_api_available_saved
 }
 
+# Returns true if the target compiler supports LTO
+proc check_lto_available { } {
+    global lto_available_saved
+    global CC
+    if {![info exists lto_available_saved]} {
+	# Check if gcc supports -flto -fuse-linker-plugin
+	if { [which $CC] == 0 } {
+	    set lto_available_saved 0
+	    return 0
+	}
+	set basename "lto"
+	set src ${basename}[pid].c
+	set output ${basename}[pid].so
+	set f [open $src "w"]
+	puts $f ""
+	close $f
+	set status [remote_exec host $CC "-shared -B[pwd]/tmpdir/ld/ -flto -fuse-linker-plugin $src -o $output"]
+	if { [lindex $status 0] == 0 } {
+	    set lto_available_saved 1
+	} else {
+	    set lto_available_saved 0
+	}
+	file delete $src
+	file delete $output
+    }
+    return $lto_available_saved
+}
+
 # Check if the assembler supports CFI statements.
 
 proc check_as_cfi { } {
