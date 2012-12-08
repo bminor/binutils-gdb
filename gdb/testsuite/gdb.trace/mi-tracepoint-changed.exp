@@ -68,8 +68,12 @@ proc test_reconnect { } { with_test_prefix "reconnect" {
 	fail "Can't run to main"
 	return 0
     }
+    # Create tracepoints on marker and main, and leave them in the
+    # remote stub.
     gdb_test "trace marker" "Tracepoint.*at.* file .*" \
-	"tracepointpoint on marker"
+	"tracepoint on marker"
+    gdb_test "trace main" "Tracepoint.*at.* file .*" \
+	"tracepoint on main"
     gdb_test_no_output "tstart" "start trace experiment"
 
     set test "disconnect"
@@ -102,18 +106,46 @@ proc test_reconnect { } { with_test_prefix "reconnect" {
     global gdbserver_protocol
     global gdbserver_gdbport
 
+    # Create tracepoints on marker and pendfunc2.
+    mi_gdb_test "-break-insert -a -f pendfunc2" \
+	{.*\^done,bkpt=.*addr=\"<PENDING>\".*} \
+	"insert tracepoint on pendfunc2"
+    mi_gdb_test "-break-insert -a marker" {.*\^done,bkpt=.*\".*} \
+	"insert tracepoint on marker"
+
+    # Connect to the remote stub again, and make sure GDB merges the
+    # tracepoints of both sides correctly.
     send_gdb "47-target-select $gdbserver_protocol $gdbserver_gdbport\n"
 
     global mi_gdb_prompt
     set test "tracepoint created"
     gdb_expect {
-	-re "=breakpoint-created,bkpt=\{number=\"1\",type=\"tracepoint\",disp=\"keep\",enabled=\"y\",.*,func=\"marker\".*${mi_gdb_prompt}" {
+	-re "=breakpoint-created,bkpt=\{number=\"1\",type=\"tracepoint\"" {
+	    # Tracepoint 1 in GDB, which has already existed before
+	    # connecting, should have been merged with a tracepoint on
+	    # the target, so we shouldn't see a =breakpoint-created
+	    # notification for it.
+	    fail "$test: 1"
+	    exp_continue
+	}
+	-re "=breakpoint-created,bkpt=\{number=\"2\",type=\"tracepoint\"" {
+	    # Similar to above.
+	    fail "$test: 2"
+	    exp_continue
+	}
+	-re "=breakpoint-created,bkpt=\{number=\"3\",type=\"tracepoint\",disp=\"keep\",enabled=\"y\",.*,func=\"main\".*${mi_gdb_prompt}" {
+	    # A tracepoint on main was defined in the stub, not in GDB,
+	    # so we should see a =breakpoint-created notification.
 	    pass $test
 	}
 	timeout {
 	    fail $test
 	}
     }
+    # Check that tracepoint 1 is still pending.
+    mi_gdb_test "-break-info 1" \
+	{.*\^done,BreakpointTable=.*addr=\"<PENDING>\".*} \
+	"break-info 1"
 
     set gdbserver_reconnect_p 0
 }}
