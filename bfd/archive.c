@@ -2408,9 +2408,6 @@ bsd_write_armap (bfd *arch,
   unsigned int count;
   struct ar_hdr hdr;
   long uid, gid;
-  file_ptr max_first_real = 1;
-
-  max_first_real <<= 31;
 
   firstreal = mapsize + elength + sizeof (struct ar_hdr) + SARMAG;
 
@@ -2453,6 +2450,7 @@ bsd_write_armap (bfd *arch,
 
   for (count = 0; count < orl_count; count++)
     {
+      unsigned int offset;
       bfd_byte buf[BSD_SYMDEF_SIZE];
 
       if (map[count].u.abfd != last_elt)
@@ -2472,7 +2470,8 @@ bsd_write_armap (bfd *arch,
       /* The archive file format only has 4 bytes to store the offset
 	 of the member.  Check to make sure that firstreal has not grown
 	 too big.  */
-      if (firstreal >= max_first_real)
+      offset = (unsigned int) firstreal;
+      if (firstreal != (file_ptr) offset)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  return FALSE;
