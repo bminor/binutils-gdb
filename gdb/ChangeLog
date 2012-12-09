@@ -1,3 +1,12 @@
+2012-12-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (struct dwarf2_cu): New field producer_is_gcc_lt_4_3.
+	Update the comment for checked_producer.
+	(check_producer): New forward declaration.
+	(producer_is_gcc_lt_4_3): New function.
+	(find_file_and_directory): Simulate *COMP_DIR only for gcc < 4.3.
+	(check_producer): Initialize also PRODUCER_IS_GCC_LT_4_3.
+
 2012-12-07  Tom Tromey  <tromey@redhat.com>
 
 	* ada-lang.c (ada_make_symbol_completion_list): Add 'code'

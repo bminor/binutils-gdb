@@ -495,12 +495,13 @@ struct dwarf2_cu
      unoptimized code.  For a future better test see GCC PR other/32998.  */
   unsigned int has_loclist : 1;
 
-  /* These cache the results for producer_is_gxx_lt_4_6 and producer_is_icc.
-     CHECKED_PRODUCER is set if both PRODUCER_IS_GXX_LT_4_6 and PRODUCER_IS_ICC
-     are valid.  This information is cached because profiling CU expansion
-     showed excessive time spent in producer_is_gxx_lt_4_6.  */
+  /* These cache the results for producer_is_* fields.  CHECKED_PRODUCER is set
+     if all the producer_is_* fields are valid.  This information is cached
+     because profiling CU expansion showed excessive time spent in
+     producer_is_gxx_lt_4_6.  */
   unsigned int checked_producer : 1;
   unsigned int producer_is_gxx_lt_4_6 : 1;
+  unsigned int producer_is_gcc_lt_4_3 : 1;
   unsigned int producer_is_icc : 1;
 };
 
@@ -1712,6 +1713,8 @@ static struct dwo_unit *lookup_dwo_type_unit
 static void free_dwo_file_cleanup (void *);
 
 static void process_cu_includes (void);
+
+static void check_producer (struct dwarf2_cu *cu);
 
 #if WORDS_BIGENDIAN
 
@@ -7805,6 +7808,19 @@ free_cu_line_header (void *arg)
   cu->line_header = NULL;
 }
 
+/* Check for possibly missing DW_AT_comp_dir with relative .debug_line
+   directory paths.  GCC SVN r127613 (new option -fdebug-prefix-map) fixed
+   this, it was first present in GCC release 4.3.0.  */
+
+static int
+producer_is_gcc_lt_4_3 (struct dwarf2_cu *cu)
+{
+  if (!cu->checked_producer)
+    check_producer (cu);
+
+  return cu->producer_is_gcc_lt_4_3;
+}
+
 static void
 find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
 			 char **name, char **comp_dir)
@@ -7825,7 +7841,8 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
   attr = dwarf2_attr (die, DW_AT_comp_dir, cu);
   if (attr)
     *comp_dir = DW_STRING (attr);
-  else if (*name != NULL && IS_ABSOLUTE_PATH (*name))
+  else if (producer_is_gcc_lt_4_3 (cu) && *name != NULL
+	   && IS_ABSOLUTE_PATH (*name))
     {
       *comp_dir = ldirname (*name);
       if (*comp_dir != NULL)
@@ -10359,7 +10376,10 @@ check_producer (struct dwarf2_cu *cu)
 	  /* Not recognized as GCC.  */
 	}
       else
-	cu->producer_is_gxx_lt_4_6 = major < 4 || (major == 4 && minor < 6);
+	{
+	  cu->producer_is_gxx_lt_4_6 = major < 4 || (major == 4 && minor < 6);
+	  cu->producer_is_gcc_lt_4_3 = major < 4 || (major == 4 && minor < 3);
+	}
     }
   else if (strncmp (cu->producer, "Intel(R) C", strlen ("Intel(R) C")) == 0)
     cu->producer_is_icc = 1;
