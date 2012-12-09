@@ -1556,9 +1556,9 @@ AC_CACHE_CHECK([for long long support in compiler], gdb_cv_c_long_long,
 [[switch (foo & 2) { case 0: return 1; }]])],
                                   gdb_cv_c_long_long=yes,
                                   gdb_cv_c_long_long=no)])
-if test $gdb_cv_c_long_long = yes; then
-  AC_DEFINE(CC_HAS_LONG_LONG, 1,
-            [Define to 1 if the compiler supports long long.])
+if test $gdb_cv_c_long_long != yes; then
+  # libdecnumber requires long long.
+  AC_MSG_ERROR([Compiler must support long long for GDB.])
 fi
 
 # Check if the compiler and runtime support printing long longs.

@@ -1805,11 +1805,7 @@ add_fde (struct dwarf2_fde_table *fde_table, struct dwarf2_fde *fde)
   fde_table->entries[fde_table->num_entries - 1] = fde;
 }
 
-#ifdef CC_HAS_LONG_LONG
 #define DW64_CIE_ID 0xffffffffffffffffULL
-#else
-#define DW64_CIE_ID ~0
-#endif
 
 /* Defines the type of eh_frames that are expected to be decoded: CIE, FDE
    or any of them.  */

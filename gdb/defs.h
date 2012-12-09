@@ -125,20 +125,8 @@ typedef bfd_vma CORE_ADDR;
 
 #else /* No BFD64 */
 
-#ifdef CC_HAS_LONG_LONG
 #define LONGEST long long
 #define ULONGEST unsigned long long
-#else
-#ifdef BFD_HOST_64_BIT
-/* BFD_HOST_64_BIT is defined for some hosts that don't have long long
-   (e.g. i386-windows) so try it.  */
-#define LONGEST BFD_HOST_64_BIT
-#define ULONGEST BFD_HOST_U_64_BIT
-#else
-#define LONGEST long
-#define ULONGEST unsigned long
-#endif
-#endif
 
 #endif /* No BFD64 */
 

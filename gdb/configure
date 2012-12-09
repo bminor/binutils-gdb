@@ -11602,10 +11602,9 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_c_long_long" >&5
 $as_echo "$gdb_cv_c_long_long" >&6; }
-if test $gdb_cv_c_long_long = yes; then
-
-$as_echo "#define CC_HAS_LONG_LONG 1" >>confdefs.h
-
+if test $gdb_cv_c_long_long != yes; then
+  # libdecnumber requires long long.
+  as_fn_error "Compiler must support long long for GDB." "$LINENO" 5
 fi
 
 # Check if the compiler and runtime support printing long longs.

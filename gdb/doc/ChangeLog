@@ -1,3 +1,7 @@
+2012-12-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbint.texinfo (Host Definition): Remove CC_HAS_LONG_LONG.
+
 2012-11-29  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (SVR4 Process Information): Document missing

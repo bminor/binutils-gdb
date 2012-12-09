@@ -2761,11 +2761,6 @@ Substitute for isatty, if not available.
 @item FOPEN_RB
 Define this if binary files are opened the same way as text files.
 
-@item CC_HAS_LONG_LONG
-@cindex @code{long long} data type
-Define this if the host C compiler supports @code{long long}.  This is set
-by the @code{configure} script.
-
 @item PRINTF_HAS_LONG_LONG
 Define this if the host can handle printing of long long integers via
 the printf format conversion specifier @code{ll}.  This is set by the

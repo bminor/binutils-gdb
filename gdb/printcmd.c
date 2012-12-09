@@ -2221,7 +2221,7 @@ ui_printf (char *arg, struct ui_file *stream)
 	    error (_("long double not supported in printf"));
 #endif
 	  case long_long_arg:
-#if defined (CC_HAS_LONG_LONG) && defined (PRINTF_HAS_LONG_LONG)
+#ifdef PRINTF_HAS_LONG_LONG
 	    {
 	      long long val = value_as_long (val_args[i]);
 
@@ -2356,7 +2356,7 @@ ui_printf (char *arg, struct ui_file *stream)
 		 handle %p as glibc would: %#x or a literal "(nil)".  */
 
 	      char *p, *fmt, *fmt_p;
-#if defined (CC_HAS_LONG_LONG) && defined (PRINTF_HAS_LONG_LONG)
+#ifdef PRINTF_HAS_LONG_LONG
 	      long long val = value_as_long (val_args[i]);
 #else
 	      long val = value_as_long (val_args[i]);
@@ -2391,7 +2391,7 @@ ui_printf (char *arg, struct ui_file *stream)
 	      gdb_assert (*p == 'p' && *(p + 1) == '\0');
 	      if (val != 0)
 		{
-#if defined (CC_HAS_LONG_LONG) && defined (PRINTF_HAS_LONG_LONG)
+#ifdef PRINTF_HAS_LONG_LONG
 		  *fmt_p++ = 'l';
 #endif
 		  *fmt_p++ = 'l';
