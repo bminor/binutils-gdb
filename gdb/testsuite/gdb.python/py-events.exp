@@ -43,7 +43,7 @@ clean_restart ${testfile}
 
 if { [skip_python_tests] } { continue }
 
-gdb_test_no_output "python execfile ('${pyfile}')" ""
+gdb_test_no_output "python exec (open ('${pyfile}').read ())" ""
 
 gdb_test "Test_Newobj_Events" "New ObjectFile Event tester registered." "Register new objfile event handler"
 

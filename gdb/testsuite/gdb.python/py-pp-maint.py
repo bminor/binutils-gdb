@@ -37,7 +37,7 @@ def lookup_function_lookup_test(val):
     return None
 
 
-class pp_s:
+class pp_s (object):
     def __init__(self, val):
         self.val = val
 
@@ -49,7 +49,7 @@ class pp_s:
         return "a=<" + str(self.val["a"]) + "> b=<" + str(self.val["b"]) + ">"
 
 
-class pp_ss:
+class pp_ss (object):
     def __init__(self, val):
         self.val = val
 

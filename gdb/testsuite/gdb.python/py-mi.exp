@@ -44,7 +44,7 @@ mi_runto main
 
 set remote_python_file [remote_download host ${srcdir}/${subdir}/${pyfile}]
 
-mi_gdb_test "python execfile ('${remote_python_file}')" ""
+mi_gdb_test "python exec (open ('${remote_python_file}').read ())" ""
 
 mi_continue_to_line [gdb_get_line_number {MI breakpoint here} ${srcfile}] \
   "step to breakpoint"

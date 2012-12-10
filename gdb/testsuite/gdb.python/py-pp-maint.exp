@@ -43,7 +43,7 @@ gdb_test "continue" ".*Breakpoint.*"
 
 set python_file ${srcdir}/${subdir}/${testfile}.py
 
-gdb_test_no_output "python execfile ('${python_file}')" ""
+gdb_test_no_output "python exec (open ('${python_file}').read ())" ""
 
 gdb_test "info pretty-printer" \
     {.*function_lookup_test.*pp-test.*struct ss.*}

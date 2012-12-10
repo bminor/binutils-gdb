@@ -36,4 +36,4 @@ gdb_test "info frame" "inlined into frame 1\r\n.*"
 
 gdb_test "up" "#1  g .*"
 
-gdb_test "python print gdb.selected_frame().read_var('l')" "\r\n42"
+gdb_test "python print (gdb.selected_frame().read_var('l'))" "\r\n42"

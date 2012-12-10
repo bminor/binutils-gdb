@@ -19,8 +19,17 @@
 import re
 import gdb
 
+def _iterator (pointer, len):
+    start = pointer
+    end = pointer + len
+    while pointer != end:
+        if exception_flag:
+            raise gdb.MemoryError ('hi bob')
+        yield ('[%d]' % int (pointer - start), pointer.dereference())
+        pointer += 1
+
 # Test returning a Value from a printer.
-class string_print:
+class string_print (object):
     def __init__(self, val):
         self.val = val
 
@@ -28,22 +37,7 @@ class string_print:
         return self.val['whybother']['contents']
 
 # Test a class-based printer.
-class ContainerPrinter:
-    class _iterator:
-        def __init__ (self, pointer, len):
-            self.start = pointer
-            self.pointer = pointer
-            self.end = pointer + len
-
-        def __iter__(self):
-            return self
-
-        def next(self):
-            if self.pointer == self.end:
-                raise StopIteration
-            result = self.pointer
-            self.pointer = self.pointer + 1
-            return ('[%d]' % int (result - self.start), result.dereference())
+class ContainerPrinter (object):
 
     def __init__(self, val):
         self.val = val
@@ -52,7 +46,7 @@ class ContainerPrinter:
         return 'container %s with %d elements' % (self.val['name'], self.val['len'])
 
     def children(self):
-        return self._iterator(self.val['elements'], self.val['len'])
+        return _iterator(self.val['elements'], self.val['len'])
 
 # Treats a container as array.
 class ArrayPrinter:
@@ -88,25 +82,7 @@ class ArrayPrinter:
 exception_flag = False
 
 # Test a printer where to_string is None
-class NoStringContainerPrinter:
-    class _iterator:
-        def __init__ (self, pointer, len):
-            self.start = pointer
-            self.pointer = pointer
-            self.end = pointer + len
-
-        def __iter__(self):
-            return self
-
-        def next(self):
-            if self.pointer == self.end:
-                raise StopIteration
-            if exception_flag:
-                raise gdb.MemoryError, 'hi bob'
-            result = self.pointer
-            self.pointer = self.pointer + 1
-            return ('[%d]' % int (result - self.start), result.dereference())
-
+class NoStringContainerPrinter (object):
     def __init__(self, val):
         self.val = val
 
@@ -114,9 +90,9 @@ class NoStringContainerPrinter:
         return None
 
     def children(self):
-        return self._iterator(self.val['elements'], self.val['len'])
+        return _iterator(self.val['elements'], self.val['len'])
 
-class pp_s:
+class pp_s (object):
     def __init__(self, val):
         self.val = val
 
@@ -127,42 +103,42 @@ class pp_s:
             raise Exception("&a(%s) != b(%s)" % (str(a.address), str(b)))
         return " a=<" + str(self.val["a"]) + "> b=<" + str(self.val["b"]) + ">"
 
-class pp_ss:
+class pp_ss (object):
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
         return "a=<" + str(self.val["a"]) + "> b=<" + str(self.val["b"]) + ">"
 
-class pp_sss:
+class pp_sss (object):
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
         return "a=<" + str(self.val['a']) + "> b=<" + str(self.val["b"]) + ">"
 
-class pp_multiple_virtual:
+class pp_multiple_virtual (object):
     def __init__ (self, val):
         self.val = val
 
     def to_string (self):
         return "pp value variable is: " + str (self.val['value'])
 
-class pp_vbase1:
+class pp_vbase1 (object):
     def __init__ (self, val):
         self.val = val
 
     def to_string (self):
         return "pp class name: " + self.val.type.tag
 
-class pp_nullstr:
+class pp_nullstr (object):
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
         return self.val['s'].string(gdb.target_charset())
 
-class pp_ns:
+class pp_ns (object):
     "Print a std::basic_string of some kind"
 
     def __init__(self, val):
@@ -177,7 +153,7 @@ class pp_ns:
 
 pp_ls_encoding = None
 
-class pp_ls:
+class pp_ls (object):
     "Print a std::basic_string of some kind"
 
     def __init__(self, val):
@@ -192,7 +168,7 @@ class pp_ls:
     def display_hint (self):
         return 'string'
 
-class pp_hint_error:
+class pp_hint_error (object):
     "Throw error from display_hint"
 
     def __init__(self, val):
@@ -204,7 +180,7 @@ class pp_hint_error:
     def display_hint (self):
         raise Exception("hint failed")
 
-class pp_children_as_list:
+class pp_children_as_list (object):
     "Throw error from display_hint"
 
     def __init__(self, val):
@@ -216,7 +192,7 @@ class pp_children_as_list:
     def children (self):
         return [('one', 1)]
 
-class pp_outer:
+class pp_outer (object):
     "Print struct outer"
 
     def __init__ (self, val):
@@ -229,24 +205,24 @@ class pp_outer:
         yield 's', self.val['s']
         yield 'x', self.val['x']
 
-class MemoryErrorString:
+class MemoryErrorString (object):
     "Raise an error"
 
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
-        raise gdb.MemoryError ("Cannot access memory.");
+        raise gdb.MemoryError ("Cannot access memory.")
 
     def display_hint (self):
         return 'string'
 
-class pp_eval_type:
+class pp_eval_type (object):
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
-	gdb.execute("bt", to_string=True)
+        gdb.execute("bt", to_string=True)
         return "eval=<" + str(gdb.parse_and_eval("eval_func (123456789, 2, 3, 4, 5, 6, 7, 8)")) + ">"
 
 def lookup_function (val):

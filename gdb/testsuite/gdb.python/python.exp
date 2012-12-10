@@ -33,7 +33,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
-gdb_test_multiple "python print 23" "verify python support" {
+gdb_test_multiple "python print (23)" "verify python support" {
     -re "not supported.*$gdb_prompt $"	{
       unsupported "python support is disabled"
 
@@ -49,21 +49,21 @@ gdb_test_multiple "python print 23" "verify python support" {
 
 gdb_py_test_multiple "multi-line python command" \
   "python" "" \
-  "print 23" "" \
+  "print (23)" "" \
   "end" "23"
 
 gdb_py_test_multiple "show python command" \
   "define zzq" "Type commands for definition of .* just \"end\"\\.*" \
   "python" "" \
-  "print 23" "" \
+  "print (23)" "" \
   "end" "" \
   "end" "" \
-  "show user zzq" "User command \"zzq\":.*  python.*print 23.*  end"
+  "show user zzq" "User command \"zzq\":.*  python.*print \\(23\\).*  end"
 
 gdb_py_test_multiple "indented multi-line python command" \
   "python" "" \
   "def foo ():" "" \
-  "  print 'hello, world!'" "" \
+  "  print ('hello, world!')" "" \
   "foo ()" "" \
   "end" "hello, world!"
 
@@ -71,15 +71,15 @@ gdb_test "source $srcdir/$subdir/source2.py" "yes" "source source2.py"
 
 gdb_test "source -s source2.py" "yes" "source -s source2.py"
 
-gdb_test "python print gdb.current_objfile()" "None"
-gdb_test "python print gdb.objfiles()" "\\\[\\\]"
+gdb_test "python print (gdb.current_objfile())" "None"
+gdb_test "python print (gdb.objfiles())" "\\\[\\\]"
 
 # Test http://bugs.python.org/issue4434 workaround in configure.ac
-gdb_test "python import itertools; print 'IMPOR'+'TED'" "IMPORTED" "pythonX.Y/lib-dynload/*.so"
+gdb_test "python import itertools; print ('IMPOR'+'TED')" "IMPORTED" "pythonX.Y/lib-dynload/*.so"
 
 gdb_test_no_output \
     "python x = gdb.execute('printf \"%d\", 23', to_string = True)"
-gdb_test "python print x" "23"
+gdb_test "python print (x)" "23"
 
 # Test post_event.
 gdb_py_test_multiple "post event insertion" \
@@ -92,7 +92,7 @@ gdb_py_test_multiple "post event insertion" \
   "gdb.post_event(Foo())" "" \
   "end" ""
 
-gdb_test "python print someVal" "1" "test post event execution"
+gdb_test "python print (someVal)" "1" "test post event execution"
 gdb_test "python gdb.post_event(str(1))" "RuntimeError: Posted event is not callable.*" "Test non callable class"
 
 # Test (no) pagination of the executed command.
@@ -101,7 +101,7 @@ set lines 10
 gdb_test_no_output "set height $lines"
 
 set test "verify pagination beforehand"
-gdb_test_multiple "python print \"\\n\" * $lines" $test {
+gdb_test_multiple "python print (\"\\n\" * $lines)" $test {
     -re "---Type <return>" {
 	exp_continue
     }
@@ -114,10 +114,10 @@ gdb_test_multiple "python print \"\\n\" * $lines" $test {
 }
 gdb_test "q" "Quit.*Error while executing Python.*" "verify pagination beforehand: q"
 
-gdb_test "python if gdb.execute('python print \"\\\\n\" * $lines', to_string=True) == \"\\n\" * [expr $lines + 1]: print \"yes\"" "yes" "gdb.execute does not page"
+gdb_test "python if gdb.execute('python print (\"\\\\n\" * $lines)', to_string=True) == \"\\n\" * [expr $lines + 1]: print (\"yes\")" "yes" "gdb.execute does not page"
 
 set test "verify pagination afterwards"
-gdb_test_multiple "python print \"\\n\" * $lines" $test {
+gdb_test_multiple "python print (\"\\n\" * $lines)" $test {
     -re "---Type <return>" {
 	exp_continue
     }
@@ -134,18 +134,18 @@ gdb_test_no_output "set height 0"
 
 gdb_test_no_output "python a = gdb.execute('help', to_string=True)" "collect help from uiout"
 
-gdb_test "python print a" ".*aliases -- Aliases of other commands.*" "verify help to uiout"
+gdb_test "python print (a)" ".*aliases -- Aliases of other commands.*" "verify help to uiout"
 
 # Test PR 12212, using InfThread.selected_thread() when no inferior is
 # loaded.
 gdb_py_test_silent_cmd "python nothread = gdb.selected_thread()" "Attempt to aquire thread with no inferior" 1
-gdb_test "python print nothread == None" "True" "Ensure that no threads are returned"
+gdb_test "python print (nothread == None)" "True" "Ensure that no threads are returned"
 
 gdb_py_test_multiple "register atexit function" \
     "python" "" \
     "import atexit" "" \
     "def printit(arg):" "" \
-    "  print arg" "" \
+    "  print (arg)" "" \
     "atexit.register(printit, 'good bye world')" "" \
     "end" ""
 
@@ -176,33 +176,33 @@ gdb_test "python gdb.decode_line(\"main.c:43\")" \
     "gdb.error: No source file named main.c.*" "test decode_line no source named main"
 
 gdb_py_test_silent_cmd "python symtab = gdb.decode_line()" "test decode_line current location" 1
-gdb_test "python print len(symtab)" "2" "Test decode_line current location"
-gdb_test "python print symtab\[0\]" "None" "Test decode_line expression parse"
-gdb_test "python print len(symtab\[1\])" "1" "Test decode_line current location"
-gdb_test "python print symtab\[1\]\[0\].symtab" ".*gdb.python/python.c.*" "Test decode_line current locationn filename"
-gdb_test "python print symtab\[1\]\[0\].line" "22" "Test decode_line current location line number"
+gdb_test "python print (len(symtab))" "2" "Test decode_line current location"
+gdb_test "python print (symtab\[0\])" "None" "Test decode_line expression parse"
+gdb_test "python print (len(symtab\[1\]))" "1" "Test decode_line current location"
+gdb_test "python print (symtab\[1\]\[0\].symtab)" ".*gdb.python/python.c.*" "Test decode_line current locationn filename"
+gdb_test "python print (symtab\[1\]\[0\].line)" "22" "Test decode_line current location line number"
 
 gdb_py_test_silent_cmd "python symtab = gdb.decode_line(\"python.c:26 if foo\")" "test decode_line python.c:26" 1
-gdb_test "python print len(symtab)" "2" "Test decode_line python.c:26 length"
-gdb_test "python print symtab\[0\]" "if foo" "Test decode_line expression parse"
-gdb_test "python print len(symtab\[1\])" "1" "Test decode_line python.c:26 length"
-gdb_test "python print symtab\[1\]\[0\].symtab" ".*gdb.python/python.c.*" "Test decode_line python.c:26 filename"
-gdb_test "python print symtab\[1\]\[0\].line" "26" "Test decode_line python.c:26 line number"
+gdb_test "python print (len(symtab))" "2" "Test decode_line python.c:26 length"
+gdb_test "python print (symtab\[0\])" "if foo" "Test decode_line expression parse"
+gdb_test "python print (len(symtab\[1\]))" "1" "Test decode_line python.c:26 length"
+gdb_test "python print (symtab\[1\]\[0\].symtab)" ".*gdb.python/python.c.*" "Test decode_line python.c:26 filename"
+gdb_test "python print (symtab\[1\]\[0\].line)" "26" "Test decode_line python.c:26 line number"
 
 gdb_test "python gdb.decode_line(\"randomfunc\")" \
     "gdb.error: Function \"randomfunc\" not defined.*" "test decode_line randomfunc"
 gdb_py_test_silent_cmd "python symtab = gdb.decode_line(\"func1\")" "test decode_line func1()" 1
-gdb_test "python print len(symtab)" "2" "Test decode_line func1 length"
-gdb_test "python print len(symtab\[1\])" "1" "Test decode_line func1 length"
-gdb_test "python print symtab\[1\]\[0\].symtab" ".*gdb.python/python-1.c.*" "Test decode_line func1 filename"
-gdb_test "python print symtab\[1\]\[0\].line" "19" "Test decode_line func1 line number"
+gdb_test "python print (len(symtab))" "2" "Test decode_line func1 length"
+gdb_test "python print (len(symtab\[1\]))" "1" "Test decode_line func1 length"
+gdb_test "python print (symtab\[1\]\[0\].symtab)" ".*gdb.python/python-1.c.*" "Test decode_line func1 filename"
+gdb_test "python print (symtab\[1\]\[0\].line)" "19" "Test decode_line func1 line number"
 gdb_py_test_silent_cmd {python symtab = gdb.decode_line ("func1,func2")} \
     "test decode_line func1,func2" 1
-gdb_test {python print symtab[0]} ",func2" "stop at comma in linespec"
+gdb_test {python print (symtab[0])} ",func2" "stop at comma in linespec"
 
 # gdb.write
-gdb_test "python print sys.stderr" ".*gdb.GdbOutputErrorFile instance at.*" "Test stderr location"
-gdb_test "python print sys.stdout" ".*gdb.GdbOutputFile instance at.*" "Test stdout location"
+gdb_test "python print (sys.stderr)" ".*gdb.GdbOutputErrorFile (instance|object) at.*" "Test stderr location"
+gdb_test "python print (sys.stdout)" ".*gdb.GdbOutputFile (instance|object) at.*" "Test stdout location"
 gdb_test "python gdb.write(\"Foo\\n\")" "Foo" "Test default write"
 gdb_test "python gdb.write(\"Error stream\\n\", stream=gdb.STDERR)" "Error stream" "Test stderr write"
 gdb_test "python gdb.write(\"Normal stream\\n\", stream=gdb.STDOUT)" "Normal stream" "Test stdout write"
@@ -362,7 +362,7 @@ gdb_py_test_multiple "prompt substitution readline" \
   "end" ""
 
 gdb_test_multiple "python gdb.prompt_hook = error_prompt" "set the hook" {
-    -re "Python Exception <type 'exceptions.RuntimeError'> Python exception called.*" {
+    -re "Python Exception <(type 'exceptions.|class ')RuntimeError'> Python exception called.*" {
 	pass "set hook"
     }
 }
@@ -395,9 +395,9 @@ if ![runto_main] then {
 runto [gdb_get_line_number "Break at func2 call site."]
 
 gdb_py_test_silent_cmd "python line = gdb.selected_frame().find_sal().line" "Get line number of func2 call site" 1
-gdb_test "python print gdb.find_pc_line(gdb.selected_frame().pc()).line == line" "True" "Test find_pc_line at func2 call site"
+gdb_test "python print (gdb.find_pc_line(gdb.selected_frame().pc()).line == line)" "True" "Test find_pc_line at func2 call site"
 
 gdb_py_test_silent_cmd "step" "Step into func2" 1
 gdb_py_test_silent_cmd "up" "Step out of func2" 1
 
-gdb_test "python print gdb.find_pc_line(gdb.selected_frame().pc()).line > line" "True" "Test find_pc_line with resume address"
+gdb_test "python print (gdb.find_pc_line(gdb.selected_frame().pc()).line > line)" "True" "Test find_pc_line with resume address"

@@ -1,3 +1,64 @@
+2012-12-10  Paul Koning  <paul_koning@dell.com>
+
+	* gdb.base/charset.exp: Change print syntax for Python 3
+	compatibility. 
+	* gdb.python/py-block.exp: Ditto.
+	* gdb.python/py-breakpoint.exp: Ditto.
+	* gdb.python/py-cmd.exp: Ditto.
+	* gdb.python/py-events.py: Ditto.
+	* gdb.python/py-finish-breakpoint.py: Ditto.
+	* gdb.python/py-finish-breakpoint2.exp: Ditto.
+	* gdb.python/py-finish-breakpoint2.py: Ditto.
+	* gdb.python/py-frame-inline.exp: Ditto.
+	* gdb.python/py-frame.exp: Ditto.
+	* gdb.python/py-infthread.exp: Ditto.
+	* gdb.python/py-objfile.exp: Ditto.
+	* gdb.python/py-parameter.exp: Ditto.
+	* gdb.python/py-progspace.exp: Ditto.
+	* gdb.python/py-prompt.exp: Ditto.
+	* gdb.python/py-symbol.exp: Ditto.
+	* gdb.python/py-symtab.exp: Ditto.
+	* gdb.python/py-template.exp: Ditto.
+	* gdb.python/py-value-cc.exp: Ditto.
+	* gdb.python/python.exp: Ditto.
+	* gdb.python/source2.py: Ditto.
+	* gdb.python/lib-types.exp: Change print syntax for Python 3
+	compatibility. 
+	Use sorted() function rather than sort() method.
+	Accept either int or long values for enum values.
+	* gdb.python/py-events.exp: Use exec(open(...).read()) instead of
+	execfile for Python 3 compatibility.
+	* gdb.python/py-evsignal.exp: Ditto.
+	* gdb.python/py-evthreads.exp: Ditto.
+	* gdb.python/py-mi.exp: Ditto.
+	* gdb.python/py-pp-maint.exp: Ditto.
+	* gdb.python/py-prettyprint.exp: Ditto.
+	* gdb.python/py-finish-breakpoint.exp: Change print syntax for
+	Python 3 compatibility. 
+	Skip tests for Python 2.4.
+	* gdb.python/py-inferior.exp: Change print syntax for
+	Python 3 compatibility. 
+	Use byte string rather than character string in memory write test
+	if Python 3.
+	* gdb.python/py-pp-maint.py: Change class declarations to "new
+	class" syntax.
+	* gdb.python/py-prettyprint.py: Change iterator class to generator
+	function for Python 3 compatibility.
+	Make all classes "new style".
+	Fix indentation issue and stray semicolon.
+	* gdb.python/py-shared.expChange print syntax for Python 3
+	compatibility.
+	Define "long" if Python 3.
+	* gdb.python/py-type.exp: Change print syntax for Python 3
+	compatibility. 
+	Accept either int or long values for enum values.
+	* gdb.python/py-value.exp: Change print syntax for Python 3
+	compatibility. 
+	Skip "long" and "unicode" tests if Python 3.
+	Accept either "type" or "class" in type checks.
+	* lib/gdb.exp (gdb_py_is_py3k): New flag set if Python 3.
+	(gdb_py_is_py24): New flag set if Python 2.4 or 2.5.
+
 2012-12-10  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/implptr-64bit.exp: Run tests with two CUs as well.

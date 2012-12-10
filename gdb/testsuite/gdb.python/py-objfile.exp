@@ -37,10 +37,10 @@ gdb_py_test_silent_cmd "python sym = gdb.lookup_symbol(\"some_var\")" \
 gdb_py_test_silent_cmd "python objfile = sym\[0\].symtab.objfile" \
     "Get backing object file" 1
 
-gdb_test "python print objfile.filename" ".*py-objfile.*" \
+gdb_test "python print (objfile.filename)" ".*py-objfile.*" \
   "Get objfile validity"
-gdb_test "python print objfile.is_valid()" "True" \
+gdb_test "python print (objfile.is_valid())" "True" \
   "Get objfile validity"
 gdb_unload
-gdb_test "python print objfile.is_valid()" "False" \
+gdb_test "python print (objfile.is_valid())" "False" \
   "Get objfile validity after unload"

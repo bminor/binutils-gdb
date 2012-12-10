@@ -19,15 +19,15 @@
 class ExceptionFinishBreakpoint(gdb.FinishBreakpoint):
     def __init__(self, frame):
         gdb.FinishBreakpoint.__init__ (self, frame, internal=1)
-        self.silent = True;
-        print "init ExceptionFinishBreakpoint"
+        self.silent = True
+        print ("init ExceptionFinishBreakpoint")
         
     def stop(self):
-        print "stopped at ExceptionFinishBreakpoint"
+        print ("stopped at ExceptionFinishBreakpoint")
         return True 
     
     def out_of_scope(self):
-        print "exception did not finish ..."
+        print ("exception did not finish ...")
 
 
-print "Python script imported"
+print ("Python script imported")

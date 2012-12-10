@@ -23,6 +23,13 @@ if {[skip_shlib_tests]} {
 
 load_lib gdb-python.exp
 
+if { $gdb_py_is_py24 == 1 } {
+    # Python 2.4, 2.5 do not support the "ValueError as e" syntax used in
+    # the py-finish-breakpoint.py script.
+	untested py-finish-breakpoint.exp
+    return 0
+}
+
 set libfile "py-events-shlib"
 set libsrc  $srcdir/$subdir/$libfile.c
 set lib_sl  [standard_output_file $libfile-nodebug.so]
@@ -74,17 +81,17 @@ gdb_test "python finishbp_default = gdb.FinishBreakpoint ()" \
          "Temporary breakpoint.*" "set FinishBreakpoint with default frame value"
 gdb_test "python finishbp = MyFinishBreakpoint (gdb.parse_and_eval ('a'), gdb.newest_frame ())" \
          "Temporary breakpoint.*" "set FinishBreakpoint"
-gdb_test "python print finishbp.return_value" "None.*" \
+gdb_test "python print (finishbp.return_value)" "None.*" \
          "check return_value at init"
 
 # check normal bp hit
 
 gdb_test "continue" "MyFinishBreakpoint stop with.*return_value is: -5.*#0.*increase.*" \
          "check MyFinishBreakpoint hit"
-gdb_test "python print finishbp.return_value" "-5.*" "check return_value"
+gdb_test "python print (finishbp.return_value)" "-5.*" "check return_value"
 
-gdb_test "python print finishbp_default.hit_count" "1.*" "check finishBP on default frame has been hit"
-gdb_test "python print finishbp.is_valid()" "False.*"\
+gdb_test "python print (finishbp_default.hit_count)" "1.*" "check finishBP on default frame has been hit"
+gdb_test "python print (finishbp.is_valid())" "False.*"\
          "ensure that finish bp is invalid afer normal hit"
 
 # check FinishBreakpoint in main no allowed
@@ -119,7 +126,7 @@ gdb_test "python finishBP = SimpleFinishBreakpoint(gdb.newest_frame())" \
          "SimpleFinishBreakpoint init" \
          "set finish breakpoint"
 gdb_test "continue" "SimpleFinishBreakpoint stop.*" "check FinishBreakpoint hit"
-gdb_test "python print finishBP.return_value" "None" "check return value without debug symbol"
+gdb_test "python print (finishBP.return_value)" "None" "check return value without debug symbol"
 
 #
 # Test FinishBreakpoint in function returned by longjmp 
@@ -143,7 +150,7 @@ gdb_test "break [gdb_get_line_number "after longjmp."]" "Breakpoint.* at .*" \
          "set BP after the jump"
 gdb_test "continue" "SimpleFinishBreakpoint out of scope.*" \
          "check FinishBP out of scope notification"
-gdb_test "python print finishbp.is_valid()" "False.*"\
+gdb_test "python print (finishbp.is_valid())" "False.*"\
          "ensure that finish bp is invalid afer out of scope notification"
 
 #

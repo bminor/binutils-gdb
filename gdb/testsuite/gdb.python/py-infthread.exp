@@ -40,28 +40,28 @@ if ![runto_main] then {
 # Test basic gdb.Inferior attributes and methods.
 
 gdb_py_test_silent_cmd "python t0 = gdb.selected_thread ()" "test gdb.selected_thread" 1
-gdb_test "python print t0" "\\<gdb.InferiorThread object at 0x\[\[:xdigit:\]\]+>" "verify InferiorThread object"
-gdb_test "python print 'result =', t0.num" " = \[0-9\]+" "test Inferior.num"
-gdb_test "python print 'result =', t0.ptid" " = \\(\[0-9\]+, \[0-9\]+, \[0-9\]+\\)" "test InferiorThread.ptid"
+gdb_test "python print (t0)" "\\<gdb.InferiorThread object at 0x\[\[:xdigit:\]\]+>" "verify InferiorThread object"
+gdb_test "python print ('result = %s' % t0.num)" " = \[0-9\]+" "test Inferior.num"
+gdb_test "python print ('result = %s' % str (t0.ptid))" " = \\(\[0-9\]+, \[0-9\]+, \[0-9\]+\\)" "test InferiorThread.ptid"
 
 gdb_py_test_silent_cmd "python name = gdb.selected_thread().name" \
     "get supplied name of current thread" 1
 gdb_py_test_silent_cmd "python gdb.selected_thread().name = 'hibob'" \
     "set name of current thread" 1
-gdb_test "python print gdb.selected_thread().name" "hibob" \
+gdb_test "python print (gdb.selected_thread().name)" "hibob" \
     "check name of current thread"
 gdb_py_test_silent_cmd "python gdb.selected_thread().name = None" \
     "reset name of current thread" 1
-gdb_test "python print gdb.selected_thread().name == name" "True" \
+gdb_test "python print (gdb.selected_thread().name == name)" "True" \
     "check name of current thread again"
 
-gdb_test "python print 'result =', t0.is_stopped ()" " = True" "test InferiorThread.is_stopped"
-gdb_test "python print 'result =', t0.is_running ()" " = False" "test InferiorThread.is_running"
-gdb_test "python print 'result =', t0.is_exited ()" " = False" "test InferiorThread.is_exited"
+gdb_test "python print ('result = %s' % t0.is_stopped ())" " = True" "test InferiorThread.is_stopped"
+gdb_test "python print ('result = %s' % t0.is_running ())" " = False" "test InferiorThread.is_running"
+gdb_test "python print ('result = %s' % t0.is_exited ())" " = False" "test InferiorThread.is_exited"
 
 # Test InferiorThread is_valid.  This must always be the last test in
 # this testcase as it kills the inferior.
 
-gdb_test "python print 'result =', t0.is_valid ()" " = True" "test InferiorThread.is_valid"
+gdb_test "python print ('result = %s' % t0.is_valid ())" " = True" "test InferiorThread.is_valid"
 gdb_test_no_output "kill inferior 1" "kill inferior 1"
-gdb_test "python print 'result =', t0.is_valid ()" " = False" "test InferiorThread.is_valid"
+gdb_test "python print ('result = %s' % t0.is_valid ())" " = False" "test InferiorThread.is_valid"
