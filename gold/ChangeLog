@@ -1,3 +1,10 @@
+2012-12-10  Roland McGrath  <mcgrathr@google.com>
+
+	* testsuite/binary_unittest.cc (read_all): New function.
+	(Sized_binary_test): Use it instead of ::read.
+	* fileread.cc (do_read): Don't assume pread always reads the whole
+	amount in a single call.
+
 2012-12-10  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_selector_powerpc::Target_selector_powerpc):
