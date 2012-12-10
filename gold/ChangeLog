@@ -1,5 +1,11 @@
 2012-12-10  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_selector_powerpc::Target_selector_powerpc):
+	Set EM_PPC64 or EM_PPC here.
+	(Target_selector_powerpc::do_recognize): Delete.
+
+2012-12-10  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Powerpc_relobj::Powerpc_relobj): Init has14_ and
 	stub_table_.
 	(Target_powerpc::Branch_info::make_stub): Don't omit addend.
