@@ -2212,25 +2212,11 @@ svr4_relocate_main_executable (void)
 
    This function is responsible for discovering those names and
    addresses, and saving sufficient information about them to allow
-   their symbols to be read at a later time.
-
-   FIXME
-
-   Between enable_break() and disable_break(), this code does not
-   properly handle hitting breakpoints which the user might have
-   set in the startup code or in the dynamic linker itself.  Proper
-   handling will probably have to wait until the implementation is
-   changed to use the "breakpoint handler function" method.
-
-   Also, what if child has exit()ed?  Must exit loop somehow.  */
+   their symbols to be read at a later time.  */
 
 static void
 svr4_solib_create_inferior_hook (int from_tty)
 {
-#if defined(_SCO_DS)
-  struct inferior *inf;
-  struct thread_info *tp;
-#endif /* defined(_SCO_DS) */
   struct svr4_info *info;
 
   info = get_svr4_info ();
@@ -2248,31 +2234,6 @@ svr4_solib_create_inferior_hook (int from_tty)
 
   if (!enable_break (info, from_tty))
     return;
-
-#if defined(_SCO_DS)
-  /* SCO needs the loop below, other systems should be using the
-     special shared library breakpoints and the shared library breakpoint
-     service routine.
-
-     Now run the target.  It will eventually hit the breakpoint, at
-     which point all of the libraries will have been mapped in and we
-     can go groveling around in the dynamic linker structures to find
-     out what we need to know about them.  */
-
-  inf = current_inferior ();
-  tp = inferior_thread ();
-
-  clear_proceed_status ();
-  inf->control.stop_soon = STOP_QUIETLY;
-  tp->suspend.stop_signal = GDB_SIGNAL_0;
-  do
-    {
-      target_resume (pid_to_ptid (-1), 0, tp->suspend.stop_signal);
-      wait_for_inferior ();
-    }
-  while (tp->suspend.stop_signal != GDB_SIGNAL_TRAP);
-  inf->control.stop_soon = NO_STOP_QUIETLY;
-#endif /* defined(_SCO_DS) */
 }
 
 static void
