@@ -1,3 +1,9 @@
+2012-12-10  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Powerpc_relobj::Powerpc_relobj): Init has14_ and
+	stub_table_.
+	(Target_powerpc::Branch_info::make_stub): Don't omit addend.
+
 2012-12-07  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/binary_unittest.cc (Sized_binary_test):

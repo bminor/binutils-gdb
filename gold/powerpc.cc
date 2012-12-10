@@ -71,7 +71,8 @@ public:
   Powerpc_relobj(const std::string& name, Input_file* input_file, off_t offset,
 		 const typename elfcpp::Ehdr<size, big_endian>& ehdr)
     : Sized_relobj_file<size, big_endian>(name, input_file, offset, ehdr),
-      special_(0), opd_valid_(false), opd_ent_(), access_from_map_()
+      special_(0), opd_valid_(false),
+      opd_ent_(), access_from_map_(), has14_(), stub_table_()
   { }
 
   ~Powerpc_relobj()
@@ -2067,6 +2068,7 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	    return;
 	  to = symval.value(this->object_, 0);
 	}
+      to += this->addend_;
       if (stub_table == NULL)
 	stub_table = this->object_->stub_table(this->shndx_);
       gold_assert(stub_table != NULL);
