@@ -37,6 +37,7 @@ struct addrmap;
    this technique.  */
 
 struct block;
+struct pending_block;
 
 #ifndef EXTERN
 #define	EXTERN extern
@@ -177,21 +178,6 @@ EXTERN int context_stack_size;
 
 EXTERN int within_function;
 
-/* List of blocks already made (lexical contexts already closed).
-   This is used at the end to make the blockvector.  */
-
-struct pending_block
-  {
-    struct pending_block *next;
-    struct block *block;
-  };
-
-/* Pointer to the head of a linked list of symbol blocks which have
-   already been finalized (lexical contexts already closed) and which
-   are just waiting to be built into a blockvector when finalizing the
-   associated symtab.  */
-
-EXTERN struct pending_block *pending_blocks;
 
 
 struct subfile_stack

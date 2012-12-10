@@ -83,6 +83,25 @@ static struct obstack pending_addrmap_obstack;
    the end, then we just toss the addrmap.  */
 static int pending_addrmap_interesting;
 
+/* An obstack used for allocating pending blocks.  */
+
+static struct obstack pending_block_obstack;
+
+/* List of blocks already made (lexical contexts already closed).
+   This is used at the end to make the blockvector.  */
+
+struct pending_block
+  {
+    struct pending_block *next;
+    struct block *block;
+  };
+
+/* Pointer to the head of a linked list of symbol blocks which have
+   already been finalized (lexical contexts already closed) and which
+   are just waiting to be built into a blockvector when finalizing the
+   associated symtab.  */
+
+static struct pending_block *pending_blocks;
 
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
 
@@ -205,9 +224,11 @@ really_free_pendings (void *dummy)
 void
 free_pending_blocks (void)
 {
-  /* The links are made in the objfile_obstack, so we only need to
-     reset PENDING_BLOCKS.  */
-  pending_blocks = NULL;
+  if (pending_blocks != NULL)
+    {
+      obstack_free (&pending_block_obstack, NULL);
+      pending_blocks = NULL;
+    }
 }
 
 /* Take one of the lists of symbols and make a block from it.  Keep
@@ -418,8 +439,11 @@ record_pending_block (struct objfile *objfile, struct block *block,
 {
   struct pending_block *pblock;
 
+  if (pending_blocks == NULL)
+    obstack_init (&pending_block_obstack);
+
   pblock = (struct pending_block *)
-    obstack_alloc (&objfile->objfile_obstack, sizeof (struct pending_block));
+    obstack_alloc (&pending_block_obstack, sizeof (struct pending_block));
   pblock->block = block;
   if (opblock)
     {

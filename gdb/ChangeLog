@@ -1,3 +1,14 @@
+2012-12-10  Tom Tromey  <tromey@redhat.com>
+
+	* buildsym.c (struct pending_block): Move from buildsym.h.
+	(pending_blocks): Likewise; now static.
+	(pending_block_obstack): New global.
+	(free_pending_blocks): Free blocks.
+	(record_pending_block): Use pending_block_obstack.
+	* buildsym.h (struct pending_block): Move definition to
+	buildsym.c.
+	(pending_blocks): Don't declare.
+
 2012-12-10  Pedro Alves  <palves@redhat.com>
 
 	* solib-svr4.c (svr4_solib_create_inferior_hook) [_SCO_DS]: Remove
