@@ -8594,8 +8594,8 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
      have dwo_unit "live" in that.  At least for now.
 
      The DWP file can be made up of a random collection of CUs and TUs.
-     However, for each CU + set of TUs that came from the same original
-     DWO file, we want combine them back into a virtual DWO file to save space
+     However, for each CU + set of TUs that came from the same original DWO
+     file, we want to combine them back into a virtual DWO file to save space
      (fewer struct dwo_file objects to allocated).  Remember that for really
      large apps there can be on the order of 8K CUs and 200K TUs, or more.  */
 

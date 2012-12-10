@@ -1,5 +1,7 @@
 2012-12-10  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (create_dwo_in_dwp): Tweak comment.
+
 	* symtab.c (find_pc_sect_symtab): Add comment.
 
 2012-12-10  Tom Tromey  <tromey@redhat.com>
