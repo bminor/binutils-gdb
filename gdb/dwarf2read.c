@@ -483,7 +483,12 @@ struct dwarf2_cu
      (zero is a valid value though).
      Note this value comes from the stub CU/TU's DIE.
      Also note that the value is zero in the non-DWO case so this value can
-     be used without needing to know whether DWO files are in use or not.  */
+     be used without needing to know whether DWO files are in use or not.
+     N.B. This does not apply to DW_AT_ranges appearing in
+     DW_TAG_compile_unit dies.  This is a bit of a wart, consider if ever
+     DW_AT_ranges appeared in the DW_TAG_compile_unit of DWO DIEs: then
+     DW_AT_ranges_base *would* have to be applied, and we'd have to care
+     whether the DW_AT_ranges attribute came from the skeleton or DWO.  */
   ULONGEST ranges_base;
 
   /* Mark used when releasing cached dies.  */
@@ -10056,7 +10061,14 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
       attr = dwarf2_attr (die, DW_AT_ranges, cu);
       if (attr != NULL)
 	{
-	  unsigned int ranges_offset = DW_UNSND (attr) + cu->ranges_base;
+	  /* DW_AT_ranges_base does not apply to DIEs from the DWO skeleton.
+	     We take advantage of the fact that DW_AT_ranges does not appear
+	     in DW_TAG_compile_unit of DWO files.  */
+	  int need_ranges_base = die->tag != DW_TAG_compile_unit;
+	  unsigned int ranges_offset = (DW_UNSND (attr)
+					+ (need_ranges_base
+					   ? cu->ranges_base
+					   : 0));
 
 	  /* Value of the DW_AT_ranges attribute is the offset in the
 	     .debug_ranges section.  */
@@ -10217,10 +10229,15 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
   if (attr)
     {
       bfd *obfd = objfile->obfd;
+      /* DW_AT_ranges_base does not apply to DIEs from the DWO skeleton.
+	 We take advantage of the fact that DW_AT_ranges does not appear
+	 in DW_TAG_compile_unit of DWO files.  */
+      int need_ranges_base = die->tag != DW_TAG_compile_unit;
 
       /* The value of the DW_AT_ranges attribute is the offset of the
          address range list in the .debug_ranges section.  */
-      unsigned long offset = DW_UNSND (attr) + cu->ranges_base;
+      unsigned long offset = (DW_UNSND (attr)
+			      + (need_ranges_base ? cu->ranges_base : 0));
       gdb_byte *buffer = dwarf2_per_objfile->ranges.buffer + offset;
 
       /* For some target architectures, but not others, the
