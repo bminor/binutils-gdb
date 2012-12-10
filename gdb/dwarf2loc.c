@@ -429,8 +429,7 @@ per_cu_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset,
 {
   struct dwarf2_locexpr_baton block;
 
-  block = dwarf2_fetch_die_location_block (die_offset, per_cu,
-					   get_frame_pc, baton);
+  block = dwarf2_fetch_die_loc_cu_off (die_offset, per_cu, get_frame_pc, baton);
 
   /* DW_OP_call_ref is currently not supported.  */
   gdb_assert (block.per_cu == per_cu);
@@ -2038,9 +2037,10 @@ indirect_pieced_value (struct value *value)
   byte_offset = value_as_address (value);
 
   gdb_assert (piece);
-  baton = dwarf2_fetch_die_location_block (piece->v.ptr.die, c->per_cu,
-					   get_frame_address_in_block_wrapper,
-					   frame);
+  baton
+    = dwarf2_fetch_die_loc_sect_off (piece->v.ptr.die, c->per_cu,
+				     get_frame_address_in_block_wrapper,
+				     frame);
 
   return dwarf2_evaluate_loc_desc_full (TYPE_TARGET_TYPE (type), frame,
 					baton.data, baton.size, baton.per_cu,
@@ -3205,8 +3205,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    op_ptr += size;
 
 	    offset.cu_off = uoffset;
-	    block = dwarf2_fetch_die_location_block (offset, per_cu,
-						     get_ax_pc, expr);
+	    block = dwarf2_fetch_die_loc_cu_off (offset, per_cu,
+						 get_ax_pc, expr);
 
 	    /* DW_OP_call_ref is currently not supported.  */
 	    gdb_assert (block.per_cu == per_cu);

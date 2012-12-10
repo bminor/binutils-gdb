@@ -17334,12 +17334,11 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
    dwarf2_locexpr_baton->data has lifetime of PER_CU->OBJFILE.  */
 
 struct dwarf2_locexpr_baton
-dwarf2_fetch_die_location_block (cu_offset offset_in_cu,
-				 struct dwarf2_per_cu_data *per_cu,
-				 CORE_ADDR (*get_frame_pc) (void *baton),
-				 void *baton)
+dwarf2_fetch_die_loc_sect_off (sect_offset offset,
+			       struct dwarf2_per_cu_data *per_cu,
+			       CORE_ADDR (*get_frame_pc) (void *baton),
+			       void *baton)
 {
-  sect_offset offset = { per_cu->offset.sect_off + offset_in_cu.cu_off };
   struct dwarf2_cu *cu;
   struct die_info *die;
   struct attribute *attr;
@@ -17392,6 +17391,20 @@ dwarf2_fetch_die_location_block (cu_offset offset_in_cu,
   age_cached_comp_units ();
 
   return retval;
+}
+
+/* Like dwarf2_fetch_die_loc_sect_off, but take a CU
+   offset.  */
+
+struct dwarf2_locexpr_baton
+dwarf2_fetch_die_loc_cu_off (cu_offset offset_in_cu,
+			     struct dwarf2_per_cu_data *per_cu,
+			     CORE_ADDR (*get_frame_pc) (void *baton),
+			     void *baton)
+{
+  sect_offset offset = { per_cu->offset.sect_off + offset_in_cu.cu_off };
+
+  return dwarf2_fetch_die_loc_sect_off (offset, per_cu, get_frame_pc, baton);
 }
 
 /* Return the type of the DIE at DIE_OFFSET in the CU named by

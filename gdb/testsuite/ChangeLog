@@ -1,3 +1,10 @@
+2012-12-10  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/implptr-64bit.exp: Run tests with two CUs as well.
+	(test): Add "two_cu" argument.
+	* gdb.dwarf2/implptr-64bit.S: Move subprogram later; use ref_addr
+	for types; allow two CUs.
+
 2012-12-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-compdir-oldgcc.S: New file.

@@ -342,7 +342,7 @@ add_piece (struct dwarf_expr_context *ctx, ULONGEST size, ULONGEST offset)
     }
   else if (p->location == DWARF_VALUE_IMPLICIT_POINTER)
     {
-      p->v.ptr.die.cu_off = ctx->len;
+      p->v.ptr.die.sect_off = ctx->len;
       p->v.ptr.offset = value_as_long (dwarf_expr_fetch (ctx, 0));
     }
   else if (p->location == DWARF_VALUE_REGISTER)
@@ -872,7 +872,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      error (_("DWARF-2 expression error: DW_OP_GNU_implicit_pointer "
 		       "is not allowed in frame context"));
 
-	    /* The referred-to DIE of cu_offset kind.  */
+	    /* The referred-to DIE of sect_offset kind.  */
 	    ctx->len = extract_unsigned_integer (op_ptr, ctx->ref_addr_size,
 						 byte_order);
 	    op_ptr += ctx->ref_addr_size;

@@ -18,11 +18,12 @@ d:
 	/* Length of Compilation Unit Info */
 #if OFFSET_SIZE == 4
 # define OFFSET .4byte
-	.4byte	debug_end - 1f
+# define HEADER_LINE1
+# define HEADER_LINE2(END) .4byte	END - 1f
 #elif OFFSET_SIZE == 8
 # define OFFSET .8byte
-	.4byte	0xffffffff
-	.8byte	debug_end - 1f
+# define HEADER_LINE1 .4byte	0xffffffff
+# define HEADER_LINE2(END) .8byte	END - 1f
 #else
 # error
 #endif
@@ -40,6 +41,16 @@ d:
 #else
 # error
 #endif
+	
+#if TWO_CU
+# define END1 .Lcu_end_1
+#else
+# define END1 debug_end
+#endif
+
+	HEADER_LINE1
+	HEADER_LINE2(END1)
+
 1:
 	.2byte	DWARF_VERSION	/* DWARF version number */
 	OFFSET	.Ldebug_abbrev0	/* Offset Into Abbrev. Section */
@@ -68,13 +79,6 @@ d:
 
 	.byte	0x0	/* end of children of DW_TAG_structure_type */
 
-	.uleb128	6			/* Abbrev: DW_TAG_subprogram */
-	.ascii		"main\0"		/* DW_AT_name */
-	ADDR		main			/* DW_AT_low_pc */
-	ADDR		main + 0x100		/* DW_AT_high_pc */
-	.4byte		.Ltype_int - d		/* DW_AT_type */
-	.byte		1			/* DW_AT_external */
-
 .Ltype_structptr:
 	.uleb128 0x5	/* DW_TAG_pointer_type */
 	.byte	ADDR_SIZE	/* DW_AT_byte_size */
@@ -90,7 +94,32 @@ d:
 3:
 	.byte	1, 1, 1, 1
 2:
-	.4byte	.Ltype_struct - d	/* DW_AT_type */
+	REF_ADDR	.Ltype_struct - d	/* DW_AT_type */
+
+#if TWO_CU
+	.byte	0x0	/* end of children of CU */
+.Lcu_end_1:
+
+	HEADER_LINE1
+	HEADER_LINE2 (debug_end)
+
+1:
+	.2byte	DWARF_VERSION	/* DWARF version number */
+	OFFSET	.Ldebug_abbrev0	/* Offset Into Abbrev. Section */
+	.byte	ADDR_SIZE	/* Pointer Size (in bytes) */
+
+	.uleb128 0x1	/* (DIE (0xb) DW_TAG_compile_unit) */
+	.ascii "GNU C 4.4.3\0"	/* DW_AT_producer */
+	.byte	0x1	/* DW_AT_language */
+	.ascii "1.c\0"	/* DW_AT_name */
+#endif
+
+	.uleb128	6			/* Abbrev: DW_TAG_subprogram */
+	.ascii		"main\0"		/* DW_AT_name */
+	ADDR		main			/* DW_AT_low_pc */
+	ADDR		main + 0x100		/* DW_AT_high_pc */
+	REF_ADDR	.Ltype_int - d		/* DW_AT_type */
+	.byte		1			/* DW_AT_external */
 
 	.uleb128 0x4	/* (DW_TAG_variable) */
 	.ascii "p\0"	/* DW_AT_name */
@@ -100,7 +129,7 @@ d:
 	REF_ADDR	.Lvar_out - d	/* referenced DIE */
 	.sleb128	0	/* offset */
 2:
-	.4byte	.Ltype_structptr - d	/* DW_AT_type */
+	REF_ADDR	.Ltype_structptr - d	/* DW_AT_type */
 
 	.byte	0x0	/* end of children of main */
 
@@ -152,7 +181,7 @@ debug_end:
 	.uleb128 0x02	/* (DW_AT_location) */
 	.uleb128 0xa	/* (DW_FORM_block1) */
 	.uleb128 0x49	/* (DW_AT_type) */
-	.uleb128 0x13	/* (DW_FORM_ref4) */
+	.uleb128 0x10	/* (DW_FORM_ref_addr) */
 	.byte	0x0
 	.byte	0x0
 
@@ -176,7 +205,7 @@ debug_end:
 	.uleb128	0x12			/* DW_AT_high_pc */
 	.uleb128	0x1			/* DW_FORM_addr */
 	.uleb128	0x49			/* DW_AT_type */
-	.uleb128	0x13			/* DW_FORM_ref4 */
+	.uleb128	0x10			/* DW_FORM_ref_addr */
 	.uleb128	0x3f			/* DW_AT_external */
 	.uleb128	0xc			/* DW_FORM_flag */
 	.byte		0x0			/* Terminator */

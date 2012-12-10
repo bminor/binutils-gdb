@@ -22,16 +22,16 @@ if {![dwarf2_support]} {
 standard_testfile .S
 set mainfile main.c
 
-proc test { dwarf_version offset_size addr_size ref_addr_size } {
+proc test { dwarf_version offset_size addr_size ref_addr_size two_cu } {
     global testfile srcfile mainfile
 
     # 32-bit targets do not support any of the testcases; keep quiet there.
     set opts {quiet}
-    foreach n { dwarf_version offset_size addr_size ref_addr_size } {
+    foreach n { dwarf_version offset_size addr_size ref_addr_size two_cu } {
 	lappend opts "additional_flags=-D[string toupper $n]=[expr "\$$n"]"
     }
 
-    set name "d${dwarf_version}o${offset_size}a${addr_size}r${ref_addr_size}"
+    set name "d${dwarf_version}o${offset_size}a${addr_size}r${ref_addr_size}t${two_cu}"
     set executable ${testfile}-${name}
     if [prepare_for_testing ${testfile}.exp $executable "${srcfile} ${mainfile}" $opts] {
 	return -1
@@ -44,8 +44,12 @@ proc test { dwarf_version offset_size addr_size ref_addr_size } {
     gdb_test "p/x p->f" " = 0x1010101" $name
 }
 
-#    DWARF_VERSION OFFSET_SIZE ADDR_SIZE REF_ADDR_SIZE
-test 2 8 4 4
-test 2 4 8 8
-test 3 8 4 8
-test 3 4 8 4
+#    DWARF_VERSION OFFSET_SIZE ADDR_SIZE REF_ADDR_SIZE TWO_CU
+test 2 8 4 4 0
+test 2 4 8 8 0
+test 3 8 4 8 0
+test 3 4 8 4 0
+test 2 8 4 4 1
+test 2 4 8 8 1
+test 3 8 4 8 1
+test 3 4 8 4 1
