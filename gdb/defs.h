@@ -116,8 +116,6 @@ typedef bfd_vma CORE_ADDR;
 
 /* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
 
-#ifndef LONGEST
-
 #ifdef BFD64
 
 #define LONGEST BFD_HOST_64_BIT
@@ -129,8 +127,6 @@ typedef bfd_vma CORE_ADDR;
 #define ULONGEST unsigned long long
 
 #endif /* No BFD64 */
-
-#endif /* ! LONGEST */
 
 #ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -617,12 +613,6 @@ enum gdb_osabi
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
 

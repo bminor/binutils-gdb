@@ -1,5 +1,10 @@
 2012-12-10  Tom Tromey  <tromey@redhat.com>
 
+	* defs.h: Don't check for definition of LONGEST.
+	(min, max): Remove duplicates.
+
+2012-12-10  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (dwarf2_fetch_die_loc_sect_off): New function.
 	(dwarf2_fetch_die_loc_cu_off): Rename from
 	dwarf2_fetch_die_location_block.  Rewrite to use
