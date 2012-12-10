@@ -2150,6 +2150,8 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
   if (best_s != NULL)
     return (best_s);
 
+  /* Not found in symtabs, search the "quick" symtabs (e.g. psymtabs).  */
+
   ALL_OBJFILES (objfile)
   {
     struct symtab *result;
