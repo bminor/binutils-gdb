@@ -40,8 +40,20 @@ AC_HEADER_DIRENT
 
 AC_FUNC_ALLOCA
 
+# Dependency checking.
+ZW_CREATE_DEPDIR
+ZW_PROG_COMPILER_DEPENDENCIES([CC])
+
 # Check for the 'make' the user wants to use.
 AC_CHECK_PROGS(MAKE, make)
+MAKE_IS_GNU=
+case "`$MAKE --version 2>&1 | sed 1q`" in
+  *GNU*)
+    MAKE_IS_GNU=yes
+    ;;
+esac
+AM_CONDITIONAL(GMAKE, test "$MAKE_IS_GNU" = yes)
+AC_PROG_MAKE_SET
 
 # Configure gnulib.  We can't use AC_CONFIG_SUBDIRS as that'd expect
 # to find the the source subdir to be configured directly under

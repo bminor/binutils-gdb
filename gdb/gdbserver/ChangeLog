@@ -1,3 +1,52 @@
+2012-12-10  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (DEPMODE, DEPDIR, depcomp, COMPILE.pre)
+	(COMPILE.post, COMPILE, POSTCOMPILE, IPAGENT_COMPILE): New
+	macros.
+	(.c.o): Rewrite.
+	(ax-ipa.o, tracepoint-ipa.o, utils-ipa.o, format-ipa.o)
+	(common-utils-ipa.o, remote-utils-ipa.o, regcache-ipa.o)
+	(i386-linux-ipa.o, linux-i386-ipa.o, linux-amd64-ipa.o)
+	(amd64-linux-ipa.o, ax.o): Rewrite.
+	(event-loop.o, hostio.o, hostio-errno.o, inferiors.o, mem-break.o)
+	(proc-service.o, regcache.o, remote-utils.o, server.o, target.o)
+	(thread-db.o, tracepoint.o, utils.o, gdbreplay.o, dll.o): Remove.
+	(signals.o, linux-procfs.o, linux-ptrace.o, common-utils.o, vec.o)
+	(gdb_vecs.o, xml-utils.o, linux-osdata.o, ptid.o, buffer.o)
+	(format.o, agent.o, vasprintf.o, vsnprintf.o): Rewrite.
+	(i386-low.o, i387-fp.o, linux-low.o, linux-arm-low.o)
+	(linux-bfin-low.o, linux-cris-low.o, linux-crisv32-low.o)
+	(linux-ia64-low.o, linux-m32r-low.o, linux-mips-low.o)
+	(linux-ppc-low.o, linux-s390-low.o, linux-sh-low.o)
+	(linux-tic6x-low.o, linux-x86-low.o, linux-xtensa-low.o)
+	(linux-tile-low.o, lynx-low.o, lynx-ppc-low.o, nto-low.o)
+	(nto-x86-low.o, linux-low.o, win32-low.o, win32-arm-low.o)
+	(win32-i386-low.o, spu-low.o, reg-arm.o, arm-with-iwmmxt.o)
+	(arm-with-vfpv2.o, arm-with-vfpv3.o, arm-with-neon.o, reg-bfin.o)
+	(reg-cris.o, reg-crisv32.o, i386.o, i386-linux.o, i386-avx.o)
+	(i386-avx-linux.o, i386-mmx.o, i386-mmx-linux.o, reg-ia64.o)
+	(reg-m32r.o, reg-m68k.o, reg-cf.o, mips-linux.o, mips-dsp-linux.o)
+	(mips64-linux.o, mips64-dsp-linux.o, powerpc-32.o, powerpc-32l.o)
+	(powerpc-altivec32l.o, powerpc-cell32l.o, powerpc-vsx32l.o)
+	(powerpc-isa205-32l.o, powerpc-isa205-altivec32l.o)
+	(powerpc-isa205-vsx32l.o, powerpc-e500l.o, powerpc-64l.o)
+	(powerpc-altivec64l.o, powerpc-cell64l.o, powerpc-vsx64l.o)
+	(powerpc-isa205-64l.o, powerpc-isa205-altivec64l.o)
+	(powerpc-isa205-vsx64l.o, s390-linux32.o, s390-linux32v1.o)
+	(s390-linux32v2.o, s390-linux64.o, s390-linux64v1.o)
+	(s390-linux64v2.o, s390x-linux64.o, s390x-linux64v1.o)
+	(s390x-linux64v2.o, tic6x-c64xp-linux.o, tic6x-c64x-linux.o)
+	(tic6x-c62x-linux.o, reg-sh.o, reg-sparc64.o, reg-spu.o, amd64.o)
+	(amd64-linux.o, amd64-avx.o, amd64-avx-linux.o, x32.o)
+	(x32-linux.o, x32-avx.o, x32-avx-linux.o, reg-xtensa.o)
+	(reg-tilegx.o): Remove.
+	(all_object_files): New macro.
+	Include .deps files.
+	* aclocal.m4, configure: Rebuild.
+	* acinclude.m4: Include depstand.m4, lead-dot.m4.
+	* configure.ac: Invoke ZW_CREATE_DEPDIR,
+	ZW_PROG_COMPILER_DEPENDENCIES.  Compute GMAKE condition.
+
 2012-12-05  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/14917:
