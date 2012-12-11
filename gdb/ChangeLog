@@ -1,5 +1,9 @@
 2012-12-11  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (dwarf2_get_dwz_file): Set 'dwz_file'.
+
+2012-12-11  Tom Tromey  <tromey@redhat.com>
+
 	* dsrec.c (report_transfer_performance): Don't declare.
 	(load_srec): Use gettimeofday, print_transfer_performance.
 	* symfile.c (report_transfer_performance): Remove.
