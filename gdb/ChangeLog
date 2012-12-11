@@ -1,3 +1,11 @@
+2012-12-11  Pedro Alves  <pedro@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* procfs.c (procfs_make_note_section) [NEW_PROC_API]: Output a
+	NT_PSTATUS note.
+	* sol2-tdep.c (sol2_core_pid_to_str): Print process IDs
+	differently from LWP IDs.
+
 2012-12-11  Pedro Alves  <palves@redhat.com>
 
 	* configure.ac (detect type of /proc): Remove Unixware handling.
