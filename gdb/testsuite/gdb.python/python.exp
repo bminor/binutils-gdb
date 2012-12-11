@@ -362,7 +362,7 @@ gdb_py_test_multiple "prompt substitution readline" \
   "end" ""
 
 gdb_test_multiple "python gdb.prompt_hook = error_prompt" "set the hook" {
-    -re "Python Exception <(type 'exceptions.|class ')RuntimeError'> Python exception called.*" {
+    -re "Python Exception (exceptions.RuntimeError|<(type 'exceptions.|class ')RuntimeError'>) Python exception called.*" {
 	pass "set hook"
     }
 }

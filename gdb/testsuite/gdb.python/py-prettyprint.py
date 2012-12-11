@@ -23,6 +23,14 @@ def _iterator (pointer, len):
     start = pointer
     end = pointer + len
     while pointer != end:
+        yield ('[%d]' % int (pointer - start), pointer.dereference())
+        pointer += 1
+
+# Same as _iterator but can be told to raise an exception.
+def _iterator_except (pointer, len):
+    start = pointer
+    end = pointer + len
+    while pointer != end:
         if exception_flag:
             raise gdb.MemoryError ('hi bob')
         yield ('[%d]' % int (pointer - start), pointer.dereference())
@@ -49,23 +57,7 @@ class ContainerPrinter (object):
         return _iterator(self.val['elements'], self.val['len'])
 
 # Treats a container as array.
-class ArrayPrinter:
-    class _iterator:
-        def __init__ (self, pointer, len):
-            self.start = pointer
-            self.pointer = pointer
-            self.end = pointer + len
-
-        def __iter__(self):
-            return self
-
-        def next(self):
-            if self.pointer == self.end:
-                raise StopIteration
-            result = self.pointer
-            self.pointer = self.pointer + 1
-            return ('[%d]' % int (result - self.start), result.dereference())
-
+class ArrayPrinter (object):
     def __init__(self, val):
         self.val = val
 
@@ -73,7 +65,7 @@ class ArrayPrinter:
         return 'array %s with %d elements' % (self.val['name'], self.val['len'])
 
     def children(self):
-        return self._iterator(self.val['elements'], self.val['len'])
+        return _iterator(self.val['elements'], self.val['len'])
 
     def display_hint (self):
         return 'array'
@@ -90,7 +82,7 @@ class NoStringContainerPrinter (object):
         return None
 
     def children(self):
-        return _iterator(self.val['elements'], self.val['len'])
+        return _iterator_except (self.val['elements'], self.val['len'])
 
 class pp_s (object):
     def __init__(self, val):
