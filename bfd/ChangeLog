@@ -1,3 +1,25 @@
+2012-12-10  Edgar E. Iglesias <edgar.iglesias@gmail.com>
+
+	* reloc.c (MICROBLAZE): Document new relocations
+	* bfd-in2.h: Regenerated
+	* libbfd.h: Regenerated
+	* elf32-microblaze.c (microblaze_elf_howto_raw): Add TLS relocations
+	(microblaze_elf_reloc_type_lookup): Likewise
+	(elf32_mb_link_hash_entry): define TLS reference types
+	(elf32_mb_link_hash_table): add TLS Local dynamic GOT entry
+	#define has_tls_reloc if section has TLS relocs
+	(dtprel_base), (check_unique_offset): New
+	(microblaze_elf_output_dynamic_relocation): output simple
+	dynamic relocation into SRELOC.
+	(microblaze_elf_relocate_section): Accommodate TLS relocations.
+	(microblaze_elf_check_relocs): Likewise
+	(update_local_sym_info): New
+	(microblaze_elf_copy_indirect_symbol): Add tls_mask.
+	(allocate_dynrelocs): Handle TLS symbol
+	(microblaze_elf_size_dynamic_sections): Set size and offset
+	(microblaze_elf_finish_dynamic_symbol): Use
+	microblaze_elf_output_dynamic_relocation
+
 2012-12-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/14933

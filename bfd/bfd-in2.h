@@ -5071,6 +5071,37 @@ value in a word.  The relocation is relative offset from  */
 the dynamic object into the runtime process image.  */
   BFD_RELOC_MICROBLAZE_COPY,
 
+/* Unused Reloc  */
+  BFD_RELOC_MICROBLAZE_64_TLS,
+
+/* This is a 64 bit reloc that stores the 32 bit GOT relative value
+of the GOT TLS GD info entry in two words (with an imm instruction). The
+relocation is GOT offset.  */
+  BFD_RELOC_MICROBLAZE_64_TLSGD,
+
+/* This is a 64 bit reloc that stores the 32 bit GOT relative value
+of the GOT TLS LD info entry in two words (with an imm instruction). The
+relocation is GOT offset.  */
+  BFD_RELOC_MICROBLAZE_64_TLSLD,
+
+/* This is a 32 bit reloc that stores the Module ID to GOT(n).  */
+  BFD_RELOC_MICROBLAZE_32_TLSDTPMOD,
+
+/* This is a 32 bit reloc that stores TLS offset to GOT(n+1).  */
+  BFD_RELOC_MICROBLAZE_32_TLSDTPREL,
+
+/* This is a 32 bit reloc for storing TLS offset to two words (uses imm
+instruction)  */
+  BFD_RELOC_MICROBLAZE_64_TLSDTPREL,
+
+/* This is a 64 bit reloc that stores 32-bit thread pointer relative offset
+to two words (uses imm instruction).  */
+  BFD_RELOC_MICROBLAZE_64_TLSGOTTPREL,
+
+/* This is a 64 bit reloc that stores 32-bit thread pointer relative offset
+to two words (uses imm instruction).  */
+  BFD_RELOC_MICROBLAZE_64_TLSTPREL,
+
 /* AArch64 ADD immediate instruction, holding bits 0 to 11 of the address.
 Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
   BFD_RELOC_AARCH64_ADD_LO12,

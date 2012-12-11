@@ -81,7 +81,12 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 #define GOT_OFFSET           8
 #define PLT_OFFSET           9
 #define GOTOFF_OFFSET        10
-
+#define TLSGD_OFFSET         11
+#define TLSLD_OFFSET         12
+#define TLSDTPMOD_OFFSET     13
+#define TLSDTPREL_OFFSET     14
+#define TLSGOTTPREL_OFFSET   15
+#define TLSTPREL_OFFSET      16
 
 /* Initialize the relax table.  */
 const relax_typeS md_relax_table[] =
@@ -97,6 +102,12 @@ const relax_typeS md_relax_table[] =
   { 0x7fffffff, 0x80000000, INST_WORD_SIZE*2, 0 },  /*  8: GOT_OFFSET.  */
   { 0x7fffffff, 0x80000000, INST_WORD_SIZE*2, 0 },  /*  9: PLT_OFFSET.  */
   { 0x7fffffff, 0x80000000, INST_WORD_SIZE*2, 0 },  /* 10: GOTOFF_OFFSET.  */
+  { 0x7fffffff, 0x80000000, INST_WORD_SIZE*2, 0 },  /* 11: TLSGD_OFFSET.  */
+  { 0x7fffffff, 0x80000000, INST_WORD_SIZE*2, 0 },  /* 12: TLSLD_OFFSET.  */
+  { 0x7fffffff, 0x80000000, INST_WORD_SIZE*1, 0 },  /* 13: TLSDTPMOD_OFFSET.  */
+  { 0x7fffffff, 0x80000000, INST_WORD_SIZE*2, 0 },  /* 14: TLSDTPREL_OFFSET.  */
+  { 0x7fffffff, 0x80000000, INST_WORD_SIZE*2, 0 },  /* 15: TLSGOTTPREL_OFFSET.  */
+  { 0x7fffffff, 0x80000000, INST_WORD_SIZE*2, 0 }   /* 16: TLSTPREL_OFFSET.  */
 };
 
 static struct hash_control * opcode_hash_control;	/* Opcode mnemonics.  */
@@ -599,9 +610,75 @@ parse_exp (char *s, expressionS *e)
 }
 
 /* Symbol modifiers (@GOT, @PLT, @GOTOFF).  */
+#define IMM_NONE   0
 #define IMM_GOT    1
 #define IMM_PLT    2
 #define IMM_GOTOFF 3
+#define IMM_TLSGD  4
+#define IMM_TLSLD  5
+#define IMM_TLSDTPMOD 6
+#define IMM_TLSDTPREL 7
+#define IMM_TLSTPREL  8
+#define IMM_MAX    9
+
+struct imm_type {
+	char *isuffix;	 /* Suffix String */
+	int itype;       /* Suffix Type */
+	int otype;       /* Offset Type */
+};
+
+/* These are NOT in assending order of type, GOTOFF is ahead to make
+   sure @GOTOFF does not get matched with @GOT  */
+static struct imm_type imm_types[] = {
+	{ "NONE", IMM_NONE , 0 },
+	{ "GOTOFF", IMM_GOTOFF , GOTOFF_OFFSET },
+	{ "GOT", IMM_GOT , GOT_OFFSET },
+	{ "PLT", IMM_PLT , PLT_OFFSET },
+	{ "TLSGD", IMM_TLSGD , TLSGD_OFFSET },
+	{ "TLSLDM", IMM_TLSLD, TLSLD_OFFSET },
+	{ "TLSDTPMOD", IMM_TLSDTPMOD, TLSDTPMOD_OFFSET },
+	{ "TLSDTPREL", IMM_TLSDTPREL, TLSDTPREL_OFFSET },
+	{ "TLSTPREL", IMM_TLSTPREL, TLSTPREL_OFFSET }
+};
+
+static int
+match_imm (const char *s, int *ilen)
+{
+  int i;
+  int slen;
+
+  /* Check for matching suffix */
+  for (i = 1; i < IMM_MAX; i++)
+    {
+      slen = strlen (imm_types[i].isuffix);
+
+      if (strncmp (imm_types[i].isuffix, s, slen) == 0)
+        {
+          *ilen = slen;
+          return imm_types[i].itype;
+        }
+    } /* for */
+  *ilen = 0;
+  return 0;
+}
+
+static int
+get_imm_otype (int itype)
+{
+  int i, otype;
+
+  otype = 0;
+  /* Check for matching itype */
+  for (i = 1; i < IMM_MAX; i++)
+    {
+      if (imm_types[i].itype == itype)
+        {
+          otype = imm_types[i].otype;
+          break;
+        }
+    }
+  return otype;
+}
 
 static symbolS * GOT_symbol;
 
@@ -612,6 +689,9 @@ parse_imm (char * s, expressionS * e, int min, int max)
 {
   char *new_pointer;
   char *atp;
+  int itype, ilen;
+
+  ilen = 0;
 
   /* Find the start of "@GOT" or "@PLT" suffix (if any) */
   for (atp = s; *atp != '@'; atp++)
@@ -620,26 +700,18 @@ parse_imm (char * s, expressionS * e, int min, int max)
 
   if (*atp == '@')
     {
-      if (strncmp (atp + 1, "GOTOFF", 5) == 0)
-	{
-	  *atp = 0;
-	  e->X_md = IMM_GOTOFF;
-	}
-      else if (strncmp (atp + 1, "GOT", 3) == 0)
-	{
-	  *atp = 0;
-	  e->X_md = IMM_GOT;
-	}
-      else if (strncmp (atp + 1, "PLT", 3) == 0)
-	{
-	  *atp = 0;
-	  e->X_md = IMM_PLT;
-	}
+      itype = match_imm (atp + 1, &ilen);
+      if (itype != 0)
+        {
+          *atp = 0;
+          e->X_md = itype;
+        }
       else
-	{
-	  atp = NULL;
-	  e->X_md = 0;
-	}
+        {
+          atp = NULL;
+          e->X_md = 0;
+          ilen = 0;
+        }
       *atp = 0;
     }
   else
@@ -654,6 +726,11 @@ parse_imm (char * s, expressionS * e, int min, int max)
     }
 
   new_pointer = parse_exp (s, e);
+
+  if (!GOT_symbol && ! strncmp (s, GOT_SYMBOL_NAME, 20))
+    {
+      GOT_symbol = symbol_find_or_make (GOT_SYMBOL_NAME);
+    }
 
   if (e->X_op == O_absent)
     ; /* An error message has already been emitted.  */
@@ -670,9 +747,7 @@ parse_imm (char * s, expressionS * e, int min, int max)
     {
       *atp = '@'; /* restore back (needed?)  */
       if (new_pointer >= atp)
-        new_pointer += (e->X_md == IMM_GOTOFF)?7:4;
-      /* sizeof("@GOTOFF", "@GOT" or "@PLT") */
-
+        new_pointer += ilen + 1; /* sizeof (imm_suffix) + 1 for '@' */
     }
   return new_pointer;
 }
@@ -792,7 +867,14 @@ tc_microblaze_fix_adjustable (struct fix *fixP)
   if (fixP->fx_r_type == BFD_RELOC_MICROBLAZE_64_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_32_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_64_GOT
-      || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_64_PLT)
+      || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_64_PLT
+      || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_64_TLSGD
+      || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_64_TLSLD
+      || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_32_TLSDTPMOD
+      || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_32_TLSDTPREL
+      || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_64_TLSDTPREL
+      || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_64_TLSGOTTPREL
+      || fixP->fx_r_type == BFD_RELOC_MICROBLAZE_64_TLSTPREL)
     return 0;
 
   return 1;
@@ -940,12 +1022,8 @@ md_assemble (char * str)
 	    opc = str_microblaze_rw_anchor;
 	  else
 	    opc = NULL;
-	  if (exp.X_md == IMM_GOT)
-	    subtype = GOT_OFFSET;
-	  else if (exp.X_md == IMM_PLT)
-	    subtype = PLT_OFFSET;
-	  else if (exp.X_md == IMM_GOTOFF)
-	    subtype = GOTOFF_OFFSET;
+	  if (exp.X_md != 0)
+	    subtype = get_imm_otype(exp.X_md);
 	  else
 	    subtype = opcode->inst_offset_type;
 
@@ -1436,12 +1514,11 @@ md_assemble (char * str)
           char *opc = NULL;
           relax_substateT subtype;
 
-	  if (exp.X_md == IMM_GOT)
-	    subtype = GOT_OFFSET;
-	  else if (exp.X_md == IMM_PLT)
-	    subtype = PLT_OFFSET;
+	  if (exp.X_md != 0)
+	    subtype = get_imm_otype(exp.X_md);
 	  else
 	    subtype = opcode->inst_offset_type;
+
 	  output = frag_var (rs_machine_dependent,
 			     isize * 2, /* maxm of 2 words.  */
 			     isize,     /* minm of 1 word.  */
@@ -1503,12 +1580,11 @@ md_assemble (char * str)
           char *opc = NULL;
           relax_substateT subtype;
 
-          if (exp.X_md == IMM_GOT)
-            subtype = GOT_OFFSET;
-          else if (exp.X_md == IMM_PLT)
-            subtype = PLT_OFFSET;
-          else
+	  if (exp.X_md != 0)
+	    subtype = get_imm_otype(exp.X_md);
+	  else
 	    subtype = opcode->inst_offset_type;
+
           output = frag_var (rs_machine_dependent,
 			     isize * 2, /* maxm of 2 words.  */
 			     isize,     /* minm of 1 word.  */
@@ -1576,12 +1652,11 @@ md_assemble (char * str)
           char *opc = NULL;
           relax_substateT subtype;
 
-          if (exp.X_md == IMM_GOT)
-            subtype = GOT_OFFSET;
-          else if (exp.X_md == IMM_PLT)
-            subtype = PLT_OFFSET;
-          else
-            subtype = opcode->inst_offset_type;
+	  if (exp.X_md != 0)
+	    subtype = get_imm_otype(exp.X_md);
+	  else
+	    subtype = opcode->inst_offset_type;
+
           output = frag_var (rs_machine_dependent,
 			     isize * 2, /* maxm of 2 words.  */
 			     isize,     /* minm of 1 word.  */
@@ -1847,6 +1922,24 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
       fragP->fr_fix += INST_WORD_SIZE * 2;
       fragP->fr_var = 0;
       break;
+    case TLSGD_OFFSET:
+      fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
+	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_64_TLSGD);
+      fragP->fr_fix += INST_WORD_SIZE * 2;
+      fragP->fr_var = 0;
+      break;
+    case TLSLD_OFFSET:
+      fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
+	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_64_TLSLD);
+      fragP->fr_fix += INST_WORD_SIZE * 2;
+      fragP->fr_var = 0;
+      break;
+    case TLSDTPREL_OFFSET:
+      fix_new (fragP, fragP->fr_fix, INST_WORD_SIZE * 2, fragP->fr_symbol,
+	       fragP->fr_offset, FALSE, BFD_RELOC_MICROBLAZE_64_TLSDTPREL);
+      fragP->fr_fix += INST_WORD_SIZE * 2;
+      fragP->fr_var = 0;
+      break;
 
     default:
       abort ();
@@ -2028,6 +2121,11 @@ md_apply_fix (fixS *   fixP,
 	}
       break;
 
+    case BFD_RELOC_MICROBLAZE_64_TLSDTPREL:
+    case BFD_RELOC_MICROBLAZE_64_TLSGD:
+    case BFD_RELOC_MICROBLAZE_64_TLSLD:
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+
     case BFD_RELOC_MICROBLAZE_64_GOTPC:
     case BFD_RELOC_MICROBLAZE_64_GOT:
     case BFD_RELOC_MICROBLAZE_64_PLT:
@@ -2206,11 +2304,16 @@ md_estimate_size_before_relax (fragS * fragP,
     case GOT_OFFSET:
     case PLT_OFFSET:
     case GOTOFF_OFFSET:
+    case TLSGD_OFFSET:
+    case TLSLD_OFFSET:
+    case TLSTPREL_OFFSET:
+    case TLSDTPREL_OFFSET:
       fragP->fr_var = INST_WORD_SIZE*2;
       break;
     case DEFINED_RO_SEGMENT:
     case DEFINED_RW_SEGMENT:
     case DEFINED_PC_OFFSET:
+    case TLSDTPMOD_OFFSET:
       fragP->fr_var = INST_WORD_SIZE;
       break;
     default:
@@ -2294,6 +2397,13 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
     case BFD_RELOC_MICROBLAZE_64_PLT:
     case BFD_RELOC_MICROBLAZE_64_GOTOFF:
     case BFD_RELOC_MICROBLAZE_32_GOTOFF:
+    case BFD_RELOC_MICROBLAZE_64_TLSGD:
+    case BFD_RELOC_MICROBLAZE_64_TLSLD:
+    case BFD_RELOC_MICROBLAZE_32_TLSDTPMOD:
+    case BFD_RELOC_MICROBLAZE_32_TLSDTPREL:
+    case BFD_RELOC_MICROBLAZE_64_TLSDTPREL:
+    case BFD_RELOC_MICROBLAZE_64_TLSGOTTPREL:
+    case BFD_RELOC_MICROBLAZE_64_TLSTPREL:
       code = fixp->fx_r_type;
       break;
 

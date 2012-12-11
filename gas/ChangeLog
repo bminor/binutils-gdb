@@ -1,3 +1,13 @@
+2012-12-11  Edgar E. Iglesias <edgar.iglesias@gmail.com>
+
+	* config/tc-microblaze.c: Define TLS offsets
+	(md_relax_table): Add TLS offsets
+	(imm_types), (match_imm), (get_imm_otype): New to support TLS offsets.
+	(tc_microblaze_fix_adjustable): Add TLS relocs.
+	(md_convert_frag): Support TLS offsets.
+	(md_apply_fix), (md_estimate_size_before_relax), (tc_gen_reloc):
+	Add TLS relocs
+
 2012-12-06  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (exp_has_bignum_p): Remove.

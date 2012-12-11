@@ -5882,6 +5882,45 @@ ENUM
 ENUMDOC
   This is used to tell the dynamic linker to copy the value out of
   the dynamic object into the runtime process image.
+ENUM
+  BFD_RELOC_MICROBLAZE_64_TLS
+ENUMDOC
+  Unused Reloc
+ENUM
+  BFD_RELOC_MICROBLAZE_64_TLSGD
+ENUMDOC
+  This is a 64 bit reloc that stores the 32 bit GOT relative value
+  of the GOT TLS GD info entry in two words (with an imm instruction). The
+  relocation is GOT offset.
+ENUM
+  BFD_RELOC_MICROBLAZE_64_TLSLD
+ENUMDOC
+  This is a 64 bit reloc that stores the 32 bit GOT relative value
+  of the GOT TLS LD info entry in two words (with an imm instruction). The
+  relocation is GOT offset.
+ENUM
+  BFD_RELOC_MICROBLAZE_32_TLSDTPMOD
+ENUMDOC
+  This is a 32 bit reloc that stores the Module ID to GOT(n).
+ENUM
+  BFD_RELOC_MICROBLAZE_32_TLSDTPREL
+ENUMDOC
+  This is a 32 bit reloc that stores TLS offset to GOT(n+1).
+ENUM
+  BFD_RELOC_MICROBLAZE_64_TLSDTPREL
+ENUMDOC
+  This is a 32 bit reloc for storing TLS offset to two words (uses imm
+  instruction)
+ENUM
+  BFD_RELOC_MICROBLAZE_64_TLSGOTTPREL
+ENUMDOC
+  This is a 64 bit reloc that stores 32-bit thread pointer relative offset
+  to two words (uses imm instruction).
+ENUM
+  BFD_RELOC_MICROBLAZE_64_TLSTPREL
+ENUMDOC
+  This is a 64 bit reloc that stores 32-bit thread pointer relative offset
+  to two words (uses imm instruction).
 
 ENUM
   BFD_RELOC_AARCH64_ADD_LO12
