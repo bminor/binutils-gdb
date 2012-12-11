@@ -1,3 +1,12 @@
+2012-12-11  Roland McGrath  <mcgrathr@google.com>
+
+	* emulparams/elf_nacl.sh (nacl_rodata_addr): New shell function.
+	(RODATA_ADDR, SHLIB_RODATA_ADDR): Use it to base the calculation
+	on SEGMENT_START("text-segment", ...) rather than ... alone.
+	* Makefile.am (earmelf_nacl.c, earmelfb_nacl.c): Add missing
+	dependency on $(srcdir)/emulparams/elf_nacl.sh.
+	* Makefile.in: Regenerate.
+
 2012-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14915

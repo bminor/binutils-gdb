@@ -725,6 +725,7 @@ earmelf_linux_eabi.c: $(srcdir)/emulparams/armelf_linux_eabi.sh \
 earmelf_nacl.c: $(srcdir)/emulparams/armelf_nacl.sh \
   $(srcdir)/emulparams/armelf_linux_eabi.sh \
   $(srcdir)/emulparams/armelf_linux.sh \
+  $(srcdir)/emulparams/elf_nacl.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf_nacl "$(tdir_armelf_nacl)"
@@ -758,6 +759,7 @@ earmelfb_nacl.c: $(srcdir)/emulparams/armelfb_nacl.sh \
   $(srcdir)/emulparams/armelf_nacl.sh \
   $(srcdir)/emulparams/armelf_linux_eabi.sh \
   $(srcdir)/emulparams/armelf_linux.sh \
+  $(srcdir)/emulparams/elf_nacl.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelfb_nacl "$(tdir_armelfb_nacl)"
