@@ -62,7 +62,6 @@
      Irix
      Solaris
      OSF
-     Unixware
      AIX5
 
    /proc works by imitating a file system: you open a simulated file
@@ -549,7 +548,7 @@ open_procinfo_files (procinfo *pi, int which)
   /* This function is getting ALMOST long enough to break up into
      several.  Here is some rationale:
 
-     NEW_PROC_API (Solaris 2.6, Solaris 2.7, Unixware):
+     NEW_PROC_API (Solaris 2.6, Solaris 2.7):
      There are several file descriptors that may need to be open
        for any given process or LWP.  The ones we're intereted in are:
 	 - control	 (ctl)	  write-only	change the state
@@ -1075,16 +1074,6 @@ proc_get_status (procinfo *pi)
 				    (char *) &pi->prstatus,
 				    sizeof (gdb_prstatus_t))
 			      == sizeof (gdb_prstatus_t));
-#if 0 /*def UNIXWARE*/
-	  if (pi->status_valid &&
-	      (pi->prstatus.pr_lwp.pr_flags & PR_ISTOP) &&
-	      pi->prstatus.pr_lwp.pr_why == PR_REQUESTED)
-	    /* Unixware peculiarity -- read the damn thing again!  */
-	    pi->status_valid = (read (pi->status_fd,
-				      (char *) &pi->prstatus,
-				      sizeof (gdb_prstatus_t))
-				== sizeof (gdb_prstatus_t));
-#endif /* UNIXWARE */
 	}
     }
 #else	/* ioctl method */
@@ -1148,14 +1137,7 @@ proc_flags (procinfo *pi)
       return 0;	/* FIXME: not a good failure value (but what is?)  */
 
 #ifdef NEW_PROC_API
-# ifdef UNIXWARE
-  /* UnixWare 7.1 puts process status flags, e.g. PR_ASYNC, in
-     pstatus_t and LWP status flags, e.g. PR_STOPPED, in lwpstatus_t.
-     The two sets of flags don't overlap.  */
-  return pi->prstatus.pr_flags | pi->prstatus.pr_lwp.pr_flags;
-# else
   return pi->prstatus.pr_lwp.pr_flags;
-# endif
 #else
   return pi->prstatus.pr_flags;
 #endif
@@ -1317,7 +1299,7 @@ proc_modify_flag (procinfo *pi, long flag, long mode)
   if (pi->pid != 0)
     pi = find_procinfo_or_die (pi->pid, 0);
 
-#ifdef NEW_PROC_API	/* Newest method: UnixWare and newer Solarii.  */
+#ifdef NEW_PROC_API	/* Newest method: Newer Solarii.  */
   /* First normalize the PCUNSET/PCRESET command opcode
      (which for no obvious reason has a different definition
      from one operating system to the next...)  */
@@ -1821,11 +1803,7 @@ proc_get_held_signals (procinfo *pi, gdb_sigset_t *save)
     if (!proc_get_status (pi))
       return NULL;
 
-#ifdef UNIXWARE
-  ret = &pi->prstatus.pr_lwp.pr_context.uc_sigmask;
-#else
   ret = &pi->prstatus.pr_lwp.pr_lwphold;
-#endif /* UNIXWARE */
 #else  /* not NEW_PROC_API */
   {
     static gdb_sigset_t sigheld;
@@ -2207,15 +2185,8 @@ proc_get_gregs (procinfo *pi)
     if (!proc_get_status (pi))
       return NULL;
 
-  /* OK, sorry about the ifdef's.  There's three cases instead of two,
-     because in this case Unixware and Solaris/RW differ.  */
-
 #ifdef NEW_PROC_API
-# ifdef UNIXWARE		/* FIXME:  Should be autoconfigured.  */
-  return &pi->prstatus.pr_lwp.pr_context.uc_mcontext.gregs;
-# else
   return &pi->prstatus.pr_lwp.pr_reg;
-# endif
 #else
   return &pi->prstatus.pr_reg;
 #endif
@@ -2232,11 +2203,7 @@ proc_get_fpregs (procinfo *pi)
     if (!proc_get_status (pi))
       return NULL;
 
-# ifdef UNIXWARE		/* FIXME:  Should be autoconfigured.  */
-  return &pi->prstatus.pr_lwp.pr_context.uc_mcontext.fpregs;
-# else
   return &pi->prstatus.pr_lwp.pr_fpreg;
-# endif
 
 #else  /* not NEW_PROC_API */
   if (pi->fpregs_valid)
@@ -2451,7 +2418,7 @@ proc_parent_pid (procinfo *pi)
    (a.k.a void pointer)!  */
 
 #if (defined (PCWATCH) || defined (PIOCSWATCH)) \
-    && !(defined (PIOCOPENLWP) || defined (UNIXWARE))
+    && !(defined (PIOCOPENLWP))
 static void *
 procfs_address_to_host_pointer (CORE_ADDR addr)
 {
@@ -2475,7 +2442,7 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
   return 0;
 #else
 /* Horrible hack!  Detect Solaris 2.5, because this doesn't work on 2.5.  */
-#if defined (PIOCOPENLWP) || defined (UNIXWARE)	/* Solaris 2.5: bail out.  */
+#if defined (PIOCOPENLWP)	/* Solaris 2.5: bail out.  */
   return 0;
 #else
   struct {
@@ -2648,7 +2615,7 @@ proc_get_nthreads (procinfo *pi)
 
 #else
 #if defined (SYS_lwpcreate) || defined (SYS_lwp_create) /* FIXME: multiple */
-/* Solaris and Unixware version */
+/* Solaris version */
 static int
 proc_get_nthreads (procinfo *pi)
 {
@@ -2683,7 +2650,7 @@ proc_get_nthreads (procinfo *pi)
    currently executing.  */
 
 #if defined (SYS_lwpcreate) || defined (SYS_lwp_create) /* FIXME: multiple */
-/* Solaris and Unixware version */
+/* Solaris version */
 static int
 proc_get_current_thread (procinfo *pi)
 {
@@ -2791,7 +2758,7 @@ proc_update_threads (procinfo *pi)
 }
 #else
 #ifdef NEW_PROC_API
-/* Unixware and Solaris 6 (and later) version.  */
+/* Solaris 6 (and later) version.  */
 static void
 do_closedir_cleanup (void *dir)
 {
@@ -2818,13 +2785,11 @@ proc_update_threads (procinfo *pi)
 
   proc_iterate_over_threads (pi, proc_delete_dead_threads, NULL);
 
-  /* Unixware
-
-     Note: this brute-force method is the only way I know of to
-     accomplish this task on Unixware.  This method will also work on
-     Solaris 2.6 and 2.7.  There is a much simpler and more elegant
-     way to do this on Solaris, but the margins of this manuscript are
-     too small to write it here...  ;-)  */
+  /* Note: this brute-force method was originally devised for Unixware
+     (support removed since), and will also work on Solaris 2.6 and
+     2.7.  The original comment mentioned the existence of a much
+     simpler and more elegant way to do this on Solaris, but didn't
+     point out what that was.  */
 
   strcpy (pathname, pi->pathname);
   strcat (pathname, "/lwp");
@@ -4815,7 +4780,6 @@ static int
 procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
 		       int after)
 {
-#ifndef UNIXWARE
 #ifndef AIX5
   int       pflags = 0;
   procinfo *pi;
@@ -4857,7 +4821,6 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
       proc_error (pi, "set_watchpoint", __LINE__);
     }
 #endif /* AIX5 */
-#endif /* UNIXWARE */
   return 0;
 }
 
@@ -5403,8 +5366,8 @@ procfs_first_available (void)
 }
 
 /* ===================  GCORE .NOTE "MODULE" =================== */
-#if defined (UNIXWARE) || defined (PIOCOPENLWP) || defined (PCAGENT)
-/* gcore only implemented on solaris and unixware (so far) */
+#if defined (PIOCOPENLWP) || defined (PCAGENT)
+/* gcore only implemented on solaris (so far) */
 
 static char *
 procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
@@ -5544,13 +5507,6 @@ procfs_make_note_section (bfd *obfd, int *note_size)
 
   stop_signal = find_stop_signal ();
 
-#ifdef UNIXWARE
-  fill_gregset (get_current_regcache (), &gregs, -1);
-  note_data = elfcore_write_pstatus (obfd, note_data, note_size,
-				     PIDGET (inferior_ptid),
-				     stop_signal, &gregs);
-#endif
-
   thread_args.obfd = obfd;
   thread_args.note_data = note_data;
   thread_args.note_size = note_size;
@@ -5574,12 +5530,12 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   make_cleanup (xfree, note_data);
   return note_data;
 }
-#else /* !(Solaris or Unixware) */
+#else /* !Solaris */
 static char *
 procfs_make_note_section (bfd *obfd, int *note_size)
 {
   error (_("gcore not implemented for this host."));
   return NULL;	/* lint */
 }
-#endif /* Solaris or Unixware */
+#endif /* Solaris */
 /* ===================  END GCORE .NOTE "MODULE" =================== */

@@ -161,7 +161,7 @@ static struct trans ioctl_table[] = {
   { PIOCLDT,       "PIOCLDT",      "get LDT" },
   { PIOCNLDT,      "PIOCNLDT",     "get number of LDT entries" },
 #endif
-#ifdef PIOCLSTATUS			/* solaris and unixware */
+#ifdef PIOCLSTATUS			/* solaris */
   { PIOCLSTATUS,   "PIOCLSTATUS",  "get status of all lwps" },
   { PIOCLUSAGE,    "PIOCLUSAGE",   "get resource usage of all lwps" },
   { PIOCOPENLWP,   "PIOCOPENLWP",  "get lwp file descriptor" },
@@ -409,9 +409,6 @@ static struct trans rw_table[] = {
 #ifdef PCREAD			/* solaris */
   { PCREAD,   "PCREAD",   "read from the address space" },
   { PCWRITE,  "PCWRITE",  "write to the address space" },
-#endif
-#ifdef PCRESET			/* unixware */
-  { PCRESET,  "PCRESET",  "unset modes" },
 #endif
   { PCRUN,    "PCRUN",    "make process/lwp runnable" },
 #ifdef PCSASRS			/* solaris 2.7 only */

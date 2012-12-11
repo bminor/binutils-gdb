@@ -1387,11 +1387,11 @@ if test $gdb_cv_have_pt_getxmmregs = yes; then
   [Define if sys/ptrace.h defines the PT_GETXMMREGS request.])
 fi
 
-# Detect which type of /proc is in use, such as for Unixware or Solaris.
+# Detect which type of /proc is in use, such as for Solaris.
 
 if test "${target}" = "${host}"; then
   case "${host}" in
-  *-*-unixware* | *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
+  *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
       AC_DEFINE(NEW_PROC_API, 1,
       [Define if you want to use new multi-fd /proc interface
        (replaces HAVE_MULTIPLE_PROC_FDS as well as other macros).])

@@ -9951,7 +9951,7 @@ specified, the file name defaults to @file{core.@var{pid}}, where
 @var{pid} is the inferior process ID.
 
 Note that this command is implemented only for some systems (as of
-this writing, @sc{gnu}/Linux, FreeBSD, Solaris, Unixware, and S390).
+this writing, @sc{gnu}/Linux, FreeBSD, Solaris, and S390).
 @end table
 
 @node Character Sets
@@ -18655,7 +18655,7 @@ proc} is available to report information about the process running
 your program, or about any process running on your system.  @code{info
 proc} works only on SVR4 systems that include the @code{procfs} code.
 This includes, as of this writing, @sc{gnu}/Linux, OSF/1 (Digital
-Unix), Solaris, Irix, and Unixware, but not HP-UX, for example.
+Unix), Solaris, Irix, but not HP-UX, for example.
 
 @table @code
 @kindex info proc

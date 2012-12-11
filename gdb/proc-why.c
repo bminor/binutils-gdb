@@ -75,7 +75,7 @@ static struct trans pr_why_table[] =
   { PR_FAULTED, "PR_FAULTED", "Incurred a traced hardware fault" },
 #endif
 #if defined (PR_SUSPENDED)
-  /* Solaris and UnixWare.  */
+  /* Solaris only.  */
   { PR_SUSPENDED, "PR_SUSPENDED", "Process suspended" },
 #endif
 #if defined (PR_CHECKPOINT)

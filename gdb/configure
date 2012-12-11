@@ -10807,11 +10807,11 @@ $as_echo "#define HAVE_PT_GETXMMREGS 1" >>confdefs.h
 
 fi
 
-# Detect which type of /proc is in use, such as for Unixware or Solaris.
+# Detect which type of /proc is in use, such as for Solaris.
 
 if test "${target}" = "${host}"; then
   case "${host}" in
-  *-*-unixware* | *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
+  *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
 
 $as_echo "#define NEW_PROC_API 1" >>confdefs.h
 

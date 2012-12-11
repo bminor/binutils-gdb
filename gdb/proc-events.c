@@ -63,45 +63,6 @@ struct trans
 
 /* Pretty print syscalls.  */
 
-/* Ugh -- UnixWare and Solaris spell these differently!  */
-
-#ifdef  SYS_lwpcreate
-#define SYS_lwp_create	SYS_lwpcreate
-#endif
-
-#ifdef  SYS_lwpexit
-#define SYS_lwp_exit SYS_lwpexit
-#endif
-
-#ifdef  SYS_lwpwait
-#define SYS_lwp_wait SYS_lwpwait
-#endif
-
-#ifdef  SYS_lwpself
-#define SYS_lwp_self SYS_lwpself
-#endif
-
-#ifdef  SYS_lwpinfo
-#define SYS_lwp_info SYS_lwpinfo
-#endif
-
-#ifdef  SYS_lwpprivate
-#define SYS_lwp_private SYS_lwpprivate
-#endif
-
-#ifdef  SYS_lwpkill
-#define SYS_lwp_kill SYS_lwpkill
-#endif
-
-#ifdef  SYS_lwpsuspend
-#define SYS_lwp_suspend SYS_lwpsuspend
-#endif
-
-#ifdef  SYS_lwpcontinue
-#define SYS_lwp_continue SYS_lwpcontinue
-#endif
-
-
 /* Syscall translation table.  */
 
 #define MAX_SYSCALLS 262	/* Pretty arbitrary.  */

@@ -3413,11 +3413,9 @@ i386_svr4_sigtramp_p (struct frame_info *this_frame)
   CORE_ADDR pc = get_frame_pc (this_frame);
   const char *name;
 
-  /* UnixWare uses _sigacthandler.  The origin of the other symbols is
-     currently unknown.  */
+  /* The origin of these symbols is currently unknown.  */
   find_pc_partial_function (pc, &name, NULL, NULL);
   return (name && (strcmp ("_sigreturn", name) == 0
-		   || strcmp ("_sigacthandler", name) == 0
 		   || strcmp ("sigvechandler", name) == 0));
 }
 
