@@ -1,3 +1,9 @@
+2012-12-11  Tom Tromey  <tromey@redhat.com>
+
+	* dsrec.c (report_transfer_performance): Don't declare.
+	(load_srec): Use gettimeofday, print_transfer_performance.
+	* symfile.c (report_transfer_performance): Remove.
+
 2012-12-11  Pedro Alves  <pedro@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 

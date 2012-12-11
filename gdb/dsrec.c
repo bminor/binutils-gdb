@@ -20,12 +20,11 @@
 #include "defs.h"
 #include "serial.h"
 #include "srec.h"
+#include <sys/time.h>
 #include <time.h>
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdb_bfd.h"
-
-extern void report_transfer_performance (unsigned long, time_t, time_t);
 
 extern int remote_debug;
 
@@ -55,7 +54,7 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
   char *srec;
   int i;
   int reclen;
-  time_t start_time, end_time;
+  struct timeval start_time, end_time;
   unsigned long data_count = 0;
   struct cleanup *cleanup;
 
@@ -76,7 +75,7 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
       return;
     }
 
-  start_time = time (NULL);
+  gettimeofday (&start_time, NULL);
 
   /* Write a type 0 header record. no data for a type 0, and there
      is no data, so len is 0.  */
@@ -151,7 +150,7 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
   if (hashmark)
     putchar_unfiltered ('\n');
 
-  end_time = time (NULL);
+  gettimeofday (&end_time, NULL);
 
   /* Write a terminator record.  */
 
@@ -173,7 +172,8 @@ load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
 
   serial_flush_input (desc);
 
-  report_transfer_performance (data_count, start_time, end_time);
+  print_transfer_performance (gdb_stdout, data_count, 0,
+			      &start_time, &end_time);
   do_cleanups (cleanup);
 }
 
