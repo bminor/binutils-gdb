@@ -1,3 +1,12 @@
+2012-12-12  Keven Boell  <keven.boell@intel.com>
+    
+	* gdb.mi/mi-catch-load-so.c: New. Clone of the
+	catch load test library source file.
+	* gdb.mi/mi-catch-load.c: New. Clone of the catch
+	load test source file.
+	* gdb.mi/mi-catch-load.exp: New. Test file for
+	basic MI -catch-load and -catch-unload tests.
+
 2012-12-11  Paul Koning  <paul_koning@dell.com>
 
 	* gdb.python/py-prettyprint.py (_iterator): Remove exception_flag
