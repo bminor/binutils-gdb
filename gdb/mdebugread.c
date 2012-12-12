@@ -479,12 +479,10 @@ struct mdebug_pending
 };
 
 
-/* The pending information is kept for an entire object file, and used
-   to be in the deprecated_sym_private field.  I took it out when I
-   split mdebugread from mipsread, because this might not be the only
-   type of symbols read from an object file.  Instead, we allocate the
-   pending information table when we create the partial symbols, and
-   we store a pointer to the single table in each psymtab.  */
+/* The pending information is kept for an entire object file.  We
+   allocate the pending information table when we create the partial
+   symbols, and we store a pointer to the single table in each
+   psymtab.  */
 
 static struct mdebug_pending **pending_list;
 

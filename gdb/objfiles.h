@@ -322,20 +322,7 @@ struct objfile
 
     struct entry_info ei;
 
-    /* Hook for information for use by the symbol reader (currently used
-       for information shared by sym_init and sym_read).  It is
-       typically a pointer to malloc'd memory.  The symbol reader's finish
-       function is responsible for freeing the memory thusly allocated.  */
-    /* NOTE: cagney/2004-10-23: This has been replaced by per-objfile
-       data points implemented using "data" and "num_data" below.  For
-       an example of how to use this replacement, see "objfile_data"
-       in "mips-tdep.c".  */
-
-    void *deprecated_sym_private;
-
     /* Per objfile data-pointers required by other GDB modules.  */
-    /* FIXME: kettenis/20030711: This mechanism could replace
-        deprecated_sym_private entirely.  */
 
     REGISTRY_FIELDS;
 

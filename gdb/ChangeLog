@@ -1,5 +1,29 @@
 2012-12-12  Tom Tromey  <tromey@redhat.com>
 
+	* coffread.c (coff_objfile_data_key): New global.
+	(coff_symfile_init): Use set_objfile_data.
+	(coff_symfile_read): Use objfile_data.
+	(coff_symfile_finish): Don't free deprecated_sym_private.
+	(coff_free_info): New function.
+	(_initialize_coffread): Initialize coff_objfile_data_key.
+	* mdebugread.c (pending_list): Update comment.
+	* objfiles.h (struct objfile) <deprecated_sym_private>: Remove.
+	* symfile.c (reread_symbols): Don't mention
+	deprecated_sym_private.
+	* xcoffread.c (xcoff_objfile_data_key): New global.
+	(XCOFF_DATA): New macro.
+	(process_linenos, enter_line_range, xcoff_next_symbol_text)
+	(read_xcoff_symtab, coff_getfilename, read_symbol_lineno): Use
+	XCOFF_DATA.
+	(xcoff_new_init) Use set_objfile_data.
+	(xcoff_symfile_finish): Don't free deprecated_sym_private.
+	(init_stringtab, swap_sym, scan_xcoff_symtab)
+	(xcoff_get_toc_offset, xcoff_initial_scan): Use XCOFF_DATA.
+	(xcoff_free_info): New function.
+	(_initialize_xcoffread): Initialize xcoff_objfile_data_key.
+
+2012-12-12  Tom Tromey  <tromey@redhat.com>
+
 	* coffread.c (coff_symfile_init): Use set_objfile_data.
 	(coff_symfile_read): Use DBX_SYMFILE_INFO.
 	* dbxread.c (dbx_objfile_data_key): New global.

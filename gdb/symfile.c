@@ -2563,7 +2563,6 @@ reread_symbols (void)
 	  objfile->free_psymtabs = NULL;
 	  objfile->template_symbols = NULL;
 	  objfile->msymbols = NULL;
-	  objfile->deprecated_sym_private = NULL;
 	  objfile->minimal_symbol_count = 0;
 	  memset (&objfile->msymbol_hash, 0,
 		  sizeof (objfile->msymbol_hash));
