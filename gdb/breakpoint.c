@@ -7850,19 +7850,19 @@ print_recreate_catch_solib (struct breakpoint *b, struct ui_file *fp)
 
 static struct breakpoint_ops catch_solib_breakpoint_ops;
 
-/* A helper function that does all the work for "catch load" and
-   "catch unload".  */
+/* Shared helper function (MI and CLI) for creating and installing
+   a shared object event catchpoint.  If IS_LOAD is non-zero then
+   the events to be caught are load events, otherwise they are
+   unload events.  If IS_TEMP is non-zero the catchpoint is a
+   temporary one.  If ENABLED is non-zero the catchpoint is
+   created in an enabled state.  */
 
-static void
-catch_load_or_unload (char *arg, int from_tty, int is_load,
-		      struct cmd_list_element *command)
+void
+add_solib_catchpoint (char *arg, int is_load, int is_temp, int enabled)
 {
   struct solib_catchpoint *c;
   struct gdbarch *gdbarch = get_current_arch ();
-  int tempflag;
   struct cleanup *cleanup;
-
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
   if (!arg)
     arg = "";
@@ -7887,11 +7887,28 @@ catch_load_or_unload (char *arg, int from_tty, int is_load,
     }
 
   c->is_load = is_load;
-  init_catchpoint (&c->base, gdbarch, tempflag, NULL,
+  init_catchpoint (&c->base, gdbarch, is_temp, NULL,
 		   &catch_solib_breakpoint_ops);
+
+  c->base.enable_state = enabled ? bp_enabled : bp_disabled;
 
   discard_cleanups (cleanup);
   install_breakpoint (0, &c->base, 1);
+}
+
+/* A helper function that does all the work for "catch load" and
+   "catch unload".  */
+
+static void
+catch_load_or_unload (char *arg, int from_tty, int is_load,
+		      struct cmd_list_element *command)
+{
+  int tempflag;
+  const int enabled = 1;
+
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  add_solib_catchpoint (arg, is_load, tempflag, enabled);
 }
 
 static void

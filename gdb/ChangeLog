@@ -1,3 +1,24 @@
+2012-12-12  Mircea Gherzan  <mircea.gherzan@intel.com>
+    
+	* Makefile.in (SUBDIR_MI_OBS): Add mi-cmd-catch.o.
+	(SUBDIR_MI_SRCS): Add mi/mi-cmd-catch.c.
+	* breakpoint.c (add_solib_catchpoint): New function that
+	can be used by both CLI and MI, factored out from
+	catch_load_or_unload.
+	(catch_load_or_unload): Strip it down and make it use the
+	new add_solib_catchpoint.
+	* breakpoint.h (add_solib_catchpoint): Declare it.
+	* mi/mi-cmd-break.h: New file.
+	* mi/mi-cmd-break.c: Include mi-cmd-break.h.
+	(setup_breakpoint_reporting): New function used for both
+	catchpoints and breakpoints.
+	(mi_cmd_break_insert): Use setup_breakpoint_reporting.
+	* mi/mi-cmd-catch.c: New file.
+	* mi/mi-cmds.c (mi_cmds): Add the handlers for -catch-load
+	and -catch-unload.
+	* mi/mi-cmds.h: Declare the handlers for -catch-load and
+	-catch-unload.
+
 2012-11-28  Tom Tromey  <tromey@redhat.com>
 
 	* dbxread.c (read_dbx_symtab): Update.

@@ -29,6 +29,7 @@
 #include "exceptions.h"
 #include "observer.h"
 #include "mi-main.h"
+#include "mi-cmd-break.h"
 
 enum
   {
@@ -58,6 +59,30 @@ enum bp_type
     HW_BP,
     REGEXP_BP
   };
+
+/* Arrange for all new breakpoints and catchpoints to be reported to
+   CURRENT_UIOUT until the cleanup returned by this function is run.
+
+   Note that MI output will be probably invalid if more than one
+   breakpoint is created inside one MI command.  */
+
+struct cleanup *
+setup_breakpoint_reporting (void)
+{
+  struct cleanup *rev_flag;
+
+  if (! mi_breakpoint_observers_installed)
+    {
+      observer_attach_breakpoint_created (breakpoint_notify);
+      mi_breakpoint_observers_installed = 1;
+    }
+
+  rev_flag = make_cleanup_restore_integer (&mi_can_breakpoint_notify);
+  mi_can_breakpoint_notify = 1;
+
+  return rev_flag;
+}
+
 
 /* Implements the -break-insert command.
    See the MI manual for the list of possible options.  */
@@ -144,14 +169,7 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   address = argv[oind];
 
   /* Now we have what we need, let's insert the breakpoint!  */
-  if (! mi_breakpoint_observers_installed)
-    {
-      observer_attach_breakpoint_created (breakpoint_notify);
-      mi_breakpoint_observers_installed = 1;
-    }
-
-  back_to = make_cleanup_restore_integer (&mi_can_breakpoint_notify);
-  mi_can_breakpoint_notify = 1;
+  back_to = setup_breakpoint_reporting ();
 
   /* Note that to request a fast tracepoint, the client uses the
      "hardware" flag, although there's nothing of hardware related to
