@@ -586,7 +586,7 @@ m:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
 # FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
 # target can single step.  If not, then implement single step using breakpoints.
 #
-# A return value of 1 means that the software_single_step breakpoints 
+# A return value of 1 means that the software_single_step breakpoints
 # were inserted; 0 means they were not.
 F:int:software_single_step:struct frame_info *frame:frame
 

@@ -1,3 +1,8 @@
+2012-12-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbarch.sh (software_single_step): Remove trailing space in
+	comment (gdbarch.h is already correct).
+
 2012-12-11  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_get_dwz_file): Set 'dwz_file'.
