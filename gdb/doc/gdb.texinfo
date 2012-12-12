@@ -27155,6 +27155,7 @@ may repeat one or more times.
 * GDB/MI Simple Examples::
 * GDB/MI Command Description Format::
 * GDB/MI Breakpoint Commands::
+* GDB/MI Catchpoint Commands::
 * GDB/MI Program Context::
 * GDB/MI Thread Commands::
 * GDB/MI Ada Tasking Commands::
@@ -28728,6 +28729,73 @@ fullname="/home/foo/devo/gdb/testsuite/gdb.mi/basics.c",line="8",
 times="1"@}]@}
 (gdb)
 @end smallexample
+
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Catchpoint Commands
+@section @sc{gdb/mi} Catchpoint Commands
+
+This section documents @sc{gdb/mi} commands for manipulating
+catchpoints.
+
+@subheading The @code{-catch-load} Command
+@findex -catch-load
+
+@subsubheading Synopsis
+
+@smallexample
+ -catch-load [ -t ] [ -d ] @var{regexp}
+@end smallexample
+
+Add a catchpoint for library load events.  If the @samp{-t} option is used,
+the catchpoint is a temporary one (@pxref{Set Breaks, ,Setting
+Breakpoints}).  If the @samp{-d} option is used, the catchpoint is created
+in a disabled state.  The @samp{regexp} argument is a regular
+expression used to match the name of the loaded library.
+
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{catch load}.
+
+@subsubheading Example
+
+@smallexample
+-catch-load -t foo.so
+^done,bkpt=@{number="1",type="catchpoint",disp="del",enabled="y",
+what="load of library matching foo.so",times="0"@}
+(gdb)
+@end smallexample
+
+
+@subheading The @code{-catch-unload} Command
+@findex -catch-unload
+
+@subsubheading Synopsis
+
+@smallexample
+ -catch-unload [ -t ] [ -d ] @var{regexp}
+@end smallexample
+
+Add a catchpoint for library unload events.  If the @samp{-t} option is
+used, the catchpoint is a temporary one (@pxref{Set Breaks, ,Setting
+Breakpoints}).  If the @samp{-d} option is used, the catchpoint is
+created in a disabled state.  The @samp{regexp} argument is a regular
+expression used to match the name of the unloaded library.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{catch unload}.
+
+@subsubheading Example
+
+@smallexample
+-catch-unload -d bar.so
+^done,bkpt=@{number="2",type="catchpoint",disp="keep",enabled="n",
+what="load of library matching bar.so",times="0"@}
+(gdb)
+@end smallexample
+
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Program Context

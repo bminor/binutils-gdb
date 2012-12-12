@@ -101,6 +101,8 @@ show print type typedefs
      has been requested.
   ** New optional parameter COUNT added to the "-data-write-memory-bytes" 
      command, to allow pattern filling of memory areas.
+  ** New commands "-catch-load"/"-catch-unload" added for intercepting
+     library load/unload events.
 
 * GDB now supports the "mini debuginfo" section, .gnu_debugdata.
   You must have the LZMA library available when configuring GDB for this

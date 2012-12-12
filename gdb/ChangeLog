@@ -1,4 +1,8 @@
 2012-12-12  Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* NEWS: Mention the -catch-load/-catch-unload MI commands.
+
+2012-12-12  Mircea Gherzan  <mircea.gherzan@intel.com>
     
 	* Makefile.in (SUBDIR_MI_OBS): Add mi-cmd-catch.o.
 	(SUBDIR_MI_SRCS): Add mi/mi-cmd-catch.c.
