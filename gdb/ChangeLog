@@ -166,6 +166,10 @@
 	(xcoff_free_info): New function.
 	(_initialize_xcoffread): Initialize xcoff_objfile_data_key.
 
+2012-12-12  Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* MAINTAINERS (Write After Approval): Add "Mircea Gherzan".
+
 2012-12-12  Tom Tromey  <tromey@redhat.com>
 
 	* coffread.c (coff_symfile_init): Use set_objfile_data.
