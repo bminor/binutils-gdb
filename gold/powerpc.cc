@@ -71,7 +71,7 @@ public:
   Powerpc_relobj(const std::string& name, Input_file* input_file, off_t offset,
 		 const typename elfcpp::Ehdr<size, big_endian>& ehdr)
     : Sized_relobj_file<size, big_endian>(name, input_file, offset, ehdr),
-      special_(0), opd_valid_(false),
+      special_(0), has_small_toc_reloc_(false), opd_valid_(false),
       opd_ent_(), access_from_map_(), has14_(), stub_table_()
   { }
 
@@ -228,6 +228,14 @@ public:
   { return 0x8000; }
 
   void
+  set_has_small_toc_reloc()
+  { has_small_toc_reloc_ = true; }
+
+  bool
+  has_small_toc_reloc() const
+  { return has_small_toc_reloc_; }
+
+  void
   set_has_14bit_branch(unsigned int shndx)
   {
     if (shndx >= this->has14_.size())
@@ -280,6 +288,10 @@ private:
 
   // For 32-bit the .got2 section shdnx, for 64-bit the .opd section shndx.
   unsigned int special_;
+
+  // For 64-bit, whether this object uses small model relocs to access
+  // the toc.
+  bool has_small_toc_reloc_;
 
   // Set at the start of gc_process_relocs, when we know opd_ent_
   // vector is valid.  The flag could be made atomic and set in
@@ -4690,6 +4702,21 @@ Target_powerpc<size, big_endian>::Scan::local(
       unsupported_reloc_local(object, r_type);
       break;
     }
+
+  switch (r_type)
+    {
+    case elfcpp::R_POWERPC_GOT_TLSLD16:
+    case elfcpp::R_POWERPC_GOT_TLSGD16:
+    case elfcpp::R_POWERPC_GOT_TPREL16:
+    case elfcpp::R_POWERPC_GOT_DTPREL16:
+    case elfcpp::R_POWERPC_GOT16:
+    case elfcpp::R_PPC64_GOT16_DS:
+    case elfcpp::R_PPC64_TOC16:
+    case elfcpp::R_PPC64_TOC16_DS:
+      ppc_object->set_has_small_toc_reloc();
+    default:
+      break;
+    }
 }
 
 // Report an unsupported relocation against a global symbol.
@@ -5126,6 +5153,21 @@ Target_powerpc<size, big_endian>::Scan::global(
       unsupported_reloc_global(object, r_type, gsym);
       break;
     }
+
+  switch (r_type)
+    {
+    case elfcpp::R_POWERPC_GOT_TLSLD16:
+    case elfcpp::R_POWERPC_GOT_TLSGD16:
+    case elfcpp::R_POWERPC_GOT_TPREL16:
+    case elfcpp::R_POWERPC_GOT_DTPREL16:
+    case elfcpp::R_POWERPC_GOT16:
+    case elfcpp::R_PPC64_GOT16_DS:
+    case elfcpp::R_PPC64_TOC16:
+    case elfcpp::R_PPC64_TOC16_DS:
+      ppc_object->set_has_small_toc_reloc();
+    default:
+      break;
+    }
 }
 
 // Process relocations for gc.
@@ -5346,6 +5388,31 @@ Target_powerpc<size, big_endian>::define_save_restore_funcs(
     }
 }
 
+// Sort linker created .got section first (for the header), then input
+// sections belonging to files using small model code.
+
+template<bool big_endian>
+class Sort_toc_sections
+{
+ public:
+  bool
+  operator()(const Output_section::Input_section& is1,
+	     const Output_section::Input_section& is2) const
+  {
+    if (!is1.is_input_section() && is2.is_input_section())
+      return true;
+    bool small1
+      = (is1.is_input_section()
+	 && (static_cast<const Powerpc_relobj<64, big_endian>*>(is1.relobj())
+	     ->has_small_toc_reloc()));
+    bool small2
+      = (is2.is_input_section()
+	 && (static_cast<const Powerpc_relobj<64, big_endian>*>(is2.relobj())
+	     ->has_small_toc_reloc()));
+    return small1 && !small2;
+  }
+};
+
 // Finalize the sections.
 
 template<int size, bool big_endian>
@@ -5399,6 +5466,15 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
 	  // need to mess with the relaxation machinery checkpointing.
 	  this->got_section(symtab, layout);
 	  this->make_brlt_section(layout);
+
+	  if (parameters->options().toc_sort())
+	    {
+	      Output_section* os = this->got_->output_section();
+	      if (os != NULL && os->input_sections().size() > 1)
+		std::stable_sort(os->input_sections().begin(),
+				 os->input_sections().end(),
+				 Sort_toc_sections<big_endian>());
+	    }
 	}
     }
 
@@ -6063,7 +6139,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	case elfcpp::R_POWERPC_GOT_DTPREL16_HA:
 	case elfcpp::R_POWERPC_GOT16_HA:
 	case elfcpp::R_PPC64_TOC16_HA:
-	  if (!parameters->options().no_toc_optimize())
+	  if (parameters->options().toc_optimize())
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);
@@ -6088,7 +6164,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	case elfcpp::R_PPC64_GOT16_LO_DS:
 	case elfcpp::R_PPC64_TOC16_LO:
 	case elfcpp::R_PPC64_TOC16_LO_DS:
-	  if (!parameters->options().no_toc_optimize())
+	  if (parameters->options().toc_optimize())
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view - 2 * big_endian);
 	      Insn insn = elfcpp::Swap<32, big_endian>::readval(iview);

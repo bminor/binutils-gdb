@@ -3941,6 +3941,10 @@ class Output_section : public Output_data
   input_sections() const
   { return this->input_sections_; }
 
+  Input_section_list&
+  input_sections()
+  { return this->input_sections_; }
+
  protected:
   // Return the output section--i.e., the object itself.
   Output_section*

@@ -1109,8 +1109,13 @@ class General_options
   DEFINE_uint64(Ttext, options::ONE_DASH, '\0', -1U,
                 N_("Set the address of the text segment"), N_("ADDRESS"));
 
-  DEFINE_bool(no_toc_optimize, options::TWO_DASHES, '\0', false,
-	      N_("(PowerPC64 only) Don't optimize TOC code sequences"), NULL);
+  DEFINE_bool(toc_optimize, options::TWO_DASHES, '\0', true,
+	      N_("(PowerPC64 only) Optimize TOC code sequences"),
+	      N_("(PowerPC64 only) Don't optimize TOC code sequences"));
+
+  DEFINE_bool(toc_sort, options::TWO_DASHES, '\0', true,
+	      N_("(PowerPC64 only) Sort TOC and GOT sections"),
+	      N_("(PowerPC64 only) Don't sort TOC and GOT sections"));
 
   DEFINE_set(undefined, options::TWO_DASHES, 'u',
 	     N_("Create undefined reference to SYMBOL"), N_("SYMBOL"));
