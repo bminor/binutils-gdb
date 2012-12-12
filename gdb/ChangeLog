@@ -1,3 +1,44 @@
+2012-11-28  Tom Tromey  <tromey@redhat.com>
+
+	* dbxread.c (read_dbx_symtab): Update.
+	(end_psymtab, dbx_psymtab_to_symtab_1, dbx_psymtab_to_symtab)
+	(read_ofile_symtab): Add 'objfile' argument.
+	* dwarf2read.c (process_psymtab_comp_unit_reader)
+	(build_type_psymtabs_reader): Update.
+	(dwarf2_psymtab_to_symtab): Add 'objfile' argument.
+	* mdebugread.c (mdebug_psymtab_to_symtab): Add 'objfile'
+	argument.
+	(parse_procedure, parse_partial_symbols): Update.
+	(psymtab_to_symtab_1): Add 'objfile' argument.
+	* psympriv.h (struct partial_symtab) <objfile>: Remove.
+	<read_symtab>: Add 'objfile' argument.
+	(sort_pst_symbols, discard_psymtab): Update.
+	* psymtab.c (partial_map_expand_apply): Update.
+	(find_pc_sect_psymtab_closer): Add 'objfile' argument.
+	(find_pc_sect_psymtab, find_pc_sect_symtab_from_partial): Update.
+	(find_pc_sect_psymbol): Add 'objfile' argument.
+	(lookup_symbol_aux_psymtabs): Update.
+	(match_partial_symbol, lookup_partial_symbol, psymtab_to_symtab):
+	Add 'objfile' argument.
+	(find_last_source_symtab_from_partial, dump_psymtab)
+	(dump_psymtabs_for_objfile, read_symtabs_for_function)
+	(expand_partial_symbol_tables, read_psymtabs_with_filename)
+	(find_symbol_file_from_partial, map_matching_symbols_psymtab)
+	(expand_symtabs_matching_via_partial): Update.
+	(sort_pst_symbols): Add 'objfile' argument.
+	(allocate_psymtab): Update.
+	(discard_psymtab): Add 'objfile' argument.
+	(maintenance_info_psymtabs, maintenance_check_symtabs): Update.
+	* stabsread.h (end_psymtab): Update.
+	* xcoffread.c (this_symtab_objfile): New global.
+	(process_linenos, enter_line_range, xcoff_next_symbol_text):
+	Update.
+	(read_xcoff_symtab): Add 'objfile' argument.
+	(read_symbol, read_symbol_lineno): Update.
+	(xcoff_psymtab_to_symtab_1, xcoff_psymtab_to_symtab)
+	(xcoff_end_psymtab): Add 'objfile' argument.
+	(scan_xcoff_symtab): Update.
+
 2012-12-12  Paul Koning  <paul_koning@dell.com>
 
 	Add support for Python 3.

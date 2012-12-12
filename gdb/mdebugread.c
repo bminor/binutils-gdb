@@ -255,7 +255,8 @@ static void sort_blocks (struct symtab *);
 
 static struct partial_symtab *new_psymtab (char *, struct objfile *);
 
-static void psymtab_to_symtab_1 (struct partial_symtab *, const char *);
+static void psymtab_to_symtab_1 (struct objfile *objfile,
+				 struct partial_symtab *, const char *);
 
 static void add_block (struct block *, struct symtab *);
 
@@ -276,7 +277,7 @@ static char *mdebug_next_symbol_text (struct objfile *);
    and reorders the symtab list at the end.  */
 
 static void
-mdebug_psymtab_to_symtab (struct partial_symtab *pst)
+mdebug_psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 {
   if (!pst)
     return;
@@ -289,11 +290,11 @@ mdebug_psymtab_to_symtab (struct partial_symtab *pst)
 
   next_symbol_text_func = mdebug_next_symbol_text;
 
-  psymtab_to_symtab_1 (pst, pst->filename);
+  psymtab_to_symtab_1 (objfile, pst, pst->filename);
 
   /* Match with global symbols.  This only needs to be done once,
      after all of the symtabs and dependencies have been read in.  */
-  scan_file_globals (pst->objfile);
+  scan_file_globals (objfile);
 
   if (info_verbose)
     printf_filtered (_("done.\n"));
@@ -2069,7 +2070,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
   if (processing_gcc_compilation == 0
       && found_ecoff_debugging_info == 0
       && TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (s))) == TYPE_CODE_VOID)
-    SYMBOL_TYPE (s) = objfile_type (pst->objfile)->nodebug_text_symbol;
+    SYMBOL_TYPE (s) = objfile_type (mdebugread_objfile)->nodebug_text_symbol;
 }
 
 /* Parse the external symbol ES.  Just call parse_symbol() after
@@ -3768,7 +3769,7 @@ parse_partial_symbols (struct objfile *objfile)
 
       /* Link pst to FDR.  end_psymtab returns NULL if the psymtab was
          empty and put on the free list.  */
-      fdr_to_pst[f_idx].pst = end_psymtab (save_pst,
+      fdr_to_pst[f_idx].pst = end_psymtab (objfile, save_pst,
 					psymtab_include_list, includes_used,
 					   -1, save_pst->texthigh,
 		       dependency_list, dependencies_used, textlow_not_set);
@@ -3957,7 +3958,8 @@ mdebug_next_symbol_text (struct objfile *objfile)
    The flow of control and even the memory allocation differs.  FIXME.  */
 
 static void
-psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
+psymtab_to_symtab_1 (struct objfile *objfile,
+		     struct partial_symtab *pst, const char *filename)
 {
   bfd_size_type external_sym_size;
   bfd_size_type external_pdr_size;
@@ -3994,7 +3996,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 	    gdb_flush (gdb_stdout);
 	  }
 	/* We only pass the filename for debug purposes.  */
-	psymtab_to_symtab_1 (pst->dependencies[i],
+	psymtab_to_symtab_1 (objfile, pst->dependencies[i],
 			     pst->dependencies[i]->filename);
       }
 
@@ -4014,7 +4016,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
   external_pdr_size = debug_swap->external_pdr_size;
   swap_sym_in = debug_swap->swap_sym_in;
   swap_pdr_in = debug_swap->swap_pdr_in;
-  mdebugread_objfile = pst->objfile;
+  mdebugread_objfile = objfile;
   cur_fd = FDR_IDX (pst);
   fh = ((cur_fd == -1)
 	? (FDR *) NULL
@@ -4042,7 +4044,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 
   if (processing_gcc_compilation != 0)
     {
-      struct gdbarch *gdbarch = get_objfile_arch (pst->objfile);
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
       /* This symbol table contains stabs-in-ecoff entries.  */
 
@@ -4086,10 +4088,10 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 		      && *name == '\000')
 		    {
 		      valu += ANOFFSET (pst->section_offsets,
-					SECT_OFF_TEXT (pst->objfile));
+					SECT_OFF_TEXT (objfile));
 		      previous_stab_code = N_SO;
-		      st = end_symtab (valu, pst->objfile,
-				       SECT_OFF_TEXT (pst->objfile));
+		      st = end_symtab (valu, objfile,
+				       SECT_OFF_TEXT (objfile));
 		      end_stabs ();
 		      last_symtab_ended = 1;
 		    }
@@ -4097,14 +4099,14 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 		    {
 		      last_symtab_ended = 0;
 		      process_one_symbol (type_code, 0, valu, name,
-					  pst->section_offsets, pst->objfile);
+					  pst->section_offsets, objfile);
 		    }
 		}
 	      /* Similarly a hack.  */
 	      else if (name[0] == '#')
 		{
 		  process_one_symbol (N_SLINE, 0, valu, name,
-				      pst->section_offsets, pst->objfile);
+				      pst->section_offsets, objfile);
 		}
 	      if (type_code == N_FUN)
 		{
@@ -4119,7 +4121,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 		  memset (e, 0, sizeof (struct mdebug_extra_func_info));
 		  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
 		  SYMBOL_CLASS (s) = LOC_CONST;
-		  SYMBOL_TYPE (s) = objfile_type (pst->objfile)->builtin_void;
+		  SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_void;
 		  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
 		  e->pdr.framereg = -1;
 		  add_symbol_to_list (s, &local_symbols);
@@ -4137,7 +4139,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 		{
 		  /* Handle encoded stab line number.  */
 		  valu += ANOFFSET (pst->section_offsets,
-				    SECT_OFF_TEXT (pst->objfile));
+				    SECT_OFF_TEXT (objfile));
 		  record_line (current_subfile, sh.index,
 			       gdbarch_addr_bits_remove (gdbarch, valu));
 		}
@@ -4153,8 +4155,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 
       if (! last_symtab_ended)
 	{
-	  st = end_symtab (pst->texthigh, pst->objfile,
-			   SECT_OFF_TEXT (pst->objfile));
+	  st = end_symtab (pst->texthigh, objfile,
+			   SECT_OFF_TEXT (objfile));
 	  end_stabs ();
 	}
 
@@ -4213,12 +4215,12 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
       if (fh == 0)
 	{
 	  maxlines = 0;
-	  st = new_symtab ("unknown", 0, pst->objfile);
+	  st = new_symtab ("unknown", 0, objfile);
 	}
       else
 	{
 	  maxlines = 2 * fh->cline;
-	  st = new_symtab (pst->filename, maxlines, pst->objfile);
+	  st = new_symtab (pst->filename, maxlines, objfile);
 
 	  /* The proper language was already determined when building
 	     the psymtab, use it.  */
@@ -4261,7 +4263,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
 	      c = parse_symbol (&sh,
 				debug_info->external_aux + fh->iauxBase,
 				sym_ptr, fh->fBigendian,
-				pst->section_offsets, pst->objfile);
+				pst->section_offsets, objfile);
 	      sym_ptr += c * external_sym_size;
 	    }
 
@@ -4335,7 +4337,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, const char *filename)
       ext_ptr = PST_PRIVATE (pst)->extern_tab;
       for (i = PST_PRIVATE (pst)->extern_count; --i >= 0; ext_ptr++)
 	parse_external (ext_ptr, fh->fBigendian,
-			pst->section_offsets, pst->objfile);
+			pst->section_offsets, objfile);
 
       /* If there are undefined symbols, tell the user.
          The alpha has an undefined symbol for every symbol that is

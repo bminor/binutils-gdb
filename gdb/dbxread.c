@@ -259,11 +259,11 @@ static int bincls_allocated;
 
 extern void _initialize_dbxread (void);
 
-static void read_ofile_symtab (struct partial_symtab *);
+static void read_ofile_symtab (struct objfile *, struct partial_symtab *);
 
-static void dbx_psymtab_to_symtab (struct partial_symtab *);
+static void dbx_psymtab_to_symtab (struct objfile *, struct partial_symtab *);
 
-static void dbx_psymtab_to_symtab_1 (struct partial_symtab *);
+static void dbx_psymtab_to_symtab_1 (struct objfile *, struct partial_symtab *);
 
 static void read_dbx_dynamic_symtab (struct objfile *objfile);
 
@@ -1388,8 +1388,8 @@ read_dbx_symtab (struct objfile *objfile)
 		     which are not the address.  */
 		  && nlist.n_value >= pst->textlow)
 		{
-		  end_psymtab (pst, psymtab_include_list, includes_used,
-			       symnum * symbol_size,
+		  end_psymtab (objfile, pst, psymtab_include_list,
+			       includes_used, symnum * symbol_size,
 			       nlist.n_value > pst->texthigh
 			       ? nlist.n_value : pst->texthigh,
 			       dependency_list, dependencies_used,
@@ -1507,8 +1507,8 @@ read_dbx_symtab (struct objfile *objfile)
 
 		if (pst)
 		  {
-		    end_psymtab (pst, psymtab_include_list, includes_used,
-				 symnum * symbol_size,
+		    end_psymtab (objfile, pst, psymtab_include_list,
+				 includes_used, symnum * symbol_size,
 				 valu > pst->texthigh ? valu : pst->texthigh,
 				 dependency_list, dependencies_used,
 				 prev_textlow_not_set);
@@ -2118,7 +2118,7 @@ read_dbx_symtab (struct objfile *objfile)
 	     follows this module.  */
 	  if (pst && gdbarch_sofun_address_maybe_missing (gdbarch))
 	    {
-	      end_psymtab (pst, psymtab_include_list, includes_used,
+	      end_psymtab (objfile, pst, psymtab_include_list, includes_used,
 			   symnum * symbol_size,
 			   (CORE_ADDR) 0, dependency_list,
 			   dependencies_used, textlow_not_set);
@@ -2181,7 +2181,7 @@ read_dbx_symtab (struct objfile *objfile)
 	 : lowest_text_address)
 	+ text_size;
 
-      end_psymtab (pst, psymtab_include_list, includes_used,
+      end_psymtab (objfile, pst, psymtab_include_list, includes_used,
 		   symnum * symbol_size,
 		   text_end > pst->texthigh ? text_end : pst->texthigh,
 		   dependency_list, dependencies_used, textlow_not_set);
@@ -2235,14 +2235,13 @@ start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
    FIXME:  List variables and peculiarities of same.  */
 
 struct partial_symtab *
-end_psymtab (struct partial_symtab *pst,
+end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 	     const char **include_list, int num_includes,
 	     int capping_symbol_offset, CORE_ADDR capping_text,
 	     struct partial_symtab **dependency_list, int number_dependencies,
 	     int textlow_not_set)
 {
   int i;
-  struct objfile *objfile = pst->objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
   if (capping_symbol_offset != -1)
@@ -2377,7 +2376,7 @@ end_psymtab (struct partial_symtab *pst,
       subpst->read_symtab = pst->read_symtab;
     }
 
-  sort_pst_symbols (pst);
+  sort_pst_symbols (objfile, pst);
 
   if (num_includes == 0
       && number_dependencies == 0
@@ -2393,7 +2392,7 @@ end_psymtab (struct partial_symtab *pst,
          is not empty, but we don't realize that.  Fixing that without slowing
          things down might be tricky.  */
 
-      discard_psymtab (pst);
+      discard_psymtab (objfile, pst);
 
       /* Indicate that psymtab was thrown away.  */
       pst = (struct partial_symtab *) NULL;
@@ -2402,7 +2401,7 @@ end_psymtab (struct partial_symtab *pst,
 }
 
 static void
-dbx_psymtab_to_symtab_1 (struct partial_symtab *pst)
+dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
 {
   struct cleanup *old_chain;
   int i;
@@ -2433,7 +2432,7 @@ dbx_psymtab_to_symtab_1 (struct partial_symtab *pst)
 	    wrap_here ("");	/* Flush output.  */
 	    gdb_flush (gdb_stdout);
 	  }
-	dbx_psymtab_to_symtab_1 (pst->dependencies[i]);
+	dbx_psymtab_to_symtab_1 (objfile, pst->dependencies[i]);
       }
 
   if (LDSYMLEN (pst))		/* Otherwise it's a dummy.  */
@@ -2446,8 +2445,8 @@ dbx_psymtab_to_symtab_1 (struct partial_symtab *pst)
       symbol_size = SYMBOL_SIZE (pst);
 
       /* Read in this file's symbols.  */
-      bfd_seek (pst->objfile->obfd, SYMBOL_OFFSET (pst), SEEK_SET);
-      read_ofile_symtab (pst);
+      bfd_seek (objfile->obfd, SYMBOL_OFFSET (pst), SEEK_SET);
+      read_ofile_symtab (objfile, pst);
 
       do_cleanups (old_chain);
     }
@@ -2459,7 +2458,7 @@ dbx_psymtab_to_symtab_1 (struct partial_symtab *pst)
    Be verbose about it if the user wants that.  */
 
 static void
-dbx_psymtab_to_symtab (struct partial_symtab *pst)
+dbx_psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 {
   bfd *sym_bfd;
   struct cleanup *back_to = NULL;
@@ -2485,15 +2484,15 @@ dbx_psymtab_to_symtab (struct partial_symtab *pst)
 	  gdb_flush (gdb_stdout);
 	}
 
-      sym_bfd = pst->objfile->obfd;
+      sym_bfd = objfile->obfd;
 
       next_symbol_text_func = dbx_next_symbol_text;
 
-      if (DBX_STAB_SECTION (pst->objfile))
+      if (DBX_STAB_SECTION (objfile))
 	{
 	  stabs_data
-	    = symfile_relocate_debug_section (pst->objfile,
-					      DBX_STAB_SECTION (pst->objfile),
+	    = symfile_relocate_debug_section (objfile,
+					      DBX_STAB_SECTION (objfile),
 					      NULL);
 
 	  if (stabs_data)
@@ -2501,14 +2500,14 @@ dbx_psymtab_to_symtab (struct partial_symtab *pst)
 				    (void *) &stabs_data);
 	}
 
-      dbx_psymtab_to_symtab_1 (pst);
+      dbx_psymtab_to_symtab_1 (objfile, pst);
 
       if (back_to)
 	do_cleanups (back_to);
 
       /* Match with global symbols.  This only needs to be done once,
          after all of the symtabs and dependencies have been read in.   */
-      scan_file_globals (pst->objfile);
+      scan_file_globals (objfile);
 
       /* Finish up the debug error message.  */
       if (info_verbose)
@@ -2519,7 +2518,7 @@ dbx_psymtab_to_symtab (struct partial_symtab *pst)
 /* Read in a defined section of a specific object file's symbols.  */
 
 static void
-read_ofile_symtab (struct partial_symtab *pst)
+read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
 {
   char *namestring;
   struct external_nlist *bufp;
@@ -2527,14 +2526,12 @@ read_ofile_symtab (struct partial_symtab *pst)
   unsigned char type;
   unsigned max_symnum;
   bfd *abfd;
-  struct objfile *objfile;
   int sym_offset;		/* Offset to start of symbols to read */
   int sym_size;			/* Size of symbols to read */
   CORE_ADDR text_offset;	/* Start of text segment for symbols */
   int text_size;		/* Size of text segment for symbols */
   struct section_offsets *section_offsets;
 
-  objfile = pst->objfile;
   sym_offset = LDSYMOFF (pst);
   sym_size = LDSYMLEN (pst);
   text_offset = pst->textlow;
