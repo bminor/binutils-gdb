@@ -1,3 +1,26 @@
+2012-12-12  Tom Tromey  <tromey@redhat.com>
+
+	* coffread.c (coff_symfile_init): Use set_objfile_data.
+	(coff_symfile_read): Use DBX_SYMFILE_INFO.
+	* dbxread.c (dbx_objfile_data_key): New global.
+	(dbx_symfile_init): Use set_objfile_data.
+	(dbx_symfile_finish): Don't free deprecated_sym_stab_info.
+	(dbx_free_symfile_info): New function.
+	(coffstab_build_psymtabs, elfstab_build_psymtabs): Use
+	DBX_SYMFILE_INFO.
+	(stabsect_build_psymtabs): Use set_objfile_data.
+	(_initialize_dbxreadb): Initialize dbx_objfile_data_key.
+	* elfread.c (elf_symtab_read): Use DBX_SYMFILE_INFO,
+	set_objfile_data.
+	(free_elfinfo): Use DBX_SYMFILE_INFO.
+	(elf_symfile_finish): Don't free deprecated_sym_stab_info.
+	(elfstab_offset_sections): Use DBX_SYMFILE_INFO.
+	* gdb-stabs.h (dbx_objfile_data_key): Declare.
+	(DBX_SYMFILE_INFO): Rewrite to use objfile_data.
+	* objfiles.h (struct objfile) <deprecated_sym_stab_info>: Remove.
+	* somread.c (som_symfile_finish): Don't free
+	deprecated_sym_stab_info.
+
 2012-12-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbarch.sh (software_single_step): Remove trailing space in

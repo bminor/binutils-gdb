@@ -248,7 +248,7 @@ elf_symtab_read (struct objfile *objfile, int type,
   /* Name of filesym.  This is either a constant string or is saved on
      the objfile's filename cache.  */
   const char *filesymname = "";
-  struct dbx_symfile_info *dbx = objfile->deprecated_sym_stab_info;
+  struct dbx_symfile_info *dbx = DBX_SYMFILE_INFO (objfile);
   int stripped = (bfd_get_symcount (objfile->obfd) == 0);
 
   for (i = 0; i < number_of_symbols; i++)
@@ -1251,6 +1251,7 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   long symcount = 0, dynsymcount = 0, synthcount, storage_needed;
   asymbol **symbol_table = NULL, **dyn_symbol_table = NULL;
   asymbol *synthsyms;
+  struct dbx_symfile_info *dbx;
 
   if (symtab_create_debug)
     {
@@ -1265,16 +1266,13 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   memset ((char *) &ei, 0, sizeof (ei));
 
   /* Allocate struct to keep track of the symfile.  */
-  objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
-    xmalloc (sizeof (struct dbx_symfile_info));
-  memset ((char *) objfile->deprecated_sym_stab_info,
-	  0, sizeof (struct dbx_symfile_info));
+  dbx = XCNEW (struct dbx_symfile_info);
+  set_objfile_data (objfile, dbx_objfile_data_key, dbx);
   make_cleanup (free_elfinfo, (void *) objfile);
 
   /* Process the normal ELF symbol table first.  This may write some
-     chain of info into the dbx_symfile_info in
-     objfile->deprecated_sym_stab_info, which can later be used by
-     elfstab_offset_sections.  */
+     chain of info into the dbx_symfile_info of the objfile, which can
+     later be used by elfstab_offset_sections.  */
 
   storage_needed = bfd_get_symtab_upper_bound (objfile->obfd);
   if (storage_needed < 0)
@@ -1467,15 +1465,14 @@ read_psyms (struct objfile *objfile)
     dwarf2_build_psymtabs (objfile);
 }
 
-/* This cleans up the objfile's deprecated_sym_stab_info pointer, and
-   the chain of stab_section_info's, that might be dangling from
-   it.  */
+/* This cleans up the objfile's dbx symfile info, and the chain of
+   stab_section_info's, that might be dangling from it.  */
 
 static void
 free_elfinfo (void *objp)
 {
   struct objfile *objfile = (struct objfile *) objp;
-  struct dbx_symfile_info *dbxinfo = objfile->deprecated_sym_stab_info;
+  struct dbx_symfile_info *dbxinfo = DBX_SYMFILE_INFO (objfile);
   struct stab_section_info *ssi, *nssi;
 
   ssi = dbxinfo->stab_section_info;
@@ -1512,11 +1509,6 @@ elf_new_init (struct objfile *ignore)
 static void
 elf_symfile_finish (struct objfile *objfile)
 {
-  if (objfile->deprecated_sym_stab_info != NULL)
-    {
-      xfree (objfile->deprecated_sym_stab_info);
-    }
-
   dwarf2_free_objfile (objfile);
 }
 
@@ -1550,7 +1542,7 @@ void
 elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
 {
   const char *filename = pst->filename;
-  struct dbx_symfile_info *dbx = objfile->deprecated_sym_stab_info;
+  struct dbx_symfile_info *dbx = DBX_SYMFILE_INFO (objfile);
   struct stab_section_info *maybe = dbx->stab_section_info;
   struct stab_section_info *questionable = 0;
   int i;

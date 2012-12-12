@@ -450,12 +450,11 @@ record_minimal_symbol (struct coff_symbol *cs, CORE_ADDR address,
 static void
 coff_symfile_init (struct objfile *objfile)
 {
-  /* Allocate struct to keep track of stab reading.  */
-  objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
-    xmalloc (sizeof (struct dbx_symfile_info));
+  struct dbx_symfile_info *dbx;
 
-  memset (objfile->deprecated_sym_stab_info, 0,
-	  sizeof (struct dbx_symfile_info));
+  /* Allocate struct to keep track of stab reading.  */
+  dbx = XCNEW (struct dbx_symfile_info);
+  set_objfile_data (objfile, dbx_objfile_data_key, dbx);
 
   /* Allocate struct to keep track of the symfile.  */
   objfile->deprecated_sym_private
@@ -528,7 +527,7 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
   int stabstrsize;
   
   info = (struct coff_symfile_info *) objfile->deprecated_sym_private;
-  dbxinfo = objfile->deprecated_sym_stab_info;
+  dbxinfo = DBX_SYMFILE_INFO (objfile);
   symfile_bfd = abfd;		/* Kludge for swap routines.  */
 
 /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */

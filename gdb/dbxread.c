@@ -64,6 +64,10 @@
 				   native, now.  */
 
 
+/* Key for dbx-associated data.  */
+
+const struct objfile_data *dbx_objfile_data_key;
+
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
 
@@ -624,12 +628,11 @@ dbx_symfile_init (struct objfile *objfile)
   char *name = bfd_get_filename (sym_bfd);
   asection *text_sect;
   unsigned char size_temp[DBX_STRINGTAB_SIZE_SIZE];
+  struct dbx_symfile_info *dbx;
 
   /* Allocate struct to keep track of the symfile.  */
-  objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
-    xmalloc (sizeof (struct dbx_symfile_info));
-  memset (objfile->deprecated_sym_stab_info, 0,
-	  sizeof (struct dbx_symfile_info));
+  dbx = XCNEW (struct dbx_symfile_info);
+  set_objfile_data (objfile, dbx_objfile_data_key, dbx);
 
   DBX_TEXT_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
   DBX_DATA_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".data");
@@ -737,24 +740,30 @@ dbx_symfile_init (struct objfile *objfile)
 static void
 dbx_symfile_finish (struct objfile *objfile)
 {
-  if (objfile->deprecated_sym_stab_info != NULL)
-    {
-      if (HEADER_FILES (objfile) != NULL)
-	{
-	  int i = N_HEADER_FILES (objfile);
-	  struct header_file *hfiles = HEADER_FILES (objfile);
-
-	  while (--i >= 0)
-	    {
-	      xfree (hfiles[i].name);
-	      xfree (hfiles[i].vector);
-	    }
-	  xfree (hfiles);
-	}
-      xfree (objfile->deprecated_sym_stab_info);
-    }
   free_header_files ();
 }
+
+static void
+dbx_free_symfile_info (struct objfile *objfile, void *arg)
+{
+  struct dbx_symfile_info *dbx = arg;
+
+  if (dbx->header_files != NULL)
+    {
+      int i = dbx->n_header_files;
+      struct header_file *hfiles = dbx->header_files;
+
+      while (--i >= 0)
+	{
+	  xfree (hfiles[i].name);
+	  xfree (hfiles[i].vector);
+	}
+      xfree (hfiles);
+    }
+
+  xfree (dbx);
+}
+
 
 
 /* Buffer for reading the symbol table entries.  */
@@ -3347,7 +3356,7 @@ coffstab_build_psymtabs (struct objfile *objfile,
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the coff symtab to help us.  */
-  info = objfile->deprecated_sym_stab_info;
+  info = DBX_SYMFILE_INFO (objfile);
 
   DBX_TEXT_ADDR (objfile) = textaddr;
   DBX_TEXT_SIZE (objfile) = textsize;
@@ -3436,7 +3445,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
 
   /* There is already a dbx_symfile_info allocated by our caller.
      It might even contain some info from the ELF symtab to help us.  */
-  info = objfile->deprecated_sym_stab_info;
+  info = DBX_SYMFILE_INFO (objfile);
 
   /* Find the first and last text address.  dbx_symfile_read seems to
      want this.  */
@@ -3515,6 +3524,7 @@ stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
   asection *stabsect;
   asection *stabstrsect;
   asection *text_sect;
+  struct dbx_symfile_info *dbx;
 
   stabsect = bfd_get_section_by_name (sym_bfd, stab_name);
   stabstrsect = bfd_get_section_by_name (sym_bfd, stabstr_name);
@@ -3527,10 +3537,8 @@ stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
 	     "but not string section (%s)"),
 	   stab_name, stabstr_name);
 
-  objfile->deprecated_sym_stab_info = (struct dbx_symfile_info *)
-    xmalloc (sizeof (struct dbx_symfile_info));
-  memset (objfile->deprecated_sym_stab_info, 0,
-	  sizeof (struct dbx_symfile_info));
+  dbx = XCNEW (struct dbx_symfile_info);
+  set_objfile_data (objfile, dbx_objfile_data_key, dbx);
 
   text_sect = bfd_get_section_by_name (sym_bfd, text_name);
   if (!text_sect)
@@ -3597,4 +3605,7 @@ void
 _initialize_dbxread (void)
 {
   add_symtab_fns (&aout_sym_fns);
+
+  dbx_objfile_data_key
+    = register_objfile_data_with_cleanup (NULL, dbx_free_symfile_info);
 }
