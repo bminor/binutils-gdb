@@ -1,5 +1,14 @@
 2012-12-12  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (class Track_tls): New.
+	(class Relocate, class Scan): Inherit Track_tls.
+	(Target_powerpc::Scan::local, global): Track tls optimization
+	and avoid creating plt entry for __tls_get_addr if all uses
+	are optimized away.
+	(Target_powerpc::Relocate::relocate): Update to use Track_tls.
+
+2012-12-12  Alan Modra  <amodra@gmail.com>
+
 	* options.h (General_options): Add --toc-sort/--no-toc-sort.
 	Replace no_toc_optimize with toc_optimize.
 	* output.h (Output_section::input_sections): Provide non-const variant.

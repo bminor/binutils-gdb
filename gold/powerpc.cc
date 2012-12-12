@@ -623,14 +623,102 @@ class Target_powerpc : public Sized_target<size, big_endian>
 
  private:
 
+  class Track_tls
+  {
+  public:
+    enum Tls_get_addr
+    {
+      NOT_EXPECTED = 0,
+      EXPECTED = 1,
+      SKIP = 2,
+      NORMAL = 3
+    };
+
+    Track_tls()
+      : tls_get_addr_(NOT_EXPECTED),
+	relinfo_(NULL), relnum_(0), r_offset_(0)
+    { }
+
+    ~Track_tls()
+    {
+      if (this->tls_get_addr_ != NOT_EXPECTED)
+	this->missing();
+    }
+
+    void
+    missing(void)
+    {
+      if (this->relinfo_ != NULL)
+	gold_error_at_location(this->relinfo_, this->relnum_, this->r_offset_,
+			       _("missing expected __tls_get_addr call"));
+    }
+
+    void
+    expect_tls_get_addr_call(
+	const Relocate_info<size, big_endian>* relinfo,
+	size_t relnum,
+	Address r_offset)
+    {
+      this->tls_get_addr_ = EXPECTED;
+      this->relinfo_ = relinfo;
+      this->relnum_ = relnum;
+      this->r_offset_ = r_offset;
+    }
+
+    void
+    expect_tls_get_addr_call()
+    { this->tls_get_addr_ = EXPECTED; }
+
+    void
+    skip_next_tls_get_addr_call()
+    {this->tls_get_addr_ = SKIP; }
+
+    Tls_get_addr
+    maybe_skip_tls_get_addr_call(unsigned int r_type, const Symbol* gsym)
+    {
+      bool is_tls_call = ((r_type == elfcpp::R_POWERPC_REL24
+			   || r_type == elfcpp::R_PPC_PLTREL24)
+			  && gsym != NULL
+			  && strcmp(gsym->name(), "__tls_get_addr") == 0);
+      Tls_get_addr last_tls = this->tls_get_addr_;
+      this->tls_get_addr_ = NOT_EXPECTED;
+      if (is_tls_call && last_tls != EXPECTED)
+	return last_tls;
+      else if (!is_tls_call && last_tls != NOT_EXPECTED)
+	{
+	  this->missing();
+	  return EXPECTED;
+	}
+      return NORMAL;
+    }
+
+  private:
+    // What we're up to regarding calls to __tls_get_addr.
+    // On powerpc, the branch and link insn making a call to
+    // __tls_get_addr is marked with a relocation, R_PPC64_TLSGD,
+    // R_PPC64_TLSLD, R_PPC_TLSGD or R_PPC_TLSLD, in addition to the
+    // usual R_POWERPC_REL24 or R_PPC_PLTREL25 relocation on a call.
+    // The marker relocation always comes first, and has the same
+    // symbol as the reloc on the insn setting up the __tls_get_addr
+    // argument.  This ties the arg setup insn with the call insn,
+    // allowing ld to safely optimize away the call.  We check that
+    // every call to __tls_get_addr has a marker relocation, and that
+    // every marker relocation is on a call to __tls_get_addr.
+    Tls_get_addr tls_get_addr_;
+    // Info about the last reloc for error message.
+    const Relocate_info<size, big_endian>* relinfo_;
+    size_t relnum_;
+    Address r_offset_;
+  };
+
   // The class which scans relocations.
-  class Scan
+  class Scan : protected Track_tls
   {
   public:
     typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
 
     Scan()
-      : issued_non_pic_error_(false)
+      : Track_tls(), issued_non_pic_error_(false)
     { }
 
     static inline int
@@ -705,32 +793,16 @@ class Target_powerpc : public Sized_target<size, big_endian>
 		    unsigned int *dest_shndx);
 
   // The class which implements relocation.
-  class Relocate
+  class Relocate : protected Track_tls
   {
    public:
     // Use 'at' branch hints when true, 'y' when false.
     // FIXME maybe: set this with an option.
     static const bool is_isa_v2 = true;
 
-    enum skip_tls
-    {
-      CALL_NOT_EXPECTED = 0,
-      CALL_EXPECTED = 1,
-      CALL_SKIP = 2
-    };
-
     Relocate()
-      : call_tls_get_addr_(CALL_NOT_EXPECTED)
+      : Track_tls()
     { }
-
-    ~Relocate()
-    {
-      if (this->call_tls_get_addr_ != CALL_NOT_EXPECTED)
-	{
-	  // FIXME: This needs to specify the location somehow.
-	  gold_error(_("missing expected __tls_get_addr call"));
-	}
-    }
 
     // Do a relocation.  Return false if the caller should not issue
     // any warnings about this relocation.
@@ -743,10 +815,6 @@ class Target_powerpc : public Sized_target<size, big_endian>
 	     unsigned char*,
 	     typename elfcpp::Elf_types<size>::Elf_Addr,
 	     section_size_type);
-
-    // This is set if we should skip the next reloc, which should be a
-    // call to __tls_get_addr.
-    enum skip_tls call_tls_get_addr_;
   };
 
   class Relocate_comdat_behavior
@@ -4398,6 +4466,25 @@ Target_powerpc<size, big_endian>::Scan::local(
     const elfcpp::Sym<size, big_endian>& lsym,
     bool is_discarded)
 {
+  this->maybe_skip_tls_get_addr_call(r_type, NULL);
+
+  if ((size == 64 && r_type == elfcpp::R_PPC64_TLSGD)
+      || (size == 32 && r_type == elfcpp::R_PPC_TLSGD))
+    {
+      this->expect_tls_get_addr_call();
+      const tls::Tls_optimization tls_type = target->optimize_tls_gd(true);
+      if (tls_type != tls::TLSOPT_NONE)
+	this->skip_next_tls_get_addr_call();
+    }
+  else if ((size == 64 && r_type == elfcpp::R_PPC64_TLSLD)
+	   || (size == 32 && r_type == elfcpp::R_PPC_TLSLD))
+    {
+      this->expect_tls_get_addr_call();
+      const tls::Tls_optimization tls_type = target->optimize_tls_ld();
+      if (tls_type != tls::TLSOPT_NONE)
+	this->skip_next_tls_get_addr_call();
+    }
+
   Powerpc_relobj<size, big_endian>* ppc_object
     = static_cast<Powerpc_relobj<size, big_endian>*>(object);
 
@@ -4747,6 +4834,27 @@ Target_powerpc<size, big_endian>::Scan::global(
     unsigned int r_type,
     Symbol* gsym)
 {
+  if (this->maybe_skip_tls_get_addr_call(r_type, gsym) == Track_tls::SKIP)
+    return;
+
+  if ((size == 64 && r_type == elfcpp::R_PPC64_TLSGD)
+      || (size == 32 && r_type == elfcpp::R_PPC_TLSGD))
+    {
+      this->expect_tls_get_addr_call();
+      const bool final = gsym->final_value_is_known();
+      const tls::Tls_optimization tls_type = target->optimize_tls_gd(final);
+      if (tls_type != tls::TLSOPT_NONE)
+	this->skip_next_tls_get_addr_call();
+    }
+  else if ((size == 64 && r_type == elfcpp::R_PPC64_TLSLD)
+	   || (size == 32 && r_type == elfcpp::R_PPC_TLSLD))
+    {
+      this->expect_tls_get_addr_call();
+      const tls::Tls_optimization tls_type = target->optimize_tls_ld();
+      if (tls_type != tls::TLSOPT_NONE)
+	this->skip_next_tls_get_addr_call();
+    }
+
   Powerpc_relobj<size, big_endian>* ppc_object
     = static_cast<Powerpc_relobj<size, big_endian>*>(object);
 
@@ -5600,23 +5708,20 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     Address address,
     section_size_type view_size)
 {
-  bool is_tls_call = ((r_type == elfcpp::R_POWERPC_REL24
-		       || r_type == elfcpp::R_PPC_PLTREL24)
-		      && gsym != NULL
-		      && strcmp(gsym->name(), "__tls_get_addr") == 0);
-  enum skip_tls last_tls = this->call_tls_get_addr_;
-  this->call_tls_get_addr_ = CALL_NOT_EXPECTED;
-  if (is_tls_call)
+  switch (this->maybe_skip_tls_get_addr_call(r_type, gsym))
     {
-      if (last_tls == CALL_NOT_EXPECTED)
-	gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
-			       _("__tls_get_addr call lacks marker reloc"));
-      else if (last_tls == CALL_SKIP)
-	return false;
+    case Track_tls::NOT_EXPECTED:
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+			     _("__tls_get_addr call lacks marker reloc"));
+      break;
+    case Track_tls::EXPECTED:
+      // We have already complained.
+      break;
+    case Track_tls::SKIP:
+      return true;
+    case Track_tls::NORMAL:
+      break;
     }
-  else if (last_tls != CALL_NOT_EXPECTED)
-    gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
-			   _("missing expected __tls_get_addr call"));
 
   typedef Powerpc_relocate_functions<size, big_endian> Reloc;
   typedef typename elfcpp::Swap<32, big_endian>::Valtype Insn;
@@ -5913,7 +6018,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     {
       // Second instruction of a global dynamic sequence,
       // the __tls_get_addr call
-      this->call_tls_get_addr_ = CALL_EXPECTED;
+      this->expect_tls_get_addr_call(relinfo, relnum, rela.get_r_offset());
       const bool final = gsym == NULL || gsym->final_value_is_known();
       const tls::Tls_optimization tls_type = target->optimize_tls_gd(final);
       if (tls_type != tls::TLSOPT_NONE)
@@ -5936,7 +6041,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      view += 2 * big_endian;
 	      value = psymval->value(object, rela.get_r_addend());
 	    }
-	  this->call_tls_get_addr_ = CALL_SKIP;
+	  this->skip_next_tls_get_addr_call();
 	}
     }
   else if ((size == 64 && r_type == elfcpp::R_PPC64_TLSLD)
@@ -5944,14 +6049,14 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     {
       // Second instruction of a local dynamic sequence,
       // the __tls_get_addr call
-      this->call_tls_get_addr_ = CALL_EXPECTED;
+      this->expect_tls_get_addr_call(relinfo, relnum, rela.get_r_offset());
       const tls::Tls_optimization tls_type = target->optimize_tls_ld();
       if (tls_type == tls::TLSOPT_TO_LE)
 	{
 	  Insn* iview = reinterpret_cast<Insn*>(view);
 	  Insn insn = addi_3_3;
 	  elfcpp::Swap<32, big_endian>::writeval(iview, insn);
-	  this->call_tls_get_addr_ = CALL_SKIP;
+	  this->skip_next_tls_get_addr_call();
 	  r_type = elfcpp::R_POWERPC_TPREL16_LO;
 	  view += 2 * big_endian;
 	  value = dtp_offset;
