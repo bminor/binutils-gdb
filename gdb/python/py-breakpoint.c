@@ -981,8 +981,7 @@ static PyMethodDef breakpoint_object_methods[] =
 
 PyTypeObject breakpoint_object_type =
 {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Breakpoint",		  /*tp_name*/
   sizeof (breakpoint_object),	  /*tp_basicsize*/
   0,				  /*tp_itemsize*/

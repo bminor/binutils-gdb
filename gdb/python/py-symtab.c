@@ -307,7 +307,7 @@ salpy_dealloc (PyObject *self)
 
   Py_DECREF (self_sal->symtab);
   xfree (self_sal->sal);
-  self_sal->ob_type->tp_free (self);
+  Py_TYPE (self)->tp_free (self);
 }
 
 /* Given a sal, and a sal_object that has previously been allocated
@@ -539,8 +539,7 @@ Return the static block of the symbol table." },
 };
 
 static PyTypeObject symtab_object_type = {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Symtab",			  /*tp_name*/
   sizeof (symtab_object),	  /*tp_basicsize*/
   0,				  /*tp_itemsize*/
@@ -590,8 +589,7 @@ Return true if this symbol table and line is valid, false if not." },
 };
 
 static PyTypeObject sal_object_type = {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Symtab_and_line",	  /*tp_name*/
   sizeof (sal_object),		  /*tp_basicsize*/
   0,				  /*tp_itemsize*/

@@ -1,3 +1,106 @@
+2012-12-12  Paul Koning  <paul_koning@dell.com>
+
+	Add support for Python 3.
+	* NEWS: Mention Python 3 support.
+	* varobj.c (value_get_print_value): Use
+	python_string_to_target_string.
+	* python/py-block.c: Use PyVarObject_HEAD_INIT in initialization
+	of type objects.
+	* python/py-breakpoint.c: Ditto.
+	* python/py-cmd.c:  Ditto.
+	* python/py-event.c: Ditto.
+	* python/py-event.h: Ditto.
+	* python/py-evtregistry.c: Ditto.
+	* python/py-finishbreakpoint.c: Ditto.
+	* python/py-frame.c: Ditto.
+	* python/py-function.c: Ditto.
+	* python/py-infthread.c: Ditto.
+	* python/py-lazy-string.c: Ditto.
+	* python/py-progspace.c: Ditto.
+	* /python/py-symbol.c: Ditto.
+	* python/py-evts.c:  (gdbpy_initialize_py_events): Add module
+	initialization for Python 3.
+	* python/py-inferior.c: Use PyVarObject_HEAD_INIT in initialization
+	of type objects.
+	(infpy_read_memory): Return memoryview object if Python 3.
+	(infpy_write_memory): Use "s*" operand parsing code for Python 3.
+	(infpy_search_memory): Ditto.
+	(get_buffer): New function for Python 3.
+	* python/py-objfile.c: Use PyVarObject_HEAD_INIT in initialization
+	of type objects.
+	(objfpy_dealloc): Use Py_TYPE to call tp_free.
+	* python/py-param.c: Use PyVarObject_HEAD_INIT in initialization
+	of type objects.
+	(get_attr): Use PyUnicode_CompareWithASCIIString if Python 3.
+	(set_attr): Ditto.
+	* python/py-prettyprint.c (print_string_repr): use PyBytes methods
+	instead of PyString methods if Python 3.
+	(print_children): Skip push_dummy_python_frame call if Python 3.
+	* python/py-symtab.c: Use PyVarObject_HEAD_INIT in initialization
+	of type objects.
+	(salpy_dealloc): Use Py_TYPE to call tp_free.
+	* python/py-type.c: Use PyVarObject_HEAD_INIT in initialization
+	of type objects.
+	(field_dealloc): Use Py_TYPE to call tp_free.
+	(typy_dealloc): Ditto.
+	(type_object_as_number): Adjust struct initializations for
+	differences in layout for Python 2 vs. Python 3.
+	* python/py-utils.c (python_string_to_unicode): Omit non-Unicode
+	string case for Python 3.
+	(unicode_to_encoded_python_string): Shorten code (no functional
+	change). 
+	(python_string_to_target_python_string): Comment that in Python 3
+	returned value is a Python "bytes" type.
+	(gdbpy_is_string): Omit non-Unicode string check in Python 3.
+	(gdb_py_object_from_longest): Omit non-long integer case in Python
+	3.
+	(gdb_py_object_from_ulongest): Ditto.
+	* python/py-value.c: Use PyVarObject_HEAD_INIT in initialization
+	of type objects.
+	(valpy_dealloc): Use Py_TYPE to call tp_free.
+	(valpy_int): Omit function if Python 3.
+	(convert_value_from_python): Use "%S" format (Python object as a
+	string) if Python 3.
+	(value_object_as_number): Adjust struct initializations for
+	differences in layout for Python 2 vs. Python 3.
+	* python/python-config.py: Adjust syntax for Python 3
+	compatibility. 
+	Include "sys.abiflags" string as part of python library name, if
+	that attribute exists (Python 3).
+	* python/python-internal.h (IS_PY3): Define if Python 3.
+	(Py_TPFLAGS_HAVE_ITER, Py_TPFLAGS_CHECKTYPES): Define with
+	placeholder value if Python 3.
+	(PyInt_Check, PyInt_FromLong, PyInt_AsLong, PyString_FromString,
+	PyString_Decode, PyString_FromFormat, PyString_Check): Define as
+	analogous Python 3 API function if Python 3.
+	(PyVarObject_HEAD_INIT): Define if not already defined.
+	(Py_TYPE): Ditto.
+	* python/python.c (eval_python_command): Omit Py_FlushLine call if
+	Python 3.
+	Check return values of all Python API calls for error.
+	Supply dummy "python" and "python-interactive" commands if Python
+	initialization failed.
+	(_initialize_python): Convert argc to wchar_t** if Python 3.
+	Add module initialization for Python 3.
+	(finish_python_initialization): Pass wchar_t * argument to
+	PySys_SetPath if Python 3.
+	* python/lib/gdb/__init__.py: Define "reload" if Python 3.
+	(_GdbFile): New class for common output file behavior.
+	(GdbOutFile): Subclass from _GdbFile.
+	(GdbOutputErrorFile): Ditto.
+	(auto_load_packages): Adjust syntax for Python 3 compatibility.
+	* python/lib/gdb/printing.py: Define basestr and int if Python 3.
+	* python/lib/gdb/prompt.py: Use sorted() function rather than
+	sort() method.
+	* python/lib/gdb/command/explore.py: Define raw_input if Python 3.
+	Adjust syntax for Python 3 compatibility.
+	* python/lib/gdb/command/pretty_printers.py: Use sorted() function
+	rather than sort() method.
+	Adjust syntax for Python 3 compatibility.
+	* python/lib/gdb/command/type_printers.py: Ditto.
+	* doc/gdb.texinfo (Inferior.read_memory): Mention that the return
+	value is a memoryview object if Python 3.
+
 2012-12-12  Tom Tromey  <tromey@redhat.com>
 
 	* coffread.c (coff_objfile_data_key): New global.

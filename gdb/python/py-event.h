@@ -48,8 +48,7 @@
 \
     qual PyTypeObject name##_event_object_type = \
     { \
-      PyObject_HEAD_INIT (NULL) \
-      0,                                          /* ob_size */ \
+      PyVarObject_HEAD_INIT (NULL, 0)				\
       py_path,                                    /* tp_name */ \
       sizeof (event_object),                      /* tp_basicsize */ \
       0,                                          /* tp_itemsize */ \

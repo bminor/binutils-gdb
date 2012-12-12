@@ -607,8 +607,7 @@ static PyMethodDef cmdpy_object_methods[] =
 
 static PyTypeObject cmdpy_object_type =
 {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Command",		  /*tp_name*/
   sizeof (cmdpy_object),	  /*tp_basicsize*/
   0,				  /*tp_itemsize*/

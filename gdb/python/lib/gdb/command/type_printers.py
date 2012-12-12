@@ -33,29 +33,29 @@ class InfoTypePrinter(gdb.Command):
         """Print a list of type printers."""
         # A potential enhancement is to provide an option to list printers in
         # "lookup order" (i.e. unsorted).
-        sorted_type_printers = copy.copy(type_printers)
-        sorted_type_printers.sort(lambda x, y: cmp(x.name, y.name))
+        sorted_type_printers = sorted (copy.copy(type_printers),
+                                       key = lambda x: x.name)
         for printer in sorted_type_printers:
             if printer.enabled:
                 enabled = ''
             else:
                 enabled = " [disabled]"
-            print "  %s%s" % (printer.name, enabled)
+            print ("  %s%s" % (printer.name, enabled))
 
     def invoke(self, arg, from_tty):
         """GDB calls this to perform the command."""
         sep = ''
         for objfile in gdb.objfiles():
             if objfile.type_printers:
-                print "%sType printers for %s:" % (sep, objfile.name)
+                print ("%sType printers for %s:" % (sep, objfile.name))
                 self.list_type_printers(objfile.type_printers)
                 sep = '\n'
         if gdb.current_progspace().type_printers:
-            print "%sType printers for program space:" % sep
+            print ("%sType printers for program space:" % sep)
             self.list_type_printers(gdb.current_progspace().type_printers)
             sep = '\n'
         if gdb.type_printers:
-            print "%sGlobal type printers:" % sep
+            print ("%sGlobal type printers:" % sep)
             self.list_type_printers(gdb.type_printers)
 
 class _EnableOrDisableCommand(gdb.Command):
@@ -83,7 +83,7 @@ class _EnableOrDisableCommand(gdb.Command):
             if self.set_some(name, gdb.type_printers):
                 ok = True
             if not ok:
-                print "No type printer named '%s'" % name
+                print ("No type printer named '%s'" % name)
 
     def add_some(self, result, word, printers):
         for p in printers:

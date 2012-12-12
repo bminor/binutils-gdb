@@ -70,8 +70,13 @@ static const char *gdbpy_should_print_stack = python_excp_message;
 #include "gdbthread.h"
 #include "observer.h"
 #include "interps.h"
+#include "event-top.h"
 
 static PyMethodDef GdbMethods[];
+
+#ifdef IS_PY3K
+static struct PyModuleDef GdbModuleDef;
+#endif
 
 PyObject *gdb_module;
 PyObject *gdb_python_module;
@@ -198,8 +203,10 @@ eval_python_command (const char *command)
     return -1;
 
   Py_DECREF (v);
+#ifndef IS_PY3K
   if (Py_FlushLine ())
     PyErr_Clear ();
+#endif
 
   return 0;
 }
@@ -1431,6 +1438,13 @@ _initialize_python (void)
 {
   char *cmd_name;
   struct cmd_list_element *cmd;
+  char *progname;
+#ifdef IS_PY3K
+  int i;
+  size_t progsize, count;
+  char *oldloc;
+  wchar_t *progname_copy;
+#endif
 
   add_com ("python-interactive", class_obscure,
 	   python_interactive_command,
@@ -1510,14 +1524,50 @@ message == an error message without a stack will be printed."),
      /foo/bin/python
      /foo/lib/pythonX.Y/...
      This must be done before calling Py_Initialize.  */
-  Py_SetProgramName (concat (ldirname (python_libdir), SLASH_STRING, "bin",
-			     SLASH_STRING, "python", NULL));
+  progname = concat (ldirname (python_libdir), SLASH_STRING, "bin",
+		     SLASH_STRING, "python", NULL);
+#ifdef IS_PY3K
+  oldloc = setlocale (LC_ALL, NULL);
+  setlocale (LC_ALL, "");
+  progsize = strlen (progname);
+  if (progsize == (size_t) -1)
+    {
+      fprintf (stderr, "Could not convert python path to string\n");
+      return;
+    }
+  progname_copy = PyMem_Malloc ((progsize + 1) * sizeof (wchar_t));
+  if (!progname_copy)
+    {
+      fprintf (stderr, "out of memory\n");
+      return;
+    }
+  count = mbstowcs (progname_copy, progname, progsize + 1);
+  if (count == (size_t) -1)
+    {
+      fprintf (stderr, "Could not convert python path to string\n");
+      return;
+    }
+  setlocale (LC_ALL, oldloc);
+
+  /* Note that Py_SetProgramName expects the string it is passed to
+     remain alive for the duration of the program's execution, so
+     it is not freed after this call.  */
+  Py_SetProgramName (progname_copy);
+#else
+  Py_SetProgramName (progname);
+#endif
 #endif
 
   Py_Initialize ();
   PyEval_InitThreads ();
 
+#ifdef IS_PY3K
+  gdb_module = PyModule_Create (&GdbModuleDef);
+  /* Add _gdb module to the list of known built-in modules.  */
+  _PyImport_FixupBuiltin (gdb_module, "_gdb");
+#else
   gdb_module = Py_InitModule ("_gdb", GdbMethods);
+#endif
 
   /* The casts to (char*) are for python 2.4.  */
   PyModule_AddStringConstant (gdb_module, "VERSION", (char*) version);
@@ -1612,7 +1662,17 @@ finish_python_initialization (void)
 
   sys_path = PySys_GetObject ("path");
 
-  if (sys_path && PyList_Check (sys_path))
+  /* If sys.path is not defined yet, define it first.  */
+  if (!(sys_path && PyList_Check (sys_path)))
+    {
+#ifdef IS_PY3K
+      PySys_SetPath (L"");
+#else
+      PySys_SetPath ("");
+#endif
+      sys_path = PySys_GetObject ("path");
+    }
+  if (sys_path && PyList_Check (sys_path))  
     {
       PyObject *pythondir;
       int err;
@@ -1628,7 +1688,7 @@ finish_python_initialization (void)
       Py_DECREF (pythondir);
     }
   else
-    PySys_SetPath (gdb_pythondir);
+    goto fail;
 
   /* Import the gdb module to finish the initialization, and
      add it to __main__ for convenience.  */
@@ -1768,4 +1828,18 @@ Return a tuple containing all inferiors." },
   {NULL, NULL, 0, NULL}
 };
 
+#ifdef IS_PY3K
+static struct PyModuleDef GdbModuleDef =
+{
+  PyModuleDef_HEAD_INIT,
+  "_gdb",
+  NULL,
+  -1, 
+  GdbMethods,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
+#endif
 #endif /* HAVE_PYTHON */

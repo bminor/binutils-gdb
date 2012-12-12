@@ -19,7 +19,12 @@
 import gdb
 import gdb.types
 import re
+import sys
 
+if sys.version_info[0] > 2:
+    # Python 3 removed basestring and long
+    basestring = str
+    long = int
 
 class PrettyPrinter(object):
     """A basic pretty-printer.

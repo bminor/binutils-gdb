@@ -98,8 +98,7 @@ def prompt_help():
     functions."""
 
     result = ''
-    keys = prompt_substitutions.keys()
-    keys.sort()
+    keys = sorted (prompt_substitutions.keys())
     for key in keys:
         result += '  \\%s\t%s\n' % (key, prompt_substitutions[key].__doc__)
     result += """

@@ -425,8 +425,7 @@ None otherwise.", NULL },
 
 static PyTypeObject finish_breakpoint_object_type =
 {
-  PyObject_HEAD_INIT (NULL)
-  0,                              /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.FinishBreakpoint",         /*tp_name*/
   sizeof (struct finish_breakpoint_object),  /*tp_basicsize*/
   0,                              /*tp_itemsize*/

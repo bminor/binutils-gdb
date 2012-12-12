@@ -123,7 +123,7 @@ field_dealloc (PyObject *obj)
   field_object *f = (field_object *) obj;
 
   Py_XDECREF (f->dict);
-  f->ob_type->tp_free (obj);
+  Py_TYPE (obj)->tp_free (obj);
 }
 
 static PyObject *
@@ -1262,7 +1262,7 @@ typy_dealloc (PyObject *obj)
   if (type->next)
     type->next->prev = type->prev;
 
-  type->ob_type->tp_free (type);
+  Py_TYPE (type)->tp_free (type);
 }
 
 /* Return number of fields ("length" of the field dictionary).  */
@@ -1657,7 +1657,9 @@ static PyNumberMethods type_object_as_number = {
   NULL,			      /* nb_add */
   NULL,			      /* nb_subtract */
   NULL,			      /* nb_multiply */
+#ifndef IS_PY3K
   NULL,			      /* nb_divide */
+#endif
   NULL,			      /* nb_remainder */
   NULL,			      /* nb_divmod */
   NULL,			      /* nb_power */
@@ -1671,12 +1673,19 @@ static PyNumberMethods type_object_as_number = {
   NULL,			      /* nb_and */
   NULL,			      /* nb_xor */
   NULL,			      /* nb_or */
+#ifdef IS_PY3K
+  NULL,			      /* nb_int */
+  NULL,			      /* reserved */
+#else
   NULL,			      /* nb_coerce */
   NULL,			      /* nb_int */
   NULL,			      /* nb_long */
+#endif
   NULL,			      /* nb_float */
+#ifndef IS_PY3K
   NULL,			      /* nb_oct */
   NULL			      /* nb_hex */
+#endif
 };
 
 static PyMappingMethods typy_mapping = {
@@ -1687,8 +1696,7 @@ static PyMappingMethods typy_mapping = {
 
 static PyTypeObject type_object_type =
 {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Type",			  /*tp_name*/
   sizeof (type_object),		  /*tp_basicsize*/
   0,				  /*tp_itemsize*/
@@ -1737,8 +1745,7 @@ static PyGetSetDef field_object_getset[] =
 
 static PyTypeObject field_object_type =
 {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Field",			  /*tp_name*/
   sizeof (field_object),	  /*tp_basicsize*/
   0,				  /*tp_itemsize*/
@@ -1779,8 +1786,7 @@ static PyTypeObject field_object_type =
 };
 
 static PyTypeObject type_iterator_object_type = {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.TypeIterator",		  /*tp_name*/
   sizeof (typy_iterator_object),  /*tp_basicsize*/
   0,				  /*tp_itemsize*/

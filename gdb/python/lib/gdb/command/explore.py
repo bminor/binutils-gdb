@@ -17,7 +17,12 @@
 """Implementation of the GDB 'explore' command using the GDB Python API."""
 
 import gdb
+import sys
 
+if sys.version_info[0] > 2:
+    # Python 3 renamed raw_input to input
+    raw_input = input
+    
 class Explorer(object):
     """Internal class which invokes other explorers."""
 
@@ -155,7 +160,7 @@ class Explorer(object):
         """A utility function which prints that the current exploration session
         is returning to the parent value. Useful when exploring values.
         """
-        print "\nReturning to parent value...\n"
+        print ("\nReturning to parent value...\n")
         
     @staticmethod
     def return_to_parent_value_prompt():
@@ -170,7 +175,7 @@ class Explorer(object):
         """A utility function which prints that the current exploration session
         is returning to the enclosing type.  Useful when exploring types.
         """
-        print "\nReturning to enclosing type...\n"
+        print ("\nReturning to enclosing type...\n")
         
     @staticmethod
     def return_to_enclosing_type_prompt():
@@ -192,7 +197,7 @@ class ScalarExplorer(object):
         """
         print ("'%s' is a scalar value of type '%s'." %
                (expr, value.type))
-        print "%s = %s" % (expr, str(value))
+        print ("%s = %s" % (expr, str(value)))
 
         if is_child:
             Explorer.return_to_parent_value_prompt()
@@ -211,13 +216,13 @@ class ScalarExplorer(object):
                 print ("%s is of an enumerated type '%s'." %
                        (name, str(datatype)))
             else:
-                print "'%s' is an enumerated type." % name
+                print ("'%s' is an enumerated type." % name)
         else:
             if is_child:
                 print ("%s is of a scalar type '%s'." %
                        (name, str(datatype)))
             else:
-                print "'%s' is a scalar type." % name
+                print ("'%s' is a scalar type." % name)
 
         if is_child:
             Explorer.return_to_enclosing_type_prompt()
@@ -268,7 +273,7 @@ class PointerExplorer(object):
                 try:
                     str(element)
                 except gdb.MemoryError:
-                    print "Cannot read value at index %d." % index
+                    print ("Cannot read value at index %d." % index)
                     continue
                 Explorer.explore_expr(element_expr, element, True)
             return False
@@ -338,7 +343,7 @@ class ArrayExplorer(object):
             element = value[index]
             str(element)
         except gdb.MemoryError:
-            print "Cannot read value at index %d." % index
+            print ("Cannot read value at index %d." % index)
             raw_input("Press enter to continue... ")
             return True
             
@@ -352,7 +357,7 @@ class ArrayExplorer(object):
         See Explorer.explore_type for more information.
         """
         target_type = datatype.target()
-        print "%s is an array of '%s'." % (name, str(target_type))
+        print ("%s is an array of '%s'." % (name, str(target_type)))
 
         Explorer.explore_type("the array element of %s" % name, target_type,
                               is_child)
@@ -371,9 +376,8 @@ class CompoundExplorer(object):
             if max_field_name_length < len(pair[0]):
                 max_field_name_length = len(pair[0])
 
-        format_str = "  {0:>%d} = {1}" % max_field_name_length
         for pair in print_list:
-            print format_str.format(pair[0], pair[1])
+            print ("  %*s = %s" % (max_field_name_length, pair[0], pair[1]))
 
     @staticmethod
     def _get_real_field_count(fields):
@@ -447,7 +451,7 @@ class CompoundExplorer(object):
             print_list.append((field.name, literal_value))
 
         CompoundExplorer._print_fields(print_list)
-        print ""
+        print ("")
 
         if has_explorable_fields:
             choice = raw_input("Enter the field number of choice: ")
@@ -484,7 +488,7 @@ class CompoundExplorer(object):
                        (name, type_desc, str(datatype)))
                 Explorer.return_to_enclosing_type_prompt()
             else:
-                print "'%s' is a %s with no fields." % (name, type_desc)
+                print ("'%s' is a %s with no fields." % (name, type_desc))
             return False
 
         if is_child:
@@ -515,7 +519,7 @@ class CompoundExplorer(object):
             current_choice = current_choice + 1
 
         CompoundExplorer._print_fields(print_list)
-        print ""
+        print ("")
 
         if len(choice_to_compound_field_map) > 0:
             choice = raw_input("Enter the field number of choice: ")
@@ -741,7 +745,7 @@ class ExploreTypeCommand(gdb.Command):
 
         value = ExploreUtils.get_value_from_str(arg_str)
         if value is not None:
-            print "'%s' is of type '%s'." % (arg_str, str(value.type))
+            print ("'%s' is of type '%s'." % (arg_str, str(value.type)))
             Explorer.explore_type(str(value.type), value.type, False)
 
         raise gdb.GdbError(("'%s' is not a type or value in the current "

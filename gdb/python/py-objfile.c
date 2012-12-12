@@ -62,7 +62,7 @@ objfpy_dealloc (PyObject *o)
 
   Py_XDECREF (self->printers);
   Py_XDECREF (self->type_printers);
-  self->ob_type->tp_free ((PyObject *) self);
+  Py_TYPE (self)->tp_free (self);
 }
 
 static PyObject *
@@ -277,8 +277,7 @@ static PyGetSetDef objfile_getset[] =
 
 static PyTypeObject objfile_object_type =
 {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Objfile",		  /*tp_name*/
   sizeof (objfile_object),	  /*tp_basicsize*/
   0,				  /*tp_itemsize*/

@@ -97,7 +97,7 @@ static void
 evregpy_dealloc (PyObject *self)
 {
   Py_XDECREF (((eventregistry_object *) self)->callbacks);
-  self->ob_type->tp_free (self);
+  Py_TYPE (self)->tp_free (self);
 }
 
 /* Initialize the Python event registry code.  */
@@ -131,8 +131,7 @@ static PyMethodDef eventregistry_object_methods[] =
 
 static PyTypeObject eventregistry_object_type =
 {
-  PyObject_HEAD_INIT (NULL)
-  0,                                          /* ob_size */
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.EventRegistry",                        /* tp_name */
   sizeof (eventregistry_object),              /* tp_basicsize */
   0,                                          /* tp_itemsize */

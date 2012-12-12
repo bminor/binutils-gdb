@@ -106,7 +106,7 @@ valpy_dealloc (PyObject *obj)
 
   Py_XDECREF (self->dynamic_type);
 
-  self->ob_type->tp_free (self);
+  Py_TYPE (self)->tp_free (self);
 }
 
 /* Helper to push a Value object on the global list.  */
@@ -1140,6 +1140,7 @@ is_intlike (struct type *type, int ptr_ok)
 	  || (ptr_ok && TYPE_CODE (type) == TYPE_CODE_PTR));
 }
 
+#ifndef IS_PY3K
 /* Implements conversion to int.  */
 static PyObject *
 valpy_int (PyObject *self)
@@ -1161,6 +1162,7 @@ valpy_int (PyObject *self)
 
   return gdb_py_object_from_longest (l);
 }
+#endif
 
 /* Implements conversion to long.  */
 static PyObject *
@@ -1335,9 +1337,14 @@ convert_value_from_python (PyObject *obj)
 	  value = value_copy (((value_object *) result)->value);
 	}
       else
+#ifdef IS_PY3K
+	PyErr_Format (PyExc_TypeError,
+		      _("Could not convert Python object: %S."), obj);
+#else
 	PyErr_Format (PyExc_TypeError,
 		      _("Could not convert Python object: %s."),
 		      PyString_AsString (PyObject_Str (obj)));
+#endif
     }
   if (except.reason < 0)
     {
@@ -1439,7 +1446,9 @@ static PyNumberMethods value_object_as_number = {
   valpy_add,
   valpy_subtract,
   valpy_multiply,
+#ifndef IS_PY3K
   valpy_divide,
+#endif
   valpy_remainder,
   NULL,			      /* nb_divmod */
   valpy_power,		      /* nb_power */
@@ -1453,12 +1462,31 @@ static PyNumberMethods value_object_as_number = {
   valpy_and,		      /* nb_and */
   valpy_xor,		      /* nb_xor */
   valpy_or,		      /* nb_or */
+#ifdef IS_PY3K
+  valpy_long,		      /* nb_int */
+  NULL,			      /* reserved */
+#else
   NULL,			      /* nb_coerce */
   valpy_int,		      /* nb_int */
   valpy_long,		      /* nb_long */
+#endif
   valpy_float,		      /* nb_float */
+#ifndef IS_PY3K
   NULL,			      /* nb_oct */
-  NULL			      /* nb_hex */
+  NULL,                       /* nb_hex */
+#endif
+  NULL,                       /* nb_inplace_add */
+  NULL,                       /* nb_inplace_subtract */
+  NULL,                       /* nb_inplace_multiply */
+  NULL,                       /* nb_inplace_remainder */
+  NULL,                       /* nb_inplace_power */
+  NULL,                       /* nb_inplace_lshift */
+  NULL,                       /* nb_inplace_rshift */
+  NULL,                       /* nb_inplace_and */
+  NULL,                       /* nb_inplace_xor */
+  NULL,                       /* nb_inplace_or */
+  NULL,                       /* nb_floor_divide */
+  valpy_divide                /* nb_true_divide */
 };
 
 static PyMappingMethods value_object_as_mapping = {
@@ -1468,8 +1496,7 @@ static PyMappingMethods value_object_as_mapping = {
 };
 
 PyTypeObject value_object_type = {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Value",			  /*tp_name*/
   sizeof (value_object),	  /*tp_basicsize*/
   0,				  /*tp_itemsize*/

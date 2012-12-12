@@ -49,12 +49,43 @@
    from including our python/python.h header file.  */
 #include <Python.h>
 #include <frameobject.h>
+
+#if PY_MAJOR_VERSION >= 3
+#define IS_PY3K 1
+#endif
+
+#ifdef IS_PY3K
+#define Py_TPFLAGS_HAVE_ITER 0
+#define Py_TPFLAGS_CHECKTYPES 0
+
+#define PyInt_Check PyLong_Check
+#define PyInt_FromLong PyLong_FromLong
+#define PyInt_AsLong PyLong_AsLong
+
+#define PyString_FromString PyUnicode_FromString
+#define PyString_Decode PyUnicode_Decode
+#define PyString_FromFormat PyUnicode_FromFormat
+#define PyString_Check PyUnicode_Check
+#endif
+
 #if HAVE_LIBPYTHON2_4
 /* Py_ssize_t is not defined until 2.5.
    Logical type for Py_ssize_t is Py_intptr_t, but that fails in 64-bit
    compilation due to several apparent mistakes in python2.4 API, so we
    use 'int' instead.  */
 typedef int Py_ssize_t;
+#endif
+
+#ifndef PyVarObject_HEAD_INIT
+/* Python 2.4 does not define PyVarObject_HEAD_INIT.  */
+#define PyVarObject_HEAD_INIT(type, size)       \
+    PyObject_HEAD_INIT(type) size,
+
+#endif
+
+#ifndef Py_TYPE
+/* Python 2.4 does not define Py_TYPE.  */
+#define Py_TYPE(ob)             (((PyObject*)(ob))->ob_type)
 #endif
 
 /* If Python.h does not define WITH_THREAD, then the various

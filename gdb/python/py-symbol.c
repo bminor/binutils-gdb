@@ -561,8 +561,7 @@ Return the value of the symbol." },
 };
 
 PyTypeObject symbol_object_type = {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Symbol",			  /*tp_name*/
   sizeof (symbol_object),	  /*tp_basicsize*/
   0,				  /*tp_itemsize*/
