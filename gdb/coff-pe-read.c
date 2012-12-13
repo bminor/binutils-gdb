@@ -55,15 +55,9 @@ struct read_pe_section_data
   char *section_name;		/* Recorded section name.  */
 };
 
-#ifndef IMAGE_SCN_CNT_CODE
-# define IMAGE_SCN_CNT_CODE 0x20
-#endif
-#ifndef IMAGE_SCN_CNT_INITIALIZED_DATA
-# define IMAGE_SCN_CNT_INITIALIZED_DATA 0x40
-#endif
-#ifndef IMAGE_SCN_CNT_UNINITIALIZED_DATA
-# define IMAGE_SCN_CNT_UNINITIALIZED_DATA 0x80
-#endif
+#define IMAGE_SCN_CNT_CODE 0x20
+#define IMAGE_SCN_CNT_INITIALIZED_DATA 0x40
+#define IMAGE_SCN_CNT_UNINITIALIZED_DATA 0x80
 #define PE_SECTION_INDEX_TEXT     0
 #define PE_SECTION_INDEX_DATA     1
 #define PE_SECTION_INDEX_BSS      2
