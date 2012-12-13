@@ -34,6 +34,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "common/common-utils.h"
+#include "coff/internal.h"
 
 #include <ctype.h>
 
@@ -458,12 +459,12 @@ read_pe_exported_syms (struct objfile *objfile)
       unsigned long vsize = pe_get32 (dll, secptr1 + 8);
       unsigned long vaddr = pe_get32 (dll, secptr1 + 12);
       unsigned long characteristics = pe_get32 (dll, secptr1 + 36);
-      char sec_name[9];
+      char sec_name[SCNNMLEN + 1];
       int sectix;
 
-      memset (sec_name, 0, sizeof (sec_name));
       bfd_seek (dll, (file_ptr) secptr1 + 0, SEEK_SET);
-      bfd_bread (sec_name, (bfd_size_type) 8, dll);
+      bfd_bread (sec_name, (bfd_size_type) SCNNMLEN, dll);
+      sec_name[SCNNMLEN] = '\0';
 
       sectix = read_pe_section_index (sec_name);
 
