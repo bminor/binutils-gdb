@@ -1,5 +1,9 @@
 2012-12-13  Tom Tromey  <tromey@redhat.com>
 
+	* solib-svr4.c (enable_break): Use SECT_OFF_TEXT.
+
+2012-12-13  Tom Tromey  <tromey@redhat.com>
+
 	* acinclude.m4 (CY_AC_C_WORKS): Remove.
 
 2012-12-13  Pierre Muller  <muller@sourceware.org>

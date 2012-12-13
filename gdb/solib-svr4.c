@@ -1504,7 +1504,7 @@ enable_break (struct svr4_info *info, int from_tty)
 
 	  tmp_bfd = os->objfile->obfd;
 	  load_addr = ANOFFSET (os->objfile->section_offsets,
-				os->objfile->sect_index_text);
+				SECT_OFF_TEXT (os->objfile));
 
 	  interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
 	  if (interp_sect)
