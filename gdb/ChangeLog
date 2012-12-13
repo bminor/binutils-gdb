@@ -1,3 +1,30 @@
+2012-12-13  Pierre Muller  <muller@sourceware.org>
+
+	* coff-pe-read.h (pe_text_section_offset): Declare new function.
+	* coff-pe-read.c (debug_coff_pe_read): New static variable.
+	(struct read_pe_section_data): Add section_name field.
+	(IMAGE_SCN_CNT_CODE): New macro, if not already defined.
+	(IMAGE_SCN_CNT_INITIALIZED_DATA): Ditto.
+	(IMAGE_SCN_CNT_UNINITIALIZED_DATA): Ditto.
+	(get_pe_section_index): New function.
+	(struct pe_sections_info): New type.
+	(get_section_vmas): Use new struct pe_sections_info.
+	(add_pe_exported_sym): Handle unnamed exported function.
+	(add_pe_forwarded_sym): New function.
+	(read_pe_truncate_name): Truncate at last dot.
+	(pe_as16): New function.
+	(read_pe_exported_syms): Use ordinal of function to
+	retrieve correct RVA address of function and handle
+	forwarded symbol.
+	(pe_text_section_offset): New function.
+	(show_debug_coff_pe_read): New function.
+	(_initialize_coff_pe_read): New function adding
+	'set/show debug coff_pe_read' commands.
+
+	* windows-tdep.c (windows_xfer_shared_library): Use
+	pe_text_section_offset function instead of possibly wrong
+	0x1000 constant for .text sextion offset.
+
 2012-12-13  Pedro Alves  <palves@redhat.com>
 
 	* gdbarch.sh (do_read): Set IFS to blank.
