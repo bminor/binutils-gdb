@@ -1,3 +1,7 @@
+2012-12-13  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch.sh (do_read): Set IFS to blank.
+
 2012-12-12  Mircea Gherzan  <mircea.gherzan@intel.com>
 
 	* NEWS: Mention the -catch-load/-catch-unload MI commands.
