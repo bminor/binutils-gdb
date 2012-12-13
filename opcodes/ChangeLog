@@ -1,3 +1,9 @@
+2012-12-13  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/14950
+	* ppc-opc.c (insert_sci8, extract_sci8): Rewrite.
+	(insert_sci8n, extract_sci8n): Likewise.
+
 2012-11-30  Oleg Raikhman  <oleg@adapteva.com>
 	    Joern Rennecke  <joern.rennecke@embecosm.com>
 

@@ -1634,62 +1634,50 @@ insert_sci8 (unsigned long insn,
 	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     const char **errmsg)
 {
-  int fill = 0;
-  int scale_factor = 0;
-  long ui8 = value;
+  unsigned int fill_scale = 0;
+  unsigned long ui8 = value;
 
-  if ((value & 0xff000000) == (unsigned int) value)
+  if ((ui8 & 0xffffff00) == 0)
+    ;
+  else if ((ui8 & 0xffffff00) == 0xffffff00)
+    fill_scale = 0x400;
+  else if ((ui8 & 0xffff00ff) == 0)
     {
-      scale_factor = 3;
-      ui8 = value >> 24;
-      fill = 0;
+      fill_scale = 1 << 8;
+      ui8 >>= 8;
     }
-  else if ((value & 0xff0000) == (unsigned int) value)
+  else if ((ui8 & 0xffff00ff) == 0xffff00ff)
     {
-      scale_factor = 2;
-      ui8 = value >> 16;
-      fill = 0;
+      fill_scale = 0x400 | (1 << 8);
+      ui8 >>= 8;
     }
-  else if ((value & 0xff00) == (unsigned int) value)
+  else if ((ui8 & 0xff00ffff) == 0)
     {
-      scale_factor = 1;
-      ui8 = value >> 8;
-      fill = 0;
+      fill_scale = 2 << 8;
+      ui8 >>= 16;
     }
-  else if ((value & 0xff) == value)
+  else if ((ui8 & 0xff00ffff) == 0xff00ffff)
     {
-      scale_factor = 0;
-      ui8 = value;
-      fill = 0;
+      fill_scale = 0x400 | (2 << 8);
+      ui8 >>= 16;
     }
-  else if ((value & 0xffffff00) == 0xffffff00)
+  else if ((ui8 & 0x00ffffff) == 0)
     {
-      scale_factor = 0;
-      ui8 = (value & 0xff);
-      fill = 1;
+      fill_scale = 3 << 8;
+      ui8 >>= 24;
     }
-  else if ((value & 0xffff00ff) == 0xffff00ff)
+  else if ((ui8 & 0x00ffffff) == 0x00ffffff)
     {
-      scale_factor = 1;
-      ui8 = (value & 0xff00) >> 8;
-      fill = 1;
-    }
-  else if ((value & 0xff00ffff) == 0xff00ffff)
-    {
-      scale_factor = 2;
-      ui8 = (value & 0xff0000) >> 16;
-      fill = 1;
-    }
-  else if ((value & 0x00ffffff) == 0x00ffffff)
-    {
-      scale_factor = 3;
-      ui8 = (value & 0xff000000) >> 24;
-      fill = 1;
+      fill_scale = 0x400 | (3 << 8);
+      ui8 >>= 24;
     }
   else
-    *errmsg = _("illegal immediate value");
+    {
+      *errmsg = _("illegal immediate value");
+      ui8 = 0;
+    }
 
-  return insn | (fill << 10) | (scale_factor << 8) | (ui8 & 0xff);
+  return insn | fill_scale | (ui8 & 0xff);
 }
 
 static long
@@ -1697,43 +1685,30 @@ extract_sci8 (unsigned long insn,
 	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	      int *invalid ATTRIBUTE_UNUSED)
 {
-  int scale_factor, fill;
-  scale_factor = (insn & 0x300) >> 8;
-  fill = (insn & 0x00000400) >> 10;
+  int fill = insn & 0x400;
+  int scale_factor = (insn & 0x300) >> 5;
+  long value = (insn & 0xff) << scale_factor;
 
-  if (fill == 0)
-    return (insn & 0xff) << (scale_factor << 3);
-
-  /* Fill is one.  */
-  if (scale_factor == 0)
-    return (insn & 0xff) | 0xffffff00;
-  else if (scale_factor == 1)
-    return 0xffff00ff | ((insn & 0xff) << (scale_factor << 3));
-  else if (scale_factor == 2)
-    return 0xff00ffff | (insn & 0xff << (scale_factor << 3));
-  else /* scale_factor 3 */
-    return 0x00ffffff | (insn & 0xff << (scale_factor << 3));
+  if (fill != 0)
+    value |= ~((long) 0xff << scale_factor);
+  return value;
 }
 
 static unsigned long
 insert_sci8n (unsigned long insn,
 	      long value,
-	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      ppc_cpu_t dialect,
 	      const char **errmsg)
 {
-  insn = insert_sci8 (insn, -(value & 0xff) & 0xff, 0, errmsg);
-  /* Set the F bit.  */
-  return insn | 0x400;
+  return insert_sci8 (insn, -value, dialect, errmsg);
 }
 
 static long
 extract_sci8n (unsigned long insn,
-	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
-	       int *invalid ATTRIBUTE_UNUSED)
+	       ppc_cpu_t dialect,
+	       int *invalid)
 {
-  int scale_factor;
-  scale_factor = (insn & 0x300) >> 8;
-  return -(((insn & 0xff) ^ 0x80) - 0x80) << (scale_factor << 3);
+  return -extract_sci8 (insn, dialect, invalid);
 }
 
 static unsigned long
