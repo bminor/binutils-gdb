@@ -36,37 +36,13 @@ sinclude([../config/codeset.m4])
 
 sinclude([../config/zlib.m4])
 
-#
-# Sometimes the native compiler is a bogus stub for gcc or /usr/ucb/cc. This
-# makes configure think it's cross compiling. If --target wasn't used, then
-# we can't configure, so something is wrong. We don't use the cache
-# here cause if somebody fixes their compiler install, we want this to work.
-AC_DEFUN([CY_AC_C_WORKS],
-[# If we cannot compile and link a trivial program, we can't expect anything to work
-AC_MSG_CHECKING(whether the compiler ($CC) actually works)
-AC_TRY_COMPILE(, [/* don't need anything here */],
-        c_compiles=yes, c_compiles=no)
-
-AC_TRY_LINK(, [/* don't need anything here */],
-        c_links=yes, c_links=no)
-
-if test x"${c_compiles}" = x"no" ; then
-  AC_MSG_ERROR(the native compiler is broken and won't compile.)
-fi
-
-if test x"${c_links}" = x"no" ; then
-  AC_MSG_ERROR(the native compiler is broken and won't link.)
-fi
-AC_MSG_RESULT(yes)
-])
-
 ## ----------------------------------------- ##
 ## ANSIfy the C compiler whenever possible.  ##
 ## From Franc,ois Pinard                     ##
 ## ----------------------------------------- ##
 
 # Copyright (C) 1996, 1997, 1999, 2000, 2001, 2008, 2009
-  Free Software Foundation, Inc.
+#  Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
