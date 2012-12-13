@@ -1,3 +1,10 @@
+2012-12-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14956
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Check local
+	IFUNC calls.
+	* elf64-x86-64.c (elf_x86_64_adjust_dynamic_symbol): Likewise.
+
 2012-12-10  Edgar E. Iglesias <edgar.iglesias@gmail.com>
 
 	* reloc.c (MICROBLAZE): Document new relocations

@@ -2066,10 +2066,39 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
 {
   struct elf_i386_link_hash_table *htab;
   asection *s;
+  struct elf_i386_link_hash_entry *eh;
+  struct elf_dyn_relocs *p;
 
   /* STT_GNU_IFUNC symbol must go through PLT. */
   if (h->type == STT_GNU_IFUNC)
     {
+      /* Check local STT_GNU_IFUNC calls.  */
+      if (h->ref_regular
+	  && SYMBOL_CALLS_LOCAL (info, h))
+	{
+	  bfd_size_type pc_count = 0;
+	  struct elf_dyn_relocs **pp;
+
+	  eh = (struct elf_i386_link_hash_entry *) h;
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      pc_count += p->pc_count;
+	      p->count -= p->pc_count;
+	      p->pc_count = 0;
+	      if (p->count == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+
+	  if (pc_count)
+	    {
+	      h->needs_plt = 1;
+	      h->plt.refcount += 1;
+	      h->non_got_ref = 1;
+	    }
+	}
+
       if (h->plt.refcount <= 0)
 	{
 	  h->plt.offset = (bfd_vma) -1;
@@ -2155,9 +2184,6 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (ELIMINATE_COPY_RELOCS
       && !get_elf_i386_backend_data (info->output_bfd)->is_vxworks)
     {
-      struct elf_i386_link_hash_entry * eh;
-      struct elf_dyn_relocs *p;
-
       eh = (struct elf_i386_link_hash_entry *) h;
       for (p = eh->dyn_relocs; p != NULL; p = p->next)
 	{
