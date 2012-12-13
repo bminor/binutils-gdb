@@ -7,7 +7,7 @@
 	* NEWS: Mention the -catch-load/-catch-unload MI commands.
 
 2012-12-12  Mircea Gherzan  <mircea.gherzan@intel.com>
-    
+
 	* Makefile.in (SUBDIR_MI_OBS): Add mi-cmd-catch.o.
 	(SUBDIR_MI_SRCS): Add mi/mi-cmd-catch.c.
 	* breakpoint.c (add_solib_catchpoint): New function that
@@ -118,7 +118,7 @@
 	* python/py-utils.c (python_string_to_unicode): Omit non-Unicode
 	string case for Python 3.
 	(unicode_to_encoded_python_string): Shorten code (no functional
-	change). 
+	change).
 	(python_string_to_target_python_string): Comment that in Python 3
 	returned value is a Python "bytes" type.
 	(gdbpy_is_string): Omit non-Unicode string check in Python 3.
@@ -134,7 +134,7 @@
 	(value_object_as_number): Adjust struct initializations for
 	differences in layout for Python 2 vs. Python 3.
 	* python/python-config.py: Adjust syntax for Python 3
-	compatibility. 
+	compatibility.
 	Include "sys.abiflags" string as part of python library name, if
 	that attribute exists (Python 3).
 	* python/python-internal.h (IS_PY3): Define if Python 3.
@@ -558,7 +558,7 @@
 
 2012-11-29  Jerome Guitton  <guitton@adacore.com>
 
-        * ada-lang.h (ada_tag_value_at_base_address): New function
+	* ada-lang.h (ada_tag_value_at_base_address): New function
 	declaration.
 	* ada-lang.c (is_ada95_tag, ada_tag_value_at_base_address):
 	New functions.
@@ -1699,7 +1699,7 @@
 	* gdbarch.c: Regenerate.
 
 2012-10-10  Joel Brobecker  <brobecker@adacore.com>
-            Tom Tromey  <tromey@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
 
 	* rs6000-aix-tdep.c (rs6000_aix_osabi_sniffer): Replace
 	inneffective if condition by gdb assertion.  Add function
@@ -2272,8 +2272,8 @@
 	for command 'remotetimeout'.
 	* command.h (enum var_types): New zuinteger_unlimited.  Update comment
 	to var_integer.
-	* source.c (_initialize_source): Call add_setshow_zuinteger_unlimited_cmd
-	for command 'set listsize'.
+	* source.c (_initialize_source): Call
+	add_setshow_zuinteger_unlimited_cmd for command 'set listsize'.
 
 2012-09-17  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
@@ -2400,8 +2400,9 @@
 	error message from the target.
 
 	* breakpoint.c (insert_bp_location, insert_breakpoint_locations):
-	Catch this exception and print the error message contained within. Do not
-	print the default hardware error breakpoint message in this case.
+	Catch this exception and print the error message contained within.
+	Do not print the default hardware error breakpoint message in this
+	case.
 
 2012-09-12  Doug Evans  <dje@google.com>
 
@@ -2477,8 +2478,8 @@
 	DEF_MI_CMD_MI DEF_MI_CMD_CLI_1 and DEF_MI_CMD_CLI_1.
 	Update some commands.
 	* mi/mi-cmds.h (struct mi_cmd) <suppress_notification>: New field.
-	* mi/mi-main.c (mi_cmd_execute): Set '*parse->cmd->suppress_notification'
-	to 1.
+	* mi/mi-main.c (mi_cmd_execute): Set
+	'*parse->cmd->suppress_notification' to 1.
 
 2012-08-31  Yao Qi  <yao@codesourcery.com>
 
@@ -4930,7 +4931,8 @@
 	can_use_displaced_stepping_on, can_use_displaced_stepping_off, and
 	can_use_displaced_stepping_enum.
 	Change can_use_displaced_stepping's type to 'enum auto_boolean'.
-	(show_can_use_displaced_stepping, use_displaced_stepping): Update callers.
+	(show_can_use_displaced_stepping, use_displaced_stepping): Update
+	callers.
 	(_initialize_infrun): Call add_setshow_auto_boolean_cmd instead of
 	add_setshow_enum_cmd.
 
