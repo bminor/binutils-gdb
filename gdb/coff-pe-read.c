@@ -672,12 +672,13 @@ pe_text_section_offset (struct bfd *abfd)
   /* Get the rva and size of the export section.  */
   for (i = 0; i < nsections; i++)
     {
-      char sname[8];
+      char sname[SCNNMLEN + 1];
       unsigned long secptr1 = secptr + 40 * i;
       unsigned long vaddr = pe_get32 (abfd, secptr1 + 12);
 
       bfd_seek (abfd, (file_ptr) secptr1, SEEK_SET);
-      bfd_bread (sname, (bfd_size_type) 8, abfd);
+      bfd_bread (sname, (bfd_size_type) SCNNMLEN, abfd);
+      sname[SCNNMLEN] = '\0';
       if (strcmp (sname, ".text") == 0)
 	return vaddr;
     }
