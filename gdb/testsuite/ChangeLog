@@ -1,3 +1,8 @@
+2012-12-13  Doug Evans  <dje@google.com>
+
+	* gdb.multi/multi-arch-exec.exp: Skip for i*86-linux.
+	* gdb.multi/multi-arch.exp: Ditto.
+
 2012-12-12  Keven Boell  <keven.boell@intel.com>
     
 	* gdb.mi/mi-catch-load-so.c: New. Clone of the

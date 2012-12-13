@@ -23,6 +23,12 @@ if [target_info exists use_gdb_stub] {
     return
 }
 
+# The 64-bit compile may succeed for i386-linux, but gdb won't be able
+# to load the file.
+if [istarget "i?86-*linux*"] {
+    return
+}
+
 # Can't use standard_testfile, we want executables with specialized
 # names.
 set exec1 "multi-arch-exec"
