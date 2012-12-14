@@ -2411,11 +2411,13 @@ windows_xfer_shared_libraries (struct target_ops *ops,
   buf = obstack_finish (&obstack);
   len_avail = strlen (buf);
   if (offset >= len_avail)
-    return 0;
-
-  if (len > len_avail - offset)
-    len = len_avail - offset;
-  memcpy (readbuf, buf + offset, len);
+    len= 0;
+  else
+    {
+      if (len > len_avail - offset)
+	len = len_avail - offset;
+      memcpy (readbuf, buf + offset, len);
+    }
 
   obstack_free (&obstack, NULL);
   return len;
