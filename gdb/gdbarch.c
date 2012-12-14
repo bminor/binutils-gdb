@@ -283,6 +283,7 @@ struct gdbarch
   int has_dos_based_file_system;
   gdbarch_gen_return_address_ftype *gen_return_address;
   gdbarch_info_proc_ftype *info_proc;
+  gdbarch_core_info_proc_ftype *core_info_proc;
   gdbarch_iterate_over_objfiles_in_search_order_ftype *iterate_over_objfiles_in_search_order;
 };
 
@@ -451,6 +452,7 @@ struct gdbarch startup_gdbarch =
   0,  /* has_dos_based_file_system */
   default_gen_return_address,  /* gen_return_address */
   0,  /* info_proc */
+  0,  /* core_info_proc */
   default_iterate_over_objfiles_in_search_order,  /* iterate_over_objfiles_in_search_order */
   /* startup_gdbarch() */
 };
@@ -750,6 +752,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of has_dos_based_file_system, invalid_p == 0 */
   /* Skip verify of gen_return_address, invalid_p == 0 */
   /* Skip verify of info_proc, has predicate.  */
+  /* Skip verify of core_info_proc, has predicate.  */
   /* Skip verify of iterate_over_objfiles_in_search_order, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
@@ -867,6 +870,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: convert_register_p = <%s>\n",
                       host_address_to_string (gdbarch->convert_register_p));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_core_info_proc_p() = %d\n",
+                      gdbarch_core_info_proc_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: core_info_proc = <%s>\n",
+                      host_address_to_string (gdbarch->core_info_proc));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_core_pid_to_str_p() = %d\n",
                       gdbarch_core_pid_to_str_p (gdbarch));
@@ -4248,6 +4257,30 @@ set_gdbarch_info_proc (struct gdbarch *gdbarch,
                        gdbarch_info_proc_ftype info_proc)
 {
   gdbarch->info_proc = info_proc;
+}
+
+int
+gdbarch_core_info_proc_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->core_info_proc != NULL;
+}
+
+void
+gdbarch_core_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->core_info_proc != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_core_info_proc called\n");
+  gdbarch->core_info_proc (gdbarch, args, what);
+}
+
+void
+set_gdbarch_core_info_proc (struct gdbarch *gdbarch,
+                            gdbarch_core_info_proc_ftype core_info_proc)
+{
+  gdbarch->core_info_proc = core_info_proc;
 }
 
 void

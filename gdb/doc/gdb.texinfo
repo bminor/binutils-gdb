@@ -18649,13 +18649,17 @@ modern FreeBSD systems.
 
 Many versions of SVR4 and compatible systems provide a facility called
 @samp{/proc} that can be used to examine the image of a running
-process using file-system subroutines.  If @value{GDBN} is configured
-for an operating system with this facility, the command @code{info
-proc} is available to report information about the process running
-your program, or about any process running on your system.  @code{info
-proc} works only on SVR4 systems that include the @code{procfs} code.
-This includes, as of this writing, @sc{gnu}/Linux, OSF/1 (Digital
-Unix), Solaris, Irix, but not HP-UX, for example.
+process using file-system subroutines.
+
+If @value{GDBN} is configured for an operating system with this
+facility, the command @code{info proc} is available to report
+information about the process running your program, or about any
+process running on your system.  This includes, as of this writing,
+@sc{gnu}/Linux, OSF/1 (Digital Unix), Solaris, and Irix, but
+not HP-UX, for example.
+
+This command may also work on core files that were created on a system
+that has the @samp{/proc} facility.
 
 @table @code
 @kindex info proc

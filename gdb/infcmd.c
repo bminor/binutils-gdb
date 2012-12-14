@@ -2883,10 +2883,13 @@ info_proc_cmd_1 (char *args, enum info_proc_what what, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
-  if (gdbarch_info_proc_p (gdbarch))
-    gdbarch_info_proc (gdbarch, args, what);
-  else
-    target_info_proc (args, what);
+  if (!target_info_proc (args, what))
+    {
+      if (gdbarch_info_proc_p (gdbarch))
+	gdbarch_info_proc (gdbarch, args, what);
+      else
+	error (_("Not supported on this target."));
+    }
 }
 
 /* Implement `info proc' when given without any futher parameters.  */

@@ -1193,6 +1193,16 @@ typedef void (gdbarch_info_proc_ftype) (struct gdbarch *gdbarch, char *args, enu
 extern void gdbarch_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
 extern void set_gdbarch_info_proc (struct gdbarch *gdbarch, gdbarch_info_proc_ftype *info_proc);
 
+/* Implement the "info proc" command for core files.  Noe that there
+   are two "info_proc"-like methods on gdbarch -- one for core files,
+   one for live targets. */
+
+extern int gdbarch_core_info_proc_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_core_info_proc_ftype) (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
+extern void gdbarch_core_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
+extern void set_gdbarch_core_info_proc (struct gdbarch *gdbarch, gdbarch_core_info_proc_ftype *core_info_proc);
+
 /* Iterate over all objfiles in the order that makes the most sense
    for the architecture to make global symbol searches.
   

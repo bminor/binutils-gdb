@@ -943,6 +943,11 @@ m:void:gen_return_address:struct agent_expr *ax, struct axs_value *value, CORE_A
 # Implement the "info proc" command.
 M:void:info_proc:char *args, enum info_proc_what what:args, what
 
+# Implement the "info proc" command for core files.  Noe that there
+# are two "info_proc"-like methods on gdbarch -- one for core files,
+# one for live targets.
+M:void:core_info_proc:char *args, enum info_proc_what what:args, what
+
 # Iterate over all objfiles in the order that makes the most sense
 # for the architecture to make global symbol searches.
 #

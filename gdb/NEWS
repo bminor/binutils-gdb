@@ -18,6 +18,8 @@
 * The 'ptype' and 'whatis' commands now accept an argument to control
   type formatting.
 
+* 'info proc' now works on some core files.
+
 * Python scripting
 
   ** Vectors can be created with gdb.Type.vector.

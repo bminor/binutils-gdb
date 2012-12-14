@@ -976,9 +976,12 @@ extern void target_store_registers (struct regcache *regcache, int regs);
 
 struct address_space *target_thread_address_space (ptid_t);
 
-/* Implement the "info proc" command.  */
+/* Implement the "info proc" command.  This returns one if the request
+   was handled, and zero otherwise.  It can also throw an exception if
+   an error was encountered while attempting to handle the
+   request.  */
 
-void target_info_proc (char *, enum info_proc_what);
+int target_info_proc (char *, enum info_proc_what);
 
 /* Returns true if this target can debug multiple processes
    simultaneously.  */
