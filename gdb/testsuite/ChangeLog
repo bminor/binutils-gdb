@@ -1,6 +1,6 @@
 2012-12-14  Yufeng Zhang  <yufeng.zhang@arm.com>
 
-        * gdb.base/kill-after-signal.exp: Disable if gdb,nosignals.
+	* gdb.base/kill-after-signal.exp: Disable if gdb,nosignals.
 
 2012-12-13  Doug Evans  <dje@google.com>
 
@@ -8,7 +8,7 @@
 	* gdb.multi/multi-arch.exp: Ditto.
 
 2012-12-12  Keven Boell  <keven.boell@intel.com>
-    
+
 	* gdb.mi/mi-catch-load-so.c: New. Clone of the
 	catch load test library source file.
 	* gdb.mi/mi-catch-load.c: New. Clone of the catch
@@ -24,16 +24,16 @@
 	(ArrayPrinter): Use _iterator function instead of local _iterator
 	class for Python 3 compatibility.
 	(NoStringContainerPrinter): Use _iterator_except instead of
-	_iterator. 
+	_iterator.
 	* gdb.python/py-typeprint.exp: Use exec(open(...).read()) instead of
 	execfile for Python 3 compatibility.
 	* gdb.python/python.exp: Handle Python 2.4 exception traceback
 	format in error_prompt test.
-	
+
 2012-12-10  Paul Koning  <paul_koning@dell.com>
 
 	* gdb.base/charset.exp: Change print syntax for Python 3
-	compatibility. 
+	compatibility.
 	* gdb.python/py-block.exp: Ditto.
 	* gdb.python/py-breakpoint.exp: Ditto.
 	* gdb.python/py-cmd.exp: Ditto.
@@ -55,7 +55,7 @@
 	* gdb.python/python.exp: Ditto.
 	* gdb.python/source2.py: Ditto.
 	* gdb.python/lib-types.exp: Change print syntax for Python 3
-	compatibility. 
+	compatibility.
 	Use sorted() function rather than sort() method.
 	Accept either int or long values for enum values.
 	* gdb.python/py-events.exp: Use exec(open(...).read()) instead of
@@ -66,10 +66,10 @@
 	* gdb.python/py-pp-maint.exp: Ditto.
 	* gdb.python/py-prettyprint.exp: Ditto.
 	* gdb.python/py-finish-breakpoint.exp: Change print syntax for
-	Python 3 compatibility. 
+	Python 3 compatibility.
 	Skip tests for Python 2.4.
 	* gdb.python/py-inferior.exp: Change print syntax for
-	Python 3 compatibility. 
+	Python 3 compatibility.
 	Use byte string rather than character string in memory write test
 	if Python 3.
 	* gdb.python/py-pp-maint.py: Change class declarations to "new
@@ -82,10 +82,10 @@
 	compatibility.
 	Define "long" if Python 3.
 	* gdb.python/py-type.exp: Change print syntax for Python 3
-	compatibility. 
+	compatibility.
 	Accept either int or long values for enum values.
 	* gdb.python/py-value.exp: Change print syntax for Python 3
-	compatibility. 
+	compatibility.
 	Skip "long" and "unicode" tests if Python 3.
 	Accept either "type" or "class" in type checks.
 	* lib/gdb.exp (gdb_py_is_py3k): New flag set if Python 3.
@@ -228,7 +228,7 @@
 	(F); Likewise.
 	(Z): New class.
 	(ZZ): New class.
- 	(N, Base, Derived): New namespace and classes.
+	(N, Base, Derived): New namespace and classes.
 	(main): Add instances of Z and ZZ.
 	Make sure all symbols from N are kept.
 	* gdb.cp/derivation.exp: Update typedef changes in tests.
@@ -1219,7 +1219,7 @@
 
 2012-07-26  Tom Tromey  <tromey@redhat.com>
 
-    	* gdb.objc/print.exp (test_float_accepted): Remove kfails.
+	* gdb.objc/print.exp (test_float_accepted): Remove kfails.
 
 2012-07-26  Markus Metzger  <markus.t.metzger@intel.com>
 
@@ -3254,8 +3254,8 @@
 	core registers.
 
 2012-03-01  Maciej W. Rozycki  <macro@mips.com>
-            Maciej W. Rozycki  <macro@codesourcery.com>
-            Daniel Jacobowitz  <dan@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/hbreak2.exp: New test for "hbreak" and "thbreak".
 
@@ -3945,7 +3945,7 @@
 	equivalent to 'local_x'.
 
 2012-01-11  Paul Hilfinger  <hilfingr@adacore.com>
-    	    Joel Brobecker <brobecker@adacore.com>
+	    Joel Brobecker <brobecker@adacore.com>
 
 	* gdb.base/recpar.c, gdb.base/recpar.exp: New files.
 
@@ -4146,7 +4146,7 @@
 	PR threads/10729
 
 	* gdb.mi/watch-nonstop.c: New file.
- 	* gdb.mi/mi-watch-nonstop.exp: New file.
+	* gdb.mi/mi-watch-nonstop.exp: New file.
 
 2011-12-13  Pedro Alves  <pedro@codesourcery.com>
 	    Doug Evans  <dje@google.com>
@@ -4321,8 +4321,8 @@
 
 2011-12-06  Joel Brobecker  <brobecker@acacore.com>
 
-        * gdb.ada/fullname_bp.exp: Add tests for other valid linespecs
-        involving a fully qualified function name.
+	* gdb.ada/fullname_bp.exp: Add tests for other valid linespecs
+	involving a fully qualified function name.
 
 2011-12-06  Tom Tromey  <tromey@redhat.com>
 
@@ -4565,7 +4565,7 @@
 	* gdb.trace/change-loc.h:  New.
 	* gdb.trace/trace-break.c (marker): Define new symbol.
 	* gdb.trace/trace-break.exp (break_trace_same_addr_5):
-        New.
+	New.
 	(break_trace_same_addr_6): New.
 
 2011-11-12  Matt Rice  <ratmice@gmail.com>
@@ -4690,8 +4690,8 @@
 2011-10-31  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
-        * gdb.trace/trace-break.c: New.
-        * gdb.trace/trace-break.exp: New.
+	* gdb.trace/trace-break.c: New.
+	* gdb.trace/trace-break.exp: New.
 
 2011-10-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
@@ -5247,7 +5247,7 @@
 
 2011-08-17  Phil Muldoon  <pmuldoon@redhat.com>
 
-        * gdb.python/python.exp: Add extended-prompt tests.
+	* gdb.python/python.exp: Add extended-prompt tests.
 
 2011-08-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
@@ -5539,9 +5539,9 @@
 
 2011-07-11  Phil Muldoon  <pmuldoon@redhat.com>
 
-        PR python/12438
+	PR python/12438
 	* gdb.python/python.exp: Add maint set/show python print-stack
-          deprecated tests.  Add set/show python print-backtrace tests.
+	deprecated tests.  Add set/show python print-backtrace tests.
 
 2011-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
@@ -5749,8 +5749,8 @@
 
 2011-06-23  Yao Qi  <yao@codesourcery.com>
 
-	* gdb.cp/mb-inline.exp: Parse the output of `info break' to check breakpoint
-	1.2 is disabled.  KFAIL for uclinux.
+	* gdb.cp/mb-inline.exp: Parse the output of `info break' to check
+	breakpoint 1.2 is disabled.  KFAIL for uclinux.
 
 2011-06-23  Marek Polacek  <mpolacek@redhat.com>
 
@@ -6231,11 +6231,11 @@
 	MI breakpoint notifications.
 
 	* testsuite/gdb.mi/mi-cli.exp: Adust.
-        * testsuite/gdb.mi/mi2-cli.exp: Adust.
-        * testsuite/gdb.mi/mi-watch.exp: Adust.
-        * testsuite/gdb.mi/mi2-watch.exp: Adust.
-        * testsuite/lib/mi-support.exp (mi_expect_stop): Accept breakpoint
-        notifications.
+	* testsuite/gdb.mi/mi2-cli.exp: Adust.
+	* testsuite/gdb.mi/mi-watch.exp: Adust.
+	* testsuite/gdb.mi/mi2-watch.exp: Adust.
+	* testsuite/lib/mi-support.exp (mi_expect_stop): Accept breakpoint
+	notifications.
 
 2011-04-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
@@ -6441,7 +6441,7 @@
 
 2011-03-22  Phil Muldoon  <pmuldoon@redhat.com>
 
-        PR python/12183
+	PR python/12183
 
 	* gdb.python/py-function.exp: Add GdbError tests.
 
@@ -6463,7 +6463,7 @@
 
 2011-03-18  Phil Muldoon  <pmuldoon@redhat.com>
 
-        PR python/12149
+	PR python/12149
 
 	* gdb.python/python.exp: Add gdb.write tests.
 
@@ -24084,23 +24084,28 @@ Wed Jun  2 17:37:05 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/annota1.exp: Allow any number of "frames-invalid" and
 	"breakpoint-invalid" to be printed.
-	* gdb.base/annota2.exp: Revise line number for main breakpoint. Allow any
-	number of "frames-invalid" and "breakpoint-invalid" to be printed.
+	* gdb.base/annota2.exp: Revise line number for main
+	breakpoint. Allow any number of "frames-invalid" and
+	"breakpoint-invalid" to be printed.
 	* gdb.base/annota2.cc: Initialize a.x to 0.
 
 1999-05-17  Keith Seitz  <keiths@cygnus.com>
 
-	* gdb.base/call-ar-st.exp: Skip "print print_double_array (double_array)"
-	when "skip_float_tests" set.
-	Ditto for "print print_double_array(array_d)", "print print_small_structs",
-	"print print_ten_doubles", and "step into print_long_arg_list".
-	Don't assume we can step into "print_long_arg_list": we could step into memcpy.
-	* gdb.base/call-rt-st.exp: Don't run float-related tests when "skip_float_tests"
-	is set: "print print_one_double(*d1)" and "print print_two_floats(*f3)".
+	* gdb.base/call-ar-st.exp: Skip
+	"print print_double_array (double_array)" when "skip_float_tests" set.
+	Ditto for "print print_double_array(array_d)",
+	"print print_small_structs", "print print_ten_doubles", and
+	"step into print_long_arg_list".
+	Don't assume we can step into "print_long_arg_list": we could step
+	into memcpy.
+	* gdb.base/call-rt-st.exp: Don't run float-related tests when
+	"skip_float_tests" is set: "print print_one_double(*d1)"
+	and "print print_two_floats(*f3)".
 	* gdb.base/funcargs.exp: Don't run "float_and_integral_args" when
 	"skip_float_tests" is set.
-	* gdb.base/varargs.exp: Skip "print find_max_double(5,1.0,17.0,2.0,3.0,4.0)"
-	when "skip_float_tests" set.
+	* gdb.base/varargs.exp: Skip
+	"print find_max_double(5,1.0,17.0,2.0,3.0,4.0)" when
+	"skip_float_tests" set.
 
 1999-05-06  Keith Seitz  <keiths@cygnus.com>
 
@@ -24231,14 +24236,15 @@ Tue Mar 23 14:56:36 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 	* gdb.base/condbreak.exp: Use the gdb_run command rather than just
 	run which doesn't work with monitors.
 
-	* gdb.base/call-ar-st.exp: fixed bogus regexp in continuing to 1034 test.
+	* gdb.base/call-ar-st.exp: fixed bogus regexp in continuing to
+	1034 test.
 
 	* gdb.base/break.exp: use the gdb_continue_to_end proc.
 
-	* lib/gdb.exp: I had added gdb_continue_to_end used to run to the end of a
-	program.  Traps the case (in Cygmon) when the program never really
-	exits.  Same as Mark's continue_to_exit, but I had put it in a lot
-	more places, so I used my name.  Sorry Mark...
+	* lib/gdb.exp: I had added gdb_continue_to_end used to run to the
+	end of a program.  Traps the case (in Cygmon) when the program
+	never really exits.  Same as Mark's continue_to_exit, but I had
+	put it in a lot more places, so I used my name.  Sorry Mark...
 
 	* config/monitor.exp (gdb_target_monitor): added another
 	target_info parameter: remotebinarydownload.  This will set the
@@ -26805,8 +26811,9 @@ Sun Aug 27 23:35:35 1995  Fred Fish  <fnf@cygnus.com>
 	* gdb.base/opaque.exp (setup_xfail_on_opaque_pointer):
 	Add mips-sgi-irix5* xfail for not gcc compiled.
 	* gdb.base/Makefile.in (nodebug.o):  Also create nodebug.ci.
-	* gdb.base/nodebug.exp: Add mips-sgi-irix5 xfail when not gcc compiled for
-	"p top", "whatis top", "p middle", and "whatis middle".
+	* gdb.base/nodebug.exp: Add mips-sgi-irix5 xfail when not gcc
+	compiled for "p top", "whatis top", "p middle", and "whatis
+	middle".
 	* gdb.base/whatis.exp: Add mips-sgi-irix* xfail for
 	"whatis signed char" for not gcc compiled.
 	* gdb.base/setvar.exp: Add mips-sgi-irix4* xfail (works on irix5) for
@@ -26818,12 +26825,11 @@ Sun Aug 27 23:35:35 1995  Fred Fish  <fnf@cygnus.com>
 	"continue to call2b".
 	Add mips-sgi-irix4* xfail (works with irix5) when gcc compiled for
 	"continue to call2g".
-	(discard_and_shuffle): Add mips-sgi-irix5* xfail whn not gcc compiled for
-	"backtrace from call6a"
-	(shuffle_round_robin): Add mips-sgi-irix* xfail when not gcc compiled for
-	"backtrace from call7k".
-	Add mips-sgi-irix5* xfail when not gcc compiled for
-	"backtrace from call7a".
+	(discard_and_shuffle): Add mips-sgi-irix5* xfail whn not gcc
+	compiled for "backtrace from call6a"
+	(shuffle_round_robin): Add mips-sgi-irix* xfail when not gcc
+	compiled for "backtrace from call7k".  Add mips-sgi-irix5* xfail
+	when not gcc compiled for "backtrace from call7a".
 	(localvars_after_alloca):  Fix gdb_test cmds for
 	"print * after runto ...".
 	Remove rs6000-*-* xfails for
