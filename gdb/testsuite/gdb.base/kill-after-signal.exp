@@ -20,6 +20,11 @@ if { ![can_single_step_to_signal_handler] } {
     return
 }
 
+if [target_info exists gdb,nosignals] {
+    verbose "Skipping kill-after-signal.exp because of nosignals."
+    continue
+}
+
 if [prepare_for_testing ${testfile}.exp ${testfile}] {
     return -1
 }

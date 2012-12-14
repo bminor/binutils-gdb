@@ -1,3 +1,7 @@
+2012-12-14  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+        * gdb.base/kill-after-signal.exp: Disable if gdb,nosignals.
+
 2012-12-13  Doug Evans  <dje@google.com>
 
 	* gdb.multi/multi-arch-exec.exp: Skip for i*86-linux.
