@@ -1,3 +1,9 @@
+2012-12-14  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* ld-elf/indirect.exp: Disable if -shared is not supported.
+	* lib/ld-lib.exp (check_shared_lib_support): Add aarch64*-*-elf and
+	arm*-*-elf to the exclude list.
+
 2012-12-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14956

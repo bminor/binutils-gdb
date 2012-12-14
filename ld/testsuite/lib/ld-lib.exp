@@ -1555,7 +1555,9 @@ proc check_gc_sections_available { } {
 # Only used and accurate for ELF targets at the moment
 
 proc check_shared_lib_support { } {
-    if {![istarget arc-*-*]
+    if {![istarget aarch64*-*-elf]
+	 && ![istarget arc-*-*]
+	 && ![istarget arm*-*-elf]
 	 && ![istarget avr-*-*]
 	 && ![istarget cr16-*-*]
 	 && ![istarget cris*-*-*]
