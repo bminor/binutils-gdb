@@ -1365,7 +1365,7 @@ static int
 package_name_p (const char *name, const struct block *block)
 {
   struct symbol *sym;
-  int is_a_field_of_this;
+  struct field_of_this_result is_a_field_of_this;
 
   sym = lookup_symbol (name, block, STRUCT_DOMAIN, &is_a_field_of_this);
 
@@ -1406,7 +1406,7 @@ classify_packaged_name (const struct block *block)
 {
   char *copy;
   struct symbol *sym;
-  int is_a_field_of_this = 0;
+  struct field_of_this_result is_a_field_of_this;
 
   copy = copy_name (yylval.sval);
 
@@ -1415,7 +1415,7 @@ classify_packaged_name (const struct block *block)
   if (sym)
     {
       yylval.ssym.sym = sym;
-      yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+      yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
     }
 
   return NAME;
@@ -1435,7 +1435,7 @@ classify_name (const struct block *block)
   struct type *type;
   struct symbol *sym;
   char *copy;
-  int is_a_field_of_this = 0;
+  struct field_of_this_result is_a_field_of_this;
 
   copy = copy_name (yylval.sval);
 
@@ -1458,7 +1458,7 @@ classify_name (const struct block *block)
   if (sym)
     {
       yylval.ssym.sym = sym;
-      yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+      yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
       return NAME;
     }
 
@@ -1484,7 +1484,7 @@ classify_name (const struct block *block)
 	  {
 	    yylval.ssym.stoken = sval;
 	    yylval.ssym.sym = sym;
-	    yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+	    yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	    return NAME;
 	  }
       }

@@ -658,7 +658,7 @@ block	:	BLOCKNAME
 block	:	block COLONCOLON name
 			{ struct symbol *tem
 			    = lookup_symbol (copy_name ($3), $1,
-					     VAR_DOMAIN, (int *) NULL);
+					     VAR_DOMAIN, NULL);
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
 				   copy_name ($3));
@@ -668,7 +668,7 @@ block	:	block COLONCOLON name
 variable:	block COLONCOLON name
 			{ struct symbol *sym;
 			  sym = lookup_symbol (copy_name ($3), $1,
-					       VAR_DOMAIN, (int *) NULL);
+					       VAR_DOMAIN, NULL);
 			  if (sym == 0)
 			    error (_("No symbol \"%s\" in specified context."),
 				   copy_name ($3));
@@ -704,7 +704,7 @@ variable:	qualified_name
 
 			  sym =
 			    lookup_symbol (name, (const struct block *) NULL,
-					   VAR_DOMAIN, (int *) NULL);
+					   VAR_DOMAIN, NULL);
 			  if (sym)
 			    {
 			      write_exp_elt_opcode (OP_VAR_VALUE);
@@ -1483,7 +1483,7 @@ yylex (void)
 	  static const char this_name[] = "this";
 
 	  if (lookup_symbol (this_name, expression_context_block,
-			     VAR_DOMAIN, (int *) NULL))
+			     VAR_DOMAIN, NULL))
 	    {
 	      free (uptokstart);
 	      return THIS;
@@ -1522,7 +1522,7 @@ yylex (void)
   {
     char *tmp = copy_name (yylval.sval);
     struct symbol *sym;
-    int is_a_field_of_this = 0;
+    struct field_of_this_result is_a_field_of_this;
     int is_a_field = 0;
     int hextype;
 
@@ -1535,7 +1535,7 @@ yylex (void)
       sym = lookup_symbol (tmp, expression_context_block,
 			   VAR_DOMAIN, &is_a_field_of_this);
     /* second chance uppercased (as Free Pascal does).  */
-    if (!sym && !is_a_field_of_this && !is_a_field)
+    if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
       {
        for (i = 0; i <= namelen; i++)
          {
@@ -1549,7 +1549,7 @@ yylex (void)
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
 			      VAR_DOMAIN, &is_a_field_of_this);
-       if (sym || is_a_field_of_this || is_a_field)
+       if (sym || is_a_field_of_this.type != NULL || is_a_field)
          for (i = 0; i <= namelen; i++)
            {
              if ((tokstart[i] >= 'a' && tokstart[i] <= 'z'))
@@ -1557,7 +1557,7 @@ yylex (void)
            }
       }
     /* Third chance Capitalized (as GPC does).  */
-    if (!sym && !is_a_field_of_this && !is_a_field)
+    if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
       {
        for (i = 0; i <= namelen; i++)
          {
@@ -1577,7 +1577,7 @@ yylex (void)
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
 			      VAR_DOMAIN, &is_a_field_of_this);
-       if (sym || is_a_field_of_this || is_a_field)
+       if (sym || is_a_field_of_this.type != NULL || is_a_field)
           for (i = 0; i <= namelen; i++)
             {
               if (i == 0)
@@ -1607,7 +1607,7 @@ yylex (void)
         || lookup_symtab (tmp))
       {
 	yylval.ssym.sym = sym;
-	yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+	yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	free (uptokstart);
 	return BLOCKNAME;
       }
@@ -1673,7 +1673,7 @@ yylex (void)
 		      memcpy (tmp1, namestart, p - namestart);
 		      tmp1[p - namestart] = '\0';
 		      cur_sym = lookup_symbol (ncopy, expression_context_block,
-					       VAR_DOMAIN, (int *) NULL);
+					       VAR_DOMAIN, NULL);
 		      if (cur_sym)
 			{
 			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)
@@ -1722,7 +1722,7 @@ yylex (void)
 	if (hextype == INT)
 	  {
 	    yylval.ssym.sym = sym;
-	    yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+	    yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	    free (uptokstart);
 	    return NAME_OR_INT;
 	  }
@@ -1731,7 +1731,7 @@ yylex (void)
     free(uptokstart);
     /* Any other kind of symbol.  */
     yylval.ssym.sym = sym;
-    yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+    yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
     return NAME;
   }
 }

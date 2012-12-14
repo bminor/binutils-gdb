@@ -919,19 +919,42 @@ int symbol_matches_domain (enum language symbol_language,
 
 extern struct symtab *lookup_symtab (const char *);
 
+/* An object of this type is passed as the 'is_a_field_of_this'
+   argument to lookup_symbol and lookup_symbol_in_language.  */
+
+struct field_of_this_result
+{
+  /* The type in which the field was found.  If this is NULL then the
+     symbol was not found in 'this'.  If non-NULL, then one of the
+     other fields will be non-NULL as well.  */
+
+  struct type *type;
+
+  /* If the symbol was found as an ordinary field of 'this', then this
+     is non-NULL and points to the particular field.  */
+
+  struct field *field;
+
+  /* If the symbol was found as an function field of 'this', then this
+     is non-NULL and points to the particular field.  */
+
+  struct fn_fieldlist *fn_field;
+};
+
 /* lookup a symbol by name (optional block) in language.  */
 
 extern struct symbol *lookup_symbol_in_language (const char *,
 						 const struct block *,
 						 const domain_enum,
 						 enum language,
-						 int *);
+						 struct field_of_this_result *);
 
 /* lookup a symbol by name (optional block, optional symtab)
    in the current language.  */
 
 extern struct symbol *lookup_symbol (const char *, const struct block *,
-				     const domain_enum, int *);
+				     const domain_enum,
+				     struct field_of_this_result *);
 
 /* A default version of lookup_symbol_nonlocal for use by languages
    that can't think of anything better to do.  */

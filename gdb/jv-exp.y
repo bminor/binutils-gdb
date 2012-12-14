@@ -1227,7 +1227,7 @@ static int
 push_variable (struct stoken name)
 {
   char *tmp = copy_name (name);
-  int is_a_field_of_this = 0;
+  struct field_of_this_result is_a_field_of_this;
   struct symbol *sym;
   sym = lookup_symbol (tmp, expression_context_block, VAR_DOMAIN,
 		       &is_a_field_of_this);
@@ -1248,7 +1248,7 @@ push_variable (struct stoken name)
       write_exp_elt_opcode (OP_VAR_VALUE);
       return 1;
     }
-  if (is_a_field_of_this)
+  if (is_a_field_of_this.type != NULL)
     {
       /* it hangs off of `this'.  Must not inadvertently convert from a
 	 method call to data ref.  */

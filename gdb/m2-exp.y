@@ -602,7 +602,7 @@ variable:	block COLONCOLON NAME
 /* Base case for variables.  */
 variable:	NAME
 			{ struct symbol *sym;
-			  int is_a_field_of_this;
+			  struct field_of_this_result is_a_field_of_this;
 
  			  sym = lookup_symbol (copy_name ($1),
 					       expression_context_block,

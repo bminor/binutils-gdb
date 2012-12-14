@@ -354,7 +354,8 @@ sympy_dealloc (PyObject *obj)
 PyObject *
 gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
 {
-  int domain = VAR_DOMAIN, is_a_field_of_this = 0;
+  int domain = VAR_DOMAIN;
+  struct field_of_this_result is_a_field_of_this;
   const char *name;
   static char *keywords[] = { "name", "block", "domain", NULL };
   struct symbol *symbol = NULL;
@@ -407,7 +408,7 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
     }
   PyTuple_SET_ITEM (ret_tuple, 0, sym_obj);
 
-  bool_obj = is_a_field_of_this? Py_True : Py_False;
+  bool_obj = (is_a_field_of_this.type != NULL) ? Py_True : Py_False;
   Py_INCREF (bool_obj);
   PyTuple_SET_ITEM (ret_tuple, 1, bool_obj);
 

@@ -692,7 +692,7 @@ write_dollar_variable (struct stoken str)
      have names beginning with $ or $$.  Check for those, first.  */
 
   sym = lookup_symbol (copy_name (str), (struct block *) NULL,
-		       VAR_DOMAIN, (int *) NULL);
+		       VAR_DOMAIN, NULL);
   if (sym)
     {
       write_exp_elt_opcode (OP_VAR_VALUE);

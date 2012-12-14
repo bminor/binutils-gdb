@@ -871,7 +871,7 @@ block	:	BLOCKNAME
 block	:	block COLONCOLON name
 			{ struct symbol *tem
 			    = lookup_symbol (copy_name ($3), $1,
-					     VAR_DOMAIN, (int *) NULL);
+					     VAR_DOMAIN, NULL);
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
 				   copy_name ($3));
@@ -896,7 +896,7 @@ variable:	name_not_typename ENTRY
 variable:	block COLONCOLON name
 			{ struct symbol *sym;
 			  sym = lookup_symbol (copy_name ($3), $1,
-					       VAR_DOMAIN, (int *) NULL);
+					       VAR_DOMAIN, NULL);
 			  if (sym == 0)
 			    error (_("No symbol \"%s\" in specified context."),
 				   copy_name ($3));
@@ -972,7 +972,7 @@ variable:	qualified_name
 
 			  sym =
 			    lookup_symbol (name, (const struct block *) NULL,
-					   VAR_DOMAIN, (int *) NULL);
+					   VAR_DOMAIN, NULL);
 			  if (sym)
 			    {
 			      write_exp_elt_opcode (OP_VAR_VALUE);
@@ -1577,11 +1577,15 @@ name_not_typename :	NAME
  */
 	|	operator
 			{
+			  struct field_of_this_result is_a_field_of_this;
+
 			  $$.stoken = $1;
 			  $$.sym = lookup_symbol ($1.ptr,
 						  expression_context_block,
 						  VAR_DOMAIN,
-						  &$$.is_a_field_of_this);
+						  &is_a_field_of_this);
+			  $$.is_a_field_of_this
+			    = is_a_field_of_this.type != NULL;
 			}
 	|	UNKNOWN_CPP_NAME
 	;
@@ -2690,7 +2694,7 @@ lex_one_token (void)
 
 	if ((ident_tokens[i].flags & FLAG_SHADOW) != 0)
 	  {
-	    int is_a_field_of_this = 0;
+	    struct field_of_this_result is_a_field_of_this;
 
 	    if (lookup_symbol (copy, expression_context_block,
 			       VAR_DOMAIN,
@@ -2747,18 +2751,22 @@ classify_name (const struct block *block)
 {
   struct symbol *sym;
   char *copy;
-  int is_a_field_of_this = 0;
+  struct field_of_this_result is_a_field_of_this;
 
   copy = copy_name (yylval.sval);
 
+  /* Initialize this in case we *don't* use it in this call; that way
+     we can refer to it unconditionally below.  */
+  memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
+
   sym = lookup_symbol (copy, block, VAR_DOMAIN, 
 		       parse_language->la_name_of_this
-		       ? &is_a_field_of_this : (int *) NULL);
+		       ? &is_a_field_of_this : NULL);
 
   if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
     {
       yylval.ssym.sym = sym;
-      yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+      yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
       return BLOCKNAME;
     }
   else if (!sym)
@@ -2812,18 +2820,18 @@ classify_name (const struct block *block)
       if (hextype == INT)
 	{
 	  yylval.ssym.sym = sym;
-	  yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+	  yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	  return NAME_OR_INT;
 	}
     }
 
   /* Any other kind of symbol */
   yylval.ssym.sym = sym;
-  yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+  yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 
   if (sym == NULL
       && parse_language->la_language == language_cplus
-      && !is_a_field_of_this
+      && is_a_field_of_this.type == NULL
       && !lookup_minimal_symbol (copy, NULL, NULL))
     return UNKNOWN_CPP_NAME;
 

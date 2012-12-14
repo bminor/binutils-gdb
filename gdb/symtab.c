@@ -82,7 +82,7 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 const struct block *block,
 					 const domain_enum domain,
 					 enum language language,
-					 int *is_a_field_of_this);
+					 struct field_of_this_result *is_a_field_of_this);
 
 static
 struct symbol *lookup_symbol_aux_local (const char *name,
@@ -1225,7 +1225,7 @@ demangle_for_lookup (const char *name, enum language lang,
 struct symbol *
 lookup_symbol_in_language (const char *name, const struct block *block,
 			   const domain_enum domain, enum language lang,
-			   int *is_a_field_of_this)
+			   struct field_of_this_result *is_a_field_of_this)
 {
   const char *modified_name;
   struct symbol *returnval;
@@ -1243,7 +1243,8 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 
 struct symbol *
 lookup_symbol (const char *name, const struct block *block,
-	       domain_enum domain, int *is_a_field_of_this)
+	       domain_enum domain,
+	       struct field_of_this_result *is_a_field_of_this)
 {
   return lookup_symbol_in_language (name, block, domain,
 				    current_language->la_language,
@@ -1283,7 +1284,8 @@ lookup_language_this (const struct language_defn *lang,
    structure/union is defined, otherwise, return 0.  */
 
 static int
-check_field (struct type *type, const char *name)
+check_field (struct type *type, const char *name,
+	     struct field_of_this_result *is_a_field_of_this)
 {
   int i;
 
@@ -1295,7 +1297,11 @@ check_field (struct type *type, const char *name)
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
-	return 1;
+	{
+	  is_a_field_of_this->type = type;
+	  is_a_field_of_this->field = &TYPE_FIELD (type, i);
+	  return 1;
+	}
     }
 
   /* C++: If it was not found as a data field, then try to return it
@@ -1304,11 +1310,15 @@ check_field (struct type *type, const char *name)
   for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
     {
       if (strcmp_iw (TYPE_FN_FIELDLIST_NAME (type, i), name) == 0)
-	return 1;
+	{
+	  is_a_field_of_this->type = type;
+	  is_a_field_of_this->fn_field = &TYPE_FN_FIELDLIST (type, i);
+	  return 1;
+	}
     }
 
   for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
-    if (check_field (TYPE_BASECLASS (type, i), name))
+    if (check_field (TYPE_BASECLASS (type, i), name, is_a_field_of_this))
       return 1;
 
   return 0;
@@ -1320,18 +1330,17 @@ check_field (struct type *type, const char *name)
 static struct symbol *
 lookup_symbol_aux (const char *name, const struct block *block,
 		   const domain_enum domain, enum language language,
-		   int *is_a_field_of_this)
+		   struct field_of_this_result *is_a_field_of_this)
 {
   struct symbol *sym;
   const struct language_defn *langdef;
 
   /* Make sure we do something sensible with is_a_field_of_this, since
      the callers that set this parameter to some non-null value will
-     certainly use it later and expect it to be either 0 or 1.
-     If we don't set it, the contents of is_a_field_of_this are
-     undefined.  */
+     certainly use it later.  If we don't set it, the contents of
+     is_a_field_of_this are undefined.  */
   if (is_a_field_of_this != NULL)
-    *is_a_field_of_this = 0;
+    memset (is_a_field_of_this, 0, sizeof (*is_a_field_of_this));
 
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
@@ -1365,11 +1374,8 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	    error (_("Internal error: `%s' is not an aggregate"),
 		   langdef->la_name_of_this);
 
-	  if (check_field (t, name))
-	    {
-	      *is_a_field_of_this = 1;
-	      return NULL;
-	    }
+	  if (check_field (t, name, is_a_field_of_this))
+	    return NULL;
 	}
     }
 

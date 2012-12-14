@@ -333,7 +333,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 		  struct symbol *wsym = (struct symbol *) NULL;
 		  struct type *wtype;
 		  struct block *block = (struct block *) NULL;
-		  int is_this_fld;
+		  struct field_of_this_result is_this_fld;
 
 		  if (want_space)
 		    fputs_filtered (" ", stream);

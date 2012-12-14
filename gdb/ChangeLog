@@ -1,5 +1,27 @@
 2012-12-14  Tom Tromey  <tromey@redhat.com>
 
+	* c-exp.y (block, variable, name_not_typename, lex_one_token,
+	classify_name): Update.
+	* c-valprint.c (c_val_print): Update.
+	* f-exp.y (yylex): Update.
+	* go-exp.y (package_name_p, classify_packaged_name)
+	(classify_name): Update.
+	* jv-exp.y (push_variable): Update.
+	* m2-exp.y (variable): Update.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Update.
+	* p-exp.y (block, variable, yylex): Update.
+	* p-valprint.c (pascal_val_print): Update.
+	* parse.c (write_dollar_variable): Update.
+	* printcmd.c (address_info): Update.
+	* python/py-symbol.c (gdbpy_lookup_symbol): Update.
+	* symtab.c (lookup_symbol_aux, lookup_symbol_in_language)
+	(lookup_symbol): Change type of 'is_a_field_of_this'.
+	(check_field): Add 'is_a_field_of_this' argument.
+	* symtab.h (struct field_of_this_result): New.
+	(lookup_symbol, lookup_symbol_in_language): Update.
+
+2012-12-14  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.c (check_field): Now static.  Move from...
 	* valops.c (check_field): ... here.  Remove.
 	* value.h (check_field): Don't declare.
