@@ -66,7 +66,7 @@ d:
 	.byte	2f - 1f	/* DW_AT_location: DW_FORM_block1 */
 1:
 	.byte	0xf2	/* DW_OP_GNU_implicit_pointer */
-	.4byte	.Lvar_out - d	/* referenced DIE */
+	.4byte	.Lvar_out	/* referenced DIE, section-relative! */
 	.sleb128	0	/* offset */
 2:
 	.4byte	.Ltype_structptr - d	/* DW_AT_type */

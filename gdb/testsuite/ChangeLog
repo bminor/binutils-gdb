@@ -1,3 +1,8 @@
+2012-12-14  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/implptr-optimized-out.S: DIE offset for
+	DW_OP_GNU_implicit_pointer is section-relative.
+
 2012-12-14  Tom Tromey  <tromey@redhat.com>
 
         * gdb.base/info-proc.exp: Add core file tests.
