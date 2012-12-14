@@ -913,8 +913,6 @@ extern void print_variable_and_value (const char *name,
 				      struct ui_file *stream,
 				      int indent);
 
-extern int check_field (struct type *, const char *);
-
 extern void typedef_print (struct type *type, struct symbol *news,
 			   struct ui_file *stream);
 

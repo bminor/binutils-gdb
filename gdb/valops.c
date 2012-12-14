@@ -3180,42 +3180,6 @@ destructor_name_p (const char *name, struct type *type)
   return 0;
 }
 
-/* Given TYPE, a structure/union,
-   return 1 if the component named NAME from the ultimate target
-   structure/union is defined, otherwise, return 0.  */
-
-int
-check_field (struct type *type, const char *name)
-{
-  int i;
-
-  /* The type may be a stub.  */
-  CHECK_TYPEDEF (type);
-
-  for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
-    {
-      const char *t_field_name = TYPE_FIELD_NAME (type, i);
-
-      if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
-	return 1;
-    }
-
-  /* C++: If it was not found as a data field, then try to return it
-     as a pointer to a method.  */
-
-  for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
-    {
-      if (strcmp_iw (TYPE_FN_FIELDLIST_NAME (type, i), name) == 0)
-	return 1;
-    }
-
-  for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
-    if (check_field (TYPE_BASECLASS (type, i), name))
-      return 1;
-
-  return 0;
-}
-
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
    return the appropriate member (or the address of the member, if
    WANT_ADDRESS).  This function is used to resolve user expressions
