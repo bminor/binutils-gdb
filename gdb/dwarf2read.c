@@ -10778,6 +10778,34 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
     }
 }
 
+/* Return true if this member function is a constructor, false
+   otherwise.  */
+
+static int
+dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
+{
+  const char *fieldname;
+  const char *typename;
+  int len;
+
+  if (die->parent == NULL)
+    return 0;
+
+  if (die->parent->tag != DW_TAG_structure_type
+      && die->parent->tag != DW_TAG_union_type
+      && die->parent->tag != DW_TAG_class_type)
+    return 0;
+
+  fieldname = dwarf2_name (die, cu);
+  typename = dwarf2_name (die->parent, cu);
+  if (fieldname == NULL || typename == NULL)
+    return 0;
+
+  len = strlen (fieldname);
+  return (strncmp (fieldname, typename, len) == 0
+	  && (typename[len] == '\0' || typename[len] == '<'));
+}
+
 /* Add a member function to the proper fieldlist.  */
 
 static void
@@ -10908,6 +10936,8 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   attr = dwarf2_attr (die, DW_AT_artificial, cu);
   if (attr && DW_UNSND (attr) != 0)
     fnp->is_artificial = 1;
+
+  fnp->is_constructor = dwarf2_is_constructor (die, cu);
 
   /* Get index in virtual function table if it is a virtual member
      function.  For older versions of GCC, this is an offset in the

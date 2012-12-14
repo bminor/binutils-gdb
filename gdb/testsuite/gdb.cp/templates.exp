@@ -60,6 +60,14 @@ proc test_ptype_of_templates {} {
 	    # This also triggers gdb/1113...
 	    kfail "gdb/1111" "ptype T5<int>"
 	    # Add here a PASS case when PR gdb/1111 gets fixed.
+	    # These are really:
+	    # http://sourceware.org/bugzilla/show_bug.cgi?id=8216
+	    # http://sourceware.org/bugzilla/show_bug.cgi?id=8218
+	}
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5\\(int\\);${ws}T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\(int\\);${ws}static void \\* operator new\\((size_t|unsigned( int| long|))\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
+	    # http://sourceware.org/bugzilla/show_bug.cgi?id=8218
+	    # The destructor has an argument type.
+	    kfail "gdb/8218" "ptype T5<int>"
 	}
     }
 
@@ -89,6 +97,14 @@ proc test_ptype_of_templates {} {
 	    # This also triggers gdb/1113...
 	    kfail "gdb/1111" "ptype T5<int>"
 	    # Add here a PASS case when PR gdb/1111 gets fixed.
+	    # These are really:
+	    # http://sourceware.org/bugzilla/show_bug.cgi?id=8216
+	    # http://sourceware.org/bugzilla/show_bug.cgi?id=8218
+	}
+	-re "type = class T5<int> \{${ws}public:${ws}static int X;${ws}int x;${ws}int val;${ws}T5\\(int\\);${ws}T5\\((T5<int> const|const T5<int>) ?&\\);${ws}~T5\\(int\\);${ws}static void \\* operator new\\((size_t|unsigned( int| long|))\\);${ws}static void operator delete\\(void ?\\*\\);${ws}int value\\((void|)\\);${ws}\}\r\n$gdb_prompt $" {
+	    # http://sourceware.org/bugzilla/show_bug.cgi?id=8218
+	    # The destructor has an argument type.
+	    kfail "gdb/8218" "ptype T5<int>"
 	}
     }
 }

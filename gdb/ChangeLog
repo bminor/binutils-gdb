@@ -1,5 +1,19 @@
 2012-12-14  Tom Tromey  <tromey@redhat.com>
 
+	Partial fix for PR c++/14160:
+	* c-typeprint.c (c_type_print_base): Use TYPE_FN_FIELD_CONSTRUCTOR.
+	* dwarf2read.c (dwarf2_is_constructor): New function.
+	(dwarf2_add_member_fn): Use it.
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): Use
+	TYPE_FN_FIELD_CONSTRUCTOR.
+	* jv-typeprint.c (java_type_print_base): Use
+	TYPE_FN_FIELD_CONSTRUCTOR.
+	* gdbtypes.h (struct fn_field) <is_constructor>: New field.
+	<dummy>: Shrink.
+	(TYPE_FN_FIELD_CONSTRUCTOR): New macro.
+
+2012-12-14  Tom Tromey  <tromey@redhat.com>
+
 	* c-exp.y (block, variable, name_not_typename, lex_one_token,
 	classify_name): Update.
 	* c-valprint.c (c_val_print): Update.
