@@ -55,6 +55,7 @@
 #include "macroscope.h"
 #include "objc-lang.h"
 #include "typeprint.h"
+#include "cp-abi.h"
 
 #define parse_type builtin_type (parse_gdbarch)
 
@@ -2779,6 +2780,26 @@ classify_name (const struct block *block)
 	{
 	  yylval.bval = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
 	  return FILENAME;
+	}
+
+      /* If we found a field of 'this', we might have erroneously
+	 found a constructor where we wanted a type name.  Handle this
+	 case by noticing that we found a constructor and then look up
+	 the type tag instead.  */
+      if (is_a_field_of_this.type != NULL
+	  && is_a_field_of_this.fn_field != NULL
+	  && TYPE_FN_FIELD_CONSTRUCTOR (is_a_field_of_this.fn_field->fn_fields,
+					0))
+	{
+	  struct field_of_this_result inner_is_a_field_of_this;
+
+	  sym = lookup_symbol (copy, block, STRUCT_DOMAIN,
+			       &inner_is_a_field_of_this);
+	  if (sym != NULL)
+	    {
+	      yylval.tsym.type = SYMBOL_TYPE (sym);
+	      return TYPENAME;
+	    }
 	}
     }
 

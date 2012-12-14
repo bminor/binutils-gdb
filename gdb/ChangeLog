@@ -1,5 +1,13 @@
 2012-12-14  Tom Tromey  <tromey@redhat.com>
 
+	PR c++/8888:
+	* symtab.c (lookup_symbol_aux): If constructor is found, consider
+	returning the type instead.
+	* c-exp.y (classify_name): Check STRUCT_DOMAIN if a constructor is
+	found.
+
+2012-12-14  Tom Tromey  <tromey@redhat.com>
+
 	Partial fix for PR c++/14160:
 	* c-typeprint.c (c_type_print_base): Use TYPE_FN_FIELD_CONSTRUCTOR.
 	* dwarf2read.c (dwarf2_is_constructor): New function.

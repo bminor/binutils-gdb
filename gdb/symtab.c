@@ -1354,7 +1354,10 @@ lookup_symbol_aux (const char *name, const struct block *block,
 
   langdef = language_def (language);
 
-  if (is_a_field_of_this != NULL)
+  /* Don't do this check if we are searching for a struct.  It will
+     not be found by check_field, but will be found by other
+     means.  */
+  if (is_a_field_of_this != NULL && domain != STRUCT_DOMAIN)
     {
       struct symbol *sym = lookup_language_this (langdef, block);
 
