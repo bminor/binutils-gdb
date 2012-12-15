@@ -54,9 +54,6 @@ static const char ravenscar_runtime_initializer[] =
 
 static struct observer *update_target_observer = NULL;
 
-/* Architecture-specific hooks.  */
-static struct ravenscar_arch_ops* current_arch_ops;
-
 static void ravenscar_find_new_threads (struct target_ops *ops);
 static ptid_t ravenscar_running_thread (void);
 static char *ravenscar_extra_thread_info (struct thread_info *tp);
@@ -276,7 +273,13 @@ ravenscar_fetch_registers (struct target_ops *ops,
       || ptid_equal (inferior_ptid, ravenscar_running_thread ()))
     beneath->to_fetch_registers (beneath, regcache, regnum);
   else
-    current_arch_ops->to_fetch_registers (regcache, regnum);
+    {
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct ravenscar_arch_ops *arch_ops
+	= gdbarch_ravenscar_ops (gdbarch);
+
+      arch_ops->to_fetch_registers (regcache, regnum);
+    }
 }
 
 static void
@@ -290,7 +293,13 @@ ravenscar_store_registers (struct target_ops *ops,
       || ptid_equal (inferior_ptid, ravenscar_running_thread ()))
     beneath->to_store_registers (beneath, regcache, regnum);
   else
-    current_arch_ops->to_store_registers (regcache, regnum);
+    {
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct ravenscar_arch_ops *arch_ops
+	= gdbarch_ravenscar_ops (gdbarch);
+
+      arch_ops->to_store_registers (regcache, regnum);
+    }
 }
 
 static void
@@ -303,7 +312,13 @@ ravenscar_prepare_to_store (struct regcache *regcache)
       || ptid_equal (inferior_ptid, ravenscar_running_thread ()))
     beneath->to_prepare_to_store (regcache);
   else
-    current_arch_ops->to_prepare_to_store (regcache);
+    {
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct ravenscar_arch_ops *arch_ops
+	= gdbarch_ravenscar_ops (gdbarch);
+
+      arch_ops->to_prepare_to_store (regcache);
+    }
 }
 
 static void
@@ -321,23 +336,16 @@ ravenscar_mourn_inferior (struct target_ops *ops)
 static void
 ravenscar_inferior_created (struct target_ops *target, int from_tty)
 {
-  if (!ravenscar_task_support || !has_ravenscar_runtime ())
+  struct ravenscar_arch_ops *ops;
+
+  if (!ravenscar_task_support
+      || gdbarch_ravenscar_ops (current_inferior ()->gdbarch) == NULL
+      || !has_ravenscar_runtime ())
     return;
 
   base_magic_null_ptid = inferior_ptid;
   ravenscar_update_inferior_ptid ();
   push_target (&ravenscar_ops);
-}
-
-void
-ravenscar_register_arch_ops (struct ravenscar_arch_ops *ops)
-{
-  /* FIXME: To be clean, we would need to handle a list of
-     architectures, just like in remote-wtx-hw.c.  However, for now the
-     only Ravenscar run-time for bare board that is implemented in
-     GNAT is for only one architecture: erc32-elf.  So no need to care about
-     that for now...  */
-  current_arch_ops = ops;
 }
 
 static ptid_t

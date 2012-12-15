@@ -23,8 +23,7 @@
 #include "sparc-tdep.h"
 #include "inferior.h"
 #include "ravenscar-thread.h"
-
-static struct ravenscar_arch_ops ravenscar_sparc_ops;
+#include "ravenscar-sparc-thread.h"
 
 static void ravenscar_sparc_fetch_registers (struct regcache *regcache,
                                              int regnum);
@@ -179,14 +178,17 @@ ravenscar_sparc_store_registers (struct regcache *regcache, int regnum)
                 buf_size);
 }
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern void _initialize_ravenscar_sparc (void);
+static struct ravenscar_arch_ops ravenscar_sparc_ops =
+{
+  ravenscar_sparc_fetch_registers,
+  ravenscar_sparc_store_registers,
+  ravenscar_sparc_prepare_to_store
+};
+
+/* Register ravenscar_arch_ops in GDBARCH.  */
 
 void
-_initialize_ravenscar_sparc (void)
+register_sparc_ravenscar_ops (struct gdbarch *gdbarch)
 {
-  ravenscar_sparc_ops.to_fetch_registers = ravenscar_sparc_fetch_registers;
-  ravenscar_sparc_ops.to_store_registers = ravenscar_sparc_store_registers;
-  ravenscar_sparc_ops.to_prepare_to_store = ravenscar_sparc_prepare_to_store;
-  ravenscar_register_arch_ops (&ravenscar_sparc_ops);
+  set_gdbarch_ravenscar_ops (gdbarch, &ravenscar_sparc_ops);
 }

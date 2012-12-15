@@ -39,6 +39,7 @@
 #include "gdb_string.h"
 
 #include "sparc-tdep.h"
+#include "ravenscar-sparc-thread.h"
 
 struct regset;
 
@@ -1682,6 +1683,8 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdep->gregset)
     set_gdbarch_regset_from_core_section (gdbarch,
 					  sparc_regset_from_core_section);
+
+  register_sparc_ravenscar_ops (gdbarch);
 
   return gdbarch;
 }

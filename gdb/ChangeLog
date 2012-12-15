@@ -1,5 +1,34 @@
 2012-12-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbarch.sh: Add "struct ravenscar_arch_ops" advance
+	declaration.
+	(ravenscar_ops): New gdbarch variable.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* ravenscar-thread.h (ravenscar_register_arch_ops): Delete.
+	* ravenscar-thread.c (current_arch_ops): Delete.
+	(ravenscar_fetch_registers): Get the ravenscar_arch_ops
+	from the gdbarch.
+	(ravenscar_store_registers, ravenscar_prepare_to_store): Likewise.
+	(ravenscar_inferior_created): Add gdbarch_ravenscar_ops check.
+	(ravenscar_register_arch_ops): Delete.
+	* ravenscar-sparc-thread.h: New file.
+	* ravenscar-sparc-thread.c: #include "ravenscar-sparc-thread.h".
+	(ravenscar_sparc_ops): Define value statically.
+	(_initialize_ravenscar_sparc): Delete.
+	(register_sparc_ravenscar_ops): New function.
+	* sparc-tdep.c: #include "ravenscar-sparc-thread.h".
+	(sparc32_gdbarch_init): Add call to register_sparc_ravenscar_ops.
+	* Makefile.in (ALL_TARGET_OBS): Add ravenscar-thread.o and
+	ravenscar-sparc-thread.o.
+	(SFILES): Add ravenscar-thread.c.
+	(HFILES_NO_SRCDIR): Add ravenscar-sparc-thread.h.
+	(ALLDEPFILES): ravenscar-sparc-thread.c.
+	* configure.tgt: Add ravenscar-thread.o and ravenscar-sparc-thread.o
+	to gdb_target_obs
+	for all the targets that use sparc-tdep.o.
+
+2012-12-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* ravenscar-thread.c (ravenscar_is_open): Delete.
 	(ravenscar_initialize): Move most of the code from here...
 	(ravenscar_inferior_created): ... to there.  Invert logic.

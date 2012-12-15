@@ -1,6 +1,6 @@
-/* Ada Ravenscar thread support.
+/* Ravenscar SPARC target support.
 
-   Copyright 2004, 2010-2012 Free Software Foundation, Inc.
+   Copyright 2012 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,16 +17,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef RAVENSCAR_THREAD_H
-#define RAVENSCAR_THREAD_H
+#ifndef RAVENSCAR_SPARC_THREAD_H
+#define RAVENSCAR_SPARC_THREAD_H
 
-/* Architecture-specific hooks.  */
+struct gdbarch;
 
-struct ravenscar_arch_ops
-{
-  void (*to_fetch_registers) (struct regcache *, int);
-  void (*to_store_registers) (struct regcache *, int);
-  void (*to_prepare_to_store) (struct regcache *);
-};
-
-#endif /* !defined (RAVENSCAR_THREAD_H) */
+extern void register_sparc_ravenscar_ops (struct gdbarch *gdbarch);
+#endif

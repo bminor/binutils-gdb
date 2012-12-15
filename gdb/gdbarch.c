@@ -285,6 +285,7 @@ struct gdbarch
   gdbarch_info_proc_ftype *info_proc;
   gdbarch_core_info_proc_ftype *core_info_proc;
   gdbarch_iterate_over_objfiles_in_search_order_ftype *iterate_over_objfiles_in_search_order;
+  struct ravenscar_arch_ops * ravenscar_ops;
 };
 
 
@@ -454,6 +455,7 @@ struct gdbarch startup_gdbarch =
   0,  /* info_proc */
   0,  /* core_info_proc */
   default_iterate_over_objfiles_in_search_order,  /* iterate_over_objfiles_in_search_order */
+  NULL,  /* ravenscar_ops */
   /* startup_gdbarch() */
 };
 
@@ -544,6 +546,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->auto_wide_charset = default_auto_wide_charset;
   gdbarch->gen_return_address = default_gen_return_address;
   gdbarch->iterate_over_objfiles_in_search_order = default_iterate_over_objfiles_in_search_order;
+  gdbarch->ravenscar_ops = NULL;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -754,6 +757,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of info_proc, has predicate.  */
   /* Skip verify of core_info_proc, has predicate.  */
   /* Skip verify of iterate_over_objfiles_in_search_order, invalid_p == 0 */
+  /* Skip verify of ravenscar_ops, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -1200,6 +1204,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: push_dummy_code = <%s>\n",
                       host_address_to_string (gdbarch->push_dummy_code));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: ravenscar_ops = %s\n",
+                      host_address_to_string (gdbarch->ravenscar_ops));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_read_pc_p() = %d\n",
                       gdbarch_read_pc_p (gdbarch));
@@ -4298,6 +4305,23 @@ set_gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *gdbarch,
                                                    gdbarch_iterate_over_objfiles_in_search_order_ftype iterate_over_objfiles_in_search_order)
 {
   gdbarch->iterate_over_objfiles_in_search_order = iterate_over_objfiles_in_search_order;
+}
+
+struct ravenscar_arch_ops *
+gdbarch_ravenscar_ops (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of ravenscar_ops, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_ravenscar_ops called\n");
+  return gdbarch->ravenscar_ops;
+}
+
+void
+set_gdbarch_ravenscar_ops (struct gdbarch *gdbarch,
+                           struct ravenscar_arch_ops * ravenscar_ops)
+{
+  gdbarch->ravenscar_ops = ravenscar_ops;
 }
 
 
