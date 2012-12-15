@@ -1,5 +1,14 @@
 2012-12-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* ravenscar-thread.c (ravenscar_is_open): Delete.
+	(ravenscar_initialize): Move most of the code from here...
+	(ravenscar_inferior_created): ... to there.  Invert logic.
+	(ravenscar_close): Delete.
+	(init_ravenscar_thread_ops): Remove setting of
+	ravenscar_ops.to_close.
+
+2012-12-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* objfiles.c (init_entry_point_info): Move function from here...
 	* symfile.c (init_entry_point_info): ... to there.  Make static.
 	* objfiles.h (objfiles.h): Delete declaration.

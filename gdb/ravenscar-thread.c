@@ -34,10 +34,6 @@
 /* If non-null, ravenscar task support is enabled.  */
 static int ravenscar_task_support = 1;
 
-/* Non-null if the ravenscar thread layer has been pushed on the target
-   stack.  */
-static int ravenscar_is_open = 0;
-
 /* This module's target-specific operations.  */
 static struct target_ops ravenscar_ops;
 
@@ -70,7 +66,6 @@ static void ravenscar_fetch_registers (struct target_ops *ops,
 static void ravenscar_store_registers (struct target_ops *ops,
                                        struct regcache *regcache, int regnum);
 static void ravenscar_prepare_to_store (struct regcache *regcache);
-static void ravenscar_initialize  (char *name, int from_tty);
 static void ravenscar_resume (struct target_ops *ops, ptid_t ptid, int step,
 			      enum gdb_signal siggnal);
 static void ravenscar_mourn_inferior (struct target_ops *ops);
@@ -177,12 +172,6 @@ get_running_thread_id (void)
   buf = alloca (buf_size);
   read_memory (object_addr, buf, buf_size);
   return extract_typed_address (buf, builtin_type_void_data_ptr);
-}
-
-static void
-ravenscar_close (int quitting)
-{
-  ravenscar_is_open = 0;
 }
 
 static void
@@ -332,9 +321,12 @@ ravenscar_mourn_inferior (struct target_ops *ops)
 static void
 ravenscar_inferior_created (struct target_ops *target, int from_tty)
 {
-  if (ravenscar_task_support
-      && has_ravenscar_runtime ())
-    ravenscar_initialize (NULL, 0);
+  if (!ravenscar_task_support || !has_ravenscar_runtime ())
+    return;
+
+  base_magic_null_ptid = inferior_ptid;
+  ravenscar_update_inferior_ptid ();
+  push_target (&ravenscar_ops);
 }
 
 void
@@ -346,20 +338,6 @@ ravenscar_register_arch_ops (struct ravenscar_arch_ops *ops)
      GNAT is for only one architecture: erc32-elf.  So no need to care about
      that for now...  */
   current_arch_ops = ops;
-}
-
-/* Initialize Ravenscar support.  */
-
-static void
-ravenscar_initialize (char *name, int from_tty)
-{
-  if (ravenscar_is_open)
-    return;
-
-  base_magic_null_ptid = inferior_ptid;
-  ravenscar_update_inferior_ptid ();
-  push_target (&ravenscar_ops);
-  ravenscar_is_open = 1;
 }
 
 static ptid_t
@@ -374,7 +352,6 @@ init_ravenscar_thread_ops (void)
   ravenscar_ops.to_shortname = "ravenscar";
   ravenscar_ops.to_longname = "Ravenscar tasks.";
   ravenscar_ops.to_doc = "Ravenscar tasks support.";
-  ravenscar_ops.to_close = ravenscar_close;
   ravenscar_ops.to_resume = ravenscar_resume;
   ravenscar_ops.to_wait = ravenscar_wait;
   ravenscar_ops.to_fetch_registers = ravenscar_fetch_registers;
