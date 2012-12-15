@@ -443,8 +443,6 @@ extern struct objfile *allocate_objfile (bfd *, int);
 
 extern struct gdbarch *get_objfile_arch (struct objfile *);
 
-extern void init_entry_point_info (struct objfile *);
-
 extern int entry_point_address_query (CORE_ADDR *entry_p);
 
 extern CORE_ADDR entry_point_address (void);

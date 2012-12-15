@@ -324,54 +324,6 @@ get_objfile_arch (struct objfile *objfile)
   return objfile->gdbarch;
 }
 
-/* Initialize entry point information for this objfile.  */
-
-void
-init_entry_point_info (struct objfile *objfile)
-{
-  /* Save startup file's range of PC addresses to help blockframe.c
-     decide where the bottom of the stack is.  */
-
-  if (bfd_get_file_flags (objfile->obfd) & EXEC_P)
-    {
-      /* Executable file -- record its entry point so we'll recognize
-         the startup file because it contains the entry point.  */
-      objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);
-      objfile->ei.entry_point_p = 1;
-    }
-  else if (bfd_get_file_flags (objfile->obfd) & DYNAMIC
-	   && bfd_get_start_address (objfile->obfd) != 0)
-    {
-      /* Some shared libraries may have entry points set and be
-	 runnable.  There's no clear way to indicate this, so just check
-	 for values other than zero.  */
-      objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);
-      objfile->ei.entry_point_p = 1;
-    }
-  else
-    {
-      /* Examination of non-executable.o files.  Short-circuit this stuff.  */
-      objfile->ei.entry_point_p = 0;
-    }
-
-  if (objfile->ei.entry_point_p)
-    {
-      CORE_ADDR entry_point =  objfile->ei.entry_point;
-
-      /* Make certain that the address points at real code, and not a
-	 function descriptor.  */
-      entry_point
-	= gdbarch_convert_from_func_ptr_addr (objfile->gdbarch,
-					      entry_point,
-					      &current_target);
-
-      /* Remove any ISA markers, so that this matches entries in the
-	 symbol table.  */
-      objfile->ei.entry_point
-	= gdbarch_addr_bits_remove (objfile->gdbarch, entry_point);
-    }
-}
-
 /* If there is a valid and known entry point, function fills *ENTRY_P with it
    and returns non-zero; otherwise it returns zero.  */
 
