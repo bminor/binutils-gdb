@@ -476,7 +476,7 @@ sparc-*-linux*)
 	gdb_target_obs="sparc-tdep.o sparc-sol2-tdep.o sol2-tdep.o \
 			sparc-linux-tdep.o solib-svr4.o symfile-mem.o \
 			linux-tdep.o \
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	if test "x$enable_64_bit_bfd" = "xyes"; then
 	    # Target: GNU/Linux UltraSPARC
 	    gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o \
@@ -489,62 +489,62 @@ sparc64-*-linux*)
 	gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o sol2-tdep.o \
 			sparc64-linux-tdep.o sparc-tdep.o sparc-sol2-tdep.o \
 			sparc-linux-tdep.o solib-svr4.o linux-tdep.o \
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	build_gdbserver=yes
 	;;
 sparc*-*-freebsd* | sparc*-*-kfreebsd*-gnu)
 	# Target: FreeBSD/sparc64
 	gdb_target_obs="sparc-tdep.o sparc64-tdep.o sparc64fbsd-tdep.o \
 			solib-svr4.o \
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc-*-netbsd* | sparc-*-knetbsd*-gnu)
 	# Target: NetBSD/sparc
 	gdb_target_obs="sparc-tdep.o sparcnbsd-tdep.o nbsd-tdep.o \
 			solib-svr4.o \
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc64-*-netbsd* | sparc64-*-knetbsd*-gnu)
 	# Target: NetBSD/sparc64
 	gdb_target_obs="sparc64-tdep.o sparc64nbsd-tdep.o sparc-tdep.o \
 			sparcnbsd-tdep.o nbsd-tdep.o solib-svr4.o \
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc-*-openbsd*)
 	# Target: OpenBSD/sparc
 	gdb_target_obs="sparc-tdep.o sparcnbsd-tdep.o sparcobsd-tdep.o \
 			nbsd-tdep.o obsd-tdep.o bsd-uthread.o solib-svr4.o \
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc64-*-openbsd*)
 	# Target: OpenBSD/sparc64
 	gdb_target_obs="sparc64-tdep.o sparc64nbsd-tdep.o sparc64obsd-tdep.o \
 			sparc-tdep.o sparcnbsd-tdep.o sparcobsd-tdep.o \
 			nbsd-tdep.o obsd-tdep.o bsd-uthread.o solib-svr4.o \
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
 	# Target: Solaris SPARC
 	gdb_target_obs="sparc-tdep.o sparc-sol2-tdep.o sol2-tdep.o \
 			solib-svr4.o \
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
 	# Target: Solaris UltraSPARC
 	gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o sparc-tdep.o \
 			sparc-sol2-tdep.o sol2-tdep.o solib-svr4.o \
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc-*-*)
 	# Target: SPARC
 	gdb_target_obs="sparc-tdep.o 
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	gdb_sim=../sim/erc32/libsim.a
 	;;
 sparc64-*-*)
 	# Target: UltraSPARC
 	gdb_target_obs="sparc-tdep.o sparc64-tdep.o \
-			ravenscar-thread.o ravenscar-sparc-thread.o"
+			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 
 spu*-*-*)

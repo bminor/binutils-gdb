@@ -23,7 +23,7 @@
 #include "sparc-tdep.h"
 #include "inferior.h"
 #include "ravenscar-thread.h"
-#include "ravenscar-sparc-thread.h"
+#include "sparc-ravenscar-thread.h"
 
 static void ravenscar_sparc_fetch_registers (struct regcache *regcache,
                                              int regnum);

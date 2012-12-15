@@ -39,7 +39,7 @@
 #include "gdb_string.h"
 
 #include "sparc-tdep.h"
-#include "ravenscar-sparc-thread.h"
+#include "sparc-ravenscar-thread.h"
 
 struct regset;
 

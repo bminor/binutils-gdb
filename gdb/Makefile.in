@@ -570,7 +570,7 @@ ALL_TARGET_OBS = \
 	score-tdep.o \
 	sh64-tdep.o sh-linux-tdep.o shnbsd-tdep.o sh-tdep.o \
 	sparc-linux-tdep.o sparcnbsd-tdep.o sparcobsd-tdep.o \
-	sparc-sol2-tdep.o sparc-tdep.o ravenscar-sparc-thread.o \
+	sparc-sol2-tdep.o sparc-tdep.o sparc-ravenscar-thread.o \
 	spu-tdep.o spu-multiarch.o solib-spu.o \
 	tic6x-tdep.o tic6x-linux-tdep.o \
 	tilegx-tdep.o tilegx-linux-tdep.o \
@@ -831,7 +831,7 @@ gnulib/import/stddef.in.h gnulib/import/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/format.h common/host-defs.h utils.h common/queue.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
-gdb_bfd.h ravenscar-sparc-thread.h
+gdb_bfd.h sparc-ravenscar-thread.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1501,7 +1501,7 @@ ALLDEPFILES = \
 	sparc64-nat.c sparc64-tdep.c sparc64fbsd-nat.c sparc64fbsd-tdep.c \
 	sparc64nbsd-nat.c sparc64nbsd-tdep.c sparc64obsd-tdep.c \
 	sparcnbsd-nat.c sparcnbsd-tdep.c sparcobsd-tdep.c \
-	ravenscar-sparc-thread.c \
+	sparc-ravenscar-thread.c \
 	spu-linux-nat.c spu-tdep.c spu-multiarch.c solib-spu.c \
 	tilegx-linux-nat.c tilegx-tdep.c tilegx-linux-tdep.c \
 	v850-tdep.c \
