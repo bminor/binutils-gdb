@@ -1,5 +1,18 @@
 2012-12-15  Yao Qi  <yao@codesourcery.com>
 
+	* breakpoint.c (print_one_breakpoint_location): Display the
+	state of 'installed' of each non-pending location of a tracepoint
+	in both CLI and MI.
+	(download_tracepoint_locations): Notify 'breakpoint-modified'
+	observer if any tracepoint location is downloaded.
+	* tracepoint.c (start_tracing): Likewise.
+	(merge_uploaded_tracepoints): Record all modified
+	tracepoints and notify 'breakpoint-modified' observer for them.
+
+	* NEWS: Mention the change for CLI and MI.
+
+2012-12-15  Yao Qi  <yao@codesourcery.com>
+
 	* breakpoint.c (download_tracepoint_locations): Iterate over
 	ALL_TRACEPOINTS first and then iterate over locations of
 	each tracepoint.

@@ -42,6 +42,9 @@
 
 * The command 'forward-search' can now be abbreviated as 'fo'.
 
+* The command 'info tracepoints' can now display 'installed on target'
+  or 'not installed on target' for each non-pending location of tracepoint.
+
 * New configure options
 
 --enable-libmcheck/--disable-libmcheck
@@ -105,6 +108,9 @@ show print type typedefs
      command, to allow pattern filling of memory areas.
   ** New commands "-catch-load"/"-catch-unload" added for intercepting
      library load/unload events.
+  ** The response to breakpoint commands and breakpoint async records
+     includes an "installed" field containing a boolean state about each
+     non-pending tracepoint location is whether installed on target or not.
 
 * GDB now supports the "mini debuginfo" section, .gnu_debugdata.
   You must have the LZMA library available when configuring GDB for this

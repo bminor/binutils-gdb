@@ -6120,6 +6120,25 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  ui_out_field_int (uiout, "pass", t->pass_count);
 	  ui_out_text (uiout, " \n");
 	}
+
+      /* Don't display it when tracepoint or tracepoint location is
+	 pending.   */
+      if (!header_of_multiple && loc != NULL && !loc->shlib_disabled)
+	{
+	  annotate_field (11);
+
+	  if (ui_out_is_mi_like_p (uiout))
+	    ui_out_field_string (uiout, "installed",
+				 loc->inserted ? "y" : "n");
+	  else
+	    {
+	      if (loc->inserted)
+		ui_out_text (uiout, "\t");
+	      else
+		ui_out_text (uiout, "\tnot ");
+	      ui_out_text (uiout, "installed on target\n");
+	    }
+	}
     }
 
   if (ui_out_is_mi_like_p (uiout) && !part_of_multiple)
@@ -12093,6 +12112,7 @@ download_tracepoint_locations (void)
     {
       struct bp_location *bl;
       struct tracepoint *t;
+      int bp_location_downloaded = 0;
 
       if ((b->type == bp_fast_tracepoint
 	   ? !may_insert_fast_tracepoints
@@ -12112,9 +12132,12 @@ download_tracepoint_locations (void)
 	  target_download_tracepoint (bl);
 
 	  bl->inserted = 1;
+	  bp_location_downloaded = 1;
 	}
       t = (struct tracepoint *) b;
       t->number_on_target = b->number;
+      if (bp_location_downloaded)
+	observer_notify_breakpoint_modified (b);
     }
 
   do_cleanups (old_chain);

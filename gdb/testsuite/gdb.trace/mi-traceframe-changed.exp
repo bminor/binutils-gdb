@@ -109,7 +109,8 @@ proc test_tfind_remote { } { with_test_prefix "remote" {
 
     mi_gdb_test "-break-insert end" "\\^done.*" "break end"
     mi_gdb_test "-break-insert -a func2" "\\^done.*" "break func2"
-    mi_gdb_test "-trace-start" "\\^done.*" "trace start"
+    mi_gdb_test "-trace-start" "=breakpoint-modified,bkpt={.*installed=\"y\".*}.*\\^done.*" \
+	"trace start"
 
     mi_execute_to "exec-continue" "breakpoint-hit" end "" ".*" ".*" \
 	{ "" "disp=\"keep\"" } \

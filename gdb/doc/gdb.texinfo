@@ -11476,6 +11476,9 @@ tracing:
 @itemize @bullet
 @item
 its passcount as given by the @code{passcount @var{n}} command
+
+@item
+the state about installed on target of each location
 @end itemize
 
 @smallexample
@@ -11488,6 +11491,15 @@ Num     Type           Disp Enb Address    What
         collect globfoo2
         end
         pass count 1200 
+2       tracepoint     keep y   <MULTIPLE>
+        collect $eip
+2.1                         y     0x0804859c in func4 at change-loc.h:35
+        installed on target
+2.2                         y     0xb7ffc480 in func4 at change-loc.h:35
+        installed on target
+2.3                         y     <PENDING>  set_tracepoint
+3       tracepoint     keep y   0x080485b1 in foo at change-loc.c:29
+        not installed on target
 (@value{GDBP})
 @end smallexample
 
@@ -28447,17 +28459,19 @@ The result is in the form:
 ^done,bkpt=@{number="@var{number}",type="@var{type}",disp="del"|"keep",
 enabled="y"|"n",addr="@var{hex}",func="@var{funcname}",file="@var{filename}",
 fullname="@var{full_filename}",line="@var{lineno}",[thread="@var{threadno},]
-times="@var{times}"@}
+times="@var{times}"[,installed="@var{installed}"]@}
 @end smallexample
 
 @noindent
 where @var{number} is the @value{GDBN} number for this breakpoint,
 @var{funcname} is the name of the function where the breakpoint was
 inserted, @var{filename} is the name of the source file which contains
-this function, @var{lineno} is the source line number within that file
-and @var{times} the number of times that the breakpoint has been hit
+this function, @var{lineno} is the source line number within that file,
+@var{times} the number of times that the breakpoint has been hit
 (always 0 for -break-insert but may be greater for -break-info or -break-list
-which use the same output).
+which use the same output), and @var{installed}, which is an optional
+boolean, is about the state of each non-pending tracepoint location
+installed on target or not.
 
 Note: this format is open to change.
 @c An out-of-band breakpoint instead of part of the result?

@@ -1,3 +1,22 @@
+2012-12-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/mi-tracepoint-changed.exp (test_pending_resolved): Check
+	'installed' field in '=breakpoint-modified'.
+	(test_reconnect): Check 'installed' field in
+	'=breakpoint-modified' and '=breakpoint-created'.
+
+	* gdb.trace/actions.exp: Update test for 'installed' field.
+	* gdb.trace/change-loc.exp (tracepoint_change_loc_1):
+	(tracepoint_change_loc_2): Likewise.
+	Check 'info tracepoint' display nothing else.
+	* gdb.trace/deltrace.exp: Likewise.
+	* gdb.trace/infotrace.exp: Likewise.
+	* gdb.trace/mi-traceframe-changed.exp (test_tfind_remote):
+	Likewise.
+	* gdb.trace/passcount.exp: Likewise.
+	* gdb.trace/tracecmd.exp: Likewise.
+	* gdb.trace/while-stepping.exp: Likewise.
+
 2012-12-14  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/member-name.exp: New file.

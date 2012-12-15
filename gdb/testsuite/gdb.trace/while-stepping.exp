@@ -49,7 +49,8 @@ if { $trcpt1 <= 0 } then {
 
 gdb_test "info tracepoints" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
-\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+" \
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+\[\t \]+not installed on target." \
 	"5.12: set a tracepoint, stepcount is zero"
 
 set stepcount 12

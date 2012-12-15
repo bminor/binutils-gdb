@@ -133,13 +133,18 @@ proc test_reconnect { } { with_test_prefix "reconnect" {
 	    fail "$test: 2"
 	    exp_continue
 	}
-	-re "=breakpoint-created,bkpt=\{number=\"3\",type=\"tracepoint\",disp=\"keep\",enabled=\"y\",.*,func=\"main\".*${mi_gdb_prompt}" {
+	-re "=breakpoint-created,bkpt=\{number=\"3\",type=\"tracepoint\",disp=\"keep\",enabled=\"y\",\[^\n\]+,func=\"main\"\[^\n\]+,installed=\"y\"" {
 	    # A tracepoint on main was defined in the stub, not in GDB,
 	    # so we should see a =breakpoint-created notification.
 	    pass $test
 	}
-	timeout {
-	    fail $test
+    }
+    # Tracepoint on marker is defined.  After the sync, we know that
+    # the tracepoint is in remote stub.  Mark it 'installed'.
+    set test "tracepoint on marker is installed"
+    gdb_expect {
+	-re "=breakpoint-modified,bkpt=\{number=\"2\".*,func=\"marker\".*installed=\"y\".*${mi_gdb_prompt}$" {
+	    pass "$test"
 	}
     }
     # Check that tracepoint 1 is still pending.
@@ -188,18 +193,22 @@ proc test_pending_resolved { } { with_test_prefix "pending resolved" {
 
     mi_send_resuming_command "exec-continue" "continuing execution to marker 1"
 
+    # It is expected to get two "=breakpoint-modified" notifications.
+    # Pending tracepoint is resolved.
     set test "tracepoint on pendfunc2 resolved"
     gdb_expect {
-	-re ".*=breakpoint-modified,bkpt=\{number=\"1\",type=\"tracepoint\".*.*times=\"0\"" {
+	-re "=breakpoint-modified,bkpt=\{number=\"1\",type=\"tracepoint\".*.*times=\"0\".*installed=\"n\"" {
 	    pass "$test"
 	}
-	-re ".*${mi_gdb_prompt}$" {
-	    fail $test
-	}
-	timeout {
-	    fail "$test (timeout)"
+    }
+    # Resolved tracepoint is installed.
+    set test "tracepoint on pendfunc2 installed"
+    gdb_expect {
+	-re "=breakpoint-modified,bkpt=\{number=\"1\",type=\"tracepoint\".*.*times=\"0\".*installed=\"y\"" {
+	    pass "$test"
 	}
     }
+
     mi_expect_stop "breakpoint-hit" "marker" ".*" ".*" ".*" \
 	{"" "disp=\"keep\""} "continue to marker"
 
