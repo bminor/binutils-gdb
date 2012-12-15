@@ -542,7 +542,7 @@ sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
 	;;
 sparc-*-*)
 	# Target: SPARC
-	gdb_target_obs="sparc-tdep.o 
+	gdb_target_obs="sparc-tdep.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	gdb_sim=../sim/erc32/libsim.a
 	;;

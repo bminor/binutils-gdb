@@ -1,5 +1,9 @@
 2012-12-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* configure.tgt (sparc-*-*): Add missing '\' in gdb_target_ops.
+
+2012-12-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* ppc-ravenscar-thread.h, ppc-ravenscar-thread.c: New files.
 	* Makefile.in (ALL_TARGET_OBS): Add ppc-ravenscar-thread.o.
 	(HFILES_NO_SRCDIR): Add ppc-ravenscar-thread.h.
