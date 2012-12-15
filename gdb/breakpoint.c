@@ -12081,7 +12081,7 @@ bp_location_target_extensions_update (void)
 static void
 download_tracepoint_locations (void)
 {
-  struct bp_location *bl, **blp_tmp;
+  struct breakpoint *b;
   struct cleanup *old_chain;
 
   if (!target_can_download_tracepoint ())
@@ -12089,31 +12089,32 @@ download_tracepoint_locations (void)
 
   old_chain = save_current_space_and_thread ();
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  ALL_TRACEPOINTS (b)
     {
+      struct bp_location *bl;
       struct tracepoint *t;
 
-      if (!is_tracepoint (bl->owner))
-	continue;
-
-      if ((bl->owner->type == bp_fast_tracepoint
+      if ((b->type == bp_fast_tracepoint
 	   ? !may_insert_fast_tracepoints
 	   : !may_insert_tracepoints))
 	continue;
 
-      /* In tracepoint, locations are _never_ duplicated, so
-	 should_be_inserted is equivalent to
-	 unduplicated_should_be_inserted.  */
-      if (!should_be_inserted (bl) || bl->inserted)
-	continue;
+      for (bl = b->loc; bl; bl = bl->next)
+	{
+	  /* In tracepoint, locations are _never_ duplicated, so
+	     should_be_inserted is equivalent to
+	     unduplicated_should_be_inserted.  */
+	  if (!should_be_inserted (bl) || bl->inserted)
+	    continue;
 
-      switch_to_program_space_and_thread (bl->pspace);
+	  switch_to_program_space_and_thread (bl->pspace);
 
-      target_download_tracepoint (bl);
+	  target_download_tracepoint (bl);
 
-      bl->inserted = 1;
-      t = (struct tracepoint *) bl->owner;
-      t->number_on_target = bl->owner->number;
+	  bl->inserted = 1;
+	}
+      t = (struct tracepoint *) b;
+      t->number_on_target = b->number;
     }
 
   do_cleanups (old_chain);
