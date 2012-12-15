@@ -3,7 +3,7 @@
 #ld: -z max-page-size=0x200000 -T maxpage5.t
 #objcopy_linked_file: -R .foo
 #readelf: -l --wide
-#target: x86_64-*-linux* i?86-*-linux-gnu
+#target: x86_64-*-linux* i?86-*-linux-gnu i?86-*-gnu*
 
 #...
 Program Headers:

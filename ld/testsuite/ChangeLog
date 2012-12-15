@@ -1,3 +1,11 @@
+2012-12-15  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* ld-elf/elf.exp (stack exec, stack size): Run for any GNU target.
+	* ld-elf/maxpage3c.d: Run for any x86 GNU target.
+	* ld-elf/maxpage4.d: Likewise.
+	* ld-elf/maxpage5.d: Likewise.
+	* ld-i386/export-class.exp: Likewise.
+
 2012-12-14  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* ld-elf/indirect.exp: Disable if -shared is not supported.
