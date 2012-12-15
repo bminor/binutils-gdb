@@ -89,7 +89,7 @@ static void cleanup_sigint_signal_handler (void *dummy);
 static void initialize_sigint_signal_handler (void);
 static int getpkt_sane (char **buf, long *sizeof_buf, int forever);
 static int getpkt_or_notif_sane (char **buf, long *sizeof_buf,
-				 int forever);
+				 int forever, int *is_notif);
 
 static void handle_remote_sigint (int);
 static void handle_remote_sigint_twice (int);
@@ -5634,15 +5634,16 @@ remote_wait_ns (ptid_t ptid, struct target_waitstatus *status, int options)
   struct remote_state *rs = get_remote_state ();
   struct stop_reply *stop_reply;
   int ret;
+  int is_notif = 0;
 
   /* If in non-stop mode, get out of getpkt even if a
      notification is received.	*/
 
   ret = getpkt_or_notif_sane (&rs->buf, &rs->buf_size,
-			      0 /* forever */);
+			      0 /* forever */, &is_notif);
   while (1)
     {
-      if (ret != -1)
+      if (ret != -1 && !is_notif)
 	switch (rs->buf[0])
 	  {
 	  case 'E':		/* Error of some sort.	*/
@@ -5679,7 +5680,7 @@ remote_wait_ns (ptid_t ptid, struct target_waitstatus *status, int options)
 
       /* Otherwise do a blocking wait.  */
       ret = getpkt_or_notif_sane (&rs->buf, &rs->buf_size,
-				  1 /* forever */);
+				  1 /* forever */, &is_notif);
     }
 }
 
@@ -7410,11 +7411,13 @@ getpkt (char **buf,
    0, this function is allowed to time out gracefully and return an
    indication of this to the caller.  Otherwise return the number of
    bytes read.  If EXPECTING_NOTIF, consider receiving a notification
-   enough reason to return to the caller.  */
+   enough reason to return to the caller.  *IS_NOTIF is an output
+   boolean that indicates whether *BUF holds a notification or not
+   (a regular packet).  */
 
 static int
 getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
-			int expecting_notif)
+			int expecting_notif, int *is_notif)
 {
   struct remote_state *rs = get_remote_state ();
   int c;
@@ -7515,6 +7518,8 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 	  /* Skip the ack char if we're in no-ack mode.  */
 	  if (!rs->noack_mode)
 	    serial_write (remote_desc, "+", 1);
+	  if (is_notif != NULL)
+	    *is_notif = 0;
 	  return val;
 	}
 
@@ -7536,13 +7541,15 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 				  str);
 	      do_cleanups (old_chain);
 	    }
+	  if (is_notif != NULL)
+	    *is_notif = 1;
 
 	  handle_notification (*buf);
 
 	  /* Notifications require no acknowledgement.  */
 
 	  if (expecting_notif)
-	    return -1;
+	    return val;
 	}
     }
 }
@@ -7550,13 +7557,15 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 static int
 getpkt_sane (char **buf, long *sizeof_buf, int forever)
 {
-  return getpkt_or_notif_sane_1 (buf, sizeof_buf, forever, 0);
+  return getpkt_or_notif_sane_1 (buf, sizeof_buf, forever, 0, NULL);
 }
 
 static int
-getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever)
+getpkt_or_notif_sane (char **buf, long *sizeof_buf, int forever,
+		      int *is_notif)
 {
-  return getpkt_or_notif_sane_1 (buf, sizeof_buf, forever, 1);
+  return getpkt_or_notif_sane_1 (buf, sizeof_buf, forever, 1,
+				 is_notif);
 }
 
 

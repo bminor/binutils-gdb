@@ -1,4 +1,14 @@
 2012-12-15  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (getpkt_or_notif_sane): Add one more argument in
+	its declaration.
+	(getpkt_or_notif_sane_1): Add one more argument.
+	(getpkt_sane): Update caller.
+	(getpkt_or_notif_sane): Likewise.  Update call
+	togetpkt_or_notif_sane_1.
+	(remote_wait_ns): Update caller.
+
+2012-12-15  Yao Qi  <yao@codesourcery.com>
 	    Doug Evans  <dje@google.com>
 
 	* common/queue.h: New.
