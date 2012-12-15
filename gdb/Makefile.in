@@ -564,7 +564,7 @@ ALL_TARGET_OBS = \
 	nto-tdep.o \
 	ppc-linux-tdep.o ppcnbsd-tdep.o ppcobsd-tdep.o ppc-sysv-tdep.o \
 	rl78-tdep.o \
-	rs6000-aix-tdep.o rs6000-tdep.o \
+	rs6000-aix-tdep.o rs6000-tdep.o ppc-ravenscar-thread.o \
 	rx-tdep.o \
 	s390-tdep.o \
 	score-tdep.o \
@@ -831,7 +831,7 @@ gnulib/import/stddef.in.h gnulib/import/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/format.h common/host-defs.h utils.h common/queue.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
-gdb_bfd.h sparc-ravenscar-thread.h
+gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1487,7 +1487,7 @@ ALLDEPFILES = \
 	remote-sim.c \
 	dcache.c \
 	rl78-tdep.c \
-	rs6000-nat.c rs6000-tdep.c \
+	rs6000-nat.c rs6000-tdep.c ppc-ravenscar-thread.c \
 	rx-tdep.c \
 	s390-tdep.c s390-nat.c \
 	score-tdep.c \

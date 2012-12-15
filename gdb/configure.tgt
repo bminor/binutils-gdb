@@ -386,31 +386,36 @@ mt-*-*)
 powerpc-*-netbsd* | powerpc-*-knetbsd*-gnu)
 	# Target: NetBSD/powerpc
 	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o ppcnbsd-tdep.o \
-			solib-svr4.o"
+			solib-svr4.o \
+			ravenscar-thread.o ppc-ravenscar-thread.o"
 	gdb_sim=../sim/ppc/libsim.a
 	;;
 powerpc-*-openbsd*)
 	# Target: OpenBSD/powerpc
 	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o ppcobsd-tdep.o \
-			solib-svr4.o"
+			solib-svr4.o \
+			ravenscar-thread.o ppc-ravenscar-thread.o"
 	;;
 powerpc-*-aix* | rs6000-*-*)
 	# Target: PowerPC running AIX
 	gdb_target_obs="rs6000-tdep.o rs6000-aix-tdep.o xcoffread.o \
-			ppc-sysv-tdep.o solib-svr4.o"
+			ppc-sysv-tdep.o solib-svr4.o \
+			ravenscar-thread.o ppc-ravenscar-thread.o"
 	;;
 powerpc-*-linux* | powerpc64-*-linux*)
 	# Target: PowerPC running Linux
 	gdb_target_obs="rs6000-tdep.o ppc-linux-tdep.o ppc-sysv-tdep.o \
 			solib-svr4.o solib-spu.o spu-multiarch.o \
-			glibc-tdep.o symfile-mem.o linux-tdep.o"
+			glibc-tdep.o symfile-mem.o linux-tdep.o \
+			ravenscar-thread.o ppc-ravenscar-thread.o"
 	gdb_sim=../sim/ppc/libsim.a
 	build_gdbserver=yes
 	;;
 powerpc*-*-*)
 	# Target: PowerPC running eabi
 	gdb_target_obs="rs6000-tdep.o monitor.o dsrec.o ppcbug-rom.o \
-			dink32-rom.o ppc-sysv-tdep.o solib-svr4.o"
+			dink32-rom.o ppc-sysv-tdep.o solib-svr4.o \
+			ravenscar-thread.o ppc-ravenscar-thread.o"
 	if test -f ../sim/ppc/Makefile; then
 	  gdb_sim=../sim/ppc/libsim.a
 	fi

@@ -52,6 +52,7 @@
 
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
+#include "ppc-ravenscar-thread.h"
 
 #include "gdb_assert.h"
 #include "dis-asm.h"
@@ -4152,6 +4153,12 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdb_assert (gdbarch_num_regs (gdbarch)
 	      + gdbarch_num_pseudo_regs (gdbarch) == cur_reg);
+
+  /* Register the ravenscar_arch_ops.  */
+  if (mach == bfd_mach_ppc_e500)
+    register_e500_ravenscar_ops (gdbarch);
+  else
+    register_ppc_ravenscar_ops (gdbarch);
 
   return gdbarch;
 }

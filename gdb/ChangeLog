@@ -1,5 +1,17 @@
 2012-12-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* ppc-ravenscar-thread.h, ppc-ravenscar-thread.c: New files.
+	* Makefile.in (ALL_TARGET_OBS): Add ppc-ravenscar-thread.o.
+	(HFILES_NO_SRCDIR): Add ppc-ravenscar-thread.h.
+	(ALLDEPFILES): Add ppc-ravenscar-thread.c.
+	* configure.tgt: Add ravenscar-thread.o and ppc-ravenscar-thread.o
+	to gdb_target_obs for every target that uses rs6000-tdep.o.
+	* rs6000-tdep.c: #include "ppc-ravenscar-thread.h".
+	(rs6000_gdbarch_init): Call register_e500_ravenscar_ops
+	or register_ppc_ravenscar_ops.
+
+2012-12-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* sparc-ravenscar-thread.h: SPARC_RAVENSCAR_THREAD_H renames
 	RAVENSCAR_SPARC_THREAD_H.
 	* sparc-ravenscar-thread.c: Rename all global entities
