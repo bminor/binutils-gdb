@@ -265,8 +265,6 @@ extern void start_event_loop (void);
 extern int handle_serial_event (int err, gdb_client_data client_data);
 extern int handle_target_event (int err, gdb_client_data client_data);
 
-extern void push_event (ptid_t ptid, struct target_waitstatus *status);
-
 /* Functions from hostio.c.  */
 extern int handle_vFile (char *, int, int *);
 

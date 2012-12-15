@@ -168,7 +168,7 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o targ
 	utils.o version.o vec.o gdb_vecs.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
 	xml-utils.o common-utils.o ptid.o buffer.o format.o \
-	dll.o \
+	dll.o notif.o \
 	$(XML_BUILTIN) \
 	$(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o

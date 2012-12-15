@@ -20,6 +20,7 @@
 #include "server.h"
 #include "gdbthread.h"
 #include "agent.h"
+#include "notif.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -115,13 +116,13 @@ static ptid_t last_ptid;
 static char *own_buf;
 static unsigned char *mem_buf;
 
-/* Structure holding information relative to a single stop reply.  We
-   keep a queue of these (really a singly-linked list) to push to GDB
-   in non-stop mode.  */
+/* A sub-class of 'struct notif_event' for stop, holding information
+   relative to a single stop reply.  We keep a queue of these to
+   push to GDB in non-stop mode.  */
+
 struct vstop_notif
 {
-  /* Pointer to next in list.  */
-  struct vstop_notif *next;
+  struct notif_event base;
 
   /* Thread or process that got the event.  */
   ptid_t ptid;
@@ -130,66 +131,39 @@ struct vstop_notif
   struct target_waitstatus status;
 };
 
-/* The pending stop replies list head.  */
-static struct vstop_notif *notif_queue = NULL;
+DEFINE_QUEUE_P (notif_event_p);
 
 /* Put a stop reply to the stop reply queue.  */
 
 static void
 queue_stop_reply (ptid_t ptid, struct target_waitstatus *status)
 {
-  struct vstop_notif *new_notif;
+  struct vstop_notif *new_notif = xmalloc (sizeof (*new_notif));
 
-  new_notif = xmalloc (sizeof (*new_notif));
-  new_notif->next = NULL;
   new_notif->ptid = ptid;
   new_notif->status = *status;
 
-  if (notif_queue)
-    {
-      struct vstop_notif *tail;
-      for (tail = notif_queue;
-	   tail && tail->next;
-	   tail = tail->next)
-	;
-      tail->next = new_notif;
-    }
-  else
-    notif_queue = new_notif;
-
-  if (remote_debug)
-    {
-      int i = 0;
-      struct vstop_notif *n;
-
-      for (n = notif_queue; n; n = n->next)
-	i++;
-
-      fprintf (stderr, "pending stop replies: %d\n", i);
-    }
+  notif_event_enque (&notif_stop, (struct notif_event *) new_notif);
 }
 
-/* Place an event in the stop reply queue, and push a notification if
-   we aren't sending one yet.  */
-
-void
-push_event (ptid_t ptid, struct target_waitstatus *status)
+static int
+remove_all_on_match_pid (QUEUE (notif_event_p) *q,
+			    QUEUE_ITER (notif_event_p) *iter,
+			    struct notif_event *event,
+			    void *data)
 {
-  gdb_assert (status->kind != TARGET_WAITKIND_IGNORE);
+  int *pid = data;
 
-  queue_stop_reply (ptid, status);
-
-  /* If this is the first stop reply in the queue, then inform GDB
-     about it, by sending a Stop notification.  */
-  if (notif_queue->next == NULL)
+  if (*pid == -1
+      || ptid_get_pid (((struct vstop_notif *) event)->ptid) == *pid)
     {
-      char *p = own_buf;
-      strcpy (p, "Stop:");
-      p += strlen (p);
-      prepare_resume_reply (p,
-			    notif_queue->ptid, &notif_queue->status);
-      putpkt_notif (own_buf);
+      if (q->free_func != NULL)
+	q->free_func (event);
+
+      QUEUE_remove_elem (notif_event_p, q, iter);
     }
+
+  return 1;
 }
 
 /* Get rid of the currently pending stop replies for PID.  If PID is
@@ -198,39 +172,22 @@ push_event (ptid_t ptid, struct target_waitstatus *status)
 static void
 discard_queued_stop_replies (int pid)
 {
-  struct vstop_notif *prev = NULL, *reply, *next;
-
-  for (reply = notif_queue; reply; reply = next)
-    {
-      next = reply->next;
-
-      if (pid == -1
-	  || ptid_get_pid (reply->ptid) == pid)
-	{
-	  if (reply == notif_queue)
-	    notif_queue = next;
-	  else
-	    prev->next = reply->next;
-
-	  free (reply);
-	}
-      else
-	prev = reply;
-    }
+  QUEUE_iterate (notif_event_p, notif_stop.queue,
+		 remove_all_on_match_pid, &pid);
 }
-
-/* If there are more stop replies to push, push one now.  */
 
 static void
-send_next_stop_reply (char *own_buf)
+vstop_notif_reply (struct notif_event *event, char *own_buf)
 {
-  if (notif_queue)
-    prepare_resume_reply (own_buf,
-			  notif_queue->ptid,
-			  &notif_queue->status);
-  else
-    write_ok (own_buf);
+  struct vstop_notif *vstop = (struct vstop_notif *) event;
+
+  prepare_resume_reply (own_buf, vstop->ptid, &vstop->status);
 }
+
+struct notif_server notif_stop =
+{
+  "vStopped", "Stop", NULL, vstop_notif_reply,
+};
 
 static int
 target_running (void)
@@ -2169,29 +2126,6 @@ handle_v_kill (char *own_buf)
     }
 }
 
-/* Handle a 'vStopped' packet.  */
-static void
-handle_v_stopped (char *own_buf)
-{
-  /* If we're waiting for GDB to acknowledge a pending stop reply,
-     consider that done.  */
-  if (notif_queue)
-    {
-      struct vstop_notif *head;
-
-      if (remote_debug)
-	fprintf (stderr, "vStopped: acking %s\n",
-		 target_pid_to_str (notif_queue->ptid));
-
-      head = notif_queue;
-      notif_queue = notif_queue->next;
-      free (head);
-    }
-
-  /* Push another stop reply, or if there are no more left, an OK.  */
-  send_next_stop_reply (own_buf);
-}
-
 /* Handle all of the extended 'v' packets.  */
 void
 handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
@@ -2252,11 +2186,8 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
       return;
     }
 
-  if (strncmp (own_buf, "vStopped", 8) == 0)
-    {
-      handle_v_stopped (own_buf);
-      return;
-    }
+  if (handle_notif_ack (own_buf, packet_len))
+    return;
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
@@ -2337,9 +2268,14 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
      manage the thread's last_status field.  */
   if (the_target->thread_stopped == NULL)
     {
+      struct vstop_notif *new_notif = xmalloc (sizeof (*new_notif));
+
+      new_notif->ptid = entry->id;
+      new_notif->status = thread->last_status;
       /* Pass the last stop reply back to GDB, but don't notify
 	 yet.  */
-      queue_stop_reply (entry->id, &thread->last_status);
+      notif_event_enque (&notif_stop,
+			 (struct notif_event *) new_notif);
     }
   else
     {
@@ -2420,7 +2356,7 @@ handle_status (char *own_buf)
       /* The first is sent immediatly.  OK is sent if there is no
 	 stopped thread, which is the same handling of the vStopped
 	 packet (by design).  */
-      send_next_stop_reply (own_buf);
+      notif_write_event (&notif_stop, own_buf);
     }
   else
     {
@@ -2788,6 +2724,8 @@ main (int argc, char *argv[])
       last_status.value.integer = 0;
       last_ptid = minus_one_ptid;
     }
+
+  initialize_notif ();
 
   /* Don't report shared library events on the initial connection,
      even if some libraries are preloaded.  Avoids the "stopped by
@@ -3400,7 +3338,7 @@ process_serial_event (void)
     {
       /* In non-stop, defer exiting until GDB had a chance to query
 	 the whole vStopped list (until it gets an OK).  */
-      if (!notif_queue)
+      if (QUEUE_is_empty (notif_event_p, notif_stop.queue))
 	{
 	  fprintf (stderr, "GDBserver exiting\n");
 	  remote_close ();
@@ -3498,8 +3436,14 @@ handle_target_event (int err, gdb_client_data client_data)
 	}
       else
 	{
-	  /* Something interesting.  Tell GDB about it.  */
-	  push_event (last_ptid, &last_status);
+	  struct vstop_notif *vstop_notif
+	    = xmalloc (sizeof (struct vstop_notif));
+
+	  vstop_notif->status = last_status;
+	  vstop_notif->ptid = last_ptid;
+	  /* Push Stop notification.  */
+	  notif_push (&notif_stop,
+		      (struct notif_event *) vstop_notif);
 	}
     }
 

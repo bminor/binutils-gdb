@@ -1,3 +1,28 @@
+2012-12-15  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (OBS): Add notif.o.
+	* notif.c, notif.h: New.
+	* server.c: Include "notif.h".
+	(struct vstop_notif) <next>: Remove.
+	<base>: New field.
+	(queue_stop_reply): Update.
+	(push_event, send_next_stop_reply): Remove.
+	(discard_queued_stop_replies): Update.
+	(notif_stop): New variable.
+	(handle_v_stopped): Remove.
+	(handle_v_requests): Don't call handle_v_stopped.  Call
+	handle_ack_notif instead.
+	(queue_stop_reply_callback): Call notif_event_enque instead
+	of queue_stop_reply.
+	(handle_status): Don't call send_next_stop_reply, call
+	notif_write_event instead.
+	(kill_inferior_callback): Likewise.
+	(detach_or_kill_inferior_callback): Likewise.
+	(main): Call initialize_notif.
+	(process_serial_event): Call QUEUE_is_empty.
+	(handle_target_event): Call notif_push instead of push event.
+	* server.h (push_event): Remove declaration.
+
 2012-12-10  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (DEPMODE, DEPDIR, depcomp, COMPILE.pre)
