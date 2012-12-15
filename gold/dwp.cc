@@ -1532,8 +1532,11 @@ Dwp_output_file::add_cu_set(uint64_t dwo_id,
 			  debug_loc, debug_str_offsets, debug_macinfo,
 			  debug_macro };
   unsigned int slot;
-  this->cu_index_.find_or_add(dwo_id, &slot);
-  this->cu_index_.enter_set(slot, cu_set);
+  if (!this->cu_index_.find_or_add(dwo_id, &slot))
+    this->cu_index_.enter_set(slot, cu_set);
+  else
+    gold_warning(_("%s: duplicate entry for CU (dwo_id 0x%llx)"),
+		 this->name_, (unsigned long long)dwo_id);
 }
 
 // Lookup a type signature and return TRUE if we have already seen it.
@@ -1617,6 +1620,7 @@ Dwp_output_file::Dwp_index::enter_set(unsigned int slot,
   this->shndx_pool_.push_back(0);
 
   // Enter the signature and pool index into the hash table.
+  gold_assert(this->hash_table_[slot] == 0);
   this->hash_table_[slot] = set.signature;
   this->index_table_[slot] = pool_index;
   ++this->used_;
