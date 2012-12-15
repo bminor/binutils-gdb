@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef RAVENSCAR_SPARC_THREAD_H
-#define RAVENSCAR_SPARC_THREAD_H
+#ifndef SPARC_RAVENSCAR_THREAD_H
+#define SPARC_RAVENSCAR_THREAD_H
 
 struct gdbarch;
 

@@ -1,5 +1,13 @@
 2012-12-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* sparc-ravenscar-thread.h: SPARC_RAVENSCAR_THREAD_H renames
+	RAVENSCAR_SPARC_THREAD_H.
+	* sparc-ravenscar-thread.c: Rename all global entities
+	whose name is uses "ravenscar_sparc" as the prefix to use
+	"sparc_ravenscar" instead.
+
+2012-12-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* sparc-ravenscar-thread.h: Renames ravenscar-sparc-thread.h.
 	* sparc-ravenscar-thread.c: Renames ravenscar-sparc-thread.c.
 	Adjust sparc-ravenscar-thread.h #include.
