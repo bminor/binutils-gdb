@@ -1,5 +1,15 @@
 2012-12-15  Yao Qi  <yao@codesourcery.com>
 
+	* remote.c (discard_pending_stop_replies): Update declaration.
+	(remote_detach_1, extended_remote_mourn_1): Likewise.
+	(discard_pending_stop_replies): Change parameter from PID to
+	INF.
+	(remote_close): Update caller.
+	(_initialize_remote): Attach discard_pending_stop_replies to
+	inferior_exit observer.
+
+2012-12-15  Yao Qi  <yao@codesourcery.com>
+
 	* remote.c (getpkt_or_notif_sane): Add one more argument in
 	its declaration.
 	(getpkt_or_notif_sane_1): Add one more argument.

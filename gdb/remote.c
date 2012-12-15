@@ -229,7 +229,7 @@ static void do_stop_reply_xfree (void *arg);
 static void remote_parse_stop_reply (char *buf, struct stop_reply *);
 static void push_stop_reply (struct stop_reply *);
 static void remote_get_pending_stop_replies (void);
-static void discard_pending_stop_replies (int pid);
+static void discard_pending_stop_replies (struct inferior *);
 static int peek_stop_reply (ptid_t ptid);
 
 static void remote_async_inferior_event_handler (gdb_client_data);
@@ -3022,8 +3022,11 @@ remote_close (int quitting)
   inferior_ptid = null_ptid;
   discard_all_inferiors ();
 
-  /* We're no longer interested in any of these events.  */
-  discard_pending_stop_replies (-1);
+  /* Stop replies may from inferiors which are still unknown to GDB.
+     We are closing the remote target, so we should discard
+     everything, including the stop replies from GDB-unknown
+     inferiors.  */
+  discard_pending_stop_replies (NULL);
 
   if (remote_async_inferior_event_token)
     delete_async_event_handler (&remote_async_inferior_event_token);
@@ -4351,7 +4354,6 @@ remote_detach_1 (char *args, int from_tty, int extended)
   if (from_tty && !extended)
     puts_filtered (_("Ending remote debugging.\n"));
 
-  discard_pending_stop_replies (pid);
   target_mourn_inferior ();
 }
 
@@ -5159,18 +5161,18 @@ stop_reply_xfree (struct stop_reply *r)
     }
 }
 
-/* Discard all pending stop replies of inferior PID.  If PID is -1,
+/* Discard all pending stop replies of inferior INF.  If INF is NULL,
    discard everything.  */
 
 static void
-discard_pending_stop_replies (int pid)
+discard_pending_stop_replies (struct inferior *inf)
 {
   struct stop_reply *prev = NULL, *reply, *next;
 
   /* Discard the in-flight notification.  */
   if (pending_stop_reply != NULL
-      && (pid == -1
-	  || ptid_get_pid (pending_stop_reply->ptid) == pid))
+      && (inf == NULL
+	  || ptid_get_pid (pending_stop_reply->ptid) == inf->pid))
     {
       stop_reply_xfree (pending_stop_reply);
       pending_stop_reply = NULL;
@@ -5181,8 +5183,8 @@ discard_pending_stop_replies (int pid)
   for (reply = stop_reply_queue; reply; reply = next)
     {
       next = reply->next;
-      if (pid == -1
-	  || ptid_get_pid (reply->ptid) == pid)
+      if (inf == NULL
+	  || ptid_get_pid (reply->ptid) == inf->pid)
 	{
 	  if (reply == stop_reply_queue)
 	    stop_reply_queue = reply->next;
@@ -7664,9 +7666,6 @@ extended_remote_mourn_1 (struct target_ops *target)
   /* In case we got here due to an error, but we're going to stay
      connected.  */
   rs->waiting_for_stop_reply = 0;
-
-  /* We're no longer interested in these events.  */
-  discard_pending_stop_replies (ptid_get_pid (inferior_ptid));
 
   /* If the current general thread belonged to the process we just
      detached from or has exited, the remote side current general
@@ -11344,6 +11343,9 @@ _initialize_remote (void)
 
   /* Hook into new objfile notification.  */
   observer_attach_new_objfile (remote_new_objfile);
+  /* We're no longer interested in notification events of an inferior
+     when it exits.  */
+  observer_attach_inferior_exit (discard_pending_stop_replies);
 
   /* Set up signal handlers.  */
   sigint_remote_token =
