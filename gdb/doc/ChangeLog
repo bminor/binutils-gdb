@@ -1,5 +1,10 @@
 2012-12-15  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.texinfo (Debugging Output): Document 'set debug
+	notification' and 'show debug notification'.
+
+2012-12-15  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.texinfo (Listing Tracepoints): New item and example about
 	'installed on target' output.
 	Add more in the example about 'installed on target'.

@@ -71,6 +71,10 @@ enable type-printer [name]...
 disable type-printer [name]...
   Enable or disable type printers.
 
+set debug notification
+show debug notification
+  Control display of debugging info for async remote notification.
+
 * Removed commands
 
   ** For the Renesas Super-H architecture, the "regs" command has been removed

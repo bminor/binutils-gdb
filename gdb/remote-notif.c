@@ -38,6 +38,7 @@
 #include "event-loop.h"
 #include "target.h"
 #include "inferior.h"
+#include "gdbcmd.h"
 
 #include <string.h>
 
@@ -267,4 +268,14 @@ void
 _initialize_notif (void)
 {
   notif_queue = QUEUE_alloc (notif_client_p, notif_xfree);
+
+  add_setshow_boolean_cmd ("notification", no_class, &notif_debug,
+			   _("\
+Set debugging of async remote notification."), _("\
+Show debugging of async remote notification."), _("\
+When non-zero, debugging output about async remote notifications"
+" is enabled."),
+			   NULL,
+			   NULL,
+			   &setdebuglist, &showdebuglist);
 }

@@ -21983,6 +21983,12 @@ Displays the current state of @value{GDBN} JIT debugging.
 Turns on or off debugging messages from the Linux LWP debug support.
 @item show debug lin-lwp
 Show the current state of Linux LWP debugging messages.
+@item set debug notification
+@cindex remote async notification debugging info
+Turns on or off debugging messages about remote async notification.
+The default is off.
+@item show debug notification
+Displays the current state of remote async notification debugging messages.
 @item set debug observer
 @cindex observer debugging info
 Turns on or off display of @value{GDBN} observer debugging.  This
