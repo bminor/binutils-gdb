@@ -1,4 +1,9 @@
 2012-12-15  Yao Qi  <yao@codesourcery.com>
+	    Doug Evans  <dje@google.com>
+
+	* common/queue.h: New.
+
+2012-12-15  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (print_one_breakpoint_location): Display the
 	state of 'installed' of each non-pending location of a tracepoint
