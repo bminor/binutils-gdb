@@ -79,7 +79,6 @@ static void
 macho_symfile_init (struct objfile *objfile)
 {
   objfile->flags |= OBJF_REORDERED;
-  init_entry_point_info (objfile);
 }
 
 /*  Add a new OSO to the vector of OSO to load.  */

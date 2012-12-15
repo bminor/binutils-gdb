@@ -1,3 +1,15 @@
+2012-12-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* symfile.c (syms_from_objfile_1): Renames syms_from_objfile.
+	Remove call to init_entry_point_info.  Add OBJFILE's
+	section_offsets and num_sections initialization.  Add note
+	about entry info in the function documentation.
+	(syms_from_objfile): New function.
+	* coffread.c (coff_symfile_init): Remove call to
+	init_entry_point_info.
+	* machoread.c (macho_symfile_init): Likewise.
+	* xcoffread.c(xcoff_symfile_init): Likewise.
+
 2012-12-15  Yao Qi  <yao@codesourcery.com>
 
 	* remote-notif.c (_initialize_notif): Add new commands

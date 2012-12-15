@@ -896,6 +896,8 @@ read_symbols (struct objfile *objfile, int add_flags)
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
 
+   This function does not set the OBJFILE's entry-point info.
+
    OBJFILE is where the symbols are to be read from.
 
    ADDRS is the list of section load addresses.  If the user has given
@@ -923,12 +925,12 @@ read_symbols (struct objfile *objfile, int add_flags)
    an extra symbol file such as dynamically loaded code, and wether
    breakpoint reset should be deferred.  */
 
-void
-syms_from_objfile (struct objfile *objfile,
-                   struct section_addr_info *addrs,
-                   struct section_offsets *offsets,
-                   int num_offsets,
-		   int add_flags)
+static void
+syms_from_objfile_1 (struct objfile *objfile,
+		     struct section_addr_info *addrs,
+		     struct section_offsets *offsets,
+		     int num_offsets,
+		     int add_flags)
 {
   struct section_addr_info *local_addr = NULL;
   struct cleanup *old_chain;
@@ -936,11 +938,21 @@ syms_from_objfile (struct objfile *objfile,
 
   gdb_assert (! (addrs && offsets));
 
-  init_entry_point_info (objfile);
   objfile->sf = find_sym_fns (objfile->obfd);
 
   if (objfile->sf == NULL)
-    return;	/* No symbols.  */
+    {
+      /* No symbols to load, but we still need to make sure
+	 that the section_offsets table is allocated.  */
+      int num_sections = bfd_count_sections (objfile->obfd);
+      size_t size = SIZEOF_N_SECTION_OFFSETS (num_offsets);
+
+      objfile->num_sections = num_sections;
+      objfile->section_offsets
+        = obstack_alloc (&objfile->objfile_obstack, size);
+      memset (objfile->section_offsets, 0, size);
+      return;
+    }
 
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
@@ -1019,6 +1031,20 @@ syms_from_objfile (struct objfile *objfile,
 
   discard_cleanups (old_chain);
   xfree (local_addr);
+}
+
+/* Same as syms_from_objfile_1, but also initializes the objfile
+   entry-point info.  */
+
+void
+syms_from_objfile (struct objfile *objfile,
+		   struct section_addr_info *addrs,
+		   struct section_offsets *offsets,
+		   int num_offsets,
+		   int add_flags)
+{
+  syms_from_objfile_1 (objfile, addrs, offsets, num_offsets, add_flags);
+  init_entry_point_info (objfile);
 }
 
 /* Perform required actions after either reading in the initial

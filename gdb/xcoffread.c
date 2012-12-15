@@ -1922,8 +1922,6 @@ xcoff_symfile_init (struct objfile *objfile)
      find this causes a significant slowdown in gdb then we could
      set it in the debug symbol readers only when necessary.  */
   objfile->flags |= OBJF_REORDERED;
-
-  init_entry_point_info (objfile);
 }
 
 /* Perform any local cleanups required when we are done with a particular
