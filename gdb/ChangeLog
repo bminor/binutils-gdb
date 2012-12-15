@@ -1,5 +1,54 @@
 2012-12-15  Yao Qi  <yao@codesourcery.com>
 
+	* Makefile.in (REMOTE_OBS): Add "remote-notif.o".
+	(SFILES): Add "remote-notif.c".
+	(HFILES_NO_SRCDIR): Add "remote-notif.h" and "common/queue.h".
+	* remote-notif.c: New.  Factored out from remote.c.
+	* remote-notif.h: New.
+	* remote.c: Include "remote-notif.h".
+	(stop_reply_xmalloc, do_stop_reply_xfree):
+	(remote_parse_stop_reply, remote_get_pending_stop_replies):
+	(remote_async_get_pending_events_handler): Remove declarations.
+	(remote_parse_stop_reply): Declare.
+	(pending_stop_reply): Remove.
+	(remote_async_get_pending_events_token): Move to
+	remote-notif.c.
+	(remote_close): Replace 'delete_async_event_handler' with
+	remote_notif_unregister_async_event_handler.
+	Don't call discard_pending_stop_replies.
+	(remote_start_remote): Replace code with remote_notif_parse
+	and remote_notif_get_pending_replies.
+	(remote_open_1): Replace 'create_async_event_handler' with
+	remote_notif_register_async_event_handler.
+	(extended_remote_attach_1): Call remote_notif_parse and
+	notif_stop_reply_push.
+	(struct stop_reply) <next>: Remove.
+	<base>: New field.
+	Callers update.
+	(stop_reply_queue): Change its type.
+	(stop_reply_xmalloc, do_stop_reply_xfree): Remove.
+	(remote_notif_remove_all): New.
+	(discard_pending_stop_replies): Update.
+	(remote_notif_stop_ack, stop_reply_dtr): New.
+	(remote_notif_stop_alloc_event): New.
+	(notif_client_stop): New variable.
+	(stop_reply_match_ptid, stop_reply_match_ptid_and_ws: New.
+	(queued_stop_reply, peek_stop_reply): Adjust.
+	(remote_get_pending_stop_replies): Rename to
+	remote_notif_get_pending_events.
+	(handle_notification): Move to remote-notif.c.
+	(remote_async_get_pending_events_handler): Likewise.
+	(remote_wait_as): Adjust to call remote_notif_parse.
+	Call 'getpkt_or_notif_sane' instead of 'getpkt_sane'.
+	Return minus_one_ptid early if gets a notification.
+	(remote_wait): Call QUEUE_is_empty (notif_reply_p).
+	(_initialize_remote): Call QUEUE_alloc.  Update caller.
+	(remote_resume): Call 'remote_notif_process' in all-stop mode.
+	* remote.h: Include "remote-notif.h".
+	(remote_notif_get_pending_replies): Declare.
+
+2012-12-15  Yao Qi  <yao@codesourcery.com>
+
 	* remote.c (discard_pending_stop_replies): Update declaration.
 	(remote_detach_1, extended_remote_mourn_1): Likewise.
 	(discard_pending_stop_replies): Change parameter from PID to

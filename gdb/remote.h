@@ -19,6 +19,8 @@
 #ifndef REMOTE_H
 #define REMOTE_H
 
+#include "remote-notif.h"
+
 struct target_desc;
 
 /* Read a packet from the remote machine, with error checking, and
@@ -59,4 +61,5 @@ extern int remote_register_number_and_offset (struct gdbarch *gdbarch,
 					      int regnum, int *pnum,
 					      int *poffset);
 
+extern void remote_notif_get_pending_events (struct notif_client *np);
 #endif

@@ -507,7 +507,8 @@ SER_HARDWIRE = @SER_HARDWIRE@
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
-REMOTE_OBS = remote.o dcache.o tracepoint.o ax-general.o ax-gdb.o remote-fileio.o
+REMOTE_OBS = remote.o dcache.o tracepoint.o ax-general.o ax-gdb.o remote-fileio.o \
+	remote-notif.o
 
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS = @SIM_OBS@
@@ -729,7 +730,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
 	proc-service.list progspace.c \
 	prologue-value.c psymtab.c \
-	regcache.c reggroups.c remote.c remote-fileio.c reverse.c \
+	regcache.c reggroups.c remote.c remote-fileio.c remote-notif.c reverse.c \
 	sentinel-frame.c \
 	serial.c ser-base.c ser-unix.c skip.c \
 	solib.c solib-target.c source.c \
@@ -774,7 +775,7 @@ c-lang.h d-lang.h go-lang.h frame.h event-loop.h block.h cli/cli-setshow.h \
 cli/cli-decode.h cli/cli-cmds.h cli/cli-dump.h cli/cli-utils.h \
 cli/cli-script.h macrotab.h symtab.h version.h \
 gnulib/import/string.in.h gnulib/import/str-two-way.h \
-gnulib/import/stdint.in.h remote.h gdb.h sparc-nat.h \
+gnulib/import/stdint.in.h remote.h remote-notif.h gdb.h sparc-nat.h \
 gdbthread.h dwarf2-frame.h dwarf2-frame-tailcall.h nbsd-nat.h dcache.h \
 amd64-nat.h s390-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
 gdbarch.h bsd-uthread.h common/gdb_stat.h memory-map.h	memrange.h \
@@ -826,7 +827,7 @@ gnulib/import/extra/snippet/arg-nonnull.h gnulib/import/extra/snippet/c++defs.h 
 gnulib/import/extra/snippet/warn-on-use.h \
 gnulib/import/stddef.in.h gnulib/import/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
-common/format.h common/host-defs.h utils.h \
+common/format.h common/host-defs.h utils.h common/queue.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h gdb_bfd.h
 
 # Header files that already have srcdir in them, or which are in objdir.
