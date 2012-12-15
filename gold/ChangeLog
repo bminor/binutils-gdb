@@ -1,5 +1,13 @@
 2012-12-14  Cary Coutant  <ccoutant@google.com>
 
+    	* testsuite/Makefile.am (exception_separate_shared_12_test): Add
+    	--no-as-needed flag.
+    	(exception_separate_shared_12_test): Likewise.
+    	(incremental_copy_test): Likewise.
+    	* testsuite/Makefile.in: Regenerate.
+
+2012-12-14  Cary Coutant  <ccoutant@google.com>
+
 	* dwp.cc (Dwp_output_file::add_cu_set): Check for duplicate CUs.
 	(Dwp_output_file::Dwp_index::enter_set): Add assert.
 

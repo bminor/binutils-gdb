@@ -607,14 +607,16 @@ exception_same_shared_test_LDADD = exception_shared.so
 exception_separate_shared_12_test_SOURCES = exception_test_main.cc
 exception_separate_shared_12_test_DEPENDENCIES = \
 	gcctestdir/ld exception_shared_1.so exception_shared_2.so
-exception_separate_shared_12_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+exception_separate_shared_12_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. \
+	-Wl,--no-as-needed
 exception_separate_shared_12_test_LDADD = \
 	exception_shared_1.so exception_shared_2.so
 
 exception_separate_shared_21_test_SOURCES = exception_test_main.cc
 exception_separate_shared_21_test_DEPENDENCIES = \
 	gcctestdir/ld exception_shared_1.so exception_shared_2.so
-exception_separate_shared_21_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+exception_separate_shared_21_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,. \
+	-Wl,--no-as-needed
 exception_separate_shared_21_test_LDADD = \
 	exception_shared_2.so exception_shared_1.so
 
@@ -2127,10 +2129,10 @@ incremental_test_6: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 check_PROGRAMS += incremental_copy_test
 incremental_copy_test: copy_test_v1.o copy_test.o copy_test_1.so copy_test_2.so
 	cp -f copy_test_v1.o copy_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ -Wl,-R,. copy_test_tmp.o copy_test_1.so copy_test_2.so
+	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Bgcctestdir/ -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
 	@sleep 1
 	cp -f copy_test.o copy_test_tmp.o
-	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ -Wl,-R,. copy_test_tmp.o copy_test_1.so copy_test_2.so
+	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
 
 check_PROGRAMS += incremental_common_test_1
 incremental_common_test_1: common_test_1_v1.o common_test_1_v2.o gcctestdir/ld
