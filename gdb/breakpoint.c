@@ -11881,7 +11881,7 @@ clear_command (char *arg, int from_tty)
   make_cleanup (VEC_cleanup (breakpoint_p), &found);
   for (i = 0; i < sals.nelts; i++)
     {
-      int is_abs, sal_name_len;
+      int is_abs;
 
       /* If exact pc given, clear bpts at that pc.
          If line given (pc == 0), clear all bpts on specified line.
@@ -11897,7 +11897,6 @@ clear_command (char *arg, int from_tty)
 
       sal = sals.sals[i];
       is_abs = sal.symtab == NULL ? 1 : IS_ABSOLUTE_PATH (sal.symtab->filename);
-      sal_name_len = is_abs ? 0 : strlen (sal.symtab->filename);
 
       /* Find all matching breakpoints and add them to 'found'.  */
       ALL_BREAKPOINTS (b)
@@ -11930,8 +11929,7 @@ clear_command (char *arg, int from_tty)
 			line_match = 1;
 		      else if (!IS_ABSOLUTE_PATH (sal.symtab->filename)
 			       && compare_filenames_for_search (loc->source_file,
-								sal.symtab->filename,
-								sal_name_len))
+								sal.symtab->filename))
 			line_match = 1;
 		    }
 

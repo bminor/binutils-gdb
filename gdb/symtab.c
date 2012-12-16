@@ -147,15 +147,14 @@ const struct block *block_found;
 
 /* See whether FILENAME matches SEARCH_NAME using the rule that we
    advertise to the user.  (The manual's description of linespecs
-   describes what we advertise).  SEARCH_LEN is the length of
-   SEARCH_NAME.  We assume that SEARCH_NAME is a relative path.
-   Returns true if they match, false otherwise.  */
+   describes what we advertise).  We assume that SEARCH_NAME is
+   a relative path.  Returns true if they match, false otherwise.  */
 
 int
-compare_filenames_for_search (const char *filename, const char *search_name,
-			      int search_len)
+compare_filenames_for_search (const char *filename, const char *search_name)
 {
   int len = strlen (filename);
+  size_t search_len = strlen (search_name);
 
   if (len < search_len)
     return 0;
@@ -196,7 +195,6 @@ iterate_over_some_symtabs (const char *name,
 {
   struct symtab *s = NULL;
   const char* base_name = lbasename (name);
-  int name_len = strlen (name);
   int is_abs = IS_ABSOLUTE_PATH (name);
 
   for (s = first; s != NULL && s != after_last; s = s->next)
@@ -208,7 +206,7 @@ iterate_over_some_symtabs (const char *name,
 	    return 1;
 	}
 
-      if (!is_abs && compare_filenames_for_search (s->filename, name, name_len))
+      if (!is_abs && compare_filenames_for_search (s->filename, name))
 	{
 	  if (callback (s, data))
 	    return 1;
@@ -233,8 +231,7 @@ iterate_over_some_symtabs (const char *name,
 	      return 1;
           }
 
-	if (fp != NULL && !is_abs && compare_filenames_for_search (fp, name,
-								   name_len))
+	if (fp != NULL && !is_abs && compare_filenames_for_search (fp, name))
 	  {
 	    if (callback (s, data))
 	      return 1;
@@ -256,7 +253,7 @@ iterate_over_some_symtabs (const char *name,
 		  return 1;
 	      }
 
-	    if (!is_abs && compare_filenames_for_search (rp, name, name_len))
+	    if (!is_abs && compare_filenames_for_search (rp, name))
 	      {
 		if (callback (s, data))
 		  return 1;
