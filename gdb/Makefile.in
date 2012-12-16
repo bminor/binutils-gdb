@@ -731,7 +731,6 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
 	proc-service.list progspace.c \
 	prologue-value.c psymtab.c \
-	ravenscar-thread.c \
 	regcache.c reggroups.c remote.c remote-fileio.c remote-notif.c reverse.c \
 	sentinel-frame.c \
 	serial.c ser-base.c ser-unix.c skip.c \
@@ -1483,6 +1482,7 @@ ALLDEPFILES = \
 	ppcnbsd-nat.c ppcnbsd-tdep.c \
 	ppcobsd-nat.c ppcobsd-tdep.c \
 	procfs.c \
+	ravenscar-thread.c \
 	remote-m32r-sdi.c remote-mips.c \
 	remote-sim.c \
 	dcache.c \
