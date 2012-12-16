@@ -1522,82 +1522,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      break;
 	    }
 
-	  /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
-	     it here if it is defined in a non-shared object.  */
-	  if (h->type == STT_GNU_IFUNC
-	      && h->def_regular)
-	    {
-	      /* It is referenced by a non-shared object. */
-	      h->ref_regular = 1;
-	      h->needs_plt = 1;
-
-	      /* STT_GNU_IFUNC symbol must go through PLT.  */
-	      h->plt.refcount += 1;
-
-	      /* STT_GNU_IFUNC needs dynamic sections.  */
-	      if (htab->elf.dynobj == NULL)
-		htab->elf.dynobj = abfd;
-
-	      switch (r_type)
-		{
-		default:
-		  if (h->root.root.string)
-		    name = h->root.root.string;
-		  else
-		    name = bfd_elf_sym_name (abfd, symtab_hdr, isym,
-					     NULL);
-		  (*_bfd_error_handler)
-		    (_("%B: relocation %s against STT_GNU_IFUNC "
-		       "symbol `%s' isn't handled by %s"), abfd,
-		     x86_64_elf_howto_table[r_type].name,
-		     name, __FUNCTION__);
-		  bfd_set_error (bfd_error_bad_value);
-		  return FALSE;
-
-		case R_X86_64_32:
-		  if (ABI_64_P (abfd))
-		    goto not_pointer;
-		case R_X86_64_64:
-		  h->non_got_ref = 1;
-		  h->pointer_equality_needed = 1;
-		  if (info->shared)
-		    {
-		      /* We must copy these reloc types into the output
-			 file.  Create a reloc section in dynobj and
-			 make room for this reloc.  */
-		      sreloc = _bfd_elf_create_ifunc_dyn_reloc
-			(abfd, info, sec, sreloc,
-			 &((struct elf_x86_64_link_hash_entry *) h)->dyn_relocs);
-		      if (sreloc == NULL)
-			return FALSE;
-		    }
-		  break;
-
-		case R_X86_64_32S:
-		case R_X86_64_PC32:
-		case R_X86_64_PC64:
-not_pointer:
-		  h->non_got_ref = 1;
-		  if (r_type != R_X86_64_PC32
-		      && r_type != R_X86_64_PC64)
-		    h->pointer_equality_needed = 1;
-		  break;
-
-		case R_X86_64_PLT32:
-		  break;
-
-		case R_X86_64_GOTPCREL:
-		case R_X86_64_GOTPCREL64:
-		  h->got.refcount += 1;
-		  if (htab->elf.sgot == NULL
-		      && !_bfd_elf_create_got_section (htab->elf.dynobj,
-						       info))
-		    return FALSE;
-		  break;
-		}
-
-	      continue;
-	    }
+	  /* It is referenced by a non-shared object. */
+	  h->ref_regular = 1;
 	}
 
       if (! elf_x86_64_tls_transition (info, abfd, sec, NULL,
