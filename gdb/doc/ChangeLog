@@ -1,3 +1,7 @@
+2012-12-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbint.texinfo (Coding Standards) (C Usage): New rule for 0 vs. NULL.
+
 2012-12-15  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Debugging Output): Document 'set debug

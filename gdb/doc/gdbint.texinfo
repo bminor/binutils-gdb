@@ -5907,6 +5907,25 @@ protected with parentheses.)
 Declarations like @samp{struct foo *} should be used in preference to
 declarations like @samp{typedef struct foo @{ @dots{} @} *foo_ptr}.
 
+Zero constant (@code{0}) is not interchangeable with a null pointer
+constant (@code{NULL}) anywhere.  @sc{gcc} does not give a warning for
+such interchange.  Specifically:
+
+@multitable @columnfractions .2 .5
+@item incorrect
+@tab @code{if (pointervar) @{@}}
+@item incorrect
+@tab @code{if (!pointervar) @{@}}
+@item incorrect
+@tab @code{if (pointervar != 0) @{@}}
+@item incorrect
+@tab @code{if (pointervar == 0) @{@}}
+@item correct
+@tab @code{if (pointervar != NULL) @{@}}
+@item correct
+@tab @code{if (pointervar == NULL) @{@}}
+@end multitable
+
 @subsection Function Prototypes
 @cindex function prototypes
 

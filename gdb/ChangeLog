@@ -1,6 +1,28 @@
 2012-12-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
+	* skip.c (skip_function_command, skip_file_command, skip_info): Remove
+	unused forward declarations.
+	(skip_file_command): Make variables symtab and filename targets const.
+	Use proper 0 vs. NULL constant everywhere.
+	(skip_function_command): Use proper 0 vs. NULL constant everywhere.
+	Include empty line after declarations.  Use GNU spacing in a comment.
+	Do not use strlen for end of string check.
+	(skip_info): Use proper 0 vs. NULL constant everywhere.  Add column 5
+	comments.
+	(skip_enable_command, skip_disable_command, skip_delete_command)
+	(add_skiplist_entry): Use proper 0 vs. NULL constant everywhere.
+	(function_pc_is_marked_for_skip): Make variable filename target const.
+	Use proper 0 vs. NULL constant everywhere.  Fix GNU non-compliant
+	comment formatting.
+	(skip_re_set): Add empty line after function comment.  Use proper 0 vs.
+	NULL constant everywhere.  Include empty line after declarations.  Make
+	variable symtab target const.  Do not use strlen for end of string
+	check.
+
+2012-12-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
 	* breakpoint.c (clear_command): Remove variable sal_name_len and its
 	initialization, remove it from the compare_filenames_for_search call.
 	* dwarf2read.c (dw2_map_symtabs_matching_filename): Remove variable
