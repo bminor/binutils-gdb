@@ -127,6 +127,7 @@ if { [check_gc_sections_available] && ![istarget "v850-*-*"] } {
 }
 
 if { [istarget *-*-*linux*]
+     || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
     run_ld_link_tests {
 	{"stack exec" "-z execstack" "" {stack.s}
