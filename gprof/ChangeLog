@@ -1,3 +1,19 @@
+2012-12-17  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add copyright notice.
+	* Makefile.am: Likewise.
+	* README: Likewise.
+	* TODO: Likewise.
+	* bsd_callg_bl.m: Likewise.
+	* cg_arcs.h: Likewise.
+	* cg_dfn.h: Likewise.
+	* configure.in: Likewise.
+	* flat_bl.m: Likewise.
+	* fsf_callg_bl.m: Likewise.
+	* hertz.h: Likewise.
+	* utils.h: Likewise.
+	* Makefile.in: Regenerate.
+
 2012-09-20  Joe Seymour  <jseymour@codesourcery.com>
 
 	* corefile.c (core_sym_class): Allow for ".constprop.N" cloned

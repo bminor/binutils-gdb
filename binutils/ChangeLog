@@ -1,3 +1,20 @@
+2012-12-17  Nick Clifton  <nickc@redhat.com>
+
+	* BRANCHES: Add copyright notice.
+	* MAINTAINERS: Likewise.
+	* Makefile.am: Likewise.
+	* NEWS: Likewise.
+	* README: Likewise.
+	* configure.com: Likewise.
+	* configure.in: Likewise.
+	* configure.tgt: Likewise.
+	* dwarf-mode.el: Likewise.
+	* makefile.vms: Likewise.
+	* syslex_wrap.c: Likewise.
+	* doc/Makefile.am: Likewise.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2012-11-27  Kai Tietz  <ktietz@redhat.com>
 
 	* resbin.c (bin_to_res_version):  Correct offset

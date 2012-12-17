@@ -1,3 +1,19 @@
+2012-12-17  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add copyright notice.
+	* Makefile.am: Likewise.
+	* NEWS: Likewise.
+	* README: Likewise.
+	* configure.host: Likewise.
+	* configure.in: Likewise.
+	* gen-doc.texi: Likewise.
+	* h8-doc.texi: Likewise.
+	* ldlex-wrapper.c: Likewise.
+	* emulparams/README: Likewise.
+	* emultempl/README: Likewise.
+	* scripttempl/README: Likewise.
+	* Makefile.in: Regenerate.
+
 2012-12-17  Alan Modra  <amodra@gmail.com>
 
 	PR ld/14962

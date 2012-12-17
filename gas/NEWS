@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the v850e3v5.
+
 Changes in 2.23:
 
 * Add support for the 64-bit ARM architecture: AArch64.
@@ -600,6 +602,12 @@ Changes in 1.93.01:
   of new CPUs and formats, lots of bugs fixed.
 
 
+Copyright (C) 2012 Free Software Foundation, Inc.
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.
+
 Local variables:
 fill-column: 79
 End:
