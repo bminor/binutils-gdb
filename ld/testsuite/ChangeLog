@@ -1,3 +1,10 @@
+2012-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14962
+	* ld-elf/var1.d: New file.
+	* ld-elf/var1.s: Likewise.
+	* ld-elf/var1.t: Likewise.
+
 2012-12-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14968
