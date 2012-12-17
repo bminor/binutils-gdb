@@ -293,7 +293,6 @@ lynx_ptrace (int request, ptid_t ptid, int addr, int data, int addr2)
 static int
 lynx_create_inferior (char *program, char **allargs)
 {
-  struct process_info *new_process;
   int pid;
 
   lynx_debug ("lynx_create_inferior ()");
@@ -318,7 +317,7 @@ lynx_create_inferior (char *program, char **allargs)
       _exit (0177);
     }
 
-  new_process = add_process (pid, 0);
+  add_process (pid, 0);
   /* Do not add the process thread just yet, as we do not know its tid.
      We will add it later, during the wait for the STOP event corresponding
      to the lynx_ptrace (PTRACE_TRACEME) call above.  */
