@@ -255,6 +255,9 @@ ptrace_request_to_str (int request)
       case PTRACE_GETLOADINFO:
         return "PTRACE_GETLOADINFO";
         break;
+      case PTRACE_GETTRACESIG:
+	return "PTRACE_GETTRACESIG";
+	break;
 #ifdef PTRACE_GETTHREADLIST
       case PTRACE_GETTHREADLIST:
         return "PTRACE_GETTHREADLIST";
