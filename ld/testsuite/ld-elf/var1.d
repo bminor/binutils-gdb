@@ -2,9 +2,9 @@
 #nm: -n
 
 #...
-0[0-9a-f]* D var1
+[0-9a-f]* D var1
 #...
-0[0-9a-f]*3 A var2
+[0-9a-f]*3 A var2
 #...
-0[0-9a-f]* D var3
+[0-9a-f]* D var3
 #pass
