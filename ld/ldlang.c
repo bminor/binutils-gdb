@@ -3951,63 +3951,12 @@ print_output_section_statement
 			output_section_statement);
 }
 
-/* Scan for the use of the destination in the right hand side
-   of an expression.  In such cases we will not compute the
-   correct expression, since the value of DST that is used on
-   the right hand side will be its final value, not its value
-   just before this expression is evaluated.  */
-
-static bfd_boolean
-scan_for_self_assignment (const char * dst, etree_type * rhs)
-{
-  if (rhs == NULL || dst == NULL)
-    return FALSE;
-
-  switch (rhs->type.node_class)
-    {
-    case etree_binary:
-      return (scan_for_self_assignment (dst, rhs->binary.lhs)
-	      || scan_for_self_assignment (dst, rhs->binary.rhs));
-
-    case etree_trinary:
-      return (scan_for_self_assignment (dst, rhs->trinary.lhs)
-	      || scan_for_self_assignment (dst, rhs->trinary.rhs));
-
-    case etree_assign:
-    case etree_provided:
-    case etree_provide:
-      if (strcmp (dst, rhs->assign.dst) == 0)
-	return TRUE;
-      return scan_for_self_assignment (dst, rhs->assign.src);
-
-    case etree_unary:
-      return scan_for_self_assignment (dst, rhs->unary.child);
-
-    case etree_value:
-      if (rhs->value.str)
-	return strcmp (dst, rhs->value.str) == 0;
-      return FALSE;
-
-    case etree_name:
-      if (rhs->name.name)
-	return strcmp (dst, rhs->name.name) == 0;
-      return FALSE;
-
-    default:
-      break;
-    }
-
-  return FALSE;
-}
-
-
 static void
 print_assignment (lang_assignment_statement_type *assignment,
 		  lang_output_section_statement_type *output_section)
 {
   unsigned int i;
   bfd_boolean is_dot;
-  bfd_boolean computation_is_valid = TRUE;
   etree_type *tree;
   asection *osec;
 
@@ -4018,15 +3967,14 @@ print_assignment (lang_assignment_statement_type *assignment,
     {
       is_dot = FALSE;
       tree = assignment->exp->assert_s.child;
-      computation_is_valid = TRUE;
     }
   else
     {
       const char *dst = assignment->exp->assign.dst;
 
       is_dot = (dst[0] == '.' && dst[1] == 0);
+      expld.assign_name = dst;
       tree = assignment->exp->assign.src;
-      computation_is_valid = is_dot || !scan_for_self_assignment (dst, tree);
     }
 
   osec = output_section->bfd_section;
@@ -4037,7 +3985,9 @@ print_assignment (lang_assignment_statement_type *assignment,
     {
       bfd_vma value;
 
-      if (computation_is_valid)
+      if (assignment->exp->type.node_class == etree_assert
+	  || is_dot
+	  || expld.assign_name != NULL)
 	{
 	  value = expld.result.value;
 
@@ -4073,6 +4023,7 @@ print_assignment (lang_assignment_statement_type *assignment,
       minfo ("        ");
 #endif
     }
+  expld.assign_name = NULL;
 
   minfo ("                ");
   exp_print_tree (assignment->exp);

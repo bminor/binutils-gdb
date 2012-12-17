@@ -1,3 +1,13 @@
+2012-12-17  Alan Modra  <amodra@gmail.com>
+
+	PR ld/14962
+	* ldexp.h (struct ldexp_control): Add "assign_name".
+	* ldexp.c (fold_name <NAME>): Compare and clear assign_name on match.
+	(exp_fold_tree_1): Remove existing code testing for self assignment.
+	Instead set and test expld.assign_name.
+	* ldlang.c (scan_for_self_assignment): Delete.
+	(print_assignment): Instead set and test expld.assign_name.
+
 2012-12-11  Roland McGrath  <mcgrathr@google.com>
 
 	* emulparams/elf_nacl.sh (nacl_rodata_addr): New shell function.
