@@ -138,7 +138,6 @@ char gdb_dirbuf[1024];
 void (*window_hook) (FILE *, char *);
 
 int epoch_interface;
-int xgdb_verbose;
 
 /* Buffer used for reading command lines, and the size
    allocated for it so far.  */
