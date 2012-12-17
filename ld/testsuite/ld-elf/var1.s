@@ -10,21 +10,21 @@ __start:
 	.byte 0
 	.globl	var3
 	.section	.data.var3,"aw",%progbits
-	.align 4
+	.p2align 2
 	.type	var3, %object
 	.size	var3, 4
 var3:
 	.zero	4
 	.globl	var2
 	.section	.data.var2,"aw",%progbits
-	.align 16
+	.p2align 4
 	.type	var2, %object
 	.size	var2, 16
 var2:
 	.zero	16
 	.globl	var1
 	.section	.data.var1,"aw",%progbits
-	.align 4
+	.p2align 2
 	.type	var1, %object
 	.size	var1, 4
 var1:
