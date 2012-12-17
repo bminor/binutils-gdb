@@ -1,5 +1,9 @@
 2012-12-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* lynx-low.c (lynx_attach): Delete variable new_process.
+
+2012-12-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* lynx-low.c (lynx_create_inferior): Delete variable
 	new_process.
 

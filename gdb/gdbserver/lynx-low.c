@@ -329,14 +329,13 @@ lynx_create_inferior (char *program, char **allargs)
 static int
 lynx_attach (unsigned long pid)
 {
-  struct process_info *new_process;
   ptid_t ptid = lynx_ptid_build (pid, 0);
 
   if (lynx_ptrace (PTRACE_ATTACH, ptid, 0, 0, 0) != 0)
     error ("Cannot attach to process %lu: %s (%d)\n", pid,
 	   strerror (errno), errno);
 
-  new_process = add_process (pid, 1);
+  add_process (pid, 1);
   add_thread (ptid, NULL);
 
   return 0;
