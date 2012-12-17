@@ -1,5 +1,10 @@
 2012-12-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* lynx-low.c (lynx_wait_1): Add debug trace before adding
+	new thread.
+
+2012-12-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* lynx-low.c (ptrace_request_to_str): Add handling for
 	PTRACE_GETTRACESIG.
 

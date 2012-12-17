@@ -448,7 +448,11 @@ retry:
      for non-threaded applications where the new-thread events are not
      generated.  */
   if (!find_thread_ptid (new_ptid))
-    add_thread (new_ptid, NULL);
+    {
+      lynx_debug ("New thread: (pid = %d, tid = %d)",
+		  lynx_ptid_get_pid (new_ptid), lynx_ptid_get_tid (new_ptid));
+      add_thread (new_ptid, NULL);
+    }
 
   if (WIFSTOPPED (wstat))
     {
