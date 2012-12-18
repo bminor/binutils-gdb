@@ -1,4 +1,4 @@
-2012-12-18  Tom Tromey  <tromey@redhat.com>
+2012-12-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* gnulib/update-gnulib.sh: Add call to autoheader.
 
