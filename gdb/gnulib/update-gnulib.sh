@@ -110,6 +110,7 @@ fi
 # Regenerate all necessary files...
 aclocal -Iimport/m4 &&
 autoconf &&
+autoheader &&
 automake
 if [ $? -ne 0 ]; then
    echo "Error: Failed to regenerate Makefiles and configure scripts."

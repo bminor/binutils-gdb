@@ -1,3 +1,7 @@
+2012-12-18  Tom Tromey  <tromey@redhat.com>
+
+	* gnulib/update-gnulib.sh: Add call to autoheader.
+
 2012-12-17  Tom Tromey  <tromey@redhat.com>
 
 	* top.c (xgdb_verbose): Remove.
