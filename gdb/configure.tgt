@@ -411,6 +411,12 @@ powerpc-*-linux* | powerpc64-*-linux*)
 	gdb_sim=../sim/ppc/libsim.a
 	build_gdbserver=yes
 	;;
+powerpc-*-lynx*178)
+	# Target: PowerPC running Lynx178.
+	gdb_target_obs="rs6000-tdep.o rs6000-lynx178-tdep.o \
+			xcoffread.o monitor.o dsrec.o ppc-sysv-tdep.o \
+			ravenscar-thread.o ppc-ravenscar-thread.o"
+	;;
 powerpc*-*-*)
 	# Target: PowerPC running eabi
 	gdb_target_obs="rs6000-tdep.o monitor.o dsrec.o ppcbug-rom.o \

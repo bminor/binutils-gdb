@@ -35,6 +35,7 @@
 #include "rs6000-tdep.h"
 #include "ppc-tdep.h"
 #include "exceptions.h"
+#include "xcoffread.h"
 
 /* Hook for determining the TOC address when calling functions in the
    inferior under AIX.  The initialization code in rs6000-nat.c sets
@@ -738,6 +739,13 @@ static enum gdb_osabi
 rs6000_aix_osabi_sniffer (bfd *abfd)
 {
   gdb_assert (bfd_get_flavour (abfd) == bfd_target_xcoff_flavour);
+
+  /* The only noticeable difference between Lynx178 XCOFF files and
+     AIX XCOFF files comes from the fact that there are no shared
+     libraries on Lynx178.  On AIX, we are betting that an executable
+     linked with no shared library will never exist.  */
+  if (xcoff_get_n_import_files (abfd) <= 0)
+    return GDB_OSABI_UNKNOWN;
 
   return GDB_OSABI_AIX;
 }

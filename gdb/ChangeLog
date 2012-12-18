@@ -1,3 +1,18 @@
+2012-12-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* defs.h (enum gdb_osabi): Add GDB_OSABI_LYNXOS178.
+	* osabi.c (gdb_osabi_names): Add entry for GDB_OSABI_LYNXOS178.
+	* xcoffread.c (xcoff_get_core_n_import_files): New function.
+	(xcoff_get_n_import_files): New function.
+	* xcoffread.h (xcoffread.h): Add declaration.
+	* rs6000-aix-tdep.c: #include "xcoffread.h".
+	(rs6000_aix_osabi_sniffer): Do not return GDB_OSABI_AIX for
+	XCOFF executables that do not depend on any shared library.
+	* rs6000-lynx178-tdep.c: New file.
+	* configure.tgt: Add powerpc-*-lynx*178 handling.
+	* Makefile.in (ALL_TARGET_OBS): Add rs6000-lynx178-tdep.o.
+	(ALLDEPFILES): Add rs6000-lynx178-tdep.c.
+
 2012-12-18  Hui Zhu  <hui_zhu@mentor.com>
 
 	* ui-file.c (ui_file): Add to_fseek.

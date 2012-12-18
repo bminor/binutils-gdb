@@ -73,6 +73,7 @@ static const char * const gdb_osabi_names[] =
   "Darwin",
   "Symbian",
   "OpenVMS",
+  "LynxOS178",
 
   "<invalid>"
 };

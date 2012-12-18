@@ -3113,6 +3113,67 @@ static const struct sym_fns xcoff_sym_fns =
   &psym_functions
 };
 
+/* Same as xcoff_get_n_import_files, but for core files.  */
+
+static int
+xcoff_get_core_n_import_files (bfd *abfd)
+{
+  asection *sect = bfd_get_section_by_name (abfd, ".ldinfo");
+  gdb_byte buf[4];
+  file_ptr offset = 0;
+  int n_entries = 0;
+
+  if (sect == NULL)
+    return -1;  /* Not a core file.  */
+
+  for (offset = 0; offset < bfd_get_section_size (sect);)
+    {
+      int next;
+
+      n_entries++;
+
+      if (!bfd_get_section_contents (abfd, sect, buf, offset, 4))
+	return -1;
+      next = bfd_get_32 (abfd, buf);
+      if (next == 0)
+	break;  /* This is the last entry.  */
+      offset += next;
+    }
+
+  /* Return the number of entries, excluding the first one, which is
+     the path to the executable that produced this core file.  */
+  return n_entries - 1;
+}
+
+/* Return the number of import files (shared libraries) that the given
+   BFD depends on.  Return -1 if this number could not be computed.  */
+
+int
+xcoff_get_n_import_files (bfd *abfd)
+{
+  asection *sect = bfd_get_section_by_name (abfd, ".loader");
+  gdb_byte buf[4];
+  int l_nimpid;
+
+  /* If the ".loader" section does not exist, the objfile is probably
+     not an executable.  Might be a core file...  */
+  if (sect == NULL)
+    return xcoff_get_core_n_import_files (abfd);
+
+  /* The number of entries in the Import Files Table is stored in
+     field l_nimpid.  This field is always at offset 16, and is
+     always 4 bytes long.  Read those 4 bytes.  */
+
+  if (!bfd_get_section_contents (abfd, sect, buf, 16, 4))
+    return -1;
+  l_nimpid = bfd_get_32 (abfd, buf);
+
+  /* By convention, the first entry is the default LIBPATH value
+     to be used by the system loader, so it does not count towards
+     the number of import files.  */
+  return l_nimpid - 1;
+}
+
 /* Free the per-objfile xcoff data.  */
 
 static void

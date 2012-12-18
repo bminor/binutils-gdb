@@ -597,6 +597,7 @@ enum gdb_osabi
   GDB_OSABI_DARWIN,
   GDB_OSABI_SYMBIAN,
   GDB_OSABI_OPENVMS,
+  GDB_OSABI_LYNXOS178,
 
   GDB_OSABI_INVALID		/* keep this last */
 };

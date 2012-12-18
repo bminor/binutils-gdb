@@ -565,6 +565,7 @@ ALL_TARGET_OBS = \
 	ppc-linux-tdep.o ppcnbsd-tdep.o ppcobsd-tdep.o ppc-sysv-tdep.o \
 	rl78-tdep.o \
 	rs6000-aix-tdep.o rs6000-tdep.o ppc-ravenscar-thread.o \
+	rs6000-lynx178-tdep.o \
 	rx-tdep.o \
 	s390-tdep.o \
 	score-tdep.o \
@@ -1488,6 +1489,7 @@ ALLDEPFILES = \
 	dcache.c \
 	rl78-tdep.c \
 	rs6000-nat.c rs6000-tdep.c ppc-ravenscar-thread.c \
+	rs6000-lynx178-tdep.c \
 	rx-tdep.c \
 	s390-tdep.c s390-nat.c \
 	score-tdep.c \
