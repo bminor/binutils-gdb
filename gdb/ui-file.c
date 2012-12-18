@@ -234,61 +234,61 @@ fputs_unfiltered (const char *buf, struct ui_file *file)
 }
 
 void
-set_ui_file_flush (struct ui_file *file, ui_file_flush_ftype *flush)
+set_ui_file_flush (struct ui_file *file, ui_file_flush_ftype *flush_ptr)
 {
-  file->to_flush = flush;
+  file->to_flush = flush_ptr;
 }
 
 void
-set_ui_file_isatty (struct ui_file *file, ui_file_isatty_ftype *isatty)
+set_ui_file_isatty (struct ui_file *file, ui_file_isatty_ftype *isatty_ptr)
 {
-  file->to_isatty = isatty;
+  file->to_isatty = isatty_ptr;
 }
 
 void
-set_ui_file_rewind (struct ui_file *file, ui_file_rewind_ftype *rewind)
+set_ui_file_rewind (struct ui_file *file, ui_file_rewind_ftype *rewind_ptr)
 {
-  file->to_rewind = rewind;
+  file->to_rewind = rewind_ptr;
 }
 
 void
-set_ui_file_put (struct ui_file *file, ui_file_put_ftype *put)
+set_ui_file_put (struct ui_file *file, ui_file_put_ftype *put_ptr)
 {
-  file->to_put = put;
+  file->to_put = put_ptr;
 }
 
 void
 set_ui_file_write (struct ui_file *file,
-		    ui_file_write_ftype *write)
+		    ui_file_write_ftype *write_ptr)
 {
-  file->to_write = write;
+  file->to_write = write_ptr;
 }
 
 void
 set_ui_file_write_async_safe (struct ui_file *file,
-			      ui_file_write_async_safe_ftype *write_async_safe)
+			      ui_file_write_async_safe_ftype *write_async_safe_ptr)
 {
-  file->to_write_async_safe = write_async_safe;
+  file->to_write_async_safe = write_async_safe_ptr;
 }
 
 void
-set_ui_file_read (struct ui_file *file, ui_file_read_ftype *read)
+set_ui_file_read (struct ui_file *file, ui_file_read_ftype *read_ptr)
 {
-  file->to_read = read;
+  file->to_read = read_ptr;
 }
 
 void
-set_ui_file_fputs (struct ui_file *file, ui_file_fputs_ftype *fputs)
+set_ui_file_fputs (struct ui_file *file, ui_file_fputs_ftype *fputs_ptr)
 {
-  file->to_fputs = fputs;
+  file->to_fputs = fputs_ptr;
 }
 
 void
 set_ui_file_data (struct ui_file *file, void *data,
-		  ui_file_delete_ftype *delete)
+		  ui_file_delete_ftype *delete_ptr)
 {
   file->to_data = data;
-  file->to_delete = delete;
+  file->to_delete = delete_ptr;
 }
 
 /* ui_file utility function for converting a ``struct ui_file'' into

@@ -1,3 +1,16 @@
+2012-12-18  Hui Zhu  <hui_zhu@mentor.com>
+
+	* ui-file.c (set_ui_file_flush): Change flush to flush_ptr.
+	(set_ui_file_isatty): Change isatty to isatty_ptr.
+	(set_ui_file_rewind): Change rewind to rewind_ptr.
+	(set_ui_file_put): Change put to put_ptr.
+	(set_ui_file_write): Change write to write_ptr.
+	(set_ui_file_write_async_safe): Change write_async_safe to
+	write_async_safe_ptr.
+	(set_ui_file_read): Change read to read_ptr.
+	(set_ui_file_fputs): Change fputs to fputs_ptr.
+	(set_ui_file_data): Change delete to delete_ptr.
+
 2012-12-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib-darwin.c (darwin_current_sos): Fix indentation.
