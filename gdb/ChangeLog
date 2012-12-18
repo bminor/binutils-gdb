@@ -11,15 +11,15 @@
 	* inferior.h (all_registers_info, nexti_command, stepi_command)
 	(continue_command, interrupt_target_command): Don't declare.
 
-2012-12-12  Tom Tromey  <tromey@redhat.com>
+2012-12-18  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-cmds.c (apropos_command): Now static.
 
-2012-12-12  Tom Tromey  <tromey@redhat.com>
+2012-12-18  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (dprintf_command): Now static.
 
-2012-12-12  Tom Tromey  <tromey@redhat.com>
+2012-12-18  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (init.c): Declare initialize_all_files;
 	don't include call-cmds.h.
@@ -28,12 +28,12 @@
 	* top.c: Don't include call-cmds.h.  Declare
 	initialize_all_files.
 
-2012-12-12  Tom Tromey  <tromey@redhat.com>
+2012-12-18  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.c (list_overlays_command, map_overlay_command)
 	(unmap_overlay_command): Now static.
 
-2012-12-12  Tom Tromey  <tromey@redhat.com>
+2012-12-18  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-cmds.c (_initialize_cli_cmds): Remove "document",
 	"define", "while", and "if" commands.
@@ -43,12 +43,12 @@
 	* cli/cli-script.h (while_command, if_command, define_command)
 	(document_command): Don't declare.
 
-2012-12-12  Tom Tromey  <tromey@redhat.com>
+2012-12-18  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-cmds.c (_initialize_cli_cmds): New function.
 	(init_cli_cmds): Move most code into new function.
 
-2012-12-12  Tom Tromey  <tromey@redhat.com>
+2012-12-18  Tom Tromey  <tromey@redhat.com>
 
 	* minsyms.c (lookup_solib_trampoline_symbol_by_pc): Now static.
 	* minsyms.h (lookup_solib_trampoline_symbol_by_pc): Don't
