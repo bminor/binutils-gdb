@@ -9859,14 +9859,12 @@ stopat_command (char *arg, int from_tty)
     break_command_1 (arg, 0, from_tty);
 }
 
-void dprintf_command (char *arg, int from_tty);
-
 /* The dynamic printf command is mostly like a regular breakpoint, but
    with a prewired command list consisting of a single output command,
    built from extra arguments supplied on the dprintf command
    line.  */
 
-void
+static void
 dprintf_command (char *arg, int from_tty)
 {
   create_breakpoint (get_current_arch (),

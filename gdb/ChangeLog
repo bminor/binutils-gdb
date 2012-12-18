@@ -1,5 +1,9 @@
 2012-12-12  Tom Tromey  <tromey@redhat.com>
 
+	* breakpoint.c (dprintf_command): Now static.
+
+2012-12-12  Tom Tromey  <tromey@redhat.com>
+
 	* Makefile.in (init.c): Declare initialize_all_files;
 	don't include call-cmds.h.
 	* call-cmds.h: Remove.
