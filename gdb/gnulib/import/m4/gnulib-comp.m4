@@ -43,6 +43,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module configmake:
   # Code from module extensions:
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
+  # Code from module extern-inline:
   # Code from module fnmatch:
   # Code from module fnmatch-gnu:
   # Code from module include_next:
@@ -87,64 +88,65 @@ AC_DEFUN([gl_INIT],
   m4_pushdef([gl_LIBSOURCES_DIR], [])
   gl_COMMON
   gl_source_base='import'
-gl_FUNC_ALLOCA
-gl_CONFIGMAKE_PREP
-gl_FUNC_FNMATCH_POSIX
-if test -n "$FNMATCH_H"; then
-  AC_LIBOBJ([fnmatch])
-  gl_PREREQ_FNMATCH
-fi
-gl_FUNC_FNMATCH_GNU
-if test -n "$FNMATCH_H"; then
-  AC_LIBOBJ([fnmatch])
-  gl_PREREQ_FNMATCH
-fi
-gl_INTTYPES_H
-gl_INTTYPES_INCOMPLETE
-gl_LOCALCHARSET
-LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(abs_top_builddir)/$gl_source_base\""
-AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
-gl_FUNC_MBRTOWC
-if test $HAVE_MBRTOWC = 0 || test $REPLACE_MBRTOWC = 1; then
-  AC_LIBOBJ([mbrtowc])
-  gl_PREREQ_MBRTOWC
-fi
-gl_WCHAR_MODULE_INDICATOR([mbrtowc])
-gl_FUNC_MBSINIT
-if test $HAVE_MBSINIT = 0 || test $REPLACE_MBSINIT = 1; then
-  AC_LIBOBJ([mbsinit])
-  gl_PREREQ_MBSINIT
-fi
-gl_WCHAR_MODULE_INDICATOR([mbsinit])
-gl_FUNC_MBSRTOWCS
-if test $HAVE_MBSRTOWCS = 0 || test $REPLACE_MBSRTOWCS = 1; then
-  AC_LIBOBJ([mbsrtowcs])
-  AC_LIBOBJ([mbsrtowcs-state])
-  gl_PREREQ_MBSRTOWCS
-fi
-gl_WCHAR_MODULE_INDICATOR([mbsrtowcs])
-gl_FUNC_MEMCHR
-if test $HAVE_MEMCHR = 0 || test $REPLACE_MEMCHR = 1; then
-  AC_LIBOBJ([memchr])
-  gl_PREREQ_MEMCHR
-fi
-gl_STRING_MODULE_INDICATOR([memchr])
-gl_FUNC_MEMMEM
-if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
-  AC_LIBOBJ([memmem])
-fi
-gl_FUNC_MEMMEM_SIMPLE
-if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
-  AC_LIBOBJ([memmem])
-fi
-gl_STRING_MODULE_INDICATOR([memmem])
-gl_MULTIARCH
-AM_STDBOOL_H
-gl_STDDEF_H
-gl_STDINT_H
-gl_HEADER_STRING_H
-gl_WCHAR_H
-gl_WCTYPE_H
+  gl_FUNC_ALLOCA
+  gl_CONFIGMAKE_PREP
+  AC_REQUIRE([gl_EXTERN_INLINE])
+  gl_FUNC_FNMATCH_POSIX
+  if test -n "$FNMATCH_H"; then
+    AC_LIBOBJ([fnmatch])
+    gl_PREREQ_FNMATCH
+  fi
+  gl_FUNC_FNMATCH_GNU
+  if test -n "$FNMATCH_H"; then
+    AC_LIBOBJ([fnmatch])
+    gl_PREREQ_FNMATCH
+  fi
+  gl_INTTYPES_H
+  gl_INTTYPES_INCOMPLETE
+  gl_LOCALCHARSET
+  LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(abs_top_builddir)/$gl_source_base\""
+  AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
+  gl_FUNC_MBRTOWC
+  if test $HAVE_MBRTOWC = 0 || test $REPLACE_MBRTOWC = 1; then
+    AC_LIBOBJ([mbrtowc])
+    gl_PREREQ_MBRTOWC
+  fi
+  gl_WCHAR_MODULE_INDICATOR([mbrtowc])
+  gl_FUNC_MBSINIT
+  if test $HAVE_MBSINIT = 0 || test $REPLACE_MBSINIT = 1; then
+    AC_LIBOBJ([mbsinit])
+    gl_PREREQ_MBSINIT
+  fi
+  gl_WCHAR_MODULE_INDICATOR([mbsinit])
+  gl_FUNC_MBSRTOWCS
+  if test $HAVE_MBSRTOWCS = 0 || test $REPLACE_MBSRTOWCS = 1; then
+    AC_LIBOBJ([mbsrtowcs])
+    AC_LIBOBJ([mbsrtowcs-state])
+    gl_PREREQ_MBSRTOWCS
+  fi
+  gl_WCHAR_MODULE_INDICATOR([mbsrtowcs])
+  gl_FUNC_MEMCHR
+  if test $HAVE_MEMCHR = 0 || test $REPLACE_MEMCHR = 1; then
+    AC_LIBOBJ([memchr])
+    gl_PREREQ_MEMCHR
+  fi
+  gl_STRING_MODULE_INDICATOR([memchr])
+  gl_FUNC_MEMMEM
+  if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
+    AC_LIBOBJ([memmem])
+  fi
+  gl_FUNC_MEMMEM_SIMPLE
+  if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
+    AC_LIBOBJ([memmem])
+  fi
+  gl_STRING_MODULE_INDICATOR([memmem])
+  gl_MULTIARCH
+  AM_STDBOOL_H
+  gl_STDDEF_H
+  gl_STDINT_H
+  gl_HEADER_STRING_H
+  gl_WCHAR_H
+  gl_WCTYPE_H
   # End of code from modules
   m4_ifval(gl_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([gl_LIBSOURCES_DIR])[ ||
@@ -318,12 +320,14 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strnlen1.h
   lib/verify.h
   lib/wchar.in.h
+  lib/wctype-h.c
   lib/wctype.in.h
   m4/00gnulib.m4
   m4/alloca.m4
   m4/codeset.m4
   m4/configmake.m4
   m4/extensions.m4
+  m4/extern-inline.m4
   m4/fcntl-o.m4
   m4/fnmatch.m4
   m4/glibc21.m4

@@ -68,6 +68,7 @@ am__aclocal_m4_deps = $(top_srcdir)/import/m4/00gnulib.m4 \
 	$(top_srcdir)/import/m4/codeset.m4 \
 	$(top_srcdir)/import/m4/configmake.m4 \
 	$(top_srcdir)/import/m4/extensions.m4 \
+	$(top_srcdir)/import/m4/extern-inline.m4 \
 	$(top_srcdir)/import/m4/fcntl-o.m4 \
 	$(top_srcdir)/import/m4/fnmatch.m4 \
 	$(top_srcdir)/import/m4/glibc21.m4 \
@@ -108,7 +109,8 @@ CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 libgnu_a_AR = $(AR) $(ARFLAGS)
 am__DEPENDENCIES_1 =
-am_libgnu_a_OBJECTS = localcharset.$(OBJEXT) strnlen1.$(OBJEXT)
+am_libgnu_a_OBJECTS = localcharset.$(OBJEXT) strnlen1.$(OBJEXT) \
+	wctype-h.$(OBJEXT)
 libgnu_a_OBJECTS = $(am_libgnu_a_OBJECTS)
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -565,7 +567,8 @@ DISTCLEANFILES =
 MAINTAINERCLEANFILES = 
 AM_CPPFLAGS = 
 AM_CFLAGS = 
-libgnu_a_SOURCES = localcharset.h localcharset.c strnlen1.h strnlen1.c
+libgnu_a_SOURCES = localcharset.h localcharset.c strnlen1.h strnlen1.c \
+	wctype-h.c
 libgnu_a_LIBADD = $(gl_LIBOBJS) @ALLOCA@
 libgnu_a_DEPENDENCIES = $(gl_LIBOBJS) @ALLOCA@
 EXTRA_libgnu_a_SOURCES = alloca.c fnmatch.c fnmatch_loop.c mbrtowc.c \
@@ -645,6 +648,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memchr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memmem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strnlen1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wctype-h.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

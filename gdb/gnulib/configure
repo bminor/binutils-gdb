@@ -4290,6 +4290,7 @@ fi
   # Code from module configmake:
   # Code from module extensions:
 
+  # Code from module extern-inline:
   # Code from module fnmatch:
   # Code from module fnmatch-gnu:
   # Code from module include_next:
@@ -5123,6 +5124,9 @@ _ACEOF
 
 
 fi
+
+
+
 
 
 
@@ -6586,7 +6590,18 @@ main ()
             #if HAVE_SYMLINK
             {
               static char const sym[] = "conftest.sym";
-              if (symlink (".", sym) != 0)
+              if (symlink ("/dev/null", sym) != 0)
+                result |= 2;
+              else
+                {
+                  int fd = open (sym, O_WRONLY | O_NOFOLLOW | O_CREAT, 0);
+                  if (fd >= 0)
+                    {
+                      close (fd);
+                      result |= 4;
+                    }
+                }
+              if (unlink (sym) != 0 || symlink (".", sym) != 0)
                 result |= 2;
               else
                 {
@@ -8181,48 +8196,6 @@ $as_echo "#define HAVE_WINT_T 1" >>confdefs.h
 
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for inline" >&5
-$as_echo_n "checking for inline... " >&6; }
-if test "${ac_cv_c_inline+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_cv_c_inline=no
-for ac_kw in inline __inline__ __inline; do
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#ifndef __cplusplus
-typedef int foo_t;
-static $ac_kw foo_t static_foo () {return 0; }
-$ac_kw foo_t foo () {return 0; }
-#endif
-
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_c_inline=$ac_kw
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  test "$ac_cv_c_inline" != no && break
-done
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_inline" >&5
-$as_echo "$ac_cv_c_inline" >&6; }
-
-case $ac_cv_c_inline in
-  inline | yes) ;;
-  *)
-    case $ac_cv_c_inline in
-      no) ac_val=;;
-      *) ac_val=$ac_cv_c_inline;;
-    esac
-    cat >>confdefs.h <<_ACEOF
-#ifndef __cplusplus
-#define inline $ac_val
-#endif
-_ACEOF
-    ;;
-esac
-
 
    if false; then
   GL_COND_LIBTOOL_TRUE=
@@ -8336,6 +8309,7 @@ fi
   fi
 
       pkglibexecdir='${libexecdir}/${PACKAGE}'
+
 
 
 
@@ -8479,7 +8453,7 @@ else
 fi
 
 
-if test -n "$FNMATCH_H"; then
+  if test -n "$FNMATCH_H"; then
 
 
 
@@ -8545,13 +8519,13 @@ _ACEOF
 
 
 
-fi
+  fi
 
 
 
 
 
-if test -n "$FNMATCH_H"; then
+  if test -n "$FNMATCH_H"; then
 
 
 
@@ -8617,7 +8591,7 @@ _ACEOF
 
 
 
-fi
+  fi
 
 
 
@@ -8885,7 +8859,7 @@ $as_echo "$gl_cv_test_UINT64_MAX_EQ_ULONG_MAX" >&6; }
 
 
 
-LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(abs_top_builddir)/$gl_source_base\""
+  LOCALCHARSET_TESTS_ENVIRONMENT="CHARSETALIASDIR=\"\$(abs_top_builddir)/$gl_source_base\""
 
 
 
@@ -9468,7 +9442,7 @@ $as_echo "#define MBRTOWC_NUL_RETVAL_BUG 1" >>confdefs.h
     fi
   fi
 
-if test $HAVE_MBRTOWC = 0 || test $REPLACE_MBRTOWC = 1; then
+  if test $HAVE_MBRTOWC = 0 || test $REPLACE_MBRTOWC = 1; then
 
 
 
@@ -9482,7 +9456,7 @@ if test $HAVE_MBRTOWC = 0 || test $REPLACE_MBRTOWC = 1; then
 
   :
 
-fi
+  fi
 
 
 
@@ -9709,7 +9683,7 @@ _ACEOF
     fi
   fi
 
-if test $HAVE_MBSINIT = 0 || test $REPLACE_MBSINIT = 1; then
+  if test $HAVE_MBSINIT = 0 || test $REPLACE_MBSINIT = 1; then
 
 
 
@@ -9723,7 +9697,7 @@ if test $HAVE_MBSINIT = 0 || test $REPLACE_MBSINIT = 1; then
 
   :
 
-fi
+  fi
 
 
 
@@ -10063,7 +10037,7 @@ $as_echo "$gl_cv_func_mbsrtowcs_works" >&6; }
     fi
   fi
 
-if test $HAVE_MBSRTOWCS = 0 || test $REPLACE_MBSRTOWCS = 1; then
+  if test $HAVE_MBSRTOWCS = 0 || test $REPLACE_MBSRTOWCS = 1; then
 
 
 
@@ -10087,7 +10061,7 @@ if test $HAVE_MBSRTOWCS = 0 || test $REPLACE_MBSRTOWCS = 1; then
 
   :
 
-fi
+  fi
 
 
 
@@ -10104,7 +10078,7 @@ $as_echo "#define GNULIB_TEST_MBSRTOWCS 1" >>confdefs.h
 
 
 
-if test $HAVE_MEMCHR = 0 || test $REPLACE_MEMCHR = 1; then
+  if test $HAVE_MEMCHR = 0 || test $REPLACE_MEMCHR = 1; then
 
 
 
@@ -10129,7 +10103,7 @@ fi
 done
 
 
-fi
+  fi
 
 
 
@@ -10240,7 +10214,7 @@ $as_echo "$gl_cv_func_memmem_works_fast" >&6; }
     esac
   fi
 
-if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
+  if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
 
 
 
@@ -10251,7 +10225,7 @@ if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
 
   gl_LIBOBJS="$gl_LIBOBJS memmem.$ac_objext"
 
-fi
+  fi
 
 
 
@@ -10368,7 +10342,7 @@ $as_echo "$gl_cv_func_memmem_works_always" >&6; }
   fi
   :
 
-if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
+  if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
 
 
 
@@ -10379,7 +10353,7 @@ if test $HAVE_MEMMEM = 0 || test $REPLACE_MEMMEM = 1; then
 
   gl_LIBOBJS="$gl_LIBOBJS memmem.$ac_objext"
 
-fi
+  fi
 
 
 
@@ -10713,8 +10687,6 @@ fi
   else
     HAVE_ISWCNTRL=0
   fi
-
-
 
 
 

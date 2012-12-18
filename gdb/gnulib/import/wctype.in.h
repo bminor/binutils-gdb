@@ -54,6 +54,11 @@
 #ifndef _@GUARD_PREFIX@_WCTYPE_H
 #define _@GUARD_PREFIX@_WCTYPE_H
 
+_GL_INLINE_HEADER_BEGIN
+#ifndef _GL_WCTYPE_INLINE
+# define _GL_WCTYPE_INLINE _GL_INLINE
+#endif
+
 /* The definitions of _GL_FUNCDECL_RPL etc. are copied here.  */
 
 /* The definition of _GL_WARN_ON_USE is copied here.  */
@@ -148,7 +153,7 @@ typedef unsigned int rpl_wint_t;
 #   endif
 #  endif
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswalnum
 #  else
@@ -160,7 +165,7 @@ iswalnum
           || ((wc & ~0x20) >= 'A' && (wc & ~0x20) <= 'Z'));
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswalpha
 #  else
@@ -171,7 +176,7 @@ iswalpha
   return (wc & ~0x20) >= 'A' && (wc & ~0x20) <= 'Z';
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswblank
 #  else
@@ -182,7 +187,7 @@ iswblank
   return wc == ' ' || wc == '\t';
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswcntrl
 #  else
@@ -193,7 +198,7 @@ iswcntrl
   return (wc & ~0x1f) == 0 || wc == 0x7f;
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswdigit
 #  else
@@ -204,7 +209,7 @@ iswdigit
   return wc >= '0' && wc <= '9';
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswgraph
 #  else
@@ -215,7 +220,7 @@ iswgraph
   return wc >= '!' && wc <= '~';
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswlower
 #  else
@@ -226,7 +231,7 @@ iswlower
   return wc >= 'a' && wc <= 'z';
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswprint
 #  else
@@ -237,7 +242,7 @@ iswprint
   return wc >= ' ' && wc <= '~';
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswpunct
 #  else
@@ -250,7 +255,7 @@ iswpunct
                || ((wc & ~0x20) >= 'A' && (wc & ~0x20) <= 'Z')));
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswspace
 #  else
@@ -262,7 +267,7 @@ iswspace
           || wc == '\n' || wc == '\v' || wc == '\f' || wc == '\r');
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswupper
 #  else
@@ -273,7 +278,7 @@ iswupper
   return wc >= 'A' && wc <= 'Z';
 }
 
-static inline int
+_GL_WCTYPE_INLINE int
 #  if @REPLACE_ISWCNTRL@
 rpl_iswxdigit
 #  else
@@ -285,7 +290,7 @@ iswxdigit
           || ((wc & ~0x20) >= 'A' && (wc & ~0x20) <= 'F'));
 }
 
-static inline wint_t
+_GL_WCTYPE_INLINE wint_t
 #  if @REPLACE_TOWLOWER@
 rpl_towlower
 #  else
@@ -296,7 +301,7 @@ towlower
   return (wc >= 'A' && wc <= 'Z' ? wc - 'A' + 'a' : wc);
 }
 
-static inline wint_t
+_GL_WCTYPE_INLINE wint_t
 #  if @REPLACE_TOWLOWER@
 rpl_towupper
 #  else
@@ -336,7 +341,7 @@ _GL_FUNCDECL_SYS (iswblank, int, (wint_t wc));
       result register.  We need to fix this by adding a zero-extend from
       wchar_t to wint_t after the call.  */
 
-static inline wint_t
+_GL_WCTYPE_INLINE wint_t
 rpl_towlower (wint_t wc)
 {
   return (wint_t) (wchar_t) towlower (wc);
@@ -345,7 +350,7 @@ rpl_towlower (wint_t wc)
 #   define towlower rpl_towlower
 #  endif
 
-static inline wint_t
+_GL_WCTYPE_INLINE wint_t
 rpl_towupper (wint_t wc)
 {
   return (wint_t) (wchar_t) towupper (wc);
@@ -493,6 +498,7 @@ _GL_WARN_ON_USE (towctrans, "towctrans is unportable - "
 # endif
 #endif
 
+_GL_INLINE_HEADER_END
 
 #endif /* _@GUARD_PREFIX@_WCTYPE_H */
 #endif /* _@GUARD_PREFIX@_WCTYPE_H */

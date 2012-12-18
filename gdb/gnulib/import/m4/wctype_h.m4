@@ -1,4 +1,4 @@
-# wctype_h.m4 serial 17
+# wctype_h.m4 serial 18
 
 dnl A placeholder for ISO C99 <wctype.h>, for platforms that lack it.
 
@@ -21,8 +21,6 @@ AC_DEFUN([gl_WCTYPE_H],
     HAVE_ISWCNTRL=0
   fi
   AC_SUBST([HAVE_ISWCNTRL])
-
-  AC_REQUIRE([AC_C_INLINE])
 
   AC_REQUIRE([gt_TYPE_WINT_T])
   if test $gt_cv_c_wint_t = yes; then

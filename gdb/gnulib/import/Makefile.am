@@ -739,6 +739,7 @@ EXTRA_DIST += wchar.in.h
 ## begin gnulib module wctype-h
 
 BUILT_SOURCES += wctype.h
+libgnu_a_SOURCES += wctype-h.c
 
 # We need the following in order to create <wctype.h> when the system
 # doesn't have one that works with the given compiler.

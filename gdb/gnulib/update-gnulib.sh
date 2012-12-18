@@ -32,7 +32,7 @@
 IMPORTED_GNULIB_MODULES="fnmatch-gnu inttypes memmem update-copyright"
 
 # The gnulib commit ID to use for the update.
-GNULIB_COMMIT_SHA1="a39f53ccb70a613e647e1019fb4c63645220267e"
+GNULIB_COMMIT_SHA1="8d5bd1402003bd0153984b138735adf537d960b0"
 
 # The expected version number for the various auto tools we will
 # use after the import.
