@@ -6791,6 +6791,7 @@ swap_out_syms (bfd *abfd,
 		  shndx = elf_tdata (abfd)->symtab_shndx_section;
 		  break;
 		default:
+		  shndx = SHN_ABS;
 		  break;
 		}
 	    }
