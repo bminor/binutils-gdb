@@ -101,7 +101,7 @@
 	PR gdb/14917:
 	* server.h (current_insn_ptr, emit_error): Declare 'extern'.
 
-2012-11-28  Markus Metzger <markus.t.metzger@intel.com>
+2012-11-28  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* configure.ac: Check for linux/perf_event.h.
 	* config.in: Regenerated.
@@ -133,7 +133,7 @@
 	instead of <sys/wait.h> header.
 	* spu-low.c: Use "gdb_wait.h" header instead of <sys/wait.h> header.
 
-2012-11-13 Markus Metzger <markus.t.metzger@intel.com>
+2012-11-13 Markus Metzger  <markus.t.metzger@intel.com>
 
 	* Makefile.in: (INTERNAL_CFLAGS): Add -DGDBSERVER
 	(various make rules): Remove -DGDBSERVER
