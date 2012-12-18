@@ -492,12 +492,26 @@ cat <<EOF
 EOF
 
 if test -n "${SEPARATE_CODE}"; then
+  if test -n "${RODATA_ADDR}"; then
+    RODATA_ADDR="\
+SEGMENT_START(\"rodata-segment\", ${RODATA_ADDR}) + SIZEOF_HEADERS"
+  else
+    RODATA_ADDR="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))}"
+    RODATA_ADDR="SEGMENT_START(\"rodata-segment\", ${RODATA_ADDR})"
+  fi
+  if test -n "${SHLIB_RODATA_ADDR}"; then
+    SHLIB_RODATA_ADDR="\
+SEGMENT_START(\"rodata-segment\", ${SHLIB_RODATA_ADDR}) + SIZEOF_HEADERS"
+  else
+    SHLIB_RODATA_ADDR="SEGMENT_START(\"rodata-segment\", ${SHLIB_RODATA_ADDR})"
+    SHLIB_RODATA_ADDR="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
+  fi
   cat <<EOF
   /* Adjust the address for the rodata segment.  We want to adjust up to
      the same address within the page on the next page up.  */
-  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+. = ${RODATA_ADDR-ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))};}}}
-  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_RODATA_ADDR-ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))};}}
-  ${CREATE_PIE+${RELOCATING+. = ${SHLIB_RODATA_ADDR-ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))};}}
+  ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+. = ${RODATA_ADDR};}}}
+  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_RODATA_ADDR};}}
+  ${CREATE_PIE+${RELOCATING+. = ${SHLIB_RODATA_ADDR};}}
 EOF
   emit_early_ro
   emit_dyn
@@ -650,8 +664,8 @@ cat <<EOF
   .debug_ranges   0 : { *(.debug_ranges) }
 
   /* DWARF Extension.  */
-  .debug_macro    0 : { *(.debug_macro) } 
-  
+  .debug_macro    0 : { *(.debug_macro) }
+
   ${TINY_DATA_SECTION}
   ${TINY_BSS_SECTION}
 

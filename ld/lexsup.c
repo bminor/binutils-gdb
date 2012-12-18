@@ -405,13 +405,13 @@ static const struct ld_option ld_options[] =
   { {"pic-executable", no_argument, NULL, OPTION_PIE},
     '\0', NULL, NULL, TWO_DASHES },
   { {"sort-common", optional_argument, NULL, OPTION_SORT_COMMON},
-    '\0', N_("[=ascending|descending]"), 
-    N_("Sort common symbols by alignment [in specified order]"), 
+    '\0', N_("[=ascending|descending]"),
+    N_("Sort common symbols by alignment [in specified order]"),
     TWO_DASHES },
   { {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
     '\0', NULL, NULL, NO_HELP },
   { {"sort-section", required_argument, NULL, OPTION_SORT_SECTION},
-    '\0', N_("name|alignment"), 
+    '\0', N_("name|alignment"),
     N_("Sort sections by name or maximum alignment"), TWO_DASHES },
   { {"spare-dynamic-tags", required_argument, NULL, OPTION_SPARE_DYNAMIC_TAGS},
     '\0', N_("COUNT"), N_("How many tags to reserve in .dynamic section"),
@@ -441,6 +441,8 @@ static const struct ld_option ld_options[] =
     '\0', N_("ADDRESS"), N_("Set address of .text section"), ONE_DASH },
   { {"Ttext-segment", required_argument, NULL, OPTION_TTEXT_SEGMENT},
     '\0', N_("ADDRESS"), N_("Set address of text segment"), ONE_DASH },
+  { {"Trodata-segment", required_argument, NULL, OPTION_TRODATA_SEGMENT},
+    '\0', N_("ADDRESS"), N_("Set address of rodata segment"), ONE_DASH },
   { {"unresolved-symbols=<method>", required_argument, NULL,
      OPTION_UNRESOLVED_SYMBOLS},
     '\0', NULL, N_("How to handle unresolved symbols.  <method> is:\n"
@@ -1190,6 +1192,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_TTEXT_SEGMENT:
 	  set_segment_start (".text-segment", optarg);
+	  break;
+	case OPTION_TRODATA_SEGMENT:
+	  set_segment_start (".rodata-segment", optarg);
 	  break;
 	case OPTION_TRADITIONAL_FORMAT:
 	  link_info.traditional_format = TRUE;

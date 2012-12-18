@@ -372,9 +372,9 @@ Adds @var{AUDITLIB} to the @code{DT_AUDIT} entry of the dynamic section.
 specified in the library.  If specified multiple times @code{DT_AUDIT}
 will contain a colon separated list of audit interfaces to use. If the linker
 finds an object with an audit entry while searching for shared libraries,
-it will add a corresponding @code{DT_DEPAUDIT} entry in the output file.  
+it will add a corresponding @code{DT_DEPAUDIT} entry in the output file.
 This option is only meaningful on ELF platforms supporting the rtld-audit
-interface.  
+interface.
 
 @ifset I960
 @cindex architectures
@@ -472,7 +472,7 @@ Adds @var{AUDITLIB} to the @code{DT_DEPAUDIT} entry of the dynamic section.
 specified in the library.  If specified multiple times @code{DT_DEPAUDIT}
 will contain a colon separated list of audit interfaces to use.  This
 option is only meaningful on ELF platforms supporting the rtld-audit interface.
-The -P option is provided for Solaris compatibility.  
+The -P option is provided for Solaris compatibility.
 
 @cindex entry point, from command line
 @kindex -e @var{entry}
@@ -1266,7 +1266,7 @@ option.
 @kindex --no-copy-dt-needed-entries
 @item --copy-dt-needed-entries
 @itemx --no-copy-dt-needed-entries
-This option affects the treatment of dynamic libraries referred to 
+This option affects the treatment of dynamic libraries referred to
 by DT_NEEDED tags @emph{inside} ELF dynamic libraries mentioned on the
 command line.  Normally the linker won't add a DT_NEEDED tag to the
 output binary for each library mentioned in a DT_NEEDED tag in an
@@ -1394,7 +1394,7 @@ the linker recursively marks as used any section referenced by their
 relocations.  See @samp{--entry} and @samp{--undefined}.
 
 This option can be set when doing a partial link (enabled with option
-@samp{-r}).  In this case the root of symbols kept must be explicitly 
+@samp{-r}).  In this case the root of symbols kept must be explicitly
 specified either by an @samp{--entry} or @samp{--undefined} option or by
 a @code{ENTRY} command in the linker script.
 
@@ -1837,6 +1837,13 @@ Same as @option{--section-start}, with @code{.bss}, @code{.data} or
 When creating an ELF executable or shared object, it will set the address
 of the first byte of the text segment.
 
+@kindex -Trodata-segment=@var{org}
+@item -Trodata-segment=@var{org}
+@cindex rodata segment origin, cmd line
+When creating an ELF executable or shared object for a target where
+the read-only data is in its own segment separate from the executable
+text, it will set the address of the first byte of the read-only data segment.
+
 @kindex --unresolved-symbols
 @item --unresolved-symbols=@var{method}
 Determine how to handle unresolved symbols.  There are four possible
@@ -2214,8 +2221,8 @@ allow their use in executable images as well, or to (probably pointlessly!)
 disallow it in object files, by using these two options.  Executable images
 generated with these long section names are slightly non-standard, carrying
 as they do a string table, and may generate confusing output when examined
-with non-GNU PE-aware tools, such as file viewers and dumpers.  However, 
-GDB relies on the use of PE long section names to find Dwarf-2 debug 
+with non-GNU PE-aware tools, such as file viewers and dumpers.  However,
+GDB relies on the use of PE long section names to find Dwarf-2 debug
 information sections in an executable image at runtime, and so if neither
 option is specified on the command-line, @command{ld} will enable long
 section names, overriding the default and technically correct behaviour,
@@ -2626,7 +2633,7 @@ Do not bind this image.
 @kindex --wdmdriver
 @item --wdmdriver
 The driver uses the MS Windows Driver Model.
- 
+
 @kindex --tsaware
 @item --tsaware
 The image is Terminal Server aware.
@@ -3197,7 +3204,7 @@ systems come with three different memory setups @code{A}, @code{B} and
 @code{C}:
 @multitable @columnfractions .25 .25 .25 .25
 @item Section @tab Variant A @tab Variant B @tab Variant C
-@item .text @tab RAM @tab ROM @tab ROM 
+@item .text @tab RAM @tab ROM @tab ROM
 @item .rodata @tab RAM @tab ROM @tab ROM2
 @item .data @tab RAM @tab RAM/ROM @tab RAM/ROM2
 @item .bss @tab RAM @tab RAM @tab RAM
@@ -4775,7 +4782,7 @@ Region names are stored in a separate name space, and will not conflict
 with symbol names, file names, or section names.  Each memory region
 must have a distinct name within the @code{MEMORY} command.  However you can
 add later alias names to existing memory regions with the @ref{REGION_ALIAS}
-command.  
+command.
 
 @cindex memory region attributes
 The @var{attr} string is an optional list of attributes that specify
@@ -5296,7 +5303,7 @@ The target's default page size.
 So for example:
 
 @smallexample
-  .text ALIGN (CONSTANT (MAXPAGESIZE)) : @{ *(.text) @} 
+  .text ALIGN (CONSTANT (MAXPAGESIZE)) : @{ *(.text) @}
 @end smallexample
 
 will create a text section aligned to the largest page boundary
@@ -6367,12 +6374,12 @@ are sufficient to avoid the erratum in both the scalar and vector cases.
 @cindex ARM1176 erratum workaround
 @kindex --fix-arm1176
 @kindex --no-fix-arm1176
-The @samp{--fix-arm1176} switch enables a link-time workaround for an erratum 
-in certain ARM1176 processors.  The workaround is enabled by default if you 
-are targeting ARM v6 (excluding ARM v6T2) or earlier.  It can be disabled 
+The @samp{--fix-arm1176} switch enables a link-time workaround for an erratum
+in certain ARM1176 processors.  The workaround is enabled by default if you
+are targeting ARM v6 (excluding ARM v6T2) or earlier.  It can be disabled
 unconditionally by specifying @samp{--no-fix-arm1176}.
 
-Further information is available in the ``ARM1176JZ-S and ARM1176JZF-S 
+Further information is available in the ``ARM1176JZ-S and ARM1176JZF-S
 Programmer Advice Notice'' available on the ARM documentation website at:
 http://infocenter.arm.com/.
 
@@ -6964,7 +6971,7 @@ When auto-export is in operation, @command{ld} will export all the non-local
 symbols known to belong to the system's runtime and libraries.  As it will
 often not be desirable to export all of a DLL's symbols, which may include
 private functions that are not part of any public interface, the command-line
-options listed above may be used to filter symbols out from the list for 
+options listed above may be used to filter symbols out from the list for
 exporting.  The @samp{--output-def} option can be used in order to see the
 final list of exported symbols with all exclusions taken into effect.
 
