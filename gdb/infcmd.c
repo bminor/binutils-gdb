@@ -57,20 +57,6 @@
 #include "continuations.h"
 #include "linespec.h"
 
-/* Functions exported for general use, in inferior.h: */
-
-void all_registers_info (char *, int);
-
-void registers_info (char *, int);
-
-void nexti_command (char *, int);
-
-void stepi_command (char *, int);
-
-void continue_command (char *, int);
-
-void interrupt_target_command (char *args, int from_tty);
-
 /* Local functions: */
 
 static void nofp_registers_info (char *, int);
@@ -756,7 +742,7 @@ continue_1 (int all_threads)
 }
 
 /* continue [-a] [proceed-count] [&]  */
-void
+static void
 continue_command (char *args, int from_tty)
 {
   int async_exec = 0;
@@ -875,13 +861,13 @@ next_command (char *count_string, int from_tty)
 
 /* Likewise, but step only one instruction.  */
 
-void
+static void
 stepi_command (char *count_string, int from_tty)
 {
   step_1 (0, 1, count_string);
 }
 
-void
+static void
 nexti_command (char *count_string, int from_tty)
 {
   step_1 (1, 1, count_string);
@@ -2294,7 +2280,7 @@ registers_info (char *addr_exp, int fpregs)
     }
 }
 
-void
+static void
 all_registers_info (char *addr_exp, int from_tty)
 {
   registers_info (addr_exp, 1);
@@ -2809,7 +2795,7 @@ interrupt_target_1 (int all_threads)
    if the `-a' switch is used.  */
 
 /* interrupt [-a]  */
-void
+static void
 interrupt_target_command (char *args, int from_tty)
 {
   if (target_can_async_p ())
