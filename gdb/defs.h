@@ -357,8 +357,6 @@ extern void mod_path (char *, char **);
 
 extern void add_path (char *, char **, int);
 
-extern void directory_command (char *, int);
-
 extern void directory_switch (char *, int);
 
 extern char *source_path;

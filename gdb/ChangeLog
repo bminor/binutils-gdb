@@ -1,5 +1,10 @@
 2012-12-18  Tom Tromey  <tromey@redhat.com>
 
+	* defs.h (directory_command): Don't declare.
+	* source.c (directory_command): Now static.
+
+2012-12-18  Tom Tromey  <tromey@redhat.com>
+
 	* infcmd.c (all_registers_info, nexti_command, stepi_command)
 	(continue_command, interrupt_target_command): Now static.
 	(registers_info): Remove declaration.
