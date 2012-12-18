@@ -1302,9 +1302,11 @@ msymbols_sort (struct objfile *objfile)
   build_minimal_symbol_hash_tables (objfile);
 }
 
-/* See minsyms.h.  */
+/* Check if PC is in a shared library trampoline code stub.
+   Return minimal symbol for the trampoline entry or NULL if PC is not
+   in a trampoline code stub.  */
 
-struct minimal_symbol *
+static struct minimal_symbol *
 lookup_solib_trampoline_symbol_by_pc (CORE_ADDR pc)
 {
   struct obj_section *section = find_pc_section (pc);
