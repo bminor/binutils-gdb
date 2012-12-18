@@ -79,6 +79,11 @@ typedef void (ui_file_delete_ftype) (struct ui_file * stream);
 extern void set_ui_file_data (struct ui_file *stream, void *data,
 			      ui_file_delete_ftype *delete);
 
+typedef int (ui_file_fseek_ftype) (struct ui_file *stream, long offset,
+				   int whence);
+extern void set_ui_file_fseek (struct ui_file *stream,
+			       ui_file_fseek_ftype *fseek_ptr);
+
 extern void *ui_file_data (struct ui_file *file);
 
 
@@ -112,6 +117,8 @@ extern char *ui_file_obsavestring (struct ui_file *file,
 				   struct obstack *obstack, long *length);
 
 extern long ui_file_read (struct ui_file *file, char *buf, long length_buf);
+
+extern int ui_file_fseek (struct ui_file *file, long offset, int whence);
 
 /* Create/open a memory based file.  Can be used as a scratch buffer
    for collecting output.  */

@@ -1,5 +1,15 @@
 2012-12-18  Hui Zhu  <hui_zhu@mentor.com>
 
+	* ui-file.c (ui_file): Add to_fseek.
+	(ui_file_new): Call set_ui_file_fseek.
+	(null_file_fseek, ui_file_fseek, set_ui_file_fseek,
+	 stdio_file_fseek): New functions.
+	(stdio_file_new): Call set_ui_file_fseek.
+	* ui-file.h (ui_file_fseek_ftype): New typedef.
+	(set_ui_file_fseek, ui_file_fseek): New externs.
+
+2012-12-18  Hui Zhu  <hui_zhu@mentor.com>
+
 	* ui-file.c (set_ui_file_flush): Change flush to flush_ptr.
 	(set_ui_file_isatty): Change isatty to isatty_ptr.
 	(set_ui_file_rewind): Change rewind to rewind_ptr.

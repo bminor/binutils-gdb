@@ -36,6 +36,7 @@ static ui_file_flush_ftype null_file_flush;
 static ui_file_delete_ftype null_file_delete;
 static ui_file_rewind_ftype null_file_rewind;
 static ui_file_put_ftype null_file_put;
+static ui_file_fseek_ftype null_file_fseek;
 
 struct ui_file
   {
@@ -49,6 +50,7 @@ struct ui_file
     ui_file_isatty_ftype *to_isatty;
     ui_file_rewind_ftype *to_rewind;
     ui_file_put_ftype *to_put;
+    ui_file_fseek_ftype *to_fseek;
     void *to_data;
   };
 int ui_file_magic;
@@ -68,6 +70,7 @@ ui_file_new (void)
   set_ui_file_isatty (file, null_file_isatty);
   set_ui_file_rewind (file, null_file_rewind);
   set_ui_file_put (file, null_file_put);
+  set_ui_file_fseek (file, null_file_fseek);
   return file;
 }
 
@@ -170,6 +173,14 @@ null_file_delete (struct ui_file *file)
   return;
 }
 
+static int
+null_file_fseek (struct ui_file *stream, long offset, int whence)
+{
+  errno = EBADF;
+
+  return -1;
+}
+
 void *
 ui_file_data (struct ui_file *file)
 {
@@ -227,6 +238,12 @@ ui_file_read (struct ui_file *file, char *buf, long length_buf)
   return file->to_read (file, buf, length_buf); 
 }
 
+int
+ui_file_fseek (struct ui_file *file, long offset, int whence)
+{
+  return file->to_fseek (file, offset, whence);
+}
+
 void
 fputs_unfiltered (const char *buf, struct ui_file *file)
 {
@@ -281,6 +298,12 @@ void
 set_ui_file_fputs (struct ui_file *file, ui_file_fputs_ftype *fputs_ptr)
 {
   file->to_fputs = fputs_ptr;
+}
+
+void
+set_ui_file_fseek (struct ui_file *file, ui_file_fseek_ftype *fseek_ptr)
+{
+  file->to_fseek = fseek_ptr;
 }
 
 void
@@ -469,6 +492,7 @@ static ui_file_isatty_ftype stdio_file_isatty;
 static ui_file_delete_ftype stdio_file_delete;
 static struct ui_file *stdio_file_new (FILE *file, int close_p);
 static ui_file_flush_ftype stdio_file_flush;
+static ui_file_fseek_ftype stdio_file_fseek;
 
 static int stdio_file_magic;
 
@@ -499,6 +523,7 @@ stdio_file_new (FILE *file, int close_p)
   set_ui_file_fputs (ui_file, stdio_file_fputs);
   set_ui_file_read (ui_file, stdio_file_read);
   set_ui_file_isatty (ui_file, stdio_file_isatty);
+  set_ui_file_fseek (ui_file, stdio_file_fseek);
   return ui_file;
 }
 
@@ -614,6 +639,18 @@ stdio_file_isatty (struct ui_file *file)
     internal_error (__FILE__, __LINE__,
 		    _("stdio_file_isatty: bad magic number"));
   return (isatty (stdio->fd));
+}
+
+static int
+stdio_file_fseek (struct ui_file *file, long offset, int whence)
+{
+  struct stdio_file *stdio = ui_file_data (file);
+
+  if (stdio->magic != &stdio_file_magic)
+    internal_error (__FILE__, __LINE__,
+		    _("stdio_file_fseek: bad magic number"));
+
+  return fseek (stdio->file, offset, whence);
 }
 
 /* Like fdopen().  Create a ui_file from a previously opened FILE.  */
