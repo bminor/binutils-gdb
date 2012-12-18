@@ -1,5 +1,9 @@
 2012-12-12  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-cmds.c (apropos_command): Now static.
+
+2012-12-12  Tom Tromey  <tromey@redhat.com>
+
 	* breakpoint.c (dprintf_command): Now static.
 
 2012-12-12  Tom Tromey  <tromey@redhat.com>

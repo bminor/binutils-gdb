@@ -86,8 +86,6 @@ static void edit_command (char *, int);
 
 static void list_command (char *, int);
 
-void apropos_command (char *, int);
-
 /* Prototypes for local utility functions */
 
 static void ambiguous_line_spec (struct symtabs_and_lines *);
@@ -1250,7 +1248,7 @@ show_user (char *args, int from_tty)
 /* Search through names of commands and documentations for a certain
    regular expression.  */
 
-void 
+static void 
 apropos_command (char *searchstr, int from_tty)
 {
   regex_t pattern;
