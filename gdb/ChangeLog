@@ -1,5 +1,13 @@
 2012-12-18  Joel Brobecker  <brobecker@adacore.com>
 
+	* solib-darwin.c (darwin_current_sos): Fix indentation.
+	(darwin_read_exec_load_addr): New function.
+	(darwin_solib_create_inferior_hook): Rebase executable.
+	* objfiles.c (objfile_rebase1, objfile_rebase): New functions.
+	* objfiles.h (objfile_rebase1, objfile_rebase): Add prototypes.
+
+2012-12-18  Joel Brobecker  <brobecker@adacore.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add errno.
 	* gnulib/import/errno.in.h: Import.
 	* gnulib/import/m4/errno_h.m4: Import.

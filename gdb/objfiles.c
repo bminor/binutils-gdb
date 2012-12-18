@@ -882,6 +882,45 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
   if (changed)
     breakpoint_re_set ();
 }
+
+/* Rebase (add to the offsets) OBJFILE by SLIDE.  SEPARATE_DEBUG_OBJFILE is
+   not touched here.
+   Return non-zero iff any change happened.  */
+
+static int
+objfile_rebase1 (struct objfile *objfile, CORE_ADDR slide)
+{
+  struct section_offsets *new_offsets =
+    ((struct section_offsets *)
+     alloca (SIZEOF_N_SECTION_OFFSETS (objfile->num_sections)));
+  int i;
+
+  for (i = 0; i < objfile->num_sections; ++i)
+    new_offsets->offsets[i] = slide;
+
+  return objfile_relocate1 (objfile, new_offsets);
+}
+
+/* Rebase (add to the offsets) OBJFILE by SLIDE.  Process also OBJFILE's
+   SEPARATE_DEBUG_OBJFILEs.  */
+
+void
+objfile_rebase (struct objfile *objfile, CORE_ADDR slide)
+{
+  struct objfile *debug_objfile;
+  int changed = 0;
+
+  changed |= objfile_rebase1 (objfile, slide);
+
+  for (debug_objfile = objfile->separate_debug_objfile;
+       debug_objfile;
+       debug_objfile = objfile_separate_debug_iterate (objfile, debug_objfile))
+    changed |= objfile_rebase1 (debug_objfile, slide);
+
+  /* Relocate breakpoints as necessary, after things are relocated.  */
+  if (changed)
+    breakpoint_re_set ();
+}
 
 /* Return non-zero if OBJFILE has partial symbols.  */
 

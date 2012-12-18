@@ -471,6 +471,7 @@ extern struct cleanup *make_cleanup_free_objfile (struct objfile *);
 extern void free_all_objfiles (void);
 
 extern void objfile_relocate (struct objfile *, struct section_offsets *);
+extern void objfile_rebase (struct objfile *, CORE_ADDR);
 
 extern int objfile_has_partial_symbols (struct objfile *objfile);
 
