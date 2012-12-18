@@ -27,7 +27,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbcmd.h"
-#include "call-cmds.h"
 #include "gdb_regex.h"
 #include "expression.h"
 #include "language.h"

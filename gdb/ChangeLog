@@ -1,5 +1,14 @@
 2012-12-12  Tom Tromey  <tromey@redhat.com>
 
+	* Makefile.in (init.c): Declare initialize_all_files;
+	don't include call-cmds.h.
+	* call-cmds.h: Remove.
+	* symtab.c: Don't include call-cmds.h.
+	* top.c: Don't include call-cmds.h.  Declare
+	initialize_all_files.
+
+2012-12-12  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (list_overlays_command, map_overlay_command)
 	(unmap_overlay_command): Now static.
 

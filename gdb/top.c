@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "gdbcmd.h"
-#include "call-cmds.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-script.h"
 #include "cli/cli-setshow.h"
@@ -64,6 +63,8 @@
 #include <ctype.h>
 #include "ui-out.h"
 #include "cli-out.h"
+
+extern void initialize_all_files (void);
 
 #define PROMPT(X) the_prompts.prompt_stack[the_prompts.top + X].prompt
 #define PREFIX(X) the_prompts.prompt_stack[the_prompts.top + X].prefix

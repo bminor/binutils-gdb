@@ -1140,7 +1140,7 @@ init.c: $(INIT_FILES)
 	@echo '/* Do not modify this file.  */' >>init.c-tmp
 	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
 	@echo '#include "defs.h"      /* For initialize_file_ftype.  */' >>init.c-tmp
-	@echo '#include "call-cmds.h" /* For initialize_all_files.  */' >>init.c-tmp
+	@echo 'extern void initialize_all_files(void);' >>init.c-tmp
 	@sed -e 's/\(.*\)/extern initialize_file_ftype _initialize_\1;/' <init.l-tmp >>init.c-tmp
 	@echo 'void' >>init.c-tmp
 	@echo 'initialize_all_files (void)' >>init.c-tmp
