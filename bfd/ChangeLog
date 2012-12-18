@@ -1,3 +1,8 @@
+2012-12-18  Edgar E. Iglesias <edgar.iglesias@gmail.com>
+
+	PR ld/14736
+	* elf32-microblaze.c (calc_fixup): Add end range.
+
 2012-12-18  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (swap_out_syms): Set shndx to SHN_ABS when not one of

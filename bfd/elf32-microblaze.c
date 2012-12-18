@@ -1600,8 +1600,9 @@ microblaze_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 /* Calculate fixup value for reference.  */
 
 static int
-calc_fixup (bfd_vma addr, asection *sec)
+calc_fixup (bfd_vma start, bfd_vma size, asection *sec)
 {
+  bfd_vma end = start + size;
   int i, fixup = 0;
 
   if (sec == NULL || sec->relax == NULL)
@@ -1610,11 +1611,12 @@ calc_fixup (bfd_vma addr, asection *sec)
   /* Look for addr in relax table, total fixup value.  */
   for (i = 0; i < sec->relax_count; i++)
     {
-      if (addr <= sec->relax[i].addr)
+      if (end <= sec->relax[i].addr)
         break;
+      if ((end != start) && (start > sec->relax[i].addr))
+        continue;
       fixup += sec->relax[i].size;
     }
-
   return fixup;
 }
 
@@ -1827,7 +1829,7 @@ microblaze_elf_relax_section (bfd *abfd,
 	  bfd_vma nraddr;
 
           /* Get the new reloc address.  */
-	  nraddr = irel->r_offset - calc_fixup (irel->r_offset, sec);
+	  nraddr = irel->r_offset - calc_fixup (irel->r_offset, 0, sec);
           switch ((enum elf_microblaze_reloc_type) ELF32_R_TYPE (irel->r_info))
 	    {
 	    default:
@@ -1845,7 +1847,7 @@ microblaze_elf_relax_section (bfd *abfd,
 		  /* Only handle relocs against .text.  */
 		  if (isym->st_shndx == shndx
 		      && ELF32_ST_TYPE (isym->st_info) == STT_SECTION)
-		    irel->r_addend -= calc_fixup (irel->r_addend, sec);
+		    irel->r_addend -= calc_fixup (irel->r_addend, 0, sec);
 	        }
 	      break;
 	    case R_MICROBLAZE_NONE:
@@ -1855,8 +1857,8 @@ microblaze_elf_relax_section (bfd *abfd,
 	        int sfix, efix;
 	        bfd_vma target_address;
 	        target_address = irel->r_addend + irel->r_offset;
-	        sfix = calc_fixup (irel->r_offset, sec);
-	        efix = calc_fixup (target_address, sec);
+	        sfix = calc_fixup (irel->r_offset, 0, sec);
+	        efix = calc_fixup (target_address, 0, sec);
 	        irel->r_addend -= (efix - sfix);
 	        /* Should use HOWTO.  */
 	        microblaze_bfd_write_imm_value_32 (abfd, contents + irel->r_offset,
@@ -1870,8 +1872,8 @@ microblaze_elf_relax_section (bfd *abfd,
 	        int sfix, efix;
 	        bfd_vma target_address;
 		target_address = irel->r_addend + irel->r_offset + INST_WORD_SIZE;
-		sfix = calc_fixup (irel->r_offset + INST_WORD_SIZE, sec);
-		efix = calc_fixup (target_address, sec);
+		sfix = calc_fixup (irel->r_offset + INST_WORD_SIZE, 0, sec);
+		efix = calc_fixup (target_address, 0, sec);
 		irel->r_addend -= (efix - sfix);
     microblaze_bfd_write_imm_value_32 (abfd, contents + irel->r_offset
                                        + INST_WORD_SIZE, irel->r_addend);
@@ -1934,7 +1936,7 @@ microblaze_elf_relax_section (bfd *abfd,
                             }
 
                         }
-		      irelscan->r_addend -= calc_fixup (irelscan->r_addend, sec);
+		      irelscan->r_addend -= calc_fixup (irelscan->r_addend, 0, sec);
                     }
 		  else if (ELF32_R_TYPE (irelscan->r_info) == (int) R_MICROBLAZE_32_SYM_OP_SYM)
 		    {
@@ -1965,6 +1967,7 @@ microblaze_elf_relax_section (bfd *abfd,
 			}
 		      irelscan->r_addend -= calc_fixup (irel->r_addend
 							+ isym->st_value,
+							0,
 							sec);
 		    }
 		}
@@ -2005,7 +2008,7 @@ microblaze_elf_relax_section (bfd *abfd,
 		      unsigned long instr = bfd_get_32 (abfd, ocontents + irelscan->r_offset);
 		      immediate = instr & 0x0000ffff;
 		      target_address = immediate;
-		      offset = calc_fixup (target_address, sec);
+		      offset = calc_fixup (target_address, 0, sec);
 		      immediate -= offset;
 		      irelscan->r_addend -= offset;
           microblaze_bfd_write_imm_value_32 (abfd, ocontents + irelscan->r_offset,
@@ -2052,7 +2055,7 @@ microblaze_elf_relax_section (bfd *abfd,
                                                 + INST_WORD_SIZE);
           immediate = (instr_hi & 0x0000ffff) << 16;
           immediate |= (instr_lo & 0x0000ffff);
-		      offset = calc_fixup (irelscan->r_addend, sec);
+		      offset = calc_fixup (irelscan->r_addend, 0, sec);
 		      immediate -= offset;
 		      irelscan->r_addend -= offset;
 		    }
@@ -2097,7 +2100,7 @@ microblaze_elf_relax_section (bfd *abfd,
           immediate = (instr_hi & 0x0000ffff) << 16;
           immediate |= (instr_lo & 0x0000ffff);
 		      target_address = immediate;
-		      offset = calc_fixup (target_address, sec);
+		      offset = calc_fixup (target_address, 0, sec);
 		      immediate -= offset;
 		      irelscan->r_addend -= offset;
           microblaze_bfd_write_imm_value_64 (abfd, ocontents
@@ -2112,24 +2115,30 @@ microblaze_elf_relax_section (bfd *abfd,
       for (isym = isymbuf; isym < isymend; isym++)
         {
           if (isym->st_shndx == shndx)
-	    isym->st_value =- calc_fixup (isym->st_value, sec);
+            {
+              isym->st_value -= calc_fixup (isym->st_value, 0, sec);
+              if (isym->st_size)
+                isym->st_size -= calc_fixup (isym->st_value, isym->st_size, sec);
+            }
         }
 
       /* Now adjust the global symbols defined in this section.  */
       isym = isymbuf + symtab_hdr->sh_info;
-      isymend = isymbuf + (symtab_hdr->sh_size / sizeof (Elf32_External_Sym));
-      for (sym_index = 0; isym < isymend; isym++, sym_index++)
+      symcount =  (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)) - symtab_hdr->sh_info;
+      for (sym_index = 0; sym_index < symcount; sym_index++)
         {
           sym_hash = elf_sym_hashes (abfd)[sym_index];
-          if (isym->st_shndx == shndx
-              && (sym_hash->root.type == bfd_link_hash_defined
+          if ((sym_hash->root.type == bfd_link_hash_defined
                   || sym_hash->root.type == bfd_link_hash_defweak)
               && sym_hash->root.u.def.section == sec)
-	    {
-	      sym_hash->root.u.def.value -= calc_fixup (sym_hash->root.u.def.value,
-						        sec);
-	    }
-	}
+            {
+              sym_hash->root.u.def.value -= calc_fixup (sym_hash->root.u.def.value,
+                                                        0, sec);
+              if (sym_hash->size)
+                sym_hash->size -= calc_fixup (sym_hash->root.u.def.value,
+                                              sym_hash->size, sec);
+            }
+        }
 
       /* Physically move the code and change the cooked size.  */
       dest = sec->relax[0].addr;
