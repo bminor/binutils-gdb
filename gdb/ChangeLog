@@ -1,5 +1,17 @@
 2012-12-18  Joel Brobecker  <brobecker@adacore.com>
 
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add errno.
+	* gnulib/import/errno.in.h: Import.
+	* gnulib/import/m4/errno_h.m4: Import.
+	* gnulib/aclocal.m4: Regenerate.
+	* gnulib/configure: Regenerate.
+	* gnulib/import/Makefile.am: Update.
+	* gnulib/import/Makefile.in: Update.
+	* gnulib/import/m4/gnulib-cache.m4: Update.
+	* gnulib/import/m4/gnulib-comp.m4: Update.
+
+2012-12-18  Joel Brobecker  <brobecker@adacore.com>
+
 	* gnulib/update-gnulib.sh (GNULIB_COMMIT_SHA1): Set to
 	8d5bd1402003bd0153984b138735adf537d960b0.
 	* gnulib/aclocal.m4, configure, config.in: Regenerate.
