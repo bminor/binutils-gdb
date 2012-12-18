@@ -1643,11 +1643,13 @@ show_max_user_call_depth (struct ui_file *file, int from_tty,
 }
 
 
+
+initialize_file_ftype _initialize_cli_cmds;
+
 void
-init_cli_cmds (void)
+_initialize_cli_cmds (void)
 {
   struct cmd_list_element *c;
-  char *source_help_text;
 
   /* Define the classes of commands.
      They will appear in the help list in alphabetical order.  */
@@ -1713,20 +1715,6 @@ Definition appears on following lines, one command per line.\n\
 End with a line of just \"end\".\n\
 Use the \"document\" command to give documentation for the new command.\n\
 Commands defined in this way may have up to ten arguments."));
-
-  source_help_text = xstrprintf (_("\
-Read commands from a file named FILE.\n\
-\n\
-Usage: source [-s] [-v] FILE\n\
--s: search for the script in the source search path,\n\
-    even if FILE contains directories.\n\
--v: each command in FILE is echoed as it is executed.\n\
-\n\
-Note that the file \"%s\" is read automatically in this way\n\
-when GDB is started."), gdbinit);
-  c = add_cmd ("source", class_support, source_command,
-	       source_help_text, &cmdlist);
-  set_cmd_completer (c, filename_completer);
 
   add_setshow_enum_cmd ("script-extension", class_support,
 			script_ext_enums, &script_ext_mode, _("\
@@ -1938,4 +1926,25 @@ Make \"spe\" an alias of \"set print elements\":\n\
   alias spe = set print elements\n\
 Make \"elms\" an alias of \"elements\" in the \"set print\" command:\n\
   alias -a set print elms = set print elements"));
+}
+
+void
+init_cli_cmds (void)
+{
+  struct cmd_list_element *c;
+  char *source_help_text;
+
+  source_help_text = xstrprintf (_("\
+Read commands from a file named FILE.\n\
+\n\
+Usage: source [-s] [-v] FILE\n\
+-s: search for the script in the source search path,\n\
+    even if FILE contains directories.\n\
+-v: each command in FILE is echoed as it is executed.\n\
+\n\
+Note that the file \"%s\" is read automatically in this way\n\
+when GDB is started."), gdbinit);
+  c = add_cmd ("source", class_support, source_command,
+	       source_help_text, &cmdlist);
+  set_cmd_completer (c, filename_completer);
 }

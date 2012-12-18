@@ -1,5 +1,10 @@
 2012-12-12  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-cmds.c (_initialize_cli_cmds): New function.
+	(init_cli_cmds): Move most code into new function.
+
+2012-12-12  Tom Tromey  <tromey@redhat.com>
+
 	* minsyms.c (lookup_solib_trampoline_symbol_by_pc): Now static.
 	* minsyms.h (lookup_solib_trampoline_symbol_by_pc): Don't
 	declare.
