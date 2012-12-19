@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.5
 
+* New targets
+
+Lynx 178 PowerPC		powerpc-*-lynx*178
+
 * If the configured location of system.gdbinit file (as given by the
   --with-system-gdbinit option at configure time) is in the
   data-directory (as specified by --with-gdb-datadir at configure
