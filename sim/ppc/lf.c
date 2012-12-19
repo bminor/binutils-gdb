@@ -4,7 +4,7 @@
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
+    the Free Software Foundation; either version 3 of the License, or
     (at your option) any later version.
 
     This program is distributed in the hope that it will be useful,
@@ -280,7 +280,7 @@ lf_print__gnu_copyleft(lf *file)
 \n\
     This program is free software; you can redistribute it and/or modify\n\
     it under the terms of the GNU General Public License as published by\n\
-    the Free Software Foundation; either version 2 of the License, or\n\
+    the Free Software Foundation; either version 3 of the License, or\n\
     (at your option) any later version.\n\
 \n\
     This program is distributed in the hope that it will be useful,\n\

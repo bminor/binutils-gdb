@@ -1,3 +1,7 @@
+2012-12-19  Joel Brobecker  <brobecker@adacore.com>
+
+	Update the non-FSF-copyrighted files in sim to GPLv3 or later.
+
 2012-11-20  Pavel Chupin  <pavel.v.chupin@intel.com>
 
 	* common/Make-common.in: Use lt_cv_dlopen_libs under PLUGINS
