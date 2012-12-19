@@ -395,7 +395,7 @@ maintenance_info_sections (char *arg, int from_tty)
     }
 }
 
-void
+static void
 maintenance_print_statistics (char *args, int from_tty)
 {
   print_objfile_statistics ();

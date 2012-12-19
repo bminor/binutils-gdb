@@ -1174,10 +1174,6 @@ void maintenance_info_psymtabs (char *, int);
 
 void maintenance_check_symtabs (char *, int);
 
-/* maint.c */
-
-void maintenance_print_statistics (char *, int);
-
 /* Symbol-reading stuff in symfile.c and solib.c.  */
 
 extern void clear_solib (void);
