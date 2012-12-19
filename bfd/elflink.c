@@ -13077,5 +13077,5 @@ elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_byte *loc = s->contents + (s->reloc_count++ * bed->s->sizeof_rel);
   BFD_ASSERT (loc + bed->s->sizeof_rel <= s->contents + s->size);
-  bed->s->swap_reloca_out (abfd, rel, loc);
+  bed->s->swap_reloc_out (abfd, rel, loc);
 }
