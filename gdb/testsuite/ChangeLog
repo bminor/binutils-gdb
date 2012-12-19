@@ -1,3 +1,14 @@
+2012-12-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* dg-extract-results.sh: Update contact info in copyright notice.
+	* gdb.arch/mips-octeon-bbit.exp: Update copyright notice to
+	GPL v3 or later.  Update contact info.
+	* gdb.fortran/logical.f90, gdb.threads/watchpoint-fork-child.c,
+	gdb.threads/watchpoint-fork-mt.c,
+	gdb.threads/watchpoint-fork-parent.c,
+	gdb.threads/watchpoint-fork-st.c,
+	gdb.threads/watchpoint-fork.h: Likewise.
+
 2012-12-15  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/mi-tracepoint-changed.exp (test_pending_resolved): Check

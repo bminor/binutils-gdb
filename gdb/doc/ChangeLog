@@ -1,3 +1,8 @@
+2012-12-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* refcard.tex: Update copyright notice to GPL v3 or later.
+	Update contact info.
+
 2012-12-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbint.texinfo (Coding Standards) (C Usage): New rule for 0 vs. NULL.
