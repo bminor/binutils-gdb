@@ -1,5 +1,12 @@
 2012-12-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbarch.sh (copyright): Update copyright years.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* copyright.py (EXCLUDE_LIST): Remove gdbarch.h and gdbarch.c.
+	(MULTIPLE_COPYRIGHT_HEADERS): Add 'gdb/gdbarch.sh'.
+
+2012-12-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* acinclude.m4: Update contact info in copyright notice.
 
 2012-12-19  Yao Qi  <yao@codesourcery.com>

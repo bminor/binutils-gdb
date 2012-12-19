@@ -172,7 +172,6 @@ def main ():
 # Filenames are relative to the root directory.
 EXCLUDE_LIST = (
     'gdb/CONTRIBUTE',
-    'gdb/gdbarch.c', 'gdb/gdbarch.h',
     'gdb/gnulib'
 )
 
@@ -202,6 +201,7 @@ BY_HAND = (
 MULTIPLE_COPYRIGHT_HEADERS = (
     "gdb/doc/gdb.texinfo",
     "gdb/doc/refcard.tex",
+    "gdb/gdbarch.sh",
 )
 
 # The list of file which have a copyright, but not head by the FSF.
