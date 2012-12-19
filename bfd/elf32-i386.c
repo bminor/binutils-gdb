@@ -4006,7 +4006,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  loc += (htab->next_tls_desc_index++
 			  * sizeof (Elf32_External_Rel));
 		  BFD_ASSERT (loc + sizeof (Elf32_External_Rel)
-			       <= sreloc->contents + sreloc->size);
+			      <= sreloc->contents + sreloc->size);
 		  bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
 		  if (indx == 0)
 		    {
