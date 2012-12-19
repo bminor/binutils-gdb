@@ -4549,7 +4549,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 			      + got_offset);
 	      rel.r_info = ELF32_R_INFO (htab->elf.hplt->indx, R_386_32);
 	      bfd_elf32_swap_reloc_out (output_bfd, &rel,
-	      loc + sizeof (Elf32_External_Rel));
+					loc + sizeof (Elf32_External_Rel));
 	    }
 	}
       else

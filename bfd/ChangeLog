@@ -1,3 +1,7 @@
+2012-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Reindent.
+
 2012-12-18  Edgar E. Iglesias <edgar.iglesias@gmail.com>
 
 	PR ld/14736
