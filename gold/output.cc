@@ -2478,6 +2478,19 @@ Output_section::add_input_section(Layout* layout,
         }
     }
 
+  // The GNU linker groups input sections whose names match .text.unlikely.*.
+  // This is used to get better code layout.  We are compatible.
+  // Additionally, it could also be beneficial to group .text.hot.*,
+  // .text.startup.* prefixed input sections.  Function
+  // "is_section_name_prefix_grouped" in layout.cc determines the input
+  // section prefixes that must be grouped.
+  if (!have_sections_script
+      && !parameters->options().relocatable()
+      && !this->input_section_order_specified()
+      && !this->must_sort_attached_input_sections()
+      && layout->is_section_name_prefix_grouped(secname))
+    this->set_input_section_order_specified();
+
   // We need to keep track of this section if we are already keeping
   // track of sections, or if we are relaxing.  Also, if this is a
   // section which requires sorting, or which may require sorting in
@@ -2491,7 +2504,8 @@ Output_section::add_input_section(Layout* layout,
       || this->must_sort_attached_input_sections()
       || parameters->options().user_set_Map()
       || parameters->target().may_relax()
-      || layout->is_section_ordering_specified())
+      || layout->is_section_ordering_specified()
+      || this->input_section_order_specified())
     {
       Input_section isecn(object, shndx, input_section_size, addralign);
       /* If section ordering is requested by specifying a ordering file,
@@ -3484,7 +3498,9 @@ Output_section::Input_section_sort_init_fini_compare::operator()(
 
 // Return true if S1 should come before S2.  Sections that do not match
 // any pattern in the section ordering file are placed ahead of the sections
-// that match some pattern.
+// that match some pattern.  This function is also used to group text according
+// to their prefix.  The following prefixes are recognized: ".text.startup",
+// ".text.hot", and ".text.unlikely".
 
 bool
 Output_section::Input_section_sort_section_order_index_compare::operator()(
@@ -3494,11 +3510,59 @@ Output_section::Input_section_sort_section_order_index_compare::operator()(
   unsigned int s1_secn_index = s1.input_section().section_order_index();
   unsigned int s2_secn_index = s2.input_section().section_order_index();
 
-  // Keep input order if section ordering cannot determine order.
-  if (s1_secn_index == s2_secn_index)
-    return s1.index() < s2.index();
+  // If section ordering is specified, it takes precedence.
+  if (s1_secn_index != s2_secn_index)
+    return s1_secn_index < s2_secn_index;
 
-  return s1_secn_index < s2_secn_index;
+  // Sort all the sections with no names to the end.
+  if (!s1.section_has_name() || !s2.section_has_name())
+    {
+      if (s1.section_has_name())
+	return true;
+      if (s2.section_has_name())
+	return false;
+      return s1.index() < s2.index();
+    }
+
+  // If it is a text section use the following order:
+  // .text.unlikely, .text.startup, .text.hot. The prefixes
+  // must match those in function is_section_name_prefix_grouped
+  // in layout.cc
+  const char* section_prefix [] = 
+  {
+    ".text.unlikely",
+    ".text.startup",
+    ".text.hot"
+  };
+
+  const unsigned int num_prefixes
+    = sizeof(section_prefix) / sizeof(const char*);
+
+  unsigned int s1_group_index = num_prefixes;
+  unsigned int s2_group_index = num_prefixes;
+
+  unsigned int flag_done = 0;
+  for (unsigned int i = 0; i < num_prefixes && flag_done < 2; i++)
+    {
+      if (s1_group_index == num_prefixes
+	  && is_prefix_of(section_prefix[i], s1.section_name().c_str()))
+	{
+          s1_group_index = i;
+	  flag_done++;
+	}
+
+      if (s2_group_index == num_prefixes
+	  && is_prefix_of(section_prefix[i], s2.section_name().c_str()))
+	{
+          s2_group_index = i;
+	  flag_done++;
+	}
+    }
+
+  if (s1_group_index == s2_group_index)
+    return s1.index() < s2.index();
+  else
+    return s1_group_index < s2_group_index;
 }
 
 // This updates the section order index of input sections according to the
@@ -3559,7 +3623,8 @@ Output_section::sort_attached_input_sections()
        p != this->input_sections_.end();
        ++p, ++i)
       sort_list.push_back(Input_section_sort_entry(*p, i,
-                            this->must_sort_attached_input_sections()));
+                            (this->must_sort_attached_input_sections()
+			     || this->input_section_order_specified())));
 
   // Sort the input sections.
   if (this->must_sort_attached_input_sections())

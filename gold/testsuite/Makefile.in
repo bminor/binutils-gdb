@@ -81,6 +81,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_so_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	text_section_grouping.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.sh \
@@ -111,6 +112,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_so_test_1.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_so_test_2.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	text_section_grouping.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.stdout \
@@ -122,6 +124,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test icf_keep_unique_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test icf_safe_so_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	text_section_grouping \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout_sequence.txt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_virtual_function_folding_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test \
@@ -3701,6 +3704,8 @@ icf_safe_so_test.sh.log: icf_safe_so_test.sh
 	@p='icf_safe_so_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 final_layout.sh.log: final_layout.sh
 	@p='final_layout.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+text_section_grouping.sh.log: text_section_grouping.sh
+	@p='text_section_grouping.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 icf_preemptible_functions_test.sh.log: icf_preemptible_functions_test.sh
 	@p='icf_preemptible_functions_test.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 icf_string_merge_test.sh.log: icf_string_merge_test.sh
@@ -4348,6 +4353,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--section-ordering-file,final_layout_sequence.txt final_layout.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@final_layout.stdout: final_layout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -n --synthetic final_layout > final_layout.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@text_section_grouping.o: text_section_grouping.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@text_section_grouping: text_section_grouping.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ text_section_grouping.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@text_section_grouping.stdout: text_section_grouping
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -n --synthetic text_section_grouping > text_section_grouping.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIE -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_virtual_function_folding_test: icf_virtual_function_folding_test.o gcctestdir/ld

@@ -552,6 +552,11 @@ class Layout
   // Maps section SECN to SEGMENT s.
   void
   insert_section_segment_map(Const_section_id secn, Unique_segment_info *s);
+
+  // By default, gold groups input sections with certain prefixes.  This 
+  // function returns true if this section name NAME contains such a prefix.
+  bool
+  is_section_name_prefix_grouped(const char *name);
   
   bool
   is_section_ordering_specified()

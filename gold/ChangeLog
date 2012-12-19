@@ -1,3 +1,19 @@
+2012-12-18  Sriraman Tallam  <tmsriram@google.com>
+
+	* layout.cc (Layout::is_section_name_prefix_grouped): New function.	
+	* layout.h (Layout::is_section_name_prefix_grouped): New function.
+	* output.cc (Output_section::add_input_section): Check if section
+	name contains special prefix.  Keep input sections to sort such
+	sections.
+	(Output_section::Input_section_sort_section_order_index_compare
+	 ::operator()): Group sections according to prefixes.
+	* (Output_section::sort_attached_input_sections): Add condition
+	to Input_section_entry constructor call.
+	* testsuite/Makefile.am (text_section_grouping): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/text_section_grouping.cc: New file.
+	* testsuite/text_section_grouping.sh: New file.
+
 2012-12-17  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am: Add copyright notice.

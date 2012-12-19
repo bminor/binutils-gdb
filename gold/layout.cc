@@ -2409,6 +2409,20 @@ Layout::relaxation_loop_body(
   return off;
 }
 
+// By default, gold groups input sections with certain prefixes.  This 
+// function returns true if this section name NAME contains such a prefix.
+
+bool
+Layout::is_section_name_prefix_grouped(const char *name)
+{
+  if (is_prefix_of(".text.unlikely", name)
+      || is_prefix_of(".text.startup", name)
+      || is_prefix_of(".text.hot", name))
+    return true;
+
+  return false;
+}
+
 // Search the list of patterns and find the postion of the given section
 // name in the output section.  If the section name matches a glob
 // pattern and a non-glob name, then the non-glob position takes

@@ -250,6 +250,16 @@ final_layout: final_layout.o final_layout_sequence.txt gcctestdir/ld
 final_layout.stdout: final_layout
 	$(TEST_NM) -n --synthetic final_layout > final_layout.stdout
 
+check_SCRIPTS += text_section_grouping.sh
+check_DATA += text_section_grouping.stdout
+MOSTLYCLEANFILES += text_section_grouping
+text_section_grouping.o: text_section_grouping.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+text_section_grouping: text_section_grouping.o gcctestdir/ld
+	$(CXXLINK)  -Bgcctestdir/ text_section_grouping.o
+text_section_grouping.stdout: text_section_grouping
+	$(TEST_NM) -n --synthetic text_section_grouping > text_section_grouping.stdout 
+
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test
 icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc
