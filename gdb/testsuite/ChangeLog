@@ -1,5 +1,10 @@
 2012-12-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.arch/mips-octeon-bbit.exp: Fix copyright header from
+	Cavium to FSF.
+
+2012-12-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* dg-extract-results.sh: Update contact info in copyright notice.
 	* gdb.arch/mips-octeon-bbit.exp: Update copyright notice to
 	GPL v3 or later.  Update contact info.
