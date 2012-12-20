@@ -546,19 +546,6 @@ serial_async (struct serial *scb,
     scb->ops->async (scb, handler != NULL);
 }
 
-int
-deprecated_serial_fd (struct serial *scb)
-{
-  /* FIXME: should this output a warning that deprecated code is being
-     called?  */
-  if (scb->fd < 0)
-    {
-      internal_error (__FILE__, __LINE__,
-		      _("serial: FD not valid"));
-    }
-  return scb->fd; /* sigh */
-}
-
 void
 serial_debug (struct serial *scb, int debug_p)
 {

@@ -205,13 +205,6 @@ typedef void (serial_event_ftype) (struct serial *scb, void *context);
 extern void serial_async (struct serial *scb,
 			  serial_event_ftype *handler, void *context);
 
-/* Provide direct access to the underlying FD (if any) used to
-   implement the serial device.  This interface is clearly
-   deprecated.  Will call internal_error() if the operation isn't
-   applicable to the current serial device.  */
-
-extern int deprecated_serial_fd (struct serial *scb);
-
 /* Trace/debug mechanism.
 
    serial_debug() enables/disables internal debugging.
