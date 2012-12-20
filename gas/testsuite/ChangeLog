@@ -1,3 +1,12 @@
+2012-12-20  Greta Yorsh  <Greta.Yorsh@arm.com>
+
+	* gas/arm/srs-t2.s: Add tests for missing srs modes.
+	* gas/arm/srs-t2.l: Update expected output.
+	* gas/arm/srs-arm.s: Add tests for missing srs modes.
+	* gas/arm/srs-arm.l: Update expected output.
+	* gas/arm/archv6.s: Add tests for missing rfe modes.
+	* gas/arm/archv6.d: Update expected output.
+
 2012-12-06  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/programmer-friendly.s: Add tests for LDR literal with
