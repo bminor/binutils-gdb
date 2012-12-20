@@ -18189,17 +18189,23 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6_notm
  TUF("rfeia",	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
+ TUF("rfe",	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
   UF(rfeib,	9900a00,           1, (RRw),			   rfe),
   UF(rfeda,	8100a00,           1, (RRw),			   rfe),
  TUF("rfedb",	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
  TUF("rfefd",	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
-  UF(rfefa,	9900a00,           1, (RRw),			   rfe),
-  UF(rfeea,	8100a00,           1, (RRw),			   rfe),
- TUF("rfeed",	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
+  UF(rfefa,	8100a00,           1, (RRw),			   rfe),
+ TUF("rfeea",	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
+  UF(rfeed,	9900a00,           1, (RRw),			   rfe),
  TUF("srsia",	8c00500, e980c000, 2, (oRRw, I31w),		   srs,  srs),
+ TUF("srs",	8c00500, e980c000, 2, (oRRw, I31w),		   srs,  srs),
+ TUF("srsea",	8c00500, e980c000, 2, (oRRw, I31w),		   srs,  srs),
   UF(srsib,	9c00500,           2, (oRRw, I31w),		   srs),
+  UF(srsfa,	9c00500,           2, (oRRw, I31w),		   srs),
   UF(srsda,	8400500,	   2, (oRRw, I31w),		   srs),
+  UF(srsed,	8400500,	   2, (oRRw, I31w),		   srs),
  TUF("srsdb",	9400500, e800c000, 2, (oRRw, I31w),		   srs,  srs),
+ TUF("srsfd",	9400500, e800c000, 2, (oRRw, I31w),		   srs,  srs),
 
 /*  ARM V6 not included in V7M (eg. integer SIMD).  */
 #undef  THUMB_VARIANT

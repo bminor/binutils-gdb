@@ -1,3 +1,8 @@
+2012-12-20  Greta Yorsh  <Greta.Yorsh@arm.com>
+
+	* config/tc-arm.c (rfefa,rfeea,rfeed): Fix encoding.
+	(rfe,srs,srsea,srsfa,srsed,srsfd): Add missing mnemonics.
+
 2012-12-17  Nick Clifton  <nickc@redhat.com>
 
 	* CONTRIBUTORS: Add copyright notice.
