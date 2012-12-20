@@ -2140,11 +2140,12 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
   /* STT_GNU_IFUNC symbol must go through PLT. */
   if (h->type == STT_GNU_IFUNC)
     {
-      /* Check local STT_GNU_IFUNC calls.  */
+      /* All local STT_GNU_IFUNC references must be treate as local
+	 calls via local PLT.  */
       if (h->ref_regular
 	  && SYMBOL_CALLS_LOCAL (info, h))
 	{
-	  bfd_size_type pc_count = 0;
+	  bfd_size_type pc_count = 0, count = 0;
 	  struct elf_dyn_relocs **pp;
 
 	  eh = (struct elf_x86_64_link_hash_entry *) h;
@@ -2153,13 +2154,14 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
 	      pc_count += p->pc_count;
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
+	      count += p->count;
 	      if (p->count == 0)
 		*pp = p->next;
 	      else
 		pp = &p->next;
 	    }
 
-	  if (pc_count)
+	  if (pc_count || count)
 	    {
 	      h->needs_plt = 1;
 	      h->plt.refcount += 1;
