@@ -36,6 +36,7 @@
 #include "gdb_stat.h"
 #include "dictionary.h"
 #include "typeprint.h"
+#include "gdbcmd.h"
 
 #include "gdb_string.h"
 #include "readline/readline.h"
@@ -401,7 +402,7 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
     dump_symtab_1 (objfile, symtab, outfile);
 }
 
-void
+static void
 maintenance_print_symbols (char *args, int from_tty)
 {
   char **argv;
@@ -626,7 +627,7 @@ print_symbol (void *args)
   return 1;
 }
 
-void
+static void
 maintenance_print_msymbols (char *args, int from_tty)
 {
   char **argv;
@@ -682,7 +683,7 @@ maintenance_print_msymbols (char *args, int from_tty)
   do_cleanups (cleanups);
 }
 
-void
+static void
 maintenance_print_objfiles (char *ignore, int from_tty)
 {
   struct program_space *pspace;
@@ -700,7 +701,7 @@ maintenance_print_objfiles (char *ignore, int from_tty)
 
 /* List all the symbol tables whose names match REGEXP (optional).  */
 
-void
+static void
 maintenance_info_symtabs (char *regexp, int from_tty)
 {
   struct program_space *pspace;
@@ -784,4 +785,27 @@ _initialize_symmisc (void)
   std_in = stdin;
   std_out = stdout;
   std_err = stderr;
+
+  add_cmd ("symbols", class_maintenance, maintenance_print_symbols, _("\
+Print dump of current symbol definitions.\n\
+Entries in the full symbol table are dumped to file OUTFILE.\n\
+If a SOURCE file is specified, dump only that file's symbols."),
+	   &maintenanceprintlist);
+
+  add_cmd ("msymbols", class_maintenance, maintenance_print_msymbols, _("\
+Print dump of current minimal symbol definitions.\n\
+Entries in the minimal symbol table are dumped to file OUTFILE.\n\
+If a SOURCE file is specified, dump only that file's minimal symbols."),
+	   &maintenanceprintlist);
+
+  add_cmd ("objfiles", class_maintenance, maintenance_print_objfiles,
+	   _("Print dump of current object file definitions."),
+	   &maintenanceprintlist);
+
+  add_cmd ("symtabs", class_maintenance, maintenance_info_symtabs, _("\
+List the full symbol tables for all object files.\n\
+This does not include information about individual symbols, blocks, or\n\
+linetables --- just the symbol table structures themselves.\n\
+With an argument REGEXP, list the symbol tables whose names that match that."),
+	   &maintenanceinfolist);
 }

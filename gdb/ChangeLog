@@ -1,5 +1,17 @@
 2012-12-20  Yao Qi  <yao@codesourcery.com>
 
+	* maint.c (_initialize_maint_cmds): Move code ...
+	* symmisc.c (_initialize_symmisc): ... to here.
+	(maintenance_print_msymbols): Make it static.
+	(maintenance_print_objfiles): Likewise.
+	(maintenance_print_symbols): Likewise.
+	(maintenance_info_symtabs): Likewise.
+	* symtab.h (maintenance_print_msymbols): Remove declaration.
+	(maintenance_print_objfiles, maintenance_print_symbols): Likewise.
+	(maintenance_info_symtabs): Likewise.
+
+2012-12-20  Yao Qi  <yao@codesourcery.com>
+
 	* maint.c (_initialize_maint_cmds): Move code to ...
 	* psymtab.c (_initialize_psymtab): ... here.  New.
 	Include "gdbcmd.h".
