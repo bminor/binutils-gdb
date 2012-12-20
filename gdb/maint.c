@@ -833,12 +833,6 @@ Entries in the minimal symbol table are dumped to file OUTFILE.\n\
 If a SOURCE file is specified, dump only that file's minimal symbols."),
 	   &maintenanceprintlist);
 
-  add_cmd ("psymbols", class_maintenance, maintenance_print_psymbols, _("\
-Print dump of current partial symbol definitions.\n\
-Entries in the partial symbol table are dumped to file OUTFILE.\n\
-If a SOURCE file is specified, dump only that file's partial symbols."),
-	   &maintenanceprintlist);
-
   add_cmd ("objfiles", class_maintenance, maintenance_print_objfiles,
 	   _("Print dump of current object file definitions."),
 	   &maintenanceprintlist);
@@ -850,12 +844,6 @@ linetables --- just the symbol table structures themselves.\n\
 With an argument REGEXP, list the symbol tables whose names that match that."),
 	   &maintenanceinfolist);
 
-  add_cmd ("psymtabs", class_maintenance, maintenance_info_psymtabs, _("\
-List the partial symbol tables for all object files.\n\
-This does not include information about individual partial symbols,\n\
-just the symbol table structures themselves."),
-	   &maintenanceinfolist);
-
   add_cmd ("statistics", class_maintenance, maintenance_print_statistics,
 	   _("Print statistics about internal gdb state."),
 	   &maintenanceprintlist);
@@ -865,10 +853,6 @@ just the symbol table structures themselves."),
 Print the internal architecture configuration.\n\
 Takes an optional file parameter."),
 	   &maintenanceprintlist);
-
-  add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
-	   _("Check consistency of psymtabs and symtabs."),
-	   &maintenancelist);
 
   add_cmd ("translate-address", class_maintenance,
 	   maintenance_translate_address,

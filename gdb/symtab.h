@@ -1162,17 +1162,11 @@ extern void resolve_sal_pc (struct symtab_and_line *);
 
 void maintenance_print_symbols (char *, int);
 
-void maintenance_print_psymbols (char *, int);
-
 void maintenance_print_msymbols (char *, int);
 
 void maintenance_print_objfiles (char *, int);
 
 void maintenance_info_symtabs (char *, int);
-
-void maintenance_info_psymtabs (char *, int);
-
-void maintenance_check_symtabs (char *, int);
 
 /* Symbol-reading stuff in symfile.c and solib.c.  */
 

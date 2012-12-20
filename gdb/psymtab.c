@@ -35,6 +35,7 @@
 #include "dictionary.h"
 #include "language.h"
 #include "cp-support.h"
+#include "gdbcmd.h"
 
 #ifndef DEV_TTY
 #define DEV_TTY "/dev/tty"
@@ -1815,7 +1816,7 @@ discard_psymtab (struct objfile *objfile, struct partial_symtab *pst)
 
 
 
-void
+static void
 maintenance_print_psymbols (char *args, int from_tty)
 {
   char **argv;
@@ -1864,7 +1865,7 @@ print-psymbols takes an output file name and optional symbol file name"));
 }
 
 /* List all the partial symbol tables whose names match REGEXP (optional).  */
-void
+static void
 maintenance_info_psymtabs (char *regexp, int from_tty)
 {
   struct program_space *pspace;
@@ -1970,7 +1971,7 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
 
 /* Check consistency of psymtabs and symtabs.  */
 
-void
+static void
 maintenance_check_symtabs (char *ignore, int from_tty)
 {
   struct symbol *sym;
@@ -2082,4 +2083,26 @@ map_partial_symbol_filenames (symbol_filename_ftype *fun, void *data,
       objfile->sf->qf->map_symbol_filenames (objfile, fun, data,
 					     need_fullname);
   }
+}
+
+extern initialize_file_ftype _initialize_psymtab;
+
+void
+_initialize_psymtab (void)
+{
+  add_cmd ("psymbols", class_maintenance, maintenance_print_psymbols, _("\
+Print dump of current partial symbol definitions.\n\
+Entries in the partial symbol table are dumped to file OUTFILE.\n\
+If a SOURCE file is specified, dump only that file's partial symbols."),
+	   &maintenanceprintlist);
+
+  add_cmd ("psymtabs", class_maintenance, maintenance_info_psymtabs, _("\
+List the partial symbol tables for all object files.\n\
+This does not include information about individual partial symbols,\n\
+just the symbol table structures themselves."),
+	   &maintenanceinfolist);
+
+  add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
+	   _("Check consistency of psymtabs and symtabs."),
+	   &maintenancelist);
 }
