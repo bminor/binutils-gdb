@@ -1,3 +1,12 @@
+2012-12-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14980
+	* ld-ifunc/ifunc-14c.s: New file.
+	* ld-ifunc/ifunc-14e-i386.d: Likewise.
+	* ld-ifunc/ifunc-14e-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-14f-i386.d: Likewise.
+	* ld-ifunc/ifunc-14f-x86-64.d: Likewise.
+
 2012-12-19  Alan Modra  <amodra@gmail.com>
 
 	PR ld/14962

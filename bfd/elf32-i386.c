@@ -2031,8 +2031,11 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  if (pc_count || count)
 	    {
 	      h->needs_plt = 1;
-	      h->plt.refcount += 1;
 	      h->non_got_ref = 1;
+	      if (h->plt.refcount <= 0)
+		h->plt.refcount = 1;
+	      else
+		h->plt.refcount += 1;
 	    }
 	}
 

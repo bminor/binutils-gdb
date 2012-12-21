@@ -1,3 +1,10 @@
+2012-12-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14980
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Properly
+	adjust h->plt.refcount.
+	* elf64-x86-64.c (elf_x86_64_adjust_dynamic_symbol): Likewise.
+
 2012-12-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Replace
