@@ -3207,8 +3207,11 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  || r_type == (int) R_X86_64_GNU_VTENTRY)
 	continue;
 
-      if (r_type >= R_X86_64_max)
+      if (r_type >= (int) R_X86_64_standard)
 	{
+	  (*_bfd_error_handler)
+	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
+	     input_bfd, input_section, r_type);
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
