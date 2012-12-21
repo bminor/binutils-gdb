@@ -1,14 +1,35 @@
+2012-12-20  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::special_ordering_of_input_section): New
+	function.
+	(Layout::layout): If input section requires special ordering, must
+	sort input sections.
+	(Layout::make_output_section): May sort .text input sections.
+	(Layout::is_section_name_prefix_grouped): Remove.
+	* layout.h (class Layout): Declare
+	special_ordering_of_input_section.  Don't declare
+	is_section_name_prefix_grouped.
+	* output.cc (Output_section::add_input_section): Revert last
+	change.
+	(Output_section::Input_section_sort::match_file_name): Don't crash
+	if called on output section data.
+	(Output_section::Input_section_sort_compare): Sort based on
+	special ordering.
+	(Output_section::Input_section_sort_section_order_index_compare):
+	Revert last patch.
+	(Output_section::sort_attached_input_sections): Likewise.
+
 2012-12-18  Sriraman Tallam  <tmsriram@google.com>
 
-	* layout.cc (Layout::is_section_name_prefix_grouped): New function.	
+	* layout.cc (Layout::is_section_name_prefix_grouped): New function.
 	* layout.h (Layout::is_section_name_prefix_grouped): New function.
 	* output.cc (Output_section::add_input_section): Check if section
 	name contains special prefix.  Keep input sections to sort such
 	sections.
 	(Output_section::Input_section_sort_section_order_index_compare
 	 ::operator()): Group sections according to prefixes.
-	* (Output_section::sort_attached_input_sections): Add condition
-	to Input_section_entry constructor call.
+	(Output_section::sort_attached_input_sections): Add condition to
+	Input_section_entry constructor call.
 	* testsuite/Makefile.am (text_section_grouping): New test.
 	* testsuite/Makefile.in: Regenerate.
 	* testsuite/text_section_grouping.cc: New file.

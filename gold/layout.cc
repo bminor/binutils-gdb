@@ -1033,6 +1033,33 @@ Layout::init_fixed_output_section(const char* name,
   return os;
 }
 
+// Return the index by which an input section should be ordered.  This
+// is used to sort some .text sections, for compatibility with GNU ld.
+
+int
+Layout::special_ordering_of_input_section(const char* name)
+{
+  // The GNU linker has some special handling for some sections that
+  // wind up in the .text section.  Sections that start with these
+  // prefixes must appear first, and must appear in the order listed
+  // here.
+  static const char* const text_section_sort[] = 
+  {
+    ".text.unlikely",
+    ".text.exit",
+    ".text.startup",
+    ".text.hot"
+  };
+
+  for (size_t i = 0;
+       i < sizeof(text_section_sort) / sizeof(text_section_sort[0]);
+       i++)
+    if (is_prefix_of(text_section_sort[i], name))
+      return i;
+
+  return -1;
+}
+
 // Return the output section to use for input section SHNDX, with name
 // NAME, with header HEADER, from object OBJECT.  RELOC_SHNDX is the
 // index of a relocation section which applies to this section, or 0
@@ -1118,6 +1145,13 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 	  || (parameters->options().ctors_in_init_array()
 	      && (strcmp(name, ".ctors") == 0
 		  || strcmp(name, ".dtors") == 0))))
+    os->set_must_sort_attached_input_sections();
+
+  // By default the GNU linker sorts some special text sections ahead
+  // of others.  We are compatible.
+  if (!this->script_options_->saw_sections_clause()
+      && !parameters->options().relocatable()
+      && Layout::special_ordering_of_input_section(name) >= 0)
     os->set_must_sort_attached_input_sections();
 
   // If this is a .ctors or .ctors.* section being mapped to a
@@ -1605,6 +1639,15 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 	  || (!parameters->options().ctors_in_init_array()
 	      && (strcmp(name, ".ctors") == 0
 		  || strcmp(name, ".dtors") == 0))))
+    os->set_may_sort_attached_input_sections();
+
+  // The GNU linker by default sorts .text.{unlikely,exit,startup,hot}
+  // sections before other .text sections.  We are compatible.  We
+  // need to know that this might happen before we attach any input
+  // sections.
+  if (!this->script_options_->saw_sections_clause()
+      && !parameters->options().relocatable()
+      && strcmp(name, ".text") == 0)
     os->set_may_sort_attached_input_sections();
 
   // Check for .stab*str sections, as .stab* sections need to link to
@@ -2407,20 +2450,6 @@ Layout::relaxation_loop_body(
 
   *pload_seg = load_seg;
   return off;
-}
-
-// By default, gold groups input sections with certain prefixes.  This 
-// function returns true if this section name NAME contains such a prefix.
-
-bool
-Layout::is_section_name_prefix_grouped(const char *name)
-{
-  if (is_prefix_of(".text.unlikely", name)
-      || is_prefix_of(".text.startup", name)
-      || is_prefix_of(".text.hot", name))
-    return true;
-
-  return false;
 }
 
 // Search the list of patterns and find the postion of the given section
