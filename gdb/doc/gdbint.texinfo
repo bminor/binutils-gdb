@@ -5935,7 +5935,8 @@ argument type and name, with the name matching that used in the actual
 function definition.
 
 All external functions should have a declaration in a header file that
-callers include, except for @code{_initialize_*} functions, which must
+callers include, that declaration should use the @code{extern} modifier.
+The only exception concerns @code{_initialize_*} functions, which must
 be external so that @file{init.c} construction works, but shouldn't be
 visible to random source files.
 
