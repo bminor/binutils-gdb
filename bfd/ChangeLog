@@ -1,5 +1,11 @@
 2012-12-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Check
+	R_X86_64_standard instead of R_X86_64_max for unrecognized
+	relocation.
+
+2012-12-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/14980
 	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Properly
 	adjust h->plt.refcount.
