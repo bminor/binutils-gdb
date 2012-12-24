@@ -1,3 +1,8 @@
+2012-12-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.bfd (i[3-7]86-*-linux-*): Add x86_64pei_vec to
+	targ64_selvecs.
+
 2012-12-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_relocate_section): Check
