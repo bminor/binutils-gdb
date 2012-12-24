@@ -11,7 +11,8 @@ static int dupname(int y)
 
 int n(int y)
 {
-  return dupname(y) - 23;	/* thefile breakpoint */
+  int v = dupname(y) - 23;	/* thefile breakpoint */
+  return v;			/* after dupname */
 }
 
 int NameSpace::overload(double x)

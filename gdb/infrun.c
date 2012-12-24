@@ -4976,7 +4976,8 @@ process_event_stop_test:
 
 	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
 	if (tmp_sal.line != 0
-	    && !function_pc_is_marked_for_skip (ecs->stop_func_start))
+	    && !function_name_is_marked_for_skip (ecs->stop_func_name,
+						  &tmp_sal))
 	  {
 	    if (execution_direction == EXEC_REVERSE)
 	      handle_step_into_function_backward (gdbarch, ecs);

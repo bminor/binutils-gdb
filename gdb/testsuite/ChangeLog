@@ -1,3 +1,19 @@
+2012-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/skip-solib.exp (info skip with pending file): Update the
+	expected output.
+	(info skip with pending file): Remove.
+	(ignoring function in solib, info skip for function multiply): Update
+	the expected output.
+	* gdb.base/skip.ex (skip (main), skip function baz, info skip)
+	(info skip (delete 1), info skip after disabling all)
+	(info skip after enabling all, info skip after disabling 4 2-3)
+	(info skip after enabling 2-3, info skip 2-3)
+	(info skip after deleting 2 3): Update the expected output.
+	* gdb.linespec/base/two/thefile.cc (n): New variable v, split the
+	statement to its initialization and return.
+	* gdb.linespec/skip-two.exp: New file.
+
 2012-12-19  Doug Evans  <dje@google.com>
 
 	* gdb.base/maint.exp: Handle testing with .gdb_index.

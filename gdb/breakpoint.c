@@ -14297,9 +14297,6 @@ breakpoint_re_set (void)
   create_longjmp_master_breakpoint ();
   create_std_terminate_master_breakpoint ();
   create_exception_master_breakpoint ();
-
-  /* While we're at it, reset the skip list too.  */
-  skip_re_set ();
 }
 
 /* Reset the thread number of this breakpoint:

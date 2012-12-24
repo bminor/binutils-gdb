@@ -69,11 +69,11 @@ Ignore file pending future shared library load.*" \
   "y"
 
 #
-# Does info skip list this entry as pending?
+# Checkinfo skip list.
 #
 gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-1\\s+file\\s+y\\s+\\s+${srcfile_lib} \\(PENDING\\)\\s*" \
+  "Num\\s+Type\\s+Enb\\s+What\\s*
+1\\s+file\\s+y\\s+${srcfile_lib}\\s*" \
   "info skip with pending file"
 
 if ![runto_main] { fail "skip tests suppressed" }
@@ -85,21 +85,12 @@ gdb_test "step" ""
 gdb_test "bt" "#0\\s+main.*" "step after ignoring solib file."
 
 #
-# Our entry should no longer be pending.  Note that we unfortunately need to do
-# at least one step before the entry will be unmarked as pending.
-#
-gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-1\\s+file\\s+y\\s+\\s+.*${srcfile_lib}\\s*" \
-  "info skip with pending file"
-
-#
 # Now restart gdb and testing ignoring of a function inside a solib.
 #
 clean_restart ${executable_main}
 
 gdb_test "skip function multiply" \
-  "Function multiply will be skipped when stepping, pending shared library load." \
+  "Function multiply will be skipped when stepping\\." \
   "ignoring function in solib" \
 "No function found named multiply..*
 Ignore function pending future shared library load.*" \
@@ -116,9 +107,9 @@ gdb_test "step" "square.*"
 # Now our entry should no longer be pending.
 #
 gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-1\\s+function\\s+y\\s+0x\[0-9a-f\]+\\s+multiply at .*${srcfile_lib}:.*\\s*" \
-  "skip should no longer be pending."
+  "Num\\s+Type\\s+Enb\\s+What\\s*
+1\\s+function\\s+y\\s+multiply\\s*" \
+  "info skip for function multiply"
 
 #
 # This step shouldn't go into multiply -- we should skip it and go on to the

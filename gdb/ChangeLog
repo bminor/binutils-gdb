@@ -1,3 +1,37 @@
+2012-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (breakpoint_re_set): Remove the skip_re_set call.
+	* infrun.c (handle_inferior_event): Rename the called function to
+	function_name_is_marked_for_skip, pass it TMP_SAL.
+	* skip.c (struct skiplist_entry): Update function_name comment.  Remove
+	fields pc, gdbarch and pending.
+	(skip_function_pc): Rename this forward declaration to ...
+	(skip_function): ... here.
+	(skip_file_command): Remove variable pending and its use, remove
+	initialization of E fields pending and gdbarch.  Do not use SYMTAB
+	filename, use the specified one.
+	(skip_function_command): Remove variable func_pc, do not set it.
+	Update the caller of skip_function.  Replace decode_line_1 call by
+	a lookup_symbol call.  Remove variables orig_arg, decode_exception and
+	sals.  Update the caller of skip_function.
+	(skip_info): Remove variable address_width and its use.  Do not print
+	address (PC).  Renumber column 5 to 4.
+	(skip_function_pc): Rename to ...
+	(skip_function): ... here and remove its parameters pc, arch and
+	pending.  Update the function comment and no longer use those
+	parameters.
+	(function_pc_is_marked_for_skip): Rename to ...
+	(function_name_is_marked_for_skip): ... here, update function comment
+	just to a skip.h reference, replace pc parameter by function_name and
+	function_sal.  No longer use E field pending and pc.  Remove variables
+	searched_for_sal, sal and filename.  Call compare_filenames_for_search
+	instead of just strcmp.
+	(skip_re_set): Remove the function.
+	* skip.h (struct symtab_and_line): New declaration.
+	(function_pc_is_marked_for_skip): Rename to ...
+	(function_name_is_marked_for_skip): ... here, replace pc parameter by
+	function_name and function_sal, update the function comment.
+
 2012-12-18  Pierre Muller  <muller@sourceware.org>
 
 	* ui-file.h (tee_file_new): Add extern modifier in header declaration.

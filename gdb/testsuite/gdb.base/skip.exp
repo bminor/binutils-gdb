@@ -42,13 +42,13 @@ gdb_test "info skip" "Not skipping any files or functions\." "info skip empty"
 # Create a skiplist entry for the current file and function.
 #
 gdb_test "skip file" "File .*$srcfile will be skipped when stepping\." "skip file ($srcfile)"
-gdb_test "skip" "Function main at .* will be skipped when stepping\." "skip (main)"
+gdb_test "skip" "Function main will be skipped when stepping\." "skip (main)"
 
 #
 # Create a skiplist entry for a specified file and function.
 #
 gdb_test "skip file skip1.c" "File .*$srcfile1 will be skipped when stepping\."
-gdb_test "skip function baz" "Function baz at .* will be skipped when stepping\."
+gdb_test "skip function baz" "Function baz will be skipped when stepping\."
 
 #
 # Test bad skiplist entry modification commands
@@ -69,11 +69,11 @@ gdb_test "info skip 999" "No skiplist entries found with number 999."
 # Does |info skip| look right?
 #
 gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
+  "Num\\s+Type\\s+Enb\\s+What\\s*
 1\\s+file\\s+y\\s+.*$srcfile\\s*
-2\\s+function\\s+y\\s+0x\[0-9a-f\]+ main at .*$srcfile:\[0-9\]+\\s*
-3\\s+file\\s+y\\s+.*$srcfile1\\s*
-4\\s+function\\s+y\\s+0x\[0-9a-f\]+ baz at .*$srcfile1:\[0-9\]+\\s*"
+2\\s+function\\s+y\\s+main\\s*
+3\\s+file\\s+y\\s+$srcfile1\\s*
+4\\s+function\\s+y\\s+baz\\s*"
 
 #
 # Right now, we have an outstanding skiplist entry on both source
@@ -93,10 +93,10 @@ gdb_test "bt" "\\s*\\#0\\s+main.*" "step after all ignored"
 gdb_test "skip delete 1"
 # Check that entry 1 is missing from |info skip|
 gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-2\\s+function\\s+y\\s+0x\[0-9a-f\]+ main at .*$srcfile:\[0-9\]+\\s*
-3\\s+file\\s+y\\s+.*$srcfile1\\s*
-4\\s+function\\s+y\\s+0x\[0-9a-f\]+ baz at .*$srcfile1:\[0-9\]+\\s*" \
+  "Num\\s+Type\\s+Enb\\s+What\\s*
+2\\s+function\\s+y\\s+main\\s*
+3\\s+file\\s+y\\s+$srcfile1\\s*
+4\\s+function\\s+y\\s+baz\\s*" \
     "info skip (delete 1)"
 
 if ![runto_main] { fail "skip tests suppressed" }
@@ -134,45 +134,45 @@ gdb_test "step" "main \\(\\) at.*" "step after enable 3 (3)"
 
 gdb_test "skip disable"
 gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-2\\s+function\\s+n\\s+0x\[0-9a-f\]+ main at .*$srcfile:\[0-9\]+\\s*
-3\\s+file\\s+n\\s+.*$srcfile1\\s*
-4\\s+function\\s+n\\s+0x\[0-9a-f\]+ baz at .*$srcfile1:\[0-9\]+\\s*" \
+  "Num\\s+Type\\s+Enb\\s+What\\s*
+2\\s+function\\s+n\\s+main\\s*
+3\\s+file\\s+n\\s+$srcfile1\\s*
+4\\s+function\\s+n\\s+baz\\s*" \
   "info skip after disabling all"
 
 gdb_test "skip enable"
 gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-2\\s+function\\s+y\\s+0x\[0-9a-f\]+ main at .*$srcfile:\[0-9\]+\\s*
-3\\s+file\\s+y\\s+.*$srcfile1\\s*
-4\\s+function\\s+y\\s+0x\[0-9a-f\]+ baz at .*$srcfile1:\[0-9\]+\\s*" \
+  "Num\\s+Type\\s+Enb\\s+What\\s*
+2\\s+function\\s+y\\s+main\\s*
+3\\s+file\\s+y\\s+$srcfile1\\s*
+4\\s+function\\s+y\\s+baz\\s*" \
   "info skip after enabling all"
 
 gdb_test "skip disable 4 2-3"
 gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-2\\s+function\\s+n\\s+0x\[0-9a-f\]+ main at .*$srcfile:\[0-9\]+\\s*
-3\\s+file\\s+n\\s+.*$srcfile1\\s*
-4\\s+function\\s+n\\s+0x\[0-9a-f\]+ baz at .*$srcfile1:\[0-9\]+\\s*" \
+  "Num\\s+Type\\s+Enb\\s+What\\s*
+2\\s+function\\s+n\\s+main\\s*
+3\\s+file\\s+n\\s+$srcfile1\\s*
+4\\s+function\\s+n\\s+baz\\s*" \
   "info skip after disabling 4 2-3"
 
 gdb_test "skip enable 2-3"
 gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-2\\s+function\\s+y\\s+0x\[0-9a-f\]+ main at .*$srcfile:\[0-9\]+\\s*
-3\\s+file\\s+y\\s+.*$srcfile1\\s*
-4\\s+function\\s+n\\s+0x\[0-9a-f\]+ baz at .*$srcfile1:\[0-9\]+\\s*" \
+  "Num\\s+Type\\s+Enb\\s+What\\s*
+2\\s+function\\s+y\\s+main\\s*
+3\\s+file\\s+y\\s+$srcfile1\\s*
+4\\s+function\\s+n\\s+baz\\s*" \
   "info skip after enabling 2-3"
 
 gdb_test "info skip 2-3" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-2\\s+function\\s+y\\s+0x\[0-9a-f\]+ main at .*$srcfile:\[0-9\]+\\s*
-3\\s+file\\s+y\\s+.*$srcfile1\\s*" \
+  "Num\\s+Type\\s+Enb\\s+What\\s*
+2\\s+function\\s+y\\s+main\\s*
+3\\s+file\\s+y\\s+$srcfile1\\s*" \
   "info skip 2-3"
 
 gdb_test "skip delete 2 3"
 gdb_test "info skip" \
-  "4\\s+function\\s+n\\s+0x\[0-9a-f\]+ baz at .*$srcfile1:\[0-9\]+\\s*" \
+  "4\\s+function\\s+n\\s+baz\\s*" \
   "info skip after deleting 2 3"
 
 gdb_test "skip delete"
