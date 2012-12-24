@@ -852,7 +852,7 @@ add_sal_to_sals (struct linespec_state *self,
 
       self->canonical_names = xrealloc (self->canonical_names,
 					sals->nelts * sizeof (char *));
-      if (!literal_canonical && sal->symtab && sal->symtab->filename)
+      if (!literal_canonical && sal->symtab)
 	{
 	  char *filename = sal->symtab->filename;
 

@@ -1178,7 +1178,7 @@ print_frame (struct frame_info *frame, int print_level,
       QUIT;
     }
   ui_out_text (uiout, ")");
-  if (sal.symtab && sal.symtab->filename)
+  if (sal.symtab)
     {
       annotate_frame_source_begin ();
       ui_out_wrap_hint (uiout, "   ");
@@ -1199,7 +1199,7 @@ print_frame (struct frame_info *frame, int print_level,
       annotate_frame_source_end ();
     }
 
-  if (pc_p && (!funname || (!sal.symtab || !sal.symtab->filename)))
+  if (pc_p && (funname == NULL || sal.symtab == NULL))
     {
 #ifdef PC_SOLIB
       char *lib = PC_SOLIB (get_frame_pc (frame));

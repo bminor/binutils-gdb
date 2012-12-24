@@ -312,8 +312,7 @@ set_traceframe_context (struct frame_info *trace_frame)
 
   /* Save file name as "$trace_file", a debugger variable visible to
      users.  */
-  if (traceframe_sal.symtab == NULL
-      || traceframe_sal.symtab->filename == NULL)
+  if (traceframe_sal.symtab == NULL)
     clear_internalvar (lookup_internalvar ("trace_file"));
   else
     set_internalvar_string (lookup_internalvar ("trace_file"),

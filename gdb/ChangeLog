@@ -1,5 +1,19 @@
 2012-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup.
+	* dwarf2read.c (fixup_go_packaging): Do not check symtab->FILENAME for
+	NULL.
+	* linespec.c (add_sal_to_sals): Likewise.
+	* psympriv.h (allocate_psymtab): Add ATTRIBUTE_NONNULL.
+	* stack.c (print_frame): Do not check symtab->FILENAME for NULL.
+	* symfile.h (allocate_symtab): Add ATTRIBUTE_NONNULL.
+	* symtab.h (struct symtab): Add comment it is never NULL for filename.
+	* tracepoint.c (set_traceframe_context): Do not check symtab->FILENAME
+	for NULL.
+	* tui/tui-source.c (tui_set_source_content): Likewise.
+
+2012-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* breakpoint.c (breakpoint_re_set): Remove the skip_re_set call.
 	* infrun.c (handle_inferior_event): Rename the called function to
 	function_name_is_marked_for_skip, pass it TMP_SAL.

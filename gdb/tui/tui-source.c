@@ -46,7 +46,7 @@ tui_set_source_content (struct symtab *s,
 {
   enum tui_status ret = TUI_FAILURE;
 
-  if (s != (struct symtab *) NULL && s->filename != (char *) NULL)
+  if (s != (struct symtab *) NULL)
     {
       FILE *stream;
       int i, desc, c, line_width, nlines;

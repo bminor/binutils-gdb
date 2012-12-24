@@ -815,7 +815,7 @@ struct symtab
      all the symtabs in a given compilation unit.  */
   struct macro_table *macro_table;
 
-  /* Name of this source file.  */
+  /* Name of this source file.  This pointer is never NULL.  */
 
   char *filename;
 
