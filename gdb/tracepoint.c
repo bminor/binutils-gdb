@@ -4872,8 +4872,7 @@ print_one_static_tracepoint_marker (int count,
 	{
 	  const char *fullname = symtab_to_fullname (sal.symtab);
 
-	  if (fullname)
-	    ui_out_field_string (uiout, "fullname", fullname);
+	  ui_out_field_string (uiout, "fullname", fullname);
 	}
       else
 	ui_out_field_skip (uiout, "fullname");

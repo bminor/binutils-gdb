@@ -31086,9 +31086,13 @@ file name or a relative file name depending on the compile command
 used.
 
 @item fullname
-This field is optional.  If it is present it will contain an absolute
-file name of @samp{file}.  If this field is not present then
-@value{GDBN} was unable to determine the absolute file name.
+Absolute file name of @samp{file}.  It is converted to a canonical form
+using the source file search path
+(@pxref{Source Path, ,Specifying Source Directories})
+and after resolving all the symbolic links.
+
+If the source file is not found this field will contain the path as
+present in the debug information.
 
 @item line_asm_insn
 This is a list of tuples containing the disassembly for @samp{line} in
@@ -32269,8 +32273,8 @@ The @value{GDBN} equivalent is @samp{info source}
 
 List the source files for the current executable.
 
-It will always output the filename, but only when @value{GDBN} can find
-the absolute file name of a source file, will it output the fullname.
+It will always output both the filename and fullname (absolute file
+name) of a source file.
 
 @subsubheading @value{GDBN} Command
 

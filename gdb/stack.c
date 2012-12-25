@@ -1189,8 +1189,7 @@ print_frame (struct frame_info *frame, int print_level,
 	{
 	  const char *fullname = symtab_to_fullname (sal.symtab);
 
-	  if (fullname != NULL)
-	    ui_out_field_string (uiout, "fullname", fullname);
+	  ui_out_field_string (uiout, "fullname", fullname);
 	}
       annotate_frame_source_file_end ();
       ui_out_text (uiout, ":");

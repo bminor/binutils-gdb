@@ -132,11 +132,8 @@ stpy_fullname (PyObject *self, PyObject *args)
   STPY_REQUIRE_VALID (self, symtab);
 
   fullname = symtab_to_fullname (symtab);
-  if (fullname)
-    return PyString_Decode (fullname, strlen (fullname),
-			    host_charset (), NULL);
 
-  Py_RETURN_NONE;
+  return PyString_Decode (fullname, strlen (fullname), host_charset (), NULL);
 }
 
 /* Implementation of gdb.Symtab.is_valid (self) -> Boolean.

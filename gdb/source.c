@@ -1075,35 +1075,32 @@ open_source_file (struct symtab *s)
 
 /* Finds the fullname that a symtab represents.
 
-   If this functions finds the fullname, it will save it in s->fullname
-   and it will also return the value.
+   This functions finds the fullname and saves it in s->fullname.
+   It will also return the value.
 
    If this function fails to find the file that this symtab represents,
-   NULL will be returned and s->fullname will be set to NULL.  */
+   the expected fullname is used.  Therefore the files does not have to
+   exist.  */
 
 const char *
 symtab_to_fullname (struct symtab *s)
 {
-  int r;
-
-  if (!s)
-    return NULL;
-
   /* Use cached copy if we have it.
      We rely on forget_cached_source_info being called appropriately
      to handle cases like the file being moved.  */
-  if (s->fullname)
-    return s->fullname;
-
-  r = find_and_open_source (s->filename, s->dirname, &s->fullname);
-
-  if (r >= 0)
+  if (s->fullname == NULL)
     {
-      close (r);
-      return s->fullname;
-    }
+      int fd = find_and_open_source (s->filename, s->dirname, &s->fullname);
 
-  return NULL;
+      if (fd >= 0)
+	close (fd);
+      else if (s->dirname == NULL)
+	s->fullname = xstrdup (s->filename);
+      else
+	s->fullname = concat (s->dirname, SLASH_STRING, s->filename, NULL);
+    } 
+
+  return s->fullname;
 }
 
 /* Create and initialize the table S->line_charpos that records
@@ -1306,8 +1303,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	    {
 	      const char *fullname = symtab_to_fullname (s);
 
-	      if (fullname != NULL)
-		ui_out_field_string (uiout, "fullname", fullname);
+	      ui_out_field_string (uiout, "fullname", fullname);
 	    }
 	  ui_out_text (uiout, "\n");
 	}

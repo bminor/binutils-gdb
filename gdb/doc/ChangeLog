@@ -1,3 +1,10 @@
+2012-12-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (GDB/MI Data Manipulation) (fullname): Make it always
+	present.
+	(GDB/MI File Commands) (-file-list-exec-source-files): Make the
+	fullname output always present.
+
 2012-12-23  Pierre Muller  <muller@sourceware.org>
 
         * gdbint.texinfo (Function prototypes): Require use of "extern"

@@ -5694,8 +5694,7 @@ print_breakpoint_location (struct breakpoint *b,
 	  struct symtab_and_line sal = find_pc_line (loc->address, 0);
 	  const char *fullname = symtab_to_fullname (sal.symtab);
 	  
-	  if (fullname)
-	    ui_out_field_string (uiout, "fullname", fullname);
+	  ui_out_field_string (uiout, "fullname", fullname);
 	}
       
       ui_out_field_int (uiout, "line", loc->line_number);
@@ -13870,8 +13869,7 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	    {
 	      const char *fullname = symtab_to_fullname (sal2.symtab);
 
-	      if (fullname)
-		ui_out_field_string (uiout, "fullname", fullname);
+	      ui_out_field_string (uiout, "fullname", fullname);
 	    }
 
 	  ui_out_field_int (uiout, "line", sal2.line);

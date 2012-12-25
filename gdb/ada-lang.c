@@ -11084,6 +11084,7 @@ is_known_support_routine (struct frame_info *frame)
   const char *func_name;
   enum language func_lang;
   int i;
+  const char *fullname;
 
   /* If this code does not have any debugging information (no symtab),
      This cannot be any user code.  */
@@ -11098,7 +11099,8 @@ is_known_support_routine (struct frame_info *frame)
      for the user.  This should also take care of case such as VxWorks
      where the kernel has some debugging info provided for a few units.  */
 
-  if (symtab_to_fullname (sal.symtab) == NULL)
+  fullname = symtab_to_fullname (sal.symtab);
+  if (access (fullname, R_OK) != 0)
     return 1;
 
   /* Check the unit filename againt the Ada runtime file naming.

@@ -224,13 +224,13 @@ iterate_over_some_symtabs (const char *name,
       {
         const char *fp = symtab_to_fullname (s);
 
-        if (fp != NULL && FILENAME_CMP (full_path, fp) == 0)
+        if (FILENAME_CMP (full_path, fp) == 0)
           {
 	    if (callback (s, data))
 	      return 1;
           }
 
-	if (fp != NULL && !is_abs && compare_filenames_for_search (fp, name))
+	if (!is_abs && compare_filenames_for_search (fp, name))
 	  {
 	    if (callback (s, data))
 	      return 1;
@@ -240,24 +240,20 @@ iterate_over_some_symtabs (const char *name,
     if (real_path != NULL)
       {
         const char *fullname = symtab_to_fullname (s);
+	char *rp = gdb_realpath (fullname);
 
-        if (fullname != NULL)
-          {
-            char *rp = gdb_realpath (fullname);
+	make_cleanup (xfree, rp);
+	if (FILENAME_CMP (real_path, rp) == 0)
+	  {
+	    if (callback (s, data))
+	      return 1;
+	  }
 
-            make_cleanup (xfree, rp);
-            if (FILENAME_CMP (real_path, rp) == 0)
-	      {
-		if (callback (s, data))
-		  return 1;
-	      }
-
-	    if (!is_abs && compare_filenames_for_search (rp, name))
-	      {
-		if (callback (s, data))
-		  return 1;
-	      }
-          }
+	if (!is_abs && compare_filenames_for_search (rp, name))
+	  {
+	    if (callback (s, data))
+	      return 1;
+	  }
       }
     }
 
@@ -2551,9 +2547,6 @@ find_line_symtab (struct symtab *symtab, int line,
 							 symtab->filename);
       }
 
-      /* Get symbol full file name if possible.  */
-      symtab_to_fullname (symtab);
-
       ALL_SYMTABS (objfile, s)
       {
 	struct linetable *l;
@@ -2561,9 +2554,7 @@ find_line_symtab (struct symtab *symtab, int line,
 
 	if (FILENAME_CMP (symtab->filename, s->filename) != 0)
 	  continue;
-	if (symtab->fullname != NULL
-	    && symtab_to_fullname (s) != NULL
-	    && FILENAME_CMP (symtab->fullname, s->fullname) != 0)
+	if (FILENAME_CMP (symtab->fullname, symtab_to_fullname (s)) != 0)
 	  continue;	
 	l = LINETABLE (s);
 	ind = find_line_common (l, line, &exact, 0);
@@ -3294,7 +3285,7 @@ sources_info (char *ignore, int from_tty)
   {
     const char *fullname = symtab_to_fullname (s);
 
-    output_source_filename (fullname ? fullname : s->filename, &data);
+    output_source_filename (fullname, &data);
   }
   printf_filtered ("\n\n");
 

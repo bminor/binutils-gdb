@@ -1,3 +1,7 @@
+2012-12-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.mi/mi-fullname-deleted.exp: New file.
+
 2012-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/skip-solib.exp (info skip with pending file): Update the

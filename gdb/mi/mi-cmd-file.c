@@ -48,16 +48,11 @@ mi_cmd_file_list_exec_source_file (char *command, char **argv, int argc)
   if (!st.symtab)
     error (_("-file-list-exec-source-file: No symtab"));
 
-  /* Extract the fullname if it is not known yet.  */
-  symtab_to_fullname (st.symtab);
-
   /* Print to the user the line, filename and fullname.  */
   ui_out_field_int (uiout, "line", st.line);
   ui_out_field_string (uiout, "file", st.symtab->filename);
 
-  /* We may not be able to open the file (not available). */
-  if (st.symtab->fullname)
-  ui_out_field_string (uiout, "fullname", st.symtab->fullname);
+  ui_out_field_string (uiout, "fullname", symtab_to_fullname (st.symtab));
 
   ui_out_field_int (uiout, "macro-info", st.symtab->macro_table ? 1 : 0);
 }
@@ -99,12 +94,7 @@ mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
     ui_out_begin (uiout, ui_out_type_tuple, NULL);
 
     ui_out_field_string (uiout, "file", s->filename);
-
-    /* Extract the fullname if it is not known yet.  */
-    symtab_to_fullname (s);
-
-    if (s->fullname)
-      ui_out_field_string (uiout, "fullname", s->fullname);
+    ui_out_field_string (uiout, "fullname", symtab_to_fullname (s));
 
     ui_out_end (uiout, ui_out_type_tuple);
   }

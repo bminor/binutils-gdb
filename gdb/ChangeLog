@@ -1,3 +1,23 @@
+2012-12-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ada-lang.c (is_known_support_routine): New variable fullname.  Use
+	access call to verify the symtab_to_fullname result.
+	* breakpoint.c (print_breakpoint_location, update_static_tracepoint):
+	Remove NULL check of symtab_to_fullname result.
+	* cli/cli-cmds.c (edit_command): Likewise.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file)
+	(mi_cmd_file_list_exec_source_files): Likewise.
+	* python/py-symtab.c (stpy_fullname): Likewise.
+	* source.c (symtab_to_fullname): Update function comment.  Rename
+	variable r to fd, move it to inner block.  Always provide non-NULL
+	result.
+	(print_source_lines_base): Remove NULL check of symtab_to_fullname
+	result.
+	* stack.c (print_frame): Likewise.
+	* symtab.c (iterate_over_some_symtabs, find_line_symtab, sources_info):
+	Likewise.
+	* tracepoint.c (print_one_static_tracepoint_marker): Likewise.
+
 2012-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
