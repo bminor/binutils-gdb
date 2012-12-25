@@ -57,7 +57,7 @@ frv_linux_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc,
 
   if (instr == 0x8efc0077)	/* setlos #__NR_sigreturn, gr7 */
     retval = NORMAL_SIGTRAMP;
-  else if (instr -= 0x8efc00ad)	/* setlos #__NR_rt_sigreturn, gr7 */
+  else if (instr == 0x8efc00ad)	/* setlos #__NR_rt_sigreturn, gr7 */
     retval = RT_SIGTRAMP;
   else
     return 0;
