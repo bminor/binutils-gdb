@@ -1,3 +1,8 @@
+2012-12-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symtab.c (find_line_symtab): Call symtab_to_fullname instead of
+	accessing FULLNAME directly.
+
 2012-12-25  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* frv-linux-tdep.c (frv_linux_pc_in_sigtramp): Fix typo.
