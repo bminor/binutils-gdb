@@ -36165,19 +36165,8 @@ for success (@pxref{Stop Reply Packets})
 @end table
 
 @item vStopped
-@anchor{vStopped packet}
 @cindex @samp{vStopped} packet
-
-In non-stop mode (@pxref{Remote Non-Stop}), acknowledge a previous stop
-reply and prompt for the stub to report another one.
-
-Reply:
-@table @samp
-@item @r{Any stop packet}
-if there is another unreported stop event (@pxref{Stop Reply Packets})
-@item OK
-if there are no unreported stop events
-@end table
+@xref{Notification Packets}.
 
 @item X @var{addr},@var{length}:@var{XX@dots{}}
 @anchor{X packet}
@@ -38498,17 +38487,91 @@ transmit notifications without fear of confusing older clients.  There
 are no notifications defined for @value{GDBN} to send at the moment, but we
 assume that most older stubs would ignore them, as well.)
 
-The following notification packets from the stub to @value{GDBN} are
-defined:
-
+Each notification is comprised of three parts:
 @table @samp
-@item Stop: @var{reply}
-Report an asynchronous stop event in non-stop mode.  
-The @var{reply} has the form of a stop reply, as
+@item @var{name}:@var{event}
+The notification packet is sent by the side that initiates the
+exchange (currently, only the stub does that), with @var{event}
+carrying the specific information about the notification.
+@var{name} is the name of the notification.
+@item @var{ack}
+The acknowledge sent by the other side, usually @value{GDBN}, to
+acknowledge the exchange and request the event.
+@end table
+
+The purpose of an asynchronous notification mechanism is to report to
+@value{GDBN} that something interesting happened in the remote stub.
+
+The remote stub may send notification @var{name}:@var{event}
+at any time, but @value{GDBN} acknowledges the notification when
+appropriate.  The notification event is pending before @value{GDBN}
+acknowledges.  Only one notification at a time may be pending; if
+additional events occur before @value{GDBN} has acknowledged the
+previous notification, they must be queued by the stub for later
+synchronous transmission in response to @var{ack} packets from
+@value{GDBN}.  Because the notification mechanism is unreliable,
+the stub is permitted to resend a notification if it believes
+@value{GDBN} may not have received it.
+
+Specifically, notifications may appear when @value{GDBN} is not
+otherwise reading input from the stub, or when @value{GDBN} is
+expecting to read a normal synchronous response or a
+@samp{+}/@samp{-} acknowledgment to a packet it has sent.
+Notification packets are distinct from any other communication from
+the stub so there is no ambiguity.
+
+After receiving a notification, @value{GDBN} shall acknowledge it by
+sending a @var{ack} packet as a regular, synchronous request to the
+stub.  Such acknowledgment is not required to happen immediately, as
+@value{GDBN} is permitted to send other, unrelated packets to the
+stub first, which the stub should process normally.
+
+Upon receiving a @var{ack} packet, if the stub has other queued
+events to report to @value{GDBN}, it shall respond by sending a
+normal @var{event}.  @value{GDBN} shall then send another @var{ack}
+packet to solicit further responses; again, it is permitted to send
+other, unrelated packets as well which the stub should process
+normally.
+
+If the stub receives a @var{ack} packet and there are no additional
+@var{event} to report, the stub shall return an @samp{OK} response.
+At this point, @value{GDBN} has finished processing a notification
+and the stub has completed sending any queued events.  @value{GDBN}
+won't accept any new notifications until the final @samp{OK} is
+received .  If further notification events occur, the stub shall send
+a new notification, @value{GDBN} shall accept the notification, and
+the process shall be repeated.
+
+The process of asynchronous notification can be illustrated by the
+following example:
+@smallexample
+<- @code{%%Stop:T0505:98e7ffbf;04:4ce6ffbf;08:b1b6e54c;thread:p7526.7526;core:0;}
+@code{...}
+-> @code{vStopped}
+<- @code{T0505:68f37db7;04:40f37db7;08:63850408;thread:p7526.7528;core:0;}
+-> @code{vStopped}
+<- @code{T0505:68e3fdb6;04:40e3fdb6;08:63850408;thread:p7526.7529;core:0;}
+-> @code{vStopped}
+<- @code{OK}
+@end smallexample
+
+The following notifications are defined:
+@multitable @columnfractions 0.12 0.12 0.38 0.38
+
+@item Notification
+@tab Ack
+@tab Event
+@tab Description
+
+@item Stop
+@tab vStopped
+@tab @var{reply}.  The @var{reply} has the form of a stop reply, as
 described in @ref{Stop Reply Packets}.  Refer to @ref{Remote Non-Stop},
 for information on how these notifications are acknowledged by 
 @value{GDBN}.
-@end table
+@tab Report an asynchronous stop event in non-stop mode.
+
+@end multitable
 
 @node Remote Non-Stop
 @section Remote Protocol Support for Non-Stop Mode
@@ -38536,45 +38599,6 @@ of a step operation, hitting a breakpoint, or a fault, only the
 affected thread is stopped; any other still-running threads continue
 to run.  When reporting a @samp{W} or @samp{X} response, all running
 threads belonging to other attached processes continue to run.
-
-Only one stop reply notification at a time may be pending; if
-additional stop events occur before @value{GDBN} has acknowledged the
-previous notification, they must be queued by the stub for later
-synchronous transmission in response to @samp{vStopped} packets from
-@value{GDBN}.  Because the notification mechanism is unreliable, 
-the stub is permitted to resend a stop reply notification
-if it believes @value{GDBN} may not have received it.  @value{GDBN}
-ignores additional stop reply notifications received before it has
-finished processing a previous notification and the stub has completed
-sending any queued stop events.
-
-Otherwise, @value{GDBN} must be prepared to receive a stop reply
-notification at any time.  Specifically, they may appear when
-@value{GDBN} is not otherwise reading input from the stub, or when
-@value{GDBN} is expecting to read a normal synchronous response or a
-@samp{+}/@samp{-} acknowledgment to a packet it has sent.
-Notification packets are distinct from any other communication from
-the stub so there is no ambiguity.
-
-After receiving a stop reply notification, @value{GDBN} shall
-acknowledge it by sending a @samp{vStopped} packet (@pxref{vStopped packet})
-as a regular, synchronous request to the stub.  Such acknowledgment
-is not required to happen immediately, as @value{GDBN} is permitted to
-send other, unrelated packets to the stub first, which the stub should
-process normally.
-
-Upon receiving a @samp{vStopped} packet, if the stub has other queued
-stop events to report to @value{GDBN}, it shall respond by sending a
-normal stop reply response.  @value{GDBN} shall then send another
-@samp{vStopped} packet to solicit further responses; again, it is
-permitted to send other, unrelated packets as well which the stub
-should process normally.
-
-If the stub receives a @samp{vStopped} packet and there are no
-additional stop events to report, the stub shall return an @samp{OK}
-response.  At this point, if further stop events occur, the stub shall
-send a new stop reply notification, @value{GDBN} shall accept the
-notification, and the process shall be repeated.
 
 In non-stop mode, the target shall respond to the @samp{?} packet as
 follows.  First, any incomplete stop reply notification/@samp{vStopped} 
