@@ -1,6 +1,5 @@
 /* Build symbol tables in GDB's internal format.
-   Copyright (C) 1986-1993, 1995-2000, 2002-2003, 2007-2012 Free
-   Software Foundation, Inc.
+   Copyright (C) 1986-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

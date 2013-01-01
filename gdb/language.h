@@ -1,7 +1,6 @@
 /* Source-language-related definitions for GDB.
 
-   Copyright (C) 1991-1995, 1998-2000, 2003-2004, 2007-2012 Free
-   Software Foundation, Inc.
+   Copyright (C) 1991-2013 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.

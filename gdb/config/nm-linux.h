@@ -1,6 +1,6 @@
 /* Native support for GNU/Linux.
 
-   Copyright 1999-2012 Free Software Foundation, Inc.
+   Copyright 1999-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

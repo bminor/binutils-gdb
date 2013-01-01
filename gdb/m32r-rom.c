@@ -1,8 +1,7 @@
 /* Remote debugging interface to m32r and mon2000 ROM monitors for GDB, 
    the GNU debugger.
 
-   Copyright (C) 1996-2001, 2004-2005, 2007-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1996-2013 Free Software Foundation, Inc.
 
    Adapted by Michael Snyder of Cygnus Support.
 

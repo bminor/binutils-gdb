@@ -1,7 +1,6 @@
 /* Support for GDB maintenance commands.
 
-   Copyright (C) 1992-1997, 1999-2004, 2007-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1992-2013 Free Software Foundation, Inc.
 
    Written by Fred Fish at Cygnus Support.
 

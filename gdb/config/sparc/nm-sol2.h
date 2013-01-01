@@ -1,6 +1,6 @@
 /* Native-dependent definitions for Solaris SPARC.
 
-   Copyright 2003, 2007-2012 Free Software Foundation, Inc.
+   Copyright 2003-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

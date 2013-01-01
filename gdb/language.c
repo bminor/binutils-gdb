@@ -1,7 +1,6 @@
 /* Multiple source language support for GDB.
 
-   Copyright (C) 1991-1996, 1998-2005, 2007-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1991-2013 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.

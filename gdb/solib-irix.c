@@ -1,6 +1,5 @@
 /* Shared library support for IRIX.
-   Copyright (C) 1993-1996, 1998-2002, 2004, 2007-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1993-2013 Free Software Foundation, Inc.
 
    This file was created using portions of irix5-nat.c originally
    contributed to GDB by Ian Lance Taylor.

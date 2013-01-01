@@ -1,6 +1,5 @@
 /* YACC parser for Ada expressions, for GDB.
-   Copyright (C) 1986, 1989-1991, 1993-1994, 1997, 2000, 2003-2004,
-   2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

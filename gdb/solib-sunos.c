@@ -1,7 +1,6 @@
 /* Handle SunOS shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 1990-1996, 1998-2001, 2004, 2007-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1990-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

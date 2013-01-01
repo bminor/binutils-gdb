@@ -1,6 +1,6 @@
 /* Overlapping symbol sizes test program.
 
-   Copyright 2007-2012 Free Software Foundation, Inc.
+   Copyright 2007-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

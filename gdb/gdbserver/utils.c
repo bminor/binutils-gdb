@@ -1,6 +1,5 @@
 /* General utility routines for the remote server for GDB.
-   Copyright (C) 1986, 1989, 1993, 1995-1997, 1999-2000, 2002-2003,
-   2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

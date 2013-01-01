@@ -1,5 +1,5 @@
 /* Native-dependent definitions for Intel 386 running the GNU Hurd
-   Copyright 1994-1996, 2002, 2007-2012 Free Software Foundation, Inc.
+   Copyright 1994-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB server.
-dnl Copyright (C) 2000, 2002-2012 Free Software Foundation, Inc.
+dnl Copyright (C) 2000-2013 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
 dnl

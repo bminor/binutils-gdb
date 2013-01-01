@@ -5,8 +5,7 @@
 # configuring other GNU programs for DJGPP.
 #
 #=====================================================================
-# Copyright 1997, 1999-2003, 2005, 2007-2012 Free Software Foundation,
-# Inc.
+# Copyright 1997-2013 Free Software Foundation, Inc.
 #
 # Originally written by Robert Hoehne, revised by Eli Zaretskii.
 # This file is part of GDB.

@@ -1,6 +1,6 @@
 /* Target-dependent interface for Matsushita MN10300 for GDB, the GNU debugger.
 
-   Copyright (C) 1996-2005, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 1996-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

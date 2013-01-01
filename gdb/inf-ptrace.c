@@ -1,7 +1,6 @@
 /* Low-level child interface to ptrace.
 
-   Copyright (C) 1988-1996, 1998-2002, 2004-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1988-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

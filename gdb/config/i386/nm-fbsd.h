@@ -1,7 +1,6 @@
 /* Native-dependent definitions for FreeBSD/i386.
 
-   Copyright 1986-1987, 1989, 1992, 1994, 1996-1997, 2000-2001,
-   2004-2005, 2007-2012 Free Software Foundation, Inc.
+   Copyright 1986-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,6 +1,5 @@
 /* Definitions for remote debugging interface for ROM monitors.
-   Copyright (C) 1990-1992, 1994-2000, 2007-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1990-2013 Free Software Foundation, Inc.
    Contributed by Cygnus Support. Written by Rob Savoye for Cygnus.
 
    This file is part of GDB.
