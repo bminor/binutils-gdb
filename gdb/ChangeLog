@@ -4,6 +4,11 @@
 
 2013-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* rs6000-nat.c (bss_data_overlap): New function.
+	(vmap_symtab): Use it to adjust the .bss section's offset.
+
+2013-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	Update year range in copyright notice of all files.
 
 2013-01-01  Joel Brobecker  <brobecker@adacore.com>
