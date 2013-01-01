@@ -1,17 +1,0 @@
-2013-01-01  Joel Brobecker  <brobecker@adacore.com>
-
-	Update year range in copyright notice of all files.
-
-2013-01-01  Joel Brobecker  <brobecker@adacore.com>
-
-	* top.c (print_gdb_version): Update copyright year.
-
-For older changes see ChangeLog-2012.
-
-Local Variables:
-mode: change-log
-left-margin: 8
-fill-column: 74
-version-control: never
-coding: utf-8
-End:
