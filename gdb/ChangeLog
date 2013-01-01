@@ -1,5 +1,9 @@
 2013-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* cli/cli-script.h (make_cleanup_free_command_lines): Make extern.
+
+2013-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	Update year range in copyright notice of all files.
 
 2013-01-01  Joel Brobecker  <brobecker@adacore.com>
