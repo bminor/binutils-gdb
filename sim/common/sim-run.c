@@ -1,5 +1,5 @@
 /* Generic simulator run.
-   Copyright (C) 1997, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 1997-2013 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.

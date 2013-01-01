@@ -1,6 +1,6 @@
 /* Module support.
 
-   Copyright 1996-1998, 2003, 2007-2012 Free Software Foundation, Inc.
+   Copyright 1996-2013 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
