@@ -1,3 +1,8 @@
+2013-01-02  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add entries for "cortex-a53"
+	and "cortex57".
+
 2013-01-02  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/14987
