@@ -1,5 +1,12 @@
 2013-01-02  Tom Tromey  <tromey@redhat.com>
 
+	* config/i386/darwin.mh (NATDEPFILES): Remove machoread.o.
+	* configure.ac: Check for Mach-O support in BFD.  Update
+	CONFIG_OBS.
+	* configure: Rebuild.
+
+2013-01-02  Tom Tromey  <tromey@redhat.com>
+
 	* acinclude.m4 (GDB_AC_CHECK_BFD): New macro.
 	* configure.ac: Use GDB_AC_CHECK_BFD.
 	* configure: Rebuild.

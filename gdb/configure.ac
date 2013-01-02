@@ -2027,6 +2027,13 @@ if test $gdb_cv_var_elf = yes; then
   fi
 fi
 
+# Add macho support to GDB, but only if BFD includes it.
+GDB_AC_CHECK_BFD([for Mach-O support in BFD], gdb_cv_var_macho,
+                 [bfd_mach_o_lookup_command (NULL, 0, NULL)], mach-o.h)
+if test $gdb_cv_var_macho = yes; then
+  CONFIG_OBS="$CONFIG_OBS machoread.o"
+fi
+
 # Add any host-specific objects to GDB.
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
 
