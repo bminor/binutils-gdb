@@ -1,3 +1,7 @@
+2013-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* as.c (parse_args): Update copyright year to 2013.
+
 2013-01-02  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (aarch64_cpus): Add entries for "cortex-a53"

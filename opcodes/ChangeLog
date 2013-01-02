@@ -1,3 +1,7 @@
+2013-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (process_copyright): Update copyright year to 2013.
+
 2013-01-02  Kaushik Phatak  <kaushik.phatak@kpitcummins.com>
 
 	* cr16-dis.c (match_opcode,make_instruction): Remove static

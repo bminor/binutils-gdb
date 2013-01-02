@@ -1,3 +1,7 @@
+2013-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.c (print_version): Update copyright year to 2013.
+
 For older changes see ChangeLog-2012
 
 Copyright (C) 2013 Free Software Foundation, Inc.
