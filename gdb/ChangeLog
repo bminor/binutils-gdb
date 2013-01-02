@@ -1,3 +1,9 @@
+2013-01-02  Tom Tromey  <tromey@redhat.com>
+
+	* acinclude.m4 (GDB_AC_CHECK_BFD): New macro.
+	* configure.ac: Use GDB_AC_CHECK_BFD.
+	* configure: Rebuild.
+
 2013-01-01  Maxim Kuvyrkov  <maxim.kuvyrkov@gmail.com>
 
 	* MAINTAINERS: Update my email.

@@ -2015,40 +2015,17 @@ esac
 AC_SUBST(WIN32LIBS)
 
 # Add ELF support to GDB, but only if BFD includes ELF support.
-OLD_CFLAGS=$CFLAGS
-OLD_LDFLAGS=$LDFLAGS
-OLD_LIBS=$LIBS
-# Put the old CFLAGS/LDFLAGS last, in case the user's (C|LD)FLAGS
-# points somewhere with bfd, with -I/foo/lib and -L/foo/lib.  We
-# always want our bfd.
-CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
-LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
-intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
-# -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
-if test "$plugins" = "yes"; then
-  LIBS="-ldl $LIBS"
-fi
-LIBS="-lbfd -liberty $intl $LIBS"
-AC_CACHE_CHECK([for ELF support in BFD], gdb_cv_var_elf,
-[AC_TRY_LINK(
-[#include <stdlib.h>
-#include "bfd.h"
-#include "elf-bfd.h"
-],
-[bfd *abfd = NULL; bfd_get_elf_phdr_upper_bound (abfd); ],
-gdb_cv_var_elf=yes, gdb_cv_var_elf=no)])
+GDB_AC_CHECK_BFD([for ELF support in BFD], gdb_cv_var_elf,
+                 [bfd_get_elf_phdr_upper_bound (NULL)], elf-bfd.h)
 if test $gdb_cv_var_elf = yes; then
   CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o"
   AC_DEFINE(HAVE_ELF, 1,
 	    [Define if ELF support should be included.])
   # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
   if test "$plugins" = "yes"; then
-    OLD_LIBS="-ldl $OLD_LIBS"
+    LIBS="-ldl $LIBS"
   fi
 fi
-CFLAGS=$OLD_CFLAGS
-LDFLAGS=$OLD_LDFLAGS
-LIBS=$OLD_LIBS
 
 # Add any host-specific objects to GDB.
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"

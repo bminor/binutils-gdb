@@ -421,3 +421,37 @@ AC_DEFUN([GDB_AC_WITH_DIR], [
   AC_SUBST([$1])
   GDB_AC_DEFINE_RELOCATABLE([$1], [$2], ${ac_define_dir})
   ])
+
+dnl GDB_AC_CHECK_BFD([MESSAGE], [CV], [CODE], [HEADER])
+dnl Check whether BFD provides a feature.
+dnl MESSAGE is the "checking" message to display.
+dnl CV is the name of the cache variable where the result is stored.
+dnl The result will be "yes" or "no".
+dnl CODE is some code to compile that checks for the feature.
+dnl A link test is run.
+dnl HEADER is the name of an extra BFD header to include.
+AC_DEFUN([GDB_AC_CHECK_BFD], [
+  OLD_CFLAGS=$CFLAGS
+  OLD_LDFLAGS=$LDFLAGS
+  OLD_LIBS=$LIBS
+  # Put the old CFLAGS/LDFLAGS last, in case the user's (C|LD)FLAGS
+  # points somewhere with bfd, with -I/foo/lib and -L/foo/lib.  We
+  # always want our bfd.
+  CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
+  LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
+  intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
+  # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
+  if test "$plugins" = "yes"; then
+    LIBS="-ldl $LIBS"
+  fi
+  LIBS="-lbfd -liberty $intl $LIBS"
+  AC_CACHE_CHECK([$1], [$2],
+  [AC_TRY_LINK(
+  [#include <stdlib.h>
+  #include "bfd.h"
+  #include "$4"
+  ],
+  [return $3;], [[$2]=yes], [[$2]=no])])
+  CFLAGS=$OLD_CFLAGS
+  LDFLAGS=$OLD_LDFLAGS
+  LIBS=$OLD_LIBS])
