@@ -1,5 +1,6 @@
 2013-01-02  Iain Sandoe  <developer@sandoe-acoustics.co.uk>
 
+	PR gdb/14405
 	* darwin-nat.c (darwin_read_dyld_info): Only build if
 	TASK_DYLD_INFO_COUNT is defined.
 	(darwin_xfer_partial): Call darwin_read_dyld_info only if
