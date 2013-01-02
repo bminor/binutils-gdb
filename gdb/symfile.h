@@ -676,13 +676,6 @@ void dwarf2_free_objfile (struct objfile *);
 
 /* From mdebugread.c */
 
-/* Hack to force structures to exist before use in parameter list.  */
-struct ecoff_debug_hack
-{
-  struct ecoff_debug_swap *a;
-  struct ecoff_debug_info *b;
-};
-
 extern void mdebug_build_psymtabs (struct objfile *,
 				   const struct ecoff_debug_swap *,
 				   struct ecoff_debug_info *);

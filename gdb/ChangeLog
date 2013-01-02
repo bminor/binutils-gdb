@@ -1,5 +1,10 @@
 2013-01-02  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.h (struct ecoff_debug_hack): Remove.
+	* objfiles.c: Don't include mdebugread.h.
+
+2013-01-02  Tom Tromey  <tromey@redhat.com>
+
 	* config/i386/darwin.mh (NATDEPFILES): Remove machoread.o.
 	* configure.ac: Check for Mach-O support in BFD.  Update
 	CONFIG_OBS.

@@ -30,7 +30,6 @@
 #include "gdb-stabs.h"
 #include "target.h"
 #include "bcache.h"
-#include "mdebugread.h"
 #include "expression.h"
 #include "parser-defs.h"
 
