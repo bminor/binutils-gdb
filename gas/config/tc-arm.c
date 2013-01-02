@@ -5291,6 +5291,9 @@ parse_address_main (char **str, int i, int group_relocations,
 	return result;
     }
 
+  /* PR gas/14987: Allow for whitespace before the closing bracket.  */
+  skip_whitespace (p);
+
   if (skip_past_char (&p, ']') == FAIL)
     {
       inst.error = _("']' expected");
