@@ -27688,6 +27688,7 @@ follow development on @email{gdb@@sourceware.org} and
 * GDB/MI Result Records::
 * GDB/MI Stream Records::
 * GDB/MI Async Records::
+* GDB/MI Breakpoint Information::
 * GDB/MI Frame Information::
 * GDB/MI Thread Information::
 * GDB/MI Ada Exception Information::
@@ -27963,6 +27964,126 @@ thread group corresponding to the affected inferior.  The optional
 @code{type="code"} part is reported if the memory written to holds
 executable code.
 @end table
+
+@node GDB/MI Breakpoint Information
+@subsection @sc{gdb/mi} Breakpoint Information
+
+When @value{GDBN} reports information about a breakpoint, a
+tracepoint, a watchpoint, or a catchpoint, it uses a tuple with the
+following fields:
+
+@table @code
+@item number
+The breakpoint number.  For a breakpoint that represents one location
+of a multi-location breakpoint, this will be a dotted pair, like
+@samp{1.2}.
+
+@item type
+The type of the breakpoint.  For ordinary breakpoints this will be
+@samp{breakpoint}, but many values are possible.
+
+@item disp
+This is the breakpoint disposition---either @samp{del}, meaning that
+the breakpoint will be deleted at the next stop, or @samp{keep},
+meaning that the breakpoint will not be deleted.
+
+@item enabled
+This indicates whether the breakpoint is enabled, in which case the
+value is @samp{y}, or disabled, in which case the value is @samp{n}.
+Note that this is not the same as the field @code{enable}.
+
+@item addr
+The address of the breakpoint.  This may be a hexidecimal number,
+giving the address; or the string @samp{<PENDING>}, for a pending
+breakpoint; or the string @samp{<MULTIPLE>}, for a breakpoint with
+multiple locations.  This field will not be present if no address can
+be determined.  For example, a watchpoint does not have an address.
+
+@item func
+If known, the function in which the breakpoint appears.
+If not known, this field is not present.
+
+@item filename
+The name of the source file which contains this function, if known.
+If not known, this field is not present.
+
+@item fullname
+The full file name of the source file which contains this function, if
+known.  If not known, this field is not present.
+
+@item line
+The line number at which this breakpoint appears, if known.
+If not known, this field is not present.
+
+@item at
+If the source file is not known, this field may be provided.  If
+provided, this holds the address of the breakpoint, possibly followed
+by a symbol name.
+
+@item pending
+If this breakpoint is pending, this field is present and holds the
+text used to set the breakpoint, as entered by the user.
+
+@item evaluated-by
+Where this breakpoint's condition is evaluated, either @samp{host} or
+@samp{target}.
+
+@item thread
+If this is a thread-specific breakpoint, then this identifies the
+thread in which the breakpoint can trigger.
+
+@item task
+If this breakpoint is restricted to a particular Ada task, then this
+field will hold the task identifier.
+
+@item cond
+If the breakpoint is conditional, this is the condition expression.
+
+@item ignore
+The ignore count of the breakpoint.
+
+@item enable
+The enable count of the breakpoint.
+
+@item traceframe-usage
+FIXME.
+
+@item static-tracepoint-marker-string-id
+For a static tracepoint, the name of the static tracepoint marker.
+
+@item mask
+For a masked watchpoint, this is the mask.
+
+@item pass
+A tracepoint's pass count.
+
+@item original-location
+The location of the breakpoint as originally specified by the user.
+This field is optional.
+
+@item times
+The number of times the breakpoint has been hit.
+
+@item installed
+This field is only given for tracepoints.  This is either @samp{y},
+meaning that the tracepoint is installed, or @samp{n}, meaning that it
+is not.
+
+@item what
+Some extra data, the exact contents of which are type-dependent.
+
+@end table
+
+For example, here is what the output of @code{-break-insert}
+(@pxref{GDB/MI Breakpoint Commands}) might be:
+
+@smallexample
+-> -break-insert main
+<- ^done,bkpt=@{number="1",type="breakpoint",disp="keep",
+    enabled="y",addr="0x08048564",func="main",file="myprog.c",
+    fullname="/home/nickrob/myprog.c",line="68",times="0"@}
+<- (gdb)
+@end smallexample
 
 @node GDB/MI Frame Information
 @subsection @sc{gdb/mi} Frame Information
@@ -28397,6 +28518,10 @@ line="5",times="0"@}]@}
 @c REDUNDANT???
 Get information about a single breakpoint.
 
+The result is a table of breakpoints.  @xref{GDB/MI Breakpoint
+Information}, for details on the format of each breakpoint in the
+table.
+
 @subsubheading @value{GDBN} Command
 
 The corresponding @value{GDBN} command is @samp{info break @var{breakpoint}}.
@@ -28456,25 +28581,8 @@ Restrict the breakpoint to the specified @var{thread-id}.
 
 @subsubheading Result
 
-The result is in the form:
-
-@smallexample
-^done,bkpt=@{number="@var{number}",type="@var{type}",disp="del"|"keep",
-enabled="y"|"n",addr="@var{hex}",func="@var{funcname}",file="@var{filename}",
-fullname="@var{full_filename}",line="@var{lineno}",[thread="@var{threadno},]
-times="@var{times}"[,installed="@var{installed}"]@}
-@end smallexample
-
-@noindent
-where @var{number} is the @value{GDBN} number for this breakpoint,
-@var{funcname} is the name of the function where the breakpoint was
-inserted, @var{filename} is the name of the source file which contains
-this function, @var{lineno} is the source line number within that file,
-@var{times} the number of times that the breakpoint has been hit
-(always 0 for -break-insert but may be greater for -break-info or -break-list
-which use the same output), and @var{installed}, which is an optional
-boolean, is about the state of each non-pending tracepoint location
-installed on target or not.
+@xref{GDB/MI Breakpoint Information}, for details on the format of the
+resulting breakpoint.
 
 Note: this format is open to change.
 @c An out-of-band breakpoint instead of part of the result?
