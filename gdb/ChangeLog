@@ -1,3 +1,10 @@
+2013-01-02  Iain Sandoe  <developer@sandoe-acoustics.co.uk>
+
+	* darwin-nat.c (darwin_read_dyld_info): Only build if
+	TASK_DYLD_INFO_COUNT is defined.
+	(darwin_xfer_partial): Call darwin_read_dyld_info only if
+	TASK_DYLD_INFO_COUNT is defined.
+
 2013-01-02  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.h (struct ecoff_debug_hack): Remove.

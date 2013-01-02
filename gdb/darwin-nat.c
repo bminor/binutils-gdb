@@ -1816,8 +1816,10 @@ out:
 
 /* Read LENGTH bytes at offset ADDR of task_dyld_info for TASK, and copy them
    to RDADDR.
-   Return 0 on failure; number of bytes read / writen otherwise.  */
+   Return 0 on failure; number of bytes read / written otherwise.  */
 
+#ifndef TASK_DYLD_INFO_COUNT
+/* This is not available in Darwin 9.  */
 static int
 darwin_read_dyld_info (task_t task, CORE_ADDR addr, char *rdaddr, int length)
 {
@@ -1839,6 +1841,7 @@ darwin_read_dyld_info (task_t task, CORE_ADDR addr, char *rdaddr, int length)
   memcpy (rdaddr, (char *)&task_dyld_info + addr, length);
   return length;
 }
+#endif
 
 
 /* Return 0 on failure, number of bytes handled otherwise.  TARGET
@@ -1881,6 +1884,7 @@ darwin_xfer_partial (struct target_ops *ops,
     case TARGET_OBJECT_MEMORY:
       return darwin_read_write_inferior (inf->private->task, offset,
                                          readbuf, writebuf, len);
+#ifdef TASK_DYLD_INFO_COUNT
     case TARGET_OBJECT_DARWIN_DYLD_INFO:
       if (writebuf != NULL || readbuf == NULL)
         {
@@ -1888,6 +1892,7 @@ darwin_xfer_partial (struct target_ops *ops,
           return -1;
         }
       return darwin_read_dyld_info (inf->private->task, offset, readbuf, len);
+#endif
     default:
       return -1;
     }
