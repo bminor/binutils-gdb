@@ -1,6 +1,6 @@
 // version.c -- print gold version information
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 // Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
@@ -63,7 +63,7 @@ print_version(bool print_short)
   if (!print_short)
     {
       // This output is intended to follow the GNU standards.
-      printf(_("Copyright 2011 Free Software Foundation, Inc.\n"));
+      printf(_("Copyright 2013 Free Software Foundation, Inc.\n"));
       printf(_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License version 3 or (at your option) a later version.\n\

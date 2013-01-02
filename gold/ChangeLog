@@ -1,3 +1,7 @@
+2013-01-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.cc (print_version): Update copyright year to 2013.
+
 2012-12-20  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::special_ordering_of_input_section): New
