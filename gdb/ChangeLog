@@ -1,3 +1,7 @@
+2013-01-01  Maxim Kuvyrkov  <maxim.kuvyrkov@gmail.com>
+
+	* MAINTAINERS: Update my email.
+
 2013-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* cli/cli-script.h (make_cleanup_free_command_lines): Make extern.
