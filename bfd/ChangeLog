@@ -1,3 +1,9 @@
+2013-01-03  Nickolai Zeldovich  <nickolai@csail.mit.edu>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (get_value): Prevent the use of an undefined shift
+	operation.  Add sanity checks.
+
 2013-01-02  Kaushik Phatak  <kaushik.phatak@kpitcummins.com>
 
 	* config.bfd (cr16*-*-uclinux*): New target support.
