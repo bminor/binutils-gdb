@@ -1,3 +1,7 @@
+2013-01-03  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* MAINTAINERS: Add myself as AArch64 co-maintainer.
+
 2013-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.c (print_version): Update copyright year to 2013.
