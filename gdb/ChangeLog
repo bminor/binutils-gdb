@@ -1,3 +1,8 @@
+2013-01-03  Pierre Muller  <muller@sourceware.org>
+
+	* main.c (relocate_gdb_directory): Avoid calling stat function
+	if DIR is empty.
+
 2013-01-03  Yao Qi  <yao@codesourcery.com>
 
 	* psymtab.c (fixup_psymbol_section): Update declaration.
