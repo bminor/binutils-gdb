@@ -1,5 +1,10 @@
 2013-01-03  Yao Qi  <yao@codesourcery.com>
 
+	* psymtab.c (fixup_psymbol_section): Update declaration.
+	(fixup_psymbol_section): Remove code returning value.
+
+2013-01-03  Yao Qi  <yao@codesourcery.com>
+
 	* symtab.h: Remove some out of date comments.
 	 (enum exception_event_kind): Move it ...
 	* breakpoint.c: ... here.
