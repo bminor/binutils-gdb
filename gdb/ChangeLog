@@ -1,3 +1,9 @@
+2013-01-03  Yao Qi  <yao@codesourcery.com>
+
+	* symtab.h: Remove some out of date comments.
+	 (enum exception_event_kind): Move it ...
+	* breakpoint.c: ... here.
+
 2013-01-02  Iain Sandoe  <developer@sandoe-acoustics.co.uk>
 
 	PR gdb/14405

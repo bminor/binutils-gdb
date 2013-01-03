@@ -82,6 +82,13 @@
 #include "mi/mi-common.h"
 #include "python/python.h"
 
+/* Enums for exception-handling support.  */
+enum exception_event_kind
+{
+  EX_EVENT_THROW,
+  EX_EVENT_CATCH
+};
+
 /* Prototypes for local functions.  */
 
 static void enable_delete_command (char *, int);
