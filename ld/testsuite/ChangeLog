@@ -1,3 +1,14 @@
+2013-01-04  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* ld-aarch64/emit-relocs-264.d: Append the '-Mno-aliases' option to
+	the objdump directive.
+	* ld-aarch64/emit-relocs-266.d: Ditto.
+	* ld-aarch64/emit-relocs-268.d: Ditto.
+	* ld-aarch64/emit-relocs-269.d: Ditto.
+	* ld-aarch64/emit-relocs-270.d: Ditto.
+	* ld-aarch64/emit-relocs-271.d: Ditto.
+	* ld-aarch64/emit-relocs-272.d: Ditto.
+
 For older changes see ChangeLog-2012
 
 Copyright (C) 2013 Free Software Foundation, Inc.

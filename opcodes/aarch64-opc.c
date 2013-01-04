@@ -1,5 +1,5 @@
 /* aarch64-opc.c -- AArch64 opcode support.
-   Copyright 2009, 2010, 2011, 2012  Free Software Foundation, Inc.
+   Copyright 2009, 2010, 2011, 2012, 2013  Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -2433,8 +2433,24 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_IMMR:
     case AARCH64_OPND_IMMS:
     case AARCH64_OPND_FBITS:
-    case AARCH64_OPND_IMM_MOV:
       snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
+      break;
+
+    case AARCH64_OPND_IMM_MOV:
+      switch (aarch64_get_qualifier_esize (opnds[0].qualifier))
+	{
+	case 4:	/* e.g. MOV Wd, #<imm32>.  */
+	    {
+	      int imm32 = opnd->imm.value;
+	      snprintf (buf, size, "#0x%-20x\t// #%d", imm32, imm32);
+	    }
+	  break;
+	case 8:	/* e.g. MOV Xd, #<imm64>.  */
+	  snprintf (buf, size, "#0x%-20" PRIx64 "\t// #%" PRIi64,
+		    opnd->imm.value, opnd->imm.value);
+	  break;
+	default: assert (0);
+	}
       break;
 
     case AARCH64_OPND_FPIMM0:

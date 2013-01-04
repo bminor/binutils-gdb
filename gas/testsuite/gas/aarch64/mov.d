@@ -13,14 +13,14 @@ Disassembly of section \.text:
   14:	910003ff 	mov	sp, sp
   18:	aa0f03e7 	mov	x7, x15
   1c:	2a0f03e7 	mov	w7, w15
-  20:	52800b01 	movz	w1, #0x58
-  24:	12800000 	movn	w0, #0x0
-  28:	b2607fe0 	orr	x0, xzr, #0xffffffff00000000
-  2c:	b2400fff 	orr	sp, xzr, #0xf
-  30:	32000fff 	orr	wsp, wzr, #0xf
-  34:	d28001ff 	movz	xzr, #0xf
-  38:	528001ff 	movz	wzr, #0xf
+  20:	52800b01 	mov	w1, #0x58                  	// #88
+  24:	12800000 	mov	w0, #0xffffffff            	// #-1
+  28:	b2607fe0 	mov	x0, #0xffffffff00000000    	// #-4294967296
+  2c:	b2400fff 	mov	sp, #0xf                   	// #15
+  30:	32000fff 	mov	wsp, #0xf                   	// #15
+  34:	d28001ff 	mov	xzr, #0xf                   	// #15
+  38:	528001ff 	mov	wzr, #0xf                   	// #15
   3c:	0e1c3de7 	mov	w7, v15\.s\[3\]
   40:	4e183fef 	mov	x15, v31\.d\[1\]
-  44:	d2801fe0 	movz	x0, #0xff
+  44:	d2801fe0 	mov	x0, #0xff                  	// #255
   48:	320de400 	orr	w0, w0, #0x99999999

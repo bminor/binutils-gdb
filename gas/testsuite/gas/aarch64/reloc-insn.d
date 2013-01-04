@@ -5,13 +5,13 @@
 Disassembly of section \.text:
 
 0000000000000000 <.*>:
-   0:	d281ffe0 	movz	x0, #0xfff
-   4:	9280ffe0 	movn	x0, #0x7ff
-   8:	d2a24681 	movz	x1, #0x1234, lsl #16
+   0:	d281ffe0 	mov	x0, #0xfff                 	// #4095
+   4:	9280ffe0 	mov	x0, #0xfffffffffffff800    	// #-2048
+   8:	d2a24681 	mov	x1, #0x12340000            	// #305397760
    c:	f28acf01 	movk	x1, #0x5678
   10:	92a00001 	movn	x1, #0x0, lsl #16
   14:	f29f0001 	movk	x1, #0xf800
-  18:	d2d55761 	movz	x1, #0xaabb, lsl #32
+  18:	d2d55761 	mov	x1, #0xaabb00000000        	// #187720135606272
   1c:	f2b99ba1 	movk	x1, #0xccdd, lsl #16
   20:	f29ddfe1 	movk	x1, #0xeeff
   24:	d2c00001 	movz	x1, #0x0, lsl #32
@@ -29,11 +29,11 @@ Disassembly of section \.text:
   3c:	92c00001 	movn	x1, #0x0, lsl #32
   40:	f2bfffe1 	movk	x1, #0xffff, lsl #16
   44:	f29f0001 	movk	x1, #0xf800
-  48:	d2ffffe1 	movz	x1, #0xffff, lsl #48
+  48:	d2ffffe1 	mov	x1, #0xffff000000000000    	// #-281474976710656
   4c:	f2dfffe1 	movk	x1, #0xffff, lsl #32
   50:	f2bfffe1 	movk	x1, #0xffff, lsl #16
   54:	f29f0001 	movk	x1, #0xf800
-  58:	d2ffdb81 	movz	x1, #0xfedc, lsl #48
+  58:	d2ffdb81 	mov	x1, #0xfedc000000000000    	// #-82190693199511552
   5c:	f2d75301 	movk	x1, #0xba98, lsl #32
   60:	f2aeca81 	movk	x1, #0x7654, lsl #16
   64:	f2864201 	movk	x1, #0x3210
@@ -121,11 +121,11 @@ Disassembly of section \.text:
  11c:	9400001f 	bl	198 <lab>
  120:	94000000 	bl	0 <xlab>
 			120: R_AARCH64_CALL26	xlab
- 124:	d2e24680 	movz	x0, #0x1234, lsl #48
+ 124:	d2e24680 	mov	x0, #0x1234000000000000    	// #1311673391471656960
  128:	f2cacf00 	movk	x0, #0x5678, lsl #32
  12c:	f2b35780 	movk	x0, #0x9abc, lsl #16
  130:	f29bde00 	movk	x0, #0xdef0
- 134:	d2ffdb80 	movz	x0, #0xfedc, lsl #48
+ 134:	d2ffdb80 	mov	x0, #0xfedc000000000000    	// #-82190693199511552
  138:	f2d75300 	movk	x0, #0xba98, lsl #32
  13c:	f2aeca80 	movk	x0, #0x7654, lsl #16
  140:	f2864200 	movk	x0, #0x3210
@@ -155,7 +155,6 @@ Disassembly of section \.text:
 			188: R_AARCH64_GOT_LD_PREL19	cdata
  18c:	39400001 	ldrb	w1, \[x0\]
  190:	d65f03c0 	ret
-
 
 0000000000000194 <llit>:
  194:	deadf00d 	\.word	0xdeadf00d
