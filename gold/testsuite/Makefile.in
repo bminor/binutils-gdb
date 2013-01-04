@@ -124,8 +124,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test icf_keep_unique_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test icf_safe_so_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	text_section_grouping \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout_sequence.txt \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	text_section_grouping \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_virtual_function_folding_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test \
@@ -2027,6 +2027,12 @@ COMPILE = `echo $(COMPILE1) | sed -e 's/-Wp,-D_FORTIFY_SOURCE=[0-9[0-9]]*//'`
 LINK = `echo $(LINK1) | sed -e 's/-Wp,-D_FORTIFY_SOURCE=[0-9][0-9]*//'`
 CXXCOMPILE = `echo $(CXXCOMPILE1) | sed -e 's/-Wp,-D_FORTIFY_SOURCE=[0-9][0-9]*//'`
 CXXLINK = `echo $(CXXLINK1) | sed -e 's/-Wp,-D_FORTIFY_SOURCE=[0-9][0-9]*//'`
+
+# Strip out -static-libgcc and -static-libstdc++ options, for tests
+# that must have these libraries linked dynamically.  The -shared-libgcc
+# option does not work correctly, and there is no -shared-libstdc++ option.
+# (See GCC PR 55781 and PR 55782.)
+CXXLINK_S = `echo $(CXXLINK1) | sed -e 's/-static-lib\\(gcc\\|stdc++\\)//g'`
 TEST_READELF = $(top_builddir)/../binutils/readelf
 TEST_OBJDUMP = $(top_builddir)/../binutils/objdump
 TEST_OBJCOPY = $(top_builddir)/../binutils/objcopy
@@ -4356,9 +4362,9 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@text_section_grouping.o: text_section_grouping.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@text_section_grouping: text_section_grouping.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ text_section_grouping.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK)  -Bgcctestdir/ text_section_grouping.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@text_section_grouping.stdout: text_section_grouping
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -n --synthetic text_section_grouping > text_section_grouping.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -n --synthetic text_section_grouping > text_section_grouping.stdout 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIE -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_virtual_function_folding_test: icf_virtual_function_folding_test.o gcctestdir/ld
@@ -4617,8 +4623,8 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation2.so: odr_violation2.cc gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -Bgcctestdir/ -O2 -g -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg_so.err: debug_msg.so odr_violation1.so odr_violation2.so gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so "2>$@"
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so 2>$@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK_S) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so "2>$@"
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK_S) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so 2>$@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of debug_msg_so should have failed"; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
@@ -4631,8 +4637,8 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation2_ndebug.so: odr_violation2.cc gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -Bgcctestdir/ -O2 -g0 -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg_ndebug.err: debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so "2>$@"
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so 2>$@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK_S) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so -shared-libgcc -Bdynamic -lstdc++ "2>$@"
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK_S) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so -shared-libgcc -Bdynamic -lstdc++ 2>$@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of debug_msg_ndebug should have failed"; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \

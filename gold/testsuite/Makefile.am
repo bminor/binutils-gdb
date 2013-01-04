@@ -38,6 +38,12 @@ LINK = `echo $(LINK1) | sed -e 's/-Wp,-D_FORTIFY_SOURCE=[0-9][0-9]*//'`
 CXXCOMPILE = `echo $(CXXCOMPILE1) | sed -e 's/-Wp,-D_FORTIFY_SOURCE=[0-9][0-9]*//'`
 CXXLINK = `echo $(CXXLINK1) | sed -e 's/-Wp,-D_FORTIFY_SOURCE=[0-9][0-9]*//'`
 
+# Strip out -static-libgcc and -static-libstdc++ options, for tests
+# that must have these libraries linked dynamically.  The -shared-libgcc
+# option does not work correctly, and there is no -shared-libstdc++ option.
+# (See GCC PR 55781 and PR 55782.)
+CXXLINK_S = `echo $(CXXLINK1) | sed -e 's/-static-lib\\(gcc\\|stdc++\\)//g'`
+
 TEST_READELF = $(top_builddir)/../binutils/readelf
 TEST_OBJDUMP = $(top_builddir)/../binutils/objdump
 TEST_OBJCOPY = $(top_builddir)/../binutils/objcopy
@@ -982,8 +988,8 @@ odr_violation1.so: odr_violation1.cc gcctestdir/ld
 odr_violation2.so: odr_violation2.cc gcctestdir/ld
 	$(CXXCOMPILE) -Bgcctestdir/ -O2 -g -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
 debug_msg_so.err: debug_msg.so odr_violation1.so odr_violation2.so gcctestdir/ld
-	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so "2>$@"
-	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so 2>$@; \
+	@echo $(CXXLINK_S) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so "2>$@"
+	@if $(CXXLINK_S) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_so debug_msg.so odr_violation1.so odr_violation2.so 2>$@; \
 	then \
 	  echo 1>&2 "Link of debug_msg_so should have failed"; \
 	  rm -f $@; \
@@ -1001,8 +1007,8 @@ odr_violation1_ndebug.so: odr_violation1.cc gcctestdir/ld
 odr_violation2_ndebug.so: odr_violation2.cc gcctestdir/ld
 	$(CXXCOMPILE) -Bgcctestdir/ -O2 -g0 -shared -fPIC -w -o $@ $(srcdir)/odr_violation2.cc
 debug_msg_ndebug.err: debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so gcctestdir/ld
-	@echo $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so "2>$@"
-	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so 2>$@; \
+	@echo $(CXXLINK_S) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so -shared-libgcc -Bdynamic -lstdc++ "2>$@"
+	@if $(CXXLINK_S) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg_ndebug debug_msg_ndebug.so odr_violation1_ndebug.so odr_violation2_ndebug.so -shared-libgcc -Bdynamic -lstdc++ 2>$@; \
 	then \
 	  echo 1>&2 "Link of debug_msg_ndebug should have failed"; \
 	  rm -f $@; \

@@ -1,3 +1,9 @@
+2013-01-04  Cary Coutant  <ccoutant@google.com>
+
+    	* testsuite/Makefile.am (CXXLINK_S): New macro.
+    	(debug_msg_so.err, debug_msg_ndebug.err): Use CXXLINK_S.
+    	* testsuite/Makefile.in: Regenerate.
+
 2013-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.cc (print_version): Update copyright year to 2013.
