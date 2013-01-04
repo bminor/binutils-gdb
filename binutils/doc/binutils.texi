@@ -12,7 +12,7 @@
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-2010, 2011, 2012
+2010, 2011, 2012, 2013
 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -4384,7 +4384,7 @@ equivalent. At least one of the @option{--output-mach},
 
 @table @env
 
-@itemx --input-mach=@var{machine}
+@item --input-mach=@var{machine}
 Set the matching input ELF machine type to @var{machine}.  If
 @option{--input-mach} isn't specified, it will match any ELF
 machine types.
@@ -4392,21 +4392,21 @@ machine types.
 The supported ELF machine types are, @var{L1OM}, @var{K1OM} and
 @var{x86-64}.
 
-@itemx --output-mach=@var{machine}
+@item --output-mach=@var{machine}
 Change the ELF machine type in the ELF header to @var{machine}.  The
 supported ELF machine types are the same as @option{--input-mach}.
 
-@itemx --input-type=@var{type}
+@item --input-type=@var{type}
 Set the matching input ELF file type to @var{type}.  If
 @option{--input-type} isn't specified, it will match any ELF file types.
 
 The supported ELF file types are, @var{rel}, @var{exec} and @var{dyn}.
 
-@itemx --output-type=@var{type}
+@item --output-type=@var{type}
 Change the ELF file type in the ELF header to @var{type}.  The
 supported ELF types are the same as @option{--input-type}.
 
-@itemx --input-osabi=@var{osabi}
+@item --input-osabi=@var{osabi}
 Set the matching input ELF file OSABI to @var{osabi}.  If
 @option{--input-osabi} isn't specified, it will match any ELF OSABIs.
 
@@ -4416,7 +4416,7 @@ The supported ELF OSABIs are, @var{none}, @var{HPUX}, @var{NetBSD},
 @var{FreeBSD}, @var{TRU64}, @var{Modesto}, @var{OpenBSD}, @var{OpenVMS},
 @var{NSK}, @var{AROS} and @var{FenixOS}.
 
-@itemx --output-osabi=@var{osabi}
+@item --output-osabi=@var{osabi}
 Change the ELF OSABI in the ELF header to @var{osabi}.  The
 supported ELF OSABI are the same as @option{--input-osabi}.
 

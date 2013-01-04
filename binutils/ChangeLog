@@ -1,3 +1,7 @@
+2013-01-04  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* doc/binutils.texi (elfedit): Fix use of @itemx in @table.
+
 2013-01-03  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* MAINTAINERS: Add myself as AArch64 co-maintainer.
