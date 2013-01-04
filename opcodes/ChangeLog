@@ -1,3 +1,8 @@
+2013-01-04  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+        * aarch64-opc.c (aarch64_prfops): Update to support PLIL1KEEP,
+        PLIL1STRM, PLIL2KEEP, PLIL2STRM, PLIL3KEEP and PLIL3STRM.
+
 2013-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (process_copyright): Update copyright year to 2013.

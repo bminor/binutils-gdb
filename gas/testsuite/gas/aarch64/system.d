@@ -230,36 +230,36 @@ Disassembly of section \.text:
  358:	f8af6be7 	prfm	#0x07, \[sp,x15\]
  35c:	f8be58e7 	prfm	#0x07, \[x7,w30,uxtw #3\]
  360:	f9800c67 	prfm	#0x07, \[x3,#24\]
- 364:	d8000008 	prfm	#0x08, 0 <LABEL1>
+ 364:	d8000008 	prfm	plil1keep, 0 <LABEL1>
 			364: R_AARCH64_LD_PREL_LO19	LABEL1
- 368:	f8af6be8 	prfm	#0x08, \[sp,x15\]
- 36c:	f8be58e8 	prfm	#0x08, \[x7,w30,uxtw #3\]
- 370:	f9800c68 	prfm	#0x08, \[x3,#24\]
- 374:	d8000009 	prfm	#0x09, 0 <LABEL1>
+ 368:	f8af6be8 	prfm	plil1keep, \[sp,x15\]
+ 36c:	f8be58e8 	prfm	plil1keep, \[x7,w30,uxtw #3\]
+ 370:	f9800c68 	prfm	plil1keep, \[x3,#24\]
+ 374:	d8000009 	prfm	plil1strm, 0 <LABEL1>
 			374: R_AARCH64_LD_PREL_LO19	LABEL1
- 378:	f8af6be9 	prfm	#0x09, \[sp,x15\]
- 37c:	f8be58e9 	prfm	#0x09, \[x7,w30,uxtw #3\]
- 380:	f9800c69 	prfm	#0x09, \[x3,#24\]
- 384:	d800000a 	prfm	#0x0a, 0 <LABEL1>
+ 378:	f8af6be9 	prfm	plil1strm, \[sp,x15\]
+ 37c:	f8be58e9 	prfm	plil1strm, \[x7,w30,uxtw #3\]
+ 380:	f9800c69 	prfm	plil1strm, \[x3,#24\]
+ 384:	d800000a 	prfm	plil2keep, 0 <LABEL1>
 			384: R_AARCH64_LD_PREL_LO19	LABEL1
- 388:	f8af6bea 	prfm	#0x0a, \[sp,x15\]
- 38c:	f8be58ea 	prfm	#0x0a, \[x7,w30,uxtw #3\]
- 390:	f9800c6a 	prfm	#0x0a, \[x3,#24\]
- 394:	d800000b 	prfm	#0x0b, 0 <LABEL1>
+ 388:	f8af6bea 	prfm	plil2keep, \[sp,x15\]
+ 38c:	f8be58ea 	prfm	plil2keep, \[x7,w30,uxtw #3\]
+ 390:	f9800c6a 	prfm	plil2keep, \[x3,#24\]
+ 394:	d800000b 	prfm	plil2strm, 0 <LABEL1>
 			394: R_AARCH64_LD_PREL_LO19	LABEL1
- 398:	f8af6beb 	prfm	#0x0b, \[sp,x15\]
- 39c:	f8be58eb 	prfm	#0x0b, \[x7,w30,uxtw #3\]
- 3a0:	f9800c6b 	prfm	#0x0b, \[x3,#24\]
- 3a4:	d800000c 	prfm	#0x0c, 0 <LABEL1>
+ 398:	f8af6beb 	prfm	plil2strm, \[sp,x15\]
+ 39c:	f8be58eb 	prfm	plil2strm, \[x7,w30,uxtw #3\]
+ 3a0:	f9800c6b 	prfm	plil2strm, \[x3,#24\]
+ 3a4:	d800000c 	prfm	plil3keep, 0 <LABEL1>
 			3a4: R_AARCH64_LD_PREL_LO19	LABEL1
- 3a8:	f8af6bec 	prfm	#0x0c, \[sp,x15\]
- 3ac:	f8be58ec 	prfm	#0x0c, \[x7,w30,uxtw #3\]
- 3b0:	f9800c6c 	prfm	#0x0c, \[x3,#24\]
- 3b4:	d800000d 	prfm	#0x0d, 0 <LABEL1>
+ 3a8:	f8af6bec 	prfm	plil3keep, \[sp,x15\]
+ 3ac:	f8be58ec 	prfm	plil3keep, \[x7,w30,uxtw #3\]
+ 3b0:	f9800c6c 	prfm	plil3keep, \[x3,#24\]
+ 3b4:	d800000d 	prfm	plil3strm, 0 <LABEL1>
 			3b4: R_AARCH64_LD_PREL_LO19	LABEL1
- 3b8:	f8af6bed 	prfm	#0x0d, \[sp,x15\]
- 3bc:	f8be58ed 	prfm	#0x0d, \[x7,w30,uxtw #3\]
- 3c0:	f9800c6d 	prfm	#0x0d, \[x3,#24\]
+ 3b8:	f8af6bed 	prfm	plil3strm, \[sp,x15\]
+ 3bc:	f8be58ed 	prfm	plil3strm, \[x7,w30,uxtw #3\]
+ 3c0:	f9800c6d 	prfm	plil3strm, \[x3,#24\]
  3c4:	d800000e 	prfm	#0x0e, 0 <LABEL1>
 			3c4: R_AARCH64_LD_PREL_LO19	LABEL1
  3c8:	f8af6bee 	prfm	#0x0e, \[sp,x15\]

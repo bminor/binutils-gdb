@@ -1,3 +1,7 @@
+2013-01-04  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+        * gas/aarch64/system.d: Update.
+
 2013-01-02  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/14987

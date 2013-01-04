@@ -334,10 +334,10 @@ const struct aarch64_name_value_pair aarch64_barrier_options[16] =
     { "sy",    0xf },
 };
 
-/* op -> op:       load = 0 store = 1
+/* op -> op:       load = 0 instruction = 1 store = 2
    l  -> level:    1-3
    t  -> temporal: temporal (retained) = 0 non-temporal (streaming) = 1   */
-#define B(op,l,t) ((((op) * 2) << 3) | (((l) - 1) << 1) | (t))
+#define B(op,l,t) (((op) << 3) | (((l) - 1) << 1) | (t))
 const struct aarch64_name_value_pair aarch64_prfops[32] =
 {
   { "pldl1keep", B(0, 1, 0) },
@@ -348,20 +348,20 @@ const struct aarch64_name_value_pair aarch64_prfops[32] =
   { "pldl3strm", B(0, 3, 1) },
   { "#0x06", 0x06 },
   { "#0x07", 0x07 },
-  { "#0x08", 0x08 },
-  { "#0x09", 0x09 },
-  { "#0x0a", 0x0a },
-  { "#0x0b", 0x0b },
-  { "#0x0c", 0x0c },
-  { "#0x0d", 0x0d },
+  { "plil1keep", B(1, 1, 0) },
+  { "plil1strm", B(1, 1, 1) },
+  { "plil2keep", B(1, 2, 0) },
+  { "plil2strm", B(1, 2, 1) },
+  { "plil3keep", B(1, 3, 0) },
+  { "plil3strm", B(1, 3, 1) },
   { "#0x0e", 0x0e },
   { "#0x0f", 0x0f },
-  { "pstl1keep", B(1, 1, 0) },
-  { "pstl1strm", B(1, 1, 1) },
-  { "pstl2keep", B(1, 2, 0) },
-  { "pstl2strm", B(1, 2, 1) },
-  { "pstl3keep", B(1, 3, 0) },
-  { "pstl3strm", B(1, 3, 1) },
+  { "pstl1keep", B(2, 1, 0) },
+  { "pstl1strm", B(2, 1, 1) },
+  { "pstl2keep", B(2, 2, 0) },
+  { "pstl2strm", B(2, 2, 1) },
+  { "pstl3keep", B(2, 3, 0) },
+  { "pstl3strm", B(2, 3, 1) },
   { "#0x16", 0x16 },
   { "#0x17", 0x17 },
   { "#0x18", 0x18 },
