@@ -1,3 +1,19 @@
+2013-01-04  Juergen Urban <JuergenUrban@gmx.de>
+
+	* config/tc-mips.c: Add support for MIPS r5900.
+	Add M_LQ_AB and M_SQ_AB to support large values for instructions
+	lq and sq.
+	(can_swap_branch_p, get_append_method): Detect some conditional
+	short loops to fix a bug on the r5900 by NOP in the branch delay
+	slot.
+	(M_MUL): Support 3 operands in multu on r5900.
+	(M_TRUNCWS): Support trunc.w.s on r5900 in MIPS ISA I.
+	(s_mipsset): Force 32 bit floating point on r5900.
+	(mips_ip): Check parameter range of instructions mfps and mtps on
+	r5900.
+	* configure.in: Detect CPU type when target string contains r5900
+	(e.g. mips64r5900el-linux-gnu).
+
 2013-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* as.c (parse_args): Update copyright year to 2013.

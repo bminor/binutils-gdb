@@ -1,6 +1,6 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
    Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
@@ -171,6 +171,10 @@ struct mips_cl_insn
 
   /* True if this instruction is complete.  */
   unsigned int complete_p : 1;
+
+  /* True if this instruction is cleared from history by unconditional
+     branch.  */
+  unsigned int cleared_p : 1;
 };
 
 /* The ABI to use.  */
@@ -518,6 +522,7 @@ static int mips_32bitmode = 0;
    || mips_opts.isa == ISA_MIPS64                     \
    || mips_opts.isa == ISA_MIPS64R2                   \
    || mips_opts.arch == CPU_R4010                     \
+   || mips_opts.arch == CPU_R5900                     \
    || mips_opts.arch == CPU_R10000                    \
    || mips_opts.arch == CPU_R12000                    \
    || mips_opts.arch == CPU_R14000                    \
@@ -535,6 +540,7 @@ static int mips_32bitmode = 0;
 #define gpr_interlocks                                \
   (mips_opts.isa != ISA_MIPS1                         \
    || mips_opts.arch == CPU_R3900                     \
+   || mips_opts.arch == CPU_R5900                     \
    || mips_opts.micromips                             \
    )
 
@@ -1679,6 +1685,7 @@ create_insn (struct mips_cl_insn *insn, const struct mips_opcode *mo)
   insn->noreorder_p = (mips_opts.noreorder > 0);
   insn->mips16_absolute_jump_p = 0;
   insn->complete_p = 0;
+  insn->cleared_p = 0;
 }
 
 /* Record the current MIPS16/microMIPS mode in now_seg.  */
@@ -3735,10 +3742,13 @@ fix_loongson2f (struct mips_cl_insn * ip)
 
 /* IP is a branch that has a delay slot, and we need to fill it
    automatically.   Return true if we can do that by swapping IP
-   with the previous instruction.  */
+   with the previous instruction.
+   ADDRESS_EXPR is an operand of the instruction to be used with
+   RELOC_TYPE.  */
 
 static bfd_boolean
-can_swap_branch_p (struct mips_cl_insn *ip)
+can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
+  bfd_reloc_code_real_type *reloc_type)
 {
   unsigned long pinfo, pinfo2, prev_pinfo, prev_pinfo2;
   unsigned int gpr_read, gpr_write, prev_gpr_read, prev_gpr_write;
@@ -3857,13 +3867,64 @@ can_swap_branch_p (struct mips_cl_insn *ip)
       && insn_length (history) != 4)
     return FALSE;
 
+  /* On R5900 short loops need to be fixed by inserting a nop in
+     the branch delay slots.
+     A short loop can be terminated too early.  */
+  if (mips_opts.arch == CPU_R5900
+      /* Check if instruction has a parameter, ignore "j $31". */
+      && (address_expr != NULL)
+      /* Parameter must be 16 bit. */
+      && (*reloc_type == BFD_RELOC_16_PCREL_S2)
+      /* Branch to same segment. */
+      && (S_GET_SEGMENT(address_expr->X_add_symbol) == now_seg)
+      /* Branch to same code fragment. */
+      && (symbol_get_frag(address_expr->X_add_symbol) == frag_now)
+      /* Can only calculate branch offset if value is known. */
+      && symbol_constant_p(address_expr->X_add_symbol)
+      /* Check if branch is really conditional. */
+      && !((ip->insn_opcode & 0xffff0000) == 0x10000000   /* beq $0,$0 */
+	|| (ip->insn_opcode & 0xffff0000) == 0x04010000   /* bgez $0 */
+	|| (ip->insn_opcode & 0xffff0000) == 0x04110000)) /* bgezal $0 */
+    {
+      int distance;
+      /* Check if loop is shorter than 6 instructions including
+         branch and delay slot.  */
+      distance = frag_now_fix() - S_GET_VALUE(address_expr->X_add_symbol);
+      if (distance <= 20)
+        {
+          int i;
+          int rv;
+
+          rv = FALSE;
+          /* When the loop includes branches or jumps,
+             it is not a short loop. */
+          for (i = 0; i < (distance / 4); i++)
+            {
+              if ((history[i].cleared_p)
+                  || delayed_branch_p(&history[i]))
+                {
+                  rv = TRUE;
+                  break;
+                }
+            }
+          if (rv == FALSE)
+            {
+              /* Insert nop after branch to fix short loop. */
+              return FALSE;
+            }
+        }
+    }
+
   return TRUE;
 }
 
-/* Decide how we should add IP to the instruction stream.  */
+/* Decide how we should add IP to the instruction stream.
+   ADDRESS_EXPR is an operand of the instruction to be used with
+   RELOC_TYPE.  */
 
 static enum append_method
-get_append_method (struct mips_cl_insn *ip)
+get_append_method (struct mips_cl_insn *ip, expressionS *address_expr,
+  bfd_reloc_code_real_type *reloc_type)
 {
   unsigned long pinfo;
 
@@ -3879,7 +3940,8 @@ get_append_method (struct mips_cl_insn *ip)
   /* Otherwise, it's our responsibility to fill branch delay slots.  */
   if (delayed_branch_p (ip))
     {
-      if (!branch_likely_p (ip) && can_swap_branch_p (ip))
+      if (!branch_likely_p (ip)
+	  && can_swap_branch_p (ip, address_expr, reloc_type))
 	return APPEND_SWAP;
 
       pinfo = ip->insn_mo->pinfo;
@@ -4260,7 +4322,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	}
     }
 
-  method = get_append_method (ip);
+  method = get_append_method (ip, address_expr, reloc_type);
   branch_disp = method == APPEND_SWAP ? insn_length (history) : 0;
 
 #ifdef OBJ_ELF
@@ -4578,7 +4640,16 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   /* If we have just completed an unconditional branch, clear the history.  */
   if ((delayed_branch_p (&history[1]) && uncond_branch_p (&history[1]))
       || (compact_branch_p (&history[0]) && uncond_branch_p (&history[0])))
+    {
+      unsigned int i;
+
     mips_no_prev_insn ();
+
+      for (i = 0; i < ARRAY_SIZE (history); i++)
+      {
+        history[i].cleared_p = 1;
+      }
+    }
 
   /* We need to emit a label at the end of branch-likely macros.  */
   if (emit_branch_likely_macro)
@@ -4591,7 +4662,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   mips_clear_insn_labels ();
 }
 
-/* Forget that there was any previous instruction or label.  */
+/* Forget that there was any previous instruction or label.
+   When BRANCH is true, the branch history is also flushed.  */
 
 static void
 mips_no_prev_insn (void)
@@ -8858,7 +8930,8 @@ macro (struct mips_cl_insn *ip)
       s = segment_name (S_GET_SEGMENT (offset_expr.X_add_symbol));
       if (strcmp (s, ".lit8") == 0)
 	{
-	  if (mips_opts.isa != ISA_MIPS1 || mips_opts.micromips)
+	  if ((mips_opts.isa != ISA_MIPS1 || mips_opts.micromips)
+	    && (mips_opts.arch != CPU_R5900))
 	    {
 	      macro_build (&offset_expr, "ldc1", "T,o(b)", treg,
 			   BFD_RELOC_MIPS_LITERAL, mips_gp_register);
@@ -8881,7 +8954,8 @@ macro (struct mips_cl_insn *ip)
 	      macro_build_lui (&offset_expr, AT);
 	    }
 
-	  if (mips_opts.isa != ISA_MIPS1 || mips_opts.micromips)
+	  if ((mips_opts.isa != ISA_MIPS1 || mips_opts.micromips)
+	    && (mips_opts.arch != CPU_R5900))
 	    {
 	      macro_build (&offset_expr, "ldc1", "T,o(b)",
 			   treg, BFD_RELOC_LO16, AT);
@@ -8898,7 +8972,8 @@ macro (struct mips_cl_insn *ip)
       r = BFD_RELOC_LO16;
     dob:
       gas_assert (!mips_opts.micromips);
-      gas_assert (mips_opts.isa == ISA_MIPS1);
+      gas_assert ((mips_opts.isa == ISA_MIPS1)
+        || (mips_opts.arch == CPU_R5900));
       macro_build (&offset_expr, "lwc1", "T,o(b)",
 		   target_big_endian ? treg + 1 : treg, r, breg);
       /* FIXME: A possible overflow which I don't know how to deal
@@ -8936,7 +9011,7 @@ macro (struct mips_cl_insn *ip)
       /* Itbl support may require additional care here.  */
       coproc = 1;
       fmt = "T,o(b)";
-      if (mips_opts.isa != ISA_MIPS1)
+      if ((mips_opts.isa != ISA_MIPS1) && (mips_opts.arch != CPU_R5900))
 	{
 	  s = "ldc1";
 	  goto ld_st;
@@ -8949,13 +9024,23 @@ macro (struct mips_cl_insn *ip)
       /* Itbl support may require additional care here.  */
       coproc = 1;
       fmt = "T,o(b)";
-      if (mips_opts.isa != ISA_MIPS1)
+      if ((mips_opts.isa != ISA_MIPS1) && (mips_opts.arch != CPU_R5900))
 	{
 	  s = "sdc1";
 	  goto ld_st;
 	}
       s = "swc1";
       goto ldd_std;
+
+    case M_LQ_AB:
+      fmt = "t,o(b)";
+      s = "lq";
+      goto ld;
+
+    case M_SQ_AB:
+      fmt = "t,o(b)";
+      s = "sq";
+      goto ld_st;
 
     case M_LD_AB:
       fmt = "t,o(b)";
@@ -9269,8 +9354,15 @@ macro (struct mips_cl_insn *ip)
     case M_DMUL:
       dbl = 1;
     case M_MUL:
+      if (mips_opts.arch == CPU_R5900)
+        {
+          macro_build (NULL, dbl ? "dmultu" : "multu", "d,s,t", dreg, sreg, treg);
+        }
+      else
+        {
       macro_build (NULL, dbl ? "dmultu" : "multu", "s,t", sreg, treg);
       macro_build (NULL, "mflo", MFHL_FMT, dreg);
+        }
       break;
 
     case M_DMUL_I:
@@ -9833,7 +9925,7 @@ macro (struct mips_cl_insn *ip)
     case M_TRUNCWS:
     case M_TRUNCWD:
       gas_assert (!mips_opts.micromips);
-      gas_assert (mips_opts.isa == ISA_MIPS1);
+      gas_assert ((mips_opts.isa == ISA_MIPS1) || (mips_opts.arch == CPU_R5900));
       used_at = 1;
       sreg = (ip->insn_opcode >> 11) & 0x1f;	/* floating reg */
       dreg = (ip->insn_opcode >> 06) & 0x1f;	/* floating reg */
@@ -10638,7 +10730,7 @@ mips_oddfpreg_ok (const struct mips_opcode *insn, int argnum)
     /* Let a macro pass, we'll catch it later when it is expanded.  */
     return 1;
 
-  if (ISA_HAS_ODD_SINGLE_FPR (mips_opts.isa))
+  if (ISA_HAS_ODD_SINGLE_FPR (mips_opts.isa) || (mips_opts.arch == CPU_R5900))
     {
       /* Allow odd registers for single-precision ops.  */
       switch (insn->pinfo & (FP_S | FP_D))
@@ -11789,6 +11881,10 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      if (imm_expr.X_add_number != 0 && imm_expr.X_add_number != 1)
 		as_warn (_("Invalid performance register (%lu)"),
 			 (unsigned long) imm_expr.X_add_number);
+	      if (imm_expr.X_add_number != 0 && mips_opts.arch == CPU_R5900
+	        && (!strcmp(insn->name,"mfps") || !strcmp(insn->name,"mtps")))
+	        as_warn (_("Invalid performance register (%lu)"),
+	          (unsigned long) imm_expr.X_add_number);
 	      INSERT_OPERAND (0, PERFREG, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
@@ -16380,7 +16476,14 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	case ISA_MIPS64:
 	case ISA_MIPS64R2:
 	  mips_opts.gp32 = 0;
+	  if (mips_opts.arch == CPU_R5900)
+	    {
+		mips_opts.fp32 = 1;
+	    }
+	  else
+	    {
 	  mips_opts.fp32 = 0;
+	    }
 	  break;
 	default:
 	  as_bad (_("unknown ISA level %s"), name + 4);
@@ -19082,6 +19185,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "r4600",          0,			ISA_MIPS3,      CPU_R4600 },
   { "orion",          0,			ISA_MIPS3,      CPU_R4600 },
   { "r4650",          0,			ISA_MIPS3,      CPU_R4650 },
+  { "r5900",          0,			ISA_MIPS3,      CPU_R5900 },
   /* ST Microelectronics Loongson 2E and 2F cores */
   { "loongson2e",     0,			ISA_MIPS3,   CPU_LOONGSON_2E },
   { "loongson2f",     0,			ISA_MIPS3,   CPU_LOONGSON_2F },

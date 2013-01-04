@@ -1,3 +1,23 @@
+2013-01-04  Juergen Urban <JuergenUrban@gmx.de>
+
+	* mips-dis.c: Add names for CP0 registers of r5900.
+	* mips-opc.c: Add M_SQ_AB and M_LQ_AB to support larger range for
+	instructions sq and lq.
+	Add support for MIPS r5900 CPU.
+	Add support for 128 bit MMI (Multimedia Instructions).
+	Add support for EE instructions (Emotion Engine).
+	Disable unsupported floating point instructions (64 bit and
+	undefined compare operations).
+	Enable instructions of MIPS ISA IV which are supported by r5900.
+	Disable 64 bit co processor instructions.
+	Disable 64 bit multiplication and division instructions.
+	Disable instructions for co-processor 2 and 3, because these are
+	not supported (preparation for later VU0 support (Vector Unit)).
+	Disable cvt.w.s because this behaves like trunc.w.s and the
+	correct execution can't be ensured on r5900.
+	Add trunc.w.s using the opcode encoding of cvt.w.s on r5900. This
+	will confuse less developers and compilers.
+
 2013-01-04  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-opc.c (aarch64_print_operand): Change to print

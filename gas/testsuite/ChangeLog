@@ -1,3 +1,11 @@
+2013-01-04  Juergen Urban <JuergenUrban@gmx.de>
+
+	* gas/mips/r5900-full.s: New test.
+	* gas/mips/r5900-full.d: Expected disassembly.
+	* gas/mips/r5900.s: New test.
+	* gas/mips/r5900.d: Expected disassembly.
+	* gas/mips/mips.exp: Run new tests.
+
 2013-01-04  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/int-insns.d: Update.

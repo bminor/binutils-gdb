@@ -1,3 +1,11 @@
+2013-01-04  Juergen Urban <JuergenUrban@gmx.de>
+
+	* archures.c (bfd_mach_mips5900): Define.
+	* bfd-in2.h: Regenerate.
+	* config.bfd: Add mips64-ps2-elf and mips-ps2-elf targets.
+	* cpu-mips.c: Add support for MIPS r5900.
+	* elfxx-mips.c: Add support for MIPS r5900 (extension of r4000).
+
 2013-01-03  Nickolai Zeldovich  <nickolai@csail.mit.edu>
 	    Nick Clifton  <nickc@redhat.com>
 

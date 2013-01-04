@@ -1,3 +1,14 @@
+2013-01-04  Juergen Urban <JuergenUrban@gmx.de>
+
+	* configure.tgt: Support ELF files for Sony Playstation 2 (for
+	ps2dev and ps2sdk).
+	* emulparams/elf32lr5900n32.sh: Create linker script for Sony
+	Playstation 2 ELF files using MIPS ABI n32.
+	* emulparams/elf32lr5900.sh: Create linker script for Sony
+	Playstation 2 ELF files using MIPS ABI o32.
+	* Makefile.am: Add linker scripts for Sony Playstation 2 ELF
+	files.
+
 2013-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldver.c (ldversion): Update copyright year to 2013.

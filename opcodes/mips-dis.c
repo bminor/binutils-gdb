@@ -233,6 +233,30 @@ static const char * const mips_cp0_names_r4000[32] =
   "c0_taglo",     "c0_taghi",     "c0_errorepc",  "$31",
 };
 
+static const char * const mips_cp0_names_r5900[32] =
+{
+  "c0_index",     "c0_random",    "c0_entrylo0",  "c0_entrylo1",
+  "c0_context",   "c0_pagemask",  "c0_wired",     "$7",
+  "c0_badvaddr",  "c0_count",     "c0_entryhi",   "c0_compare",
+  "c0_sr",        "c0_cause",     "c0_epc",       "c0_prid",
+  "c0_config",    "$17",          "$18",          "$19",
+  "$20",          "$21",          "$22",          "c0_badpaddr",
+  "c0_depc",      "c0_perfcnt",   "$26",          "$27",
+  "c0_taglo",     "c0_taghi",     "c0_errorepc",  "$31"
+};
+
+static const struct mips_cp0sel_name mips_cp0sel_names_mipsr5900[] =
+{
+  { 24, 2, "c0_iab"			},
+  { 24, 3, "c0_iabm"		},
+  { 24, 4, "c0_dab"			},
+  { 24, 5, "c0_dabm"		},
+  { 24, 6, "c0_dvb"			},
+  { 24, 7, "c0_dvbm"		},
+  { 25, 1, "c0_perfcnt,1"	},
+  { 25, 2, "c0_perfcnt,2"	}
+};
+
 static const char * const mips_cp0_names_mips3264[32] =
 {
   "c0_index",     "c0_random",    "c0_entrylo0",  "c0_entrylo1",
@@ -532,6 +556,8 @@ const struct mips_arch_choice mips_arch_choices[] =
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
   { "vr5500",	1, bfd_mach_mips5500, CPU_VR5500, ISA_MIPS4,
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+  { "r5900",	1, bfd_mach_mips5900, CPU_R5900, ISA_MIPS3,
+    mips_cp0_names_r5900, NULL, 0, mips_hwr_names_numeric },
   { "r6000",	1, bfd_mach_mips6000, CPU_R6000, ISA_MIPS2,
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
   { "rm7000",	1, bfd_mach_mips7000, CPU_RM7000, ISA_MIPS4,

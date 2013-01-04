@@ -12060,6 +12060,9 @@ _ACEOF
 	  mips64* | mipsisa64* | mipsisa32*)
 	    mips_cpu=`echo $target_cpu | sed -e 's/[a-z]*..//' -e 's/el$//'`
 	    ;;
+	  mips*)
+	    mips_cpu=`echo $target_cpu | sed -e 's/^mips//' -e 's/el$//'`
+	    ;;
 	  *)
 	    as_fn_error "$target_cpu isn't a supported MIPS CPU name" "$LINENO" 5
 	    ;;

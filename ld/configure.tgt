@@ -1,3 +1,21 @@
+# configure.tgt
+#
+#   Copyright 2013 Free Software Foundation
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING3.  If not see
+# <http://www.gnu.org/licenses/>.
+
 # This is the linker target specific file.  This is invoked by the
 # autoconf generated configure script.  Putting it in a separate shell
 # file lets us skip running autoconf when modifying target specific
@@ -438,6 +456,12 @@ mips*el-sde-elf*)	targ_emul=elf32ltsmip
 mips*-sde-elf* | mips*-mti-elf*)
 			targ_emul=elf32btsmip
 			targ_extra_emuls="elf32ltsmip elf32btsmipn32 elf64btsmip elf32ltsmipn32 elf64ltsmip" ;;
+mips64*el-ps2-elf*)	targ_emul=elf32lr5900n32
+			targ_extra_emuls="elf32lr5900"
+			targ_extra_libpath=$targ_extra_emuls ;;
+mips*el-ps2-elf*)	targ_emul=elf32lr5900
+			targ_extra_emuls="elf32lr5900n32"
+			targ_extra_libpath=$targ_extra_emuls ;;
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;
