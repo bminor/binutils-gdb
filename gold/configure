@@ -7320,7 +7320,7 @@ else
   gold_cv_hash_off_t=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-CXXFLAGS=$CFLAGS_hold
+CXXFLAGS=$CXXFLAGS_hold
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gold_cv_hash_off_t" >&5
 $as_echo "$gold_cv_hash_off_t" >&6; }

@@ -546,7 +546,7 @@ std::tr1::hash<off_t> h;
 ],
 [gold_cv_hash_off_t=yes],
 [gold_cv_hash_off_t=no])
-CXXFLAGS=$CFLAGS_hold])
+CXXFLAGS=$CXXFLAGS_hold])
 if test "$gold_cv_hash_off_t" = "yes"; then
    AC_DEFINE(HAVE_TR1_HASH_OFF_T, 1,
 	     [Define if std::tr1::hash<off_t> is usable])
