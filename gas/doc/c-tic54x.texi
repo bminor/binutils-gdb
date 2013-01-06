@@ -345,7 +345,7 @@ Assign @var{name} the string @var{string}.  String replacement is
 performed on @var{string} before assignment.
 
 @cindex @code{eval} directive, TIC54X
-@itemx .eval @var{string}, @var{name}
+@item .eval @var{string}, @var{name}
 Evaluate the contents of string @var{string} and assign the result as a
 string to the subsym @var{name}.  String replacement is performed on
 @var{string} before assignment. 
