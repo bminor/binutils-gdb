@@ -1,3 +1,8 @@
+2013-01-07  Kaushik Phatak  <kaushik.phatak@kpitcummins.com>
+
+	* cr16-dis.c (make_instruction): Rename to cr16_make_instruction.
+	(match_opcode): Rename to cr16_match_opcode.
+
 2013-01-04  Juergen Urban <JuergenUrban@gmx.de>
 
 	* mips-dis.c: Add names for CP0 registers of r5900.

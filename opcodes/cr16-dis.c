@@ -315,7 +315,7 @@ build_mask (void)
 /* Search for a matching opcode. Return 1 for success, 0 for failure.  */
 
 int
-match_opcode (void)
+cr16_match_opcode (void)
 {
   unsigned long mask;
   /* The instruction 'constant' opcode doewsn't exceed 32 bits.  */
@@ -743,7 +743,7 @@ print_arguments (ins *currentInsn, bfd_vma memaddr, struct disassemble_info *inf
 /* Build the instruction's arguments.  */
 
 void
-make_instruction (void)
+cr16_make_instruction (void)
 {
   int i;
   unsigned int shift;
@@ -813,7 +813,7 @@ print_insn_cr16 (bfd_vma memaddr, struct disassemble_info *info)
   /* Retrieve the encoding from current memory location.  */
   get_words_at_PC (memaddr, info);
   /* Find a matching opcode in table.  */
-  is_decoded = match_opcode ();
+  is_decoded = cr16_match_opcode ();
   /* If found, print the instruction's mnemonic and arguments.  */
   if (is_decoded > 0 && (cr16_words[0] << 16 || cr16_words[1]) != 0)
     {
@@ -825,7 +825,7 @@ print_insn_cr16 (bfd_vma memaddr, struct disassemble_info *info)
       if (((cr16_currInsn.nargs = get_number_of_operands ()) != 0)
 	  && ! (IS_INSN_MNEMONIC ("b")))
         info->fprintf_func (info->stream, "\t");
-      make_instruction ();
+      cr16_make_instruction ();
       /* For push/pop/pushrtn with RA instructions.  */
       if ((INST_HAS_REG_LIST) && ((cr16_words[0] >> 7) & 0x1))
         cr16_currInsn.nargs +=1;
