@@ -354,10 +354,9 @@ lynx_resume (struct thread_resume *resume_info, size_t n)
   const int request = (resume_info[0].kind == resume_step
                        ? PTRACE_SINGLESTEP : PTRACE_CONT);
   const int signal = resume_info[0].sig;
-  int ret;
 
   regcache_invalidate ();
-  ret = lynx_ptrace (request, inferior_ptid, 1, signal, 0);
+  lynx_ptrace (request, inferior_ptid, 1, signal, 0);
 }
 
 /* Resume the execution of the given PTID.  */
