@@ -1,4 +1,13 @@
 2013-01-07  H.J. Lu  <hongjiu.lu@intel.com>
+	    Ian Lance Taylor  <iant@google.com>
+
+	PR gold/14897
+	* configure.ac (--enable-ld): Removed.
+	(install_as_default): Set to yes only for --enable-gold=default
+	or --disable-ld.
+	* configure: Regenerated.
+
+2013-01-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* options.h (General_options): Add -fuse-ld= for GCC linker
 	option compatibility.

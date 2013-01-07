@@ -774,7 +774,6 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 with_sysroot
-enable_ld
 enable_gold
 enable_threads
 enable_plugins
@@ -1424,7 +1423,6 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-ld[=ARG]     build ld [ARG={default,yes,no}]
   --enable-gold[=ARG]     build gold [ARG={default,yes,no}]
   --enable-threads        multi-threaded linking
   --enable-plugins        linker plugins
@@ -3270,35 +3268,21 @@ _ACEOF
 
 
 
-default_ld=
-# Check whether --enable-ld was given.
-if test "${enable_ld+set}" = set; then :
-  enableval=$enable_ld; case "${enableval}" in
-  default)
-    default_ld=ld.bfd
-    ;;
-esac
-fi
-
-
+installed_linker=ld.gold
 # Check whether --enable-gold was given.
 if test "${enable_gold+set}" = set; then :
   enableval=$enable_gold; case "${enableval}" in
- yes|default)
-   if test x${default_ld} = x; then
+ default)
+   install_as_default=yes
+   ;;
+ yes)
+   if test x${enable_ld} = xno; then
      install_as_default=yes
    fi
-   installed_linker=ld.gold
-   ;;
- no)
-   ;;
- *)
-   as_fn_error "invalid --enable-gold argument" "$LINENO" 5
    ;;
  esac
 else
   install_as_default=no
- installed_linker=ld.gold
 fi
 
 

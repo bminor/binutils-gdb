@@ -68,32 +68,20 @@ dnl "install_as_default" is true if the linker to be installed as the
 dnl default linker, ld.
 dnl "installed_linker" is the installed gold linker name.
 
-default_ld=
-AC_ARG_ENABLE(ld,
-[[  --enable-ld[=ARG]     build ld [ARG={default,yes,no}]]],
-[case "${enableval}" in
-  default)
-    default_ld=ld.bfd
-    ;;
-esac])
-
+installed_linker=ld.gold
 AC_ARG_ENABLE(gold,
 [[  --enable-gold[=ARG]     build gold [ARG={default,yes,no}]]],
 [case "${enableval}" in
- yes|default)
-   if test x${default_ld} = x; then
+ default)
+   install_as_default=yes
+   ;;
+ yes)
+   if test x${enable_ld} = xno; then
      install_as_default=yes
    fi
-   installed_linker=ld.gold
-   ;;
- no)
-   ;;
- *)
-   AC_MSG_ERROR([invalid --enable-gold argument])
    ;;
  esac],
-[install_as_default=no
- installed_linker=ld.gold])
+[install_as_default=no])
 AC_SUBST(install_as_default)
 AC_SUBST(installed_linker)
 
