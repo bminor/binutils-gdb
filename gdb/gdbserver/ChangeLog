@@ -1,5 +1,9 @@
 2013-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* configure.srv (i[34567]86-*-lynxos*): Set srv_xmlfiles.
+
+2013-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.srv (powerpc-*-lynxos*): Set srv_xmlfiles.
 
 2013-01-07  Joel Brobecker  <brobecker@adacore.com>

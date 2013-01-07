@@ -105,6 +105,9 @@ case "${target}" in
 			;;
   i[34567]86-*-lynxos*)	srv_regobj="i386.o"
 			srv_tgtobj="lynx-low.o lynx-i386-low.o"
+			srv_xmlfiles="i386/i386.xml"
+			srv_xmlfiles="${srv_xmlfiles} i386/32bit-core.xml"
+			srv_xmlfiles="${srv_xmlfiles} i386/32bit-sse.xml"
 			srv_lynxos=yes
 			;;
   i[34567]86-*-mingw32ce*)
