@@ -1,3 +1,17 @@
+2013-01-07  Roland McGrath  <mcgrathr@google.com>
+
+	* objcopy.c (deterministic): Make int rather than bfd_boolean,
+	initialize to -1.
+	(strip_options, copy_options): Add -U/--disable-deterministic-archives.
+	(default_deterministic): New function.
+	(strip_main, copy_main): Handle -U.  Call default_deterministic.
+	(copy_usage, strip_usage): Describe -U.  Cite whether -D or -U is
+	the default based on DEFAULT_AR_DETERMINISTIC.
+	* doc/binutils.texi (objcopy, strip): Describe -U and effect of
+	configure options on -D.
+
+	* ar.c (default_deterministic): Comment fix.
+
 2013-01-07  Patrice Dumas  <pertusus@free.fr>
 
 	* doc/binutils.texi: Fix ordering of top level nodes.
