@@ -1,3 +1,8 @@
+2013-01-07  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/14887
+	* gas/arm/neon-ldst-es.s: Add more whitespace.
+
 2013-01-04  Juergen Urban <JuergenUrban@gmx.de>
 
 	* gas/mips/r5900-full.s: New test.
