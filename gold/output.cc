@@ -2422,7 +2422,7 @@ Output_section::add_input_section(Layout* layout,
     input_section_size = uncompressed_size;
 
   off_t offset_in_section;
-  off_t aligned_offset_in_section;
+
   if (this->has_fixed_layout())
     {
       // For incremental updates, find a chunk of unused space in the section.
@@ -2432,16 +2432,14 @@ Output_section::add_input_section(Layout* layout,
         gold_fallback(_("out of patch space in section %s; "
 			"relink with --incremental-full"),
 		      this->name());
-      aligned_offset_in_section = offset_in_section;
+      return offset_in_section;
     }
-  else
-    {
-      offset_in_section = this->current_data_size_for_child();
-      aligned_offset_in_section = align_address(offset_in_section,
-						addralign);
-      this->set_current_data_size_for_child(aligned_offset_in_section
-					    + input_section_size);
-    }
+
+  offset_in_section = this->current_data_size_for_child();
+  off_t aligned_offset_in_section = align_address(offset_in_section,
+						  addralign);
+  this->set_current_data_size_for_child(aligned_offset_in_section
+					+ input_section_size);
 
   // Determine if we want to delay code-fill generation until the output
   // section is written.  When the target is relaxing, we want to delay fill
@@ -2507,14 +2505,6 @@ Output_section::add_input_section(Layout* layout,
               this->set_input_section_order_specified();
             }
         }
-      if (this->has_fixed_layout())
-	{
-	  // For incremental updates, finalize the address and offset now.
-	  uint64_t addr = this->address();
-	  isecn.set_address_and_file_offset(addr + aligned_offset_in_section,
-					    aligned_offset_in_section,
-					    this->offset());
-	}
       this->input_sections_.push_back(isecn);
     }
 

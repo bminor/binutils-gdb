@@ -1,3 +1,10 @@
+2013-01-07  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/14993
+	* output.cc (Output_section::add_input_section): For incremental
+	updates, don't track input sections that are allocated from patch
+	space.
+
 2013-01-07  H.J. Lu  <hongjiu.lu@intel.com>
 	    Ian Lance Taylor  <iant@google.com>
 
