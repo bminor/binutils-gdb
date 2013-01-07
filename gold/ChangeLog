@@ -1,3 +1,8 @@
+2013-01-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* options.h (General_options): Add -fuse-ld= for GCC linker
+	option compatibility.
+
 2013-01-04  Cary Coutant  <ccoutant@google.com>
 
 	* configure.ac: Fix typo restoring CXXFLAGS.
@@ -5,9 +10,9 @@
 
 2013-01-04  Cary Coutant  <ccoutant@google.com>
 
-    	* testsuite/Makefile.am (CXXLINK_S): New macro.
-    	(debug_msg_so.err, debug_msg_ndebug.err): Use CXXLINK_S.
-    	* testsuite/Makefile.in: Regenerate.
+	* testsuite/Makefile.am (CXXLINK_S): New macro.
+	(debug_msg_so.err, debug_msg_ndebug.err): Use CXXLINK_S.
+	* testsuite/Makefile.in: Regenerate.
 
 2013-01-02  H.J. Lu  <hongjiu.lu@intel.com>
 

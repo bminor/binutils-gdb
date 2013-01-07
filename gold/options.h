@@ -1199,6 +1199,10 @@ class General_options
   DEFINE_special(end_lib, options::TWO_DASHES, '\0',
                  N_("End a library "), NULL);
 
+  DEFINE_string(fuse_ld, options::ONE_DASH, '\0', "",
+		N_("Ignored for GCC linker option compatibility"),
+		"");
+
   // The -z options.
 
   DEFINE_bool(combreloc, options::DASH_Z, '\0', true,
