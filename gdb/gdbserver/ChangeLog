@@ -1,5 +1,15 @@
 2013-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* lynx-low.c (lynx_resume): Use the resume_info parameter
+	to determine the ptid for the lynx_ptrace call, unless
+	it is equal to minus_one_ptid, in which case we use the
+	ptid of the current_inferior.
+	(lynx_wait_1): After having received a thread create/exit
+	event, resume the inferior's execution using the signaling
+	thread's ptid, rather than the old ptid.
+
+2013-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* lynx-low.c (lynx_resume): Delete variable ret.
 
 2013-01-01  Joel Brobecker  <brobecker@adacore.com>

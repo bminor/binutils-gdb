@@ -349,14 +349,17 @@ lynx_attach (unsigned long pid)
 static void
 lynx_resume (struct thread_resume *resume_info, size_t n)
 {
-  ptid_t inferior_ptid = thread_to_gdb_id (current_inferior);
   /* FIXME: Assume for now that n == 1.  */
+  ptid_t ptid = resume_info[0].thread;
   const int request = (resume_info[0].kind == resume_step
                        ? PTRACE_SINGLESTEP : PTRACE_CONT);
   const int signal = resume_info[0].sig;
 
+  if (ptid_equal (ptid, minus_one_ptid))
+    ptid = thread_to_gdb_id (current_inferior);
+
   regcache_invalidate ();
-  lynx_ptrace (request, inferior_ptid, 1, signal, 0);
+  lynx_ptrace (request, ptid, 1, signal, 0);
 }
 
 /* Resume the execution of the given PTID.  */
@@ -497,12 +500,12 @@ retry:
 	  case SIGNEWTHREAD:
 	    /* We just added the new thread above.  No need to do anything
 	       further.  Just resume the execution again.  */
-	    lynx_continue (ptid);
+	    lynx_continue (new_ptid);
 	    goto retry;
 
 	  case SIGTHREADEXIT:
 	    remove_thread (find_thread_ptid (new_ptid));
-	    lynx_continue (ptid);
+	    lynx_continue (new_ptid);
 	    goto retry;
 	}
     }
