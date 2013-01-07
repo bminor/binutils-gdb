@@ -1,6 +1,6 @@
 /* ar.c - Archive modify and extract.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -575,7 +575,7 @@ decode_options (int argc, char **argv)
   return &argv[optind];
 }
 
-/* If neither -D nor -U was not specified explicitly,
+/* If neither -D nor -U was specified explicitly,
    then use the configured default.  */
 static void
 default_deterministic (void)

@@ -1060,6 +1060,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{-R} @var{sectionname}|@option{--remove-section=}@var{sectionname}]
         [@option{-p}|@option{--preserve-dates}]
         [@option{-D}|@option{--enable-deterministic-archives}]
+        [@option{-U}|@option{--disable-deterministic-archives}]
         [@option{--debugging}]
         [@option{--gap-fill=}@var{val}]
         [@option{--pad-to=}@var{address}]
@@ -1328,9 +1329,27 @@ as those of the input file.
 
 @item -D
 @itemx --enable-deterministic-archives
+@cindex deterministic archives
+@kindex --enable-deterministic-archives
 Operate in @emph{deterministic} mode.  When copying archive members
 and writing the archive index, use zero for UIDs, GIDs, timestamps,
 and use consistent file modes for all files.
+
+If @file{binutils} was configured with
+@option{--enable-deterministic-archives}, then this mode is on by default.
+It can be disabled with the @samp{-U} option, below.
+
+@item -U
+@itemx --disable-deterministic-archives
+@cindex deterministic archives
+@kindex --enable-deterministic-archives
+Do @emph{not} operate in @emph{deterministic} mode.  This is the
+inverse of the @option{-D} option, above: when copying archive members
+and writing the archive index, use their actual UID, GID, timestamp,
+and file mode values.
+
+This is the default unless @file{binutils} was configured with
+@option{--enable-deterministic-archives}.
 
 @item --debugging
 Convert debugging information, if possible.  This is not the default
@@ -2709,6 +2728,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
       [@option{-D}|@option{--enable-deterministic-archives}]
+      [@option{-U}|@option{--disable-deterministic-archives}]
       [@option{--keep-file-symbols}]
       [@option{--only-keep-debug}]
       [@option{-v} |@option{--verbose}] [@option{-V}|@option{--version}]
@@ -2801,9 +2821,27 @@ Preserve the access and modification dates of the file.
 
 @item -D
 @itemx --enable-deterministic-archives
+@cindex deterministic archives
+@kindex --enable-deterministic-archives
 Operate in @emph{deterministic} mode.  When copying archive members
 and writing the archive index, use zero for UIDs, GIDs, timestamps,
 and use consistent file modes for all files.
+
+If @file{binutils} was configured with
+@option{--enable-deterministic-archives}, then this mode is on by default.
+It can be disabled with the @samp{-U} option, below.
+
+@item -U
+@itemx --disable-deterministic-archives
+@cindex deterministic archives
+@kindex --enable-deterministic-archives
+Do @emph{not} operate in @emph{deterministic} mode.  This is the
+inverse of the @option{-D} option, above: when copying archive members
+and writing the archive index, use their actual UID, GID, timestamp,
+and file mode values.
+
+This is the default unless @file{binutils} was configured with
+@option{--enable-deterministic-archives}.
 
 @item -w
 @itemx --wildcard

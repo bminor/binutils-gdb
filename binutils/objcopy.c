@@ -1,6 +1,6 @@
 /* objcopy.c -- copy object file from input to output, optionally massaging it.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -86,7 +86,7 @@ static int copy_width = 1;
 
 static bfd_boolean verbose;		/* Print file and target names.  */
 static bfd_boolean preserve_dates;	/* Preserve input file timestamp.  */
-static bfd_boolean deterministic;	/* Enable deterministic archives.  */
+static int deterministic = -1;		/* Enable deterministic archives.  */
 static int status = 0;		/* Exit status.  */
 
 enum strip_action
@@ -325,6 +325,7 @@ enum command_line_switch
 
 static struct option strip_options[] =
 {
+  {"disable-deterministic-archives", no_argument, 0, 'U'},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
   {"enable-deterministic-archives", no_argument, 0, 'D'},
@@ -376,6 +377,7 @@ static struct option copy_options[] =
   {"compress-debug-sections", no_argument, 0, OPTION_COMPRESS_DEBUG_SECTIONS},
   {"debugging", no_argument, 0, OPTION_DEBUGGING},
   {"decompress-debug-sections", no_argument, 0, OPTION_DECOMPRESS_DEBUG_SECTIONS},
+  {"disable-deterministic-archives", no_argument, 0, 'U'},
   {"discard-all", no_argument, 0, 'x'},
   {"discard-locals", no_argument, 0, 'X'},
   {"enable-deterministic-archives", no_argument, 0, 'D'},
@@ -489,9 +491,20 @@ copy_usage (FILE *stream, int exit_status)
   -B --binary-architecture <arch>  Set output arch, when input is arch-less\n\
   -F --target <bfdname>            Set both input and output format to <bfdname>\n\
      --debugging                   Convert debugging information, if possible\n\
-  -p --preserve-dates              Copy modified/access timestamps to the output\n\
+  -p --preserve-dates              Copy modified/access timestamps to the output\n"));
+  if (DEFAULT_AR_DETERMINISTIC)
+    fprintf (stream, _("\
+  -D --enable-deterministic-archives\n\
+                                   Produce deterministic output when stripping archives (default)\n\
+  -U --disable-deterministic-archives\n\
+                                   Disable -D behavior\n"));
+  else
+    fprintf (stream, _("\
   -D --enable-deterministic-archives\n\
                                    Produce deterministic output when stripping archives\n\
+  -U --disable-deterministic-archives\n\
+                                   Disable -D behavior (default)\n"));
+  fprintf (stream, _("\
   -j --only-section <name>         Only copy section <name> into the output\n\
      --add-gnu-debuglink=<file>    Add section .gnu_debuglink linking to <file>\n\
   -R --remove-section <name>       Remove section <name> from the output\n\
@@ -602,8 +615,20 @@ strip_usage (FILE *stream, int exit_status)
   -O --output-target=<bfdname>     Create an output file in format <bfdname>\n\
   -F --target=<bfdname>            Set both input and output format to <bfdname>\n\
   -p --preserve-dates              Copy modified/access timestamps to the output\n\
+"));
+  if (DEFAULT_AR_DETERMINISTIC)
+    fprintf (stream, _("\
+  -D --enable-deterministic-archives\n\
+                                   Produce deterministic output when stripping archives (default)\n\
+  -U --disable-deterministic-archives\n\
+                                   Disable -D behavior\n"));
+  else
+    fprintf (stream, _("\
   -D --enable-deterministic-archives\n\
                                    Produce deterministic output when stripping archives\n\
+  -U --disable-deterministic-archives\n\
+                                   Disable -D behavior (default)\n"));
+  fprintf (stream, _("\
   -R --remove-section=<name>       Remove section <name> from the output\n\
   -s --strip-all                   Remove all symbol and relocation information\n\
   -g -S -d --strip-debug           Remove all debugging symbols & sections\n\
@@ -3015,6 +3040,15 @@ write_debugging_info (bfd *obfd, void *dhandle,
   return FALSE;
 }
 
+/* If neither -D nor -U was specified explicitly,
+   then use the configured default.  */
+static void
+default_deterministic (void)
+{
+  if (deterministic < 0)
+    deterministic = DEFAULT_AR_DETERMINISTIC;
+}
+
 static int
 strip_main (int argc, char *argv[])
 {
@@ -3075,6 +3109,9 @@ strip_main (int argc, char *argv[])
 	case 'D':
 	  deterministic = TRUE;
 	  break;
+	case 'U':
+	  deterministic = FALSE;
+	  break;
 	case 'x':
 	  discard_locals = LOCALS_ALL;
 	  break;
@@ -3118,6 +3155,8 @@ strip_main (int argc, char *argv[])
 
   if (show_version)
     print_version ("strip");
+
+  default_deterministic ();
 
   /* Default is to strip all symbols.  */
   if (strip_symbols == STRIP_UNDEF
@@ -3201,7 +3240,7 @@ set_pe_subsystem (const char *s)
     }
   v[] =
     {
-      { "native", 0, IMAGE_SUBSYSTEM_NATIVE },  
+      { "native", 0, IMAGE_SUBSYSTEM_NATIVE },
       { "windows", 0, IMAGE_SUBSYSTEM_WINDOWS_GUI },
       { "console", 0, IMAGE_SUBSYSTEM_WINDOWS_CUI },
       { "posix", 0, IMAGE_SUBSYSTEM_POSIX_CUI },
@@ -3441,6 +3480,10 @@ copy_main (int argc, char *argv[])
 
 	case 'D':
 	  deterministic = TRUE;
+	  break;
+
+	case 'U':
+	  deterministic = FALSE;
 	  break;
 
 	case 'w':
@@ -3877,7 +3920,7 @@ copy_main (int argc, char *argv[])
 	case OPTION_FILE_ALIGNMENT:
 	  pe_file_alignment = parse_vma (optarg, "--file-alignment");
 	  break;
-	
+
 	case OPTION_HEAP:
 	    {
 	      char *end;
@@ -3895,20 +3938,20 @@ copy_main (int argc, char *argv[])
 		}
 	    }
 	  break;
-	
+
 	case OPTION_IMAGE_BASE:
 	  pe_image_base = parse_vma (optarg, "--image-base");
 	  break;
-	
+
 	case OPTION_SECTION_ALIGNMENT:
 	  pe_section_alignment = parse_vma (optarg,
 					    "--section-alignment");
 	  break;
-	
+
 	case OPTION_SUBSYSTEM:
 	  set_pe_subsystem (optarg);
 	  break;
-	
+
 	case OPTION_STACK:
 	    {
 	      char *end;
@@ -3926,7 +3969,7 @@ copy_main (int argc, char *argv[])
 		}
 	    }
 	  break;
-	
+
 	case 0:
 	  /* We've been given a long option.  */
 	  break;
@@ -3964,6 +4007,8 @@ copy_main (int argc, char *argv[])
   input_filename = argv[optind];
   if (optind + 1 < argc)
     output_filename = argv[optind + 1];
+
+  default_deterministic ();
 
   /* Default is to strip no symbols.  */
   if (strip_symbols == STRIP_UNDEF && discard_locals == LOCALS_UNDEF)
