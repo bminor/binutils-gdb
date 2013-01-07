@@ -175,6 +175,9 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Ignored for GCC LTO option compatibility"),
     ONE_DASH },
 #endif /* ENABLE_PLUGINS */
+  { {"fuse-ld=", required_argument, NULL, OPTION_IGNORE},
+    '\0', NULL, N_("Ignored for GCC linker option compatibility"),
+    ONE_DASH },
   { {"Qy", no_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for SVR4 compatibility"), ONE_DASH },
   { {"emit-relocs", no_argument, NULL, 'q'},
