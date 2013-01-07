@@ -359,7 +359,11 @@ lynx_resume (struct thread_resume *resume_info, size_t n)
     ptid = thread_to_gdb_id (current_inferior);
 
   regcache_invalidate ();
+
+  errno = 0;
   lynx_ptrace (request, ptid, 1, signal, 0);
+  if (errno)
+    perror_with_name ("ptrace");
 }
 
 /* Resume the execution of the given PTID.  */

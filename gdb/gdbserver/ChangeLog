@@ -1,5 +1,10 @@
 2013-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* lynx-low.c (lynx_resume): Call perror_with_name if lynx_ptrace
+	sets errno.
+
+2013-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.srv (i[34567]86-*-lynxos*): Set srv_xmlfiles.
 
 2013-01-07  Joel Brobecker  <brobecker@adacore.com>
