@@ -1,5 +1,9 @@
 2013-01-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* configure.srv (powerpc-*-lynxos*): Set srv_xmlfiles.
+
+2013-01-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* lynx-low.c (lynx_resume): Use the resume_info parameter
 	to determine the ptid for the lynx_ptrace call, unless
 	it is equal to minus_one_ptid, in which case we use the

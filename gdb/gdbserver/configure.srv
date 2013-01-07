@@ -229,6 +229,9 @@ case "${target}" in
 			;;
   powerpc-*-lynxos*)	srv_regobj="powerpc-32.o"
 			srv_tgtobj="lynx-low.o lynx-ppc-low.o"
+			srv_xmlfiles="rs6000/powerpc-32.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power-core.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power-fpu.xml"
 			srv_lynxos=yes
 			;;
   s390*-*-linux*)	srv_regobj="s390-linux32.o"
