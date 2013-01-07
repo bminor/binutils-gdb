@@ -1,3 +1,10 @@
+2013-01-07  Tom Tromey  <tromey@redhat.com>
+
+	* section.c (_bfd_std_section): Rename from std_section.
+        (bfd_com_section_ptr, bfd_und_section_ptr, bfd_abs_section_ptr)
+        (STD_SECTION): Update.
+	* bfd-in2.h: Rebuild.
+
 2013-01-04  Juergen Urban <JuergenUrban@gmx.de>
 
 	* archures.c (bfd_mach_mips5900): Define.
