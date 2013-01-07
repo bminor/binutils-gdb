@@ -1,3 +1,34 @@
+2013-01-07  Tom Tromey  <tromey@redhat.com>
+
+	PR cli/7719:
+	* NEWS: Update.
+	* ada-valprint.c (printstr, print_field_values): Remove
+	"inspect_it" code.
+	* cp-valprint.c (cp_print_value_fields): Remove "inspect_it"
+	code.
+	* jv-valprint.c (java_print_value_fields): Remove "inspect_it"
+	code.
+	* m2-lang.c (m2_printstr): Remove "inspect_it" code.
+	* main.c (captured_main): Remove "epoch" argument.
+	* objc-lang.c (objc_printstr): Remove "inspect_it" code.
+	* p-lang.c (pascal_printstr): Remove "inspect_it" code.
+	* p-valprint.c (pascal_object_print_value_fields): Remove
+	"inspect_it" code.
+	* printcmd.c (print_command_1): Remove 'inspect' argument.
+	(print_command, call_command): Update.
+	(inspect_command): Remove.
+	(_initialize_printcmd): Make "inspect" an alias for "print".
+	* top.c (epoch_interface): Remove.
+	* top.h (epoch_interface): Remove.
+	* valprint.c (user_print_options): Update.
+	(print_converted_chars_to_obstack): Remove "inspect_it" code.
+	* valprint.h (struct value_print_options) <inspect_it>: Remove
+	field.
+
+2013-01-04  Tom Tromey  <tromey@redhat.com>
+
+	* valprint.h (read_string): Add 'extern'.
+
 2013-01-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* darwin-nat.c: Fix typo in TASK_DYLD_INFO_COUNT macro test
@@ -62,7 +93,7 @@
 
 	Update year range in copyright notice of all files.
 
-2013-01-01  Joel Brobecker  <brobecker@adacore.com>
+2013-01-01, 13  Joel Brobecker  <brobecker@adacore.com>
 
 	* top.c (print_gdb_version): Update copyright year.
 

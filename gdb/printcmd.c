@@ -934,7 +934,7 @@ validate_format (struct format_data fmt, char *cmdname)
    first argument ("/x myvar" for example, to print myvar in hex).  */
 
 static void
-print_command_1 (char *exp, int inspect, int voidprint)
+print_command_1 (char *exp, int voidprint)
 {
   struct expression *expr;
   struct cleanup *old_chain = 0;
@@ -979,17 +979,13 @@ print_command_1 (char *exp, int inspect, int voidprint)
       else
 	annotate_value_begin (value_type (val));
 
-      if (inspect)
-	printf_unfiltered ("\031(gdb-makebuffer \"%s\"  %d '(\"",
-			   exp, histindex);
-      else if (histindex >= 0)
+      if (histindex >= 0)
 	printf_filtered ("$%d = ", histindex);
 
       if (histindex >= 0)
 	annotate_value_history_value ();
 
       get_formatted_print_options (&opts, format);
-      opts.inspect_it = inspect;
       opts.raw = fmt.raw;
 
       print_formatted (val, fmt.size, &opts, gdb_stdout);
@@ -999,9 +995,6 @@ print_command_1 (char *exp, int inspect, int voidprint)
 	annotate_value_history_end ();
       else
 	annotate_value_end ();
-
-      if (inspect)
-	printf_unfiltered ("\") )\030");
     }
 
   if (cleanup)
@@ -1011,23 +1004,14 @@ print_command_1 (char *exp, int inspect, int voidprint)
 static void
 print_command (char *exp, int from_tty)
 {
-  print_command_1 (exp, 0, 1);
-}
-
-/* Same as print, except in epoch, it gets its own window.  */
-static void
-inspect_command (char *exp, int from_tty)
-{
-  extern int epoch_interface;
-
-  print_command_1 (exp, epoch_interface, 1);
+  print_command_1 (exp, 1);
 }
 
 /* Same as print, except it doesn't print void results.  */
 static void
 call_command (char *exp, int from_tty)
 {
-  print_command_1 (exp, 0, 0);
+  print_command_1 (exp, 0);
 }
 
 void
@@ -2600,11 +2584,7 @@ EXP may be preceded with /FMT, where FMT is a format letter\n\
 but no count or size letter (see \"x\" command)."));
   set_cmd_completer (c, expression_completer);
   add_com_alias ("p", "print", class_vars, 1);
-
-  c = add_com ("inspect", class_vars, inspect_command, _("\
-Same as \"print\" command, except that if you are running in the epoch\n\
-environment, the value is printed in its own window."));
-  set_cmd_completer (c, expression_completer);
+  add_com_alias ("inspect", "print", class_vars, 1);
 
   add_setshow_uinteger_cmd ("max-symbolic-offset", no_class,
 			    &max_symbolic_offset, _("\

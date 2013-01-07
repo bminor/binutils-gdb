@@ -361,36 +361,17 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	    {
 	      wrap_here (n_spaces (2 + 2 * recurse));
 	    }
-	  if (options->inspect_it)
-	    {
-	      if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_PTR)
-		fputs_filtered ("\"( ptr \"", stream);
-	      else
-		fputs_filtered ("\"( nodef \"", stream);
-	      if (field_is_static (&TYPE_FIELD (type, i)))
-		fputs_filtered ("static ", stream);
-	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
-				       language_cplus,
-				       DMGL_PARAMS | DMGL_ANSI);
-	      fputs_filtered ("\" \"", stream);
-	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
-				       language_cplus,
-				       DMGL_PARAMS | DMGL_ANSI);
-	      fputs_filtered ("\") \"", stream);
-	    }
-	  else
-	    {
-	      annotate_field_begin (TYPE_FIELD_TYPE (type, i));
 
-	      if (field_is_static (&TYPE_FIELD (type, i)))
-		fputs_filtered ("static ", stream);
-	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
-				       language_cplus,
-				       DMGL_PARAMS | DMGL_ANSI);
-	      annotate_field_name_end ();
-	      fputs_filtered (": ", stream);
-	      annotate_field_value ();
-	    }
+	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
+
+	  if (field_is_static (&TYPE_FIELD (type, i)))
+	    fputs_filtered ("static ", stream);
+	  fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
+				   language_cplus,
+				   DMGL_PARAMS | DMGL_ANSI);
+	  annotate_field_name_end ();
+	  fputs_filtered (": ", stream);
+	  annotate_field_value ();
 
 	  if (!field_is_static (&TYPE_FIELD (type, i))
 	      && TYPE_FIELD_PACKED (type, i))

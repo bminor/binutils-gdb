@@ -509,10 +509,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	{
 	  if (in_quotes)
 	    {
-	      if (options->inspect_it)
-		fputs_filtered ("\\\", ", stream);
-	      else
-		fputs_filtered ("\", ", stream);
+	      fputs_filtered ("\", ", stream);
 	      in_quotes = 0;
 	    }
 	  fputs_filtered ("'", stream);
@@ -528,10 +525,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	{
 	  if (!in_quotes)
 	    {
-	      if (options->inspect_it)
-		fputs_filtered ("\\\"", stream);
-	      else
-		fputs_filtered ("\"", stream);
+	      fputs_filtered ("\"", stream);
 	      in_quotes = 1;
 	    }
 	  ada_emit_char (char_at (string, i, type_len, byte_order),
@@ -542,12 +536,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 
   /* Terminate the quotes if necessary.  */
   if (in_quotes)
-    {
-      if (options->inspect_it)
-	fputs_filtered ("\\\"", stream);
-      else
-	fputs_filtered ("\"", stream);
-    }
+    fputs_filtered ("\"", stream);
 
   if (force_ellipses || i < length)
     fputs_filtered ("...", stream);
@@ -1089,29 +1078,14 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 	{
 	  wrap_here (n_spaces (2 + 2 * recurse));
 	}
-      if (options->inspect_it)
-	{
-	  if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_PTR)
-	    fputs_filtered ("\"( ptr \"", stream);
-	  else
-	    fputs_filtered ("\"( nodef \"", stream);
-	  fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
-				   language_cplus, DMGL_NO_OPTS);
-	  fputs_filtered ("\" \"", stream);
-	  fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
-				   language_cplus, DMGL_NO_OPTS);
-	  fputs_filtered ("\") \"", stream);
-	}
-      else
-	{
-	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
-	  fprintf_filtered (stream, "%.*s",
-			    ada_name_prefix_len (TYPE_FIELD_NAME (type, i)),
-			    TYPE_FIELD_NAME (type, i));
-	  annotate_field_name_end ();
-	  fputs_filtered (" => ", stream);
-	  annotate_field_value ();
-	}
+
+      annotate_field_begin (TYPE_FIELD_TYPE (type, i));
+      fprintf_filtered (stream, "%.*s",
+			ada_name_prefix_len (TYPE_FIELD_NAME (type, i)),
+			TYPE_FIELD_NAME (type, i));
+      annotate_field_name_end ();
+      fputs_filtered (" => ", stream);
+      annotate_field_value ();
 
       if (TYPE_FIELD_PACKED (type, i))
 	{

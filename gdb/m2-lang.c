@@ -145,10 +145,7 @@ m2_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
 	{
 	  if (in_quotes)
 	    {
-	      if (options->inspect_it)
-		fputs_filtered ("\\\", ", stream);
-	      else
-		fputs_filtered ("\", ", stream);
+	      fputs_filtered ("\", ", stream);
 	      in_quotes = 0;
 	    }
 	  m2_printchar (string[i], type, stream);
@@ -161,10 +158,7 @@ m2_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
 	{
 	  if (!in_quotes)
 	    {
-	      if (options->inspect_it)
-		fputs_filtered ("\\\"", stream);
-	      else
-		fputs_filtered ("\"", stream);
+	      fputs_filtered ("\"", stream);
 	      in_quotes = 1;
 	    }
 	  LA_EMIT_CHAR (string[i], type, stream, '"');
@@ -174,12 +168,7 @@ m2_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
 
   /* Terminate the quotes if necessary.  */
   if (in_quotes)
-    {
-      if (options->inspect_it)
-	fputs_filtered ("\\\"", stream);
-      else
-	fputs_filtered ("\"", stream);
-    }
+    fputs_filtered ("\"", stream);
 
   if (force_ellipses || i < length)
     fputs_filtered ("...", stream);

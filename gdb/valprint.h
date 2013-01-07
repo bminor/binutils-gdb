@@ -66,9 +66,6 @@ struct value_print_options
   /* Stop printing at null character?  */
   int stop_print_at_null;
 
-  /* True if this value is being printed in an epoch window.  */
-  int inspect_it;
-
   /* True if we should print the index of each element when printing
      an array.  */
   int print_array_indexes;
@@ -156,9 +153,10 @@ extern void print_function_pointer_address (const struct value_print_options *op
 					    CORE_ADDR address,
 					    struct ui_file *stream);
 
-int read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
-		 enum bfd_endian byte_order, gdb_byte **buffer,
-		 int *bytes_read);
+extern int read_string (CORE_ADDR addr, int len, int width,
+			unsigned int fetchlimit,
+			enum bfd_endian byte_order, gdb_byte **buffer,
+			int *bytes_read);
 
 extern void val_print_optimized_out (struct ui_file *stream);
 

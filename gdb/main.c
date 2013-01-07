@@ -451,7 +451,6 @@ captured_main (void *data)
       {"n", no_argument, &inhibit_gdbinit, 1},
       {"batch-silent", no_argument, 0, 'B'},
       {"batch", no_argument, &batch_flag, 1},
-      {"epoch", no_argument, &epoch_interface, 1},
 
     /* This is a synonym for "--annotate=1".  --annotate is now
        preferred, but keep this here for a long time because people

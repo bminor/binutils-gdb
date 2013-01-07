@@ -28,7 +28,6 @@ extern int in_user_command;
 extern int confirm;
 extern char gdb_dirbuf[1024];
 extern int inhibit_gdbinit;
-extern int epoch_interface;
 extern char gdbinit[];
 
 extern void print_gdb_version (struct ui_file *);

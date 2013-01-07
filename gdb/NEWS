@@ -19,6 +19,11 @@ Lynx 178 PowerPC		powerpc-*-lynx*178
 -nh   Disables auto-loading of ~/.gdbinit, but still executes all the
       other initialization files, unlike -nx which disables all of them.
 
+* Removed command line options
+
+-epoch  This was used by the gdb mode in Epoch, an ancient fork of
+        Emacs.
+
 * The 'ptype' and 'whatis' commands now accept an argument to control
   type formatting.
 

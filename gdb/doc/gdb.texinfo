@@ -1178,13 +1178,6 @@ and a newline.  The Emacs-to-@value{GDBN} interface program uses the two
 @samp{\032} characters as a signal to display the source code for the
 frame.
 
-@item -epoch
-@cindex @code{--epoch}
-The Epoch Emacs-@value{GDBN} interface sets this option when it runs
-@value{GDBN} as a subprocess.  It tells @value{GDBN} to modify its print
-routines so as to allow Epoch to display values of expressions in a
-separate window.
-
 @item -annotate @var{level}
 @cindex @code{--annotate}
 This option sets the @dfn{annotation level} inside @value{GDBN}.  Its
@@ -7390,9 +7383,6 @@ instruction.
 @cindex examining data
 @kindex print
 @kindex inspect
-@c "inspect" is not quite a synonym if you are using Epoch, which we do not
-@c document because it is nonstandard...  Under Epoch it displays in a
-@c different window or something like that.
 The usual way to examine data in your program is with the @code{print}
 command (abbreviated @code{p}), or its synonym @code{inspect}.  It
 evaluates and prints the value of an expression of the language your
@@ -27101,21 +27091,6 @@ to correspond properly with the code.
 A more detailed description of Emacs' interaction with @value{GDBN} is
 given in the Emacs manual (@pxref{Debuggers,,, Emacs, The @sc{gnu}
 Emacs Manual}).
-
-@c The following dropped because Epoch is nonstandard.  Reactivate
-@c if/when v19 does something similar. ---doc@cygnus.com 19dec1990
-@ignore
-@kindex Emacs Epoch environment
-@kindex Epoch
-@kindex inspect
-
-Version 18 of @sc{gnu} Emacs has a built-in window system
-called the @code{epoch}
-environment.  Users of this environment can use a new command,
-@code{inspect} which performs identically to @code{print} except that
-each value is printed in its own window.
-@end ignore
-
 
 @node GDB/MI
 @chapter The @sc{gdb/mi} Interface

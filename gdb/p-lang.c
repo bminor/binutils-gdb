@@ -279,10 +279,7 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 	{
 	  if (in_quotes)
 	    {
-	      if (options->inspect_it)
-		fputs_filtered ("\\', ", stream);
-	      else
-		fputs_filtered ("', ", stream);
+	      fputs_filtered ("', ", stream);
 	      in_quotes = 0;
 	    }
 	  pascal_printchar (current_char, type, stream);
@@ -295,10 +292,7 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 	{
 	  if ((!in_quotes) && (PRINT_LITERAL_FORM (current_char)))
 	    {
-	      if (options->inspect_it)
-		fputs_filtered ("\\'", stream);
-	      else
-		fputs_filtered ("'", stream);
+	      fputs_filtered ("'", stream);
 	      in_quotes = 1;
 	    }
 	  pascal_one_char (current_char, stream, &in_quotes);
@@ -308,12 +302,7 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 
   /* Terminate the quotes if necessary.  */
   if (in_quotes)
-    {
-      if (options->inspect_it)
-	fputs_filtered ("\\'", stream);
-      else
-	fputs_filtered ("'", stream);
-    }
+    fputs_filtered ("'", stream);
 
   if (force_ellipses || i < length)
     fputs_filtered ("...", stream);

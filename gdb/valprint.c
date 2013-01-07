@@ -116,7 +116,6 @@ struct value_print_options user_print_options =
   0,				/* output_format */
   0,				/* format */
   0,				/* stop_print_at_null */
-  0,				/* inspect_it */
   0,				/* print_array_indexes */
   0,				/* deref_ref */
   1,				/* static_field_print */
@@ -2211,8 +2210,6 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 		   must output and a comma and a quote.  */
 		if (last != START)
 		  obstack_grow_wstr (obstack, LCST (", "));
-		if (options->inspect_it)
-		  obstack_grow_wstr (obstack, LCST ("\\"));
 		obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
 	      }
 	    /* Output the character.  */
@@ -2240,8 +2237,6 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 	      {
 		/* We were outputting a single string.  Terminate the
 		   string.  */
-		if (options->inspect_it)
-		  obstack_grow_wstr (obstack, LCST ("\\"));
 		obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
 	      }
 	    if (last != START)
@@ -2272,8 +2267,6 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 	    {
 	      /* If we were outputting a string of SINGLE characters,
 		 terminate the quote.  */
-	      if (options->inspect_it)
-		obstack_grow_wstr (obstack, LCST ("\\"));
 	      obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
 	    }
 	  if (last != START)
@@ -2294,11 +2287,7 @@ print_converted_chars_to_obstack (struct obstack *obstack,
 	     characters, the string must be terminated.  Otherwise,
 	     REPEAT and INCOMPLETE are always left properly terminated.  */
 	  if (last == SINGLE)
-	    {
-	      if (options->inspect_it)
-		obstack_grow_wstr (obstack, LCST ("\\"));
-	      obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
-	    }
+	    obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
 
 	  return;
 	}
