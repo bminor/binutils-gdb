@@ -1,4 +1,10 @@
 2013-01-07  Joel Brobecker  <brobecker@adacore.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* lynx-low.c (ptrace_request_to_str): Define a temporary
+	macro and use it to simplify this function's implementation.
+
+2013-01-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* lynx-low.c (lynx_resume): Call perror_with_name if lynx_ptrace
 	sets errno.

@@ -96,174 +96,79 @@ lynx_ptrace_pid_from_ptid (ptid_t ptid)
 static char *
 ptrace_request_to_str (int request)
 {
+#define CASE(X) case X: return #X
   switch (request)
     {
-      case PTRACE_TRACEME:
-        return "PTRACE_TRACEME";
-        break;
-      case PTRACE_PEEKTEXT:
-        return "PTRACE_PEEKTEXT";
-        break;
-      case PTRACE_PEEKDATA:
-        return "PTRACE_PEEKDATA";
-        break;
-      case PTRACE_PEEKUSER:
-        return "PTRACE_PEEKUSER";
-        break;
-      case PTRACE_POKETEXT:
-        return "PTRACE_POKETEXT";
-        break;
-      case PTRACE_POKEDATA:
-        return "PTRACE_POKEDATA";
-        break;
-      case PTRACE_POKEUSER:
-        return "PTRACE_POKEUSER";
-        break;
-      case PTRACE_CONT:
-        return "PTRACE_CONT";
-        break;
-      case PTRACE_KILL:
-        return "PTRACE_KILL";
-        break;
-      case PTRACE_SINGLESTEP:
-        return "PTRACE_SINGLESTEP";
-        break;
-      case PTRACE_ATTACH:
-        return "PTRACE_ATTACH";
-        break;
-      case PTRACE_DETACH:
-        return "PTRACE_DETACH";
-        break;
-      case PTRACE_GETREGS:
-        return "PTRACE_GETREGS";
-        break;
-      case PTRACE_SETREGS:
-        return "PTRACE_SETREGS";
-        break;
-      case PTRACE_GETFPREGS:
-        return "PTRACE_GETFPREGS";
-        break;
-      case PTRACE_SETFPREGS:
-        return "PTRACE_SETFPREGS";
-        break;
-      case PTRACE_READDATA:
-        return "PTRACE_READDATA";
-        break;
-      case PTRACE_WRITEDATA:
-        return "PTRACE_WRITEDATA";
-        break;
-      case PTRACE_READTEXT:
-        return "PTRACE_READTEXT";
-        break;
-      case PTRACE_WRITETEXT:
-        return "PTRACE_WRITETEXT";
-        break;
-      case PTRACE_GETFPAREGS:
-        return "PTRACE_GETFPAREGS";
-        break;
-      case PTRACE_SETFPAREGS:
-        return "PTRACE_SETFPAREGS";
-        break;
-      case PTRACE_GETWINDOW:
-        return "PTRACE_GETWINDOW";
-        break;
-      case PTRACE_SETWINDOW:
-        return "PTRACE_SETWINDOW";
-        break;
-      case PTRACE_SYSCALL:
-        return "PTRACE_SYSCALL";
-        break;
-      case PTRACE_DUMPCORE:
-        return "PTRACE_DUMPCORE";
-        break;
-      case PTRACE_SETWRBKPT:
-        return "PTRACE_SETWRBKPT";
-        break;
-      case PTRACE_SETACBKPT:
-        return "PTRACE_SETACBKPT";
-        break;
-      case PTRACE_CLRBKPT:
-        return "PTRACE_CLRBKPT";
-        break;
-      case PTRACE_GET_UCODE:
-        return "PTRACE_GET_UCODE";
-        break;
+      CASE(PTRACE_TRACEME);
+      CASE(PTRACE_PEEKTEXT);
+      CASE(PTRACE_PEEKDATA);
+      CASE(PTRACE_PEEKUSER);
+      CASE(PTRACE_POKETEXT);
+      CASE(PTRACE_POKEDATA);
+      CASE(PTRACE_POKEUSER);
+      CASE(PTRACE_CONT);
+      CASE(PTRACE_KILL);
+      CASE(PTRACE_SINGLESTEP);
+      CASE(PTRACE_ATTACH);
+      CASE(PTRACE_DETACH);
+      CASE(PTRACE_GETREGS);
+      CASE(PTRACE_SETREGS);
+      CASE(PTRACE_GETFPREGS);
+      CASE(PTRACE_SETFPREGS);
+      CASE(PTRACE_READDATA);
+      CASE(PTRACE_WRITEDATA);
+      CASE(PTRACE_READTEXT);
+      CASE(PTRACE_WRITETEXT);
+      CASE(PTRACE_GETFPAREGS);
+      CASE(PTRACE_SETFPAREGS);
+      CASE(PTRACE_GETWINDOW);
+      CASE(PTRACE_SETWINDOW);
+      CASE(PTRACE_SYSCALL);
+      CASE(PTRACE_DUMPCORE);
+      CASE(PTRACE_SETWRBKPT);
+      CASE(PTRACE_SETACBKPT);
+      CASE(PTRACE_CLRBKPT);
+      CASE(PTRACE_GET_UCODE);
 #ifdef PT_READ_GPR
-      case PT_READ_GPR:
-        return "PT_READ_GPR";
-        break;
+      CASE(PT_READ_GPR);
 #endif
 #ifdef PT_WRITE_GPR
-      case PT_WRITE_GPR:
-        return "PT_WRITE_GPR";
-        break;
+      CASE(PT_WRITE_GPR);
 #endif
 #ifdef PT_READ_FPR
-      case PT_READ_FPR:
-        return "PT_READ_FPR";
-        break;
+      CASE(PT_READ_FPR);
 #endif
 #ifdef PT_WRITE_FPR
-      case PT_WRITE_FPR:
-        return "PT_WRITE_FPR";
-        break;
+      CASE(PT_WRITE_FPR);
 #endif
 #ifdef PT_READ_VPR
-      case PT_READ_VPR:
-        return "PT_READ_VPR";
-        break;
+      CASE(PT_READ_VPR);
 #endif
 #ifdef PT_WRITE_VPR
-      case PT_WRITE_VPR:
-        return "PT_WRITE_VPR";
-        break;
+      CASE(PT_WRITE_VPR);
 #endif
 #ifdef PTRACE_PEEKUSP
-      case PTRACE_PEEKUSP:
-        return "PTRACE_PEEKUSP";
-        break;
+      CASE(PTRACE_PEEKUSP);
 #endif
 #ifdef PTRACE_POKEUSP
-      case PTRACE_POKEUSP:
-        return "PTRACE_POKEUSP";
-        break;
+      CASE(PTRACE_POKEUSP);
 #endif
-      case PTRACE_PEEKTHREAD:
-        return "PTRACE_PEEKTHREAD";
-        break;
-      case PTRACE_THREADUSER:
-        return "PTRACE_THREADUSER";
-        break;
-      case PTRACE_FPREAD:
-        return "PTRACE_FPREAD";
-        break;
-      case PTRACE_FPWRITE:
-        return "PTRACE_FPWRITE";
-        break;
-      case PTRACE_SETSIG:
-        return "PTRACE_SETSIG";
-        break;
-      case PTRACE_CONT_ONE:
-        return "PTRACE_CONT_ONE";
-        break;
-      case PTRACE_KILL_ONE:
-        return "PTRACE_KILL_ONE";
-        break;
-      case PTRACE_SINGLESTEP_ONE:
-        return "PTRACE_SINGLESTEP_ONE";
-        break;
-      case PTRACE_GETLOADINFO:
-        return "PTRACE_GETLOADINFO";
-        break;
-      case PTRACE_GETTRACESIG:
-	return "PTRACE_GETTRACESIG";
-	break;
+      CASE(PTRACE_PEEKTHREAD);
+      CASE(PTRACE_THREADUSER);
+      CASE(PTRACE_FPREAD);
+      CASE(PTRACE_FPWRITE);
+      CASE(PTRACE_SETSIG);
+      CASE(PTRACE_CONT_ONE);
+      CASE(PTRACE_KILL_ONE);
+      CASE(PTRACE_SINGLESTEP_ONE);
+      CASE(PTRACE_GETLOADINFO);
+      CASE(PTRACE_GETTRACESIG);
 #ifdef PTRACE_GETTHREADLIST
-      case PTRACE_GETTHREADLIST:
-        return "PTRACE_GETTHREADLIST";
-        break;
+      CASE(PTRACE_GETTHREADLIST);
 #endif
     }
+#undef CASE
+
   return "<unknown-request>";
 }
 
