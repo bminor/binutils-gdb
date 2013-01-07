@@ -1818,7 +1818,7 @@ out:
    to RDADDR.
    Return 0 on failure; number of bytes read / written otherwise.  */
 
-#ifndef TASK_DYLD_INFO_COUNT
+#ifdef TASK_DYLD_INFO_COUNT
 /* This is not available in Darwin 9.  */
 static int
 darwin_read_dyld_info (task_t task, CORE_ADDR addr, char *rdaddr, int length)

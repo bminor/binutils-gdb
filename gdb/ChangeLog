@@ -1,3 +1,8 @@
+2013-01-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* darwin-nat.c: Fix typo in TASK_DYLD_INFO_COUNT macro test
+	used to decide whether to define darwin_read_dyld_info or not.
+
 2013-01-03  Pierre Muller  <muller@sourceware.org>
 
 	* main.c (relocate_gdb_directory): Avoid calling stat function
