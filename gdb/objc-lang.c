@@ -282,149 +282,6 @@ objc_demangle (const char *mangled, int options)
     return NULL;	/* Not an objc mangled name.  */
 }
 
-/* Print the character C on STREAM as part of the contents of a
-   literal string whose delimiter is QUOTER.  Note that that format
-   for printing characters and strings is language specific.  */
-
-static void
-objc_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
-{
-  c &= 0xFF;			/* Avoid sign bit follies.  */
-
-  if (PRINT_LITERAL_FORM (c))
-    {
-      if (c == '\\' || c == quoter)
-	{
-	  fputs_filtered ("\\", stream);
-	}
-      fprintf_filtered (stream, "%c", c);
-    }
-  else
-    {
-      switch (c)
-	{
-	case '\n':
-	  fputs_filtered ("\\n", stream);
-	  break;
-	case '\b':
-	  fputs_filtered ("\\b", stream);
-	  break;
-	case '\t':
-	  fputs_filtered ("\\t", stream);
-	  break;
-	case '\f':
-	  fputs_filtered ("\\f", stream);
-	  break;
-	case '\r':
-	  fputs_filtered ("\\r", stream);
-	  break;
-	case '\033':
-	  fputs_filtered ("\\e", stream);
-	  break;
-	case '\007':
-	  fputs_filtered ("\\a", stream);
-	  break;
-	default:
-	  fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
-	  break;
-	}
-    }
-}
-
-static void
-objc_printchar (int c, struct type *type, struct ui_file *stream)
-{
-  fputs_filtered ("'", stream);
-  objc_emit_char (c, type, stream, '\'');
-  fputs_filtered ("'", stream);
-}
-
-/* Print the character string STRING, printing at most LENGTH
-   characters.  Printing stops early if the number hits print_max;
-   repeat counts are printed as appropriate.  Print ellipses at the
-   end if we had to stop before printing LENGTH characters, or if
-   FORCE_ELLIPSES.  */
-
-static void
-objc_printstr (struct ui_file *stream, struct type *type,
-	       const gdb_byte *string, unsigned int length,
-	       const char *encoding, int force_ellipses,
-	       const struct value_print_options *options)
-{
-  unsigned int i;
-  unsigned int things_printed = 0;
-  int in_quotes = 0;
-  int need_comma = 0;
-
-  /* If the string was not truncated due to `set print elements', and
-     the last byte of it is a null, we don't print that, in
-     traditional C style.  */
-  if ((!force_ellipses) && length > 0 && string[length-1] == '\0')
-    length--;
-
-  if (length == 0)
-    {
-      fputs_filtered ("\"\"", stream);
-      return;
-    }
-
-  for (i = 0; i < length && things_printed < options->print_max; ++i)
-    {
-      /* Position of the character we are examining to see whether it
-	 is repeated.  */
-      unsigned int rep1;
-      /* Number of repetitions we have detected so far.  */
-      unsigned int reps;
-
-      QUIT;
-
-      if (need_comma)
-	{
-	  fputs_filtered (", ", stream);
-	  need_comma = 0;
-	}
-
-      rep1 = i + 1;
-      reps = 1;
-      while (rep1 < length && string[rep1] == string[i])
-	{
-	  ++rep1;
-	  ++reps;
-	}
-
-      if (reps > options->repeat_count_threshold)
-	{
-	  if (in_quotes)
-	    {
-	      fputs_filtered ("\", ", stream);
-	      in_quotes = 0;
-	    }
-	  objc_printchar (string[i], type, stream);
-	  fprintf_filtered (stream, " <repeats %u times>", reps);
-	  i = rep1 - 1;
-	  things_printed += options->repeat_count_threshold;
-	  need_comma = 1;
-	}
-      else
-	{
-	  if (!in_quotes)
-	    {
-	      fputs_filtered ("\"", stream);
-	      in_quotes = 1;
-	    }
-	  objc_emit_char (string[i], type, stream, '"');
-	  ++things_printed;
-	}
-    }
-
-  /* Terminate the quotes if necessary.  */
-  if (in_quotes)
-    fputs_filtered ("\"", stream);
-
-  if (force_ellipses || i < length)
-    fputs_filtered ("...", stream);
-}
-
 /* Determine if we are currently in the Objective-C dispatch function.
    If so, get the address of the method function that the dispatcher
    would call and use that as the function to step into instead.  Also
@@ -505,9 +362,9 @@ const struct language_defn objc_language_defn = {
   c_parse,
   c_error,
   null_post_parser,
-  objc_printchar,		/* Print a character constant */
-  objc_printstr,		/* Function to print string constant */
-  objc_emit_char,
+  c_printchar,		       /* Print a character constant */
+  c_printstr,		       /* Function to print string constant */
+  c_emit_char,
   c_print_type,			/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */

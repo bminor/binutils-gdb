@@ -1,5 +1,12 @@
 2013-01-07  Tom Tromey  <tromey@redhat.com>
 
+	* objc-lang.c (objc_emit_char, objc_printchar, objc_printstr):
+	Remove.
+	(objc_language_defn): Use c_printchar, c_printstr,
+	c_emit_char.
+
+2013-01-07  Tom Tromey  <tromey@redhat.com>
+
 	PR cli/7719:
 	* NEWS: Update.
 	* ada-valprint.c (printstr, print_field_values): Remove
