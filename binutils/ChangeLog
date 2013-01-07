@@ -1,3 +1,8 @@
+2013-01-07  Patrice Dumas  <pertusus@free.fr>
+
+	* doc/binutils.texi: Fix ordering of top level nodes.
+	Replace erroneous uses of @itemx with @item.
+
 2013-01-04  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* doc/binutils.texi (elfedit): Fix use of @itemx in @table.
