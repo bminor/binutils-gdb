@@ -318,7 +318,7 @@ int
 cr16_match_opcode (void)
 {
   unsigned long mask;
-  /* The instruction 'constant' opcode doewsn't exceed 32 bits.  */
+  /* The instruction 'constant' opcode doesn't exceed 32 bits.  */
   unsigned long doubleWord = (cr16_words[1]
 			     + (cr16_words[0] << 16)) & 0xffffffff;
 
