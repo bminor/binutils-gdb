@@ -1,6 +1,7 @@
 /* tc-aarch64.c -- Assemble for the AArch64 ISA
 
-   Copyright 2009, 2010, 2011, 2012  Free Software Foundation, Inc.
+   Copyright 2009, 2010, 2011, 2012, 2013
+   Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of GAS.
@@ -5050,7 +5051,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_SYSREG:
-	  if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1)) == FALSE)
+	  if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1))
+	      == PARSE_FAIL)
 	    {
 	      set_syntax_error (_("unknown or missing system register name"));
 	      goto failure;
@@ -5059,7 +5061,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_PSTATEFIELD:
-	  if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0)) == FALSE)
+	  if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0))
+	      == PARSE_FAIL)
 	    {
 	      set_syntax_error (_("unknown or missing PSTATE field name"));
 	      goto failure;

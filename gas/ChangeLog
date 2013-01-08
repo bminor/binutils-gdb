@@ -1,3 +1,8 @@
+2013-01-08  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Change to compare the result
+	of function call 'parse_sys_reg' with 'PARSE_FAIL' instead of 'FALSE'.
+
 2013-01-07  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/14887

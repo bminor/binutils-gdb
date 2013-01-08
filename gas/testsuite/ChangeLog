@@ -1,3 +1,8 @@
+2013-01-08  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/diagnostic.s: Add test.
+	* gas/aarch64/diagnostic.l: Update.
+
 2013-01-07  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/14887

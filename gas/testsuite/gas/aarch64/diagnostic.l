@@ -85,3 +85,4 @@
 [^:]*:87: Error: immediate offset out of range -256 to 252 at operand 3 -- `ldnp w7,w15,\[x3,#256\]'
 [^:]*:88: Error: shift is not permitted at operand 2 -- `movi v1.2d,4294967295,lsl#0'
 [^:]*:89: Error: shift amount non-zero at operand 2 -- `movi v1.8b,97,lsl#8'
+[^:]*:90: Error: unknown or missing system register name at operand 1 -- `msr dummy,x1'
