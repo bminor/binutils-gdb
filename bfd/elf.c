@@ -1,7 +1,8 @@
 /* ELF executable support for BFD.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012,
+   2013
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -8162,6 +8163,24 @@ elfcore_grok_arm_vfp (bfd *abfd, Elf_Internal_Note *note)
   return elfcore_make_note_pseudosection (abfd, ".reg-arm-vfp", note);
 }
 
+static bfd_boolean
+elfcore_grok_aarch_tls (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-aarch-tls", note);
+}
+
+static bfd_boolean
+elfcore_grok_aarch_hw_break (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-aarch-hw-break", note);
+}
+
+static bfd_boolean
+elfcore_grok_aarch_hw_watch (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-aarch-hw-watch", note);
+}
+
 #if defined (HAVE_PRPSINFO_T)
 typedef prpsinfo_t   elfcore_psinfo_t;
 #if defined (HAVE_PRPSINFO32_T)		/* Sparc64 cross Sparc32 */
@@ -8599,6 +8618,27 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       if (note->namesz == 6
 	  && strcmp (note->namedata, "LINUX") == 0)
 	return elfcore_grok_arm_vfp (abfd, note);
+      else
+	return TRUE;
+
+    case NT_ARM_TLS:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_aarch_tls (abfd, note);
+      else
+	return TRUE;
+
+    case NT_ARM_HW_BREAK:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_aarch_hw_break (abfd, note);
+      else
+	return TRUE;
+
+    case NT_ARM_HW_WATCH:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_aarch_hw_watch (abfd, note);
       else
 	return TRUE;
 
@@ -9406,6 +9446,42 @@ elfcore_write_arm_vfp (bfd *abfd,
 }
 
 char *
+elfcore_write_aarch_tls (bfd *abfd,
+		       char *buf,
+		       int *bufsiz,
+		       const void *aarch_tls,
+		       int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_ARM_TLS, aarch_tls, size);
+}
+
+char *
+elfcore_write_aarch_hw_break (bfd *abfd,
+			    char *buf,
+			    int *bufsiz,
+			    const void *aarch_hw_break,
+			    int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_ARM_HW_BREAK, aarch_hw_break, size);
+}
+
+char *
+elfcore_write_aarch_hw_watch (bfd *abfd,
+			    char *buf,
+			    int *bufsiz,
+			    const void *aarch_hw_watch,
+			    int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_ARM_HW_WATCH, aarch_hw_watch, size);
+}
+
+char *
 elfcore_write_register_note (bfd *abfd,
 			     char *buf,
 			     int *bufsiz,
@@ -9441,6 +9517,12 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_s390_system_call (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-arm-vfp") == 0)
     return elfcore_write_arm_vfp (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-aarch-tls") == 0)
+    return elfcore_write_aarch_tls (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-aarch-hw-break") == 0)
+    return elfcore_write_aarch_hw_break (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-aarch-hw-watch") == 0)
+    return elfcore_write_aarch_hw_watch (abfd, buf, bufsiz, data, size);
   return NULL;
 }
 

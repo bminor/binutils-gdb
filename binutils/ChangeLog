@@ -1,3 +1,8 @@
+2013-01-08  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* readelf.c (get_note_type): Handle NT_ARM_TLS, NT_ARM_HW_BREAK
+	and NT_ARM_HW_WATCH.
+
 2013-01-07  Roland McGrath  <mcgrathr@google.com>
 
 	* objcopy.c (deterministic): Make int rather than bfd_boolean,
