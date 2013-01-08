@@ -569,7 +569,8 @@ EOF
 #endif
 
 static bfd_boolean
-gld${EMULATION_NAME}_check_ld_elf_hints (const char *name, int force)
+gld${EMULATION_NAME}_check_ld_elf_hints (const struct bfd_link_needed_list *l,
+					 int force)
 {
   static bfd_boolean initialized;
   static char *ld_elf_hints;
@@ -612,10 +613,9 @@ gld${EMULATION_NAME}_check_ld_elf_hints (const char *name, int force)
   if (ld_elf_hints == NULL)
     return FALSE;
 
-  needed.by = NULL;
-  needed.name = name;
-  return gld${EMULATION_NAME}_search_needed (ld_elf_hints, & needed,
-					     force);
+  needed.by = l->by;
+  needed.name = l->name;
+  return gld${EMULATION_NAME}_search_needed (ld_elf_hints, &needed, force);
 }
 EOF
     # FreeBSD
@@ -787,7 +787,8 @@ gld${EMULATION_NAME}_parse_ld_so_conf
 }
 
 static bfd_boolean
-gld${EMULATION_NAME}_check_ld_so_conf (const char *name, int force)
+gld${EMULATION_NAME}_check_ld_so_conf (const struct bfd_link_needed_list *l,
+				       int force)
 {
   static bfd_boolean initialized;
   static char *ld_so_conf;
@@ -824,8 +825,8 @@ gld${EMULATION_NAME}_check_ld_so_conf (const char *name, int force)
     return FALSE;
 
 
-  needed.by = NULL;
-  needed.name = name;
+  needed.by = l->by;
+  needed.name = l->name;
   return gld${EMULATION_NAME}_search_needed (ld_so_conf, &needed, force);
 }
 
@@ -1308,7 +1309,7 @@ if [ "x${USE_LIBPATH}" = xyes ] ; then
   case ${target} in
     *-*-freebsd* | *-*-dragonfly*)
       fragment <<EOF
-	  if (gld${EMULATION_NAME}_check_ld_elf_hints (l->name, force))
+	  if (gld${EMULATION_NAME}_check_ld_elf_hints (l, force))
 	    break;
 EOF
     # FreeBSD
@@ -1317,7 +1318,7 @@ EOF
     *-*-linux-* | *-*-k*bsd*-* | *-*-gnu*)
     # Linux
       fragment <<EOF
-	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))
+	  if (gld${EMULATION_NAME}_check_ld_so_conf (l, force))
 	    break;
 
 EOF
