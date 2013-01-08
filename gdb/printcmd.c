@@ -172,8 +172,6 @@ static int display_number;
 
 /* Prototypes for exported functions.  */
 
-void output_command (char *, int);
-
 void _initialize_printcmd (void);
 
 /* Prototypes for local functions.  */

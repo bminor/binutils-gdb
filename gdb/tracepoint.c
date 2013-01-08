@@ -93,11 +93,6 @@ extern void (*deprecated_readline_begin_hook) (char *, ...);
 extern char *(*deprecated_readline_hook) (char *);
 extern void (*deprecated_readline_end_hook) (void);
 
-/* GDB commands implemented in other modules:
- */  
-
-extern void output_command (char *, int);
-
 /* 
    Tracepoint.c:
 

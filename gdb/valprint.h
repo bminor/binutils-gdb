@@ -203,4 +203,6 @@ extern void generic_printstr (struct ui_file *stream, struct type *type,
 			      int quote_char, int c_style_terminator,
 			      const struct value_print_options *options);
 
+extern void output_command (char *exp, int from_tty);
+
 #endif
