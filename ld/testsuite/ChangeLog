@@ -1,3 +1,8 @@
+2013-01-08  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* ld-i386/export-class.exp: Restore (and reword) comment about
+	excluded targets.
+
 2013-01-04  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* ld-aarch64/emit-relocs-264.d: Append the '-Mno-aliases' option to
