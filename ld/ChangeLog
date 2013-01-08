@@ -1,7 +1,7 @@
 2013-01-08  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_check_ld_so_conf): Replace
-	"name" param with a bfd_link_needed_link pointer.  Update caller.
+	"name" param with a bfd_link_needed_list pointer.  Update caller.
 	(gld${EMULATION_NAME}_check_ld_elf_hints): Likewise.
 
 2013-01-08  Alan Modra  <amodra@gmail.com>
