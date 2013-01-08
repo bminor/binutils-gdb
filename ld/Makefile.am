@@ -182,13 +182,13 @@ ALL_EMULATION_SOURCES = \
 	eavr5.c \
 	eavr51.c \
 	eavr6.c \
-	eavrxmega1.o \
-	eavrxmega2.o \
-	eavrxmega3.o \
-	eavrxmega4.o \
-	eavrxmega5.o \
-	eavrxmega6.o \
-	eavrxmega7.o \
+	eavrxmega1.c \
+	eavrxmega2.c \
+	eavrxmega3.c \
+	eavrxmega4.c \
+	eavrxmega5.c \
+	eavrxmega6.c \
+	eavrxmega7.c \
 	ecoff_i860.c \
 	ecoff_sparc.c \
 	ecrisaout.c \
