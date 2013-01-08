@@ -1,3 +1,8 @@
+2013-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* mem.c (MDBL): Correct value.
+	(MDBH): Correct value.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* config.in, configure: Regenerate.
