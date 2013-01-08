@@ -114,7 +114,8 @@ linux_ptrace_test_ret_to_nx (void)
 			".globl linux_ptrace_test_ret_to_nx_instr;"
 			"linux_ptrace_test_ret_to_nx_instr:"
 			"ret"
-			: : "r" (return_address) : "%rsp", "memory");
+			: : "r" ((uint64_t) (uintptr_t) return_address)
+			: "%rsp", "memory");
 #else
 # error "!__i386__ && !__x86_64__"
 #endif

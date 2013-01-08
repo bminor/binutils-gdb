@@ -1,3 +1,8 @@
+2012-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* common/linux-ptrace.c (linux_ptrace_test_ret_to_nx) [__x86_64__]:
+	Cast return_address to 64bits.
+
 2013-01-08  Hui Zhu  <hui_zhu@mentor.com>
 
 	* printcmd.c: Remove define of function output_command.
