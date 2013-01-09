@@ -12674,6 +12674,58 @@ if test $gdb_cv_var_macho = yes; then
   CONFIG_OBS="$CONFIG_OBS machoread.o"
 fi
 
+# Add SOM support to GDB, but only if BFD includes it.
+
+  OLD_CFLAGS=$CFLAGS
+  OLD_LDFLAGS=$LDFLAGS
+  OLD_LIBS=$LIBS
+  # Put the old CFLAGS/LDFLAGS last, in case the user's (C|LD)FLAGS
+  # points somewhere with bfd, with -I/foo/lib and -L/foo/lib.  We
+  # always want our bfd.
+  CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
+  LDFLAGS="-L../bfd -L../libiberty $LDFLAGS"
+  intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
+  # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
+  if test "$plugins" = "yes"; then
+    LIBS="-ldl $LIBS"
+  fi
+  LIBS="-lbfd -liberty $intl $LIBS"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SOM support in BFD" >&5
+$as_echo_n "checking for SOM support in BFD... " >&6; }
+if test "${gdb_cv_var_som+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdlib.h>
+  #include "bfd.h"
+  #include "som.h"
+
+int
+main ()
+{
+return bfd_som_attach_aux_hdr (NULL, 0, NULL);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  gdb_cv_var_som=yes
+else
+  gdb_cv_var_som=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_var_som" >&5
+$as_echo "$gdb_cv_var_som" >&6; }
+  CFLAGS=$OLD_CFLAGS
+  LDFLAGS=$OLD_LDFLAGS
+  LIBS=$OLD_LIBS
+if test $gdb_cv_var_som = yes; then
+  CONFIG_OBS="$CONFIG_OBS somread.o"
+fi
+
 # Add any host-specific objects to GDB.
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
 

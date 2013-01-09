@@ -1,3 +1,14 @@
+2013-01-09  Tom Tromey  <tromey@redhat.com>
+
+	* config/pa/hpux.mh (NATDEPFILES): Remove somread.o.
+	* configure: Rebuild.
+	* configure.ac: Add somread.o to the build if BFD has SOM
+	support.
+	* somread.c: Include som/aout.h, not syms.h.
+	(som_symtab_read): Use som_external_symbol_dictionary_record.
+	Unpack records manually.
+	(_initialize_somread): Declare.
+
 2012-01-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* common/linux-ptrace.c (linux_ptrace_test_ret_to_nx) [__x86_64__]:

@@ -2034,6 +2034,13 @@ if test $gdb_cv_var_macho = yes; then
   CONFIG_OBS="$CONFIG_OBS machoread.o"
 fi
 
+# Add SOM support to GDB, but only if BFD includes it.
+GDB_AC_CHECK_BFD([for SOM support in BFD], gdb_cv_var_som,
+                 [bfd_som_attach_aux_hdr (NULL, 0, NULL)], som.h)
+if test $gdb_cv_var_som = yes; then
+  CONFIG_OBS="$CONFIG_OBS somread.o"
+fi
+
 # Add any host-specific objects to GDB.
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
 

@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "bfd.h"
-#include <syms.h>
+#include "som/aout.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -51,9 +51,9 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
   int val, dynamic;
   char *stringtab;
   asection *shlib_info;
-  struct symbol_dictionary_record *buf, *bufp, *endbufp;
+  struct som_external_symbol_dictionary_record *buf, *bufp, *endbufp;
   char *symname;
-  CONST int symsize = sizeof (struct symbol_dictionary_record);
+  CONST int symsize = sizeof (struct som_external_symbol_dictionary_record);
   CORE_ADDR text_offset, data_offset;
 
 
@@ -100,14 +100,20 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
   for (bufp = buf; bufp < endbufp; ++bufp)
     {
       enum minimal_symbol_type ms_type;
+      unsigned int flags = bfd_getb32 (bufp->flags);
+      unsigned int symbol_type
+	= (flags >> SOM_SYMBOL_TYPE_SH) & SOM_SYMBOL_TYPE_MASK;
+      unsigned int symbol_scope
+	= (flags >> SOM_SYMBOL_SCOPE_SH) & SOM_SYMBOL_SCOPE_MASK;
+      CORE_ADDR symbol_value = bfd_getb32 (bufp->symbol_value);
 
       QUIT;
 
-      switch (bufp->symbol_scope)
+      switch (symbol_scope)
 	{
 	case SS_UNIVERSAL:
 	case SS_EXTERNAL:
-	  switch (bufp->symbol_type)
+	  switch (symbol_type)
 	    {
 	    case ST_SYM_EXT:
 	    case ST_ARG_EXT:
@@ -117,15 +123,14 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	    case ST_PRI_PROG:
 	    case ST_SEC_PROG:
 	    case ST_MILLICODE:
-	      symname = bufp->name.n_strx + stringtab;
+	      symname = bfd_getb32 (bufp->name) + stringtab;
 	      ms_type = mst_text;
-	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_addr_bits_remove
-				     (gdbarch, bufp->symbol_value);
+	      symbol_value += text_offset;
+	      symbol_value = gdbarch_addr_bits_remove (gdbarch, symbol_value);
 	      break;
 
 	    case ST_ENTRY:
-	      symname = bufp->name.n_strx + stringtab;
+	      symname = bfd_getb32 (bufp->name) + stringtab;
 	      /* For a dynamic executable, ST_ENTRY symbols are
 	         the stubs, while the ST_CODE symbol is the real
 	         function.  */
@@ -133,22 +138,20 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 		ms_type = mst_solib_trampoline;
 	      else
 		ms_type = mst_text;
-	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_addr_bits_remove
-				     (gdbarch, bufp->symbol_value);
+	      symbol_value += text_offset;
+	      symbol_value = gdbarch_addr_bits_remove (gdbarch, symbol_value);
 	      break;
 
 	    case ST_STUB:
-	      symname = bufp->name.n_strx + stringtab;
+	      symname = bfd_getb32 (bufp->name) + stringtab;
 	      ms_type = mst_solib_trampoline;
-	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_addr_bits_remove
-				     (gdbarch, bufp->symbol_value);
+	      symbol_value += text_offset;
+	      symbol_value = gdbarch_addr_bits_remove (gdbarch, symbol_value);
 	      break;
 
 	    case ST_DATA:
-	      symname = bufp->name.n_strx + stringtab;
-	      bufp->symbol_value += data_offset;
+	      symname = bfd_getb32 (bufp->name) + stringtab;
+	      symbol_value += data_offset;
 	      ms_type = mst_data;
 	      break;
 	    default:
@@ -161,18 +164,17 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	case SS_GLOBAL:
 #endif
 	case SS_LOCAL:
-	  switch (bufp->symbol_type)
+	  switch (symbol_type)
 	    {
 	    case ST_SYM_EXT:
 	    case ST_ARG_EXT:
 	      continue;
 
 	    case ST_CODE:
-	      symname = bufp->name.n_strx + stringtab;
+	      symname = bfd_getb32 (bufp->name) + stringtab;
 	      ms_type = mst_file_text;
-	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_addr_bits_remove
-				     (gdbarch, bufp->symbol_value);
+	      symbol_value += text_offset;
+	      symbol_value = gdbarch_addr_bits_remove (gdbarch, symbol_value);
 
 	    check_strange_names:
 	      /* Utah GCC 2.5, FSF GCC 2.6 and later generate correct local
@@ -200,37 +202,34 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	    case ST_PRI_PROG:
 	    case ST_SEC_PROG:
 	    case ST_MILLICODE:
-	      symname = bufp->name.n_strx + stringtab;
+	      symname = bfd_getb32 (bufp->name) + stringtab;
 	      ms_type = mst_file_text;
-	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_addr_bits_remove
-				     (gdbarch, bufp->symbol_value);
+	      symbol_value += text_offset;
+	      symbol_value = gdbarch_addr_bits_remove (gdbarch, symbol_value);
 	      break;
 
 	    case ST_ENTRY:
-	      symname = bufp->name.n_strx + stringtab;
+	      symname = bfd_getb32 (bufp->name) + stringtab;
 	      /* SS_LOCAL symbols in a shared library do not have
 		 export stubs, so we do not have to worry about
 		 using mst_file_text vs mst_solib_trampoline here like
 		 we do for SS_UNIVERSAL and SS_EXTERNAL symbols above.  */
 	      ms_type = mst_file_text;
-	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_addr_bits_remove
-				     (gdbarch, bufp->symbol_value);
+	      symbol_value += text_offset;
+	      symbol_value = gdbarch_addr_bits_remove (gdbarch, symbol_value);
 	      break;
 
 	    case ST_STUB:
-	      symname = bufp->name.n_strx + stringtab;
+	      symname = bfd_getb32 (bufp->name) + stringtab;
 	      ms_type = mst_solib_trampoline;
-	      bufp->symbol_value += text_offset;
-	      bufp->symbol_value = gdbarch_addr_bits_remove
-				     (gdbarch, bufp->symbol_value);
+	      symbol_value += text_offset;
+	      symbol_value = gdbarch_addr_bits_remove (gdbarch, symbol_value);
 	      break;
 
 
 	    case ST_DATA:
-	      symname = bufp->name.n_strx + stringtab;
-	      bufp->symbol_value += data_offset;
+	      symname = bfd_getb32 (bufp->name) + stringtab;
+	      symbol_value += data_offset;
 	      ms_type = mst_file_data;
 	      goto check_strange_names;
 
@@ -246,12 +245,12 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	     This also happens for weak symbols, but their type is
 	     ST_DATA.  */
 	case SS_UNSAT:
-	  switch (bufp->symbol_type)
+	  switch (symbol_type)
 	    {
 	    case ST_STORAGE:
 	    case ST_DATA:
-	      symname = bufp->name.n_strx + stringtab;
-	      bufp->symbol_value += data_offset;
+	      symname = bfd_getb32 (bufp->name) + stringtab;
+	      symbol_value += data_offset;
 	      ms_type = mst_data;
 	      break;
 
@@ -264,12 +263,11 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	  continue;
 	}
 
-      if (bufp->name.n_strx > obj_som_stringtab_size (abfd))
-	error (_("Invalid symbol data; bad HP string table offset: %d"),
-	       bufp->name.n_strx);
+      if (bfd_getb32 (bufp->name) > obj_som_stringtab_size (abfd))
+	error (_("Invalid symbol data; bad HP string table offset: %s"),
+	       plongest (bfd_getb32 (bufp->name)));
 
-      prim_record_minimal_symbol (symname, bufp->symbol_value, ms_type,
-				  objfile);
+      prim_record_minimal_symbol (symname, symbol_value, ms_type, objfile);
     }
 }
 
@@ -425,6 +423,8 @@ static const struct sym_fns som_sym_fns =
   NULL,				/* sym_get_probes */
   &psym_functions
 };
+
+initialize_file_ftype _initialize_somread;
 
 void
 _initialize_somread (void)
