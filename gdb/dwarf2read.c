@@ -3149,99 +3149,168 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
   return 0;
 }
 
+/* Struct used to manage iterating over all CUs looking for a symbol.  */
+
+struct dw2_symtab_iterator
+{
+  /* The internalized form of .gdb_index.  */
+  struct mapped_index *index;
+  /* If non-zero, only look for symbols that match BLOCK_INDEX.  */
+  int want_specific_block;
+  /* One of GLOBAL_BLOCK or STATIC_BLOCK.
+     Unused if !WANT_SPECIFIC_BLOCK.  */
+  int block_index;
+  /* The kind of symbol we're looking for.  */
+  domain_enum domain;
+  /* The list of CUs from the index entry of the symbol,
+     or NULL if not found.  */
+  offset_type *vec;
+  /* The next element in VEC to look at.  */
+  int next;
+  /* The number of elements in VEC, or zero if there is no match.  */
+  int length;
+};
+
+/* Initialize the index symtab iterator ITER.
+   If WANT_SPECIFIC_BLOCK is non-zero, only look for symbols
+   in block BLOCK_INDEX.  Otherwise BLOCK_INDEX is ignored.  */
+
+static void
+dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
+		      struct mapped_index *index,
+		      int want_specific_block,
+		      int block_index,
+		      domain_enum domain,
+		      const char *name)
+{
+  iter->index = index;
+  iter->want_specific_block = want_specific_block;
+  iter->block_index = block_index;
+  iter->domain = domain;
+  iter->next = 0;
+
+  if (find_slot_in_mapped_hash (index, name, &iter->vec))
+    iter->length = MAYBE_SWAP (*iter->vec);
+  else
+    {
+      iter->vec = NULL;
+      iter->length = 0;
+    }
+}
+
+/* Return the next matching CU or NULL if there are no more.  */
+
+static struct dwarf2_per_cu_data *
+dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
+{
+  for ( ; iter->next < iter->length; ++iter->next)
+    {
+      offset_type cu_index_and_attrs =
+	MAYBE_SWAP (iter->vec[iter->next + 1]);
+      offset_type cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
+      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (cu_index);
+      int want_static = iter->block_index != GLOBAL_BLOCK;
+      /* This value is only valid for index versions >= 7.  */
+      int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
+      gdb_index_symbol_kind symbol_kind =
+	GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
+      /* Only check the symbol attributes if they're present.
+	 Indices prior to version 7 don't record them,
+	 and indices >= 7 may elide them for certain symbols
+	 (gold does this).  */
+      int attrs_valid =
+	(iter->index->version >= 7
+	 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
+
+      /* Skip if already read in.  */
+      if (per_cu->v.quick->symtab)
+	continue;
+
+      if (attrs_valid
+	  && iter->want_specific_block
+	  && want_static != is_static)
+	continue;
+
+      /* Only check the symbol's kind if it has one.  */
+      if (attrs_valid)
+	{
+	  switch (iter->domain)
+	    {
+	    case VAR_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_VARIABLE
+		  && symbol_kind != GDB_INDEX_SYMBOL_KIND_FUNCTION
+		  /* Some types are also in VAR_DOMAIN.  */
+		  && symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
+		continue;
+	      break;
+	    case STRUCT_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
+		continue;
+	      break;
+	    case LABEL_DOMAIN:
+	      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_OTHER)
+		continue;
+	      break;
+	    default:
+	      break;
+	    }
+	}
+
+      ++iter->next;
+      return per_cu;
+    }
+
+  return NULL;
+}
+
 static struct symtab *
 dw2_lookup_symbol (struct objfile *objfile, int block_index,
 		   const char *name, domain_enum domain)
 {
-  /* We do all the work in the pre_expand_symtabs_matching hook
-     instead.  */
-  return NULL;
-}
-
-/* A helper function that expands all symtabs that hold an object
-   named NAME.  If WANT_SPECIFIC_BLOCK is non-zero, only look for
-   symbols in block BLOCK_KIND.  */
-
-static void
-dw2_do_expand_symtabs_matching (struct objfile *objfile,
-				int want_specific_block,
-				enum block_enum block_kind,
-				const char *name, domain_enum domain)
-{
+  struct symtab *stab_best = NULL;
   struct mapped_index *index;
 
   dw2_setup (objfile);
 
   index = dwarf2_per_objfile->index_table;
 
-  /* index_table is NULL if OBJF_READNOW.  */
+  /* index is NULL if OBJF_READNOW.  */
   if (index)
     {
-      offset_type *vec;
+      struct dw2_symtab_iterator iter;
+      struct dwarf2_per_cu_data *per_cu;
 
-      if (find_slot_in_mapped_hash (index, name, &vec))
+      dw2_symtab_iter_init (&iter, index, 1, block_index, domain, name);
+
+      while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
 	{
-	  offset_type i, len = MAYBE_SWAP (*vec);
-	  for (i = 0; i < len; ++i)
+	  struct symbol *sym = NULL;
+	  struct symtab *stab = dw2_instantiate_symtab (per_cu);
+
+	  /* Some caution must be observed with overloaded functions
+	     and methods, since the index will not contain any overload
+	     information (but NAME might contain it).  */
+	  if (stab->primary)
 	    {
-	      offset_type cu_index_and_attrs = MAYBE_SWAP (vec[i + 1]);
-	      offset_type cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
-	      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (cu_index);
-	      int want_static = block_kind != GLOBAL_BLOCK;
-	      /* This value is only valid for index versions >= 7.  */
-	      int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
-	      gdb_index_symbol_kind symbol_kind =
-		GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
-	      /* Only check the symbol attributes if they're present.
-		 Indices prior to version 7 don't record them,
-		 and indices >= 7 may elide them for certain symbols
-		 (gold does this).  */
-	      int attrs_valid =
-		(index->version >= 7
-		 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
+	      struct blockvector *bv = BLOCKVECTOR (stab);
+	      struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
 
-	      if (attrs_valid
-		  && want_specific_block
-		  && want_static != is_static)
-		continue;
-
-	      /* Only check the symbol's kind if it has one.  */
-	      if (attrs_valid)
-		{
-		  switch (domain)
-		    {
-		    case VAR_DOMAIN:
-		      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_VARIABLE
-			  && symbol_kind != GDB_INDEX_SYMBOL_KIND_FUNCTION
-			  /* Some types are also in VAR_DOMAIN.  */
-			  && symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
-			continue;
-		      break;
-		    case STRUCT_DOMAIN:
-		      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_TYPE)
-			continue;
-		      break;
-		    case LABEL_DOMAIN:
-		      if (symbol_kind != GDB_INDEX_SYMBOL_KIND_OTHER)
-			continue;
-		      break;
-		    default:
-		      break;
-		    }
-		}
-
-	      dw2_instantiate_symtab (per_cu);
+	      sym = lookup_block_symbol (block, name, domain);
 	    }
+
+	  if (sym && strcmp_iw (SYMBOL_SEARCH_NAME (sym), name) == 0)
+	    {
+	      if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
+		return stab;
+
+	      stab_best = stab;
+	    }
+
+	  /* Keep looking through other CUs.  */
 	}
     }
-}
 
-static void
-dw2_pre_expand_symtabs_matching (struct objfile *objfile,
-				 enum block_enum block_kind, const char *name,
-				 domain_enum domain)
-{
-  dw2_do_expand_symtabs_matching (objfile, 1, block_kind, name, domain);
+  return stab_best;
 }
 
 static void
@@ -3279,9 +3348,25 @@ static void
 dw2_expand_symtabs_for_function (struct objfile *objfile,
 				 const char *func_name)
 {
-  /* Note: It doesn't matter what we pass for block_kind here.  */
-  dw2_do_expand_symtabs_matching (objfile, 0, GLOBAL_BLOCK, func_name,
-				  VAR_DOMAIN);
+  struct mapped_index *index;
+
+  dw2_setup (objfile);
+
+  index = dwarf2_per_objfile->index_table;
+
+  /* index is NULL if OBJF_READNOW.  */
+  if (index)
+    {
+      struct dw2_symtab_iterator iter;
+      struct dwarf2_per_cu_data *per_cu;
+
+      /* Note: It doesn't matter what we pass for block_index here.  */
+      dw2_symtab_iter_init (&iter, index, 0, GLOBAL_BLOCK, VAR_DOMAIN,
+			    func_name);
+
+      while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
+	dw2_instantiate_symtab (per_cu);
+    }
 }
 
 static void
@@ -3697,7 +3782,6 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_forget_cached_source_info,
   dw2_map_symtabs_matching_filename,
   dw2_lookup_symbol,
-  dw2_pre_expand_symtabs_matching,
   dw2_print_stats,
   dw2_dump,
   dw2_relocate,

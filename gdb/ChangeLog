@@ -1,3 +1,17 @@
+2013-01-09  Doug Evans  <dje@google.com>
+
+	* symfile.h (quick_symbol_functions): Delete member
+	pre_expand_symtabs_matching.  All uses removed.
+	* dwarf2read.c (dw2_lookup_symbol): Implement.
+	(dw2_do_expand_symtabs_matching): Delete.
+	(dw2_pre_expand_symtabs_matching): Delete.
+	(struct dw2_symtab_iterator): New type.
+	(dw2_symtab_iter_init, dw2_symtab_iter_next): New functions.
+	(dw2_expand_symtabs_for_function): Rewrite.
+	(dwarf2_gdb_index_functions): Update.
+	* psymtab.c (pre_expand_symtabs_matching_psymtabs): Delete.
+	(psym_functions): Update.
+
 2013-01-09  Tom Tromey  <tromey@redhat.com>
 
 	* config/pa/hpux.mh (NATDEPFILES): Remove somread.o.

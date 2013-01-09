@@ -628,15 +628,6 @@ match_partial_symbol (struct objfile *objfile,
   return NULL;
 }
 
-static void
-pre_expand_symtabs_matching_psymtabs (struct objfile *objfile,
-				      enum block_enum block_kind,
-				      const char *name,
-				      domain_enum domain)
-{
-  /* Nothing.  */
-}
-
 /* Returns the name used to search psymtabs.  Unlike symtabs, psymtabs do
    not contain any method/function instance information (since this would
    force reading type information while reading psymtabs).  Therefore,
@@ -1428,7 +1419,6 @@ const struct quick_symbol_functions psym_functions =
   forget_cached_source_info_partial,
   partial_map_symtabs_matching_filename,
   lookup_symbol_aux_psymtabs,
-  pre_expand_symtabs_matching_psymtabs,
   print_psymtab_stats_for_objfile,
   dump_psymtabs_for_objfile,
   relocate_psymtabs,
