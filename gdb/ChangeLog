@@ -1,3 +1,9 @@
+2013-01-09  Anthony Green  <green@moxielogic.com>
+
+	* cp-abi.c (cplus_print_vtable): Don't return value from void
+	function.
+	* ada-lang.c (re_set_catch_assert): Ditto.
+
 2013-01-09  Doug Evans  <dje@google.com>
 
 	* symfile.h (quick_symbol_functions): Delete member

@@ -176,7 +176,7 @@ cplus_print_vtable (struct value *value)
 {
   if (current_cp_abi.print_vtable == NULL)
     error (_("GDB cannot print the vtable on this target"));
-  return (*current_cp_abi.print_vtable) (value);
+  (*current_cp_abi.print_vtable) (value);
 }
 
 int
