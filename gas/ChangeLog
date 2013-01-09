@@ -1,3 +1,9 @@
+2013-01-09  Steve Ellcey  <sellcey@mips.com>
+
+	* config/tc-i386.c (md_begin): Remove 'internal Error' from as_fatal
+	calls.
+	* config/tc-mips.c (internalError): Remove, replace with abort.
+
 2013-01-08  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (parse_operands): Change to compare the result

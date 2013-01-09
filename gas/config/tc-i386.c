@@ -2375,7 +2375,7 @@ md_begin (void)
 				    (void *) core_optab);
 	    if (hash_err)
 	      {
-		as_fatal (_("internal Error:  Can't hash %s: %s"),
+		as_fatal (_("can't hash %s: %s"),
 			  (optab - 1)->name,
 			  hash_err);
 	      }
@@ -2397,7 +2397,7 @@ md_begin (void)
       {
 	hash_err = hash_insert (reg_hash, regtab->reg_name, (void *) regtab);
 	if (hash_err)
-	  as_fatal (_("internal Error:  Can't hash %s: %s"),
+	  as_fatal (_("can't hash %s: %s"),
 		    regtab->reg_name,
 		    hash_err);
       }

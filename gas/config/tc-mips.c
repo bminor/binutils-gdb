@@ -1310,9 +1310,6 @@ static struct {
 
 /* Prototypes for static functions.  */
 
-#define internalError()							\
-    as_fatal (_("internal Error, line %d, %s"), __LINE__, __FILE__)
-
 enum mips_regclass { MIPS_GR_REG, MIPS_FP_REG, MIPS16_REG };
 
 static void append_insn
@@ -5030,7 +5027,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	      continue;
 
 	    default:
-	      internalError ();
+	      abort ();
 	    }
 	  continue;
 
@@ -5234,12 +5231,12 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	      break;
 
 	    default:
-	      internalError ();
+	      abort ();
 	    }
 	  continue;
 
 	default:
-	  internalError ();
+	  abort ();
 	}
       break;
     }
@@ -10152,7 +10149,7 @@ mips16_macro (struct mips_cl_insn *ip)
   switch (mask)
     {
     default:
-      internalError ();
+      abort ();
 
     case M_DDIV_3:
       dbl = 1;
@@ -11300,7 +11297,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		    while (imm->type && imm->type != *args)
 		      ++imm;
 		    if (! imm->type)
-		      internalError ();
+		      abort ();
 		    my_getExpression (&imm_expr, s);
 		    check_absolute_expr (ip, &imm_expr);
 		    if ((unsigned long) imm_expr.X_add_number & ~imm->mask)
@@ -12835,7 +12832,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			break;
 
 		      default:
-			internalError ();
+			abort ();
 		    }
 
 		  if (regno == ILLEGAL_REG)
@@ -12908,7 +12905,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			break;
 
 		      default:
-			internalError ();
+			abort ();
 		    }
 		  continue;
 
@@ -13372,7 +13369,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
 	    default:
 	      as_bad (_("Bad char = '%c'\n"), *args);
-	      internalError ();
+	      abort ();
 	    }
 	  break;
 	}
@@ -13649,7 +13646,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		  break;
 
 		default:
-		  internalError ();
+		  abort ();
 		}
 
 	      if (regno == ILLEGAL_REG)
@@ -13682,7 +13679,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		  MIPS16_INSERT_OPERAND (REG32R, *ip, regno);
 		  break;
 		default:
-		  internalError ();
+		  abort ();
 		}
 
 	      lastregno = regno;
@@ -14041,7 +14038,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    default:
-	      internalError ();
+	      abort ();
 	    }
 	  break;
 	}
@@ -15852,7 +15849,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
 
     default:
-      internalError ();
+      abort ();
     }
 
   /* Remember value for tc_gen_reloc.  */
