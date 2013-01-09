@@ -213,8 +213,7 @@ test "${LARGE_SECTIONS}" = "yes" && REL_LARGE="
   .rela.lbss    ${RELOCATING-0} : { *(.rela.lbss${RELOCATING+ .rela.lbss.* .rela.gnu.linkonce.lb.*}) }
   .rel.lrodata  ${RELOCATING-0} : { *(.rel.lrodata${RELOCATING+ .rel.lrodata.* .rel.gnu.linkonce.lr.*}) }
   .rela.lrodata ${RELOCATING-0} : { *(.rela.lrodata${RELOCATING+ .rela.lrodata.* .rela.gnu.linkonce.lr.*}) }"
-test "${LARGE_SECTIONS}" = "yes" && OTHER_BSS_SECTIONS="
-  ${OTHER_BSS_SECTIONS}
+test "${LARGE_SECTIONS}" = "yes" && LARGE_BSS="
   .lbss ${RELOCATING-0} :
   {
     *(.dynlbss)
@@ -606,9 +605,11 @@ cat <<EOF
    ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
   }
   ${OTHER_BSS_SECTIONS}
+  ${LARGE_BSS_AFTER_BSS+${LARGE_BSS}}
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${LARGE_SECTIONS}
+  ${LARGE_BSS_AFTER_BSS-${LARGE_BSS}}
   ${RELOCATING+. = ALIGN(${ALIGNMENT});}
   ${RELOCATING+${OTHER_END_SYMBOLS}}
   ${RELOCATING+${END_SYMBOLS-${USER_LABEL_PREFIX}_end = .; PROVIDE (${USER_LABEL_PREFIX}end = .);}}

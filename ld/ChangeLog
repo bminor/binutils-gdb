@@ -1,3 +1,12 @@
+2013-01-09  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/elf_x86_64.sh (LARGE_BSS_AFTER_BSS): Define.
+	* emulparams/elf32_x86_64.sh: Likewise.
+	* emulparams/elf_k1om.sh: Likewise.
+	* emulparams/elf_l1om.sh: Likewise.
+	* scripttempl/elf.sc (LARGE_BSS): Define rather than appending to
+	OTHER_BSS_SECTIONS.  Substitute in script.
+
 2013-01-08  Leif Ekblad  <leif@rdos.net>
 
 	* scripttempl/elf.sc (RODATA_ADDR): Typo fix.
