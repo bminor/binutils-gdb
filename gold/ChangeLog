@@ -1,3 +1,11 @@
+2013-01-09  Ben Cheng  <bccheng@google.com>
+
+	* arm.cc (Target_arm::attributes_accept_div): New function.
+	(Target_arm::attributes_forbid_div): New function.
+	(Target_arm::merge_object_attributes): Merge the Tag_DIV_use
+	attribute using the same new functions as what bfd/elf32_arm.c
+	does.
+
 2013-01-07  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/14993
