@@ -46,7 +46,7 @@ ticoff1_bad_format_hook (bfd * abfd ATTRIBUTE_UNUSED,
 
 /* Replace the stock _bfd_coff_is_local_label_name
    to recognize TI COFF local labels.  */
-static bfd_boolean 
+static bfd_boolean
 ticoff_bfd_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED,
 				const char *name)
 {
@@ -57,15 +57,15 @@ ticoff_bfd_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED,
 
 #define coff_bfd_is_local_label_name ticoff_bfd_is_local_label_name
 
-/* Customize coffcode.h; the default coff_ functions are set up to use COFF2; 
+/* Customize coffcode.h; the default coff_ functions are set up to use COFF2;
    coff_bad_format_hook uses BADMAG, so set that for COFF2.  The COFF1
    and COFF0 vectors use custom _bad_format_hook procs instead of setting
-   BADMAG.  */ 
+   BADMAG.  */
 #define BADMAG(x) COFF2_BADMAG(x)
 #include "coffcode.h"
 
 /* COFF0 differs in file/section header size and relocation entry size.  */
-static bfd_coff_backend_data ticoff0_swap_table = 
+static bfd_coff_backend_data ticoff0_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
@@ -93,7 +93,7 @@ static bfd_coff_backend_data ticoff0_swap_table =
 };
 
 /* COFF1 differs in section header size.  */
-static bfd_coff_backend_data ticoff1_swap_table = 
+static bfd_coff_backend_data ticoff1_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,

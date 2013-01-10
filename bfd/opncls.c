@@ -186,7 +186,7 @@ DESCRIPTION
 	Return a pointer to the created BFD.  If @var{fd} is not -1,
 	then <<fdopen>> is used to open the file; otherwise, <<fopen>>
 	is used.  @var{mode} is passed directly to <<fopen>> or
-	<<fdopen>>. 
+	<<fdopen>>.
 
 	Calls <<bfd_find_target>>, so @var{target} is interpreted as by
 	that function.
@@ -222,7 +222,7 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
       _bfd_delete_bfd (nbfd);
       return NULL;
     }
-  
+
 #ifdef HAVE_FDOPEN
   if (fd != -1)
     nbfd->iostream = fdopen (fd, mode);
@@ -241,7 +241,7 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
 
   /* Figure out whether the user is opening the file for reading,
      writing, or both, by looking at the MODE argument.  */
-  if ((mode[0] == 'r' || mode[0] == 'w' || mode[0] == 'a') 
+  if ((mode[0] == 'r' || mode[0] == 'w' || mode[0] == 'a')
       && mode[1] == '+')
     nbfd->direction = both_direction;
   else if (mode[0] == 'r')

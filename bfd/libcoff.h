@@ -733,7 +733,7 @@ typedef struct
   bfd_boolean _bfd_coff_long_section_names;
   bfd_boolean (*_bfd_coff_set_long_section_names)
     (bfd *, int);
-  
+
   unsigned int _bfd_coff_default_section_alignment_power;
   bfd_boolean _bfd_coff_force_symnames_in_strings;
   unsigned int _bfd_coff_debug_string_prefix_length;

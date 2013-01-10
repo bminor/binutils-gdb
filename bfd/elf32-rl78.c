@@ -1155,7 +1155,7 @@ rl78_get_reloc (long reloc)
 
 /* We support 16-bit pointers to code above 64k by generating a thunk
    below 64k containing a JMP instruction to the final address.  */
- 
+
 static bfd_boolean
 rl78_elf_check_relocs
     (bfd *                     abfd,
@@ -1173,7 +1173,7 @@ rl78_elf_check_relocs
 
   if (info->relocatable)
     return TRUE;
- 
+
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
   local_plt_offsets = elf_local_got_offsets (abfd);
@@ -1186,7 +1186,7 @@ rl78_elf_check_relocs
       struct elf_link_hash_entry *h;
       unsigned long r_symndx;
       bfd_vma *offset;
- 
+
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
         h = NULL;
@@ -1197,7 +1197,7 @@ rl78_elf_check_relocs
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
- 
+
       switch (ELF32_R_TYPE (rel->r_info))
         {
 	  /* This relocation describes a 16-bit pointer to a function.
@@ -1251,7 +1251,7 @@ rl78_elf_check_relocs
 	  break;
         }
     }
- 
+
   return TRUE;
 }
 
@@ -1971,7 +1971,7 @@ struct {
   { 0x71, 0x58, 0x53, 0x5b },	/* CLR1	!addr16.0 */
   { 0x71, 0x68, 0x63, 0x6b },	/* CLR1	!addr16.0 */
   { 0x71, 0x78, 0x73, 0x7b },	/* CLR1	!addr16.0 */
-  
+
   { -1, -1, -1, -1 }
 };
 
@@ -2348,7 +2348,7 @@ rl78_elf_relax_section
 		}
 	      break;
 	    }
-	  
+
 	}
 
       if (irel->r_addend & RL78_RELAXA_ADDR16)
@@ -2414,7 +2414,7 @@ rl78_elf_relax_section
 		      insn[poff] = relax_addr16[idx].insn_for_saddr;
 		      SNIP (poff+2, 1, R_RL78_RH_SADDR);
 		    }
-		
+
 		}
 	    }
 	}

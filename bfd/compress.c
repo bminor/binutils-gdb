@@ -79,7 +79,7 @@ DESCRIPTION
 	field was allocated using bfd_malloc() or equivalent.  If zlib
 	is not installed on this machine, the input is unmodified.
 
-	Return @code{TRUE} if the full section contents is compressed 
+	Return @code{TRUE} if the full section contents is compressed
 	successfully.
 */
 
@@ -148,7 +148,7 @@ SYNOPSIS
 DESCRIPTION
 	Read all data from @var{section} in BFD @var{abfd}, decompress
 	if needed, and store in @var{*ptr}.  If @var{*ptr} is NULL,
-	return @var{*ptr} with memory malloc'd by this function.  
+	return @var{*ptr} with memory malloc'd by this function.
 
 	Return @code{TRUE} if the full section contents is retrieved
 	successfully.

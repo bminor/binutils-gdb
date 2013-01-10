@@ -619,7 +619,7 @@ bfd_boolean bfd_mach_o_bfd_copy_private_bfd_data (bfd *, bfd *);
 bfd_boolean bfd_mach_o_bfd_set_private_flags (bfd *, flagword);
 long bfd_mach_o_get_symtab_upper_bound (bfd *);
 long bfd_mach_o_canonicalize_symtab (bfd *, asymbol **);
-long bfd_mach_o_get_synthetic_symtab (bfd *, long, asymbol **, long, 
+long bfd_mach_o_get_synthetic_symtab (bfd *, long, asymbol **, long,
                                       asymbol **, asymbol **ret);
 long bfd_mach_o_get_reloc_upper_bound (bfd *, asection *);
 long bfd_mach_o_canonicalize_reloc (bfd *, asection *, arelent **, asymbol **);

@@ -605,7 +605,7 @@ coff_link_add_symbols (bfd *abfd,
 	{
 	  bfd_size_type string_offset = 0;
 	  asection *stab;
-	  
+
 	  for (stab = abfd->sections; stab; stab = stab->next)
 	    if (CONST_STRNEQ (stab->name, ".stab")
 		&& (!stab->name[5]
@@ -614,7 +614,7 @@ coff_link_add_symbols (bfd *abfd,
 	      struct coff_link_hash_table *table;
 	      struct coff_section_tdata *secdata
 		= coff_section_data (abfd, stab);
-	      
+
 	      if (secdata == NULL)
 		{
 		  amt = sizeof (struct coff_section_tdata);
@@ -1159,7 +1159,7 @@ _bfd_coff_final_link (bfd *abfd,
 		 elsewhere. */
 	      struct internal_reloc incount;
 	      bfd_byte *excount = (bfd_byte *)bfd_malloc (relsz);
-	      
+
 	      memset (&incount, 0, sizeof (incount));
 	      incount.r_vaddr = o->reloc_count + 1;
 	      bfd_coff_swap_reloc_out (abfd, &incount, excount);

@@ -83,7 +83,7 @@ h8300_scan (const struct bfd_arch_info *info, const char *string)
 
 	  return (info->mach == bfd_mach_h8300sx);
 	}
-      
+
       return (info->mach == bfd_mach_h8300s);
     }
   else

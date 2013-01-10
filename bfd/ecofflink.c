@@ -1788,7 +1788,7 @@ mk_fdrtab (bfd *abfd,
 	     'lookup_line'.  */
 	  /* The address of the first PDR is the offset of that
 	     procedure relative to the beginning of file FDR.  */
-	  tab->base_addr = fdr_ptr->adr; 
+	  tab->base_addr = fdr_ptr->adr;
 	}
       else
 	{
@@ -1887,7 +1887,7 @@ lookup_line (bfd *abfd,
   i = fdrtab_lookup (line_info, offset);
   if (i < 0)
     return FALSE;		/* no FDR, no fun...  */
-  
+
   /* eraxxon: 'fdrtab_lookup' doesn't give what we want, at least for Compaq's
      C++ compiler 6.2.  Consider three FDRs with starting addresses of x, y,
      and z, respectively, such that x < y < z.  Assume further that
@@ -2052,7 +2052,7 @@ lookup_line (bfd *abfd,
 	 read stabs FDRs as ECOFF ones.  However, I don't think this will
 	 harm anything.  */
       i = 0;
-      
+
       /* Search FDR list starting at tab[i] for the PDR that best matches
          OFFSET.  Normally, the FDR list is only one entry long.  */
       best_fdr = NULL;
@@ -2097,7 +2097,7 @@ lookup_line (bfd *abfd,
 
 	  if (!best_pdr || (min_dist >= 0 && min_dist < best_dist))
 	    {
-	      best_dist = (bfd_vma) min_dist;  
+	      best_dist = (bfd_vma) min_dist;
 	      best_fdr = fdr_ptr;
 	      best_pdr = pdr_hold;
 	    }

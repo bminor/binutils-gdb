@@ -131,7 +131,7 @@ coff_i860_reloc (bfd *abfd,
   return bfd_reloc_continue;
 }
 
-/* This is just a temporary measure until we teach bfd to generate 
+/* This is just a temporary measure until we teach bfd to generate
    these relocations.  */
 
 static bfd_reloc_status_type

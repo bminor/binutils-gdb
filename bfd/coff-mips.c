@@ -45,7 +45,7 @@ static bfd_reloc_status_type
 mips_reflo_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type
-mips_gprel_reloc 
+mips_gprel_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 
 
@@ -1255,7 +1255,7 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     (unsigned (*) (bfd *,void *,void *)) bfd_void, /* reloc_out */
     mips_ecoff_swap_filehdr_out, mips_ecoff_swap_aouthdr_out,
     mips_ecoff_swap_scnhdr_out,
-    FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, 0, FILNMLEN, TRUE, 
+    FILHSZ, AOUTSZ, SCNHSZ, 0, 0, 0, 0, FILNMLEN, TRUE,
     ECOFF_NO_LONG_SECTION_NAMES, 4, FALSE, 2,
     mips_ecoff_swap_filehdr_in, mips_ecoff_swap_aouthdr_in,
     mips_ecoff_swap_scnhdr_in, NULL,

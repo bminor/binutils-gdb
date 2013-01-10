@@ -1,6 +1,6 @@
 /* Infineon XC16X-specific support for 16-bit ELF.
    Copyright 2006, 2007, 2009, 2010, 2012 Free Software Foundation, Inc.
-   Contributed by KPIT Cummins Infosystems 
+   Contributed by KPIT Cummins Infosystems
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -433,11 +433,11 @@ elf32_xc16x_final_write_processing (bfd *abfd,
 
 static unsigned long
 elf32_xc16x_mach (flagword flags)
-{  
+{
   switch (flags)
     {
     case 0x1000:
-    default: 
+    default:
       return bfd_mach_xc16x;
 
     case 0x1001:

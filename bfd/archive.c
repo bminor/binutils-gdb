@@ -2492,7 +2492,7 @@ bsd_write_armap (bfd *arch,
 	  bfd_set_error (bfd_error_file_truncated);
 	  return FALSE;
 	}
-      
+
       last_elt = current;
       H_PUT_32 (arch, map[count].namidx, buf);
       H_PUT_32 (arch, firstreal, buf + BSD_SYMDEF_OFFSET_SIZE);

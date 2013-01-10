@@ -2698,7 +2698,7 @@ cris_elf_plt_sym_val (bfd_vma i ATTRIBUTE_UNUSED, const asection *plt,
     {
       bfd_size_type got_offset;
       bfd_byte gotoffs_raw[4];
-      
+
       if (!bfd_get_section_contents (abfd, (asection *) plt, gotoffs_raw,
 				     pltoffs + plt_entry_got_offset,
 				     sizeof (gotoffs_raw)))

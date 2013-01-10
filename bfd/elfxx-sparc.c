@@ -1433,7 +1433,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 						TRUE);
 	      if (h == NULL)
 		return FALSE;
-	      
+
 	      /* Fake a STT_GNU_IFUNC symbol.  */
 	      h->type = STT_GNU_IFUNC;
 	      h->def_regular = 1;
@@ -2985,7 +2985,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	      if (h == NULL)
 		abort ();
 
-	      /* Set STT_GNU_IFUNC symbol value.  */ 
+	      /* Set STT_GNU_IFUNC symbol value.  */
 	      h->root.u.def.value = sym->st_value;
 	      h->root.u.def.section = sec;
 	    }
@@ -3278,7 +3278,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	      if (h == NULL)
 		break;
 	    }
-	  /* PR 7027: We need similar behaviour for 64-bit binaries.  */ 
+	  /* PR 7027: We need similar behaviour for 64-bit binaries.  */
 	  else if (r_type == R_SPARC_WPLT30 && h == NULL)
 	    break;
 	  else
@@ -4126,7 +4126,7 @@ do_relocation:
 	      {
 		const char *name;
 
-		/* The Solaris native linker silently disregards overflows. 
+		/* The Solaris native linker silently disregards overflows.
 		   We don't, but this breaks stabs debugging info, whose
 		   relocations are only 32-bits wide.  Ignore overflows in
 		   this case and also for discarded entries.  */
@@ -4718,7 +4718,7 @@ finish_local_dynamic_symbol (void **slot, void *inf)
   struct elf_link_hash_entry *h
     = (struct elf_link_hash_entry *) *slot;
   struct bfd_link_info *info
-    = (struct bfd_link_info *) inf; 
+    = (struct bfd_link_info *) inf;
 
   return _bfd_sparc_elf_finish_dynamic_symbol (info->output_bfd, info,
 					       h, NULL);

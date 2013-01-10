@@ -3259,7 +3259,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	      slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
 	      if (! (*slurp_relocs) (abfd, relplt, dyn_syms, TRUE))
 		goto free_contents_and_exit;
-	
+
 	      plt_count = relplt->size / sizeof (Elf64_External_Rela);
 	      size += plt_count * sizeof (asymbol);
 
@@ -4488,7 +4488,7 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
   /* If we were called to copy over info for a weak sym, that's all.
      You might think dyn_relocs need not be copied over;  After all,
      both syms will be dynamic or both non-dynamic so we're just
-     moving reloc accounting around.  However, ELIMINATE_COPY_RELOCS 
+     moving reloc accounting around.  However, ELIMINATE_COPY_RELOCS
      code in ppc64_elf_adjust_dynamic_symbol needs to check for
      dyn_relocs in read-only sections, and it does so on what is the
      DIR sym here.  */
@@ -8253,7 +8253,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	 .  addi ry,rx,addr@toc@l
 	 when addr is within 2G of the toc pointer.  This then means
 	 that the word storing "addr" in the toc is no longer needed.  */
-	 
+
       if (!ppc64_elf_tdata (ibfd)->has_small_toc_reloc
 	  && toc->output_section->rawsize < (bfd_vma) 1 << 31
 	  && toc->reloc_count != 0)
@@ -11352,7 +11352,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
 	  "GOMP_parallel_loop_dynamic_start",
 	  "GOMP_parallel_loop_guided_start",
 	  "GOMP_parallel_loop_runtime_start",
-	  "GOMP_parallel_sections_start", 
+	  "GOMP_parallel_sections_start",
 	};
       unsigned i;
 

@@ -148,7 +148,7 @@ struct xcoff_link_hash_table
     struct xcoff_link_size_list *next;
     struct xcoff_link_hash_entry *h;
     bfd_size_type size;
-  } 
+  }
   *size_list;
 
   /* Information about archives.  */

@@ -476,7 +476,7 @@ hppa64_elf_local_refcounts (bfd *abfd)
 {
   Elf_Internal_Shdr *symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   bfd_signed_vma *local_refcounts;
-                  
+
   local_refcounts = elf_local_got_refcounts (abfd);
   if (local_refcounts == NULL)
     {
@@ -796,7 +796,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 	  else
 	    {
 	      bfd_signed_vma *local_dlt_refcounts;
-                  
+
 	      /* This is a DLT entry for a local symbol.  */
 	      local_dlt_refcounts = hppa64_elf_local_refcounts (abfd);
 	      if (local_dlt_refcounts == NULL)
@@ -821,7 +821,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 	    {
 	      bfd_signed_vma *local_dlt_refcounts;
 	      bfd_signed_vma *local_plt_refcounts;
-                  
+
 	      /* This is a PLT entry for a local symbol.  */
 	      local_dlt_refcounts = hppa64_elf_local_refcounts (abfd);
 	      if (local_dlt_refcounts == NULL)
@@ -855,7 +855,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 	    {
 	      bfd_signed_vma *local_dlt_refcounts;
 	      bfd_signed_vma *local_opd_refcounts;
-                  
+
 	      /* This is a OPD for a local symbol.  */
 	      local_dlt_refcounts = hppa64_elf_local_refcounts (abfd);
 	      if (local_dlt_refcounts == NULL)
@@ -1132,7 +1132,7 @@ elf64_hppa_post_process_headers (bfd *abfd,
   Elf_Internal_Ehdr * i_ehdrp;
 
   i_ehdrp = elf_elfheader (abfd);
-  
+
   i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
   i_ehdrp->e_ident[EI_ABIVERSION] = 1;
 }
@@ -1639,7 +1639,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	    {
 	      *local_dlt = sec->size;
 	      sec->size += DLT_ENTRY_SIZE;
-	      if (info->shared) 
+	      if (info->shared)
 	        {
 		  srel->size += sizeof (Elf64_External_Rela);
 	        }
@@ -2213,7 +2213,7 @@ elf64_hppa_finalize_opd (struct elf_link_hash_entry *eh, void *data)
 
 	  nh = elf_link_hash_lookup (elf_hash_table (info),
 				     new_name, TRUE, TRUE, FALSE);
- 
+
 	  /* All we really want from the new symbol is its dynamic
 	     symbol index.  */
 	  if (nh)
@@ -3190,7 +3190,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 
   if (hppa_info == NULL)
     return bfd_reloc_notsupported;
-  
+
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   local_offsets = elf_local_got_offsets (input_bfd);
   insn = bfd_get_32 (input_bfd, hit_data);
@@ -3859,14 +3859,14 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 	  /* This is not a local symbol.  */
 	  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
 
-	  /* It seems this can happen with erroneous or unsupported 
+	  /* It seems this can happen with erroneous or unsupported
 	     input (mixing a.out and elf in an archive, for example.)  */
 	  if (sym_hashes == NULL)
 	    return FALSE;
 
 	  eh = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-	  while (eh->root.type == bfd_link_hash_indirect 
+	  while (eh->root.type == bfd_link_hash_indirect
 		 || eh->root.type == bfd_link_hash_warning)
 	    eh = (struct elf_link_hash_entry *) eh->root.u.i.link;
 
@@ -4057,7 +4057,7 @@ const struct elf_size_info hppa64_elf_size_info =
 					elf64_hppa_finish_dynamic_sections
 #define elf_backend_grok_prstatus	elf64_hppa_grok_prstatus
 #define elf_backend_grok_psinfo		elf64_hppa_grok_psinfo
- 
+
 /* Stuff for the BFD linker: */
 #define bfd_elf64_bfd_link_hash_table_create \
 	elf64_hppa_hash_table_create

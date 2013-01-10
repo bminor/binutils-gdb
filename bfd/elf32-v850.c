@@ -2531,7 +2531,7 @@ v850_elf_print_private_bfd_data (bfd *abfd, void * ptr)
   if (bfd_get_arch (abfd) == bfd_arch_v850_rh850)
     {
       if ((elf_elfheader (abfd)->e_flags & EF_RH850_ABI) != EF_RH850_ABI)
-	fprintf (file, _("unknown v850 architecture"));	
+	fprintf (file, _("unknown v850 architecture"));
       else if (elf_elfheader (abfd)->e_flags & EF_V800_850E3)
 	fprintf (file, _("v850 E3 architecture"));
       else
@@ -3244,7 +3244,7 @@ v850_elf_relax_section (bfd *abfd,
 	      /* Get the reloc for the address from which the register is
 	         being loaded.  This reloc will tell us which function is
 	         actually being called.  */
-	      
+
 	      for (hi_irelfn = internal_relocs; hi_irelfn < irelend; hi_irelfn ++)
 		{
 		  r_type = ELF32_R_TYPE (hi_irelfn->r_info);
@@ -3873,7 +3873,7 @@ v800_elf_info_to_howto (bfd *               abfd,
   r_type -= R_V810_NONE;
   BFD_ASSERT (r_type < ARRAY_SIZE (v800_elf_howto_table));
 
-  cache_ptr->howto = v800_elf_howto_table + r_type;  
+  cache_ptr->howto = v800_elf_howto_table + r_type;
 }
 
 

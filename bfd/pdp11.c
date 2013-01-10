@@ -340,7 +340,7 @@ pdp11_aout_write_headers (bfd *abfd, struct internal_exec *execp)
       if (bfd_seek (abfd, (file_ptr) (N_TRELOFF(*execp)), SEEK_SET) != 0
 	  || !NAME (aout, squirt_out_relocs) (abfd, obj_textsec (abfd))
 	  || bfd_seek (abfd, (file_ptr) (N_DRELOFF(*execp)), SEEK_SET) != 0
-	  || !NAME (aout, squirt_out_relocs) (abfd, obj_datasec (abfd)))  
+	  || !NAME (aout, squirt_out_relocs) (abfd, obj_datasec (abfd)))
 	return FALSE;
     }
 

@@ -761,7 +761,7 @@ cr16_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
             {
               srelgot = bfd_get_linker_section (dynobj, ".rela.got");
               if (srelgot == NULL)
-                { 
+                {
 		  flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
 				    | SEC_IN_MEMORY | SEC_LINKER_CREATED
 				    | SEC_READONLY);
@@ -912,7 +912,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
        /* We only care about the addend, where the difference between
           expressions is kept.  */
        Rvalue = 0;
-       
+
      default:
        break;
     }
@@ -1043,7 +1043,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
                         | ((Rvalue >> 16) & 0xf)), hit_data);
             bfd_put_16 (input_bfd, (Rvalue) & 0xffff, hit_data + 2);
           }
-        else if (r_type == R_CR16_GOT_REGREL20) 
+        else if (r_type == R_CR16_GOT_REGREL20)
           {
             asection * sgot = bfd_get_linker_section (dynobj, ".got");
 
@@ -1060,7 +1060,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
                        -Bsymbolic link and the symbol is defined
                        locally, or the symbol was forced to be local
                        because of a version file.  We must initialize
-                       this entry in the global offset table. 
+                       this entry in the global offset table.
                        When doing a dynamic link, we create a .rela.got
                        relocation entry to initialize the value.  This
                        is done in the finish_dynamic_symbol routine.  */
@@ -1080,7 +1080,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
 
              Rvalue += addend;
 
-             /* REVISIT: if ((long) Rvalue > 0xffffff || 
+             /* REVISIT: if ((long) Rvalue > 0xffffff ||
                                     (long) Rvalue < -0x800000).  */
              if ((long) Rvalue > 0xffffff || (long) Rvalue < 0)
                return bfd_reloc_overflow;
@@ -1111,7 +1111,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
                     -Bsymbolic link and the symbol is defined
                      locally, or the symbol was forced to be local
                      because of a version file.  We must initialize
-                     this entry in the global offset table. 
+                     this entry in the global offset table.
                      When doing a dynamic link, we create a .rela.got
                      relocation entry to initialize the value.  This
                      is done in the finish_dynamic_symbol routine.  */
@@ -1142,7 +1142,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
                Rvalue += Rvalue1;
 
               /* Check for range.  */
-             /* REVISIT: if ((long) Rvalue > 0xffffff 
+             /* REVISIT: if ((long) Rvalue > 0xffffff
                              || (long) Rvalue < -0x800000).  */
              if ((long) Rvalue > 0xffffff || (long) Rvalue < 0)
                return bfd_reloc_overflow;
@@ -1224,7 +1224,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
               }
             else if (r_type == R_CR16_NUM32)
               {
-                 Rvalue1 = (bfd_get_32 (input_bfd, hit_data)); 
+                 Rvalue1 = (bfd_get_32 (input_bfd, hit_data));
 
                  /* Add or subtract the offset value */
                  if (Rvalue1 & 0x80000000)
@@ -1309,7 +1309,7 @@ elf32_cr16_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd,
                   && ELF32_R_TYPE (irel->r_info) != (int) R_CR16_SWITCH16
                   && ELF32_R_TYPE (irel->r_info) != (int) R_CR16_SWITCH32)
                  continue;
-        
+
               r_symndx = ELF32_R_SYM (irel->r_info);
               rsym = (Elf_Internal_Sym *) symtab_hdr->contents + r_symndx;
 
@@ -1981,7 +1981,7 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
           bfd_vma value = symval;
           unsigned short is_add_mov = 0;
           bfd_vma value1 = 0;
-          
+
           /* Get the existing value from the mcode */
           value1 = ((bfd_get_32 (abfd, contents + irel->r_offset + 2) >> 16)
                    |(((bfd_get_32 (abfd, contents + irel->r_offset + 2) & 0xffff) << 16)));
@@ -1996,7 +1996,7 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
 
               /* Verify it's a 'arithmetic ADDD or MOVD instruction'.
                  For ADDD and MOVD only, convert to IMM32 -> IMM20.  */
-     
+
               if (((code & 0xfff0) == 0x0070) || ((code & 0xfff0) == 0x0020))
                  is_add_mov = 1;
 
@@ -2016,7 +2016,7 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
 
                   bfd_put_8 (abfd, (code & 0xf) << 4, contents + irel->r_offset);
 
-                  /* If existing value is nagavive adjust approriately 
+                  /* If existing value is nagavive adjust approriately
                      place the 16-20bits (ie 4 bit) in new opcode,
                      as the 0xffffxxxx, the higher 2 byte values removed. */
                   if (value1 & 0x80000000)
@@ -2040,7 +2040,7 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
             }
 
           /* See if the value will fit in 16 bits.  */
-          if ((!is_add_mov) 
+          if ((!is_add_mov)
               && ((long)(value + value1) < 0x7fff && (long)(value + value1) > 0))
             {
               unsigned short code;
@@ -2065,7 +2065,7 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
 
               bfd_put_8 (abfd, 0xb0 | (code & 0xf), contents + irel->r_offset);
 
-              /* If existing value is nagavive adjust approriately 
+              /* If existing value is nagavive adjust approriately
                  place the 12-16bits (ie 4 bit) in new opcode,
                  as the 0xfffffxxx, the higher 2 byte values removed. */
               if (value1 & 0x80000000)
@@ -2092,7 +2092,7 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
 #if 0
       /* Try to turn a 16bit immediate address into a 4bit
          immediate address.  */
-      if ((ELF32_R_TYPE (irel->r_info) == (int) R_CR16_IMM20) 
+      if ((ELF32_R_TYPE (irel->r_info) == (int) R_CR16_IMM20)
           || (ELF32_R_TYPE (irel->r_info) == (int) R_CR16_IMM16))
         {
           bfd_vma value = symval;
@@ -2200,7 +2200,7 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
       else
        /* Cache the section contents for elf_link_input_bfd.  */
        elf_section_data (sec)->this_hdr.contents = contents;
-       
+
     }
 
   if (internal_relocs != NULL

@@ -195,7 +195,7 @@ elf_vxworks_emit_relocs (bfd *output_bfd,
 		{
 		  asection *sec = (*hash_ptr)->root.u.def.section;
 		  int this_idx = sec->output_section->target_index;
-		  
+
 		  irela[j].r_info
 		    = ELF32_R_INFO (this_idx, ELF32_R_TYPE (irela[j].r_info));
 		  irela[j].r_addend += (*hash_ptr)->root.u.def.value;
@@ -262,34 +262,34 @@ bfd_boolean
 elf_vxworks_finish_dynamic_entry (bfd *output_bfd, Elf_Internal_Dyn *dyn)
 {
   asection *sec;
-  
+
   switch (dyn->d_tag)
     {
     default:
       return FALSE;
-      
+
     case DT_VX_WRS_TLS_DATA_START:
       sec = bfd_get_section_by_name (output_bfd, ".tls_data");
       dyn->d_un.d_ptr = sec->vma;
       break;
-      
+
     case DT_VX_WRS_TLS_DATA_SIZE:
       sec = bfd_get_section_by_name (output_bfd, ".tls_data");
       dyn->d_un.d_val = sec->size;
       break;
-      
+
     case DT_VX_WRS_TLS_DATA_ALIGN:
       sec = bfd_get_section_by_name (output_bfd, ".tls_data");
       dyn->d_un.d_val
 	= (bfd_size_type)1 << bfd_get_section_alignment (output_bfd,
 							 sec);
       break;
-      
+
     case DT_VX_WRS_TLS_VARS_START:
       sec = bfd_get_section_by_name (output_bfd, ".tls_vars");
       dyn->d_un.d_ptr = sec->vma;
       break;
-      
+
     case DT_VX_WRS_TLS_VARS_SIZE:
       sec = bfd_get_section_by_name (output_bfd, ".tls_vars");
       dyn->d_un.d_val = sec->size;

@@ -225,7 +225,7 @@ struct alpha_elf_link_hash_table
 #define alpha_elf_sym_hashes(abfd) \
   ((struct alpha_elf_link_hash_entry **)elf_sym_hashes(abfd))
 
-/* Should we do dynamic things to this symbol?  This differs from the 
+/* Should we do dynamic things to this symbol?  This differs from the
    generic version in that we never need to consider function pointer
    equality wrt PLT entries -- we don't create a PLT entry if a symbol's
    address is ever taken.  */
@@ -4141,7 +4141,7 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   bfd_boolean ret_val;
 
   BFD_ASSERT (is_alpha_elf (input_bfd));
-  
+
   /* Handle relocatable links with a smaller loop.  */
   if (info->relocatable)
     return elf64_alpha_relocate_section_r (output_bfd, info, input_bfd,
@@ -4890,12 +4890,12 @@ elf64_alpha_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 	      abort ();
 	    }
 
-	  elf64_alpha_emit_dynrel (output_bfd, info, sgot, srel, 
+	  elf64_alpha_emit_dynrel (output_bfd, info, sgot, srel,
 				   gotent->got_offset, h->dynindx,
 				   r_type, gotent->addend);
 
 	  if (gotent->reloc_type == R_ALPHA_TLSGD)
-	    elf64_alpha_emit_dynrel (output_bfd, info, sgot, srel, 
+	    elf64_alpha_emit_dynrel (output_bfd, info, sgot, srel,
 				     gotent->got_offset + 8, h->dynindx,
 				     R_ALPHA_DTPREL64, gotent->addend);
 	}

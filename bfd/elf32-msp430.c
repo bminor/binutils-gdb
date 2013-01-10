@@ -808,18 +808,18 @@ msp430_elf_relax_adjust_locals(bfd * abfd, asection * sec, bfd_vma addr,
   irelend = irel + sec->reloc_count;
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
-  
+
   for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
     {
       int sidx = ELF32_R_SYM(irel->r_info);
       Elf_Internal_Sym *lsym = isym + sidx;
-      
+
       /* Adjust symbols referenced by .sec+0xXX */
-      if (irel->r_addend > addr && irel->r_addend < toaddr 
+      if (irel->r_addend > addr && irel->r_addend < toaddr
 	  && lsym->st_shndx == sec_shndx)
 	irel->r_addend -= count;
     }
-  
+
   return TRUE;
 }
 
@@ -868,7 +868,7 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
 
   for (p = abfd->sections; p != NULL; p = p->next)
     msp430_elf_relax_adjust_locals(abfd,p,addr,count,sec_shndx,toaddr);
-  
+
   /* Adjust the local symbols defined in this section.  */
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   isym = (Elf_Internal_Sym *) symtab_hdr->contents;
@@ -1013,7 +1013,7 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 
       /* Try to turn a 16bit pc-relative branch into a 10bit pc-relative
          branch.  */
-      /* Paranoia? paranoia...  */      
+      /* Paranoia? paranoia...  */
       if (ELF32_R_TYPE (irel->r_info) == (int) R_MSP430_RL_PCREL)
 	{
 	  bfd_vma value = symval;

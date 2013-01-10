@@ -149,7 +149,7 @@ coff_swap_reloc_out (bfd * abfd, void * src, void * dst)
   H_PUT_32 (abfd, reloc_src->r_symndx, reloc_dst->r_symndx);
   H_PUT_16 (abfd, reloc_src->r_type, reloc_dst->r_type);
 
-#ifdef SWAP_OUT_RELOC_OFFSET 
+#ifdef SWAP_OUT_RELOC_OFFSET
   SWAP_OUT_RELOC_OFFSET (abfd, reloc_src->r_offset, reloc_dst->r_offset);
 #endif
 #ifdef SWAP_OUT_RELOC_EXTRA
@@ -350,7 +350,7 @@ pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
       && pe_data (ibfd) != NULL
       && pe_data (ibfd)->real_flags & IMAGE_FILE_LARGE_ADDRESS_AWARE)
     pe_data (obfd)->real_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
-      
+
   if (!_bfd_XX_bfd_copy_private_bfd_data_common (ibfd, obfd))
     return FALSE;
 
@@ -885,14 +885,14 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       if (import_name_type != IMPORT_NAME)
 	{
 	  char c = symbol[0];
-	  
+
 	  /* Check that we don't remove for targets with empty
 	     USER_LABEL_PREFIX the leading underscore.  */
 	  if ((c == '_' && abfd->xvec->symbol_leading_char != 0)
 	      || c == '@' || c == '?')
 	    symbol++;
 	}
-      
+
       len = strlen (symbol);
       if (import_name_type == IMPORT_NAME_UNDECORATE)
 	{

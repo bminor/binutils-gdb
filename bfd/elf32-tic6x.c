@@ -1787,7 +1787,7 @@ elf32_tic6x_finish_dynamic_symbol (bfd * output_bfd,
 	 Get the offset into the .got table of the entry that
 	 corresponds to this function.  Each .got entry is 4 bytes.
 	 The first three are reserved.
-	 
+
 	 For static executables, we don't reserve anything.  */
 
       plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
@@ -3965,11 +3965,11 @@ elf32_tic6x_add_unwind_table_edit (tic6x_unwind_table_edit **head,
 {
   tic6x_unwind_table_edit *new_edit = (tic6x_unwind_table_edit *)
       xmalloc (sizeof (tic6x_unwind_table_edit));
-  
+
   new_edit->type = type;
   new_edit->linked_section = linked_section;
   new_edit->index = tindex;
-  
+
   if (tindex > 0)
     {
       new_edit->next = NULL;
@@ -4035,7 +4035,7 @@ elf32_tic6x_insert_cantunwind_after (asection *text_sec, asection *exidx_sec)
 
 /* Scan .cx6abi.exidx tables, and create a list describing edits which
    should be made to those tables, such that:
-   
+
      1. Regions without unwind data are marked with EXIDX_CANTUNWIND entries.
      2. Duplicate entries are merged together (EXIDX_CANTUNWIND, or unwind
         codes which have been inlined into the index).
@@ -4063,15 +4063,15 @@ elf32_tic6x_fix_exidx_coverage (asection **text_section_order,
   for (inp = info->input_bfds; inp != NULL; inp = inp->link_next)
     {
       asection *sec;
-      
+
       for (sec = inp->sections; sec != NULL; sec = sec->next)
         {
 	  struct bfd_elf_section_data *elf_sec = elf_section_data (sec);
 	  Elf_Internal_Shdr *hdr = &elf_sec->this_hdr;
-	  
+
 	  if (!hdr || hdr->sh_type != SHT_C6000_UNWIND)
 	    continue;
-	  
+
 	  if (elf_sec->linked_to)
 	    {
 	      Elf_Internal_Shdr *linked_hdr
@@ -4134,13 +4134,13 @@ elf32_tic6x_fix_exidx_coverage (asection **text_section_order,
       hdr = &elf_section_data (exidx_sec)->this_hdr;
       if (hdr->sh_type != SHT_C6000_UNWIND)
         continue;
-      
+
       exidx_data = get_tic6x_elf_section_data (exidx_sec);
       if (exidx_data == NULL)
         continue;
-      
+
       ibfd = exidx_sec->owner;
-	  
+
       if (hdr->contents != NULL)
 	contents = hdr->contents;
       else if (! bfd_malloc_and_get_section (ibfd, exidx_sec, &contents))
@@ -4193,7 +4193,7 @@ elf32_tic6x_fix_exidx_coverage (asection **text_section_order,
       /* Record edits to be applied later (in elf32_tic6x_write_section).  */
       exidx_data->u.exidx.unwind_edit_list = unwind_edit_head;
       exidx_data->u.exidx.unwind_edit_tail = unwind_edit_tail;
-	  
+
       if (deleted_exidx_bytes > 0)
 	elf32_tic6x_adjust_exidx_size (exidx_sec, -deleted_exidx_bytes);
 
@@ -4231,12 +4231,12 @@ elf32_tic6x_copy_exidx_entry (bfd *output_bfd, bfd_byte *to, bfd_byte *from,
   /* High bit of first word is supposed to be zero.  */
   if ((first_word & 0x80000000ul) == 0)
     first_word = elf32_tic6x_add_low31 (first_word, offset);
-  
+
   /* If the high bit of the first word is clear, and the bit pattern is not 0x1
      (EXIDX_CANTUNWIND), this is an offset to an .c6xabi.extab entry.  */
   if ((second_word != 0x1) && ((second_word & 0x80000000ul) == 0))
     second_word = elf32_tic6x_add_low31 (second_word, offset);
-  
+
   bfd_put_32 (output_bfd, first_word, to);
   bfd_put_32 (output_bfd, second_word, to + 4);
 }
@@ -4282,7 +4282,7 @@ elf32_tic6x_write_section (bfd *output_bfd,
       if (edit_node)
 	{
 	  unsigned int edit_index = edit_node->index;
-	  
+
 	  if (in_index < edit_index && in_index * 8 < input_size)
 	    {
 	      elf32_tic6x_copy_exidx_entry (output_bfd,
@@ -4301,7 +4301,7 @@ elf32_tic6x_write_section (bfd *output_bfd,
 		  in_index++;
 		  add_to_offsets += 8;
 		  break;
-		
+
 		case INSERT_EXIDX_CANTUNWIND_AT_END:
 		  {
 		    asection *text_sec = edit_node->linked_section;
@@ -4331,7 +4331,7 @@ elf32_tic6x_write_section (bfd *output_bfd,
 		  }
 		  break;
 		}
-	      
+
 	      edit_node = edit_node->next;
 	    }
 	}

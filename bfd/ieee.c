@@ -1662,7 +1662,7 @@ ieee_slurp_section_data (bfd *abfd)
   unsigned int section_number;
   ieee_per_section_type *current_map = NULL;
   asection *s;
-  
+
   /* Seek to the start of the data area.  */
   if (ieee->read_data)
     return TRUE;

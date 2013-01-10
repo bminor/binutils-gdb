@@ -3712,7 +3712,7 @@ error_free_dyn:
 	return TRUE;
 
       /* Save the DT_AUDIT entry for the linker emulation code. */
-      elf_dt_audit (abfd) = audit; 
+      elf_dt_audit (abfd) = audit;
     }
 
   /* If this is a dynamic object, we always link against the .dynsym
@@ -4029,7 +4029,7 @@ error_free_dyn:
 		  && h->root.u.undef.abfd)
 		undef_bfd = h->root.u.undef.abfd;
 	    }
-	  
+
 	  if (ever == NULL)
 	    {
 	      if (info->default_imported_symver)
@@ -11756,7 +11756,7 @@ _bfd_elf_gc_mark_hook (asection *sec,
 	  if (sec_name && *sec_name != '\0')
 	    {
 	      bfd *i;
-	      
+
 	      for (i = info->input_bfds; i; i = i->link_next)
 		{
 		  sec = bfd_get_section_by_name (i, sec_name);
@@ -12513,7 +12513,7 @@ bfd_elf_lookup_section_flags (struct bfd_link_info *info,
 	    }
 	  if (!tf->valid)
 	    {
-	      info->callbacks->einfo 
+	      info->callbacks->einfo
 		(_("Unrecognized INPUT_SECTION_FLAG %s\n"), tf->name);
 	      return FALSE;
 	    }
@@ -12981,7 +12981,7 @@ get_dynamic_reloc_section_name (bfd *       abfd,
     return NULL;
 
   name = bfd_alloc (abfd, strlen (prefix) + strlen (old_name) + 1);
-  sprintf (name, "%s%s", prefix, old_name); 
+  sprintf (name, "%s%s", prefix, old_name);
 
   return name;
 }

@@ -2009,7 +2009,7 @@ find_abstract_instance_name (struct comp_unit *unit,
 
       info_ptr = unit->sec_info_ptr + die_ref;
     }
-  else 
+  else
     info_ptr = unit->info_ptr_unit + die_ref;
   abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
   info_ptr += bytes_read;
@@ -3508,10 +3508,10 @@ find_line (bfd *abfd,
 	    stash->all_comp_units->prev_unit = each;
 	  else
 	    stash->last_comp_unit = each;
-	  
+
 	  each->next_unit = stash->all_comp_units;
 	  stash->all_comp_units = each;
-	  
+
 	  /* DW_AT_low_pc and DW_AT_high_pc are optional for
 	     compilation units.  If we don't have them (i.e.,
 	     unit->high == 0), we need to consult the line info table

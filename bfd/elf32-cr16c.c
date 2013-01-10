@@ -29,14 +29,14 @@
 
 #define USE_REL	1	/* CR16C uses REL relocations instead of RELA.  */
 
-/* The following definition is based on EMPTY_HOWTO macro, 
+/* The following definition is based on EMPTY_HOWTO macro,
    but also initiates the "name" field in HOWTO struct.  */
 #define ONLY_NAME_HOWTO(C) \
   HOWTO ((C), 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL, \
 	  STRINGX(C), FALSE, 0, 0, FALSE)
 
 /* reloc_map_index array maps CRASM relocation type into a BFD
-   relocation enum. The array's indices are synchronized with 
+   relocation enum. The array's indices are synchronized with
    RINDEX_16C_* indices, created in include/elf/cr16c.h.
    The array is used in:
    1. elf32-cr16c.c : elf_cr16c_reloc_type_lookup().

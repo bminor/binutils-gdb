@@ -5330,7 +5330,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  if (h->call_stub != NULL && h->call_fp_stub != NULL)
 	    {
 	      asection *o;
-	      
+
 	      sec = NULL;
 	      for (o = input_bfd->sections; o != NULL; o = o->next)
 		{
@@ -5919,7 +5919,7 @@ mips_elf_obtain_contents (reloc_howto_type *howto,
 /* It has been determined that the result of the RELOCATION is the
    VALUE.  Use HOWTO to place VALUE into the output file at the
    appropriate position.  The SECTION is the section to which the
-   relocation applies.  
+   relocation applies.
    CROSS_MODE_JUMP_P is true if the relocation field
    is a MIPS16 or microMIPS jump to standard MIPS code, or vice versa.
 
@@ -7840,14 +7840,14 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	{
 	  h = ((struct mips_elf_link_hash_entry *)
 	       sym_hashes[r_symndx - extsymoff]);
-	  
+
 	  /* H is the symbol this stub is for.  */
-	  
+
 	  if (CALL_FP_STUB_P (name))
 	    loc = &h->call_fp_stub;
 	  else
 	    loc = &h->call_stub;
-	  
+
 	  /* If we already have an appropriate stub for this function, we
 	     don't need another one, so we can discard this one.  Since
 	     this function is called before the linker maps input sections
@@ -14032,7 +14032,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
       if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
 	  && (bfd_get_arch_info (obfd)->the_default
-	      || mips_mach_extends_p (bfd_get_mach (obfd), 
+	      || mips_mach_extends_p (bfd_get_mach (obfd),
 				      bfd_get_mach (ibfd))))
 	{
 	  if (! bfd_set_arch_mach (obfd, bfd_get_arch (ibfd),

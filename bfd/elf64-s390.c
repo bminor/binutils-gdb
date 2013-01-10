@@ -415,7 +415,7 @@ s390_elf_ldisp_reloc (bfd *abfd,
       relocation -= reloc_entry->address;
     }
 
-  insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address); 
+  insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
   insn |= (relocation & 0xfff) << 16 | (relocation & 0xff000) >> 4;
   bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
 

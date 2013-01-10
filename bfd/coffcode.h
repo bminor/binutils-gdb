@@ -119,11 +119,11 @@ SUBSUBSECTION
 
 	The Microsoft PE variants of the Coff object file format add
 	an extension to support the use of long section names.  This
-	extension is defined in section 4 of the Microsoft PE/COFF 
+	extension is defined in section 4 of the Microsoft PE/COFF
 	specification (rev 8.1).  If a section name is too long to fit
 	into the section header's @code{s_name} field, it is instead
 	placed into the string table, and the @code{s_name} field is
-	filled with a slash ("/") followed by the ASCII decimal 
+	filled with a slash ("/") followed by the ASCII decimal
 	representation of the offset of the full name relative to the
 	string table base.
 
@@ -140,11 +140,11 @@ SUBSUBSECTION
 	expecting the MS standard format may become confused; @file{PEview} is
 	one known example.
 
-	The functionality is supported in BFD by code implemented under 
+	The functionality is supported in BFD by code implemented under
 	the control of the macro @code{COFF_LONG_SECTION_NAMES}.  If not
 	defined, the format does not support long section names in any way.
-	If defined, it is used to initialise a flag, 
-	@code{_bfd_coff_long_section_names}, and a hook function pointer, 
+	If defined, it is used to initialise a flag,
+	@code{_bfd_coff_long_section_names}, and a hook function pointer,
 	@code{_bfd_coff_set_long_section_names}, in the Coff backend data
 	structure.  The flag controls the generation of long section names
 	in output BFDs at runtime; if it is false, as it will be by default
@@ -153,7 +153,7 @@ SUBSUBSECTION
 	points to a function that allows the value of the flag to be altered
 	at runtime, on formats that support long section names at all; on
 	other formats it points to a stub that returns an error indication.
-	
+
 	With input BFDs, the flag is set according to whether any long section
 	names are detected while reading the section headers.  For a completely
 	new BFD, the flag is set to the default for the target format.  This
@@ -707,7 +707,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
        & (SEC_LINK_DUPLICATES_DISCARD | SEC_LINK_DUPLICATES_SAME_CONTENTS
           | SEC_LINK_DUPLICATES_SAME_SIZE)) != 0)
     styp_flags |= IMAGE_SCN_LNK_COMDAT;
-  
+
   /* skip LINKER_CREATED */
 
   if ((sec_flags & SEC_COFF_NOREAD) == 0)
@@ -1385,7 +1385,7 @@ Special entry points for gdb to swap in coff symbol table parts:
 .  bfd_boolean _bfd_coff_long_section_names;
 .  bfd_boolean (*_bfd_coff_set_long_section_names)
 .    (bfd *, int);
-.  
+.
 .  unsigned int _bfd_coff_default_section_alignment_power;
 .  bfd_boolean _bfd_coff_force_symnames_in_strings;
 .  unsigned int _bfd_coff_debug_string_prefix_length;

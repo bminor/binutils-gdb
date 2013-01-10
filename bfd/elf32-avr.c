@@ -1703,8 +1703,8 @@ elf32_avr_relax_section (bfd *abfd,
   struct elf32_avr_link_hash_table *htab;
 
   /* If 'shrinkable' is FALSE, do not shrink by deleting bytes while
-     relaxing. Such shrinking can cause issues for the sections such 
-     as .vectors and .jumptables. Instead the unused bytes should be 
+     relaxing. Such shrinking can cause issues for the sections such
+     as .vectors and .jumptables. Instead the unused bytes should be
      filled with nop instructions. */
   bfd_boolean shrinkable = TRUE;
 
@@ -1875,7 +1875,7 @@ elf32_avr_relax_section (bfd *abfd,
               distance_short_enough = 1;
             /* If shrinkable, then we can check for a range of distance which
                is two bytes farther on both the directions because the call
-               or jump target will be closer by two bytes after the 
+               or jump target will be closer by two bytes after the
                relaxation. */
             else if (shrinkable && ((int) gap >= -4094 && (int) gap <= 4097))
               distance_short_enough = 1;
@@ -1952,7 +1952,7 @@ elf32_avr_relax_section (bfd *abfd,
                                              R_AVR_13_PCREL);
 
                 /* We should not modify the ordering if 'shrinkable' is
-                   FALSE. */ 
+                   FALSE. */
                 if (!shrinkable)
                   {
                     /* Let's insert a nop.  */

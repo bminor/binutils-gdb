@@ -2919,7 +2919,7 @@ DESCRIPTION
 /* Sections marked with the SEC_LINK_ONCE flag should only be linked
    once into the output.  This routine checks each section, and
    arrange to discard it if a section of the same name has already
-   been linked.  This code assumes that all relevant sections have the 
+   been linked.  This code assumes that all relevant sections have the
    SEC_LINK_ONCE flag set; that is, it does not depend solely upon the
    section name.  bfd_section_already_linked is called via
    bfd_map_over_sections.  */
@@ -3302,7 +3302,7 @@ bfd_generic_define_common_symbol (bfd *output_bfd,
 
 /*
 FUNCTION
-	bfd_find_version_for_sym 
+	bfd_find_version_for_sym
 
 SYNOPSIS
 	struct bfd_elf_version_tree * bfd_find_version_for_sym

@@ -1415,7 +1415,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
 	 TRUE),			/* pcrel_offset */
-	 
+
   /* A relative 15 bit branch.  */
   HOWTO (R_PPC_VLE_REL15,	/* type */
 	 1,			/* rightshift */
@@ -1431,7 +1431,7 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
 	 0xfe,			/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
-  /* A relative 24 bit branch.  */ 
+  /* A relative 24 bit branch.  */
   HOWTO (R_PPC_VLE_REL24,	/* type */
 	 1,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -2259,7 +2259,7 @@ ppc_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type, ...)
 }
 
 static flagword
-ppc_elf_lookup_section_flags (char *flag_name) 
+ppc_elf_lookup_section_flags (char *flag_name)
 {
 
   if (!strcmp (flag_name, "SHF_PPC_VLE"))
@@ -2353,7 +2353,7 @@ ppc_elf_additional_program_headers (bfd *abfd,
   return ret;
 }
 
-/* Modify the segment map for VLE executables.  */ 
+/* Modify the segment map for VLE executables.  */
 
 bfd_boolean
 ppc_elf_modify_segment_map (bfd *abfd,
@@ -3413,7 +3413,7 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
   /* If we were called to copy over info for a weak sym, that's all.
      You might think dyn_relocs need not be copied over;  After all,
      both syms will be dynamic or both non-dynamic so we're just
-     moving reloc accounting around.  However, ELIMINATE_COPY_RELOCS 
+     moving reloc accounting around.  However, ELIMINATE_COPY_RELOCS
      code in ppc_elf_adjust_dynamic_symbol needs to check for
      dyn_relocs in read-only sections, and it does so on what is the
      DIR sym here.  */

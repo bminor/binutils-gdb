@@ -62,7 +62,7 @@ extern "C" {
    problem for example when trying to use STRING_COMMA_LEN to build
    the arguments to the strncmp() macro.  Hence this alternative
    definition of strncmp is provided here.
-   
+
    Note - these macros do NOT work if STR2 is not a constant string.  */
 #define CONST_STRNEQ(STR1,STR2) (strncmp ((STR1), (STR2), sizeof (STR2) - 1) == 0)
   /* strcpy() can have a similar problem, but since we know we are
@@ -955,7 +955,7 @@ extern bfd_boolean elf64_aarch64_size_stubs
    void (*) (void));
 extern bfd_boolean elf64_aarch64_build_stubs
   (struct bfd_link_info *);
-  
+
 /* TI COFF load page support.  */
 extern void bfd_ticoff_set_section_load_page
   (struct bfd_section *, int);

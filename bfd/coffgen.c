@@ -647,7 +647,7 @@ fixup_symbol_value (bfd *abfd,
 		    struct internal_syment *syment)
 {
   /* Normalize the symbol flags.  */
-  if (coff_symbol_ptr->symbol.section 
+  if (coff_symbol_ptr->symbol.section
       && bfd_is_com_section (coff_symbol_ptr->symbol.section))
     {
       /* A common symbol is undefined with a value.  */
@@ -1519,7 +1519,7 @@ coff_pointerize_aux (bfd *abfd,
   /* Otherwise patch up.  */
 #define N_TMASK coff_data  (abfd)->local_n_tmask
 #define N_BTSHFT coff_data (abfd)->local_n_btshft
-  
+
   if ((ISFCN (type) || ISTAG (n_sclass) || n_sclass == C_BLOCK
        || n_sclass == C_FCN)
       && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l > 0)
@@ -1942,7 +1942,7 @@ coff_bfd_make_debug_symbol (bfd *abfd,
   new_symbol->lineno = NULL;
   new_symbol->done_lineno = FALSE;
   new_symbol->symbol.the_bfd = abfd;
-  
+
   return & new_symbol->symbol;
 }
 

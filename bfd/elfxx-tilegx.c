@@ -2977,7 +2977,7 @@ static const bfd_byte insn_mask_X1[] = {
 /* Mask to extract the bits corresponding to an instruction in a
    specific pipe of a bundle, minus the destination operand and the
    first source operand.  */
-static const bfd_byte insn_mask_X0_no_dest_no_srca[] = { 
+static const bfd_byte insn_mask_X0_no_dest_no_srca[] = {
   0x00, 0xf0, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00
 };
 

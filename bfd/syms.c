@@ -77,7 +77,7 @@ SUBSECTION
 |
 |	  if (storage_needed == 0)
 |	    return;
-|	  
+|
 |	  symbol_table = xmalloc (storage_needed);
 |	    ...
 |	  number_of_symbols =
@@ -1008,7 +1008,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	  /* Try SOM section names.  */
 	  info->stabsec = bfd_get_section_by_name (abfd, "$GDB_SYMBOLS$");
 	  info->strsec  = bfd_get_section_by_name (abfd, "$GDB_STRINGS$");
-  
+
 	  if (info->stabsec == NULL || info->strsec == NULL)
 	    {
 	      /* No stabs debugging information.  Set *pinfo so that we

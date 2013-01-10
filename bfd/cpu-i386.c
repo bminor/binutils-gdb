@@ -50,7 +50,7 @@ bfd_arch_i386_fill (bfd_size_type count, bfd_boolean code,
 		    bfd_boolean long_nop)
 {
   /* nop */
-  static const char nop_1[] = { 0x90 };	
+  static const char nop_1[] = { 0x90 };
   /* xchg %ax,%ax */
   static const char nop_2[] = { 0x66, 0x90 };
   /* nopl (%[re]ax) */

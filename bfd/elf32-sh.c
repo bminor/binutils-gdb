@@ -4233,7 +4233,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      ((*_bfd_error_handler)
 	       (_("%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
 		input_section->owner,
-		(unsigned long) rel->r_offset, howto->name, 
+		(unsigned long) rel->r_offset, howto->name,
 		(unsigned long) relocation));
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -4248,7 +4248,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      ((*_bfd_error_handler)
 	       (_("%B: 0x%lx: fatal: unaligned %s relocation 0x%lx"),
 		input_section->owner,
-		(unsigned long) rel->r_offset, howto->name, 
+		(unsigned long) rel->r_offset, howto->name,
 		(unsigned long) relocation));
 	      bfd_set_error (bfd_error_bad_value);
 	      return FALSE;
@@ -5933,9 +5933,9 @@ sh_elf_copy_indirect_symbol (struct bfd_link_info *info,
   eind->datalabel_got.refcount = 0;
 #endif
   edir->funcdesc.refcount += eind->funcdesc.refcount;
-  eind->funcdesc.refcount = 0;  
+  eind->funcdesc.refcount = 0;
   edir->abs_funcdesc_refcount += eind->abs_funcdesc_refcount;
-  eind->abs_funcdesc_refcount = 0;  
+  eind->abs_funcdesc_refcount = 0;
 
   if (ind->root.type == bfd_link_hash_indirect
       && dir->got.refcount <= 0)
@@ -6555,7 +6555,7 @@ sh_elf_set_mach_from_flags (bfd *abfd)
 
   if (sh_ef_bfd_table[flags] == 0)
     return FALSE;
-  
+
   bfd_default_set_arch_mach (abfd, bfd_arch_sh, sh_ef_bfd_table[flags]);
 
   return TRUE;
@@ -6571,11 +6571,11 @@ int
 sh_elf_get_flags_from_mach (unsigned long mach)
 {
   int i = ARRAY_SIZE (sh_ef_bfd_table) - 1;
-  
+
   for (; i>0; i--)
     if (sh_ef_bfd_table[i] == mach)
       return i;
-  
+
   /* shouldn't get here */
   BFD_FAIL();
 
@@ -7245,7 +7245,7 @@ sh_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 
   if (sgotplt && sgotplt->size > 0)
     elf_section_data (sgotplt->output_section)->this_hdr.sh_entsize = 4;
-    
+
   /* At the very end of the .rofixup section is a pointer to the GOT.  */
   if (htab->fdpic_p && htab->srofixup != NULL)
     {
@@ -7351,7 +7351,7 @@ elf32_shlin_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 }
 #endif /* not SH_TARGET_ALREADY_DEFINED */
 
- 
+
 /* Return address for Ith PLT stub in section PLT, for relocation REL
    or (bfd_vma) -1 if it should not be included.  */
 

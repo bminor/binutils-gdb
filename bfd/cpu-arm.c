@@ -252,10 +252,10 @@ arm_check_note (bfd *abfd,
 	return FALSE;
     }
   else
-    { 
+    {
       if (namesz != ((strlen (expected_name) + 1 + 3) & ~3))
 	return FALSE;
-      
+
       if (strcmp (descr, expected_name) != 0)
 	return FALSE;
 

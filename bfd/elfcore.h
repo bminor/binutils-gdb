@@ -294,7 +294,7 @@ elf_core_file_p (bfd *abfd)
   {
     bfd_size_type high = 0;
     struct stat statbuf;
-    for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex) 
+    for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex)
       {
 	Elf_Internal_Phdr *p = i_phdrp + phindex;
 	if (p->p_filesz)
@@ -315,7 +315,7 @@ elf_core_file_p (bfd *abfd)
 	  }
       }
   }
-  
+
   /* Save the entry point from the ELF header.  */
   bfd_get_start_address (abfd) = i_ehdrp->e_entry;
 

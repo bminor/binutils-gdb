@@ -367,7 +367,7 @@ static const mach_o_section_name_xlat import_section_names_xlat[] =
   {
     {	".picsymbol_stub3",		"__jump_table",
 	SEC_CODE | SEC_LOAD,		BFD_MACH_O_S_SYMBOL_STUBS,
-	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS 
+	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS
 	| BFD_MACH_O_S_SELF_MODIFYING_CODE,
 					6},
     {	".non_lazy_symbol_pointer_x86",	"__pointers",
@@ -391,7 +391,7 @@ const mach_o_segment_name_xlat mach_o_i386_segsec_names_xlat[] =
 #define bfd_mach_o_tgt_seg_table mach_o_i386_segsec_names_xlat
 #define bfd_mach_o_section_type_valid_for_tgt NULL
 
-#define bfd_mach_o_bfd_reloc_type_lookup bfd_mach_o_i386_bfd_reloc_type_lookup 
+#define bfd_mach_o_bfd_reloc_type_lookup bfd_mach_o_i386_bfd_reloc_type_lookup
 #define bfd_mach_o_bfd_reloc_name_lookup bfd_mach_o_i386_bfd_reloc_name_lookup
 
 #define TARGET_NAME 		mach_o_i386_vec

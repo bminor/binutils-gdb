@@ -45,7 +45,7 @@
 /* A reference to a shared library.
    The text portion of the object contains "overflow text" from
    the shared library to be linked in with an object.  */
-#define SLOMAGIC        (MF_IS_SL | OMAGIC) 
+#define SLOMAGIC        (MF_IS_SL | OMAGIC)
 
 /* Sqeezed demand paged.
    NOTE: This interpretation of QMAGIC seems to be at variance

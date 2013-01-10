@@ -332,7 +332,7 @@ static reloc_howto_type crx_elf_howto_table[] =
 	 0x0,  			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
- 
+
   /* An 8 bit switch table entry.  This is generated for an expression
      such as ``.byte L1 - L2''.  The offset holds the difference
      between the reloc address and L2.  */
@@ -475,10 +475,10 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
      case R_CRX_SWITCH8:
      case R_CRX_SWITCH16:
      case R_CRX_SWITCH32:
-       /* We only care about the addend, where the difference between 
+       /* We only care about the addend, where the difference between
 	  expressions is kept.  */
        Rvalue = 0;
-       
+
      default:
        break;
     }
@@ -585,7 +585,7 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
 /* Delete some bytes from a section while relaxing.  */
 
 static bfd_boolean
-elf32_crx_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd, 
+elf32_crx_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd,
 			      asection *sec, bfd_vma addr, int count)
 {
   Elf_Internal_Shdr *symtab_hdr;
@@ -632,7 +632,7 @@ elf32_crx_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd,
 	  && isym->st_value > addr
 	  && isym->st_value < toaddr)
 	{
-	  /* Adjust the addend of SWITCH relocations in this section, 
+	  /* Adjust the addend of SWITCH relocations in this section,
 	     which reference this local symbol.  */
 	  for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
 	    {
@@ -677,22 +677,22 @@ elf32_crx_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd,
     {
       struct elf_link_hash_entry *sym_hash = *sym_hashes;
 
-      /* The '--wrap SYMBOL' option is causing a pain when the object file, 
-	 containing the definition of __wrap_SYMBOL, includes a direct 
-	 call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference 
-	 the same symbol (which is __wrap_SYMBOL), but still exist as two 
-	 different symbols in 'sym_hashes', we don't want to adjust 
-	 the global symbol __wrap_SYMBOL twice.  
+      /* The '--wrap SYMBOL' option is causing a pain when the object file,
+	 containing the definition of __wrap_SYMBOL, includes a direct
+	 call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference
+	 the same symbol (which is __wrap_SYMBOL), but still exist as two
+	 different symbols in 'sym_hashes', we don't want to adjust
+	 the global symbol __wrap_SYMBOL twice.
 	 This check is only relevant when symbols are being wrapped.  */
       if (link_info->wrap_hash != NULL)
 	{
 	  struct elf_link_hash_entry **cur_sym_hashes;
-	  
+
 	  /* Loop only over the symbols whom been already checked.  */
-	  for (cur_sym_hashes = start_hashes; cur_sym_hashes < sym_hashes; 
+	  for (cur_sym_hashes = start_hashes; cur_sym_hashes < sym_hashes;
 	       cur_sym_hashes++)
 	    {
-	      /* If the current symbol is identical to 'sym_hash', that means 
+	      /* If the current symbol is identical to 'sym_hash', that means
 		 the symbol was already adjusted (or at least checked).  */
 	      if (*cur_sym_hashes == sym_hash)
 		break;

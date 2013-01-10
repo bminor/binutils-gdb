@@ -362,7 +362,7 @@ s390_elf_ldisp_reloc (bfd *abfd ATTRIBUTE_UNUSED,
   reloc_howto_type *howto = reloc_entry->howto;
   bfd_vma relocation;
   bfd_vma insn;
-  
+
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
       && (! howto->partial_inplace
@@ -371,13 +371,13 @@ s390_elf_ldisp_reloc (bfd *abfd ATTRIBUTE_UNUSED,
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;
     }
-  
+
   if (output_bfd != NULL)
     return bfd_reloc_continue;
-  
+
   if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
     return bfd_reloc_outofrange;
-  
+
   relocation = (symbol->value
 		+ symbol->section->output_section->vma
 		+ symbol->section->output_offset);
@@ -388,11 +388,11 @@ s390_elf_ldisp_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 		     + input_section->output_offset);
       relocation -= reloc_entry->address;
     }
-  
+
   insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
   insn |= (relocation & 0xfff) << 16 | (relocation & 0xff000) >> 4;
   bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
-  
+
   if ((bfd_signed_vma) relocation < - 0x80000
       || (bfd_signed_vma) relocation > 0x7ffff)
     return bfd_reloc_overflow;

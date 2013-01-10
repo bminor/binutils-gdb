@@ -667,7 +667,7 @@ elf32_m68hc11_build_stubs (bfd *abfd, struct bfd_link_info *info)
   /* Build the stubs as directed by the stub hash table.  */
   table = htab->stub_hash_table;
   bfd_hash_traverse (table, m68hc11_elf_export_one_stub, info);
-  
+
   /* Scan the output sections to see if we use the memory banks.
      If so, export the symbols that define how the memory banks
      are mapped.  This is used by gdb and the simulator to obtain
@@ -1117,7 +1117,7 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                       "relocation may result in incorrect execution");
               buf = alloca (strlen (msg) + strlen (name) + 10);
               sprintf (buf, msg, name);
-              
+
               (* info->callbacks->warning)
                 (info, buf, name, input_bfd, NULL, rel->r_offset);
             }
@@ -1443,7 +1443,7 @@ _bfd_m68hc11_elf_print_private_bfd_data (bfd *abfd, void *ptr)
   else if (elf_elfheader (abfd)->e_flags & EF_M68HCS12_MACH)
     fprintf (file, _("cpu=HCS12]"));
   else
-    fprintf (file, _("cpu=HC12]"));    
+    fprintf (file, _("cpu=HC12]"));
 
   if (elf_elfheader (abfd)->e_flags & E_M68HC12_BANKS)
     fprintf (file, _(" [memory=bank-model]"));
@@ -1466,7 +1466,7 @@ static void scan_sections_for_abi (bfd *abfd ATTRIBUTE_UNUSED,
   if (asect->vma >= p->pinfo->bank_virtual)
     p->use_memory_banks = TRUE;
 }
-  
+
 /* Tweak the OSABI field of the elf header.  */
 
 void
