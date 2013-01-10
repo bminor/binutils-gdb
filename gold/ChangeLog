@@ -1,3 +1,17 @@
+2013-01-09  Sriraman Tallam  <tmsriram@google.com>
+
+	* output.h (sort_attached_input_sections): Change to be public.
+	* script-sections.cc
+	(Output_section_definition::set_section_addresses): Sort
+	attached input sections according to section order before linker
+	script assigns section addresses.
+	(Orphan_output_section::set_section_addresses): Sort
+	attached input sections according to section order before linker
+	script assigns section addresses.
+	* Makefile.am (final_layout.sh): Use a simple linker script to
+	check if section ordering still works.
+	* Makefile.in: Regenerate.
+
 2013-01-09  Ben Cheng  <bccheng@google.com>
 
 	* arm.cc (Target_arm::attributes_accept_div): New function.

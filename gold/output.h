@@ -3300,6 +3300,10 @@ class Output_section : public Output_data
     this->dynsym_index_ = index;
   }
 
+  // Sort the attached input sections.
+  void
+  sort_attached_input_sections();
+
   // Return whether the input sections sections attachd to this output
   // section may require sorting.  This is used to handle constructor
   // priorities compatibly with GNU ld.
@@ -4252,10 +4256,6 @@ class Output_section : public Output_data
   void
   add_output_merge_section(Output_section_data* posd, bool is_string,
 			   uint64_t entsize);
-
-  // Sort the attached input sections.
-  void
-  sort_attached_input_sections();
 
   // Find the merge section into which an input section with index SHNDX in
   // OBJECT has been added.  Return NULL if none found.
