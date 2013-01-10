@@ -1,3 +1,20 @@
+2013-01-10  Will Newton <will.newton@imgtec.com>
+
+	* Makefile.am: Add Meta.
+	* Makefile.in: Regenerate.
+	* archures.c (bfd_mach_metag): New.
+	* bfd-in2.h: Regenerate.
+	* config.bfd: Add Meta.
+	* configure: Regenerate.
+	* configure.in: Add Meta.
+	* cpu-metag.c: New file.
+	* elf-bfd.h: Add Meta.
+	* elf32-metag.c: New file.
+	* elf32-metag.h: New file.
+	* libbfd.h: Regenerate.
+	* reloc.c: Add Meta relocations.
+	* targets.c: Add Meta.
+
 2013-01-08  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* elf-bfd.h (elfcore_write_aarch_tls): Add prototype.

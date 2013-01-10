@@ -415,6 +415,7 @@ mcore-*-pe)		targ_emul=mcorepe ;
 mcore-*-elf)		targ_emul=elf32mcore
 			;;
 mep-*-elf)		targ_emul=elf32mep ;;
+metag-*-*)		targ_emul=elf32metag ;;
 microblazeel*-linux*)	targ_emul="elf32mbel_linux"
 			targ_extra_emuls="elf32mb_linux"
 			;;

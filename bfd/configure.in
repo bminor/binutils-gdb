@@ -780,6 +780,7 @@ do
     bfd_elf32_mcore_little_vec)	tb="$tb elf32-mcore.lo elf32.lo $elf" ;;
     bfd_elf32_mep_vec)		tb="$tb elf32-mep.lo elf32.lo $elf" ;;
     bfd_elf32_mep_little_vec)	tb="$tb elf32-mep.lo elf32.lo $elf" ;;
+    bfd_elf32_metag_vec)	tb="$tb elf32-metag.lo elf32.lo $elf" ;;
     bfd_elf32_microblazeel_vec)	tb="$tb elf32-microblaze.lo elf32.lo $elf" ;;
     bfd_elf32_microblaze_vec)	tb="$tb elf32-microblaze.lo elf32.lo $elf" ;;
     bfd_elf32_mn10200_vec)	tb="$tb elf-m10200.lo elf32.lo $elf" ;;

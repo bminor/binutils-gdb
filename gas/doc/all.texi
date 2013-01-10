@@ -52,6 +52,7 @@
 @set M68HC11
 @set M680X0
 @set MCORE
+@set METAG
 @set MICROBLAZE
 @set MIPS
 @set MMIX

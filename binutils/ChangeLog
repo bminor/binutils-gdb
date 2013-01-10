@@ -1,3 +1,11 @@
+2013-01-10  Will Newton <will.newton@imgtec.com>
+
+	* binutils/readelf.c: (guess_is_rela): Add EM_METAG.
+	(dump_relocations): Add EM_METAG.
+	(get_machine_name): Correct case for Meta.
+	(is_32bit_abs_reloc): Add support for Meta ADDR32 reloc.
+	(is_none_reloc): Add support for Meta NONE reloc.
+
 2013-01-08  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* readelf.c (get_note_type): Handle NT_ARM_TLS, NT_ARM_HW_BREAK

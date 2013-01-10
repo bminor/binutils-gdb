@@ -1,3 +1,16 @@
+2013-01-10  Will Newton <will.newton@imgtec.com>
+
+	* Makefile.am: Add Meta.
+	* Makefile.in: Regenerate.
+	* config/tc-metag.c: New file.
+	* config/tc-metag.h: New file.
+	* configure.tgt: Add Meta.
+	* doc/Makefile.am: Add Meta.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi: Add Meta.
+	* doc/as.texiinfo: Document Meta options.
+	* doc/c-metag.texi: New file.
+
 2013-01-09  Steve Ellcey  <sellcey@mips.com>
 
 	* config/tc-i386.c (md_begin): Remove 'internal Error' from as_fatal

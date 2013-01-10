@@ -387,6 +387,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-jsri2bsr}] [@b{-sifilter}] [@b{-relax}]
    [@b{-mcpu=[210|340]}]
 @end ifset
+@ifset METAG
+
+@emph{Target Meta options:}
+   [@b{-mcpu=@var{cpu}}] [@b{-mfpu=@var{cpu}}] [@b{-mdsp=@var{cpu}}]
+@end ifset
 @ifset MICROBLAZE
 @emph{Target MICROBLAZE options:}
 @c MicroBlaze has no machine-dependent assembler options.
@@ -1372,7 +1377,28 @@ Assemble for a little endian target.
 
 @end table
 @end ifset
+@c man end
 
+@ifset METAG
+
+@ifclear man
+@xref{Meta Options}, for the options available when @value{AS} is configured
+for a Meta processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for a
+Meta processor.
+@c man end
+@c man begin INCLUDE
+@include c-metag.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
+@c man begin OPTIONS
 @ifset MMIX
 See the info pages for documentation of the MMIX-specific options.
 @end ifset
@@ -7018,6 +7044,9 @@ subject, see the hardware manufacturer's manual.
 @ifset M68HC11
 * M68HC11-Dependent::           M68HC11 and 68HC12 Dependent Features
 @end ifset
+@ifset METAG
+* Meta-Dependent ::             Meta Dependent Features
+@end ifset
 @ifset MICROBLAZE
 * MicroBlaze-Dependent::	MICROBLAZE Dependent Features
 @end ifset
@@ -7219,6 +7248,10 @@ family.
 
 @ifset M68HC11
 @include c-m68hc11.texi
+@end ifset
+
+@ifset METAG
+@include c-metag.texi
 @end ifset
 
 @ifset MICROBLAZE

@@ -1,3 +1,29 @@
+2013-01-10  Will Newton <will.newton@imgtec.com>
+
+	* gas/metag/labelarithmetic.d: New file.
+	* gas/metag/labelarithmetic.s: New file.
+	* gas/metag/metacore12.d: New file.
+	* gas/metag/metacore12.s: New file.
+	* gas/metag/metacore21-invalid.l: New file.
+	* gas/metag/metacore21-invalid.s: New file.
+	* gas/metag/metacore21.d: New file.
+	* gas/metag/metacore21.s: New file.
+	* gas/metag/metacore21ext.d: New file.
+	* gas/metag/metacore21ext.s: New file.
+	* gas/metag/metadsp21-invalid.l: New file.
+	* gas/metag/metadsp21-invalid.s: New file.
+	* gas/metag/metadsp21.d: New file.
+	* gas/metag/metadsp21.s: New file.
+	* gas/metag/metadsp21ext.d: New file.
+	* gas/metag/metadsp21ext.s: New file.
+	* gas/metag/metafpu21.d: New file.
+	* gas/metag/metafpu21.s: New file.
+	* gas/metag/metafpu21ext.d: New file.
+	* gas/metag/metafpu21ext.s: New file.
+	* gas/metag/metag.exp: New file.
+	* gas/metag/tls.d: New file.
+	* gas/metag/tls.s: New file.
+
 2013-01-08  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/diagnostic.s: Add test.

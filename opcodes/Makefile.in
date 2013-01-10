@@ -461,6 +461,7 @@ TARGET_LIBOPCODES_CFILES = \
 	mep-dis.c \
 	mep-ibld.c \
 	mep-opc.c \
+	metag-dis.c \
 	microblaze-dis.c \
 	micromips-opc.c \
 	mips-dis.c \
@@ -857,6 +858,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mep-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mep-ibld.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mep-opc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/metag-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/microblaze-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/micromips-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mips-dis.Plo@am__quote@

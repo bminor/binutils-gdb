@@ -365,6 +365,8 @@ DESCRIPTION
 .#define bfd_mach_mep		1
 .#define bfd_mach_mep_h1	0x6831
 .#define bfd_mach_mep_c5	0x6335
+.  bfd_arch_metag,
+.#define bfd_mach_metag		1
 .  bfd_arch_ia64,      {* HP/Intel ia64 *}
 .#define bfd_mach_ia64_elf64	64
 .#define bfd_mach_ia64_elf32	32
@@ -548,6 +550,7 @@ extern const bfd_arch_info_type bfd_m68k_arch;
 extern const bfd_arch_info_type bfd_m88k_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_mep_arch;
+extern const bfd_arch_info_type bfd_metag_arch;
 extern const bfd_arch_info_type bfd_mips_arch;
 extern const bfd_arch_info_type bfd_microblaze_arch;
 extern const bfd_arch_info_type bfd_mmix_arch;
@@ -635,6 +638,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_m88k_arch,
     &bfd_mcore_arch,
     &bfd_mep_arch,
+    &bfd_metag_arch,
     &bfd_microblaze_arch,
     &bfd_mips_arch,
     &bfd_mmix_arch,

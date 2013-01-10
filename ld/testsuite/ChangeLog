@@ -1,3 +1,26 @@
+2013-01-10  Will Newton <will.newton@imgtec.com>
+
+	* ld-elf/merge.d: Mark Meta as xfail.
+	* ld-gc/start.d: Skip this test on Meta.
+	* ld-gc/personality.d: Skip this test on Meta.
+	* ld-metag/external.s: New file.
+	* ld-metag/metag.exp: New file.
+	* ld-metag/pcrel.d: New file.
+	* ld-metag/pcrel.s: New file.
+	* ld-metag/shared.d: New file.
+	* ld-metag/shared.r: New file.
+	* ld-metag/shared.s: New file.
+	* ld-metag/stub.d: New file.
+	* ld-metag/stub.s: New file.
+	* ld-metag/stub_pic_app.d: New file.
+	* ld-metag/stub_pic_app.r: New file.
+	* ld-metag/stub_pic_app.s: New file.
+	* ld-metag/stub_pic_shared.d: New file.
+	* ld-metag/stub_pic_shared.s: New file.
+	* ld-metag/stub_shared.d: New file.
+	* ld-metag/stub_shared.r: New file.
+	* ld-metag/stub_shared.s: New file.
+
 2013-01-08  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* ld-i386/export-class.exp: Restore (and reword) comment about

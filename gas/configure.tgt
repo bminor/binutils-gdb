@@ -306,6 +306,9 @@ case ${generic_target} in
 
   mep-*-elf)				fmt=elf ;;
 
+  metag-*-elf)				fmt=elf ;;
+  metag-*-linux*)			fmt=elf em=linux ;;
+
   mcore-*-elf)				fmt=elf ;;
   mcore-*-pe)				fmt=coff em=pe bfd_gas=yes ;;
 

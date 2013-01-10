@@ -58,6 +58,7 @@
 #define ARCH_m88k
 #define ARCH_mcore
 #define ARCH_mep
+#define ARCH_metag
 #define ARCH_microblaze
 #define ARCH_mips
 #define ARCH_mmix
@@ -307,6 +308,11 @@ disassembler (abfd)
 #ifdef ARCH_mep
     case bfd_arch_mep:
       disassemble = print_insn_mep;
+      break;
+#endif
+#ifdef ARCH_metag
+    case bfd_arch_metag:
+      disassemble = print_insn_metag;
       break;
 #endif
 #ifdef ARCH_mips
@@ -579,6 +585,11 @@ disassemble_init_for_target (struct disassemble_info * info)
     case bfd_arch_mep:
       info->skip_zeroes = 256;
       info->skip_zeroes_at_end = 0;
+      break;
+#endif
+#ifdef ARCH_metag
+    case bfd_arch_metag:
+      info->disassembler_needs_relocs = TRUE;
       break;
 #endif
 #ifdef ARCH_m32c

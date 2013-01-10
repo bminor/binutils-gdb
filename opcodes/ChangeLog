@@ -1,3 +1,12 @@
+2013-01-10  Will Newton <will.newton@imgtec.com>
+
+	* Makefile.am: Add Meta.
+	* configure.in: Add Meta.
+	* disassemble.c: Add Meta support.
+	* metag-dis.c: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2013-01-07  Kaushik Phatak  <kaushik.phatak@kpitcummins.com>
 
 	* cr16-dis.c (make_instruction): Rename to cr16_make_instruction.
