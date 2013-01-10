@@ -349,8 +349,11 @@ md_begin (void)
       prev_op_name = op_handles[j].name;
     }
 
-  if (flag_print_opcodes == 1)
-    xgate_print_table ();
+  if (flag_print_opcodes)
+    {
+      print_opcode_list ();
+      exit (EXIT_SUCCESS);
+    }
 }
 
 void

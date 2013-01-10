@@ -1,3 +1,8 @@
+2013-01-10  Sean Keys  <skeys@ipdatasys.com>
+
+	* config/tc-xgate.c (md_begin): Fix the printing of opcodes so
+        that the assember exits after the opcodes have been printed.
+
 2013-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* app.c: Remove trailing white spaces.
