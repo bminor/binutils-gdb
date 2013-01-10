@@ -267,7 +267,8 @@ sim_open (kind, cb, abfd, argv)
 
   /* determine the machine type */
   if (STATE_ARCHITECTURE (sd) != NULL
-      && STATE_ARCHITECTURE (sd)->arch == bfd_arch_v850)
+      && (STATE_ARCHITECTURE (sd)->arch == bfd_arch_v850
+	  || STATE_ARCHITECTURE (sd)->arch == bfd_arch_v850_rh850))
     mach = STATE_ARCHITECTURE (sd)->mach;
   else
     mach = bfd_mach_v850; /* default */
@@ -278,6 +279,8 @@ sim_open (kind, cb, abfd, argv)
     case bfd_mach_v850:
     case bfd_mach_v850e:
     case bfd_mach_v850e1:
+    case bfd_mach_v850e2:
+    case bfd_mach_v850e2v3:
       STATE_CPU (sd, 0)->psw_mask = (PSW_NP | PSW_EP | PSW_ID | PSW_SAT
 				     | PSW_CY | PSW_OV | PSW_S | PSW_Z);
       break;

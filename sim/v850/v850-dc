@@ -42,7 +42,7 @@
 
 # for trncf.sw, cvtf.sw
   switch,combine        :   0 :    0 :    :    :    :    0 :F_I         : v850e2v3
-  switch,combine        :   3 :    3 :    :    :    :    0 :F_I         : v850e2v3
+  switch,combine        :   4 :    0 :    :    :    :    0 :F_I         : v850e2v3
 
 # for rsqrtf.s, sqrtf.s
   switch,combine        :   1 :    1 :    :    :    :    0 :F_I         : v850e2v3

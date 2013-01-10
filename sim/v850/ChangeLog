@@ -1,3 +1,17 @@
+2013-01-10  Nick Clifton  <nickc@redhat.com>
+
+	* interp.c (sim_open): Add support for bfd_arch_v850_rh850
+	architecture type.  Add support for bfd_mach_v850e2 and
+	bfd_mach_v850e2v3 machine numbers.
+        * v850.igen (dbtrap): Add support for SIM_OPEN_DEBUG.
+        (cmpf.d): Correct order of operands.
+        (cmpf.s): Likewise.
+        (trncf.dul): New pattern.
+        (trncf.duw): New pattern.
+        (trncf.sul): New pattern.
+        (trncf.suw): New pattern.
+        * v850-dc: Correct bitfield selection for TRNCF.SW and CVTF.SW.
+
 2012-09-13  Nick Clifton  <nickc@redhat.com>
 
 	* v850.igen (W,WWWW): Correct computation of register number.
