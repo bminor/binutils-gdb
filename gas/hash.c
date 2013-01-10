@@ -1,6 +1,6 @@
 /* hash.c -- gas hash table code
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2002, 2003, 2005, 2007, 2008, 2009, 2011
+   2000, 2001, 2002, 2003, 2005, 2007, 2008, 2009, 2011, 2013
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -83,7 +83,7 @@ set_gas_hash_table_size (unsigned long size)
 
 /* Create a hash table.  This return a control block.  */
 
-static struct hash_control *
+struct hash_control *
 hash_new_sized (unsigned long size)
 {
   unsigned long alloc;

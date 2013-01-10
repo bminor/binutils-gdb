@@ -1,3 +1,10 @@
+2013-01-10  Roland McGrath  <mcgrathr@google.com>
+
+	* hash.c (hash_new_sized): Make it global.
+	* hash.h: Declare it.
+	* macro.c (define_macro): Use hash_new_sized instead of hash_new,
+	pass a small size.
+
 2013-01-10  Will Newton <will.newton@imgtec.com>
 
 	* Makefile.am: Add Meta.
