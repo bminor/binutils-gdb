@@ -1,3 +1,12 @@
+2013-01-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* psymtab.c (psymtab_to_fullname, psymtab_to_fullname): Make the return
+	type const char *.
+	* tui/tui-source.c (tui_source_is_displayed): Make the parameter fname
+	const char *.
+	* tui/tui-source.h (tui_source_is_displayed): Likewise.
+
 2013-01-09  Anthony Green  <green@moxielogic.com>
 
 	* cp-abi.c (cplus_print_vtable): Don't return value from void

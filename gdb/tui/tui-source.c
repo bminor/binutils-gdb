@@ -332,7 +332,7 @@ tui_show_symtab_source (struct gdbarch *gdbarch, struct symtab *s,
 /* Answer whether the source is currently displayed in the source
    window.  */
 int
-tui_source_is_displayed (char *fname)
+tui_source_is_displayed (const char *fname)
 {
   return (TUI_SRC_WIN != NULL
 	  && TUI_SRC_WIN->generic.content_in_use 

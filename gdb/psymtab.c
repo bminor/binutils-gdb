@@ -58,7 +58,7 @@ static struct partial_symbol *lookup_partial_symbol (struct objfile *,
 						     const char *, int,
 						     domain_enum);
 
-static char *psymtab_to_fullname (struct partial_symtab *ps);
+static const char *psymtab_to_fullname (struct partial_symtab *ps);
 
 static struct partial_symbol *find_pc_sect_psymbol (struct objfile *,
 						    struct partial_symtab *,
@@ -1174,7 +1174,7 @@ map_symbol_filenames_psymtab (struct objfile *objfile,
    If this function fails to find the file that this partial_symtab represents,
    NULL will be returned and ps->fullname will be set to NULL.  */
 
-static char *
+static const char *
 psymtab_to_fullname (struct partial_symtab *ps)
 {
   int r;
