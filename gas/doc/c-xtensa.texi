@@ -629,7 +629,7 @@ both directives and command-line flags.
 @subsection literal
 @cindex @code{literal} directive
 
-The @code{.literal} directive is used to define literal pool data, i.e., 
+The @code{.literal} directive is used to define literal pool data, i.e.,
 read-only 32-bit data accessed via @code{L32R} instructions.
 
 @smallexample
@@ -727,7 +727,7 @@ The @code{.literal_position} directive is ignored when the
 @samp{--text-@-section-@-literals} option is not used or when
 @code{L32R} instructions use the absolute addressing mode.
 
-The assembler will automatically place text section literal pools 
+The assembler will automatically place text section literal pools
 before @code{ENTRY} instructions, so the @code{.literal_position}
 directive is only needed to specify some other location for a literal
 pool.  You may need to add an explicit jump instruction to skip over an

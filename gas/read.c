@@ -1630,7 +1630,7 @@ read_symbol_name (void)
 	      name_end = start + len;
 	      name = start + sofar;
 	    }
-	  
+
 	  *name++ = (char) C;
 	}
       *name = 0;
@@ -1672,7 +1672,7 @@ read_symbol_name (void)
       ignore_rest_of_line ();
       return NULL;
     }
-    
+
   SKIP_WHITESPACE ();
 
   return start;

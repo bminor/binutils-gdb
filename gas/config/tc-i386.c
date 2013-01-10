@@ -6846,8 +6846,8 @@ lex_got (enum bfd_reloc_code_real *rel,
    input string, minus the `@SECREL32' into a malloc'd buffer for
    parsing by the calling routine.  Return this buffer, and if ADJUST
    is non-null set it to the length of the string we removed from the
-   input line.  Otherwise return NULL.  
-   
+   input line.  Otherwise return NULL.
+
    This function is copied from the ELF version above adjusted for PE targets.  */
 
 static char *

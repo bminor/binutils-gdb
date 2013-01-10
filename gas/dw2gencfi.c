@@ -86,7 +86,7 @@
 
 #if SUPPORT_FRAME_LINKONCE
 #define CUR_SEG(structp) structp->cur_seg
-#define SET_CUR_SEG(structp, seg) structp->cur_seg = seg 
+#define SET_CUR_SEG(structp, seg) structp->cur_seg = seg
 #define HANDLED(structp) structp->handled
 #define SET_HANDLED(structp, val) structp->handled = val
 #else

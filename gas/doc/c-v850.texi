@@ -264,13 +264,13 @@ The V850 family uses @sc{ieee} floating-point numbers.
 @table @code
 @cindex @code{offset} directive, V850
 @item .offset @var{<expression>}
-Moves the offset into the current section to the specified amount. 
+Moves the offset into the current section to the specified amount.
 
 @cindex @code{section} directive, V850
 @item .section "name", <type>
 This is an extension to the standard .section directive.  It sets the
 current section to be <type> and creates an alias for this section
-called "name". 
+called "name".
 
 @cindex @code{.v850} directive, V850
 @item .v850
@@ -325,7 +325,7 @@ the immediate operand field of the given instruction.  For example:
 computes the difference between the address of labels 'here' and
 'there', takes the upper 16 bits of this difference, shifts it down 16
 bits and then multiplies it by the lower 16 bits in register 5, putting
-the result into register 6. 
+the result into register 6.
 
 @cindex @code{lo} pseudo-op, V850
 @item lo()
@@ -369,14 +369,14 @@ mov instruction).  For example:
     @samp{mov hilo(here), r6}
 
 computes the absolute address of label 'here' and puts the result into
-register 6.  
+register 6.
 
 @cindex @code{sdaoff} pseudo-op, V850
 @item sdaoff()
 Computes the offset of the named variable from the start of the Small
 Data Area (whoes address is held in register 4, the GP register) and
 stores the result as a 16 bit signed value in the immediate operand
-field of the given instruction.  For example: 
+field of the given instruction.  For example:
 
       @samp{ld.w sdaoff(_a_variable)[gp],r6}
 

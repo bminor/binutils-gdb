@@ -96,13 +96,13 @@ memory space and greater than 64K data space (MCU types: none).
 Instruction set avrxmega4 is for the XMEGA AVR core with up to 64K program
 memory space and less than 64K data space (MCU types: atxmega64a3, atxmega64d3).
 
-Instruction set avrxmega5 is for the XMEGA AVR core with up to 64K program 
+Instruction set avrxmega5 is for the XMEGA AVR core with up to 64K program
 memory space and greater than 64K data space (MCU types: atxmega64a1,
 atxmega64a1u).
 
 Instruction set avrxmega6 is for the XMEGA AVR core with up to 256K program
 memory space and less than 64K data space (MCU types: atxmega128a3,
-atxmega128d3, atxmega192a3, atxmega128b1, atxmega192d3, atxmega256a3, 
+atxmega128d3, atxmega192a3, atxmega128b1, atxmega192d3, atxmega256a3,
 atxmega256a3b, atxmega256a3bu, atxmega192d3).
 
 Instruction set avrxmega7 is for the XMEGA AVR core with up to 256K program
@@ -294,37 +294,37 @@ The following table summarizes the AVR opcodes, and their arguments.
    S   @r{immediate value from 0 to 7 (S = s << 4)}
    ?   @r{use this opcode entry if no parameters, else use next opcode entry}
 
-1001010010001000   clc  
-1001010011011000   clh  
-1001010011111000   cli  
-1001010010101000   cln  
-1001010011001000   cls  
-1001010011101000   clt  
-1001010010111000   clv  
-1001010010011000   clz  
-1001010000001000   sec  
-1001010001011000   seh  
-1001010001111000   sei  
-1001010000101000   sen  
-1001010001001000   ses  
-1001010001101000   set  
-1001010000111000   sev  
-1001010000011000   sez  
+1001010010001000   clc
+1001010011011000   clh
+1001010011111000   cli
+1001010010101000   cln
+1001010011001000   cls
+1001010011101000   clt
+1001010010111000   clv
+1001010010011000   clz
+1001010000001000   sec
+1001010001011000   seh
+1001010001111000   sei
+1001010000101000   sen
+1001010001001000   ses
+1001010001101000   set
+1001010000111000   sev
+1001010000011000   sez
 100101001SSS1000   bclr    S
 100101000SSS1000   bset    S
 1001010100001001   icall
-1001010000001001   ijmp 
+1001010000001001   ijmp
 1001010111001000   lpm     ?
 1001000ddddd010+   lpm     r,z
 1001010111011000   elpm    ?
 1001000ddddd011+   elpm    r,z
-0000000000000000   nop  
-1001010100001000   ret  
-1001010100011000   reti 
+0000000000000000   nop
+1001010100001000   ret
+1001010100011000   reti
 1001010110001000   sleep
 1001010110011000   break
-1001010110101000   wdr  
-1001010111101000   spm  
+1001010110101000   wdr
+1001010111101000   spm
 000111rdddddrrrr   adc     r,r
 000011rdddddrrrr   add     r,r
 001000rdddddrrrr   and     r,r
@@ -408,6 +408,6 @@ The following table summarizes the AVR opcodes, and their arguments.
 100!000dddddee-+   ld      r,e
 10o0oo1rrrrrbooo   std     b,r
 100!001rrrrree-+   st      e,r
-1001010100011001   eicall  
-1001010000011001   eijmp   
+1001010100011001   eicall
+1001010000011001   eijmp
 @end smallexample

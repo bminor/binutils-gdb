@@ -158,12 +158,12 @@ for the H8/300 family.
 
 @item .h8300hn
 Recognize and emit additional instructions for the H8/300H variant in
-normal mode, and also make @code{.int} emit 32-bit numbers rather than 
+normal mode, and also make @code{.int} emit 32-bit numbers rather than
 the usual (16-bit) for the H8/300 family.
 
 @item .h8300sn
 Recognize and emit additional instructions for the H8S variant in
-normal mode, and also make @code{.int} emit 32-bit numbers rather than 
+normal mode, and also make @code{.int} emit 32-bit numbers rather than
 the usual (16-bit) for the H8/300 family.
 @end table
 

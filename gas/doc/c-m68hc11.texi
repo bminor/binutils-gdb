@@ -121,7 +121,7 @@ associated to the @samp{jbra}, @samp{jbsr} and @samp{jbXX} pseudo opcodes.
 The @samp{--force-long-branches} option forces the translation of
 relative branches into absolute branches. This option does not affect
 the optimization associated to the @samp{jbra}, @samp{jbsr} and
-@samp{jbXX} pseudo opcodes. 
+@samp{jbXX} pseudo opcodes.
 
 @cindex @samp{--print-insn-syntax}
 @item --print-insn-syntax
@@ -434,7 +434,7 @@ The following table summarizes the pseudo-operations.
  bra | bra <pc-rel>    <error>  |               jmp <abs>          |
 jbsr | bsr <pc-rel>   jsr <abs> | bsr <pc-rel>  jsr <abs>          |
 jbra | bra <pc-rel>   jmp <abs> | bra <pc-rel>  jmp <abs>          |
- bXX | bXX <pc-rel>    <error>  |               bNX +3; jmp <abs>  | 
+ bXX | bXX <pc-rel>    <error>  |               bNX +3; jmp <abs>  |
 jbXX | bXX <pc-rel>   bNX +3;   | bXX <pc-rel>  bNX +3; jmp <abs>  |
      |                jmp <abs> |                                  |
      +--------------------------+----------------------------------+

@@ -1182,7 +1182,7 @@ get_frag_for_reloc (fragS *last_frag,
 		    const struct reloc_list *r)
 {
   fragS *f;
-  
+
   for (f = last_frag; f != NULL; f = f->fr_next)
     if (f->fr_address <= r->u.b.r.address
 	&& r->u.b.r.address < f->fr_address + f->fr_fix)

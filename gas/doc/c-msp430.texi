@@ -30,10 +30,10 @@
 
 @item -m
 select the mpu arch. Currently has no effect.
-@item -mP 
+@item -mP
 enables polymorph instructions handler.
 
-@item -mQ 
+@item -mQ
 enables relaxation at assembly time. DANGEROUS!
 
 @end table
@@ -60,7 +60,7 @@ Additional built-in macros are:
 
 @table @code
 
-@item llo(exp) 
+@item llo(exp)
 Extracts least significant word from 32-bit expression 'exp'.
 
 @item lhi(exp)
@@ -69,17 +69,17 @@ Extracts most significant word from 32-bit expression 'exp'.
 @item hlo(exp)
 Extracts 3rd word from 64-bit expression 'exp'.
 
-@item 	hhi(exp) 
+@item 	hhi(exp)
 Extracts 4rd word from 64-bit expression 'exp'.
 
 @end table
 
 They normally being used as an immediate source operand.
 @smallexample
-    mov	#llo(1), r10	;	== mov	#1, r10	
+    mov	#llo(1), r10	;	== mov	#1, r10
     mov	#lhi(1), r10	;	== mov	#0, r10
 @end smallexample
-	
+
 @node MSP430-Chars
 @subsection Special Characters
 
@@ -101,7 +101,7 @@ separated by the @samp{@{} character.
 
 @cindex identifiers, MSP 430
 @cindex MSP 430 identifiers
-The character @samp{$} in jump instructions indicates current location and 
+The character @samp{$} in jump instructions indicates current location and
 implemented only for TI syntax compatibility.
 
 @node MSP430-Regs
@@ -264,43 +264,43 @@ where:
 
 @samp{flags} is a combination of the following characters:
 
-@item  s 
+@item  s
 function entry
-@item  x  
+@item  x
 function exit
-@item  i  
+@item  i
 function is in init section
-@item  f  
+@item  f
 function is in fini section
-@item  l  
+@item  l
 library call
-@item  c  
+@item  c
 libc standard call
-@item  d  
+@item  d
 stack value demand
-@item  I  
+@item  I
 interrupt service routine
-@item  P  
+@item  P
 prologue start
-@item  p  
+@item  p
 prologue end
-@item  E  
+@item  E
 epilogue start
-@item  e  
+@item  e
 epilogue end
-@item  j  
+@item  j
 long jump / sjlj unwind
-@item  a  
+@item  a
 an arbitrary code fragment
 @item t
 extra parameter saved (a constant value like frame size)
 @end table
 
-@item function_to_profile 
+@item function_to_profile
 a function address
-@item cycle_corrector  
+@item cycle_corrector
 a value which should be added to the cycle counter, zero if omitted.
-@item extra  
+@item extra
 any extra parameter, zero if omitted.
 
 @end table
@@ -319,7 +319,7 @@ fxx:
   push r8
 .profiler "cdpt",fxx,0, .LFrameOffset_fxx  ; check stack value at this point
 					  ; (this is a prologue end)
-					  ; note, that spare var filled with 
+					  ; note, that spare var filled with
 					  ; the farme size
   mov r15,r8
 ...

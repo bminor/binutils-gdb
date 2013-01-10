@@ -91,7 +91,7 @@ s_ifdef (int test_defined)
   *input_line_pointer = c;
 
   initialize_cframe (&cframe);
-  
+
   if (cframe.dead_tree)
     cframe.ignoring = 1;
   else
@@ -191,7 +191,7 @@ s_ifb (int test_blank)
   struct conditional_frame cframe;
 
   initialize_cframe (&cframe);
-  
+
   if (cframe.dead_tree)
     cframe.ignoring = 1;
   else

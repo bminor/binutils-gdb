@@ -1250,7 +1250,7 @@ It may also create any necessary relocations.
 @cindex TC_FINALIZE_SYMS_BEFORE_SIZE_SEG
 Specifies the value to be assigned to @code{finalize_syms} before the function
 @code{size_segs} is called.  Since @code{size_segs} calls @code{cvt_frag_to_fill}
-which can call @code{md_convert_frag}, this constant governs whether the symbols 
+which can call @code{md_convert_frag}, this constant governs whether the symbols
 accessed in @code{md_convert_frag} will be fully resolved.  In particular it
 governs whether local symbols will have been resolved, and had their frag
 information removed.  Depending upon the processing performed by

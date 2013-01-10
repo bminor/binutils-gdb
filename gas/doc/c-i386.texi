@@ -49,7 +49,7 @@ extending the Intel architecture to 64-bits.
 @cindex options for i386
 @cindex options for x86-64
 @cindex i386 options
-@cindex x86-64 options 
+@cindex x86-64 options
 
 The i386 version of @code{@value{AS}} has a few machine
 dependent options:
@@ -92,7 +92,7 @@ affect using @samp{#} for starting a comment.
 This option specifies the target processor.  The assembler will
 issue an error message if an attempt is made to assemble an instruction
 which will not execute on the target processor.  The following
-processor names are recognized: 
+processor names are recognized:
 @code{i8086},
 @code{i186},
 @code{i286},
@@ -126,7 +126,7 @@ processor names are recognized:
 @code{generic32} and
 @code{generic64}.
 
-In addition to the basic instruction set, the assembler can be told to 
+In addition to the basic instruction set, the assembler can be told to
 accept various extension mnemonics.  For example,
 @code{-march=i686+sse4+vmx} extends @var{i686} with @var{sse4} and
 @var{vmx}.  The following extensions are currently supported:
@@ -231,7 +231,7 @@ with 256bit vector length.
 @cindex @samp{-mmnemonic=} option, x86-64
 @item -mmnemonic=@var{att}
 @itemx -mmnemonic=@var{intel}
-This option specifies instruction mnemonic for matching instructions. 
+This option specifies instruction mnemonic for matching instructions.
 The @code{.att_mnemonic} and @code{.intel_mnemonic} directives will
 take precedent.
 
@@ -239,7 +239,7 @@ take precedent.
 @cindex @samp{-msyntax=} option, x86-64
 @item -msyntax=@var{att}
 @itemx -msyntax=@var{intel}
-This option specifies instruction syntax when processing instructions. 
+This option specifies instruction syntax when processing instructions.
 The @code{.att_syntax} and @code{.intel_syntax} directives will
 take precedent.
 
@@ -903,7 +903,7 @@ For detailed information on the LWP instruction set, see the
 
 BMI instructions provide several instructions implementing individual
 bit manipulation operations such as isolation, masking, setting, or
-resetting.  
+resetting.
 
 @c Need to add a specification citation here when available.
 

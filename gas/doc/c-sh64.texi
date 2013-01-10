@@ -185,7 +185,7 @@ command line.
 
 @item .abi [32|64]
 Specify the ABI for the following instructions.  Note that you cannot use
-this directive unless you specified an ABI on the command line, and the 
+this directive unless you specified an ABI on the command line, and the
 ABIs specified must match.
 
 @end table

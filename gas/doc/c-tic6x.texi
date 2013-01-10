@@ -179,7 +179,7 @@ section.
 
 @cindex @code{.personalityindex} directive, TIC6X
 @item .personalityindex @var{index}
-Sets the personality routine for the current function to the ABI specified 
+Sets the personality routine for the current function to the ABI specified
 compact routine number @var{index}
 
 @cindex @code{.personality} directive, TIC6X

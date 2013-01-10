@@ -684,7 +684,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 	case 16:
 	  /* We have seen an 'a' at the start of a symbol, look for an 'f'.  */
 	  ch = GET ();
-	  if (ch == 'f' || ch == 'F') 
+	  if (ch == 'f' || ch == 'F')
 	    {
 	      state = 17;
 	      PUT (ch);
@@ -1330,12 +1330,12 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 
 #ifdef TC_Z80
 	  /* "af'" is a symbol containing '\''.  */
-	  if (state == 3 && (ch == 'a' || ch == 'A')) 
+	  if (state == 3 && (ch == 'a' || ch == 'A'))
 	    {
 	      state = 16;
 	      PUT (ch);
 	      ch = GET ();
-	      if (ch == 'f' || ch == 'F') 
+	      if (ch == 'f' || ch == 'F')
 		{
 		  state = 17;
 		  PUT (ch);

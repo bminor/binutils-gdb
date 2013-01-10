@@ -2535,7 +2535,7 @@ ecoff_directive_def (int ignore ATTRIBUTE_UNUSED)
 	free (coff_sym_name);
       if (coff_tag != (char *) NULL)
 	free (coff_tag);
-      
+
       coff_sym_name = xstrdup (name);
       coff_type = type_info_init;
       coff_storage_class = sc_Nil;

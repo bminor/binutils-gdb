@@ -32,7 +32,7 @@
 This option specifies the target processor.  The assembler will issue an
 error message if an attempt is made to assemble an instruction which
 will not execute on the target processor.  The following processor names are
-recognized: 
+recognized:
 @code{ms1-64-001},
 @code{ms1-16-002},
 @code{ms1-16-003},

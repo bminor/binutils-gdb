@@ -25,9 +25,9 @@
    Understands command arguments.
    Has a few routines that don't fit in other modules because they
    are shared.
-  
+
   			bugs
-  
+
    : initialisers
   	Since no-one else says they will support them in future: I
    don't support them now.  */
@@ -368,7 +368,7 @@ Options:\n\
   --listing-cont-lines    set the maximum number of continuation lines used\n\
                           for the output data column of the listing\n"));
   fprintf (stream, _("\
-  @FILE                   read options from FILE\n")); 
+  @FILE                   read options from FILE\n"));
 
   md_show_usage (stream);
 
@@ -460,7 +460,7 @@ parse_args (int * pargc, char *** pargv)
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
-  
+
   static const struct option std_longopts[] =
   {
     /* Note: commas are placed at the start of the line rather than
@@ -1267,7 +1267,7 @@ main (int argc, char ** argv)
       gnustack = subseg_new (".note.GNU-stack", 0);
       bfd_set_section_flags (stdoutput, gnustack,
 			     SEC_READONLY | (flag_execstack ? SEC_CODE : 0));
-                                                                             
+
     }
 #endif
 
@@ -1275,7 +1275,7 @@ main (int argc, char ** argv)
      assembly debugging or on behalf of the compiler, emit it now.  */
   dwarf2_finish ();
 
-  /* If we constructed dwarf2 .eh_frame info, either via .cfi 
+  /* If we constructed dwarf2 .eh_frame info, either via .cfi
      directives from the user or by the backend, emit it now.  */
   cfi_finish ();
 

@@ -113,7 +113,7 @@ sb_scrub_and_add_sb (sb *ptr, sb *s)
 {
   sb_to_scrub = s;
   scrub_position = s->ptr;
-  
+
   sb_check (ptr, s->len);
   ptr->len += do_scrub_chars (scrub_from_sb, ptr->ptr + ptr->len, s->len);
 

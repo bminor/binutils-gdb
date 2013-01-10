@@ -602,7 +602,7 @@ bar:
         .word 0x0
 baz:
         .word 0x1
-        
+
 @end example
 
 @node MIPS option stack

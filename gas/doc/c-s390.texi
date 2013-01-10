@@ -33,7 +33,7 @@ are g5, g6, z900, z990, z9-109, z9-ec, z10, z196, and zEC12.
 @cindex s390 options
 
 The following table lists all available s390 specific options:
- 
+
 @table @code
 @cindex @samp{-m31} option, s390
 @cindex @samp{-m64} option, s390
@@ -58,7 +58,7 @@ message.
 @cindex @samp{-march=} option, s390
 @item -march=@var{CPU}
 This option specifies the target processor. The following processor names
-are recognized: 
+are recognized:
 @code{g5},
 @code{g6},
 @code{z900},
@@ -110,9 +110,9 @@ statements.
 @cindex instruction syntax, s390
 @cindex s390 instruction syntax
 
-The assembler syntax closely follows the syntax outlined in 
-Enterprise Systems Architecture/390 Principles of Operation (SA22-7201) 
-and the z/Architecture Principles of Operation (SA22-7832). 
+The assembler syntax closely follows the syntax outlined in
+Enterprise Systems Architecture/390 Principles of Operation (SA22-7201)
+and the z/Architecture Principles of Operation (SA22-7832).
 
 Each instruction has two major parts, the instruction mnemonic
 and the instruction operands. The instruction format varies.
@@ -297,7 +297,7 @@ field. The notation changes as follows:
 
 The Principles of Operation manuals lists 26 instruction formats where
 some of the formats have multiple variants. For the @samp{.insn}
-pseudo directive the assembler recognizes some of the formats. 
+pseudo directive the assembler recognizes some of the formats.
 Typically, the most general variant of the instruction format is used
 by the @samp{.insn} directive.
 
@@ -380,7 +380,7 @@ with the @samp{.insn} pseudo directive:
 +--------+----+----+
 | OpCode | R1 | R2 |
 +--------+----+----+
-0        8    12  15  
+0        8    12  15
 @end verbatim
 
 @item RRE format: <insn> R1,R2
@@ -679,7 +679,7 @@ the pc-relative offset from the current instruction to the GOT slot for the
 symbol.
 @item @@gotoff
 The @@gotoff modifier can be used for 16-bit immediate fields. The symbol
-term is replaced with the offset from the start of the GOT to the 
+term is replaced with the offset from the start of the GOT to the
 address of the symbol.
 @item @@gotplt
 The @@gotplt modifier can be used for displacement fields, 16-bit immediate
@@ -703,7 +703,7 @@ of the symbol.
 The @@gotntpoff modifier can be used for displacement fields. The symbol
 is added to the static TLS block and the negated offset to the symbol
 in the static TLS block is added to the GOT. The symbol term is replaced
-with the offset to the GOT slot from the start of the GOT. 
+with the offset to the GOT slot from the start of the GOT.
 @item @@indntpoff
 The @@indntpoff modifier can be used for 32-bit pc-relative immediate
 fields. The symbol is added to the static TLS block and the negated offset
@@ -728,7 +728,7 @@ perform code optimization.
 @item :tls_load
 The :tls_load marker is used to flag the load instruction in the initial
 exec TLS model that retrieves the offset from the thread pointer to a
-thread local storage variable from the GOT. 
+thread local storage variable from the GOT.
 @item :tls_gdcall
 The :tls_gdcall marker is used to flag the branch-and-save instruction to
 the __tls_get_offset function in the global dynamic TLS model.
@@ -783,7 +783,7 @@ entries to the current position.
 @node s390 Directives
 @section Assembler Directives
 
-@code{@value{AS}} for s390 supports all of the standard ELF 
+@code{@value{AS}} for s390 supports all of the standard ELF
 assembler directives as outlined in the main part of this document.
 Some directives have been extended and there are some additional
 directives, which are only available for the s390 @code{@value{AS}}.
@@ -804,7 +804,7 @@ For example, the instruction @samp{l %r1,24(%r15)} could be written as
 @itemx .quad
 This directive places one or more 16-bit (.short), 32-bit (.long), or
 64-bit (.quad) values into the current section. If an ELF or TLS modifier
-is used only the following expressions are allowed: 
+is used only the following expressions are allowed:
 @samp{symbol@@modifier + constant},
 @samp{symbol@@modifier + label + constant}, and
 @samp{symbol@@modifier - label + constant}.

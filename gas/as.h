@@ -23,13 +23,13 @@
 #ifndef GAS
 #define GAS 1
 /* I think this stuff is largely out of date.  xoxorich.
- 
+
    CAPITALISED names are #defined.
    "lowercaseH" is #defined if "lowercase.h" has been #include-d.
    "lowercaseT" is a typedef of "lowercase" objects.
    "lowercaseP" is type "pointer to object of type 'lowercase'".
    "lowercaseS" is typedef struct ... lowercaseS.
-  
+
    #define DEBUG to enable all the "know" assertion tests.
    #define SUSPECT when debugging hash code.
    #define COMMON as "extern" for all modules except one, where you #define
