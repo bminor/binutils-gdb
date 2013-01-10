@@ -361,7 +361,7 @@ read_file_list (const char *filename)
       /* Replace end of line by nul.  */
       if (*e != '\0')
         *e++ = '\0';
-      
+
       if (b != e)
         lang_add_input_file (b, lang_input_file_is_search_file_enum, NULL);
       b = e;

@@ -72,7 +72,7 @@ avr_elf_${EMULATION_NAME}_before_allocation (void)
   gld${EMULATION_NAME}_before_allocation ();
 
   /* We only need stubs for avr6, avrxmega6, and avrxmega7. */
-  if (strcmp ("${EMULATION_NAME}","avr6") 
+  if (strcmp ("${EMULATION_NAME}","avr6")
       && strcmp ("${EMULATION_NAME}","avrxmega6")
       && strcmp ("${EMULATION_NAME}","avrxmega7") )
     avr_no_stubs = TRUE;

@@ -261,7 +261,7 @@ fragment <<EOF
 #define OPTION_DYNAMIC_BASE		(OPTION_DISABLE_LONG_SECTION_NAMES + 1)
 #define OPTION_FORCE_INTEGRITY		(OPTION_DYNAMIC_BASE + 1)
 #define OPTION_NX_COMPAT		(OPTION_FORCE_INTEGRITY + 1)
-#define OPTION_NO_ISOLATION		(OPTION_NX_COMPAT + 1) 
+#define OPTION_NO_ISOLATION		(OPTION_NX_COMPAT + 1)
 #define OPTION_NO_SEH			(OPTION_NO_ISOLATION + 1)
 #define OPTION_NO_BIND			(OPTION_NO_SEH + 1)
 #define OPTION_WDM_DRIVER		(OPTION_NO_BIND + 1)
@@ -1204,7 +1204,7 @@ pr_sym (struct bfd_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 }
 #endif /* DLL_SUPPORT */
 
-static void 
+static void
 debug_section_p (bfd *abfd ATTRIBUTE_UNUSED, asection *sect, void *obj)
 {
   int *found = (int *) obj;

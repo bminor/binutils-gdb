@@ -312,7 +312,7 @@ fold_binary (etree_type *tree)
       /* Check to see if the user has overridden the default
 	 value.  */
       segment_name = tree->binary.rhs->name.name;
-      for (seg = segments; seg; seg = seg->next) 
+      for (seg = segments; seg; seg = seg->next)
 	if (strcmp (seg->name, segment_name) == 0)
 	  {
 	    if (!seg->used
@@ -697,7 +697,7 @@ fold_name (etree_type *tree)
 		       / bfd_octets_per_byte (link_info.output_bfd));
 	      else
 		val = (bfd_vma)1 << os->bfd_section->alignment_power;
-	      
+
 	      new_number (val);
 	    }
 	  else
@@ -708,11 +708,11 @@ fold_name (etree_type *tree)
     case LENGTH:
       {
         lang_memory_region_type *mem;
-        
-        mem = lang_memory_region_lookup (tree->name.name, FALSE);  
-        if (mem != NULL) 
+
+        mem = lang_memory_region_lookup (tree->name.name, FALSE);
+        if (mem != NULL)
           new_number (mem->length);
-        else          
+        else
           einfo (_("%F%S: undefined MEMORY region `%s'"
 		   " referenced in expression\n"),
 		 tree, tree->name.name);
@@ -723,11 +723,11 @@ fold_name (etree_type *tree)
       if (expld.phase != lang_first_phase_enum)
 	{
 	  lang_memory_region_type *mem;
-        
-	  mem = lang_memory_region_lookup (tree->name.name, FALSE);  
-	  if (mem != NULL) 
+
+	  mem = lang_memory_region_lookup (tree->name.name, FALSE);
+	  if (mem != NULL)
 	    new_rel_from_abs (mem->origin);
-	  else          
+	  else
 	    einfo (_("%F%S: undefined MEMORY region `%s'"
 		     " referenced in expression\n"),
 		   tree, tree->name.name);

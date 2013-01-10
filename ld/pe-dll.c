@@ -2844,7 +2844,7 @@ pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
   struct key_value *kv;
   struct key_value key;
   char *at, *lname = (char *) alloca (strlen (name) + 3);
-  
+
   strcpy (lname, name);
 
   at = strchr (lname + (lname[0] == '@'), '@');
@@ -2925,7 +2925,7 @@ pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
       if (h->type == bfd_link_hash_undefined)
         return h;
     }
-  
+
   return NULL;
 }
 

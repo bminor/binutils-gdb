@@ -1,3 +1,33 @@
+2013-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* deffilep.y: Remove trailing white spaces.
+	* elf-hints-local.h: Likewise.
+	* ldexp.c: Likewise.
+	* ldlang.h: Likewise.
+	* ldmisc.c: Likewise.
+	* ldwrite.c: Likewise.
+	* pe-dll.c: Likewise.
+	* emulparams/criself.sh: Likewise.
+	* emulparams/crislinux.sh: Likewise.
+	* emulparams/elf32_tic6x_le.sh: Likewise.
+	* emulparams/elf32bmipn32-defs.sh: Likewise.
+	* emulparams/elf32mb_linux.sh: Likewise.
+	* emulparams/elf32mep.sh: Likewise.
+	* emulparams/elf32microblaze.sh: Likewise.
+	* emulparams/elf32ppc.sh: Likewise.
+	* emulparams/elf64_s390.sh: Likewise.
+	* emulparams/elf64alpha.sh: Likewise.
+	* emulparams/elf_s390.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/tic80coff.sh: Likewise.
+	* emultempl/aix.em: Likewise.
+	* emultempl/avrelf.em: Likewise.
+	* emultempl/cr16elf.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+	* emultempl/tic6xdsbt.em: Likewise.
+
 2013-01-10  Will Newton <will.newton@imgtec.com>
 
 	* Makefile.am: Add Meta.

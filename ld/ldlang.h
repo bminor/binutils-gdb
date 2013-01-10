@@ -162,9 +162,9 @@ typedef struct lang_output_section_statement_struct
   unsigned int processed_lma : 1;
   unsigned int all_input_readonly : 1;
   /* If this section should be ignored.  */
-  unsigned int ignored : 1; 
+  unsigned int ignored : 1;
   /* If this section should update "dot".  Prevents section being ignored.  */
-  unsigned int update_dot : 1; 
+  unsigned int update_dot : 1;
   /* If this section is after assignment to _end.  */
   unsigned int after_end : 1;
 } lang_output_section_statement_type;

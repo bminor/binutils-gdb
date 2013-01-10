@@ -43,7 +43,7 @@ static struct spu_elf_params params =
   1, 0, 16, 0, 0, 2000
 };
 
-static unsigned int no_overlays = 0;  
+static unsigned int no_overlays = 0;
 static unsigned int num_lines_set = 0;
 static unsigned int line_size_set = 0;
 static char *auto_overlay_file = 0;
@@ -551,7 +551,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
 	  pex_return = pex_one (PEX_SEARCH | PEX_LAST, cmd[0], (char *const *) cmd,
 				cmd[0], NULL, NULL, &status, &errno);
 	}
-      if (NULL != pex_return) {      
+      if (NULL != pex_return) {
 	perror (pex_return);
 	_exit (127);
       }

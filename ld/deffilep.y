@@ -46,13 +46,13 @@
 #define	yylval	def_lval
 #define	yychar	def_char
 #define	yydebug	def_debug
-#define	yypact	def_pact	
-#define	yyr1	def_r1			
-#define	yyr2	def_r2			
-#define	yydef	def_def		
-#define	yychk	def_chk		
-#define	yypgo	def_pgo		
-#define	yyact	def_act		
+#define	yypact	def_pact
+#define	yyr1	def_r1
+#define	yyr2	def_r2
+#define	yydef	def_def
+#define	yychk	def_chk
+#define	yypgo	def_pgo
+#define	yyact	def_act
 #define	yyexca	def_exca
 #define yyerrflag def_errflag
 #define yynerrs	def_nerrs
@@ -138,7 +138,7 @@ start: start command
 	| command
 	;
 
-command: 
+command:
 		NAME opt_name opt_base { def_image_name ($2, $3, 0); }
 	|	LIBRARY opt_name opt_base { def_image_name ($2, $3, 1); }
 	|	DESCRIPTION ID { def_description ($2);}
@@ -147,7 +147,7 @@ command:
 	|	CODE attr_list { def_section ("CODE", $2);}
 	|	DATAU attr_list  { def_section ("DATA", $2);}
 	|	SECTIONS seclist
-	|	EXPORTS explist 
+	|	EXPORTS explist
 	|	IMPORTS implist
 	|	VERSIONK NUMBER { def_version ($2, 0);}
 	|	VERSIONK NUMBER '.' NUMBER { def_version ($2, $4);}
@@ -186,7 +186,7 @@ exp_opt:
 	|	PRIVATEU	{ $$ = 8; }
 	|	PRIVATEL	{ $$ = 8; }
 	;
-implist:	
+implist:
 		implist impline
 	|	impline
 	;
@@ -223,15 +223,15 @@ attr_list:
 
 opt_comma:
 	','
-	| 
+	|
 	;
 opt_number: ',' NUMBER { $$=$2;}
 	|	   { $$=-1;}
 	;
-	
+
 attr:
 		READ	{ $$ = 1;}
-	|	WRITE	{ $$ = 2;}	
+	|	WRITE	{ $$ = 2;}
 	|	EXECUTE	{ $$=4;}
 	|	SHARED	{ $$=8;}
 	;
@@ -275,19 +275,19 @@ opt_name2: ID { $$ = $1; }
 	    $$ = name;
 	  }
 	| '.' opt_name2
-	  { 
+	  {
 	    char *name = def_pool_alloc (strlen ($2) + 2);
 	    sprintf (name, ".%s", $2);
 	    $$ = name;
 	  }
 	| keyword_as_name '.' opt_name2
-	  { 
+	  {
 	    char *name = def_pool_alloc (strlen ($1) + 1 + strlen ($3) + 1);
 	    sprintf (name, "%s.%s", $1, $3);
 	    $$ = name;
 	  }
 	| ID '.' opt_name2
-	  { 
+	  {
 	    char *name = def_pool_alloc (strlen ($1) + 1 + strlen ($3) + 1);
 	    sprintf (name, "%s.%s", $1, $3);
 	    $$ = name;
@@ -302,14 +302,14 @@ opt_equalequal_name: EQUAL ID	{ $$ = $2; }
 	|							{ $$ = 0; }
 	;
 
-opt_ordinal: 
+opt_ordinal:
 	  '@' NUMBER     { $$ = $2;}
 	|                { $$ = -1;}
 	;
 
 opt_equal_name:
           '=' opt_name2	{ $$ = $2; }
-        | 		{ $$ =  0; }			 
+        | 		{ $$ =  0; }
 	;
 
 opt_base: BASE	'=' NUMBER	{ $$ = $3;}
@@ -960,7 +960,7 @@ def_image_name (const char *name, int base, int is_dll)
 	       name);
       if (def->name)
 	free (def->name);
-      /* Append the default suffix, if none specified.  */ 
+      /* Append the default suffix, if none specified.  */
       if (strchr (image_name, '.') == 0)
 	{
 	  const char * suffix = is_dll ? ".dll" : ".exe";
@@ -1115,7 +1115,7 @@ def_import (const char *internal_name,
   char *buf = 0;
   const char *ext = dllext ? dllext : "dll";
   int is_dup = 0;
-   
+
   buf = xmalloc (strlen (module) + strlen (ext) + 2);
   sprintf (buf, "%s.%s", module, ext);
   module = buf;
@@ -1147,7 +1147,7 @@ static void
 def_aligncomm (char *str, int align)
 {
   def_file_aligncomm *c, *p;
-  
+
   p = NULL;
   c = def->aligncomms;
   while (c != NULL)

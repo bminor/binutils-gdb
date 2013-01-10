@@ -773,7 +773,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
 
   /*  Set DLLCharacteristics bits  */
   set_pep_name ("__dll_characteristics__", pe_dll_characteristics);
- 
+
   return TRUE;
 }
 
@@ -892,7 +892,7 @@ gld_${EMULATION_NAME}_after_parse (void)
       "targets, did you mean --export-all-symbols?\n"));
 
   set_entry_point ();
-  
+
   after_parse_default ();
 }
 
@@ -1136,7 +1136,7 @@ pr_sym (struct bfd_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 }
 #endif /* DLL_SUPPORT */
 
-static void 
+static void
 debug_section_p (bfd *abfd ATTRIBUTE_UNUSED, asection *sect, void *obj)
 {
   int *found = (int *) obj;

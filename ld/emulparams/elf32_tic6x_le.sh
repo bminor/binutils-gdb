@@ -47,12 +47,12 @@ OTHER_READWRITE_RELOC_SECTIONS="
 case ${target} in
     *-elf)
 	OTHER_BSS_SECTIONS="
-  .heap : 
-  { 
-    . = ALIGN(4); 
-    _HEAP_START = .; 
-    . += 0x2000000; 
-    _HEAP_MAX = .; 
+  .heap :
+  {
+    . = ALIGN(4);
+    _HEAP_START = .;
+    . += 0x2000000;
+    _HEAP_MAX = .;
   }
   .stack :
   {

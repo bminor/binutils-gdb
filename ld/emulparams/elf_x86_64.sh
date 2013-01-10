@@ -32,7 +32,7 @@ case "$target" in
       *64*) LIBPATH_SUFFIX=64 ;;
     esac
     ;;
-  *-*-solaris2*) 
+  *-*-solaris2*)
     LIBPATH_SUFFIX=/amd64
     ELF_INTERPRETER_NAME=\"/lib/amd64/ld.so.1\"
   ;;

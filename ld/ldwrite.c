@@ -338,7 +338,7 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
 {
   char *tname;
   char *sname;
-  unsigned int len;	
+  unsigned int len;
   asection *n;
   struct bfd_link_hash_entry *h;
 

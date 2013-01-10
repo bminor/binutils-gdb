@@ -304,7 +304,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 
 		/* The GNU Coding Standard requires that error messages
 		   be of the form:
-		   
+
 		     source-file-name:lineno: message
 
 		   We do not always have a line number available so if
