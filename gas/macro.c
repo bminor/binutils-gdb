@@ -1,6 +1,6 @@
 /* macro.c - macro support for gas
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2011, 2012 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2011, 2012, 2013 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -574,9 +574,9 @@ do_formals (macro_entry *macro, size_t idx, sb *in)
       formal_entry *formal = new_formal ();
 
       /* Add a special NARG formal, which macro_expand will set to the
-         number of arguments.  */
+	 number of arguments.  */
       /* The same MRI assemblers which treat '@' characters also use
-         the name $NARG.  At least until we find an exception.  */
+	 the name $NARG.  At least until we find an exception.  */
       if (macro_strip_at)
 	name = "$NARG";
       else
@@ -642,7 +642,7 @@ define_macro (size_t idx, sb *in, sb *label,
 
   macro->formal_count = 0;
   macro->formals = 0;
-  macro->formal_hash = hash_new ();
+  macro->formal_hash = hash_new_sized (7);
 
   idx = sb_skip_white (idx, in);
   if (! buffer_and_nest ("MACRO", "ENDM", &macro->sub, get_line))
@@ -950,13 +950,13 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	  if (ptr == NULL)
 	    {
 	      /* FIXME: We should really return a warning string here,
-                 but we can't, because the == might be in the MRI
-                 comment field, and, since the nature of the MRI
-                 comment field depends upon the exact instruction
-                 being used, we don't have enough information here to
-                 figure out whether it is or not.  Instead, we leave
-                 the == in place, which should cause a syntax error if
-                 it is not in a comment.  */
+		 but we can't, because the == might be in the MRI
+		 comment field, and, since the nature of the MRI
+		 comment field depends upon the exact instruction
+		 being used, we don't have enough information here to
+		 figure out whether it is or not.  Instead, we leave
+		 the == in place, which should cause a syntax error if
+		 it is not in a comment.  */
 	      sb_add_char (out, '=');
 	      sb_add_char (out, '=');
 	      sb_add_sb (out, &t);
@@ -1023,7 +1023,7 @@ macro_expand (size_t idx, sb *in, macro_entry *m, sb *out)
   if (macro_mri)
     {
       /* The macro may be called with an optional qualifier, which may
-         be referred to in the macro body as \0.  */
+	 be referred to in the macro body as \0.  */
       if (idx < in->len && in->ptr[idx] == '.')
 	{
 	  /* The Microtec assembler ignores this if followed by a white space.
@@ -1349,7 +1349,7 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
 
 		  if (irpc)
 		    in_quotes = ! in_quotes;
-	  
+
 		  nxt = sb_skip_white (idx + 1, in);
 		  if (nxt >= in->len)
 		    {
