@@ -1,3 +1,14 @@
+2013-01-10  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (ppc_opts): Add "power8", "pwr8" and "htm" entries.
+	* ppc-opc.c (HTM_R, HTM_SI, XRTRB_MASK, XRTRARB_MASK, XRTLRARB_MASK,
+	XRTARARB_MASK, XRTBFRARB_MASK, XRCL, POWER8, PPCHTM): New defines.
+	(SH6): Update.
+	<"tabort.", "tabortdc.", "tabortdci.", "tabortwc.",
+	"tabortwci.", "tbegin.", "tcheck", "tend.", "trechkpt.",
+	"treclaim.", "tsr.">: Add POWER8 HTM opcodes.
+	<"tendall.", "tresume.", "tsuspend.">: Add POWER8 HTM extended opcodes.
+
 2013-01-10  Will Newton <will.newton@imgtec.com>
 
 	* Makefile.am: Add Meta.

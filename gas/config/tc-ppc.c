@@ -1302,12 +1302,14 @@ PowerPC options:\n\
                         generate code for Power5 architecture\n\
 -mpower6, -mpwr6        generate code for Power6 architecture\n\
 -mpower7, -mpwr7        generate code for Power7 architecture\n\
+-mpower8, -mpwr8        generate code for Power8 architecture\n\
 -mcell                  generate code for Cell Broadband Engine architecture\n\
 -mcom                   generate code Power/PowerPC common instructions\n\
 -many                   generate code for any architecture (PWR/PWRX/PPC)\n"));
   fprintf (stream, _("\
 -maltivec               generate code for AltiVec\n\
 -mvsx                   generate code for Vector-Scalar (VSX) instructions\n\
+-mhtm                   generate code for Hardware Transactional Memory\n\
 -me300                  generate code for PowerPC e300 family\n\
 -me500, -me500x2        generate code for Motorola e500 core complex\n\
 -me500mc,               generate code for Freescale e500mc core complex\n\
@@ -6265,9 +6267,10 @@ ppc_handle_align (struct frag *fragP)
       md_number_to_chars (dest, 0x60000000, 4);
 
       if ((ppc_cpu & PPC_OPCODE_POWER6) != 0
-	  || (ppc_cpu & PPC_OPCODE_POWER7) != 0)
+	  || (ppc_cpu & PPC_OPCODE_POWER7) != 0
+	  || (ppc_cpu & PPC_OPCODE_POWER8) != 0)
 	{
-	  /* For power6 and power7, we want the last nop to be a group
+	  /* For power6, power7 and power8, we want the last nop to be a group
 	     terminating one.  Do this by inserting an rs_fill frag immediately
 	     after this one, with its address set to the last nop location.
 	     This will automatically reduce the number of nops in the current
@@ -6285,13 +6288,14 @@ ppc_handle_align (struct frag *fragP)
 	      dest = group_nop->fr_literal;
 	    }
 
-	  if ((ppc_cpu & PPC_OPCODE_POWER7) != 0)
+	  if ((ppc_cpu & PPC_OPCODE_POWER7) != 0
+	      || (ppc_cpu & PPC_OPCODE_POWER8) != 0)
 	    {
 	      if (ppc_cpu & PPC_OPCODE_E500MC)
 		/* e500mc group terminating nop: "ori 0,0,0".  */
 		md_number_to_chars (dest, 0x60000000, 4);
 	      else
-		/* power7 group terminating nop: "ori 2,2,0".  */
+		/* power7/power8 group terminating nop: "ori 2,2,0".  */
 		md_number_to_chars (dest, 0x60420000, 4);
 	    }
 	  else

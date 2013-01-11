@@ -1,3 +1,10 @@
+2013-01-10  Peter Bergner <bergner@vnet.ibm.com>
+
+	* doc/as.texinfo (Target PowerPC): Document -mpower8 and -mhtm.
+	* doc/c-ppc.texi (PowerPC-Opts):  Likewise.
+	* config/tc-ppc.c (md_show_usage): Likewise.
+	(ppc_handle_align): Handle power8's group ending nop.
+
 2013-01-10  Sean Keys  <skeys@ipdatasys.com>
 
 	* config/tc-xgate.c (md_begin): Fix the printing of opcodes so

@@ -1,3 +1,11 @@
+2013-01-10  Peter Bergner <bergner@vnet.ibm.com>
+
+	* gas/ppc/htm.d: New test.
+	* gas/ppc/htm.s: Likewise.
+	* gas/ppc/power8.d: Likewise.
+	* gas/ppc/power8.s: Likewise.
+	* gas/ppc/ppc.exp: Run them.
+
 2013-01-10  Will Newton <will.newton@imgtec.com>
 
 	* gas/metag/labelarithmetic.d: New file.
