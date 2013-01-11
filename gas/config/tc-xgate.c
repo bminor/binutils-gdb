@@ -351,7 +351,7 @@ md_begin (void)
 
   if (flag_print_opcodes)
     {
-      print_opcode_list ();
+      xgate_print_table ();
       exit (EXIT_SUCCESS);
     }
 }

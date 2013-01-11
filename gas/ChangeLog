@@ -1,3 +1,8 @@
+2013-01-11  Sean Keys  <skeys@ipdatasys.com>
+
+	* config/tc-xgate.c (md_begin): Fix mistake made when going from
+        git to cvs.
+
 2013-01-10  Peter Bergner <bergner@vnet.ibm.com>
 
 	* doc/as.texinfo (Target PowerPC): Document -mpower8 and -mhtm.
