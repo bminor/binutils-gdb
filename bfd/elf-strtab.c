@@ -202,12 +202,10 @@ _bfd_elf_strtab_delref (struct elf_strtab_hash *tab, bfd_size_type idx)
 }
 
 void
-_bfd_elf_strtab_clear_all_refs (struct elf_strtab_hash *tab)
+_bfd_elf_strtab_clear_refs (struct elf_strtab_hash *tab, bfd_size_type idx)
 {
-  bfd_size_type idx;
-
-  for (idx = 1; idx < tab->size; ++idx)
-    tab->array[idx]->refcount = 0;
+  while (idx < tab->size)
+    tab->array[idx++]->refcount = 0;
 }
 
 bfd_size_type

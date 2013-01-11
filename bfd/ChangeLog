@@ -1,3 +1,13 @@
+2013-01-12  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12549
+	* elf-bfd.h (_bfd_elf_strtab_clear_refs): Declare.
+	(_bfd_elf_strtab_clear_all_refs): Define.
+	* elf-strtab.c (_bfd_elf_strtab_clear_refs): New function.
+	(_bfd_elf_strtab_clear_all_refs): Delete.
+	* elflink.c (elf_link_add_object_symbols): Clear out added
+	strtab refs.  Correct handling of warning common symbols.
+
 2013-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* aout0.c: Remove trailing white spaces.
