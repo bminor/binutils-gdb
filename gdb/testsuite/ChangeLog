@@ -1,3 +1,8 @@
+2013-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/dprintf.exp (dprintf info 1): Fix expectation on 64-bit
+	targets.
+
 2013-01-11  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/dprintf.exp: Check the output of 'info breakpoints'

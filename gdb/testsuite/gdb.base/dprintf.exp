@@ -44,7 +44,7 @@ gdb_test "dprintf $dp_location1,\"arg=%d, g=%d\\n\", arg, g" \
   "Dprintf .*"
 
 gdb_test_sequence "info breakpoints" "dprintf info 1" {
-    "\[\r\n\]Num     Type           Disp Enb Address    What"
+    "\[\r\n\]Num     Type           Disp Enb Address +What"
     "\[\r\n\]2       breakpoint"
     "\[\r\n\]3       dprintf"
     "\[\r\n\]        printf \"At foo entry\\\\n\""
