@@ -1702,7 +1702,7 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
 
   /* Current best guess is that approximately a twentieth
      of the total symbols (in a debugging file) are global or static
-     oriented symbols.  */
+     oriented symbols, then multiply that by slop factor of two.  */
 
   objfile->global_psymbols.size = total_symbols / 10;
   objfile->static_psymbols.size = total_symbols / 10;

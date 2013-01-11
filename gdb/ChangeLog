@@ -1,4 +1,9 @@
 2013-01-11  Yao Qi  <yao@codesourcery.com>
+	    Stan Shebs  <stan@codesourcery.com>
+
+	* psymtab.c (init_psymbol_list): Clarify the comment.
+
+2013-01-11  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (print_one_breakpoint_location): Remove dead code.
 	(update_dprintf_command_list): Assert that 'printf_line' is
