@@ -596,6 +596,7 @@ MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
 HAVE_PUBNAMES_FALSE
 HAVE_PUBNAMES_TRUE
+DLOPEN_LIBS
 CXXCPP
 HAVE_ZLIB_FALSE
 HAVE_ZLIB_TRUE
@@ -7138,6 +7139,35 @@ _ACEOF
 fi
 
 done
+
+
+for ac_header in windows.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "windows.h" "ac_cv_header_windows_h" "$ac_includes_default"
+if test "x$ac_cv_header_windows_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WINDOWS_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in dlfcn.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "dlfcn.h" "ac_cv_header_dlfcn_h" "$ac_includes_default"
+if test "x$ac_cv_header_dlfcn_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DLFCN_H 1
+_ACEOF
+ DLOPEN_LIBS="-ldl"
+else
+  DLOPEN_LIBS=""
+fi
+
+done
+
+
 
 for ac_func in mallinfo posix_fallocate fallocate readv sysconf times
 do :

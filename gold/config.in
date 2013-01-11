@@ -73,6 +73,9 @@
    don't. */
 #undef HAVE_DECL_VSNPRINTF
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Define to 1 if you have the <ext/hash_map> header file. */
 #undef HAVE_EXT_HASH_MAP
 
@@ -183,6 +186,9 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <windows.h> header file. */
+#undef HAVE_WINDOWS_H
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H

@@ -1,6 +1,7 @@
 ## Process this file with automake to generate Makefile.in
 #
-#   Copyright 2012 Free Software Foundation
+#  Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
+#  Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -37,7 +38,7 @@ AM_CPPFLAGS = \
 LIBIBERTY = ../libiberty/libiberty.a
 
 if PLUGINS
-LIBDL = -ldl
+LIBDL = @DLOPEN_LIBS@
 endif
 
 if THREADS

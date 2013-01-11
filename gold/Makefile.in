@@ -16,7 +16,8 @@
 @SET_MAKE@
 
 #
-#   Copyright 2012 Free Software Foundation
+#  Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
+#  Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -272,6 +273,7 @@ CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DLOPEN_LIBS = @DLOPEN_LIBS@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -398,7 +400,7 @@ AM_CPPFLAGS = \
 	-DTOOLLIBDIR="\"$(tooldir)/lib\"" @INCINTL@
 
 LIBIBERTY = ../libiberty/libiberty.a
-@PLUGINS_TRUE@LIBDL = -ldl
+@PLUGINS_TRUE@LIBDL = @DLOPEN_LIBS@
 @THREADS_TRUE@THREADSLIB = -lpthread
 AM_YFLAGS = -d
 

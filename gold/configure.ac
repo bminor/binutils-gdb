@@ -1,6 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl   Copyright 2012 Free Software Foundation
+dnl   Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
+dnl   Free Software Foundation, Inc.
 dnl
 dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -505,6 +506,13 @@ AC_LANG_PUSH(C++)
 AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
 AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_HEADERS(byteswap.h)
+
+dnl When plugins enabled dynamic loader interface is required. Check headers
+dnl which may provide this interface. In case of dlfcn.h add libdl to link.
+AC_CHECK_HEADERS(windows.h)
+AC_CHECK_HEADERS(dlfcn.h, [DLOPEN_LIBS="-ldl"], [DLOPEN_LIBS=""])
+AC_SUBST(DLOPEN_LIBS)
+
 AC_CHECK_FUNCS(mallinfo posix_fallocate fallocate readv sysconf times)
 AC_CHECK_DECLS([basename, ffs, asprintf, vasprintf, snprintf, vsnprintf, strverscmp, strndup, memmem])
 
