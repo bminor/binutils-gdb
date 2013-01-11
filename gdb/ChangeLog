@@ -1,3 +1,9 @@
+2013-01-11  Yao Qi  <yao@codesourcery.com>
+
+	* breakpoint.c (print_one_breakpoint_location): Remove dead code.
+	(update_dprintf_command_list): Assert that 'printf_line' is
+	non-null.  Remove condition check.
+
 2013-01-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

@@ -6094,15 +6094,6 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  ui_out_text (uiout, " bytes\n");
 	}
     }
-  
-  if (!part_of_multiple && b->extra_string
-      && b->type == bp_dprintf && !b->commands)
-    {
-      annotate_field (7);
-      ui_out_text (uiout, "\t(agent printf) ");
-      ui_out_field_string (uiout, "printf", b->extra_string);
-      ui_out_text (uiout, "\n");
-    }
 
   l = b->commands ? b->commands->commands : NULL;
   if (!part_of_multiple && l)
@@ -8894,30 +8885,30 @@ update_dprintf_command_list (struct breakpoint *b)
     internal_error (__FILE__, __LINE__,
 		    _("Invalid dprintf style."));
 
+  gdb_assert (printf_line != NULL);
   /* Manufacture a printf/continue sequence.  */
-  if (printf_line)
-    {
-      struct command_line *printf_cmd_line, *cont_cmd_line = NULL;
+  {
+    struct command_line *printf_cmd_line, *cont_cmd_line = NULL;
 
-      if (strcmp (dprintf_style, dprintf_style_agent) != 0)
-	{
-	  cont_cmd_line = xmalloc (sizeof (struct command_line));
-	  cont_cmd_line->control_type = simple_control;
-	  cont_cmd_line->body_count = 0;
-	  cont_cmd_line->body_list = NULL;
-	  cont_cmd_line->next = NULL;
-	  cont_cmd_line->line = xstrdup ("continue");
-	}
+    if (strcmp (dprintf_style, dprintf_style_agent) != 0)
+      {
+	cont_cmd_line = xmalloc (sizeof (struct command_line));
+	cont_cmd_line->control_type = simple_control;
+	cont_cmd_line->body_count = 0;
+	cont_cmd_line->body_list = NULL;
+	cont_cmd_line->next = NULL;
+	cont_cmd_line->line = xstrdup ("continue");
+      }
 
-      printf_cmd_line = xmalloc (sizeof (struct command_line));
-      printf_cmd_line->control_type = simple_control;
-      printf_cmd_line->body_count = 0;
-      printf_cmd_line->body_list = NULL;
-      printf_cmd_line->next = cont_cmd_line;
-      printf_cmd_line->line = printf_line;
+    printf_cmd_line = xmalloc (sizeof (struct command_line));
+    printf_cmd_line->control_type = simple_control;
+    printf_cmd_line->body_count = 0;
+    printf_cmd_line->body_list = NULL;
+    printf_cmd_line->next = cont_cmd_line;
+    printf_cmd_line->line = printf_line;
 
-      breakpoint_set_commands (b, printf_cmd_line);
-    }
+    breakpoint_set_commands (b, printf_cmd_line);
+  }
 }
 
 /* Update all dprintf commands, making their command lists reflect
