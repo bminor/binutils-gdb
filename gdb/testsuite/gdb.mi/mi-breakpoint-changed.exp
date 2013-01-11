@@ -96,7 +96,7 @@ proc test_insert_delete_modify { } {
 	$test
     set test "dprintf marker, \"arg\" \""
     mi_gdb_test $test \
-	{.*=breakpoint-created,bkpt=\{number="6",type="dprintf".*\}.*\n\^done} \
+	{.*=breakpoint-created,bkpt=\{number="6",type="dprintf".*,script=\{\"printf \\\\\"arg\\\\\" \\\\\"\",\"continue\"\}.*\}\r\n\^done} \
 	$test
 
     # 2. when modifying condition

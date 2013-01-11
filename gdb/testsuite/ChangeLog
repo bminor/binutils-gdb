@@ -1,3 +1,10 @@
+2013-01-11  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/dprintf.exp: Check the output of 'info breakpoints'
+	for dprintf.
+	* gdb.mi/mi-breakpoint-changed.exp (test_insert_delete_modify):
+	Check the fields in "=breakpoint-created" for dprintf.
+
 2012-12-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.mi/mi-fullname-deleted.exp: New file.
