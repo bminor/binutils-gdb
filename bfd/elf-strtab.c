@@ -201,6 +201,12 @@ _bfd_elf_strtab_delref (struct elf_strtab_hash *tab, bfd_size_type idx)
   --tab->array[idx]->refcount;
 }
 
+unsigned int
+_bfd_elf_strtab_refcount (struct elf_strtab_hash *tab, bfd_size_type idx)
+{
+  return tab->array[idx]->refcount;
+}
+
 void
 _bfd_elf_strtab_clear_refs (struct elf_strtab_hash *tab, bfd_size_type idx)
 {

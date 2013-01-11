@@ -1,5 +1,11 @@
 2013-01-12  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (_bfd_elf_strtab_refcount): Declare.
+	* elf-strtab.c (_bfd_elf_strtab_refcount): New function.
+	* elflink.c (elf_add_dt_needed_tag): Use _bfd_elf_strtab_refcount.
+
+2013-01-12  Alan Modra  <amodra@gmail.com>
+
 	PR ld/12549
 	* elf-bfd.h (_bfd_elf_strtab_clear_refs): Declare.
 	(_bfd_elf_strtab_clear_all_refs): Define.
