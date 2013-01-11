@@ -49,9 +49,7 @@ macro_command (char *arg, int from_tty)
 /* Prints an informational message regarding the lack of macro information.  */
 static void macro_inform_no_debuginfo()
 {
-  fputs_filtered ("GDB has no preprocessor macro information for "
-                  "that code.",
-                  gdb_stdout);
+  puts_filtered ("GDB has no preprocessor macro information for that code.\n");
 }
 
 static void

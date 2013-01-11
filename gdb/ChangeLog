@@ -1,3 +1,8 @@
+2013-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* macrocmd.c (macro_inform_no_debuginfo): Use puts_filtered instead of
+	fputs_filtered.  Append trailing newline.
+
 2013-01-11  Yao Qi  <yao@codesourcery.com>
 	    Stan Shebs  <stan@codesourcery.com>
 
