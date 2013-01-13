@@ -1,3 +1,9 @@
+2013-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Set bfd errror for
+	normal and TLS symbol access.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
 2013-01-12  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (_bfd_elf_strtab_refcount): Declare.

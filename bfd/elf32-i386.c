@@ -1642,6 +1642,7 @@ elf_i386_check_relocs (bfd *abfd,
 		      (_("%B: `%s' accessed both as normal and "
 			 "thread local symbol"),
 		       abfd, name);
+		    bfd_set_error (bfd_error_bad_value);
 		    return FALSE;
 		  }
 	      }

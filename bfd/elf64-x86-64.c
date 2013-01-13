@@ -1644,6 +1644,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    (*_bfd_error_handler)
 		      (_("%B: '%s' accessed both as normal and thread local symbol"),
 		       abfd, name);
+		    bfd_set_error (bfd_error_bad_value);
 		    return FALSE;
 		  }
 	      }
