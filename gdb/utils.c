@@ -503,6 +503,28 @@ make_cleanup_free_so (struct so_list *so)
   return make_cleanup (do_free_so, so);
 }
 
+/* Helper for make_cleanup_restore_current_language.  */
+
+static void
+do_restore_current_language (void *p)
+{
+  enum language saved_lang = (uintptr_t) p;
+
+  set_language (saved_lang);
+}
+
+/* Remember the current value of CURRENT_LANGUAGE and make it restored when
+   the cleanup is run.  */
+
+struct cleanup *
+make_cleanup_restore_current_language (void)
+{
+  enum language saved_lang = current_language->la_language;
+
+  return make_cleanup (do_restore_current_language,
+		       (void *) (uintptr_t) saved_lang);
+}
+
 /* This function is useful for cleanups.
    Do
 

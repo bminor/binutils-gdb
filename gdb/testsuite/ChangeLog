@@ -1,5 +1,10 @@
 2013-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.cp/parse-lang.cc: New file.
+	* gdb.cp/parse-lang.exp: New file.
+
+2013-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.mi/mi-fullname-deleted.exp: Set srcfileabssubst and initdir.
 	(set substitute-path): New test.
 	(fullname present): Remove content.

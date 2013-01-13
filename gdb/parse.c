@@ -1143,7 +1143,7 @@ parse_exp_in_context (char **stringptr, CORE_ADDR pc, const struct block *block,
 		      int comma, int void_context_p, int *out_subexp)
 {
   volatile struct gdb_exception except;
-  struct cleanup *old_chain;
+  struct cleanup *old_chain, *inner_chain;
   const struct language_defn *lang = NULL;
   int subexp;
 
@@ -1213,7 +1213,13 @@ parse_exp_in_context (char **stringptr, CORE_ADDR pc, const struct block *block,
   else
     lang = current_language;
 
+  /* get_current_arch may reset CURRENT_LANGUAGE via select_frame.
+     While we need CURRENT_LANGUAGE to be set to LANG (for lookup_symbol
+     and others called from *.y) ensure CURRENT_LANGUAGE gets restored
+     to the value matching SELECTED_FRAME as set by get_current_arch.  */
   initialize_expout (10, lang, get_current_arch ());
+  inner_chain = make_cleanup_restore_current_language ();
+  set_language (lang->la_language);
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
@@ -1228,8 +1234,6 @@ parse_exp_in_context (char **stringptr, CORE_ADDR pc, const struct block *block,
 	  throw_exception (except);
 	}
     }
-
-  discard_cleanups (old_chain);
 
   reallocate_expout ();
 
@@ -1248,6 +1252,9 @@ parse_exp_in_context (char **stringptr, CORE_ADDR pc, const struct block *block,
 
   if (expressiondebug)
     dump_prefix_expression (expout, gdb_stdlog);
+
+  do_cleanups (inner_chain);
+  discard_cleanups (old_chain);
 
   *stringptr = lexptr;
   return expout;

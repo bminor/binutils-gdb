@@ -1,5 +1,14 @@
 2013-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* parse.c (parse_exp_in_context): New variable inner_chain.  Call
+	make_cleanup_restore_current_language.  Call set_language.  Move
+	OLD_CHAIN and INNER_CHAIN cleanups.
+	* utils.c (do_restore_current_language)
+	(make_cleanup_restore_current_language): New functions.
+	* utils.h (make_cleanup_restore_current_language): New declaration.
+
+2013-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* source.c (symtab_to_fullname): Apply rewrite_source_path also for
 	non-existing files.
 
