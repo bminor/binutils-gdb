@@ -3,6 +3,9 @@
 	* source.c (symtab_to_fullname): Apply rewrite_source_path also for
 	non-existing files.
 
+	* source.c (symtab_to_fullname): Do not prepend DIRNAME for
+	non-existing files if FILENAME is already absolute.
+
 2013-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* macrocmd.c (macro_inform_no_debuginfo): Use puts_filtered instead of

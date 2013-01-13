@@ -1102,7 +1102,7 @@ symtab_to_fullname (struct symtab *s)
 	  /* rewrite_source_path would be applied by find_and_open_source, we
 	     should report the pathname where GDB tried to find the file.  */
 
-	  if (s->dirname == NULL)
+	  if (s->dirname == NULL || IS_ABSOLUTE_PATH (s->filename))
 	    fullname = xstrdup (s->filename);
 	  else
 	    fullname = concat (s->dirname, SLASH_STRING, s->filename, NULL);
