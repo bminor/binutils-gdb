@@ -1,3 +1,15 @@
+2013-01-13  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_link_hash_entry): Delete dynamic_weak.
+	Add ref_dynamic_nonweak.
+	* elflink.c (_bfd_elf_mark_dynamic_def_weak): Delete.
+	(_bfd_elf_merge_symbol): Don't call above function.  Move
+	setting of ref_dynamic_nonweak and dynamic_def earlier.  Don't
+	clear dynamic_def.
+	(elf_link_add_object_symbols): Delete redundant "override" test.
+	Don't set dynamic_def here.
+	(elf_link_output_extsym): Update.
+
 2013-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Set bfd errror for

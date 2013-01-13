@@ -895,33 +895,6 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
     }
 }
 
-/* Mark if a symbol has a definition in a dynamic object or is
-   weak in all dynamic objects.  */
-
-static void
-_bfd_elf_mark_dynamic_def_weak (struct elf_link_hash_entry *h,
-				asection *sec, int bind)
-{
-  if (!h->dynamic_def)
-    {
-      if (!bfd_is_und_section (sec))
-	h->dynamic_def = 1;
-      else
-	{
-	  /* Check if this symbol is weak in all dynamic objects. If it
-	     is the first time we see it in a dynamic object, we mark
-	     if it is weak. Otherwise, we clear it.  */
-	  if (!h->ref_dynamic)
-	    {
-	      if (bind == STB_WEAK)
-		h->dynamic_weak = 1;
-	    }
-	  else if (bind != STB_WEAK)
-	    h->dynamic_weak = 0;
-	}
-    }
-}
-
 /* This function is called when we want to define a new symbol.  It
    handles the various cases which arise when we find a definition in
    a dynamic object, or when there is already a definition in a
@@ -998,9 +971,38 @@ _bfd_elf_merge_symbol (bfd *abfd,
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   /* We have to check it for every instance since the first few may be
-     refereences and not all compilers emit symbol type for undefined
+     references and not all compilers emit symbol type for undefined
      symbols.  */
   bfd_elf_link_mark_dynamic_symbol (info, h, sym);
+
+  /* NEWDYN and OLDDYN indicate whether the new or old symbol,
+     respectively, is from a dynamic object.  */
+
+  newdyn = (abfd->flags & DYNAMIC) != 0;
+
+  /* ref_dynamic_nonweak and dynamic_def flags track actual undefined
+     syms and defined syms in dynamic libraries respectively.
+     ref_dynamic on the other hand can be set for a symbol defined in
+     a dynamic library, and def_dynamic may not be set;  When the
+     definition in a dynamic lib is overridden by a definition in the
+     executable use of the symbol in the dynamic lib becomes a
+     reference to the executable symbol.  */
+  if (newdyn)
+    {
+      if (bfd_is_und_section (sec))
+	{
+	  if (bind != STB_WEAK)
+	    {
+	      h->ref_dynamic_nonweak = 1;
+	      hi->ref_dynamic_nonweak = 1;
+	    }
+	}
+      else
+	{
+	  h->dynamic_def = 1;
+	  hi->dynamic_def = 1;
+	}
+    }
 
   /* If we just created the symbol, mark it as being an ELF symbol.
      Other than that, there is nothing to do--there is no merge issue
@@ -1058,11 +1060,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && ((abfd->flags & DYNAMIC) == 0
 	  || !h->def_regular))
     return TRUE;
-
-  /* NEWDYN and OLDDYN indicate whether the new or old symbol,
-     respectively, is from a dynamic object.  */
-
-  newdyn = (abfd->flags & DYNAMIC) != 0;
 
   olddyn = FALSE;
   if (oldbfd != NULL)
@@ -1167,16 +1164,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
       return FALSE;
     }
 
-  /* We need to remember if a symbol has a definition in a dynamic
-     object or is weak in all dynamic objects. Internal and hidden
-     visibility will make it unavailable to dynamic objects.  */
-  if (newdyn)
-    {
-      _bfd_elf_mark_dynamic_def_weak (h, sec, bind);
-      if (h != hi)
-	_bfd_elf_mark_dynamic_def_weak (hi, sec, bind);
-    }
-
   /* If the old symbol has non-default visibility, we ignore the new
      definition from a dynamic object.  */
   if (newdyn
@@ -1230,7 +1217,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
 		h->ref_dynamic = 1;
 
 	      h->def_dynamic = 0;
-	      h->dynamic_def = 0;
 	      /* FIXME: Should we check type and size for protected symbol?  */
 	      h->size = 0;
 	      h->type = 0;
@@ -1270,7 +1256,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
       else
 	h->ref_dynamic = 1;
       h->def_dynamic = 0;
-      h->dynamic_def = 0;
       /* FIXME: Should we check type and size for protected symbol?  */
       h->size = 0;
       h->type = 0;
@@ -4190,7 +4175,6 @@ error_free_dyn:
 	    }
 
 	  if (elf_tdata (abfd)->verdef != NULL
-	      && ! override
 	      && vernum > 1
 	      && definition)
 	    h->verinfo.verdef = &elf_tdata (abfd)->verdef[vernum - 1];
@@ -4415,9 +4399,7 @@ error_free_dyn:
 	      else
 		{
 		  h->def_dynamic = 1;
-		  h->dynamic_def = 1;
 		  hi->def_dynamic = 1;
-		  hi->dynamic_def = 1;
 		}
 
 	      /* If the indirect symbol has been forced local, don't
@@ -8811,7 +8793,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
       && h->ref_dynamic
       && h->def_regular
       && !h->dynamic_def
-      && !h->dynamic_weak
+      && h->ref_dynamic_nonweak
       && !elf_link_check_versioned_symbol (flinfo->info, bed, h))
     {
       bfd *def_bfd;
