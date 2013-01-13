@@ -1094,10 +1094,25 @@ symtab_to_fullname (struct symtab *s)
 
       if (fd >= 0)
 	close (fd);
-      else if (s->dirname == NULL)
-	s->fullname = xstrdup (s->filename);
       else
-	s->fullname = concat (s->dirname, SLASH_STRING, s->filename, NULL);
+	{
+	  char *fullname;
+	  struct cleanup *back_to;
+
+	  /* rewrite_source_path would be applied by find_and_open_source, we
+	     should report the pathname where GDB tried to find the file.  */
+
+	  if (s->dirname == NULL)
+	    fullname = xstrdup (s->filename);
+	  else
+	    fullname = concat (s->dirname, SLASH_STRING, s->filename, NULL);
+
+	  back_to = make_cleanup (xfree, fullname);
+	  s->fullname = rewrite_source_path (fullname);
+	  if (s->fullname == NULL)
+	    s->fullname = xstrdup (fullname);
+	  do_cleanups (back_to);
+	}
     } 
 
   return s->fullname;

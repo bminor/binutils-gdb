@@ -1,3 +1,8 @@
+2013-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* source.c (symtab_to_fullname): Apply rewrite_source_path also for
+	non-existing files.
+
 2013-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* macrocmd.c (macro_inform_no_debuginfo): Use puts_filtered instead of

@@ -1,3 +1,10 @@
+2013-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.mi/mi-fullname-deleted.exp: Set srcfileabssubst and initdir.
+	(set substitute-path): New test.
+	(fullname present): Remove content.
+	(substituted fullname): New test.
+
 2013-01-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.python/py-finish-breakpoint.exp: Add skip_python_tests

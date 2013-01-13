@@ -24,6 +24,12 @@ if [mi_gdb_start] {
 standard_testfile
 set srcfileabs [standard_output_file $srcfile]
 
+if { [regsub {^(/[^/]+)/} $srcfileabs {\1subst/} srcfileabssubst] != 1
+     || [regsub {^(/[^/]+)/.*$} $srcfileabs {\1} initdir] != 1 } {
+    xfail "Missing root subdirectory"
+    return -1
+}
+
 set f [open $srcfileabs "w"]
 puts $f "int main (void) { return 0; }"
 close $f
@@ -38,4 +44,8 @@ file delete -- $srcfileabs
 mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
-mi_gdb_test "-file-list-exec-source-file" ".*\",fullname=\"[string_to_regexp $srcfileabs]\".*" "fullname present"
+mi_gdb_test "-interpreter-exec console \"set substitute-path ${initdir} ${initdir}subst\"" {\^done} "set substitute-path"
+
+mi_gdb_test "-file-list-exec-source-file" ".*\",fullname=\".*\".*" "fullname present"
+
+mi_gdb_test "-file-list-exec-source-file" ".*\",fullname=\"[string_to_regexp $srcfileabssubst]\".*" "substituted fullname"
