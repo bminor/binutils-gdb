@@ -23,13 +23,6 @@ if {[skip_shlib_tests]} {
 
 load_lib gdb-python.exp
 
-if { $gdb_py_is_py24 == 1 } {
-    # Python 2.4, 2.5 do not support the "ValueError as e" syntax used in
-    # the py-finish-breakpoint.py script.
-	untested py-finish-breakpoint.exp
-    return 0
-}
-
 set libfile "py-events-shlib"
 set libsrc  $srcdir/$subdir/$libfile.c
 set lib_sl  [standard_output_file $libfile-nodebug.so]
@@ -50,6 +43,15 @@ if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
 
 # Start with a fresh gdb.
 clean_restart ${testfile}
+
+if { [skip_python_tests] } { continue }
+
+if { $gdb_py_is_py24 == 1 } {
+    # Python 2.4, 2.5 do not support the "ValueError as e" syntax used in
+    # the py-finish-breakpoint.py script.
+	untested py-finish-breakpoint.exp
+    return 0
+}
 
 set python_file ${srcdir}/${subdir}/${testfile}.py
 
