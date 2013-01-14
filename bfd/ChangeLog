@@ -1,3 +1,13 @@
+2013-01-14  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/14813
+	* bfdio.c (struct bfd_iovec <bclose>): Revert 2012-11-06.
+	(memory_bclose): Likewise.  Return 0 on success.
+	* cache.c (cache_bclose): Likewise.
+	* opncls.c (opncls_bclose, bfd_close): Likewise.
+	* vms-lib.c (vms_lib_bclose): Likewise.
+	* libbfd.h: Regenerate.
+
 2013-01-13  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_link_hash_entry): Delete dynamic_weak.

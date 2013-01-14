@@ -508,7 +508,7 @@ opncls_bwrite (struct bfd *abfd ATTRIBUTE_UNUSED,
   return -1;
 }
 
-static bfd_boolean
+static int
 opncls_bclose (struct bfd *abfd)
 {
   struct opncls *vec = (struct opncls *) abfd->iostream;
@@ -518,7 +518,7 @@ opncls_bclose (struct bfd *abfd)
   if (vec->close != NULL)
     status = (vec->close) (abfd, vec->stream);
   abfd->iostream = NULL;
-  return status == 0;
+  return status;
 }
 
 static int
@@ -723,7 +723,7 @@ bfd_close (bfd *abfd)
   if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
     return FALSE;
 
-  ret = abfd->iovec->bclose (abfd);
+  ret = abfd->iovec->bclose (abfd) == 0;
 
   if (ret)
     _maybe_make_executable (abfd);

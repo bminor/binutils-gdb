@@ -871,7 +871,7 @@ struct bfd_iovec
   /* For the following, on successful completion a value of 0 is returned.
      Otherwise, a value of -1 is returned (and  <<bfd_error>> is set).  */
   int (*bseek) (struct bfd *abfd, file_ptr offset, int whence);
-  bfd_boolean (*bclose) (struct bfd *abfd);
+  int (*bclose) (struct bfd *abfd);
   int (*bflush) (struct bfd *abfd);
   int (*bstat) (struct bfd *abfd, struct stat *sb);
   /* Mmap a part of the files. ADDR, LEN, PROT, FLAGS and OFFSET are the usual
