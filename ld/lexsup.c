@@ -446,6 +446,8 @@ static const struct ld_option ld_options[] =
     '\0', N_("ADDRESS"), N_("Set address of text segment"), ONE_DASH },
   { {"Trodata-segment", required_argument, NULL, OPTION_TRODATA_SEGMENT},
     '\0', N_("ADDRESS"), N_("Set address of rodata segment"), ONE_DASH },
+  { {"Tldata-segment", required_argument, NULL, OPTION_TLDATA_SEGMENT},
+    '\0', N_("ADDRESS"), N_("Set address of ldata segment"), ONE_DASH },
   { {"unresolved-symbols=<method>", required_argument, NULL,
      OPTION_UNRESOLVED_SYMBOLS},
     '\0', NULL, N_("How to handle unresolved symbols.  <method> is:\n"
@@ -1198,6 +1200,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_TRODATA_SEGMENT:
 	  set_segment_start (".rodata-segment", optarg);
+	  break;
+	case OPTION_TLDATA_SEGMENT:
+	  set_segment_start (".ldata-segment", optarg);
 	  break;
 	case OPTION_TRADITIONAL_FORMAT:
 	  link_info.traditional_format = TRUE;

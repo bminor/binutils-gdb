@@ -1,3 +1,12 @@
+2013-01-14  Leif Ekblad <leif@rdos.net>
+	    Alan Modra  <amodra@gmail.com>
+
+	* ld.texinfo (-Tldata-segment): Describe.
+	* ldlex.h (OPTION_TLDATA_SEGMENT): New enum value.
+	* lexsup.c (ld_options): Add -Tldata-segment.
+	(parse_args): Handle OPTION_TLDATA_SEGMENT.
+	* scripttempl/elf.sc: Support LARGE_DATA_ADDR.
+
 2013-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* deffilep.y: Remove trailing white spaces.

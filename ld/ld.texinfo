@@ -1846,6 +1846,12 @@ When creating an ELF executable or shared object for a target where
 the read-only data is in its own segment separate from the executable
 text, it will set the address of the first byte of the read-only data segment.
 
+@kindex -Tldata-segment=@var{org}
+@item -Tldata-segment=@var{org}
+@cindex ldata segment origin, cmd line
+When creating an ELF executable or shared object for x86-64 medium memory
+model, it will set the address of the first byte of the ldata segment.
+
 @kindex --unresolved-symbols
 @item --unresolved-symbols=@var{method}
 Determine how to handle unresolved symbols.  There are four possible
