@@ -1,3 +1,9 @@
+2013-01-14  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/pr14926.d: Disable for d10v, msp, xstormy.
+	* ld-elf/sec-to-seg.exp: Choose correct variant output to suit
+	updated microblaze page size.
+
 2013-01-10  Will Newton <will.newton@imgtec.com>
 
 	* ld-elf/merge.d: Mark Meta as xfail.
