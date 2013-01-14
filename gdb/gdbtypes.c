@@ -676,6 +676,17 @@ make_cv_type (int cnst, int voltl,
   return ntype;
 }
 
+/* Make a 'restrict'-qualified version of TYPE.  */
+
+struct type *
+make_restrict_type (struct type *type)
+{
+  return make_qualified_type (type,
+			      (TYPE_INSTANCE_FLAGS (type)
+			       | TYPE_INSTANCE_FLAG_RESTRICT),
+			      NULL);
+}
+
 /* Replace the contents of ntype with the type *type.  This changes the
    contents, rather than the pointer for TYPE_MAIN_TYPE (ntype); thus
    the changes are propogated to all types in the TYPE_CHAIN.
@@ -3193,6 +3204,10 @@ recursive_dump_type (struct type *type, int spaces)
   if (TYPE_ADDRESS_CLASS_2 (type))
     {
       puts_filtered (" TYPE_FLAG_ADDRESS_CLASS_2");
+    }
+  if (TYPE_RESTRICT (type))
+    {
+      puts_filtered (" TYPE_FLAG_RESTRICT");
     }
   puts_filtered ("\n");
 

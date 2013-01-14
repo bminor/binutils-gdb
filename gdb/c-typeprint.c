@@ -269,6 +269,9 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 
       if (TYPE_VOLATILE (domain))
 	fprintf_filtered (stream, " volatile");
+
+      if (TYPE_RESTRICT (domain))
+	fprintf_filtered (stream, " restrict");
     }
 }
 
@@ -419,6 +422,14 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
       if (did_print_modifier || need_pre_space)
 	fprintf_filtered (stream, " ");
       fprintf_filtered (stream, "volatile");
+      did_print_modifier = 1;
+    }
+
+  if (TYPE_RESTRICT (type))
+    {
+      if (did_print_modifier || need_pre_space)
+	fprintf_filtered (stream, " ");
+      fprintf_filtered (stream, "restrict");
       did_print_modifier = 1;
     }
 

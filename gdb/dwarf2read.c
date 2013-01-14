@@ -12383,6 +12383,24 @@ read_tag_volatile_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, cv_type, cu);
 }
 
+/* Handle DW_TAG_restrict_type.  */
+
+static struct type *
+read_tag_restrict_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct type *base_type, *cv_type;
+
+  base_type = die_type (die, cu);
+
+  /* The die_type call above may have already set the type for this DIE.  */
+  cv_type = get_die_type (die, cu);
+  if (cv_type)
+    return cv_type;
+
+  cv_type = make_restrict_type (base_type);
+  return set_die_type (die, cv_type, cu);
+}
+
 /* Extract all information from a DW_TAG_string_type DIE and add to
    the user defined type vector.  It isn't really a user defined type,
    but it behaves like one, with other DIE's using an AT_user_def_type
@@ -16547,6 +16565,9 @@ read_type_die_1 (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_volatile_type:
       this_type = read_tag_volatile_type (die, cu);
+      break;
+    case DW_TAG_restrict_type:
+      this_type = read_tag_restrict_type (die, cu);
       break;
     case DW_TAG_string_type:
       this_type = read_tag_string_type (die, cu);

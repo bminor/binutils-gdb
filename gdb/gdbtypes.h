@@ -169,18 +169,18 @@ enum type_code
 
 enum type_flag_value
 {
-  TYPE_FLAG_UNSIGNED = (1 << 7),
-  TYPE_FLAG_NOSIGN = (1 << 8),
-  TYPE_FLAG_STUB = (1 << 9),
-  TYPE_FLAG_TARGET_STUB = (1 << 10),
-  TYPE_FLAG_STATIC = (1 << 11),
-  TYPE_FLAG_PROTOTYPED = (1 << 12),
-  TYPE_FLAG_INCOMPLETE = (1 << 13),
-  TYPE_FLAG_VARARGS = (1 << 14),
-  TYPE_FLAG_VECTOR = (1 << 15),
-  TYPE_FLAG_FIXED_INSTANCE = (1 << 16),
-  TYPE_FLAG_STUB_SUPPORTED = (1 << 17),
-  TYPE_FLAG_GNU_IFUNC = (1 << 18),
+  TYPE_FLAG_UNSIGNED = (1 << 8),
+  TYPE_FLAG_NOSIGN = (1 << 9),
+  TYPE_FLAG_STUB = (1 << 10),
+  TYPE_FLAG_TARGET_STUB = (1 << 11),
+  TYPE_FLAG_STATIC = (1 << 12),
+  TYPE_FLAG_PROTOTYPED = (1 << 13),
+  TYPE_FLAG_INCOMPLETE = (1 << 14),
+  TYPE_FLAG_VARARGS = (1 << 15),
+  TYPE_FLAG_VECTOR = (1 << 16),
+  TYPE_FLAG_FIXED_INSTANCE = (1 << 17),
+  TYPE_FLAG_STUB_SUPPORTED = (1 << 18),
+  TYPE_FLAG_GNU_IFUNC = (1 << 19),
 
   /* Used for error-checking.  */
   TYPE_FLAG_MIN = TYPE_FLAG_UNSIGNED
@@ -198,6 +198,7 @@ enum type_instance_flag_value
   TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1 = (1 << 4),
   TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2 = (1 << 5),
   TYPE_INSTANCE_FLAG_NOTTEXT = (1 << 6),
+  TYPE_INSTANCE_FLAG_RESTRICT = (1 << 7)
 };
 
 /* Unsigned integer type.  If this is not set for a TYPE_CODE_INT, the
@@ -318,6 +319,12 @@ enum type_instance_flag_value
 
 #define TYPE_VOLATILE(t) \
   (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_VOLATILE)
+
+/* Restrict type.  If this is set, the corresponding type has a
+   restrict modifier.  */
+
+#define TYPE_RESTRICT(t) \
+  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_RESTRICT)
 
 /* Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -1470,6 +1477,8 @@ extern struct type *lookup_reference_type (struct type *);
 extern struct type *make_reference_type (struct type *, struct type **);
 
 extern struct type *make_cv_type (int, int, struct type *, struct type **);
+
+extern struct type *make_restrict_type (struct type *);
 
 extern void replace_type (struct type *, struct type *);
 

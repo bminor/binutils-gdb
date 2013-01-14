@@ -1,5 +1,11 @@
 2013-01-14  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/dw2-restrict.S: New file.
+	* gdb.dwarf2/dw2-restrict.c: New file.
+	* gdb.dwarf2/dw2-restrict.exp: New file.
+
+2013-01-14  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/dw2-error.exp: New file.
 	* gdb.dwarf2/dw2-error.c: New file.
 	* gdb.dwarf2/dw2-error.S: New file.
