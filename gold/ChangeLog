@@ -1,3 +1,8 @@
+2013-01-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add various output files.
+	* testsuite/Makefile.in: Regenerate.
+
 2013-01-11  Pavel Chupin  <pavel.v.chupin@intel.com>
 
 	Fix mingw gold build with plugins enabled

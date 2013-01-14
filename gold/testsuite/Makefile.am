@@ -148,7 +148,7 @@ flagstest_ndebug.o: constructor_test.cc
 
 check_SCRIPTS += incremental_test.sh
 check_DATA += incremental_test.stdout
-MOSTLYCLEANFILES += incremental_test
+MOSTLYCLEANFILES += incremental_test incremental_test.cmdline
 incremental_test_1.o: incremental_test_1.c
 	$(COMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 incremental_test_2.o: incremental_test_2.c
@@ -269,7 +269,7 @@ text_section_grouping.stdout: text_section_grouping
 	$(TEST_NM) -n --synthetic text_section_grouping > text_section_grouping.stdout 
 
 check_PROGRAMS += icf_virtual_function_folding_test
-MOSTLYCLEANFILES += icf_virtual_function_folding_test
+MOSTLYCLEANFILES += icf_virtual_function_folding_test icf_virtual_function_folding_test.map
 icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIE -g -o $@ $<
 icf_virtual_function_folding_test: icf_virtual_function_folding_test.o gcctestdir/ld
@@ -1072,6 +1072,7 @@ flagstest_o_ttext_1: flagstest_debug.o gcctestdir/ld
 # PT_PHDR segment at file offset 0.  We just make sure that we can
 # build it without error.
 check_DATA += flagstest_o_ttext_2
+MOSTLYCLEANFILES += flagstest_o_ttext_2
 flagstest_o_ttext_2: flagstest_debug.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,-Ttext,0x400010 -Wl,-Tdata,0x800010
 
@@ -1284,6 +1285,7 @@ justsyms_exec_SOURCES = justsyms_exec.c
 justsyms_exec_DEPENDENCIES = gcctestdir/ld justsyms_lib
 justsyms_exec_LDFLAGS = -Bgcctestdir/ -Wl,-R,justsyms_lib
 justsyms_exec_LDADD =
+MOSTLYCLEANFILES += justsyms_lib
 justsyms_lib.o: justsyms_lib.c
 	$(COMPILE) -c -o $@ $<
 justsyms_lib: justsyms_lib.o gcctestdir/ld
@@ -1377,6 +1379,7 @@ script_test_8.stdout: script_test_8
 
 check_SCRIPTS += script_test_9.sh
 check_DATA += script_test_9.stdout
+MOSTLYCLEANFILES += script_test_9
 script_test_9.o: script_test_9.cc
 	$(CXXCOMPILE) -O0 -c -o $@ $<
 script_test_9: gcctestdir/ld $(srcdir)/script_test_9.t script_test_9.o
@@ -1570,6 +1573,7 @@ unused.c:
 
 check_SCRIPTS += plugin_final_layout.sh
 check_DATA += plugin_final_layout.stdout plugin_final_layout_readelf.stdout
+MOSTLYCLEANFILES += plugin_final_layout
 plugin_final_layout.o: plugin_final_layout.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections  -fdata-sections -g -o $@ $<
 plugin_final_layout: plugin_final_layout.o plugin_section_order.so gcctestdir/ld
@@ -2001,6 +2005,7 @@ dyn_weak_ref.stdout: dyn_weak_ref_1.so
 
 # Test that --start-lib and --end-lib function correctly.
 check_PROGRAMS += start_lib_test
+MOSTLYCLEANFILES += libstart_lib_test.a
 start_lib_test: start_lib_test_main.o libstart_lib_test.a start_lib_test_2.o start_lib_test_3.o \
 	gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -o $@ start_lib_test_main.o -L. -lstart_lib_test \
@@ -2183,6 +2188,7 @@ if NATIVE_OR_CROSS_LINKER
 # Test script section order.
 check_SCRIPTS += script_test_10.sh
 check_DATA += script_test_10.stdout
+MOSTLYCLEANFILES += script_test_10
 script_test_10.o: script_test_10.s
 	$(TEST_AS) -o $@ $<
 script_test_10: $(srcdir)/script_test_10.t script_test_10.o gcctestdir/ld
@@ -2795,6 +2801,7 @@ dwp_test_1b.dwo: dwp_test_1b.o
 dwp_test_2.dwo: dwp_test_2.o
 	$(TEST_OBJCOPY) --extract-dwo $< $@
 
+MOSTLYCLEANFILES += *.dwo *.dwp
 check_SCRIPTS += dwp_test_1.sh
 check_DATA += dwp_test_1.stdout
 dwp_test_1.stdout: dwp_test_1.dwp

@@ -119,6 +119,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt_shared.so debug_msg.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = incremental_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test.cmdline \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test gc_tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test pr14265 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test icf_keep_unique_test \
@@ -128,6 +129,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout_script.lds \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	text_section_grouping \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_virtual_function_folding_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_virtual_function_folding_test.map \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test \
@@ -253,15 +255,18 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_30 = debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_11.a \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_3.err binary.txt \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_ttext_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_11.a protected_3.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_lib binary.txt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4 script_test_5 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_6 script_test_7 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8 dynamic_list \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout libthin1.a \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthin3.a libthinall.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8 script_test_9 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list dynamic_list.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthin1.a libthin3.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthinall.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_2.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_4.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libthin2.a alt/libthin4.a
@@ -347,7 +352,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_7.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_9.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	two_file_test_1c.o \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	unused.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	unused.c \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_final_layout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_37 = exclude_libs_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test
@@ -407,6 +413,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref_1.so \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref_2.so \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dyn_weak_ref.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libstart_lib_test.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.stdout memory_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	memory_test.o
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_41 = large
@@ -528,20 +535,21 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Test script section order.
 @NATIVE_OR_CROSS_LINKER_TRUE@am__append_65 = script_test_10.sh
 @NATIVE_OR_CROSS_LINKER_TRUE@am__append_66 = script_test_10.stdout
+@NATIVE_OR_CROSS_LINKER_TRUE@am__append_67 = script_test_10
 
 # These tests work with cross linkers only.
-@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_67 = split_i386.sh
-@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_68 = split_i386_1.stdout split_i386_2.stdout \
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_68 = split_i386.sh
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_69 = split_i386_1.stdout split_i386_2.stdout \
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_i386_3.stdout split_i386_4.stdout split_i386_r.stdout
 
-@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_69 = split_i386_1 split_i386_2 split_i386_3 \
+@DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_70 = split_i386_1 split_i386_2 split_i386_3 \
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_i386_4 split_i386_r
 
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_70 = split_x86_64.sh
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_71 = split_x86_64_1.stdout split_x86_64_2.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_71 = split_x86_64.sh
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_72 = split_x86_64_1.stdout split_x86_64_2.stdout \
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_3.stdout split_x86_64_4.stdout split_x86_64_r.stdout
 
-@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_72 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
+@DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_73 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 @DEFAULT_TARGET_X86_64_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_x86_64_4 split_x86_64_r
 
 
@@ -556,7 +564,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Check Thumb to Thumb farcall veneers
 
 # Check Thumb to ARM farcall veneers
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_73 = arm_abs_global.sh \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_74 = arm_abs_global.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_in_range.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_branch_out_of_range.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_fix_v4bx.sh \
@@ -570,7 +578,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_arm_thumb.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb.sh \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm.sh
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_74 = arm_abs_global.stdout \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_75 = arm_abs_global.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_in_range.stdout \
@@ -615,7 +623,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb_6m.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm.stdout \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm_5t.stdout
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_75 = arm_abs_global \
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@am__append_76 = arm_abs_global \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_in_range \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_bl_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	thumb_bl_in_range \
@@ -658,9 +666,10 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_thumb_6m \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm \
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	arm_farcall_thumb_arm_5t
-@DEFAULT_TARGET_X86_64_TRUE@am__append_76 = dwp_test_1.sh \
+@DEFAULT_TARGET_X86_64_TRUE@am__append_77 = *.dwo *.dwp
+@DEFAULT_TARGET_X86_64_TRUE@am__append_78 = dwp_test_1.sh \
 @DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.sh
-@DEFAULT_TARGET_X86_64_TRUE@am__append_77 = dwp_test_1.stdout \
+@DEFAULT_TARGET_X86_64_TRUE@am__append_79 = dwp_test_1.stdout \
 @DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.stdout
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am
@@ -2055,21 +2064,21 @@ MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_4) \
 	$(am__append_17) $(am__append_26) $(am__append_28) \
 	$(am__append_30) $(am__append_36) $(am__append_40) \
 	$(am__append_56) $(am__append_59) $(am__append_62) \
-	$(am__append_64) $(am__append_69) $(am__append_72) \
-	$(am__append_75)
+	$(am__append_64) $(am__append_67) $(am__append_70) \
+	$(am__append_73) $(am__append_76) $(am__append_77)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
 check_SCRIPTS = $(am__append_2) $(am__append_34) $(am__append_38) \
 	$(am__append_54) $(am__append_57) $(am__append_60) \
-	$(am__append_65) $(am__append_67) $(am__append_70) \
-	$(am__append_73) $(am__append_76)
+	$(am__append_65) $(am__append_68) $(am__append_71) \
+	$(am__append_74) $(am__append_78)
 check_DATA = $(am__append_3) $(am__append_27) $(am__append_29) \
 	$(am__append_35) $(am__append_39) $(am__append_55) \
 	$(am__append_58) $(am__append_61) $(am__append_66) \
-	$(am__append_68) $(am__append_71) $(am__append_74) \
-	$(am__append_77)
+	$(am__append_69) $(am__append_72) $(am__append_75) \
+	$(am__append_79)
 BUILT_SOURCES = $(am__append_25)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
