@@ -2759,6 +2759,15 @@ remote_threads_info (struct target_ops *ops)
       bufp = rs->buf;
       if (bufp[0] != '\0')		/* q packet recognized */
 	{
+	  struct cleanup *old_chain;
+	  char *saved_reply;
+
+	  /* remote_notice_new_inferior (in the loop below) may make
+	     new RSP calls, which clobber rs->buf.  Work with a
+	     copy.  */
+	  bufp = saved_reply = xstrdup (rs->buf);
+	  old_chain = make_cleanup (free_current_contents, &saved_reply);
+
 	  while (*bufp++ == 'm')	/* reply contains one or more TID */
 	    {
 	      do
@@ -2776,10 +2785,12 @@ remote_threads_info (struct target_ops *ops)
 		    }
 		}
 	      while (*bufp++ == ',');	/* comma-separated list */
+	      free_current_contents (&saved_reply);
 	      putpkt ("qsThreadInfo");
 	      getpkt (&rs->buf, &rs->buf_size, 0);
-	      bufp = rs->buf;
+	      bufp = saved_reply = xstrdup (rs->buf);
 	    }
+	  do_cleanups (old_chain);
 	  return;	/* done */
 	}
     }
