@@ -1,3 +1,8 @@
+2013-01-14  Alan Modra  <amodra@gmail.com>
+
+	* gas/v850/basic.exp (reloc part 1): Pass -mgcc-abi to gas.
+	* gas/v850/split-lo16.d: Likewise.
+
 2013-01-14  Will Newton <will.newton@imgtec.com>
 
 	* gas/metag/metadsp21.d: Fix expected MMOV disassembly.

@@ -1,6 +1,6 @@
 #objdump: -dr
 #name: V850E split LO16 tests
-#as: -mv850e
+#as: -mv850e -mgcc-abi
 #...
 00000000 <.*>:
    0:	40 0e 00 00 	movhi	0, r0, r1
