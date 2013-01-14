@@ -33,7 +33,7 @@
 
 #define OPERAND_WIDTH   92
 #define ADDR_WIDTH      20
-#define REG_WIDTH       50
+#define REG_WIDTH       64
 #define DSP_PREFIX_WIDTH 17
 
 /* Value to print if we fail to parse a register name.  */

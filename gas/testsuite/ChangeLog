@@ -1,3 +1,7 @@
+2013-01-14  Will Newton <will.newton@imgtec.com>
+
+	* gas/metag/metadsp21.d: Fix expected MMOV disassembly.
+
 2013-01-14  Alan Modra  <amodra@gmail.com>
 
 	* gas/ppc/htm.s: Use .text rather than .section ".text".
