@@ -1,4 +1,4 @@
-	.section	".text"
+	.text
 power8:
 	tabort.      5
 	tabortwc.    7,8,16

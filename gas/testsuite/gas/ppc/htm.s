@@ -1,4 +1,4 @@
-	.section	".text"
+	.text
 htm:
 	tabort.      5
 	tabortwc.    7,8,16

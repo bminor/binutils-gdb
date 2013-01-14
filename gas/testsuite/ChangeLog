@@ -1,3 +1,10 @@
+2013-01-14  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/htm.s: Use .text rather than .section ".text".
+	* gas/ppc/power8.s: Likewise.
+	* gas/ppc/htm.d: Don't match file format.
+	* gas/ppc/power8.d: Likewise.
+
 2013-01-10  Peter Bergner <bergner@vnet.ibm.com>
 
 	* gas/ppc/htm.d: New test.

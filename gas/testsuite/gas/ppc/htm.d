@@ -2,7 +2,7 @@
 #objdump: -dr -Mhtm
 #name: Hardware Transactional Memory (HTM) tests
 
-.*: +file format elf(32)?(64)?-powerpc.*
+.*
 
 Disassembly of section \.text:
 

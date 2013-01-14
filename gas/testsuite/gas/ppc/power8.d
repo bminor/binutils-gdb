@@ -2,7 +2,7 @@
 #objdump: -dr -Mpower8
 #name: POWER8 tests (includes Altivec, VSX and HTM)
 
-.*: +file format elf(32)?(64)?-powerpc.*
+.*
 
 Disassembly of section \.text:
 
