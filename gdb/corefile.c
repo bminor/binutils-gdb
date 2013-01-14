@@ -34,6 +34,7 @@
 #include "completer.h"
 #include "exceptions.h"
 #include "observer.h"
+#include "cli/cli-utils.h"
 
 /* Local function declarations.  */
 
@@ -419,10 +420,38 @@ static void
 set_gnutarget_command (char *ignore, int from_tty,
 		       struct cmd_list_element *c)
 {
+  char *gend = gnutarget_string + strlen (gnutarget_string);
+
+  gend = remove_trailing_whitespace (gnutarget_string, gend);
+  *gend = '\0';
+
   if (strcmp (gnutarget_string, "auto") == 0)
     gnutarget = NULL;
   else
     gnutarget = gnutarget_string;
+}
+
+/* A completion function for "set gnutarget".  */
+
+static VEC (char_ptr) *
+complete_set_gnutarget (struct cmd_list_element *cmd, char *text, char *word)
+{
+  static const char **bfd_targets;
+
+  if (bfd_targets == NULL)
+    {
+      int last;
+
+      bfd_targets = bfd_target_list ();
+      for (last = 0; bfd_targets[last] != NULL; ++last)
+	;
+
+      bfd_targets = xrealloc (bfd_targets, (last + 2) * sizeof (const char **));
+      bfd_targets[last] = "auto";
+      bfd_targets[last + 1] = NULL;
+    }
+
+  return complete_on_enum (bfd_targets, text, word);
 }
 
 /* Set the gnutarget.  */
@@ -447,14 +476,16 @@ No arg means have no core file.  This command has been superseded by the\n\
   set_cmd_completer (c, filename_completer);
 
   
-  add_setshow_string_noescape_cmd ("gnutarget", class_files,
-				   &gnutarget_string, _("\
+  c = add_setshow_string_noescape_cmd ("gnutarget", class_files,
+				       &gnutarget_string, _("\
 Set the current BFD target."), _("\
 Show the current BFD target."), _("\
 Use `set gnutarget auto' to specify automatic detection."),
-				   set_gnutarget_command,
-				   show_gnutarget_string,
-				   &setlist, &showlist);
+				       set_gnutarget_command,
+				       show_gnutarget_string,
+				       &setlist, &showlist);
+  set_cmd_completer (c, complete_set_gnutarget);
+
   add_alias_cmd ("g", "gnutarget", class_files, 1, &setlist);
 
   if (getenv ("GNUTARGET"))

@@ -597,7 +597,7 @@ add_setshow_string_cmd (char *name, enum command_class class,
 
 /* Add element named NAME to both the set and show command LISTs (the
    list for set/show or some sublist thereof).  */
-void
+struct cmd_list_element *
 add_setshow_string_noescape_cmd (char *name, enum command_class class,
 				 char **var,
 				 const char *set_doc, const char *show_doc,
@@ -607,11 +607,14 @@ add_setshow_string_noescape_cmd (char *name, enum command_class class,
 				 struct cmd_list_element **set_list,
 				 struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *set_cmd;
+
   add_setshow_cmd_full (name, class, var_string_noescape, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&set_cmd, NULL);
+  return set_cmd;
 }
 
 /* Add element named NAME to both the set and show command LISTs (the

@@ -1,5 +1,9 @@
 2013-01-14  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/completion.exp: Add "set gnutarget" test.
+
+2013-01-14  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/dw2-restrict.S: New file.
 	* gdb.dwarf2/dw2-restrict.c: New file.
 	* gdb.dwarf2/dw2-restrict.exp: New file.

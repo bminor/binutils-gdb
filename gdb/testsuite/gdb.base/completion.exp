@@ -707,6 +707,9 @@ gdb_test "complete ptype struct some_" "ptype struct some_struct"
 gdb_test "complete ptype enum some_" "ptype enum some_enum"
 gdb_test "complete ptype union some_" "ptype union some_union"
 
+
+gdb_test "complete set gnutarget aut" "set gnutarget auto"
+
 # Restore globals modified in this test...
 set timeout $oldtimeout1
 

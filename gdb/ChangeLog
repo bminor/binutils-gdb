@@ -1,5 +1,14 @@
 2013-01-14  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-decode.c (add_setshow_string_noescape_cmd): Return the
+	set command.
+	* command.h (add_setshow_string_noescape_cmd): Update.
+	* corefile.c (set_gnutarget_command): Remove trailing whitespace.
+	(complete_set_gnutarget): New function.
+	(_initialize_core): Set the "set gnutarget" completer.
+
+2013-01-14  Tom Tromey  <tromey@redhat.com>
+
 	PR symtab/14442:
 	* c-typeprint.c (cp_type_print_method_args): Handle 'restrict'.
 	(c_type_print_modifier): Likewise.
