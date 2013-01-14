@@ -1798,6 +1798,44 @@ discard_psymtab (struct objfile *objfile, struct partial_symtab *pst)
   objfile->free_psymtabs = pst;
 }
 
+/* An object of this type is passed to discard_psymtabs_upto.  */
+
+struct psymtab_state
+{
+  /* The objfile where psymtabs are discarded.  */
+
+  struct objfile *objfile;
+
+  /* The first psymtab to save.  */
+
+  struct partial_symtab *save;
+};
+
+/* A cleanup function used by make_cleanup_discard_psymtabs.  */
+
+static void
+discard_psymtabs_upto (void *arg)
+{
+  struct psymtab_state *state = arg;
+
+  while (state->objfile->psymtabs != state->save)
+    discard_psymtab (state->objfile, state->objfile->psymtabs);
+}
+
+/* Return a new cleanup that discards all psymtabs created in OBJFILE
+   after this function is called.  */
+
+struct cleanup *
+make_cleanup_discard_psymtabs (struct objfile *objfile)
+{
+  struct psymtab_state *state = XNEW (struct psymtab_state);
+
+  state->objfile = objfile;
+  state->save = objfile->psymtabs;
+
+  return make_cleanup_dtor (discard_psymtabs_upto, state, xfree);
+}
+
 
 
 static void

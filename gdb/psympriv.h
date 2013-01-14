@@ -231,6 +231,8 @@ extern struct partial_symtab *allocate_psymtab (const char *,
 
 extern void discard_psymtab (struct objfile *, struct partial_symtab *);
 
+extern struct cleanup *make_cleanup_discard_psymtabs (struct objfile *);
+
 /* Traverse all psymtabs in one objfile.  */
 
 #define	ALL_OBJFILE_PSYMTABS(objfile, p) \

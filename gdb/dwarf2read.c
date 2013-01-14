@@ -3843,12 +3843,25 @@ dwarf2_initialize_objfile (struct objfile *objfile)
 void
 dwarf2_build_psymtabs (struct objfile *objfile)
 {
+  volatile struct gdb_exception except;
+
   if (objfile->global_psymbols.size == 0 && objfile->static_psymbols.size == 0)
     {
       init_psymbol_list (objfile, 1024);
     }
 
-  dwarf2_build_psymtabs_hard (objfile);
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      /* This isn't really ideal: all the data we allocate on the
+	 objfile's obstack is still uselessly kept around.  However,
+	 freeing it seems unsafe.  */
+      struct cleanup *cleanups = make_cleanup_discard_psymtabs (objfile);
+
+      dwarf2_build_psymtabs_hard (objfile);
+      discard_cleanups (cleanups);
+    }
+  if (except.reason < 0)
+    exception_print (gdb_stderr, except);
 }
 
 /* Return the total length of the CU described by HEADER.  */

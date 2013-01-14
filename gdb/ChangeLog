@@ -1,3 +1,12 @@
+2013-01-14  Tom Tromey  <tromey@redhat.com>
+
+	PR symtab/14931:
+	* psymtab.c (struct psymtab_state): New.
+	(discard_psymtabs_upto, make_cleanup_discard_psymtabs): New
+	functions.
+	* psympriv.h (make_cleanup_discard_psymtabs): Declare.
+	* dwarf2read.c (dwarf2_build_psymtabs): Catch exceptions.
+
 2013-01-14  Richard Sharman  <richard_sharman@mitel.com>
 	    Pedro Alves  <palves@redhat.com>
 
