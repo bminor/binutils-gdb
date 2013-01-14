@@ -2406,9 +2406,6 @@ dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
   struct cleanup *old_chain;
   int i;
 
-  if (!pst)
-    return;
-
   if (pst->readin)
     {
       fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  "
@@ -2455,16 +2452,13 @@ dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
 }
 
 /* Read in all of the symbols for a given psymtab for real.
-   Be verbose about it if the user wants that.  */
+   Be verbose about it if the user wants that.  PST is not NULL.  */
 
 static void
 dbx_psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 {
   bfd *sym_bfd;
   struct cleanup *back_to = NULL;
-
-  if (!pst)
-    return;
 
   if (pst->readin)
     {

@@ -1855,14 +1855,11 @@ xcoff_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
 }
 
 /* Read in all of the symbols for a given psymtab for real.
-   Be verbose about it if the user wants that.  */
+   Be verbose about it if the user wants that.  PST is not NULL.  */
 
 static void
 xcoff_psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 {
-  if (!pst)
-    return;
-
   if (pst->readin)
     {
       fprintf_unfiltered

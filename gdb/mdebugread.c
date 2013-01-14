@@ -273,14 +273,11 @@ static char *mdebug_next_symbol_text (struct objfile *);
 /* Exported procedure: Builds a symtab from the PST partial one.
    Restores the environment in effect when PST was created, delegates
    most of the work to an ancillary procedure, and sorts
-   and reorders the symtab list at the end.  */
+   and reorders the symtab list at the end.  PST is not NULL.  */
 
 static void
 mdebug_psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 {
-  if (!pst)
-    return;
-
   if (info_verbose)
     {
       printf_filtered (_("Reading in symbols for %s..."), pst->filename);

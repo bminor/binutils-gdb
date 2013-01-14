@@ -1,3 +1,11 @@
+2013-01-14  Yao Qi  <yao@codesourcery.com>
+
+	* dbxread.c (dbx_psymtab_to_symtab_1): Don't check PST is NULL.
+	(dbx_psymtab_to_symtab): Likewise.
+	* dwarf2read.c (dwarf2_psymtab_to_symtab): Likewise.
+	* mdebugread.c (mdebug_psymtab_to_symtab): Likewise.
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Likewise.
+
 2013-01-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* parse.c (parse_exp_in_context): New variable inner_chain.  Call
