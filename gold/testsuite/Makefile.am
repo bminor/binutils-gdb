@@ -252,7 +252,7 @@ final_layout.o: final_layout.cc
 final_layout_sequence.txt:
 	(echo "*_Z3barv*" && echo ".text._Z3bazv" && echo "*_Z3foov*" && echo "*global_varb*" && echo "*global_vara*" && echo "*global_varc*") > final_layout_sequence.txt
 final_layout_script.lds:
-	(echo "SECTIONS { .text : { *(.text*) } .bss : { *(.bss*) } }") > final_layout_script.lds
+	(echo "SECTIONS { .text : { *(.text*) } .got : { *(.got .toc) } .bss : { *(.bss*) } }") > final_layout_script.lds
 final_layout: final_layout.o final_layout_sequence.txt final_layout_script.lds gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--section-ordering-file,final_layout_sequence.txt -Wl,-T,final_layout_script.lds final_layout.o
 final_layout.stdout: final_layout
