@@ -339,8 +339,8 @@ msp430_final_link_relocate (reloc_howto_type * howto, bfd * input_bfd,
       bfd_put_16 (input_bfd, x, contents - 2);
       break;
 
-    case R_MSP430_16_PCREL:
     case R_MSP430_RL_PCREL:
+    case R_MSP430_16_PCREL:
       contents += rel->r_offset;
       srel = (bfd_signed_vma) relocation;
       srel += rel->r_addend;
@@ -667,7 +667,7 @@ elf32_msp430_object_p (bfd * abfd)
    Relaxation required only in two cases:
     - Bad hand coding like jumps from one section to another or
       from file to file.
-    - Sibling calls. This will affect onlu 'jump label' polymorph. Without
+    - Sibling calls. This will affect only 'jump label' polymorph. Without
       relaxing this enlarges code by 2 bytes. Sibcalls implemented but
       do not work in gcc's port by the reason I do not know.
    Anyway, if a relaxation required, user should pass -relax option to the
@@ -794,7 +794,7 @@ msp430_elf_symbol_address_p (bfd * abfd,
 }
 
 /* Adjust all local symbols defined as '.section + 0xXXXX' (.section has sec_shndx)
-    referenced from current and other sections */
+    referenced from current and other sections.  */
 static bfd_boolean
 msp430_elf_relax_adjust_locals(bfd * abfd, asection * sec, bfd_vma addr,
     int count, unsigned int sec_shndx, bfd_vma toaddr)
@@ -896,7 +896,6 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
 
   return TRUE;
 }
-
 
 static bfd_boolean
 msp430_elf_relax_section (bfd * abfd, asection * sec,
