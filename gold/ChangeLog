@@ -1,5 +1,10 @@
 2013-01-15  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::do_relax): Default shared libs to
+	plt-thread-safe.
+
+2013-01-15  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/Makefile.am (final_layout_script.lds): Handle .got section.
 	* testsuite/Makefile.in: Regenerate.
 

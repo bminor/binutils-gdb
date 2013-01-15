@@ -2182,7 +2182,7 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
       bool thread_safe = parameters->options().plt_thread_safe();
       if (size == 64 && !parameters->options().user_set_plt_thread_safe())
 	{
-	  const char* const thread_starter[] =
+	  static const char* const thread_starter[] =
 	    {
 	      "pthread_create",
 	      /* libstdc++ */
@@ -2201,14 +2201,21 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 	      "GOMP_parallel_sections_start", 
 	    };
 
-	  for (unsigned int i = 0;
-	       i < sizeof(thread_starter) / sizeof(thread_starter[0]);
-	       i++)
+	  if (parameters->options().shared())
+	    thread_safe = true;
+	  else
 	    {
-	      Symbol* sym = symtab->lookup(thread_starter[i], NULL);
-	      thread_safe = sym != NULL && sym->in_reg() && sym->in_real_elf();
-	      if (thread_safe)
-		break;
+	      for (unsigned int i = 0;
+		   i < sizeof(thread_starter) / sizeof(thread_starter[0]);
+		   i++)
+		{
+		  Symbol* sym = symtab->lookup(thread_starter[i], NULL);
+		  thread_safe = (sym != NULL
+				 && sym->in_reg()
+				 && sym->in_real_elf());
+		  if (thread_safe)
+		    break;
+		}
 	    }
 	}
       this->plt_thread_safe_ = thread_safe;

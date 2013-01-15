@@ -11334,9 +11334,11 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
 
   htab->plt_static_chain = plt_static_chain;
   htab->plt_stub_align = plt_stub_align;
+  if (plt_thread_safe == -1 && !info->executable)
+    plt_thread_safe = 1;
   if (plt_thread_safe == -1)
     {
-      const char *const thread_starter[] =
+      static const char *const thread_starter[] =
 	{
 	  "pthread_create",
 	  /* libstdc++ */

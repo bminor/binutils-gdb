@@ -13,20 +13,22 @@ Disassembly of section \.text:
 .*	(e9 62 80 70|70 80 62 e9) 	ld      r11,-32656\(r2\)
 .*	(7d 69 03 a6|a6 03 69 7d) 	mtctr   r11
 .*	(e8 42 80 78|78 80 42 e8) 	ld      r2,-32648\(r2\)
-.*	(4e 80 04 20|20 04 80 4e) 	bctr
+.*	(28 22 00 00|00 00 22 28) 	cmpldi  r2,0
+.*	(4c e2 04 20|20 04 e2 4c) 	bnectr\+ 
+.*	(48 00 00 ..|.. 00 00 48) 	b       .* <__glink_PLTresolve\+0x38>
 
 .* <_start>:
 .*	(38 62 80 08|08 80 62 38) 	addi    r3,r2,-32760
-.*	(4b ff ff e9|e9 ff ff 4b) 	bl      .*
+.*	(4b ff ff ..|.. ff ff 4b) 	bl      .*plt_call.__tls_get_addr.*
 .*	(e8 41 00 28|28 00 41 e8) 	ld      r2,40\(r1\)
 .*	(38 62 80 18|18 80 62 38) 	addi    r3,r2,-32744
-.*	(4b ff ff dd|dd ff ff 4b) 	bl      .*
+.*	(4b ff ff ..|.. ff ff 4b) 	bl      .*plt_call.__tls_get_addr.*
 .*	(e8 41 00 28|28 00 41 e8) 	ld      r2,40\(r1\)
 .*	(38 62 80 28|28 80 62 38) 	addi    r3,r2,-32728
-.*	(4b ff ff d1|d1 ff ff 4b) 	bl      .*
+.*	(4b ff ff ..|.. ff ff 4b) 	bl      .*plt_call.__tls_get_addr.*
 .*	(e8 41 00 28|28 00 41 e8) 	ld      r2,40\(r1\)
 .*	(38 62 80 38|38 80 62 38) 	addi    r3,r2,-32712
-.*	(4b ff ff c5|c5 ff ff 4b) 	bl      .*
+.*	(4b ff ff ..|.. ff ff 4b) 	bl      .*plt_call.__tls_get_addr.*
 .*	(e8 41 00 28|28 00 41 e8) 	ld      r2,40\(r1\)
 .*	(39 23 80 40|40 80 23 39) 	addi    r9,r3,-32704
 .*	(3d 23 00 00|00 00 23 3d) 	addis   r9,r3,0

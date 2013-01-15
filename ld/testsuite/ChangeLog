@@ -1,5 +1,13 @@
 2013-01-15  Alan Modra  <amodra@gmail.com>
 
+	* ld-powerpc/tlsso.d: Adjust for plt-thread-safe stubs.
+	* ld-powerpc/tlsso.g: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstocso.d: Likewise.
+	* ld-powerpc/tlstocso.g: Likewise.
+
+2013-01-15  Alan Modra  <amodra@gmail.com>
+
 	* ld-plugin/lto-16a.d: Match powerpc64 function symbol type.
 	* ld-plugin/lto-16b.d: Likewise.
 	* ld-plugin/lto-17a.d: Likewise.
