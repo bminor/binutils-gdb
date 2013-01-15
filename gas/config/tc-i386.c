@@ -6783,8 +6783,6 @@ lex_got (enum bfd_reloc_code_real *rel,
 	      char *tmpbuf, *past_reloc;
 
 	      *rel = gotrel[j].rel[object_64bit];
-	      if (adjust)
-		*adjust = len;
 
 	      if (types)
 		{
@@ -6819,6 +6817,12 @@ lex_got (enum bfd_reloc_code_real *rel,
 		/* Replace the relocation token with ' ', so that
 		   errors like foo@GOTOFF1 will be detected.  */
 		tmpbuf[first++] = ' ';
+	      else
+		/* Increment length by 1 if the relocation token is
+		   removed.  */
+		len++;
+	      if (adjust)
+		*adjust = len;
 	      memcpy (tmpbuf + first, past_reloc, second);
 	      tmpbuf[first + second] = '\0';
 	      return tmpbuf;

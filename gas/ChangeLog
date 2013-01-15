@@ -1,3 +1,9 @@
+2013-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/15019
+	* config/tc-i386.c (lex_got): Increment length by 1 if the
+	relocation token is removed.
+
 2013-01-15  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-v850.c (md_assemble): Allow signed values for
@@ -6,7 +12,7 @@
 2013-01-11  Sean Keys  <skeys@ipdatasys.com>
 
 	* config/tc-xgate.c (md_begin): Fix mistake made when going from
-        git to cvs.
+	git to cvs.
 
 2013-01-10  Peter Bergner <bergner@vnet.ibm.com>
 
@@ -18,7 +24,7 @@
 2013-01-10  Sean Keys  <skeys@ipdatasys.com>
 
 	* config/tc-xgate.c (md_begin): Fix the printing of opcodes so
-        that the assember exits after the opcodes have been printed.
+	that the assember exits after the opcodes have been printed.
 
 2013-01-10  H.J. Lu  <hongjiu.lu@intel.com>
 
