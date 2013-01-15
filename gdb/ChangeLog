@@ -1,3 +1,7 @@
+2013-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (psymtab_include_file_name): Extend the function comment.
+
 2013-01-14  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-decode.c (add_setshow_string_noescape_cmd): Return the
