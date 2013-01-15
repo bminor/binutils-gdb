@@ -173,7 +173,7 @@ static reloc_howto_type x86_64_elf_howto_table[] =
      R_X86_64_standard counts the number up to this point, and
      R_X86_64_vt_offset is the value to subtract from a reloc type of
      R_X86_64_GNU_VT* to form an index into this table.  */
-#define R_X86_64_standard (R_X86_64_IRELATIVE + 1)
+#define R_X86_64_standard (R_X86_64_RELATIVE64 + 1)
 #define R_X86_64_vt_offset (R_X86_64_GNU_VTINHERIT - R_X86_64_standard)
 
 /* GNU extension to record C++ vtable hierarchy.  */

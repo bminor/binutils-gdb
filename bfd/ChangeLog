@@ -1,3 +1,8 @@
+2013-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (R_X86_64_standard): Replace R_X86_64_IRELATIVE
+	with R_X86_64_RELATIVE64.
+
 2013-01-15  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-msp430.c: Fix spelling typo.
