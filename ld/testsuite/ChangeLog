@@ -1,3 +1,10 @@
+2013-01-15  Alan Modra  <amodra@gmail.com>
+
+	* ld-plugin/lto-16a.d: Match powerpc64 function symbol type.
+	* ld-plugin/lto-16b.d: Likewise.
+	* ld-plugin/lto-17a.d: Likewise.
+	* ld-plugin/lto-17b-2.d: Likewise.
+
 2013-01-14  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/pr14926.d: Disable for d10v, msp, xstormy.
