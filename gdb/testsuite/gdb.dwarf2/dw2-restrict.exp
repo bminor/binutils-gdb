@@ -20,6 +20,11 @@ if {![dwarf2_support]} {
     return 0
 }
 
+# This test can only be run on x86-64 targets.
+if {![istarget x86_64-*] || ![is_lp64_target]} {
+    return 0
+}
+
 standard_testfile .S
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile {nodebug}]} {
