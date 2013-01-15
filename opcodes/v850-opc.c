@@ -747,9 +747,9 @@ const struct v850_operand v850_operands[] =
 #define IMM16	(I16 + 1)
   { 16, 32, NULL, NULL, V850E_IMMEDIATE16, BFD_RELOC_16 },
 
-/* The 16 bit immediate following a 32 bit instruction.  */
+/* The signed 16 bit immediate following a prepare instruction.  */
 #define IMM16LO	(IMM16 + 1)
-  { 16, 32, NULL, NULL, V850E_IMMEDIATE16, BFD_RELOC_LO16 },
+  { 16, 32, NULL, NULL, V850E_IMMEDIATE16 | V850_OPERAND_SIGNED, BFD_RELOC_LO16 },
 
 /* The hi 16 bit immediate following a 32 bit instruction.  */
 #define IMM16HI	(IMM16LO + 1)

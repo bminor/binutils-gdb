@@ -1,3 +1,8 @@
+2013-01-15  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-v850.c (md_assemble): Allow signed values for
+	V850E_IMMEDIATE.
+
 2013-01-11  Sean Keys  <skeys@ipdatasys.com>
 
 	* config/tc-xgate.c (md_begin): Fix mistake made when going from

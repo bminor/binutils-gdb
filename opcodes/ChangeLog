@@ -1,3 +1,9 @@
+2013-01-15  Nick Clifton  <nickc@redhat.com>
+
+	* v850-dis.c (get_operand_value): Sign extend V850E_IMMEDIATE
+	values.
+	* v850-opc.c (IMM16LO): Add V850_OPERAND_SIGNED attribute.
+
 2013-01-14  Will Newton <will.newton@imgtec.com>
 
 	* metag-dis.c (REG_WIDTH): Increase to 64.

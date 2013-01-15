@@ -1,3 +1,11 @@
+2013-01-15  Nick Clifton  <nickc@redhat.com>
+
+	* gas/v850/basic.exp: Allow for variations in reloc names.
+	* gas/v850/split-lo16.d: Likewise.
+
+	* gas/v850/v850e1.s: Add more tests of the PREPARE insn.
+	* gas/v850/v850e1.d: Update expected disassembly.
+
 2013-01-14  Alan Modra  <amodra@gmail.com>
 
 	* gas/v850/basic.exp (reloc part 1): Pass -mgcc-abi to gas.

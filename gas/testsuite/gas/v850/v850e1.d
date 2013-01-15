@@ -43,3 +43,4 @@ Disassembly of section .text:
 0x0+7a 83 00  [ 	]*zxb	sp
 0x0+7c c4 00  [ 	]*zxh	gp
 0x0+7e 63 ff 9d 00[ 	]*st.w	lp, 156\[sp\]
+0x0+82 80 07 0b e8 f6 ff[ 	]*prepare	{r20, r24 - r26}, 0, -10

@@ -2350,7 +2350,8 @@ md_assemble (char *str)
 		    }
 		  if (operand->flags & V850E_IMMEDIATE16)
 		    {
-		      if (ex.X_add_number & 0xffff0000)
+		      if ((ex.X_add_number & 0xffff0000)
+			  && ((ex.X_add_number & 0xffff0000) != 0xffff0000))
 			{
 			  errmsg = _("constant too big to fit into instruction");
 			  goto error;

@@ -386,17 +386,17 @@ proc do_simple_reloc_tests {} {
 
 	while 1 {
 	    expect {
-		-re "^00000002\[^\n\]*R_V850_LO16\[^\n\]*\n"
+		-re "^00000002\[^\n\]*R_V8\[A-Z0-9_\]+\[^\n\]*\n"
 			{ set x [expr $x+1] }
-		-re "^00000006\[^\n\]*R_V850_HI16_S\[^\n\]*\n"
+		-re "^00000006\[^\n\]*R_V8\[A-Z0-9_\]+\[^\n\]*\n"
 			{ set x [expr $x+1] }
-		-re "^0000000a\[^\n\]*R_V850_HI16\[^\n\]*\n"
+		-re "^0000000a\[^\n\]*R_V8\[A-Z0-9_\]+\[^\n\]*\n"
 			{ set x [expr $x+1] }
-		-re "^0000000e\[^\n\]*R_V850_ZDA_16_16_OFFSET\[^\n\]*\n"
+		-re "^0000000e\[^\n\]*R_V8\[A-Z0-9_\]+\[^\n\]*\n"
 			{ set x [expr $x+1] }
-		-re "^00000012\[^\n\]*R_V850_TDA_16_16_OFFSET\[^\n\]*\n"
+		-re "^00000012\[^\n\]*R_V8\[A-Z0-9_\]+\[^\n\]*\n"
 			{ set x [expr $x+1] }
-		-re "^00000016\[^\n\]*R_V850_SDA_16_16_OFFSET\[^\n\]*\n"
+		-re "^00000016\[^\n\]*R_V8\[A-Z0-9_\]+\[^\n\]*\n"
 			{ set x [expr $x+1] }
 		-re "\[^\n\]*\n"				{ }
 		timeout			{ perror "timeout\n"; break }
