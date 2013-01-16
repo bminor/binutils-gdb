@@ -1,3 +1,27 @@
+2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
+	* elf32-i386.c (elf_howto_table): Fill R_386_SIZE32 entry.
+	(elf_i386_reloc_type_lookup): Support BFD_RELOC_SIZE32.
+	(elf_i386_check_relocs): Handle R_386_SIZE32.
+	(elf_i386_gc_sweep_hook): Likewise.
+	(elf_i386_relocate_section): Likewise.
+
+	* elf64-x86-64.c (x86_64_elf_howto_table): Fill R_X86_64_SIZE32
+	and R_X86_64_SIZE64 entries.
+	(x86_64_reloc_map): Add BFD_RELOC_SIZE32 and BFD_RELOC_SIZE64,
+	(elf_x86_64_rtype_to_howto): Handle R_X86_64_SIZE32 for x32.
+	(elf_x86_64_reloc_name_lookup): Likewise.
+	(elf_x86_64_check_relocs): Handle R_X86_64_SIZE32 and
+	R_X86_64_SIZE64.
+	(elf_x86_64_gc_sweep_hook): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+
+	* reloc.c (bfd_reloc_code_type): Add BFD_RELOC_SIZE32 and
+	BFD_RELOC_SIZE64.
+
 2013-01-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (R_X86_64_standard): Replace R_X86_64_IRELATIVE

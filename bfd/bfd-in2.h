@@ -2523,6 +2523,10 @@ The 24-bit relocation is used in some Intel 960 configurations.  */
   BFD_RELOC_HI16_S_PLTOFF,
   BFD_RELOC_8_PLTOFF,
 
+/* Size relocations.  */
+  BFD_RELOC_SIZE32,
+  BFD_RELOC_SIZE64,
+
 /* Relocations used by 68K ELF.  */
   BFD_RELOC_68K_GLOB_DAT,
   BFD_RELOC_68K_JMP_SLOT,
