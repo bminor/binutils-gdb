@@ -7529,6 +7529,9 @@ print_one_catch_fork (struct breakpoint *b, struct bp_location **last_loc)
                         ptid_get_pid (c->forked_inferior_pid));
       ui_out_spaces (uiout, 1);
     }
+
+  if (ui_out_is_mi_like_p (uiout))
+    ui_out_field_string (uiout, "catch-type", "fork");
 }
 
 /* Implement the "print_mention" breakpoint_ops method for fork
@@ -7642,6 +7645,9 @@ print_one_catch_vfork (struct breakpoint *b, struct bp_location **last_loc)
                         ptid_get_pid (c->forked_inferior_pid));
       ui_out_spaces (uiout, 1);
     }
+
+  if (ui_out_is_mi_like_p (uiout))
+    ui_out_field_string (uiout, "catch-type", "vfork");
 }
 
 /* Implement the "print_mention" breakpoint_ops method for vfork
@@ -7840,6 +7846,10 @@ print_one_catch_solib (struct breakpoint *b, struct bp_location **locs)
     }
   ui_out_field_string (uiout, "what", msg);
   xfree (msg);
+
+  if (ui_out_is_mi_like_p (uiout))
+    ui_out_field_string (uiout, "catch-type",
+			 self->is_load ? "load" : "unload");
 }
 
 static void
@@ -8251,6 +8261,9 @@ print_one_catch_syscall (struct breakpoint *b,
   else
     ui_out_field_string (uiout, "what", "<any syscall>");
   ui_out_text (uiout, "\" ");
+
+  if (ui_out_is_mi_like_p (uiout))
+    ui_out_field_string (uiout, "catch-type", "syscall");
 }
 
 /* Implement the "print_mention" breakpoint_ops method for syscall
@@ -8488,6 +8501,9 @@ print_one_catch_exec (struct breakpoint *b, struct bp_location **last_loc)
       ui_out_field_string (uiout, "what", c->exec_pathname);
       ui_out_text (uiout, "\" ");
     }
+
+  if (ui_out_is_mi_like_p (uiout))
+    ui_out_field_string (uiout, "catch-type", "exec");
 }
 
 static void
@@ -11536,9 +11552,17 @@ print_one_exception_catchpoint (struct breakpoint *b,
   if (b->loc)
     *last_loc = b->loc;
   if (strstr (b->addr_string, "throw") != NULL)
-    ui_out_field_string (uiout, "what", "exception throw");
+    {
+      ui_out_field_string (uiout, "what", "exception throw");
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_string (uiout, "catch-type", "throw");
+    }
   else
-    ui_out_field_string (uiout, "what", "exception catch");
+    {
+      ui_out_field_string (uiout, "what", "exception catch");
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_string (uiout, "catch-type", "catch");
+    }
 }
 
 static void

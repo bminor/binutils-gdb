@@ -27957,6 +27957,10 @@ of a multi-location breakpoint, this will be a dotted pair, like
 The type of the breakpoint.  For ordinary breakpoints this will be
 @samp{breakpoint}, but many values are possible.
 
+@item catch-type
+If the type of the breakpoint is @samp{catchpoint}, then this
+indicates the exact type of catchpoint.
+
 @item disp
 This is the breakpoint disposition---either @samp{del}, meaning that
 the breakpoint will be deleted at the next stop, or @samp{keep},
@@ -28867,7 +28871,7 @@ The corresponding @value{GDBN} command is @samp{catch load}.
 @smallexample
 -catch-load -t foo.so
 ^done,bkpt=@{number="1",type="catchpoint",disp="del",enabled="y",
-what="load of library matching foo.so",times="0"@}
+what="load of library matching foo.so",catch-type="load",times="0"@}
 (gdb)
 @end smallexample
 
@@ -28896,7 +28900,7 @@ The corresponding @value{GDBN} command is @samp{catch unload}.
 @smallexample
 -catch-unload -d bar.so
 ^done,bkpt=@{number="2",type="catchpoint",disp="keep",enabled="n",
-what="load of library matching bar.so",times="0"@}
+what="load of library matching bar.so",catch-type="unload",times="0"@}
 (gdb)
 @end smallexample
 
