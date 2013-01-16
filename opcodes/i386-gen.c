@@ -294,6 +294,8 @@ static initializer operand_type_init[] =
     "Imm16|Imm32S" },
   { "OPERAND_TYPE_IMM16_32_32S",
     "Imm16|Imm32|Imm32S" },
+  { "OPERAND_TYPE_IMM32_64",
+    "Imm32|Imm64" },
   { "OPERAND_TYPE_IMM32_32S_DISP32",
     "Imm32|Imm32S|Disp32" },
   { "OPERAND_TYPE_IMM64_DISP64",
