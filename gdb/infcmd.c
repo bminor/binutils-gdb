@@ -1032,7 +1032,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	  CORE_ADDR pc;
 
 	  /* Step at an inlined function behaves like "down".  */
-	  if (!skip_subroutines && !single_inst
+	  if (!skip_subroutines
 	      && inline_skipped_frames (inferior_ptid))
 	    {
 	      ptid_t resume_ptid;

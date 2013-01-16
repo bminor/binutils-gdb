@@ -1,3 +1,8 @@
+2013-01-16  Yao Qi  <yao@codesourcery.com>
+
+	* infcmd.c (step_once): Don't check '!single_inst' as it was
+	checked before.
+
 2013-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (psymtab_include_file_name): Extend the function comment.
