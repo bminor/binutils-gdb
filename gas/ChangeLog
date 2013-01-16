@@ -1,3 +1,9 @@
+2013-01-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_assemble <TE_PE>): Ignore line after
+	finding some sort of toc syntax error, and break to avoid
+	compiler uninit warning.
+
 2013-01-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/15019
