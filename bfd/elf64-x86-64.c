@@ -1706,6 +1706,10 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    }
 	  goto create_got;
 
+	case R_X86_64_SIZE32:
+	case R_X86_64_SIZE64:
+	  goto do_size;
+
 	case R_X86_64_32:
 	  if (!ABI_64_P (abfd))
 	    goto pointer;
@@ -1737,8 +1741,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_PC32:
 	case R_X86_64_PC64:
 	case R_X86_64_64:
-	case R_X86_64_SIZE32:
-	case R_X86_64_SIZE64:
 pointer:
 	  if (h != NULL && info->executable)
 	    {
@@ -1757,6 +1759,7 @@ pointer:
 		h->pointer_equality_needed = 1;
 	    }
 
+do_size:
 	  /* If we are creating a shared library, and this is a reloc
 	     against a global symbol, or a non PC relative reloc
 	     against a local symbol, then we need to copy the reloc
@@ -3678,20 +3681,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 
 	case R_X86_64_SIZE32:
 	case R_X86_64_SIZE64:
-	  if (h
-	      && h->type == STT_TLS
-	      && (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-	      && h->root.u.def.section->output_section != NULL
-	      && htab->elf.tls_sec == NULL)
-	    {
-	      (*_bfd_error_handler)
-		(_("%B: `%s' accessed both as normal and thread local symbol"),
-		 input_bfd, h->root.root.string);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
-
 	  /* Set to symbol size.  */
 	  relocation = st_size;
 	  goto direct;

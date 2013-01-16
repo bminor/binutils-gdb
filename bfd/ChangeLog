@@ -1,5 +1,16 @@
 2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-i386.c (elf_i386_check_relocs): Update R_386_SIZE32
+	check.
+	(elf_i386_relocate_section): Don't check TLS for R_386_SIZE32.
+
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Update R_X86_64_SIZE32
+	and R_X86_64_SIZE64 check.
+	(elf_x86_64_relocate_section): Don't check TLS for R_X86_64_SIZE32
+	nor R_X86_64_SIZE64.
+
+2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* bfd-in2.h: Regenerated.
 	* libbfd.h: Likewise.
 

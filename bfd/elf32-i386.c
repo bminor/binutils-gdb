@@ -1556,6 +1556,9 @@ elf_i386_check_relocs (bfd *abfd,
 	  h->plt.refcount += 1;
 	  break;
 
+	case R_386_SIZE32:
+	  goto do_size;
+
 	case R_386_TLS_IE_32:
 	case R_386_TLS_IE:
 	case R_386_TLS_GOTIE:
@@ -1686,7 +1689,6 @@ elf_i386_check_relocs (bfd *abfd,
 
 	case R_386_32:
 	case R_386_PC32:
-	case R_386_SIZE32:
 	  if (h != NULL && info->executable)
 	    {
 	      /* If this reloc is in a read-only section, we might
@@ -1704,6 +1706,7 @@ elf_i386_check_relocs (bfd *abfd,
 		h->pointer_equality_needed = 1;
 	    }
 
+do_size:
 	  /* If we are creating a shared library, and this is a reloc
 	     against a global symbol, or a non PC relative reloc
 	     against a local symbol, then we need to copy the reloc
@@ -3682,20 +3685,6 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_386_SIZE32:
-	  if (h
-	      && h->type == STT_TLS
-	      && (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-	      && h->root.u.def.section->output_section != NULL
-	      && htab->elf.tls_sec == NULL)
-	    {
-	      (*_bfd_error_handler)
-		(_("%B: `%s' accessed both as normal and thread local symbol"),
-		 input_bfd, h->root.root.string);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
-	    }
-
 	  /* Set to symbol size.  */
 	  relocation = st_size;
 	  /* Fall through.  */
