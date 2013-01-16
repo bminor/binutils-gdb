@@ -1,3 +1,30 @@
+2013-01-16  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	PR cli/7221:
+	* NEWS: Add "catch signal".
+	* breakpoint.c (base_breakpoint_ops): No longer static.
+	(bpstat_explains_signal): New function.
+	(init_catchpoint): No longer static.
+	(base_breakpoint_explains_signal): New function.
+	(base_breakpoint_ops): Initialize new field.
+	* breakpoint.h (enum bpstat_signal_value): New.
+	(struct breakpoint_ops) <explains_signal>: New field.
+	(bpstat_explains_signal): Remove macro, declare as function.
+	(base_breakpoint_ops, init_catchpoint): Declare.
+	* break-catch-sig.c: New file.
+	* inferior.h (signal_catch_update): Declare.
+	* infrun.c (signal_catch): New global.
+	(handle_syscall_event): Update for change to
+	bpstat_explains_signal.
+	(handle_inferior_event): Likewise.  Always handle random signals
+	via bpstats.
+	(signal_cache_update): Check signal_catch.
+	(signal_catch_update): New function.
+	(_initialize_infrun): Initialize signal_catch.
+	* Makefile.in (SFILES): Add break-catch-sig.c.
+	(COMMON_OBS): Add break-catch-sig.o.
+
 2013-01-16  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (print_one_catch_fork, print_one_catch_vfork)

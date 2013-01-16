@@ -65,6 +65,10 @@ Lynx 178 PowerPC		powerpc-*-lynx*178
 
 * New commands (for set/show, see "New options" below)
 
+catch signal 
+  Catch signals.  This is similar to "handle", but allows commands and
+  conditions to be attached.
+
 maint info bfds
   List the BFDs known to GDB.
 

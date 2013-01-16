@@ -4234,6 +4234,31 @@ The loading or unloading of a shared library.  If @var{regexp} is
 given, then the catchpoint will stop only if the regular expression
 matches one of the affected libraries.
 
+@item signal @r{[}@var{signal}@dots{} @r{|} @samp{all}@r{]}
+The delivery of a signal.
+
+With no arguments, this catchpoint will catch any signal that is not
+used internally by @value{GDBN}, specifically, all signals except
+@samp{SIGTRAP} and @samp{SIGINT}.
+
+With the argument @samp{all}, all signals, including those used by
+@value{GDBN}, will be caught.  This argument cannot be used with other
+signal names.
+
+Otherwise, the arguments are a list of signal names as given to
+@code{handle} (@pxref{Signals}).  Only signals specified in this list
+will be caught.
+
+One reason that @code{catch signal} can be more useful than
+@code{handle} is that you can attach commands and conditions to the
+catchpoint.
+
+When a signal is caught by a catchpoint, the signal's @code{stop} and
+@code{print} settings, as specified by @code{handle}, are ignored.
+However, whether the signal is still delivered to the inferior depends
+on the @code{pass} setting; this can be changed in the catchpoint's
+commands.
+
 @end table
 
 @item tcatch @var{event}
@@ -5325,6 +5350,10 @@ the defined types of signals.
 Similar, but print information only about the specified signal number.
 
 @code{info handle} is an alias for @code{info signals}.
+
+@item catch signal @r{[}@var{signal}@dots{} @r{|} @samp{all}@r{]}
+Set a catchpoint for the indicated signals.  @xref{Set Catchpoints},
+for details about this command.
 
 @kindex handle
 @item handle @var{signal} @r{[}@var{keywords}@dots{}@r{]}

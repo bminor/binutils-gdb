@@ -474,6 +474,22 @@ struct bp_location
   char *source_file;
 };
 
+/* Return values for bpstat_explains_signal.  Note that the order of
+   the constants is important here; they are compared directly in
+   bpstat_explains_signal.  */
+
+enum bpstat_signal_value
+  {
+    /* bpstat does not explain this signal.  */
+    BPSTAT_SIGNAL_NO = 0,
+
+    /* bpstat explains this signal; signal should not be delivered.  */
+    BPSTAT_SIGNAL_HIDE,
+
+    /* bpstat explains this signal; signal should be delivered.  */
+    BPSTAT_SIGNAL_PASS
+  };
+
 /* This structure is a collection of function pointers that, if available,
    will be called instead of the performing the default action for this
    bptype.  */
@@ -588,6 +604,12 @@ struct breakpoint_ops
      This function is called inside `addr_string_to_sals'.  */
   void (*decode_linespec) (struct breakpoint *, char **,
 			   struct symtabs_and_lines *);
+
+  /* Return true if this breakpoint explains a signal, but the signal
+     should still be delivered to the inferior.  This is used to make
+     'catch signal' interact properly with 'handle'; see
+     bpstat_explains_signal.  */
+  enum bpstat_signal_value (*explains_signal) (struct breakpoint *);
 };
 
 /* Helper for breakpoint_ops->print_recreate implementations.  Prints
@@ -980,10 +1002,9 @@ struct bpstat_what bpstat_what (bpstat);
 bpstat bpstat_find_breakpoint (bpstat, struct breakpoint *);
 
 /* Nonzero if a signal that we got in wait() was due to circumstances
-   explained by the BS.  */
-/* Currently that is true if we have hit a breakpoint, or if there is
-   a watchpoint enabled.  */
-#define bpstat_explains_signal(bs) ((bs) != NULL)
+   explained by the bpstat; and the signal should therefore not be
+   delivered.  */
+extern enum bpstat_signal_value bpstat_explains_signal (bpstat);
 
 /* Nonzero is this bpstat causes a stop.  */
 extern int bpstat_causes_stop (bpstat);
@@ -1183,6 +1204,7 @@ extern void awatch_command_wrapper (char *, int, int);
 extern void rwatch_command_wrapper (char *, int, int);
 extern void tbreak_command (char *, int);
 
+extern struct breakpoint_ops base_breakpoint_ops;
 extern struct breakpoint_ops bkpt_breakpoint_ops;
 extern struct breakpoint_ops tracepoint_breakpoint_ops;
 
@@ -1214,6 +1236,11 @@ extern void
 				 const struct breakpoint_ops *ops,
 				 int tempflag,
 				 int from_tty);
+
+extern void init_catchpoint (struct breakpoint *b,
+			     struct gdbarch *gdbarch, int tempflag,
+			     char *cond_string,
+			     const struct breakpoint_ops *ops);
 
 /* Add breakpoint B on the breakpoint list, and notify the user, the
    target and breakpoint_created observers of its existence.  If

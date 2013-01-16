@@ -1,5 +1,10 @@
 2013-01-16  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Set Catchpoints): Document "catch signal".
+	(Signals): Likewise.
+
+2013-01-16  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (GDB/MI Breakpoint Information): Document
 	"catch-type" field.
 	(GDB/MI Catchpoint Commands): Add "catch-type" to examples.

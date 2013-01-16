@@ -632,6 +632,8 @@ extern void update_observer_mode (void);
 
 extern void update_signals_program_target (void);
 
+extern void signal_catch_update (const unsigned int *);
+
 /* In some circumstances we allow a command to specify a numeric
    signal.  The idea is to keep these circumstances limited so that
    users (and scripts) develop portable habits.  For comparison,

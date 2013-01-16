@@ -279,14 +279,9 @@ static struct bp_location **get_first_locp_gte_addr (CORE_ADDR address);
 
 static int strace_marker_p (struct breakpoint *b);
 
-static void init_catchpoint (struct breakpoint *b,
-			     struct gdbarch *gdbarch, int tempflag,
-			     char *cond_string,
-			     const struct breakpoint_ops *ops);
-
 /* The abstract base class all breakpoint_ops structures inherit
    from.  */
-static struct breakpoint_ops base_breakpoint_ops;
+struct breakpoint_ops base_breakpoint_ops;
 
 /* The breakpoint_ops structure to be inherited by all breakpoint_ops
    that are implemented on top of software or hardware breakpoints
@@ -4150,6 +4145,29 @@ bpstat_find_breakpoint (bpstat bsp, struct breakpoint *breakpoint)
 	return bsp;
     }
   return NULL;
+}
+
+/* See breakpoint.h.  */
+
+enum bpstat_signal_value
+bpstat_explains_signal (bpstat bsp)
+{
+  enum bpstat_signal_value result = BPSTAT_SIGNAL_NO;
+
+  for (; bsp != NULL; bsp = bsp->next)
+    {
+      /* Ensure that, if we ever entered this loop, then we at least
+	 return BPSTAT_SIGNAL_HIDE.  */
+      enum bpstat_signal_value newval = BPSTAT_SIGNAL_HIDE;
+
+      if (bsp->breakpoint_at != NULL)
+	newval = bsp->breakpoint_at->ops->explains_signal (bsp->breakpoint_at);
+
+      if (newval > result)
+	result = newval;
+    }
+
+  return result;
 }
 
 /* Put in *NUM the breakpoint number of the first breakpoint we are
@@ -8349,7 +8367,7 @@ syscall_catchpoint_p (struct breakpoint *b)
    not NULL, then store it in the breakpoint.  OPS, if not NULL, is
    the breakpoint_ops structure associated to the catchpoint.  */
 
-static void
+void
 init_catchpoint (struct breakpoint *b,
 		 struct gdbarch *gdbarch, int tempflag,
 		 char *cond_string,
@@ -12865,7 +12883,15 @@ base_breakpoint_decode_linespec (struct breakpoint *b, char **s,
   internal_error_pure_virtual_called ();
 }
 
-static struct breakpoint_ops base_breakpoint_ops =
+/* The default 'explains_signal' method.  */
+
+static enum bpstat_signal_value
+base_breakpoint_explains_signal (struct breakpoint *b)
+{
+  return BPSTAT_SIGNAL_HIDE;
+}
+
+struct breakpoint_ops base_breakpoint_ops =
 {
   base_breakpoint_dtor,
   base_breakpoint_allocate_location,
@@ -12884,6 +12910,7 @@ static struct breakpoint_ops base_breakpoint_ops =
   base_breakpoint_create_sals_from_address,
   base_breakpoint_create_breakpoints_sal,
   base_breakpoint_decode_linespec,
+  base_breakpoint_explains_signal
 };
 
 /* Default breakpoint_ops methods.  */

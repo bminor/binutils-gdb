@@ -1,5 +1,10 @@
 2013-01-16  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/catch-signal.c: New file.
+	* gdb.base/catch-signal.exp: New file.
+
+2013-01-16  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.mi/mi-catch-load.exp: Look for "catch-type".
 
 2013-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
