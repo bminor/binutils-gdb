@@ -1,3 +1,7 @@
+2013-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* rx.c (decode_opcode): Handle RXO_satr.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* config.in, configure: Regenerate.

@@ -1802,6 +1802,22 @@ decode_opcode ()
       E1;
       break;
 
+    case RXO_satr:
+      if (FLAG_O && ! FLAG_S)
+	{
+	  put_reg (6, 0x0);
+	  put_reg (5, 0x7fffffff);
+	  put_reg (4, 0xffffffff);
+	}
+      else if (FLAG_O && FLAG_S)
+	{
+	  put_reg (6, 0xffffffff);
+	  put_reg (5, 0x80000000);
+	  put_reg (4, 0x0);
+	}
+      E1;
+      break;
+      
     case RXO_sbb:
       MATH_OP (-, ! carry);
       break;
