@@ -30,6 +30,9 @@
 #   CC_FOR_TARGET="/bin/sh $srcdir/gdb/contrib/cc-with-tweaks.sh ARGS gcc" \
 #   CXX_FOR_TARGET="/bin/sh $srcdir/gdb/contrib/cc-with-tweaks.sh ARGS g++"
 #
+# For documentation on Fission and dwp files:
+#     http://gcc.gnu.org/wiki/DebugFission
+#     http://gcc.gnu.org/wiki/DebugFissionDWP
 # For documentation on index files: info -f gdb.info -n "Index Files"
 # For information about 'dwz', see the announcement:
 #     http://gcc.gnu.org/ml/gcc/2012-04/msg00686.html
@@ -40,6 +43,7 @@
 # -z compress using dwz
 # -m compress using dwz -m
 # -i make an index
+# -p create .dwp files (Fission)
 # If nothing is given, no changes are made
 
 myname=cc-with-tweaks.sh

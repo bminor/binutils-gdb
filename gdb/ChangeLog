@@ -1,3 +1,7 @@
+2013-01-16  Doug Evans  <dje@google.com>
+
+	* contrib/cc-with-tweaks.sh: Add references to Fission docs.
+
 2013-01-16  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 
