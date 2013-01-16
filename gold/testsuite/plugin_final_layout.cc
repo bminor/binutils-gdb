@@ -21,16 +21,22 @@
 // MA 02110-1301, USA.
 
 // The goal of this program is to verify if section ordering
-// via plugins happens correctly.
+// via plugins happens correctly.  Also, test is plugin based ordering
+// overrides default text section ordering where ".text.hot" sections
+// are grouped.  The plugin does not want foo and baz next to each other.
+// Plugin section order is foo() followed by bar() and then baz().
 
+__attribute__ ((section(".text._Z3barv")))
 void bar ()
 {
 }
 
+__attribute__ ((section(".text.hot._Z3bazv")))
 void baz ()
 {
 }
 
+__attribute__ ((section(".text.hot._Z3foov")))
 void foo ()
 {
 }

@@ -1,3 +1,11 @@
+2013-01-16  Sriraman Tallam  <tmsriram@google.com>
+
+	* layout.cc (Layout::layout): Do not do default sorting for
+	text sections when section ordering is specified.
+	(make_output_section): Ditto.
+	* testsuite/plugin_final_layout.cc: Name the function sections
+	to catch reordering issues.
+
 2013-01-15  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::do_relax): Default shared libs to
