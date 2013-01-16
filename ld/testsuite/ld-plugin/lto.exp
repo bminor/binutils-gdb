@@ -69,7 +69,7 @@ set lto_link_tests {
    "-O2 -flto -fuse-linker-plugin" ""
    {lto-6.c} {} "lto-6.exe" "c"}
   {"Build libdummy.a 9"
-   "" "-O2 -flto"
+   "" "-O2 -finline -flto"
    {lto-9.cc} {} "libdummy.a"}
   {"Build libdummy.a 11a"
    "" "-O -flto"
@@ -175,7 +175,7 @@ set lto_link_elf_tests {
    "-shared -O2 -fPIC -flto -fuse-linker-plugin -nostdlib -Wl,-version-script,pr12975.t" "-O2 -flto"
    {pr12975.c} {{"readelf" {-s --wide} "pr12975.d"}} "pr12975.so" "c"}
   {"PR ld/13229"
-   "-shared -O2 -fPIC -flto -fuse-linker-plugin -nostdlib" "-O2 -fno-early-inlining -flto"
+   "-shared -O2 -fPIC -flto -fuse-linker-plugin -nostdlib" "-O2 -finline -fno-early-inlining -flto"
    {pr13229.cc} {{"readelf" {-s --wide} "pr13229.d"}} "pr13229.so" "c++"}
   {"PR ld/13244"
    "-shared -O2 -fPIC -flto -fuse-linker-plugin -nostdlib" "-O2 -fno-early-inlining -flto"

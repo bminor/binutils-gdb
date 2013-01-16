@@ -1,3 +1,7 @@
+2013-01-16  Alan Modra  <amodra@gmail.com>
+
+	* ld-plugin/lto.exp (lto-9.o, pr13229.o): Pass -finline.
+
 2013-01-15  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tlsso.d: Adjust for plt-thread-safe stubs.
