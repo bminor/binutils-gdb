@@ -122,7 +122,7 @@ show_print_symbol_filename (struct ui_file *file, int from_tty,
    So that we can disable it if we get a signal within it.
    -1 when not doing one.  */
 
-int current_display_number;
+static int current_display_number;
 
 struct display
   {

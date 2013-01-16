@@ -1,5 +1,9 @@
 2013-01-16  Yao Qi  <yao@codesourcery.com>
 
+	* printcmd.c (current_display_number): Make it static.
+
+2013-01-16  Yao Qi  <yao@codesourcery.com>
+
 	* infcmd.c (step_once): Don't check '!single_inst' as it was
 	checked before.
 
