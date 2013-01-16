@@ -24,3 +24,4 @@ Disassembly of section \.text:
   38:	(7c 00 05 dd|dd 05 00 7c) 	tsuspend\.
   3c:	(7c 20 05 dd|dd 05 20 7c) 	tresume\.
   40:	(7c 20 05 dd|dd 05 20 7c) 	tresume\.
+#pass

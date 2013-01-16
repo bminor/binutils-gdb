@@ -1,3 +1,7 @@
+2013-01-16  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/htm.d: Ignore padding at end of section.
+
 2013-01-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/15019
