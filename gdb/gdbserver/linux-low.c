@@ -3192,7 +3192,7 @@ linux_resume_one_lwp (struct lwp_info *lwp,
 	fprintf (stderr, "  pending reinsert at 0x%s\n",
 		 paddress (lwp->bp_reinsert));
 
-      if (lwp->bp_reinsert != 0 && can_hardware_single_step ())
+      if (can_hardware_single_step ())
 	{
 	  if (fast_tp_collecting == 0)
 	    {

@@ -1,3 +1,8 @@
+2013-01-16  Yao Qi  <yao@codesourcery.com>
+
+	* linux-low.c (linux_resume_one_lwp): Don't check
+	'lwp->bp_reinsert != 0'.
+
 2013-01-07  Joel Brobecker  <brobecker@adacore.com>
 	    Pedro Alves  <palves@redhat.com>
 
