@@ -33973,15 +33973,19 @@ Readers can be loaded and unloaded using the @code{jit-reader-load}
 and @code{jit-reader-unload} commands.
 
 @table @code
-@item jit-reader-load @var{reader-name}
-Load the JIT reader named @var{reader-name}.  On a UNIX system, this
-will usually load @file{@var{libdir}/gdb/@var{reader-name}}, where
-@var{libdir} is the system library directory, usually
-@file{/usr/local/lib}.  Only one reader can be active at a time;
-trying to load a second reader when one is already loaded will result
-in @value{GDBN} reporting an error.  A new JIT reader can be loaded by
-first unloading the current one using @code{jit-reader-load} and then
-invoking @code{jit-reader-load}.
+@item jit-reader-load @var{reader}
+Load the JIT reader named @var{reader}.  @var{reader} is a shared
+object specified as either an absolute or a relative file name.  In
+the latter case, @value{GDBN} will try to load the reader from a
+pre-configured directory, usually @file{@var{libdir}/gdb/} on a UNIX
+system (here @var{libdir} is the system library directory, often
+@file{/usr/local/lib}).
+
+Only one reader can be active at a time; trying to load a second
+reader when one is already loaded will result in @value{GDBN}
+reporting an error.  A new JIT reader can be loaded by first unloading
+the current one using @code{jit-reader-unload} and then invoking
+@code{jit-reader-load}.
 
 @item jit-reader-unload
 Unload the currently loaded JIT reader.

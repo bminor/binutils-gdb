@@ -25,6 +25,7 @@
 #include "breakpoint.h"
 #include "command.h"
 #include "dictionary.h"
+#include "filenames.h"
 #include "frame-unwind.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
@@ -208,7 +209,10 @@ jit_reader_load_command (char *args, int from_tty)
   if (loaded_jit_reader != NULL)
     error (_("JIT reader already loaded.  Run jit-reader-unload first."));
 
-  so_name = xstrprintf ("%s/%s", jit_reader_dir, args);
+  if (IS_ABSOLUTE_PATH (args))
+    so_name = xstrdup (args);
+  else
+    so_name = xstrprintf ("%s%s%s", SLASH_STRING, jit_reader_dir, args);
   prev_cleanup = make_cleanup (xfree, so_name);
 
   loaded_jit_reader = jit_reader_load (so_name);

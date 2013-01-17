@@ -1,5 +1,10 @@
 2012-01-17  Sanjoy Das <sanjoy@playingwithpointers.com>
 
+	* jit.c (jit_reader_load_command): Interpret the jit reader name
+	as an absolute path if it begins with a forward slash.
+
+2012-01-17  Sanjoy Das <sanjoy@playingwithpointers.com>
+
 	PR gdb/14550
 
 	* jit.c (finalize_symtab): Ensure that only the global block has a
