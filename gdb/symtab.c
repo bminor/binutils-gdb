@@ -241,19 +241,26 @@ iterate_over_some_symtabs (const char *name,
       {
         const char *fullname = symtab_to_fullname (s);
 	char *rp = gdb_realpath (fullname);
+	struct cleanup *cleanups = make_cleanup (xfree, rp);
 
-	make_cleanup (xfree, rp);
 	if (FILENAME_CMP (real_path, rp) == 0)
 	  {
 	    if (callback (s, data))
-	      return 1;
+	      {
+		do_cleanups (cleanups);
+		return 1;
+	      }
 	  }
 
 	if (!is_abs && compare_filenames_for_search (rp, name))
 	  {
 	    if (callback (s, data))
-	      return 1;
+	      {
+		do_cleanups (cleanups);
+		return 1;
+	      }
 	  }
+	do_cleanups (cleanups);
       }
     }
 
