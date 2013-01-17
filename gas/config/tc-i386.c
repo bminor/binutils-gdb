@@ -2686,6 +2686,14 @@ reloc (unsigned int size,
 	    break;
 	  }
 
+      if (other == BFD_RELOC_SIZE32)
+	{
+	  if (size == 8)
+	    return BFD_RELOC_SIZE64;
+	  if (pcrel)
+	    as_bad (_("there are no pc-relative size relocations"));
+	}
+
       /* Sign-checking 4-byte relocations in 16-/32-bit code is pointless.  */
       if (size == 4 && (flag_code != CODE_64BIT || disallow_64bit_reloc))
 	sign = -1;
@@ -2769,8 +2777,11 @@ tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
       && fixP->fx_r_type == BFD_RELOC_32_PCREL)
     return 0;
 
-  /* adjust_reloc_syms doesn't know about the GOT.  */
-  if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF
+  /* Adjust_reloc_syms doesn't know about the GOT.  Need to keep symbol
+     for size relocations.  */
+  if (fixP->fx_r_type == BFD_RELOC_SIZE32
+      || fixP->fx_r_type == BFD_RELOC_SIZE64
+      || fixP->fx_r_type == BFD_RELOC_386_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_386_PLT32
       || fixP->fx_r_type == BFD_RELOC_386_GOT32
       || fixP->fx_r_type == BFD_RELOC_386_TLS_GD
@@ -6708,6 +6719,9 @@ lex_got (enum bfd_reloc_code_real *rel,
     const enum bfd_reloc_code_real rel[2];
     const i386_operand_type types64;
   } gotrel[] = {
+    { STRING_COMMA_LEN ("SIZE"),      { BFD_RELOC_SIZE32,
+					BFD_RELOC_SIZE32 },
+      OPERAND_TYPE_IMM32_64 },
     { STRING_COMMA_LEN ("PLTOFF"),   { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_PLTOFF64 },
       OPERAND_TYPE_IMM64 },
@@ -6795,7 +6809,7 @@ lex_got (enum bfd_reloc_code_real *rel,
 		    *types = gotrel[j].types64;
 		}
 
-	      if (GOT_symbol == NULL)
+	      if (j != 0 && GOT_symbol == NULL)
 		GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
 
 	      /* The length of the first part of our input line.  */
@@ -9231,6 +9245,24 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
   switch (fixp->fx_r_type)
     {
+    case BFD_RELOC_SIZE32:
+    case BFD_RELOC_SIZE64:
+      if (S_IS_DEFINED (fixp->fx_addsy)
+	  && !S_IS_EXTERNAL (fixp->fx_addsy))
+	{
+	  /* Resolve size relocation against local symbol to size of
+	     the symbol plus addend.  */
+	  valueT value = S_GET_SIZE (fixp->fx_addsy) + fixp->fx_offset;
+	  if (fixp->fx_r_type == BFD_RELOC_SIZE32
+	      && !fits_in_unsigned_long (value))
+	    as_bad_where (fixp->fx_file, fixp->fx_line,
+			  _("symbol size computation overflow"));
+	  fixp->fx_addsy = NULL;
+	  fixp->fx_subsy = NULL;
+	  md_apply_fix (fixp, (valueT *) &value, NULL);
+	  return NULL;
+	}
+
     case BFD_RELOC_X86_64_PLT32:
     case BFD_RELOC_X86_64_GOT32:
     case BFD_RELOC_X86_64_GOTPCREL:

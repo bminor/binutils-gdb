@@ -1,3 +1,41 @@
+2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-size/size.exp: New file.
+	* ld-size/size32-1-i386.d: Likewise.
+	* ld-size/size32-1-x32.d: Likewise.
+	* ld-size/size32-1-x86-64.d: Likewise.
+	* ld-size/size32-1.s: Likewise.
+	* ld-size/size32-2-i386.d: Likewise.
+	* ld-size/size32-2-x32.d: Likewise.
+	* ld-size/size32-2-x86-64.d: Likewise.
+	* ld-size/size32-2.s: Likewise.
+	* ld-size/size64-1-x32.d: Likewise.
+	* ld-size/size64-1-x86-64.d: Likewise.
+	* ld-size/size64-1.s: Likewise.
+	* ld-size/size64-2-x32.d: Likewise.
+	* ld-size/size64-2-x86-64.d: Likewise.
+	* ld-size/size64-2.s: Likewise.
+	* ld-size/size-3.c: Likewise.
+	* ld-size/size-3.out: Likewise.
+	* ld-size/size-3a.c: Likewise.
+	* ld-size/size-3b.c: Likewise.
+	* ld-size/size-3c.c: Likewise.
+	* ld-size/size-4.out: Likewise.
+	* ld-size/size-4a.c: Likewise.
+	* ld-size/size-4b.c: Likewise.
+	* ld-size/size-5.out: Likewise.
+	* ld-size/size-5a.c: Likewise.
+	* ld-size/size-5b.c: Likewise.
+	* ld-size/size-6.out: Likewise.
+	* ld-size/size-6a.c: Likewise.
+	* ld-size/size-6b.c: Likewise.
+	* ld-size/size-7.rd: Likewise.
+	* ld-size/size-7a.c: Likewise.
+	* ld-size/size-7b.c: Likewise.
+	* ld-size/size-8.rd: Likewise.
+	* ld-size/size-8a.c: Likewise.
+	* ld-size/size-8b.c: Likewise.
+
 2013-01-16  Alan Modra  <amodra@gmail.com>
 
 	* ld-plugin/lto.exp (lto-9.o, pr13229.o): Pass -finline.

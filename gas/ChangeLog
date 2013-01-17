@@ -1,3 +1,13 @@
+2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (reloc): Support BFD_RELOC_SIZE32.
+	(tc_i386_fix_adjustable): Keep symbol for BFD_RELOC_32_SIZE and
+	BFD_RELOC_64_SIZE relocations.
+	(lex_got): Support "symbol@SIZE" and don't create GOT symbol
+	for it.
+	(tc_gen_reloc): Resolve BFD_RELOC_SIZE32 and BFD_RELOC_SIZE64
+	relocations against local symbols.
+
 2013-01-16  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_assemble <TE_PE>): Ignore line after

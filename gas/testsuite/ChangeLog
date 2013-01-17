@@ -1,3 +1,31 @@
+2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run size-1, size-2, size-3, size-4,
+	x86-64-size-1, x86-64-size-2, x86-64-size-3, x86-64-size-4,
+	x86-64-size-5 and x86-64-size-inval-1.
+
+	* gas/i386/size-1.d: New file.
+	* gas/i386/size-1.s: Likewise.
+	* gas/i386/size-2.d: Likewise.
+	* gas/i386/size-2.s: Likewise.
+	* gas/i386/size-3.d: Likewise.
+	* gas/i386/size-3.s: Likewise.
+	* gas/i386/size-4.d: Likewise.
+	* gas/i386/size-4.s: Likewise.
+	* gas/i386/x86-64-size-1.d: Likewise.
+	* gas/i386/x86-64-size-2.d: Likewise.
+	* gas/i386/x86-64-size-3.d: Likewise.
+	* gas/i386/x86-64-size-4.d: Likewise.
+	* gas/i386/x86-64-size-5.d: Likewise.
+	* gas/i386/x86-64-size-5.s: Likewise.
+	* gas/i386/x86-64-size-inval-1.l: Likewise.
+	* gas/i386/x86-64-size-inval-1.s: Likewise.
+	* gas/i386/ilp32/x86-64-size-1.d: Likewise.
+	* gas/i386/ilp32/x86-64-size-2.d: Likewise.
+	* gas/i386/ilp32/x86-64-size-3.d: Likewise.
+	* gas/i386/ilp32/x86-64-size-4.d: Likewise.
+	* gas/i386/ilp32/x86-64-size-5.d: Likewise.
+
 2013-01-16  Alan Modra  <amodra@gmail.com>
 
 	* gas/ppc/htm.d: Ignore padding at end of section.
