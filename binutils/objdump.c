@@ -2651,7 +2651,7 @@ dump_target_specific (bfd *abfd)
     if ((*desc)->filter (abfd))
       break;
 
-  if (desc == NULL)
+  if (*desc == NULL)
     {
       non_fatal (_("option -P/--private not supported by this file"));
       return;
