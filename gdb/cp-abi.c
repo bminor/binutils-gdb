@@ -329,7 +329,7 @@ cp_abi_completer (struct cmd_list_element *ignore,
       cp_abi_names = XNEWVEC (const char *, num_cp_abis + 1);
       for (i = 0; i < num_cp_abis; ++i)
 	cp_abi_names[i] = cp_abis[i]->shortname;
-      cp_abis[i] = NULL;
+      cp_abi_names[i] = NULL;
     }
 
   return complete_on_enum (cp_abi_names, text, word);
