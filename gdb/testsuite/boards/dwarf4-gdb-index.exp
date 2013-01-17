@@ -19,19 +19,28 @@
 # Example usage:
 # bash$ make check RUNTESTFLAGS='--target_board=dwarf4-gdb-index'
 
-# This is copied from baseboards/unix.exp.
-# At the moment this only supports things that unix.exp supports.
+# This is needed otherwise dejagnu tries to rsh to host "dwarf4-gdb-index".
+# set_board_info only sets the value if not already set.
+# find_gcc checks for this, so set early.
+unset_board_info isremote
+set_board_info isremote 0
+
+# This is based on baseboards/unix.exp.
+# At the moment we only support systems that unix.exp supports.
 load_generic_config "unix"
 process_multilib_options ""
-set_board_info compiler "[find_gcc]"
+set found_gcc [find_gcc]
+set found_gxx [find_g++]
+set_board_info compiler "$found_gcc"
 
 set_board_info debug_flags "-gdwarf-4 -fdebug-types-section"
 
 set contrib_dir [file normalize $srcdir/../contrib]
-set CC_FOR_TARGET "/bin/sh $contrib_dir/cc-with-tweaks.sh -i gcc"
-set CXX_FOR_TARGET "/bin/sh $contrib_dir/cc-with-tweaks.sh -i g++"
-
-# This is needed otherwise dejagnu tries to rsh to host "dwarf4-gdb-index".
-# set_board_info only sets the value if not already set.
-unset_board_info isremote
-set_board_info isremote 0
+if ![info exists CC_FOR_TARGET] {
+    set CC_FOR_TARGET "$found_gcc"
+}
+set CC_FOR_TARGET "/bin/sh $contrib_dir/cc-with-tweaks.sh -i $CC_FOR_TARGET"
+if ![info exists CXX_FOR_TARGET] {
+    set CXX_FOR_TARGET "$found_gxx"
+}
+set CXX_FOR_TARGET "/bin/sh $contrib_dir/cc-with-tweaks.sh -i $CXX_FOR_TARGET"
