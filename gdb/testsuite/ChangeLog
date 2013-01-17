@@ -1,3 +1,20 @@
+2013-01-17  Pedro Alves  <palves@redhat.com>
+
+	Merge dg-extract-results.sh from upstream (svn 195224).
+
+	2013-01-15  David Blaikie <dblaikie@gmail.com>
+    	* dg-extract-results.sh: Fix order of summary counts.
+
+	2013-01-15  David Blaikie <dblaikie@gmail.com>
+    	* dg-extract-results.sh: Constrain the start-of-log pattern.
+
+	2013-01-15  David Blaikie <dblaikie@gmail.com>
+    	* dg-extract-results.sh: Handle KPASSes.
+
+	2010-05-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+	* dg-extract-results.sh: Redirect grep output to /dev/null instead
+	of grep -q.
+
 2012-01-17  Sanjoy Das <sanjoy@playingwithpointers.com>
 
 	* gdb.base/jit-reader.exp: New file. Test case for the jit-reader

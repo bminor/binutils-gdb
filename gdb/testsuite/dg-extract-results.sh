@@ -222,7 +222,7 @@ else
   VARIANTS=""
   for VAR in $VARS
   do
-    grep -q "Running target $VAR" $SUM_FILES && VARIANTS="$VARIANTS $VAR"
+    grep "Running target $VAR" $SUM_FILES > /dev/null && VARIANTS="$VARIANTS $VAR"
   done
 fi
 
@@ -286,7 +286,7 @@ BEGIN {
 /^Using / {
   if (variant == curvar && print_using) { print; next }
 }
-/^Running / {
+/^Running .*\\.exp \\.\\.\\./ {
   print_using=0
   if (variant == curvar) {
     if (need_close) close(curfile)
@@ -343,7 +343,7 @@ EOF
 BEGIN {
   variant="$VAR"
   tool="$TOOL"
-  passcnt=0; failcnt=0; untstcnt=0; xpasscnt=0; xfailcnt=0; kfailcnt=0; unsupcnt=0; unrescnt=0;
+  passcnt=0; failcnt=0; untstcnt=0; xpasscnt=0; xfailcnt=0; kpasscnt=0; kfailcnt=0; unsupcnt=0; unrescnt=0;
   curvar=""; insummary=0
 }
 /^Running target /		{ curvar = \$3; next }
@@ -352,6 +352,7 @@ BEGIN {
 /^# of unexpected successes/	{ if (insummary == 1) xpasscnt += \$5; next; }
 /^# of unexpected failures/	{ if (insummary == 1) failcnt += \$5; next; }
 /^# of expected failures/	{ if (insummary == 1) xfailcnt += \$5; next; }
+/^# of unknown successes/	{ if (insummary == 1) kpasscnt += \$5; next; }
 /^# of known failures/		{ if (insummary == 1) kfailcnt += \$5; next; }
 /^# of untested testcases/	{ if (insummary == 1) untstcnt += \$5; next; }
 /^# of unresolved testcases/	{ if (insummary == 1) unrescnt += \$5; next; }
@@ -367,6 +368,7 @@ END {
   if (failcnt != 0) printf ("# of unexpected failures\t%d\n", failcnt)
   if (xpasscnt != 0) printf ("# of unexpected successes\t%d\n", xpasscnt)
   if (xfailcnt != 0) printf ("# of expected failures\t\t%d\n", xfailcnt)
+  if (kpasscnt != 0) printf ("# of unknown successes\t\t%d\n", kpasscnt)
   if (kfailcnt != 0) printf ("# of known failures\t\t%d\n", kfailcnt)
   if (untstcnt != 0) printf ("# of untested testcases\t\t%d\n", untstcnt)
   if (unrescnt != 0) printf ("# of unresolved testcases\t%d\n", unrescnt)
@@ -397,6 +399,7 @@ BEGIN {
 /^# of unexpected failures/	{ failcnt += \$5 }
 /^# of unexpected successes/	{ xpasscnt += \$5 }
 /^# of expected failures/	{ xfailcnt += \$5 }
+/^# of unknown successes/	{ kpasscnt += \$5 }
 /^# of known failures/		{ kfailcnt += \$5 }
 /^# of untested testcases/	{ untstcnt += \$5 }
 /^# of unresolved testcases/	{ unrescnt += \$5 }
@@ -407,6 +410,7 @@ END {
   if (failcnt != 0) printf ("# of unexpected failures\t%d\n", failcnt)
   if (xpasscnt != 0) printf ("# of unexpected successes\t%d\n", xpasscnt)
   if (xfailcnt != 0) printf ("# of expected failures\t\t%d\n", xfailcnt)
+  if (kpasscnt != 0) printf ("# of unknown successes\t\t%d\n", kpasscnt)
   if (kfailcnt != 0) printf ("# of known failures\t\t%d\n", kfailcnt)
   if (untstcnt != 0) printf ("# of untested testcases\t\t%d\n", untstcnt)
   if (unrescnt != 0) printf ("# of unresolved testcases\t%d\n", unrescnt)
@@ -420,6 +424,6 @@ cat ${TMP}/var-* | $AWK -f $TOTAL_AWK
 # This is ugly, but if there's version output from the compiler under test
 # at the end of the file, we want it.  The other thing that might be there
 # is the final summary counts.
-tail -2 $FIRST_SUM | grep -q '^#' || tail -2 $FIRST_SUM
+tail -2 $FIRST_SUM | grep '^#' > /dev/null || tail -2 $FIRST_SUM
 
 exit 0
