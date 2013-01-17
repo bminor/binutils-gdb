@@ -1165,7 +1165,6 @@ sim_open (kind, cb, abfd, argv)
      char ** argv;
 {
   SIM_DESC sd = sim_state_alloc (kind, cb);
-  printf ("0x%x 0x%x\n", sd, STATE_MAGIC(sd));
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
