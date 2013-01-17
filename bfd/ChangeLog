@@ -1,3 +1,10 @@
+2013-01-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Count size relocation as
+	PC-relative relocation.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Count size relocation
+	as PC-relative relocation.
+
 2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_check_relocs): Update R_386_SIZE32

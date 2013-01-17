@@ -1424,6 +1424,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *isym;
       const char *name;
+      bfd_boolean size_reloc;
 
       r_symndx = htab->r_sym (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -1708,6 +1709,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_X86_64_SIZE32:
 	case R_X86_64_SIZE64:
+	  size_reloc = TRUE;
 	  goto do_size;
 
 	case R_X86_64_32:
@@ -1759,6 +1761,7 @@ pointer:
 		h->pointer_equality_needed = 1;
 	    }
 
+	  size_reloc = FALSE;
 do_size:
 	  /* If we are creating a shared library, and this is a reloc
 	     against a global symbol, or a non PC relative reloc
@@ -1860,7 +1863,8 @@ do_size:
 		}
 
 	      p->count += 1;
-	      if (IS_X86_64_PCREL_TYPE (r_type))
+	      /* Count size relocation as PC-relative relocation.  */
+	      if (IS_X86_64_PCREL_TYPE (r_type) || size_reloc)
 		p->pc_count += 1;
 	    }
 	  break;
