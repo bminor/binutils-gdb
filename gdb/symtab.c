@@ -164,7 +164,12 @@ compare_filenames_for_search (const char *filename, const char *search_name)
 
   /* Either the names must completely match, or the character
      preceding the trailing SEARCH_NAME segment of FILENAME must be a
-     directory separator.  */
+     directory separator.
+
+     The HAS_DRIVE_SPEC purpose is to make FILENAME "c:file.c"
+     compatible with SEARCH_NAME "file.c".  In such case a compiler had
+     to put the "c:file.c" name into debug info.  Such compatibility
+     works only on GDB built for DOS host.  */
   return (len == search_len
 	  || IS_DIR_SEPARATOR (filename[len - search_len - 1])
 	  || (HAS_DRIVE_SPEC (filename)
