@@ -1171,11 +1171,11 @@
   QLF2(V_4S, NIL),		\
 }
 
-/* e.g. MOVI <Vd>.8B, #<imm8>.  */
+/* e.g. MOVI <Vd>.8B, #<imm8> {, LSL #<amount>}.  */
 #define QL_SIMD_IMM_B		\
 {				\
-  QLF2(V_8B, NIL),		\
-  QLF2(V_16B, NIL),		\
+  QLF2(V_8B, LSL),		\
+  QLF2(V_16B, LSL),		\
 }
 /* e.g. MOVI <Dd>, #<imm>.  */
 #define QL_SIMD_IMM_D		\
@@ -1341,7 +1341,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   {"movi", 0xf008400, 0xbff8dc00, asimdimm, 0, SIMD, OP2 (Vd, SIMD_IMM_SFT), QL_SIMD_IMM_S0H, F_SIZEQ},
   {"orr", 0xf009400, 0xbff8dc00, asimdimm, 0, SIMD, OP2 (Vd, SIMD_IMM_SFT), QL_SIMD_IMM_S0H, F_SIZEQ},
   {"movi", 0xf00c400, 0xbff8ec00, asimdimm, 0, SIMD, OP2 (Vd, SIMD_IMM_SFT), QL_SIMD_IMM_S1W, F_SIZEQ},
-  {"movi", 0xf00e400, 0xbff8fc00, asimdimm, OP_V_MOVI_B, SIMD, OP2 (Vd, SIMD_IMM), QL_SIMD_IMM_B, F_SIZEQ},
+  {"movi", 0xf00e400, 0xbff8fc00, asimdimm, 0, SIMD, OP2 (Vd, SIMD_IMM_SFT), QL_SIMD_IMM_B, F_SIZEQ},
   {"fmov", 0xf00f400, 0xbff8fc00, asimdimm, 0, SIMD, OP2 (Vd, SIMD_FPIMM), QL_SIMD_IMM_S, F_SIZEQ},
   {"mvni", 0x2f000400, 0xbff89c00, asimdimm, 0, SIMD, OP2 (Vd, SIMD_IMM_SFT), QL_SIMD_IMM_S0W, F_SIZEQ},
   {"bic", 0x2f001400, 0xbff89c00, asimdimm, 0, SIMD, OP2 (Vd, SIMD_IMM_SFT), QL_SIMD_IMM_S0W, F_SIZEQ},

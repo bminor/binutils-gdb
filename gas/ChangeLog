@@ -1,3 +1,11 @@
+2013-01-17  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (output_operand_error_record): Change to output
+	the out-of-range error message as value-expected message if there is
+	only one single value in the expected range.
+	(programmer_friendly_fixup): Remove the handling of 8-bit MOVI with
+	LSL #0 as a programmer-friendly feature.
+
 2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (reloc): Support BFD_RELOC_SIZE32.

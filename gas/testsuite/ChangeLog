@@ -1,3 +1,10 @@
+2013-01-17  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/diagnostic.l: Update.
+	* gas/aarch64/movi.s: Add tests.
+	* gas/aarch64/movi.d: Update.
+	* gas/aarch64/programmer-friendly.s: Add comment.
+
 2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run size-1, size-2, size-3, size-4,

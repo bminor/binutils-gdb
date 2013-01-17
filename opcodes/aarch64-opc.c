@@ -1745,15 +1745,15 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	    case AARCH64_MOD_LSL:
 	      size = aarch64_get_qualifier_esize (opnds[0].qualifier);
+	      if (!value_in_range_p (opnd->shifter.amount, 0, (size - 1) * 8))
+		{
+		  set_sft_amount_out_of_range_error (mismatch_detail, idx, 0,
+						     (size - 1) * 8);
+		  return 0;
+		}
 	      if (!value_aligned_p (opnd->shifter.amount, 8))
 		{
 		  set_unaligned_error (mismatch_detail, idx, 8);
-		  return 0;
-		}
-	      if (!value_in_range_p (opnd->shifter.amount, 0, (size - 1) * 8))
-		{
-		  set_imm_out_of_range_error (mismatch_detail, idx, 0,
-					      (size - 1) * 8);
 		  return 0;
 		}
 	      break;

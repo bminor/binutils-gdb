@@ -642,6 +642,7 @@ aarch64_ext_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	{
 	case 4: gen_sub_field (FLD_cmode, 1, 2, &field); break;	/* per word */
 	case 2: gen_sub_field (FLD_cmode, 1, 1, &field); break;	/* per half */
+	case 1: gen_sub_field (FLD_cmode, 1, 0, &field); break;	/* per byte */
 	default: assert (0); return 0;
 	}
       /* 00: 0; 01: 8; 10:16; 11:24.  */

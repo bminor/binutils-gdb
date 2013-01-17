@@ -382,7 +382,11 @@ aarch64_ins_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
     {
       /* AARCH64_MOD_LSL: shift zeros.  */
       int esize = aarch64_get_qualifier_esize (opnd0_qualifier);
-      assert (esize == 4 || esize == 2);
+      assert (esize == 4 || esize == 2 || esize == 1);
+      /* For 8-bit move immediate, the optional LSL #0 does not require
+	 encoding.  */
+      if (esize == 1)
+	return NULL;
       amount >>= 3;
       if (esize == 4)
 	gen_sub_field (FLD_cmode, 1, 2, &field);	/* per word */

@@ -3926,9 +3926,14 @@ output_operand_error_record (const operand_error_record *record, char *str)
       break;
 
     case AARCH64_OPDE_OUT_OF_RANGE:
-      as_bad (_("%s out of range %d to %d at operand %d -- `%s'"),
-	      detail->error ? detail->error : _("immediate value"),
-	      detail->data[0], detail->data[1], detail->index + 1, str);
+      if (detail->data[0] != detail->data[1])
+	as_bad (_("%s out of range %d to %d at operand %d -- `%s'"),
+		detail->error ? detail->error : _("immediate value"),
+		detail->data[0], detail->data[1], detail->index + 1, str);
+      else
+	as_bad (_("%s expected to be %d at operand %d -- `%s'"),
+		detail->error ? detail->error : _("immediate value"),
+		detail->data[0], detail->index + 1, str);
       break;
 
     case AARCH64_OPDE_REG_LIST:
@@ -5257,25 +5262,6 @@ programmer_friendly_fixup (aarch64_instruction *instr)
 				    _("literal pool insertion failed"));
 	      return FALSE;
 	    }
-	}
-      break;
-    case asimdimm:
-      /* Allow MOVI V0.16B, 97, LSL 0, although the preferred architectural
-	 syntax requires that the LSL shifter can only be used when the
-	 destination register has the shape of 4H, 8H, 2S or 4S.  */
-      if (op == OP_V_MOVI_B && operands[1].shifter.kind == AARCH64_MOD_LSL
-	  && (operands[0].qualifier == AARCH64_OPND_QLF_V_8B
-	      || operands[0].qualifier == AARCH64_OPND_QLF_V_16B))
-	{
-	  if (operands[1].shifter.amount != 0)
-	    {
-	      record_operand_error (opcode, 1,
-				    AARCH64_OPDE_OTHER_ERROR,
-				    _("shift amount non-zero"));
-	      return FALSE;
-	    }
-	  operands[1].shifter.kind = AARCH64_MOD_NONE;
-	  operands[1].qualifier = AARCH64_OPND_QLF_NIL;
 	}
       break;
     case log_shift:

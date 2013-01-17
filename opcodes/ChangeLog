@@ -1,3 +1,16 @@
+2013-01-17  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-asm.c (aarch64_ins_advsimd_imm_modified): Handle 8-bit MOVI.
+	* aarch64-dis.c (aarch64_ext_advsimd_imm_modified): Likewise.
+	* aarch64-opc.c (operand_general_constraint_met_p): For
+	AARCH64_MOD_LSL, move the range check on the shift amount before the 
+	alignment check; change to call set_sft_amount_out_of_range_error
+	instead of set_imm_out_of_range_error.
+	* aarch64-tbl.h (QL_SIMD_IMM_B): Replace NIL with LSL.
+	(aarch64_opcode_table): Remove the OP enumerator from the asimdimm
+	8-bit MOVI entry; change the 2nd operand from SIMD_IMM to
+	SIMD_IMM_SFT.
+
 2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (operand_type_init): Add OPERAND_TYPE_IMM32_64.
