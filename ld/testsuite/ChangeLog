@@ -3,7 +3,8 @@
 	* ld-size/size32-3-i386.d: New file.
 	* ld-size/size32-3-x32.d: Likewise.
 	* ld-size/size32-3-x86-64.d: Likewise.
-	* ld-size/size32-3.s: Likewise.
+	* ld-size/size32-3a.s: Likewise.
+	* ld-size/size32-3b.s: Likewise.
 
 2013-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
