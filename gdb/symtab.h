@@ -1216,6 +1216,8 @@ extern struct symbol *fixup_symbol_section (struct symbol *,
 					    struct objfile *);
 
 /* Symbol searching */
+/* Note: struct symbol_search, search_symbols, et.al. are declared here,
+   instead of making them local to symtab.c, for gdbtk's sake.  */
 
 /* When using search_symbols, a list of the following structs is returned.
    Callers must free the search list using free_search_symbols!  */
