@@ -1,3 +1,12 @@
+2012-01-17  Sanjoy Das <sanjoy@playingwithpointers.com>
+
+	* gdb.base/jit-reader.exp: New file. Test case for the jit-reader
+	interface.
+	* gdb.base/jithost.c: New file.
+	* gdb.base/jithost.h: New file.
+	* gdb.base/jitreader.c : New file.
+	* gdb.base/jit-protocol.h: New file.
+
 2013-01-16  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/catch-signal.c: New file.
