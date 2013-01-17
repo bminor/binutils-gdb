@@ -1,5 +1,9 @@
 2013-01-16  Sriraman Tallam  <tmsriram@google.com>
 
+	* testsuite/plugin_final_layout.cc: Fix comment.
+
+2013-01-16  Sriraman Tallam  <tmsriram@google.com>
+
 	* layout.cc (Layout::layout): Do not do default sorting for
 	text sections when section ordering is specified.
 	(make_output_section): Ditto.

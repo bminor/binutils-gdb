@@ -21,7 +21,7 @@
 // MA 02110-1301, USA.
 
 // The goal of this program is to verify if section ordering
-// via plugins happens correctly.  Also, test is plugin based ordering
+// via plugins happens correctly.  Also, test if plugin based ordering
 // overrides default text section ordering where ".text.hot" sections
 // are grouped.  The plugin does not want foo and baz next to each other.
 // Plugin section order is foo() followed by bar() and then baz().
