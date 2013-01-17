@@ -724,8 +724,18 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
        gdb_block_iter = gdb_block_iter->next)
     {
       if (gdb_block_iter->parent != NULL)
-        BLOCK_SUPERBLOCK (gdb_block_iter->real_block) =
-          gdb_block_iter->parent->real_block;
+	{
+	  /* If the plugin specifically mentioned a parent block, we
+	     use that.  */
+	  BLOCK_SUPERBLOCK (gdb_block_iter->real_block) =
+	    gdb_block_iter->parent->real_block;
+	}
+      else
+	{
+	  /* And if not, we set a default parent block.  */
+	  BLOCK_SUPERBLOCK (gdb_block_iter->real_block) =
+	    BLOCKVECTOR_BLOCK (symtab->blockvector, STATIC_BLOCK);
+	}
     }
 
   /* Free memory.  */
