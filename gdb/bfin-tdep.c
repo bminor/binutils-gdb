@@ -574,11 +574,11 @@ bfin_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   return map_gcc_gdb[reg];
 }
 
-/* This function implements the BREAKPOINT_FROM_PC macro.  It returns
-   a pointer to a string of bytes that encode a breakpoint instruction,
-   stores the length of the string to *lenptr, and adjusts the program
-   counter (if necessary) to point to the actual memory location where
-   the breakpoint should be inserted.  */
+/* This function implements the 'breakpoint_from_pc' gdbarch method.
+   It returns a pointer to a string of bytes that encode a breakpoint
+   instruction, stores the length of the string to *lenptr, and
+   adjusts the program counter (if necessary) to point to the actual
+   memory location where the breakpoint should be inserted.  */
 
 static const unsigned char *
 bfin_breakpoint_from_pc (struct gdbarch *gdbarch,

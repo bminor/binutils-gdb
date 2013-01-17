@@ -20,10 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-
-/* This file is only useful if BREAKPOINT_FROM_PC is set.  If not, we
-   punt.  */
-
 #include "symtab.h"
 #include "breakpoint.h"
 #include "inferior.h"
