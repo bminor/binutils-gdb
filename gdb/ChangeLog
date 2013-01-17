@@ -1,5 +1,8 @@
 2013-01-17  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dw2_build_type_unit_groups_reader): Delete.
+	(dw2_build_type_unit_groups): Delete.  All uses updated.
+
 	* symtab.h (struct symbol_search): Add comment.
 
 2013-01-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
