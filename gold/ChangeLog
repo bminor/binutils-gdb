@@ -1,3 +1,9 @@
+2013-01-17  Serge Pavlov  <serge.v.pavlov@gmail.com>
+
+	* powerpc.cc (Stub_table::find_plt_call_entry): Make types
+	used in declaration and definition consistent.
+	(Target_powerpc::symval_for_branch): Ditto.
+
 2013-01-16  Sriraman Tallam  <tmsriram@google.com>
 
 	* testsuite/plugin_final_layout.cc: Fix comment.
