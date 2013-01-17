@@ -1,17 +1,30 @@
 dnl written by Rob Savoye <rob@cygnus.com> for Cygnus Support
 dnl major rewriting for Tcl 7.5 by Don Libes <libes@nist.gov>
 
+# Keep these includes in sync with the aclocal_m4_deps list in
+# Makefile.in.
+
 sinclude(acx_configure_dir.m4)
 
 dnl gdb/configure.in uses BFD_NEED_DECLARATION, so get its definition.
 sinclude(../bfd/bfd.m4)
 
-dnl This gets the standard macros
+dnl This gets the standard macros.
 sinclude(../config/acinclude.m4)
 
-dnl This gets autoconf bugfixes
+dnl This gets AC_PLUGINS, needed by ACX_LARGEFILE.
+sinclude(../config/plugins.m4)
+
+dnl For ACX_LARGEFILE.
+sinclude(../config/largefile.m4)
+
+dnl For AM_SET_LEADING_DOT.
+sinclude(../config/lead-dot.m4)
+
+dnl This gets autoconf bugfixes.
 sinclude(../config/override.m4)
 
+dnl For ZW_GNU_GETTEXT_SISTER_DIR.
 sinclude(../config/gettext-sister.m4)
 
 dnl For AC_LIB_HAVE_LINKFLAGS.
