@@ -314,6 +314,27 @@ set_cp_abi_cmd (char *args, int from_tty)
     error (_("Could not find \"%s\" in ABI list"), args);
 }
 
+/* A completion function for "set cp-abi".  */
+
+static VEC (char_ptr) *
+cp_abi_completer (struct cmd_list_element *ignore,
+		  char *text, char *word)
+{
+  static const char **cp_abi_names;
+
+  if (cp_abi_names == NULL)
+    {
+      int i;
+
+      cp_abi_names = XNEWVEC (const char *, num_cp_abis + 1);
+      for (i = 0; i < num_cp_abis; ++i)
+	cp_abi_names[i] = cp_abis[i]->shortname;
+      cp_abis[i] = NULL;
+    }
+
+  return complete_on_enum (cp_abi_names, text, word);
+}
+
 /* Show the currently selected C++ ABI.  */
 
 static void
@@ -334,13 +355,16 @@ extern initialize_file_ftype _initialize_cp_abi; /* -Wmissing-prototypes */
 void
 _initialize_cp_abi (void)
 {
+  struct cmd_list_element *c;
+
   register_cp_abi (&auto_cp_abi);
   switch_to_cp_abi ("auto");
 
-  add_cmd ("cp-abi", class_obscure, set_cp_abi_cmd, _("\
+  c = add_cmd ("cp-abi", class_obscure, set_cp_abi_cmd, _("\
 Set the ABI used for inspecting C++ objects.\n\
 \"set cp-abi\" with no arguments will list the available ABIs."),
-	   &setlist);
+	       &setlist);
+  set_cmd_completer (c, cp_abi_completer);
 
   add_cmd ("cp-abi", class_obscure, show_cp_abi_cmd,
 	   _("Show the ABI used for inspecting C++ objects."),

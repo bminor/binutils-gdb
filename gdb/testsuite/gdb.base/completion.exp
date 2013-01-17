@@ -710,6 +710,9 @@ gdb_test "complete ptype union some_" "ptype union some_union"
 
 gdb_test "complete set gnutarget aut" "set gnutarget auto"
 
+
+gdb_test "complete set cp-abi aut" "set cp-abi auto"
+
 # Restore globals modified in this test...
 set timeout $oldtimeout1
 
