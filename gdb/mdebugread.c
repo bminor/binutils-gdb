@@ -270,23 +270,23 @@ static void handle_psymbol_enumerators (struct objfile *, FDR *, int,
 
 static char *mdebug_next_symbol_text (struct objfile *);
 
-/* Exported procedure: Builds a symtab from the PST partial one.
-   Restores the environment in effect when PST was created, delegates
+/* Exported procedure: Builds a symtab from the partial symtab SELF.
+   Restores the environment in effect when SELF was created, delegates
    most of the work to an ancillary procedure, and sorts
-   and reorders the symtab list at the end.  PST is not NULL.  */
+   and reorders the symtab list at the end.  SELF is not NULL.  */
 
 static void
-mdebug_psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
+mdebug_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 {
   if (info_verbose)
     {
-      printf_filtered (_("Reading in symbols for %s..."), pst->filename);
+      printf_filtered (_("Reading in symbols for %s..."), self->filename);
       gdb_flush (gdb_stdout);
     }
 
   next_symbol_text_func = mdebug_next_symbol_text;
 
-  psymtab_to_symtab_1 (objfile, pst, pst->filename);
+  psymtab_to_symtab_1 (objfile, self, self->filename);
 
   /* Match with global symbols.  This only needs to be done once,
      after all of the symtabs and dependencies have been read in.  */
@@ -2696,7 +2696,7 @@ parse_partial_symbols (struct objfile *objfile)
       PENDING_LIST (pst) = pending_list;
 
       /* The way to turn this into a symtab is to call...  */
-      pst->read_symtab = mdebug_psymtab_to_symtab;
+      pst->read_symtab = mdebug_read_symtab;
 
       /* Set up language for the pst.
          The language from the FDR is used if it is unambigious (e.g. cfront
@@ -4796,7 +4796,7 @@ new_psymtab (char *name, struct objfile *objfile)
   PENDING_LIST (psymtab) = pending_list;
 
   /* The way to turn this into a symtab is to call...  */
-  psymtab->read_symtab = mdebug_psymtab_to_symtab;
+  psymtab->read_symtab = mdebug_read_symtab;
   return (psymtab);
 }
 

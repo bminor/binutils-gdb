@@ -261,7 +261,8 @@ extern void _initialize_dbxread (void);
 
 static void read_ofile_symtab (struct objfile *, struct partial_symtab *);
 
-static void dbx_psymtab_to_symtab (struct objfile *, struct partial_symtab *);
+static void dbx_read_symtab (struct partial_symtab *self,
+			     struct objfile *objfile);
 
 static void dbx_psymtab_to_symtab_1 (struct objfile *, struct partial_symtab *);
 
@@ -2209,7 +2210,7 @@ start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
   result->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
 					       sizeof (struct symloc));
   LDSYMOFF (result) = ldsymoff;
-  result->read_symtab = dbx_psymtab_to_symtab;
+  result->read_symtab = dbx_read_symtab;
   SYMBOL_SIZE (result) = symbol_size;
   SYMBOL_OFFSET (result) = symbol_table_offset;
   STRING_OFFSET (result) = string_table_offset;
@@ -2452,29 +2453,29 @@ dbx_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
 }
 
 /* Read in all of the symbols for a given psymtab for real.
-   Be verbose about it if the user wants that.  PST is not NULL.  */
+   Be verbose about it if the user wants that.  SELF is not NULL.  */
 
 static void
-dbx_psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
+dbx_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 {
   bfd *sym_bfd;
   struct cleanup *back_to = NULL;
 
-  if (pst->readin)
+  if (self->readin)
     {
       fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  "
 			  "Shouldn't happen.\n",
-			  pst->filename);
+			  self->filename);
       return;
     }
 
-  if (LDSYMLEN (pst) || pst->number_of_dependencies)
+  if (LDSYMLEN (self) || self->number_of_dependencies)
     {
       /* Print the message now, before reading the string table,
          to avoid disconcerting pauses.  */
       if (info_verbose)
 	{
-	  printf_filtered ("Reading in symbols for %s...", pst->filename);
+	  printf_filtered ("Reading in symbols for %s...", self->filename);
 	  gdb_flush (gdb_stdout);
 	}
 
@@ -2494,7 +2495,7 @@ dbx_psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 				    (void *) &stabs_data);
 	}
 
-      dbx_psymtab_to_symtab_1 (objfile, pst);
+      dbx_psymtab_to_symtab_1 (objfile, self);
 
       if (back_to)
 	do_cleanups (back_to);

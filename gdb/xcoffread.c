@@ -1855,33 +1855,33 @@ xcoff_psymtab_to_symtab_1 (struct objfile *objfile, struct partial_symtab *pst)
 }
 
 /* Read in all of the symbols for a given psymtab for real.
-   Be verbose about it if the user wants that.  PST is not NULL.  */
+   Be verbose about it if the user wants that.  SELF is not NULL.  */
 
 static void
-xcoff_psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
+xcoff_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 {
-  if (pst->readin)
+  if (self->readin)
     {
       fprintf_unfiltered
 	(gdb_stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
-	 pst->filename);
+	 self->filename);
       return;
     }
 
-  if (((struct symloc *) pst->read_symtab_private)->numsyms != 0
-      || pst->number_of_dependencies)
+  if (((struct symloc *) self->read_symtab_private)->numsyms != 0
+      || self->number_of_dependencies)
     {
       /* Print the message now, before reading the string table,
          to avoid disconcerting pauses.  */
       if (info_verbose)
 	{
-	  printf_filtered ("Reading in symbols for %s...", pst->filename);
+	  printf_filtered ("Reading in symbols for %s...", self->filename);
 	  gdb_flush (gdb_stdout);
 	}
 
       next_symbol_text_func = xcoff_next_symbol_text;
 
-      xcoff_psymtab_to_symtab_1 (objfile, pst);
+      xcoff_psymtab_to_symtab_1 (objfile, self);
 
       /* Match with global symbols.  This only needs to be done once,
          after all of the symtabs and dependencies have been read in.   */
@@ -2017,7 +2017,7 @@ xcoff_start_psymtab (struct objfile *objfile,
   result->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
 					       sizeof (struct symloc));
   ((struct symloc *) result->read_symtab_private)->first_symnum = first_symnum;
-  result->read_symtab = xcoff_psymtab_to_symtab;
+  result->read_symtab = xcoff_read_symtab;
 
   /* Deduce the source language from the filename for this psymtab.  */
   psymtab_language = deduce_language_from_filename (filename);
