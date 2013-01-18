@@ -2139,7 +2139,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
   struct thread_info *tp;
   CORE_ADDR pc;
   struct address_space *aspace;
-  int oneproc = 0;
+  /* GDB may force the inferior to step due to various reasons.  */
+  int force_step = 0;
 
   /* If we're stopped at a fork/vfork, follow the branch set by the
      "set follow-fork-mode" command; otherwise, we'll just proceed
@@ -2179,13 +2180,13 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
 	   actually be executing the breakpoint insn anyway.
 	   We'll be (un-)executing the previous instruction.  */
 
-	oneproc = 1;
+	force_step = 1;
       else if (gdbarch_single_step_through_delay_p (gdbarch)
 	       && gdbarch_single_step_through_delay (gdbarch,
 						     get_current_frame ()))
 	/* We stepped onto an instruction that needs to be stepped
 	   again before re-inserting the breakpoint, do so.  */
-	oneproc = 1;
+	force_step = 1;
     }
   else
     {
@@ -2216,13 +2217,13 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
 	 is required it returns TRUE and sets the current thread to
 	 the old thread.  */
       if (prepare_to_proceed (step))
-	oneproc = 1;
+	force_step = 1;
     }
 
   /* prepare_to_proceed may change the current thread.  */
   tp = inferior_thread ();
 
-  if (oneproc)
+  if (force_step)
     {
       tp->control.trap_expected = 1;
       /* If displaced stepping is enabled, we can step over the
@@ -2310,7 +2311,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
   init_infwait_state ();
 
   /* Resume inferior.  */
-  resume (oneproc || step || bpstat_should_step (), tp->suspend.stop_signal);
+  resume (force_step || step || bpstat_should_step (),
+	  tp->suspend.stop_signal);
 
   /* Wait for it to stop (if not standalone)
      and in any case decode why it stopped, and act accordingly.  */
