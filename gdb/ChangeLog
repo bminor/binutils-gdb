@@ -1,3 +1,9 @@
+2013-01-18  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/14999:
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax) <DW_OP_fbreg>:
+	Call require_rvalue.
+
 2013-01-18  Yao Qi  <yao@codesourcery.com>
 
 	* dbxread.c (dbx_psymtab_to_symtab): Delete the declaration.

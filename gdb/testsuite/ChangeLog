@@ -1,3 +1,8 @@
+2013-01-18  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/trace-crash.s: New file.
+	* gdb.dwarf2/trace-crash.exp: New file.
+
 2013-01-18  Hafiz Abid Qadeer<abidh@codesourcery.com>
 
         PR gdb/13443
