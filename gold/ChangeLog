@@ -1,3 +1,9 @@
+2013-01-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* layout.cc (Layout::finish_dynamic_section): Only add DT_RPATH
+	when enable_new_dtags is false.  Only add DT_RUNPATH when
+	enable_new_dtags is true.
+
 2013-01-17  Serge Pavlov  <serge.v.pavlov@gmail.com>
 
 	* powerpc.cc (Stub_table::find_plt_call_entry): Make types

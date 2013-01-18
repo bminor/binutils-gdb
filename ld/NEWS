@@ -2,6 +2,8 @@
 
 * Add support for the Imagination Technologies Meta processor.
 
+* --enable-new-dtags no longer generates old dtags in addition to new dtags.
+
 Changes in 2.23:
 
 * Enable compressed debug section feature for x86/x86_64 pe-coff.

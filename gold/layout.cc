@@ -4647,8 +4647,9 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
 	    }
 	}
 
-      odyn->add_string(elfcpp::DT_RPATH, rpath_val);
-      if (parameters->options().enable_new_dtags())
+      if (!parameters->options().enable_new_dtags())
+	odyn->add_string(elfcpp::DT_RPATH, rpath_val);
+      else
 	odyn->add_string(elfcpp::DT_RUNPATH, rpath_val);
     }
 

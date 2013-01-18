@@ -2112,7 +2112,8 @@ if linker generated unwind info is supported.
 @itemx --disable-new-dtags
 This linker can create the new dynamic tags in ELF. But the older ELF
 systems may not understand them. If you specify
-@option{--enable-new-dtags}, the dynamic tags will be created as needed.
+@option{--enable-new-dtags}, the new dynamic tags will be created as needed
+and older dynamic tags will be omitted.
 If you specify @option{--disable-new-dtags}, no new dynamic tags will be
 created. By default, the new dynamic tags are not created. Note that
 those options are only available for ELF systems.
