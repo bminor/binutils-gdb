@@ -249,7 +249,12 @@ translate_addresses (bfd *abfd, asection *section)
       if (! found)
 	{
 	  if (with_functions)
-	    printf ("??\n");
+	    {
+	      if (pretty_print)
+		printf ("?? ");
+	      else
+		printf ("??\n");
+	    }
 	  printf ("??:0\n");
 	}
       else

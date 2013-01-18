@@ -1,3 +1,9 @@
+2013-01-18  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15026
+	* addr2line.c (translate_addresses): When pretty printing, print
+	unknown function names on the same line as unknown symbol names.
+
 2013-01-17  Nickolai Zeldovich  <nickolai@csail.mit.edu>
 
 	* objdump.c (dump_target_specific): Fix NULL pointer test.
