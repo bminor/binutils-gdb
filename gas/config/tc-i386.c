@@ -2686,6 +2686,7 @@ reloc (unsigned int size,
 	    break;
 	  }
 
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       if (other == BFD_RELOC_SIZE32)
 	{
 	  if (size == 8)
@@ -2693,6 +2694,7 @@ reloc (unsigned int size,
 	  if (pcrel)
 	    as_bad (_("there are no pc-relative size relocations"));
 	}
+#endif
 
       /* Sign-checking 4-byte relocations in 16-/32-bit code is pointless.  */
       if (size == 4 && (flag_code != CODE_64BIT || disallow_64bit_reloc))
@@ -6719,9 +6721,11 @@ lex_got (enum bfd_reloc_code_real *rel,
     const enum bfd_reloc_code_real rel[2];
     const i386_operand_type types64;
   } gotrel[] = {
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
     { STRING_COMMA_LEN ("SIZE"),      { BFD_RELOC_SIZE32,
 					BFD_RELOC_SIZE32 },
       OPERAND_TYPE_IMM32_64 },
+#endif
     { STRING_COMMA_LEN ("PLTOFF"),   { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_PLTOFF64 },
       OPERAND_TYPE_IMM64 },
@@ -9245,6 +9249,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
   switch (fixp->fx_r_type)
     {
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
     case BFD_RELOC_SIZE32:
     case BFD_RELOC_SIZE64:
       if (S_IS_DEFINED (fixp->fx_addsy)
@@ -9262,6 +9267,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	  md_apply_fix (fixp, (valueT *) &value, NULL);
 	  return NULL;
 	}
+#endif
 
     case BFD_RELOC_X86_64_PLT32:
     case BFD_RELOC_X86_64_GOT32:

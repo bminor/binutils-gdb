@@ -1,3 +1,10 @@
+2013-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (reloc): Support size relocation only for ELF.
+	(tc_i386_fix_adjustable): Likewise.
+	(lex_got): Likewise.
+	(tc_gen_reloc): Likewise.
+
 2013-01-17  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (output_operand_error_record): Change to output
