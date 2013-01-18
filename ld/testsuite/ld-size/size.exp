@@ -55,6 +55,12 @@ if { [which $CC] == 0 } {
 }
 
 set build_tests {
+  {"Build libsize-1.so"
+   "-shared" "-fPIC"
+   {size-1a.c size-1b.c} {} "libsize-1.so"}
+  {"Build libsize-2.so"
+   "-shared" "-fPIC"
+   {size-2a.c size-2b.c} {} "libsize-2.so"}
   {"Build libsize-3a.so"
    "-shared" "-fPIC"
    {size-3a.c} {} "libsize-3a.so"}
@@ -84,6 +90,12 @@ set build_tests {
 run_cc_link_tests $build_tests
 
 set run_tests {
+    {"Run size-1"
+     "tmpdir/libsize-1.so" ""
+     {size-1.c} "size-1" "size-1.out"}
+    {"Run size-2"
+     "tmpdir/libsize-2.so" ""
+     {size-2.c} "size-2" "size-2.out"}
     {"Run size-3a"
      "" ""
      {size-3.c size-3a.c} "size-3a" "size-3.out"}

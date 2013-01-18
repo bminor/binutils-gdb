@@ -1,5 +1,20 @@
 2013-01-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-size/size-1.c: New file.
+	* ld-size/size-1.out: Likewise.
+	* ld-size/size-1a.c: Likewise.
+	* ld-size/size-1b.c: Likewise.
+	* ld-size/size-2.c: Likewise.
+	* ld-size/size-2.out: Likewise.
+	* ld-size/size-2a.c: Likewise.
+	* ld-size/size-2b.c: Likewise.
+
+	* ld-size/size.exp (build_tests): Build libsize-1.so and
+	libsize-2.so.
+	(run_tests): Run size-1 and size-2.
+
+2013-01-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-size/size32-3-i386.d: New file.
 	* ld-size/size32-3-x32.d: Likewise.
 	* ld-size/size32-3-x86-64.d: Likewise.
