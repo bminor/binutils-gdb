@@ -1,3 +1,8 @@
+2013-01-18  David Blaikie  <dblaikie@gmail.com>
+
+	* gdb.base/label.c (main): Correct the type of the second
+	parameter.
+
 2013-01-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/trace-crash.s: New file.
