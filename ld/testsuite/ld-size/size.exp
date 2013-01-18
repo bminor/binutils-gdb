@@ -85,6 +85,12 @@ set build_tests {
   {"Build size-8"
    "tmpdir/libsize-8.so" ""
    {size-8a.c} {{readelf -rW size-8.rd}} "size-8.exe"}
+  {"Build libsize-9.so"
+   "-shared" "-fPIC"
+   {size-9b.c} {{readelf -rW size-9.rd}} "libsize-9.so"}
+  {"Build libsize-10.so"
+   "-shared" "-fPIC"
+   {size-10b.c} {{readelf -rW size-10.rd}} "libsize-10.so"}
 }
 
 run_cc_link_tests $build_tests
@@ -132,3 +138,32 @@ set run_tests {
 }
 
 run_ld_link_exec_tests [] $run_tests
+
+# Check if size relocation works at run-time.
+catch "exec tmpdir/size-7.exe > tmpdir/dump.out" exec_output
+if ![string match "" $exec_output] then {
+    send_log "No run-time size relocation support: $exec_output\n"
+    verbose "No run-time size relocation support: $exec_output" 1
+    return
+}
+
+if { [regexp_diff "tmpdir/dump.out" "$srcdir/$subdir/size-7.out" ] } then {
+    verbose "output is [file_contents "tmpdir/dump.out"]" 2
+    fail "Run-time size relocation"
+    return
+}
+
+# Run-time size relocation tests.
+set run_time_tests {
+    {"Run size-8"
+     "tmpdir/libsize-8.so" ""
+     {size-8a.c} "size-8" "size-8.out"}
+    {"Run size-9"
+     "tmpdir/libsize-9.so" ""
+     {size-9a.c} "size-9" "size-9.out"}
+    {"Run size-10"
+     "tmpdir/libsize-10.so" ""
+     {size-10a.c} "size-10" "size-10.out"}
+}
+
+run_ld_link_exec_tests [] $run_time_tests

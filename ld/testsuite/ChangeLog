@@ -1,5 +1,23 @@
 2013-01-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-size/size-7.out: New file.
+	* ld-size/size-8.out: Likewise.
+	* ld-size/size-9.out: Likewise.
+	* ld-size/size-9.rd: Likewise.
+	* ld-size/size-9a.c: Likewise.
+	* ld-size/size-9b.c: Likewise.
+	* ld-size/size-10.out: Likewise.
+	* ld-size/size-10.rd: Likewise.
+	* ld-size/size-10a.c: Likewise.
+	* ld-size/size-10b.c: Likewise.
+
+	* ld-size/size.exp (build_tests): Build libsize-9.so and
+	libsize-10.so.
+	Run-time size relocation tests if supported.
+	(run_time_tests): New.
+
+2013-01-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-size/size-1.c: New file.
 	* ld-size/size-1.out: Likewise.
 	* ld-size/size-1a.c: Likewise.
