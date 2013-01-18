@@ -1,3 +1,21 @@
+2013-01-18  Yao Qi  <yao@codesourcery.com>
+
+	* ax.h (struct eval_agent_expr_context): New.
+	(gdb_eval_agent_expr): Update declaration.
+	* ax.c (gdb_eval_agent_expr): Remove argument REGCACHE and
+	TFRAME.  Add new argument CTX.
+	* server.h (struct eval_agent_expr_context): Declare.
+	(agent_mem_read, agent_tsv_read): Update declaration.
+	(agent_mem_read_string): Likewise.
+	* tracepoint.c (eval_tracepoint_agent_expr): Remove.
+	(add_traceframe_block): Add new argument TPOINT.
+	Increase TPOINT->traceframe_usage.
+	(do_action_at_tracepoint): Call gdb_eval_agent_expr instead of
+	eval_tracepoint_agent_expr.
+	(condition_true_at_tracepoint): Likewise.
+	(agent_mem_read): Remove argument TFRAME.  Add argument CTX.
+	(agent_mem_read_string, agent_tsv_read): Likewise.
+
 2013-01-16  Yao Qi  <yao@codesourcery.com>
 
 	* linux-low.c (linux_resume_one_lwp): Don't check

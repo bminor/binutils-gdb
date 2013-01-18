@@ -89,3 +89,32 @@ gdb_test "help info tracepoints" \
     "Status of specified tracepoints .all tracepoints if no argument.*" \
     "2.5: help info tracepoints"
 
+# 2.6 info tracepoints (check trace buffer usage).  We need a live
+# tracing.
+gdb_breakpoint "main"
+gdb_trace_setactions "collect on tracepoint 1" "1" \
+	"collect gdb_struct1_test" "^$"
+gdb_run_cmd
+gdb_test "" "Breakpoint ${decimal}, main.*"
+
+if { ![gdb_target_supports_trace] } then {
+    unsupported "Current target does not support trace"
+    return 1;
+}
+
+gdb_test "break end" "Breakpoint \[0-9\] at .*"
+gdb_test_no_output "tstart"
+gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*" \
+    "continue to end"
+gdb_test_no_output "tstop"
+gdb_test "tstatus"
+gdb_test "info tracepoints" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+\[\t \]+tracepoint already hit 1 time.
+\[\t \]+trace buffer usage ${decimal} bytes.
+\[\t \]+collect gdb_struct1_test.
+\tinstalled on target.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
+\tinstalled on target." \
+    "2.6: info tracepoints (trace buffer usage)"

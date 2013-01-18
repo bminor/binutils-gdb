@@ -19,6 +19,14 @@ void
 end (void)
 {}
 
+struct foo
+{
+  int bar1;
+  long bar2;
+};
+
+struct foo foo;
+
 void
 start (void)
 {}

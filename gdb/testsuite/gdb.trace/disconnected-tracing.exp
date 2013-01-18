@@ -47,6 +47,8 @@ if ![gdb_target_supports_trace] {
 
 proc disconnected_tracing {  } { with_test_prefix "trace" {
     global executable
+    global decimal
+    global srcfile
 
     # Start with a fresh gdb.
     clean_restart ${executable}
@@ -57,10 +59,18 @@ proc disconnected_tracing {  } { with_test_prefix "trace" {
 
     gdb_test_no_output "set confirm off"
     gdb_test_no_output "set disconnected-tracing on"
-    gdb_test "trace main" ".*"
+    gdb_test "trace start" ".*"
+    gdb_trace_setactions "collect on tracepoint 2" "2" \
+	"collect foo" "^$"
+    gdb_test "break end" "Breakpoint ${decimal} at .*"
+
     gdb_test_no_output "tstart"
 
-    gdb_test "info tracepoints" ".*in main at.*" "first info tracepoints"
+    gdb_test "continue" "Continuing\\.\[ \r\n\]+Breakpoint.*"
+    gdb_test_no_output "tstop"
+
+    gdb_test "info tracepoints" ".*in start at.*" \
+	"first info tracepoints"
 
     gdb_test "disconnect" "Ending remote debugging\\." "first disconnect"
     if { [gdb_reconnect] == 0 } {
@@ -69,10 +79,12 @@ proc disconnected_tracing {  } { with_test_prefix "trace" {
 	fail "first reconnect after unload"
 	return 0
     }
-    gdb_test "info tracepoints" ".*in main at.*" "second info tracepoints"
+    gdb_test "info tracepoints" ".*in start at.*" \
+	"second info tracepoints"
 
     delete_breakpoints
-    gdb_test "info tracepoints" ".*No tracepoints..*" "third info tracepoints"
+    gdb_test "info tracepoints" ".*No tracepoints..*" \
+	"third info tracepoints"
 
     gdb_test "disconnect" "Ending remote debugging\\." "second disconnect"
     if { [gdb_reconnect] == 0 } {
@@ -81,7 +93,14 @@ proc disconnected_tracing {  } { with_test_prefix "trace" {
 	fail "second reconnect after unload"
 	return 0
     }
-    gdb_test "info tracepoints" ".*in main at.*" "fourth info tracepoints"
+    gdb_test "tstatus"
+    gdb_test "info tracepoints" \
+	"Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in start at .*$srcfile:\[0-9\]+.
+\[\t \]+tracepoint already hit 1 time.
+\[\t \]+trace buffer usage ${decimal} bytes.
+\[\t \]+collect foo.*" \
+	"fourth info tracepoints"
 }}
 
 disconnected_tracing

@@ -1346,12 +1346,6 @@ struct trap_tracepoint_ctx
 
 #endif
 
-static enum eval_result_type
-eval_tracepoint_agent_expr (struct tracepoint_hit_ctx *ctx,
-			    struct traceframe *tframe,
-			    struct agent_expr *aexpr,
-			    ULONGEST *rslt);
-
 #ifndef IN_PROCESS_AGENT
 static CORE_ADDR traceframe_get_pc (struct traceframe *tframe);
 static int traceframe_read_tsv (int num, LONGEST *val);
@@ -2216,7 +2210,8 @@ add_traceframe (struct tracepoint *tpoint)
 /* Add a block to the traceframe currently being worked on.  */
 
 static unsigned char *
-add_traceframe_block (struct traceframe *tframe, int amt)
+add_traceframe_block (struct traceframe *tframe,
+		      struct tracepoint *tpoint, int amt)
 {
   unsigned char *block;
 
@@ -2228,7 +2223,10 @@ add_traceframe_block (struct traceframe *tframe, int amt)
   if (!block)
     return NULL;
 
+  gdb_assert (tframe->tpnum == tpoint->number);
+
   tframe->data_size += amt;
+  tpoint->traceframe_usage += amt;
 
   return block;
 }
@@ -4705,15 +4703,19 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
     case 'M':
       {
 	struct collect_memory_action *maction;
+	struct eval_agent_expr_context ax_ctx;
 
 	maction = (struct collect_memory_action *) taction;
+	ax_ctx.regcache = NULL;
+	ax_ctx.tframe = tframe;
+	ax_ctx.tpoint = tpoint;
 
 	trace_debug ("Want to collect %s bytes at 0x%s (basereg %d)",
 		     pulongest (maction->len),
 		     paddress (maction->addr), maction->basereg);
 	/* (should use basereg) */
-	agent_mem_read (tframe, NULL,
-			(CORE_ADDR) maction->addr, maction->len);
+	agent_mem_read (&ax_ctx, NULL, (CORE_ADDR) maction->addr,
+			maction->len);
 	break;
       }
     case 'R':
@@ -4726,7 +4728,7 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 	trace_debug ("Want to collect registers");
 
 	/* Collect all registers for now.  */
-	regspace = add_traceframe_block (tframe,
+	regspace = add_traceframe_block (tframe, tpoint,
 					 1 + register_cache_size ());
 	if (regspace == NULL)
 	  {
@@ -4768,12 +4770,16 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
     case 'X':
       {
 	struct eval_expr_action *eaction;
+	struct eval_agent_expr_context ax_ctx;
 
 	eaction = (struct eval_expr_action *) taction;
+	ax_ctx.regcache = get_context_regcache (ctx);
+	ax_ctx.tframe = tframe;
+	ax_ctx.tpoint = tpoint;
 
 	trace_debug ("Want to evaluate expression");
 
-	err = eval_tracepoint_agent_expr (ctx, tframe, eaction->expr, NULL);
+	err = gdb_eval_agent_expr (&ax_ctx, eaction->expr, NULL);
 
 	if (err != expr_eval_no_error)
 	  {
@@ -4825,8 +4831,15 @@ condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
     err = ((condfn) (uintptr_t) (tpoint->compiled_cond)) (ctx, &value);
   else
 #endif
-    err = eval_tracepoint_agent_expr (ctx, NULL, tpoint->cond, &value);
+    {
+      struct eval_agent_expr_context ax_ctx;
 
+      ax_ctx.regcache = get_context_regcache (ctx);
+      ax_ctx.tframe = NULL;
+      ax_ctx.tpoint = tpoint;
+
+      err = gdb_eval_agent_expr (&ax_ctx, tpoint->cond, &value);
+    }
   if (err != expr_eval_no_error)
     {
       record_tracepoint_error (tpoint, "condition", err);
@@ -4840,27 +4853,11 @@ condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
   return (value ? 1 : 0);
 }
 
-/* Evaluates a tracepoint agent expression with context CTX,
-   traceframe TFRAME, agent expression AEXPR and store the
-   result in RSLT.  */
-
-static enum eval_result_type
-eval_tracepoint_agent_expr (struct tracepoint_hit_ctx *ctx,
-			    struct traceframe *tframe,
-			    struct agent_expr *aexpr,
-			    ULONGEST *rslt)
-{
-  struct regcache *regcache;
-  regcache = get_context_regcache (ctx);
-
-  return gdb_eval_agent_expr (regcache, tframe, aexpr, rslt);
-}
-
 /* Do memory copies for bytecodes.  */
 /* Do the recording of memory blocks for actions and bytecodes.  */
 
 int
-agent_mem_read (struct traceframe *tframe,
+agent_mem_read (struct eval_agent_expr_context *ctx,
 		unsigned char *to, CORE_ADDR from, ULONGEST len)
 {
   unsigned char *mspace;
@@ -4881,7 +4878,7 @@ agent_mem_read (struct traceframe *tframe,
 
       blocklen = (remaining > 65535 ? 65535 : remaining);
       sp = 1 + sizeof (from) + sizeof (blocklen) + blocklen;
-      mspace = add_traceframe_block (tframe, sp);
+      mspace = add_traceframe_block (ctx->tframe, ctx->tpoint, sp);
       if (mspace == NULL)
 	return 1;
       /* Identify block as a memory block.  */
@@ -4902,7 +4899,7 @@ agent_mem_read (struct traceframe *tframe,
 }
 
 int
-agent_mem_read_string (struct traceframe *tframe,
+agent_mem_read_string (struct eval_agent_expr_context *ctx,
 		       unsigned char *to, CORE_ADDR from, ULONGEST len)
 {
   unsigned char *buf, *mspace;
@@ -4938,7 +4935,7 @@ agent_mem_read_string (struct traceframe *tframe,
 	    }
 	}
       sp = 1 + sizeof (from) + sizeof (blocklen) + blocklen;
-      mspace = add_traceframe_block (tframe, sp);
+      mspace = add_traceframe_block (ctx->tframe, ctx->tpoint, sp);
       if (mspace == NULL)
 	{
 	  xfree (buf);
@@ -4964,12 +4961,12 @@ agent_mem_read_string (struct traceframe *tframe,
 /* Record the value of a trace state variable.  */
 
 int
-agent_tsv_read (struct traceframe *tframe, int n)
+agent_tsv_read (struct eval_agent_expr_context *ctx, int n)
 {
   unsigned char *vspace;
   LONGEST val;
 
-  vspace = add_traceframe_block (tframe,
+  vspace = add_traceframe_block (ctx->tframe, ctx->tpoint,
 				 1 + sizeof (n) + sizeof (LONGEST));
   if (vspace == NULL)
     return 1;
@@ -6346,7 +6343,8 @@ upload_fast_traceframes (void)
 	{
 	  /* Copy the whole set of blocks in one go for now.  FIXME:
 	     split this in smaller blocks.  */
-	  block = add_traceframe_block (tframe, ipa_tframe.data_size);
+	  block = add_traceframe_block (tframe, tpoint,
+					ipa_tframe.data_size);
 	  if (block != NULL)
 	    {
 	      if (read_inferior_memory (tf
@@ -6645,7 +6643,7 @@ collect_ust_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
   trace_debug ("Want to collect ust data");
 
   /* 'S' + size + string */
-  bufspace = add_traceframe_block (tframe,
+  bufspace = add_traceframe_block (tframe, umd->tpoint,
 				   1 + sizeof (blocklen) + size + 1);
   if (bufspace == NULL)
     {
