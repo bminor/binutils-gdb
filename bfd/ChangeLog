@@ -1,3 +1,14 @@
+2013-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Clear pc_count for
+	non-zero TLS symbol.
+	(elf_i386_relocate_section): Resolve size relocation against
+	non-zero TLS symbol.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Clear pc_count
+	for non-zero TLS symbol.
+	(elf_x86_64_relocate_section): Resolve size relocation against
+	non-zero TLS symbol.
+
 2013-01-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* elflink.c (bfd_elf_size_dynamic_sections): Only add DT_RPATH
