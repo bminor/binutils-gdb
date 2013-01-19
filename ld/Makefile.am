@@ -86,6 +86,7 @@ POD2MAN = pod2man --center="GNU Development Tools" \
 
 #stuff for self hosting (can be overridden in config file).
 HOSTING_CRT0 = @HOSTING_CRT0@
+HOSTING_SCRT0 = @HOSTING_SCRT0@
 HOSTING_LIBS = @HOSTING_LIBS@
 HOSTING_EMU = -m $(EMUL)
 

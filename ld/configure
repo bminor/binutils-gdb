@@ -614,6 +614,7 @@ ENABLE_PLUGINS_FALSE
 ENABLE_PLUGINS_TRUE
 NATIVE_LIB_DIRS
 HOSTING_LIBS
+HOSTING_SCRT0
 HOSTING_CRT0
 HDEFINES
 do_compare
@@ -12185,7 +12186,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12188 "configure"
+#line 12189 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12291,7 +12292,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12294 "configure"
+#line 12295 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16194,6 +16195,7 @@ do_compare="$gcc_cv_prog_cmp_skip"
 
 
 . ${srcdir}/configure.host
+
 
 
 

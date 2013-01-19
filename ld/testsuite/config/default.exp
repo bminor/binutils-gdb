@@ -139,11 +139,11 @@ proc get_target_emul {} {
 }
 
 if [isnative] {
-    foreach x {HOSTING_CRT0 HOSTING_LIBS} {
+    foreach x {HOSTING_CRT0 HOSTING_SCRT0 HOSTING_LIBS} {
 	get_link_files $x
     }
 } else {
-    foreach x {HOSTING_CRT0 HOSTING_LIBS} { set $x "" }
+    foreach x {HOSTING_CRT0 HOSTING_SCRT0 HOSTING_LIBS} { set $x "" }
 }
 if ![info exists HOSTING_EMU] { set HOSTING_EMU "-m [get_target_emul]" }
 

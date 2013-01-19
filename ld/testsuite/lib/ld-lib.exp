@@ -179,13 +179,18 @@ proc big_or_little_endian {} {
 proc default_ld_link { ld target objects } {
     global HOSTING_EMU
     global HOSTING_CRT0
+    global HOSTING_SCRT0
     global HOSTING_LIBS
     global LIBS
     global host_triplet
     global link_output
     global exec_output
 
-    set objs "$HOSTING_CRT0 $objects"
+    if { [ string match "* -pie *" $objects ] } {
+	set objs "$HOSTING_SCRT0 $objects"
+    } else {
+	set objs "$HOSTING_CRT0 $objects"
+    }
     set libs "$LIBS $HOSTING_LIBS"
 
     if [is_endian_output_format $objects] then {

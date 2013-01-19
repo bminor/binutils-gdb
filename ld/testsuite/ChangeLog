@@ -1,3 +1,9 @@
+2013-01-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/default.exp (get_target_emul): Also set HOSTING_SCRT0.
+
+	* lib/ld-lib.exp (default_ld_link): Use HOSTING_SCRT0 for -pie.
+
 2013-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-size/size-10.rd: Updated.
