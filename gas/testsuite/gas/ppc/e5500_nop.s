@@ -1,5 +1,5 @@
 # Power E5500 nop tests
-	.section  ".text"
+	.text
 start:
 	nop
 	.p2align 4,,15

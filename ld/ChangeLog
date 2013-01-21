@@ -1,3 +1,49 @@
+2013-01-22  Alan Modra  <amodra@gmail.com>
+
+	Apply mainline patches
+	2013-01-08  Alan Modra  <amodra@gmail.com>
+	* emultempl/elf32.em (gld${EMULATION_NAME}_check_ld_so_conf): Replace
+	"name" param with a bfd_link_needed_link pointer.  Update caller.
+	(gld${EMULATION_NAME}_check_ld_elf_hints): Likewise.
+
+	2012-12-17  Alan Modra  <amodra@gmail.com>
+	PR ld/14962
+	* ldexp.h (struct ldexp_control): Add "assign_name".
+	* ldexp.c (fold_name <NAME>): Compare and clear assign_name on match.
+	(exp_fold_tree_1): Remove existing code testing for self assignment.
+	Instead set and test expld.assign_name.
+	* ldlang.c (scan_for_self_assignment): Delete.
+	(print_assignment): Instead set and test expld.assign_name.
+
+	2012-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/14915
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Also
+	check DT_NEEDED entries when creating shared object with
+	--copy-dt-needed-entries.
+
+	2012-12-03  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/14904
+	* ldmain.c (main): Don't check plugin_load_plugins return.
+	* lexsup.c (parse_args): Don't check plugin_opt_plugin return.
+	* plugin.c (dlerror): New.  Defined if HAVE_DLFCN_H isn't
+	defined.
+	(plugin_opt_plugin): Change return type to void.  Stop on
+	dlopen error and report error with dlerror ().
+	(plugin_load_plugins): Change return type to void.  Stop on
+	dlsym error and report error with dlerror ().  Don't use
+	set_plugin_error.
+	(plugin_call_cleanup): Issue an error for each plugin.
+	* plugin.h (plugin_opt_plugin): Change return type to void.
+	(plugin_load_plugins): Likewise.
+
+	2012-11-01  Alan Modra  <amodra@gmail.com>
+	* ldlang.c (insert_pad): Correct output section size calculation.
+	(lang_size_sections_1): Likewise for lang_data_statement and
+	lang_reloc_statement.
+
+	2012-10-22  Alan Modra  <amodra@gmail.com>
+	* plugin.c (plugin_load_plugins): Warning fix.
+
 2012-12-18  Roland McGrath  <mcgrathr@google.com>
 
 	* ld.texinfo (Options): Describe -Trodata-segment.

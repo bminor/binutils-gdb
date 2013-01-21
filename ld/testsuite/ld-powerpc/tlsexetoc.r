@@ -1,7 +1,7 @@
 #source: tlslib.s
 #source: tlstoc.s
 #as: -a64
-#ld: -melf64ppc
+#ld: 
 #readelf: -WSsrl
 #target: powerpc64*-*-*
 

@@ -1,6 +1,6 @@
 # PowerPC POWER6 AltiVec tests
 #as: -mpower6
-	.section ".text"
+	.text
 start:
 	doze
 	nap

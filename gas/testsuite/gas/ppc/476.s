@@ -1,4 +1,4 @@
-	.section        ".text"
+	.text
 ppc476:
 	add	3,4,5
 	add.	3,4,5

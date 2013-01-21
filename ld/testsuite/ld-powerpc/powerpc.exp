@@ -242,6 +242,27 @@ set ppceabitests {
     {{objdump "-Mvle -d" vle-reloc-3.d}} "vle-reloc-3"}
 }
 
+if [istarget "powerpc*le*-*-*"] then {
+    set options_regsub(ld) {-melf32ppc -melf32lppc}
+
+    for {set i 0} {$i < [llength $ppcelftests]} {incr i} {
+	set line [lindex $ppcelftests $i]
+	set ld_options [lindex $line 1]
+	regsub -all elf32ppc $ld_options elf32lppc ld_options
+	set line [lreplace $line 1 1 $ld_options]
+	set ppcelftests [lreplace $ppcelftests $i $i $line]
+    }
+
+    if [ supports_ppc64 ] then {
+	for {set i 0} {$i < [llength $ppc64elftests]} {incr i} {
+	    set line [lindex $ppcelftests $i]
+	    set ld_options [lindex $line 1]
+	    regsub -all elf64ppc $ld_options elf64lppc ld_options
+	    set line [lreplace $line 1 1 $ld_options]
+	    set ppc64elftests [lreplace $ppc64elftests $i $i $line]
+	}
+    }
+}
 
 run_ld_link_tests $ppcelftests
 

@@ -1,4 +1,4 @@
-        .section .text
+        .text
 
         e_extlwi        2, 2, 1, 0
         e_extrwi        2, 3, 10, 5

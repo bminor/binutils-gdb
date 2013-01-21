@@ -305,8 +305,7 @@ main (int argc, char **argv)
 
 #ifdef ENABLE_PLUGINS
   /* Now all the plugin arguments have been gathered, we can load them.  */
-  if (plugin_load_plugins ())
-    einfo (_("%P%F: %s: error loading plugin\n"), plugin_error_plugin ());
+  plugin_load_plugins ();
 #endif /* ENABLE_PLUGINS */
 
   ldemul_set_symbols ();

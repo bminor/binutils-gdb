@@ -586,7 +586,7 @@ memory_bclose (struct bfd *abfd)
   free (bim);
   abfd->iostream = NULL;
 
-  return TRUE;
+  return 0;
 }
 
 static int

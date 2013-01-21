@@ -137,7 +137,10 @@ sb_check (sb *ptr, size_t len)
       if ((ssize_t) want < 0)
 	as_fatal ("string buffer overflow");
 #if GCC_VERSION >= 3004
-      max = (size_t) 1 << (CHAR_BIT * sizeof (want) - __builtin_clzl (want));
+      max = (size_t) 1 << (CHAR_BIT * sizeof (want)
+			   - (sizeof (want) <= sizeof (long)
+			      ? __builtin_clzl ((long) want)
+			      : __builtin_clzll ((long long) want)));
 #else
       max = 128;
       while (want > max)

@@ -569,7 +569,8 @@ EOF
 #endif
 
 static bfd_boolean
-gld${EMULATION_NAME}_check_ld_elf_hints (const char *name, int force)
+gld${EMULATION_NAME}_check_ld_elf_hints (const struct bfd_link_needed_list *l,
+					 int force)
 {
   static bfd_boolean initialized;
   static char *ld_elf_hints;
@@ -612,10 +613,9 @@ gld${EMULATION_NAME}_check_ld_elf_hints (const char *name, int force)
   if (ld_elf_hints == NULL)
     return FALSE;
 
-  needed.by = NULL;
-  needed.name = name;
-  return gld${EMULATION_NAME}_search_needed (ld_elf_hints, & needed,
-					     force);
+  needed.by = l->by;
+  needed.name = l->name;
+  return gld${EMULATION_NAME}_search_needed (ld_elf_hints, &needed, force);
 }
 EOF
     # FreeBSD
@@ -787,7 +787,8 @@ gld${EMULATION_NAME}_parse_ld_so_conf
 }
 
 static bfd_boolean
-gld${EMULATION_NAME}_check_ld_so_conf (const char *name, int force)
+gld${EMULATION_NAME}_check_ld_so_conf (const struct bfd_link_needed_list *l,
+				       int force)
 {
   static bfd_boolean initialized;
   static char *ld_so_conf;
@@ -824,8 +825,8 @@ gld${EMULATION_NAME}_check_ld_so_conf (const char *name, int force)
     return FALSE;
 
 
-  needed.by = NULL;
-  needed.name = name;
+  needed.by = l->by;
+  needed.name = l->name;
   return gld${EMULATION_NAME}_search_needed (ld_so_conf, &needed, force);
 }
 
@@ -1181,8 +1182,6 @@ gld${EMULATION_NAME}_after_open (void)
      special action by the person doing the link.  Note that the
      needed list can actually grow while we are stepping through this
      loop.  */
-  if (!link_info.executable)
-    return;
   needed = bfd_elf_get_needed_list (link_info.output_bfd, &link_info);
   for (l = needed; l != NULL; l = l->next)
     {
@@ -1191,9 +1190,13 @@ gld${EMULATION_NAME}_after_open (void)
       int force;
 
       /* If the lib that needs this one was --as-needed and wasn't
-	 found to be needed, then this lib isn't needed either.  */
+	 found to be needed, then this lib isn't needed either.  Skip
+	 the lib when creating a shared object unless we are copying
+	 DT_NEEDED entres.  */
       if (l->by != NULL
-	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0)
+	  && ((bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0
+	      || (!link_info.executable
+		  && bfd_elf_get_dyn_lib_class (l->by) & DYN_NO_ADD_NEEDED) != 0))
 	continue;
 
       /* If we've already seen this file, skip it.  */
@@ -1306,7 +1309,7 @@ if [ "x${USE_LIBPATH}" = xyes ] ; then
   case ${target} in
     *-*-freebsd* | *-*-dragonfly*)
       fragment <<EOF
-	  if (gld${EMULATION_NAME}_check_ld_elf_hints (l->name, force))
+	  if (gld${EMULATION_NAME}_check_ld_elf_hints (l, force))
 	    break;
 EOF
     # FreeBSD
@@ -1315,7 +1318,7 @@ EOF
     *-*-linux-* | *-*-k*bsd*-* | *-*-gnu*)
     # Linux
       fragment <<EOF
-	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))
+	  if (gld${EMULATION_NAME}_check_ld_so_conf (l, force))
 	    break;
 
 EOF

@@ -1,3 +1,126 @@
+2013-01-22  Alan Modra  <amodra@gmail.com>
+
+	Apply mainline patches
+	2013-01-15  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ppc64_elf_size_stubs): Default shared libs to
+	plt-thread-safe.
+
+	2013-01-14  Alan Modra  <amodra@gmail.com>
+	PR binutils/14813
+	* bfdio.c (struct bfd_iovec <bclose>): Revert 2012-11-06.
+	(memory_bclose): Likewise.  Return 0 on success.
+	* cache.c (cache_bclose): Likewise.
+	* opncls.c (opncls_bclose, bfd_close): Likewise.
+	* vms-lib.c (vms_lib_bclose): Likewise.
+	* libbfd.h: Regenerate.
+
+	2013-01-13  Alan Modra  <amodra@gmail.com>
+	* elf-bfd.h (struct elf_link_hash_entry): Delete dynamic_weak.
+	Add ref_dynamic_nonweak.
+	* elflink.c (_bfd_elf_mark_dynamic_def_weak): Delete.
+	(_bfd_elf_merge_symbol): Don't call above function.  Move
+	setting of ref_dynamic_nonweak and dynamic_def earlier.  Don't
+	clear dynamic_def.
+	(elf_link_add_object_symbols): Delete redundant "override" test.
+	Don't set dynamic_def here.
+	(elf_link_output_extsym): Update.
+
+	2013-01-12  Alan Modra  <amodra@gmail.com>
+	* elf-bfd.h (_bfd_elf_strtab_refcount): Declare.
+	* elf-strtab.c (_bfd_elf_strtab_refcount): New function.
+	* elflink.c (elf_add_dt_needed_tag): Use _bfd_elf_strtab_refcount.
+
+	2013-01-12  Alan Modra  <amodra@gmail.com>
+	PR ld/12549
+	* elf-bfd.h (_bfd_elf_strtab_clear_refs): Declare.
+	(_bfd_elf_strtab_clear_all_refs): Define.
+	* elf-strtab.c (_bfd_elf_strtab_clear_refs): New function.
+	(_bfd_elf_strtab_clear_all_refs): Delete.
+	* elflink.c (elf_link_add_object_symbols): Clear out added
+	strtab refs.  Correct handling of warning common symbols.
+
+	2012-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+	* elf32-i386.c (elf_i386_relocate_section): Replace
+	bfd_elf32_swap_reloc_out with elf_append_rel.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	* elflink.c (elf_append_rel): Call swap_reloc_out instead of
+	swap_reloca_out.
+
+	2012-12-18  Alan Modra  <amodra@gmail.com>
+	* elf.c (swap_out_syms): Set shndx to SHN_ABS when not one of
+	the special MAP_* values.
+
+	2012-12-07  Alan Modra  <amodra@gmail.com>
+	PR ld/14926
+	* elf.c (_bfd_elf_map_sections_to_segments): Include elf header
+	size when determining phdr_in_segment.
+
+	2012-12-05  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (build_plt_stub): Fix off by one error in branch
+	to glink.
+
+	2012-11-21  H.J. Lu  <hongjiu.lu@intel.com>
+	PR binutils/14493
+	* elf.c (copy_elf_program_header): When rewriting program
+	header, set the output maxpagesize to the maximum alignment
+	of input PT_LOAD segments.
+
+	2012-11-13  Joe Seymour  <jseymour@codesourcery.com>
+	* elf.c (rewrite_elf_program_header): Allocate elf_segment_map
+	with bfd_zalloc, instead of bfd_alloc.
+
+	2012-11-06  H.J. Lu  <hongjiu.lu@intel.com>
+	PR binutils/14813
+	* bfdio.c (bfd_iovec): Change return type of bclose to
+	bfd_boolean.
+	(memory_bclose): Change return type to bfd_boolean.
+	* cache.c (cache_bclose): Likewise.
+	* opncls.c (opncls_bclose): Likewise.  Return TRUE on success.
+	* vms-lib.c (vms_lib_bclose): Likewise.  Return TRUE.
+	* libbfd.h: Regenerated.
+
+	2012-11-06  Alan Modra  <amodra@gmail.com>
+	PR binutils/14567
+	* opncls.c (opncls_iovec): Forward declare.
+	(_bfd_new_bfd_contained_in): If using opncls_iovec, copy iostream
+	to new bfd.
+
+	2012-11-06  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (maybe_strip_output): Heed SEC_KEEP.
+
+	2012-11-05  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ppc64_elf_edit_toc): Clear "repeat" inside
+	loop.  Really mark toc entry referring to another toc entry
+	only if the first is used.
+
+	2012-10-29  Alan Modra  <amodra@gmail.com>
+	* elf32-ppc.c (ppc_elf_howto_raw): Correct dst_mask in
+	R_PPC_VLE_LO16A, R_PPC_VLE_HI16A, R_PPC_VLE_HA16A,
+	R_PPC_VLE_SDAREL_LO16A, R_PPC_VLE_SDAREL_HI16A,
+	R_PPC_VLE_SDAREL_HA16A reloc howtos.
+
+	2012-10-26  Alan Modra  <amodra@gmail.com>
+	PR gas/14758
+	* elf32-ppc.c (ppc_elf_reloc_type_lookup): Decode ppc64 _DS
+	bfd_reloc values.  Map to corresponding D-form relocs.
+	(is_insn_ds_form, is_insn_qs_form): New functions.
+	(ppc_elf_relocate_section): Validate insn with DS-form or DQ-form
+	fields using D-form reloc.
+
+	2012-10-21  Hans-Peter Nilsson  <hp@bitrange.com>
+	* linker.c (_bfd_generic_link_output_symbols): Handle a
+	no-longer-global symbol entered as a BFD_PLUGIN.
+
+	2012-10-08  Alan Modra  <amodra@gmail.com>
+	PR binutils/14662
+	* elf.c (_bfd_elf_make_section_from_shdr): Treat .gdb_index as
+	SEC_DEBUGGING.
+
+	2012-09-04  H.J. Lu  <hongjiu.lu@intel.com>
+	PR binutils/14493
+	* elf.c (ignore_section_sym): Also ignore section symbols without
+	a BFD section.
+
 2012-12-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_relocate_section): Check

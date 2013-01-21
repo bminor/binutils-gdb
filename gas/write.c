@@ -406,8 +406,8 @@ chain_frchains_together_1 (segT section, struct frchain *frchp)
 	  prev_fix = frchp->fix_tail;
 	}
     }
-  gas_assert (prev_frag->fr_type != 0);
-  gas_assert (prev_frag != &dummy);
+  gas_assert (prev_frag != &dummy
+	      && prev_frag->fr_type != 0);
   prev_frag->fr_next = 0;
   return prev_frag;
 }

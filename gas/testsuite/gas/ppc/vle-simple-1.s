@@ -1,4 +1,4 @@
-	.section .text
+	.text
 
 target0:
 	se_beq	target3

@@ -1,3 +1,52 @@
+2013-01-22  Alan Modra  <amodra@gmail.com>
+
+	Apply mainline patches
+	2012-11-23  Alan Modra  <amodra@gmail.com>
+	* config/tc-ppc.c (sticky): New var.
+	(md_parse_option, ppc_machine): Update ppc_parse_cpu calls.
+
+	2012-11-14  Ulrich Weigand  <uweigand@de.ibm.com>
+	* config/tc-ppc.c (md_apply_fix): Leave field zero when emitting
+	an ELF reloc on data as well.
+
+	2012-11-06  Alan Modra  <amodra@gmail.com>
+	* config/tc-ppc.c (md_apply_fix): Fix xcoff build breakage.
+
+	2012-11-05  Alan Modra  <amodra@gmail.com>
+	* config/tc-ppc.c (md_chars_to_number): Delete.
+	(ppc_setup_opcodes): Assert num_powerpc_operands fit.
+	(ppc_is_toc_sym): Move earlier in file.
+	(md_assemble): Move code setting reloc from md_apply_fix.  Combine
+	non-ELF code setting fixup with ELF code.  Stash opindex in
+	fx_pcrel_adjust.  Adjust fixup offset for VLE.  Don't set
+	fx_no_overflow here.
+	(md_apply_fix): Rewrite to use ppc_insert_operand for all
+	resolved instruction fields.  Leave insn field zero when
+	emitting an ELF reloc in most cases.
+
+	2012-10-29  Alan Modra  <amodra@gmail.com>
+	* sb.c (sb_check): Use __builtin_clzll when size_t is not the
+	same size as long.
+
+	2012-10-26  Alan Modra  <amodra@gmail.com>
+	PR gas/14758
+	* config/tc-ppc.c (ppc_setup_opcodes): Fix comment.
+	(md_assemble): Translate to _DS relocs for ppc32 as well as ppc64.
+	(tc_gen_reloc): Handle _DS relocs in ppc32 mode.
+
+	2012-10-01  Alan Modra  <amodra@gmail.com>
+	* write.c (chain_frchains_together_1): Reorder assertion to avoid
+	uninit warning.
+
+	2012-08-01  James Lemke  <jwlemke@codesourcery.com>
+	* dwarf2dbg.c (out_set_addr): Allow for non-constant value of
+	DWARF2_LINE_MIN_INSN_LENGTH
+	* config/tc-ppc.c (ppc_dwarf2_line_min_insn_length): Declare
+	and initialize.
+	(md_apply_fix): Branch addr can be a multiple of 2 or 4.
+	* config/tc-ppc.h (DWARF2_LINE_MIN_INSN_LENGTH): Now a
+	variable reference.
+
 2013-01-10  Roland McGrath  <mcgrathr@google.com>
 
 	* hash.c (hash_new_sized): Make it global.

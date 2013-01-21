@@ -572,6 +572,9 @@ fold_name (etree_type *tree)
       break;
 
     case NAME:
+      if (expld.assign_name != NULL
+	  && strcmp (expld.assign_name, tree->name.name) == 0)
+	expld.assign_name = NULL;
       if (expld.phase == lang_first_phase_enum)
 	;
       else if (tree->name.name[0] == '.' && tree->name.name[1] == 0)
@@ -852,8 +855,6 @@ exp_fold_tree_1 (etree_type *tree)
 	}
       else
 	{
-	  etree_type *name;
-
 	  struct bfd_link_hash_entry *h = NULL;
 
 	  if (tree->type.node_class == etree_provide)
@@ -871,25 +872,20 @@ exp_fold_tree_1 (etree_type *tree)
 		}
 	    }
 
-	  name = tree->assign.src;
-	  if (name->type.node_class == etree_trinary)
-	    {
-	      exp_fold_tree_1 (name->trinary.cond);
-	      if (expld.result.valid_p)
-		name = (expld.result.value
-			? name->trinary.lhs : name->trinary.rhs);
-	    }
-
-	  if (name->type.node_class == etree_name
-	      && name->type.node_code == NAME
-	      && strcmp (tree->assign.dst, name->name.name) == 0)
-	    /* Leave it alone.  Do not replace a symbol with its own
-	       output address, in case there is another section sizing
-	       pass.  Folding does not preserve input sections.  */
-	    break;
-
+	  expld.assign_name = tree->assign.dst;
 	  exp_fold_tree_1 (tree->assign.src);
-	  if (expld.result.valid_p
+	  /* expld.assign_name remaining equal to tree->assign.dst
+	     below indicates the evaluation of tree->assign.src did
+	     not use the value of tree->assign.dst.  We don't allow
+	     self assignment until the final phase for two reasons:
+	     1) Expressions are evaluated multiple times.  With
+	     relaxation, the number of times may vary.
+	     2) Section relative symbol values cannot be correctly
+	     converted to absolute values, as is required by many
+	     expressions, until final section sizing is complete.  */
+	  if ((expld.result.valid_p
+	       && (expld.phase == lang_final_phase_enum
+		   || expld.assign_name != NULL))
 	      || (expld.phase <= lang_mark_phase_enum
 		  && tree->type.node_class == etree_assign
 		  && tree->assign.defsym))
@@ -937,6 +933,7 @@ exp_fold_tree_1 (etree_type *tree)
 		  && h->type == bfd_link_hash_new)
 		h->type = bfd_link_hash_undefined;
 	    }
+	  expld.assign_name = NULL;
 	}
       break;
 
