@@ -675,6 +675,7 @@ maintenance_print_msymbols (char *args, int from_tty)
       {
 	QUIT;
 	if (symname == NULL || (!stat (objfile->name, &obj_st)
+				&& sym_st.st_dev == obj_st.st_dev
 				&& sym_st.st_ino == obj_st.st_ino))
 	  dump_msymbols (objfile, outfile);
       }

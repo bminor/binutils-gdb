@@ -1,5 +1,9 @@
 2013-01-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* symmisc.c (maintenance_print_msymbols): Check also ST_DEV.
+
+2013-01-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix gdb.fortran/common-block.exp crash in PIE mode.
 	* dwarf2read.c (new_symbol_full) <DW_TAG_common_block>: Use
 	LOC_COMMON_BLOCK.
