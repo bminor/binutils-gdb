@@ -526,7 +526,7 @@ symbol_set_language (struct general_symbol_info *gsymbol,
 /* Objects of this type are stored in the demangled name hash table.  */
 struct demangled_name_entry
 {
-  char *mangled;
+  const char *mangled;
   char demangled[1];
 };
 
@@ -758,7 +758,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       linkage_name_copy = linkage_name;
     }
 
-  entry.mangled = (char *) lookup_name;
+  entry.mangled = lookup_name;
   slot = ((struct demangled_name_entry **)
 	  htab_find_slot (objfile->demangled_names_hash,
 			  &entry, INSERT));
@@ -789,10 +789,12 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 				 offsetof (struct demangled_name_entry,
 					   demangled)
 				 + demangled_len + 1);
-	  (*slot)->mangled = (char *) lookup_name;
+	  (*slot)->mangled = lookup_name;
 	}
       else
 	{
+	  char *mangled_ptr;
+
 	  /* If we must copy the mangled name, put it directly after
 	     the demangled name so we can have a single
 	     allocation.  */
@@ -800,8 +802,9 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 				 offsetof (struct demangled_name_entry,
 					   demangled)
 				 + lookup_len + demangled_len + 2);
-	  (*slot)->mangled = &((*slot)->demangled[demangled_len + 1]);
-	  strcpy ((*slot)->mangled, lookup_name);
+	  mangled_ptr = &((*slot)->demangled[demangled_len + 1]);
+	  strcpy (mangled_ptr, lookup_name);
+	  (*slot)->mangled = mangled_ptr;
 	}
 
       if (demangled_name != NULL)
