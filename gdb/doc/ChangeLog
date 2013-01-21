@@ -1,3 +1,8 @@
+2013-01-21  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Breakpoint Commands): Document new
+	'thread-groups' field when printing a breakpoint in MI.
+
 2012-01-17  Sanjoy Das <sanjoy@playingwithpointers.com>
 	* gdb.texinfo (Using JIT Debug Info Readers): Change documentation
 	to reflect that jit-reader-load now supports absolute file-names.

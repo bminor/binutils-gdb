@@ -49,7 +49,7 @@ mi_run_to_main
 # test -catch-load
 mi_gdb_test "111-gdb-set auto-solib-add on" "111\\^done" "catch-load: auto-solib-add on"
 mi_gdb_test "222-catch-load -t mi-catch-load-so.so*" \
-    "222\\^done,bkpt=\{number=\"2\",type=\"catchpoint\",disp=\"del\",enabled=\"y\",what=\"load of library matching mi-catch-load-so\.so\\*\",catch-type=\"load\",times=\"0\"\}" \
+    "222\\^done,bkpt=\{number=\"2\",type=\"catchpoint\",disp=\"del\",enabled=\"y\",what=\"load of library matching mi-catch-load-so\.so\\*\",catch-type=\"load\",thread-groups=\\\[\"i1\"\\\],times=\"0\"\}" \
     "catch-load: catch load"
 mi_send_resuming_command "exec-continue" "catch-load: continue"
 
@@ -76,7 +76,7 @@ mi_run_to_main
 # test -catch-unload
 mi_gdb_test "111-gdb-set auto-solib-add on" "111\\^done" "catch-unload: auto-solib-add on"
 mi_gdb_test "222-catch-unload -t mi-catch-load-so.so*" \
-    "222\\^done,bkpt=\{number=\"2\",type=\"catchpoint\",disp=\"del\",enabled=\"y\",what=\"unload of library matching mi-catch-load-so\.so\\*\",catch-type=\"unload\",times=\"0\"\}" \
+    "222\\^done,bkpt=\{number=\"2\",type=\"catchpoint\",disp=\"del\",enabled=\"y\",what=\"unload of library matching mi-catch-load-so\.so\\*\",catch-type=\"unload\",thread-groups=\\\[\"i1\"\\\],times=\"0\"\}" \
     "catch-unload: catch unload"
 mi_send_resuming_command "exec-continue" "catch-unload: continue"
 

@@ -5805,6 +5805,51 @@ bptype_string (enum bptype type)
   return bptypes[(int) type].description;
 }
 
+DEF_VEC_I(int);
+
+/* For MI, output a field named 'thread-groups' with a list as the value.
+   For CLI, prefix the list with the string 'inf'. */
+
+static void
+output_thread_groups (struct ui_out *uiout,
+		      const char *field_name,
+		      VEC(int) *inf_num,
+		      int mi_only)
+{
+  struct cleanup *back_to = make_cleanup_ui_out_list_begin_end (uiout,
+								field_name);
+  int is_mi = ui_out_is_mi_like_p (uiout);
+  int inf;
+  int i;
+
+  /* For backward compatibility, don't display inferiors in CLI unless
+     there are several.  Always display them for MI. */
+  if (!is_mi && mi_only)
+    return;
+
+  for (i = 0; VEC_iterate (int, inf_num, i, inf); ++i)
+    {
+      if (is_mi)
+	{
+	  char mi_group[10];
+
+	  xsnprintf (mi_group, sizeof (mi_group), "i%d", inf);
+	  ui_out_field_string (uiout, NULL, mi_group);
+	}
+      else
+	{
+	  if (i == 0)
+	    ui_out_text (uiout, " inf ");
+	  else
+	    ui_out_text (uiout, ", ");
+	
+	  ui_out_text (uiout, plongest (inf));
+	}
+    }
+
+  do_cleanups (back_to);
+}
+
 /* Print B to gdb_stdout.  */
 
 static void
@@ -5956,35 +6001,30 @@ print_one_breakpoint_location (struct breakpoint *b,
       }
 
 
-  /* For backward compatibility, don't display inferiors unless there
-     are several.  */
-  if (loc != NULL
-      && !header_of_multiple
-      && (allflag
-	  || (!gdbarch_has_global_breakpoints (target_gdbarch ())
-	      && (number_of_program_spaces () > 1
-		  || number_of_inferiors () > 1)
-	      /* LOC is for existing B, it cannot be in
-		 moribund_locations and thus having NULL OWNER.  */
-	      && loc->owner->type != bp_catchpoint)))
+  if (loc != NULL && !header_of_multiple)
     {
       struct inferior *inf;
-      int first = 1;
+      VEC(int) *inf_num = NULL;
+      int mi_only = 1;
 
-      for (inf = inferior_list; inf != NULL; inf = inf->next)
+      ALL_INFERIORS (inf)
 	{
 	  if (inf->pspace == loc->pspace)
-	    {
-	      if (first)
-		{
-		  first = 0;
-		  ui_out_text (uiout, " inf ");
-		}
-	      else
-		ui_out_text (uiout, ", ");
-	      ui_out_text (uiout, plongest (inf->num));
-	    }
+	    VEC_safe_push (int, inf_num, inf->num);
 	}
+
+        /* For backward compatibility, don't display inferiors in CLI unless
+	   there are several.  Always display for MI. */
+	if (allflag
+	    || (!gdbarch_has_global_breakpoints (target_gdbarch ())
+		&& (number_of_program_spaces () > 1
+		    || number_of_inferiors () > 1)
+		/* LOC is for existing B, it cannot be in
+		   moribund_locations and thus having NULL OWNER.  */
+		&& loc->owner->type != bp_catchpoint))
+	mi_only = 0;
+      output_thread_groups (uiout, "thread-groups", inf_num, mi_only);
+      VEC_free (int, inf_num);
     }
 
   if (!part_of_multiple)
@@ -7968,8 +8008,6 @@ catch_unload_command_1 (char *arg, int from_tty,
 {
   catch_load_or_unload (arg, from_tty, 0, command);
 }
-
-DEF_VEC_I(int);
 
 /* An instance of this type is used to represent a syscall catchpoint.
    It includes a "struct breakpoint" as a kind of base class; users

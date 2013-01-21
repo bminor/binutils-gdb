@@ -93,7 +93,7 @@ proc test_tbreak_creation_and_listing {} {
              "insert temp breakpoint at \"<fullfilename>\":\$line_callee4_head"
 
     mi_gdb_test "666-break-list" \
-     	    "666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",${fullname},line=\"$line_main_body\",times=\"0\",original-location=\".*\"\}.*\\\]\}" \
+     	    "666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",${fullname},line=\"$line_main_body\",thread-groups=\\\[\"i1\"\\\],times=\"0\",original-location=\".*\"\}.*\\\]\}" \
                 "list of breakpoints"
 
     mi_gdb_test "777-break-delete" \
@@ -142,7 +142,7 @@ proc test_rbreak_creation_and_listing {} {
 
     setup_kfail "*-*-*" mi/14270
     mi_gdb_test "166-break-list" \
-	    "1\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"5\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"$line_main_body\",times=\"0\"\},.*\}\\\]\}" \
+	    "1\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"5\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"$line_main_body\",thread-groups=\\\[\"i1\"\\\],times=\"0\"\},.*\}\\\]\}" \
                 "list of breakpoints"
 
     mi_gdb_test "177-break-delete" \
@@ -208,7 +208,7 @@ proc test_disabled_creation {} {
     global line_callee2_body
 
     mi_gdb_test "-break-insert -d basics.c:callee2" \
-        "\\^done,bkpt=\{number=\"6\",type=\"breakpoint\",disp=\"keep\",enabled=\"n\",addr=\"$hex\",func=\"callee2\",file=\".*basics.c\",fullname=\".*\",line=\"$line_callee2_body\",times=\"0\",original-location=\".*\"\}" \
+        "\\^done,bkpt=\{number=\"6\",type=\"breakpoint\",disp=\"keep\",enabled=\"n\",addr=\"$hex\",func=\"callee2\",file=\".*basics.c\",fullname=\".*\",line=\"$line_callee2_body\",thread-groups=\\\[\"i1\"\\\],times=\"0\",original-location=\".*\"\}" \
         "test disabled creation"
 
     mi_gdb_test "-break-delete" \
@@ -229,7 +229,7 @@ proc test_breakpoint_commands {} {
         "breakpoint commands: set commands"
 
     mi_gdb_test "-break-info 7" \
-    	"\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"7\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee2\",file=\".*basics.c\",${fullname},line=\"$line_callee2_body\",times=\"0\",script=\{\"print 10\",\"continue\"\},original-location=\".*\"\}.*\\\]\}" \
+    	"\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"7\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee2\",file=\".*basics.c\",${fullname},line=\"$line_callee2_body\",thread-groups=\\\[\"i1\"\\\],times=\"0\",script=\{\"print 10\",\"continue\"\},original-location=\".*\"\}.*\\\]\}" \
         "breakpoint commands: check that commands are set"
 
     mi_gdb_test "-break-commands 7" \

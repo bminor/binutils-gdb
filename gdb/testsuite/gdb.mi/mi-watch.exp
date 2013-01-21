@@ -57,7 +57,7 @@ proc test_watchpoint_creation_and_listing {type} {
              "break-watch operation"
 
     mi_gdb_test "222-break-list" \
-	    "222\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"2\",type=\".*watchpoint\",disp=\"keep\",enabled=\"y\",what=\"C\",times=\"0\",original-location=\"C\"\}\\\]\}" \
+	    "222\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"2\",type=\".*watchpoint\",disp=\"keep\",enabled=\"y\",what=\"C\",thread-groups=\\\[\"i1\"\\\],times=\"0\",original-location=\"C\"\}\\\]\}" \
                 "list of watchpoints"
 
 }
@@ -81,7 +81,7 @@ proc test_awatch_creation_and_listing {type} {
              "break-watch -a operation"
 
     mi_gdb_test "444-break-list" \
-	    "444\\^done,BreakpointTable=\{.*,hdr=\\\[.*\\\],body=\\\[bkpt=\{number=\"3\",type=\"watchpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"$line_main_body\",times=\"0\"\},.*\}\\\]\}" \
+	    "444\\^done,BreakpointTable=\{.*,hdr=\\\[.*\\\],body=\\\[bkpt=\{number=\"3\",type=\"watchpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"$line_main_body\",thread-groups=\\\[\"i1\"\\\],times=\"0\"\},.*\}\\\]\}" \
                 "list of watchpoints awatch"
 
     mi_gdb_test "777-break-delete 3" \
@@ -108,7 +108,7 @@ proc test_rwatch_creation_and_listing {type} {
              "break-watch -r operation"
 
     mi_gdb_test "300-break-list" \
-	    "300\\^done,BreakpointTable=\{.*,hdr=\\\[.*\\\],body=\\\[bkpt=\{number=\"5\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"$line_main_body\",times=\"0\"\},.*\}\\\}\}" \
+	    "300\\^done,BreakpointTable=\{.*,hdr=\\\[.*\\\],body=\\\[bkpt=\{number=\"5\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"$line_main_body\",thread-groups=\\\[\"i1\"\\\],times=\"0\"\},.*\}\\\}\}" \
                 "list of breakpoints"
 
     mi_gdb_test "177-break-delete 4" \

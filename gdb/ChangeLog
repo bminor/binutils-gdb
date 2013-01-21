@@ -5,6 +5,12 @@
 	being invoked.
 	(ExploreTypeCommand.invoke): Add a missing 'return'.
 
+2013-01-21  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* breakpoint.c (print_one_breakpoint_location): Add MI
+	field 'thread-groups' when printing a breakpoint.
+	(output_thread_groups): New function.
+
 2013-01-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb_obstack.h (obconcat): Move declaration here, from...
