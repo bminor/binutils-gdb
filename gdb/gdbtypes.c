@@ -1957,7 +1957,7 @@ allocate_gnat_aux_type (struct type *type)
 
 struct type *
 init_type (enum type_code code, int length, int flags,
-	   char *name, struct objfile *objfile)
+	   const char *name, struct objfile *objfile)
 {
   struct type *type;
 

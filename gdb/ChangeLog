@@ -1,5 +1,10 @@
 2013-01-21  Tom Tromey  <tromey@redhat.com>
 
+	* gdbtypes.c (init_type): Make 'name' const.
+	* gdbtypes.h (init_type): Update.
+
+2013-01-21  Tom Tromey  <tromey@redhat.com>
+
 	* buildsym.c (patch_subfile_names): Use set_last_source_file.
 	(start_symtab): Make 'name' and 'dirname' const.  Use
 	set_last_source_file.

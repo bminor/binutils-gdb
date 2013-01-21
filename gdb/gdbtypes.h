@@ -1432,7 +1432,7 @@ extern struct type *alloc_type_copy (const struct type *);
 extern struct gdbarch *get_type_arch (const struct type *);
 
 /* Helper function to construct objfile-owned types.  */
-extern struct type *init_type (enum type_code, int, int, char *,
+extern struct type *init_type (enum type_code, int, int, const char *,
 			       struct objfile *);
 
 /* Helper functions to construct architecture-owned types.  */
