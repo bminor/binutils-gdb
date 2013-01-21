@@ -1,3 +1,8 @@
+2013-01-21  Alan Modra  <amodra@gmail.com>
+
+	* ld-size/size.exp (build_tests <size-7, size-8>): Pass
+	--no-as-needed in cflags.
+
 2013-01-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/default.exp (get_target_emul): Also set HOSTING_SCRT0.
