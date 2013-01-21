@@ -15767,7 +15767,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       if (cu->language == language_fortran
           && symbol_get_demangled_name (&(sym->ginfo)) == NULL)
 	symbol_set_demangled_name (&(sym->ginfo),
-				   (char *) dwarf2_full_name (name, die, cu),
+				   dwarf2_full_name (name, die, cu),
 	                           NULL);
 
       /* Default assumptions.

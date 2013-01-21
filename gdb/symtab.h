@@ -167,7 +167,8 @@ struct general_symbol_info
   struct obj_section *obj_section;
 };
 
-extern void symbol_set_demangled_name (struct general_symbol_info *, char *,
+extern void symbol_set_demangled_name (struct general_symbol_info *,
+				       const char *,
                                        struct objfile *);
 
 extern const char *symbol_get_demangled_name

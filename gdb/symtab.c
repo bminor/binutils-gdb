@@ -465,7 +465,7 @@ symbol_init_cplus_specific (struct general_symbol_info *gsymbol,
 
 void
 symbol_set_demangled_name (struct general_symbol_info *gsymbol,
-                           char *name,
+                           const char *name,
                            struct objfile *objfile)
 {
   if (gsymbol->language == language_cplus)

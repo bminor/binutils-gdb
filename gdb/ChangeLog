@@ -1,5 +1,11 @@
 2013-01-21  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (new_symbol_full): Remove cast.
+	* symtab.c (symbol_set_demangled_name): Make 'name' const.
+	* symtab.h (symbol_set_demangled_name): Update.
+
+2013-01-21  Tom Tromey  <tromey@redhat.com>
+
 	* main.c (captured_main): Call bfd_init.
 
 2013-01-21  Tom Tromey  <tromey@redhat.com>
