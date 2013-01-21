@@ -1950,10 +1950,9 @@ allocate_gnat_aux_type (struct type *type)
 
 /* Helper function to initialize the standard scalar types.
 
-   If NAME is non-NULL, then we make a copy of the string pointed
-   to by name in the objfile_obstack for that objfile, and initialize
-   the type name to that copy.  There are places (mipsread.c in particular),
-   where init_type is called with a NULL value for NAME).  */
+   If NAME is non-NULL, then it is used to initialize the type name.
+   Note that NAME is not copied; it is required to have a lifetime at
+   least as long as OBJFILE.  */
 
 struct type *
 init_type (enum type_code code, int length, int flags,
@@ -1991,9 +1990,7 @@ init_type (enum type_code code, int length, int flags,
   if (flags & TYPE_FLAG_GNU_IFUNC)
     TYPE_GNU_IFUNC (type) = 1;
 
-  if (name)
-    TYPE_NAME (type) = obsavestring (name, strlen (name),
-				     &objfile->objfile_obstack);
+  TYPE_NAME (type) = name;
 
   /* C++ fancies.  */
 

@@ -6803,15 +6803,19 @@ fixup_go_packaging (struct dwarf2_cu *cu)
   if (package_name != NULL)
     {
       struct objfile *objfile = cu->objfile;
+      const char *saved_package_name = obsavestring (package_name,
+						     strlen (package_name),
+						     &objfile->objfile_obstack);
       struct type *type = init_type (TYPE_CODE_MODULE, 0, 0,
-				     package_name, objfile);
+				     saved_package_name, objfile);
       struct symbol *sym;
 
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
       sym = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symbol);
       SYMBOL_SET_LANGUAGE (sym, language_go);
-      SYMBOL_SET_NAMES (sym, package_name, strlen (package_name), 1, objfile);
+      SYMBOL_SET_NAMES (sym, saved_package_name,
+			strlen (saved_package_name), 0, objfile);
       /* This is not VAR_DOMAIN because we want a way to ensure a lookup of,
 	 e.g., "main" finds the "main" module and not C's main().  */
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
