@@ -1,3 +1,15 @@
+2013-01-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix gdb.fortran/common-block.exp crash in PIE mode.
+	* dwarf2read.c (new_symbol_full) <DW_TAG_common_block>: Use
+	LOC_COMMON_BLOCK.
+	* f-valprint.c (info_common_command_for_block): Expect
+	LOC_COMMON_BLOCK in gdb_assert.
+	* symtab.h (struct general_symbol_info): Update comment for the
+	common_block member.
+	(domain_enum): Extend comment for the COMMON_BLOCK_DOMAIN member.
+	(enum address_class): New member LOC_COMMON_BLOCK.
+
 2013-01-18  David Blaikie  <dblaikie@gmail.com>
 
 	* MAINTAINERS (Write After Approval): Add "David Blaikie".

@@ -427,7 +427,7 @@ info_common_command_for_block (struct block *block, const char *comname,
 	struct common_block *common = SYMBOL_VALUE_COMMON_BLOCK (sym);
 	size_t index;
 
-	gdb_assert (SYMBOL_CLASS (sym) == LOC_STATIC);
+	gdb_assert (SYMBOL_CLASS (sym) == LOC_COMMON_BLOCK);
 
 	if (comname && (!SYMBOL_LINKAGE_NAME (sym)
 	                || strcmp (comname, SYMBOL_LINKAGE_NAME (sym)) != 0))

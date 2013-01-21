@@ -16071,7 +16071,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  list_to_add = &global_symbols;
 	  break;
 	case DW_TAG_common_block:
-	  SYMBOL_CLASS (sym) = LOC_STATIC;
+	  SYMBOL_CLASS (sym) = LOC_COMMON_BLOCK;
 	  SYMBOL_DOMAIN (sym) = COMMON_BLOCK_DOMAIN;
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
