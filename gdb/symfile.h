@@ -506,13 +506,6 @@ extern struct section_addr_info
 extern void free_section_addr_info (struct section_addr_info *);
 
 
-/* Concatenate NULL terminated variable argument list of `const char
-   *' strings; return the new string.  Space is found in the OBSTACKP.
-   Argument list must be terminated by a sentinel expression `(char *)
-   NULL'.  */
-
-extern char *obconcat (struct obstack *obstackp, ...) ATTRIBUTE_SENTINEL;
-
 			/*   Variables   */
 
 /* If non-zero, shared library symbols will be added automatically

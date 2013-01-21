@@ -51,4 +51,11 @@
 #define obstack_grow_wstr(OBSTACK, WSTRING) \
   obstack_grow (OBSTACK, WSTRING, sizeof (gdb_wchar_t) * gdb_wcslen (WSTRING))
 
+/* Concatenate NULL terminated variable argument list of `const char
+   *' strings; return the new string.  Space is found in the OBSTACKP.
+   Argument list must be terminated by a sentinel expression `(char *)
+   NULL'.  */
+
+extern char *obconcat (struct obstack *obstackp, ...) ATTRIBUTE_SENTINEL;
+
 #endif

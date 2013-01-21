@@ -1,5 +1,15 @@
 2013-01-21  Tom Tromey  <tromey@redhat.com>
 
+	* gdb_obstack.h (obconcat): Move declaration here, from...
+	* symfile.h (obconcat): ... here.
+	* gdb_obstack.c: New file.
+	(obconcat): Move from...
+	* symfile.c (obconcat): ... here.
+	* Makefile.in (SFILES): Add gdb_obstack.c.
+	(COMMON_OBS): Add gdb_obstack.o.
+
+2013-01-21  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.h (obsavestring): Don't declare.
 	* symfile.c (obsavestring): Remove.
 	* ada-exp.y: Use obstack_copy0, not obsavestring.

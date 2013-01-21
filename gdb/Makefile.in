@@ -713,7 +713,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	exceptions.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c filesystem.c \
 	findcmd.c findvar.c frame.c frame-base.c frame-unwind.c \
-	gdbarch.c arch-utils.c gdb_bfd.c gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
+	gdbarch.c arch-utils.c gdb_bfd.c gdb_obstack.c \
+	gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
 	go-exp.y go-lang.c go-typeprint.c go-valprint.c \
 	inf-loop.c \
 	infcall.c \
@@ -883,7 +884,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	macrotab.o macrocmd.o macroexp.o macroscope.o \
 	mi-common.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
-	gdbarch.o arch-utils.o gdbtypes.o gdb_bfd.o osabi.o copying.o \
+	gdbarch.o arch-utils.o gdbtypes.o gdb_bfd.o gdb_obstack.o \
+	osabi.o copying.o \
 	memattr.o mem-break.o target.o parse.o language.o buildsym.o \
 	findcmd.o \
 	std-regs.o \
