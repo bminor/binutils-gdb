@@ -2394,7 +2394,7 @@ parse_partial_symbols (struct objfile *objfile)
     (struct partial_symtab **) alloca (dependencies_allocated *
 				       sizeof (struct partial_symtab *));
 
-  last_source_file = NULL;
+  set_last_source_file (NULL);
 
   /*
    * Big plan:
@@ -4079,7 +4079,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
                      would otherwise be ended twice, once in
                      process_one_symbol, and once after this loop.  */
 		  if (type_code == N_SO
-		      && last_source_file
+		      && get_last_source_file ()
 		      && previous_stab_code != (unsigned char) N_SO
 		      && *name == '\000')
 		    {

@@ -655,7 +655,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 		 start, 0, &main_source_baseline);
 	    }
 
-	  if (strcmp (inclTable[ii].name, last_source_file) == 0)
+	  if (strcmp (inclTable[ii].name, get_last_source_file ()) == 0)
 	    {
               /* The entry in the include table refers to the main source
                  file.  Add the lines to the main subfile.  */
@@ -894,7 +894,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
    text address for the file, and SIZE is the number of bytes of text.  */
 
 #define complete_symtab(name, start_addr) {	\
-  last_source_file = xstrdup (name);		\
+  set_last_source_file (name);			\
   last_source_start_addr = start_addr;		\
 }
 
@@ -1031,7 +1031,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
      handling.  */
   local_symesz = coff_data (abfd)->local_symesz;
 
-  last_source_file = NULL;
+  set_last_source_file (NULL);
   last_csect_name = 0;
 
   start_stabs ();
@@ -1119,7 +1119,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
       if (cs->c_symnum == next_file_symnum && cs->c_sclass != C_FILE)
 	{
-	  if (last_source_file)
+	  if (get_last_source_file ())
 	    {
 	      pst->symtab = end_symtab (cur_src_end_addr, objfile,
 					SECT_OFF_TEXT (objfile));
@@ -1488,7 +1488,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 	}
     }
 
-  if (last_source_file)
+  if (get_last_source_file ())
     {
       struct symtab *s;
 
@@ -2225,7 +2225,7 @@ scan_xcoff_symtab (struct objfile *objfile)
     (struct partial_symtab **) alloca (dependencies_allocated *
 				       sizeof (struct partial_symtab *));
 
-  last_source_file = NULL;
+  set_last_source_file (NULL);
 
   abfd = objfile->obfd;
   next_symbol_text_func = xcoff_next_symbol_text;

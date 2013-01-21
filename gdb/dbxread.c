@@ -1255,7 +1255,7 @@ read_dbx_symtab (struct objfile *objfile)
   init_bincl_list (20, objfile);
   back_to = make_cleanup_free_bincl_list (objfile);
 
-  last_source_file = NULL;
+  set_last_source_file (NULL);
 
   lowest_text_address = (CORE_ADDR) -1;
 
@@ -2541,7 +2541,7 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
   subfile_stack = NULL;
 
   stringtab_global = DBX_STRINGTAB (objfile);
-  last_source_file = NULL;
+  set_last_source_file (NULL);
 
   abfd = objfile->obfd;
   symfile_bfd = objfile->obfd;	/* Implicit param to next_text_symbol.  */
@@ -2765,7 +2765,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
   /* Something is wrong if we see real data before seeing a source
      file name.  */
 
-  if (last_source_file == NULL && type != (unsigned char) N_SO)
+  if (get_last_source_file () == NULL && type != (unsigned char) N_SO)
     {
       /* Ignore any symbols which appear before an N_SO symbol.
          Currently no one puts symbols there, but we should deal
@@ -2941,7 +2941,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
       n_opt_found = 0;
 
-      if (last_source_file)
+      if (get_last_source_file ())
 	{
 	  /* Check if previous symbol was also an N_SO (with some
 	     sanity checks).  If so, that one was actually the
@@ -3174,7 +3174,8 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
 		  CORE_ADDR minsym_valu = 
-		    find_stab_function_addr (name, last_source_file, objfile);
+		    find_stab_function_addr (name, get_last_source_file (),
+					     objfile);
 
 		  /* The function find_stab_function_addr will return
 		     0 if the minimal symbol wasn't found.

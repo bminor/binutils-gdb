@@ -45,12 +45,6 @@ struct pending_block;
 #define HASHSIZE 127		/* Size of things hashed via
 				   hashname().  */
 
-/* Name of source file whose symbol data we are now processing.  This
-   comes from a symbol of type N_SO for stabs.  For Dwarf it comes
-   from the DW_AT_name attribute of a DW_TAG_compile_unit DIE.  */
-
-EXTERN char *last_source_file;
-
 /* Core address of start of text of current source file.  This too
    comes from the N_SO symbol.  For Dwarf it typically comes from the
    DW_AT_low_pc attribute of a DW_TAG_compile_unit DIE.  */
@@ -269,7 +263,8 @@ extern struct context_stack *pop_context (void);
 
 extern void record_line (struct subfile *subfile, int line, CORE_ADDR pc);
 
-extern void start_symtab (char *name, char *dirname, CORE_ADDR start_addr);
+extern void start_symtab (const char *name, const char *dirname,
+			  CORE_ADDR start_addr);
 
 extern void restart_symtab (CORE_ADDR start_addr);
 
@@ -291,6 +286,15 @@ extern void record_producer (const char *producer);
 
 extern void merge_symbol_lists (struct pending **srclist,
 				struct pending **targetlist);
+
+/* Set the name of the last source file.  NAME is copied by this
+   function.  */
+
+extern void set_last_source_file (const char *name);
+
+/* Fetch the name of the last source file.  */
+
+extern const char *get_last_source_file (void);
 
 /* The macro table for the compilation unit whose symbols we're
    currently reading.  All the symtabs for this CU will point to

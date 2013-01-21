@@ -1,5 +1,29 @@
 2013-01-21  Tom Tromey  <tromey@redhat.com>
 
+	* buildsym.c (patch_subfile_names): Use set_last_source_file.
+	(start_symtab): Make 'name' and 'dirname' const.  Use
+	set_last_source_file.
+	(restart_symtab, reset_symtab_globals): Use set_last_source_file.
+	(last_source_file): Define.  Now static.
+	(set_last_source_file, get_last_source_file): New functions.
+	* buildsym.h (last_source_file): Don't declare.
+	(start_symtab): Update.
+	(set_last_source_file, get_last_source_file): Declare.
+	* coffread.c (complete_symtab): Use set_last_source_file.
+	(coff_end_symtab): Likewise.
+	(coff_symtab_read): Use set_last_source_file, get_last_source_file.
+	* dbxread.c (read_dbx_symtab, read_ofile_symtab): Use
+	set_last_source_file.
+	(process_one_symbol): Use get_last_source_file.
+	* mdebugread.c (parse_partial_symbols): Use set_last_source_file.
+	(psymtab_to_symtab_1): Use get_last_source_file.
+	* xcoffread.c (process_linenos): Use get_last_source_file.
+	(complete_symtab): Use set_last_source_file.
+	(read_xcoff_symtab): Use set_last_source_file, get_last_source_file.
+	(scan_xcoff_symtab): Use set_last_source_file.
+
+2013-01-21  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.c (struct demangled_name_entry) <mangled>: Now const.
 	(symbol_set_names): Remove casts.  Handle field const-ness.
 

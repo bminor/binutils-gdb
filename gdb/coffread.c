@@ -396,9 +396,7 @@ coff_start_symtab (const char *name)
 static void
 complete_symtab (const char *name, CORE_ADDR start_addr, unsigned int size)
 {
-  if (last_source_file != NULL)
-    xfree (last_source_file);
-  last_source_file = xstrdup (name);
+  set_last_source_file (name);
   current_source_start_addr = start_addr;
   current_source_end_addr = start_addr + size;
 }
@@ -417,7 +415,7 @@ coff_end_symtab (struct objfile *objfile)
 	      SECT_OFF_TEXT (objfile));
 
   /* Reinitialize for beginning of new file.  */
-  last_source_file = NULL;
+  set_last_source_file (NULL);
 }
 
 static struct minimal_symbol *
@@ -745,7 +743,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
   coffread_objfile = objfile;
   nlist_bfd_global = objfile->obfd;
   nlist_nsyms_global = nsyms;
-  last_source_file = NULL;
+  set_last_source_file (NULL);
   memset (opaque_type_chain, 0, sizeof opaque_type_chain);
 
   if (type_vector)		/* Get rid of previous one.  */
@@ -766,7 +764,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
       if (cs->c_symnum == next_file_symnum && cs->c_sclass != C_FILE)
 	{
-	  if (last_source_file)
+	  if (get_last_source_file ())
 	    coff_end_symtab (objfile);
 
 	  coff_start_symtab ("_globals_");
@@ -782,7 +780,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
       /* Special case for file with type declarations only, no
 	 text.  */
-      if (!last_source_file && SDB_TYPE (cs->c_type)
+      if (!get_last_source_file () && SDB_TYPE (cs->c_type)
 	  && cs->c_secnum == N_DEBUG)
 	complete_symtab (filestring, 0, 0);
 
@@ -831,7 +829,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
 	  /* Complete symbol table for last object file
 	     containing debugging information.  */
-	  if (last_source_file)
+	  if (get_last_source_file ())
 	    {
 	      coff_end_symtab (objfile);
 	      coff_start_symtab (filestring);
@@ -1121,7 +1119,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
       read_pe_exported_syms (objfile);
     }
 
-  if (last_source_file)
+  if (get_last_source_file ())
     coff_end_symtab (objfile);
 
   /* Patch up any opaque types (references to types that are not defined

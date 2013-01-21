@@ -681,7 +681,7 @@ patch_subfile_names (struct subfile *subfile, char *name)
     {
       subfile->dirname = subfile->name;
       subfile->name = xstrdup (name);
-      last_source_file = name;
+      set_last_source_file (name);
 
       /* Default the source language to whatever can be deduced from
          the filename.  If nothing can be deduced (such as for a C/C++
@@ -835,10 +835,10 @@ compare_line_numbers (const void *ln1p, const void *ln2p)
    lowest address of objects in the file (or 0 if not known).  */
 
 void
-start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
+start_symtab (const char *name, const char *dirname, CORE_ADDR start_addr)
 {
   restart_symtab (start_addr);
-  last_source_file = name;
+  set_last_source_file (name);
   start_subfile (name, dirname);
 }
 
@@ -850,7 +850,7 @@ start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
 void
 restart_symtab (CORE_ADDR start_addr)
 {
-  last_source_file = NULL;
+  set_last_source_file (NULL);
   last_source_start_addr = start_addr;
   file_symbols = NULL;
   global_symbols = NULL;
@@ -971,7 +971,7 @@ block_compar (const void *ap, const void *bp)
 static void
 reset_symtab_globals (void)
 {
-  last_source_file = NULL;
+  set_last_source_file (NULL);
   current_subfile = NULL;
   pending_macros = NULL;
   if (pending_addrmap)
@@ -1500,6 +1500,32 @@ merge_symbol_lists (struct pending **srclist, struct pending **targetlist)
   free_pendings = (*srclist);
 }
 
+
+/* Name of source file whose symbol data we are now processing.  This
+   comes from a symbol of type N_SO for stabs.  For Dwarf it comes
+   from the DW_AT_name attribute of a DW_TAG_compile_unit DIE.  */
+
+static char *last_source_file;
+
+/* See buildsym.h.  */
+
+void
+set_last_source_file (const char *name)
+{
+  xfree (last_source_file);
+  last_source_file = name == NULL ? NULL : xstrdup (name);
+}
+
+/* See buildsym.h.  */
+
+const char *
+get_last_source_file (void)
+{
+  return last_source_file;
+}
+
+
+
 /* Initialize anything that needs initializing when starting to read a
    fresh piece of a symbol file, e.g. reading in the stuff
    corresponding to a psymtab.  */
