@@ -1,5 +1,9 @@
 2013-01-21  Tom Tromey  <tromey@redhat.com>
 
+	* main.c (captured_main): Call bfd_init.
+
+2013-01-21  Tom Tromey  <tromey@redhat.com>
+
 	* gnu-v2-abi.c (_initialize_gnu_v2_abi): Don't set default ABI.
 	* gnu-v3-abi.c (_initialize_gnu_v3_abi): Set default ABI.
 	* minsyms.c (install_minimal_symbols): Don't check for _Z symbols.
