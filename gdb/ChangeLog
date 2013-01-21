@@ -1,3 +1,10 @@
+2013-01-21  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python/lib/gdb/commands/explore.py
+	(CompoundExplorer.explore_expr): Correct the name of a method
+	being invoked.
+	(ExploreTypeCommand.invoke): Add a missing 'return'.
+
 2013-01-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb_obstack.h (obconcat): Move declaration here, from...

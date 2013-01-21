@@ -164,13 +164,23 @@ gdb_test_multiple "explore cs" "" {
                 gdb_test_multiple " " "end cs.s exploration" {
                     -re ".*$enter_field_number_prompt" {
                         pass "end cs.s exploration"
-                        gdb_test_multiple "\0" "end cs exploration" {
-                            -re "$gdb_prompt" {
-                                pass "end cs exploration"
-                            }
-                        }
                     }
                 }
+            }
+        }
+        gdb_test_multiple "1" "explore cs.u" {
+            -re "[compound_description {cs.u} {union} {union SimpleUnion}].*.*[field_choices {i} {c} {f} {d}].*$enter_field_number_prompt" {
+                pass "explore cs.u"
+                gdb_test_multiple " " "end cs.u exploration" {
+                    -re ".*$enter_field_number_prompt" {
+                        pass "end cs.u exploration"
+                    }
+                }
+            }
+        }
+        gdb_test_multiple "\0" "explore cs.u" {
+            -re "$gdb_prompt" {
+                pass "end cs exploration"
             }
         }
     }

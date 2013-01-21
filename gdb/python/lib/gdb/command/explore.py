@@ -462,7 +462,7 @@ class CompoundExplorer(object):
                 return True
             else:
                 if is_child:
-                    Explorer.returning_to_parent_value_message()
+                    Explorer.return_to_parent_value()
         else:
             if is_child:
                 Explorer.return_to_parent_value_prompt()
@@ -747,6 +747,7 @@ class ExploreTypeCommand(gdb.Command):
         if value is not None:
             print ("'%s' is of type '%s'." % (arg_str, str(value.type)))
             Explorer.explore_type(str(value.type), value.type, False)
+            return
 
         raise gdb.GdbError(("'%s' is not a type or value in the current "
                             "context." % arg_str))
