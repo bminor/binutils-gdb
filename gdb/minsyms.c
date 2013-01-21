@@ -1240,29 +1240,6 @@ install_minimal_symbols (struct objfile *objfile)
       objfile->minimal_symbol_count = mcount;
       objfile->msymbols = msymbols;
 
-      /* Try to guess the appropriate C++ ABI by looking at the names 
-	 of the minimal symbols in the table.  */
-      {
-	int i;
-
-	for (i = 0; i < mcount; i++)
-	  {
-	    /* If a symbol's name starts with _Z and was successfully
-	       demangled, then we can assume we've found a GNU v3 symbol.
-	       For now we set the C++ ABI globally; if the user is
-	       mixing ABIs then the user will need to "set cp-abi"
-	       manually.  */
-	    const char *name = SYMBOL_LINKAGE_NAME (&objfile->msymbols[i]);
-
-	    if (name[0] == '_' && name[1] == 'Z'
-		&& SYMBOL_DEMANGLED_NAME (&objfile->msymbols[i]) != NULL)
-	      {
-		set_cp_abi_as_auto_default ("gnu-v3");
-		break;
-	      }
-	  }
-      }
-
       /* Now build the hash tables; we can't do this incrementally
          at an earlier point since we weren't finished with the obstack
 	 yet.  (And if the msymbol obstack gets moved, all the internal

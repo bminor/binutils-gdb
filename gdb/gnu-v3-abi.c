@@ -1134,4 +1134,5 @@ _initialize_gnu_v3_abi (void)
   init_gnuv3_ops ();
 
   register_cp_abi (&gnu_v3_abi_ops);
+  set_cp_abi_as_auto_default (gnu_v3_abi_ops.shortname);
 }

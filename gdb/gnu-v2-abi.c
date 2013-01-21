@@ -423,5 +423,4 @@ _initialize_gnu_v2_abi (void)
 {
   init_gnuv2_ops ();
   register_cp_abi (&gnu_v2_abi_ops);
-  set_cp_abi_as_auto_default (gnu_v2_abi_ops.shortname);
 }

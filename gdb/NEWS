@@ -49,6 +49,9 @@ Lynx 178 PowerPC		powerpc-*-lynx*178
 * The 'cd' command now defaults to using '~' (the home directory) if not
   given an argument.
 
+* The C++ ABI now defaults to the GNU v3 ABI.  This has been the
+  default for GCC since November 2000.
+
 * The command 'forward-search' can now be abbreviated as 'fo'.
 
 * The command 'info tracepoints' can now display 'installed on target'
