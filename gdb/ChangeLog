@@ -1,5 +1,21 @@
 2013-01-21  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.h (obsavestring): Don't declare.
+	* symfile.c (obsavestring): Remove.
+	* ada-exp.y: Use obstack_copy0, not obsavestring.
+	* ada-lang.c: Use obstack_copy0, not obsavestring.
+	* coffread.c: Use obstack_copy0, not obsavestring.
+	* cp-namespace.c: Use obstack_copy0, not obsavestring.
+	* dbxread.c: Use obstack_copy0, not obsavestring.
+	* dwarf2read.c: Use obstack_copy0, not obsavestring.
+	* jit.c: Use obstack_copy0, not obsavestring.
+	* mdebugread.c: Use obstack_copy0, not obsavestring.
+	* psymtab.c: Use obstack_copy0, not obsavestring.
+	* stabsread.c: Use obstack_copy0, not obsavestring.
+	* xcoffread.c: Use obstack_copy0, not obsavestring.
+
+2013-01-21  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (fixup_go_packaging): Save package name
 	on objfile obstack.
 	* gdbtypes.c (init_type): Don't copy name.

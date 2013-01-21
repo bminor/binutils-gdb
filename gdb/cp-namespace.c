@@ -173,15 +173,15 @@ cp_add_using_directive (const char *dest,
 				    * sizeof (*new->excludes))));
   memset (new, 0, sizeof (*new));
 
-  new->import_src = obsavestring (src, strlen (src), obstack);
-  new->import_dest = obsavestring (dest, strlen (dest), obstack);
+  new->import_src = obstack_copy0 (obstack, src, strlen (src));
+  new->import_dest = obstack_copy0 (obstack, dest, strlen (dest));
 
   if (alias != NULL)
-    new->alias = obsavestring (alias, strlen (alias), obstack);
+    new->alias = obstack_copy0 (obstack, alias, strlen (alias));
 
   if (declaration != NULL)
-    new->declaration = obsavestring (declaration, strlen (declaration),
-                                     obstack);
+    new->declaration = obstack_copy0 (obstack,
+				      declaration, strlen (declaration));
 
   memcpy (new->excludes, VEC_address (const_char_ptr, excludes),
 	  VEC_length (const_char_ptr, excludes) * sizeof (*new->excludes));
@@ -205,9 +205,8 @@ cp_set_block_scope (const struct symbol *symbol,
   if (processing_has_namespace_info)
     {
       block_set_scope
-	(block, obsavestring (processing_current_prefix,
-			      strlen (processing_current_prefix),
-			      obstack),
+	(block, obstack_copy0 (obstack, processing_current_prefix,
+			       strlen (processing_current_prefix)),
 	 obstack);
     }
   else if (SYMBOL_DEMANGLED_NAME (symbol) != NULL)
@@ -224,7 +223,7 @@ cp_set_block_scope (const struct symbol *symbol,
       unsigned int prefix_len = cp_entire_prefix_len (name);
 
       block_set_scope (block,
-		       obsavestring (name, prefix_len, obstack),
+		       obstack_copy0 (obstack, name, prefix_len),
 		       obstack);
     }
 }

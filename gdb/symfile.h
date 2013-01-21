@@ -506,12 +506,6 @@ extern struct section_addr_info
 extern void free_section_addr_info (struct section_addr_info *);
 
 
-/* Make a copy of the string at PTR with SIZE characters in the symbol
-   obstack (and add a null character at the end in the copy).  Returns
-   the address of the copy.  */
-
-extern char *obsavestring (const char *, int, struct obstack *);
-
 /* Concatenate NULL terminated variable argument list of `const char
    *' strings; return the new string.  Space is found in the OBSTACKP.
    Argument list must be terminated by a sentinel expression `(char *)

@@ -387,8 +387,8 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
 	      SYMBOL_SET_LINKAGE_NAME
-		(sym, obsavestring (name, pp - name,
-				    &objfile->objfile_obstack));
+		(sym, obstack_copy0 (&objfile->objfile_obstack,
+				     name, pp - name));
 	      pp += 2;
 	      if (*(pp - 1) == 'F' || *(pp - 1) == 'f')
 		{
@@ -1632,8 +1632,8 @@ again:
 	      new_name = cp_canonicalize_string (name);
 	      if (new_name != NULL)
 		{
-		  type_name = obsavestring (new_name, strlen (new_name),
-					    &objfile->objfile_obstack);
+		  type_name = obstack_copy0 (&objfile->objfile_obstack,
+					     new_name, strlen (new_name));
 		  xfree (new_name);
 		}
 	    }
@@ -2712,8 +2712,8 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 					     dem_opname, 0);
 	      if (ret)
 		new_fnlist->fn_fieldlist.name
-		  = obsavestring (dem_opname, strlen (dem_opname),
-				  &objfile->objfile_obstack);
+		  = obstack_copy0 (&objfile->objfile_obstack,
+				   dem_opname, strlen (dem_opname));
 	      xfree (main_fn_name);
 	    }
 
@@ -2855,7 +2855,7 @@ read_one_struct_field (struct field_info *fip, char **pp, char *p,
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
   fip->list->field.name =
-    obsavestring (*pp, p - *pp, &objfile->objfile_obstack);
+    obstack_copy0 (&objfile->objfile_obstack, *pp, p - *pp);
   *pp = p + 1;
 
   /* This means we have a visibility for a field coming.  */
@@ -3674,7 +3674,7 @@ read_enum_type (char **pp, struct type *type,
       p = *pp;
       while (*p != ':')
 	p++;
-      name = obsavestring (*pp, p - *pp, &objfile->objfile_obstack);
+      name = obstack_copy0 (&objfile->objfile_obstack, *pp, p - *pp);
       *pp = p + 1;
       n = read_huge_number (pp, ',', &nbits, 0);
       if (nbits != 0)
@@ -4328,8 +4328,8 @@ common_block_start (char *name, struct objfile *objfile)
     }
   common_block = local_symbols;
   common_block_i = local_symbols ? local_symbols->nsyms : 0;
-  common_block_name = obsavestring (name, strlen (name),
-				    &objfile->objfile_obstack);
+  common_block_name = obstack_copy0 (&objfile->objfile_obstack,
+				     name, strlen (name));
 }
 
 /* Process a N_ECOMM symbol.  */

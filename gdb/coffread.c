@@ -2011,8 +2011,8 @@ coff_read_struct_type (int index, int length, int lastsym,
 	  list = new;
 
 	  /* Save the data.  */
-	  list->field.name = obsavestring (name, strlen (name), 
-					   &objfile->objfile_obstack);
+	  list->field.name = obstack_copy0 (&objfile->objfile_obstack,
+					    name, strlen (name));
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type,
 						  &sub_aux, objfile);
 	  SET_FIELD_BITPOS (list->field, 8 * ms->c_value);
@@ -2028,8 +2028,8 @@ coff_read_struct_type (int index, int length, int lastsym,
 	  list = new;
 
 	  /* Save the data.  */
-	  list->field.name = obsavestring (name, strlen (name), 
-					   &objfile->objfile_obstack);
+	  list->field.name = obstack_copy0 (&objfile->objfile_obstack,
+					    name, strlen (name));
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type,
 						  &sub_aux, objfile);
 	  SET_FIELD_BITPOS (list->field, ms->c_value);
@@ -2102,8 +2102,8 @@ coff_read_enum_type (int index, int length, int lastsym,
 	  memset (sym, 0, sizeof (struct symbol));
 
 	  SYMBOL_SET_LINKAGE_NAME (sym,
-				   obsavestring (name, strlen (name),
-						 &objfile->objfile_obstack));
+				   obstack_copy0 (&objfile->objfile_obstack,
+						  name, strlen (name)));
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_VALUE (sym) = ms->c_value;

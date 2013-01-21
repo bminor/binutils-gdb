@@ -1512,8 +1512,8 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
 
 #define	SYMNAME_ALLOC(NAME, ALLOCED)	\
-  ((ALLOCED) ? (NAME) : obsavestring ((NAME), strlen (NAME), \
-				      &objfile->objfile_obstack))
+  ((ALLOCED) ? (NAME) : obstack_copy0 (&objfile->objfile_obstack, \
+				       (NAME), strlen (NAME)))
 
 
 /* process one xcoff symbol.  */

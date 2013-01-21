@@ -1706,8 +1706,8 @@ read_dbx_symtab (struct objfile *objfile)
  	      if (new_name != NULL)
  		{
  		  sym_len = strlen (new_name);
- 		  sym_name = obsavestring (new_name, sym_len,
- 					   &objfile->objfile_obstack);
+ 		  sym_name = obstack_copy0 (&objfile->objfile_obstack,
+					    new_name, sym_len);
  		  xfree (new_name);
  		}
               xfree (name);

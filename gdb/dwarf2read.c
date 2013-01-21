@@ -6803,9 +6803,9 @@ fixup_go_packaging (struct dwarf2_cu *cu)
   if (package_name != NULL)
     {
       struct objfile *objfile = cu->objfile;
-      const char *saved_package_name = obsavestring (package_name,
-						     strlen (package_name),
-						     &objfile->objfile_obstack);
+      const char *saved_package_name = obstack_copy0 (&objfile->objfile_obstack,
+						      package_name,
+						      strlen (package_name));
       struct type *type = init_type (TYPE_CODE_MODULE, 0, 0,
 				     saved_package_name, objfile);
       struct symbol *sym;
@@ -7673,8 +7673,7 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
     retval = canon;
 
   if (need_copy)
-    retval = obsavestring (retval, strlen (retval),
-			   &objfile->objfile_obstack);
+    retval = obstack_copy0 (&objfile->objfile_obstack, retval, strlen (retval));
 
   do_cleanups (back_to);
   return retval;
@@ -13873,9 +13872,9 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
 	  if (actual_class_name != NULL)
 	    {
 	      struct_pdi->name
-		= obsavestring (actual_class_name,
-				strlen (actual_class_name),
-				&cu->objfile->objfile_obstack);
+		= obstack_copy0 (&cu->objfile->objfile_obstack,
+				 actual_class_name,
+				 strlen (actual_class_name));
 	      xfree (actual_class_name);
 	    }
 	  break;
@@ -13959,8 +13958,8 @@ fixup_partial_die (struct partial_die_info *part_die,
 	  else
 	    base = demangled;
 
-	  part_die->name = obsavestring (base, strlen (base),
-					 &cu->objfile->objfile_obstack);
+	  part_die->name = obstack_copy0 (&cu->objfile->objfile_obstack,
+					  base, strlen (base));
 	  xfree (demangled);
 	}
     }
@@ -16630,9 +16629,9 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
 			  && actual_name[actual_name_len
 					 - die_name_len - 1] == ':')
 			name =
-			  obsavestring (actual_name,
-					actual_name_len - die_name_len - 2,
-					&cu->objfile->objfile_obstack);
+			  obstack_copy0 (&cu->objfile->objfile_obstack,
+					 actual_name,
+					 actual_name_len - die_name_len - 2);
 		    }
 		}
 	      xfree (actual_name);
@@ -16676,8 +16675,8 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
   if (base == NULL || base == DW_STRING (attr) || base[-1] != ':')
     return "";
 
-  return obsavestring (DW_STRING (attr), &base[-1] - DW_STRING (attr),
-		       &cu->objfile->objfile_obstack);
+  return obstack_copy0 (&cu->objfile->objfile_obstack,
+			DW_STRING (attr), &base[-1] - DW_STRING (attr));
 }
 
 /* Return the name of the namespace/class that DIE is defined within,
@@ -16906,8 +16905,7 @@ dwarf2_canonicalize_name (const char *name, struct dwarf2_cu *cu,
       if (canon_name != NULL)
 	{
 	  if (strcmp (canon_name, name) != 0)
-	    name = obsavestring (canon_name, strlen (canon_name),
-				 obstack);
+	    name = obstack_copy0 (obstack, canon_name, strlen (canon_name));
 	  xfree (canon_name);
 	}
     }
@@ -17008,8 +17006,8 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	      char *base;
 
 	      /* FIXME: we already did this for the partial symbol... */
-	      DW_STRING (attr) = obsavestring (demangled, strlen (demangled),
-					       &cu->objfile->objfile_obstack);
+	      DW_STRING (attr) = obstack_copy0 (&cu->objfile->objfile_obstack,
+						demangled, strlen (demangled));
 	      DW_STRING_IS_CANONICAL (attr) = 1;
 	      xfree (demangled);
 
