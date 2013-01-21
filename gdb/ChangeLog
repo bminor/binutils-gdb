@@ -1,5 +1,28 @@
 2013-01-21  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (struct partial_die_info) <name, scope>: Now
+	const.
+	(struct attribute) <u.str>: Now const.
+	(struct fnfieldlist) <name>: Now const.
+	(dw2_get_file_names_reader, init_cutu_and_read_dies): Update.
+	(partial_die_parent_scope): Make return type const.
+	(partial_die_full_name, add_partial_symbol): Update.
+	(dwarf2_compute_name, dwarf2_full_name, dwarf2_physname): Make
+	'name' const.
+	(find_file_and_directory): Make 'name' and 'comp_dir' const.
+	(read_file_scope, read_func_scope, dwarf2_add_field)
+	(dwarf2_add_member_fn, read_structure_type)
+	(process_enumeration_scope, read_array_type, read_module_type)
+	(read_base_type, read_subrange_type): Update.
+	(dwarf2_start_symtab): Make 'name' and 'comp_dir' const.
+	(new_symbol_full, guess_full_die_structure_name): Update.
+	(dwarf2_canonicalize_name): Return const type.  Make 'name' const.
+	(dwarf2_name): Return const type.
+	(dwarf_decode_macro_bytes, dwarf_decode_macros): Make 'comp_dir'
+	const.
+
+2013-01-21  Tom Tromey  <tromey@redhat.com>
+
 	* gdbtypes.c (init_type): Make 'name' const.
 	* gdbtypes.h (init_type): Update.
 
