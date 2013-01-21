@@ -1,3 +1,9 @@
+2012-01-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set
+	link_info.new_dtags to TRUE for linux/gnu targets.
+	* NEWS: Mention new dtags default.
+
 2013-01-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (HOSTING_SCRT0): New.
