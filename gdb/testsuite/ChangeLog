@@ -1,15 +1,16 @@
-2013-01-21  Siva Chandra Reddy  <sivachandra@google.com>
-
-	* gdb.python/py-explore.exp: Improve a test
-
 2013-01-21  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* gdb.mi/mi-break.exp: Expect new 'thread-groups' field.
+	* gdb.mi/mi-catch-load.exp: Ditto.
 	* gdb.mi/mi-nsmoribund.exp: Expect new 'thread-groups' field.
 	Also handle 'thread' field.
 	* gdb.mi/mi-simplerun.exp: Expect new 'thread-groups' field.
 	* gdb.mi/mi-watch.exp: Ditto.
 	* lib/mi-support.exp: Ditto.
+
+2013-01-21  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/py-explore.exp: Improve a test
 
 2013-01-18  David Blaikie  <dblaikie@gmail.com>
 
