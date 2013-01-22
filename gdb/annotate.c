@@ -575,6 +575,9 @@ annotate_display_prompt (void)
 static void
 breakpoint_changed (struct breakpoint *b)
 {
+  if (b->number <= 0)
+    return;
+
   annotate_breakpoints_invalid ();
 }
 

@@ -1,5 +1,12 @@
 2013-01-22  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/annota1.exp (signal sent): No longer expect
+	breakpoints-invalid.
+	* gdb.cp/annota2.exp (continue until exit)
+	(watch triggered on a.x): Ditto.
+
+2013-01-22  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/annota1.exp (breakpoints_invalid): New variable.
 	Adjust tests to breakpoints-invalid changes.
 	* gdb.cp/annota2.exp (breakpoints_invalid, frames_invalid): New

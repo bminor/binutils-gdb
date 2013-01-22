@@ -1,5 +1,10 @@
 2013-01-22  Pedro Alves  <palves@redhat.com>
 
+	* annotate.c (breakpoint_changed): Skip if breakpoint is not
+	user-visible.
+
+2013-01-22  Pedro Alves  <palves@redhat.com>
+
 	* annotate.c (annotate_breakpoints_changed): Rename to ...
 	(annotate_breakpoints_invalid): ... this.  Make static.
 	(breakpoint_changed): Adjust.

@@ -102,7 +102,7 @@ gdb_test_multiple "print a" "print class" {
 # `a.x is 1' is asynchronous regarding to `frames-invalid'.
 #
 gdb_test_multiple "continue" "continue until exit" {
-    -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)*\r\na.x is 1\r\n\(\r\n\032\032frames-invalid\r\n\)*\r\n\032\032exited 0\r\n$inferior_exited_re normally.\r\n${breakpoints_invalid}\r\n\032\032stopped\r\n$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)*\r\na.x is 1\r\n\(\r\n\032\032frames-invalid\r\n\)*\r\n\032\032exited 0\r\n$inferior_exited_re normally.\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
 	pass "continue until exit"
     }
 }
@@ -162,10 +162,10 @@ gdb_test_multiple "watch a.x" "set watch on a.x" {
 # annotate-watchpoint
 #
 gdb_test_multiple "next" "watch triggered on a.x" {
-    -re "\r\n\032\032post-prompt\r\n\032\032starting\r\n${frames_invalid}${breakpoints_invalid}\r\n\032\032watchpoint 3\r\n.*atchpoint 3: a.x\r\n\r\nOld value = 0\r\nNew value = 1\r\n\r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*$srcfile\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$decimal\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n${breakpoints_invalid}.*$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\n\032\032starting\r\n${frames_invalid}${breakpoints_invalid}\r\n\032\032watchpoint 3\r\n.*atchpoint 3: a.x\r\n\r\nOld value = 0\r\nNew value = 1\r\n\r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*$srcfile\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$decimal\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n.*$gdb_prompt$" {
 	pass "watch triggered on a.x"
     }
-    -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n${frames_invalid}\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n${breakpoints_invalid}$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n${frames_invalid}\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
 	kfail "gdb/38" "watch triggered on a.x"
     }
 }
