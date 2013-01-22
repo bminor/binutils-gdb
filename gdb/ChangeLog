@@ -1,3 +1,8 @@
+2013-01-22  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax) <DW_OP_fbreg>: Only
+	require_rvalue for a register location.
+
 2013-01-21  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* breakpoint.c (print_one_breakpoint_location): Add MI

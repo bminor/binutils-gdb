@@ -2878,7 +2878,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	    dwarf2_compile_expr_to_ax (expr, loc, arch, addr_size, datastart,
 				       datastart + datalen, per_cu);
-	    require_rvalue (expr, loc);
+	    if (loc->kind == axs_lvalue_register)
+	      require_rvalue (expr, loc);
 
 	    if (offset != 0)
 	      {
