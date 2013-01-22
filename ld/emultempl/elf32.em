@@ -13,7 +13,7 @@ fragment <<EOF
 
 /* ${ELFSIZE} bit ELF emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
    Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    ELF support by Ian Lance Taylor <ian@cygnus.com>
@@ -108,7 +108,7 @@ gld${EMULATION_NAME}_before_parse (void)
 EOF
 
 case ${target} in
-  *-*-linux-* | *-*-k*bsd*-* | *-*-gnu*)
+  *-*-linux-* | *-*-k*bsd*-* | *-*-gnu* | *-*-nacl*)
     fragment <<EOF
   link_info.new_dtags = TRUE;
 EOF

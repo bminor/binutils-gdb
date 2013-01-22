@@ -1,4 +1,9 @@
-2012-01-21  Mike Frysinger  <vapier@gentoo.org>
+2013-01-22  Roland McGrath  <mcgrathr@google.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set
+	new_dtags to TRUE for *-*-nacl* targets.
+
+2013-01-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set
 	link_info.new_dtags to TRUE for linux/gnu targets.
