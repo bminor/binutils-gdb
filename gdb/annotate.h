@@ -19,8 +19,6 @@
 #include "symtab.h"
 #include "gdbtypes.h"
 
-extern void annotate_breakpoints_changed (void);
-
 extern void annotate_breakpoint (int);
 extern void annotate_catchpoint (int);
 extern void annotate_watchpoint (int);

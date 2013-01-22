@@ -63,9 +63,9 @@ print_value_flags (struct type *t)
   else
     printf_filtered (("-"));
 }
-
-void
-annotate_breakpoints_changed (void)
+
+static void
+annotate_breakpoints_invalid (void)
 {
   if (annotation_level == 2
       && (!breakpoints_invalid_emitted
@@ -575,15 +575,13 @@ annotate_display_prompt (void)
 static void
 breakpoint_changed (struct breakpoint *b)
 {
-  annotate_breakpoints_changed ();
+  annotate_breakpoints_invalid ();
 }
 
 void
 _initialize_annotate (void)
 {
-  if (annotation_level == 2)
-    {
-      observer_attach_breakpoint_deleted (breakpoint_changed);
-      observer_attach_breakpoint_modified (breakpoint_changed);
-    }
+  observer_attach_breakpoint_created (breakpoint_changed);
+  observer_attach_breakpoint_deleted (breakpoint_changed);
+  observer_attach_breakpoint_modified (breakpoint_changed);
 }

@@ -1,5 +1,19 @@
 2013-01-22  Pedro Alves  <palves@redhat.com>
 
+	* annotate.c (annotate_breakpoints_changed): Rename to ...
+	(annotate_breakpoints_invalid): ... this.  Make static.
+	(breakpoint_changed): Adjust.
+	(_initialize_annotate): Always install the observers.  Install a
+	"breakpoint_created" observer.
+	* annotate.h (annotate_breakpoints_changed): Delete declaration.
+	* breakpoint.c (set_breakpoint_condition)
+	(breakpoint_set_commands, do_map_commands_command)
+	(init_raw_breakpoint, clear_command, set_ignore_count)
+	(enable_breakpoint_disp): No longer call
+	annotate_breakpoints_changed.
+
+2013-01-22  Pedro Alves  <palves@redhat.com>
+
 	* annotate.c: Include "inferior.h".
 	(frames_invalid_emitted)
 	(breakpoints_invalid_emitted): New globals.

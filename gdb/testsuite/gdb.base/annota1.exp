@@ -25,6 +25,7 @@ if [is_remote target] then {
     return 0
 }
 
+set breakpoints_invalid "\r\n\032\032breakpoints-invalid\r\n"
 
 #
 # test running programs
@@ -190,7 +191,7 @@ gdb_test_multiple "print non_existent_value" "print non_existent_value" {
 # we can test annotate-signal-handler-caller
 #
 gdb_test_multiple "break handle_USR1" "break handle_USR1" {
-    -re  "\r\n\032\032post-prompt\r\n\r\n\032\032breakpoints-invalid\r\nBreakpoint.*at $hex: file.*$srcfile, line.*\r\n$gdb_prompt$" {
+    -re  "\r\n\032\032post-prompt\r\nBreakpoint.*at $hex: file.*$srcfile, line.*\r\n\032\032breakpoints-invalid\r\n.*$gdb_prompt$" {
 	pass "break handle_USR1"
     }
 }
@@ -199,7 +200,7 @@ gdb_test_multiple "break handle_USR1" "break handle_USR1" {
 # break at printf. When we are stopped at printf, we can test 
 #
 gdb_test_multiple "break printf" "break printf" {
-    -re  "\r\n\032\032post-prompt\r\n\r\n\032\032breakpoints-invalid\r\nBreakpoint.*at $hex.*$gdb_prompt$" {
+    -re  "\r\n\032\032post-prompt\r\nBreakpoint.*at $hex.*\032\032breakpoints-invalid\r\n.*$gdb_prompt$" {
 	pass "break printf" 
     }
     -re  "\r\n\032\032post-prompt\r\nwarning: Breakpoint address adjusted from $hex to $hex.\r\n\r\n\032\032breakpoints-invalid\r\nBreakpoint.*at $hex.*$gdb_prompt$" {
@@ -210,7 +211,7 @@ gdb_test_multiple "break printf" "break printf" {
 #
 # get to printf
 #
-set pat_begin "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)+\r\n"
+set pat_begin "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n${breakpoints_invalid}"
 set pat_adjust "warning: Breakpoint 3 address previously adjusted from $hex to $hex.\r\n"
 set pat_end "\r\n\032\032breakpoint 3\r\n\r\nBreakpoint 3, \r\n\032\032frame-begin 0 $hex\r\n\r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*.*\032\032frame-function-name\r\n.*printf(@.*)?\r\n\032\032frame-args\r\n.*\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$"
 
@@ -279,19 +280,19 @@ if [target_info exists gdb,nosignals] {
 # delete all the breakpoints
 #
 gdb_test_multiple "delete 1" "delete bp 1" {
-    -re "\r\n\032\032post-prompt\r\n$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\n${breakpoints_invalid}$gdb_prompt$" {
 	pass "delete bp 1"
     }
 }
 
 gdb_test_multiple "delete 2" "delete bp 2" {
-    -re "\r\n\032\032post-prompt\r\n$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\n${breakpoints_invalid}$gdb_prompt$" {
 	pass "delete bp 2"
     }
 }
 
 gdb_test_multiple "delete 3" "delete bp 3" {
-    -re "\r\n\032\032post-prompt\r\n$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\n${breakpoints_invalid}$gdb_prompt$" {
 	pass "delete bp 3"
     }
 }
@@ -301,10 +302,10 @@ gdb_test_multiple "delete 3" "delete bp 3" {
 # to test the annotate output for the display command.
 #
 gdb_test_multiple "break main" "break at main" {
-    -re "post-prompt.*\032\032breakpoints-invalid.*Breakpoint 4 at $hex: file ${escapedsrcfile}, line $main_line.*$gdb_prompt$" {
+    -re "post-prompt.*Breakpoint 4 at $hex: file ${escapedsrcfile}, line $main_line.*\032\032breakpoints-invalid.*$gdb_prompt$" {
 	pass "break at main"
     }
-    -re "post-prompt.*\032\032breakpoints-invalid.*Breakpoint 4 at $hex: file .*${srcfile}, line $main_line.*$gdb_prompt$" {
+    -re "post-prompt.*Breakpoint 4 at $hex: file .*${srcfile}, line $main_line.*\032\032breakpoints-invalid.*$gdb_prompt$" {
 	setup_xfail "*-*-*" 1270
 	fail "break at main"
     }
@@ -424,7 +425,7 @@ if [target_info exists gdb,nosignals] {
 } else {
     setup_xfail hppa*-*-hpux11*
     gdb_test_multiple "signal SIGTRAP" "signal sent" {
-	-re ".*\032\032post-prompt\r\nContinuing with signal SIGTRAP.\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)+\r\n\r\n\032\032signalled\r\n\r\nProgram terminated with signal \r\n\032\032signal-name\r\nSIGTRAP\r\n\032\032signal-name-end\r\n, \r\n\032\032signal-string\r\nTrace.breakpoint trap\r\n\032\032signal-string-end\r\n.\r\nThe program no longer exists.\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
+	-re ".*\032\032post-prompt\r\nContinuing with signal SIGTRAP.\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)+\r\n\r\n\032\032signalled\r\n\r\nProgram terminated with signal \r\n\032\032signal-name\r\nSIGTRAP\r\n\032\032signal-name-end\r\n, \r\n\032\032signal-string\r\nTrace.breakpoint trap\r\n\032\032signal-string-end\r\n.\r\nThe program no longer exists.\r\n${breakpoints_invalid}\r\n\032\032stopped\r\n$gdb_prompt$" {
 	    pass "signal sent"
 	}
     }

@@ -985,7 +985,6 @@ set_breakpoint_condition (struct breakpoint *b, char *exp,
     }
   mark_breakpoint_modified (b);
 
-  annotate_breakpoints_changed ();
   observer_notify_breakpoint_modified (b);
 }
 
@@ -1217,7 +1216,6 @@ breakpoint_set_commands (struct breakpoint *b,
 
   decref_counted_command_line (&b->commands);
   b->commands = alloc_counted_command_line (commands);
-  annotate_breakpoints_changed ();
   observer_notify_breakpoint_modified (b);
 }
 
@@ -1334,7 +1332,6 @@ do_map_commands_command (struct breakpoint *b, void *data)
       incref_counted_command_line (info->cmd);
       decref_counted_command_line (&b->commands);
       b->commands = info->cmd;
-      annotate_breakpoints_changed ();
       observer_notify_breakpoint_modified (b);
     }
 }
@@ -7072,8 +7069,6 @@ init_raw_breakpoint (struct breakpoint *b, struct gdbarch *gdbarch,
      program space.  */
   if (bptype != bp_breakpoint && bptype != bp_hardware_breakpoint)
     b->pspace = sal.pspace;
-
-  annotate_breakpoints_changed ();
 }
 
 /* set_raw_breakpoint is a low level routine for allocating and
@@ -12053,7 +12048,6 @@ clear_command (char *arg, int from_tty)
       else
 	printf_unfiltered (_("Deleted breakpoints "));
     }
-  annotate_breakpoints_changed ();
 
   for (ix = 0; VEC_iterate(breakpoint_p, found, ix, b); ix++)
     {
@@ -14441,7 +14435,6 @@ set_ignore_count (int bptnum, int count, int from_tty)
 			       "crossings of breakpoint %d."),
 			     count, bptnum);
 	}
-      annotate_breakpoints_changed ();
       observer_notify_breakpoint_modified (b);
       return;
     }
@@ -14706,8 +14699,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
   bpt->disposition = disposition;
   bpt->enable_count = count;
   update_global_location_list (1);
-  annotate_breakpoints_changed ();
-  
+
   observer_notify_breakpoint_modified (bpt);
 }
 

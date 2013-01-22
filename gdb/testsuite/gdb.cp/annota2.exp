@@ -38,6 +38,9 @@ if [is_remote target] then {
     return 0
 }
 
+set breakpoints_invalid "\r\n\032\032breakpoints-invalid\r\n"
+set frames_invalid "\r\n\032\032frames-invalid\r\n"
+
 #
 # line number where we need to stop in main
 #
@@ -99,7 +102,7 @@ gdb_test_multiple "print a" "print class" {
 # `a.x is 1' is asynchronous regarding to `frames-invalid'.
 #
 gdb_test_multiple "continue" "continue until exit" {
-    -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)*\r\na.x is 1\r\n\(\r\n\032\032frames-invalid\r\n\)*\r\n\032\032exited 0\r\n$inferior_exited_re normally.\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)*\r\na.x is 1\r\n\(\r\n\032\032frames-invalid\r\n\)*\r\n\032\032exited 0\r\n$inferior_exited_re normally.\r\n${breakpoints_invalid}\r\n\032\032stopped\r\n$gdb_prompt$" {
 	pass "continue until exit"
     }
 }
@@ -112,7 +115,7 @@ gdb_expect {
   -re ".*Delete all breakpoints. \\(y or n\\) \r\n\032\032query.*$" {
            send_gdb "y\n"
            gdb_expect {
-	     -re "\r\n\032\032post-query\r\n$gdb_prompt$" { pass "delete bps" }
+	     -re "\r\n\032\032post-query\r\n${breakpoints_invalid}$gdb_prompt$" { pass "delete bps" }
 	     -re ".*$gdb_prompt$" { fail "delete bps" }
 	     timeout  { fail "delete bps (timeout)" }
 	 }
@@ -125,7 +128,7 @@ gdb_expect {
 # break at first line of main. 
 #
 gdb_test_multiple "break 22" "break at main" {
-    -re  "\r\n\032\032post-prompt\r\n\r\n\032\032breakpoints-invalid\r\nBreakpoint.*at $hex: file.*$srcfile, line.*\r\n$gdb_prompt$" {
+    -re  "\r\n\032\032post-prompt\r\nBreakpoint.*at $hex: file.*$srcfile, line.*\r\n\032\032breakpoints-invalid.*\r\n$gdb_prompt$" {
 	pass "breakpoint at main"
     }
 }
@@ -149,7 +152,7 @@ gdb_test_multiple "run" "run until main breakpoint" {
 # set up a watch point on a.x 
 #
 gdb_test_multiple "watch a.x" "set watch on a.x" {
-    -re "\r\n\032\032post-prompt\r\n\r\n\032\032breakpoints-invalid\r\n.*atchpoint 3: a.x\r\n$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\n.*atchpoint 3: a.x.*\r\n\032\032breakpoints-invalid\r\n.*$gdb_prompt$" {
 	pass "set watch on a.x"
     }
 }
@@ -159,10 +162,10 @@ gdb_test_multiple "watch a.x" "set watch on a.x" {
 # annotate-watchpoint
 #
 gdb_test_multiple "next" "watch triggered on a.x" {
-    -re "\r\n\032\032post-prompt\r\n\r\n(\032\032breakpoints-invalid\r\n\r\n)*\032\032starting\r\n\r\n(\032\032frames-invalid\r\n\r\n)*\032\032watchpoint 3\r\n.*atchpoint 3: a.x\r\n\r\nOld value = 0\r\nNew value = 1\r\n\r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*$srcfile\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$decimal\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n.*$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\n\032\032starting\r\n${frames_invalid}${breakpoints_invalid}\r\n\032\032watchpoint 3\r\n.*atchpoint 3: a.x\r\n\r\nOld value = 0\r\nNew value = 1\r\n\r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*$srcfile\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$decimal\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n${breakpoints_invalid}.*$gdb_prompt$" {
 	pass "watch triggered on a.x"
     }
-    -re "\r\n\032\032post-prompt\r\n\r\n(\032\032breakpoints-invalid\r\n\r\n)*\032\032starting\r\n\r\n(\032\032frames-invalid\r\n\r\n)*\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\n\r\n\032\032starting\r\n${frames_invalid}\r\n\032\032source .*$srcfile.*beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n${breakpoints_invalid}$gdb_prompt$" {
 	kfail "gdb/38" "watch triggered on a.x"
     }
 }
