@@ -44,6 +44,8 @@ extern void annotate_frames_invalid (void);
 extern void annotate_new_thread (void);
 extern void annotate_thread_changed (void);
 
+extern void annotate_display_prompt (void);
+
 struct type;
 
 extern void annotate_field_begin (struct type *);

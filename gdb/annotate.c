@@ -23,6 +23,7 @@
 #include "gdbtypes.h"
 #include "breakpoint.h"
 #include "observer.h"
+#include "inferior.h"
 
 
 /* Prototypes for local functions.  */
@@ -37,6 +38,23 @@ static void breakpoint_changed (struct breakpoint *b);
 void (*deprecated_annotate_signalled_hook) (void);
 void (*deprecated_annotate_signal_hook) (void);
 
+/* Booleans indicating whether we've emitted certain notifications.
+   Used to suppress useless repeated notifications until the next time
+   we're ready to accept more commands.  Reset whenever a prompt is
+   displayed.  */
+static int frames_invalid_emitted;
+static int breakpoints_invalid_emitted;
+
+/* True if the target can async, and a synchronous execution command
+   is not in progress.  If true, input is accepted, so don't suppress
+   annotations.  */
+
+static int
+async_background_execution_p (void)
+{
+  return (target_can_async_p () && !sync_execution);
+}
+
 static void
 print_value_flags (struct type *t)
 {
@@ -49,10 +67,13 @@ print_value_flags (struct type *t)
 void
 annotate_breakpoints_changed (void)
 {
-  if (annotation_level == 2)
+  if (annotation_level == 2
+      && (!breakpoints_invalid_emitted
+	  || async_background_execution_p ()))
     {
       target_terminal_ours ();
       printf_unfiltered (("\n\032\032breakpoints-invalid\n"));
+      breakpoints_invalid_emitted = 1;
     }
 }
 
@@ -184,10 +205,13 @@ annotate_breakpoints_table_end (void)
 void
 annotate_frames_invalid (void)
 {
-  if (annotation_level == 2)
+  if (annotation_level == 2
+      && (!frames_invalid_emitted
+	  || async_background_execution_p ()))
     {
       target_terminal_ours ();
       printf_unfiltered (("\n\032\032frames-invalid\n"));
+      frames_invalid_emitted = 1;
     }
 }
 
@@ -535,6 +559,17 @@ annotate_array_section_end (void)
 {
   if (annotation_level == 2)
     printf_filtered (("\n\032\032array-section-end\n"));
+}
+
+/* Called when GDB is about to display the prompt.  Used to reset
+   annotation suppression whenever we're ready to accept new
+   frontend/user commands.  */
+
+void
+annotate_display_prompt (void)
+{
+  frames_invalid_emitted = 0;
+  breakpoints_invalid_emitted = 0;
 }
 
 static void

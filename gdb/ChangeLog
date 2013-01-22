@@ -1,5 +1,18 @@
 2013-01-22  Pedro Alves  <palves@redhat.com>
 
+	* annotate.c: Include "inferior.h".
+	(frames_invalid_emitted)
+	(breakpoints_invalid_emitted): New globals.
+	(async_background_execution_p): New function.
+	(annotate_breakpoints_changed, annotate_frames_invalid): Skip
+	emitting the annotation if it has already been emitted.
+	(annotate_display_prompt): New function.
+	* annotate.h (annotate_display_prompt): New declaration.
+	* event-top.c: Include annotate.h.
+	(display_gdb_prompt): Call annotate_display_prompt.
+
+2013-01-22  Pedro Alves  <palves@redhat.com>
+
 	* annotate.c (ignore_count_changed): Delete.
 	(annotate_breakpoints_changed): Don't clear ignore_count_changed.
 	(annotate_ignore_count_change): Delete.
