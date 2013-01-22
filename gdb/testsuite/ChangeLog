@@ -1,3 +1,8 @@
+2013-01-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/annota1.exp (annotate ignore count change): Add
+	expected output for failure case.
+
 2013-01-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.gdb/selftest.exp (do_steps_and_nexts): Handle bfd_init

@@ -1,3 +1,14 @@
+2013-01-22  Pedro Alves  <palves@redhat.com>
+
+	* annotate.c (ignore_count_changed): Delete.
+	(annotate_breakpoints_changed): Don't clear ignore_count_changed.
+	(annotate_ignore_count_change): Delete.
+	(annotate_stopped): Don't emit a delayed breakpoints-changed
+	annotation.
+	* annotate.h (annotate_ignore_count_change): Delete.
+	* breakpoint.c (bpstat_check_breakpoint_conditions): Don't call
+	annotate_ignore_count_change.
+
 2013-01-22  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.c (dwarf2_compile_expr_to_ax) <DW_OP_fbreg>: Only

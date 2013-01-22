@@ -365,7 +365,10 @@ gdb_test_multiple "ignore 5 4" "ignore 5 4" {
 }
 
 gdb_test_multiple "continue" "annotate ignore count change" {
-    -re ".*$srcfile:$value_inc_line:.*\032\032stopped\r\n\r\n\032\032breakpoints-invalid\r\n$gdb_prompt$" {
+    -re ".*breakpoints-invalid.*breakpoints-invalid.*$gdb_prompt$" {
+	fail "annotate ignore count change"
+    }
+    -re ".*$srcfile:$value_inc_line:.*\032\032stopped\r\n$gdb_prompt$" {
 	pass "annotate ignore count change"
     }
 }

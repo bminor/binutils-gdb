@@ -5137,7 +5137,6 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
       else if (b->ignore_count > 0)
 	{
 	  b->ignore_count--;
-	  annotate_ignore_count_change ();
 	  bs->stop = 0;
 	  /* Increase the hit count even though we don't stop.  */
 	  ++(b->hit_count);
