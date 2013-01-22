@@ -1,3 +1,8 @@
+2013-01-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Handle bfd_init
+	call.
+
 2013-01-21  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* gdb.mi/mi-break.exp: Expect new 'thread-groups' field.

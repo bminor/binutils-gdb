@@ -150,6 +150,10 @@ proc do_steps_and_nexts {} {
 		set description "next over textdomain PACKAGE"
 		set command "next"
 	    }
+	    -re ".*bfd_init ..;.*$gdb_prompt $" {
+		set description "next over bfd_init"
+		set command "next"
+	    }
 	    -re ".*VEC_cleanup .cmdarg_s.*$gdb_prompt $" {
 		set description "next over cmdarg_s VEC_cleanup"
 		set command "next"
