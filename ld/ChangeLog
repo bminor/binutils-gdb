@@ -1,3 +1,8 @@
+2013-01-23  Georg-Johann Lay  <avr@gjlay.de>
+
+	PR ld/15037
+	* scripttempl/avr.sc (.eeprom): Keep it.
+
 2013-01-23  Leif Ekblad  <leif@rdos.net>
 
 	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eelf64rdos.c.

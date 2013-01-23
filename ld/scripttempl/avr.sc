@@ -198,7 +198,8 @@ SECTIONS
 
   .eeprom ${RELOCATING-0}:
   {
-    *(.eeprom*)
+    /* See .data above...  */
+    KEEP(*(.eeprom*))
     ${RELOCATING+ __eeprom_end = . ; }
   } ${RELOCATING+ > eeprom}
 
