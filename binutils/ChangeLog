@@ -1,3 +1,8 @@
+2013-01-23  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* readelf.c: Add strings for NT_S390_LAST_BREAK and
+	NT_S390_SYSTEM_CALL.
+
 2013-01-18  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15026

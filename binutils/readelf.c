@@ -12811,6 +12811,10 @@ get_note_type (unsigned e_type)
 	return _("NT_S390_CTRS (s390 control registers)");
       case NT_S390_PREFIX:
 	return _("NT_S390_PREFIX (s390 prefix register)");
+      case NT_S390_LAST_BREAK:
+	return _("NT_S390_LAST_BREAK (s390 last breaking event address)");
+      case NT_S390_SYSTEM_CALL:
+	return _("NT_S390_SYSTEM_CALL (s390 system call restart data)");
       case NT_ARM_VFP:
 	return _("NT_ARM_VFP (arm VFP registers)");
       case NT_ARM_TLS:
