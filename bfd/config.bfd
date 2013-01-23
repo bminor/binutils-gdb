@@ -680,7 +680,6 @@ case "${targ}" in
     ;;
   x86_64-*-rdos*)
     targ_defvec=bfd_elf64_x86_64_vec
-    targ_selvecs="bfd_elf32_i386_vec bfd_elf64_l1om_vec bfd_elf64_k1om_vec"
     want64=true
     ;;
 #endif

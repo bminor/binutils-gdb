@@ -1,3 +1,7 @@
+2013-01-23  Leif Ekblad  <leif@rdos.net>
+
+	* config.bfd (x86_64-*-rdos*): Remove targ_selvecs.
+
 2013-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): Clear pc_count for
