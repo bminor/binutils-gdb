@@ -1,3 +1,10 @@
+2013-01-23  Martin Koegler  <martin.koegler@chello.at>
+
+	PR ld/15041
+	* scripttempl/pep.sc (.pdata): Only accept .pdata sections.
+	(.xdata): Similarly.
+	(.debug_frame): Similarly.
+
 2013-01-23  Georg-Johann Lay  <avr@gjlay.de>
 
 	PR ld/15037
