@@ -39,6 +39,12 @@ Lynx 178 PowerPC		powerpc-*-lynx*178
 
   ** Python 3 is now supported (in addition to Python 2.4 or later)
 
+  ** New class gdb.Architecture exposes GDB's internal representation
+     of architecture in the Python API.
+
+  ** New method Frame.architecture returns the gdb.Architecture object
+     corresponding to the frame's architecture.
+
 * New Python-based convenience functions:
 
   ** $_memeq(buf1, buf2, length)

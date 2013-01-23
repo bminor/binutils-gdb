@@ -167,6 +167,25 @@ frapy_type (PyObject *self, PyObject *args)
   return PyInt_FromLong (type);
 }
 
+/* Implementation of gdb.Frame.architecture (self) -> gdb.Architecture.
+   Returns the frame's architecture as a gdb.Architecture object.  */
+
+static PyObject *
+frapy_arch (PyObject *self, PyObject *args)
+{
+  struct frame_info *frame = NULL;    /* Initialize to appease gcc warning.  */
+  frame_object *obj = (frame_object *) self;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      FRAPY_REQUIRE_VALID (self, frame);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  return gdbarch_to_arch_object (obj->gdbarch);
+}
+
 /* Implementation of gdb.Frame.unwind_stop_reason (self) -> Integer.
    Returns one of the gdb.FRAME_UNWIND_* constants.  */
 
@@ -632,6 +651,9 @@ Return the function name of the frame, or None if it can't be determined." },
   { "type", frapy_type, METH_NOARGS,
     "type () -> Integer.\n\
 Return the type of the frame." },
+  { "architecture", frapy_arch, METH_NOARGS,
+    "architecture () -> gdb.Architecture.\n\
+Return the architecture of the frame." },
   { "unwind_stop_reason", frapy_unwind_stop_reason, METH_NOARGS,
     "unwind_stop_reason () -> Integer.\n\
 Return the reason why it's not possible to find frames older than this." },

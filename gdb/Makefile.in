@@ -271,6 +271,7 @@ SUBDIR_TUI_CFLAGS= \
 #
 SUBDIR_PYTHON_OBS = \
 	python.o \
+	py-arch.o \
 	py-auto-load.o \
 	py-block.o \
 	py-bpevent.o \
@@ -304,6 +305,7 @@ SUBDIR_PYTHON_OBS = \
 
 SUBDIR_PYTHON_SRCS = \
 	python/python.c \
+	python/py-arch.c \
 	python/py-auto-load.c \
 	python/py-block.c \
 	python/py-bpevent.c \
@@ -2045,6 +2047,10 @@ PYTHON_CFLAGS=@PYTHON_CFLAGS@
 
 python.o: $(srcdir)/python/python.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python.c
+	$(POSTCOMPILE)
+
+py-arch.o: $(srcdir)/python/py-arch.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-arch.c
 	$(POSTCOMPILE)
 
 py-auto-load.o: $(srcdir)/python/py-auto-load.c

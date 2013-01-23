@@ -1620,6 +1620,7 @@ message == an error message without a stack will be printed."),
   gdbpy_initialize_exited_event ();
   gdbpy_initialize_thread_event ();
   gdbpy_initialize_new_objfile_event () ;
+  gdbpy_initialize_arch ();
 
   observer_attach_before_prompt (before_prompt_hook);
 

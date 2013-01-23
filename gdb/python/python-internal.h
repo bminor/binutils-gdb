@@ -250,6 +250,8 @@ PyObject *pspy_get_printers (PyObject *, void *);
 PyObject *objfile_to_objfile_object (struct objfile *);
 PyObject *objfpy_get_printers (PyObject *, void *);
 
+PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
+
 thread_object *create_thread_object (struct thread_info *tp);
 thread_object *find_thread_object (ptid_t ptid);
 PyObject *find_inferior_object (int pid);
@@ -263,6 +265,7 @@ struct type *type_object_to_type (PyObject *obj);
 struct symtab *symtab_object_to_symtab (PyObject *obj);
 struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
 struct frame_info *frame_object_to_frame_info (PyObject *frame_obj);
+struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 
 void gdbpy_initialize_gdb_readline (void);
 void gdbpy_initialize_auto_load (void);
@@ -293,6 +296,7 @@ void gdbpy_initialize_continue_event (void);
 void gdbpy_initialize_exited_event (void);
 void gdbpy_initialize_thread_event (void);
 void gdbpy_initialize_new_objfile_event (void);
+void gdbpy_initialize_arch (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
 

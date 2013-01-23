@@ -1,3 +1,10 @@
+2013-01-23  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* doc/gdb.texinfo (Architectures In Python): New sub-sub-section
+	describing the gdb.Architecture class.
+	(Frames In Python): Add description about the new method
+	gdb.Frame.architecture().
+
 2013-01-23  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Index Section Format): Document .gdb_index version 8.

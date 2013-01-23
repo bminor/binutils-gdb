@@ -22807,6 +22807,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Finish Breakpoints in Python:: Setting Breakpoints on function return
                                 using Python.
 * Lazy Strings In Python::      Python representation of lazy strings.
+* Architectures In Python::     Python representation of architectures.
 @end menu
 
 @node Basic Python
@@ -25110,6 +25111,11 @@ Returns the function name of the frame, or @code{None} if it can't be
 obtained.
 @end defun
 
+@defun Frame.architecture ()
+Returns the @code{gdb.Architecture} object corresponding to the frame's
+architecture.  @xref{Architectures In Python}.
+@end defun
+
 @defun Frame.type ()
 Returns the type of the frame.  The value can be one of:
 @table @code
@@ -25971,6 +25977,20 @@ resolve this to the lazy string's character type, use the type's
 @code{target} method.  @xref{Types In Python}.  This attribute is not
 writable.
 @end defvar
+
+@node Architectures In Python
+@subsubsection Python representation of architectures
+@cindex Python architectures
+
+@value{GDBN} uses architecture specific parameters and artifacts in a
+number of its various computations.  An architecture is represented
+by an instance of the @code{gdb.Architecture} class.
+
+A @code{gdb.Architecture} class has the following methods:
+
+@defun Architecture.name ()
+Return the name (string value) of the architecture.
+@end defun
 
 @node Python Auto-loading
 @subsection Python Auto-loading

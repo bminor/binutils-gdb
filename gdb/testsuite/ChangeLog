@@ -1,3 +1,8 @@
+2013-01-23  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* testsuite/gdb.python/frame.exp: Add a test for
+	gdb.Frame.architecture() method.
+
 2013-01-22  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/annota1.exp (signal sent): No longer expect

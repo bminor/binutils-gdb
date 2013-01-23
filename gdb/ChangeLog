@@ -1,3 +1,20 @@
+2013-01-23  Siva Chandra Reddy  <sivachandra@google.com>
+
+	Add a new class gdb.Architecture which exposes GDB's
+	internal representation of architecture via GDB Python API.
+	* Makefile.in: Add entries corresponding to the new file
+	python/py-arch.c.
+	* NEWS (Python Scripting): Add entries for the new class
+	gdb.Architecture and the new method gdb.Frame.architecture.
+	* python/py-arch.c: Implement gdb.Architecture class.
+	* python/py-frame.c (frapy_arch): Implement the method
+	gdb.Frame.architecture().
+	(frame_object_methods): Add 'architecture' to the method table.
+	* python/python-internal.h: Add declarations of new utility
+	functions.
+	* python/python.c (_initialize_python): Initialize
+	gdb.Architecture class.
+
 2013-01-23  Doug Evans  <dje@google.com>
 
 	Work around binutils/15021.
