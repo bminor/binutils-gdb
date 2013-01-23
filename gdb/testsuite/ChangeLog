@@ -1,5 +1,9 @@
 2013-01-23  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/dw2-error.exp: Pass test name to "file" test.
+
+2013-01-23  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.cp/converts.cc (main): Initialize 'a'.
 
 2013-01-23  Siva Chandra Reddy  <sivachandra@google.com>
