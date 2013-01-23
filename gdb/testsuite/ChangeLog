@@ -1,3 +1,7 @@
+2013-01-23  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/converts.cc (main): Initialize 'a'.
+
 2013-01-23  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* testsuite/gdb.python/frame.exp: Add a test for

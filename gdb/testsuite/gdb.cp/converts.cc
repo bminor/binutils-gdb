@@ -53,7 +53,8 @@ int main()
 //foo0_3(bppp); // Pointer-to-pointer-to-pointer base.
   foo0_3((A***)bppp); // to ensure that the function is emitted.
 
-  char *a;             // pointer to..
+  char av = 'a';
+  char *a = &av;       // pointer to..
   B *bp;
   foo1_1 (a);          // ..pointer
   foo1_2 (a);          // ..array
