@@ -1,3 +1,13 @@
+2013-01-23  Doug Evans  <dje@google.com>
+
+	Work around binutils/15021.
+	* dwarf2read.c (dwarf2_per_cu_data): Split imported_symtabs and
+	type_unit_group out of union s.  All uses updated.
+	(read_index_from_section): Watch for index version 8.
+	(follow_die_sig): If using .gdb_index version <= 7, record the TU as
+	an imported symtab.
+	(write_psymtabs_to_index): Increment version number to 8.
+
 2013-01-22  Pedro Alves  <palves@redhat.com>
 
 	* annotate.c (breakpoint_changed): Skip if breakpoint is not

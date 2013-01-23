@@ -41050,12 +41050,18 @@ unless otherwise noted:
 
 @enumerate
 @item
-The version number, currently 7.  Versions 1, 2 and 3 are obsolete.
+The version number, currently 8.  Versions 1, 2 and 3 are obsolete.
 Version 4 uses a different hashing function from versions 5 and 6.
 Version 6 includes symbols for inlined functions, whereas versions 4
 and 5 do not.  Version 7 adds attributes to the CU indices in the
-symbol table.  @value{GDBN} will only read version 4, 5, or 6 indices
+symbol table.  Version 8 specifies that symbols from DWARF type units
+(@samp{DW_TAG_type_unit}) refer to the type unit's symbol table and not the
+compilation unit (@samp{DW_TAG_comp_unit}) using the type.
+
+@value{GDBN} will only read version 4, 5, or 6 indices
 by specifying @code{set use-deprecated-index-sections on}.
+GDB has a workaround for potentially broken version 7 indices so it is
+currently not flagged as deprecated.
 
 @item
 The offset, from the start of the file, of the CU list.
