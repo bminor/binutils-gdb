@@ -1,3 +1,11 @@
+2013-01-23  Leif Ekblad  <leif@rdos.net>
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eelf64rdos.c.
+	(eelf64rdos.c): New rule.
+	* emulparams/elf64rdos.sh: New file.
+	* configure.tgt (x86_64-*-rdos*): Use above.
+	* Makefile.in: Regenerate.
+
 2013-01-22  Roland McGrath  <mcgrathr@google.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_parse): Set
