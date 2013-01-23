@@ -319,11 +319,11 @@ static VEC (symbolp) *find_label_symbols (struct linespec_state *self,
 					  VEC (symbolp) **label_funcs_ret,
 					  const char *name);
 
-void find_linespec_symbols (struct linespec_state *self,
-			    VEC (symtab_p) *file_symtabs,
-			    const char *name,
-			    VEC (symbolp) **symbols,
-			    VEC (minsym_and_objfile_d) **minsyms);
+static void find_linespec_symbols (struct linespec_state *self,
+				   VEC (symtab_p) *file_symtabs,
+				   const char *name,
+				   VEC (symbolp) **symbols,
+				   VEC (minsym_and_objfile_d) **minsyms);
 
 static struct line_offset
      linespec_parse_variable (struct linespec_state *self,
@@ -2948,7 +2948,7 @@ find_function_symbols (struct linespec_state *state,
 /* Find all symbols named NAME in FILE_SYMTABS, returning debug symbols
    in SYMBOLS and minimal symbols in MINSYMS.  */
 
-void
+static void
 find_linespec_symbols (struct linespec_state *state,
 		       VEC (symtab_p) *file_symtabs,
 		       const char *name,
