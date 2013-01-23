@@ -1,3 +1,8 @@
+2013-01-23  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/15039
+	* config/tc-avr.c: Include dwarf2dbg.h.
+
 2013-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (reloc): Support size relocation only for ELF.
