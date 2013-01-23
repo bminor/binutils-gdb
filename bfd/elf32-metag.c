@@ -2131,14 +2131,25 @@ elf_metag_check_relocs (bfd *abfd,
     {
       int r_type;
       struct elf_metag_link_hash_entry *hh;
+      Elf_Internal_Sym *isym;
       unsigned long r_symndx;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
-	hh = NULL;
+	{
+	  /* A local symbol.  */
+	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+					abfd, r_symndx);
+	  if (isym == NULL)
+	    return FALSE;
+
+	  hh = NULL;
+	}
       else
 	{
+	  isym = NULL;
+
 	  hh = (struct elf_metag_link_hash_entry *)
 	    eh_syms[r_symndx - symtab_hdr->sh_info];
 	  while (hh->eh.root.type == bfd_link_hash_indirect
@@ -2262,9 +2273,31 @@ elf_metag_check_relocs (bfd *abfd,
 	  hh->eh.plt.refcount += 1;
 	  break;
 
-	case R_METAG_ADDR32:
 	case R_METAG_HIADDR16:
 	case R_METAG_LOADDR16:
+	  /* Let's help debug shared library creation.  These relocs
+	     cannot be used in shared libs.  Don't error out for
+	     sections we don't care about, such as debug sections or
+	     non-constant sections.  */
+	  if (info->shared
+	      && (sec->flags & SEC_ALLOC) != 0
+	      && (sec->flags & SEC_READONLY) != 0)
+	    {
+	      const char *name;
+
+	      if (hh)
+		name = hh->eh.root.root.string;
+	      else
+		name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
+	      (*_bfd_error_handler)
+		(_("%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"),
+		 abfd, elf_metag_howto_table[r_type].name, name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+
+	  /* Fall through.  */
+	case R_METAG_ADDR32:
 	case R_METAG_RELBRANCH:
 	case R_METAG_GETSETOFF:
 	  if (hh != NULL && !info->shared)
@@ -2337,12 +2370,6 @@ elf_metag_check_relocs (bfd *abfd,
 		  /* Track dynamic relocs needed for local syms too.  */
 		  asection *sr;
 		  void *vpp;
-		  Elf_Internal_Sym *isym;
-
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
-						abfd, r_symndx);
-		  if (isym == NULL)
-		    return FALSE;
 
 		  sr = bfd_section_from_elf_index (abfd, isym->st_shndx);
 		  if (sr == NULL)

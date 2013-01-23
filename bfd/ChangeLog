@@ -1,3 +1,7 @@
+2013-01-23  Markos Chandras  <markos.chandras@imgtec.com>
+
+	* elf32-metag.c: Error on HIADDR16/LOADDR16 in shared link.
+
 2013-01-23  Leif Ekblad  <leif@rdos.net>
 
 	* config.bfd (x86_64-*-rdos*): Remove targ_selvecs.
