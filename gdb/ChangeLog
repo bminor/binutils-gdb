@@ -1,3 +1,8 @@
+2013-01-23  Tiago Stürmer Daitx  <tdaitx@linux.vnet.ibm.com>
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_return_value): Set correct
+	type on float conversion for complex type.
+
 2013-01-23  Siva Chandra Reddy  <sivachandra@google.com>
 
 	Add a new class gdb.Architecture which exposes GDB's
