@@ -2476,6 +2476,9 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	case EM_CYGNUS_V850:
 	  switch (e_flags & EF_V850_ARCH)
 	    {
+	    case E_V850E3V5_ARCH:
+	      strcat (buf, ", v850e3v5");
+	      break;
 	    case E_V850E2V3_ARCH:
 	      strcat (buf, ", v850e2v3");
 	      break;
@@ -10323,8 +10326,8 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_M32C_OLD:
     case EM_M32C:
       return reloc_type == 1; /* R_M32C_16 */
-    case EM_MSP430_OLD:
     case EM_MSP430:
+    case EM_MSP430_OLD:
       return reloc_type == 5; /* R_MSP430_16_BYTE.  */
     case EM_ALTERA_NIOS2:
     case EM_NIOS32:

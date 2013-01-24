@@ -1,3 +1,7 @@
+2013-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* NEWS: Mention support for V850E3V5 architecture.
+
 2013-01-23  Martin Koegler  <martin.koegler@chello.at>
 
 	PR ld/15041

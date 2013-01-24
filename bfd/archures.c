@@ -330,6 +330,7 @@ DESCRIPTION
 .#define bfd_mach_v850e1        '1'
 .#define bfd_mach_v850e2        0x4532
 .#define bfd_mach_v850e2v3      0x45325633
+.#define bfd_mach_v850e3v5      0x45335635 {* ('E'|'3'|'V'|'5') *}
 .  bfd_arch_arc,       {* ARC Cores *}
 .#define bfd_mach_arc_5         5
 .#define bfd_mach_arc_6         6

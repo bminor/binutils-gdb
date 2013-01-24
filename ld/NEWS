@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the V850E3V5 architecture.
+
 * Add support for the Imagination Technologies Meta processor.
 
 * --enable-new-dtags no longer generates old dtags in addition to new dtags.

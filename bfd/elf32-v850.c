@@ -1,7 +1,5 @@
 /* V850-specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright 1996-2013 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2340,7 +2338,8 @@ v850_elf_object_p (bfd *abfd)
     {
     case EM_V800:
       arch = bfd_arch_v850_rh850;
-      mach = bfd_mach_v850e2v3;
+      mach = (elf_elfheader (abfd)->e_flags & EF_V800_850E3)
+	? bfd_mach_v850e3v5 : bfd_mach_v850e2v3;
       break;
 
     case EM_CYGNUS_V850:
@@ -2354,6 +2353,7 @@ v850_elf_object_p (bfd *abfd)
 	case E_V850E1_ARCH:   mach = bfd_mach_v850e1; break;
 	case E_V850E2_ARCH:   mach = bfd_mach_v850e2; break;
 	case E_V850E2V3_ARCH: mach = bfd_mach_v850e2v3; break;
+	case E_V850E3V5_ARCH: mach = bfd_mach_v850e3v5; break;
 	}
       break;
 
@@ -2376,6 +2376,8 @@ v850_elf_final_write_processing (bfd *abfd,
     {
     case bfd_arch_v850_rh850:
       val = EF_RH850_ABI;
+      if (bfd_get_mach (abfd) == bfd_mach_v850e3v5)
+	val |= EF_V800_850E3;
       elf_elfheader (abfd)->e_flags |= val;
       break;
 
@@ -2388,6 +2390,7 @@ v850_elf_final_write_processing (bfd *abfd,
 	case bfd_mach_v850e1:   val = E_V850E1_ARCH; break;
 	case bfd_mach_v850e2:   val = E_V850E2_ARCH; break;
 	case bfd_mach_v850e2v3: val = E_V850E2V3_ARCH; break;
+	case bfd_mach_v850e3v5: val = E_V850E3V5_ARCH; break;
 	}
       elf_elfheader (abfd)->e_flags &=~ EF_V850_ARCH;
       elf_elfheader (abfd)->e_flags |= val;
@@ -2507,6 +2510,17 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  return TRUE;
 	}
 
+      if ((   (in_flags & EF_V850_ARCH) == E_V850_ARCH
+	   || (in_flags & EF_V850_ARCH) == E_V850E_ARCH
+	   || (in_flags & EF_V850_ARCH) == E_V850E2_ARCH
+           || (in_flags & EF_V850_ARCH) == E_V850E2V3_ARCH)
+	  && (out_flags & EF_V850_ARCH) == E_V850E3V5_ARCH)
+	{
+	  elf_elfheader (obfd)->e_flags =
+	    ((out_flags & ~ EF_V850_ARCH) | E_V850E3V5_ARCH);
+	  return TRUE;
+	}
+
       _bfd_error_handler (_("%B: Architecture mismatch with previous modules"),
 			  ibfd);
     }
@@ -2550,6 +2564,7 @@ v850_elf_print_private_bfd_data (bfd *abfd, void * ptr)
 	case E_V850E1_ARCH: fprintf (file, _("v850e1 architecture")); break;
 	case E_V850E2_ARCH: fprintf (file, _("v850e2 architecture")); break;
 	case E_V850E2V3_ARCH: fprintf (file, _("v850e2v3 architecture")); break;
+	case E_V850E3V5_ARCH: fprintf (file, _("v850e3v5 architecture")); break;
 	}
     }
 

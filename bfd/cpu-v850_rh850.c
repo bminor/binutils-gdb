@@ -1,5 +1,5 @@
 /* BFD support for the NEC V850 processor with the RH850 ABI.
-   Copyright 2012  Free Software Foundation, Inc.
+   Copyright 2012-2013  Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -29,9 +29,11 @@
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  R (bfd_mach_v850e2v3, "v850e2v3", 	FALSE, & arch_info_struct[1]),
-  R (bfd_mach_v850e2,   "v850e2", 	FALSE, & arch_info_struct[2]),
-  R (bfd_mach_v850e1,   "v850e1",  	FALSE, & arch_info_struct[3]),
+  R (bfd_mach_v850e3v5, "v850e3v5", 	FALSE, & arch_info_struct[1]),
+  R (bfd_mach_v850e3v5, "v850e2v4", 	FALSE, & arch_info_struct[2]),
+  R (bfd_mach_v850e2v3, "v850e2v3", 	FALSE, & arch_info_struct[3]),
+  R (bfd_mach_v850e2,   "v850e2", 	FALSE, & arch_info_struct[4]),
+  R (bfd_mach_v850e1,   "v850e1",  	FALSE, & arch_info_struct[5]),
   R (bfd_mach_v850e,    "v850e",   	FALSE, NULL)
 };
 

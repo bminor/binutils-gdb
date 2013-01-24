@@ -1,3 +1,11 @@
+2013-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* archures.c: Add bfd_mach_v850e3v5.
+	* bfd-in2.h: Regenerate.
+	* cpu-v850.c: Add entries for v850e2v5 and v850e3v5.
+	* cpu-v850_rh850.c: Likewise.
+	* elf32-v850.c: Add support for v850e3v5 architecture.
+
 2013-01-23  Markos Chandras  <markos.chandras@imgtec.com>
 
 	* elf32-metag.c: Error on HIADDR16/LOADDR16 in shared link.
