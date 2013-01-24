@@ -1,3 +1,8 @@
+2013-01-24  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	PR gdb/13443
+	* gdb.mi/mi-var-block.exp: Make test messages unique.
+
 2013-01-23  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/dw2-error.exp: Pass test name to "file" test.
