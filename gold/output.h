@@ -4200,6 +4200,15 @@ class Output_section : public Output_data
 	       const Input_section_sort_entry&) const;
   };
 
+  // This is the sort comparison function for .text to sort sections with
+  // prefixes .text.{unlikely,exit,startup,hot} before other sections.
+  struct Input_section_sort_section_name_special_ordering_compare
+  {
+    bool
+    operator()(const Input_section_sort_entry&,
+	       const Input_section_sort_entry&) const;
+  };
+
   // Fill data.  This is used to fill in data between input sections.
   // It is also used for data statements (BYTE, WORD, etc.) in linker
   // scripts.  When we have to keep track of the input sections, we

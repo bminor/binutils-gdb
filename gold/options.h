@@ -878,6 +878,11 @@ class General_options
   DEFINE_dirlist(library_path, options::TWO_DASHES, 'L',
                  N_("Add directory to search path"), N_("DIR"));
 
+  DEFINE_bool(text_reorder, options::TWO_DASHES, '\0', true,
+	      N_("Enable text section reordering for GCC section names "
+		 "(default)"),
+	      N_("Disable text section reordering for GCC section names"));
+
   DEFINE_bool(nostdlib, options::ONE_DASH, '\0', false,
               N_(" Only search directories specified on the command line."),
               NULL);

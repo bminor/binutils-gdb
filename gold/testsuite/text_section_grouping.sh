@@ -26,6 +26,8 @@
 # according to prefix.  .text.unlikely, .text.startup and .text.hot should
 # be grouped and placed together.
 
+# Also check if the functions do not get grouped with option --no-text-reorder.
+
 set -e
 
 check()
@@ -63,3 +65,9 @@ check text_section_grouping.stdout "unlikely_bar" "startup_bar"
 check text_section_grouping.stdout "startup_bar" "hot_bar"
 check text_section_grouping.stdout "unlikely_foo" "startup_bar"
 check text_section_grouping.stdout "startup_foo" "hot_bar"
+
+check text_section_no_grouping.stdout "hot_foo" "startup_foo"
+check text_section_no_grouping.stdout "startup_foo" "unlikely_foo"
+check text_section_no_grouping.stdout "unlikely_foo" "hot_bar"
+check text_section_no_grouping.stdout "hot_bar" "startup_bar"
+check text_section_no_grouping.stdout "startup_bar" "unlikely_bar"

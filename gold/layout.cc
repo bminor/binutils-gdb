@@ -1149,7 +1149,8 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 
   // By default the GNU linker sorts some special text sections ahead
   // of others.  We are compatible.
-  if (!this->script_options_->saw_sections_clause()
+  if (parameters->options().text_reorder()
+      && !this->script_options_->saw_sections_clause()
       && !this->is_section_ordering_specified()
       && !parameters->options().relocatable()
       && Layout::special_ordering_of_input_section(name) >= 0)
@@ -1646,7 +1647,8 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
   // sections before other .text sections.  We are compatible.  We
   // need to know that this might happen before we attach any input
   // sections.
-  if (!this->script_options_->saw_sections_clause()
+  if (parameters->options().text_reorder()
+      && !this->script_options_->saw_sections_clause()
       && !this->is_section_ordering_specified()
       && !parameters->options().relocatable()
       && strcmp(name, ".text") == 0)

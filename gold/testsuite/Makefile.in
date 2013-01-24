@@ -113,6 +113,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_so_test_2.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	text_section_grouping.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	text_section_no_grouping.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_string_merge_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.stdout \
@@ -128,6 +129,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout_sequence.txt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	final_layout_script.lds \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	text_section_grouping \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	text_section_no_grouping \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_virtual_function_folding_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_virtual_function_folding_test.map \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_preemptible_functions_test \
@@ -4376,8 +4378,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@text_section_grouping: text_section_grouping.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK)  -Bgcctestdir/ text_section_grouping.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@text_section_no_grouping: text_section_grouping.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK)  -Bgcctestdir/ -Wl,--no-text-reorder text_section_grouping.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@text_section_grouping.stdout: text_section_grouping
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -n --synthetic text_section_grouping > text_section_grouping.stdout 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -n --synthetic text_section_grouping > text_section_grouping.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@text_section_no_grouping.stdout: text_section_no_grouping
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -n --synthetic text_section_no_grouping > text_section_no_grouping.stdout 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIE -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_virtual_function_folding_test: icf_virtual_function_folding_test.o gcctestdir/ld

@@ -259,14 +259,18 @@ final_layout.stdout: final_layout
 	$(TEST_NM) -n --synthetic final_layout > final_layout.stdout
 
 check_SCRIPTS += text_section_grouping.sh
-check_DATA += text_section_grouping.stdout
-MOSTLYCLEANFILES += text_section_grouping
+check_DATA += text_section_grouping.stdout text_section_no_grouping.stdout
+MOSTLYCLEANFILES += text_section_grouping text_section_no_grouping
 text_section_grouping.o: text_section_grouping.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 text_section_grouping: text_section_grouping.o gcctestdir/ld
 	$(CXXLINK)  -Bgcctestdir/ text_section_grouping.o
+text_section_no_grouping: text_section_grouping.o gcctestdir/ld
+	$(CXXLINK)  -Bgcctestdir/ -Wl,--no-text-reorder text_section_grouping.o
 text_section_grouping.stdout: text_section_grouping
-	$(TEST_NM) -n --synthetic text_section_grouping > text_section_grouping.stdout 
+	$(TEST_NM) -n --synthetic text_section_grouping > text_section_grouping.stdout
+text_section_no_grouping.stdout: text_section_no_grouping
+	$(TEST_NM) -n --synthetic text_section_no_grouping > text_section_no_grouping.stdout 
 
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test icf_virtual_function_folding_test.map

@@ -1,3 +1,23 @@
+2013-01-24  Sriraman Tallam  <tmsriram@google.com>
+
+	* layout.cc (Layout::layout): Check for option text_reorder.
+	(Layout::make_output_section): Ditto.
+	* options.h (text_reorder): New option.
+	* output.cc (Input_section_sort_compare): Remove special ordering
+	of section names.
+	(Output_section::
+	 Input_section_sort_section_name_special_ordering_compare::
+	 operator()): New function.
+	(Output_section::sort_attached_input_sections): Use new sort function
+	for .text.
+	* output.h (Input_section_sort_section_name_special_ordering_compare):
+	New struct.
+	* testsuite/Makefile.am (text_section_grouping): Test option
+	--no-text-reorder
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/text_section_grouping.sh: Check order of functions without
+	default text reordering.
+
 2013-01-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* options.h (General_options): Change default to true for new_dtags.
