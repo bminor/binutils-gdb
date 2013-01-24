@@ -1296,11 +1296,11 @@ static struct htab *decoded_names_store;
    const, but nevertheless modified to a semantically equivalent form
    when a decoded name is cached in it.  */
 
-char *
+const char *
 ada_decode_symbol (const struct general_symbol_info *gsymbol)
 {
-  char **resultp =
-    (char **) &gsymbol->language_specific.mangled_lang.demangled_name;
+  const char **resultp =
+    (const char **) &gsymbol->language_specific.mangled_lang.demangled_name;
 
   if (*resultp == NULL)
     {
