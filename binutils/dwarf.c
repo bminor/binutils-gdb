@@ -4399,7 +4399,7 @@ display_debug_addr (struct dwarf_section *section,
 
   printf (_("Contents of the %s section:\n\n"), section->name);
 
-  debug_addr_info = (debug_info **) xmalloc (num_debug_info_entries + 1
+  debug_addr_info = (debug_info **) xmalloc ((num_debug_info_entries + 1)
                                              * sizeof (debug_info *));
 
   count = 0;
