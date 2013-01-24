@@ -4905,6 +4905,10 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 	     line mark the prologue -> body transition.  */
 	  if (sal.line >= prologue_sal.line)
 	    break;
+	  /* Likewise if we are in a different symtab altogether
+	     (e.g. within a file included via #include).  */
+	  if (sal.symtab != prologue_sal.symtab)
+	    break;
 
 	  /* The line number is smaller.  Check that it's from the
 	     same function, not something inlined.  If it's inlined,

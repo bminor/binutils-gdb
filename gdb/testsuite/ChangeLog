@@ -1,3 +1,9 @@
+2013-01-24  Tiago Stürmer Daitx  <tdaitx@linux.vnet.ibm.com>
+
+	* gdb.base/prologue-include.c: New file.
+	* gdb.base/prologue-include.exp: New file.
+	* gdb.base/prologue-include.h: New file.
+
 2013-01-24  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	PR gdb/13443
