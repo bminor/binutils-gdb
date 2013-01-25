@@ -205,43 +205,6 @@ cp_add_using_directive (const char *dest,
   using_directives = new;
 }
 
-/* Record the namespace that the function defined by SYMBOL was
-   defined in, if necessary.  BLOCK is the associated block; use
-   OBSTACK for allocation.  */
-
-void
-cp_set_block_scope (const struct symbol *symbol,
-		    struct block *block,
-		    struct obstack *obstack,
-		    const char *processing_current_prefix,
-		    int processing_has_namespace_info)
-{
-  if (processing_has_namespace_info)
-    {
-      block_set_scope
-	(block, obstack_copy0 (obstack, processing_current_prefix,
-			       strlen (processing_current_prefix)),
-	 obstack);
-    }
-  else if (SYMBOL_DEMANGLED_NAME (symbol) != NULL)
-    {
-      /* Try to figure out the appropriate namespace from the
-	 demangled name.  */
-
-      /* FIXME: carlton/2003-04-15: If the function in question is
-	 a method of a class, the name will actually include the
-	 name of the class as well.  This should be harmless, but
-	 is a little unfortunate.  */
-
-      const char *name = SYMBOL_DEMANGLED_NAME (symbol);
-      unsigned int prefix_len = cp_entire_prefix_len (name);
-
-      block_set_scope (block,
-		       obstack_copy0 (obstack, name, prefix_len),
-		       obstack);
-    }
-}
-
 /* Test whether or not NAMESPACE looks like it mentions an anonymous
    namespace; return nonzero if so.  */
 

@@ -9564,10 +9564,10 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
                         lowpc, highpc, objfile);
 
   /* For C++, set the block's scope.  */
-  if (cu->language == language_cplus || cu->language == language_fortran)
-    cp_set_block_scope (new->name, block, &objfile->objfile_obstack,
-			determine_prefix (die, cu),
-			processing_has_namespace_info);
+  if ((cu->language == language_cplus || cu->language == language_fortran)
+      && processing_has_namespace_info)
+    block_set_scope (block, determine_prefix (die, cu),
+		     &objfile->objfile_obstack);
 
   /* If we have address ranges, record them.  */
   dwarf2_record_block_ranges (die, block, baseaddr, cu);

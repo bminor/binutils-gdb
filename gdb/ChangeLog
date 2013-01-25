@@ -1,3 +1,12 @@
+2013-01-25  Tom Tromey  <tromey@redhat.com>
+
+	* cp-namespace.c (cp_set_block_scope): Remove.
+	* cp-support.h (cp_set_block_scope): Remove.
+	* dbxread.c: Include block.h.
+	(cp_set_block_scope): New function.
+	(process_one_symbol): Update.
+	* dwarf2read.c (read_func_scope): Use block_set_scope.
+
 2013-01-25  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (add_current_inferior_and_thread): Tweak comment.

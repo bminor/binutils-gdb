@@ -189,12 +189,6 @@ extern void cp_add_using_directive (const char *dest,
 				    int copy_names,
                                     struct obstack *obstack);
 
-extern void cp_set_block_scope (const struct symbol *symbol,
-				struct block *block,
-				struct obstack *obstack,
-				const char *processing_current_prefix,
-				int processing_has_namespace_info);
-
 extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol,
 					      struct objfile *objfile);
 

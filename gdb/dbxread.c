@@ -55,6 +55,7 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "psympriv.h"
+#include "block.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -2706,6 +2707,34 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
 }
 
 
+/* Record the namespace that the function defined by SYMBOL was
+   defined in, if necessary.  BLOCK is the associated block; use
+   OBSTACK for allocation.  */
+
+static void
+cp_set_block_scope (const struct symbol *symbol,
+		    struct block *block,
+		    struct obstack *obstack)
+{
+  if (SYMBOL_DEMANGLED_NAME (symbol) != NULL)
+    {
+      /* Try to figure out the appropriate namespace from the
+	 demangled name.  */
+
+      /* FIXME: carlton/2003-04-15: If the function in question is
+	 a method of a class, the name will actually include the
+	 name of the class as well.  This should be harmless, but
+	 is a little unfortunate.  */
+
+      const char *name = SYMBOL_DEMANGLED_NAME (symbol);
+      unsigned int prefix_len = cp_entire_prefix_len (name);
+
+      block_set_scope (block,
+		       obstack_copy0 (obstack, name, prefix_len),
+		       obstack);
+    }
+}
+
 /* This handles a single symbol from the symbol-file, building symbols
    into a GDB symtab.  It takes these arguments and an implicit argument.
 
@@ -2813,8 +2842,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
 	  /* For C++, set the block's scope.  */
 	  if (SYMBOL_LANGUAGE (new->name) == language_cplus)
-	    cp_set_block_scope (new->name, block, &objfile->objfile_obstack,
-				"", 0);
+	    cp_set_block_scope (new->name, block, &objfile->objfile_obstack);
 
 	  /* May be switching to an assembler file which may not be using
 	     block relative stabs, so reset the offset.  */
@@ -3219,8 +3247,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		  /* For C++, set the block's scope.  */
 		  if (SYMBOL_LANGUAGE (new->name) == language_cplus)
 		    cp_set_block_scope (new->name, block,
-					&objfile->objfile_obstack,
-					"", 0);
+					&objfile->objfile_obstack);
 		}
 
 	      new = push_context (0, valu);
