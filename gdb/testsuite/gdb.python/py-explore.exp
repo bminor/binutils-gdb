@@ -96,7 +96,7 @@ gdb_test_multiple "explore ss_ptr" "" {
     -re "[pointer_description {ss_ptr} $SS].*" {
         pass "explore ss_ptr"
         gdb_test_multiple "y" "explore_as_single_value_pointer" {
-            -re "$SS_fields" {
+            -re "$SS_fields.*$gdb_prompt" {
                 pass "explore ss_ptr as single value pointer"
             }
         }

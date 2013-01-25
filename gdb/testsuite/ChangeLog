@@ -1,3 +1,7 @@
+2013-01-25  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-explore.exp: Expect the gdb prompt.
+
 2013-01-25  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.base/gnu_vector.c: New variable for use in tests.
