@@ -3808,6 +3808,8 @@ display_loc_list (struct dwarf_section *section,
           break;
         }
 
+      printf ("    %8.8lx ", offset + (start - *start_ptr));
+
       /* Note: we use sign extension here in order to be sure that we can detect
          the -1 escape value.  Sign extension into the top 32 bits of a 32-bit
          address will not affect the values that we display since we always show
@@ -3816,8 +3818,6 @@ display_loc_list (struct dwarf_section *section,
       start += pointer_size;
       end = byte_get_signed (start, pointer_size);
       start += pointer_size;
-
-      printf ("    %8.8lx ", offset);
 
       if (begin == 0 && end == 0)
         {
@@ -3880,6 +3880,17 @@ display_loc_list (struct dwarf_section *section,
   *start_ptr = start;
 }
 
+/* Print a .debug_addr table index in decimal, surrounded by square brackets,
+   right-adjusted in a field of length LEN, and followed by a space.  */
+
+static void
+print_addr_index (unsigned int idx, unsigned int len)
+{
+  static char buf[15];
+  snprintf (buf, sizeof (buf), "[%d]", idx);
+  printf("%*s ", len, buf);
+}
+
 /* Display a location list from a .dwo section. It uses address indexes rather
    than embedded addresses.  This code closely follows display_loc_list, but the
    two are sufficiently different that combining things is very ugly.  */
@@ -3900,14 +3911,14 @@ display_loc_list_dwo (struct dwarf_section *section,
   int entry_type;
   unsigned short length;
   int need_frame_base;
-  dwarf_vma idx;
+  unsigned int idx;
   unsigned int bytes_read;
 
   while (1)
     {
-      printf ("    %8.8lx ", offset);
+      printf ("    %8.8lx ", offset + (start - *start_ptr));
 
-      if (start + 2 > section_end)
+      if (start >= section_end)
         {
           warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
                 offset);
@@ -3919,31 +3930,42 @@ display_loc_list_dwo (struct dwarf_section *section,
       switch (entry_type)
         {
           case 0: /* A terminating entry.  */
-            idx = byte_get (start, 1);
-            start++;
             *start_ptr = start;
-            if (idx == 0)
-              printf (_("<End of list>\n"));
-            else
-              warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
-                    offset);
+	    printf (_("<End of list>\n"));
             return;
           case 1: /* A base-address entry.  */
             idx = read_leb128 (start, &bytes_read, 0);
             start += bytes_read;
-            print_dwarf_vma (idx, pointer_size);
-            printf (_("(base address index)\n"));
+            print_addr_index (idx, 8);
+            printf ("         ");
+            printf (_("(base address selection entry)\n"));
             continue;
-          case 2: /* A normal entry.  */
+          case 2: /* A start/end entry.  */
             idx = read_leb128 (start, &bytes_read, 0);
             start += bytes_read;
-            print_dwarf_vma (idx, pointer_size);
+            print_addr_index (idx, 8);
             idx = read_leb128 (start, &bytes_read, 0);
             start += bytes_read;
-            print_dwarf_vma (idx, pointer_size);
+            print_addr_index (idx, 8);
+            break;
+          case 3: /* A start/length entry.  */
+            idx = read_leb128 (start, &bytes_read, 0);
+            start += bytes_read;
+            print_addr_index (idx, 8);
+            idx = byte_get (start, 4);
+            start += 4;
+            printf ("%08x ", idx);
+            break;
+          case 4: /* An offset pair entry.  */
+            idx = byte_get (start, 4);
+            start += 4;
+            printf ("%08x ", idx);
+            idx = byte_get (start, 4);
+            start += 4;
+            printf ("%08x ", idx);
             break;
           default:
-            warn (_("Unknown location-list type 0x%x.\n"), entry_type);
+            warn (_("Unknown location list entry type 0x%x.\n"), entry_type);
             *start_ptr = start;
             return;
         }
@@ -4086,10 +4108,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
   if (!locs_sorted)
     array = (unsigned int *) xcmalloc (num_loc_list, sizeof (unsigned int));
   printf (_("Contents of the %s section:\n\n"), section->name);
-  if (!is_dwo)
-    printf (_("    Offset   Begin    End      Expression\n"));
-  else
-    printf (_("    Offset   Begin idx End idx  Expression\n"));
+  printf (_("    Offset   Begin    End      Expression\n"));
 
   seen_first_offset = 0;
   for (i = first; i < num_debug_info_entries; i++)
@@ -4417,19 +4436,22 @@ display_debug_addr (struct dwarf_section *section,
   for (i = 0; i < count; i++)
     {
       unsigned int idx;
+      unsigned int address_size = debug_addr_info [i]->pointer_size;
 
       printf (_("  For compilation unit at offset 0x%s:\n"),
               dwarf_vmatoa ("x", debug_addr_info [i]->cu_offset));
 
-      printf (_("\tIndex\tOffset\n"));
+      printf (_("\tIndex\tAddress\n"));
       entry = section->start + debug_addr_info [i]->addr_base;
       end = section->start + debug_addr_info [i + 1]->addr_base;
       idx = 0;
       while (entry < end)
         {
-          dwarf_vma base = byte_get (entry, debug_addr_info [i]->pointer_size);
-          printf (_("\t%d:\t%s\n"), idx, dwarf_vmatoa ("x", base));
-          entry += debug_addr_info [i]->pointer_size;
+          dwarf_vma base = byte_get (entry, address_size);
+          printf (_("\t%d:\t"), idx);
+          print_dwarf_vma (base, address_size);
+          printf ("\n");
+          entry += address_size;
           idx++;
         }
     }
