@@ -3453,6 +3453,7 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_ADD_GNU_DEBUGLINK:
+	  long_section_names = ENABLE ;
 	  gnu_debuglink_filename = optarg;
 	  break;
 

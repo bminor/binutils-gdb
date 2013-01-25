@@ -1,3 +1,7 @@
+2013-01-25  Marco Atzeri  <marco.atzeri@gmail.com>
+
+	* objcopy.c : Enable long section names for OPTION_ADD_GNU_DEBUGLINK.
+
 2013-01-24  Doug Evans  <dje@google.com>
 
 	* dwarf.c (display_debug_addr): Add missing parentheses to expression.
