@@ -1,3 +1,7 @@
+2013-01-25  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (qualified_name): Use TYPE_SAFE_NAME.
+
 2013-01-25  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (stop_reply_extract_thread): New.

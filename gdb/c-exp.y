@@ -923,7 +923,7 @@ qualified_name:	TYPENAME COLONCOLON name
 			      && TYPE_CODE (type) != TYPE_CODE_UNION
 			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
 			    error (_("`%s' is not defined as an aggregate type."),
-				   TYPE_NAME (type));
+				   TYPE_SAFE_NAME (type));
 
 			  write_exp_elt_opcode (OP_SCOPE);
 			  write_exp_elt_type (type);
@@ -939,7 +939,7 @@ qualified_name:	TYPENAME COLONCOLON name
 			      && TYPE_CODE (type) != TYPE_CODE_UNION
 			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
 			    error (_("`%s' is not defined as an aggregate type."),
-				   TYPE_NAME (type));
+				   TYPE_SAFE_NAME (type));
 
 			  tmp_token.ptr = (char*) alloca ($4.length + 2);
 			  tmp_token.length = $4.length + 1;
@@ -959,7 +959,7 @@ qualified_name:	TYPENAME COLONCOLON name
 			  char *copy = copy_name ($3);
 			  error (_("No type \"%s\" within class "
 				   "or namespace \"%s\"."),
-				 copy, TYPE_NAME ($1.type));
+				 copy, TYPE_SAFE_NAME ($1.type));
 			}
 	;
 
