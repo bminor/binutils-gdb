@@ -1,3 +1,12 @@
+2013-01-25  Kai Tietz  <ktietz@redhat.com>
+
+	* deffilep.y (def_image_name): Adjust type of base-address
+	argument.
+	(%union): Add new type bfd_vma as vma.
+	(VMA):  New rule.
+	(opt_base): Use VMA instead of NUMBER rule to evaluate value.
+	(def_file_print): Use bfd's fprintf_vma to output base-address.
+
 2013-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Mention support for V850E3V5 architecture.

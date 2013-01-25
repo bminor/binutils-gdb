@@ -94,7 +94,7 @@ static void def_exports (const char *, const char *, int, int, const char *);
 static void def_heapsize (int, int);
 static void def_import (const char *, const char *, const char *, const char *,
 			int, const char *);
-static void def_image_name (const char *, int, int);
+static void def_image_name (const char *, bfd_vma, int);
 static void def_section (const char *, int);
 static void def_section_alt (const char *, const char *);
 static void def_stacksize (int, int);
@@ -115,6 +115,7 @@ static const char *lex_parse_string_end = 0;
   char *id;
   const char *id_const;
   int number;
+  bfd_vma vma;
   char *digits;
 };
 
@@ -125,8 +126,9 @@ static const char *lex_parse_string_end = 0;
 %token <id> ID
 %token <digits> DIGITS
 %type  <number> NUMBER
+%type  <vma> VMA opt_base
 %type  <digits> opt_digits
-%type  <number> opt_base opt_ordinal
+%type  <number> opt_ordinal
 %type  <number> attr attr_list opt_number exp_opt_list exp_opt
 %type  <id> opt_name opt_name2 opt_equal_name anylang_id opt_id
 %type  <id> opt_equalequal_name
@@ -312,8 +314,8 @@ opt_equal_name:
         | 		{ $$ =  0; }
 	;
 
-opt_base: BASE	'=' NUMBER	{ $$ = $3;}
-	|	{ $$ = -1;}
+opt_base: BASE	'=' VMA	{ $$ = $3;}
+	|	{ $$ = (bfd_vma) -1;}
 	;
 
 anylang_id: ID		{ $$ = $1; }
@@ -340,6 +342,8 @@ opt_id: ID		{ $$ = $1; }
 	;
 
 NUMBER: DIGITS		{ $$ = strtoul ($1, 0, 0); }
+	;
+VMA: DIGITS		{ $$ = (bfd_vma) strtoull ($1, 0, 0); }
 
 %%
 
@@ -509,7 +513,11 @@ def_file_print (FILE *file, def_file *fdef)
   if (fdef->is_dll != -1)
     fprintf (file, "  is dll: %s\n", fdef->is_dll ? "yes" : "no");
   if (fdef->base_address != (bfd_vma) -1)
-    fprintf (file, "  base address: 0x%08x\n", fdef->base_address);
+    {
+      fprintf (file, "  base address: 0x");
+      fprintf_vma (file, fdef->base_address);
+      fprintf (file, "\n");
+    }
   if (fdef->description)
     fprintf (file, "  description: `%s'\n", fdef->description);
   if (fdef->stack_reserve != -1)
@@ -946,7 +954,7 @@ def_file_add_directive (def_file *my_def, const char *param, int len)
 /* Parser Callbacks.  */
 
 static void
-def_image_name (const char *name, int base, int is_dll)
+def_image_name (const char *name, bfd_vma base, int is_dll)
 {
   /* If a LIBRARY or NAME statement is specified without a name, there is nothing
      to do here.  We retain the output filename specified on command line.  */
