@@ -89,12 +89,6 @@ static int check_physname = 0;
 /* When non-zero, do not reject deprecated .gdb_index sections.  */
 static int use_deprecated_index_sections = 0;
 
-/* When set, the file that we're processing is known to have debugging
-   info for C++ namespaces.  GCC 3.3.x did not produce this information,
-   but later versions do.  */
-
-static int processing_has_namespace_info;
-
 static const struct objfile_data *dwarf2_objfile_data_key;
 
 struct dwarf2_section_info
@@ -508,6 +502,12 @@ struct dwarf2_cu
   unsigned int producer_is_gxx_lt_4_6 : 1;
   unsigned int producer_is_gcc_lt_4_3 : 1;
   unsigned int producer_is_icc : 1;
+
+  /* When set, the file that we're processing is known to have
+     debugging info for C++ namespaces.  GCC 3.3.x did not produce
+     this information, but later versions do.  */
+
+  unsigned int processing_has_namespace_info : 1;
 };
 
 /* Persistent data held for a compilation unit, even when not
@@ -7229,16 +7229,16 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_common_inclusion:
       break;
     case DW_TAG_namespace:
-      processing_has_namespace_info = 1;
+      cu->processing_has_namespace_info = 1;
       read_namespace (die, cu);
       break;
     case DW_TAG_module:
-      processing_has_namespace_info = 1;
+      cu->processing_has_namespace_info = 1;
       read_module (die, cu);
       break;
     case DW_TAG_imported_declaration:
     case DW_TAG_imported_module:
-      processing_has_namespace_info = 1;
+      cu->processing_has_namespace_info = 1;
       if (die->child != NULL && (die->tag == DW_TAG_imported_declaration
 				 || cu->language != language_fortran))
 	complaint (&symfile_complaints, _("Tag '%s' has unexpected children"),
@@ -9565,7 +9565,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   /* For C++, set the block's scope.  */
   if ((cu->language == language_cplus || cu->language == language_fortran)
-      && processing_has_namespace_info)
+      && cu->processing_has_namespace_info)
     block_set_scope (block, determine_prefix (die, cu),
 		     &objfile->objfile_obstack);
 
@@ -15665,7 +15665,7 @@ dwarf2_start_symtab (struct dwarf2_cu *cu,
   /* We assume that we're processing GCC output.  */
   processing_gcc_compilation = 2;
 
-  processing_has_namespace_info = 0;
+  cu->processing_has_namespace_info = 0;
 }
 
 static void
@@ -16110,7 +16110,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
       /* For the benefit of old versions of GCC, check for anonymous
 	 namespaces based on the demangled name.  */
-      if (!processing_has_namespace_info
+      if (!cu->processing_has_namespace_info
 	  && cu->language == language_cplus)
 	cp_scan_for_anonymous_namespaces (sym, objfile);
     }

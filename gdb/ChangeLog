@@ -1,5 +1,12 @@
 2013-01-25  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (processing_has_namespace_info): Remove.
+	(struct dwarf2_cu) <processing_has_namespace_info>: New field.
+	(process_die, read_func_scope, dwarf2_start_symtab)
+	(new_symbol_full): Update.
+
+2013-01-25  Tom Tromey  <tromey@redhat.com>
+
 	* cp-namespace.c (cp_set_block_scope): Remove.
 	* cp-support.h (cp_set_block_scope): Remove.
 	* dbxread.c: Include block.h.
