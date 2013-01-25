@@ -31,6 +31,7 @@ int ia = 2;
 int ib = 1;
 float fa = 2;
 float fb = 1;
+long long lla __attribute__ ((mode(DI))) = 0x0000000100000001ll;
 char4 c4 = {1, 2, 3, 4};
 int4 i4a = {2, 4, 8, 16};
 int4 i4b = {1, 2, 8, 4};

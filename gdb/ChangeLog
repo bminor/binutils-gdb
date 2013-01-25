@@ -1,3 +1,21 @@
+2013-01-25  Andrew Burgess  <aburgess@broadcom.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* valarith.c (value_vector_widen): New function for replicating a
+	scalar into a vector.
+	(value_binop): Use value_vector_widen to widen scalar to vector
+	rather than casting, this better matches gcc C behaviour.
+	* valops.c (value_casst): Update logic for casting between vector
+	types, and for casting from scalar to vector, try to match gcc C
+	behaviour.
+	* value.h (value_vector_widen): Declare.
+	* opencl-lang.c (opencl_value_cast): New opencl specific casting
+	function, handle special case for casting scalar to vector.
+	(opencl_relop): Use opencl_value_cast.
+	(evaluate_subexp_opencl): Use opencl_value_cast instead of
+	value_cast, and handle BINOP_ASSIGN, UNOP_CAST, and UNOP_CAST_TYPE
+	in order to use opencl_value_cast.
+
 2013-01-25  Yao Qi  <yao@codesourcery.com>
 
 	* event-loop.c: Include "queue.h".

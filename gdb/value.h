@@ -482,6 +482,12 @@ extern void read_value_memory (struct value *val, int embedded_offset,
 			       int stack, CORE_ADDR memaddr,
 			       gdb_byte *buffer, size_t length);
 
+/* Cast SCALAR_VALUE to the element type of VECTOR_TYPE, then replicate
+   into each element of a new vector value with VECTOR_TYPE.  */
+
+struct value *value_vector_widen (struct value *scalar_value,
+				  struct type *vector_type);
+
 
 
 #include "symtab.h"

@@ -50,6 +50,9 @@ enum E
 { v1, v2, v3
 };
 
+struct s vec_data_1 = {1, 1};
+struct s vec_data_2 = {1, 2};
+
 int
 main ()
 {

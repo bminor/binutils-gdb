@@ -1,3 +1,12 @@
+2013-01-25  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.base/gnu_vector.c: New variable for use in tests.
+	* gdb.base/gnu_vector.exp: Update and extend tests to reflect
+	changes in scalar to vector casting and widening.
+	* gdb.python/py-type.c: New variables for use in tests.
+	* gdb.python/py-type.exp: Update vector related tests to reflect
+	changes in scalar to vector casting and widening.
+
 2013-01-24  Tiago Stürmer Daitx  <tdaitx@linux.vnet.ibm.com>
 
 	* gdb.base/prologue-include.c: New file.

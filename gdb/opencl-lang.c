@@ -683,6 +683,58 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
   return ret;
 }
 
+/* Perform a cast of ARG into TYPE.  There's sadly a lot of duplication in
+   here from valops.c:value_cast, opencl is different only in the
+   behaviour of scalar to vector casting.  As far as possibly we're going
+   to try and delegate back to the standard value_cast function. */
+
+static struct value *
+opencl_value_cast (struct type *type, struct value *arg)
+{
+  if (type != value_type (arg))
+    {
+      /* Casting scalar to vector is a special case for OpenCL, scalar
+	 is cast to element type of vector then replicated into each
+	 element of the vector.  First though, we need to work out if
+	 this is a scalar to vector cast; code lifted from
+	 valops.c:value_cast.  */
+      enum type_code code1, code2;
+      struct type *to_type;
+      int scalar;
+
+      to_type = check_typedef (type);
+
+      code1 = TYPE_CODE (to_type);
+      code2 = TYPE_CODE (check_typedef (value_type (arg)));
+
+      if (code2 == TYPE_CODE_REF)
+	code2 = TYPE_CODE (check_typedef (value_type (coerce_ref (arg))));
+
+      scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_BOOL
+		|| code2 == TYPE_CODE_CHAR || code2 == TYPE_CODE_FLT
+		|| code2 == TYPE_CODE_DECFLOAT || code2 == TYPE_CODE_ENUM
+		|| code2 == TYPE_CODE_RANGE);
+
+      if (code1 == TYPE_CODE_ARRAY && TYPE_VECTOR (to_type) && scalar)
+	{
+	  struct type *eltype;
+
+	  /* Cast to the element type of the vector here as
+	     value_vector_widen will error if the scalar value is
+	     truncated by the cast.  To avoid the error, cast (and
+	     possibly truncate) here.  */
+	  eltype = check_typedef (TYPE_TARGET_TYPE (to_type));
+	  arg = value_cast (eltype, arg);
+
+	  return value_vector_widen (arg, type);
+	}
+      else
+	/* Standard cast handler.  */
+	arg = value_cast (type, arg);
+    }
+  return arg;
+}
+
 /* Perform a relational operation on two operands.  */
 
 static struct value *
@@ -718,7 +770,7 @@ opencl_relop (struct expression *exp, struct value *arg1, struct value *arg2,
       if (TYPE_CODE (t) != TYPE_CODE_FLT && !is_integral_type (t))
 	error (_("Argument to operation not a number or boolean."));
 
-      *v = value_cast (t1_is_vec ? type1 : type2, *v);
+      *v = opencl_value_cast (t1_is_vec ? type1 : type2, *v);
       val = vector_relop (exp, arg1, arg2, op);
     }
 
@@ -740,6 +792,46 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 
   switch (op)
     {
+    /* Handle assignment and cast operators to support OpenCL-style
+       scalar-to-vector widening.  */
+    case BINOP_ASSIGN:
+      (*pos)++;
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      type1 = value_type (arg1);
+      arg2 = evaluate_subexp (type1, exp, pos, noside);
+
+      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+	return arg1;
+
+      if (deprecated_value_modifiable (arg1)
+	  && VALUE_LVAL (arg1) != lval_internalvar)
+	arg2 = opencl_value_cast (type1, arg2);
+
+      return value_assign (arg1, arg2);
+
+    case UNOP_CAST:
+      type1 = exp->elts[*pos + 1].type;
+      (*pos) += 2;
+      arg1 = evaluate_subexp (type1, exp, pos, noside);
+
+      if (noside == EVAL_SKIP)
+	return value_from_longest (builtin_type (exp->gdbarch)->
+				   builtin_int, 1);
+
+      return opencl_value_cast (type1, arg1);
+
+    case UNOP_CAST_TYPE:
+      (*pos)++;
+      arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+      type1 = value_type (arg1);
+      arg1 = evaluate_subexp (type1, exp, pos, noside);
+
+      if (noside == EVAL_SKIP)
+	return value_from_longest (builtin_type (exp->gdbarch)->
+				   builtin_int, 1);
+
+      return opencl_value_cast (type1, arg1);
+
     /* Handle binary relational and equality operators that are either not
        or differently defined for GNU vectors.  */
     case BINOP_EQUAL:
@@ -852,12 +944,12 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	  /* Widen the scalar operand to a vector if necessary.  */
 	  if (t2_is_vec || !t3_is_vec)
 	    {
-	      arg3 = value_cast (type2, arg3);
+	      arg3 = opencl_value_cast (type2, arg3);
 	      type3 = value_type (arg3);
 	    }
 	  else if (!t2_is_vec || t3_is_vec)
 	    {
-	      arg2 = value_cast (type3, arg2);
+	      arg2 = opencl_value_cast (type3, arg2);
 	      type2 = value_type (arg2);
 	    }
 	  else if (!t2_is_vec || !t3_is_vec)

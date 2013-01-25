@@ -118,7 +118,7 @@ proc test_fields {lang} {
     # Test gdb.Type.array.
     gdb_test "python print (ar\[0\].cast(ar\[0\].type.array(1)))" \
         ".1, 2." "cast to array with one argument"
-    gdb_test "python print (ar\[0\].cast(ar\[0\].type.array(0, 1)))" \
+    gdb_test "python print ar\[0\].cast(ar\[0\].type.array(0, 1))" \
         ".1, 2." "cast to array with two arguments"
 
     gdb_test "python print (ar\[0\].type == ar\[0\].type)" "True"
@@ -126,16 +126,19 @@ proc test_fields {lang} {
     # Test gdb.Type.vector.
     # Note: vectors cast differently than arrays.  Here ar[0] is replicated
     # for the size of the vector.
-    gdb_py_test_silent_cmd \
-        "python vec1 = ar\[0\].cast(ar\[0\].type.vector(1))" "set vec1" 1
-    gdb_test "python print (vec1)" ".1, 1." "cast to vector with one argument"
-    gdb_py_test_silent_cmd \
-        "python vec2 = ar\[0\].cast(ar\[0\].type.vector(0, 1))" "set vec2" 1
-    gdb_test "python print (vec2)" ".1, 1." "cast to vector with two arguments"
-    gdb_test "python print (vec1 == vec2)" "True"
-    gdb_py_test_silent_cmd \
-        "python vec3 = ar\[1\].cast(ar\[1\].type.vector(1))" "set vec3" 1
-    gdb_test "python print (vec1 == vec3)" "False"
+    gdb_py_test_silent_cmd "print vec_data_1" "print value (vec_data_1)" 1
+    gdb_py_test_silent_cmd "python vec_data_1 = gdb.history (0)" "get value (vec_data_1) from history" 1
+
+    gdb_py_test_silent_cmd "print vec_data_2" "print value (vec_data_2)" 1
+    gdb_py_test_silent_cmd "python vec_data_2 = gdb.history (0)" "get value (vec_data_2) from history" 1
+
+    gdb_py_test_silent_cmd "python vec1 = vec_data_1.cast(ar\[0\].type.vector(1))" "set vec1" 1
+    gdb_test "python print vec1" ".1, 1." "cast to vector with one argument"
+    gdb_py_test_silent_cmd "python vec2 = vec_data_1.cast(ar\[0\].type.vector(0, 1))" "set vec2" 1
+    gdb_test "python print vec2" ".1, 1." "cast to vector with two arguments"
+    gdb_test "python print vec1 == vec2" "True"
+    gdb_py_test_silent_cmd "python vec3 = vec_data_2.cast(ar\[0\].type.vector(1))" "set vec3" 1
+    gdb_test "python print vec1 == vec3" "False"
   }
 }
 

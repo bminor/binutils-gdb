@@ -546,29 +546,13 @@ value_cast (struct type *type, struct value *arg2)
 	 minus one, instead of biasing the normal case.  */
       return value_from_longest (type, -1);
     }
-  else if (code1 == TYPE_CODE_ARRAY && TYPE_VECTOR (type) && scalar)
-    {
-      /* Widen the scalar to a vector.  */
-      struct type *eltype;
-      struct value *val;
-      LONGEST low_bound, high_bound;
-      int i;
-
-      if (!get_array_bounds (type, &low_bound, &high_bound))
-	error (_("Could not determine the vector bounds"));
-
-      eltype = check_typedef (TYPE_TARGET_TYPE (type));
-      arg2 = value_cast (eltype, arg2);
-      val = allocate_value (type);
-
-      for (i = 0; i < high_bound - low_bound + 1; i++)
-	{
-	  /* Duplicate the contents of arg2 into the destination vector.  */
-	  memcpy (value_contents_writeable (val) + (i * TYPE_LENGTH (eltype)),
-		  value_contents_all (arg2), TYPE_LENGTH (eltype));
-	}
-      return val;
-    }
+  else if (code1 == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+	   && code2 == TYPE_CODE_ARRAY && TYPE_VECTOR (type2)
+	   && TYPE_LENGTH (type) != TYPE_LENGTH (type2))
+    error (_("Cannot convert between vector values of different sizes"));
+  else if (code1 == TYPE_CODE_ARRAY && TYPE_VECTOR (type) && scalar
+	   && TYPE_LENGTH (type) != TYPE_LENGTH (type2))
+    error (_("can only cast scalar to vector of same size"));
   else if (code1 == TYPE_CODE_VOID)
     {
       return value_zero (type, not_lval);
