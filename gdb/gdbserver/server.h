@@ -259,6 +259,7 @@ extern int append_callback_event (callback_handler_func *proc,
 extern void delete_callback_event (int id);
 
 extern void start_event_loop (void);
+extern void initialize_event_loop (void);
 
 /* Functions from server.c.  */
 extern int handle_serial_event (int err, gdb_client_data client_data);

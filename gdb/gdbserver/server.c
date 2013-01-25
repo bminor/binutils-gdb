@@ -2687,6 +2687,7 @@ main (int argc, char *argv[])
 
   initialize_async_io ();
   initialize_low ();
+  initialize_event_loop ();
   if (target_supports_tracepoints ())
     initialize_tracepoint ();
 

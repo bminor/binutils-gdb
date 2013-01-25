@@ -1,3 +1,17 @@
+2013-01-25  Yao Qi  <yao@codesourcery.com>
+
+	* event-loop.c: Include "queue.h".
+	(gdb_event_p): New typedef.
+	(struct gdb_event) <next_event>: Remove.
+	(event_queue): Change to QUEUE(gdb_event_p).
+	(async_queue_event): Remove.
+	(gdb_event_xfree): New.
+	(initialize_event_loop): New.
+	(process_event): Use API from QUEUE.
+	(wait_for_event): Likewise.
+	* server.c (main): Call initialize_event_loop.
+	* server.h (initialize_event_loop): Declare.
+
 2013-01-18  Yao Qi  <yao@codesourcery.com>
 
 	* ax.h (struct eval_agent_expr_context): New.
