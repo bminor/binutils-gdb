@@ -1,3 +1,8 @@
+2013-01-25  Yao Qi  <yao@codesourcery.com>
+
+	* main.c (print_gdb_help): Remove "--epoch" from the help
+	message.
+
 2013-01-24  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* symtab.c (skip_prologue_using_sal): Consider a file
