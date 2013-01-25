@@ -1,3 +1,8 @@
+2013-01-24  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/tc-ppc.c (md_assemble): Do not generate APUinfo sections
+	for 64-bit output.
+
 2013-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-v850.c: Add support for e3v5 architecture.
