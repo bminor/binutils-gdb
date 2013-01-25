@@ -1,3 +1,13 @@
+2013-01-25  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* valops.c (find_overload_match): Remove unused argument 'lax'.
+	* value.h: Remove unused argument 'lax' from the declaration of
+	find_overload_match.
+	* eval.c (value_subexp_standard): Do not pass a 'lax' argument
+	to find_overload_match.
+	* valarith.c (value_user_defined_cpp_op): Do not pass a 'lax'
+	argument to find_overload_match.
+
 2013-01-25  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (processing_has_namespace_info): Remove.

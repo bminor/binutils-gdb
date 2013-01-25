@@ -294,7 +294,7 @@ value_user_defined_cpp_op (struct value **args, int nargs, char *operator,
   struct value *valp = NULL;
 
   find_overload_match (args, nargs, operator, BOTH /* could be method */,
-                       0 /* strict match */, &args[0], /* objp */
+                       &args[0] /* objp */,
                        NULL /* pass NULL symbol since symbol is unknown */,
                        &valp, &symp, static_memfuncp, 0);
 

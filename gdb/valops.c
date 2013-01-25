@@ -2516,11 +2516,9 @@ value_find_oload_method_list (struct value **argp, const char *method,
 
 /* Given an array of arguments (ARGS) (which includes an
    entry for "this" in the case of C++ methods), the number of
-   arguments NARGS, the NAME of a function whether it's a method or
-   not (METHOD), and the degree of laxness (LAX) in conforming to
-   overload resolution rules in ANSI C++, find the best function that
-   matches on the argument types according to the overload resolution
-   rules.
+   arguments NARGS, the NAME of a function, and whether it's a method or
+   not (METHOD), find the best function that matches on the argument types
+   according to the overload resolution rules.
 
    METHOD can be one of three values:
      NON_METHOD for non-member functions.
@@ -2559,7 +2557,7 @@ value_find_oload_method_list (struct value **argp, const char *method,
 int
 find_overload_match (struct value **args, int nargs,
 		     const char *name, enum oload_search_type method,
-		     int lax, struct value **objp, struct symbol *fsym,
+		     struct value **objp, struct symbol *fsym,
 		     struct value **valp, struct symbol **symp, 
 		     int *staticp, const int no_adl)
 {

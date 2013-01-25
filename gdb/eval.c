@@ -1590,7 +1590,6 @@ evaluate_subexp_standard (struct type *expect_type,
 
           find_overload_match (&argvec[1], nargs, func_name,
                                NON_METHOD, /* not method */
-			       0,          /* strict match */
                                NULL, NULL, /* pass NULL symbol since
 					      symbol is unknown */
                                NULL, &symp, NULL, 0);
@@ -1626,7 +1625,6 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	      (void) find_overload_match (&argvec[1], nargs, tstr,
 	                                  METHOD, /* method */
-					  0,      /* strict match */
 					  &arg2,  /* the object */
 					  NULL, &valp, NULL,
 					  &static_memfuncp, 0);
@@ -1698,7 +1696,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	      (void) find_overload_match (&argvec[1], nargs,
 					  NULL,        /* no need for name */
 	                                  NON_METHOD,  /* not method */
-					  0,           /* strict match */
 	                                  NULL, function, /* the function */
 					  NULL, &symp, NULL, no_adl);
 
