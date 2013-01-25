@@ -1,3 +1,14 @@
+2013-01-25  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (stop_reply_extract_thread): New.
+	(add_current_inferior_and_thread): New parameter 'wait_status'.
+	Handle it.
+	(remote_start_remote): Pass wait status to
+	add_current_inferior_and_thread.
+	(extended_remote_run): Update comment.
+	(extended_remote_create_inferior_1): Pass wait status to
+	add_current_inferior_and_thread.
+
 2013-01-25  Andrew Burgess  <aburgess@broadcom.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
