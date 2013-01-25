@@ -1,5 +1,23 @@
 2013-01-25  Yao Qi  <yao@codesourcery.com>
 
+	* event-loop.c: Include "queue.h".
+	(gdb_event_p): New typedef.
+	(DECLARE_QUEUE_P): Use.
+	(DEFINE_QUEUE_P): Use.
+	(async_queue_event): Remove.
+	(gdb_event_xfree): New.
+	(initialize_event_loop): New.
+	(process_event): Use QUEUE macros.
+	(event_queue): Remove.
+	(gdb_wait_for_event): Caller update.
+	(check_async_event_handlers): Likewise.
+	(poll_timers): Likewise.
+	* event-loop.h (initialize_event_loop): Declare.
+	* event-loop.c (gdb_event_xfree): New.
+	* top.c (gdb_init): Call initialize_event_loop.
+
+2013-01-25  Yao Qi  <yao@codesourcery.com>
+
 	* event-loop.c (async_queue_event): Remove one parameter
 	'position'.  Remove code handling 'position' == TAIL.
 	(gdb_wait_for_event): Caller update.
