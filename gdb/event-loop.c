@@ -274,9 +274,7 @@ static int gdb_wait_for_event (int);
 static void poll_timers (void);
 
 
-/* Insert an event object into the gdb event queue at 
-   the specified position.
-   POSITION can be head or tail, with values TAIL, HEAD.
+/* Insert an event object into the gdb event queue.
    EVENT_PTR points to the event to be inserted into the queue.
    The caller must allocate memory for the event.  It is freed
    after the event has ben handled.
@@ -285,28 +283,16 @@ static void poll_timers (void);
    as last in first out.  Event appended at the tail of the queue
    will be processed first in first out.  */
 static void
-async_queue_event (gdb_event * event_ptr, queue_position position)
+async_queue_event (gdb_event * event_ptr)
 {
-  if (position == TAIL)
-    {
-      /* The event will become the new last_event.  */
+  /* The event will become the new last_event.  */
 
-      event_ptr->next_event = NULL;
-      if (event_queue.first_event == NULL)
-	event_queue.first_event = event_ptr;
-      else
-	event_queue.last_event->next_event = event_ptr;
-      event_queue.last_event = event_ptr;
-    }
-  else if (position == HEAD)
-    {
-      /* The event becomes the new first_event.  */
-
-      event_ptr->next_event = event_queue.first_event;
-      if (event_queue.first_event == NULL)
-	event_queue.last_event = event_ptr;
-      event_queue.first_event = event_ptr;
-    }
+  event_ptr->next_event = NULL;
+  if (event_queue.first_event == NULL)
+    event_queue.first_event = event_ptr;
+  else
+    event_queue.last_event->next_event = event_ptr;
+  event_queue.last_event = event_ptr;
 }
 
 /* Create a generic event, to be enqueued in the event queue for
@@ -936,7 +922,7 @@ gdb_wait_for_event (int block)
 	      if (file_ptr->ready_mask == 0)
 		{
 		  file_event_ptr = create_file_event (file_ptr->fd);
-		  async_queue_event (file_event_ptr, TAIL);
+		  async_queue_event (file_event_ptr);
 		}
 	      file_ptr->ready_mask = (gdb_notifier.poll_fds + i)->revents;
 	    }
@@ -972,7 +958,7 @@ gdb_wait_for_event (int block)
 	  if (file_ptr->ready_mask == 0)
 	    {
 	      file_event_ptr = create_file_event (file_ptr->fd);
-	      async_queue_event (file_event_ptr, TAIL);
+	      async_queue_event (file_event_ptr);
 	    }
 	  file_ptr->ready_mask = mask;
 	}
@@ -1158,7 +1144,7 @@ check_async_event_handlers (void)
 	  data.ptr = hdata;
 
 	  event_ptr = create_event (invoke_async_event_handler, data);
-	  async_queue_event (event_ptr, TAIL);
+	  async_queue_event (event_ptr);
 	}
     }
 }
@@ -1365,7 +1351,7 @@ poll_timers (void)
 	  event_ptr = (gdb_event *) xmalloc (sizeof (gdb_event));
 	  event_ptr->proc = handle_timer_event;
 	  event_ptr->data.integer = timer_list.first_timer->timer_id;
-	  async_queue_event (event_ptr, TAIL);
+	  async_queue_event (event_ptr);
 	}
 
       /* Now we need to update the timeout for select/ poll, because

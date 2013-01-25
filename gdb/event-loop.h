@@ -75,18 +75,6 @@ typedef void (sig_handler_func) (gdb_client_data);
 typedef void (async_event_handler_func) (gdb_client_data);
 typedef void (timer_handler_func) (gdb_client_data);
 
-/* Where to add an event onto the event queue, by queue_event.  */
-typedef enum
-  {
-    /* Add at tail of queue.  It will be processed in first in first
-       out order.  */
-    TAIL,
-    /* Add at head of queue.  It will be processed in last in first
-       out order.  */
-    HEAD
-  }
-queue_position;
-
 /* Exported functions from event-loop.c */
 
 extern void start_event_loop (void);

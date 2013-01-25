@@ -1,3 +1,12 @@
+2013-01-25  Yao Qi  <yao@codesourcery.com>
+
+	* event-loop.c (async_queue_event): Remove one parameter
+	'position'.  Remove code handling 'position' == TAIL.
+	(gdb_wait_for_event): Caller update.
+	(check_async_event_handlers): Caller update.
+	(poll_timers): Caller update.
+	* event-loop.h (enum queue_position): Remove.
+
 2013-01-25  Maxim Kuvyrkov  <maxim@kugelworks.com>
 
 	* MAINTAINERS: Update my email.
