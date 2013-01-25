@@ -1,3 +1,7 @@
+2013-01-25  Maxim Kuvyrkov  <maxim@kugelworks.com>
+
+	* MAINTAINERS: Update my email.
+
 2013-01-25  Yao Qi  <yao@codesourcery.com>
 
 	* main.c (print_gdb_help): Remove "--epoch" from the help
