@@ -1,5 +1,15 @@
 2013-01-25  Tom Tromey  <tromey@redhat.com>
 
+	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Update.
+	(cp_add_using_directive): Add 'copy_names' argument.
+	* cp-support.h (cp_add_using_directive): Update.
+	(struct using_direct) <import_src, import_dest, alias,
+	declaration>: Now const.
+	* dwarf2read.c (read_import_statement): Use obconcat.
+	Don't copy names passed to cp_add_using_directive.
+
+2013-01-25  Tom Tromey  <tromey@redhat.com>
+
 	* c-exp.y (qualified_name): Use TYPE_SAFE_NAME.
 
 2013-01-25  Pedro Alves  <palves@redhat.com>

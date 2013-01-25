@@ -7713,8 +7713,6 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
   VEC (const_char_ptr) *excludes = NULL;
   struct cleanup *cleanups;
 
-  char *temp;
-
   import_attr = dwarf2_attr (die, DW_AT_import, cu);
   if (import_attr == NULL)
     {
@@ -7780,14 +7778,9 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
       canonical_name = imported_name_prefix;
     }
   else if (strlen (imported_name_prefix) > 0)
-    {
-      temp = alloca (strlen (imported_name_prefix)
-                     + 2 + strlen (imported_name) + 1);
-      strcpy (temp, imported_name_prefix);
-      strcat (temp, "::");
-      strcat (temp, imported_name);
-      canonical_name = temp;
-    }
+    canonical_name = obconcat (&objfile->objfile_obstack,
+			       imported_name_prefix, "::", imported_name,
+			       (char *) NULL);
   else
     canonical_name = imported_name;
 
@@ -7842,6 +7835,7 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
                           import_alias,
                           imported_declaration,
 			  excludes,
+			  0,
                           &objfile->objfile_obstack);
 
   do_cleanups (cleanups);
@@ -12108,7 +12102,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	  const char *previous_prefix = determine_prefix (die, cu);
 
 	  cp_add_using_directive (previous_prefix, TYPE_NAME (type), NULL,
-				  NULL, NULL, &objfile->objfile_obstack);
+				  NULL, NULL, 0, &objfile->objfile_obstack);
 	}
     }
 
