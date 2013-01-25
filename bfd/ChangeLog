@@ -1,3 +1,8 @@
+2013-01-25  Michael Schewe  <michael.schewe@gmx.net>
+
+	* elf32-h8300.c (elf32_h8_relax_section): When checking for a
+	second reloc, make sure that the reloc potentially exists first.
+
 2013-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* archures.c: Add bfd_mach_v850e3v5.

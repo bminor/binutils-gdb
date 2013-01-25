@@ -1239,7 +1239,7 @@ elf32_h8_relax_section (bfd *abfd, asection *sec,
 			    second_reloc = 1;
 			  }
 		      }
-		    if (irel < irelend)
+		    if (irel + 1 < irelend)
 		      {
 			Elf_Internal_Rela *next_reloc = irel + 1;
 			arelent bfd_reloc;
