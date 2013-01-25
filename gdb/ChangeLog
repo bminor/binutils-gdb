@@ -1,3 +1,7 @@
+2013-01-25  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (add_current_inferior_and_thread): Tweak comment.
+
 2013-01-25  Tom Tromey  <tromey@redhat.com>
 
 	* cp-namespace.c (cp_scan_for_anonymous_namespaces): Update.
