@@ -1,3 +1,11 @@
+2013-01-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* gdb.base/restore.exp: Replace gdb_compile, gdb_exit, gdb_start,
+	gdb_reinitialize_dir and gdb_load by standard_testfile, set executable
+	and prepare_for_testing.
+	* gdb.base/store.exp: Likewise.
+
 2013-01-25  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-explore.exp: Expect the gdb prompt.

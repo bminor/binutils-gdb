@@ -15,26 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#
-# test running programs
-#
+standard_testfile
+set executable $testfile
 
-set testfile "store"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested store.exp
+if { [prepare_for_testing $testfile.exp $executable $srcfile] } {
     return -1
 }
 
 if [get_compiler_info] {
     return -1;
 }
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 #
 # set it up at a breakpoint so we can play with the variable values

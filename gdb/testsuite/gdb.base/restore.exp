@@ -21,12 +21,10 @@
 # This file was written by Jim Blandy <jimb@cygnus.com>, with
 # fragments borrowed from return.exp.
 
+standard_testfile
+set executable $testfile
 
-set testfile "restore"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested restore.exp
+if { [prepare_for_testing $testfile.exp $executable $srcfile] } {
     return -1
 }
 
@@ -96,15 +94,6 @@ proc restore_tests { } {
 	gdb_test "continue" ".*" ""
     }
 }
-
-
-
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 set prev_timeout $timeout
 set timeout 30
