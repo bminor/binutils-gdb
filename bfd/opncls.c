@@ -86,7 +86,7 @@ _bfd_new_bfd (void)
   nbfd->iostream = NULL;
   nbfd->where = 0;
   if (!bfd_hash_table_init_n (& nbfd->section_htab, bfd_section_hash_newfunc,
-			      sizeof (struct section_hash_entry), 251))
+			      sizeof (struct section_hash_entry), 13))
     {
       free (nbfd);
       return NULL;

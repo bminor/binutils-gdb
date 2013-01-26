@@ -84,10 +84,7 @@ elf_core_file_p (bfd *abfd)
   Elf_Internal_Phdr *i_phdrp;	/* Elf program header, internal form.  */
   unsigned int phindex;
   const struct elf_backend_data *ebd;
-  struct bfd_preserve preserve;
   bfd_size_type amt;
-
-  preserve.marker = NULL;
 
   /* Read in the ELF header in external format.  */
   if (bfd_bread (&x_ehdr, sizeof (x_ehdr), abfd) != sizeof (x_ehdr))
@@ -123,13 +120,9 @@ elf_core_file_p (bfd *abfd)
       goto wrong;
     }
 
-  if (!bfd_preserve_save (abfd, &preserve))
-    goto fail;
-
   /* Give abfd an elf_obj_tdata.  */
   if (! (*abfd->xvec->_bfd_set_format[bfd_core]) (abfd))
     goto fail;
-  preserve.marker = elf_tdata (abfd);
 
   /* Swap in the rest of the header, now that we have the byte order.  */
   i_ehdrp = elf_elfheader (abfd);
@@ -318,24 +311,10 @@ elf_core_file_p (bfd *abfd)
 
   /* Save the entry point from the ELF header.  */
   bfd_get_start_address (abfd) = i_ehdrp->e_entry;
-
-  bfd_preserve_finish (abfd, &preserve);
   return abfd->xvec;
 
 wrong:
-  /* There is way too much undoing of half-known state here.  The caller,
-     bfd_check_format_matches, really shouldn't iterate on live bfd's to
-     check match/no-match like it does.  We have to rely on that a call to
-     bfd_default_set_arch_mach with the previously known mach, undoes what
-     was done by the first bfd_default_set_arch_mach (with mach 0) here.
-     For this to work, only elf-data and the mach may be changed by the
-     target-specific elf_backend_object_p function.  Note that saving the
-     whole bfd here and restoring it would be even worse; the first thing
-     you notice is that the cached bfd file position gets out of sync.  */
   bfd_set_error (bfd_error_wrong_format);
-
 fail:
-  if (preserve.marker != NULL)
-    bfd_preserve_restore (abfd, &preserve);
   return NULL;
 }

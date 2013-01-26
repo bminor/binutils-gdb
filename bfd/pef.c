@@ -583,34 +583,28 @@ bfd_pef_read_header (bfd *abfd, bfd_pef_header *header)
 static const bfd_target *
 bfd_pef_object_p (bfd *abfd)
 {
-  struct bfd_preserve preserve;
   bfd_pef_header header;
+  bfd_pef_data_struct *mdata;
 
-  preserve.marker = NULL;
   if (bfd_pef_read_header (abfd, &header) != 0)
     goto wrong;
 
   if (header.tag1 != BFD_PEF_TAG1 || header.tag2 != BFD_PEF_TAG2)
     goto wrong;
 
-  preserve.marker = bfd_zalloc (abfd, sizeof (bfd_pef_data_struct));
-  if (preserve.marker == NULL
-      || !bfd_preserve_save (abfd, &preserve))
+  mdata = (bfd_pef_data_struct *) bfd_zalloc (abfd, sizeof (*mdata));
+  if (mdata == NULL)
     goto fail;
 
-  if (bfd_pef_scan (abfd, &header,
-		    (bfd_pef_data_struct *) preserve.marker) != 0)
+  if (bfd_pef_scan (abfd, &header, mdata))
     goto wrong;
 
-  bfd_preserve_finish (abfd, &preserve);
   return abfd->xvec;
 
  wrong:
   bfd_set_error (bfd_error_wrong_format);
 
  fail:
-  if (preserve.marker != NULL)
-    bfd_preserve_restore (abfd, &preserve);
   return NULL;
 }
 
@@ -1124,7 +1118,6 @@ bfd_pef_xlib_scan (bfd *abfd, bfd_pef_xlib_header *header)
 static const bfd_target *
 bfd_pef_xlib_object_p (bfd *abfd)
 {
-  struct bfd_preserve preserve;
   bfd_pef_xlib_header header;
 
   if (bfd_pef_xlib_read_header (abfd, &header) != 0)
@@ -1141,20 +1134,12 @@ bfd_pef_xlib_object_p (bfd *abfd)
       return NULL;
     }
 
-  if (! bfd_preserve_save (abfd, &preserve))
-    {
-      bfd_set_error (bfd_error_wrong_format);
-      return NULL;
-    }
-
   if (bfd_pef_xlib_scan (abfd, &header) != 0)
     {
-      bfd_preserve_restore (abfd, &preserve);
       bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 
-  bfd_preserve_finish (abfd, &preserve);
   return abfd->xvec;
 }
 

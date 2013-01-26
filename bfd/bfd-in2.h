@@ -6247,24 +6247,6 @@ extern bfd_byte *bfd_get_relocated_section_contents
 
 bfd_boolean bfd_alt_mach_code (bfd *abfd, int alternative);
 
-struct bfd_preserve
-{
-  void *marker;
-  void *tdata;
-  flagword flags;
-  const struct bfd_arch_info *arch_info;
-  struct bfd_section *sections;
-  struct bfd_section *section_last;
-  unsigned int section_count;
-  struct bfd_hash_table section_htab;
-};
-
-bfd_boolean bfd_preserve_save (bfd *, struct bfd_preserve *);
-
-void bfd_preserve_restore (bfd *, struct bfd_preserve *);
-
-void bfd_preserve_finish (bfd *, struct bfd_preserve *);
-
 bfd_vma bfd_emul_get_maxpagesize (const char *);
 
 void bfd_emul_set_maxpagesize (const char *, bfd_vma);

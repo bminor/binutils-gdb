@@ -495,12 +495,9 @@ elf_object_p (bfd *abfd)
   Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   unsigned int shindex;
   const struct elf_backend_data *ebd;
-  struct bfd_preserve preserve;
   asection *s;
   bfd_size_type amt;
   const bfd_target *target;
-
-  preserve.marker = NULL;
 
   /* Read in the ELF header in external format.  */
 
@@ -539,9 +536,6 @@ elf_object_p (bfd *abfd)
       goto got_wrong_format_error;
     }
 
-  if (!bfd_preserve_save (abfd, &preserve))
-    goto got_no_match;
-
   target = abfd->xvec;
 
   /* Allocate an instance of the elf_obj_tdata structure and hook it up to
@@ -549,7 +543,6 @@ elf_object_p (bfd *abfd)
 
   if (! (*target->_bfd_set_format[bfd_object]) (abfd))
     goto got_no_match;
-  preserve.marker = elf_tdata (abfd);
 
   /* Now that we know the byte order, swap in the rest of the header */
   i_ehdrp = elf_elfheader (abfd);
@@ -842,25 +835,12 @@ elf_object_p (bfd *abfd)
 	    s->flags |= SEC_DEBUGGING;
 	}
     }
-
-  bfd_preserve_finish (abfd, &preserve);
   return target;
 
  got_wrong_format_error:
-  /* There is way too much undoing of half-known state here.  The caller,
-     bfd_check_format_matches, really shouldn't iterate on live bfd's to
-     check match/no-match like it does.  We have to rely on that a call to
-     bfd_default_set_arch_mach with the previously known mach, undoes what
-     was done by the first bfd_default_set_arch_mach (with mach 0) here.
-     For this to work, only elf-data and the mach may be changed by the
-     target-specific elf_backend_object_p function.  Note that saving the
-     whole bfd here and restoring it would be even worse; the first thing
-     you notice is that the cached bfd file position gets out of sync.  */
   bfd_set_error (bfd_error_wrong_format);
 
  got_no_match:
-  if (preserve.marker != NULL)
-    bfd_preserve_restore (abfd, &preserve);
   return NULL;
 }
 

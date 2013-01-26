@@ -1,3 +1,21 @@
+2013-01-26  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (struct bfd_preserve, bfd_preserve_save, bfd_preserve_restore,
+	bfd_preserve_finish): Move to..
+	* format.c: ..here, splitting out..
+	(bfd_reinit): ..this.  New function.
+	(bfd_check_format_matches): Use bfd_preserve_save/restore to
+	keep bfd state for a match.
+	* elfcode.h (elf_object_p): Don't use bfd_preserve_save/restore.
+	* elfcore.h (elf_core_file_p): Likewise.
+	* mach-o.c (bfd_mach_o_header_p): Likewise.
+	* pef.c (bfd_pef_object_p, bfd_pef_xlib_object_p): Likewise.
+	* xsym.c (bfd_sym_object_p): Likewise.
+	* mmo.c (mmo_scan): Clear abfd->symcount.
+	* opncls.c (_bfd_new_bfd): Use a smaller section hash table.
+	* section.c (bfd_section_list_clear): Clear section_htab.count.
+	* bfd-in2.h: Regenerate.
+
 2013-01-25  Michael Schewe  <michael.schewe@gmx.net>
 
 	* elf32-h8300.c (elf32_h8_relax_section): When checking for a

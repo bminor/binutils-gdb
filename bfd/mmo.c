@@ -1536,6 +1536,7 @@ mmo_scan (bfd *abfd)
   long stab_loc = -1;
   char *file_names[256];
 
+  abfd->symcount = 0;
   memset (file_names, 0, sizeof (file_names));
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)

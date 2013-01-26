@@ -835,6 +835,7 @@ bfd_section_list_clear (bfd *abfd)
   abfd->section_count = 0;
   memset (abfd->section_htab.table, 0,
 	  abfd->section_htab.size * sizeof (struct bfd_hash_entry *));
+  abfd->section_htab.count = 0;
 }
 
 /*

@@ -4177,10 +4177,9 @@ bfd_mach_o_header_p (bfd *abfd,
                      bfd_mach_o_filetype filetype,
                      bfd_mach_o_cpu_type cputype)
 {
-  struct bfd_preserve preserve;
   bfd_mach_o_header header;
+  bfd_mach_o_data_struct *mdata;
 
-  preserve.marker = NULL;
   if (!bfd_mach_o_read_header (abfd, &header))
     goto wrong;
 
@@ -4226,24 +4225,19 @@ bfd_mach_o_header_p (bfd *abfd,
         }
     }
 
-  preserve.marker = bfd_zalloc (abfd, sizeof (bfd_mach_o_data_struct));
-  if (preserve.marker == NULL
-      || !bfd_preserve_save (abfd, &preserve))
+  mdata = (bfd_mach_o_data_struct *) bfd_zalloc (abfd, sizeof (*mdata));
+  if (mdata == NULL)
     goto fail;
 
-  if (!bfd_mach_o_scan (abfd, &header,
-                        (bfd_mach_o_data_struct *) preserve.marker))
+  if (!bfd_mach_o_scan (abfd, &header, mdata))
     goto wrong;
 
-  bfd_preserve_finish (abfd, &preserve);
   return abfd->xvec;
 
  wrong:
   bfd_set_error (bfd_error_wrong_format);
 
  fail:
-  if (preserve.marker != NULL)
-    bfd_preserve_restore (abfd, &preserve);
   return NULL;
 }
 
