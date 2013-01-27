@@ -63,6 +63,7 @@
 
 2013-01-11  Pavel Chupin  <pavel.v.chupin@intel.com>
 
+	PR bfd/14430
 	Fix mingw gold build with plugins enabled
 	* Makefile.am: Replace -ldl with @DLOPEN_LIBS@.
 	* configure.ac: Export DLOPEN_LIBS and add headers check.

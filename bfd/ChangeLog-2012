@@ -629,6 +629,7 @@
 
 2012-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR bfd/14430
 	* Makefile.am (LIBDL): Replace -ldl with @lt_cv_dlopen_libs@.
 	* configure.in (lt_cv_dlopen_libs): AC_SUBST.
 	* Makefile.in: Regenerated.
