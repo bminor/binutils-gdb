@@ -252,9 +252,14 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	  gdb_assert_not_reached ("bad debug_loc_kind");
 	}
 
-      /* Otherwise, a location expression entry.  */
-      low += base_address;
-      high += base_address;
+      /* Otherwise, a location expression entry.
+	 If the entry is from a DWO, don't add base address: the entry is
+	 from .debug_addr which has absolute addresses.  */
+      if (! baton->from_dwo)
+	{
+	  low += base_address;
+	  high += base_address;
+	}
 
       length = extract_unsigned_integer (loc_ptr, 2, byte_order);
       loc_ptr += 2;

@@ -1,3 +1,8 @@
+2013-01-28  Doug Evans  <dje@google.com>
+
+	* dwarf2loc.c (dwarf2_find_location_expression): Don't add base address
+	to addresses from dwo files.
+
 2013-01-25  Siva Chandra Reddy  <sivachandra@google.com>
 
 	* valops.c (find_overload_match): Remove unused argument 'lax'.
