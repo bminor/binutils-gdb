@@ -1,3 +1,11 @@
+2013-01-28  Alan Modra  <amodra@gmail.com>
+
+	* archive.c (bfd_generic_archive_p): Return target and keep
+	ardata on partial matches.
+	* format.c (bfd_check_format_matches): Adjust for above
+	change.  Remove bfd_error_file_ambiguously_recognized dead
+	code.
+
 2013-01-26  Alan Modra  <amodra@gmail.com>
 
 	* bfd.c (struct bfd_preserve, bfd_preserve_save, bfd_preserve_restore,

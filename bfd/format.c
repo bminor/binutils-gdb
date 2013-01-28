@@ -279,7 +279,6 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   for (target = bfd_target_vector; *target != NULL; target++)
     {
       const bfd_target *temp;
-      bfd_error_type err;
 
       /* Don't check the default target twice.  */
       if (*target == &binary_vec
@@ -310,47 +309,47 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	  match_targ = temp;
 	  if (preserve.marker != NULL)
 	    bfd_preserve_finish (abfd, &preserve);
-	}
 
-      if (temp && (abfd->format != bfd_archive || bfd_has_map (abfd)))
-	{
-	  /* This format checks out as ok!  */
-	  right_targ = temp;
-
-	  /* If this is the default target, accept it, even if other
-	     targets might match.  People who want those other targets
-	     have to set the GNUTARGET variable.  */
-	  if (temp == bfd_default_vector[0])
-	    goto ok_ret;
-
-	  if (matching_vector)
-	    matching_vector[match_count] = temp;
-	  match_count++;
-
-	  if (temp->match_priority < best_match)
+	  if (abfd->format != bfd_archive
+	      || (bfd_has_map (abfd)
+		  && bfd_get_error () != bfd_error_wrong_object_format))
 	    {
-	      best_match = temp->match_priority;
-	      best_count = 0;
-	    }
-	  best_count++;
-	}
-      else if (temp
-	       || (err = bfd_get_error ()) == bfd_error_wrong_object_format
-	       || err == bfd_error_file_ambiguously_recognized)
-	{
-	  /* An archive with no armap or objects of the wrong type,
-	     or an ambiguous match.  We want this target to match
-	     if we get no better matches.  */
-	  if (ar_right_targ != bfd_default_vector[0])
-	    ar_right_targ = *target;
-	  if (matching_vector)
-	    matching_vector[ar_match_index] = *target;
-	  ar_match_index++;
-	}
-      else if (err != bfd_error_wrong_format)
-	goto err_ret;
+	      /* This format checks out as ok!  */
+	      right_targ = temp;
 
-      if (temp && !bfd_preserve_save (abfd, &preserve))
+	      /* If this is the default target, accept it, even if
+		 other targets might match.  People who want those
+		 other targets have to set the GNUTARGET variable.  */
+	      if (temp == bfd_default_vector[0])
+		goto ok_ret;
+
+	      if (matching_vector)
+		matching_vector[match_count] = temp;
+	      match_count++;
+
+	      if (temp->match_priority < best_match)
+		{
+		  best_match = temp->match_priority;
+		  best_count = 0;
+		}
+	      best_count++;
+	    }
+	  else
+	    {
+	      /* An archive with no armap or objects of the wrong
+		 type.  We want this target to match if we get no
+		 better matches.  */
+	      if (ar_right_targ != bfd_default_vector[0])
+		ar_right_targ = *target;
+	      if (matching_vector)
+		matching_vector[ar_match_index] = *target;
+	      ar_match_index++;
+	    }
+
+	  if (!bfd_preserve_save (abfd, &preserve))
+	    goto err_ret;
+	}
+      else if (bfd_get_error () != bfd_error_wrong_format)
 	goto err_ret;
     }
 
