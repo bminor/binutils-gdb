@@ -116,6 +116,8 @@ int mpu_store_mem_test (SIM_DESC sd, unsigned int addr, int len, int base_reg);
 
 void v850_sar (SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p);
 void v850_shl (SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p);
+void v850_rotl (SIM_DESC sd, unsigned int, unsigned int, unsigned int *);
+void v850_bins (SIM_DESC sd, unsigned int, unsigned int, unsigned int, unsigned int *);
 void v850_shr (SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p);
 void v850_satadd (SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p);
 void v850_satsub (SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p);

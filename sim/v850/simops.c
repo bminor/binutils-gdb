@@ -3281,6 +3281,56 @@ void v850_shl(SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2
   *op2p = result;
 }
 
+void
+v850_rotl (SIM_DESC sd, unsigned int amount, unsigned int src, unsigned int * dest)
+{
+  unsigned int result, z, s, cy;
+
+  amount &= 0x1f;
+  result = src << amount;
+  result |= src >> (32 - amount);
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = ! (result & 1);
+
+  /* Store the result and condition codes.  */
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV | PSW_CY);
+  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0));
+
+  * dest = result;
+}
+
+void
+v850_bins (SIM_DESC sd, unsigned int source, unsigned int lsb, unsigned int msb,
+	   unsigned int * dest)
+{
+  unsigned int mask;
+  unsigned int result, pos, width;
+  unsigned int z, s;
+
+  pos = lsb;
+  width = (msb - lsb) + 1;
+
+  mask = ~ (-1 << width);
+  source &= mask;
+  mask <<= pos;
+  result = (* dest) & ~ mask;
+  result |= source << pos;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = result & 0x80000000;
+
+  /* Store the result and condition codes.  */
+  PSW &= ~(PSW_Z | PSW_S | PSW_OV );
+  PSW |= (z ? PSW_Z : 0) | (s ? PSW_S : 0);
+  
+  * dest = result;
+}
+
 void v850_shr(SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p)
 {
   unsigned int result, z, s, cy;

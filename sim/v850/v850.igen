@@ -19,6 +19,8 @@
 :model:::v850e2:v850e2:
 :option:::multi-sim:true
 :model:::v850e2v3:v850e2v3:
+:option:::multi-sim:true
+:model:::v850e3v5:v850e3v5:
 
 // Cache macros
 
@@ -61,6 +63,7 @@
 
 :cache:::unsigned:bit3:bbb:bbb
 :cache:::unsigned:bit4:bbbb:bbbb
+:cache:::unsigned:bit13:B,BBB:((B << 3) + BBB)
 
 
 // What do we do with an illegal instruction?
@@ -101,6 +104,7 @@ rrrrr,110000,RRRRR + iiiiiiiiiiiiiiii:VI:::addi
 rrrrr,111111,RRRRR + wwwww,011101,cccc!13,0:XI:::adf
 *v850e2
 *v850e2v3
+*v850e3v5
 "adf %s<cccc>, r<reg1>, r<reg2>, r<reg3>"
 {
   int cond = condition_met (cccc);
@@ -185,6 +189,7 @@ ddddd,1011,ddd,cccc:III:::Bcond
 "breakpoint":((disp17 == 0) && (cccc == 0x05))
 "b%s<cccc> <disp17>"
 *v850e2v3
+*v850e3v5
 {
   int cond;
   cond = condition_met (cccc);
@@ -202,6 +207,7 @@ rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "bsh r<reg2>, r<reg3>"
 {
   unsigned32 value;
@@ -229,6 +235,7 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "bsw r<reg2>, r<reg3>"
 {
 #define WORDHASNULLBYTE(x) (((x) - 0x01010101) & ~(x)&0x80808080)
@@ -259,6 +266,7 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "callt <imm6>"
 {
   unsigned32 adr;
@@ -277,6 +285,7 @@ rrrrr,11111100000 + wwwww,01101000000:XII:::bsw
 rrrrr,111111,RRRRR + wwwww,00011101110:IX:::caxi
 *v850e2
 *v850e2v3
+*v850e3v5
 "caxi [reg1], reg2, reg3"
 {
   unsigned int z,s,cy,ov;
@@ -333,6 +342,7 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "clr1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E407E0 ());
@@ -346,6 +356,7 @@ rrrrr,111111,RRRRR + 0000000011100100:IX:::clr1
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "ctret"
 {
   nia  = (CTPC & ~1);
@@ -361,6 +372,7 @@ rrrrr,111111,RRRRR + wwwww,011001,cccc,0:XI:::cmov
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "cmov %s<cccc>, r<reg1>, r<reg2>, r<reg3>"
 {
   int cond = condition_met (cccc);
@@ -374,6 +386,7 @@ rrrrr,111111,iiiii + wwwww,011000,cccc,0:XII:::cmov
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "cmov %s<cccc>, <imm5>, r<reg2>, r<reg3>"
 {
   int cond = condition_met (cccc);
@@ -416,6 +429,7 @@ rrrrr,010011,iiiii:II:::cmp
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "dispose <imm5>, <list12>":RRRRR == 0
 "dispose <imm5>, <list12>, [reg1]"
 {
@@ -451,6 +465,7 @@ rrrrr,111111,RRRRR + wwwww,01011000000:XI:::div
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "div r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_2C007E0 ());
@@ -510,6 +525,7 @@ rrrrr,111111,RRRRR + wwwww,01010000000:XI:::divh
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "divh r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_28007E0 ());
@@ -522,6 +538,7 @@ rrrrr,111111,RRRRR + wwwww,01010000010:XI:::divhu
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "divhu r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_28207E0 ());
@@ -534,6 +551,7 @@ rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "divu r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_2C207E0 ());
@@ -544,6 +562,7 @@ rrrrr,111111,RRRRR + wwwww,01011000010:XI:::divu
 rrrrr,111111,RRRRR + wwwww,01011111100:XI:::divq
 *v850e2
 *v850e2v3
+*v850e3v5
 "divq r<reg1>, r<reg2>, r<reg3>"
 {
   unsigned int quotient;
@@ -567,6 +586,7 @@ rrrrr,111111,RRRRR + wwwww,01011111100:XI:::divq
 rrrrr,111111,RRRRR + wwwww,01011111110:XI:::divqu
 *v850e2
 *v850e2v3
+*v850e3v5
 "divq r<reg1>, r<reg2>, r<reg3>"
 {
   unsigned int quotient;
@@ -600,6 +620,7 @@ rrrrr,111111,RRRRR + wwwww,01011111110:XI:::divqu
 "eiret"
 *v850e2
 *v850e2v3
+*v850e3v5
 {
   TRACE_ALU_INPUT1 (MPM & MPM_AUE);
 
@@ -625,6 +646,7 @@ rrrrr,111111,RRRRR + wwwww,01011111110:XI:::divqu
 "feret"
 *v850e2
 *v850e2v3
+*v850e3v5
 {
   TRACE_ALU_INPUT1 (MPM & MPM_AUE);
 
@@ -649,6 +671,7 @@ rrrrr,111111,RRRRR + wwwww,01011111110:XI:::divqu
 "fetrap"
 *v850e2
 *v850e2v3
+*v850e3v5
 {
   TRACE_ALU_INPUT0 ();
 
@@ -678,6 +701,7 @@ rrrrr,111111,RRRRR + wwwww,01011111110:XI:::divqu
 rrrrr,11111100000 + wwwww,01101000110:XII:::hsh
 *v850e2
 *v850e2v3
+*v850e3v5
 "hsh r<reg2>, r<reg3>"
 {
   unsigned32 value;
@@ -701,6 +725,7 @@ rrrrr,11111100000 + wwwww,01101000100:XII:::hsw
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "hsw r<reg2>, r<reg3>"
 {
   unsigned32 value;
@@ -735,11 +760,22 @@ rrrrr!0,11110,dddddd + ddddddddddddddd,0:V:::jarl
 00000010111,RRRRR!0 + iiiiiiiiiiiiiiii + IIIIIIIIIIIIIIII:VI:::jarl32
 *v850e2
 *v850e2v3
+*v850e3v5
 "jarl <imm32>, r<reg1>"
 {
   GR[reg1] = nia;
   nia = (cia + imm32) & ~1;
 
+  TRACE_BRANCH_RESULT (nia);
+}
+
+
+11000111111,RRRRR + wwwww!0,00101100000:XI:::jarl_reg
+*v850e3v5
+"jarl [r<reg1>], r<reg3>"
+{
+  GR[reg3] = nia;
+  nia = GR[reg1];
   TRACE_BRANCH_RESULT (nia);
 }
 
@@ -755,6 +791,7 @@ rrrrr!0,11110,dddddd + ddddddddddddddd,0:V:::jarl
 00000110111,RRRRR + iiiiiiiiiiiiiiii + IIIIIIIIIIIIIIII:VI:::jmp32
 *v850e2
 *v850e2v3
+*v850e3v5
 "jmp <imm32>[r<reg1>]"
 {
   nia = (GR[reg1] + imm32) & ~1;
@@ -776,6 +813,7 @@ rrrrr!0,11110,dddddd + ddddddddddddddd,0:V:::jarl
 0000001011100000 + iiiiiiiiiiiiiiii + IIIIIIIIIIIIIIII:VI:::jr32
 *v850e2
 *v850e2v3
+*v850e3v5
 "jr <imm32>"
 {
   nia = (cia + imm32) & ~1;
@@ -794,6 +832,7 @@ rrrrr,111000,RRRRR + dddddddddddddddd:VII:::ld.b
 00000111100,RRRRR+wwwww,ddddddd,0101+dddddddddddddddd:XIV:::ld.b
 "ld.b <disp23>[r<reg1>], r<reg3>"
 *v850e2v3
+*v850e3v5
 {
   unsigned32 addr = GR[reg1] + disp23;
   unsigned32 result = EXTEND8 (load_data_mem (sd, addr, 1));
@@ -809,6 +848,7 @@ rrrrr,111001,RRRRR + ddddddddddddddd,0:VII:::ld.h
 
 00000111100,RRRRR+wwwww,dddddd,00111+dddddddddddddddd:XIV:::ld.h
 *v850e2v3
+*v850e3v5
 "ld.h <disp23>[r<reg1>], r<reg3>"
 {
   unsigned32 addr = GR[reg1] + disp23;
@@ -825,6 +865,7 @@ rrrrr,111001,RRRRR + ddddddddddddddd,1:VII:::ld.w
 
 00000111100,RRRRR+wwwww,dddddd,01001+dddddddddddddddd:XIV:::ld.w
 *v850e2v3
+*v850e3v5
 "ld.w <disp23>[r<reg1>], r<reg3>"
 {
   unsigned32 addr = GR[reg1] + disp23;
@@ -833,11 +874,25 @@ rrrrr,111001,RRRRR + ddddddddddddddd,1:VII:::ld.w
   TRACE_LD (addr, result);
 }
 
+00000111101,RRRRR+wwwww,dddddd,01001+dddddddddddddddd:XIV:::ld.dw
+*v850e3v5
+"ld.dw <disp23>[r<reg1>], r<reg3>"
+{
+  unsigned32 addr = GR[reg1] + disp23;
+  unsigned32 result = load_data_mem (sd, addr, 4);
+  GR[reg3] = result;
+  TRACE_LD (addr, result);
+  result = load_data_mem (sd, addr + 4, 4);
+  GR[reg3 + 1] = result;
+  TRACE_LD (addr + 4, result);
+}
+
 rrrrr!0,11110,b,RRRRR + ddddddddddddddd,1:VII:::ld.bu
 *v850e
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "ld.bu <disp16>[r<reg1>], r<reg2>"
 {
   COMPAT_2 (OP_10780 ());
@@ -845,6 +900,7 @@ rrrrr!0,11110,b,RRRRR + ddddddddddddddd,1:VII:::ld.bu
 
 00000111101,RRRRR+wwwww,ddddddd,0101+dddddddddddddddd:XIV:::ld.bu
 *v850e2v3
+*v850e3v5
 "ld.bu <disp23>[r<reg1>], r<reg3>"
 { 
   unsigned32 addr = GR[reg1] + disp23;
@@ -858,6 +914,7 @@ rrrrr!0,111111,RRRRR + ddddddddddddddd,1:VII:::ld.hu
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "ld.hu <disp16>[r<reg1>], r<reg2>"
 {
   COMPAT_2 (OP_107E0 ());
@@ -865,6 +922,7 @@ rrrrr!0,111111,RRRRR + ddddddddddddddd,1:VII:::ld.hu
 
 00000111101,RRRRR+wwwww,dddddd,00111+dddddddddddddddd:XIV:::ld.hu
 *v850e2v3
+*v850e3v5
 "ld.hu <disp23>[r<reg1>], r<reg3>"
 {
   unsigned32 addr = GR[reg1] + disp23;
@@ -883,6 +941,7 @@ regID,111111,RRRRR + 0000000000100000:IX:::ldsr
   TRACE_ALU_INPUT1 (GR[reg1]);
   
    if ((idecode_issue == idecode_v850e2_issue
+       || idecode_issue == idecode_v850e3v5_issue
        || idecode_issue == idecode_v850e2v3_issue)
       && regID < 28)
     {
@@ -1037,6 +1096,7 @@ regID,111111,RRRRR + 0000000000100000:IX:::ldsr
 rrrrr,111111,RRRRR + wwww,0011110,mmmm,0:XI:::mac
 *v850e2
 *v850e2v3
+*v850e3v5
 "mac r<reg1>, r<reg2>, r<reg3e>, r<reg4e>"
 {
   unsigned long op0;
@@ -1110,6 +1170,7 @@ rrrrr,111111,RRRRR + wwww,0011110,mmmm,0:XI:::mac
 rrrrr,111111,RRRRR + wwww,0011111,mmmm,0:XI:::macu
 *v850e2
 *v850e2v3
+*v850e3v5
 "macu r<reg1>, r<reg2>, r<reg3e>, r<reg4e>"
 {
   unsigned long op0;
@@ -1177,6 +1238,7 @@ rrrrr!0,010000,iiiii:II:::mov
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "mov <imm32>, r<reg1>"
 {
   SAVE_2;
@@ -1213,6 +1275,7 @@ rrrrr,111111,RRRRR + wwwww,01000100000:XI:::mul
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "mul r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_22007E0 ());
@@ -1223,6 +1286,7 @@ rrrrr,111111,iiiii + wwwww,01001,IIII,00:XII:::mul
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "mul <imm9>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_24007E0 ());
@@ -1259,6 +1323,7 @@ rrrrr,111111,RRRRR + wwwww,01000100010:XI:::mulu
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "mulu r<reg1>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_22207E0 ());
@@ -1269,6 +1334,7 @@ rrrrr,111111,iiiii + wwwww,01001,IIII,10:XII:::mulu
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "mulu <imm9>, r<reg2>, r<reg3>"
 {
   COMPAT_2 (OP_24207E0 ());
@@ -1306,6 +1372,7 @@ rrrrr,111111,RRRRR + 0000000011100010:IX:::not1
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "not1 r<reg2>, r<reg1>"
 {
   COMPAT_2 (OP_E207E0 ());
@@ -1337,6 +1404,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "prepare <list12>, <imm5>"
 {
   int  i;
@@ -1364,6 +1432,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "prepare <list12>, <imm5>, sp"
 {
   COMPAT_2 (OP_30780 ());
@@ -1374,6 +1443,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "prepare <list12>, <imm5>, <uimm16>"
 {
   COMPAT_2 (OP_B0780 ());
@@ -1384,6 +1454,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "prepare <list12>, <imm5>, <uimm16>"
 {
   COMPAT_2 (OP_130780 ());
@@ -1394,6 +1465,7 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "prepare <list12>, <imm5>, <uimm32>"
 {
   COMPAT_2 (OP_1B0780 ());
@@ -1441,6 +1513,7 @@ rrrrr,010101,iiiii:II:::sar
 rrrrr,111111,RRRRR + wwwww,00010100010:XI:::sar
 *v850e2
 *v850e2v3
+*v850e3v5
 "sar r<reg1>, r<reg2>, r<reg3>"
 {
   TRACE_ALU_INPUT2 (GR[reg1], GR[reg2]);
@@ -1455,6 +1528,7 @@ rrrrr,1111110,cccc + 0000001000000000:IX:::sasf
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "sasf %s<cccc>, r<reg2>"
 {
   COMPAT_2 (OP_20007E0 ());
@@ -1478,6 +1552,7 @@ rrrrr!0,010001,iiiii:II:::satadd
 rrrrr,111111,RRRRR + wwwww,01110111010:XI:::satadd
 *v850e2
 *v850e2v3
+*v850e3v5
 "satadd r<reg1>, r<reg2>, r<reg3>"
 {
   TRACE_ALU_INPUT2 (GR[reg1], GR[reg2]);
@@ -1497,6 +1572,7 @@ rrrrr!0,000101,RRRRR:I:::satsub
 rrrrr,111111,RRRRR + wwwww,01110011010:XI:::satsub
 *v850e2
 *v850e2v3
+*v850e3v5
 "satsub r<reg1>, r<reg2>, r<reg3>"
 {
   TRACE_ALU_INPUT2 (GR[reg1], GR[reg2]);
@@ -1528,6 +1604,7 @@ rrrrr!0,000100,RRRRR:I:::satsubr
 rrrrr,111111,RRRRR + wwwww,011100,cccc!13,0:XI:::sbf
 *v850e2
 *v850e2v3
+*v850e3v5
 "sbf %s<cccc>, r<reg1>, r<reg2>, r<reg3>"
 {
   int cond = condition_met (cccc);
@@ -1542,6 +1619,7 @@ rrrrr,111111,RRRRR + wwwww,011100,cccc!13,0:XI:::sbf
 rrrrr,11111100000 + wwwww,01101100100:IX:::sch0l
 *v850e2
 *v850e2v3
+*v850e3v5
 "sch0l r<reg2>, r<reg3>"
 {
   unsigned int pos, op0;
@@ -1591,6 +1669,7 @@ rrrrr,11111100000 + wwwww,01101100100:IX:::sch0l
 rrrrr,11111100000 + wwwww,01101100000:IX:::sch0r
 *v850e2
 *v850e2v3
+*v850e3v5
 "sch0r r<reg2>, r<reg3>"
 {
   unsigned int pos, op0;
@@ -1638,6 +1717,7 @@ rrrrr,11111100000 + wwwww,01101100000:IX:::sch0r
 rrrrr,11111100000 + wwwww,01101100110:IX:::sch1l
 *v850e2
 *v850e2v3
+*v850e3v5
 "sch1l r<reg2>, r<reg3>"
 {
   unsigned int pos, op0;
@@ -1685,6 +1765,7 @@ rrrrr,11111100000 + wwwww,01101100110:IX:::sch1l
 rrrrr,11111100000 + wwwww,01101100010:IX:::sch1r
 *v850e2
 *v850e2v3
+*v850e3v5
 "sch1r r<reg2>, r<reg3>"
 {
   unsigned int pos, op0;
@@ -1732,6 +1813,7 @@ rrrrr,11111100000 + wwwww,01101100010:IX:::sch1r
 rrrrr,111111,RRRRR + wwwww,00011000010:XI:::shl
 *v850e2
 *v850e2v3
+*v850e3v5
 "shl r<reg1>, r<reg2>, r<reg3>"
 {
   TRACE_ALU_INPUT2 (GR[reg1], GR[reg2]);
@@ -1743,6 +1825,7 @@ rrrrr,111111,RRRRR + wwwww,00011000010:XI:::shl
 rrrrr,111111,RRRRR + wwwww,00010000010:XI:::shr
 *v850e2
 *v850e2v3
+*v850e3v5
 "shr r<reg1>, r<reg2>, r<reg3>"
 {
   TRACE_ALU_INPUT2 (GR[reg1], GR[reg2]);
@@ -1773,6 +1856,7 @@ rrrrr,111111,RRRRR + 0000000011100000:IX:::set1
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "set1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E007E0 ());
@@ -1863,6 +1947,7 @@ rrrrr!0,0000110,dddd:IV:::sld.bu
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "sld.b <disp4>[ep], r<reg2>":(PSW & PSW_US)
 "sld.bu <disp4>[ep], r<reg2>"
 {
@@ -1886,6 +1971,7 @@ rrrrr!0,0000111,dddd:IV:::sld.hu
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "sld.h <disp5>[ep], r<reg2>":(PSW & PSW_US)
 "sld.hu <disp5>[ep], r<reg2>"
 {
@@ -1934,6 +2020,7 @@ rrrrr,111010,RRRRR + dddddddddddddddd:VII:::st.b
 
 00000111100,RRRRR + wwwww,ddddddd,1101 + dddddddddddddddd:XIV:::st.b
 *v850e2v3
+*v850e3v5
 "st.b r<reg3>, <disp23>[r<reg1>]"
 {
   unsigned32 addr = GR[reg1] + disp23;
@@ -1949,6 +2036,7 @@ rrrrr,111011,RRRRR + ddddddddddddddd,0:VII:::st.h
 
 00000111101,RRRRR+wwwww,dddddd,01101+dddddddddddddddd:XIV:::st.h
 *v850e2v3
+*v850e3v5
 "st.h r<reg3>, <disp23>[r<reg1>]"
 {
   unsigned32 addr = GR[reg1] + disp23;
@@ -1964,11 +2052,23 @@ rrrrr,111011,RRRRR + ddddddddddddddd,1:VII:::st.w
 
 00000111100,RRRRR+wwwww,dddddd,01111+dddddddddddddddd:XIV:::st.w
 *v850e2v3
+*v850e3v5
 "st.w r<reg3>, <disp23>[r<reg1>]"
 {
   unsigned32 addr = GR[reg1] + disp23;
   store_data_mem (sd, addr, 4, GR[reg3]);
   TRACE_ST (addr, GR[reg3]);
+}
+
+00000111101,RRRRR+wwwww,dddddd,01111+dddddddddddddddd:XIV:::st.dw
+*v850e3v5
+"st.dw r<reg3>, <disp23>[r<reg1>]"
+{
+  unsigned32 addr = GR[reg1] + disp23;
+  store_data_mem (sd, addr, 4, GR[reg3]);
+  TRACE_ST (addr, GR[reg3]);
+  store_data_mem (sd, addr + 4, 4, GR[reg3 + 1]);
+  TRACE_ST (addr + 4, GR[reg3 + 1]);
 }
 
 
@@ -1979,6 +2079,7 @@ rrrrr,111111,regID + 0000000001000000:IX:::stsr
   uint32 sreg = 0;
 
   if ((idecode_issue == idecode_v850e2_issue
+       || idecode_issue == idecode_v850e3v5_issue
        || idecode_issue == idecode_v850e2v3_issue)
       && regID < 28)
     {
@@ -2057,6 +2158,7 @@ rrrrr,001100,RRRRR:I:::subr
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "switch r<reg1>"
 {
   unsigned long adr;
@@ -2073,6 +2175,7 @@ rrrrr,001100,RRRRR:I:::subr
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "sxb r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -2086,6 +2189,7 @@ rrrrr,001100,RRRRR:I:::subr
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "sxh r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -2119,6 +2223,7 @@ rrrrr,111111,RRRRR + 0000000011100110:IX:::tst1
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "tst1 r<reg2>, [r<reg1>]"
 {
   COMPAT_2 (OP_E607E0 ());
@@ -2144,6 +2249,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "zxb r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -2157,6 +2263,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "zxh r<reg1>"
 {
   TRACE_ALU_INPUT1 (GR[reg1]);
@@ -2177,6 +2284,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "dbtrap"
 {
   if (STATE_OPEN_KIND (SD) == SIM_OPEN_DEBUG)
@@ -2205,6 +2313,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 *v850e1
 *v850e2
 *v850e2v3
+*v850e3v5
 "dbret"
 {
   nia = DBPC;
@@ -2245,6 +2354,7 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 // ABSF.D
 rrrr,011111100000 + wwww,010001011000:F_I:::absf_d
 *v850e2v3
+*v850e3v5
 "absf.d r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop;
@@ -2264,6 +2374,7 @@ rrrr,011111100000 + wwww,010001011000:F_I:::absf_d
 // ABSF.S
 rrrrr,11111100000 + wwwww,10001001000:F_I:::absf_s
 *v850e2v3
+*v850e3v5
 "absf.s r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop;
@@ -2282,6 +2393,7 @@ rrrrr,11111100000 + wwwww,10001001000:F_I:::absf_s
 // ADDF.D
 rrrr,0111111,RRRR,0 + wwww,010001110000:F_I:::addf_d
 *v850e2v3
+*v850e3v5
 "addf.d r<reg1e>, r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop1, wop2;
@@ -2303,6 +2415,7 @@ rrrr,0111111,RRRR,0 + wwww,010001110000:F_I:::addf_d
 // ADDF.S
 rrrrr,111111,RRRRR + wwwww,10001100000:F_I:::addf_s
 *v850e2v3
+*v850e3v5
 "addf.s r<reg1>, r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop1, wop2;
@@ -2324,6 +2437,7 @@ rrrrr,111111,RRRRR + wwwww,10001100000:F_I:::addf_s
 // CMOVF.D
 rrrr,0111111,RRRR,0 + wwww!0,01000001,bbb,0:F_I:::cmovf_d
 *v850e2v3
+*v850e3v5
 "cmovf.d <bbb>, r<reg1e>, r<reg2e>, r<reg3e>"
 {
   unsigned int ophi,oplow;
@@ -2354,6 +2468,7 @@ rrrr,0111111,RRRR,0 + wwww!0,01000001,bbb,0:F_I:::cmovf_d
 // CMOVF.S
 rrrrr,111111,RRRRR!0 + wwwww!0,1000000,bbb,0:F_I:::cmovf_s
 *v850e2v3
+*v850e3v5
 "cmovf.d <bbb>, r<reg1>, r<reg2>, r<reg3>"
 {
   unsigned int op;
@@ -2381,6 +2496,7 @@ rrrrr,111111,RRRRR!0 + wwwww!0,1000000,bbb,0:F_I:::cmovf_s
 // CMPF.D
 rrrr,0111111,RRRR,0 + 0,FFFF,1000011,bbb,0:F_I:::cmpf_d
 *v850e2v3
+*v850e3v5
 "cmpf.d %s<FFFF>, r<reg2e>, r<reg1e>":(bbb == 0)
 "cmpf.d %s<FFFF>, r<reg2e>, r<reg1e>, <bbb>"
 {
@@ -2405,6 +2521,7 @@ rrrr,0111111,RRRR,0 + 0,FFFF,1000011,bbb,0:F_I:::cmpf_d
 // CMPF.S
 rrrrr,111111,RRRRR + 0,FFFF,1000010,bbb,0:F_I:::cmpf_s
 *v850e2v3
+*v850e3v5
 "cmpf.s %s<FFFF>, r<reg2>, r<reg1>":(bbb == 0)
 "cmpf.s %s<FFFF>, r<reg2>, r<reg1>, <bbb>"
 {
@@ -2429,6 +2546,7 @@ rrrrr,111111,RRRRR + 0,FFFF,1000010,bbb,0:F_I:::cmpf_s
 // CVTF.DL
 rrrr,011111100100 + wwww,010001010100:F_I:::cvtf_dl
 *v850e2v3
+*v850e3v5
 "cvtf.dl r<reg2e>, r<reg3e>"
 {
   unsigned64 ans;
@@ -2451,6 +2569,7 @@ rrrr,011111100100 + wwww,010001010100:F_I:::cvtf_dl
 // CVTF.DS
 rrrr,011111100011 + wwwww,10001010010:F_I:::cvtf_ds
 *v850e2v3
+*v850e3v5
 "cvtf.ds r<reg2e>, r<reg3>"
 {
   sim_fpu wop;
@@ -2470,6 +2589,7 @@ rrrr,011111100011 + wwwww,10001010010:F_I:::cvtf_ds
 // CVTF.DW
 rrrr,011111100100 + wwwww,10001010000:F_I:::cvtf_dw
 *v850e2v3
+*v850e3v5
 "cvtf.dw r<reg2e>, r<reg3>"
 {
   uint32 ans;
@@ -2491,6 +2611,7 @@ rrrr,011111100100 + wwwww,10001010000:F_I:::cvtf_dw
 // CVTF.LD
 rrrr,011111100001 + wwww,010001010010:F_I:::cvtf_ld
 *v850e2v3
+*v850e3v5
 "cvtf.ld r<reg2e>, r<reg3e>"
 {
   signed64 op;
@@ -2512,6 +2633,7 @@ rrrr,011111100001 + wwww,010001010010:F_I:::cvtf_ld
 // CVTF.LS
 rrrr,011111100001 + wwwww,10001000010:F_I:::cvtf_ls
 *v850e2v3
+*v850e3v5
 "cvtf.ls r<reg2e>, r<reg3>"
 {
   signed64 op;
@@ -2533,6 +2655,7 @@ rrrr,011111100001 + wwwww,10001000010:F_I:::cvtf_ls
 // CVTF.SD
 rrrrr,11111100010 + wwww,010001010010:F_I:::cvtf_sd
 *v850e2v3
+*v850e3v5
 "cvtf.sd r<reg2>, r<reg3e>"
 {
   sim_fpu wop;
@@ -2551,6 +2674,7 @@ rrrrr,11111100010 + wwww,010001010010:F_I:::cvtf_sd
 // CVTF.SL
 rrrrr,11111100100 + wwww,010001000100:F_I:::cvtf_sl
 *v850e2v3
+*v850e3v5
 "cvtf.sl r<reg2>, r<reg3e>"
 {
   signed64 ans;
@@ -2573,6 +2697,7 @@ rrrrr,11111100100 + wwww,010001000100:F_I:::cvtf_sl
 // CVTF.SW
 rrrrr,11111100100 + wwwww,10001000000:F_I:::cvtf_sw
 *v850e2v3
+*v850e3v5
 "cvtf.sw r<reg2>, r<reg3>"
 {
   uint32 ans;
@@ -2594,6 +2719,7 @@ rrrrr,11111100100 + wwwww,10001000000:F_I:::cvtf_sw
 // CVTF.WD
 rrrrr,11111100000 + wwww,010001010010:F_I:::cvtf_wd
 *v850e2v3
+*v850e3v5
 "cvtf.wd r<reg2>, r<reg3e>"
 {
   sim_fpu wop;
@@ -2612,6 +2738,7 @@ rrrrr,11111100000 + wwww,010001010010:F_I:::cvtf_wd
 // CVTF.WS
 rrrrr,11111100000 + wwwww,10001000010:F_I:::cvtf_ws
 *v850e2v3
+*v850e3v5
 "cvtf.ws r<reg2>, r<reg3>"
 {
   sim_fpu wop;
@@ -2630,6 +2757,7 @@ rrrrr,11111100000 + wwwww,10001000010:F_I:::cvtf_ws
 // DIVF.D
 rrrr,0111111,RRRR,0 + wwww,010001111110:F_I:::divf_d
 *v850e2v3
+*v850e3v5
 "divf.d r<reg1e>, r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop1, wop2;
@@ -2651,6 +2779,7 @@ rrrr,0111111,RRRR,0 + wwww,010001111110:F_I:::divf_d
 // DIVF.S
 rrrrr,111111,RRRRR + wwwww,10001101110:F_I:::divf_s
 *v850e2v3
+*v850e3v5
 "divf.s r<reg1>, r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop1, wop2;
@@ -2672,6 +2801,7 @@ rrrrr,111111,RRRRR + wwwww,10001101110:F_I:::divf_s
 // MADDF.S
 rrrrr,111111,RRRRR + wwwww,101,W,00,WWWW,0:F_I:::maddf_s
 *v850e2v3
+*v850e3v5
 "maddf.s r<reg1>, r<reg2>, r<reg3>, r<reg4>"
 {
   sim_fpu ans, wop1, wop2, wop3;
@@ -2696,6 +2826,7 @@ rrrrr,111111,RRRRR + wwwww,101,W,00,WWWW,0:F_I:::maddf_s
 // MAXF.D
 rrrr,0111111,RRRR,0 + wwww,010001111000:F_I:::maxf_d
 *v850e2v3
+*v850e3v5
 "maxf.d r<reg1e>, r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop1, wop2;
@@ -2733,6 +2864,7 @@ rrrr,0111111,RRRR,0 + wwww,010001111000:F_I:::maxf_d
 // MAXF.S
 rrrrr,111111,RRRRR + wwwww,10001101000:F_I:::maxf_s
 *v850e2v3
+*v850e3v5
 "maxf.s r<reg1>, r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop1, wop2;
@@ -2770,6 +2902,7 @@ rrrrr,111111,RRRRR + wwwww,10001101000:F_I:::maxf_s
 // MINF.D
 rrrr,0111111,RRRR,0 + wwww,010001111010:F_I:::minf_d
 *v850e2v3
+*v850e3v5
 "minf.d r<reg1e>, r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop1, wop2;
@@ -2807,6 +2940,7 @@ rrrr,0111111,RRRR,0 + wwww,010001111010:F_I:::minf_d
 // MINF.S
 rrrrr,111111,RRRRR + wwwww,10001101010:F_I:::minf_s
 *v850e2v3
+*v850e3v5
 "minf.s r<reg1>, r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop1, wop2;
@@ -2844,6 +2978,7 @@ rrrrr,111111,RRRRR + wwwww,10001101010:F_I:::minf_s
 // MSUBF.S
 rrrrr,111111,RRRRR + wwwww,101,W,01,WWWW,0:F_I:::msubf_s
 *v850e2v3
+*v850e3v5
 "msubf.s r<reg1>, r<reg2>, r<reg3>, r<reg4>"
 {
   sim_fpu ans, wop1, wop2, wop3;
@@ -2869,6 +3004,7 @@ rrrrr,111111,RRRRR + wwwww,101,W,01,WWWW,0:F_I:::msubf_s
 // MULF.D
 rrrr,0111111,RRRR,0 + wwww,010001110100:F_I:::mulf_d
 *v850e2v3
+*v850e3v5
 "mulf.d r<reg1e>, r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop1, wop2;
@@ -2890,6 +3026,7 @@ rrrr,0111111,RRRR,0 + wwww,010001110100:F_I:::mulf_d
 // MULF.S
 rrrrr,111111,RRRRR + wwwww,10001100100:F_I:::mulf_s
 *v850e2v3
+*v850e3v5
 "mulf.s r<reg1>, r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop1, wop2;
@@ -2911,6 +3048,7 @@ rrrrr,111111,RRRRR + wwwww,10001100100:F_I:::mulf_s
 // NEGF.D
 rrrr,011111100001 + wwww,010001011000:F_I:::negf_d
 *v850e2v3
+*v850e3v5
 "negf.d r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop;
@@ -2930,6 +3068,7 @@ rrrr,011111100001 + wwww,010001011000:F_I:::negf_d
 // NEGF.S
 rrrrr,11111100001 + wwwww,10001001000:F_I:::negf_s
 *v850e2v3
+*v850e3v5
 "negf.s r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop;
@@ -2949,6 +3088,7 @@ rrrrr,11111100001 + wwwww,10001001000:F_I:::negf_s
 // NMADDF.S
 rrrrr,111111,RRRRR + wwwww,101,W,10,WWWW,0:F_I:::nmaddf_s
 *v850e2v3
+*v850e3v5
 "nmaddf.s r<reg1>, r<reg2>, r<reg3>, r<reg4>"
 {
   sim_fpu ans, wop1, wop2, wop3;
@@ -2975,6 +3115,7 @@ rrrrr,111111,RRRRR + wwwww,101,W,10,WWWW,0:F_I:::nmaddf_s
 // NMSUBF.S
 rrrrr,111111,RRRRR + wwwww,101,W,11,WWWW,0:F_I:::nmsubf_s
 *v850e2v3
+*v850e3v5
 "nmsubf.s r<reg1>, r<reg2>, r<reg3>, r<reg4>"
 {
   sim_fpu ans, wop1, wop2, wop3;
@@ -3002,6 +3143,7 @@ rrrrr,111111,RRRRR + wwwww,101,W,11,WWWW,0:F_I:::nmsubf_s
 // RECIPF.D
 rrrr,011111100001 + wwww,010001011110:F_I:::recipf.d
 *v850e2v3
+*v850e3v5
 "recipf.d r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop;
@@ -3022,6 +3164,7 @@ rrrr,011111100001 + wwww,010001011110:F_I:::recipf.d
 // RECIPF.S
 rrrrr,11111100001 + wwwww,10001001110:F_I:::recipf.s
 *v850e2v3
+*v850e3v5
 "recipf.s r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop;
@@ -3042,6 +3185,7 @@ rrrrr,11111100001 + wwwww,10001001110:F_I:::recipf.s
 // RSQRTF.D
 rrrr,011111100010 + wwww,010001011110:F_I:::rsqrtf.d
 *v850e2v3
+*v850e3v5
 "rsqrtf.d r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop;
@@ -3065,6 +3209,7 @@ rrrr,011111100010 + wwww,010001011110:F_I:::rsqrtf.d
 // RSQRTF.S
 rrrrr,11111100010 + wwwww,10001001110:F_I:::rsqrtf.s
 *v850e2v3
+*v850e3v5
 "rsqrtf.s r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop;
@@ -3088,6 +3233,7 @@ rrrrr,11111100010 + wwwww,10001001110:F_I:::rsqrtf.s
 // SQRTF.D
 rrrr,011111100000 + wwww,010001011110:F_I:::sqrtf.d
 *v850e2v3
+*v850e3v5
 "sqrtf.d r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop;
@@ -3108,6 +3254,7 @@ rrrr,011111100000 + wwww,010001011110:F_I:::sqrtf.d
 // SQRTF.S
 rrrrr,11111100000 + wwwww,10001001110:F_I:::sqrtf.s
 *v850e2v3
+*v850e3v5
 "sqrtf.s r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop;
@@ -3128,6 +3275,7 @@ rrrrr,11111100000 + wwwww,10001001110:F_I:::sqrtf.s
 // SUBF.D
 rrrr,0111111,RRRR,0 + wwww,010001110010:F_I:::subf.d
 *v850e2v3
+*v850e3v5
 "subf.d r<reg1e>, r<reg2e>, r<reg3e>"
 {
   sim_fpu ans, wop1, wop2;
@@ -3149,6 +3297,7 @@ rrrr,0111111,RRRR,0 + wwww,010001110010:F_I:::subf.d
 // SUBF.S
 rrrrr,111111,RRRRR + wwwww,10001100010:F_I:::subf.s
 *v850e2v3
+*v850e3v5
 "subf.s r<reg1>, r<reg2>, r<reg3>"
 {
   sim_fpu ans, wop1, wop2;
@@ -3170,6 +3319,7 @@ rrrrr,111111,RRRRR + wwwww,10001100010:F_I:::subf.s
 // TRFSR
 0000011111100000 + 000001000000,bbb,0:F_I:::trfsr
 *v850e2v3
+*v850e3v5
 "trfsr":(bbb == 0)
 "trfsr <bbb>"
 {
@@ -3186,6 +3336,7 @@ rrrrr,111111,RRRRR + wwwww,10001100010:F_I:::subf.s
 // TRNCF.DL
 rrrr,011111100001 + wwww,010001010100:F_I:::trncf_dl
 *v850e2v3
+*v850e3v5
 "trncf.dl r<reg2e>, r<reg3e>"
 {
   signed64 ans;
@@ -3207,6 +3358,7 @@ rrrr,011111100001 + wwww,010001010100:F_I:::trncf_dl
 // TRNCF.DUL
 rrrr,011111110001 + wwww,010001010100:F_I:::trncf_dul
 *v850e2v3
+*v850e3v5
 "trncf.dul r<reg2e>, r<reg3e>"
 {
   signed64 ans;
@@ -3228,6 +3380,7 @@ rrrr,011111110001 + wwww,010001010100:F_I:::trncf_dul
 // TRNCF.DW
 rrrr,011111100001 + wwwww,10001010000:F_I:::trncf_dw
 *v850e2v3
+*v850e3v5
 "trncf.dw r<reg2e>, r<reg3>"
 {
   uint32 ans;
@@ -3248,6 +3401,7 @@ rrrr,011111100001 + wwwww,10001010000:F_I:::trncf_dw
 // TRNCF.DUW
 rrrr,011111110001 + wwwww,10001010000:F_I:::trncf_duw
 *v850e2v3
+*v850e3v5
 "trncf.duw r<reg2e>, r<reg3>"
 {
   uint32 ans;
@@ -3268,6 +3422,7 @@ rrrr,011111110001 + wwwww,10001010000:F_I:::trncf_duw
 // TRNCF.SL
 rrrrr,11111100001 + wwww,010001000100:F_I:::trncf_sl
 *v850e2v3
+*v850e3v5
 "trncf.sl r<reg2>, r<reg3e>"
 {
   signed64 ans;
@@ -3287,6 +3442,7 @@ rrrrr,11111100001 + wwww,010001000100:F_I:::trncf_sl
 // TRNCF.SUL
 rrrrr,11111110001 + wwww,010001000100:F_I:::trncf_sul
 *v850e2v3
+*v850e3v5
 "trncf.sul r<reg2>, r<reg3e>"
 {
   signed64 ans;
@@ -3306,6 +3462,7 @@ rrrrr,11111110001 + wwww,010001000100:F_I:::trncf_sul
 // TRNCF.SW
 rrrrr,11111100001 + wwwww,10001000000:F_I:::trncf_sw
 *v850e2v3
+*v850e3v5
 "trncf.sw r<reg2>, r<reg3>"
 {
   uint32 ans;
@@ -3327,6 +3484,7 @@ rrrrr,11111100001 + wwwww,10001000000:F_I:::trncf_sw
 // TRNCF.SUW
 rrrrr,11111110001 + wwwww,10001000000:F_I:::trncf_suw
 *v850e2v3
+*v850e3v5
 "trncf.suw r<reg2>, r<reg3>"
 {
   uint32 ans;
@@ -3342,4 +3500,52 @@ rrrrr,11111110001 + wwwww,10001000000:F_I:::trncf_suw
 
   GR[reg3] = ans;
   TRACE_FP_RESULT_WORD1 (ans);
+}
+
+
+// ROTL
+rrrrr,111111,iiiii+wwwww,00011000100:VII:::rotl_imm
+*v850e3v5
+"rotl imm5, r<reg2>, r<reg3>"
+{
+  TRACE_ALU_INPUT1 (GR[reg2]);
+  v850_rotl (sd, imm5, GR[reg2], & GR[reg3]);
+  TRACE_ALU_RESULT1 (GR[reg3]);
+}
+
+rrrrr,111111,RRRRR+wwwww,00011000110:VII:::rotl
+*v850e3v5
+"rotl r<reg1>, r<reg2>, r<reg3>"
+{
+  TRACE_ALU_INPUT2 (GR[reg1], GR[reg2]);
+  v850_rotl (sd, GR[reg1], GR[reg2], & GR[reg3]);
+  TRACE_ALU_RESULT1 (GR[reg3]);
+}
+
+// BINS
+rrrrr,111111,RRRRR+bbbb,B,0001001,BBB,0:IX:::bins_top
+*v850e3v5
+"bins r<reg1>, <bit13> + 16, <bit4> - <bit13> + 17, r<reg2>"
+{
+  TRACE_ALU_INPUT1 (GR[reg1]);
+  v850_bins (sd, GR[reg1], bit13 + 16, bit4 + 16, & GR[reg2]);
+  TRACE_ALU_RESULT1 (GR[reg2]);
+}
+
+rrrrr,111111,RRRRR+bbbb,B,0001011,BBB,0:IX:::bins_middle
+*v850e3v5
+"bins r<reg1>, <bit13>, <bit4> - <bit13> + 17, r<reg2>"
+{
+  TRACE_ALU_INPUT1 (GR[reg1]);
+  v850_bins (sd, GR[reg1], bit13, bit4 + 16, & GR[reg2]);
+  TRACE_ALU_RESULT1 (GR[reg2]);
+}
+
+rrrrr,111111,RRRRR+bbbb,B,0001101,BBB,0:IX:::bins_bottom
+*v850e3v5
+"bins r<reg1>, <bit13>, <bit4> - <bit13> + 1, r<reg2>"
+{
+  TRACE_ALU_INPUT1 (GR[reg1]);
+  v850_bins (sd, GR[reg1], bit13, bit4, & GR[reg2]);
+  TRACE_ALU_RESULT1 (GR[reg2]);
 }

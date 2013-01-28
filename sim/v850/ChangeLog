@@ -1,3 +1,12 @@
+2013-01-28  Nick Clifton  <nickc@redhat.com>
+
+	* simops.c (v850_rotl): New function.
+	(v850_bins): New function.
+	* simops.h: Add prototypes fir v850_rotl and v850_bins.
+	* v850-dc: Add entries for V850e3v5.
+	* v850.igen: Add support for v850e3v5.
+	(ld.dw, st.dw, rotl, bins): New patterns.
+
 2013-01-10  Nick Clifton  <nickc@redhat.com>
 
 	* interp.c (sim_open): Add support for bfd_arch_v850_rh850

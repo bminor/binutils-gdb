@@ -281,6 +281,7 @@ sim_open (kind, cb, abfd, argv)
     case bfd_mach_v850e1:
     case bfd_mach_v850e2:
     case bfd_mach_v850e2v3:
+    case bfd_mach_v850e3v5:
       STATE_CPU (sd, 0)->psw_mask = (PSW_NP | PSW_EP | PSW_ID | PSW_SAT
 				     | PSW_CY | PSW_OV | PSW_S | PSW_Z);
       break;
