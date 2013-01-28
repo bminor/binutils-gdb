@@ -1,5 +1,14 @@
 2013-01-28  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c: Use %T to print symbols names and remove redundant
+	"relocation" in error messages throughout file.
+	(ppc64_elf_relocate_section): Remove sibling call error message,
+	replace with "call lacks nop".  Specially report errors for
+	branches to function entry points via OPD lookup and branches
+	to stubs.  Remove NULL symbol handling now done by %T.
+
+2013-01-28  Alan Modra  <amodra@gmail.com>
+
 	* archive.c (bfd_generic_archive_p): Return target and keep
 	ardata on partial matches.
 	* format.c (bfd_check_format_matches): Adjust for above
