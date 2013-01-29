@@ -1,3 +1,8 @@
+2013-01-29  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rl78.c (rl78_cons_fix_new): Handle user-specified
+	relocs in .word/.etc statements.
+
 2013-01-29  Roland McGrath  <mcgrathr@google.com>
 
 	* config/tc-arm.c (md_apply_fix): Use as_bad_where for "bad

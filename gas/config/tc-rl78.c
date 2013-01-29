@@ -554,6 +554,23 @@ rl78_cons_fix_new (fragS *	frag,
       return;
     }
 
+  switch (exp->X_md)
+    {
+    case BFD_RELOC_RL78_LO16:
+    case BFD_RELOC_RL78_HI16:
+      if (size != 2)
+	as_bad (_("%%hi16/%%lo16 only applies to .short or .hword"));
+      type = exp->X_md;
+      break;
+    case BFD_RELOC_RL78_HI8:
+      if (size != 1)
+	as_bad (_("%%hi8 only applies to .byte"));
+      type = exp->X_md;
+      break;
+    default:
+      break;
+    }
+
   if (exp->X_op == O_subtract && exp->X_op_symbol)
     {
       if (size != 4 && size != 2 && size != 1)

@@ -3098,9 +3098,15 @@ rx_elf_object_p (bfd * abfd)
 	{
 	  Elf_Internal_Shdr *sec = elf_tdata(abfd)->elf_sect_ptr[u];
 
+<<<<<<< elf32-rx.c
+	  if (phdr[i].p_offset <= (bfd_vma) sec->sh_offset
+	      && (bfd_vma)sec->sh_offset <= phdr[i].p_offset + (phdr[i].p_filesz - 1)
+	      && sec->sh_size > 0)
+=======
 	  if (phdr[i].p_filesz
 	      && phdr[i].p_offset <= (bfd_vma) sec->sh_offset
 	      && (bfd_vma)sec->sh_offset <= phdr[i].p_offset + (phdr[i].p_filesz - 1))
+>>>>>>> 1.20
 	    {
 	      /* Found one!  The difference between the two addresses,
 		 plus the difference between the two file offsets, is
@@ -3113,7 +3119,7 @@ rx_elf_object_p (bfd * abfd)
 		 The correct LMA for the section is fffc0140 + (2050-2010).
 	      */
 
-	      phdr[i].p_vaddr = sec->sh_addr + (sec->sh_offset - phdr[i].p_offset);
+	      phdr[i].p_vaddr = sec->sh_addr - (sec->sh_offset - phdr[i].p_offset);
 	      break;
 	    }
 	}
@@ -3123,9 +3129,15 @@ rx_elf_object_p (bfd * abfd)
       bsec = abfd->sections;
       while (bsec)
 	{
+<<<<<<< elf32-rx.c
+	  if (bsec->flags & (SEC_LOAD | SEC_ALLOC)
+	      && phdr[i].p_offset <= (bfd_vma) bsec->filepos
+	      && (bfd_vma) bsec->filepos <= phdr[i].p_offset + (phdr[i].p_filesz - 1))
+=======
 	  if (phdr[i].p_filesz
 	      && phdr[i].p_vaddr <= bsec->vma
 	      && bsec->vma <= phdr[i].p_vaddr + (phdr[i].p_filesz - 1))
+>>>>>>> 1.20
 	    {
 	      bsec->lma = phdr[i].p_paddr + (bsec->vma - phdr[i].p_vaddr);
 	    }
