@@ -55,12 +55,16 @@ namespace gold {
 
 class Dwp_output_file;
 
-// An input file.
-// This class may represent either a .dwo file or a .dwp file
-// produced by an earlier run.
-
 template <int size, bool big_endian>
 class Sized_relobj_dwo;
+
+// List of .dwo files to process.
+typedef std::vector<std::string> File_list;
+
+// An input file.
+// This class may represent a .dwo file, a .dwp file
+// produced by an earlier run, or an executable file whose
+// debug section identifies a set of .dwo files to read.
 
 class Dwo_file
 {
@@ -71,6 +75,11 @@ class Dwo_file
   { }
 
   ~Dwo_file();
+
+  // Read the input executable file and extract the list of .dwo files
+  // that it references.
+  void
+  read_executable(File_list* files);
 
   // Read the input file and send its contents to OUTPUT_FILE.
   void
@@ -95,8 +104,7 @@ class Dwo_file
   // and record the target info.  P is a pointer to the ELF header
   // in memory.
   Relobj*
-  make_object(int size, bool big_endian, const unsigned char* p,
-	      Input_file* input_file, Dwp_output_file* output_file);
+  make_object(Dwp_output_file* output_file);
 
   template <int size, bool big_endian>
   Relobj*
@@ -631,6 +639,38 @@ class Dwp_output_file
   unsigned int last_tu_slot_;
 };
 
+// A specialization of Dwarf_info_reader, for reading dwo_names from
+// DWARF CUs.
+
+class Dwo_name_info_reader : public Dwarf_info_reader
+{
+ public:
+  Dwo_name_info_reader(Relobj* object, unsigned int shndx)
+    : Dwarf_info_reader(false, object, NULL, 0, shndx, 0, 0),
+      files_(NULL)
+  { }
+
+  ~Dwo_name_info_reader()
+  { }
+
+  // Get the dwo_names from the DWARF compilation unit DIEs.
+  void
+  get_dwo_names(File_list* files)
+  { 
+    this->files_ = files;
+    this->parse();
+  }
+
+ protected:
+  // Visit a compilation unit.
+  virtual void
+  visit_compilation_unit(off_t cu_offset, off_t cu_length, Dwarf_die*);
+
+ private:
+  // The list of files to populate.
+  File_list* files_;
+};
+
 // A specialization of Dwarf_info_reader, for reading dwo_ids and
 // type signatures from DWARF CUs and TUs.
 
@@ -639,13 +679,8 @@ class Dwo_id_info_reader : public Dwarf_info_reader
  public:
   Dwo_id_info_reader(bool is_type_unit,
 		     Relobj* object,
-		     const unsigned char* symbols,
-		     off_t symbols_size,
-		     unsigned int shndx,
-		     unsigned int reloc_shndx,
-		     unsigned int reloc_type)
-    : Dwarf_info_reader(is_type_unit, object, symbols, symbols_size, shndx,
-			reloc_shndx, reloc_type),
+		     unsigned int shndx)
+    : Dwarf_info_reader(is_type_unit, object, NULL, 0, shndx, 0, 0),
       dwo_id_found_(false), dwo_id_(0), type_sig_found_(false), type_sig_(0)
   { }
 
@@ -685,10 +720,6 @@ class Dwo_id_info_reader : public Dwarf_info_reader
 		  Dwarf_die*);
 
  private:
-  // Visit a top-level DIE.
-  void
-  visit_top_die(Dwarf_die* die);
-
   // TRUE if we found a dwo_id.
   bool dwo_id_found_;
   // The dwo_id.
@@ -772,10 +803,56 @@ Sized_relobj_dwo<size, big_endian>::do_decompressed_section_contents(
 
 Dwo_file::~Dwo_file()
 {
-  if (this->input_file_ != NULL)
-    delete this->input_file_;
   if (this->obj_ != NULL)
     delete this->obj_;
+  if (this->input_file_ != NULL)
+    delete this->input_file_;
+}
+
+// Read the input executable file and extract the list of .dwo files
+// that it references.
+
+void
+Dwo_file::read_executable(File_list* files)
+{
+  this->obj_ = this->make_object(NULL);
+
+  unsigned int shnum = this->shnum();
+  this->is_compressed_.resize(shnum);
+  this->shndx_map_.resize(shnum);
+
+  unsigned int debug_info = 0;
+  unsigned int debug_abbrev = 0;
+
+  // Scan the section table and collect the debug sections we need.
+  // (Section index 0 is a dummy section; skip it.)
+  for (unsigned int i = 1; i < shnum; i++)
+    {
+      if (this->section_type(i) != elfcpp::SHT_PROGBITS)
+	continue;
+      std::string sect_name = this->section_name(i);
+      const char* suffix = sect_name.c_str();
+      if (is_prefix_of(".debug_", suffix))
+	suffix += 7;
+      else if (is_prefix_of(".zdebug_", suffix))
+	{
+	  this->is_compressed_[i] = true;
+	  suffix += 8;
+	}
+      else
+	continue;
+      if (strcmp(suffix, "info") == 0)
+	debug_info = i;
+      else if (strcmp(suffix, "abbrev") == 0)
+	debug_abbrev = i;
+    }
+
+  if (debug_info > 0)
+    {
+      Dwo_name_info_reader dwarf_reader(this->obj_, debug_info);
+      dwarf_reader.set_abbrev_shndx(debug_abbrev);
+      dwarf_reader.get_dwo_names(files);
+    }
 }
 
 // Read the input file and send its contents to OUTPUT_FILE.
@@ -783,35 +860,7 @@ Dwo_file::~Dwo_file()
 void
 Dwo_file::read(Dwp_output_file* output_file)
 {
-  // Open the input file.
-  this->input_file_ = new Input_file(this->name_);
-  Dirsearch dirpath;
-  int index;
-  if (!this->input_file_->open(dirpath, NULL, &index))
-    gold_fatal(_("%s: can't open"), this->name_);
-  
-  // Check that it's an ELF file.
-  off_t filesize = this->input_file_->file().filesize();
-  int hdrsize = elfcpp::Elf_recognizer::max_header_size;
-  if (filesize < hdrsize)
-    hdrsize = filesize;
-  const unsigned char* p =
-      this->input_file_->file().get_view(0, 0, hdrsize, true, false);
-  if (!elfcpp::Elf_recognizer::is_elf_file(p, hdrsize))
-    gold_fatal(_("%s: not an ELF object file"), this->name_);
-  
-  // Get the size, endianness, machine, etc. info from the header,
-  // make an appropriately-sized Relobj, and pass the target info
-  // to the output object.
-  int size;
-  bool big_endian;
-  std::string error;
-  if (!elfcpp::Elf_recognizer::is_valid_header(p, hdrsize, &size,
-					       &big_endian, &error))
-    gold_fatal(_("%s: %s"), this->name_, error.c_str());
-
-  this->obj_ = this->make_object(size, big_endian, p, this->input_file_,
-				 output_file);
+  this->obj_ = this->make_object(output_file);
 
   unsigned int shnum = this->shnum();
   this->is_compressed_.resize(shnum);
@@ -906,8 +955,7 @@ Dwo_file::read(Dwp_output_file* output_file)
     {
       // Extract the dwo_id from .debug_info.dwo section.
       uint64_t dwo_id;
-      Dwo_id_info_reader dwarf_reader(false, this->obj_, NULL, 0, debug_info,
-				      0, 0);
+      Dwo_id_info_reader dwarf_reader(false, this->obj_, debug_info);
       dwarf_reader.set_abbrev_shndx(debug_abbrev);
       if (!dwarf_reader.get_dwo_id(&dwo_id))
 	gold_fatal(_("%s: .debug_info.dwo section does not have DW_AT_GNU_dwo_id "
@@ -924,7 +972,7 @@ Dwo_file::read(Dwp_output_file* output_file)
       // Extract the type signature from .debug_types.dwo section.
       uint64_t type_sig;
       gold_assert(*tp > 0);
-      Dwo_id_info_reader dwarf_reader(true, this->obj_, NULL, 0, *tp, 0, 0);
+      Dwo_id_info_reader dwarf_reader(true, this->obj_, *tp);
       dwarf_reader.set_abbrev_shndx(debug_abbrev);
       if (!dwarf_reader.get_type_sig(&type_sig))
 	gold_fatal(_("%s: .debug_types.dwo section does not have type signature"),
@@ -935,24 +983,52 @@ Dwo_file::read(Dwp_output_file* output_file)
 }
 
 // Create a Sized_relobj_dwo of the given size and endianness,
-// and record the target info.  P is a pointer to the ELF header
-// in memory.
+// and record the target info.
 
 Relobj*
-Dwo_file::make_object(int size, bool big_endian, const unsigned char* p,
-		      Input_file* input_file, Dwp_output_file* output_file)
+Dwo_file::make_object(Dwp_output_file* output_file)
 {
+  // Open the input file.
+  Input_file* input_file = new Input_file(this->name_);
+  this->input_file_ = input_file;
+  Dirsearch dirpath;
+  int index;
+  if (!input_file->open(dirpath, NULL, &index))
+    gold_fatal(_("%s: can't open"), this->name_);
+  
+  // Check that it's an ELF file.
+  off_t filesize = input_file->file().filesize();
+  int hdrsize = elfcpp::Elf_recognizer::max_header_size;
+  if (filesize < hdrsize)
+    hdrsize = filesize;
+  const unsigned char* elf_header =
+      input_file->file().get_view(0, 0, hdrsize, true, false);
+  if (!elfcpp::Elf_recognizer::is_elf_file(elf_header, hdrsize))
+    gold_fatal(_("%s: not an ELF object file"), this->name_);
+  
+  // Get the size, endianness, machine, etc. info from the header,
+  // make an appropriately-sized Relobj, and pass the target info
+  // to the output object.
+  int size;
+  bool big_endian;
+  std::string error;
+  if (!elfcpp::Elf_recognizer::is_valid_header(elf_header, hdrsize, &size,
+					       &big_endian, &error))
+    gold_fatal(_("%s: %s"), this->name_, error.c_str());
+
   if (size == 32)
     {
       if (big_endian)
 #ifdef HAVE_TARGET_32_BIG
-	return this->sized_make_object<32, true>(p, input_file, output_file);
+	return this->sized_make_object<32, true>(elf_header, input_file,
+						 output_file);
 #else
 	gold_unreachable();
 #endif
       else
 #ifdef HAVE_TARGET_32_LITTLE
-	return this->sized_make_object<32, false>(p, input_file, output_file);
+	return this->sized_make_object<32, false>(elf_header, input_file,
+						  output_file);
 #else
 	gold_unreachable();
 #endif
@@ -961,13 +1037,15 @@ Dwo_file::make_object(int size, bool big_endian, const unsigned char* p,
     {
       if (big_endian)
 #ifdef HAVE_TARGET_64_BIG
-	return this->sized_make_object<64, true>(p, input_file, output_file);
+	return this->sized_make_object<64, true>(elf_header, input_file,
+						 output_file);
 #else
 	gold_unreachable();
 #endif
       else
 #ifdef HAVE_TARGET_64_LITTLE
-	return this->sized_make_object<64, false>(p, input_file, output_file);
+	return this->sized_make_object<64, false>(elf_header, input_file,
+						  output_file);
 #else
 	gold_unreachable();
 #endif
@@ -988,10 +1066,11 @@ Dwo_file::sized_make_object(const unsigned char* p, Input_file* input_file,
   Sized_relobj_dwo<size, big_endian>* obj =
       new Sized_relobj_dwo<size, big_endian>(this->name_, input_file, ehdr);
   obj->setup();
-  output_file->record_target_info(
-      this->name_, ehdr.get_e_machine(), size, big_endian,
-      ehdr.get_e_ident()[elfcpp::EI_OSABI],
-      ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
+  if (output_file != NULL)
+    output_file->record_target_info(
+	this->name_, ehdr.get_e_machine(), size, big_endian,
+	ehdr.get_e_ident()[elfcpp::EI_OSABI],
+	ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
   return obj;
 }
 
@@ -1962,6 +2041,18 @@ Dwp_output_file::sized_write_shdr(const char* name, unsigned int type,
     gold_fatal(_("%s: error writing section header table"), this->name_);
 }
 
+// Class Dwo_name_info_reader.
+
+// Visit a compilation unit.
+
+void
+Dwo_name_info_reader::visit_compilation_unit(off_t, off_t, Dwarf_die* die)
+{
+  const char* dwo_name = die->string_attribute(elfcpp::DW_AT_GNU_dwo_name);
+  if (dwo_name != NULL)
+      this->files_->push_back(dwo_name);
+}
+
 // Class Dwo_id_info_reader.
 
 // Visit a compilation unit.
@@ -1977,7 +2068,8 @@ Dwo_id_info_reader::visit_compilation_unit(off_t, off_t, Dwarf_die* die)
 // Visit a type unit.
 
 void
-Dwo_id_info_reader::visit_type_unit(off_t, off_t, uint64_t signature, Dwarf_die*)
+Dwo_id_info_reader::visit_type_unit(off_t, off_t, uint64_t signature,
+				    Dwarf_die*)
 {
   this->type_sig_ = signature;
   this->type_sig_found_ = true;
@@ -1991,6 +2083,7 @@ using namespace gold;
 
 struct option dwp_options[] =
   {
+    { "exec", required_argument, NULL, 'e' },
     { "help", no_argument, NULL, 'h' },
     { "output", required_argument, NULL, 'o' },
     { "verbose", no_argument, NULL, 'v' },
@@ -2003,10 +2096,11 @@ struct option dwp_options[] =
 static void
 usage(FILE* fd, int exit_status)
 {
-  fprintf(fd, _("Usage: %s [options] file...\n"), program_name);
+  fprintf(fd, _("Usage: %s [options] [file...]\n"), program_name);
   fprintf(fd, _("  -h, --help               Print this help message\n"));
-  fprintf(fd, _("  -o FILE, --output FILE   Set output dwp file name"
-		    " (required)\n"));
+  fprintf(fd, _("  -e EXE, --exec EXE       Get list of dwo files from EXE"
+		" (defaults output to EXE.dwp)\n"));
+  fprintf(fd, _("  -o FILE, --output FILE   Set output dwp file name\n"));
   fprintf(fd, _("  -v, --verbose            Verbose output\n"));
   fprintf(fd, _("  -V, --version            Print version number\n"));
 
@@ -2063,19 +2157,22 @@ main(int argc, char** argv)
   expandargv(&argc, &argv);
 
   // Collect file names and options.
-  typedef std::vector<char*> File_list;
   File_list files;
-  const char* output_filename = NULL;
+  std::string output_filename;
+  const char* exe_filename = NULL;
   bool verbose = false;
   int c;
-  while ((c = getopt_long(argc, argv, "ho:vV", dwp_options, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "e:ho:vV", dwp_options, NULL)) != -1)
     {
       switch (c)
         {
 	  case 'h':
 	    usage(stdout, EXIT_SUCCESS);
+	  case 'e':
+	    exe_filename = optarg;
+	    break;
 	  case 'o':
-	    output_filename = optarg;
+	    output_filename.assign(optarg);
 	    break;
 	  case 'v':
 	    verbose = true;
@@ -2087,22 +2184,37 @@ main(int argc, char** argv)
 	    usage(stderr, EXIT_FAILURE);
 	}
     }
+
+  if (output_filename.empty())
+    {
+      if (exe_filename == NULL)
+	gold_fatal(_("no output file specified"));
+      output_filename.assign(exe_filename);
+      output_filename.append(".dwp");
+    }
+
+  Dwp_output_file output_file(output_filename.c_str());
+
+  // Get list of .dwo files from the executable.
+  if (exe_filename != NULL)
+    {
+      Dwo_file exe_file(exe_filename);
+      exe_file.read_executable(&files);
+    }
+
+  // Add any additional files listed on command line.
   for (int i = optind; i < argc; ++i)
     files.push_back(argv[i]);
 
-  if (files.empty())
-    gold_fatal(_("no input files"));
-  if (output_filename == NULL)
-    gold_fatal(_("no output file specified"));
+  if (exe_filename == NULL && files.empty())
+    gold_fatal(_("no input files and no executable specified"));
 
-  Dwp_output_file output_file(output_filename);
-  
   // Process each file, adding its contents to the output file.
   for (File_list::const_iterator f = files.begin(); f != files.end(); ++f)
     {
       if (verbose)
-        fprintf(stderr, "%s\n", *f);
-      Dwo_file dwo_file(*f);
+        fprintf(stderr, "%s\n", f->c_str());
+      Dwo_file dwo_file(f->c_str());
       dwo_file.read(&output_file);
     }
 

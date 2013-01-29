@@ -1,3 +1,17 @@
+2013-01-28  Cary Coutant  <ccoutant@google.com>
+
+    	* dwp.cc (File_list): New typedef.
+    	(Dwo_name_info_reader): New class.
+    	(Dwo_id_info_reader::Dwo_id_info_reader): Remove unused parameters.
+    	(Dwo_id_info_reader::visit_top_die): Remove unused member function.
+    	(Dwo_file::~Dwo_file): Delete input_file_ after obj_.
+    	(Dwo_file::read_executable): New function.
+    	(Dwo_file::read): Move common setup code to ...
+    	(Dwo_file::make_object): ... here.
+    	(dwp_options): Add --exec/-e.
+    	(usage): Likewise.
+    	(main): Likewise.
+
 2013-01-24  Sriraman Tallam  <tmsriram@google.com>
 
 	* layout.cc (Layout::layout): Check for option text_reorder.
