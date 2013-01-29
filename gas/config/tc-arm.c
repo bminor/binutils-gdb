@@ -887,7 +887,7 @@ skip_past_char (char ** str, char c)
 {
   /* PR gas/14987: Allow for whitespace before the expected character.  */
   skip_whitespace (*str);
-  
+
   if (**str == c)
     {
       (*str)++;
@@ -21549,8 +21549,9 @@ md_apply_fix (fixS *	fixP,
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid literal constant: pool needs to be closer"));
 	  else
-	    as_bad (_("bad immediate value for 8-bit offset (%ld)"),
-		    (long) value);
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("bad immediate value for 8-bit offset (%ld)"),
+			  (long) value);
 	  break;
 	}
 

@@ -1,3 +1,8 @@
+2013-01-29  Roland McGrath  <mcgrathr@google.com>
+
+	* config/tc-arm.c (md_apply_fix): Use as_bad_where for "bad
+	immediate value for 8-bit offset" error so it shows line info.
+
 2013-01-24  Joseph Myers  <joseph@codesourcery.com>
 
 	* config/tc-ppc.c (md_assemble): Do not generate APUinfo sections
