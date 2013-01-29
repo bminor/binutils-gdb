@@ -32,3 +32,7 @@ gdb_test "break main" "Breakpoint.*at.*"
 
 # If we get this far gdb didn't crash, nor did an error occur.
 pass $testfile
+
+gdb_unload
+# If we get this far gdb didn't crash, nor did an error occur.
+pass "$testfile - unload"

@@ -1,5 +1,9 @@
 2013-01-29  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (free_dwo_file): Remove assert.
+
+2013-01-29  Tom Tromey  <tromey@redhat.com>
+
 	* value.c (deprecated_set_value_modifiable): Remove.
 	* value.h (deprecated_set_value_modifiable): Remove.
 
