@@ -1,7 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010, 2011, 2012, 2013
-   Free Software Foundation, Inc.
+   Copyright 1998-2013 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -8469,8 +8467,8 @@ process_version_sections (FILE * file)
 		int j;
 		int isum;
 
-		/* Check for negative or very large indicies.  */
-		if ((unsigned char *) edefs + idx < (unsigned char *) edefs)
+		/* Check for very large indicies.  */
+		if (idx > (size_t) (endbuf - (char *) edefs))
 		  break;
 
 		vstart = ((char *) edefs) + idx;
@@ -8494,8 +8492,7 @@ process_version_sections (FILE * file)
 			ent.vd_ndx, ent.vd_cnt);
 
 		/* Check for overflow.  */
-		if ((unsigned char *)(vstart + ent.vd_aux) < (unsigned char *) vstart
-		    || (unsigned char *)(vstart + ent.vd_aux) > (unsigned char *) endbuf)
+		if (ent.vd_aux > (size_t) (endbuf - vstart))
 		  break;
 
 		vstart += ent.vd_aux;
@@ -8515,8 +8512,7 @@ process_version_sections (FILE * file)
 		for (j = 1; j < ent.vd_cnt; j++)
 		  {
 		    /* Check for overflow.  */
-		    if ((unsigned char *)(vstart + aux.vda_next) < (unsigned char *) vstart
-			|| (unsigned char *)(vstart + aux.vda_next) > (unsigned char *) endbuf)
+		    if (aux.vda_next > (size_t) (endbuf - vstart))
 		      break;
 
 		    isum   += aux.vda_next;
@@ -8586,7 +8582,7 @@ process_version_sections (FILE * file)
 		int isum;
 		char * vstart;
 
-		if ((unsigned char *) eneed + idx < (unsigned char *) eneed)
+		if (idx > (size_t) (endbuf - (char *) eneed))
 		  break;
 
 		vstart = ((char *) eneed) + idx;
@@ -8611,8 +8607,7 @@ process_version_sections (FILE * file)
 		printf (_("  Cnt: %d\n"), ent.vn_cnt);
 
 		/* Check for overflow.  */
-		if ((unsigned char *)(vstart + ent.vn_aux) < (unsigned char *) vstart
-		    || (unsigned char *)(vstart + ent.vn_aux) > (unsigned char *) endbuf)
+		if (ent.vn_aux > (size_t) (endbuf - vstart))
 		  break;
 
 		vstart += ent.vn_aux;
@@ -8643,8 +8638,7 @@ process_version_sections (FILE * file)
 			    get_ver_flags (aux.vna_flags), aux.vna_other);
 
 		    /* Check for overflow.  */
-		    if ((unsigned char *)(vstart + aux.vna_next) < (unsigned char *) vstart
-			|| (unsigned char *)(vstart + aux.vna_next) > (unsigned char *) endbuf)
+		    if (aux.vna_next > (size_t) (endbuf - vstart))
 		      break;
 
 		    isum   += aux.vna_next;

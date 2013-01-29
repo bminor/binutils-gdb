@@ -1,3 +1,8 @@
+2013-01-29  Xi Wang  <xi.wang@gmail.com>
+
+	* readelf.c (process_version_sections): Fix overflow checks to
+	avoid undefined behaviour.
+
 2013-01-28  Doug Evans  <dje@google.com>
 
 	* dwarf.c (display_gdb_index): Handle .gdb_index version 8.
