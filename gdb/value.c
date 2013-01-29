@@ -1198,11 +1198,6 @@ deprecated_value_modifiable (struct value *value)
 {
   return value->modifiable;
 }
-void
-deprecated_set_value_modifiable (struct value *value, int modifiable)
-{
-  value->modifiable = modifiable;
-}
 
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed

@@ -90,8 +90,6 @@ extern void set_value_offset (struct value *, int offset);
    not_lval and be done with it?  */
 
 extern int deprecated_value_modifiable (struct value *value);
-extern void deprecated_set_value_modifiable (struct value *value,
-					     int modifiable);
 
 /* If a value represents a C++ object, then the `type' field gives the
    object's compile-time type.  If the object actually belongs to some

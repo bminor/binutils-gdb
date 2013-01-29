@@ -1,3 +1,8 @@
+2013-01-29  Tom Tromey  <tromey@redhat.com>
+
+	* value.c (deprecated_set_value_modifiable): Remove.
+	* value.h (deprecated_set_value_modifiable): Remove.
+
 2013-01-28  Doug Evans  <dje@google.com>
 
 	* dwarf2loc.c (dwarf2_find_location_expression): Don't add base address
