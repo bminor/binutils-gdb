@@ -1,3 +1,9 @@
+2013-01-30  Markos Chandras  <markos.chandras@imgtec.com>
+
+	* gas/metag/metacore21-invalid.s: Add invalid SWAP testcases.
+	* gas/metag/metacore21-invalid.l: Add expected output for invalid
+	SWAP testcases.
+
 2013-01-28  Alexis Deruelle  <alexis.deruelle@gmail.com>
 
 	PR gas/15069

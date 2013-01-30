@@ -15,3 +15,9 @@
 .*:8: Error: .*
 .*:8: Error: .*
 .*:8: Error: .*
+.*:9: Error: .*
+.*:9: Error: .*
+.*:10: Error: .*
+.*:10: Error: .*
+.*:11: Error: .*
+.*:11: Error: .*

@@ -2026,11 +2026,37 @@ parse_swap (const char *line, metag_insn *insn,
   if (l == NULL)
     return NULL;
 
-  insn->bits = (template->meta_opcode |
-		(regs[1]->no << 19) |
-		(regs[0]->no << 14) |
-		(regs[1]->unit << 10) |
-		(regs[0]->unit << 5));
+  /* PC.r | CT.r | TR.r | TT.r are treated as if they are a single unit.  */
+  switch (regs[0]->unit)
+    {
+    case UNIT_PC:
+    case UNIT_CT:
+    case UNIT_TR:
+    case UNIT_TT:
+      if (regs[1]->unit == UNIT_PC
+	  || regs[1]->unit == UNIT_CT
+	  || regs[1]->unit == UNIT_TR
+	  || regs[1]->unit == UNIT_TT)
+	{
+	  as_bad (_("PC, CT, TR and TT are treated as if they are a single unit but operands must be in different units"));
+	  return NULL;
+	}
+
+    default:
+      /* Registers must be in different units.  */
+      if (regs[0]->unit == regs[1]->unit)
+	{
+	  as_bad (_("source and destination register must be in different units"));
+	  return NULL;
+	}
+      break;
+    }
+
+  insn->bits = (template->meta_opcode
+		| (regs[1]->no << 19)
+		| (regs[0]->no << 14)
+		| (regs[1]->unit << 10)
+		| (regs[0]->unit << 5));
 
   insn->len = 4;
   return l;

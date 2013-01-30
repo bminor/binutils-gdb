@@ -1,3 +1,8 @@
+2013-01-30  Markos Chandras  <markos.chandras@imgtec.com>
+
+	* config/tc-metag.c: Make SWAP instruction less permissive with
+	its operands.
+
 2013-01-29  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-rl78.c (rl78_cons_fix_new): Handle user-specified
