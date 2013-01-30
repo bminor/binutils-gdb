@@ -1358,7 +1358,7 @@ get_file_crc (bfd *abfd, unsigned long *file_crc_return)
 	}
       if (count == 0)
 	break;
-      file_crc = gnu_debuglink_crc32 (file_crc, buffer, count);
+      file_crc = bfd_calc_gnu_debuglink_crc32 (file_crc, buffer, count);
     }
 
   *file_crc_return = file_crc;

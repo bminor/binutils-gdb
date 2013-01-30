@@ -343,9 +343,6 @@ extern pid_t wait_to_die_with_timeout (pid_t pid, int *status, int timeout);
 
 extern int producer_is_gcc_ge_4 (const char *producer);
 
-extern unsigned long gnu_debuglink_crc32 (unsigned long crc,
-                                          unsigned char *buf, size_t len);
-
 extern int myread (int, char *, int);
 
 /* Ensure that V is aligned to an N byte boundary (B's assumed to be a
