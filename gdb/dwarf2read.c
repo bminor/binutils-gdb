@@ -12070,7 +12070,7 @@ read_namespace_type (struct die_info *die, struct dwarf2_cu *cu)
   /* Create the type.  */
   type = init_type (TYPE_CODE_NAMESPACE, 0, 0, NULL,
 		    objfile);
-  TYPE_NAME (type) = (char *) name;
+  TYPE_NAME (type) = name;
   TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
   return set_die_type (die, type, cu);
@@ -12594,7 +12594,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
   name = dwarf2_full_name (NULL, die, cu);
   this_type = init_type (TYPE_CODE_TYPEDEF, 0,
 			 TYPE_FLAG_TARGET_STUB, NULL, objfile);
-  TYPE_NAME (this_type) = (char *) name;
+  TYPE_NAME (this_type) = name;
   set_die_type (die, this_type, cu);
   target_type = die_type (die, cu);
   if (target_type != this_type)
