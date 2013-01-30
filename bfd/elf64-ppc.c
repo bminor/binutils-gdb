@@ -9772,7 +9772,7 @@ build_plt_stub (struct ppc_link_hash_table *htab,
     {
       bfd_put_32 (obfd, CMPLDI_R2_0, p),			p += 4;
       bfd_put_32 (obfd, BNECTR_P4, p),				p += 4;
-      bfd_put_32 (obfd, B_DOT + cmp_branch_off, p),		p += 4;
+      bfd_put_32 (obfd, B_DOT | (cmp_branch_off & 0x3fffffc), p), p += 4;
     }
   else
     bfd_put_32 (obfd, BCTR, p),					p += 4;
