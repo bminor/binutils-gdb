@@ -1,5 +1,5 @@
 /* aarch64-dis.c -- AArch64 disassembler.
-   Copyright 2009, 2010, 2011, 2012  Free Software Foundation, Inc.
+   Copyright 2009, 2010, 2011, 2012, 2013  Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -1478,6 +1478,20 @@ convert_extr_to_ror (aarch64_inst *inst)
   return 0;
 }
 
+/* UXTL<Q> <Vd>.<Ta>, <Vn>.<Tb>
+     is equivalent to:
+   USHLL<Q> <Vd>.<Ta>, <Vn>.<Tb>, #0.  */
+static int
+convert_shll_to_xtl (aarch64_inst *inst)
+{
+  if (inst->operands[2].imm.value == 0)
+    {
+      inst->operands[2].type = AARCH64_OPND_NIL;
+      return 1;
+    }
+  return 0;
+}
+
 /* Convert
      UBFM <Xd>, <Xn>, #<shift>, #63.
    to
@@ -1731,6 +1745,11 @@ convert_to_alias (aarch64_inst *inst, const aarch64_opcode *alias)
       return convert_movebitmask_to_mov (inst);
     case OP_ROR_IMM:
       return convert_extr_to_ror (inst);
+    case OP_SXTL:
+    case OP_SXTL2:
+    case OP_UXTL:
+    case OP_UXTL2:
+      return convert_shll_to_xtl (inst);
     default:
       return 0;
     }

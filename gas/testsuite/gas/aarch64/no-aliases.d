@@ -73,3 +73,27 @@ Disassembly of section \.text:
  100:	b13ffdff 	adds	xzr, x15, #0xfff
  104:	f13fffef 	subs	x15, sp, #0xfff
  108:	b13ffdff 	adds	xzr, x15, #0xfff
+ 10c:	0f08a448 	sshll	v8.8h, v2.8b, #0
+ 110:	0f08a448 	sshll	v8.8h, v2.8b, #0
+ 114:	4f08a448 	sshll2	v8.8h, v2.16b, #0
+ 118:	4f08a448 	sshll2	v8.8h, v2.16b, #0
+ 11c:	0f10a448 	sshll	v8.4s, v2.4h, #0
+ 120:	0f10a448 	sshll	v8.4s, v2.4h, #0
+ 124:	4f10a448 	sshll2	v8.4s, v2.8h, #0
+ 128:	4f10a448 	sshll2	v8.4s, v2.8h, #0
+ 12c:	0f20a448 	sshll	v8.2d, v2.2s, #0
+ 130:	0f20a448 	sshll	v8.2d, v2.2s, #0
+ 134:	4f20a448 	sshll2	v8.2d, v2.4s, #0
+ 138:	4f20a448 	sshll2	v8.2d, v2.4s, #0
+ 13c:	2f08a448 	ushll	v8.8h, v2.8b, #0
+ 140:	2f08a448 	ushll	v8.8h, v2.8b, #0
+ 144:	6f08a448 	ushll2	v8.8h, v2.16b, #0
+ 148:	6f08a448 	ushll2	v8.8h, v2.16b, #0
+ 14c:	2f10a448 	ushll	v8.4s, v2.4h, #0
+ 150:	2f10a448 	ushll	v8.4s, v2.4h, #0
+ 154:	6f10a448 	ushll2	v8.4s, v2.8h, #0
+ 158:	6f10a448 	ushll2	v8.4s, v2.8h, #0
+ 15c:	2f20a448 	ushll	v8.2d, v2.2s, #0
+ 160:	2f20a448 	ushll	v8.2d, v2.2s, #0
+ 164:	6f20a448 	ushll2	v8.2d, v2.4s, #0
+ 168:	6f20a448 	ushll2	v8.2d, v2.4s, #0

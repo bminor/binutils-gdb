@@ -1,5 +1,5 @@
 /* aarch64-asm.c -- AArch64 assembler support.
-   Copyright 2012  Free Software Foundation, Inc.
+   Copyright 2012, 2013  Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -958,6 +958,16 @@ convert_ror_to_extr (aarch64_inst *inst)
   copy_operand_info (inst, 2, 1);
 }
 
+/* UXTL<Q> <Vd>.<Ta>, <Vn>.<Tb>
+     is equivalent to:
+   USHLL<Q> <Vd>.<Ta>, <Vn>.<Tb>, #0.  */
+static void
+convert_xtl_to_shll (aarch64_inst *inst)
+{
+  inst->operands[2].qualifier = inst->operands[1].qualifier;
+  inst->operands[2].imm.value = 0;
+}
+
 /* Convert
      LSR <Xd>, <Xn>, #<shift>
    to
@@ -1166,6 +1176,12 @@ convert_to_real (aarch64_inst *inst, const aarch64_opcode *real)
       break;
     case OP_ROR_IMM:
       convert_ror_to_extr (inst);
+      break;
+    case OP_SXTL:
+    case OP_SXTL2:
+    case OP_UXTL:
+    case OP_UXTL2:
+      convert_xtl_to_shll (inst);
       break;
     default:
       break;

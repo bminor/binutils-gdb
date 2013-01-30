@@ -1,3 +1,18 @@
+2013-01-30  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Flag sshll, sshll2, ushll and
+	ushll2 with F_HAS_ALIAS.  Add entries for sxtl, sxtl2, uxtl and uxtl2.
+	* aarch64-asm.c (convert_xtl_to_shll): New function.
+	(convert_to_real): Handle OP_SXTL, OP_SXTL2, OP_UXTL and OP_UXTL2 by
+	calling convert_xtl_to_shll.
+	* aarch64-dis.c (convert_shll_to_xtl): New function.
+	(convert_to_alias): Handle OP_SXTL, OP_SXTL2, OP_UXTL and OP_UXTL2 by
+	calling convert_shll_to_xtl.
+	* aarch64-gen.c: Update copyright year.
+	* aarch64-asm-2.c: Re-generate.
+	* aarch64-dis-2.c: Re-generate.
+	* aarch64-opc-2.c: Re-generate.
+
 2013-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* v850-dis.c: Add support for e3v5 architecture.
