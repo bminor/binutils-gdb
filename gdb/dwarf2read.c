@@ -6762,7 +6762,7 @@ compute_delayed_physnames (struct dwarf2_cu *cu)
       const char *physname;
       struct fn_fieldlist *fn_flp
 	= &TYPE_FN_FIELDLIST (mi->type, mi->fnfield_index);
-      physname = dwarf2_physname ((char *) mi->name, mi->die, cu);
+      physname = dwarf2_physname (mi->name, mi->die, cu);
       fn_flp->fn_fields[mi->index].physname = physname ? physname : "";
     }
 }
@@ -9808,7 +9808,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		         "physname, for referencing DIE 0x%x [in module %s]"),
 		       die->offset.sect_off, objfile->name);
 	  else
-	    SET_FIELD_PHYSNAME (call_site->target, (char *) target_physname);
+	    SET_FIELD_PHYSNAME (call_site->target, target_physname);
 	}
       else
 	{
@@ -11254,7 +11254,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  /* The name is already allocated along with this objfile, so
 	     we don't need to duplicate it for the type.  */
-	  TYPE_TAG_NAME (type) = (char *) name;
+	  TYPE_TAG_NAME (type) = name;
 	  if (die->tag == DW_TAG_class_type)
 	    TYPE_NAME (type) = TYPE_TAG_NAME (type);
 	}
@@ -11557,7 +11557,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   name = dwarf2_full_name (NULL, die, cu);
   if (name != NULL)
-    TYPE_TAG_NAME (type) = (char *) name;
+    TYPE_TAG_NAME (type) = name;
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)

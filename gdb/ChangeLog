@@ -1,5 +1,10 @@
 2013-01-30  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (compute_delayed_physnames, read_call_site_scope)
+	(read_structure_type, read_enumeration_type): Remove cast.
+
+2013-01-30  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (read_namespace_type): Remove cast.
 	(read_typedef): Likewise.
 
