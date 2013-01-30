@@ -1,5 +1,9 @@
 2013-01-30  Tom Tromey  <tromey@redhat.com>
 
+	* hppa-tdep.c (read_unwind_info): Use SECT_OFF_TEXT, not "0".
+
+2013-01-30  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (get_file_crc): Use bfd_calc_gnu_debuglink_crc32.
 	* utils.c (gnu_debuglink_crc32): Remove.
 	* utils.h (gnu_debuglink_crc32): Don't declare.
