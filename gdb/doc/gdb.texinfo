@@ -17169,7 +17169,7 @@ you must know the actual BFD name.
 Use the @code{show gnutarget} command to display what file format
 @code{gnutarget} is set to read.  If you have not set @code{gnutarget},
 @value{GDBN} will determine the file format for each file automatically,
-and @code{show gnutarget} displays @samp{The current BDF target is "auto"}.
+and @code{show gnutarget} displays @samp{The current BFD target is "auto"}.
 @end table
 
 @cindex common targets
