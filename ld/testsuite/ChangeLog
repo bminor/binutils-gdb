@@ -1,3 +1,14 @@
+2013-01-31  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tlsexe.d: Update for changed stub names.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexetoc.d: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.d: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstocso.d: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+
 2013-01-31  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/libdso-13.d: Adjust for --enable-new-dtags now

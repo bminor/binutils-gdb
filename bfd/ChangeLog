@@ -1,5 +1,9 @@
 2013-01-31  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc_stub_name): Trim off trailing "+0".
+
+2013-01-31  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (build_plt_stub): Correct plt stub branch to glink.
 
 2013-01-28  Alan Modra  <amodra@gmail.com>

@@ -4074,7 +4074,7 @@ ppc_stub_name (const asection *input_section,
 	       const Elf_Internal_Rela *rel)
 {
   char *stub_name;
-  bfd_size_type len;
+  ssize_t len;
 
   /* rel->r_addend is actually 64 bit, but who uses more than +/- 2^31
      offsets from a sym as a branch target?  In fact, we could
@@ -4088,10 +4088,10 @@ ppc_stub_name (const asection *input_section,
       if (stub_name == NULL)
 	return stub_name;
 
-      sprintf (stub_name, "%08x.%s+%x",
-	       input_section->id & 0xffffffff,
-	       h->elf.root.root.string,
-	       (int) rel->r_addend & 0xffffffff);
+      len = sprintf (stub_name, "%08x.%s+%x",
+		     input_section->id & 0xffffffff,
+		     h->elf.root.root.string,
+		     (int) rel->r_addend & 0xffffffff);
     }
   else
     {
@@ -4100,13 +4100,13 @@ ppc_stub_name (const asection *input_section,
       if (stub_name == NULL)
 	return stub_name;
 
-      sprintf (stub_name, "%08x.%x:%x+%x",
-	       input_section->id & 0xffffffff,
-	       sym_sec->id & 0xffffffff,
-	       (int) ELF64_R_SYM (rel->r_info) & 0xffffffff,
-	       (int) rel->r_addend & 0xffffffff);
+      len = sprintf (stub_name, "%08x.%x:%x+%x",
+		     input_section->id & 0xffffffff,
+		     sym_sec->id & 0xffffffff,
+		     (int) ELF64_R_SYM (rel->r_info) & 0xffffffff,
+		     (int) rel->r_addend & 0xffffffff);
     }
-  if (stub_name[len - 2] == '+' && stub_name[len - 1] == '0')
+  if (len > 2 && stub_name[len - 2] == '+' && stub_name[len - 1] == '0')
     stub_name[len - 2] = 0;
   return stub_name;
 }

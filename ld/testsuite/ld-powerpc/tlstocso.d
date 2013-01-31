@@ -8,7 +8,7 @@
 
 Disassembly of section \.text:
 
-.* <00000010\.plt_call\.__tls_get_addr(|_opt)\+0>:
+.* <00000010\.plt_call\.__tls_get_addr(|_opt)>:
 .*	(f8 41 00 28|28 00 41 f8) 	std     r2,40\(r1\)
 .*	(e9 62 80 70|70 80 62 e9) 	ld      r11,-32656\(r2\)
 .*	(7d 69 03 a6|a6 03 69 7d) 	mtctr   r11
