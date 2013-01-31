@@ -3073,14 +3073,12 @@ static int
 handle_syscall_event (struct execution_control_state *ecs)
 {
   struct regcache *regcache;
-  struct gdbarch *gdbarch;
   int syscall_number;
 
   if (!ptid_equal (ecs->ptid, inferior_ptid))
     context_switch (ecs->ptid);
 
   regcache = get_thread_regcache (ecs->ptid);
-  gdbarch = get_regcache_arch (regcache);
   syscall_number = ecs->ws.value.syscall_number;
   stop_pc = regcache_read_pc (regcache);
 
@@ -6745,7 +6743,9 @@ save_infcall_suspend_state (void)
 {
   struct infcall_suspend_state *inf_state;
   struct thread_info *tp = inferior_thread ();
+#if 0
   struct inferior *inf = current_inferior ();
+#endif
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   gdb_byte *siginfo_data = NULL;
@@ -6800,7 +6800,9 @@ void
 restore_infcall_suspend_state (struct infcall_suspend_state *inf_state)
 {
   struct thread_info *tp = inferior_thread ();
+#if 0
   struct inferior *inf = current_inferior ();
+#endif
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 

@@ -926,9 +926,7 @@ static void
 jit_register_code (struct gdbarch *gdbarch,
                    CORE_ADDR entry_addr, struct jit_code_entry *code_entry)
 {
-  int i, success;
-  const struct bfd_arch_info *b;
-  struct jit_inferior_data *inf_data = get_jit_inferior_data ();
+  int success;
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,
@@ -1115,12 +1113,9 @@ static int
 jit_frame_sniffer (const struct frame_unwind *self,
                    struct frame_info *this_frame, void **cache)
 {
-  struct jit_inferior_data *inf_data;
   struct jit_unwind_private *priv_data;
   struct gdb_unwind_callbacks callbacks;
   struct gdb_reader_funcs *funcs;
-
-  inf_data = get_jit_inferior_data ();
 
   callbacks.reg_get = jit_unwind_reg_get_impl;
   callbacks.reg_set = jit_unwind_reg_set_impl;

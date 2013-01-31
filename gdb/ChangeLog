@@ -1,5 +1,13 @@
 2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* infrun.c (handle_syscall_event): Remove unused gdbarch.
+	(save_infcall_suspend_state): Ifdef out unused inf.
+	(restore_infcall_suspend_state): Ifdef out unused inf.
+	* jit.c (jit_register_code): Remove unused i, b, inf_data.
+	(jit_frame_sniffer): Remove unused inf_data.
+
+2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* c-exp.y (classify_inner_name): Remove unused type.
 	* c-lang.c (c_printstr): Remove unused byte_order, i, things_printed,
 	in_quotes, need_comma, wchar_buf, output, cleanup, iter, finished,
