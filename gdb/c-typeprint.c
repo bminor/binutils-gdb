@@ -462,13 +462,10 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 		   int linkage_name, enum language language,
 		   const struct type_print_options *flags)
 {
-  int i, len;
-  struct field *args;
+  int i;
   int printed_any = 0;
 
   fprintf_filtered (stream, "(");
-  args = TYPE_FIELDS (type);
-  len = TYPE_NFIELDS (type);
 
   for (i = 0; i < TYPE_NFIELDS (type); i++)
     {
@@ -1298,7 +1295,6 @@ c_type_print_base (struct type *type, struct ui_file *stream,
 		for (i = 0; i < TYPE_TYPEDEF_FIELD_COUNT (type); i++)
 		  {
 		    struct type *target = TYPE_TYPEDEF_FIELD_TYPE (type, i);
-		    struct typedef_hash_table *table2;
 
 		    /* Dereference the typedef declaration itself.  */
 		    gdb_assert (TYPE_CODE (target) == TYPE_CODE_TYPEDEF);

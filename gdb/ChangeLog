@@ -1,5 +1,14 @@
 2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* c-exp.y (classify_inner_name): Remove unused type.
+	* c-lang.c (c_printstr): Remove unused byte_order, i, things_printed,
+	in_quotes, need_comma, wchar_buf, output, cleanup, iter, finished,
+	need_escape.
+	(c_get_string): Remove unused kind.
+	* c-typeprint.c (c_type_print_args): Remove unused i, len, args, table2.
+
+2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* charset.c (intermediate_encoding): Remove unused i.
 	* completer.c (signal_completer): Remove unused i.
 	* continuations.c (discard_my_continuations_1): Remove unused

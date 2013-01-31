@@ -196,17 +196,6 @@ c_printstr (struct ui_file *stream, struct type *type,
   const char *type_encoding;
   const char *encoding;
 
-  enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
-  unsigned int i;
-  unsigned int things_printed = 0;
-  int in_quotes = 0;
-  int need_comma = 0;
-  struct obstack wchar_buf, output;
-  struct cleanup *cleanup;
-  struct wchar_iterator *iter;
-  int finished = 0;
-  int need_escape = 0;
-
   str_type = (classify_type (type, get_type_arch (type), &type_encoding)
 	      & ~C_CHAR);
   switch (str_type)
@@ -255,7 +244,6 @@ c_get_string (struct value *value, gdb_byte **buffer,
   int req_length = *length;
   enum bfd_endian byte_order
     = gdbarch_byte_order (get_type_arch (type));
-  enum c_string_type kind;
 
   if (element_type == NULL)
     goto error;
@@ -284,9 +272,7 @@ c_get_string (struct value *value, gdb_byte **buffer,
 
   if (! c_textual_element_type (element_type, 0))
     goto error;
-  kind = classify_type (element_type,
-			get_type_arch (element_type),
-			charset);
+  classify_type (element_type, get_type_arch (element_type), charset);
   width = TYPE_LENGTH (element_type);
 
   /* If the string lives in GDB's memory instead of the inferior's,

@@ -2865,7 +2865,7 @@ classify_name (const struct block *block)
 static int
 classify_inner_name (const struct block *block, int first_name)
 {
-  struct type *type, *new_type;
+  struct type *type;
   char *copy;
 
   if (first_name)
