@@ -444,7 +444,6 @@ catch_signal_command (char *arg, int from_tty,
 {
   int tempflag, catch_all = 0;
   VEC (gdb_signal_type) *filter;
-  struct gdbarch *gdbarch = get_current_arch ();
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 

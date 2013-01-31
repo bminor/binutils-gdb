@@ -375,7 +375,6 @@ void
 ax_print (struct ui_file *f, struct agent_expr *x)
 {
   int i;
-  int is_float = 0;
 
   fprintf_filtered (f, _("Scope: %s\n"), paddress (x->gdbarch, x->scope));
   fprintf_filtered (f, _("Reg mask:"));
@@ -430,8 +429,6 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 	}
       fprintf_filtered (f, "\n");
       i += 1 + aop_map[op].op_size;
-
-      is_float = (op == aop_float);
     }
 }
 

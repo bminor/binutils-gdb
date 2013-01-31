@@ -178,7 +178,6 @@ auto_load_expand_dir_vars (const char *string)
 static void
 auto_load_safe_path_vec_update (void)
 {
-  VEC (char_ptr) *dir_vec = NULL;
   unsigned len;
   int ix;
 

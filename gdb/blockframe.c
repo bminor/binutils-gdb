@@ -360,14 +360,9 @@ struct frame_info *
 block_innermost_frame (const struct block *block)
 {
   struct frame_info *frame;
-  CORE_ADDR start;
-  CORE_ADDR end;
 
   if (block == NULL)
     return NULL;
-
-  start = BLOCK_START (block);
-  end = BLOCK_END (block);
 
   frame = get_selected_frame_if_set ();
   if (frame == NULL)

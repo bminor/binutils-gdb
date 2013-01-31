@@ -1,5 +1,13 @@
 2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* auto-load.c (auto_load_expand_dir_vars): Remove unused dir_vec.
+	* ax-gdb.c (gen_printf): Remove unused expr, i, bot, fr, flen, fmt.
+	* ax-general.c (ax_print): Remove unused is_float.
+	* blockframe.c (block_innermost_frame): Remove unused start, end.
+	* break-catch-sig.c (catch_signal_command): Remove unused gdbarch.
+
+2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* solib-svr4.c (svr4_keep_data_in_core): Remove unused lmo.
 	(svr4_read_so_list): Remove unused lmo.
 	* solib-target.c (solib_target_relocate_section_addresses): Remove
