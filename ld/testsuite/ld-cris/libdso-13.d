@@ -12,7 +12,7 @@
 # generally disabled.)  Split out the expected readelf output
 # into a separate test using that option.
 
-Dynamic section at offset 0x[0-9a-f][0-9a-f][0-9a-f] contains 10 entries:
+Dynamic section at offset 0x[0-9a-f][0-9a-f][0-9a-f] contains 11 entries:
   Tag[ 	]+Type[ 	]+Name/Value
  0x0+4 \(HASH\)[ 	]+0x94
  0x0+5 \(STRTAB\)[ 	]+0x[12][0-9a-f][0-9a-f]
@@ -23,6 +23,7 @@ Dynamic section at offset 0x[0-9a-f][0-9a-f][0-9a-f] contains 10 entries:
  0x0+8 \(RELASZ\)[ 	]+12 \(bytes\)
  0x0+9 \(RELAENT\)[ 	]+12 \(bytes\)
  0x0+16 \(TEXTREL\)[ 	]+0x0
+ 0x0+1e \(FLAGS\)[ 	]+TEXTREL
  0x0+ \(NULL\)[ 	]+0x0
 
 Relocation section '\.rela\.text' at offset 0x[12][0-9a-f][0-9a-f] contains 1 entries:
