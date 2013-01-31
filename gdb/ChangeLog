@@ -1,3 +1,10 @@
+2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* solib-svr4.c (svr4_keep_data_in_core): Remove unused lmo.
+	(svr4_read_so_list): Remove unused lmo.
+	* solib-target.c (solib_target_relocate_section_addresses): Remove
+	unused flags.
+
 2013-01-30  Tom Tromey  <tromey@redhat.com>
 
 	* hppa-tdep.c (read_unwind_info): Use SECT_OFF_TEXT, not "0".

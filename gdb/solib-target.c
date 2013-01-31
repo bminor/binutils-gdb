@@ -333,7 +333,6 @@ static void
 solib_target_relocate_section_addresses (struct so_list *so,
 					 struct target_section *sec)
 {
-  int flags = bfd_get_section_flags (sec->bfd, sec->the_bfd_section);
   CORE_ADDR offset;
 
   /* Build the offset table only once per object file.  We can not do
