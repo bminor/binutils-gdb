@@ -4976,8 +4976,6 @@ linux_nat_stop_lwp (struct lwp_info *lwp, void *data)
 {
   if (!lwp->stopped)
     {
-      ptid_t ptid = lwp->ptid;
-
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LNSL: running -> suspending %s\n",

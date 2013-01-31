@@ -269,7 +269,6 @@ type_from_class (struct gdbarch *gdbarch, struct value *clas)
   struct value *utf8_name;
   char *nptr;
   CORE_ADDR addr;
-  int is_array = 0;
 
   type = check_typedef (value_type (clas));
   if (TYPE_CODE (type) == TYPE_CODE_PTR)
@@ -318,7 +317,6 @@ type_from_class (struct gdbarch *gdbarch, struct value *clas)
 	name = obstack_alloc (&objfile->objfile_obstack, namelen + 1);
       java_demangled_signature_copy (name, signature);
       name[namelen] = '\0';
-      is_array = 1;
       temp = clas;
       /* Set array element type.  */
       temp = value_struct_elt (&temp, NULL, "methods", NULL, "structure");

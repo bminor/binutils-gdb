@@ -33,7 +33,6 @@
 static void
 mi_catch_load_unload (int load, char *argv[], int argc)
 {
-  struct solib_catchpoint *c;
   struct cleanup *back_to;
   const char *actual_cmd = load ? "-catch-load" : "-catch-unload";
   int temp = 0;

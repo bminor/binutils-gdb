@@ -117,7 +117,6 @@ exec_close (void)
 static void
 exec_close_1 (int quitting)
 {
-  int need_symtab_cleanup = 0;
   struct vmap *vp, *nxt;
 
   using_exec_ops = 0;
@@ -128,10 +127,7 @@ exec_close_1 (int quitting)
       nxt = vp->nxt;
 
       if (vp->objfile)
-	{
-	  free_objfile (vp->objfile);
-	  need_symtab_cleanup = 1;
-	}
+	free_objfile (vp->objfile);
 
       gdb_bfd_unref (vp->bfd);
 
@@ -391,11 +387,9 @@ add_to_section_table (bfd *abfd, struct bfd_section *asect,
 int
 resize_section_table (struct target_section_table *table, int num_added)
 {
-  struct target_section *old_value;
   int old_count;
   int new_count;
 
-  old_value = table->sections;
   old_count = table->sections_end - table->sections;
 
   new_count = num_added + old_count;

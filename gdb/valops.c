@@ -2236,7 +2236,6 @@ search_struct_method (const char *name, struct value **arg1p,
   for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
     {
       int base_offset;
-      int skip = 0;
       int this_offset;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))

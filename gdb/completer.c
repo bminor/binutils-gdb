@@ -787,7 +787,6 @@ VEC (char_ptr) *
 signal_completer (struct cmd_list_element *ignore,
 		  char *text, char *word)
 {
-  int i;
   VEC (char_ptr) *return_val = NULL;
   size_t len = strlen (word);
   enum gdb_signal signum;

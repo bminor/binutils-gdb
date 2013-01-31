@@ -451,10 +451,6 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 
   if (function != NULL && SYMBOL_LANGUAGE (function) == language_cplus)
     {
-      int i;
-      struct cplus_specific *cps
-	= function->ginfo.language_specific.cplus_specific;
-
       /* Search the function's template parameters.  */
       if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (function))
 	{

@@ -37,7 +37,7 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
 			char *prompt)
 {
   int n;
-  char *p = NULL, *p_start, *p_end, *q;
+  char *p = NULL, *q;
   volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ALL)

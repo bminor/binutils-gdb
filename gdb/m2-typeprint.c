@@ -77,8 +77,6 @@ m2_print_type (struct type *type, const char *varstring,
 	       int show, int level,
 	       const struct type_print_options *flags)
 {
-  enum type_code code;
-
   CHECK_TYPEDEF (type);
 
   QUIT;
@@ -90,7 +88,6 @@ m2_print_type (struct type *type, const char *varstring,
       return;
     }
 
-  code = TYPE_CODE (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_SET:

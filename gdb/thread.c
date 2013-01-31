@@ -1233,7 +1233,6 @@ thread_apply_command (char *tidlist, int from_tty)
     {
       struct thread_info *tp;
       int start;
-      char *p = tidlist;
 
       start = get_number_or_range (&state);
 

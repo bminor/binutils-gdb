@@ -2865,7 +2865,6 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    size_t datalen;
 	    struct block *b;
 	    struct symbol *framefunc;
-	    LONGEST base_offset = 0;
 
 	    b = block_for_pc (expr->scope);
 
@@ -4051,7 +4050,6 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 {
   struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   const gdb_byte *loc_ptr, *buf_end;
-  int first = 1;
   struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

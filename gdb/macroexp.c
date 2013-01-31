@@ -337,7 +337,6 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
 	  && p[1] == '\''))
     {
       char *tok_start = p;
-      char *body_start;
       int char_count = 0;
 
       if (*p == '\'')
@@ -347,7 +346,6 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
       else
         gdb_assert_not_reached ("unexpected character constant");
 
-      body_start = p;
       for (;;)
         {
           if (p >= end)
@@ -700,7 +698,6 @@ macro_stringify (const char *str)
 {
   struct macro_buffer buffer;
   int len = strlen (str);
-  char *result;
 
   init_buffer (&buffer, len);
   stringify (&buffer, str, len);

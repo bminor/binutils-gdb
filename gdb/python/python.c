@@ -1436,8 +1436,6 @@ extern initialize_file_ftype _initialize_python;
 void
 _initialize_python (void)
 {
-  char *cmd_name;
-  struct cmd_list_element *cmd;
   char *progname;
 #ifdef IS_PY3K
   int i;

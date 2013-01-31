@@ -1450,7 +1450,6 @@ get_return_value (struct value *function, struct type *value_type)
   struct regcache *stop_regs = stop_registers;
   struct gdbarch *gdbarch;
   struct value *value;
-  struct ui_out *uiout = current_uiout;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
   /* If stop_registers were not saved, use the current registers.  */

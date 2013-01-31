@@ -370,7 +370,6 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
 		   const struct generic_val_print_decorations *decorations)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int i = 0;	/* Number of characters printed.  */
   unsigned len;
   struct type *elttype, *unresolved_elttype;

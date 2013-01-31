@@ -504,8 +504,6 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
   struct ui_file *stb;
   /* True if we should print arguments, false otherwise.  */
   int print_args = strcmp (print_frame_arguments, "none");
-  /* True in "summary" mode, false otherwise.  */
-  int summary = !strcmp (print_frame_arguments, "scalars");
 
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);

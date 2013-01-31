@@ -4339,7 +4339,6 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   gdb_byte buf[MAX_REGISTER_SIZE];
   struct i386_record_s ir;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int rex = 0;
   uint8_t rex_w = -1;
   uint8_t rex_r = 0;
 
@@ -4419,7 +4418,6 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
           if (ir.regmap[X86_RECORD_R8_REGNUM])	/* 64 bit target */
             {
                /* REX */
-               rex = 1;
                rex_w = (opcode8 >> 3) & 1;
                rex_r = (opcode8 & 0x4) << 1;
                ir.rex_x = (opcode8 & 0x2) << 2;

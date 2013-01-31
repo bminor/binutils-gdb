@@ -1,5 +1,53 @@
 2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* charset.c (intermediate_encoding): Remove unused i.
+	* completer.c (signal_completer): Remove unused i.
+	* continuations.c (discard_my_continuations_1): Remove unused
+	continuation_ptr.
+	* corelow.c (core_close): Remove unuseD name.
+	(get_core_siginfo): Remove unused pid.
+	* cp-namespace.c (cp_lookup_symbol_imports_or_template): Remove unused
+	i, cps.
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Remove unused base_offset.
+	(loclist_describe_location): Remove unused first.
+	* event-top.c (command_line_handler): Remove unused got_eof.
+	* exec.c (exec_close_1): Remove unused need_symtab_cleanup.
+	(resize_section_table): Remove unused old_value.
+	* gdb_bfd.c (gdb_bfd_map_section): Remove unused header.
+	* gnu-v3-abi.c (compute_vtable_size): Remove unused addr.
+	* i386-tdep.c (i386_process_record): Remove unused rex.
+	* infcmd.c (get_return_value): Remove unused uiout.
+	* jv-lang.c (type_from_class): Remove unused is_array.
+	* jv-valprint.c (java_val_print): Remove unused i.
+	* linux-nat.c (linux_nat_stop_lwp): Remove unused ptid.
+	* linux-thread-db.c (thread_db_find_new_threads_2): Remove unuseD pid.
+	* m2-typeprint.c (m2_print_type): Remove unused code.
+	* macroexp.c (get_character_constant): Remove unused body_start.
+	(macro_stringify): Remove unused result.
+	* objc-lang.c (find_methods): Remove unused gdbarch.
+	* objfiles.c (filter_overlapping_sections): Remove unused abfd1, abfd2.
+	* regcache.c (regcache_cooked_read): Remove unused gdbarch.
+	* stack.c (print_frame_args): Remove unused summary.
+	* thread.c (thread_apply_command): Remove unused p.
+	* valarith.c (value_x_unop): Remove unused mangle_ptr.
+	* valops.c (search_struct_method): Remove unused skip.
+	* valprint.c (generic_val_print): Remove unused byte_order.
+	* varobj.c (varobj_update): Remove unused changed.
+	* cli/cli-cmds.c (complete_command): Remove unused next_item.
+	(alias_command): Remove unused c.
+	* mi/mi-cmd-catch.c (mi_catch_load_unload): Remove unused c.
+	* mi/mi-main.c (mi_cmd_data_write_register_values): Remove unused
+	format.
+	(mi_cmd_data_write_memory): Remove unused word_format.
+	(mi_cmd_data_write_memory_bytes): Remove unused r.
+	* python/py-gdb-readline.c (gdbpy_readline_wrapper): Remove unused
+	p_start, p_end.
+	* python/python.c (_initialize_python): Remove unused cmd_name, cmd.
+	* tui/tui-disasm.c (tui_set_disassem_content): Remove unused
+	line_width.
+
+2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* dwarf2-frame.c (dwarf2_compile_cfa_to_ax): Remove unused num_regs.
 	* symtab.c (iterate_over_symtabs): Remove unused s.
 	(find_pc_sect_symtab): Remove unused pspAce.

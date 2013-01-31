@@ -805,7 +805,6 @@ compute_vtable_size (htab_t offset_hash,
   struct type *type = check_typedef (value_type (value));
   void **slot;
   struct value_and_voffset search_vo, *current_vo;
-  CORE_ADDR addr = value_address (value) + value_embedded_offset (value);
 
   /* If the object is not dynamic, then we are done; as it cannot have
      dynamic base types either.  */

@@ -965,7 +965,6 @@ intermediate_encoding (void)
   iconv_t desc;
   static const char *stored_result = NULL;
   char *result;
-  int i;
 
   if (stored_result)
     return stored_result;

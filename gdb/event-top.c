@@ -453,8 +453,6 @@ command_line_handler (char *rl)
   char *p;
   char *p1;
   char *nline;
-  char got_eof = 0;
-
   int repeat = (instream == stdin);
 
   if (annotation_level > 1 && instream == stdin)
@@ -499,7 +497,6 @@ command_line_handler (char *rl)
      and exit from gdb.  */
   if (!rl || rl == (char *) EOF)
     {
-      got_eof = 1;
       command_handler (0);
       return;			/* Lint.  */
     }

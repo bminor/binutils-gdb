@@ -1234,9 +1234,6 @@ filter_overlapping_sections (struct obj_section **map, int map_size)
 	      struct objfile *const objf1 = sect1->objfile;
 	      struct objfile *const objf2 = sect2->objfile;
 
-	      const struct bfd *const abfd1 = objf1->obfd;
-	      const struct bfd *const abfd2 = objf2->obfd;
-
 	      const struct bfd_section *const bfds1 = sect1->the_bfd_section;
 	      const struct bfd_section *const bfds2 = sect2->the_bfd_section;
 

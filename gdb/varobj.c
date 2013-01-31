@@ -1969,7 +1969,6 @@ varobj_value_has_mutated (struct varobj *var, struct value *new_value,
 VEC(varobj_update_result) *
 varobj_update (struct varobj **varp, int explicit)
 {
-  int changed = 0;
   int type_changed = 0;
   int i;
   struct value *new;

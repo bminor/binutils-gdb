@@ -996,8 +996,6 @@ find_methods (char type, const char *class, const char *category,
 
       ALL_OBJFILE_MSYMBOLS (objfile, msymbol)
 	{
-	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-
 	  QUIT;
 
 	  /* Check the symbol name first as this can be done entirely without

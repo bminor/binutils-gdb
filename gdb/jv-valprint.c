@@ -471,7 +471,6 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 		const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  unsigned int i = 0;	/* Number of characters printed.  */
   struct type *target_type;
   CORE_ADDR addr;
 

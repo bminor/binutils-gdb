@@ -510,7 +510,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 {
   struct gdbarch *gdbarch = get_type_arch (value_type (arg1));
   struct value **argvec;
-  char *ptr, *mangle_ptr;
+  char *ptr;
   char tstr[13], mangle_tstr[13];
   int static_memfuncp, nargs;
 
@@ -532,7 +532,6 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
   strcpy (tstr, "operator__");
   ptr = tstr + 8;
   strcpy (mangle_tstr, "__");
-  mangle_ptr = mangle_tstr + 2;
   switch (op)
     {
     case UNOP_PREINCREMENT:

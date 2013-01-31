@@ -345,7 +345,6 @@ const gdb_byte *
 gdb_bfd_map_section (asection *sectp, bfd_size_type *size)
 {
   bfd *abfd;
-  unsigned char header[4];
   struct gdb_bfd_section_data *descriptor;
   bfd_byte *data;
 

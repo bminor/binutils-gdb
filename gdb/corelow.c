@@ -194,8 +194,6 @@ gdb_check_format (bfd *abfd)
 static void
 core_close (int quitting)
 {
-  char *name;
-
   if (core_bfd)
     {
       int pid = ptid_get_pid (inferior_ptid);
@@ -664,7 +662,6 @@ static LONGEST
 get_core_siginfo (bfd *abfd, gdb_byte *readbuf, ULONGEST offset, LONGEST len)
 {
   asection *section;
-  long pid;
   char *section_name;
   const char *name = ".note.linuxcore.siginfo";
 

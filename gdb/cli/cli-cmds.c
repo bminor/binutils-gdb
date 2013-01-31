@@ -285,8 +285,6 @@ complete_command (char *arg, int from_tty)
 	 unique item once.  */
       for (ix = 0; VEC_iterate (char_ptr, completions, ix, item); ++ix)
 	{
-	  int next_item;
-
 	  if (prev == NULL || strcmp (item, prev) != 0)
 	    {
 	      printf_unfiltered ("%s%s\n", arg_prefix, item);
@@ -1323,7 +1321,6 @@ alias_command (char *args, int from_tty)
   char *args2, *equals, *alias, *command;
   char **alias_argv, **command_argv;
   dyn_string_t alias_dyn_string, command_dyn_string;
-  struct cmd_list_element *c;
   static const char usage[] = N_("Usage: alias [-a] [--] ALIAS = COMMAND");
 
   if (args == NULL || strchr (args, '=') == NULL)

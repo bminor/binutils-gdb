@@ -706,8 +706,6 @@ regcache_cooked_read (struct regcache *regcache, int regnum, gdb_byte *buf)
     {
       /* Read-only register cache, perhaps the cooked value was
 	 cached?  */
-      struct gdbarch *gdbarch = regcache->descr->gdbarch;
-
       if (regcache->register_status[regnum] == REG_VALID)
 	memcpy (buf, register_buffer (regcache, regnum),
 		regcache->descr->sizeof_register[regnum]);

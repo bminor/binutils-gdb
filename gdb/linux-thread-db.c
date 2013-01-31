@@ -1661,7 +1661,6 @@ thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new)
 {
   td_err_e err = TD_OK;
   struct thread_db_info *info;
-  int pid = ptid_get_pid (ptid);
   int i, loop;
 
   info = get_thread_db_info (GET_PID (ptid));

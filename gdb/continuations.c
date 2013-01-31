@@ -100,8 +100,6 @@ discard_my_continuations_1 (struct continuation **pmy_chain)
 static void
 discard_my_continuations (struct continuation **list)
 {
-  struct continuation *continuation_ptr = *list;
-
   discard_my_continuations_1 (list);
   *list = NULL;
 }
