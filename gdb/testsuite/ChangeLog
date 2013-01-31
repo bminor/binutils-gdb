@@ -1,5 +1,10 @@
 2013-01-31  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/jit.exp (compile_jit_test): New proc.
+	Add PIE tests.
+
+2013-01-31  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/method-ptr.cc: New file.
 	* gdb.dwarf2/method-ptr.exp: New file.
 

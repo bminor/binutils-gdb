@@ -28,28 +28,38 @@ if {[get_compiler_info]} {
 # test running programs
 #
 
-set testfile jit-main
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested jit.exp
-    return -1
+proc compile_jit_test {testname options} {
+    global testfile srcfile binfile srcdir subdir
+    global solib_testfile solib_srcfile solib_binfile solib_binfile_test_msg
+    global solib_binfile_target
+
+    set testfile jit-main
+    set srcfile ${testfile}.c
+    set binfile [standard_output_file $testfile]
+    if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
+	      executable [concat debug $options]] != "" } {
+	untested $testname
+	return -1
+    }
+
+    set solib_testfile "jit-solib"
+    set solib_srcfile "${srcdir}/${subdir}/${solib_testfile}.c"
+    set solib_binfile [standard_output_file ${solib_testfile}.so]
+    set solib_binfile_test_msg "SHLIBDIR/${solib_testfile}.so"
+
+    # Note: compiling without debug info: the library goes through
+    # symbol renaming by munging on its symbol table, and that
+    # wouldn't work for .debug sections.  Also, output for "info
+    # function" changes when debug info is present.
+    if { [gdb_compile_shlib ${solib_srcfile} ${solib_binfile} {-fPIC}] != "" } {
+	untested $testname
+	return -1
+    }
+
+    set solib_binfile_target [gdb_download ${solib_binfile}]
+
+    return 0
 }
-
-set solib_testfile "jit-solib"
-set solib_srcfile "${srcdir}/${subdir}/${solib_testfile}.c"
-set solib_binfile "${objdir}/${subdir}/${solib_testfile}.so"
-set solib_binfile_test_msg "SHLIBDIR/${solib_testfile}.so"
-
-# Note: compiling without debug info: the library goes through symbol
-# renaming by munging on its symbol table, and that wouldn't work for .debug
-# sections.  Also, output for "info function" changes when debug info is resent.
-if { [gdb_compile_shlib ${solib_srcfile} ${solib_binfile} {-fPIC}] != "" } {
-    untested jit.exp
-    return -1
-}
-
-set solib_binfile_target [gdb_download ${solib_binfile}]
 
 proc one_jit_test {count match_str} { with_test_prefix "one_jit_test-$count" {
     global verbose testfile solib_binfile_target solib_binfile_test_msg
@@ -93,5 +103,17 @@ proc one_jit_test {count match_str} { with_test_prefix "one_jit_test-$count" {
 	"All functions matching regular expression \"jit_function\":"
 }}
 
+if {[compile_jit_test jit.exp {}] < 0} {
+    return
+}
 one_jit_test 1 "${hex}  jit_function_0000"
 one_jit_test 2 "${hex}  jit_function_0000\[\r\n\]+${hex}  jit_function_0001"
+
+with_test_prefix PIE {
+    if {[compile_jit_test "jit.exp PIE tests" \
+	     {additional_flags=-fPIE ldflags=-pie}] < 0} {
+	return
+    }
+
+    one_jit_test 1 "${hex}  jit_function_0000"
+}

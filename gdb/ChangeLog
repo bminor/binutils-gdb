@@ -1,3 +1,14 @@
+2013-01-31  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/13987:
+	* jit.c (struct jit_inferior_data) <cached_code_address,
+	jit_breakpoint>: New fields.
+	(jit_breakpoint_re_set_internal): Fix logging.  Only create
+	breakpoint if cached address has changed.
+	(jit_update_inferior_cache, jit_breakpoint_deleted): New
+	functions.
+	(_initialize_jit): Register breakpoint deleted observer.
+
 2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* infrun.c (handle_syscall_event): Remove unused gdbarch.

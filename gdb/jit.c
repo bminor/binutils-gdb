@@ -243,9 +243,24 @@ struct jit_inferior_data
      symbols.  */
 
   struct objfile *objfile;
+
+  /* If this inferior has __jit_debug_register_code, this is the
+     cached address from the minimal symbol.  This is used to detect
+     relocations requiring the breakpoint to be re-created.  */
+
+  CORE_ADDR cached_code_address;
+
+  /* This is the JIT event breakpoint, or NULL if it has not been
+     set.  */
+
+  struct breakpoint *jit_breakpoint;
 };
 
-/* Per-objfile structure recording the addresses in the inferior.  */
+/* Per-objfile structure recording the addresses in the inferior.
+   This object serves two purposes: for ordinary objfiles, it may
+   cache some symbols related to the JIT interface; and for
+   JIT-created objfiles, it holds some information about the
+   jit_code_entry.  */
 
 struct jit_objfile_data
 {
@@ -255,7 +270,8 @@ struct jit_objfile_data
   /* Symbol for __jit_debug_descriptor.  */
   struct minimal_symbol *descriptor;
 
-  /* Address of struct jit_code_entry in this objfile.  */
+  /* Address of struct jit_code_entry in this objfile.  This is only
+     non-zero for objfiles that represent code created by the JIT.  */
   CORE_ADDR addr;
 };
 
@@ -968,6 +984,44 @@ jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
   return NULL;
 }
 
+/* A callback for iterate_over_inferiors that updates the inferior's
+   JIT breakpoint information, if necessary.  */
+
+static int
+jit_update_inferior_cache (struct inferior *inf, void *data)
+{
+  struct bp_location *loc = data;
+
+  if (inf->pspace == loc->pspace)
+    {
+      struct jit_inferior_data *inf_data;
+
+      inf_data = inferior_data (inf, jit_inferior_data);
+      if (inf_data != NULL && inf_data->jit_breakpoint == loc->owner)
+	{
+	  inf_data->cached_code_address = 0;
+	  inf_data->jit_breakpoint = NULL;
+	}
+    }
+
+  return 0;
+}
+
+/* This is called when a breakpoint is deleted.  It updates the
+   inferior's cache, if needed.  */
+
+static void
+jit_breakpoint_deleted (struct breakpoint *b)
+{
+  struct bp_location *iter;
+
+  if (b->type != bp_jit_event)
+    return;
+
+  for (iter = b->loc; iter != NULL; iter = iter->next)
+    iterate_over_inferiors (jit_update_inferior_cache, iter);
+}
+
 /* (Re-)Initialize the jit breakpoint if necessary.
    Return 0 on success.  */
 
@@ -978,36 +1032,47 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
   struct minimal_symbol *reg_symbol, *desc_symbol;
   struct objfile *objf;
   struct jit_objfile_data *objf_data;
+  CORE_ADDR addr;
 
-  if (inf_data->objfile != NULL)
-    return 0;
+  if (inf_data->objfile == NULL)
+    {
+      /* Lookup the registration symbol.  If it is missing, then we
+	 assume we are not attached to a JIT.  */
+      reg_symbol = lookup_minimal_symbol_and_objfile (jit_break_name, &objf);
+      if (reg_symbol == NULL || SYMBOL_VALUE_ADDRESS (reg_symbol) == 0)
+	return 1;
 
-  /* Lookup the registration symbol.  If it is missing, then we assume
-     we are not attached to a JIT.  */
-  reg_symbol = lookup_minimal_symbol_and_objfile (jit_break_name, &objf);
-  if (reg_symbol == NULL || SYMBOL_VALUE_ADDRESS (reg_symbol) == 0)
-    return 1;
+      desc_symbol = lookup_minimal_symbol (jit_descriptor_name, NULL, objf);
+      if (desc_symbol == NULL || SYMBOL_VALUE_ADDRESS (desc_symbol) == 0)
+	return 1;
 
-  desc_symbol = lookup_minimal_symbol (jit_descriptor_name, NULL, objf);
-  if (desc_symbol == NULL || SYMBOL_VALUE_ADDRESS (desc_symbol) == 0)
-    return 1;
+      objf_data = get_jit_objfile_data (objf);
+      objf_data->register_code = reg_symbol;
+      objf_data->descriptor = desc_symbol;
 
-  objf_data = get_jit_objfile_data (objf);
-  objf_data->register_code = reg_symbol;
-  objf_data->descriptor = desc_symbol;
+      inf_data->objfile = objf;
+    }
+  else
+    objf_data = get_jit_objfile_data (inf_data->objfile);
 
-  inf_data->objfile = objf;
-
-  jit_inferior_init (gdbarch);
+  addr = SYMBOL_VALUE_ADDRESS (objf_data->register_code);
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"jit_breakpoint_re_set_internal, "
 			"breakpoint_addr = %s\n",
-			paddress (gdbarch, SYMBOL_VALUE_ADDRESS (reg_symbol)));
+			paddress (gdbarch, addr));
+
+  if (inf_data->cached_code_address == addr)
+    return 1;
+
+  /* Delete the old breakpoint.  */
+  if (inf_data->jit_breakpoint != NULL)
+    delete_breakpoint (inf_data->jit_breakpoint);
 
   /* Put a breakpoint in the registration symbol.  */
-  create_jit_event_breakpoint (gdbarch, SYMBOL_VALUE_ADDRESS (reg_symbol));
+  inf_data->cached_code_address = addr;
+  inf_data->jit_breakpoint = create_jit_event_breakpoint (gdbarch, addr);
 
   return 0;
 }
@@ -1419,6 +1484,8 @@ _initialize_jit (void)
 			     &setdebuglist, &showdebuglist);
 
   observer_attach_inferior_exit (jit_inferior_exit_hook);
+  observer_attach_breakpoint_deleted (jit_breakpoint_deleted);
+
   jit_objfile_data =
     register_objfile_data_with_cleanup (NULL, free_objfile_data);
   jit_inferior_data =
