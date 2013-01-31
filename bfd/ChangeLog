@@ -1,3 +1,9 @@
+2013-01-31  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_scan): Call bfd_mach_o_flatten_sections
+	earlier.  Fix status checking of bfd_mach_o_scan_start_address.
+	(bfd_mach_o_scan_start_address): Handle LC_MAIN.
+
 2013-01-31  Alan Modra  <amodra@gmail.com>
 	    David S. Miller  <davem@davemloft.net>
 

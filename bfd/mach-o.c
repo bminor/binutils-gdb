@@ -3979,6 +3979,18 @@ bfd_mach_o_scan_start_address (bfd *abfd)
         cmd = &mdata->commands[i].command.thread;
         break;
       }
+    else if (mdata->commands[i].type == BFD_MACH_O_LC_MAIN
+	     && mdata->nsects > 1)
+      {
+	bfd_mach_o_main_command *main_cmd = &mdata->commands[i].command.main;
+	bfd_mach_o_section *text_sect = mdata->sections[0];
+	if (text_sect)
+	  {
+	    abfd->start_address = main_cmd->entryoff
+	      + (text_sect->addr - text_sect->offset);
+	    return TRUE;
+	  }
+      }
 
   if (cmd == NULL)
     return FALSE;
@@ -4121,10 +4133,11 @@ bfd_mach_o_scan (bfd *abfd,
 	}
     }
 
-  if (bfd_mach_o_scan_start_address (abfd) < 0)
+  /* Sections should be flatten before scanning start address.  */
+  bfd_mach_o_flatten_sections (abfd);
+  if (!bfd_mach_o_scan_start_address (abfd))
     return FALSE;
 
-  bfd_mach_o_flatten_sections (abfd);
   return TRUE;
 }
 
