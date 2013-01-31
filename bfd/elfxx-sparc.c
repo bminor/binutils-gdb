@@ -1873,6 +1873,29 @@ _bfd_sparc_elf_gc_mark_hook (asection *sec,
 	return NULL;
       }
 
+  /* FIXME: The test here, in check_relocs and in relocate_section
+     dealing with TLS optimization, ought to be !info->executable.  */
+  if (info->shared)
+    {
+      switch (SPARC_ELF_R_TYPE (rel->r_info))
+	{
+	case R_SPARC_TLS_GD_CALL:
+	case R_SPARC_TLS_LDM_CALL:
+	  /* This reloc implicitly references __tls_get_addr.  We know
+	     another reloc will reference the same symbol as the one
+	     on this reloc, so the real symbol and section will be
+	     gc marked when processing the other reloc.  That lets
+	     us handle __tls_get_addr here.  */
+	  h = elf_link_hash_lookup (elf_hash_table (info), "__tls_get_addr",
+				    FALSE, FALSE, TRUE);
+	  BFD_ASSERT (h != NULL);
+	  h->mark = 1;
+	  if (h->u.weakdef != NULL)
+	    h->u.weakdef->mark = 1;
+	  sym = NULL;
+	}
+    }
+
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
