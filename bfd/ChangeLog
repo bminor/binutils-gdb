@@ -1,4 +1,14 @@
 2013-01-31  Alan Modra  <amodra@gmail.com>
+	    David S. Miller  <davem@davemloft.net>
+
+	PR ld/15056
+	* elfxx-sparc.c (_bfd_sparc_elf_gc_mark_hook): Handle implicit
+	references to __tls_get_addr.
+	* elf32-tilpro.c (tilepro_elf_gc_mark_hook): Likewise.  Correct
+	vtinherit and vtentry reloc handling too.
+	* elfxx-tilegx.c (tilegx_elf_gc_mark_hook): As for tilepro.
+
+2013-01-31  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc_stub_name): Trim off trailing "+0".
 
