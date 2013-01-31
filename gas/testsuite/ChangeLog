@@ -1,3 +1,8 @@
+2013-01-31  Tristan Gingold  <gingold@adacore.com>
+
+	* gas/ppc/test1xcoff32.d: Updated.
+	* gas/all/fwdexp.d: Adjusted for AIX.
+
 2013-01-30  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/alias.s: Add new tests.
