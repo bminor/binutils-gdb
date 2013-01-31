@@ -12270,6 +12270,15 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
 
   if (TYPE_CODE (check_typedef (to_type)) == TYPE_CODE_METHOD)
     type = lookup_methodptr_type (to_type);
+  else if (TYPE_CODE (check_typedef (to_type)) == TYPE_CODE_FUNC)
+    {
+      struct type *new_type = alloc_type (cu->objfile);
+
+      smash_to_method_type (new_type, domain, TYPE_TARGET_TYPE (to_type),
+			    TYPE_FIELDS (to_type), TYPE_NFIELDS (to_type),
+			    TYPE_VARARGS (to_type));
+      type = lookup_methodptr_type (new_type);
+    }
   else
     type = lookup_memberptr_type (to_type, domain);
 
