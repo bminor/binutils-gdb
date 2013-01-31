@@ -1,5 +1,28 @@
 2013-01-31  Tom Tromey  <tromey@redhat.com>
 
+	* jit.c (jit_program_space_data): Rename from jit_inferior_data;
+	change type.
+	(struct jit_program_space_data): Rename from jit_inferior_data.
+	Update comments.
+	(get_jit_program_space_data): Rename from get_jit_inferior_data.
+	Change return type.  Attach data to program space.
+	(jit_program_space_data_cleanup): Rename from
+	jit_inferior_data_cleanup; change argument type.
+	(jit_read_descriptor): Change 'inf_data' argument to 'ps_data',
+	change type.
+	(jit_register_code): Update.
+	(jit_update_inferior_cache): Remove.
+	(jit_breakpoint_deleted): Get jit data from the location's program
+	space.
+	(jit_breakpoint_re_set_internal): Rename 'inf_data' argument to
+	'ps_data', change type.
+	(jit_inferior_init, jit_breakpoint_re_set_internal)
+	(jit_event_handler): Update.
+	(free_objfile_data): Get data from objfile's program space.
+	(_initialize_jit): Update.
+
+2013-01-31  Tom Tromey  <tromey@redhat.com>
+
 	PR gdb/13987:
 	* jit.c (struct jit_inferior_data) <cached_code_address,
 	jit_breakpoint>: New fields.
