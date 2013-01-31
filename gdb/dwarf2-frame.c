@@ -888,8 +888,6 @@ dwarf2_compile_cfa_to_ax (struct agent_expr *expr, struct axs_value *loc,
 			  CORE_ADDR pc,
 			  struct dwarf2_per_cu_data *data)
 {
-  const int num_regs = gdbarch_num_regs (gdbarch)
-		       + gdbarch_num_pseudo_regs (gdbarch);
   struct dwarf2_fde *fde;
   CORE_ADDR text_offset;
   struct dwarf2_frame_state fs;

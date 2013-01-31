@@ -285,7 +285,6 @@ iterate_over_symtabs (const char *name,
 				       void *data),
 		      void *data)
 {
-  struct symtab *s = NULL;
   struct objfile *objfile;
   char *real_path = NULL;
   char *full_path = NULL;
@@ -2103,11 +2102,8 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
   struct symtab *s = NULL;
   struct symtab *best_s = NULL;
   struct objfile *objfile;
-  struct program_space *pspace;
   CORE_ADDR distance = 0;
   struct minimal_symbol *msymbol;
-
-  pspace = current_program_space;
 
   /* If we know that this is not a text address, return failure.  This is
      necessary because we loop based on the block's high and low code
@@ -2261,7 +2257,6 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
      we will use a line one less than this,
      with a range from the start of that file to the first line's pc.  */
   struct linetable_entry *alt = NULL;
-  struct symtab *alt_symtab = 0;
 
   /* Info on best line seen in this file.  */
 
@@ -2406,10 +2401,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       /* Is this file's first line closer than the first lines of other files?
          If so, record this file, and its first line, as best alternate.  */
       if (item->pc > pc && (!alt || item->pc < alt->pc))
-	{
-	  alt = item;
-	  alt_symtab = s;
-	}
+	alt = item;
 
       for (i = 0; i < len; i++, item++)
 	{
@@ -2600,8 +2592,7 @@ VEC (CORE_ADDR) *
 find_pcs_for_symtab_line (struct symtab *symtab, int line,
 			  struct linetable_entry **best_item)
 {
-  int start = 0, ix;
-  struct symbol *previous_function = NULL;
+  int start = 0;
   VEC (CORE_ADDR) *result = NULL;
 
   /* First, collect all the PCs that are at this line.  */
@@ -4041,8 +4032,6 @@ completion_list_add_name (const char *symname,
 			  const char *sym_text, int sym_text_len,
 			  const char *text, const char *word)
 {
-  int newsize;
-
   /* Clip symbols that cannot match.  */
   if (!compare_symbol_name (symname, sym_text, sym_text_len))
     return;

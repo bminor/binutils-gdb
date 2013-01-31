@@ -1,3 +1,12 @@
+2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* dwarf2-frame.c (dwarf2_compile_cfa_to_ax): Remove unused num_regs.
+	* symtab.c (iterate_over_symtabs): Remove unused s.
+	(find_pc_sect_symtab): Remove unused pspAce.
+	(find_pc_sect_line): Remove unused alt_symtab.
+	(find_pcs_for_symtab_line): Remove unused ix, previous_function.
+	(completion_list_add_name): Remove unused newsize.
+
 2013-01-31  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/14998:
