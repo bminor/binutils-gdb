@@ -1,6 +1,7 @@
 2013-01-31  Hans-Peter Nilsson  <hp@axis.com>
 
-	* ld-cris/libdso-13.d: Adjust for --enable-new-dtags now default.
+	* ld-cris/libdso-13.d: Adjust for --enable-new-dtags now
+	default for *-*-linux-*.
 
 2013-01-21  Alan Modra  <amodra@gmail.com>
 
