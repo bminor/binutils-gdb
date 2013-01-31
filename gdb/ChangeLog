@@ -1,5 +1,9 @@
 2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* target.c (target_read_string): Remove unused origlen.
+
+2013-01-31  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* auto-load.c (auto_load_expand_dir_vars): Remove unused dir_vec.
 	* ax-gdb.c (gen_printf): Remove unused expr, i, bot, fr, flen, fmt.
 	* ax-general.c (ax_print): Remove unused is_float.
