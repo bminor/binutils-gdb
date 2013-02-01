@@ -1,3 +1,7 @@
+2013-02-01  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* ada-lang.c (assign_aggregate): Remove unused 'is_array_aggregate'.
+
 2013-02-01  Pedro Alves  <palves@redhat.com>
 
 	* dummy-frame.c (deprecated_pc_in_call_dummy): Delete function.

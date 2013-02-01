@@ -9029,7 +9029,6 @@ assign_aggregate (struct value *container,
   int num_specs;
   LONGEST *indices;
   int max_indices, num_indices;
-  int is_array_aggregate;
   int i;
 
   *pos += 3;
@@ -9054,13 +9053,11 @@ assign_aggregate (struct value *container,
       lhs_type = value_type (lhs);
       low_index = TYPE_ARRAY_LOWER_BOUND_VALUE (lhs_type);
       high_index = TYPE_ARRAY_UPPER_BOUND_VALUE (lhs_type);
-      is_array_aggregate = 1;
     }
   else if (TYPE_CODE (lhs_type) == TYPE_CODE_STRUCT)
     {
       low_index = 0;
       high_index = num_visible_fields (lhs_type) - 1;
-      is_array_aggregate = 0;
     }
   else
     error (_("Left-hand side must be array or record."));
