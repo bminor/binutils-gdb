@@ -1,3 +1,8 @@
+2013-02-01  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (dec_dynrel_count): Don't error when elf_gc_sweep_symbol
+	clears def_regular.
+
 2013-01-31  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_scan): Call bfd_mach_o_flatten_sections

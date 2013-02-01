@@ -7056,13 +7056,14 @@ dec_dynrel_count (bfd_vma r_info,
 	  void *vpp = &elf_section_data (sec)->local_dynrel;
 	  pp = (struct elf_dyn_relocs **) vpp;
 	}
-
-      /* elf_gc_sweep may have already removed all dyn relocs associated
-	 with local syms for a given section.  Don't report a dynreloc
-	 miscount.  */
-      if (*pp == NULL)
-	return TRUE;
     }
+
+  /* elf_gc_sweep may have already removed all dyn relocs associated
+     with local syms for a given section.  Also, symbol flags are
+     changed by elf_gc_sweep_symbol, confusing the test above.  Don't
+     report a dynreloc miscount.  */
+  if (*pp == NULL && info->gc_sections)
+    return TRUE;
 
   while ((p = *pp) != NULL)
     {
