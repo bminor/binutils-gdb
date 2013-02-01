@@ -732,6 +732,7 @@ namespace eval Dwarf {
 	variable _defer
 	variable _label_num
 	variable _strings
+	variable _cu_count
 
 	if {!$_initialized} {
 	    _read_constants

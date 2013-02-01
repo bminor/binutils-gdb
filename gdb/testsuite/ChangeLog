@@ -1,3 +1,9 @@
+2013-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/method-ptr.exp: Link with c++.
+	* lib/dwarf.exp (Dwarf::assemble): Declare _cu_count.
+
 2013-01-31  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/jit.exp (compile_jit_test): New proc.

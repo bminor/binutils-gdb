@@ -87,7 +87,7 @@ if  {[gdb_compile $asm_file ${binfile}2.o object {nodebug}] != ""} {
 }
 
 if  {[gdb_compile [list ${binfile}1.o ${binfile}2.o] \
-	  "${binfile}" executable {}] != ""} {
+	  "${binfile}" executable {c++}] != ""} {
     return -1
 }
 
