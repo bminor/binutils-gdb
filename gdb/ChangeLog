@@ -1,5 +1,9 @@
 2013-02-01  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* ada-valprint.c (ada_print_floating): Remove unused 'len'.
+
+2013-02-01  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* ada-lang.c (assign_aggregate): Remove unused 'is_array_aggregate'.
 
 2013-02-01  Pedro Alves  <palves@redhat.com>

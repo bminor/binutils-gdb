@@ -320,7 +320,6 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
 {
   char buffer[64];
   char *s, *result;
-  int len;
   struct ui_file *tmp_stream = mem_fileopen ();
   struct cleanup *cleanups = make_cleanup_ui_file_delete (tmp_stream);
 
@@ -329,7 +328,6 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
   do_cleanups (cleanups);
 
   result = buffer;
-  len = strlen (result);
 
   /* Modify for Ada rules.  */
 
