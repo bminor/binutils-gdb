@@ -1431,8 +1431,18 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   /* If the file has its own symbol tables it has no separate debug
      info.  `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to
      SYMTABS/PSYMTABS.  `.gnu_debuglink' may no longer be present with
-     `.note.gnu.build-id'.  */
-  else if (!objfile_has_partial_symbols (objfile))
+     `.note.gnu.build-id'.
+
+     .gnu_debugdata is !objfile_has_partial_symbols because it contains only
+     .symtab, not .debug_* section.  But if we already added .gnu_debugdata as
+     an objfile via find_separate_debug_file_in_section there was no separate
+     debug info available.  Therefore do not attempt to search for another one,
+     objfile->separate_debug_objfile->separate_debug_objfile GDB guarantees to
+     be NULL and we would possibly violate it.  */
+
+  else if (!objfile_has_partial_symbols (objfile)
+	   && objfile->separate_debug_objfile == NULL
+	   && objfile->separate_debug_objfile_backlink == NULL)
     {
       char *debugfile;
 

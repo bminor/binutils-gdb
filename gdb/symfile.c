@@ -823,7 +823,12 @@ static void
 read_symbols (struct objfile *objfile, int add_flags)
 {
   (*objfile->sf->sym_read) (objfile, add_flags);
-  if (!objfile_has_partial_symbols (objfile))
+
+  /* find_separate_debug_file_in_section should be called only if there is
+     single binary with no existing separate debug info file.  */
+  if (!objfile_has_partial_symbols (objfile)
+      && objfile->separate_debug_objfile == NULL
+      && objfile->separate_debug_objfile_backlink == NULL)
     {
       bfd *abfd = find_separate_debug_file_in_section (objfile);
       struct cleanup *cleanup = make_cleanup_bfd_unref (abfd);

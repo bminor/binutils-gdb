@@ -1,3 +1,10 @@
+2013-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/gnu-debugdata.exp): Create ${binfile}.debug,
+	${binfile}.mini_debuginfo-debuglink, add -k to xz, use now
+	${binfile}.mini_debuginfo-debuglink and
+	${binfile}.mini_debuginfo-debuglink.xz.
+
 2013-02-01  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/method-ptr.exp: Use correct form for non-string

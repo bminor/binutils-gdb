@@ -1,3 +1,11 @@
+2013-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elfread.c (elf_symfile_read): Limit separate debug info additions to
+	files with no separate debug info.
+	* objfiles.c (add_separate_debug_objfile): Add gdb_assert calls.
+	* symfile.c (read_symbols): Call find_separate_debug_file_in_section
+	only for files with no separate debug info.
+
 2013-01-31  Tom Tromey  <tromey@redhat.com>
 
 	* jit.c (jit_program_space_data): Rename from jit_inferior_data;

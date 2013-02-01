@@ -476,6 +476,9 @@ add_separate_debug_objfile (struct objfile *objfile, struct objfile *parent)
   /* Must not be already in a list.  */
   gdb_assert (objfile->separate_debug_objfile_backlink == NULL);
   gdb_assert (objfile->separate_debug_objfile_link == NULL);
+  gdb_assert (objfile->separate_debug_objfile == NULL);
+  gdb_assert (parent->separate_debug_objfile_backlink == NULL);
+  gdb_assert (parent->separate_debug_objfile_link == NULL);
 
   objfile->separate_debug_objfile_backlink = parent;
   objfile->separate_debug_objfile_link = parent->separate_debug_objfile;
