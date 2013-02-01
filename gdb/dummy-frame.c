@@ -47,40 +47,6 @@ struct dummy_frame
 
 static struct dummy_frame *dummy_frame_stack = NULL;
 
-/* Function: deprecated_pc_in_call_dummy (pc)
-
-   Return non-zero if the PC falls in a dummy frame created by gdb for
-   an inferior call.  The code below which allows gdbarch_decr_pc_after_break
-   is for infrun.c, which may give the function a PC without that
-   subtracted out.
-
-   FIXME: cagney/2002-11-23: This is silly.  Surely "infrun.c" can
-   figure out what the real PC (as in the resume address) is BEFORE
-   calling this function.
-
-   NOTE: cagney/2004-08-02: I'm pretty sure that, with the introduction of
-   infrun.c:adjust_pc_after_break (thanks), this function is now
-   always called with a correctly adjusted PC!
-
-   NOTE: cagney/2004-08-02: Code should not need to call this.  */
-
-int
-deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc)
-{
-  struct dummy_frame *dummyframe;
-
-  for (dummyframe = dummy_frame_stack;
-       dummyframe != NULL;
-       dummyframe = dummyframe->next)
-    {
-      if ((pc >= dummyframe->id.code_addr)
-	  && (pc <= dummyframe->id.code_addr
-		    + gdbarch_decr_pc_after_break (gdbarch)))
-	return 1;
-    }
-  return 0;
-}
-
 /* Push the caller's state, along with the dummy frame info, onto the
    dummy-frame stack.  */
 

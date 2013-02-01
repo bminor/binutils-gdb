@@ -1,3 +1,8 @@
+2013-02-01  Pedro Alves  <palves@redhat.com>
+
+	* dummy-frame.c (deprecated_pc_in_call_dummy): Delete function.
+	* frame.h (deprecated_pc_in_call_dummy): Delete declaration.
+
 2013-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elfread.c (elf_symfile_read): Limit separate debug info additions to
