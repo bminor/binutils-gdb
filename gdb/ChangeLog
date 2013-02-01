@@ -1,3 +1,31 @@
+2013-02-01  Andreas Tobler  <andreast@fgznet.ch>
+
+	* Makefile.in (ALL_TARGET_OBS): Add ppc64-tdep.o.
+	(HFILES_NO_SRCDIR): Add ppc64-tdep.h.
+	(ALLDEPFILES): Add ppc64-tdep.c.
+	* configure.tgt (powerpc-*-linux* | powerpc64-*-linux*): Add
+	ppc64-tdep.o to gdb_target_obs.
+	* ppc64-tdep.h: New file.
+	* ppc64-tdep.c: New file.
+	(insn_d, insn_ds, insn_xfx, ppc64_desc_entry_point): Move from
+	ppc-linux-tdep.c to here.
+	(PPC64_STANDARD_LINKAGE1_LEN, PPC64_STANDARD_LINKAGE2_LEN)
+	(PPC64_STANDARD_LINKAGE2_LEN): Likewise and use ARRAY_SIZE macro.
+	(ppc64_standard_linkage1_target, ppc64_standard_linkage2_target)
+	(ppc64_standard_linkage3_target, ppc64_skip_trampoline_code): Move
+	from ppc-linux-tdep.c to here.
+	(ppc64_convert_from_func_ptr_addr): Rename from
+	ppc64_linux_convert_from_func_ptr_addr to
+	ppc64_convert_from_func_ptr_addr and move from ppc-linux-tdep.c to
+	here.
+	* rs6000-tdep.c:
+	(read_insn): Move from ppc-linux-tdep.c to here.
+	(insns_match_pattern, insn_d_field, insn_ds_field): Move
+	from ppc-linux-tdep.c to here and rename them with the ppc_ prefix.
+	* ppc-linux-tdep.c: Include ppc64-tdep.h.
+	Removed above functions.
+	(ppc_linux_init_abi): Adjust.
+
 2013-02-01  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* ada-valprint.c (ada_print_floating): Remove unused 'len'.

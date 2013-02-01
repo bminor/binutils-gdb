@@ -405,7 +405,8 @@ powerpc-*-aix* | rs6000-*-*)
 powerpc-*-linux* | powerpc64-*-linux*)
 	# Target: PowerPC running Linux
 	gdb_target_obs="rs6000-tdep.o ppc-linux-tdep.o ppc-sysv-tdep.o \
-			solib-svr4.o solib-spu.o spu-multiarch.o \
+			ppc64-tdep.o solib-svr4.o solib-spu.o \
+			spu-multiarch.o \
 			glibc-tdep.o symfile-mem.o linux-tdep.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
 	gdb_sim=../sim/ppc/libsim.a

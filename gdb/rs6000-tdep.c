@@ -4238,6 +4238,68 @@ show_powerpc_exact_watchpoints (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Use of exact watchpoints is %s.\n"), value);
 }
 
+/* Read a PPC instruction from memory.  PPC instructions are always
+   big-endian, no matter what endianness the program is running in, so
+   we can hardcode BFD_ENDIAN_BIG for read_memory_unsigned_integer.  */
+
+static unsigned int
+read_insn (CORE_ADDR pc)
+{
+  return read_memory_unsigned_integer (pc, 4, BFD_ENDIAN_BIG);
+}
+
+/* Return non-zero if the instructions at PC match the series
+   described in PATTERN, or zero otherwise.  PATTERN is an array of
+   'struct ppc_insn_pattern' objects, terminated by an entry whose
+   mask is zero.
+
+   When the match is successful, fill INSN[i] with what PATTERN[i]
+   matched.  If PATTERN[i] is optional, and the instruction wasn't
+   present, set INSN[i] to 0 (which is not a valid PPC instruction).
+   INSN should have as many elements as PATTERN.  Note that, if
+   PATTERN contains optional instructions which aren't present in
+   memory, then INSN will have holes, so INSN[i] isn't necessarily the
+   i'th instruction in memory.  */
+
+int
+ppc_insns_match_pattern (CORE_ADDR pc, struct ppc_insn_pattern *pattern,
+			 unsigned int *insn)
+{
+  int i;
+
+  for (i = 0; pattern[i].mask; i++)
+    {
+      insn[i] = read_insn (pc);
+      if ((insn[i] & pattern[i].mask) == pattern[i].data)
+	pc += 4;
+      else if (pattern[i].optional)
+	insn[i] = 0;
+      else
+	return 0;
+    }
+
+  return 1;
+}
+
+/* Return the 'd' field of the d-form instruction INSN, properly
+   sign-extended.  */
+
+CORE_ADDR
+ppc_insn_d_field (unsigned int insn)
+{
+  return ((((CORE_ADDR) insn & 0xffff) ^ 0x8000) - 0x8000);
+}
+
+/* Return the 'ds' field of the ds-form instruction INSN, with the two
+   zero bits concatenated at the right, and properly
+   sign-extended.  */
+
+CORE_ADDR
+ppc_insn_ds_field (unsigned int insn)
+{
+  return ((((CORE_ADDR) insn & 0xfffc) ^ 0x8000) - 0x8000);
+}
+
 /* Initialization code.  */
 
 /* -Wmissing-prototypes */

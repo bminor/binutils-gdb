@@ -291,6 +291,21 @@ enum {
   PPC_NUM_REGS
 };
 
+/* An instruction to match.  */
+
+struct ppc_insn_pattern
+{
+  unsigned int mask;            /* mask the insn with this...  */
+  unsigned int data;            /* ...and see if it matches this.  */
+  int optional;                 /* If non-zero, this insn may be absent.  */
+};
+
+extern int ppc_insns_match_pattern (CORE_ADDR pc,
+				    struct ppc_insn_pattern *pattern,
+				    unsigned int *insn);
+extern CORE_ADDR ppc_insn_d_field (unsigned int insn);
+
+extern CORE_ADDR ppc_insn_ds_field (unsigned int insn);
 
 /* Instruction size.  */
 #define PPC_INSN_SIZE 4
