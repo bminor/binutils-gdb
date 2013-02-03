@@ -179,7 +179,7 @@ compare_filenames_for_search (const char *filename, const char *search_name)
 /* Check for a symtab of a specific name by searching some symtabs.
    This is a helper function for callbacks of iterate_over_symtabs.
 
-   The return value, NAME, FULL_PATH, REAL_PATH, CALLBACK, and DATA
+   The return value, NAME, REAL_PATH, CALLBACK, and DATA
    are identical to the `map_symtabs_matching_filename' method of
    quick_symbol_functions.
 
@@ -189,7 +189,6 @@ compare_filenames_for_search (const char *filename, const char *search_name)
 
 int
 iterate_over_some_symtabs (const char *name,
-			   const char *full_path,
 			   const char *real_path,
 			   int (*callback) (struct symtab *symtab,
 					    void *data),
@@ -225,47 +224,21 @@ iterate_over_some_symtabs (const char *name,
     /* If the user gave us an absolute path, try to find the file in
        this symtab and use its absolute path.  */
 
-    if (full_path != NULL)
-      {
-        const char *fp = symtab_to_fullname (s);
-
-        if (FILENAME_CMP (full_path, fp) == 0)
-          {
-	    if (callback (s, data))
-	      return 1;
-          }
-
-	if (!is_abs && compare_filenames_for_search (fp, name))
-	  {
-	    if (callback (s, data))
-	      return 1;
-	  }
-      }
-
     if (real_path != NULL)
       {
         const char *fullname = symtab_to_fullname (s);
-	char *rp = gdb_realpath (fullname);
-	struct cleanup *cleanups = make_cleanup (xfree, rp);
 
-	if (FILENAME_CMP (real_path, rp) == 0)
+	if (FILENAME_CMP (real_path, fullname) == 0)
 	  {
 	    if (callback (s, data))
-	      {
-		do_cleanups (cleanups);
-		return 1;
-	      }
+	      return 1;
 	  }
 
-	if (!is_abs && compare_filenames_for_search (rp, name))
+	if (!is_abs && compare_filenames_for_search (fullname, name))
 	  {
 	    if (callback (s, data))
-	      {
-		do_cleanups (cleanups);
-		return 1;
-	      }
+	      return 1;
 	  }
-	do_cleanups (cleanups);
       }
     }
 
@@ -287,22 +260,19 @@ iterate_over_symtabs (const char *name,
 {
   struct objfile *objfile;
   char *real_path = NULL;
-  char *full_path = NULL;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
 
   /* Here we are interested in canonicalizing an absolute path, not
      absolutizing a relative path.  */
   if (IS_ABSOLUTE_PATH (name))
     {
-      full_path = xfullpath (name);
-      make_cleanup (xfree, full_path);
       real_path = gdb_realpath (name);
       make_cleanup (xfree, real_path);
     }
 
   ALL_OBJFILES (objfile)
   {
-    if (iterate_over_some_symtabs (name, full_path, real_path, callback, data,
+    if (iterate_over_some_symtabs (name, real_path, callback, data,
 				   objfile->symtabs, NULL))
       {
 	do_cleanups (cleanups);
@@ -318,7 +288,6 @@ iterate_over_symtabs (const char *name,
     if (objfile->sf
 	&& objfile->sf->qf->map_symtabs_matching_filename (objfile,
 							   name,
-							   full_path,
 							   real_path,
 							   callback,
 							   data))

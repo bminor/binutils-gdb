@@ -103,37 +103,37 @@ proc test_with_self { executable } {
     }
 
     # A file which contains a directory prefix
-    gdb_test "print xfullpath (\"./xfullpath.exp\")" \
+    gdb_test "print gdb_realpath (\"./xfullpath.exp\")" \
              ".\[0-9\]+ =.*\".*/xfullpath.exp\"" \
              "A filename with ./ as the directory prefix"
 
     # A file which contains a directory prefix
-    gdb_test "print xfullpath (\"../../defs.h\")" \
+    gdb_test "print gdb_realpath (\"../../defs.h\")" \
              ".\[0-9\]+ =.*\".*/defs.h\"" \
              "A filename with ../ in the directory prefix"
 
     # A one-character filename
-    gdb_test "print xfullpath (\"./a\")" \
+    gdb_test "print gdb_realpath (\"./a\")" \
              ".\[0-9\]+ =.*\".*/a\"" \
              "A one-char filename in the current directory"
           
     # A file in the root directory
-    gdb_test "print xfullpath (\"/root_file_which_should_exist\")" \
+    gdb_test "print gdb_realpath (\"/root_file_which_should_exist\")" \
              ".\[0-9\]+ =.*\"/root_file_which_should_exist\"" \
              "A filename in the root directory"
           
     # A file which does not have a directory prefix
-    gdb_test "print xfullpath (\"xfullpath.exp\")" \
+    gdb_test "print gdb_realpath (\"xfullpath.exp\")" \
              ".\[0-9\]+ =.*\"xfullpath.exp\"" \
              "A filename without any directory prefix"
 
     # A one-char filename without any directory prefix
-    gdb_test "print xfullpath (\"a\")" \
+    gdb_test "print gdb_realpath (\"a\")" \
              ".\[0-9\]+ =.*\"a\"" \
              "A one-char filename without any directory prefix"
 
     # An empty filename
-    gdb_test "print xfullpath (\"\")" \
+    gdb_test "print gdb_realpath (\"\")" \
              ".\[0-9\]+ =.*\"\"" \
              "An empty filename"
 

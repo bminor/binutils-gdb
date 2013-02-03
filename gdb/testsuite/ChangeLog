@@ -1,3 +1,7 @@
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.gdb/xfullpath.exp: Replace xfullpath calls by gdb_realpath calls.
+
 2013-02-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/java.exp (compile_java_from_source): Initialize ARGS as a list.

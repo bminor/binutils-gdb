@@ -1284,7 +1284,6 @@ int compare_filenames_for_search (const char *filename,
 				  const char *search_name);
 
 int iterate_over_some_symtabs (const char *name,
-			       const char *full_path,
 			       const char *real_path,
 			       int (*callback) (struct symtab *symtab,
 						void *data),

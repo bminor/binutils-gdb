@@ -655,7 +655,7 @@ maintenance_print_msymbols (char *args, int from_tty)
       /* If a second arg is supplied, it is a source file name to match on.  */
       if (argv[1] != NULL)
 	{
-	  symname = xfullpath (argv[1]);
+	  symname = gdb_realpath (argv[1]);
 	  make_cleanup (xfree, symname);
 	  if (symname && stat (symname, &sym_st))
 	    perror_with_name (symname);

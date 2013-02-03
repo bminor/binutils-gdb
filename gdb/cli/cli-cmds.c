@@ -463,10 +463,7 @@ show_script_ext_mode (struct ui_file *file, int from_tty,
    we tried to open.
 
    If SEARCH_PATH is non-zero, and the file isn't found in cwd,
-   search for it in the source search path.
-
-   NOTE: This calls openp which uses xfullpath to compute the full path
-   instead of gdb_realpath.  Symbolic links are not resolved.  */
+   search for it in the source search path.  */
 
 int
 find_and_open_script (const char *script_file, int search_path,
