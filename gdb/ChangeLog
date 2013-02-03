@@ -1,5 +1,25 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup.
+	* breakpoint.c (print_breakpoint_location): Replace bp_location field
+	source_file references by symtab field references.  Remove variables
+	sal and fullname.
+	(momentary_breakpoint_from_master, add_location_to_breakpoint):
+	(clear_command, say_where): Replace bp_location field source_file
+	references by symtab field references.
+	(bp_location_dtor): Remove the source_file reference.
+	(update_static_tracepoint): Replace bp_location field source_file
+	references by symtab field references.
+	(breakpoint_free_objfile): New function.
+	* breakpoint.h (struct bp_location): Extend the comment for line_number.
+	Replace the field source_file by field symtab, extend its comment.
+	(breakpoint_free_objfile): New declaration.
+	* objfiles.c (free_objfile): Call breakpoint_free_objfile.
+	* tui/tui-winsource.c (tui_update_breakpoint_info): Replace bp_location
+	field source_file references by symtab field references.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Replace xfullpath calls by gdb_realpath calls.
 	* cli/cli-cmds.c (find_and_open_script): Remove xfullpath from the
 	function comment.

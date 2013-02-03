@@ -566,6 +566,8 @@ free_objfile (struct objfile *objfile)
      the symbol file data.  */
   forget_cached_source_info_for_objfile (objfile);
 
+  breakpoint_free_objfile (objfile);
+
   /* First do any symbol file specific actions required when we are
      finished with a particular symbol file.  Note that if the objfile
      is using reusable symbol information (via mmalloc) then each of

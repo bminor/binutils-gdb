@@ -5694,7 +5694,7 @@ print_breakpoint_location (struct breakpoint *b,
 
   if (b->display_canonical)
     ui_out_field_string (uiout, "what", b->addr_string);
-  else if (loc && loc->source_file)
+  else if (loc && loc->symtab)
     {
       struct symbol *sym 
 	= find_pc_sect_function (loc->address, loc->section);
@@ -5707,16 +5707,12 @@ print_breakpoint_location (struct breakpoint *b,
 	  ui_out_wrap_hint (uiout, wrap_indent_at_field (uiout, "what"));
 	  ui_out_text (uiout, "at ");
 	}
-      ui_out_field_string (uiout, "file", loc->source_file);
+      ui_out_field_string (uiout, "file", loc->symtab->filename);
       ui_out_text (uiout, ":");
       
       if (ui_out_is_mi_like_p (uiout))
-	{
-	  struct symtab_and_line sal = find_pc_line (loc->address, 0);
-	  const char *fullname = symtab_to_fullname (sal.symtab);
-	  
-	  ui_out_field_string (uiout, "fullname", fullname);
-	}
+	ui_out_field_string (uiout, "fullname",
+			     symtab_to_fullname (loc->symtab));
       
       ui_out_field_int (uiout, "line", loc->line_number);
     }
@@ -8756,11 +8752,8 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
   copy->loc->section = orig->loc->section;
   copy->loc->pspace = orig->loc->pspace;
   copy->loc->probe = orig->loc->probe;
-
-  if (orig->loc->source_file != NULL)
-    copy->loc->source_file = xstrdup (orig->loc->source_file);
-
   copy->loc->line_number = orig->loc->line_number;
+  copy->loc->symtab = orig->loc->symtab;
   copy->frame_id = orig->frame_id;
   copy->thread = orig->thread;
   copy->pspace = orig->pspace;
@@ -8845,10 +8838,8 @@ add_location_to_breakpoint (struct breakpoint *b,
   gdb_assert (loc->pspace != NULL);
   loc->section = sal->section;
   loc->gdbarch = loc_gdbarch;
-
-  if (sal->symtab != NULL)
-    loc->source_file = xstrdup (sal->symtab->filename);
   loc->line_number = sal->line;
+  loc->symtab = sal->symtab;
 
   set_breakpoint_location_function (loc,
 				    sal->explicit_pc || sal->explicit_line);
@@ -11988,16 +11979,16 @@ clear_command (char *arg, int from_tty)
 		  int line_match = 0;
 
 		  if ((default_match || sal.explicit_line)
-		      && loc->source_file != NULL
+		      && loc->symtab != NULL
 		      && sal.symtab != NULL
 		      && sal.pspace == loc->pspace
 		      && loc->line_number == sal.line)
 		    {
-		      if (filename_cmp (loc->source_file,
+		      if (filename_cmp (loc->symtab->filename,
 					sal.symtab->filename) == 0)
 			line_match = 1;
 		      else if (!IS_ABSOLUTE_PATH (sal.symtab->filename)
-			       && compare_filenames_for_search (loc->source_file,
+			       && compare_filenames_for_search (loc->symtab->filename,
 								sal.symtab->filename))
 			line_match = 1;
 		    }
@@ -12730,19 +12721,19 @@ say_where (struct breakpoint *b)
     }
   else
     {
-      if (opts.addressprint || b->loc->source_file == NULL)
+      if (opts.addressprint || b->loc->symtab == NULL)
 	{
 	  printf_filtered (" at ");
 	  fputs_filtered (paddress (b->loc->gdbarch, b->loc->address),
 			  gdb_stdout);
 	}
-      if (b->loc->source_file)
+      if (b->loc->symtab != NULL)
 	{
 	  /* If there is a single location, we can print the location
 	     more nicely.  */
 	  if (b->loc->next == NULL)
 	    printf_filtered (": file %s, line %d.",
-			     b->loc->source_file, b->loc->line_number);
+			     b->loc->symtab->filename, b->loc->line_number);
 	  else
 	    /* This is not ideal, but each location may have a
 	       different file name, and this at least reflects the
@@ -12770,7 +12761,6 @@ bp_location_dtor (struct bp_location *self)
   if (self->cond_bytecode)
     free_agent_expr (self->cond_bytecode);
   xfree (self->function_name);
-  xfree (self->source_file);
 }
 
 static const struct bp_location_ops bp_location_ops =
@@ -13956,12 +13946,7 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	  ui_out_text (uiout, "\n");
 
 	  b->loc->line_number = sal2.line;
-
-	  xfree (b->loc->source_file);
-	  if (sym)
-	    b->loc->source_file = xstrdup (sal2.symtab->filename);
-	  else
-	    b->loc->source_file = NULL;
+	  b->loc->symtab = sym != NULL ? sal2.symtab : NULL;
 
 	  xfree (b->addr_string);
 	  b->addr_string = xstrprintf ("%s:%d",
@@ -15796,6 +15781,18 @@ pc_at_non_inline_function (struct address_space *aspace, CORE_ADDR pc,
     }
 
   return 0;
+}
+
+/* Remove any references to OBJFILE which is going to be freed.  */
+
+void
+breakpoint_free_objfile (struct objfile *objfile)
+{
+  struct bp_location **locp, *loc;
+
+  ALL_BP_LOCATIONS (loc, locp)
+    if (loc->symtab != NULL && loc->symtab->objfile == objfile)
+      loc->symtab = NULL;
 }
 
 void

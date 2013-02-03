@@ -465,13 +465,17 @@ struct bp_location
      it becomes 0 this location is retired.  */
   int events_till_retirement;
 
-  /* Line number of this address.  */
+  /* Line number which was used to place this location.
+
+     Breakpoint placed into a comment keeps it's user specified line number
+     despite ADDRESS resolves into a different line number.  */
 
   int line_number;
 
-  /* Source file name of this address.  */
+  /* Symtab which was used to place this location.  This is used
+     to find the corresponding source file name.  */
 
-  char *source_file;
+  struct symtab *symtab;
 };
 
 /* Return values for bpstat_explains_signal.  Note that the order of
@@ -1549,5 +1553,7 @@ extern int user_breakpoint_p (struct breakpoint *);
 extern struct gdbarch *get_sal_arch (struct symtab_and_line sal);
 
 extern void handle_solib_event (void);
+
+extern void breakpoint_free_objfile (struct objfile *objfile);
 
 #endif /* !defined (BREAKPOINT_H) */
