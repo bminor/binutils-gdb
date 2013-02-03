@@ -58,6 +58,7 @@
 #include "gdb_stat.h"
 #include "gdb_string.h"
 #include "psympriv.h"
+#include "source.h"
 
 #include "bfd.h"
 
@@ -4343,7 +4344,8 @@ psymtab_to_symtab_1 (struct objfile *objfile,
       if (info_verbose && n_undef_symbols)
 	{
 	  printf_filtered (_("File %s contains %d unresolved references:"),
-			   st->filename, n_undef_symbols);
+			   symtab_to_filename_for_display (st),
+			   n_undef_symbols);
 	  printf_filtered ("\n\t%4d variables\n\t%4d "
 			   "procedures\n\t%4d labels\n",
 			   n_undef_vars, n_undef_procs, n_undef_labels);

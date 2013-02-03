@@ -50,6 +50,7 @@
 #include "arch-utils.h"
 #include "cli/cli-utils.h"
 #include "format.h"
+#include "source.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et al.   */
@@ -724,7 +725,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
 
       if (sal.symtab)
 	{
-	  *filename = xstrdup (sal.symtab->filename);
+	  *filename = xstrdup (symtab_to_filename_for_display (sal.symtab));
 	  *line = sal.line;
 	}
     }

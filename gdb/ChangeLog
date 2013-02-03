@@ -1,3 +1,86 @@
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ada-lang.c (user_select_syms): Replace symtab->filename refererences
+	by symtab_to_filename_for_display calls.
+	* breakpoint.c (print_breakpoint_location, resolve_sal_pc): Likewise.
+	(clear_command): New variable sal_fullname, initialize it.  Replace
+	compare_filenames_for_search by filename_cmp with sal_fullname.
+	(say_where, update_static_tracepoint): Replace symtab->filename
+	refererences by symtab_to_filename_for_display calls.
+	* cli/cli-cmds.c (edit_command, list_command, ambiguous_line_spec):
+	Likewise.
+	* dwarf2read.c: Include source.h.
+	(fixup_go_packaging): Replace symtab->filename refererences by
+	symtab_to_filename_for_display calls.
+	* linespec.c (add_sal_to_sals): Rename variable filename to fullname.
+	Replace symtab->filename refererences by symtab_to_filename_for_display
+	calls.
+	(create_sals_line_offset, convert_linespec_to_sals): New variable
+	fullname, initialize it, replace symtab->filename reference by the
+	variable.
+	* linux-fork.c: Include source.h.
+	(info_checkpoints_command): Replace symtab->filename refererences by
+	symtab_to_filename_for_display calls.
+	* macroscope.c (sal_macro_scope): Replace symtab->filename refererences
+	by symtab_to_filename_for_display calls.
+	* mdebugread.c: Include source.h.
+	(psymtab_to_symtab_1): Replace symtab->filename refererences by
+	symtab_to_filename_for_display calls.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_file)
+	(mi_cmd_file_list_exec_source_files): Likewise.
+	* printcmd.c: Include source.h.
+	(build_address_symbolic): Replace symtab->filename refererences by
+	symtab_to_filename_for_display calls.
+	* psymtab.c (partial_map_symtabs_matching_filename)
+	(read_psymtabs_with_fullname): Call compare_filenames_for_search also
+	with psymtab_to_fullname.
+	* python/py-symtab.c (stpy_str): Replace symtab->filename refererences
+	by symtab_to_filename_for_display calls.
+	(stpy_get_filename): New variable filename, initialize it, use instead
+	of symtab->filename refererences.
+	(salpy_str): Make variable filename const char *.  Replace
+	symtab->filename refererences by symtab_to_filename_for_display calls.
+	* skip.c: Include source.h and filenames.h.
+	(skip_file_command): Remove const from the symtab variable.  Replace
+	symtab->filename refererences by symtab_to_fullname call.
+	(function_name_is_marked_for_skip): New variables searched_for_fullname
+	and fullname.  Use them to search also with symtab's fullname.
+	* source.c (find_source_lines): Replace symtab->filename refererences
+	by symtab_to_filename_for_display calls.
+	(print_source_lines_base): New variable filename, use it instead of
+	symtab->filename.  Replace symtab->filename refererences by
+	symtab_to_filename_for_display calls.
+	(line_info, forward_search_command): Replace symtab->filename
+	refererences by symtab_to_filename_for_display calls.
+	(reverse_search_command): Replace symtab->filename refererences by
+	symtab_to_filename_for_display calls.  New variable filename for it.
+	* stack.c (frame_info): Likewise.
+	* symmisc.c: Include source.h.
+	(dump_objfile, dump_symtab_1, maintenance_print_symbols)
+	(maintenance_info_symtabs): Replace symtab->filename refererences by
+	symtab_to_filename_for_display calls.
+	* symtab.c (iterate_over_some_symtabs): Call
+	compare_filenames_for_search also with symtab_to_fullname.
+	(lookup_symbol_aux_quick, basic_lookup_transparent_type_quick): Replace
+	symtab->filename refererences by symtab_to_filename_for_display calls.
+	(find_line_symtab): Replace symtab->filename refererences by
+	symtab_to_filename_for_display calls.
+	(file_matches): Replace filename_cmp by compare_filenames_for_search.
+	(print_symbol_info): Make the last parameter const char *.  New
+	variable s_filename.  Use it in the function.
+	(symtab_symbol_info): Make the last_filename variable const char *.
+	Replace symtab->filename refererences by symtab_to_filename_for_display
+	calls.
+	(rbreak_command): New variable fullname.  Use it.  Replace
+	symtab->filename refererence by symtab_to_filename_for_display call.
+	* tracepoint.c (set_traceframe_context, trace_find_line_command)
+	(print_one_static_tracepoint_marker): Replace symtab->filename
+	refererences by symtab_to_filename_for_display calls.
+	* tui/tui-source.c (tui_set_source_content): New variables filename and
+	s_filename.  Replace symtab->filename refererences by this variable.
+	Replace other symtab->filename refererences by
+	symtab_to_filename_for_display calls.
+
 2013-02-03  Eldar Gaynetdinov <hal9000ed2k@gmail.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

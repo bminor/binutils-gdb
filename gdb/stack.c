@@ -1460,7 +1460,8 @@ frame_info (char *addr_exp, int from_tty)
     }
   wrap_here ("   ");
   if (sal.symtab)
-    printf_filtered (" (%s:%d)", sal.symtab->filename, sal.line);
+    printf_filtered (" (%s:%d)", symtab_to_filename_for_display (sal.symtab),
+		     sal.line);
   puts_filtered ("; ");
   wrap_here ("    ");
   printf_filtered ("saved %s ", pc_regname);

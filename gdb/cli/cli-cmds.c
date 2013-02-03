@@ -818,11 +818,13 @@ edit_command (char *arg, int from_tty)
 	    printf_filtered ("%s is in %s (%s:%d).\n",
 			     paddress (gdbarch, sal.pc),
 			     SYMBOL_PRINT_NAME (sym),
-			     sal.symtab->filename, sal.line);
+			     symtab_to_filename_for_display (sal.symtab),
+			     sal.line);
           else
 	    printf_filtered ("%s is at %s:%d.\n",
 			     paddress (gdbarch, sal.pc),
-			     sal.symtab->filename, sal.line);
+			     symtab_to_filename_for_display (sal.symtab),
+			     sal.line);
         }
 
       /* If what was given does not imply a symtab, it must be an
@@ -981,11 +983,11 @@ list_command (char *arg, int from_tty)
 	printf_filtered ("%s is in %s (%s:%d).\n",
 			 paddress (gdbarch, sal.pc),
 			 SYMBOL_PRINT_NAME (sym),
-			 sal.symtab->filename, sal.line);
+			 symtab_to_filename_for_display (sal.symtab), sal.line);
       else
 	printf_filtered ("%s is at %s:%d.\n",
 			 paddress (gdbarch, sal.pc),
-			 sal.symtab->filename, sal.line);
+			 symtab_to_filename_for_display (sal.symtab), sal.line);
     }
 
   /* If line was not specified by just a line number, and it does not
@@ -1445,7 +1447,8 @@ ambiguous_line_spec (struct symtabs_and_lines *sals)
 
   for (i = 0; i < sals->nelts; ++i)
     printf_filtered (_("file: \"%s\", line number: %d\n"),
-		     sals->sals[i].symtab->filename, sals->sals[i].line);
+		     symtab_to_filename_for_display (sals->sals[i].symtab),
+		     sals->sals[i].line);
 }
 
 /* Sort function for filter_sals.  */

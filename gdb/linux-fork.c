@@ -29,6 +29,7 @@
 #include "linux-fork.h"
 #include "linux-nat.h"
 #include "gdbthread.h"
+#include "source.h"
 
 #include <sys/ptrace.h>
 #include "gdb_wait.h"
@@ -583,7 +584,8 @@ info_checkpoints_command (char *arg, int from_tty)
 
       sal = find_pc_line (pc, 0);
       if (sal.symtab)
-	printf_filtered (_(", file %s"), lbasename (sal.symtab->filename));
+	printf_filtered (_(", file %s"),
+			 symtab_to_filename_for_display (sal.symtab));
       if (sal.line)
 	printf_filtered (_(", line %d"), sal.line);
       if (!sal.symtab && !sal.line)

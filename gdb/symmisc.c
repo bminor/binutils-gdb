@@ -36,6 +36,7 @@
 #include "dictionary.h"
 #include "typeprint.h"
 #include "gdbcmd.h"
+#include "source.h"
 
 #include "gdb_string.h"
 #include "readline/readline.h"
@@ -185,7 +186,7 @@ dump_objfile (struct objfile *objfile)
 	   symtab != NULL;
 	   symtab = symtab->next)
 	{
-	  printf_filtered ("%s at ", symtab->filename);
+	  printf_filtered ("%s at ", symtab_to_filename_for_display (symtab));
 	  gdb_print_host_address (symtab, gdb_stdout);
 	  printf_filtered (", ");
 	  if (symtab->objfile != objfile)
@@ -294,7 +295,8 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
   struct block *b;
   int depth;
 
-  fprintf_filtered (outfile, "\nSymtab for file %s\n", symtab->filename);
+  fprintf_filtered (outfile, "\nSymtab for file %s\n",
+		    symtab_to_filename_for_display (symtab));
   if (symtab->dirname)
     fprintf_filtered (outfile, "Compilation directory is %s\n",
 		      symtab->dirname);
@@ -443,7 +445,8 @@ maintenance_print_symbols (char *args, int from_tty)
   ALL_SYMTABS (objfile, s)
     {
       QUIT;
-      if (symname == NULL || filename_cmp (symname, s->filename) == 0)
+      if (symname == NULL
+	  || filename_cmp (symname, symtab_to_filename_for_display (s)) == 0)
 	dump_symtab (objfile, s, outfile);
     }
   do_cleanups (cleanups);
@@ -724,7 +727,7 @@ maintenance_info_symtabs (char *regexp, int from_tty)
 	  QUIT;
 
 	  if (! regexp
-	      || re_exec (symtab->filename))
+	      || re_exec (symtab_to_filename_for_display (symtab)))
 	    {
 	      if (! printed_objfile_start)
 		{
@@ -735,7 +738,8 @@ maintenance_info_symtabs (char *regexp, int from_tty)
 		  printed_objfile_start = 1;
 		}
 
-	      printf_filtered ("	{ symtab %s ", symtab->filename);
+	      printf_filtered ("	{ symtab %s ",
+			       symtab_to_filename_for_display (symtab));
 	      wrap_here ("    ");
 	      printf_filtered ("((struct symtab *) %s)\n", 
 			       host_address_to_string (symtab));

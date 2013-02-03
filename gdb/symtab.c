@@ -219,6 +219,12 @@ iterate_over_some_symtabs (const char *name,
 	&& FILENAME_CMP (base_name, lbasename (s->filename)) != 0)
       continue;
 
+    if (compare_filenames_for_search (symtab_to_fullname (s), name))
+      {
+	if (callback (s, data))
+	  return 1;
+      }
+
     /* If the user gave us an absolute path, try to find the file in
        this symtab and use its absolute path.  */
 
@@ -1650,7 +1656,7 @@ Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
 (if a template, try specifying an instantiation: %s<type>)."),
 	       kind == GLOBAL_BLOCK ? "global" : "static",
-	       name, symtab->filename, name, name);
+	       name, symtab_to_filename_for_display (symtab), name, name);
     }
   return fixup_symbol_section (sym, objfile);
 }
@@ -1855,7 +1861,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int kind,
 Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
 (if a template, try specifying an instantiation: %s<type>)."),
-	       name, symtab->filename, name, name);
+	       name, symtab_to_filename_for_display (symtab), name, name);
     }
   if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
     return SYMBOL_TYPE (sym);
@@ -2502,7 +2508,7 @@ find_line_symtab (struct symtab *symtab, int line,
       {
 	if (objfile->sf)
 	  objfile->sf->qf->expand_symtabs_with_fullname (objfile,
-							 symtab->filename);
+						   symtab_to_fullname (symtab));
       }
 
       ALL_SYMTABS (objfile, s)
@@ -3268,7 +3274,7 @@ file_matches (const char *file, char *files[], int nfiles)
     {
       for (i = 0; i < nfiles; i++)
 	{
-	  if (filename_cmp (files[i], lbasename (file)) == 0)
+	  if (compare_filenames_for_search (file, files[i]))
 	    return 1;
 	}
     }
@@ -3699,12 +3705,14 @@ search_symbols (char *regexp, enum search_domain kind,
 static void
 print_symbol_info (enum search_domain kind,
 		   struct symtab *s, struct symbol *sym,
-		   int block, char *last)
+		   int block, const char *last)
 {
-  if (last == NULL || filename_cmp (last, s->filename) != 0)
+  const char *s_filename = symtab_to_filename_for_display (s);
+
+  if (last == NULL || filename_cmp (last, s_filename) != 0)
     {
       fputs_filtered ("\nFile ", gdb_stdout);
-      fputs_filtered (s->filename, gdb_stdout);
+      fputs_filtered (s_filename, gdb_stdout);
       fputs_filtered (":\n", gdb_stdout);
     }
 
@@ -3762,7 +3770,7 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
   struct symbol_search *symbols;
   struct symbol_search *p;
   struct cleanup *old_chain;
-  char *last_filename = NULL;
+  const char *last_filename = NULL;
   int first = 1;
 
   gdb_assert (kind <= TYPES_DOMAIN);
@@ -3797,7 +3805,7 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
 			     p->symbol,
 			     p->block,
 			     last_filename);
-	  last_filename = p->symtab->filename;
+	  last_filename = symtab_to_filename_for_display (p->symtab);
 	}
     }
 
@@ -3881,7 +3889,9 @@ rbreak_command (char *regexp, int from_tty)
     {
       if (p->msymbol == NULL)
 	{
-	  int newlen = (strlen (p->symtab->filename)
+	  const char *fullname = symtab_to_fullname (p->symtab);
+
+	  int newlen = (strlen (fullname)
 			+ strlen (SYMBOL_LINKAGE_NAME (p->symbol))
 			+ 4);
 
@@ -3890,7 +3900,7 @@ rbreak_command (char *regexp, int from_tty)
 	      string = xrealloc (string, newlen);
 	      len = newlen;
 	    }
-	  strcpy (string, p->symtab->filename);
+	  strcpy (string, fullname);
 	  strcat (string, ":'");
 	  strcat (string, SYMBOL_LINKAGE_NAME (p->symbol));
 	  strcat (string, "'");
@@ -3899,7 +3909,7 @@ rbreak_command (char *regexp, int from_tty)
 			     p->symtab,
 			     p->symbol,
 			     p->block,
-			     p->symtab->filename);
+			     symtab_to_filename_for_display (p->symtab));
 	}
       else
 	{

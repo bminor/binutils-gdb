@@ -32,6 +32,8 @@
 #include "objfiles.h"
 #include "exceptions.h"
 #include "breakpoint.h" /* for get_sal_arch () */
+#include "source.h"
+#include "filenames.h"
 
 struct skiplist_entry
 {
@@ -69,7 +71,7 @@ static void
 skip_file_command (char *arg, int from_tty)
 {
   struct skiplist_entry *e;
-  const struct symtab *symtab;
+  struct symtab *symtab;
   const char *filename = NULL;
 
   /* If no argument was given, try to default to the last
@@ -79,8 +81,10 @@ skip_file_command (char *arg, int from_tty)
       symtab = get_last_displayed_symtab ();
       if (symtab == NULL)
 	error (_("No default file now."));
-      else
-	filename = symtab->filename;
+
+      /* It is not a typo, symtab_to_filename_for_display woule be needlessly
+	 ambiguous.  */
+      filename = symtab_to_fullname (symtab);
     }
   else
     {
@@ -91,8 +95,9 @@ skip_file_command (char *arg, int from_tty)
 	  if (!nquery (_("\
 Ignore file pending future shared library load? ")))
 	    return;
-
 	}
+      /* Do not use SYMTAB's filename, later loaded shared libraries may match
+         given ARG but not SYMTAB's filename.  */
       filename = arg;
     }
 
@@ -330,6 +335,8 @@ int
 function_name_is_marked_for_skip (const char *function_name,
 				  const struct symtab_and_line *function_sal)
 {
+  int searched_for_fullname = 0;
+  const char *fullname = NULL;
   struct skiplist_entry *e;
 
   if (function_name == NULL)
@@ -345,11 +352,35 @@ function_name_is_marked_for_skip (const char *function_name,
 	  && strcmp_iw (function_name, e->function_name) == 0)
 	return 1;
 
-      if (e->filename != NULL && function_sal->symtab != NULL
-	  && function_sal->symtab->filename != NULL
-	  && compare_filenames_for_search (function_sal->symtab->filename,
-					   e->filename))
-	return 1;
+      if (e->filename != NULL)
+	{
+	  /* Check first sole SYMTAB->FILENAME.  It does not need to be
+	     a substring of symtab_to_fullname as it may contain "./" etc.  */
+	  if (function_sal->symtab != NULL
+	      && compare_filenames_for_search (function_sal->symtab->filename,
+					       e->filename))
+	    return 1;
+
+	  /* Before we invoke realpath, which can get expensive when many
+	     files are involved, do a quick comparison of the basenames.  */
+	  if (!basenames_may_differ
+	      && (function_sal->symtab == NULL
+	          || filename_cmp (lbasename (function_sal->symtab->filename),
+				   lbasename (e->filename)) != 0))
+	    continue;
+
+	  /* Get the filename corresponding to this FUNCTION_SAL, if we haven't
+	     yet.  */
+	  if (!searched_for_fullname)
+	    {
+	      if (function_sal->symtab != NULL)
+		fullname = symtab_to_fullname (function_sal->symtab);
+	      searched_for_fullname = 1;
+	    }
+	  if (fullname != NULL
+	      && compare_filenames_for_search (fullname, e->filename))
+	    return 1;
+	}
     }
 
   return 0;

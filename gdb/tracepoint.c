@@ -311,7 +311,7 @@ set_traceframe_context (struct frame_info *trace_frame)
     clear_internalvar (lookup_internalvar ("trace_file"));
   else
     set_internalvar_string (lookup_internalvar ("trace_file"),
-			    traceframe_sal.symtab->filename);
+			symtab_to_filename_for_display (traceframe_sal.symtab));
 }
 
 /* Create a new trace state variable with the given name.  */
@@ -2512,7 +2512,8 @@ trace_find_line_command (char *args, int from_tty)
       if (start_pc == end_pc)
   	{
 	  printf_filtered ("Line %d of \"%s\"",
-			   sal.line, sal.symtab->filename);
+			   sal.line,
+			   symtab_to_filename_for_display (sal.symtab));
 	  wrap_here ("  ");
 	  printf_filtered (" is at address ");
 	  print_address (get_current_arch (), start_pc, gdb_stdout);
@@ -2533,7 +2534,7 @@ trace_find_line_command (char *args, int from_tty)
        which the user would want to see?  If we have debugging
        symbols and no line numbers?  */
     error (_("Line number %d is out of range for \"%s\"."),
-	   sal.line, sal.symtab->filename);
+	   sal.line, symtab_to_filename_for_display (sal.symtab));
 
   /* Find within range of stated line.  */
   if (args && *args)
@@ -4860,7 +4861,8 @@ print_one_static_tracepoint_marker (int count,
 
   if (sal.symtab != NULL)
     {
-      ui_out_field_string (uiout, "file", sal.symtab->filename);
+      ui_out_field_string (uiout, "file",
+			   symtab_to_filename_for_display (sal.symtab));
       ui_out_text (uiout, ":");
 
       if (ui_out_is_mi_like_p (uiout))

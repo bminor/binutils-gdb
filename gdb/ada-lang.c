@@ -3573,7 +3573,8 @@ See set/show multiple-symbol."));
 	  else
 	    printf_unfiltered (_("[%d] %s at %s:%d\n"), i + first_choice,
 			       SYMBOL_PRINT_NAME (syms[i].sym),
-			       sal.symtab->filename, sal.line);
+			       symtab_to_filename_for_display (sal.symtab),
+			       sal.line);
           continue;
         }
       else
@@ -3588,7 +3589,8 @@ See set/show multiple-symbol."));
             printf_unfiltered (_("[%d] %s at %s:%d\n"),
                                i + first_choice,
                                SYMBOL_PRINT_NAME (syms[i].sym),
-                               symtab->filename, SYMBOL_LINE (syms[i].sym));
+			       symtab_to_filename_for_display (symtab),
+			       SYMBOL_LINE (syms[i].sym));
           else if (is_enumeral
                    && TYPE_NAME (SYMBOL_TYPE (syms[i].sym)) != NULL)
             {
@@ -3604,7 +3606,7 @@ See set/show multiple-symbol."));
                                : _("[%d] %s at %s:?\n"),
                                i + first_choice,
                                SYMBOL_PRINT_NAME (syms[i].sym),
-                               symtab->filename);
+                               symtab_to_filename_for_display (symtab));
           else
             printf_unfiltered (is_enumeral
                                ? _("[%d] %s (enumeral)\n")

@@ -50,7 +50,8 @@ mi_cmd_file_list_exec_source_file (char *command, char **argv, int argc)
 
   /* Print to the user the line, filename and fullname.  */
   ui_out_field_int (uiout, "line", st.line);
-  ui_out_field_string (uiout, "file", st.symtab->filename);
+  ui_out_field_string (uiout, "file",
+		       symtab_to_filename_for_display (st.symtab));
 
   ui_out_field_string (uiout, "fullname", symtab_to_fullname (st.symtab));
 
@@ -93,7 +94,7 @@ mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
   {
     ui_out_begin (uiout, ui_out_type_tuple, NULL);
 
-    ui_out_field_string (uiout, "file", s->filename);
+    ui_out_field_string (uiout, "file", symtab_to_filename_for_display (s));
     ui_out_field_string (uiout, "fullname", symtab_to_fullname (s));
 
     ui_out_end (uiout, ui_out_type_tuple);
