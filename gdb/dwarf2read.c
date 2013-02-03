@@ -3343,8 +3343,8 @@ dw2_expand_all_symtabs (struct objfile *objfile)
 }
 
 static void
-dw2_expand_symtabs_with_filename (struct objfile *objfile,
-				  const char *filename)
+dw2_expand_symtabs_with_fullname (struct objfile *objfile,
+				  const char *fullname)
 {
   int i;
 
@@ -3371,8 +3371,9 @@ dw2_expand_symtabs_with_filename (struct objfile *objfile,
 
       for (j = 0; j < file_data->num_file_names; ++j)
 	{
-	  const char *this_name = file_data->file_names[j];
-	  if (FILENAME_CMP (this_name, filename) == 0)
+	  const char *this_fullname = file_data->file_names[j];
+
+	  if (filename_cmp (this_fullname, fullname) == 0)
 	    {
 	      dw2_instantiate_symtab (per_cu);
 	      break;
@@ -3423,7 +3424,10 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
 	  struct symbol *sym = lookup_block_symbol (block, name, VAR_DOMAIN);
 
 	  if (sym)
-	    return SYMBOL_SYMTAB (sym)->filename;
+	    {
+	      /* Only file extension of returned filename is recognized.  */
+	      return SYMBOL_SYMTAB (sym)->filename;
+	    }
 	}
       return NULL;
     }
@@ -3440,11 +3444,15 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
   per_cu = dw2_get_cu (GDB_INDEX_CU_VALUE (MAYBE_SWAP (vec[1])));
 
   if (per_cu->v.quick->symtab != NULL)
-    return per_cu->v.quick->symtab->filename;
+    {
+      /* Only file extension of returned filename is recognized.  */
+      return per_cu->v.quick->symtab->filename;
+    }
 
   init_cutu_and_read_dies (per_cu, NULL, 0, 0,
 			   dw2_get_primary_filename_reader, &filename);
 
+  /* Only file extension of returned filename is recognized.  */
   return filename;
 }
 
@@ -3743,7 +3751,7 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_relocate,
   dw2_expand_symtabs_for_function,
   dw2_expand_all_symtabs,
-  dw2_expand_symtabs_with_filename,
+  dw2_expand_symtabs_with_fullname,
   dw2_find_symbol_file,
   dw2_map_matching_symbols,
   dw2_expand_symtabs_matching,

@@ -212,16 +212,17 @@ struct quick_symbol_functions
   /* Read all symbol tables associated with OBJFILE.  */
   void (*expand_all_symtabs) (struct objfile *objfile);
 
-  /* Read all symbol tables associated with OBJFILE which have the
-     file name FILENAME.
+  /* Read all symbol tables associated with OBJFILE which have
+     symtab_to_fullname equal to FULLNAME.
      This is for the purposes of examining code only, e.g., expand_line_sal.
      The routine may ignore debug info that is known to not be useful with
      code, e.g., DW_TAG_type_unit for dwarf debug info.  */
-  void (*expand_symtabs_with_filename) (struct objfile *objfile,
-					const char *filename);
+  void (*expand_symtabs_with_fullname) (struct objfile *objfile,
+					const char *fullname);
 
   /* Return the file name of the file holding the global symbol in OBJFILE
-     named NAME.  If no such symbol exists in OBJFILE, return NULL.  */
+     named NAME.  If no such symbol exists in OBJFILE, return NULL.
+     Only file extension of returned filename is recognized.  */
   const char *(*find_symbol_file) (struct objfile *objfile, const char *name);
 
   /* Find global or static symbols in all tables that are in NAMESPACE 

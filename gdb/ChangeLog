@@ -1,6 +1,27 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
+	* dwarf2read.c (dw2_expand_symtabs_with_filename): Rename to ...
+	(dw2_expand_symtabs_with_fullname): ... here.  Rename parameter
+	filename to fullname.  Rename variable this_name to this_fullname.
+	Lowercase FILENAME_CMP call.
+	(dw2_find_symbol_file): New comment for the returned string.
+	(dwarf2_gdb_index_functions): Rename the function to
+	dw2_expand_symtabs_with_fullname.
+	* psymtab.c (read_psymtabs_with_filename): Rename to ...
+	(read_psymtabs_with_fullname): ... here.  Rename parameter filename to
+	fullname.
+	(psym_functions): Rename the function to read_psymtabs_with_fullname.
+	* symfile.h (struct quick_symbol_functions): Rename field
+	expand_symtabs_with_filename to expand_symtabs_with_fullname and its
+	parameter filename to fullname.  Document returned string meaning for
+	find_symbol_file.
+	* symtab.c (find_line_symtab): Rename the called function to
+	expand_symtabs_with_fullname.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
 	* breakpoint.c (clear_command): Remove variable is_abs, unify the
 	call of filename_cmp with compare_filenames_for_search.
 	* dwarf2read.c (dw2_map_symtabs_matching_filename): Remove variable

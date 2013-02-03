@@ -2501,7 +2501,7 @@ find_line_symtab (struct symtab *symtab, int line,
       ALL_OBJFILES (objfile)
       {
 	if (objfile->sf)
-	  objfile->sf->qf->expand_symtabs_with_filename (objfile,
+	  objfile->sf->qf->expand_symtabs_with_fullname (objfile,
 							 symtab->filename);
       }
 
