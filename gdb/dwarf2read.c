@@ -18034,12 +18034,12 @@ dwarf_alloc_die (struct dwarf2_cu *cu, int num_attrs)
 
 /* Macro support.  */
 
-/* Return the full name of file number I in *LH's file name table.
-   Use COMP_DIR as the name of the current directory of the
-   compilation.  The result is allocated using xmalloc; the caller is
+/* Return file name relative to the compilation directory of file number I in
+   *LH's file name table.  The result is allocated using xmalloc; the caller is
    responsible for freeing it.  */
+
 static char *
-file_full_name (int file, struct line_header *lh, const char *comp_dir)
+file_file_name (int file, struct line_header *lh)
 {
   /* Is the file number a valid index into the line header's file name
      table?  Remember that file numbers start with one, not zero.  */
@@ -18047,27 +18047,10 @@ file_full_name (int file, struct line_header *lh, const char *comp_dir)
     {
       struct file_entry *fe = &lh->file_names[file - 1];
 
-      if (IS_ABSOLUTE_PATH (fe->name))
+      if (IS_ABSOLUTE_PATH (fe->name) || fe->dir_index == 0)
         return xstrdup (fe->name);
-      else
-        {
-          const char *dir;
-
-          if (fe->dir_index == 0)
-            dir = comp_dir;
-	  else
-	    {
-	      dir = lh->include_dirs[fe->dir_index - 1];
-	      if (!IS_ABSOLUTE_PATH (dir))
-		return concat (comp_dir, SLASH_STRING, dir, SLASH_STRING,
-			       fe->name, NULL);
-	    }
-
-          if (dir)
-	    return concat (dir, SLASH_STRING, fe->name, NULL);
-          else
-            return xstrdup (fe->name);
-        }
+      return concat (lh->include_dirs[fe->dir_index - 1], SLASH_STRING,
+		     fe->name, NULL);
     }
   else
     {
@@ -18087,6 +18070,27 @@ file_full_name (int file, struct line_header *lh, const char *comp_dir)
     }
 }
 
+/* Return the full name of file number I in *LH's file name table.
+   Use COMP_DIR as the name of the current directory of the
+   compilation.  The result is allocated using xmalloc; the caller is
+   responsible for freeing it.  */
+static char *
+file_full_name (int file, struct line_header *lh, const char *comp_dir)
+{
+  /* Is the file number a valid index into the line header's file name
+     table?  Remember that file numbers start with one, not zero.  */
+  if (1 <= file && file <= lh->num_file_names)
+    {
+      char *relative = file_file_name (file, lh);
+
+      if (IS_ABSOLUTE_PATH (relative) || comp_dir == NULL)
+	return relative;
+      return reconcat (relative, comp_dir, SLASH_STRING, relative, NULL);
+    }
+  else
+    return file_file_name (file, lh);
+}
+
 
 static struct macro_source_file *
 macro_start_file (int file, int line,
@@ -18094,26 +18098,27 @@ macro_start_file (int file, int line,
                   const char *comp_dir,
                   struct line_header *lh, struct objfile *objfile)
 {
-  /* The full name of this source file.  */
-  char *full_name = file_full_name (file, lh, comp_dir);
+  /* File name relative to the compilation directory of this source file.  */
+  char *file_name = file_file_name (file, lh);
 
   /* We don't create a macro table for this compilation unit
      at all until we actually get a filename.  */
   if (! pending_macros)
     pending_macros = new_macro_table (&objfile->per_bfd->storage_obstack,
-                                      objfile->per_bfd->macro_cache);
+				      objfile->per_bfd->macro_cache,
+				      comp_dir);
 
   if (! current_file)
     {
       /* If we have no current file, then this must be the start_file
 	 directive for the compilation unit's main source file.  */
-      current_file = macro_set_main (pending_macros, full_name);
+      current_file = macro_set_main (pending_macros, file_name);
       macro_define_special (pending_macros);
     }
   else
-    current_file = macro_include (current_file, line, full_name);
+    current_file = macro_include (current_file, line, file_name);
 
-  xfree (full_name);
+  xfree (file_name);
 
   return current_file;
 }

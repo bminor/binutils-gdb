@@ -1,5 +1,12 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.linespec/base/one/header.h: New file.
+	* gdb.linespec/base/two/header.h: New file.
+	* gdb.linespec/macro-relative.c: New file.
+	* gdb.linespec/macro-relative.exp: New file.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/fullpath-expand-func.c: New file.
 	* gdb.base/fullpath-expand.c: New file.
 	* gdb.base/fullpath-expand.exp: New file.

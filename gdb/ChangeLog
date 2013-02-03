@@ -1,5 +1,40 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2read.c (file_file_name): New function with code from
+	file_full_name.
+	(file_full_name): Move most of the code to file_file_name.
+	(macro_start_file): Rename variable full_name to file_name and use
+	file_file_name for it.  Add comp_dir parameter to new_macro_table.
+	* macrocmd.c (show_pp_source_pos): New variable fullname.  Replace any
+	macro_source_file->filename access by macro_source_fullname call.
+	* macroscope.c (_initialize_macroscope): Update the new_macro_table
+	caller.
+	* macrotab.c (struct macro_table): New field comp_dir.
+	(macro_include): New variables link_fullname and source_fullname.
+	Replace any macro_source_file->filename access by macro_source_fullname
+	call.
+	(macro_lookup_inclusion): Remove the partial filenames checking code.
+	(check_for_redefinition): New variables source_fullname and
+	found_key_fullname.  Replace any macro_source_file->filename access by
+	macro_source_fullname call.
+	(macro_undef): New variables source_fullname and key_fullname.  Replace
+	any macro_source_file->filename access by macro_source_fullname call.
+	(macro_lookup_definition): New variables retval and source_fullname.
+	Replace any macro_source_file->filename access by macro_source_fullname
+	call.
+	(foreach_macro): New variable key_fullname.  Replace any
+	macro_source_file->filename access by macro_source_fullname call.
+	(foreach_macro_in_scope): New variable datum_fullname.  Replace any
+	macro_source_file->filename access by macro_source_fullname call.
+	(new_macro_table): Add parameter comp_dir.  Initialize T with it.
+	(macro_source_fullname): New function.
+	* macrotab.h (struct macro_source_file): Extent the filename field
+	comment.
+	(new_macro_table): New parameter comp_dir, add a comment for it.
+	(macro_source_fullname): new declaration.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2read.c (dw2_map_symtabs_matching_filename): Move variable
 	this_real_name to outer block.  Use it also for
 	compare_filenames_for_search.

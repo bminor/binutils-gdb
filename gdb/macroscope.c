@@ -159,7 +159,7 @@ extern initialize_file_ftype _initialize_macroscope;
 void
 _initialize_macroscope (void)
 {
-  macro_user_macros = new_macro_table (0, 0);
+  macro_user_macros = new_macro_table (NULL, NULL, NULL);
   macro_set_main (macro_user_macros, "<user-defined>");
   macro_allow_redefinitions (macro_user_macros);
 }
