@@ -1,5 +1,10 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.dwarf2/dw2-dir-file-name.exp: New file.
+	* gdb.dwarf2/dw2-dir-file-name.c: New file.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.mi/mi-fullname-deleted.exp: Use double last slash for $srcfileabs.
 	(compare_filenames_for_search does not match)
 	(compare_filenames_for_search does match): New tests.

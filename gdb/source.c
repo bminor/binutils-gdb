@@ -109,6 +109,27 @@ show_lines_to_list (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* Possible values of 'set filename-display'.  */
+static const char filename_display_basename[] = "basename";
+static const char filename_display_relative[] = "relative";
+static const char filename_display_absolute[] = "absolute";
+
+static const char *const filename_display_kind_names[] = {
+  filename_display_basename,
+  filename_display_relative,
+  filename_display_absolute,
+  NULL
+};
+
+static const char *filename_display_string = filename_display_relative;
+
+static void
+show_filename_display_string (struct ui_file *file, int from_tty,
+			      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Filenames are displayed as \"%s\".\n"), value);
+}
+ 
 /* Line number of last line printed.  Default for various commands.
    current_source_line is usually, but not always, the same as this.  */
 
@@ -1111,6 +1132,21 @@ symtab_to_fullname (struct symtab *s)
 
   return s->fullname;
 }
+
+/* See commentary in source.h.  */
+
+const char *
+symtab_to_filename_for_display (struct symtab *symtab)
+{
+  if (filename_display_string == filename_display_basename)
+    return lbasename (symtab->filename);
+  else if (filename_display_string == filename_display_absolute)
+    return symtab_to_fullname (symtab);
+  else if (filename_display_string == filename_display_relative)
+    return symtab->filename;
+  else
+    internal_error (__FILE__, __LINE__, _("invalid filename_display_string"));
+}
 
 /* Create and initialize the table S->line_charpos that records
    the positions of the lines in the source file, which is assumed
@@ -2014,4 +2050,19 @@ Usage: show substitute-path [FROM]\n\
 Print the rule for substituting FROM in source file names. If FROM\n\
 is not specified, print all substitution rules."),
            &showlist);
+
+  add_setshow_enum_cmd ("filename-display", class_files,
+			filename_display_kind_names,
+			&filename_display_string, _("\
+Set how to display filenames."), _("\
+Show how to display filenames."), _("\
+filename-display can be:\n\
+  basename - display only basename of a filename\n\
+  relative - display a filename relative to the compilation directory\n\
+  absolute - display an absolute filename\n\
+By default, relative filenames are displayed."),
+			NULL,
+			show_filename_display_string,
+			&setlist, &showlist);
+
 }

@@ -1,3 +1,20 @@
+2013-02-03  Eldar Gaynetdinov <hal9000ed2k@gmail.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Add a new variable that controls a way in which filenames are
+	displayed.
+	* NEWS (set filename-display): New entry.
+	* source.c (filename_display_basename, filename_display_relative)
+	(filename_display_absolute, filename_display_kind_names)
+	(filename_display_string, show_filename_display_string)
+	(symtab_to_filename_for_display): New.
+	(_initialize_source): Added initialization of 'filename-display'
+	variable.
+	* source.h (symtab_to_filename_for_display): Added declaration.
+	* stack.c (print_frame): Added new variable and calling of a new
+	function and condition with this variable. Changed third argument of
+	calling of a function.
+
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* tui/tui-data.c (init_win_info, tui_del_window, tui_free_window):

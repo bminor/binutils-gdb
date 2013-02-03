@@ -1178,11 +1178,14 @@ print_frame (struct frame_info *frame, int print_level,
   ui_out_text (uiout, ")");
   if (sal.symtab)
     {
+      const char *filename_display;
+      
+      filename_display = symtab_to_filename_for_display (sal.symtab);
       annotate_frame_source_begin ();
       ui_out_wrap_hint (uiout, "   ");
       ui_out_text (uiout, " at ");
       annotate_frame_source_file ();
-      ui_out_field_string (uiout, "file", sal.symtab->filename);
+      ui_out_field_string (uiout, "file", filename_display);
       if (ui_out_is_mi_like_p (uiout))
 	{
 	  const char *fullname = symtab_to_fullname (sal.symtab);

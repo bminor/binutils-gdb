@@ -1,3 +1,9 @@
+2013-02-03  Eldar Gaynetdinov <hal9000ed2k@gmail.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (Backtrace): Added description of 'filename-display'
+	variable in 'set/show backtrace' section.
+
 2013-01-31  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Target Commands): Fix typo.
