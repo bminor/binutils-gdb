@@ -3072,6 +3072,7 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
       for (j = 0; j < file_data->num_file_names; ++j)
 	{
 	  const char *this_name = file_data->file_names[j];
+	  const char *this_real_name;
 
 	  if (compare_filenames_for_search (this_name, name))
 	    {
@@ -3086,11 +3087,16 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 	      && FILENAME_CMP (lbasename (this_name), name_basename) != 0)
 	    continue;
 
+	  this_real_name = dw2_get_real_path (objfile, file_data, j);
+	  if (compare_filenames_for_search (this_real_name, name))
+	    {
+	      if (dw2_map_expand_apply (objfile, per_cu, name, real_path,
+					callback, data))
+		return 1;
+	    }
+
 	  if (real_path != NULL)
 	    {
-	      const char *this_real_name = dw2_get_real_path (objfile,
-							      file_data, j);
-
 	      gdb_assert (IS_ABSOLUTE_PATH (real_path));
 	      gdb_assert (IS_ABSOLUTE_PATH (name));
 	      if (this_real_name != NULL
@@ -3533,7 +3539,23 @@ dw2_expand_symtabs_matching
 
 	  for (j = 0; j < file_data->num_file_names; ++j)
 	    {
+	      const char *this_real_name;
+
 	      if (file_matcher (file_data->file_names[j], data, 0))
+		{
+		  per_cu->v.quick->mark = 1;
+		  break;
+		}
+
+	      /* Before we invoke realpath, which can get expensive when many
+		 files are involved, do a quick comparison of the basenames.  */
+	      if (!basenames_may_differ
+		  && !file_matcher (lbasename (file_data->file_names[j]),
+				    data, 1))
+		continue;
+
+	      this_real_name = dw2_get_real_path (objfile, file_data, j);
+	      if (file_matcher (this_real_name, data, 0))
 		{
 		  per_cu->v.quick->mark = 1;
 		  break;
@@ -18030,23 +18052,19 @@ file_full_name (int file, struct line_header *lh, const char *comp_dir)
       else
         {
           const char *dir;
-          int dir_len;
-          char *full_name;
 
-          if (fe->dir_index)
-            dir = lh->include_dirs[fe->dir_index - 1];
-          else
+          if (fe->dir_index == 0)
             dir = comp_dir;
+	  else
+	    {
+	      dir = lh->include_dirs[fe->dir_index - 1];
+	      if (!IS_ABSOLUTE_PATH (dir))
+		return concat (comp_dir, SLASH_STRING, dir, SLASH_STRING,
+			       fe->name, NULL);
+	    }
 
           if (dir)
-            {
-              dir_len = strlen (dir);
-              full_name = xmalloc (dir_len + 1 + strlen (fe->name) + 1);
-              strcpy (full_name, dir);
-              full_name[dir_len] = '/';
-              strcpy (full_name + dir_len + 1, fe->name);
-              return full_name;
-            }
+	    return concat (dir, SLASH_STRING, fe->name, NULL);
           else
             return xstrdup (fe->name);
         }

@@ -1,5 +1,15 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2read.c (dw2_map_symtabs_matching_filename): Move variable
+	this_real_name to outer block.  Use it also for
+	compare_filenames_for_search.
+	(dw2_expand_symtabs_matching): New variable this_real_name.  Use it
+	with dw2_get_real_path for file_matcher, considering also
+	BASENAMES_MAY_DIFFER.
+	(file_full_name): Prepend COMP_DIR even for relative lh->INCLUDE_DIRS.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2read.c (dw2_expand_symtabs_matching): Add basenames parameter
 	to the file_matcher parameter.  Pass 0 to it.
 	(dwarf2_create_include_psymtab): Copy also DIRNAME.
