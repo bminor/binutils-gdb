@@ -510,7 +510,7 @@ init_content_element (struct tui_win_element *element,
       element->which_element.data.content = (char*) NULL;
       break;
     case LOCATOR_WIN:
-      element->which_element.locator.file_name[0] =
+      element->which_element.locator.full_name[0] =
 	element->which_element.locator.proc_name[0] = (char) 0;
       element->which_element.locator.line_no = 0;
       element->which_element.locator.addr = 0;

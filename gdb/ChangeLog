@@ -1,5 +1,45 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* source.c (print_source_lines_base): Print for TUI also "fullname".
+	* tui/tui-data.c (init_content_element): Change tui_locator_element
+	field to full_name.
+	* tui/tui-data.h (struct tui_locator_element): Likewise.
+	* tui/tui-disasm.c (tui_show_disassem_and_update_source): Rename
+	tui_update_locator_filename calls to tui_update_locator_fullname.
+	Replace symtab->filename refererence by symtab_to_fullname call.
+	* tui/tui-out.c (tui_field_string): Check for "fullname" now.
+	* tui/tui-source.c (tui_set_source_content): Change tui_locator_element
+	field to full_name.  Replace symtab->filename refererence by
+	symtab_to_fullname call.
+	(tui_show_symtab_source): Rename parameter to fullname.  Change
+	tui_locator_element field to full_name.
+	* tui/tui-stack.c: Include source.h.
+	(tui_set_locator_filename): Rename the declaration to ...
+	(tui_set_locator_fullname): ... here.  Rename its parameter to
+	fullname, updates its comment.
+	(tui_set_locator_info): Rename its parameter to fullname.
+	(tui_set_locator_filename): Rename the definition to ...
+	(tui_set_locator_fullname): ... here.  Rename its parameter to
+	fullname, updates its comment.  Change tui_locator_element field to
+	full_name.
+	(tui_set_locator_info): Rename its parameter to fullname.
+	(tui_set_locator_info): Rename callee to tui_set_locator_fullname.
+	(tui_update_locator_filename): Rename to ...
+	(tui_update_locator_fullname): ... here. Rename callee to
+	tui_set_locator_fullname.
+	(tui_show_frame_info): Replace symtab->filename refererence by
+	symtab_to_fullname call.
+	* tui/tui-stack.h (tui_update_locator_filename): Rename to ...
+	(tui_update_locator_fullname): ... here.
+	* tui/tui-winsource.c (tui_display_main): Rename the callee to
+	tui_update_locator_fullname.  Replace symtab->filename refererence by
+	symtab_to_fullname call.
+	* tui/tui.c (tui_show_source): Rename its parameter to fullname.
+	Rename the callee to tui_update_locator_fullname.
+	* tui/tui.h (tui_show_source): Rename its parameter to fullname.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* ada-lang.c (user_select_syms): Replace symtab->filename refererences
 	by symtab_to_filename_for_display calls.
 	* breakpoint.c (print_breakpoint_location, resolve_sal_pc): Likewise.

@@ -59,9 +59,9 @@ tui_display_main (void)
 	  tui_update_source_windows_with_addr (gdbarch, addr);
 	  sal = find_pc_line (addr, 0);
           if (sal.symtab)
-             tui_update_locator_filename (sal.symtab->filename);
+             tui_update_locator_fullname (symtab_to_fullname (sal.symtab));
           else
-             tui_update_locator_filename ("??");
+             tui_update_locator_fullname ("??");
 	}
     }
 }

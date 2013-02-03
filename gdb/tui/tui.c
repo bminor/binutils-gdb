@@ -532,7 +532,7 @@ tui_reset (void)
 #endif
 
 void
-tui_show_source (const char *file, int line)
+tui_show_source (const char *fullname, int line)
 {
   struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
@@ -540,7 +540,7 @@ tui_show_source (const char *file, int line)
   tui_add_win_to_layout (SRC_WIN);
 
   tui_update_source_windows_with_line (cursal.symtab, line);
-  tui_update_locator_filename (file);
+  tui_update_locator_fullname (fullname);
 }
 
 void

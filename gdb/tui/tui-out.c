@@ -84,7 +84,7 @@ tui_field_string (struct ui_out *uiout,
   if (data->base.suppress_output)
     return;
 
-  if (fldname && data->line > 0 && strcmp (fldname, "file") == 0)
+  if (fldname && data->line > 0 && strcmp (fldname, "fullname") == 0)
     {
       data->start_of_line ++;
       if (data->line > 0)

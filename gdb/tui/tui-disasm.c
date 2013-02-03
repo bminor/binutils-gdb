@@ -316,10 +316,10 @@ tui_show_disassem_and_update_source (struct gdbarch *gdbarch,
       if (sal.symtab)
 	{
 	  set_current_source_symtab_and_line (&sal);
-	  tui_update_locator_filename (sal.symtab->filename);
+	  tui_update_locator_fullname (symtab_to_fullname (sal.symtab));
 	}
       else
-	tui_update_locator_filename ("?");
+	tui_update_locator_fullname ("?");
     }
 
   return;

@@ -24,7 +24,7 @@
 
 struct frame_info;
 
-extern void tui_update_locator_filename (const char *);
+extern void tui_update_locator_fullname (const char *);
 extern void tui_show_locator_content (void);
 extern void tui_show_frame_info (struct frame_info *);
 

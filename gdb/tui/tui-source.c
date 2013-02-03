@@ -153,8 +153,8 @@ tui_set_source_content (struct symtab *s,
 			cur_line_no;
 		      element->which_element.source.is_exec_point =
 			(filename_cmp (((struct tui_win_element *)
-				       locator->content[0])->which_element.locator.file_name,
-				       s->filename) == 0
+				       locator->content[0])->which_element.locator.full_name,
+				       symtab_to_fullname (s)) == 0
 			 && cur_line_no == ((struct tui_win_element *)
 					    locator->content[0])->which_element.locator.line_no);
 		      if (c != EOF)
@@ -335,14 +335,14 @@ tui_show_symtab_source (struct gdbarch *gdbarch, struct symtab *s,
 /* Answer whether the source is currently displayed in the source
    window.  */
 int
-tui_source_is_displayed (const char *fname)
+tui_source_is_displayed (const char *fullname)
 {
   return (TUI_SRC_WIN != NULL
 	  && TUI_SRC_WIN->generic.content_in_use 
 	  && (filename_cmp (((struct tui_win_element *)
 			     (tui_locator_win_info_ptr ())->
-			     content[0])->which_element.locator.file_name,
-			    fname) == 0));
+			     content[0])->which_element.locator.full_name,
+			    fullname) == 0));
 }
 
 

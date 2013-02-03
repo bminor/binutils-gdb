@@ -203,7 +203,8 @@ struct tui_command_element
 /* Elements in the locator window content.  */
 struct tui_locator_element
 {
-  char file_name[MAX_LOCATOR_ELEMENT_LEN];
+  /* Resolved absolute filename as returned by symtab_to_fullname.  */
+  char full_name[MAX_LOCATOR_ELEMENT_LEN];
   char proc_name[MAX_LOCATOR_ELEMENT_LEN];
   int line_no;
   CORE_ADDR addr;
