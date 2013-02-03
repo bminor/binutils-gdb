@@ -204,9 +204,7 @@ partial_map_symtabs_matching_filename (struct objfile *objfile,
       {
 	gdb_assert (IS_ABSOLUTE_PATH (real_path));
 	gdb_assert (IS_ABSOLUTE_PATH (name));
-	psymtab_to_fullname (pst);
-	if (pst->fullname != NULL
-	    && FILENAME_CMP (real_path, pst->fullname) == 0)
+	if (filename_cmp (psymtab_to_fullname (pst), real_path) == 0)
 	  {
 	    if (partial_map_expand_apply (objfile, name, real_path,
 					  pst, callback, data))
@@ -1161,28 +1159,39 @@ map_symbol_filenames_psymtab (struct objfile *objfile,
 static const char *
 psymtab_to_fullname (struct partial_symtab *ps)
 {
-  int r;
-
-  if (!ps)
-    return NULL;
-  if (ps->anonymous)
-    return NULL;
+  gdb_assert (!ps->anonymous);
 
   /* Use cached copy if we have it.
      We rely on forget_cached_source_info being called appropriately
      to handle cases like the file being moved.  */
-  if (ps->fullname)
-    return ps->fullname;
-
-  r = find_and_open_source (ps->filename, ps->dirname, &ps->fullname);
-
-  if (r >= 0)
+  if (ps->fullname == NULL)
     {
-      close (r);
-      return ps->fullname;
-    }
+      int fd = find_and_open_source (ps->filename, ps->dirname, &ps->fullname);
 
-  return NULL;
+      if (fd >= 0)
+	close (fd);
+      else
+	{
+	  char *fullname;
+	  struct cleanup *back_to;
+
+	  /* rewrite_source_path would be applied by find_and_open_source, we
+	     should report the pathname where GDB tried to find the file.  */
+
+	  if (ps->dirname == NULL || IS_ABSOLUTE_PATH (ps->filename))
+	    fullname = xstrdup (ps->filename);
+	  else
+	    fullname = concat (ps->dirname, SLASH_STRING, ps->filename, NULL);
+
+	  back_to = make_cleanup (xfree, fullname);
+	  ps->fullname = rewrite_source_path (fullname);
+	  if (ps->fullname == NULL)
+	    ps->fullname = xstrdup (fullname);
+	  do_cleanups (back_to);
+	}
+    } 
+
+  return ps->fullname;
 }
 
 static const char *
@@ -1354,7 +1363,7 @@ recursively_search_psymtabs (struct partial_symtab *ps,
 static void
 expand_symtabs_matching_via_partial
   (struct objfile *objfile,
-   int (*file_matcher) (const char *, void *),
+   int (*file_matcher) (const char *, void *, int basenames),
    int (*name_matcher) (const char *, void *),
    enum search_domain kind,
    void *data)
@@ -1381,7 +1390,13 @@ expand_symtabs_matching_via_partial
 	{
 	  if (ps->anonymous)
 	    continue;
-	  if (! (*file_matcher) (ps->filename, data))
+
+	  /* Before we invoke realpath, which can get expensive when many
+	     files are involved, do a quick comparison of the basenames.  */
+	  if (!(*file_matcher) (ps->filename, data, 0)
+	      && (basenames_may_differ
+		  || (*file_matcher) (lbasename (ps->filename), data, 1))
+	      && !(*file_matcher) (psymtab_to_fullname (ps), data, 0))
 	    continue;
 	}
 

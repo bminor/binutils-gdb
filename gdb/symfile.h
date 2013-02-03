@@ -255,6 +255,8 @@ struct quick_symbol_functions
      FILE_MATCHER is called for each file in OBJFILE.  The file name
      and the DATA argument are passed to it.  If it returns zero, this
      file is skipped.  If FILE_MATCHER is NULL such file is not skipped.
+     If BASENAMES is non-zero the function should consider only base name of
+     DATA (passed file name is already only the lbasename part).
 
      Otherwise, if KIND does not match this symbol is skipped.
 
@@ -270,7 +272,7 @@ struct quick_symbol_functions
      functions.  */
   void (*expand_symtabs_matching)
     (struct objfile *objfile,
-     int (*file_matcher) (const char *, void *),
+     int (*file_matcher) (const char *, void *, int basenames),
      int (*name_matcher) (const char *, void *),
      enum search_domain kind,
      void *data);

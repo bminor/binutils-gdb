@@ -1,5 +1,14 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/fullpath-expand-func.c: New file.
+	* gdb.base/fullpath-expand.c: New file.
+	* gdb.base/fullpath-expand.exp: New file.
+	* gdb.base/realname-expand-real.c: New file.
+	* gdb.base/realname-expand.c: New file.
+	* gdb.base/realname-expand.exp: New file.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.dwarf2/dw2-dir-file-name.exp: New file.
 	* gdb.dwarf2/dw2-dir-file-name.c: New file.
 

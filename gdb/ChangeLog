@@ -1,5 +1,28 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2read.c (dw2_expand_symtabs_matching): Add basenames parameter
+	to the file_matcher parameter.  Pass 0 to it.
+	(dwarf2_create_include_psymtab): Copy also DIRNAME.
+	* psymtab.c (partial_map_symtabs_matching_filename): Drop handling of
+	NULL psymtab_to_fullname result.
+	(psymtab_to_fullname): Remove variable r.  Never return NULL, assemble
+	an expected filename instead.
+	(expand_symtabs_matching_via_partial): Add basenames parameter to the
+	file_matcher parameter.  Call also psymtab_to_fullname, after newly
+	considering BASENAMES_MAY_DIFFER.
+	* source.c (rewrite_source_path): Remove static.
+	* source.h (rewrite_source_path): New declaration.
+	* symfile.h (struct quick_symbol_functions): Add basenames parameter to
+	the expand_symtabs_matching field.  Comment it.
+	* symtab.c (file_matches): New function comment.  Add parameter
+	basenames, implement it.
+	(search_symbols_file_matches): Add basenames parameter.  Update the
+	file_matches caller.
+	(search_symbols): Match FILES also against symtab_to_fullname.
+	Optimize it for BASENAMES_MAY_DIFFER.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* source.c (print_source_lines_base): Print for TUI also "fullname".
 	* tui/tui-data.c (init_content_element): Change tui_locator_element
 	field to full_name.

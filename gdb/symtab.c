@@ -3265,8 +3265,11 @@ sources_info (char *ignore, int from_tty)
   do_cleanups (cleanups);
 }
 
+/* Compare FILE against all the NFILES entries of FILES.  If BASENAMES is
+   non-zero compare only lbasename of FILES.  */
+
 static int
-file_matches (const char *file, char *files[], int nfiles)
+file_matches (const char *file, char *files[], int nfiles, int basenames)
 {
   int i;
 
@@ -3274,7 +3277,9 @@ file_matches (const char *file, char *files[], int nfiles)
     {
       for (i = 0; i < nfiles; i++)
 	{
-	  if (compare_filenames_for_search (file, files[i]))
+	  if (compare_filenames_for_search (file, (basenames
+						   ? lbasename (files[i])
+						   : files[i])))
 	    return 1;
 	}
     }
@@ -3374,11 +3379,12 @@ struct search_symbols_data
 /* A callback for expand_symtabs_matching.  */
 
 static int
-search_symbols_file_matches (const char *filename, void *user_data)
+search_symbols_file_matches (const char *filename, void *user_data,
+			     int basenames)
 {
   struct search_symbols_data *data = user_data;
 
-  return file_matches (filename, data->files, data->nfiles);
+  return file_matches (filename, data->files, data->nfiles, basenames);
 }
 
 /* A callback for expand_symtabs_matching.  */
@@ -3587,7 +3593,14 @@ search_symbols (char *regexp, enum search_domain kind,
 
 	    QUIT;
 
-	    if (file_matches (real_symtab->filename, files, nfiles)
+	    /* Check first sole REAL_SYMTAB->FILENAME.  It does not need to be
+	       a substring of symtab_to_fullname as it may contain "./" etc.  */
+	    if ((file_matches (real_symtab->filename, files, nfiles, 0)
+		 || ((basenames_may_differ
+		      || file_matches (lbasename (real_symtab->filename),
+				       files, nfiles, 1))
+		     && file_matches (symtab_to_fullname (real_symtab),
+				      files, nfiles, 0)))
 		&& ((!datum.preg_p
 		     || regexec (&datum.preg, SYMBOL_NATURAL_NAME (sym), 0,
 				 NULL, 0) == 0)
