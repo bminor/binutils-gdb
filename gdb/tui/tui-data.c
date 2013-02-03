@@ -541,7 +541,7 @@ init_win_info (struct tui_win_info *win_info)
       win_info->detail.source_info.gdbarch = NULL;
       win_info->detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
       win_info->detail.source_info.start_line_or_addr.u.addr = 0;
-      win_info->detail.source_info.filename = 0;
+      win_info->detail.source_info.fullname = NULL;
       break;
     case DATA_WIN:
       win_info->detail.data_display_info.data_content = (tui_win_content) NULL;
@@ -681,10 +681,10 @@ tui_del_window (struct tui_win_info *win_info)
 	  generic_win->handle = (WINDOW *) NULL;
 	  generic_win->is_visible = FALSE;
 	}
-      if (win_info->detail.source_info.filename)
+      if (win_info->detail.source_info.fullname)
         {
-          xfree (win_info->detail.source_info.filename);
-          win_info->detail.source_info.filename = 0;
+          xfree (win_info->detail.source_info.fullname);
+          win_info->detail.source_info.fullname = NULL;
         }
       generic_win = win_info->detail.source_info.execution_info;
       if (generic_win != (struct tui_gen_win_info *) NULL)
@@ -731,10 +731,10 @@ tui_free_window (struct tui_win_info *win_info)
 	  generic_win->handle = (WINDOW *) NULL;
 	}
       tui_free_win_content (generic_win);
-      if (win_info->detail.source_info.filename)
+      if (win_info->detail.source_info.fullname)
         {
-          xfree (win_info->detail.source_info.filename);
-          win_info->detail.source_info.filename = 0;
+          xfree (win_info->detail.source_info.fullname);
+          win_info->detail.source_info.fullname = NULL;
         }
       generic_win = win_info->detail.source_info.execution_info;
       if (generic_win != (struct tui_gen_win_info *) NULL)

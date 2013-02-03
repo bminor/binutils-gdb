@@ -1,5 +1,17 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* tui/tui-data.c (init_win_info, tui_del_window, tui_free_window):
+	Rename field reference filename to fullname.
+	* tui/tui-data.h (struct tui_source_info): Rename field filename to
+	fullname.  New comment for it.
+	* tui/tui-source.c (tui_set_source_content): Rename field reference
+	filename to fullname.  Initialize field by symtab_to_fullname now.
+	* tui/tui-winsource.c (tui_update_breakpoint_info): Rename field
+	reference filename to fullname.  Use symtab_to_fullname during
+	comparison.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* dwarf2read.c (dw2_expand_symtabs_with_filename): Rename to ...
 	(dw2_expand_symtabs_with_fullname): ... here.  Rename parameter
