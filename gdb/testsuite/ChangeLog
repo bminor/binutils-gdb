@@ -1,5 +1,11 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.mi/mi-fullname-deleted.exp: Use double last slash for $srcfileabs.
+	(compare_filenames_for_search does not match)
+	(compare_filenames_for_search does match): New tests.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.gdb/xfullpath.exp: Replace xfullpath calls by gdb_realpath calls.
 
 2013-02-02  Jan Kratochvil  <jan.kratochvil@redhat.com>

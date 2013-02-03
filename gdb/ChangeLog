@@ -1,6 +1,26 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
+	* breakpoint.c (clear_command): Remove variable is_abs, unify the
+	call of filename_cmp with compare_filenames_for_search.
+	* dwarf2read.c (dw2_map_symtabs_matching_filename): Remove variable
+	is_abs, unify the call of FILENAME_CMP with
+	compare_filenames_for_search.  New gdb_asserts for real_path and name.
+	Unify the call of compare_filenames_for_search with FILENAME_CMP.
+	* psymtab.c (partial_map_symtabs_matching_filename): Likewise.
+	* symfile.h (struct quick_symbol_functions): Extend the comment for
+	map_symtabs_matching_filename.
+	* symtab.c (compare_filenames_for_search): Remove the function comment
+	relative path requirement.  Handle absolute filenames, with a comment.
+	(iterate_over_some_symtabs): Remove variable is_abs, unify the call of
+	FILENAME_CMP with compare_filenames_for_search.  New gdb_asserts for
+	real_path and name.  Unify the call of compare_filenames_for_search
+	with FILENAME_CMP.
+	(iterate_over_symtabs): New gdb_assert on REAL_PATH.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
 	* breakpoint.c (print_breakpoint_location): Replace bp_location field
 	source_file references by symtab field references.  Remove variables
 	sal and fullname.

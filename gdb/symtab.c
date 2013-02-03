@@ -146,8 +146,8 @@ const struct block *block_found;
 
 /* See whether FILENAME matches SEARCH_NAME using the rule that we
    advertise to the user.  (The manual's description of linespecs
-   describes what we advertise).  We assume that SEARCH_NAME is
-   a relative path.  Returns true if they match, false otherwise.  */
+   describes what we advertise).  Returns true if they match, false
+   otherwise.  */
 
 int
 compare_filenames_for_search (const char *filename, const char *search_name)
@@ -166,12 +166,18 @@ compare_filenames_for_search (const char *filename, const char *search_name)
      preceding the trailing SEARCH_NAME segment of FILENAME must be a
      directory separator.
 
+     The check !IS_ABSOLUTE_PATH ensures SEARCH_NAME "/dir/file.c"
+     cannot match FILENAME "/path//dir/file.c" - as user has requested
+     absolute path.  The sama applies for "c:\file.c" possibly
+     incorrectly hypothetically matching "d:\dir\c:\file.c".
+
      The HAS_DRIVE_SPEC purpose is to make FILENAME "c:file.c"
      compatible with SEARCH_NAME "file.c".  In such case a compiler had
      to put the "c:file.c" name into debug info.  Such compatibility
      works only on GDB built for DOS host.  */
   return (len == search_len
-	  || IS_DIR_SEPARATOR (filename[len - search_len - 1])
+	  || (!IS_ABSOLUTE_PATH (search_name)
+	      && IS_DIR_SEPARATOR (filename[len - search_len - 1]))
 	  || (HAS_DRIVE_SPEC (filename)
 	      && STRIP_DRIVE_SPEC (filename) == &filename[len - search_len]));
 }
@@ -198,18 +204,10 @@ iterate_over_some_symtabs (const char *name,
 {
   struct symtab *s = NULL;
   const char* base_name = lbasename (name);
-  int is_abs = IS_ABSOLUTE_PATH (name);
 
   for (s = first; s != NULL && s != after_last; s = s->next)
     {
-      /* Exact match is always ok.  */
-      if (FILENAME_CMP (name, s->filename) == 0)
-	{
-	  if (callback (s, data))
-	    return 1;
-	}
-
-      if (!is_abs && compare_filenames_for_search (s->filename, name))
+      if (compare_filenames_for_search (s->filename, name))
 	{
 	  if (callback (s, data))
 	    return 1;
@@ -228,13 +226,9 @@ iterate_over_some_symtabs (const char *name,
       {
         const char *fullname = symtab_to_fullname (s);
 
+	gdb_assert (IS_ABSOLUTE_PATH (real_path));
+	gdb_assert (IS_ABSOLUTE_PATH (name));
 	if (FILENAME_CMP (real_path, fullname) == 0)
-	  {
-	    if (callback (s, data))
-	      return 1;
-	  }
-
-	if (!is_abs && compare_filenames_for_search (fullname, name))
 	  {
 	    if (callback (s, data))
 	      return 1;
@@ -268,6 +262,7 @@ iterate_over_symtabs (const char *name,
     {
       real_path = gdb_realpath (name);
       make_cleanup (xfree, real_path);
+      gdb_assert (IS_ABSOLUTE_PATH (real_path));
     }
 
   ALL_OBJFILES (objfile)

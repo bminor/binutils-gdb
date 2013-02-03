@@ -24,6 +24,12 @@ if [mi_gdb_start] {
 standard_testfile
 set srcfileabs [standard_output_file $srcfile]
 
+# "//$srcfile" It is used for the test of compare_filenames_for_search.
+if { [regsub {/[^/]+$} $srcfileabs {/\0} srcfileabs] != 1 } {
+    xfail "Cannot double the last slash separator"
+    return -1
+}
+
 if { [regsub {^(/[^/]+)/} $srcfileabs {\1subst/} srcfileabssubst] != 1
      || [regsub {^(/[^/]+)/.*$} $srcfileabs {\1} initdir] != 1 } {
     xfail "Missing root subdirectory"
@@ -49,3 +55,12 @@ mi_gdb_test "-interpreter-exec console \"set substitute-path ${initdir} ${initdi
 mi_gdb_test "-file-list-exec-source-file" ".*\",fullname=\".*\".*" "fullname present"
 
 mi_gdb_test "-file-list-exec-source-file" ".*\",fullname=\"[string_to_regexp $srcfileabssubst]\".*" "substituted fullname"
+
+# Test compare_filenames_for_search does not falsely use absolute filename as
+# a relative one.
+mi_gdb_test "-break-insert -t /$srcfile:main" \
+	    "\\^error,msg=\"No source file named /[string_to_regexp $srcfile]\\.\"" \
+	    "compare_filenames_for_search does not match"
+mi_gdb_test "-break-insert -t $srcfile:main" \
+	    {\^done,bkpt=.*} \
+	    "compare_filenames_for_search does match"
