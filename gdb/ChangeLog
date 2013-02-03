@@ -1,5 +1,10 @@
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* contrib/expect-read1.c: New file.
+	* contrib/expect-read1.sh: New file.
+
+2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2read.c (file_file_name): New function with code from
 	file_full_name.
 	(file_full_name): Move most of the code to file_file_name.
