@@ -45,6 +45,7 @@ SECTION
 #include "elf-bfd.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
+#include "elf-linux-psinfo.h"
 
 #ifdef CORE_HEADER
 #include CORE_HEADER
@@ -9156,6 +9157,34 @@ elfcore_write_prpsinfo (bfd  *abfd,
 
   free (buf);
   return NULL;
+}
+
+char *
+elfcore_write_linux_prpsinfo32
+  (bfd *abfd, char *buf, int *bufsiz,
+   const struct elf_internal_linux_prpsinfo *prpsinfo)
+{
+  struct elf_external_linux_prpsinfo32 data;
+
+  memset (&data, 0, sizeof (data));
+  LINUX_PRPSINFO32_SWAP_FIELDS (abfd, prpsinfo, data);
+
+  return elfcore_write_note (abfd, buf, bufsiz, "CORE", NT_PRPSINFO,
+			     &data, sizeof (data));
+}
+
+char *
+elfcore_write_linux_prpsinfo64
+  (bfd *abfd, char *buf, int *bufsiz,
+   const struct elf_internal_linux_prpsinfo *prpsinfo)
+{
+  struct elf_external_linux_prpsinfo64 data;
+
+  memset (&data, 0, sizeof (data));
+  LINUX_PRPSINFO64_SWAP_FIELDS (abfd, prpsinfo, data);
+
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     "CORE", NT_PRPSINFO, &data, sizeof (data));
 }
 
 char *

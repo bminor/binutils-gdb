@@ -2285,6 +2285,42 @@ extern char *elfcore_write_lwpstatus
 extern char *elfcore_write_register_note
   (bfd *, char *, int *, const char *, const void *, int);
 
+/* Internal structure which holds information to be included in the
+   PRPSINFO section of Linux core files.
+
+   This is an "internal" structure in the sense that it should be used
+   to pass information to BFD (via the `elfcore_write_linux_prpsinfo'
+   function), so things like endianess shouldn't be an issue.  This
+   structure will eventually be converted in one of the
+   `elf_external_linux_*' structures and written out to an output bfd
+   by one of the functions declared below.  */
+
+struct elf_internal_linux_prpsinfo
+  {
+    char pr_state;			/* Numeric process state.  */
+    char pr_sname;			/* Char for pr_state.  */
+    char pr_zomb;			/* Zombie.  */
+    char pr_nice;			/* Nice val.  */
+    unsigned long pr_flag;		/* Flags.  */
+    unsigned int pr_uid;
+    unsigned int pr_gid;
+    int pr_pid, pr_ppid, pr_pgrp, pr_sid;
+    char pr_fname[16 + 1];		/* Filename of executable.  */
+    char pr_psargs[80 + 1];		/* Initial part of arg list.  */
+  };
+
+/* Linux/most 32-bit archs.  */
+extern char *elfcore_write_linux_prpsinfo32
+  (bfd *, char *, int *, const struct elf_internal_linux_prpsinfo *);
+
+/* Linux/most 64-bit archs.  */
+extern char *elfcore_write_linux_prpsinfo64
+  (bfd *, char *, int *, const struct elf_internal_linux_prpsinfo *);
+
+/* Linux/PPC32 uses different layout compared to most archs.  */
+extern char *elfcore_write_ppc_linux_prpsinfo32
+  (bfd *, char *, int *, const struct elf_internal_linux_prpsinfo *);
+
 extern bfd *_bfd_elf32_bfd_from_remote_memory
   (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
    int (*target_read_memory) (bfd_vma, bfd_byte *, bfd_size_type));
