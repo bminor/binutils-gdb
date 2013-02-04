@@ -259,7 +259,7 @@
 
 2012-10-26  Alan Modra  <amodra@gmail.com>
 
-	PR target/14758
+	PR gas/14758
 	* config/tc-ppc.c (ppc_setup_opcodes): Fix comment.
 	(md_assemble): Translate to _DS relocs for ppc32 as well as ppc64.
 	(tc_gen_reloc): Handle _DS relocs in ppc32 mode.

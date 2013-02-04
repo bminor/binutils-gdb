@@ -459,7 +459,7 @@
 
 2012-10-26  Alan Modra  <amodra@gmail.com>
 
-	PR target/14758
+	PR gas/14758
 	* elf32-ppc.c (ppc_elf_reloc_type_lookup): Decode ppc64 _DS
 	bfd_reloc values.  Map to corresponding D-form relocs.
 	(is_insn_ds_form, is_insn_qs_form): New functions.
