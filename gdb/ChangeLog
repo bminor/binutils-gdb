@@ -1,3 +1,25 @@
+2013-02-04  Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Add arch64-tdep.o.
+	(HFILES_NO_SRCDIR): Add aarch64-tdep.h.
+	(ALLDEPFILES): Add aarch64-tdep.c.
+	* aarch64-tdep.c: New file.
+	* aarch64-tdep.h: New file.
+	* configure.tgt: Add AArch64.
+	* features/Makefile (WHICH): Add aarch64 and aarch64-without-fpu.
+	(aarch64-expedite): New definition.
+	* features/aarch64-core.xml: New file.
+	* features/aarch64-fpu.xml: New file.
+	* features/aarch64-without-fpu.c: New file (generated).
+	* features/aarch64-without-fpu.xml: New file.
+	* features/aarch64.c: New file (generated).
+	* features/aarch64.xml: New file.
+	* regformats/aarch64-without-fpu.dat: New file (generated).
+	* regformats/aarch64.dat: New file (generated).
+
 2013-02-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* contrib/expect-read1.c: New file.

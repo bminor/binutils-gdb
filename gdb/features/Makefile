@@ -30,7 +30,8 @@
 # in the GDB repository.  To generate C files:
 #   make GDB=/path/to/gdb XMLTOC="xml files" cfiles
 
-WHICH = arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
+WHICH = aarch64 aarch64-without-fpu \
+	arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
 	arm-with-m arm-with-m-fpa-layout arm-with-m-vfp-d16 \
 	i386/i386 i386/i386-linux \
 	i386/i386-mmx i386/i386-mmx-linux \
@@ -52,6 +53,7 @@ WHICH = arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
 	tic6x-c64xp-linux tic6x-c64x-linux tic6x-c62x-linux
 
 # Record which registers should be sent to GDB by default after stop.
+aarch64-expedite = x29,sp,pc
 arm-expedite = r11,sp,pc
 i386/i386-expedite = ebp,esp,eip
 i386/i386-linux-expedite = ebp,esp,eip

@@ -521,6 +521,7 @@ TARGET_OBS = @TARGET_OBS@
 # All target-dependent objects files that require 64-bit CORE_ADDR
 # (used with --enable-targets=all --enable-64-bit-bfd).
 ALL_64_TARGET_OBS = \
+	aarch64-tdep.o \
 	alphabsd-tdep.o alphafbsd-tdep.o alpha-linux-tdep.o alpha-mdebug-tdep.o \
 	alphanbsd-tdep.o alphaobsd-tdep.o alpha-osf1-tdep.o alpha-tdep.o \
 	amd64fbsd-tdep.o amd64-darwin-tdep.o amd64-dicos-tdep.o \
@@ -771,7 +772,7 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 HFILES_NO_SRCDIR = \
 common/gdb_signals.h common/gdb_thread_db.h common/gdb_vecs.h \
 common/i386-xstate.h common/linux-ptrace.h \
-proc-utils.h arm-tdep.h ax-gdb.h ppcnbsd-tdep.h	\
+proc-utils.h aarch64-tdep.h arm-tdep.h ax-gdb.h ppcnbsd-tdep.h	\
 cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
 exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h amd64bsd-nat.h \
 i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
@@ -1420,6 +1421,7 @@ force_update:
 MAKEOVERRIDES=
 
 ALLDEPFILES = \
+	aarch64-tdep.c \
 	aix-thread.c \
 	alpha-nat.c alphabsd-nat.c alpha-linux-nat.c \
 	alpha-tdep.c alpha-mdebug-tdep.c \

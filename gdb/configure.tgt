@@ -31,6 +31,11 @@ esac
 # map target info into gdb names.
 
 case "${targ}" in
+aarch64*-*-elf)
+	# Target: AArch64 embedded system
+	gdb_target_obs="aarch64-tdep.o"
+	;;
+
 
 alpha*-*-osf*)
 	# Target: Little-endian Alpha running OSF/1
