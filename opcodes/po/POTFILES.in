@@ -137,6 +137,7 @@ mep-dis.c
 mep-ibld.c
 mep-opc.c
 mep-opc.h
+metag-dis.c
 microblaze-dis.c
 microblaze-opc.h
 micromips-opc.c

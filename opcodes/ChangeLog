@@ -1,3 +1,9 @@
+2013-02-04  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+	* rl78-decode.c: Regenerate.
+	* rx-decode.c: Regenerate.
+
 2013-01-30  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-tbl.h (aarch64_opcode_table): Flag sshll, sshll2, ushll and
