@@ -521,7 +521,7 @@ TARGET_OBS = @TARGET_OBS@
 # All target-dependent objects files that require 64-bit CORE_ADDR
 # (used with --enable-targets=all --enable-64-bit-bfd).
 ALL_64_TARGET_OBS = \
-	aarch64-tdep.o \
+	aarch64-tdep.o aarch64-linux-tdep.o \
 	alphabsd-tdep.o alphafbsd-tdep.o alpha-linux-tdep.o alpha-mdebug-tdep.o \
 	alphanbsd-tdep.o alphaobsd-tdep.o alpha-osf1-tdep.o alpha-tdep.o \
 	amd64fbsd-tdep.o amd64-darwin-tdep.o amd64-dicos-tdep.o \
@@ -1421,7 +1421,7 @@ force_update:
 MAKEOVERRIDES=
 
 ALLDEPFILES = \
-	aarch64-tdep.c \
+	aarch64-tdep.c aarch64-linux-tdep.c \
 	aix-thread.c \
 	alpha-nat.c alphabsd-nat.c alpha-linux-nat.c \
 	alpha-tdep.c alpha-mdebug-tdep.c \

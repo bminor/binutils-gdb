@@ -3,6 +3,18 @@
 	    Nigel Stephens  <nigel.stephens@arm.com>
 	    Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* Makefile.in (ALL_64_TARGET_OBS): Add aarch64-linux-tdep.o.
+	(ALLDEPFILES): Add aarch64-linux-tdep.c.
+	* aarch64-linux-tdep.c: New file.
+	* aarch64-linux-tdep.h: New file.
+	* aarch64-tdep.h (gdbarch_tdep): Define gregset and fpregset.
+	* configure.tgt: Add aarch64-none-linux-gnu.
+
+2013-02-04  Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* Makefile.in (ALL_64_TARGET_OBS): Add arch64-tdep.o.
 	(HFILES_NO_SRCDIR): Add aarch64-tdep.h.
 	(ALLDEPFILES): Add aarch64-tdep.c.
