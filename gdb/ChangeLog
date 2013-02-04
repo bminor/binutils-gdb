@@ -3,6 +3,19 @@
 	    Nigel Stephens  <nigel.stephens@arm.com>
 	    Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* aarch64-newlib-tdep.c: New file.
+	* configure.tgt: Add aarch64-newlib-tdep.o to gdb_target_obs of
+	aarch64*-*-elf.
+	* defs.h (enum gdb_osabi): Add GDB_OSABI_NEWLIB.
+	* Makefile.in (ALL_64_TARGET_OBS): Add aarch64-newlib-tdep.o.
+	(ALLDEPFILES): Add aarch64-newlib-tdep.c.
+	* osabi.c (gdb_osabi_names): Add "Newlib".
+
+2013-02-04  Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* Makefile.in (ALL_64_TARGET_OBS): Add aarch64-linux-tdep.o.
 	(ALLDEPFILES): Add aarch64-linux-tdep.c.
 	* aarch64-linux-tdep.c: New file.
