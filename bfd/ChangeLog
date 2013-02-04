@@ -1,3 +1,8 @@
+2013-02-04  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_scan_start_address): Do not fail if no
+	start address.
+
 2013-02-04  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (BFD64_BACKENDS): Remove elf-nacl.lo.

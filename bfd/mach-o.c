@@ -3992,8 +3992,9 @@ bfd_mach_o_scan_start_address (bfd *abfd)
 	  }
       }
 
+  /* An object file has no start address, so do not fail if not found.  */
   if (cmd == NULL)
-    return FALSE;
+    return TRUE;
 
   /* FIXME: create a subtarget hook ?  */
   for (i = 0; i < cmd->nflavours; i++)
