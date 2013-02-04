@@ -1,3 +1,8 @@
+2013-02-04  Alan Modra  <amodra@gmail.com>
+
+	* coff-tic54x.c (SWAP_OUT_RELOC_EXTRA): Delete.
+	* coff-tic80.c (SWAP_OUT_RELOC_EXTRA): Delete.
+
 2013-02-01  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (dec_dynrel_count): Don't error when elf_gc_sweep_symbol
