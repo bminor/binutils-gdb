@@ -102,6 +102,7 @@ cpu-m9s12x.c
 cpu-m9s12xg.c
 cpu-mcore.c
 cpu-mep.c
+cpu-metag.c
 cpu-microblaze.c
 cpu-mips.c
 cpu-mmix.c
@@ -131,6 +132,7 @@ cpu-tic80.c
 cpu-tilegx.c
 cpu-tilepro.c
 cpu-v850.c
+cpu-v850_rh850.c
 cpu-vax.c
 cpu-w65.c
 cpu-we32k.c
@@ -153,7 +155,6 @@ elf-hppa.h
 elf-ifunc.c
 elf-m10200.c
 elf-m10300.c
-elf-nacl.c
 elf-nacl.c
 elf-strtab.c
 elf-vxworks.c
@@ -193,6 +194,7 @@ elf32-m68k.c
 elf32-m88k.c
 elf32-mcore.c
 elf32-mep.c
+elf32-metag.c
 elf32-microblaze.c
 elf32-mips.c
 elf32-moxie.c

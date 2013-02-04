@@ -645,7 +645,6 @@ BFD64_BACKENDS = \
 	coff-x86_64.lo \
 	coff64-rs6000.lo \
 	demo64.lo \
-	elf-nacl.lo \
 	elf32-ia64.lo \
 	elf32-score.lo \
 	elf32-score7.lo \
@@ -684,7 +683,6 @@ BFD64_BACKENDS_CFILES = \
 	coff-x86_64.c \
 	coff64-rs6000.c \
 	demo64.c \
-	elf-nacl.c \
 	elf32-score.c \
 	elf32-score7.c \
 	elf64-alpha.c \
