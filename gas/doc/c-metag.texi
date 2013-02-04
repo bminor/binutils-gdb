@@ -2,6 +2,8 @@
 @c Contributed by Imagination Technologies Ltd.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
+@c man end
+
 @ifset GENERIC
 @page
 @node Meta-Dependent
@@ -33,6 +35,7 @@ each core supports, please see the chip's technical reference manual.
 
 The following table lists all available Meta options.
 
+@c man begin OPTIONS
 @table @code
 @item -mcpu=metac11
 Generate code for Meta 1.1.
@@ -47,6 +50,7 @@ Generate code for Meta 2.1.
 Allow code to use FPU hardware of Meta 2.1.
 
 @end table
+@c man end
 
 @node Meta Syntax
 @section Syntax
