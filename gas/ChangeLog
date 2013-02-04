@@ -1,3 +1,7 @@
+2013-02-04  Alan Modra  <amodra@gmail.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2013-01-30  Markos Chandras  <markos.chandras@imgtec.com>
 
 	* config/tc-metag.c: Make SWAP instruction less permissive with
