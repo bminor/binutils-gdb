@@ -1,3 +1,14 @@
+2013-02-04  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+        * linux-low.c (handle_extended_wait, linux_create_inferior)
+	(linux_attach_lwp_1, linux_kill_one_lwp, linux_attach_one_lwp)
+	(dequeue_one_deferred_signal, linux_resume_one_thread)
+	(fetch_register, linux_write_memory, linux_enable_event_reporting)
+	(linux_tracefork_grandchild, linux_test_for_tracefork)
+	(linux_read_offsets, linux_xfer_siginfo, linux_xfer_siginfo): Add
+	PTRACE_ARG3_TYPE and PTRACE_ARG4_TYPE cast to ptrace arguments
+	where the argument is 0.
+
 2013-01-25  Yao Qi  <yao@codesourcery.com>
 
 	* event-loop.c: Include "queue.h".
