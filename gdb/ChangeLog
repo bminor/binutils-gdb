@@ -1,3 +1,11 @@
+2013-02-04  Andreas Tobler  <andreast@fgznet.ch>
+
+	* Makefile.in (ALL_TARGET_OBS): Add powerpc FreeBSD files.
+	* configure.host: Add powerpc*-*-freebsd* target.
+	* configure.tgt: Add target info for powerpc*-*-freebsd*.
+	* ppcfbsd-nat.c, ppcfbsd-tdep.h, ppcfbsd-tdep.c: New files.
+	* config/powerpc/fbsd.mh: New file.
+
 2013-02-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Denys Vlasenko  <dvlasenk@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
