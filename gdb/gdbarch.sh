@@ -641,6 +641,13 @@ v:struct core_regset_section *:core_regset_sections:const char *name, int len:::
 # Create core file notes
 M:char *:make_corefile_notes:bfd *obfd, int *note_size:obfd, note_size
 
+# The elfcore writer hook to use to write Linux prpsinfo notes to core
+# files.  Most Linux architectures use the same prpsinfo32 or
+# prpsinfo64 layouts, and so won't need to provide this hook, as we
+# call the Linux generic routines in bfd to write prpsinfo notes by
+# default.
+F:char *:elfcore_write_linux_prpsinfo:bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info:obfd, note_data, note_size, info
+
 # Find core file memory regions
 M:int:find_memory_regions:find_memory_region_ftype func, void *data:func, data
 
@@ -1082,6 +1089,7 @@ struct agent_expr;
 struct axs_value;
 struct stap_parse_info;
 struct ravenscar_arch_ops;
+struct elf_internal_linux_prpsinfo;
 
 /* The architecture associated with the inferior through the
    connection to the target.

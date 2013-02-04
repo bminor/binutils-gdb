@@ -1,3 +1,20 @@
+2013-02-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Denys Vlasenko  <dvlasenk@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdbarch.sh (elfcore_write_linux_prpsinfo): New F hook.
+	(struct elf_internal_linux_prpsinfo): Forward declare.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* linux-tdep.c: Include `cli/cli-utils.h'.
+	(linux_fill_prpsinfo): New function.
+	(linux_make_corefile_notes): Use linux_fill_prpsinfo.  If there's
+	an elfcore_write_linux_prpsinfo hook, use it, otherwise, use
+	elfcore_write_linux_prpsinfo32 or elfcore_write_linux_prpsinfo64
+	depending on gdbarch pointer bitness.
+	* ppc-linux-tdep.c: Include elf-bfd.h.
+	(ppc_linux_init_abi): Hook in elfcore_write_ppc_linux_prpsinfo32
+	on 32-bit.
+
 2013-02-04  Jim MacArthur  <jim.macarthur@arm.com>
 	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
 	    Nigel Stephens  <nigel.stephens@arm.com>

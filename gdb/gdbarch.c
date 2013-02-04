@@ -238,6 +238,7 @@ struct gdbarch
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
   struct core_regset_section * core_regset_sections;
   gdbarch_make_corefile_notes_ftype *make_corefile_notes;
+  gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo;
   gdbarch_find_memory_regions_ftype *find_memory_regions;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   gdbarch_core_pid_to_str_ftype *core_pid_to_str;
@@ -408,6 +409,7 @@ struct gdbarch startup_gdbarch =
   0,  /* regset_from_core_section */
   0,  /* core_regset_sections */
   0,  /* make_corefile_notes */
+  0,  /* elfcore_write_linux_prpsinfo */
   0,  /* find_memory_regions */
   0,  /* core_xfer_shared_libraries */
   0,  /* core_pid_to_str */
@@ -709,6 +711,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of fetch_pointer_argument, has predicate.  */
   /* Skip verify of regset_from_core_section, has predicate.  */
   /* Skip verify of make_corefile_notes, has predicate.  */
+  /* Skip verify of elfcore_write_linux_prpsinfo, has predicate.  */
   /* Skip verify of find_memory_regions, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries, has predicate.  */
   /* Skip verify of core_pid_to_str, has predicate.  */
@@ -954,6 +957,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: elf_make_msymbol_special = <%s>\n",
                       host_address_to_string (gdbarch->elf_make_msymbol_special));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_elfcore_write_linux_prpsinfo_p() = %d\n",
+                      gdbarch_elfcore_write_linux_prpsinfo_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: elfcore_write_linux_prpsinfo = <%s>\n",
+                      host_address_to_string (gdbarch->elfcore_write_linux_prpsinfo));
   fprintf_unfiltered (file,
                       "gdbarch_dump: fast_tracepoint_valid_at = <%s>\n",
                       host_address_to_string (gdbarch->fast_tracepoint_valid_at));
@@ -3365,6 +3374,30 @@ set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch,
                                  gdbarch_make_corefile_notes_ftype make_corefile_notes)
 {
   gdbarch->make_corefile_notes = make_corefile_notes;
+}
+
+int
+gdbarch_elfcore_write_linux_prpsinfo_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->elfcore_write_linux_prpsinfo != NULL;
+}
+
+char *
+gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->elfcore_write_linux_prpsinfo != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_elfcore_write_linux_prpsinfo called\n");
+  return gdbarch->elfcore_write_linux_prpsinfo (obfd, note_data, note_size, info);
+}
+
+void
+set_gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch,
+                                          gdbarch_elfcore_write_linux_prpsinfo_ftype elfcore_write_linux_prpsinfo)
+{
+  gdbarch->elfcore_write_linux_prpsinfo = elfcore_write_linux_prpsinfo;
 }
 
 int

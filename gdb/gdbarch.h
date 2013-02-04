@@ -57,6 +57,7 @@ struct agent_expr;
 struct axs_value;
 struct stap_parse_info;
 struct ravenscar_arch_ops;
+struct elf_internal_linux_prpsinfo;
 
 /* The architecture associated with the inferior through the
    connection to the target.
@@ -735,6 +736,18 @@ extern int gdbarch_make_corefile_notes_p (struct gdbarch *gdbarch);
 typedef char * (gdbarch_make_corefile_notes_ftype) (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
 extern char * gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
 extern void set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch, gdbarch_make_corefile_notes_ftype *make_corefile_notes);
+
+/* The elfcore writer hook to use to write Linux prpsinfo notes to core
+   files.  Most Linux architectures use the same prpsinfo32 or
+   prpsinfo64 layouts, and so won't need to provide this hook, as we
+   call the Linux generic routines in bfd to write prpsinfo notes by
+   default. */
+
+extern int gdbarch_elfcore_write_linux_prpsinfo_p (struct gdbarch *gdbarch);
+
+typedef char * (gdbarch_elfcore_write_linux_prpsinfo_ftype) (bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info);
+extern char * gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info);
+extern void set_gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo);
 
 /* Find core file memory regions */
 
