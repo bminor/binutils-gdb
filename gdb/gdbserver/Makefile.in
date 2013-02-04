@@ -316,6 +316,7 @@ clean:
 	rm -f version.c
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
 	rm -f $(IPA_LIB)
+	rm -f aarch64.c aarch64-without-fpu.c
 	rm -f reg-arm.c reg-bfin.c i386.c reg-ia64.c reg-m32r.c reg-m68k.c
 	rm -f reg-sh.c reg-sparc.c reg-spu.c amd64.c i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c amd64-linux.c reg-xtensa.c
@@ -561,6 +562,10 @@ linux-low.o: linux-low.c
 
 win32_low_h = $(srcdir)/win32-low.h
 
+aarch64.c : $(srcdir)/../regformats/aarch64.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/aarch64.dat aarch64.c
+aarch64-without-fpu.c : $(srcdir)/../regformats/aarch64-without-fpu.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/aarch64-without-fpu.dat aarch64-without-fpu.c
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c
 arm-with-iwmmxt.c : $(srcdir)/../regformats/arm-with-iwmmxt.dat $(regdat_sh)

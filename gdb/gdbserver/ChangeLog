@@ -1,3 +1,13 @@
+2013-02-04  Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* Makefile.in (clean): Remove aarch64.c and aarch64-without-fpu.c.
+	(aarch64.c, aarch64-without-fpu.c): New targets.
+	* configure.srv (aarch64*-*-linux*): New.
+	* linux-aarch64-low.c: New file.
+
 2013-02-04  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
         * linux-low.c (handle_extended_wait, linux_create_inferior)

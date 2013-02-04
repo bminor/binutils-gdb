@@ -3,6 +3,13 @@
 	    Nigel Stephens  <nigel.stephens@arm.com>
 	    Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* configure.tgt (aarch64*-*-linux*): Set build_gdbserver=yes.
+
+2013-02-04  Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* aarch64-newlib-tdep.c: New file.
 	* configure.tgt: Add aarch64-newlib-tdep.o to gdb_target_obs of
 	aarch64*-*-elf.
