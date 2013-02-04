@@ -30,10 +30,6 @@
 #include "libbfd.h"
 #include "compress-debug.h"
 
-#ifndef TC_ADJUST_RELOC_COUNT
-#define TC_ADJUST_RELOC_COUNT(FIX, COUNT)
-#endif
-
 #ifndef TC_FORCE_RELOCATION
 #define TC_FORCE_RELOCATION(FIX)		\
   (generic_force_reloc (FIX))
@@ -890,15 +886,12 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
    handled now.  (These consist of fixS where we have since discovered
    the value of a symbol, or the address of the frag involved.)
    For each one, call md_apply_fix to put the fix into the frag data.
+   Ones that we couldn't completely handle here will be output later
+   by emit_relocations.  */
 
-   Result is a count of how many relocation structs will be needed to
-   handle the remaining fixS's that we couldn't completely handle here.
-   These will be output later by emit_relocations().  */
-
-static long
+static void
 fixup_segment (fixS *fixP, segT this_segment)
 {
-  long seg_reloc_count = 0;
   valueT add_number;
   fragS *fragP;
   segT add_symbol_segment = absolute_section;
@@ -928,10 +921,8 @@ fixup_segment (fixS *fixP, segT this_segment)
 	    symbol_mark_used_in_reloc (fixP->fx_addsy);
 	    if (fixP->fx_subsy != NULL)
 	      symbol_mark_used_in_reloc (fixP->fx_subsy);
-	    seg_reloc_count++;
 	  }
-      TC_ADJUST_RELOC_COUNT (fixP, seg_reloc_count);
-      return seg_reloc_count;
+      return;
     }
 
   for (; fixP; fixP = fixP->fx_next)
@@ -1073,7 +1064,6 @@ fixup_segment (fixS *fixP, segT this_segment)
 
       if (!fixP->fx_done)
 	{
-	  ++seg_reloc_count;
 	  if (fixP->fx_addsy == NULL)
 	    fixP->fx_addsy = abs_section_sym;
 	  symbol_mark_used_in_reloc (fixP->fx_addsy);
@@ -1126,9 +1116,6 @@ fixup_segment (fixS *fixP, segT this_segment)
       print_fixup (fixP);
 #endif
     }				/* For each fixS in this segment.  */
-
-  TC_ADJUST_RELOC_COUNT (fixP, seg_reloc_count);
-  return seg_reloc_count;
 }
 
 static void
