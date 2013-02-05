@@ -1,3 +1,8 @@
+2013-02-06  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (SOURCE_HFILES): Add `elf-linux-psinfo.h'.
+	* Makefile.in: Regenerate.
+
 2013-02-04  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
