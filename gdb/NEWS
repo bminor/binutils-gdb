@@ -3,6 +3,10 @@
 
 *** Changes since GDB 7.5
 
+* New native configurations
+
+FreeBSD/powerpc			powerpc*-*-freebsd
+
 * New targets
 
 Lynx 178 PowerPC		powerpc-*-lynx*178
