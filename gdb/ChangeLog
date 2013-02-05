@@ -1,3 +1,8 @@
+2013-02-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (add_location_to_breakpoint): Insert the location with
+	ADDRESS sorted.
+
 2013-02-05  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* aarch64-tdep.c (aarch64_analyze_prologue): ARI fix:

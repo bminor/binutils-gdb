@@ -8827,9 +8827,12 @@ add_location_to_breakpoint (struct breakpoint *b,
   adjusted_address = adjust_breakpoint_address (loc_gdbarch,
 						sal->pc, b->type);
 
+  /* Sort the locations by their ADDRESS.  */
   loc = allocate_bp_location (b);
-  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
+  for (tmp = &(b->loc); *tmp != NULL && (*tmp)->address <= adjusted_address;
+       tmp = &((*tmp)->next))
     ;
+  loc->next = *tmp;
   *tmp = loc;
 
   loc->requested_address = sal->pc;
