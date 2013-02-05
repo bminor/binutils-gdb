@@ -166,6 +166,15 @@ avr_elf_after_allocation (void)
     }
 }
 
+static void
+avr_elf_before_parse (void)
+{
+  /* Don't create a demand-paged executable, since this feature isn't
+     meaningful in AVR. */
+  config.magic_demand_paged = FALSE;
+
+  gld${EMULATION_NAME}_before_parse ();
+}
 
 EOF
 
@@ -262,6 +271,7 @@ PARSE_AND_LIST_ARGS_CASES='
 #
 # Put these extra avr-elf routines in ld_${EMULATION_NAME}_emulation
 #
+LDEMUL_BEFORE_PARSE=avr_elf_before_parse
 LDEMUL_BEFORE_ALLOCATION=avr_elf_${EMULATION_NAME}_before_allocation
 LDEMUL_AFTER_ALLOCATION=avr_elf_after_allocation
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=avr_elf_create_output_section_statements

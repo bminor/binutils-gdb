@@ -1,3 +1,8 @@
+2013-02-06  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* emultempl/avrelf.em (avr_elf_before_parse): New function.
+	(LDEMUL_BEFORE_PARSE): Define.
+
 2013-02-06  Alan Modra  <amodra@gmail.com>
 
 	PR ld/15096
