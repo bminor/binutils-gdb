@@ -1386,29 +1386,9 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED,
 {
   arelent *reloc;
 
-  if (fixp->fx_addsy && fixp->fx_subsy)
+  if (fixp->fx_subsy != NULL)
     {
-      long value = 0;
-
-      if ((S_GET_SEGMENT (fixp->fx_addsy) != S_GET_SEGMENT (fixp->fx_subsy))
-          || S_GET_SEGMENT (fixp->fx_addsy) == undefined_section)
-        {
-          as_bad_where (fixp->fx_file, fixp->fx_line,
-              "Difference of symbols in different sections is not supported");
-          return NULL;
-        }
-
-      /* We are dealing with two symbols defined in the same section.
-         Let us fix-up them here.  */
-      value += S_GET_VALUE (fixp->fx_addsy);
-      value -= S_GET_VALUE (fixp->fx_subsy);
-
-      /* When fx_addsy and fx_subsy both are zero, md_apply_fix
-         only takes it's second operands for the fixup value.  */
-      fixp->fx_addsy = NULL;
-      fixp->fx_subsy = NULL;
-      md_apply_fix (fixp, (valueT *) &value, NULL);
-
+      as_bad_where (fixp->fx_file, fixp->fx_line, _("expression too complex"));
       return NULL;
     }
 

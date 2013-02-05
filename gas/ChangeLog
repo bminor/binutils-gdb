@@ -1,3 +1,11 @@
+2013-02-06  Alan Modra  <amodra@gmail.com>
+
+	PR gas/14255
+	* config/tc-avr.h (TC_VALIDATE_FIX): Mark symbol used by reloc.
+	Don't skip fixups with fx_subsy non-NULL.
+	* config/tc-avr.c (tc_gen_reloc): Don't specially handle fixups
+	with fx_subsy non-NULL.
+
 2013-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/c-metag.texi: Add "@c man" markers.

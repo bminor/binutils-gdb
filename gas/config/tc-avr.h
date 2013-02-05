@@ -125,9 +125,9 @@ extern long md_pcrel_from_section (struct fix *, segT);
 /* We don't want gas to fixup the following program memory related relocations.
    We will need them in case that we want to do linker relaxation.
    We could in principle keep these fixups in gas when not relaxing.
-   However, there is no serious performance penilty when making the linker
+   However, there is no serious performance penalty when making the linker
    make the fixup work.  Check also that fx_addsy is not NULL, in order to make
-   sure that the fixup refers to some sort of lable.  */
+   sure that the fixup refers to some sort of label.  */
 #define TC_VALIDATE_FIX(FIXP,SEG,SKIP)                       \
   if (   (FIXP->fx_r_type == BFD_RELOC_AVR_7_PCREL           \
        || FIXP->fx_r_type == BFD_RELOC_AVR_13_PCREL          \
@@ -143,9 +143,11 @@ extern long md_pcrel_from_section (struct fix *, segT);
        || FIXP->fx_r_type == BFD_RELOC_AVR_8_HI              \
        || FIXP->fx_r_type == BFD_RELOC_AVR_8_HLO             \
        || FIXP->fx_r_type == BFD_RELOC_AVR_16_PM)            \
-      && (FIXP->fx_addsy))			             \
-    {                                                        \
-      goto SKIP;                                             \
+      && FIXP->fx_addsy != NULL				     \
+      && FIXP->fx_subsy == NULL)			     \
+    {							     \
+      symbol_mark_used_in_reloc (FIXP->fx_addsy);	     \
+      goto SKIP;					     \
     }
 
 /* This target is buggy, and sets fix size too large.  */
