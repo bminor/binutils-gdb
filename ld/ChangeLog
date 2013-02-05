@@ -1,3 +1,28 @@
+2013-02-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15096
+	* emultempl/alphaelf.em (alpha_after_parse): Call
+	gld${EMULATION_NAME}_after_parse instead of after_parse_default.
+	* emultempl/cr16elf.em (cr16elf_after_parse): Likewise.
+	* emultempl/crxelf.em (crxelf_after_parse): Likewise.
+	* emultempl/hppaelf.em (hppaelf_after_parse): Likewise.
+	* emultempl/mipself.em (mips_after_parse): Likewise.
+
+	* emultempl/ia64elf.em (gld${EMULATION_NAME}_after_parse): Renamed
+	to ...
+	(gld_${EMULATION_NAME}_after_parse): This.  Call
+	gld${EMULATION_NAME}_after_parse instead of after_parse_default.
+	(LDEMUL_AFTER_PARSE): Set to gld_${EMULATION_NAME}_after_parse.
+
+	* emultempl/elf32.em (new_dtags_set): New variable.
+	(gld${EMULATION_NAME}_before_parse): Don't set link_info.new_dtags
+	here.
+	(gld${EMULATION_NAME}_after_parse): New function.
+	(ld_${EMULATION_NAME}_emulation): Replace after_parse_default'
+	with gld${EMULATION_NAME}_after_parse.
+	(gld${EMULATION_NAME}_handle_option): Set new_dtags_set to TRUE
+	when setting link_info.new_dtags.
+
 2013-01-25  Kai Tietz  <ktietz@redhat.com>
 
 	* deffilep.y (def_image_name): Adjust type of base-address
