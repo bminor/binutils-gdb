@@ -1,3 +1,8 @@
+2013-02-05  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* aarch64-tdep.c (aarch64_analyze_prologue): ARI fix:
+	Refactor if statement to avoid trailing || operator.
+
 2013-02-05  Andreas Tobler  <andreast@fgznet.ch>
 
 	* NEWS: Add PowerPC FreeBSD as a new native configuration.

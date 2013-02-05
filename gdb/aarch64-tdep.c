@@ -773,8 +773,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	     (perhaps because rn is not known) then we should abandon
 	     further prologue analysis.  */
 	  if (pv_area_store_would_trash (stack,
-					 pv_add_constant (regs[rn], imm)) ||
-	      pv_area_store_would_trash (stack,
+					 pv_add_constant (regs[rn], imm)))
+	    break;
+
+	  if (pv_area_store_would_trash (stack,
 					 pv_add_constant (regs[rn], imm + 8)))
 	    break;
 
