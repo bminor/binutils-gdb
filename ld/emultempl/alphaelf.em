@@ -80,7 +80,7 @@ alpha_after_parse (void)
 				   exp_nameop (SIZEOF_HEADERS, NULL)),
 			NULL);
 
-  gld${EMULATION_NAME}_after_parse ();
+  after_parse_default ();
 }
 
 static void

@@ -6,8 +6,6 @@
 
 * --enable-new-dtags no longer generates old dtags in addition to new dtags.
 
-* For Linux/GNU targets, new dtags is now the default.
-
 Changes in 2.23:
 
 * Enable compressed debug section feature for x86/x86_64 pe-coff.

@@ -63,22 +63,12 @@ fragment <<EOF
 
 /* Declare functions used by various EXTRA_EM_FILEs.  */
 static void gld${EMULATION_NAME}_before_parse (void);
-static void gld${EMULATION_NAME}_after_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
 static void gld${EMULATION_NAME}_after_allocation (void);
 static lang_output_section_statement_type *gld${EMULATION_NAME}_place_orphan
   (asection *, const char *, int);
 EOF
-
-if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
-  fragment <<EOF
-
-/* TRUE if link_info.new_dtags is set.  */
-static bfd_boolean new_dtags_set;
-
-EOF
-fi
 
 if [ "x${USE_LIBPATH}" = xyes ] ; then
   case ${target} in
@@ -115,35 +105,6 @@ gld${EMULATION_NAME}_before_parse (void)
   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
-}
-
-EOF
-fi
-
-fragment <<EOF
-static void
-gld${EMULATION_NAME}_after_parse (void)
-{
-EOF
-
-if test x"$LDEMUL_AFTER_PARSE" != xgld"$EMULATION_NAME"_after_parse; then
-# Enable the "new" dtags by default only for Linux target emulation if
-# -rpath isn't used.
-case ${target} in
-  *-*-linux-* | *-*-k*bsd*-* | *-*-gnu* | *-*-nacl*)
-    case " ${EMULATION_LIBPATH} " in
-      *" ${EMULATION_NAME} "*)
-fragment <<EOF
-  if (!new_dtags_set && command_line.rpath == NULL) 
-    link_info.new_dtags = TRUE;
-EOF
-      ;;
-    esac
-    ;;
-esac
-
-fragment <<EOF
-  after_parse_default ();
 }
 
 EOF
@@ -1355,12 +1316,12 @@ EOF
     ;;
 
     *-*-linux-* | *-*-k*bsd*-* | *-*-gnu*)
-    # Linux
       fragment <<EOF
 	  if (gld${EMULATION_NAME}_check_ld_so_conf (l, force))
 	    break;
 
 EOF
+    # Linux
     ;;
   esac
 fi
@@ -2256,12 +2217,10 @@ fragment <<EOF
 
     case OPTION_DISABLE_NEW_DTAGS:
       link_info.new_dtags = FALSE;
-      new_dtags_set = TRUE;
       break;
 
     case OPTION_ENABLE_NEW_DTAGS:
       link_info.new_dtags = TRUE;
-      new_dtags_set = TRUE;
       break;
 
     case OPTION_EH_FRAME_HDR:
@@ -2546,7 +2505,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_BEFORE_PARSE-gld${EMULATION_NAME}_before_parse},
   ${LDEMUL_SYSLIB-syslib_default},
   ${LDEMUL_HLL-hll_default},
-  ${LDEMUL_AFTER_PARSE-gld${EMULATION_NAME}_after_parse},
+  ${LDEMUL_AFTER_PARSE-after_parse_default},
   ${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open},
   ${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation},
   ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},

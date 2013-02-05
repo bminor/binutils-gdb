@@ -60,7 +60,7 @@ hppaelf_after_parse (void)
 			  NULL);
   */
 
-  gld${EMULATION_NAME}_after_parse ();
+  after_parse_default ();
 }
 
 /* This is called before the input files are opened.  We create a new

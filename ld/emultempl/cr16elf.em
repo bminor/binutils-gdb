@@ -119,7 +119,7 @@ cr16elf_after_parse (void)
      is true the link sometimes fails.  */
   config.magic_demand_paged = FALSE;
 
-  gld${EMULATION_NAME}_after_parse ();
+  after_parse_default ();
 }
 
 /* This is called after the sections have been attached to output

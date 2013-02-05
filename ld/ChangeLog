@@ -1,3 +1,15 @@
+2013-02-06  Alan Modra  <amodra@gmail.com>
+
+	PR ld/15096
+	* emultempl/elf32.em: Revert 2013-02-04, 2013-01-22 and 2013-01-21.
+	* emultempl/alphaelf.em: Revert 2013-02-04.
+	* emultempl/cr16elf.em: Likewise.
+	* emultempl/crxelf.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/ia64elf.em: Likewise.
+	* emultempl/mipself.em: Likewise.
+	* NEWS: Revert 2013-01-21.
+
 2013-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15096

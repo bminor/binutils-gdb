@@ -1,3 +1,15 @@
+2013-02-06  Alan Modra  <amodra@gmail.com>
+
+	PR ld/15096
+	* ld-elf/new-dtags-1.d: Delete.
+	* ld-elf/new-dtags-2.d: Likewise.
+	* ld-elf/new-dtags-3.d: Likewise.
+	* ld-elf/new-dtags-4.d: Likewise.
+	* ld-elf/new-dtags-5.d: Likewise.
+	* ld-elf/new-dtags-6.d: Likewise.
+	* ld-elf/new-dtags-7.d: Likewise.
+	* ld-elf/new-dtags-8.d: Likewise.
+
 2013-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15096
