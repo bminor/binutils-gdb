@@ -199,7 +199,7 @@ location_completer (struct cmd_list_element *ignore,
   char *orig_text = text;
   size_t text_len;
 
-  /* Do we have an unquoted colon, as in "break foo.c::bar"?  */
+  /* Do we have an unquoted colon, as in "break foo.c:bar"?  */
   for (p = text; *p != '\0'; ++p)
     {
       if (*p == '\\' && p[1] == '\'')

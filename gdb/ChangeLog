@@ -1,3 +1,7 @@
+2013-02-05  Doug Evans  <dje@google.com>
+
+	* completer.c (location_completer): Fix typo in comment.
+
 2013-02-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (add_location_to_breakpoint): Insert the location with
