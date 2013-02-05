@@ -1,5 +1,10 @@
 2013-02-06  Alan Modra  <amodra@gmail.com>
 
+	* elf32-arm.c (elf32_arm_final_link_relocate): Only test for
+	stubs in stub_bfd.
+
+2013-02-06  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.am (SOURCE_HFILES): Add `elf-linux-psinfo.h'.
 	* Makefile.in: Regenerate.
 
