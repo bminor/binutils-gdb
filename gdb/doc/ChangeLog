@@ -1,3 +1,12 @@
+2013-02-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gdb.texinfo (AArch64 Features): New section; document
+	org.gnu.gdb.aarch64.core and org.gnu.gdb.aarch64.fpu.
+	(Architectures): Add new AArch64 section to document AArch64
+	architecture specific commands.
+	(ABI): Add description of the new OS ABI "Newlib" and its influence
+	on the longjmp handling.
+
 2013-02-03  Eldar Gaynetdinov <hal9000ed2k@gmail.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

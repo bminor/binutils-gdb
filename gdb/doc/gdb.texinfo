@@ -20693,6 +20693,7 @@ This section describes characteristics of architectures that affect
 all uses of @value{GDBN} with the architecture, both native and cross.
 
 @menu
+* AArch64::
 * i386::
 * Alpha::
 * MIPS::
@@ -20700,6 +20701,24 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * SPU::                Cell Broadband Engine SPU architecture
 * PowerPC::
 @end menu
+
+@node AArch64
+@subsection AArch64
+@cindex AArch64 support
+
+When @value{GDBN} is debugging the AArch64 architecture, it provides the
+following special commands:
+
+@table @code
+@item set debug aarch64
+@kindex set debug aarch64
+This command determines whether AArch64 architecture-specific debugging
+messages are to be displayed.
+
+@item show debug aarch64
+Show whether AArch64 debugging messages are displayed.
+
+@end table
 
 @node i386
 @subsection x86 Architecture-specific Issues
@@ -21330,6 +21349,7 @@ current ABI.
 @cindex OS ABI
 @kindex set osabi
 @kindex show osabi
+@cindex Newlib OS ABI and its influence on the longjmp handling
 
 One @value{GDBN} configuration can debug binaries for multiple operating
 system targets, either via remote debugging or native emulation.
@@ -21339,6 +21359,11 @@ One example where this is useful is in debugging of binaries which use
 an alternate C library (e.g.@: @sc{uClibc} for @sc{gnu}/Linux) which does
 not have the same identifying marks that the standard C library for your
 platform provides.
+
+When @value{GDBN} is debugging the AArch64 architecture, it provides a
+``Newlib'' OS ABI.  This is useful for handling @code{setjmp} and
+@code{longjmp} when debugging binaries that use the @sc{newlib} C library.
+The ``Newlib'' OS ABI can be selected by @code{set osabi Newlib}.
 
 @table @code
 @item show osabi
@@ -40770,6 +40795,7 @@ of recognizing standard features, but @value{GDBN} will only display
 registers using the capitalization used in the description.
 
 @menu
+* AArch64 Features::
 * ARM Features::
 * i386 Features::
 * MIPS Features::
@@ -40778,6 +40804,18 @@ registers using the capitalization used in the description.
 * TIC6x Features::
 @end menu
 
+
+@node AArch64 Features
+@subsection AArch64 Features
+@cindex target descriptions, AArch64 features
+
+The @samp{org.gnu.gdb.aarch64.core} feature is required for AArch64
+targets.  It should contain registers @samp{x0} through @samp{x30},
+@samp{sp}, @samp{pc}, and @samp{cpsr}.
+
+The @samp{org.gnu.gdb.aarch64.fpu} feature is optional.  If present,
+it should contain registers @samp{v0} through @samp{v31}, @samp{fpsr},
+and @samp{fpcr}.
 
 @node ARM Features
 @subsection ARM Features
