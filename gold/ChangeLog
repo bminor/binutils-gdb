@@ -1,3 +1,7 @@
+2013-02-06  Alan Modra  <amodra@gmail.com>
+
+	* README: Update coding style link.
+
 2013-01-28  Cary Coutant  <ccoutant@google.com>
 
     	* dwp.cc (File_list): New typedef.
