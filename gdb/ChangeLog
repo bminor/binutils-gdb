@@ -1,3 +1,8 @@
+2013-02-06  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-type.c (typy_strip_typedefs): Don't call check_typedef
+	outside of TRY_CATCH.
+
 2013-02-06  Yao Qi  <yao@codesourcery.com>
 
 	* mi/mi-interp.c: Include "tracepoint.h".

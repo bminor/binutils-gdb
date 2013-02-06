@@ -423,7 +423,7 @@ typy_strip_typedefs (PyObject *self, PyObject *args)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  return type_to_type_object (check_typedef (type));
+  return type_to_type_object (type);
 }
 
 /* Strip typedefs and pointers/reference from a type.  Then check that
