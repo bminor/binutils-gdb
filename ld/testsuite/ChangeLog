@@ -1,3 +1,14 @@
+2013-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/now-1.d: New file.
+	* ld-elf/now-2.d: Likewise.
+	* ld-elf/now-3.d: Likewise.
+	* ld-elf/now-4.d: Likewise.
+	* ld-elf/rpath-1.d: Likewise.
+	* ld-elf/rpath-2.d: Likewise.
+	* ld-elf/runpath-1.d: Likewise.
+	* ld-elf/runpath-2.d: Likewise.
+
 2013-02-06  Alan Modra  <amodra@gmail.com>
 
 	PR ld/15096
