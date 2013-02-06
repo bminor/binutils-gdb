@@ -74,6 +74,7 @@ CPU_DOCS = \
 	c-mmix.texi \
 	c-mt.texi \
 	c-msp430.texi \
+	c-nios2.texi \
 	c-ns32k.texi \
 	c-pdp11.texi \
 	c-pj.texi \

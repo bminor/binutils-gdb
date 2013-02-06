@@ -67,6 +67,7 @@
 #define ARCH_moxie
 #define ARCH_mt
 #define ARCH_msp430
+#define ARCH_nios2
 #define ARCH_ns32k
 #define ARCH_openrisc
 #define ARCH_or32
@@ -336,6 +337,14 @@ disassembler (abfd)
 #ifdef ARCH_mn10300
     case bfd_arch_mn10300:
       disassemble = print_insn_mn10300;
+      break;
+#endif
+#ifdef ARCH_nios2
+    case bfd_arch_nios2:
+      if (bfd_big_endian (abfd))
+	disassemble = print_insn_big_nios2;
+      else
+	disassemble = print_insn_little_nios2;
       break;
 #endif
 #ifdef ARCH_openrisc

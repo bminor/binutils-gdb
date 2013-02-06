@@ -1,3 +1,14 @@
+2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
+            Andrew Jenner <andrew@codesourcery.com>
+
+	Based on patches from Altera Corporation.
+
+	* Makefile.am (enios2elf.c): New rule.
+	* Makefile.in: Regenerated.
+	* configure.tgt: Add case for nios2*-*-*.
+	* emulparams/nios2elf.sh: New file.
+	* NEWS: Note Altera Nios II support.
+
 2013-02-06  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* emultempl/avrelf.em (avr_elf_before_parse): New function.

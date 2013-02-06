@@ -62,6 +62,10 @@
 #include "elf/mep.h"
 #endif
 
+#ifdef TC_NIOS2
+#include "elf/nios2.h"
+#endif
+
 static void obj_elf_line (int);
 static void obj_elf_size (int);
 static void obj_elf_type (int);

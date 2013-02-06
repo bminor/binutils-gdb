@@ -1,3 +1,18 @@
+2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
+            Andrew Jenner <andrew@codesourcery.com>
+
+	Based on patches from Altera Corporation.
+
+	* readelf.c: Include elf/nios2.h.
+	(dump_relocations): Add case for EM_ALTERA_NIOS2.
+	(get_nios2_dynamic_type): New.
+	(get_dynamic_type): Add case for EM_ALTERA_NIOS2.
+	(is_32bit_abs_reloc): Fix EM_ALTERA_NIOS2 case.
+	(is_16bit_abs_reloc): Likewise.
+	(is_none_reloc): Add EM_ALTERA_NIOS2 and EM_NIOS32 cases.
+	* NEWS: Note Altera Nios II support.
+	* MAINTAINERS: Add Nios II maintainers.
+
 2013-01-29  Xi Wang  <xi.wang@gmail.com>
 
 	* readelf.c (process_version_sections): Fix overflow checks to

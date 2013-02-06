@@ -181,6 +181,10 @@ proc assembler_generates_commons {} {
     return 1
 }
 
+if [istarget nios2*-*-*] {
+    set CFLAGS "$CFLAGS -G0"
+}
+
 # Explicitly use "-fcommon" so that even if $CFLAGS includes
 # "-fno-common", these tests are compiled as expected.
 if {   ![ld_compile "$CC $CFLAGS -fcommon" $srcdir/$subdir/common1a.c tmpdir/common1a.o]

@@ -153,6 +153,8 @@
 #include "elf/xstormy16.h"
 #include "elf/xtensa.h"
 
+#include "elf/nios2.h"
+
 #include "getopt.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
@@ -1288,6 +1290,10 @@ dump_relocations (FILE * file,
 	case EM_XGATE:
 	  rtype = elf_xgate_reloc_type (type);
 	  break;
+
+	case EM_ALTERA_NIOS2:
+	  rtype = elf_nios2_reloc_type (type);
+	  break;
 	}
 
       if (rtype == NULL)
@@ -1687,6 +1693,17 @@ get_tic6x_dynamic_type (unsigned long type)
 }
 
 static const char *
+get_nios2_dynamic_type (unsigned long type)
+{
+  switch (type)
+    {
+    case DT_NIOS2_GP: return "NIOS2_GP";
+    default:
+      return NULL;
+    }
+}
+
+static const char *
 get_dynamic_type (unsigned long type)
 {
   static char buff[64];
@@ -1799,6 +1816,9 @@ get_dynamic_type (unsigned long type)
 	      break;
 	    case EM_TI_C6000:
 	      result = get_tic6x_dynamic_type (type);
+	      break;
+	    case EM_ALTERA_NIOS2:
+	      result = get_nios2_dynamic_type (type);
 	      break;
 	    default:
 	      result = NULL;
@@ -10074,6 +10094,7 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_MT:
       return reloc_type == 2; /* R_MT_32.  */
     case EM_ALTERA_NIOS2:
+      return reloc_type == 12; /* R_NIOS2_BFD_RELOC_32.  */
     case EM_NIOS32:
       return reloc_type == 1; /* R_NIOS_32.  */
     case EM_OPENRISC:
@@ -10324,6 +10345,7 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_MSP430_OLD:
       return reloc_type == 5; /* R_MSP430_16_BYTE.  */
     case EM_ALTERA_NIOS2:
+      return reloc_type == 13; /* R_NIOS2_BFD_RELOC_16.  */
     case EM_NIOS32:
       return reloc_type == 9; /* R_NIOS_16.  */
     case EM_TI_C6000:
@@ -10380,6 +10402,8 @@ is_none_reloc (unsigned int reloc_type)
     case EM_TILEPRO: /* R_TILEPRO_NONE.  */
     case EM_XC16X:
     case EM_C166:    /* R_XC16X_NONE.  */
+    case EM_ALTERA_NIOS2: /* R_NIOS2_NONE.  */
+    case EM_NIOS32:  /* R_NIOS_NONE.  */
       return reloc_type == 0;
     case EM_AARCH64:
       return reloc_type == 0 || reloc_type == 256;

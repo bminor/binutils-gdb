@@ -468,6 +468,8 @@ DESCRIPTION
 .#define bfd_mach_tilegx32  2
 .  bfd_arch_aarch64,   {* AArch64  *}
 .#define bfd_mach_aarch64 0
+.  bfd_arch_nios2,
+.#define bfd_mach_nios2	0
 .  bfd_arch_last
 .  };
 */
@@ -560,6 +562,7 @@ extern const bfd_arch_info_type bfd_mn10300_arch;
 extern const bfd_arch_info_type bfd_moxie_arch;
 extern const bfd_arch_info_type bfd_msp430_arch;
 extern const bfd_arch_info_type bfd_mt_arch;
+extern const bfd_arch_info_type bfd_nios2_arch;
 extern const bfd_arch_info_type bfd_ns32k_arch;
 extern const bfd_arch_info_type bfd_openrisc_arch;
 extern const bfd_arch_info_type bfd_or32_arch;
@@ -648,6 +651,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_moxie_arch,
     &bfd_msp430_arch,
     &bfd_mt_arch,
+    &bfd_nios2_arch,
     &bfd_ns32k_arch,
     &bfd_openrisc_arch,
     &bfd_or32_arch,

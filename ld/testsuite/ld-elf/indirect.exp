@@ -37,6 +37,11 @@ if { [which $CC] == 0 } {
     return
 }
 
+# Some bare-metal targets don't support shared libs or PIC.
+if { ![run_host_cmd_yesno $CC "-shared -fPIC $srcdir/$subdir/dummy.c -o tmpdir/t.so"] } {
+    return
+}
+
 proc check_link_message { cmd string testname } {
     send_log "$cmd\n"
     verbose "$cmd"

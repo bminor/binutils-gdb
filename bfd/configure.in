@@ -725,6 +725,7 @@ do
     bfd_elf32_bigmips_vxworks_vec)
 			 	tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_bigmoxie_vec)	tb="$tb elf32-moxie.lo elf32.lo $elf" ;;
+    bfd_elf32_bignios2_vec)	tb="$tb elf32-nios2.lo elf32.lo $elf" ;;
     bfd_elf32_cr16_vec)		tb="$tb elf32-cr16.lo elf32.lo $elf" ;;
     bfd_elf32_cr16c_vec)	tb="$tb elf32-cr16c.lo elf32.lo $elf" ;;
     bfd_elf32_cris_vec)		tb="$tb elf32-cris.lo elf32.lo $elf" ;;
@@ -767,6 +768,7 @@ do
     bfd_elf32_littlemips_vxworks_vec)
 			 	tb="$tb elf32-mips.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo" ;;
     bfd_elf32_littlemoxie_vec)	tb="$tb elf32-moxie.lo elf32.lo $elf" ;;
+    bfd_elf32_littlenios2_vec)	tb="$tb elf32-nios2.lo elf32.lo $elf" ;;
     bfd_elf32_m32c_vec)         tb="$tb elf32-m32c.lo elf32.lo $elf" ;;
     bfd_elf32_m32r_vec)		tb="$tb elf32-m32r.lo elf32.lo $elf" ;;
     bfd_elf32_m32rle_vec)       tb="$tb elf32-m32r.lo elf32.lo $elf" ;;

@@ -433,6 +433,7 @@ TARGET_CPU_CFILES = \
 	config/tc-moxie.c \
 	config/tc-msp430.c \
 	config/tc-mt.c \
+	config/tc-nios2.c \
 	config/tc-ns32k.c \
 	config/tc-openrisc.c \
 	config/tc-or32.c \
@@ -503,6 +504,7 @@ TARGET_CPU_HFILES = \
 	config/tc-mn10300.h \
 	config/tc-msp430.h \
 	config/tc-mt.h \
+	config/tc-nios2.h \
 	config/tc-ns32k.h \
 	config/tc-openrisc.h \
 	config/tc-or32.h \
@@ -855,6 +857,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-moxie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-msp430.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-mt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-nios2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-ns32k.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-openrisc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-or32.Po@am__quote@
@@ -1467,6 +1470,20 @@ tc-mt.obj: config/tc-mt.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-mt.c' object='tc-mt.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-mt.obj `if test -f 'config/tc-mt.c'; then $(CYGPATH_W) 'config/tc-mt.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-mt.c'; fi`
+
+tc-nios2.o: config/tc-nios2.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-nios2.o -MD -MP -MF $(DEPDIR)/tc-nios2.Tpo -c -o tc-nios2.o `test -f 'config/tc-nios2.c' || echo '$(srcdir)/'`config/tc-nios2.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-nios2.Tpo $(DEPDIR)/tc-nios2.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-nios2.c' object='tc-nios2.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-nios2.o `test -f 'config/tc-nios2.c' || echo '$(srcdir)/'`config/tc-nios2.c
+
+tc-nios2.obj: config/tc-nios2.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-nios2.obj -MD -MP -MF $(DEPDIR)/tc-nios2.Tpo -c -o tc-nios2.obj `if test -f 'config/tc-nios2.c'; then $(CYGPATH_W) 'config/tc-nios2.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-nios2.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-nios2.Tpo $(DEPDIR)/tc-nios2.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-nios2.c' object='tc-nios2.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-nios2.obj `if test -f 'config/tc-nios2.c'; then $(CYGPATH_W) 'config/tc-nios2.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-nios2.c'; fi`
 
 tc-ns32k.o: config/tc-ns32k.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-ns32k.o -MD -MP -MF $(DEPDIR)/tc-ns32k.Tpo -c -o tc-ns32k.o `test -f 'config/tc-ns32k.c' || echo '$(srcdir)/'`config/tc-ns32k.c

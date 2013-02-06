@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Altera Nios II.
+
 Changes in 2.23:
 
 * Add support for the VLE extension to the PowerPC architecture.

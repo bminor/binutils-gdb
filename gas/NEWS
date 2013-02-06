@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Altera Nios II.
+
 * Add support for the Imagination Technologies Meta processor.
 
 * Add support for the v850e3v5.

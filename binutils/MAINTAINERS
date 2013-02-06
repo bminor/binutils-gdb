@@ -107,6 +107,8 @@ responsibility among the other maintainers.
   Moxie		   Anthony Green <green@moxielogic.com>
   MSP430	   Dmitry Diky <diwil@spec.ru>
   NetBSD support   Matt Thomas <matt@netbsd.org>
+  Nios II	   Sandra Loosemore <sandra@codesourcery.com>
+  Nios II	   Andrew Jenner <andrew@codesourcery.com>
   PPC		   Geoff Keating <geoffk@geoffk.org>
   PPC		   Alan Modra <amodra@gmail.com>
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>

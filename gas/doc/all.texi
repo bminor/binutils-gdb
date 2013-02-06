@@ -58,6 +58,7 @@
 @set MMIX
 @set MS1
 @set MSP430
+@set NIOSII
 @set NS32K
 @set PDP11
 @set PJ

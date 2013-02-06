@@ -1,3 +1,49 @@
+2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
+            Andrew Jenner <andrew@codesourcery.com>
+
+	Based on patches from Altera Corporation.
+
+	* ld-nios2/emit-relocs-1a.s: New.
+	* ld-nios2/emit-relocs-1b.s: New.
+	* ld-nios2/emit-relocs-1.d: New.
+	* ld-nios2/emit-relocs-1.ld: New.
+	* ld-nios2/gprel.d: New.
+	* ld-nios2/gprel.s: New.
+	* ld-nios2/hilo16.d: New.
+	* ld-nios2/hilo16.s: New.
+	* ld-nios2/hilo16_symbol.s: New.
+	* ld-nios2/imm5.d: New.
+	* ld-nios2/imm5.s: New.
+	* ld-nios2/imm5_symbol.s: New.
+	* ld-nios2/nios2.exp: New.
+	* ld-nios2/pcrel16.d: New.
+	* ld-nios2/pcrel16_label.s: New.
+	* ld-nios2/pcrel16.s: New.
+	* ld-nios2/relax_callr.d: New.
+	* ld-nios2/relax_callr.ld: New.
+	* ld-nios2/relax_callr.s: New.
+	* ld-nios2/relax_cjmp.d: New.
+	* ld-nios2/relax_cjmp.s: New.
+	* ld-nios2/relax_jmp.ld: New.
+	* ld-nios2/relax_section.d: New.
+	* ld-nios2/relax_section.s: New.
+	* ld-nios2/relax_ujmp.d: New.
+	* ld-nios2/relax_ujmp.s: New.
+	* ld-nios2/reloc.d: New.
+	* ld-nios2/reloc.s: New.
+	* ld-nios2/reloc_symbol.s: New.
+	* ld-nios2/s16.d: New.
+	* ld-nios2/s16.s: New.
+	* ld-nios2/s16_symbol.s: New.
+	* ld-nios2/u16.d: New.
+	* ld-nios2/u16.s: New.
+	* ld-nios2/u16_symbol.s: New.
+	* ld-elf/indirect.exp: Skip on targets that don't support
+	-shared -fPIC.
+	* ld-elfcomm/elfcomm.exp: Build with -G0 for nios2.
+	* ld-plugin/lto.exp: Skip shared library tests on targets that
+	don't support them.  Skip execution tests on non-native targets.
+
 2013-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/now-1.d: New file.

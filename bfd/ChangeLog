@@ -1,3 +1,32 @@
+2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
+            Andrew Jenner <andrew@codesourcery.com>
+
+	Based on patches from Altera Corporation.
+
+	* Makefile.am (ALL_MACHINES): Add cpu-nios2.lo.
+	(ALL_MACHINES_CFILES): Add cpu-nios2.c.
+	(BFD_BACKENDS): Add elf32-nios2.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-nios2.c.
+	* Makefile.in: Regenerated.
+	* configure.in: Add entries for bfd_elf32_bignios2_vec and
+	bfd_elf32_littlenios2_vec.
+	* configure: Regenerated.
+	* config.bfd: Add cases for nios2.
+	* archures.c (enum bfd_architecture): Add bfd_arch_nios2.
+	(bfd_mach_nios2): Define.
+	(bfd_nios2_arch): Declare.
+	(bfd_archures_list): Add bfd_nios2_arch.
+	* targets.c (bfd_elf32_bignios2_vec): Declare.
+	(bfd_elf32_littlenios2_vec): Declare.
+	(_bfd_target_vector): Add entries for bfd_elf32_bignios2_vec and
+	bfd_elf32_littlenios2_vec.
+	* elf-bfd.h (enum elf_target_id): Add NIOS2_ELF_DATA.
+	* reloc.c (enum bfd_reloc_code_real): Add Nios II relocations.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Regenerated.
+	* cpu-nios2.c: New file.
+	* elf32-nios2.c: New file.
+
 2013-02-06  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Only test for

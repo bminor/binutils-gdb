@@ -1,3 +1,18 @@
+2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
+            Andrew Jenner <andrew@codesourcery.com>
+
+	Based on patches from Altera Corporation.
+
+	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add nios2-dis.c and
+	nios2-opc.c.
+	* Makefile.in: Regenerated.
+	* configure.in: Add case for bfd_nios2_arch.
+	* configure: Regenerated.
+	* disassemble.c (ARCH_nios2): Define.
+	(disassembler): Add case for bfd_arch_nios2.
+	* nios2-dis.c: New file.
+	* nios2-opc.c: New file.
+
 2013-02-04  Alan Modra  <amodra@gmail.com>
 
 	* po/POTFILES.in: Regenerate.

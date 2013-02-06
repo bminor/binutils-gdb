@@ -350,6 +350,8 @@ case ${generic_target} in
 
   msp430-*-*)				fmt=elf ;;
 
+  nios2*-linux*)                        fmt=elf em=linux ;;
+
   ns32k-pc532-mach*)			fmt=aout em=pc532mach ;;
   ns32k-pc532-ux*)			fmt=aout em=pc532mach ;;
   ns32k-pc532-lites*)			fmt=aout em=nbsd532 ;;

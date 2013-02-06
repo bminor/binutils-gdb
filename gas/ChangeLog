@@ -1,3 +1,23 @@
+2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
+            Andrew Jenner <andrew@codesourcery.com>
+
+	Based on patches from Altera Corporation.
+
+	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-nios2.c.
+	(TARGET_CPU_HFILES): Add config/tc-nios2.h.
+	* Makefile.in: Regenerated.
+	* configure.tgt: Add case for nios2*-linux*.
+	* config/obj-elf.c: Conditionally include elf/nios2.h.
+	* config/tc-nios2.c: New file.
+	* config/tc-nios2.h: New file.
+	* doc/Makefile.am (CPU_DOCS): Add c-nios2.texi.
+	* doc/Makefile.in: Regenerated.
+	* doc/all.texi: Set NIOSII.
+	* doc/as.texinfo (Overview): Add Nios II options.
+	(Machine Dependencies): Include c-nios2.texi.
+	* doc/c-nios2.texi: New file.
+	* NEWS: Note Altera Nios II support.
+
 2013-02-06  Alan Modra  <amodra@gmail.com>
 
 	PR gas/14255
