@@ -1,3 +1,13 @@
+2013-02-06  David S. Miller  <davem@davemloft.net>
+
+	* sparc-tdep.c (sparc32_return_value): Handle writing return value when
+	using RETURN_VALUE_ABI_PRESERVES_ADDRESS.
+	* value.c (struct_return_convention): New function.
+	(using_struct_return): Implement in terms of struct_return_convention.
+	* value.h (struct_return_convention): Declare.
+	* stack.c (return_command): Allow successful overriding of the return
+	value when RETURN_VALUE_ABI_PRESERVES_ADDRESS.
+
 2013-02-06  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-type.c (typy_strip_typedefs): Don't call check_typedef

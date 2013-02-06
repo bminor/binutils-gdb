@@ -1370,14 +1370,20 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
   if (sparc_structure_or_union_p (type)
       || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
     {
+      ULONGEST sp;
+      CORE_ADDR addr;
+
       if (readbuf)
 	{
-	  ULONGEST sp;
-	  CORE_ADDR addr;
-
 	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
 	  addr = read_memory_unsigned_integer (sp + 64, 4, byte_order);
 	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+      if (writebuf)
+	{
+	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
+	  addr = read_memory_unsigned_integer (sp + 64, 4, byte_order);
+	  write_memory (addr, writebuf, TYPE_LENGTH (type));
 	}
 
       return RETURN_VALUE_ABI_PRESERVES_ADDRESS;

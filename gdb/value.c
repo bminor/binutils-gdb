@@ -3323,6 +3323,23 @@ coerce_array (struct value *arg)
 }
 
 
+/* Return the return value convention that will be used for the
+   specified type.  */
+
+enum return_value_convention
+struct_return_convention (struct gdbarch *gdbarch,
+			  struct value *function, struct type *value_type)
+{
+  enum type_code code = TYPE_CODE (value_type);
+
+  if (code == TYPE_CODE_ERROR)
+    error (_("Function return type unknown."));
+
+  /* Probe the architecture for the return-value convention.  */
+  return gdbarch_return_value (gdbarch, function, value_type,
+			       NULL, NULL, NULL);
+}
+
 /* Return true if the function returning the specified type is using
    the convention of returning structures in memory (passing in the
    address as a hidden first parameter).  */
@@ -3331,19 +3348,12 @@ int
 using_struct_return (struct gdbarch *gdbarch,
 		     struct value *function, struct type *value_type)
 {
-  enum type_code code = TYPE_CODE (value_type);
-
-  if (code == TYPE_CODE_ERROR)
-    error (_("Function return type unknown."));
-
-  if (code == TYPE_CODE_VOID)
+  if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
     /* A void return value is never in memory.  See also corresponding
        code in "print_return_value".  */
     return 0;
 
-  /* Probe the architecture for the return-value convention.  */
-  return (gdbarch_return_value (gdbarch, function, value_type,
-				NULL, NULL, NULL)
+  return (struct_return_convention (gdbarch, function, value_type)
 	  != RETURN_VALUE_REGISTER_CONVENTION);
 }
 
