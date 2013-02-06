@@ -1,3 +1,11 @@
+2013-02-06  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Async Records): Document new MI
+	notification "=tsv-modified".  Update the document of MI
+	notification "=tsv-created".
+	* observer.texi (GDB Observers): New observer tsv_modified.
+	Update observer tsv_created and tsv_delete.
+
 2013-02-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gdb.texinfo (AArch64 Features): New section; document

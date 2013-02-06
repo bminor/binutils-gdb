@@ -1,3 +1,10 @@
+2013-02-06  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/mi-tsv-changed.exp (test_create_delete_tsv): Rename
+	to ...
+	(test_create_delete_modify_tsv): ... here.  New test on modifying
+	the initial value of a tsv.
+
 2013-02-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-dir-file-name.exp (cd ${srcabsdir}/rdir): Rename to ...

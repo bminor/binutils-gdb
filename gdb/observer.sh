@@ -64,6 +64,7 @@ struct so_list;
 struct objfile;
 struct thread_info;
 struct inferior;
+struct trace_state_variable;
 EOF
         ;;
 esac

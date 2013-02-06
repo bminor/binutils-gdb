@@ -130,8 +130,9 @@ show filename-display
      "=cmd-param-changed".
   ** Trace frame changes caused by command "tfind" are now notified using
      new async record "=traceframe-changed".
-  ** The creation and deletion of trace state variables are now notified
-     using new async records "=tsv-created" and "=tsv-deleted".
+  ** The creation, deletion and modification of trace state variables
+     are now notified using new async records "=tsv-created",
+     "=tsv-deleted" and "=tsv-modified".
   ** The start and stop of process record are now notified using new
      async record "=record-started" and "=record-stopped".
   ** Memory changes are now notified using new async record

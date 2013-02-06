@@ -351,10 +351,10 @@ delete_trace_state_variable (const char *name)
   for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
     if (strcmp (name, tsv->name) == 0)
       {
+	observer_notify_tsv_deleted (tsv);
+
 	xfree ((void *)tsv->name);
 	VEC_unordered_remove (tsv_s, tvariables, ix);
-
-	observer_notify_tsv_deleted (name);
 
 	return;
       }
@@ -408,7 +408,11 @@ trace_variable_command (char *args, int from_tty)
   tsv = find_trace_state_variable (internalvar_name (intvar));
   if (tsv)
     {
-      tsv->initial_value = initval;
+      if (tsv->initial_value != initval)
+	{
+	  tsv->initial_value = initval;
+	  observer_notify_tsv_modified (tsv);
+	}
       printf_filtered (_("Trace state variable $%s "
 			 "now has initial value %s.\n"),
 		       tsv->name, plongest (tsv->initial_value));
@@ -420,7 +424,7 @@ trace_variable_command (char *args, int from_tty)
   tsv = create_trace_state_variable (internalvar_name (intvar));
   tsv->initial_value = initval;
 
-  observer_notify_tsv_created (tsv->name, initval);
+  observer_notify_tsv_created (tsv);
 
   printf_filtered (_("Trace state variable $%s "
 		     "created, with initial value %s.\n"),
@@ -3587,7 +3591,7 @@ create_tsv_from_upload (struct uploaded_tsv *utsv)
   tsv->initial_value = utsv->initial_value;
   tsv->builtin = utsv->builtin;
 
-  observer_notify_tsv_created (tsv->name, tsv->initial_value);
+  observer_notify_tsv_created (tsv);
 
   do_cleanups (old_chain);
 

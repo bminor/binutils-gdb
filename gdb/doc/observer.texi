@@ -236,14 +236,17 @@ method is called after a command @code{set @var{param} @var{value}}.
 is the value of changed parameter.
 @end deftypefun
 
-@deftypefun void tsv_created (const char *@var{name}, LONGEST @var{value})
-The new trace state variable @var{name} is created with value
-@var{value}.
+@deftypefun void tsv_created (const struct trace_state_variable *@var{tsv})
+The new trace state variable @var{tsv} is created.
 @end deftypefun
 
-@deftypefun void tsv_deleted (const char *@var{name})
-The trace state variable @var{name} is deleted.  If @var{name} is
+@deftypefun void tsv_deleted (const struct trace_state_variable *@var{tsv})
+The trace state variable @var{tsv} is deleted.  If @var{tsv} is
 @code{NULL}, all trace state variables are deleted.
+@end deftypefun
+
+@deftypefun void tsv_modified (const struct trace_state_variable *@var{tsv})
+The trace state value @var{tsv} is modified.
 @end deftypefun
 
 @deftypefun void test_notification (int @var{somearg})

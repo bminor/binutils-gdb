@@ -1,3 +1,22 @@
+2013-02-06  Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-interp.c: Include "tracepoint.h".
+	(mi_tsv_modified): Declare.
+	(mi_tsv_created, mi_tsv_deleted): Update declaration.
+	(mi_interpreter_init): Call observer_attach_tsv_modified.
+	(mi_tsv_modified): New.
+	(mi_tsv_created, mi_tsv_deleted): Update.
+	* tracepoint.c (trace_variable_command): Call
+	observer_notify_tsv_modified if the initial value of tsv is
+	changed.
+	(delete_trace_state_variable): Call
+	observer_notify_tsv_deleted earlier.
+	(trace_variable_command): Caller update.
+	(create_tsv_from_upload): Likewise.
+	* observer.sh: Declare "struct trace_state_variable".
+
+	* NEWS: Mention the new MI notification "=tsv-modified".
+
 2013-02-05  Doug Evans  <dje@google.com>
 
 	* completer.c (location_completer): Fix typo in comment.

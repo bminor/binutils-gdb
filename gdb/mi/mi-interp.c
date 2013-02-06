@@ -36,6 +36,7 @@
 #include "solist.h"
 #include "gdb.h"
 #include "objfiles.h"
+#include "tracepoint.h"
 
 /* These are the interpreter setup, etc. functions for the MI
    interpreter.  */
@@ -71,8 +72,9 @@ static void mi_solib_loaded (struct so_list *solib);
 static void mi_solib_unloaded (struct so_list *solib);
 static void mi_about_to_proceed (void);
 static void mi_traceframe_changed (int tfnum, int tpnum);
-static void mi_tsv_created (const char *name, LONGEST value);
-static void mi_tsv_deleted (const char *name);
+static void mi_tsv_created (const struct trace_state_variable *tsv);
+static void mi_tsv_deleted (const struct trace_state_variable *tsv);
+static void mi_tsv_modified (const struct trace_state_variable *tsv);
 static void mi_breakpoint_created (struct breakpoint *b);
 static void mi_breakpoint_deleted (struct breakpoint *b);
 static void mi_breakpoint_modified (struct breakpoint *b);
@@ -137,6 +139,7 @@ mi_interpreter_init (struct interp *interp, int top_level)
       observer_attach_traceframe_changed (mi_traceframe_changed);
       observer_attach_tsv_created (mi_tsv_created);
       observer_attach_tsv_deleted (mi_tsv_deleted);
+      observer_attach_tsv_modified (mi_tsv_modified);
       observer_attach_breakpoint_created (mi_breakpoint_created);
       observer_attach_breakpoint_deleted (mi_breakpoint_deleted);
       observer_attach_breakpoint_modified (mi_breakpoint_modified);
@@ -563,15 +566,15 @@ mi_traceframe_changed (int tfnum, int tpnum)
 /* Emit notification on creating a trace state variable.  */
 
 static void
-mi_tsv_created (const char *name, LONGEST value)
+mi_tsv_created (const struct trace_state_variable *tsv)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
 
   target_terminal_ours ();
 
   fprintf_unfiltered (mi->event_channel, "tsv-created,"
-		      "name=\"%s\",value=\"%s\"\n",
-		      name, plongest (value));
+		      "name=\"%s\",initial=\"%s\"\n",
+		      tsv->name, plongest (tsv->initial_value));
 
   gdb_flush (mi->event_channel);
 }
@@ -579,17 +582,43 @@ mi_tsv_created (const char *name, LONGEST value)
 /* Emit notification on deleting a trace state variable.  */
 
 static void
-mi_tsv_deleted (const char *name)
+mi_tsv_deleted (const struct trace_state_variable *tsv)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
 
   target_terminal_ours ();
 
-  if (name != NULL)
+  if (tsv != NULL)
     fprintf_unfiltered (mi->event_channel, "tsv-deleted,"
-			"name=\"%s\"\n", name);
+			"name=\"%s\"\n", tsv->name);
   else
     fprintf_unfiltered (mi->event_channel, "tsv-deleted\n");
+
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification on modifying a trace state variable.  */
+
+static void
+mi_tsv_modified (const struct trace_state_variable *tsv)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+  struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
+
+  target_terminal_ours ();
+
+  fprintf_unfiltered (mi->event_channel,
+		      "tsv-modified");
+
+  ui_out_redirect (mi_uiout, mi->event_channel);
+
+  ui_out_field_string (mi_uiout, "name", tsv->name);
+  ui_out_field_string (mi_uiout, "initial",
+		       plongest (tsv->initial_value));
+  if (tsv->value_known)
+    ui_out_field_string (mi_uiout, "current", plongest (tsv->value));
+
+  ui_out_redirect (mi_uiout, NULL);
 
   gdb_flush (mi->event_channel);
 }
