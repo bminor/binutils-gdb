@@ -347,6 +347,10 @@ _bfd_elf_copy_obj_attributes (bfd *ibfd, bfd *obfd)
   int i;
   int vendor;
 
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return;
+
   for (vendor = OBJ_ATTR_FIRST; vendor <= OBJ_ATTR_LAST; vendor++)
     {
       in_attr

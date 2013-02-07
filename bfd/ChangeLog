@@ -1,3 +1,9 @@
+2013-02-07  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/14873
+	* elf-attrs.c (_bfd_elf_copy_obj_attributes): Don't attempt to
+	copy attributes from or to non-ELF.
+
 2013-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): Don't clear pc_count
