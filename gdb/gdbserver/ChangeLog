@@ -1,5 +1,11 @@
 2013-02-07  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* linux-aarch64-low.c (aarch64_arch_setup): Clamp
+	aarch64_num_wp_regs and aarch64_num_bp_regs to
+	AARCH64_HWP_MAX_NUM and AARCH64_HBP_MAX_NUM respectively.
+
+2013-02-07  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* linux-aarch64-low.c (ps_get_thread_area): Replace
 	PTRACE_GET_THREAD_AREA with PTRACE_GETREGSET.
 

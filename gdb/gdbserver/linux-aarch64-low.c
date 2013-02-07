@@ -1202,10 +1202,13 @@ aarch64_arch_setup (void)
       && AARCH64_DEBUG_ARCH (dreg_state.dbg_info) == AARCH64_DEBUG_ARCH_V8)
     {
       aarch64_num_wp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
-      if (aarch64_num_wp_regs > AARCH64_HBP_MAX_NUM)
-	warning ("Unexpected number of hardware watchpoint registers reported"
-		 " by ptrace, got %d, expected %d.",
-		 aarch64_num_wp_regs, AARCH64_HBP_MAX_NUM);
+      if (aarch64_num_wp_regs > AARCH64_HWP_MAX_NUM)
+	{
+	  warning ("Unexpected number of hardware watchpoint registers reported"
+		   " by ptrace, got %d, expected %d.",
+		   aarch64_num_wp_regs, AARCH64_HWP_MAX_NUM);
+	  aarch64_num_wp_regs = AARCH64_HWP_MAX_NUM;
+	}
     }
   else
     {
@@ -1220,9 +1223,12 @@ aarch64_arch_setup (void)
     {
       aarch64_num_bp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
       if (aarch64_num_bp_regs > AARCH64_HBP_MAX_NUM)
-	warning ("Unexpected number of hardware breakpoint registers reported"
-		 " by ptrace, got %d, expected %d.",
-		 aarch64_num_bp_regs, AARCH64_HBP_MAX_NUM);
+	{
+	  warning ("Unexpected number of hardware breakpoint registers reported"
+		   " by ptrace, got %d, expected %d.",
+		   aarch64_num_bp_regs, AARCH64_HBP_MAX_NUM);
+	  aarch64_num_bp_regs = AARCH64_HBP_MAX_NUM;
+	}
     }
   else
     {
