@@ -7485,6 +7485,7 @@ elf_find_function (bfd *abfd,
 		   const char **functionname_ptr)
 {
   static asection *last_section;
+  static asymbol **last_symbols;
   static asymbol *func;
   static const char *filename;
   static bfd_size_type func_size;
@@ -7493,6 +7494,7 @@ elf_find_function (bfd *abfd,
     return FALSE;
 
   if (last_section != section
+      || last_symbols != symbols
       || func == NULL
       || offset < func->value
       || offset >= func->value + func_size)
@@ -7518,6 +7520,7 @@ elf_find_function (bfd *abfd,
       state = nothing_seen;
       func_size = 0;
       last_section = section;
+      last_symbols = symbols;
 
       for (p = symbols; *p != NULL; p++)
 	{
