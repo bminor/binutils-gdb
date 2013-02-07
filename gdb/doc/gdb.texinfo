@@ -7373,6 +7373,11 @@ Dump of assembler code from 0x400281 to 0x40028b:
 End of assembler dump.
 @end smallexample
 
+Addresses cannot be specified as a linespec (@pxref{Specify Location}).
+So, for example, if you want to disassemble function @code{bar}
+in file @file{foo.c}, you must type @samp{disassemble 'foo.c'::bar}
+and not @samp{disassemble foo.c:bar}.
+
 Some architectures have more than one commonly-used set of instruction
 mnemonics or other syntax.
 

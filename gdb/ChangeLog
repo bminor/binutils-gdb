@@ -1,3 +1,8 @@
+2013-02-07  Doug Evans  <dje@google.com>
+
+	* cli/cli-cmds.c (_initialize_cli_cmds): Clarify argument to
+	disassemble command.
+
 2013-02-07  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Call

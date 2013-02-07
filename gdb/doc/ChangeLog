@@ -1,3 +1,8 @@
+2013-02-07  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Machine Code): Clarify argument to disassemble
+	command.
+
 2013-02-06  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Async Records): Document new MI

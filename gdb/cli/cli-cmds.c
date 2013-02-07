@@ -1843,7 +1843,12 @@ With a /m modifier, source lines are included (if available).\n\
 With a /r modifier, raw instructions in hex are included.\n\
 With a single argument, the function surrounding that address is dumped.\n\
 Two arguments (separated by a comma) are taken as a range of memory to dump,\n\
-  in the form of \"start,end\", or \"start,+length\"."));
+  in the form of \"start,end\", or \"start,+length\".\n\
+\n\
+Note that the address is interpreted as an expression, not as a location\n\
+like in the \"break\" command.\n\
+So, for example, if you want to disassemble function bar in file foo.c\n\
+you must type \"disassemble 'foo.c'::bar\" and not \"disassemble foo.c:bar\"."));
   set_cmd_completer (c, location_completer);
   if (xdb_commands)
     add_com_alias ("va", "disassemble", class_xdb, 0);
