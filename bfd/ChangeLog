@@ -1,3 +1,9 @@
+2013-02-07  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/14873
+	* elf-attrs.c (_bfd_elf_copy_obj_attributes): Don't attempt to
+	copy attributes from or to non-ELF.
+
 2013-02-01  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (dec_dynrel_count): Don't error when elf_gc_sweep_symbol
