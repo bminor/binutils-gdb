@@ -586,6 +586,12 @@ get_archive_member_name (struct archive_info *arch,
       char *member_file_name;
       char *member_name;
 
+      if (arch->longnames == NULL || arch->longnames_size == 0)
+	{
+	  error (_("Archive member uses long names, but no longname table found\n"));
+	  return NULL;
+	}
+      
       arch->nested_member_origin = 0;
       k = j = strtoul (arch->arhdr.ar_name + 1, &endp, 10);
       if (arch->is_thin_archive && endp != NULL && * endp == ':')
