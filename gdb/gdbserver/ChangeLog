@@ -1,3 +1,8 @@
+2013-02-07  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* linux-aarch64-low.c (ps_get_thread_area): Replace
+	PTRACE_GET_THREAD_AREA with PTRACE_GETREGSET.
+
 2013-02-04  Jim MacArthur  <jim.macarthur@arm.com>
 	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
 	    Nigel Stephens  <nigel.stephens@arm.com>

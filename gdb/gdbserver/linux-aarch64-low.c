@@ -1089,16 +1089,22 @@ aarch64_stopped_by_watchpoint (void)
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
-ps_get_thread_area (const struct ps_prochandle * ph,
+ps_get_thread_area (const struct ps_prochandle *ph,
 		    lwpid_t lwpid, int idx, void **base)
 {
-  if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
+  struct iovec iovec;
+  uint64_t reg;
+
+  iovec.iov_base = &reg;
+  iovec.iov_len = sizeof (reg);
+
+  if (ptrace (PTRACE_GETREGSET, lwpid, NT_ARM_TLS, &iovec) != 0)
     return PS_ERR;
 
   /* IDX is the bias from the thread pointer to the beginning of the
      thread descriptor.  It has to be subtracted due to implementation
      quirks in libthread_db.  */
-  *base = (void *) ((char *) *base - idx);
+  *base = (void *) (reg - idx);
 
   return PS_OK;
 }
