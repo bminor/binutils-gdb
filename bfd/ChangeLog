@@ -1,5 +1,16 @@
+2013-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Don't clear pc_count
+	for non-zero TLS symbol.
+	(elf_i386_relocate_section): Don't resolve size relocation against
+	non-zero TLS symbol.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Don't clear
+	pc_count for non-zero TLS symbol.
+	(elf_x86_64_relocate_section): Don't resolve size relocation
+	against non-zero TLS symbol.
+
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
-            Andrew Jenner <andrew@codesourcery.com>
+	    Andrew Jenner <andrew@codesourcery.com>
 
 	Based on patches from Altera Corporation.
 

@@ -156,7 +156,7 @@ if { [regexp_diff "tmpdir/dump.out" "$srcdir/$subdir/size-7.out" ] } then {
 # Run-time size relocation tests.
 set run_time_tests {
     {"Run size-8"
-     "tmpdir/libsize-8.so" ""
+     "tmpdir/libsize-8.so --hash-styl=gnu" ""
      {size-8a.c} "size-8" "size-8.out"}
     {"Run size-9"
      "tmpdir/libsize-9.so" ""
