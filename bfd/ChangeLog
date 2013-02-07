@@ -1,3 +1,8 @@
+2013-02-07  Roberto Agostino Vitillo  <ra.vitillo@gmail.com>
+
+	PR binutils/15106
+	* elf.c (elf_find_function): Don't cache if symbols change.
+
 2013-02-07  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/14873
