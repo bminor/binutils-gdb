@@ -1,3 +1,8 @@
+2013-02-08  Yi-Hsiu, Hsu  <ahsu@marvell.com>
+
+	* gas/config/tc-arm.c (arm_cpus): Add support for mcpu=marvell-pj4
+	core.
+
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
             Andrew Jenner <andrew@codesourcery.com>
 
