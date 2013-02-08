@@ -1,3 +1,8 @@
+2013-02-08  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-linux-tdep.c (AARCH64_LINUX_SIZEOF_GREGSET): Change the
+	number of the registers from 36 to 34.
+
 2013-02-08  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* NEWS: Mention new AArch64 native and target support.
