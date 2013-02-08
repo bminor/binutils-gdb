@@ -1,3 +1,8 @@
+2013-02-08  Markos Chandras  <markos.chandras@imgtec.com>
+
+	* emultempl/metagelf.em (build_section_lists): Use sec_info_type
+	rather than userdata->flags.just_syms.
+
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
             Andrew Jenner <andrew@codesourcery.com>
 
