@@ -1,3 +1,7 @@
+2013-02-08  Doug Evans  <dje@google.com>
+
+	* common/format.c (parse_format_string): Fix whitespace.
+
 2013-02-08  Matthew Gretton-Dann  <matthew.gretton-dann@linaro.org>
 
 	* stack.c (return_command): Work around uninitialized variable
