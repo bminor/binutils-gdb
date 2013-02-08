@@ -2,6 +2,8 @@
 
 	* elf32-metag.c: Use bfd_get_linker_section to get SEC_LINKER_CREATED
 	sections.
+	(elf_metag_adjust_dynamic_symbol): Don't error on zero size dynbss
+	symbol.
 
 2013-02-08  Yufeng Zhang  <yufeng.zhang@arm.com>
 
