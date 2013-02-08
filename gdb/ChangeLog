@@ -1,5 +1,9 @@
 2013-02-08  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* NEWS: Mention new AArch64 native and target support.
+
+2013-02-08  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* MAINTAINERS (Write After Approval): Add myself.
 
 2013-02-08  Jim MacArthur  <jim.macarthur@arm.com>

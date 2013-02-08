@@ -5,10 +5,13 @@
 
 * New native configurations
 
+ARM AArch64 GNU/Linux		aarch64*-*-linux-gnu
 FreeBSD/powerpc			powerpc*-*-freebsd
 
 * New targets
 
+ARM AArch64			aarch64*-*-elf
+ARM AArch64 GNU/Linux		aarch64*-*-linux
 Lynx 178 PowerPC		powerpc-*-lynx*178
 
 * If the configured location of system.gdbinit file (as given by the
