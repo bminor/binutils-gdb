@@ -2278,7 +2278,8 @@ down_command (char *count_exp, int from_tty)
 void
 return_command (char *retval_exp, int from_tty)
 {
-  enum return_value_convention rv_conv;
+  /* Initialize it just to avoid a GCC false warning.  */
+  enum return_value_convention rv_conv = RETURN_VALUE_STRUCT_CONVENTION;
   struct frame_info *thisframe;
   struct gdbarch *gdbarch;
   struct symbol *thisfun;

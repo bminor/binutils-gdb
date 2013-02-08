@@ -1,3 +1,8 @@
+2013-02-08  Matthew Gretton-Dann  <matthew.gretton-dann@linaro.org>
+
+	* stack.c (return_command): Work around uninitialized variable
+	warning.
+
 2013-02-08  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-linux-tdep.c (AARCH64_LINUX_SIZEOF_GREGSET): Change the
