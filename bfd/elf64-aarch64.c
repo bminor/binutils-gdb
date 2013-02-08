@@ -1540,7 +1540,7 @@ elf64_aarch64_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 
 	/* pr_reg */
 	offset = 112;
-	size = 288;
+	size = 272;
 
 	break;
     }

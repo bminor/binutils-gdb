@@ -1,3 +1,8 @@
+2013-02-08  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* elf64-aarch64.c (elf64_aarch64_grok_prstatus): Change 'size' from
+	288 to 272.
+
 2013-02-08  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/15106
