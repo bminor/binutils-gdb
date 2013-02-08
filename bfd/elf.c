@@ -7504,20 +7504,29 @@ elf_find_function (bfd *abfd,
 		   const char **filename_ptr,
 		   const char **functionname_ptr)
 {
-  static asection *last_section;
-  static asymbol **last_symbols;
-  static asymbol *func;
-  static const char *filename;
-  static bfd_size_type func_size;
+  struct elf_find_function_cache
+  {
+    asection *last_section;
+    asymbol *func;
+    const char *filename;
+    bfd_size_type func_size;
+  } *cache;
 
   if (symbols == NULL)
     return FALSE;
 
-  if (last_section != section
-      || last_symbols != symbols
-      || func == NULL
-      || offset < func->value
-      || offset >= func->value + func_size)
+  cache = elf_tdata (abfd)->elf_find_function_cache;
+  if (cache == NULL)
+    {
+      cache = bfd_zalloc (abfd, sizeof (*cache));
+      elf_tdata (abfd)->elf_find_function_cache = cache;
+      if (cache == NULL)
+	return FALSE;
+    }
+  if (cache->last_section != section
+      || cache->func == NULL
+      || offset < cache->func->value
+      || offset >= cache->func->value + cache->func_size)
     {
       asymbol *file;
       bfd_vma low_func;
@@ -7533,14 +7542,13 @@ elf_find_function (bfd *abfd,
       enum { nothing_seen, symbol_seen, file_after_symbol_seen } state;
       const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
-      filename = NULL;
-      func = NULL;
       file = NULL;
       low_func = 0;
       state = nothing_seen;
-      func_size = 0;
-      last_section = section;
-      last_symbols = symbols;
+      cache->filename = NULL;
+      cache->func = NULL;
+      cache->func_size = 0;
+      cache->last_section = section;
 
       for (p = symbols; *p != NULL; p++)
 	{
@@ -7561,29 +7569,29 @@ elf_find_function (bfd *abfd,
 	      && code_off <= offset
 	      && (code_off > low_func
 		  || (code_off == low_func
-		      && size > func_size)))
+		      && size > cache->func_size)))
 	    {
-	      func = sym;
-	      func_size = size;
+	      cache->func = sym;
+	      cache->func_size = size;
+	      cache->filename = NULL;
 	      low_func = code_off;
-	      filename = NULL;
 	      if (file != NULL
 		  && ((sym->flags & BSF_LOCAL) != 0
 		      || state != file_after_symbol_seen))
-		filename = bfd_asymbol_name (file);
+		cache->filename = bfd_asymbol_name (file);
 	    }
 	  if (state == nothing_seen)
 	    state = symbol_seen;
 	}
     }
 
-  if (func == NULL)
+  if (cache->func == NULL)
     return FALSE;
 
   if (filename_ptr)
-    *filename_ptr = filename;
+    *filename_ptr = cache->filename;
   if (functionname_ptr)
-    *functionname_ptr = bfd_asymbol_name (func);
+    *functionname_ptr = bfd_asymbol_name (cache->func);
 
   return TRUE;
 }

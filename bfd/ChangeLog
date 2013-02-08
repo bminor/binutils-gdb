@@ -1,3 +1,10 @@
+2013-02-08  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/15106
+	* elf-bfd.h (struct elf_obj_tdata): Add elf_find_function_cache.
+	* elf.c (elf_find_function): Revert last change.  Use new
+	tdata field rather than static vars for cache.
+
 2013-02-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15107
