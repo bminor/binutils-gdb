@@ -1,3 +1,8 @@
+2013-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15107
+	* ld-unique/unique_empty.s: Add reference to "b".
+
 2013-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-size/size-10.rd: Updated.

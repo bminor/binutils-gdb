@@ -1,3 +1,9 @@
+2013-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15107
+	* elflink.c (elf_link_output_extsym): Set STB_GNU_UNIQUE only if
+	symbol is defined in regular object.
+
 2013-02-07  Roberto Agostino Vitillo  <ra.vitillo@gmail.com>
 
 	PR binutils/15106
