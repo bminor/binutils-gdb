@@ -23903,7 +23903,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("ep9312",	ARM_FEATURE (ARM_AEXT_V4T, ARM_CEXT_MAVERICK),
 						 FPU_ARCH_MAVERICK, "ARM920T"),
   /* Marvell processors.  */
-  ARM_CPU_OPT ("marvell-pj4",   ARM_FEATURE (ARM_AEXT_V7A|ARM_EXT_MP|ARM_EXT_SEC),
+  ARM_CPU_OPT ("marvell-pj4",   ARM_FEATURE (ARM_AEXT_V7A | ARM_EXT_MP | ARM_EXT_SEC, 0),
 	       					FPU_ARCH_VFP_V3D16, NULL),
 
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE, NULL }
