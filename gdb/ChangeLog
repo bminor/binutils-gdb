@@ -1,3 +1,13 @@
+2013-02-08  Jim MacArthur  <jim.macarthur@arm.com>
+	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
+	    Nigel Stephens  <nigel.stephens@arm.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-linux-nat.c: New file.
+	* config/aarch64/linux.mh: New file.
+	* configure.host: Add AArch64.
+	* Makefile.in (ALLDEPFILES): Add aarch64-linux-nat.c.
+
 2013-02-07  Doug Evans  <dje@google.com>
 
 	* cli/cli-cmds.c (_initialize_cli_cmds): Clarify argument to

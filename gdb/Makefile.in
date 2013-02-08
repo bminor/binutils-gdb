@@ -1422,6 +1422,7 @@ MAKEOVERRIDES=
 
 ALLDEPFILES = \
 	aarch64-tdep.c aarch64-linux-tdep.c aarch64-newlib-tdep.c \
+	aarch64-linux-nat.c \
 	aix-thread.c \
 	alpha-nat.c alphabsd-nat.c alpha-linux-nat.c \
 	alpha-tdep.c alpha-mdebug-tdep.c \

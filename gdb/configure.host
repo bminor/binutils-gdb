@@ -39,6 +39,7 @@ esac
 
 case "${host_cpu}" in
 
+aarch64*)		gdb_host_cpu=aarch64 ;;
 alpha*)			gdb_host_cpu=alpha ;;
 arm*)			gdb_host_cpu=arm ;;
 hppa*)			gdb_host_cpu=pa ;;
@@ -63,6 +64,8 @@ esac
 case "${host}" in
 
 *-*-darwin*)		gdb_host=darwin ;;
+
+aarch64*-*-linux*)	gdb_host=linux ;;
 
 alpha*-*-osf[3456789]*)	gdb_host=alpha-osf3 ;;
 alpha*-*-linux*)	gdb_host=alpha-linux ;;
