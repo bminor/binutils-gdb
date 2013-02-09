@@ -1,3 +1,9 @@
+2013-02-09  Jürgen Urban  <JuergenUrban@gmx.de>
+
+	* mips-opc.c (mips_builtin_opcodes): Enable l.d and s.d macros for
+	single-float.  Disable ll, lld, sc and scd for EE.  Disable the
+	trunc.w.s macro for EE.
+
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
             Andrew Jenner <andrew@codesourcery.com>
 

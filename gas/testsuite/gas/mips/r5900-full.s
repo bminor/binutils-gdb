@@ -417,5 +417,19 @@ stuff:
 	maddu $31, $0
 	sync
 
+	# Enable sc/ll instructions by changing ISA level:
+	.set push
+	.set mips2
+	ll $5, 0($6)
+	sc $5, 0($6)
+	.set pop
+
+	# Enable scd/lld instructions by changing ISA level:
+	.set push
+	.set mips3
+	lld $5, 0($6)
+	scd $5, 0($6)
+	.set pop
+
 	.space	8
 	.end stuff

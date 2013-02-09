@@ -1,3 +1,17 @@
+2013-02-09  Jürgen Urban  <JuergenUrban@gmx.de>
+
+	* gas/mips/24k-triple-stores-2.d, gas/mips/24k-triple-stores-2.s,
+	gas/mips/micromips@24k-triple-stores-2.d: Move "sc" tests to...
+	* gas/mips/24k-triple-stores-2-llsc.d,
+	gas/mips/24k-triple-stores-2-llsc.s,
+	gas/mips/micromips@24k-triple-stores-2-llsc.d: ...these new tests.
+	* gas/mips/r5900-full.d, gas/mips/r5900-full.s: Verify that the
+	MIPS ISA level can be upgraded to support ll, sc, lld and scd.
+	* gas/mips/l_d-single.d, gas/mips/s_d-single.d,
+	gas/mips/r5900-nollsc.l, gas/mips/r5900-nollsc.s: New tests.
+	* gas/mips/mips.exp: Update accordingly.  Add "nollsc" to r5900
+	properties.
+
 2013-02-08  Alan Modra  <amodra@gmail.com>
 
 	* gas/nios2/nios2.exp: Add copyright.

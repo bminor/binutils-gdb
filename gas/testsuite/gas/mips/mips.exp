@@ -91,6 +91,9 @@
 #	singlefloat
 #		The CPU is 64 bit, but only supports 32 bit FPU.
 #
+#	nollsc
+#		The CPU doesn't support ll, sc, lld and scd instructions.
+#
 # as_flags: The assembler flags used when assembling tests for this
 # architecture.
 #
@@ -463,7 +466,7 @@ mips_arch_create octeon2 64	octeonp {} \
 			{ }
 mips_arch_create xlr 	64	mips64	{} \
 			{ -march=xlr -mtune=xlr } { -mmips:xlr }
-mips_arch_create r5900 	64	mips3	{ gpr_ilocks singlefloat } \
+mips_arch_create r5900 	64	mips3	{ gpr_ilocks singlefloat nollsc } \
 			{ -march=r5900 -mtune=r5900 } { -mmips:5900 } \
 			{ mipsr5900el-*-* mips64r5900el-*-* }
 
@@ -566,6 +569,8 @@ if { [istarget mips*-*-vxworks*] } {
 				[mips_arch_list_matching fpisa5 !octeon]
     run_dump_test_arches "24k-triple-stores-2" \
 					[mips_arch_list_matching mips2]
+    run_dump_test_arches "24k-triple-stores-2-llsc" \
+					[mips_arch_list_matching mips2 !nollsc]
     run_dump_test_arches "24k-triple-stores-3" \
 					[mips_arch_list_matching mips2]
     run_dump_test_arches "24k-triple-stores-4" \
@@ -625,9 +630,15 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test_arches "sd-forward" \
 					[mips_arch_list_matching mips1]
 	run_dump_test_arches "l_d"	[mips_arch_list_matching mips1 !singlefloat]
+	if $elf {
+	    run_dump_test_arches "l_d-single"	[mips_arch_list_matching mips1 singlefloat]
+	}
 	run_dump_test_arches "l_d-forward" \
 					[mips_arch_list_matching mips1 !singlefloat]
 	run_dump_test_arches "s_d"	[mips_arch_list_matching mips1 !singlefloat]
+	if $elf {
+	    run_dump_test_arches "s_d-single"	[mips_arch_list_matching mips1 singlefloat]
+	}
 	run_dump_test_arches "s_d-forward" \
 					[mips_arch_list_matching mips1 !singlefloat]
 	run_dump_test_arches "ldc1"	[mips_arch_list_matching mips2 !singlefloat]
@@ -1157,4 +1168,5 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "r5900"
     run_dump_test "r5900-full"
+    if $elf { run_list_test "r5900-nollsc" "-mabi=o64 -march=r5900" }
 }
