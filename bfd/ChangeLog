@@ -1,3 +1,8 @@
+2013-02-10  Alan Modra  <amodra@gmail.com>
+
+	PR ld/15113
+	* elf32-sh.c (sh_elf_link_hash_table_create): Use bfd_zmalloc.
+
 2013-02-08  Markos Chandras  <markos.chandras@imgtec.com>
 
 	* elf32-metag.c: Use bfd_get_linker_section to get SEC_LINKER_CREATED
