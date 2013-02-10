@@ -1717,7 +1717,7 @@ environment variable @code{LD_RUN_PATH}.
 On SunOS, if the @option{-rpath} option was not used, search any
 directories specified using @option{-L} options.
 @item
-For a native linker, the search the contents of the environment
+For a native linker, search the contents of the environment
 variable @code{LD_LIBRARY_PATH}.
 @item
 For a native ELF linker, the directories in @code{DT_RUNPATH} or
