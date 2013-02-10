@@ -2549,7 +2549,7 @@ sh_elf_link_hash_table_create (bfd *abfd)
   struct elf_sh_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_sh_link_hash_table);
 
-  ret = (struct elf_sh_link_hash_table *) bfd_malloc (amt);
+  ret = (struct elf_sh_link_hash_table *) bfd_zmalloc (amt);
   if (ret == (struct elf_sh_link_hash_table *) NULL)
     return NULL;
 
@@ -2562,17 +2562,6 @@ sh_elf_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->sgot = NULL;
-  ret->sgotplt = NULL;
-  ret->srelgot = NULL;
-  ret->splt = NULL;
-  ret->srelplt = NULL;
-  ret->sdynbss = NULL;
-  ret->srelbss = NULL;
-  ret->srelplt2 = NULL;
-  ret->sym_cache.abfd = NULL;
-  ret->tls_ldm_got.refcount = 0;
-  ret->plt_info = NULL;
   ret->vxworks_p = vxworks_object_p (abfd);
   ret->fdpic_p = fdpic_object_p (abfd);
 
