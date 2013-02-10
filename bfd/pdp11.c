@@ -2459,7 +2459,7 @@ NAME (aout, link_hash_table_create) (bfd *abfd)
   struct aout_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct aout_link_hash_table);
 
-  ret = bfd_alloc (abfd, amt);
+  ret = bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
   if (! NAME (aout, link_hash_table_init) (ret, abfd,

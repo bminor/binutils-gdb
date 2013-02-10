@@ -1,5 +1,17 @@
 2013-02-10  Alan Modra  <amodra@gmail.com>
 
+	* i386linux.c (linux_link_hash_table_create): Allocate table
+	with bfd_zmalloc, not bfd_alloc.
+	* pdp11.c (link_hash_table_create): Allocate table with
+	bfd_malloc, not bfd_alloc.
+	* elf32-bfin.c (bfinfdpic_elf_link_hash_table_create): Allocate table
+	with bfd_zmalloc, not bfd_zalloc.
+	(bfin_link_hash_table_create): Likewise.
+	* elf32-frv.c (frvfdpic_elf_link_hash_table_create): Likewise.
+	* elf64-hppa.c (elf64_hppa_hash_table_create): Likewise.
+
+2013-02-10  Alan Modra  <amodra@gmail.com>
+
 	PR ld/15113
 	* elf32-sh.c (sh_elf_link_hash_table_create): Use bfd_zmalloc.
 

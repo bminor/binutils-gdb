@@ -299,7 +299,7 @@ elf64_hppa_hash_table_create (bfd *abfd)
   struct elf64_hppa_link_hash_table *htab;
   bfd_size_type amt = sizeof (*htab);
 
-  htab = bfd_zalloc (abfd, amt);
+  htab = bfd_zmalloc (amt);
   if (htab == NULL)
     return NULL;
 
@@ -308,7 +308,7 @@ elf64_hppa_hash_table_create (bfd *abfd)
 				      sizeof (struct elf64_hppa_link_hash_entry),
 				      HPPA64_ELF_DATA))
     {
-      bfd_release (abfd, htab);
+      free (htab);
       return NULL;
     }
 

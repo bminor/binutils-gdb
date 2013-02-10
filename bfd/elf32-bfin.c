@@ -1821,7 +1821,7 @@ bfinfdpic_elf_link_hash_table_create (bfd *abfd)
   struct bfinfdpic_elf_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct bfinfdpic_elf_link_hash_table);
 
-  ret = bfd_zalloc (abfd, amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -5088,7 +5088,7 @@ bfin_link_hash_table_create (bfd * abfd)
   struct bfin_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct bfin_link_hash_table);
 
-  ret = bfd_zalloc (abfd, amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
