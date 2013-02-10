@@ -672,7 +672,7 @@ elf32_avr_link_hash_table_create (bfd *abfd)
   struct elf32_avr_link_hash_table *htab;
   bfd_size_type amt = sizeof (*htab);
 
-  htab = bfd_malloc (amt);
+  htab = bfd_zmalloc (amt);
   if (htab == NULL)
     return NULL;
 
@@ -689,15 +689,6 @@ elf32_avr_link_hash_table_create (bfd *abfd)
   if (!bfd_hash_table_init (&htab->bstab, stub_hash_newfunc,
                             sizeof (struct elf32_avr_stub_hash_entry)))
     return NULL;
-
-  htab->stub_bfd = NULL;
-  htab->stub_sec = NULL;
-
-  /* Initialize the address mapping table.  */
-  htab->amt_stub_offsets = NULL;
-  htab->amt_destination_addr = NULL;
-  htab->amt_entry_cnt = 0;
-  htab->amt_max_entry_cnt = 0;
 
   return &htab->etab.root;
 }

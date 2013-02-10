@@ -580,7 +580,7 @@ _bfd_xcoff_bfd_link_hash_table_create (bfd *abfd)
   struct xcoff_link_hash_table *ret;
   bfd_size_type amt = sizeof (* ret);
 
-  ret = bfd_malloc (amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
   if (!_bfd_link_hash_table_init (&ret->root, abfd, xcoff_link_hash_newfunc,
@@ -591,20 +591,8 @@ _bfd_xcoff_bfd_link_hash_table_create (bfd *abfd)
     }
 
   ret->debug_strtab = _bfd_xcoff_stringtab_init ();
-  ret->debug_section = NULL;
-  ret->loader_section = NULL;
-  ret->ldrel_count = 0;
-  memset (&ret->ldhdr, 0, sizeof (struct internal_ldhdr));
-  ret->linkage_section = NULL;
-  ret->toc_section = NULL;
-  ret->descriptor_section = NULL;
-  ret->imports = NULL;
-  ret->file_align = 0;
-  ret->textro = FALSE;
-  ret->gc = FALSE;
   ret->archive_info = htab_create (37, xcoff_archive_info_hash,
 				   xcoff_archive_info_eq, NULL);
-  memset (ret->special_sections, 0, sizeof ret->special_sections);
 
   /* The linker will always generate a full a.out header.  We need to
      record that fact now, before the sizeof_headers routine could be

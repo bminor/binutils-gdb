@@ -3958,7 +3958,7 @@ nios2_elf32_link_hash_table_create (bfd *abfd)
   struct elf32_nios2_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf32_nios2_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -3972,11 +3972,6 @@ nios2_elf32_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->sdynbss = NULL;
-  ret->srelbss = NULL;
-  ret->sbss = NULL;
-  ret->tls_ldm_got.refcount = 0;
-  ret->sym_cache.abfd = NULL;
   return &ret->root.root;
 }
 

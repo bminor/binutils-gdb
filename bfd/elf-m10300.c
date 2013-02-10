@@ -4603,7 +4603,7 @@ elf32_mn10300_link_hash_table_create (bfd *abfd)
   struct elf32_mn10300_link_hash_table *ret;
   bfd_size_type amt = sizeof (* ret);
 
-  ret = bfd_malloc (amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -4616,14 +4616,10 @@ elf32_mn10300_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->flags = 0;
-  ret->tls_ldm_got.refcount = 0;
   ret->tls_ldm_got.offset = -1;
-  ret->tls_ldm_got.got_allocated = 0;
-  ret->tls_ldm_got.rel_emitted = 0;
 
   amt = sizeof (struct elf_link_hash_table);
-  ret->static_hash_table = bfd_malloc (amt);
+  ret->static_hash_table = bfd_zmalloc (amt);
   if (ret->static_hash_table == NULL)
     {
       free (ret);

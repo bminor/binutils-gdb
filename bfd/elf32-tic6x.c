@@ -1570,7 +1570,7 @@ elf32_tic6x_link_hash_table_create (bfd *abfd)
   struct elf32_tic6x_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf32_tic6x_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -1583,7 +1583,6 @@ elf32_tic6x_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->sym_cache.abfd = NULL;
   ret->obfd = abfd;
   ret->elf.is_relocatable_executable = 1;
 

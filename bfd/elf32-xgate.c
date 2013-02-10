@@ -448,11 +448,10 @@ xgate_elf_bfd_link_hash_table_create (bfd *abfd)
   struct xgate_elf_link_hash_table *ret;
   bfd_size_type amt = sizeof(struct xgate_elf_link_hash_table);
 
-  ret = (struct xgate_elf_link_hash_table *) bfd_malloc (amt);
+  ret = (struct xgate_elf_link_hash_table *) bfd_zmalloc (amt);
   if (ret == (struct xgate_elf_link_hash_table *) NULL)
     return NULL;
 
-  memset (ret, 0, amt);
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
       _bfd_elf_link_hash_newfunc, sizeof(struct elf_link_hash_entry),
       XGATE_ELF_DATA))
@@ -463,7 +462,7 @@ xgate_elf_bfd_link_hash_table_create (bfd *abfd)
 
   /* Init the stub hash table too.  */
   amt = sizeof(struct bfd_hash_table);
-  ret->stub_hash_table = (struct bfd_hash_table*) bfd_malloc (amt);
+  ret->stub_hash_table = (struct bfd_hash_table*) bfd_zmalloc (amt);
   if (ret->stub_hash_table == NULL)
     {
       free (ret);
@@ -472,12 +471,11 @@ xgate_elf_bfd_link_hash_table_create (bfd *abfd)
 
   if (!bfd_hash_table_init (ret->stub_hash_table, stub_hash_newfunc,
       sizeof(struct elf32_xgate_stub_hash_entry)))
-    return NULL;
-
-  ret->stub_bfd = NULL;
-  ret->stub_section = 0;
-  ret->add_stub_section = NULL;
-  ret->sym_cache.abfd = NULL;
+    {
+      free (ret->stub_hash_table);
+      free (ret);
+      return NULL;
+    }
 
   return &ret->root.root;
 }

@@ -1585,7 +1585,7 @@ m32r_elf_link_hash_table_create (bfd *abfd)
   struct elf_m32r_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_m32r_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -1597,15 +1597,6 @@ m32r_elf_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-
-  ret->sgot = NULL;
-  ret->sgotplt = NULL;
-  ret->srelgot = NULL;
-  ret->splt = NULL;
-  ret->srelplt = NULL;
-  ret->sdynbss = NULL;
-  ret->srelbss = NULL;
-  ret->sym_cache.abfd = NULL;
 
   return &ret->root.root;
 }

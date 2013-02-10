@@ -440,7 +440,7 @@ spu_elf_link_hash_table_create (bfd *abfd)
 {
   struct spu_link_hash_table *htab;
 
-  htab = bfd_malloc (sizeof (*htab));
+  htab = bfd_zmalloc (sizeof (*htab));
   if (htab == NULL)
     return NULL;
 
@@ -452,9 +452,6 @@ spu_elf_link_hash_table_create (bfd *abfd)
       free (htab);
       return NULL;
     }
-
-  memset (&htab->ovtab, 0,
-	  sizeof (*htab) - offsetof (struct spu_link_hash_table, ovtab));
 
   htab->elf.init_got_refcount.refcount = 0;
   htab->elf.init_got_refcount.glist = NULL;

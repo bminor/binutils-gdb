@@ -173,7 +173,7 @@ h8300_coff_link_hash_table_create (bfd *abfd)
   struct h8300_coff_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct h8300_coff_link_hash_table);
 
-  ret = (struct h8300_coff_link_hash_table *) bfd_malloc (amt);
+  ret = (struct h8300_coff_link_hash_table *) bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
   if (!_bfd_link_hash_table_init (&ret->root.root, abfd,
@@ -184,11 +184,6 @@ h8300_coff_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  /* Initialize our data.  */
-  ret->vectors_sec = NULL;
-  ret->funcvec_hash_table = NULL;
-
-  /* OK.  Everything's initialized, return the base pointer.  */
   return &ret->root.root;
 }
 

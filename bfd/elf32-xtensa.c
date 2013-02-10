@@ -655,7 +655,7 @@ elf_xtensa_link_hash_table_create (bfd *abfd)
   struct elf_xtensa_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_xtensa_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -667,16 +667,6 @@ elf_xtensa_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-
-  ret->sgot = NULL;
-  ret->sgotplt = NULL;
-  ret->srelgot = NULL;
-  ret->splt = NULL;
-  ret->srelplt = NULL;
-  ret->sgotloc = NULL;
-  ret->spltlittbl = NULL;
-
-  ret->plt_reloc_count = 0;
 
   /* Create a hash entry for "_TLS_MODULE_BASE_" to speed up checking
      for it later.  */

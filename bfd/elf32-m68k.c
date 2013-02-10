@@ -950,7 +950,7 @@ elf_m68k_link_hash_table_create (bfd *abfd)
   struct elf_m68k_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_m68k_link_hash_table);
 
-  ret = (struct elf_m68k_link_hash_table *) bfd_malloc (amt);
+  ret = (struct elf_m68k_link_hash_table *) bfd_zmalloc (amt);
   if (ret == (struct elf_m68k_link_hash_table *) NULL)
     return NULL;
 
@@ -963,12 +963,6 @@ elf_m68k_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->sym_cache.abfd = NULL;
-  ret->plt_info = NULL;
-  ret->local_gp_p = FALSE;
-  ret->use_neg_got_offsets_p = FALSE;
-  ret->allow_multigot_p = FALSE;
-  ret->multi_got_.bfd2got = NULL;
   ret->multi_got_.global_symndx = 1;
 
   return &ret->root.root;

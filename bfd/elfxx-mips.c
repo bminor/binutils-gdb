@@ -420,11 +420,6 @@ struct mips_elf_link_hash_entry
 struct mips_elf_link_hash_table
 {
   struct elf_link_hash_table root;
-#if 0
-  /* We no longer use this.  */
-  /* String section indices for the dynamic section symbols.  */
-  bfd_size_type dynsym_sec_strindex[SIZEOF_MIPS_DYNSYM_SECNAMES];
-#endif
 
   /* The number of .rtproc entries.  */
   bfd_size_type procedure_count;
@@ -12949,7 +12944,7 @@ _bfd_mips_elf_link_hash_table_create (bfd *abfd)
   struct mips_elf_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct mips_elf_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -12961,36 +12956,6 @@ _bfd_mips_elf_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-
-#if 0
-  /* We no longer use this.  */
-  for (i = 0; i < SIZEOF_MIPS_DYNSYM_SECNAMES; i++)
-    ret->dynsym_sec_strindex[i] = (bfd_size_type) -1;
-#endif
-  ret->procedure_count = 0;
-  ret->compact_rel_size = 0;
-  ret->use_rld_obj_head = FALSE;
-  ret->rld_symbol = NULL;
-  ret->mips16_stubs_seen = FALSE;
-  ret->use_plts_and_copy_relocs = FALSE;
-  ret->is_vxworks = FALSE;
-  ret->small_data_overflow_reported = FALSE;
-  ret->srelbss = NULL;
-  ret->sdynbss = NULL;
-  ret->srelplt = NULL;
-  ret->srelplt2 = NULL;
-  ret->sgotplt = NULL;
-  ret->splt = NULL;
-  ret->sstubs = NULL;
-  ret->sgot = NULL;
-  ret->got_info = NULL;
-  ret->plt_header_size = 0;
-  ret->plt_entry_size = 0;
-  ret->lazy_stub_count = 0;
-  ret->function_stub_size = 0;
-  ret->strampoline = NULL;
-  ret->la25_stubs = NULL;
-  ret->add_stub_section = NULL;
 
   return &ret->root.root;
 }

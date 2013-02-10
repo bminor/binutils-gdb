@@ -3069,7 +3069,7 @@ sh64_elf64_link_hash_table_create (bfd *abfd)
 {
   struct elf_link_hash_table *ret;
 
-  ret = (struct elf_link_hash_table *) bfd_malloc (sizeof (* ret));
+  ret = (struct elf_link_hash_table *) bfd_zmalloc (sizeof (* ret));
   if (ret == (struct elf_link_hash_table *) NULL)
     return NULL;
 

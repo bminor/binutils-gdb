@@ -918,7 +918,7 @@ coff_arm_link_hash_table_create (bfd * abfd)
   struct coff_arm_link_hash_table * ret;
   bfd_size_type amt = sizeof (struct coff_arm_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -930,10 +930,6 @@ coff_arm_link_hash_table_create (bfd * abfd)
       free (ret);
       return NULL;
     }
-
-  ret->thumb_glue_size   = 0;
-  ret->arm_glue_size     = 0;
-  ret->bfd_of_glue_owner = NULL;
 
   return & ret->root.root;
 }

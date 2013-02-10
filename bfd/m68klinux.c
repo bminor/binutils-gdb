@@ -203,7 +203,7 @@ linux_link_hash_table_create (bfd *abfd)
   struct linux_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct linux_link_hash_table);
 
-  ret = (struct linux_link_hash_table *) bfd_malloc (amt);
+  ret = (struct linux_link_hash_table *) bfd_zmalloc (amt);
   if (ret == (struct linux_link_hash_table *) NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -216,11 +216,6 @@ linux_link_hash_table_create (bfd *abfd)
       free (ret);
       return (struct bfd_link_hash_table *) NULL;
     }
-
-  ret->dynobj = NULL;
-  ret->fixup_count = 0;
-  ret->local_builtins = 0;
-  ret->fixup_list = NULL;
 
   return &ret->root.root;
 }

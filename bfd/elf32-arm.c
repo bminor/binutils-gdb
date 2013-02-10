@@ -3417,7 +3417,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   struct elf32_arm_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf32_arm_link_hash_table);
 
-  ret = (struct elf32_arm_link_hash_table *) bfd_malloc (amt);
+  ret = (struct elf32_arm_link_hash_table *) bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -3430,27 +3430,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->sdynbss = NULL;
-  ret->srelbss = NULL;
-  ret->srelplt2 = NULL;
-  ret->dt_tlsdesc_plt = 0;
-  ret->dt_tlsdesc_got = 0;
-  ret->tls_trampoline = 0;
-  ret->next_tls_desc_index = 0;
-  ret->num_tls_desc = 0;
-  ret->thumb_glue_size = 0;
-  ret->arm_glue_size = 0;
-  ret->bx_glue_size = 0;
-  memset (ret->bx_glue_offset, 0, sizeof (ret->bx_glue_offset));
   ret->vfp11_fix = BFD_ARM_VFP11_FIX_NONE;
-  ret->vfp11_erratum_glue_size = 0;
-  ret->num_vfp11_fixes = 0;
-  ret->fix_cortex_a8 = 0;
-  ret->fix_arm1176 = 0;
-  ret->bfd_of_glue_owner = NULL;
-  ret->byteswap_code = 0;
-  ret->target1_is_rel = 0;
-  ret->target2_reloc = R_ARM_NONE;
 #ifdef FOUR_WORD_PLT
   ret->plt_header_size = 16;
   ret->plt_entry_size = 16;
@@ -3458,23 +3438,8 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->plt_header_size = 20;
   ret->plt_entry_size = 12;
 #endif
-  ret->fix_v4bx = 0;
-  ret->use_blx = 0;
-  ret->vxworks_p = 0;
-  ret->symbian_p = 0;
-  ret->nacl_p = 0;
   ret->use_rel = 1;
-  ret->sym_cache.abfd = NULL;
   ret->obfd = abfd;
-  ret->tls_ldm_got.refcount = 0;
-  ret->stub_bfd = NULL;
-  ret->add_stub_section = NULL;
-  ret->layout_sections_again = NULL;
-  ret->stub_group = NULL;
-  ret->top_id = 0;
-  ret->bfd_count = 0;
-  ret->top_index = 0;
-  ret->input_list = NULL;
 
   if (!bfd_hash_table_init (&ret->stub_hash_table, stub_hash_newfunc,
 			    sizeof (struct elf32_arm_stub_hash_entry)))

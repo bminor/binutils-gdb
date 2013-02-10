@@ -937,7 +937,7 @@ elf_i386_link_hash_table_create (bfd *abfd)
   struct elf_i386_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_i386_link_hash_table);
 
-  ret = (struct elf_i386_link_hash_table *) bfd_malloc (amt);
+  ret = (struct elf_i386_link_hash_table *) bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -949,18 +949,6 @@ elf_i386_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-
-  ret->sdynbss = NULL;
-  ret->srelbss = NULL;
-  ret->plt_eh_frame = NULL;
-  ret->tls_ldm_got.refcount = 0;
-  ret->next_tls_desc_index = 0;
-  ret->sgotplt_jump_table_size = 0;
-  ret->sym_cache.abfd = NULL;
-  ret->srelplt2 = NULL;
-  ret->tls_module_base = NULL;
-  ret->next_jump_slot_index = 0;
-  ret->next_irelative_index = 0;
 
   ret->loc_hash_table = htab_try_create (1024,
 					 elf_i386_local_htab_hash,

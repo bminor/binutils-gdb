@@ -679,7 +679,7 @@ sunos_link_hash_table_create (bfd *abfd)
   struct sunos_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct sunos_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = bfd_zmalloc (amt);
   if (ret ==  NULL)
     return NULL;
   if (!NAME (aout, link_hash_table_init) (&ret->root, abfd,
@@ -689,15 +689,6 @@ sunos_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-
-  ret->dynobj = NULL;
-  ret->dynamic_sections_created = FALSE;
-  ret->dynamic_sections_needed = FALSE;
-  ret->got_needed = FALSE;
-  ret->dynsymcount = 0;
-  ret->bucketcount = 0;
-  ret->needed = NULL;
-  ret->got_base = 0;
 
   return &ret->root.root;
 }

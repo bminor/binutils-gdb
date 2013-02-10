@@ -2093,7 +2093,7 @@ elf64_aarch64_link_hash_table_create (bfd *abfd)
   struct elf64_aarch64_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf64_aarch64_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -2105,23 +2105,9 @@ elf64_aarch64_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->sdynbss = NULL;
-  ret->srelbss = NULL;
-
   ret->plt_header_size = PLT_ENTRY_SIZE;
   ret->plt_entry_size = PLT_SMALL_ENTRY_SIZE;
-
-  ret->sym_cache.abfd = NULL;
   ret->obfd = abfd;
-
-  ret->stub_bfd = NULL;
-  ret->add_stub_section = NULL;
-  ret->layout_sections_again = NULL;
-  ret->stub_group = NULL;
-  ret->bfd_count = 0;
-  ret->top_index = 0;
-  ret->input_list = NULL;
-  ret->tlsdesc_plt = 0;
   ret->dt_tlsdesc_got = (bfd_vma) - 1;
 
   if (!bfd_hash_table_init (&ret->stub_hash_table, stub_hash_newfunc,

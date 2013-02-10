@@ -1027,7 +1027,7 @@ elf_metag_link_hash_table_create (bfd *abfd)
   struct elf_metag_link_hash_table *htab;
   bfd_size_type amt = sizeof (*htab);
 
-  htab = bfd_malloc (amt);
+  htab = bfd_zmalloc (amt);
   if (htab == NULL)
     return NULL;
 
@@ -1044,20 +1044,6 @@ elf_metag_link_hash_table_create (bfd *abfd)
   if (!bfd_hash_table_init (&htab->bstab, stub_hash_newfunc,
 			    sizeof (struct elf_metag_stub_hash_entry)))
     return NULL;
-
-  htab->stub_bfd = NULL;
-  htab->add_stub_section = NULL;
-  htab->layout_sections_again = NULL;
-  htab->stub_group = NULL;
-  htab->sgot = NULL;
-  htab->sgotplt = NULL;
-  htab->srelgot = NULL;
-  htab->splt = NULL;
-  htab->srelplt = NULL;
-  htab->sdynbss = NULL;
-  htab->srelbss = NULL;
-  htab->sym_cache.abfd = NULL;
-  htab->tls_ldm_got.refcount = 0;
 
   return &htab->etab.root;
 }

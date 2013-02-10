@@ -888,7 +888,7 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
   struct elf_x86_64_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_x86_64_link_hash_table);
 
-  ret = (struct elf_x86_64_link_hash_table *) bfd_malloc (amt);
+  ret = (struct elf_x86_64_link_hash_table *) bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -900,18 +900,6 @@ elf_x86_64_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-
-  ret->sdynbss = NULL;
-  ret->srelbss = NULL;
-  ret->plt_eh_frame = NULL;
-  ret->sym_cache.abfd = NULL;
-  ret->tlsdesc_plt = 0;
-  ret->tlsdesc_got = 0;
-  ret->tls_ld_got.refcount = 0;
-  ret->sgotplt_jump_table_size = 0;
-  ret->tls_module_base = NULL;
-  ret->next_jump_slot_index = 0;
-  ret->next_irelative_index = 0;
 
   if (ABI_64_P (abfd))
     {

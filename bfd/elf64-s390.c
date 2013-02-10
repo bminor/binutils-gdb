@@ -699,7 +699,7 @@ elf_s390_link_hash_table_create (bfd *abfd)
   struct elf_s390_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_s390_link_hash_table);
 
-  ret = (struct elf_s390_link_hash_table *) bfd_malloc (amt);
+  ret = (struct elf_s390_link_hash_table *) bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -710,16 +710,6 @@ elf_s390_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-
-  ret->elf.sgot = NULL;
-  ret->elf.sgotplt = NULL;
-  ret->elf.srelgot = NULL;
-  ret->elf.splt = NULL;
-  ret->elf.srelplt = NULL;
-  ret->sdynbss = NULL;
-  ret->srelbss = NULL;
-  ret->tls_ldm_got.refcount = 0;
-  ret->sym_cache.abfd = NULL;
 
   return &ret->elf.root;
 }

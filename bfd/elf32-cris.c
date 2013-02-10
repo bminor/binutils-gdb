@@ -884,7 +884,7 @@ elf_cris_link_hash_table_create (bfd *abfd)
   struct elf_cris_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_cris_link_hash_table);
 
-  ret = ((struct elf_cris_link_hash_table *) bfd_malloc (amt));
+  ret = ((struct elf_cris_link_hash_table *) bfd_zmalloc (amt));
   if (ret == (struct elf_cris_link_hash_table *) NULL)
     return NULL;
 
@@ -900,9 +900,6 @@ elf_cris_link_hash_table_create (bfd *abfd)
   /* Initialize to skip over the first three entries in the gotplt; they
      are used for run-time symbol evaluation.  */
   ret->next_gotplt_entry = 12;
-
-  /* We haven't seen any R_CRIS_nn_GOT_TPREL initially.  */
-  ret->dtpmod_refcount = 0;
 
   return &ret->root.root;
 }
