@@ -125,4 +125,5 @@ gdb_test "python print (\"'\" + str(p\[0\]) + \"'\")" "'$gdb_prompt_fail '" \
 gdb_exit
 
 set GDBFLAGS $saved_gdbflags
+exec kill -9 ${testpid}
 return 0
