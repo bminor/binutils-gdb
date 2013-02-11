@@ -12,9 +12,9 @@ OFFSET   TYPE              VALUE
 0014948c R_MIPS_TLS_DTPREL32  tlsvar_gd
 0013f828 R_MIPS_TLS_TPREL32  tlsvar_ie
 00149484 R_MIPS_TLS_TPREL32  tlsvar_ie
-00143e28 R_MIPS_REL32      sym_1_9526
+00143e3c R_MIPS_REL32      sym_1_9526
 #...
-00139aa8 R_MIPS_REL32      sym_2_8654
+0013a8f8 R_MIPS_REL32      sym_2_8654
 
 
 Contents of section .got:

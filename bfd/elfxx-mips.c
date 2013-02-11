@@ -699,8 +699,6 @@ static bfd_boolean mips_elf_create_dynamic_relocation
   (bfd *, struct bfd_link_info *, const Elf_Internal_Rela *,
    struct mips_elf_link_hash_entry *, asection *, bfd_vma,
    bfd_vma *, asection *);
-static hashval_t mips_elf_got_entry_hash
-  (const void *);
 static bfd_vma mips_elf_adjust_gp
   (bfd *, struct mips_got_info *, bfd *);
 static struct mips_got_info *mips_elf_got_for_ibfd
@@ -2795,19 +2793,6 @@ mips_elf_hash_bfd_vma (bfd_vma addr)
    use all fields to compute the hash, and compare the appropriate
    union members.  */
 
-static hashval_t
-mips_elf_got_entry_hash (const void *entry_)
-{
-  const struct mips_got_entry *entry = (struct mips_got_entry *)entry_;
-
-  return entry->symndx
-    + ((entry->tls_type & GOT_TLS_LDM) << 17)
-    + (! entry->abfd ? mips_elf_hash_bfd_vma (entry->d.address)
-       : entry->abfd->id
-         + (entry->symndx >= 0 ? mips_elf_hash_bfd_vma (entry->d.addend)
-	    : entry->d.h->root.root.root.hash));
-}
-
 static int
 mips_elf_got_entry_eq (const void *entry1, const void *entry2)
 {
@@ -2830,7 +2815,7 @@ mips_elf_got_entry_eq (const void *entry1, const void *entry2)
    accordingly.  */
 
 static hashval_t
-mips_elf_multi_got_entry_hash (const void *entry_)
+mips_elf_got_entry_hash (const void *entry_)
 {
   const struct mips_got_entry *entry = (struct mips_got_entry *)entry_;
 
@@ -2902,7 +2887,7 @@ mips_elf_create_got_info (bfd *abfd, bfd_boolean master_got_p)
     g->got_entries = htab_try_create (1, mips_elf_got_entry_hash,
 				      mips_elf_got_entry_eq, NULL);
   else
-    g->got_entries = htab_try_create (1, mips_elf_multi_got_entry_hash,
+    g->got_entries = htab_try_create (1, mips_elf_got_entry_hash,
 				      mips_elf_multi_got_entry_eq, NULL);
   if (g->got_entries == NULL)
     return NULL;

@@ -1,5 +1,18 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* ld-mips-elf/tls-hidden3.d, ld-mips-elf/tls-hidden3.got,
+	ld-mips-elf/tls-multi-got-1.got, ld-mips-elf/tlsbin-o32.d,
+	ld-mips-elf/tlsbin-o32.got, ld-mips-elf/tlsdyn-o32-1.d,
+	ld-mips-elf/tlsdyn-o32-1.got, ld-mips-elf/tlsdyn-o32-2.d,
+	ld-mips-elf/tlsdyn-o32-2.got, ld-mips-elf/tlsdyn-o32-3.d,
+	ld-mips-elf/tlsdyn-o32-3.got, ld-mips-elf/tlsdyn-o32.d,
+	ld-mips-elf/tlsdyn-o32.got, ld-mips-elf/tlslib-o32.d,
+	ld-mips-elf/tlslib-o32.got, ld-mips-elf/tlslib-o32-hidden.got,
+	ld-mips-elf/tlslib-o32-ver.got: Adjust GOT layout for new
+	got_entry hash function.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* ld-mips-elf/tlsdyn-o32-2.got, ld-mips-elf/tlsdyn-o32-3.got: Remove
 	unused GOT entries.
 

@@ -1,5 +1,12 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_multi_got_entry_hash): Rename to...
+	(mips_elf_got_entry_hash): ...this, deleting the old version.
+	(mips_elf_create_got_info): Use mips_elf_got_entry_hash for
+	both types of GOT.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_create_got_info): New function.
 	(mips_elf_get_got_for_bfd, mips_elf_multi_got): Use it.
 	(mips_elf_create_got_section): Likewise.
