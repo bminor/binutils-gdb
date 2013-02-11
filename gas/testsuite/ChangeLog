@@ -1,3 +1,8 @@
+2013-02-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* gas/arm/archv6t2.s: Add strht and ldrht tests.
+	* gas/arm/archv6t2.d: Add disassembly patterns for the above.
+
 2013-02-09  Jürgen Urban  <JuergenUrban@gmx.de>
 
 	* gas/mips/24k-triple-stores-2.d, gas/mips/24k-triple-stores-2.s,

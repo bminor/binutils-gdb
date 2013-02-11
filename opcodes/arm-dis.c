@@ -928,8 +928,8 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V6T2, 0x07c0001f, 0x0fe0007f, "bfc%c\t%12-15R, %E"},
   {ARM_EXT_V6T2, 0x07c00010, 0x0fe00070, "bfi%c\t%12-15R, %0-3r, %E"},
   {ARM_EXT_V6T2, 0x00600090, 0x0ff000f0, "mls%c\t%16-19R, %0-3R, %8-11R, %12-15R"},
-  {ARM_EXT_V6T2, 0x006000b0, 0x0f7000f0, "strht%c\t%12-15R, %S"},
-  
+  {ARM_EXT_V6T2, 0x002000b0, 0x0f3000f0, "strht%c\t%12-15R, %S"},
+
   {ARM_EXT_V6T2, 0x00300090, 0x0f3000f0, UNDEFINED_INSTRUCTION },
   {ARM_EXT_V6T2, 0x00300090, 0x0f300090, "ldr%6's%5?hbt%c\t%12-15R, %S"},
   

@@ -1,3 +1,7 @@
+2013-02-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* arm-dis.c: Update strht pattern.
+
 2013-02-09  Jürgen Urban  <JuergenUrban@gmx.de>
 
 	* mips-opc.c (mips_builtin_opcodes): Enable l.d and s.d macros for
