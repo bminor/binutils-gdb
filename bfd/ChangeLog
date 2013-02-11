@@ -1,5 +1,17 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_recreate_got): Don't change the entry;
+	create another one if necessary.
+	(mips_elf_set_gotidx): New function.
+	(mips_elf_set_global_gotidx): Use it.
+	(mips_elf_initialize_tls_index): Likewise.  Take a
+	mips_elf_traverse_got_arg as argument.
+	(mips_elf_lay_out_got): Update use of mips_elf_initialize_tls_index.
+	(mips_elf_multi_got): Likewise.  Cope with error returns from
+	mips_elf_set_global_gotidx.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_got_info): Add relocs field.
 	(mips_elf_set_global_got_offset_arg, mips_elf_count_tls_arg): Replace
 	with...

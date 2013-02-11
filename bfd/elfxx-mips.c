@@ -3991,22 +3991,28 @@ static int
 mips_elf_recreate_got (void **entryp, void *data)
 {
   htab_t *new_got;
-  struct mips_got_entry *entry;
+  struct mips_got_entry new_entry, *entry;
   void **slot;
 
   new_got = (htab_t *) data;
   entry = (struct mips_got_entry *) *entryp;
-  if (entry->abfd != NULL && entry->symndx == -1)
+  if (entry->abfd != NULL
+      && entry->symndx == -1
+      && (entry->d.h->root.root.type == bfd_link_hash_indirect
+	  || entry->d.h->root.root.type == bfd_link_hash_warning))
     {
       struct mips_elf_link_hash_entry *h;
 
+      new_entry = *entry;
+      entry = &new_entry;
       h = entry->d.h;
-      while (h->root.root.type == bfd_link_hash_indirect
-	     || h->root.root.type == bfd_link_hash_warning)
+      do
 	{
 	  BFD_ASSERT (h->global_got_area == GGA_NONE);
 	  h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
 	}
+      while (h->root.root.type == bfd_link_hash_indirect
+	     || h->root.root.type == bfd_link_hash_warning);
       entry->d.h = h;
     }
   slot = htab_find_slot (*new_got, entry, INSERT);
@@ -4016,7 +4022,19 @@ mips_elf_recreate_got (void **entryp, void *data)
       return 0;
     }
   if (*slot == NULL)
-    *slot = entry;
+    {
+      if (entry == &new_entry)
+	{
+	  entry = bfd_alloc (entry->abfd, sizeof (*entry));
+	  if (!entry)
+	    {
+	      *new_got = NULL;
+	      return 0;
+	    }
+	  *entry = new_entry;
+	}
+      *slot = entry;
+    }
   return 1;
 }
 
@@ -4349,23 +4367,54 @@ mips_elf_merge_gots (void **bfd2got_, void *p)
   return 1;
 }
 
-/* Set the TLS GOT index for the GOT entry in ENTRYP.  ENTRYP's NEXT field
-   is null iff there is just a single GOT.  */
+/* ENTRYP is a hash table entry for a mips_got_entry.  Set its gotidx
+   to GOTIDX, duplicating the entry if it has already been assigned
+   an index in a different GOT.  */
+
+static bfd_boolean
+mips_elf_set_gotidx (void **entryp, long gotidx)
+{
+  struct mips_got_entry *entry;
+
+  entry = (struct mips_got_entry *) *entryp;
+  if (entry->gotidx > 0)
+    {
+      struct mips_got_entry *new_entry;
+
+      new_entry = bfd_alloc (entry->abfd, sizeof (*entry));
+      if (!new_entry)
+	return FALSE;
+
+      *new_entry = *entry;
+      *entryp = new_entry;
+      entry = new_entry;
+    }
+  entry->gotidx = gotidx;
+  return TRUE;
+}
+
+/* Set the TLS GOT index for the GOT entry in ENTRYP.  DATA points to a
+   mips_elf_traverse_got_arg in which DATA->value is the size of one
+   GOT entry.  Set DATA->g to null on failure.  */
 
 static int
-mips_elf_initialize_tls_index (void **entryp, void *p)
+mips_elf_initialize_tls_index (void **entryp, void *data)
 {
-  struct mips_got_entry *entry = (struct mips_got_entry *)*entryp;
-  struct mips_got_info *g = p;
+  struct mips_got_entry *entry;
+  struct mips_elf_traverse_got_arg *arg;
+  struct mips_got_info *g;
   bfd_vma next_index;
   unsigned char tls_type;
 
   /* We're only interested in TLS symbols.  */
+  entry = (struct mips_got_entry *) *entryp;
   tls_type = (entry->tls_type & GOT_TLS_TYPE);
   if (tls_type == 0)
     return 1;
 
-  next_index = MIPS_ELF_GOT_SIZE (entry->abfd) * (long) g->tls_assigned_gotno;
+  arg = (struct mips_elf_traverse_got_arg *) data;
+  g = arg->g;
+  next_index = arg->value * g->tls_assigned_gotno;
 
   if (entry->symndx == -1 && g->next == NULL)
     {
@@ -4401,7 +4450,11 @@ mips_elf_initialize_tls_index (void **entryp, void *p)
 	    }
 	  g->tls_ldm_offset = next_index;
 	}
-      entry->gotidx = next_index;
+      if (!mips_elf_set_gotidx (entryp, next_index))
+	{
+	  arg->g = NULL;
+	  return 0;
+	}
     }
 
   /* Account for the entries we've just allocated.  */
@@ -4431,7 +4484,7 @@ mips_elf_set_global_got_area (void **entryp, void *data)
 /* A htab_traverse callback for secondary GOT entries, where DATA points
    to a mips_elf_traverse_got_arg.  Assign GOT indices to global entries
    and record the number of relocations they require.  DATA->value is
-   the size of one GOT entry.  */
+   the size of one GOT entry.  Set DATA->g to null on failure.  */
 
 static int
 mips_elf_set_global_gotidx (void **entryp, void *data)
@@ -4445,7 +4498,13 @@ mips_elf_set_global_gotidx (void **entryp, void *data)
       && entry->symndx == -1
       && entry->d.h->global_got_area != GGA_NONE)
     {
-      entry->gotidx = arg->value * (long) arg->g->assigned_gotno++;
+      if (!mips_elf_set_gotidx (entryp, arg->value * arg->g->assigned_gotno))
+	{
+	  arg->g = NULL;
+	  return 0;
+	}
+      arg->g->assigned_gotno += 1;
+
       if (arg->info->shared
 	  || (elf_hash_table (arg->info)->dynamic_sections_created
 	      && entry->d.h->root.def_dynamic
@@ -4646,7 +4705,11 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
       /* Set up any TLS entries.  We always place the TLS entries after
 	 all non-TLS entries.  */
       g->tls_assigned_gotno = g->local_gotno + g->global_gotno;
-      htab_traverse (g->got_entries, mips_elf_initialize_tls_index, g);
+      tga.g = g;
+      tga.value = MIPS_ELF_GOT_SIZE (abfd);
+      htab_traverse (g->got_entries, mips_elf_initialize_tls_index, &tga);
+      if (!tga.g)
+	return FALSE;
       BFD_ASSERT (g->tls_assigned_gotno == assign);
 
       /* Move onto the next GOT.  It will be a secondary GOT if nonull.  */
@@ -4674,9 +4737,11 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
       tga.value = MIPS_ELF_GOT_SIZE (abfd);
       tga.g = g;
       htab_traverse (g->got_entries, mips_elf_set_global_gotidx, &tga);
-      BFD_ASSERT (g->assigned_gotno - g->local_gotno <= g->global_gotno);
-
+      if (!tga.g)
+	return FALSE;
+      BFD_ASSERT (g->assigned_gotno == g->local_gotno + g->global_gotno);
       g->assigned_gotno = save_assign;
+
       if (info->shared)
 	{
 	  g->relocs += g->local_gotno - g->assigned_gotno;
@@ -8877,7 +8942,12 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
     {
       /* Set up TLS entries.  */
       g->tls_assigned_gotno = g->global_gotno + g->local_gotno;
-      htab_traverse (g->got_entries, mips_elf_initialize_tls_index, g);
+      tga.info = info;
+      tga.g = g;
+      tga.value = MIPS_ELF_GOT_SIZE (output_bfd);
+      htab_traverse (g->got_entries, mips_elf_initialize_tls_index, &tga);
+      if (!tga.g)
+	return FALSE;
       BFD_ASSERT (g->tls_assigned_gotno
 		  == g->global_gotno + g->local_gotno + g->tls_gotno);
 
