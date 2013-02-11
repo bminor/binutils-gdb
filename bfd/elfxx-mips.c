@@ -512,6 +512,9 @@ struct mips_elf_obj_tdata
 
   /* Input BFD providing Tag_GNU_MIPS_ABI_FP attribute for output.  */
   bfd *abi_fp_bfd;
+
+  /* The GOT requirements of input bfds.  */
+  struct mips_got_info *got;
 };
 
 /* Get MIPS ELF private object data from BFD's tdata.  */
@@ -2883,6 +2886,23 @@ mips_elf_create_got_info (bfd *abfd, bfd_boolean master_got_p)
   return g;
 }
 
+/* Return the GOT info for input bfd ABFD, trying to create a new one if
+   CREATE_P and if ABFD doesn't already have a GOT.  */
+
+static struct mips_got_info *
+mips_elf_bfd_got (bfd *abfd, bfd_boolean create_p)
+{
+  struct mips_elf_obj_tdata *tdata;
+
+  if (!is_mips_elf (abfd))
+    return NULL;
+
+  tdata = mips_elf_tdata (abfd);
+  if (!tdata->got && create_p)
+    tdata->got = mips_elf_create_got_info (abfd, FALSE);
+  return tdata->got;
+}
+
 /* Return the dynamic relocation section.  If it doesn't exist, try to
    create a new it if CREATE_P, otherwise return NULL.  Also return NULL
    if creation fails.  */
@@ -3706,6 +3726,53 @@ mips_elf_sort_hash_table_f (struct mips_elf_link_hash_entry *h, void *data)
   return TRUE;
 }
 
+/* Record that input bfd ABFD requires a GOT entry like *LOOKUP
+   (which is owned by the caller and shouldn't be added to the
+   hash table directly).  */
+
+static bfd_boolean
+mips_elf_record_got_entry (struct bfd_link_info *info, bfd *abfd,
+			   struct mips_got_entry *lookup)
+{
+  struct mips_elf_link_hash_table *htab;
+  struct mips_got_entry *entry;
+  struct mips_got_info *g;
+  void **loc, **bfd_loc;
+
+  /* Make sure there's a slot for this entry in the master GOT.  */
+  htab = mips_elf_hash_table (info);
+  g = htab->got_info;
+  loc = htab_find_slot (g->got_entries, lookup, INSERT);
+  if (!loc)
+    return FALSE;
+
+  /* Populate the entry if it isn't already.  */
+  entry = (struct mips_got_entry *) *loc;
+  if (!entry)
+    {
+      entry = (struct mips_got_entry *) bfd_alloc (abfd, sizeof (*entry));
+      if (!entry)
+	return FALSE;
+
+      lookup->gotidx = -1;
+      *entry = *lookup;
+      *loc = entry;
+    }
+
+  /* Reuse the same GOT entry for the BFD's GOT.  */
+  g = mips_elf_bfd_got (abfd, TRUE);
+  if (!g)
+    return FALSE;
+
+  bfd_loc = htab_find_slot (g->got_entries, lookup, INSERT);
+  if (!bfd_loc)
+    return FALSE;
+
+  if (!*bfd_loc)
+    *bfd_loc = entry;
+  return TRUE;
+}
+
 /* ABFD has a GOT relocation of type R_TYPE against H.  Reserve a GOT
    entry for it.  FOR_CALL is true if the caller is only interested in
    using the GOT entry for calls.  */
@@ -3717,8 +3784,8 @@ mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
 {
   struct mips_elf_link_hash_table *htab;
   struct mips_elf_link_hash_entry *hmips;
-  struct mips_got_entry entry, **loc;
-  struct mips_got_info *g;
+  struct mips_got_entry entry;
+  unsigned char tls_type;
 
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
@@ -3742,40 +3809,19 @@ mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
 	return FALSE;
     }
 
-  /* Make sure we have a GOT to put this entry into.  */
-  g = htab->got_info;
-  BFD_ASSERT (g != NULL);
+  tls_type = mips_elf_reloc_tls_type (r_type);
+  if (tls_type == GOT_NORMAL && hmips->global_got_area > GGA_NORMAL)
+    hmips->global_got_area = GGA_NORMAL;
+  else if (tls_type == GOT_TLS_IE && hmips->tls_ie_type == 0)
+    hmips->tls_ie_type = tls_type;
+  else if (tls_type == GOT_TLS_GD && hmips->tls_gd_type == 0)
+    hmips->tls_gd_type = tls_type;
 
   entry.abfd = abfd;
   entry.symndx = -1;
   entry.d.h = (struct mips_elf_link_hash_entry *) h;
-  entry.tls_type = mips_elf_reloc_tls_type (r_type);
-
-  loc = (struct mips_got_entry **) htab_find_slot (g->got_entries, &entry,
-						   INSERT);
-
-  /* If we've already marked this entry as needing GOT space, we don't
-     need to do it again.  */
-  if (*loc)
-    return TRUE;
-
-  *loc = (struct mips_got_entry *)bfd_alloc (abfd, sizeof entry);
-
-  if (! *loc)
-    return FALSE;
-
-  entry.gotidx = -1;
-
-  memcpy (*loc, &entry, sizeof entry);
-
-  if (entry.tls_type == GOT_NORMAL)
-    hmips->global_got_area = GGA_NORMAL;
-  else if (entry.tls_type == GOT_TLS_IE)
-    hmips->tls_ie_type = entry.tls_type;
-  else if (entry.tls_type == GOT_TLS_GD)
-    hmips->tls_gd_type = entry.tls_type;
-
-  return TRUE;
+  entry.tls_type = tls_type;
+  return mips_elf_record_got_entry (info, abfd, &entry);
 }
 
 /* ABFD has a GOT relocation of type R_TYPE against symbol SYMNDX + ADDEND,
@@ -3787,7 +3833,7 @@ mips_elf_record_local_got_symbol (bfd *abfd, long symndx, bfd_vma addend,
 {
   struct mips_elf_link_hash_table *htab;
   struct mips_got_info *g;
-  struct mips_got_entry entry, **loc;
+  struct mips_got_entry entry;
 
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
@@ -3799,22 +3845,7 @@ mips_elf_record_local_got_symbol (bfd *abfd, long symndx, bfd_vma addend,
   entry.symndx = symndx;
   entry.d.addend = addend;
   entry.tls_type = mips_elf_reloc_tls_type (r_type);
-  loc = (struct mips_got_entry **)
-    htab_find_slot (g->got_entries, &entry, INSERT);
-
-  if (*loc)
-    return TRUE;
-
-  entry.gotidx = -1;
-
-  *loc = (struct mips_got_entry *)bfd_alloc (abfd, sizeof entry);
-
-  if (! *loc)
-    return FALSE;
-
-  memcpy (*loc, &entry, sizeof entry);
-
-  return TRUE;
+  return mips_elf_record_got_entry (info, abfd, &entry);
 }
 
 /* Return the maximum number of GOT page entries required for RANGE.  */
@@ -3837,22 +3868,22 @@ mips_elf_record_got_page_entry (struct bfd_link_info *info, bfd *abfd,
 				long symndx, bfd_signed_vma addend)
 {
   struct mips_elf_link_hash_table *htab;
-  struct mips_got_info *g;
+  struct mips_got_info *g1, *g2;
   struct mips_got_page_entry lookup, *entry;
   struct mips_got_page_range **range_ptr, *range;
   bfd_vma old_pages, new_pages;
-  void **loc;
+  void **loc, **bfd_loc;
 
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
 
-  g = htab->got_info;
-  BFD_ASSERT (g != NULL);
+  g1 = htab->got_info;
+  BFD_ASSERT (g1 != NULL);
 
   /* Find the mips_got_page_entry hash table entry for this symbol.  */
   lookup.abfd = abfd;
   lookup.symndx = symndx;
-  loc = htab_find_slot (g->got_page_entries, &lookup, INSERT);
+  loc = htab_find_slot (g1->got_page_entries, &lookup, INSERT);
   if (loc == NULL)
     return FALSE;
 
@@ -3871,6 +3902,18 @@ mips_elf_record_got_page_entry (struct bfd_link_info *info, bfd *abfd,
       entry->num_pages = 0;
       *loc = entry;
     }
+
+  /* Add the same entry to the BFD's GOT.  */
+  g2 = mips_elf_bfd_got (abfd, TRUE);
+  if (!g2)
+    return FALSE;
+
+  bfd_loc = htab_find_slot (g2->got_page_entries, &lookup, INSERT);
+  if (!bfd_loc)
+    return FALSE;
+
+  if (!*bfd_loc)
+    *bfd_loc = entry;
 
   /* Skip over ranges whose maximum extent cannot share a page entry
      with ADDEND.  */
@@ -3894,7 +3937,8 @@ mips_elf_record_got_page_entry (struct bfd_link_info *info, bfd *abfd,
 
       *range_ptr = range;
       entry->num_pages++;
-      g->page_gotno++;
+      g1->page_gotno++;
+      g2->page_gotno++;
       return TRUE;
     }
 
@@ -3921,7 +3965,8 @@ mips_elf_record_got_page_entry (struct bfd_link_info *info, bfd *abfd,
   if (old_pages != new_pages)
     {
       entry->num_pages += new_pages - old_pages;
-      g->page_gotno += new_pages - old_pages;
+      g1->page_gotno += new_pages - old_pages;
+      g2->page_gotno += new_pages - old_pages;
     }
 
   return TRUE;

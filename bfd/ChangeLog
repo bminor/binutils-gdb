@@ -1,5 +1,16 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_obj_tdata): Add a got field.
+	(mips_elf_bfd_got, mips_elf_record_got_entry): New functions.
+	(mips_elf_record_global_got_symbol): Update the hash entry before
+	adding the mips_got_entry.  Use mips_elf_record_got_entry to do
+	the latter.
+	(mips_elf_record_local_got_symbol): Use mips_elf_record_got_entry.
+	(mips_elf_record_got_page_entry): Record the entry in both the
+	master and bfd GOTs.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_recreate_got): Don't change the entry;
 	create another one if necessary.
 	(mips_elf_set_gotidx): New function.
