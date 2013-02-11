@@ -1,3 +1,8 @@
+2013-02-11  Doug Evans  <dje@google.com>
+
+	* gdb.base/printcmds.exp (test_printf_with_dfp): Add test for printing
+	two decfloats.
+
 2013-02-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/bitfields.c (struct internalvartest): New declaration.

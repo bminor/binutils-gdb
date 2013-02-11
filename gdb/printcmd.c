@@ -1978,6 +1978,241 @@ print_variable_and_value (const char *name, struct symbol *var,
   fprintf_filtered (stream, "\n");
 }
 
+/* Subroutine of ui_printf to simplify it.
+   Print VALUE to STREAM using FORMAT.
+   VALUE is either a C-style string on the target, or an internal variable.  */
+
+static void
+printf_c_string (struct ui_file *stream, const char *format,
+		 struct value *value)
+{
+  gdb_byte *str;
+  CORE_ADDR tem;
+  int j;
+
+  tem = value_as_address (value);
+
+  /* This is a %s argument.  Find the length of the string.  */
+  for (j = 0;; j++)
+    {
+      gdb_byte c;
+
+      QUIT;
+      read_memory (tem + j, &c, 1);
+      if (c == 0)
+	break;
+    }
+
+  /* Copy the string contents into a string inside GDB.  */
+  str = (gdb_byte *) alloca (j + 1);
+  if (j != 0)
+    read_memory (tem, str, j);
+  str[j] = 0;
+
+  fprintf_filtered (stream, format, (char *) str);
+}
+
+/* Subroutine of ui_printf to simplify it.
+   Print VALUE to STREAM using FORMAT.
+   VALUE is either a wide C-style string on the target,
+   or an internal variable.  */
+
+static void
+printf_wide_c_string (struct ui_file *stream, const char *format,
+		      struct value *value)
+{
+  gdb_byte *str;
+  CORE_ADDR tem;
+  int j;
+  struct gdbarch *gdbarch = get_type_arch (value_type (value));
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct type *wctype = lookup_typename (current_language, gdbarch,
+					 "wchar_t", NULL, 0);
+  int wcwidth = TYPE_LENGTH (wctype);
+  gdb_byte *buf = alloca (wcwidth);
+  struct obstack output;
+  struct cleanup *inner_cleanup;
+
+  tem = value_as_address (value);
+
+  /* This is a %s argument.  Find the length of the string.  */
+  for (j = 0;; j += wcwidth)
+    {
+      QUIT;
+      read_memory (tem + j, buf, wcwidth);
+      if (extract_unsigned_integer (buf, wcwidth, byte_order) == 0)
+	break;
+    }
+
+  /* Copy the string contents into a string inside GDB.  */
+  str = (gdb_byte *) alloca (j + wcwidth);
+  if (j != 0)
+    read_memory (tem, str, j);
+  memset (&str[j], 0, wcwidth);
+
+  obstack_init (&output);
+  inner_cleanup = make_cleanup_obstack_free (&output);
+
+  convert_between_encodings (target_wide_charset (gdbarch),
+			     host_charset (),
+			     str, j, wcwidth,
+			     &output, translit_char);
+  obstack_grow_str0 (&output, "");
+
+  fprintf_filtered (stream, format, obstack_base (&output));
+  do_cleanups (inner_cleanup);
+}
+
+/* Subroutine of ui_printf to simplify it.
+   Print VALUE, a decimal floating point value, to STREAM using FORMAT.  */
+
+static void
+printf_decfloat (struct ui_file *stream, const char *format,
+		 struct value *value)
+{
+  const gdb_byte *param_ptr = value_contents (value);
+
+#if defined (PRINTF_HAS_DECFLOAT)
+  /* If we have native support for Decimal floating
+     printing, handle it here.  */
+  fprintf_filtered (stream, format, param_ptr);
+#else
+  /* As a workaround until vasprintf has native support for DFP
+     we convert the DFP values to string and print them using
+     the %s format specifier.  */
+  const char *p;
+
+  /* Parameter data.  */
+  struct type *param_type = value_type (value);
+  struct gdbarch *gdbarch = get_type_arch (param_type);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  /* DFP output data.  */
+  struct value *dfp_value = NULL;
+  gdb_byte *dfp_ptr;
+  int dfp_len = 16;
+  gdb_byte dec[16];
+  struct type *dfp_type = NULL;
+  char decstr[MAX_DECIMAL_STRING];
+
+  /* Points to the end of the string so that we can go back
+     and check for DFP length modifiers.  */
+  p = format + strlen (format);
+
+  /* Look for the float/double format specifier.  */
+  while (*p != 'f' && *p != 'e' && *p != 'E'
+	 && *p != 'g' && *p != 'G')
+    p--;
+
+  /* Search for the '%' char and extract the size and type of
+     the output decimal value based on its modifiers
+     (%Hf, %Df, %DDf).  */
+  while (*--p != '%')
+    {
+      if (*p == 'H')
+	{
+	  dfp_len = 4;
+	  dfp_type = builtin_type (gdbarch)->builtin_decfloat;
+	}
+      else if (*p == 'D' && *(p - 1) == 'D')
+	{
+	  dfp_len = 16;
+	  dfp_type = builtin_type (gdbarch)->builtin_declong;
+	  p--;
+	}
+      else
+	{
+	  dfp_len = 8;
+	  dfp_type = builtin_type (gdbarch)->builtin_decdouble;
+	}
+    }
+
+  /* Conversion between different DFP types.  */
+  if (TYPE_CODE (param_type) == TYPE_CODE_DECFLOAT)
+    decimal_convert (param_ptr, TYPE_LENGTH (param_type),
+		     byte_order, dec, dfp_len, byte_order);
+  else
+    /* If this is a non-trivial conversion, just output 0.
+       A correct converted value can be displayed by explicitly
+       casting to a DFP type.  */
+    decimal_from_string (dec, dfp_len, byte_order, "0");
+
+  dfp_value = value_from_decfloat (dfp_type, dec);
+
+  dfp_ptr = (gdb_byte *) value_contents (dfp_value);
+
+  decimal_to_string (dfp_ptr, dfp_len, byte_order, decstr);
+
+  /* Print the DFP value.  */
+  fprintf_filtered (stream, "%s", decstr);
+#endif
+}
+
+/* Subroutine of ui_printf to simplify it.
+   Print VALUE, a target pointer, to STREAM using FORMAT.  */
+
+static void
+printf_pointer (struct ui_file *stream, const char *format,
+		struct value *value)
+{
+  /* We avoid the host's %p because pointers are too
+     likely to be the wrong size.  The only interesting
+     modifier for %p is a width; extract that, and then
+     handle %p as glibc would: %#x or a literal "(nil)".  */
+
+  const char *p;
+  char *fmt, *fmt_p;
+#ifdef PRINTF_HAS_LONG_LONG
+  long long val = value_as_long (value);
+#else
+  long val = value_as_long (value);
+#endif
+
+  fmt = alloca (strlen (format) + 5);
+
+  /* Copy up to the leading %.  */
+  p = format;
+  fmt_p = fmt;
+  while (*p)
+    {
+      int is_percent = (*p == '%');
+
+      *fmt_p++ = *p++;
+      if (is_percent)
+	{
+	  if (*p == '%')
+	    *fmt_p++ = *p++;
+	  else
+	    break;
+	}
+    }
+
+  if (val != 0)
+    *fmt_p++ = '#';
+
+  /* Copy any width.  */
+  while (*p >= '0' && *p < '9')
+    *fmt_p++ = *p++;
+
+  gdb_assert (*p == 'p' && *(p + 1) == '\0');
+  if (val != 0)
+    {
+#ifdef PRINTF_HAS_LONG_LONG
+      *fmt_p++ = 'l';
+#endif
+      *fmt_p++ = 'l';
+      *fmt_p++ = 'x';
+      *fmt_p++ = '\0';
+      fprintf_filtered (stream, fmt, val);
+    }
+  else
+    {
+      *fmt_p++ = 's';
+      *fmt_p++ = '\0';
+      fprintf_filtered (stream, fmt, "(nil)");
+    }
+}
+
 /* printf "printf format string" ARG to STREAM.  */
 
 static void
@@ -2059,78 +2294,10 @@ ui_printf (char *arg, struct ui_file *stream)
 	switch (fpieces[fr].argclass)
 	  {
 	  case string_arg:
-	    {
-	      gdb_byte *str;
-	      CORE_ADDR tem;
-	      int j;
-
-	      tem = value_as_address (val_args[i]);
-
-	      /* This is a %s argument.  Find the length of the string.  */
-	      for (j = 0;; j++)
-		{
-		  gdb_byte c;
-
-		  QUIT;
-		  read_memory (tem + j, &c, 1);
-		  if (c == 0)
-		    break;
-		}
-
-	      /* Copy the string contents into a string inside GDB.  */
-	      str = (gdb_byte *) alloca (j + 1);
-	      if (j != 0)
-		read_memory (tem, str, j);
-	      str[j] = 0;
-
-              fprintf_filtered (stream, current_substring, (char *) str);
-	    }
+	    printf_c_string (stream, current_substring, val_args[i]);
 	    break;
 	  case wide_string_arg:
-	    {
-	      gdb_byte *str;
-	      CORE_ADDR tem;
-	      int j;
-	      struct gdbarch *gdbarch
-		= get_type_arch (value_type (val_args[i]));
-	      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-	      struct type *wctype = lookup_typename (current_language, gdbarch,
-						     "wchar_t", NULL, 0);
-	      int wcwidth = TYPE_LENGTH (wctype);
-	      gdb_byte *buf = alloca (wcwidth);
-	      struct obstack output;
-	      struct cleanup *inner_cleanup;
-
-	      tem = value_as_address (val_args[i]);
-
-	      /* This is a %s argument.  Find the length of the string.  */
-	      for (j = 0;; j += wcwidth)
-		{
-		  QUIT;
-		  read_memory (tem + j, buf, wcwidth);
-		  if (extract_unsigned_integer (buf, wcwidth, byte_order) == 0)
-		    break;
-		}
-
-	      /* Copy the string contents into a string inside GDB.  */
-	      str = (gdb_byte *) alloca (j + wcwidth);
-	      if (j != 0)
-		read_memory (tem, str, j);
-	      memset (&str[j], 0, wcwidth);
-
-	      obstack_init (&output);
-	      inner_cleanup = make_cleanup_obstack_free (&output);
-
-	      convert_between_encodings (target_wide_charset (gdbarch),
-					 host_charset (),
-					 str, j, wcwidth,
-					 &output, translit_char);
-	      obstack_grow_str0 (&output, "");
-
-	      fprintf_filtered (stream, current_substring,
-                                obstack_base (&output));
-	      do_cleanups (inner_cleanup);
-	    }
+	    printf_wide_c_string (stream, current_substring, val_args[i]);
 	    break;
 	  case wide_char_arg:
 	    {
@@ -2227,169 +2394,13 @@ ui_printf (char *arg, struct ui_file *stream)
               fprintf_filtered (stream, current_substring, val);
 	      break;
 	    }
-
 	  /* Handles decimal floating values.  */
-	case decfloat_arg:
-	    {
-	      const gdb_byte *param_ptr = value_contents (val_args[i]);
-
-#if defined (PRINTF_HAS_DECFLOAT)
-	      /* If we have native support for Decimal floating
-		 printing, handle it here.  */
-              fprintf_filtered (stream, current_substring, param_ptr);
-#else
-
-	      /* As a workaround until vasprintf has native support for DFP
-	       we convert the DFP values to string and print them using
-	       the %s format specifier.  */
-
-	      char *eos, *sos;
-	      int nnull_chars = 0;
-
-	      /* Parameter data.  */
-	      struct type *param_type = value_type (val_args[i]);
-	      struct gdbarch *gdbarch = get_type_arch (param_type);
-	      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-
-	      /* DFP output data.  */
-	      struct value *dfp_value = NULL;
-	      gdb_byte *dfp_ptr;
-	      int dfp_len = 16;
-	      gdb_byte dec[16];
-	      struct type *dfp_type = NULL;
-	      char decstr[MAX_DECIMAL_STRING];
-
-	      /* Points to the end of the string so that we can go back
-		 and check for DFP length modifiers.  */
-	      eos = current_substring + strlen (current_substring);
-
-	      /* Look for the float/double format specifier.  */
-	      while (*eos != 'f' && *eos != 'e' && *eos != 'E'
-		     && *eos != 'g' && *eos != 'G')
-		  eos--;
-
-	      sos = eos;
-
-	      /* Search for the '%' char and extract the size and type of
-		 the output decimal value based on its modifiers
-		 (%Hf, %Df, %DDf).  */
-	      while (*--sos != '%')
-		{
-		  if (*sos == 'H')
-		    {
-		      dfp_len = 4;
-		      dfp_type = builtin_type (gdbarch)->builtin_decfloat;
-		    }
-		  else if (*sos == 'D' && *(sos - 1) == 'D')
-		    {
-		      dfp_len = 16;
-		      dfp_type = builtin_type (gdbarch)->builtin_declong;
-		      sos--;
-		    }
-		  else
-		    {
-		      dfp_len = 8;
-		      dfp_type = builtin_type (gdbarch)->builtin_decdouble;
-		    }
-		}
-
-	      /* Replace %Hf, %Df and %DDf with %s's.  */
-	      *++sos = 's';
-
-	      /* Go through the whole format string and pull the correct
-		 number of chars back to compensate for the change in the
-		 format specifier.  */
-	      while (nnull_chars < nargs - i)
-		{
-		  if (*eos == '\0')
-		    nnull_chars++;
-
-		  *++sos = *++eos;
-		}
-
-	      /* Conversion between different DFP types.  */
-	      if (TYPE_CODE (param_type) == TYPE_CODE_DECFLOAT)
-		decimal_convert (param_ptr, TYPE_LENGTH (param_type),
-				 byte_order, dec, dfp_len, byte_order);
-	      else
-		/* If this is a non-trivial conversion, just output 0.
-		   A correct converted value can be displayed by explicitly
-		   casting to a DFP type.  */
-		decimal_from_string (dec, dfp_len, byte_order, "0");
-
-	      dfp_value = value_from_decfloat (dfp_type, dec);
-
-	      dfp_ptr = (gdb_byte *) value_contents (dfp_value);
-
-	      decimal_to_string (dfp_ptr, dfp_len, byte_order, decstr);
-
-	      /* Print the DFP value.  */
-              fprintf_filtered (stream, current_substring, decstr);
-
-	      break;
-#endif
-	    }
-
+	  case decfloat_arg:
+	    printf_decfloat (stream, current_substring, val_args[i]);
+	    break;
 	  case ptr_arg:
-	    {
-	      /* We avoid the host's %p because pointers are too
-		 likely to be the wrong size.  The only interesting
-		 modifier for %p is a width; extract that, and then
-		 handle %p as glibc would: %#x or a literal "(nil)".  */
-
-	      char *p, *fmt, *fmt_p;
-#ifdef PRINTF_HAS_LONG_LONG
-	      long long val = value_as_long (val_args[i]);
-#else
-	      long val = value_as_long (val_args[i]);
-#endif
-
-	      fmt = alloca (strlen (current_substring) + 5);
-
-	      /* Copy up to the leading %.  */
-	      p = current_substring;
-	      fmt_p = fmt;
-	      while (*p)
-		{
-		  int is_percent = (*p == '%');
-
-		  *fmt_p++ = *p++;
-		  if (is_percent)
-		    {
-		      if (*p == '%')
-			*fmt_p++ = *p++;
-		      else
-			break;
-		    }
-		}
-
-	      if (val != 0)
-		*fmt_p++ = '#';
-
-	      /* Copy any width.  */
-	      while (*p >= '0' && *p < '9')
-		*fmt_p++ = *p++;
-
-	      gdb_assert (*p == 'p' && *(p + 1) == '\0');
-	      if (val != 0)
-		{
-#ifdef PRINTF_HAS_LONG_LONG
-		  *fmt_p++ = 'l';
-#endif
-		  *fmt_p++ = 'l';
-		  *fmt_p++ = 'x';
-		  *fmt_p++ = '\0';
-                  fprintf_filtered (stream, fmt, val);
-		}
-	      else
-		{
-		  *fmt_p++ = 's';
-		  *fmt_p++ = '\0';
-                  fprintf_filtered (stream, fmt, "(nil)");
-		}
-
-	      break;
-	    }
+	    printf_pointer (stream, current_substring, val_args[i]);
+	    break;
 	  case literal_piece:
 	    /* Print a portion of the format string that has no
 	       directives.  Note that this will not include any

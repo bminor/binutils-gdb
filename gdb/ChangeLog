@@ -1,3 +1,12 @@
+2013-02-11  Doug Evans  <dje@google.com>
+
+	* printcmd.c (printf_c_string,printf_wide_c_string): New functions.
+	(printf_decfloat): New function.  Broken out from ui_printf.
+	Remove unnecessary code to shift the entire format string down.
+	(printf_pointer): New function.
+	(ui_printf): Code to print C strings, wide C strings, decfloats,
+	and pointers moved to separate functions.
+
 2013-02-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* valops.c (value_assign): Handling bitfield offset in

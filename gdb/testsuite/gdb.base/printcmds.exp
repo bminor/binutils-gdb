@@ -770,6 +770,9 @@ proc test_printf_with_dfp {} {
 
     # The largest exponent for 128-bit dfp value is 6144.
     gdb_test "printf \"%DDf\\n\",1.2E6144dl" "1.200000000000000000000000000000000E\\+6144"
+
+    # GDB used to get this wrong.
+    gdb_test "printf \"%Hf %Hf\\n\",1.2df,1.3df" "1.2 1.3"
 }
 
 proc test_print_symbol {} {
