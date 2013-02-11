@@ -1,5 +1,51 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_got_entry): Update comment above tls_type entry
+	to say that each structure represents only one type of TLS reference.
+	(GOT_TLS_TYPE): New define.
+	(mips_elf_link_hash_entry): Temporarily split tls_type and
+	tls_got_offset into two variables each.
+	(mips_elf_link_hash_newfunc): Update accordingly.
+	(mips_elf_got_entry_eq, mips_elf_got_entry_hash)
+	(mips_elf_multi_got_entry_eq): Require the tls_type to be the same.
+	(mips_elf_reloc_tls_type, mips_tls_got_entries): New functions.
+	(mips_tls_got_relocs): Use a switch statement.
+	(mips_elf_count_global_tls_entries): Handle the new hash entry fields.
+	(mips_elf_initialize_tls_slots): Use a switch statement.  Avoid
+	local "offset" variable.
+	(mips_tls_got_index): Remove r_type argument and assert.  Remove
+	code that handled entries with two TLS types; always use the
+	original got_index instead.
+	(mips_tls_single_got_index): New function.
+	(mips_elf_local_got_index): Use entry->tls_type to check for
+	TLS entries.  Use mips_tls_single_got_index.  Update call to
+	mips_tls_got_index.
+	(mips_elf_global_got_index): Use mips_elf_reloc_tls_type.
+	Use p->tls_type to check for TLS entries.  Update call to
+	mips_tls_got_index.  Use mips_tls_single_got_index.
+	(mips_elf_create_local_got_entry): Use mips_elf_reloc_tls_type.
+	Use entry.tls_type to check for TLS entries.
+	(mips_elf_record_global_got_symbol): Replace tls_flag argument
+	with r_type argument.  Use mips_elf_reloc_tls_type.
+	Set up the new hash entry fields.
+	(mips_elf_record_local_got_symbol): Replace tls_flag argument
+	with r_type argument.  Use mips_elf_reloc_tls_type and
+	mips_tls_got_entries.  Remove code that handled entries
+	with multiple TLS types.
+	(mips_elf_make_got_per_bfd): Use mips_tls_got_entries.
+	(mips_elf_initialize_tls_index): Handle new hash entry fields.
+	Use equality rather than masks when checking for specific TLS types.
+	Use mips_tls_got_entries.  Remove code that handled entries
+	with multiple TLS types.
+	(mips_elf_calculate_relocation): Use TLS_RELOC_P instead of
+	testing the hash table entry.
+	(_bfd_mips_elf_check_relocs): Update calls to
+	mips_elf_record_global_got_symbol and mips_elf_record_local_got_symbol.
+	(_bfd_mips_elf_finish_dynamic_symbol): Don't check h->type.
+	(_bfd_mips_elf_copy_indirect_symbol): Handle new hash entry fields.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_multi_got_entry_hash): Rename to...
 	(mips_elf_got_entry_hash): ...this, deleting the old version.
 	(mips_elf_create_got_info): Use mips_elf_got_entry_hash for
