@@ -1,5 +1,11 @@
 2013-02-11  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c (get_init_priority): Comment typo.
+	(lang_finish): Free link_info.hash and lang_definedness_table.
+	(lang_end): Delete lang_definedness_table comment.
+
+2013-02-11  Alan Modra  <amodra@gmail.com>
+
 	PR ld/15130
 	* ld.texinfo (-rpath-link): Typo fix.
 
