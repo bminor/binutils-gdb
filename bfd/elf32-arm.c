@@ -3460,7 +3460,7 @@ elf32_arm_hash_table_free (struct bfd_link_hash_table *hash)
     = (struct elf32_arm_link_hash_table *) hash;
 
   bfd_hash_table_free (&ret->stub_hash_table);
-  _bfd_generic_link_hash_table_free (hash);
+  _bfd_elf_link_hash_table_free (hash);
 }
 
 /* Determine if we're dealing with a Thumb only architecture.  */

@@ -4043,7 +4043,7 @@ ppc64_elf_link_hash_table_free (struct bfd_link_hash_table *hash)
   bfd_hash_table_free (&htab->branch_hash_table);
   if (htab->tocsave_htab)
     htab_delete (htab->tocsave_htab);
-  _bfd_generic_link_hash_table_free (hash);
+  _bfd_elf_link_hash_table_free (hash);
 }
 
 /* Satisfy the ELF linker by filling in some fields in our fake bfd.  */

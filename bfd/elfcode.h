@@ -1071,6 +1071,7 @@ elf_checksum_contents (bfd *abfd,
     {
       Elf_Internal_Shdr i_shdr;
       Elf_External_Shdr x_shdr;
+      bfd_byte *contents, *free_contents;
 
       i_shdr = *i_shdrp[count];
       i_shdr.sh_offset = 0;
@@ -1078,27 +1079,35 @@ elf_checksum_contents (bfd *abfd,
       elf_swap_shdr_out (abfd, &i_shdr, &x_shdr);
       (*process) (&x_shdr, sizeof x_shdr, arg);
 
-      /* PR ld/12451:
-	 Process the section's contents, if it has some.  Read them in if necessary.  */
-      if (i_shdr.contents)
-	(*process) (i_shdr.contents, i_shdr.sh_size, arg);
-      else if (i_shdr.sh_type != SHT_NOBITS)
+      /* Process the section's contents, if it has some.
+	 PR ld/12451: Read them in if necessary.  */
+      if (i_shdr.sh_type == SHT_NOBITS)
+	continue;
+      free_contents = NULL;
+      contents = i_shdr.contents;
+      if (contents == NULL)
 	{
 	  asection *sec;
 
 	  sec = bfd_section_from_elf_index (abfd, count);
 	  if (sec != NULL)
 	    {
-	      if (sec->contents == NULL)
+	      contents = sec->contents;
+	      if (contents == NULL)
 		{
 		  /* Force rereading from file.  */
 		  sec->flags &= ~SEC_IN_MEMORY;
-		  if (! bfd_malloc_and_get_section (abfd, sec, & sec->contents))
+		  if (!bfd_malloc_and_get_section (abfd, sec, &free_contents))
 		    continue;
+		  contents = free_contents;
 		}
-	      if (sec->contents != NULL)
-		(*process) (sec->contents, i_shdr.sh_size, arg);
 	    }
+	}
+      if (contents != NULL)
+	{
+	  (*process) (contents, i_shdr.sh_size, arg);
+	  if (free_contents != NULL)
+	    free (free_contents);
 	}
     }
 

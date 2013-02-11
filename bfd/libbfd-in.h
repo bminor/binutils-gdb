@@ -707,6 +707,10 @@ extern bfd_boolean _bfd_write_merged_section
 extern bfd_vma _bfd_merged_section_offset
   (bfd *, asection **, void *, bfd_vma);
 
+/* Tidy up when done.  */
+
+extern void _bfd_merge_sections_free (void *);
+
 /* Create a string table.  */
 extern struct bfd_strtab_hash *_bfd_stringtab_init
   (void);

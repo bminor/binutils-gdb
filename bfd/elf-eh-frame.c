@@ -1770,74 +1770,81 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
   struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
   asection *sec;
-  bfd_byte *contents;
-  asection *eh_frame_sec;
-  bfd_size_type size;
-  bfd_boolean retval;
-  bfd_vma encoded_eh_frame;
+  bfd_boolean retval = TRUE;
 
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
   sec = hdr_info->hdr_sec;
-  if (sec == NULL)
-    return TRUE;
 
-  size = EH_FRAME_HDR_SIZE;
-  if (hdr_info->array && hdr_info->array_count == hdr_info->fde_count)
-    size += 4 + hdr_info->fde_count * 8;
-  contents = (bfd_byte *) bfd_malloc (size);
-  if (contents == NULL)
-    return FALSE;
-
-  eh_frame_sec = bfd_get_section_by_name (abfd, ".eh_frame");
-  if (eh_frame_sec == NULL)
+  if (info->eh_frame_hdr && sec != NULL)
     {
-      free (contents);
-      return FALSE;
-    }
+      bfd_byte *contents;
+      asection *eh_frame_sec;
+      bfd_size_type size;
+      bfd_vma encoded_eh_frame;
 
-  memset (contents, 0, EH_FRAME_HDR_SIZE);
-  contents[0] = 1;				/* Version.  */
-  contents[1] = get_elf_backend_data (abfd)->elf_backend_encode_eh_address
-    (abfd, info, eh_frame_sec, 0, sec, 4,
-     &encoded_eh_frame);			/* .eh_frame offset.  */
+      size = EH_FRAME_HDR_SIZE;
+      if (hdr_info->array && hdr_info->array_count == hdr_info->fde_count)
+	size += 4 + hdr_info->fde_count * 8;
+      contents = (bfd_byte *) bfd_malloc (size);
+      if (contents == NULL)
+	return FALSE;
 
-  if (hdr_info->array && hdr_info->array_count == hdr_info->fde_count)
-    {
-      contents[2] = DW_EH_PE_udata4;		/* FDE count encoding.  */
-      contents[3] = DW_EH_PE_datarel | DW_EH_PE_sdata4; /* Search table enc.  */
-    }
-  else
-    {
-      contents[2] = DW_EH_PE_omit;
-      contents[3] = DW_EH_PE_omit;
-    }
-  bfd_put_32 (abfd, encoded_eh_frame, contents + 4);
-
-  if (contents[2] != DW_EH_PE_omit)
-    {
-      unsigned int i;
-
-      bfd_put_32 (abfd, hdr_info->fde_count, contents + EH_FRAME_HDR_SIZE);
-      qsort (hdr_info->array, hdr_info->fde_count, sizeof (*hdr_info->array),
-	     vma_compare);
-      for (i = 0; i < hdr_info->fde_count; i++)
+      eh_frame_sec = bfd_get_section_by_name (abfd, ".eh_frame");
+      if (eh_frame_sec == NULL)
 	{
-	  bfd_put_32 (abfd,
-		      hdr_info->array[i].initial_loc
-		      - sec->output_section->vma,
-		      contents + EH_FRAME_HDR_SIZE + i * 8 + 4);
-	  bfd_put_32 (abfd,
-		      hdr_info->array[i].fde - sec->output_section->vma,
-		      contents + EH_FRAME_HDR_SIZE + i * 8 + 8);
+	  free (contents);
+	  return FALSE;
 	}
-    }
 
-  /* FIXME: octets_per_byte.  */
-  retval = bfd_set_section_contents (abfd, sec->output_section,
-				     contents, (file_ptr) sec->output_offset,
-				     sec->size);
-  free (contents);
+      memset (contents, 0, EH_FRAME_HDR_SIZE);
+      /* Version.  */
+      contents[0] = 1;
+      /* .eh_frame offset.  */
+      contents[1] = get_elf_backend_data (abfd)->elf_backend_encode_eh_address
+	(abfd, info, eh_frame_sec, 0, sec, 4, &encoded_eh_frame);
+
+      if (hdr_info->array && hdr_info->array_count == hdr_info->fde_count)
+	{
+	  /* FDE count encoding.  */
+	  contents[2] = DW_EH_PE_udata4;
+	  /* Search table encoding.  */
+	  contents[3] = DW_EH_PE_datarel | DW_EH_PE_sdata4;
+	}
+      else
+	{
+	  contents[2] = DW_EH_PE_omit;
+	  contents[3] = DW_EH_PE_omit;
+	}
+      bfd_put_32 (abfd, encoded_eh_frame, contents + 4);
+
+      if (contents[2] != DW_EH_PE_omit)
+	{
+	  unsigned int i;
+
+	  bfd_put_32 (abfd, hdr_info->fde_count, contents + EH_FRAME_HDR_SIZE);
+	  qsort (hdr_info->array, hdr_info->fde_count,
+		 sizeof (*hdr_info->array), vma_compare);
+	  for (i = 0; i < hdr_info->fde_count; i++)
+	    {
+	      bfd_put_32 (abfd,
+			  hdr_info->array[i].initial_loc
+			  - sec->output_section->vma,
+			  contents + EH_FRAME_HDR_SIZE + i * 8 + 4);
+	      bfd_put_32 (abfd,
+			  hdr_info->array[i].fde - sec->output_section->vma,
+			  contents + EH_FRAME_HDR_SIZE + i * 8 + 8);
+	    }
+	}
+
+      /* FIXME: octets_per_byte.  */
+      retval = bfd_set_section_contents (abfd, sec->output_section, contents,
+					 (file_ptr) sec->output_offset,
+					 sec->size);
+      free (contents);
+    }
+  if (hdr_info->array != NULL)
+    free (hdr_info->array);
   return retval;
 }
 

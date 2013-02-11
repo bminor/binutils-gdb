@@ -1057,7 +1057,7 @@ elf_metag_link_hash_table_free (struct bfd_link_hash_table *btab)
     = (struct elf_metag_link_hash_table *) btab;
 
   bfd_hash_table_free (&htab->bstab);
-  _bfd_generic_link_hash_table_free (btab);
+  _bfd_elf_link_hash_table_free (btab);
 }
 
 /* Section name for stubs is the associated section name plus this

@@ -2129,7 +2129,7 @@ elf64_aarch64_hash_table_free (struct bfd_link_hash_table *hash)
     = (struct elf64_aarch64_link_hash_table *) hash;
 
   bfd_hash_table_free (&ret->stub_hash_table);
-  _bfd_generic_link_hash_table_free (hash);
+  _bfd_elf_link_hash_table_free (hash);
 }
 
 static bfd_vma

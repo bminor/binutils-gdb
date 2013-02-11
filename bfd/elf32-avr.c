@@ -708,7 +708,7 @@ elf32_avr_link_hash_table_free (struct bfd_link_hash_table *btab)
     free (htab->amt_destination_addr);
 
   bfd_hash_table_free (&htab->bstab);
-  _bfd_generic_link_hash_table_free (btab);
+  _bfd_elf_link_hash_table_free (btab);
 }
 
 /* Calculates the effective distance of a pc relative jump/call.  */

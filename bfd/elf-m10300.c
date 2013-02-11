@@ -4646,9 +4646,9 @@ elf32_mn10300_link_hash_table_free (struct bfd_link_hash_table *hash)
   struct elf32_mn10300_link_hash_table *ret
     = (struct elf32_mn10300_link_hash_table *) hash;
 
-  _bfd_generic_link_hash_table_free
+  _bfd_elf_link_hash_table_free
     ((struct bfd_link_hash_table *) ret->static_hash_table);
-  _bfd_generic_link_hash_table_free
+  _bfd_elf_link_hash_table_free
     ((struct bfd_link_hash_table *) ret);
 }
 

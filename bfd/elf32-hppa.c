@@ -450,7 +450,7 @@ elf32_hppa_link_hash_table_free (struct bfd_link_hash_table *btab)
     = (struct elf32_hppa_link_hash_table *) btab;
 
   bfd_hash_table_free (&htab->bstab);
-  _bfd_generic_link_hash_table_free (btab);
+  _bfd_elf_link_hash_table_free (btab);
 }
 
 /* Build a name for an entry in the stub hash table.  */

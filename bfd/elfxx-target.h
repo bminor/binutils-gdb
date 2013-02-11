@@ -233,7 +233,7 @@
 #endif
 
 #ifndef bfd_elfNN_bfd_link_hash_table_free
-#define bfd_elfNN_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
+#define bfd_elfNN_bfd_link_hash_table_free _bfd_elf_link_hash_table_free
 #endif
 
 #ifdef elf_backend_relocate_section

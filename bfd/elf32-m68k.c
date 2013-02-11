@@ -982,6 +982,7 @@ elf_m68k_link_hash_table_free (struct bfd_link_hash_table *_htab)
       htab_delete (htab->multi_got_.bfd2got);
       htab->multi_got_.bfd2got = NULL;
     }
+  _bfd_elf_link_hash_table_free (_htab);
 }
 
 /* Set the right machine number.  */

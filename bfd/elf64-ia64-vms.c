@@ -1072,7 +1072,7 @@ elf64_ia64_hash_table_free (struct bfd_link_hash_table *hash)
     objalloc_free ((struct objalloc *) ia64_info->loc_hash_memory);
   elf_link_hash_traverse (&ia64_info->root,
 			  elf64_ia64_global_dyn_info_free, NULL);
-  _bfd_generic_link_hash_table_free (hash);
+  _bfd_elf_link_hash_table_free (hash);
 }
 
 /* Traverse both local and global hash tables.  */

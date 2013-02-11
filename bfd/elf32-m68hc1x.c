@@ -105,7 +105,7 @@ m68hc11_elf_bfd_link_hash_table_free (struct bfd_link_hash_table *hash)
 
   bfd_hash_table_free (ret->stub_hash_table);
   free (ret->stub_hash_table);
-  _bfd_generic_link_hash_table_free (hash);
+  _bfd_elf_link_hash_table_free (hash);
 }
 
 /* Assorted hash table functions.  */
