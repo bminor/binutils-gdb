@@ -1,5 +1,16 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_count_got_entries): Delete.
+	(mips_elf_check_recreate_got, mips_elf_recreate_got): Take a
+	mips_elf_traverse_got_arg.  Count GOT entries.
+	(mips_elf_resolve_final_got_entries): Take the bfd_link_info
+	as argument.  Update after above changes.
+	(mips_elf_merge_got, mips_elf_lay_out_got): Don't call
+	mips_elf_count_got_entries.  Update the calls to
+	mips_elf_resolve_final_got_entries.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_got_tls_type): New enum.
 	(mips_got_entry): Add tls_initialized.
 	(mips_elf_got_entry_hash, mips_elf_got_entry_eq, mips_tls_got_relocs)

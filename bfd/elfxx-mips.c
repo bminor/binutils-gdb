@@ -2979,23 +2979,6 @@ mips_elf_count_got_entry (struct bfd_link_info *info,
     g->global_gotno += 1;
 }
 
-/* A htab_traverse callback.  Count the number of GOT entries and
-   TLS relocations required for the GOT entry in *ENTRYP.  DATA points
-   to a mips_elf_traverse_got_arg structure.  */
-
-static int
-mips_elf_count_got_entries (void **entryp, void *data)
-{
-  struct mips_got_entry *entry;
-  struct mips_elf_traverse_got_arg *arg;
-
-  entry = (struct mips_got_entry *) *entryp;
-  arg = (struct mips_elf_traverse_got_arg *) data;
-  mips_elf_count_got_entry (arg->info, arg->g, entry);
-
-  return 1;
-}
-
 /* Output a simple dynamic relocation into SRELOC.  */
 
 static void
@@ -3861,17 +3844,19 @@ mips_elf_allocate_dynamic_relocations (bfd *abfd, struct bfd_link_info *info,
     }
 }
 
-/* A htab_traverse callback for GOT entries.  Set boolean *DATA to true
-   if the GOT entry is for an indirect or warning symbol.  */
+/* A htab_traverse callback for GOT entries, with DATA pointing to a
+   mips_elf_traverse_got_arg structure.  Count the number of GOT
+   entries and TLS relocs.  Set DATA->value to true if we need
+   to resolve indirect or warning symbols and then recreate the GOT.  */
 
 static int
 mips_elf_check_recreate_got (void **entryp, void *data)
 {
   struct mips_got_entry *entry;
-  bfd_boolean *must_recreate;
+  struct mips_elf_traverse_got_arg *arg;
 
   entry = (struct mips_got_entry *) *entryp;
-  must_recreate = (bfd_boolean *) data;
+  arg = (struct mips_elf_traverse_got_arg *) data;
   if (entry->abfd != NULL && entry->symndx == -1)
     {
       struct mips_elf_link_hash_entry *h;
@@ -3880,27 +3865,28 @@ mips_elf_check_recreate_got (void **entryp, void *data)
       if (h->root.root.type == bfd_link_hash_indirect
 	  || h->root.root.type == bfd_link_hash_warning)
 	{
-	  *must_recreate = TRUE;
+	  arg->value = TRUE;
 	  return 0;
 	}
     }
+  mips_elf_count_got_entry (arg->info, arg->g, entry);
   return 1;
 }
 
-/* A htab_traverse callback for GOT entries.  Add all entries to
-   hash table *DATA, converting entries for indirect and warning
-   symbols into entries for the target symbol.  Set *DATA to null
-   on error.  */
+/* A htab_traverse callback for GOT entries, with DATA pointing to a
+   mips_elf_traverse_got_arg structure.  Add all entries to DATA->g,
+   converting entries for indirect and warning symbols into entries
+   for the target symbol.  Set DATA->g to null on error.  */
 
 static int
 mips_elf_recreate_got (void **entryp, void *data)
 {
-  htab_t *new_got;
   struct mips_got_entry new_entry, *entry;
+  struct mips_elf_traverse_got_arg *arg;
   void **slot;
 
-  new_got = (htab_t *) data;
   entry = (struct mips_got_entry *) *entryp;
+  arg = (struct mips_elf_traverse_got_arg *) data;
   if (entry->abfd != NULL
       && entry->symndx == -1
       && (entry->d.h->root.root.type == bfd_link_hash_indirect
@@ -3920,10 +3906,10 @@ mips_elf_recreate_got (void **entryp, void *data)
 	     || h->root.root.type == bfd_link_hash_warning);
       entry->d.h = h;
     }
-  slot = htab_find_slot (*new_got, entry, INSERT);
+  slot = htab_find_slot (arg->g->got_entries, entry, INSERT);
   if (slot == NULL)
     {
-      *new_got = NULL;
+      arg->g = NULL;
       return 0;
     }
   if (*slot == NULL)
@@ -3933,12 +3919,13 @@ mips_elf_recreate_got (void **entryp, void *data)
 	  entry = bfd_alloc (entry->abfd, sizeof (*entry));
 	  if (!entry)
 	    {
-	      *new_got = NULL;
+	      arg->g = NULL;
 	      return 0;
 	    }
 	  *entry = new_entry;
 	}
       *slot = entry;
+      mips_elf_count_got_entry (arg->info, arg->g, entry);
     }
   return 1;
 }
@@ -3947,24 +3934,32 @@ mips_elf_recreate_got (void **entryp, void *data)
    replace them with entries for the target symbol.  */
 
 static bfd_boolean
-mips_elf_resolve_final_got_entries (struct mips_got_info *g)
+mips_elf_resolve_final_got_entries (struct bfd_link_info *info,
+				    struct mips_got_info *g)
 {
-  bfd_boolean must_recreate;
-  htab_t new_got;
+  struct mips_elf_traverse_got_arg tga;
+  struct mips_got_info oldg;
 
-  must_recreate = FALSE;
-  htab_traverse (g->got_entries, mips_elf_check_recreate_got, &must_recreate);
-  if (must_recreate)
+  oldg = *g;
+
+  tga.info = info;
+  tga.g = g;
+  tga.value = FALSE;
+  htab_traverse (g->got_entries, mips_elf_check_recreate_got, &tga);
+  if (tga.value)
     {
-      new_got = htab_create (htab_size (g->got_entries),
-			     mips_elf_got_entry_hash,
-			     mips_elf_got_entry_eq, NULL);
-      htab_traverse (g->got_entries, mips_elf_recreate_got, &new_got);
-      if (new_got == NULL)
+      *g = oldg;
+      g->got_entries = htab_create (htab_size (oldg.got_entries),
+				    mips_elf_got_entry_hash,
+				    mips_elf_got_entry_eq, NULL);
+      if (!g->got_entries)
 	return FALSE;
 
-      htab_delete (g->got_entries);
-      g->got_entries = new_got;
+      htab_traverse (oldg.got_entries, mips_elf_recreate_got, &tga);
+      if (!tga.g)
+	return FALSE;
+
+      htab_delete (oldg.got_entries);
     }
   return TRUE;
 }
@@ -4134,16 +4129,11 @@ static bfd_boolean
 mips_elf_merge_got (bfd *abfd, struct mips_got_info *g,
 		    struct mips_elf_got_per_bfd_arg *arg)
 {
-  struct mips_elf_traverse_got_arg tga;
   unsigned int estimate;
   int result;
 
-  if (!mips_elf_resolve_final_got_entries (g))
+  if (!mips_elf_resolve_final_got_entries (arg->info, g))
     return FALSE;
-
-  tga.info = arg->info;
-  tga.g = g;
-  htab_traverse (g->got_entries, mips_elf_count_got_entries, &tga);
 
   /* Work out the number of page, local and TLS entries.  */
   estimate = arg->max_pages;
@@ -8608,11 +8598,6 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   g->local_gotno += htab->reserved_gotno;
   g->assigned_gotno = htab->reserved_gotno;
 
-  /* Replace entries for indirect and warning symbols with entries for
-     the target symbol.  */
-  if (!mips_elf_resolve_final_got_entries (g))
-    return FALSE;
-
   /* Decide which symbols need to go in the global part of the GOT and
      count the number of reloc-only GOT symbols.  */
   mips_elf_link_hash_traverse (htab, mips_elf_count_got_symbols, info);
@@ -8652,10 +8637,10 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
 
   g->local_gotno += page_gotno;
 
-  /* Count the number of GOT entries and TLS relocs.  */
-  tga.info = info;
-  tga.g = g;
-  htab_traverse (g->got_entries, mips_elf_count_got_entries, &tga);
+  /* Replace entries for indirect and warning symbols with entries for
+     the target symbol.  Count the number of GOT entries and TLS relocs.  */
+  if (!mips_elf_resolve_final_got_entries (info, g))
+    return FALSE;
 
   s->size += g->local_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
   s->size += g->global_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
