@@ -161,9 +161,6 @@ struct mips_got_info
   struct htab *got_entries;
   /* A hash table of mips_got_page_entry structures.  */
   struct htab *got_page_entries;
-  /* A hash table mapping input bfds to other mips_got_info.  NULL
-     unless multi-got was necessary.  */
-  struct htab *bfd2got;
   /* In multi-got links, a pointer to the next got (err, rather, most
      of the time, it points to the previous got).  */
   struct mips_got_info *next;
@@ -174,21 +171,10 @@ struct mips_got_info
   bfd_vma tls_ldm_offset;
 };
 
-/* Map an input bfd to a got in a multi-got link.  */
-
-struct mips_elf_bfd2got_hash
-{
-  bfd *bfd;
-  struct mips_got_info *g;
-};
-
-/* Structure passed when traversing the bfd2got hash table, used to
-   create and merge bfd's gots.  */
+/* Structure passed when merging bfds' gots.  */
 
 struct mips_elf_got_per_bfd_arg
 {
-  /* A hashtable that maps bfds to gots.  */
-  htab_t bfd2got;
   /* The output bfd.  */
   bfd *obfd;
   /* The link information.  */
@@ -696,8 +682,6 @@ static bfd_boolean mips_elf_create_dynamic_relocation
    bfd_vma *, asection *);
 static bfd_vma mips_elf_adjust_gp
   (bfd *, struct mips_got_info *, bfd *);
-static struct mips_got_info *mips_elf_got_for_ibfd
-  (struct mips_got_info *, bfd *);
 
 /* This will be used when we sort the dynamic relocation records.  */
 static bfd *reldyn_sorting_bfd;
@@ -2903,6 +2887,25 @@ mips_elf_bfd_got (bfd *abfd, bfd_boolean create_p)
   return tdata->got;
 }
 
+/* Record that ABFD should use output GOT G.  */
+
+static void
+mips_elf_replace_bfd_got (bfd *abfd, struct mips_got_info *g)
+{
+  struct mips_elf_obj_tdata *tdata;
+
+  BFD_ASSERT (is_mips_elf (abfd));
+  tdata = mips_elf_tdata (abfd);
+  if (tdata->got)
+    {
+      /* The GOT structure itself and the hash table entries are
+	 allocated to a bfd, but the hash tables aren't.  */
+      htab_delete (tdata->got->got_entries);
+      htab_delete (tdata->got->got_page_entries);
+    }
+  tdata->got = g;
+}
+
 /* Return the dynamic relocation section.  If it doesn't exist, try to
    create a new it if CREATE_P, otherwise return NULL.  Also return NULL
    if creation fails.  */
@@ -3034,6 +3037,23 @@ mips_elf_count_got_entry (struct bfd_link_info *info,
     g->local_gotno += 1;
   else
     g->global_gotno += 1;
+}
+
+/* A htab_traverse callback.  Count the number of GOT entries and
+   TLS relocations required for the GOT entry in *ENTRYP.  DATA points
+   to a mips_elf_traverse_got_arg structure.  */
+
+static int
+mips_elf_count_got_entries (void **entryp, void *data)
+{
+  struct mips_got_entry *entry;
+  struct mips_elf_traverse_got_arg *arg;
+
+  entry = (struct mips_got_entry *) *entryp;
+  arg = (struct mips_elf_traverse_got_arg *) data;
+  mips_elf_count_got_entry (arg->info, arg->g, entry);
+
+  return 1;
 }
 
 /* A htab_traverse callback.  If *SLOT describes a GOT entry for a local
@@ -3365,13 +3385,14 @@ mips_elf_global_got_index (bfd *abfd, bfd *ibfd, struct elf_link_hash_entry *h,
   BFD_ASSERT (htab != NULL);
 
   gg = g = htab->got_info;
-  if (g->bfd2got && ibfd)
+  if (g->next && ibfd)
     {
       struct mips_got_entry e, *p;
 
       BFD_ASSERT (h->dynindx >= 0);
 
-      g = mips_elf_got_for_ibfd (g, ibfd);
+      g = mips_elf_bfd_got (ibfd, FALSE);
+      BFD_ASSERT (g);
       if (g->next != gg || TLS_RELOC_P (r_type))
 	{
 	  e.abfd = ibfd;
@@ -3535,10 +3556,10 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
   entry.d.address = value;
   entry.tls_type = mips_elf_reloc_tls_type (r_type);
 
-  g = mips_elf_got_for_ibfd (htab->got_info, ibfd);
+  g = mips_elf_bfd_got (ibfd, FALSE);
   if (g == NULL)
     {
-      g = mips_elf_got_for_ibfd (htab->got_info, abfd);
+      g = mips_elf_bfd_got (abfd, FALSE);
       BFD_ASSERT (g != NULL);
     }
 
@@ -4163,147 +4184,70 @@ mips_elf_count_got_symbols (struct mips_elf_link_hash_entry *h, void *data)
   return 1;
 }
 
-/* Compute the hash value of the bfd in a bfd2got hash entry.  */
-
-static hashval_t
-mips_elf_bfd2got_entry_hash (const void *entry_)
-{
-  const struct mips_elf_bfd2got_hash *entry
-    = (struct mips_elf_bfd2got_hash *)entry_;
-
-  return entry->bfd->id;
-}
-
-/* Check whether two hash entries have the same bfd.  */
+/* A htab_traverse callback for GOT entries.  Add each one to the GOT
+   given in mips_elf_traverse_got_arg DATA.  Clear DATA->G on error.  */
 
 static int
-mips_elf_bfd2got_entry_eq (const void *entry1, const void *entry2)
+mips_elf_add_got_entry (void **entryp, void *data)
 {
-  const struct mips_elf_bfd2got_hash *e1
-    = (const struct mips_elf_bfd2got_hash *)entry1;
-  const struct mips_elf_bfd2got_hash *e2
-    = (const struct mips_elf_bfd2got_hash *)entry2;
+  struct mips_got_entry *entry;
+  struct mips_elf_traverse_got_arg *arg;
+  void **slot;
 
-  return e1->bfd == e2->bfd;
-}
-
-/* In a multi-got link, determine the GOT to be used for IBFD.  G must
-   be the master GOT data.  */
-
-static struct mips_got_info *
-mips_elf_got_for_ibfd (struct mips_got_info *g, bfd *ibfd)
-{
-  struct mips_elf_bfd2got_hash e, *p;
-
-  if (! g->bfd2got)
-    return g;
-
-  e.bfd = ibfd;
-  p = htab_find (g->bfd2got, &e);
-  return p ? p->g : NULL;
-}
-
-/* Use BFD2GOT to find ABFD's got entry, creating one if none exists.
-   Return NULL if an error occured.  */
-
-static struct mips_got_info *
-mips_elf_get_got_for_bfd (struct htab *bfd2got, bfd *output_bfd,
-			  bfd *input_bfd)
-{
-  struct mips_elf_bfd2got_hash bfdgot_entry, *bfdgot;
-  void **bfdgotp;
-
-  bfdgot_entry.bfd = input_bfd;
-  bfdgotp = htab_find_slot (bfd2got, &bfdgot_entry, INSERT);
-  bfdgot = (struct mips_elf_bfd2got_hash *) *bfdgotp;
-
-  if (bfdgot == NULL)
+  entry = (struct mips_got_entry *) *entryp;
+  arg = (struct mips_elf_traverse_got_arg *) data;
+  slot = htab_find_slot (arg->g->got_entries, entry, INSERT);
+  if (!slot)
     {
-      bfdgot = ((struct mips_elf_bfd2got_hash *)
-		bfd_alloc (output_bfd, sizeof (struct mips_elf_bfd2got_hash)));
-      if (bfdgot == NULL)
-	return NULL;
-
-      *bfdgotp = bfdgot;
-
-      bfdgot->bfd = input_bfd;
-      bfdgot->g = mips_elf_create_got_info (input_bfd, FALSE);
-      if (bfdgot->g == NULL)
-	return NULL;
-    }
-
-  return bfdgot->g;
-}
-
-/* A htab_traverse callback for the entries in the master got.
-   Create one separate got for each bfd that has entries in the global
-   got, such that we can tell how many local and global entries each
-   bfd requires.  */
-
-static int
-mips_elf_make_got_per_bfd (void **entryp, void *p)
-{
-  struct mips_got_entry *entry = (struct mips_got_entry *)*entryp;
-  struct mips_elf_got_per_bfd_arg *arg = (struct mips_elf_got_per_bfd_arg *)p;
-  struct mips_got_info *g;
-
-  g = mips_elf_get_got_for_bfd (arg->bfd2got, arg->obfd, entry->abfd);
-  if (g == NULL)
-    {
-      arg->obfd = NULL;
+      arg->g = NULL;
       return 0;
     }
-
-  /* Insert the GOT entry in the bfd's got entry hash table.  */
-  entryp = htab_find_slot (g->got_entries, entry, INSERT);
-  if (*entryp != NULL)
-    return 1;
-
-  *entryp = entry;
-  mips_elf_count_got_entry (arg->info, g, entry);
-
+  if (!*slot)
+    {
+      *slot = entry;
+      mips_elf_count_got_entry (arg->info, arg->g, entry);
+    }
   return 1;
 }
 
-/* A htab_traverse callback for the page entries in the master got.
-   Associate each page entry with the bfd's got.  */
+/* A htab_traverse callback for GOT page entries.  Add each one to the GOT
+   given in mips_elf_traverse_got_arg DATA.  Clear DATA->G on error.  */
 
 static int
-mips_elf_make_got_pages_per_bfd (void **entryp, void *p)
+mips_elf_add_got_page_entry (void **entryp, void *data)
 {
-  struct mips_got_page_entry *entry = (struct mips_got_page_entry *) *entryp;
-  struct mips_elf_got_per_bfd_arg *arg = (struct mips_elf_got_per_bfd_arg *) p;
-  struct mips_got_info *g;
+  struct mips_got_page_entry *entry;
+  struct mips_elf_traverse_got_arg *arg;
+  void **slot;
 
-  g = mips_elf_get_got_for_bfd (arg->bfd2got, arg->obfd, entry->abfd);
-  if (g == NULL)
+  entry = (struct mips_got_page_entry *) *entryp;
+  arg = (struct mips_elf_traverse_got_arg *) data;
+  slot = htab_find_slot (arg->g->got_page_entries, entry, INSERT);
+  if (!slot)
     {
-      arg->obfd = NULL;
+      arg->g = NULL;
       return 0;
     }
-
-  /* Insert the GOT entry in the bfd's got entry hash table.  */
-  entryp = htab_find_slot (g->got_page_entries, entry, INSERT);
-  if (*entryp != NULL)
-    return 1;
-
-  *entryp = entry;
-  g->page_gotno += entry->num_pages;
+  if (!*slot)
+    {
+      *slot = entry;
+      arg->g->page_gotno += entry->num_pages;
+    }
   return 1;
 }
 
-/* Consider merging the got described by BFD2GOT with TO, using the
-   information given by ARG.  Return -1 if this would lead to overflow,
-   1 if they were merged successfully, and 0 if a merge failed due to
-   lack of memory.  (These values are chosen so that nonnegative return
-   values can be returned by a htab_traverse callback.)  */
+/* Consider merging FROM, which is ABFD's GOT, into TO.  Return -1 if
+   this would lead to overflow, 1 if they were merged successfully,
+   and 0 if a merge failed due to lack of memory.  (These values are chosen
+   so that nonnegative return values can be returned by a htab_traverse
+   callback.)  */
 
 static int
-mips_elf_merge_got_with (struct mips_elf_bfd2got_hash *bfd2got,
+mips_elf_merge_got_with (bfd *abfd, struct mips_got_info *from,
 			 struct mips_got_info *to,
 			 struct mips_elf_got_per_bfd_arg *arg)
 {
-  struct mips_got_info *from = bfd2got->g;
+  struct mips_elf_traverse_got_arg tga;
   unsigned int estimate;
 
   /* Work out how many page entries we would need for the combined GOT.  */
@@ -4328,44 +4272,42 @@ mips_elf_merge_got_with (struct mips_elf_bfd2got_hash *bfd2got,
   if (estimate > arg->max_count)
     return -1;
 
-  /* Commit to the merge.  Record that TO is now the bfd for this got.  */
-  bfd2got->g = to;
-
   /* Transfer the bfd's got information from FROM to TO.  */
-  htab_traverse (from->got_entries, mips_elf_make_got_per_bfd, arg);
-  if (arg->obfd == NULL)
+  tga.info = arg->info;
+  tga.g = to;
+  htab_traverse (from->got_entries, mips_elf_add_got_entry, &tga);
+  if (!tga.g)
     return 0;
 
-  htab_traverse (from->got_page_entries, mips_elf_make_got_pages_per_bfd, arg);
-  if (arg->obfd == NULL)
+  htab_traverse (from->got_page_entries, mips_elf_add_got_page_entry, &tga);
+  if (!tga.g)
     return 0;
 
-  /* We don't have to worry about releasing memory of the actual
-     got entries, since they're all in the master got_entries hash
-     table anyway.  */
-  htab_delete (from->got_entries);
-  htab_delete (from->got_page_entries);
+  mips_elf_replace_bfd_got (abfd, to);
   return 1;
 }
 
-/* Attempt to merge gots of different input bfds.  Try to use as much
+/* Attempt to merge GOT G, which belongs to ABFD.  Try to use as much
    as possible of the primary got, since it doesn't require explicit
    dynamic relocations, but don't use bfds that would reference global
    symbols out of the addressable range.  Failing the primary got,
    attempt to merge with the current got, or finish the current got
    and then make make the new got current.  */
 
-static int
-mips_elf_merge_gots (void **bfd2got_, void *p)
+static bfd_boolean
+mips_elf_merge_got (bfd *abfd, struct mips_got_info *g,
+		    struct mips_elf_got_per_bfd_arg *arg)
 {
-  struct mips_elf_bfd2got_hash *bfd2got
-    = (struct mips_elf_bfd2got_hash *)*bfd2got_;
-  struct mips_elf_got_per_bfd_arg *arg = (struct mips_elf_got_per_bfd_arg *)p;
-  struct mips_got_info *g;
+  struct mips_elf_traverse_got_arg tga;
   unsigned int estimate;
   int result;
 
-  g = bfd2got->g;
+  if (!mips_elf_resolve_final_got_entries (g))
+    return FALSE;
+
+  tga.info = arg->info;
+  tga.g = g;
+  htab_traverse (g->got_entries, mips_elf_count_got_entries, &tga);
 
   /* Work out the number of page, local and TLS entries.  */
   estimate = arg->max_pages;
@@ -4385,12 +4327,12 @@ mips_elf_merge_gots (void **bfd2got_, void *p)
 	 a starting point for the primary GOT.  */
       if (!arg->primary)
 	{
-	  arg->primary = bfd2got->g;
-	  return 1;
+	  arg->primary = g;
+	  return TRUE;
 	}
 
       /* Try merging with the primary GOT.  */
-      result = mips_elf_merge_got_with (bfd2got, arg->primary, arg);
+      result = mips_elf_merge_got_with (abfd, g, arg->primary, arg);
       if (result >= 0)
 	return result;
     }
@@ -4398,7 +4340,7 @@ mips_elf_merge_gots (void **bfd2got_, void *p)
   /* If we can merge with the last-created got, do it.  */
   if (arg->current)
     {
-      result = mips_elf_merge_got_with (bfd2got, arg->current, arg);
+      result = mips_elf_merge_got_with (abfd, g, arg->current, arg);
       if (result >= 0)
 	return result;
     }
@@ -4409,7 +4351,7 @@ mips_elf_merge_gots (void **bfd2got_, void *p)
   g->next = arg->current;
   arg->current = g;
 
-  return 1;
+  return TRUE;
 }
 
 /* ENTRYP is a hash table entry for a mips_got_entry.  Set its gotidx
@@ -4592,10 +4534,10 @@ mips_elf_forbid_lazy_stubs (void **entryp, void *data)
 static bfd_vma
 mips_elf_adjust_gp (bfd *abfd, struct mips_got_info *g, bfd *ibfd)
 {
-  if (g->bfd2got == NULL)
+  if (!g->next)
     return 0;
 
-  g = mips_elf_got_for_ibfd (g, ibfd);
+  g = mips_elf_bfd_got (ibfd, FALSE);
   if (! g)
     return 0;
 
@@ -4619,34 +4561,16 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
   struct mips_elf_traverse_got_arg tga;
   struct mips_got_info *g, *gg;
   unsigned int assign, needed_relocs;
-  bfd *dynobj;
+  bfd *dynobj, *ibfd;
 
   dynobj = elf_hash_table (info)->dynobj;
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
 
   g = htab->got_info;
-  g->bfd2got = htab_try_create (1, mips_elf_bfd2got_entry_hash,
-				mips_elf_bfd2got_entry_eq, NULL);
-  if (g->bfd2got == NULL)
-    return FALSE;
 
-  got_per_bfd_arg.bfd2got = g->bfd2got;
   got_per_bfd_arg.obfd = abfd;
   got_per_bfd_arg.info = info;
-
-  /* Count how many GOT entries each input bfd requires, creating a
-     map from bfd to got info while at that.  */
-  htab_traverse (g->got_entries, mips_elf_make_got_per_bfd, &got_per_bfd_arg);
-  if (got_per_bfd_arg.obfd == NULL)
-    return FALSE;
-
-  /* Also count how many page entries each input bfd requires.  */
-  htab_traverse (g->got_page_entries, mips_elf_make_got_pages_per_bfd,
-		 &got_per_bfd_arg);
-  if (got_per_bfd_arg.obfd == NULL)
-    return FALSE;
-
   got_per_bfd_arg.current = NULL;
   got_per_bfd_arg.primary = NULL;
   got_per_bfd_arg.max_count = ((MIPS_ELF_GOT_MAX_SIZE (info)
@@ -4661,9 +4585,12 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
   /* Try to merge the GOTs of input bfds together, as long as they
      don't seem to exceed the maximum GOT size, choosing one of them
      to be the primary GOT.  */
-  htab_traverse (g->bfd2got, mips_elf_merge_gots, &got_per_bfd_arg);
-  if (got_per_bfd_arg.obfd == NULL)
-    return FALSE;
+  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
+    {
+      gg = mips_elf_bfd_got (ibfd, FALSE);
+      if (gg && !mips_elf_merge_got (ibfd, gg, &got_per_bfd_arg))
+	return FALSE;
+    }
 
   /* If we do not find any suitable primary GOT, create an empty one.  */
   if (got_per_bfd_arg.primary == NULL)
@@ -4681,23 +4608,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
      didn't mark in check_relocs, and we want a quick way to find it.
      We can't just use gg->next because we're going to reverse the
      list.  */
-  {
-    struct mips_elf_bfd2got_hash *bfdgot;
-    void **bfdgotp;
-
-    bfdgot = (struct mips_elf_bfd2got_hash *)bfd_alloc
-      (abfd, sizeof (struct mips_elf_bfd2got_hash));
-
-    if (bfdgot == NULL)
-      return FALSE;
-
-    bfdgot->bfd = abfd;
-    bfdgot->g = g;
-    bfdgotp = htab_find_slot (gg->bfd2got, bfdgot, INSERT);
-
-    BFD_ASSERT (*bfdgotp == NULL);
-    *bfdgotp = bfdgot;
-  }
+  mips_elf_replace_bfd_got (abfd, g);
 
   /* Every symbol that is referenced in a dynamic relocation must be
      present in the primary GOT, so arrange for them to appear after
@@ -8879,7 +8790,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   struct mips_got_info *g;
   bfd_size_type loadable_size = 0;
   bfd_size_type page_gotno;
-  bfd *sub;
+  bfd *ibfd;
   struct mips_elf_traverse_got_arg tga;
   struct mips_elf_link_hash_table *htab;
 
@@ -8914,11 +8825,11 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   /* Calculate the total loadable size of the output.  That
      will give us the maximum number of GOT_PAGE entries
      required.  */
-  for (sub = info->input_bfds; sub; sub = sub->link_next)
+  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
     {
       asection *subsection;
 
-      for (subsection = sub->sections;
+      for (subsection = ibfd->sections;
 	   subsection;
 	   subsection = subsection->next)
 	{
@@ -8985,6 +8896,13 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
     }
   else
     {
+      /* Record that all bfds use G.  This also has the effect of freeing
+	 the per-bfd GOTs, which we no longer need.  */
+      for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
+	if (mips_elf_bfd_got (ibfd, FALSE))
+	  mips_elf_replace_bfd_got (ibfd, g);
+      mips_elf_replace_bfd_got (output_bfd, g);
+
       /* Set up TLS entries.  */
       g->tls_assigned_gotno = g->global_gotno + g->local_gotno;
       tga.info = info;
@@ -10589,7 +10507,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
       BFD_ASSERT (sdyn != NULL);
       BFD_ASSERT (gg != NULL);
 
-      g = mips_elf_got_for_ibfd (gg, output_bfd);
+      g = mips_elf_bfd_got (output_bfd, FALSE);
       BFD_ASSERT (g != NULL);
 
       for (b = sdyn->contents;

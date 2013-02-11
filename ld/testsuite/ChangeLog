@@ -1,5 +1,11 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* ld-mips-elf/tls-hidden4.got, ld-mips-elf/tls-multi-got-1.d,
+	ld-mips-elf/tls-multi-got-1.got: Update for changes in the order
+	that symbols are added to per-bfd GOTs.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* ld-mips-elf/tls-hidden3.d, ld-mips-elf/tls-hidden3.got,
 	ld-mips-elf/tls-multi-got-1.got, ld-mips-elf/tlsbin-o32.d,
 	ld-mips-elf/tlsbin-o32.got, ld-mips-elf/tlsdyn-o32-1.d,

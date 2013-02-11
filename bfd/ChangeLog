@@ -1,5 +1,40 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_got_info): Remove bfd2got.
+	(mips_elf_bfd2got_hash): Delete.
+	(mips_elf_got_per_bfd_arg): Remove bfd2got.
+	(mips_elf_replace_bfd_got, mips_elf_count_got_entries): New functions.
+	(mips_elf_global_got_index, mips_elf_create_local_got_entry): Use
+	g->next to test for the multigot case.  Use mips_elf_bfd_got rather
+	than mips_elf_got_for_ibfd.
+	(mips_elf_bfd2got_entry_hash, mips_elf_bfd2got_entry_eq)
+	(mips_elf_got_for_ibfd, mips_elf_get_got_for_bfd): Delete.
+	(mips_elf_make_got_per_bfd): Replace with...
+	(mips_elf_add_got_entry): ...this new function.
+	(mips_elf_make_got_pages_per_bfd): Replace with...
+	(mips_elf_add_got_page_entry): ...this new function.
+	(mips_elf_merge_got_with): Replace bfd2got argument with separate
+	bfd and GOT arguments.  Use mips_elf_add_got_entry and
+	mips_elf_add_got_page_entry instead of mips_elf_make_got_per_bfd
+	and mips_elf_make_got_pages_per_bfd.  Use mips_elf_replace_bfd_got
+	to set the BFD's GOT and free the old table.
+	(mips_elf_merge_got): Replace bfd2got argument with separate
+	bfd and GOT arguments.  Apply mips_elf_resolve_final_got_entries.
+	Use mips_elf_count_got_entries to count the number of entries in
+	each GOT.  Update the calls to mips_elf_merge_got_with.
+	(mips_elf_adjust_gp): Use g->next to test for the multigot case.
+	Use mips_elf_bfd_got rather than mips_elf_got_for_ibfd.
+	(mips_elf_multi_got): Don't create the bfd2got hash table.
+	Replace hash table traversal with a walk over the input bfds,
+	updating the call to mips_elf_merge_got.  Use mips_elf_replace_bfd_got
+	to set the output bfd's GOT.
+	(mips_elf_lay_out_got): Rename "sub" to "ibfd".  Record that all
+	bfds use the master GOT in the single-GOT case.
+	(_bfd_mips_elf_finish_dynamic_sections): Use mips_elf_bfd_got
+	rather than mips_elf_got_for_ibfd.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_obj_tdata): Add a got field.
 	(mips_elf_bfd_got, mips_elf_record_got_entry): New functions.
 	(mips_elf_record_global_got_symbol): Update the hash entry before
