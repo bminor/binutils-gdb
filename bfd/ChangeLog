@@ -1,5 +1,15 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_got_entry): Update comments.
+	(mips_elf_multi_got_entry_eq): Rename to...
+	(mips_elf_got_entry_eq): ...this, deleting the old definition.
+	(mips_elf_create_got_info): Remove master_got_p argument.
+	Always use mips_elf_got_entry_eq.
+	(mips_elf_bfd_got, mips_elf_multi_got, mips_elf_create_got_section):
+	Update calls accordingly.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_got_info): Remove bfd2got.
 	(mips_elf_bfd2got_hash): Delete.
 	(mips_elf_got_per_bfd_arg): Remove bfd2got.

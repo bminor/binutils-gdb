@@ -12,7 +12,13 @@ Disassembly of section .text:
   .*:	03a0f021 	move	s8,sp
   .*:	afbc0000 	sw	gp,0\(sp\)
   .*:	8f998018 	lw	t9,-32744\(gp\)
-  .*:	27848020 	addiu	a0,gp,-32736
+  .*:	27848028 	addiu	a0,gp,-32728
+  .*:	0320f809 	jalr	t9
+  .*:	00000000 	nop
+  .*:	8fdc0000 	lw	gp,0\(s8\)
+  .*:	00000000 	nop
+  .*:	8f998018 	lw	t9,-32744\(gp\)
+  .*:	2784801c 	addiu	a0,gp,-32740
   .*:	0320f809 	jalr	t9
   .*:	00000000 	nop
   .*:	8fdc0000 	lw	gp,0\(s8\)
@@ -22,18 +28,12 @@ Disassembly of section .text:
   .*:	0320f809 	jalr	t9
   .*:	00000000 	nop
   .*:	8fdc0000 	lw	gp,0\(s8\)
-  .*:	00000000 	nop
-  .*:	8f998018 	lw	t9,-32744\(gp\)
-  .*:	27848028 	addiu	a0,gp,-32728
-  .*:	0320f809 	jalr	t9
-  .*:	00000000 	nop
-  .*:	8fdc0000 	lw	gp,0\(s8\)
   .*:	00401021 	move	v0,v0
   .*:	3c030000 	lui	v1,0x0
   .*:	24638000 	addiu	v1,v1,-32768
   .*:	00621821 	addu	v1,v1,v0
   .*:	7c02283b 	rdhwr	v0,\$5
-  .*:	8f83801c 	lw	v1,-32740\(gp\)
+  .*:	8f838024 	lw	v1,-32732\(gp\)
   .*:	00000000 	nop
   .*:	00621821 	addu	v1,v1,v0
   .*:	8f838030 	lw	v1,-32720\(gp\)
@@ -62,7 +62,13 @@ Disassembly of section .text:
   .*:	03a0f021 	move	s8,sp
   .*:	afbc0000 	sw	gp,0\(sp\)
   .*:	8f998018 	lw	t9,-32744\(gp\)
-  .*:	27848020 	addiu	a0,gp,-32736
+  .*:	27848028 	addiu	a0,gp,-32728
+  .*:	0320f809 	jalr	t9
+  .*:	00000000 	nop
+  .*:	8fdc0000 	lw	gp,0\(s8\)
+  .*:	00000000 	nop
+  .*:	8f998018 	lw	t9,-32744\(gp\)
+  .*:	2784801c 	addiu	a0,gp,-32740
   .*:	0320f809 	jalr	t9
   .*:	00000000 	nop
   .*:	8fdc0000 	lw	gp,0\(s8\)
@@ -72,18 +78,12 @@ Disassembly of section .text:
   .*:	0320f809 	jalr	t9
   .*:	00000000 	nop
   .*:	8fdc0000 	lw	gp,0\(s8\)
-  .*:	00000000 	nop
-  .*:	8f998018 	lw	t9,-32744\(gp\)
-  .*:	27848028 	addiu	a0,gp,-32728
-  .*:	0320f809 	jalr	t9
-  .*:	00000000 	nop
-  .*:	8fdc0000 	lw	gp,0\(s8\)
   .*:	00401021 	move	v0,v0
   .*:	3c030000 	lui	v1,0x0
   .*:	24638000 	addiu	v1,v1,-32768
   .*:	00621821 	addu	v1,v1,v0
   .*:	7c02283b 	rdhwr	v0,\$5
-  .*:	8f83801c 	lw	v1,-32740\(gp\)
+  .*:	8f838024 	lw	v1,-32732\(gp\)
   .*:	00000000 	nop
   .*:	00621821 	addu	v1,v1,v0
   .*:	8f838030 	lw	v1,-32720\(gp\)

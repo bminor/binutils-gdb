@@ -48,41 +48,26 @@
 #include "hashtab.h"
 
 /* This structure is used to hold information about one GOT entry.
-   There are three types of entry:
+   There are four types of entry:
 
-      (1) absolute addresses
-	    (abfd == NULL)
-      (2) SYMBOL + OFFSET addresses, where SYMBOL is local to an input bfd
-	    (abfd != NULL, symndx >= 0)
-      (3) SYMBOL addresses, where SYMBOL is not local to an input bfd
-	    (abfd != NULL, symndx == -1)
+      (1) an absolute address
+	    requires: abfd == NULL
+	    fields: d.address
 
-   Type (3) entries are treated differently for different types of GOT.
-   In the "master" GOT -- i.e.  the one that describes every GOT
-   reference needed in the link -- the mips_got_entry is keyed on both
-   the symbol and the input bfd that references it.  If it turns out
-   that we need multiple GOTs, we can then use this information to
-   create separate GOTs for each input bfd.
+      (2) a SYMBOL + OFFSET address, where SYMBOL is local to an input bfd
+	    requires: abfd != NULL, symndx >= 0, tls_type != GOT_TLS_LDM
+	    fields: abfd, symndx, d.addend, tls_type
 
-   However, we want each of these separate GOTs to have at most one
-   entry for a given symbol, so their type (3) entries are keyed only
-   on the symbol.  The input bfd given by the "abfd" field is somewhat
-   arbitrary in this case.
+      (3) a SYMBOL address, where SYMBOL is not local to an input bfd
+	    requires: abfd != NULL, symndx == -1
+	    fields: d.h, tls_type
 
-   This means that when there are multiple GOTs, each GOT has a unique
-   mips_got_entry for every symbol within it.  We can therefore use the
-   mips_got_entry fields (tls_type and gotidx) to track the symbol's
-   GOT index.
-
-   However, if it turns out that we need only a single GOT, we continue
-   to use the master GOT to describe it.  There may therefore be several
-   mips_got_entries for the same symbol, each with a different input bfd.
-   We want to make sure that each symbol gets a unique GOT entry, so when
-   there's a single GOT, we use the symbol's hash entry, not the
-   mips_got_entry fields, to track a symbol's GOT index.  */
+      (4) a TLS LDM slot
+	    requires: abfd != NULL, symndx == 0, tls_type == GOT_TLS_LDM
+	    fields: none; there's only one of these per GOT.  */
 struct mips_got_entry
 {
-  /* The input bfd in which the symbol is defined.  */
+  /* One input bfd that needs the GOT entry.  */
   bfd *abfd;
   /* The index of the symbol, as stored in the relocation r_info, if
      we have a local symbol; -1 otherwise.  */
@@ -95,7 +80,7 @@ struct mips_got_entry
        that should be added to the symbol value.  */
     bfd_vma addend;
     /* If abfd != NULL && symndx == -1, the hash table entry
-       corresponding to symbol in the GOT.  The symbol's entry
+       corresponding to a symbol in the GOT.  The symbol's entry
        is in the local area if h->global_got_area is GGA_NONE,
        otherwise it is in the global area.  */
     struct mips_elf_link_hash_entry *h;
@@ -2769,29 +2754,6 @@ mips_elf_hash_bfd_vma (bfd_vma addr)
 #endif
 }
 
-/* got_entries only match if they're identical, except for gotidx, so
-   use all fields to compute the hash, and compare the appropriate
-   union members.  */
-
-static int
-mips_elf_got_entry_eq (const void *entry1, const void *entry2)
-{
-  const struct mips_got_entry *e1 = (struct mips_got_entry *)entry1;
-  const struct mips_got_entry *e2 = (struct mips_got_entry *)entry2;
-
-  return (e1->abfd == e2->abfd
-	  && e1->symndx == e2->symndx
-	  && (e1->tls_type & GOT_TLS_TYPE) == (e2->tls_type & GOT_TLS_TYPE)
-	  && (!e1->abfd ? e1->d.address == e2->d.address
-	      : e1->symndx >= 0 ? e1->d.addend == e2->d.addend
-	      : e1->d.h == e2->d.h));
-}
-
-/* multi_got_entries are still a match in the case of global objects,
-   even if the input bfd in which they're referenced differs, so the
-   hash computation and compare functions are adjusted
-   accordingly.  */
-
 static hashval_t
 mips_elf_got_entry_hash (const void *entry_)
 {
@@ -2807,7 +2769,7 @@ mips_elf_got_entry_hash (const void *entry_)
 }
 
 static int
-mips_elf_multi_got_entry_eq (const void *entry1, const void *entry2)
+mips_elf_got_entry_eq (const void *entry1, const void *entry2)
 {
   const struct mips_got_entry *e1 = (struct mips_got_entry *)entry1;
   const struct mips_got_entry *e2 = (struct mips_got_entry *)entry2;
@@ -2840,11 +2802,10 @@ mips_got_page_entry_eq (const void *entry1_, const void *entry2_)
   return entry1->abfd == entry2->abfd && entry1->symndx == entry2->symndx;
 }
 
-/* Create and return a new mips_got_info structure.  MASTER_GOT_P
-   is true if this is the master GOT rather than a multigot.  */
+/* Create and return a new mips_got_info structure.  */
 
 static struct mips_got_info *
-mips_elf_create_got_info (bfd *abfd, bfd_boolean master_got_p)
+mips_elf_create_got_info (bfd *abfd)
 {
   struct mips_got_info *g;
 
@@ -2853,12 +2814,8 @@ mips_elf_create_got_info (bfd *abfd, bfd_boolean master_got_p)
     return NULL;
 
   g->tls_ldm_offset = MINUS_ONE;
-  if (master_got_p)
-    g->got_entries = htab_try_create (1, mips_elf_got_entry_hash,
-				      mips_elf_got_entry_eq, NULL);
-  else
-    g->got_entries = htab_try_create (1, mips_elf_got_entry_hash,
-				      mips_elf_multi_got_entry_eq, NULL);
+  g->got_entries = htab_try_create (1, mips_elf_got_entry_hash,
+				    mips_elf_got_entry_eq, NULL);
   if (g->got_entries == NULL)
     return NULL;
 
@@ -2883,7 +2840,7 @@ mips_elf_bfd_got (bfd *abfd, bfd_boolean create_p)
 
   tdata = mips_elf_tdata (abfd);
   if (!tdata->got && create_p)
-    tdata->got = mips_elf_create_got_info (abfd, FALSE);
+    tdata->got = mips_elf_create_got_info (abfd);
   return tdata->got;
 }
 
@@ -4594,7 +4551,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
 
   /* If we do not find any suitable primary GOT, create an empty one.  */
   if (got_per_bfd_arg.primary == NULL)
-    g->next = mips_elf_create_got_info (abfd, FALSE);
+    g->next = mips_elf_create_got_info (abfd);
   else
     g->next = got_per_bfd_arg.primary;
   g->next->next = got_per_bfd_arg.current;
@@ -4904,7 +4861,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
       && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
-  htab->got_info = mips_elf_create_got_info (abfd, TRUE);
+  htab->got_info = mips_elf_create_got_info (abfd);
   mips_elf_section_data (s)->elf.this_hdr.sh_flags
     |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
 
