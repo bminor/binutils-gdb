@@ -1,5 +1,18 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_primary_global_got_index): New function,
+	split out from...
+	(mips_elf_global_got_index): ...here.  Reorder arguments so that
+	the output bfd and info come first.
+	(mips_elf_calculate_relocation): Update the call to
+	mips_elf_global_got_index accordingly.
+	(_bfd_mips_elf_finish_dynamic_symbol): Use
+	mips_elf_primary_global_got_index rather than
+	mips_elf_global_got_index.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_got_entry): Update comments.
 	(mips_elf_multi_got_entry_eq): Rename to...
 	(mips_elf_got_entry_eq): ...this, deleting the old definition.

@@ -3327,16 +3327,47 @@ mips_elf_local_got_index (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
     return entry->gotidx;
 }
 
-/* Returns the GOT index for the global symbol indicated by H.  */
+/* Return the GOT index of global symbol H in the primary GOT.  */
 
 static bfd_vma
-mips_elf_global_got_index (bfd *abfd, bfd *ibfd, struct elf_link_hash_entry *h,
-			   int r_type, struct bfd_link_info *info)
+mips_elf_primary_global_got_index (bfd *obfd, struct bfd_link_info *info,
+				   struct elf_link_hash_entry *h)
+{
+  struct mips_elf_link_hash_table *htab;
+  long global_got_dynindx;
+  struct mips_got_info *g;
+  bfd_vma got_index;
+
+  htab = mips_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
+
+  global_got_dynindx = 0;
+  if (htab->global_gotsym != NULL)
+    global_got_dynindx = htab->global_gotsym->dynindx;
+
+  /* Once we determine the global GOT entry with the lowest dynamic
+     symbol table index, we must put all dynamic symbols with greater
+     indices into the primary GOT.  That makes it easy to calculate the
+     GOT offset.  */
+  BFD_ASSERT (h->dynindx >= global_got_dynindx);
+  g = mips_elf_bfd_got (obfd, FALSE);
+  got_index = ((h->dynindx - global_got_dynindx + g->local_gotno)
+	       * MIPS_ELF_GOT_SIZE (obfd));
+  BFD_ASSERT (got_index < htab->sgot->size);
+
+  return got_index;
+}
+
+/* Return the GOT index for the global symbol indicated by H, which is
+   referenced by a relocation of type R_TYPE in IBFD.  */
+
+static bfd_vma
+mips_elf_global_got_index (bfd *obfd, struct bfd_link_info *info, bfd *ibfd,
+			   struct elf_link_hash_entry *h, int r_type)
 {
   struct mips_elf_link_hash_table *htab;
   bfd_vma got_index;
   struct mips_got_info *g, *gg;
-  long global_got_dynindx = 0;
 
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
@@ -3371,16 +3402,13 @@ mips_elf_global_got_index (bfd *abfd, bfd *ibfd, struct elf_link_hash_entry *h,
 			 + h->root.u.def.section->output_offset
 			 + h->root.u.def.section->output_section->vma);
 
-	      return mips_tls_got_index (abfd, p->gotidx, &p->tls_type,
+	      return mips_tls_got_index (obfd, p->gotidx, &p->tls_type,
 					 info, e.d.h, value);
 	    }
 	  else
 	    return p->gotidx;
 	}
     }
-
-  if (htab->global_gotsym != NULL)
-    global_got_dynindx = htab->global_gotsym->dynindx;
 
   if (TLS_RELOC_P (r_type))
     {
@@ -3395,18 +3423,10 @@ mips_elf_global_got_index (bfd *abfd, bfd *ibfd, struct elf_link_hash_entry *h,
 		 + h->root.u.def.section->output_offset
 		 + h->root.u.def.section->output_section->vma);
 
-      got_index = mips_tls_single_got_index (abfd, r_type, info, hm, value);
+      got_index = mips_tls_single_got_index (obfd, r_type, info, hm, value);
     }
   else
-    {
-      /* Once we determine the global GOT entry with the lowest dynamic
-	 symbol table index, we must put all dynamic symbols with greater
-	 indices into the GOT.  That makes it easy to calculate the GOT
-	 offset.  */
-      BFD_ASSERT (h->dynindx >= global_got_dynindx);
-      got_index = ((h->dynindx - global_got_dynindx + g->local_gotno)
-		   * MIPS_ELF_GOT_SIZE (abfd));
-    }
+    got_index = mips_elf_primary_global_got_index (obfd, info, h);
   BFD_ASSERT (got_index < htab->sgot->size);
 
   return got_index;
@@ -5359,8 +5379,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  else
 	    {
 	      BFD_ASSERT (addend == 0);
-	      g = mips_elf_global_got_index (dynobj, input_bfd,
-					     &h->root, r_type, info);
+	      g = mips_elf_global_got_index (abfd, info, input_bfd,
+					     &h->root, r_type);
 	      if (!TLS_RELOC_P (r_type)
 		  && !elf_hash_table (info)->dynamic_sections_created)
 		/* This is a static link.  We must initialize the GOT entry.  */
@@ -9992,8 +10012,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
       bfd_vma value;
 
       value = sym->st_value;
-      offset = mips_elf_global_got_index (dynobj, output_bfd, h,
-					  R_MIPS_GOT16, info);
+      offset = mips_elf_primary_global_got_index (output_bfd, info, h);
       MIPS_ELF_PUT_WORD (output_bfd, value, sgot->contents + offset);
     }
 
@@ -10257,8 +10276,7 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
       asection *s;
 
       /* Install the symbol value in the GOT.   */
-      offset = mips_elf_global_got_index (dynobj, output_bfd, h,
-					  R_MIPS_GOT16, info);
+      offset = mips_elf_primary_global_got_index (output_bfd, info, h);
       MIPS_ELF_PUT_WORD (output_bfd, sym->st_value, sgot->contents + offset);
 
       /* Add a dynamic relocation for it.  */
