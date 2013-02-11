@@ -1,5 +1,10 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_create_local_got_entry): Tidy.  Avoid
+	aliasing violation.  Check for htab allocation failures.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_primary_global_got_index): New function,
 	split out from...
 	(mips_elf_global_got_index): ...here.  Reorder arguments so that

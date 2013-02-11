@@ -3521,17 +3521,13 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
 				 struct mips_elf_link_hash_entry *h,
 				 int r_type)
 {
-  struct mips_got_entry entry, **loc;
+  struct mips_got_entry lookup, *entry;
+  void **loc;
   struct mips_got_info *g;
   struct mips_elf_link_hash_table *htab;
 
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
-
-  entry.abfd = NULL;
-  entry.symndx = -1;
-  entry.d.address = value;
-  entry.tls_type = mips_elf_reloc_tls_type (r_type);
 
   g = mips_elf_bfd_got (ibfd, FALSE);
   if (g == NULL)
@@ -3543,48 +3539,46 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
   /* This function shouldn't be called for symbols that live in the global
      area of the GOT.  */
   BFD_ASSERT (h == NULL || h->global_got_area == GGA_NONE);
-  if (entry.tls_type)
-    {
-      struct mips_got_entry *p;
 
-      entry.abfd = ibfd;
+  lookup.tls_type = mips_elf_reloc_tls_type (r_type);
+  if (lookup.tls_type)
+    {
+      lookup.abfd = ibfd;
       if (tls_ldm_reloc_p (r_type))
 	{
-	  entry.symndx = 0;
-	  entry.d.addend = 0;
+	  lookup.symndx = 0;
+	  lookup.d.addend = 0;
 	}
       else if (h == NULL)
 	{
-	  entry.symndx = r_symndx;
-	  entry.d.addend = 0;
+	  lookup.symndx = r_symndx;
+	  lookup.d.addend = 0;
 	}
       else
-	entry.d.h = h;
+	{
+	  lookup.symndx = -1;
+	  lookup.d.h = h;
+	}
 
-      p = (struct mips_got_entry *)
-	htab_find (g->got_entries, &entry);
+      entry = (struct mips_got_entry *) htab_find (g->got_entries, &lookup);
+      BFD_ASSERT (entry);
 
-      BFD_ASSERT (p);
-      return p;
+      return entry;
     }
 
-  loc = (struct mips_got_entry **) htab_find_slot (g->got_entries, &entry,
-						   INSERT);
-  if (*loc)
-    return *loc;
-
-  entry.gotidx = MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno++;
-
-  *loc = (struct mips_got_entry *)bfd_alloc (abfd, sizeof entry);
-
-  if (! *loc)
+  lookup.abfd = NULL;
+  lookup.symndx = -1;
+  lookup.d.address = value;
+  loc = htab_find_slot (g->got_entries, &lookup, INSERT);
+  if (!loc)
     return NULL;
 
-  memcpy (*loc, &entry, sizeof entry);
+  entry = (struct mips_got_entry *) *loc;
+  if (entry)
+    return entry;
 
-  if (g->assigned_gotno > g->local_gotno)
+  if (g->assigned_gotno >= g->local_gotno)
     {
-      (*loc)->gotidx = -1;
       /* We didn't allocate enough space in the GOT.  */
       (*_bfd_error_handler)
 	(_("not enough GOT space for local GOT entries"));
@@ -3592,8 +3586,15 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
       return NULL;
     }
 
-  MIPS_ELF_PUT_WORD (abfd, value,
-		     (htab->sgot->contents + entry.gotidx));
+  entry = (struct mips_got_entry *) bfd_alloc (abfd, sizeof (*entry));
+  if (!entry)
+    return NULL;
+
+  lookup.gotidx = MIPS_ELF_GOT_SIZE (abfd) * g->assigned_gotno++;
+  *entry = lookup;
+  *loc = entry;
+
+  MIPS_ELF_PUT_WORD (abfd, value, htab->sgot->contents + entry->gotidx);
 
   /* These GOT entries need a dynamic relocation on VxWorks.  */
   if (htab->is_vxworks)
@@ -3606,7 +3607,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
       s = mips_elf_rel_dyn_section (info, FALSE);
       got_address = (htab->sgot->output_section->vma
 		     + htab->sgot->output_offset
-		     + entry.gotidx);
+		     + entry->gotidx);
 
       rloc = s->contents + (s->reloc_count++ * sizeof (Elf32_External_Rela));
       outrel.r_offset = got_address;
@@ -3615,7 +3616,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
       bfd_elf32_swap_reloca_out (abfd, &outrel, rloc);
     }
 
-  return *loc;
+  return entry;
 }
 
 /* Return the number of dynamic section symbols required by OUTPUT_BFD.
