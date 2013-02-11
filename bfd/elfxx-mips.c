@@ -3982,8 +3982,6 @@ mips_elf_recreate_got (void **entryp, void *data)
     }
   if (*slot == NULL)
     *slot = entry;
-  else
-    free (entry);
   return 1;
 }
 
@@ -4007,8 +4005,6 @@ mips_elf_resolve_final_got_entries (struct mips_got_info *g)
       if (new_got == NULL)
 	return FALSE;
 
-      /* Each entry in g->got_entries has either been copied to new_got
-	 or freed.  Now delete the hash table itself.  */
       htab_delete (g->got_entries);
       g->got_entries = new_got;
     }
