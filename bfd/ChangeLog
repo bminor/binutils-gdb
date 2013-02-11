@@ -1,3 +1,8 @@
+2013-02-12  Alan Modra  <amodra@gmail.com>
+
+	* elfxx-target.h (bfd_elfNN_bfd_link_hash_table_free): Provide
+	suitable definition when using generic linker hash table.
+
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* elfxx-mips.c (mips_elf_count_got_entries): Delete.
@@ -264,6 +269,41 @@
 
 	* elfxx-mips.c (mips_elf_recreate_got): Remove free.
 	(mips_elf_resolve_final_got_entries): Remove bogus comment.
+
+2013-02-11  Alan Modra  <amodra@gmail.com>
+
+	* elfcode.h (elf_checksum_contents): Free contents.
+	* elf-bfd.h (_bfd_elf_link_hash_table_free): Declare.
+	* elflink.c (_bfd_elf_link_hash_table_free): New function.
+	(elf_final_link_free): New function, extracted from..
+	(bfd_elf_final_link): ..here.  Always call
+	_bfd_elf_write_section_eh_frame_hdr.
+	* elfxx-target.h (bfd_elfNN_bfd_link_hash_table_free): Default to
+	_bfd_elf_link_hash_table_free.
+	* libbfd-in.h (_bfd_merge_sections_free): Declare.
+	* libbfd.h: Regenerate.
+	* merge.c (_bfd_merge_sections_free): New function.
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame_hdr): Free
+	hdr_info->array.
+	* elf-m10300.c (elf32_mn10300_link_hash_table_free): Call
+	_bfd_elf_link_hash_table_free.
+	* elf32-arm.c (elf32_arm_link_hash_table_free): Likewise.
+	* elf32-avr.c (elf32_avr_link_hash_table_free): Likewise.
+	* elf32-hppa.c (elf32_hppa_link_hash_table_free): Likewise.
+	* elf32-i386.c (elf_i386_link_hash_table_free): Likewise.
+	* elf32-m68hc1x.c (m68hc11_elf_hash_table_free): Likewise.
+	* elf32-m68k.c (elf_m68k_link_hash_table_free): Likewise.
+	* elf32-metag.c (elf_metag_link_hash_table_free): Likewise.
+	* elf32-xgate.c (xgate_elf_bfd_link_hash_table_free): Likewise.
+	* elf64-aarch64.c (elf64_aarch64_link_hash_table_free): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_hash_table_free): Likewise.
+	* elf64-ppc.c (ppc64_elf_link_hash_table_free): Likewise.
+	* elf64-x86-64.c (elf_x86_64_link_hash_table_free): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_hash_table_free): Likewise.
+	* elf32-cr16.c (elf32_cr16_link_hash_table_free): Delete.
+	(bfd_elf32_bfd_link_hash_table_free): Don't define.
+	* elf32-tic6x.c (elf32_tic6x_link_hash_table_free): Delete.
+	(bfd_elf32_bfd_link_hash_table_free): Dont' define.
 
 2013-02-10  Alan Modra  <amodra@gmail.com>
 
